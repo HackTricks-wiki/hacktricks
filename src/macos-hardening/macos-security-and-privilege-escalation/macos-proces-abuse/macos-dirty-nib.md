@@ -2,32 +2,34 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Dirty NIB, imzalı bir macOS app paketinin içindeki Interface Builder dosyaları (.xib/.nib) kötüye kullanılarak hedef süreç içinde saldırgan kontrollü mantığın çalıştırılmasına ve böylece o sürecin entitlements ve TCC izinlerinin devralınmasına işaret eder. Bu teknik ilk olarak xpn (MDSec) tarafından belgelenmiş, daha sonra Sector7 tarafından genelleştirilmiş ve önemli ölçüde genişletilmiştir; Sector7 ayrıca Apple’ın macOS 13 Ventura ve macOS 14 Sonoma’daki hafifleştirmelerini de ele almıştır. Arka plan ve detaylı incelemeler için sondaki referanslara bakın.
+Dirty NIB, imzalı bir macOS app bundle içindeki Interface Builder dosyalarının (.xib/.nib) kötüye kullanılarak hedef process içinde saldırgan kontrollü mantık çalıştırılmasını ve böylece hedef process’in entitlements ve TCC permissions değerlerinin devralınmasını ifade eder. Bu teknik ilk olarak xpn (MDSec) tarafından belgelenmiş, daha sonra Apple’ın macOS 13 Ventura ve macOS 14 Sonoma sürümlerindeki mitigations uygulamalarını da ele alan Sector7 tarafından genelleştirilmiş ve önemli ölçüde genişletilmiştir.<sup>[1][2]</sup> Arka plan ve detaylı incelemeler için sondaki referanslara bakın.
 
-> Özet
-> • macOS 13 Ventura öncesi: bir bundle’ın MainMenu.nib’ini (veya startup’ta yüklenen başka bir nib’i) değiştirmek genellikle process injection elde etmeye ve sıkça privilege escalation’a güvenilir şekilde ulaşmaya izin veriyordu.
-> • macOS 13 (Ventura) ile başlayan ve macOS 14 (Sonoma) ile geliştirilmiş: first‑launch deep verification, bundle protection, Launch Constraints ve yeni TCC “App Management” izni, ilişkisiz uygulamaların post‑launch nib tahrifatını büyük ölçüde engelliyor. Yine de bazı niş durumlarda saldırılar mümkün olabilir (ör. aynı geliştiriciye ait tooling’in kendi uygulamalarını değiştirmesi veya kullanıcı tarafından App Management/Full Disk Access verilmiş terminaller gibi).
+> TL;DR
+> • macOS 13 Ventura öncesinde: Bir bundle’ın MainMenu.nib dosyasını (veya startup sırasında yüklenen başka bir nib dosyasını) değiştirmek, güvenilir biçimde process injection ve çoğu zaman privilege escalation sağlayabiliyordu.
+> • macOS 13 (Ventura) ile birlikte ve macOS 14’te (Sonoma) geliştirilen first‑launch deep verification, bundle protection, Launch Constraints ve yeni TCC “App Management” permission, ilgisiz app’ler tarafından launch sonrasında nib üzerinde yapılacak değişiklikleri büyük ölçüde engeller. Ancak niş durumlarda saldırılar hâlâ mümkün olabilir (ör. same‑developer tooling’in kendi app’lerini değiştirmesi veya kullanıcı tarafından App Management/Full Disk Access verilen terminaller).
 
-## What are NIB/XIB files
 
-Nib (NeXT Interface Builder kısaltması) dosyaları, AppKit uygulamaları tarafından kullanılan serileştirilmiş UI nesne grafikleri’dir. Modern Xcode, düzenlenebilir XML .xib dosyalarını depolar ve bunlar build zamanında .nib’e derlenir. Tipik bir uygulama ana UI’sini `NSApplicationMain()` aracılığıyla yükler; bu fonksiyon app’in Info.plist’inden `NSMainNibFile` anahtarını okur ve çalışma zamanında nesne grafiğini örnekler.
+## NIB/XIB dosyaları nedir?
 
-Saldırıyı mümkün kılan ana noktalar:
-- NIB yükleme, sınıfların NSSecureCoding’e uymasını gerektirmeden rastgele Objective‑C sınıflarını örnekler (Apple’ın nib loader’ı `initWithCoder:` mevcut olmadığında `init`/`initWithFrame:`’e geri döner).
-- Cocoa Bindings, nib’ler örneklenirken yöntem çağırmak için kötüye kullanılabilir; kullanıcı etkileşimi gerektirmeyen zincirlenmiş çağrılar dahil.
+Nib (NeXT Interface Builder’ın kısaltması) dosyaları, AppKit app’leri tarafından kullanılan serialize edilmiş UI object graph’larıdır. Modern Xcode, düzenlenebilir XML .xib dosyalarını build sırasında .nib dosyasına derler. Tipik bir app, main UI’ını `NSApplicationMain()` aracılığıyla yükler; bu işlem app’in Info.plist dosyasındaki `NSMainNibFile` key’ini okur ve object graph’ı runtime sırasında instantiate eder.
 
-## Dirty NIB injection process (attacker view)
+Saldırıyı mümkün kılan temel noktalar:
+- NIB loading, sınıfların NSSecureCoding’e uymasını gerektirmeden rastgele Objective‑C class’larını instantiate eder (Apple’ın nib loader’ı, `initWithCoder:` mevcut olmadığında `init`/`initWithFrame:` yöntemlerine geri döner).
+- Cocoa Bindings, nib’ler instantiate edilirken method’ları çağırmak için kötüye kullanılabilir; buna user interaction gerektirmeyen chained calls da dahildir.
 
-Klasik Ventura‑öncesi akış:
-1) Kötücül bir .xib oluşturun
-- Bir `NSAppleScript` nesnesi ekleyin (veya `NSTask` gibi diğer “gadget” sınıflar).
-- Başlığı payload içeren (ör. AppleScript veya komut argümanları) bir `NSTextField` ekleyin.
-- Hedef nesne üzerinde yöntemleri çağırmak için bindings ile bağlanmış bir veya daha fazla `NSMenuItem` nesnesi ekleyin.
 
-2) Kullanıcı tıklaması olmadan otomatik tetikleyin
-- Bir menü öğesinin target/selector’ünü ayarlamak için bindings kullanın ve ardından eylemin nib yüklendiğinde otomatik olarak tetiklenmesi için özel `_corePerformAction` metodunu çağırın. Bu, bir kullanıcının butona tıklaması gerekliliğini ortadan kaldırır.
+## Dirty NIB injection süreci (attacker view)
 
-Bir .xib içinde otomatik tetik zincirinin minimal örneği (anlaşılırlık için kısaltılmış):
+Klasik Ventura öncesi akış:
+1) Kötü amaçlı bir .xib oluşturun
+- Bir `NSAppleScript` object’i (veya `NSTask` gibi başka “gadget” class’ları) ekleyin.
+- Payload’ı (ör. AppleScript veya command arguments) title olarak içeren bir `NSTextField` ekleyin.
+- Target object üzerindeki method’ları çağırmak için bindings aracılığıyla bağlanmış bir veya daha fazla `NSMenuItem` object’i ekleyin.
+
+2) User click olmadan auto-trigger
+- Bir menu item’ın target/selector değerlerini ayarlamak için bindings kullanın ve ardından private `_corePerformAction` method’unu invoke ederek action’ın nib yüklenirken otomatik olarak çalışmasını sağlayın. Böylece user’ın bir button’a tıklaması gerekmez.
+
+Bir .xib içindeki auto-trigger chain’in minimal örneği (açıklık için kısaltılmıştır):
 ```xml
 <objects>
 <customObject id="A1" customClass="NSAppleScript"/>
@@ -52,86 +54,87 @@ Bir .xib içinde otomatik tetik zincirinin minimal örneği (anlaşılırlık i�
 <menuItem id="T2"><connections><binding keyPath="_corePerformAction" destination="C2"/></connections></menuItem>
 </objects>
 ```
-Bu, nib yüklendiğinde hedef süreçte keyfi AppleScript yürütülmesini sağlar. Gelişmiş zincirler şunları yapabilir:
-- Keyfi AppKit sınıflarını örnekleyebilir (ör. `NSTask`) ve `-launch` gibi argümansız yöntemleri çağırabilir.
-- Yukarıdaki binding hilesiyle nesne argümanlı keyfi selector'leri çağırabilir.
-- AppleScriptObjC.framework'i yükleyip Objective‑C'ye köprü kurabilir ve seçili C API'lerini bile çağırabilir.
-- Hâlâ Python.framework içeren daha eski sistemlerde, Python'a köprü kurup `ctypes` kullanarak keyfi C fonksiyonlarını çağırabilir (Sector7'in araştırması).
+Bu, nib yüklemesi sırasında hedef süreçte rastgele AppleScript çalıştırılmasını sağlar.<sup>[1]</sup> Gelişmiş zincirler şunları yapabilir:
+- Rastgele AppKit sınıflarını (ör. `NSTask`) örneklemek ve `-launch` gibi sıfır bağımsız değişkenli yöntemleri çağırmak.
+- Yukarıdaki binding hilesiyle nesne bağımsız değişkenleri içeren rastgele selector'ları çağırmak.
+- Objective-C ile köprü kurmak ve hatta seçili C API'lerini çağırmak için AppleScriptObjC.framework'ü yüklemek.
+- Hâlâ Python.framework içeren eski sistemlerde Python'a köprü kurmak ve ardından rastgele C işlevlerini çağırmak için `ctypes` kullanmak (Sector7 araştırması).<sup>[2]</sup>
 
-3) Uygulamanın nib'ini değiştirin
-- target.app'i yazılabilir bir konuma kopyalayın, örn. `Contents/Resources/MainMenu.nib` dosyasını kötü amaçlı nib ile değiştirin ve target.app'i çalıştırın. Pre‑Ventura döneminde, tek seferlik bir Gatekeeper değerlendirmesinden sonra sonraki başlatmalarda yalnızca yüzeysel imza kontrolleri yapıldığından, yürütülebilir olmayan kaynaklar (ör. .nib) yeniden doğrulanmazdı.
+3) Uygulamanın nib'ini değiştir
+- target.app'yi yazılabilir bir konuma kopyalayın, örneğin `Contents/Resources/MainMenu.nib` dosyasını kötü amaçlı nib ile değiştirin ve target.app'yi çalıştırın. Ventura öncesinde, tek seferlik bir Gatekeeper değerlendirmesinden sonra sonraki başlatmalarda yalnızca yüzeysel imza kontrolleri gerçekleştiriliyordu; bu nedenle `.nib` gibi çalıştırılabilir olmayan kaynaklar yeniden doğrulanmıyordu.
 
-Görünür bir test için örnek AppleScript payload:
+Görünür bir test için örnek AppleScript payload'ı:
 ```applescript
 set theDialogText to "PWND"
 display dialog theDialogText
 ```
 ## Modern macOS protections (Ventura/Monterey/Sonoma/Sequoia)
 
-Apple, Dirty NIB'in modern macOS'ta geçerliliğini önemli ölçüde azaltan birkaç sistemsel hafifletme getirdi:
-- First‑launch deep verification and bundle protection (macOS 13 Ventura)
-- Herhangi bir uygulamanın ilk çalıştırılmasında (quarantined or not), derin bir imza doğrulaması tüm bundle kaynaklarını kapsar. Sonrasında bundle korunur: yalnızca aynı geliştiriciden gelen uygulamalar (veya uygulama tarafından açıkça izin verilenler) içeriğini değiştirebilir. Diğer uygulamaların başka bir uygulamanın bundle'ına yazabilmesi için yeni TCC “App Management” iznine ihtiyaç vardır.
+Apple, modern macOS’ta Dirty NIB’in uygulanabilirliğini büyük ölçüde azaltan çeşitli sistemik mitigation’lar sundu:<sup>[2]</sup>
+- İlk çalıştırmada derin doğrulama ve bundle koruması (macOS 13 Ventura)
+- Herhangi bir uygulamanın ilk çalıştırılmasında (quarantine edilmiş olsun veya olmasın) derin bir signature check, tüm bundle kaynaklarını kapsar. Bundan sonra bundle protected hâle gelir: yalnızca aynı developer’a ait uygulamalar (veya uygulama tarafından açıkça izin verilenler) içeriğini değiştirebilir. Diğer uygulamaların başka bir uygulamanın bundle’ına yazabilmesi için yeni TCC “App Management” izni gerekir.
 - Launch Constraints (macOS 13 Ventura)
-- System/Apple‑bundled apps can’t be copied elsewhere and launched; bu, OS uygulamaları için “copy to /tmp, patch, run” yaklaşımını öldürür.
-- Improvements in macOS 14 Sonoma
-- Apple App Management'ı sertleştirdi ve Sector7 tarafından belirtilen bilinen bypass'ları (ör. CVE‑2023‑40450) düzeltti. Python.framework daha önce (macOS 12.3) kaldırılmıştı, bu da bazı privilege‑escalation zincirlerini kırdı.
-- Gatekeeper/Quarantine changes
-- Bu tekniği etkileyen Gatekeeper, provenance, ve assessment değişikliklerinin daha geniş tartışması için, aşağıda referans verilen sayfaya bakın.
+- System/Apple-bundled uygulamalar başka bir konuma kopyalanıp çalıştırılamaz; bu durum OS uygulamaları için “copy to /tmp, patch, run” yaklaşımını etkisiz hâle getirir.
+- macOS 14 Sonoma’daki iyileştirmeler
+- Apple, App Management’ı güçlendirdi ve Sector7 tarafından belirtilen bilinen bypass’ları (ör. CVE‑2023‑40450) düzeltti. Python.framework daha önce (macOS 12.3) kaldırılmıştı; bu da bazı privilege-escalation chain’lerini bozdu.
+- Gatekeeper/Quarantine değişiklikleri
+- Bu tekniği etkileyen Gatekeeper, provenance ve assessment değişikliklerinin daha geniş kapsamlı bir açıklaması için aşağıda referans verilen sayfaya bakın.
 
-> Practical implication
-> • On Ventura+ you generally cannot modify a third‑party app’s .nib unless your process has App Management or is signed by the same Team ID as the target (e.g., developer tooling).
-> • Granting App Management or Full Disk Access to shells/terminals effectively re‑opens this attack surface for anything that can execute code inside that terminal’s context.
-
-
-### Launch Constraints'i Ele Alma
-
-Launch Constraints, Ventura ile başlayarak birçok Apple uygulamasının varsayılan olmayan konumlardan çalıştırılmasını engeller. Eğer bir Apple uygulamasını geçici bir dizine kopyalayıp, `MainMenu.nib`'i değiştirip başlatmak gibi pre‑Ventura iş akışlarına dayanıyorsanız, bunun >= 13.0'da başarısız olmasını bekleyin.
+> Pratik sonucu
+> • Ventura+ sürümlerinde, process’in App Management izni yoksa veya hedefle aynı Team ID ile signed değilse (ör. developer tooling), genellikle üçüncü taraf bir uygulamanın .nib dosyasını değiştiremezsiniz.
+> • Shell’lere/terminal’lere App Management veya Full Disk Access vermek, o terminalin context’i içinde code execute edebilen her şey için bu attack surface’i fiilen yeniden açar.
 
 
-## Hedefleri ve nib'leri listeleme (araştırma / eski sistemler için faydalı)
+### Launch Constraints’ı ele alma
 
-- UI'si nib‑tabanlı uygulamaları tespit edin:
+Launch Constraints, Ventura ile birlikte birçok Apple uygulamasının default olmayan konumlardan çalıştırılmasını engeller. Bir Apple uygulamasını temp directory’ye kopyalamak, `MainMenu.nib` dosyasını değiştirmek ve ardından uygulamayı çalıştırmak gibi Ventura öncesi workflow’lara güveniyorsanız bunun >= 13.0 sürümlerinde başarısız olmasını bekleyin.
+
+
+## Hedefleri ve nib’leri listeleme (research / legacy sistemler için kullanışlı)
+
+- UI’ı nib tabanlı olan uygulamaları bulun:
 ```bash
 find /Applications -maxdepth 2 -name Info.plist -exec sh -c \
 'for p; do if /usr/libexec/PlistBuddy -c "Print :NSMainNibFile" "$p" >/dev/null 2>&1; \
 then echo "[+] $(dirname "$p") uses NSMainNibFile=$( /usr/libexec/PlistBuddy -c "Print :NSMainNibFile" "$p" )"; fi; done' sh {} +
 ```
-- Bir bundle içinde aday nib kaynaklarını bul:
+- Bir bundle içindeki aday nib kaynaklarını bulun:
 ```bash
 find target.app -type f \( -name "*.nib" -o -name "*.xib" \) -print
 ```
-- Kod imzalarını derinlemesine doğrulayın (kaynaklarla oynadıysanız ve yeniden imzalamadıysanız başarısız olur):
+- Kod imzalarını kapsamlı biçimde doğrulayın (kaynakları değiştirdiyseniz ve yeniden imzalamadıysanız başarısız olur):
 ```bash
 codesign --verify --deep --strict --verbose=4 target.app
 ```
-> Not: Modern macOS'ta, başka bir uygulamanın bundle'ına uygun yetki olmadan yazmaya çalıştığınızda bundle protection/TCC tarafından engellenirsiniz.
+> Not: Modern macOS'ta uygun yetkilendirme olmadan başka bir uygulamanın bundle'ına yazmaya çalıştığınızda bundle protection/TCC tarafından da engellenirsiniz.
 
-## Tespit ve DFIR ipuçları
 
-- bundle kaynakları üzerinde dosya bütünlüğü izleme
-- Yüklü uygulamalarda `Contents/Resources/*.nib` ve diğer yürütülemeyen kaynaklarda mtime/ctime değişikliklerini izleyin.
-- Unified logs ve süreç davranışı
-- GUI uygulamaları içinde beklenmeyen AppleScript yürütmelerini ve AppleScriptObjC veya Python.framework yükleyen süreçleri izleyin. Örnek:
+## Detection ve DFIR ipuçları
+
+- Bundle kaynaklarında file integrity monitoring
+- Yüklü uygulamalardaki `Contents/Resources/*.nib` ve diğer non-executable kaynaklarda mtime/ctime değişikliklerini izleyin.
+- Unified logs ve process behavior
+- GUI uygulamaları içinde beklenmeyen AppleScript çalıştırılmasını ve AppleScriptObjC veya Python.framework yükleyen process'leri izleyin. Örnek:
 ```bash
 log stream --info --predicate 'processImagePath CONTAINS[cd] ".app/Contents/MacOS/" AND (eventMessage CONTAINS[cd] "AppleScript" OR eventMessage CONTAINS[cd] "loadAppleScriptObjectiveCScripts")'
 ```
-- Proaktif değerlendirmeler
-- Kritik uygulamalar üzerinde `codesign --verify --deep` komutunu periyodik olarak çalıştırarak kaynakların sağlam kaldığından emin olun.
-- Yetki bağlamı
-- TCC “App Management” veya Full Disk Access hakkına kimlerin/neyin sahip olduğunu denetleyin (özellikle terminaller ve yönetim ajanları). Genel‑amaç shell'lerden bunları kaldırmak, Dirty NIB‑stilindeki manipülasyonların kolayca yeniden etkinleştirilmesini engeller.
+- Proactive assessments
+- Kaynakların bütünlüğünü koruduğundan emin olmak için kritik uygulamalarda düzenli olarak `codesign --verify --deep` çalıştırın.
+- Privilege context
+- TCC “App Management” veya Full Disk Access yetkisine kimlerin/hangi process'lerin sahip olduğunu denetleyin (özellikle terminaller ve management agent'ları). Bunları general-purpose shell'lerden kaldırmak, Dirty NIB tarzı tampering'in kolayca yeniden etkinleştirilmesini önler.
 
 
-## Savunma sertleştirmesi (geliştiriciler ve savunucular)
+## Defensive hardening (developers ve defenders)
 
-- Programatik UI tercih edin veya nib'lerden instantiated edilen öğeleri sınırlayın. nib grafiğine güçlü sınıfları (ör. `NSTask`) dahil etmekten kaçının ve rastgele nesneler üzerinde dolaylı olarak selector çağıran bindings'ten kaçının.
-- Library Validation ile hardened runtime'ı benimseyin (modern uygulamalar için zaten standart). Bu tek başına nib enjeksiyonunu durdurmasa da kolay native kod yüklemeyi engeller ve saldırganları sadece scripting‑tabanlı payload'lara zorlar.
-- Genel‑amaç araçlarda geniş App Management izinleri talep etmeyin veya bunlara bağlı olmayın. Eğer MDM App Management gerektiriyorsa, bu bağlamı kullanıcı tarafından başlatılan shell'lerden ayırın.
-- Uygulama bundle'ınızın bütünlüğünü düzenli olarak doğrulayın ve güncelleme mekanizmalarınızı bundle kaynaklarını otomatik olarak onaran şekilde tasarlayın.
+- Programmatic UI kullanmayı veya nib'lerden instantiate edilen öğeleri sınırlandırmayı tercih edin. Güçlü sınıfları (ör. `NSTask`) nib graph'larına dahil etmekten kaçının ve arbitrary object'ler üzerinde selector'ları dolaylı olarak çağıran binding'lerden kaçının.
+- Library Validation içeren hardened runtime'ı benimseyin (modern uygulamalarda zaten standarttır). Bu, nib injection'ı tek başına durdurmasa da kolay native code loading'i engeller ve saldırganları yalnızca scripting payload'larına yönlendirir.
+- General-purpose tool'larda geniş App Management izinleri istemeyin veya bu izinlere bağlı kalmayın. MDM App Management gerektiriyorsa bu context'i user-driven shell'lerden ayırın.
+- Uygulamanızın bundle bütünlüğünü düzenli olarak doğrulayın ve update mekanizmalarınızın bundle kaynaklarını self-heal etmesini sağlayın.
 
 
-## Related reading in HackTricks
+## HackTricks'te ilgili okumalar
 
-Learn more about Gatekeeper, quarantine and provenance changes that affect this technique:
+Bu tekniği etkileyen Gatekeeper, quarantine ve provenance değişiklikleri hakkında daha fazla bilgi edinin:
 
 {{#ref}}
 ../macos-security-protections/macos-gatekeeper.md
@@ -140,7 +143,7 @@ Learn more about Gatekeeper, quarantine and provenance changes that affect this 
 
 ## References
 
-- xpn – DirtyNIB (orijinal yazı, Pages örneğiyle): https://blog.xpnsec.com/dirtynib/
-- Sector7 – Bringing process injection into view(s): exploiting all macOS apps using nib files (5 Nisan 2024): https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/
+- [1] [xpn – DirtyNIB (Pages örneğini içeren original write-up)](https://blog.xpnsec.com/dirtynib/)
+- [2] [Sector7 – Bringing process injection into view(s): exploiting all macOS apps using nib files (April 5, 2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,4 +1,4 @@
-# macOS Kod İmzalama
+# macOS Code Signing
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -9,12 +9,12 @@
 {{#endref}}
 
 
-Mach-o ikili dosyaları, ikili içindeki imzaların **offset** ve **size** bilgisini gösteren **`LC_CODE_SIGNATURE`** adlı bir load command içerir. Aslında, GUI aracı MachOView kullanılarak ikilinin sonunda bu bilgileri içeren **Code Signature** adlı bir bölüm bulmak mümkündür:
+Mach-o binary dosyaları, binary içindeki imzaların **offset** ve **size** değerlerini belirten **`LC_CODE_SIGNATURE`** adlı bir load command içerir. Aslında MachOView GUI aracını kullanarak binary'nin sonunda bu bilgileri içeren **Code Signature** adlı bir bölüm bulmak mümkündür:
 
 <figure><img src="../../../images/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
-**Code Signature**'ın magic header'ı **`0xFADE0CC0`**'dir. Sonrasında bunları içeren superBlob'un length ve blob sayısı gibi bilgiler yer alır.\
-Bu bilgiyi [source code here](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276) içinde bulmak mümkündür:
+Code Signature'ın magic header değeri **`0xFADE0CC0`** (embedded code signature) veya **`0xFADE0CC1`** (detached code signature) şeklindedir. Ardından, bunları içeren superBlob'un uzunluğu ve blob sayısı gibi bilgilere ulaşabilirsiniz.\
+Bu bilgileri [buradaki kaynak kodunda](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276) bulmak mümkündür:<sup>[1]</sup>
 ```c
 /*
 * Structure of an embedded-signature SuperBlob
@@ -43,14 +43,14 @@ char data[];
 } CS_GenericBlob
 __attribute__ ((aligned(1)));
 ```
-Common blobs contained are Code Directory, Requirements and Entitlements and a Cryptographic Message Syntax (CMS).\
-Ayrıca, blobs içinde kodlanmış verilerin **Big Endian** ile kodlandığına dikkat edin.
+Yaygın olarak bulunan blob'lar Code Directory, Requirements ve Entitlements ile Cryptographic Message Syntax (CMS) içerir.\
+Ayrıca blob'larda kodlanan verilerin **Big Endian** olarak kodlandığına dikkat edin.
 
-Ayrıca, imzalar ikili dosyalardan ayrılabilir ve `/var/db/DetachedSignatures` içinde saklanabilir (iOS tarafından kullanılır).
+Ayrıca imzaların binary dosyalardan ayrılarak `/var/db/DetachedSignatures` konumunda saklanabileceğini unutmayın (iOS tarafından kullanılır).
 
 ## Code Directory Blob
 
-Koddaki [Code Directory Blob in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):
+[Code Directory Blob tanımını](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104) kod içinde bulmak mümkündür:<sup>[1]</sup>
 ```c
 typedef struct __CodeDirectory {
 uint32_t magic;                                 /* magic number (CSMAGIC_CODEDIRECTORY) */
@@ -106,11 +106,14 @@ char end_withLinkage[0];
 } CS_CodeDirectory
 __attribute__ ((aligned(1)));
 ```
-Bu struct'ın farklı sürümleri olduğunu unutmayın; eski sürümler daha az bilgi içerebilir.
+Bu struct'ın farklı sürümleri olduğunu ve eski sürümlerin daha az bilgi içerebileceğini unutmayın.
 
-## Kod Sayfalarının İmzalanması
+Code directory'nin herhangi bir hashing algorithm kullanabileceğini unutmayın. Şu anda en yaygın olanı **SHA256**'dır (`hashType` alanındaki 2 değeriyle belirtilir), ancak gelecekte bu hash kırılırsa Apple farklı bir hash kullanmaya başlayabilir.
 
-Tam ikilinin tamamının hash'lenmesi, yalnızca kısmen belleğe yüklendiğinde verimsiz hatta işe yaramaz olur. Bu nedenle, kod imzası aslında her bir ikili sayfasının ayrı ayrı hash'lendiği hash'lerin bir hash'idir.\ Aslında, önceki **Code Directory** kodunda **sayfa boyutunun alanlardan birinde belirtildiğini** görebilirsiniz. Ayrıca, ikilinin boyutu bir sayfa boyutunun tam katı değilse, **CodeLimit** alanı imzanın nerede sona erdiğini belirtir.
+## Signing Code Pages
+
+Tam binary'yi hash'lemek verimsiz olurdu ve binary yalnızca kısmen memory'ye yüklendiğinde tamamen gereksiz olurdu. Bu nedenle code signature, her binary page'inin ayrı ayrı hash'lendiği bir hash'lerin hash'idir.\
+Aslında, önceki **Code Directory** kodunda **page size**'ın alanlarından birinde belirtildiğini görebilirsiniz. Ayrıca binary'nin boyutu bir page'in boyutunun katı değilse, **CodeLimit** alanı signature'ın nerede sona erdiğini belirtir.
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -136,7 +139,38 @@ Page size=4096
 2=93d476eeace15a5ad14c0fb56169fd080a04b99582b4c7a01e1afcbc58688f
 [...]
 
-# Calculate the hasehs of each page manually
+# get them with disarm
+disarm -vv --sig /bin/ps # Get all the hashes of the binary
+An embedded signature of 5824 bytes, with 5 blobs:
+Code Directory (869 bytes)
+Version:     20400
+Flags:       none
+Platform Binary
+CodeLimit:   0x10f80
+Identifier:  com.apple.ps (@0x58)
+Executable Segment: Base 0x0 Limit: 0x00008000 Flags: 0x00000001
+CDHash:	     ba668da43c001d101f02ffd9c915b8d4b88e3a7ad5333acd58499189a22a16a2 (computed)
+# of hashes: 17 code (4K pages) + 7 special
+Hashes @325 size: 32 Type: SHA-256
+Special Slot   7 Entitlements ASN1/DER:	a542b4dcbc134fbd950c230ed9ddb99a343262a2df8e0c847caee2b6d3b41cc8 (OK)
+Special Slot   6 DMG:	Not Bound
+Special Slot   5 Entitlements blob:	2bb2de519f43b8e116c7eeea8adc6811a276fb134c55c9c2e9dcbd3047f80c7d (OK)
+Special Slot   4 Application Specific:	Not Bound
+Special Slot   3 Resource Directory:	Not Bound
+Special Slot   2 Requirements blob:	4ca453dc8908dc7f6e637d6159c8761124ae56d080a4a550ad050c27ead273b3 (OK)
+Special Slot   1 Bound Info.plist:	Not Bound
+Slot   0 (File page @0x0000):	68eb381817e783faf97d5bf64ca066e6f3867a1ef16c145b32ad282cd550cabd (OK)
+Slot   1 (File page @0x1000):	4c0714307c8ffbabe003573bc45d5a5690256ecc52c39250cae211f3ecafd507 (OK)
+Slot   2 (File page @0x2000):	6e291b8260de343ef8fb984b88eac08d55f473870f5a612c71f7538a9c846beb (OK)
+Slot   3 (File page @0x3000):	7a735f6a34a3544ca716cf2ab7ddf0dbd499aba1c279268de7c86626f4d320d9 (OK)
+Slot   4 (File page @0x4000):	d01f0d2ddca0b0dc07269349add7320fbc277a7ad629c00f25fe59b926d9ca5f (OK)
+Slot   5 (File page @0x5000):	7f282101b9601946b573303e3a6adbbc855768a15784d1c25e217b4fdea4da7e (OK)
+Slot   6 (File page @0x6000):	NULL PAGE HASH (OK)
+Slot   7 (File page @0x7000):	NULL PAGE HASH (OK)
+Slot   8 (File page @0x8000):	b90a5987d6daa560ef3013c3626d23133e1dfad33499ae27ba1bd7c40b321347 (OK)
+[...]
+
+# Calculate the hashes of each page manually
 BINARY=/bin/ps
 SIZE=`stat -f "%Z" $BINARY`
 PAGESIZE=4096 # From the previous output
@@ -145,28 +179,30 @@ for i in `seq 0 $PAGES`; do
 dd if=$BINARY of=/tmp/`basename $BINARY`.page.$i bs=$PAGESIZE skip=$i count=1
 done
 openssl sha256 /tmp/*.page.*
+
+#Note that the last pages might not coincide because the binary didn't signed the signatura that it was calculating but the real size of the binary.
 ```
 ## Entitlements Blob
 
-Uygulamaların, tüm yetkilendirmelerin tanımlandığı bir **entitlement blob** içerebileceğini unutmayın. Ayrıca, bazı iOS ikili dosyalarının yetkilendirmeleri özel slot -5 yerine özel slot -7'de yer alabilir.
+Uygulamaların tüm entitlements tanımlarının bulunduğu bir **entitlement blob** da içerebileceğini unutmayın. Ayrıca bazı iOS binary'leri, entitlements bilgilerini -5 özel slotu yerine özel -7 slotunda bulundurabilir.
 
 ## Special Slots
 
-MacOS uygulamaları yürütmek için ihtiyaç duydukları her şeyi yalnızca ikili dosya içinde barındırmaz; genellikle uygulamanın **bundle**'ı içinde bulunan **dış kaynakları** da kullanırlar. Bu nedenle, ikili dosya içinde bazı ilgi çekici dış kaynakların değiştirilmediğini doğrulamak için onların hash'lerini içeren bazı özel slotlar bulunur.
+macOS uygulamaları çalıştırılmak için ihtiyaç duydukları her şeyi binary'nin içinde bulundurmaz; aynı zamanda **external resources** da kullanır (genellikle uygulamanın **bundle**'ı içinde). Bu nedenle binary içinde, bazı önemli external resources'ların değiştirilmediğini kontrol etmek için bu kaynakların hash'lerini içeren bazı slotlar bulunur.
 
-Aslında, Code Directory struct'larında özel slot sayısını gösteren **`nSpecialSlots`** adlı bir parametre görülebilir. 0 numaralı özel bir slot yoktur ve en yaygın olanlar (−1 ile −6 arası) şunlardır:
+Aslında Code Directory struct'larında, özel slotların sayısını belirten **`nSpecialSlots`** adlı bir parametre görmek mümkündür. 0 numaralı bir özel slot yoktur ve en yaygın olanlar (-1 ile -6 arasındakiler) şunlardır:
 
-- `info.plist` (veya `__TEXT.__info__plist` içindekinin) hash'i.
-- Requirements'in hash'i
-- Resource Directory'nin hash'i (`_CodeSignature/CodeResources` dosyasının bundle içindeki hash'i).
+- `info.plist` dosyasının hash'i (veya `__TEXT.__info__plist` içindeki dosyanın hash'i).
+- Requirements'ın hash'i
+- Resource Directory'nin hash'i (bundle içindeki `_CodeSignature/CodeResources` dosyasının hash'i).
 - Uygulamaya özel (kullanılmıyor)
-- Entitlements'in hash'i
-- Sadece DMG code signatures
+- Entitlements'ın hash'i
+- Yalnızca DMG code signatures
 - DER Entitlements
 
 ## Code Signing Flags
 
-Her sürecin kernel tarafından başlatılan ve `status` olarak bilinen ilişkili bir bitmaskesi vardır ve bunların bazıları **code signature** tarafından geçersiz kılınabilir. Code signing içine dahil edilebilen bu bayraklar [kodda tanımlanmıştır](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):
+Her process'in, kernel tarafından başlatılan ve bazıları **code signature** tarafından override edilebilen `status` olarak bilinen ilişkili bir bitmask'i vardır. Code signing içine dahil edilebilen bu flag'ler [code içinde tanımlanmıştır](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):<sup>[1]</sup>
 ```c
 /* code signing attributes of a process */
 #define CS_VALID                    0x00000001  /* dynamically valid */
@@ -213,13 +249,13 @@ CS_RESTRICT | CS_ENFORCEMENT | CS_REQUIRE_LV | CS_RUNTIME | CS_LINKER_SIGNED)
 ```
 Note that the function [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) can also add the `CS_EXEC_*` flags dynamically when starting the execution.
 
-## Kod İmzası Gereksinimleri
+## Code Signature Gereksinimleri
 
-Her uygulama, yürütülebilmek için **karşılaması gereken** bazı **gereksinimleri** saklar. Eğer uygulamanın içerdiği **gereksinimler** karşılanmıyorsa, uygulama çalıştırılmaz (muhtemelen değiştirilmiş olduğu için).
+Her application, çalıştırılabilmek için **karşılaması** gereken bazı **requirements** depolar. **Application tarafından içerilen requirements application tarafından karşılanmıyorsa**, çalıştırılmaz (muhtemelen değiştirilmiştir).
 
-Bir ikili dosyanın gereksinimleri, bir akış halinde **ifadeler** olan bir **özel dilbilgisi** kullanır ve `0xfade0c00` sihirli değeri olarak kullanılarak blob'lar halinde kodlanır; bunların **hash'i özel bir code slot'ta saklanır**.
+Bir binary'nin requirements'ı, bir **expressions** akışı olan **special grammar** kullanır ve magic olarak `0xfade0c00` kullanılarak blob'lar şeklinde encode edilir; bunların **hash** değeri özel bir code slot'unda depolanır.
 
-Bir ikili dosyanın gereksinimleri çalışırken şöyle görülebilir:
+Bir binary'nin requirements'ı şu şekilde görüntülenebilir:
 ```bash
 codesign -d -r- /bin/ls
 Executable=/bin/ls
@@ -230,9 +266,9 @@ Executable=/Applications/Signal.app/Contents/MacOS/Signal
 designated => identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR
 ```
 > [!TIP]
-> Bu imzaların sertifika bilgileri, TeamID, IDs, entitlements ve birçok başka veriyi nasıl kontrol edebildiğine dikkat edin.
+> Bu imzaların sertifika bilgileri, TeamID, ID'ler, entitlements ve daha birçok veri gibi şeyleri kontrol edebildiğine dikkat edin.
 
-Ayrıca, `csreq` aracı kullanılarak bazı derlenmiş gereksinimler oluşturmak mümkündür:
+Ayrıca `csreq` aracı kullanılarak bazı derlenmiş gereksinimler oluşturulabilir:
 ```bash
 # Generate compiled requirements
 csreq -b /tmp/output.csreq -r='identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR'
@@ -244,57 +280,60 @@ od -A x -t x1 /tmp/output.csreq
 0000020    00  00  00  21  6f  72  67  2e  77  68  69  73  70  65  72  73
 [...]
 ```
-It's possible to access this information and create or modify requirements with some APIs from the `Security.framework` like:
+Bu bilgilere erişmek ve `Security.framework` içindeki bazı API'lerle gereksinimler oluşturmak veya değiştirmek mümkündür:<sup>[4]</sup>
 
 #### **Geçerliliği Kontrol Etme**
 
-- **`Sec[Static]CodeCheckValidity`**: Requirement'e göre SecCodeRef'in geçerliliğini kontrol eder.
-- **`SecRequirementEvaluate`**: Sertifika bağlamında gereksinimi doğrular.
+- **`Sec[Static]CodeCheckValidity`**: SecCodeRef'in geçerliliğini Requirement'a göre kontrol eder.
+- **`SecRequirementEvaluate`**: Gereksinimi sertifika bağlamında doğrular.
 - **`SecTaskValidateForRequirement`**: Çalışan bir SecTask'ı `CFString` gereksinimine karşı doğrular.
 
-#### **Kod Gereksinimlerini Oluşturma ve Yönetme**
+#### **Code Requirements Oluşturma ve Yönetme**
 
-- **`SecRequirementCreateWithData`:** Gereksinimi temsil eden ikili veriden bir `SecRequirementRef` oluşturur.
+- **`SecRequirementCreateWithData`:** Gereksinimi temsil eden binary data'dan bir `SecRequirementRef` oluşturur.
 - **`SecRequirementCreateWithString`:** Gereksinimin string ifadesinden bir `SecRequirementRef` oluşturur.
-- **`SecRequirementCopy[Data/String]`**: Bir `SecRequirementRef`'in ikili veri temsilini alır.
+- **`SecRequirementCopy[Data/String]`**: Bir `SecRequirementRef`'in binary data temsilini alır.
 - **`SecRequirementCreateGroup`**: app-group üyeliği için bir gereksinim oluşturur.
 
-#### **Code Signing Bilgilerine Erişim**
+#### **Code Signing Bilgilerine Erişme**
 
-- **`SecStaticCodeCreateWithPath`**: Kod imzalarını incelemek için dosya sistemi yolundan bir `SecStaticCodeRef` nesnesi başlatır.
-- **`SecCodeCopySigningInformation`**: Bir `SecCodeRef` veya `SecStaticCodeRef`'ten imzalama bilgilerini elde eder.
+- **`SecStaticCodeCreateWithPath`**: Code signature'larını incelemek için bir dosya sistemi yolundan `SecStaticCodeRef` nesnesi başlatır.
+- **`SecCodeCopySigningInformation`**: Bir `SecCodeRef` veya `SecStaticCodeRef`'ten signing bilgilerini alır.
 
-#### **Kod Gereksinimlerini Değiştirme**
+#### **Code Requirements Değiştirme**
 
-- **`SecCodeSignerCreate`**: Kod imzalama işlemleri yapmak için bir `SecCodeSignerRef` nesnesi oluşturur.
-- **`SecCodeSignerSetRequirement`**: İmzalama sırasında uygulanacak yeni bir gereksinimi code signer için ayarlar.
-- **`SecCodeSignerAddSignature`**: Belirtilen signer ile imzalanan koda bir imza ekler.
+- **`SecCodeSignerCreate`**: Code signing işlemlerini gerçekleştirmek için bir `SecCodeSignerRef` nesnesi oluşturur.
+- **`SecCodeSignerSetRequirement`**: Signing sırasında uygulanması için code signer'a yeni bir gereksinim atar.
+- **`SecCodeSignerAddSignature`**: Belirtilen signer ile signing işlemi gerçekleştirilen code'a bir signature ekler.
 
-#### **Gereksinimlerle Kodu Doğrulama**
+#### **Code'u Requirements ile Doğrulama**
 
-- **`SecStaticCodeCheckValidity`**: Belirtilen gereksinimlere karşı statik bir kod nesnesini doğrular.
+- **`SecStaticCodeCheckValidity`**: Bir static code nesnesini belirtilen gereksinimlere karşı doğrular.
 
-#### **Ek Yararlı API'ler**
+#### **Ek Faydalı API'ler**
 
-- **`SecCodeCopy[Internal/Designated]Requirement`: Get SecRequirementRef from SecCodeRef**
-- **`SecCodeCopyGuestWithAttributes`**: Sandbox için yararlı olan, belirli özniteliklere dayalı bir kod nesnesini temsil eden bir `SecCodeRef` oluşturur.
+- **`SecCodeCopy[Internal/Designated]Requirement`:** SecCodeRef'ten SecRequirementRef alır.
+- **`SecCodeCopyGuestWithAttributes`**: Belirli attribute'lara dayalı bir code nesnesini temsil eden `SecCodeRef` oluşturur; sandboxing için kullanışlıdır.
 - **`SecCodeCopyPath`**: Bir `SecCodeRef` ile ilişkili dosya sistemi yolunu alır.
-- **`SecCodeCopySigningIdentifier`**: Bir `SecCodeRef`'ten imzalama tanımlayıcısını (ör. Team ID) alır.
+- **`SecCodeCopySigningIdentifier`**: Bir `SecCodeRef`'ten signing identifier'ını (ör. Team ID) alır.
 - **`SecCodeGetTypeID`**: `SecCodeRef` nesneleri için type identifier döndürür.
 - **`SecRequirementGetTypeID`**: Bir `SecRequirementRef`'in CFTypeID'sini alır.
 
-#### **Code Signing Bayrakları ve Sabitleri**
+#### **Code Signing Flag'leri ve Sabitleri**
 
-- **`kSecCSDefaultFlags`**: Code signing işlemleri için birçok Security.framework fonksiyonunda kullanılan varsayılan bayraklar.
-- **`kSecCSSigningInformation`**: İmzalama bilgisi alınması gerektiğini belirtmek için kullanılan bayrak.
+- **`kSecCSDefaultFlags`**: Code signing işlemleri için birçok Security.framework fonksiyonunda kullanılan varsayılan flag'ler.
+- **`kSecCSSigningInformation`**: Signing bilgilerinin alınması gerektiğini belirtmek için kullanılan flag.
 
 ## Code Signature Enforcement
 
-Kernel, uygulamanın kodunun çalışmasına izin vermeden önce code signature'ı kontrol eden bileşendir. Ayrıca, belleğe yeni kod yazıp çalıştırabilmenin bir yolu, `mprotect` `MAP_JIT` bayrağı ile çağrıldığında JIT'i kötüye kullanmaktır. Uygulamanın bunu yapabilmesi için özel bir entitlement'a sahip olması gerektiğini unutmayın.
+Uygulamanın code'unun çalıştırılmasına izin vermeden önce **code signature'ı kontrol eden** **kernel**'dir. Ayrıca, belleğe yeni code yazıp çalıştırabilmenin bir yolu, `mprotect` `MAP_JIT` flag'iyle çağrıldığında JIT'i abuse etmektir. Uygulamanın bunu yapabilmesi için özel bir entitlement'a sahip olması gerektiğini unutmayın.
 
-## `cs_blobs` & `cs_blob`
+## `cs_blobs` ve `cs_blob`
 
-[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) struct, üzerinde çalışan sürecin entitlement bilgilerini içerir. `csb_platform_binary` ayrıca uygulamanın platform binary olup olmadığını bildirir (OS tarafından bu süreçlerin task ports'larına olan SEND haklarını korumak gibi güvenlik mekanizmalarını uygulamak için farklı zamanlarda kontrol edilir).
+[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) struct'ı, çalışan process'in entitlement bilgilerini içerir. `csb_platform_binary` ayrıca uygulamanın **platform binary** olup olmadığını bildirir (işletim sistemi tarafından, bu process'lerin task port'larına yönelik SEND haklarını korumak gibi security mechanism'lerini uygulamak için farklı anlarda kontrol edilir).
+
+> [!WARNING]
+> Bazı security measure'ların binary'nin platform binary olmasına bağlı olduğunu unutmayın. Bu nedenle privilege escalation yöntemlerinden biri, **binary'yi platform binary haline getirmektir** (örneğin, bunu izin veren bir certificate ile yeniden signing yaparak).
 ```c
 struct cs_blob {
 struct cs_blob  *csb_next;
@@ -355,6 +394,10 @@ bool csb_csm_managed;
 ```
 ## Kaynaklar
 
-- [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
+- [1] [XNU — `osfmk/kern/cs_blobs.h` (`CodeDirectory`, `CS_*` flags, blob magic values)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [2] [XNU — `bsd/kern/ubc_subr.c` (`cs_blob` işleme ve imza doğrulama)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/ubc_subr.c)
+- [3] [XNU — `bsd/sys/codesign.h` (`csops`/`csops_audittoken` işlemleri)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [4] [Apple Security framework kaynak kodu — `libsecurity_codesigning`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/libsecurity_codesigning)
+- [5] [Apple Developer — Code Signing Rehberi](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Introduction/Introduction.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

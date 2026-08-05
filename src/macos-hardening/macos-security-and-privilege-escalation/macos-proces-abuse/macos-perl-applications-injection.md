@@ -1,50 +1,52 @@
-# macOS Perl Uygulamaları Enjeksiyonu
+# macOS Perl Applications Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## `PERL5OPT` & `PERL5LIB` ortam değişkeni aracılığıyla
+## `PERL5OPT` ve `PERL5LIB` env variable üzerinden
 
-Ortam değişkeni **`PERL5OPT`** kullanarak, **Perl**'ün yorumlayıcı başladığında (hedef scriptin ilk satırı analiz edilmeden **önce** bile) rastgele komutlar çalıştırmasını sağlamak mümkündür. Örneğin, bu scripti oluşturun:
+**`PERL5OPT`** env variable'ını kullanarak, interpreter başlatıldığında **Perl**'ün rastgele komutlar çalıştırmasını sağlamak mümkündür (hedef script'in ilk satırı parse edilmeden **önce** bile).
+Örneğin, bu script'i oluşturun:
 ```perl:test.pl
 #!/usr/bin/perl
 print "Hello from the Perl script!\n";
 ```
-Şimdi **env değişkenini dışa aktarın** ve **perl** betiğini çalıştırın:
+Şimdi **env değişkenini dışa aktarın** ve **perl** script'ini çalıştırın:
 ```bash
 export PERL5OPT='-Mwarnings;system("whoami")'
 perl test.pl # This will execute "whoami"
 ```
-Başka bir seçenek, bir Perl modülü oluşturmaktır (örneğin, `/tmp/pmod.pm`):
+Diğer bir seçenek, bir Perl modülü (ör. `/tmp/pmod.pm`) oluşturmaktır:
 ```perl:/tmp/pmod.pm
 #!/usr/bin/perl
 package pmod;
 system('whoami');
 1; # Modules must return a true value
 ```
-Ve ardından modülün otomatik olarak bulunması ve yüklenmesi için env değişkenlerini kullanın:
+Ardından, modülün otomatik olarak bulunup yüklenmesi için env değişkenlerini kullanın:
 ```bash
 PERL5LIB=/tmp/ PERL5OPT=-Mpmod perl victim.pl
 ```
-### Diğer ilginç ortam değişkenleri
+### Diğer ilginç environment variables
 
-* **`PERL5DB`** – yorumlayıcı **`-d`** (hata ayıklayıcı) bayrağı ile başlatıldığında, `PERL5DB`'nin içeriği hata ayıklayıcı bağlamında Perl kodu olarak çalıştırılır. Hem ortamı **hem de** ayrıcalıklı bir Perl sürecinin komut satırı bayraklarını etkileyebiliyorsanız, şöyle bir şey yapabilirsiniz:
+* **`PERL5DB`** – interpreter **`-d`** (debugger) flag'iyle başlatıldığında, `PERL5DB` içeriği debugger context'i *içinde* Perl code olarak execute edilir.
+Hem environment'ı hem de privileged Perl process'in command-line flag'lerini etkileyebiliyorsanız şuna benzer bir şey yapabilirsiniz:
 
 ```bash
 export PERL5DB='system("/bin/zsh")'
-sudo perl -d /usr/bin/some_admin_script.pl   # scripti çalıştırmadan önce bir shell açar
+sudo perl -d /usr/bin/some_admin_script.pl   # script execute edilmeden önce bir shell açar
 ```
 
-* **`PERL5SHELL`** – Windows'ta bu değişken, Perl'in bir shell açması gerektiğinde hangi shell yürütülebilir dosyasını kullanacağını kontrol eder. Bu, macOS'ta ilgili olmadığı için burada yalnızca tamamlayıcılık açısından belirtilmiştir.
+* **`PERL5SHELL`** – Windows'ta bu variable, Perl'in bir shell spawn etmesi gerektiğinde hangi shell executable'ını kullanacağını kontrol eder. Burada yalnızca eksiksizlik amacıyla belirtilmiştir; macOS ile ilgili değildir.
 
-`PERL5DB` bayrağını gerektirse de, bu bayrak açıkken *root* olarak çalıştırılan bakım veya yükleyici betikleri bulmak yaygındır, bu da değişkeni geçerli bir yükseltme vektörü haline getirir.
+`PERL5DB` **`-d`** switch'ini gerektirse de, verbose troubleshooting için bu flag etkinleştirilerek *root* olarak execute edilen maintenance veya installer script'lerine sıkça rastlanır. Bu da variable'ı geçerli bir escalation vector'ü hâline getirir.
 
-## Bağımlılıklar aracılığıyla (@INC istismarı)
+## Dependencies üzerinden (@INC abuse)
 
-Perl'in arayacağı dahil etme yolunu listelemek mümkündür (**`@INC`**) çalıştırarak:
+Perl'in arayacağı include path'i (**`@INC`**) şu şekilde listelemek mümkündür:
 ```bash
 perl -e 'print join("\n", @INC)'
 ```
-macOS 13/14'teki tipik çıktı şöyle görünür:
+macOS 13/14'te tipik çıktı şu şekilde görünür:
 ```bash
 /Library/Perl/5.30/darwin-thread-multi-2level
 /Library/Perl/5.30
@@ -56,23 +58,23 @@ macOS 13/14'teki tipik çıktı şöyle görünür:
 /System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
 /System/Library/Perl/Extras/5.30
 ```
-Bazı döndürülen klasörler hiç mevcut değil, ancak **`/Library/Perl/5.30`** mevcut, SIP tarafından *korunmuyor* ve SIP ile korunan klasörlerden *önce* yer alıyor. Bu nedenle, eğer *root* olarak yazabiliyorsanız, o modülü içe aktaran herhangi bir ayrıcalıklı script tarafından *öncelikli olarak* yüklenecek kötü niyetli bir modül (örneğin, `File/Basename.pm`) bırakabilirsiniz.
+Döndürülen klasörlerin bazıları hiç mevcut değil; ancak **`/Library/Perl/5.30`** mevcut, SIP tarafından korunmuyor ve SIP korumalı klasörlerden önce geliyor. Bu nedenle *root* olarak yazabiliyorsanız, ayrıcalıklı bir script tarafından bu modülü import eden her işlem tarafından *öncelikli olarak* yüklenecek kötü amaçlı bir modül (ör. `File/Basename.pm`) bırakabilirsiniz.
 
 > [!WARNING]
-> `/Library/Perl` içine yazmak için hala **root** olmanız gerekiyor ve macOS, yazma işlemini gerçekleştiren süreç için *Tam Disk Erişimi* talep eden bir **TCC** istemi gösterecektir.
+> `/Library/Perl` içine yazmak için yine de **root** yetkisine ihtiyacınız vardır ve macOS, yazma işlemini gerçekleştiren işlem için *Full Disk Access* isteyen bir **TCC** prompt'u gösterir.
 
-Örneğin, bir script **`use File::Basename;`** ifadesini içe aktarıyorsa, saldırgan kontrolündeki kodu içeren `/Library/Perl/5.30/File/Basename.pm` oluşturmak mümkün olacaktır.
+Örneğin bir script **`use File::Basename;`** import ediyorsa, saldırgan kontrollü kod içeren `/Library/Perl/5.30/File/Basename.pm` dosyasını oluşturmak mümkün olurdu.
 
-## Migration Assistant ile SIP atlatma (CVE-2023-32369 “Migraine”)
+## Migration Assistant üzerinden SIP bypass (CVE-2023-32369 “Migraine”)
 
-Mayıs 2023'te Microsoft, *root* bir saldırganın **Sistem Bütünlüğü Korumasını (SIP)** tamamen **atlatmasına** olanak tanıyan **CVE-2023-32369**'u, takma adıyla **Migraine**, açıkladı. 
-Zayıf nokta, **`com.apple.rootless.install.heritable`** yetkisine sahip bir daemon olan **`systemmigrationd`**'dir. Bu daemon tarafından başlatılan herhangi bir çocuk süreç, yetkiyi miras alır ve bu nedenle **SIP** kısıtlamalarının *dışında* çalışır.
+Mayıs 2023'te Microsoft, **CVE-2023-32369** adlı ve **Migraine** olarak adlandırılan, *root* saldırganın **System Integrity Protection (SIP)** özelliğini tamamen **bypass** etmesine olanak tanıyan bir post-exploitation tekniğini açıkladı.
+Güvenlik açığı bulunan bileşen, **`com.apple.rootless.install.heritable`** entitlement'ına sahip bir daemon olan **`systemmigrationd`**'dir. Bu daemon tarafından spawn edilen tüm child process'ler entitlement'ı devralır ve bu nedenle SIP kısıtlamalarının **dışında** çalışır.<sup>[1]</sup>
 
-Araştırmacılar tarafından tanımlanan çocuklar arasında Apple imzalı yorumlayıcı bulunmaktadır:
+Araştırmacılar tarafından tespit edilen child process'ler arasında Apple tarafından imzalanmış interpreter da bulunur:<sup>[1]</sup>
 ```
 /usr/bin/perl /usr/libexec/migrateLocalKDC …
 ```
-Çünkü Perl `PERL5OPT`'i (ve Bash `BASH_ENV`'i) dikkate alır, daemon'un *ortamını* zehirlemek, SIP'siz bir bağlamda keyfi yürütme elde etmek için yeterlidir:
+Perl `PERL5OPT` değişkenine (ve Bash `BASH_ENV` değişkenine) uyduğu için, daemon’ın *environment*’ını zehirlemek SIP’siz bir bağlamda arbitrary execution elde etmek için yeterlidir:<sup>[1][2]</sup>
 ```bash
 # As root
 launchctl setenv PERL5OPT '-Mwarnings;system("/private/tmp/migraine.sh")'
@@ -80,20 +82,20 @@ launchctl setenv PERL5OPT '-Mwarnings;system("/private/tmp/migraine.sh")'
 # Trigger a migration (or just wait – systemmigrationd will eventually spawn perl)
 open -a "Migration Assistant.app"   # or programmatically invoke /System/Library/PrivateFrameworks/SystemMigration.framework/Resources/MigrationUtility
 ```
-When `migrateLocalKDC` çalıştığında, `/usr/bin/perl` kötü niyetli `PERL5OPT` ile başlar ve `/private/tmp/migraine.sh` dosyasını *SIP yeniden etkinleştirilmeden önce* çalıştırır. Bu scriptten, örneğin, bir yükü **`/System/Library/LaunchDaemons`** içine kopyalayabilir veya bir dosyayı **silinemez** hale getirmek için `com.apple.rootless` genişletilmiş niteliğini atayabilirsiniz.
+`migrateLocalKDC` çalıştığında, `/usr/bin/perl` kötü amaçlı `PERL5OPT` ile başlar ve SIP yeniden etkinleştirilmeden önce `/private/tmp/migraine.sh` dosyasını çalıştırır. Bu script üzerinden, örneğin **`/System/Library/LaunchDaemons`** içine bir payload kopyalayabilir veya bir dosyayı **silinemez** hâle getirmek için `com.apple.rootless` extended attribute'ını atayabilirsiniz.
 
-Apple bu sorunu macOS **Ventura 13.4**, **Monterey 12.6.6** ve **Big Sur 11.7.7**'de düzeltti, ancak daha eski veya yamanmamış sistemler istismar edilebilir durumda kalmaktadır.
+Apple bu sorunu macOS **Ventura 13.4**, **Monterey 12.6.6** ve **Big Sur 11.7.7** sürümlerinde düzeltti; ancak daha eski veya patch uygulanmamış sistemler hâlâ exploit edilebilir durumdadır.<sup>[1]</sup>
 
-## Hardening recommendations
+## Hardening önerileri
 
-1. **Tehlikeli değişkenleri temizleyin** – ayrıcalıklı launchdaemons veya cron görevleri temiz bir ortamda başlamalıdır (`launchctl unsetenv PERL5OPT`, `env -i`, vb.).
-2. **Yalnızca kesinlikle gerekli olmadıkça kök olarak yorumlayıcıları çalıştırmaktan kaçının**. Derlenmiş ikilileri kullanın veya yetkileri erken düşürün.
-3. **`-T` (taint modu) ile satıcı scriptleri** kullanın, böylece Perl taint kontrolü etkinleştirildiğinde `PERL5OPT` ve diğer güvensiz anahtarları göz ardı eder.
-4. **macOS'u güncel tutun** – “Migraine” mevcut sürümlerde tamamen yamanmıştır.
+1. **Tehlikeli değişkenleri temizleyin** – privileged launchdaemon'lar veya cron job'ları temiz bir environment ile başlatılmalıdır (`launchctl unsetenv PERL5OPT`, `env -i` vb.).
+2. **Interpreter'ları root olarak çalıştırmaktan kaçının** – kesinlikle gerekli olmadıkça compiled binary'ler kullanın veya privilege'ları erken aşamada düşürün.
+3. **Script'leri `-T` (taint mode) ile vendor edin** – taint checking etkinleştirildiğinde Perl, `PERL5OPT` ve diğer güvenli olmayan switch'leri yok sayar.
+4. **macOS'u güncel tutun** – “Migraine” güncel sürümlerde tamamen patch'lenmiştir.
 
 ## References
 
-- Microsoft Security Blog – “Yeni macOS güvenlik açığı, Migraine, Sistem Bütünlüğü Korumasını atlayabilir” (CVE-2023-32369), 30 Mayıs 2023.
-- Hackyboiz – “macOS SIP Atlatma (PERL5OPT & BASH_ENV) araştırması”, Mayıs 2025.
+- [1] [Microsoft Security Blog – Yeni macOS açığı Migraine, System Integrity Protection'ı atlayabilir (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [2] [Hackyboiz – macOS: Part1 - SIP Bypass](https://hackyboiz.github.io/2025/05/11/clalxk/MacOS_SIP-Bypass_en/)
 
 {{#include ../../../banners/hacktricks-training.md}}

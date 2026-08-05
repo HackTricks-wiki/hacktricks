@@ -2,47 +2,47 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## AppleMobileFileIntegrity.kext and amfid
+## AppleMobileFileIntegrity.kext ve amfid
 
-Sistemde çalışan code’un integrity’sini zorlamaya odaklanır ve XNU’nun code signature verification mantığını sağlar. Ayrıca entitlements kontrol edebilir ve debugging’e izin verme veya task ports elde etme gibi diğer hassas görevleri de yönetebilir.
+Sistemde çalışan kodun bütünlüğünü zorunlu kılmaya odaklanır ve XNU'nun code signature doğrulamasının arkasındaki mantığı sağlar. Ayrıca entitlements'ları kontrol edebilir ve debugging'e izin verme veya task port'ları elde etme gibi diğer hassas görevleri gerçekleştirebilir.
 
-Buna ek olarak, bazı işlemler için kext, user space’te çalışan daemon `/usr/libexec/amfid` ile iletişim kurmayı tercih eder. Bu trust relationship, birkaç jailbreak içinde abused edilmiştir.
+Bunun yanı sıra kext, bazı işlemler için user space'te çalışan `/usr/libexec/amfid` daemon'ı ile iletişim kurmayı tercih eder. Bu güven ilişkisi çeşitli jailbreak'lerde abuse edilmiştir.
 
-Yeni macOS sürümlerinde AMFI artık bağımsız bir on-disk kext olarak kolayca görünmez; bu yüzden reverse etmek genellikle `/System/Library/Extensions` içinde gezinmek yerine **kernelcache** veya bir **KDK** ile çalışmayı gerektirir.
+Güncel macOS sürümlerinde AMFI artık disk üzerinde bağımsız bir kext olarak kolayca sunulmamaktadır; bu nedenle reversing genellikle `/System/Library/Extensions` dizinine göz atmak yerine **kernelcache** veya **KDK** üzerinden çalışmayı gerektirir.
 
-AMFI, **MACF** policies kullanır ve başlatıldığı anda hook’larını kaydeder. Ayrıca, yüklenmesini engellemek veya unload etmek kernel panic tetikleyebilir. Ancak AMFI’yi zayıflatmaya izin veren bazı boot arguments vardır:
+AMFI, **MACF** policies kullanır ve başlatıldığı anda hook'larını kaydeder. Ayrıca yüklenmesini engellemek veya yükünü kaldırmak kernel panic'i tetikleyebilir. Bununla birlikte AMFI'yi devre dışı bırakmaya olanak tanıyan bazı boot arguments vardır:
 
-- `amfi_unrestricted_task_for_pid`: Gerekli entitlements olmadan task_for_pid’e izin ver
-- `amfi_allow_any_signature`: Herhangi bir code signature’a izin ver
-- `cs_enforcement_disable`: code signing enforcement’ı sistem genelinde devre dışı bırakmak için kullanılan argument
-- `amfi_prevent_old_entitled_platform_binaries`: entitlements içeren platform binaries’leri void et
-- `amfi_get_out_of_my_way`: amfi’yi tamamen devre dışı bırakır
+- `amfi_unrestricted_task_for_pid`: Gerekli entitlements olmadan task_for_pid kullanımına izin verir
+- `amfi_allow_any_signature`: Herhangi bir code signature'a izin verir
+- `cs_enforcement_disable`: Code signing enforcement'ı sistem genelinde devre dışı bırakmak için kullanılan argument
+- `amfi_prevent_old_entitled_platform_binaries`: Entitlements içeren platform binaries'lerini geçersiz kılar
+- `amfi_get_out_of_my_way`: amfi'yi tamamen devre dışı bırakır
 
-Bunlar kaydettiği bazı MACF policies’tir:
+Bunlar, kaydettiği MACF policies'lerinden bazılarıdır:<sup>[1]</sup>
 
-- **`cred_check_label_update_execve:`** Label update yapılır ve 1 döner
-- **`cred_label_associate`**: AMFI’nin mac label slot’unu label ile günceller
-- **`cred_label_destroy`**: AMFI’nin mac label slot’unu kaldırır
-- **`cred_label_init`**: AMFI’nin mac label slot’unda 0’a geçer
-- **`cred_label_update_execve`:** Label’ları değiştirmesine izin verilip verilmemesi gerektiğini görmek için process’in entitlements’ını kontrol eder.
-- **`file_check_mmap`:** mmap’in memory alıp bunu executable olarak ayarlayıp ayarlamadığını kontrol eder. Böyle bir durumda library validation gerekip gerekmediğini kontrol eder ve gerekiyorsa library validation function’ını çağırır.
-- **`file_check_library_validation`**: Diğer şeylerin yanında bir platform binary’nin başka bir platform binary yükleyip yüklemediğini veya process ile yeni yüklenen file’ın aynı TeamID’ye sahip olup olmadığını kontrol eden library validation function’ını çağırır. Bazı entitlements ayrıca herhangi bir library yüklemeye izin verir.
-- **`policy_initbsd`**: Güvenilir NVRAM Keys ayarlar
-- **`policy_syscall`**: Binary’nin unrestricted segments’e sahip olup olmadığı, env vars’a izin verilip verilmeyeceği gibi DYLD policies’i kontrol eder... bu ayrıca bir process `amfi_check_dyld_policy_self()` üzerinden başlatıldığında da çağrılır.
-- **`proc_check_inherit_ipc_ports`**: Bir process yeni bir binary çalıştırdığında, process’in task port’u üzerinde SEND rights’a sahip diğer process’lerin bunları koruyup korumaması gerektiğini kontrol eder. Platform binaries’e izin verilir, `get-task-allow` entitlements buna izin verir, `task_for_pid-allow` entitles’ları izinlidir ve aynı TeamID’ye sahip binaries için de izin verilir.
-- **`proc_check_expose_task`**: entitlements’ı zorlar
-- **`amfi_exc_action_check_exception_send`**: Bir exception message debugger’a gönderilir
+- **`cred_check_label_update_execve:`** Label güncellemesi gerçekleştirilir ve 1 döndürülür
+- **`cred_label_associate`**: AMFI'nin mac label slot'unu label ile günceller
+- **`cred_label_destroy`**: AMFI'nin mac label slot'unu kaldırır
+- **`cred_label_init`**: AMFI'nin mac label slot'una 0 taşır
+- **`cred_label_update_execve:`**:** Process'in label'ları değiştirmesine izin verilip verilmediğini görmek için entitlements'larını kontrol eder.
+- **`file_check_mmap:`**:** mmap'in memory elde edip bunu executable olarak ayarlayıp ayarlamadığını kontrol eder. Bu durumda library validation gerekip gerekmediğini kontrol eder ve gerekiyorsa library validation function'ı çağırır.
+- **`file_check_library_validation`**: Diğer şeylerin yanı sıra bir platform binary'sinin başka bir platform binary'si yükleyip yüklemediğini veya process ile yeni yüklenen file'ın aynı TeamID'ye sahip olup olmadığını kontrol eden library validation function'ı çağırır. Belirli entitlements'lar herhangi bir library'nin yüklenmesine de izin verir.
+- **`policy_initbsd`**: Trusted NVRAM Keys'i ayarlar
+- **`policy_syscall`**: Binary'nin unrestricted segments'lara sahip olup olmadığı veya env vars'a izin verilip verilmemesi gibi DYLD policies'lerini kontrol eder; bu ayrıca bir process `amfi_check_dyld_policy_self()` aracılığıyla başlatıldığında da çağrılır.
+- **`proc_check_inherit_ipc_ports`**: Bir process yeni bir binary execute ettiğinde, process'in task port'u üzerinde SEND rights sahibi diğer process'lerin bunları koruyup korumaması gerektiğini kontrol eder. Platform binaries'lerine izin verilir, `get-task-allow` entitle'ına sahip olanlara izin verilir, `task_for_pid-allow` entitlements'larına izin verilir ve aynı TeamID'ye sahip binary'lere izin verilir.
+- **`proc_check_expose_task`**: Entitlements'ları enforce eder
+- **`amfi_exc_action_check_exception_send`**: Debugger'a bir exception message gönderilir
 - **`amfi_exc_action_label_associate & amfi_exc_action_label_copy/populate & amfi_exc_action_label_destroy & amfi_exc_action_label_init & amfi_exc_action_label_update`**: Exception handling (debugging) sırasında label lifecycle
-- **`proc_check_get_task`**: `get-task-allow` gibi, diğer process’lerin task port’u almasına izin veren entitlements ile `task_for_pid-allow` gibi, process’in diğer process’lerin task port’larını almasına izin veren entitlements’ı kontrol eder. Bunların hiçbiri yoksa, bunun izinli olup olmadığını kontrol etmek için `amfid permitunrestricteddebugging`’e başvurur.
-- **`proc_check_mprotect`**: `mprotect`, bölgenin valid bir code signature’a sahipmiş gibi ele alınması gerektiğini belirten `VM_PROT_TRUSTED` flag’i ile çağrılırsa reddeder
-- **`vnode_check_exec`**: Executable files memory’ye yüklendiğinde çağrılır ve sayfalardan herhangi biri geçersiz hale gelirse process’i öldürecek `cs_hard | cs_kill` ayarlar
-- **`vnode_check_getextattr`**: MacOS: `com.apple.root.installed` ve `isVnodeQuarantined()` kontrol eder
-- **`vnode_check_setextattr`**: get + `com.apple.private.allow-bless` ve internal-installer-equivalent entitlement
-- **`vnode_check_signature`**: Entitlements, trust cache ve `amfid` kullanarak code signature’ı kontrol etmek için XNU’ya çağrı yapan code
-- **`proc_check_run_cs_invalid`**: `ptrace()` çağrılarını (`PT_ATTACH` ve `PT_TRACE_ME`) intercept eder. `get-task-allow`, `run-invalid-allow` ve `run-unsigned-code` entitlements’ından herhangi birini kontrol eder ve hiçbiri yoksa debugging’e izin verilip verilmediğini kontrol eder.
-- **`proc_check_map_anon`**: Eğer `mmap`, **`MAP_JIT`** flag’i ile çağrılırsa, AMFI `dynamic-codesigning` entitlement’ını kontrol eder.
+- **`proc_check_get_task`**: Diğer process'lerin task port'unu elde etmesine izin veren `get-task-allow` ve process'in diğer process'lerin task port'larını elde etmesine izin veren `task_for_pid-allow` gibi entitlements'ları kontrol eder. Bunların hiçbiri yoksa izin verilip verilmediğini kontrol etmek için `amfid permitunrestricteddebugging`'e kadar çağrı yapar.
+- **`proc_check_mprotect`**: Bölgenin geçerli bir code signature'a sahipmiş gibi ele alınması gerektiğini belirten `VM_PROT_TRUSTED` flag'i ile `mprotect` çağrılırsa reddeder.
+- **`vnode_check_exec`**: Executable files memory'ye yüklendiğinde çağrılır ve sayfalardan herhangi biri geçersiz hale gelirse process'i öldürecek `cs_hard | cs_kill` değerlerini ayarlar<sup>[2]</sup>
+- **`vnode_check_getextattr`**: MacOS: `com.apple.root.installed` ve `isVnodeQuarantined()` kontrol edilir
+- **`vnode_check_setextattr`**: `get` işlemi ile aynıdır; ayrıca `com.apple.private.allow-bless` ve `internal-installer-equivalent` entitlement'ını gerektirir
+- **`vnode_check_signature`**: Entitlements, trust cache ve `amfid` kullanarak code signature'ı kontrol etmek için XNU'yu çağıran code<sup>[3]</sup>
+- **`proc_check_run_cs_invalid`**: `ptrace()` çağrılarını (`PT_ATTACH` ve `PT_TRACE_ME`) intercept eder. `get-task-allow`, `run-invalid-allow` ve `run-unsigned-code` entitlements'larından herhangi birini kontrol eder; hiçbiri yoksa debugging'e izin verilip verilmediğini kontrol eder.
+- **`proc_check_map_anon`**: mmap **`MAP_JIT`** flag'i ile çağrılırsa AMFI, `dynamic-codesigning` entitlement'ını kontrol eder.
 
-`AMFI.kext` ayrıca diğer kernel extensions için de bir API expose eder ve bağımlılıklarını şu şekilde bulmak mümkündür:
+`AMFI.kext`, diğer kernel extensions'lar için de bir API sunar ve dependencies'lerini şu şekilde bulmak mümkündür:
 ```bash
 kextstat | grep " 19 " | cut -c2-5,50- | cut -d '(' -f1
 Executing: /usr/bin/kmutil showloaded
@@ -67,18 +67,18 @@ No variant specified, falling back to release
 ```
 ## amfid
 
-Bu, `AMFI.kext`’in user mode’da code signature’ları kontrol etmek için kullanacağı user mode çalışan daemon’dır.\
-`AMFI.kext`’in daemon ile iletişim kurması için `HOST_AMFID_PORT` üzerinden mach mesajları kullanır; bu özel port `18`’dir.
+Bu, `AMFI.kext`'in kullanıcı modunda code signature'ları kontrol etmek için kullandığı user mode daemon'ıdır.\
+`AMFI.kext`'in daemon ile iletişim kurabilmesi için `HOST_AMFID_PORT` portu üzerinden Mach mesajlarını kullanır; bu, özel `18` portudur.
 
-macOS’ta artık root process’lerin özel portları hijack etmesi mümkün değildir çünkü bunlar `SIP` tarafından korunur ve yalnızca launchd bunları alabilir. iOS’ta ise response’u geri gönderen process’in CDHash hardcoded olarak `amfid`’in CDHash’ı olacak şekilde kontrol edilir.
+macOS'ta root process'lerinin artık özel portları hijack etmesinin mümkün olmadığını unutmayın; çünkü bu portlar `SIP` tarafından korunur ve bunlara yalnızca launchd erişebilir. iOS'ta ise yanıtı gönderen process'in `amfid`'in hardcoded CDHash'ine sahip olduğu kontrol edilir.
 
-`amfid`’nin bir binary’yi kontrol etmesinin istendiğini ve response’unu görmek, onu debug edip `mach_msg` içinde bir breakpoint koyarak mümkündür.
+`amfid`'den bir binary'yi kontrol etmesi istendiğinde ve yanıt verdiğinde, debug ederek ve `mach_msg` içinde breakpoint ayarlayarak bunu görmek mümkündür.
 
-Özel port üzerinden bir mesaj alındığında, çağırdığı her function’ı ilgili function’a göndermek için **MIG** kullanılır. Ana function’lar tersine mühendislik yapılarak kitap içinde açıklanmıştır.
+Özel port üzerinden bir mesaj alındığında, her function'ı çağırdığı function'a göndermek için **MIG** kullanılır. Ana function'lar reverse edildi ve book içinde açıklandı.
 
-### DYLD policy and library validation
+### DYLD policy ve library validation
 
-Yeni `dyld` sürümleri, process `DYLD_*` path variables, interposing, fallback paths, embedded variables kullanabilir mi ya da failed library insertion’ı tolere edebilir mi diye AMFI’ye sormak için `configureProcessRestrictions()` içinden çok erken bir aşamada `amfi_check_dyld_policy_self()` çağırır. Bu nedenle, bir injection surface’i incelerken yalnızca Mach-O load commands’a bakmak yeterli değildir: ayrıca AMFI’nin `dyld` policy’ye çevireceği entitlements ve runtime flags de incelenmelidir.
+Recent `dyld` sürümleri, process'in `DYLD_*` path variable'larını, interposing'i, fallback path'lerini veya embedded variable'ları kullanıp kullanamayacağını ya da başarısız library insertion'larını tolere edip edemeyeceğini AMFI'ye sormak için `configureProcessRestrictions()` içinden çok erken bir aşamada `amfi_check_dyld_policy_self()` function'ını çağırır. Bu nedenle bir injection surface'i triage ederken yalnızca Mach-O load command'larını incelemek yeterli değildir: AMFI'nin `dyld` policy'ye dönüştüreceği entitlement'ları ve runtime flag'lerini de incelemeniz gerekir.
 
 Pratik bir triage döngüsü şöyledir:
 ```bash
@@ -91,15 +91,15 @@ egrep "disable-library-validation|clear-library-validation|allow-dyld-environmen
 # Runtime flags / TeamID / hardened-runtime metadata
 codesign -dvvv "$BIN" 2>&1 | egrep "TeamIdentifier=|Runtime Version|flags="
 ```
-Modern macOS’ta birçok Apple binary artık doğrudan `com.apple.security.cs.disable-library-validation` taşımıyor ve bunun yerine `com.apple.private.security.clear-library-validation` ile geliyor. Bu durumda library validation `execve` sırasında devre dışı bırakılmaz: süreç kendisi üzerinde `csops(..., CS_OPS_CLEAR_LV, ...)` çağırmak zorundadır ve XNU bu işlemi yalnızca entitlement mevcut olduğunda çağıran süreç için izin verir. Saldırı açısından bu önemlidir çünkü bir hedef, LV’yi açıkça temizleyen code path’e ulaştıktan **sonra** injectable hale gelebilir (örneğin, optional plugins yüklenmeden hemen önce).
+Modern macOS'te birçok Apple binary'si artık `com.apple.security.cs.disable-library-validation` değerini doğrudan taşımıyor; bunun yerine `com.apple.private.security.clear-library-validation` ile geliyor. Bu durumda library validation `execve` zamanında devre dışı bırakılmaz: process'in kendi üzerinde `csops(..., CS_OPS_CLEAR_LV, ...)` çağrısı yapması gerekir ve XNU, entitlement mevcut olduğunda bu işleme yalnızca çağrıyı yapan process üzerinde izin verir. Offensive açıdan bu önemlidir; çünkü bir hedef, LV'yi açıkça temizleyen code path'e ulaşana kadar injectable hale gelmeyebilir (örneğin optional plugin'leri yüklemeden hemen önce).<sup>[4][5]</sup>
 
 ## Provisioning Profiles
 
-Bir provisioning profile code imzalamak için kullanılabilir. Code imzalamak ve test etmek için kullanılabilen **Developer** profilleri ve tüm cihazlarda kullanılabilen **Enterprise** profilleri vardır.
+Bir provisioning profile, code imzalamak için kullanılabilir. Code'u imzalamak ve test etmek için kullanılabilen **Developer** profilleri ve tüm cihazlarda kullanılabilen **Enterprise** profilleri vardır.
 
-Bir App Apple Store’a gönderildikten sonra, eğer onaylanırsa Apple tarafından imzalanır ve provisioning profile artık gerekli olmaz.
+Bir App Apple Store'a gönderildikten ve onaylandıktan sonra Apple tarafından imzalanır ve provisioning profile artık gerekli olmaz.
 
-Bir profile genellikle `.mobileprovision` veya `.provisionprofile` uzantısı kullanır ve şununla dump edilebilir:
+Bir profile genellikle `.mobileprovision` veya `.provisionprofile` extension'ına sahiptir ve şu komutla dump edilebilir:
 ```bash
 openssl asn1parse -inform der -in /path/to/profile
 
@@ -107,50 +107,53 @@ openssl asn1parse -inform der -in /path/to/profile
 
 security cms -D -i /path/to/profile
 ```
-Bazen certificated olarak anılsa da, bu provisioning profile'lar bir certificate'tan daha fazlasını içerir:
+Bazen sertifikalı olarak adlandırılsalar da bu provisioning profile'lar bir sertifikadan daha fazlasını içerir:
 
 - **AppIDName:** Application Identifier
-- **AppleInternalProfile**: Bunu bir Apple Internal profile olarak tanımlar
-- **ApplicationIdentifierPrefix**: AppIDName önüne eklenir (TeamIdentifier ile aynı)
+- **AppleInternalProfile**: Bunun bir Apple Internal profile olduğunu belirtir
+- **ApplicationIdentifierPrefix**: AppIDName'in önüne eklenir (TeamIdentifier ile aynıdır)
 - **CreationDate**: `YYYY-MM-DDTHH:mm:ssZ` formatında tarih
-- **DeveloperCertificates**: Base64 verisi olarak kodlanmış (genellikle bir) certificate dizisi
-- **Entitlements**: Bu profile için izin verilen entitlements ile birlikte entitlements
-- **ExpirationDate**: `YYYY-MM-DDTHH:mm:ssZ` formatında son kullanma tarihi
-- **Name**: Application Name, AppIDName ile aynı
-- **ProvisionedDevices**: Bu profile geçerli olan UDID'lerin (developer certificates için) dizisi
-- **ProvisionsAllDevices**: Bir boolean (enterprise certificates için true)
-- **TeamIdentifier**: Uygulamalar arası etkileşim amacıyla developer'ı tanımlamak için kullanılan (genellikle bir) alfanümerik string dizisi
-- **TeamName**: Developer'ı tanımlamak için kullanılan, insan tarafından okunabilir bir isim
-- **TimeToLive**: certificate'ın geçerliliği (gün cinsinden)
-- **UUID**: Bu profile ait Evrensel Benzersiz Tanımlayıcı
-- **Version**: Şu anda 1 olarak ayarlı
+- **DeveloperCertificates**: Base64 data olarak kodlanmış (genellikle bir) sertifika dizisi
+- **Entitlements**: Bu profile için izin verilen entitlements
+- **ExpirationDate**: `YYYY-MM-DDTHH:mm:ssZ` formatında sona erme tarihi
+- **Name**: Application Name; AppIDName ile aynıdır
+- **ProvisionedDevices**: Bu profile'ın geçerli olduğu UDID'lerin (developer certificate'ları için) bir dizisi
+- **ProvisionsAllDevices**: Bir boolean (enterprise certificate'ları için true)
+- **TeamIdentifier**: Inter-app interaction amaçları doğrultusunda developer'ı tanımlamak için kullanılan (genellikle bir) alfanümerik string dizisi
+- **TeamName**: Developer'ı tanımlamak için kullanılan, insanlar tarafından okunabilir ad
+- **TimeToLive**: Certificate'ın geçerlilik süresi (gün cinsinden)
+- **UUID**: Bu profile için Universally Unique Identifier
+- **Version**: Şu anda 1 olarak ayarlanmıştır
 
-Entitlements girdisinin kısıtlı bir entitlements kümesi içereceğini ve provisioning profile'ın yalnızca bu belirli entitlements'ları verebileceğini unutmayın; böylece Apple private entitlements verilmesi engellenir.
+Entitlements girdisinin kısıtlı bir entitlements kümesi içereceğini ve provisioning profile'ın, Apple private entitlements'ın verilmesini önlemek için yalnızca bu belirli entitlements'ı sağlayabileceğini unutmayın.
 
-Profile'ların genellikle `/var/MobileDeviceProvisioningProfiles` içinde bulunduğunu ve bunların **`security cms -D -i /path/to/profile`** ile kontrol edilebileceğini unutmayın
+Profile'ların genellikle `/var/MobileDeviceProvisioningProfiles` konumunda bulunduğunu ve **`security cms -D -i /path/to/profile`** ile kontrol edilebileceğini unutmayın.
 
 ## **libmis.dylib**
 
-Bu, `amfid`'nin bir şeyi izin verip vermemesi gerektiğini sormak için çağırdığı harici library'dir. Tarihsel olarak jailbreaking içinde, her şeye izin verecek backdoored bir sürümü çalıştırılarak kötüye kullanılmıştır.
+Bu, bir şeye izin verip vermemesi gerektiğini sormak için `amfid` tarafından çağrılan external library'dir. Geçmişte jailbreaking sürecinde, her şeye izin veren backdoored bir sürümü çalıştırılarak kötüye kullanılmıştır.
 
-macOS'ta bu, `MobileDevice.framework` içindedir.
+macOS'ta bu library `MobileDevice.framework` içinde bulunur.
 
 ## AMFI Trust Caches
 
-Trust cache'ler yalnızca bir iOS konsepti değildir. Modern macOS'ta, özellikle **Apple silicon** üzerinde, static trust cache ve loadable trust cache'ler Secure Boot zincirinin bir parçasıdır. Bir Mach-O'nun **CodeDirectory hash**'i burada mevcut olduğunda, AMFI başlangıçta ek authenticity checks yapmadan ona **platform privilege** verebilir. Bu aynı zamanda Apple'ın platform binary'lerini belirli bir OS sürümüne kilitlemesine ve daha eski Apple-imzalı binary'lerin daha yeni sistemlerde yeniden oynatılmasını engellemesine de olanak tanır.
+Trust cache'ler yalnızca iOS'a özgü bir kavram değildir. Modern macOS'ta, özellikle **Apple silicon** üzerinde, static trust cache ve loadable trust cache'ler Secure Boot zincirinin bir parçasıdır. Bir Mach-O'nun **CodeDirectory hash** değeri burada mevcutsa AMFI, launch sırasında ek authenticity kontrolleri yapmadan ona **platform privilege** verebilir. Bu ayrıca Apple'ın platform binary'lerini belirli bir OS sürümüne kilitlemesine ve daha eski Apple-signed binary'lerin daha yeni sistemlerde replay edilmesini önlemesine olanak tanır.<sup>[6]</sup>
 
-Son macOS sürümlerinde trust-cache metadata'sı ayrıca **launch constraints** ile bağlantılıdır; bu yüzden kopyalanmış system app'ler ve yanlış parent/location'dan başlatılan binary'ler, hâlâ Apple-signed olsalar bile AMFI tarafından reddedilebilir. Ayrıntılı extraction ve reversing workflow şu bölümde anlatılmaktadır:
+Yeni macOS sürümlerinde trust-cache metadata'sı ayrıca **launch constraints** ile ilişkilidir. Bu nedenle kopyalanmış system app'leri ve binary'ler hâlâ Apple-signed olsalar bile yanlış parent/location'dan başlatıldıklarında AMFI tarafından reddedilebilir. Ayrıntılı extraction ve reversing workflow'u şurada ele alınmaktadır:
 
 {{#ref}}
 macos-launch-environment-constraints.md
 {{#endref}}
 
-iOS ve jailbreak research içinde, ad-hoc signed binary'leri whitelist etmek için kullanılan geleneksel **loadable trust caches** modelini hâlâ bulabilirsiniz.
+iOS ve jailbreak araştırmalarında, ad-hoc signed binary'leri whitelist etmek için kullanılan geleneksel **loadable trust cache** modeline hâlâ rastlarsınız.
 
 ## References
 
-- [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
-- [https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/)
-- [https://support.apple.com/guide/security/trust-caches-sec7d38fbf97/web](https://support.apple.com/guide/security/trust-caches-sec7d38fbf97/web)
+- [1] [XNU — `security/mac_policy.h` (AMFI'nin kaydettiği MACF policy ops; `mpo_policy_syscall` dahil)](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_policy.h)
+- [2] [XNU — `osfmk/kern/cs_blobs.h` (AMFI'nin ayarladığı `CS_*` code-signing flag'leri)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [3] [XNU — `bsd/kern/ubc_subr.c` (code-signature blob parsing ve validation)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/ubc_subr.c)
+- [4] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` operations ve `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [5] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` handler'ı)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
+- [6] [Apple Platform Security Guide — Trust cache'ler](https://support.apple.com/guide/security/trust-caches-sec7d38fbf97/web)
 
 {{#include ../../../banners/hacktricks-training.md}}

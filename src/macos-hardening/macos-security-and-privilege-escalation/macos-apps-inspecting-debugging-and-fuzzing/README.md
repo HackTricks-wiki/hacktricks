@@ -1,4 +1,4 @@
-# macOS Uygulamaları - İnceleme, hata ayıklama ve Fuzzing
+# macOS Uygulamaları - İnceleme, debugging ve Fuzzing
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -22,39 +22,29 @@ objdump --disassemble-symbols=_hello --x86-asm-syntax=intel toolsdemo #Disassemb
 ```bash
 nm -m ./tccd # List of symbols
 ```
-### jtool2 & Disarm
+### Disarm (old jtool2)
 
-Buradan [**disarm'ı indirebilirsiniz**](https://newosxbook.com/tools/disarm.html).
+[**disarm'ı buradan indirebilirsiniz**](https://newosxbook.com/tools/disarm.html).
+
+> [!TIP]
+> **`disarm`**'ın sıkıştırılmış IM4P dosyalarıyla (örneğin `kernelcache`) de çalışabildiğini ve yalnızca gerekli bölümleri çıkarabildiğini, hatta gerekli bölümü çıkarmadan analiz edebildiğini unutmayın.
 ```bash
+export JCOLOR=1
 ARCH=arm64e disarm -c -i -I --signature /path/bin # Get bin info and signature
 ARCH=arm64e disarm -c -l /path/bin # Get binary sections
 ARCH=arm64e disarm -c -L /path/bin # Get binary commands (dependencies included)
 ARCH=arm64e disarm -c -S /path/bin # Get symbols (func names, strings...)
 ARCH=arm64e disarm -c -d /path/bin # Get disasembled
-jtool2 -d __DATA.__const myipc_server | grep MIG # Get MIG info
+
+disarm -e filesets kernelcache.release.d23 # Extract filesets from kernelcache
+JDEBUG=1 disarm -e filesets kernelcache.release.d23 # Extract filesets from kernelcache with debug info
+disarm -r "code signature" /bin/ps # Check code signature of a binary
+disarm -e "code signature" /bin/ps # Extract code signature of a binary
 ```
-Buradan [**jtool2'yi indirebilirsiniz**](http://www.newosxbook.com/tools/jtool.html) veya `brew` ile kurabilirsiniz.
-```bash
-# Install
-brew install --cask jtool2
-
-jtool2 -l /bin/ls # Get commands (headers)
-jtool2 -L /bin/ls # Get libraries
-jtool2 -S /bin/ls # Get symbol info
-jtool2 -d /bin/ls # Dump binary
-jtool2 -D /bin/ls # Decompile binary
-
-# Get signature information
-ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Automator
-
-# Get MIG information
-jtool2 -d __DATA.__const myipc_server | grep MIG
-```
-> [!CAUTION] > **jtool, disarm lehine kullanımdan kaldırılmıştır**
-
 ### Codesign / ldid
 
-> [!TIP] > **`Codesign`** **macOS**'te bulunabilirken, **`ldid`** **iOS**'te bulunabilir
+> [!TIP]
+> **`Codesign`**, **macOS** içinde bulunabilirken **`ldid`**, **iOS** içinde bulunabilir.
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -83,50 +73,50 @@ ldid -S/tmp/entl.xml <binary>
 ```
 ### SuspiciousPackage
 
-[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) , **.pkg** dosyalarını (kurulum dosyaları) incelemek ve yüklemeden önce içeriğini görmek için yararlı bir araçtır.\
-Bu kurulum dosyaları, kötü amaçlı yazılım yazarlarının genellikle kötü amaçlı yazılımı **sürdürmek** için kötüye kullandığı `preinstall` ve `postinstall` bash betikleri içerir.
+[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html), **.pkg** dosyalarını (installer'ları) incelemek ve yüklemeden önce içlerinde ne olduğunu görmek için kullanışlı bir araçtır.\
+Bu installer'lar, malware yazarlarının **malware'i** **persist** etmek için genellikle kötüye kullandığı `preinstall` ve `postinstall` bash script'lerine sahiptir.
 
 ### hdiutil
 
-Bu araç, herhangi bir şey çalıştırmadan önce Apple disk görüntülerini (**.dmg**) incelemek için **monte** etmeye olanak tanır:
+Bu araç, herhangi bir şeyi çalıştırmadan önce incelemek amacıyla Apple disk image (**.dmg**) dosyalarını **mount** etmenizi sağlar:
 ```bash
 hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 ```
-`/Volumes` altında monte edilecektir.
+It `/Volumes` içine mount edilecektir.
 
-### Paketlenmiş ikili dosyalar
+### Packed binaries
 
-- Yüksek entropi kontrolü
-- String'leri kontrol et (anlaşılır string yoksa, paketlenmiş)
-- MacOS için UPX paketleyici, "\_\_XHDR" adında bir bölüm oluşturur.
+- Yüksek entropy olup olmadığını kontrol edin
+- String'leri kontrol edin (anlaşılabilir neredeyse hiç string yoksa packed olabilir)
+- MacOS için UPX packer, "\_\_XHDR" adlı bir section oluşturur
 
-## Statik Objective-C analizi
+## Static Objective-C analysis
 
 ### Metadata
 
 > [!CAUTION]
-> Objective-C ile yazılmış programların **derlendiğinde** [Mach-O ikili dosyalarına](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md) **sınıf bildirimlerini** **koruduğunu** unutmayın. Bu tür sınıf bildirimleri **şunları içerir**:
+> Objective-C ile yazılmış programların [Mach-O binaries](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md) içine **compiled** edildiğinde sınıf bildirimlerini **koruduğunu** unutmayın. Bu tür sınıf bildirimleri aşağıdakilerin adını ve türünü **içerir**:
 
-- Tanımlanan arayüzler
-- Arayüz yöntemleri
-- Arayüz örnek değişkenleri
-- Tanımlanan protokoller
+- Tanımlanan interface'ler
+- Interface method'ları
+- Interface instance variable'ları
+- Tanımlanan protocol'ler
 
-Bu isimlerin, ikilinin tersine mühendislik sürecini zorlaştırmak için obfuscate edilebileceğini unutmayın.
+Binary'nin reversing işlemini zorlaştırmak için bu isimlerin obfuscate edilmiş olabileceğini unutmayın.
 
-### Fonksiyon çağrısı
+### Function calling
 
-Bir ikili dosyada Objective-C kullanan bir fonksiyon çağrıldığında, derlenmiş kod o fonksiyonu çağırmak yerine **`objc_msgSend`** çağrısını yapar. Bu, nihai fonksiyonu çağıracaktır:
+Objective-C kullanan bir binary'de bir function çağrıldığında, compiled code bu function'ı doğrudan çağırmak yerine **`objc_msgSend`** çağrısını yapar. Bu çağrı da nihai function'ı çağırır:
 
-![](<../../../images/image (305).png>)
+![Metadata - Function calling: When a function is called in a binary that uses objective-C, the compiled code instead of calling that function, it will call objc msgSend . Which will be...](<../../../images/image (305).png>)
 
-Bu fonksiyonun beklediği parametreler şunlardır:
+Bu function'ın beklediği parametreler şunlardır:
 
-- İlk parametre (**self**) "mesajı alacak **sınıfın örneğine işaret eden bir işaretçi**"dir. Daha basit bir ifadeyle, bu, metodun çağrıldığı nesnedir. Eğer metod bir sınıf metoduysa, bu sınıf nesnesinin (bütün olarak) bir örneği olacaktır; oysa bir örnek metodu için, self sınıfın bir örneğine işaret edecektir.
-- İkinci parametre (**op**), "mesajı işleyen metodun seçicisidir". Yine, daha basit bir ifadeyle, bu sadece **metodun adıdır.**
-- Kalan parametreler, metodun gerektirdiği herhangi bir **değerdir** (op).
+- İlk parametre (**self**), "**mesajı alacak class instance'ını gösteren bir pointer**"dır. Daha basit ifade etmek gerekirse, method'un üzerinde çağrıldığı object'tir. Method bir class method'uysa bu, class object'inin (bütün olarak) bir instance'ı olur; instance method'u içinse self, class'ın object olarak instantiate edilmiş bir instance'ını gösterir.
+- İkinci parametre (**op**), "mesajı işleyen method'un selector'ı"dır. Yine daha basit ifade etmek gerekirse bu yalnızca **method'un adıdır.**
+- Kalan parametreler, method'un (**op**) ihtiyaç duyduğu **değerlerdir**.
 
-Bu bilgiyi **ARM64'te `lldb` ile kolayca nasıl alacağınızı** bu sayfada görün:
+ARM64'te `lldb` ile bu bilgilerin nasıl kolayca **alınacağını** şu sayfada görebilirsiniz:
 
 
 {{#ref}}
@@ -135,27 +125,27 @@ arm64-basic-assembly.md
 
 x64:
 
-| **Argüman**      | **Kayıt**                                                      | **(için) objc_msgSend**                                 |
-| ----------------- | ------------------------------------------------------------- | ------------------------------------------------------ |
-| **1. argüman**    | **rdi**                                                       | **self: metodun çağrıldığı nesne**                     |
-| **2. argüman**    | **rsi**                                                       | **op: metodun adı**                                    |
-| **3. argüman**    | **rdx**                                                       | **metoda 1. argüman**                                 |
-| **4. argüman**    | **rcx**                                                       | **metoda 2. argüman**                                 |
-| **5. argüman**    | **r8**                                                        | **metoda 3. argüman**                                 |
-| **6. argüman**    | **r9**                                                        | **metoda 4. argüman**                                 |
-| **7. ve üzeri argüman** | <p><strong>rsp+</strong><br><strong>(stack'te)</strong></p> | **metoda 5. ve üzeri argüman**                        |
+| **Argument**      | **Register**                                                    | **(for) objc_msgSend**                                 |
+| ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
+| **1st argument**  | **rdi**                                                         | **self: method'un üzerinde çağrıldığı object**         |
+| **2nd argument**  | **rsi**                                                         | **op: method'un adı**                                  |
+| **3rd argument**  | **rdx**                                                         | **method'a ait 1. argument**                           |
+| **4th argument**  | **rcx**                                                         | **method'a ait 2. argument**                           |
+| **5th argument**  | **r8**                                                          | **method'a ait 3. argument**                           |
+| **6th argument**  | **r9**                                                          | **method'a ait 4. argument**                           |
+| **7th+ argument** | <p><strong>rsp+</strong><br><strong>(on the stack)</strong></p> | **method'a ait 5.+ argument**                         |
 
-### ObjectiveC metadata dökümü
+### Dump ObjectiveC metadata
 
 ### Dynadump
 
-[**Dynadump**](https://github.com/DerekSelander/dynadump), Objective-C ikili dosyalarını sınıf dökümü yapmak için bir araçtır. Github, dylib'leri belirtmektedir ancak bu yürütülebilir dosyalarla da çalışır.
+[**Dynadump**](https://github.com/DerekSelander/dynadump), Objective-C binary'lerini class-dump etmek için kullanılan bir tool'dur. Github sayfasında dylib'ler belirtilmiş olsa da bu tool executable'larla da çalışır.
 ```bash
 ./dynadump dump /path/to/bin
 ```
-Yazma zamanı itibarıyla, bu **şu anda en iyi çalışan** olanıdır.
+Yazım sırasında **şu anda en iyi çalışan seçenek budur**.
 
-#### Normal araçlar
+#### Standart araçlar
 ```bash
 nm --dyldinfo-only /path/to/bin
 otool -ov /path/to/bin
@@ -163,24 +153,24 @@ objdump --macho --objc-meta-data /path/to/bin
 ```
 #### class-dump
 
-[**class-dump**](https://github.com/nygard/class-dump/) , ObjectiveC formatında kod için sınıflar, kategoriler ve protokoller için bildirimler üreten orijinal araçtır.
+[**class-dump**](https://github.com/nygard/class-dump/), Objective-C ile biçimlendirilmiş kodda bulunan class, category ve protocol'ler için declaration'lar oluşturan orijinal araçtır.
 
-Eski ve bakımsızdır, bu yüzden muhtemelen düzgün çalışmayacaktır.
+Eski ve artık bakımı yapılmıyor; bu nedenle muhtemelen düzgün çalışmayacaktır.
 
 #### ICDump
 
-[**iCDump**](https://github.com/romainthomas/iCDump) modern ve çok platformlu bir Objective-C sınıf dökümüdür. Mevcut araçlarla karşılaştırıldığında, iCDump Apple ekosisteminden bağımsız olarak çalışabilir ve Python bağlamalarını açığa çıkarır.
+[**iCDump**](https://github.com/romainthomas/iCDump), modern ve cross-platform bir Objective-C class dump aracıdır. Mevcut araçlarla karşılaştırıldığında iCDump, Apple ekosisteminden bağımsız olarak çalışabilir ve Python bindings sunar.
 ```python
 import icdump
 metadata = icdump.objc.parse("/path/to/bin")
 
 print(metadata.to_decl())
 ```
-## Statik Swift analizi
+## Static Swift analizi
 
-Swift ikili dosyaları ile, Objective-C uyumluluğu olduğundan, bazen [class-dump](https://github.com/nygard/class-dump/) kullanarak bildirimleri çıkartabilirsiniz ama her zaman değil.
+Swift binary'lerinde Objective-C uyumluluğu bulunduğundan, bazen [class-dump](https://github.com/nygard/class-dump/) kullanarak bildirimleri çıkarabilirsiniz, ancak bu her zaman mümkün değildir.
 
-**`jtool -l`** veya **`otool -l`** komut satırları ile **`__swift5`** ön eki ile başlayan birkaç bölüm bulmak mümkündür:
+**`jtool -l`** veya **`otool -l`** komut satırlarıyla, **`__swift5`** önekiyle başlayan çeşitli bölümleri bulmak mümkündür:
 ```bash
 jtool2 -l /Applications/Stocks.app/Contents/MacOS/Stocks
 LC 00: LC_SEGMENT_64              Mem: 0x000000000-0x100000000    __PAGEZERO
@@ -192,9 +182,9 @@ Mem: 0x100027064-0x1000274cc        __TEXT.__swift5_fieldmd
 Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
 [...]
 ```
-Daha fazla bilgiye [**bu bölümde saklanan bilgiler hakkında bu blog yazısında**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html) ulaşabilirsiniz.
+Bu bölümlerde depolanan [**bilgiler hakkında daha fazla bilgiyi bu blog yazısında bulabilirsiniz**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html).
 
-Ayrıca, **Swift ikili dosyaları sembollere sahip olabilir** (örneğin, kütüphanelerin fonksiyonlarının çağrılabilmesi için sembolleri saklaması gerekir). **Semboller genellikle fonksiyon adı ve attr hakkında çirkin bir şekilde bilgi içerir**, bu nedenle çok faydalıdırlar ve orijinal adı alabilen "**demanglers"** vardır:
+Ayrıca, **Swift binaries symbols içerebilir** (örneğin, kütüphanelerin işlevlerinin çağrılabilmesi için symbols depolaması gerekir). **Symbols genellikle işlev adı ve öznitelikleri hakkında bilgileri** okunması zor bir biçimde içerir; bu nedenle oldukça kullanışlıdırlar ve özgün adı elde edebilen **"demanglers"** vardır:
 ```bash
 # Ghidra plugin
 https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
@@ -202,77 +192,77 @@ https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
 # Swift cli
 swift demangle
 ```
-## Dinamik Analiz
+## Dynamic Analysis
 
 > [!WARNING]
-> İkili dosyaları hata ayıklamak için, **SIP'nin devre dışı bırakılması gerekir** (`csrutil disable` veya `csrutil enable --without debug`) veya ikili dosyaları geçici bir klasöre kopyalayıp **imzayı kaldırmak** için `codesign --remove-signature <binary-path>` veya ikili dosyanın hata ayıklanmasına izin vermek gerekir (bunu [bu script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b) ile kullanabilirsiniz).
+> İkili dosyalarda debug işlemi yapabilmek için **SIP'nin devre dışı bırakılması** (`csrutil disable` veya `csrutil enable --without debug) ya da ikili dosyaların geçici bir klasöre kopyalanıp imzanın `codesign --remove-signature <binary-path>` ile **kaldırılması** veya ikilinin debug edilmesine izin verilmesi gerekir ([bu scripti](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b) kullanabilirsiniz).
 
 > [!WARNING]
-> macOS'ta **sistem ikili dosyalarını enstrümante etmek** için (örneğin `cloudconfigurationd`), **SIP'nin devre dışı bırakılması gerekir** (sadece imzayı kaldırmak işe yaramaz).
+> macOS'ta `cloudconfigurationd` gibi **sistem ikililerini instrument etmek** için **SIP devre dışı bırakılmalıdır** (yalnızca imzayı kaldırmak işe yaramaz).
 
-### API'ler
+### APIs
 
-macOS, süreçler hakkında bilgi veren bazı ilginç API'ler sunar:
+macOS, süreçler hakkında bilgi sağlayan bazı ilginç API'ler sunar:
 
-- `proc_info`: Her süreç hakkında çok fazla bilgi veren ana API'dir. Diğer süreçlerin bilgilerini almak için root olmanız gerekir, ancak özel yetkilere veya mach portlarına ihtiyacınız yoktur.
-- `libsysmon.dylib`: XPC ile sunulan işlevler aracılığıyla süreçler hakkında bilgi almayı sağlar, ancak `com.apple.sysmond.client` yetkisine sahip olmak gerekir.
+- `proc_info`: Her süreç hakkında çok miktarda bilgi sağlayan temel API'dir. Diğer süreçlerin bilgilerini almak için root olmanız gerekir, ancak özel entitlements veya mach port'larına ihtiyacınız yoktur.
+- `libsysmon.dylib`: XPC üzerinden sunulan işlevler aracılığıyla süreçler hakkında bilgi edinmenizi sağlar; ancak `com.apple.sysmond.client` entitlement'ına sahip olmanız gerekir.
 
 ### Stackshot & microstackshots
 
-**Stackshotting**, süreçlerin durumunu, tüm çalışan iş parçacıklarının çağrı yığınlarını içerecek şekilde yakalamak için kullanılan bir tekniktir. Bu, hata ayıklama, performans analizi ve sistemin belirli bir zamanda davranışını anlamak için özellikle yararlıdır. iOS ve macOS'ta, stackshotting, **`sample`** ve **`spindump`** gibi çeşitli araçlar ve yöntemler kullanılarak gerçekleştirilebilir.
+**Stackshotting**, çalışan tüm thread'lerin çağrı stack'leri de dahil olmak üzere süreçlerin durumunu yakalamak için kullanılan bir tekniktir. Bu teknik özellikle debug, performans analizi ve sistemin belirli bir zamandaki davranışını anlamak için yararlıdır. iOS ve macOS'ta stackshotting, **`sample`** ve **`spindump`** gibi çeşitli araçlar ve yöntemler kullanılarak gerçekleştirilebilir.
 
 ### Sysdiagnose
 
-Bu araç (`/usr/bini/ysdiagnose`), bilgisayarınızdan `ps`, `zprint` gibi onlarca farklı komut çalıştırarak çok fazla bilgi toplar...
+Bu araç (`/usr/bini/ysdiagnose`), `ps`, `zprint` gibi onlarca farklı komutu çalıştırarak bilgisayarınızdan temel olarak çok miktarda bilgi toplar.
 
-**root** olarak çalıştırılmalıdır ve `/usr/libexec/sysdiagnosed` daemon'u `com.apple.system-task-ports` ve `get-task-allow` gibi çok ilginç yetkilere sahiptir.
+**root** olarak çalıştırılmalıdır ve `/usr/libexec/sysdiagnosed` daemon'ı, `com.apple.system-task-ports` ve `get-task-allow` gibi oldukça ilginç entitlements'lara sahiptir.
 
-Plist'i `/System/Library/LaunchDaemons/com.apple.sysdiagnose.plist` konumunda bulunur ve 3 MachServices tanımlar:
+plist'i `/System/Library/LaunchDaemons/com.apple.sysdiagnose.plist` konumunda bulunur ve 3 MachServices tanımlar:
 
 - `com.apple.sysdiagnose.CacheDelete`: /var/rmp içindeki eski arşivleri siler
 - `com.apple.sysdiagnose.kernel.ipc`: Özel port 23 (kernel)
-- `com.apple.sysdiagnose.service.xpc`: `Libsysdiagnose` Obj-C sınıfı aracılığıyla kullanıcı modu arayüzü. Bir sözlükte üç argüman geçirilebilir (`compress`, `display`, `run`)
+- `com.apple.sysdiagnose.service.xpc`: `Libsysdiagnose` Obj-C sınıfı üzerinden user mode arayüzü. Bir dict içinde üç argüman (`compress`, `display`, `run`) aktarılabilir
 
-### Birleşik Günlükler
+### Unified Logs
 
-MacOS, bir uygulama çalıştırırken **ne yaptığını** anlamaya çalışırken çok yararlı olabilecek birçok günlük oluşturur.
+MacOS, bir uygulamayı çalıştırırken **ne yaptığını** anlamaya çalıştığınızda oldukça yararlı olabilecek çok sayıda log üretir.
 
-Ayrıca, bazı günlükler, bazı **kullanıcı** veya **bilgisayar** **tanımlanabilir** bilgileri **gizlemek için** `<private>` etiketini içerecektir. Ancak, bu bilgileri açığa çıkarmak için **bir sertifika yüklemek mümkündür**. Açıklamaları [**buradan**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log) takip edin.
+Ayrıca bazı loglarda, bazı **user** veya **computer** **identifiable** bilgilerini **gizlemek** için `<private>` etiketi bulunur. Ancak, bu bilgileri açığa çıkarmak için **bir sertifika yüklemek** mümkündür. Açıklamaları [**buradan**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log) takip edin.
 
 ### Hopper
 
-#### Sol panel
+#### Left panel
 
-Hopper'ın sol panelinde, ikilinin sembollerini (**Etiketler**), prosedürler ve işlevler listesini (**Proc**) ve dizeleri (**Str**) görebilirsiniz. Bunlar tüm dizeler değildir, ancak Mac-O dosyasının çeşitli bölümlerinde tanımlananlardır (örneğin _cstring veya_ `objc_methname`).
+Hopper'ın sol panelinde ikilinin sembollerini (**Labels**), prosedür ve işlev listesini (**Proc**) ve string'leri (**Str**) görebilirsiniz. Bunlar tüm string'ler değil, Mac-O dosyasının çeşitli bölümlerinde (örneğin _cstring veya_ `objc_methname`) tanımlanan string'lerdir.
 
-#### Orta panel
+#### Middle panel
 
-Orta panelde **dağıtılmış kodu** görebilirsiniz. Ve bunu **ham** dağıtım, **graf** olarak, **decompile edilmiş** ve **ikili** olarak ilgili simgeye tıklayarak görebilirsiniz:
+Orta panelde **dissasembled code** görebilirsiniz. Ayrıca ilgili simgeye tıklayarak bunu **raw** disassemble, **graph**, **decompiled** veya **binary** olarak görüntüleyebilirsiniz:
 
 <figure><img src="../../../images/image (343).png" alt=""><figcaption></figcaption></figure>
 
-Bir kod nesnesine sağ tıkladığınızda, o nesneye **referansları** görebilir veya adını değiştirebilirsiniz (bu, decompile edilmiş psödo kodda çalışmaz):
+Bir code object'e sağ tıklayarak **bu nesneye yapılan/nesneden yapılan referansları** görebilir veya adını değiştirebilirsiniz (bu işlem decompiled pseudocode'da çalışmaz):
 
 <figure><img src="../../../images/image (1117).png" alt=""><figcaption></figcaption></figure>
 
-Ayrıca, **orta altta python komutları yazabilirsiniz**.
+Ayrıca, **orta panelin alt kısmına Python komutları yazabilirsiniz**.
 
-#### Sağ panel
+#### Right panel
 
-Sağ panelde, **navigasyon geçmişi** gibi ilginç bilgileri görebilirsiniz (bu sayede mevcut duruma nasıl geldiğinizi bilirsiniz), bu işlevi çağıran tüm **işlevleri** ve **bu işlevin çağırdığı** tüm işlevleri görebileceğiniz **çağrı grafiği** ve **yerel değişkenler** bilgisi.
+Sağ panelde **navigation history** (böylece mevcut duruma nasıl geldiğinizi bilirsiniz), bu **function'ı çağıran tüm function'ları** ve **bu function'ın çağırdığı tüm function'ları** görebileceğiniz **call grap**h ve **local variables** bilgileri gibi ilginç bilgiler bulunur.
 
 ### dtrace
 
-Kullanıcılara uygulamalara son derece **düşük seviyede** erişim sağlar ve kullanıcılara **programları izleme** ve hatta yürütme akışlarını değiştirme imkanı sunar. Dtrace, **kernel boyunca yerleştirilen** **prob'lar** kullanır ve sistem çağrılarının başlangıç ve bitiş noktaları gibi yerlerde bulunur.
+Kullanıcıların uygulamalara son derece **low level** erişmesini sağlar ve kullanıcılara **programları trace etme** ve hatta yürütme akışlarını değiştirme olanağı sunar. Dtrace, **kernel boyunca yerleştirilen** ve system call'ların başlangıcı ile sonu gibi konumlarda bulunan **probe**'ları kullanır.
 
-DTrace, her sistem çağrısı için bir prob oluşturmak üzere **`dtrace_probe_create`** işlevini kullanır. Bu prob'lar, her sistem çağrısının **giriş ve çıkış noktasında** tetiklenebilir. DTrace ile etkileşim, yalnızca root kullanıcı için mevcut olan /dev/dtrace aracılığıyla gerçekleşir.
+DTrace, her system call için bir probe oluşturmak amacıyla **`dtrace_probe_create`** işlevini kullanır. Bu probe'lar her system call'ın **entry ve exit noktalarında** tetiklenebilir. DTrace ile etkileşim, yalnızca root kullanıcısı tarafından kullanılabilen /dev/dtrace üzerinden gerçekleşir.
 
 > [!TIP]
-> Dtrace'ı SIP korumasını tamamen devre dışı bırakmadan etkinleştirmek için kurtarma modunda şunu çalıştırabilirsiniz: `csrutil enable --without dtrace`
+> SIP korumasını tamamen devre dışı bırakmadan Dtrace'i etkinleştirmek için recovery mode'da şu komutu çalıştırabilirsiniz: `csrutil enable --without dtrace`
 >
-> Ayrıca **`dtrace`** veya **`dtruss`** ikililerini **derlediğiniz** dosyaları kullanarak çalıştırabilirsiniz.
+> Ayrıca **derlediğiniz** **`dtrace`** veya **`dtruss`** ikililerini de kullanabilirsiniz.
 
-Dtrace'ın mevcut prob'ları şu şekilde elde edilebilir:
+Kullanılabilir dtrace probe'ları şu komutla elde edilebilir:
 ```bash
 dtrace -l | head
 ID   PROVIDER            MODULE                          FUNCTION NAME
@@ -282,20 +272,22 @@ ID   PROVIDER            MODULE                          FUNCTION NAME
 43    profile                                                     profile-97
 44    profile                                                     profile-199
 ```
-Probe adı dört bölümden oluşur: sağlayıcı, modül, işlev ve ad (`fbt:mach_kernel:ptrace:entry`). Eğer adın bazı bölümlerini belirtmezseniz, Dtrace o bölümü joker karakter olarak uygular.
+Probe adı dört bölümden oluşur: provider, module, function ve name (`fbt:mach_kernel:ptrace:entry`). Adın bazı bölümlerini belirtmezseniz, DTrace bu bölümü wildcard olarak uygular.
 
-DTrace'i probeleri etkinleştirmek ve tetiklendiğinde hangi eylemlerin gerçekleştirileceğini belirtmek için D dilini kullanmamız gerekecek.
+DTrace'i probe'ları etkinleştirecek ve tetiklendiklerinde gerçekleştirilecek eylemleri belirtecek şekilde yapılandırmak için D dilini kullanmamız gerekir.
 
-Daha ayrıntılı bir açıklama ve daha fazla örnek için [https://illumos.org/books/dtrace/chp-intro.html](https://illumos.org/books/dtrace/chp-intro.html) adresine bakabilirsiniz.
+Daha ayrıntılı bir açıklama ve daha fazla örnek [https://illumos.org/books/dtrace/chp-intro.html](https://illumos.org/books/dtrace/chp-intro.html) adresinde bulunabilir.
 
 #### Örnekler
 
-`man -k dtrace` komutunu çalıştırarak **mevcut DTrace betiklerini** listeleyin. Örnek: `sudo dtruss -n binary`
+Mevcut **DTrace script'lerini** listelemek için `man -k dtrace` komutunu çalıştırın. Örnek: `sudo dtruss -n binary`
+
+- Satır içinde
 ```bash
 #Count the number of syscalls of each running process
 sudo dtrace -n 'syscall:::entry {@[execname] = count()}'
 ```
-- betik
+- script
 ```bash
 syscall:::entry
 /pid == $1/
@@ -340,109 +332,109 @@ dtruss -c -p 1000 #get syscalls of PID 1000
 ```
 ### kdebug
 
-Bu, bir çekirdek izleme aracıdır. Belgelendirilmiş kodlar **`/usr/share/misc/trace.codes`** içinde bulunabilir.
+Bir kernel tracing facility'sidir. Belgelenmiş kodlar **`/usr/share/misc/trace.codes`** içinde bulunabilir.
 
 `latency`, `sc_usage`, `fs_usage` ve `trace` gibi araçlar bunu dahili olarak kullanır.
 
-`kdebug` ile etkileşim kurmak için `sysctl`, `kern.kdebug` ad alanı üzerinden kullanılır ve kullanılacak MIB'ler `bsd/kern/kdebug.c` içinde uygulanan fonksiyonlarla birlikte `sys/sysctl.h` dosyasında bulunabilir.
+`kdebug` ile arayüz oluşturmak için `kern.kdebug` namespace'i üzerinden `sysctl` kullanılır; kullanılacak MIB'ler `sys/sysctl.h` içinde bulunabilir ve fonksiyonlar `bsd/kern/kdebug.c` dosyasında uygulanmıştır.
 
-Özel bir istemci ile kdebug ile etkileşim kurmak için genellikle şu adımlar izlenir:
+Özel bir client ile kdebug ile etkileşim kurmak için genellikle şu adımlar izlenir:
 
-- Mevcut ayarları KERN_KDSETREMOVE ile kaldırın
-- KERN_KDSETBUF ve KERN_KDSETUP ile izlemeyi ayarlayın
-- KERN_KDGETBUF ile tampon girişlerinin sayısını alın
-- KERN_KDPINDEX ile izleme kaydından kendi istemcinizi çıkarın
-- KERN_KDENABLE ile izlemeyi etkinleştirin
-- KERN_KDREADTR çağrısını yaparak tamponu okuyun
-- Her bir iş parçacığını kendi süreci ile eşleştirmek için KERN_KDTHRMAP çağrısını yapın.
+- KERN_KDSETREMOVE ile mevcut ayarları kaldırın
+- KERN_KDSETBUF ve KERN_KDSETUP ile trace'i ayarlayın
+- Buffer entry sayısını almak için KERN_KDGETBUF kullanın
+- KERN_KDPINDEX ile kendi client'ınızı trace'ten çıkarın
+- KERN_KDENABLE ile tracing'i etkinleştirin
+- KERN_KDREADTR çağrısıyla buffer'ı okuyun
+- Her thread'i process'iyle eşleştirmek için KERN_KDTHRMAP çağrısını kullanın.
 
-Bu bilgiyi almak için Apple aracı **`trace`** veya özel araç [kDebugView (kdv)](https://newosxbook.com/tools/kdv.html)** kullanılabilir.**
+Bu bilgileri almak için Apple aracı **`trace`** veya özel araç [kDebugView (kdv)](https://newosxbook.com/tools/kdv.html)** kullanılabilir.**
 
-**Kdebug'un aynı anda yalnızca 1 müşteri için mevcut olduğunu unutmayın.** Yani aynı anda yalnızca bir k-debug destekli araç çalıştırılabilir.
+**Kdebug'in aynı anda yalnızca 1 müşteri için kullanılabildiğini unutmayın.** Bu nedenle aynı anda yalnızca bir k-debug destekli araç çalıştırılabilir.
 
 ### ktrace
 
-`ktrace_*` API'leri, `Kdebug`'ın sarmalayıcıları olan `libktrace.dylib`'den gelir. Ardından, bir istemci sadece `ktrace_session_create` ve `ktrace_events_[single/class]` çağrısı yaparak belirli kodlar üzerinde geri çağırmalar ayarlayabilir ve ardından `ktrace_start` ile başlatabilir.
+`ktrace_*` API'leri, `Kdebug` API'lerini saran `libktrace.dylib` içinden gelir. Ardından bir client, belirli kodlar üzerinde callback'leri ayarlamak için `ktrace_session_create` ve `ktrace_events_[single/class]` çağrılarını yapabilir ve sonra `ktrace_start` ile başlatabilir.
 
-Bunu **SIP etkinleştirildiğinde** bile kullanabilirsiniz.
+Bunu **SIP etkin durumdayken** bile kullanabilirsiniz.
 
-İstemci olarak `ktrace` aracını kullanabilirsiniz:
+Client olarak `ktrace` yardımcı programını kullanabilirsiniz:
 ```bash
 ktrace trace -s -S -t c -c ls | grep "ls("
 ```
-Or `tailspin`.
+Veya `tailspin`.
 
 ### kperf
 
-Bu, bir çekirdek düzeyinde profil oluşturmak için kullanılır ve `Kdebug` çağrıları kullanılarak oluşturulmuştur.
+Bu, kernel seviyesinde profiling yapmak için kullanılır ve `Kdebug` callout'ları kullanılarak oluşturulmuştur.
 
-Temelde, global değişken `kernel_debug_active` kontrol edilir ve ayarlandığında `kperf_kdebug_handler` çağrılır, `Kdebug` kodu ve çağrılan çekirdek çerçevesinin adresi ile. Eğer `Kdebug` kodu seçilenlerden biriyle eşleşirse, "hareketler" bitmap olarak yapılandırılır (seçenekler için `osfmk/kperf/action.h` dosyasına bakın).
+Temel olarak, global `kernel_debug_active` değişkeni kontrol edilir ve etkinse, çağrı yapan kernel frame'inin `Kdebug` kodu ve adresiyle birlikte `kperf_kdebug_handler` çağrılır. `Kdebug` kodu seçilen kodlardan biriyle eşleşirse, bitmap olarak yapılandırılmış "actions" alınır (seçenekler için `osfmk/kperf/action.h` dosyasına bakın).
 
-Kperf ayrıca bir sysctl MIB tablosuna sahiptir: (root olarak) `sysctl kperf`. Bu kodlar `osfmk/kperf/kperfbsd.c` dosyasında bulunabilir.
+Kperf'in ayrıca bir sysctl MIB tablosu vardır: (root olarak) `sysctl kperf`. Bu kodlar `osfmk/kperf/kperfbsd.c` içinde bulunabilir.
 
-Ayrıca, Kperf'in işlevselliğinin bir alt kümesi `kpc` içinde yer alır ve bu, makine performans sayaçları hakkında bilgi sağlar.
+Bununla birlikte, Kperf işlevselliğinin bir alt kümesi, makine performance counter'ları hakkında bilgi sağlayan `kpc` içinde bulunur.
 
 ### ProcessMonitor
 
-[**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor), bir sürecin gerçekleştirdiği işlemle ilgili eylemleri kontrol etmek için çok yararlı bir araçtır (örneğin, bir sürecin hangi yeni süreçleri oluşturduğunu izlemek).
+[**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor), bir process'in gerçekleştirdiği process ile ilgili action'ları kontrol etmek için çok kullanışlı bir tool'dur (örneğin, bir process'in hangi yeni process'leri oluşturduğunu izlemek için).
 
 ### SpriteTree
 
-[**SpriteTree**](https://themittenmac.com/tools/) süreçler arasındaki ilişkileri yazdıran bir araçtır.\
-Mac'inizi **`sudo eslogger fork exec rename create > cap.json`** gibi bir komutla izlemelisiniz (bu komutu başlatan terminal FDA gerektirir). Ardından, bu aracı kullanarak json'u yükleyebilir ve tüm ilişkileri görüntüleyebilirsiniz:
+[**SpriteTree**](https://themittenmac.com/tools/), process'ler arasındaki ilişkileri yazdıran bir tool'dur.\
+Mac'inizi **`sudo eslogger fork exec rename create > cap.json`** gibi bir command ile monitor etmeniz gerekir (bunu başlatan terminal FDA gerektirir). Ardından tüm ilişkileri görüntülemek için json dosyasını bu tool'a yükleyebilirsiniz:
 
 <figure><img src="../../../images/image (1182).png" alt="" width="375"><figcaption></figcaption></figure>
 
 ### FileMonitor
 
-[**FileMonitor**](https://objective-see.com/products/utilities.html#FileMonitor), dosya olaylarını (oluşturma, değişiklikler ve silmeler gibi) izlemeye olanak tanır ve bu olaylar hakkında ayrıntılı bilgi sağlar.
+[**FileMonitor**](https://objective-see.com/products/utilities.html#FileMonitor), file event'lerini (oluşturma, değiştirme ve silme gibi) monitor etmeyi ve bu event'ler hakkında ayrıntılı bilgi sağlamayı mümkün kılar.
 
 ### Crescendo
 
-[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo), Windows kullanıcılarının Microsoft Sysinternal’s _Procmon_'dan tanıyabileceği bir GUI aracıdır. Bu araç, çeşitli olay türlerinin kaydedilmesini başlatıp durdurmaya, bu olayları dosya, süreç, ağ vb. gibi kategorilere göre filtrelemeye ve kaydedilen olayları json formatında kaydetme işlevselliği sunar.
+[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo), Windows kullanıcılarının Microsoft Sysinternal'ın _Procmon_'undan aşina olabileceği görünüm ve kullanım deneyimine sahip bir GUI tool'udur. Bu tool, çeşitli event türlerinin kaydının başlatılıp durdurulmasına, bu event'lerin file, process, network vb. kategorilere göre filtrelenmesine ve kaydedilen event'lerin json formatında saklanmasına olanak tanır.
 
 ### Apple Instruments
 
-[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html), Xcode’un Geliştirici araçlarının bir parçasıdır – uygulama performansını izlemek, bellek sızıntılarını tanımlamak ve dosya sistemi etkinliğini takip etmek için kullanılır.
+[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html), Xcode'un Developer tools'larının bir parçasıdır; application performance'ını monitor etmek, memory leak'lerini tespit etmek ve filesystem activity'sini takip etmek için kullanılır.
 
-![](<../../../images/image (1138).png>)
+![Crescendo - Apple Instruments: Apple Instruments, Xcode'un Developer tools'larının bir parçasıdır; application performance'ını monitor etmek, memory leak'lerini tespit etmek ve filesystem activity'sini takip etmek için kullanılır](<../../../images/image (1138).png>)
 
 ### fs_usage
 
-Süreçler tarafından gerçekleştirilen eylemleri takip etmeye olanak tanır:
+Process'ler tarafından gerçekleştirilen action'ları takip etmeyi sağlar:
 ```bash
 fs_usage -w -f filesys ls #This tracks filesystem actions of proccess names containing ls
 fs_usage -w -f network curl #This tracks network actions
 ```
 ### TaskExplorer
 
-[**Taskexplorer**](https://objective-see.com/products/taskexplorer.html), bir ikili dosyanın kullandığı **kütüphaneleri**, kullandığı **dosyaları** ve **ağ** bağlantılarını görmek için faydalıdır.\
-Ayrıca, ikili süreçleri **virustotal** ile kontrol eder ve ikili hakkında bilgi gösterir.
+[**Taskexplorer**](https://objective-see.com/products/taskexplorer.html), bir binary tarafından kullanılan **libraries**'leri, kullandığı **files**'ları ve **network** bağlantılarını görmek için kullanışlıdır.\
+Ayrıca binary process'lerini **virustotal** ile karşılaştırır ve binary hakkında bilgi gösterir.
 
 ## PT_DENY_ATTACH <a href="#page-title" id="page-title"></a>
 
-[**Bu blog yazısında**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) **`PT_DENY_ATTACH`** kullanan bir **çalışan daemon'u** nasıl **hata ayıklayacağınız** hakkında bir örnek bulabilirsiniz; bu, SIP devre dışı bırakılmış olsa bile hata ayıklamayı engellemek için kullanılır.
+[**bu blog gönderisinde**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html), SIP devre dışı olsa bile debugging'i önlemek için **`PT_DENY_ATTACH`** kullanan **çalışan bir daemon'ın debugging** işleminin nasıl yapılacağına dair bir örnek bulabilirsiniz.
 
 ### lldb
 
-**lldb**, **macOS** ikili **hata ayıklama** için de **facto** araçtır.
+**lldb**, macOS binary **debugging** işlemi için kullanılan de facto araçtır.
 ```bash
 lldb ./malware.bin
 lldb -p 1122
 lldb -n malware.bin
 lldb -n malware.bin --waitfor
 ```
-Intel lezzetini ayarlamak için, ana dizininizde **`.lldbinit`** adında bir dosya oluşturarak aşağıdaki satırı ekleyebilirsiniz:
+`lldb` kullanırken, ana klasörünüzde aşağıdaki satırı içeren **`.lldbinit`** adlı bir dosya oluşturarak Intel syntax'ını ayarlayabilirsiniz:
 ```bash
 settings set target.x86-disassembly-flavor intel
 ```
 > [!WARNING]
-> lldb içinde bir işlemi `process save-core` ile dökme
+> lldb içinde `process save-core` ile bir process dump'ı alın
 
-<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Komut</strong></td><td><strong>Açıklama</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Bir kesme noktası vurulana veya işlem sona erene kadar devam edecek şekilde yürütmeyi başlatır.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Giriş noktasında durarak yürütmeyi başlatır</td></tr><tr><td><strong>continue (c)</strong></td><td>Hata ayıklanan işlemin yürütmesini devam ettirir.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Sonraki talimatı yürüt. Bu komut, işlev çağrılarını atlayacaktır.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Sonraki talimatı yürüt. nexti komutunun aksine, bu komut işlev çağrılarına adım atar.</td></tr><tr><td><strong>finish (f)</strong></td><td>Mevcut işlevdeki (“çerçeve”) geri dönüş ve durma ile kalan talimatları yürütür.</td></tr><tr><td><strong>control + c</strong></td><td>Yürütmeyi duraklat. İşlem run (r) veya continue (c) ile çalıştırılmışsa, bu işlem mevcut yürütme yerinde durmasına neden olur.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Herhangi bir main adlı işlev</p><p><code>b <binname>`main</code> #Binin ana işlevi</p><p><code>b set -n main --shlib <lib_name></code> #Belirtilen binin ana işlevi</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Herhangi bir NSFileManager yöntemi</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # O kütüphanedeki tüm işlevlerde dur</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Kesme noktası listesi</p><p><code>br e/dis <num></code> #Kesme noktasını Etkinleştir/Durdur</p><p>breakpoint delete <num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Kesme noktası komutu hakkında yardım al</p><p>help memory write #Belleğe yazma hakkında yardım al</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format <<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s <reg/bellek adresi></strong></td><td>Belleği null-terminatlı dize olarak görüntüler.</td></tr><tr><td><strong>x/i <reg/bellek adresi></strong></td><td>Belleği montaj talimatı olarak görüntüler.</td></tr><tr><td><strong>x/b <reg/bellek adresi></strong></td><td>Belleği bayt olarak görüntüler.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Bu, parametre ile referans verilen nesneyi yazdırır</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Apple’ın Objective-C API'lerinin veya yöntemlerinin çoğu nesneler döndürdüğünden, bunlar “print object” (po) komutu ile görüntülenmelidir. Eğer po anlamlı bir çıktı üretmiyorsa <code>x/b</code> kullanın.</p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #O adrese AAAA yaz<br>memory write -f s $rip+0x11f+7 "AAAA" #Adrese AAAA yaz</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Mevcut işlevi disassemble et</p><p>dis -n <funcname> #İşlevi disassemble et</p><p>dis -n <funcname> -b <basename> #İşlevi disassemble et<br>dis -c 6 #6 satırı disassemble et<br>dis -c 0x100003764 -e 0x100003768 #Bir eklemden diğerine kadar<br>dis -p -c 4 #Mevcut adreste disassemble etmeye başla</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # x1 reg'inde 3 bileşenli diziyi kontrol et</td></tr><tr><td><strong>image dump sections</strong></td><td>Mevcut işlem belleğinin haritasını yazdırır</td></tr><tr><td><strong>image dump symtab <kütüphane></strong></td><td><code>image dump symtab CoreNLP</code> #CoreNLP'den tüm sembollerin adresini al</td></tr></tbody></table>
+<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Command</strong></td><td><strong>Açıklama</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Çalıştırmayı başlatır; bir breakpoint'e ulaşılana veya process sonlanana kadar kesintisiz şekilde devam eder.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Çalıştırmayı başlatır ve entry point'te durur</td></tr><tr><td><strong>continue (c)</strong></td><td>Debug edilen process'in çalıştırılmasına devam eder.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Sonraki instruction'ı çalıştırır. Bu komut function call'larını atlar.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Sonraki instruction'ı çalıştırır. nexti komutunun aksine bu komut function call'larının içine girer.</td></tr><tr><td><strong>finish (f)</strong></td><td>Mevcut function'daki (“frame”) kalan instruction'ları çalıştırır, return eder ve durur.</td></tr><tr><td><strong>control + c</strong></td><td>Çalıştırmayı duraklatır. Process run (r) ile çalıştırılmış veya continue (c) ile devam ettirilmişse, process'in o anda çalıştığı ...herhangi bir yerde durmasına neden olur.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #main olarak adlandırılan herhangi bir func</p><p><code>b <binname>`main</code> #Bin'in main func'ı</p><p><code>b set -n main --shlib <lib_name></code> #Belirtilen bin'in main func'ı</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Herhangi bir NSFileManager method'u</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Bu library'deki tüm function'larda break</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Breakpoint listesi</p><p><code>br e/dis <num></code> #Breakpoint'i etkinleştirir/devre dışı bırakır</p><p>breakpoint delete <num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Breakpoint komutu hakkında yardım al</p><p>help memory write #Memory'ye yazma hakkında yardım al</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format <<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s <reg/memory address></strong></td><td>Memory'yi null-terminated string olarak görüntüler.</td></tr><tr><td><strong>x/i <reg/memory address></strong></td><td>Memory'yi assembly instruction olarak görüntüler.</td></tr><tr><td><strong>x/b <reg/memory address></strong></td><td>Memory'yi byte olarak görüntüler.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Bu, parametre tarafından referans verilen object'i yazdırır</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Apple'ın Objective-C API'lerinin veya method'larının çoğunun object döndürdüğünü ve bu nedenle “print object” (po) komutuyla görüntülenmesi gerektiğini unutmayın. po anlamlı bir çıktı üretmezse <code>x/b</code> kullanın</p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Bu address'e AAAA yaz<br>memory write -f s $rip+0x11f+7 "AAAA" #Address'e AAAA yaz</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Mevcut function'ın disassembly'si</p><p>dis -n <funcname> #Func'ın disassembly'si</p><p>dis -n <funcname> -b <basename> #Func'ın disassembly'si<br>dis -c 6 #6 satırın disassembly'si<br>dis -c 0x100003764 -e 0x100003768 # Bir add'den diğerine kadar<br>dis -p -c 4 #Mevcut address'ten başlayarak disassembly yapar</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # x1 reg'indeki 3 bileşenden oluşan array'i kontrol et</td></tr><tr><td><strong>image dump sections</strong></td><td>Mevcut process memory'sinin map'ini yazdırır</td></tr><tr><td><strong>image dump symtab <library></strong></td><td><code>image dump symtab CoreNLP</code> #CoreNLP'deki tüm symbol'lerin address'ini alır</td></tr></tbody></table>
 
 > [!TIP]
-> **`objc_sendMsg`** fonksiyonu çağrıldığında, **rsi** kaydedicisi **metodun adını** null-terminatlı (“C”) dize olarak tutar. Adı lldb üzerinden yazdırmak için:
+> **`objc_sendMsg`** function'ı çağrılırken **rsi** register'ı method'un adını null-terminated (“C”) string olarak tutar. Adı lldb aracılığıyla yazdırmak için:
 >
 > `(lldb) x/s $rsi: 0x1000f1576: "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 >
@@ -451,39 +443,39 @@ settings set target.x86-disassembly-flavor intel
 >
 > `(lldb) reg read $rsi: rsi = 0x00000001000f1576 "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 
-### Anti-Dinamik Analiz
+### Anti-Dynamic Analysis
 
-#### VM tespiti
+#### VM detection
 
-- **`sysctl hw.model`** komutu **host bir MacOS** olduğunda "Mac" döner, ancak bir VM olduğunda farklı bir şey döner.
-- **`hw.logicalcpu`** ve **`hw.physicalcpu`** değerleri ile oynayarak bazı kötü amaçlı yazılımlar bir VM olup olmadığını tespit etmeye çalışır.
-- Bazı kötü amaçlı yazılımlar, MAC adresine (00:50:56) dayanarak makinenin **VMware** tabanlı olup olmadığını da **tespit edebilir**.
-- Basit bir kod ile **bir işlemin hata ayıklanıp ayıklanmadığını** bulmak da mümkündür:
-- `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //işlem hata ayıklanıyor }`
-- Ayrıca **`ptrace`** sistem çağrısını **`PT_DENY_ATTACH`** bayrağı ile çağırabilir. Bu, bir hata ayıklayıcının bağlanmasını ve izlenmesini **engeller**.
-- **`sysctl`** veya **`ptrace`** fonksiyonunun **içe aktarıldığını** kontrol edebilirsiniz (ancak kötü amaçlı yazılım bunu dinamik olarak içe aktarabilir).
-- Bu yazıda belirtildiği gibi, “[Anti-Debug Tekniklerini Aşmak: macOS ptrace varyantları](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
-“_Process # exited with **status = 45 (0x0000002d)** mesajı genellikle hata ayıklama hedefinin **PT_DENY_ATTACH** kullandığını gösteren bir işarettir_”
+- **`sysctl hw.model`** komutu, **host MacOS** olduğunda "Mac", VM olduğunda ise farklı bir değer döndürür.
+- Bazı malware'ler bunun bir VM olup olmadığını anlamaya çalışmak için **`hw.logicalcpu`** ve **`hw.physicalcpu`** değerleriyle oynar.
+- Bazı malware'ler ayrıca MAC address'e (00:50:56) dayanarak makinenin **VMware** olup olmadığını **tespit edebilir**.
+- Bir process'in debug edilip edilmediğini basit bir kod ile bulmak da mümkündür:
+- `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
+- Ayrıca **`PT_DENY_ATTACH`** flag'iyle **`ptrace`** system call'ını çağırabilir. Bu, bir **deb**u**gger'ın** attach olup trace etmesini **engeller**.
+- **`sysctl`** veya **`ptrace`** function'ının **import** edilip edilmediğini kontrol edebilirsiniz (ancak malware bunu dinamik olarak import edebilir)
+- Bu writeup'ta belirtildiği üzere, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
+“_Process # exited with **status = 45 (0x0000002d)** mesajı, genellikle debug hedefinin **PT_DENY_ATTACH** kullandığının açık bir göstergesidir_”
 
 ## Core Dumps
 
-Core dump'lar aşağıdaki durumlarda oluşturulur:
+Core dump'lar şu durumlarda oluşturulur:
 
-- `kern.coredump` sysctl 1 olarak ayarlanmışsa (varsayılan olarak)
-- İşlem suid/sgid değilse veya `kern.sugid_coredump` 1 ise (varsayılan olarak 0)
-- `AS_CORE` limiti işlemi izin veriyorsa. Kod dump'larının oluşturulmasını engellemek için `ulimit -c 0` çağrısı yapılabilir ve tekrar etkinleştirmek için `ulimit -c unlimited` kullanılabilir.
+- `kern.coredump` sysctl değeri 1 olarak ayarlanmışsa (varsayılan olarak böyledir)
+- Process suid/sgid değilse veya `kern.sugid_coredump` değeri 1 ise (varsayılan değer 0'dır)
+- `AS_CORE` limiti işlemi izin veriyorsa. `ulimit -c 0` çağrılarak core dump oluşturulması engellenebilir ve `ulimit -c unlimited` ile yeniden etkinleştirilebilir.
 
-Bu durumlarda core dump, `kern.corefile` sysctl'ine göre oluşturulur ve genellikle `/cores/core/.%P` dizininde saklanır.
+Bu durumlarda core dump'lar `kern.corefile` sysctl değerine göre oluşturulur ve genellikle `/cores/core/.%P` konumunda saklanır.
 
 ## Fuzzing
 
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html)
 
-ReportCrash **çöken işlemleri analiz eder ve bir çökme raporunu diske kaydeder**. Bir çökme raporu, bir geliştiricinin çökme nedenini teşhis etmesine yardımcı olabilecek bilgileri içerir.\
-Kullanıcı başına launchd bağlamında **çalışan uygulamalar ve diğer işlemler** için, ReportCrash bir LaunchAgent olarak çalışır ve çökme raporlarını kullanıcının `~/Library/Logs/DiagnosticReports/` dizinine kaydeder.\
-Daimonlar, sistem launchd bağlamında **çalışan diğer işlemler** ve diğer ayrıcalıklı işlemler için, ReportCrash bir LaunchDaemon olarak çalışır ve çökme raporlarını sistemin `/Library/Logs/DiagnosticReports` dizinine kaydeder.
+ReportCrash **crash olan process'leri analiz eder ve diske bir crash report kaydeder**. Bir crash report, **bir developer'ın** crash'in nedenini **teşhis etmesine yardımcı olabilecek** bilgiler içerir.\
+**Per-user launchd context'inde çalışan** application'lar ve diğer process'ler için ReportCrash, bir LaunchAgent olarak çalışır ve crash report'larını kullanıcının `~/Library/Logs/DiagnosticReports/` konumuna kaydeder.\
+Daemon'lar, **system launchd context'inde çalışan diğer process'ler** ve diğer privileged process'ler için ReportCrash, bir LaunchDaemon olarak çalışır ve crash report'larını sistemin `/Library/Logs/DiagnosticReports` konumuna kaydeder
 
-Eğer çökme raporlarının **Apple'a gönderilmesinden endişe ediyorsanız**, bunları devre dışı bırakabilirsiniz. Aksi takdirde, çökme raporları **bir sunucunun nasıl çöktüğünü anlamak için** faydalı olabilir.
+Crash report'larının **Apple'a gönderilmesinden endişe ediyorsanız** bunları devre dışı bırakabilirsiniz. Aksi halde crash report'ları **bir server'ın neden crash olduğunu anlamak** için yararlı olabilir.
 ```bash
 #To disable crash reporting:
 launchctl unload -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
@@ -495,15 +487,15 @@ sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.
 ```
 ### Uyku
 
-MacOS'ta fuzzing yaparken Mac'in uykuya dalmasına izin vermemek önemlidir:
+Bir Mac üzerinde fuzzing yaparken Mac'in uykuya geçmesine izin vermemek önemlidir:
 
 - systemsetup -setsleep Never
-- pmset, Sistem Tercihleri
+- pmset, System Preferences
 - [KeepingYouAwake](https://github.com/newmarcel/KeepingYouAwake)
 
-#### SSH Bağlantısı Kesilmesi
+#### SSH Bağlantısının Kesilmesi
 
-Eğer bir SSH bağlantısı üzerinden fuzzing yapıyorsanız, oturumun kapanmayacağından emin olmak önemlidir. Bu nedenle sshd_config dosyasını şu şekilde değiştirin:
+Bir SSH bağlantısı üzerinden fuzzing yapıyorsanız oturumun kesilmeyeceğinden emin olmanız önemlidir. Bu nedenle sshd_config dosyasını şu şekilde değiştirin:
 
 - TCPKeepAlive Yes
 - ClientAliveInterval 0
@@ -512,24 +504,25 @@ Eğer bir SSH bağlantısı üzerinden fuzzing yapıyorsanız, oturumun kapanmay
 sudo launchctl unload /System/Library/LaunchDaemons/ssh.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 ```
-### İçsel İşleyiciler
+### Dahili Handler'lar
 
-**Aşağıdaki sayfayı kontrol edin** hangi uygulamanın **belirtilen şemayı veya protokolü işlediğini bulmak için:**
+**Aşağıdaki sayfaya göz atın** ve belirtilen **şema veya protokolü işlemekten** hangi uygulamanın sorumlu olduğunu nasıl bulabileceğinizi öğrenin:
+
 
 {{#ref}}
 ../macos-file-extension-apps.md
 {{#endref}}
 
-### Ağ Süreçlerini Sayma
+### Ağ Süreçlerini Listeleme
 
-Ağ verilerini yöneten süreçleri bulmak için bu ilginçtir:
+Ağ verilerini yöneten süreçleri bulmak ilginç olabilir:
 ```bash
 dtrace -n 'syscall::recv*:entry { printf("-> %s (pid=%d)", execname, pid); }' >> recv.log
 #wait some time
 sort -u recv.log > procs.txt
 cat procs.txt
 ```
-Ya da `netstat` veya `lsof` kullanın
+Veya `netstat` veya `lsof` kullanın
 
 ### Libgmalloc
 
@@ -537,15 +530,15 @@ Ya da `netstat` veya `lsof` kullanın
 ```bash
 lldb -o "target create `which some-binary`" -o "settings set target.env-vars DYLD_INSERT_LIBRARIES=/usr/lib/libgmalloc.dylib" -o "run arg1 arg2" -o "bt" -o "reg read" -o "dis -s \$pc-32 -c 24 -m -F intel" -o "quit"
 ```
-### Fuzzers
+### Fuzzer'lar
 
 #### [AFL++](https://github.com/AFLplusplus/AFLplusplus)
 
-CLI araçları için çalışır
+CLI araçlarıyla çalışır
 
 #### [Litefuzz](https://github.com/sec-tools/litefuzz)
 
-macOS GUI araçlarıyla "**sadece çalışır**". Bazı macOS uygulamalarının benzersiz dosya adları, doğru uzantı gibi belirli gereksinimleri olduğunu unutmayın, dosyaları sandbox'tan (`~/Library/Containers/com.apple.Safari/Data`) okumaları gerekir...
+macOS GUI araçlarıyla "**sadece çalışır**". Bazı macOS uygulamalarının benzersiz dosya adları, doğru uzantı, dosyaları sandbox içinden (`~/Library/Containers/com.apple.Safari/Data`) okuma gibi özel gereksinimleri olduğunu unutmayın...
 
 Bazı örnekler:
 ```bash
@@ -571,7 +564,7 @@ litefuzz -lk -c "smbutil view smb://localhost:4455" -a tcp://localhost:4455 -i i
 # screensharingd (using pcap capture)
 litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash screensharingd -p -n 100000
 ```
-### Daha Fazla Fuzzing MacOS Bilgisi
+### MacOS Fuzzing Hakkında Daha Fazla Bilgi
 
 - [https://www.youtube.com/watch?v=T5xfL9tEg44](https://www.youtube.com/watch?v=T5xfL9tEg44)
 - [https://github.com/bnagy/slides/blob/master/OSXScale.pdf](https://github.com/bnagy/slides/blob/master/OSXScale.pdf)
@@ -580,9 +573,9 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 
 ## Referanslar
 
-- [**OS X Olay Yanıtı: Betik ve Analiz**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
-- [**https://www.youtube.com/watch?v=T5xfL9tEg44**](https://www.youtube.com/watch?v=T5xfL9tEg44)
-- [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
-- [**Mac Kötü Amaçlı Yazılımı Sanatı: Kötü Amaçlı Yazılımları Analiz Etme Rehberi**](https://taomm.org/)
+- [1] [OS X Olay Müdahalesi: Scripting ve Analiz](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+- [2] [Jeremy Brown - Summer of Fuzz: MacOS - DEF CON 29 AppSec Village](https://www.youtube.com/watch?v=T5xfL9tEg44)
+- [3] [Mac Malware Sanatı, Cilt I: Analiz](https://taomm.org/vol1/analysis.html)
+- [4] [Mac Malware Sanatı: Malicious Software Analiz Rehberi](https://taomm.org/)
 
 {{#include ../../../banners/hacktricks-training.md}}

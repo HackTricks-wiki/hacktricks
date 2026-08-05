@@ -4,20 +4,20 @@
 
 ## Temel Bilgiler
 
-Quick Look, macOS'un dosya önizleme çerçevesidir. Kullanıcı Finder'da bir dosyayı seçtiğinde, Space tuşuna bastığında, üzerine geldiğinde veya küçük resimler etkinken bir dizini görüntülediğinde, Quick Look dosyayı ayrıştırmak ve görsel bir önizleme oluşturmak için otomatik olarak bir generator plugin yükler.
+Quick Look, macOS'un **dosya önizleme framework'üdür**. Bir kullanıcı Finder'da bir dosya seçtiğinde, Space tuşuna bastığında, dosyanın üzerine geldiğinde veya thumbnails etkin bir directory görüntülediğinde, Quick Look dosyayı ayrıştırmak ve görsel bir önizleme oluşturmak için **otomatik olarak bir generator plugin'i yükler**.<sup>[1]</sup>
 
-Quick Look generators, belirli Uniform Type Identifiers (UTIs) için kayıtlı bundle'lar (.qlgenerator)dır. macOS, o UTI ile eşleşen bir dosyanın önizlemesine ihtiyaç duyduğunda, generator'ı sandboxed helper process'e (QuickLookSatellite veya qlmanage) yükler ve generator fonksiyonunu çağırır.
+Quick Look generators, belirli **Uniform Type Identifiers (UTIs)** için kayıt olan **bundle**'lardır (`.qlgenerator`). macOS, bu UTI ile eşleşen bir dosya için önizlemeye ihtiyaç duyduğunda generator'ı sandboxed bir yardımcı process'e (`QuickLookSatellite` veya `qlmanage`) yükler ve generator function'ını çağırır.
 
-### Güvenlik Açısından Neden Önemli
+### Bu Neden Security Açısından Önemlidir?
 
 > [!WARNING]
-> Quick Look generators, bir dosyayı sadece seçme veya görüntüleme ile tetiklenir — "Open" işlemi gerekmez. Bu onları güçlü bir pasif istismar vektörü yapar: kullanıcı, kötü amaçlı bir dosya içeren bir dizine gitmesi yeterlidir.
+> Quick Look generators, **yalnızca bir dosya seçilerek veya görüntülenerek** tetiklenir — "Open" action'ı gerekmez. Bu durum onları güçlü bir **pasif exploitation vector'ı** hâline getirir: Kullanıcının yalnızca malicious bir dosya içeren directory'ye gitmesi yeterlidir.
 
-Saldırı yüzeyi:
-- Generators, diskteki, indirmelerdeki, e-posta eklerindeki veya ağ paylaşımlarındaki rastgele dosya içeriğini parse eder
-- Hazırlanmış bir dosya, generator kodundaki ayrıştırma zafiyetlerini (buffer overflows, format strings, type confusion) istismar edebilir
-- Önizleme render'ı otomatik olarak gerçekleşir — kötü amaçlı bir dosyanın indiği Downloads klasörünü görüntülemek yeterlidir
-- Quick Look sandboxed bir yardımcı süreçte çalışır, ancak bu bağlamdan sandbox kaçışları gösterilmiştir
+**Attack surface:**
+- Generators, diskten, download'lardan, email attachment'larından veya network share'lerden gelen **keyfi dosya içeriğini parse eder**
+- Özel olarak hazırlanmış bir dosya, generator kodundaki **parsing vulnerability'lerini** (buffer overflow'ları, format string'leri, type confusion) exploit edebilir
+- Preview rendering işlemi **otomatik olarak** gerçekleşir — malicious bir dosyanın bulunduğu Downloads folder'ını görüntülemek yeterlidir
+- Quick Look, **sandboxed bir helper** içinde çalışır; ancak bu context'ten sandbox escape örnekleri gösterilmiştir
 
 ## Architecture
 ```
@@ -31,9 +31,9 @@ Plugin parses file content → Returns preview image/HTML
 ↓
 Preview displayed to user
 ```
-## Keşif
+## Enumerasyon
 
-### Yüklü Generators'leri Listele
+### Yüklü Generator'ları Listeleme
 ```bash
 # List all Quick Look generators with their UTI registrations
 qlmanage -m plugins 2>&1
@@ -49,7 +49,7 @@ ls /System/Library/QuickLook/
 # Check a generator's Info.plist for UTI registrations
 defaults read /path/to/Generator.qlgenerator/Contents/Info.plist 2>/dev/null
 ```
-### Tarayıcıyı Kullanma
+### Scanner'ı Kullanma
 ```bash
 sqlite3 /tmp/executables.db "
 SELECT e.path, h.handler_type, h.handler_metadata
@@ -59,11 +59,11 @@ JOIN handlers h ON eh.handler_id = h.id
 WHERE h.handler_type = 'quicklook_generator'
 ORDER BY e.path;"
 ```
-## Saldırı Senaryoları
+## Attack Scenarios
 
-### Dosya Tabanlı İstismar
+### File-Based Exploitation
 
-Karmaşık dosya formatlarını (3D modeller, bilimsel veriler, arşiv formatları) ayrıştıran üçüncü taraf bir Quick Look generator'ı başlıca hedeftir:
+Complex file formats (3D models, scientific data, archive formats) ayrıştıran üçüncü taraf bir Quick Look generator, birincil hedeftir:
 ```bash
 # 1. Identify a third-party generator and its UTI
 qlmanage -m plugins 2>&1 | grep -v "com.apple" | head -20
@@ -80,7 +80,7 @@ cp malicious.xyz ~/Downloads/
 
 # 5. When user opens Downloads in Finder → preview triggers → exploit fires
 ```
-### İndirmeler aracılığıyla Drive-By
+### Downloads Üzerinden Drive-By
 ```
 1. Send crafted file via email/AirDrop/web download
 2. File lands in ~/Downloads/
@@ -89,9 +89,9 @@ cp malicious.xyz ~/Downloads/
 5. Generator parses malicious file → code execution in QuickLookSatellite
 6. (Optional) Sandbox escape from QuickLookSatellite context
 ```
-### Üçüncü Taraf Generator Değiştirme
+### Third-Party Generator Replacement
 
-Eğer bir Quick Look generator bundle'ı **kullanıcı tarafından yazılabilir bir konuma** (`~/Library/QuickLook/`) kurulmuşsa, değiştirilebilir:
+Bir Quick Look generator bundle'ı **kullanıcı tarafından yazılabilir bir konuma** (`~/Library/QuickLook/`) kurulmuşsa, değiştirilebilir:
 ```bash
 # Check for user-writable generators
 ls -la ~/Library/QuickLook/ 2>/dev/null
@@ -100,7 +100,7 @@ ls -la ~/Library/QuickLook/ 2>/dev/null
 # 1. Executes payload when any matching file is previewed
 # 2. Optionally still generates a valid preview to avoid suspicion
 ```
-### Quick Look'ı Uzaktan Tetikleme
+### Quick Look'u Uzaktan Tetikleme
 ```bash
 # Force Quick Look preview generation (for testing)
 qlmanage -p /path/to/malicious/file
@@ -111,14 +111,14 @@ qlmanage -t /path/to/malicious/file
 # Force thumbnail regeneration for a directory
 qlmanage -r cache
 ```
-## Sandbox ile İlgili Hususlar
+## Sandbox Hususları
 
-Quick Look generator'ları sandbox'lanmış bir yardımcı süreç içinde çalışır. Sandbox profili şunları kısıtlar:
-- Dosya sistemi erişimi (çoğunlukla önizlenen dosyaya salt okunur)
-- Ağ erişimi (sınırlı)
+Quick Look generator'ları sandbox'lanmış bir yardımcı işlem içinde çalışır. Sandbox profili şunları sınırlar:
+- Dosya sistemi erişimi (çoğunlukla önizlemesi yapılan dosyaya salt okunur erişim)
+- Network erişimi (kısıtlı)
 - IPC (sınırlı mach-lookup)
 
-Ancak, sandbox'un bilinen kaçış vektörleri vardır:
+Ancak sandbox'ın bilinen kaçış vektörleri vardır:
 ```bash
 # Check the sandbox profile used by QuickLookSatellite
 sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
@@ -131,10 +131,10 @@ sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
 
 | CVE | Açıklama |
 |---|---|
-| CVE-2019-8741 | Kasıtlı dosya ile Quick Look önizlemede bellek bozulması |
+| CVE-2019-8741 | Özel olarak hazırlanmış dosya aracılığıyla Quick Look önizlemesinde bellek bozulması |
 | CVE-2018-4293 | Quick Look generator sandbox kaçışı |
-| CVE-2020-9963 | Quick Look önizleme işleminde bilgi ifşası |
-| CVE-2021-30876 | Küçük resim oluşturma sırasında bellek bozulması |
+| CVE-2020-9963 | Quick Look önizleme işleme bilgi disclosure |
+| CVE-2021-30876 | Thumbnail oluşturma sırasında bellek bozulması |
 
 ## Quick Look Generators için Fuzzing
 ```bash
@@ -160,8 +160,8 @@ done
 ```
 ## Referanslar
 
-* [Apple Developer — Quick Look Programming Guide](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
-* [Apple Security Updates — Quick Look CVEs](https://support.apple.com/en-us/HT201222)
-* [Objective-See — Quick Look Attack Surface](https://objective-see.org/blog.html)
+- [1] [Apple Developer — Quick Look Programming Guide](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
+- [2] [Apple Security Updates — Quick Look CVEs](https://support.apple.com/en-us/HT201222)
+- [3] [Objective-See — Quick Look Attack Surface](https://objective-see.org/blog.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

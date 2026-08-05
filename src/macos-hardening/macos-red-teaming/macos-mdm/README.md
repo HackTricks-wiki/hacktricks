@@ -2,202 +2,209 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**macOS MDM'leri hakkında bilgi almak için kontrol edin:**
+**macOS MDM'leri hakkında bilgi edinmek için:**
 
 - [https://www.youtube.com/watch?v=ku8jZe-MHUU](https://www.youtube.com/watch?v=ku8jZe-MHUU)
 - [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe)
 
 ## Temel Bilgiler
 
-### **MDM (Mobil Cihaz Yönetimi) Genel Bakış**
+### **MDM (Mobile Device Management) Genel Bakış**
 
-[Mobil Cihaz Yönetimi](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM), akıllı telefonlar, dizüstü bilgisayarlar ve tabletler gibi çeşitli son kullanıcı cihazlarını yönetmek için kullanılır. Özellikle Apple'ın platformları (iOS, macOS, tvOS) için, özel özellikler, API'ler ve uygulamalar setini içerir. MDM'nin çalışması, ya ticari olarak mevcut ya da açık kaynak olan uyumlu bir MDM sunucusuna dayanır ve [MDM Protokolü](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf)'nu desteklemelidir. Ana noktalar şunlardır:
+[Mobile Device Management](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM), akıllı telefonlar, laptop'lar ve tabletler gibi çeşitli son kullanıcı cihazlarını yönetmek için kullanılır. Özellikle Apple platformları (iOS, macOS, tvOS) için özel bir dizi özellik, API ve uygulamayı içerir. MDM'nin çalışması, ticari olarak sunulan veya open-source olan ve [MDM Protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf)'ü desteklemesi gereken uyumlu bir MDM sunucusuna dayanır. Önemli noktalar:
 
 - Cihazlar üzerinde merkezi kontrol.
 - MDM protokolüne uyan bir MDM sunucusuna bağımlılık.
-- MDM sunucusunun cihazlara çeşitli komutlar gönderebilme yeteneği, örneğin, uzaktan veri silme veya yapılandırma yükleme.
+- MDM sunucusunun cihazlara uzaktan veri silme veya yapılandırma yükleme gibi çeşitli komutlar gönderebilmesi.
 
-### **DEP (Cihaz Kaydı Programı) Temelleri**
+### **DEP (Device Enrollment Program) Temelleri**
 
-Apple tarafından sunulan [Cihaz Kaydı Programı](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP), iOS, macOS ve tvOS cihazları için sıfırdan yapılandırma kolaylığı sağlayarak Mobil Cihaz Yönetimi (MDM) entegrasyonunu basitleştirir. DEP, cihazların kutudan çıkar çıkmaz çalışır hale gelmesini sağlayarak, kullanıcı veya yönetici müdahalesini en aza indirir. Temel yönler şunlardır:
+Apple tarafından sunulan [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP), iOS, macOS ve tvOS cihazları için zero-touch yapılandırma sağlayarak Mobile Device Management (MDM) entegrasyonunu kolaylaştırır. DEP, enrollment sürecini otomatikleştirerek cihazların kullanıcı veya yönetici müdahalesini en aza indirerek kutudan çıkar çıkmaz çalışır durumda olmasını sağlar. Temel özellikler:
 
-- Cihazların ilk etkinleştirme sırasında önceden tanımlanmış bir MDM sunucusuna otomatik olarak kaydolmasını sağlar.
-- Öncelikle yeni cihazlar için faydalıdır, ancak yeniden yapılandırma sürecindeki cihazlar için de geçerlidir.
-- Cihazların hızlı bir şekilde kurulumunu sağlayarak, organizasyonel kullanım için hazır hale getirir.
+- Cihazların ilk etkinleştirme sırasında önceden tanımlanmış bir MDM sunucusuna otomatik olarak kayıt olmasını sağlar.
+- Öncelikle yeni cihazlar için faydalıdır; ancak yeniden yapılandırılan cihazlar için de kullanılabilir.
+- Basit bir kurulum sağlayarak cihazları kuruluşta kullanılmaya hızlıca hazır hale getirir.
 
-### **Güvenlik Dikkati**
+### **Güvenlik Hususları**
 
-DEP tarafından sağlanan kayıt kolaylığının faydalı olmasına rağmen, güvenlik riskleri de oluşturabileceğini belirtmek önemlidir. MDM kaydı için koruyucu önlemler yeterince uygulanmazsa, saldırganlar bu basitleştirilmiş süreci kullanarak kendi cihazlarını organizasyonun MDM sunucusuna kaydedebilir ve kurumsal bir cihaz gibi davranabilirler.
+DEP tarafından sağlanan enrollment kolaylığının faydalı olmakla birlikte güvenlik riskleri de oluşturabileceğini belirtmek önemlidir. MDM enrollment için koruyucu önlemler yeterince uygulanmazsa saldırganlar, kurumsal bir cihaz gibi görünerek kendi cihazlarını kuruluşun MDM sunucusuna kaydetmek için bu kolaylaştırılmış süreci kötüye kullanabilir.<sup>[2]</sup>
 
 > [!CAUTION]
-> **Güvenlik Uyarısı**: Basitleştirilmiş DEP kaydı, uygun önlemler alınmadığı takdirde, organizasyonun MDM sunucusunda yetkisiz cihaz kaydına izin verebilir.
+> **Güvenlik Uyarısı**: Basitleştirilmiş DEP enrollment, uygun güvenlik önlemleri mevcut değilse yetkisiz cihazların kuruluşun MDM sunucusuna kaydedilmesine olanak sağlayabilir.
 
-### SCEP (Basit Sertifika Kaydı Protokolü) Nedir?
+### SCEP (Simple Certificate Enrolment Protocol) Nedir?
 
-- TLS ve HTTPS yaygınlaşmadan önce oluşturulmuş, nispeten eski bir protokoldür.
-- Müşterilere bir **Sertifika İmzalama Talebi** (CSR) gönderme konusunda standart bir yol sunar. Müşteri, sunucudan imzalı bir sertifika talep eder.
+- TLS ve HTTPS'in yaygınlaşmasından önce oluşturulmuş, nispeten eski bir protokoldür.
+- İstemcilere, sertifika verilmesi amacıyla standartlaştırılmış bir **Certificate Signing Request** (CSR) gönderme yöntemi sunar. İstemci, sunucudan kendisine imzalı bir sertifika vermesini ister.
 
-### Yapılandırma Profilleri (mobilconfigs) Nedir?
+### Configuration Profiles (diğer adıyla mobileconfigs) Nedir?
 
-- Apple’ın **sistem yapılandırmasını ayarlama/uygulama** için resmi yolu.
-- Birden fazla yük içerebilen dosya formatı.
-- Özellik listelerine (XML türü) dayanır.
-- “Kökenlerini doğrulamak, bütünlüklerini sağlamak ve içeriklerini korumak için imzalanabilir ve şifrelenebilir.” Temeller — Sayfa 70, iOS Güvenlik Kılavuzu, Ocak 2018.
+- **Sistem yapılandırmasını ayarlamak/zorunlu kılmak için** Apple'ın resmi yöntemidir.
+- Birden fazla payload içerebilen dosya formatıdır.
+- Property list'lere (XML türündeki) dayanır.
+- “Kökenlerini doğrulamak, bütünlüklerini güvence altına almak ve içeriklerini korumak için imzalanabilir ve şifrelenebilir.” Basics — Page 70, iOS Security Guide, January 2018.
 
 ## Protokoller
 
 ### MDM
 
-- APNs (**Apple sunucuları**) + RESTful API (**MDM** **satıcı** sunucuları) kombinasyonu
-- **İletişim**, bir **cihaz** ile bir **cihaz yönetim** **ürünü** ile ilişkili bir sunucu arasında gerçekleşir
-- **Komutlar**, MDM'den cihaza **plist kodlu sözlükler** içinde iletilir
-- Tüm iletişim **HTTPS** üzerinden. MDM sunucuları genellikle pinlenebilir.
-- Apple, MDM satıcısına kimlik doğrulama için bir **APNs sertifikası** verir.
+- APNs (**Apple sunucuları**) + RESTful API (**MDM vendor** sunucuları) birleşimidir.
+- **İletişim**, bir **cihaz** ile bir **cihaz** **yönetimi** **ürünü** ile ilişkili sunucu arasında gerçekleşir.
+- **Komutlar**, MDM'den cihaza **plist-encoded dictionary** biçiminde iletilir.
+- Her şey **HTTPS** üzerinden gerçekleşir. MDM sunucuları certificate pinning kullanabilir (ve genellikle kullanır).
+- Apple, kimlik doğrulama için MDM vendor'a bir **APNs certificate** verir.
 
 ### DEP
 
-- **3 API**: 1 satıcılar için, 1 MDM satıcıları için, 1 cihaz kimliği için (belgelendirilmemiş):
-- Sözde [DEP "bulut hizmeti" API'si](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Bu, MDM sunucuları tarafından DEP profillerini belirli cihazlarla ilişkilendirmek için kullanılır.
-- [Apple Yetkili Satıcıları tarafından kullanılan DEP API'si](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html) cihazları kaydetmek, kayıt durumunu kontrol etmek ve işlem durumunu kontrol etmek için kullanılır.
-- Belgelendirilmemiş özel DEP API'si. Bu, Apple Cihazları tarafından DEP profillerini talep etmek için kullanılır. macOS'ta, `cloudconfigurationd` ikili dosyası bu API üzerinden iletişim kurmaktan sorumludur.
-- Daha modern ve **JSON** tabanlı (plist'e göre)
-- Apple, MDM satıcısına bir **OAuth token** verir.
+- **3 API** bulunur: 1 tanesi reseller'lar, 1 tanesi MDM vendor'ları ve 1 tanesi device identity için (belgelenmemiş):
+- Sözde [DEP "cloud service" API](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). MDM sunucuları bunu DEP profillerini belirli cihazlarla ilişkilendirmek için kullanır.
+- Cihazları enroll etmek, enrollment durumunu kontrol etmek ve transaction durumunu kontrol etmek için [Apple Authorized Resellers tarafından kullanılan DEP API](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html).
+- Belgelenmemiş private DEP API. Apple Devices bunu DEP profillerini istemek için kullanır. macOS'ta `cloudconfigurationd` binary'si bu API üzerinden iletişim kurmaktan sorumludur.
+- Daha modern ve **JSON** tabanlıdır (plist'in aksine).
+- Apple, MDM vendor'a bir **OAuth token** verir.
 
-**DEP "bulut hizmeti" API'si**
+**DEP "cloud service" API**
 
-- RESTful
-- Apple'dan MDM sunucusuna cihaz kayıtlarını senkronize eder
-- MDM sunucusundan Apple'a "DEP profilleri" senkronize eder (daha sonra cihazlara Apple tarafından iletilir)
-- Bir DEP “profili” şunları içerir:
-- MDM satıcı sunucu URL'si
-- Sunucu URL'si için ek güvenilir sertifikalar (isteğe bağlı pinleme)
-- Ek ayarlar (örneğin, Kurulum Asistanı'nda hangi ekranların atlanacağı)
+- RESTful'dur.
+- Cihaz kayıtlarını Apple'dan MDM sunucusuna sync eder.
+- “DEP profiles”'ı MDM sunucusundan Apple'a sync eder (daha sonra Apple tarafından cihaza iletilir).
+- Bir DEP “profile” şunları içerir:
+- MDM vendor sunucusunun URL'si.
+- Sunucu URL'si için ek trusted certificates (isteğe bağlı pinning).
+- Ek ayarlar (ör. Setup Assistant'ta hangi ekranların atlanacağı).
 
-## Seri Numarası
+## Serial Number
 
-2010'dan sonra üretilen Apple cihazları genellikle **12 karakterli alfanümerik** seri numaralarına sahiptir; **ilk üç rakam üretim yerini**, sonraki **iki** rakam **üretim yılı** ve **haftasını**, sonraki **üç** rakam **benzersiz** **tanımlayıcıyı** ve **son dört** rakam **model numarasını** temsil eder.
+2010'dan sonra üretilen Apple cihazları genellikle **12 karakterli alfanümerik** serial number'lara sahiptir. İlk üç karakter üretim yerini, sonraki **iki** karakter üretim yılını ve haftasını, sonraki **üç** karakter benzersiz bir **identifier**'ı ve **son dört** karakter model numarasını belirtir.
+
 
 {{#ref}}
 macos-serial-number.md
 {{#endref}}
 
-## Kayıt ve Yönetim Adımları
+## Enrollment ve yönetim adımları
 
-1. Cihaz kaydı oluşturma (Satıcı, Apple): Yeni cihaz için kayıt oluşturulur
-2. Cihaz kaydı atama (Müşteri): Cihaz bir MDM sunucusuna atanır
-3. Cihaz kaydı senkronizasyonu (MDM satıcısı): MDM, cihaz kayıtlarını senkronize eder ve DEP profillerini Apple'a iletir
-4. DEP kontrolü (Cihaz): Cihaz DEP profilini alır
-5. Profil alma (Cihaz)
-6. Profil yükleme (Cihaz) a. MDM, SCEP ve kök CA yüklerini içerir
-7. MDM komutunun verilmesi (Cihaz)
+1. Device record creation (Reseller, Apple): Yeni cihazın kaydı oluşturulur.
+2. Device record assignment (Customer): Cihaz bir MDM sunucusuna atanır.
+3. Device record sync (MDM vendor): MDM, cihaz kayıtlarını sync eder ve DEP profillerini Apple'a push eder.
+4. DEP check-in (Device): Cihaz DEP profilini alır.
+5. Profile retrieval (Device)
+6. Profile installation (Device) a. MDM, SCEP ve root CA payload'ları dahil.
+7. MDM command issuance (Device)
 
-![](<../../../images/image (694).png>)
+![Serial Number - Enrollment ve yönetim adımları: 7. MDM command issuance (Device)](<../../../images/image (694).png>)
 
-Dosya `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd`, kayıt sürecinin **yüksek seviyeli "adımları"** olarak kabul edilebilecek işlevleri dışa aktarır.
+`/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd` dosyası, enrollment sürecinin **yüksek seviyeli "adımları"** olarak değerlendirilebilecek fonksiyonları dışa aktarır.
 
-### Adım 4: DEP kontrolü - Aktivasyon Kaydını Alma
+### Step 4: DEP check-in - Activation Record'ı Alma
 
-Bu süreç, bir **kullanıcının bir Mac'i ilk kez başlattığında** (veya tamamen silindikten sonra) gerçekleşir.
+Sürecin bu bölümü, bir **kullanıcının Mac'i ilk kez başlatması** (veya tamamen wipe işleminden sonra) sırasında gerçekleşir.
 
-![](<../../../images/image (1044).png>)
+![Enrollment ve yönetim adımları - Step 4: DEP check-in - Activation Record'ı Alma: Sürecin bu bölümü, kullanıcının Mac'i ilk kez başlatması veya tamamen...](<../../../images/image (1044).png>)
 
-veya `sudo profiles show -type enrollment` komutu çalıştırıldığında
+veya `sudo profiles show -type enrollment` komutu çalıştırıldığında gerçekleşir.
 
-- **Cihazın DEP etkin olup olmadığını belirleme**
-- Aktivasyon Kaydı, **DEP “profili”** için içsel bir isimdir
-- Cihaz internete bağlandığı anda başlar
-- **`CPFetchActivationRecord`** tarafından yönlendirilir
-- **`cloudconfigurationd`** tarafından XPC aracılığıyla uygulanır. **"Kurulum Asistanı"** (cihaz ilk kez başlatıldığında) veya **`profiles`** komutu, aktivasyon kaydını almak için bu daemon ile **iletişim kurar**.
-- LaunchDaemon (her zaman root olarak çalışır)
+- **Cihazın DEP enabled olup olmadığını** belirler.
+- Activation Record, **DEP “profile”** için kullanılan dahili addır.
+- Cihaz Internet'e bağlanır bağlanmaz başlar.
+- **`CPFetchActivationRecord`** tarafından yürütülür.
+- XPC üzerinden **`cloudconfigurationd`** tarafından uygulanır. **"Setup Assistant**" (cihaz ilk kez başlatıldığında) veya **`profiles`** komutu, activation record'ı almak için **bu daemon ile iletişim kurar**.
+- LaunchDaemon (her zaman root olarak çalışır).
 
-Aktivasyon Kaydını almak için **`MCTeslaConfigurationFetcher`** tarafından gerçekleştirilen birkaç adım izlenir. Bu süreç, **Absinthe** adı verilen bir şifreleme kullanır.
+Activation Record'ı almak için gereken birkaç adım **`MCTeslaConfigurationFetcher`** tarafından gerçekleştirilir. Bu süreç **Absinthe** adlı bir encryption kullanır.<sup>[1]</sup>
 
-1. **sertifika al**
+1. **Certificate** alınır.
 1. GET [https://iprofiles.apple.com/resource/certificate.cer](https://iprofiles.apple.com/resource/certificate.cer)
-2. Sertifikadan durumu **başlat** (**`NACInit`**)
-1. Çeşitli cihaz spesifik verileri kullanır (yani **Seri Numarası `IOKit` aracılığıyla**)
-3. **oturum anahtarını al**
+2. Certificate'tan state başlatılır (**`NACInit`**).
+1. Çeşitli cihaza özgü verileri kullanır (ör. **`IOKit` üzerinden Serial Number**).
+3. **Session key** alınır.
 1. POST [https://iprofiles.apple.com/session](https://iprofiles.apple.com/session)
-4. Oturumu kur (**`NACKeyEstablishment`**)
-5. Talebi yap
-1. POST [https://iprofiles.apple.com/macProfile](https://iprofiles.apple.com/macProfile) adresine `{ "action": "RequestProfileConfiguration", "sn": "" }` verisini göndererek
-2. JSON yükü Absinthe ile şifrelenir (**`NACSign`**)
-3. Tüm talepler HTTPS üzerinden, yerleşik kök sertifikalar kullanılır
+4. Session oluşturulur (**`NACKeyEstablishment`**).
+5. Request yapılır.
+1. [https://iprofiles.apple.com/macProfile](https://iprofiles.apple.com/macProfile) adresine POST yapılarak `{ "action": "RequestProfileConfiguration", "sn": "" }` verisi gönderilir.
+2. JSON payload, Absinthe kullanılarak encryption uygulanır (**`NACSign`**).
+3. Tüm request'ler HTTPs üzerinden yapılır; built-in root certificates kullanılır.
 
-![](<../../../images/image (566) (1).png>)
+![Enrollment ve yönetim adımları - Step 4: DEP check-in - Activation Record'ı Alma: 3. Tüm request'ler HTTPs üzerinden yapılır; built-in root certificates kullanılır](<../../../images/image (566) (1).png>)
 
-Yanıt, aşağıdaki gibi bazı önemli verileri içeren bir JSON sözlüğüdür:
+Response, aşağıdakiler gibi bazı önemli verileri içeren bir JSON dictionary'dir:
 
-- **url**: Aktivasyon profili için MDM satıcı ana bilgisayarının URL'si
-- **anchor-certs**: Güvenilir kökler olarak kullanılan DER sertifikalarının dizisi
+- **url**: Activation profile için MDM vendor host'unun URL'si.
+- **anchor-certs**: Trusted anchor olarak kullanılan DER certificates dizisi.
 
-### **Adım 5: Profil Alma**
+### **Step 5: Profile Retrieval**
 
-![](<../../../images/image (444).png>)
+![Step 4: DEP check-in - Activation Record'ı Alma - Step 5: Profile Retrieval: Step 5: Profile Retrieval](<../../../images/image (444).png>)
 
-- **DEP profilinde sağlanan URL'ye** talep gönderilir.
-- **Köprü sertifikaları**, sağlanmışsa **güven değerlendirmesi** için kullanılır.
-- Hatırlatma: **anchor_certs** özelliği DEP profilinin
-- **Talep, cihaz tanımlaması ile basit bir .plist**'dir
-- Örnekler: **UDID, OS sürümü**.
-- CMS imzalı, DER kodlu
-- **Cihaz kimliği sertifikası (APNS'den)** kullanılarak imzalanmıştır.
-- **Sertifika zinciri**, süresi dolmuş **Apple iPhone Cihaz CA**'sını içerir.
+- Request, **DEP profile'da sağlanan url** adresine gönderilir.
+- Sağlanmışsa **anchor certificates**, **trust değerlendirmesi** için kullanılır.
+- Hatırlatma: DEP profile'ın **anchor_certs** property'si.
+- **Request, cihaz tanımlama bilgilerini içeren basit bir .plist'tir**.
+- Örnekler: **UDID, OS version**.
+- CMS-signed, DER-encoded.
+- **APNS'ten alınan device identity certificate** kullanılarak imzalanır.
+- **Certificate chain**, süresi dolmuş **Apple iPhone Device CA** içerir.
 
-![](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
+![Step 4: DEP check-in - Activation Record'ı Alma - Step 5: Profile Retrieval: APNS'ten alınan device identity certificate kullanılarak imzalanır](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
 
-### Adım 6: Profil Yükleme
+### Step 6: Profile Installation
 
-- Alındıktan sonra, **profil sistemde saklanır**
-- Bu adım otomatik olarak başlar (eğer **kurulum asistanında** ise)
-- **`CPInstallActivationProfile`** tarafından yönlendirilir
-- XPC üzerinden mdmclient tarafından uygulanır
-- Bağlama Daemon (root olarak) veya Bağlama Ajansı (kullanıcı olarak), bağlama bağlamına bağlı olarak
-- Yapılandırma profilleri, yüklemek için birden fazla yük içerir
-- Çerçeve, profilleri yüklemek için eklenti tabanlı bir mimariye sahiptir
-- Her yük türü bir eklenti ile ilişkilendirilmiştir
-- XPC (çerçevede) veya klasik Cocoa (ManagedClient.app içinde) olabilir
+- Alındıktan sonra **profile sistemde saklanır**.
+- Bu adım otomatik olarak başlar (**setup assistant** içindeyse).
+- **`CPInstallActivationProfile`** tarafından yürütülür.
+- XPC üzerinden mdmclient tarafından uygulanır.
+- Bağlama bağlı olarak LaunchDaemon (root olarak) veya LaunchAgent (user olarak).
+- Configuration profiles, yüklenecek birden fazla payload içerir.
+- Framework, profilleri yüklemek için plugin tabanlı bir mimariye sahiptir.
+- Her payload türü bir plugin ile ilişkilidir.
+- Bu plugin, XPC (framework içinde) veya classic Cocoa (ManagedClient.app içinde) olabilir.
 - Örnek:
-- Sertifika Yükleri, CertificateService.xpc kullanır
+- Certificate Payloads, CertificateService.xpc'yi kullanır.
 
-Genellikle, bir MDM satıcısı tarafından sağlanan **aktivasyon profili** aşağıdaki yükleri **içerecektir**:
+Genellikle bir MDM vendor tarafından sağlanan **activation profile** aşağıdaki payload'ları içerir:
 
-- `com.apple.mdm`: cihazı MDM'ye **kaydetmek** için
-- `com.apple.security.scep`: cihaza güvenli bir **istemci sertifikası** sağlamak için.
-- `com.apple.security.pem`: cihaza güvenilir CA sertifikalarını **yüklemek** için.
-- MDM yüklemesi, belgelerdeki **MDM kontrolü** ile eşdeğerdir
-- Yük **anahtar özellikleri** içerir:
-- - MDM Kontrol URL'si (**`CheckInURL`**)
-- MDM Komut Polling URL'si (**`ServerURL`**) + tetiklemek için APNs konusu
-- MDM yüklemesi için, **`CheckInURL`**'ye talep gönderilir
-- **`mdmclient`** içinde uygulanır
-- MDM yüklemesi diğer yüklerden bağımsız olabilir
-- **Belirli sertifikalara pinlenmiş taleplere** izin verir:
-- Özellik: **`CheckInURLPinningCertificateUUIDs`**
-- Özellik: **`ServerURLPinningCertificateUUIDs`**
-- PEM yükü aracılığıyla iletilir
-- Cihazın bir kimlik sertifikası ile ilişkilendirilmesine izin verir:
-- Özellik: IdentityCertificateUUID
-- SCEP yükü aracılığıyla iletilir
+- `com.apple.mdm`: cihazı MDM'e **enroll etmek** için.
+- `com.apple.security.scep`: cihaza güvenli şekilde bir **client certificate** sağlamak için.
+- `com.apple.security.pem`: trusted CA certificates'ı cihazın System Keychain'ine **yüklemek** için.
+- MDM payload'ını yüklemek, dokümantasyondaki **MDM check-in** işlemine eşdeğerdir.
+- Payload, **önemli key property'ler** içerir:
+- - MDM Check-In URL (**`CheckInURL`**).
+- MDM Command Polling URL (**`ServerURL`**) + bunu tetiklemek için APNs topic.
+- MDM payload'ını yüklemek için request **`CheckInURL`** adresine gönderilir.
+- **`mdmclient`** tarafından uygulanır.
+- MDM payload'ı diğer payload'lara bağlı olabilir.
+- **Request'lerin belirli certificates'a pinlenmesine** olanak sağlar:
+- Property: **`CheckInURLPinningCertificateUUIDs`**.
+- Property: **`ServerURLPinningCertificateUUIDs`**.
+- PEM payload üzerinden iletilir.
+- Cihaza bir identity certificate atanmasına olanak sağlar:
+- Property: IdentityCertificateUUID.
+- SCEP payload üzerinden iletilir.
 
-### **Adım 7: MDM komutlarını dinleme**
+### **Step 7: MDM command'larını Dinleme**
 
-- MDM kontrolü tamamlandıktan sonra, satıcı **APNs kullanarak push bildirimleri gönderebilir**
-- Alındığında, **`mdmclient`** tarafından işlenir
-- MDM komutları için sorgulama yapmak üzere, ServerURL'ye talep gönderilir
-- Daha önce yüklenmiş MDM yüklemesini kullanır:
-- **`ServerURLPinningCertificateUUIDs`** talep için pinleme
-- **`IdentityCertificateUUID`** TLS istemci sertifikası için
+- MDM check-in tamamlandıktan sonra vendor, **APNs kullanarak push notifications gönderebilir**.
+- Alındığında **`mdmclient`** tarafından işlenir.
+- MDM command'larını poll etmek için request ServerURL'a gönderilir.
+- Daha önce yüklenen MDM payload'ından yararlanır:
+- Pinning request için **`ServerURLPinningCertificateUUIDs`**.
+- TLS client certificate için **`IdentityCertificateUUID`**.
 
 ## Saldırılar
 
-### Diğer Organizasyonlarda Cihaz Kaydı
+### Diğer Organizasyonlarda Cihaz Enroll Etme
 
-Daha önce belirtildiği gibi, bir cihazı bir organizasyona kaydetmek için **sadece o Organizasyona ait bir Seri Numarası gereklidir**. Cihaz kaydedildikten sonra, birçok organizasyon yeni cihaza hassas veriler yükleyecektir: sertifikalar, uygulamalar, WiFi şifreleri, VPN yapılandırmaları [ve benzeri](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Bu nedenle, kayıt süreci doğru bir şekilde korunmazsa, bu saldırganlar için tehlikeli bir giriş noktası olabilir:
+Daha önce belirtildiği gibi, bir cihazı bir organizasyona enroll etmeye çalışmak için **sadece o organizasyona ait bir Serial Number gereklidir**. Cihaz enroll edildikten sonra birçok organizasyon yeni cihaza hassas veriler yükler: certificates, applications, WiFi passwords, VPN configurations [ve benzeri](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+Bu nedenle enrollment süreci doğru şekilde korunmuyorsa saldırganlar için tehlikeli bir giriş noktası olabilir:<sup>[2]</sup>
+
 
 {{#ref}}
 enrolling-devices-in-other-organisations.md
 {{#endref}}
+
+## Referanslar
+
+- [1] [A Deep Dive into macOS MDM (and How it can be Compromised)](https://www.youtube.com/watch?v=ku8jZe-MHUU)
+- [2] [Duo Labs — "MDM Me Maybe?" (DEP/MDM enrollment security research)](https://duo.com/labs/research/mdm-me-maybe)
 
 {{#include ../../../banners/hacktricks-training.md}}

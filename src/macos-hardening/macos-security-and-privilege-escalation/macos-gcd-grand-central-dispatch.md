@@ -4,92 +4,92 @@
 
 ## Temel Bilgiler
 
-**Grand Central Dispatch (GCD),** ayrıca **libdispatch** (`libdispatch.dyld`) olarak da bilinir, hem macOS hem de iOS'ta mevcuttur. Bu, Apple tarafından çok çekirdekli donanımda eşzamanlı (çok iş parçacıklı) yürütme için uygulama desteğini optimize etmek amacıyla geliştirilmiş bir teknolojidir.
+**Grand Central Dispatch (GCD),** **libdispatch** (`libdispatch.dyld`) olarak da bilinir ve hem macOS hem de iOS'ta kullanılabilir. Apple tarafından, çok çekirdekli donanımlarda eşzamanlı (multithreaded) yürütme için uygulama desteğini optimize etmek amacıyla geliştirilmiş bir teknolojidir.
 
-**GCD**, uygulamanızın **blok nesneleri** şeklinde **görevler** **gönderebileceği** **FIFO kuyrukları** sağlar ve yönetir. Dağıtım kuyruklarına gönderilen bloklar, sistem tarafından tamamen yönetilen bir **iş parçacığı havuzunda** **yürütülür**. GCD, dağıtım kuyruklarındaki görevleri yürütmek için otomatik olarak iş parçacıkları oluşturur ve bu görevleri mevcut çekirdeklerde çalışacak şekilde planlar.
+**GCD**, uygulamanızın **block object** biçiminde **task'ler gönderebileceği** ve yöneteceği **FIFO kuyrukları** sağlar. Dispatch queue'lara gönderilen block'lar, tamamen sistem tarafından yönetilen bir **thread havuzunda yürütülür**. GCD, dispatch queue'lardaki task'leri yürütmek için otomatik olarak thread'ler oluşturur ve bu task'lerin mevcut core'larda çalışmasını planlar.
 
 > [!TIP]
-> Özetle, **paralel** kod yürütmek için, süreçler **GCD'ye kod blokları gönderebilir**, bu da yürütmelerini üstlenir. Bu nedenle, süreçler yeni iş parçacıkları oluşturmaz; **GCD verilen kodu kendi iş parçacığı havuzuyla yürütür** (gerekirse artabilir veya azalabilir).
+> Özetle, kodu **parallel** olarak yürütmek için process'ler **GCD'ye kod block'ları gönderebilir** ve GCD bunların yürütülmesini yönetir. Bu nedenle process'ler yeni thread'ler oluşturmaz; **GCD, verilen kodu kendi thread havuzuyla yürütür** (gerektiğinde bu havuz büyüyebilir veya küçülebilir).
 
-Bu, paralel yürütmeyi başarılı bir şekilde yönetmek için çok yardımcıdır, süreçlerin oluşturduğu iş parçacığı sayısını büyük ölçüde azaltır ve paralel yürütmeyi optimize eder. Bu, **büyük paralellik** gerektiren görevler (brute-forcing?) veya ana iş parçacığını engellememesi gereken görevler için idealdir: Örneğin, iOS'taki ana iş parçacığı UI etkileşimlerini yönetir, bu nedenle uygulamanın donmasına neden olabilecek herhangi bir başka işlev (arama, web erişimi, dosya okuma...) bu şekilde yönetilir.
+Bu yöntem, parallel yürütmeyi başarılı bir şekilde yönetmek için oldukça kullanışlıdır; process'lerin oluşturduğu thread sayısını büyük ölçüde azaltır ve parallel yürütmeyi optimize eder. Bu, **yüksek düzeyde parallelism** gerektiren task'ler (brute-forcing?) veya main thread'i engellememesi gereken task'ler için idealdir: Örneğin, iOS'ta main thread UI etkileşimlerini yönetir; bu nedenle uygulamanın takılmasına neden olabilecek diğer işlevler (arama, web'e erişme, dosya okuma...) bu şekilde yönetilir.
 
-### Bloklar
+### Block'lar
 
-Bir blok, **kendi kendine yeterli bir kod bölümü** (bir değer döndüren argümanlı bir fonksiyon gibi) olup, bağlı değişkenleri de belirtebilir.\
-Ancak, derleyici seviyesinde bloklar mevcut değildir, bunlar `os_object`lerdir. Bu nesnelerin her biri iki yapıdan oluşur:
+Bir block, **kendi içinde bağımsız bir kod bölümüdür** (parametreleri olan ve bir değer döndüren bir function gibi) ve bound variable'lar da belirtebilir.\
+Ancak compiler seviyesinde block'lar mevcut değildir; bunlar `os_object`'lerdir. Bu object'lerin her biri iki structure'dan oluşur:
 
-- **blok literal**:
-- Blok sınıfına işaret eden **`isa`** alanıyla başlar:
-- `NSConcreteGlobalBlock` (bloklar `__DATA.__const`'dan)
-- `NSConcreteMallocBlock` (yığın içindeki bloklar)
-- `NSConcreateStackBlock` (yığın içindeki bloklar)
-- **`flags`** (blok tanımında mevcut alanları gösterir) ve bazı ayrılmış baytlar
-- Çağrılacak fonksiyon işaretçisi
-- Blok tanımına işaretçi
-- İçe aktarılan blok değişkenleri (varsa)
-- **blok tanımı**: Boyutu mevcut veriye bağlıdır (önceki bayraklarda belirtildiği gibi)
-- Bazı ayrılmış baytları vardır
+- **block literal**:
+- Block'ın class'ına işaret eden **`isa`** alanıyla başlar:
+- `NSConcreteGlobalBlock` (`__DATA.__const` içindeki block'lar)
+- `NSConcreteMallocBlock` (heap'teki block'lar)
+- `NSConcreateStackBlock` (stack'teki block'lar)
+- Block descriptor'da mevcut olan alanları belirten **`flags`** ve bazı reserved byte'lar
+- Çağrılacak function pointer'ı
+- Block descriptor'a işaret eden pointer
+- Block tarafından import edilen variable'lar (varsa)
+- **block descriptor**: Boyutu, mevcut olan data'ya bağlıdır (önceki flag'lerde belirtildiği gibi)
+- Bazı reserved byte'lara sahiptir
 - Boyutu
-- Genellikle parametreler için ne kadar alan gerektiğini bilmek için bir Objective-C tarzı imzaya işaretçi içerir (bayrak `BLOCK_HAS_SIGNATURE`)
-- Değişkenler referans alınıyorsa, bu blok ayrıca bir kopyalama yardımcı programına (değeri başta kopyalama) ve bir serbest bırakma yardımcı programına (serbest bırakma) işaretçiler içerir.
+- Parametreler için ne kadar alana ihtiyaç olduğunu bilmek amacıyla genellikle Objective-C tarzı bir signature'a işaret eden bir pointer içerir (`BLOCK_HAS_SIGNATURE` flag'i)
+- Variable'lara referans veriliyorsa bu block ayrıca bir copy helper'a (başlangıçta değeri kopyalamak için) ve dispose helper'a (değeri serbest bırakmak için) işaret eden pointer'lara sahip olur.
 
 ### Kuyruklar
 
-Bir dağıtım kuyruğu, yürütme için blokların FIFO sıralamasını sağlayan adlandırılmış bir nesnedir.
+Bir dispatch queue, yürütülecek block'lar için FIFO sıralaması sağlayan adlandırılmış bir object'tir.
 
-Bloklar, yürütülmek üzere kuyruklara yerleştirilir ve bu kuyruklar 2 modu destekler: `DISPATCH_QUEUE_SERIAL` ve `DISPATCH_QUEUE_CONCURRENT`. Elbette **seri** olan **yarış durumu** sorunları yaşamayacaktır çünkü bir blok, önceki blok bitene kadar yürütülmeyecektir. Ancak **diğer türdeki kuyrukta bu sorun olabilir**.
+Block'lar yürütülmek üzere queue'lara yerleştirilir ve bu queue'lar 2 mode'u destekler: `DISPATCH_QUEUE_SERIAL` ve `DISPATCH_QUEUE_CONCURRENT`. Elbette **serial** olan queue'da **race condition** sorunları **olmaz**, çünkü bir block önceki block tamamlanana kadar yürütülmez. Ancak **diğer queue türünde bu sorun yaşanabilir**.
 
-Varsayılan kuyruklar:
+Default queue'lar:
 
-- `.main-thread`: `dispatch_get_main_queue()`'dan
-- `.libdispatch-manager`: GCD'nin kuyruk yöneticisi
-- `.root.libdispatch-manager`: GCD'nin kuyruk yöneticisi
-- `.root.maintenance-qos`: En düşük öncelikli görevler
+- `.main-thread`: `dispatch_get_main_queue()` tarafından sağlanır
+- `.libdispatch-manager`: GCD'nin queue manager'ı
+- `.root.libdispatch-manager`: GCD'nin queue manager'ı
+- `.root.maintenance-qos`: En düşük öncelikli task'ler
 - `.root.maintenance-qos.overcommit`
-- `.root.background-qos`: `DISPATCH_QUEUE_PRIORITY_BACKGROUND` olarak mevcut
+- `.root.background-qos`: `DISPATCH_QUEUE_PRIORITY_BACKGROUND` olarak kullanılabilir
 - `.root.background-qos.overcommit`
-- `.root.utility-qos`: `DISPATCH_QUEUE_PRIORITY_NON_INTERACTIVE` olarak mevcut
+- `.root.utility-qos`: `DISPATCH_QUEUE_PRIORITY_NON_INTERACTIVE` olarak kullanılabilir
 - `.root.utility-qos.overcommit`
-- `.root.default-qos`: `DISPATCH_QUEUE_PRIORITY_DEFAULT` olarak mevcut
+- `.root.default-qos`: `DISPATCH_QUEUE_PRIORITY_DEFAULT` olarak kullanılabilir
 - `.root.background-qos.overcommit`
-- `.root.user-initiated-qos`: `DISPATCH_QUEUE_PRIORITY_HIGH` olarak mevcut
+- `.root.user-initiated-qos`: `DISPATCH_QUEUE_PRIORITY_HIGH` olarak kullanılabilir
 - `.root.background-qos.overcommit`
 - `.root.user-interactive-qos`: En yüksek öncelik
 - `.root.background-qos.overcommit`
 
-Her zaman **hangi iş parçacıklarının hangi kuyrukları yöneteceğine** sistemin karar vereceğini unutmayın (birden fazla iş parçacığı aynı kuyrukta çalışabilir veya aynı iş parçacığı farklı kuyruklarda bir noktada çalışabilir).
+Her zaman **hangi thread'lerin hangi queue'ları yöneteceğine sistemin karar vereceğini** unutmayın (birden fazla thread aynı queue üzerinde çalışabilir veya aynı thread bir noktada farklı queue'larda çalışabilir).
 
 #### Özellikler
 
-**`dispatch_queue_create`** ile bir kuyruk oluştururken üçüncü argüman bir `dispatch_queue_attr_t`'dir, bu genellikle ya `DISPATCH_QUEUE_SERIAL` (aslında NULL'dur) ya da bazı kuyruk parametrelerini kontrol etmeye olanak tanıyan bir `dispatch_queue_attr_t` yapısına işaret eden `DISPATCH_QUEUE_CONCURRENT`'dır.
+**`dispatch_queue_create`** ile bir queue oluşturulurken üçüncü parametre, genellikle `DISPATCH_QUEUE_SERIAL` (aslında NULL'dur) veya queue'nun bazı parametrelerini kontrol etmeyi sağlayan bir `dispatch_queue_attr_t` struct'ına pointer olan `DISPATCH_QUEUE_CONCURRENT` değeridir.
 
-### Dağıtım nesneleri
+### Dispatch object'leri
 
-libdispatch'in kullandığı birkaç nesne vardır ve kuyruklar ile bloklar bunlardan sadece 2'sidir. Bu nesneleri `dispatch_object_create` ile oluşturmak mümkündür:
+libdispatch'in kullandığı çeşitli object'ler vardır; queue'lar ve block'lar bunlardan yalnızca 2 tanesidir. Bu object'leri `dispatch_object_create` ile oluşturmak mümkündür:
 
 - `block`
-- `data`: Veri blokları
-- `group`: Blok grubu
-- `io`: Asenkron I/O istekleri
-- `mach`: Mach portları
-- `mach_msg`: Mach mesajları
-- `pthread_root_queue`: Bir pthread iş parçacığı havuzuna sahip bir kuyruk ve iş kuyrukları değil
+- `data`: Data block'ları
+- `group`: Block grubu
+- `io`: Async I/O request'leri
+- `mach`: Mach port'ları
+- `mach_msg`: Mach message'ları
+- `pthread_root_queue`: pthread thread pool'una sahip, workqueue'su olmayan bir queue
 - `queue`
 - `semaphore`
-- `source`: Olay kaynağı
+- `source`: Event source
 
 ## Objective-C
 
-Objective-C'de bir bloğu paralel olarak yürütmek için gönderme işlevleri vardır:
+Objective-C'de bir block'ı parallel olarak yürütülmek üzere göndermek için farklı function'lar vardır:
 
-- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Bir dağıtım kuyruğunda asenkron yürütme için bir blok gönderir ve hemen döner.
-- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Yürütme için bir blok nesnesi gönderir ve o blok yürütmeyi bitirdikten sonra döner.
-- [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): Bir blok nesnesini yalnızca bir kez uygulamanın ömrü boyunca yürütür.
-- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Yürütme için bir iş öğesi gönderir ve yalnızca yürütmeyi bitirdikten sonra döner. [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync) ile karşılaştırıldığında, bu işlev blok yürütüldüğünde kuyruk özelliklerinin tümüne saygı gösterir.
+- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Bir block'ı bir dispatch queue üzerinde asynchronous olarak yürütülmek üzere gönderir ve hemen döner.
+- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Bir block object'ini yürütülmek üzere gönderir ve block'ın yürütülmesi tamamlandıktan sonra döner.
+- [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): Bir block object'ini uygulamanın yaşam süresi boyunca yalnızca bir kez yürütür.
+- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Bir work item'ı yürütülmek üzere gönderir ve yalnızca yürütülmesi tamamlandıktan sonra döner. [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync)'den farklı olarak bu function, block'ı yürütürken queue'nun tüm attribute'larına uyar.
 
-Bu işlevler şu parametreleri bekler: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
+Bu function'lar şu parametreleri bekler: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
 
-Bu, bir Blok'un **yapısıdır**:
+Bu, bir Block'ın **struct**'ıdır:
 ```c
 struct Block {
 void *isa; // NSConcreteStackBlock,...
@@ -100,7 +100,7 @@ struct BlockDescriptor *descriptor;
 // captured variables go here
 };
 ```
-Ve bu, **`dispatch_async`** ile **parallelism** kullanmanın bir örneğidir:
+Ve bu, **`dispatch_async`** ile **paralellik** kullanmaya yönelik bir örnektir:
 ```objectivec
 #import <Foundation/Foundation.h>
 
@@ -132,8 +132,8 @@ return 0;
 ```
 ## Swift
 
-**`libswiftDispatch`**, C dilinde yazılmış olan Grand Central Dispatch (GCD) çerçevesine **Swift bağlamaları** sağlayan bir kütüphanedir.\
-**`libswiftDispatch`** kütüphanesi, C GCD API'lerini daha Swift dostu bir arayüzde sararak, Swift geliştiricilerinin GCD ile çalışmasını daha kolay ve sezgisel hale getirir.
+**`libswiftDispatch`**, başlangıçta C ile yazılmış Grand Central Dispatch (GCD) framework'ü için **Swift bindings** sağlayan bir kütüphanedir.\
+**`libswiftDispatch`** kütüphanesi, C GCD API'lerini Swift'e daha uygun bir interface ile sarar ve Swift geliştiricilerinin GCD ile çalışmasını daha kolay ve sezgisel hâle getirir.
 
 - **`DispatchQueue.global().sync{ ... }`**
 - **`DispatchQueue.global().async{ ... }`**
@@ -141,7 +141,7 @@ return 0;
 - **`async await`**
 - **`var (data, response) = await URLSession.shared.data(from: URL(string: "https://api.example.com/getData"))`**
 
-**Code example**:
+**Kod örneği**:
 ```swift
 import Foundation
 
@@ -170,7 +170,7 @@ sleep(1)  // Simulate a long-running task
 ```
 ## Frida
 
-Aşağıdaki Frida script'i **birçok `dispatch`** fonksiyonuna hook yapmak ve kuyruk adını, geri izlemeyi ve bloğu çıkarmak için kullanılabilir: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
+Aşağıdaki Frida script'i, çeşitli `dispatch` işlevlerine **hook** eklemek ve queue adını, backtrace'i ve block'u çıkarmak için kullanılabilir: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js).
 ```bash
 frida -U <prog_name> -l libdispatch.js
 
@@ -185,9 +185,9 @@ Backtrace:
 ```
 ## Ghidra
 
-Şu anda Ghidra, ne ObjectiveC **`dispatch_block_t`** yapısını ne de **`swift_dispatch_block`** yapısını anlamıyor.
+Şu anda Ghidra ne ObjectiveC **`dispatch_block_t`** yapısını ne de **`swift_dispatch_block`** yapısını anlayabiliyor.
 
-Eğer bunları anlamasını istiyorsanız, sadece **tanımlayabilirsiniz**:
+Bunları anlamasını istiyorsanız, bunları **tanımlamanız** yeterlidir:
 
 <figure><img src="../../images/image (1160).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -195,14 +195,14 @@ Eğer bunları anlamasını istiyorsanız, sadece **tanımlayabilirsiniz**:
 
 <figure><img src="../../images/image (1163).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Sonra, kodda bunların **kullanıldığı** bir yer bulun:
+Ardından, bunların **kullanıldığı** kodda bir yer bulun:
 
 > [!TIP]
-> "block" ile yapılan tüm referansları not edin, böylece yapının nasıl kullanıldığını anlayabilirsiniz.
+> Yapının kullanıldığını nasıl tespit edebileceğinizi anlamak için "block" ile ilgili tüm referansları not edin.
 
 <figure><img src="../../images/image (1164).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Değişkene sağ tıklayın -> Değişkeni Yeniden Yazın ve bu durumda **`swift_dispatch_block`**'ı seçin:
+Değişkene sağ tıklayın -> Retype Variable seçeneğine tıklayın ve bu durumda **`swift_dispatch_block`** öğesini seçin:
 
 <figure><img src="../../images/image (1165).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -210,8 +210,11 @@ Ghidra her şeyi otomatik olarak yeniden yazacaktır:
 
 <figure><img src="../../images/image (1166).png" alt="" width="563"><figcaption></figcaption></figure>
 
-## References
+## Referanslar
 
-- [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [1] [libdispatch — `src/queue.c` (queue/thread-pool implementation)](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/queue.c)
+- [2] [libdispatch — `src/source.c` (dispatch sources)](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/source.c)
+- [3] [libdispatch — `dispatch/queue.h` (public queue API)](https://github.com/apple-oss-distributions/libdispatch/blob/main/dispatch/queue.h)
+- [4] [Apple Developer — Dispatch](https://developer.apple.com/documentation/dispatch)
 
 {{#include ../../banners/hacktricks-training.md}}

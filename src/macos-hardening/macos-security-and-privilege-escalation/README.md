@@ -1,12 +1,12 @@
-# macOS Güvenliği & Yetki Yükseltme
+# macOS Güvenliği ve Privilege Escalation
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Temel MacOS
 
-Eğer macOS ile tanışık değilseniz, macOS'un temellerini öğrenmeye başlamalısınız:
+macOS hakkında bilgi sahibi değilseniz macOS'un temellerini öğrenerek başlamalısınız:
 
-- Özel macOS **dosyaları & izinleri:**
+- Özel macOS **dosyaları ve izinleri:**
 
 
 {{#ref}}
@@ -27,105 +27,105 @@ macos-users.md
 macos-applefs.md
 {{#endref}}
 
-- **kernel**'ın **mimari**si
+- k**ernel** mimarisi
 
 
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
-- Yaygın macOS n**etwork hizmetleri & protokolleri**
+- Yaygın macOS **network servisleri ve protokolleri**
 
 
 {{#ref}}
 macos-protocols.md
 {{#endref}}
 
-- **Açık kaynak** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
-- Bir `tar.gz` indirmek için bir URL'yi [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) adresinden [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) adresine değiştirin.
+- **Opensource** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
+- Bir `tar.gz` indirmek için [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) gibi bir URL'yi [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) şeklinde değiştirin.
 
 ### MacOS MDM
 
-Şirketlerde **macOS** sistemleri büyük olasılıkla **bir MDM ile yönetilecektir**. Bu nedenle, bir saldırgan açısından **nasıl çalıştığını** bilmek ilginçtir:
+Şirketlerde **macOS** sistemlerinin bir **MDM ile yönetilmesi** oldukça muhtemeldir. Bu nedenle, saldırganın bakış açısından **bunun nasıl çalıştığını** bilmek ilgi çekicidir:
 
 
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
 {{#endref}}
 
-### MacOS - İnceleme, Hata Ayıklama ve Fuzzing
+### MacOS - İnceleme, Debugging ve Fuzzing
 
 
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
-## MacOS Güvenlik Koruma Önlemleri
+## MacOS Güvenlik Korumaları
 
 
 {{#ref}}
 macos-security-protections/
 {{#endref}}
 
-## Saldırı Yüzeyi
+## Attack Surface
 
 ### Dosya İzinleri
 
-Eğer bir **root olarak çalışan bir işlem** bir dosya yazıyorsa ve bu dosya bir kullanıcı tarafından kontrol edilebiliyorsa, kullanıcı bunu **yetkileri yükseltmek için** kötüye kullanabilir.\
-Bu aşağıdaki durumlarda gerçekleşebilir:
+**root olarak çalışan bir process**, bir kullanıcı tarafından kontrol edilebilen bir dosyaya **yazarsa**, kullanıcı bunu **privilege escalation** için kötüye kullanabilir.\
+Bu, aşağıdaki durumlarda gerçekleşebilir:
 
-- Kullanılan dosya zaten bir kullanıcı tarafından oluşturulmuş (kullanıcıya ait)
-- Kullanılan dosya bir grup nedeniyle kullanıcı tarafından yazılabilir
-- Kullanılan dosya, kullanıcının oluşturabileceği bir dizin içinde
-- Kullanılan dosya root'a ait bir dizin içinde ancak kullanıcı bir grup nedeniyle üzerinde yazma erişimine sahip (kullanıcı dosyayı oluşturabilir)
+- Kullanılan dosya daha önce bir kullanıcı tarafından oluşturulmuştur (dosyanın sahibi kullanıcıdır)
+- Kullanılan dosya bir grup nedeniyle kullanıcı tarafından yazılabilirdir
+- Kullanılan dosya kullanıcının sahip olduğu bir dizinin içindedir (kullanıcı dosyayı oluşturabilir)
+- Kullanılan dosya root'un sahip olduğu bir dizinin içindedir ancak kullanıcı bir grup nedeniyle bu dizine yazma erişimine sahiptir (kullanıcı dosyayı oluşturabilir)
 
-**root** tarafından **kullanılacak bir dosya** oluşturabilmek, bir kullanıcının **içeriğinden faydalanmasına** veya hatta başka bir yere işaret eden **sembolik/sert bağlantılar** oluşturmasına olanak tanır.
+**root tarafından kullanılacak bir dosya oluşturabilmek**, kullanıcının **içeriğinden yararlanmasına** veya dosyayı başka bir konuma gösterecek **symlink/hardlink**'ler oluşturmasına olanak tanır.
 
-Bu tür zafiyetler için **savunmasız `.pkg` yükleyicilerini kontrol etmeyi** unutmayın:
+Bu tür zafiyetler için **zafiyetli `.pkg` installer'larını** kontrol etmeyi unutmayın:
 
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### Dosya Uzantısı & URL şeması uygulama işleyicileri
+### Dosya Uzantısı ve URL scheme app handler'ları
 
-Dosya uzantılarıyla kaydedilen garip uygulamalar kötüye kullanılabilir ve farklı uygulamalar belirli protokolleri açmak için kaydedilebilir.
+Dosya uzantıları tarafından kaydedilmiş şüpheli uygulamalar kötüye kullanılabilir ve farklı uygulamalar belirli protokolleri açmak üzere kaydedilebilir.
 
 
 {{#ref}}
 macos-file-extension-apps.md
 {{#endref}}
 
-## macOS TCC / SIP Yetki Yükseltme
+## macOS TCC / SIP Privilege Escalation
 
-macOS'ta **uygulamalar ve ikili dosyalar**, diğerlerinden daha ayrıcalıklı olmalarını sağlayan klasörlere veya ayarlara erişim iznine sahip olabilir.
+macOS'ta **uygulamalar ve binary'ler, klasörlere veya ayarlara erişim izinlerine sahip olabilir**; bu da onları diğerlerinden daha ayrıcalıklı hale getirir.
 
-Bu nedenle, bir macOS makinesini başarılı bir şekilde ele geçirmek isteyen bir saldırgan, **TCC ayrıcalıklarını yükseltmek** (veya ihtiyaçlarına bağlı olarak **SIP'yi atlamak**) zorundadır.
+Bu nedenle, bir macOS makinesini başarıyla ele geçirmek isteyen bir saldırganın **TCC ayrıcalıklarını yükseltmesi** (veya ihtiyaçlarına bağlı olarak **SIP'i bypass etmesi**) gerekir.
 
-Bu ayrıcalıklar genellikle uygulamanın imzalandığı **haklar** şeklinde verilir veya uygulama bazı erişimler talep edebilir ve **kullanıcı onayladıktan** sonra **TCC veritabanlarında** bulunabilir. Bir işlemin bu ayrıcalıkları elde etmenin bir diğer yolu, bu **ayrıcalıklara** sahip bir işlemin **çocuğu** olmaktır, çünkü genellikle **miras alınırlar**.
+Bu ayrıcalıklar genellikle uygulamanın imzalandığı **entitlement**'lar aracılığıyla verilir veya uygulama bazı erişimler talep edebilir; **kullanıcı bunları onayladıktan** sonra bu erişimler **TCC database**'lerinde bulunabilir. Bir process'in bu ayrıcalıkları elde etmesinin başka bir yolu da bu **ayrıcalıklara** sahip bir process'in **child process'i** olmasıdır; çünkü bu ayrıcalıklar genellikle **inherit** edilir.
 
-Farklı yolları bulmak için bu bağlantılara göz atın [**TCC'de yetki yükseltme**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**TCC'yi atlama**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) ve geçmişte [**SIP'nin nasıl atlandığı**](macos-security-protections/macos-sip.md#sip-bypasses).
+Farklı yöntemlerle [**TCC'de privilege escalation**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses) yapmayı, [**TCC'yi bypass etmeyi**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) ve geçmişte [**SIP'in nasıl bypass edildiğini**](macos-security-protections/macos-sip.md#sip-bypasses) öğrenmek için bu bağlantıları takip edin.
 
-## macOS Geleneksel Yetki Yükseltme
+## macOS Geleneksel Privilege Escalation
 
-Elbette, bir kırmızı takım perspektifinden root'a yükseltme ile de ilgilenmelisiniz. Bazı ipuçları için aşağıdaki gönderiye göz atın:
+Elbette bir red team perspektifinden root'a yükselmeyle de ilgilenmelisiniz. Bazı ipuçları için aşağıdaki gönderiye göz atın:
 
 
 {{#ref}}
 macos-privilege-escalation.md
 {{#endref}}
 
-## macOS Uyum
+## macOS Compliance
 
 - [https://github.com/usnistgov/macos_security](https://github.com/usnistgov/macos_security)
 
 ## Referanslar
 
-- [**OS X Olay Yanıtı: Betik ve Analiz**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
-- [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
-- [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
-- [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
-- [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
+- [1] [OS X Incident Response: Scripting and Analysis](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+- [2] [The Art of Mac Malware, Vol. 1 — Analysis (Patrick Wardle)](https://taomm.org/vol1/analysis.html)
+- [3] [NicolasGrimonpont/Cheatsheet — macOS/Linux/Windows commands & security tools cheatsheet](https://github.com/NicolasGrimonpont/Cheatsheet)
+- [4] [SentinelOne — macOS Security Resource](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
+- [5] [2022 - macOS local security: escaping the sandbox and bypassing TCC (YouTube)](https://www.youtube.com/watch?v=vMGiplQtjTY)
 
 {{#include ../../banners/hacktricks-training.md}}

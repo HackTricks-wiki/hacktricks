@@ -1,64 +1,64 @@
-# macOS Bundle'leri
+# macOS Paketleri
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Temel Bilgiler
 
-macOS'teki bundle'lar uygulamalar, kütüphaneler ve diğer gerekli dosyalar dahil çeşitli kaynakları içeren kapsayıcılar olarak görev yapar; bu sayede Finder'da tek bir nesne gibi görünürler, örneğin tanıdık `*.app` dosyaları. En sık karşılaşılan bundle `.app` paketidir, ancak `.framework`, `.systemextension` ve `.kext` gibi diğer türler de yaygındır.
+macOS'taki paketler; uygulamalar, library'ler ve diğer gerekli dosyalar dahil olmak üzere çeşitli kaynaklar için container görevi görür. Bu sayede Finder'da tanıdık `*.app` dosyaları gibi tek nesneler olarak görünürler. En sık karşılaşılan paket `.app` paketidir; ancak `.framework`, `.systemextension` ve `.kext` gibi diğer türler de yaygın olarak kullanılır.
 
-### Bir Bundle'ın Temel Bileşenleri
+### Bir Paketin Temel Bileşenleri
 
-Bir bundle içinde, özellikle `<application>.app/Contents/` dizininde, çeşitli önemli kaynaklar bulunur:
+Bir paketin içinde, özellikle `<application>.app/Contents/` dizininde, çeşitli önemli kaynaklar bulunur:
 
-- **\_CodeSignature**: Bu dizin, uygulamanın bütünlüğünü doğrulamak için kritik olan kod imzalama (code-signing) bilgilerini saklar. Kod imzalama bilgilerini şu komutlarla inceleyebilirsiniz:
+- **\_CodeSignature**: Bu dizin, uygulamanın bütünlüğünü doğrulamak için gerekli code-signing ayrıntılarını depolar. Code-signing bilgilerini şu tür komutları kullanarak inceleyebilirsiniz:
 ```bash
 openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64
 ```
-- **MacOS**: Uygulamanın kullanıcı etkileşimiyle çalıştırılan yürütülebilir ikili dosyasını içerir.
-- **Resources**: Görseller, belgeler ve arayüz tanımlamaları (nib/xib dosyaları) dahil olmak üzere uygulamanın kullanıcı arayüzü bileşenleri için bir depo.
-- **Info.plist**: Uygulamanın ana yapılandırma dosyası olarak görev yapar; sistemin uygulamayı uygun şekilde tanıması ve etkileşimde bulunması için kritik öneme sahiptir.
+- **MacOS**: Kullanıcı etkileşimi gerçekleştiğinde çalışan uygulamanın executable binary dosyasını içerir.
+- **Resources**: Görseller, belgeler ve arayüz açıklamaları (nib/xib dosyaları) dahil olmak üzere uygulamanın kullanıcı arayüzü bileşenleri için bir depodur.
+- **Info.plist**: Uygulamanın ana yapılandırma dosyası olarak görev yapar; sistemin uygulamayı uygun şekilde tanıması ve uygulamayla etkileşim kurması açısından kritik öneme sahiptir.
 
-#### Important Keys in Info.plist
+#### Info.plist İçindeki Önemli Key'ler
 
-`Info.plist` dosyası uygulama yapılandırmasının temel taşlarından biridir ve şu anahtarları içerir:
+`Info.plist` dosyası, aşağıdakiler gibi key'ler içeren uygulama yapılandırmasının temel unsurudur:
 
-- **CFBundleExecutable**: `Contents/MacOS` dizininde bulunan ana yürütülebilir dosyanın adını belirtir.
-- **CFBundleIdentifier**: Uygulama için küresel bir tanımlayıcı sağlar; macOS tarafından uygulama yönetimi için yoğun şekilde kullanılır.
-- **LSMinimumSystemVersion**: Uygulamanın çalışması için gereken minimum macOS sürümünü gösterir.
+- **CFBundleExecutable**: `Contents/MacOS` dizininde bulunan ana executable dosyanın adını belirtir.
+- **CFBundleIdentifier**: Uygulama için global bir identifier sağlar; macOS tarafından uygulama yönetimi için yoğun şekilde kullanılır.
+- **LSMinimumSystemVersion**: Uygulamanın çalışması için gereken minimum macOS sürümünü belirtir.
 
-### Exploring Bundles
+### Bundle'ları İnceleme
 
-Bir bundle'ın, örneğin `Safari.app`, içeriğini keşfetmek için şu komut kullanılabilir: `bash ls -lR /Applications/Safari.app/Contents`
+`Safari.app` gibi bir bundle'ın içeriğini incelemek için şu komut kullanılabilir: `bash ls -lR /Applications/Safari.app/Contents`
 
-Bu inceleme `_CodeSignature`, `MacOS`, `Resources` gibi dizinleri ve `Info.plist` gibi dosyaları ortaya çıkarır; bunların her biri uygulamayı güvence altına almaktan kullanıcı arayüzünü ve çalışma parametrelerini tanımlamaya kadar farklı amaçlara hizmet eder.
+Bu inceleme, `_CodeSignature`, `MacOS`, `Resources` gibi dizinleri ve `Info.plist` gibi dosyaları ortaya çıkarır. Bunların her biri uygulamanın güvenliğini sağlamaktan kullanıcı arayüzünü ve çalışma parametrelerini tanımlamaya kadar farklı bir amaca hizmet eder.
 
-#### Additional Bundle Directories
+#### Ek Bundle Dizinleri
 
-Yaygın dizinlerin ötesinde, bundle'lar ayrıca şunları içerebilir:
+Yaygın dizinlerin yanı sıra bundle'lar şunları da içerebilir:
 
-- **Frameworks**: Uygulama tarafından kullanılan paketlenmiş framework'leri içerir. Framework'ler, ek kaynaklara sahip dylib'ler gibidir.
-- **PlugIns**: Uygulamanın yeteneklerini artıran plug-in ve uzantılar için bir dizin.
-- **XPCServices**: Uygulamanın süreç-dışı (out-of-process) iletişim için kullandığı XPC servislerini barındırır.
+- **Frameworks**: Uygulama tarafından kullanılan bundled framework'leri içerir. Framework'ler, ek kaynaklara sahip dylib'ler gibidir.
+- **PlugIns**: Uygulamanın yeteneklerini geliştiren plug-in'ler ve extension'lar için bir dizindir.
+- **XPCServices**: Uygulama tarafından process dışı iletişim için kullanılan XPC service'lerini barındırır.
 
 Bu yapı, gerekli tüm bileşenlerin bundle içinde kapsüllenmesini sağlayarak modüler ve güvenli bir uygulama ortamını kolaylaştırır.
 
-For more detailed information on `Info.plist` keys and their meanings, the Apple developer documentation provides extensive resources: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
+`Info.plist` key'leri ve anlamları hakkında daha ayrıntılı bilgi için Apple developer documentation kapsamlı kaynaklar sunar: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
 
-## Güvenlik Notları & Kötüye Kullanım Vektörleri
+## Security Notes & Abuse Vectors
 
-- **Gatekeeper / App Translocation**: Karantinaya alınmış bir bundle ilk çalıştırıldığında, macOS derin bir imza doğrulaması yapar ve bundle'ı rastgele oluşturulmuş bir translocated yoldan çalıştırabilir. Kabul edildikten sonra, sonraki başlatmalarda sadece yüzeysel kontroller yapılır; `Resources/`, `PlugIns/`, nib'ler vb. içindeki kaynak dosyalar tarihsel olarak denetlenmiyordu. macOS 13 Ventura'dan itibaren ilk çalıştırmada derin doğrulama zorunlu hale gelmiştir ve yeni *App Management* TCC izni, üçüncü taraf süreçlerin kullanıcı onayı olmadan diğer bundle'ları değiştirmesini kısıtlar; ancak eski sistemler hâlâ savunmasız kalmaktadır.
-- **Bundle Identifier collisions**: Birden fazla gömülü hedef (PlugIns, helper tools) aynı `CFBundleIdentifier`'ı kullandığında imza doğrulaması bozulabilir ve bazen URL‑scheme kaçırma/karışıklığına yol açabilir. Alt-bundle'ları her zaman listeleyin ve benzersiz kimlikleri doğrulayın.
+- **Gatekeeper / App Translocation**: Quarantine uygulanmış bir bundle ilk kez çalıştırıldığında macOS kapsamlı bir signature verification gerçekleştirir ve bundle'ı randomized bir translocated path üzerinden çalıştırabilir. Kabul edildikten sonra sonraki çalıştırmalarda yalnızca yüzeysel kontroller gerçekleştirilir; `Resources/`, `PlugIns/`, nib'ler vb. içindeki resource dosyaları geçmişte kontrol edilmezdi. macOS 13 Ventura'dan beri ilk çalıştırmada kapsamlı bir kontrol zorunlu tutulur ve yeni *App Management* TCC permission'ı, user consent olmadan third-party process'lerin diğer bundle'ları değiştirmesini kısıtlar; ancak eski sistemler hâlâ savunmasızdır.
+- **Bundle Identifier collisions**: Aynı `CFBundleIdentifier` değerini yeniden kullanan birden fazla embedded target (PlugIns, helper tools), signature validation işlemini bozabilir ve zaman zaman URL-scheme hijacking/confusion'a olanak sağlayabilir. Her zaman sub-bundle'ları enumerate edin ve benzersiz ID'leri doğrulayın.
 
 ## Resource Hijacking (Dirty NIB / NIB Injection)
 
-Ventura öncesinde, imzalı bir uygulamadaki UI kaynaklarını değiştirerek yüzeysel code signing atlatılabilir ve uygulamanın entitlements'larıyla kod çalıştırılmasına izin verilebilirdi. Güncel araştırmalar (2024) bunun pre‑Ventura ve karantinaya alınmamış build'lerde hâlâ çalıştığını göstermektedir:
+Ventura'dan önce, signed bir uygulamadaki UI resource'larını değiştirmek shallow code signing'i bypass edebilir ve uygulamanın entitlements'larıyla code execution sağlayabilirdi. 2024'teki güncel research, bunun pre-Ventura sistemlerde ve quarantine uygulanmamış build'lerde hâlâ çalıştığını gösteriyor:<sup>[1][2]</sup>
 
-1. Hedef uygulamayı yazılabilir bir konuma kopyalayın (ör. `/tmp/Victim.app`).
-2. `Contents/Resources/MainMenu.nib` dosyasını (veya `NSMainNibFile` içinde belirtilen herhangi bir nib'i) `NSAppleScript`, `NSTask` vb. örnekleyen kötü amaçlı bir nib ile değiştirin.
-3. Uygulamayı başlatın. Kötü amaçlı nib, hedefin bundle ID'si ve entitlements'ları (TCC izinleri, mikrofon/kamera vb.) altında çalışır.
-4. Ventura+ bunun üzerine ilk başlatmada bundle'ı derinlemesine doğrulama ve sonraki değişiklikler için *App Management* izni gerektirme yoluyla hafifletme uygular; bu nedenle kalıcılık zorlaşır fakat eski macOS sürümlerindeki ilk başlatma saldırıları hala geçerlidir.
+1. Hedef uygulamayı writable bir konuma kopyalayın (ör. `/tmp/Victim.app`).
+2. `Contents/Resources/MainMenu.nib` dosyasını (veya `NSMainNibFile` içinde tanımlanan herhangi bir nib'i), `NSAppleScript`, `NSTask` vb. instantiate eden malicious bir nib ile değiştirin.
+3. Uygulamayı başlatın. Malicious nib, victim'ın bundle ID'si ve entitlements'ları (TCC grants, microphone/camera vb.) ile çalışır.
+4. Ventura+ ilk launch sırasında bundle'ı deep-verify ederek ve sonraki değişiklikler için *App Management* permission'ı gerektirerek riski azaltır; bu nedenle persistence daha zordur, ancak eski macOS sürümlerindeki initial-launch attacks hâlâ geçerlidir.<sup>[1]</sup>
 
-Minimal kötü amaçlı nib payload örneği (xib'i `ibtool` ile nib'e derleyin):
+Minimal malicious nib payload örneği (`ibtool` ile xib'i nib'e compile edin):
 ```bash
 # create a nib that runs osascript -e 'do shell script "id"'
 # ...build xib in Xcode, then
@@ -66,11 +66,11 @@ ibtool --compile MainMenu.nib MainMenu.xib
 cp MainMenu.nib /tmp/Victim.app/Contents/Resources/
 open /tmp/Victim.app
 ```
-## Framework / PlugIn / dylib Hijacking Bundles içinde
+## Bundle'lar içinde Framework / PlugIn / dylib Hijacking
 
-Çünkü `@rpath` aramaları paketlenmiş Frameworks/PlugIns'i tercih eder, `Contents/Frameworks/` veya `Contents/PlugIns/` içine kötü amaçlı bir kütüphane yerleştirmek, ana binary kütüphane doğrulaması olmadan imzalanmışsa veya zayıf `LC_RPATH` sıralaması varsa yükleme sırasını yönlendirebilir.
+`@rpath` aramaları bundled Frameworks/PlugIns'ı tercih ettiğinden, `Contents/Frameworks/` veya `Contents/PlugIns/` içine malicious bir library bırakmak, ana binary library validation olmadan veya zayıf `LC_RPATH` sıralamasıyla imzalandığında yükleme sırasını yönlendirebilir.
 
-İmzasız/ad‑hoc bundle'ı kötüye kullanırken tipik adımlar:
+İmzalanmamış/ad-hoc bir bundle'ı kötüye kullanırken tipik adımlar:
 ```bash
 cp evil.dylib /tmp/Victim.app/Contents/Frameworks/
 install_name_tool -add_rpath @executable_path/../Frameworks /tmp/Victim.app/Contents/MacOS/Victim
@@ -80,10 +80,11 @@ codesign -f -s - --timestamp=none /tmp/Victim.app/Contents/Frameworks/evil.dylib
 codesign -f -s - --deep --timestamp=none /tmp/Victim.app
 open /tmp/Victim.app
 ```
-- Hardened runtime'da `com.apple.security.cs.disable-library-validation` yoksa third-party dylibs engellenir; önce entitlements'i kontrol edin.
-- `Contents/XPCServices/` altındaki XPC servisleri genellikle kardeş framework'leri yükler — persistence veya privilege escalation yolları için bu servislerin binary'lerini benzer şekilde patch'leyin.
+Notlar:
+- `com.apple.security.cs.disable-library-validation` bulunmayan Hardened Runtime, üçüncü taraf dylib'leri engeller; önce entitlements'ları kontrol edin.
+- `Contents/XPCServices/` altındaki XPC servisleri genellikle kardeş framework'leri yükler; persistence veya privilege escalation yolları için ikili dosyalarını benzer şekilde patch'leyin.
 
-## Hızlı İnceleme Kılavuzu
+## Hızlı İnceleme Cheat Sheet
 ```bash
 # list top-level bundle metadata
 /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" /Applications/App.app/Contents/Info.plist
@@ -100,6 +101,7 @@ otool -L /Applications/App.app/Contents/MacOS/App
 ```
 ## Referanslar
 
-- [Bringing process injection into view(s): exploiting macOS apps using nib files (2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
-- [Dirty NIB & bundle resource tampering write‑up (2024)](https://karol-mazurek.medium.com/snake-apple-app-bundle-ext-f5c43a3c84c4)
+- [1] [Process injection'ı görünür hale getirmek: nib dosyalarını kullanarak macOS uygulamalarını exploit etmek (2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
+- [2] [Dirty NIB ve bundle resource tampering write-up'ı (2024)](https://karol-mazurek.medium.com/snake-apple-app-bundle-ext-f5c43a3c84c4)
+
 {{#include ../../../banners/hacktricks-training.md}}

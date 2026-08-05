@@ -1,4 +1,4 @@
-# macOS Thread Injection via Task port
+# Task port üzerinden macOS Thread Injection
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
@@ -9,47 +9,47 @@
 
 ## 1. Thread Hijacking
 
-Başlangıçta, `task_threads()` fonksiyonu, uzaktaki görevden bir iş parçacığı listesi almak için görev portu üzerinde çağrılır. Bir iş parçacığı ele geçirilmek üzere seçilir. Bu yaklaşım, `thread_create_running()`'i engelleyen önlemler nedeniyle yeni bir uzaktan iş parçacığı oluşturmanın yasak olduğu geleneksel kod enjekte etme yöntemlerinden sapmaktadır.
+İlk olarak, remote task'tan bir thread listesi almak için task port üzerinde `task_threads()` fonksiyonu çağrılır. Hijacking için bir thread seçilir. `thread_create_running()` fonksiyonunu engelleyen mitigation nedeniyle yeni bir remote thread oluşturulması yasak olduğundan, bu yaklaşım geleneksel code-injection yöntemlerinden farklıdır.<sup>[1]</sup>
 
-İş parçacığını kontrol etmek için, `thread_suspend()` çağrılır ve yürütmesi durdurulur.
+Thread'i kontrol etmek için `thread_suspend()` çağrılarak çalışması durdurulur.<sup>[1]</sup>
 
-Uzaktaki iş parçacığı üzerinde yalnızca **durdurma** ve **başlatma** ile **kayıt değerlerini alma/değiştirme** işlemlerine izin verilir. Uzaktan fonksiyon çağrıları, `x0` ile `x7` kayıtlarını **argümanlar** ile ayarlayarak, `pc`'yi hedeflenen fonksiyona yapılandırarak ve iş parçacığını yeniden başlatarak başlatılır. İş parçacığının dönüşten sonra çökmediğinden emin olmak, dönüşün tespit edilmesini gerektirir.
+Remote thread üzerinde izin verilen tek işlemler onu **durdurmak** ve **başlatmak** ile register değerlerini **almak**/**değiştirmek**tir. Remote function call işlemleri, `x0` ile `x7` arasındaki register'lar **arguments** olacak şekilde ayarlanıp `pc` hedeflenen fonksiyonu gösterecek biçimde yapılandırılarak ve thread yeniden başlatılarak gerçekleştirilir. Return sonrasında thread'in crash olmamasını sağlamak için return'ün tespit edilmesi gerekir.<sup>[1]</sup>
 
-Bir strateji, uzaktaki iş parçacığı için `thread_set_exception_ports()` kullanarak bir **istisna işleyici** kaydetmektir; bu işlem, fonksiyon çağrısından önce `lr` kaydını geçersiz bir adrese ayarlamayı içerir. Bu, fonksiyon yürütüldükten sonra bir istisna tetikler ve istisna portuna bir mesaj gönderir, böylece iş parçacığının durumunu inceleyerek dönüş değerini kurtarmaya olanak tanır. Alternatif olarak, Ian Beer’in *triple_fetch* istismarından alınan bir yöntemle, `lr` sonsuz döngüye ayarlanır; iş parçacığının kayıtları, `pc` o talimata işaret edene kadar sürekli izlenir.
+Bir yöntem, `thread_set_exception_ports()` kullanarak remote thread için bir **exception handler** kaydetmek ve function call öncesinde `lr` register'ını geçersiz bir adrese ayarlamaktır. Bu, function execution sonrasında bir exception tetikleyerek exception port'a bir message gönderir ve return value'yu kurtarmak için thread state'inin incelenmesini sağlar. Alternatif olarak, Ian Beer'ın *triple_fetch* exploit'inden uyarlanan yöntemde `lr` sonsuz döngüye ayarlanır; ardından `pc` bu instruction'ı gösterene kadar thread'in register'ları sürekli izlenir.<sup>[1]</sup>
 
-## 2. Mach ports for communication
+## 2. İletişim için Mach ports
 
-Sonraki aşama, uzaktaki iş parçacığı ile iletişimi kolaylaştırmak için Mach portları kurmaktır. Bu portlar, görevler arasında keyfi gönderme/alma haklarının aktarımında önemlidir.
+Sonraki aşama, remote thread ile iletişimi kolaylaştırmak için Mach ports oluşturmaktır. Bu port'lar, task'lar arasında arbitrary send/receive rights aktarımında kullanılır.<sup>[1]</sup>
 
-İki yönlü iletişim için, bir yerel ve diğeri uzaktaki görevde olmak üzere iki Mach alma hakkı oluşturulur. Ardından, her port için bir gönderme hakkı karşıt göreve aktarılır ve mesaj alışverişine olanak tanır.
+Bidirectional communication için iki Mach receive right oluşturulur: biri local, diğeri remote task'ta. Ardından her port için bir send right karşılık gelen task'a aktarılır ve message exchange mümkün hale gelir.<sup>[1]</sup>
 
-Yerel port üzerinde odaklanıldığında, alma hakkı yerel görev tarafından tutulur. Port, `mach_port_allocate()` ile oluşturulur. Bu port için bir gönderme hakkını uzaktaki göreve aktarmak zorluk teşkil eder.
+Local port'a odaklanıldığında receive right local task tarafından tutulur. Port, `mach_port_allocate()` ile oluşturulur. Zorluk, bu port'a ait bir send right'ın remote task'a aktarılmasında yatar.<sup>[1]</sup>
 
-Bir strateji, `thread_set_special_port()` kullanarak yerel port için bir gönderme hakkını uzaktaki iş parçacığının `THREAD_KERNEL_PORT`'una yerleştirmeyi içerir. Ardından, uzaktaki iş parçacığına `mach_thread_self()` çağrısı yapması talimatı verilir, böylece gönderme hakkı alınır.
+Bir yöntem, local port'a ait send right'ı remote thread'in `THREAD_KERNEL_PORT` alanına yerleştirmek için `thread_set_special_port()` kullanmaktır. Ardından remote thread'e send right'ı almak için `mach_thread_self()` çağırması talimatı verilir.<sup>[1]</sup>
 
-Uzaktaki port için süreç esasen tersine çevrilir. Uzaktaki iş parçacığı, `mach_reply_port()` aracılığıyla bir Mach portu oluşturması için yönlendirilir (çünkü `mach_port_allocate()` dönüş mekanizması nedeniyle uygun değildir). Port oluşturulduktan sonra, uzaktaki iş parçacığında bir gönderme hakkı oluşturmak için `mach_port_insert_right()` çağrılır. Bu hak daha sonra `thread_set_special_port()` kullanılarak çekirdekte saklanır. Yerel görevde, uzaktaki iş parçacığı üzerinde `thread_get_special_port()` kullanılarak uzaktaki görevde yeni tahsis edilen Mach portuna bir gönderme hakkı alınır.
+Remote port için süreç esasen tersine çevrilir. Remote thread'e `mach_reply_port()` aracılığıyla bir Mach port oluşturması talimatı verilir (`mach_port_allocate()` return mechanism nedeniyle uygun değildir). Port oluşturulduktan sonra, bir send right oluşturmak için remote thread içinde `mach_port_insert_right()` çağrılır. Bu right daha sonra `thread_set_special_port()` kullanılarak kernel'da saklanır. Local task'a dönüldüğünde, remote task'ta yeni allocate edilmiş Mach port'a ait bir send right edinmek için remote thread üzerinde `thread_get_special_port()` kullanılır.<sup>[1]</sup>
 
-Bu adımların tamamlanması, Mach portlarının kurulmasını sağlar ve iki yönlü iletişim için zemin hazırlar.
+Bu adımların tamamlanması, Mach ports'un oluşturulmasını sağlar ve bidirectional communication için temel oluşturur.<sup>[1]</sup>
 
 ## 3. Basic Memory Read/Write Primitives
 
-Bu bölümde, temel bellek okuma/yazma ilkelilerini oluşturmak için yürütme ilkesinin kullanılması üzerine odaklanılmaktadır. Bu ilk adımlar, uzaktaki süreç üzerinde daha fazla kontrol elde etmek için kritik öneme sahiptir, ancak bu aşamadaki ilkeliler pek çok amaca hizmet etmeyecektir. Kısa süre içinde daha gelişmiş versiyonlara yükseltilecektir.
+Bu bölümde, basic memory read/write primitives oluşturmak için execute primitive'in kullanılmasına odaklanılır. Bu ilk adımlar remote process üzerinde daha fazla kontrol elde etmek açısından kritik olsa da, bu aşamadaki primitives fazla işlev sağlamayacaktır. Kısa süre içinde daha gelişmiş versiyonlara yükseltileceklerdir.<sup>[1]</sup>
 
-### Memory reading and writing using the execute primitive
+### execute primitive kullanarak memory reading ve writing
 
-Amaç, belirli fonksiyonlar kullanarak bellek okuma ve yazma gerçekleştirmektir. **Bellek okuma** için:
+Amaç, belirli fonksiyonları kullanarak memory reading ve writing gerçekleştirmektir. **Memory reading** için:
 ```c
 uint64_t read_func(uint64_t *address) {
 return *address;
 }
 ```
-**bellek yazma**:
+**Bellek yazmak için:**
 ```c
 void write_func(uint64_t *address, uint64_t value) {
 *address = value;
 }
 ```
-Bu fonksiyonlar aşağıdaki assembly'e karşılık gelir:
+Bu işlevler aşağıdaki assembly'ye karşılık gelir:
 ```
 _read_func:
 ldr x0, [x0]
@@ -58,82 +58,82 @@ _write_func:
 str x1, [x0]
 ret
 ```
-### Uygun Fonksiyonların Belirlenmesi
+### Uygun fonksiyonları belirleme
 
-Yaygın kütüphanelerin taranması, bu işlemler için uygun adayları ortaya çıkardı:
+Yaygın library'lerin taranması, bu işlemler için uygun adayları ortaya çıkardı:<sup>[1]</sup>
 
-1. **Belleği Okuma — `property_getName()`** (libobjc):
+1. **Bellek okuma — `property_getName()`** (libobjc):
 ```c
 const char *property_getName(objc_property_t prop) {
 return prop->name;
 }
 ```
-2. **Bellek yazma — `_xpc_int64_set_value()`** (libxpc):
+2. **Belleğe yazma — `_xpc_int64_set_value()`** (libxpc):
 ```c
 __xpc_int64_set_value:
 str x1, [x0, #0x18]
 ret
 ```
-Rastgele bir adrese 64-bit yazma işlemi gerçekleştirmek için:
+Keyfi bir adrese 64 bitlik bir yazma işlemi gerçekleştirmek için:
 ```c
 _xpc_int64_set_value(address - 0x18, value);
 ```
-Bu ilkelere dayanarak, paylaşılan bellek oluşturmak için sahne hazırlandı ve bu, uzaktaki süreci kontrol etmede önemli bir ilerleme kaydedildi.
+Bu primitive'ler oluşturulduğunda, shared memory oluşturmanın ve remote process üzerinde kontrol sağlamada önemli bir ilerleme kaydetmenin zemini hazırlanmış olur.<sup>[1]</sup>
 
-## 4. Paylaşılan Bellek Kurulumu
+## 4. Shared Memory Setup
 
-Amaç, yerel ve uzaktaki görevler arasında paylaşılan bellek oluşturarak veri transferini basitleştirmek ve birden fazla argümanla fonksiyon çağrılarını kolaylaştırmaktır. Bu yaklaşım, Mach bellek girişleri üzerine inşa edilmiş `libxpc` ve onun `OS_xpc_shmem` nesne türünü kullanır.
+Amaç, local ve remote task'ler arasında shared memory oluşturarak data transferini basitleştirmek ve birden fazla argümanla function çağrılmasını kolaylaştırmaktır. Yaklaşım, Mach memory entry'leri üzerine kurulmuş `OS_xpc_shmem` object type'ını ve `libxpc`'yi kullanır.<sup>[1]</sup>
 
-### Süreç genel görünümü
+### Process overview
 
-1. **Bellek tahsisi**
-* `mach_vm_allocate()` kullanarak paylaşım için bellek tahsis edin.
-* Tahsis edilen bölge için bir `OS_xpc_shmem` nesnesi oluşturmak üzere `xpc_shmem_create()` kullanın.
-2. **Uzaktaki süreçte paylaşılan bellek oluşturma**
-* Uzaktaki süreçte `OS_xpc_shmem` nesnesi için bellek tahsis edin (`remote_malloc`).
-* Yerel şablon nesnesini kopyalayın; gömülü Mach gönderim hakkının `0x18` ofsetinde düzeltilmesi hala gereklidir.
-3. **Mach bellek girişini düzeltme**
-* `thread_set_special_port()` ile bir gönderim hakkı ekleyin ve `0x18` alanını uzaktaki girişin adıyla üzerine yazın.
-4. **Tamamlama**
-* Uzaktaki nesneyi doğrulayın ve `xpc_shmem_remote()` ile uzaktan bir çağrı yaparak haritalayın.
+1. **Memory allocation**
+* Paylaşım için `mach_vm_allocate()` kullanarak memory allocate edin.
+* Allocate edilen bölge için bir `OS_xpc_shmem` object oluşturmak üzere `xpc_shmem_create()` kullanın.
+2. **Creating shared memory in the remote process**
+* Remote process içinde `OS_xpc_shmem` object için memory allocate edin (`remote_malloc`).
+* Local template object'i kopyalayın; `0x18` offset'indeki embedded Mach send right için fix-up işlemi hâlâ gereklidir.
+3. **Correcting the Mach memory entry**
+* `thread_set_special_port()` ile bir send right ekleyin ve `0x18` field'ını remote entry'nin name'iyle overwrite edin.
+4. **Finalising**
+* Remote object'i validate edin ve remote call ile `xpc_shmem_remote()` kullanarak map edin.
 
-## 5. Tam Kontrol Sağlama
+## 5. Achieving Full Control
 
-Rastgele yürütme ve paylaşılan bellek geri kanalı mevcut olduğunda, hedef süreci etkili bir şekilde kontrol altına alırsınız:
+Arbitrary execution ve shared-memory back-channel elde edildiğinde hedef process üzerinde fiilen tam kontrol sahibi olursunuz:<sup>[1]</sup>
 
-* **Rastgele bellek R/W** — yerel ve paylaşılan bölgeler arasında `memcpy()` kullanın.
-* **> 8 argümanlı fonksiyon çağrıları** — ek argümanları arm64 çağrı konvansiyonunu takip ederek yığın üzerine yerleştirin.
-* **Mach port transferi** — kurulan portlar aracılığıyla Mach mesajlarında hakları geçirin.
-* **Dosya tanımlayıcı transferi** — dosya portlarını kullanın (bkz. *triple_fetch*).
+* **Arbitrary memory R/W** — local ve shared bölgeler arasında `memcpy()` kullanın.
+* **Function calls with > 8 args** — arm64 calling convention'ı izleyerek ek argümanları stack üzerine yerleştirin.
+* **Mach port transfer** — oluşturulan port'lar üzerinden Mach message'larında right'ları aktarın.
+* **File-descriptor transfer** — fileport'ları kullanın (*triple_fetch*'e bakın).
 
-Tüm bunlar, kolay yeniden kullanım için [`threadexec`](https://github.com/bazad/threadexec) kütüphanesinde sarılmıştır.
+Bunların tümü, kolayca yeniden kullanılabilmesi için [`threadexec`](https://github.com/bazad/threadexec) library'si içinde wrapper'lanmıştır.
 
 ---
 
-## 6. Apple Silicon (arm64e) Nuanları
+## 6. Apple Silicon (arm64e) Nuances
 
-Apple Silicon cihazlarında (arm64e) **Pointer Authentication Codes (PAC)** tüm dönüş adreslerini ve birçok fonksiyon işaretçisini korur. Mevcut kodu *yeniden kullanan* thread-hijacking teknikleri, `lr`/`pc` içindeki orijinal değerler zaten geçerli PAC imzaları taşıdığı için çalışmaya devam eder. Saldırgan kontrolündeki belleğe atlamaya çalıştığınızda sorunlar ortaya çıkar:
+Apple Silicon cihazlarda (arm64e), **Pointer Authentication Codes (PAC)** tüm return address'leri ve birçok function pointer'ı korur. Mevcut code'u *reuse* eden thread-hijacking teknikleri çalışmaya devam eder; çünkü `lr`/`pc` içindeki original value'lar zaten geçerli PAC signature'larını taşır. Attacker-controlled memory'ye jump etmeye çalıştığınızda sorunlar ortaya çıkar:
 
-1. Hedef içinde yürütülebilir bellek tahsis edin (uzak `mach_vm_allocate` + `mprotect(PROT_EXEC)`).
-2. Payload'unuzu kopyalayın.
-3. *Uzak* süreçte işaretçiyi imzalayın:
+1. Target içinde executable memory allocate edin (remote `mach_vm_allocate` + `mprotect(PROT_EXEC)`).
+2. Payload'ınızı kopyalayın.
+3. *Remote* process içinde pointer'ı sign edin:
 ```c
 uint64_t ptr = (uint64_t)payload;
 ptr = ptrauth_sign_unauthenticated((void*)ptr, ptrauth_key_asia, 0);
 ```
-4. Ele geçirilmiş thread durumunda `pc = ptr` olarak ayarlayın.
+4. Ele geçirilen thread state içinde `pc = ptr` ayarlayın.
 
-Alternatif olarak, mevcut gadget'ları/fonksiyonları zincirleyerek PAC uyumlu kalın (geleneksel ROP).
+Alternatif olarak, mevcut gadget/function'ları zincirleyerek (geleneksel ROP) PAC uyumluluğunu koruyun.
 
-## 7. Tespit & EndpointSecurity ile Güçlendirme
+## 7. EndpointSecurity ile Detection & Hardening
 
-**EndpointSecurity (ES)** çerçevesi, savunucuların thread-enjeksiyon girişimlerini gözlemlemesine veya engellemesine olanak tanıyan çekirdek olaylarını açığa çıkarır:
+**EndpointSecurity (ES)** framework'ü, savunma ekiplerinin thread-injection girişimlerini gözlemlemesine veya engellemesine olanak tanıyan kernel event'lerini sunar:
 
-* `ES_EVENT_TYPE_AUTH_GET_TASK` – bir süreç başka bir görevin portunu talep ettiğinde tetiklenir (örneğin `task_for_pid()`).
-* `ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE` – bir thread *farklı* bir görevde oluşturulduğunda yayımlanır.
-* `ES_EVENT_TYPE_NOTIFY_THREAD_SET_STATE` (macOS 14 Sonoma'da eklendi) – mevcut bir thread'in kayıt manipülasyonunu gösterir.
+* `ES_EVENT_TYPE_AUTH_GET_TASK` – bir process başka bir task'ın portunu istediğinde tetiklenir (ör. `task_for_pid()`).
+* `ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE` – farklı bir task içinde thread oluşturulduğunda gönderilir.<sup>[3]</sup>
+* `ES_EVENT_TYPE_NOTIFY_THREAD_SET_STATE` (macOS 14 Sonoma'da eklendi) – mevcut bir thread'in register'larının manipüle edildiğini belirtir.
 
-Uzak-thread olaylarını yazdıran minimal Swift istemcisi:
+Remote-thread event'lerini yazdıran minimal Swift client:
 ```swift
 import EndpointSecurity
 
@@ -145,29 +145,29 @@ print("[ALERT] remote thread in pid \(evt.target.pid) by pid \(evt.thread.pid)")
 }
 RunLoop.main.run()
 ```
-**osquery** ≥ 5.8 ile Sorgulama:
+**osquery** ≥ 5.8 ile sorgulama:
 ```sql
 SELECT target_pid, source_pid, target_path
 FROM es_process_events
 WHERE event_type = 'REMOTE_THREAD_CREATE';
 ```
-### Hardened-runtime considerations
+### Hardened-runtime hususları
 
-Uygulamanızı `com.apple.security.get-task-allow` yetkisi **olmadan** dağıtmak, kök olmayan saldırganların görev-portunu elde etmesini engeller. Sistem Bütünlüğü Koruması (SIP) hala birçok Apple ikili dosyasına erişimi engelliyor, ancak üçüncü taraf yazılımlar açıkça opt-out yapmalıdır.
+Uygulamanızı **`com.apple.security.get-task-allow` entitlement'ı olmadan** dağıtmak, non-root saldırganların uygulamanın task-port'unu elde etmesini engeller. System Integrity Protection (SIP) hâlâ birçok Apple binary'sine erişimi engeller, ancak üçüncü taraf yazılımların açıkça opt-out yapması gerekir.
 
 ## 8. Recent Public Tooling (2023-2025)
 
 | Tool | Year | Remarks |
 |------|------|---------|
-| [`task_vaccine`](https://github.com/rodionovd/task_vaccine) | 2023 | Ventura/Sonoma üzerinde PAC farkında thread kaçırmayı gösteren kompakt PoC |
-| `remote_thread_es` | 2024 | Birçok EDR satıcısı tarafından `REMOTE_THREAD_CREATE` olaylarını yüzeye çıkarmak için kullanılan EndpointSecurity yardımcı programı |
+| [`task_vaccine`](https://github.com/rodionovd/task_vaccine) | 2023 | Ventura/Sonoma üzerinde PAC-aware thread hijacking'i gösteren kompakt bir PoC |
+| `remote_thread_es` | 2024 | Birkaç EDR vendor'ının `REMOTE_THREAD_CREATE` event'lerini görünür hâle getirmek için kullandığı EndpointSecurity helper'ı |
 
-> Bu projelerin kaynak kodunu okumak, macOS 13/14'te tanıtılan API değişikliklerini anlamak ve Intel ↔ Apple Silicon arasında uyumlu kalmak için faydalıdır.
+> Bu projelerin source code'unu incelemek, macOS 13/14'te sunulan API değişikliklerini anlamak ve Intel ↔ Apple Silicon arasında uyumluluğu korumak için faydalıdır.
 
 ## References
 
-- [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
-- [https://github.com/rodionovd/task_vaccine](https://github.com/rodionovd/task_vaccine)
-- [https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create](https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create)
+- [1] [Bypassing platform binary restrictions with task_threads() - bazad.github.io](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
+- [2] [rodionovd/task_vaccine - GitHub](https://github.com/rodionovd/task_vaccine)
+- [3] [ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE - Apple Developer Documentation](https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create)
 
 {{#include ../../../../banners/hacktricks-training.md}}
