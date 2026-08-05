@@ -1,30 +1,30 @@
-# macOS Крадіжка облікових даних та даних через дозволи TCC
+# Крадіжка облікових даних і даних macOS через дозволи TCC
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Overview
+## Огляд
 
-macOS TCC (Прозорість, Згода та Контроль) захищає доступ до конфіденційних даних користувача. Коли зловмисник **компрометує бінарний файл, який уже має надані дозволи TCC**, він успадковує ці дозволи. Ця сторінка документує потенціал експлуатації кожного дозволу TCC, пов’язаного з викраденням даних.
+macOS TCC (Transparency, Consent, and Control) захищає доступ до конфіденційних даних користувача. Коли attacker **компрометує binary, який уже має дозволи TCC**, він успадковує ці дозволи. На цій сторінці описано потенціал експлуатації кожного дозволу TCC, пов’язаного з крадіжкою даних.
 
 > [!WARNING]
-> Ін'єкція коду в бінарник з дозволами TCC (через DYLD injection, dylib hijacking або task port) **мовчки успадковує всі його дозволи TCC**. Додаткових підказок або перевірок не відбувається, коли той самий процес читає захищені дані.
+> Ін’єкція коду в binary із дозволами TCC (через DYLD injection, dylib hijacking або task port) **непомітно успадковує всі його дозволи TCC**. Додатковий prompt або перевірка не виконуються, коли той самий процес читає захищені дані.
 
 ---
 
-## Keychain Access Groups
+## Групи доступу Keychain
 
-### The Prize
+### Ціль
 
 macOS Keychain зберігає:
-- **Wi-Fi passwords** — всі збережені облікові дані бездротових мереж
-- **Website passwords** — паролі Safari, Chrome (коли використовується Keychain) та інших браузерів
-- **Application passwords** — облікові записи електронної пошти, дані доступу до VPN, токени для розробки
-- **Certificates and private keys** — підпис коду, клієнтський TLS, шифрування S/MIME
-- **Secure notes** — секрети, що зберігає користувач
+- **Паролі Wi-Fi** — усі збережені облікові дані бездротових мереж
+- **Паролі вебсайтів** — паролі Safari, Chrome (під час використання Keychain) та інших браузерів
+- **Паролі застосунків** — облікові записи електронної пошти, облікові дані VPN, токени розробки
+- **Сертифікати та приватні ключі** — підписування коду, клієнтський TLS, шифрування S/MIME
+- **Захищені нотатки** — секрети, збережені користувачем
 
 ### Entitlement: `keychain-access-groups`
 
-Елементи Keychain організовані в **групи доступу**. Право застосунку `keychain-access-groups` перелічує, до яких груп він може отримати доступ:
+Елементи Keychain організовані в **групи доступу**. Entitlement `keychain-access-groups` застосунку містить перелік груп, до яких він може отримати доступ:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -50,7 +50,7 @@ security dump-keychain -d ~/Library/Keychains/login.keychain-db 2>&1 | head -100
 security find-generic-password -s "Wi-Fi" -w 2>&1
 security find-internet-password -s "github.com" 2>&1
 ```
-### Code Injection → Keychain Theft
+### Code Injection → Викрадення Keychain
 ```objc
 // Injected dylib code — runs with the target's keychain groups
 #import <Security/Security.h>
@@ -85,13 +85,13 @@ NSString *password = [[NSString alloc] initWithData:passData encoding:NSUTF8Stri
 
 ### Експлуатація
 
-Бінарний файл із правом доступу до камери в TCC (через `kTCCServiceCamera` або право `com.apple.security.device.camera`) може робити знімки та записувати відео:
+Бінарний файл із дозволом TCC на доступ до камери (через `kTCCServiceCamera` або entitlement `com.apple.security.device.camera`) може робити фотографії та відео:
 ```bash
 # Find camera-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='kTCCServiceCamera' AND auth_value=2;"
 ```
-### Тихе перехоплення
+### Тихе захоплення
 ```objc
 // Injected into a camera-entitled process
 #import <AVFoundation/AVFoundation.h>
@@ -125,21 +125,21 @@ fromConnection:(AVCaptureConnection *)connection {
 @end
 ```
 > [!TIP]
-> Починаючи з **macOS Sonoma**, індикатор камери в рядку меню є постійним і не може бути прихований програмно. На **старіших версіях macOS**, коротка зйомка може не викликати помітного індикатора.
+> Починаючи з **macOS Sonoma**, індикатор камери в рядку меню є постійним і не може бути прихований програмно. У **старіших версіях macOS** короткочасне захоплення може не спричинити помітної індикації.
 
 ---
 
 ## Доступ до мікрофона (kTCCServiceMicrophone)
 
-### Експлуатація
+### Exploitation
 
-Доступ до мікрофона захоплює весь аудіосигнал з вбудованого мікрофона, гарнітури або підключених аудіовхідних пристроїв:
+Доступ до мікрофона захоплює весь звук із вбудованого мікрофона, гарнітури або підключених аудіопристроїв введення:
 ```bash
 # Find mic-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='kTCCServiceMicrophone' AND auth_value=2;"
 ```
-### Атака: Ambient Recording
+### Атака: Фоновий запис
 ```objc
 // Injected into a mic-entitled process
 #import <AVFoundation/AVFoundation.h>
@@ -167,13 +167,13 @@ dispatch_get_main_queue(), ^{
 
 ## Відстеження місцезнаходження (kTCCServiceLocation)
 
-### Експлуатація
+### Exploitation
 ```bash
 # Find location-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service LIKE '%Location%' AND auth_value=2;"
 ```
-### Постійне відстеження
+### Безперервне відстеження
 ```objc
 #import <CoreLocation/CoreLocation.h>
 
@@ -201,15 +201,15 @@ loc.coordinate.latitude, loc.coordinate.longitude, [NSDate date]];
 ```
 ---
 
-## Контакти / Календар / Фото
+## Контакти / Календар / Фотографії
 
-### Експфільтрація персональних даних
+### Витік персональних даних
 
-| Служба TCC | Фреймворк | Дані |
+| Служба TCC | Framework | Дані |
 |---|---|---|
 | `kTCCServiceAddressBook` | `Contacts.framework` | Імена, електронні адреси, телефони, адреси |
-| `kTCCServiceCalendar` | `EventKit` | Зустрічі, учасники, місця |
-| `kTCCServicePhotos` | `Photos.framework` | Фотографії, скріншоти, метадані місцеположення |
+| `kTCCServiceCalendar` | `EventKit` | Зустрічі, учасники, місця проведення |
+| `kTCCServicePhotos` | `Photos.framework` | Фотографії, знімки екрана, метадані місцезнаходження |
 ```bash
 # Find authorized binaries for each service
 for svc in kTCCServiceAddressBook kTCCServiceCalendar kTCCServicePhotos; do
@@ -218,7 +218,7 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='$svc' AND auth_value=2;"
 done
 ```
-### Збір контактів
+### Збирання контактів
 ```objc
 #import <Contacts/Contacts.h>
 
@@ -238,13 +238,13 @@ usingBlock:^(CNContact *contact, BOOL *stop) {
 
 ## Доступ до облікового запису iCloud
 
-### Права доступу: `com.apple.private.icloud-account-access`
+### Entitlement: `com.apple.private.icloud-account-access`
 
-Це право дозволяє взаємодіяти з XPC-сервісом `com.apple.iCloudHelper`, надаючи доступ до:
-- **iCloud tokens** — токени автентифікації для Apple ID користувача
-- **iCloud Drive** — синхронізовані документи з усіх пристроїв
-- **iCloud Keychain** — паролі, синхронізовані між усіма пристроями Apple
-- **Find My** — місцезнаходження всіх пристроїв користувача Apple
+Цей entitlement дозволяє взаємодіяти із сервісом `com.apple.iCloudHelper` XPC, надаючи доступ до:
+- **Токенів iCloud** — токенів автентифікації для Apple ID користувача
+- **iCloud Drive** — синхронізованих документів з усіх пристроїв
+- **iCloud Keychain** — паролів, синхронізованих на всіх пристроях Apple
+- **Find My** — місцезнаходження всіх пристроїв Apple користувача<sup>[4]</sup>
 ```bash
 # Find iCloud-entitled binaries
 sqlite3 /tmp/executables.db "
@@ -253,20 +253,20 @@ WHERE iCloudAccs = 1
 ORDER BY privileged DESC;"
 ```
 > [!CAUTION]
-> Компрометація iCloud-entitled binary розширює атаку з **одного пристрою на всю екосистему Apple**: інші Macs, iPhones, iPads, Apple Watch. Синхронізація iCloud Keychain означає, що паролі з усіх пристроїв стають доступними.
+> Компрометація binary з iCloud entitlement розширює атаку **з одного пристрою на всю екосистему Apple**: інші Mac, iPhone, iPad, Apple Watch. Синхронізація iCloud Keychain означає, що паролі з усіх пристроїв доступні.
 
 ---
 
-## Full Disk Access (kTCCServiceSystemPolicyAllFiles)
+## Повний доступ до диска (kTCCServiceSystemPolicyAllFiles)
 
 ### Найпотужніший дозвіл TCC
 
-Full Disk Access надає можливість читати **кожен файл у системі**, включно з:
-- Дані інших додатків (Messages, Mail, історія Safari)
-- Бази даних TCC (розкривають усі інші дозволи)
+Повний доступ до диска надає можливість читати **кожен файл у системі**, зокрема:
+- Дані інших застосунків (Messages, Mail, історія Safari)
+- Бази даних TCC (які розкривають усі інші дозволи)
 - SSH-ключі та конфігурацію
-- cookie браузера та session tokens
-- Бази даних та кеші додатків
+- Cookies браузерів і токени сеансів
+- Бази даних і кеші застосунків
 ```bash
 # Find FDA-granted binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -280,25 +280,25 @@ cat ~/.ssh/id_rsa                           # SSH private key
 ```
 ---
 
-## Матриця пріоритетів експлуатації
+## Матриця пріоритетів Exploitation
 
-Під час оцінки injectable бінарів, яким TCC надав дозволи, визначайте пріоритети за цінністю даних:
+Під час оцінювання injectable бінарних файлів із наданими TCC-дозволами визначайте пріоритет за цінністю даних:
 
-| Пріоритет | TCC Permission | Чому |
+| Пріоритет | Дозвіл TCC | Причина |
 |---|---|---|
 | **Критичний** | Full Disk Access | Доступ до всього |
-| **Критичний** | TCC Manager | Може надати будь-які дозволи |
+| **Критичний** | TCC Manager | Може надати будь-який дозвіл |
 | **Високий** | Keychain Access Groups | Усі збережені паролі |
 | **Високий** | iCloud Account Access | Компрометація кількох пристроїв |
-| **Високий** | Input Monitoring (ListenEvent) | Запис натискань клавіш |
-| **Високий** | Accessibility | Керування GUI, можливість самонадання дозволів |
-| **Середній** | Screen Capture | Збір візуальної інформації |
+| **Високий** | Input Monitoring (ListenEvent) | Keylogging |
+| **Високий** | Accessibility | Керування GUI, self-granting |
+| **Середній** | Screen Capture | Захоплення візуальних даних |
 | **Середній** | Camera + Microphone | Спостереження |
-| **Середній** | Contacts + Calendar | Дані для соціальної інженерії |
-| **Низький** | Location | Фізичне відстеження |
+| **Середній** | Contacts + Calendar | Дані для social engineering |
+| **Низький** | Location | Відстеження фізичного розташування |
 | **Низький** | Photos | Особисті дані |
 
-## Скрипт перерахування
+## Enumeration Script
 ```bash
 #!/bin/bash
 echo "=== TCC Credential Theft Surface Audit ==="
@@ -324,9 +324,9 @@ SELECT path FROM executables WHERE iCloudAccs = 1;" 2>/dev/null
 ```
 ## Посилання
 
-* [Apple Developer — Keychain Services](https://developer.apple.com/documentation/security/keychain_services)
-* [Apple Developer — TCC](https://developer.apple.com/documentation/security/protecting-the-user-s-privacy)
-* [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
-* [OBTS v5.0 — iCloud Token Extraction (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+- [1] [Apple Developer — Keychain Services](https://developer.apple.com/documentation/security/keychain_services)
+- [2] [Apple Developer — TCC](https://developer.apple.com/documentation/security/protecting-the-user-s-privacy)
+- [3] [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
+- [4] [OBTS v5.0 — «What Happens on your Mac, Stays on Apple's iCloud?!» (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 {{#include ../../../../banners/hacktricks-training.md}}

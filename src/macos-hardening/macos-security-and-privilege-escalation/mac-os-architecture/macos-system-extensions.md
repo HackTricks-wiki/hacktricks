@@ -1,81 +1,82 @@
-# macOS System Extensions
+# Системні розширення macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## System Extensions / Endpoint Security Framework
+## Системні розширення / Endpoint Security Framework
 
-На відміну від Kernel Extensions, **System Extensions працюють у просторі користувача** замість простору ядра, що зменшує ризик аварійної зупинки системи через несправність розширення.
+На відміну від Kernel Extensions, **System Extensions працюють у user space**, а не в kernel space, що зменшує ризик аварійного завершення роботи системи через несправність розширення.
 
 <figure><img src="../../../images/image (606).png" alt="https://knight.sc/images/system-extension-internals-1.png"><figcaption></figcaption></figure>
 
-Існує три типи системних розширень: **DriverKit** Extensions, **Network** Extensions та **Endpoint Security** Extensions.
+Існує три типи системних розширень: розширення **DriverKit**, **Network** і **Endpoint Security**.
 
-### **DriverKit Extensions**
+### **Розширення DriverKit**
 
-DriverKit є заміною для kernel extensions, які **надають апаратну підтримку**. Він дозволяє драйверам пристроїв (таким як USB, Serial, NIC та HID драйвери) працювати в просторі користувача, а не в просторі ядра. Фреймворк DriverKit включає **версії певних класів I/O Kit для простору користувача**, а ядро пересилає звичайні події I/O Kit у простір користувача, пропонуючи безпечніше середовище для роботи цих драйверів.
+DriverKit є заміною kernel extensions, які **забезпечують підтримку hardware**. Він дає змогу драйверам пристроїв (наприклад, USB, Serial, NIC і HID-драйверам) працювати в user space, а не в kernel space. Framework DriverKit містить **версії певних класів I/O Kit для user space**, а kernel пересилає звичайні події I/O Kit у user space, забезпечуючи безпечніше середовище для роботи цих драйверів.<sup>[2]</sup>
 
 ### **Network Extensions**
 
-Network Extensions надають можливість налаштування мережевої поведінки. Існує кілька типів Network Extensions:
+Network Extensions дають змогу налаштовувати мережеву поведінку. Існує кілька типів Network Extensions:
 
-- **App Proxy**: Використовується для створення VPN-клієнта, який реалізує орієнтований на потоки, кастомний VPN-протокол. Це означає, що він обробляє мережевий трафік на основі з'єднань (або потоків), а не окремих пакетів.
-- **Packet Tunnel**: Використовується для створення VPN-клієнта, який реалізує орієнтований на пакети, кастомний VPN-протокол. Це означає, що він обробляє мережевий трафік на основі окремих пакетів.
-- **Filter Data**: Використовується для фільтрації мережевих "потоків". Він може моніторити або змінювати мережеві дані на рівні потоку.
-- **Filter Packet**: Використовується для фільтрації окремих мережевих пакетів. Він може моніторити або змінювати мережеві дані на рівні пакета.
-- **DNS Proxy**: Використовується для створення кастомного DNS-провайдера. Може використовуватися для моніторингу або зміни DNS-запитів і відповідей.
+- **App Proxy**: використовується для створення VPN-клієнта, який реалізує flow-oriented custom VPN protocol. Це означає, що він обробляє мережевий трафік на основі з'єднань (або flows), а не окремих пакетів.
+- **Packet Tunnel**: використовується для створення VPN-клієнта, який реалізує packet-oriented custom VPN protocol. Це означає, що він обробляє мережевий трафік на основі окремих пакетів.
+- **Filter Data**: використовується для фільтрації мережевих "flows". Він може відстежувати або змінювати мережеві дані на рівні flow.
+- **Filter Packet**: використовується для фільтрації окремих мережевих пакетів. Він може відстежувати або змінювати мережеві дані на рівні пакетів.
+- **DNS Proxy**: використовується для створення custom DNS provider. Його можна використовувати для відстеження або зміни DNS-запитів і відповідей.<sup>[2]</sup>
 
 ## Endpoint Security Framework
 
-Endpoint Security - це фреймворк, наданий Apple в macOS, який забезпечує набір API для системної безпеки. Він призначений для використання **постачальниками безпеки та розробниками для створення продуктів, які можуть моніторити та контролювати системну активність** для виявлення та захисту від шкідливої активності.
+Endpoint Security — це framework, наданий Apple у macOS, який містить набір API для безпеки системи. Він призначений для використання **security vendors і developers з метою створення продуктів, здатних відстежувати та контролювати активність системи**, щоб виявляти malicious activity і захищати від неї.
 
-Цей фреймворк надає **збірку API для моніторингу та контролю системної активності**, такої як виконання процесів, події файлової системи, мережеві та ядрові події.
+Цей framework надає **набір API для відстеження та контролю активності системи**, зокрема виконання процесів, подій файлової системи, мережевих і kernel-подій.
 
-Ядро цього фреймворку реалізовано в ядрі, як Kernel Extension (KEXT), розташоване за адресою **`/System/Library/Extensions/EndpointSecurity.kext`**. Цей KEXT складається з кількох ключових компонентів:
+Основна частина цього framework реалізована в kernel як Kernel Extension (KEXT), розташована за шляхом **`/System/Library/Extensions/EndpointSecurity.kext`**.<sup>[2]</sup> Цей KEXT складається з кількох ключових компонентів:
 
-- **EndpointSecurityDriver**: Діє як "точка входу" для розширення ядра. Це основна точка взаємодії між ОС та фреймворком Endpoint Security.
-- **EndpointSecurityEventManager**: Цей компонент відповідає за реалізацію ядрових хуків. Ядрові хуки дозволяють фреймворку моніторити системні події, перехоплюючи системні виклики.
-- **EndpointSecurityClientManager**: Цей компонент управляє зв'язком з клієнтами простору користувача, відстежуючи, які клієнти підключені та потребують отримання сповіщень про події.
-- **EndpointSecurityMessageManager**: Цей компонент надсилає повідомлення та сповіщення про події клієнтам простору користувача.
+- **EndpointSecurityDriver**: виконує роль "entry point" для kernel extension. Це основна точка взаємодії між OS і Endpoint Security framework.
+- **EndpointSecurityEventManager**: цей компонент відповідає за реалізацію kernel hooks. Kernel hooks дають framework змогу відстежувати системні події шляхом перехоплення system calls.
+- **EndpointSecurityClientManager**: керує комунікацією з клієнтами в user space, відстежуючи, які клієнти підключені та мають отримувати сповіщення про події.
+- **EndpointSecurityMessageManager**: надсилає повідомлення та сповіщення про події клієнтам у user space.
 
-Події, які фреймворк Endpoint Security може моніторити, класифікуються на:
+Події, які може відстежувати Endpoint Security framework, поділяються на такі категорії:
 
-- Події файлів
-- Події процесів
-- Події сокетів
-- Ядрові події (такі як завантаження/вивантаження розширення ядра або відкриття пристрою I/O Kit)
+- File events
+- Process events
+- Socket events
+- Kernel events (наприклад, завантаження/вивантаження kernel extension або відкриття пристрою I/O Kit)
 
-### Архітектура фреймворку Endpoint Security
+### Архітектура Endpoint Security Framework
 
 <figure><img src="../../../images/image (1068).png" alt="https://www.youtube.com/watch?v=jaVkpM1UqOs"><figcaption></figcaption></figure>
 
-**Зв'язок у просторі користувача** з фреймворком Endpoint Security відбувається через клас IOUserClient. Використовуються два різні підкласи, залежно від типу виклику:
+**Комунікація з user space** через Endpoint Security framework відбувається за допомогою класу IOUserClient. Залежно від типу caller використовуються два різні subclass-и:
 
-- **EndpointSecurityDriverClient**: Це вимагає права `com.apple.private.endpoint-security.manager`, яке має лише системний процес `endpointsecurityd`.
-- **EndpointSecurityExternalClient**: Це вимагає права `com.apple.developer.endpoint-security.client`. Це зазвичай використовуватиметься стороннім програмним забезпеченням безпеки, яке потребує взаємодії з фреймворком Endpoint Security.
+- **EndpointSecurityDriverClient**: вимагає entitlement `com.apple.private.endpoint-security.manager`, який має лише системний процес `endpointsecurityd`.
+- **EndpointSecurityExternalClient**: вимагає entitlement `com.apple.developer.endpoint-security.client`. Зазвичай його використовує third-party security software, якому потрібно взаємодіяти з Endpoint Security framework.<sup>[1]</sup>
 
-Розширення Endpoint Security:**`libEndpointSecurity.dylib`** є C-бібліотекою, яку системні розширення використовують для зв'язку з ядром. Ця бібліотека використовує I/O Kit (`IOKit`) для зв'язку з KEXT Endpoint Security.
+Endpoint Security Extensions:**`libEndpointSecurity.dylib`** — це C library, яку системні розширення використовують для комунікації з kernel. Ця library використовує I/O Kit (`IOKit`) для взаємодії з Endpoint Security KEXT.<sup>[2]</sup>
 
-**`endpointsecurityd`** є ключовим системним демоном, який бере участь в управлінні та запуску системних розширень безпеки кінцевих точок, особливо під час раннього процесу завантаження. **Тільки системні розширення**, позначені **`NSEndpointSecurityEarlyBoot`** у їхньому файлі `Info.plist`, отримують це раннє завантаження.
+**`endpointsecurityd`** — ключовий системний daemon, залучений до керування та запуску endpoint security system extensions, особливо під час early boot process. **Лише system extensions**, позначені як **`NSEndpointSecurityEarlyBoot`** у файлі `Info.plist`, отримують таку обробку під час early boot.<sup>[2]</sup>
 
-Ще один системний демон, **`sysextd`**, **перевіряє системні розширення** та переміщує їх у відповідні системні місця. Потім він запитує відповідний демон, щоб завантажити розширення. **`SystemExtensions.framework`** відповідає за активацію та деактивацію системних розширень.
+Інший системний daemon, **`sysextd`**, **перевіряє system extensions** і переміщує їх у відповідні системні locations. Після цього він просить відповідний daemon завантажити extension. За активацію та деактивацію system extensions відповідає **`SystemExtensions.framework`**.<sup>[2]</sup>
 
 ## Обхід ESF
 
-ESF використовується інструментами безпеки, які намагатимуться виявити червону команду, тому будь-яка інформація про те, як це можна уникнути, звучить цікаво.
+ESF використовується security tools, які намагатимуться виявити red teamer, тому будь-яка інформація про те, як цього можна уникнути, є цікавою.
 
 ### CVE-2021-30965
 
-Справа в тому, що безпекова програма повинна мати **дозволи на повний доступ до диска**. Тож, якщо зловмисник зможе це видалити, він зможе запобігти запуску програмного забезпечення:
+Проблема полягає в тому, що security application має отримати **Full Disk Access permissions**. Тому якщо attacker зможе їх видалити, він зможе перешкодити роботі software:<sup>[3]</sup>
 ```bash
 tccutil reset All
 ```
-Для **додаткової інформації** про цей обхід та пов'язані з ним, перегляньте доповідь [#OBTS v5.0: "Ахіллесова п'ята EndpointSecurity" - Фіцл Чаба](https://www.youtube.com/watch?v=lQO7tvNCoTI)
+Для **більш детальної інформації** про цей bypass та пов’язані з ним bypass перевірте доповідь [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
 
-В кінці це було виправлено, надавши новий дозвіл **`kTCCServiceEndpointSecurityClient`** безпековому додатку, керованому **`tccd`**, щоб `tccutil` не очищав його дозволи, що заважає йому працювати.
+Зрештою це виправили, надавши новий дозвіл **`kTCCServiceEndpointSecurityClient`** security app, яким керує **`tccd`**, щоб `tccutil` не очищав його дозволи, перешкоджаючи його запуску.<sup>[3]</sup>
 
 ## Посилання
 
-- [**OBTS v3.0: "Безпека та небезпека Endpoint" - Скотт Найт**](https://www.youtube.com/watch?v=jaVkpM1UqOs)
-- [**https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html**](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)
+- [1] [OBTS v3.0: "Endpoint Security & Insecurity" - Scott Knight](https://www.youtube.com/watch?v=jaVkpM1UqOs)
+- [2] [Knight.sc - System Extension Internals](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)
+- [3] [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
 
 {{#include ../../../banners/hacktricks-training.md}}

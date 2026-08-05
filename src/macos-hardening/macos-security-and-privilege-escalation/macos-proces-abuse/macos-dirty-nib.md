@@ -2,34 +2,34 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Dirty NIB refers to abusing Interface Builder files (.xib/.nib) inside a signed macOS app bundle to execute attacker-controlled logic inside the target process, thereby inheriting its entitlements and TCC permissions. This technique was originally documented by xpn (MDSec) and later generalized and significantly expanded by Sector7, who also covered Apple’s mitigations in macOS 13 Ventura and macOS 14 Sonoma. For background and deep dives, see the references at the end.
+Dirty NIB означає зловживання файлами Interface Builder (.xib/.nib) усередині підписаного bundle macOS app для виконання логіки, контрольованої attacker, усередині target process, успадковуючи таким чином його entitlements і TCC permissions. Цю техніку спочатку задокументував xpn (MDSec), а пізніше узагальнив і значно розширив Sector7, який також описав mitigation від Apple у macOS 13 Ventura та macOS 14 Sonoma.<sup>[1][2]</sup> Довідкову інформацію та детальний розбір див. у references наприкінці.
 
 > TL;DR
-> • Before macOS 13 Ventura: replacing a bundle’s MainMenu.nib (or another nib loaded at startup) could reliably achieve process injection and often privilege escalation.
-> • Since macOS 13 (Ventura) and improved in macOS 14 (Sonoma): first‑launch deep verification, bundle protection, Launch Constraints, and the new TCC “App Management” permission largely prevent post‑launch nib tampering by unrelated apps. Attacks may still be feasible in niche cases (e.g., same‑developer tooling modifying own apps, or terminals granted App Management/Full Disk Access by the user).
+> • До macOS 13 Ventura: заміна MainMenu.nib у bundle (або іншого nib, що завантажується під час запуску) могла надійно забезпечити process injection і часто privilege escalation.
+> • Починаючи з macOS 13 (Ventura), а також після покращень у macOS 14 (Sonoma): deep verification під час першого запуску, bundle protection, Launch Constraints і новий TCC permission “App Management” значною мірою запобігають post-launch nib tampering з боку unrelated apps. Атаки все ще можуть бути можливими в окремих випадках (наприклад, tooling того самого developer, що змінює власні apps, або terminals, яким user надав App Management/Full Disk Access).
 
 
-## Що таке NIB/XIB файли
+## What are NIB/XIB files
 
-Nib (short for NeXT Interface Builder) файли — серіалізовані графи UI-об'єктів, що використовуються AppKit додатками. Сучасний Xcode зберігає редаговані XML .xib файли, які під час збірки компілюються в .nib. Типовий додаток завантажує головний UI через `NSApplicationMain()`, яка читає ключ `NSMainNibFile` з Info.plist додатку і створює граф об'єктів під час виконання.
+Файли Nib (скорочення від NeXT Interface Builder) — це серіалізовані графи UI-об’єктів, які використовуються AppKit apps. Сучасний Xcode зберігає редаговані XML .xib files, які під час build компілюються у .nib. Типовий app завантажує свій основний UI через `NSApplicationMain()`, який читає key `NSMainNibFile` з app’s Info.plist і під час runtime інстанціює граф об’єктів.
 
-Ключові моменти, що дозволяють атаку:
-- Завантаження NIB створює екземпляри довільних Objective‑C класів, не вимагаючи їхньої відповідності NSSecureCoding (nib loader Apple відкатується до `init`/`initWithFrame:`, якщо `initWithCoder:` недоступний).
-- Cocoa Bindings можна зловживати для виклику методів під час інстанціювання nib, включно з ланцюговими викликами, що не вимагають взаємодії користувача.
+Ключові моменти, які уможливлюють атаку:
+- NIB loading інстанціює довільні Objective-C classes без необхідності відповідати вимогам NSSecureCoding (nib loader від Apple використовує `init`/`initWithFrame:`, якщо `initWithCoder:` недоступний).
+- Cocoa Bindings можна використати для виклику methods під час інстанціювання nib, зокрема chained calls, які не потребують user interaction.
 
 
-## Процес ін'єкції Dirty NIB (з погляду нападника)
+## Dirty NIB injection process (attacker view)
 
-Класичний хід до Ventura:
-1) Створити шкідливий .xib
-- Додати об'єкт `NSAppleScript` (або інші “gadget” класи такі як `NSTask`).
-- Додати `NSTextField`, чий title містить payload (наприклад, AppleScript або аргументи команди).
-- Додати один або кілька `NSMenuItem` об'єктів, підключених через bindings для виклику методів на цільовому об'єкті.
+Класичний flow до Ventura:
+1) Створіть malicious .xib
+- Додайте об’єкт `NSAppleScript` (або інші “gadget” classes, такі як `NSTask`).
+- Додайте `NSTextField`, title якого містить payload (наприклад, AppleScript або command arguments).
+- Додайте один або кілька об’єктів `NSMenuItem`, підключених через bindings для виклику methods у target object.
 
-2) Автозапуск без кліків користувача
-- Використати bindings для встановлення target/selector пункту меню і потім викликати приватний метод `_corePerformAction`, щоб дія виконалася автоматично при завантаженні nib. Це усуває потребу в кліку користувача.
+2) Auto-trigger без user clicks
+- Використайте bindings, щоб встановити target/selector menu item, а потім викликати private method `_corePerformAction`, щоб action автоматично виконався під час завантаження nib. Це усуває потребу в тому, щоб user натискав кнопку.
 
-Мінімальний приклад ланцюга автозапуску всередині .xib (скорочено для ясності):
+Мінімальний приклад auto-trigger chain усередині .xib (скорочено для ясності):
 ```xml
 <objects>
 <customObject id="A1" customClass="NSAppleScript"/>
@@ -54,87 +54,87 @@ Nib (short for NeXT Interface Builder) файли — серіалізовані
 <menuItem id="T2"><connections><binding keyPath="_corePerformAction" destination="C2"/></connections></menuItem>
 </objects>
 ```
-Це дозволяє виконувати довільний AppleScript у цільовому процесі під час завантаження nib. Більш складні ланцюжки можуть:
-- Ініціювати довільні класи AppKit (наприклад, `NSTask`) і викликати методи без аргументів, такі як `-launch`.
-- Викликати довільні селектори з об'єктними аргументами за допомогою трюку прив'язки, описаного вище.
-- Завантажити AppleScriptObjC.framework для з'єднання з Objective‑C і навіть виклику вибраних C APIs.
-- На старіших системах, які ще містять Python.framework, перейти до Python і використовувати `ctypes` для виклику довільних C-функцій (дослідження Sector7).
+Це забезпечує довільне виконання AppleScript у цільовому процесі під час завантаження nib.<sup>[1]</sup> Розширені ланцюжки можуть:
+- Створювати довільні класи AppKit (наприклад, `NSTask`) і викликати методи без аргументів, як-от `-launch`.
+- Викликати довільні selectors з object arguments за допомогою описаного вище binding trick.
+- Завантажувати AppleScriptObjC.framework для bridge до Objective‑C і навіть викликати вибрані C APIs.
+- У старіших системах, де все ще міститься Python.framework, створювати bridge до Python, а потім використовувати `ctypes` для виклику довільних C functions (дослідження Sector7).<sup>[2]</sup>
 
-3) Replace the app’s nib
-- Скопіюйте target.app у місце з правами на запис, замініть, наприклад, `Contents/Resources/MainMenu.nib` на шкідливий nib і запустіть target.app. Pre‑Ventura, після одноразової перевірки Gatekeeper, подальші запуски виконували лише поверхневі перевірки підпису, тому не виконувані ресурси (наприклад, .nib) не перевірялися повторно.
+3) Замініть nib застосунку
+- Скопіюйте target.app у доступне для запису розташування, замініть, наприклад, `Contents/Resources/MainMenu.nib` на malicious nib і запустіть target.app. До Ventura включно, після одноразової перевірки Gatekeeper під час наступних запусків виконувалися лише поверхневі перевірки підпису, тому ресурси, що не є executable (наприклад, `.nib`), повторно не перевірялися.
 
 Приклад AppleScript payload для видимого тесту:
 ```applescript
 set theDialogText to "PWND"
 display dialog theDialogText
 ```
-## Modern macOS protections (Ventura/Monterey/Sonoma/Sequoia)
+## Сучасні захисти macOS (Ventura/Monterey/Sonoma/Sequoia)
 
-Apple introduced several systemic mitigations that dramatically reduce the viability of Dirty NIB in modern macOS:
-- First‑launch deep verification and bundle protection (macOS 13 Ventura)
-- При першому запуску будь‑якого додатка (quarantined або ні) виконується глибока перевірка підпису, яка охоплює всі bundle ресурси. Після цього bundle стає захищеним: лише додатки від того ж розробника (або явно дозволені самим додатком) можуть змінювати його вміст. Іншим додаткам потрібен новий TCC «App Management» дозвіл, щоб записувати у bundle іншого додатка.
+Apple запровадила кілька системних засобів захисту, які суттєво знижують життєздатність Dirty NIB у сучасних версіях macOS:<sup>[2]</sup>
+- Глибока перевірка під час першого запуску та захист bundle (macOS 13 Ventura)
+- Під час першого запуску будь-якої програми (із quarantine або без нього) глибока перевірка підпису охоплює всі ресурси bundle. Після цього bundle стає захищеним: лише програми від того самого розробника (або явно дозволені програмою) можуть змінювати його вміст. Для запису в bundle іншої програми іншим програмам потрібен новий дозвіл TCC “App Management”.
 - Launch Constraints (macOS 13 Ventura)
-- System/Apple‑bundled apps не можна скопіювати кудись ще й запустити; це вбиває підхід «copy to /tmp, patch, run» для системних додатків.
-- Improvements in macOS 14 Sonoma
-- Apple посилила App Management і виправила відомі обхідні шляхи (наприклад, CVE‑2023‑40450), помічені Sector7. Python.framework було видалено раніше (macOS 12.3), що зламало деякі privilege‑escalation ланцюги.
-- Gatekeeper/Quarantine changes
-- Для ширшого обговорення Gatekeeper, provenance та assessment змін, які вплинули на цю техніку, див. сторінку, вказану нижче.
+- System/Apple-bundled apps не можна скопіювати в інше місце та запустити; це унеможливлює підхід “скопіювати в /tmp, пропатчити, запустити” для OS apps.
+- Покращення в macOS 14 Sonoma
+- Apple посилила App Management і виправила відомі bypass (наприклад, CVE‑2023‑40450), про які повідомляв Sector7. Python.framework було видалено раніше (macOS 12.3), що зламало деякі ланцюжки privilege escalation.
+- Зміни Gatekeeper/Quarantine
+- Ширше обговорення змін Gatekeeper, provenance та assessment, які вплинули на цю техніку, дивіться на сторінці, наведеної нижче.
 
-> Practical implication
-> • На Ventura+ ви загалом не можете змінити .nib стороннього додатка, якщо ваш процес не має App Management або не підписаний тим самим Team ID, що й ціль (наприклад, developer tooling).
-> • Надання App Management або Full Disk Access shell'ам/terminals фактично знову відкриває цю поверхню атаки для всього, що може виконувати код у контексті цього термінала.
-
-
-### Addressing Launch Constraints
-
-Launch Constraints блокують запуск багатьох Apple додатків із нестандартних локацій починаючи з Ventura. Якщо ви покладалися на робочі процеси до Ventura, наприклад копіювання Apple app у тимчасовий каталог, модифікацію `MainMenu.nib` і запуск, очікуйте, що це не спрацює на версіях >= 13.0.
+> Практичний наслідок
+> • У Ventura+ зазвичай неможливо змінити .nib сторонньої програми, якщо ваш процес не має App Management або не підписаний тим самим Team ID, що й цільова програма (наприклад, developer tooling).
+> • Надання App Management або Full Disk Access shell/терміналам фактично знову відкриває цю поверхню атаки для всього, що може виконувати code у контексті цього термінала.
 
 
-## Enumerating targets and nibs (useful for research / legacy systems)
+### Усунення обмежень Launch Constraints
 
-- Locate apps whose UI is nib‑driven:
+Launch Constraints блокують запуск багатьох Apple apps із нестандартних місць, починаючи з Ventura. Якщо ви покладалися на workflow до Ventura, як-от копіювання Apple app у тимчасову директорію, змінення `MainMenu.nib` і її запуск, очікуйте, що це не працюватиме в >= 13.0.
+
+
+## Перелік цілей і nib (корисно для досліджень / legacy systems)
+
+- Знайти apps, інтерфейс яких працює на nib:
 ```bash
 find /Applications -maxdepth 2 -name Info.plist -exec sh -c \
 'for p; do if /usr/libexec/PlistBuddy -c "Print :NSMainNibFile" "$p" >/dev/null 2>&1; \
 then echo "[+] $(dirname "$p") uses NSMainNibFile=$( /usr/libexec/PlistBuddy -c "Print :NSMainNibFile" "$p" )"; fi; done' sh {} +
 ```
-- Знайти кандидатні nib-ресурси всередині bundle:
+- Знайдіть потенційні ресурси nib усередині bundle:
 ```bash
 find target.app -type f \( -name "*.nib" -o -name "*.xib" \) -print
 ```
-- Ретельно перевіряйте підписи коду (перевірка не пройде, якщо ви внесли зміни в ресурси і не підписали їх наново):
+- Ретельно перевіряйте підписи коду (перевірка завершиться помилкою, якщо ви змінили ресурси й не перепідписали їх):
 ```bash
 codesign --verify --deep --strict --verbose=4 target.app
 ```
-> Примітка: На сучасних macOS вас також заблокує bundle protection/TCC, якщо ви спробуєте записати в bundle іншого додатка без належної авторизації.
+> Примітка: У сучасних версіях macOS під час спроби запису до bundle іншого застосунку без належної авторизації вас також заблокує захист bundle/TCC.
 
 
-## Виявлення та поради DFIR
+## Поради щодо виявлення та DFIR
 
-- Моніторинг цілісності файлів для bundle resources
-- Слідкуйте за змінами mtime/ctime у `Contents/Resources/*.nib` та інших не‑виконуваних ресурсах встановлених додатків.
-- Уніфіковані логи та поведінка процесів
-- Моніторьте несподіване виконання AppleScript всередині GUI‑додатків та процеси, які завантажують AppleScriptObjC або Python.framework. Приклад:
+- Моніторинг цілісності файлів у ресурсах bundle
+- Слідкуйте за змінами mtime/ctime для `Contents/Resources/*.nib` та інших невиконуваних ресурсів у встановлених застосунках.
+- Уніфіковані журнали та поведінка процесів
+- Відстежуйте неочікуване виконання AppleScript усередині GUI-застосунків, а також процеси, що завантажують AppleScriptObjC або Python.framework. Приклад:
 ```bash
 log stream --info --predicate 'processImagePath CONTAINS[cd] ".app/Contents/MacOS/" AND (eventMessage CONTAINS[cd] "AppleScript" OR eventMessage CONTAINS[cd] "loadAppleScriptObjectiveCScripts")'
 ```
 - Проактивні перевірки
-- Періодично запускайте `codesign --verify --deep` для критичних додатків, щоб переконатися, що ресурси залишаються цілими.
+- Періодично запускайте `codesign --verify --deep` для критично важливих застосунків, щоб переконатися, що ресурси залишаються незмінними.
 - Контекст привілеїв
-- Аудитуйте, хто/що має TCC “App Management” або Full Disk Access (особливо термінали та агенти управління). Видалення таких прав з універсальних shell‑ів перешкоджає тривіальному повторному увімкненню Dirty NIB‑style tampering.
+- Перевіряйте, хто або що має TCC-дозвіл “App Management” або Full Disk Access (особливо термінали та агенти керування). Вилучення цих дозволів із оболонок загального призначення запобігає тривіальному повторному ввімкненню втручання на кшталт Dirty NIB.
 
 
-## Зміцнення захисту (розробникам і захисникам)
+## Посилення захисту (для розробників і захисників)
 
-- Віддавайте перевагу програмній UI або обмежуйте те, що інстанціюється з nibs. Уникайте включення потужних класів (наприклад, `NSTask`) у nib‑графи та уникайте bindings, які опосередковано викликають селектори на довільних об’єктах.
-- Використовуйте hardened runtime з Library Validation (вже стандарт для сучасних додатків). Хоча це саме по собі не зупиняє nib injection, воно блокує просте завантаження рідного коду і змушує нападників використовувати лише скриптові payload‑и.
-- Не запитуйте і не покладайтеся на широкі дозволи App Management у загального призначення інструментах. Якщо MDM вимагає App Management, сегрегуйте цей контекст від користувацьких shell‑ів.
-- Регулярно перевіряйте цілісність вашого app bundle і робіть механізми оновлення таким чином, щоб вони самі відновлювали ресурси bundle.
+- Надавайте перевагу програмному UI або обмежуйте те, що створюється з nib. Не додавайте потужні класи (наприклад, `NSTask`) до графів nib і уникайте bindings, які опосередковано викликають selectors довільних об’єктів.
+- Використовуйте hardened runtime з Library Validation (це вже стандарт для сучасних застосунків). Хоча це саме по собі не зупиняє nib injection, воно блокує просте завантаження native code і змушує атакувальників використовувати payloads лише на основі scripting.
+- Не запитуйте та не використовуйте широкі дозволи App Management у інструментах загального призначення. Якщо MDM потребує App Management, відокремте цей контекст від shells, керованих користувачем.
+- Регулярно перевіряйте цілісність bundle вашого застосунку та забезпечте self-healing ресурсів bundle у механізмах оновлення.
 
 
-## Пов'язані матеріали в HackTricks
+## Пов’язані матеріали в HackTricks
 
-Дізнайтеся більше про зміни Gatekeeper, quarantine та provenance, що впливають на цю техніку:
+Дізнайтеся більше про Gatekeeper, quarantine та зміни provenance, які впливають на цю техніку:
 
 {{#ref}}
 ../macos-security-protections/macos-gatekeeper.md
@@ -143,7 +143,7 @@ log stream --info --predicate 'processImagePath CONTAINS[cd] ".app/Contents/MacO
 
 ## Посилання
 
-- xpn – DirtyNIB (оригінальний опис з прикладом для Pages): https://blog.xpnsec.com/dirtynib/
-- Sector7 – Bringing process injection into view(s): exploiting all macOS apps using nib files (5 квітня 2024): https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/
+- [1] [xpn – DirtyNIB (оригінальний write-up із прикладом для Pages)](https://blog.xpnsec.com/dirtynib/)
+- [2] [Sector7 – Bringing process injection into view(s): exploiting all macOS apps using nib files (5 квітня 2024 року)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
 
 {{#include ../../../banners/hacktricks-training.md}}

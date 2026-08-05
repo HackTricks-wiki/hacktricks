@@ -1,8 +1,8 @@
-# macOS Корисні команди
+# Корисні команди macOS
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Автоматичні інструменти енумерації для macOS
+### Інструменти автоматичного Enumeration у macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
@@ -115,9 +115,9 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Швидка перевірка антианалізу / віртуалізації
+### Швидка перевірка на anti-analysis / virtualization
 
-Деякі macOS stealers викликають `system_profiler` для виявлення VMs і **завершують роботу з унікальним кодом виходу (наприклад, 100)**, щоб уникнути детонації sandbox:
+Деякі macOS stealers викликають `system_profiler`, щоб виявити VM, і **переривають виконання з окремим кодом виходу (наприклад, 100)**, щоб уникнути sandbox detonation<sup>[1]</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -125,14 +125,14 @@ fi
 ```
 ### Встановлене програмне забезпечення та сервіси
 
-Перевірте наявність **підозрілих** встановлених додатків та **привілеїв** над встановленими ресурсами:
+Перевірте встановлені **підозрілі** застосунки та **привілеї** щодо встановлених ресурсів:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### Користувацькі процеси
+### Процеси користувачів
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -143,14 +143,14 @@ launchctl print system
 # will print detailed information about the specific launch agent. And if it’s not running or you’ve mistyped, you will get some output with a non-zero exit code: Could not find service “com.company.launchagent.label” in domain for login
 launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
-### Створити користувача
+### Створення користувача
 
-Без підказок
+Без запитів
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
 ## Посилання
 
-- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, рік Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

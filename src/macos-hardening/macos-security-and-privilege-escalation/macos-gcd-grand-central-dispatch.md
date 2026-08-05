@@ -4,92 +4,92 @@
 
 ## Основна інформація
 
-**Grand Central Dispatch (GCD),** також відомий як **libdispatch** (`libdispatch.dyld`), доступний як в macOS, так і в iOS. Це технологія, розроблена Apple для оптимізації підтримки додатків для паралельного (мультитредового) виконання на багатоядерному апаратному забезпеченні.
+**Grand Central Dispatch (GCD),** також відомий як **libdispatch** (`libdispatch.dyld`), доступний і в macOS, і в iOS. Це технологія, розроблена Apple для оптимізації підтримки застосунками паралельного (багатопотокового) виконання на багатоядерному обладнанні.
 
-**GCD** надає та керує **FIFO чергами**, до яких ваш додаток може **подавати завдання** у формі **блок-об'єктів**. Блоки, подані до черг, **виконуються на пулі потоків**, повністю керованих системою. GCD автоматично створює потоки для виконання завдань у чергах і планує ці завдання для виконання на доступних ядрах.
+**GCD** надає та керує **FIFO queues**, до яких ваш застосунок може **надсилати завдання** у формі **block objects**. Blocks, надіслані до dispatch queues, **виконуються в пулі потоків**, яким повністю керує система. GCD автоматично створює потоки для виконання завдань у dispatch queues і планує ці завдання для запуску на доступних ядрах.
 
 > [!TIP]
-> Підсумовуючи, для виконання коду **паралельно**, процеси можуть надсилати **блоки коду до GCD**, який подбає про їх виконання. Тому процеси не створюють нові потоки; **GCD виконує даний код зі своїм власним пулом потоків** (який може збільшуватися або зменшуватися за необхідності).
+> Підсумовуючи, для виконання коду **паралельно** процеси можуть надсилати **blocks of code до GCD**, який подбає про їх виконання. Тому процеси не створюють нові потоки; **GCD виконує наданий код у власному пулі потоків** (який може збільшуватися або зменшуватися за потреби).
 
-Це дуже корисно для успішного управління паралельним виконанням, значно зменшуючи кількість потоків, які створюють процеси, і оптимізуючи паралельне виконання. Це ідеально підходить для завдань, які вимагають **великого паралелізму** (брутфорс?) або для завдань, які не повинні блокувати основний потік: наприклад, основний потік на iOS обробляє взаємодії з UI, тому будь-яка інша функціональність, яка може призвести до зависання додатка (пошук, доступ до вебу, читання файлу...) управляється таким чином.
+Це дуже допомагає успішно керувати паралельним виконанням, значно зменшуючи кількість потоків, які створюють процеси, і оптимізуючи паралельне виконання. Це ідеально підходить для завдань, які потребують **значного паралелізму** (brute-forcing?), або для завдань, які не повинні блокувати головний потік: наприклад, головний потік в iOS обробляє взаємодії з UI, тому будь-яка інша функціональність, яка може призвести до зависання застосунку (пошук, доступ до web, читання файлу...), керується таким способом.
 
-### Блоки
+### Blocks
 
-Блок — це **самостійна секція коду** (як функція з аргументами, що повертає значення) і може також вказувати зв'язані змінні.\
-Однак на рівні компілятора блоки не існують, вони є `os_object`s. Кожен з цих об'єктів складається з двох структур:
+Block — це **самодостатня секція коду** (на кшталт функції з аргументами, яка повертає значення), яка також може визначати зв'язані змінні.\
+Однак на рівні compiler blocks не існують, вони є `os_object`s. Кожен із цих об'єктів складається з двох структур:
 
-- **літерал блоку**:
-- Він починається з поля **`isa`**, що вказує на клас блоку:
-- `NSConcreteGlobalBlock` (блоки з `__DATA.__const`)
-- `NSConcreteMallocBlock` (блоки в купі)
-- `NSConcreateStackBlock` (блоки в стеку)
-- Має **`flags`** (які вказують на поля, присутні в дескрипторі блоку) та деякі зарезервовані байти
-- Вказівник на функцію для виклику
-- Вказівник на дескриптор блоку
-- Імпортовані змінні блоку (якщо є)
-- **дескриптор блоку**: Його розмір залежить від даних, що присутні (як вказано в попередніх прапорах)
-- Має деякі зарезервовані байти
-- Розмір його
-- Зазвичай матиме вказівник на підпис у стилі Objective-C, щоб знати, скільки місця потрібно для параметрів (прапор `BLOCK_HAS_SIGNATURE`)
-- Якщо змінні посилаються, цей блок також матиме вказівники на допоміжний засіб копіювання (копіюючи значення на початку) та допоміжний засіб звільнення (вивільняючи його).
+- **block literal**:
+- Він починається з поля **`isa`**, яке вказує на клас block:
+- `NSConcreteGlobalBlock` (blocks із `__DATA.__const`)
+- `NSConcreteMallocBlock` (blocks у heap)
+- `NSConcreateStackBlock` (blocks у stack)
+- Він має **`flags`** (що вказують на поля, наявні в block descriptor) і кілька зарезервованих bytes
+- Вказівник на function, яку потрібно викликати
+- Вказівник на block descriptor
+- Імпортовані block variables (якщо є)
+- **block descriptor**: Його розмір залежить від наявних даних (як зазначено в попередніх flags)
+- Він має кілька зарезервованих bytes
+- Його розмір
+- Зазвичай він має вказівник на signature у стилі Objective-C, щоб визначити, скільки простору потрібно для params (flag `BLOCK_HAS_SIGNATURE`)
+- Якщо на variables є посилання, цей block також матиме вказівники на copy helper (копіює значення на початку) і dispose helper (звільняє його).
 
-### Черги
+### Queues
 
-Черга диспетчера — це іменований об'єкт, що забезпечує FIFO порядок блоків для виконання.
+Dispatch queue — це іменований об'єкт, який забезпечує FIFO-порядок виконання blocks.
 
-Блоки встановлюються в черги для виконання, і ці черги підтримують 2 режими: `DISPATCH_QUEUE_SERIAL` та `DISPATCH_QUEUE_CONCURRENT`. Звичайно, **послідовна** черга **не матиме проблем з гонками**, оскільки блок не буде виконуватись, поки попередній не завершиться. Але **інший тип черги може мати їх**.
+Blocks встановлюються в queues для виконання, і ці queues підтримують 2 режими: `DISPATCH_QUEUE_SERIAL` і `DISPATCH_QUEUE_CONCURRENT`. Звичайно, **serial** queue **не матиме проблем із race condition**, оскільки block не буде виконуватися, доки попередній не завершить виконання. Але **інший тип queue може їх мати**.
 
-Черги за замовчуванням:
+Стандартні queues:
 
 - `.main-thread`: З `dispatch_get_main_queue()`
-- `.libdispatch-manager`: Менеджер черг GCD
-- `.root.libdispatch-manager`: Менеджер черг GCD
+- `.libdispatch-manager`: Менеджер queue GCD
+- `.root.libdispatch-manager`: Менеджер queue GCD
 - `.root.maintenance-qos`: Завдання з найнижчим пріоритетом
 - `.root.maintenance-qos.overcommit`
-- `.root.background-qos`: Доступно як `DISPATCH_QUEUE_PRIORITY_BACKGROUND`
+- `.root.background-qos`: Доступна як `DISPATCH_QUEUE_PRIORITY_BACKGROUND`
 - `.root.background-qos.overcommit`
-- `.root.utility-qos`: Доступно як `DISPATCH_QUEUE_PRIORITY_NON_INTERACTIVE`
+- `.root.utility-qos`: Доступна як `DISPATCH_QUEUE_PRIORITY_NON_INTERACTIVE`
 - `.root.utility-qos.overcommit`
-- `.root.default-qos`: Доступно як `DISPATCH_QUEUE_PRIORITY_DEFAULT`
+- `.root.default-qos`: Доступна як `DISPATCH_QUEUE_PRIORITY_DEFAULT`
 - `.root.background-qos.overcommit`
-- `.root.user-initiated-qos`: Доступно як `DISPATCH_QUEUE_PRIORITY_HIGH`
+- `.root.user-initiated-qos`: Доступна як `DISPATCH_QUEUE_PRIORITY_HIGH`
 - `.root.background-qos.overcommit`
 - `.root.user-interactive-qos`: Найвищий пріоритет
 - `.root.background-qos.overcommit`
 
-Зверніть увагу, що саме система вирішує, **які потоки обробляють які черги в кожен момент часу** (декілька потоків можуть працювати в одній черзі або один і той же потік може працювати в різних чергах в певний момент)
+Зверніть увагу, що саме система вирішує, **які потоки обробляють які queues у кожен момент часу** (кілька потоків можуть працювати в одній queue, або один і той самий потік у певний момент може працювати в різних queues)
 
 #### Атрибути
 
-При створенні черги з **`dispatch_queue_create`** третій аргумент є `dispatch_queue_attr_t`, який зазвичай є або `DISPATCH_QUEUE_SERIAL` (який насправді є NULL), або `DISPATCH_QUEUE_CONCURRENT`, що є вказівником на структуру `dispatch_queue_attr_t`, яка дозволяє контролювати деякі параметри черги.
+Під час створення queue за допомогою **`dispatch_queue_create`** третім аргументом є `dispatch_queue_attr_t`, який зазвичай є або `DISPATCH_QUEUE_SERIAL` (що фактично є NULL), або `DISPATCH_QUEUE_CONCURRENT`, який є вказівником на структуру `dispatch_queue_attr_t`, що дає змогу керувати деякими параметрами queue.
 
-### Об'єкти диспетчера
+### Dispatch objects
 
-Існує кілька об'єктів, які використовує libdispatch, і черги та блоки — це лише 2 з них. Можливо створити ці об'єкти за допомогою `dispatch_object_create`:
+Існує кілька об'єктів, які використовує libdispatch, і queues та blocks — лише 2 з них. Ці об'єкти можна створювати за допомогою `dispatch_object_create`:
 
 - `block`
-- `data`: Блоки даних
-- `group`: Група блоків
-- `io`: Асинхронні запити I/O
-- `mach`: Порти Mach
-- `mach_msg`: Повідомлення Mach
-- `pthread_root_queue`: Черга з пулом потоків pthread і не робочими чергами
+- `data`: Data blocks
+- `group`: Group of blocks
+- `io`: Async I/O requests
+- `mach`: Mach ports
+- `mach_msg`: Mach messages
+- `pthread_root_queue`: Queue з пулом потоків pthread, але без workqueues
 - `queue`
 - `semaphore`
-- `source`: Джерело подій
+- `source`: Event source
 
 ## Objective-C
 
-В Objective-C є різні функції для надсилання блоку для виконання паралельно:
+В Objective-C існують різні functions для надсилання block на виконання паралельно:
 
-- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Подає блок для асинхронного виконання в черзі диспетчера та повертає негайно.
-- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Подає об'єкт блоку для виконання та повертає після завершення виконання цього блоку.
-- [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): Виконує об'єкт блоку лише один раз протягом життєвого циклу програми.
-- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Подає робочий елемент для виконання та повертає лише після його завершення. На відміну від [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync), ця функція поважає всі атрибути черги під час виконання блоку.
+- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Надсилає block для асинхронного виконання в dispatch queue і негайно повертає результат.
+- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Надсилає block object на виконання і повертає результат після завершення виконання цього block.
+- [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): Виконує block object лише один раз протягом життєвого циклу застосунку.
+- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Надсилає work item на виконання і повертає результат лише після завершення його виконання. На відміну від [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync), ця function враховує всі атрибути queue під час виконання block.
 
-Ці функції очікують такі параметри: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
+Ці functions очікують такі parameters: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
 
-Це **структура блоку**:
+Це **struct Block**:
 ```c
 struct Block {
 void *isa; // NSConcreteStackBlock,...
@@ -100,7 +100,7 @@ struct BlockDescriptor *descriptor;
 // captured variables go here
 };
 ```
-І це приклад використання **паралелізму** з **`dispatch_async`**:
+А це приклад використання **паралелізму** з **`dispatch_async`**:
 ```objectivec
 #import <Foundation/Foundation.h>
 
@@ -132,8 +132,8 @@ return 0;
 ```
 ## Swift
 
-**`libswiftDispatch`** є бібліотекою, яка надає **Swift прив'язки** до фреймворку Grand Central Dispatch (GCD), який спочатку написаний на C.\
-Бібліотека **`libswiftDispatch`** обгортає C GCD API в більш дружній до Swift інтерфейс, що робить роботу з GCD легшою та інтуїтивно зрозумілішою для розробників Swift.
+**`libswiftDispatch`** — це бібліотека, яка надає **Swift bindings** для фреймворку Grand Central Dispatch (GCD), спочатку написаного мовою C.\
+Бібліотека **`libswiftDispatch`** обгортає API C GCD в інтерфейс, зручніший для Swift, що полегшує та робить інтуїтивнішою роботу Swift-розробників із GCD.
 
 - **`DispatchQueue.global().sync{ ... }`**
 - **`DispatchQueue.global().async{ ... }`**
@@ -141,7 +141,7 @@ return 0;
 - **`async await`**
 - **`var (data, response) = await URLSession.shared.data(from: URL(string: "https://api.example.com/getData"))`**
 
-**Code example**:
+**Приклад коду**:
 ```swift
 import Foundation
 
@@ -170,7 +170,7 @@ sleep(1)  // Simulate a long-running task
 ```
 ## Frida
 
-Наступний скрипт Frida можна використовувати для **перехоплення кількох `dispatch`** функцій та витягнення назви черги, зворотного сліду та блоку: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
+Наступний Frida script можна використовувати, щоб **hook into кілька функцій `dispatch`** і отримати назву черги, backtrace та block: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js).
 ```bash
 frida -U <prog_name> -l libdispatch.js
 
@@ -185,9 +185,9 @@ Backtrace:
 ```
 ## Ghidra
 
-Наразі Ghidra не розуміє ні структуру ObjectiveC **`dispatch_block_t`**, ні **`swift_dispatch_block`**.
+Наразі Ghidra не розуміє ні структуру ObjectiveC **`dispatch_block_t`**, ні структуру **`swift_dispatch_block`**.
 
-Отже, якщо ви хочете, щоб вона їх розуміла, ви можете просто **оголосити їх**:
+Тож якщо ви хочете, щоб вона їх розуміла, ви можете просто **оголосити їх**:
 
 <figure><img src="../../images/image (1160).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -195,14 +195,14 @@ Backtrace:
 
 <figure><img src="../../images/image (1163).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Потім знайдіть місце в коді, де вони **використовуються**:
+Потім знайдіть у коді місце, де вони **використовуються**:
 
 > [!TIP]
-> Зверніть увагу на всі посилання на "block", щоб зрозуміти, як ви можете зрозуміти, що структура використовується.
+> Зверніть увагу на всі посилання на "block", щоб зрозуміти, як можна визначити, що використовується ця структура.
 
 <figure><img src="../../images/image (1164).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Клацніть правою кнопкою миші на змінній -> Змінити тип змінної і виберіть у цьому випадку **`swift_dispatch_block`**:
+Клацніть правою кнопкою миші змінну -> Retype Variable і в цьому випадку виберіть **`swift_dispatch_block`**:
 
 <figure><img src="../../images/image (1165).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -210,8 +210,11 @@ Ghidra автоматично перепише все:
 
 <figure><img src="../../images/image (1166).png" alt="" width="563"><figcaption></figcaption></figure>
 
-## References
+## Посилання
 
-- [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [1] [libdispatch — `src/queue.c` (реалізація queue/thread-pool)](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/queue.c)
+- [2] [libdispatch — `src/source.c` (dispatch sources)](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/source.c)
+- [3] [libdispatch — `dispatch/queue.h` (публічний API queue)](https://github.com/apple-oss-distributions/libdispatch/blob/main/dispatch/queue.h)
+- [4] [Apple Developer — Dispatch](https://developer.apple.com/documentation/dispatch)
 
 {{#include ../../banners/hacktricks-training.md}}

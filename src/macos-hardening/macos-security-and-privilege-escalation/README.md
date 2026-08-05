@@ -1,19 +1,19 @@
-# macOS Security & Privilege Escalation
+# Безпека macOS і підвищення привілеїв
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic MacOS
+## Основи macOS
 
-Якщо ви не знайомі з macOS, вам слід почати вивчати основи macOS:
+Якщо ви не знайомі з macOS, почніть із вивчення основ macOS:
 
-- Спеціальні файли та **дозволи macOS:**
+- Спеціальні **файли та дозволи** macOS:
 
 
 {{#ref}}
 macos-files-folders-and-binaries/
 {{#endref}}
 
-- Загальні **користувачі macOS**
+- Поширені **користувачі** macOS
 
 
 {{#ref}}
@@ -27,14 +27,14 @@ macos-users.md
 macos-applefs.md
 {{#endref}}
 
-- **Архітектура** ядра
+- **Архітектура** **kernel**
 
 
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
-- Загальні **мережеві сервіси та протоколи macOS**
+- Поширені **мережеві служби та протоколи** macOS
 
 
 {{#ref}}
@@ -42,90 +42,90 @@ macos-protocols.md
 {{#endref}}
 
 - **Opensource** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
-- Щоб завантажити `tar.gz`, змініть URL, наприклад, [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) на [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+- Щоб завантажити `tar.gz`, змініть URL, наприклад [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) на [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
-### MacOS MDM
+### MDM macOS
 
-У компаніях системи **macOS** ймовірно будуть **керуватися за допомогою MDM**. Тому з точки зору атакуючого цікаво знати, **як це працює**:
+У компаніях системи **macOS**, найімовірніше, будуть **керуватися за допомогою MDM**. Тому з погляду атакера цікаво знати, **як це працює**:
 
 
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
 {{#endref}}
 
-### MacOS - Інспекція, налагодження та фуззинг
+### macOS — перевірка, налагодження та fuzzing
 
 
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
-## MacOS Security Protections
+## Засоби захисту macOS
 
 
 {{#ref}}
 macos-security-protections/
 {{#endref}}
 
-## Attack Surface
+## Поверхня атаки
 
-### File Permissions
+### Дозволи файлів
 
-Якщо **процес, що працює від імені root, записує** файл, який може контролюватися користувачем, користувач може зловживати цим для **ескалації привілеїв**.\
-Це може статися в наступних ситуаціях:
+Якщо **процес, що працює від імені root, записує** файл, яким може керувати користувач, користувач може скористатися цим для **підвищення привілеїв**.\
+Це може відбуватися в таких ситуаціях:
 
-- Файл, що використовується, вже був створений користувачем (належить користувачу)
-- Файл, що використовується, доступний для запису користувачем через групу
-- Файл, що використовується, знаходиться в каталозі, що належить користувачу (користувач може створити файл)
-- Файл, що використовується, знаходиться в каталозі, що належить root, але користувач має доступ на запис через групу (користувач може створити файл)
+- Файл уже був створений користувачем (належить користувачеві)
+- Файл доступний для запису користувачеві через групу
+- Файл розташований у каталозі, що належить користувачеві (користувач може створити файл)
+- Файл розташований у каталозі, що належить root, але користувач має доступ до запису через групу (користувач може створити файл)
 
-Можливість **створити файл**, який буде **використовуватися root**, дозволяє користувачу **використовувати його вміст** або навіть створювати **символічні/жорсткі посилання** на інше місце.
+Можливість **створити файл**, який буде **використовуватися root**, дає користувачеві змогу **скористатися його вмістом** або навіть створити **symlinks/hardlinks**, що вказують на інше місце.
 
-Для таких вразливостей не забудьте **перевірити вразливі `.pkg` інсталяційні файли**:
+Для цього типу вразливостей не забудьте **перевірити вразливі інсталятори `.pkg`**:
 
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### File Extension & URL scheme app handlers
+### Обробники розширень файлів і схем URL
 
-Дивні програми, зареєстровані за розширеннями файлів, можуть бути зловживані, і різні програми можуть бути зареєстровані для відкриття специфічних протоколів
+Дивні програми, зареєстровані для розширень файлів, можуть бути використані зловмисниками, а різні програми можуть бути зареєстровані для відкриття певних протоколів
 
 
 {{#ref}}
 macos-file-extension-apps.md
 {{#endref}}
 
-## macOS TCC / SIP Privilege Escalation
+## Підвищення привілеїв macOS TCC / SIP
 
-У macOS **додатки та бінарні файли можуть мати дозволи** на доступ до папок або налаштувань, які роблять їх більш привілейованими, ніж інші.
+У macOS **програми та binaries можуть мати дозволи** на доступ до каталогів або налаштувань, що робить їх привілейованішими за інші.
 
-Тому атакуючий, який хоче успішно скомпрометувати машину macOS, повинен **ескалувати свої привілеї TCC** (або навіть **обійти SIP**, залежно від його потреб).
+Тому атакеру, який хоче успішно скомпрометувати машину macOS, потрібно буде **підвищити свої привілеї TCC** (або навіть **обійти SIP**, залежно від його потреб).
 
-Ці привілеї зазвичай надаються у формі **прав**, з якими підписаний додаток, або додаток може запитати деякі доступи, і після **схвалення їх користувачем** вони можуть бути знайдені в **базах даних TCC**. Інший спосіб, яким процес може отримати ці привілеї, - це бути **дочірнім процесом** з такими **привілеями**, оскільки вони зазвичай **успадковуються**.
+Ці привілеї зазвичай надаються у формі **entitlements**, з якими підписано програму, або програма могла запитати певний доступ, і після **його схвалення користувачем** ці дозволи можна знайти в **базах даних TCC**. Інший спосіб, у який процес може отримати ці привілеї, — бути **дочірнім процесом** процесу, що має такі **привілеї**, оскільки вони зазвичай **успадковуються**.
 
-Слідуйте цим посиланням, щоб знайти різні способи [**ескалації привілеїв у TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**обійти TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) і як у минулому [**SIP було обійдено**](macos-security-protections/macos-sip.md#sip-bypasses).
+Перейдіть за цими посиланнями, щоб дізнатися про різні способи [**підвищення привілеїв у TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**обходу TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) і про те, як у минулому [**обходили SIP**](macos-security-protections/macos-sip.md#sip-bypasses).
 
-## macOS Traditional Privilege Escalation
+## Традиційне підвищення привілеїв macOS
 
-Звичайно, з точки зору червоних команд, вам також слід бути зацікавленими в ескалації до root. Перегляньте наступний пост для деяких підказок:
+Звичайно, з погляду red team вам також має бути цікаво підвищити привілеї до root. Перегляньте наступну публікацію, щоб знайти підказки:
 
 
 {{#ref}}
 macos-privilege-escalation.md
 {{#endref}}
 
-## macOS Compliance
+## Відповідність macOS вимогам безпеки
 
 - [https://github.com/usnistgov/macos_security](https://github.com/usnistgov/macos_security)
 
-## References
+## Посилання
 
-- [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
-- [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
-- [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
-- [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
-- [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
+- [1] [OS X Incident Response: Scripting and Analysis](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+- [2] [The Art of Mac Malware, Vol. 1 — Analysis (Patrick Wardle)](https://taomm.org/vol1/analysis.html)
+- [3] [NicolasGrimonpont/Cheatsheet — macOS/Linux/Windows commands & security tools cheatsheet](https://github.com/NicolasGrimonpont/Cheatsheet)
+- [4] [SentinelOne — macOS Security Resource](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
+- [5] [2022 - macOS local security: escaping the sandbox and bypassing TCC (YouTube)](https://www.youtube.com/watch?v=vMGiplQtjTY)
 
 {{#include ../../banners/hacktricks-training.md}}
