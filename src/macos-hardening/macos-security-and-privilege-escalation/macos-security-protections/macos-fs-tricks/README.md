@@ -4,13 +4,15 @@
 
 ## POSIX permissions combinations
 
-Permissions in a **directory**:
+For a **directory**, the three permission bits mean something different from what they mean on a regular file. `chmod(1)` calls the execute bit "**search**" when it is applied to a directory:
 
-- **read** - you can **enumerate** the directory entries
-- **write** - you can **delete/write** **files** in the directory and you can **delete empty folders**.
-  - But you **cannot delete/modify non-empty folders** unless you have write permissions over it.
-  - You **cannot modify the name of a folder** unless you own it.
-- **execute** - you are **allowed to traverse** the directory - if you don’t have this right, you can’t access any files inside it, or in any subdirectories.
+> `0100` For files, allow execution by owner. For directories, allow the owner to **search** in the directory.
+
+- **read** - you can **enumerate** the directory entries (list the names).
+- **write** - you can **create, rename and delete entries** in the directory. Note this is a property of the *containing* directory, not of the file: you can delete a file you cannot read or write, as long as you can write its parent directory.
+  - To delete a **subdirectory** it must be empty, which in turn requires enough rights to remove everything inside it.
+  - If the directory has the **sticky bit** (`S_ISVTX`, like `/tmp`) this is restricted — POSIX states that a process may then remove or rename files in it only if it owns the file, owns the directory, or has appropriate privileges.
+- **execute / search** - you are **allowed to traverse** the directory. Pathname resolution locates each component "in the directory specified by its predecessor", so **losing search rights on any single component of the path prefix makes everything below it unreachable by path**, even if the leaf file itself is world-readable.
 
 ### Dangerous Combinations
 
@@ -22,11 +24,25 @@ Permissions in a **directory**:
 
 With any of the previous combinations, an attacker could **inject** a **sym/hard link** the expected path to obtain a privileged arbitrary write.
 
-### Folder root R+X Special case
+### Folder root R+X special case
 
-If there are files in a **directory** where **only root has R+X access**, those are **not accessible to anyone else**. So a vulnerability allowing to **move a file readable by a user**, that cannot be read because of that **restriction**, from this folder **to a different one**, could be abuse to read these files.
+This falls straight out of the pathname-resolution rule above. If a **directory only grants R+X to root**, the files inside it are unreachable *by path* for everybody else — but the **files' own permission bits may still be permissive**. The directory is the only thing standing in the way.
 
-Example in: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
+So any primitive that lets you get the file **out of that directory** — a privileged process that **moves/renames/copies** an attacker-chosen path into a location you *can* traverse — turns into an arbitrary read, without ever needing to defeat the file's own mode:
+
+```bash
+# Reproduce the primitive locally
+sudo mkdir -p /tmp/locked && sudo chmod 700 /tmp/locked
+sudo sh -c 'echo secret > /tmp/locked/data.txt; chmod 644 /tmp/locked/data.txt'
+
+ls -l /tmp/locked/data.txt   # Permission denied: cannot even stat through the directory
+cat /tmp/locked/data.txt     # Permission denied
+
+# The file itself is mode 644 - only the parent directory's search bit blocks you.
+sudo ls -l /tmp/locked/
+```
+
+Look for privileged file movers (installers, log rotators, crash/diagnostic collectors, backup and "export" features) that accept a source path from a lower-privileged user.
 
 ## Symbolic Link / Hard Link
 
@@ -495,11 +511,11 @@ This feature is particularly useful for preventing certain classes of security v
 
 ## References
 
-- [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/)
+- [POSIX.1-2024 — Base Definitions, Ch. 4 (File Access Permissions, Directory Protection, Pathname Resolution)](https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html)
+- [`chmod(1)` man page](https://keith.github.io/xcode-man-pages/chmod.1.html) (directory search/execute bit, ACL inheritance flags)
+- [`open(2)` man page](https://keith.github.io/xcode-man-pages/open.2.html) (`O_NOFOLLOW`, `O_NOFOLLOW_ANY`, `O_RESOLVE_BENEATH`)
 - [SektionEins - OS X 10.10 DYLD_PRINT_TO_FILE Local Privilege Escalation](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html) (leaked FD without close-on-exec)
 - [The Eclectic Light Company - Which file systems and cloud services preserve extended attributes?](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)
-- [`open(2)` man page](https://keith.github.io/xcode-man-pages/open.2.html) (`O_NOFOLLOW`, `O_NOFOLLOW_ANY`, `O_RESOLVE_BENEATH`)
-- [`chmod(1)` man page](https://keith.github.io/xcode-man-pages/chmod.1.html) (ACL inheritance flags)
 - [Microsoft - Gatekeeper's Achilles heel: unearthing a macOS vulnerability](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
 
 {{#include ../../../../banners/hacktricks-training.md}}

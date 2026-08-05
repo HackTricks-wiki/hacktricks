@@ -168,9 +168,23 @@ While implementing constraints on the XPC service might be beneficial by **narro
 
 Even if it's required that the application has to be **opened by LaunchService** (in the parents constraints). This can be achieved using **`open`** (which can set env variables) or using the **Launch Services API** (where env variables can be indicated).
 
+### CVE-2025-43253 - Overriding the built-in constraints at spawn time
+
+Launch constraints (officially **lightweight code requirements**, *LWCR*) are enforced by the **AMFI MAC policy**. `posix_spawn` lets a caller hand an arbitrary blob to a MAC policy through **`posix_spawnattr_setmacpolicyinfo_np()`**, and AMFI accepted a caller-supplied LWCR dictionary through that path. The bug was that the **attacker-supplied constraints replaced the binary's built-in ones** instead of being checked in addition to them:
+
+- Build a minimal (even empty) launch-constraints dictionary.
+- Set the **constraint category to `127`**, a value that AMFI allows in spawn attributes but does **not enforce** — it only logs `Launch Constraint Violation (not enforcing)` instead of blocking the execution.
+- Pass it via the spawn attributes, and the process launches in a context its real self/parent constraints would have forbidden.
+
+After the fix, **both** the built-in and the supplied constraints are validated, so the supplied dictionary can no longer weaken the built-in one.
+
+> [!TIP]
+> This is the general shape to look for when auditing constraint enforcement: an API that lets untrusted input *supply* a policy tends to be interesting whenever the policy engine treats the supplied value as a replacement rather than an additional requirement.
+
 ## References
 
 - [https://youtu.be/f1HA5QhLQ7Y?t=24146](https://youtu.be/f1HA5QhLQ7Y?t=24146)
+- [CVE-2025-43253: Bypassing Launch Constraints on macOS (wts.dev)](https://wts.dev/posts/bypassing-launch-constraints/)
 - [https://theevilbit.github.io/posts/launch_constraints_deep_dive/](https://theevilbit.github.io/posts/launch_constraints_deep_dive/)
 - [https://eclecticlight.co/2023/06/13/why-wont-a-system-app-or-command-tool-run-launch-constraints-and-trust-caches/](https://eclecticlight.co/2023/06/13/why-wont-a-system-app-or-command-tool-run-launch-constraints-and-trust-caches/)
 - [https://developer.apple.com/videos/play/wwdc2023/10266/](https://developer.apple.com/videos/play/wwdc2023/10266/)
