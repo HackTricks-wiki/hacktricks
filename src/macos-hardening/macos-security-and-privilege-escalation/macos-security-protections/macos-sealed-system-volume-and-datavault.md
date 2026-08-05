@@ -1,4 +1,4 @@
-# macOS Mühürlenmiş Sistem Bölümü & DataVault
+# macOS Sealed System Volume & DataVault
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,14 +6,14 @@
 
 ### Temel Bilgiler
 
-macOS Big Sur (11.0) ile başlayarak, sistem hacmi APFS snapshot hash tree kullanılarak kriptografik olarak mühürlenir. Bu, Sealed System Volume (SSV) olarak adlandırılır. Sistem bölümü yalnızca okunur olarak bağlanır ve yapılacak herhangi bir değişiklik, önyükleme sırasında doğrulanan mührü bozar.
+**macOS Big Sur (11.0)** ile birlikte sistem volume'ü, **APFS snapshot hash tree** kullanılarak kriptografik olarak mühürlenir. Buna **Sealed System Volume (SSV)** adı verilir. Sistem partition'ı **salt okunur** olarak mount edilir ve herhangi bir değişiklik mührü bozar; bu durum boot sırasında doğrulanır.
 
 SSV şunları sağlar:
-- **Tamper detection** — sistem ikili dosyalarına/framework'lerine yapılan herhangi bir değişiklik kırılmış kriptografik mühür aracılığıyla tespit edilebilir
-- **Rollback protection** — önyükleme işlemi sistem anlık görüntüsünün bütünlüğünü doğrular
-- **Rootkit prevention** — root bile sistem hacmindeki dosyaları kalıcı olarak değiştiremez (mührü kırmadan)
+- **Kurcalama tespiti** — sistem binary'leri/framework'leri üzerinde yapılan tüm değişiklikler, bozulan kriptografik mühür aracılığıyla tespit edilebilir
+- **Rollback koruması** — boot süreci sistem snapshot'ının bütünlüğünü doğrular
+- **Rootkit önleme** — root bile sistem volume'ündeki dosyaları kalıcı olarak değiştiremez (mühür bozulmadan)
 
-### SSV Durumunu Kontrol Etme
+### SSV Durumunu Kontrol Etmek
 ```bash
 # Check if authenticated root is enabled (SSV seal verification)
 csrutil authenticated-root status
@@ -27,18 +27,18 @@ mount | grep " / "
 # Verify the system volume seal
 diskutil apfs listVolumeGroups
 ```
-### SSV Writer İzinleri
+### SSV Writer Entitlements
 
-Certain Apple system binaries have entitlements that allow them to modify or manage the sealed system volume:
+Bazı Apple system binary'leri, sealed system volume'u değiştirmelerine veya yönetmelerine olanak tanıyan entitlement'lara sahiptir:
 
-| İzin | Amaç |
+| Entitlement | Amaç |
 |---|---|
-| `com.apple.private.apfs.revert-to-snapshot` | System volume'u önceki bir snapshot'a geri döndürür |
-| `com.apple.private.apfs.create-sealed-snapshot` | Sistem güncellemelerinden sonra yeni bir sealed snapshot oluşturur |
-| `com.apple.rootless.install.heritable` | SIP korumalı yollara yazma izni verir (alt süreçler tarafından devralınır) |
-| `com.apple.rootless.install` | SIP korumalı yollara yazma izni verir |
+| `com.apple.private.apfs.revert-to-snapshot` | System volume'u önceki bir snapshot'a geri döndürmek |
+| `com.apple.private.apfs.create-sealed-snapshot` | System update'lerinden sonra yeni bir sealed snapshot oluşturmak |
+| `com.apple.rootless.install.heritable` | SIP tarafından korunan path'lere yazmak (child process'ler tarafından devralınır) |
+| `com.apple.rootless.install` | SIP tarafından korunan path'lere yazmak |
 
-### SSV Writer'larını Bulma
+### Finding SSV Writers
 ```bash
 # Search for binaries with SSV-related entitlements
 find /System /usr -type f -perm +111 -exec sh -c '
@@ -54,11 +54,11 @@ JOIN executable_capabilities ec ON e.id = ec.executable_id
 JOIN capabilities c ON ec.capability_id = c.id
 WHERE c.name = 'ssv_writer';"
 ```
-### Saldırı Senaryoları
+### Attack Scenarios
 
 #### Snapshot Rollback Attack
 
-Bir saldırgan `com.apple.private.apfs.revert-to-snapshot` etiketine sahip bir binary'i ele geçirirse, sistem hacmini **güncelleme öncesi bir duruma geri alabilir**, bilinen zafiyetleri geri yükleyerek:
+Bir saldırgan `com.apple.private.apfs.revert-to-snapshot` yetkisine sahip bir binary'yi ele geçirirse, **system volume'u güncelleme öncesi bir duruma geri döndürebilir** ve bilinen güvenlik açıklarını yeniden etkinleştirebilir:
 ```bash
 # Conceptual — the snapshot revert operation would:
 # 1. List available snapshots
@@ -68,50 +68,50 @@ diskutil apfs listSnapshots disk3s1
 # This restores the system to a state with known, patched vulnerabilities
 ```
 > [!WARNING]
-> Anlık görüntü (snapshot) geri alımı aslında **güvenlik güncellemelerini geri alır**, daha önce yamalanmış çekirdek ve sistem zafiyetlerini geri yükler. Bu, modern macOS'ta mümkün olan en tehlikeli işlemlerden biridir.
+> Snapshot rollback işlemi **security updates'leri geri alarak**, daha önce yamalanmış kernel ve system vulnerability'lerini yeniden etkinleştirir. Bu, modern macOS'ta gerçekleştirilebilecek en tehlikeli işlemlerden biridir.
 
-#### Sistem İkili Değiştirme
+#### System Binary Replacement
 
-With SIP bypass + SSV write capability, an attacker can:
+SIP bypass + SSV write capability ile bir attacker:
 
-1. Sistem hacmini okuma-yazma olarak bağlamak
-2. Bir system daemon'ını veya framework kütüphanesini trojaned bir sürümle değiştirmek
-3. Snapshot'i yeniden mühürlemek (veya SIP zaten zayıflatılmışsa kırık mühürü kabul etmek)
-4. Rootkit yeniden başlatmalar arasında kalıcı olur ve userland tespit araçlarına görünmez
+1. System volume'ü read-write olarak mount eder
+2. Bir system daemon'u veya framework library'yi trojan edilmiş bir sürümle değiştirir
+3. Snapshot'ı yeniden seal eder (veya SIP zaten degraded durumdaysa bozuk seal'i kabul eder)
+4. Rootkit reboot'lar arasında kalıcılığını korur ve userland detection tools tarafından görünmez
 
-### Gerçek Dünya CVE'leri
+### Real-World CVEs
 
-| CVE | Açıklama |
+| CVE | Description |
 |---|---|
-| CVE-2021-30892 | **Shrootless** — `system_installd` üzerinden SSV değişikliğine izin veren SIP bypass'ı |
-| CVE-2022-22583 | PackageKit'in snapshot işleme mekanizması üzerinden SSV bypass'ı |
-| CVE-2022-46689 | SIP korumalı dosyalara yazmaya izin veren race condition |
+| CVE-2021-30892 | **Shrootless** — arbitrary post-install scripts çalıştırmak için `system_installd`'in `com.apple.rootless.install.heritable` entitlement'ını abuse eden SIP bypass ([Microsoft](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)) |
+| CVE-2022-22583 | SIP bypass: `system_installd`, post-install script'i `/tmp` altındaki SIP-protected bir folder'a stage etti; ancak `/tmp`'nin kendisi SIP-protected değildir, bu nedenle folder üzerine bir image mount edilerek folder değiştirilebilirdi ([Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html)) |
+| CVE-2022-46689 | **MacDirtyCow** — XNU'da read-only root-owned files'lara write yapılmasına olanak sağlayan copy-on-write race ([Worth Doing Badly](https://worthdoingbadly.com/macdirtycow/)) |
 
 ---
 
 ## DataVault
 
-### Temel Bilgiler
+### Basic Information
 
-**DataVault**, hassas sistem veritabanları için Apple'ın koruma katmanıdır. Hatta **root, DataVault korumalı dosyalara erişemez** — sadece belirli entitlements'a sahip prosesler bunları okuyup değiştirebilir. Korunan depolar şunları içerir:
+**DataVault**, sensitive system databases için Apple'ın protection layer'ıdır. Belirli entitlement'lara sahip process'ler dışında **root bile DataVault-protected files'lara erişemez** — bu process'ler dosyaları okuyabilir veya değiştirebilir. Protected stores şunları içerir:
 
-| Korunan Veritabanı | Yol | İçerik |
+| Protected Database | Path | Content |
 |---|---|---|
-| TCC (system) | `/Library/Application Support/com.apple.TCC/TCC.db` | Sistem genelinde TCC gizlilik kararları |
-| TCC (user) | `~/Library/Application Support/com.apple.TCC/TCC.db` | Kullanıcı başına TCC gizlilik kararları |
-| Keychain (system) | `/Library/Keychains/System.keychain` | Sistem keychain'i |
-| Keychain (user) | `~/Library/Keychains/login.keychain-db` | Kullanıcı keychain'i |
+| TCC (system) | `/Library/Application Support/com.apple.TCC/TCC.db` | System-wide TCC privacy decisions |
+| TCC (user) | `~/Library/Application Support/com.apple.TCC/TCC.db` | Per-user TCC privacy decisions |
+| Keychain (system) | `/Library/Keychains/System.keychain` | System keychain |
+| Keychain (user) | `~/Library/Keychains/login.keychain-db` | User keychain |
 
-DataVault koruması, çekirdek tarafından doğrulanan genişletilmiş öznitelikler ve hacim koruma bayrakları kullanılarak **dosya sistemi düzeyinde** uygulanır.
+DataVault protection, kernel tarafından doğrulanan extended attributes ve volume protection flags kullanılarak **filesystem level**'da uygulanır.
 
-### DataVault Denetleyici Entitlements
+### DataVault Controller Entitlements
 ```
 com.apple.private.tcc.manager         — Full TCC database read/write
 com.apple.private.tcc.manager.check-by-audit-token — TCC checks via audit token
 com.apple.private.tcc.allow           — Access specific TCC-protected resources
 com.apple.rootless.storage.TCC        — Write to TCC database (SIP-related)
 ```
-### DataVault Denetleyicilerini Bulma
+### DataVault Controller'larını Bulma
 ```bash
 # Check DataVault protection on the TCC database
 ls -le@ "/Library/Application Support/com.apple.TCC/TCC.db"
@@ -132,9 +132,9 @@ WHERE c.name = 'datavault_controller';"
 ```
 ### Saldırı Senaryoları
 
-#### Doğrudan TCC veritabanı değişikliği
+#### Doğrudan TCC Veritabanı Değişikliği
 
-Bir saldırgan bir DataVault controller binary'sini ele geçirirse (ör. bir işleme `com.apple.private.tcc.manager` ile kod enjeksiyonu yoluyla), herhangi bir uygulamaya herhangi bir TCC izni vermek için **TCC veritabanını doğrudan değiştirebilir:**
+Bir saldırgan, bir DataVault controller binary'sini (ör. `com.apple.private.tcc.manager` özelliğine sahip bir process'e code injection yoluyla) ele geçirirse, herhangi bir uygulamaya herhangi bir TCC izni vermek için **TCC veritabanını doğrudan değiştirebilir**:
 ```sql
 -- Grant Full Disk Access to a malicious binary (conceptual)
 INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_version)
@@ -145,30 +145,31 @@ INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_
 VALUES ('kTCCServiceCamera', 'com.attacker.malware', 0, 2, 4, 1);
 ```
 > [!CAUTION]
-> TCC veritabanı değişikliği **nihai gizlilik atlatmasıdır** — herhangi bir izni sessizce, kullanıcıya bir istem veya görünür bir gösterge olmadan verir. Tarihsel olarak, çok sayıda macOS ayrıcalık yükseltme zinciri son payload olarak TCC veritabanı yazmalarıyla sonlanmıştır.
+> TCC database modification, herhangi bir izni sessizce verir — hiçbir kullanıcı istemi veya görünür gösterge olmadan — **nihai gizlilik bypass'ıdır**. Geçmişte birden fazla macOS privilege escalation zinciri, son payload olarak TCC database yazma işlemiyle sonuçlanmıştır.
 
-#### Keychain Veritabanı Erişimi
+#### Keychain Database Access
 
-DataVault ayrıca keychain'i destekleyen dosyaları da korur. İhlal edilmiş bir DataVault kontrolcüsü şunları yapabilir:
+DataVault, keychain backing dosyalarını da korur. Ele geçirilmiş bir DataVault controller şunları yapabilir:
 
-1. Keychain'in ham veritabanı dosyalarını okuyabilir
-2. Şifrelenmiş keychain öğelerini çıkarabilir
-3. Kullanıcının parolası veya kurtarılan anahtarlar kullanılarak çevrimdışı şifre çözme girişiminde bulunabilir
+1. Ham keychain database dosyalarını okuma
+2. Şifrelenmiş keychain öğelerini çıkarma
+3. Kullanıcının password'ünü veya kurtarılmış key'leri kullanarak offline decryption denemesi
 
-### Real-World CVEs Involving DataVault/TCC Bypass
+### DataVault/TCC Bypass İçeren Gerçek Dünya CVE'leri
 
-| CVE | Description |
+| CVE | Açıklama |
 |---|---|
-| CVE-2023-40424 | DataVault tarafından korunan dosyaya symlink aracılığıyla TCC bypass |
-| CVE-2023-32364 | TCC veritabanı değişikliğine yol açan sandbox bypass |
-| CVE-2021-30713 | XCSSET malware'in TCC.db'yi değiştirerek gerçekleştirdiği TCC bypass |
-| CVE-2020-9934 | Ortam değişkeni manipülasyonu yoluyla TCC bypass |
-| CVE-2020-29621 | Music app'in TCC bypass'ı DataVault'a erişim sağlıyor |
+| CVE-2024-44131 | Ayrıcalıklı bir helper'ın TCC tarafından korunan verilere ulaşmasını sağlayan FileProvider symlink race ([Jamf](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)) |
+| CVE-2023-40424 | Root olarak, `NFSHomeDirectory` değeri attacker-controlled bir `TCC.db` dosyasını gösteren **yeni bir user oluşturma**; login sırasında `tccd` bu dosyayı kullanır ve grant'ler uygulanarak diğer user'ların verilerine ulaşılır ([Kandji](https://blog.kandji.io/malware-bypass-tcc)) |
+| CVE-2021-30970 | Attacker-controlled bir TCC.db yerleştirmek için user'ın home dir'ini değiştirme: "powerdir" ([Microsoft](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)) |
+| CVE-2021-30713 | Bir app'in herhangi bir prompt olmadan **donor bundle'ın TCC grant'lerini miras almasını** sağlayan bundle-conclusion flaw; masaüstünün screenshot'ını almak için gerçek dünyada **XCSSET** tarafından exploit edildi ([Jamf](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)) |
+| CVE-2020-9934 | `tccd`, DB path'ini `$HOME` üzerinden oluşturuyordu; bu nedenle `launchctl setenv HOME`, path'i attacker-controlled bir `TCC.db` dosyasına yönlendiriyordu ([Matt Shockley](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)) |
+| CVE-2020-29621 | `coreaudiod`, `com.apple.private.tcc.manager` yetkisine sahipti ve library validation'ı devre dışı bırakıyordu; bu nedenle `/Library/Audio/Plug-Ins/HAL` konumuna yerleştirilen bir HAL plug-in'i rastgele TCC hakları verebiliyordu ([Wojciech Reguła](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)) |
 
 ## Referanslar
 
 * [Apple Platform Security — Data Protection](https://support.apple.com/guide/security/data-protection-overview-sece3bee0835/web)
-* [The Nightmare of Apple OTA Updates (APFS Snapshots)](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
+* [Apple OTA Updates Kabusu (APFS Snapshots)](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
 * [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
