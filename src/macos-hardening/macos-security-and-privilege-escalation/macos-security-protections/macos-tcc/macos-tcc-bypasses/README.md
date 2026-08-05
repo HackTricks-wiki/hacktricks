@@ -165,21 +165,28 @@ The binary `/usr/libexec/lsd` with the library `libsecurity_translocate` had the
 
 It was possible to add the quarantine attribute to "Library", call the **`com.apple.security.translocation`** XPC service and then it would map Library to **`$TMPDIR/AppTranslocation/d/d/Library`** where all the documents inside Library could be **accessed**.
 
-### CVE-2023-38571 - Music & TV <a href="#cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv" id="cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv"></a>
+### CVE-2024-44131 - FileProvider symlink race
 
-**`Music`** has an interesting feature: When it's running, it will **import** the files dropped to **`~/Music/Music/Media.localized/Automatically Add to Music.localized`** into the user's "media library". Moreover, it calls something like: **`rename(a, b);`** where `a` and `b` are:
+Apps that hand file operations over to a **privileged helper** (here **`fileproviderd`** / `Files.app`) copy or move items **on behalf of the user**, so the copy runs with the helper's privileges instead of the caller's.
 
-- `a = "~/Music/Music/Media.localized/Automatically Add to Music.localized/myfile.mp3"`
-- `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3`
+Jamf Threat Labs showed that the symlink validation performed before the operation can be **raced**: instead of planting the symlink on the **last** path component (which is checked), the attacker swaps an **intermediate** directory of the path **after the copy has already started**. The privileged helper then follows the attacker-controlled link and reads/writes TCC-protected locations **without ever showing a prompt**.
 
-This **`rename(a, b);`** bevabiour is vulnerable to a **Race Condition**, as it's possible to put inside the `Automatically Add to Music.localized` folder a fake **TCC.db** file and then when the new forder(b) is created to copy the file, delete it, and point it to **`~/Library/Application Support/com.apple.TCC`**/.
-**More info** [**in the writeup**](https://gergelykalman.com/CVE-2023-38571-a-macOS-TCC-bypass-in-Music-and-TV.html)
+Directories that are **not** protected by a random UUID in their path (for example `~/Library/Mobile Documents/com~apple~CloudDocs`) are the easiest targets, because the attacker can predict the full path to race.
 
+> [!TIP]
+> This is the generic pattern to look for: **any privileged process that resolves a path more than once** (check-then-use, or `rename()`/`copyfile()` resolving source and destination separately) can be raced by swapping a directory in the middle of the path. Only `O_NOFOLLOW_ANY`, `openat()` on an already-opened directory FD, or `realpath()` + re-validation actually close the window.
 
-### SQLITE_SQLLOG_DIR - CVE-2023-32422
+More info in [**the Jamf Threat Labs writeup**](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/).
 
-If **`SQLITE_SQLLOG_DIR="path/folder"`** basically means that **any open db is copied to that path**. In this CVE this control was abused to **write** inside a **SQLite database** that is going to be **open by a process with FDA the TCC database**, and then abuse **`SQLITE_SQLLOG_DIR`** with a **symlink in the filename** so when that database is **open**, the user **TCC.db is overwritten** with the opened one.\
-**More info** [**in the writeup**](https://gergelykalman.com/sqlol-CVE-2023-32422-a-macos-tcc-bypass.html) **and**[ **in the talk**](https://www.youtube.com/watch?v=f1HA5QhLQ7Y&t=20548s).
+### SQLITE_SQLLOG_DIR
+
+`libsqlite3` can be built with `SQLITE_ENABLE_SQLLOG`, which adds a logging hook driven by environment variables ([upstream `test_sqllog.c`](https://github.com/sqlite/sqlite/blob/master/src/test_sqllog.c)):
+
+- **`SQLITE_SQLLOG_DIR=path`** – for **every database that is opened**, a **copy of the database file** and a log of the SQL statements are written into `path` (the directory must already exist).
+- **`SQLITE_SQLLOG_REUSE_FILES=0`** – take a **fresh copy every time** a DB is opened/attached instead of reusing one.
+- **`SQLITE_SQLLOG_CONDITIONAL`** – only log a connection if a `<database>-sqllog` file exists next to the main DB.
+
+If you can inject this variable into a process that has **FDA** and opens SQLite databases, it will happily **copy those protected databases** into a directory you control. Because the destination filename is derived from attacker-controlled data, a **symlink planted at the destination** turns the same primitive into an **arbitrary file write** with the target process' privileges.
 
 ### **SQLITE_AUTO_TRACE**
 
@@ -192,43 +199,21 @@ Several Apple applications used this library to access TCC protected information
 launchctl setenv SQLITE_AUTO_TRACE 1
 ```
 
-### MTL_DUMP_PIPELINES_TO_JSON_FILE - CVE-2023-32407
+### Hunting for env-var driven file writes
 
-This **env variable is used by the `Metal` framework** which is a dependency to various programs, most notably `Music`, which has FDA.
+The two previous entries are instances of the same generic technique, and it is worth hunting for more: **frameworks loaded into TCC-privileged apps often expose debug/logging environment variables that make the process create a file at a caller-controlled path**.
 
-Setting the following: `MTL_DUMP_PIPELINES_TO_JSON_FILE="path/name"`. If `path` is a valid directory, the bug will trigger and we can use `fs_usage` to see what is going on in the program:
+Workflow to find them:
 
-- a file will be `open()`ed, called `path/.dat.nosyncXXXX.XXXXXX` (X is random)
-- one or more `write()`s will write the contents to the file (we do not control this)
-- `path/.dat.nosyncXXXX.XXXXXX` will be `renamed()`d to `path/name`
+1. Pick a target with FDA or another juicy TCC permission (`Music`, `TV`, `Terminal`, MDM agents...) and list the frameworks it links (`otool -L`, `vmmap`).
+2. Grep those frameworks for `getenv` strings: `strings -a /System/Library/Frameworks/<X>.framework/<X> | grep -iE '^[A-Z0-9_]{6,}$'`.
+3. Set candidate variables via `launchctl setenv NAME /path/you/control`, launch the app and watch what it does on the filesystem with `fs_usage -w -f filesys <pid>` or `sudo fs_usage | grep <path>`.
+4. If the process **creates or renames** a file in your directory, you have a write primitive: point the destination at a symlink (or race an intermediate directory, as in CVE-2024-44131 above) to redirect it onto `~/Library/Application Support/com.apple.TCC/TCC.db`.
 
-It's a temporary file write, followed by a **`rename(old, new)`** **which is not secure.**
+> [!TIP]
+> Two things limit this. First, **`DYLD_*` variables are ignored for hardened-runtime binaries** unless the app ships the [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.allow-dyld-environment-variables) entitlement ("a Boolean value that indicates whether the app may be affected by dynamic linker environment variables, which you can use to inject code into your app's process") — see also [Notarization: the hardened runtime](https://eclecticlight.co/2021/01/07/notarization-the-hardened-runtime/). Second, Apple removes individual framework debug variables as they get reported, so a variable that worked on one macOS release is often gone on the next. If an app silently refuses to launch after you set one, treat that variable as already filtered.
 
-It's not secure because it has to **resolve the old and new paths separately**, which can take some time and can be vulenrable to a Race Condition. For more information you can check out the `xnu` function `renameat_internal()`.
-
-> [!CAUTION]
-> So, basically, if a privileged process is renaming from a folder you control, you could win a RCE and make it access a different file or, like in this CVE, open the file the privileged app created and store a FD.
->
-> If the rename access a folder you control, while you have modified the source file or has a FD to it, you change the destination file (or folder) to point a symlink, so you can write whenever you want.
-
-This was the attack in the CVE: For example, to overwrite the user's `TCC.db`, we can:
-
-- create `/Users/hacker/ourlink` to point to `/Users/hacker/Library/Application Support/com.apple.TCC/`
-- create the directory `/Users/hacker/tmp/`
-- set `MTL_DUMP_PIPELINES_TO_JSON_FILE=/Users/hacker/tmp/TCC.db`
-- trigger the bug by running `Music` with this env var
-- catch the `open()` of `/Users/hacker/tmp/.dat.nosyncXXXX.XXXXXX` (X is random)
-  - here we also `open()` this file for writing, and hold on to the file descriptor
-- atomically switch `/Users/hacker/tmp` with `/Users/hacker/ourlink` **in a loop**
-  - we do this to maximize our chances of succeeding as the race window is pretty slim, but losing the race has negligible downside
-- wait a bit
-- test if we got lucky
-  - if not, run again from the top
-
-More info in [https://gergelykalman.com/lateralus-CVE-2023-32407-a-macos-tcc-bypass.html](https://gergelykalman.com/lateralus-CVE-2023-32407-a-macos-tcc-bypass.html)
-
-> [!CAUTION]
-> Now, if you try to use the env variable `MTL_DUMP_PIPELINES_TO_JSON_FILE` apps won't launch
+Look at [macOS Dyld Hijacking & DYLD_INSERT_LIBRARIES](../../../macos-proces-abuse/macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md) for the equivalent trick with linker variables.
 
 ### Apple Remote Desktop
 
@@ -540,6 +525,10 @@ Another way using [**CoreGraphics events**](https://objectivebythesea.org/v2/tal
 - [**https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/**](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
 - [**20+ Ways to Bypass Your macOS Privacy Mechanisms**](https://www.youtube.com/watch?v=W9GxnP8c8FU)
 - [**Knockout Win Against TCC - 20+ NEW Ways to Bypass Your MacOS Privacy Mechanisms**](https://www.youtube.com/watch?v=a9hsxPdRxsY)
+- [**Jamf Threat Labs - CVE-2024-44131: TCC bypass steals data from iCloud**](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)
+- [**SQLite - `test_sqllog.c` (SQLITE_ENABLE_SQLLOG env variables)**](https://github.com/sqlite/sqlite/blob/master/src/test_sqllog.c)
+- [**Apple - Allow DYLD environment variables entitlement**](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.allow-dyld-environment-variables)
+- [**The Eclectic Light Company - Notarization: the hardened runtime**](https://eclecticlight.co/2021/01/07/notarization-the-hardened-runtime/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
