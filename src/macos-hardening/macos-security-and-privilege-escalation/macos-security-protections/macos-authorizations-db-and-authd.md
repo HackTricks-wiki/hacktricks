@@ -1,31 +1,31 @@
-# macOS Authorizations DB & Authd
+# Banco de Dados de Authorizations do macOS & authd
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Banco de Dados de Autorizações**
+## **Banco de Dados de Authorizations**
 
-O banco de dados localizado em `/var/db/auth.db` é um banco de dados usado para armazenar permissões para realizar operações sensíveis. Essas operações são realizadas completamente no **espaço do usuário** e geralmente são usadas por **serviços XPC** que precisam verificar **se o cliente chamador está autorizado** a realizar determinada ação verificando este banco de dados.
+O banco de dados localizado em `/var/db/auth.db` é usado para armazenar permissões para realizar operações sensíveis. Essas operações são realizadas completamente no **user space** e geralmente são usadas por serviços **XPC** que precisam verificar **se o cliente que faz a chamada está autorizado** a realizar determinada ação, consultando este banco de dados.
 
-Inicialmente, este banco de dados é criado a partir do conteúdo de `/System/Library/Security/authorization.plist`. Em seguida, alguns serviços podem adicionar ou modificar este banco de dados para adicionar outras permissões a ele.
+Inicialmente, esse banco de dados é criado a partir do conteúdo de `/System/Library/Security/authorization.plist`. Em seguida, alguns serviços podem adicionar ou modificar esse banco de dados para incluir outras permissões.
 
 As regras são armazenadas na tabela `rules` dentro do banco de dados e contêm as seguintes colunas:
 
-- **id**: Um identificador único para cada regra, automaticamente incrementado e servindo como chave primária.
-- **name**: O nome único da regra usado para identificá-la e referenciá-la dentro do sistema de autorização.
-- **type**: Especifica o tipo da regra, restrito aos valores 1 ou 2 para definir sua lógica de autorização.
-- **class**: Categoriza a regra em uma classe específica, garantindo que seja um número inteiro positivo.
-- "allow" para permitir, "deny" para negar, "user" se a propriedade do grupo indicar um grupo cuja membresia permite o acesso, "rule" indica em um array uma regra a ser cumprida, "evaluate-mechanisms" seguido por um array `mechanisms` que são ou embutidos ou um nome de um pacote dentro de `/System/Library/CoreServices/SecurityAgentPlugins/` ou /Library/Security//SecurityAgentPlugins
-- **group**: Indica o grupo de usuários associado à regra para autorização baseada em grupo.
+- **id**: Um identificador exclusivo para cada regra, incrementado automaticamente e usado como chave primária.
+- **name**: O nome exclusivo da regra, usado para identificá-la e referenciá-la dentro do sistema de autorização.
+- **type**: Especifica o tipo da regra, limitado aos valores 1 ou 2 para definir sua lógica de autorização.
+- **class**: Categoriza a regra em uma classe específica, garantindo que seja um inteiro positivo.
+- "allow" para permitir, "deny" para negar, "user" se a propriedade de grupo indicar um grupo cuja associação permite o acesso, "rule" indica, em um array, uma regra a ser cumprida, "evaluate-mechanisms" seguido por um array `mechanisms`, cujos elementos podem ser builtins ou o nome de um bundle dentro de `/System/Library/CoreServices/SecurityAgentPlugins/` ou `/Library/Security//SecurityAgentPlugins`
+- **group**: Indica o grupo de usuários associado à regra para autorização baseada em grupos.
 - **kofn**: Representa o parâmetro "k-of-n", determinando quantas sub-regras devem ser satisfeitas de um número total.
-- **timeout**: Define a duração em segundos antes que a autorização concedida pela regra expire.
+- **timeout**: Define a duração, em segundos, antes que a autorização concedida pela regra expire.
 - **flags**: Contém várias flags que modificam o comportamento e as características da regra.
 - **tries**: Limita o número de tentativas de autorização permitidas para aumentar a segurança.
-- **version**: Rastreia a versão da regra para controle de versão e atualizações.
-- **created**: Registra o timestamp quando a regra foi criada para fins de auditoria.
+- **version**: Registra a versão da regra para controle de versão e atualizações.
+- **created**: Registra o timestamp em que a regra foi criada para fins de auditoria.
 - **modified**: Armazena o timestamp da última modificação feita na regra.
-- **hash**: Contém um valor hash da regra para garantir sua integridade e detectar adulterações.
-- **identifier**: Fornece um identificador de string único, como um UUID, para referências externas à regra.
-- **requirement**: Contém dados serializados definindo os requisitos e mecanismos específicos de autorização da regra.
+- **hash**: Contém um valor de hash da regra para garantir sua integridade e detectar adulterações.
+- **identifier**: Fornece um identificador exclusivo em formato de string, como um UUID, para referências externas à regra.
+- **requirement**: Contém dados serializados que definem os requisitos e mecanismos específicos de autorização da regra.
 - **comment**: Oferece uma descrição ou comentário legível por humanos sobre a regra para documentação e clareza.
 
 ### Exemplo
@@ -56,7 +56,7 @@ security authorizationdb read com.apple.tcc.util.admin
 </dict>
 </plist>
 ```
-Além disso, em [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) é possível ver o significado de `authenticate-admin-nonshared`:
+Além disso, em [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) é possível ver o significado de `authenticate-admin-nonshared`:<sup>[1]</sup>
 ```json
 {
 "allow-root": "false",
@@ -73,12 +73,16 @@ Além disso, em [https://www.dssw.co.uk/reference/authorization-rights/authentic
 ```
 ## Authd
 
-É um daemon que receberá solicitações para autorizar clientes a realizar ações sensíveis. Funciona como um serviço XPC definido dentro da pasta `XPCServices/` e costuma gravar seus logs em `/var/log/authd.log`.
+É um daemon que recebe solicitações para autorizar clientes a realizar ações sensíveis. Ele funciona como um serviço XPC definido dentro da pasta `XPCServices/` e costumava gravar seus logs em `/var/log/authd.log`.
 
-Além disso, usando a ferramenta de segurança, é possível testar muitas APIs do `Security.framework`. Por exemplo, o `AuthorizationExecuteWithPrivileges` executando: `security execute-with-privileges /bin/ls`
+Além disso, usando a ferramenta `security`, é possível testar várias APIs do `Security.framework`. Por exemplo, executar `AuthorizationExecuteWithPrivileges`: `security execute-with-privileges /bin/ls`
 
-Isso irá fork e exec `/usr/libexec/security_authtrampoline /bin/ls` como root, que pedirá permissões em um prompt para executar ls como root:
+Isso fará um fork e executará `/usr/libexec/security_authtrampoline /bin/ls` como root, o que solicitará permissões em um prompt para executar ls como root:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
+
+## References
+
+- [1] [authenticate-admin-nonshared - Overview of the macOS Authorization Right](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
 
 {{#include ../../../banners/hacktricks-training.md}}

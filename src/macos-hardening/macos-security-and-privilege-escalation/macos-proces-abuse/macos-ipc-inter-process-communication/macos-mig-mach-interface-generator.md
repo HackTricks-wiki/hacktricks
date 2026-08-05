@@ -2,26 +2,26 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Informações Básicas
+## Informações básicas
 
-MIG foi criado para **simplificar o processo de criação de código Mach IPC**. Ele basicamente **gera o código necessário** para que o servidor e o cliente se comuniquem com uma definição dada. Mesmo que o código gerado seja feio, um desenvolvedor só precisará importá-lo e seu código será muito mais simples do que antes.
+O MIG foi criado para **simplificar o processo de criação de código para Mach IPC**. Basicamente, ele **gera o código necessário** para que o server e o client se comuniquem com base em uma determinada definição. Mesmo que o código gerado seja difícil de ler, um developer precisará apenas importá-lo, e seu código será muito mais simples do que antes.
 
-A definição é especificada na Linguagem de Definição de Interface (IDL) usando a extensão `.defs`.
+A definição é especificada na Interface Definition Language (IDL), usando a extensão `.defs`.
 
 Essas definições têm 5 seções:
 
-- **Declaração de subsistema**: A palavra-chave subsystem é usada para indicar o **nome** e o **id**. Também é possível marcá-lo como **`KernelServer`** se o servidor deve ser executado no kernel.
-- **Inclusões e imports**: MIG usa o pré-processador C, então é capaz de usar imports. Além disso, é possível usar `uimport` e `simport` para código gerado pelo usuário ou servidor.
-- **Declarações de tipo**: É possível definir tipos de dados, embora geralmente ele importe `mach_types.defs` e `std_types.defs`. Para tipos personalizados, pode-se usar alguma sintaxe:
-- \[i`n/out]tran`: Função que precisa ser traduzida de uma mensagem de entrada ou para uma mensagem de saída
+- **Declaração do subsystem**: A keyword subsystem é usada para indicar o **nome** e o **id**. Também é possível marcá-lo como **`KernelServer`** se o server precisar ser executado no kernel.
+- **Inclusões e imports**: O MIG usa o pré-processador C, portanto é capaz de usar imports. Além disso, é possível usar `uimport` e `simport` para o código gerado pelo user ou pelo server.
+- **Declarações de tipos**: É possível definir tipos de dados, embora normalmente sejam importados `mach_types.defs` e `std_types.defs`. Para tipos personalizados, algumas sintaxes podem ser usadas:
+- \[i`n/out]tran`: Função que precisa ser traduzida a partir de uma mensagem recebida ou para uma mensagem enviada
 - `c[user/server]type`: Mapeamento para outro tipo C.
-- `destructor`: Chame esta função quando o tipo for liberado.
+- `destructor`: Chama essa função quando o tipo é liberado.
 - **Operações**: Estas são as definições dos métodos RPC. Existem 5 tipos diferentes:
-- `routine`: Espera resposta
-- `simpleroutine`: Não espera resposta
-- `procedure`: Espera resposta
-- `simpleprocedure`: Não espera resposta
-- `function`: Espera resposta
+- `routine`: Espera uma resposta
+- `simpleroutine`: Não espera uma resposta
+- `procedure`: Espera uma resposta
+- `simpleprocedure`: Não espera uma resposta
+- `function`: Espera uma resposta
 
 ### Exemplo
 
@@ -40,19 +40,19 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Observe que o primeiro **argumento é a porta a ser vinculada** e o MIG **lidará automaticamente com a porta de resposta** (a menos que `mig_get_reply_port()` seja chamado no código do cliente). Além disso, o **ID das operações** será **sequencial**, começando pelo ID do subsistema indicado (portanto, se uma operação for descontinuada, ela é excluída e `skip` é usada para ainda utilizar seu ID).
+Observe que o primeiro **argumento é a porta a ser vinculada** e o MIG **gerenciará automaticamente a porta de resposta** (a menos que `mig_get_reply_port()` seja chamado no código do cliente). Além disso, os **IDs das operações** serão **sequenciais**, começando pelo ID de subsistema indicado (portanto, se uma operação for descontinuada, ela será excluída e `skip` será usado para continuar utilizando seu ID).
 
-Agora use o MIG para gerar o código do servidor e do cliente que será capaz de se comunicar entre si para chamar a função Subtract:
+Agora use o MIG para gerar o código do servidor e do cliente que poderão se comunicar entre si para chamar a função Subtract:
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 ```
-Vários novos arquivos serão criados no diretório atual.
+Vários arquivos novos serão criados no diretório atual.
 
 > [!TIP]
 > Você pode encontrar um exemplo mais complexo em seu sistema com: `mdfind mach_port.defs`\
-> E você pode compilá-lo a partir da mesma pasta que o arquivo com: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`
+> E pode compilá-lo a partir da mesma pasta do arquivo com: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`
 
-Nos arquivos **`myipcServer.c`** e **`myipcServer.h`** você pode encontrar a declaração e definição da struct **`SERVERPREFmyipc_subsystem`**, que basicamente define a função a ser chamada com base no ID da mensagem recebida (indicamos um número inicial de 500):
+Nos arquivos **`myipcServer.c`** e **`myipcServer.h`**, você encontrará a declaração e a definição da struct **`SERVERPREFmyipc_subsystem`**, que basicamente define a função a ser chamada com base no ID da mensagem recebida (indicamos o número inicial como 500):
 
 {{#tabs}}
 {{#tab name="myipcServer.c"}}
@@ -89,7 +89,7 @@ routine[1];
 {{#endtab}}
 {{#endtabs}}
 
-Com base na estrutura anterior, a função **`myipc_server_routine`** obterá o **ID da mensagem** e retornará a função apropriada a ser chamada:
+Com base na struct anterior, a função **`myipc_server_routine`** obterá o **ID da mensagem** e retornará a função apropriada a ser chamada:
 ```c
 mig_external mig_routine_t myipc_server_routine
 (mach_msg_header_t *InHeadP)
@@ -104,9 +104,9 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-Neste exemplo, definimos apenas 1 função nas definições, mas se tivéssemos definido mais funções, elas estariam dentro do array de **`SERVERPREFmyipc_subsystem`** e a primeira seria atribuída ao ID **500**, a segunda ao ID **501**...
+Neste exemplo, definimos apenas 1 função nas definições, mas, se tivéssemos definido mais funções, elas estariam dentro do array **`SERVERPREFmyipc_subsystem`**, e a primeira teria recebido o ID **500**, a segunda, o ID **501**...
 
-Se a função fosse esperada para enviar uma **reply**, a função `mig_internal kern_return_t __MIG_check__Reply__<name>` também existiria.
+Se fosse esperado que a função enviasse um **reply**, a função `mig_internal kern_return_t __MIG_check__Reply__<name>` também existiria.
 
 Na verdade, é possível identificar essa relação na struct **`subsystem_to_name_map_myipc`** de **`myipcServer.h`** (**`subsystem*to_name_map*\***`** em outros arquivos):
 ```c
@@ -115,7 +115,7 @@ Na verdade, é possível identificar essa relação na struct **`subsystem_to_na
 { "Subtract", 500 }
 #endif
 ```
-Finalmente, outra função importante para fazer o servidor funcionar será **`myipc_server`**, que é a que realmente **chamará a função** relacionada ao id recebido:
+Finalmente, outra função importante para fazer o servidor funcionar será **`myipc_server`**, que é a função que realmente **chamará a função** relacionada ao id recebido:
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -132,7 +132,7 @@ mig_routine_t routine;
 
 OutHeadP->msgh_bits = MACH_MSGH_BITS(MACH_MSGH_BITS_REPLY(InHeadP->msgh_bits), 0);
 OutHeadP->msgh_remote_port = InHeadP->msgh_reply_port;
-/* Tamanho mínimo: routine() irá atualizá-lo se diferente */
+/* Minimal size: routine() will update it if different */
 OutHeadP->msgh_size = (mach_msg_size_t)sizeof(mig_reply_error_t);
 OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
@@ -149,9 +149,9 @@ return FALSE;
 }
 </code></pre>
 
-Verifique as linhas destacadas anteriormente acessando a função a ser chamada pelo ID.
+Verifique as linhas destacadas anteriormente que acessam a função a ser chamada pelo ID.
 
-O seguinte é o código para criar um **servidor** e **cliente** simples onde o cliente pode chamar as funções Subtrair do servidor:
+A seguir está o código para criar um **server** e um **client** simples, no qual o client pode chamar as funções Subtract do server:
 
 {{#tabs}}
 {{#tab name="myipc_server.c"}}
@@ -215,33 +215,33 @@ USERPREFSubtract(port, 40, 2);
 {{#endtab}}
 {{#endtabs}}
 
-### O NDR_record
+### The NDR_record
 
-O NDR_record é exportado por `libsystem_kernel.dylib`, e é uma struct que permite que o MIG **transforme dados para que seja agnóstico ao sistema** em que está sendo usado, já que o MIG foi pensado para ser utilizado entre diferentes sistemas (e não apenas na mesma máquina).
+O NDR_record é exportado por `libsystem_kernel.dylib`, e é uma struct que permite ao MIG **transformar dados para que sejam agnósticos ao sistema** em que estão sendo usados, pois o MIG foi projetado para ser usado entre sistemas diferentes (e não apenas na mesma máquina).
 
-Isso é interessante porque se `_NDR_record` for encontrado em um binário como uma dependência (`jtool2 -S <binary> | grep NDR` ou `nm`), isso significa que o binário é um cliente ou servidor MIG.
+Isso é interessante porque, se `_NDR_record` for encontrado em um binário como uma dependência (`jtool2 -S <binary> | grep NDR` ou `nm`), significa que o binário é um cliente ou servidor MIG.
 
-Além disso, **servidores MIG** têm a tabela de despacho em `__DATA.__const` (ou em `__CONST.__constdata` no kernel do macOS e `__DATA_CONST.__const` em outros kernels \*OS). Isso pode ser despejado com **`jtool2`**.
+Além disso, **servidores MIG** têm a dispatch table em `__DATA.__const` (ou em `__CONST.__constdata` no kernel do macOS e em `__DATA_CONST.__const` nos outros kernels \*OS). Isso pode ser extraído com o **`jtool2`**.
 
-E **clientes MIG** usarão o `__NDR_record` para enviar com `__mach_msg` para os servidores.
+E **clientes MIG** usarão o `__NDR_record` para enviar mensagens com `__mach_msg` aos servidores.
 
-## Análise de Binários
+## Análise de binário
 
 ### jtool
 
-Como muitos binários agora usam MIG para expor portas mach, é interessante saber como **identificar que o MIG foi usado** e as **funções que o MIG executa** com cada ID de mensagem.
+Como muitos binários agora usam MIG para expor portas Mach, é interessante saber como **identificar se o MIG foi usado** e as **funções que o MIG executa** com cada ID de mensagem.
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) pode analisar informações do MIG a partir de um binário Mach-O, indicando o ID da mensagem e identificando a função a ser executada:
+O [**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) pode analisar informações do MIG a partir de um binário Mach-O, indicando o ID da mensagem e identificando a função a ser executada:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-Além disso, as funções MIG são apenas envoltórios da função real que é chamada, o que significa que, ao obter sua desassemblagem e procurar por BL, você pode ser capaz de encontrar a função real que está sendo chamada:
+Além disso, as funções MIG são apenas wrappers da função real que é chamada, o que significa que, obtendo sua disassembly e procurando por BL, talvez seja possível encontrar a função real que está sendo chamada:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### Assembly
 
-Foi mencionado anteriormente que a função que se encarregará de **chamar a função correta dependendo do ID da mensagem recebida** era `myipc_server`. No entanto, você geralmente não terá os símbolos do binário (sem nomes de funções), então é interessante **ver como ela aparece decompilada**, pois será sempre muito semelhante (o código desta função é independente das funções expostas):
+Foi mencionado anteriormente que a função responsável por **chamar a função correta dependendo do message ID recebido** era `myipc_server`. No entanto, normalmente você não terá os símbolos do binary (nomes das funções), portanto é interessante **verificar como ela aparece decompilada**, pois será sempre muito semelhante (o código dessa função é independente das funções expostas):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -249,7 +249,7 @@ Foi mencionado anteriormente que a função que se encarregará de **chamar a fu
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 var_10 = arg0;
 var_18 = arg1;
-// Instruções iniciais para encontrar os ponteiros de função apropriados
+// Initial instructions to find the proper function ponters
 *(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
@@ -258,20 +258,20 @@ var_18 = arg1;
 *(int32_t *)(var_18 + 0x10) = 0x0;
 if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
-// Chamada para sign_extend_64 que pode ajudar a identificar esta função
-// Isso armazena em rax o ponteiro para a chamada que precisa ser chamada
-// Verifique o uso do endereço 0x100004040 (array de endereços de funções)
-// 0x1f4 = 500 (o ID inicial)
+// Call to sign_extend_64 that can help to identifyf this function
+// This stores in rax the pointer to the call that needs to be called
+// Check the used of the address 0x100004040 (functions addresses array)
+// 0x1f4 = 500 (the strating ID)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
-// Se - else, o if retorna falso, enquanto o else chama a função correta e retorna verdadeiro
+// If - else, the if returns false, while the else call the correct function and returns true
 <strong>            if (rax == 0x0) {
 </strong>                    *(var_18 + 0x18) = **_NDR_record;
 *(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
 var_4 = 0x0;
 }
 else {
-// Endereço calculado que chama a função apropriada com 2 argumentos
+// Calculated address that calls the proper function with 2 arguments
 <strong>                    (var_20)(var_10, var_18);
 </strong>                    var_4 = 0x1;
 }
@@ -289,7 +289,7 @@ return rax;
 {{#endtab}}
 
 {{#tab name="myipc_server decompiled 2"}}
-Esta é a mesma função decompilada em uma versão diferente do Hopper free:
+Esta é a mesma função decompilada em uma versão free diferente do Hopper:
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -297,7 +297,7 @@ saved_fp = r29;
 stack[-8] = r30;
 var_10 = arg0;
 var_18 = arg1;
-// Instruções iniciais para encontrar os ponteiros de função apropriados
+// Initial instructions to find the proper function ponters
 *(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f | 0x0;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
@@ -321,7 +321,7 @@ r8 = 0x1;
 }
 if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
-// 0x1f4 = 500 (o ID inicial)
+// 0x1f4 = 500 (the strating ID)
 <strong>                    r8 = r8 - 0x1f4;
 </strong>                    asm { smaddl     x8, w8, w9, x10 };
 r8 = *(r8 + 0x8);
@@ -332,15 +332,15 @@ if (CPU_FLAGS & NE) {
 r8 = 0x1;
 }
 }
-// Mesmo if else que na versão anterior
-// Verifique o uso do endereço 0x100004040 (array de endereços de funções)
+// Same if else as in the previous version
+// Check the used of the address 0x100004040 (functions addresses array)
 <strong>                    if ((r8 & 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
 var_4 = 0x0;
 }
 else {
-// Chamada para o endereço calculado onde a função deve estar
+// Call to the calculated address where the function should be
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
 }
@@ -365,7 +365,7 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-Na verdade, se você for para a função **`0x100004000`**, encontrará o array de **`routine_descriptor`** structs. O primeiro elemento da struct é o **endereço** onde a **função** é implementada, e a **struct ocupa 0x28 bytes**, então a cada 0x28 bytes (começando do byte 0) você pode obter 8 bytes e esse será o **endereço da função** que será chamada:
+Na verdade, se você acessar a função **`0x100004000`**, encontrará o array de structs **`routine_descriptor`**. O primeiro elemento da struct é o **endereço** onde a **função** está implementada, e a **struct ocupa 0x28 bytes**. Portanto, a cada 0x28 bytes (começando no byte 0), você pode obter 8 bytes, que serão o **endereço da função** que será chamada:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 
@@ -373,12 +373,15 @@ Na verdade, se você for para a função **`0x100004000`**, encontrará o array 
 
 Esses dados podem ser extraídos [**usando este script do Hopper**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py).
 
-### Debug
+### Depuração
 
-O código gerado pelo MIG também chama `kernel_debug` para gerar logs sobre operações de entrada e saída. É possível verificá-los usando **`trace`** ou **`kdv`**: `kdv all | grep MIG`
+O código gerado pelo MIG também chama `kernel_debug` para gerar logs sobre as operações na entrada e na saída. É possível verificá-los usando **`trace`** ou **`kdv`**: `kdv all | grep MIG`
 
-## References
+## Referências
 
-- [\*OS Internals, Volume I, User Mode, Jonathan Levin](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [1] [bootstrap_cmds — `migcom.tproj` (o próprio compilador MIG)](https://github.com/apple-oss-distributions/bootstrap_cmds/tree/main/migcom.tproj)
+- [2] [XNU — `osfmk/mach/mach_port.defs` (exemplo de definição de subsystem MIG)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
+- [3] [XNU — `osfmk/mach/task.defs` (definição MIG do subsystem task)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
+- [4] [XNU — `osfmk/mach/message.h` (layout do header de mensagem Mach)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
 
 {{#include ../../../../banners/hacktricks-training.md}}

@@ -1,30 +1,30 @@
-# macOS Defensive Apps
+# Aplicativos defensivos do macOS
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Firewalls
 
-- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): Ele monitorará cada conexão feita por cada processo. Dependendo do modo (permitir conexões silenciosamente, negar conexões silenciosamente e alertar), ele **mostrará um alerta** toda vez que uma nova conexão for estabelecida. Ele também tem uma GUI muito boa para ver todas essas informações.
-- [**LuLu**](https://objective-see.org/products/lulu.html): firewall da Objective-See. Este é um firewall básico que irá alertá-lo sobre conexões suspeitas (ele tem uma GUI, mas não é tão sofisticada quanto a do Little Snitch).
+- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): Monitora cada conexão feita por cada processo. Dependendo do modo (permitir conexões silenciosamente, negar conexões silenciosamente e alertar), ele **mostrará um alerta** sempre que uma nova conexão for estabelecida. Ele também possui uma GUI muito útil para visualizar todas essas informações.
+- [**LuLu**](https://objective-see.org/products/lulu.html): Firewall da Objective-See. Este é um firewall básico que alertará sobre conexões suspeitas (possui uma GUI, mas não é tão sofisticada quanto a do Little Snitch).
 
 ## Detecção de persistência
 
-- [**KnockKnock**](https://objective-see.org/products/knockknock.html): aplicação da Objective-See que vai procurar em vários locais onde **malware poderia estar persistindo** (é uma ferramenta de uso único, não um serviço de monitoramento).
-- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Como o KnockKnock, monitorando processos que geram persistência.
+- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Aplicativo da Objective-See que pesquisa vários locais onde o **malware pode estar persistindo** (é uma ferramenta de uso único, não um serviço de monitoramento).
+- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Semelhante ao KnockKnock, monitorando processos que geram persistência.
 
-## Detecção de keyloggers
+## Detecção de Keyloggers
 
-- [**ReiKey**](https://objective-see.org/products/reikey.html): aplicação da Objective-See para encontrar **keyloggers** que instalam "event taps" do teclado
+- [**ReiKey**](https://objective-see.org/products/reikey.html): Aplicativo da Objective-See para encontrar **keyloggers** que instalam "event taps" do teclado.
 
 ## Telemetria de endpoint / controle de execução
 
-- [**Santa**](https://santa.dev/): Sistema de autorização binária e monitoramento para macOS. Ele usa um cliente de **Endpoint Security** para autorizar eventos de **`exec`** antes da execução do código, então é comum em frotas corporativas focadas em **allowlisting/denylisting** em vez de apenas detecção pós-execução.
-- [**Mac Monitor**](https://github.com/redcanaryco/mac-monitor): ferramenta de análise dinâmica para macOS, tipo Procmon. Ele ingere **telemetria de Endpoint Security** (eventos de processo, arquivo, interprocesso, login e relacionados ao XProtect) e é útil para entender o que um sensor maduro baseado em ES realmente consegue observar.
-- [**ProcessMonitor / FileMonitor / DNSMonitor**](https://objective-see.org/products/utilities.html): ferramentas leves da Objective-See para telemetria de **processo**, **arquivo** e **DNS**. Em macOS modernos, elas têm pré-requisitos extras como **root**, **Terminal Full Disk Access** ou aprovação de **System/Network Extension**. Para mais ideias de instrumentação, veja [esta outra página sobre inspeção/debugging e fuzzing de apps no macOS](macos-apps-inspecting-debugging-and-fuzzing/README.md).
+- [**Santa**](https://santa.dev/): Sistema de autorização e monitoramento de binários para macOS. Ele usa um cliente do **Endpoint Security** para autorizar eventos **`exec`** antes que o código seja executado, por isso é comum em frotas empresariais focadas em **allowlisting/denylisting**, em vez de depender apenas da detecção pós-execução.
+- [**Mac Monitor**](https://github.com/redcanaryco/mac-monitor): Ferramenta de análise dinâmica do macOS semelhante ao Procmon. Ela ingere **telemetria do Endpoint Security** (eventos relacionados a processos, arquivos, comunicação entre processos, login e XProtect) e é útil para entender o que um sensor maduro baseado em ES pode realmente observar.<sup>[2]</sup>
+- [**ProcessMonitor / FileMonitor / DNSMonitor**](https://objective-see.org/products/utilities.html): Ferramentas leves da Objective-See para telemetria de **processos**, **arquivos** e **DNS**. Em versões modernas do macOS, elas têm pré-requisitos adicionais, como **root**, **Terminal Full Disk Access** ou aprovação de **System/Network Extension**. Para mais ideias de instrumentação, consulte [esta outra página sobre inspeção, debugging e fuzzing de aplicativos do macOS](macos-apps-inspecting-debugging-and-fuzzing/README.md).
 
-## Triagem rápida de tooling defensivo
+## Triagem rápida de ferramentas defensivas
 
-A maioria dos produtos modernos de segurança para macOS roda como alguma combinação de **System Extensions / Endpoint Security clients**, **launchd agents/daemons** e aplicações com **Full Disk Access**. Uma checklist rápida do operador:
+A maioria dos produtos modernos de segurança para macOS é executada como alguma combinação de **System Extensions / clientes do Endpoint Security**, **agentes/daemons do launchd** e aplicativos com **Full Disk Access**. Uma checklist rápida para o operador:
 ```bash
 # System / network extensions (EDRs, DNS filters, firewalls, VPNs)
 systemextensionsctl list
@@ -48,15 +48,15 @@ echo "== $db =="
 sqlite3 "$db" 'SELECT service,client,auth_value,last_modified FROM access WHERE service IN ("kTCCServiceSystemPolicyAllFiles","kTCCServiceEndpointSecurityClient") ORDER BY last_modified DESC;'
 done
 ```
-If `systemextensionsctl list` mostrar um sensor como **`[activated enabled]`**, geralmente é o indicador mais rápido de que a extensão está realmente ativa. No **macOS 15 Sequoia e posteriores**, o MDM também pode marcar extensões de segurança específicas como **não removíveis pela UI**, então "desativá-la em System Settings" já não é uma suposição segura. Para detalhes internos, veja [macOS System Extensions](mac-os-architecture/macos-system-extensions.md).
+Se `systemextensionsctl list` mostrar um sensor como **`[activated enabled]`**, geralmente este é o indicador mais rápido de que a extensão está realmente ativa. No **macOS 15 Sequoia e posteriores**, o MDM também pode marcar extensões de segurança específicas como **não removíveis pela interface**, portanto, “desative-a nos Ajustes do Sistema” não é mais uma suposição segura. Para detalhes internos, consulte [macOS System Extensions](mac-os-architecture/macos-system-extensions.md).
 
-## Telemetria nativa recente que defensores podem consumir
+## Telemetria nativa recente que os defensores podem consumir
 
-Versões recentes do macOS tornaram alguns bypasses acionados pelo usuário, antes irritantes de detectar, muito mais barulhentos para blue teams:
+Versões recentes do macOS tornaram alguns bypasses anteriores, difíceis de detectar e iniciados pelo usuário, muito mais ruidosos para as equipes de blue team:
 
-- **macOS 15+**: clientes de Endpoint Security podem receber eventos **`gatekeeper_user_override`**, então bypasses manuais de Gatekeeper podem ser registrados centralmente.
-- **As ferramentas atuais de Endpoint Security no macOS** também podem ingerir eventos de **detecção de malware do XProtect**, facilitando confirmar o que a Apple já detectou no endpoint.
-- **macOS 15.4+**: Endpoint Security adiciona **`tcc_modify`**, que finalmente dá aos defensores uma forma suportada de monitorar **concessões/revogação de TCC** em vez de extrair logs de debug do TCC.
+- **macOS 15+**: clientes do Endpoint Security podem receber eventos **`gatekeeper_user_override`**, permitindo que bypasses manuais do Gatekeeper sejam registrados centralmente.
+- As ferramentas atuais de Endpoint Security do macOS também podem ingerir eventos de **detecção de malware do XProtect**, facilitando a confirmação do que a Apple já detectou no endpoint.
+- **macOS 15.4+**: o Endpoint Security adiciona **`tcc_modify`**, finalmente oferecendo aos defensores uma forma compatível de monitorar **concessões/revogações do TCC**, em vez de extrair informações dos logs de depuração do TCC.<sup>[1]</sup>
 ```bash
 # Gatekeeper user overrides
 sudo eslogger gatekeeper_user_override
@@ -67,11 +67,11 @@ sudo eslogger xp_malware_detected
 # macOS 15.4+
 sudo eslogger tcc_modify
 ```
-Isso é útil tanto para defensores quanto para red teamers fazendo autoavaliação: se o alvo tiver uma stack madura baseada em ES, **cadeias de bypass de Gatekeeper / TCC aprovadas pelo usuário podem ser muito mais visíveis do que antes**. Para contexto sobre essas proteções, veja [Gatekeeper / Quarantine / XProtect](macos-security-protections/macos-gatekeeper.md) e [TCC](macos-security-protections/macos-tcc/README.md).
+Isso é útil tanto para defensores quanto para red teamers fazendo uma autoavaliação: se o alvo tiver uma stack madura baseada em ES, **cadeias de bypass de Gatekeeper / TCC aprovadas pelo usuário podem estar muito mais visíveis do que antes**. Para obter informações básicas sobre essas proteções, consulte [Gatekeeper / Quarantine / XProtect](macos-security-protections/macos-gatekeeper.md) e [TCC](macos-security-protections/macos-tcc/README.md).
 
-## References
+## Referências
 
-- [**Objective-See - TCCing is Believing! Apple finally adds TCC events to Endpoint Security!**](https://objective-see.org/blog/blog_0x7F.html)
-- [**Red Canary - Introducing: Mac Monitor**](https://redcanary.com/blog/threat-detection/mac-monitor/)
+- [1] [Objective-See - TCCing é acreditar! A Apple finalmente adiciona eventos TCC ao Endpoint Security!](https://objective-see.org/blog/blog_0x7F.html)
+- [2] [Red Canary - Apresentando: Mac Monitor](https://redcanary.com/blog/threat-detection/mac-monitor/)
 
 {{#include ../../banners/hacktricks-training.md}}
