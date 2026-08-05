@@ -1,19 +1,19 @@
-# macOS Zapečaćeni sistemski volumen & DataVault
+# macOS Sealed System Volume & DataVault
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Zapečaćeni sistemski volumen (SSV)
+## Sealed System Volume (SSV)
 
 ### Osnovne informacije
 
-Počevši od **macOS Big Sur (11.0)**, sistemski volumen je kriptografski zapečaćen korišćenjem **APFS snapshot hash tree**. Ovo se naziva **Zapečaćeni sistemski volumen (SSV)**. Sistemsku particiju montira se kao **samo za čitanje** i svaka izmena prekida pečat, koji se proverava pri pokretanju sistema.
+Počev od **macOS Big Sur (11.0)**, system volume je kriptografski zapečaćen pomoću **APFS snapshot hash tree**. Ovo se naziva **Sealed System Volume (SSV)**. System partition se montira **read-only**, a svaka izmena narušava seal, što se proverava tokom boot procesa.
 
-SSV pruža:
-- **Otkrivanje neovlašćenih izmena** — svaka izmena sistemskih binaries/framework-ova može se otkriti preko prekinutog kriptografskog pečata
-- **Zaštita od rollback-a** — proces podizanja sistema proverava integritet sistemskog snapshot-a
-- **Sprečavanje rootkita** — čak ni root ne može trajno da izmeni fajlove na sistemskom volumenu (bez prekida pečata)
+SSV obezbeđuje:
+- **Detekciju neovlašćenih izmena** — svaka izmena system binaries/frameworks može se otkriti putem narušenog cryptographic seal-a
+- **Zaštitu od rollback-a** — boot proces proverava integritet system snapshot-a
+- **Prevenciju rootkit-a** — čak ni root ne može trajno da menja fajlove na system volume-u (bez narušavanja seal-a)
 
-### Provera statusa SSV
+### Provera SSV statusa
 ```bash
 # Check if authenticated root is enabled (SSV seal verification)
 csrutil authenticated-root status
@@ -27,16 +27,16 @@ mount | grep " / "
 # Verify the system volume seal
 diskutil apfs listVolumeGroups
 ```
-### Dozvole SSV Writer-a
+### Entitlements za SSV Writer-e
 
-Neki Apple sistemski binarni fajlovi imaju dozvole koje im omogućavaju da menjaju ili upravljaju sealed system volume:
+Određeni Apple sistemski binarni fajlovi imaju entitlements koji im omogućavaju da menjaju ili upravljaju zapečaćenim sistemskim volumenom:
 
-| Dozvola | Svrha |
+| Entitlement | Svrha |
 |---|---|
-| `com.apple.private.apfs.revert-to-snapshot` | Vratiti sistemski volume na prethodni snapshot |
-| `com.apple.private.apfs.create-sealed-snapshot` | Kreirati novi sealed snapshot nakon sistemskih ažuriranja |
-| `com.apple.rootless.install.heritable` | Pisati u SIP-zaštićene putanje (nasleđeno u podprocesima) |
-| `com.apple.rootless.install` | Pisati u SIP-zaštićene putanje |
+| `com.apple.private.apfs.revert-to-snapshot` | Vraćanje sistemskog volumena na prethodni snapshot |
+| `com.apple.private.apfs.create-sealed-snapshot` | Kreiranje novog zapečaćenog snapshot-a nakon ažuriranja sistema |
+| `com.apple.rootless.install.heritable` | Pisanje u putanje zaštićene SIP-om (nasleđuju ih child procesi) |
+| `com.apple.rootless.install` | Pisanje u putanje zaštićene SIP-om |
 
 ### Pronalaženje SSV Writer-a
 ```bash
@@ -58,7 +58,7 @@ WHERE c.name = 'ssv_writer';"
 
 #### Snapshot Rollback Attack
 
-Ako napadač kompromituje binarni fajl sa `com.apple.private.apfs.revert-to-snapshot`, može **vratiti sistemski volumen u stanje pre ažuriranja**, obnavljajući poznate ranjivosti:
+Ako napadač kompromituje binary sa `com.apple.private.apfs.revert-to-snapshot`, može **vratiti system volume u stanje pre ažuriranja**, čime se ponovo aktiviraju poznate ranjivosti:
 ```bash
 # Conceptual — the snapshot revert operation would:
 # 1. List available snapshots
@@ -68,24 +68,24 @@ diskutil apfs listSnapshots disk3s1
 # This restores the system to a state with known, patched vulnerabilities
 ```
 > [!WARNING]
-> Vraćanje snapshot-a efektivno **poništava sigurnosne nadogradnje**, vraćajući ranije zakrpljene ranjivosti kernela i sistema. Ovo je jedna od najopasnijih operacija na modernom macOS-u.
+> Vraćanje snapshot-a efektivno **poništava security updates**, obnavljajući prethodno zakrpene kernel i sistemske ranjivosti. Ovo je jedna od najopasnijih mogućih operacija na modernom macOS-u.
 
 #### Zamena sistemskih binarnih datoteka
 
-Sa SIP bypass + SSV write capability, napadač može:
+Sa SIP bypass + SSV write capability, napadač može da:
 
-1. Montirati sistemski volumen u režimu čitanja i pisanja
-2. Zameniti sistemski daemon ili framework biblioteku trojanskom verzijom
-3. Ponovo zapečatiti snapshot (ili prihvatiti pokidani seal ako je SIP već degradiran)
-4. Rootkit opstaje preko restartovanja i nevidljiv je userland detekcionim alatima
+1. Montira system volume sa read-write dozvolama
+2. Zameni sistemski daemon ili framework library trojanizovanom verzijom
+3. Ponovo zapečati snapshot (ili prihvati neispravan seal ako je SIP već degradiran)
+4. Rootkit ostaje aktivan nakon reboot-a i nevidljiv je alatima za detekciju u userland-u
 
-### Real-World CVEs
+### CVE-ovi iz stvarnog sveta
 
-| CVE | Description |
+| CVE | Opis |
 |---|---|
-| CVE-2021-30892 | **Shrootless** — zaobilaženje SIP-a koje omogućava izmenu SSV-a preko `system_installd` |
-| CVE-2022-22583 | SSV bypass kroz PackageKit-ovo rukovanje snapshot-ovima |
-| CVE-2022-46689 | Race condition koja omogućava pisanje u fajlove zaštićene SIP-om |
+| CVE-2021-30892 | **Shrootless** — SIP bypass koji zloupotrebljava `system_installd` entitlement `com.apple.rootless.install.heritable` za pokretanje proizvoljnih post-install skripti ([Microsoft](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)) |
+| CVE-2022-22583 | SIP bypass: `system_installd` je post-install skriptu smestio u SIP-protected folder unutar `/tmp`, ali sam `/tmp` nije SIP-protected, pa je folder mogao biti zamenjen montiranjem image-a preko njega ([Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html)) |
+| CVE-2022-46689 | **MacDirtyCow** — copy-on-write race u XNU-u koji omogućava upis u read-only fajlove čiji je vlasnik root ([Worth Doing Badly](https://worthdoingbadly.com/macdirtycow/)) |
 
 ---
 
@@ -93,16 +93,16 @@ Sa SIP bypass + SSV write capability, napadač može:
 
 ### Osnovne informacije
 
-**DataVault** je Apple-ov sloj zaštite za osetljive sistemske baze podataka. Čak ni **root ne može pristupiti datotekama zaštićenim od strane DataVault-a** — samo procesi sa specifičnim entitlements mogu da ih čitaju ili menjaju. Zaštićena skladišta uključuju:
+**DataVault** je Apple-ov protection layer za osetljive sistemske baze podataka. Čak ni **root ne može da pristupi DataVault-protected fajlovima** — samo procesi sa specifičnim entitlement-ima mogu da ih čitaju ili menjaju. Zaštićeni store-ovi obuhvataju:
 
-| Zaštićena baza | Putanja | Sadržaj |
+| Zaštićena baza podataka | Putanja | Sadržaj |
 |---|---|---|
-| TCC (system) | `/Library/Application Support/com.apple.TCC/TCC.db` | Sistemske TCC odluke o privatnosti |
-| TCC (user) | `~/Library/Application Support/com.apple.TCC/TCC.db` | TCC odluke o privatnosti po korisniku |
-| Keychain (system) | `/Library/Keychains/System.keychain` | Sistem keychain |
-| Keychain (user) | `~/Library/Keychains/login.keychain-db` | Korisnički keychain |
+| TCC (system) | `/Library/Application Support/com.apple.TCC/TCC.db` | TCC privacy odluke na nivou sistema |
+| TCC (user) | `~/Library/Application Support/com.apple.TCC/TCC.db` | TCC privacy odluke po korisniku |
+| Keychain (system) | `/Library/Keychains/System.keychain` | System keychain |
+| Keychain (user) | `~/Library/Keychains/login.keychain-db` | User keychain |
 
-Zaštita DataVault-a se sprovodi na nivou **filesystem-a** koristeći extended attributes i volume protection flags, koje verifikuje kernel.
+DataVault protection se sprovodi na **filesystem nivou** korišćenjem extended attributes i volume protection flags, a proverava ga kernel.
 
 ### DataVault Controller Entitlements
 ```
@@ -130,11 +130,11 @@ JOIN executable_capabilities ec ON e.id = ec.executable_id
 JOIN capabilities c ON ec.capability_id = c.id
 WHERE c.name = 'datavault_controller';"
 ```
-### Scenariji napada
+### Scenario napada
 
 #### Direktna izmena TCC baze podataka
 
-Ako napadač kompromituje binarni fajl kontrolera DataVault (npr. putem injektovanja koda u proces sa `com.apple.private.tcc.manager`), može **direktno izmeniti TCC bazu podataka** kako bi dodelio bilo kojoj aplikaciji bilo koju TCC dozvolu:
+Ako napadač kompromituje DataVault controller binary (npr. putem code injection-a u proces sa `com.apple.private.tcc.manager`), može **direktno da izmeni TCC bazu podataka** i dodeli bilo kojoj aplikaciji bilo koju TCC dozvolu:
 ```sql
 -- Grant Full Disk Access to a malicious binary (conceptual)
 INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_version)
@@ -145,25 +145,26 @@ INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_
 VALUES ('kTCCServiceCamera', 'com.attacker.malware', 0, 2, 4, 1);
 ```
 > [!CAUTION]
-> Izmena TCC baze podataka je **krajnji bypass privatnosti** — dodeljuje bilo koju dozvolu tiho, bez bilo kakvog korisničkog upita ili vidljivog indikatora. Istorijski, više macOS lanaca eskalacije privilegija završilo je zapisima u TCC bazi podataka kao konačnim payload-om.
+> Izmena TCC baze podataka je **konačni zaobilazak zaštite privatnosti** — nečujno dodeljuje bilo koju dozvolu, bez ikakvog korisničkog upita ili vidljivog indikatora. Istorijski gledano, više macOS lanaca eskalacije privilegija završilo se upisivanjem u TCC bazu podataka kao završnim payloadom.
 
-#### Pristup Keychain baze podataka
+#### Pristup Keychain bazi podataka
 
-DataVault takođe štiti keychain backing fajlove. Kompromitovan DataVault controller može:
+DataVault takođe štiti pomoćne datoteke keychain-a. Kompromitovani DataVault kontroler može da:
 
-1. Pročitati sirove keychain database fajlove
-2. Izvući enkriptovane keychain stavke
-3. Pokušati offline dekripciju koristeći korisničku lozinku ili povraćene ključeve
+1. Čita neobrađene datoteke keychain baze podataka
+2. Izdvoji šifrovane keychain stavke
+3. Pokuša offline dešifrovanje pomoću korisničke lozinke ili pronađenih ključeva
 
-### Stvarni CVE-ovi koji uključuju DataVault/TCC bypass
+### CVE ranjivosti iz stvarnog sveta koje uključuju DataVault/TCC zaobilaženje
 
-| CVE | Description |
+| CVE | Opis |
 |---|---|
-| CVE-2023-40424 | TCC bypass via symlink to DataVault-protected file |
-| CVE-2023-32364 | Sandbox bypass leading to TCC database modification |
-| CVE-2021-30713 | TCC bypass via XCSSET malware modifying TCC.db |
-| CVE-2020-9934 | TCC bypass via environment variable manipulation |
-| CVE-2020-29621 | Music app TCC bypass reaching DataVault |
+| CVE-2024-44131 | Symlink race u FileProvider-u koji privilegovanom helper-u omogućava pristup podacima zaštićenim TCC-om ([Jamf](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)) |
+| CVE-2023-40424 | Kao root, **kreiranje novog korisnika čiji `NFSHomeDirectory` pokazuje na napadačev `TCC.db`**; prilikom prijavljivanja `tccd` ga učitava i primenjuje dodeljene dozvole, čime se omogućava pristup podacima drugih korisnika ([Kandji](https://blog.kandji.io/malware-bypass-tcc)) |
+| CVE-2021-30970 | "powerdir": promena korisnikovog home direktorijuma radi postavljanja napadačevog `TCC.db` ([Microsoft](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)) |
+| CVE-2021-30713 | Greška u zaključivanju bundle-a koja aplikaciji omogućava **nasleđivanje TCC dozvola donor bundle-a** bez upita; u divljini ju je iskorišćavao **XCSSET** za snimanje ekrana ([Jamf](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)) |
+| CVE-2020-9934 | `tccd` je formirao putanju do baze iz `$HOME`, pa ju je `launchctl setenv HOME` preusmeravao na napadačev `TCC.db` ([Matt Shockley](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)) |
+| CVE-2020-29621 | `coreaudiod` je posedovao `com.apple.private.tcc.manager` **i imao onemogućenu validaciju biblioteka**, pa je HAL plug-in postavljen u `/Library/Audio/Plug-Ins/HAL` mogao da dodeli proizvoljna TCC prava ([Wojciech Reguła](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)) |
 
 ## Reference
 

