@@ -2,32 +2,32 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Garage Doors
+## Drzwi garażowe
 
-Otwieracze do garażu zazwyczaj działają na częstotliwościach w zakresie 300-190 MHz, przy czym najczęściej spotykane częstotliwości to 300 MHz, 310 MHz, 315 MHz i 390 MHz. Ten zakres częstotliwości jest powszechnie używany w otwieraczach do garażu, ponieważ jest mniej zatłoczony niż inne pasma częstotliwości i jest mniej narażony na zakłócenia od innych urządzeń.
+Otwieracze drzwi garażowych zazwyczaj działają w zakresie częstotliwości 300-190 MHz, przy czym najczęściej używane są częstotliwości 300 MHz, 310 MHz, 315 MHz i 390 MHz. Ten zakres częstotliwości jest powszechnie używany przez otwieracze drzwi garażowych, ponieważ jest mniej zatłoczony niż inne pasma częstotliwości i występuje w nim mniejsze prawdopodobieństwo zakłóceń powodowanych przez inne urządzenia.
 
-## Car Doors
+## Drzwi samochodowe
 
-Większość pilotów do samochodów działa na **315 MHz lub 433 MHz**. Obie te częstotliwości to częstotliwości radiowe, które są używane w różnych zastosowaniach. Główna różnica między tymi dwiema częstotliwościami polega na tym, że 433 MHz ma dłuższy zasięg niż 315 MHz. Oznacza to, że 433 MHz jest lepsze do zastosowań wymagających dłuższego zasięgu, takich jak zdalne otwieranie bezkluczykowe.\
-W Europie powszechnie używa się 433,92 MHz, a w USA i Japonii 315 MHz.
+Większość pilotów samochodowych działa na częstotliwości **315 MHz lub 433 MHz**. Są to częstotliwości radiowe używane w wielu różnych zastosowaniach. Główna różnica między tymi częstotliwościami polega na tym, że 433 MHz zapewnia większy zasięg niż 315 MHz. Oznacza to, że 433 MHz lepiej sprawdza się w zastosowaniach wymagających większego zasięgu, takich jak zdalny bezkluczykowy dostęp.\
+W Europie powszechnie używana jest częstotliwość 433,92 MHz, a w USA i Japonii 315 MHz.<sup>[[1]](#references)</sup>
 
 ## **Brute-force Attack**
 
 <figure><img src="../../images/image (1084).png" alt=""><figcaption></figcaption></figure>
 
-Jeśli zamiast wysyłać każdy kod 5 razy (wysyłany w ten sposób, aby upewnić się, że odbiornik go odbierze), wyślesz go tylko raz, czas zostaje skrócony do 6 minut:
+Jeśli zamiast wysyłać każdy kod 5 razy (jest on wysyłany w ten sposób, aby upewnić się, że odbiornik go otrzyma), wyślemy go tylko raz, czas zostanie skrócony do 6 minut:
 
 <figure><img src="../../images/image (622).png" alt=""><figcaption></figcaption></figure>
 
-a jeśli **usunięcie 2 ms oczekiwania** między sygnałami pozwoli **zmniejszyć czas do 3 minut.**
+a jeśli **usuniesz 2 ms oczekiwania** między sygnałami, możesz **skrócić czas do 3 minut.**
 
-Co więcej, używając sekwencji De Bruijn (sposób na zmniejszenie liczby bitów potrzebnych do wysłania wszystkich potencjalnych liczb binarnych do bruteforce), ten **czas zostaje skrócony do 8 sekund**:
+Co więcej, dzięki użyciu sekwencji De Bruijna (sposobu na zmniejszenie liczby bitów potrzebnych do wysłania wszystkich potencjalnych liczb binarnych w celu przeprowadzenia brute-force) ten **czas zostaje skrócony do zaledwie 8 sekund**:
 
 <figure><img src="../../images/image (583).png" alt=""><figcaption></figcaption></figure>
 
-Przykład tego ataku został zaimplementowany w [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
+Przykład tego ataku zaimplementowano w [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)<sup>[[3]](#references)</sup>
 
-Wymaganie **preambuły unika optymalizacji sekwencji De Bruijn** i **kodowanie zmienne zapobiega temu atakowi** (zakładając, że kod jest wystarczająco długi, aby nie można go było złamać).
+Wymaganie **preambuły uniemożliwi optymalizację za pomocą sekwencji De Bruijna**, a **rolling codes zapobiegną temu atakowi** (zakładając, że kod jest wystarczająco długi, aby nie można było przeprowadzić brute-force).
 
 ## Sub-GHz Attack
 
@@ -40,49 +40,49 @@ flipper-zero/fz-sub-ghz.md
 
 ## Rolling Codes Protection
 
-Automatyczne otwieracze do garażu zazwyczaj używają bezprzewodowego pilota do otwierania i zamykania drzwi garażowych. Pilot **wysyła sygnał radiowy (RF)** do otwieracza do garażu, który aktywuje silnik do otwarcia lub zamknięcia drzwi.
+Automatyczne otwieracze drzwi garażowych zazwyczaj używają bezprzewodowego pilota do otwierania i zamykania drzwi garażowych. Pilot **wysyła sygnał radiowy (RF)** do otwieracza drzwi garażowych, który uruchamia silnik otwierający lub zamykający drzwi.
 
-Możliwe jest, że ktoś użyje urządzenia znanego jako code grabber, aby przechwycić sygnał RF i nagrać go do późniejszego użycia. Jest to znane jako **atak powtórzeniowy**. Aby zapobiec tego typu atakowi, wiele nowoczesnych otwieraczy do garażu używa bardziej bezpiecznej metody szyfrowania znanej jako system **rolling code**.
+Możliwe jest użycie urządzenia znanego jako code grabber do przechwycenia sygnału RF i zapisania go do późniejszego użycia. Jest to znane jako **replay attack**. Aby zapobiec tego typu atakom, wiele nowoczesnych otwieraczy drzwi garażowych używa bezpieczniejszej metody szyfrowania znanej jako system **rolling code**.
 
-**Sygnał RF jest zazwyczaj przesyłany za pomocą rolling code**, co oznacza, że kod zmienia się przy każdym użyciu. To sprawia, że **trudno** jest komuś **przechwycić** sygnał i **użyć** go do uzyskania **nieautoryzowanego** dostępu do garażu.
+**Sygnał RF jest zazwyczaj przesyłany przy użyciu rolling code**, co oznacza, że kod zmienia się przy każdym użyciu. Utrudnia to **przechwycenie** sygnału i wykorzystanie go do uzyskania **nieautoryzowanego** dostępu do garażu.
 
-W systemie rolling code pilot i otwieracz do garażu mają **wspólny algorytm**, który **generuje nowy kod** za każdym razem, gdy pilot jest używany. Otwieracz do garażu zareaguje tylko na **poprawny kod**, co znacznie utrudnia uzyskanie nieautoryzowanego dostępu do garażu tylko poprzez przechwycenie kodu.
+W systemie rolling code pilot i otwieracz drzwi garażowych mają **wspólny algorytm**, który **generuje nowy kod** za każdym użyciem pilota. Otwieracz drzwi garażowych odpowie wyłącznie na **prawidłowy kod**, co znacznie utrudnia uzyskanie nieautoryzowanego dostępu do garażu poprzez samo przechwycenie kodu.
 
 ### **Missing Link Attack**
 
-W zasadzie nasłuchujesz przycisku i **przechwytujesz sygnał, gdy pilot jest poza zasięgiem** urządzenia (powiedzmy samochodu lub garażu). Następnie przechodzisz do urządzenia i **używasz przechwyconego kodu, aby je otworzyć**.
+Zasadniczo nasłuchujesz naciśnięcia przycisku i **przechwytujesz sygnał, gdy pilot znajduje się poza zasięgiem** urządzenia (na przykład samochodu lub garażu). Następnie przemieszczasz się do urządzenia i **używasz przechwyconego kodu, aby je otworzyć**.<sup>[[2]](#references)</sup>
 
 ### Full Link Jamming Attack
 
-Napastnik może **zakłócać sygnał w pobliżu pojazdu lub odbiornika**, aby **odbiornik nie mógł faktycznie „usłyszeć” kodu**, a gdy to się dzieje, możesz po prostu **przechwycić i powtórzyć** kod, gdy przestaniesz zakłócać.
+Atakujący może **zagłuszyć sygnał w pobliżu pojazdu lub odbiornika**, aby **odbiornik faktycznie nie mógł „usłyszeć” kodu**, a gdy już to nastąpi, można po prostu **przechwycić i odtworzyć** kod po zakończeniu zagłuszania.
 
-Ofiara w pewnym momencie użyje **kluczy do zablokowania samochodu**, ale atakujący **nagrał wystarczająco dużo kodów „zamknij drzwi”**, które mam nadzieję można będzie ponownie wysłać, aby otworzyć drzwi (może być potrzebna **zmiana częstotliwości**, ponieważ są samochody, które używają tych samych kodów do otwierania i zamykania, ale nasłuchują obu poleceń na różnych częstotliwościach).
+W pewnym momencie ofiara użyje **kluczy, aby zamknąć samochód**, ale wtedy atakujący będzie miał **zarejestrowaną wystarczającą liczbę kodów „zamknij drzwi”**, które będzie można ponownie wysłać w celu otwarcia drzwi (może być konieczna **zmiana częstotliwości**, ponieważ istnieją samochody używające tych samych kodów do otwierania i zamykania, ale nasłuchujące obu poleceń na różnych częstotliwościach).
 
 > [!WARNING]
-> **Zakłócanie działa**, ale jest zauważalne, ponieważ jeśli **osoba zamykająca samochód po prostu sprawdza drzwi**, aby upewnić się, że są zablokowane, zauważy, że samochód jest odblokowany. Dodatkowo, jeśli byłaby świadoma takich ataków, mogłaby nawet usłyszeć, że drzwi nigdy nie wydały dźwięku **zamka** lub światła samochodu **nigdy nie migały**, gdy nacisnęła przycisk „zablokuj”.
+> **Jamming działa**, ale jest zauważalny, ponieważ jeśli **osoba zamykająca samochód po prostu sprawdzi drzwi**, aby upewnić się, że są zamknięte, zauważy, że samochód jest odblokowany. Ponadto, jeśli znałaby takie ataki, mogłaby nawet zauważyć, że drzwi nigdy nie wydały dźwięku **zamykania** albo że **światła samochodu** nie mignęły po naciśnięciu przycisku „lock”.
 
 ### **Code Grabbing Attack ( aka ‘RollJam’ )**
 
-To bardziej **technika zakłócania w ukryciu**. Napastnik zakłóci sygnał, więc gdy ofiara spróbuje zablokować drzwi, to nie zadziała, ale napastnik **nagra ten kod**. Następnie ofiara **spróbuje ponownie zablokować samochód**, naciskając przycisk, a samochód **nagra ten drugi kod**.\
-Natychmiast po tym **napastnik może wysłać pierwszy kod**, a **samochód się zablokuje** (ofiara pomyśli, że drugi nacisk go zamknął). Następnie napastnik będzie mógł **wysłać drugi skradziony kod, aby otworzyć** samochód (zakładając, że **kod „zamknij samochód” może być również użyty do otwarcia**). Może być potrzebna zmiana częstotliwości (ponieważ są samochody, które używają tych samych kodów do otwierania i zamykania, ale nasłuchują obu poleceń na różnych częstotliwościach).
+Jest to bardziej **stealth technika Jamming**. Atakujący zagłuszy sygnał, więc gdy ofiara spróbuje zamknąć drzwi, nie zadziała to, ale atakujący **zarejestruje ten kod**. Następnie ofiara **spróbuje ponownie zamknąć samochód**, naciskając przycisk, a samochód **zarejestruje ten drugi kod**.\
+Natychmiast po tym **atakujący może wysłać pierwszy kod**, a **samochód zostanie zamknięty** (ofiara uzna, że zamknęła go drugim naciśnięciem). Następnie atakujący będzie mógł **wysłać drugi skradziony kod, aby otworzyć** samochód (zakładając, że **kod „zamknij samochód” może być również użyty do jego otwarcia**). Może być konieczna zmiana częstotliwości (ponieważ istnieją samochody używające tych samych kodów do otwierania i zamykania, ale nasłuchujące obu poleceń na różnych częstotliwościach).<sup>[[3]](#references)[[2]](#references)</sup>
 
-Napastnik może **zakłócać odbiornik samochodu, a nie swój odbiornik**, ponieważ jeśli odbiornik samochodu nasłuchuje na przykład w szerokim paśmie 1 MHz, napastnik nie **zakłóci** dokładnej częstotliwości używanej przez pilot, ale **bliską w tym spektrum**, podczas gdy **odbiornik napastnika będzie nasłuchiwał w mniejszym zakresie**, gdzie może usłyszeć sygnał pilota **bez sygnału zakłócającego**.
+Atakujący może **zagłuszać odbiornik samochodu, a nie własny odbiornik**, ponieważ jeśli odbiornik samochodu nasłuchuje na przykład pasma o szerokości 1 MHz, atakujący nie będzie **zagłuszał** dokładnej częstotliwości używanej przez pilota, lecz **zbliżoną częstotliwość w tym paśmie**, podczas gdy **odbiornik atakującego będzie nasłuchiwał w węższym zakresie**, w którym będzie mógł odebrać sygnał pilota **bez sygnału zagłuszającego**.
 
 > [!WARNING]
-> Inne implementacje widziane w specyfikacjach pokazują, że **rolling code jest częścią** całkowitego kodu wysyłanego. Tj. wysyłany kod to **24-bitowy klucz**, gdzie pierwsze **12 to rolling code**, **drugie 8 to polecenie** (takie jak zablokuj lub odblokuj), a ostatnie 4 to **suma kontrolna**. Pojazdy implementujące ten typ są również naturalnie podatne, ponieważ napastnik musi jedynie zastąpić segment rolling code, aby móc **używać dowolnego rolling code na obu częstotliwościach**.
+> Inne implementacje opisane w specyfikacjach pokazują, że **rolling code stanowi część** całkowitego wysyłanego kodu. Oznacza to, że wysyłany kod jest **24-bitowym kluczem**, w którym pierwsze **12 bitów to rolling code**, kolejne **8 bitów to polecenie** (takie jak lock lub unlock), a ostatnie 4 bity to **suma kontrolna**. Pojazdy implementujące ten typ są również naturalnie podatne, ponieważ atakujący musi jedynie zastąpić segment rolling code, aby móc **użyć dowolnego rolling code na obu częstotliwościach**.
 
 > [!CAUTION]
-> Zauważ, że jeśli ofiara wyśle trzeci kod, podczas gdy napastnik wysyła pierwszy, pierwszy i drugi kod zostaną unieważnione.
+> Należy pamiętać, że jeśli ofiara wyśle trzeci kod podczas wysyłania przez atakującego pierwszego kodu, pierwszy i drugi kod zostaną unieważnione.
 
 ### Alarm Sounding Jamming Attack
 
-Testując system rolling code zainstalowany w samochodzie, **wysłanie tego samego kodu dwa razy** natychmiast **aktywowało alarm** i immobilizer, co stwarza unikalną **możliwość odmowy usługi**. Ironią jest to, że środkiem **wyłączania alarmu** i immobilizera było **naciśnięcie** **pilota**, co daje napastnikowi możliwość **ciągłego przeprowadzania ataku DoS**. Lub połączenie tego ataku z **poprzednim, aby uzyskać więcej kodów**, ponieważ ofiara chciałaby jak najszybciej zakończyć atak.
+Podczas testów aftermarketowego systemu rolling code zainstalowanego w samochodzie **dwukrotne wysłanie tego samego kodu** natychmiast **aktywowało alarm** i immobiliser, zapewniając wyjątkową możliwość przeprowadzenia **denial of service**. Co ciekawe, sposobem na **wyłączenie alarmu** i immobilisera było **naciśnięcie** przycisku **pilota**, co dawało atakującemu możliwość **ciągłego przeprowadzania ataku DoS**. Można też połączyć ten atak z **poprzednim, aby uzyskać więcej kodów**, ponieważ ofiara będzie chciała jak najszybciej zatrzymać atak.<sup>[[2]](#references)</sup>
 
 ## References
 
-- [https://www.americanradioarchives.com/what-radio-frequency-does-car-key-fobs-run-on/](https://www.americanradioarchives.com/what-radio-frequency-does-car-key-fobs-run-on/)
-- [https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/](https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/)
-- [https://samy.pl/defcon2015/](https://samy.pl/defcon2015/)
-- [https://hackaday.io/project/164566-how-to-hack-a-car/details](https://hackaday.io/project/164566-how-to-hack-a-car/details)
+- [1] [What Radio Frequency Does Car Key Fobs Run On?](https://www.americanradioarchives.com/what-radio-frequency-do-car-key-fobs-run-on/)
+- [2] [Bypassing Rolling Code Systems](https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/)
+- [3] [Drive It Like You Hacked It (DEF CON 23) - OpenSesame / RollJam](https://samy.pl/defcon2015/)
+- [4] [How to hack a car (RollJam recreation)](https://hackaday.io/project/164566-how-to-hack-a-car/details)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,35 +1,35 @@
-# Steganografia tekstu
+# Steganografia tekstowa
 
 {{#include ../../banners/hacktricks-training.md}}
 
 Szukaj:
 
-- Unicode homoglyphs
-- Zero-width characters
-- Whitespace patterns (spaces vs tabs)
+- Homoglifów Unicode
+- Znaków o zerowej szerokości
+- Wzorców białych znaków (spacje vs tabulatory)
 
 ## Praktyczna ścieżka
 
-Jeśli zwykły tekst zachowuje się nieoczekiwanie, zbadaj punkty kodowe i normalizuj ostrożnie (nie niszcz dowodów).
+Jeśli zwykły tekst zachowuje się nieoczekiwanie, sprawdź codepointy i ostrożnie go normalizuj (nie niszcz dowodów).
 
 ### Technika
 
-Steganografia tekstu często opiera się na znakach, które wyświetlają się identycznie (lub są niewidoczne):
+Stego tekstowe często opiera się na znakach, które wyglądają identycznie (lub są niewidoczne):
 
-- Homoglyphs: different Unicode codepoints that look the same (Latin `a` vs Cyrillic `а`)
-- Zero-width characters: joiners, non-joiners, zero-width spaces
-- Whitespace encodings: spaces vs tabs, trailing spaces, line-length patterns
+- Homoglifach: różnych codepointach Unicode, które wyglądają tak samo (łacińskie `a` vs cyrylickie `а`)
+- Znakach o zerowej szerokości: joinery, non-joinery, spacje o zerowej szerokości
+- Kodowaniu białymi znakami: spacjach vs tabulatorach, końcowych spacjach, wzorcach długości wierszy<sup>[[1]](#references)</sup>
 
-Dodatkowe przypadki o wysokim sygnale:
+Dodatkowe przypadki o wysokiej wartości sygnału:
 
-- Bidirectional override/control characters (can visually reorder text)
-- Variation selectors and combining characters used as a covert channel
+- Znakach sterujących/nadpisujących kierunek dwukierunkowy (mogą wizualnie zmieniać kolejność tekstu)
+- Selektorach wariantów i znakach łączących używanych jako covert channel
 
-### Decode helpers
+### Pomocniki do dekodowania
 
 - Unicode homoglyph/zero-width playground: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
 
-### Sprawdź punkty kodowe
+### Sprawdzanie codepointów
 ```bash
 python3 - <<'PY'
 import sys
@@ -39,16 +39,16 @@ if ord(ch) > 127 or ch.isspace():
 print(i, hex(ord(ch)), repr(ch))
 PY
 ```
-## Kanały CSS `unicode-range`
+## Kanały `unicode-range` CSS
 
-Reguły `@font-face` mogą kodować bajty w wpisach `unicode-range: U+..`. Wyodrębnij punkty kodowe, połącz szesnastkowe wartości i zdekoduj:
+Reguły `@font-face` mogą kodować bajty we wpisach `unicode-range: U+..`. Wyodrębnij punkty kodowe, połącz wartości szesnastkowe i zdekoduj:
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-Jeżeli zakresy zawierają wiele bytes w jednej deklaracji, najpierw rozdziel je przecinkami i znormalizuj (`tr ',+' '\n'`). Python ułatwia parsowanie i emitowanie bytes, jeśli formatowanie jest niespójne.
+Jeśli zakresy zawierają wiele bajtów w jednej deklaracji, najpierw podziel je po przecinkach i znormalizuj (`tr ',+' '\n'`). Python ułatwia analizowanie i generowanie bajtów, gdy formatowanie jest niespójne.
 
-## Źródła
+## Referencje
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

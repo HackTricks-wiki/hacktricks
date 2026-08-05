@@ -2,42 +2,42 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro
+## Wprowadzenie
 
-Aby uzyskać więcej informacji na temat tego, czym jest iButton, sprawdź:
+Więcej informacji o tym, czym jest iButton, znajdziesz tutaj:
 
 
 {{#ref}}
 ../ibutton.md
 {{#endref}}
 
-## Design
+## Konstrukcja
 
-**Niebieska** część poniższego obrazu to sposób, w jaki należy **umieścić prawdziwy iButton**, aby Flipper mógł **go odczytać.** **Zielona** część to sposób, w jaki należy **dotknąć czytnika** Flipperem zero, aby **prawidłowo emulować iButton**.
+**Niebieska** część poniższego obrazu pokazuje, jak należy **przyłożyć prawdziwy iButton**, aby Flipper mógł go **odczytać.** **Zielona** część pokazuje, jak należy **przyłożyć czytnik** do Flipper Zero, aby **prawidłowo emulować iButton**.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## Działania
 
-### Read
+### Odczyt
 
-W trybie odczytu Flipper czeka na dotknięcie klucza iButton i jest w stanie przetworzyć dowolny z trzech typów kluczy: **Dallas, Cyfral i Metakom**. Flipper **samoistnie określi typ klucza**. Nazwa protokołu klucza będzie wyświetlana na ekranie powyżej numeru ID.
+W trybie odczytu Flipper oczekuje na przyłożenie klucza iButton i potrafi obsługiwać trzy typy kluczy: **Dallas, Cyfral i Metakom**. Flipper **sam określi typ klucza**. Nazwa protokołu klucza zostanie wyświetlona na ekranie nad numerem ID.<sup>[[1]](#references)</sup>
 
-### Add manually
+### Dodawanie ręczne
 
-Możliwe jest **ręczne dodanie** iButtona typu: **Dallas, Cyfral i Metakom**
+Możliwe jest **ręczne dodanie** iButton typu: **Dallas, Cyfral i Metakom**
 
-### **Emulate**
+### **Emulacja**
 
 Możliwe jest **emulowanie** zapisanych iButtonów (odczytanych lub dodanych ręcznie).
 
 > [!TIP]
-> Jeśli nie możesz sprawić, aby oczekiwane styki Flippera Zero dotknęły czytnika, możesz **użyć zewnętrznego GPIO:**
+> Jeśli nie możesz uzyskać oczekiwanego kontaktu Flipper Zero z czytnikiem, możesz **użyć zewnętrznego GPIO:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## References
+## Referencje
 
-- [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
+- [1] [Taming iButton Keys with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../../banners/hacktricks-training.md}}

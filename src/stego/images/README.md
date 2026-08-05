@@ -1,49 +1,49 @@
-# Image Steganography
+# Steganografia obrazów
 
 {{#include ../../banners/hacktricks-training.md}}
 
-W większości zadań CTF image stego sprowadza się do jednej z tych kategorii:
+Większość image stego w CTF-ach można przypisać do jednej z tych kategorii:
 
 - LSB/bit-planes (PNG/BMP)
-- Metadata/comment payloads
-- PNG chunk weirdness / corruption repair
-- JPEG DCT-domain tools (OutGuess, etc)
-- Frame-based (GIF/APNG)
+- Ładunki w metadanych/komentarzach
+- Nietypowe chunki PNG / naprawa uszkodzeń
+- Narzędzia działające w domenie DCT JPEG (OutGuess itd.)
+- Oparte na klatkach (GIF/APNG)
 
-## Quick triage
+## Szybki triage
 
-Priorytetyzuj dowody na poziomie kontenera zanim przejdziesz do głębokiej analizy zawartości:
+Przed dogłębną analizą zawartości nadaj priorytet dowodom na poziomie kontenera:
 
-- Zwaliduj plik i sprawdź strukturę: `file`, `magick identify -verbose`, format validators (np. `pngcheck`).
-- Wyciągnij metadata i widoczne ciągi: `exiftool -a -u -g1`, `strings`.
-- Sprawdź osadzoną/dodaną zawartość: `binwalk` i inspekcja końca pliku (`tail | xxd`).
-- Postępuj według typu kontenera:
-- PNG/BMP: bit-planes/LSB i anomalie na poziomie chunk.
-- JPEG: metadata + DCT-domain tooling (OutGuess/F5-style families).
-- GIF/APNG: ekstrakcja klatek, frame differencing, triki z paletą.
+- Zweryfikuj plik i sprawdź jego strukturę: `file`, `magick identify -verbose`, walidatory formatów (np. `pngcheck`).
+- Wyodrębnij metadane i widoczne stringi: `exiftool -a -u -g1`, `strings`.
+- Sprawdź, czy nie ma osadzonej/dodanej zawartości: `binwalk` oraz inspekcja końca pliku (`tail | xxd`).
+- Wybierz ścieżkę na podstawie kontenera:
+- PNG/BMP: bit-planes/LSB i anomalie na poziomie chunków.
+- JPEG: metadane + narzędzia działające w domenie DCT (rodziny w stylu OutGuess/F5).
+- GIF/APNG: ekstrakcja klatek, różnicowanie klatek, triki z paletą.
 
 ## Bit-planes / LSB
 
 ### Technique
 
-PNG/BMP są popularne w CTF, ponieważ przechowują piksele w sposób, który ułatwia manipulację na poziomie bitów. Klasyczny mechanizm ukrywania/wyodrębniania to:
+PNG/BMP są popularne w CTF-ach, ponieważ przechowują piksele w sposób ułatwiający **manipulację na poziomie bitów**. Klasyczny mechanizm ukrywania/ekstrakcji polega na tym, że:
 
 - Każdy kanał piksela (R/G/B/A) ma wiele bitów.
-- The **least significant bit** (LSB) of each channel changes the image very little.
-- Atakujący ukrywają dane w tych niskorzędnych bitach, czasem ze skokiem, permutacją lub wyborem per-kanałowym.
+- **Najmniej znaczący bit** (LSB) każdego kanału bardzo nieznacznie zmienia obraz.
+- Napastnicy ukrywają dane w tych bitach niskiego rzędu, czasami używając stride, permutacji lub wyboru kanału dla każdego elementu.
 
-Czego się spodziewać w zadaniach:
+Czego można oczekiwać w challenge'ach:
 
-- Payload jest tylko w jednym kanale (np. `R` LSB).
-- Payload jest w kanale alpha.
-- Payload jest skompresowany/zakodowany po ekstrakcji.
-- Wiadomość jest rozłożona po bit-planes lub ukryta przez XOR między bit-planes.
+- payload znajduje się tylko w jednym kanale (np. LSB kanału `R`).
+- payload znajduje się w kanale alfa.
+- payload jest kompresowany/zakodowany po ekstrakcji.
+- Wiadomość jest rozproszona między planes lub ukryta za pomocą XOR między planes.
 
-Dodatkowe rodziny, na które możesz natrafić (zależne od implementacji):
+Dodatkowe rodziny, które możesz napotkać (zależnie od implementacji):
 
-- **LSB matching** (nie tylko odwracanie bitu, lecz dostosowania +/-1, by dopasować docelowy bit)
-- **Palette/index-based hiding** (indexed PNG/GIF: payload w indeksach kolorów zamiast surowego RGB)
-- **Alpha-only payloads** (całkowicie niewidoczne w widoku RGB)
+- **LSB matching** (nie tylko odwracanie bitu, ale także korekty +/-1 w celu dopasowania bitu docelowego)
+- **Ukrywanie oparte na palecie/indeksie** (indeksowane PNG/GIF: payload znajduje się w indeksach kolorów, a nie w surowych wartościach RGB)
+- **Payload wyłącznie w kanale alfa** (całkowicie niewidoczny w widoku RGB)
 
 ### Tooling
 
@@ -53,103 +53,103 @@ Dodatkowe rodziny, na które możesz natrafić (zależne od implementacji):
 ```bash
 zsteg -a file.png
 ```
-Repozytorium: https://github.com/zed-0xff/zsteg
+Repo: https://github.com/zed-0xff/zsteg
 
 #### StegoVeritas / Stegsolve
 
-- `stegoVeritas`: uruchamia zestaw transformacji (metadane, transformacje obrazu, brute forcing LSB variants).
-- `stegsolve`: ręczne filtry wizualne (channel isolation, plane inspection, XOR, itp).
+- `stegoVeritas`: uruchamia zestaw transformacji (metadane, transformacje obrazu, brute forcing wariantów LSB).
+- `stegsolve`: ręczne filtry wizualne (izolowanie kanałów, inspekcja płaszczyzn, XOR itd.).
 
-Pobierz Stegsolve: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
+Pobieranie Stegsolve: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
 
-#### FFT-based visibility tricks
+#### Triki zwiększające widoczność oparte na FFT
 
-FFT nie jest ekstrakcją LSB; służy w przypadkach, gdy zawartość jest celowo ukryta w przestrzeni częstotliwości lub subtelnych wzorcach.
+FFT nie służy do ekstrakcji LSB; jest używane w przypadkach, gdy zawartość została celowo ukryta w przestrzeni częstotliwości lub w subtelnych wzorcach.
 
-- EPFL demo: http://bigwww.epfl.ch/demo/ip/demos/FFT/
+- Demo EPFL: http://bigwww.epfl.ch/demo/ip/demos/FFT/
 - Fourifier: https://www.ejectamenta.com/Fourifier-fullscreen/
 - FFTStegPic: https://github.com/0xcomposure/FFTStegPic
 
-Triage webowe często używane w CTF-ach:
+Webowy triage jest często używany w CTF-ach:
 
 - Aperi’Solve: https://aperisolve.com/
 - StegOnline: https://stegonline.georgeom.net/
 
-## Wnętrze PNG: chunki, uszkodzenia i ukryte dane
+## Wewnętrzna struktura PNG: chunki, uszkodzenia i ukryte dane
 
 ### Technika
 
-PNG to format oparty na chunkach. W wielu zadaniach payload jest przechowywany na poziomie kontenera/chunka zamiast w wartościach pikseli:
+PNG jest formatem opartym na chunkach. W wielu challenge'ach payload jest przechowywany na poziomie kontenera/chunka, a nie w wartościach pikseli:
 
-- **Extra bytes after `IEND`** (wiele programów do podglądu ignoruje bajty na końcu)
-- **Non-standard ancillary chunks** przenoszące payloady
-- **Corrupted headers** które ukrywają wymiary lub łamią parsery, dopóki nie zostaną naprawione
+- **Dodatkowe bajty po `IEND`** (wiele przeglądarek je ignoruje)
+- **Niestandardowe chunki ancillary** przenoszące payload
+- **Uszkodzone nagłówki**, które ukrywają wymiary lub powodują błędy parserów do czasu ich naprawienia
 
-Chunki warte sprawdzenia:
+Wysokosygnałowe lokalizacje chunków do sprawdzenia:
 
-- `tEXt` / `iTXt` / `zTXt` (tekstowe metadane, czasem skompresowane)
-- `iCCP` (ICC profile) i inne chunki pomocnicze używane jako nośnik
+- `tEXt` / `iTXt` / `zTXt` (metadane tekstowe, czasami skompresowane)
+- `iCCP` (profil ICC) oraz inne chunki ancillary używane jako nośnik
 - `eXIf` (dane EXIF w PNG)
 
-### Polecenia triage
+### Komendy triage
 ```bash
 magick identify -verbose file.png
 pngcheck -v file.png
 ```
 Na co zwrócić uwagę:
 
-- Nietypowe kombinacje width/height/bit-depth/colour-type
-- Błędy CRC/chunków (pngcheck zazwyczaj wskazuje dokładny offset)
-- Ostrzeżenia o dodatkowych danych po `IEND`
+- Nietypowe kombinacje szerokości/wysokości/głębi bitowej/typu koloru
+- Błędy CRC/chunków (`pngcheck` zwykle wskazuje dokładny offset)
+- Ostrzeżenia dotyczące dodatkowych danych po `IEND`
 
 Jeśli potrzebujesz bardziej szczegółowego widoku chunków:
 ```bash
 pngcheck -vp file.png
 exiftool -a -u -g1 file.png
 ```
-Przydatne odniesienia:
+Przydatne materiały:
 
-- PNG specification (structure, chunks): https://www.w3.org/TR/PNG/
-- File format tricks (PNG/JPEG/GIF corner cases): https://github.com/corkami/docs
+- Specyfikacja PNG (struktura, chunki): https://www.w3.org/TR/PNG/
+- Sztuczki związane z formatami plików (przypadki brzegowe PNG/JPEG/GIF): https://github.com/corkami/docs
 
-## JPEG: metadane, narzędzia w domenie DCT i ograniczenia ELA
+## JPEG: metadane, narzędzia działające w domenie DCT i ograniczenia ELA
 
 ### Technika
 
-JPEG nie jest przechowywany jako surowe piksele; jest skompresowany w domenie DCT. Dlatego narzędzia stego dla JPEG różnią się od narzędzi PNG LSB:
+JPEG nie jest przechowywany jako surowe piksele; jest skompresowany w domenie DCT. Dlatego narzędzia stego dla JPEG różnią się od narzędzi LSB dla PNG:
 
-- Metadata/comment payloads są na poziomie pliku (high-signal i szybkie do sprawdzenia)
+- Ładunki metadanych/komentarzy znajdują się na poziomie pliku (są wyraźnym sygnałem i można je szybko sprawdzić)
 - Narzędzia stego działające w domenie DCT osadzają bity we współczynnikach częstotliwości
 
-Operacyjnie traktuj JPEG jako:
+Z punktu widzenia działań operacyjnych traktuj JPEG jako:
 
-- Kontener dla segmentów metadanych (high-signal, szybkie do sprawdzenia)
+- Kontener na segmenty metadanych (wyraźny sygnał, szybka inspekcja)
 - Skompresowaną domenę sygnału (współczynniki DCT), w której działają wyspecjalizowane narzędzia stego
 
-### Szybkie kontrole
+### Szybkie sprawdzenia
 ```bash
 exiftool file.jpg
 strings -n 6 file.jpg | head
 binwalk file.jpg
 ```
-High-signal locations:
+Miejsca o wysokiej wartości sygnału:
 
-- EXIF/XMP/IPTC metadane
-- JPEG comment segment (`COM`)
-- Application segments (`APP1` for EXIF, `APPn` for vendor data)
+- Metadane EXIF/XMP/IPTC
+- Segment komentarza JPEG (`COM`)
+- Segmenty aplikacyjne (`APP1` dla EXIF, `APPn` dla danych dostawcy)
 
-### Popularne narzędzia
+### Typowe narzędzia
 
 - OutGuess: https://github.com/resurrecting-open-source-projects/outguess
 - OpenStego: https://www.openstego.com/
 
-If you are specifically facing steghide payloads in JPEGs, consider using `stegseek` (szybszy bruteforce niż starsze skrypty):
+Jeśli masz do czynienia konkretnie z payloads steghide w plikach JPEG, rozważ użycie `stegseek` (szybszy bruteforce niż starsze skrypty):
 
 - [https://github.com/RickdeJager/stegseek](https://github.com/RickdeJager/stegseek)
 
-### Error Level Analysis
+### Analiza poziomu błędów
 
-ELA highlights different recompression artifacts; it can point you to regions that were edited, but it’s not a stego detector by itself:
+ELA uwidacznia różne artefakty ponownej kompresji; może wskazać regiony, które zostały zmodyfikowane, ale sama w sobie nie jest detektorem stego:
 
 - [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
 
@@ -157,32 +157,32 @@ ELA highlights different recompression artifacts; it can point you to regions th
 
 ### Technika
 
-For animated images, assume the message is:
+W przypadku obrazów animowanych załóż, że wiadomość:
 
-- In a single frame (easy), or
-- Spread across frames (ordering matters), or
-- Only visible when you diff consecutive frames
+- Znajduje się w pojedynczej klatce (łatwy przypadek), lub
+- Jest rozłożona na wiele klatek (kolejność ma znaczenie), lub
+- Jest widoczna tylko po wykonaniu diff kolejnych klatek
 
-### Wyodrębnij klatki
+### Wyodrębnianie klatek
 ```bash
 ffmpeg -i anim.gif frame_%04d.png
 ```
-Następnie traktuj klatki jak zwykłe pliki PNG: `zsteg`, `pngcheck`, channel isolation.
+Następnie traktuj klatki jak zwykłe pliki PNG: `zsteg`, `pngcheck`, izolacja kanałów.
 
 Alternatywne narzędzia:
 
-- `gifsicle --explode anim.gif` (szybkie wydobywanie klatek)
-- `imagemagick`/`magick` do transformacji pojedynczych klatek
+- `gifsicle --explode anim.gif` (szybka ekstrakcja klatek)
+- `imagemagick`/`magick` do transformacji poszczególnych klatek
 
-Porównywanie różnic między klatkami często bywa decydujące:
+Różnicowanie klatek często jest rozstrzygające:
 ```bash
 magick frame_0001.png frame_0002.png -compose difference -composite diff.png
 ```
-### Kodowanie liczbą pikseli w APNG
+### Kodowanie liczby pikseli APNG
 
 - Wykryj kontenery APNG: `exiftool -a -G1 file.png | grep -i animation` lub `file`.
-- Wyodrębnij klatki bez zmiany czasowania: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`.
-- Odzyskaj payloads zakodowane jako liczba pikseli na klatkę:
+- Wyodrębnij klatki bez zmiany synchronizacji czasowej: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`.
+- Odzyskaj payloads zakodowane jako liczby pikseli dla każdej klatki:
 ```python
 from PIL import Image
 import glob
@@ -193,33 +193,35 @@ target = dict(counts).get((255, 0, 255, 255))  # adjust the target color
 out.append(target or 0)
 print(bytes(out).decode('latin1'))
 ```
-Animowane wyzwania mogą zakodować każdy bajt jako liczbę wystąpień określonego koloru w każdej klatce; połączenie tych wartości odtwarza wiadomość.
+Animowane challenges mogą kodować każdy bajt jako liczbę wystąpień określonego koloru w każdej klatce; po połączeniu tych liczności można odtworzyć wiadomość.<sup>[[1]](#references)</sup>
 
 ## Osadzanie chronione hasłem
 
-Jeśli podejrzewasz, że osadzanie jest chronione passphrase zamiast manipulacji na poziomie pikseli, zwykle to najszybsza ścieżka.
+Jeśli podejrzewasz osadzanie chronione passphrase, a nie manipulację na poziomie pikseli, jest to zwykle najszybsza metoda.
 
 ### steghide
 
-Obsługuje `JPEG, BMP, WAV, AU` i może embed/extract encrypted payloads.
+Obsługuje `JPEG, BMP, WAV, AU` i umożliwia osadzanie oraz ekstrakcję zaszyfrowanych payloadów.
 ```bash
 steghide info file
 steghide extract -sf file --passphrase 'password'
 ```
-I don't have access to the repository files. Please paste the contents of src/stego/images/README.md (or the excerpt you want translated). I will translate the English text to Polish, preserving all markdown, tags, links, paths and code exactly as requested.
+Repozytorium: https://github.com/StefanoDeVuono/steghide
+
+### StegCracker
 ```bash
 stegcracker file.jpg wordlist.txt
 ```
-Repozytorium: https://github.com/Paradoxis/StegCracker
+Repo: https://github.com/Paradoxis/StegCracker
 
 ### stegpy
 
 Obsługuje PNG/BMP/GIF/WebP/WAV.
 
-Repozytorium: https://github.com/dhsdshdhk/stegpy
+Repo: https://github.com/dhsdshdhk/stegpy
 
-## Źródła
+## Referencje
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}
