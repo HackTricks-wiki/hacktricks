@@ -2,9 +2,10 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#id-9wrzi" id="id-9wrzi"></a>
+## Giriş <a href="#id-9wrzi" id="id-9wrzi"></a>
 
-RFID ve NFC hakkında bilgi için aşağıdaki sayfayı kontrol edin:
+RFID ve NFC hakkında bilgi için aşağıdaki sayfaya bakın:
+
 
 {{#ref}}
 ../pentesting-rfid.md
@@ -13,67 +14,67 @@ RFID ve NFC hakkında bilgi için aşağıdaki sayfayı kontrol edin:
 ## Desteklenen NFC kartları <a href="#id-9wrzi" id="id-9wrzi"></a>
 
 > [!CAUTION]
-> NFC kartları dışında Flipper Zero, birkaç **Mifare** Classic ve Ultralight ile **NTAG** gibi **diğer yüksek frekanslı kart türlerini** destekler.
+> NFC kartlarının yanı sıra Flipper Zero, birkaç **Mifare** Classic ve Ultralight ile **NTAG** gibi **diğer High-frequency kart türlerini** de destekler.
 
-Yeni NFC kart türleri desteklenen kartlar listesine eklenecektir. Flipper Zero, aşağıdaki **NFC kart türü A**'yı (ISO 14443A) destekler:
+Desteklenen kartlar listesine yeni NFC kartı türleri eklenecektir. Flipper Zero aşağıdaki **NFC type A kartlarını** (ISO 14443A) destekler:
 
-- **Banka kartları (EMV)** — yalnızca UID, SAK ve ATQA'yı okumak, kaydetmeden.
-- **Bilinmeyen kartlar** — (UID, SAK, ATQA) okuyup bir UID'yi taklit edebilir.
+- **Bank cards (EMV)** — yalnızca UID, SAK ve ATQA'yı okur, kaydetmez.
+- **Bilinmeyen kartlar** — UID, SAK ve ATQA'yı okur ve bir UID'yi emulate eder.
 
-**NFC kart türü B, türü F ve türü V** için Flipper Zero, bir UID'yi kaydetmeden okuyabilir.
+**NFC type B, type F ve type V kartları** için Flipper Zero, UID'yi kaydetmeden okuyabilir.
 
-### NFC kart türü A <a href="#uvusf" id="uvusf"></a>
+### NFC type A kartları <a href="#uvusf" id="uvusf"></a>
 
-#### Banka kartı (EMV) <a href="#kzmrp" id="kzmrp"></a>
+#### Bank card (EMV) <a href="#kzmrp" id="kzmrp"></a>
 
-Flipper Zero, banka kartlarında yalnızca UID, SAK, ATQA ve depolanan verileri **kaydetmeden** okuyabilir.
+Flipper Zero, bank cards üzerindeki UID, SAK, ATQA ve depolanan verileri yalnızca **kaydetmeden** okuyabilir.
 
-Banka kartı okuma ekranıBanka kartları için Flipper Zero, verileri yalnızca **kaydetmeden ve taklit etmeden** okuyabilir.
+Bank card reading screenBank cards için Flipper Zero, verileri yalnızca **kaydetmeden ve emulate etmeden** okuyabilir.
 
 <figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&ixlib=react-9.1.1&h=916&w=2662" alt=""><figcaption></figcaption></figure>
 
 #### Bilinmeyen kartlar <a href="#id-37eo8" id="id-37eo8"></a>
 
-Flipper Zero, **NFC kartının türünü belirleyemediğinde**, yalnızca **UID, SAK ve ATQA** okunup **kaydedilebilir**.
+Flipper Zero **NFC kartının türünü belirleyemediğinde**, yalnızca bir **UID, SAK ve ATQA** **okunabilir ve kaydedilebilir**.
 
-Bilinmeyen kart okuma ekranıBilinmeyen NFC kartları için Flipper Zero yalnızca bir UID'yi taklit edebilir.
+Unknown card reading screenBilinmeyen NFC kartları için Flipper Zero yalnızca bir UID'yi emulate edebilir.
 
 <figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&ixlib=react-9.1.1&h=932&w=2634" alt=""><figcaption></figcaption></figure>
 
-### NFC kart türleri B, F ve V <a href="#wyg51" id="wyg51"></a>
+### NFC type B, F ve V kartları <a href="#wyg51" id="wyg51"></a>
 
-**NFC kart türleri B, F ve V** için Flipper Zero yalnızca **bir UID'yi okuyup görüntüleyebilir** ve bunu kaydedemez.
+**NFC type B, type F ve type V kartları** için Flipper Zero, UID'yi kaydetmeden yalnızca **okuyabilir ve görüntüleyebilir**.
 
 <figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&ixlib=react-9.1.1&h=1080&w=2704" alt=""><figcaption></figcaption></figure>
 
-## Eylemler
+## İşlemler
 
-NFC hakkında bir giriş için [**bu sayfayı okuyun**](../pentesting-rfid.md#high-frequency-rfid-tags-13.56-mhz).
+NFC hakkında giriş için [**bu sayfayı okuyun**](../pentesting-rfid.md#high-frequency-rfid-tags-13.56-mhz).
 
 ### Oku
 
-Flipper Zero **NFC kartlarını okuyabilir**, ancak **ISO 14443'e dayanan tüm protokolleri anlamaz**. Ancak, **UID düşük seviyeli bir özellik olduğundan**, **UID zaten okunmuş olabilir, ancak yüksek seviyeli veri aktarım protokolü hala bilinmiyor olabilir**. UID'yi yetkilendirme için kullanan ilkel okuyucular için Flipper ile UID'yi okuyabilir, taklit edebilir ve manuel olarak girebilirsiniz.
+Flipper Zero **NFC kartlarını okuyabilir**, ancak ISO 14443 tabanlı **tüm protokolleri anlayamaz**. Bununla birlikte, **UID düşük seviyeli bir öznitelik** olduğundan, **UID'nin zaten okunduğu ancak yüksek seviyeli veri aktarım protokolünün hâlâ bilinmediği** bir durumla karşılaşabilirsiniz. Yetkilendirme için UID kullanan basit okuyucularda Flipper'ı kullanarak UID'yi okuyabilir, emulate edebilir ve manuel olarak girebilirsiniz.<sup>[[1]](#references)</sup>
 
-#### UID Okuma VS İçerideki Veriyi Okuma <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
+#### UID'yi Okumaya Karşı İçindeki Verileri Okuma <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
 
 <figure><img src="../../../images/image (217).png" alt=""><figcaption></figcaption></figure>
 
-Flipper'da 13.56 MHz etiketlerini okumak iki parçaya ayrılabilir:
+Flipper'da 13.56 MHz kartlarının okunması iki bölüme ayrılabilir:<sup>[[1]](#references)</sup>
 
-- **Düşük seviyeli okuma** — yalnızca UID, SAK ve ATQA'yı okur. Flipper, karttan okunan bu veriye dayanarak yüksek seviyeli protokolü tahmin etmeye çalışır. Bununla %100 emin olamazsınız, çünkü bu belirli faktörlere dayanan bir varsayımdır.
-- **Yüksek seviyeli okuma** — kartın belleğinden belirli bir yüksek seviyeli protokol kullanarak verileri okur. Bu, bir Mifare Ultralight üzerindeki verileri okumak, bir Mifare Classic'ten sektörleri okumak veya PayPass/Apple Pay'den kartın özelliklerini okumak anlamına gelir.
+- **Düşük seviyeli okuma** — yalnızca UID, SAK ve ATQA'yı okur. Flipper, karttan okunan bu verilere göre yüksek seviyeli protokolü tahmin etmeye çalışır. Bu yalnızca belirli etkenlere dayalı bir varsayım olduğundan bundan %100 emin olamazsınız.
+- **Yüksek seviyeli okuma** — belirli bir yüksek seviyeli protokol kullanarak kartın belleğindeki verileri okur. Bu, Mifare Ultralight üzerindeki verileri, Mifare Classic üzerindeki sektörleri veya PayPass/Apple Pay üzerindeki kart özniteliklerini okumak anlamına gelir.
 
-### Belirli Okuma
+### Specific Oku
 
-Flipper Zero, düşük seviyeli verilerden kart türünü bulamıyorsa, `Ekstra Eylemler` bölümünde `Belirli Kart Türünü Oku` seçeneğini seçebilir ve **manuel olarak okumak istediğiniz kart türünü belirtebilirsiniz**.
+Flipper Zero düşük seviyeli verilerden kart türünü bulamadığında, `Extra Actions` bölümünden `Read Specific Card Type` seçeneğini belirleyebilir ve okumak istediğiniz kartın türünü **manuel olarak** **belirtebilirsiniz**.
 
-#### EMV Banka Kartları (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
+#### EMV Bank Cards (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
 
-Sadece UID'yi okumak dışında, bir banka kartından çok daha fazla veri çıkarabilirsiniz. **Tam kart numarasını** (kartın önündeki 16 haneli numara), **geçerlilik tarihini** ve bazı durumlarda **sahibinin adını** ve **en son işlemlerin** listesini almak mümkündür.\
-Ancak, bu şekilde **CVV'yi okuyamazsınız** (kartın arkasındaki 3 haneli numara). Ayrıca **banka kartları yeniden oynatma saldırılarından korunmaktadır**, bu nedenle Flipper ile kopyalayıp ardından bir şeyler ödemek için taklit etmeye çalışmak işe yaramayacaktır.
+UID'yi basitçe okumaya ek olarak, bir bank card üzerinden çok daha fazla veri çıkarabilirsiniz. **Tam kart numarasını** (kartın ön yüzündeki 16 hane), **geçerlilik tarihini** ve bazı durumlarda **kart sahibinin adını** ve **en son işlemlerin** listesini almak mümkündür.\
+Ancak **CVV'yi bu şekilde okuyamazsınız** (kartın arkasındaki 3 hane). Ayrıca **bank cards replay attacks saldırılarına karşı korunur**, bu nedenle kartı Flipper ile kopyalayıp ardından bir şey ödemek için emulate etmeye çalışmak işe yaramaz.<sup>[[1]](#references)</sup>
 
 ## Referanslar
 
-- [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
+- [1] [Flipper Zero ile RFID Protocols'a Derinlemesine Bakış](https://blog.flipperzero.one/rfid/)
 
 {{#include ../../../banners/hacktricks-training.md}}

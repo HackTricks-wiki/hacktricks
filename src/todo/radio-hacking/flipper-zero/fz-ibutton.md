@@ -2,41 +2,42 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro
+## Giriş
 
-iButton nedir hakkında daha fazla bilgi için kontrol edin:
+iButton hakkında daha fazla bilgi için bkz.:
+
 
 {{#ref}}
 ../ibutton.md
 {{#endref}}
 
-## Design
+## Tasarım
 
-Aşağıdaki resmin **mavi** kısmı, Flipper'ın **okuyabilmesi için gerçek iButton'ı** nasıl **yerleştirmeniz gerektiğini** gösterir. **Yeşil** kısım ise Flipper Zero ile okuyucuya **doğru bir şekilde iButton'ı taklit etmek için** nasıl **dokunmanız gerektiğini** gösterir.
+Aşağıdaki görseldeki **mavi** bölüm, Flipper'ın **okuyabilmesi** için **gerçek iButton'ı** yerleştirmeniz gereken yerdir. **Yeşil** bölüm ise bir iButton'ı **doğru şekilde emüle etmek** için Flipper Zero ile okuyucuya **dokunmanız** gereken yerdir.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## Eylemler
 
-### Read
+### Oku
 
-Okuma Modunda Flipper, iButton anahtarının dokunmasını bekler ve üç tür anahtarı sindirebilir: **Dallas, Cyfral ve Metakom**. Flipper, anahtarın türünü **kendisi belirleyecektir**. Anahtar protokolünün adı, ID numarasının üzerinde ekranda görüntülenecektir.
+Read Mode'da Flipper, iButton anahtarının dokundurulmasını bekler ve üç tür anahtardan herhangi birini okuyabilir: **Dallas, Cyfral ve Metakom**. Flipper, anahtarın türünü **kendisi belirler**. Anahtar protokolünün adı, ID numarasının üzerinde ekranda görüntülenir.<sup>[[1]](#references)</sup>
 
-### Add manually
+### Manuel olarak ekle
 
-**Manuel olarak** aşağıdaki türde bir iButton eklemek mümkündür: **Dallas, Cyfral ve Metakom**
+Şu türlerde bir iButton'ı **manuel olarak eklemek** mümkündür: **Dallas, Cyfral ve Metakom**
 
-### **Emulate**
+### **Emüle et**
 
-Kaydedilmiş iButton'ları (okunan veya manuel olarak eklenen) **taklit etmek** mümkündür.
+Kaydedilmiş iButton'ları (okunmuş veya manuel olarak eklenmiş) **emüle etmek** mümkündür.
 
 > [!TIP]
-> Flipper Zero'nun beklenen temaslarının okuyucuya dokunmasını sağlayamazsanız, **harici GPIO'yu kullanabilirsiniz:**
+> Flipper Zero'nun beklenen temas noktalarını okuyucuya dokunduramıyorsanız **harici GPIO'yu kullanabilirsiniz:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## References
+## Referanslar
 
-- [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
+- [1] [Taming iButton Keys with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../../banners/hacktricks-training.md}}

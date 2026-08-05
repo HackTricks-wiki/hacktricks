@@ -1,28 +1,28 @@
-# Side Channel Analysis Attacks
+# Yan Kanal Analizi Saldırıları
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Side-channel saldırıları, fiziksel veya mikro-mimari "sızıntıları" gözlemleyerek sırları geri kazanır; bu sızıntılar, iç durumla *ilişkili* ancak cihazın mantıksal arayüzünün *bir parçası* değildir. Örnekler, bir akıllı kartın anlık akımını ölçmekten, bir ağ üzerinden CPU güç yönetimi etkilerini kötüye kullanmaya kadar uzanır.
+Yan kanal saldırıları, cihazın mantıksal arayüzünün parçası olmayan ancak dahili durumla *ilişkili* fiziksel veya mikro-mimari "leakage" gözlemlenerek gizli bilgileri ortaya çıkarır. Örnekler, bir smart-card tarafından anlık olarak çekilen akımın ölçülmesinden ağ üzerinden CPU power-management etkilerinin kötüye kullanılmasına kadar uzanır.
 
 ---
 
-## Ana Sızıntı Kanalları
+## Başlıca Leakage Kanalları
 
-| Kanal | Tipik Hedef | Aletler |
-|-------|-------------|---------|
-| Güç tüketimi | Akıllı kartlar, IoT MCU'lar, FPGA'lar | Osiloskop + şönt direnç/HS probu (örn. CW503) |
-| Elektromanyetik alan (EM) | CPU'lar, RFID, AES hızlandırıcıları | H-alan probu + LNA, ChipWhisperer/RTL-SDR |
-| İcra süresi / önbellekler | Masaüstü & bulut CPU'ları | Yüksek hassasiyetli zamanlayıcılar (rdtsc/rdtscp), uzaktan zaman uçuşu |
-| Akustik / mekanik | Klavyeler, 3-D yazıcılar, röleler | MEMS mikrofon, lazer vibrometre |
-| Optik & termal | LED'ler, lazer yazıcılar, DRAM | Fotodiyot / yüksek hızlı kamera, IR kamera |
-| Hata kaynaklı | ASIC/MCU kriptoları | Saat/voltaj hatası, EMFI, lazer enjeksiyonu |
+| Kanal | Tipik Hedef | Enstrümantasyon |
+|---------|---------------|-----------------|
+| Güç tüketimi | Smart-card'lar, IoT MCU'ları, FPGA'ler | Osiloskop + şönt direnç/HS probu (ör. CW503)
+| Elektromanyetik alan (EM) | CPU'lar, RFID, AES accelerators | H-field probu + LNA, ChipWhisperer/RTL-SDR
+| Çalışma süresi / cache'ler | Desktop ve cloud CPU'ları | Yüksek hassasiyetli zamanlayıcılar (rdtsc/rdtscp), uzaktan time-of-flight
+| Akustik / mekanik | Klavyeler, 3-D yazıcılar, röleler | MEMS mikrofonu, laser vibrometer
+| Optik ve termal | LED'ler, laser printer'lar, DRAM | Photodiode / high-speed camera, IR camera
+| Hata kaynaklı | ASIC/MCU cryptos | Clock/voltage glitch, EMFI, laser injection
 
 ---
 
 ## Güç Analizi
 
-### Basit Güç Analizi (SPA)
-*Tek* bir iz gözlemleyin ve zirveleri/çukurları işlemlerle doğrudan ilişkilendirin (örn. DES S-kutuları).
+### Simple Power Analysis (SPA)
+*Tek* bir trace gözlemlenir ve peak/valley değerleri doğrudan işlemlerle (ör. DES S-box'ları) ilişkilendirilir.
 ```python
 # ChipWhisperer-husky example – capture one AES trace
 from chipwhisperer.capture.api.programmers import STMLink
@@ -34,73 +34,73 @@ cw.capture.init()
 trace = cw.capture.capture_trace()
 print(trace.wave)  # numpy array of power samples
 ```
-### Diferansiyel/Korelasyon Güç Analizi (DPA/CPA)
-*N > 1 000* iz elde edin, anahtar baytı `k` varsayın, HW/HD modelini hesaplayın ve sızıntı ile ilişkilendirin.
+### Differential/Correlation Power Analysis (DPA/CPA)
+*N > 1 000* trace topla, key byte `k` için hipotez oluştur, HW/HD modelini hesapla ve leak ile korelasyon kur.
 ```python
 import numpy as np
 corr = np.corrcoef(leakage_model(k), traces[:,sample])
 ```
-CPA, en son teknoloji olmayı sürdürüyor ancak makine öğrenimi varyantları (MLA, derin öğrenme SCA) artık ASCAD-v2 (2023) gibi yarışmalarda hakim durumda.
+CPA state-of-the-art olmaya devam ediyor, ancak machine-learning varyantları (MLA, deep-learning SCA) artık ASCAD-v2 (2023) gibi yarışmalara hakim.
 
 ---
 
-## Elektromanyetik Analiz (EMA)
-Yakın alan EM probeleri (500 MHz–3 GHz), şant eklemeden güç analizine *eşit* bilgiler sızdırır. 2024 araştırması, spektrum korelasyonu ve düşük maliyetli RTL-SDR ön uçları kullanarak **>10 cm** mesafeden bir STM32'den anahtar kurtarma gösterdi.
+## Electromagnetic Analysis (EMA)
+Near-field EM probes (500 MHz–3 GHz), shunt eklemeden power analysis ile aynı bilgiyi leak eder. 2024 araştırması, spectrum correlation ve düşük maliyetli RTL-SDR front-end'leri kullanarak bir STM32'den **>10 cm** mesafeden key recovery gerçekleştirildiğini gösterdi.
 
 ---
 
-## Zamanlama ve Mikro-mimari Saldırılar
-Modern CPU'lar, paylaşılan kaynaklar aracılığıyla sırları sızdırır:
-* **Hertzbleed (2022)** – DVFS frekans ölçeklendirmesi, Hamming ağırlığı ile korelasyon gösterir ve *uzaktan* EdDSA anahtarlarının çıkarılmasına olanak tanır.
-* **Downfall / Gather Data Sampling (Intel, 2023)** – geçici yürütme ile SMT iş parçacıkları arasında AVX-gather verilerini okuma.
-* **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – spekülatif vektör yanlış tahmini, kayıtları alanlar arası sızdırır.
+## Timing & Micro-architectural Attacks
+Modern CPU'lar, paylaşılan kaynaklar üzerinden secret bilgileri leak eder:
+* **Hertzbleed (2022)** – DVFS frequency scaling, Hamming weight ile korelasyon göstererek EdDSA key'lerinin *remote* extraction işlemine olanak tanır.<sup>[[2]](#references)</sup>
+* **Downfall / Gather Data Sampling (Intel, 2023)** – SMT thread'leri arasındaki AVX-gather verilerini okumak için transient-execution.
+* **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – speculative vector mis-prediction, register'ları domain'ler arasında leak eder.
 
 ---
 
-## Akustik ve Optik Saldırılar
-* 2024 "​iLeakKeys", bir **akıllı telefon mikrofonu üzerinden Zoom** kullanarak dizüstü bilgisayar tuş vuruşlarını %95 doğrulukla kurtardığını gösterdi.
-* Yüksek hızlı fotodiyotlar, DDR4 aktivite LED'ini yakalar ve AES tur anahtarlarını <1 dakikada yeniden oluşturur (BlackHat 2023).
+## Acoustic & Optical Attacks
+* 2024 tarihli "​iLeakKeys", bir CNN classifier kullanarak **Zoom üzerinden bir smart-phone microphone** ile laptop keystroke'larını %95 doğrulukla recovery etti.
+* High-speed photodiode'lar DDR4 activity LED'ini capture eder ve AES round key'lerini <1 dakika içinde yeniden oluşturur (BlackHat 2023).
 
 ---
 
-## Hata Enjeksiyonu ve Diferansiyel Hata Analizi (DFA)
-Hataları yan kanal sızıntısı ile birleştirmek, anahtar aramasını kısaltır (örneğin, 1-iz AES DFA). Son zamanlarda hobi fiyatlı araçlar:
-* **ChipSHOUTER & PicoEMP** – alt-1 ns elektromanyetik darbe bozulması.
-* **GlitchKit-R5 (2025)** – RISC-V SoC'leri destekleyen açık kaynak saat/voltaj bozulma platformu.
+## Fault Injection & Differential Fault Analysis (DFA)
+Fault'ları side-channel leakage ile birleştirmek key search işlemini kısaltır (ör. 1-trace AES DFA). Yakın zamanda hobbyist fiyatlı araçlar:
+* **ChipSHOUTER & PicoEMP** – 1 ns altı electromagnetic pulse glitching.
+* **GlitchKit-R5 (2025)** – RISC-V SoC'lerini destekleyen open-source clock/voltage glitch platformu.
 
 ---
 
-## Tipik Saldırı İş Akışı
-1. Sızıntı kanalını ve montaj noktasını belirleyin (VCC pini, ayrıştırma kapasitörü, yakın alan noktası).
-2. Tetikleyici ekleyin (GPIO veya desen tabanlı).
-3. Uygun örnekleme/filtrelerle >1 k iz toplayın.
-4. Ön işleme (hizalama, ortalama çıkarma, LP/HP filtre, dalgacık, PCA).
-5. İstatistiksel veya ML anahtar kurtarma (CPA, MIA, DL-SCA).
-6. Aykırı değerleri doğrulayın ve yineleyin.
+## Typical Attack Workflow
+1. Leakage channel ve mount point'i belirleyin (VCC pin, decoupling cap, near-field spot).
+2. Trigger ekleyin (GPIO veya pattern-based).
+3. Uygun sampling/filter'lar ile >1 k trace toplayın.
+4. Pre-process uygulayın (alignment, mean removal, LP/HP filter, wavelet, PCA).
+5. Statistical veya ML key recovery (CPA, MIA, DL-SCA).
+6. Outlier'ları validate edin ve süreci yineleyin.
 
 ---
 
-## Savunmalar ve Sertleştirme
-* **Sabit zaman** uygulamaları ve bellek-zor algoritmalar.
-* **Maskeleme/karıştırma** – sırları rastgele paylara bölün; birinci dereceden direnç TVLA tarafından sertifikalandırılmıştır.
-* **Gizleme** – yonga üzeri voltaj regülatörleri, rastgeleleştirilmiş saat, çift ray mantığı, EM kalkanları.
-* **Hata tespiti** – yedek hesaplama, eşik imzaları.
-* **Operasyonel** – kripto çekirdeklerinde DVFS/turbo'yu devre dışı bırakın, SMT'yi izole edin, çok kiracılı bulutlarda birlikte yerleştirmeyi yasaklayın.
+## Defences & Hardening
+* **Constant-time** implementasyonlar ve memory-hard algorithm'ler.
+* **Masking/shuffling** – secret'ları random share'lere ayırın; first-order resistance, TVLA ile certify edilir.
+* **Hiding** – on-chip voltage regulator'lar, randomised clock, dual-rail logic, EM shield'leri.
+* **Fault detection** – redundant computation, threshold signature'lar.
+* **Operational** – crypto kernel'lerinde DVFS/turbo'yu disable edin, SMT'yi isolate edin, multi-tenant cloud'larda co-location'ı yasaklayın.
 
 ---
 
-## Araçlar ve Çerçeveler
-* **ChipWhisperer-Husky** (2024) – 500 MS/s osiloskop + Cortex-M tetikleyici; yukarıdaki gibi Python API.
-* **Riscure Inspector & FI** – ticari, otomatik sızıntı değerlendirmesini destekler (TVLA-2.0).
-* **scaaml** – TensorFlow tabanlı derin öğrenme SCA kütüphanesi (v1.2 – 2025).
-* **pyecsca** – ANSSI açık kaynak ECC SCA çerçevesi.
+## Tools & Frameworks
+* **ChipWhisperer-Husky** (2024) – 500 MS/s scope + Cortex-M trigger; yukarıdaki gibi Python API.<sup>[[1]](#references)</sup>
+* **Riscure Inspector & FI** – commercial, automated leakage assessment (TVLA-2.0) desteği sunar.
+* **scaaml** – TensorFlow tabanlı deep-learning SCA library'si (v1.2 – 2025).
+* **pyecsca** – ANSSI open-source ECC SCA framework'ü.
 
 ---
 
-## Referanslar
+## References
 
-* [ChipWhisperer Documentation](https://chipwhisperer.readthedocs.io/en/latest/)
-* [Hertzbleed Attack Paper](https://www.hertzbleed.com/)
+- [1] [ChipWhisperer Documentation](https://chipwhisperer.readthedocs.io/en/latest/)
+- [2] [Hertzbleed Attack Paper](https://www.hertzbleed.com/)
 
 
 {{#include ../../banners/hacktricks-training.md}}

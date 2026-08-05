@@ -1,30 +1,30 @@
-# Audio Steganography
+# Ses Steganografisi
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Yaygın kalıplar:
+Yaygın desenler:
 
-- Spectrogram messages
+- Spectrogram mesajları
 - WAV LSB embedding
 - DTMF / dial tones encoding
 - Metadata payloads
 
-## Hızlı ön değerlendirme
+## Hızlı ön inceleme
 
-Uzman araçlardan önce:
+Özel araçları kullanmadan önce:
 
-- codec/container ayrıntılarını ve anomalileri doğrulayın:
+- Codec/container ayrıntılarını ve anormallikleri doğrulayın:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Eğer ses gürültü-benzeri içerik veya tonal yapı içeriyorsa, erken bir spectrogram incelemesi yapın.
+- Ses noise benzeri içerik veya tonal yapı barındırıyorsa, erkenden bir spectrogram inceleyin.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
-## Spectrogram steganography
+## Spektrogram steganografisi
 
-### Technique
+### Teknik
 
-Spectrogram stego enerjiyi zaman/frekans boyunca şekillendirerek verileri gizler, böylece yalnızca bir zaman-frekans grafiğinde görünür hale gelir (çoğunlukla duyulmaz veya gürültü olarak algılanır).
+Spectrogram stego, verileri zaman/frekans boyunca enerjiyi şekillendirerek gizler; böylece veriler yalnızca bir zaman-frekans grafiğinde görünür hâle gelir (çoğunlukla duyulamaz veya gürültü olarak algılanır).
 
 ### Sonic Visualiser
 
@@ -35,13 +35,13 @@ Spektrogram incelemesi için birincil araç:
 ### Alternatifler
 
 - Audacity (spektrogram görünümü, filtreler): https://www.audacityteam.org/
-- `sox` komut satırından spektrogramlar oluşturabilir:
+- `sox`, CLI üzerinden spektrogramlar oluşturabilir:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
-## FSK / modem dekodlama
+## FSK / modem decoding
 
-Frequency-shift keyed ses genellikle spektrogramda dönüşümlü tek tonlar gibi görünür. Yaklaşık bir center/shift ve baud tahminine sahip olduğunuzda, `minimodem` ile brute force yapın:
+Frequency-shift keyed audio, spectrogram'da genellikle tek tonların dönüşümlü olarak görünmesi şeklindedir.<sup>[[1]](#references)</sup> Yaklaşık bir merkez frekans/kayma ve baud tahmininiz olduğunda, `minimodem` ile brute force uygulayın:
 ```bash
 # Visualize the band to pick baud/frequency
 sox noise.wav -n spectrogram -o spec.png
@@ -52,24 +52,24 @@ minimodem -f noise.wav 300
 minimodem -f noise.wav 1200
 minimodem -f noise.wav 2400
 ```
-`minimodem` otomatik kazanç ayarı yapar ve mark/space tonlarını otomatik olarak algılar; çıktı bozuksa `--rx-invert` veya `--samplerate`'i ayarlayın.
+`minimodem`, mark/space tonlarını otomatik olarak algılar ve kazancı otomatik ayarlar; çıktı bozuksa `--rx-invert` veya `--samplerate` değerini ayarlayın.
 
 ## WAV LSB
 
 ### Teknik
 
-Sıkıştırılmamış PCM (WAV) için, her örnek bir tam sayıdır. Düşük bitleri değiştirmek dalga formunu çok az değiştirir; bu nedenle saldırganlar şunları gizleyebilir:
+Sıkıştırılmamış PCM (WAV) için her sample bir tamsayıdır. Düşük bitlerin değiştirilmesi waveform'u çok az değiştirir; bu nedenle saldırganlar şunları gizleyebilir:
 
-- örnek başına 1 bit (veya daha fazlası)
-- Kanallar arasında enterleştirilmiş
-- stride/permütasyon ile
+- Sample başına 1 bit (veya daha fazlası)
+- Kanallar arasında interleaved
+- Bir stride/permutation kullanarak
 
-Karşılaşabileceğiniz diğer ses gizleme aileleri:
+Karşılaşabileceğiniz diğer audio-hiding aileleri:
 
 - Phase coding
 - Echo hiding
 - Spread-spectrum embedding
-- Codec-side channels (formata bağlı ve araca bağlı)
+- Codec-side channels (format ve tool'a bağlı)
 
 ### WavSteg
 
@@ -82,19 +82,19 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 - [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
-## DTMF / tuş tonları
+## DTMF / arama tonları
 
 ### Teknik
 
-DTMF, karakterleri sabit frekans çiftleri olarak kodlar (telefon tuş takımı). Ses, tuş tonu veya düzenli çift frekanslı bip'lere benziyorsa, DTMF çözümlemesini erken test edin.
+DTMF, karakterleri sabit frekans çiftleri olarak kodlar (telefon tuş takımı). Ses, tuş takımı tonlarına veya düzenli çift frekanslı bip seslerine benziyorsa DTMF decoding'i erkenden test edin.
 
-Çevrimiçi dekoderler:
+Online decoder'lar:
 
 - [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
 - [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
 ## Referanslar
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

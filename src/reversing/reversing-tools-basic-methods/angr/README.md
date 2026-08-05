@@ -1,8 +1,10 @@
+# Angr
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-Bu hile sayfasının bir kısmı [angr belgeleri](https://docs.angr.io/_/downloads/en/stable/pdf/) temel alınarak hazırlanmıştır.
+Bu cheatsheet'in bir kısmı [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/) temel alınarak hazırlanmıştır.<sup>[[1]](#references)</sup>
 
-# Kurulum
+## Kurulum
 ```bash
 sudo apt-get install python3-dev libffi-dev build-essential
 python3 -m pip install --user virtualenv
@@ -10,7 +12,7 @@ python3 -m venv ang
 source ang/bin/activate
 pip install angr
 ```
-# Temel Eylemler
+## Temel İşlemler
 ```python
 import angr
 import monkeyhex # this will format numerical results in hexadecimal
@@ -28,9 +30,9 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-# Yüklenmiş ve Ana nesne bilgileri
+## Yüklenen ve Ana nesne bilgileri
 
-## Yüklenmiş Veriler
+### Yüklenen Veriler
 ```python
 #LOADED DATA
 proj.loader #<Loaded true, maps [0x400000:0x5004000]>
@@ -53,7 +55,7 @@ proj.loader.all_elf_objects #Get all ELF objects loaded (Linux)
 proj.loader.all_pe_objects #Get all binaries loaded (Windows)
 proj.loader.find_object_containing(0x400000)#Get object loaded in an address "<ELF Object fauxware, maps [0x400000:0x60105f]>"
 ```
-## Ana Nesne
+### Ana Nesne
 ```python
 #Main Object (main binary loaded)
 obj = proj.loader.main_object #<ELF Object true, maps [0x400000:0x60721f]>
@@ -67,7 +69,7 @@ obj.find_section_containing(obj.entry) #Get section by address
 obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
-## Semboller ve Yeniden Yerleştirmeler
+### Semboller ve Relokasyonlar
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 
@@ -84,7 +86,7 @@ main_strcmp.is_export #False
 main_strcmp.is_import #True
 main_strcmp.resolvedby #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 ```
-## Bloklar
+### Bloklar
 ```python
 #Blocks
 block = proj.factory.block(proj.entry) #Get the block of the entrypoint fo the binary
@@ -92,9 +94,9 @@ block.pp() #Print disassembly of the block
 block.instructions #"0xb" Get number of instructions
 block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x401675, 0x401676, 0x401679, 0x40167d, 0x40167e, 0x40167f, 0x401686, 0x40168d, 0x401694]"
 ```
-# Dinamik Analiz
+## Dinamik Analiz
 
-## Simülasyon Yöneticisi, Durumlar
+### Simülasyon Yöneticisi, Durumlar
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -117,13 +119,13 @@ simgr = proj.factory.simulation_manager(state) #Start
 simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
-## Fonksiyonları Çağırma
+### Fonksiyon çağırma
 
-- `entry_state` ve `full_init_state` içine `args` aracılığıyla bir argüman listesi ve `env` aracılığıyla bir ortam değişkenleri sözlüğü geçirebilirsiniz. Bu yapılardaki değerler string veya bitvector olabilir ve simüle edilen yürütme için argümanlar ve ortam olarak duruma serileştirilecektir. Varsayılan `args` boş bir listedir, bu nedenle analiz ettiğiniz program en az bir `argv[0]` bulmayı bekliyorsa, bunu her zaman sağlamalısınız!
-- `argc`'nin sembolik olmasını istiyorsanız, `entry_state` ve `full_init_state` yapıcılarına sembolik bir bitvector olarak `argc` geçirebilirsiniz. Ancak dikkatli olun: bunu yaparsanız, `args` içine geçirdiğiniz argüman sayısından daha büyük olamayacak şekilde sonuçlanan duruma bir kısıtlama eklemelisiniz.
-- Çağrı durumunu kullanmak için, `.call_state(addr, arg1, arg2, ...)` ile çağırmalısınız; burada `addr`, çağırmak istediğiniz fonksiyonun adresidir ve `argN`, o fonksiyona geçilecek N'inci argümandır; bu argüman bir python tamsayı, string, dizi veya bitvector olabilir. Bellek tahsis etmek ve gerçekten bir nesneye işaretçi geçmek istiyorsanız, bunu bir PointerWrapper içinde sarmalısınız, yani `angr.PointerWrapper("point to me!")`. Bu API'nin sonuçları biraz öngörülemez olabilir, ama üzerinde çalışıyoruz.
+- `args` aracılığıyla bir argüman listesi ve `env` aracılığıyla bir environment variables dictionary'sini `entry_state` ve `full_init_state` içine aktarabilirsiniz. Bu yapılardaki değerler string veya bitvector olabilir ve argümanlar ile simulated execution ortamı olarak state içine serialize edilir. Varsayılan `args`, boş bir listedir; bu nedenle analiz ettiğiniz program en az bir `argv[0]` bulmayı bekliyorsa bunu her zaman sağlamalısınız!
+- `argc` değerinin symbolic olmasını istiyorsanız `entry_state` ve `full_init_state` constructor'larına `argc` olarak symbolic bir bitvector aktarabilirsiniz. Ancak dikkatli olun: bunu yaparsanız, sonuçta oluşan state'e `argc` değerinizin `args` içine aktardığınız argüman sayısından büyük olamayacağını belirten bir constraint de eklemelisiniz.
+- Call state'i kullanmak için onu `.call_state(addr, arg1, arg2, ...)` ile çağırmalısınız. Burada `addr`, çağırmak istediğiniz fonksiyonun adresi; `argN` ise bu fonksiyona verilen N'inci argümandır ve python integer, string, array veya bitvector olabilir. Bellek allocate etmek ve bir nesneye pointer aktarmak istiyorsanız onu bir PointerWrapper içine sarmalısınız; örneğin `angr.PointerWrapper("point to me!")`. Bu API'nin sonuçları biraz öngörülemez olabilir, ancak bunun üzerinde çalışıyoruz.
 
-## BitVectors
+### BitVectors
 ```python
 #BitVectors
 state = proj.factory.entry_state()
@@ -132,7 +134,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-## Sembolik BitVektörleri ve Kısıtlamalar
+### Sembolik BitVector'lar ve Kısıtlamalar
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -166,7 +168,7 @@ solver.eval_exact(expression, n) #n solutions to the given expression, throwing 
 solver.min(expression) #minimum possible solution to the given expression.
 solver.max(expression) #maximum possible solution to the given expression.
 ```
-## Hooking
+### Hooking
 ```python
 >>> stub_func = angr.SIM_PROCEDURES['stubs']['ReturnUnconstrained'] # this is a CLASS
 >>> proj.hook(0x10000, stub_func())  # hook with an instance of the class
@@ -184,8 +186,12 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-Ayrıca, sembolün bulunduğu adresi bağlamak için ilk argüman olarak bir sembol adı vererek `proj.hook_symbol(name, hook)` kullanabilirsiniz.
+Ayrıca, ilk argüman olarak bir symbol adı ve hook sağlayarak, symbol'ün bulunduğu adresi hook'lamak için `proj.hook_symbol(name, hook)` kullanabilirsiniz<sup>[[1]](#references)</sup>
 
-# Örnekler
+## Örnekler
+
+## Referanslar
+
+- [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
 
 {{#include ../../../banners/hacktricks-training.md}}

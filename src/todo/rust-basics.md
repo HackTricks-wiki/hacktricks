@@ -4,11 +4,11 @@
 
 ### Değişkenlerin sahipliği
 
-Bellek, derleyicinin derleme zamanında kontrol ettiği aşağıdaki kurallarla bir sahiplik sistemi aracılığıyla yönetilir:
+Bellek, derleme zamanında compiler tarafından denetlenen aşağıdaki kurallara sahip bir sahiplik sistemi aracılığıyla yönetilir:
 
-1. Rust'taki her değerin sahibi olarak adlandırılan bir değişkeni vardır.
-2. Aynı anda yalnızca bir sahibi olabilir.
-3. Sahip kapsam dışına çıktığında, değer serbest bırakılır.
+1. Rust'taki her değerin owner olarak adlandırılan bir değişkeni vardır.
+2. Aynı anda yalnızca bir owner olabilir.
+3. Owner kapsam dışına çıktığında değer bellekten kaldırılır.
 ```rust
 fn main() {
 let student_age: u32 = 20;
@@ -20,9 +20,9 @@ println!("The student is {} and teacher is {}", student_age, teacher_age);
 // println!("the teacher is {}", teacher_age); // this will not work as teacher_age has been dropped
 }
 ```
-### Jenerik Tipler
+### Generic Türler
 
-Değerlerinden biri herhangi bir tür olabilecek bir struct oluşturun
+Değerlerinden birinin herhangi bir tür olabileceği bir struct oluşturun
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -39,32 +39,34 @@ Wrapper::new("Foo").value, "Foo"
 ```
 ### Option, Some & None
 
-Option türü, değerin Some (bir şey var) veya None olabileceği anlamına gelir:
+Option türü, değerin Some (bir şey var) veya None türünde olabileceği anlamına gelir:
 ```rust
 pub enum Option<T> {
 None,
 Some(T),
 }
 ```
-Option değerini kontrol etmek için `is_some()` veya `is_none()` gibi fonksiyonları kullanabilirsiniz.
+`Option` değerini kontrol etmek için `is_some()` veya `is_none()` gibi işlevleri kullanabilirsiniz.
 
-### Result, Ok & Err
 
-Hataları döndürmek ve iletmek için kullanılır.
+### Result, Ok ve Err
+
+Hataları döndürmek ve yaymak için kullanılır
 ```rust
 pub enum Result<T, E> {
 Ok(T),
 Err(E),
 }
 ```
-You can use functions such as `is_ok()` or `is_err()` to check the value of the result
+Sonucun değerini kontrol etmek için `is_ok()` veya `is_err()` gibi fonksiyonları kullanabilirsiniz.
 
-The `Option` enum should be used in situations where a value might not exist (be `None`).
-The `Result` enum should be used in situations where you do something that might go wrong
+`Option` enum'u, bir değerin mevcut olmayabileceği (`None` olabileceği) durumlarda kullanılmalıdır.  
+`Result` enum'u ise yanlış gidebilecek bir işlem yaptığınız durumlarda kullanılmalıdır.
+
 
 ### Macros
 
-Makrolar, yazdığınız koda göre daha fazla kod üretecek şekilde genişleyebildikleri için fonksiyonlardan daha güçlüdür. Örneğin, bir fonksiyon imzası fonksiyonun sahip olduğu parametrelerin sayısını ve türünü belirtmek zorundadır. Diğer yandan, makrolar değişken sayıda parametre alabilir: `println!("hello")` tek argümanla veya `println!("hello {}", name)` iki argümanla çağrılabilir. Ayrıca, makrolar derleyici kodun anlamını yorumlamadan önce genişletilir; bu nedenle bir makro, örneğin, belirli bir tipe bir trait uygulayabilir. Bir fonksiyon bunu yapamaz, çünkü fonksiyon çalışma zamanında çağrılır ve trait'in derleme zamanında uygulanması gerekir.
+Macros, yazdığınız koddan daha fazla kod üretmek üzere genişletildikleri için functions'tan daha güçlüdür. Örneğin, bir function signature, function'ın sahip olduğu parametrelerin sayısını ve türünü bildirmelidir. Buna karşılık Macros, değişken sayıda parametre alabilir: `println!("hello")` çağrısını tek bir argument ile veya `println!("hello {}", name)` çağrısını iki argument ile yapabiliriz. Ayrıca Macros, compiler kodun anlamını yorumlamadan önce genişletilir; bu nedenle bir macro, örneğin belirli bir type üzerinde bir trait implement edebilir. Bir function bunu yapamaz, çünkü runtime'da çağrılır ve bir trait'in compile time'da implement edilmesi gerekir.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -89,7 +91,7 @@ println!("Check out my macro!");
 }
 }
 ```
-### Yineleme
+### Yinele
 ```rust
 // Iterate through a vector
 let my_fav_fruits = vec!["banana", "raspberry"];
@@ -106,7 +108,7 @@ for (key, hashvalue) in &*map {
 for key in map.keys() {
 for value in map.values() {
 ```
-### Özyinelemeli Box
+### Recursive Box
 ```rust
 enum List {
 Cons(i32, List),
@@ -115,7 +117,7 @@ Nil,
 
 let list = Cons(1, Cons(2, Cons(3, Nil)));
 ```
-### Koşullar
+### Koşullu ifadeler
 
 #### if
 ```rust
@@ -180,7 +182,7 @@ println!("{}", n);
 n += 1;
 }
 ```
-#### for
+#### için
 ```rust
 for n in 1..101 {
 if n % 15 == 0 {
@@ -254,9 +256,9 @@ optional = Some(i + 1);
 // explicitly handling the failing case.
 }
 ```
-### Traits
+### Trait'ler
 
-Bir tür için yeni bir metot oluştur
+Bir tür için yeni bir metot oluşturun
 ```rust
 trait AppendBar {
 fn append_bar(self) -> Self;
@@ -284,11 +286,11 @@ assert_ne!(true, false);
 }
 }
 ```
-### İş parçacıkları
+### Threading
 
 #### Arc
 
-Bir Arc, Clone kullanarak nesne üzerinde daha fazla referans oluşturup bunları iş parçacıklarına aktarabilir. Bir değere işaret eden son referans işaretçisi kapsam dışına çıktığında, değişken yok edilir.
+Bir Arc, nesneye yönelik daha fazla referans oluşturmak ve bunları thread'lere geçirmek için Clone kullanabilir. Bir değere yönelik son referans işaretçisi kapsam dışına çıktığında değişken drop edilir.
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -299,9 +301,9 @@ println!("{:?}", apple);
 });
 }
 ```
-#### İş parçacıkları
+#### Threads
 
-Bu durumda iş parçacığına değiştirebileceği bir değişken geçireceğiz.
+Bu durumda thread'e değiştirebileceği bir değişken aktaracağız
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -321,17 +323,17 @@ thread::sleep(Duration::from_millis(500));
 ```
 ### Güvenlik Temelleri
 
-Rust varsayılan olarak güçlü bellek güvenliği garantileri sağlar, ancak `unsafe` kodu, bağımlılık sorunları veya mantık hataları yoluyla hâlâ kritik güvenlik açıkları ortaya çıkabilir. Aşağıdaki mini-cheatsheet, Rust yazılımlarının saldırı ya da savunma amaçlı güvenlik incelemeleri sırasında en sık dokunacağınız ilkel işlemleri toplar.
+Rust varsayılan olarak güçlü bellek güvenliği garantileri sağlar, ancak `unsafe` code, dependency sorunları veya mantık hataları yoluyla hâlâ kritik güvenlik açıkları oluşturabilirsiniz. Aşağıdaki mini-cheatsheet, Rust yazılımlarının saldırı veya savunma amaçlı güvenlik incelemeleri sırasında en sık kullanacağınız primitive'leri bir araya getirir.
 
-#### Unsafe kodu & bellek güvenliği
+#### `unsafe` code ve bellek güvenliği
 
-`unsafe` blokları derleyicinin aliasing ve bounds kontrollerinden muafiyet sağlar, bu yüzden **tüm geleneksel bellek bozulması hataları (OOB, use-after-free, double free, vb.) yeniden ortaya çıkabilir**. Hızlı bir denetim kontrol listesi:
+`unsafe` blokları derleyicinin aliasing ve sınır kontrollerinden vazgeçer; bu nedenle **geleneksel bellek bozulması hatalarının tamamı (OOB, use-after-free, double free vb.) yeniden ortaya çıkabilir**. Hızlı bir denetim kontrol listesi:
 
-* `unsafe` bloklarını, `extern "C"` fonksiyonlarını, `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointers veya `ffi` modüllerine yapılan çağrıları arayın.
-* Düşük seviyeli fonksiyonlara geçirilen her işaretçi aritmetiğini ve uzunluk argümanını doğrulayın.
-* `#![forbid(unsafe_code)]` (crate-genel) veya `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) kullanmayı tercih edin; böylece biri `unsafe`'ı yeniden eklediğinde derleme başarısız olur.
+* `unsafe` bloklarını, `extern "C"` fonksiyonlarını, `ptr::copy*` çağrılarını, `std::mem::transmute`, `MaybeUninit`, raw pointer'ları veya `ffi` modüllerini arayın.
+* Düşük seviyeli fonksiyonlara aktarılan her pointer arithmetic işlemini ve length argümanını doğrulayın.
+* Birisi yeniden `unsafe` eklediğinde derlemenin başarısız olması için `#![forbid(unsafe_code)]` (crate genelinde) veya `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) kullanmayı tercih edin.
 
-Example overflow created with raw pointers:
+Raw pointer'larla oluşturulan örnek overflow:
 ```rust
 use std::ptr;
 
@@ -345,54 +347,54 @@ dst.set_len(src.len());
 dst
 }
 ```
-Miri'yi çalıştırmak, test sırasında UB'yi tespit etmenin düşük maliyetli bir yoludur:
+Miri'yi çalıştırmak, test zamanında UB'yi tespit etmenin düşük maliyetli bir yoludur:
 ```bash
 rustup component add miri
 cargo miri test  # hunts for OOB / UAF during unit tests
 ```
-#### RustSec / cargo-audit ile bağımlılık denetimi
+#### RustSec / cargo-audit ile bağımlılıkları denetleme
 
-Gerçek dünya Rust zafiyetlerinin çoğu üçüncü taraf crate'lerde bulunur. RustSec advisory DB (topluluk destekli) yerel olarak sorgulanabilir:
+Gerçek dünyadaki Rust zafiyetlerinin çoğu üçüncü taraf crate'lerde bulunur. RustSec advisory DB'si (topluluk destekli) yerel olarak sorgulanabilir:<sup>[[1]](#references)</sup>
 ```bash
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
 ```
-Bunu CI'ye entegre edin ve `--deny warnings` ile başarısız olmasını sağlayın.
+CI'ya entegre edin ve `--deny warnings` durumunda başarısız olun.
 
-`cargo deny check advisories` benzer işlevsellik sunar; ayrıca lisans ve yasak-listesi kontrolleri yapar.
+`cargo deny check advisories`, benzer işlevin yanı sıra lisans ve ban-list kontrolleri de sunar.
 
 #### cargo-tarpaulin ile kod kapsamı
 
-`cargo tarpaulin`, Cargo build sistemi için bir kod kapsamı raporlama aracıdır.
+`cargo tarpaulin`, Cargo build sistemi için bir kod kapsamı raporlama aracıdır
 ```bash
 cargo binstall cargo-tarpaulin
 cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
 ```
-Linux'te, Tarpaulin'in varsayılan izleme arka ucu hâlâ Ptrace'tir ve yalnızca x86_64 işlemcilerde çalışır. Bu, `--engine llvm` ile llvm coverage enstrümantasyonuna değiştirilebilir. Mac ve Windows için bu varsayılan toplama yöntemidir.
+Linux'ta Tarpaulin'in varsayılan tracing backend'i hâlâ Ptrace'dir ve yalnızca x86_64 işlemcilerde çalışır. Bu, `--engine llvm` ile llvm coverage instrumentation'a değiştirilebilir. Mac ve Windows'ta bu varsayılan collection method'udur.
 
-#### Tedarik zinciri doğrulaması cargo-vet ile (2024)
+#### cargo-vet ile tedarik zinciri doğrulaması (2024)
 
-`cargo vet` içe aktardığınız her crate için bir inceleme hash'i kaydeder ve fark edilmeyen yükseltmeleri engeller:
+`cargo vet`, içe aktardığınız her crate için bir review hash kaydeder ve fark edilmeden yapılan sürüm yükseltmelerini önler:
 ```bash
 cargo install cargo-vet
 cargo vet init      # generates vet.toml
 cargo vet --locked  # verifies packages referenced in Cargo.lock
 ```
-Bu araç, poisoned-package saldırılarını azaltmak için Rust proje altyapısı ve giderek daha fazla kuruluş tarafından benimseniyor.
+Araç, zehirlenmiş paket saldırılarını azaltmak amacıyla Rust proje altyapısı ve giderek artan sayıda kuruluş tarafından benimseniyor.<sup>[[2]](#references)</sup>
 
-#### Fuzzing API yüzeyiniz (cargo-fuzz)
+#### API yüzeyinizi fuzzing ile test etme (cargo-fuzz)
 
-Fuzz testleri, panics, tam sayı taşmaları ve mantık hatalarını kolayca yakalar; bunlar DoS veya side-channel sorunlarına dönüşebilir:
+Fuzz testleri, DoS veya yan kanal sorunlarına dönüşebilecek panic'leri, integer taşmalarını ve mantık hatalarını kolayca yakalar:
 ```bash
 cargo install cargo-fuzz
 cargo fuzz init              # creates fuzz_targets/
 cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
 ```
-Fuzz target'ı repoya ekleyin ve pipeline'ınızda çalıştırın.
+fuzz target'ı repository'nize ekleyin ve pipeline'ınızda çalıştırın.
 
 ## Referanslar
 
-- RustSec Advisory Database – <https://rustsec.org>
-- Cargo-vet: "Auditing your Rust Dependencies" – <https://mozilla.github.io/cargo-vet/>
+- [1] [RustSec Advisory Database](https://rustsec.org)
+- [2] [Cargo-vet: Rust Dependencies'lerinizi Denetleme](https://mozilla.github.io/cargo-vet/)
 
 {{#include ../banners/hacktricks-training.md}}

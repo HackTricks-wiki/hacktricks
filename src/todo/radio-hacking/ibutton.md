@@ -2,44 +2,45 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Intro
+## Giriş
 
-iButton, **madeni para şeklinde metal bir kap** içinde paketlenmiş bir elektronik kimlik anahtarının genel adıdır. Aynı zamanda **Dallas Touch** Memory veya temas belleği olarak da adlandırılır. Sıklıkla “mıknatıslı” anahtar olarak yanlış bir şekilde anılsa da, içinde **mıknatıslı** hiçbir şey yoktur. Aslında, içinde dijital bir protokol üzerinde çalışan tam teşekküllü bir **mikroçip** gizlidir.
+iButton, **madeni para şeklindeki metal bir muhafazaya** yerleştirilmiş elektronik bir kimlik anahtarı için kullanılan genel bir addır. Ayrıca Dallas Touch Memory veya contact memory olarak da adlandırılır. Genellikle yanlışlıkla “manyetik” anahtar olarak anılsa da içinde **manyetik hiçbir şey yoktur**. Aslında içinde dijital bir protokol üzerinden çalışan tam teşekküllü bir **mikroçip** gizlidir.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
-### What is iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
+### iButton nedir? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-Genellikle, iButton anahtarın ve okuyucunun fiziksel formunu ifade eder - iki temas noktası olan yuvarlak bir madeni para. Etrafını saran çerçeve için, en yaygın delikli plastik tutucudan halkalar, kolyeler vb. olmak üzere birçok varyasyon vardır.
+Genellikle iButton, anahtarın ve okuyucunun fiziksel biçimini ifade eder - iki temas noktası bulunan yuvarlak bir madeni para. Anahtarı çevreleyen çerçeve için, delikli en yaygın plastik tutucudan halkalara, kolyelere vb. pek çok farklı seçenek vardır.
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-Anahtar okuyucuya ulaştığında, **temas noktaları birbirine değiyor** ve anahtar **kimliğini iletmek** için güç alıyor. Bazen anahtar **hemen okunmaz** çünkü bir interkomun **temas PSD'si** olması gerekenden daha büyüktür. Bu durumda, anahtarın dış konturları okuyucu ile temas edemez. Eğer durum buysa, anahtarı okuyucunun duvarlarından birinin üzerine basmanız gerekecek.
+Anahtar okuyucuya ulaştığında **temas noktaları birbirine dokunur** ve anahtara **kimliğini iletmesi** için güç verilir. Bazen **intercom'un temas PSD'si olması gerekenden daha büyük** olduğu için anahtar **hemen okunmaz**. Bu nedenle anahtarın ve okuyucunun dış hatları birbirine dokunamaz. Durum buysa anahtarı okuyucunun duvarlarından birine bastırmanız gerekir.
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
-### **1-Wire protocol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
+### **1-Wire protokolü** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Dallas anahtarları, 1-wire protokolünü kullanarak veri alışverişi yapar. Veri transferi için sadece bir temas noktası (!!) ile, hem ana cihazdan köle cihaza hem de tersine. 1-wire protokolü, Master-Slave modeline göre çalışır. Bu topolojide, Master her zaman iletişimi başlatır ve Slave onun talimatlarını takip eder.
+Dallas anahtarları, 1-wire protokolünü kullanarak veri alışverişi yapar. Her iki yöndeki veri aktarımı için - master'dan slave'e ve tersi yönde - yalnızca bir veri temas noktası (!!) kullanılır. 1-wire protokolü Master-Slave modeline göre çalışır. Bu topolojide Master iletişimi her zaman başlatır ve Slave onun talimatlarını izler.
 
-Anahtar (Slave) interkomla (Master) temas ettiğinde, anahtarın içindeki çip açılır, interkom tarafından güç sağlanır ve anahtar başlatılır. Ardından interkom anahtar kimliğini talep eder. Bu süreci daha ayrıntılı olarak inceleyeceğiz.
+Anahtar (Slave) intercom'a (Master) temas ettiğinde, anahtarın içindeki çip intercom tarafından sağlanan güçle açılır ve anahtar başlatılır. Bunun ardından intercom anahtarın kimliğini ister. Şimdi bu sürece daha ayrıntılı olarak bakacağız.
 
-Flipper, hem Master hem de Slave modlarında çalışabilir. Anahtar okuma modunda, Flipper bir okuyucu olarak hareket eder, yani Master olarak çalışır. Anahtar emülasyon modunda ise, Flipper bir anahtar gibi davranır, Slave modundadır.
+Flipper hem Master hem de Slave modlarında çalışabilir. Anahtar okuma modunda Flipper bir okuyucu gibi davranır; yani Master olarak çalışır. Anahtar emülasyonu modunda ise Flipper anahtar gibi davranır ve Slave modundadır.
 
-### Dallas, Cyfral & Metakom keys
+### Dallas, Cyfral ve Metakom anahtarları
 
-Bu anahtarların nasıl çalıştığı hakkında bilgi için [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/) sayfasını kontrol edin.
+Bu anahtarların nasıl çalıştığı hakkında bilgi için [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/) sayfasına bakın.<sup>[[1]](#references)</sup>
 
-### Attacks
+### Saldırılar
 
-iButton'lar Flipper Zero ile saldırıya uğrayabilir:
+iButton'lara Flipper Zero ile saldırılabilir:
+
 
 {{#ref}}
 flipper-zero/fz-ibutton.md
 {{#endref}}
 
-## References
+## Referanslar
 
-- [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
+- [1] [Taming iButton](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../banners/hacktricks-training.md}}

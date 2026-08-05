@@ -4,106 +4,106 @@
 
 ## OWASP Top 10 Machine Learning Vulnerabilities
 
-OWASP, AI sistemlerini etkileyebilecek en önemli 10 machine learning açığını belirlemiştir. Bu açıklar data poisoning, model inversion ve adversarial attacks dahil olmak üzere çeşitli güvenlik sorunlarına yol açabilir. Bu açıkları anlamak, güvenli AI sistemleri oluşturmak için kritik öneme sahiptir.
+Owasp, AI sistemlerini etkileyebilecek en önemli 10 machine learning vulnerability'yi belirlemiştir. Bu vulnerabilities; data poisoning, model inversion ve adversarial attacks dahil olmak üzere çeşitli security issue'lara yol açabilir. Bu vulnerabilities'leri anlamak, güvenli AI sistemleri oluşturmak için kritik öneme sahiptir.
 
-En güncel ve ayrıntılı top 10 machine learning vulnerabilities listesi için [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/) projesine başvurun.
+En güncel ve ayrıntılı top 10 machine learning vulnerabilities listesi için [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/) projesine başvurun.<sup>[[10]](#references)</sup>
 
-- **Input Manipulation Attack**: Bir saldırgan, modelin yanlış karar vermesini sağlamak için **gelen veriye** küçük ve çoğu zaman görünmez değişiklikler ekler.\
-*Örnek*: Bir stop işaretinin üzerine birkaç boya lekesi konulması, self-driving car'ın işareti hız sınırı işareti olarak "görmesine" neden olur.
+- **Input Manipulation Attack**: Bir attacker, modelin yanlış karar vermesini sağlamak için **incoming data** üzerinde küçük ve çoğunlukla görünmez değişiklikler yapar.\
+*Örnek*: Birkaç boya lekesi, self-driving car'ın bir stop işaretini hız sınırı işareti olarak "görmesine" neden olur.
 
-- **Data Poisoning Attack**: **Training set**, kötü örneklerle kasıtlı olarak kirletilerek modele zararlı kurallar öğretilir.\
-*Örnek*: Bir antivirus training corpus içindeki malware binary'leri "benign" olarak yanlış etiketlenir ve benzer malware'lerin daha sonra gözden kaçmasına izin verilir.
+- **Data Poisoning Attack**: **Training set**, modele zararlı kurallar öğretecek kötü örneklerle kasıtlı olarak kirletilir.\
+*Örnek*: Bir antivirus training corpus içindeki malware binary'leri "benign" olarak etiketlenir ve benzer malware'lerin daha sonra tespit edilmeden geçmesine izin verilir.
 
-- **Model Inversion Attack**: Bir saldırgan, çıktıları sorgulayarak orijinal girdilerin hassas özelliklerini yeniden oluşturan bir **reverse model** oluşturur.\
-*Örnek*: Bir cancer-detection modelinin tahminlerinden bir hastanın MRI görüntüsünü yeniden oluşturmak.
+- **Model Inversion Attack**: Bir attacker, çıktıları inceleyerek orijinal input'ların hassas özelliklerini yeniden oluşturan bir **reverse model** oluşturur.\
+*Örnek*: Bir cancer-detection model'inin tahminlerinden bir hastanın MRI görüntüsünü yeniden oluşturmak.
 
-- **Membership Inference Attack**: Saldırgan, güven düzeylerindeki farklılıkları tespit ederek **belirli bir kaydın** training sırasında kullanılıp kullanılmadığını test eder.\
-*Örnek*: Bir kişinin banka işleminin fraud-detection modelinin training data'sında bulunduğunu doğrulamak.
+- **Membership Inference Attack**: Adversary, confidence farklarını tespit ederek **specific record**'un training sırasında kullanılıp kullanılmadığını test eder.\
+*Örnek*: Bir kişinin bank transaction'ının fraud-detection model'inin training data'sında bulunduğunu doğrulamak.
 
-- **Model Theft**: Tekrarlanan sorgulama, saldırganın karar sınırlarını öğrenmesine ve modelin davranışını (ve IP'sini) **klonlamasına** olanak tanır.\
-*Örnek*: Bir ML-as-a-Service API'den yeterli sayıda Q&A çifti toplayarak neredeyse eşdeğer bir local model oluşturmak.
+- **Model Theft**: Tekrarlanan sorgular, bir attacker's decision boundary'leri öğrenmesini ve **model's behavior**'ı (ve IP'sini) clone etmesini sağlar.\
+*Örnek*: Bir ML-as-a-Service API'den near-equivalent bir local model oluşturmak için yeterli sayıda Q&A pair toplamak.
 
-- **AI Supply-Chain Attack**: **ML pipeline** içindeki herhangi bir bileşenin (data, libraries, pre-trained weights, CI/CD) ele geçirilmesi, sonraki modellerin bozulmasına yol açabilir.\
-*Örnek*: Bir model-hub üzerindeki poisoned dependency, birçok uygulamaya backdoored bir sentiment-analysis model kurar.
+- **AI Supply-Chain Attack**: **ML pipeline** içindeki herhangi bir component'in (data, library'ler, pre-trained weight'ler, CI/CD) ele geçirilerek downstream model'lerin bozulması.\
+*Örnek*: Bir model-hub üzerindeki poisoned dependency, birçok app'e backdoored sentiment-analysis model'i yükler.
 
-- **Transfer Learning Attack**: **Pre-trained model** içine kötü amaçlı logic yerleştirilir ve kurbanın görevi üzerinde fine-tuning yapılmasından sonra da varlığını sürdürür.\
-*Örnek*: Gizli bir trigger içeren bir vision backbone, medical imaging için uyarlandıktan sonra da label'ları değiştirmeye devam eder.
+- **Transfer Learning Attack**: Kötü amaçlı logic bir **pre-trained model** içine yerleştirilir ve victim'ın task'ı üzerinde fine-tuning yapılmasından sonra da varlığını sürdürür.\
+*Örnek*: Gizli bir trigger içeren vision backbone, medical imaging için adapte edildikten sonra da label'ları değiştirmeye devam eder.
 
-- **Model Skewing**: İnce biçimde biased veya yanlış etiketlenmiş data, saldırganın amacını destekleyecek şekilde **modelin çıktılarını değiştirir**.\
-*Örnek*: "Clean" spam e-postalarını ham olarak etiketleyerek enjekte etmek; böylece bir spam filter'ın benzer gelecekteki e-postalara izin vermesini sağlamak.
+- **Model Skewing**: İnce şekilde biased veya yanlış etiketlenmiş data, **model's outputs**'u attacker's agenda'sını destekleyecek şekilde değiştirir.\
+*Örnek*: "Clean" spam email'lerini ham olarak etiketleyip enjekte etmek; böylece bir spam filter'ın gelecekteki benzer email'lere izin vermesini sağlamak.
 
-- **Output Integrity Attack**: Saldırgan modelin kendisini değil, **model predictions'larını aktarım sırasında değiştirerek** sonraki sistemleri kandırır.\
-*Örnek*: Bir malware classifier'ın "malicious" kararını file-quarantine aşaması görmeden önce "benign" olarak değiştirmek.
+- **Output Integrity Attack**: Attacker, modelin kendisini değil, **model predictions**'ı transit sırasında değiştirerek downstream system'leri kandırır.\
+*Örnek*: File-quarantine stage görmeden önce bir malware classifier'ın "malicious" kararını "benign" olarak değiştirmek.
 
 - **Model Poisoning** --- Genellikle write access elde edildikten sonra **model parameters** üzerinde doğrudan ve hedefli değişiklikler yaparak davranışı değiştirmek.\
-*Örnek*: Production'daki bir fraud-detection modelinin weights değerlerini değiştirerek belirli kartlardan yapılan işlemlerin her zaman onaylanmasını sağlamak.
+*Örnek*: Production'daki bir fraud-detection model'inin weight'lerini değiştirerek belirli card'lardan yapılan transaction'ların her zaman onaylanmasını sağlamak.
 
 
-## Google SAIF Risks
+## Google SAIF Riskleri
 
-Google'ın [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) çerçevesi, AI sistemleriyle ilişkili çeşitli riskleri açıklar:
+Google'ın [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) framework'ü, AI sistemleriyle ilişkili çeşitli riskleri açıklamaktadır:<sup>[[11]](#references)</sup>
 
-- **Data Poisoning**: Kötü amaçlı kişiler, accuracy'yi düşürmek, backdoor yerleştirmek veya sonuçları saptırmak için training/tuning data'sını değiştirir ya da data ekler; bu durum tüm data-lifecycle boyunca model integrity'sini zayıflatır.
+- **Data Poisoning**: Kötü amaçlı kişiler, accuracy'yi düşürmek, backdoor yerleştirmek veya sonuçları çarpıtmak için training/tuning data'sını değiştirir ya da data enjekte eder. Bu durum, tüm data-lifecycle boyunca model integrity'sini zayıflatır.
 
-- **Unauthorized Training Data**: Copyright kapsamındaki, hassas veya izinsiz dataset'lerin alınması; modelin kullanmasına hiçbir zaman izin verilmeyen data'dan öğrenmesi nedeniyle hukuki, etik ve performance riskleri oluşturur.
+- **Unauthorized Training Data**: Copyright'lı, hassas veya izin alınmamış dataset'lerin alınması; modelin kullanmasına izin verilmeyen data'dan öğrenmesi nedeniyle legal, ethical ve performance riskleri oluşturur.
 
-- **Model Source Tampering**: Training öncesinde veya sırasında model code'unun, dependencies'lerin ya da weights'lerin supply-chain veya insider manipulation yoluyla değiştirilmesi, retraining sonrasında bile varlığını sürdüren gizli logic yerleştirebilir.
+- **Model Source Tampering**: Training'den önce veya training sırasında model code'unun, dependency'lerin veya weight'lerin supply-chain ya da insider manipulation yoluyla değiştirilmesi, retraining'den sonra bile kalıcı olan gizli logic yerleştirebilir.
 
-- **Excessive Data Handling**: Zayıf data-retention ve governance kontrolleri, sistemlerin gereğinden fazla personal data saklamasına veya işlemesine yol açarak exposure ve compliance riskini artırır.
+- **Excessive Data Handling**: Zayıf data-retention ve governance kontrolleri, sistemlerin gerekenden daha fazla personal data saklamasına veya işlemesine yol açarak exposure ve compliance riskini artırır.
 
-- **Model Exfiltration**: Saldırganlar model files/weights'leri çalar; bu, intellectual property kaybına ve copy-cat services veya follow-on attacks oluşturulmasına olanak tanır.
+- **Model Exfiltration**: Attacker'lar model file'larını veya weight'lerini çalar; bu durum intellectual property kaybına ve copy-cat service'lerin ya da follow-on attack'ların etkinleştirilmesine neden olur.
 
-- **Model Deployment Tampering**: Adversaries, model artifacts'lerini veya serving infrastructure'ı değiştirerek çalışan modelin doğrulanmış sürümden farklı olmasını sağlayabilir ve potansiyel olarak davranışını değiştirebilir.
+- **Model Deployment Tampering**: Adversary'ler model artifact'larını veya serving infrastructure'ı değiştirerek çalışan modelin incelenmiş version'dan farklı olmasını sağlar ve behaviour'ı değiştirebilir.
 
-- **Denial of ML Service**: API'leri flood'lamak veya “sponge” inputs göndermek compute/energy kaynaklarını tüketerek modeli offline duruma getirebilir; bu, klasik DoS attacks'leri andırır.
+- **Denial of ML Service**: API'leri flood'lamak veya “sponge” input'lar göndermek compute/energy kaynaklarını tüketerek modeli offline bırakabilir; bu durum klasik DoS attack'larına benzer.
 
-- **Model Reverse Engineering**: Saldırganlar, çok sayıda input-output pair toplayarak modeli klonlayabilir veya distil edebilir; bu da imitation products ve özelleştirilmiş adversarial attacks için kaynak oluşturur.
+- **Model Reverse Engineering**: Çok sayıda input-output pair toplayan attacker'lar modeli clone edebilir veya distil edebilir; bu da imitation product'ları ve özelleştirilmiş adversarial attack'ları destekler.
 
-- **Insecure Integrated Component**: Vulnerable plugins, agents veya upstream services, saldırganların AI pipeline içine code inject etmesine veya privilege escalation gerçekleştirmesine olanak tanır.
+- **Insecure Integrated Component**: Vulnerable plugin'ler, agent'lar veya upstream service'ler, attacker'ların AI pipeline içine code enjekte etmesine ya da privilege escalation yapmasına olanak tanır.
 
-- **Prompt Injection**: System intent'i geçersiz kılan talimatları gizlice içeri sokmak ve modelin istenmeyen commands gerçekleştirmesini sağlamak için doğrudan veya dolaylı biçimde prompts oluşturmak.
+- **Prompt Injection**: System intent'i geçersiz kılan instruction'ları gizlice iletmek ve modelin amaçlanmayan command'leri çalıştırmasını sağlamak için doğrudan veya dolaylı prompt'lar oluşturmak.
 
-- **Model Evasion**: Özenle tasarlanmış inputs, modelin yanlış sınıflandırma yapmasına, hallucinate etmesine veya izin verilmeyen content üretmesine neden olarak safety ve trust'ı zayıflatır.
+- **Model Evasion**: Özenle tasarlanmış input'lar, modelin yanlış classification yapmasına, hallucinate etmesine veya izin verilmeyen content output etmesine neden olarak safety ve trust'ı zayıflatır.
 
-- **Sensitive Data Disclosure**: Model, training data'sından veya user context'ten private ya da confidential information açığa çıkararak privacy ve regulations'ı ihlal eder.
+- **Sensitive Data Disclosure**: Model, training data'sından veya user context'inden private ya da confidential information açığa çıkararak privacy ve regulation'ları ihlal eder.
 
-- **Inferred Sensitive Data**: Model, hiç sağlanmamış personal attributes'ları çıkarabilir ve inference yoluyla yeni privacy ihlalleri oluşturabilir.
+- **Inferred Sensitive Data**: Model, hiç sağlanmamış personal attribute'ları çıkarabilir ve inference yoluyla yeni privacy zararları oluşturabilir.
 
-- **Insecure Model Output**: Sanitize edilmemiş responses, harmful code, misinformation veya inappropriate content'i kullanıcılara ya da downstream systems'e aktarır.
+- **Insecure Model Output**: Sanitize edilmemiş response'lar, harmful code'u, misinformation'ı veya inappropriate content'i user'lara ya da downstream system'lere aktarır.
 
-- **Rogue Actions**: Autonomously-integrated agents, yeterli user oversight olmadan istenmeyen gerçek dünya işlemlerini (file writes, API calls, purchases vb.) gerçekleştirir.
+- **Rogue Actions**: Autonomously-integrated agent'lar, yeterli user oversight olmadan amaçlanmayan real-world operation'ları (file write, API call, purchase vb.) gerçekleştirir.
 
 ## Mitre AI ATLAS Matrix
 
-[MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS), AI sistemleriyle ilişkili riskleri anlamak ve azaltmak için kapsamlı bir framework sağlar. Adversaries'lerin AI models'e karşı kullanabileceği çeşitli attack techniques ve tactics'leri, ayrıca AI systems'in farklı attacks gerçekleştirmek için nasıl kullanılabileceğini kategorilere ayırır.
+[MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS), AI sistemleriyle ilişkili riskleri anlamak ve azaltmak için kapsamlı bir framework sunar. Adversary'lerin AI model'lerine karşı kullanabileceği çeşitli attack technique ve tactic'lerini; ayrıca AI sistemlerinin farklı attack'ları gerçekleştirmek için nasıl kullanılacağını kategorilere ayırır.<sup>[[12]](#references)</sup>
 
 ## LLMJacking (Token Theft & Resale of Cloud-hosted LLM Access)
 
-Saldırganlar active session tokens veya cloud API credentials'ları çalar ve ücretli, cloud-hosted LLM'leri izinsiz şekilde çalıştırır. Access, çoğu zaman kurbanın account'unun önünde konumlanan reverse proxies aracılığıyla yeniden satılır; örneğin "oai-reverse-proxy" deployments. Sonuçlar arasında financial loss, policy dışında model misuse ve victim tenant'a atfedilme bulunur.
+Attacker'lar active session token'larını veya cloud API credential'larını çalarak ücretli, cloud-hosted LLM'leri yetkisiz şekilde çağırır. Access çoğunlukla victim'ın account'unu öne çıkaran reverse proxy'ler üzerinden yeniden satılır; örneğin "oai-reverse-proxy" deployment'ları. Sonuçlar arasında financial loss, policy dışı model misuse ve victim tenant'a atfedilme bulunur.<sup>[[2]](#references)[[3]](#references)</sup>
 
-TTPs:
-- Infected developer machines veya browsers'tan tokens toplayın; CI/CD secrets'ları çalın; leaked cookies satın alın.
-- Genuine provider'a requests ileten, upstream key'i gizleyen ve birçok customer'ı multiplex eden bir reverse proxy kurun.
-- Enterprise guardrails ve rate limits'i aşmak için direct base-model endpoints'leri kötüye kullanın.
+TTP'ler:
+- Infected developer machine'lardan veya browser'lardan token toplamak; CI/CD secret'larını çalmak; leak edilmiş cookie'ler satın almak.
+- Genuine provider'a request'leri forward eden, upstream key'i gizleyen ve birçok customer'ı multiplex eden bir reverse proxy kurmak.
+- Enterprise guardrail'lerini ve rate limit'lerini aşmak için direct base-model endpoint'lerini kötüye kullanmak.
 
 Mitigations:
-- Tokens'ları device fingerprint, IP ranges ve client attestation'a bağlayın; kısa expirations uygulayın ve MFA ile refresh edin.
-- Keys'leri minimum kapsamda tutun (tool access olmasın, uygun olduğunda read-only kullanın); anomaly durumunda rotate edin.
-- Safety filters, route başına quotas ve tenant isolation uygulayan bir policy gateway arkasında tüm traffic'i server-side sonlandırın.
-- Unusual usage patterns'ı (ani spend spikes, atypical regions, UA strings) izleyin ve şüpheli sessions'ları otomatik olarak revoke edin.
-- Uzun ömürlü static API keys yerine IdP'niz tarafından verilen mTLS veya signed JWTs kullanmayı tercih edin.
+- Token'ları device fingerprint, IP range'leri ve client attestation'a bağlamak; kısa expiration süreleri uygulamak ve MFA ile refresh etmek.
+- Key'leri minimum scope'la sınırlandırmak (tool access olmadan, uygun durumlarda read-only); anomaly durumunda rotate etmek.
+- Tüm traffic'i safety filter'ları, route başına quota'ları ve tenant isolation'ı uygulayan bir policy gateway arkasında server-side sonlandırmak.
+- Olağandışı usage pattern'lerini (ani spend spike'ları, alışılmadık region'lar, UA string'leri) izlemek ve şüpheli session'ları otomatik olarak revoke etmek.
+- Uzun ömürlü static API key'ler yerine IdP'niz tarafından verilen mTLS veya signed JWT'leri tercih etmek.
 
 ## Self-hosted LLM inference hardening
 
-Confidential data için local LLM server çalıştırmak, cloud-hosted APIs'lerden farklı bir attack surface oluşturur: inference/debug endpoints prompts leak edebilir, serving stack genellikle bir reverse proxy açığa çıkarır ve GPU device nodes büyük `ioctl()` surfaces'larına erişim sağlar. Bir on-prem inference service'i değerlendiriyor veya deploy ediyorsanız en azından aşağıdaki noktaları inceleyin.
+Confidential data için local LLM server çalıştırmak, cloud-hosted API'lerden farklı bir attack surface oluşturur: inference/debug endpoint'leri prompt'ları leak edebilir, serving stack genellikle bir reverse proxy açığa çıkarır ve GPU device node'ları geniş `ioctl()` surface'lerine access sağlar. Bir on-prem inference service'i değerlendiriyor veya deployment ediyorsanız en azından aşağıdaki noktaları inceleyin.<sup>[[4]](#references)</sup>
 
-### Debug ve monitoring endpoints üzerinden prompt leakage
+### Debug ve monitoring endpoint'leri üzerinden prompt leakage
 
-Inference API'yi **multi-user sensitive service** olarak ele alın. Debug veya monitoring routes; prompt contents, slot state, model metadata veya internal queue information açığa çıkarabilir. `llama.cpp` içinde `/slots` endpoint'i özellikle hassastır; per-slot state'i açığa çıkarır ve yalnızca slot inspection/management için tasarlanmıştır.
+Inference API'yi **multi-user sensitive service** olarak değerlendirin. Debug veya monitoring route'ları prompt content'ini, slot state'i, model metadata'sını veya internal queue information'ı açığa çıkarabilir. `llama.cpp` içinde `/slots` endpoint'i özellikle hassastır; çünkü her slot'a ait state'i açığa çıkarır ve yalnızca slot inspection/management amacıyla kullanılması gerekir.<sup>[[4]](#references)[[5]](#references)</sup>
 
 - Inference server'ın önüne bir reverse proxy koyun ve **deny by default** uygulayın.
-- Client/UI tarafından ihtiyaç duyulan tam HTTP method + path combinations'ı yalnızca allowlist'e alın.
-- Mümkün olduğunda backend'in içindeki introspection endpoints'leri devre dışı bırakın; örneğin `llama-server --no-slots`.
+- Yalnızca client/UI tarafından ihtiyaç duyulan kesin HTTP method + path combination'larını allowlist'e alın.
+- Backend'in kendisindeki introspection endpoint'lerini mümkün olduğunda devre dışı bırakın; örneğin `llama-server --no-slots`.
 - Reverse proxy'yi `127.0.0.1` adresine bind edin ve LAN üzerinde publish etmek yerine SSH local port forwarding gibi authenticated bir transport üzerinden expose edin.
 
 Example allowlist with nginx:
@@ -126,9 +126,9 @@ proxy_pass http://unix:/run/llama-cpp/llama-cpp.sock:;
 }
 }
 ```
-### Ağ olmadan rootless container'lar ve UNIX socket'leri
+### Ağ olmadan ve UNIX sockets kullanan rootless konteynerler
 
-Inference daemon bir UNIX socket üzerinde dinlemeyi destekliyorsa, TCP yerine bunu tercih edin ve container'ı **network stack olmadan** çalıştırın:
+Inference daemon bir UNIX socket üzerinden dinlemeyi destekliyorsa, bunu TCP yerine tercih edin ve konteyneri **ağ yığını olmadan** çalıştırın:
 ```bash
 podman run --rm -d \
 --network none \
@@ -144,19 +144,19 @@ ghcr.io/ggml-org/llama.cpp:server-cuda13 \
 --no-slots
 ```
 Faydalar:
-- `--network none`, gelen/giden TCP/IP maruziyetini ortadan kaldırır ve rootless container'ların aksi takdirde ihtiyaç duyacağı user-mode yardımcılarından kaçınır.
-- Bir UNIX socket, ilk access-control katmanı olarak socket path üzerinde POSIX permissions/ACLs kullanmanıza olanak tanır.
-- `--userns=keep-id` ve rootless Podman, container breakout etkisini azaltır; çünkü container root kullanıcısı host root kullanıcısı değildir.
-- Read-only model mount'ları, container içinden model tampering olasılığını azaltır.
+- `--network none`, gelen/giden TCP/IP maruziyetini ortadan kaldırır ve rootless container'ların aksi durumda ihtiyaç duyacağı kullanıcı alanı yardımcılarını önler.
+- Bir UNIX socket, ilk erişim denetimi katmanı olarak socket path üzerinde POSIX izinlerini/ACL'lerini kullanmanıza olanak tanır.
+- `--userns=keep-id` ve rootless Podman, container breakout etkisini azaltır; çünkü container root'u host root'u değildir.
+- Salt okunur model mount'ları, container içinden model üzerinde değişiklik yapılması olasılığını azaltır.
 
 ### GPU device-node minimizasyonu
 
-GPU-backed inference için `/dev/nvidia*` dosyaları, büyük driver `ioctl()` işleyicilerini ve potansiyel olarak paylaşılan GPU memory-management yollarını açığa çıkardıkları için yüksek değerli local attack surface'lerdir.
+GPU destekli inference için `/dev/nvidia*` dosyaları, büyük driver `ioctl()` işleyicilerini ve potansiyel olarak paylaşılan GPU memory-management yollarını açığa çıkardıkları için yüksek değerli yerel saldırı yüzeyleridir.<sup>[[4]](#references)</sup>
 
-- `/dev/nvidia*` dosyalarını herkes tarafından yazılabilir durumda bırakmayın.
-- `nvidia`, `nvidiactl` ve `nvidia-uvm` için `NVreg_DeviceFileUID/GID/Mode`, udev rules ve ACLs kullanarak yalnızca mapped container UID'nin bunları açabilmesini sağlayın.
-- Headless inference host'larında `nvidia_drm`, `nvidia_modeset` ve `nvidia_peermem` gibi gereksiz modülleri blacklist edin.
-- Runtime'ın inference startup sırasında bunları fırsatçı biçimde `modprobe` etmesine izin vermek yerine yalnızca gerekli modülleri boot sırasında preload edin.
+- `/dev/nvidia*` dosyalarını world writable bırakmayın.
+- `nvidia`, `nvidiactl` ve `nvidia-uvm` öğelerini `NVreg_DeviceFileUID/GID/Mode`, udev kuralları ve ACL'ler ile kısıtlayarak yalnızca eşlenen container UID'sinin bunları açabilmesini sağlayın.
+- Headless inference host'larında `nvidia_drm`, `nvidia_modeset` ve `nvidia_peermem` gibi gereksiz modülleri blacklist'e alın.
+- Runtime'ın inference startup sırasında fırsatçı biçimde `modprobe` çalıştırmasına izin vermek yerine yalnızca gerekli modülleri boot sırasında preload edin.
 
 Örnek:
 ```bash
@@ -164,18 +164,18 @@ options nvidia NVreg_DeviceFileUID=0
 options nvidia NVreg_DeviceFileGID=0
 options nvidia NVreg_DeviceFileMode=0660
 ```
-Önemli bir inceleme noktası **`/dev/nvidia-uvm`**'dir. İş yükü açıkça `cudaMallocManaged()` kullanmasa bile, güncel CUDA runtime'ları yine de `nvidia-uvm` gerektirebilir. Bu device paylaşıldığından ve GPU virtual memory management işlemlerini yürüttüğünden, bunu tenant'lar arası veri ifşası yüzeyi olarak değerlendirin. Inference backend destekliyorsa, Vulkan backend ilginç bir trade-off olabilir; çünkü `nvidia-uvm`'yi container'a hiç expose etmeyi gerektirmeyebilir.
+Önemli bir inceleme noktası **`/dev/nvidia-uvm`**'dir. İş yükü açıkça `cudaMallocManaged()` kullanmasa bile, güncel CUDA runtime'ları yine de `nvidia-uvm` gerektirebilir. Bu aygıt paylaşıldığı ve GPU sanal bellek yönetimini gerçekleştirdiği için, onu tenant'lar arası veri ifşası yüzeyi olarak değerlendirin. Inference backend destekliyorsa Vulkan backend ilginç bir ödünleşim sunabilir; çünkü container'a `nvidia-uvm` erişimi sağlanmasını tamamen önleyebilir.
 
-### Inference worker'ları için LSM izolasyonu
+### Inference worker'ları için LSM confinement
 
-Inference process'i çevresinde defense in depth olarak AppArmor/SELinux/seccomp kullanılmalıdır:
+AppArmor/SELinux/seccomp, inference process'i çevresinde defense in depth olarak kullanılmalıdır:<sup>[[4]](#references)</sup>
 
-- Yalnızca gerçekten gerekli olan shared library'lere, model path'lerine, socket directory'ye ve GPU device node'larına izin verin.
-- `sys_admin`, `sys_module`, `sys_rawio` ve `sys_ptrace` gibi high-risk capability'leri açıkça deny edin.
-- Model directory'sini read-only tutun ve writable path'leri yalnızca runtime socket/cache directory'leriyle sınırlandırın.
-- Denial log'larını monitor edin; model server veya post-exploitation payload beklenen davranışından kaçmaya çalıştığında bunlar faydalı detection telemetry sağlar.
+- Yalnızca gerçekten gerekli olan shared library'lere, model path'lerine, socket directory'sine ve GPU device node'larına izin verin.
+- `sys_admin`, `sys_module`, `sys_rawio` ve `sys_ptrace` gibi yüksek riskli capability'leri açıkça reddedin.
+- Model directory'sini read-only tutun ve yazılabilir path'leri yalnızca runtime socket/cache directory'leriyle sınırlandırın.
+- Denial log'larını izleyin; model server veya post-exploitation payload beklenen davranış alanından çıkmaya çalıştığında bu log'lar yararlı detection telemetry sağlar.
 
-GPU-backed worker için örnek AppArmor kuralları:
+GPU-backed bir worker için örnek AppArmor kuralları:
 ```text
 deny capability sys_admin,
 deny capability sys_module,
@@ -188,58 +188,61 @@ deny capability sys_ptrace,
 /var/lib/models/** r,
 owner /srv/llm/** rw,
 ```
-## Phantom Squatting: LLM-Hallucinated Domains as an AI Supply-Chain Vector
+## Phantom Squatting: LLM-Hallucinated Domains as Bir AI Tedarik-Zinciri Vektörü
 
-Phantom squatting, **slopsquatting'in domain/URL eşdeğeridir**. LLM, mevcut olmayan bir package adını hallucinate etmek yerine, gerçek bir brand için makul görünen bir **portal, API, webhook, billing, SSO, download veya support domain'i** hallucinate eder ve saldırgan, bir insan veya agent onu kullanmadan önce bu namespace'i register eder.
+Phantom squatting, **slopsquatting'in domain/URL karşılığıdır**. LLM, var olmayan bir paket adını hallucinate etmek yerine gerçek bir marka için makul görünen bir **portal, API, webhook, billing, SSO, download veya support domain'ini** hallucinate eder ve saldırgan, bir insan veya agent bunu kullanmadan önce bu namespace'i kaydeder.<sup>[[8]](#references)[[9]](#references)</sup>
 
-Bu önemlidir; çünkü birçok AI-assisted workflow'da model çıktısı **güvenilir bir dependency** olarak kabul edilir:
-- Developer'lar önerilen endpoint'i code veya CI/CD integration'larına yapıştırır.
-- AI agent'lar documentation, schema, APK, ZIP veya webhook target'larını otomatik olarak fetch eder.
-- Oluşturulan runbook veya doc'lar fake URL'yi authoritative bir kaynakmış gibi içerebilir.
+Bu önemlidir; çünkü birçok AI destekli workflow'da model çıktısı **güvenilir bir dependency** olarak kabul edilir:
+- Developer'lar önerilen endpoint'i code veya CI/CD entegrasyonlarına yapıştırır.
+- AI agent'ları documentation, schema, APK, ZIP veya webhook target'larını otomatik olarak fetch eder.
+- Oluşturulan runbook'lar veya doc'lar sahte URL'yi yetkiliymiş gibi embed edebilir.
 
 ### Offensive workflow
 
-1. **Hallucination surface'i probe edin**: `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook` veya `mobile app` portal'ları gibi gerçekçi workflow'lar hakkında brand-specific sorular sorun.
-2. **Adayları normalize edin**: generated URL'leri resolve edin, NXDOMAIN response'larını parent registerable domain'e indirgeyin ve prompt family'lerini deduplicate edin. Prompt corpus'ları çeşitli kalmalıdır; örneğin **Jaccard similarity** kullanarak near-duplicate'leri eleyin.
+1. **Hallucination surface'i probe edin**: `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook` veya `mobile app` portalları gibi gerçekçi workflow'lar hakkında marka-özel sorular sorun.
+2. **Adayları normalize edin**: oluşturulan URL'leri resolve edin, NXDOMAIN response'larını parent registerable domain'e indirgeyin ve prompt family'lerini deduplicate edin. Prompt corpus'ları çeşitli kalmalıdır; örneğin **Jaccard similarity** kullanarak birbirine çok yakın tekrarları çıkarın.
 3. **Öngörülebilir hallucination'lara öncelik verin**:
-- **Thermal Hallucination Persistence (THP)**: aynı fake domain, `T=0.1` gibi düşük temperature değerleri dahil olmak üzere farklı temperature'larda görünür.
+- **Thermal Hallucination Persistence (THP)**: aynı fake domain, `T=0.1` gibi düşük temperature değerleri dahil olmak üzere farklı temperature değerlerinde de görünür.
 - **Cross-model consensus**: birden fazla LLM family aynı fake domain'i üretir.
-4. Parent domain'i **register edin ve weaponize edin**, ardından phishing, fake APK/ZIP download'ları, credential harvester'lar, malicious doc'lar veya secret/webhook payload'larını toplayan API endpoint'leri host edin. **Pure domain-level hallucination'lar** monetize edilmesi en kolay olanlardır; çünkü saldırgan tüm namespace'i kontrol eder. Subdomain/path hallucination'ları da normalize edilen parent register edilmemişse abuse edilebilir.
-5. **Zero-reputation window'u exploit edin**: yeni register edilmiş domain'ler genellikle blocklist geçmişinden, URL reputation'dan ve olgun telemetry'den yoksundur; bu nedenle detection'lar yetişene kadar kontrolleri bypass edebilirler. Saldırganlar bu window'u crawler-only benign response'lar, redirect cloaking, CAPTCHA gate'leri veya delayed payload staging ile uzatabilir.
+4. **Parent domain'i register edip weaponize edin**; ardından phishing, fake APK/ZIP download'ları, credential harvester'lar, malicious doc'lar veya secret/webhook payload'larını toplayan API endpoint'leri host edin. **Pure domain-level hallucination'lar** monetize edilmesi en kolay olanlardır; çünkü saldırgan tüm namespace'i kontrol eder. Subdomain/path hallucination'ları da normalize edilmiş parent register edilmemiş olduğunda abuse edilebilir.
+5. **Zero-reputation window'ı exploit edin**: yeni register edilmiş domain'lerde genellikle blocklist history, URL reputation ve olgun telemetry bulunmadığından, detection'lar yetişene kadar kontrolleri bypass edebilirler. Saldırganlar bu window'ı crawler-only benign response'lar, redirect cloaking, CAPTCHA gate'leri veya gecikmeli payload staging ile uzatabilir.
 
 ### Agent'lar için neden tehlikelidir?
 
-Human victim için fake domain genellikle bir click ve başka bir action gerektirir. **Agentic workflow** için LLM hem **lure** hem de **executor** olabilir: agent hallucinate edilmiş URL'yi alır, URL'yi fetch eder, response'u parse eder ve ardından herhangi bir human review olmadan token'ları leak edebilir, instruction'ları execute edebilir, bir dependency download edebilir veya poisoned data'yı CI/CD'ye push edebilir.
+İnsan victim için fake domain genellikle bir click ve ek bir action gerektirir. **Agentic workflow**'ta ise LLM hem **lure** hem de **executor** olabilir: agent hallucinate edilmiş URL'yi alır, URL'yi fetch eder, response'u parse eder ve ardından herhangi bir human review olmadan token'ları leak edebilir, instruction'ları execute edebilir, bir dependency download edebilir veya CI/CD'ye poisoned data push edebilir.<sup>[[8]](#references)</sup>
 
-### Practical attacker prompts
+### Pratik attacker prompt'ları
 
-High-yield prompt'lar genellikle explicit phishing lure'ları yerine normal enterprise task'ları andırır:
-- “`<brand>` integration'ları için payment sandbox URL nedir?”
-- “`<brand>` build notification'ları için hangi webhook endpoint'i kullanmalıyım?”
-- “`<brand>` için employee benefits / billing / SSO portal'ı nerede?”
+High-yield prompt'lar genellikle açık phishing lure'ları yerine normal enterprise task'larına benzer:
+- “`<brand>` entegrasyonları için payment sandbox URL'si nedir?”
+- “`<brand>` build notification'ları için hangi webhook endpoint'ini kullanmalıyım?”
+- “`<brand>` için employee benefits / billing / SSO portalı nerede?”
 - “`<brand>` için doğrudan Android APK veya desktop client download'ını ver.”
 
 ### Defensive inversion
 
-Bunu yalnızca bir prompt-injection problemi olarak değil, proactive domain-monitoring problemi olarak ele alın:
+Bunu yalnızca bir prompt-injection problemi olarak değil, proaktif bir domain-monitoring problemi olarak ele alın:
 - Bir **brand prompt corpus** oluşturun ve kullanıcılarınızın/agent'larınızın güvendiği LLM'leri periyodik olarak probe edin.
-- Hallucinate edilmiş URL'leri saklayın ve hangilerinin temperature/model'lar arasında stable olduğunu track edin.
-- **Adversarial Exploitation Window (AEW)** değerini track edin: ilk hallucination ile attacker registration arasındaki süre. Pozitif AEW, defender'ların weaponization'dan önce pre-register, sinkhole veya pre-block yapabileceği anlamına gelir.
-- Parent domain'ler için **NXDOMAIN → registered** transition'larını monitor edin.
+- Hallucinate edilmiş URL'leri saklayın ve hangilerinin temperature/model'lar arasında stabil olduğunu takip edin.
+- **Adversarial Exploitation Window (AEW)** değerini takip edin: ilk hallucination ile saldırganın registration'ı arasındaki süre. Pozitif AEW, defender'ların weaponization'dan önce pre-register, sinkhole veya pre-block yapabileceği anlamına gelir.
+- Parent domain'lerdeki **NXDOMAIN → registered** geçişlerini izleyin.
 - Registration sonrasında registrar'ı, creation date'i, nameserver'ları, privacy shielding'i, page content'i, screenshot'ları, parked-page status'ını ve brand-asset similarity'yi triage edin.
-- Agent ve developer'ların **LLM-generated domain'lere varsayılan olarak güvenmemesi** için policy gate'leri ekleyin: ilk kullanım öncesinde allowlist, ownership validation, CT/RDAP check veya human approval gerektirin.
+- Agent'ların/developer'ların **LLM tarafından üretilen domain'lere varsayılan olarak trust etmemesi** için policy gate'leri ekleyin: ilk kullanımdan önce allowlist, ownership validation, CT/RDAP check veya human approval gerektirin.
 
-Bu konu aynı anda birkaç AI risk bucket'ına uyar: **AI supply-chain attack**, **insecure model output** ve agent'ların hallucinate edilmiş URL'yi otonom olarak tükettiği durumlarda **rogue actions**.
+Bu durum aynı anda birkaç AI risk bucket'ına uyar: **AI supply-chain attack**, **insecure model output** ve agent'ların hallucinate edilmiş URL'yi otonom olarak tüketmesi durumunda **rogue actions**.
 
 ## References
-- [Unit 42 – Code Assistant LLM'lerinin Riskleri: Zararlı İçerik, Kötüye Kullanım ve Aldatma](https://unit42.paloaltonetworks.com/code-assistant-llms/)
-- [LLMJacking scheme overview – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
-- [oai-reverse-proxy (çalınmış LLM erişiminin yeniden satılması)](https://gitgud.io/khanon/oai-reverse-proxy)
-- [Synacktiv - On-premise düşük yetkili bir LLM server deployment'ının deep-dive incelemesi](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
-- [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
-- [Podman quadlet'leri: podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
-- [CNCF Container Device Interface (CDI) specification](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
-- [Unit 42 – Phantom Squatting: Software Supply Chain Vector olarak AI-Hallucinated Domain'ler](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
-- [Socket – Slopsquatting: AI Hallucination'ları Yeni Bir Supply Chain Attack Sınıfını Nasıl Besliyor](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
+- [1] [Unit 42 – Code Assistant LLM'lerinin riskleri: Zararlı içerik, kötüye kullanım ve aldatma](https://unit42.paloaltonetworks.com/code-assistant-llms/)
+- [2] [LLMJacking scheme'e genel bakış – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
+- [3] [oai-reverse-proxy (çalınmış LLM erişiminin yeniden satılması)](https://gitgud.io/khanon/oai-reverse-proxy)
+- [4] [Synacktiv - On-premise düşük yetkili bir LLM server'ının deployment'ına derinlemesine bakış](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
+- [5] [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
+- [6] [Podman quadlet'leri: podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
+- [7] [CNCF Container Device Interface (CDI) specification](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
+- [8] [Unit 42 – Phantom Squatting: AI-Hallucinated Domain'ler bir Software Supply Chain Vector olarak](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
+- [9] [Socket – Slopsquatting: AI Hallucination'ları yeni bir Supply Chain Attack sınıfını nasıl besliyor](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
+- [10] [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [11] [Google SAIF (Security AI Framework) Risk'leri](https://saif.google/secure-ai-framework/risks)
+- [12] [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS)
 
 {{#include ../banners/hacktricks-training.md}}

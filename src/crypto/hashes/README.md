@@ -1,39 +1,41 @@
-# Hashes, MACs & KDFs
+# Hash'ler, MAC'ler ve KDF'ler
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Yaygın CTF patterns
+## Yaygın CTF kalıpları
 
 - "Signature" aslında `hash(secret || message)` → length extension.
-- Unsalted password hashes → trivial cracking / lookup.
+- Salt eklenmemiş password hash'leri → trivial cracking / lookup.
 - Hash ile MAC'i karıştırmak (hash != authentication).
 
 ## Hash length extension attack
 
-### Teknik
+### Technique
 
-Bunu genellikle şu şekilde bir "signature" hesaplayan bir sunucuda istismar edebilirsiniz:
+Bir server aşağıdakine benzer bir "signature" hesaplıyorsa bunu sıklıkla exploit edebilirsiniz:
 
 `sig = HASH(secret || message)`
 
-ve Merkle–Damgård hash kullandığında (klasik örnekler: MD5, SHA-1, SHA-256).
+ve bir Merkle–Damgård hash'i (klasik örnekler: MD5, SHA-1, SHA-256) kullanıyorsa.
 
-Eğer şunları biliyorsanız:
+Şunları biliyorsanız:
 
 - `message`
 - `sig`
 - hash function
-- (veya brute-force yapabiliyorsanız) `len(secret)`
+- (`len(secret)` değerini brute-force edebiliyorsanız)
 
-O zaman secret'i bilmeden şu için geçerli bir signature hesaplayabilirsiniz:
+şunu bilmeden geçerli bir signature hesaplayabilirsiniz:
 
 `message || padding || appended_data`
 
+secret.<sup>[[1]](#references)</sup>
+
 ### Önemli sınırlama: HMAC etkilenmez
 
-Length extension attacks, Merkle–Damgård hash'leri için `HASH(secret || message)` gibi yapılarla ilgilidir. **HMAC** (ör. HMAC-SHA256) bu sınıf problemi önlemek için özel olarak tasarlanmıştır, bu yüzden etkilenmez.
+Length extension attacks, Merkle–Damgård hash'leri için `HASH(secret || message)` gibi construction'lara uygulanır. Özellikle bu problem sınıfından kaçınmak üzere tasarlanmış **HMAC**'e (ör. HMAC-SHA256) uygulanmaz.<sup>[[1]](#references)</sup>
 
-### Araçlar
+### Tools
 
 - hash_extender:
 {{#ref}}
@@ -44,7 +46,7 @@ https://github.com/iagox86/hash_extender
 https://github.com/bwall/HashPump
 {{#endref}}
 
-### İyi açıklama
+### İyi bir açıklama
 
 {{#ref}}
 https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks
@@ -54,24 +56,28 @@ https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-lengt
 
 ### İlk sorular
 
-- Is it **salted**? (look for `salt$hash` formats)
-- Is it a **fast hash** (MD5/SHA1/SHA256) or a **slow KDF** (bcrypt/scrypt/argon2/PBKDF2)?
-- Do you have a **format hint** (hashcat mode / John format)?
+- **Salt eklenmiş mi?** (`salt$hash` formatlarını arayın)
+- **Fast hash** (MD5/SHA1/SHA256) mi, yoksa **slow KDF** (bcrypt/scrypt/argon2/PBKDF2) mi?
+- Bir **format hint** (hashcat mode / John format) var mı?
 
-### Pratik iş akışı
+### Pratik workflow
 
-1. Hash'i belirleyin:
+1. Hash'i identify edin:
 - `hashid <hash>`
 - `hashcat --example-hashes | rg -n "<pattern>"`
-2. Eğer unsalted ve yaygınsa: çevrimiçi DB'leri ve crypto workflow bölümündeki tanımlama araçlarını deneyin.
-3. Aksi halde kırın:
+2. Salt eklenmemiş ve yaygınsa: crypto workflow section'daki online DB'leri ve identification tooling'i deneyin.
+3. Aksi takdirde crack edin:
 - `hashcat -m <mode> -a 0 hashes.txt wordlist.txt`
 - `john --wordlist=wordlist.txt --format=<fmt> hashes.txt`
 
-### İstismar edebileceğiniz yaygın hatalar
+### Exploit edebileceğiniz yaygın hatalar
 
-- Aynı parola kullanıcılar arasında tekrar kullanılmış → birini kırın, pivot yapın.
-- Truncated hashes / custom transforms → normalize edip tekrar deneyin.
-- Zayıf KDF parametreleri (ör. düşük PBKDF2 iterasyon sayısı) → hâlâ kırılabilir.
+- Aynı password'ün users arasında yeniden kullanılması → birini crack edin, pivot yapın.
+- Truncated hash'ler / custom transform'lar → normalize edin ve yeniden deneyin.
+- Weak KDF parameters (ör. düşük PBKDF2 iteration sayısı) → yine de crack edilebilir.
+
+## References
+
+- [1] [Everything you need to know about hash length extension attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
 {{#include ../../banners/hacktricks-training.md}}

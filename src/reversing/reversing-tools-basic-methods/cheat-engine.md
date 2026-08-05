@@ -2,189 +2,189 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) çalışan bir oyunun belleğinde önemli değerlerin nerede saklandığını bulmak ve bunları değiştirmek için yararlı bir programdır.\
-İndirdiğinizde ve çalıştırdığınızda, aracı nasıl kullanacağınızı gösteren bir **eğitim** ile **karşılaşırsınız**. Aracı nasıl kullanacağınızı öğrenmek istiyorsanız, bunu tamamlamanız şiddetle tavsiye edilir.
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php), çalışan bir oyunun belleğinde önemli değerlerin nerede saklandığını bulmak ve bunları değiştirmek için kullanışlı bir programdır.\
+Programı indirip çalıştırdığınızda, araçla nasıl kullanılacağını anlatan bir **tutorial** ile karşılaşırsınız. Aracı nasıl kullanacağınızı öğrenmek istiyorsanız bunu tamamlamanız kesinlikle önerilir.<sup>[[3]](#references)</sup>
 
-## Ne arıyorsunuz?
+## Neyi arıyorsunuz?
 
-![](<../../images/image (762).png>)
+![Cheat Engine - Neyi arıyorsunuz?: Neyi arıyorsunuz?](<../../images/image (762).png>)
 
-Bu araç, bir programın belleğinde **bir değerin** (genellikle bir sayı) **nerede saklandığını** bulmak için çok yararlıdır.\
-**Genellikle sayılar** **4bayt** formatında saklanır, ancak bunları **double** veya **float** formatlarında da bulabilirsiniz veya **bir sayıdan farklı** bir şey aramak isteyebilirsiniz. Bu nedenle, neyi **arama** yapmak istediğinizi **seçtiğinizden** emin olmalısınız:
+Bu araç, bir programın belleğinde **bir değerin** (genellikle bir sayının) **nerede saklandığını** bulmak için çok kullanışlıdır.\
+**Sayılar genellikle** **4bytes** biçiminde saklanır, ancak bunları **double** veya **float** formatlarında da bulabilirsiniz ya da **sayıdan farklı** bir şey aramak isteyebilirsiniz. Bu nedenle **aramak** istediğiniz şeyi **seçtiğinizden** emin olmanız gerekir:
 
-![](<../../images/image (324).png>)
+![Cheat Engine - Neyi arıyorsunuz?: Sayılar genellikle 4bytes biçiminde saklanır, ancak bunları double veya float formatlarında da bulabilirsiniz ya da farklı bir şey aramak isteyebilirsiniz...](<../../images/image (324).png>)
 
-Ayrıca **farklı** türde **arama** seçenekleri de belirtebilirsiniz:
+Ayrıca **farklı** **arama** türlerini belirtebilirsiniz:
 
-![](<../../images/image (311).png>)
+![Cheat Engine - Neyi arıyorsunuz?: Ayrıca farklı arama türlerini belirtebilirsiniz](<../../images/image (311).png>)
 
-Belleği tararken **oyunu durdurmak için** kutucuğu işaretleyebilirsiniz:
+Belleği tararken **oyunu durdurmak** için kutuyu da işaretleyebilirsiniz:
 
-![](<../../images/image (1052).png>)
+![Cheat Engine - Neyi arıyorsunuz?: Belleği tararken oyunu durdurmak için kutuyu da işaretleyebilirsiniz](<../../images/image (1052).png>)
 
-### Kısayollar
+### Hotkeys
 
-_**Düzenle --> Ayarlar --> Kısayollar**_ bölümünde, **oyunu durdurma** gibi farklı amaçlar için farklı **kısayollar** ayarlayabilirsiniz (bu, belleği taramak istediğinizde oldukça kullanışlıdır). Diğer seçenekler de mevcuttur:
+_**Edit --> Settings --> Hotkeys**_ bölümünde, **oyunu durdurmak** gibi farklı amaçlar için farklı **hotkeys** ayarlayabilirsiniz (bu, bazı durumlarda belleği taramak istediğinizde oldukça kullanışlıdır). Başka seçenekler de mevcuttur:
 
-![](<../../images/image (864).png>)
+![Neyi arıyorsunuz? - Hotkeys: Edit -- Settings -- Hotkeys bölümünde, oyunu durdurmak gibi farklı amaçlar için farklı hotkeys ayarlayabilirsiniz (bu, bazı durumlarda...](<../../images/image (864).png>)
 
 ## Değeri değiştirme
 
-Aradığınız **değerin** nerede olduğunu **bulduğunuzda** (bununla ilgili daha fazla bilgi sonraki adımlarda) değeri **değiştirmek için** üzerine çift tıklayarak, ardından değerine çift tıklayarak değiştirebilirsiniz:
+Aradığınız **değerin** nerede olduğunu **bulduğunuzda** (bununla ilgili daha fazla bilgi aşağıdaki adımlardadır), değere çift tıklayıp ardından değerinin üzerine çift tıklayarak **değiştirebilirsiniz**:
 
-![](<../../images/image (563).png>)
+![Hotkeys - Değeri değiştirme: Aradığınız değerin nerede olduğunu bulduğunuzda (bununla ilgili daha fazla bilgi aşağıdaki adımlardadır), değere çift tıklayıp ardından...](<../../images/image (563).png>)
 
-Ve son olarak, bellekteki değişikliği gerçekleştirmek için **onay kutusunu işaretleyerek**:
+Son olarak, bellekte değişikliği gerçekleştirmek için **işaretleme kutusunu** seçin:
 
-![](<../../images/image (385).png>)
+![Hotkeys - Değeri değiştirme: Son olarak, bellekte değişikliği gerçekleştirmek için işaretleme kutusunu seçin](<../../images/image (385).png>)
 
-**Bellekteki değişiklik** hemen **uygulanacaktır** (oyun bu değeri tekrar kullanmadığı sürece değer **oyunda güncellenmeyecektir**).
+**Bellekteki** **değişiklik** hemen **uygulanır** (oyun bu değeri tekrar kullanana kadar değerin **oyunda güncellenmeyeceğini** unutmayın).
 
 ## Değeri arama
 
-Öyleyse, geliştirmek istediğiniz önemli bir değer (kullanıcınızın hayatı gibi) olduğunu varsayıyoruz ve bu değeri bellekte arıyorsunuz.
+Önemli bir değeri (kullanıcınızın canı gibi) artırmak istediğinizi ve bu değeri bellekte aradığınızı varsayalım.
 
-### Bilinen bir değişim aracılığıyla
+### Bilinen bir değişiklik üzerinden
 
-100 değerini aradığınızı varsayalım, bu değeri aramak için bir **tarama** gerçekleştiriyorsunuz ve birçok eşleşme buluyorsunuz:
+100 değerini aradığınızı varsayalım. Bu değeri aramak için bir **scan gerçekleştirirsiniz** ve birçok eşleşme bulursunuz:
 
-![](<../../images/image (108).png>)
+![Değeri arama - Bilinen bir değişiklik üzerinden: 100 değerini aradığınızı varsayalım. Bu değeri aramak için bir scan gerçekleştirirsiniz ve birçok eşleşme bulursunuz](<../../images/image (108).png>)
 
-Sonra, **değerin değişmesi için** bir şey yapıyorsunuz ve oyunu **durdurup** **bir sonraki taramayı** gerçekleştiriyorsunuz:
+Ardından **değerin değişmesini** sağlayacak bir işlem yapar, oyunu **durdurur** ve bir **next scan gerçekleştirirsiniz**:
 
-![](<../../images/image (684).png>)
+![Değeri arama - Bilinen bir değişiklik üzerinden: Ardından değerin değişmesini sağlayacak bir işlem yapar, oyunu durdurur ve bir next scan gerçekleştirirsiniz](<../../images/image (684).png>)
 
-Cheat Engine, **100'den yeni değere** geçen **değerleri** arayacaktır. Tebrikler, aradığınız değerin **adresini buldunuz**, şimdi bunu değiştirebilirsiniz.\
-_Eğer hala birkaç değer varsa, o değeri tekrar değiştirmek için bir şey yapın ve adresleri filtrelemek için bir "sonraki tarama" gerçekleştirin._
+Cheat Engine, **100'den yeni değere değişen** **değerleri** arar. Tebrikler, aradığınız değerin **adresini** **buldunuz**; artık değeri değiştirebilirsiniz.\
+_Hâlâ birden fazla değer varsa, bu değeri tekrar değiştirecek bir işlem yapın ve adresleri filtrelemek için başka bir "next scan" gerçekleştirin._
 
-### Bilinmeyen Değer, bilinen değişim
+### Bilinmeyen Değer, bilinen değişiklik
 
-Değeri **bilmiyorsanız** ama **değişmesini nasıl sağlayacağınızı** biliyorsanız (ve hatta değişim değerini de biliyorsanız) numaranızı arayabilirsiniz.
+**Değeri bilmediğiniz**, ancak **değişmesini nasıl sağlayacağınızı** (hatta değişimin miktarını) bildiğiniz senaryolarda sayınızı arayabilirsiniz.
 
-Öyleyse, "**Bilinmeyen başlangıç değeri**" türünde bir tarama yaparak başlayın:
+Öncelikle "**Unknown initial value**" türünde bir scan gerçekleştirin:
 
-![](<../../images/image (890).png>)
+![Bilinen bir değişiklik üzerinden - Bilinmeyen Değer, bilinen değişiklik: Öncelikle " Unknown initial value " türünde bir scan gerçekleştirin](<../../images/image (890).png>)
 
-Sonra, değerin değişmesini sağlayın, **değerin nasıl değiştiğini** belirtin (benim durumumda 1 azaldı) ve bir **sonraki tarama** gerçekleştirin:
+Ardından değeri değiştirin, **değerin** **nasıl değiştiğini** belirtin (benim durumumda 1 azaltıldı) ve bir **next scan gerçekleştirin**:
 
-![](<../../images/image (371).png>)
+![Bilinen bir değişiklik üzerinden - Bilinmeyen Değer, bilinen değişiklik: Ardından değeri değiştirin, değerin nasıl değiştiğini belirtin (benim durumumda 1 azaltıldı) ve bir next scan gerçekleştirin](<../../images/image (371).png>)
 
-Seçilen şekilde **değiştirilen tüm değerler** size sunulacaktır:
+Seçtiğiniz şekilde değiştirilen **tüm değerler** gösterilir:
 
-![](<../../images/image (569).png>)
+![Bilinen bir değişiklik üzerinden - Bilinmeyen Değer, bilinen değişiklik: Seçtiğiniz şekilde değiştirilen tüm değerler gösterilir](<../../images/image (569).png>)
 
-Değerinizi bulduğunuzda, onu değiştirebilirsiniz.
+Değerinizi bulduktan sonra onu değiştirebilirsiniz.
 
-Birçok **mümkün değişim** olduğunu ve sonuçları filtrelemek için bu **adımları istediğiniz kadar** yapabileceğinizi unutmayın:
+Birçok **olası değişiklik** olduğunu ve sonuçları filtrelemek için bu **adımları istediğiniz kadar** tekrarlayabileceğinizi unutmayın:
 
-![](<../../images/image (574).png>)
+![Bilinen bir değişiklik üzerinden - Bilinmeyen Değer, bilinen değişiklik: Birçok olası değişiklik olduğunu ve sonuçları filtrelemek için bu adımları istediğiniz kadar tekrarlayabileceğinizi unutmayın](<../../images/image (574).png>)
 
-### Rastgele Bellek Adresi - Kodu Bulma
+### Rastgele Bellek Adresi - Kodu bulma
 
-Şimdiye kadar bir değeri saklayan bir adres bulmayı öğrendik, ancak **oyunun farklı çalıştırmalarında bu adresin bellekte farklı yerlerde olma olasılığı yüksektir**. Bu nedenle, bu adresi her zaman nasıl bulacağımızı öğrenelim.
+Şimdiye kadar bir değeri saklayan adresi bulmayı öğrendik, ancak **oyunun farklı çalıştırılmalarında bu adresin belleğin farklı yerlerinde bulunması** oldukça olasıdır. Şimdi bu adresi her zaman nasıl bulacağımızı görelim.
 
-Bahsedilen bazı ipuçlarını kullanarak, mevcut oyununuzun önemli değeri sakladığı adresi bulun. Sonra (isterseniz oyunu durdurarak) bulunan **adrese sağ tıklayın** ve "**Bu adrese erişenleri bul**" veya "**Bu adrese yazanları bul**" seçeneğini seçin:
+Bahsedilen yöntemlerden bazılarını kullanarak mevcut oyununuzun önemli değeri sakladığı adresi bulun. Ardından (isterseniz oyunu durdurarak) bulunan **adrese** **sağ tıklayın** ve "**Find out what accesses this address**" veya "**Find out what writes to this address**" seçeneğini seçin:
 
-![](<../../images/image (1067).png>)
+![Bilinmeyen Değer, bilinen değişiklik - Rastgele Bellek Adresi - Kodu bulma: Bahsedilen yöntemlerden bazılarını kullanarak mevcut oyununuzun önemli değeri sakladığı adresi bulun. Ardından...](<../../images/image (1067).png>)
 
-**İlk seçenek**, bu **adresin** hangi **kod parçaları** tarafından **kullanıldığını** bilmek için yararlıdır (bu, oyunun kodunu **nerede değiştirebileceğinizi** bilmek gibi daha fazla şey için yararlıdır).\
-**İkinci seçenek** daha **özeldir** ve bu durumda **değerin nereden yazıldığını** bilmekle ilgilendiğimiz için daha faydalı olacaktır.
+**İlk seçenek**, **kodun** hangi **bölümlerinin** bu **adresi kullandığını** öğrenmek için faydalıdır (oyunun **kodunu nerede değiştirebileceğinizi öğrenmek** gibi başka amaçlar için de kullanışlıdır).\
+**İkinci seçenek** daha **özeldir** ve bu durumda daha faydalı olacaktır; çünkü bu değerin **nereden yazıldığını** öğrenmek istiyoruz.
 
-Bu seçeneklerden birini seçtiğinizde, **hata ayıklayıcı** programa **bağlanacak** ve yeni bir **boş pencere** açılacaktır. Şimdi, **oyunu oynayın** ve **değeri değiştirin** (oyunu yeniden başlatmadan). **Pencere**, **değeri değiştiren** **adreslerle** **doldurulmalıdır**:
+Bu seçeneklerden birini seçtiğinizde **debugger** programa **bağlanır** ve yeni, **boş bir pencere** açılır. Şimdi **oyunu oynayın** ve bu **değeri değiştirin** (oyunu yeniden başlatmadan). **Pencere**, **değeri değiştiren** **adreslerle** doldurulmalıdır:
 
-![](<../../images/image (91).png>)
+![Bilinmeyen Değer, bilinen değişiklik - Rastgele Bellek Adresi - Kodu bulma: Bu seçeneklerden birini seçtiğinizde debugger programa bağlanır ve yeni, boş bir pencere açılır. Ardından...](<../../images/image (91).png>)
 
-Artık değeri değiştiren adresi bulduğunuza göre, kodu istediğiniz gibi **değiştirebilirsiniz** (Cheat Engine, bunu NOP'lar için hızlıca değiştirmenize izin verir):
+Artık değeri değiştiren adresi bulduğunuza göre **kodu istediğiniz gibi değiştirebilirsiniz** (Cheat Engine, NOP'lar için hızlıca değişiklik yapmanıza olanak tanır):
 
-![](<../../images/image (1057).png>)
+![Bilinmeyen Değer, bilinen değişiklik - Rastgele Bellek Adresi - Kodu bulma: Artık değeri değiştiren adresi bulduğunuza göre kodu istediğiniz gibi değiştirebilirsiniz (Cheat Engine...](<../../images/image (1057).png>)
 
-Artık kodu, sayınızı etkilemeyecek şekilde veya her zaman olumlu bir şekilde etkileyecek şekilde değiştirebilirsiniz.
+Böylece kodu, sayınızı etkilemeyecek veya her zaman olumlu yönde etkileyecek şekilde değiştirebilirsiniz.
 
-### Rastgele Bellek Adresi - Göstergeleri Bulma
+### Rastgele Bellek Adresi - Pointer'ı bulma
 
-Önceki adımları takip ederek, ilgilendiğiniz değerin nerede olduğunu bulun. Sonra, "**Bu adrese yazanları bul**" seçeneğini kullanarak bu değeri yazan adresi bulun ve üzerine çift tıklayarak ayrıştırma görünümünü alın:
+Önceki adımları izleyerek ilgilendiğiniz değerin nerede olduğunu bulun. Ardından "**Find out what writes to this address**" seçeneğini kullanarak bu değeri hangi adresin yazdığını bulun ve disassembly görünümünü açmak için üzerine çift tıklayın:
 
-![](<../../images/image (1039).png>)
+![Rastgele Bellek Adresi - Kodu bulma - Rastgele Bellek Adresi - Pointer'ı bulma: Önceki adımları izleyerek ilgilendiğiniz değerin nerede olduğunu bulun. Ardından " Find out...](<../../images/image (1039).png>)
 
-Sonra, **"\[]"** arasındaki hex değerini aramak için yeni bir tarama gerçekleştirin (bu durumda $edx'in değeri):
+Ardından **"\[]" arasındaki hex değerini arayarak** yeni bir scan gerçekleştirin (bu durumda $edx'in değeri):
 
-![](<../../images/image (994).png>)
+![Rastgele Bellek Adresi - Kodu bulma - Rastgele Bellek Adresi - Pointer'ı bulma: Ardından " ()" arasındaki hex değerini arayarak yeni bir scan gerçekleştirin (bu durumda $edx'in değeri)](<../../images/image (994).png>)
 
-(_Birden fazla görünüyorsa genellikle en küçük adres olanı almanız gerekir_)\
-Artık, **ilgilendiğimiz değeri değiştirecek göstericiyi bulduk**.
+(_Birden fazla sonuç çıkarsa genellikle en küçük adresi seçmeniz gerekir_)\
+Şimdi ilgilendiğimiz değeri değiştirecek **pointer'ı bulduk**.
 
-"**Adres Ekle**" seçeneğine tıklayın:
+"**Add Address Manually**" seçeneğine tıklayın:
 
-![](<../../images/image (990).png>)
+![Rastgele Bellek Adresi - Kodu bulma - Rastgele Bellek Adresi - Pointer'ı bulma: " Add Address Manually " seçeneğine tıklayın](<../../images/image (990).png>)
 
-Şimdi, "Gösterici" onay kutusuna tıklayın ve metin kutusuna bulunan adresi ekleyin (bu senaryoda, önceki resimde bulunan adres "Tutorial-i386.exe"+2426B0 idi):
+Şimdi "Pointer" onay kutusuna tıklayın ve bulunan adresi metin kutusuna ekleyin (bu senaryoda önceki görselde bulunan adres "Tutorial-i386.exe"+2426B0 idi):
 
-![](<../../images/image (392).png>)
+![Rastgele Bellek Adresi - Kodu bulma - Rastgele Bellek Adresi - Pointer'ı bulma: Şimdi "Pointer" onay kutusuna tıklayın ve bulunan adresi metin kutusuna ekleyin (bu senaryoda...](<../../images/image (392).png>)
 
-(İlk "Adresin", girdiğiniz gösterici adresinden otomatik olarak doldurulduğuna dikkat edin)
+İlk "Address" alanının, girdiğiniz pointer adresinden otomatik olarak doldurulduğuna dikkat edin.
 
-Tamam'a tıklayın ve yeni bir gösterici oluşturulacaktır:
+OK'e tıklayın; yeni bir pointer oluşturulur:
 
-![](<../../images/image (308).png>)
+![Rastgele Bellek Adresi - Kodu bulma - Rastgele Bellek Adresi - Pointer'ı bulma: OK'e tıklayın; yeni bir pointer oluşturulur](<../../images/image (308).png>)
 
-Artık, o değeri değiştirdiğinizde, değerin bulunduğu bellek adresi farklı olsa bile **önemli değeri değiştiriyorsunuz**.
+Artık bu değeri her değiştirdiğinizde, değerin bulunduğu bellek adresi farklı olsa bile **önemli değeri değiştirmiş olursunuz**.
 
-### Kod Enjeksiyonu
+### Code Injection
 
-Kod enjeksiyonu, hedef işleme bir kod parçası enjekte etme tekniğidir ve ardından kodun yürütülmesini kendi yazdığınız koddan geçirecek şekilde yönlendirme yapar (örneğin, puan vermek yerine puan düşürmek).
+Code injection, hedef sürece bir kod parçası enjekte ettiğiniz ve ardından kodun çalışmasını kendi yazdığınız koddan geçecek şekilde yönlendirdiğiniz bir tekniktir (örneğin puanları azaltmak yerine size puan vermek).
 
-Öyleyse, oyuncunuzun hayatından 1 çıkaran adresi bulduğunuzu hayal edin:
+Oyuncunuzun canından 1 çıkaran adresi bulduğunuzu varsayalım:
 
-![](<../../images/image (203).png>)
+![Rastgele Bellek Adresi - Pointer'ı bulma - Code Injection: Oyuncunuzun canından 1 çıkaran adresi bulduğunuzu varsayalım](<../../images/image (203).png>)
 
-**Ayrıştırıcı kodu** almak için Ayrıştırıcıyı göster'e tıklayın.\
-Sonra, **CTRL+a** tuşlarına basarak Otomatik derleme penceresini açın ve _**Şablon --> Kod Enjeksiyonu**_ seçeneğini seçin:
+**Disassemble code**'u görmek için Show disassembler seçeneğine tıklayın.\
+Ardından Auto assemble penceresini açmak için **CTRL+a** tuşlarına basın ve _**Template --> Code Injection**_ seçeneğini seçin.
 
-![](<../../images/image (902).png>)
+![Rastgele Bellek Adresi - Pointer'ı bulma - Code Injection: Auto assemble penceresini açmak için CTRL+a tuşlarına basın ve Template -- Code Injection seçeneğini seçin](<../../images/image (902).png>)
 
-Değiştirmek istediğiniz **talimatın adresini** doldurun (bu genellikle otomatik olarak doldurulur):
+**Değiştirmek istediğiniz talimatın adresini** girin (bu alan genellikle otomatik olarak doldurulur):
 
-![](<../../images/image (744).png>)
+![Rastgele Bellek Adresi - Pointer'ı bulma - Code Injection: Değiştirmek istediğiniz talimatın adresini girin (bu alan genellikle otomatik olarak doldurulur)](<../../images/image (744).png>)
 
-Bir şablon oluşturulacaktır:
+Bir template oluşturulur:
 
-![](<../../images/image (944).png>)
+![Rastgele Bellek Adresi - Pointer'ı bulma - Code Injection: Bir template oluşturulur](<../../images/image (944).png>)
 
-Bu nedenle, yeni assembly kodunuzu "**newmem**" bölümüne ekleyin ve orijinal kodu "**originalcode**" bölümünden kaldırın, eğer çalıştırılmasını istemiyorsanız. Bu örnekte, enjekte edilen kod 1 çıkarmak yerine 2 puan ekleyecektir:
+Yeni assembly kodunuzu "**newmem**" bölümüne ekleyin ve çalıştırılmasını istemiyorsanız özgün kodu "**originalcode**" bölümünden kaldırın**.** Bu örnekte enjekte edilen kod, 1 çıkarmak yerine 2 puan ekleyecektir:
 
-![](<../../images/image (521).png>)
+![Rastgele Bellek Adresi - Pointer'ı bulma - Code Injection: Yeni assembly kodunuzu " newmem " bölümüne ekleyin ve çalıştırılmasını istemiyorsanız özgün kodu " originalcode " bölümünden kaldırın...](<../../images/image (521).png>)
 
-**Uygula'ya tıklayın ve kodunuz programda enjekte edilerek işlevselliğin davranışını değiştirmelidir!**
+**Execute'a tıklayın ve kodunuz programa enjekte edilerek işlevin davranışını değiştirsin!**
 
-## Cheat Engine 7.x (2023-2025) Gelişmiş Özellikler
+## Cheat Engine 7.x'teki gelişmiş özellikler (2023-2025)
 
-Cheat Engine, 7.0 sürümünden bu yana gelişmeye devam etti ve modern yazılımları (sadece oyunları değil!) analiz ederken son derece kullanışlı olan birçok yaşam kalitesi ve *saldırgan tersine mühendislik* özelliği eklendi. Aşağıda, kırmızı takım/CTF çalışmaları sırasında en muhtemel kullanacağınız eklemelere dair **çok yoğun bir saha kılavuzu** bulunmaktadır.
+Cheat Engine, 7.0 sürümünden bu yana gelişmeye devam etti ve modern yazılımları (yalnızca oyunları değil!) analiz ederken son derece kullanışlı olan çeşitli kullanım kolaylığı ve *offensive-reversing* özellikleri eklendi. Aşağıda, red-team/CTF çalışmalarında büyük olasılıkla kullanacağınız eklemelere ilişkin **çok yoğunlaştırılmış bir saha rehberi** yer alıyor.<sup>[[1]](#references)</sup>
 
-### Göstergeler Tarayıcı 2 iyileştirmeleri
-* `Göstergeler belirli ofsetlerle bitmelidir` ve yeni **Sapma** kaydırıcı (≥7.4), bir güncellemeden sonra yeniden tarama yaptığınızda yanlış pozitifleri büyük ölçüde azaltır. Bunu çoklu harita karşılaştırmasıyla birlikte kullanarak (`.PTR` → *Diğer kaydedilmiş gösterici haritasıyla sonuçları karşılaştır*) sadece birkaç dakikada **tek bir dayanıklı temel gösterici** elde edebilirsiniz.
-* Toplu filtre kısayolu: ilk taramadan sonra `Ctrl+A → Boşluk` tuşlarına basarak her şeyi işaretleyin, ardından `Ctrl+I` (ters) tuşuna basarak yeniden taramayı geçemeyen adresleri seçimi kaldırın.
+### Pointer Scanner 2 iyileştirmeleri
+* `Pointers must end with specific offsets` ve yeni **Deviation** slider'ı (≥7.4), bir güncellemeden sonra yeniden scan gerçekleştirdiğinizde false positive sonuçlarını büyük ölçüde azaltır. Bunu, yalnızca birkaç dakika içinde **tek ve dayanıklı bir base-pointer** elde etmek için multi-map karşılaştırmasıyla (`.PTR` → *Compare results with other saved pointer map*) birlikte kullanın.
+* Toplu filtreleme kısayolu: İlk scan'den sonra her şeyi işaretlemek için `Ctrl+A → Space` tuşlarına basın, ardından yeniden scan'i geçemeyen adreslerin seçimini kaldırmak için `Ctrl+I` tuşlarına basın.
 
-### Ultimap 3 – Intel PT izleme
-*7.5'ten itibaren eski Ultimap, **Intel İşlemci İzleme (IPT)** üzerine yeniden uygulanmıştır. Bu, artık hedefin aldığı **her** dalı **tek adım atma olmadan** kaydedebileceğiniz anlamına gelir (sadece kullanıcı modu, çoğu anti-hata ayıklama cihazını tetiklemez).
+### Ultimap 3 – Intel PT tracing
+*7.5 sürümünden itibaren eski Ultimap, **Intel Processor-Trace (IPT)** temel alınarak yeniden uygulandı.* Bu, artık hedefin gerçekleştirdiği **her branch'i**, **single-stepping** yapmadan kaydedebileceğiniz anlamına gelir (yalnızca user-mode; çoğu anti-debug gadget'ını tetiklemez).
 ```
 Memory View → Tools → Ultimap 3 → check «Intel PT»
 Select number of buffers → Start
 ```
-Birkaç saniye sonra yakalamayı durdurun ve **sağ tıklayın → Çalıştırma listesini dosyaya kaydet**. Yüksek frekanslı oyun mantığı sıcak noktalarını çok hızlı bir şekilde bulmak için dal adreslerini `Bu talimat hangi adreslere erişiyor bul` oturumu ile birleştirin.
+Birkaç saniye sonra capture işlemini durdurun ve **sağ tıklayın → Save execution list to file**. Branch adreslerini bir `Find out what addresses this instruction accesses` oturumuyla birleştirerek yüksek frekanslı game-logic hotspot'larını son derece hızlı şekilde bulun.
 
-### 1-byte `jmp` / otomatik yamanma şablonları
-Versiyon 7.5, bir SEH işleyicisi kuran ve orijinal konumda bir INT3 yerleştiren *bir baytlık* JMP stub'ı (0xEB) tanıttı. 5 baytlık göreli atlama ile yamanamayan talimatlar üzerinde **Otomatik Montajcı → Şablon → Kod Enjeksiyonu** kullandığınızda otomatik olarak üretilir. Bu, paketlenmiş veya boyut kısıtlı rutinler içinde “sıkı” kancaların mümkün olmasını sağlar.
+### 1-byte `jmp` / auto-patch templates
+Version 7.5, bir SEH handler yükleyen ve orijinal konuma bir INT3 yerleştiren *one-byte* JMP stub'ı (0xEB) kullanıma sundu. Bu stub, 5-byte relative jump ile patch edilemeyen instruction'lar üzerinde **Auto Assembler → Template → Code Injection** kullandığınızda otomatik olarak oluşturulur. Bu, packed veya boyut kısıtlamalı routine'lerin içinde “tight” hook'ların oluşturulmasını mümkün kılar.
 
-### Kernel düzeyinde gizlilik ile DBVM (AMD & Intel)
-*DBVM*, CE’nin yerleşik Tip-2 hipervizörüdür. Son sürümler nihayet **AMD-V/SVM desteği** ekledi, böylece Ryzen/EPYC ana bilgisayarlarda `Sürücü → DBVM Yükle` çalıştırabilirsiniz. DBVM ile:
-1. Ring-3/anti-debug kontrollerine görünmez donanım kesme noktaları oluşturabilirsiniz.
-2. Kullanıcı modu sürücüsü devre dışı olsa bile sayfalı veya korumalı çekirdek bellek bölgelerini okuyup yazabilirsiniz.
-3. VM-EXIT'siz zamanlama saldırısı atlamaları gerçekleştirebilirsiniz (örneğin, hipervizörden `rdtsc` sorgulamak).
+### DBVM ile kernel-level stealth (AMD ve Intel)
+*DBVM*, CE'nin yerleşik Type-2 hypervisor'ıdır. Güncel build'ler sonunda **AMD-V/SVM support** ekledi; böylece Ryzen/EPYC host'larında `Driver → Load DBVM` çalıştırabilirsiniz. DBVM şunları yapmanıza olanak tanır:
+1. Ring-3/anti-debug kontrolleri tarafından görünmeyen hardware breakpoint'ler oluşturmak.
+2. User-mode driver devre dışı olsa bile pageable veya protected kernel memory bölgelerini okumak/yazmak.
+3. VM-EXIT-less timing-attack bypass'ları gerçekleştirmek (ör. hypervisor üzerinden `rdtsc` sorgulamak).
 
-**İpucu:** DBVM, Windows 11'de HVCI/Bellek Bütünlüğü etkin olduğunda yüklemeyi reddedecektir → kapatın veya özel bir VM ana bilgisayarına önyükleme yapın.
+**İpucu:** Windows 11'de HVCI/Memory-Integrity etkin olduğunda DBVM yüklenmeyi reddeder → bunu devre dışı bırakın veya özel bir VM-host başlatın.
 
-### Uzaktan / çapraz platform hata ayıklama ile **ceserver**
-CE artık *ceserver*'ın tam bir yeniden yazımını gönderiyor ve **Linux, Android, macOS & iOS** hedeflerine TCP üzerinden bağlanabiliyor. Popüler bir çatal, dinamik enstrümantasyonu CE’nin GUI'si ile birleştirmek için *Frida*'yı entegre ediyor – bir telefonda çalışan Unity veya Unreal oyunlarını yamanmanız gerektiğinde ideal:
+### **ceserver** ile Remote / cross-platform debugging
+CE artık *ceserver*'ın tamamen yeniden yazılmış sürümüyle birlikte geliyor ve **Linux, Android, macOS ve iOS** hedeflerine TCP üzerinden attach olabilir. Popüler bir fork, dynamic instrumentation'ı CE'nin GUI'siyle birleştirmek için *Frida* entegrasyonu sunuyor; bu, telefonda çalışan Unity veya Unreal oyunlarını patch etmeniz gerektiğinde idealdir:
 ```
 # on the target (arm64)
 ./ceserver_arm64 &
@@ -192,26 +192,26 @@ CE artık *ceserver*'ın tam bir yeniden yazımını gönderiyor ve **Linux, And
 adb forward tcp:52736 tcp:52736   # (or ssh tunnel)
 Cheat Engine → "Network" icon → Host = localhost → Connect
 ```
-Frida köprüsü için GitHub'da `bb33bb/frida-ceserver`'a bakın.
+Frida bridge için GitHub'da `bb33bb/frida-ceserver` adresine bakın.<sup>[[2]](#references)</sup>
 
-### Diğer dikkate değer araçlar
-* **Patch Scanner** (MemView → Tools) – yürütülebilir bölümlerde beklenmedik kod değişikliklerini tespit eder; kötü amaçlı yazılım analizi için kullanışlıdır.
-* **Structure Dissector 2** – bir adres sürükleyin → `Ctrl+D`, ardından *Guess fields* ile C-yapılarını otomatik olarak değerlendirin.
-* **.NET & Mono Dissector** – geliştirilmiş Unity oyun desteği; yöntemleri doğrudan CE Lua konsolundan çağırın.
-* **Big-Endian özel türler** – tersine çevrilmiş bayt sırası tarama/düzenleme (konsol emülatörleri ve ağ paket tamponları için yararlıdır).
-* **Autosave & sekmeler** AutoAssembler/Lua pencereleri için, ayrıca çok satırlı talimat yeniden yazımı için `reassemble()`.
+### Dikkate değer diğer özellikler
+* **Patch Scanner** (MemView → Tools) – executable bölümlerindeki beklenmeyen code değişikliklerini algılar; malware analysis için kullanışlıdır.
+* **Structure Dissector 2** – bir adresi sürükleyip bırakın → `Ctrl+D`, ardından C-structures'ı otomatik olarak değerlendirmek için *Guess fields* seçeneğini kullanın.
+* **.NET & Mono Dissector** – geliştirilmiş Unity game desteği; method'ları doğrudan CE Lua console'dan çağırın.
+* **Big-Endian custom types** – ters byte sırası tarama/düzenleme (console emulator'ları ve network packet buffer'ları için kullanışlıdır).
+* AutoAssembler/Lua window'ları için **Autosave & tabs** ve çok satırlı instruction yeniden yazımı için `reassemble()`.
 
-### Kurulum & OPSEC notları (2024-2025)
-* Resmi yükleyici, InnoSetup **reklam teklifleri** (`RAV` vb.) ile sarılmıştır. **Her zaman *Reddet* butonuna tıklayın** *veya kaynak kodundan derleyin* PUP'lerden kaçınmak için. AV'ler hala `cheatengine.exe`'yi *HackTool* olarak işaretleyecektir, bu beklenmektedir.
-* Modern anti-hile sürücüleri (EAC/Battleye, ACE-BASE.sys, mhyprot2.sys) CE’nin pencere sınıfını yeniden adlandırılsa bile tespit eder. Tersine çevirme kopyanızı **tek kullanımlık bir VM içinde** veya ağ oyununu devre dışı bıraktıktan sonra çalıştırın.
-* Sadece kullanıcı modu erişimine ihtiyacınız varsa **`Settings → Extra → Kernel mode debug = off`** seçeneğini seçin, bu CE’nin imzasız sürücüsünü yüklemekten kaçınmak için, bu Windows 11 24H2 Secure-Boot'ta BSOD'ya neden olabilir.
+### Installation & OPSEC notları (2024-2025)
+* Resmi installer, InnoSetup **ad-offers** (`RAV` vb.) ile paketlenmiştir. PUP'ları önlemek için **her zaman *Decline* seçeneğine tıklayın** *veya source code'dan compile edin*. AV'ler `cheatengine.exe` dosyasını beklenen bir durum olarak *HackTool* şeklinde işaretlemeye devam eder.
+* Modern anti-cheat driver'ları (EAC/Battleye, ACE-BASE.sys, mhyprot2.sys), yeniden adlandırıldığında bile CE'nin window class'ını algılar. Reversing kopyanızı **disposable bir VM içinde** veya network play'i devre dışı bıraktıktan sonra çalıştırın.
+* Yalnızca user-mode erişimine ihtiyacınız varsa, Windows 11 24H2 Secure-Boot'ta BSOD'a neden olabilecek CE'nin unsigned driver'ını yüklemekten kaçınmak için **`Settings → Extra → Kernel mode debug = off`** seçeneğini belirleyin.
 
 ---
 
-## **Referanslar**
+## References
 
-- [Cheat Engine 7.5 sürüm notları (GitHub)](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
-- [frida-ceserver çoklu platform köprüsü](https://github.com/bb33bb/frida-ceserver-Mac-and-IOS)
-- **Cheat Engine eğitimi, Cheat Engine ile nasıl başlayacağınızı öğrenmek için tamamlayın**
+- [1] [Cheat Engine 7.5 release notes (GitHub)](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
+- [2] [frida-ceserver cross-platform bridge](https://github.com/bb33bb/frida-ceserver-Mac-and-IOS)
+- [3] Cheat Engine tutorial, Cheat Engine ile nasıl başlanacağını öğrenmek için tamamlayın
 
 {{#include ../../banners/hacktricks-training.md}}

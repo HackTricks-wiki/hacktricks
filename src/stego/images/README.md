@@ -1,138 +1,138 @@
-# Image Steganography
+# Görüntü Steganografisi
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Çoğu CTF image stego şu başlıklardan birine indirgenir:
+Çoğu CTF image stego örneği şu kategorilerden birine girer:
 
 - LSB/bit-planes (PNG/BMP)
 - Metadata/comment payloads
-- PNG chunk weirdness / corruption repair
-- JPEG DCT-domain tools (OutGuess, etc)
+- PNG chunk anormallikleri / bozulma onarımı
+- JPEG DCT-domain tools (OutGuess vb.)
 - Frame-based (GIF/APNG)
 
-## Hızlı triyaj
+## Hızlı ön inceleme
 
-Derin içerik analizinden önce container düzeyindeki kanıtlara öncelik verin:
+Derin content analysis işleminden önce container-level kanıtları önceliklendirin:
 
-- Dosyayı doğrulayın ve yapısını inceleyin: `file`, `magick identify -verbose`, format doğrulayıcıları (ör. `pngcheck`).
-- Metadata ve görünen string'leri çıkarın: `exiftool -a -u -g1`, `strings`.
-- Gömülü/append edilmiş içerik olup olmadığını kontrol edin: `binwalk` ve dosya sonu incelemesi (`tail | xxd`).
-- Container'a göre dallanın:
-  - PNG/BMP: bit-planes/LSB ve chunk düzeyindeki anormallikler.
-  - JPEG: metadata + DCT-domain tooling (OutGuess/F5-style families).
-  - GIF/APNG: frame extraction, frame differencing, palet hileleri.
+- Dosyayı doğrulayın ve yapıyı inceleyin: `file`, `magick identify -verbose`, format validators (ör. `pngcheck`).
+- Metadata ve görünür string'leri çıkarın: `exiftool -a -u -g1`, `strings`.
+- Embedded/appended content olup olmadığını kontrol edin: `binwalk` ve dosya sonu incelemesi (`tail | xxd`).
+- Container türüne göre ilerleyin:
+- PNG/BMP: bit-planes/LSB ve chunk-level anormallikleri.
+- JPEG: metadata + DCT-domain tooling (OutGuess/F5-style families).
+- GIF/APNG: frame extraction, frame differencing, palette tricks.
 
 ## Bit-planes / LSB
 
-### Teknik
+### Technique
 
-PNG/BMP, pikselleri **bit-seviyesi manipülasyonu** kolaylaştıracak şekilde sakladıkları için CTF'lerde popülerdir. Klasik gizleme/çıkartma mekanizması şudur:
+PNG/BMP, pikselleri **bit-level manipulation** işlemini kolaylaştıracak şekilde sakladıkları için CTF'lerde popülerdir. Klasik hide/extract mekanizması şöyledir:
 
-- Her piksel kanalı (R/G/B/A) birden fazla bit içerir.
-- Her kanalın **least significant bit** (LSB) görüntüyü çok az değiştirir.
-- Saldırganlar veriyi bu düşük dereceli bitlerde saklar; bazen stride, permutation veya kanal başına seçim kullanılır.
+- Her pixel channel (R/G/B/A) birden fazla bit içerir.
+- Her channel'ın **least significant bit** (LSB) değeri görüntüyü çok az değiştirir.
+- Attackers verileri bu düşük anlamlı bitlere gizler; bazen stride, permutation veya channel başına seçim kullanılır.
 
-Meydan okumalarda bekleyebilecekleriniz:
+Challenge'larda beklenebilecekler:
 
-- Payload sadece tek bir kanalda olur (ör. `R` LSB).
-- Payload alpha kanalında olur.
-- Payload çıkarıldıktan sonra sıkıştırılmış/kodlanmış olabilir.
-- Mesaj bit-planları arasında yayılmış veya planlar arasında XOR ile gizlenmiş olabilir.
+- Payload yalnızca tek bir channel içindedir (ör. `R` LSB).
+- Payload alpha channel içindedir.
+- Payload extraction sonrasında compressed/encoded durumdadır.
+- Message plane'ler arasına dağıtılmış veya plane'ler arasındaki XOR kullanılarak gizlenmiştir.
 
-Karşılaşabileceğiniz ek aileler (uygulamaya bağlı olarak):
+Karşılaşabileceğiniz ek family'ler (implementation-dependent):
 
-- **LSB matching** (sadece biti çevirmek değil, hedef biti eşleştirmek için +/-1 ayarlamaları)
-- **Palette/index-based hiding** (indexed PNG/GIF: payload renk indekslerinde, ham RGB yerine)
+- **LSB matching** (yalnızca biti değiştirmek yerine target bit ile eşleşmesi için +/-1 ayarlamaları yapmak)
+- **Palette/index-based hiding** (indexed PNG/GIF: payload raw RGB yerine color indices içinde)
 - **Alpha-only payloads** (RGB görünümünde tamamen görünmez)
 
-### Araçlar
+### Tooling
 
 #### zsteg
 
-`zsteg` PNG/BMP için birçok LSB/bit-plane çıkarma desenini listeler:
+`zsteg`, PNG/BMP için birçok LSB/bit-plane extraction pattern'ını enumerate eder:
 ```bash
 zsteg -a file.png
 ```
-Depo: https://github.com/zed-0xff/zsteg
+Repo: https://github.com/zed-0xff/zsteg
 
 #### StegoVeritas / Stegsolve
 
-- `stegoVeritas`: bir dizi dönüşüm çalıştırır (metadata, image transforms, brute forcing LSB variants).
-- `stegsolve`: manuel görsel filtreler uygular (channel isolation, plane inspection, XOR, vb).
+- `stegoVeritas`: bir dizi transform çalıştırır (metadata, image transforms, LSB varyantlarının brute forcing işlemi).
+- `stegsolve`: manuel görsel filtreler (kanal izolasyonu, plane incelemesi, XOR vb.).
 
-Stegsolve indirme: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
+Stegsolve download: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
 
-#### FFT-based visibility tricks
+#### FFT tabanlı görünürlük teknikleri
 
-FFT, LSB extraction değildir; içerik frekans uzayında veya ince desenlerde kasıtlı olarak gizlendiğinde kullanılır.
+FFT, LSB extraction değildir; içeriğin frequency space içinde kasıtlı olarak gizlendiği veya ince pattern'lerin kullanıldığı durumlar içindir.
 
 - EPFL demo: http://bigwww.epfl.ch/demo/ip/demos/FFT/
 - Fourifier: https://www.ejectamenta.com/Fourifier-fullscreen/
 - FFTStegPic: https://github.com/0xcomposure/FFTStegPic
 
-CTF'lerde sıklıkla kullanılan web tabanlı ön inceleme araçları:
+CTF'lerde sıklıkla kullanılan web tabanlı triage araçları:
 
 - Aperi’Solve: https://aperisolve.com/
 - StegOnline: https://stegonline.georgeom.net/
 
-## PNG internals: chunks, corruption, and hidden data
+## PNG internals: chunk'lar, corruption ve hidden data
 
-### Teknik
+### Technique
 
-PNG, chunk tabanlı bir formattır. Birçok görevde payload, piksel değerleri yerine container/chunk seviyesinde saklanır:
+PNG, chunk tabanlı bir formattır. Birçok challenge'da payload, pixel değerleri yerine container/chunk seviyesinde saklanır:
 
-- **`IEND` sonrasında ekstra byte'lar** (birçok görüntüleyici sonundaki byte'ları yok sayar)
-- **Standart dışı yardımcı chunk'lar** payload taşır
-- **Bozulmuş başlıklar** boyutları gizleyebilir veya düzeltileene kadar ayrıştırıcıları bozabilir
+- **`IEND` sonrasındaki extra bytes** (birçok viewer trailing bytes'ı yok sayar)
+- **Payload taşıyan non-standard ancillary chunk'lar**
+- **Boyutları gizleyen veya düzeltilene kadar parser'ları bozan corrupted header'lar**
 
-Öncelikli kontrol edilecek chunk konumları:
+İncelenmesi gereken high-signal chunk konumları:
 
-- `tEXt` / `iTXt` / `zTXt` (metin meta verisi, bazen sıkıştırılmış)
-- `iCCP` (ICC profile) ve taşıyıcı olarak kullanılan diğer yardımcı chunk'lar
-- `eXIf` (PNG'de EXIF verisi)
+- `tEXt` / `iTXt` / `zTXt` (text metadata; bazen compressed)
+- `iCCP` (ICC profile) ve carrier olarak kullanılan diğer ancillary chunk'lar
+- `eXIf` (PNG içindeki EXIF data)
 
 ### Triage commands
 ```bash
 magick identify -verbose file.png
 pngcheck -v file.png
 ```
-Nelere dikkat edilmeli:
+Neleri kontrol etmeli:
 
-- Garip width/height/bit-depth/colour-type kombinasyonları
-- CRC/chunk hataları (pngcheck genellikle tam offset'i gösterir)
-- `IEND` sonrası ek veri ile ilgili uyarılar
+- Olağandışı width/height/bit-depth/colour-type kombinasyonları
+- CRC/chunk hataları (`pngcheck` genellikle tam offset'i gösterir)
+- `IEND` sonrasında ek veri olduğuna dair uyarılar
 
-Daha derin bir chunk görünümüne ihtiyacınız varsa:
+Daha ayrıntılı bir chunk görünümüne ihtiyacınız varsa:
 ```bash
 pngcheck -vp file.png
 exiftool -a -u -g1 file.png
 ```
-Faydalı referanslar:
+Yararlı referanslar:
 
 - PNG specification (structure, chunks): https://www.w3.org/TR/PNG/
 - File format tricks (PNG/JPEG/GIF corner cases): https://github.com/corkami/docs
 
 ## JPEG: metadata, DCT-domain tools, and ELA limitations
 
-### Teknik
+### Technique
 
-JPEG ham piksel olarak saklanmaz; DCT domaininde sıkıştırılır. Bu yüzden JPEG stego araçları PNG LSB araçlarından farklıdır:
+JPEG ham pikseller olarak saklanmaz; DCT domain içinde sıkıştırılır. JPEG stego tools bu nedenle PNG LSB tools'tan farklıdır:
 
-- Metadata/comment payloads dosya seviyesindedir (high-signal ve hızlıca incelenebilir)
-- DCT-domain stego araçları bitleri frekans katsayılarına gömer
+- Metadata/comment payload'ları dosya seviyesindedir (yüksek sinyalli ve hızlıca incelenebilir)
+- DCT-domain stego tools, bit'leri frekans katsayılarına gömer
 
 Operasyonel olarak JPEG'i şu şekilde ele alın:
 
-- A container for metadata segments (high-signal, quick to inspect)
-- Özel stego araçlarının çalıştığı sıkıştırılmış bir sinyal domaini (DCT katsayıları)
+- Metadata segment'leri için bir container (yüksek sinyalli, hızlıca incelenebilir)
+- Specialized stego tools'un çalıştığı sıkıştırılmış bir sinyal domain'i (DCT katsayıları)
 
-### Hızlı kontroller
+### Quick checks
 ```bash
 exiftool file.jpg
 strings -n 6 file.jpg | head
 binwalk file.jpg
 ```
-Yüksek-sinyal konumları:
+Yüksek sinyalli konumlar:
 
 - EXIF/XMP/IPTC metadata
 - JPEG comment segment (`COM`)
@@ -143,46 +143,46 @@ Yüksek-sinyal konumları:
 - OutGuess: https://github.com/resurrecting-open-source-projects/outguess
 - OpenStego: https://www.openstego.com/
 
-If you are specifically facing steghide payloads in JPEGs, consider using `stegseek` (faster bruteforce than older scripts):
+Özellikle JPEG dosyalarındaki steghide payload'larıyla karşılaşıyorsanız `stegseek` kullanmayı değerlendirin (eski script'lerden daha hızlı bruteforce):
 
 - [https://github.com/RickdeJager/stegseek](https://github.com/RickdeJager/stegseek)
 
 ### Error Level Analysis
 
-ELA farklı yeniden sıkıştırma artefaktlarını vurgular; düzenlenmiş bölgelere işaret edebilir, ancak tek başına bir stego detector değildir:
+ELA, farklı yeniden sıkıştırma artefact'larını vurgular; düzenlenmiş bölgeleri tespit etmenize yardımcı olabilir, ancak tek başına bir stego detector değildir:
 
 - [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
 
-## Animasyonlu görüntüler
+## Animated images
 
-### Teknik
+### Technique
 
-Animasyonlu görüntüler için, mesajın şunlardan biri olduğunu varsayın:
+Animated images için mesajın şu şekillerden biri olduğunu varsayın:
 
-- Tek bir karede (kolay), veya
-- Karelere yayılmış (sıra önemli), veya
-- Sadece ardışık kareleri difflediğinizde görünür
+- Tek bir frame'de (kolay), veya
+- Frame'lere yayılmış (sıralama önemlidir), veya
+- Yalnızca ardışık frame'leri diff ettiğinizde görünür
 
 ### Kareleri çıkarma
 ```bash
 ffmpeg -i anim.gif frame_%04d.png
 ```
-Sonra frame'leri normal PNG'ler gibi ele al: `zsteg`, `pngcheck`, channel isolation.
+Sonrasında karelere normal PNG'ler gibi davranın: `zsteg`, `pngcheck`, kanal izolasyonu.
 
 Alternatif araçlar:
 
-- `gifsicle --explode anim.gif` (hızlı frame çıkarma)
-- `imagemagick`/`magick` frame başına dönüşümler için
+- `gifsicle --explode anim.gif` (hızlı kare çıkarma)
+- Kare başına dönüşümler için `imagemagick`/`magick`
 
-Frame differencing genellikle belirleyicidir:
+Kare fark analizi çoğu zaman belirleyicidir:
 ```bash
 magick frame_0001.png frame_0002.png -compose difference -composite diff.png
 ```
 ### APNG pixel-count encoding
 
-- APNG konteynerlerini tespit et: `exiftool -a -G1 file.png | grep -i animation` veya `file`.
-- Zamanlamayı değiştirmeden kareleri çıkar: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`.
-- Her kare başına piksel sayısı olarak kodlanmış payload'ları kurtar:
+- APNG container'larını tespit edin: `exiftool -a -G1 file.png | grep -i animation` veya `file`.
+- Yeniden zamanlama yapmadan frame'leri çıkarın: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`.
+- Frame başına pixel count olarak encode edilmiş payload'ları kurtarın:
 ```python
 from PIL import Image
 import glob
@@ -193,33 +193,35 @@ target = dict(counts).get((255, 0, 255, 255))  # adjust the target color
 out.append(target or 0)
 print(bytes(out).decode('latin1'))
 ```
-Animasyonlu zorluklar, her baytı her karede belirli bir rengin sayısı olarak kodlayabilir; bu sayıların birleştirilmesi mesajı yeniden oluşturur.
+Animasyonlu challenge'lar, her byte'ı her frame'deki belirli bir rengin sayısı olarak kodlayabilir; bu sayıları birleştirmek mesajı yeniden oluşturur.<sup>[[1]](#references)</sup>
 
-## Password-protected embedding
+## Parola korumalı embedding
 
-Eğer piksel düzeyindeki manipülasyon yerine passphrase ile korunan embedding olduğunu düşünüyorsanız, bu genellikle en hızlı yoldur.
+Embedding işleminin pixel-level manipulation yerine bir passphrase ile korunduğundan şüpheleniyorsanız, bu genellikle en hızlı yoldur.
 
 ### steghide
 
-`JPEG, BMP, WAV, AU`'yi destekler ve şifrelenmiş payloadları embed/extract edebilir.
+`JPEG, BMP, WAV, AU` formatlarını destekler ve şifrelenmiş payload'ları embed/extract edebilir.
 ```bash
 steghide info file
 steghide extract -sf file --passphrase 'password'
 ```
-src/stego/images/README.md dosyasının içeriğini buraya yapıştırır mısınız (veya raw link verin)? İçeriği aldıktan sonra istenen kurallara uyarak Türkçeye çevirip aynı markdown/html sözdizimini koruyacağım.
+Repo: https://github.com/StefanoDeVuono/steghide
+
+### StegCracker
 ```bash
 stegcracker file.jpg wordlist.txt
 ```
-Depo: https://github.com/Paradoxis/StegCracker
+Repo: https://github.com/Paradoxis/StegCracker
 
 ### stegpy
 
-PNG/BMP/GIF/WebP/WAV desteği.
+PNG/BMP/GIF/WebP/WAV destekler.
 
-Depo: https://github.com/dhsdshdhk/stegpy
+Repo: https://github.com/dhsdshdhk/stegpy
 
 ## Referanslar
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,13 +1,13 @@
-# Angr - Örnekler
+# Angr - Examples
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
-> Eğer program **stdin'den birden fazla değeri aynı anda almak için `scanf`** kullanıyorsa, **`scanf`**'den sonra başlayan bir durum oluşturmanız gerekir.
+> [!TIP]
+> Program, **stdin'den aynı anda birkaç değer** almak için `scanf` kullanıyorsa **`scanf`** sonrasında başlayan bir state oluşturmanız gerekir.
 
-Kodlar [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf) adresinden alınmıştır.
+Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### Adrese ulaşmak için girdi (adres belirten)
+### Adrese ulaşmak için input (adresi belirterek)
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Adrese ulaşmak için girdi (yazdırmaları gösterir)
+### Adrese ulaşmak için girdi (print ifadelerini belirterek)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -75,7 +75,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Kayıt defteri değerleri
+### Registry değerleri
 ```python
 # Angr doesn't currently support reading multiple things with scanf (Ex:
 # scanf("%u %u).) You will have to tell the simulation engine to begin the
@@ -139,7 +139,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Yığın değerleri
+### Stack değerleri
 ```python
 # Put bit vectors in th stack to find out the vallue that stack position need to
 # have to reach a rogram flow
@@ -201,11 +201,11 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-Bu senaryoda, girdi `scanf("%u %u")` ile alındı ve değer olarak `"1 1"` verildi, bu nedenle yığın üzerindeki **`0x00000001`** değerleri **kullanıcı girdisinden** gelmektedir. Bu değerlerin `$ebp - 8`'de nasıl başladığını görebilirsiniz. Bu nedenle, kodda **`$esp`'den 8 bayt çıkardık (o anda `$ebp` ve `$esp` aynı değere sahipti)** ve ardından BVS'yi itmiş olduk.
+Bu senaryoda input `scanf("%u %u")` ile alındı ve `"1 1"` değeri verildi; bu nedenle stack'teki **`0x00000001`** değerleri **user input**'tan gelir. Bu değerlerin `$ebp - 8` konumunda nasıl başladığını görebilirsiniz. Dolayısıyla kodda **`$esp` değerinden 8 byte çıkardık** (**o anda `$ebp` ve `$esp` aynı değere sahipti**) ve ardından BVS'yi push ettik.
 
-![](<../../../images/image (136).png>)
+![Stack'e bit vektörlerini yerleştirerek bir program akışına ulaşmak için stack konumunun sahip olması gereken değeri bulma: Bu senaryoda input scanf("%u %u") ile alındı ve "1...](<../../../images/image (136).png>)
 
-### Statik Bellek Değerleri (Küresel Değişkenler)
+### Static Memory values (Global variables)
 ```python
 import angr
 import claripy
@@ -380,35 +380,35 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-> [!NOTE]
+> [!TIP]
 > Sembolik dosyanın, sembolik verilerle birleştirilmiş sabit veriler de içerebileceğini unutmayın:
 >
 > ```python
->   # Merhaba dünya, benim adım John.
->   # ^                       ^
->   # ^ adres 0               ^ adres 24 (karakter sayısını sayın)
->   # Bunu bellekte temsil etmek için, dizeyi dosyanın
->   # başına yazmak isteyeceğiz:
->   #
->   # hello_txt_contents = claripy.BVV('Merhaba dünya, benim adım John.', 30*8)
->   #
->   # Belki de, John'u bir
->   # sembolik değişkenle değiştirmek isteyeceğiz. Şunu çağıracağız:
->   #
->   # name_bitvector = claripy.BVS('sembolik_ad', 4*8)
->   #
->   # Daha sonra, program fopen('hello.txt', 'r') çağrısını yaptıktan sonra
->   # fread(buffer, sizeof(char), 30, hello_txt_file) çağrısını yaptığında, tampon
->   # dosyadan dizeyi içerecek, ancak adın saklanacağı dört sembolik bayt ile
->   # birlikte.
->   # (!)
+>  # Hello world, my name is John.
+>  # ^                       ^
+>  # ^ address 0             ^ address 24 (count the number of characters)
+>  # In order to represent this in memory, we would want to write the string to
+>  # the beginning of the file:
+>  #
+>  # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
+>  #
+>  # Perhaps, then, we would want to replace John with a
+>  # symbolic variable. We would call:
+>  #
+>  # name_bitvector = claripy.BVS('symbolic_name', 4*8)
+>  #
+>  # Then, after the program calls fopen('hello.txt', 'r') and then
+>  # fread(buffer, sizeof(char), 30, hello_txt_file), the buffer would contain
+>  # the string from the file, except four symbolic bytes where the name would be
+>  # stored.
+>  # (!)
 > ```
 
-### Kısıtlamaların Uygulanması
+### Kısıtlamaları Uygulama
 
-> [!NOTE]
-> Bazen 16 karakter uzunluğundaki 2 kelimeyi **karakter karakter** karşılaştırmak gibi basit insan işlemleri, **angr** için çok maliyetli olabilir çünkü her if için 1 dal oluşturması gerektiğinden **üstel** olarak dallar üretmesi gerekir: `2^16`\
-> Bu nedenle, **angr'den önceki bir noktaya ulaşmasını istemek** ve **bu kısıtlamaları manuel olarak ayarlamak** daha kolaydır.
+> [!TIP]
+> Bazen 16 karakter uzunluğundaki 2 kelimeyi **karakter karakter** (döngüyle) karşılaştırmak gibi basit işlemler **angr** için çok fazla **maliyete** neden olur; çünkü her `if` için 1 branch oluşturduğundan, branch'leri **üstel olarak** üretmesi gerekir: `2^16`\
+> Bu nedenle, **angr**'dan **önceki bir noktaya ulaşmasını istemek** (gerçekten zor kısmın zaten tamamlandığı bir nokta) ve bu **kısıtlamaları manuel olarak ayarlamak** daha kolaydır.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> Bazı senaryolarda **veritesting**'i etkinleştirebilirsiniz, bu da benzer durumları birleştirerek gereksiz dalları kaydetmek ve çözümü bulmak için kullanılır: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> Bazı senaryolarda, gereksiz branch'leri ortadan kaldırmak ve çözümü bulmak için benzer status'ları birleştiren **veritesting** özelliğini etkinleştirebilirsiniz: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
-> [!NOTE]
-> Bu senaryolarda yapabileceğiniz bir diğer şey, **angr'ye daha kolay anlayabileceği bir şey vererek fonksiyonu hooklamak**tır.
+> [!TIP]
+> Bu senaryolarda yapabileceğiniz başka bir şey de **fonksiyonu hook'layarak angr'a daha kolay anlayabileceği bir şey vermektir**.
 
-### Simülasyon Yöneticileri
+### Simulation Managers
 
-Bazı simülasyon yöneticileri diğerlerinden daha faydalı olabilir. Önceki örnekte birçok faydalı dal oluşturulduğu için bir sorun vardı. Burada, **veritesting** tekniği bunları birleştirerek bir çözüm bulacaktır.\
-Bu simülasyon yöneticisi ayrıca şu şekilde etkinleştirilebilir: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Bazı simulation manager'lar diğerlerinden daha kullanışlı olabilir. Önceki örnekte, çok sayıda kullanışlı branch oluşturulduğu için bir sorun vardı. Burada **veritesting** tekniği bu branch'leri birleştirerek bir çözüm bulacaktır.\
+Bu simulation manager şu şekilde de etkinleştirilebilir: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Bir fonksiyona yapılan bir çağrıyı Hooklama/Atlatma
+### Bir function çağrısını Hooking/Bypassing
 ```python
 # This level performs the following computations:
 #
@@ -594,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Bir fonksiyonu yakalamak / Simprocedure
+### Bir fonksiyonu hook'lama / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -678,7 +678,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Birden Fazla Parametre ile scanf'ı Simüle Et
+### Birden fazla parametreyle scanf simülasyonu
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.
@@ -740,7 +740,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Statik İkili Dosyalar
+### Statik Binary'ler
 ```python
 # This challenge is the exact same as the first challenge, except that it was
 # compiled as a static binary. Normally, Angr automatically replaces standard
@@ -807,4 +807,8 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
+## Referanslar
+
+- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+
 {{#include ../../../banners/hacktricks-training.md}}

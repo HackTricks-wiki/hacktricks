@@ -1,10 +1,10 @@
-# Çok temel olarak, bu araç, bazı koşulları sağlaması gereken değişkenler için değerler bulmamıza yardımcı olacak ve bunları elle hesaplamak çok can sıkıcı olacaktır. Bu nedenle, Z3'e değişkenlerin sağlaması gereken koşulları belirtebilirsiniz ve o da bazı değerler bulacaktır (eğer mümkünse).
+# Çok temel olarak bu araç, bazı koşulları karşılaması gereken değişkenler için değerler bulmamıza yardımcı olur; bunları elle hesaplamak oldukça zahmetli olacaktır. Bu nedenle Z3'e değişkenlerin karşılaması gereken koşulları belirtebilirsiniz; Z3 de mümkünse bazı değerler bulacaktır.
 
 {{#include ../../banners/hacktricks-training.md}}
 
 # Temel İşlemler
 
-## Booleans/And/Or/Not
+## Boolean'lar/And/Or/Not
 ```python
 # pip3 install z3-solver
 from z3 import *
@@ -20,7 +20,7 @@ s.add(And(Or(x, y, Not(z)), y))
 s.check() # If response is "sat" then the model is satisfiable, if "unsat" something is wrong
 print(s.model()) # Print valid values to satisfy the model
 ```
-## Ints/Simplify/Reals
+## Tamsayılar/Sadeleştir/Reel Sayılar
 ```python
 from z3 import *
 
@@ -58,9 +58,9 @@ print("x = %s" % m[x])
 for d in m.decls():
 print("%s = %s" % (d.name(), m[d]))
 ```
-# Makine Aritmetiği
+# Machine Arithmetic
 
-Modern CPU'lar ve ana akım programlama dilleri, sabit boyutlu bit-vektörler üzerinde aritmetik kullanır. Makine aritmetiği, Z3Py'de Bit-Vectors olarak mevcuttur.
+Modern CPU'lar ve mainstream programming language'ler, sabit boyutlu bit-vector'ler üzerinde arithmetic kullanır. Machine arithmetic, Z3Py'de Bit-Vectors olarak kullanılabilir.<sup>[[1]](#references)</sup>
 ```python
 from z3 import *
 
@@ -75,9 +75,9 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) # This is False
 ```
-## Signed/Unsigned Numbers
+## İmzalı/İşaretsiz Sayılar
 
-Z3, bir bit-vector'ın signed mı unsigned mı olarak ele alınmasının fark yarattığı aritmetik işlemlerin özel signed sürümlerini sağlar. Z3Py'de `<`, `<=`, `>`, `>=`, `/`, `%` ve `>>` operatörleri signed sürümlere karşılık gelir. Karşılık gelen unsigned operatörler `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` ve `LShR`'dir.
+Z3, bit-vector'ün signed veya unsigned olarak ele alınmasının fark yarattığı durumlarda aritmetik işlemlerin özel signed sürümlerini sağlar. Z3Py'de `<`, `<=`, `>`, `>=`, `/`, `%` ve `>>` operatörleri signed sürümlere karşılık gelir. Bunlara karşılık gelen unsigned operatörler `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` ve `LShR`'dir.<sup>[[1]](#references)</sup>
 ```python
 from z3 import *
 
@@ -97,9 +97,9 @@ solve(ULT(x, 0))
 ```
 ## Fonksiyonlar
 
-Aritmetik gibi yorumlanan fonksiyonların sabit bir standart yorumu vardır. Yorumlanmamış fonksiyonlar ve sabitler ise en esnek haldedir; fonksiyon ya da sabit üzerindeki kısıtlarla tutarlı olan herhangi bir yoruma izin verirler.
+Aritmetik gibi yorumlanan fonksiyonlar sabit bir standart yoruma sahiptir. Yorumlanmamış fonksiyonlar ve sabitler maksimum düzeyde esnektir; fonksiyon veya sabit üzerindeki kısıtlamalarla tutarlı olan herhangi bir yoruma izin verirler.<sup>[[1]](#references)</sup>
 
-Örnek: `f`'in `x`'e iki kez uygulanması yine `x` sonucunu verir, ancak `f`'in `x`'e bir kez uygulanması `x`'ten farklıdır.
+Örnek: `f` fonksiyonunun `x` üzerine iki kez uygulanması tekrar `x` sonucunu verir, ancak `f` fonksiyonunun `x` üzerine bir kez uygulanması `x`'ten farklıdır.
 ```python
 from z3 import *
 
@@ -118,13 +118,13 @@ s.add(f(x) == 4) # Find the value that generates 4 as response
 s.check()
 print(s.model())
 ```
-# Reversing-Oriented Patterns
+# Reversing Odaklı Pattern'ler
 
-Bir binary üzerinde manuel olarak yalnızca birkaç kontrolü yükseltmek yerine tam symbolic execution gerekiyorsa, [Angr - Examples](angr/angr-examples.md) kısmına bakın. Pratikte çok yaygın bir workflow, ilgili predicates'leri decompiler/assembly’den geri çıkarmak ve yalnızca ilginç arithmetic veya memory constraints'leri Z3 içinde yeniden oluşturmaktır.
+Bir binary üzerinde yalnızca birkaç check'i manuel olarak lift etmek yerine full symbolic execution yapmanız gerekiyorsa [Angr - Examples](angr/angr-examples.md) sayfasına bakın. Pratikte oldukça yaygın bir workflow, ilgili predicate'leri decompiler/assembly üzerinden çıkarmak ve yalnızca ilgi çekici arithmetic veya memory constraint'lerini Z3'te yeniden oluşturmaktır.
 
-## Model user-controlled data as bytes first
+## User-controlled verileri önce byte olarak modelleyin
 
-Reversing için, genellikle her input byte için `BitVec(..., 8)` ile başlamak ve ardından kelimeleri target’ın yaptığı şekilde aynen yeniden kurmak daha iyidir. Bu yaklaşım wrap-around, signedness bug'ları, shift, rotate ve byte-order sorunlarını korur.
+Reversing işlemlerinde genellikle her input byte'ı için `BitVec(..., 8)` ile başlamak ve ardından word'leri target'ın yaptığı şekilde yeniden oluşturmak daha iyidir. Bu yaklaşım wrap-around'u, signedness bug'larını, shift'leri, rotate'leri ve byte-order sorunlarını korur.
 ```python
 from z3 import *
 
@@ -139,16 +139,16 @@ s.add(RotateRight(dword, 8) == 0x41444342)
 print(s.check())
 print(hex(s.model().eval(dword).as_long()))
 ```
-Assembly veya decompiler kodunu çevirirken yararlı yardımcılar:
+Assembly veya decompiler kodunu çevirirken kullanışlı yardımcılar:
 
-- `Concat`: bytes'tan 16/32/64-bit değerleri yeniden oluşturur
-- `Extract`: high/low words karşılaştırır veya maskeleri/shiftleri taklit eder
-- `ZeroExt` / `SignExt`: zero/sign extension bug'larını doğru şekilde modellemeye yarar
-- `LShR` / `RotateLeft` / `RotateRight`: crackmes, hashes ve obfuscators içinde yaygındır
+- `Concat`: byte'lardan 16/32/64-bit değerleri yeniden oluşturur
+- `Extract`: yüksek/düşük word'leri karşılaştırır veya maskeleri/shift'leri taklit eder
+- `ZeroExt` / `SignExt`: zero/sign extension bug'larını doğru şekilde modeller
+- `LShR` / `RotateLeft` / `RotateRight`: crackme'lerde, hash'lerde ve obfuscator'larda yaygındır
 
-## Model memory/register tables with arrays
+## Array'lerle memory/register tablolarını modelleme
 
-Bir kontrol `buf[i]`, lookup tables veya emulated memory'ye bağlıysa, `Array` onlarca ayrı değişken oluşturmaktan daha temiz olabilir.
+Bir kontrol `buf[i]`, lookup tablolarına veya emüle edilmiş memory'ye bağlı olduğunda, düzinelerce ayrı variable oluşturmak yerine `Array` kullanmak daha temiz olabilir.
 ```python
 from z3 import *
 
@@ -165,11 +165,11 @@ s = Solver()
 s.add(word == 0x4241)
 print(s.check())
 ```
-Bu, özellikle binary değerleri doğrulamadan önce memory içinde kopyaladığında veya tüm programı çalıştırmadan birkaç `mov`/`xor`/`add` operasyonunun etkisini modellemek istediğinde çok kullanışlıdır.
+Bu, özellikle binary değerleri doğrulamadan önce memory içinde kopyaladığında veya tüm programı çalıştırmadan birkaç `mov`/`xor`/`add` işleminin etkisini modellemek istediğinde oldukça kullanışlıdır.
 
 ## Incremental solving branch triage için harikadır
 
-Base constraints zaten çıkardıysan, her seferinde solver’ı yeniden oluşturmadan alternatif branch’leri test etmek için `push()` / `pop()` (veya assumptions) kullan:
+Temel constraints'leri zaten çıkardıysanız, her seferinde solver'ı yeniden oluşturmadan alternatif branch'leri test etmek için `push()` / `pop()` (veya assumptions) kullanın:
 ```python
 from z3 import *
 
@@ -187,11 +187,11 @@ s.add(x < 0x100)
 print("branch 2:", s.check())
 s.pop()
 ```
-Bu, bir decompiler'dan geri kazanılan path conditions'ları replay ederken veya modelin `unsat` olmasına hangi comparison'ın neden olduğunu hızlıca belirlemek istediğinizde faydalıdır.
+Bu, bir decompiler'dan kurtarılan path koşullarını yeniden oynatırken veya modelin `unsat` olmasına hangi karşılaştırmanın neden olduğunu hızlıca belirlemek istediğinizde kullanışlıdır.
 
-## Daha güzel payloads için optimize et
+## Daha kullanışlı payload'lar için Optimize
 
-Bir model satisfiable olduktan sonra, `Optimize()` daha kullanılabilir bir solution elde etmenize yardımcı olabilir: örneğin printable bytes'ları tercih etmek, bir checksum component'ini minimize etmek veya geri kazanılan password'ü yazmayı ya da kopyalamayı daha kolay hale getiren bir structure'ı maximize etmek.
+Bir model karşılanabilir olduğunda, `Optimize()` daha kullanışlı bir çözüm elde etmenize yardımcı olabilir: örneğin yazdırılabilir byte'ları tercih edebilir, bir checksum bileşenini minimize edebilir veya kurtarılan parolanın yazılmasını ya da kopyalanmasını kolaylaştıran bir yapıyı maksimize edebilirsiniz.
 ```python
 from z3 import *
 
@@ -204,9 +204,9 @@ o.add_soft(And(c >= 0x20, c <= 0x7e))
 print(o.check())
 print(bytes(o.model()[c].as_long() for c in key))
 ```
-## Format-ağır seriallar için String/sequences
+## Format ağırlıklı serial değerleri için String/Seq
 
-Hedef esas olarak prefix, suffix, substring veya regex benzeri yapıyı kontrol ediyorsa, `String`/`Seq` constraints byte-byte bit-vector’lardan daha kolay olabilir:
+Hedef çoğunlukla prefix, suffix, substring veya regex benzeri yapıyı kontrol ediyorsa, `String`/`Seq` kısıtları byte-by-byte bit-vectors kullanmaktan daha kolay olabilir:
 ```python
 from z3 import *
 
@@ -217,11 +217,11 @@ s.add(PrefixOf(StringVal("HTB{"), serial))
 s.add(SuffixOf(StringVal("}"), serial))
 s.add(Contains(serial, StringVal("_")))
 ```
-Ancak, binary aritmetik, döndürmeler, checksum’lar veya karakterler üzerinde cast işlemleri yapmaya başladığında, genellikle 8-bit bit-vectors’a geri dönmek daha iyidir.
+Ancak binary karakterler üzerinde aritmetik işlemler, rotations, checksums veya casts yapmaya başladığında, genellikle yeniden 8-bit bit-vector'lere dönmek daha iyidir.
 
-# Examples
+# Örnekler
 
-## Sudoku solver
+## Sudoku çözücü
 ```python
 # 9x9 matrix of integer variables
 X = [[Int("x_%s_%s" % (i+1, j+1)) for j in range(9)]
@@ -271,7 +271,8 @@ print("failed to solve")
 ```
 ## Referanslar
 
-* [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
-* [https://microsoft.github.io/z3guide/](https://microsoft.github.io/z3guide/)
-* [https://theory.stanford.edu/~nikolaj/programmingz3.html](https://theory.stanford.edu/~nikolaj/programmingz3.html)
+- [1] [Z3Py Guide - Örnekler (ericpony)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
+- [2] [Z3 Guide (Microsoft)](https://microsoft.github.io/z3guide/)
+- [3] [Z3 Programlama (Stanford)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
+
 {{#include ../../banners/hacktricks-training.md}}

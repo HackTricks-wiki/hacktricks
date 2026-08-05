@@ -1,79 +1,79 @@
-# Denetimli Öğrenme Algoritmaları
+# Supervised Learning Algorithms
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Temel Bilgiler
+## Basic Information
 
-Denetimli öğrenme, yeni, görülmemiş girdiler üzerinde tahminler yapabilen modelleri eğitmek için etiketli veriler kullanır. Siber güvenlikte, denetimli makine öğrenimi, saldırı tespiti (ağ trafiğini *normal* veya *saldırı* olarak sınıflandırma), kötü amaçlı yazılım tespiti (zararlı yazılımları zararsız olanlardan ayırma), kimlik avı tespiti (sahte web siteleri veya e-postaları tanımlama) ve spam filtreleme gibi görevlerde yaygın olarak uygulanmaktadır. Her algoritmanın güçlü yönleri vardır ve farklı problem türlerine (sınıflandırma veya regresyon) uygundur. Aşağıda, ana denetimli öğrenme algoritmalarını gözden geçiriyoruz, nasıl çalıştıklarını açıklıyoruz ve gerçek siber güvenlik veri setlerinde kullanımını gösteriyoruz. Ayrıca, modellerin birleştirilmesinin (ansambl öğrenme) tahmin performansını sıklıkla nasıl artırabileceğini tartışıyoruz.
+Supervised learning, yeni ve daha önce görülmemiş girdiler hakkında tahminler yapabilen modelleri eğitmek için etiketli verileri kullanır. Cybersecurity alanında supervised machine learning; izinsiz giriş tespiti (ağ trafiğini *normal* veya *attack* olarak sınıflandırma), malware detection (kötü amaçlı yazılımları benign yazılımlardan ayırma), phishing detection (sahte web sitelerini veya e-postaları tespit etme) ve spam filtering gibi görevlerde yaygın olarak kullanılır. Her algorithm farklı güçlü yönlere sahiptir ve farklı problem türlerine (classification veya regression) uygundur. Aşağıda temel supervised learning algorithms konularını inceliyor, nasıl çalıştıklarını açıklıyor ve gerçek cybersecurity datasets üzerinde kullanımlarını gösteriyoruz. Ayrıca modellerin birleştirilmesinin (ensemble learning) tahmin performansını çoğu zaman nasıl artırabileceğini de ele alıyoruz.
 
-## Algoritmalar
+## Algorithms
 
--   **Doğrusal Regresyon:** Sayısal sonuçları tahmin etmek için verilere doğrusal bir denklem uyduran temel bir regresyon algoritmasıdır.
+-   **Linear Regression:** Verilere bir doğrusal denklem uydurarak sayısal sonuçları tahmin etmek için kullanılan temel bir regression algorithm.
 
--   **Lojistik Regresyon:** İki değerli bir sonucun olasılığını modellemek için lojistik bir fonksiyon kullanan bir sınıflandırma algoritmasıdır (adıyla çelişmesine rağmen).
+-   **Logistic Regression:** İkili bir sonucun olasılığını modellemek için logistic function kullanan bir classification algorithm (adına rağmen).
 
--   **Karar Ağaçları:** Verileri özelliklere göre bölen ağaç yapısındaki modellerdir; genellikle yorumlanabilirlikleri için kullanılır.
+-   **Decision Trees:** Tahmin yapmak için verileri feature'lara göre bölen, ağaç yapısındaki modeller; genellikle yorumlanabilirlikleri nedeniyle kullanılır.
 
--   **Rastgele Ormanlar:** Doğruluk artıran ve aşırı uyumu azaltan karar ağaçlarının (bagging yoluyla) bir ansamblıdır.
+-   **Random Forests:** Doğruluğu artıran ve overfitting'i azaltan, decision trees topluluğu (bagging yoluyla).
 
--   **Destek Vektör Makineleri (SVM):** Optimal ayırıcı hiper düzlemi bulan maksimum marj sınıflandırıcılarıdır; doğrusal olmayan veriler için çekirdekler kullanabilir.
+-   **Support Vector Machines (SVM):** En uygun ayırıcı hyperplane'i bulan, maksimum marjlı classifier'lar; non-linear veriler için kernel'lar kullanabilir.
 
--   **Naive Bayes:** Özellik bağımsızlığı varsayımı ile Bayes teoremi temelinde bir olasılık sınıflandırıcısıdır; ünlü olarak spam filtrelemede kullanılır.
+-   **Naive Bayes:** Feature'ların bağımsız olduğu varsayımıyla Bayes' theorem'e dayanan ve spam filtering'de yaygın olarak kullanılan olasılıksal bir classifier.
 
--   **k-En Yakın Komşu (k-NN):** En yakın komşularının çoğunluk sınıfına dayalı olarak bir örneği etiketleyen basit bir "örnek tabanlı" sınıflandırıcıdır.
+-   **k-Nearest Neighbors (k-NN):** Bir sample'ı en yakın komşularının çoğunluk sınıfına göre etiketleyen basit, "instance-based" bir classifier.
 
--   **Gradient Boosting Makineleri:** Zayıf öğrenicileri (genellikle karar ağaçları) ardışık olarak ekleyerek güçlü bir tahminci oluşturan ansambl modelleridir (örneğin, XGBoost, LightGBM).
+-   **Gradient Boosting Machines:** Daha zayıf learner'ları (genellikle decision trees) art arda ekleyerek güçlü bir predictor oluşturan ensemble modelleri (ör. XGBoost, LightGBM).
 
-Aşağıdaki her bölüm, algoritmanın geliştirilmiş bir tanımını ve `pandas` ve `scikit-learn` (ve sinir ağı örneği için `PyTorch`) gibi kütüphaneleri kullanarak bir **Python kod örneği** sunmaktadır. Örnekler, kamuya açık siber güvenlik veri setlerini (örneğin, saldırı tespiti için NSL-KDD ve bir Kimlik Avı Web Siteleri veri seti) kullanmakta ve tutarlı bir yapı izlemektedir:
+Aşağıdaki her bölüm algorithm hakkında geliştirilmiş bir açıklama ve `pandas` ile `scikit-learn` gibi kütüphaneleri (ve neural network örneği için `PyTorch`) kullanan bir **Python code example** sunar. Örnekler, herkese açık cybersecurity datasets'lerini (izinsiz giriş tespiti için NSL-KDD ve bir Phishing Websites dataset'i gibi) kullanır ve tutarlı bir yapı izler:
 
-1.  **Veri setini yükle** (varsa URL üzerinden indir).
+1.  **Load the dataset** (varsa URL üzerinden indirme).
 
-2.  **Verileri ön işleme** (örneğin, kategorik özellikleri kodlama, değerleri ölçeklendirme, eğitim/test setlerine ayırma).
+2.  **Preprocess the data** (ör. categorical features'ları encode etme, değerleri scale etme, train/test set'lerine ayırma).
 
-3.  **Modeli eğit** eğitim verileri üzerinde.
+3.  **Train the model** training data üzerinde.
 
-4.  **Test setinde değerlendir**: sınıflandırma için doğruluk, hassasiyet, geri çağırma, F1 skoru ve ROC AUC (ve regresyon için ortalama kare hatası) metriklerini kullanarak.
+4.  Classification için accuracy, precision, recall, F1-score ve ROC AUC; regression için ise mean squared error metric'lerini kullanarak bir test seti üzerinde **Evaluate** etme.
 
-Her bir algoritmaya dalalım:
+Her algorithm'a göz atalım:
 
-### Doğrusal Regresyon
+### Linear Regression
 
-Doğrusal regresyon, sürekli sayısal değerleri tahmin etmek için kullanılan bir **regresyon** algoritmasıdır. Girdi özellikleri (bağımsız değişkenler) ile çıktı (bağımlı değişken) arasında doğrusal bir ilişki varsayar. Model, özellikler ile hedef arasındaki ilişkiyi en iyi şekilde tanımlayan bir doğruyu (veya daha yüksek boyutlarda bir hiper düzlemi) uydurmaya çalışır. Bu genellikle tahmin edilen ve gerçek değerler arasındaki kare hataların toplamını minimize ederek yapılır (Ordinary Least Squares yöntemi).
+Linear regression, sürekli sayısal değerleri tahmin etmek için kullanılan bir **regression** algorithm'dir. Girdi feature'ları (independent variables) ile çıktı (dependent variable) arasında doğrusal bir ilişki olduğunu varsayar. Model, feature'lar ile target arasındaki ilişkiyi en iyi şekilde açıklayan düz bir çizgi (veya daha yüksek boyutlarda hyperplane) uydurmaya çalışır. Bu işlem genellikle tahmin edilen ve gerçek değerler arasındaki squared errors toplamının minimize edilmesiyle gerçekleştirilir (Ordinary Least Squares method).<sup>[[8]](#references)</sup>
 
-Doğrusal regresyonu temsil etmenin en basit yolu bir doğrudur:
+Linear regression'ı temsil etmenin en basit biçimi bir doğrudur:
 ```plaintext
 y = mx + b
 ```
 Nerede:
 
-- `y` tahmin edilen değer (çıktı)
-- `m` doğrunun eğimi (katsayı)
-- `x` girdi özelliği
-- `b` y-kesişimi
+- `y` tahmin edilen değerdir (çıktı)
+- `m` doğrunun eğimidir (katsayı)
+- `x` girdi özelliğidir
+- `b` y-kesişimidir
 
-Doğrusal regresyonun amacı, tahmin edilen değerler ile veri setindeki gerçek değerler arasındaki farkı en aza indiren en iyi uyumlu çizgiyi bulmaktır. Elbette, bu çok basit, iki kategoriyi ayıran düz bir çizgi olur, ancak daha fazla boyut eklendiğinde, çizgi daha karmaşık hale gelir:
+Linear regression'ın amacı, veri kümesindeki tahmin edilen değerlerle gerçek değerler arasındaki farkı en aza indiren en uygun doğruyu bulmaktır. Elbette bu çok basittir; iki kategoriyi ayıran düz bir doğru olur. Ancak daha fazla boyut eklenirse doğru daha karmaşık hale gelir:
 ```plaintext
 y = w1*x1 + w2*x2 + ... + wn*xn + b
 ```
 > [!TIP]
-> *Siber güvenlikte kullanım durumları:* Doğrusal regresyon, temel güvenlik görevleri için (genellikle sınıflandırma olan) daha az yaygındır, ancak sayısal sonuçları tahmin etmek için uygulanabilir. Örneğin, doğrusal regresyon kullanılarak **ağ trafiği hacmi tahmin edilebilir** veya belirli bir zaman diliminde **saldırı sayısı tahmin edilebilir** geçmiş verilere dayanarak. Ayrıca, belirli sistem metrikleri göz önüne alındığında, bir risk puanı veya bir saldırının tespit edilmesine kadar beklenen süreyi tahmin edebilir. Pratikte, sınıflandırma algoritmaları (lojistik regresyon veya ağaçlar gibi) ihlalleri veya kötü amaçlı yazılımları tespit etmek için daha sık kullanılır, ancak doğrusal regresyon bir temel olarak hizmet eder ve regresyon odaklı analizler için faydalıdır.
+> *Siber güvenlikte kullanım alanları:* Linear regression, temel güvenlik görevlerinde (bunlar çoğunlukla classification görevleridir) daha az yaygındır, ancak sayısal sonuçları tahmin etmek için uygulanabilir. Örneğin, geçmiş verilere dayanarak **network traffic hacmini tahmin etmek** veya **belirli bir zaman aralığındaki saldırı sayısını tahmin etmek** için linear regression kullanılabilir. Ayrıca belirli sistem metrikleri verildiğinde bir risk skorunu veya bir saldırının tespit edilmesine kadar geçmesi beklenen süreyi tahmin edebilir. Uygulamada, izinsiz girişleri veya malware'i tespit etmek için classification algorithms (logistic regression veya trees gibi) daha sık kullanılır; ancak linear regression, regression odaklı analizler için bir temel oluşturur ve kullanışlıdır.
 
-#### **Doğrusal Regresyonun Anahtar Özellikleri:**
+#### **Linear Regression'ın temel özellikleri:**
 
--   **Problem Türü:** Regresyon (sürekli değerleri tahmin etme). Çıktıya bir eşik uygulanmadıkça doğrudan sınıflandırma için uygun değildir.
+-   **Problem türü:** Regression (sürekli değerleri tahmin etme). Çıktıya bir eşik uygulanmadığı sürece doğrudan classification için uygun değildir.
 
--   **Yorumlanabilirlik:** Yüksek -- katsayılar, her özelliğin doğrusal etkisini göstererek basit bir şekilde yorumlanabilir.
+-   **Yorumlanabilirlik:** Yüksek -- katsayıların yorumlanması kolaydır ve her feature'ın doğrusal etkisini gösterir.
 
--   **Avantajlar:** Basit ve hızlı; regresyon görevleri için iyi bir temel; gerçek ilişki yaklaşık olarak doğrusal olduğunda iyi çalışır.
+-   **Avantajlar:** Basit ve hızlıdır; regression görevleri için iyi bir başlangıç noktasıdır; gerçek ilişki yaklaşık olarak doğrusal olduğunda iyi çalışır.
 
--   **Sınırlamalar:** Karmaşık veya doğrusal olmayan ilişkileri yakalayamaz (manuel özellik mühendisliği olmadan); ilişkiler doğrusal değilse aşırı uyum sağlama eğilimindedir; sonuçları çarpıtabilecek aykırı değerlere duyarlıdır.
+-   **Sınırlamalar:** Manuel feature engineering yapılmadığında karmaşık veya doğrusal olmayan ilişkileri yakalayamaz; ilişkiler doğrusal olmadığında underfitting'e yatkındır; sonuçları çarpıtabilecek outlier'lara karşı hassastır.
 
--   **En İyi Uyumun Bulunması:** Olası kategorileri ayıran en iyi uyum çizgisini bulmak için **Ordinary Least Squares (OLS)** adı verilen bir yöntem kullanıyoruz. Bu yöntem, gözlemlenen değerler ile doğrusal model tarafından tahmin edilen değerler arasındaki kare farkların toplamını minimize eder.
+-   **En iyi uyumu bulma:** Olası kategorileri ayıran en iyi uyum doğrusunu bulmak için **Ordinary Least Squares (OLS)** adı verilen bir yöntem kullanırız. Bu yöntem, gözlemlenen değerler ile linear model tarafından tahmin edilen değerler arasındaki farkların kareleri toplamını minimize eder.
 
 <details>
-<summary>Örnek -- Bir İhlal Veri Setinde Bağlantı Süresini Tahmin Etme (Regresyon)
+<summary>Örnek -- Bir Intrusion Dataset'inde Connection Duration Tahmini (Regression)
 </summary>
-Aşağıda, NSL-KDD siber güvenlik veri setini kullanarak doğrusal regresyonu gösteriyoruz. Bunu, diğer özelliklere dayanarak ağ bağlantılarının `süresini` tahmin ederek bir regresyon problemi olarak ele alacağız. (Gerçekte, `süre` NSL-KDD'nin bir özelliğidir; burada regresyonu göstermek için kullanıyoruz.) Veri setini yüklüyoruz, ön işleme tabi tutuyoruz (kategorik özellikleri kodluyoruz), bir doğrusal regresyon modeli eğitiyoruz ve bir test setinde Ortalama Kare Hata (MSE) ve R² puanını değerlendiriyoruz.
+Aşağıda NSL-KDD cybersecurity dataset'ini kullanarak linear regression'ı gösteriyoruz. Diğer feature'lara dayanarak network connection'ların `duration` değerini tahmin ederek bunu bir regression problemi olarak ele alacağız. (Gerçekte `duration`, NSL-KDD'nin feature'larından biridir; burada yalnızca regression'ı göstermek amacıyla kullanıyoruz.) Dataset'i yüklüyor, preprocess ediyor (categorical feature'ları encode ediyor), bir linear regression modelini eğitiyor ve bir test seti üzerinde Mean Squared Error (MSE) ile R² skorunu değerlendiriyoruz.
 ```python
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -128,43 +128,45 @@ Test MSE: 3021333.56
 Test R² : -0.526
 """
 ```
-Bu örnekte, doğrusal regresyon modeli diğer ağ özelliklerinden bağlantı `süresi`ni tahmin etmeye çalışır. Performansı Ortalama Kare Hatası (MSE) ve R² ile ölçüyoruz. R²'nin 1.0'a yakın olması, modelin `süre`deki çoğu varyansı açıkladığını gösterirken, düşük veya negatif bir R² kötü bir uyum olduğunu belirtir. (R²'nin burada düşük olmasına şaşırmayın -- verilen özelliklerden `süre`yi tahmin etmek zor olabilir ve doğrusal regresyon karmaşık desenleri yakalayamayabilir.)
+Bu örnekte, linear regression modeli diğer ağ özelliklerinden bağlantı `duration` değerini tahmin etmeye çalışır. Performansı Mean Squared Error (MSE) ve R² ile ölçeriz. 1.0'a yakın bir R², modelin `duration` değerindeki varyansın çoğunu açıkladığını gösterirken düşük veya negatif bir R², uyumun zayıf olduğunu gösterir. (Burada R² düşük çıkarsa şaşırmayın -- `duration` değerini verilen özelliklerden tahmin etmek zor olabilir ve linear regression, örüntüler karmaşıksa bunları yakalayamayabilir.)
+</details>
 
-### Lojistik Regresyon
+### Logistic Regression
 
-Lojistik regresyon, bir örneğin belirli bir sınıfa (genellikle "pozitif" sınıf) ait olma olasılığını modelleyen bir **sınıflandırma** algoritmasıdır. Adına rağmen, *lojistik* regresyon ayrık sonuçlar için kullanılır (doğrusal regresyonun sürekli sonuçlar için olduğu gibi). Özellikle **ikili sınıflandırma** (iki sınıf, örneğin, kötü niyetli vs. zararsız) için kullanılır, ancak çok sınıflı problemlere (softmax veya bir-vs-diğer yaklaşımlarını kullanarak) genişletilebilir.
+Logistic regression, bir örneğin belirli bir sınıfa (genellikle "pozitif" sınıfa) ait olma olasılığını modelleyen bir **classification** algoritmasıdır. Adına rağmen *logistic* regression, discrete sonuçlar için kullanılır (continuous sonuçlar için kullanılan linear regression'ın aksine). Özellikle **binary classification** (iki sınıf; örneğin malicious ve benign) için kullanılır, ancak multi-class problemlerine de (softmax veya one-vs-rest yaklaşımları kullanılarak) genişletilebilir.<sup>[[1]](#references)</sup>
 
-Lojistik regresyon, tahmin edilen değerleri olasılıklara eşlemek için lojistik fonksiyonu (aynı zamanda sigmoid fonksiyonu olarak da bilinir) kullanır. Sigmoid fonksiyonunun, sınıflandırmanın ihtiyaçlarına göre S şeklinde bir eğri ile büyüyen, 0 ile 1 arasında değerler alan bir fonksiyon olduğunu unutmayın; bu, ikili sınıflandırma görevleri için faydalıdır. Bu nedenle, her girişin her özelliği, atanan ağırlığı ile çarpılır ve sonuç, bir olasılık üretmek için sigmoid fonksiyonundan geçirilir:
+Logistic regression, tahmin edilen değerleri olasılıklara dönüştürmek için logistic function'ı (sigmoid function olarak da bilinir) kullanır. Sigmoid function'ın, classification gereksinimlerine göre S şeklinde bir eğri boyunca büyüyen ve 0 ile 1 arasında değerler alan bir function olduğunu unutmayın; bu, binary classification görevleri için kullanışlıdır. Bu nedenle, her input'un her feature'ı kendisine atanmış weight ile çarpılır ve sonuç, bir olasılık üretmek üzere sigmoid function'dan geçirilir:
 ```plaintext
 p(y=1|x) = 1 / (1 + e^(-z))
 ```
 Where:
 
-- `p(y=1|x)` çıktının `y` 1 olma olasılığıdır, verilen girdi `x`
-- `e` doğal logaritmanın tabanıdır
-- `z` girdi özelliklerinin lineer kombinasyonudur, genellikle `z = w1*x1 + w2*x2 + ... + wn*xn + b` olarak temsil edilir. En basit haliyle bir doğru olduğunu, ancak daha karmaşık durumlarda birkaç boyutlu (her özellik için bir) bir hiper düzlem haline geldiğini unutmayın.
+- `p(y=1|x)`, `x` girdisi verildiğinde çıktının `y` değerinin 1 olma olasılığıdır
+- `e`, doğal logaritmanın tabanıdır
+- `z`, girdi özelliklerinin doğrusal birleşimidir ve genellikle `z = w1*x1 + w2*x2 + ... + wn*xn + b` şeklinde gösterilir. En basit hâlinde bunun yine düz bir çizgi olduğuna, ancak daha karmaşık durumlarda birkaç boyuta sahip (her özellik için bir tane) bir hyperplane'a dönüştüğüne dikkat edin.
 
 > [!TIP]
-> *Siber güvenlikte kullanım durumları:* Birçok güvenlik problemi esasen evet/hayır kararları olduğundan, lojistik regresyon yaygın olarak kullanılmaktadır. Örneğin, bir saldırı tespit sistemi, bir ağ bağlantısının o bağlantının özelliklerine dayanarak bir saldırı olup olmadığını belirlemek için lojistik regresyon kullanabilir. Phishing tespitinde, lojistik regresyon bir web sitesinin özelliklerini (URL uzunluğu, "@" sembolünün varlığı vb.) phishing olma olasılığına dönüştürebilir. Erken nesil spam filtrelerinde kullanılmıştır ve birçok sınıflandırma görevi için güçlü bir temel olmaya devam etmektedir.
+> *Siber güvenlikte kullanım alanları:* Birçok güvenlik problemi esasen evet/hayır kararları olduğundan logistic regression yaygın olarak kullanılır. Örneğin bir intrusion detection system, bir network connection'ın özelliklerine dayanarak bu bağlantının bir attack olup olmadığına karar vermek için logistic regression kullanabilir. Phishing detection işleminde logistic regression, bir web sitesinin özelliklerini (URL uzunluğu, `"@"` sembolünün bulunması vb.) phishing olma olasılığına dönüştürebilir. Erken nesil spam filtrelerinde kullanılmıştır ve birçok classification görevi için hâlâ güçlü bir baseline olma özelliğini korumaktadır.
 
-#### Lojistik Regresyonun ikili olmayan sınıflandırma için
+#### Binary olmayan classification için Logistic Regression
 
-Lojistik regresyon ikili sınıflandırma için tasarlanmıştır, ancak **bir-vs-diğerleri** (OvR) veya **softmax regresyonu** gibi teknikler kullanarak çoklu sınıf problemlerini ele almak için genişletilebilir. OvR'de, her sınıf için ayrı bir lojistik regresyon modeli eğitilir ve bu sınıf diğer tüm sınıflara karşı pozitif sınıf olarak ele alınır. En yüksek tahmin edilen olasılığa sahip sınıf, nihai tahmin olarak seçilir. Softmax regresyonu, çıktı katmanına softmax fonksiyonu uygulayarak lojistik regresyonu birden fazla sınıfa genelleştirir ve tüm sınıflar üzerinde bir olasılık dağılımı üretir.
+Logistic regression binary classification için tasarlanmıştır, ancak **one-vs-rest** (OvR) veya **softmax regression** gibi teknikler kullanılarak multi-class problemleri ele alacak şekilde genişletilebilir. OvR'de her class için ayrı bir logistic regression modeli eğitilir ve ilgili class, diğer tüm class'lara karşı positive class olarak değerlendirilir. En yüksek tahmin edilen olasılığa sahip class, nihai tahmin olarak seçilir. Softmax regression, çıktı katmanına softmax fonksiyonunu uygulayarak ve tüm class'lar üzerinde bir olasılık dağılımı üreterek logistic regression'ı birden fazla class'ı destekleyecek şekilde genelleştirir.
 
-#### **Lojistik Regresyonun Ana Özellikleri:**
+#### **Logistic Regression'ın temel özellikleri:**
 
--   **Problem Türü:** Sınıflandırma (genellikle ikili). Pozitif sınıfın olasılığını tahmin eder.
+-   **Problem türü:** Classification (genellikle binary). Positive class'ın olasılığını tahmin eder.
 
--   **Yorumlanabilirlik:** Yüksek -- lineer regresyon gibi, özellik katsayıları her bir özelliğin sonucun log-odds'unu nasıl etkilediğini gösterebilir. Bu şeffaflık, bir uyarıya hangi faktörlerin katkıda bulunduğunu anlamak için güvenlikte genellikle takdir edilmektedir.
+-   **Yorumlanabilirlik:** Yüksek -- linear regression'da olduğu gibi feature coefficient'ları, her özelliğin sonucun log-odds değerini nasıl etkilediğini gösterebilir. Bu şeffaflık, bir alert'e hangi faktörlerin katkıda bulunduğunu anlamak açısından security alanında genellikle değerlidir.
 
--   **Avantajlar:** Eğitimi basit ve hızlıdır; özellikler ile sonucun log-odds'u arasındaki ilişki lineer olduğunda iyi çalışır. Olasılıkları çıktılar, risk puanlamasına olanak tanır. Uygun düzenleme ile iyi genelleme yapar ve çoklu doğrusal bağıntıları düz lineer regresyondan daha iyi ele alabilir.
+-   **Avantajları:** Eğitilmesi basit ve hızlıdır; feature'lar ile sonucun log-odds değeri arasındaki ilişki linear olduğunda iyi çalışır. Risk scoring yapılmasını sağlayan olasılıklar üretir. Uygun regularization ile iyi genelleme yapar ve multicollinearity durumunu plain linear regression'a göre daha iyi ele alabilir.
 
--   **Sınırlamalar:** Özellik alanında lineer bir karar sınırı varsayar (gerçek sınır karmaşık/lineer değilse başarısız olur). Etkileşimlerin veya lineer olmayan etkilerin kritik olduğu problemler üzerinde düşük performans gösterebilir, aksi takdirde polinom veya etkileşim özelliklerini manuel olarak eklemeniz gerekir. Ayrıca, sınıflar özelliklerin lineer kombinasyonu ile kolayca ayrılabilir değilse, lojistik regresyon daha az etkili olur.
+-   **Sınırlamaları:** Feature space içinde linear bir decision boundary olduğunu varsayar (gerçek boundary karmaşık/non-linear ise başarısız olur). Etkileşimlerin veya non-linear etkilerin kritik olduğu problemlerde, polynomial veya interaction feature'larını manuel olarak eklemediğiniz sürece düşük performans gösterebilir. Ayrıca class'lar feature'ların linear bir birleşimiyle kolayca ayrılamıyorsa logistic regression daha az etkili olur.
+
 
 <details>
-<summary>Örnek -- Lojistik Regresyon ile Phishing Web Sitesi Tespiti:</summary>
+<summary>Örnek -- Logistic Regression ile Phishing Website Detection:</summary>
 
-Bir **Phishing Web Siteleri Veri Seti** (UCI deposundan) kullanacağız; bu veri seti, web sitelerinin çıkarılmış özelliklerini (URL'nin bir IP adresi olup olmadığı, alan adının yaşı, HTML'deki şüpheli unsurların varlığı vb.) ve sitenin phishing veya meşru olup olmadığını belirten bir etiketi içerir. Web sitelerini sınıflandırmak için bir lojistik regresyon modeli eğitiyoruz ve ardından test bölümü üzerinde doğruluğunu, kesinliğini, hatırlama oranını, F1-skorunu ve ROC AUC'yi değerlendiriyoruz.
+UCI repository'den alınan ve web sitelerinin çıkarılmış feature'larını (URL'nin bir IP address içerip içermediği, domain'in yaşı, HTML'de şüpheli öğelerin bulunup bulunmadığı vb.) ve sitenin phishing veya legitimate olduğunu belirten bir label'ı içeren bir **Phishing Websites Dataset** kullanacağız. Web sitelerini sınıflandırmak için bir logistic regression modeli eğitecek ve ardından bir test split'i üzerinde accuracy, precision, recall, F1-score ve ROC AUC değerlerini değerlendireceğiz.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -219,26 +221,26 @@ F1-score : 0.917
 ROC AUC  : 0.979
 """
 ```
-Bu phishing tespiti örneğinde, lojistik regresyon her web sitesinin phishing olma olasılığını üretir. Doğruluk, kesinlik, hatırlama ve F1 değerlendirerek modelin performansını anlarız. Örneğin, yüksek bir hatırlama, çoğu phishing sitesini yakaladığı anlamına gelir (kaçırılan saldırıları en aza indirmek için güvenlik açısından önemlidir), yüksek kesinlik ise az sayıda yanlış alarm olduğu anlamına gelir (analist yorgunluğunu önlemek için önemlidir). ROC AUC (ROC Eğrisi Altındaki Alan), performansın eşik bağımsız bir ölçüsünü verir (1.0 ideal, 0.5 şansa eşit). Lojistik regresyon genellikle bu tür görevlerde iyi performans gösterir, ancak phishing ve meşru siteler arasındaki karar sınırı karmaşık ise, daha güçlü doğrusal olmayan modellere ihtiyaç duyulabilir.
+Bu phishing detection örneğinde logistic regression, her web sitesinin phishing olma olasılığını üretir. Accuracy, precision, recall ve F1 değerlerini değerlendirerek modelin performansı hakkında fikir ediniriz. Örneğin, yüksek recall değeri çoğu phishing sitesini yakaladığı anlamına gelir (kaçırılan saldırıları en aza indirmek için güvenlik açısından önemlidir); yüksek precision değeri ise az sayıda false alarm ürettiği anlamına gelir (analist yorgunluğunu önlemek için önemlidir). ROC AUC (ROC Eğrisi Altındaki Alan), threshold'dan bağımsız bir performans ölçümü sağlar (1.0 ideal, 0.5 ise şanstan daha iyi değil anlamına gelir). Logistic regression bu tür görevlerde genellikle iyi performans gösterir; ancak phishing ve legitimate siteler arasındaki decision boundary karmaşıksa daha güçlü non-linear modellere ihtiyaç duyulabilir.
 
 </details>
 
 ### Karar Ağaçları
 
-Karar ağacı, hem sınıflandırma hem de regresyon görevleri için kullanılabilen çok yönlü bir **denetimli öğrenme algoritması**dır. Verilerin özelliklerine dayalı olarak kararların hiyerarşik ağaç benzeri bir modelini öğrenir. Ağacın her iç düğümü belirli bir özellik üzerinde bir testi temsil eder, her dal o testin bir sonucunu temsil eder ve her yaprak düğümü bir tahmin edilen sınıfı (sınıflandırma için) veya değeri (regresyon için) temsil eder.
+Bir decision tree, hem classification hem de regression görevleri için kullanılabilen çok yönlü bir **supervised learning algorithm**'dir. Verilerin feature'larına dayalı, hiyerarşik ve ağaç benzeri bir karar modeli öğrenir. Ağacın her internal node'u belirli bir feature üzerinde yapılan bir testi, her branch bu testin bir sonucunu ve her leaf node classification için tahmin edilen class'ı veya regression için değeri temsil eder.<sup>[[2]](#references)</sup>
 
-Bir ağaç inşa etmek için CART (Sınıflandırma ve Regresyon Ağacı) gibi algoritmalar, her adımda verileri bölmek için en iyi özelliği ve eşiği seçmek üzere **Gini saflığı** veya **bilgi kazancı (entropi)** gibi ölçüleri kullanır. Her bölünmedeki hedef, sonuçta oluşan alt kümelerde hedef değişkenin homojenliğini artırmak için verileri bölmektir (sınıflandırma için, her düğüm mümkün olduğunca saf olmaya çalışır ve ağırlıklı olarak tek bir sınıf içerir).
+Bir ağaç oluşturmak için CART (Classification and Regression Tree) gibi algoritmalar, verileri her adımda bölmek üzere en iyi feature'ı ve threshold'u seçmek amacıyla **Gini impurity** veya **information gain (entropy)** gibi ölçümler kullanır. Her split işlemindeki amaç, ortaya çıkan alt kümelerde target variable'ın homojenliğini artıracak şekilde verileri partition etmektir (classification için her node, ağırlıklı olarak tek bir class içerecek şekilde mümkün olduğunca pure olmayı hedefler).
 
-Karar ağaçları **yüksek derecede yorumlanabilir** -- bir tahminin arkasındaki mantığı anlamak için kökten yaprağa kadar olan yolu takip edebilirsiniz (örneğin, *"EĞER `service = telnet` VE `src_bytes > 1000` VE `failed_logins > 3` O ZAMAN saldırı olarak sınıflandır"*). Bu, belirli bir uyarının neden yükseltildiğini açıklamak için siber güvenlikte değerlidir. Ağaçlar hem sayısal hem de kategorik verileri doğal olarak işleyebilir ve az miktarda ön işleme gerektirir (örneğin, özellik ölçeklendirmeye ihtiyaç yoktur).
+Decision tree'ler **son derece açıklanabilirdir** -- bir prediction'ın mantığını anlamak için root'tan leaf'e kadar olan yol takip edilebilir (ör. *"`service = telnet` AND `src_bytes > 1000` AND `failed_logins > 3` İSE attack olarak classify et"*). Bu, belirli bir alert'in neden üretildiğini açıklamak açısından cybersecurity'de değerlidir. Ağaçlar hem numerical hem de categorical data'yı doğal olarak işleyebilir ve çok az preprocessing gerektirir (ör. feature scaling gerekli değildir).
 
-Ancak, tek bir karar ağacı eğitim verilerine kolayca aşırı uyum sağlayabilir, özellikle derin büyütüldüğünde (birçok bölme). Aşırı uyumu önlemek için genellikle budama (ağaç derinliğini sınırlama veya her yaprak için minimum örnek sayısı gerektirme) gibi teknikler kullanılır.
+Bununla birlikte, özellikle derin oluşturulduklarında (çok sayıda split), tek bir decision tree training data'ya kolayca overfit olabilir. Overfitting'i önlemek için pruning (tree depth'i sınırlandırmak veya leaf başına minimum sample sayısı belirlemek) gibi teknikler sıklıkla kullanılır.
 
-Bir karar ağacının 3 ana bileşeni vardır:
-- **Kök Düğüm**: Ağacın en üst düğümü, tüm veri kümesini temsil eder.
-- **İç Düğümler**: Özellikleri ve bu özelliklere dayalı kararları temsil eden düğümler.
-- **Yaprak Düğümler**: Nihai sonucu veya tahmini temsil eden düğümler.
+Bir decision tree'nin 3 ana bileşeni vardır:
+- **Root Node**: Tüm dataset'i temsil eden ağacın en üst node'u.
+- **Internal Nodes**: Feature'ları ve bu feature'lara dayalı kararları temsil eden node'lar.
+- **Leaf Nodes**: Nihai sonucu veya prediction'ı temsil eden node'lar.
 
-Bir ağaç şu şekilde görünebilir:
+Bir ağaç aşağıdaki gibi görünebilir:
 ```plaintext
 [Root Node]
 /   \
@@ -247,50 +249,50 @@ Bir ağaç şu şekilde görünebilir:
 [Leaf 1] [Leaf 2] [Leaf 3] [Leaf 4]
 ```
 > [!TIP]
-> *Siber güvenlikte kullanım durumları:* Karar ağaçları, saldırıları tanımlamak için **kurallar** türetmek amacıyla saldırı tespit sistemlerinde kullanılmıştır. Örneğin, ID3/C4.5 tabanlı erken IDS'ler, normal ve kötü niyetli trafiği ayırt etmek için insan tarafından okunabilir kurallar oluştururdu. Ayrıca, bir dosyanın kötü niyetli olup olmadığını belirlemek için dosya boyutu, bölüm entropisi, API çağrıları gibi özelliklerine dayanarak kötü amaçlı yazılım analizinde de kullanılırlar. Karar ağaçlarının netliği, şeffaflığın gerektiği durumlarda faydalı olmasını sağlar -- bir analist, tespiti doğrulamak için ağacı inceleyebilir.
+> *Siber güvenlikte kullanım alanları:* Karar ağaçları, saldırıları tanımlamaya yönelik **kurallar** türetmek için intrusion detection sistemlerinde kullanılmıştır. Örneğin, ID3/C4.5 tabanlı erken dönem IDS'ler, normal ve kötü amaçlı trafiği birbirinden ayırmak için insanlar tarafından okunabilir kurallar üretirdi. Ayrıca bir dosyanın özniteliklerine (dosya boyutu, section entropy, API çağrıları vb.) dayanarak kötü amaçlı olup olmadığına karar vermek için malware analysis süreçlerinde de kullanılırlar. Karar ağaçlarının açıklığı, şeffaflığın gerekli olduğu durumlarda onları kullanışlı kılar -- bir analyst, detection mantığını doğrulamak için ağacı inceleyebilir.
 
-#### **Karar Ağaçlarının Temel Özellikleri:**
+#### **Karar Ağaçlarının temel özellikleri:**
 
--   **Problem Türü:** Hem sınıflandırma hem de regresyon. Saldırıların normal trafikten ayırt edilmesi gibi sınıflandırma için yaygın olarak kullanılır.
+-   **Problem Türü:** Hem classification hem de regression. Saldırılar ile normal trafiğin sınıflandırılmasında vb. yaygın olarak kullanılır.
 
--   **Yorumlanabilirlik:** Çok yüksek -- modelin kararları, bir dizi if-then kuralı olarak görselleştirilebilir ve anlaşılabilir. Bu, güvenlikte model davranışının güvenilirliği ve doğrulanması için büyük bir avantajdır.
+-   **Yorumlanabilirlik:** Çok yüksek -- modelin kararları görselleştirilebilir ve if-then kuralları kümesi olarak anlaşılabilir. Bu, model davranışına duyulan güven ve doğrulama açısından security alanında önemli bir avantajdır.
 
--   **Avantajlar:** Doğrusal olmayan ilişkileri ve özellikler arasındaki etkileşimleri yakalayabilir (her bir bölme bir etkileşim olarak görülebilir). Özellikleri ölçeklendirmeye veya kategorik değişkenleri one-hot kodlamaya gerek yoktur -- ağaçlar bunları yerel olarak işler. Hızlı çıkarım (tahmin, ağaçta bir yolu takip etmekten ibarettir).
+-   **Avantajlar:** Öznitelikler arasındaki doğrusal olmayan ilişkileri ve etkileşimleri yakalayabilir (her split bir etkileşim olarak görülebilir). Öznitelikleri ölçeklendirmeye veya kategorik değişkenleri one-hot encode etmeye gerek yoktur -- ağaçlar bunları yerel olarak işler. Hızlı inference (prediction yalnızca ağaçta bir yol izlemektir).
 
--   **Sınırlamalar:** Kontrol edilmediğinde aşırı uyum sağlama eğilimindedir (derin bir ağaç eğitim setini ezberleyebilir). Dengesiz olabilirler -- verilerdeki küçük değişiklikler farklı bir ağaç yapısına yol açabilir. Tek modeller olarak, doğrulukları daha gelişmiş yöntemlerle (Random Forests gibi topluluklar genellikle varyansı azaltarak daha iyi performans gösterir) eşleşmeyebilir.
+-   **Sınırlamalar:** Kontrol edilmezse overfitting'e eğilimlidir (derin bir ağaç training set'ini ezberleyebilir). Kararsız olabilirler -- verilerdeki küçük değişiklikler farklı bir ağaç yapısına yol açabilir. Tekil modeller olarak doğrulukları daha gelişmiş yöntemlerle aynı seviyeye ulaşmayabilir (Random Forests gibi ensemble'lar variance'ı azaltarak genellikle daha iyi performans gösterir).
 
--   **En İyi Bölmeyi Bulma:**
-- **Gini Safsızlığı**: Bir düğümün safsızlığını ölçer. Daha düşük Gini safsızlığı, daha iyi bir bölmeyi gösterir. Formül:
+-   **En İyi Split'i Bulma:**
+- **Gini Impurity**: Bir node'un impurity'sini ölçer. Daha düşük bir Gini impurity, daha iyi bir split olduğunu gösterir. Formül:
 
 ```plaintext
 Gini = 1 - Σ(p_i^2)
 ```
 
-Burada `p_i`, `i` sınıfındaki örneklerin oranını temsil eder.
+Burada `p_i`, `i` sınıfındaki örneklerin oranıdır.
 
-- **Entropi**: Veri setindeki belirsizliği ölçer. Daha düşük entropi, daha iyi bir bölmeyi gösterir. Formül:
+- **Entropy**: Dataset'teki belirsizliği ölçer. Daha düşük entropy, daha iyi bir split olduğunu gösterir. Formül:
 
 ```plaintext
 Entropy = -Σ(p_i * log2(p_i))
 ```
 
-Burada `p_i`, `i` sınıfındaki örneklerin oranını temsil eder.
+Burada `p_i`, `i` sınıfındaki örneklerin oranıdır.
 
-- **Bilgi Kazancı**: Bir bölmeden sonra entropi veya Gini safsızlığındaki azalma. Bilgi kazancı ne kadar yüksekse, bölme o kadar iyidir. Hesaplama:
+- **Information Gain**: Bir split sonrasında entropy veya Gini impurity'deki azalmadır. Information gain ne kadar yüksekse split o kadar iyidir. Şu şekilde hesaplanır:
 
 ```plaintext
 Information Gain = Entropy(parent) - (Weighted Average of Entropy(children))
 ```
 
-Ayrıca, bir ağaç şu durumlarda sonlanır:
-- Bir düğümdeki tüm örnekler aynı sınıfa aittir. Bu aşırı uyuma yol açabilir.
-- Ağacın maksimum derinliği (sabit kodlanmış) ulaşılmıştır. Bu, aşırı uyumu önlemenin bir yoludur.
-- Bir düğümdeki örnek sayısı belirli bir eşik değerinin altındadır. Bu da aşırı uyumu önlemenin bir yoludur.
-- Daha fazla bölmeden elde edilen bilgi kazancı belirli bir eşik değerinin altındadır. Bu da aşırı uyumu önlemenin bir yoludur.
+Ayrıca bir ağaç şu durumlarda sonlandırılır:
+- Bir node'daki tüm örnekler aynı sınıfa aittir. Bu, overfitting'e yol açabilir.
+- Ağacın maksimum derinliğine (hardcoded) ulaşılmıştır. Bu, overfitting'i önlemenin bir yoludur.
+- Bir node'daki örnek sayısı belirli bir threshold'un altındadır. Bu da overfitting'i önlemenin bir yoludur.
+- İleri split'lerden elde edilen information gain belirli bir threshold'un altındadır. Bu da overfitting'i önlemenin bir yoludur.
 
 <details>
-<summary>Örnek -- Saldırı Tespiti için Karar Ağacı:</summary>
-Ağ bağlantılarını *normal* veya *saldırı* olarak sınıflandırmak için NSL-KDD veri setinde bir karar ağacı eğiteceğiz. NSL-KDD, protokol türü, hizmet, süre, başarısız girişim sayısı gibi özelliklere sahip klasik KDD Cup 1999 veri setinin geliştirilmiş bir versiyonudur ve saldırı türünü veya "normal"i belirten bir etiket içerir. Tüm saldırı türlerini "anomalik" sınıfına (ikili sınıflandırma: normal vs anomali) eşleştireceğiz. Eğitimden sonra, ağacın test setindeki performansını değerlendireceğiz.
+<summary>Örnek -- Intrusion Detection için Karar Ağacı:</summary>
+Ağ bağlantılarını *normal* veya *attack* olarak sınıflandırmak için NSL-KDD dataset'i üzerinde bir karar ağacı eğiteceğiz. NSL-KDD, protokol türü, service, duration, başarısız login sayısı vb. özniteliklere ve saldırı türünü veya "normal" değerini belirten bir label'a sahip klasik KDD Cup 1999 dataset'inin geliştirilmiş bir sürümüdür. Tüm saldırı türlerini "anomaly" sınıfına eşleyeceğiz (binary classification: normal ve anomaly). Eğitimden sonra ağacın test setindeki performansını değerlendireceğiz.
 ```python
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
@@ -354,40 +356,40 @@ F1‑score : 0.756
 ROC AUC  : 0.758
 """
 ```
-Bu karar ağacı örneğinde, aşırı uyumdan kaçınmak için ağacın derinliğini 10 ile sınırladık (`max_depth=10` parametresi). Metikler, ağacın normal ile saldırı trafiğini ne kadar iyi ayırt ettiğini gösterir. Yüksek bir geri çağırma, çoğu saldırıyı yakaladığı anlamına gelir (IDS için önemlidir), yüksek bir hassasiyet ise az sayıda yanlış alarm demektir. Karar ağaçları genellikle yapılandırılmış verilerde makul bir doğruluk elde eder, ancak tek bir ağaç en iyi performansa ulaşamayabilir. Yine de, modelin *yorumlanabilirliği* büyük bir artıdır -- örneğin, bir bağlantıyı kötü niyetli olarak işaretlemede en etkili olan özelliklerin (örneğin, `service`, `src_bytes` vb.) neler olduğunu görmek için ağacın bölümlerini inceleyebiliriz.
+Bu karar ağacı örneğinde, aşırı overfitting'i önlemek için ağaç derinliğini 10 ile sınırladık (`max_depth=10` parametresi). Metrikler, ağacın normal ve saldırı trafiğini ne kadar iyi ayırt ettiğini gösterir. Yüksek recall, saldırıların çoğunu yakaladığı anlamına gelir (bir IDS için önemlidir); yüksek precision ise az sayıda yanlış alarm olduğu anlamına gelir. Karar ağaçları yapılandırılmış verilerde genellikle makul bir doğruluk elde eder, ancak tek bir ağaç mümkün olan en iyi performansa ulaşamayabilir. Bununla birlikte, modelin *yorumlanabilirliği* büyük bir avantajdır -- ağacın bölünmelerini inceleyerek hangi özelliklerin (ör. `service`, `src_bytes` vb.) bir bağlantının kötü amaçlı olarak işaretlenmesinde en etkili olduğunu görebiliriz.
 
 </details>
 
-### Rastgele Ormanlar
+### Random Forests
 
-Rastgele Orman, performansı artırmak için karar ağaçlarına dayanan bir **toplu öğrenme** yöntemidir. Rastgele orman, birden fazla karar ağacı (bu nedenle "orman") eğitir ve nihai tahmin yapmak için çıktıları birleştirir (sınıflandırma için genellikle çoğunluk oyu ile). Rastgele ormanda iki ana fikir **bagging** (bootstrap toplama) ve **özellik rastgeleliği**dir:
+Random Forest, performansı iyileştirmek için karar ağaçlarını temel alan bir **ensemble learning** yöntemidir. Bir random forest birden fazla karar ağacı eğitir (bu nedenle "forest") ve nihai bir tahmin yapmak için bu ağaçların çıktılarını birleştirir (classification için genellikle çoğunluk oyu kullanılır). Bir random forest'taki iki temel fikir **bagging** (bootstrap aggregating) ve **feature randomness**'tır:
 
--   **Bagging:** Her ağaç, eğitim verilerinin rastgele bir bootstrap örneği üzerinde eğitilir (yerine koyarak örnekleme). Bu, ağaçlar arasında çeşitlilik sağlar.
+-   **Bagging:** Her ağaç, eğitim verilerinin rastgele bir bootstrap örneği üzerinde eğitilir (örnekler yerine koymalı olarak seçilir). Bu, ağaçlar arasında çeşitlilik oluşturur.
 
--   **Özellik Rastgeleliği:** Bir ağaçtaki her bölmede, bölme için rastgele bir özellik alt kümesi dikkate alınır (tüm özellikler yerine). Bu, ağaçların daha fazla korelasyonunu azaltır.
+-   **Feature Randomness:** Bir ağaçtaki her bölünmede, bölme işlemi için rastgele bir özellik alt kümesi değerlendirilir (tüm özellikler yerine). Bu, ağaçların korelasyonunu daha da azaltır.
 
-Birçok ağacın sonuçlarını ortalamasıyla, rastgele orman, tek bir karar ağacının sahip olabileceği varyansı azaltır. Basit terimlerle, bireysel ağaçlar aşırı uyum sağlayabilir veya gürültülü olabilir, ancak çeşitli ağaçların birlikte oy vermesi bu hataları düzeltir. Sonuç genellikle **daha yüksek doğruluk** ve tek bir karar ağacından daha iyi genelleme ile bir modeldir. Ayrıca, rastgele ormanlar, her özelliğin ortalama olarak saflığı ne kadar azalttığını gözlemleyerek özellik öneminin bir tahminini sağlayabilir.
+Random forest, birçok ağacın sonuçlarının ortalamasını alarak tek bir karar ağacının sahip olabileceği varyansı azaltır. Basitçe ifade etmek gerekirse, tek tek ağaçlar overfit olabilir veya gürültülü sonuçlar üretebilir; ancak birlikte oy kullanan çok sayıda çeşitli ağaç bu hataları dengeler. Sonuç genellikle tek bir karar ağacına kıyasla **daha yüksek doğruluk** ve daha iyi genelleme sağlayan bir modeldir. Ayrıca random forests, her özellik bölünmesinin impurity'yi ortalama olarak ne kadar azalttığına bakarak feature importance için bir tahmin sağlayabilir.
 
-Rastgele ormanlar, sızma tespiti, kötü amaçlı yazılım sınıflandırması ve spam tespiti gibi görevler için siber güvenlikte bir **iş gücü** haline gelmiştir. Genellikle minimal ayarlarla kutudan çıktığı gibi iyi performans gösterir ve büyük özellik setlerini yönetebilir. Örneğin, sızma tespitinde, bir rastgele orman, daha az yanlış pozitif ile daha ince saldırı desenlerini yakalayarak bireysel bir karar ağacından daha iyi performans gösterebilir. Araştırmalar, rastgele ormanların NSL-KDD ve UNSW-NB15 gibi veri setlerinde saldırıları sınıflandırmada diğer algoritmalara kıyasla olumlu sonuçlar verdiğini göstermiştir.
+Random forests; intrusion detection, malware classification ve spam detection gibi görevlerde **siber güvenlikte temel araçlardan biri** haline gelmiştir. Genellikle çok az ayarlamayla kullanıma hazır şekilde iyi performans gösterir ve büyük özellik kümelerini işleyebilir. Örneğin intrusion detection'da bir random forest, daha az false positive ile daha ince saldırı örüntülerini yakalayarak tek bir karar ağacından daha iyi performans gösterebilir. Araştırmalar, random forests'ın NSL-KDD ve UNSW-NB15 gibi veri kümelerinde saldırıları sınıflandırırken diğer algoritmalara kıyasla başarılı sonuçlar verdiğini göstermiştir.<sup>[[3]](#references)[[9]](#references)</sup>
 
-#### **Rastgele Ormanların Ana Özellikleri:**
+#### **Key characteristics of Random Forests:**
 
--   **Problem Türü:** Öncelikle sınıflandırma (regresyon için de kullanılır). Güvenlik günlüklerinde yaygın olan yüksek boyutlu yapılandırılmış veriler için çok uygundur.
+-   **Type of Problem:** Öncelikle classification (regression için de kullanılır). Güvenlik loglarında yaygın olan yüksek boyutlu yapılandırılmış veriler için çok uygundur.
 
--   **Yorumlanabilirlik:** Tek bir karar ağacından daha düşük -- yüzlerce ağacı aynı anda kolayca görselleştiremez veya açıklayamazsınız. Ancak, özellik önem puanları, hangi niteliklerin en etkili olduğu hakkında bazı bilgiler sağlar.
+-   **Interpretability:** Tek bir karar ağacına kıyasla daha düşüktür -- yüzlerce ağacı aynı anda kolayca görselleştiremez veya açıklayamazsınız. Bununla birlikte, feature importance skorları hangi özniteliklerin en etkili olduğuna dair bir miktar fikir sağlar.
 
--   **Avantajlar:** Genellikle toplu etki nedeniyle tek ağaç modellerinden daha yüksek doğruluk. Aşırı uyuma karşı dayanıklıdır -- bireysel ağaçlar aşırı uyum sağlasa bile, topluluk daha iyi genelleme yapar. Hem sayısal hem de kategorik özellikleri yönetir ve kayıp verileri bir ölçüde idare edebilir. Ayrıca, uç değerlere karşı da nispeten dayanıklıdır.
+-   **Advantages:** Ensemble etkisi sayesinde genellikle tek ağaçlı modellere kıyasla daha yüksek doğruluk sağlar. Overfitting'e karşı dayanıklıdır -- tek tek ağaçlar overfit olsa bile ensemble daha iyi genelleme yapar. Hem numerical hem de categorical özellikleri işler ve missing data'yı bir ölçüde yönetebilir. Ayrıca outlier'lara karşı da görece dayanıklıdır.
 
--   **Sınırlamalar:** Model boyutu büyük olabilir (birçok ağaç, her biri potansiyel olarak derin). Tahminler, birçok ağaç üzerinde toplama yapmanız gerektiğinden tek bir ağaçtan daha yavaştır. Daha az yorumlanabilir -- önemli özellikleri bilseniz de, tam mantık basit bir kural olarak kolayca izlenemez. Veri seti son derece yüksek boyutlu ve seyrekse, çok büyük bir ormanı eğitmek hesaplama açısından ağır olabilir.
+-   **Limitations:** Model boyutu büyük olabilir (çok sayıda ağaç ve her biri potansiyel olarak derin). Tahminler tek bir ağaca göre daha yavaştır (çünkü birçok ağaç üzerinden aggregation yapmanız gerekir). Daha az yorumlanabilirdir -- önemli özellikleri bilseniz de kesin mantık, basit bir kural gibi kolayca izlenemez. Veri kümesi son derece yüksek boyutlu ve sparse ise çok büyük bir forest'ı eğitmek computational açıdan ağır olabilir.
 
--   **Eğitim Süreci:**
-1. **Bootstrap Örnekleme**: Eğitim verilerini yerine koyarak rastgele örnekleyerek birden fazla alt küme (bootstrap örnekleri) oluşturun.
-2. **Ağaç İnşası**: Her bootstrap örneği için, her bölmede rastgele bir özellik alt kümesi kullanarak bir karar ağacı inşa edin. Bu, ağaçlar arasında çeşitlilik sağlar.
-3. **Toplama**: Sınıflandırma görevleri için, nihai tahmin, tüm ağaçların tahminleri arasında çoğunluk oyu alarak yapılır. Regresyon görevleri için, nihai tahmin, tüm ağaçların tahminlerinin ortalamasıdır.
+-   **Training Process:**
+1. **Bootstrap Sampling**: Birden fazla alt küme (bootstrap samples) oluşturmak için eğitim verilerini replacement ile rastgele örnekleyin.
+2. **Tree Construction**: Her bootstrap sample için, her bölünmede rastgele bir özellik alt kümesi kullanarak bir karar ağacı oluşturun. Bu, ağaçlar arasında çeşitlilik sağlar.
+3. **Aggregation**: Classification görevlerinde nihai tahmin, tüm ağaçların tahminleri arasındaki çoğunluk oyu alınarak yapılır. Regression görevlerinde nihai tahmin, tüm ağaçların tahminlerinin ortalamasıdır.
 
 <details>
-<summary>Örnek -- Sızma Tespiti için Rastgele Orman (NSL-KDD):</summary>
-Aynı NSL-KDD veri setini (normal ile anomali olarak ikili etiketlenmiş) kullanacağız ve bir Rastgele Orman sınıflandırıcısı eğiteceğiz. Rastgele ormanın, varyansı azaltan toplu ortalama sayesinde tek karar ağacından eşit veya daha iyi performans göstermesini bekliyoruz. Aynı metriklerle değerlendireceğiz.
+<summary>Example -- Random Forest for Intrusion Detection (NSL-KDD):</summary>
+Aynı NSL-KDD veri kümesini (normal ve anomaly olarak binary etiketlenmiş) kullanacak ve bir Random Forest classifier eğiteceğiz. Ensemble averaging varyansı azalttığı için random forest'ın tek karar ağacı kadar iyi veya ondan daha iyi performans göstermesini bekliyoruz. Modeli aynı metriklerle değerlendireceğiz.
 ```python
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -479,35 +481,35 @@ F1-score:  0.754
 ROC AUC:   0.962
 """
 ```
-Rastgele orman, bu saldırı tespit görevinde genellikle güçlü sonuçlar elde eder. Tek bir karar ağacına kıyasla, özellikle geri çağırma veya hassasiyet açısından, veriye bağlı olarak F1 veya AUC gibi metriklerde bir iyileşme gözlemleyebiliriz. Bu, *"Rastgele Orman (RF), bir topluluk sınıflandırıcısıdır ve saldırıların etkili sınıflandırması için diğer geleneksel sınıflandırıcılara kıyasla iyi performans gösterir."* anlayışıyla uyumludur. Bir güvenlik operasyonları bağlamında, rastgele orman modeli, birçok karar kuralının ortalaması sayesinde saldırıları daha güvenilir bir şekilde işaretleyebilirken yanlış alarmları azaltabilir. Ormandan elde edilen özellik önemi, hangi ağ özelliklerinin saldırıları en iyi şekilde gösterdiğini (örneğin, belirli ağ hizmetleri veya olağandışı paket sayıları) bize söyleyebilir.
+Random forest genellikle bu intrusion detection görevinde güçlü sonuçlar elde eder. Verilere bağlı olarak, tek bir decision tree ile karşılaştırıldığında özellikle recall veya precision değerlerinde F1 ya da AUC gibi metriklerde iyileşme gözlemleyebiliriz. Bu durum, *"Random Forest (RF) is an ensemble classifier and performs well compared to other traditional classifiers for effective classification of attacks."* anlayışıyla örtüşür. Bir security operations bağlamında random forest modeli, çok sayıda decision rule'un ortalamasını aldığı için false alarm'ları azaltırken saldırıları daha güvenilir şekilde işaretleyebilir. Forest'tan elde edilen feature importance değerleri, hangi network feature'larının saldırıların en belirgin göstergeleri olduğunu (örneğin belirli network services veya olağandışı packet sayıları) gösterebilir.
 
 </details>
 
-### Destek Vektör Makineleri (SVM)
+### Support Vector Machines (SVM)
 
-Destek Vektör Makineleri, öncelikle sınıflandırma (ve ayrıca SVR olarak regresyon) için kullanılan güçlü denetimli öğrenme modelleridir. Bir SVM, iki sınıf arasındaki marjı maksimize eden **optimal ayırıcı hiper düzlemi** bulmaya çalışır. Bu hiper düzlemin konumunu belirleyen tek bir eğitim noktası alt kümesi (sınırın en yakınındaki "destek vektörleri") vardır. Marjı maksimize ederek (destek vektörleri ile hiper düzlem arasındaki mesafe), SVM'ler iyi genelleme sağlama eğilimindedir.
+Support Vector Machines, öncelikli olarak classification (ve ayrıca SVR olarak regression) için kullanılan güçlü supervised learning modelleridir. Bir SVM, iki class arasındaki margin'i maksimize eden **optimal separating hyperplane**'ı bulmaya çalışır. Yalnızca training point'lerinin bir alt kümesi (sınıra en yakın olan "support vectors") bu hyperplane'ın konumunu belirler. Margin'i (support vectors ile hyperplane arasındaki mesafeyi) maksimize ederek SVM'ler iyi bir generalization elde etme eğilimindedir.<sup>[[4]](#references)</sup>
 
-SVM'nin gücünün anahtarı, doğrusal olmayan ilişkileri ele almak için **kernel fonksiyonları** kullanma yeteneğidir. Veriler, doğrusal bir ayırıcı olabilecek daha yüksek boyutlu bir özellik alanına örtük olarak dönüştürülebilir. Yaygın kernel türleri arasında polinom, radyal baz fonksiyonu (RBF) ve sigmoid bulunur. Örneğin, ağ trafiği sınıfları ham özellik alanında doğrusal olarak ayrılamıyorsa, bir RBF kernel, bunları SVM'nin doğrusal bir bölme bulduğu daha yüksek bir boyuta haritalayabilir (bu, orijinal alandaki doğrusal olmayan bir sınırla karşılık gelir). Kernel seçme esnekliği, SVM'lerin çeşitli problemleri ele almasına olanak tanır.
+SVM'nin gücünün temelinde, non-linear ilişkileri ele almak için **kernel functions** kullanabilmesi vardır. Data, linear bir separator'ın bulunabileceği daha yüksek boyutlu bir feature space'e örtük olarak dönüştürülebilir. Yaygın kernel'lar arasında polynomial, radial basis function (RBF) ve sigmoid bulunur. Örneğin, network traffic class'ları raw feature space'te linearly separable değilse, bir RBF kernel bunları daha yüksek bir boyuta map edebilir; burada SVM, linear bir split bulur (bu, original space'te non-linear bir boundary'ye karşılık gelir). Kernel seçme esnekliği, SVM'lerin çeşitli problemlerle başa çıkmasını sağlar.
 
-SVM'lerin, yüksek boyutlu özellik alanlarında (metin verisi veya kötü amaçlı yazılım opcode dizileri gibi) ve özellik sayısının örnek sayısına göre büyük olduğu durumlarda iyi performans gösterdiği bilinmektedir. 2000'lerde kötü amaçlı yazılım sınıflandırması ve anomali tabanlı saldırı tespiti gibi birçok erken siber güvenlik uygulamasında popülerdi ve genellikle yüksek doğruluk gösteriyordu.
+SVM'lerin, yüksek boyutlu feature space'lerde (text data veya malware opcode sequences gibi) ve feature sayısının sample sayısına kıyasla fazla olduğu durumlarda iyi performans gösterdiği bilinir. 2000'lerde malware classification ve anomaly-based intrusion detection gibi birçok erken dönem cybersecurity uygulamasında popülerdiler ve çoğu zaman yüksek accuracy gösterdiler.
 
-Ancak, SVM'ler çok büyük veri setlerine kolayca ölçeklenemez (eğitim karmaşıklığı, örnek sayısında süper lineerdir ve bellek kullanımı yüksek olabilir çünkü birçok destek vektörünü saklaması gerekebilir). Pratikte, milyonlarca kayıttan oluşan ağ saldırı tespiti gibi görevler için, dikkatli alt örnekleme veya yaklaşık yöntemler kullanılmadıkça SVM çok yavaş olabilir.
+Ancak SVM'ler çok büyük dataset'lere kolayca ölçeklenemez (training complexity, sample sayısına göre super-linear'dır ve çok sayıda support vector saklaması gerekebileceğinden memory kullanımı yüksek olabilir). Uygulamada, milyonlarca record içeren network intrusion detection görevlerinde SVM, dikkatli subsampling yapılmadan veya approximate methods kullanılmadan çok yavaş olabilir.
 
-#### **SVM'nin Ana Özellikleri:**
+#### **Key characteristics of SVM:**
 
--   **Problem Türü:** Sınıflandırma (ikili veya çok sınıflı bir-vs-bir/bir-vs-kalan) ve regresyon varyantları. Genellikle net marj ayrımı ile ikili sınıflandırmada kullanılır.
+-   **Type of Problem:** Classification (one-vs-one/one-vs-rest aracılığıyla binary veya multiclass) ve regression varyantları. Genellikle clear margin separation bulunan binary classification için kullanılır.
 
--   **Yorumlanabilirlik:** Orta -- SVM'ler, karar ağaçları veya lojistik regresyon kadar yorumlanabilir değildir. Hangi veri noktalarının destek vektörleri olduğunu belirleyebilir ve hangi özelliklerin etkili olabileceği hakkında bir fikir edinebilirsiniz (doğrusal kernel durumundaki ağırlıklar aracılığıyla), pratikte SVM'ler (özellikle doğrusal olmayan kernel'lerle) kara kutu sınıflandırıcılar olarak ele alınır.
+-   **Interpretability:** Medium -- SVM'ler decision trees veya logistic regression kadar interpretable değildir. Hangi data point'lerinin support vector olduğunu belirleyebilir ve hangi feature'ların etkili olabileceği hakkında (linear kernel durumunda weights aracılığıyla) fikir edinebilirsiniz; ancak pratikte SVM'ler (özellikle non-linear kernel'larla) black-box classifier olarak değerlendirilir.
 
--   **Avantajlar:** Yüksek boyutlu alanlarda etkili; kernel hilesi ile karmaşık karar sınırlarını modelleyebilir; marj maksimize edildiğinde aşırı uyuma karşı dayanıklıdır (özellikle uygun bir düzenleme parametresi C ile); sınıflar büyük bir mesafe ile ayrılmadığında bile iyi çalışır (en iyi uzlaşma sınırını bulur).
+-   **Advantages:** High-dimensional space'lerde etkilidir; kernel trick ile complex decision boundaries modelleyebilir; margin maksimize edilirse overfitting'e karşı dayanıklıdır (özellikle uygun bir regularization parameter C ile); class'lar büyük bir mesafeyle ayrılmamış olsa bile iyi çalışır (en iyi compromise boundary'yi bulur).
 
--   **Sınırlamalar:** **Büyük veri setleri için hesaplama açısından yoğun** (hem eğitim hem de tahmin, veri büyüdükçe kötü ölçeklenir). Kernel ve düzenleme parametrelerinin (C, kernel türü, RBF için gamma vb.) dikkatli bir şekilde ayarlanmasını gerektirir. Doğrudan olasılık çıktıları sağlamaz (ancak olasılıkları elde etmek için Platt ölçeklendirmesi kullanılabilir). Ayrıca, SVM'ler kernel parametrelerinin seçimine karşı hassas olabilir --- kötü bir seçim, aşırı uyum veya yetersiz uyum ile sonuçlanabilir.
+-   **Limitations:** Büyük dataset'ler için **computationally intensive**'dır (data büyüdükçe hem training hem de prediction kötü ölçeklenir). Kernel ve regularization parameter'larının (C, kernel type, RBF için gamma vb.) dikkatle ayarlanmasını gerektirir. Doğrudan probabilistic output sağlamaz (ancak probability elde etmek için Platt scaling kullanılabilir). Ayrıca SVM'ler kernel parameter'larının seçimine duyarlı olabilir --- kötü bir seçim underfit veya overfit'e yol açabilir.
 
-*Siber güvenlikteki kullanım durumları:* SVM'ler, **kötü amaçlı yazılım tespiti** (örneğin, çıkarılan özellikler veya opcode dizileri temelinde dosyaları sınıflandırma), **ağ anomali tespiti** (trafiği normal veya kötü niyetli olarak sınıflandırma) ve **oltalama tespiti** (URL'lerin özelliklerini kullanarak) için kullanılmıştır. Örneğin, bir SVM, bir e-postanın özelliklerini (belirli anahtar kelimelerin sayıları, gönderenin itibar puanları vb.) alabilir ve bunu oltalama veya meşru olarak sınıflandırabilir. Ayrıca, KDD gibi özellik setlerinde **saldırı tespiti** için de uygulanmışlardır ve genellikle hesaplama maliyeti pahasına yüksek doğruluk elde etmiştir.
+*Use cases in cybersecurity:* SVM'ler **malware detection** (örneğin extracted feature'lara veya opcode sequences'a göre file'ları sınıflandırma), **network anomaly detection** (traffic'i normal veya malicious olarak sınıflandırma) ve **phishing detection** (URL feature'larını kullanarak) için kullanılmıştır. Örneğin bir SVM, bir email'in feature'larını (belirli keyword'lerin sayıları, sender reputation score'ları vb.) alıp bunu phishing veya legitimate olarak sınıflandırabilir. Ayrıca KDD gibi feature set'leri üzerinde **intrusion detection** için de uygulanmış ve computation maliyeti karşılığında çoğu zaman yüksek accuracy elde edilmiştir.
 
 <details>
-<summary>Örnek -- Kötü Amaçlı Yazılım Sınıflandırması için SVM:</summary>
-Yine oltalama web sitesi veri setini kullanacağız, bu sefer bir SVM ile. SVM'ler yavaş olabileceğinden, gerekirse eğitim için verinin bir alt kümesini kullanacağız (veri seti yaklaşık 11k örnekten oluşuyor, bu da SVM'nin makul bir şekilde başa çıkabileceği bir miktar). Doğrusal olmayan veriler için yaygın bir seçim olan bir RBF kernel kullanacağız ve ROC AUC hesaplamak için olasılık tahminlerini etkinleştireceğiz.
+<summary>Example -- Malware Classification için SVM:</summary>
+Bu kez bir SVM kullanarak phishing website dataset'ini yeniden kullanacağız. SVM'ler yavaş olabileceğinden, gerekirse training için data'nın bir alt kümesini kullanacağız (dataset yaklaşık 11k instance içeriyor; bu miktar SVM'nin makul şekilde işleyebileceği bir miktardır). Non-linear data için yaygın bir seçim olan RBF kernel'ı kullanacağız ve ROC AUC'yi hesaplamak için probability estimates'i etkinleştireceğiz.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -575,72 +577,75 @@ F1‑score : 0.950
 ROC AUC  : 0.989
 """
 ```
-SVM modeli, aynı görevde lojistik regresyon ile karşılaştırabileceğimiz metrikler üretecektir. Verilerin özellikler tarafından iyi ayrılmış olması durumunda SVM'nin yüksek bir doğruluk ve AUC elde ettiğini görebiliriz. Öte yandan, veri setinde çok fazla gürültü veya örtüşen sınıflar varsa, SVM lojistik regresyonu önemli ölçüde geçemeyebilir. Pratikte, SVM'ler, özellikler ve sınıf arasında karmaşık, doğrusal olmayan ilişkiler olduğunda bir avantaj sağlayabilir - RBF çekirdeği, lojistik regresyonun kaçıracağı eğrilen karar sınırlarını yakalayabilir. Tüm modellerde olduğu gibi, `C` (düzenleme) ve çekirdek parametrelerinin (RBF için `gamma` gibi) dikkatli bir şekilde ayarlanması, yanlılık ve varyansı dengelemek için gereklidir.
+SVM modeli, aynı görevdeki logistic regression ile karşılaştırabileceğimiz metrikler üretecektir. Veriler özellikler tarafından iyi bir şekilde ayrıştırılmışsa SVM'nin yüksek accuracy ve AUC değerlerine ulaştığını görebiliriz. Öte yandan dataset çok fazla gürültüye veya örtüşen sınıflara sahipse SVM, logistic regression'dan anlamlı ölçüde daha iyi performans göstermeyebilir. Uygulamada SVM'ler, özellikler ile sınıf arasında karmaşık ve doğrusal olmayan ilişkiler olduğunda performansı artırabilir -- RBF kernel, logistic regression'ın yakalayamayacağı eğri karar sınırlarını yakalayabilir. Tüm modellerde olduğu gibi, bias ve variance arasında denge kurmak için `C` (regularization) ve kernel parametrelerinin (RBF için `gamma` gibi) dikkatli bir şekilde ayarlanması gerekir.
 
 </details>
 
-#### Lojistik Regresyonlar ve SVM Arasındaki Fark
+#### Logistic Regression ve SVM Arasındaki Fark
 
-| Aspect | **Lojistik Regresyon** | **Destek Vektör Makineleri** |
+| Aspect | **Logistic Regression** | **Support Vector Machines** |
 |---|---|---|
-| **Amaç fonksiyonu** | **log-kayıp** (çapraz-entropi) en aza indirir. | **margini** maksimize ederken **hinge-kayıp** en aza indirir. |
-| **Karar sınırı** | _P(y\|x)_ modelleyen **en iyi uyum hiper düzlemi** bulur. | **maksimum-margini hiper düzlemi** (en yakın noktalara en büyük boşluk) bulur. |
-| **Çıktı** | **Olasılıksal** – σ(w·x + b) aracılığıyla kalibre edilmiş sınıf olasılıkları verir. | **Belirleyici** – sınıf etiketlerini döndürür; olasılıklar ek çalışma gerektirir (örneğin, Platt ölçeklendirmesi). |
-| **Düzenleme** | L2 (varsayılan) veya L1, doğrudan aşırı/az fit etmeyi dengeler. | C parametresi, margin genişliği ile yanlış sınıflandırmalar arasında bir denge kurar; çekirdek parametreleri karmaşıklık ekler. |
-| **Çekirdekler / Doğrusal Olmayan** | Yerel formu **doğrusal**; doğrusal olmayanlık özellik mühendisliği ile eklenir. | Yerleşik **çekirdek hilesi** (RBF, polinom vb.) karmaşık sınırları yüksek boyutlu uzayda modellemesine olanak tanır. |
-| **Ölçeklenebilirlik** | **O(nd)**'de konveks optimizasyonu çözer; çok büyük n'leri iyi yönetir. | Eğitim, özel çözücüler olmadan **O(n²–n³)** bellek/zaman alabilir; büyük n'lere daha az dostça. |
-| **Yorumlanabilirlik** | **Yüksek** – ağırlıklar özellik etkisini gösterir; oran oranı sezgisel. | Doğrusal olmayan çekirdekler için **Düşük**; destek vektörleri seyrek ama açıklaması kolay değildir. |
-| **Aykırı değerlere duyarlılık** | Pürüzsüz log-kayıp kullanır → daha az duyarlıdır. | Sert margin ile hinge-kayıp **duyarlı** olabilir; yumuşak margin (C) bunu hafifletir. |
-| **Tipik kullanım durumları** | Kredi puanlama, tıbbi risk, A/B testi – **olasılıklar ve açıklanabilirlik** önemli olduğunda. | Görüntü/metin sınıflandırması, biyoinformatik – **karmaşık sınırlar** ve **yüksek boyutlu veriler** önemli olduğunda. |
+| **Objective function** | **log-loss** (cross-entropy) değerini minimize eder. | **margin** değerini maksimize ederken **hinge-loss** değerini minimize eder. |
+| **Decision boundary** | _P(y\|x)_ değerini modelleyen **en iyi uyumlu hyperplane**'i bulur. | **Maximum-margin hyperplane**'i (en yakın noktalara olan en büyük aralığı) bulur. |
+| **Output** | **Probabilistic** – σ(w·x + b) aracılığıyla kalibre edilmiş sınıf olasılıkları verir. | **Deterministic** – sınıf etiketleri döndürür; olasılıklar için ek işlem gerekir (ör. Platt scaling). |
+| **Regularisation** | L2 (varsayılan) veya L1, underfitting/overfitting dengesini doğrudan sağlar. | C parametresi, margin genişliği ile yanlış sınıflandırmalar arasında denge kurar; kernel parametreleri karmaşıklık ekler. |
+| **Kernels / Non-linear** | Yerleşik biçimi **linear**'dır; non-linearity feature engineering ile eklenir. | Yerleşik **kernel trick** (RBF, poly vb.), yüksek boyutlu uzayda karmaşık sınırları modellemesini sağlar. |
+| **Scalability** | **O(nd)** karmaşıklığında convex optimisation gerçekleştirir; çok büyük n değerlerini iyi işler. | Özel solver'lar olmadan eğitim bellek/zaman açısından **O(n²–n³)** olabilir; çok büyük n değerleri için daha az uygundur. |
+| **Interpretability** | **Yüksek** – ağırlıklar feature etkisini gösterir; odds ratio sezgiseldir. | Non-linear kernel'lar için **düşük**; support vector'ler seyrektir ancak açıklanmaları kolay değildir. |
+| **Sensitivity to outliers** | Smooth log-loss kullandığı için daha az hassastır. | Hard margin kullanan hinge-loss **hassas** olabilir; soft-margin (C) bunu azaltır. |
+| **Typical use cases** | **Olasılıkların ve açıklanabilirliğin** önemli olduğu kredi skorlama, tıbbi risk ve A/B testing. | **Karmaşık sınırların** ve **yüksek boyutlu verilerin** önemli olduğu image/text classification ve bio-informatics. |
 
-* **Kalibre edilmiş olasılıklara, yorumlanabilirliğe ihtiyacınız varsa veya büyük veri setlerinde çalışıyorsanız — Lojistik Regresyon'u seçin.**
-* **Manuel özellik mühendisliği olmadan doğrusal olmayan ilişkileri yakalayabilen esnek bir modele ihtiyacınız varsa — SVM'yi (çekirdeklerle) seçin.**
-* Her ikisi de konveks hedefleri optimize eder, bu nedenle **küresel minimumlar garanti edilir**, ancak SVM'nin çekirdekleri hiper-parametreler ve hesaplama maliyeti ekler.
+* **Kalibre edilmiş olasılıklara, açıklanabilirliğe ihtiyacınız varsa veya çok büyük dataset'ler üzerinde çalışıyorsanız — Logistic Regression'ı seçin.**
+* **Manuel feature engineering yapmadan doğrusal olmayan ilişkileri yakalayabilen esnek bir modele ihtiyacınız varsa — SVM'yi (kernel'lar ile) seçin.**
+* Her ikisi de convex objective'ları optimize eder; bu nedenle **global minimum'lar garanti edilir**, ancak SVM'nin kernel'ları hyper-parameter'lar ve computational cost ekler.
 
-### Naif Bayes
+### Naive Bayes
 
-Naif Bayes, özellikler arasında güçlü bir bağımsızlık varsayımına dayanan **olasılıksal sınıflandırıcılar** ailesidir. Bu "naif" varsayıma rağmen, Naif Bayes belirli uygulamalar için, özellikle metin veya kategorik verilerle ilgili olanlar, spam tespiti gibi, şaşırtıcı derecede iyi çalışır.
+Naive Bayes, feature'lar arasında güçlü bir bağımsızlık varsayımıyla Bayes' Theorem'ın uygulanmasına dayanan bir **probabilistic classifier** ailesidir. Bu "naive" varsayıma rağmen Naive Bayes, özellikle spam detection gibi text veya categorical data içeren belirli uygulamalarda çoğu zaman şaşırtıcı derecede iyi çalışır.<sup>[[5]](#references)</sup>
 
-#### Bayes Teoremi
 
-Bayes teoremi, Naif Bayes sınıflandırıcılarının temelini oluşturur. Rastgele olayların koşullu ve marjinal olasılıklarını ilişkilendirir. Formül:
+#### Bayes' Theorem
+
+Bayes' theorem, Naive Bayes classifier'larının temelidir. Rastgele olayların koşullu ve marjinal olasılıkları arasındaki ilişkiyi kurar. Formül şöyledir:
 ```plaintext
 P(A|B) = (P(B|A) * P(A)) / P(B)
 ```
-Where:
-- `P(A|B)` sınıf `A`'nın özellik `B` verildiğinde posterior olasılığıdır.
-- `P(B|A)` sınıf `A` verildiğinde özellik `B`'nin olasılığıdır.
-- `P(A)` sınıf `A`'nın öncel olasılığıdır.
-- `P(B)` özellik `B`'nin öncel olasılığıdır.
+Nerede:
+- `P(A|B)`, `B` özelliği verildiğinde `A` sınıfının posterior olasılığıdır.
+- `P(B|A)`, `A` sınıfı verildiğinde `B` özelliğinin likelihood değeridir.
+- `P(A)`, `A` sınıfının prior olasılığıdır.
+- `P(B)`, `B` özelliğinin prior olasılığıdır.
 
-Örneğin, bir metnin bir çocuk veya bir yetişkin tarafından yazılıp yazılmadığını sınıflandırmak istiyorsak, metindeki kelimeleri özellikler olarak kullanabiliriz. Bazı başlangıç verilerine dayanarak, Naive Bayes sınıflandırıcısı her kelimenin her potansiyel sınıfta (çocuk veya yetişkin) olma olasılıklarını önceden hesaplayacaktır. Yeni bir metin verildiğinde, metindeki kelimelere dayanarak her potansiyel sınıfın olasılığını hesaplayacak ve en yüksek olasılığa sahip sınıfı seçecektir.
+Örneğin, bir metnin çocuk mu yoksa yetişkin tarafından mı yazıldığını sınıflandırmak istiyorsak metindeki kelimeleri özellik olarak kullanabiliriz. Bazı başlangıç verilerine dayanarak Naive Bayes classifier, her kelimenin olası sınıfların (çocuk veya yetişkin) her birinde bulunma olasılığını önceden hesaplar. Yeni bir metin verildiğinde, metindeki kelimeler verildiğinde her olası sınıfın olasılığını hesaplar ve olasılığı en yüksek olan sınıfı seçer.
 
-Bu örnekte görüldüğü gibi, Naive Bayes sınıflandırıcısı çok basit ve hızlıdır, ancak özelliklerin bağımsız olduğunu varsayar; bu, gerçek dünya verilerinde her zaman geçerli değildir.
+Bu örnekte görebileceğiniz gibi Naive Bayes classifier oldukça basit ve hızlıdır; ancak özelliklerin bağımsız olduğunu varsayar. Gerçek dünya verilerinde bu her zaman geçerli değildir.
 
-#### Naive Bayes Sınıflandırıcılarının Türleri
 
-Veri türüne ve özelliklerin dağılımına bağlı olarak birkaç tür Naive Bayes sınıflandırıcısı vardır:
-- **Gaussian Naive Bayes**: Özelliklerin Gaussian (normal) dağılımı izlediğini varsayar. Sürekli veriler için uygundur.
-- **Multinomial Naive Bayes**: Özelliklerin multinomial dağılımı izlediğini varsayar. Metin sınıflandırmasında kelime sayıları gibi ayrık veriler için uygundur.
-- **Bernoulli Naive Bayes**: Özelliklerin ikili (0 veya 1) olduğunu varsayar. Metin sınıflandırmasında kelimelerin varlığı veya yokluğu gibi ikili veriler için uygundur.
-- **Categorical Naive Bayes**: Özelliklerin kategorik değişkenler olduğunu varsayar. Renk ve şekil gibi kategorik veriler için uygundur.
+#### Naive Bayes Classifier Türleri
 
-#### **Naive Bayes'in Ana Özellikleri:**
+Veri türüne ve özelliklerin dağılımına bağlı olarak birkaç Naive Bayes classifier türü vardır:
+- **Gaussian Naive Bayes**: Özelliklerin Gaussian (normal) dağılımını izlediğini varsayar. Sürekli veriler için uygundur.
+- **Multinomial Naive Bayes**: Özelliklerin multinomial dağılımını izlediğini varsayar. Metin classification işlemindeki kelime sayımları gibi ayrık veriler için uygundur.
+- **Bernoulli Naive Bayes**: Özelliklerin binary (0 veya 1) olduğunu varsayar. Metin classification işleminde kelimelerin bulunması veya bulunmaması gibi binary veriler için uygundur.
+- **Categorical Naive Bayes**: Özelliklerin categorical değişkenler olduğunu varsayar. Meyveleri renk ve şekillerine göre sınıflandırmak gibi categorical veriler için uygundur.
 
--   **Problem Türü:** Sınıflandırma (ikili veya çoklu sınıf). Siber güvenlikte metin sınıflandırma görevleri için yaygın olarak kullanılır (spam, phishing, vb.).
 
--   **Yorumlanabilirlik:** Orta -- karar ağaçları kadar doğrudan yorumlanabilir değildir, ancak öğrenilen olasılıkları incelemek mümkündür (örneğin, spam ve ham e-postalarda hangi kelimelerin en olası olduğu). Modelin formu (sınıfa göre her özellik için olasılıklar) gerektiğinde anlaşılabilir.
+#### **Naive Bayes'in temel özellikleri:**
 
--   **Avantajlar:** **Çok hızlı** eğitim ve tahmin, büyük veri setlerinde bile (örnek sayısı * özellik sayısı açısından lineer). Olasılıkları güvenilir bir şekilde tahmin etmek için nispeten az veri gerektirir, özellikle uygun düzeltme ile. Özellikler bağımsız olarak sınıfa kanıt sunduğunda genellikle şaşırtıcı derecede doğru bir temel sağlar. Yüksek boyutlu verilerle (örneğin, metinden gelen binlerce özellik) iyi çalışır. Düzeltme parametresi ayarlamaktan başka karmaşık ayarlamalar gerektirmez.
+-   **Problem Türü:** Classification (binary veya multi-class). Cybersecurity alanında text classification görevlerinde (spam, phishing vb.) yaygın olarak kullanılır.
 
--   **Sınırlamalar:** Bağımsızlık varsayımı, özellikler yüksek oranda korelasyona sahipse doğruluğu sınırlayabilir. Örneğin, ağ verilerinde `src_bytes` ve `dst_bytes` gibi özellikler birbirleriyle ilişkili olabilir; Naive Bayes bu etkileşimi yakalayamaz. Veri boyutu çok büyük hale geldikçe, daha ifade edici modeller (örneğin, topluluklar veya sinir ağları) özellik bağımlılıklarını öğrenerek NB'yi geçebilir. Ayrıca, bir saldırıyı tanımlamak için belirli bir özellik kombinasyonu gerekiyorsa (sadece bireysel özellikler bağımsız olarak değil), NB zorlanacaktır.
+-   **Yorumlanabilirlik:** Orta -- bir decision tree kadar doğrudan yorumlanabilir değildir; ancak öğrenilen olasılıklar incelenebilir (örneğin spam ve ham e-postalarda hangi kelimelerin görülme olasılığının en yüksek olduğu). Modelin yapısı (sınıf verildiğinde her özellik için olasılıklar), gerektiğinde anlaşılabilir.
+
+-   **Avantajlar:** Büyük dataset'lerde bile **çok hızlı** training ve prediction (instance sayısı * feature sayısı ile doğrusal). Özellikle uygun smoothing kullanıldığında, olasılıkları güvenilir şekilde tahmin etmek için nispeten az miktarda veri gerektirir. Özelliklerin sınıfa bağımsız şekilde kanıt sağlaması durumunda, özellikle bir baseline olarak çoğu zaman şaşırtıcı derecede doğrudur. High-dimensional verilerle (örneğin text'ten elde edilen binlerce feature) iyi çalışır. Bir smoothing parameter ayarlamanın ötesinde karmaşık tuning gerektirmez.
+
+-   **Sınırlamalar:** Özellikler yüksek oranda correlated olduğunda independence assumption doğruluğu sınırlayabilir. Örneğin network verilerinde `src_bytes` ve `dst_bytes` gibi özellikler correlated olabilir; Naive Bayes bu etkileşimi yakalayamaz. Veri boyutu çok büyüdüğünde, feature dependency'lerini öğrenebilen daha expressive modeller (ensemble'lar veya neural net'ler gibi) NB'yi geçebilir. Ayrıca bir attack'ı belirlemek için özelliklerin tek tek bağımsız olmasından ziyade belirli bir feature kombinasyonu gerekiyorsa NB zorlanır.
 
 > [!TIP]
-> *Siber güvenlikte kullanım durumları:* Klasik kullanım **spam tespiti**dir -- Naive Bayes, belirli token'ların (kelimeler, ifadeler, IP adresleri) sıklıklarını kullanarak bir e-postanın spam olma olasılığını hesaplayan erken spam filtrelerinin temelini oluşturuyordu. Ayrıca **phishing e-posta tespiti** ve **URL sınıflandırması** için de kullanılır; belirli anahtar kelimelerin veya özelliklerin (örneğin, bir URL'de "login.php" veya bir URL yolunda `@` varlığı) phishing olasılığına katkıda bulunur. Kötü amaçlı yazılım analizinde, belirli API çağrılarının veya yazılımdaki izinlerin varlığını kullanarak bunun kötü amaçlı yazılım olup olmadığını tahmin eden bir Naive Bayes sınıflandırıcısı hayal edilebilir. Daha gelişmiş algoritmalar genellikle daha iyi performans gösterse de, Naive Bayes hızı ve sadeliği nedeniyle iyi bir temel olarak kalır.
+> *Cybersecurity'deki kullanım alanları:* Klasik kullanım alanı **spam detection**'dır -- Naive Bayes, belirli token'ların (kelimeler, ifadeler, IP adresleri) frekanslarını kullanarak bir e-postanın spam olma olasılığını hesaplayan ilk spam filter'larının temelini oluşturuyordu. Ayrıca belirli keyword'lerin veya karakteristiklerin (bir URL'de `"login.php"` ya da bir URL path'inde `@` bulunması gibi) phishing olasılığına katkıda bulunduğu **phishing email detection** ve **URL classification** işlemlerinde de kullanılır. Malware analysis alanında, bir yazılımın malware olup olmadığını tahmin etmek için belirli API çağrılarının veya permission'ların varlığını kullanan bir Naive Bayes classifier düşünülebilir. Daha gelişmiş algorithm'ler çoğu zaman daha iyi performans gösterse de Naive Bayes, hızı ve basitliği sayesinde iyi bir baseline olmaya devam eder.
 
 <details>
-<summary>Örnek -- Phishing Tespiti için Naive Bayes:</summary>
-Naive Bayes'i göstermek için, NSL-KDD saldırı veri setinde (ikili etiketlerle) Gaussian Naive Bayes kullanacağız. Gaussian NB, her özelliği sınıfa göre normal dağılım izliyormuş gibi ele alacaktır. Bu, birçok ağ özelliği ayrık veya yüksek oranda çarpık olduğu için kaba bir seçimdir, ancak NB'nin sürekli özellik verilerine nasıl uygulanacağını gösterir. Ayrıca, ikili özellikler (tetiklenmiş uyarılar gibi) içeren bir veri setinde Bernoulli NB'yi de seçebiliriz, ancak burada süreklilik için NSL-KDD ile devam edeceğiz.
+<summary>Örnek -- Phishing Detection için Naive Bayes:</summary>
+Naive Bayes'i göstermek için NSL-KDD intrusion dataset'i üzerinde (binary label'lar ile) Gaussian Naive Bayes kullanacağız. Gaussian NB, her feature'ın sınıf başına normal bir dağılım izlediğini varsayar. Birçok network feature'ı ayrık veya highly skewed olduğundan bu, yaklaşık bir seçimdir; ancak NB'nin continuous feature verilerine nasıl uygulanacağını gösterir. Ayrıca binary feature'lardan (örneğin tetiklenen alert'lerden oluşan bir set) oluşan bir dataset üzerinde Bernoulli NB seçebilirdik; ancak burada continuity sağlamak için NSL-KDD ile devam edeceğiz.
 ```python
 import pandas as pd
 from sklearn.naive_bayes import GaussianNB
@@ -701,34 +706,34 @@ F1-score:  0.071
 ROC AUC:   0.867
 """
 ```
-Bu kod, saldırıları tespit etmek için bir Naive Bayes sınıflandırıcısını eğitir. Naive Bayes, özellikler arasında bağımsızlık varsayarak, eğitim verilerine dayanarak `P(service=http | Attack)` ve `P(Service=http | Normal)` gibi şeyleri hesaplayacaktır. Ardından, gözlemlenen özelliklere dayanarak yeni bağlantıları normal veya saldırı olarak sınıflandırmak için bu olasılıkları kullanacaktır. NB'nin NSL-KDD üzerindeki performansı, daha gelişmiş modeller kadar yüksek olmayabilir (çünkü özellik bağımsızlığı ihlal edilmiştir), ancak genellikle makuldür ve aşırı hız avantajıyla birlikte gelir. Gerçek zamanlı e-posta filtreleme veya URL'lerin ilk önceliklendirilmesi gibi senaryolarda, bir Naive Bayes modeli, belirgin şekilde kötü niyetli durumları hızlı bir şekilde işaretleyebilir ve düşük kaynak kullanımı ile çalışır.
+Bu kod, saldırıları tespit etmek için bir Naive Bayes classifier eğitir. Naive Bayes, feature'lar arasındaki bağımsızlığı varsayarak training data temelinde `P(service=http | Attack)` ve `P(Service=http | Normal)` gibi olasılıkları hesaplar. Ardından gözlemlenen feature'lara göre yeni bağlantıları normal veya attack olarak sınıflandırmak için bu olasılıkları kullanır. NB'nin NSL-KDD üzerindeki performansı, feature bağımsızlığı ihlal edildiği için daha gelişmiş modeller kadar yüksek olmayabilir; ancak genellikle yeterli sonuç verir ve son derece yüksek hız avantajına sahiptir. Gerçek zamanlı email filtering veya URL'lerin ilk triage'ı gibi senaryolarda, bir Naive Bayes modeli düşük kaynak kullanımıyla bariz şekilde malicious durumları hızlıca işaretleyebilir.
 
 </details>
 
-### k-En Yakın Komşular (k-NN)
+### k-Nearest Neighbors (k-NN)
 
-k-En Yakın Komşular, en basit makine öğrenimi algoritmalarından biridir. Bu, eğitim setindeki örneklere benzerliğe dayalı tahminler yapan **parametre içermeyen, örnek bazlı** bir yöntemdir. Sınıflandırma fikri şudur: yeni bir veri noktasını sınıflandırmak için, eğitim verilerindeki **k** en yakın noktaları (en "yakın komşularını") bulmak ve bu komşular arasında çoğunluk sınıfını atamaktır. "Yakınlık", genellikle sayısal veriler için Öklid mesafesi olan bir mesafe metriği ile tanımlanır (farklı türde özellikler veya problemler için diğer mesafeler kullanılabilir).
+k-Nearest Neighbors, en basit machine learning algoritmalarından biridir. Training set'teki örneklere benzerliğe göre tahmin yapan **non-parametric, instance-based** bir yöntemdir. Classification için temel fikir şudur: yeni bir data point'i sınıflandırmak üzere training data içindeki en yakın **k** point'i (yani "nearest neighbors") bulmak ve bu komşular arasındaki çoğunluk class'ını atamak. "Yakınlık", bir distance metric ile tanımlanır; numeric data için genellikle Euclidean distance kullanılır (farklı feature veya problem türleri için başka distance'lar da kullanılabilir).<sup>[[10]](#references)</sup>
 
-K-NN, *açık bir eğitim gerektirmez* -- "eğitim" aşaması sadece veri kümesini depolamaktır. Tüm çalışma sorgu (tahmin) sırasında gerçekleşir: algoritma, en yakın noktaları bulmak için sorgu noktasından tüm eğitim noktalarına mesafeleri hesaplamak zorundadır. Bu, tahmin süresini **eğitim örneklerinin sayısına göre lineer** hale getirir, bu da büyük veri setleri için maliyetli olabilir. Bu nedenle, k-NN, daha küçük veri setleri veya bellek ve hızı basitlik için takas edebileceğiniz senaryolar için en uygun olanıdır.
+K-NN, *explicit training* gerektirmez -- "training" aşaması yalnızca dataset'i saklamaktan ibarettir. Tüm işlem query (prediction) sırasında gerçekleşir: algoritma, en yakın point'leri bulmak için query point ile tüm training point'leri arasındaki distance'ları hesaplamalıdır. Bu nedenle prediction time, **training sample sayısıyla lineer** olarak artar ve büyük dataset'lerde maliyetli olabilir. Bu yüzden k-NN, daha küçük dataset'ler veya basitlik karşılığında memory ve speed'den ödün verebileceğiniz senaryolar için en uygunudur.
 
-Basitliğine rağmen, k-NN çok karmaşık karar sınırlarını modelleyebilir (çünkü etkili bir şekilde karar sınırı, örneklerin dağılımı tarafından belirlenen herhangi bir şekil olabilir). Karar sınırı çok düzensiz olduğunda ve çok fazla veriniz olduğunda iyi sonuçlar verir -- esasen verilerin "kendi kendine konuşmasına" izin verir. Ancak, yüksek boyutlarda, mesafe metrikleri daha az anlamlı hale gelebilir (boyut laneti) ve yöntem, büyük sayıda örneğiniz yoksa zorlanabilir.
+Basitliğine rağmen k-NN, çok karmaşık decision boundary'leri modelleyebilir (çünkü decision boundary, örneklerin dağılımının belirlediği herhangi bir şekle sahip olabilir). Decision boundary çok düzensiz olduğunda ve elinizde çok fazla data bulunduğunda genellikle iyi sonuç verir -- esas olarak data'nın "kendi adına konuşmasına" izin verir. Ancak yüksek dimension'larda distance metric'leri daha az anlamlı hale gelebilir (curse of dimensionality) ve çok büyük sayıda sample olmadığında yöntem zorlanabilir.
 
-*Siber güvenlikteki kullanım durumları:* k-NN, anomali tespiti için uygulanmıştır -- örneğin, bir saldırı tespit sistemi, en yakın komşularının (önceki olaylar) çoğu kötü niyetli ise bir ağ olayını kötü niyetli olarak etiketleyebilir. Normal trafik kümeler oluşturursa ve saldırılar aykırı değerlerse, k-NN yaklaşımı (k=1 veya küçük k ile) esasen **en yakın komşu anomali tespiti** yapar. K-NN, ikili özellik vektörleri ile kötü amaçlı yazılım ailelerini sınıflandırmak için de kullanılmıştır: yeni bir dosya, o ailenin bilinen örneklerine çok yakınsa belirli bir kötü amaçlı yazılım ailesi olarak sınıflandırılabilir. Pratikte, k-NN, daha ölçeklenebilir algoritmalar kadar yaygın değildir, ancak kavramsal olarak basittir ve bazen bir temel veya küçük ölçekli problemler için kullanılır.
+*Use cases in cybersecurity:* k-NN, anomaly detection için kullanılmıştır -- örneğin bir intrusion detection system, nearest neighbor'larının (önceki event'lerin) çoğu malicious ise bir network event'ini malicious olarak işaretleyebilir. Normal traffic cluster'lar oluşturuyor ve attack'ler outlier durumundaysa, bir K-NN yaklaşımı (k=1 veya küçük bir k ile) temelde bir **nearest-neighbor anomaly detection** yöntemi olur. K-NN, malware family'lerini binary feature vector'lar aracılığıyla sınıflandırmak için de kullanılmıştır: yeni bir file, feature space'te belirli bir malware family'sinin bilinen instance'larına çok yakınsa o family'ye ait olarak sınıflandırılabilir. Uygulamada k-NN, daha scalable algoritmalar kadar yaygın değildir; ancak kavramsal olarak basittir ve bazen baseline olarak veya küçük ölçekli problemler için kullanılır.
 
-#### **k-NN'nin Ana Özellikleri:**
+#### **Key characteristics of k-NN:**
 
--   **Problem Türü:** Sınıflandırma (ve regresyon varyantları mevcuttur). Bu, *tembel öğrenme* yöntemidir -- açık bir model uyumu yoktur.
+-   **Type of Problem:** Classification (regression variant'ları da vardır). Bu, *lazy learning* yöntemidir -- explicit model fitting yapılmaz.
 
--   **Yorumlanabilirlik:** Düşük ila orta -- global bir model veya özlü bir açıklama yoktur, ancak bir kararın etkilediği en yakın komşulara bakarak sonuçlar yorumlanabilir (örneğin, "bu ağ akışı, bu 3 bilinen kötü niyetli akışa benzer olduğu için kötü niyetli olarak sınıflandırıldı"). Bu nedenle, açıklamalar örnek bazlı olabilir.
+-   **Interpretability:** Düşük ile orta arasıdır -- global bir model veya kısa ve öz bir açıklama yoktur; ancak bir kararı etkileyen nearest neighbor'lara bakılarak sonuçlar yorumlanabilir (örneğin, "bu network flow, şu 3 bilinen malicious flow'a benzediği için malicious olarak sınıflandırıldı"). Bu nedenle açıklamalar example-based olabilir.
 
--   **Avantajlar:** Uygulaması ve anlaşılması çok basit. Veri dağılımı hakkında hiçbir varsayımda bulunmaz (parametre içermeyen). Çok sınıflı problemleri doğal olarak ele alabilir. **Uyumlu** bir yapıya sahiptir; karar sınırları çok karmaşık olabilir ve veri dağılımı tarafından şekillendirilir.
+-   **Advantages:** Uygulaması ve anlaşılması çok basittir. Data distribution hakkında herhangi bir varsayımda bulunmaz (non-parametric). Multi-class problemlerini doğal olarak ele alabilir. Decision boundary'lerin data distribution tarafından şekillendirilen çok karmaşık yapılara sahip olabilmesi nedeniyle **adaptive**'dir.
 
--   **Sınırlamalar:** Büyük veri setleri için tahmin yavaş olabilir (birçok mesafe hesaplanması gerekir). Bellek yoğun -- tüm eğitim verilerini depolar. Yüksek boyutlu özellik alanlarında performans düşer çünkü tüm noktalar neredeyse eşit uzaklıkta hale gelir (bu da "en yakın" kavramını daha az anlamlı kılar). *k* (komşu sayısı) uygun bir şekilde seçilmelidir -- çok küçük k gürültülü olabilir, çok büyük k diğer sınıflardan alakasız noktaları içerebilir. Ayrıca, mesafe hesaplamaları ölçeğe duyarlı olduğundan, özelliklerin uygun şekilde ölçeklendirilmesi gerekir.
+-   **Limitations:** Büyük dataset'lerde prediction yavaş olabilir (çok sayıda distance hesaplanmalıdır). Memory-intensive'dır -- tüm training data'yı saklar. Tüm point'ler neredeyse eşit uzaklıkta hale gelme eğiliminde olduğundan, high-dimensional feature space'lerde performans düşer (bu da "nearest" kavramını daha az anlamlı hale getirir). *k* (neighbor sayısı) uygun şekilde seçilmelidir -- çok küçük bir k gürültülü sonuçlara, çok büyük bir k ise diğer class'lara ait ilgisiz point'lerin dahil edilmesine yol açabilir. Ayrıca distance hesaplamaları scale'e duyarlı olduğundan feature'lar uygun şekilde scaled edilmelidir.
 
 <details>
-<summary>Örnek -- Phishing Tespiti için k-NN:</summary>
+<summary>Example -- Phishing Detection için k-NN:</summary>
 
-Yine NSL-KDD'yi (ikili sınıflandırma) kullanacağız. k-NN hesaplama açısından ağır olduğu için, bu gösterimde yönetilebilir tutmak için eğitim verilerinin bir alt kümesini kullanacağız. Tam 125k'dan 20,000 eğitim örneği seçeceğiz ve k=5 komşu kullanacağız. Eğitimden sonra (gerçekten sadece veriyi depolamak), test setinde değerlendirme yapacağız. Ayrıca, ölçek hesaplaması için özellikleri ölçeklendireceğiz, böylece tek bir özellik ölçek nedeniyle baskın çıkmaz.
+Yine NSL-KDD'yi (binary classification) kullanacağız. k-NN computationally heavy olduğu için bu demonstration'da yönetilebilir tutmak amacıyla training data'nın bir subset'ini kullanacağız. Full 125k içinden, örneğin 20.000 training sample seçecek ve k=5 neighbor kullanacağız. Training'den sonra (aslında yalnızca data'yı sakladıktan sonra) test seti üzerinde evaluation yapacağız. Ayrıca distance calculation için feature'ları scale edeceğiz; böylece scale nedeniyle hiçbir tek feature'ın baskın hale gelmemesini sağlayacağız.
 ```python
 import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
@@ -797,32 +802,33 @@ F1-score:  0.766
 ROC AUC:   0.837
 """
 ```
-k-NN modeli, bağlantıyı eğitim seti alt kümesindeki en yakın 5 bağlantıya bakarak sınıflandırır. Örneğin, bu komşulardan 4'ü saldırı (anomaliler) ve 1'i normal ise, yeni bağlantı bir saldırı olarak sınıflandırılacaktır. Performans makul olabilir, ancak genellikle aynı verilerde iyi ayarlanmış bir Random Forest veya SVM kadar yüksek değildir. Ancak, k-NN bazen sınıf dağılımları çok düzensiz ve karmaşık olduğunda parlayabilir - etkili bir şekilde bellek tabanlı bir arama kullanarak. Siber güvenlikte, k-NN (k=1 veya küçük k ile) bilinen saldırı desenlerinin tespiti için örnek olarak veya daha karmaşık sistemlerde (örneğin, kümeleme ve ardından küme üyeliğine göre sınıflandırma için) bir bileşen olarak kullanılabilir.
+k-NN modeli, eğitim kümesi alt kümesindeki en yakın 5 bağlantıya bakarak bir bağlantıyı sınıflandırır. Örneğin, bu komşuların 4'ü attack (anomaly) ve 1'i normal ise yeni bağlantı attack olarak sınıflandırılır. Performans makul olabilir, ancak çoğu zaman aynı veriler üzerinde iyi ayarlanmış bir Random Forest veya SVM kadar yüksek değildir. Bununla birlikte, sınıf dağılımları çok düzensiz ve karmaşık olduğunda k-NN bazen öne çıkabilir; bu durumda model, etkili bir şekilde memory-based lookup kullanır. Cybersecurity alanında k-NN (k=1 veya küçük k değerleriyle), bilinen attack pattern'lerini örnekler üzerinden tespit etmek ya da daha karmaşık sistemlerde (ör. clustering ve ardından cluster üyeliğine göre classification yapmak) bir bileşen olarak kullanılabilir.
+</details>
 
-### Gradient Boosting Machines (örneğin, XGBoost)
+### Gradient Boosting Machines (ör. XGBoost)
 
-Gradient Boosting Machines, yapılandırılmış veriler için en güçlü algoritmalardan biridir. **Gradient boosting**, zayıf öğrenicilerin (genellikle karar ağaçları) ardışık bir şekilde bir topluluk oluşturma tekniğini ifade eder; burada her yeni model, önceki topluluğun hatalarını düzeltir. Ağaçları paralel olarak inşa eden ve ortalayan bagging (Random Forests) ile karşılaştırıldığında, boosting ağaçları *birer birer* inşa eder ve her biri önceki ağaçların yanlış tahmin ettiği örneklere daha fazla odaklanır.
+Gradient Boosting Machines, structured data için en güçlü algoritmalar arasındadır. **Gradient boosting**, weak learner'lardan (çoğunlukla decision tree'lerden) oluşan bir ensemble'ı, her yeni model önceki ensemble'ın hatalarını düzeltecek şekilde ardışık olarak oluşturma tekniğini ifade eder. Ağaçları paralel olarak oluşturan ve ortalamalarını alan bagging'in (Random Forests) aksine boosting, ağaçları *tek tek* oluşturur ve her ağaç, önceki ağaçların yanlış tahmin ettiği örneklere daha fazla odaklanır.
 
-Son yıllarda en popüler uygulamalar **XGBoost**, **LightGBM** ve **CatBoost**'tur; bunların hepsi gradient boosting karar ağaçları (GBDT) kütüphaneleridir. Makine öğrenimi yarışmalarında ve uygulamalarında son derece başarılı olmuşlardır ve genellikle **tablo verilerinde en son teknoloji performansı elde etmektedirler**. Siber güvenlikte, araştırmacılar ve uygulayıcılar, **kötü amaçlı yazılım tespiti** (dosyalardan veya çalışma zamanı davranışından çıkarılan özellikler kullanarak) ve **ağ saldırı tespiti** gibi görevler için gradient boosted ağaçlar kullanmışlardır. Örneğin, bir gradient boosting modeli, "birçok SYN paketi ve alışılmadık port -> muhtemel tarama" gibi birçok zayıf kuralı (ağaçları) güçlü bir bileşik dedektöre dönüştürebilir ve birçok ince deseni dikkate alır.
+Son yıllarda en popüler implementasyonlar **XGBoost**, **LightGBM** ve **CatBoost** olmuştur; bunların tümü gradient boosting decision tree (GBDT) kütüphaneleridir. Machine learning yarışmalarında ve uygulamalarında son derece başarılı olmuş, çoğu zaman **tabular dataset'lerde state-of-the-art performans** elde etmişlerdir. Cybersecurity alanında araştırmacılar ve uygulayıcılar, **malware detection** (dosyalardan veya runtime davranışından çıkarılan feature'ları kullanarak) ve **network intrusion detection** gibi görevlerde gradient boosted tree'ler kullanmıştır. Örneğin bir gradient boosting modeli, "çok sayıda SYN paketi ve olağandışı port -> muhtemel scan" gibi birçok weak rule'u (tree'leri) bir araya getirerek, çok sayıda ince pattern'i hesaba katan güçlü bir composite detector oluşturabilir.<sup>[[6]](#references)</sup>
 
-Neden artırılmış ağaçlar bu kadar etkilidir? Sıralamadaki her ağaç, mevcut topluluğun tahminlerinin *artık hataları* (gradyanlar) üzerinde eğitilir. Bu şekilde, model zayıf olduğu alanları yavaş yavaş **"artırır"**. Karar ağaçlarının temel öğreniciler olarak kullanılması, nihai modelin karmaşık etkileşimleri ve doğrusal olmayan ilişkileri yakalayabilmesini sağlar. Ayrıca, boosting, yerleşik bir düzenleme biçimine sahiptir: birçok küçük ağaç ekleyerek (ve katkılarını ölçeklendirmek için bir öğrenme oranı kullanarak), genellikle uygun parametreler seçildiğinde büyük aşırı uyum olmadan iyi genelleme yapar.
+Boosted tree'ler neden bu kadar etkilidir? Sequence içindeki her tree, mevcut ensemble'ın tahminlerindeki *residual error'lar* (gradient'ler) üzerinde eğitilir. Böylece model, zayıf olduğu alanları kademeli olarak **"boost"** eder. Base learner olarak decision tree'lerin kullanılması, final modelin karmaşık etkileşimleri ve non-linear ilişkileri yakalamasını sağlar. Ayrıca boosting, yerleşik bir regularization biçimine sahiptir: çok sayıda küçük tree ekleyerek (ve katkılarını ölçeklendirmek için learning rate kullanarak), uygun parametreler seçildiğinde aşırı overfitting olmadan çoğu zaman iyi genelleme yapar.
 
-#### **Gradient Boosting'in Ana Özellikleri:**
+#### **Gradient Boosting'in temel özellikleri:**
 
--   **Problem Türü:** Öncelikle sınıflandırma ve regresyon. Güvenlikte genellikle sınıflandırma (örneğin, bir bağlantıyı veya dosyayı ikili olarak sınıflandırma). İkili, çok sınıflı (uygun kayıpla) ve hatta sıralama problemlerini ele alır.
+-   **Problem Türü:** Öncelikle classification ve regression. Security alanında genellikle classification (ör. bir bağlantıyı veya dosyayı binary olarak sınıflandırmak) kullanılır. Uygun loss ile binary, multi-class ve hatta ranking problemlerini ele alabilir.
 
--   **Yorumlanabilirlik:** Düşük ila orta. Tek bir artırılmış ağaç küçük olsa da, tam bir model yüzlerce ağaç içerebilir, bu da bütünüyle insan tarafından yorumlanamaz. Ancak, Random Forest gibi, özellik önem puanları sağlayabilir ve SHAP (SHapley Additive exPlanations) gibi araçlar, bireysel tahminleri bir ölçüde yorumlamak için kullanılabilir.
+-   **Yorumlanabilirlik:** Düşük ila orta düzey. Tek bir boosted tree küçük olsa da tam bir model yüzlerce tree içerebilir ve bir bütün olarak insan tarafından yorumlanabilir değildir. Ancak Random Forest gibi feature importance skorları sağlayabilir; SHAP (SHapley Additive exPlanations) gibi araçlar da bireysel tahminleri belirli ölçüde yorumlamak için kullanılabilir.
 
--   **Avantajlar:** Genellikle yapılandırılmış/tablo verileri için **en iyi performans gösteren** algoritmadır. Karmaşık desenleri ve etkileşimleri tespit edebilir. Model karmaşıklığını özelleştirmek ve aşırı uyumu önlemek için birçok ayar düğmesine (ağaç sayısı, ağaç derinliği, öğrenme oranı, düzenleme terimleri) sahiptir. Modern uygulamalar hız için optimize edilmiştir (örneğin, XGBoost ikinci dereceden gradyan bilgisi ve verimli veri yapıları kullanır). Uygun kayıp fonksiyonları ile veya örnek ağırlıklarını ayarlayarak dengesiz verileri daha iyi işleme eğilimindedir.
+-   **Avantajlar:** Structured/tabular data için çoğu zaman **en iyi performans gösteren** algoritmadır. Karmaşık pattern'leri ve etkileşimleri tespit edebilir. Model karmaşıklığını özelleştirmek ve overfitting'i önlemek için çok sayıda ayar seçeneğine (tree sayısı, tree derinliği, learning rate, regularization terimleri) sahiptir. Modern implementasyonlar hız için optimize edilmiştir (ör. XGBoost, second-order gradient bilgisi ve verimli data structure'lar kullanır). Uygun loss function'larla birleştirildiğinde veya sample weight'ler ayarlandığında imbalanced data'yı daha iyi ele alma eğilimindedir.
 
--   **Sınırlamalar:** Daha basit modellere göre ayarlaması daha karmaşıktır; ağaçlar derin veya ağaç sayısı büyükse eğitim yavaş olabilir (ancak yine de genellikle aynı verilerde karşılaştırılabilir bir derin sinir ağını eğitmekten daha hızlıdır). Model ayarlanmadan aşırı uyum sağlayabilir (örneğin, yetersiz düzenleme ile çok fazla derin ağaç). Birçok hiperparametre nedeniyle, gradient boosting'i etkili bir şekilde kullanmak daha fazla uzmanlık veya deney yapmayı gerektirebilir. Ayrıca, ağaç tabanlı yöntemler gibi, çok seyrek yüksek boyutlu verileri doğrusal modeller veya Naive Bayes kadar verimli bir şekilde ele almaz (ancak yine de uygulanabilir, örneğin metin sınıflandırmasında, ancak özellik mühendisliği olmadan ilk tercih olmayabilir).
+-   **Sınırlamalar:** Daha basit modellere göre ayarlanması daha zordur; tree'ler derinse veya tree sayısı fazlaysa training yavaş olabilir (ancak aynı veriler üzerinde karşılaştırılabilir bir deep neural network eğitmekten genellikle hâlâ daha hızlıdır). Model uygun şekilde ayarlanmazsa overfit olabilir (ör. yeterli regularization olmadan çok fazla sayıda derin tree kullanılması). Çok sayıda hyperparameter nedeniyle gradient boosting'i etkili şekilde kullanmak daha fazla uzmanlık veya deneme gerektirebilir. Ayrıca tree-based method'lar gibi, çok sparse ve high-dimensional data'yı linear model'ler veya Naive Bayes kadar verimli şekilde doğal olarak ele almaz (yine de text classification gibi alanlarda uygulanabilir; ancak feature engineering olmadan ilk tercih olmayabilir).
 
 > [!TIP]
-> *Siber güvenlikte kullanım alanları:* Bir karar ağacı veya rastgele orman kullanılabilecek hemen her yerde, bir gradient boosting modeli daha iyi doğruluk elde edebilir. Örneğin, **Microsoft'un kötü amaçlı yazılım tespiti** yarışmalarında, ikili dosyalardan mühendislik özellikleri üzerinde XGBoost'un yoğun kullanımı görülmüştür. **Ağ saldırı tespiti** araştırmaları genellikle GBDT'lerle en iyi sonuçları rapor etmektedir (örneğin, XGBoost'un CIC-IDS2017 veya UNSW-NB15 veri setlerinde). Bu modeller, tehditleri tespit etmek için geniş bir özellik yelpazesini (protokol türleri, belirli olayların sıklığı, trafik istatistiksel özellikleri vb.) alabilir ve bunları birleştirebilir. Phishing tespitinde, gradient boosting, URL'lerin sözcüksel özelliklerini, alan adı itibar özelliklerini ve sayfa içerik özelliklerini birleştirerek çok yüksek doğruluk elde edebilir. Topluluk yaklaşımı, verilerdeki birçok köşe durumu ve inceliği kapsamaya yardımcı olur.
+> *Cybersecurity'de kullanım alanları:* Bir decision tree veya random forest'ın kullanılabileceği hemen her yerde, bir gradient boosting modeli daha iyi doğruluk elde edebilir. Örneğin **Microsoft'un malware detection** yarışmalarında, binary dosyalardan çıkarılan ve işlenmiş feature'lar üzerinde XGBoost yoğun olarak kullanılmıştır. **Network intrusion detection** araştırmalarında GBDT'lerle (ör. CIC-IDS2017 veya UNSW-NB15 dataset'leri üzerinde XGBoost) en iyi sonuçların elde edildiği sıkça raporlanır. Bu modeller çok çeşitli feature'ları (protocol türleri, belirli event'lerin sıklığı, traffic'in statistical feature'ları vb.) alıp threat'leri tespit etmek üzere birleştirebilir. Phishing detection'da gradient boosting; URL'lerin lexical feature'larını, domain reputation feature'larını ve page content feature'larını birleştirerek çok yüksek doğruluk elde edebilir. Ensemble yaklaşımı, data'daki birçok corner case'i ve ince ayrıntıyı kapsama konusunda yardımcı olur.
 
 <details>
-<summary>Örnek -- Phishing Tespiti için XGBoost:</summary>
-Phishing veri setinde bir gradient boosting sınıflandırıcısı kullanacağız. İşleri basit ve kendi kendine yeterli tutmak için, `sklearn.ensemble.GradientBoostingClassifier` (bu daha yavaş ama basit bir uygulamadır) kullanacağız. Normalde, daha iyi performans ve ek özellikler için `xgboost` veya `lightgbm` kütüphaneleri kullanılabilir. Modeli eğiteceğiz ve daha önceki gibi değerlendireceğiz.
+<summary>Örnek -- XGBoost ile Phishing Detection:</summary>
+Phishing dataset'i üzerinde bir gradient boosting classifier kullanacağız. İşleri basit ve self-contained tutmak için `sklearn.ensemble.GradientBoostingClassifier` kullanacağız (bu, daha yavaş ancak anlaşılır bir implementasyondur). Normalde daha iyi performans ve ek özellikler için `xgboost` veya `lightgbm` kütüphaneleri kullanılabilir. Modeli eğitecek ve daha önce olduğu gibi değerlendireceğiz.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -870,23 +876,23 @@ F1‑score:  0.957
 ROC AUC:   0.990
 """
 ```
-Gradient boosting modeli, bu phishing veri setinde çok yüksek doğruluk ve AUC elde etme olasılığı taşımaktadır (genellikle bu modeller, bu tür verilerde uygun ayarlamalarla %95'ten fazla doğruluk elde edebilir, literatürde görüldüğü gibi. Bu, GBDT'lerin *"tablo veri setleri için en iyi model" olarak neden kabul edildiğini gösterir* -- karmaşık desenleri yakalayarak genellikle daha basit algoritmalardan daha iyi performans gösterirler. Siber güvenlik bağlamında, bu daha fazla phishing sitesi veya saldırısını daha az hata ile yakalamak anlamına gelebilir. Elbette, aşırı uyum konusunda dikkatli olunmalıdır -- böyle bir modeli dağıtım için geliştirirken genellikle çapraz doğrulama gibi teknikler kullanır ve bir doğrulama setinde performansı izleriz.
+Gradient boosting modeli, bu phishing veri setinde muhtemelen çok yüksek doğruluk ve AUC elde edecektir (literatürde görüldüğü üzere, uygun ayarlamayla bu tür verilerde bu modeller sıklıkla %95'in üzerinde doğruluğa ulaşabilir. Bu, GBDT'lerin neden *"the state of the art model for tabular dataset"* olarak kabul edildiğini gösterir -- karmaşık örüntüleri yakalayarak genellikle daha basit algoritmalardan daha iyi performans gösterirler. Siber güvenlik bağlamında bu, daha az hatalı tespit ile daha fazla phishing sitesinin veya saldırının yakalanması anlamına gelebilir. Elbette overfitting konusunda dikkatli olunmalıdır -- böyle bir modeli deployment için geliştirirken genellikle cross-validation gibi teknikler kullanır ve bir validation seti üzerindeki performansı izleriz.
 
 </details>
 
-### Modelleri Birleştirme: Ensemble Öğrenme ve Stacking
+### Modelleri Birleştirme: Ensemble Learning ve Stacking
 
-Ensemble öğrenme, genel performansı artırmak için **birden fazla modeli birleştirme** stratejisidir. Daha önce belirli ensemble yöntemlerini gördük: Random Forest (bagging ile ağaçların bir ensemble'ı) ve Gradient Boosting (sıralı boosting ile ağaçların bir ensemble'ı). Ancak, ensemble'lar **oylama ensemble'ları** veya **stacked generalization (stacking)** gibi diğer yollarla da oluşturulabilir. Ana fikir, farklı modellerin farklı desenleri yakalayabileceği veya farklı zayıflıkları olabileceğidir; bunları birleştirerek, **her modelin hatalarını diğerinin güçlü yönleriyle telafi edebiliriz**.
+Ensemble learning, genel performansı artırmak için **birden fazla modeli birleştirme** stratejisidir. Daha önce belirli ensemble yöntemlerini gördük: Random Forest (bagging aracılığıyla ağaçlardan oluşan bir ensemble) ve Gradient Boosting (ardışık boosting aracılığıyla ağaçlardan oluşan bir ensemble). Ancak ensemble'lar **voting ensemble** veya **stacked generalization (stacking)** gibi başka yöntemlerle de oluşturulabilir. Temel fikir, farklı modellerin farklı örüntüleri yakalayabilmesi veya farklı zayıflıklara sahip olmasıdır; bu modelleri birleştirerek **her modelin hatalarını diğerinin güçlü yönleriyle telafi edebiliriz**.<sup>[[13]](#references)</sup>
 
--   **Oylama Ensemble:** Basit bir oylama sınıflandırıcısında, birden fazla çeşitli modeli (örneğin, bir lojistik regresyon, bir karar ağacı ve bir SVM) eğitiyoruz ve bunların son tahmin üzerinde oy kullanmalarını sağlıyoruz (sınıflandırma için çoğunluk oyu). Oylara ağırlık verirsek (örneğin, daha doğru modellere daha yüksek ağırlık), bu ağırlıklı bir oylama şemasına dönüşür. Bu genellikle bireysel modeller makul derecede iyi ve bağımsız olduğunda performansı artırır -- ensemble, bireysel bir modelin hatasının riskini azaltır çünkü diğerleri bunu düzeltebilir. Bu, tek bir görüş yerine bir uzman paneline sahip olmak gibidir.
+-   **Voting Ensemble:** Basit bir voting classifier'da birden fazla farklı model (örneğin logistic regression, decision tree ve SVM) eğitir ve son tahmin için bunların oylarını kullanırız (classification için çoğunluk oyu). Oyları ağırlıklandırırsak (örneğin daha doğru modellere daha yüksek ağırlık verirsek), bu weighted voting yöntemi olur. Bireysel modeller makul ölçüde iyi ve bağımsız olduğunda bu yöntem genellikle performansı artırır -- diğer modeller hatayı düzeltebileceğinden ensemble, tek bir modelin hata yapma riskini azaltır. Bu, tek bir görüş yerine bir uzmanlar paneline sahip olmaya benzer.
 
--   **Stacking (Stacked Ensemble):** Stacking bir adım daha ileri gider. Basit bir oy yerine, bir **meta-model** eğiterek **temel modellerin tahminlerini en iyi şekilde nasıl birleştireceğini öğrenir**. Örneğin, 3 farklı sınıflandırıcı (temel öğreniciler) eğitirsiniz, ardından çıktıları (veya olasılıkları) bir meta-sınıflandırıcıya (genellikle lojistik regresyon gibi basit bir model) özellik olarak beslersiniz; bu model, bunları harmanlamanın en iyi yolunu öğrenir. Meta-model, aşırı uyumu önlemek için bir doğrulama setinde veya çapraz doğrulama ile eğitilir. Stacking, *hangi modellerin hangi durumlarda daha fazla güvenilir olduğunu öğrenerek* basit oylamadan genellikle daha iyi performans gösterebilir. Siber güvenlikte, bir model ağ taramalarını yakalamada daha iyi olabilirken, diğeri kötü amaçlı yazılım sinyallerini yakalamada daha iyi olabilir; bir stacking modeli her birine uygun şekilde güvenmeyi öğrenebilir.
+-   **Stacking (Stacked Ensemble):** Stacking bir adım daha ileri gider. Basit bir oylama yerine, base modellerin tahminlerini **en iyi şekilde nasıl birleştireceğini öğrenen** bir **meta-model** eğitir. Örneğin 3 farklı classifier (base learner) eğitir, ardından bunların çıktılarını (veya olasılıklarını) özellik olarak bir meta-classifier'a (genellikle logistic regression gibi basit bir modele) vererek bunları en uygun şekilde birleştirmeyi öğrenmesini sağlarsınız. Overfitting'i önlemek için meta-model bir validation seti üzerinde veya cross-validation aracılığıyla eğitilir. Stacking, *hangi koşullarda hangi modellere daha fazla güvenilmesi gerektiğini* öğrenerek basit voting yönteminden daha iyi performans gösterebilir. Siber güvenlikte bir model network scan'lerini yakalamada daha iyi olabilirken başka bir model malware beaconing'i yakalamada daha başarılı olabilir; bir stacking modeli her birine uygun şekilde güvenmeyi öğrenebilir.
 
-Oylama veya stacking ile olsun, ensemble'lar genellikle **doğruluğu** ve sağlamlığı artırma eğilimindedir. Dezavantajı, artan karmaşıklık ve bazen azalan yorumlanabilirliktir (ancak karar ağaçlarının ortalaması gibi bazı ensemble yaklaşımları yine de bazı içgörüler sağlayabilir, örneğin, özellik önemi). Pratikte, operasyonel kısıtlamalar izin veriyorsa, bir ensemble kullanmak daha yüksek tespit oranlarına yol açabilir. Siber güvenlik zorluklarında (ve genel olarak Kaggle yarışmalarında) birçok kazanan çözüm, son performans parçasını elde etmek için ensemble tekniklerini kullanmaktadır.
+Voting veya stacking yoluyla oluşturulan ensemble'lar genellikle **doğruluğu** ve dayanıklılığı artırır. Dezavantajı, karmaşıklığın artması ve bazen yorumlanabilirliğin azalmasıdır (ancak decision tree'lerin ortalamasını alan ensemble gibi bazı ensemble yaklaşımları, örneğin feature importance aracılığıyla, yine de belirli düzeyde içgörü sağlayabilir). Uygulama kısıtları izin veriyorsa bir ensemble kullanmak pratikte daha yüksek detection oranları sağlayabilir. Siber güvenlik yarışmalarındaki (ve genel olarak Kaggle yarışmalarındaki) birçok başarılı çözüm, performanstan geriye kalan son küçük kazanımları elde etmek için ensemble tekniklerini kullanır.
 
 <details>
-<summary>Örnek -- Phishing Tespiti için Oylama Ensemble:</summary>
-Model stacking'i göstermek için, phishing veri setinde tartıştığımız birkaç modeli birleştirelim. Temel öğreniciler olarak bir lojistik regresyon, bir karar ağacı ve bir k-NN kullanacağız ve tahminlerini toplamak için bir Random Forest'ı meta-öğrenici olarak kullanacağız. Meta-öğrenici, temel öğrenicilerin çıktıları üzerinde (eğitim setinde çapraz doğrulama kullanarak) eğitilecektir. Stacked modelin, bireysel modeller kadar iyi veya biraz daha iyi performans göstermesini bekliyoruz.
+<summary>Örnek -- Phishing Detection için Voting Ensemble:</summary>
+Model stacking'i açıklamak için ele aldığımız modellerden birkaçını phishing veri seti üzerinde birleştirelim. Base learner olarak bir logistic regression, bir decision tree ve bir k-NN kullanacak; tahminlerini birleştirmek için de meta-learner olarak bir Random Forest kullanacağız. Meta-learner, base learner'ların çıktıları üzerinde (training seti için cross-validation kullanılarak) eğitilecektir. Stacked modelin, bireysel modeller kadar iyi veya onlardan biraz daha iyi performans göstermesini bekliyoruz.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -965,30 +971,27 @@ F1‑score : 0.948
 ROC AUC  : 0.992
 """
 ```
-Yığın topluluğu, temel modellerin tamamlayıcı güçlerinden yararlanır. Örneğin, lojistik regresyon verilerin doğrusal yönlerini ele alabilir, karar ağaçları belirli kural benzeri etkileşimleri yakalayabilir ve k-NN, özellik alanındaki yerel komşuluklarda başarılı olabilir. Meta-model (burada bir rastgele orman) bu girdileri nasıl ağırlayacağını öğrenebilir. Ortaya çıkan metrikler genellikle herhangi bir tek modelin metriklerine göre bir iyileşme (hatta az da olsa) gösterir. Phishing örneğimizde, eğer lojistik tek başına 0.95 F1 değerine ve ağaç 0.94'e sahipse, yığın her modelin hata yaptığı yerleri alarak 0.96'ya ulaşabilir.
+Stacked ensemble, temel modellerin birbirini tamamlayan güçlü yönlerinden yararlanır. Örneğin logistic regression verilerin doğrusal yönlerini ele alabilir, decision tree belirli kural benzeri etkileşimleri yakalayabilir ve k-NN özellik uzayındaki yerel komşuluklarda başarılı olabilir. Meta-model (burada random forest), bu girdilerin nasıl ağırlıklandırılacağını öğrenebilir. Ortaya çıkan metrikler genellikle herhangi bir tek modelin metriklerine kıyasla (küçük de olsa) bir iyileşme gösterir. Phishing örneğimizde logistic tek başına 0.95, tree ise 0.94 F1 değerine sahipse stack, her modelin hata yaptığı noktaları telafi ederek 0.96 değerine ulaşabilir.
 
-Bu tür topluluk yöntemleri, *"birden fazla modelin birleştirilmesinin genellikle daha iyi genelleme sağladığı"*. Siber güvenlikte, bu, birden fazla tespit motoru (birinin kural tabanlı, birinin makine öğrenimi, birinin anomali tabanlı olabileceği) bulundurularak ve ardından uyarılarını toplayan bir katman eklenerek uygulanabilir -- etkili bir topluluk biçimi -- daha yüksek güvenle nihai bir karar vermek için. Bu tür sistemler dağıtılırken, ek karmaşıklığı göz önünde bulundurmak ve topluluğun yönetilmesi veya açıklanması zor hale gelmediğinden emin olmak gerekir. Ancak doğruluk açısından, topluluklar ve yığınlama model performansını artırmak için güçlü araçlardır.
+Bunun gibi ensemble yöntemleri, *"birden fazla modeli birleştirmek genellikle daha iyi genelleme sağlar"* ilkesini gösterir. Cybersecurity alanında bu, birden fazla detection engine kullanılarak uygulanabilir (bunlardan biri rule-based, biri machine learning, biri anomaly-based olabilir) ve ardından uyarıları toplayan bir katman -- etkin biçimde bir ensemble biçimi -- daha yüksek güvenle nihai bir karar verebilir. Bu tür sistemleri dağıtırken ek karmaşıklık göz önünde bulundurulmalı ve ensemble'ın yönetilmesinin veya açıklanmasının fazla zorlaşmadığından emin olunmalıdır. Ancak doğruluk açısından ensemble ve stacking, model performansını iyileştirmek için güçlü araçlardır.
 
 </details>
 
 
-## Referanslar
+## References
 
-- [https://madhuramiah.medium.com/logistic-regression-6e55553cc003](https://madhuramiah.medium.com/logistic-regression-6e55553cc003)
-- [https://www.geeksforgeeks.org/decision-tree-introduction-example/](https://www.geeksforgeeks.org/decision-tree-introduction-example/)
-- [https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132](https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132)
-- [https://www.ibm.com/think/topics/support-vector-machine](https://www.ibm.com/think/topics/support-vector-machine)
-- [https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering](https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering)
-- [https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644](https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644)
-- [https://zvelo.com/ai-and-machine-learning-in-cybersecurity/](https://zvelo.com/ai-and-machine-learning-in-cybersecurity/)
-- [https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae](https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae)
-- [https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8](https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8)
-- [https://www.ibm.com/think/topics/knn](https://www.ibm.com/think/topics/knn)
-- [https://www.ibm.com/think/topics/knn](https://www.ibm.com/think/topics/knn)
-- [https://arxiv.org/pdf/2101.02552](https://arxiv.org/pdf/2101.02552)
-- [https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
-- [https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
-- [https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
-- [https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
+- [1] [Logistic Regression](https://madhuramiah.medium.com/logistic-regression-6e55553cc003)
+- [2] [Decision Tree - Introduction with example](https://www.geeksforgeeks.org/decision-tree-introduction-example/)
+- [3] [Denial of Services Attack Detection using Random Forest Classifier with Information Gain](https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132)
+- [4] [What are Support Vector Machines (SVMs)? (IBM)](https://www.ibm.com/think/topics/support-vector-machine)
+- [5] [Naive Bayes spam filtering (Wikipedia)](https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering)
+- [6] [GBDT Demystified: How LightGBM, XGBoost, and CatBoost Work](https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644)
+- [7] [AI and Machine Learning in Cybersecurity (zvelo)](https://zvelo.com/ai-and-machine-learning-in-cybersecurity/)
+- [8] [Linear Regression Explained](https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae)
+- [9] [Performance analysis of machine learning models for intrusion detection system using Gini Impurity-based Weighted Random Forest (GIWRF) feature selection technique](https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8)
+- [10] [What is the k-nearest neighbors (KNN) algorithm? (IBM)](https://www.ibm.com/think/topics/knn)
+- [11] [Phishing Attacks and Websites Classification Using Machine Learning and Multiple Datasets (A Comparative Analysis)](https://arxiv.org/pdf/2101.02552)
+- [12] [How Deep Learning Enhances Intrusion Detection Systems](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
+- [13] [Ensemble Learning: Boosting Model Performance by Combining Strengths](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
 
 {{#include ../banners/hacktricks-training.md}}
