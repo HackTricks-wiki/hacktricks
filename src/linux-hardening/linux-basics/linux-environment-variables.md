@@ -257,7 +257,7 @@ PERL5LIB=/tmp/perllib PERL5OPT=-MHT perl -e 'print "target\n"'
 - `--require <file>`: preload a CommonJS file before the target script.
 - `--import <module>`: preload an ES module before the target script.
 
-Node rejects some dangerous flags in `NODE_OPTIONS`, but `--require` and `--import` are explicitly allowed and are processed **before** the regular command-line arguments.
+Node rejects some dangerous flags in `NODE_OPTIONS`, but `--require` and `--import` are explicitly allowed and are processed **before** the regular command-line arguments.<sup>[[4]](#references)</sup>
 
 ```bash
 cat > /tmp/preload.js <<'EOF'
@@ -281,7 +281,7 @@ printf 'warn "[+] RUBYOPT preload reached"\n' > /tmp/rubylib/ht.rb
 RUBYLIB=/tmp/rubylib RUBYOPT='-rht' ruby -e 'puts :target'
 ```
 
-The 2024 **needrestart** vulnerabilities showed that this is not just a lab trick: the same root-owned helper that was vulnerable to `PYTHONPATH` abuse could also be coerced into running Ruby with an attacker-controlled `RUBYLIB`, loading `enc/encdb.so` from an attacker directory.
+The 2024 **needrestart** vulnerabilities showed that this is not just a lab trick: the same root-owned helper that was vulnerable to `PYTHONPATH` abuse could also be coerced into running Ruby with an attacker-controlled `RUBYLIB`, loading `enc/encdb.so` from an attacker directory.<sup>[[3]](#references)</sup>
 
 ### **PAGER, MANPAGER, GIT_PAGER, GIT_EDITOR & LESSOPEN**
 
@@ -338,9 +338,10 @@ One background job, one stopped and last command didn't finish correctly:
 
 ## References
 
-- [GNU Bash Manual - Bash Startup Files](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html)
-- [ld.so(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)
-- [Qualys - LPEs in needrestart](https://www.qualys.com/2024/11/19/needrestart/needrestart.txt)
-- [Node.js CLI documentation - `NODE_OPTIONS`](https://nodejs.org/api/cli.html)
+- [1] [GNU Bash Manual - Bash Startup Files](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html)
+- [2] [ld.so(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)
+- [3] [Qualys - LPEs in needrestart](https://www.qualys.com/2024/11/19/needrestart/needrestart.txt)
+- [4] [Node.js CLI documentation - `NODE_OPTIONS`](https://nodejs.org/api/cli.html)
+- [5] [Common environment variables - Geek University](https://geek-university.com/linux/common-environment-variables/)
 
 {{#include ../../banners/hacktricks-training.md}}

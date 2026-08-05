@@ -4,7 +4,7 @@
 
 Rooting frameworks like KernelSU, APatch, SKRoot and Magisk frequently patch the Linux/Android kernel and expose privileged functionality to an unprivileged userspace "manager" app via a hooked syscall. If the manager-authentication step is flawed, any local app can reach this channel and escalate privileges on already-rooted devices.
 
-This page abstracts the techniques and pitfalls uncovered in public research (notably Zimperium’s analysis of KernelSU v0.5.7) to help both red and blue teams understand attack surfaces, exploitation primitives, and robust mitigations.
+This page abstracts the techniques and pitfalls uncovered in public research (notably Zimperium’s analysis of KernelSU v0.5.7) to help both red and blue teams understand attack surfaces, exploitation primitives, and robust mitigations.<sup>[[1]](#references)</sup>
 
 ---
 ## Architecture pattern: syscall-hooked manager channel
@@ -30,17 +30,17 @@ When userspace calls prctl(0xDEADBEEF, CMD_BECOME_MANAGER, data_dir_path, ...), 
 
 1) Path prefix check
 - The provided path must start with an expected prefix for the caller UID, e.g. /data/data/<pkg> or /data/user/<id>/<pkg>.
-  - Reference: core_hook.c (v0.5.7) path prefix logic.
+  - Reference: core_hook.c (v0.5.7) path prefix logic.<sup>[[2]](#references)</sup>
 
 2) Ownership check
 - The path must be owned by the caller UID.
-  - Reference: core_hook.c (v0.5.7) ownership logic.
+  - Reference: core_hook.c (v0.5.7) ownership logic.<sup>[[2]](#references)</sup>
 
 3) APK signature check via FD table scan
 - Iterate the calling process’ open file descriptors (FDs).
 - Pick the first file whose path matches /data/app/*/base.apk.
 - Parse APK v2 signature and verify against the official manager certificate.
-  - References: manager.c (iterating FDs), apk_sign.c (APK v2 verification).
+  - References: manager.c (iterating FDs), apk_sign.c (APK v2 verification).<sup>[[3]](#references)[[4]](#references)</sup>
 
 If all checks pass, the kernel caches the manager’s UID temporarily and accepts privileged commands from that UID until reset.
 
@@ -49,9 +49,9 @@ If all checks pass, the kernel caches the manager’s UID temporarily and accept
 
 If the signature check binds to "the first matching /data/app/*/base.apk" found in the process FD table, it is not actually verifying the caller’s own package. An attacker can pre-position a legitimately signed APK (the real manager’s) so that it appears earlier in the FD list than their own base.apk.
 
-This trust-by-indirection lets an unprivileged app impersonate the manager without owning the manager’s signing key.
+This trust-by-indirection lets an unprivileged app impersonate the manager without owning the manager’s signing key.<sup>[[1]](#references)</sup>
 
-Key properties exploited:
+Key properties exploited:<sup>[[1]](#references)</sup>
 - The FD scan does not bind to the caller’s package identity; it only pattern-matches path strings.
 - open() returns the lowest available FD. By closing lower-numbered FDs first, an attacker can control ordering.
 - The filter only checks that the path matches /data/app/*/base.apk – not that it corresponds to the installed package of the caller.
@@ -61,12 +61,12 @@ Key properties exploited:
 
 - The device is already rooted with a vulnerable rooting framework (e.g., KernelSU v0.5.7).
 - The attacker can run arbitrary unprivileged code locally (Android app process).
-- The real manager has not yet authenticated (e.g., right after a reboot). Some frameworks cache the manager UID after success; you must win the race.
+- The real manager has not yet authenticated (e.g., right after a reboot). Some frameworks cache the manager UID after success; you must win the race.<sup>[[1]](#references)</sup>
 
 ---
 ## Exploitation outline (KernelSU v0.5.7)
 
-High-level steps:
+High-level steps:<sup>[[1]](#references)</sup>
 1) Build a valid path to your own app data directory to satisfy prefix and ownership checks.
 2) Ensure a genuine KernelSU Manager base.apk is opened on a lower-numbered FD than your own base.apk.
 3) Invoke prctl(0xDEADBEEF, CMD_BECOME_MANAGER, <your_data_dir>, ...) to pass the checks.

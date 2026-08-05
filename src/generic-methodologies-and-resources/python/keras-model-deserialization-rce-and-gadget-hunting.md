@@ -187,21 +187,21 @@ fickling.hook.activate_safe_ml_environment(also_allow=[
 ])
 ```
 
-- Fickling also exposes generic runtime guards if you prefer more granular control:
+- Fickling also exposes generic runtime guards if you prefer more granular control:<sup>[[9]](#references)</sup>
   - fickling.always_check_safety() to enforce checks for all pickle.load()
   - with fickling.check_safety(): for scoped enforcement
   - fickling.load(path) / fickling.is_likely_safe(path) for one-off checks
 
 - Prefer non-pickle model formats when possible (e.g., SafeTensors). If you must accept pickle, run loaders under least privilege without network egress and enforce the allowlist.
 
-This allowlist-first strategy demonstrably blocks common ML pickle exploit paths while keeping compatibility high. In ToB’s benchmark, Fickling flagged 100% of synthetic malicious files and allowed ~99% of clean files from top Hugging Face repos.
+This allowlist-first strategy demonstrably blocks common ML pickle exploit paths while keeping compatibility high. In ToB’s benchmark, Fickling flagged 100% of synthetic malicious files and allowed ~99% of clean files from top Hugging Face repos.<sup>[[8]](#references)</sup>
 
 
 ## Researcher toolkit
 
 1) Systematic gadget discovery in allowed modules
 
-Enumerate candidate callables across keras, keras_nlp, keras_cv, keras_hub and prioritize those with file/network/process/env side effects.
+Enumerate candidate callables across keras, keras_nlp, keras_cv, keras_hub and prioritize those with file/network/process/env side effects.<sup>[[1]](#references)</sup>
 
 <details>
 <summary>Enumerate potentially dangerous callables in allowlisted Keras modules</summary>
@@ -253,7 +253,7 @@ print("\n".join(sorted(candidates)[:200]))
 
 2) Direct deserialization testing (no .keras archive needed)
 
-Feed crafted dicts directly into Keras deserializers to learn accepted params and observe side effects.
+Feed crafted dicts directly into Keras deserializers to learn accepted params and observe side effects.<sup>[[1]](#references)</sup>
 
 ```python
 from keras import layers
@@ -273,7 +273,7 @@ layer = layers.deserialize(cfg, safe_mode=True)  # Observe behavior
 
 3) Cross-version probing and formats
 
-Keras exists in multiple codebases/eras with different guardrails and formats:
+Keras exists in multiple codebases/eras with different guardrails and formats:<sup>[[1]](#references)</sup>
 - TensorFlow built-in Keras: tensorflow/python/keras (legacy, slated for deletion)
 - tf-keras: maintained separately
 - Multi-backend Keras 3 (official): introduced native .keras
