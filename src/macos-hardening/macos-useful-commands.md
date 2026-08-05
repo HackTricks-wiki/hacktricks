@@ -1,14 +1,14 @@
-# macOS Faydalı Komutlar
+# macOS Useful Commands
 
 {{#include ../banners/hacktricks-training.md}}
 
-### macOS Automatic Enumeration Araçları
+### MacOS Automatic Enumeration Tools
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Özel macOS Komutları
+### Specific MacOS Commands
 ```bash
 #System info
 date
@@ -115,17 +115,17 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Hızlı anti-analysis / sanallaştırma kontrolü
+### Hızlı anti-analysis / virtualization kontrolü
 
-Bazı macOS stealer'ları VM'leri tespit etmek ve sandbox detonation'dan kaçınmak için `system_profiler` çağırır ve **belirgin bir çıkış koduyla (ör. 100) sonlanır**<sup>[1]</sup>:
+Bazı macOS stealer'ları VM'leri tespit etmek için `system_profiler` çağırır ve sandbox detonation'ı önlemek amacıyla **belirgin bir exit code (ör. 100)** ile işlemi sonlandırır<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### Yüklü Yazılımlar ve Servisler
+### Kurulu Yazılımlar ve Servisler
 
-Yüklü **şüpheli** uygulamaları ve yüklü kaynaklar üzerindeki **yetkileri** kontrol edin:
+Kurulu **şüpheli** uygulamaları ve kurulu kaynaklar üzerindeki **yetkileri** kontrol edin:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -145,12 +145,12 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### Kullanıcı oluşturma
 
-İstemler olmadan
+İstem olmadan
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
 ## Referanslar
 
-- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, Infostealer yılı](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

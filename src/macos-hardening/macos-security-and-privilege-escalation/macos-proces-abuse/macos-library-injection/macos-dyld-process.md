@@ -1,59 +1,59 @@
-# macOS Dyld Süreci
+# macOS Dyld Process
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 ## Temel Bilgiler
 
-Bir Mach-o binary'sinin gerçek **entrypoint**'i, dinamik linker tarafından tanımlanır ve `LC_LOAD_DYLINKER` içinde belirtilir; genellikle `/usr/lib/dyld` olur.<sup>[3]</sup>
+Bir Mach-o binary'sinin gerçek **entrypoint**'i, `LC_LOAD_DYLINKER` içinde tanımlanan ve genellikle `/usr/lib/dyld` olan dynamic linker'dır.<sup>[[3]](#references)</sup>
 
-Bu linker'ın tüm executable library'leri bulması, bunları belleğe map etmesi ve lazy olmayan tüm library'leri linklemesi gerekir. Binary'nin entry-point'i ancak bu işlemden sonra çalıştırılır.
+Bu linker, tüm executable library'leri bulmalı, belleğe map etmeli ve lazy olmayan tüm library'leri linklemelidir. Binary'nin entry-point'i ancak bu işlemden sonra çalıştırılır.
 
-Elbette **`dyld`** herhangi bir dependency'ye sahip değildir (syscall'ları ve libSystem parçalarını kullanır).
+Elbette **`dyld`** herhangi bir dependency'ye sahip değildir (syscall'ları ve libSystem alıntılarını kullanır).
 
 > [!CAUTION]
-> Bu linker herhangi bir vulnerability içeriyorsa, herhangi bir binary çalıştırılmadan önce (yüksek ayrıcalıklı olanlar dahil) çalıştırıldığı için **privilege escalation** mümkün olabilir.
+> Bu linker herhangi bir vulnerability içeriyorsa, herhangi bir binary (yüksek ayrıcalıklı olanlar dahil) çalıştırılmadan önce çalıştırıldığı için **privilege escalation** mümkün olabilir.
 
 ### Akış
 
-Dyld, **stack canary** gibi şeyleri de yükleyen **`dyldboostrap::start`** tarafından yüklenir. Bunun nedeni, bu function'ın **`apple`** argument vector'ünde bunu ve diğer **sensitive** **value**'ları almasıdır.<sup>[1]</sup>
+Dyld, **stack canary** gibi şeyleri de yükleyen **`dyldboostrap::start`** tarafından yüklenir. Bunun nedeni, bu function'ın **`apple`** argument vector'ü içinde bunu ve diğer **sensitive** **value**'ları almasıdır.<sup>[[1]](#references)</sup>
 
-**`dyls::_main()`**, dyld'nin entry point'idir ve ilk görevi, genellikle:<sup>[2]</sup> bölümünde açıklanan **`DYLD_*`** environment variable'larını kısıtlayan `configureProcessRestrictions()` function'ını çalıştırmaktır:
+**`dyls::_main()`**, dyld'nin entry point'idir ve ilk görevi, genellikle aşağıda açıklanan **`DYLD_*`** environment variable'larını kısıtlayan `configureProcessRestrictions()` function'ını çalıştırmaktır:<sup>[[2]](#references)</sup>
 
 
 {{#ref}}
 ./
 {{#endref}}
 
-Ardından, tüm önemli system library'lerini önceden linkleyen dyld shared cache'i map eder; daha sonra binary'nin dependency duyduğu library'leri map eder ve gerekli tüm library'ler yüklenene kadar recursive olarak devam eder. Bu nedenle:
+Ardından tüm önemli system library'lerini prelink eden dyld shared cache'i map eder; daha sonra binary'nin dependency'si olan library'leri map eder ve gerekli tüm library'ler yüklenene kadar recursively devam eder. Bu nedenle:
 
-1. `DYLD_INSERT_LIBRARIES` ile eklenen library'leri yüklemeye başlar (izin veriliyorsa)
-2. Ardından shared cache'dekileri
-3. Ardından import edilenleri
-1. Sonra library'leri recursive olarak import etmeye devam eder
+1. İzin veriliyorsa `DYLD_INSERT_LIBRARIES` ile eklenen library'leri yüklemeye başlar
+2. Ardından shared cache'dekileri yükler
+3. Ardından import edilenleri yükler
+1. Daha sonra library'leri recursively import etmeye devam eder
 
-Tümü yüklendikten sonra bu library'lerin **initialiser**'ları çalıştırılır. Bunlar, `LC_ROUTINES[_64]` içinde tanımlanan (artık deprecated) veya `S_MOD_INIT_FUNC_POINTERS` ile işaretlenmiş bir section'daki pointer'lar aracılığıyla (genellikle: **`__DATA.__MOD_INIT_FUNC`**) tanımlanan **`__attribute__((constructor))`** kullanılarak kodlanır.
+Tümü yüklendikten sonra bu library'lerin **initialiser**'ları çalıştırılır. Bunlar, `LC_ROUTINES[_64]` içinde tanımlanan (artık deprecated) veya `S_MOD_INIT_FUNC_POINTERS` ile işaretlenmiş bir section'daki pointer'lar (genellikle **`__DATA.__MOD_INIT_FUNC`**) kullanılarak kodlanan **`__attribute__((constructor))`** ile tanımlanır.
 
 Terminator'lar **`__attribute__((destructor))`** ile kodlanır ve `S_MOD_TERM_FUNC_POINTERS` ile işaretlenmiş bir section'da (**`__DATA.__mod_term_func`**) bulunur.
 
-### Stub'lar
+### Stubs
 
-macOS'taki tüm binary'ler dynamic olarak linklenir. Bu nedenle binary'lerin, farklı machine'lerde ve context'lerde doğru code'a atlamasına yardımcı olan bazı stub section'ları içerirler. Binary çalıştırıldığında bu address'leri çözümlemesi gereken, en azından lazy olmayanlar için, dyld'dir.
+macOS'taki tüm binary'ler dynamically linked'dir. Bu nedenle binary'ler, farklı machine'lerde ve context'lerde doğru code'a jump etmelerine yardımcı olan bazı stub section'ları içerir. Binary çalıştırıldığında bu address'leri çözümlemesi gereken mekanizma (en azından lazy olmayanlar için) dyld'dir.
 
 Binary'deki bazı stub section'ları:
 
 - **`__TEXT.__[auth_]stubs`**: `__DATA` section'larındaki pointer'lar
-- **`__TEXT.__stub_helper`**: Çağrılacak function hakkındaki bilgilerle dynamic linking'i çağıran küçük code
-- **`__DATA.__[auth_]got`**: Global Offset Table (import edilen function'ların address'leri; çözümlendiğinde, `S_NON_LAZY_SYMBOL_POINTERS` flag'i ile işaretlendiği için load time'da bind edilir)
-- **`__DATA.__nl_symbol_ptr`**: Lazy olmayan symbol pointer'ları (`S_NON_LAZY_SYMBOL_POINTERS` flag'i ile işaretlendiği için load time'da bind edilir)
-- **`__DATA.__la_symbol_ptr`**: Lazy symbol pointer'ları (ilk access sırasında bind edilir)
+- **`__TEXT.__stub_helper`**: Çağrılacak function hakkında bilgiyle dynamic linking'i çağıran küçük code
+- **`__DATA.__[auth_]got`**: Global Offset Table (import edilen function'ların address'leri; `S_NON_LAZY_SYMBOL_POINTERS` flag'iyle işaretlendiği için çözümlendiğinde load time sırasında bound edilir)
+- **`__DATA.__nl_symbol_ptr`**: Lazy olmayan symbol pointer'ları (`S_NON_LAZY_SYMBOL_POINTERS` flag'iyle işaretlendiği için load time sırasında bound edilir)
+- **`__DATA.__la_symbol_ptr`**: Lazy symbol pointer'ları (ilk erişimde bound edilir)
 
 > [!WARNING]
-> "auth_" prefix'ine sahip pointer'ların, onları korumak için process içi tek bir encryption key (PAC) kullandığını unutmayın. Ayrıca pointer'ı takip etmeden önce doğrulamak için arm64 instruction'ı `BLRA[A/B]` kullanılabilir. RET address yerine RETA\[A/B] kullanılabilir.\
-> Aslında **`__TEXT.__auth_stubs`** içindeki code, istenen function'ı çağırmak ve pointer'ı authenticate etmek için **`bl`** yerine **`braa`** kullanır.
+> "auth\_" prefix'ine sahip pointer'ların, onları korumak için process içi bir encryption key (PAC) kullandığını unutmayın. Ayrıca pointer'ı takip etmeden önce doğrulamak için arm64 instruction'ı `BLRA[A/B]` kullanılabilir. RET address yerine RETA\[A/B] de kullanılabilir.\
+> Aslında **`__TEXT.__auth_stubs`** içindeki code, pointer'ı authenticate etmek için istenen function'ı çağırırken **`bl`** yerine **`braa`** kullanır.
 >
-> Ayrıca mevcut dyld version'larının her şeyi lazy olmayan şekilde yüklediğini unutmayın.
+> Ayrıca mevcut dyld version'larının her şeyi **non-lazy** olarak yüklediğini unutmayın.
 
-### Lazy symbol'leri Bulma
+### Lazy symbols bulma
 ```c
 //gcc load.c -o load
 #include <stdio.h>
@@ -62,14 +62,14 @@ int main (int argc, char **argv, char **envp, char **apple)
 printf("Hi\n");
 }
 ```
-İlginç disassembly bölümü:
+İlginç disassembly kısmı:
 ```armasm
 ; objdump -d ./load
 100003f7c: 90000000    	adrp	x0, 0x100003000 <_main+0x1c>
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-printf çağrısına yapılan atlamanın **`__TEXT.__stubs`** konumuna gittiği görülebilir:
+printf'e yapılan jump'in **`__TEXT.__stubs`** adresine gittiği görülebilir:
 ```bash
 objdump --section-headers ./load
 
@@ -83,7 +83,7 @@ Idx Name          Size     VMA              Type
 3 __unwind_info 00000058 0000000100003fa8 DATA
 4 __got         00000008 0000000100004000 DATA
 ```
-**`__stubs`** bölümünün disassembly çıktısında:
+**`__stubs`** bölümünün disassembly'sinde:
 ```bash
 objdump -d --section=__stubs ./load
 
@@ -96,21 +96,21 @@ Disassembly of section __TEXT,__stubs:
 100003f9c: f9400210    	ldr	x16, [x16]
 100003fa0: d61f0200    	br	x16
 ```
-GOT'un **adresine atladığımızı** görebilirsiniz; bu durumda GOT non-lazy olarak resolve edilir ve `printf` fonksiyonunun adresini içerir.
+GOT adresine **atladığımızı** görebilirsiniz; bu durumda adres non-lazy olarak çözümlenir ve `printf` fonksiyonunun adresini içerir.
 
-Diğer durumlarda GOT'a doğrudan atlamak yerine **`__DATA.__la_symbol_ptr`** adresine atlanabilir. Bu, yüklenmeye çalışılan fonksiyonu temsil eden bir değeri yükler ve ardından **`__TEXT.__stub_helper`** adresine atlar. Bu adres de **`__DATA.__nl_symbol_ptr`** adresine atlar; burada **`dyld_stub_binder`** adresi bulunur. `dyld_stub_binder`, parametre olarak fonksiyon numarasını ve bir adresi alır.\
-Bu son fonksiyon, aranan fonksiyonun adresini bulduktan sonra gelecekte tekrar lookup yapılmasını önlemek için bu adresi **`__TEXT.__stub_helper`** içindeki ilgili konuma yazar.
+Diğer durumlarda, doğrudan GOT'a atlamak yerine **`__DATA.__la_symbol_ptr`** adresine atlanabilir. Bu, yüklemeye çalıştığı fonksiyonu temsil eden bir değer yükler ve ardından **`__TEXT.__stub_helper`** adresine atlar. Bu da **`__DATA.__nl_symbol_ptr`** adresine atlar; burada, parametre olarak fonksiyon numarasını ve bir adresi alan **`dyld_stub_binder`** adresi bulunur.\
+Bu son fonksiyon, aranan fonksiyonun adresini bulduktan sonra gelecekte tekrar arama yapılmasını önlemek için bu adresi **`__TEXT.__stub_helper`** içindeki karşılık gelen konuma yazar.
 
 > [!TIP]
 > Ancak mevcut dyld sürümlerinin her şeyi non-lazy olarak yüklediğine dikkat edin.
 
-#### Dyld opcodes
+#### Dyld opcode'ları
 
-Son olarak, **`dyld_stub_binder`** belirtilen fonksiyonu bulmalı ve tekrar aramamak için doğru adrese yazmalıdır. Bunu yapmak için dyld içindeki opcodes'ları (sonlu durum makinesi) kullanır.
+Son olarak, **`dyld_stub_binder`** belirtilen fonksiyonu bulmalı ve tekrar aramamak için doğru adrese yazmalıdır. Bunu yapmak için dyld içindeki opcode'ları (sonlu durum makinesini) kullanır.
 
 ## apple\[] argüman vektörü
 
-macOS'ta main fonksiyonu aslında 3 yerine 4 argüman alır. Dördüncü argüman apple olarak adlandırılır ve her giriş `key=value` biçimindedir. Örneğin:
+macOS'ta main fonksiyonu aslında 3 yerine 4 argüman alır. Dördüncü argümana apple adı verilir ve her girdi `key=value` biçimindedir. Örneğin:
 ```c
 // gcc apple.c -o apple
 #include <stdio.h>
@@ -136,7 +136,7 @@ Sonuç:
 11: th_port=
 ```
 > [!TIP]
-> Bu değerler main function'a ulaştığında, hassas bilgiler ya onlardan zaten kaldırılmıştır ya da data leak gerçekleşmiş olur.
+> Bu değerler main function'a ulaştığında, hassas bilgiler değerlerden zaten kaldırılmıştır; aksi takdirde bu bir data leak olurdu.
 
 main'e girmeden önce debugging yaparak tüm bu ilginç değerleri görmek mümkündür:
 
@@ -181,17 +181,17 @@ main'e girmeden önce debugging yaparak tüm bu ilginç değerleri görmek mümk
 
 ## dyld_all_image_infos
 
-Bu, dyld tarafından export edilen ve dyld state hakkında bilgiler içeren bir structure'dır. [**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) içinde bulunabilir ve version, dyld_image_info array'ine pointer, dyld_image_notifier'a pointer, proc'un shared cache'ten ayrılıp ayrılmadığı, libSystem initializer'ının çağrılıp çağrılmadığı, dyld'in kendi Mach header'ına pointer, dyld version string'i gibi bilgiler içerir.
+Bu, dyld tarafından export edilen ve dyld durumu hakkında bilgi içeren bir yapıdır. [**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) içinde bulunabilir. Sürüm, dyld_image_info array'ine pointer, dyld_image_notifier'a pointer, proc'un shared cache'ten ayrılıp ayrılmadığı, libSystem initializer'ın çağrılıp çağrılmadığı, dyld'in kendi Mach header'ına pointer'ı, dyld version string'i gibi bilgiler içerir.
 
-## dyld env variables
+## dyld env değişkenleri
 
-### debug dyld
+### dyld debug
 
-dyld'in ne yaptığını anlamaya yardımcı olan ilginç env variables:
+dyld'in ne yaptığını anlamaya yardımcı olan ilginç env değişkenleri:
 
 - **DYLD_PRINT_LIBRARIES**
 
-Yüklenen her library'yi kontrol edin:
+Yüklenen her library'yi kontrol eder:
 ```
 DYLD_PRINT_LIBRARIES=1 ./apple
 dyld[19948]: <9F848759-9AB8-3BD2-96A1-C069DC1FFD43> /private/tmp/a
@@ -246,7 +246,7 @@ dyld[21147]:     __LINKEDIT (r..) 0x000239574000->0x000270BE4000
 ```
 - **DYLD_PRINT_INITIALIZERS**
 
-Her library initializer çalıştırıldığında yazdırır:
+Her library initializer çalıştığında yazdırır:
 ```
 DYLD_PRINT_INITIALIZERS=1 ./apple
 dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
@@ -255,36 +255,36 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ### Diğerleri
 
 - `DYLD_BIND_AT_LAUNCH`: Lazy bindings, non-lazy bindings ile çözümlenir
-- `DYLD_DISABLE_PREFETCH`: \_\_DATA ve \_\_LINKEDIT içeriği için pre-fetching'i devre dışı bırakır
+- `DYLD_DISABLE_PREFETCH`: \_\_DATA ve \_\_LINKEDIT içeriği için pre-fetch işlemini devre dışı bırakır
 - `DYLD_FORCE_FLAT_NAMESPACE`: Tek seviyeli bindings
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Çözümleme yolları
 - `DYLD_INSERT_LIBRARIES`: Belirli bir library yükler
 - `DYLD_PRINT_TO_FILE`: dyld debug çıktısını bir dosyaya yazar
 - `DYLD_PRINT_APIS`: libdyld API çağrılarını yazdırır
 - `DYLD_PRINT_APIS_APP`: main tarafından yapılan libdyld API çağrılarını yazdırır
-- `DYLD_PRINT_BINDINGS`: Binding işlemi sırasında symbols'ları yazdırır
-- `DYLD_WEAK_BINDINGS`: Binding işlemi sırasında yalnızca weak symbols'ları yazdırır
+- `DYLD_PRINT_BINDINGS`: Binding işlemi sırasında sembolleri yazdırır
+- `DYLD_WEAK_BINDINGS`: Binding işlemi sırasında yalnızca weak sembolleri yazdırır
 - `DYLD_PRINT_CODE_SIGNATURES`: Code signature kayıt işlemlerini yazdırır
 - `DYLD_PRINT_DOFS`: Yüklendikçe D-Trace object format bölümlerini yazdırır
 - `DYLD_PRINT_ENV`: dyld tarafından görülen env değerlerini yazdırır
 - `DYLD_PRINT_INTERPOSTING`: Interposting işlemlerini yazdırır
 - `DYLD_PRINT_LIBRARIES`: Yüklenen library'leri yazdırır
 - `DYLD_PRINT_OPTS`: Load seçeneklerini yazdırır
-- `DYLD_REBASING`: Symbol rebasing işlemlerini yazdırır
-- `DYLD_RPATHS`: `@rpath` genişletmelerini yazdırır
-- `DYLD_PRINT_SEGMENTS`: Mach-O segmentlerinin mapping işlemlerini yazdırır
+- `DYLD_REBASING`: Sembol rebasing işlemlerini yazdırır
+- `DYLD_RPATHS`: @rpath genişletmelerini yazdırır
+- `DYLD_PRINT_SEGMENTS`: Mach-O segmentlerinin mappings bilgilerini yazdırır
 - `DYLD_PRINT_STATISTICS`: Zamanlama istatistiklerini yazdırır
 - `DYLD_PRINT_STATISTICS_DETAILS`: Ayrıntılı zamanlama istatistiklerini yazdırır
 - `DYLD_PRINT_WARNINGS`: Uyarı mesajlarını yazdırır
 - `DYLD_SHARED_CACHE_DIR`: Shared library cache için kullanılacak yol
 - `DYLD_SHARED_REGION`: "use", "private", "avoid"
-- `DYLD_USE_CLOSURES`: Closures'ı etkinleştirir
+- `DYLD_USE_CLOSURES`: Closures özelliğini etkinleştirir
 
 Şuna benzer bir yöntemle daha fazlasını bulmak mümkündür:
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```
-Ya da [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) adresinden dyld project'ini indirip klasörün içinde çalıştırmak:
+Veya dyld projesini [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) adresinden indirip klasörün içinde şunu çalıştırmak:
 ```bash
 find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```

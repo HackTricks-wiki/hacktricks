@@ -8,13 +8,13 @@
 
 | Değişken | Amaç |
 |---|---|
-| `boot-args` | Kernel önyükleme argümanları (debug flag'leri, ayrıntılı önyükleme, AMFI bypass) |
-| `csr-active-config` | **SIP yapılandırma bitmask'i** — hangi korumaların etkin olduğunu kontrol eder |
-| `SystemAudioVolume` | Önyükleme sırasındaki ses düzeyi |
+| `boot-args` | Kernel önyükleme bağımsız değişkenleri (debug flag'leri, ayrıntılı önyükleme, AMFI bypass) |
+| `csr-active-config` | **SIP yapılandırma bitmaskesi** — hangi korumaların etkin olduğunu kontrol eder |
+| `SystemAudioVolume` | Önyükleme sırasındaki ses seviyesi |
 | `prev-lang:kbd` | Tercih edilen dil / klavye düzeni |
 | `efi-boot-device-data` | Önyükleme aygıtı seçimi |
 
-Modern Mac'lerde NVRAM değişkenleri **system** değişkenleri (Secure Boot tarafından korunan) ve **non-system** değişkenleri olarak ayrılır. Apple Silicon Mac'ler, NVRAM durumunu boot chain'e kriptografik olarak bağlamak için bir **Secure Storage Component (SSC)** kullanır.<sup>[1]</sup>
+Modern Mac'lerde NVRAM değişkenleri **system** değişkenleri (Secure Boot tarafından korunan) ve **non-system** değişkenleri arasında bölünür. Apple Silicon Mac'ler, NVRAM durumunu boot chain'e kriptografik olarak bağlamak için bir **Secure Storage Component (SSC)** kullanır.<sup>[[1]](#references)</sup>
 
 ## User Space'ten NVRAM Erişimi
 
@@ -57,9 +57,9 @@ codesign -dvvv /usr/sbin/nvram 2>&1 | grep "flags="
 ```
 ## Güvenlik Etkileri
 
-### NVRAM aracılığıyla SIP'nin zayıflatılması
+### NVRAM Aracılığıyla SIP'nin Zayıflatılması
 
-Bir saldırgan NVRAM'a yazabiliyorsa (NVRAM kısıtlaması olmayan ele geçirilmiş bir binary aracılığıyla veya bir güvenlik açığından yararlanarak), `csr-active-config` değerini değiştirerek **sonraki açılışta SIP korumalarını devre dışı bırakabilir**:
+Bir saldırgan NVRAM'e yazabiliyorsa (ya güvenliği ihlal edilmiş bir `NVRAM-unrestricted` binary aracılığıyla ya da bir güvenlik açığından yararlanarak), `csr-active-config` değerini değiştirerek **sonraki açılışta SIP korumalarını devre dışı bırakabilir**:
 ```bash
 # SIP configuration is a bitmask stored in NVRAM
 # Each bit controls a different SIP protection:
@@ -79,7 +79,7 @@ nvram csr-active-config | xxd
 # nvram csr-active-config=%7f%00%00%00   # Disable most SIP protections
 ```
 > [!WARNING]
-> Modern Apple Silicon Mac'lerde **Secure Boot chain**, NVRAM değişikliklerini doğrular ve çalışma zamanında SIP değişikliğini engeller. `csr-active-config` değişiklikleri yalnızca recoveryOS üzerinden etkili olur. Ancak **Intel Mac'lerde** veya **reduced security mode** kullanılan sistemlerde NVRAM manipülasyonu SIP'i hâlâ zayıflatabilir.
+> Modern Apple Silicon Mac'lerde **Secure Boot zinciri NVRAM** değişikliklerini doğrular ve runtime SIP değişikliklerini engeller. `csr-active-config` değişiklikleri yalnızca recoveryOS üzerinden etkili olur. Ancak **Intel Mac'lerde** veya **reduced security mode** kullanılan sistemlerde NVRAM manipülasyonu SIP'i hâlâ zayıflatabilir.
 
 ### Kernel Debugging'i Etkinleştirme
 ```bash
@@ -97,7 +97,7 @@ sudo nvram boot-args="kcsuffix=development"
 ```
 ### Firmware Kalıcılığı
 
-NVRAM değişiklikleri **OS yeniden kurulumundan sonra da varlığını sürdürür** — firmware düzeyinde kalıcıdır. Bir saldırgan, bir persistence mekanizmasının boot sırasında okuduğu özel NVRAM değişkenlerini yazabilir:
+NVRAM değişiklikleri **OS yeniden kurulumundan sağ çıkar** — firmware düzeyinde kalıcı olurlar. Bir saldırgan, bir persistence mekanizmasının boot sırasında okuyacağı özel NVRAM değişkenlerini yazabilir:
 ```bash
 # Write a persistence marker
 nvram attacker-payload-config="base64_encoded_config_here"
@@ -106,23 +106,23 @@ nvram attacker-payload-config="base64_encoded_config_here"
 nvram attacker-payload-config 2>/dev/null && /path/to/payload
 ```
 > [!CAUTION]
-> NVRAM kalıcılığı, disk silme ve işletim sistemi yeniden kurulumlarından sonra da devam eder. Temizlemek için **PRAM/NVRAM reset** (Intel Mac'lerde Command+Option+P+R) veya **DFU restore** (Apple Silicon) gerekir.
+> NVRAM persistence disk silmelerinden ve işletim sistemi yeniden kurulumlarından sonra da devam eder. Temizlemek için **PRAM/NVRAM reset** (Intel Mac'lerde Command+Option+P+R) veya **DFU restore** (Apple Silicon) gerekir.
 
 ### AMFI Bypass
 
-`amfi_get_out_of_my_way=1` boot argument'ı **Apple Mobile File Integrity** özelliğini devre dışı bırakarak imzasız kodun çalıştırılmasına izin verir:
+`amfi_get_out_of_my_way=1` boot argument'ı **Apple Mobile File Integrity** özelliğini devre dışı bırakarak unsigned code'un çalıştırılmasına izin verir:
 ```bash
 # This requires NVRAM write access AND reduced security boot:
 sudo nvram boot-args="amfi_get_out_of_my_way=1"
 ```
-## Gerçek Dünyadaki CVE'ler
+## Real-World CVEs
 
 | CVE | Açıklama |
 |---|---|
-| CVE-2020-9839 | Kalıcı SIP bypass sağlayan NVRAM manipulation |
+| CVE-2020-9839 | Kalıcı SIP bypass'ını mümkün kılan NVRAM manipulation |
 | CVE-2019-8779 | T2 Mac'lerde firmware-level NVRAM persistence |
-| CVE-2022-22583 | PackageKit ile ilişkili privilege escalation |
-| CVE-2020-10004 | Sistem modification'a olanak tanıyan NVRAM handling mantık sorunu |
+| CVE-2022-22583 | PackageKit ile ilişkili NVRAM privilege escalation |
+| CVE-2020-10004 | Sistem modification'ına izin veren NVRAM handling mantık sorunu |
 
 ## Enumeration Script
 ```bash
@@ -154,8 +154,8 @@ nvram -p | grep -v "^$" | grep -vE "^(SystemAudioVolume|boot-args|csr-active-con
 ```
 ## Referanslar
 
-- [1] [Apple Platform Security Guide — Önyükleme süreci](https://support.apple.com/guide/security/boot-process-secac71d5623/web)
-- [2] [Apple Security Updates — NVRAM ile ilgili CVE'ler](https://support.apple.com/en-us/HT201222)
-- [3] [Duo Labs — Apple T2 Güvenliği](https://duo.com/labs/research/apple-t2-xpc)
+- [1] [Apple Platform Security Guide — Boot process](https://support.apple.com/guide/security/boot-process-secac71d5623/web)
+- [2] [Apple Security Updates — NVRAM-related CVEs](https://support.apple.com/en-us/HT201222)
+- [3] [Duo Labs — Apple T2 Security](https://duo.com/labs/research/apple-t2-xpc)
 
 {{#include ../../../banners/hacktricks-training.md}}

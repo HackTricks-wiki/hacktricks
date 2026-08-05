@@ -4,48 +4,48 @@
 
 ## **x64'e Giriş**
 
-x64, x86-64 olarak da bilinen ve ağırlıklı olarak masaüstü ve sunucu bilişiminde kullanılan 64-bit bir işlemci mimarisidir. Intel tarafından üretilen x86 mimarisinden türemiş ve daha sonra AMD tarafından AMD64 adıyla benimsenmiştir. Günümüzde kişisel bilgisayarlarda ve sunucularda yaygın olarak kullanılan mimaridir.
+x64 veya x86-64 olarak da bilinen, çoğunlukla masaüstü ve sunucu bilişiminde kullanılan 64-bit işlemci mimarisidir. Intel tarafından üretilen x86 mimarisinden türemiş ve daha sonra AMD tarafından AMD64 adıyla benimsenmiştir. Günümüzde kişisel bilgisayarlarda ve sunucularda en yaygın kullanılan mimaridir.
 
 ### **Register'lar**
 
-x64, x86 mimarisini genişleterek `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi` ve `r8` ile `r15` arasındaki adlarla belirtilen **16 genel amaçlı register** sunar. Bunların her biri **64-bit** (8-byte) değer saklayabilir. Bu register'ların uyumluluk ve özel görevler için 32-bit, 16-bit ve 8-bit alt register'ları da bulunur.
+x64, x86 mimarisini genişleterek `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi` ve `r8` ile `r15` arasındaki register'larla etiketlenmiş **16 genel amaçlı register** sunar. Bunların her biri **64-bit** (8-byte) değer saklayabilir. Bu register'ların uyumluluk ve özel görevler için 32-bit, 16-bit ve 8-bit alt register'ları da vardır.
 
 1. **`rax`** - Geleneksel olarak fonksiyonlardan döndürülen **return value** değerleri için kullanılır.
-2. **`rbx`** - Bellek işlemleri için sıklıkla **base register** olarak kullanılır.
-3. **`rcx`** - Yaygın olarak **loop counter** olarak kullanılır.
+2. **`rbx`** - Bellek işlemleri için çoğunlukla **base register** olarak kullanılır.
+3. **`rcx`** - Genellikle **loop counter** olarak kullanılır.
 4. **`rdx`** - Genişletilmiş aritmetik işlemleri de dahil olmak üzere çeşitli amaçlarla kullanılır.
 5. **`rbp`** - Stack frame için **base pointer**.
-6. **`rsp`** - Stack'in en üstünü takip eden **stack pointer**.
+6. **`rsp`** - Stack'in tepesini takip eden **stack pointer**.
 7. **`rsi`** ve **`rdi`** - String/bellek işlemlerinde **source** ve **destination** index'leri için kullanılır.
-8. **`r8`** ile **`r15`** - x64 ile sunulan ek genel amaçlı register'lar.
+8. **`r8`** ile **`r15`** - x64'te sunulan ek genel amaçlı register'lar.
 
 ### **Calling Convention**
 
-x64 calling convention işletim sistemleri arasında değişiklik gösterir. Örneğin:
+x64 calling convention işletim sistemleri arasında değişir. Örneğin:
 
-- **Windows**: İlk **dört parametre** **`rcx`**, **`rdx`**, **`r8`** ve **`r9`** register'larında aktarılır. Sonraki parametreler stack'e push edilir. Return value **`rax`** içindedir.
-- **System V (UNIX benzeri sistemlerde yaygın olarak kullanılır)**: İlk **altı integer veya pointer parametresi** **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** ve **`r9`** register'larında aktarılır. Return value yine **`rax`** içindedir.
+- **Windows**: İlk **dört parametre** **`rcx`**, **`rdx`**, **`r8`** ve **`r9`** register'larında geçirilir. Sonraki parametreler stack'e push edilir. Return value **`rax`** içindedir.
+- **System V (UNIX-like sistemlerde yaygın olarak kullanılır)**: İlk **altı integer veya pointer parametresi** **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** ve **`r9`** register'larında geçirilir. Return value yine **`rax`** içindedir.
 
-Fonksiyonun altıdan fazla girdisi varsa, **kalanlar stack üzerinde aktarılır**. Stack pointer olan **RSP**, **16-byte hizalanmış** olmalıdır; bu, gösterdiği adresin herhangi bir call gerçekleşmeden önce 16'ya bölünebilir olması gerektiği anlamına gelir. Bu nedenle normalde bir fonksiyon çağrısı yapmadan önce shellcode'umuzda RSP'nin uygun şekilde hizalandığından emin olmamız gerekir. Ancak pratikte system call'lar bu gereksinim karşılanmasa bile çoğu zaman çalışır.
+Fonksiyonun altıdan fazla girdisi varsa, **kalanlar stack üzerinde geçirilir**. Stack pointer olan **RSP**, **16 byte hizalı** olmalıdır; bu, gösterdiği adresin herhangi bir call gerçekleşmeden önce 16'ya bölünebilir olması gerektiği anlamına gelir. Bu nedenle normalde bir fonksiyon call etmeden önce shellcode'umuzda RSP'nin uygun şekilde hizalandığından emin olmamız gerekir. Ancak pratikte system call'lar, bu gereksinim karşılanmasa bile çoğu zaman çalışır.
 
 ### Swift'te Calling Convention
 
-Swift'in [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64) adresinde bulunabilen kendine ait bir **calling convention**'ı vardır.
+Swift'in, [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64) adresinde bulunabilen kendine ait bir **calling convention**'ı vardır.
 
 ### **Yaygın Instruction'lar**
 
-x64 instruction'ları, önceki x86 instruction'larıyla uyumluluğu koruyan ve yeni instruction'lar sunan zengin bir kümedir.
+x64 instruction'ları, önceki x86 instruction'larıyla uyumluluğu koruyan ve yeni instruction'lar sunan zengin bir kümeye sahiptir.
 
-- **`mov`**: Bir değeri bir **register** veya **bellek konumundan** diğerine **taşır**.
+- **`mov`**: Bir değeri bir **register** veya **bellek konumundan** başka bir konuma **taşır**.
 - Örnek: `mov rax, rbx` — `rbx` içindeki değeri `rax`'e taşır.
-- **`push`** ve **`pop`**: Değerleri stack'e push eder veya stack'ten pop eder.
+- **`push`** ve **`pop`**: Değerleri **stack'e push eder** veya stack'ten **pop eder**.
 - Örnek: `push rax` — `rax` içindeki değeri stack'e push eder.
-- Örnek: `pop rax` — Stack'in en üstündeki değeri stack'ten `rax` içine pop eder.
+- Örnek: `pop rax` — Stack'in tepesindeki değeri stack'ten `rax` içine pop eder.
 - **`add`** ve **`sub`**: **Toplama** ve **çıkarma** işlemleri.
 - Örnek: `add rax, rcx` — `rax` ve `rcx` içindeki değerleri toplar ve sonucu `rax` içinde saklar.
 - **`mul`** ve **`div`**: **Çarpma** ve **bölme** işlemleri. Not: Bunların operand kullanımıyla ilgili özel davranışları vardır.
-- **`call`** ve **`ret`**: **Fonksiyonları çağırmak** ve **fonksiyonlardan dönmek** için kullanılır.
-- **`int`**: Bir software **interrupt** tetiklemek için kullanılır. Örneğin `int 0x80`, 32-bit x86 Linux'ta system call'lar için kullanılırdı.
+- **`call`** ve **`ret`**: **Fonksiyonları call etmek** ve **fonksiyonlardan return etmek** için kullanılır.
+- **`int`**: Yazılımsal bir **interrupt** tetiklemek için kullanılır. Örneğin `int 0x80`, 32-bit x86 Linux'ta system call'lar için kullanılıyordu.
 - **`cmp`**: İki değeri **karşılaştırır** ve sonuca göre CPU flag'lerini ayarlar.
 - Örnek: `cmp rax, rdx` — `rax` ile `rdx`'i karşılaştırır.
 - **`je`, `jne`, `jl`, `jge`, ...**: Önceki bir `cmp` veya test sonucuna göre control flow'u değiştiren **conditional jump** instruction'larıdır.
@@ -56,14 +56,14 @@ x64 instruction'ları, önceki x86 instruction'larıyla uyumluluğu koruyan ve y
 ### **Function Prologue**
 
 1. **Eski base pointer'ı push et**: `push rbp` (caller'ın base pointer'ını kaydeder)
-2. **Mevcut stack pointer'ı base pointer'a taşı**: `mov rbp, rsp` (mevcut fonksiyon için yeni base pointer'ı ayarlar)
-3. **Yerel değişkenler için stack'te alan ayır**: `sub rsp, <size>` (burada `<size>`, gereken byte sayısıdır)
+2. **Mevcut stack pointer'ı base pointer'a taşı**: `mov rbp, rsp` (mevcut fonksiyon için yeni base pointer'ı oluşturur)
+3. **Local variable'lar için stack üzerinde alan ayır**: `sub rsp, <size>` (burada `<size>`, gereken byte sayısıdır)
 
 ### **Function Epilogue**
 
-1. **Mevcut base pointer'ı stack pointer'a taşı**: `mov rsp, rbp` (yerel değişkenlerin alanını serbest bırakır)
+1. **Mevcut base pointer'ı stack pointer'a taşı**: `mov rsp, rbp` (local variable'ları serbest bırakır)
 2. **Eski base pointer'ı stack'ten pop et**: `pop rbp` (caller'ın base pointer'ını geri yükler)
-3. **Return**: `ret` (control'ü caller'a döndürür)
+3. **Return et**: `ret` (control'ü caller'a geri döndürür)
 
 ## macOS
 
@@ -78,7 +78,7 @@ Farklı syscall sınıfları vardır; bunları [**burada bulabilirsiniz**](https
 #define SYSCALL_CLASS_DIAG	4	/* Diagnostics */
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
-Ardından, her syscall numarasını [**bu URL'de**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
+Ardından, her syscall numarasını [**bu URL'de**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)** bulabilirsiniz:
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
 1	AUE_EXIT	ALL	{ void exit(int rval); }
@@ -95,9 +95,9 @@ Ardından, her syscall numarasını [**bu URL'de**](https://opensource.apple.com
 12	AUE_CHDIR	ALL	{ int chdir(user_addr_t path); }
 [...]
 ```
-Bu nedenle **Unix/BSD class** içinden `open` syscall'ını (**5**) çağırmak için şunu eklemeniz gerekir: `0x2000000`
+Bu nedenle **Unix/BSD class** içinden `open` syscall'ını (**5**) çağırmak için bunu eklemeniz gerekir: `0x2000000`
 
-Dolayısıyla open'ı çağıracak syscall numarası `0x2000005` olur.
+Dolayısıyla open çağrısı için syscall numarası `0x2000005` olur
 
 ### Shellcodes
 
@@ -106,7 +106,7 @@ Derlemek için:
 nasm -f macho64 shell.asm -o shell.o
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 ```
-Baytları çıkarmak için:
+Byte'ları çıkarmak için:
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/b729f716aaf24cbc8109e0d94681ccb84c0b0c9e/helper/extract.sh
 for c in $(objdump -d "shell.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
@@ -168,7 +168,7 @@ return 0;
 
 #### Shell
 
-[**Buradan**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) alınmış ve açıklanmıştır.<sup>[1]</sup>
+[**buradan**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) alınmış ve açıklanmıştır.<sup>[[1]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -280,7 +280,7 @@ touch_command:  db "touch /tmp/lalala", 0
 ```
 #### Bind shell
 
-**port 4444** üzerindeki [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) adresindeki Bind shell<sup>[2]</sup>.
+[https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) adresindeki **4444 portundaki** Bind shell<sup>[[2]](#references)</sup>.
 ```armasm
 section .text
 global _main
@@ -357,7 +357,7 @@ syscall
 ```
 #### Reverse Shell
 
-[https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html) adresinden Reverse shell. **127.0.0.1:4444** adresine Reverse shell<sup>[3]</sup>.
+[https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html) adresinden Reverse shell. **127.0.0.1:4444** adresine Reverse shell<sup>[[3]](#references)</sup>.
 ```armasm
 section .text
 global _main
@@ -419,7 +419,7 @@ mov  rax, r8
 mov  al, 0x3b
 syscall
 ```
-## References
+## Referanslar
 
 - [1] [daem0nc0re/macOS_ARM64_Shellcode - shell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)
 - [2] [Packet Storm - macOS TCP 4444 Bind Shell (Null-Free) Shellcode](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html)

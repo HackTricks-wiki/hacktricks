@@ -4,15 +4,15 @@
 
 ## Temel Bilgiler
 
-I/O Kit, XNU kernel içindeki açık kaynaklı, nesne yönelimli bir **device-driver framework**'üdür ve **dinamik olarak yüklenen device driver**'ları yönetir. Modüler kodun kernel'e anlık olarak eklenmesine olanak tanıyarak çeşitli donanımları destekler.
+I/O Kit, XNU kernel içindeki açık kaynaklı, nesne yönelimli bir **device-driver framework**'üdür ve **dinamik olarak yüklenen device driver**'ları yönetir. Modüler kodun kernel'e anlık olarak eklenmesine olanak tanır ve çeşitli donanımları destekler.
 
-IOKit driver'ları temel olarak **kernel'den fonksiyonlar export eder**. Bu fonksiyonların parametre **type**'ları **önceden tanımlıdır** ve doğrulanır. Ayrıca XPC'ye benzer şekilde IOKit, **Mach messages** üzerine kurulmuş başka bir katmandır.
+IOKit driver'ları temel olarak **kernel'den fonksiyonlar export eder**. Bu fonksiyonların parametre **türleri** **önceden tanımlanmıştır** ve doğrulanır. Ayrıca, XPC'ye benzer şekilde IOKit de **Mach mesajlarının üzerinde** çalışan başka bir katmandır.
 
-**IOKit XNU kernel kodu**, Apple tarafından [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit) adresinde opensource olarak yayımlanmıştır. Ayrıca user space IOKit bileşenleri de opensource olarak [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser) adresinde yayımlanmıştır.
+**IOKit XNU kernel kodu**, Apple tarafından [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit) adresinde open source olarak sunulmaktadır. Ayrıca, user space IOKit bileşenleri de [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser) adresinde open source olarak sunulmaktadır.
 
-Ancak **hiçbir IOKit driver'ı** opensource değildir. Bununla birlikte zaman zaman bir driver release'i, debug işlemini kolaylaştıran symbol'lerle birlikte gelebilir. [**driver extension'larını firmware'den nasıl alacağınızı buradan**](#ipsw) kontrol edin**.**
+Ancak **hiçbir IOKit driver'ı** open source değildir. Bununla birlikte, zaman zaman bir driver sürümü, driver'ın debug edilmesini kolaylaştıran sembollerle birlikte yayınlanabilir. [**Firmware'den driver extension'larını nasıl alacağınızı buradan öğrenin**](#ipsw)**.**
 
-**C++** ile yazılmıştır. Demangle edilmiş C++ symbol'lerini şu şekilde alabilirsiniz:
+**C++** ile yazılmıştır. Demangled C++ sembollerini şu şekilde alabilirsiniz:
 ```bash
 # Get demangled symbols
 nm -C com.apple.driver.AppleJPEGDriver
@@ -23,9 +23,9 @@ __ZN16IOUserClient202222dispatchExternalMethodEjP31IOExternalMethodArgumentsOpaq
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
 > [!CAUTION]
-> IOKit **exposed functions**, bir client bir function çağırmayı denediğinde **additional security checks** gerçekleştirebilir; ancak uygulamaların genellikle hangi IOKit function'larıyla etkileşime girebilecekleri konusunda **sandbox** tarafından **limited** olduğunu unutmayın.
+> IOKit **exposed functions**, bir istemci bir işlevi çağırmayı denediğinde **additional security checks** gerçekleştirebilir; ancak uygulamaların genellikle hangi IOKit işlevleriyle etkileşime girebileceği konusunda **sandbox** tarafından **limited** olduğunu unutmayın.
 
-## Sürücüler
+## Drivers
 
 macOS'ta şu konumlarda bulunurlar:
 
@@ -54,9 +54,9 @@ Index Refs Address            Size       Wired      Name (Version) UUID <Linked 
 9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
 10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
 ```
-9 numarasına kadar listelenen driver'lar **0 adresine yüklenir**. Bu, bunların gerçek driver'lar olmadığı, **kernel'in bir parçası oldukları ve unload edilemeyecekleri** anlamına gelir.
+9 numarasına kadar listelenen driver'lar **0 adresine yüklenmiştir**. Bu, bunların gerçek driver'lar olmadığı, **kernel'in bir parçası oldukları ve unload edilemeyecekleri** anlamına gelir.
 
-Belirli extension'ları bulmak için şunları kullanabilirsiniz:
+Belirli extension'ları bulmak için şunu kullanabilirsiniz:
 ```bash
 kextfind -bundle-id com.apple.iokit.IOReportFamily #Search by full bundle-id
 kextfind -bundle-id -substring IOR #Search by substring in bundle-id
@@ -68,33 +68,33 @@ kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-**IORegistry**, macOS ve iOS'ta sistemin donanım yapılandırmasını ve durumunu temsil eden bir veritabanı görevi gören IOKit framework'ünün önemli bir parçasıdır. Sistemde yüklü olan tüm donanım ve driver'ları ve bunların birbirleriyle olan ilişkilerini temsil eden **hiyerarşik bir nesne koleksiyonudur**.
+**IORegistry**, macOS ve iOS'ta sistemin donanım yapılandırmasını ve durumunu temsil eden bir veritabanı olarak görev yapan IOKit framework'ünün kritik bir parçasıdır. **Sistemde yüklü olan tüm donanım ve driver'ları ve bunların birbirleriyle olan ilişkilerini temsil eden hiyerarşik bir nesne koleksiyonudur.**
 
-IORegistry'yi, konsoldan incelemek için **`ioreg`** CLI aracını kullanarak alabilirsiniz (özellikle iOS için kullanışlıdır).
+IORegistry'yi, konsoldan incelemek için **`ioreg`** CLI aracını kullanarak edinebilirsiniz (özellikle iOS için kullanışlıdır).
 ```bash
 ioreg -l #List all
 ioreg -w 0 #Not cut lines
 ioreg -p <plane> #Check other plane
 ```
-**`IORegistryExplorer`** aracını **Xcode Additional Tools** içinden [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) adresinden indirebilir ve **macOS IORegistry**'yi **grafiksel** bir arayüz üzerinden inceleyebilirsiniz.
+**`IORegistryExplorer`**'ı [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) adresindeki **Xcode Additional Tools** üzerinden indirebilir ve **macOS IORegistry**'yi **grafiksel** bir arayüz aracılığıyla inceleyebilirsiniz.
 
 <figure><img src="../../../images/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
-IORegistryExplorer'da, IORegistry'deki farklı nesneler arasındaki ilişkileri düzenlemek ve görüntülemek için "planes" kullanılır. Her plane, belirli bir ilişki türünü veya sistemin donanım ve driver yapılandırmasına ait belirli bir görünümü temsil eder. IORegistryExplorer'da karşılaşabileceğiniz yaygın plane'lerden bazıları şunlardır:
+IORegistryExplorer'da "planes", IORegistry'deki farklı nesneler arasındaki ilişkileri düzenlemek ve görüntülemek için kullanılır. Her plane, belirli bir ilişki türünü veya sistemin donanım ve driver yapılandırmasının belirli bir görünümünü temsil eder. IORegistryExplorer'da karşılaşabileceğiniz yaygın plane'lerden bazıları şunlardır:
 
-1. **IOService Plane**: Bu, driver'ları ve nub'ları (driver'lar arasındaki iletişim kanallarını) temsil eden service nesnelerini görüntüleyen en genel plane'dir. Bu nesneler arasındaki provider-client ilişkilerini gösterir.
+1. **IOService Plane**: Bu, driver'ları ve nub'ları (driver'lar arasındaki iletişim kanalları) temsil eden service nesnelerini görüntüleyen en genel plane'dir. Bu nesneler arasındaki provider-client ilişkilerini gösterir.
 2. **IODeviceTree Plane**: Bu plane, cihazların sisteme bağlanma şekillerine göre aralarındaki fiziksel bağlantıları temsil eder. Genellikle USB veya PCI gibi bus'lar üzerinden bağlanan cihazların hiyerarşisini görselleştirmek için kullanılır.
-3. **IOPower Plane**: Nesneleri ve aralarındaki ilişkileri power management açısından görüntüler. Hangi nesnelerin diğerlerinin power state'ini etkilediğini gösterebilir ve power ile ilgili sorunların debug edilmesinde faydalıdır.
+3. **IOPower Plane**: Nesneleri ve aralarındaki ilişkileri power management açısından görüntüler. Hangi nesnelerin diğerlerinin power state'ini etkilediğini gösterebilir; power ile ilgili sorunlarda debugging için kullanışlıdır.
 4. **IOUSB Plane**: Özellikle USB cihazlarına ve aralarındaki ilişkilere odaklanır; USB hub'larının ve bağlı cihazların hiyerarşisini gösterir.
-5. **IOAudio Plane**: Bu plane, sistemdeki audio cihazlarını ve aralarındaki ilişkileri temsil eder.
+5. **IOAudio Plane**: Bu plane, audio cihazlarını ve sistem içindeki ilişkilerini temsil eder.
 6. ...
 
 ## Driver Comm Code Example
 
-Aşağıdaki code, IOKit service'i `YourServiceNameHere` ile bağlantı kurar ve selector 0'ı çağırır:
+Aşağıdaki code, `YourServiceNameHere` IOKit service'ine bağlanır ve selector 0'ı çağırır:
 
-- Öncelikle service'i almak için **`IOServiceMatching`** ve **`IOServiceGetMatchingServices`** çağrılır.
-- Ardından **`IOServiceOpen`** çağrılarak bir bağlantı oluşturulur.
+- Önce service'i almak için **`IOServiceMatching`** ve **`IOServiceGetMatchingServices`** çağrılır.
+- Ardından **`IOServiceOpen`** çağrısıyla bir bağlantı kurulur.
 - Son olarak, selector 0'ı belirterek **`IOConnectCallScalarMethod`** ile bir function çağrılır (selector, çağırmak istediğiniz function'a atanmış numaradır).
 
 <details>
@@ -155,23 +155,23 @@ return 0;
 ```
 </details>
 
-**`IOConnectScalarMethod`** dışında **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`** gibi IOKit fonksiyonlarını çağırmak için kullanılabilecek **başka** fonksiyonlar da vardır...
+**`IOConnectCallScalarMethod`** dışında **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`** gibi IOKit function'larını çağırmak için kullanılabilecek **başka** function'lar da vardır...
 
-## Driver giriş noktasını tersine mühendislik
+## Driver entrypoint'ini reverse etme
 
-Bunları örneğin bir [**firmware image (ipsw)**](#ipsw) içinden elde edebilirsiniz. Ardından, favori decompiler'ınıza yükleyin.
+Bunları örneğin bir [**firmware image (ipsw)**](#ipsw) üzerinden elde edebilirsiniz. Ardından bunları tercih ettiğiniz decompiler'a yükleyin.
 
-Çağrıyı alacak ve doğru fonksiyonu çağıracak driver fonksiyonu olduğundan, **`externalMethod`** fonksiyonunu decompile etmeye başlayabilirsiniz:
+Çağrıyı alacak ve doğru function'ı çağıracak driver function'ı olduğundan, **`externalMethod`** function'ını decompile etmeye başlayabilirsiniz:
 
 <figure><img src="../../../images/image (1168).png" alt="" width="315"><figcaption></figcaption></figure>
 
 <figure><img src="../../../images/image (1169).png" alt=""><figcaption></figcaption></figure>
 
-Bu korkunç demangled çağrı şu anlama gelir:
+Bu korkunç demangled call şu anlama gelir:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-Önceki tanımda **`self`** parametresinin eksik olduğuna dikkat edin; doğru tanım şu şekilde olmalıdır:
+Önceki tanımda **`self`** parametresinin atlandığına dikkat edin; doğru tanım şöyle olmalıdır:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(self, unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
@@ -185,11 +185,11 @@ Bu bilgilerle Ctrl+Right -> `Edit function signature` seçeneğini yeniden yazab
 
 <figure><img src="../../../images/image (1174).png" alt=""><figcaption></figcaption></figure>
 
-Yeni decompile edilmiş kod şu şekilde görünecektir:
+Yeni decompiled kod şu şekilde görünecektir:
 
 <figure><img src="../../../images/image (1175).png" alt=""><figcaption></figcaption></figure>
 
-Sonraki adım için **`IOExternalMethodDispatch2022`** struct'ının tanımlanmış olması gerekir. Bu struct [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176) adresinde açık kaynak olarak bulunur; aşağıdaki şekilde tanımlayabilirsiniz:
+Sonraki adım için **`IOExternalMethodDispatch2022`** struct'ının tanımlanmış olması gerekir. Bu struct, [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176) adresinde opensource olarak bulunur; şu şekilde tanımlayabilirsiniz:
 
 <figure><img src="../../../images/image (1170).png" alt=""><figcaption></figcaption></figure>
 
@@ -205,26 +205,26 @@ değişiklikten sonra:
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Burada **7 elementten oluşan bir array** bulunduğunu bildiğimize göre (nihai decompile edilmiş kodu kontrol edin), 7 elementlik bir array oluşturmak için tıklayın:
+Burada **7 elementten oluşan bir array** bulunduğunu bildiğimize göre (nihai decompiled kodu kontrol edin), 7 elementlik bir array oluşturmak için tıklayın:
 
 <figure><img src="../../../images/image (1180).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Array oluşturulduktan sonra tüm export edilmiş fonksiyonları görebilirsiniz:
+Array oluşturulduktan sonra tüm exported function'ları görebilirsiniz:
 
 <figure><img src="../../../images/image (1181).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Hatırlarsanız, user space'ten **export edilmiş** bir fonksiyonu **çağırmak** için fonksiyonun adını çağırmamız gerekmez; bunun yerine **selector numarasını** kullanırız. Burada selector **0**'ın **`initializeDecoder`**, selector **1**'in **`startDecoder`**, selector **2**'nin ise **`initializeEncoder`** fonksiyonu olduğunu görebilirsiniz...
+> Hatırlarsanız, user space'ten bir **exported** function'ı **call** etmek için function'ın adını çağırmamız gerekmez; bunun yerine **selector number** kullanırız. Burada selector **0**'ın **`initializeDecoder`**, selector **1**'in **`startDecoder`**, selector **2**'nin ise **`initializeEncoder`** function'ı olduğunu görebilirsiniz...
 
 ## Güncel IOKit attack surface (2023–2025)
 
-- **IOHIDFamily üzerinden keystroke capture** – CVE-2024-27799 (14.5), izinleri fazla geniş olan bir `IOHIDSystem` client'ının secure input etkin olsa bile HID event'lerini alabileceğini gösterdi; `externalMethod` handler'larının yalnızca user-client type'a değil, entitlement'lara da göre doğrulama yaptığından emin olun.<sup>[2]</sup>
-- **IOGPUFamily memory corruption** – CVE-2024-44197 ve CVE-2025-24257, sandbox'lanmış uygulamaların GPU user client'larına hatalı variable-length data göndermesiyle erişilebilen OOB write'ları düzeltti; yaygın hata, `IOConnectCallStructMethod` argümanları etrafında yetersiz bounds kontrolüdür.<sup>[1]</sup>
-- **Legacy keystroke monitoring** – CVE-2023-42891 (14.2), HID user client'larının sandbox-escape vector'ü olmaya devam ettiğini doğruladı; keyboard/event queue'ları açığa çıkaran tüm driver'ları fuzz edin.<sup>[3]</sup>
+- **IOHIDFamily üzerinden keystroke capture** – CVE-2024-27799 (14.5), izinleri fazla geniş olan bir `IOHIDSystem` client'ının secure input etkin olsa bile HID event'lerini alabileceğini gösterdi; `externalMethod` handler'larının yalnızca user-client type'ına değil, entitlement'lara da göre kontrol uyguladığından emin olun.<sup>[[2]](#references)</sup>
+- **IOGPUFamily memory corruption** – CVE-2024-44197 ve CVE-2025-24257, sandboxed app'lerden GPU user client'larına gönderilen hatalı variable-length data nedeniyle erişilebilen OOB write'ları düzeltti; olağan bug, `IOConnectCallStructMethod` argümanları etrafındaki yetersiz bounds kontrolleridir.<sup>[[1]](#references)</sup>
+- **Legacy keystroke monitoring** – CVE-2023-42891 (14.2), HID user client'larının sandbox-escape vector'ı olmaya devam ettiğini doğruladı; keyboard/event queue'ları sunan tüm driver'larda fuzzing yapın.<sup>[[3]](#references)</sup>
 
 ### Hızlı triage ve fuzzing ipuçları
 
-- Bir fuzzer'ı beslemek için userland'den bir user client'a ait tüm external method'ları listeleyin:
+- Bir fuzzer'ı seed etmek için userland'den bir user client için tüm external method'ları enumerate edin:
 ```bash
 # list selectors for a service
 python3 - <<'PY'
@@ -236,35 +236,35 @@ for sel, name in obj.external_methods():
 print(f"{sel:02d} {name}")
 PY
 ```
-- Reverse engineering yaparken `IOExternalMethodDispatch2022` sayılarına dikkat edin. Recent CVE'lerde yaygın bir bug pattern, `structureInputSize`/`structureOutputSize` ile gerçek `copyin` uzunluğu arasındaki tutarsızlıktır; bu durum `IOConnectCallStructMethod` içinde heap OOB'a yol açabilir.
-- Sandbox erişilebilirliği hâlâ entitlements'a bağlıdır. Bir hedef üzerinde zaman harcamadan önce client'ın third-party app üzerinden erişimine izin verilip verilmediğini kontrol edin:
+- Tersine mühendislik yaparken `IOExternalMethodDispatch2022` count değerlerine dikkat edin. Son CVE'lerde yaygın bir bug pattern, `structureInputSize`/`structureOutputSize` ile gerçek `copyin` length değerlerinin tutarsız olmasıdır; bu durum `IOConnectCallStructMethod` içinde heap OOB'ye yol açabilir.
+- Sandbox erişilebilirliği hâlâ entitlements'a bağlıdır. Bir hedef üzerinde zaman harcamadan önce client'a third-party app üzerinden izin verilip verilmediğini kontrol edin:
 ```bash
 strings /System/Library/Extensions/IOHIDFamily.kext/Contents/MacOS/IOHIDFamily | \
 grep -E "^com\.apple\.(driver|private)"
 ```
-- GPU/iomfb bug'larında, `IOConnectCallMethod` üzerinden aşırı büyük diziler geçirmek çoğu zaman hatalı sınır denetimlerini tetiklemek için yeterlidir. Boyut karmaşasını tetiklemek için minimal harness (selector X):
+- GPU/iomfb bug'larında, `IOConnectCallMethod` üzerinden aşırı büyük diziler geçirmek genellikle hatalı sınır denetimlerini tetiklemek için yeterlidir. Boyut karmaşasını tetikleyen minimal harness (selector X):
 ```c
 uint8_t buf[0x1000];
 size_t outSz = sizeof(buf);
 IOConnectCallStructMethod(conn, X, buf, sizeof(buf), buf, &outSz);
 ```
-## DriverKit — User-Space Drivers
+## DriverKit — Kullanıcı Alanı Sürücüleri
 
 ### Temel Bilgiler
 
-**DriverKit**, macOS 10.15'te kullanıma sunulan, Apple'ın kernel extensions (kexts) için geliştirdiği user-space alternatifidir. DriverKit binary'leri (`.dext` bundles) user-space process'leri olarak çalışır, ancak ayrıcalıklı bir IOKit interface'i üzerinden kernel ile doğrudan iletişim kurar.
+**DriverKit**, macOS 10.15 ile kullanıma sunulan, Apple'ın kernel extension'ların (kext'ler) kullanıcı alanındaki alternatifidir. DriverKit binary'leri (`.dext` bundle'ları) kullanıcı alanı işlemleri olarak çalışır, ancak ayrıcalıklı bir IOKit arayüzü üzerinden kernel ile doğrudan iletişim kurar.
 
-DriverKit extensions donanımları yönetir:
-- **USB** controllers ve devices
-- **Thunderbolt** / PCIe devices
-- **HID** (keyboards, mice, game controllers)
-- **Audio** hardware
-- **Networking** interfaces
-- **Serial** ve **Block Storage** devices
+DriverKit extension'ları donanımı yönetir:
+- **USB** denetleyicileri ve cihazları
+- **Thunderbolt** / PCIe cihazları
+- **HID** (klavyeler, fareler, oyun kumandaları)
+- **Audio** donanımı
+- **Networking** arayüzleri
+- **Serial** ve **Block Storage** cihazları
 
-SIP'in devre dışı bırakıldığı boot veya notarization gerektiren kext'lerin aksine, DriverKit extensions `SystemExtensions.framework` aracılığıyla yüklenir ve yalnızca **one-time user approval** gerektirir.
+SIP devre dışı bırakılmış boot veya notarization gerektiren kext'lerin aksine, DriverKit extension'ları `SystemExtensions.framework` üzerinden yüklenir ve yalnızca **bir kerelik kullanıcı onayı** gerektirir.
 
-### Keşif ve Enumerasyon
+### Keşif ve Numaralandırma
 ```bash
 # List all installed system extensions (includes DriverKit)
 systemextensionsctl list
@@ -287,13 +287,13 @@ codesign -d --entitlements - /path/to/binary.dext/binary 2>&1 | grep driverkit
 ### Güvenlik Etkileri
 
 > [!WARNING]
-> DriverKit binaries, **kernel ile doğrudan bir iletişim kanalına** sahiptir. Bu kanal üzerinden hatalı biçimlendirilmiş mesajlar göndermek kernel açıklarını tetikleyebilir. Her driver belirli user-client sınıflarını kaydeder ve hatalı biçimlendirilmiş `IOConnectCallMethod` çağrıları kernel belleğinde bozulmaya neden olabilir.
+> DriverKit binaries have a **direct communication channel to the kernel**. Bu kanal üzerinden malformed messages göndermek kernel vulnerabilities tetikleyebilir. Her driver belirli user-client classes kaydeder ve malformed `IOConnectCallMethod` çağrıları kernel memory corruption'a neden olabilir.
 
 **Saldırı yüzeyi:**
-1. **Kernel IOKit message fuzzing** — Her DriverKit user-client, user space'ten çağrılabilen selector'lar sunar. Hatalı biçimlendirilmiş argümanlar kernel hatalarını tetikler.
-2. **USB device spoofing** — Ele geçirilmiş bir USB DriverKit binary'si kötü amaçlı bir USB device profili sunabilir (örneğin HID injection için klavyeyi taklit edebilir).
-3. **DMA attacks** — PCIe/Thunderbolt DriverKit extension'ları fiziksel belleğe potansiyel DMA erişimine sahiptir.
-4. **Persistence** — Bir system extension olarak kurulduktan sonra DriverKit binary'leri yeniden başlatmalar ve app güncellemeleri boyunca kalıcılığını sürdürür.
+1. **Kernel IOKit message fuzzing** — Her DriverKit user-client, user space'ten çağrılabilen selector'lar sunar. Malformed arguments kernel bugs tetikler.
+2. **USB device spoofing** — Compromised bir USB DriverKit binary, malicious bir USB device profile sunabilir (ör. HID injection için keyboard taklidi yapabilir).
+3. **DMA attacks** — PCIe/Thunderbolt DriverKit extensions, physical memory'ye potansiyel DMA erişimine sahiptir.
+4. **Persistence** — DriverKit binaries, system extension olarak yüklendikten sonra reboot'lar ve app updates boyunca kalıcı olur.
 
 ### DriverKit IOKit User-Client Fuzzing
 ```bash
@@ -323,20 +323,20 @@ size_t outSz = sizeof(buf);
 kern_return_t kr = IOConnectCallStructMethod(conn, X, buf, sizeof(buf), buf, &outSz);
 // If the driver doesn't validate structureInputSize, this causes kernel OOB
 ```
-### DriverKit CVEs
+### DriverKit CVE'leri
 
 | CVE | Açıklama |
 |---|---|
-| CVE-2022-26766 | DriverKit USB stack güvenlik açığı — kernel code execution |
-| CVE-2021-30838 | Grafik sürücülerinde IOKit user-client type confusion |
-| CVE-2024-44197 | Hatalı biçimlendirilmiş DriverKit bağımsız değişkenleri aracılığıyla IOGPUFamily OOB write |
+| CVE-2022-26766 | DriverKit USB stack açığı — kernel code execution |
+| CVE-2021-30838 | Grafik driver'larında IOKit user-client type confusion |
+| CVE-2024-44197 | Hatalı DriverKit argümanları aracılığıyla IOGPUFamily OOB write |
 
 ## Referanslar
 
 - [1] [Apple Security Updates – macOS Sequoia 15.1 / Sonoma 14.7.1 (IOGPUFamily)](https://support.apple.com/en-us/121564)
-- [2] [Rapid7 – IOHIDFamily CVE-2024-27799 summary](https://www.rapid7.com/db/vulnerabilities/apple-osx-iohidfamily-cve-2024-27799/)
+- [2] [Rapid7 – IOHIDFamily CVE-2024-27799 özeti](https://www.rapid7.com/db/vulnerabilities/apple-osx-iohidfamily-cve-2024-27799/)
 - [3] [Apple Security Updates – macOS 13.6.1 (CVE-2023-42891 IOHIDFamily)](https://support.apple.com/en-us/121551)
 - [4] [Apple Developer — DriverKit](https://developer.apple.com/documentation/driverkit)
-- [5] [Apple Developer — System Extensions](https://developer.apple.com/documentation/systemextensions)
+- [5] [Apple Developer — Sistem Uzantıları](https://developer.apple.com/documentation/systemextensions)
 
 {{#include ../../../banners/hacktricks-training.md}}

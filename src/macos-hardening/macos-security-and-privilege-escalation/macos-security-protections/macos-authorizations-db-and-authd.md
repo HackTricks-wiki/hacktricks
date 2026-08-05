@@ -4,29 +4,29 @@
 
 ## **Yetkilendirmeler DB**
 
-`/var/db/auth.db` konumundaki veritabanı, hassas işlemleri gerçekleştirme izinlerini depolamak için kullanılır. Bu işlemler tamamen **user space** içinde gerçekleştirilir ve genellikle, **çağıran istemcinin** bu veritabanını kontrol ederek belirli bir eylemi gerçekleştirme yetkisine sahip olup olmadığını denetlemesi gereken **XPC services** tarafından kullanılır.
+`/var/db/auth.db` konumundaki database, hassas işlemleri gerçekleştirme izinlerini depolamak için kullanılan database'dir. Bu işlemler tamamen **user space** içinde gerçekleştirilir ve genellikle **XPC services** tarafından, bu database'i kontrol ederek **calling client'ın** belirli bir eylemi gerçekleştirmeye yetkili olup olmadığını doğrulamak için kullanılır.
 
-Başlangıçta bu veritabanı, `/System/Library/Security/authorization.plist` içeriğinden oluşturulur. Ardından bazı servisler, başka izinler eklemek için bu veritabanına veri ekleyebilir veya verileri değiştirebilir.
+Başlangıçta bu database, `/System/Library/Security/authorization.plist` içeriğinden oluşturulur. Ardından bazı servisler, başka izinler eklemek için bu database'e veri ekleyebilir veya verileri değiştirebilir.
 
-Kurallar, veritabanındaki `rules` tablosunda saklanır ve aşağıdaki sütunları içerir:
+Kurallar, database içindeki `rules` tablosunda saklanır ve aşağıdaki sütunları içerir:
 
-- **id**: Her kural için otomatik olarak artırılan ve birincil anahtar olarak kullanılan benzersiz tanımlayıcı.
-- **name**: Yetkilendirme sistemi içinde kuralı tanımlamak ve referans vermek için kullanılan benzersiz kural adı.
-- **type**: Kuralın türünü belirtir; yetkilendirme mantığını tanımlamak için 1 veya 2 değerleriyle sınırlıdır.
-- **class**: Kuralı belirli bir sınıfa kategorize eder ve pozitif bir tamsayı olmasını sağlar.
-- "allow" izin vermek, "deny" reddetmek, `group` özelliği üyeliği erişime izin veren bir grubu belirtiyorsa "user", bir dizide karşılanması gereken bir kuralı belirtmek için "rule", ardından yerleşik değerler veya `/System/Library/CoreServices/SecurityAgentPlugins/` ya da `/Library/Security//SecurityAgentPlugins` içindeki bir bundle adı olan `mechanisms` dizisiyle birlikte "evaluate-mechanisms"
-- **group**: Grup tabanlı yetkilendirme için kuralla ilişkili kullanıcı grubunu belirtir.
-- **kofn**: Toplam kural sayısı içinden kaç alt kuralın karşılanması gerektiğini belirleyen "k-of-n" parametresini temsil eder.
-- **timeout**: Kural tarafından verilen yetkilendirmenin sona ermesinden önce geçecek süreyi saniye cinsinden tanımlar.
+- **id**: Her kural için otomatik olarak artırılan ve primary key olarak kullanılan benzersiz bir identifier.
+- **name**: Authorization system içinde kuralı tanımlamak ve referans göstermek için kullanılan benzersiz kural adı.
+- **type**: Authorization logic'i tanımlamak üzere 1 veya 2 değerleriyle sınırlı olan kural türünü belirtir.
+- **class**: Kuralı belirli bir class içinde kategorize eder ve pozitif bir integer olmasını gerektirir.
+- "allow" izin verme, "deny" reddetme, `group` özelliği erişime izin veren bir grubu belirtiyorsa "user", karşılanması gereken bir kuralı array içinde belirtmek için "rule", ardından `mechanisms` array'i gelen "evaluate-mechanisms"; bu array'deki değerler ya builtins ya da `/System/Library/CoreServices/SecurityAgentPlugins/` veya `/Library/Security//SecurityAgentPlugins` içindeki bir bundle adıdır.
+- **group**: Group-based authorization için kuralla ilişkili user group'u belirtir.
+- **kofn**: Toplam bir sayı içinden kaç alt kuralın karşılanması gerektiğini belirleyen "k-of-n" parametresini temsil eder.
+- **timeout**: Kural tarafından verilen authorization'ın süresi dolmadan önce geçecek saniye cinsinden süreyi tanımlar.
 - **flags**: Kuralın davranışını ve özelliklerini değiştiren çeşitli flag'leri içerir.
-- **tries**: Güvenliği artırmak için izin verilen yetkilendirme denemelerinin sayısını sınırlar.
-- **version**: Sürüm kontrolü ve güncellemeler için kuralın sürümünü takip eder.
-- **created**: Denetim amacıyla kuralın oluşturulduğu zaman damgasını kaydeder.
-- **modified**: Kuralda yapılan son değişikliğin zaman damgasını saklar.
-- **hash**: Kuralın bütünlüğünü doğrulamak ve kurcalamayı tespit etmek için kuralın hash değerini içerir.
-- **identifier**: Kural için UUID gibi harici referanslarda kullanılan benzersiz bir dize tanımlayıcı sağlar.
-- **requirement**: Kuralın özel yetkilendirme gereksinimlerini ve mekanizmalarını tanımlayan serileştirilmiş verileri içerir.
-- **comment**: Belgeleme ve açıklık amacıyla kural hakkında insanlar tarafından okunabilir bir açıklama veya yorum sunar.
+- **tries**: Güvenliği artırmak için izin verilen authorization denemelerinin sayısını sınırlar.
+- **version**: Version control ve güncellemeler için kuralın sürümünü takip eder.
+- **created**: Denetim amacıyla kuralın oluşturulduğu timestamp'i kaydeder.
+- **modified**: Kuralda yapılan son değişikliğin timestamp'ini saklar.
+- **hash**: Kuralın bütünlüğünü sağlamak ve kurcalamayı tespit etmek için kuralın hash değerini tutar.
+- **identifier**: Kuralın harici referansları için UUID gibi benzersiz bir string identifier sağlar.
+- **requirement**: Kuralın belirli authorization gereksinimlerini ve mekanizmalarını tanımlayan serialized verileri içerir.
+- **comment**: Documentation ve açıklık amacıyla kural hakkında human-readable bir açıklama veya yorum sunar.
 
 ### Örnek
 ```bash
@@ -56,7 +56,7 @@ security authorizationdb read com.apple.tcc.util.admin
 </dict>
 </plist>
 ```
-Ayrıca [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) adresinde `authenticate-admin-nonshared` ifadesinin anlamını görmek mümkündür:<sup>[1]</sup>
+Ayrıca [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) adresinde `authenticate-admin-nonshared` ifadesinin anlamını görmek mümkündür:<sup>[[1]](#references)</sup>
 ```json
 {
 "allow-root": "false",
@@ -73,15 +73,15 @@ Ayrıca [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admi
 ```
 ## Authd
 
-Hassas eylemleri gerçekleştirmek üzere istemcileri yetkilendirmek için gelen istekleri alan bir daemon'dur. `XPCServices/` klasörü içinde tanımlanan bir XPC service olarak çalışır ve loglarını `/var/log/authd.log` dosyasına yazar.
+Hassas işlemleri gerçekleştirmeleri için istemcileri yetkilendirme isteklerini alan bir daemon'dur. `XPCServices/` klasörü içinde tanımlanmış bir XPC service olarak çalışır ve loglarını `/var/log/authd.log` dosyasına yazar.
 
-Ayrıca `security` tool'u kullanılarak birçok `Security.framework` API'si test edilebilir. Örneğin `AuthorizationExecuteWithPrivileges` şu şekilde çalıştırılabilir: `security execute-with-privileges /bin/ls`
+Ayrıca `security` tool kullanılarak birçok `Security.framework` API'si test edilebilir. Örneğin, `AuthorizationExecuteWithPrivileges` şu şekilde çalıştırılabilir: `security execute-with-privileges /bin/ls`
 
-Bu işlem, `/bin/ls` komutunu root olarak çalıştırmak üzere `/usr/libexec/security_authtrampoline /bin/ls` dosyasını fork edip exec eder ve ls komutunu root olarak çalıştırmak için bir izin istemi görüntüler:
+Bu işlem, `/bin/ls` komutunu root olarak çalıştırmak üzere `/usr/libexec/security_authtrampoline /bin/ls` komutunu fork edip exec eder ve root olarak ls çalıştırmak için bir istemde izin ister:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
-## References
+## Referanslar
 
 - [1] [authenticate-admin-nonshared - macOS Authorization Right'a Genel Bakış](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
 

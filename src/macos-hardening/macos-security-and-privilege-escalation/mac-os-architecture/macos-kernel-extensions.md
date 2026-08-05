@@ -7,47 +7,47 @@
 Kernel extensions (Kexts), ana işletim sistemine ek işlevsellik sağlayan ve **doğrudan macOS kernel alanına yüklenen**, **`.kext`** uzantılı **paketlerdir**.
 
 ### Kullanımdan kaldırılma durumu ve DriverKit / System Extensions
-**macOS Catalina (10.15)** ile birlikte Apple, eski KPI'ların çoğunu *kullanımdan kaldırılmış* olarak işaretledi ve **user-space** içinde çalışan **System Extensions & DriverKit** framework'lerini kullanıma sundu. **macOS Big Sur (11)** sürümünden itibaren işletim sistemi, makine **Reduced Security** modunda başlatılmadıkça, kullanımdan kaldırılmış KPI'lara dayanan üçüncü taraf kext'leri *yüklemeyi reddeder*. Apple Silicon üzerinde kext'leri etkinleştirmek için kullanıcının ayrıca şunları yapması gerekir:
+**macOS Catalina (10.15)** ile başlayan süreçte Apple, eski KPI'ların çoğunu *deprecated* olarak işaretledi ve **user-space** içinde çalışan **System Extensions & DriverKit** framework'lerini kullanıma sundu. **macOS Big Sur (11)** itibarıyla işletim sistemi, makine **Reduced Security** modunda başlatılmadığı sürece deprecated KPI'lara dayanan üçüncü taraf kext'leri *yüklemeyi reddeder*. Apple Silicon'da kext'leri etkinleştirmek için kullanıcının ayrıca şunları yapması gerekir:
 
-1. **Recovery** modunda yeniden başlatın → *Startup Security Utility*.
-2. **Reduced Security** seçeneğini belirleyin ve **“Allow user management of kernel extensions from identified developers”** seçeneğini işaretleyin.
+1. **Recovery** moduna yeniden başlatın → *Startup Security Utility*.
+2. **Reduced Security** seçeneğini seçin ve **“Allow user management of kernel extensions from identified developers”** kutusunu işaretleyin.
 3. Yeniden başlatın ve kext'i **System Settings → Privacy & Security** üzerinden onaylayın.
 
-DriverKit/System Extensions ile yazılan user-land driver'ları, çökmeler veya bellek bozulması kernel alanı yerine sandbox'lanmış bir process ile sınırlandırıldığından **attack surface'i önemli ölçüde azaltır**.<sup>[1]</sup>
+DriverKit/System Extensions ile yazılan user-land driver'ları, çökmeler veya memory corruption kernel space yerine sandbox'lanmış bir process ile sınırlı kaldığından **attack surface'i önemli ölçüde azaltır**.<sup>[[1]](#references)</sup>
 
-> 📝 macOS Sequoia'dan (15) itibaren Apple, eski networking ve USB KPI'larının birkaçını tamamen kaldırdı – vendor'lar için forward-compatible tek çözüm System Extensions'a geçiş yapmaktır.
+> 📝 macOS Sequoia'dan (15) itibaren Apple, birkaç eski networking ve USB KPI'ını tamamen kaldırmıştır – vendor'lar için ileriye dönük uyumlu tek çözüm System Extensions'a geçiş yapmaktır.
 
 ### Gereksinimler
 
-Açıkça, bu işlem kernel extension yüklemeyi **zorlaştıracak kadar güçlüdür**. Bir kernel extension'ın yüklenebilmesi için karşılaması gereken **gereksinimler** şunlardır:
+Açıkça görüldüğü üzere bu işlem çok güçlüdür ve bu nedenle **kernel extension yüklemek** karmaşıktır. Bir kernel extension'ın yüklenebilmesi için karşılaması gereken **gereksinimler** şunlardır:
 
-- **Recovery mode'a girilirken**, kernel **extension'larının yüklenmesine izin verilmelidir**:
+- **Recovery mode'a girilirken**, kernel **extension'ların yüklenmesine izin verilmelidir**:
 
 <figure><img src="../../../images/image (327).png" alt=""><figcaption></figcaption></figure>
 
-- Kernel extension, yalnızca **Apple tarafından verilebilen** bir kernel code signing certificate ile **imzalanmış** olmalıdır. Apple, şirketi ve buna neden ihtiyaç duyulduğunu ayrıntılı olarak inceleyecektir.
-- Kernel extension ayrıca **notarized** olmalıdır; Apple onu malware açısından kontrol edebilir.
-- Ardından, kernel extension'ı **yükleyebilen** kullanıcı **root** kullanıcısıdır ve paket içindeki dosyalar **root'a ait** olmalıdır.
-- Upload işlemi sırasında paket, korumalı ve root olmayan bir konum olan `/Library/StagedExtensions` içinde hazırlanmalıdır (`com.apple.rootless.storage.KernelExtensionManagement` grant'i gerekir).
-- Son olarak, yüklemeyi denediğinde kullanıcı [**bir confirmation request alır**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) ve bu kabul edilirse, yüklenebilmesi için bilgisayarın **yeniden başlatılması** gerekir.
+- Kernel extension, yalnızca **Apple tarafından verilebilen** bir kernel code signing certificate ile **imzalanmış** olmalıdır. Apple, şirketi ve buna neden ihtiyaç duyulduğunu ayrıntılı olarak inceler.
+- Kernel extension ayrıca **notarized** olmalıdır; Apple bu sayede extension'ı malware açısından kontrol edebilir.
+- Ardından kernel extension'ı **root** user yükleyebilir ve package içindeki dosyalar **root'a ait** olmalıdır.
+- Upload işlemi sırasında package, korumalı ve root olmayan bir konumda hazırlanmalıdır: `/Library/StagedExtensions` (`com.apple.rootless.storage.KernelExtensionManagement` grant'i gerektirir).
+- Son olarak yüklenmeye çalışıldığında kullanıcı [**bir onay isteği alır**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) ve onaylanırsa extension'ın yüklenmesi için bilgisayar yeniden başlatılmalıdır.
 
 ### Yükleme süreci
 
-Catalina'da süreç şu şekildeydi: **verification** sürecinin userland'de gerçekleştiğini belirtmek ilginçtir. Ancak yalnızca **`com.apple.private.security.kext-management`** grant'ine sahip uygulamalar bir extension'ın yüklenmesini kernel'den **talep edebilir**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
+Catalina'da süreç şu şekildeydi: **verification** işleminin userland'de gerçekleştiğini belirtmek ilginçtir. Ancak yalnızca **`com.apple.private.security.kext-management`** grant'ine sahip uygulamalar **kernel'den bir extension yüklemesini isteyebilir**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
 
-1. **`kextutil`** cli, bir extension'ın yüklenmesi için **verification** sürecini **başlatır**
-- Bir **Mach service** kullanarak mesaj gönderip **`kextd`** ile iletişim kurar.
-2. **`kextd`**, **signature** gibi çeşitli şeyleri kontrol eder
+1. **`kextutil`** cli, bir extension'ın yüklenmesine yönelik **verification** sürecini **başlatır**
+- Bir **Mach service** kullanarak **`kextd`** ile iletişim kurar.
+2. **`kextd`**, **signature** gibi çeşitli unsurları kontrol eder
 - Extension'ın **yüklenip yüklenemeyeceğini kontrol etmek** için **`syspolicyd`** ile iletişim kurar.
-3. Extension daha önce yüklenmemişse **`syspolicyd`** kullanıcıya **prompt gösterir**.
+3. Extension daha önce yüklenmemişse **`syspolicyd`**, **kullanıcıya** bir **prompt** gösterir.
 - **`syspolicyd`**, sonucu **`kextd`**'ye bildirir
-4. **`kextd`** son olarak extension'ın **yüklenmesi için kernel'e talimat verebilir**
+4. **`kextd`** son olarak **kernel'e extension'ı yüklemesini söyleyebilir**
 
-**`kextd`** kullanılabilir değilse **`kextutil`** aynı kontrolleri gerçekleştirebilir.
+**`kextd`** kullanılamıyorsa **`kextutil`** aynı kontrolleri gerçekleştirebilir.
 
-### Enumeration ve management (loaded kexts)
+### Enumeration ve management (yüklü kext'ler)
 
-`kextstat` geçmişte kullanılan araçtı, ancak güncel macOS sürümlerinde **deprecated** durumdadır. Modern interface **`kmutil`**'dir:
+`kextstat` geçmişte kullanılan araçtı ancak güncel macOS sürümlerinde **deprecated** durumdadır. Modern interface **`kmutil`**'dir:
 ```bash
 # List every extension currently linked in the kernel, sorted by load address
 sudo kmutil showloaded --sort
@@ -77,20 +77,20 @@ kmutil libraries -p /Library/Extensions/FancyUSB.kext --undef-symbols
 ## Kernelcache
 
 > [!CAUTION]
-> Kernel extensions'ın `/System/Library/Extensions/` içinde bulunması beklense de bu klasöre gittiğinizde **hiçbir binary bulamazsınız**. Bunun nedeni **kernelcache**'tir ve bir `.kext` dosyasını reverse etmek için onu elde etmenin bir yolunu bulmanız gerekir.
+> Kernel extensions'ın `/System/Library/Extensions/` konumunda bulunması beklense de bu klasöre gittiğinizde **hiçbir binary bulamazsınız**. Bunun nedeni **kernelcache**'tir ve bir `.kext` dosyasını reverse etmek için onu elde etmenin bir yolunu bulmanız gerekir.
 
-**kernelcache**, temel aygıt **driver'ları** ve **kernel extension'lar** ile birlikte **XNU kernel'ının önceden derlenmiş ve önceden linklenmiş bir sürümüdür**. **Sıkıştırılmış** bir formatta saklanır ve boot-up işlemi sırasında memory'ye açılır. Kernelcache, kernel'ın ve kritik driver'ların çalışmaya hazır bir sürümünü kullanıma sunarak **daha hızlı boot süresi** sağlar; böylece boot sırasında bu bileşenleri dinamik olarak yüklemek ve linklemek için harcanacak zaman ve kaynaklar azalır.
+**Kernelcache**, temel device **drivers** ve **kernel extensions** ile birlikte **XNU kernel'in önceden derlenmiş ve önceden linklenmiş sürümüdür**. **Sıkıştırılmış** bir formatta depolanır ve boot-up işlemi sırasında belleğe açılır. Kernelcache, kernel'in ve kritik driver'ların çalıştırılmaya hazır bir sürümünü sağlayarak **daha hızlı boot süresini** mümkün kılar; böylece bu bileşenlerin boot sırasında dinamik olarak yüklenmesi ve linklenmesi için harcanacak zaman ve kaynaklar azalır.
 
-Kernelcache'in temel avantajları **yükleme hızı** ve tüm module'lerin önceden linklenmiş olmasıdır (yükleme süresinde herhangi bir engel yoktur). Tüm module'ler önceden linklendikten sonra KXLD memory'den kaldırılabilir; bu nedenle **XNU yeni KEXT'ler yükleyemez.**
+Kernelcache'in temel avantajları **yükleme hızıdır** ve tüm modüllerin önceden linklenmiş olmasıdır (yükleme süresinde herhangi bir engel yoktur). Ayrıca tüm modüller önceden linklendikten sonra KXLD bellekten kaldırılabilir; böylece **XNU yeni KEXT'ler yükleyemez.**
 
 > [!TIP]
-> [https://github.com/dhinakg/aeota](https://github.com/dhinakg/aeota) tool'u, Apple'ın AEA (Apple Encrypted Archive / AEA asset) container'larını deşifre eder. Bunlar Apple'ın OTA asset'leri ve bazı IPSW parçaları için kullandığı şifreli container formatıdır. Tool, daha sonra sağlanan aastuff tool'larıyla extract edebileceğiniz temel .dmg/asset archive'ını oluşturabilir.
+> [https://github.com/dhinakg/aeota](https://github.com/dhinakg/aeota) aracı, Apple'ın AEA (Apple Encrypted Archive / AEA asset) container'larını — Apple'ın OTA asset'leri ve bazı IPSW parçaları için kullandığı şifreli container formatını — decrypt eder ve ardından sağlanan aastuff araçlarıyla extract edebileceğiniz temel .dmg/asset arşivini oluşturabilir.
 
 
 ### Yerel Kernelcache
 
 iOS'ta `/System/Library/Caches/com.apple.kernelcaches/kernelcache` konumunda bulunur; macOS'ta şu komutla bulabilirsiniz: **`find / -name "kernelcache" 2>/dev/null`** \
-Benim macOS durumumda şu konumda buldum:
+Benim durumumda macOS'ta şu konumda buldum:
 
 - `/System/Volumes/Preboot/1BAEB4B5-180B-4C46-BD53-51152B7D92DA/boot/DAD35E7BC0CDA79634C20BD1BD80678DFB510B2AAD3D25C1228BB34BCD0A711529D3D571C93E29E1D0C1264750FA043F/System/Library/Caches/com.apple.kernelcaches/kernelcache`
 
@@ -98,7 +98,7 @@ Burada ayrıca [**symbols içeren version 14 kernelcache'ini**](https://x.com/ti
 
 #### IMG4 / BVX2 (LZFSE) compressed
 
-IMG4 file format, Apple tarafından iOS ve macOS cihazlarında **firmware** bileşenlerini (örneğin **kernelcache**) güvenli bir şekilde **saklamak ve doğrulamak** için kullanılan bir container formatıdır. IMG4 formatı, gerçek payload'u (kernel veya bootloader gibi), bir signature'ı ve manifest property'lerinden oluşan bir seti kapsülleyen bir header ve çeşitli tag'ler içerir. Format, cryptographic verification'ı destekler ve cihazın firmware bileşenini çalıştırmadan önce gerçekliğini ve bütünlüğünü doğrulamasını sağlar.
+IMG4 file format, Apple tarafından iOS ve macOS cihazlarında **firmware** bileşenlerini (örneğin **kernelcache**) güvenli şekilde **depolamak ve doğrulamak** için kullanılan bir container formatıdır. IMG4 formatı, gerçek payload'u (örneğin bir kernel veya bootloader), bir signature'ı ve manifest özelliklerinden oluşan bir seti kapsülleyen bir header ve çeşitli tag'ler içerir. Format, cryptographic verification'ı destekler ve cihazın firmware bileşenini çalıştırmadan önce bu bileşenin authenticity ve integrity'sini doğrulamasını sağlar.
 
 Genellikle aşağıdaki bileşenlerden oluşur:
 
@@ -110,10 +110,10 @@ Genellikle aşağıdaki bileşenlerden oluşur:
 - Ek bir Key/Value dictionary
 - **Restore Info (IM4R)**:
 - APNonce olarak da bilinir
-- Bazı update'lerin replay edilmesini önler
+- Bazı update'lerin replay edilmesini engeller
 - OPTIONAL: Genellikle bu bulunmaz
 
-Kernelcache'i decompress edin:
+Kernelcache'in compression'ını açın:
 ```bash
 # img4tool (https://github.com/tihmstar/img4tool)
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
@@ -132,9 +132,9 @@ disarm -e filesets kernelcache.release.d23
 ```
 #### Kernel için Disarm sembolleri
 
-**`Disarm`**, matcher'ları kullanarak kernelcache içindeki işlevleri symbolicate etmeye olanak tanır. Bu matcher'lar, disarm'a bir binary içindeki işlevleri, argümanları ve panic/log string'lerini nasıl tanıyıp otomatik olarak symbolicate edeceğini bildiren basit pattern kurallarıdır (metin satırlarıdır).
+**`Disarm`**, matcher'ları kullanarak kernelcache içindeki fonksiyonları symbolicate etmeyi sağlar. Bu matcher'lar, disarm'a bir binary içindeki fonksiyonları, argümanları ve panic/log string'lerini nasıl tanıyıp otomatik olarak symbolicate edeceğini söyleyen basit pattern kurallarıdır (metin satırlarıdır).
 
-Temel olarak, bir işlevin kullandığı string'i belirtirsiniz ve disarm onu bulup **symbolicate eder**.
+Temel olarak, bir fonksiyonun kullandığı string'i belirtirsiniz ve disarm bu string'i bulup **symbolicate eder**.
 ```bash
 You can find some `xnu.matchers` in [https://newosxbook.com/tools/disarm.html](https://newosxbook.com/tools/disarm.html) in the **`Matchers`** section. You can also create your own matchers.
 
@@ -166,17 +166,17 @@ Sometime Apple releases **kernelcache** with **symbols**. You can download some 
 To **extract** the kernel cache you can do:
 
 ```bash
-# ipsw tool'u yükle
+# ipsw tool'u kurun
 brew install blacktop/tap/ipsw
 
-# Yalnızca kernelcache'i IPSW'den çıkar
+# IPSW'den yalnızca kernelcache'i çıkarın
 ipsw extract --kernel /path/to/YourFirmware.ipsw -o out/
 
-# Şuna benzer bir çıktı almalısın:
+# Şuna benzer bir çıktı almalısınız:
 #   out/Firmware/kernelcache.release.iPhoneXX
 #   veya bir IMG4 payload'u: out/Firmware/kernelcache.release.iPhoneXX.im4p
 
-# Bir IMG4 payload'u alırsan:
+# Bir IMG4 payload'u alırsanız:
 ipsw img4 im4p extract out/Firmware/kernelcache*.im4p -o kcache.raw
 ```
 
@@ -253,11 +253,9 @@ Apple’s recommended workflow is to build a **Kernel Debug Kit (KDK)** that mat
 ### One-shot local debug of a panic
 
 ```bash
-# En son panic için bir symbolication bundle oluşturun
-```bash
+# Create a symbolication bundle for the latest panic
 sudo kdpwrit dump latest.kcdata
 kmutil analyze-panic latest.kcdata -o ~/panic_report.txt
-```
 ```
 
 ### Live remote debugging from another Mac
@@ -276,7 +274,7 @@ reboot
 ```bash
 lldb
 (lldb) kdp-remote "udp://macbook-target"
-(lldb) bt  # kernel bağlamında backtrace al
+(lldb) bt  # get backtrace in kernel context
 ```
 
 ### Attaching LLDB to a specific loaded kext
@@ -285,7 +283,7 @@ lldb
 # kext'in yükleme adresini belirle
 ADDR=$(kmutil showloaded --bundle-identifier com.example.driver | awk '{print $4}')
 
-# Bağlan
+# Attach
 sudo lldb -n kernel_task -o "target modules load --file /Library/Extensions/Example.kext/Contents/MacOS/Example --slide $ADDR"
 ```
 

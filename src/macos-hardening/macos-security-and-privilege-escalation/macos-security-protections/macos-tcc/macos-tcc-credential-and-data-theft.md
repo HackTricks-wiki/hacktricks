@@ -1,30 +1,30 @@
-# TCC İzinleri Üzerinden macOS Kimlik Bilgileri ve Veri Hırsızlığı
+# TCC Permissions Üzerinden macOS Credential ve Data Theft
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 ## Genel Bakış
 
-macOS TCC (Transparency, Consent, and Control), hassas kullanıcı verilerine erişimi korur. Bir saldırgan **halihazırda TCC izinlerine sahip bir binary'yi ele geçirdiğinde**, bu izinleri devralır. Bu sayfa, veri hırsızlığıyla ilgili her TCC izninin istismar potansiyelini belgeler.
+macOS TCC (Transparency, Consent, and Control), hassas kullanıcı verilerine erişimi korur. Bir attacker, **halihazırda TCC grant'lerine sahip bir binary'yi compromise ettiğinde**, bu permission'ları devralır. Bu sayfa, data theft ile ilişkili her TCC permission'ının exploitation potansiyelini belgeler.
 
 > [!WARNING]
-> TCC izni verilmiş bir binary'ye (DYLD injection, dylib hijacking veya task port aracılığıyla) code injection yapılması, **binary'nin tüm TCC izinlerinin sessizce devralınmasını** sağlar. Aynı process korunan verileri okuduğunda ek bir prompt veya doğrulama gösterilmez.
+> TCC grant'ine sahip bir binary'ye (DYLD injection, dylib hijacking veya task port üzerinden) code injection yapılması, **tüm TCC permission'larını sessizce devralır**. Aynı process korunan data'yı okuduğunda ek bir prompt veya verification gerçekleşmez.
 
 ---
 
-## Keychain Erişim Grupları
+## Keychain Access Groups
 
 ### Ödül
 
 macOS Keychain şunları depolar:
-- **Wi-Fi parolaları** — kaydedilmiş tüm kablosuz ağ kimlik bilgileri
-- **Web sitesi parolaları** — Safari, Chrome (Keychain kullanıldığında) ve diğer browser parolaları
-- **Uygulama parolaları** — e-posta hesapları, VPN kimlik bilgileri, development token'ları
-- **Sertifikalar ve private key'ler** — code signing, client TLS, S/MIME encryption
-- **Güvenli notlar** — kullanıcı tarafından depolanan secret'lar
+- **Wi-Fi passwords** — kaydedilmiş tüm wireless network credential'ları
+- **Website passwords** — Safari, Chrome (Keychain kullanırken) ve diğer browser password'ları
+- **Application passwords** — email account'ları, VPN credential'ları, development token'ları
+- **Certificates and private keys** — code signing, client TLS, S/MIME encryption
+- **Secure notes** — kullanıcı tarafından depolanan secret'lar
 
 ### Entitlement: `keychain-access-groups`
 
-Keychain öğeleri **erişim grupları** halinde düzenlenir. Bir uygulamanın `keychain-access-groups` entitlement'ı, erişebileceği grupları listeler:
+Keychain item'ları **access group'lar** halinde düzenlenir. Bir application'ın `keychain-access-groups` entitlement'ı, erişebileceği group'ları listeler:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -83,9 +83,9 @@ NSString *password = [[NSString alloc] initWithData:passData encoding:NSUTF8Stri
 
 ## Kamera Erişimi (kTCCServiceCamera)
 
-### İstismar
+### Exploitation
 
-Kamera TCC iznine sahip bir binary (`kTCCServiceCamera` veya `com.apple.security.device.camera` entitlement'ı aracılığıyla) fotoğraf ve video çekebilir:
+Kamera TCC iznine sahip bir binary (`kTCCServiceCamera` veya `com.apple.security.device.camera` entitlement aracılığıyla) fotoğraf ve video çekebilir:
 ```bash
 # Find camera-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -125,7 +125,7 @@ fromConnection:(AVCaptureConnection *)connection {
 @end
 ```
 > [!TIP]
-> **macOS Sonoma** ile başlayan sürümlerde menü çubuğundaki kamera göstergesi kalıcıdır ve programatik olarak gizlenemez. **Daha eski macOS sürümlerinde** kısa süreli bir kayıt fark edilebilir bir gösterge oluşturmayabilir.
+> **macOS Sonoma** ile birlikte menü çubuğundaki kamera göstergesi kalıcı hale gelir ve programatik olarak gizlenemez. **Daha eski macOS sürümlerinde**, kısa süreli bir capture fark edilebilir bir gösterge oluşturmayabilir.
 
 ---
 
@@ -133,13 +133,13 @@ fromConnection:(AVCaptureConnection *)connection {
 
 ### Exploitation
 
-Mikrofon erişimi; yerleşik mikrofondan, kulaklıktan veya bağlı ses giriş cihazlarından gelen tüm sesleri kaydeder:
+Mikrofon erişimi, dahili mikrofondan, headset'ten veya bağlı ses giriş cihazlarından gelen tüm sesleri capture eder:
 ```bash
 # Find mic-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='kTCCServiceMicrophone' AND auth_value=2;"
 ```
-### Saldırı: Ambient Recording
+### Saldırı: Ortam Kaydı
 ```objc
 // Injected into a mic-entitled process
 #import <AVFoundation/AVFoundation.h>
@@ -167,7 +167,7 @@ dispatch_get_main_queue(), ^{
 
 ## Konum Takibi (kTCCServiceLocation)
 
-### Exploitation
+### İstismar
 ```bash
 # Find location-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -205,7 +205,7 @@ loc.coordinate.latitude, loc.coordinate.longitude, [NSDate date]];
 
 ### Kişisel Veri Exfiltration
 
-| TCC Service | Framework | Veri |
+| TCC Service | Framework | Data |
 |---|---|---|
 | `kTCCServiceAddressBook` | `Contacts.framework` | İsimler, e-postalar, telefonlar, adresler |
 | `kTCCServiceCalendar` | `EventKit` | Toplantılar, katılımcılar, konumlar |
@@ -243,8 +243,8 @@ usingBlock:^(CNContact *contact, BOOL *stop) {
 Bu entitlement, aşağıdakilere erişim sağlayan `com.apple.iCloudHelper` XPC service ile iletişim kurulmasına olanak tanır:
 - **iCloud tokens** — kullanıcının Apple ID'si için authentication tokens
 - **iCloud Drive** — tüm cihazlardan senkronize edilen belgeler
-- **iCloud Keychain** — tüm Apple cihazları arasında senkronize edilen parolalar
-- **Find My** — kullanıcının tüm Apple cihazlarının konumu<sup>[4]</sup>
+- **iCloud Keychain** — tüm Apple cihazları arasında senkronize edilen passwords
+- **Find My** — kullanıcının tüm Apple cihazlarının konumu<sup>[[4]](#references)</sup>
 ```bash
 # Find iCloud-entitled binaries
 sqlite3 /tmp/executables.db "
@@ -253,7 +253,7 @@ WHERE iCloudAccs = 1
 ORDER BY privileged DESC;"
 ```
 > [!CAUTION]
-> iCloud-entitled bir binary'yi ele geçirmek saldırıyı **tek bir cihazdan tüm Apple ekosistemine** genişletir: diğer Mac'ler, iPhone'lar, iPad'ler ve Apple Watch. iCloud Keychain senkronizasyonu, tüm cihazlardaki parolalara erişilebilmesini sağlar.
+> iCloud yetkisine sahip bir binary'yi ele geçirmek, saldırıyı **tek bir cihazdan tüm Apple ekosistemine** genişletir: diğer Mac'ler, iPhone'lar, iPad'ler ve Apple Watch. iCloud Keychain senkronizasyonu, tüm cihazlardaki parolalara erişilebilmesini sağlar.
 
 ---
 
@@ -263,10 +263,10 @@ ORDER BY privileged DESC;"
 
 Full Disk Access, aşağıdakiler dahil olmak üzere **sistemdeki her dosyaya** okuma yetkisi verir:
 - Diğer uygulamaların verileri (Messages, Mail, Safari geçmişi)
-- TCC veritabanları (diğer tüm izinleri ortaya çıkarır)
+- TCC veritabanları (diğer tüm izinleri açığa çıkarır)
 - SSH anahtarları ve yapılandırması
-- Tarayıcı çerezleri ve session token'ları
-- Uygulama veritabanları ve önbellekleri
+- Tarayıcı çerezleri ve oturum token'ları
+- Uygulama veritabanları ve cache'ler
 ```bash
 # Find FDA-granted binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -282,21 +282,21 @@ cat ~/.ssh/id_rsa                           # SSH private key
 
 ## Exploitation Öncelik Matrisi
 
-Enjekte edilebilir ve TCC tarafından izin verilmiş binary'leri değerlendirirken veri değerine göre önceliklendirin:
+Injectable TCC-granted binary'leri değerlendirirken veri değerine göre önceliklendirme yapın:
 
-| Priority | TCC Permission | Why |
+| Öncelik | TCC İzni | Neden |
 |---|---|---|
-| **Critical** | Full Disk Access | Her şeye erişim |
-| **Critical** | TCC Manager | Herhangi bir izni verebilir |
-| **High** | Keychain Access Groups | Depolanan tüm parolalar |
-| **High** | iCloud Account Access | Birden fazla cihazın ele geçirilmesi |
-| **High** | Input Monitoring (ListenEvent) | Keylogging |
-| **High** | Accessibility | GUI kontrolü, kendisine izin verme |
-| **Medium** | Screen Capture | Görsel veri yakalama |
-| **Medium** | Camera + Microphone | Gözetleme |
-| **Medium** | Contacts + Calendar | Social engineering verileri |
-| **Low** | Location | Fiziksel takip |
-| **Low** | Photos | Kişisel veriler |
+| **Kritik** | Full Disk Access | Her şeye erişim |
+| **Kritik** | TCC Manager | Herhangi bir izni verebilir |
+| **Yüksek** | Keychain Access Groups | Saklanan tüm parolalar |
+| **Yüksek** | iCloud Account Access | Birden fazla cihazın ele geçirilmesi |
+| **Yüksek** | Input Monitoring (ListenEvent) | Keylogging |
+| **Yüksek** | Accessibility | GUI kontrolü, kendisine izin verme |
+| **Orta** | Screen Capture | Görsel veri yakalama |
+| **Orta** | Camera + Microphone | Gözetleme |
+| **Orta** | Contacts + Calendar | Social engineering verileri |
+| **Düşük** | Location | Fiziksel takip |
+| **Düşük** | Photos | Kişisel veriler |
 
 ## Enumeration Script
 ```bash

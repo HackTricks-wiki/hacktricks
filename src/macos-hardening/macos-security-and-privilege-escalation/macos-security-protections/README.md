@@ -4,7 +4,7 @@
 
 ## Gatekeeper
 
-Gatekeeper genellikle **Quarantine + Gatekeeper + XProtect** birleşimini ifade etmek için kullanılır; bunlar, **potansiyel olarak kötü amaçlı indirilen yazılımların kullanıcılar tarafından çalıştırılmasını engellemeye** çalışan 3 macOS security module'üdür.
+Gatekeeper genellikle **Quarantine + Gatekeeper + XProtect** birleşimini ifade etmek için kullanılır; bunlar, **indirilmiş potansiyel olarak kötü amaçlı yazılımların kullanıcılar tarafından çalıştırılmasını engellemeye** çalışan 3 macOS güvenlik modülüdür.
 
 Daha fazla bilgi:
 
@@ -26,7 +26,7 @@ macos-sip.md
 
 ### Sandbox
 
-MacOS Sandbox, sandbox içinde çalışan **uygulamaları**, uygulamanın çalıştığı **Sandbox profile'ında belirtilen izin verilen eylemlerle sınırlar**. Bu, **uygulamanın yalnızca beklenen kaynaklara erişmesini** sağlamaya yardımcı olur.
+MacOS Sandbox, sandbox içinde çalışan **uygulamaları**, uygulamanın çalıştığı **Sandbox profilinde belirtilen izin verilen eylemlerle sınırlar**. Bu, **uygulamanın yalnızca beklenen kaynaklara erişmesini** sağlamaya yardımcı olur.
 
 
 {{#ref}}
@@ -35,7 +35,7 @@ macos-sandbox/
 
 ### TCC - **Transparency, Consent, and Control**
 
-**TCC (Transparency, Consent, and Control)** bir security framework'üdür. Uygulamaların **izinlerini yönetmek** ve özellikle hassas özelliklere erişimlerini düzenlemek için tasarlanmıştır. Buna **konum servisleri, kişiler, fotoğraflar, microphone, camera, accessibility ve full disk access** gibi unsurlar dahildir. TCC, uygulamaların bu özelliklere yalnızca açık kullanıcı onayı aldıktan sonra erişebilmesini sağlayarak gizliliği ve kişisel veriler üzerindeki kontrolü güçlendirir.
+**TCC (Transparency, Consent, and Control)** bir güvenlik framework'üdür. Uygulamaların izinlerini **yönetmek**, özellikle de hassas özelliklere erişimlerini düzenlemek için tasarlanmıştır. Buna **konum servisleri, kişiler, fotoğraflar, mikrofon, kamera, erişilebilirlik ve tam disk erişimi** gibi unsurlar dahildir. TCC, uygulamaların bu özelliklere yalnızca açık kullanıcı onayı aldıktan sonra erişebilmesini sağlayarak gizliliği ve kişisel veriler üzerindeki kontrolü güçlendirir.
 
 
 {{#ref}}
@@ -44,7 +44,7 @@ macos-tcc/
 
 ### Launch/Environment Constraints & Trust Cache
 
-macOS'taki Launch constraints, **bir süreci kimin**, **nasıl** ve **nereden** başlatabileceğini tanımlayarak **süreç başlatılmasını düzenleyen** bir security feature'dır. macOS Ventura'da tanıtılan bu özellik, system binary'lerini bir **trust cache** içindeki constraint kategorilerine ayırır. Her executable binary'nin **başlatılması** için **self**, **parent** ve **responsible** constraints dahil olmak üzere belirlenmiş **kuralları** vardır. macOS Sonoma'da üçüncü taraf uygulamalara **Environment Constraints** olarak genişletilen bu özellikler, süreç başlatma koşullarını yöneterek olası system exploitation'larını azaltmaya yardımcı olur.
+macOS'taki Launch constraints, bir süreci **kimlerin**, **nasıl** ve **nereden** başlatabileceğini tanımlayarak **süreç başlatmayı düzenleyen** bir güvenlik özelliğidir. macOS Ventura'da tanıtılan bu özellik, sistem binary'lerini bir **trust cache** içindeki constraint kategorilerine ayırır. Her executable binary, **self**, **parent** ve **responsible** constraints dahil olmak üzere **başlatılmasına** yönelik belirli **kurallara** sahiptir. macOS Sonoma'da üçüncü taraf uygulamalara **Environment Constraints** olarak genişletilen bu özellikler, süreç başlatma koşullarını yöneterek olası sistem exploit'lerini azaltmaya yardımcı olur.
 
 
 {{#ref}}
@@ -53,28 +53,28 @@ macos-launch-environment-constraints.md
 
 ## MRT - Malware Removal Tool
 
-Malware Removal Tool (MRT), macOS'un security infrastructure'ının başka bir parçasıdır. Adından da anlaşılacağı üzere MRT'nin temel işlevi **bilinen malware'leri infected system'lerden kaldırmaktır**.
+Malware Removal Tool (MRT), macOS güvenlik altyapısının bir başka parçasıdır. Adından da anlaşılacağı gibi MRT'nin temel işlevi **bilinen malware'leri infected sistemlerden kaldırmaktır**.
 
-Bir Mac'te malware tespit edildiğinde (XProtect tarafından veya başka bir yolla), MRT **malware'i otomatik olarak kaldırmak** için kullanılabilir. MRT arka planda sessizce çalışır ve genellikle system güncellendiğinde veya yeni bir malware definition indirildiğinde çalışır (MRT'nin malware tespit etmek için kullandığı kuralların binary içinde bulunduğu görülüyor).
+Bir Mac'te malware tespit edildiğinde (XProtect tarafından veya başka bir yöntemle), MRT **malware'i otomatik olarak kaldırmak** için kullanılabilir. MRT arka planda sessizce çalışır ve genellikle sistem güncellendiğinde veya yeni bir malware tanımı indirildiğinde çalışır (MRT'nin malware tespit etmek için kullandığı kuralların binary'nin içinde bulunduğu görülüyor).
 
-Hem XProtect hem de MRT macOS'un security measures'ının parçası olsa da farklı işlevler gerçekleştirir:
+Hem XProtect hem de MRT macOS güvenlik önlemlerinin parçası olsa da farklı işlevleri yerine getirir:
 
-- **XProtect** bir preventative tool'dur. **Dosyaları indirildikleri sırada** (belirli applications aracılığıyla) **kontrol eder** ve bilinen herhangi bir malware türü tespit ederse **dosyanın açılmasını engeller**; böylece malware'in ilk etapta system'e bulaşmasını önler.
-- Buna karşılık **MRT**, **reactive tool**'dur. Bir system'de malware tespit edildikten sonra çalışır ve system'i temizlemek için offending software'i kaldırmayı amaçlar.
+- **XProtect** önleyici bir araçtır. **Dosyaları indirildikleri sırada** (belirli uygulamalar aracılığıyla) **kontrol eder** ve bilinen malware türlerinden herhangi birini tespit ederse **dosyanın açılmasını engeller**; böylece malware'in ilk etapta sisteminize bulaşmasını önler.
+- Buna karşılık **MRT**, **reaktif bir araçtır**. Bir sistemde malware tespit edildikten sonra çalışır ve sistemi temizlemek için sorun oluşturan yazılımı kaldırmayı amaçlar.
 
-MRT application'ı **`/Library/Apple/System/Library/CoreServices/MRT.app`** konumunda bulunur.
+MRT uygulaması **`/Library/Apple/System/Library/CoreServices/MRT.app`** konumunda bulunur.
 
 ## Background Tasks Management
 
-**macOS**, bir tool code execution'ı persist etmek için iyi bilinen bir **technique** kullandığında (Login Items, Daemons gibi) artık **her seferinde alert verir**; böylece kullanıcı **hangi software'in persistence sağladığını** daha iyi bilir.<sup>[3]</sup>
+**macOS**, bir araç **code execution'ı kalıcı hale getirmek için iyi bilinen bir technique** (Login Items, Daemons gibi) kullandığında artık **her seferinde uyarı verir**; böylece kullanıcı **hangi yazılımın persistence sağladığını** daha iyi bilir.<sup>[[3]](#references)</sup>
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
-Bu işlem, `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` konumunda bulunan bir **daemon** ve `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app` konumundaki **agent** ile gerçekleştirilir.<sup>[1]</sup>
+Bu işlem, `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` konumundaki bir **daemon** ve `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app` konumundaki **agent** ile gerçekleştirilir.<sup>[[1]](#references)</sup>
 
-**`backgroundtaskmanagementd`**'nin bir şeyin persistent folder'a yüklendiğini anlamasının yolu, **FSEvents'leri alması** ve bunlar için bazı **handler'lar** oluşturmasıdır.<sup>[1]</sup>
+**`backgroundtaskmanagementd`**'nin bir şeyin persistence sağlanan bir klasöre kurulduğunu anlamasının yolu, **FSEvents'leri alması** ve bunlar için bazı **handler'lar** oluşturmasıdır.<sup>[[1]](#references)</sup>
 
-Ayrıca Apple tarafından sürdürülen ve sık sık persistence sağlayan **well known applications**'ları içeren bir plist file şu konumda bulunur: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`<sup>[3]</sup>
+Ayrıca Apple tarafından sürdürülen ve sıklıkla persistence sağlayan **iyi bilinen uygulamaları** içeren bir plist dosyası şu konumda bulunur: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`<sup>[[3]](#references)</sup>.
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -92,31 +92,31 @@ Ayrıca Apple tarafından sürdürülen ve sık sık persistence sağlayan **wel
 ```
 ### Enumeration
 
-Apple CLI aracını çalıştırarak yapılandırılmış **tüm** arka plan öğelerini **enumerate** etmek mümkündür:<sup>[3]</sup>
+Apple CLI tool'u çalıştırarak yapılandırılmış **tüm** arka plan öğelerini enumerate etmek mümkündür:<sup>[[3]](#references)</sup>
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
 ```
-Ayrıca, bu bilgileri [**DumpBTM**](https://github.com/objective-see/DumpBTM) ile listelemek de mümkündür.<sup>[2]</sup>
+Ayrıca, bu bilgileri [**DumpBTM**](https://github.com/objective-see/DumpBTM) ile listelemek de mümkündür.<sup>[[2]](#references)</sup>
 ```bash
 # You need to grant the Terminal Full Disk Access for this to work
 chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
-Bu bilgiler **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** içinde depolanır ve Terminal için FDA gerekir.<sup>[2]</sup>
+Bu bilgiler **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** konumunda depolanır ve Terminal için FDA gerekir.<sup>[[2]](#references)</sup>
 
-### BTM ile Oynamak
+### BTM ile Oynama
 
-Yeni bir persistence bulunduğunda **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** türünde bir event oluşturulur. Bu nedenle, bu **event**'in gönderilmesini **engellemenin** veya **agent**'ın kullanıcıyı **uyarmasını engellemenin** herhangi bir yolu, saldırganın BTM'yi _**bypass**_ etmesine yardımcı olur.<sup>[1]</sup>
+Yeni bir persistence bulunduğunda **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** türünde bir event oluşturulur. Bu nedenle, bu **event**'in gönderilmesini **engellemenin** veya **agent'ın kullanıcıyı uyarmasını** önlemenin herhangi bir yolu, saldırganın BTM'yi _**bypass**_ etmesine yardımcı olur.<sup>[[1]](#references)</sup>
 
-- **Veritabanını sıfırlama**: Aşağıdaki komutu çalıştırmak veritabanını sıfırlar (veritabanının baştan oluşturulması gerekir); ancak herhangi bir nedenle, bu işlemden sonra sistem yeniden başlatılana kadar **yeni bir persistence için uyarı verilmez**.<sup>[1]</sup>
-- **root** gerekir.
+- **Veritabanını sıfırlama**: Aşağıdaki komutu çalıştırmak veritabanını sıfırlar (veritabanının baştan oluşturulması gerekir); ancak bazı nedenlerden dolayı, bu işlemden sonra sistem yeniden başlatılana kadar **hiçbir yeni persistence için uyarı verilmez**.<sup>[[1]](#references)</sup>
+- **root** gereklidir.
 ```bash
 # Reset the database
 sfltool resettbtm
 ```
-- **Agent'i Durdurma**: Agent'e bir durdurma sinyali gönderilerek yeni tespitler bulunduğunda **kullanıcıyı uyarmaması** sağlanabilir.<sup>[1]</sup>
+- **Agent'i Durdur**: Agent'a bir durdurma sinyali gönderilerek yeni tespitler bulunduğunda **kullanıcıyı uyarmaması** sağlanabilir.<sup>[[1]](#references)</sup>
 ```bash
 # Get PID
 pgrep BackgroundTaskManagementAgent
@@ -129,12 +129,12 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-- **Hata**: **persistence'ı oluşturan process hemen ardından hızlıca kapanırsa**, daemon onun hakkında **bilgi almaya** çalışacak, **başarısız olacak** ve yeni bir şeyin persistence yaptığını belirten **event'i gönderemeyecek**.<sup>[1]</sup>
+- **Bug**: **persistence'ı oluşturan process**, oluşturduktan hemen sonra **hızla sona ererse**, daemon onun hakkında **bilgi almaya** çalışacak, **başarısız olacak** ve yeni bir şeyin persistence oluşturduğunu belirten **event'i gönderemeyecek**.<sup>[[1]](#references)</sup>
 
-## Referanslar
+## References
 
-- [1] [OBTS v6.0: "macOS'un Background Task Management Sisteminin Gizemini Çözmek (& Bypass Etmek)" - Patrick Wardle & Chris Lopez](https://youtu.be/9hjUmT031tc?t=26481)
+- [1] [OBTS v6.0: "macOS'un Background Task Management'ını Gizeminden Arındırma (& Bypass Etme)" - Patrick Wardle & Chris Lopez](https://youtu.be/9hjUmT031tc?t=26481)
 - [2] [Yeni (Developer) Tool: "DumpBTM" - Patrick Wardle (Patreon)](https://www.patreon.com/posts/new-developer-77420730?l=fr)
-- [3] [Mac'te login items ve background tasks'ı yönetme - Apple Platform Deployment](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
+- [3] [Mac'te login item'ları ve background task'leri yönetme - Apple Platform Deployment](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
 
 {{#include ../../../banners/hacktricks-training.md}}

