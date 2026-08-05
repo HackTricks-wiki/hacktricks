@@ -6,14 +6,14 @@
 
 ### Basic Information
 
-macOS Big Sur (11.0) 以降、システムボリュームは APFS スナップショットハッシュツリーを使って暗号的に封印されます。これは Sealed System Volume (SSV) と呼ばれます。システムパーティションは読み取り専用でマウントされ、改変は封印を破ることになり、起動時に検証されます。
+**macOS Big Sur (11.0)** 以降、system volume は **APFS snapshot hash tree** を使用して暗号学的に sealed されています。これは **Sealed System Volume (SSV)** と呼ばれます。system partition は **read-only** で mount され、変更を加えると seal が破壊されます。この状態は boot 時に検証されます。
 
-The SSV provides:
-- Tamper detection — システムのバイナリ／フレームワークへの改変は、暗号的封印が破れることで検出可能です
-- Rollback protection — ブートプロセスはシステムスナップショットの整合性を検証します
-- Rootkit prevention — root であっても（封印を破らない限り）システムボリューム上のファイルを永続的に変更できません
+SSV は以下を提供します:
+- **Tamper detection** — system binaries/frameworks への変更は、破壊された cryptographic seal によって検出可能
+- **Rollback protection** — boot process により system snapshot の integrity が検証される
+- **Rootkit prevention** — root であっても、seal を破壊せずに system volume 上の files を永続的に変更することはできない
 
-### SSV ステータスの確認
+### Checking SSV Status
 ```bash
 # Check if authenticated root is enabled (SSV seal verification)
 csrutil authenticated-root status
@@ -27,16 +27,18 @@ mount | grep " / "
 # Verify the system volume seal
 diskutil apfs listVolumeGroups
 ```
-### SSV Writer の権限
+### SSV Writer Entitlements
+
+一部の Apple システムバイナリには、sealed system volume の変更または管理を許可する entitlements があります。
 
 | Entitlement | Purpose |
 |---|---|
-| `com.apple.private.apfs.revert-to-snapshot` | システムボリュームを以前のスナップショットに戻す |
-| `com.apple.private.apfs.create-sealed-snapshot` | システム更新後に新しい sealed snapshot を作成する |
-| `com.apple.rootless.install.heritable` | SIP保護パスに書き込む（子プロセスに継承される） |
-| `com.apple.rootless.install` | SIP保護パスに書き込む |
+| `com.apple.private.apfs.revert-to-snapshot` | system volume を以前の snapshot に revert する |
+| `com.apple.private.apfs.create-sealed-snapshot` | system update 後に新しい sealed snapshot を作成する |
+| `com.apple.rootless.install.heritable` | SIP で保護された path への書き込み（child process に継承） |
+| `com.apple.rootless.install` | SIP で保護された path への書き込み |
 
-### SSV Writer を見つける方法
+### SSV Writers の確認
 ```bash
 # Search for binaries with SSV-related entitlements
 find /System /usr -type f -perm +111 -exec sh -c '
@@ -56,7 +58,7 @@ WHERE c.name = 'ssv_writer';"
 
 #### Snapshot Rollback Attack
 
-もし攻撃者が `com.apple.private.apfs.revert-to-snapshot` を持つバイナリを侵害した場合、**システムボリュームをアップデート前の状態にロールバックする**ことで、既知の脆弱性を復元できます：
+攻撃者が `com.apple.private.apfs.revert-to-snapshot` を持つバイナリを侵害した場合、**システムボリュームをアップデート前の状態にロールバック**し、既知の脆弱性を復元できます。
 ```bash
 # Conceptual — the snapshot revert operation would:
 # 1. List available snapshots
@@ -66,24 +68,24 @@ diskutil apfs listSnapshots disk3s1
 # This restores the system to a state with known, patched vulnerabilities
 ```
 > [!WARNING]
-> スナップショットのロールバックは実質的に **セキュリティアップデートを元に戻す** ことになり、以前に修正されたカーネルやシステムの脆弱性を復元します。これは現代の macOS 上で可能な最も危険な操作の一つです。
+> Snapshot rollback は、以前に修正された kernel および system の脆弱性を復元することで、セキュリティアップデートを実質的に**取り消します**。これは、現代の macOS で可能な操作の中でも最も危険なものの 1 つです。
 
 #### System Binary Replacement
 
-SIPバイパス + SSV 書き込み能力があれば、攻撃者は以下を行えます:
+SIP bypass + SSV write capability により、攻撃者は以下を実行できます。
 
-1. システムボリュームを読み書き可能にマウントする
-2. システムデーモンやフレームワークライブラリをトロイ化されたバージョンと置き換える
-3. スナップショットを再シールする（または SIP が既に低下している場合は壊れたシールを受け入れる）
-4. rootkit は再起動後も持続し、ユーザーランドの検出ツールからは見えなくなる
+1. system volume を read-write で mount する
+2. system daemon または framework library を trojaned version に置き換える
+3. snapshot を再封印する（または、SIP がすでに劣化している場合は壊れた seal を受け入れる）
+4. rootkit は reboot 後も persistence し、userland detection tools から見えなくなる
 
 ### Real-World CVEs
 
 | CVE | Description |
 |---|---|
-| CVE-2021-30892 | **Shrootless** — SIPバイパスにより `system_installd` 経由でSSVの変更を可能にする |
-| CVE-2022-22583 | PackageKitのスナップショット処理を通じたSSVバイパス |
-| CVE-2022-46689 | SIP保護ファイルへの書き込みを許すレースコンディション |
+| CVE-2021-30892 | **Shrootless** — `system_installd` の `com.apple.rootless.install.heritable` entitlement を悪用して、任意の post-install scripts を実行する SIP bypass ([Microsoft](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)) |
+| CVE-2022-22583 | SIP bypass: `system_installd` は post-install script を `/tmp` 配下の SIP-protected folder に stage していましたが、`/tmp` 自体は SIP-protected ではないため、その folder に image を mount することで置き換え可能でした ([Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html)) |
+| CVE-2022-46689 | **MacDirtyCow** — XNU における copy-on-write race により、read-only の root-owned files への write を可能にする ([Worth Doing Badly](https://worthdoingbadly.com/macdirtycow/)) |
 
 ---
 
@@ -91,16 +93,16 @@ SIPバイパス + SSV 書き込み能力があれば、攻撃者は以下を行�
 
 ### Basic Information
 
-**DataVault** は機密性の高いシステムデータベース向けのAppleの保護レイヤーです。Even **root cannot access DataVault-protected files** — 特定のentitlementsを持つプロセスのみがそれらを読み書きできます。保護対象のストアには以下が含まれます:
+**DataVault** は、機密性の高い system databases を保護する Apple の protection layer です。**root であっても DataVault-protected files にはアクセスできません** — 読み取りまたは変更が可能なのは、特定の entitlements を持つ processes のみです。保護対象の stores には以下が含まれます。
 
 | Protected Database | Path | Content |
 |---|---|---|
-| TCC (system) | `/Library/Application Support/com.apple.TCC/TCC.db` | システム全体のTCCプライバシー許可設定 |
-| TCC (user) | `~/Library/Application Support/com.apple.TCC/TCC.db` | ユーザーごとのTCCプライバシー許可設定 |
-| Keychain (system) | `/Library/Keychains/System.keychain` | システムキーチェーン |
-| Keychain (user) | `~/Library/Keychains/login.keychain-db` | ユーザーのキーチェーン |
+| TCC (system) | `/Library/Application Support/com.apple.TCC/TCC.db` | system-wide TCC privacy decisions |
+| TCC (user) | `~/Library/Application Support/com.apple.TCC/TCC.db` | per-user TCC privacy decisions |
+| Keychain (system) | `/Library/Keychains/System.keychain` | system keychain |
+| Keychain (user) | `~/Library/Keychains/login.keychain-db` | user keychain |
 
-DataVault の保護は、カーネルによって検証される拡張属性とボリューム保護フラグを使用してファイルシステムレベルで強制されます。
+DataVault protection は、extended attributes と volume protection flags を使用して**filesystem level**で強制され、kernel によって検証されます。
 
 ### DataVault Controller Entitlements
 ```
@@ -109,7 +111,7 @@ com.apple.private.tcc.manager.check-by-audit-token — TCC checks via audit toke
 com.apple.private.tcc.allow           — Access specific TCC-protected resources
 com.apple.rootless.storage.TCC        — Write to TCC database (SIP-related)
 ```
-### DataVault コントローラーの検出
+### DataVault コントローラの検出
 ```bash
 # Check DataVault protection on the TCC database
 ls -le@ "/Library/Application Support/com.apple.TCC/TCC.db"
@@ -128,11 +130,11 @@ JOIN executable_capabilities ec ON e.id = ec.executable_id
 JOIN capabilities c ON ec.capability_id = c.id
 WHERE c.name = 'datavault_controller';"
 ```
-### 攻撃シナリオ
+### Attack Scenarios
 
-#### 直接的な TCC データベースの改変
+#### 直接的な TCC Database Modification
 
-攻撃者が DataVault コントローラのバイナリを侵害した場合（例：`com.apple.private.tcc.manager` を持つプロセスへのコード注入経由など）、彼らは **TCC データベースを直接改変** して任意のアプリケーションに任意の TCC 権限を付与することができます:
+攻撃者が DataVault controller binary（`com.apple.private.tcc.manager` を持つ process への code injection などによって）を侵害した場合、**TCC database を直接変更**して、任意の application に任意の TCC permission を付与できます：
 ```sql
 -- Grant Full Disk Access to a malicious binary (conceptual)
 INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_version)
@@ -143,25 +145,26 @@ INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_
 VALUES ('kTCCServiceCamera', 'com.attacker.malware', 0, 2, 4, 1);
 ```
 > [!CAUTION]
-> TCCデータベースの改ざんは、**究極のプライバシー回避手段**です — ユーザーのプロンプトや可視のインジケータなしに任意の権限を静かに付与します。歴史的に、複数のmacOS権限昇格チェーンは最終ペイロードとしてTCCデータベースへの書き込みで終わっています。
+> TCC database の変更は**究極のプライバシーバイパス**です。ユーザーへのプロンプトや目に見えるインジケーターなしで、あらゆる権限を暗黙的に付与します。これまで、複数の macOS privilege escalation chain が、最終 payload として TCC database への書き込みに行き着いています。
 
 #### Keychain Database Access
 
-DataVaultはkeychainのバックエンドファイルも保護します。DataVaultコントローラが侵害された場合、以下が可能になります:
+DataVault は keychain の backing files も保護します。侵害された DataVault controller は、以下を実行できます。
 
-1. 生のkeychainデータベースファイルを読み取る
-2. 暗号化されたkeychainアイテムを抽出する
-3. ユーザーのパスワードや回収した鍵を使ってオフラインで復号を試みる
+1. raw keychain database files の読み取り
+2. encrypted keychain items の抽出
+3. ユーザーのパスワードまたは復元した keys を使用した offline decryption の試行
 
-### Real-World CVEs Involving DataVault/TCC Bypass
+### DataVault/TCC Bypass に関係する実際の CVE
 
-| CVE | Description |
+| CVE | 説明 |
 |---|---|
-| CVE-2023-40424 | DataVault保護ファイルへのsymlinkを介したTCCバイパス |
-| CVE-2023-32364 | TCCデータベースの変更につながるSandboxバイパス |
-| CVE-2021-30713 | XCSSETマルウェアがTCC.dbを変更することでのTCCバイパス |
-| CVE-2020-9934 | 環境変数の操作によるTCCバイパス |
-| CVE-2020-29621 | MusicアプリのTCCバイパスがDataVaultに到達 |
+| CVE-2024-44131 | FileProvider の symlink race により、privileged helper が TCC-protected data にアクセス可能になる ([Jamf](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)) |
+| CVE-2023-40424 | root として、`NFSHomeDirectory` が attacker-controlled な `TCC.db` を指す新しいユーザーを**作成**できる。ログイン時に `tccd` がそれを読み込み、grant が適用されて他のユーザーの data に到達できる ([Kandji](https://blog.kandji.io/malware-bypass-tcc)) |
+| CVE-2021-30970 | "powerdir": ユーザーの home dir を変更し、attacker-controlled な TCC.db を配置する ([Microsoft](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)) |
+| CVE-2021-30713 | bundle-conclusion の flaw により、アプリが prompt なしで**donor bundle の TCC grants を継承**できる。実環境では **XCSSET** によって悪用され、desktop の screenshot を取得された ([Jamf](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)) |
+| CVE-2020-9934 | `tccd` が `$HOME` から DB path を構築していたため、`launchctl setenv HOME` により attacker-controlled な `TCC.db` へリダイレクトできる ([Matt Shockley](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)) |
+| CVE-2020-29621 | `coreaudiod` が `com.apple.private.tcc.manager` を保持し、さらに library validation を無効化していた。そのため、`/Library/Audio/Plug-Ins/HAL` に配置された HAL plug-in が任意の TCC rights を付与できる ([Wojciech Reguła](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)) |
 
 ## References
 

@@ -1,27 +1,27 @@
-# macOS PID Reuse
+# macOS PID 再利用
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-## PID Reuse
+## PID 再利用
 
-macOSの**XPCサービス**が**PID**に基づいて呼び出されたプロセスをチェックし、**監査トークン**ではない場合、PID再利用攻撃に対して脆弱です。この攻撃は**レースコンディション**に基づいており、**エクスプロイト**が**XPC**サービスにメッセージを**送信し**、その後に**`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`**を**許可された**バイナリで実行します。
+macOS の **XPC service** が、**audit token** ではなく **PID** に基づいて呼び出し元のプロセスをチェックしている場合、PID reuse attack に対して脆弱です。この攻撃は **race condition** に基づいており、**exploit** は **XPC** service に対して機能を**abusing**する **messages** を**送信**し、その**直後**に、**allowed** binary を使って **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** を実行します。
 
-この関数は**許可されたバイナリがPIDを所有する**ようにしますが、**悪意のあるXPCメッセージはその直前に送信されます**。したがって、**XPC**サービスが**PID**を使用して送信者を**認証**し、**`posix_spawn`**の実行**後**にそれをチェックすると、それが**認可された**プロセスからのものであると考えます。
+この関数により、**allowed binary** がその **PID** を所有することになりますが、**malicious XPC message** はその直前に**送信済み**です。そのため、**XPC** service が送信者を**authenticate**するために **PID** を使用し、**`posix_spawn`** の実行**後**にチェックすると、認証済みのプロセスから送信されたものだと判断します。
 
-### Exploit example
+### Exploit の例
 
-もし**`shouldAcceptNewConnection`**関数やそれを呼び出す関数が**`processIdentifier`**を呼び出し、**`auditToken`**を呼び出していない場合、それは**プロセスPIDを検証している**可能性が高いです。\
-例えば、以下の画像のように（参照から取得）：
+**`shouldAcceptNewConnection`** 関数、またはそれから呼び出される関数が **`processIdentifier`** を呼び出し、**`auditToken`** を呼び出していないことを発見した場合、**audit token** ではなくプロセスの **PID** を**検証している**可能性が高いです。\
+例えば、次の画像のようになります（reference から引用）:
 
 <figure><img src="../../../../../../images/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
 
-このエクスプロイトの例を確認してください（再び、参照から取得）して、エクスプロイトの2つの部分を見てください：
+この example exploit を確認すると（こちらも reference から引用）、exploit の 2 つの部分を確認できます:
 
-- 複数のフォークを**生成する**もの
-- **各フォーク**は**メッセージを送信した後に`posix_spawn`を実行しながら、XPCサービスにペイロードを送信します**。
+- 複数の fork を**生成**する部分
+- **各 fork** が **payload** を XPC service に**送信**し、その直後に **`posix_spawn`** を実行する部分
 
 > [!CAUTION]
-> エクスプロイトが機能するためには、` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`**を設定するか、エクスプロイト内に次のように記述することが重要です：
+> exploit を動作させるには、` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** を実行するか、exploit 内に次のコードを記述することが重要です:
 >
 > ```objectivec
 > asm(".section __DATA,__objc_fork_ok\n"
@@ -31,7 +31,7 @@ macOSの**XPCサービス**が**PID**に基づいて呼び出されたプロセ�
 
 {{#tabs}}
 {{#tab name="NSTasks"}}
-最初のオプションは**`NSTasks`**を使用し、子プロセスを起動するための引数を指定してRCをエクスプロイトします。
+**NSTasks** と、RC を exploit する children を起動するための引数を使用する最初の方法。
 ```objectivec
 // Code from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl
@@ -140,7 +140,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="fork"}}
-この例では、生の **`fork`** を使用して **PID レースコンディションを悪用する子プロセスを起動し、次にハードリンクを介して別のレースコンディションを悪用します:**
+この例では、raw **`fork`** を使用して、**PID race condition** を悪用する子プロセスを起動し、その後、Hard link を介して別の race condition を悪用します。
 ```objectivec
 // export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 // gcc -framework Foundation expl.m -o expl
@@ -278,11 +278,16 @@ return 0;
 
 ## その他の例
 
-- [https://gergelykalman.com/why-you-shouldnt-use-a-commercial-vpn-amateur-hour-with-windscribe.html](https://gergelykalman.com/why-you-shouldnt-use-a-commercial-vpn-amateur-hour-with-windscribe.html)
+- [**Intego X9: Why your macOS antivirus should not trust PIDs**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - PIDでクライアントを認証していたAVのprivileged helperに対するLPE。
+- [**Exploiting GOG Galaxy XPC service for privilege escalation in macOS**](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
+- [**Rootpipe Reborn (Part II)**](https://objective-see.org/blog/blog_0x41.html)
 
-## 参考文献
+## 参考資料
 
 - [https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
 - [https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
+- [https://blog.quarkslab.com/intego_lpe_macos_2.html](https://blog.quarkslab.com/intego_lpe_macos_2.html)
+- [https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
+- [https://objective-see.org/blog/blog_0x41.html](https://objective-see.org/blog/blog_0x41.html)
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
