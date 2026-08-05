@@ -4,22 +4,22 @@
 
 ## Basic Information
 
-MacOS Sandbox (शुरुआत में Seatbelt कहा जाता था) **ऐप्लिकेशनों को सीमित करता है** जो सैंडबॉक्स के अंदर चल रही हैं **सैंडबॉक्स प्रोफ़ाइल में निर्दिष्ट अनुमत क्रियाओं** तक। यह सुनिश्चित करने में मदद करता है कि **ऐप्लिकेशन केवल अपेक्षित संसाधनों तक पहुंच बनाएगा**।
+MacOS Sandbox (जिसे शुरुआत में Seatbelt कहा जाता था) Sandbox के अंदर चलने वाले **applications को सीमित करता है**, ताकि वे केवल उन **allowed actions** को कर सकें जो उस Sandbox profile में निर्दिष्ट हैं, जिसके साथ app चल रहा है। इससे यह सुनिश्चित करने में मदद मिलती है कि **application केवल अपेक्षित resources तक ही पहुंच बनाए**।
 
-कोई भी ऐप जिसमें **अधिकार** **`com.apple.security.app-sandbox`** है, सैंडबॉक्स के अंदर चलाया जाएगा। **एप्पल बाइनरीज़** आमतौर पर सैंडबॉक्स के अंदर चलती हैं, और **ऐप स्टोर** से सभी ऐप्स के पास वह अधिकार होता है। इसलिए कई ऐप्लिकेशन सैंडबॉक्स के अंदर चलाए जाएंगे।
+**`com.apple.security.app-sandbox`** entitlement वाले किसी भी app को Sandbox के अंदर execute किया जाएगा। **Apple binaries** आमतौर पर Sandbox के अंदर execute की जाती हैं, और **App Store से आने वाले सभी applications में यह entitlement होता है**। इसलिए कई applications Sandbox के अंदर execute की जाएंगी।<sup>[4]</sup>
 
-यह नियंत्रित करने के लिए कि एक प्रक्रिया क्या कर सकती है या नहीं, **सैंडबॉक्स में लगभग किसी भी ऑपरेशन में हुक होते हैं** जो एक प्रक्रिया कोशिश कर सकती है (अधिकांश syscalls सहित) **MACF** का उपयोग करते हुए। हालाँकि, ऐप के **अधिकारों** के आधार पर सैंडबॉक्स प्रक्रिया के साथ अधिक उदार हो सकता है।
+किसी process द्वारा किए जा सकने वाले या न किए जा सकने वाले कार्यों को नियंत्रित करने के लिए, **Sandbox में hooks** होते हैं, जो किसी process द्वारा किए जाने वाले लगभग हर operation (अधिकांश syscalls सहित) पर **MACF** का उपयोग करते हैं। हालांकि, app के **entitlements** पर **निर्भर** करते हुए Sandbox process के लिए अधिक permissive हो सकता है।
 
-सैंडबॉक्स के कुछ महत्वपूर्ण घटक हैं:
+Sandbox के कुछ महत्वपूर्ण components हैं:
 
-- **कर्नेल एक्सटेंशन** `/System/Library/Extensions/Sandbox.kext`
-- **निजी ढांचा** `/System/Library/PrivateFrameworks/AppSandbox.framework`
-- एक **डेमन** जो उपयोगकर्ता भूमि में चल रहा है `/usr/libexec/sandboxd`
-- **कंटेनर** `~/Library/Containers`
+- **kernel extension** `/System/Library/Extensions/Sandbox.kext`
+- **private framework** `/System/Library/PrivateFrameworks/AppSandbox.framework`
+- userland में चलने वाला एक **daemon** `/usr/libexec/sandboxd`
+- **containers** `~/Library/Containers`
 
 ### Containers
 
-हर सैंडबॉक्स किया गया ऐप्लिकेशन का अपना कंटेनर होगा `~/Library/Containers/{CFBundleIdentifier}` :
+हर sandboxed application का अपना container `~/Library/Containers/{CFBundleIdentifier}` में होगा:
 ```bash
 ls -l ~/Library/Containers
 total 0
@@ -30,7 +30,7 @@ drwx------@ 4 username  staff  128 Mar 25 14:14 com.apple.Accessibility-Settings
 drwx------@ 4 username  staff  128 Mar 25 14:10 com.apple.ActionKit.BundledIntentHandler
 [...]
 ```
-प्रत्येक बंडल आईडी फ़ोल्डर के अंदर आप **plist** और ऐप के **Data directory** को पा सकते हैं, जिसकी संरचना होम फ़ोल्डर की नकल करती है:
+प्रत्येक bundle id folder के अंदर आपको App का **plist** और **Data directory** मिलते हैं, जिनकी structure Home folder जैसी होती है:
 ```bash
 cd /Users/username/Library/Containers/com.apple.Safari
 ls -la
@@ -54,9 +54,9 @@ drwx------   2 username  staff    64 Mar 24 18:02 SystemData
 drwx------   2 username  staff    64 Mar 24 18:02 tmp
 ```
 > [!CAUTION]
-> ध्यान दें कि भले ही symlinks "Sandbox" से "escape" करने और अन्य फ़ोल्डरों तक पहुँचने के लिए वहाँ हैं, ऐप को अभी भी **अनुमतियाँ** होनी चाहिए ताकि वह उन्हें एक्सेस कर सके। ये अनुमतियाँ **`.plist`** में `RedirectablePaths` के अंदर हैं।
+> ध्यान दें कि भले ही Sandbox से "escape" करने और अन्य folders को access करने के लिए symlinks मौजूद हों, App के पास उन्हें access करने की **permissions** होना आवश्यक है। ये permissions **`.plist`** के अंदर `RedirectablePaths` में होती हैं।
 
-**`SandboxProfileData`** संकलित सैंडबॉक्स प्रोफ़ाइल CFData है जिसे B64 में एस्केप किया गया है।
+**`SandboxProfileData`** compiled sandbox profile CFData को B64 में escaped रूप में रखता है।
 ```bash
 # Get container config
 ## You need FDA to access the file, not even just root can read it
@@ -106,13 +106,13 @@ AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
 [...]
 ```
 > [!WARNING]
-> एक Sandboxed एप्लिकेशन द्वारा बनाई गई/संशोधित हर चीज़ को **quarantine attribute** मिलेगा। यदि सैंडबॉक्स ऐप कुछ **`open`** के साथ निष्पादित करने की कोशिश करता है, तो यह Gatekeeper को ट्रिगर करके एक सैंडबॉक्स स्पेस को रोक देगा।
+> Sandboxed application द्वारा बनाई/संशोधित की गई हर चीज़ को **quarantine attribut**e मिलेगा। यह **`open`** का उपयोग करके कुछ execute करने का प्रयास करने पर Gatekeeper को trigger करके sandbox space को रोक देगा।
 
-## Sandbox Profiles
+## Sandbox प्रोफाइल
 
-Sandbox प्रोफाइल कॉन्फ़िगरेशन फ़ाइलें हैं जो यह संकेत देती हैं कि उस **Sandbox** में क्या **अनुमति/प्रतिबंधित** होगा। यह **Sandbox Profile Language (SBPL)** का उपयोग करता है, जो [**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>) प्रोग्रामिंग भाषा का उपयोग करता है।
+Sandbox प्रोफाइल configuration files होती हैं, जो यह निर्धारित करती हैं कि उस **Sandbox** में क्या **allowed/forbidden** होगा। इसमें **Sandbox Profile Language (SBPL)** का उपयोग किया जाता है, जो [**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>) programming language का उपयोग करती है।
 
-यहाँ एक उदाहरण है:
+यहाँ आपको एक example मिल सकता है:
 ```scheme
 (version 1) ; First you get the version
 
@@ -131,27 +131,29 @@ Sandbox प्रोफाइल कॉन्फ़िगरेशन फ़ा�
 )
 ```
 > [!TIP]
-> इस [**शोध**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **को देखें ताकि अधिक क्रियाएँ जो अनुमति दी जा सकती हैं या अस्वीकृत की जा सकती हैं, की जांच की जा सके।**
+> अधिक actions की जाँच करने के लिए यह [**research**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) देखें, जिन्हें allow या deny किया जा सकता है।<sup>[5]</sup>
 >
-> ध्यान दें कि एक प्रोफ़ाइल के संकलित संस्करण में संचालन के नाम को एक ऐरे में उनके प्रविष्टियों द्वारा प्रतिस्थापित किया जाता है जिसे dylib और kext द्वारा जाना जाता है, जिससे संकलित संस्करण छोटा और पढ़ने में अधिक कठिन हो जाता है।
+> ध्यान दें कि किसी profile के compiled version में operations के नामों को एक array में उनकी entries से बदल दिया जाता है, जिसे dylib और kext जानते हैं। इससे compiled version छोटा और पढ़ना अधिक कठिन हो जाता है।
 
-महत्वपूर्ण **सिस्टम सेवाएँ** अपने स्वयं के कस्टम **सैंडबॉक्स** के अंदर चलती हैं जैसे कि `mdnsresponder` सेवा। आप इन कस्टम **सैंडबॉक्स प्रोफाइल** को देख सकते हैं:
+महत्वपूर्ण **system services** भी अपने custom **sandbox** के अंदर चलते हैं, जैसे `mdnsresponder` service। आप इन custom **sandbox profiles** को यहाँ देख सकते हैं:
 
 - **`/usr/share/sandbox`**
 - **`/System/Library/Sandbox/Profiles`**
-- अन्य सैंडबॉक्स प्रोफाइल की जांच [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles) पर की जा सकती है।
+- अन्य sandbox profiles को [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles) में देखा जा सकता है।
+- iOS में platform profile sandbox `.kext` के अंदर, binary में `_platform_profile_data` के भीतर होती है।
 
-**ऐप स्टोर** ऐप्स **प्रोफ़ाइल** **`/System/Library/Sandbox/Profiles/application.sb`** का उपयोग करते हैं। आप इस प्रोफ़ाइल में देख सकते हैं कि कैसे अधिकार जैसे **`com.apple.security.network.server`** एक प्रक्रिया को नेटवर्क का उपयोग करने की अनुमति देते हैं।
+**App Store** apps **`/System/Library/Sandbox/Profiles/application.sb`** वाली **profile** का उपयोग करते हैं। इस profile में आप देख सकते हैं कि **`com.apple.security.network.server`** जैसे entitlements किसी process को network का उपयोग करने की अनुमति कैसे देते हैं।
 
-फिर, कुछ **Apple डेमन सेवाएँ** विभिन्न प्रोफाइल का उपयोग करती हैं जो `/System/Library/Sandbox/Profiles/*.sb` या `/usr/share/sandbox/*.sb` में स्थित होती हैं। ये सैंडबॉक्स मुख्य कार्य में लागू होते हैं जो API `sandbox_init_XXX` को कॉल करता है।
+इसके बाद, कुछ **Apple daemon services** `/System/Library/Sandbox/Profiles/*.sb` या `/usr/share/sandbox/*.sb` में स्थित अलग-अलग profiles का उपयोग करती हैं। ये sandboxes API `sandbox_init_XXX` को call करने वाले main function में लागू की जाती हैं।<sup>[3]</sup>
 
-**SIP** एक सैंडबॉक्स प्रोफ़ाइल है जिसे `/System/Library/Sandbox/rootless.conf` में platform_profile कहा जाता है।
+**SIP** एक Sandbox profile है, जिसे `/System/Library/Sandbox/rootless.conf` में platform_profile कहा जाता है।
 
-### सैंडबॉक्स प्रोफ़ाइल उदाहरण
+### Sandbox Profile के उदाहरण
 
-एक **विशिष्ट सैंडबॉक्स प्रोफ़ाइल** के साथ एक एप्लिकेशन शुरू करने के लिए आप उपयोग कर सकते हैं:
+किसी application को **specific sandbox profile** के साथ शुरू करने के लिए आप इसका उपयोग कर सकते हैं:
 ```bash
 sandbox-exec -f example.sb /Path/To/The/Application
+sandbox-exec -n no-internet ping 8.8.8.8
 ```
 {{#tabs}}
 {{#tab name="touch"}}
@@ -200,52 +202,52 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 {{#endtabs}}
 
 > [!TIP]
-> ध्यान दें कि **Apple-authored** **software** जो **Windows** पर चलता है, उसमें **अतिरिक्त सुरक्षा उपाय** नहीं हैं, जैसे कि एप्लिकेशन सैंडबॉक्सिंग।
+> ध्यान दें कि **Windows** पर चलने वाले **Apple-authored** **software** में application sandboxing जैसी अतिरिक्त security precautions नहीं होती हैं।
 
-बायपास के उदाहरण:
+Bypasses के उदाहरण:
 
-- [https://lapcatsoftware.com/articles/sandbox-escape.html](https://lapcatsoftware.com/articles/sandbox-escape.html)
-- [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c) (वे `~$` से शुरू होने वाले नाम के साथ सैंडबॉक्स के बाहर फ़ाइलें लिखने में सक्षम हैं)।
+- [https://lapcatsoftware.com/articles/sandbox-escape.html](https://lapcatsoftware.com/articles/sandbox-escape.html)<sup>[6]</sup>
+- [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c) (वे sandbox के बाहर ऐसी files लिख पाने में सक्षम हैं जिनका नाम `~$` से शुरू होता है।)<sup>[7]</sup>
 
-### सैंडबॉक्स ट्रेसिंग
+### Sandbox Tracing
 
-#### प्रोफ़ाइल के माध्यम से
+#### Profile के माध्यम से
 
-यह संभव है कि हर बार जब कोई क्रिया जांची जाती है, तो सैंडबॉक्स द्वारा किए गए सभी चेक को ट्रेस किया जा सके। इसके लिए बस निम्नलिखित प्रोफ़ाइल बनाएं:
+हर बार किसी action की जाँच होने पर sandbox द्वारा किए जाने वाले सभी checks को trace करना संभव है। इसके लिए बस निम्नलिखित profile बनाएँ:
 ```scheme:trace.sb
 (version 1)
 (trace /tmp/trace.out)
 ```
-फिर उस प्रोफ़ाइल का उपयोग करके कुछ निष्पादित करें:
+और फिर बस उस profile का उपयोग करके कुछ execute करें:
 ```bash
 sandbox-exec -f /tmp/trace.sb /bin/ls
 ```
-In `/tmp/trace.out` आप हर बार किए गए प्रत्येक सैंडबॉक्स चेक को देख सकेंगे (तो, बहुत सारे डुप्लिकेट होंगे)।
+`/tmp/trace.out` में आप हर बार किए गए प्रत्येक sandbox check को देख पाएंगे (इसलिए, बहुत सारे duplicates होंगे)।
 
-सैंडबॉक्स को **`-t`** पैरामीटर का उपयोग करके ट्रेस करना भी संभव है: `sandbox-exec -t /path/trace.out -p "(version 1)" /bin/ls`
+**`-t`** parameter का उपयोग करके sandbox को trace करना भी संभव है: `sandbox-exec -t /path/trace.out -p "(version 1)" /bin/ls`
 
-#### API के माध्यम से
+#### Via API
 
-`libsystem_sandbox.dylib` द्वारा निर्यातित `sandbox_set_trace_path` फ़ंक्शन एक ट्रेस फ़ाइल नाम निर्दिष्ट करने की अनुमति देता है जहाँ सैंडबॉक्स चेक लिखे जाएंगे।\
-यह `sandbox_vtrace_enable()` को कॉल करके और फिर `sandbox_vtrace_report()` को कॉल करके बफर से लॉग त्रुटियों को प्राप्त करके कुछ समान करना भी संभव है।
+`libsystem_sandbox.dylib` द्वारा exported function `sandbox_set_trace_path` एक trace filename निर्दिष्ट करने की अनुमति देता है, जिसमें sandbox checks लिखे जाएंगे।\
+` sandbox_vtrace_enable()` को call करके और फिर `sandbox_vtrace_report()` को call करके buffer से logs error प्राप्त करके भी कुछ ऐसा ही करना संभव है।
 
-### सैंडबॉक्स निरीक्षण
+### Sandbox Inspection
 
-`libsandbox.dylib` एक फ़ंक्शन निर्यात करता है जिसे sandbox_inspect_pid कहा जाता है जो एक प्रक्रिया की सैंडबॉक्स स्थिति की सूची देता है (जिसमें एक्सटेंशन शामिल हैं)। हालाँकि, केवल प्लेटफ़ॉर्म बाइनरी इस फ़ंक्शन का उपयोग कर सकते हैं।
+`libsandbox.dylib` एक `sandbox_inspect_pid` नामक function export करता है, जो किसी process की sandbox state (extensions सहित) की list देता है। हालांकि, केवल platform binaries ही इस function का उपयोग कर सकते हैं।
 
-### MacOS और iOS सैंडबॉक्स प्रोफाइल
+### MacOS & iOS Sandbox Profiles
 
-MacOS सिस्टम सैंडबॉक्स प्रोफाइल को दो स्थानों पर संग्रहीत करता है: **/usr/share/sandbox/** और **/System/Library/Sandbox/Profiles**।
+MacOS system sandbox profiles को दो locations में store करता है: **/usr/share/sandbox/** और **/System/Library/Sandbox/Profiles**।
 
-और यदि कोई तृतीय-पक्ष एप्लिकेशन _**com.apple.security.app-sandbox**_ अधिकार लेता है, तो सिस्टम उस प्रक्रिया पर **/System/Library/Sandbox/Profiles/application.sb** प्रोफाइल लागू करता है।
+और यदि कोई third-party application _**com.apple.security.app-sandbox**_ entitlement रखता है, तो system उस process पर **/System/Library/Sandbox/Profiles/application.sb** profile लागू करता है।
 
-iOS में, डिफ़ॉल्ट प्रोफाइल को **container** कहा जाता है और हमारे पास SBPL पाठ प्रतिनिधित्व नहीं है। मेमोरी में, इस सैंडबॉक्स को सैंडबॉक्स से प्रत्येक अनुमतियों के लिए Allow/Deny बाइनरी ट्री के रूप में दर्शाया गया है।
+iOS में, default profile को **container** कहा जाता है और हमारे पास SBPL text representation नहीं है। Memory में, यह sandbox, sandbox की प्रत्येक permission के लिए Allow/Deny binary tree के रूप में represented होता है।
 
-### ऐप स्टोर ऐप्स में कस्टम SBPL
+### Custom SBPL in App Store apps
 
-कंपनियों के लिए **कस्टम सैंडबॉक्स प्रोफाइल** के साथ अपने ऐप्स चलाना संभव हो सकता है (डिफ़ॉल्ट वाले के बजाय)। उन्हें **`com.apple.security.temporary-exception.sbpl`** अधिकार का उपयोग करने की आवश्यकता है जिसे Apple द्वारा अधिकृत किया जाना चाहिए।
+Companies के लिए अपने apps को **custom Sandbox profiles** के साथ (default वाले के बजाय) run करना संभव हो सकता है। उन्हें **`com.apple.security.temporary-exception.sbpl`** entitlement का उपयोग करना होगा, जिसे Apple द्वारा authorized किया जाना आवश्यक है।
 
-इस अधिकार की परिभाषा की जांच करना संभव है **`/System/Library/Sandbox/Profiles/application.sb:`**
+इस entitlement की definition को **`/System/Library/Sandbox/Profiles/application.sb:`** में check करना संभव है।
 ```scheme
 (sandbox-array-entitlement
 "com.apple.security.temporary-exception.sbpl"
@@ -253,30 +255,30 @@ iOS में, डिफ़ॉल्ट प्रोफाइल को **contai
 (let* ((port (open-input-string string)) (sbpl (read port)))
 (with-transparent-redirection (eval sbpl)))))
 ```
-यह **इस अधिकार के बाद स्ट्रिंग का मूल्यांकन करेगा** एक Sandbox प्रोफ़ाइल के रूप में।
+यह **इस entitlement के बाद वाली string को** एक Sandbox profile के रूप में `eval` करेगा।
 
-### Sandbox प्रोफ़ाइल को संकलित और डीकंपाइल करना
+### Sandbox Profile को Compile और Decompile करना
 
-**`sandbox-exec`** उपकरण `libsandbox.dylib` से `sandbox_compile_*` कार्यों का उपयोग करता है। मुख्य निर्यातित कार्य हैं: `sandbox_compile_file` (एक फ़ाइल पथ की अपेक्षा करता है, पैरामीटर `-f`), `sandbox_compile_string` (एक स्ट्रिंग की अपेक्षा करता है, पैरामीटर `-p`), `sandbox_compile_name` (एक कंटेनर का नाम अपेक्षित है, पैरामीटर `-n`), `sandbox_compile_entitlements` (अधिकार plist की अपेक्षा करता है)।
+**`sandbox-exec`** tool, `libsandbox.dylib` से `sandbox_compile_*` functions का उपयोग करता है। Export किए गए मुख्य functions हैं: `sandbox_compile_file` (एक file path अपेक्षित है, param `-f`), `sandbox_compile_string` (एक string अपेक्षित है, param `-p`), `sandbox_compile_name` (एक container का name अपेक्षित है, param `-n`), `sandbox_compile_entitlements` (entitlements plist अपेक्षित है)।
 
-इस उलटे और [**ओपन सोर्स संस्करण के उपकरण sandbox-exec**](https://newosxbook.com/src.jl?tree=listings&file=/sandbox_exec.c) की अनुमति देता है **`sandbox-exec`** को संकलित Sandbox प्रोफ़ाइल को एक फ़ाइल में लिखने के लिए।
+Tool **sandbox-exec** का यह reversed और [**open sourced version**](https://newosxbook.com/src.jl?tree=listings&file=/sandbox_exec.c), **`sandbox-exec`** को compiled sandbox profile को एक file में लिखने की सुविधा देता है।
 
-इसके अलावा, एक प्रक्रिया को एक कंटेनर के अंदर सीमित करने के लिए यह `sandbox_spawnattrs_set[container/profilename]` को कॉल कर सकता है और एक कंटेनर या पूर्व-निर्मित प्रोफ़ाइल पास कर सकता है।
+इसके अलावा, किसी process को किसी container के अंदर confine करने के लिए वह `sandbox_spawnattrs_set[container/profilename]` को call कर सकता है और कोई container या पहले से मौजूद profile pass कर सकता है।
 
-## Sandbox को डिबग और बायपास करें
+## Debug & Bypass Sandbox
 
-macOS पर, iOS के विपरीत जहां प्रक्रियाएँ शुरू से ही कर्नेल द्वारा सैंडबॉक्स की जाती हैं, **प्रक्रियाओं को स्वयं सैंडबॉक्स में शामिल होना चाहिए**। इसका मतलब है कि macOS पर, एक प्रक्रिया सैंडबॉक्स द्वारा प्रतिबंधित नहीं होती जब तक कि यह सक्रिय रूप से इसमें प्रवेश करने का निर्णय नहीं लेती, हालांकि ऐप स्टोर ऐप हमेशा सैंडबॉक्स होते हैं।
+macOS पर, iOS के विपरीत जहाँ processes को kernel द्वारा शुरुआत से ही sandbox किया जाता है, **processes को स्वयं Sandbox में opt-in करना पड़ता है**। इसका अर्थ है कि macOS पर कोई process तब तक Sandbox द्वारा restricted नहीं होता जब तक वह सक्रिय रूप से उसमें enter करने का निर्णय न ले, हालांकि App Store apps हमेशा sandboxed होते हैं।
 
-यदि प्रक्रियाओं के पास अधिकार है: `com.apple.security.app-sandbox`, तो वे उपयोगकर्ता भूमि से स्वचालित रूप से सैंडबॉक्स की जाती हैं जब वे शुरू होती हैं। इस प्रक्रिया के विस्तृत विवरण के लिए देखें:
+यदि उनके पास entitlement `com.apple.security.app-sandbox` हो, तो processes userland से start होते समय automatically Sandboxed हो जाते हैं। इस process की विस्तृत explanation के लिए देखें:
 
 
 {{#ref}}
 macos-sandbox-debug-and-bypass/
 {{#endref}}
 
-## **Sandbox एक्सटेंशन**
+## **Sandbox Extensions**
 
-एक्सटेंशन एक ऑब्जेक्ट को आगे के विशेषाधिकार देने की अनुमति देते हैं और इनमें से एक कार्य को कॉल करते हैं:
+Extensions किसी object को अतिरिक्त privileges देने की अनुमति देते हैं और निम्न functions में से किसी एक को call करके दिए जाते हैं:
 
 - `sandbox_issue_extension`
 - `sandbox_extension_issue_file[_with_new_type]`
@@ -286,18 +288,18 @@ macos-sandbox-debug-and-bypass/
 - `sandbox_extension_issue_generic`
 - `sandbox_extension_issue_posix_ipc`
 
-एक्सटेंशन दूसरे MACF लेबल स्लॉट में संग्रहीत होते हैं जो प्रक्रिया क्रेडेंशियल्स से सुलभ होते हैं। निम्नलिखित **`sbtool`** इस जानकारी तक पहुँच सकता है।
+Extensions को process credentials से accessible दूसरे MACF label slot में store किया जाता है। निम्न **`sbtool`** इस information को access कर सकता है।
 
-ध्यान दें कि एक्सटेंशन आमतौर पर अनुमत प्रक्रियाओं द्वारा दिए जाते हैं, उदाहरण के लिए, `tccd` उस एक्सटेंशन टोकन को `com.apple.tcc.kTCCServicePhotos` देगा जब एक प्रक्रिया ने फ़ोटो तक पहुँचने की कोशिश की और एक XPC संदेश में अनुमति दी गई। फिर, प्रक्रिया को एक्सटेंशन टोकन का उपभोग करने की आवश्यकता होगी ताकि इसे जोड़ा जा सके।\
-ध्यान दें कि एक्सटेंशन टोकन लंबे हेक्साडेसिमल होते हैं जो दिए गए अनुमतियों को एन्कोड करते हैं। हालाँकि, इनमें अनुमत PID हार्डकोडेड नहीं होते हैं जिसका अर्थ है कि किसी भी प्रक्रिया के पास टोकन तक पहुँच होने पर इसे **कई प्रक्रियाओं द्वारा उपभोग किया जा सकता है**।
+ध्यान दें कि Extensions आमतौर पर allowed processes द्वारा grant किए जाते हैं। उदाहरण के लिए, जब किसी process ने photos access करने का प्रयास किया और XPC message में उसे allow किया गया, तब `tccd` `com.apple.tcc.kTCCServicePhotos` का extension token grant करेगा। इसके बाद process को extension token consume करना होगा, ताकि वह उसमें add हो जाए।\
+ध्यान दें कि extension tokens लंबे hexadecimal होते हैं, जो granted permissions को encode करते हैं। हालांकि उनमें allowed PID hardcoded नहीं होता, जिसका अर्थ है कि token तक access रखने वाले किसी भी process द्वारा इसे **multiple processes consume कर सकते हैं**।
 
-ध्यान दें कि एक्सटेंशन अधिकारों से भी बहुत संबंधित होते हैं, इसलिए कुछ अधिकार होने से स्वचालित रूप से कुछ एक्सटेंशन मिल सकते हैं।
+ध्यान दें कि Extensions entitlements से भी closely related होते हैं, इसलिए कुछ entitlements होने पर कुछ Extensions automatically grant हो सकते हैं।
 
-### **PID विशेषाधिकार की जाँच करें**
+### **PID Privileges की जाँच करना**
 
-[**इसके अनुसार**](https://www.youtube.com/watch?v=mG715HcDgO8&t=3011s), **`sandbox_check`** कार्य (यह एक `__mac_syscall` है), यह जाँच कर सकते हैं **यदि एक ऑपरेशन की अनुमति है या नहीं** सैंडबॉक्स द्वारा एक निश्चित PID, ऑडिट टोकन या अद्वितीय ID में।
+[**इसके अनुसार**](https://www.youtube.com/watch?v=mG715HcDgO8&t=3011s), **`sandbox_check`** functions (यह एक `__mac_syscall` है), किसी निश्चित PID, audit token या unique ID में **किसी operation को Sandbox द्वारा allow किया गया है या नहीं**, यह check कर सकते हैं।<sup>[8]</sup>
 
-[**उपकरण sbtool**](http://newosxbook.com/src.jl?tree=listings&file=sbtool.c) (इसे [यहाँ संकलित किया गया है](https://newosxbook.com/articles/hitsb.html)) यह जाँच कर सकता है कि क्या एक PID कुछ कार्य कर सकता है:
+[**tool sbtool**](http://newosxbook.com/src.jl?tree=listings&file=sbtool.c) (इसे [यहाँ compiled रूप में खोजें](https://newosxbook.com/articles/hitsb.html)) यह check कर सकता है कि कोई PID कुछ actions perform कर सकता है या नहीं:
 ```bash
 sbtool <pid> mach #Check mac-ports (got from launchd with an api)
 sbtool <pid> file /tmp #Check file access
@@ -306,9 +308,9 @@ sbtool <pid> all
 ```
 ### \[un]suspend
 
-यह संभव है कि `libsystem_sandbox.dylib` से `sandbox_suspend` और `sandbox_unsuspend` फ़ंक्शंस का उपयोग करके सैंडबॉक्स को निलंबित और पुनः सक्रिय किया जाए।
+`libsystem_sandbox.dylib` से मिलने वाले `sandbox_suspend` और `sandbox_unsuspend` functions का उपयोग करके sandbox को suspend और unsuspend करना भी संभव है।
 
-ध्यान दें कि निलंबित फ़ंक्शन को कॉल करने के लिए कुछ अधिकारों की जांच की जाती है ताकि कॉलर को इसे कॉल करने के लिए अधिकृत किया जा सके जैसे:
+ध्यान दें कि suspend function को call करने के लिए caller को इसे call करने की अनुमति देने हेतु कुछ entitlements की जांच की जाती है, जैसे:
 
 - com.apple.private.security.sandbox-manager
 - com.apple.security.print
@@ -316,67 +318,74 @@ sbtool <pid> all
 
 ## mac_syscall
 
-यह सिस्टम कॉल (#381) पहले तर्क के रूप में एक स्ट्रिंग की अपेक्षा करता है जो चलाने के लिए मॉड्यूल को इंगित करेगा, और फिर दूसरे तर्क में एक कोड जो चलाने के लिए फ़ंक्शन को इंगित करेगा। फिर तीसरा तर्क उस फ़ंक्शन पर निर्भर करेगा जो निष्पादित किया गया है।
+यह system call (#381) पहले argument के रूप में एक string लेता है, जो चलाए जाने वाले module को दर्शाती है, और फिर दूसरे argument में एक code लेता है, जो चलाए जाने वाले function को दर्शाता है। इसके बाद तीसरा argument चलाए गए function पर निर्भर करता है।<sup>[2]</sup>
 
-फ़ंक्शन `___sandbox_ms` कॉल `mac_syscall` को लपेटता है पहले तर्क में `"Sandbox"` को इंगित करते हुए ठीक उसी तरह जैसे `___sandbox_msp` `mac_set_proc` (#387) का एक लपेटन है। फिर, `___sandbox_ms` द्वारा समर्थित कुछ कोड इस तालिका में पाए जा सकते हैं:
+Function `___sandbox_ms`, `mac_syscall` को wrap करता है और पहले argument में `"Sandbox"` देता है, ठीक उसी तरह जैसे `___sandbox_msp`, `mac_set_proc` (#387) का wrapper है। इसके बाद, `___sandbox_ms` द्वारा समर्थित कुछ codes इस table में दिए गए हैं:
 
-- **set_profile (#0)**: एक प्रक्रिया पर एक संकलित या नामित प्रोफ़ाइल लागू करें।
-- **platform_policy (#1)**: प्लेटफ़ॉर्म-विशिष्ट नीति जांच लागू करें (macOS और iOS के बीच भिन्नता होती है)।
-- **check_sandbox (#2)**: एक विशिष्ट सैंडबॉक्स ऑपरेशन की मैनुअल जांच करें।
-- **note (#3)**: एक सैंडबॉक्स में एक नोटेशन जोड़ता है।
-- **container (#4)**: एक सैंडबॉक्स में एक नोटेशन संलग्न करें, आमतौर पर डिबगिंग या पहचान के लिए।
-- **extension_issue (#5)**: एक प्रक्रिया के लिए एक नया एक्सटेंशन उत्पन्न करें।
-- **extension_consume (#6)**: एक दिए गए एक्सटेंशन का उपभोग करें।
-- **extension_release (#7)**: एक उपभोग किए गए एक्सटेंशन से संबंधित मेमोरी को मुक्त करें।
-- **extension_update_file (#8)**: सैंडबॉक्स के भीतर एक मौजूदा फ़ाइल एक्सटेंशन के पैरामीटर को संशोधित करें।
-- **extension_twiddle (#9)**: एक मौजूदा फ़ाइल एक्सटेंशन को समायोजित या संशोधित करें (जैसे, TextEdit, rtf, rtfd)।
-- **suspend (#10)**: सभी सैंडबॉक्स जांचों को अस्थायी रूप से निलंबित करें (उचित अधिकारों की आवश्यकता होती है)।
-- **unsuspend (#11)**: सभी पूर्व में निलंबित सैंडबॉक्स जांचों को फिर से शुरू करें।
-- **passthrough_access (#12)**: एक संसाधन के लिए सीधे पासथ्रू एक्सेस की अनुमति दें, सैंडबॉक्स जांचों को बायपास करते हुए।
-- **set_container_path (#13)**: (iOS केवल) एक ऐप समूह या साइनिंग आईडी के लिए एक कंटेनर पथ सेट करें।
-- **container_map (#14)**: (iOS केवल) `containermanagerd` से एक कंटेनर पथ प्राप्त करें।
-- **sandbox_user_state_item_buffer_send (#15)**: (iOS 10+) सैंडबॉक्स में उपयोगकर्ता मोड मेटाडेटा सेट करें।
-- **inspect (#16)**: एक सैंडबॉक्स की गई प्रक्रिया के बारे में डिबग जानकारी प्रदान करें।
-- **dump (#18)**: (macOS 11) विश्लेषण के लिए एक सैंडबॉक्स की वर्तमान प्रोफ़ाइल को डंप करें।
-- **vtrace (#19)**: निगरानी या डिबगिंग के लिए सैंडबॉक्स संचालन को ट्रेस करें।
-- **builtin_profile_deactivate (#20)**: (macOS < 11) नामित प्रोफाइल को निष्क्रिय करें (जैसे, `pe_i_can_has_debugger`)।
-- **check_bulk (#21)**: एक ही कॉल में कई `sandbox_check` संचालन करें।
-- **reference_retain_by_audit_token (#28)**: सैंडबॉक्स जांचों में उपयोग के लिए एक ऑडिट टोकन के लिए एक संदर्भ बनाएं।
-- **reference_release (#29)**: पहले से रखे गए ऑडिट टोकन संदर्भ को मुक्त करें।
-- **rootless_allows_task_for_pid (#30)**: सत्यापित करें कि `task_for_pid` की अनुमति है या नहीं (जो `csr` जांचों के समान है)।
-- **rootless_whitelist_push (#31)**: (macOS) एक सिस्टम इंटीग्रिटी प्रोटेक्शन (SIP) मैनिफेस्ट फ़ाइल लागू करें।
-- **rootless_whitelist_check (preflight) (#32)**: निष्पादन से पहले SIP मैनिफेस्ट फ़ाइल की जांच करें।
-- **rootless_protected_volume (#33)**: (macOS) एक डिस्क या विभाजन पर SIP सुरक्षा लागू करें।
-- **rootless_mkdir_protected (#34)**: एक निर्देशिका निर्माण प्रक्रिया पर SIP/DataVault सुरक्षा लागू करें।
+- **set_profile (#0)**: किसी process पर compiled या named profile लागू करें।
+- **platform_policy (#1)**: platform-specific policy checks लागू करें (macOS और iOS के बीच अलग-अलग)।
+- **check_sandbox (#2)**: किसी specific sandbox operation की manual जांच करें।
+- **note (#3)**: किसी Sandbox में annotation जोड़ें।
+- **container (#4)**: किसी sandbox से annotation attach करें, आमतौर पर debugging या identification के लिए।
+- **extension_issue (#5)**: किसी process के लिए नया extension generate करें।
+- **extension_consume (#6)**: दिए गए extension का उपयोग करें।
+- **extension_release (#7)**: consume किए गए extension से जुड़ी memory release करें।
+- **extension_update_file (#8)**: sandbox के भीतर किसी मौजूदा file extension के parameters को modify करें।
+- **extension_twiddle (#9)**: किसी मौजूदा file extension को adjust या modify करें (जैसे TextEdit, rtf, rtfd)।
+- **suspend (#10)**: सभी sandbox checks को अस्थायी रूप से suspend करें (उपयुक्त entitlements आवश्यक हैं)।
+- **unsuspend (#11)**: पहले suspend किए गए सभी sandbox checks को फिर से शुरू करें।
+- **passthrough_access (#12)**: sandbox checks को bypass करते हुए किसी resource तक direct passthrough access की अनुमति दें।
+- **set_container_path (#13)**: (केवल iOS) किसी app group या signing ID के लिए container path सेट करें।
+- **container_map (#14)**: `containermanagerd` से container path प्राप्त करें (केवल iOS)।
+- **sandbox_user_state_item_buffer_send (#15)**: (iOS 10+) sandbox में user mode metadata सेट करें।
+- **inspect (#16)**: किसी sandboxed process के बारे में debug information प्रदान करें।
+- **dump (#18)**: (macOS 11) analysis के लिए किसी sandbox का current profile dump करें।
+- **vtrace (#19)**: monitoring या debugging के लिए sandbox operations को trace करें।
+- **builtin_profile_deactivate (#20)**: (macOS < 11) named profiles को deactivate करें (जैसे `pe_i_can_has_debugger`)।
+- **check_bulk (#21)**: एक ही call में कई `sandbox_check` operations perform करें।
+- **reference_retain_by_audit_token (#28)**: sandbox checks में उपयोग के लिए किसी audit token का reference बनाएं।
+- **reference_release (#29)**: पहले retain किए गए audit token reference को release करें।
+- **rootless_allows_task_for_pid (#30)**: जांचें कि `task_for_pid` की अनुमति है या नहीं (`csr` checks के समान)।
+- **rootless_whitelist_push (#31)**: (macOS) System Integrity Protection (SIP) manifest file लागू करें।
+- **rootless_whitelist_check (preflight) (#32)**: execution से पहले SIP manifest file की जांच करें।
+- **rootless_protected_volume (#33)**: (macOS) किसी disk या partition पर SIP protections लागू करें।
+- **rootless_mkdir_protected (#34)**: किसी directory creation process पर SIP/DataVault protection लागू करें।
 
 ## Sandbox.kext
 
-ध्यान दें कि iOS में कर्नेल एक्सटेंशन में **सभी प्रोफाइल हार्डकोडेड** होते हैं `__TEXT.__const` खंड के भीतर ताकि उन्हें संशोधित न किया जा सके। कर्नेल एक्सटेंशन से कुछ दिलचस्प फ़ंक्शंस निम्नलिखित हैं:
+ध्यान दें कि iOS में kernel extension के `__TEXT.__const` segment के भीतर **सभी profiles hardcoded** होते हैं, ताकि उन्हें modify न किया जा सके। Kernel extension के कुछ interesting functions निम्नलिखित हैं:
 
-- **`hook_policy_init`**: यह `mpo_policy_init` को हुक करता है और इसे `mac_policy_register` के बाद कॉल किया जाता है। यह सैंडबॉक्स के अधिकांश प्रारंभिककरण करता है। यह SIP को भी प्रारंभ करता है।
-- **`hook_policy_initbsd`**: यह sysctl इंटरफ़ेस को सेट करता है जो `security.mac.sandbox.sentinel`, `security.mac.sandbox.audio_active` और `security.mac.sandbox.debug_mode` को पंजीकृत करता है (यदि `PE_i_can_has_debugger` के साथ बूट किया गया हो)।
-- **`hook_policy_syscall`**: इसे `mac_syscall` द्वारा "Sandbox" के पहले तर्क के रूप में और दूसरे में ऑपरेशन को इंगित करने वाले कोड के साथ कॉल किया जाता है। एक स्विच का उपयोग किया जाता है ताकि अनुरोधित कोड के अनुसार चलाने के लिए कोड खोजा जा सके।
+- **`hook_policy_init`**: यह `mpo_policy_init` को hook करता है और `mac_policy_register` के बाद call होता है। यह Sandbox के अधिकांश initializations perform करता है। यह SIP को भी initialize करता है।
+- **`hook_policy_initbsd`**: यह `security.mac.sandbox.sentinel`, `security.mac.sandbox.audio_active` और `security.mac.sandbox.debug_mode` को register करके sysctl interface सेट करता है (`PE_i_can_has_debugger` के साथ boot होने पर)।
+- **`hook_policy_syscall`**: इसे `mac_syscall` द्वारा पहले argument के रूप में `"Sandbox"` और दूसरे argument में operation दर्शाने वाले code के साथ call किया जाता है। Requested code के अनुसार चलाए जाने वाले code को खोजने के लिए switch का उपयोग किया जाता है।
 
 ### MACF Hooks
 
-**`Sandbox.kext`** MACF के माध्यम से एक सौ से अधिक हुक का उपयोग करता है। अधिकांश हुक कुछ तुच्छ मामलों की जांच करेंगे जो कार्रवाई करने की अनुमति देते हैं, यदि नहीं, तो वे **`cred_sb_evalutate`** को **क्रेडेंशियल्स** के साथ कॉल करेंगे MACF से और एक संख्या जो **ऑपरेशन** को करने के लिए है और एक **बफर** आउटपुट के लिए।
+**`Sandbox.kext`** MACF के माध्यम से सौ से अधिक hooks का उपयोग करता है। अधिकांश hooks केवल कुछ trivial cases check करेंगे, जो action को allow करते हैं; यदि ऐसा नहीं होता, तो वे MACF से प्राप्त **credentials**, perform किए जाने वाले **operation** के अनुरूप एक number और output के लिए एक **buffer** के साथ **`cred_sb_evalutate`** को call करेंगे।<sup>[1]</sup>
 
-इसका एक अच्छा उदाहरण फ़ंक्शन **`_mpo_file_check_mmap`** है जो **`mmap`** को हुक करता है और यह जांचना शुरू करेगा कि क्या नई मेमोरी लिखने योग्य होने जा रही है (और यदि नहीं तो निष्पादन की अनुमति नहीं देगा), फिर यह जांचेगा कि क्या इसका उपयोग dyld साझा कैश के लिए किया जा रहा है और यदि हां तो निष्पादन की अनुमति देगा, और अंततः यह **`sb_evaluate_internal`** (या इसके लपेटनों में से एक) को आगे की अनुमति जांच करने के लिए कॉल करेगा।
+इसका एक अच्छा उदाहरण function **`_mpo_file_check_mmap`** है, जो `mmap` को hook करता है। यह पहले check करता है कि नई memory writable होगी या नहीं (और यदि नहीं, तो execution को allow कर देता है), फिर check करता है कि इसका उपयोग dyld shared cache के लिए हो रहा है या नहीं और यदि ऐसा हो तो execution को allow कर देता है, और अंत में आगे के allowance checks perform करने के लिए **`sb_evaluate_internal`** (या इसके किसी wrapper) को call करता है।
 
-इसके अलावा, सैंडबॉक्स द्वारा उपयोग किए जाने वाले सौ(ों) हुक में से, 3 विशेष रूप से बहुत दिलचस्प हैं:
+इसके अलावा, Sandbox द्वारा उपयोग किए जाने वाले सौ से अधिक hooks में से 3 विशेष रूप से interesting हैं:
 
-- `mpo_proc_check_for`: यदि आवश्यक हो तो प्रोफ़ाइल लागू करता है और यदि इसे पहले लागू नहीं किया गया था।
-- `mpo_vnode_check_exec`: जब एक प्रक्रिया संबंधित बाइनरी को लोड करती है, तो एक प्रोफ़ाइल जांच की जाती है और SUID/SGID निष्पादनों को प्रतिबंधित करने की भी जांच की जाती है।
-- `mpo_cred_label_update_execve`: यह तब कॉल किया जाता है जब लेबल असाइन किया जाता है। यह सबसे लंबा है क्योंकि इसे तब कॉल किया जाता है जब बाइनरी पूरी तरह से लोड हो जाती है लेकिन अभी तक निष्पादित नहीं हुई है। यह सैंडबॉक्स ऑब्जेक्ट बनाने, kauth क्रेडेंशियल्स से सैंडबॉक्स संरचना संलग्न करने, mach पोर्ट्स तक पहुंच को हटाने जैसी क्रियाएँ करेगा...
+- `mpo_proc_check_for`: आवश्यकता होने पर और यदि profile पहले apply नहीं किया गया हो, तो profile apply करता है।
+- `mpo_vnode_check_exec`: इसे तब call किया जाता है जब कोई process संबंधित binary load करता है; इसके बाद profile check किया जाता है और SUID/SGID executions को रोकने वाला check भी perform किया जाता है।
+- `mpo_cred_label_update_execve`: इसे label assign किए जाने पर call किया जाता है। यह सबसे लंबा function है, क्योंकि इसे binary के पूरी तरह load हो जाने के बाद, लेकिन execute होने से पहले call किया जाता है। यह sandbox object बनाने, sandbox struct को kauth credentials से attach करने, mach ports तक access हटाने जैसी actions perform करता है।
 
-ध्यान दें कि **`_cred_sb_evalutate`** **`sb_evaluate_internal`** का एक लपेटन है और यह फ़ंक्शन पास किए गए क्रेडेंशियल्स को प्राप्त करता है और फिर **`eval`** फ़ंक्शन का उपयोग करके मूल्यांकन करता है जो आमतौर पर **प्लेटफ़ॉर्म प्रोफ़ाइल** का मूल्यांकन करता है जो डिफ़ॉल्ट रूप से सभी प्रक्रियाओं पर लागू होता है और फिर **विशिष्ट प्रक्रिया प्रोफ़ाइल**। ध्यान दें कि प्लेटफ़ॉर्म प्रोफ़ाइल macOS में **SIP** के मुख्य घटकों में से एक है।
+ध्यान दें कि **`_cred_sb_evalutate`**, **`sb_evaluate_internal`** का wrapper है। यह function दिए गए credentials प्राप्त करता है और फिर **`eval`** function का उपयोग करके evaluation perform करता है, जो आमतौर पर पहले **platform profile** का evaluation करता है, जिसे default रूप से सभी processes पर apply किया जाता है, और फिर **specific process profile** का। ध्यान दें कि macOS में platform profile, **SIP** के मुख्य components में से एक है।
 
 ## Sandboxd
 
-सैंडबॉक्स में एक उपयोगकर्ता डेमन भी चल रहा है जो XPC Mach सेवा `com.apple.sandboxd` को उजागर करता है और विशेष पोर्ट 14 (`HOST_SEATBELT_PORT`) को बाइंड करता है जिसका उपयोग कर्नेल एक्सटेंशन इसके साथ संवाद करने के लिए करता है। यह MIG का उपयोग करके कुछ फ़ंक्शंस को उजागर करता है।
+Sandbox में एक user daemon भी चलता है, जो XPC Mach service `com.apple.sandboxd` expose करता है और special port 14 (`HOST_SEATBELT_PORT`) को bind करता है। Kernel extension इससे communicate करने के लिए इस port का उपयोग करता है। यह MIG का उपयोग करके कुछ functions expose करता है।
 
 ## References
 
-- [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
+- [1] [XNU — `security/mac_policy.h` (MACF hooks the Sandbox kext registers)](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_policy.h)
+- [2] [XNU — `security/mac_base.c` (`__mac_syscall`, the entry point behind `__sandbox_ms`)](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_base.c)
+- [3] [`sandbox_init(3)` man page](https://keith.github.io/xcode-man-pages/sandbox_init.3.html)
+- [4] [Apple Developer — App Sandbox](https://developer.apple.com/documentation/security/app-sandbox)
+- [5] [Apple Sandbox Guide v1.0](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/)
+- [6] [Mac sandbox escape](https://lapcatsoftware.com/articles/sandbox-escape.html)
+- [7] [Office365 MacOS Sandbox Escape](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c)
+- [8] [HITBGSEC 2016 SG - The Apple Sandbox: Deeper Into The Quagmire - Jonathan Levin](https://www.youtube.com/watch?v=mG715HcDgO8&t=3011s)
 
 {{#include ../../../../banners/hacktricks-training.md}}

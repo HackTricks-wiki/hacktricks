@@ -1,18 +1,18 @@
-# macOS Network Services & Protocols
+# macOS Network Services और Protocols
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Remote Access Services
 
-ये सामान्य macOS services हैं जिन्हें remotely access किया जा सकता है।\
-आप इन्हें `System Settings` --> `Sharing` में enable/disable कर सकते हैं
+ये macOS को remotely access करने के लिए सामान्य services हैं।\
+आप इन services को `System Settings` --> `Sharing` में enable/disable कर सकते हैं।
 
-- **VNC**, जिसे “Screen Sharing” कहा जाता है (tcp:5900)
+- **VNC**, जिसे “Screen Sharing” के नाम से जाना जाता है (tcp:5900)
 - **SSH**, जिसे “Remote Login” कहा जाता है (tcp:22)
 - **Apple Remote Desktop** (ARD), या “Remote Management” (tcp:3283, tcp:5900)
-- **AppleEvent**, जिसे “Remote Apple Event” कहा जाता है (tcp:3031)
+- **AppleEvent**, जिसे “Remote Apple Event” के नाम से जाना जाता है (tcp:3031)
 
-देखें कि इनमें से कोई enabled है या नहीं, running:
+जांचें कि इनमें से कोई enabled है या नहीं:
 ```bash
 rmMgmt=$(netstat -na | grep LISTEN | grep tcp46 | grep "*.3283" | wc -l);
 scrShrng=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.5900" | wc -l);
@@ -22,9 +22,9 @@ rAE=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.3031" | wc -l);
 bmM=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.4488" | wc -l);
 printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharing: %s\nFile Sharing: %s\nRemote Login: %s\nRemote Mgmt: %s\nRemote Apple Events: %s\nBack to My Mac: %s\n\n" "$scrShrng" "$flShrng" "$rLgn" "$rmMgmt" "$rAE" "$bmM";
 ```
-### स्थानीय रूप से sharing configuration का enumerating
+### स्थानीय रूप से sharing configuration की enumeration
 
-जब आपके पास Mac पर पहले से local code execution हो, तो **configured state** जांचें, सिर्फ listening sockets नहीं। `systemsetup` और `launchctl` आमतौर पर बताते हैं कि service administratively enabled है या नहीं, जबकि `kickstart` और `system_profiler` effective ARD/Sharing configuration की पुष्टि करने में मदद करते हैं:
+जब आपके पास पहले से ही किसी Mac पर **local code execution** हो, तो केवल listening sockets ही नहीं, बल्कि **configured state** भी **check** करें। `systemsetup` और `launchctl` आमतौर पर बताते हैं कि service administratively enabled है या नहीं, जबकि `kickstart` और `system_profiler` effective ARD/Sharing configuration की पुष्टि करने में सहायता करते हैं:
 ```bash
 system_profiler SPSharingDataType
 sudo /usr/sbin/systemsetup -getremotelogin
@@ -32,23 +32,51 @@ sudo /usr/sbin/systemsetup -getremoteappleevents
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -status
 sudo launchctl print-disabled system | egrep 'com.apple.screensharing|com.apple.AEServer|ssh'
 ```
-### ARD का Pentesting
+### Pentesting ARD
 
-Apple Remote Desktop (ARD) [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) का macOS के लिए अनुकूलित एक उन्नत संस्करण है, जो अतिरिक्त features प्रदान करता है। ARD में एक उल्लेखनीय vulnerability control screen password के authentication method में है, जो password के केवल पहले 8 characters का उपयोग करता है, जिससे यह Hydra या [GoRedShell](https://github.com/ahhh/GoRedShell/) जैसे tools के साथ [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) के लिए prone हो जाता है, क्योंकि इसमें default rate limits नहीं होते।
+Apple Remote Desktop (ARD), macOS के लिए अनुकूलित [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) का एक enhanced version है, जो अतिरिक्त features प्रदान करता है। ARD में एक उल्लेखनीय vulnerability इसकी control screen password की authentication method है, जो password के केवल पहले 8 characters का उपयोग करती है। इसके कारण यह [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) के लिए संवेदनशील हो जाती है और Hydra या [GoRedShell](https://github.com/ahhh/GoRedShell/) जैसे tools से इसका लाभ उठाया जा सकता है, क्योंकि कोई default rate limits नहीं हैं।<sup>[3]</sup>
 
-Vulnerable instances की पहचान **nmap** के `vnc-info` script से की जा सकती है। `VNC Authentication (2)` support करने वाली services विशेष रूप से 8-character password truncation के कारण brute force attacks के लिए susceptible होती हैं।
+Vulnerable instances की पहचान **nmap** की `vnc-info` script का उपयोग करके की जा सकती है। `VNC Authentication (2)` को support करने वाली services 8-character password truncation के कारण brute force attacks के लिए विशेष रूप से susceptible होती हैं।
 
-Privilege escalation, GUI access, या user monitoring जैसे विभिन्न administrative tasks के लिए ARD enable करने हेतु, निम्न command का उपयोग करें:
+Privilege escalation, GUI access या user monitoring जैसे विभिन्न administrative tasks के लिए ARD को enable करने हेतु निम्नलिखित command का उपयोग करें:
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
-ARD बहुमुखी control levels प्रदान करता है, जिसमें observation, shared control, और full control शामिल हैं, और sessions user password बदलने के बाद भी persist रहती हैं। यह Unix commands को सीधे भेजने की अनुमति देता है, और administrative users के लिए उन्हें root के रूप में execute करता है। Task scheduling और Remote Spotlight search उल्लेखनीय features हैं, जो multiple machines पर sensitive files के लिए remote, low-impact searches को आसान बनाते हैं।
+ARD बहुमुखी control levels प्रदान करता है, जिनमें observation, shared control और full control शामिल हैं। User password बदलने के बाद भी sessions सक्रिय रहते हैं। यह Unix commands सीधे भेजने की सुविधा देता है और administrative users के लिए उन्हें root के रूप में execute करता है। Task scheduling और Remote Spotlight search उल्लेखनीय features हैं, जो कई machines पर sensitive files के लिए remote, low-impact searches को संभव बनाते हैं।
 
-Operator perspective से, **Monterey 12.1+ ने managed fleets में remote-enablement workflows बदल दिए**। अगर आप पहले से victim के MDM को control करते हैं, तो Apple का `EnableRemoteDesktop` command newer systems पर remote desktop functionality activate करने का अक्सर सबसे clean तरीका होता है। अगर आपके पास host पर पहले से foothold है, तो `kickstart` अभी भी command line से ARD privileges inspect या reconfigure करने के लिए useful है।
+Operator के दृष्टिकोण से, **Monterey 12.1+ ने managed fleets में remote-enablement workflows बदल दिए हैं**। यदि आपके पास पहले से victim के MDM का control है, तो नए systems पर remote desktop functionality activate करने के लिए Apple's `EnableRemoteDesktop` command अक्सर सबसे साफ तरीका है। यदि आपके पास host पर पहले से foothold है, तो command line से ARD privileges inspect या reconfigure करने के लिए `kickstart` अभी भी उपयोगी है।
+
+#### Apple Screen Sharing (RFB 003.889 / security type 36) pre-auth file-copy abuse
+
+हालिया `screensharingd` research से पता चला कि Apple Screen Sharing हमेशा classic VNC auth का उपयोग नहीं करता: नए builds **RFB `003.889`** बोलते हैं और **security type `36`** advertise करते हैं, जहाँ पहले **SRP** authentication होता है और **ChaCha20-Poly1305** केवल `ccsrp_server_verify_session` के सफल होने के बाद install किया जाता है। Public write-up के अनुसार, यह bug **macOS Tahoe 26.6** (**July 27, 2026**) में fixed है।<sup>[8][9]</sup>
+
+याद रखने योग्य एक उपयोगी pattern **stale-status parser bypass** है: सफल 4-byte length read के बाद, हर oversized/error branch को fresh error return करना आवश्यक है। प्रभावित builds में, big-endian SRP frame length **`>= 32768`** rejection path को पिछले `NetBufferRead` success (`0`) का पुनः उपयोग करने पर मजबूर करता है। इसके परिणामस्वरूप caller session को authenticated set कर देता है, भले ही कोई password proof न चला हो और कोई transport crypto install न हुआ हो। चूँकि unread bytes shared socket buffer में बने रहते हैं, attacker **malformed SRP data और post-auth RFB messages को एक ही TCP burst में pipeline** कर सकता है और उन्हें **cleartext authenticated traffic** के रूप में parse करवा सकता है।<sup>[8]</sup>
+
+Bypass के बाद, Apple's proprietary **file-copy** message **`0x22`** एक **root file read/write primitive** बन जाता है, क्योंकि `screensharingd` root के रूप में चलता है:<sup>[8]</sup>
+```text
+[u8 0x22][u8 sub][be32 L]
+[be16 ver][be16 kind][be32 sid][be32 arg]
+[L-12 bytes payload]
+```
+- `kind=1` / `StartFileSend`: arbitrary file read
+- `kind=2` / `StartFileReceive`: arbitrary file write
+- अलग-अलग `sid` values एक ही connection में कई transactions को pipeline करने देते हैं
+- `kind=101` (`NewItem`) में regular file के लिए byte `14` / `arg[0]` को `0x01` पर सेट करें, payload offset `+42` पर **non-zero** big-endian file size रखें, और payload offset `+0x5a` पर वांछित Unix mode रखें (`crontab` को target करने पर `0600`)
+
+Writable paths पर दिलचस्प post-write pivots में **`/etc/sudoers.d/`**, **`/etc/zshenv`**, **`/Library/LaunchDaemons/`**, और **`/var/root/.ssh/authorized_keys`** शामिल हैं। **SIP auth bypass या root file read को नहीं रोकता**, लेकिन यह **`/var/at`** जैसे कुछ write targets को block करता है, इसलिए cron-based execution केवल SIP disabled होने पर काम करता है। Default SIP-enabled hosts पर तुरंत code execution के बजाय **"privileged auto-consumed files में root file write"** के रूप में सोचें।<sup>[8]</sup>
+
+उसी research से जुड़ा एक और SRP pitfall: servers को केवल `A > 0` नहीं, बल्कि (RFC 5054 के अनुसार) **`A mod N != 0`** validate करना चाहिए। **`A = N`** स्वीकार करने से shared secret को zero पर force किया जा सकता है और password verification कमजोर हो सकती है।<sup>[8][10]</sup>
+
+**Detection ideas**
+
+- Security type `36` sessions जिनमें पहला SRP frame length **`>= 32768`** हो
+- ऐसे sessions जो किसी successful SRP proof / cipher install से पहले cleartext **`0x22`** file-copy traffic को process करना शुरू कर दें
+- **TCP/5900** पर बार-बार होने वाले short-lived retries, साथ में एक ही burst में कई file-copy `sid` values
+- Screen Sharing exposure के बाद **`/etc/zshenv`**, **`/etc/sudoers.d/*`**, **`/Library/LaunchDaemons/*.plist`**, या **`/var/root/.ssh/authorized_keys`** का unexpected creation
 
 ### Pentesting Remote Apple Events (RAE / EPPC)
 
-Apple इस feature को modern System Settings में **Remote Application Scripting** कहता है। अंदर से यह **Apple Event Manager** को remotely **EPPC** के over **TCP/3031** पर `com.apple.AEServer` service के जरिए expose करता है। Palo Alto Unit 42 ने इसे फिर से एक practical **macOS lateral movement** primitive के रूप में highlight किया, क्योंकि valid credentials plus enabled RAE service operator को remote Mac पर scriptable applications control करने देते हैं।
+Apple आधुनिक System Settings में इस feature को **Remote Application Scripting** कहता है। इसके under the hood यह **`com.apple.AEServer`** service के माध्यम से **TCP/3031** पर **EPPC** के जरिए **Apple Event Manager** को remotely expose करता है। Palo Alto Unit 42 ने इसे फिर से एक practical **macOS lateral movement** primitive के रूप में highlight किया, क्योंकि valid credentials और enabled RAE service किसी operator को remote Mac पर scriptable applications चलाने की अनुमति देते हैं।<sup>[6]</sup>
 
 Useful checks:
 ```bash
@@ -56,28 +84,28 @@ sudo /usr/sbin/systemsetup -getremoteappleevents
 sudo launchctl print-disabled system | grep AEServer
 lsof -nP -iTCP:3031 -sTCP:LISTEN
 ```
-अगर आपके पास पहले से target पर admin/root है और आप इसे enable करना चाहते हैं:
+यदि आपके पास target पर पहले से admin/root access है और आप इसे enable करना चाहते हैं:
 ```bash
 sudo /usr/sbin/systemsetup -setremoteappleevents on
 ```
-दूसरे Mac से basic connectivity test:
+किसी अन्य Mac से बुनियादी connectivity test:
 ```bash
 osascript -e 'tell application "Finder" of machine "eppc://user:pass@192.0.2.10" to get name of startup disk'
 ```
-व्यवहार में, abuse case केवल Finder तक सीमित नहीं है। कोई भी **scriptable application** जो आवश्यक Apple events स्वीकार करता है, एक remote attack surface बन जाता है, जिससे internal macOS networks पर credential theft के बाद RAE विशेष रूप से interesting हो जाता है।
+व्यवहार में, abuse case केवल Finder तक सीमित नहीं है। कोई भी **scriptable application** जो आवश्यक Apple events स्वीकार करती है, एक remote attack surface बन जाती है। इसी कारण internal macOS networks पर credential theft के बाद RAE विशेष रूप से महत्वपूर्ण हो जाता है।
 
 #### Recent Screen-Sharing / ARD vulnerabilities (2023-2025)
 
 | Year | CVE | Component | Impact | Fixed in |
 |------|-----|-----------|--------|----------|
-|2023|CVE-2023-42940|Screen Sharing|गलत session rendering के कारण *गलत* desktop या window transmit हो सकता था, जिससे sensitive information का leakage हो सकता था|macOS Sonoma 14.2.1 (Dec 2023) |
-|2024|CVE-2024-44248|Screen Sharing Server|screen sharing access वाला एक user **किसी दूसरे user की screen** देख सकता था क्योंकि state-management issue था|macOS Ventura 13.7.2 / Sonoma 14.7.2 / Sequoia 15.1 (Oct-Dec 2024) |
+|2023|CVE-2023-42940|Screen Sharing|गलत session rendering के कारण *गलत* desktop या window transmit हो सकता था, जिससे sensitive information का leak हो सकता था|macOS Sonoma 14.2.1 (Dec 2023) |
+|2024|CVE-2024-44248|Screen Sharing Server|Screen sharing access वाला user state-management issue के कारण **किसी अन्य user की screen** देख सकता था|macOS Ventura 13.7.2 / Sonoma 14.7.2 / Sequoia 15.1 (Oct-Dec 2024) |
 
 **Hardening tips**
 
-* जब strictly required न हो, *Screen Sharing*/*Remote Management* disable करें।
-* macOS को fully patched रखें (Apple आम तौर पर last three major releases के लिए security fixes ship करता है)।
-* एक **Strong Password** का उपयोग करें *और* संभव हो तो *“VNC viewers may control screen with password”* option को **disabled** रखें।
+* जब तक सख्त आवश्यकता न हो, *Screen Sharing*/*Remote Management* disable रखें।
+* macOS को पूरी तरह patched रखें (Apple सामान्यतः पिछले तीन major releases के लिए security fixes जारी करता है)।
+* एक **Strong Password** का उपयोग करें और संभव होने पर *“VNC viewers may control screen with password”* option को **disabled** रखें।
 * TCP 5900/3283 को Internet पर expose करने के बजाय service को VPN के पीछे रखें।
 * `ARDAgent` को local subnet तक सीमित करने के लिए Application Firewall rule जोड़ें:
 
@@ -90,49 +118,49 @@ sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setblockapp /System/Libra
 
 ## Bonjour Protocol
 
-Bonjour, Apple द्वारा डिज़ाइन की गई technology, **same network पर मौजूद devices को एक-दूसरे की offered services detect करने** देती है। इसे Rendezvous, **Zero Configuration**, या Zeroconf के रूप में भी जाना जाता है; यह किसी device को TCP/IP network में join करने, **automatically एक IP address चुनने**, और अपनी services को अन्य network devices तक broadcast करने में सक्षम बनाती है।
+Bonjour, Apple द्वारा design की गई technology, **एक ही network पर मौजूद devices को एक-दूसरे द्वारा offered services detect करने** की सुविधा देती है। इसे Rendezvous, **Zero Configuration**, या Zeroconf के नाम से भी जाना जाता है। यह किसी device को TCP/IP network से जुड़ने, **automatically एक IP address चुनने**, और अपनी services को अन्य network devices पर broadcast करने में सक्षम बनाता है।
 
-Zero Configuration Networking, जो Bonjour द्वारा प्रदान किया जाता है, यह सुनिश्चित करता है कि devices:
+Bonjour द्वारा प्रदान की जाने वाली Zero Configuration Networking यह सुनिश्चित करती है कि devices:
 
-- DHCP server न होने पर भी **Automatically एक IP Address obtain** कर सकें।
+- **DHCP server की अनुपस्थिति में भी automatically एक IP Address प्राप्त कर सकें।**
 - DNS server की आवश्यकता के बिना **name-to-address translation** कर सकें।
-- नेटवर्क पर उपलब्ध **services discover** कर सकें।
+- Network पर उपलब्ध **services discover** कर सकें।
 
-Bonjour का उपयोग करने वाले devices खुद को **169.254/16 range से एक IP address** assign करेंगे और नेटवर्क पर उसकी uniqueness verify करेंगे। Macs इस subnet के लिए routing table entry बनाए रखते हैं, जिसे `netstat -rn | grep 169` से verify किया जा सकता है।
+Bonjour का उपयोग करने वाले devices स्वयं को **169.254/16 range से एक IP address assign** करेंगे और network पर उसकी uniqueness verify करेंगे। Macs इस subnet के लिए routing table entry बनाए रखते हैं, जिसे `netstat -rn | grep 169` के माध्यम से verify किया जा सकता है।
 
-DNS के लिए, Bonjour **Multicast DNS (mDNS) protocol** का उपयोग करता है। mDNS **port 5353/UDP** पर काम करता है, **standard DNS queries** का उपयोग करते हुए लेकिन **multicast address 224.0.0.251** को target करता है। यह approach सुनिश्चित करती है कि नेटवर्क पर सभी listening devices queries receive और respond कर सकें, जिससे उनके records update करना संभव होता है।
+DNS के लिए Bonjour **Multicast DNS (mDNS) protocol** का उपयोग करता है। mDNS **port 5353/UDP** पर operate करता है और **standard DNS queries** का उपयोग करता है, लेकिन इन्हें **multicast address 224.0.0.251** पर target करता है। यह approach सुनिश्चित करती है कि network पर मौजूद सभी listening devices queries प्राप्त कर सकें और उनका response दे सकें, जिससे उनके records update किए जा सकें।
 
-नेटवर्क में join करने पर, प्रत्येक device अपना नाम self-select करती है, आमतौर पर जो **.local** पर समाप्त होता है, जिसे hostname से लिया जा सकता है या randomly generated हो सकता है।
+Network से जुड़ने पर प्रत्येक device स्वयं एक name select करता है, जो सामान्यतः **.local** पर समाप्त होता है। यह name hostname से derived या randomly generated हो सकता है।
 
-नेटवर्क के भीतर service discovery **DNS Service Discovery (DNS-SD)** द्वारा facilitated होती है। DNS SRV records के format का लाभ उठाते हुए, DNS-SD कई services को list करने के लिए **DNS PTR records** का उपयोग करता है। कोई client जो किसी specific service की तलाश कर रहा है, वह `<Service>.<Domain>` के लिए PTR record request करेगा, और बदले में `<Instance>.<Service>.<Domain>` के रूप में formatted PTR records की list प्राप्त करेगा यदि service multiple hosts पर available हो।
+Network के भीतर service discovery **DNS Service Discovery (DNS-SD)** द्वारा संभव होती है। DNS SRV records के format का उपयोग करते हुए, DNS-SD multiple services की listing सक्षम करने के लिए **DNS PTR records** का उपयोग करता है। किसी specific service की तलाश करने वाला client `<Service>.<Domain>` के लिए PTR record request करेगा। यदि वह service multiple hosts से available है, तो response में `<Instance>.<Service>.<Domain>` format में PTR records की list प्राप्त होगी।
 
-`dns-sd` utility का उपयोग **network services discover और advertise** करने के लिए किया जा सकता है। इसके उपयोग के कुछ उदाहरण नीचे दिए गए हैं:
+`dns-sd` utility का उपयोग **network services discover और advertise करने** के लिए किया जा सकता है। इसके उपयोग के कुछ examples यहां दिए गए हैं:
 
-### SSH Services की खोज
+### Searching for SSH Services
 
-नेटवर्क पर SSH services खोजने के लिए, निम्न command का उपयोग किया जाता है:
+Network पर SSH services search करने के लिए निम्न command का उपयोग किया जाता है:
 ```bash
 dns-sd -B _ssh._tcp
 ```
-यह कमांड \_ssh.\_tcp सेवाओं के लिए browsing शुरू करता है और timestamp, flags, interface, domain, service type, और instance name जैसी details output करता है।
+यह command \_ssh.\_tcp services के लिए browsing शुरू करता है और timestamp, flags, interface, domain, service type और instance name जैसी details output करता है।
 
-### Advertising an HTTP Service
+### HTTP Service का Advertising
 
-HTTP service advertise करने के लिए, आप उपयोग कर सकते हैं:
+HTTP service का advertising करने के लिए, आप इसका उपयोग कर सकते हैं:
 ```bash
 dns-sd -R "Index" _http._tcp . 80 path=/index.html
 ```
-यह कमांड पोर्ट 80 पर `/index.html` path के साथ "Index" नामक एक HTTP service register करता है।
+यह command पोर्ट 80 पर `/index.html` path के साथ "Index" नाम की HTTP service register करता है।
 
-इसके बाद network पर HTTP services search करने के लिए:
+इसके बाद network पर HTTP services खोजने के लिए:
 ```bash
 dns-sd -B _http._tcp
 ```
-जब एक service शुरू होती है, तो वह subnet पर सभी devices को multicast करके अपनी presence की घोषणा करती है। इन services में रुचि रखने वाले devices को requests भेजने की जरूरत नहीं होती, बल्कि वे बस इन announcements को सुनते हैं।
+जब कोई service शुरू होती है, तो वह अपनी उपस्थिति को multicast करके subnet पर मौजूद सभी devices को अपनी availability की घोषणा करती है। इन services में रुचि रखने वाले devices को requests भेजने की आवश्यकता नहीं होती, बल्कि वे केवल इन announcements को सुनते हैं।
 
-एक अधिक user-friendly interface के लिए, Apple App Store पर उपलब्ध **Discovery - DNS-SD Browser** app आपके local network पर offered services को visualize कर सकती है।
+अधिक user-friendly interface के लिए, Apple App Store पर उपलब्ध **Discovery - DNS-SD Browser** app आपके local network पर उपलब्ध services को visualize कर सकती है।
 
-वैकल्पिक रूप से, custom scripts लिखकर `python-zeroconf` library का उपयोग करके services को browse और discover किया जा सकता है। [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) script `_http._tcp.local.` services के लिए एक service browser बनाने का demonstration करती है, जो added या removed services को print करती है:
+वैकल्पिक रूप से, `python-zeroconf` library का उपयोग करके services को browse और discover करने के लिए custom scripts लिखी जा सकती हैं। [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) script `_http._tcp.local.` services के लिए service browser बनाने और जोड़ी या हटाई गई services को print करने का तरीका दिखाती है:
 ```python
 from zeroconf import ServiceBrowser, Zeroconf
 
@@ -155,7 +183,7 @@ zeroconf.close()
 ```
 ### macOS-specific Bonjour hunting
 
-macOS नेटवर्क्स पर, Bonjour अक्सर **remote administration surfaces** को बिना target को सीधे touch किए ढूँढने का सबसे आसान तरीका होता है। Apple Remote Desktop खुद Bonjour के जरिए clients discover कर सकता है, इसलिए वही discovery data attacker के लिए भी useful होती है।
+macOS networks पर, Bonjour अक्सर target को सीधे touch किए बिना **remote administration surfaces** खोजने का सबसे आसान तरीका होता है। Apple Remote Desktop स्वयं Bonjour के माध्यम से clients को discover कर सकता है, इसलिए वही discovery data attacker के लिए भी उपयोगी होती है।
 ```bash
 # Enumerate every advertised service type first
 dns-sd -B _services._dns-sd._udp local
@@ -169,63 +197,66 @@ dns-sd -B _eppc._tcp local     # Remote Apple Events / EPPC
 dns-sd -L "<Instance>" _rfb._tcp local
 dns-sd -L "<Instance>" _eppc._tcp local
 ```
-बड़े पैमाने पर **mDNS spoofing, impersonation, and cross-subnet discovery** techniques के लिए, समर्पित page देखें:
+व्यापक **mDNS spoofing, impersonation, और cross-subnet discovery** techniques के लिए dedicated page देखें:
 
 {{#ref}}
 ../../network-services-pentesting/5353-udp-multicast-dns-mdns.md
 {{#endref}}
 
-### नेटवर्क पर Bonjour को enumerate करना
+### नेटवर्क पर Bonjour की enumeration
 
-* **Nmap NSE** – एक single host द्वारा advertised services को discover करें:
+* **Nmap NSE** – single host द्वारा advertised services discover करें:
 
 ```bash
 nmap -sU -p 5353 --script=dns-service-discovery <target>
 ```
 
-`dns-service-discovery` script `_services._dns-sd._udp.local` query भेजता है और फिर हर advertised service type को enumerate करता है।
+`dns-service-discovery` script एक `_services._dns-sd._udp.local` query भेजती है और फिर प्रत्येक advertised service type की enumeration करती है।
 
-* **mdns_recon** – Python tool जो पूरी ranges scan करता है और *misconfigured* mDNS responders को ढूँढता है जो unicast queries का answer देते हैं (subnets/WAN के across reachable devices खोजने के लिए उपयोगी):
+* **mdns_recon** – Python tool जो पूरी ranges को scan करके *misconfigured* mDNS responders खोजता है, जो unicast queries का उत्तर देते हैं (subnets/WAN के पार reachable devices खोजने में उपयोगी):
 
 ```bash
 git clone https://github.com/chadillac/mdns_recon && cd mdns_recon
 python3 mdns_recon.py -r 192.0.2.0/24 -s _ssh._tcp.local
 ```
 
-यह local link के बाहर Bonjour के जरिए SSH expose करने वाले hosts वापस करेगा।
+यह local link के बाहर Bonjour के माध्यम से SSH expose करने वाले hosts लौटाएगा।
 
-### Security considerations & recent vulnerabilities (2024-2025)
+### Security considerations और हाल की vulnerabilities (2024-2025)
 
 | Year | CVE | Severity | Issue | Patched in |
 |------|-----|----------|-------|------------|
-|2024|CVE-2024-44183|Medium|*mDNSResponder* में एक logic error ने crafted packet को **denial-of-service** trigger करने दिया|macOS Ventura 13.7 / Sonoma 14.7 / Sequoia 15.0 (Sep 2024) |
-|2025|CVE-2025-31222|High|*mDNSResponder* में एक correctness issue का दुरुपयोग **local privilege escalation** के लिए किया जा सकता था|macOS Ventura 13.7.6 / Sonoma 14.7.6 / Sequoia 15.5 (May 2025) |
+|2024|CVE-2024-44183|Medium|*mDNSResponder* में एक logic error के कारण crafted packet **denial-of-service** trigger कर सकता था|macOS Ventura 13.7 / Sonoma 14.7 / Sequoia 15.0 (Sep 2024) |
+|2025|CVE-2025-31222|High|*mDNSResponder* में correctness issue का दुरुपयोग करके **local privilege escalation** किया जा सकता था|macOS Ventura 13.7.6 / Sonoma 14.7.6 / Sequoia 15.5 (May 2025) |
 
 **Mitigation guidance**
 
-1. UDP 5353 को *link-local* scope तक सीमित करें – wireless controllers, routers, और host-based firewalls पर इसे block या rate-limit करें।
-2. जिन systems को service discovery की आवश्यकता नहीं है, उन पर Bonjour पूरी तरह disable करें:
+1. UDP 5353 को *link-local* scope तक सीमित करें – इसे wireless controllers, routers और host-based firewalls पर block या rate-limit करें।
+2. जिन systems को service discovery की आवश्यकता नहीं है, उन पर Bonjour को पूरी तरह disable करें:
 
 ```bash
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
-3. ऐसे environments में जहाँ Bonjour internal रूप से required है लेकिन network boundaries को कभी cross नहीं करना चाहिए, *AirPlay Receiver* profile restrictions (MDM) या mDNS proxy का उपयोग करें।
-4. **System Integrity Protection (SIP)** enable करें और macOS को up to date रखें – ऊपर की दोनों vulnerabilities जल्दी patch की गई थीं, लेकिन full protection के लिए SIP का enabled होना जरूरी था।
+3. ऐसे environments में जहाँ Bonjour internally आवश्यक है, लेकिन इसे network boundaries के पार कभी नहीं जाना चाहिए, *AirPlay Receiver* profile restrictions (MDM) या mDNS proxy का उपयोग करें।
+4. **System Integrity Protection (SIP)** enable करें और macOS को up to date रखें – ऊपर दी गई दोनों vulnerabilities को शीघ्र patch किया गया था, लेकिन पूर्ण protection के लिए SIP enabled होना आवश्यक था।
 
 ### Bonjour को disable करना
 
-यदि security या अन्य कारणों से Bonjour को disable करने की चिंता है, तो इसे following command का उपयोग करके बंद किया जा सकता है:
+यदि security या अन्य कारणों से Bonjour को disable करने की चिंता है, तो इसे निम्न command का उपयोग करके बंद किया जा सकता है:
 ```bash
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
-## References
+## संदर्भ
 
-- [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
-- [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
-- [**https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html**](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html)
-- [**NVD – CVE-2023-42940**](https://nvd.nist.gov/vuln/detail/CVE-2023-42940)
-- [**NVD – CVE-2024-44183**](https://nvd.nist.gov/vuln/detail/CVE-2024-44183)
-- [**Palo Alto Unit 42 - Lateral Movement on macOS: Unique and Popular Techniques and In-the-Wild Examples**](https://unit42.paloaltonetworks.com/unique-popular-techniques-lateral-movement-macos/)
-- [**Apple Support - About the security content of macOS Sonoma 14.7.2**](https://support.apple.com/en-us/121840)
+- [1] [The Mac Hacker's Handbook](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
+- [2] [The Art of Mac Malware, Volume I: Analysis - Patrick Wardle](https://taomm.org/vol1/analysis.html)
+- [3] [LockBoxx - macOS Red Teaming 206: ARD (Apple Remote Desktop Protocol)](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html)
+- [4] [NVD – CVE-2023-42940](https://nvd.nist.gov/vuln/detail/CVE-2023-42940)
+- [5] [NVD – CVE-2024-44183](https://nvd.nist.gov/vuln/detail/CVE-2024-44183)
+- [6] [Palo Alto Unit 42 - macOS पर Lateral Movement: विशिष्ट और लोकप्रिय तकनीकें तथा वास्तविक दुनिया के उदाहरण](https://unit42.paloaltonetworks.com/unique-popular-techniques-lateral-movement-macos/)
+- [7] [Apple Support - macOS Sonoma 14.7.2 की security content के बारे में](https://support.apple.com/en-us/121840)
+- [8] [Apple Screen Sharing Pre-Auth RCE](https://warez.sl0p.foo/apple-screensharing-rce/)
+- [9] [Apple Support - macOS Tahoe 26.6 की security content के बारे में](https://support.apple.com/en-us/128067)
+- [10] [RFC 5054 - TLS Authentication के लिए Secure Remote Password (SRP) Protocol का उपयोग](https://www.rfc-editor.org/rfc/rfc5054)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,53 +1,57 @@
-# अन्य संगठनों में उपकरणों का नामांकन
+# अन्य Organisations में Devices Enroll करना
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## परिचय
 
-जैसा कि [**पहले टिप्पणी की गई**](#what-is-mdm-mobile-device-management)**,** किसी उपकरण को एक संगठन में नामांकित करने के लिए **केवल उस संगठन का एक सीरियल नंबर आवश्यक है**। एक बार जब उपकरण नामांकित हो जाता है, तो कई संगठन नए उपकरण पर संवेदनशील डेटा स्थापित करेंगे: प्रमाणपत्र, अनुप्रयोग, WiFi पासवर्ड, VPN कॉन्फ़िगरेशन [और इसी तरह](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf)।\
-इसलिए, यदि नामांकन प्रक्रिया को सही तरीके से सुरक्षित नहीं किया गया है, तो यह हमलावरों के लिए एक खतरनाक प्रवेश बिंदु हो सकता है।
+जैसा कि [**previously commented**](#what-is-mdm-mobile-device-management)**,** किसी device को किसी organization में enroll करने के लिए **केवल उस Organization से संबंधित Serial Number की आवश्यकता होती है**। Device के enroll हो जाने के बाद, कई organizations नए device पर sensitive data install करती हैं: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf)।\
+इसलिए, यदि enrolment process सही ढंग से protected न हो, तो यह attackers के लिए एक dangerous entrypoint हो सकता है।
 
-**यहाँ अनुसंधान का एक सारांश है [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe)। आगे तकनीकी विवरण के लिए इसे देखें!**
+**निम्नलिखित research का summary है [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe)। आगे के technical details के लिए इसे देखें!**<sup>[1]</sup>
 
-## DEP और MDM बाइनरी विश्लेषण का अवलोकन
+## DEP और MDM Binary Analysis का Overview
 
-यह अनुसंधान macOS पर डिवाइस नामांकन कार्यक्रम (DEP) और मोबाइल डिवाइस प्रबंधन (MDM) से संबंधित बाइनरी में गहराई से जाता है। प्रमुख घटक शामिल हैं:
+यह research macOS पर Device Enrollment Program (DEP) और Mobile Device Management (MDM) से संबंधित binaries का विश्लेषण करती है। मुख्य components में शामिल हैं:
 
-- **`mdmclient`**: MDM सर्वरों के साथ संवाद करता है और macOS संस्करण 10.13.4 से पहले DEP चेक-इन को ट्रिगर करता है।
-- **`profiles`**: कॉन्फ़िगरेशन प्रोफाइल का प्रबंधन करता है, और macOS संस्करण 10.13.4 और बाद में DEP चेक-इन को ट्रिगर करता है।
-- **`cloudconfigurationd`**: DEP API संचार का प्रबंधन करता है और डिवाइस नामांकन प्रोफाइल प्राप्त करता है।
+- **`mdmclient`**: MDM servers के साथ communicate करता है और 10.13.4 से पहले के macOS versions पर DEP check-ins trigger करता है।
+- **`profiles`**: Configuration Profiles को manage करता है और macOS versions 10.13.4 और बाद के versions पर DEP check-ins trigger करता है।
+- **`cloudconfigurationd`**: DEP API communications को manage करता है और Device Enrollment profiles retrieve करता है।
 
-DEP चेक-इन `CPFetchActivationRecord` और `CPGetActivationRecord` कार्यों का उपयोग करता है जो निजी कॉन्फ़िगरेशन प्रोफाइल ढांचे से सक्रियण रिकॉर्ड को प्राप्त करने के लिए हैं, जिसमें `CPFetchActivationRecord` XPC के माध्यम से `cloudconfigurationd` के साथ समन्वय करता है।
+DEP check-ins, private Configuration Profiles framework के `CPFetchActivationRecord` और `CPGetActivationRecord` functions का उपयोग करके Activation Record fetch करते हैं। `CPFetchActivationRecord`, XPC के माध्यम से `cloudconfigurationd` के साथ coordinate करता है।<sup>[1]</sup>
 
-## टेस्ला प्रोटोकॉल और एब्सिन्थ स्कीम रिवर्स इंजीनियरिंग
+## Tesla Protocol और Absinthe Scheme की Reverse Engineering
 
-DEP चेक-इन में `cloudconfigurationd` एक एन्क्रिप्टेड, साइन किया हुआ JSON पेलोड _iprofiles.apple.com/macProfile_ पर भेजता है। पेलोड में उपकरण का सीरियल नंबर और क्रिया "RequestProfileConfiguration" शामिल है। उपयोग की जाने वाली एन्क्रिप्शन स्कीम को आंतरिक रूप से "Absinthe" के रूप में संदर्भित किया जाता है। इस स्कीम को सुलझाना जटिल है और इसमें कई चरण शामिल हैं, जिसने सक्रियण रिकॉर्ड अनुरोध में मनमाने सीरियल नंबर डालने के वैकल्पिक तरीकों की खोज की।
+DEP check-in में `cloudconfigurationd`, _iprofiles.apple.com/macProfile_ को एक encrypted और signed JSON payload भेजता है। Payload में device का serial number और `"RequestProfileConfiguration"` action शामिल होता है। उपयोग की जाने वाली encryption scheme को internally "Absinthe" कहा जाता है। इस scheme को समझना complex है और इसमें कई steps शामिल हैं, जिसके कारण Activation Record request में arbitrary serial numbers insert करने के alternative methods तलाशे गए।<sup>[1]</sup>
 
-## DEP अनुरोधों को प्रॉक्सी करना
+## DEP Requests को Proxy करना
 
-_iprofiles.apple.com_ पर DEP अनुरोधों को इंटरसेप्ट और संशोधित करने के प्रयास चार्ल्स प्रॉक्सी जैसे उपकरणों का उपयोग करते समय पेलोड एन्क्रिप्शन और SSL/TLS सुरक्षा उपायों द्वारा बाधित हो गए। हालाँकि, `MCCloudConfigAcceptAnyHTTPSCertificate` कॉन्फ़िगरेशन को सक्षम करने से सर्वर प्रमाणपत्र मान्यता को बायपास करने की अनुमति मिलती है, हालाँकि पेलोड की एन्क्रिप्टेड प्रकृति अभी भी डिक्रिप्शन कुंजी के बिना सीरियल नंबर में संशोधन को रोकती है।
+Charles Proxy जैसे tools का उपयोग करके _iprofiles.apple.com_ को भेजे गए DEP requests को intercept और modify करने के प्रयास payload encryption और SSL/TLS security measures के कारण बाधित हुए। हालांकि, `MCCloudConfigAcceptAnyHTTPSCertificate` configuration को enable करने से server certificate validation को bypass किया जा सकता है, लेकिन payload की encrypted nature के कारण decryption key के बिना serial number को modify करना अब भी संभव नहीं होता।<sup>[1]</sup>
 
-## DEP के साथ इंटरैक्ट करने वाले सिस्टम बाइनरी को इंस्ट्रूमेंट करना
+## DEP के साथ Interact करने वाली System Binaries को Instrument करना
 
-`cloudconfigurationd` जैसे सिस्टम बाइनरी को इंस्ट्रूमेंट करने के लिए macOS पर सिस्टम इंटीग्रिटी प्रोटेक्शन (SIP) को अक्षम करना आवश्यक है। SIP अक्षम होने पर, LLDB जैसे उपकरणों का उपयोग सिस्टम प्रक्रियाओं से जुड़ने और DEP API इंटरैक्शन में उपयोग किए जाने वाले सीरियल नंबर को संभावित रूप से संशोधित करने के लिए किया जा सकता है। यह विधि वरीयता प्राप्त है क्योंकि यह अधिकारों और कोड साइनिंग की जटिलताओं से बचती है।
+`cloudconfigurationd` जैसी system binaries को instrument करने के लिए macOS पर System Integrity Protection (SIP) को disable करना आवश्यक है। SIP disabled होने पर, LLDB जैसे tools का उपयोग system processes से attach करने और DEP API interactions में उपयोग किए जाने वाले serial number को संभावित रूप से modify करने के लिए किया जा सकता है। यह method बेहतर है क्योंकि इससे entitlements और code signing की complexities से बचा जा सकता है।
 
-**बाइनरी इंस्ट्रूमेंटेशन का शोषण:**
-`cloudconfigurationd` में JSON सीरियलाइजेशन से पहले DEP अनुरोध पेलोड को संशोधित करना प्रभावी साबित हुआ। प्रक्रिया में शामिल थे:
+**Binary Instrumentation का Exploitation:**
+`cloudconfigurationd` में JSON serialization से पहले DEP request payload को modify करना effective साबित हुआ। इस process में शामिल steps:
 
-1. `cloudconfigurationd` से LLDB को संलग्न करना।
-2. उस बिंदु का पता लगाना जहां सिस्टम सीरियल नंबर प्राप्त किया जाता है।
-3. पेलोड को एन्क्रिप्ट और भेजे जाने से पहले मेमोरी में एक मनमाना सीरियल नंबर इंजेक्ट करना।
+1. `cloudconfigurationd` से LLDB attach करना।
+2. उस point को locate करना जहाँ system serial number fetch किया जाता है।
+3. Payload के encrypted होकर भेजे जाने से पहले memory में एक arbitrary serial number inject करना।
 
-इस विधि ने मनमाने सीरियल नंबर के लिए पूर्ण DEP प्रोफाइल प्राप्त करने की अनुमति दी, जो एक संभावित भेद्यता को प्रदर्शित करती है।
+इस method से arbitrary serial numbers के लिए complete DEP profiles retrieve करना संभव हुआ, जो एक potential vulnerability को दर्शाता है।<sup>[1]</sup>
 
-### पायथन के साथ इंस्ट्रूमेंटेशन को स्वचालित करना
+### Python के साथ Instrumentation को Automate करना
 
-शोषण प्रक्रिया को LLDB API के साथ पायथन का उपयोग करके स्वचालित किया गया, जिससे मनमाने सीरियल नंबर को प्रोग्रामेटिक रूप से इंजेक्ट करना और संबंधित DEP प्रोफाइल प्राप्त करना संभव हो गया।
+Exploitation process को LLDB API के साथ Python का उपयोग करके automated किया गया, जिससे arbitrary serial numbers को programmatically inject करना और corresponding DEP profiles retrieve करना feasible हो गया।<sup>[1]</sup>
 
-### DEP और MDM भेद्यताओं के संभावित प्रभाव
+### DEP और MDM Vulnerabilities के Potential Impacts
 
-अनुसंधान ने महत्वपूर्ण सुरक्षा चिंताओं को उजागर किया:
+Research ने महत्वपूर्ण security concerns को उजागर किया:
 
-1. **जानकारी का खुलासा**: DEP-रजिस्टर्ड सीरियल नंबर प्रदान करके, DEP प्रोफाइल में निहित संवेदनशील संगठनात्मक जानकारी प्राप्त की जा सकती है।
+1. **Information Disclosure**: DEP-registered serial number provide करके, DEP profile में मौजूद sensitive organizational information retrieve की जा सकती है।<sup>[1]</sup>
+
+## References
+
+- [1] [Duo Labs — MDM Me Maybe: Device Enrollment Program Security](https://duo.com/labs/research/mdm-me-maybe)
 
 {{#include ../../../banners/hacktricks-training.md}}

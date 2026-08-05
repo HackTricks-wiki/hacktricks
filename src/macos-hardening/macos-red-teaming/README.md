@@ -8,52 +8,52 @@
 - JAMF Pro: `jamf checkJSSConnection`
 - Kandji
 
-यदि आप प्रबंधन प्लेटफ़ॉर्म तक पहुँचने के लिए **व्यवस्थापक क्रेडेंशियल्स से समझौता** करने में सफल होते हैं, तो आप मशीनों में अपने मैलवेयर को वितरित करके **सभी कंप्यूटरों से समझौता** कर सकते हैं।
+यदि आप management platform तक पहुंचने के लिए **admin credentials को compromise** कर लेते हैं, तो आप **संभावित रूप से सभी computers को compromise** कर सकते हैं, क्योंकि आप machines में अपना malware वितरित कर सकते हैं।
 
-MacOS वातावरण में रेड टीमिंग के लिए MDMs के काम करने के तरीके की कुछ समझ होना अत्यधिक अनुशंसित है:
+MacOS environments में red teaming के लिए यह समझना अत्यधिक recommended है कि MDMs कैसे काम करते हैं:
 
 
 {{#ref}}
 macos-mdm/
 {{#endref}}
 
-### C2 के रूप में MDM का उपयोग करना
+### MDM को C2 के रूप में उपयोग करना
 
-एक MDM के पास प्रोफाइल स्थापित करने, क्वेरी करने या हटाने, एप्लिकेशन स्थापित करने, स्थानीय व्यवस्थापक खाते बनाने, फर्मवेयर पासवर्ड सेट करने, FileVault कुंजी बदलने की अनुमति होगी...
+एक MDM के पास profiles को install, query या remove करने, applications install करने, local admin accounts बनाने, firmware password set करने और FileVault key बदलने की permission होगी...
 
-अपने स्वयं के MDM को चलाने के लिए आपको **अपने CSR को एक विक्रेता द्वारा साइन कराना** होगा, जिसे आप [**https://mdmcert.download/**](https://mdmcert.download/) से प्राप्त करने की कोशिश कर सकते हैं। और Apple उपकरणों के लिए अपने स्वयं के MDM को चलाने के लिए आप [**MicroMDM**](https://github.com/micromdm/micromdm) का उपयोग कर सकते हैं।
+अपना MDM चलाने के लिए आपको **अपने CSR को किसी vendor से signed करवाना होगा**, जिसे आप [**https://mdmcert.download/**](https://mdmcert.download/) से प्राप्त करने का प्रयास कर सकते हैं। Apple devices के लिए अपना MDM चलाने हेतु आप [**MicroMDM**](https://github.com/micromdm/micromdm) का उपयोग कर सकते हैं।
 
-हालांकि, एक नामांकित उपकरण में एप्लिकेशन स्थापित करने के लिए, आपको इसे एक डेवलपर खाते द्वारा साइन कराना होगा... हालाँकि, MDM नामांकन के दौरान **उपकरण MDM के SSL प्रमाणपत्र को एक विश्वसनीय CA के रूप में जोड़ता है**, इसलिए आप अब कुछ भी साइन कर सकते हैं।
+हालांकि, किसी enrolled device में application install करने के लिए उसे अभी भी developer account से signed होना आवश्यक है... लेकिन MDM enrolment के दौरान **device MDM का SSL cert एक trusted CA के रूप में जोड़ देता है**, इसलिए अब आप किसी भी चीज़ को sign कर सकते हैं।<sup>[4]</sup>
 
-MDM में उपकरण को नामांकित करने के लिए, आपको **`mobileconfig`** फ़ाइल को रूट के रूप में स्थापित करना होगा, जिसे **pkg** फ़ाइल के माध्यम से वितरित किया जा सकता है (आप इसे ज़िप में संकुचित कर सकते हैं और जब इसे सफारी से डाउनलोड किया जाता है, तो यह अनसंकुचित हो जाएगा)।
+Device को MDM में enrol करने के लिए आपको root के रूप में एक **`mobileconfig`** file install करनी होगी, जिसे **pkg** file के माध्यम से deliver किया जा सकता है (आप इसे zip में compress कर सकते हैं और Safari से download किए जाने पर यह decompress हो जाएगी)।
 
-**Mythic एजेंट Orthrus** इस तकनीक का उपयोग करता है।
+**Mythic agent Orthrus** इस technique का उपयोग करता है।
 
 ### JAMF PRO का दुरुपयोग
 
-JAMF **कस्टम स्क्रिप्ट** (sysadmin द्वारा विकसित स्क्रिप्ट), **स्थानीय पेलोड** (स्थानीय खाता निर्माण, EFI पासवर्ड सेट करना, फ़ाइल/प्रक्रिया निगरानी...) और **MDM** (उपकरण कॉन्फ़िगरेशन, उपकरण प्रमाणपत्र...) चला सकता है।
+JAMF **custom scripts** (sysadmin द्वारा विकसित scripts), **native payloads** (local account creation, EFI password set करना, file/process monitoring...) और **MDM** (device configurations, device certificates...) चला सकता है।<sup>[5]</sup>
 
-#### JAMF स्व-नामांकन
+#### JAMF self-enrolment
 
-जैसे पृष्ठ पर जाएँ `https://<company-name>.jamfcloud.com/enroll/` यह देखने के लिए कि क्या उनके पास **स्व-नामांकन सक्षम** है। यदि उनके पास है, तो यह **पहुँच के लिए क्रेडेंशियल्स** मांग सकता है।
+`https://<company-name>.jamfcloud.com/enroll/` जैसे page पर जाकर देखें कि क्या उन्होंने **self-enrolment enabled** किया है। यदि enabled है, तो यह **access करने के लिए credentials मांग सकता है**।
 
-आप पासवर्ड स्प्रेइंग हमले को करने के लिए स्क्रिप्ट [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) का उपयोग कर सकते हैं।
+Password spraying attack करने के लिए आप [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) script का उपयोग कर सकते हैं।
 
-इसके अलावा, उचित क्रेडेंशियल्स खोजने के बाद, आप अगले फॉर्म के साथ अन्य उपयोगकर्ता नामों को ब्रूट-फोर्स करने में सक्षम हो सकते हैं:
+इसके अलावा, उचित credentials मिलने के बाद आप निम्न form के माध्यम से अन्य usernames को brute-force कर सकते हैं:
 
-![](<../../images/image (107).png>)
+![Abusing JAMF PRO - JAMF self-enrolment: Moreover, after finding proper credentials you could be able to brute-force other usernames with the next form](<../../images/image (107).png>)
 
-#### JAMF उपकरण प्रमाणीकरण
+#### JAMF device Authentication
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
-**`jamf`** बाइनरी में कीचेन को खोलने का रहस्य था जो खोज के समय सभी के बीच **साझा** था और यह था: **`jk23ucnq91jfu9aj`**।\
-इसके अलावा, jamf **`/Library/LaunchAgents/com.jamf.management.agent.plist`** में **LaunchDaemon** के रूप में **स्थायी** रहता है।
+**`jamf`** binary में keychain खोलने के लिए secret मौजूद था, जो discovery के समय **सभी के बीच shared** था और यह था: **`jk23ucnq91jfu9aj`**।<sup>[5]</sup>\
+इसके अलावा, jamf **`/Library/LaunchAgents/com.jamf.management.agent.plist`** में **LaunchDaemon** के रूप में **persist** करता है।
 
-#### JAMF उपकरण अधिग्रहण
+#### JAMF Device Takeover
 
-**JSS** (Jamf सॉफ़्टवेयर सर्वर) **URL** जो **`jamf`** उपयोग करेगा, **`/Library/Preferences/com.jamfsoftware.jamf.plist`** में स्थित है।\
-यह फ़ाइल मूल रूप से URL को शामिल करती है:
+**JSS** (Jamf Software Server) का **URL**, जिसे **`jamf`** उपयोग करेगा, **`/Library/Preferences/com.jamfsoftware.jamf.plist`** में स्थित है।\
+यह file मूल रूप से URL रखती है:
 ```bash
 plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 
@@ -66,86 +66,90 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <integer>4</integer>
 [...]
 ```
-तो, एक हमलावर एक दुर्भावनापूर्ण पैकेज (`pkg`) छोड़ सकता है जो स्थापित होने पर **इस फ़ाइल को ओवरराइट करता है** और **Typhon एजेंट से एक Mythic C2 लिस्नर के लिए URL सेट करता है** ताकि अब JAMF का दुरुपयोग C2 के रूप में किया जा सके।
+इसलिए, एक attacker ऐसा malicious package (`pkg`) drop कर सकता है जो install होने पर **इस file को overwrite कर दे** और **Typhon agent से Mythic C2 listener का URL सेट कर दे**, जिससे अब JAMF को C2 के रूप में abuse किया जा सके।
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
 
 # TODO: There is an ID, maybe it's possible to have the real jamf connection and another one to the C2
 ```
-#### JAMF धोखाधड़ी
+#### JAMF Impersonation
 
-एक डिवाइस और JMF के बीच **धोखाधड़ी करने के लिए** आपको आवश्यकता है:
+किसी device और JMF के बीच **communication को impersonate** करने के लिए आपको चाहिए:
 
-- डिवाइस का **UUID**: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
-- **JAMF कीचेन**: `/Library/Application\ Support/Jamf/JAMF.keychain` जिसमें डिवाइस का प्रमाणपत्र होता है
+- device का **UUID**: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
+- `/Library/Application\ Support/Jamf/JAMF.keychain` से **JAMF keychain**, जिसमें device certificate होता है
 
-इस जानकारी के साथ, **एक VM बनाएं** जिसमें **चुराया गया** हार्डवेयर **UUID** हो और **SIP अक्षम** हो, **JAMF कीचेन** डालें, **जाम्फ़ एजेंट** को **हुक** करें और इसकी जानकारी चुराएं।
+इस जानकारी के साथ, **stolen** Hardware **UUID** वाली और **SIP disabled** **VM create करें**, **JAMF keychain drop करें**, Jamf **agent को hook करें** और उसकी information चुरा लें।
 
-#### रहस्यों की चोरी
+#### Secrets stealing
 
 <figure><img src="../../images/image (1025).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-आप `/Library/Application Support/Jamf/tmp/` स्थान की निगरानी भी कर सकते हैं जहाँ **कस्टम स्क्रिप्ट** हो सकती हैं जिन्हें व्यवस्थापक Jamf के माध्यम से निष्पादित करना चाहते हैं क्योंकि ये **यहाँ रखी जाती हैं, निष्पादित की जाती हैं और हटा दी जाती हैं**। ये स्क्रिप्ट **प्रमाण पत्र** शामिल कर सकती हैं।
+आप `/Library/Application Support/Jamf/tmp/` location को **custom scripts** के लिए भी monitor कर सकते हैं, जिन्हें admins Jamf के ज़रिए execute करना चाह सकते हैं, क्योंकि वे **यहाँ place, execute और remove** की जाती हैं। इन scripts में **credentials हो सकते हैं**।
 
-हालांकि, **प्रमाण पत्र** इन स्क्रिप्टों में **पैरामीटर** के रूप में पास किए जा सकते हैं, इसलिए आपको `ps aux | grep -i jamf` की निगरानी करनी होगी (बिना रूट बने)।
+हालाँकि, **credentials** इन scripts को **parameters** के रूप में pass किए जा सकते हैं, इसलिए आपको `ps aux | grep -i jamf` monitor करना होगा (बिना root हुए भी)।
 
-स्क्रिप्ट [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) नए फ़ाइलों को जोड़े जाने और नए प्रक्रिया तर्कों के लिए सुन सकती है।
+[**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) script नए add किए गए files और नए process arguments को listen कर सकती है।
 
-### macOS दूरस्थ पहुंच
+### macOS Remote Access
 
-और **MacOS** "विशेष" **नेटवर्क** **प्रोटोकॉल** के बारे में:
+और MacOS के "special" **network** **protocols** के बारे में भी:
+
 
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
 {{#endref}}
 
-## सक्रिय निर्देशिका
+## Active Directory
 
-कुछ अवसरों पर आप पाएंगे कि **MacOS कंप्यूटर एक AD से जुड़ा हुआ है**। इस परिदृश्य में, आपको सक्रिय निर्देशिका को **सूचीबद्ध** करने का प्रयास करना चाहिए जैसा कि आप इसके लिए उपयोग करते हैं। निम्नलिखित पृष्ठों में कुछ **सहायता** प्राप्त करें:
+कुछ अवसरों पर आपको पता चलेगा कि **MacOS computer किसी AD से connected है**। इस scenario में आपको active directory को उसी तरह **enumerate** करने का प्रयास करना चाहिए, जैसा आप सामान्यतः करते हैं। निम्नलिखित pages में कुछ **help** प्राप्त करें:
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
 
+
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/
 {{#endref}}
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/
 {{#endref}}
 
-कुछ **स्थानीय MacOS उपकरण** जो आपकी मदद कर सकते हैं वह है `dscl`:
+कुछ **local MacOS tools**, जो आपकी मदद कर सकते हैं, `dscl` हैं:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-इसके अलावा, MacOS के लिए कुछ उपकरण तैयार किए गए हैं जो स्वचालित रूप से AD को सूचीबद्ध करते हैं और kerberos के साथ काम करते हैं:
+MacOS के लिए कुछ tools भी तैयार किए गए हैं, जो AD को automatically enumerate करने और Kerberos के साथ काम करने में सहायता करते हैं:
 
-- [**Machound**](https://github.com/XMCyber/MacHound): MacHound एक Bloodhound ऑडिटिंग उपकरण का विस्तार है जो MacOS होस्ट पर Active Directory संबंधों को एकत्रित और ग्रहण करने की अनुमति देता है।
-- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost एक Objective-C प्रोजेक्ट है जिसे macOS पर Heimdal krb5 APIs के साथ इंटरैक्ट करने के लिए डिज़ाइन किया गया है। इस प्रोजेक्ट का लक्ष्य macOS उपकरणों पर Kerberos के चारों ओर बेहतर सुरक्षा परीक्षण सक्षम करना है, जो कि किसी अन्य ढांचे या पैकेज की आवश्यकता के बिना मूल APIs का उपयोग करता है।
-- [**Orchard**](https://github.com/its-a-feature/Orchard): Active Directory सूचीकरण करने के लिए Automation (JXA) के लिए JavaScript उपकरण।
+- [**Machound**](https://github.com/XMCyber/MacHound): MacHound, BloodHound auditing tool का एक extension है, जो MacOS hosts पर Active Directory relationships को collect और ingest करने की सुविधा देता है।<sup>[2]</sup>
+- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost एक Objective-C project है, जिसे macOS पर Heimdal krb5 APIs के साथ interact करने के लिए बनाया गया है। इस project का लक्ष्य target पर किसी अन्य framework या packages की आवश्यकता के बिना native APIs का उपयोग करके macOS devices पर Kerberos से संबंधित बेहतर security testing सक्षम करना है।
+- [**Orchard**](https://github.com/its-a-feature/Orchard): Active Directory enumeration करने के लिए JavaScript for Automation (JXA) tool।
 
 ### Domain Information
 ```bash
 echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 ```
-### Users
+### उपयोगकर्ता
 
-MacOS उपयोगकर्ताओं के तीन प्रकार हैं:
+MacOS users के तीन प्रकार हैं:
 
-- **Local Users** — स्थानीय OpenDirectory सेवा द्वारा प्रबंधित, ये Active Directory से किसी भी तरह से जुड़े नहीं होते हैं।
-- **Network Users** — अस्थायी Active Directory उपयोगकर्ता जिन्हें प्रमाणीकरण के लिए DC सर्वर से कनेक्शन की आवश्यकता होती है।
-- **Mobile Users** — Active Directory उपयोगकर्ता जिनके पास अपनी क्रेडेंशियल्स और फ़ाइलों का स्थानीय बैकअप होता है।
+- **Local Users** — Local OpenDirectory service द्वारा managed, ये किसी भी तरह Active Directory से connected नहीं होते।
+- **Network Users** — Volatile Active Directory users, जिन्हें authenticate होने के लिए DC server से connection की आवश्यकता होती है।
+- **Mobile Users** — Active Directory users, जिनके credentials और files का local backup होता है।
 
-उपयोगकर्ताओं और समूहों के बारे में स्थानीय जानकारी फ़ोल्डर _/var/db/dslocal/nodes/Default._ में संग्रहीत होती है।\
-उदाहरण के लिए, _mark_ नाम के उपयोगकर्ता की जानकारी _/var/db/dslocal/nodes/Default/users/mark.plist_ में संग्रहीत होती है और समूह _admin_ की जानकारी _/var/db/dslocal/nodes/Default/groups/admin.plist_ में होती है।
+Users और groups की local information _/var/db/dslocal/nodes/Default._ folder में stored होती है।\
+उदाहरण के लिए, _mark_ नामक user की information _/var/db/dslocal/nodes/Default/users/mark.plist_ में और _admin_ group की information _/var/db/dslocal/nodes/Default/groups/admin.plist_ में stored होती है।
 
-HasSession और AdminTo किनारों का उपयोग करने के अलावा, **MacHound Bloodhound डेटाबेस में तीन नए किनारे जोड़ता है**:
+HasSession और AdminTo edges के अतिरिक्त, **MacHound Bloodhound database में तीन नए edges जोड़ता है**:<sup>[2]</sup>
 
-- **CanSSH** - इकाई जिसे होस्ट पर SSH करने की अनुमति है
-- **CanVNC** - इकाई जिसे होस्ट पर VNC करने की अनुमति है
-- **CanAE** - इकाई जिसे होस्ट पर AppleEvent स्क्रिप्ट निष्पादित करने की अनुमति है
+- **CanSSH** - host पर SSH करने की अनुमति वाली entity
+- **CanVNC** - host पर VNC करने की अनुमति वाली entity
+- **CanAE** - host पर AppleEvent scripts execute करने की अनुमति वाली entity
 ```bash
 #User enumeration
 dscl . ls /Users
@@ -167,24 +171,24 @@ dscl "/Active Directory/TEST/All Domains" read "/Groups/[groupname]"
 #Domain Information
 dsconfigad -show
 ```
-अधिक जानकारी के लिए [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
+अधिक जानकारी [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
 
-### Computer$ पासवर्ड
+### Computer$ password
 
-पासवर्ड प्राप्त करने के लिए:
+इसका उपयोग करके passwords प्राप्त करें:
 ```bash
 bifrost --action askhash --username [name] --password [password] --domain [domain]
 ```
-यह **`Computer$`** पासवर्ड को सिस्टम कीचेन के अंदर एक्सेस करना संभव है।
+**`Computer$`** password को System keychain के अंदर access करना संभव है।
 
-### ओवर-पास-दी-हैश
+### Over-Pass-The-Hash
 
-एक विशिष्ट उपयोगकर्ता और सेवा के लिए TGT प्राप्त करें:
+किसी specific user और service के लिए TGT प्राप्त करें:
 ```bash
 bifrost --action asktgt --username [user] --domain [domain.com] \
 --hash [hash] --enctype [enctype] --keytab [/path/to/keytab]
 ```
-एक बार जब TGT इकट्ठा कर लिया जाता है, तो इसे वर्तमान सत्र में इंजेक्ट करना संभव है:
+TGT gather हो जाने के बाद, इसे current session में inject करना संभव है:
 ```bash
 bifrost --action asktgt --username test_lab_admin \
 --hash CF59D3256B62EE655F6430B0F80701EE05A0885B8B52E9C2480154AFA62E78 \
@@ -195,39 +199,39 @@ bifrost --action asktgt --username test_lab_admin \
 bifrost --action asktgs --spn [service] --domain [domain.com] \
 --username [user] --hash [hash] --enctype [enctype]
 ```
-प्राप्त सेवा टिकटों के साथ, अन्य कंप्यूटरों में शेयरों तक पहुँचने की कोशिश करना संभव है:
+प्राप्त किए गए service tickets के साथ अन्य कंप्यूटरों में shares तक पहुंचने का प्रयास करना संभव है:
 ```bash
 smbutil view //computer.fqdn
 mount -t smbfs //server/folder /local/mount/point
 ```
-## Keychain तक पहुँचना
+## Keychain तक पहुंच
 
-Keychain में संवेदनशील जानकारी हो सकती है जो यदि बिना प्रॉम्प्ट उत्पन्न किए पहुँचाई जाए तो एक रेड टीम अभ्यास को आगे बढ़ाने में मदद कर सकती है:
+Keychain में अत्यधिक संभावना है कि संवेदनशील जानकारी मौजूद हो, जिसे बिना prompt उत्पन्न किए access करने पर red team exercise को आगे बढ़ाने में मदद मिल सकती है:
 
 
 {{#ref}}
 macos-keychain.md
 {{#endref}}
 
-## बाहरी सेवाएँ
+## External Services
 
-MacOS रेड टीमिंग एक सामान्य Windows रेड टीमिंग से अलग है क्योंकि आमतौर पर **MacOS कई बाहरी प्लेटफार्मों के साथ सीधे एकीकृत होता है**। MacOS की एक सामान्य कॉन्फ़िगरेशन है **OneLogin समन्वयित क्रेडेंशियल्स का उपयोग करके कंप्यूटर तक पहुँच प्राप्त करना, और OneLogin के माध्यम से कई बाहरी सेवाओं (जैसे github, aws...) तक पहुँच प्राप्त करना**।
+MacOS Red Teaming नियमित Windows Red Teaming से अलग है, क्योंकि आमतौर पर **MacOS कई external platforms के साथ सीधे integrated होता है**। MacOS का एक सामान्य configuration कंप्यूटर तक पहुंचने के लिए **OneLogin synchronised credentials का उपयोग करना और OneLogin के माध्यम से कई external services** (जैसे github, aws...) को access करना है।
 
-## विविध रेड टीम तकनीकें
+## Misc Red Team techniques
 
-### सफारी
+### Safari
 
-जब सफारी में एक फ़ाइल डाउनलोड की जाती है, यदि यह एक "सुरक्षित" फ़ाइल है, तो इसे **स्वतः खोला जाएगा**। तो उदाहरण के लिए, यदि आप **एक ज़िप डाउनलोड करते हैं**, तो इसे स्वचालित रूप से अनज़िप किया जाएगा:
+जब Safari में कोई file download की जाती है और वह एक "safe" file होती है, तो वह **automatically open हो जाती है**। उदाहरण के लिए, यदि आप **एक zip download करते हैं**, तो वह automatically decompressed हो जाएगी:
 
 <figure><img src="../../images/image (226).png" alt=""><figcaption></figcaption></figure>
 
-## संदर्भ
+## References
 
-- [**https://www.youtube.com/watch?v=IiMladUbL6E**](https://www.youtube.com/watch?v=IiMladUbL6E)
-- [**https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6**](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)
-- [**https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0**](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
-- [**Come to the Dark Side, We Have Apples: Turning macOS Management Evil**](https://www.youtube.com/watch?v=pOQOh07eMxY)
-- [**OBTS v3.0: "An Attackers Perspective on Jamf Configurations" - Luke Roberts / Calum Hall**](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
+- [1] [Gone Apple Pickin': Red Teaming MacOS Environments in 2021 - Cedric Owens (DEF CON 29)](https://www.youtube.com/watch?v=IiMladUbL6E)
+- [2] [Introducing MacHound: A Solution to macOS Active Directory Based Attacks](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)
+- [3] [its-a-feature - Domain Enumeration Commands (dscl / net / ldapsearch equivalents)](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
+- [4] [Come to the Dark Side, We Have Apples: Turning macOS Management Evil](https://www.youtube.com/watch?v=pOQOh07eMxY)
+- [5] [OBTS v3.0: "An Attackers Perspective on Jamf Configurations" - Luke Roberts / Calum Hall](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
 
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -115,17 +115,17 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### त्वरित एंटी-विश्लेषण / वर्चुअलाइज़ेशन जांच
+### त्वरित anti-analysis / virtualization check
 
-कुछ macOS stealers VMs का पता लगाने के लिए `system_profiler` को कॉल करते हैं और sandbox detonation से बचने के लिए **abort with a distinct exit code (e.g., 100)**:
+कुछ macOS stealers VMs का पता लगाने के लिए `system_profiler` को call करते हैं और sandbox detonation से बचने के लिए **एक विशिष्ट exit code (जैसे, 100) के साथ abort** कर देते हैं<sup>[1]</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### इंस्टॉल किए गए सॉफ़्टवेयर और सेवाएँ
+### इंस्टॉल किए गए Software और Services
 
-इंस्टॉल किए गए **संदिग्ध** अनुप्रयोगों और इंस्टॉल किए गए संसाधनों पर होने वाले **privileges** की जाँच करें:
+इंस्टॉल किए गए **suspicious** applications और इंस्टॉल किए गए resources पर **privileges** की जाँच करें:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -143,14 +143,14 @@ launchctl print system
 # will print detailed information about the specific launch agent. And if it’s not running or you’ve mistyped, you will get some output with a non-zero exit code: Could not find service “com.company.launchagent.label” in domain for login
 launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
-### उपयोगकर्ता बनाएं
+### यूज़र बनाएँ
 
-प्रॉम्प्ट्स के बिना
+बिना prompts के
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
-## संदर्भ
+## References
 
-- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, Infostealer का वर्ष](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

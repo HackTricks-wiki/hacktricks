@@ -1,8 +1,8 @@
-# macOS ऐप्स - निरीक्षण, डिबगिंग और फज़िंग
+# macOS Apps - निरीक्षण, debugging और Fuzzing
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## स्थैतिक विश्लेषण
+## Static Analysis
 
 ### otool & objdump & nm
 ```bash
@@ -22,39 +22,29 @@ objdump --disassemble-symbols=_hello --x86-asm-syntax=intel toolsdemo #Disassemb
 ```bash
 nm -m ./tccd # List of symbols
 ```
-### jtool2 & Disarm
+### Disarm (old jtool2)
 
-आप [**यहां से disarm डाउनलोड कर सकते हैं**](https://newosxbook.com/tools/disarm.html).
+आप [**disarm को यहाँ से download कर सकते हैं**](https://newosxbook.com/tools/disarm.html)।
+
+> [!TIP]
+> ध्यान दें कि **`disarm`** compressed IM4P files (जैसे `kernelcache`) के साथ भी काम कर सकता है और केवल आवश्यक parts को extract कर सकता है या उन्हें extract किए बिना भी आवश्यक part का analyze कर सकता है।
 ```bash
+export JCOLOR=1
 ARCH=arm64e disarm -c -i -I --signature /path/bin # Get bin info and signature
 ARCH=arm64e disarm -c -l /path/bin # Get binary sections
 ARCH=arm64e disarm -c -L /path/bin # Get binary commands (dependencies included)
 ARCH=arm64e disarm -c -S /path/bin # Get symbols (func names, strings...)
 ARCH=arm64e disarm -c -d /path/bin # Get disasembled
-jtool2 -d __DATA.__const myipc_server | grep MIG # Get MIG info
+
+disarm -e filesets kernelcache.release.d23 # Extract filesets from kernelcache
+JDEBUG=1 disarm -e filesets kernelcache.release.d23 # Extract filesets from kernelcache with debug info
+disarm -r "code signature" /bin/ps # Check code signature of a binary
+disarm -e "code signature" /bin/ps # Extract code signature of a binary
 ```
-आप [**jtool2 यहाँ डाउनलोड कर सकते हैं**](http://www.newosxbook.com/tools/jtool.html) या इसे `brew` के साथ इंस्टॉल कर सकते हैं।
-```bash
-# Install
-brew install --cask jtool2
-
-jtool2 -l /bin/ls # Get commands (headers)
-jtool2 -L /bin/ls # Get libraries
-jtool2 -S /bin/ls # Get symbol info
-jtool2 -d /bin/ls # Dump binary
-jtool2 -D /bin/ls # Decompile binary
-
-# Get signature information
-ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Automator
-
-# Get MIG information
-jtool2 -d __DATA.__const myipc_server | grep MIG
-```
-> [!CAUTION] > **jtool का उपयोग बंद कर दिया गया है और disarm का उपयोग किया जाना चाहिए**
-
 ### Codesign / ldid
 
-> [!TIP] > **`Codesign`** **macOS** में पाया जा सकता है जबकि **`ldid`** **iOS** में पाया जा सकता है
+> [!TIP]
+> **`Codesign`** **macOS** में पाया जा सकता है, जबकि **`ldid`** **iOS** में पाया जा सकता है.
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -83,50 +73,51 @@ ldid -S/tmp/entl.xml <binary>
 ```
 ### SuspiciousPackage
 
-[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) एक उपकरण है जो **.pkg** फ़ाइलों (इंस्टॉलर) की जांच करने के लिए उपयोगी है और यह देखने के लिए कि इसे स्थापित करने से पहले इसके अंदर क्या है।\
-इन इंस्टॉलरों में `preinstall` और `postinstall` बैश स्क्रिप्ट होते हैं जिनका उपयोग मैलवेयर लेखक आमतौर पर **persist** **the** **malware** के लिए करते हैं।
+[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) एक ऐसा tool है जो **.pkg** files (installers) का निरीक्षण करने और उन्हें install करने से पहले यह देखने के लिए उपयोगी है कि उनके अंदर क्या है।\
+इन installers में `preinstall` और `postinstall` bash scripts होती हैं, जिनका malware authors आमतौर पर **malware** को **persist** करने के लिए दुरुपयोग करते हैं।
 
 ### hdiutil
 
-यह उपकरण Apple डिस्क इमेज (**.dmg**) फ़ाइलों को **mount** करने की अनुमति देता है ताकि उन्हें चलाने से पहले जांचा जा सके:
+यह tool Apple disk images (**.dmg**) files को **mount** करने की अनुमति देता है, ताकि कुछ भी run करने से पहले उनका निरीक्षण किया जा सके:
 ```bash
 hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 ```
-It will be mounted in `/Volumes`
+It `/Volumes` में mount किया जाएगा।
 
 ### Packed binaries
 
-- उच्च एंट्रॉपी के लिए जांचें
-- स्ट्रिंग्स की जांच करें (यदि लगभग कोई समझने योग्य स्ट्रिंग नहीं है, तो पैक किया गया है)
-- MacOS के लिए UPX पैकर एक सेक्शन बनाता है जिसे "\_\_XHDR" कहा जाता है
+- High entropy की जाँच करें
+- Strings की जाँच करें (यदि लगभग कोई समझ में आने वाली string नहीं है, तो यह packed है)
+- MacOS के लिए UPX packer `\_\_XHDR` नामक section बनाता है
 
 ## Static Objective-C analysis
 
 ### Metadata
 
 > [!CAUTION]
-> ध्यान दें कि Objective-C में लिखे गए प्रोग्राम **क्लास डिक्लेरेशन को बनाए रखते हैं** **जब** **कंपाइल** किया जाता है [Mach-O binaries](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md) में। ऐसे क्लास डिक्लेरेशन **में शामिल हैं**:
+> ध्यान दें कि Objective-C में लिखे गए programs, [Mach-O binaries](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md) में **compiled** किए जाने पर भी अपनी class declarations **retain** करते हैं। ऐसी class declarations में निम्नलिखित के नाम और type **include** होते हैं:
 
-- परिभाषित इंटरफेस
-- इंटरफेस विधियाँ
-- इंटरफेस इंस्टेंस वेरिएबल्स
-- परिभाषित प्रोटोकॉल
+- Defined interfaces
+- Interface methods
+- Interface instance variables
+- Defined protocols
 
-ध्यान दें कि ये नाम उलझाए जा सकते हैं ताकि बाइनरी का रिवर्सिंग करना अधिक कठिन हो जाए।
+ध्यान दें कि binary को reverse करना अधिक कठिन बनाने के लिए इन names को obfuscate किया जा सकता है।
 
 ### Function calling
 
-जब एक बाइनरी में एक फ़ंक्शन को कॉल किया जाता है जो Objective-C का उपयोग करता है, तो कंपाइल किया गया कोड उस फ़ंक्शन को कॉल करने के बजाय **`objc_msgSend`** को कॉल करेगा। जो अंतिम फ़ंक्शन को कॉल करेगा:
+जब Objective-C का उपयोग करने वाले binary में किसी function को call किया जाता है, तो compiled code उस function को सीधे call करने के बजाय **`objc_msgSend`** को call करेगा। यह final function को call करेगा:
 
-![](<../../../images/image (305).png>)
+![Metadata - Function calling: जब Objective-C का उपयोग करने वाले binary में किसी function को call किया जाता है, तो compiled code उस function को call करने के बजाय objc msgSend को call करेगा। जो...](<../../../images/image (305).png>)
 
-इस फ़ंक्शन की अपेक्षित पैरामीटर हैं:
+इस function को जिन params की आवश्यकता होती है, वे हैं:
 
-- पहला पैरामीटर (**self**) "एक पॉइंटर है जो **क्लास के इंस्टेंस की ओर इशारा करता है जो संदेश प्राप्त करने वाला है**"। या सरल शब्दों में, यह वह ऑब्जेक्ट है जिस पर विधि को लागू किया जा रहा है। यदि विधि एक क्लास विधि है, तो यह क्लास ऑब्जेक्ट का एक इंस्टेंस होगा (जैसे पूरा), जबकि एक इंस्टेंस विधि के लिए, self क्लास के एक इंस्टेंस को ऑब्जेक्ट के रूप में इंगित करेगा।
-- दूसरा पैरामीटर, (**op**), "विधि का चयनकर्ता है जो संदेश को संभालता है"। फिर से, सरल शब्दों में, यह बस **विधि का नाम है।**
-- शेष पैरामीटर वे **मान हैं जो विधि द्वारा आवश्यक हैं** (op)।
+- पहला parameter (**self**) "एक pointer है जो उस **class के instance की ओर point करता है जिसे message receive करना है**।" या अधिक सरल शब्दों में, यह वह object है जिस पर method invoke किया जा रहा है। यदि method एक class method है, तो यह class object (पूरे के रूप में) के instance को दर्शाएगा, जबकि instance method के लिए, self class के एक instantiated instance को object के रूप में point करेगा।
+- दूसरा parameter, (**op**), "उस method का selector है जो message को handle करता है।" सरल शब्दों में, यह केवल **method का name** है।
+- शेष parameters वे **values हैं जिनकी method को आवश्यकता होती है** (op)।
 
-देखें कि **`lldb` का उपयोग करके ARM64 में इस जानकारी को आसानी से कैसे प्राप्त करें** इस पृष्ठ पर:
+देखें कि **ARM64 में `lldb` के साथ यह info आसानी से कैसे प्राप्त करें**:
+
 
 {{#ref}}
 arm64-basic-assembly.md
@@ -136,25 +127,25 @@ x64:
 
 | **Argument**      | **Register**                                                    | **(for) objc_msgSend**                                 |
 | ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
-| **1st argument**  | **rdi**                                                         | **self: object that the method is being invoked upon** |
-| **2nd argument**  | **rsi**                                                         | **op: name of the method**                             |
-| **3rd argument**  | **rdx**                                                         | **1st argument to the method**                         |
-| **4th argument**  | **rcx**                                                         | **2nd argument to the method**                         |
-| **5th argument**  | **r8**                                                          | **3rd argument to the method**                         |
-| **6th argument**  | **r9**                                                          | **4th argument to the method**                         |
-| **7th+ argument** | <p><strong>rsp+</strong><br><strong>(on the stack)</strong></p> | **5th+ argument to the method**                        |
+| **1st argument**  | **rdi**                                                         | **self: वह object जिस पर method invoke किया जा रहा है** |
+| **2nd argument**  | **rsi**                                                         | **op: method का name**                             |
+| **3rd argument**  | **rdx**                                                         | **method का 1st argument**                         |
+| **4th argument**  | **rcx**                                                         | **method का 2nd argument**                         |
+| **5th argument**  | **r8**                                                          | **method का 3rd argument**                         |
+| **6th argument**  | **r9**                                                          | **method का 4th argument**                         |
+| **7th+ argument** | <p><strong>rsp+</strong><br><strong>(on the stack)</strong></p> | **method का 5th+ argument**                        |
 
 ### Dump ObjectiveC metadata
 
 ### Dynadump
 
-[**Dynadump**](https://github.com/DerekSelander/dynadump) एक उपकरण है जो Objective-C बाइनरी को क्लास-डंप करता है। गिटहब में dylibs निर्दिष्ट हैं लेकिन यह निष्पादन योग्य फ़ाइलों के साथ भी काम करता है।
+[**Dynadump**](https://github.com/DerekSelander/dynadump) Objective-C binaries को class-dump करने का एक tool है। Github पर dylibs का उल्लेख है, लेकिन यह executables के साथ भी काम करता है।
 ```bash
 ./dynadump dump /path/to/bin
 ```
-लेखन के समय, यह **वर्तमान में सबसे अच्छा काम करने वाला है**।
+लेखन के समय, **वर्तमान में यही सबसे अच्छी तरह काम करता है**।
 
-#### नियमित उपकरण
+#### सामान्य tools
 ```bash
 nm --dyldinfo-only /path/to/bin
 otool -ov /path/to/bin
@@ -162,13 +153,13 @@ objdump --macho --objc-meta-data /path/to/bin
 ```
 #### class-dump
 
-[**class-dump**](https://github.com/nygard/class-dump/) मूल उपकरण है जो ObjetiveC स्वरूपित कोड में वर्गों, श्रेणियों और प्रोटोकॉल के लिए घोषणाएँ उत्पन्न करता है।
+[**class-dump**](https://github.com/nygard/class-dump/) वह मूल tool है जो ObjetiveC formatted code में classes, categories और protocols के लिए declarations generate करता है।
 
-यह पुराना और अनुपयुक्त है इसलिए यह शायद ठीक से काम नहीं करेगा।
+यह पुराना और unmaintained है, इसलिए संभवतः ठीक से काम नहीं करेगा।
 
 #### ICDump
 
-[**iCDump**](https://github.com/romainthomas/iCDump) एक आधुनिक और क्रॉस-प्लेटफ़ॉर्म Objective-C क्लास डंप है। मौजूदा उपकरणों की तुलना में, iCDump Apple पारिस्थितिकी तंत्र से स्वतंत्र रूप से चल सकता है और यह Python बाइंडिंग्स को उजागर करता है।
+[**iCDump**](https://github.com/romainthomas/iCDump) एक modern और cross-platform Objective-C class dump है। मौजूदा tools की तुलना में, iCDump Apple ecosystem से स्वतंत्र रूप से run कर सकता है और यह Python bindings expose करता है।
 ```python
 import icdump
 metadata = icdump.objc.parse("/path/to/bin")
@@ -177,9 +168,9 @@ print(metadata.to_decl())
 ```
 ## Static Swift analysis
 
-Swift बाइनरी के साथ, चूंकि इसमें Objective-C संगतता है, कभी-कभी आप [class-dump](https://github.com/nygard/class-dump/) का उपयोग करके घोषणाएँ निकाल सकते हैं लेकिन हमेशा नहीं।
+Swift binaries में Objective-C compatibility होने के कारण, कभी-कभी आप [class-dump](https://github.com/nygard/class-dump/) का उपयोग करके declarations extract कर सकते हैं, लेकिन हमेशा ऐसा नहीं होता।
 
-**`jtool -l`** या **`otool -l`** कमांड लाइनों के साथ यह संभव है कि आप कई सेक्शन पा सकें जो **`__swift5`** उपसर्ग से शुरू होते हैं:
+**`jtool -l`** या **`otool -l`** command lines से **`__swift5`** prefix से शुरू होने वाले कई sections ढूँढना संभव है:
 ```bash
 jtool2 -l /Applications/Stocks.app/Contents/MacOS/Stocks
 LC 00: LC_SEGMENT_64              Mem: 0x000000000-0x100000000    __PAGEZERO
@@ -191,9 +182,9 @@ Mem: 0x100027064-0x1000274cc        __TEXT.__swift5_fieldmd
 Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
 [...]
 ```
-आप इस [**ब्लॉग पोस्ट में इन अनुभागों में संग्रहीत जानकारी**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html) के बारे में और जानकारी प्राप्त कर सकते हैं।
+आप [**इन sections में stored information के बारे में इस blog post में अधिक जानकारी पा सकते हैं**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html)।
 
-इसके अलावा, **Swift बाइनरी में प्रतीक हो सकते हैं** (उदाहरण के लिए पुस्तकालयों को प्रतीकों को संग्रहीत करने की आवश्यकता होती है ताकि उनके कार्यों को कॉल किया जा सके)। **प्रतीकों में आमतौर पर कार्य का नाम** और विशेषता के बारे में जानकारी होती है, इसलिए वे बहुत उपयोगी होते हैं और ऐसे "**डेमैंग्लर्स"** होते हैं जो मूल नाम प्राप्त कर सकते हैं:
+इसके अलावा, **Swift binaries में symbols हो सकते हैं** (उदाहरण के लिए, libraries को symbols store करने की आवश्यकता होती है ताकि उनके functions को call किया जा सके)। **Symbols में आमतौर पर function name और attributes की जानकारी** एक अस्पष्ट तरीके से होती है, इसलिए वे बहुत उपयोगी होते हैं और ऐसे "**demanglers"** मौजूद हैं जो original name प्राप्त कर सकते हैं:
 ```bash
 # Ghidra plugin
 https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
@@ -201,77 +192,77 @@ https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
 # Swift cli
 swift demangle
 ```
-## डायनामिक विश्लेषण
+## Dynamic Analysis
 
 > [!WARNING]
-> ध्यान दें कि बाइनरी को डिबग करने के लिए, **SIP को अक्षम करना आवश्यक है** (`csrutil disable` या `csrutil enable --without debug`) या बाइनरी को एक अस्थायी फ़ोल्डर में कॉपी करना और **हस्ताक्षर को हटाना** `codesign --remove-signature <binary-path>` या बाइनरी के डिबगिंग की अनुमति देना (आप [इस स्क्रिप्ट](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b) का उपयोग कर सकते हैं)
+> ध्यान दें कि binaries को debug करने के लिए, **SIP को disabled करना आवश्यक है** (`csrutil disable` या `csrutil enable --without debug`), या binaries को किसी temporary folder में copy करके `codesign --remove-signature <binary-path>` से **signature remove करें**, या binary की debugging की अनुमति दें (आप [इस script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b) का उपयोग कर सकते हैं)।
 
 > [!WARNING]
-> ध्यान दें कि **सिस्टम बाइनरीज़ को इंस्ट्रूमेंट** करने के लिए, (जैसे `cloudconfigurationd`) macOS पर, **SIP को अक्षम करना आवश्यक है** (सिर्फ हस्ताक्षर हटाना काम नहीं करेगा)।
+> ध्यान दें कि macOS पर **system binaries को instrument करने के लिए**, (जैसे `cloudconfigurationd`) **SIP disabled होना आवश्यक है** (केवल signature remove करना काम नहीं करेगा)।
 
 ### APIs
 
-macOS कुछ दिलचस्प APIs को उजागर करता है जो प्रक्रियाओं के बारे में जानकारी देते हैं:
+macOS कुछ उपयोगी APIs उपलब्ध कराता है, जो processes के बारे में information देते हैं:
 
-- `proc_info`: यह मुख्य है जो प्रत्येक प्रक्रिया के बारे में बहुत सारी जानकारी देता है। आपको अन्य प्रक्रियाओं की जानकारी प्राप्त करने के लिए रूट होना आवश्यक है लेकिन आपको विशेष अधिकार या मच पोर्ट की आवश्यकता नहीं है।
-- `libsysmon.dylib`: यह XPC द्वारा उजागर की गई कार्यों के माध्यम से प्रक्रियाओं के बारे में जानकारी प्राप्त करने की अनुमति देता है, हालाँकि, `com.apple.sysmond.client` का अधिकार होना आवश्यक है।
+- `proc_info`: यह मुख्य API है, जो प्रत्येक process के बारे में बहुत सारी information देता है। अन्य processes की information प्राप्त करने के लिए आपको root होना आवश्यक है, लेकिन आपको special entitlements या mach ports की आवश्यकता नहीं होती।
+- `libsysmon.dylib`: यह XPC exposed functions के माध्यम से processes की information प्राप्त करने की अनुमति देता है, हालांकि इसके लिए `com.apple.sysmond.client` entitlement होना आवश्यक है।
 
-### स्टैकशॉट और माइक्रोस्टैकशॉट्स
+### Stackshot & microstackshots
 
-**स्टैकशॉटिंग** एक तकनीक है जिसका उपयोग प्रक्रियाओं की स्थिति को कैप्चर करने के लिए किया जाता है, जिसमें सभी चल रहे थ्रेड्स के कॉल स्टैक शामिल होते हैं। यह विशेष रूप से डिबगिंग, प्रदर्शन विश्लेषण, और किसी विशेष समय पर सिस्टम के व्यवहार को समझने के लिए उपयोगी है। iOS और macOS पर, स्टैकशॉटिंग कई उपकरणों और विधियों का उपयोग करके की जा सकती है जैसे कि उपकरण **`sample`** और **`spindump`**।
+**Stackshotting** एक ऐसी technique है जिसका उपयोग processes की state capture करने के लिए किया जाता है, जिसमें सभी running threads के call stacks शामिल होते हैं। यह विशेष रूप से debugging, performance analysis और किसी विशेष समय पर system के behavior को समझने के लिए उपयोगी है। iOS और macOS पर stackshotting को **`sample`** और **`spindump`** जैसे tools और methods का उपयोग करके किया जा सकता है।
 
 ### Sysdiagnose
 
-यह उपकरण (`/usr/bini/ysdiagnose`) मूल रूप से आपके कंप्यूटर से बहुत सारी जानकारी एकत्र करता है, जिसमें `ps`, `zprint` जैसे दर्जनों विभिन्न कमांड चलाना शामिल है...
+यह tool (`/usr/bini/ysdiagnose`) मूल रूप से आपके computer से बहुत सारी information collect करता है और `ps`, `zprint`... जैसे दर्जनों अलग-अलग commands execute करता है।
 
-इसे **रूट** के रूप में चलाना आवश्यक है और डेमन `/usr/libexec/sysdiagnosed` के पास बहुत दिलचस्प अधिकार हैं जैसे `com.apple.system-task-ports` और `get-task-allow`।
+इसे **root** के रूप में run करना आवश्यक है और daemon `/usr/libexec/sysdiagnosed` में `com.apple.system-task-ports` और `get-task-allow` जैसे बहुत interesting entitlements हैं।
 
-इसका plist `/System/Library/LaunchDaemons/com.apple.sysdiagnose.plist` में स्थित है जो 3 MachServices की घोषणा करता है:
+इसकी plist `/System/Library/LaunchDaemons/com.apple.sysdiagnose.plist` पर स्थित है, जिसमें 3 MachServices घोषित हैं:
 
-- `com.apple.sysdiagnose.CacheDelete`: /var/rmp में पुराने आर्काइव को हटाता है
-- `com.apple.sysdiagnose.kernel.ipc`: विशेष पोर्ट 23 (kernel)
-- `com.apple.sysdiagnose.service.xpc`: `Libsysdiagnose` Obj-C वर्ग के माध्यम से उपयोगकर्ता मोड इंटरफ़ेस। एक dict में तीन तर्क पास किए जा सकते हैं (`compress`, `display`, `run`)
+- `com.apple.sysdiagnose.CacheDelete`: /var/rmp में पुराने archives delete करता है
+- `com.apple.sysdiagnose.kernel.ipc`: Special port 23 (kernel)
+- `com.apple.sysdiagnose.service.xpc`: `Libsysdiagnose` Obj-C class के माध्यम से user mode interface। एक dict में तीन arguments (`compress`, `display`, `run`) pass किए जा सकते हैं।
 
-### यूनिफाइड लॉग्स
+### Unified Logs
 
-MacOS बहुत सारे लॉग उत्पन्न करता है जो एक एप्लिकेशन चलाते समय **यह समझने में बहुत उपयोगी हो सकते हैं कि यह क्या कर रहा है**।
+MacOS बहुत सारे logs generate करता है, जो किसी application को run करते समय यह समझने में बहुत उपयोगी हो सकते हैं कि वह **क्या कर रहा है**।
 
-इसके अलावा, कुछ लॉग्स में `<private>` टैग होगा ताकि कुछ **उपयोगकर्ता** या **कंप्यूटर** **पहचान योग्य** जानकारी को **छिपाया** जा सके। हालाँकि, इस जानकारी को प्रकट करने के लिए **एक प्रमाणपत्र स्थापित करना संभव है**। [**यहाँ**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log) से स्पष्टीकरण का पालन करें।
+इसके अलावा, कुछ logs में `<private>` tag होगा, जो कुछ **user** या **computer** से संबंधित **identifiable** information को **hide** करता है। हालांकि, **इस information को disclose करने के लिए certificate install करना संभव है**। [**यहां**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log) दिए गए explanations का पालन करें।
 
-### हॉप्पर
+### Hopper
 
-#### बाईं पैनल
+#### Left panel
 
-हॉप्पर के बाईं पैनल में बाइनरी के प्रतीक (**Labels**), प्रक्रियाओं और कार्यों की सूची (**Proc**) और स्ट्रिंग्स (**Str**) देखी जा सकती हैं। ये सभी स्ट्रिंग्स नहीं हैं बल्कि वे हैं जो Mac-O फ़ाइल के कई भागों में परिभाषित हैं (जैसे _cstring या_ `objc_methname`)।
+Hopper के left panel में binary के symbols (**Labels**), procedures और functions की list (**Proc**) और strings (**Str**) देखी जा सकती हैं। ये सभी strings नहीं हैं, बल्कि Mac-O file के कई parts में defined strings हैं (जैसे _cstring या `objc_methname`)।
 
-#### मध्य पैनल
+#### Middle panel
 
-मध्य पैनल में आप **डिस्सेम्बल्ड कोड** देख सकते हैं। और आप इसे **कच्चे** डिस्सेम्बल, **ग्राफ** के रूप में, **डीकंपाइल** के रूप में और **बाइनरी** के रूप में देख सकते हैं, संबंधित आइकन पर क्लिक करके:
+Middle panel में आप **disassembled code** देख सकते हैं। संबंधित icon पर click करके आप इसे **raw** disassemble, **graph**, **decompiled** और **binary** रूप में देख सकते हैं:
 
 <figure><img src="../../../images/image (343).png" alt=""><figcaption></figcaption></figure>
 
-कोड ऑब्जेक्ट पर दाएं क्लिक करने पर आप **उस ऑब्जेक्ट के लिए संदर्भ** देख सकते हैं या यहां तक कि इसका नाम बदल सकते हैं (यह डीकंपाइल किए गए प्सेडोकोड में काम नहीं करता):
+किसी code object पर right-click करने से आप **उस object के references to/from** देख सकते हैं या उसका नाम बदल सकते हैं (यह decompiled pseudocode में काम नहीं करता):
 
 <figure><img src="../../../images/image (1117).png" alt=""><figcaption></figcaption></figure>
 
-इसके अलावा, **मध्य नीचे आप पायथन कमांड लिख सकते हैं**।
+इसके अलावा, **middle panel के नीचे आप python commands लिख सकते हैं**।
 
-#### दाईं पैनल
+#### Right panel
 
-दाईं पैनल में आप दिलचस्प जानकारी देख सकते हैं जैसे **नेविगेशन इतिहास** (ताकि आप जान सकें कि आप वर्तमान स्थिति पर कैसे पहुंचे), **कॉल ग्राफ** जहां आप देख सकते हैं सभी **कार्य जो इस कार्य को कॉल करते हैं** और सभी कार्य जो **यह कार्य कॉल करता है**, और **स्थानीय चर** की जानकारी।
+Right panel में आप navigation history जैसी interesting information देख सकते हैं (जिससे आपको पता चलता है कि आप current स्थिति तक कैसे पहुंचे), **call graph**, जिसमें वे सभी **functions दिखते हैं जो इस function को call करते हैं** और वे सभी functions भी **जिन्हें यह function call करता है**, तथा **local variables** की information।
 
 ### dtrace
 
-यह उपयोगकर्ताओं को अनुप्रयोगों तक अत्यधिक **निम्न स्तर** पर पहुंच प्रदान करता है और उपयोगकर्ताओं को **कार्यक्रमों को ट्रेस** करने और यहां तक कि उनके निष्पादन प्रवाह को बदलने का एक तरीका प्रदान करता है। Dtrace **प्रोब्स** का उपयोग करता है जो **कर्नेल के चारों ओर रखे जाते हैं** और सिस्टम कॉल के प्रारंभ और अंत जैसे स्थानों पर होते हैं।
+यह users को applications तक अत्यंत **low level** पर access देता है और users को **programs trace** करने तथा उनके execution flow को बदलने का तरीका भी प्रदान करता है। Dtrace **probes** का उपयोग करता है, जिन्हें **kernel में विभिन्न स्थानों पर place** किया जाता है, जैसे system calls की शुरुआत और अंत में।
 
-DTrace प्रत्येक सिस्टम कॉल के लिए एक प्रोब बनाने के लिए **`dtrace_probe_create`** फ़ंक्शन का उपयोग करता है। ये प्रोब्स प्रत्येक सिस्टम कॉल के **प्रवेश और निकास बिंदु** में फायर किए जा सकते हैं। DTrace के साथ इंटरैक्शन /dev/dtrace के माध्यम से होता है जो केवल रूट उपयोगकर्ता के लिए उपलब्ध है।
+DTrace प्रत्येक system call के लिए probe create करने हेतु **`dtrace_probe_create`** function का उपयोग करता है। ये probes प्रत्येक system call के **entry और exit point** पर fire किए जा सकते हैं। DTrace के साथ interaction /dev/dtrace के माध्यम से होता है, जो केवल root user के लिए उपलब्ध है।
 
 > [!TIP]
-> Dtrace को पूरी तरह से SIP सुरक्षा को अक्षम किए बिना सक्षम करने के लिए आप रिकवरी मोड में निष्पादित कर सकते हैं: `csrutil enable --without dtrace`
+> SIP protection को पूरी तरह disable किए बिना Dtrace enable करने के लिए आप recovery mode में यह execute कर सकते हैं: `csrutil enable --without dtrace`
 >
-> आप **`dtrace`** या **`dtruss`** बाइनरी भी कर सकते हैं जो **आपने संकलित की हैं**।
+> आप अपने द्वारा **compiled** किए गए **`dtrace`** या **`dtruss`** binaries को भी चला सकते हैं।
 
-dtrace के उपलब्ध प्रोब्स को प्राप्त किया जा सकता है:
+dtrace के available probes इस command से प्राप्त किए जा सकते हैं:
 ```bash
 dtrace -l | head
 ID   PROVIDER            MODULE                          FUNCTION NAME
@@ -281,20 +272,22 @@ ID   PROVIDER            MODULE                          FUNCTION NAME
 43    profile                                                     profile-97
 44    profile                                                     profile-199
 ```
-प्रोब नाम चार भागों में बंटा होता है: प्रदाता, मॉड्यूल, फ़ंक्शन, और नाम (`fbt:mach_kernel:ptrace:entry`)। यदि आप नाम के किसी भाग को निर्दिष्ट नहीं करते हैं, तो Dtrace उस भाग को वाइल्डकार्ड के रूप में लागू करेगा।
+Probe name में चार भाग होते हैं: provider, module, function और name (`fbt:mach_kernel:ptrace:entry`)। यदि आप name के कुछ भाग निर्दिष्ट नहीं करते हैं, तो Dtrace उस भाग को wildcard के रूप में लागू करेगा।
 
-DTrace को प्रोब्स को सक्रिय करने और जब वे फायर होते हैं तो कौन से क्रियाएँ करनी हैं, यह निर्दिष्ट करने के लिए, हमें D भाषा का उपयोग करने की आवश्यकता होगी।
+Probes को activate करने और उनके fire होने पर की जाने वाली actions निर्दिष्ट करने के लिए, हमें D language का उपयोग करना होगा।
 
-एक अधिक विस्तृत व्याख्या और अधिक उदाहरण [https://illumos.org/books/dtrace/chp-intro.html](https://illumos.org/books/dtrace/chp-intro.html) में पाया जा सकता है।
+अधिक विस्तृत विवरण और अधिक examples [https://illumos.org/books/dtrace/chp-intro.html](https://illumos.org/books/dtrace/chp-intro.html) पर मिल सकते हैं।
 
-#### उदाहरण
+#### Examples
 
-`man -k dtrace` चलाएँ ताकि **DTrace स्क्रिप्ट उपलब्ध** की सूची मिल सके। उदाहरण: `sudo dtruss -n binary`
+उपलब्ध **DTrace scripts** की सूची देखने के लिए `man -k dtrace` चलाएँ। Example: `sudo dtruss -n binary`
+
+- लाइन में
 ```bash
 #Count the number of syscalls of each running process
 sudo dtrace -n 'syscall:::entry {@[execname] = count()}'
 ```
-- स्क्रिप्ट
+- script
 ```bash
 syscall:::entry
 /pid == $1/
@@ -339,109 +332,109 @@ dtruss -c -p 1000 #get syscalls of PID 1000
 ```
 ### kdebug
 
-यह एक कर्नेल ट्रेसिंग सुविधा है। दस्तावेज़ित कोड **`/usr/share/misc/trace.codes`** में पाए जा सकते हैं।
+यह एक kernel tracing facility है। Documented codes **`/usr/share/misc/trace.codes`** में मिल सकते हैं।
 
-`latency`, `sc_usage`, `fs_usage` और `trace` जैसे उपकरण इसका आंतरिक रूप से उपयोग करते हैं।
+`latency`, `sc_usage`, `fs_usage` और `trace` जैसे tools इसे internally उपयोग करते हैं।
 
-`kdebug` के साथ इंटरफेस करने के लिए `sysctl` का उपयोग `kern.kdebug` नामस्थान पर किया जाता है और उपयोग करने के लिए MIBs `sys/sysctl.h` में पाए जा सकते हैं जिसमें कार्य `bsd/kern/kdebug.c` में लागू किए गए हैं।
+`kdebug` के साथ interface करने के लिए `kern.kdebug` namespace पर `sysctl` का उपयोग किया जाता है, और उपयोग किए जाने वाले MIBs `sys/sysctl.h` में मिल सकते हैं, जिनके functions `bsd/kern/kdebug.c` में implemented हैं।
 
-कस्टम क्लाइंट के साथ kdebug के साथ इंटरैक्ट करने के लिए ये आमतौर पर कदम होते हैं:
+Custom client के साथ kdebug से interact करने के सामान्य steps ये हैं:
 
-- KERN_KDSETREMOVE के साथ मौजूदा सेटिंग्स को हटाएं
-- KERN_KDSETBUF और KERN_KDSETUP के साथ ट्रेस सेट करें
-- बफर प्रविष्टियों की संख्या प्राप्त करने के लिए KERN_KDGETBUF का उपयोग करें
-- KERN_KDPINDEX के साथ ट्रेस से अपने क्लाइंट को प्राप्त करें
-- KERN_KDENABLE के साथ ट्रेसिंग सक्षम करें
-- KERN_KDREADTR को कॉल करके बफर पढ़ें
-- प्रत्येक थ्रेड को उसके प्रोसेस से मेल करने के लिए KERN_KDTHRMAP को कॉल करें।
+- KERN_KDSETREMOVE के साथ मौजूदा settings हटाएँ
+- KERN_KDSETBUF और KERN_KDSETUP के साथ trace set करें
+- Buffer entries की संख्या प्राप्त करने के लिए KERN_KDGETBUF का उपयोग करें
+- KERN_KDPINDEX के साथ अपने client को trace से बाहर निकालें
+- KERN_KDENABLE के साथ tracing enable करें
+- KERN_KDREADTR को call करके buffer पढ़ें
+- प्रत्येक thread को उसके process से match करने के लिए KERN_KDTHRMAP को call करें।
 
-इस जानकारी को प्राप्त करने के लिए Apple उपकरण **`trace`** या कस्टम उपकरण [kDebugView (kdv)](https://newosxbook.com/tools/kdv.html)** का उपयोग करना संभव है।**
+यह information प्राप्त करने के लिए Apple tool **`trace`** या custom tool [kDebugView (kdv)](https://newosxbook.com/tools/kdv.html)** का उपयोग किया जा सकता है।**
 
-**ध्यान दें कि Kdebug केवल एक ग्राहक के लिए एक समय में उपलब्ध है।** इसलिए केवल एक k-debug संचालित उपकरण को एक ही समय में निष्पादित किया जा सकता है।
+**ध्यान दें कि Kdebug एक समय में केवल 1 customer के लिए उपलब्ध है।** इसलिए एक ही समय में केवल एक k-debug powered tool execute किया जा सकता है।
 
 ### ktrace
 
-`ktrace_*` APIs `libktrace.dylib` से आती हैं जो `Kdebug` के उन परतों को लपेटती हैं। फिर, एक क्लाइंट बस `ktrace_session_create` और `ktrace_events_[single/class]` को कॉल कर सकता है ताकि विशिष्ट कोड पर कॉलबैक सेट कर सके और फिर इसे `ktrace_start` के साथ शुरू कर सके।
+`ktrace_*` APIs `libktrace.dylib` से आती हैं, जो Kdebug की APIs को wrap करती हैं। इसके बाद, client केवल `ktrace_session_create` और `ktrace_events_[single/class]` को call करके specific codes पर callbacks set कर सकता है और फिर `ktrace_start` के साथ इसे start कर सकता है।
 
-आप इसे **SIP सक्रिय होने पर भी** उपयोग कर सकते हैं।
+आप इसका उपयोग **SIP activated** होने पर भी कर सकते हैं।
 
-आप क्लाइंट के रूप में उपयोगिता `ktrace` का उपयोग कर सकते हैं:
+आप clients के रूप में `ktrace` utility का उपयोग कर सकते हैं:
 ```bash
 ktrace trace -s -S -t c -c ls | grep "ls("
 ```
-Or `tailspin`.
+या `tailspin`।
 
 ### kperf
 
-यह कर्नेल स्तर की प्रोफाइलिंग करने के लिए उपयोग किया जाता है और इसे `Kdebug` कॉलआउट्स का उपयोग करके बनाया गया है।
+इसका उपयोग kernel level profiling करने के लिए किया जाता है और इसे `Kdebug` callouts का उपयोग करके बनाया गया है।
 
-बुनियादी रूप से, वैश्विक चर `kernel_debug_active` की जांच की जाती है और इसे सेट किया जाता है, यह `kperf_kdebug_handler` को `Kdebug` कोड और कर्नेल फ्रेम के पते के साथ कॉल करता है। यदि `Kdebug` कोड में से एक से मेल खाता है, तो इसे एक बिटमैप के रूप में कॉन्फ़िगर किए गए "क्रियाएँ" मिलती हैं (विकल्पों के लिए `osfmk/kperf/action.h` देखें)।
+मूल रूप से, global variable `kernel_debug_active` को check किया जाता है और यदि यह set है, तो यह `Kdebug` code और calling kernel frame के address के साथ `kperf_kdebug_handler` को call करता है। यदि `Kdebug` code चुने गए codes में से किसी एक से match करता है, तो इसे bitmap के रूप में configured "actions" मिलते हैं (विकल्पों के लिए `osfmk/kperf/action.h` check करें)।
 
-Kperf का एक sysctl MIB तालिका भी है: (रूट के रूप में) `sysctl kperf`। ये कोड `osfmk/kperf/kperfbsd.c` में पाए जा सकते हैं।
+Kperf के पास एक sysctl MIB table भी है: (as root) `sysctl kperf`। इन codes को `osfmk/kperf/kperfbsd.c` में पाया जा सकता है।
 
-इसके अलावा, Kperfs की कार्यक्षमता का एक उपसमुच्चय `kpc` में स्थित है, जो मशीन प्रदर्शन काउंटर के बारे में जानकारी प्रदान करता है।
+इसके अलावा, Kperf की functionality का एक subset `kpc` में मौजूद है, जो machine performance counters के बारे में information प्रदान करता है।
 
 ### ProcessMonitor
 
-[**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) एक बहुत उपयोगी उपकरण है जो यह जांचने के लिए है कि एक प्रक्रिया कौन-कौन से क्रियाएँ कर रही है (उदाहरण के लिए, यह मॉनिटर करें कि एक प्रक्रिया कौन-कौन से नए प्रक्रियाएँ बना रही है)।
+[**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) उन process-related actions को check करने के लिए बहुत उपयोगी tool है जिन्हें कोई process perform कर रहा है (उदाहरण के लिए, यह monitor करना कि कोई process कौन-से नए processes create कर रहा है)।
 
 ### SpriteTree
 
-[**SpriteTree**](https://themittenmac.com/tools/) एक उपकरण है जो प्रक्रियाओं के बीच संबंधों को प्रिंट करता है।\
-आपको अपने मैक को एक कमांड के साथ मॉनिटर करना होगा जैसे **`sudo eslogger fork exec rename create > cap.json`** (इसकी आवश्यकता के लिए टर्मिनल को FDA लॉन्च करना होगा)। और फिर आप इस उपकरण में json लोड कर सकते हैं ताकि सभी संबंधों को देख सकें:
+[**SpriteTree**](https://themittenmac.com/tools/) processes के बीच relations print करने वाला tool है।\
+आपको अपने Mac को इस तरह के command से monitor करना होगा: **`sudo eslogger fork exec rename create > cap.json`** (इसे launch करने वाले terminal को FDA की आवश्यकता होती है)। इसके बाद आप सभी relations देखने के लिए इस tool में json load कर सकते हैं:
 
 <figure><img src="../../../images/image (1182).png" alt="" width="375"><figcaption></figcaption></figure>
 
 ### FileMonitor
 
-[**FileMonitor**](https://objective-see.com/products/utilities.html#FileMonitor) फ़ाइल घटनाओं (जैसे निर्माण, संशोधन, और विलोपन) की निगरानी करने की अनुमति देता है, जो ऐसी घटनाओं के बारे में विस्तृत जानकारी प्रदान करता है।
+[**FileMonitor**](https://objective-see.com/products/utilities.html#FileMonitor) file events (जैसे creation, modifications और deletions) को monitor करने की सुविधा देता है और ऐसे events के बारे में detailed information प्रदान करता है।
 
 ### Crescendo
 
-[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) एक GUI उपकरण है जिसका रूप और अनुभव Windows उपयोगकर्ताओं को Microsoft Sysinternal के _Procmon_ से परिचित हो सकता है। यह उपकरण विभिन्न प्रकार की घटनाओं को रिकॉर्ड करने की अनुमति देता है, जिन्हें शुरू और बंद किया जा सकता है, इन घटनाओं को फ़ाइल, प्रक्रिया, नेटवर्क आदि जैसी श्रेणियों द्वारा फ़िल्टर करने की अनुमति देता है, और रिकॉर्ड की गई घटनाओं को json प्रारूप में सहेजने की कार्यक्षमता प्रदान करता है।
+[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) एक GUI tool है जिसका look and feel Windows users को Microsoft Sysinternal के _Procmon_ से परिचित लग सकता है। यह tool विभिन्न event types की recording को start और stop करने देता है, file, process, network आदि जैसी categories के आधार पर इन events को filter करने देता है, और recorded events को json format में save करने की functionality प्रदान करता है।
 
 ### Apple Instruments
 
-[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html) Xcode के डेवलपर उपकरणों का हिस्सा हैं - जो एप्लिकेशन प्रदर्शन की निगरानी, मेमोरी लीक की पहचान और फ़ाइल सिस्टम गतिविधि को ट्रैक करने के लिए उपयोग किए जाते हैं।
+[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html) Xcode के Developer tools का हिस्सा हैं - इनका उपयोग application performance monitor करने, memory leaks identify करने और filesystem activity track करने के लिए किया जाता है।
 
-![](<../../../images/image (1138).png>)
+![Crescendo - Apple Instruments: Apple Instruments Xcode के Developer tools का हिस्सा हैं - इनका उपयोग application performance monitor करने, memory leaks identify करने और filesystem activity track करने के लिए किया जाता है](<../../../images/image (1138).png>)
 
 ### fs_usage
 
-यह प्रक्रियाओं द्वारा किए गए कार्यों का पालन करने की अनुमति देता है:
+Processes द्वारा perform किए गए actions को follow करने की सुविधा देता है:
 ```bash
 fs_usage -w -f filesys ls #This tracks filesystem actions of proccess names containing ls
 fs_usage -w -f network curl #This tracks network actions
 ```
 ### TaskExplorer
 
-[**Taskexplorer**](https://objective-see.com/products/taskexplorer.html) एक बाइनरी द्वारा उपयोग की जाने वाली **लाइब्रेरीज़**, इसके द्वारा उपयोग किए जा रहे **फाइलों** और **नेटवर्क** कनेक्शनों को देखने के लिए उपयोगी है।\
-यह बाइनरी प्रक्रियाओं की जांच **virustotal** के खिलाफ भी करता है और बाइनरी के बारे में जानकारी दिखाता है।
+[**Taskexplorer**](https://objective-see.com/products/taskexplorer.html) किसी binary द्वारा उपयोग की जाने वाली **libraries**, उसके द्वारा उपयोग की जा रही **files** और **network** connections को देखने के लिए उपयोगी है।\
+यह binary processes को **virustotal** के साथ भी check करता है और binary के बारे में information दिखाता है।
 
 ## PT_DENY_ATTACH <a href="#page-title" id="page-title"></a>
 
-[**इस ब्लॉग पोस्ट**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) में आप एक उदाहरण पा सकते हैं कि कैसे **एक चल रहे डेमन** को **`PT_DENY_ATTACH`** का उपयोग करके डिबग किया जाए ताकि डिबगिंग को रोका जा सके, भले ही SIP अक्षम हो।
+[**इस blog post**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) में आप एक ऐसे **running daemon** को **debug** करने का उदाहरण पा सकते हैं, जिसने SIP disabled होने पर भी debugging को रोकने के लिए **`PT_DENY_ATTACH`** का उपयोग किया था।
 
 ### lldb
 
-**lldb** **macOS** बाइनरी **डिबगिंग** के लिए de **facto tool** है।
+**lldb** macOS binary **debugging** के लिए de **facto tool** है।
 ```bash
 lldb ./malware.bin
 lldb -p 1122
 lldb -n malware.bin
 lldb -n malware.bin --waitfor
 ```
-आप अपने होम फ़ोल्डर में **`.lldbinit`** नामक फ़ाइल बनाकर lldb का उपयोग करते समय intel स्वाद सेट कर सकते हैं, जिसमें निम्नलिखित पंक्ति हो:
+आप अपने home folder में निम्नलिखित line वाली **`.lldbinit`** file बनाकर lldb का intel flavour सेट कर सकते हैं:
 ```bash
 settings set target.x86-disassembly-flavor intel
 ```
 > [!WARNING]
-> lldb के अंदर, `process save-core` के साथ एक प्रक्रिया को डंप करें
+> lldb के अंदर, `process save-core` से किसी process का dump लें।
 
-<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) कमांड</strong></td><td><strong>विवरण</strong></td></tr><tr><td><strong>run (r)</strong></td><td>कार्यवाही शुरू करना, जो तब तक जारी रहेगा जब तक कि एक ब्रेकपॉइंट हिट न हो या प्रक्रिया समाप्त न हो जाए।</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>प्रवेश बिंदु पर रुकते हुए कार्यवाही शुरू करें</td></tr><tr><td><strong>continue (c)</strong></td><td>डीबग की गई प्रक्रिया की कार्यवाही जारी रखें।</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>अगली निर्देश को निष्पादित करें। यह कमांड फ़ंक्शन कॉल को छोड़ देगा।</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>अगली निर्देश को निष्पादित करें। अगली कमांड के विपरीत, यह कमांड फ़ंक्शन कॉल में कदम रखेगा।</td></tr><tr><td><strong>finish (f)</strong></td><td>वर्तमान फ़ंक्शन (“फ्रेम”) में शेष निर्देशों को निष्पादित करें, लौटें और रुकें।</td></tr><tr><td><strong>control + c</strong></td><td>कार्यवाही को रोकें। यदि प्रक्रिया को चलाया गया है (r) या जारी रखा गया है (c), तो यह प्रक्रिया को रोक देगा ...जहाँ भी यह वर्तमान में निष्पादित हो रही है।</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #कोई भी फ़ंक्शन जिसे main कहा जाता है</p><p><code>b <binname>`main</code> #बिन का मुख्य फ़ंक्शन</p><p><code>b set -n main --shlib <lib_name></code> #संकेतित बिन का मुख्य फ़ंक्शन</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #कोई भी NSFileManager विधि</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # उस पुस्तकालय के सभी फ़ंक्शनों में ब्रेक</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #ब्रेकपॉइंट सूची</p><p><code>br e/dis <num></code> #ब्रेकपॉइंट सक्षम/अक्षम करें</p><p>breakpoint delete <num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #ब्रेकपॉइंट कमांड की मदद प्राप्त करें</p><p>help memory write #मेमोरी में लिखने के लिए मदद प्राप्त करें</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format <<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s <reg/memory address></strong></td><td>मेमोरी को एक नल-टर्मिनेटेड स्ट्रिंग के रूप में प्रदर्शित करें।</td></tr><tr><td><strong>x/i <reg/memory address></strong></td><td>मेमोरी को असेंबली निर्देश के रूप में प्रदर्शित करें।</td></tr><tr><td><strong>x/b <reg/memory address></strong></td><td>मेमोरी को बाइट के रूप में प्रदर्शित करें।</td></tr><tr><td><strong>print object (po)</strong></td><td><p>यह उस ऑब्जेक्ट को प्रिंट करेगा जिसका संदर्भ पैरामीटर द्वारा दिया गया है</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>ध्यान दें कि Apple के अधिकांश Objective-C APIs या विधियाँ ऑब्जेक्ट लौटाती हैं, और इसलिए उन्हें “print object” (po) कमांड के माध्यम से प्रदर्शित किया जाना चाहिए। यदि po अर्थपूर्ण आउटपुट नहीं देता है तो <code>x/b</code> का उपयोग करें</p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #उस पते में AAAA लिखें<br>memory write -f s $rip+0x11f+7 "AAAA" #पते में AAAA लिखें</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #वर्तमान फ़ंक्शन का डिसासेम्बल करें</p><p>dis -n <funcname> #फ़ंक्शन का डिसासेम्बल करें</p><p>dis -n <funcname> -b <basename> #फ़ंक्शन का डिसासेम्बल करें<br>dis -c 6 #6 पंक्तियों का डिसासेम्बल करें<br>dis -c 0x100003764 -e 0x100003768 #एक जोड़ से दूसरे तक<br>dis -p -c 4 #वर्तमान पते से डिसासेम्बल करना शुरू करें</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 #x1 रजिस्टर में 3 घटकों का ऐरे जांचें</td></tr><tr><td><strong>image dump sections</strong></td><td>वर्तमान प्रक्रिया की मेमोरी का मानचित्र प्रिंट करें</td></tr><tr><td><strong>image dump symtab <library></strong></td><td><code>image dump symtab CoreNLP</code> #CoreNLP से सभी प्रतीकों के पते प्राप्त करें</td></tr></tbody></table>
+<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Command</strong></td><td><strong>विवरण</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Execution शुरू करता है, जो breakpoint हिट होने या process terminate होने तक बिना रुके जारी रहता है।</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Entry point पर execution रोकते हुए शुरू करता है</td></tr><tr><td><strong>continue (c)</strong></td><td>Debug किए जा रहे process का execution जारी रखता है।</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>अगला instruction execute करता है। यह command function calls को skip कर देगा।</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>अगला instruction execute करता है। nexti command के विपरीत, यह command function calls के अंदर step करेगा।</td></tr><tr><td><strong>finish (f)</strong></td><td>वर्तमान function (“frame”) के बाकी instructions को execute करके return और halt करता है।</td></tr><tr><td><strong>control + c</strong></td><td>Execution को pause करता है। यदि process को run (r) या continue (c) किया गया है, तो इससे process उसी स्थान पर halt हो जाएगा ...जहां वह वर्तमान में execute हो रहा है।</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Any func called main</p><p><code>b <binname>`main</code> #Main func of the bin</p><p><code>b set -n main --shlib <lib_name></code> #Main func of the indicated bin</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Any NSFileManager method</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Break in all functions of that library</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Breakpoint list</p><p><code>br e/dis <num></code> #Enable/Disable breakpoint</p><p>breakpoint delete <num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Get help of breakpoint command</p><p>help memory write #Get help to write into the memory</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format <<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s <reg/memory address></strong></td><td>Memory को null-terminated string के रूप में display करता है।</td></tr><tr><td><strong>x/i <reg/memory address></strong></td><td>Memory को assembly instruction के रूप में display करता है।</td></tr><tr><td><strong>x/b <reg/memory address></strong></td><td>Memory को byte के रूप में display करता है।</td></tr><tr><td><strong>print object (po)</strong></td><td><p>यह param द्वारा referenced object को print करेगा</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>ध्यान दें कि Apple के अधिकांश Objective-C APIs या methods objects return करते हैं, इसलिए उन्हें “print object” (po) command के माध्यम से display किया जाना चाहिए। यदि po meaningful output नहीं देता है, तो <code>x/b</code> का उपयोग करें</p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Write AAAA in that address<br>memory write -f s $rip+0x11f+7 "AAAA" #Write AAAA in the addr</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Disas current function</p><p>dis -n <funcname> #Disas func</p><p>dis -n <funcname> -b <basename> #Disas func<br>dis -c 6 #Disas 6 lines<br>dis -c 0x100003764 -e 0x100003768 # From one add until the other<br>dis -p -c 4 # Start in current address disassembling</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Check array of 3 components in x1 reg</td></tr><tr><td><strong>image dump sections</strong></td><td>वर्तमान process memory का map print करता है</td></tr><tr><td><strong>image dump symtab <library></strong></td><td><code>image dump symtab CoreNLP</code> #Get the address of all the symbols from CoreNLP</td></tr></tbody></table>
 
 > [!TIP]
-> जब **`objc_sendMsg`** फ़ंक्शन को कॉल किया जाता है, तो **rsi** रजिस्टर **विधि का नाम** एक नल-टर्मिनेटेड (“C”) स्ट्रिंग के रूप में रखता है। lldb के माध्यम से नाम प्रिंट करने के लिए करें:
+> **`objc_sendMsg`** function को call करते समय, **rsi** register method का name null-terminated (“C”) string के रूप में रखता है। lldb के माध्यम से name print करने के लिए:
 >
 > `(lldb) x/s $rsi: 0x1000f1576: "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 >
@@ -450,39 +443,39 @@ settings set target.x86-disassembly-flavor intel
 >
 > `(lldb) reg read $rsi: rsi = 0x00000001000f1576 "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 
-### एंटी-डायनामिक एनालिसिस
+### Anti-Dynamic Analysis
 
-#### VM पहचान
+#### VM detection
 
-- कमांड **`sysctl hw.model`** "Mac" लौटाता है जब **होस्ट MacOS है** लेकिन जब यह एक VM है तो कुछ अलग।
-- **`hw.logicalcpu`** और **`hw.physicalcpu`** के मानों के साथ खेलते हुए कुछ मैलवेयर यह पहचानने की कोशिश करते हैं कि क्या यह एक VM है।
-- कुछ मैलवेयर यह भी **पहचान सकते हैं** कि मशीन **VMware** आधारित है या नहीं MAC पते (00:50:56) के आधार पर।
-- यह भी संभव है कि **यदि एक प्रक्रिया को डीबग किया जा रहा है** तो इसे एक साधारण कोड के साथ जांचा जा सके जैसे:
-- `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //प्रक्रिया को डीबग किया जा रहा है }`
-- यह **`ptrace`** सिस्टम कॉल को **`PT_DENY_ATTACH`** फ्लैग के साथ भी कॉल कर सकता है। यह **डीबगर** को अटैच और ट्रेस करने से **रोकता** है।
-- आप जांच सकते हैं कि **`sysctl`** या **`ptrace`** फ़ंक्शन को **आयात** किया जा रहा है (लेकिन मैलवेयर इसे गतिशील रूप से आयात कर सकता है)
-- जैसा कि इस लेख में नोट किया गया है, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
-“_संदेश प्रक्रिया # समाप्त हो गई **स्थिति = 45 (0x0000002d)** आमतौर पर यह एक संकेत है कि डिबग लक्ष्य **PT_DENY_ATTACH** का उपयोग कर रहा है_”
+- **`sysctl hw.model`** command तब "Mac" return करता है जब **host एक MacOS** हो, लेकिन VM होने पर कुछ अलग return करता है।
+- **`hw.logicalcpu`** और **`hw.physicalcpu`** की values के साथ प्रयोग करके कुछ malwares यह detect करने का प्रयास करते हैं कि system VM है या नहीं।
+- कुछ malwares MAC address (00:50:56) के आधार पर यह भी **detect** कर सकते हैं कि machine **VMware** है।
+- सरल code से यह पता लगाना भी संभव है कि **process को debug किया जा रहा है**:
+- `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
+- यह **`PT_DENY_ATTACH`** flag के साथ **`ptrace`** system call को भी invoke कर सकता है। यह किसी deb**u**gger को attach और trace करने से **रोकता है**।
+- आप यह check कर सकते हैं कि **`sysctl`** या **`ptrace`** function **import** किया जा रहा है या नहीं (लेकिन malware इसे dynamically import कर सकता है)
+- जैसा कि इस writeup में बताया गया है, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
+“_The message Process # exited with **status = 45 (0x0000002d)** is usually a tell-tale sign that the debug target is using **PT_DENY_ATTACH**_”
 
-## कोर डंप
+## Core Dumps
 
-कोर डंप तब बनाए जाते हैं यदि:
+Core dumps तब create होते हैं जब:
 
-- `kern.coredump` sysctl 1 पर सेट है (डिफ़ॉल्ट रूप से)
-- यदि प्रक्रिया suid/sgid नहीं थी या `kern.sugid_coredump` 1 है (डिफ़ॉल्ट रूप से 0)
-- `AS_CORE` सीमा ऑपरेशन की अनुमति देती है। कोड डंप निर्माण को दबाने के लिए `ulimit -c 0` कॉल करना संभव है और उन्हें फिर से सक्षम करने के लिए `ulimit -c unlimited`।
+- `kern.coredump` sysctl को 1 पर set किया गया हो (default रूप से)
+- यदि process suid/sgid न हो या `kern.sugid_coredump` 1 हो (default रूप से 0)
+- `AS_CORE` limit operation की अनुमति देती हो। `ulimit -c 0` call करके core dumps creation को suppress करना और `ulimit -c unlimited` से उन्हें फिर enable करना संभव है।
 
-इन मामलों में कोर डंप `kern.corefile` sysctl के अनुसार उत्पन्न होते हैं और आमतौर पर `/cores/core/.%P` में संग्रहीत होते हैं।
+इन स्थितियों में core dumps `kern.corefile` sysctl के अनुसार generate होते हैं और सामान्यतः `/cores/core/.%P` में store किए जाते हैं।
 
-## फज़िंग
+## Fuzzing
 
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html)
 
-ReportCrash **क्रैश होने वाली प्रक्रियाओं का विश्लेषण करता है और डिस्क पर एक क्रैश रिपोर्ट सहेजता है**। एक क्रैश रिपोर्ट में ऐसी जानकारी होती है जो **डेवलपर को क्रैश के कारण का निदान करने में मदद कर सकती है**।\
-उपयोगकर्ता के लॉन्चड संदर्भ में **चलने वाली** एप्लिकेशन और अन्य प्रक्रियाओं के लिए, ReportCrash एक LaunchAgent के रूप में चलता है और उपयोगकर्ता के `~/Library/Logs/DiagnosticReports/` में क्रैश रिपोर्ट सहेजता है।\
-डेमन्स, सिस्टम लॉन्चड संदर्भ में चलने वाली अन्य प्रक्रियाओं और अन्य विशेषाधिकार प्राप्त प्रक्रियाओं के लिए, ReportCrash एक LaunchDaemon के रूप में चलता है और सिस्टम के `/Library/Logs/DiagnosticReports` में क्रैश रिपोर्ट सहेजता है।
+ReportCrash **crashing processes का analysis करता है और disk पर crash report save करता है**। Crash report में ऐसी information होती है जो **developer को crash का कारण diagnose करने में मदद** कर सकती है।\
+Applications और **per-user launchd context में चल रहे अन्य processes** के लिए, ReportCrash LaunchAgent के रूप में run होता है और crash reports को user के `~/Library/Logs/DiagnosticReports/` में save करता है।\
+Daemons, **system launchd context में चल रहे अन्य processes** और अन्य privileged processes के लिए, ReportCrash LaunchDaemon के रूप में run होता है और crash reports को system के `/Library/Logs/DiagnosticReports` में save करता है।
 
-यदि आप क्रैश रिपोर्ट के बारे में चिंतित हैं **जो Apple को भेजी जा रही हैं** तो आप उन्हें अक्षम कर सकते हैं। यदि नहीं, तो क्रैश रिपोर्ट **यह पता लगाने में सहायक हो सकती हैं कि सर्वर कैसे क्रैश हुआ**।
+यदि आपको चिंता है कि crash reports **Apple को भेजी जा रही हैं**, तो आप उन्हें disable कर सकते हैं। अन्यथा, crash reports यह **पता लगाने के लिए उपयोगी हो सकती हैं कि server कैसे crash हुआ**।
 ```bash
 #To disable crash reporting:
 launchctl unload -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
@@ -492,17 +485,17 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Roo
 launchctl load -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist
 ```
-### नींद
+### Sleep
 
-MacOS में फज़िंग करते समय यह महत्वपूर्ण है कि मैक को सोने न दिया जाए:
+MacOS में fuzzing करते समय यह महत्वपूर्ण है कि Mac को sleep होने की अनुमति न दी जाए:
 
 - systemsetup -setsleep Never
 - pmset, System Preferences
 - [KeepingYouAwake](https://github.com/newmarcel/KeepingYouAwake)
 
-#### SSH डिस्कनेक्ट
+#### SSH Disconnect
 
-यदि आप SSH कनेक्शन के माध्यम से फज़िंग कर रहे हैं, तो यह सुनिश्चित करना महत्वपूर्ण है कि सत्र समाप्त न हो। इसलिए sshd_config फ़ाइल को बदलें:
+यदि आप SSH connection के माध्यम से fuzzing कर रहे हैं, तो यह सुनिश्चित करना महत्वपूर्ण है कि session disconnect न हो। इसलिए `sshd_config` file में निम्नलिखित बदलाव करें:
 
 - TCPKeepAlive Yes
 - ClientAliveInterval 0
@@ -513,16 +506,16 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 ```
 ### Internal Handlers
 
-**नीचे दिए गए पृष्ठ पर जाएं** यह जानने के लिए कि आप किस ऐप के लिए **निर्धारित स्कीम या प्रोटोकॉल को संभालने के लिए जिम्मेदार है:**
+यह जानने के लिए कि **specified scheme or protocol को handle करने के लिए कौन-सा app जिम्मेदार है**, निम्नलिखित page देखें:
 
 
 {{#ref}}
 ../macos-file-extension-apps.md
 {{#endref}}
 
-### Enumerating Network Processes
+### Network Processes की Enumeration
 
-यह नेटवर्क डेटा का प्रबंधन करने वाले प्रक्रियाओं को खोजने के लिए दिलचस्प है:
+Network data manage करने वाले processes को find करना उपयोगी है:
 ```bash
 dtrace -n 'syscall::recv*:entry { printf("-> %s (pid=%d)", execname, pid); }' >> recv.log
 #wait some time
@@ -541,11 +534,11 @@ lldb -o "target create `which some-binary`" -o "settings set target.env-vars DYL
 
 #### [AFL++](https://github.com/AFLplusplus/AFLplusplus)
 
-CLI टूल्स के लिए काम करता है
+CLI tools के लिए काम करता है।
 
 #### [Litefuzz](https://github.com/sec-tools/litefuzz)
 
-यह "**बस काम करता है"** macOS GUI टूल्स के साथ। ध्यान दें कि कुछ macOS ऐप्स में कुछ विशिष्ट आवश्यकताएँ होती हैं जैसे अद्वितीय फ़ाइल नाम, सही एक्सटेंशन, फ़ाइलों को सैंडबॉक्स से पढ़ने की आवश्यकता (`~/Library/Containers/com.apple.Safari/Data`)...
+यह macOS GUI tools के साथ **"बस काम करता है"**। ध्यान दें कि कुछ macOS apps की विशिष्ट आवश्यकताएँ होती हैं, जैसे unique filenames, सही extension, files को sandbox (`~/Library/Containers/com.apple.Safari/Data`) से पढ़ना...
 
 कुछ उदाहरण:
 ```bash
@@ -571,7 +564,7 @@ litefuzz -lk -c "smbutil view smb://localhost:4455" -a tcp://localhost:4455 -i i
 # screensharingd (using pcap capture)
 litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash screensharingd -p -n 100000
 ```
-### अधिक फज़िंग मैकोस जानकारी
+### अधिक Fuzzing MacOS जानकारी
 
 - [https://www.youtube.com/watch?v=T5xfL9tEg44](https://www.youtube.com/watch?v=T5xfL9tEg44)
 - [https://github.com/bnagy/slides/blob/master/OSXScale.pdf](https://github.com/bnagy/slides/blob/master/OSXScale.pdf)
@@ -580,9 +573,9 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 
 ## संदर्भ
 
-- [**OS X घटना प्रतिक्रिया: स्क्रिप्टिंग और विश्लेषण**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
-- [**https://www.youtube.com/watch?v=T5xfL9tEg44**](https://www.youtube.com/watch?v=T5xfL9tEg44)
-- [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
-- [**Mac मैलवेयर की कला: दुर्भावनापूर्ण सॉफ़्टवेयर का विश्लेषण करने के लिए गाइड**](https://taomm.org/)
+- [1] [OS X Incident Response: Scripting and Analysis](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+- [2] [Jeremy Brown - Summer of Fuzz: MacOS - DEF CON 29 AppSec Village](https://www.youtube.com/watch?v=T5xfL9tEg44)
+- [3] [The Art of Mac Malware, Volume I: Analysis](https://taomm.org/vol1/analysis.html)
+- [4] [The Art of Mac Malware: The Guide to Analyzing Malicious Software](https://taomm.org/)
 
 {{#include ../../../banners/hacktricks-training.md}}

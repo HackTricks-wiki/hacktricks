@@ -1,43 +1,78 @@
-# macOS Kernel & System Extensions
+# macOS Kernel और System Extensions
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## XNU Kernel
 
-macOS का **मुख्य भाग XNU है**, जिसका अर्थ है "X is Not Unix"। यह कर्नेल मूल रूप से **Mach माइक्रोकर्नेल** (जिस पर बाद में चर्चा की जाएगी) और **Berkeley Software Distribution (BSD)** के तत्वों से बना है। XNU **I/O Kit** नामक एक प्रणाली के माध्यम से **कर्नेल ड्राइवरों** के लिए एक प्लेटफॉर्म भी प्रदान करता है। XNU कर्नेल डार्विन ओपन-सोर्स प्रोजेक्ट का हिस्सा है, जिसका अर्थ है कि **इसका स्रोत कोड स्वतंत्र रूप से उपलब्ध है**।
+**macOS का core XNU है**, जिसका अर्थ "X is Not Unix" है। यह kernel मूल रूप से **Mach microkernel** (जिस पर बाद में चर्चा की जाएगी), **और** Berkeley Software Distribution (**BSD**) के elements से बना है। XNU **I/O Kit नामक system के माध्यम से kernel drivers** के लिए भी platform प्रदान करता है। XNU kernel Darwin open source project का हिस्सा है, जिसका अर्थ है कि **इसका source code freely accessible है**।
 
-एक सुरक्षा शोधकर्ता या Unix डेवलपर के दृष्टिकोण से, **macOS** एक **FreeBSD** प्रणाली के समान महसूस कर सकता है जिसमें एक सुंदर GUI और कई कस्टम एप्लिकेशन हैं। BSD के लिए विकसित अधिकांश एप्लिकेशन macOS पर बिना किसी संशोधन के संकलित और चलाए जा सकते हैं, क्योंकि Unix उपयोगकर्ताओं के लिए परिचित कमांड-लाइन उपकरण macOS में सभी मौजूद हैं। हालाँकि, चूंकि XNU कर्नेल Mach को शामिल करता है, इसलिए पारंपरिक Unix-जैसे सिस्टम और macOS के बीच कुछ महत्वपूर्ण अंतर हैं, और ये अंतर संभावित समस्याएँ उत्पन्न कर सकते हैं या अद्वितीय लाभ प्रदान कर सकते हैं।
+Security researcher या Unix developer के दृष्टिकोण से, **macOS** एक elegant GUI और कई custom applications वाले **FreeBSD** system के समान महसूस हो सकता है। BSD के लिए विकसित अधिकांश applications macOS पर बिना modifications के compile और run हो जाएंगी, क्योंकि Unix users से परिचित command-line tools macOS में मौजूद हैं। हालांकि, क्योंकि XNU kernel में Mach शामिल है, traditional Unix-like system और macOS के बीच कुछ महत्वपूर्ण differences हैं, और ये differences potential issues पैदा कर सकते हैं या unique advantages प्रदान कर सकते हैं।
 
-XNU का ओपन-सोर्स संस्करण: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
+XNU का open source version: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
 
 ### Mach
 
-Mach एक **माइक्रोकर्नेल** है जिसे **UNIX-संगत** बनाने के लिए डिज़ाइन किया गया है। इसके प्रमुख डिज़ाइन सिद्धांतों में से एक था **कर्नेल** स्थान में चलने वाले **कोड** की मात्रा को **कम करना** और इसके बजाय कई सामान्य कर्नेल कार्यों, जैसे फ़ाइल प्रणाली, नेटवर्किंग, और I/O, को **उपयोगकर्ता-स्तरीय कार्यों के रूप में चलाने** की अनुमति देना।
+Mach एक **microkernel** है जिसे **UNIX-compatible** होने के लिए design किया गया है। इसके प्रमुख design principles में से एक था **kernel** space में चलने वाले **code** की मात्रा को **कम करना** और इसके बजाय file system, networking और I/O जैसे कई typical kernel functions को **user-level tasks के रूप में run** होने देना।
 
-XNU में, Mach **कर्नेल द्वारा सामान्यतः संभाले जाने वाले कई महत्वपूर्ण निम्न-स्तरीय संचालन** के लिए **जिम्मेदार** है, जैसे प्रोसेसर शेड्यूलिंग, मल्टीटास्किंग, और वर्चुअल मेमोरी प्रबंधन।
+XNU में Mach कई critical low-level operations के लिए **responsible** है, जिन्हें आमतौर पर kernel handle करता है, जैसे processor scheduling, multitasking और virtual memory management।
 
 ### BSD
 
-XNU **कर्नेल** में **FreeBSD** प्रोजेक्ट से निकाले गए कोड की एक महत्वपूर्ण मात्रा भी **शामिल** है। यह कोड **Mach के साथ कर्नेल का हिस्सा के रूप में चलता है**, एक ही पते की जगह में। हालाँकि, XNU के भीतर FreeBSD कोड मूल FreeBSD कोड से काफी भिन्न हो सकता है क्योंकि Mach के साथ इसकी संगतता सुनिश्चित करने के लिए संशोधन आवश्यक थे। FreeBSD कई कर्नेल संचालन में योगदान करता है, जिसमें शामिल हैं:
+XNU **kernel** में **FreeBSD** project से derived काफी मात्रा में code भी **incorporate** किया गया है। यह code Mach के साथ kernel के हिस्से के रूप में, उसी address space में **run** होता है। हालांकि, XNU के भीतर मौजूद FreeBSD code मूल FreeBSD code से काफी अलग हो सकता है, क्योंकि Mach के साथ compatibility सुनिश्चित करने के लिए modifications आवश्यक थे। FreeBSD कई kernel operations में योगदान देता है, जिनमें शामिल हैं:
 
-- प्रक्रिया प्रबंधन
-- सिग्नल हैंडलिंग
-- उपयोगकर्ता और समूह प्रबंधन सहित बुनियादी सुरक्षा तंत्र
-- सिस्टम कॉल अवसंरचना
-- TCP/IP स्टैक और सॉकेट
-- फ़ायरवॉल और पैकेट फ़िल्टरिंग
+- Process management
+- Signal handling
+- Basic security mechanisms, जिसमें user और group management शामिल हैं
+- System call infrastructure
+- TCP/IP stack और sockets
+- Firewall और packet filtering
 
-BSD और Mach के बीच बातचीत को समझना जटिल हो सकता है, उनके विभिन्न वैचारिक ढांचे के कारण। उदाहरण के लिए, BSD प्रक्रियाओं का उपयोग अपने मौलिक निष्पादन इकाई के रूप में करता है, जबकि Mach थ्रेड के आधार पर कार्य करता है। इस विसंगति को XNU में **प्रत्येक BSD प्रक्रिया को एक Mach कार्य के साथ जोड़कर** सुलझाया गया है जिसमें ठीक एक Mach थ्रेड होता है। जब BSD का fork() सिस्टम कॉल उपयोग किया जाता है, तो कर्नेल के भीतर BSD कोड एक कार्य और एक थ्रेड संरचना बनाने के लिए Mach कार्यों का उपयोग करता है।
+BSD और Mach के interaction को समझना जटिल हो सकता है, क्योंकि उनके conceptual frameworks अलग हैं। उदाहरण के लिए, BSD processes को अपनी fundamental executing unit के रूप में use करता है, जबकि Mach threads पर आधारित operate करता है। XNU में इस discrepancy को **प्रत्येक BSD process को एक Mach task के साथ associate करके** resolve किया जाता है, जिसमें ठीक एक Mach thread होता है। BSD के `fork()` system call का उपयोग किए जाने पर, kernel के भीतर BSD code Mach functions का उपयोग करके एक task और thread structure create करता है।
 
-इसके अलावा, **Mach और BSD प्रत्येक अलग-अलग सुरक्षा मॉडल बनाए रखते हैं**: **Mach का** सुरक्षा मॉडल **पोर्ट अधिकारों** पर आधारित है, जबकि BSD का सुरक्षा मॉडल **प्रक्रिया स्वामित्व** के आधार पर कार्य करता है। इन दोनों मॉडलों के बीच के भिन्नताएँ कभी-कभी स्थानीय विशेषाधिकार-उन्नयन कमजोरियों का परिणाम बनती हैं। सामान्य सिस्टम कॉल के अलावा, **Mach ट्रैप भी हैं जो उपयोगकर्ता-स्थान कार्यक्रमों को कर्नेल के साथ बातचीत करने की अनुमति देते हैं**। ये विभिन्न तत्व मिलकर macOS कर्नेल की बहुपरकारी, हाइब्रिड आर्किटेक्चर का निर्माण करते हैं।
+इसके अलावा, **Mach और BSD दोनों अलग-अलग security models maintain करते हैं**: **Mach का** security model **port rights** पर आधारित है, जबकि BSD का security model **process ownership** पर operate करता है। इन दोनों models के बीच disparities ने कभी-कभी local privilege-escalation vulnerabilities को जन्म दिया है। Typical system calls के अलावा, **Mach traps भी मौजूद हैं, जो user-space programs को kernel के साथ interact करने देते हैं**। ये अलग-अलग elements मिलकर macOS kernel की multifaceted, hybrid architecture बनाते हैं।
 
 ### I/O Kit - Drivers
 
-I/O Kit एक ओपन-सोर्स, ऑब्जेक्ट-ओरिएंटेड **डिवाइस-ड्राइवर ढांचा** है जो XNU कर्नेल में **गतिशील रूप से लोड किए गए डिवाइस ड्राइवरों** को संभालता है। यह कर्नेल में ऑन-द-फ्लाई मॉड्यूलर कोड जोड़ने की अनुमति देता है, जो विविध हार्डवेयर का समर्थन करता है।
+I/O Kit XNU kernel में एक open-source, object-oriented **device-driver framework** है, जो **dynamically loaded device drivers** को handle करता है। यह modular code को on-the-fly kernel में add करने की अनुमति देता है और diverse hardware को support करता है।
+
 
 {{#ref}}
 macos-iokit.md
 {{#endref}}
+
+### macOS Architecture में Coprocessors
+
+Apple platforms latency-sensitive work को main cores से दूर रखने और security-critical functions को isolate करने के लिए कई coprocessors पर निर्भर करते हैं।
+
+- **Secure Enclave Processor (SEP)**: अपना microkernel और secure boot chain वाला dedicated ARM core, जो आमतौर पर **EL3/secure world** में run होता है। Interaction macOS में EL1 पर मौजूद mailbox drivers के माध्यम से होता है।
+- Attack surface: SEP firmware updates और user-space daemons (`seputil`, `securityd`) जो requests को proxy करते हैं।
+- Impact of compromise: Long-term keys का leak, biometric gating को bypass करना और FileVault या Apple Pay protections को तोड़ना।
+- **System Management Controller (SMC)**: ARM exception levels के बाहर एक microcontroller पर proprietary firmware run करता है। macOS (EL1) I/O Kit user clients के माध्यम से इस तक पहुंचता है।
+- Attack surface: USB-C power delivery messages, fan/battery management interfaces और firmware update paths।
+- Impact of compromise: Thermal limits को override करना, fake sensor data inject करना, power cut करना या persistent NVRAM backdoors implant करना।
+- **T1/T2 Security Chips**: अपने ARM cores पर मुख्यतः EL1/EL3 में bridgeOS (watchOS-derived) run करते हैं। macOS IOKit द्वारा mediated PCIe/USB-like channels के माध्यम से communicate करता है।
+- Attack surface: DFU/restore pathways, `tccd` जैसी services द्वारा exposed IPC endpoints और T2 से bridged media pipelines।
+- Impact of compromise: Secure boot disable करना, SSD contents decrypt करना, camera/mic gating hijack करना या stealth persistence के लिए HID input emulate करना।
+- **Display Coprocessor (DCP)**: DART (Apple का IOMMU) द्वारा protected isolated address space के अंदर EL1 पर firmware execute करता है।
+- Attack surface: `DCPAVService` interfaces, shared descriptor buffers और firmware image parsing।
+- Impact of compromise: Arbitrary frames inject करना, framebuffers snoop करना या DoS के लिए display pipeline को brick करना।
+- **Apple Neural Engine (ANE)**: Dedicated ML cluster पर microcode run करता है (कोई ARM EL levels नहीं)। macOS `ANECompilerService` और IOKit के माध्यम से work schedule करता है।
+- Attack surface: Compiled model binaries (`.ane`), custom kernels feed करने वाली Core ML APIs और firmware loaders।
+- Impact of compromise: ML models को tamper या exfiltrate करना, processed audio/vision data का leak या on-device inference को sabotage करना।
+- **AGX GPU**: Firmware custom GPU cores पर scheduler के साथ run होता है; EL0 Metal commands submit करता है, जिन्हें EL1 validate करता है।
+- Attack surface: Metal shader compiler, shared buffer mapping APIs और `com.apple.AGXFirmware` ioctl interfaces।
+- Impact of compromise: System memory तक DMA access, GPU drivers के माध्यम से sandbox escapes या persistent firmware implants।
+- **Apple Video Encoder (AVE)**: Media Engine पर EL1-like sandbox में firmware execute करता है। macOS VideoToolbox और `AppleAVE2` के माध्यम से interact करता है।
+- Attack surface: Codec bitstreams, parameter sets, user-supplied buffers और firmware update blobs।
+- Impact of compromise: Uncompressed frames का leak, DRM bypass करना या DMA engines तक access के साथ code execution प्राप्त करना।
+- **Image Signal Processor (ISP)**: Media Engine cluster में secure firmware run करता है; macOS camera drivers EL1 पर operate करते हैं।
+- Attack surface: Camera HALs, RAW frame descriptors, ISP configuration queues और firmware updates।
+- Impact of compromise: Raw camera feeds को silently capture करना, privacy indicators disable करना या fabricated imagery inject करना।
+- **AMX Matrix cores**: New instructions के माध्यम से EL0/EL1 पर exposed coprocessor units के रूप में operate करते हैं।
+- Attack surface: AMX state (`thread_set_state`, context switches) का kernel virtualization और user-space code generation।
+- Impact of compromise: अन्य processes के tile registers का leak, workloads की fingerprinting या kernel memory corruption के माध्यम से escalation।
+
+Modern macOS इन coprocessors को chain of trust में trusted components के रूप में treat करता है। SEP, SMC और T2 का firmware Apple द्वारा signed होता है, और handshake protocols (जो अक्सर mailboxes या I/O Kit families पर implemented होते हैं) में challenge-response checks शामिल होते हैं, ताकि केवल authenticated firmware ही requests service कर सके।
 
 ### IPC - Inter Process Communication
 
@@ -47,9 +82,9 @@ macos-iokit.md
 
 ## macOS Kernel Extensions
 
-macOS **कर्नेल एक्सटेंशन** (.kext) लोड करने के लिए **अत्यधिक प्रतिबंधात्मक** है क्योंकि कोड उच्च विशेषाधिकार के साथ चलेगा। वास्तव में, डिफ़ॉल्ट रूप से यह लगभग असंभव है (जब तक कि कोई बायपास नहीं पाया जाता)।
+macOS **Kernel Extensions** (.kext) को load करने के लिए **बहुत restrictive** है, क्योंकि यह code high privileges के साथ run करेगा। वास्तव में, default रूप से यह virtually impossible है (जब तक कोई bypass न मिल जाए)।
 
-अगली पृष्ठ पर आप यह भी देख सकते हैं कि macOS अपने **कर्नेलकैश** के भीतर लोड किए गए `.kext` को कैसे पुनर्प्राप्त किया जा सकता है:
+अगले page पर आप यह भी देख सकते हैं कि macOS अपने **kernelcache** के अंदर load किए गए `.kext` को कैसे recover करता है:
 
 {{#ref}}
 macos-kernel-extensions.md
@@ -57,15 +92,35 @@ macos-kernel-extensions.md
 
 ### macOS System Extensions
 
-कर्नेल एक्सटेंशन का उपयोग करने के बजाय, macOS ने सिस्टम एक्सटेंशन बनाए, जो कर्नेल के साथ बातचीत करने के लिए उपयोगकर्ता स्तर के APIs प्रदान करते हैं। इस तरह, डेवलपर्स कर्नेल एक्सटेंशन का उपयोग करने से बच सकते हैं।
+Kernel Extensions का उपयोग करने के बजाय macOS ने System Extensions create किए, जो kernel के साथ interact करने के लिए user level APIs प्रदान करते हैं। इस तरह developers kernel extensions का उपयोग करने से बच सकते हैं।
 
 {{#ref}}
 macos-system-extensions.md
 {{#endref}}
 
+
+### Cryptexes और RSR (Rapid Security Response)
+
+- **Cryptex** का अर्थ **CRYPTographically-sealed EXtension** है। यह एक sealed disk image (container) है, जिसका उपयोग Apple OS के उन parts (frameworks, shared libraries, apps) को host करने के लिए करता है, जिनमें major OS updates के बीच बदलने की अधिक संभावना होती है।
+- macOS और iOS पर, cryptexes के अंदर रखे गए components को पूरे system volume को फिर से seal किए बिना RSR के माध्यम से **patch या replace** किया जा सकता है।
+- Cryptexes **Preboot volume** पर boot firmware के साथ reside करते हैं और runtime पर OS file system में graft किए जाते हैं।
+- Cryptex content को load करने में validation शामिल होती है: system file seals, manifests और root hashes check करता है, फिर cryptex content को mount या “graft” करता है, ताकि runtime पर apps जहां उपलब्ध हों वहां cryptex versions का उपयोग करें।
+- Boot logs में cryptex loading kernel initialization के बाद, लेकिन full system services के up होने से पहले होता है।
+
+
+#### Rapid Security Response (RSR)
+
+- **RSR** regular OS updates के बीच **security patches deliver करने का Apple का mechanism** है। यह vulnerable parts (जैसे libraries और frameworks) को update करने के लिए cryptex content को target करता है, core system volume को modify किए बिना।
+- RSR update apply करते समय device Apple के signing server से एक **Cryptex1 Image4 manifest** request करता है। यह manifest device और नए cryptex content के साथ cryptographically bound होता है।
+- Base system के लिए मौजूदा AP boot ticket **RSR द्वारा modify नहीं किया जाता**। Patch sealed base OS के ऊपर additive रूप से काम करता है।
+- macOS पर कुछ patched components (जैसे Safari) app के relaunch होते ही active हो जाते हैं; full system restart हमेशा आवश्यक नहीं होता।
+- RSRs **removable** होते हैं: प्रत्येक के साथ एक patch और “antipatch” ship होता है, जो base OS version पर rollback कर सकता है। Removal के बाद cryptex content revert हो जाता है।
+- RSR updates आमतौर पर full OS updates से काफी छोटे होते हैं और install करने के लिए lower battery state की आवश्यकता होती है।
+
+
 ## References
 
-- [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
-- [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
+- [1] [The Mac Hacker's Handbook](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
+- [2] [The Art of Mac Malware, Vol. 1 — Analysis](https://taomm.org/vol1/analysis.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
