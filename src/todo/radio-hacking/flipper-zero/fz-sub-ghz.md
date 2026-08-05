@@ -4,101 +4,101 @@
 
 ## Intro <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zeroは**300-928 MHzの範囲の無線周波数を受信および送信**できる内蔵モジュールを備えており、リモコンを読み取り、保存し、エミュレートすることができます。これらのコントロールは、ゲート、バリア、無線ロック、リモートコントロールスイッチ、ワイヤレスドアベル、スマートライトなどとの相互作用に使用されます。Flipper Zeroは、あなたのセキュリティが侵害されているかどうかを学ぶのに役立ちます。
+Flipper Zeroは、内蔵モジュールにより**300-928 MHzの範囲のradio frequenciesを受信および送信**でき、remote controlsの読み取り、保存、emulateが可能です。これらのcontrolsは、gate、barrier、radio lock、remote control switch、wireless doorbell、smart lightなどとのインタラクションに使用されます。Flipper Zeroは、セキュリティがcompromiseされているかどうかの確認に役立ちます。<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (714).png" alt=""><figcaption></figcaption></figure>
 
 ## Sub-GHz hardware <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zeroは、[﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101チップ](https://www.ti.com/lit/ds/symlink/cc1101.pdf)に基づく内蔵のサブ1 GHzモジュールと無線アンテナを備えており（最大範囲は50メートル）、CC1101チップとアンテナは、300-348 MHz、387-464 MHz、779-928 MHzの周波数帯域で動作するように設計されています。
+Flipper Zeroには、[﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101 chip](https://www.ti.com/lit/ds/symlink/cc1101.pdf)とradio antenna（最大rangeは50 meters）をベースにした、内蔵のsub-1 GHz moduleがあります。CC1101 chipとantennaはどちらも、300-348 MHz、387-464 MHz、779-928 MHz bandsで動作するよう設計されています。<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (923).png" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## 操作
 
 ### Frequency Analyser
 
-> [!NOTE]
-> リモコンが使用している周波数を見つける方法
+> [!TIP]
+> remoteが使用しているfrequencyの確認方法
 
-分析中、Flipper Zeroは周波数設定で利用可能なすべての周波数で信号強度（RSSI）をスキャンしています。Flipper Zeroは、最も高いRSSI値を持つ周波数を表示し、信号強度が-90 [dBm](https://en.wikipedia.org/wiki/DBm)より高い場合に表示します。
+分析時、Flipper Zeroはfrequency configurationで利用可能なすべてのfrequenciesでsignal strength（RSSI）をscanします。Flipper Zeroは、-90 [dBm](https://en.wikipedia.org/wiki/DBm)より高いsignal strengthを持つ、RSSI valueが最も高いfrequencyを表示します。<sup>[[1]](#references)</sup>
 
-リモコンの周波数を特定するには、次の手順を実行します：
+remoteのfrequencyを特定するには、次の操作を行います。
 
-1. リモコンをFlipper Zeroの左側に非常に近く置きます。
-2. **メインメニュー** **→ Sub-GHz**に移動します。
-3. **Frequency Analyzer**を選択し、分析したいリモコンのボタンを押し続けます。
-4. 画面に表示される周波数値を確認します。
+1. remote controlをFlipper Zeroの左側に非常に近づけます。
+2. **Main Menu** **→ Sub-GHz**に移動します。
+3. **Frequency Analyzer**を選択し、分析したいremote controlのbuttonを長押しします。
+4. 画面上のfrequency valueを確認します。
 
 ### Read
 
-> [!NOTE]
-> 使用されている周波数に関する情報を見つける（使用されている周波数を見つける別の方法）
+> [!TIP]
+> 使用されているfrequencyの情報を確認する（使用されているfrequencyを確認する別の方法）
 
-**Read**オプションは、指定された変調で**設定された周波数をリスニング**します：デフォルトは433.92 AMです。読み取り中に**何かが見つかった場合**、**情報が画面に表示されます**。この情報は、将来信号を再現するために使用できます。
+**Read** optionは、指定されたmodulationで**configured frequencyをlisten**します。Read中に**何かが検出される**と、画面に**情報が表示され**ます。この情報は、後でsignalをreplicateするために使用できます。<sup>[[1]](#references)</sup>
 
-Readを使用している間、**左ボタン**を押して**設定する**ことができます。\
-この時点で**4つの変調**（AM270、AM650、FM328、FM476）と**いくつかの関連周波数**が保存されています：
+Readの使用中は、**left button**を押して**設定**できます。\
+現在、**4つのmodulations**（AM270、AM650、FM328、FM476）と、**複数の関連するfrequencies**が保存されています。
 
 <figure><img src="../../../images/image (947).png" alt=""><figcaption></figcaption></figure>
 
-**興味のある周波数を設定する**ことができますが、リモコンが使用している周波数が**不明な場合**は、**HoppingをONに設定**（デフォルトはOFF）し、Flipperがそれをキャプチャして周波数を設定するために必要な情報を提供するまでボタンを何度も押してください。
+**興味のあるものを任意に設定**できます。ただし、手元のremoteが使用しているfrequencyが**不明な場合**は、**HoppingをON**（デフォルトではOff）に設定し、Flipperがsignalをcaptureしてfrequency設定に必要な情報を表示するまでbuttonを何度か押します。
 
 > [!CAUTION]
-> 周波数を切り替えるには時間がかかるため、切り替え時に送信された信号が失われる可能性があります。信号の受信を改善するために、Frequency Analyzerによって決定された固定周波数を設定してください。
+> frequenciesの切り替えには時間がかかるため、切り替え中に送信されたsignalsをmissする可能性があります。より良いsignal receptionのため、Frequency Analyzerで特定したfixed frequencyを設定してください。
 
 ### **Read Raw**
 
-> [!NOTE]
-> 設定された周波数で信号を盗む（および再生する）
+> [!TIP]
+> configured frequencyのsignalをstealしてreplayする
 
-**Read Raw**オプションは、リスニング周波数で送信された信号を**記録**します。これを使用して信号を**盗み**、**繰り返す**ことができます。
+**Read Raw** optionは、listening frequencyで送信されたsignalsを**record**します。これはsignalを**steal**して**repeat**するために使用できます。
 
-デフォルトでは**Read Rawも433.92のAM650**で動作しますが、Readオプションで興味のある信号が**異なる周波数/変調**にあることがわかった場合は、Read Rawオプション内で左を押すことでそれを変更できます。
+デフォルトでは、**Read RawもAM650の433.92**ですが、Read optionで目的のsignalが**異なるfrequency/modulationにあることが判明した場合は、Read Raw option内でleftを押して変更することもできます**。
 
-### Brute-Force
+### ブルートフォース
 
-ガレージドアで使用されるプロトコルを知っている場合、Flipper Zeroを使用して**すべてのコードを生成し、送信する**ことが可能です。これは一般的なガレージのタイプをサポートする例です：[**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
+garage doorで使用されているprotocolがわかっている場合、**すべてのcodesをgenerateしてFlipper Zeroで送信できます。**これは、一般的なgarageのcommon typesをサポートする例です：[**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
 
-### Add Manually
+### 手動で追加
 
-> [!NOTE]
-> 設定されたプロトコルのリストから信号を追加する
+> [!TIP]
+> configured list of protocolsからsignalsを追加する
 
-#### [サポートされているプロトコルのリスト](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
+#### [supported protocols](https://docs.flipperzero.one/sub-ghz/add-new-remote)の一覧 <a href="#id-3iglu" id="id-3iglu"></a>
 
-| Princeton_433（ほとんどの静的コードシステムで動作） | 433.92 | 静的  |
+| Princeton_433 (works with the majority of static code systems) | 433.92 | Static  |
 | -------------------------------------------------------------- | ------ | ------- |
-| Nice Flo 12bit_433                                             | 433.92 | 静的  |
-| Nice Flo 24bit_433                                             | 433.92 | 静的  |
-| CAME 12bit_433                                                 | 433.92 | 静的  |
-| CAME 24bit_433                                                 | 433.92 | 静的  |
-| Linear_300                                                     | 300.00 | 静的  |
-| CAME TWEE                                                      | 433.92 | 静的  |
-| Gate TX_433                                                    | 433.92 | 静的  |
-| DoorHan_315                                                    | 315.00 | 動的  |
-| DoorHan_433                                                    | 433.92 | 動的  |
-| LiftMaster_315                                                 | 315.00 | 動的  |
-| LiftMaster_390                                                 | 390.00 | 動的  |
-| Security+2.0_310                                               | 310.00 | 動的  |
-| Security+2.0_315                                               | 315.00 | 動的  |
-| Security+2.0_390                                               | 390.00 | 動的  |
+| Nice Flo 12bit_433                                             | 433.92 | Static  |
+| Nice Flo 24bit_433                                             | 433.92 | Static  |
+| CAME 12bit_433                                                 | 433.92 | Static  |
+| CAME 24bit_433                                                 | 433.92 | Static  |
+| Linear_300                                                     | 300.00 | Static  |
+| CAME TWEE                                                      | 433.92 | Static  |
+| Gate TX_433                                                    | 433.92 | Static  |
+| DoorHan_315                                                    | 315.00 | Dynamic |
+| DoorHan_433                                                    | 433.92 | Dynamic |
+| LiftMaster_315                                                 | 315.00 | Dynamic |
+| LiftMaster_390                                                 | 390.00 | Dynamic |
+| Security+2.0_310                                               | 310.00 | Dynamic |
+| Security+2.0_315                                               | 315.00 | Dynamic |
+| Security+2.0_390                                               | 390.00 | Dynamic |
 
-### サポートされているSub-GHzベンダー
+### サポートされているSub-GHz vendors
 
-[https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)のリストを確認してください。
+[https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)のlistを確認してください。
 
-### 地域別のサポートされている周波数
+### region別のサポートされているFrequencies
 
-[https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)のリストを確認してください。
+[https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)のlistを確認してください。
 
 ### Test
 
-> [!NOTE]
-> 保存された周波数のdBmsを取得する
+> [!TIP]
+> 保存されたfrequenciesのdBmsを取得する
 
-## Reference
+## References
 
-- [https://docs.flipperzero.one/sub-ghz](https://docs.flipperzero.one/sub-ghz)
+- [1] [Flipper Zero Sub-GHz documentation](https://docs.flipperzero.one/sub-ghz)
 
 {{#include ../../../banners/hacktricks-training.md}}

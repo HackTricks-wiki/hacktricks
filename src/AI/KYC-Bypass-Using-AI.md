@@ -2,49 +2,49 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Generative modelsは、**browser-based KYC、年齢確認、biometric liveness workflowをbypass**するために使用できます。弱点は、多くの場合、**transportやcloud liveness providerではなく、camera trust boundary**にあります。desktop browserは通常、`getUserMedia()`がwebcamとして公開するデバイスをそのまま信頼します。
+Generative modelsは、**browser-based KYC、年齢確認、biometric liveness workflowsをbypass**するために使用できます。弱点は、多くの場合**transportやcloud liveness providerではなく、camera trust boundary**にあります。desktop browserは通常、`getUserMedia()`がwebcamとして公開するデバイスをそのまま信頼します。<sup>[[1]](#references)</sup>
 
 ## Practical Attack Chain
 
-1. source actorとvictim reference imageを使用し、video-to-video modelで**challengeに準拠したmediaを生成**する。
-2. **signingまたはuploadの前に偽装streamをinject**する。たとえば、`v4l2loopback`で作成したLinux virtual cameraに、OBSまたはFFmpegから映像を入力する。
-3. browserとvendor SDK（WebRTC、AWSなど）に、**攻撃者が制御するframeを実際のwebcamから取得したものとしてcapture、sign、upload**させる。
+1. source actorとvictim reference imageから、video-to-video modelを使用して**challenge-compliant mediaを生成**する。
+2. **signingまたはuploadの前に偽装streamをinject**する。例えば、`v4l2loopback`で作成したLinux virtual cameraに、OBSまたはFFmpegから映像を入力する。
+3. browserとvendor SDK（WebRTC、AWSなど）に、**attacker-controlled framesを実際のwebcamから取得したものとしてcapture、sign、upload**させる。
 
-これはassessment中に重要です。signed WebSocket chunksやproprietary SDK framingによって**network-layer tampering**が実用的でなくても、**camera-layer injection**は機能する可能性があるためです。
+これはassessmentにおいて重要です。signed WebSocket chunksやproprietary SDK framingにより、**network-layer tampering**は実用的でない場合がありますが、**camera-layer injection**は依然として機能するためです。<sup>[[1]](#references)</sup>
 
 ## High-Value Testing Angles
 
-- **Virtual webcam acceptance**: desktop browserからflowが動作する場合、OBS、`v4l2loopback`、またはvendor virtual cameraが通常のperipheralとして受け入れられるかをテストする。
-- **Camera API redirection on mobile**: Fridaでcamera APIをhookし、sensor bufferをMP4のframeまたはemulator-backed virtual cameraのframeに置き換えると、native mobile flowでも脆弱な可能性がある。
-- **Constraint weakening**: 正確な`deviceId`、`frameRate`、`width`、`height`、または`facingMode`を要求するpageは、`navigator.mediaDevices.getUserMedia`をmonkeypatchし、strict constraintをより広いrangeに置き換えることでbypassできる場合がある。
-- **Low-quality generation plus post-processing**: modelが安定してrenderできる最も低コストのvideoを生成し、その後FFmpegのupscalingまたはframe interpolationを使用してcapture要件を満たす。
-- **Predictable active challenges**: head-movementまたはlight-flash sequenceが繰り返される場合、recordしてgenerative workflowを通じてreplayする価値がある。
-- **Weak replay detection**: cropやposition shift、overlayの変更、わずかなmotionなどの単純なscene perturbationで、anti-replay logicが表面的なframe similarityのみをチェックしている場合には十分なことがある。
+- **Virtual webcam acceptance**: desktop browserからflowが動作する場合、OBS、`v4l2loopback`、またはvendor virtual camerasが通常のperipheralsとして受け入れられるかをtestする。
+- **Camera API redirection on mobile**: native mobile flowsでは、Fridaがcamera APIsをhookし、sensor buffersをMP4またはemulator-backed virtual cameraからのframesに置き換えることで、依然としてvulnerableになる可能性がある。
+- **Constraint weakening**: 正確な`deviceId`、`frameRate`、`width`、`height`、または`facingMode`を要求するpagesは、`navigator.mediaDevices.getUserMedia`をmonkeypatchし、strict constraintsをより広いrangesに置き換えることでbypassできる場合がある。
+- **Low-quality generation plus post-processing**: modelが確実にrenderできる最も低コストのvideoを生成し、その後FFmpeg upscalingまたはframe interpolationを使用してcapture requirementsを満たす。
+- **Predictable active challenges**: 繰り返し行われるhead-movementまたはlight-flash sequencesは、recordしてgenerative workflow経由でreplayする価値がある。
+- **Weak replay detection**: cropまたはposition shifts、overlay changes、わずかなmotionなどの単純なscene perturbationsは、anti-replay logicが表面的なframe similarityのみをcheckしている場合、十分なことがある。<sup>[[1]](#references)</sup>
 
 ## Mobile vs. Desktop Trust Differences
 
-Native mobile appは、以下によって攻撃者のコストを高められます。
+Native mobile appsは、以下によってattackerのコストを高められます。
 
-- camera bufferに対する**sensorまたはSecure Element attestation**;
-- **Play Integrity**や**App Attest**などの**execution-integrity** signal;
+- camera buffersに対する**sensorまたはSecure Element attestation**；
+- **Play Integrity**または**App Attest**などの**execution-integrity** signals；
 - videoとaccelerometerまたはgyroscope telemetry間の**motion correlation**。
 
-Desktop web flowには通常、同等のcamera chain of trustがないため、一般的に最も容易な経路になります。
+Desktop web flowsには通常、同等のcamera chain of trustがないため、一般的に最も抵抗の少ないpathとなります。<sup>[[1]](#references)</sup>
 
 ## Defensive Review Notes
 
-KYCまたはliveness integrationをreviewする際は、以下を確認します。
+KYCまたはliveness integrationをreviewする際は、以下を確認してください。
 
-- mobile captureのみを想定してthreat-modelingされたworkflowに対し、**desktop-browser fallback**を許可していないか。
-- suspicious sessionに対する強力なhuman escalationなしに、主に**algorithmic liveness**に依存していないか。
-- pre-recordしてgeneration pipelineに入力できる**stableまたはpredictable challenge**を使用していないか。
-- **`getUserMedia` monkeypatching**、virtual camera、矛盾したbrowser hardware telemetry、または欠落したdevice attestationを検出しているか。
+- mobile captureのみを対象にthreat-modelingされたworkflowに対して、**desktop-browser fallback**を許可しているか。
+- suspicious sessionsに対する強力なhuman escalationなしに、主に**algorithmic liveness**に依存しているか。
+- pre-recordしてgeneration pipelineに入力できる、**stableまたはpredictable challenges**を使用しているか。
+- **`getUserMedia` monkeypatching**、virtual cameras、一貫性のないbrowser hardware telemetry、または欠落したdevice attestationをdetectしているか。<sup>[[1]](#references)</sup>
 
 ## References
 
-- [Synacktiv - KYC: Generative video modelsを使用した年齢確認のBypass](https://www.synacktiv.com/en/publications/kyc-bypass-age-verification-using-generative-video-models.html)
-- [Amazon Rekognition Face Liveness](https://docs.aws.amazon.com/rekognition/latest/dg/face-liveness.html)
-- [v4l2loopback](https://github.com/v4l2loopback/v4l2loopback)
-- [MDN - MediaDevices.getUserMedia()](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia)
+- [1] [Synacktiv - generative video modelsを使用した年齢確認のKYC Bypass](https://www.synacktiv.com/en/publications/kyc-bypass-age-verification-using-generative-video-models.html)
+- [2] [Amazon Rekognition Face Liveness](https://docs.aws.amazon.com/rekognition/latest/dg/face-liveness.html)
+- [3] [v4l2loopback](https://github.com/v4l2loopback/v4l2loopback)
+- [4] [MDN - MediaDevices.getUserMedia()](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia)
 
 {{#include ../banners/hacktricks-training.md}}

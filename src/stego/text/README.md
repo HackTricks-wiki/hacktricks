@@ -2,34 +2,34 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-確認項目:
+以下を探します:
 
 - Unicode homoglyphs
 - Zero-width characters
 - Whitespace patterns (spaces vs tabs)
 
-## 実践的な手順
+## Practical path
 
-プレーンテキストが予期せぬ振る舞いをする場合は、コードポイントを確認して正規化を慎重に行う（証拠を破壊しないこと）。
+プレーンテキストが予期せず動作する場合は、codepointsを調査し、慎重に正規化します（証拠を破壊しないでください）。
 
-### 手法
+### Technique
 
-Text stegoは、同じように表示される（あるいは不可視の）文字にしばしば依存します:
+Text stegoは、同じように表示される（または表示されない）文字に依存することがよくあります:
 
-- Homoglyphs: 見た目が同じ異なるUnicodeコードポイント（Latin `a` vs Cyrillic `а`）
-- Zero-width characters: joiners, non-joiners, zero-width spaces
-- Whitespace encodings: spaces vs tabs, trailing spaces, line-length patterns
+- Homoglyphs: 同じように見える異なるUnicode codepoints（Latin `a` と Cyrillic `а`）
+- Zero-width characters: joiners、non-joiners、zero-width spaces
+- Whitespace encodings: spaces と tabs、末尾のspaces、行長のパターン<sup>[[1]](#references)</sup>
 
-追加で注目すべきケース:
+その他のhigh-signalなケース:
 
-- Bidirectional override/control characters (視覚的にテキストの順序を入れ替えることがある)
-- Variation selectors and combining characters used as a covert channel
+- Bidirectional override/control characters（テキストの表示順序を視覚的に変更できる）
+- Variation selectorsおよびcombining charactersをcovert channelとして使用する
 
-### デコード補助
+### Decode helpers
 
 - Unicode homoglyph/zero-width playground: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
 
-### コードポイントを検査する
+### Inspect codepoints
 ```bash
 python3 - <<'PY'
 import sys
@@ -39,16 +39,16 @@ if ord(ch) > 127 or ch.isspace():
 print(i, hex(ord(ch)), repr(ch))
 PY
 ```
-## CSS `unicode-range` チャネル
+## CSS `unicode-range` channels
 
-`@font-face` ルールは `unicode-range: U+..` エントリ内にバイトをエンコードできます。コードポイントを抽出し、16進数を連結してデコードします:
+`@font-face` ルールは、`unicode-range: U+..` エントリにバイトをエンコードできます。コードポイントを抽出し、16進数を連結してデコードします。
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-範囲の宣言に複数 bytes が含まれる場合は、まずカンマで分割し、正規化してください (`tr ',+' '\n'`)。Python を使うと、フォーマットが不一致でも bytes の解析と出力が簡単になります。
+1つの宣言に複数のバイトが含まれている場合は、まずカンマで分割し、正規化します（`tr ',+' '\n'`）。Pythonを使うと、形式が一貫していない場合でもバイトの解析と出力を簡単に行えます。
 
-## References
+## 参考資料
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

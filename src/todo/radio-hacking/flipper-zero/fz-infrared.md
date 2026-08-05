@@ -1,41 +1,41 @@
-# FZ - Infrared
+# FZ - 赤外線
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## はじめに <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-赤外線の仕組みについての詳細は以下を確認してください:
+赤外線の仕組みについて詳しくは、以下を確認してください:
 
 
 {{#ref}}
 ../infrared.md
 {{#endref}}
 
-## IR Signal Receiver in Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## Flipper ZeroのIR Signal Receiver <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-FlipperはデジタルIR信号受信機TSOPを使用しており、**IRリモコンからの信号を傍受することができます**。Xiaomiのような**スマートフォン**の中にはIRポートを持つものもありますが、**ほとんどは信号を送信することしかできず**、**受信することはできません**。
+FlipperはデジタルIR Signal ReceiverであるTSOPを使用しており、**IR remoteからの信号を傍受できます**。XiaomiのようにIRポートを搭載した**スマートフォン**もありますが、**ほとんどの機種は信号を送信することしかできず、受信はできない**ことに注意してください。<sup>[[1]](#references)</sup>
 
-Flipperの赤外線**受信機は非常に敏感です**。リモコンとテレビの間にいる状態でも**信号を受信することができます**。リモコンをFlipperのIRポートに直接向ける必要はありません。これは、誰かがテレビの近くに立ってチャンネルを切り替えているときに便利で、あなたとFlipperがある程度離れていても機能します。
+Flipperの赤外線**receiverは非常に高感度です**。remoteとTVの**間のどこかに**いるだけでも、**信号をキャッチできます**。remoteをFlipperのIRポートへ直接向ける必要はありません。これは、誰かがTVの近くに立ってチャンネルを切り替えているときに、あなたとFlipperがある程度離れた場所にいる場合に役立ちます。
 
-**赤外線信号のデコード**は**ソフトウェア**側で行われるため、Flipper Zeroは**任意のIRリモコンコードの受信と送信をサポートする可能性があります**。認識できない**プロトコル**の場合、Flipperは受信したままの生信号を**記録して再生**します。
+赤外線信号の**decodingは**ソフトウェア**側で行われる**ため、Flipper Zeroは原理上、あらゆるIR remote codeの**受信と送信をサポートできます**。認識できない**unknown** protocolの場合は、受信したraw signalをそのまま**記録して再生します**。<sup>[[1]](#references)</sup>
 
 ## Actions
 
 ### Universal Remotes
 
-Flipper Zeroは**任意のテレビ、エアコン、またはメディアセンターを制御するためのユニバーサルリモコン**として使用できます。このモードでは、Flipperは**SDカードの辞書に基づいて**すべてのサポートされているメーカーの**既知のコードを総当たり**します。レストランのテレビを消すために特定のリモコンを選ぶ必要はありません。
+Flipper Zeroは、**あらゆるTV、エアコン、メディアセンターを操作するuniversal remote**として使用できます。このモードでは、Flipperは**SDカード上のdictionaryに従って**、サポートされているすべてのmanufacturerの**known codeをbruteforce**します。レストランのTVを消すために、特定のremoteを選ぶ必要はありません。<sup>[[1]](#references)</sup>
 
-ユニバーサルリモコンモードで電源ボタンを押すだけで、Flipperは**知っているすべてのテレビの「電源オフ」**コマンドを順次送信します：Sony、Samsung、Panasonic...など。テレビが信号を受信すると、反応してオフになります。
+Universal Remoteモードでpower buttonを押すだけで、Flipperは認識しているすべてのTVに対して**「Power Off」** commandを**順番に送信**します。TVがその信号を受信すると、反応して電源が切れます。
 
-このような総当たりには時間がかかります。辞書が大きいほど、完了するまでの時間が長くなります。テレビが正確にどの信号を認識したかを知ることはできません。テレビからのフィードバックがないためです。
+このbrute-forceには時間がかかります。dictionaryが大きいほど、完了までに時間がかかります。TVからのfeedbackがないため、TVが正確にどの信号を認識したのかを知ることはできません。
 
 ### Learn New Remote
 
-Flipper Zeroで**赤外線信号をキャプチャ**することが可能です。データベース内で信号を**見つけた場合**、Flipperは自動的に**このデバイスが何であるかを知り**、それと対話できるようになります。\
-見つからない場合、Flipperは**信号を保存**し、**再生する**ことを許可します。
+Flipper Zeroで**赤外線信号をcapture**できます。信号が**database内に見つかる**と、Flipperは自動的に**どのdeviceのものかを把握し**、操作できるようにします。\
+見つからない場合でも、Flipperはその**信号を保存**し、**replay**できるようにします。<sup>[[1]](#references)</sup>
 
 ## References
 
-- [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
+- [1] [Taking over TVs with Flipper Zero Infrared Port](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../../banners/hacktricks-training.md}}

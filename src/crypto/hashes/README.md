@@ -2,34 +2,38 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Common CTF patterns
+## CTFでよくあるパターン
 
-- "Signature" は実際には `hash(secret || message)` → length extension.
-- ソルトのないパスワードハッシュ → 簡単にクラッキング／照合される。
-- ハッシュとMACを混同する (hash != authentication)。
+- 「Signature」が実際には `hash(secret || message)` → length extension。
+- Saltなしの password hash → trivial cracking / lookup。
+- hash と MAC の混同（hash != authentication）。
 
 ## Hash length extension attack
 
 ### Technique
 
-サーバーが次のような "signature" を計算している場合、しばしばこれを悪用できます:
+サーバーが次のような「signature」を計算している場合、これを悪用できることがあります。
 
 `sig = HASH(secret || message)`
 
-かつ Merkle–Damgård ハッシュ（典型例: MD5, SHA-1, SHA-256）を使っている場合。
+また、Merkle–Damgård hash（classic examples: MD5, SHA-1, SHA-256）が使用されている必要があります。
 
-もし以下が分かっていれば:
+次の情報が分かっている場合：
 
 - `message`
 - `sig`
 - hash function
-- (またはブルートフォースで分かる) `len(secret)`
+- （または brute-force できる）`len(secret)`
 
-次のような `message || padding || appended_data` に対する有効な署名を、秘密を知らなくても計算できます。
+secret を知らなくても、次のデータに対する有効な signature を計算できます。
+
+`message || padding || appended_data`
+
+<sup>[[1]](#references)</sup>
 
 ### Important limitation: HMAC is not affected
 
-長さ拡張攻撃は Merkle–Damgård ハッシュに対する `HASH(secret || message)` のような構成に適用されます。**HMAC**（例: HMAC-SHA256）には適用されません。HMAC はこの種の問題を回避するように設計されています。
+Length extension attacks は、Merkle–Damgård hashes に対する `HASH(secret || message)` のような構成に適用されます。これらは、この種類の問題を回避するよう特別に設計された **HMAC**（例：HMAC-SHA256）には適用されません。<sup>[[1]](#references)</sup>
 
 ### Tools
 
@@ -52,24 +56,28 @@ https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-lengt
 
 ### First questions
 
-- Is it **salted**? (look for `salt$hash` formats)
-- Is it a **fast hash** (MD5/SHA1/SHA256) or a **slow KDF** (bcrypt/scrypt/argon2/PBKDF2)?
-- Do you have a **format hint** (hashcat mode / John format)?
+- **salted** か？（`salt$hash` 形式を探す）
+- **fast hash**（MD5/SHA1/SHA256）か、**slow KDF**（bcrypt/scrypt/argon2/PBKDF2）か？
+- **format hint**（hashcat mode / John format）はあるか？
 
 ### Practical workflow
 
-1. Identify the hash:
+1. hash を特定する：
 - `hashid <hash>`
 - `hashcat --example-hashes | rg -n "<pattern>"`
-2. If unsalted and common: try online DBs and identification tooling from the crypto workflow section.
-3. Otherwise crack:
+2. Saltなしで common な場合：crypto workflow section の online DB と identification tooling を試す。
+3. それ以外は crack する：
 - `hashcat -m <mode> -a 0 hashes.txt wordlist.txt`
 - `john --wordlist=wordlist.txt --format=<fmt> hashes.txt`
 
 ### Common mistakes you can exploit
 
-- Same password reused across users → crack one, pivot.
-- Truncated hashes / custom transforms → normalize and retry.
-- Weak KDF parameters (e.g., low PBKDF2 iterations) → still crackable.
+- 複数の user 間で同じ password を再利用 → 1つを crack して pivot。
+- Truncated hashes / custom transforms → normalize して再試行。
+- Weak KDF parameters（例：少ない PBKDF2 iterations）→ それでも crack 可能。
+
+## References
+
+- [1] [Everything you need to know about hash length extension attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
 {{#include ../../banners/hacktricks-training.md}}

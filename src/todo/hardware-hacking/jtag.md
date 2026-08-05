@@ -2,65 +2,68 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 {{#ref}}
 README.md
 {{#endref}}
 
 ## JTAGenum
 
-[**JTAGenum**](https://github.com/cyphunk/JTAGenum) は、Arduino互換のMCUまたは（実験的に）Raspberry Piにロードして、未知のJTAGピンアウトをブルートフォースし、命令レジスタを列挙するためのツールです。
+[**JTAGenum**](https://github.com/cyphunk/JTAGenum) は、Arduino互換MCUまたは（実験的に）Raspberry Piにロードして、未知のJTAGピン配置を総当たりし、命令レジスタを列挙することもできるツールです。
 
-- Arduino: デジタルピンD2–D11を最大10の疑わしいJTAGパッド/テストポイントに接続し、Arduino GNDをターゲットGNDに接続します。レールが安全であることがわからない限り、ターゲットに別途電源を供給してください。3.3 Vロジック（例：Arduino Due）を好むか、1.8–3.3 Vターゲットをプローブする際にはレベルシフタ/直列抵抗を使用してください。
-- Raspberry Pi: Piビルドは使用可能なGPIOが少なく（スキャンが遅くなる）、現在のピンマップと制約についてはリポジトリを確認してください。
+- Arduino: デジタルピンD2〜D11を、最大10個のJTAG候補パッド/テストポイントに接続し、ArduinoのGNDをターゲットのGNDに接続します。電源レールが安全だと分かっている場合を除き、ターゲットには別途電源を供給してください。3.3 Vロジック（例: Arduino Due）を優先するか、1.8〜3.3 Vのターゲットをプローブする際はレベルシフター/直列抵抗を使用してください。
+- Raspberry Pi: Pi版では使用可能なGPIOが少ないため、スキャンは遅くなります。現在のピンマップと制約については、リポジトリを確認してください。
 
-フラッシュが完了したら、115200ボーでシリアルモニタを開き、`h`を送信してヘルプを表示します。典型的なフロー：
+書き込み後、115200 baudでシリアルモニターを開き、`h`を送信してヘルプを表示します。一般的な流れ:
 
-- `l` ループバックを見つけて偽陽性を避ける
-- `r` 必要に応じて内部プルアップを切り替える
-- `s` TCK/TMS/TDI/TDO（時にはTRST/SRST）をスキャンする
-- `y` 文書化されていないオペコードを発見するためにIRをブルートフォースする
-- `x` ピン状態の境界スキャンスナップショット
+- `l` 誤検出を避けるためにループバックを検索
+- `r` 必要に応じて内部プルアップを切り替え
+- `s` TCK/TMS/TDI/TDO（場合によってはTRST/SRSTも）をスキャン
+- `y` IRを総当たりして未文書化のopcodeを発見
+- `x` boundary-scanでピン状態をスナップショット
 
-![](<../../images/image (939).png>)
+![JTAG - JTAGenum: x boundary-scanによるピン状態のスナップショット](<../../images/image (939).png>)
 
-![](<../../images/image (578).png>)
+![JTAG - JTAGenum: x boundary-scanによるピン状態のスナップショット](<../../images/image (578).png>)
 
-![](<../../images/image (774).png>)
+![JTAG - JTAGenum: x boundary-scanによるピン状態のスナップショット](<../../images/image (774).png>)
+
+
 
 有効なTAPが見つかると、発見されたピンを示す`FOUND!`で始まる行が表示されます。
 
 ヒント
-- 常にグラウンドを共有し、未知のピンをターゲットVtref以上に駆動しないでください。疑わしい場合は、候補ピンに100–470 Ωの直列抵抗を追加してください。
-- デバイスが4線JTAGの代わりにSWD/SWJを使用している場合、JTAGenumはそれを検出できない可能性があります。SWDツールまたはSWJ-DPをサポートするアダプタを試してください。
+- 必ずグランドを共有し、未知のピンをターゲットのVtrefを超える電圧で駆動しないでください。不明な場合は、候補ピンに100〜470 Ωの直列抵抗を追加してください。
+- デバイスが4線式JTAGではなくSWD/SWJを使用している場合、JTAGenumでは検出できない可能性があります。SWD tools、またはSWJ-DPをサポートするアダプターを試してください。
 
-## Safer pin hunting and hardware setup
+## より安全なピン探索とハードウェア設定
 
-- まずマルチメーターでVtrefとGNDを特定します。多くのアダプタはI/O電圧を設定するためにVtrefを必要とします。
-- レベルシフティング: プッシュプル信号用に設計された双方向レベルシフタを好みます（JTAGラインはオープンドレインではありません）。JTAG用の自動方向I2Cシフタは避けてください。
-- 有用なアダプタ: FT2232H/FT232Hボード（例：Tigard）、CMSIS-DAP、J-Link、ST-LINK（ベンダー特有）、ESP-USB-JTAG（ESP32-Sx上）。最低限TCK、TMS、TDI、TDO、GNDおよびVtrefを接続します。オプションでTRSTとSRSTを接続します。
+- まずマルチメーターでVtrefとGNDを特定します。多くのアダプターでは、I/O電圧を設定するためにVtrefが必要です。
+- レベルシフト: push-pull信号向けに設計された双方向レベルシフターを優先してください（JTAGラインはopen-drainではありません）。JTAGには自動方向I2Cシフターを使用しないでください。
+- 便利なアダプター: FT2232H/FT232Hボード（例: Tigard）、CMSIS-DAP、J-Link、ST-LINK（ベンダー固有）、ESP-USB-JTAG（ESP32-Sx上）。最低限、TCK、TMS、TDI、TDO、GND、Vtrefを接続し、必要に応じてTRSTとSRSTも接続します。
 
-## First contact with OpenOCD (scan and IDCODE)
+## OpenOCDでの初回接続（スキャンとIDCODE）
 
-OpenOCDはJTAG/SWDの事実上のOSSです。サポートされているアダプタを使用すると、チェーンをスキャンしてIDCODEを読み取ることができます：
+OpenOCDは、JTAG/SWD向けの事実上のOSSです。サポート対象のアダプターを使用すれば、チェーンをスキャンしてIDCODEを読み取れます。
 
-- J-Linkを使用した一般的な例:
+- J-Linkを使用する一般的な例:
 ```
 openocd -f interface/jlink.cfg -c "transport select jtag; adapter speed 1000" \
 -c "init; scan_chain; shutdown"
 ```
-- ESP32‑S3 内蔵 USB‑JTAG（外部プローブは不要）：
+- ESP32-S3 built-in USB-JTAG（外部プローブ不要）：
 ```
 openocd -f board/esp32s3-builtin.cfg -c "init; scan_chain; shutdown"
 ```
-ノート
-- "すべての1/0" IDCODEが表示された場合は、配線、電源、Vtref、およびポートがヒューズ/オプションバイトによってロックされていないことを確認してください。
-- 不明なチェーンを立ち上げる際の手動TAPインタラクションについては、OpenOCDの低レベル`irscan`/`drscan`を参照してください。
+注記
+- 「all ones/zeros」IDCODE が表示された場合は、配線、電源、Vtref、およびポートが fuse/option bytes によってロックされていないことを確認してください。
+- 不明な chain の bring-up 時に手動で TAP を操作するには、OpenOCD の low-level `irscan`/`drscan` を参照してください。<sup>[[1]](#references)</sup>
 
-## CPUの停止とメモリ/フラッシュのダンプ
+## CPU を halt して memory/flash を dump する
 
-TAPが認識され、ターゲットスクリプトが選択されると、コアを停止し、メモリ領域または内部フラッシュをダンプできます。例（ターゲット、ベースアドレス、サイズを調整してください）：
+TAP が認識され、target script が選択されたら、core を halt して memory 領域または internal flash を dump できます。例（target、base addresses、sizes は適宜調整してください）:
 
-- 初期化後の一般的なターゲット:
+- init 後の generic target:
 ```
 openocd -f interface/jlink.cfg -f target/stm32f1x.cfg \
 -c "init; reset halt; mdw 0x08000000 4; dump_image flash.bin 0x08000000 0x00100000; shutdown"
@@ -70,22 +73,22 @@ openocd -f interface/jlink.cfg -f target/stm32f1x.cfg \
 openocd -f interface/ftdi/ft232h.cfg -f target/riscv.cfg \
 -c "init; riscv set_prefer_sba on; halt; dump_image sram.bin 0x80000000 0x20000; shutdown"
 ```
-- ESP32‑S3、OpenOCDヘルパーを介してプログラムまたは読み取る:
+- ESP32‑S3、OpenOCD helperを介して書き込みまたは読み取り:
 ```
 openocd -f board/esp32s3-builtin.cfg \
 -c "program_esp app.bin 0x10000 verify exit"
 ```
 Tips
-- `mdw/mdh/mdb`を使用して、長いダンプの前にメモリをサニティチェックします。
-- マルチデバイスチェーンの場合、非ターゲットに対してBYPASSを設定するか、すべてのTAPを定義するボードファイルを使用します。
+- 長時間のダンプの前に、`mdw/mdh/mdb` を使ってメモリを sanity-check する。
+- 複数デバイスの chain では、対象外のデバイスで BYPASS を設定するか、すべての TAP を定義した board file を使用する。
 
-## バウンダリスキャンのトリック (EXTEST/SAMPLE)
+## Boundary-scan tricks (EXTEST/SAMPLE)
 
-CPUデバッグアクセスがロックされていても、バウンダリスキャンが露出している場合があります。UrJTAG/OpenOCDを使用すると、次のことができます：
-- SAMPLEを使用して、システムが動作している間にピンの状態をスナップショットします（バスのアクティビティを見つけ、ピンのマッピングを確認します）。
-- EXTESTを使用してピンを駆動します（例：ボードの配線が許可されている場合、MCUを介して外部SPIフラッシュラインをビットバンギングしてオフラインで読み取ります）。
+CPU の debug access がロックされていても、boundary-scan が公開されたままの場合があります。UrJTAG/OpenOCD を使用すると、以下が可能です。
+- システムの実行中に SAMPLE でピンの状態をスナップショットし、バスのアクティビティを確認してピンマッピングを検証する。
+- EXTEST でピンを駆動する（例：MCU 経由で外部 SPI flash のラインを bit-bang し、board の配線が対応していればオフラインで読み取る）。
 
-FT2232xアダプタを使用した最小限のUrJTAGフロー：
+FT2232x adapter を使用した最小限の UrJTAG フロー:
 ```
 jtag> cable ft2232 vid=0x0403 pid=0x6010 interface=1
 jtag> frequency 100000
@@ -95,24 +98,24 @@ jtag> instruction EXTEST
 jtag> shift ir
 jtag> dr  <bit pattern for boundary register>
 ```
-デバイスのBSDLが必要で、境界レジスタのビット順序を知る必要があります。いくつかのベンダーは、製造時に境界スキャンセルをロックすることに注意してください。
+デバイスの BSDL が必要です。boundary register のビット順序を把握するためです。本番環境では一部のベンダーが boundary-scan cell をロックしていることに注意してください。
 
-## 現代のターゲットと注意事項
+## 最新の target と注意事項
 
-- ESP32‑S3/C3はネイティブUSB‑JTAGブリッジを含んでおり、OpenOCDは外部プローブなしでUSB経由で直接通信できます。トリアージやダンプに非常に便利です。
-- RISC‑Vデバッグ（v0.13+）はOpenOCDによって広くサポートされています。コアを安全に停止できない場合は、メモリアクセスにはSBAを優先してください。
-- 多くのMCUはデバッグ認証とライフサイクル状態を実装しています。JTAGが死んでいるように見えるが電源が正しい場合、デバイスは閉じた状態にフューズされているか、認証されたプローブが必要です。
+- ESP32‑S3/C3 には native USB‑JTAG bridge が搭載されています。OpenOCD は外部 probe なしで USB 経由で直接通信できます。triage や dump に非常に便利です。<sup>[[2]](#references)</sup>
+- RISC‑V debug (v0.13+) は OpenOCD で広くサポートされています。core を安全に halt できない場合は、memory access に SBA を優先してください。
+- 多くの MCU は debug authentication と lifecycle state を実装しています。電源が正常なのに JTAG が dead に見える場合、device が closed state に fuse されているか、authenticated probe が必要な可能性があります。
 
-## 防御と強化（実際のデバイスで期待されること）
+## 防御と hardening（実際の device で想定されるもの）
 
-- 製造時にJTAG/SWDを永久に無効にするかロックします（例：STM32 RDPレベル2、PAD JTAGを無効にするESP eFuses、NXP/Nordic APPROTECT/DPAP）。
-- 製造アクセスを維持しながら、認証されたデバッグを要求します（ARMv8.2‑A ADIv6デバッグ認証、OEM管理のチャレンジレスポンス）。
-- 簡単なテストパッドを配線しないでください；テストビアを埋め、TAPを隔離するために抵抗を取り除く/配置し、キー付きコネクタやポゴピンフィクスチャを使用します。
-- 電源オンデバッグロック：セキュアブートを強制する初期ROMの背後にTAPをゲートします。
+- 本番環境では JTAG/SWD を恒久的に無効化または lock する（例：STM32 RDP level 2、PAD JTAG を無効化する ESP eFuse、NXP/Nordic APPROTECT/DPAP）。
+- 製造時の access を維持しながら、authenticated debug（ARMv8.2‑A ADIv6 Debug Authentication、OEM 管理の challenge‑response）を必須にする。
+- 簡単にアクセスできる test pad を配置しない。test via を埋め込み、resistor を remove/populate して TAP を分離し、keying 付き connector または pogo‑pin fixture を使用する。
+- Power-on debug lock：secure boot を適用する初期 ROM によって TAP を gate する。
 
-## 参考文献
+## References
 
-- OpenOCDユーザーガイド – JTAGコマンドと設定。 https://openocd.org/doc-release/html/JTAG-Commands.html
-- Espressif ESP32‑S3 JTAGデバッグ（USB‑JTAG、OpenOCDの使用）。 https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/
+- [1] [OpenOCD User’s Guide – JTAG Commands and configuration](https://openocd.org/doc-release/html/JTAG-Commands.html)
+- [2] [Espressif ESP32‑S3 JTAG debugging (USB‑JTAG, OpenOCD usage)](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/)
 
 {{#include ../../banners/hacktricks-training.md}}

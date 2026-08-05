@@ -2,37 +2,38 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Intro
+## 概要
 
-iButtonは、**コイン型の金属容器**に詰め込まれた電子識別キーの一般的な名称です。これは**Dallas Touch** Memoryまたは接触メモリとも呼ばれます。しばしば「磁気」キーと誤って呼ばれますが、実際には**磁気的なものは何もありません**。実際には、デジタルプロトコルで動作する**マイクロチップ**が内部に隠されています。
+iButtonは、**コイン形状の金属ケース**に収められた電子識別キーの一般的な名称です。**Dallas Touch** Memoryまたはcontact memoryとも呼ばれます。「磁気」キーと誤って呼ばれることがよくありますが、内部に**磁気的なものは一切ありません**。実際には、デジタルプロトコルで動作する本格的な**microchip**が内部に隠されています。<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
-### What is iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
+### iButtonとは？ <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-通常、iButtonはキーとリーダーの物理的な形状を指し、2つの接点を持つ丸いコインです。その周囲のフレームには、穴のある最も一般的なプラスチックホルダーからリング、ペンダントなど、さまざまなバリエーションがあります。
+通常、iButtonとはキーとreaderの物理的な形状を指します。つまり、2つの接点を持つ丸いコインです。それを囲むフレームには、穴の開いた最も一般的なプラスチックホルダーから、リング、ペンダントなどまで、さまざまな種類があります。
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-キーがリーダーに到達すると、**接点が接触し**、キーが**IDを送信するために電源が入ります**。時々、**インターホンの接触PSDが大きすぎる**ため、キーが**すぐに読み取られない**ことがあります。その場合、キーとリーダーの外形が接触できません。その場合は、リーダーの壁の1つの上にキーを押し付ける必要があります。
+キーがreaderに到達すると、**接点が接触し**、キーに電力が供給されてIDを**送信**します。intercomの**接点PSDが本来より大きい**ため、キーがすぐに**読み取られない**ことがあります。その場合、キーとreaderの外周が接触できません。このときは、readerの壁のいずれかにキーを押し付ける必要があります。
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
 ### **1-Wire protocol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Dallasキーは1-wireプロトコルを使用してデータを交換します。データ転送用の接点は1つだけで (!!) 、マスターからスレーブ、そしてその逆の両方向で機能します。1-wireプロトコルはマスター-スレーブモデルに従って動作します。このトポロジーでは、マスターが常に通信を開始し、スレーブがその指示に従います。
+Dallas keysは1-wire protocolを使用してデータを交換します。データ転送用の接点は、MasterからSlave、またはその逆方向の両方で、わずか1つだけです（!!）。1-wire protocolはMaster-Slaveモデルに従って動作します。このトポロジーでは、Masterが常に通信を開始し、Slaveがその指示に従います。
 
-キー（スレーブ）がインターホン（マスター）に接触すると、キー内部のチップが起動し、インターホンによって電源が供給され、キーが初期化されます。その後、インターホンがキーIDを要求します。次に、このプロセスをより詳細に見ていきます。
+キー（Slave）がintercom（Master）に接触すると、キー内部のchipがintercomから電力を供給されて起動し、キーが初期化されます。その後、intercomがキーのIDを要求します。次に、このプロセスを詳しく見ていきます。
 
-Flipperはマスターとスレーブの両方のモードで動作できます。キー読み取りモードでは、Flipperはリーダーとして機能し、つまりマスターとして動作します。そして、キーエミュレーションモードでは、Flipperはキーのふりをし、スレーブモードにあります。
+FlipperはMasterモードとSlaveモードの両方で動作できます。キーのreading modeでは、Flipperはreaderとして動作します。つまり、Masterとして動作します。また、キーのemulation modeでは、Flipperはキーのふりをするため、Slaveモードになります。
 
-### Dallas, Cyfral & Metakom keys
+### Dallas、Cyfral、Metakom keys
 
-これらのキーの動作についての情報は、ページ[https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)を確認してください。
+これらのkeysの動作については、[https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)のページを確認してください。<sup>[[1]](#references)</sup>
 
 ### Attacks
 
-iButtonsはFlipper Zeroで攻撃できます：
+iButtonsはFlipper Zeroで攻撃できます:
+
 
 {{#ref}}
 flipper-zero/fz-ibutton.md
@@ -40,6 +41,6 @@ flipper-zero/fz-ibutton.md
 
 ## References
 
-- [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
+- [1] [Taming iButton](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../banners/hacktricks-training.md}}

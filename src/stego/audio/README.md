@@ -2,46 +2,46 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-一般的なパターン:
+Common patterns:
 
 - Spectrogram messages
 - WAV LSB embedding
 - DTMF / dial tones encoding
 - Metadata payloads
 
-## クイックトリアージ
+## Quick triage
 
-専用ツールを使う前に:
+Before specialized tooling:
 
-- codec/container の詳細と異常を確認する:
+- Confirm codec/container details and anomalies:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- オーディオにノイズのような内容やトーンの構造が含まれている場合、早めに spectrogram を確認する。
+- If the audio contains noise-like content or tonal structure, inspect a spectrogram early.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
-## Spectrogram steganography
+## スペクトログラム steganography
 
-### 手法
+### Technique
 
-Spectrogram stegoは、時間/周波数に沿ったエネルギー分布を成形してデータを隠し、時間-周波数プロットでのみ可視化されるようにします（多くの場合可聴ではなくノイズとして認識されます）。
+Spectrogram stego は、時間/周波数にわたってエネルギーを整形することでデータを隠し、時間-周波数プロットでのみ可視化されるようにします（多くの場合、不可聴またはノイズとして知覚されます）。
 
 ### Sonic Visualiser
 
-スペクトログラム検査の主要なツール:
+Spectrogram 検査用の主要な tool：
 
 - [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
-### 代替
+### Alternatives
 
-- Audacity (スペクトログラム表示、フィルタ): https://www.audacityteam.org/
-- `sox`はCLIからスペクトログラムを生成できます:
+- Audacity（spectrogram view、filters）：https://www.audacityteam.org/
+- `sox` は CLI から spectrograms を生成できます：
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
-## FSK / modem 復号
+## FSK / modem の復号
 
-FSK 音声はスペクトログラム上で交互に現れる単一トーンのように見えることが多い。大まかな center/shift と baud の推定ができたら、`minimodem` で総当たりしてみる:
+Frequency-shift keyed audio は、spectrogram 上で交互に現れる単一トーンのように見えることがよくあります。<sup>[[1]](#references)</sup> おおよその center/shift と baud の推定値が得られたら、`minimodem` で brute force します：
 ```bash
 # Visualize the band to pick baud/frequency
 sox noise.wav -n spectrogram -o spec.png
@@ -52,24 +52,24 @@ minimodem -f noise.wav 300
 minimodem -f noise.wav 1200
 minimodem -f noise.wav 2400
 ```
-`minimodem` はオートゲインとマーク/スペース音の自動検出を行います。出力が乱れる場合は `--rx-invert` や `--samplerate` を調整してください。
+`minimodem` は mark/space tones を自動ゲイン調整および自動検出します。出力が文字化けする場合は、`--rx-invert` または `--samplerate` を調整してください。
 
 ## WAV LSB
 
-### 手法
+### Technique
 
-非圧縮の PCM (WAV) では、各サンプルは整数値です。下位ビットを変更しても波形はごくわずかしか変化しないため、攻撃者は次のように隠すことができます：
+非圧縮 PCM（WAV）では、各 sample は整数です。下位ビットを変更しても波形はごくわずかしか変化しないため、攻撃者は以下の方法でデータを隠せます。
 
-- 各サンプルあたり1ビット（またはそれ以上）
-- チャンネル間でインターリーブ
-- ストライド/順列を伴う
+- 1 sample あたり 1 bit（またはそれ以上）
+- channels 間で interleave
+- stride/permutation を使用
 
-その他に遭遇する可能性のある音声隠蔽の手法：
+遭遇する可能性があるその他の audio-hiding の種類：
 
 - Phase coding
 - Echo hiding
 - Spread-spectrum embedding
-- Codec-side channels (format-dependent and tool-dependent)
+- Codec-side channels（format と tool に依存）
 
 ### WavSteg
 
@@ -82,19 +82,19 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 - [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
-## DTMF / ダイヤル音
+## DTMF / ダイヤルトーン
 
 ### 手法
 
-DTMFは文字を固定周波数のペア（telephone keypad）としてエンコードします。音声がキーパッドのトーンや規則的な二重周波数のビープ音に似ている場合は、早い段階でDTMFデコードを試してください。
+DTMFは、固定周波数のペア（電話のキーパッド）として文字をエンコードします。音声がキーパッドのトーンや、規則的な2周波数のビープ音に似ている場合は、早い段階でDTMF decodingを試してください。
 
-オンラインデコーダー:
+Online decoders:
 
 - [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
 - [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
-## References
+## 参考資料
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

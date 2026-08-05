@@ -2,20 +2,20 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**BlobRunner**](https://github.com/OALabs/BlobRunner) は、デバッグ用の小さな Windows **shellcode loader** です。RWX メモリを確保し、blob をコピーし、ベースアドレス / エントリポイントを表示してから、その場所へ実行を移します。これは、サンプルが **raw shellcode**、**malware から抽出された復号済みステージ**、または PE ヘッダーを持たない **position-independent blob** の場合に便利です。
+[**BlobRunner**](https://github.com/OALabs/BlobRunner) は、**debugging 用の小型 Windows shellcode loader** です。RWX memory を割り当てて blob をコピーし、base address / entry point を表示して、そこへ execution を移します。これは、サンプルが **raw shellcode**、**malware から抽出した decrypted stage**、または PE header を持たない **position-independent blob** の場合に便利です。
 
-以下のスニペットは元の考え方を保ちつつ、表示するポインタに **`%p`** を使用しています。そのため、デバッガを attach したり、RE tool で blob を rebasing しようとしている間に、x64 ビルドでアドレスが切り捨てられることがありません。
+以下の snippet は元のアイデアを維持しつつ、表示する pointer に **`%p`** を使用しています。これにより、debugger を attach したり、RE tool で blob を rebase したりする際に、x64 build で address が truncate されることを防げます。
 
-## Build
+## ビルド
 
-元のプロジェクトを build する最も簡単な方法は、**Visual Studio Developer Command Prompt** から行うことです：
+元の project をビルドする最も簡単な方法は、**Visual Studio Developer Command Prompt** から実行することです。
 ```bash
 cl blobrunner.c
 cl /Feblobrunner64.exe /Foblobrunner64.out blobrunner.c
 ```
-小さな Visual Studio / VS Code の C プロジェクトにコードを貼り付けて、そこでコンパイルすることもできます。
+コードを小さな Visual Studio / VS Code C project に貼り付けて、そこで compile することもできます。
 
-## Useful usage patterns
+## 便利な使用パターン
 ```bash
 # Execute from the beginning of the blob
 BlobRunner.exe shellcode.bin
@@ -29,58 +29,58 @@ BlobRunner.exe shellcode.bin --nopause
 # Force an access violation and let the configured JIT debugger catch it
 BlobRunner.exe shellcode.bin --jit
 ```
-- **x86** では、BlobRunner は一時停止したあと、blob の entry point へ直接ジャンプします。
-- **x64** では、**suspended thread** を作成するので、実行を再開する前に thread start address にブレークできます。
-- `--offset` は、ダンプした blob の先頭が **decoder / unpacking stub** で、実際の entry point をすでに分かっている場合に特に便利です。
+- **x86** では、BlobRunner は一時停止した後、blob のエントリポイントへ直接ジャンプします。
+- **x64** では、**suspended thread** を作成するため、実行を再開する前にスレッドの開始アドレスで break できます。
+- `--offset` は、dump した blob が **decoder / unpacking stub** で始まっており、実際のエントリポイントがすでに分かっている場合に特に便利です。
 
-## 実践メモ
+## 実用上の注意
 
-### x64 ラボで表示されるアドレスを修正する
+### x64 lab で表示されるアドレスを修正する
 
-古い BlobRunner のコードは、`(int)(size_t)lpvBase` や `%08x` / `%016x` のようなキャストでアドレスを表示します。64-bit のワークフローでは、これによりポインタの上位半分が切り捨てられ、rebase や breakpoint の配置が面倒になります。下のスニペットでは、**`%p`** の値を直接表示することで、すでにこれを修正しています。
+古い BlobRunner のコードでは、`(int)(size_t)lpvBase` や `%08x` / `%016x` などの cast を使ってアドレスを表示します。64-bit workflow では、これによりポインタの上位 half が切り捨てられ、rebase や breakpoint の設定が面倒になることがあります。以下の snippet では、アドレスを **`%p`** の値として直接表示することで、この問題を修正しています。
 
-### `--jit` は first-instruction breakpoints に便利
+### `--jit` は first-instruction breakpoint に便利
 
-`--jit` は shellcode の先頭 1 バイトから execute access を取り除き、blob の実行開始時に Windows に **access violation** を発生させます。これは、手動で attach を急ぐのではなく、**configured JIT debugger**（たとえば x64dbg）に最初の実行試行を捕まえさせたい場合に便利です。debugger が break したら、execute 権限を復元して続行します。
+`--jit` は shellcode の最初の byte から execute access を削除し、blob が実行を開始したときに Windows が **access violation** を発生させるようにします。これにより、手動で attach のタイミングを競う代わりに、設定済みの **JIT debugger**（たとえば x64dbg）で最初の実行試行を捕捉できます。debugger が break した後、execute rights を復元して続行します。
 
-実用的な **x64dbg** の流れは次のとおりです:
+実用的な **x64dbg** の flow は次のとおりです。
 ```text
 setjit
 setjitauto on
 BlobRunner.exe shellcode.bin --jit
 setpagerights <region>, ExecuteReadWrite
 ```
-最初の2つのコマンドは x64dbg を JIT debugger として登録し、`setpagerights` は debugger が access violation を検知した後に BlobRunner が出力した領域の execute 権限を復元します。
+最初の2つのコマンドは x64dbg を JIT debugger として登録し、`setpagerights` は、debugger が access violation を捕捉した後に BlobRunner が出力した領域の execute rights を復元します。
 
-### shellcode をライブで single-stepping する代わりに time-travel する
+### shellcode を live で single-stepping する代わりに time-travel する
 
-最近の非常に実用的なワークフローは、BlobRunner を **TTD** で記録してから、**Binary Ninja** / **WinDbg** で trace を確認することです。blob が自己復号し、API を動的に解決し、または複数の短命な stage を実行する場合に特に有効です。**Binary Ninja 4.1** 以降、TTD サポートはもはや beta 品質ではありません。reverse-debugging を実行でき、Binary Ninja から直接 WinDbg / TTD ワークフローを簡略化できます。
+非常に実用的な最近の workflow は、**TTD** で BlobRunner を記録し、その後 **Binary Ninja** / **WinDbg** で trace を調査する方法です。blob が自身を decrypt したり、API を動的に解決したり、短時間で終了する複数の stage を実行したりする場合に特に有効です。**Binary Ninja 4.1** 以降、TTD support はもはや beta quality にとどまらず、reverse-debugging を実行し、WinDbg / TTD workflow を Binary Ninja から直接簡略化できます。<sup>[[1]](#references)</sup>
 ```bash
 TTD.exe .\blobrunner.exe .\shellcode.bin
 ```
-重要なのは、**BlobRunner が表示する割り当て済みのベースアドレスを記録し**、そのアドレスに合わせてシェルコードのビューを**rebase**してからトレースを再生することです。また、Microsoft は TTD の記録を**invasive**と文書化しています。**elevated** なプロンプトから実行し、目立つ低速化を想定し、巨大なトレースファイルを避けるため記録時間は短く保ってください。
+重要なのは、**BlobRunner によって出力された割り当て済みのベースアドレスを記録し**、trace を再生する前に shellcode view をそのアドレスへ **rebase** することです。また、Microsoft は TTD の記録を **invasive** と説明しています。**elevated** prompt から実行し、 noticeable な slowdown を想定してください。さらに、巨大な trace file の生成を避けるため、recording window は短く保ってください。
 
-### blob に companion data が必要な場合は、代わりに PE wrapper を使う
+### blob に companion data が必要な場合は、PE wrapper を使用する
 
-一部の shellcode は、メモリ上に **second blob**、**mapped file**、または他の **structured content** が存在することを想定しています。BlobRunner は意図的に最小限なので、こうしたケースでは **SCLauncher** のような runner の方が便利です。SCLauncher は次のことができます。
+一部の shellcode は、**second blob**、**mapped file**、またはその他の **structured content** がメモリ上に存在することを前提とします。BlobRunner は意図的に最小構成となっているため、このような場合は **SCLauncher** のような runner の方が便利です。SCLauncher では次の操作が可能です。<sup>[[2]](#references)</sup>
 
-- 実行前に pause する
+- execution の前に pause する
 - `INT3` breakpoint を挿入する
 - **additional content** をメモリに load する
-- その追加コンテンツを memory-map する
-- あるいは shellcode を一時的な **PE** でラップして、通常の executable を前提にした tools で分析しやすくする
+- その追加 content を memory-map する、または
+- shellcode を一時的な **PE** 内に wrap し、通常の executable を優先する tools で analysis しやすくする
 
 Example:
 ```bash
 SCLauncher.exe -f=shellcode.bin -pause -d=config.bin -mm
 SCLauncher.exe -f=shellcode.bin -pe -64 -ep=0x120
 ```
-補完的なワークフローとして、**jmp2it**、**Cutter** emulation、または **scdbg** ベースの shellcode tracing については、[parent shellcode reversing page](README.md) を確認してください。
+補完的な workflow として **jmp2it**、**Cutter** emulation、または **scdbg** ベースの shellcode tracing を使用する場合は、[parent shellcode reversing page](README.md) を確認してください。
 
 ## Source code
 
-[original code](https://github.com/OALabs/BlobRunner) から変更されている唯一の行は、x64 address truncation を避けるために使われている pointer-printing の行です。
-コンパイルするには、**Visual Studio Code で C/C++ project を作成し、コードをコピーして貼り付けてビルドするだけです**。
+[original code](https://github.com/OALabs/BlobRunner) から変更したのは、x64 address truncation を回避するための pointer-printing lines のみです。
+compile するには、**Visual Studio Code で C/C++ project を作成し、code を copy and paste して build するだけです**。
 ```c
 #include <stdio.h>
 #include <windows.h>
@@ -284,8 +284,8 @@ getchar();
 return 0;
 }
 ```
-## 参考資料
+## 参考文献
 
-- [Binary Ninja で Shellcode を Time Travel Debugging する](https://www.lrqa.com/en/cyber-labs/time-travel-debugging-shellcode-with-binary-ninja/)
-- [SCLauncher で Shellcode を解析する](https://www.thecyberyeti.com/post/analyzing-shellcode-with-sclauncher)
+- [1] [Binary NinjaでShellcodeをTime Travel Debuggingする](https://www.lrqa.com/en/cyber-labs/time-travel-debugging-shellcode-with-binary-ninja/)
+- [2] [SCLauncherでShellcodeを解析する](https://www.thecyberyeti.com/post/analyzing-shellcode-with-sclauncher)
 {{#include ../../banners/hacktricks-training.md}}

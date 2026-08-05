@@ -1,8 +1,10 @@
+# Angr
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-このチートシートの一部は[angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)に基づいています。
+このcheatsheetの一部は、[angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)に基づいています。<sup>[[1]](#references)</sup>
 
-# インストール
+## インストール
 ```bash
 sudo apt-get install python3-dev libffi-dev build-essential
 python3 -m pip install --user virtualenv
@@ -10,7 +12,7 @@ python3 -m venv ang
 source ang/bin/activate
 pip install angr
 ```
-# 基本的なアクション
+## 基本操作
 ```python
 import angr
 import monkeyhex # this will format numerical results in hexadecimal
@@ -28,9 +30,9 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-# 読み込まれたおよびメインオブジェクト情報
+## Loaded and Main object information
 
-## 読み込まれたデータ
+### Loaded Data
 ```python
 #LOADED DATA
 proj.loader #<Loaded true, maps [0x400000:0x5004000]>
@@ -53,7 +55,7 @@ proj.loader.all_elf_objects #Get all ELF objects loaded (Linux)
 proj.loader.all_pe_objects #Get all binaries loaded (Windows)
 proj.loader.find_object_containing(0x400000)#Get object loaded in an address "<ELF Object fauxware, maps [0x400000:0x60105f]>"
 ```
-## メインオブジェクト
+### Main Object
 ```python
 #Main Object (main binary loaded)
 obj = proj.loader.main_object #<ELF Object true, maps [0x400000:0x60721f]>
@@ -67,7 +69,7 @@ obj.find_section_containing(obj.entry) #Get section by address
 obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
-## シンボルと再配置
+### シンボルとリロケーション
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 
@@ -84,7 +86,7 @@ main_strcmp.is_export #False
 main_strcmp.is_import #True
 main_strcmp.resolvedby #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 ```
-## ブロック
+### ブロック
 ```python
 #Blocks
 block = proj.factory.block(proj.entry) #Get the block of the entrypoint fo the binary
@@ -92,9 +94,9 @@ block.pp() #Print disassembly of the block
 block.instructions #"0xb" Get number of instructions
 block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x401675, 0x401676, 0x401679, 0x40167d, 0x40167e, 0x40167f, 0x401686, 0x40168d, 0x401694]"
 ```
-# 動的解析
+## 動的解析
 
-## シミュレーションマネージャー、状態
+### シミュレーションマネージャー、状態
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -117,13 +119,13 @@ simgr = proj.factory.simulation_manager(state) #Start
 simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
-## 関数の呼び出し
+### 関数の呼び出し
 
-- `entry_state` と `full_init_state` に `args` を通じて引数のリストを渡し、`env` を通じて環境変数の辞書を渡すことができます。これらの構造内の値は文字列またはビットベクタであり、シミュレーションされた実行の引数と環境として状態にシリアライズされます。デフォルトの `args` は空のリストなので、分析しているプログラムが少なくとも `argv[0]` を見つけることを期待している場合は、常にそれを提供する必要があります！
-- `argc` をシンボリックにしたい場合は、`entry_state` と `full_init_state` コンストラクタにシンボリックビットベクタを `argc` として渡すことができます。ただし、注意が必要です：これを行う場合、`argc` の値が `args` に渡した引数の数より大きくならないように、結果の状態に制約を追加する必要があります。
-- コールステートを使用するには、`.call_state(addr, arg1, arg2, ...)` で呼び出す必要があります。ここで `addr` は呼び出したい関数のアドレスで、`argN` はその関数への N 番目の引数であり、Python の整数、文字列、配列、またはビットベクタのいずれかです。メモリを割り当ててオブジェクトへのポインタを実際に渡したい場合は、`angr.PointerWrapper("point to me!")` のように PointerWrapper でラップする必要があります。この API の結果は少し予測不可能ですが、改善に取り組んでいます。
+- `args` を通じて引数のリストを、`env` を通じて環境変数の辞書を `entry_state` と `full_init_state` に渡すことができます。これらの構造体の値には文字列またはビットベクトルを使用でき、シミュレーション実行時の引数および環境として state にシリアライズされます。デフォルトの `args` は空のリストであるため、解析対象のプログラムが少なくとも `argv[0]` を見つけることを想定している場合は、必ず指定してください。
+- `argc` を symbolic にしたい場合は、`entry_state` および `full_init_state` のコンストラクターに、symbolic bitvector を `argc` として渡すことができます。ただし、この場合は、`args` に渡した引数の数を `argc` の値が超えられないよう、生成された state に constraint も追加する必要があります。
+- call state を使用するには、`.call_state(addr, arg1, arg2, ...)` の形式で呼び出します。ここで `addr` は呼び出す関数のアドレス、`argN` はその関数の N 番目の引数であり、python の整数、文字列、配列、または bitvector を指定できます。メモリを割り当ててオブジェクトへのポインターを実際に渡したい場合は、`angr.PointerWrapper("point to me!")` のように `PointerWrapper` でラップしてください。この API の結果はやや予測しにくい場合がありますが、現在改善に取り組んでいます。
 
-## ビットベクタ
+### BitVectors
 ```python
 #BitVectors
 state = proj.factory.entry_state()
@@ -132,7 +134,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-## シンボリックビットベクターと制約
+### Symbolic BitVectors と制約
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -166,7 +168,7 @@ solver.eval_exact(expression, n) #n solutions to the given expression, throwing 
 solver.min(expression) #minimum possible solution to the given expression.
 solver.max(expression) #maximum possible solution to the given expression.
 ```
-## フッキング
+### Hooking
 ```python
 >>> stub_func = angr.SIM_PROCEDURES['stubs']['ReturnUnconstrained'] # this is a CLASS
 >>> proj.hook(0x10000, stub_func())  # hook with an instance of the class
@@ -184,8 +186,12 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-さらに、`proj.hook_symbol(name, hook)`を使用して、最初の引数としてシンボルの名前を提供することで、シンボルが存在するアドレスをフックできます。
+さらに、`proj.hook_symbol(name, hook)` を使用し、最初の引数としてシンボル名を指定することで、シンボルが存在するアドレスにフックできます<sup>[[1]](#references)</sup>
 
-# 例
+## 例
+
+## 参考資料
+
+- [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -4,34 +4,35 @@
 
 ## 教師なし学習
 
-教師なし学習は、ラベル付きの応答なしでデータに基づいてモデルを訓練する機械学習の一種です。目的は、データ内のパターン、構造、または関係を見つけることです。ラベル付きの例から学習する教師あり学習とは異なり、教師なし学習アルゴリズムはラベルのないデータで動作します。
-教師なし学習は、クラスタリング、次元削減、異常検出などのタスクにしばしば使用されます。データ内の隠れたパターンを発見したり、類似のアイテムをグループ化したり、データの本質的な特徴を保持しながらその複雑さを減少させるのに役立ちます。
+教師なし学習は、ラベル付きの応答なしでデータを使ってモデルを訓練する機械学習の一種です。目的は、データ内のパターン、構造、または関係を見つけることです。モデルがラベル付きの例から学習する教師あり学習とは異なり、教師なし学習アルゴリズムはラベルのないデータを扱います。
+教師なし学習は、クラスタリング、次元削減、異常検知などのタスクによく使われます。データに隠れたパターンを見つけたり、類似した項目をまとめたり、本質的な特徴を保持しながらデータの複雑さを軽減したりするのに役立ちます。
 
-### K-Meansクラスタリング
 
-K-Meansは、各点を最も近いクラスタ平均に割り当てることによってデータをK個のクラスタに分割する重心ベースのクラスタリングアルゴリズムです。アルゴリズムは次のように機能します：
-1. **初期化**: K個の初期クラスタ中心（重心）を選択します。通常はランダムに、またはk-means++のようなよりスマートな方法で行います。
-2. **割り当て**: 距離メトリック（例：ユークリッド距離）に基づいて、各データポイントを最も近い重心に割り当てます。
-3. **更新**: 各クラスタに割り当てられたすべてのデータポイントの平均を取ることで重心を再計算します。
-4. **繰り返し**: クラスタの割り当てが安定するまで（重心が大きく移動しなくなるまで）ステップ2〜3を繰り返します。
+### K-Means Clustering
+
+K-Meansは、各点を最も近いクラスタ平均に割り当てることで、データをK個のクラスタに分割するセントロイドベースのクラスタリングアルゴリズムです。アルゴリズムは次のように動作します。
+1. **初期化**: K個の初期クラスタ中心（セントロイド）を、多くの場合はランダムに、またはk-means++のようなより高度な手法で選択する
+2. **割り当て**: 距離メトリック（例: ユークリッド距離）に基づいて、各データ点を最も近いセントロイドに割り当てる
+3. **更新**: 各クラスタに割り当てられたすべてのデータ点の平均を取り、セントロイドを再計算する
+4. **反復**: クラスタの割り当てが安定する（セントロイドが大きく移動しなくなる）まで、手順2〜3を繰り返す
 
 > [!TIP]
-> *サイバーセキュリティにおけるユースケース:* K-Meansは、ネットワークイベントをクラスタリングすることによって侵入検知に使用されます。例えば、研究者はKDD Cup 99侵入データセットにK-Meansを適用し、正常なトラフィックと攻撃クラスタに効果的に分割されることを発見しました。実際には、セキュリティアナリストはログエントリやユーザー行動データをクラスタリングして、類似の活動のグループを見つけることがあります。うまく形成されたクラスタに属さないポイントは、異常を示す可能性があります（例：新しいマルウェアの亜種が独自の小さなクラスタを形成する）。K-Meansは、バイナリを行動プロファイルや特徴ベクトルに基づいてグループ化することによって、マルウェアファミリーの分類にも役立ちます。
+> *サイバーセキュリティでの使用例:* K-Meansは、ネットワークイベントをクラスタリングして侵入検知に使用されます。たとえば、研究者はKDD Cup 99 intrusion datasetにK-Meansを適用し、トラフィックを正常クラスタと攻撃クラスタに効果的に分割できることを示しました。実際には、security analystがログエントリやユーザー行動データをクラスタリングして、類似したアクティビティのグループを見つけることがあります。適切に形成されたクラスタに属さない点は、異常を示している可能性があります（例: 新しいmalware variantが独自の小さなクラスタを形成する場合）。K-Meansは、behavior profileやfeature vectorに基づいてバイナリをグループ化することで、malware familyの分類にも役立ちます。
 
 #### Kの選択
-クラスタの数（K）は、アルゴリズムを実行する前に定義する必要があるハイパーパラメータです。エルボー法やシルエットスコアのような手法は、クラスタリングのパフォーマンスを評価することによってKの適切な値を決定するのに役立ちます：
+クラスタ数（K）は、アルゴリズムを実行する前に定義する必要があるハイパーパラメータです。Elbow MethodやSilhouette Scoreなどの手法は、クラスタリングの性能を評価することで、適切なKの値を決定するのに役立ちます。
 
-- **エルボー法**: 各ポイントからその割り当てられたクラスタ重心までの二乗距離の合計をKの関数としてプロットします。減少率が急激に変化する「エルボー」ポイントを探し、適切なクラスタ数を示します。
-- **シルエットスコア**: 異なるKの値に対してシルエットスコアを計算します。シルエットスコアが高いほど、より明確に定義されたクラスタを示します。
+- **Elbow Method**: 各点から割り当てられたクラスタセントロイドまでの二乗距離の合計を、Kの関数としてプロットします。減少率が急激に変化する「ひじ（elbow）」の点を探します。これは、適切なクラスタ数を示します。
+- **Silhouette Score**: Kのさまざまな値に対してsilhouette scoreを計算します。silhouette scoreが高いほど、より明確に定義されたクラスタであることを示します。
 
-#### 仮定と制限
+#### 前提と制限
 
-K-Meansは、**クラスタが球状で同じサイズである**と仮定していますが、これはすべてのデータセットに当てはまるわけではありません。初期の重心の配置に敏感であり、局所的な最小値に収束する可能性があります。さらに、K-Meansは、異なる密度や非球状の形状を持つデータセットや、異なるスケールの特徴には適していません。すべての特徴が距離計算に等しく寄与することを保証するために、正規化や標準化のような前処理ステップが必要になる場合があります。
+K-Meansは、**クラスタが球状で同じサイズである**ことを前提としますが、これはすべてのデータセットに当てはまるとは限りません。セントロイドの初期配置に敏感であり、局所的な最小値に収束する可能性があります。また、K-Meansは密度が変化するデータセット、球状でない形状のデータセット、特徴量のスケールが異なるデータセットには適していません。すべての特徴量が距離計算に等しく寄与するように、正規化や標準化などの前処理が必要になる場合があります。
 
 <details>
 <summary>例 -- ネットワークイベントのクラスタリング
 </summary>
-以下では、ネットワークトラフィックデータをシミュレートし、K-Meansを使用してクラスタリングします。接続時間やバイト数のような特徴を持つイベントがあると仮定します。「正常」トラフィックの3つのクラスタと、攻撃パターンを表す1つの小さなクラスタを作成します。その後、K-Meansを実行して、それらが分離されるかどうかを確認します。
+以下では、ネットワークトラフィックデータをシミュレートし、K-Meansを使ってクラスタリングします。接続時間やバイト数などの特徴量を持つイベントがあるとします。「正常」トラフィックのクラスタを3つ作成し、攻撃パターンを表す小さなクラスタを1つ作成します。その後、K-Meansを実行して、それらを分離できるか確認します。
 ```python
 import numpy as np
 from sklearn.cluster import KMeans
@@ -57,32 +58,32 @@ print("Cluster centers (duration, bytes):")
 for idx, center in enumerate(kmeans.cluster_centers_):
 print(f"  Cluster {idx}: {center}")
 ```
-この例では、K-Meansは4つのクラスターを見つけるべきです。異常に高い持続時間（約200）を持つ小さな攻撃クラスターは、通常のクラスターからの距離を考慮して、理想的には独自のクラスターを形成します。結果を解釈するために、クラスターのサイズと中心を印刷します。実際のシナリオでは、少数のポイントを持つクラスターに潜在的な異常としてラベルを付けるか、そのメンバーを悪意のある活動のために調査することができます。
+この例では、K-Means は4つのクラスタを見つけるはずです。小規模な attack クラスタ（通常より duration が異常に長い約200）は、通常のクラスタから離れているため、理想的には独自のクラスタを形成します。結果を解釈するため、クラスタのサイズと中心を表示します。実際のシナリオでは、ポイント数の少ないクラスタを潜在的な異常としてラベル付けしたり、そのメンバーを調査して悪意のある活動がないか確認したりできます。
 </details>
 
-### 階層的クラスタリング
+### 階層型クラスタリング
 
-階層的クラスタリングは、ボトムアップ（凝集型）アプローチまたはトップダウン（分割型）アプローチを使用して、クラスターの階層を構築します。
+階層型クラスタリングは、ボトムアップ（凝集型）アプローチまたはトップダウン（分割型）アプローチを使用して、クラスタの階層を構築します。
 
-1. **凝集型（ボトムアップ）**: 各データポイントを別々のクラスターとして開始し、最も近いクラスターを反復的にマージして、単一のクラスターが残るか、停止基準が満たされるまで続けます。
-2. **分割型（トップダウン）**: すべてのデータポイントを単一のクラスターに入れ、各データポイントが独自のクラスターになるか、停止基準が満たされるまでクラスターを反復的に分割します。
+1. **凝集型（ボトムアップ）**: 各データポイントを個別のクラスタとして開始し、単一のクラスタが残るまで、または停止条件を満たすまで、最も近いクラスタを反復的に結合します。
+2. **分割型（トップダウン）**: すべてのデータポイントを1つのクラスタにまとめて開始し、各データポイントが独自のクラスタになるまで、または停止条件を満たすまで、クラスタを反復的に分割します。
 
-凝集型クラスタリングは、クラスター間の距離の定義と、どのクラスターをマージするかを決定するためのリンク基準を必要とします。一般的なリンク方法には、単一リンク（2つのクラスター間の最も近いポイントの距離）、完全リンク（最も遠いポイントの距離）、平均リンクなどがあり、距離メトリックはしばしばユークリッドです。リンクの選択は生成されるクラスターの形状に影響を与えます。クラスターの数Kを事前に指定する必要はなく、選択したレベルで樹形図を「カット」して、希望する数のクラスターを得ることができます。
+凝集型クラスタリングでは、クラスタ間距離の定義と、どのクラスタを結合するかを決定するリンケージ基準が必要です。一般的なリンケージ手法には、single linkage（2つのクラスタ間で最も近いポイント同士の距離）、complete linkage（最も遠いポイント同士の距離）、average linkage などがあり、距離メトリックには Euclidean が使われることが多いです。リンケージの選択は、生成されるクラスタの形状に影響します。クラスタ数 K を事前に指定する必要はなく、選択したレベルでデンドログラムを「切る」ことで、目的のクラスタ数を得られます。
 
-階層的クラスタリングは、異なる粒度レベルでクラスター間の関係を示す樹形図を生成します。樹形図は、特定の数のクラスターを得るために希望するレベルでカットすることができます。
+階層型クラスタリングは、異なる粒度レベルにおけるクラスタ間の関係を示す、木構造のようなデンドログラムを生成します。デンドログラムを任意のレベルで切ることで、特定のクラスタ数を取得できます。
 
 > [!TIP]
-> *サイバーセキュリティにおけるユースケース:* 階層的クラスタリングは、イベントやエンティティをツリーに整理して関係を特定することができます。たとえば、マルウェア分析では、凝集型クラスタリングが行動の類似性によってサンプルをグループ化し、マルウェアファミリーとバリアントの階層を明らかにすることができます。ネットワークセキュリティでは、IPトラフィックフローをクラスタリングし、樹形図を使用してトラフィックのサブグループ（例：プロトコル別、次に行動別）を確認することができます。Kを事前に選択する必要がないため、攻撃カテゴリの数が不明な新しいデータを探索する際に便利です。
+> *サイバーセキュリティでの使用例:* 階層型クラスタリングは、イベントやエンティティをツリー構造に整理し、関係性を見つけるために利用できます。たとえば malware analysis では、凝集型クラスタリングによってサンプルを挙動の類似性ごとにグループ化し、malware のファミリーと variant の階層を明らかにできます。network security では、IP traffic flow をクラスタリングし、デンドログラムを使ってトラフィックのサブグループ（たとえば protocol、次に behavior ごと）を確認できます。K を事前に決める必要がないため、attack category の数が不明な新しいデータを調査する場合に有用です。
 
-#### 仮定と制限
+#### 前提と制限
 
-階層的クラスタリングは特定のクラスター形状を仮定せず、ネストされたクラスターをキャプチャできます。これは、グループ間の分類法や関係を発見するのに役立ちます（例：マルウェアをファミリーサブグループでグループ化）。これは決定論的であり（ランダム初期化の問題はありません）、主要な利点は、すべてのスケールでデータのクラスタリング構造に関する洞察を提供する樹形図です。セキュリティアナリストは、意味のあるクラスターを特定するための適切なカットオフを決定できます。ただし、計算コストが高く（通常は$O(n^2)$時間またはそれ以上のナイーブな実装）、非常に大きなデータセットには実行可能ではありません。また、これは貪欲な手法であり、一度マージまたは分割が行われると元に戻すことができず、早期に間違いが発生した場合に最適でないクラスターが生じる可能性があります。外れ値も一部のリンク戦略に影響を与える可能性があります（単一リンクは、外れ値を介してクラスターがリンクする「チェイニング」効果を引き起こす可能性があります）。
+階層型クラスタリングは特定のクラスタ形状を仮定せず、入れ子状のクラスタを捉えることができます。taxonomy やグループ間の関係（たとえば malware を family subgroup ごとにグループ化すること）の発見に役立ちます。また、決定論的であり、random initialization に関する問題がありません。主な利点は、あらゆるスケールでデータのクラスタ構造を把握できるデンドログラムです。security analyst は、意味のあるクラスタを特定するための適切な cutoff を決定できます。ただし、計算コストが高く（単純な実装では通常 $O(n^2)$ 時間、またはそれ以上）、非常に大規模なデータセットには適していません。また、greedy な手順であるため、一度 merge または split を実行すると元に戻せず、初期段階で誤りが発生した場合に最適でないクラスタになる可能性があります。outlier は一部の linkage strategy にも影響を与えることがあります（single-link では、outlier を介してクラスタ同士がつながる「chaining」効果が発生する可能性があります）。
 
 <details>
-<summary>例 -- イベントの凝集型クラスタリング
+<summary>Example -- Events の Agglomerative Clustering
 </summary>
 
-K-Meansの例から合成データ（3つの通常のクラスター + 1つの攻撃クラスター）を再利用し、凝集型クラスタリングを適用します。次に、樹形図とクラスターラベルを取得する方法を示します。
+K-Means の例で使用した synthetic data（3つの normal cluster + 1つの attack cluster）を再利用し、agglomerative clustering を適用します。次に、デンドログラムとクラスタ label を取得する方法を示します。
 ```python
 from sklearn.cluster import AgglomerativeClustering
 from scipy.cluster.hierarchy import linkage, dendrogram
@@ -102,32 +103,32 @@ print(f"Cluster sizes for 3 clusters: {np.bincount(clusters_3)}")
 ```
 </details>
 
-### DBSCAN (ノイズを伴うアプリケーションの密度ベースの空間クラスタリング)
+### DBSCAN (Density-Based Spatial Clustering of Applications with Noise)
 
-DBSCANは、密度に基づくクラスタリングアルゴリズムで、密集しているポイントをグループ化し、低密度領域のポイントを外れ値としてマークします。これは、異なる密度と非球形の形状を持つデータセットに特に有用です。
+DBSCANは、互いに近接して密集している点をグループ化し、低密度領域にある点を外れ値としてマークする、密度ベースのクラスタリングアルゴリズムです。密度が異なるデータセットや、球形ではない形状のデータセットに特に有用です。
 
-DBSCANは、2つのパラメータを定義することによって機能します：
-- **Epsilon (ε)**: 同じクラスタの一部と見なされる2つのポイント間の最大距離。
-- **MinPts**: 密な領域（コアポイント）を形成するために必要な最小ポイント数。
+DBSCANは、次の2つのパラメータを定義して動作します。
+- **Epsilon (ε)**: 2つの点が同じクラスタの一部とみなされるための最大距離。
+- **MinPts**: 高密度領域（core point）を形成するために必要な点の最小数。
 
-DBSCANは、コアポイント、ボーダーポイント、ノイズポイントを識別します：
-- **コアポイント**: ε距離内に少なくともMinPtsの隣接ポイントを持つポイント。
-- **ボーダーポイント**: コアポイントのε距離内にあるが、MinPts未満の隣接ポイントを持つポイント。
-- **ノイズポイント**: コアポイントでもボーダーポイントでもないポイント。
+DBSCANは、core point、border point、noise pointを特定します。
+- **Core Point**: ε距離以内に少なくともMinPts個の近傍点を持つ点。
+- **Border Point**: core pointからε距離以内にあるものの、MinPts個未満の近傍点しか持たない点。
+- **Noise Point**: core pointでもborder pointでもない点。
 
-クラスタリングは、未訪問のコアポイントを選択し、それを新しいクラスタとしてマークし、そこから密度到達可能なすべてのポイント（コアポイントとその隣接ポイントなど）を再帰的に追加することによって進行します。ボーダーポイントは近くのコアのクラスタに追加されます。すべての到達可能なポイントを拡張した後、DBSCANは別の未訪問のコアに移動して新しいクラスタを開始します。どのコアにも到達できなかったポイントはノイズとしてラベル付けされます。
+クラスタリングは、未訪問のcore pointを選び、それを新しいクラスタとしてマークすることで進みます。その後、その点からdensity-reachableであるすべての点（core pointとその近傍点など）を再帰的に追加します。border pointは、近くにあるcore pointのクラスタに追加されます。到達可能なすべての点を展開した後、DBSCANは別の未訪問のcore pointに移動して、新しいクラスタを開始します。どのcore pointからも到達されなかった点は、noiseとしてラベル付けされたままになります。
 
 > [!TIP]
-> *サイバーセキュリティにおけるユースケース:* DBSCANはネットワークトラフィックの異常検出に役立ちます。たとえば、通常のユーザー活動は特徴空間において1つ以上の密なクラスタを形成する一方で、新しい攻撃行動は散発的なポイントとして現れ、DBSCANはそれをノイズ（外れ値）としてラベル付けします。これは、ポートスキャンやサービス拒否トラフィックをポイントのまばらな領域として検出できるネットワークフローレコードのクラスタリングに使用されてきました。別のアプリケーションはマルウェアのバリアントをグループ化することです：ほとんどのサンプルがファミリーごとにクラスタリングされるが、いくつかはどこにも適合しない場合、それらはゼロデイマルウェアである可能性があります。ノイズをフラグ付けする能力により、セキュリティチームはこれらの外れ値の調査に集中できます。
+> *サイバーセキュリティにおけるユースケース:* DBSCANは、ネットワークトラフィックの異常検知に有用です。たとえば、通常のユーザーアクティビティはfeature space内で1つ以上の密なクラスタを形成する一方、新しい攻撃挙動は散在する点として現れ、DBSCANによってnoise（外れ値）としてラベル付けされます。ネットワークフローレコードのクラスタリングにも使用されており、port scanやdenial-of-serviceトラフィックを、点が疎らに存在する領域として検出できます。別の用途として、malwareのvariantのグループ化があります。大半のsampleがfamilyごとにクラスタを形成する一方、どのクラスタにも適合しないものが少数ある場合、それらはzero-day malwareである可能性があります。noiseを検出できるため、security teamはそうした外れ値の調査に集中できます。
 
-#### 仮定と制限
+#### Assumptions and Limitations
 
-**仮定と強み:** DBSCANは球状のクラスタを仮定しません – 任意の形状のクラスタ（連鎖状または隣接するクラスタさえも）を見つけることができます。データの密度に基づいてクラスタの数を自動的に決定し、外れ値をノイズとして効果的に識別できます。これにより、不規則な形状とノイズを持つ実世界のデータに対して強力です。外れ値に対して頑健です（K-Meansとは異なり、外れ値をクラスタに強制的に入れません）。クラスタがほぼ均一な密度を持つ場合にうまく機能します。
+**Assumptions & Strengths:**: DBSCANは球形のクラスタを仮定しないため、任意の形状のクラスタ（chain状や隣接したクラスタを含む）を検出できます。データの密度に基づいてクラスタ数を自動的に決定し、外れ値をnoiseとして効果的に特定できます。そのため、不規則な形状やnoiseを含む現実世界のデータに対して強力です。外れ値に対してrobustです（外れ値をクラスタに無理に割り当てるK-Meansとは異なります）。クラスタの密度が概ね均一である場合に良好に動作します。
 
-**制限:** DBSCANのパフォーマンスは、適切なεとMinPtsの値を選択することに依存します。密度が異なるデータに対しては苦労することがあります – 単一のεでは、密なクラスタとまばらなクラスタの両方を収容できません。εが小さすぎると、ほとんどのポイントがノイズとしてラベル付けされます；大きすぎると、クラスタが不正にマージされる可能性があります。また、DBSCANは非常に大きなデータセットでは非効率的になることがあります（単純には$O(n^2)$ですが、空間インデックスが役立つことがあります）。高次元の特徴空間では、「ε内の距離」の概念があまり意味を持たなくなることがあります（次元の呪い）、そのためDBSCANは慎重なパラメータ調整が必要になるか、直感的なクラスタを見つけられないことがあります。それにもかかわらず、HDBSCANのような拡張は、いくつかの問題（密度の変化など）に対処します。
+**Limitations**: DBSCANの性能は、適切なεとMinPtsの値の選択に依存します。密度が異なるデータでは、1つのεで密なクラスタと疎なクラスタの両方に対応できないため、問題が生じる可能性があります。εが小さすぎると、ほとんどの点がnoiseとしてラベル付けされます。大きすぎると、クラスタが誤って統合される可能性があります。また、DBSCANは非常に大規模なデータセットでは非効率になることがあります（素朴な実装では$O(n^2)$ですが、spatial indexingによって改善できます）。高次元のfeature spaceでは、「ε以内の距離」という概念があまり意味を持たなくなる可能性があり（curse of dimensionality）、DBSCANには慎重なパラメータ調整が必要になるか、直感的なクラスタを検出できない場合があります。これらの問題がある一方で、HDBSCANのようなextensionは、密度の変動など一部の問題に対処します。
 
 <details>
-<summary>例 -- ノイズを伴うクラスタリング
+<summary>Example -- Clustering with Noise
 </summary>
 ```python
 from sklearn.cluster import DBSCAN
@@ -150,61 +151,61 @@ num_noise = np.sum(labels == -1)
 print(f"DBSCAN found {num_clusters} clusters and {num_noise} noise points")
 print("Cluster labels for first 10 points:", labels[:10])
 ```
-このスニペットでは、データスケールに合わせて `eps` と `min_samples` を調整しました（特徴単位で15.0、クラスタを形成するために5ポイントが必要）。DBSCANは2つのクラスタ（通常のトラフィッククラスタ）を見つけ、5つの注入された外れ値をノイズとしてフラグ付けする必要があります。これを確認するために、クラスタ数とノイズポイントの数を出力します。実際の設定では、εを反復処理（k距離グラフヒューリスティックを使用してεを選択）し、MinPts（一般的にはデータの次元数 + 1に設定される）を調整して安定したクラスタリング結果を見つけることがあります。ノイズを明示的にラベル付けする能力は、さらなる分析のために潜在的な攻撃データを分離するのに役立ちます。
+このスニペットでは、データのスケールに合わせて `eps` と `min_samples` を調整しました（feature units で 15.0、cluster を形成するために 5 points を要求）。DBSCAN は 2 clusters（normal traffic clusters）を検出し、注入された 5 つの outliers を noise として flag するはずです。これを確認するため、clusters 数と noise points 数を出力します。実際の環境では、安定した clustering results を見つけるために、ε（k-distance graph heuristic を使用して ε を選択）と MinPts（rule of thumb として、data dimensionality + 1 前後に設定することが多い）を反復的に調整する場合があります。noise を明示的に label できるため、potential attack data を分離して further analysis に回せます。
 
 </details>
 
-### 主成分分析 (PCA)
+### Principal Component Analysis (PCA)
 
-PCAは、データの最大分散を捉える新しい直交軸（主成分）を見つけるための**次元削減**手法です。簡単に言えば、PCAはデータを新しい座標系に回転させて投影し、最初の主成分（PC1）が可能な限り最大の分散を説明し、2番目の主成分（PC2）がPC1に直交する最大の分散を説明し、以下同様です。数学的には、PCAはデータの共分散行列の固有ベクトルを計算します。これらの固有ベクトルは主成分の方向であり、対応する固有値は各固有ベクトルによって説明される分散の量を示します。PCAは、特徴抽出、視覚化、ノイズ削減に頻繁に使用されます。
+PCA は **dimensionality reduction** の technique であり、データ内の variance を最大限に捉える、新しい orthogonal axes（principal components）の集合を見つけます。簡単に言うと、PCA はデータを新しい coordinate system に rotate および project します。その結果、first principal component (PC1) は可能な限り大きな variance を説明し、second PC (PC2) は PC1 に orthogonal な variance のうち最大のものを説明します。数学的には、PCA はデータの covariance matrix の eigenvectors を計算します。これらの eigenvectors は principal component directions であり、対応する eigenvalues は各 component によって説明される variance の量を示します。PCA は feature extraction、visualization、noise reduction によく使用されます。
 
-この手法は、データセットの次元に**重要な線形依存関係や相関関係**が含まれている場合に有用です。
+dataset dimensions に **significant linear dependencies or correlations** が含まれている場合に有用である点に注意してください。
 
-PCAは、データの主成分を特定することによって機能します。主成分は最大分散の方向です。PCAに関与するステップは次のとおりです：
-1. **標準化**：データの平均を引き、単位分散にスケーリングしてデータを中心にします。
-2. **共分散行列**：標準化されたデータの共分散行列を計算し、特徴間の関係を理解します。
-3. **固有値分解**：共分散行列に対して固有値分解を行い、固有値と固有ベクトルを取得します。
-4. **主成分の選択**：固有値を降順に並べ、最大の固有値に対応する上位Kの固有ベクトルを選択します。これらの固有ベクトルが新しい特徴空間を形成します。
-5. **データの変換**：選択した主成分を使用して、元のデータを新しい特徴空間に投影します。
-PCAは、データの視覚化、ノイズ削減、他の機械学習アルゴリズムの前処理ステップとして広く使用されています。データの次元を削減しながら、その本質的な構造を保持するのに役立ちます。
+PCA は、データの principal components、つまり maximum variance の directions を特定することで機能します。PCA に含まれる steps は次のとおりです。
+1. **Standardization**: mean を subtract してデータを center し、unit variance に scale します。
+2. **Covariance Matrix**: standardized data の covariance matrix を計算し、features 間の relationships を把握します。
+3. **Eigenvalue Decomposition**: covariance matrix に対して eigenvalue decomposition を実行し、eigenvalues と eigenvectors を取得します。
+4. **Select Principal Components**: eigenvalues を descending order に sort し、最大の eigenvalues に対応する上位 K 個の eigenvectors を選択します。これらの eigenvectors が新しい feature space を形成します。
+5. **Transform Data**: 選択した principal components を使用して、original data を新しい feature space に project します。
+PCA は data visualization、noise reduction、および他の machine learning algorithms の preprocessing step として広く使用されています。データの essential structure を保持しながら、データの dimensionality を reduce するのに役立ちます。
 
-#### 固有値と固有ベクトル
+#### Eigenvalues and Eigenvectors
 
-固有値は、対応する固有ベクトルによって捉えられる分散の量を示すスカラーです。固有ベクトルは、データが最も変動する特徴空間の方向を表します。
+eigenvalue は、対応する eigenvector によって capture される variance の量を示す scalar です。eigenvector は、データが最も大きく変化する feature space 内の direction を表します。
 
-Aが正方行列で、vがゼロでないベクトルであるとします： `A * v = λ * v`
-ここで：
-- Aは [ [1, 2], [2, 1]] のような正方行列（例：共分散行列）
-- vは固有ベクトル（例：[1, 1]）
+A が square matrix で、v が次の条件を満たす non-zero vector だとします: `A * v = λ * v`
+ここで:
+- A は [ [1, 2], [2, 1]] のような square matrix（例: covariance matrix）
+- v は eigenvector（例: [1, 1]）
 
-すると、 `A * v = [ [1, 2], [2, 1]] * [1, 1] = [3, 3]` となり、これは固有値λが固有ベクトルvで掛けられたもので、固有値λ = 3になります。
+この場合、`A * v = [ [1, 2], [2, 1]] * [1, 1] = [3, 3]` となります。これは eigenvalue λ に eigenvector v を掛けたものなので、eigenvalue λ = 3 となります。
 
-#### PCAにおける固有値と固有ベクトル
+#### Eigenvalues and Eigenvectors in PCA
 
-これを例で説明しましょう。100x100ピクセルの顔のグレースケール画像がたくさんあるデータセットがあるとします。各ピクセルは特徴と見なすことができるため、画像ごとに10,000の特徴（または画像ごとの10,000成分のベクトル）があります。このデータセットの次元をPCAを使用して削減したい場合、次の手順に従います：
+例を使って説明します。100x100 pixels の顔の grey scale pictures が大量に含まれる dataset を考えてみてください。各 pixel は feature とみなせるため、image ごとに 10,000 features（または image ごとに 10000 components の vector）があります。PCA を使用してこの dataset の dimensionality を reduce する場合、次の steps に従います。
 
-1. **標準化**：データセットから各特徴（ピクセル）の平均を引いてデータを中心にします。
-2. **共分散行列**：標準化されたデータの共分散行列を計算し、特徴（ピクセル）がどのように一緒に変動するかを捉えます。
-- 2つの変数（この場合はピクセル）間の共分散は、どの程度一緒に変化するかを示します。ここでのアイデアは、どのピクセルが線形関係で一緒に増加または減少する傾向があるかを見つけることです。
-- 例えば、ピクセル1とピクセル2が一緒に増加する傾向がある場合、彼らの間の共分散は正になります。
-- 共分散行列は10,000x10,000の行列になり、各エントリは2つのピクセル間の共分散を表します。
-3. **固有値方程式を解く**：解くべき固有値方程式は `C * v = λ * v` で、Cは共分散行列、vは固有ベクトル、λは固有値です。これは次のような方法で解くことができます：
-- **固有値分解**：共分散行列に対して固有値分解を行い、固有値と固有ベクトルを取得します。
-- **特異値分解 (SVD)**：代わりに、SVDを使用してデータ行列を特異値とベクトルに分解し、主成分を得ることもできます。
-4. **主成分の選択**：固有値を降順に並べ、最大の固有値に対応する上位Kの固有ベクトルを選択します。これらの固有ベクトルは、データの最大分散の方向を表します。
+1. **Standardization**: 各 feature（pixel）の mean を dataset から subtract してデータを center します。
+2. **Covariance Matrix**: standardized data の covariance matrix を計算します。これは features（pixels）がどのように一緒に変化するかを capture します。
+- 2 つの variables（この場合は pixels）間の covariance は、それらがどの程度一緒に変化するかを示します。したがって、ここでの考え方は、どの pixels が linear relationship に従って一緒に increase または decrease する傾向があるかを見つけることです。
+- 例えば、pixel 1 と pixel 2 が一緒に increase する傾向がある場合、それらの covariance は positive になります。
+- covariance matrix は 10,000x10,000 の matrix で、各 entry は 2 つの pixels 間の covariance を表します。
+3. **Solve the The eigenvalue equation**: 解く eigenvalue equation は `C * v = λ * v` です。ここで C は covariance matrix、v は eigenvector、λ は eigenvalue です。これは次のような methods を使用して解けます。
+- **Eigenvalue Decomposition**: covariance matrix に対して eigenvalue decomposition を実行し、eigenvalues と eigenvectors を取得します。
+- **Singular Value Decomposition (SVD)**: 代わりに SVD を使用して data matrix を singular values と vectors に decompose することもできます。これによって principal components も取得できます。
+4. **Select Principal Components**: eigenvalues を descending order に sort し、最大の eigenvalues に対応する上位 K 個の eigenvectors を選択します。これらの eigenvectors はデータ内の maximum variance の directions を表します。
 
 > [!TIP]
-> *サイバーセキュリティにおけるユースケース:* セキュリティにおけるPCAの一般的な使用法は、異常検出のための特徴削減です。たとえば、40以上のネットワークメトリック（NSL-KDDの特徴など）を持つ侵入検知システムは、PCAを使用して数個の成分に削減し、視覚化のためにデータを要約したり、クラスタリングアルゴリズムに供給したりできます。アナリストは、最初の2つの主成分の空間でネットワークトラフィックをプロットして、攻撃が通常のトラフィックから分離されるかどうかを確認することがあります。PCAは、冗長な特徴（相関がある場合の送信バイトと受信バイトなど）を排除するのにも役立ち、検出アルゴリズムをより堅牢で迅速にします。
+> *Use cases in cybersecurity:* security における PCA の一般的な use は、anomaly detection のための feature reduction です。例えば、40 個以上の network metrics（NSL-KDD features など）を持つ intrusion detection system は、PCA を使用してそれらを少数の components に reduce できます。これにより、visualization 用または clustering algorithms への input 用にデータを要約できます。Analysts は、first two principal components の space に network traffic を plot して、attacks が normal traffic から分離されるか確認できます。また PCA は、correlated である bytes sent と bytes received のような redundant features を eliminate し、detection algorithms をより robust かつ高速にするのにも役立ちます。
 
-#### 仮定と制限
+#### Assumptions and Limitations
 
-PCAは、**分散の主軸が意味のあるものである**と仮定します。これは線形手法であるため、データの線形相関を捉えます。これは教師なしであり、特徴の共分散のみを使用します。PCAの利点には、ノイズ削減（小さな分散の成分はしばしばノイズに対応する）や特徴の非相関化が含まれます。中程度の高次元に対して計算効率が良く、他のアルゴリズムの前処理ステップとしてしばしば有用です（次元の呪いを軽減するため）。1つの制限は、PCAが線形関係に制限されていることです。複雑な非線形構造を捉えることはできません（オートエンコーダやt-SNEができるかもしれません）。また、PCAの成分は元の特徴の観点から解釈が難しい場合があります（元の特徴の組み合わせです）。サイバーセキュリティでは、注意が必要です：低分散の特徴にわずかな変化を引き起こす攻撃は、上位の主成分に現れないかもしれません（PCAは分散を優先するため、「興味深さ」を必ずしも優先するわけではありません）。
+PCA は **principal axes of variance are meaningful** であることを前提とします。これは linear method であるため、データ内の linear correlations を capture します。feature covariance のみを使用するため unsupervised です。PCA の advantages には noise reduction（small-variance components は noise に対応することが多い）と features の decorrelation があります。moderately high dimensions に対して computationally efficient であり、他の algorithms の preprocessing step として有用なことが多い手法です（curse of dimensionality を mitigate するため）。Limitation の 1 つは、PCA が linear relationships に限定されることです。そのため、complex nonlinear structure（autoencoders や t-SNE なら capture できる可能性があるもの）は capture できません。また、PCA components は original features の観点から解釈しにくい場合があります（original features の組み合わせであるため）。cybersecurity では注意が必要です。low-variance feature に subtle change しか引き起こさない attack は、top PCs に現れない可能性があります（PCA は “interestingness” ではなく variance を優先するため）。
 
 <details>
-<summary>例 -- ネットワークデータの次元削減
+<summary>Example -- Reducing Dimensions of Network Data
 </summary>
 
-ネットワーク接続ログに複数の特徴（例：持続時間、バイト、カウント）があるとします。相関のある特徴を持つ合成の4次元データセットを生成し、PCAを使用して視覚化またはさらなる分析のために2次元に削減します。
+network connection logs に複数の features（例: durations、bytes、counts）があるとします。ここでは、features 間に一部 correlation がある synthetic 4-dimensional dataset を生成し、visualization または further analysis のために PCA を使用して 2 dimensions に reduce します。
 ```python
 from sklearn.decomposition import PCA
 
@@ -224,47 +225,48 @@ print("Original shape:", data_4d.shape, "Reduced shape:", data_2d.shape)
 # We can examine a few transformed points
 print("First 5 data points in PCA space:\n", data_2d[:5])
 ```
-ここでは、以前の通常のトラフィッククラスタを取り、各データポイントにバイト数と期間に相関する2つの追加機能（パケットとエラー）を拡張しました。次に、PCAを使用して4つの特徴を2つの主成分に圧縮します。説明された分散比を印刷し、例えば、2つの成分によって95％以上の分散が捕捉されていることを示すかもしれません（つまり、情報損失が少ないことを意味します）。出力は、データの形状が(1500, 4)から(1500, 2)に減少することも示しています。PCA空間の最初のいくつかのポイントが例として示されています。実際には、data_2dをプロットしてクラスタが区別可能かどうかを視覚的に確認できます。異常が存在する場合、PCA空間の主要なクラスタから離れた点としてそれを見ることができるかもしれません。したがって、PCAは複雑なデータを人間の解釈や他のアルゴリズムへの入力として管理可能な形に精製するのに役立ちます。
+ここでは、以前の通常トラフィックのクラスタを取り上げ、各データポイントに、bytesおよびdurationと相関する2つの追加feature（packetsとerrors）を追加しました。次にPCAを使用して、4つのfeatureを2つのprincipal componentに圧縮します。説明分散比を出力すると、例えば分散の95%以上が2つのcomponentによって捉えられていることが示される場合があります（つまり、情報損失がほとんどないということです）。出力には、データのshapeが(1500, 4)から(1500, 2)に縮小されたことも示されます。PCA空間における最初のいくつかのポイントが例として示されます。実際には、data_2dをplotして、クラスタが見分けやすいかを視覚的に確認できます。anomalyが存在する場合、PCA-spaceでメインクラスタから離れた位置にあるポイントとして確認できることがあります。このように、PCAは複雑なデータを、人間による解釈や他のalgorithmへの入力に適した扱いやすい形式へ整理するのに役立ちます。
 
 </details>
 
 
-### ガウス混合モデル (GMM)
+### Gaussian Mixture Models (GMM)
 
-ガウス混合モデルは、データが**未知のパラメータを持ついくつかのガウス（正規）分布の混合から生成される**と仮定します。本質的には、これは確率的クラスタリングモデルです：各ポイントをK個のガウス成分の1つに柔らかく割り当てようとします。各ガウス成分kは、平均ベクトル(μ_k)、共分散行列(Σ_k)、およびそのクラスタの普及度を表す混合重み(π_k)を持っています。K-Meansが「ハード」割り当てを行うのに対し、GMMは各ポイントが各クラスタに属する確率を与えます。
+Gaussian Mixture Modelは、データが**パラメータが未知の複数のGaussian（normal）distributionの混合から生成される**と仮定します。本質的には、これはprobabilistic clustering modelです。各ポイントをK個のGaussian componentのいずれかにsoftに割り当てようとします。各Gaussian component kには、mean vector（μ_k）、covariance matrix（Σ_k）、およびそのclusterがどの程度一般的かを表すmixing weight（π_k）があります。“hard”な割り当てを行うK-Meansとは異なり、GMMは各ポイントが各clusterに属する確率を返します。
 
-GMMのフィッティングは通常、期待値最大化（EM）アルゴリズムを介して行われます：
+GMMのfittingは通常、Expectation-Maximization（EM）algorithmによって行われます。
 
-- **初期化**：平均、共分散、および混合係数の初期推定値から始める（またはK-Meansの結果を出発点として使用する）。
+- **Initialization**: mean、covariance、mixing coefficientの初期値を設定します（または、K-Meansの結果をstarting pointとして使用します）。
 
-- **Eステップ（期待値）**：現在のパラメータに基づいて、各ポイントに対する各クラスタの責任を計算します：本質的には`r_nk = P(z_k | x_n)`であり、ここでz_kはポイントx_nのクラスタメンバーシップを示す潜在変数です。これはベイズの定理を使用して行われ、現在のパラメータに基づいて各ポイントが各クラスタに属する後方確率を計算します。責任は次のように計算されます：
+- **E-step (Expectation)**: 現在のparameterに基づき、各ポイントに対する各clusterのresponsibilityを計算します。これは基本的に `r_nk = P(z_k | x_n)` です。ここでz_kは、ポイントx_nのcluster membershipを示すlatent variableです。これはBayes' theoremを使用して行われ、現在のparameterに基づいて、各ポイントが各clusterに属するposterior probabilityを計算します。responsibilityは次のように計算されます。
 ```math
 r_{nk} = \frac{\pi_k \mathcal{N}(x_n | \mu_k, \Sigma_k)}{\sum_{j=1}^{K} \pi_j \mathcal{N}(x_n | \mu_j, \Sigma_j)}
 ```
-ここで：
-- \( \pi_k \) はクラスタkの混合係数（クラスタkの事前確率）です。
-- \( \mathcal{N}(x_n | \mu_k, \Sigma_k) \) は、平均\( \mu_k \)と共分散\( \Sigma_k \)が与えられたポイント\( x_n \)のガウス確率密度関数です。
+ここで、
+- \( \pi_k \) はcluster kのmixing coefficient（cluster kのprior probability）です。
+- \( \mathcal{N}(x_n | \mu_k, \Sigma_k) \) は、mean \( \mu_k \) およびcovariance \( \Sigma_k \) を指定した場合の、point \( x_n \) に対するGaussian probability density functionです。
 
-- **Mステップ（最大化）**：Eステップで計算された責任を使用してパラメータを更新します：
-- 各平均μ_kをポイントの重み付き平均として更新します。重みは責任です。
-- 各共分散Σ_kをクラスタkに割り当てられたポイントの重み付き共分散として更新します。
-- 混合係数π_kをクラスタkの平均責任として更新します。
+- **M-step (Maximization)**: E-stepで計算したresponsibilityを使用してparameterを更新します。
+- 各mean μ_kを、ポイントのweighted averageとして更新します。weightsにはresponsibilityを使用します。
+- 各covariance Σ_kを、cluster kに割り当てられたポイントのweighted covarianceとして更新します。
+- mixing coefficient π_kを、cluster kに対するaverage responsibilityとして更新します。
 
-- **EおよびMステップを繰り返す** 収束するまで（パラメータが安定するか、尤度の改善が閾値を下回るまで）。
+- **Iterate** E-stepとM-stepを、convergenceするまで繰り返します（parameterが安定する、またはlikelihoodの改善がthresholdを下回るまで）。
 
-結果は、全体のデータ分布を集団的にモデル化するガウス分布のセットです。フィッティングされたGMMを使用して、各ポイントを最も高い確率のガウスに割り当てることでクラスタリングするか、不確実性のために確率を保持することができます。また、新しいポイントの尤度を評価して、それらがモデルに適合するかどうかを確認することもできます（異常検出に役立ちます）。
+その結果、全体のデータ分布をまとめてmodel化するGaussian distributionの集合が得られます。fitted GMMを使用して、各ポイントを最も高いprobabilityを持つGaussianに割り当てることでclusteringできます。または、不確実性を考慮するためにprobabilityをそのまま保持することもできます。さらに、新しいポイントのlikelihoodを評価して、それらがmodelに適合するかを確認することもできます（anomaly detectionに有用です）。
 
 > [!TIP]
-> *サイバーセキュリティにおけるユースケース：* GMMは、正常データの分布をモデル化することによって異常検出に使用できます：学習した混合の下で非常に低い確率を持つポイントは異常としてフラグ付けされます。たとえば、正当なネットワークトラフィックの特徴に基づいてGMMをトレーニングすることができます。学習したクラスタに似ていない攻撃接続は低い尤度を持つでしょう。GMMは、クラスタが異なる形状を持つ可能性がある活動をクラスタリングするためにも使用されます。たとえば、行動プロファイルによってユーザーをグループ化する場合、各プロファイルの特徴はガウス的である可能性がありますが、それぞれ独自の分散構造を持っています。別のシナリオとして、フィッシング検出では、正当なメールの特徴が1つのガウスクラスタを形成し、既知のフィッシングが別のものを形成し、新しいフィッシングキャンペーンが既存の混合に対して別のガウスまたは低い尤度のポイントとして現れる可能性があります。
+> *Use cases in cybersecurity:* GMMは、normal dataのdistributionをmodel化することでanomaly detectionに利用できます。学習したmixtureにおけるprobabilityが非常に低いポイントは、anomalyとしてflagされます。例えば、legitimate network trafficのfeatureを使ってGMMをtrainできます。学習済みのどのclusterにも類似しないattack connectionは、低いlikelihoodを持つことになります。GMMは、clusterの形状が異なる可能性があるactivityのclusteringにも使用されます。例えば、behavior profileによってusersをgroupingする場合、各profileのfeatureはGaussian-likeでありながら、それぞれ固有のvariance structureを持つことがあります。別のscenarioとして、phishing detectionでは、legitimate emailのfeatureが1つのGaussian clusterを形成し、既知のphishingが別のclusterを形成し、新しいphishing campaignが、別のGaussianとして、または既存のmixtureに対して低いlikelihoodを持つポイントとして現れる可能性があります。
 
-#### 仮定と制限
+#### Assumptions and Limitations
 
-GMMは、共分散を取り入れたK-Meansの一般化であり、クラスタは楕円体である可能性があります（球形だけではありません）。共分散が完全であれば、異なるサイズと形状のクラスタを処理できます。ソフトクラスタリングは、クラスタ境界があいまいな場合に利点があります。たとえば、サイバーセキュリティでは、イベントが複数の攻撃タイプの特性を持つ可能性があります。GMMは確率でその不確実性を反映できます。GMMはまた、データの確率密度推定を提供し、外れ値（すべての混合成分の下で低い尤度を持つポイント）を検出するのに役立ちます。
+GMMはcovarianceを取り入れたK-Meansのgeneralizationであるため、clusterは（球形だけでなく）ellipsoidalにもなります。covarianceがfullの場合、サイズや形状の異なるclusterを扱えます。clusterの境界が曖昧な場合、soft clusteringは利点になります。例えばcybersecurityでは、あるeventが複数のattack typeの特徴を持つことがあります。GMMはprobabilityによって、その不確実性を表現できます。またGMMは、データのprobabilistic density estimationも提供するため、すべてのmixture componentにおけるlikelihoodが低いoutlierの検出に役立ちます。
 
-欠点として、GMMは成分の数Kを指定する必要があります（ただし、BIC/AICのような基準を使用して選択できます）。EMは時々遅く収束したり、局所最適に収束したりすることがあるため、初期化が重要です（通常、EMを複数回実行します）。データが実際にガウスの混合に従わない場合、モデルは適合が悪い可能性があります。また、1つのガウスが外れ値をカバーするために縮小するリスクもあります（ただし、正則化や最小共分散境界がそれを軽減できます）。
+一方で、GMMではcomponent数Kを指定する必要があります（ただし、BIC/AICのようなcriteriaを使用して選択できます）。EMはconvergeが遅くなったり、local optimumに収束したりすることがあるため、initializationが重要です（通常はEMを複数回実行します）。データが実際にはGaussianのmixtureに従っていない場合、modelのfitが悪くなる可能性があります。また、1つのGaussianがoutlierだけを覆うように縮小するリスクもあります（ただし、regularizationやminimum covariance boundsによって軽減できます）。
+
 
 <details>
-<summary>例 -- ソフトクラスタリングと異常スコア
+<summary>Example --  Soft Clustering & Anomaly Scores
 </summary>
 ```python
 from sklearn.mixture import GaussianMixture
@@ -284,28 +286,29 @@ log_likelihood = gmm.score_samples(sample_attack)
 print("Cluster membership probabilities for sample attack:", probs)
 print("Log-likelihood of sample attack under GMM:", log_likelihood)
 ```
-このコードでは、正常なトラフィックに対して3つのガウス分布を持つGMMをトレーニングします（正当なトラフィックの3つのプロファイルを知っていると仮定します）。印刷された平均と共分散はこれらのクラスタを説明します（例えば、1つの平均は[50,500]の周辺で、1つのクラスタの中心に対応するかもしれません）。次に、疑わしい接続[duration=200, bytes=800]をテストします。predict_probaは、このポイントが3つのクラスタのそれぞれに属する確率を示します – [200,800]が正常なクラスタから遠く離れているため、これらの確率は非常に低いか、非常に偏っていると予想されます。全体のscore_samples（対数尤度）が印刷されます；非常に低い値は、そのポイントがモデルにうまく適合していないことを示し、異常としてフラグを立てます。実際には、対数尤度（または最大確率）にしきい値を設定して、ポイントが悪意のあるものと見なされるには十分にありそうもないかどうかを判断できます。したがって、GMMは異常検出を行うための原則的な方法を提供し、不確実性を認識するソフトクラスタも生成します。
+このコードでは、正常な traffic に対して 3 つの Gaussian を持つ GMM を学習します（正当な traffic の profile が 3 つあることが分かっていると仮定します）。出力された means と covariances は、これらの clusters を表します（例えば、ある mean は [50,500] 付近で、1 つの cluster の中心に対応する可能性があります）。次に、疑わしい connection [duration=200, bytes=800] をテストします。predict_proba は、この point が 3 つの clusters それぞれに属する確率を返します。[200,800] は正常な clusters から大きく離れているため、これらの確率は非常に低いか、大きく偏ることが予想されます。全体の score_samples（log-likelihood）も出力されます。非常に低い値は、その point が model にうまく適合していないことを示し、anomaly として flag できます。実際には、log-likelihood（または max probability）に threshold を設定し、point の確率が十分に低く malicious と判断できるかどうかを決定できます。このように、GMM は anomaly detection のための原理に基づいた方法を提供すると同時に、不確実性を考慮した soft clusters も生成します。
+</details>
 
 ### Isolation Forest
 
-**Isolation Forest**は、ポイントをランダムに孤立させるというアイデアに基づいたアンサンブル異常検出アルゴリズムです。原則は、異常は少なく異なるため、正常なポイントよりも孤立させやすいということです。Isolation Forestは、多くのバイナリ孤立木（ランダム決定木）を構築し、データをランダムに分割します。木の各ノードでは、ランダムな特徴が選択され、その特徴の最小値と最大値の間でランダムな分割値が選ばれます。この分割はデータを2つの枝に分けます。木は、各ポイントが自分の葉に孤立するか、最大の木の高さに達するまで成長します。
+**Isolation Forest** は、points をランダムに isolation するという考えに基づく ensemble anomaly detection algorithm です。その原理は、anomalies は少数で異質なため、normal points よりも isolation しやすいというものです。Isolation Forest は、多数の binary isolation trees（random decision trees）を構築し、data をランダムに partition します。tree の各 node では、random feature が 1 つ選択され、その node 内の data におけるその feature の min と max の間から random split value が選ばれます。この split により、data は 2 つの branches に分割されます。tree は、各 point がそれぞれ自身の leaf に isolation されるか、tree の最大 height に到達するまで成長します。
 
-異常検出は、これらのランダムな木の各ポイントのパスの長さを観察することによって行われます – ポイントを孤立させるために必要な分割の数です。直感的に、異常（外れ値）は、ランダムな分割が外れ値（まばらな領域にある）を分離する可能性が高いため、より早く孤立する傾向があります。Isolation Forestは、すべての木の平均パスの長さから異常スコアを計算します：平均パスが短いほど → より異常です。スコアは通常[0,1]に正規化され、1は非常に異常であることを意味します。
+Anomaly detection は、これらの random trees における各 point の path length（point を isolation するために必要な splits の数）を観察することで実行されます。直感的には、anomalies（outliers）は、sparse region に存在するため、dense cluster 内の normal point よりも random split によって分離されやすく、より早く isolation される傾向があります。Isolation Forest は、すべての trees における平均 path length から anomaly score を計算します。平均 path が短いほど、より anomalous です。Scores は通常 [0,1] に normalize され、1 は anomaly である可能性が非常に高いことを意味します。
 
 > [!TIP]
-> *サイバーセキュリティにおけるユースケース:* Isolation Forestは、侵入検知や詐欺検知に成功裏に使用されています。例えば、主に正常な動作を含むネットワークトラフィックログでIsolation Forestをトレーニングします；フォレストは、奇妙なトラフィック（聞いたことのないポートを使用するIPや異常なパケットサイズパターンなど）に対して短いパスを生成し、検査のためにフラグを立てます。ラベル付きの攻撃を必要としないため、未知の攻撃タイプを検出するのに適しています。また、ユーザーログインデータに展開してアカウント乗っ取りを検出することもできます（異常なログイン時間や場所が迅速に孤立します）。あるユースケースでは、Isolation Forestがシステムメトリクスを監視し、メトリクスの組み合わせ（CPU、ネットワーク、ファイル変更）が歴史的パターンと非常に異なる場合（短い孤立パス）にアラートを生成することで、企業を保護するかもしれません。
+> *cybersecurity における Use cases:* Isolation Forests は intrusion detection や fraud detection で広く利用されています。例えば、ほとんどが normal behavior で構成される network traffic logs を使って Isolation Forest を train すると、forest は通常と異なる traffic（聞いたことのない port を使用する IP や、異常な packet size pattern など）に対して短い paths を生成し、inspection のために flag します。labeled attacks が不要なため、未知の attack types の検出に適しています。また、user login data に対して deploy し、account takeovers を検出することもできます（異常な login times や locations はすぐに isolation されます）。ある use-case では、Isolation Forest が system metrics を監視し、metrics の組み合わせ（CPU、network、file changes）が過去の patterns と大きく異なる（isolation paths が短い）場合に alert を生成することで、enterprise を保護できます。
 
-#### 仮定と制限
+#### Assumptions and Limitations
 
-**利点**: Isolation Forestは分布の仮定を必要とせず、孤立を直接ターゲットにします。高次元データや大規模データセットに対して効率的です（フォレストを構築するための線形複雑度$O(n\log n)$）ので、各木は特徴のサブセットと分割のみでポイントを孤立させます。数値特徴をうまく処理する傾向があり、$O(n^2)$の可能性がある距離ベースの方法よりも速くなることがあります。また、自動的に異常スコアを提供するため、アラートのしきい値を設定することができます（または、期待される異常割合に基づいてカットオフを自動的に決定するために汚染パラメータを使用できます）。
+**Advantages**: Isolation Forest は distribution に関する assumption を必要とせず、isolation を直接対象にします。高次元 data や大規模 datasets に対して効率的です（forest の構築は linear complexity $O(n\log n)$）。これは、各 tree が feature の subset と splits のみを使って points を isolation するためです。数値 features を適切に扱う傾向があり、$O(n^2)$ になる可能性がある distance-based methods より高速な場合があります。また、anomaly score が自動的に提供されるため、alerts 用の threshold を設定できます（または contamination parameter を使用して、想定される anomaly の割合に基づき cutoff を自動的に決定できます）。
 
-**制限**: ランダムな性質のため、結果は実行間でわずかに異なる場合があります（ただし、十分な数の木があればこれは小さいです）。データに多くの無関係な特徴がある場合や、異常がどの特徴でも強く区別されない場合、孤立が効果的でない可能性があります（ランダムな分割が正常なポイントを偶然に孤立させる可能性があります – ただし、多くの木を平均化することでこれを軽減します）。また、Isolation Forestは一般的に異常が少数派であると仮定します（これは通常、サイバーセキュリティのシナリオでは真実です）。
+**Limitations**: random nature により、run ごとに結果が多少変動する可能性があります（ただし、十分な数の trees を使用すれば、この影響は小さくなります）。data に irrelevant features が多い場合や、anomalies がどの feature においても明確に異なっていない場合、isolation が効果的でない可能性があります（random splits によって normal points が偶然 isolation される可能性があります。ただし、多数の trees による averaging でこの影響は軽減されます）。また、Isolation Forest は一般に、anomalies が少数派であることを前提とします（これは通常、cybersecurity scenarios では当てはまります）。
 
 <details>
-<summary>例 -- ネットワークログにおける外れ値の検出
+<summary>Example --  Network Logs における Outliers の検出
 </summary>
 
-以前のテストデータセット（正常なポイントといくつかの攻撃ポイントを含む）を使用し、Isolation Forestを実行して攻撃を分離できるかどうかを確認します。デモンストレーションのために、データの約15%が異常であると予想すると仮定します。
+先ほどの test dataset（normal points と一部の attack points を含む）を使用し、Isolation Forest を実行して attacks を分離できるか確認します。ここでは、data の約 15% が anomalous であると想定します（demonstration のため）。
 ```python
 from sklearn.ensemble import IsolationForest
 
@@ -321,36 +324,38 @@ print("Isolation Forest predicted labels (first 20):", preds[:20])
 print("Number of anomalies detected:", np.sum(preds == -1))
 print("Example anomaly scores (lower means more anomalous):", anomaly_scores[:5])
 ```
-このコードでは、`IsolationForest`を100本の木でインスタンス化し、`contamination=0.15`を設定します（これは約15%の異常を期待することを意味します; モデルはスコアの閾値を設定し、約15%のポイントがフラグ付けされるようにします）。`X_test_if`にフィットさせますが、これは通常のポイントと攻撃ポイントの混合を含んでいます（注意: 通常はトレーニングデータにフィットさせ、新しいデータに対して予測を行いますが、ここでは結果を直接観察するために同じセットでフィットと予測を行います）。
+このコードでは、100本のtreeを持つ`IsolationForest`をインスタンス化し、`contamination=0.15`を設定しています（約15%がanomaliesであると想定する設定です。modelは、約15%のpointsがflagされるようにscore thresholdを設定します）。通常のpointsとattack pointsが混在する`X_test_if`にfitしています（注: 通常はtraining dataにfitしてから、新しいdataに対してpredictを使用しますが、ここでは結果を直接確認するため、説明目的で同じsetにfitとpredictを行っています）。
 
-出力は最初の20ポイントの予測ラベルを示しています（-1は異常を示します）。また、合計で検出された異常の数といくつかの例の異常スコアを印刷します。120ポイントのうち約18ポイントが-1とラベル付けされることを期待します（汚染が15%だったため）。もし私たちの20の攻撃サンプルが本当に最も外れたものであれば、そのほとんどはこれらの-1予測に現れるはずです。異常スコア（Isolation Forestの決定関数）は、通常のポイントでは高く、異常では低く（より負の値）なります – 分離を確認するためにいくつかの値を印刷します。実際には、データをスコアでソートしてトップの外れ値を確認し、調査することが考えられます。したがって、Isolation Forestは、大規模なラベルのないセキュリティデータを効率的にふるい分け、人間の分析やさらなる自動的な精査のために最も不規則なインスタンスを選び出す方法を提供します。
+出力には、最初の20 pointsに対するpredicted labelsが表示されます（`-1`はanomalyを示します）。また、検出されたanomaliesの総数と、anomaly scoresの例も表示します。`contamination`が15%なので、120 pointsのうちおよそ18 pointsが`-1`になると予想されます。20個のattack samplesが本当に最も外れたpointsであれば、その多くがこれらの`-1` predictionsに含まれるはずです。anomaly score（Isolation Forestのdecision function）はnormal pointsでは高く、anomaliesでは低く（よりnegativeに）なります。分離の様子を確認するため、いくつかの値を表示します。実際には、scoreの順にdataをsortして上位のoutliersを確認し、人間による分析や追加のautomated scrutinyを行うこともできます。このようにIsolation Forestは、大規模なunlabeled security dataを効率的にふるいにかけ、最も不規則なinstancesを抽出して人間による分析や、さらなるautomated scrutinyに回す方法を提供します。
+</details>
 
-### t-SNE (t-分布確率的近傍埋め込み)
 
-**t-SNE**は、高次元データを2次元または3次元で視覚化するために特別に設計された非線形次元削減技術です。データポイント間の類似性を結合確率分布に変換し、低次元投影における局所的な近傍の構造を保持しようとします。簡単に言えば、t-SNEは（例えば）2Dにポイントを配置し、類似したポイント（元の空間で）を近くに、異なるポイントを高い確率で遠くに配置します。
+### t-SNE（t-Distributed Stochastic Neighbor Embedding）
 
-アルゴリズムには2つの主要なステージがあります：
+**t-SNE**は、高次元dataを2次元または3次元でvisualizeするために特化して設計された、nonlinear dimensionality reduction techniqueです。data points間のsimilaritiesをjoint probability distributionsに変換し、低次元projectionでもlocal neighborhoodsの構造を維持しようとします。簡単に言えば、t-SNEは、元のspaceでsimilarなpointsが近くに配置され、dissimilarなpointsが高い確率で遠くに配置されるように、pointsを（たとえば）2D上に配置します。
 
-1. **高次元空間でのペアワイズ親和性の計算:** 各ポイントのペアについて、t-SNEはそのペアを近隣として選ぶ確率を計算します（これは各ポイントにガウス分布を中心にして距離を測定することで行われます – パープレキシティパラメータは考慮される近隣の実効数に影響を与えます）。
-2. **低次元（例えば2D）空間でのペアワイズ親和性の計算:** 最初に、ポイントは2Dにランダムに配置されます。t-SNEはこのマップの距離に対して類似の確率を定義します（より遠くのポイントに自由を与えるために、ガウスよりも重い尾を持つスチューデントt分布カーネルを使用します）。
-3. **勾配降下法:** t-SNEは次に、2Dのポイントを反復的に移動させ、高次元の親和性分布と低次元のそれとの間のクルバック–ライブラー（KL）ダイバージェンスを最小化します。これにより、2Dの配置が高次元の構造をできるだけ反映するようになります – 元の空間で近かったポイントは互いに引き寄せられ、遠くのポイントは反発し、バランスが見つかるまで続きます。
+algorithmには、主に次の3つのstageがあります。
 
-その結果、データのクラスターが明らかになる視覚的に意味のある散布図が得られます。
+1. **高次元spaceでpairwise affinitiesを計算:** 各pointのpairについて、t-SNEはそのpairがneighborsとして選ばれる確率を計算します（各pointを中心とするGaussian distributionを配置し、distancesを測定して行います。perplexity parameterは、考慮されるeffective number of neighborsに影響します）。
+2. **低次元（例: 2D）spaceでpairwise affinitiesを計算:** 最初に、pointsを2D上にrandomに配置します。t-SNEは、このmap上のdistancesに対して同様のprobabilityを定義します（Gaussianよりもheavier tailsを持つStudent t-distribution kernelを使用し、遠くにあるpointsがより自由に配置されるようにします）。
+3. **Gradient Descent:** 次にt-SNEは、high-D affinity distributionとlow-D affinity distribution間のKullback–Leibler（KL）divergenceを最小化するため、2D上のpointsを反復的に移動させます。これにより、2D上の配置がhigh-D structureを可能な限り反映します。元のspaceで近かったpointsは互いに引き寄せ合い、遠かったpointsは反発し合い、最終的にbalanceが見つかります。
+
+結果として、data内のclustersが明確になる、視覚的に意味のあるscatter plotが得られることがよくあります。
 
 > [!TIP]
-> *サイバーセキュリティにおけるユースケース:* t-SNEはしばしば**人間の分析のために高次元のセキュリティデータを視覚化する**ために使用されます。例えば、セキュリティオペレーションセンターでは、アナリストがポート番号、頻度、バイト数などの数十の特徴を持つイベントデータセットを取り、t-SNEを使用して2Dプロットを生成することができます。このプロットでは、攻撃が独自のクラスターを形成したり、通常のデータから分離したりすることがあり、識別が容易になります。マルウェアファミリーのグルーピングや、異なる攻撃タイプが明確にクラスター化されるネットワーク侵入データに適用され、さらなる調査を導くことができます。基本的に、t-SNEはサイバーデータの構造を視覚化する方法を提供します。
+> *cybersecurityにおけるuse cases:* t-SNEは、**human analysisのためにhigh-dimensional security dataをvisualizeする**目的でよく使用されます。たとえば、security operations centerのanalystsは、数十個のfeatures（port numbers、frequencies、byte countsなど）を含むevent datasetを取得し、t-SNEを使って2D plotを作成できます。このplotでは、attacksが独自のclustersを形成したり、normal dataから分離したりする可能性があり、識別しやすくなります。malware datasetsに適用してmalware familiesのgroupingsを確認したり、異なるattack typesが明確にcluster化されるnetwork intrusion dataに適用したりすることで、さらなるinvestigationの指針にできます。基本的にt-SNEは、通常であれば理解しにくいcyber data内のstructureを可視化する方法を提供します。
 
-#### 仮定と制限
+#### Assumptions and Limitations
 
-t-SNEはパターンの視覚的発見に優れています。クラスター、サブクラスター、他の線形手法（PCAなど）では見逃されるかもしれない外れ値を明らかにすることができます。マルウェアの行動プロファイルやネットワークトラフィックパターンのような複雑なデータを視覚化するためにサイバーセキュリティ研究で使用されてきました。局所的な構造を保持するため、自然なグルーピングを示すのに適しています。
+t-SNEは、patternsをvisual discoveryするのに優れています。他のlinear methods（PCAなど）では見つけにくいclusters、subclusters、outliersを明らかにできます。malware behavior profilesやnetwork traffic patternsなどの複雑なdataをvisualizeするため、cybersecurity researchでも使用されています。local structureを維持するため、自然なgroupingsを示すのに適しています。
 
-しかし、t-SNEは計算負荷が重く（約$O(n^2)$）、非常に大きなデータセットではサンプリングが必要になる場合があります。また、出力に影響を与えるハイパーパラメータ（パープレキシティ、学習率、反復回数）があります – 例えば、異なるパープレキシティ値は異なるスケールでクラスターを明らかにするかもしれません。t-SNEプロットは時折誤解されることがあります – マップ内の距離はグローバルに直接的な意味を持たず（局所的な近隣に焦点を当てており、時にはクラスターが人工的に分離されて見えることがあります）。また、t-SNEは主に視覚化のためのものであり、新しいデータポイントを再計算なしに投影するための簡単な方法を提供せず、予測モデリングの前処理として使用することは意図されていません（UMAPはこれらの問題のいくつかをより速い速度で解決する代替手段です）。
+ただし、t-SNEはcomputationally heavier（およそ$O(n^2)$）であるため、非常に大規模なdatasetsではsamplingが必要になる場合があります。また、hyperparameters（perplexity、learning rate、iterations）があり、outputに影響を与える可能性があります。たとえば、異なるperplexity valuesによって、異なるscaleのclustersが明らかになることがあります。t-SNE plotsは誤解されることもあります。map上のdistancesはglobalには直接的な意味を持たず、local neighborhoodに重点を置いているため、clustersが実際よりも明確に分離されているように見える場合があります。また、t-SNEは主にvisualization用であり、再計算せずに新しいdata pointsをprojectionする簡単な方法を提供しません。さらに、predictive modelingのpreprocessingとして使用することを目的としていません（UMAPは、より高速な処理によってこれらの問題の一部に対応するalternativeです）。
 
 <details>
-<summary>例 -- ネットワーク接続の視覚化
+<summary>Example -- Network ConnectionsのVisualizing
 </summary>
 
-t-SNEを使用してマルチフィーチャーデータセットを2Dに削減します。例として、以前の4Dデータ（通常のトラフィックの3つの自然なクラスターがあったもの）にいくつかの異常ポイントを追加します。その後、t-SNEを実行し（概念的に）結果を視覚化します。
+t-SNEを使用して、multi-feature datasetを2Dにreduceします。説明のため、先ほどの4D data（normal trafficに3つのnatural clustersがあったもの）を使用し、いくつかのanomaly pointsを追加します。その後、t-SNEを実行し、結果を（conceptually）visualizeします。
 ```python
 # 1 ─────────────────────────────────────────────────────────────────────
 #    Create synthetic 4-D dataset
@@ -433,23 +438,24 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 ```
-ここでは、以前の4Dノーマルデータセットに少数の極端な外れ値を組み合わせました（外れ値は1つの特徴（「duration」）が非常に高く設定されており、奇妙なパターンをシミュレートしています）。典型的なパープレキシティ30でt-SNEを実行します。出力データdata_2dの形状は(1505, 2)です。このテキストでは実際にプロットはしませんが、もし行った場合、3つのノーマルクラスタに対応する3つの密集したクラスタと、これらのクラスタから遠く離れた孤立した点として現れる5つの外れ値が見られると予想されます。インタラクティブなワークフローでは、ポイントをそのラベル（ノーマルまたはどのクラスタ、対異常）で色分けしてこの構造を確認できます。ラベルがなくても、アナリストは2Dプロット上の空のスペースに座っている5つのポイントに気づき、それらをフラグ付けするかもしれません。これは、t-SNEがサイバーセキュリティデータにおける視覚的異常検出とクラスタ検査の強力な支援となり、上記の自動化アルゴリズムを補完する方法を示しています。
+ここでは、以前の4D normal datasetに、いくつかの極端な外れ値を追加しました（外れ値では、異常なパターンをシミュレートするため、1つのfeature（「duration」）を非常に高く設定するなどしています）。典型的なperplexity 30でt-SNEを実行します。出力データ`data_2d`のshapeは(1505, 2)です。ここでは実際にplotはしませんが、plotした場合、3つのnormal clusterに対応する、おそらく3つの密集したclusterと、それらのclusterから遠く離れた孤立点として現れる5つの外れ値が確認できるでしょう。インタラクティブなworkflowでは、pointをlabel（normalまたはどのclusterに属するか、あるいはanomaly）でcolor分けし、この構造を検証できます。labelがなくても、analystは2D plot上の何もない空間に存在する5つのpointに気付き、flagを立てられる可能性があります。これは、t-SNEがcybersecurity dataにおけるvisual anomaly detectionとcluster inspectionを強力に支援し、上述のautomated algorithmを補完できることを示しています。
 
 </details>
 
-### HDBSCAN（ノイズを伴うアプリケーションの階層的密度ベース空間クラスタリング）
 
-**HDBSCAN**は、単一のグローバル`eps`値を選択する必要を排除し、密度接続コンポーネントの階層を構築してからそれを凝縮することによって、**異なる密度**のクラスタを回復できるDBSCANの拡張です。バニラDBSCANと比較して、通常は
+### HDBSCAN（ノイズを含む階層的密度ベース空間クラスタリング）
 
-* 一部のクラスタが密で他のクラスタがまばらな場合に、より直感的なクラスタを抽出します。
-* 実際のハイパーパラメータは1つ（`min_cluster_size`）のみで、妥当なデフォルトがあります。
-* 各ポイントにクラスタメンバーシップの*確率*と**外れ値スコア**（`outlier_scores_`）を与え、脅威ハンティングダッシュボードに非常に便利です。
+**HDBSCAN**はDBSCANを拡張したもので、単一のglobalな`eps`値を選択する必要をなくし、density-connected componentのhierarchyを構築してからcondenseすることで、**異なるdensity**のclusterを検出できます。通常のDBSCANと比較すると、通常は次のような特徴があります。
+
+* 一部のclusterがdenseで、その他がsparseな場合でも、より直感的なclusterを抽出する
+* 実質的なhyper-parameterは1つ（`min_cluster_size`）だけで、妥当なdefault値がある
+* すべてのpointにcluster-membershipの*probability*と**outlier score**（`outlier_scores_`）を付与するため、threat-hunting dashboardに非常に便利である<sup>[[1]](#references)</sup>
 
 > [!TIP]
-> *サイバーセキュリティにおけるユースケース:* HDBSCANは現代の脅威ハンティングパイプラインで非常に人気があり、商業XDRスイートに付属するノートブックベースのハンティングプレイブックの中でよく見られます。実用的なレシピの1つは、IR中にHTTPビーニングトラフィックをクラスタリングすることです：ユーザーエージェント、間隔、URIの長さは、正当なソフトウェアアップデーターのいくつかの密集したグループを形成することが多い一方で、C2ビーニングは小さな低密度クラスタまたは純粋なノイズとして残ります。
+> *cybersecurityでのユースケース:* HDBSCANはmodernなthreat-hunting pipelineで非常に広く利用されています。commercialなXDR suiteに同梱されたnotebook-based hunting playbookの中で見かけることも多いでしょう。実用的なrecipeの1つは、IR中にHTTP beaconing trafficをcluster化することです。user-agent、interval、URI lengthは、正規のsoftware updaterに対応する複数の密集したgroupを形成する一方、C2 beaconは小規模なlow-density cluster、または純粋なnoiseとして残ることがよくあります。
 
 <details>
-<summary>例 – ビーニングC2チャネルの発見</summary>
+<summary>Example – beaconing C2 channelの検出</summary>
 ```python
 import pandas as pd
 from hdbscan import HDBSCAN
@@ -477,33 +483,33 @@ print("Suspect beacon count:", len(suspects))
 
 ---
 
-### ロバスト性とセキュリティの考慮事項 – 毒物散布と敵対的攻撃 (2023-2025)
+### Robustness and Security Considerations – Poisoning & Adversarial Attacks (2023-2025)
 
-最近の研究により、**教師なし学習者は*アクティブな攻撃者*に対して免疫ではない**ことが示されています：
+近年の研究により、**unsupervised learner は *active attacker* に対して無防備ではない**ことが明らかになっています。
 
-* **異常検出器に対するデータ毒物散布。** Chen *et al.* (IEEE S&P 2024) は、わずか3%の加工されたトラフィックを追加することで、Isolation ForestとECODの決定境界がシフトし、実際の攻撃が正常に見えるようになることを示しました。著者たちは、毒点を自動的に合成するオープンソースのPoC（`udo-poison`）を公開しました。
-* **クラスタリングモデルへのバックドア。** *BadCME*技術（BlackHat EU 2023）は、小さなトリガーパターンを埋め込みます。そのトリガーが現れると、K-Meansベースの検出器は静かにイベントを「良性」クラスタに配置します。
-* **DBSCAN/HDBSCANの回避。** KU Leuvenの2025年の学術プレプリントは、攻撃者が意図的に密度のギャップに落ち込むビーコニングパターンを作成できることを示し、*ノイズ*ラベルの中に効果的に隠れることができます。
+* **anomaly detector に対する Data-poisoning。** Chen *et al.*（IEEE S&P 2024）は、わずか 3 % の細工した traffic を追加するだけで Isolation Forest と ECOD の decision boundary を移動させ、実際の攻撃を正常に見せられることを実証しました。著者らは、poison point を自動的に合成する open-source PoC（`udo-poison`）を公開しています。<sup>[[2]](#references)</sup>
+* **clustering model の Backdooring。** *BadCME* technique（BlackHat EU 2023）は、小さな trigger pattern を埋め込みます。その trigger が現れると、K-Means-based detector はイベントを密かに「benign」cluster 内に配置します。
+* **DBSCAN/HDBSCAN の Evasion。** KU Leuven による 2025 年の academic pre-print では、攻撃者が意図的に density gap に入る beaconing pattern を作成し、実質的に *noise* label の中に隠れられることが示されました。
 
-注目を集めている緩和策：
+次の Mitigation が注目を集めています。
 
-1. **モデルのサニタイズ / TRIM。** すべての再トレーニングエポックの前に、1–2%の最高損失ポイント（トリムされた最大尤度）を破棄し、毒物散布を劇的に困難にします。
-2. **コンセンサスアンサンブル。** 複数の異種検出器（例：Isolation Forest + GMM + ECOD）を組み合わせ、*いずれか*のモデルがポイントをフラグ付けした場合に警告を発します。研究によると、これにより攻撃者のコストが10倍以上増加します。
-3. **クラスタリングのための距離ベースの防御。** `k` 異なるランダムシードでクラスタを再計算し、常にクラスタを移動するポイントを無視します。
+1. **Model sanitisation / TRIM。** 各 retraining epoch の前に、loss が最も大きい 1–2 % の point を破棄します（trimmed maximum likelihood）。これにより poisoning を大幅に困難にします。
+2. **Consensus ensembling。** 複数の heterogeneous detector（例：Isolation Forest + GMM + ECOD）を組み合わせ、いずれかの model が point を flag した場合に alert を発生させます。研究によれば、これにより攻撃者のコストは 10 倍以上に増加します。
+3. **clustering 向けの Distance-based defence。** `k` 個の異なる random seed で cluster を再計算し、常に cluster 間を移動する point を無視します。
 
 ---
 
-### 現代のオープンソースツール (2024-2025)
+### Modern Open-Source Tooling (2024-2025)
 
-* **PyOD 2.x**（2024年5月リリース）は、*ECOD*、*COPOD*、およびGPU加速された*AutoFormer*検出器を追加しました。これにより、**1行のコード**でデータセット上の30以上のアルゴリズムを比較できる`benchmark`サブコマンドが提供されます：
+* **PyOD 2.x**（2024 年 5 月リリース）では、*ECOD*、*COPOD*、GPU-accelerated *AutoFormer* detector が追加されました。現在は `benchmark` sub-command が付属しており、次の **one line of code** で dataset 上の 30 種類以上の algorithm を比較できます。
 ```bash
 pyod benchmark --input logs.csv --label attack --n_jobs 8
 ```
-* **Anomalib v1.5**（2025年2月）は視覚に焦点を当てていますが、一般的な**PatchCore**実装も含まれており、スクリーンショットベースのフィッシングページ検出に便利です。
-* **scikit-learn 1.5**（2024年11月）は、Python 3.12のときに外部のcontribパッケージを必要とせずに、新しい`cluster.HDBSCAN`ラッパーを介して*HDBSCAN*のための`score_samples`を最終的に公開しました。
+* **Anomalib v1.5**（2025 年 2 月）は vision に重点を置いていますが、generic **PatchCore** implementation も含まれており、screenshot-based phishing page detection に便利です。
+* **scikit-learn 1.5**（2024 年 11 月）では、新しい `cluster.HDBSCAN` wrapper を通じて、ついに *HDBSCAN* の `score_samples` が公開されました。そのため、Python 3.12 を使用する場合に外部の contrib package は不要です。
 
 <details>
-<summary>クイックPyOD例 – ECOD + Isolation Forestアンサンブル</summary>
+<summary>Quick PyOD example – ECOD + Isolation Forest ensemble</summary>
 ```python
 from pyod.models import ECOD, IForest
 from pyod.utils.data import generate_data, evaluate_print
@@ -524,8 +530,8 @@ evaluate_print("Ensemble", y_test, anomaly_scores)
 
 ## 参考文献
 
-- [HDBSCAN – 階層的密度ベースのクラスタリング](https://github.com/scikit-learn-contrib/hdbscan)
-- Chen, X. *et al.* “無監督異常検出のデータポイズニングに対する脆弱性について。” *IEEEセキュリティとプライバシーシンポジウム*, 2024.
+- [1] [HDBSCAN - 階層的密度ベースクラスタリング](https://github.com/scikit-learn-contrib/hdbscan)
+- [2] Chen, X. *et al.* 「教師なし異常検知のデータポイズニングに対する脆弱性について」 *IEEE Symposium on Security and Privacy*, 2024。
 
 
 

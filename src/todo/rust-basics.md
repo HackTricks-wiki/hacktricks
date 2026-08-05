@@ -1,14 +1,14 @@
-# Rustの基本
+# Rust Basics
 
 {{#include ../banners/hacktricks-training.md}}
 
 ### 変数の所有権
 
-メモリは所有権の仕組みによって管理され、コンパイラは以下のルールをコンパイル時にチェックします:
+Memoryは、compilerがcompile timeにチェックする以下の所有権システムを通じて管理されます。
 
-1. Rustの各値には、その所有者と呼ばれる変数があります。
-2. 所有者は同時に1つだけ存在します。
-3. 所有者がスコープを抜けると、その値は破棄されます。
+1. Rustの各valueには、ownerと呼ばれるvariableがあります。
+2. 一度に存在できるownerは1つだけです。
+3. ownerがscope外に出ると、valueはdropされます。
 ```rust
 fn main() {
 let student_age: u32 = 20;
@@ -22,7 +22,7 @@ println!("The student is {} and teacher is {}", student_age, teacher_age);
 ```
 ### ジェネリック型
 
-フィールドの1つが任意の型になり得るstructを作成する
+値の1つが任意の型になり得るstructを作成する
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -37,36 +37,36 @@ Wrapper { value }
 Wrapper::new(42).value
 Wrapper::new("Foo").value, "Foo"
 ```
-### Option, Some & None
+### Option、Some、None
 
-Option型は、値がSome（何かがある）またはNoneのいずれかである可能性があることを意味します:
+Option型は、値がSome（何かが存在する）またはNoneのいずれかである可能性があることを意味します：
 ```rust
 pub enum Option<T> {
 None,
 Some(T),
 }
 ```
-Optionの値をチェックするには、`is_some()` や `is_none()` といった関数を使えます。
+`is_some()` や `is_none()` などの関数を使用して、Option の値を確認できます。
 
 
 ### Result, Ok & Err
 
-エラーの返却と伝播に使われます
+エラーの返却および伝播に使用されます
 ```rust
 pub enum Result<T, E> {
 Ok(T),
 Err(E),
 }
 ```
-結果の値を確認するために、`is_ok()` や `is_err()` のような関数を使うことができます。
+`is_ok()` や `is_err()` などの関数を使用して、結果の値を確認できます
 
-`Option` enum は、値が存在しない（`None` である）可能性がある状況で使用するべきです。  
-`Result` enum は、処理が失敗する可能性がある場合に使用します。
+値が存在しない可能性がある（`None` になる）状況では、`Option` enum を使用します。
+何かを実行する際に問題が発生する可能性がある状況では、`Result` enum を使用します。
 
 
 ### マクロ
 
-マクロは、手動で書いたコードよりも多くのコードを展開して生成するため、関数より強力です。例えば、関数のシグネチャは引数の数と型を宣言しなければなりません。これに対してマクロは可変個の引数を取ることができます。たとえば、`println!("hello")` を1つの引数で呼ぶことも、`println!("hello {}", name)` を2つの引数で呼ぶこともできます。また、マクロはコンパイラがコードの意味を解釈する前に展開されるため、たとえばマクロはある型に対して trait を実装することができます。関数ではこれはできません。関数は実行時に呼ばれ、trait はコンパイル時に実装される必要があるからです。
+マクロは、手動で記述したコードよりも多くのコードを生成するよう展開されるため、関数よりも強力です。たとえば、関数シグネチャでは、その関数が持つパラメータの数と型を宣言する必要があります。一方、マクロは可変数のパラメータを受け取れます。つまり、引数を1つ指定して `println!("hello")` と呼び出すことも、引数を2つ指定して `println!("hello {}", name)` と呼び出すこともできます。また、マクロはコンパイラがコードの意味を解釈する前に展開されるため、たとえば、指定された型に trait を実装できます。関数ではこれができません。関数は runtime に呼び出されるのに対し、trait は compile time に実装する必要があるためです。
 ```rust
 macro_rules! my_macro {
 () => {
@@ -91,7 +91,7 @@ println!("Check out my macro!");
 }
 }
 ```
-### 繰り返し
+### 反復処理
 ```rust
 // Iterate through a vector
 let my_fav_fruits = vec!["banana", "raspberry"];
@@ -108,7 +108,7 @@ for (key, hashvalue) in &*map {
 for key in map.keys() {
 for value in map.values() {
 ```
-### 再帰的な Box
+### Recursive Box
 ```rust
 enum List {
 Cons(i32, List),
@@ -153,7 +153,7 @@ true => 1,
 // TODO ^ Try commenting out one of these arms
 };
 ```
-#### loop (無限)
+#### loop（無限）
 ```rust
 loop {
 count += 1;
@@ -182,7 +182,7 @@ println!("{}", n);
 n += 1;
 }
 ```
-#### for文
+#### for
 ```rust
 for n in 1..101 {
 if n % 15 == 0 {
@@ -258,7 +258,7 @@ optional = Some(i + 1);
 ```
 ### Traits
 
-型に対して新しいメソッドを作成する
+型に新しいメソッドを作成する
 ```rust
 trait AppendBar {
 fn append_bar(self) -> Self;
@@ -274,7 +274,7 @@ let s = String::from("Foo");
 let s = s.append_bar();
 println!("s: {}", s);
 ```
-### テスト
+### Tests
 ```rust
 #[cfg(test)]
 mod tests {
@@ -286,11 +286,11 @@ assert_ne!(true, false);
 }
 }
 ```
-### スレッド
+### Threading
 
 #### Arc
 
-ArcはCloneを使ってオブジェクトへの参照を増やし、スレッドに渡すことができます。値への最後の参照ポインタがスコープ外になると、その変数は破棄されます。
+Arc は Clone を使用してオブジェクトへの参照を追加作成し、それらを threads に渡せます。値への最後の参照ポインターがスコープ外になると、変数は drop されます。
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -301,9 +301,9 @@ println!("{:?}", apple);
 });
 }
 ```
-#### スレッド
+#### Threads
 
-この場合、スレッドに変数を渡し、スレッドがその変数を変更できるようにします。
+この場合、thread に変更可能な変数を渡します
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -321,19 +321,19 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-### セキュリティの基本
+### Security Essentials
 
-Rustはデフォルトで強力なメモリ安全性を提供しますが、`unsafe`コード、依存関係の問題、あるいはロジックミスにより重大な脆弱性を導入することがあります。以下のミニチートシートは、Rustソフトウェアの攻撃側／防御側のセキュリティレビューで最も頻繁に触れるプリミティブをまとめたものです。
+Rust はデフォルトで強力な memory-safety 保証を提供しますが、`unsafe` code、dependency の問題、または logic のミスによって、依然として重大な脆弱性を導入する可能性があります。以下の mini-cheatsheet では、Rust software の offensive または defensive な security review で最も頻繁に扱う primitives をまとめています。
 
-#### `unsafe` code とメモリ安全性
+#### Unsafe code & memory safety
 
-`unsafe`ブロックはコンパイラのエイリアスや境界チェックを無効化するため、**従来の全てのメモリ破壊バグ（OOB、use-after-free、double free など）が再び現れ得ます**。簡単な監査チェックリスト：
+`unsafe` blocks は compiler の aliasing および bounds checks を無効にするため、**従来のすべての memory-corruption bugs（OOB、use-after-free、double free など）が再び発生する可能性があります**。簡単な audit checklist：
 
-* `unsafe`ブロック、`extern "C"`関数、`ptr::copy*`、`std::mem::transmute`への呼び出し、`MaybeUninit`、raw pointers、または`ffi`モジュールを探す。
-* 低レベル関数に渡される全てのポインタ算術や長さ引数を検証する。
-* 誰かが`unsafe`を再導入したときにコンパイルを失敗させるため、`#![forbid(unsafe_code)]`（crate全体）または`#[deny(unsafe_op_in_unsafe_fn)]`（1.68以降）を推奨する。
+* `unsafe` blocks、`extern "C"` functions、`ptr::copy*`、`std::mem::transmute`、`MaybeUninit`、raw pointers、または `ffi` modules を探します。
+* low-level functions に渡されるすべての pointer arithmetic と length argument を検証します。
+* `#![forbid(unsafe_code)]`（crate 全体）または `#[deny(unsafe_op_in_unsafe_fn)]`（1.68 +）を使用して、誰かが `unsafe` を再導入したときに compilation が失敗するようにします。
 
-Example overflow created with raw pointers:
+raw pointers によって作成された overflow の例：
 ```rust
 use std::ptr;
 
@@ -347,54 +347,54 @@ dst.set_len(src.len());
 dst
 }
 ```
-Miriを実行することは、テスト時にUBを検出するための低コストな方法です:
+Miriを実行することは、テスト時にUBを検出する低コストな方法です。
 ```bash
 rustup component add miri
 cargo miri test  # hunts for OOB / UAF during unit tests
 ```
-#### RustSec / cargo-audit を使った依存関係の監査
+#### RustSec / cargo-audit による依存関係の監査
 
-実際の Rust の脆弱性の多くはサードパーティのクレートに存在します。RustSec advisory DB（コミュニティ運用）はローカルで照会できます：
+現実世界の Rust 脆弱性の多くは、サードパーティ製 crate に存在します。RustSec advisory DB（コミュニティによって運営）はローカルから照会できます。<sup>[[1]](#references)</sup>
 ```bash
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
 ```
-CIに組み込み、`--deny warnings`で失敗させます。
+CIに統合し、`--deny warnings`で失敗するようにします。
 
-`cargo deny check advisories` は同様の機能に加え、ライセンスと禁止リストのチェックを提供します。
+`cargo deny check advisories`は、ライセンスと禁止リストのチェックに加えて、同様の機能を提供します。
 
 #### cargo-tarpaulinによるコードカバレッジ
 
-`cargo tarpaulin` はCargoのビルドシステム向けのコードカバレッジ報告ツールです。
+`cargo tarpaulin`は、Cargo build system向けのコードカバレッジレポートツールです
 ```bash
 cargo binstall cargo-tarpaulin
 cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
 ```
-Linuxでは、Tarpaulinのデフォルトのトレーシングバックエンドは依然として Ptrace で、x86_64 プロセッサでのみ動作します。これは `--engine llvm` を使って llvm のカバレッジ計測に変更できます。Mac および Windows では、これがデフォルトの収集方法です。
+Linuxでは、Tarpaulinのデフォルトのtracing backendは依然としてPtraceであり、x86_64プロセッサでのみ動作します。`--engine llvm`を指定すると、llvm coverage instrumentationに変更できます。MacとWindowsでは、これがデフォルトのcollection methodです。
 
-#### cargo-vet によるサプライチェーン検証 (2024)
+#### cargo-vetによるsupply-chain verification（2024）
 
-`cargo vet` はインポートする各 crate に対してレビュー・ハッシュを記録し、見落とされたアップグレードを防ぎます:
+`cargo vet`は、importするすべてのcrateについてreview hashを記録し、気付かないアップグレードを防止します。
 ```bash
 cargo install cargo-vet
 cargo vet init      # generates vet.toml
 cargo vet --locked  # verifies packages referenced in Cargo.lock
 ```
-このツールは、Rust project infrastructure と増えつつある複数の組織に採用され、poisoned-package attacks を緩和するために使われています。
+この tool は Rust project infrastructure に採用されており、poisoned-package attacks を軽減するために、採用する orgs の数も増えています。<sup>[[2]](#references)</sup>
 
-#### Fuzzing your API surface (cargo-fuzz)
+#### API surface の Fuzzing（cargo-fuzz）
 
-Fuzz tests は、panics、integer overflows、そして DoS や side-channel 問題になり得るロジックバグを簡単に検出します:
+Fuzz tests は、DoS や side-channel issues につながる可能性のある panic、integer overflows、logic bugs を簡単に検出できます:
 ```bash
 cargo install cargo-fuzz
 cargo fuzz init              # creates fuzz_targets/
 cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
 ```
-リポジトリにfuzz targetを追加し、パイプラインで実行してください。
+fuzz target をリポジトリに追加し、pipeline で実行します。
 
 ## 参考資料
 
-- RustSec Advisory Database – <https://rustsec.org>
-- Cargo-vet: "Auditing your Rust Dependencies" – <https://mozilla.github.io/cargo-vet/>
+- [1] [RustSec Advisory Database](https://rustsec.org)
+- [2] [Cargo-vet: Rust Dependencies の監査](https://mozilla.github.io/cargo-vet/)
 
 {{#include ../banners/hacktricks-training.md}}

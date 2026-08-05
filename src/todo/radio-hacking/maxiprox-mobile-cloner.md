@@ -1,84 +1,84 @@
-# ポータブル HID MaxiProx 125 kHz モバイルクローンの構築
+# ポータブル HID MaxiProx 125 kHz Mobile Cloner の構築
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 目標
-メイン電源で動作する HID MaxiProx 5375 ロングレンジ 125 kHz リーダーを、物理セキュリティ評価中に近接カードを静かに収集するフィールド展開可能なバッテリー駆動のバッジクローンに変換します。
+## 目的
+商用電源で動作する HID MaxiProx 5375 long-range 125 kHz reader を、現場へ持ち運べるバッテリー駆動の badge cloner に改造し、physical-security assessments 中に proximity card を気付かれずに収集できるようにする。
 
-ここで説明する変換は、TrustedSec の「Let’s Clone a Cloner – Part 3: Putting It All Together」研究シリーズに基づいており、最終的なデバイスがバックパックに入れられ、現場で即座に使用できるように、機械的、電気的、RF の考慮事項を組み合わせています。
+ここで説明する改造は、TrustedSec の「Let’s Clone a Cloner – Part 3: Putting It All Together」research series をもとにしており、機械、電気、RF に関する考慮事項を組み合わせ、完成したデバイスをバックパックに入れて現場ですぐ使用できるようにする。<sup>[[1]](#references)</sup>
 
 > [!warning]
-> メイン電源で動作する機器やリチウムイオン電源バンクを操作することは危険です。回路に電源を入れる前に**すべての接続を確認**し、リーダーの調整を避けるためにアンテナ、同軸ケーブル、接地プレーンを工場設計のままに保ってください。
+> 商用電源機器や Lithium-ion power-bank の取り扱いは危険な場合がある。回路に**通電する前**にすべての接続を確認し、reader の detuning を避けるため、antenna、coax、ground plane は工場設計時の状態を正確に維持すること。
 
-## 材料費用明細書 (BOM)
+## 部品表 (BOM)
 
-* HID MaxiProx 5375 リーダー（または任意の 12 V HID Prox® ロングレンジリーダー）
-* ESP RFID Tool v2.2 (ESP32ベースのWiegandスニファー/ロガー)
-* 12 V @ ≥3 A を交渉できる USB-PD (Power-Delivery) トリガーモジュール
-* 100 W USB-C パワーバンク（12 V PD プロファイル出力）
-* 26 AWG シリコン絶縁フックアップワイヤー – 赤/白
-* パネルマウント SPST トグルスイッチ（ビーパーキルスイッチ用）
-* NKK AT4072 スイッチガード / 事故防止キャップ
-* ハンダごて、ハンダ吸い取り線 & 吸い取りポンプ
-* ABS 評価の手工具：コーピングソー、ユーティリティナイフ、平ファイル & 半丸ファイル
-* ドリルビット 1/16″ (1.5 mm) と 1/8″ (3 mm)
-* 3 M VHB 両面テープ & ジップタイ
+* HID MaxiProx 5375 reader（または 12 V HID Prox® long-range reader）
+* ESP RFID Tool v2.2（ESP32-based Wiegand sniffer/logger）
+* 12 V @ ≥3 A を negotiate できる USB-PD (Power-Delivery) trigger module
+* 100 W USB-C power-bank（12 V PD profile を出力）
+* 26 AWG silicone-insulated hook-up wire – red/white
+* Panel-mount SPST toggle switch（beeper kill-switch 用）
+* NKK AT4072 switch-guard / accident-proof cap
+* はんだごて、solder wick、desolder pump
+* ABS対応 hand tools: coping-saw、utility-knife、flat & half-round files
+* Drill bits 1/16″ (1.5 mm) および 1/8″ (3 mm)
+* 3 M VHB double-sided tape および Zip-ties
 
 ## 1. 電源サブシステム
 
-1. 論理 PCB 用に 5 V を生成するために使用される工場のバッカンバーを脱ハンダして取り外します。
-2. ESP RFID Tool の隣に USB-PD トリガーを取り付け、トリガーの USB-C 受信口をエンクロージャの外側にルーティングします。
-3. PD トリガーはパワーバンクから 12 V を交渉し、直接 MaxiProx に供給します（リーダーは本来 10–14 V を期待します）。 ESP ボードから 5 V のセカンダリレールを取り出して、アクセサリに電力を供給します。
-4. 100 W バッテリーパックは内部スタンドオフにフラッシュに配置され、フェライトアンテナに電源ケーブルがかからないようにして RF 性能を保持します。
+1. Logic PCB 用の 5 V を生成するために使用されている factory buck-converter daughter-board を desolder して取り外す。
+2. ESP RFID Tool の隣に USB-PD trigger を取り付け、trigger の USB-C receptacle を enclosure の外側へ引き出す。
+3. PD trigger は power-bank から 12 V を negotiate し、それを MaxiProx に直接供給する（reader は本来 10–14 V を想定）。アクセサリへの電力供給用として、ESP board から secondary 5 V rail を取り出す。
+4. 100 W battery pack は internal standoff にぴったり接するように配置し、ferrite antenna の上に電源ケーブルが**またがらない**ようにすることで、RF performance を維持する。
 
-## 2. ビーパーキルスイッチ – サイレントオペレーション
+## 2. Beeper Kill-Switch – 無音動作
 
-1. MaxiProx 論理基板上の 2 つのスピーカーパッドを見つけます。
-2. *両方*のパッドをきれいにし、**負**のパッドのみを再ハンダします。
-3. ビーパー パッドに 26 AWG ワイヤー（白 = 負、赤 = 正）をハンダ付けし、新たに切ったスロットを通してパネルマウント SPST スイッチにルーティングします。
-4. スイッチがオープンのとき、ビーパー回路は切断され、リーダーは完全に静かに動作します – 秘密のバッジ収集に最適です。
-5. トグルの上に NKK AT4072 スプリングローデッドセーフティキャップを取り付けます。コーピングソー/ファイルで穴を慎重に広げ、スイッチ本体にスナップするまで広げます。ガードはバックパック内での誤作動を防ぎます。
+1. MaxiProx logic board 上の 2 つの speaker pad を特定する。
+2. *両方*の pad をきれいに wick し、その後 **negative** pad のみを再 solder する。
+3. 26 AWG wires（white = negative、red = positive）を beeper pad に solder し、新たに切り開いた slot を通して panel-mount SPST switch へ配線する。
+4. switch を open にすると beeper circuit が切断され、reader は完全な無音で動作する – covert badge harvesting に適している。
+5. toggle の上に NKK AT4072 spring-loaded safety cap を取り付ける。coping-saw / file で bore を慎重に広げ、switch body に snap で固定できるようにする。guard により、バックパック内部での accidental activation を防止できる。
 
-## 3. エンクロージャ & 機械作業
+## 3. Enclosure と機械加工
 
-• フラッシュカッターを使用し、次にナイフとファイルで内部の ABS “バンプアウト” を*取り除き*、大きな USB-C バッテリーがスタンドオフに平らに座るようにします。
-• エンクロージャの壁に USB-C ケーブル用の 2 つの平行なチャネルを彫ります。これによりバッテリーが固定され、動きや振動が排除されます。
-• バッテリーの**電源**ボタン用の長方形の開口部を作成します：
-1. 位置に紙の型紙をテープで貼ります。
-2. すべての四隅に 1/16″ のパイロットホールをドリルします。
-3. 1/8″ ビットで拡大します。
-4. コーピングソーで穴をつなぎ、ファイルでエッジを仕上げます。
-✱ 高速ビットが厚い ABS を溶かし、醜いエッジを残すため、回転式 Dremel は*避けられました*。
+• flush cutters を使用してから knife と file で、内部の ABS 製「bump-out」を*取り除く*。これにより、大型 USB-C battery を standoff 上に平らに置ける。
+• USB-C cable 用に enclosure wall に平行な 2 本の channel を切り、battery を所定位置に固定して movement/vibration をなくす。
+• battery の **power** button 用に rectangular aperture を作成する:
+1. 位置に paper stencil を tape で貼る。
+2. 4 隅すべてに 1/16″ pilot hole を drill する。
+3. 1/8″ bit で穴を広げる。
+4. coping saw で穴同士をつなぎ、file で edges を仕上げる。
+✱  rotary Dremel は*避ける* – 高速 bit が厚い ABS を溶かし、見栄えの悪い edge を残すためである。
 
 ## 4. 最終組み立て
 
-1. MaxiProx 論理基板を再取り付けし、SMA ピグテールをリーダーの PCB グラウンドパッドに再ハンダします。
-2. ESP RFID Tool と USB-PD トリガーを 3 M VHB を使用して取り付けます。
-3. すべての配線をジップタイで整え、電源リードをアンテナループから**遠く**に保ちます。
-4. エンクロージャのネジを締めてバッテリーが軽く圧縮されるまで締めます。内部の摩擦がデバイスがカードを読み取った後にパックが移動するのを防ぎます。
+1. MaxiProx logic board を再取り付けし、SMA pigtail を reader の PCB ground pad に再 solder する。
+2. ESP RFID Tool と USB-PD trigger を 3 M VHB で固定する。
+3. すべての wiring を zip-ties で整え、power leads を antenna loop から**十分に離す**。
+4. battery が軽く圧縮されるまで enclosure screws を締める。internal friction により、各 card read 後に device が recoil しても pack がずれない。
 
-## 5. 範囲 & シールドテスト
+## 5. Range と Shielding のテスト
 
-* 125 kHz **Pupa** テストカードを使用して、ポータブルクローンは**≈ 8 cm**の範囲で一貫した読み取りを達成しました – メイン電源での動作と同じです。
-* リーダーを薄壁の金属製現金箱の中に置く（銀行ロビーのデスクを模擬するため）と、範囲が ≤ 2 cm に減少し、 substantial metal enclosures が効果的な RF シールドとして機能することが確認されました。
+* 125 kHz **Pupa** test card を使用した場合、portable cloner は free-air で **約 8 cm** の安定した read を達成し、商用電源での動作と同一だった。<sup>[[1]](#references)</sup>
+* reader を薄い金属製 cash box（bank lobby desk を想定）に入れると、range は ≤ 2 cm に低下した。これは、相当量の metal enclosure が effective RF shield として機能することを確認している。<sup>[[1]](#references)</sup>
 
-## 使用ワークフロー
+## 使用手順
 
-1. USB-C バッテリーを充電し、接続し、メイン電源スイッチを切り替えます。
-2. （オプション）ビーパーガードを開き、ベンチテスト時に音声フィードバックを有効にします。秘密のフィールド使用の前にロックします。
-3. ターゲットバッジホルダーの近くを歩きます – MaxiProx がカードに電力を供給し、ESP RFID Tool が Wiegand ストリームをキャプチャします。
-4. キャプチャした認証情報を Wi-Fi または USB-UART 経由でダンプし、必要に応じて再生/クローンします。
+1. USB-C battery を充電して接続し、main power switch を flip する。
+2. （任意）bench-testing 時に audible feedback を有効にする場合は beeper guard を開く。covert field use の前には lock しておく。
+3. target badge holder の横を通過する – MaxiProx が card を energise し、ESP RFID Tool が Wiegand stream を capture する。
+4. captured credentials を Wi-Fi または USB-UART 経由で dump し、必要に応じて replay/clone する。
 
 ## トラブルシューティング
 
-| 症状 | 考えられる原因 | 修正 |
+| 症状 | 考えられる原因 | 対処 |
 |---------|--------------|------|
-| カードを提示するとリーダーが再起動する | PD トリガーが 9 V を交渉したが 12 V ではない | トリガージャンパーを確認 / より高出力の USB-C ケーブルを試す |
-| 読み取り範囲がない | バッテリーまたは配線がアンテナの*上に*ある | ケーブルを再ルーティングし、フェライトループの周りに 2 cm のクリアランスを保つ |
-| ビーパーがまだ鳴る | スイッチが負のリードではなく正のリードに配線されている | キルスイッチを移動して**負**のスピーカートレースを切断します |
+| card を提示すると reader が reboot する | PD trigger が 12 V ではなく 9 V を negotiate した | trigger jumper を確認する / より high-power の USB-C cable を試す |
+| read range がない | battery または wiring が antenna の*真上*にある | cables を再配線し、ferrite loop の周囲に 2 cm の clearance を確保する |
+| beeper が鳴り続ける | switch が negative ではなく positive lead に配線されている | kill-switch を移動し、**negative** speaker trace を切断する |
 
-## 参考文献
+## References
 
-- [Let’s Clone a Cloner – Part 3 (TrustedSec)](https://trustedsec.com/blog/lets-clone-a-cloner-part-3-putting-it-all-together)
+- [1] [Let’s Clone a Cloner – Part 3 (TrustedSec)](https://trustedsec.com/blog/lets-clone-a-cloner-part-3-putting-it-all-together)
 
 {{#include ../../banners/hacktricks-training.md}}
