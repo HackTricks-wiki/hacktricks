@@ -4,16 +4,16 @@
 
 ## Sealed System Volume (SSV)
 
-### Basic Information
+### Taarifa za Msingi
 
-Kuanzia na **macOS Big Sur (11.0)**, system volume imefungwa kwa njia ya kriptografia kwa kutumia **APFS snapshot hash tree**. Hii inaitwa **Sealed System Volume (SSV)**. System partition imewekwa **read-only** na mabadiliko yoyote yanavunja muhuri, ambao unathibitishwa wakati wa boot.
+Kuanzia **macOS Big Sur (11.0)**, volume ya mfumo hufungwa kwa njia ya cryptographic kwa kutumia **APFS snapshot hash tree**. Hii huitwa **Sealed System Volume (SSV)**. Partition ya mfumo huwekwa **read-only**, na marekebisho yoyote huvunja seal, jambo linalothibitishwa wakati wa boot.
 
-The SSV provides:
-- **Tamper detection** — mabadiliko yoyote kwenye system binaries/frameworks yanaweza kugunduliwa kupitia kuvunjwa kwa muhuri wa kriptografia
-- **Rollback protection** — mchakato wa boot unathibitisha uadilifu wa snapshot ya mfumo
-- **Rootkit prevention** — hata root hawezi kubadilisha kwa kudumu faili kwenye system volume (bila kuvunja muhuri)
+SSV hutoa:
+- **Utambuzi wa tampering** — marekebisho yoyote kwenye system binaries/frameworks yanaweza kutambuliwa kupitia cryptographic seal iliyovunjika
+- **Ulinzi dhidi ya rollback** — mchakato wa boot huthibitisha integrity ya system snapshot
+- **Kuzuia rootkit** — hata root haiwezi kufanya marekebisho ya kudumu kwenye files zilizo kwenye system volume (bila kuvunja seal)
 
-### Checking SSV Status
+### Kukagua Hali ya SSV
 ```bash
 # Check if authenticated root is enabled (SSV seal verification)
 csrutil authenticated-root status
@@ -27,16 +27,16 @@ mount | grep " / "
 # Verify the system volume seal
 diskutil apfs listVolumeGroups
 ```
-### Idhini za Mwandishi wa SSV
+### Waandishi wa SSV wenye Entitlements
 
-Binaries fulani za mfumo wa Apple zina idhini zinazowawezesha kurekebisha au kusimamia volumu iliyofungwa ya mfumo (Sealed System Volume):
+Binaries fulani za mfumo wa Apple zina entitlements zinazoziruhusu kurekebisha au kudhibiti sealed system volume:
 
 | Entitlement | Madhumuni |
 |---|---|
-| `com.apple.private.apfs.revert-to-snapshot` | Rudisha volumu ya mfumo kwa snapshot ya awali |
-| `com.apple.private.apfs.create-sealed-snapshot` | Unda snapshot mpya iliyofungwa baada ya masasisho ya mfumo |
-| `com.apple.rootless.install.heritable` | Andika kwenye njia zilizo na ulinzi za SIP (zinazorithiwa na michakato ya mtoto) |
-| `com.apple.rootless.install` | Andika kwenye njia zilizo na ulinzi za SIP |
+| `com.apple.private.apfs.revert-to-snapshot` | Kurudisha system volume kwenye snapshot ya awali |
+| `com.apple.private.apfs.create-sealed-snapshot` | Kuunda snapshot mpya iliyotiwa muhuri baada ya system updates |
+| `com.apple.rootless.install.heritable` | Kuandika kwenye paths zinazolindwa na SIP (hurithishwa na child processes) |
+| `com.apple.rootless.install` | Kuandika kwenye paths zinazolindwa na SIP |
 
 ### Kutafuta Waandishi wa SSV
 ```bash
@@ -54,11 +54,11 @@ JOIN executable_capabilities ec ON e.id = ec.executable_id
 JOIN capabilities c ON ec.capability_id = c.id
 WHERE c.name = 'ssv_writer';"
 ```
-### Senario za Shambulio
+### Matukio ya Mashambulizi
 
 #### Snapshot Rollback Attack
 
-Ikiwa mshambuliaji anapata udhibiti wa binary yenye `com.apple.private.apfs.revert-to-snapshot`, anaweza **kurudisha volume ya mfumo katika hali ya kabla ya sasisho**, akirejesha udhaifu uliotambuliwa:
+Ikiwa mshambuliaji ataathiri binary yenye `com.apple.private.apfs.revert-to-snapshot`, anaweza **kurudisha system volume kwenye hali ya kabla ya update**, na kurejesha vulnerabilities zinazojulikana:
 ```bash
 # Conceptual — the snapshot revert operation would:
 # 1. List available snapshots
@@ -68,24 +68,24 @@ diskutil apfs listSnapshots disk3s1
 # This restores the system to a state with known, patched vulnerabilities
 ```
 > [!WARNING]
-> Kurudisha snapshot kwa ufanisi **hurejesha sasisho za usalama**, ikirejesha udhaifu wa kernel na mfumo uliotengenezwa hapo awali. Hii ni moja ya shughuli hatari zaidi zinazowezekana kwenye macOS za kisasa.
+> Urejeshaji wa snapshot (**Snapshot rollback**) kwa ufanisi **hubatilisha security updates**, na kurejesha udhaifu wa kernel na mfumo uliokuwa umesharekebishwa. Hii ni mojawapo ya operesheni hatari zaidi zinazowezekana kwenye macOS ya kisasa.
 
-#### Ubadilishaji wa Binary ya Mfumo
+#### Ubadilishaji wa System Binary
 
-Kwa SIP bypass + uwezo wa kuandika SSV, mshambuliaji anaweza:
+Kwa SIP bypass + uwezo wa kuandika kwenye SSV, mshambuliaji anaweza:
 
-1. Ku-mount volume ya mfumo kwa kusomeka-na-kuandika
-2. Kubadilisha daemon ya mfumo au maktaba ya framework na toleo lenye trojan
-3. Kure-seal snapshot (au kukubali seal iliyovunjika ikiwa SIP tayari imeharibika)
-4. Rootkit hubaki kuhifadhiwa baada ya kuanzisha upya na haonekani kwa zana za utambuzi za userland
+1. Ku-mount system volume kwa read-write
+2. Kubadilisha system daemon au framework library kwa toleo lenye trojan
+3. Kuweka muhuri upya snapshot (**re-seal**) (au kukubali seal iliyoharibika ikiwa SIP tayari imedhoofishwa)
+4. Rootkit hubaki baada ya kuwasha upya na haionekani kwa userland detection tools
 
-### CVE za Dunia Halisi
+### CVEs za Ulimwengu Halisi
 
 | CVE | Maelezo |
 |---|---|
-| CVE-2021-30892 | **Shrootless** — SIP bypass inayoruhusu urekebishaji wa SSV kupitia `system_installd` |
-| CVE-2022-22583 | SSV bypass kupitia usimamizi wa snapshot wa PackageKit |
-| CVE-2022-46689 | Race condition inayoruhusu uandishi kwa faili zilizolindwa na SIP |
+| CVE-2021-30892 | **Shrootless** — SIP bypass inayotumia entitlement ya `system_installd` ya `com.apple.rootless.install.heritable` kuendesha post-install scripts kiholela ([Microsoft](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)) |
+| CVE-2022-22583 | SIP bypass: `system_installd` iliweka post-install script katika SIP-protected folder ndani ya `/tmp`, lakini `/tmp` yenyewe haijalindwa na SIP, hivyo folder ingeweza kubadilishwa kwa ku-mount image juu yake ([Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html)) |
+| CVE-2022-46689 | **MacDirtyCow** — copy-on-write race katika XNU inayowezesha kuandika kwenye read-only files zinazomilikiwa na root ([Worth Doing Badly](https://worthdoingbadly.com/macdirtycow/)) |
 
 ---
 
@@ -93,25 +93,25 @@ Kwa SIP bypass + uwezo wa kuandika SSV, mshambuliaji anaweza:
 
 ### Taarifa za Msingi
 
-**DataVault** ni safu ya ulinzi ya Apple kwa hifadhidata za mfumo zinazohitaji ulinzi. Hata **root hawezi kufikia faili zilizolindwa na DataVault** — ni mchakato tu wenye entitlements maalum wanaoweza kusoma au kuhariri. Hifadhidata zilizolindwa ni pamoja na:
+**DataVault** ni protection layer ya Apple kwa system databases nyeti. Hata **root hawezi kufikia files zinazolindwa na DataVault** — ni processes zenye entitlements maalum pekee zinazoweza kuzisoma au kuzirekebisha. Protected stores zinajumuisha:
 
-| Hifadhidata Iliolindwa | Njia | Yaliyomo |
+| Protected Database | Path | Content |
 |---|---|---|
-| TCC (system) | `/Library/Application Support/com.apple.TCC/TCC.db` | Maamuzi ya faragha ya TCC kwa kiwango cha mfumo |
-| TCC (user) | `~/Library/Application Support/com.apple.TCC/TCC.db` | Maamuzi ya faragha ya TCC kwa kila mtumiaji |
-| Keychain (system) | `/Library/Keychains/System.keychain` | Keychain ya mfumo |
-| Keychain (user) | `~/Library/Keychains/login.keychain-db` | Keychain ya mtumiaji |
+| TCC (system) | `/Library/Application Support/com.apple.TCC/TCC.db` | Maamuzi ya faragha ya TCC kwa mfumo mzima |
+| TCC (user) | `~/Library/Application Support/com.apple.TCC/TCC.db` | Maamuzi ya faragha ya TCC kwa kila user |
+| Keychain (system) | `/Library/Keychains/System.keychain` | System keychain |
+| Keychain (user) | `~/Library/Keychains/login.keychain-db` | User keychain |
 
-Ulinzi wa DataVault unatekelezwa katika **ngazi ya filesystem** kwa kutumia extended attributes na volume protection flags, ukathibitishwa na kernel.
+Ulinzi wa DataVault unatekelezwa katika **filesystem level** kwa kutumia extended attributes na volume protection flags, ambazo zinathibitishwa na kernel.
 
-### Entitlements za DataVault Controller
+### DataVault Controller Entitlements
 ```
 com.apple.private.tcc.manager         — Full TCC database read/write
 com.apple.private.tcc.manager.check-by-audit-token — TCC checks via audit token
 com.apple.private.tcc.allow           — Access specific TCC-protected resources
 com.apple.rootless.storage.TCC        — Write to TCC database (SIP-related)
 ```
-### Kugundua DataVault Controllers
+### Kupata DataVault Controllers
 ```bash
 # Check DataVault protection on the TCC database
 ls -le@ "/Library/Application Support/com.apple.TCC/TCC.db"
@@ -130,11 +130,11 @@ JOIN executable_capabilities ec ON e.id = ec.executable_id
 JOIN capabilities c ON ec.capability_id = c.id
 WHERE c.name = 'datavault_controller';"
 ```
-### Mifano ya Mashambulizi
+### Matukio ya Mashambulizi
 
-#### Marekebisho ya Moja kwa Moja ya TCC Database
+#### Direct TCC Database Modification
 
-Ikiwa mshambuliaji atapata udhibiti wa DataVault controller binary (kwa mfano, kwa njia ya code injection katika process yenye `com.apple.private.tcc.manager`), anaweza **kubadilisha moja kwa moja TCC database** ili kumpa application yoyote ruhusa yoyote ya TCC:
+Ikiwa attacker atavuruga binary ya DataVault controller (kwa mfano, kupitia code injection kwenye process yenye `com.apple.private.tcc.manager`), anaweza **kurekebisha moja kwa moja TCC database** ili kuipa application yoyote ruhusa yoyote ya TCC:
 ```sql
 -- Grant Full Disk Access to a malicious binary (conceptual)
 INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_version)
@@ -145,30 +145,31 @@ INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_
 VALUES ('kTCCServiceCamera', 'com.attacker.malware', 0, 2, 4, 1);
 ```
 > [!CAUTION]
-> Marekebisho ya database ya TCC ni **bypass ya faragha ya mwisho** — yanatoa ruhusa yoyote kimya, bila ombi la mtumiaji au dalili inayoonekana. Kihistoria, minyororo mingi ya privilege escalation kwenye macOS imeisha kwa maandishi kwenye database ya TCC kama payload ya mwisho.
+> Marekebisho ya database ya TCC ni **njia kuu kabisa ya kukwepa ulinzi wa faragha** — hutoa ruhusa yoyote kimya kimya, bila prompt yoyote ya mtumiaji au kiashiria kinachoonekana. Kihistoria, minyororo kadhaa ya macOS privilege escalation imeishia kwenye uandishi wa database ya TCC kama payload ya mwisho.
 
-#### Ufikiaji wa Hifadhidata za Keychain
+#### Keychain Database Access
 
-DataVault pia inalinda faili za kuhifadhi za keychain. Kontrola ya DataVault iliyodhulikazwa inaweza:
+DataVault pia hulinda mafaili ya msingi ya keychain. Controller ya DataVault iliyoathiriwa inaweza:
 
-1. Kusoma faili ghafi za database za keychain
-2. Kutoa vitu vya keychain vilivyosenywa
-3. Ku jaribu decryption offline kwa kutumia nenosiri la mtumiaji au funguo zilizopatikana
+1. Kusoma mafaili ghafi ya database ya keychain
+2. Kutoa vipengee vya keychain vilivyosimbwa
+3. Kujaribu kuvifungua offline kwa kutumia password ya mtumiaji au keys zilizorejeshwa
 
-### CVE za Maisha Halisi Zinazohusiana na DataVault/TCC Bypass
+### Real-World CVEs Involving DataVault/TCC Bypass
 
 | CVE | Description |
 |---|---|
-| CVE-2023-40424 | TCC bypass via symlink to DataVault-protected file |
-| CVE-2023-32364 | Sandbox bypass leading to TCC database modification |
-| CVE-2021-30713 | TCC bypass via XCSSET malware modifying TCC.db |
-| CVE-2020-9934 | TCC bypass via environment variable manipulation |
-| CVE-2020-29621 | Music app TCC bypass reaching DataVault |
+| CVE-2024-44131 | FileProvider symlink race inayomwezesha privileged helper kufikia data inayolindwa na TCC ([Jamf](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)) |
+| CVE-2023-40424 | Kama root, **kuunda mtumiaji mpya ambaye `NFSHomeDirectory` yake inaelekeza kwenye `TCC.db` inayodhibitiwa na attacker**; wakati wa login `tccd` huitumia na grants hutumika, hivyo kufikia data ya watumiaji wengine ([Kandji](https://blog.kandji.io/malware-bypass-tcc)) |
+| CVE-2021-30970 | "powerdir": kubadilisha home dir ya mtumiaji ili kupandikiza TCC.db inayodhibitiwa na attacker ([Microsoft](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)) |
+| CVE-2021-30713 | Hitilafu ya bundle-conclusion inayowezesha app **kurithi TCC grants za donor bundle** bila prompt; ilitumiwa porini na **XCSSET** kupiga screenshot ya desktop ([Jamf](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)) |
+| CVE-2020-9934 | `tccd` iliunda DB path kutoka kwa `$HOME`, hivyo `launchctl setenv HOME` iliielekeza kwenye `TCC.db` inayodhibitiwa na attacker ([Matt Shockley](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)) |
+| CVE-2020-29621 | `coreaudiod` ilikuwa na `com.apple.private.tcc.manager` **na** ilikuwa imezima library validation, hivyo HAL plug-in iliyowekwa kwenye `/Library/Audio/Plug-Ins/HAL` ingeweza kutoa TCC rights kiholela ([Wojciech Reguła](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)) |
 
-## References
+## Marejeo
 
 * [Apple Platform Security — Data Protection](https://support.apple.com/guide/security/data-protection-overview-sece3bee0835/web)
 * [The Nightmare of Apple OTA Updates (APFS Snapshots)](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
-* [Objective-See — TCC Exploitation](https://objectivesee.org/blog/blog_0x4C.html)
+* [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
