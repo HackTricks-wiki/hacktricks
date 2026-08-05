@@ -99,7 +99,7 @@ With SIP bypass + SSV write capability, an attacker can:
 
 ### Basic Information
 
-**DataVault** is Apple's protection layer for sensitive system databases. Even **root cannot access DataVault-protected files** — only processes with specific entitlements can read or modify them. Protected stores include:
+**DataVault** is Apple's protection layer for sensitive system databases. Even **root cannot access DataVault-protected files** — only processes with specific entitlements can read or modify them.<sup>[1]</sup> Protected stores include:
 
 | Protected Database | Path | Content |
 |---|---|---|
@@ -180,8 +180,8 @@ DataVault also protects the keychain backing files. A compromised DataVault cont
 
 ## References
 
-* [Apple Platform Security — Data Protection](https://support.apple.com/guide/security/data-protection-overview-sece3bee0835/web)
-* [The Nightmare of Apple OTA Updates (APFS Snapshots)](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
-* [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
+- [1] [Apple Platform Security — Data Protection](https://support.apple.com/guide/security/data-protection-overview-sece3bee0835/web)
+- [2] [The Nightmare of Apple OTA Updates (APFS Snapshots)](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
+- [3] [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

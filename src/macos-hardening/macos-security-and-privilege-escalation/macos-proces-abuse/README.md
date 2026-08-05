@@ -267,7 +267,7 @@ Note that executables compiled with **`pyinstaller`** won't use these environmen
 
 ### Shield
 
-[**Shield**](https://github.com/theevilbit/Shield) is an open source **EndpointSecurity**-based application that detects and blocks process injection. It is a good reference for which signals are actually observable from ES, since it alerts on:
+[**Shield**](https://github.com/theevilbit/Shield) is an open source **EndpointSecurity**-based application that detects and blocks process injection. It is a good reference for which signals are actually observable from ES, since it alerts on:<sup>[1]</sup>
 
 - **Injection environment variables** on process exec: `DYLD_INSERT_LIBRARIES`, `CFNETWORK_LIBRARY_PATH`, `RAWCAMERA_BUNDLE_PATH` and `ELECTRON_RUN_AS_NODE`.
 - **`task_for_pid`** calls — one process asking for another's task port, which is the prerequisite for injecting into it.
@@ -276,15 +276,16 @@ Note that executables compiled with **`pyinstaller`** won't use these environmen
 
 ### Calls made by other processes
 
-In [**this blog post**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) you can find how it's possible to use the function **`task_name_for_pid`** to get information about other **processes injecting code in a process** and then getting information about that other process.
+In [**this blog post**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) you can find how it's possible to use the function **`task_name_for_pid`** to get information about other **processes injecting code in a process** and then getting information about that other process.<sup>[4]</sup>
 
 Note that to call that function you need to be **the same uid** as the one running the process or **root** (and it returns info about the process, not a way to inject code).
 
 ## References
 
-- [Shield — open source macOS process-injection detection (GitHub)](https://github.com/theevilbit/Shield)
-- [Apple Developer — EndpointSecurity framework](https://developer.apple.com/documentation/endpointsecurity)
-- [https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
+- [1] [Shield — open source macOS process-injection detection (GitHub)](https://github.com/theevilbit/Shield)
+- [2] [Apple Developer — EndpointSecurity framework](https://developer.apple.com/documentation/endpointsecurity)
+- [3] [Metnew - Why Electron apps can't store your secrets confidentially: --inspect option](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
+- [4] [Scott Knight - Detecting task modifications](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
 

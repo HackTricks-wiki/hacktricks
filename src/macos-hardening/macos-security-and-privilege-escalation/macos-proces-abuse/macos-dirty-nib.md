@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Dirty NIB refers to abusing Interface Builder files (.xib/.nib) inside a signed macOS app bundle to execute attacker-controlled logic inside the target process, thereby inheriting its entitlements and TCC permissions. This technique was originally documented by xpn (MDSec) and later generalized and significantly expanded by Sector7, who also covered Apple’s mitigations in macOS 13 Ventura and macOS 14 Sonoma. For background and deep dives, see the references at the end.
+Dirty NIB refers to abusing Interface Builder files (.xib/.nib) inside a signed macOS app bundle to execute attacker-controlled logic inside the target process, thereby inheriting its entitlements and TCC permissions. This technique was originally documented by xpn (MDSec) and later generalized and significantly expanded by Sector7, who also covered Apple’s mitigations in macOS 13 Ventura and macOS 14 Sonoma.<sup>[1][2]</sup> For background and deep dives, see the references at the end.
 
 > TL;DR
 > • Before macOS 13 Ventura: replacing a bundle’s MainMenu.nib (or another nib loaded at startup) could reliably achieve process injection and often privilege escalation.  
@@ -54,11 +54,11 @@ Minimal example of an auto‑trigger chain inside a .xib (abridged for clarity):
   <menuItem id="T2"><connections><binding keyPath="_corePerformAction" destination="C2"/></connections></menuItem>
 </objects>
 ```
-This achieves arbitrary AppleScript execution in the target process upon nib load. Advanced chains can:
+This achieves arbitrary AppleScript execution in the target process upon nib load.<sup>[1]</sup> Advanced chains can:
 - Instantiate arbitrary AppKit classes (e.g., `NSTask`) and call zero‑argument methods like `-launch`.
 - Call arbitrary selectors with object arguments via the binding trick above.
 - Load AppleScriptObjC.framework to bridge into Objective‑C and even call selected C APIs.
-- On older systems that still include Python.framework, bridge into Python and then use `ctypes` to call arbitrary C functions (Sector7’s research).
+- On older systems that still include Python.framework, bridge into Python and then use `ctypes` to call arbitrary C functions (Sector7’s research).<sup>[2]</sup>
 
 3) Replace the app’s nib
 - Copy target.app to a writable location, replace e.g., `Contents/Resources/MainMenu.nib` with the malicious nib, and run target.app. Pre‑Ventura, after a one‑time Gatekeeper assessment, subsequent launches only performed shallow signature checks, so non‑executable resources (like .nib) weren’t re‑validated.
@@ -72,7 +72,7 @@ display dialog theDialogText
 
 ## Modern macOS protections (Ventura/Monterey/Sonoma/Sequoia)
 
-Apple introduced several systemic mitigations that dramatically reduce the viability of Dirty NIB in modern macOS:
+Apple introduced several systemic mitigations that dramatically reduce the viability of Dirty NIB in modern macOS:<sup>[2]</sup>
 - First‑launch deep verification and bundle protection (macOS 13 Ventura)
   - On first run of any app (quarantined or not), a deep signature check covers all bundle resources. Afterwards, the bundle becomes protected: only apps from the same developer (or explicitly allowed by the app) may modify its contents. Other apps require the new TCC “App Management” permission to write into another app’s bundle.
 - Launch Constraints (macOS 13 Ventura)
@@ -146,7 +146,7 @@ Learn more about Gatekeeper, quarantine and provenance changes that affect this 
 
 ## References
 
-- xpn – DirtyNIB (original write‑up with Pages example): https://blog.xpnsec.com/dirtynib/
-- Sector7 – Bringing process injection into view(s): exploiting all macOS apps using nib files (April 5, 2024): https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/
+- [1] [xpn – DirtyNIB (original write‑up with Pages example)](https://blog.xpnsec.com/dirtynib/)
+- [2] [Sector7 – Bringing process injection into view(s): exploiting all macOS apps using nib files (April 5, 2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
 
 {{#include ../../../banners/hacktricks-training.md}}

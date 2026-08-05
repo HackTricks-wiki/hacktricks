@@ -16,7 +16,7 @@ The `--load-extension` flag auto-loads unpacked extensions (comma-separated path
 
 #### `--remote-debugging-port` / `--remote-debugging-pipe` Flags
 
-These switches expose the Chrome DevTools Protocol (CDP) over TCP or a pipe so external tooling can drive the browser. Google observed widespread infostealer abuse of this interface and, beginning with Chrome 136 (March 2025), the switches are ignored for the default profile unless the browser is launched with a non-standard `--user-data-dir`. This enforces App-Bound Encryption on real profiles, but attackers can still spawn a fresh profile, coerce the victim to authenticate inside it (phishing/triage assistance), and harvest cookies, tokens, device trust states, or WebAuthn registrations via CDP.
+These switches expose the Chrome DevTools Protocol (CDP) over TCP or a pipe so external tooling can drive the browser. Google observed widespread infostealer abuse of this interface and, beginning with Chrome 136 (March 2025), the switches are ignored for the default profile unless the browser is launched with a non-standard `--user-data-dir`. This enforces App-Bound Encryption on real profiles, but attackers can still spawn a fresh profile, coerce the victim to authenticate inside it (phishing/triage assistance), and harvest cookies, tokens, device trust states, or WebAuthn registrations via CDP.<sup>[5]</sup>
 
 #### `--user-data-dir` Flag
 
@@ -28,9 +28,9 @@ This switch bypasses the camera/mic permission prompt so any page that calls `ge
 
 ## Delivery & Relaunch Patterns Seen in the Wild
 
-CDP abuse is commonly a **post-exploitation** stage rather than the initial payload. A recent macOS developer-targeting campaign used a poisoned Xcode **`Run Script` build phase** (`PBXShellScriptBuildPhase`) so code executed only when the victim **built** the project, not when they merely cloned or opened it. After that first execution, the malware also infected other `.xcodeproj` trees, added malicious Git `pre-commit` hooks, and searched ZIP archives for more Xcode projects.
+CDP abuse is commonly a **post-exploitation** stage rather than the initial payload. A recent macOS developer-targeting campaign used a poisoned Xcode **`Run Script` build phase** (`PBXShellScriptBuildPhase`) so code executed only when the victim **built** the project, not when they merely cloned or opened it. After that first execution, the malware also infected other `.xcodeproj` trees, added malicious Git `pre-commit` hooks, and searched ZIP archives for more Xcode projects.<sup>[3]</sup>
 
-For Chromium abuse this matters because the attacker doesn't need to patch the browser binary itself. A short-lived build-phase / `osascript` stager can instead install a **browser wrapper** (LaunchAgent, login item, Dock entry, trojanized app launcher, etc.) that reopens the legitimate browser with attacker-controlled flags every time the user starts it.
+For Chromium abuse this matters because the attacker doesn't need to patch the browser binary itself. A short-lived build-phase / `osascript` stager can instead install a **browser wrapper** (LaunchAgent, login item, Dock entry, trojanized app launcher, etc.) that reopens the legitimate browser with attacker-controlled flags every time the user starts it.<sup>[3]</sup>
 
 > [!TIP]
 > On developer endpoints, inspect `.pbxproj` files, `.git/hooks/pre-commit`, and ZIPs containing `.xcodeproj` for unexpected `curl`, `osascript`, `xxd`, nested `base64`, or Chrome relaunch logic.
@@ -41,7 +41,7 @@ Once Chrome is relaunched with a dedicated `--user-data-dir` and `--remote-debug
 
 - **Cookie/session theft:** `Network.getAllCookies` and `Storage.getCookies` return HttpOnly values even when App-Bound encryption would normally block filesystem access, because CDP asks the running browser to decrypt them.
 - **Permission tampering:** `Browser.grantPermissions` and `Emulation.setGeolocationOverride` let you bypass camera/mic prompts (especially when combined with `--use-fake-ui-for-media-stream`) or falsify location-based security checks.
-- **Keystroke/script injection:** `Runtime.evaluate` executes arbitrary JavaScript inside the active tab, enabling credential lifting, DOM patching, or injecting persistence beacons that survive navigation.
+- **Keystroke/script injection:** `Runtime.evaluate` executes arbitrary JavaScript inside the active tab, enabling credential lifting, DOM patching, or injecting persistence beacons that survive navigation.<sup>[1]</sup>
 - **Live exfiltration:** `Network.webRequestWillBeSentExtraInfo` and `Fetch.enable` intercept authenticated requests/responses in real time without touching disk artifacts.
 
 ```javascript
@@ -58,7 +58,7 @@ import CDP from 'chrome-remote-interface';
 })();
 ```
 
-Because Chrome 136 blocks CDP on the default profile, copy/pasting the victim's existing `~/Library/Application Support/Google/Chrome` directory to a staging path no longer yields decrypted cookies. Instead, social-engineer the user into authenticating inside the instrumented profile (e.g., "helpful" support session) or capture MFA tokens in transit via CDP-controlled network hooks.
+Because Chrome 136 blocks CDP on the default profile, copy/pasting the victim's existing `~/Library/Application Support/Google/Chrome` directory to a staging path no longer yields decrypted cookies. Instead, social-engineer the user into authenticating inside the instrumented profile (e.g., "helpful" support session) or capture MFA tokens in transit via CDP-controlled network hooks.<sup>[5]</sup>
 
 ### XCSSET-style CDP Backdoor Chain
 
@@ -66,9 +66,9 @@ A practical malware pattern is:
 
 1. Restart the userland implant or wrapper each time Chrome is launched.
 2. Spawn the legitimate browser with `--remote-debugging-port=<port>` and, on Chrome 136+, usually a paired non-default `--user-data-dir=<dir>`.
-3. Start a helper that connects to the local CDP WebSocket and registers a pre-document hook with `Page.addScriptToEvaluateOnNewDocument`.
+3. Start a helper that connects to the local CDP WebSocket and registers a pre-document hook with `Page.addScriptToEvaluateOnNewDocument`.<sup>[2]</sup>
 
-That helper can inject JavaScript **before** site code runs, which is ideal for hooking `window.fetch`, `XMLHttpRequest`, wallet providers, or autofill flows without patching files on disk.
+That helper can inject JavaScript **before** site code runs, which is ideal for hooking `window.fetch`, `XMLHttpRequest`, wallet providers, or autofill flows without patching files on disk.<sup>[3]</sup>
 
 ```javascript
 await Page.enable();
@@ -85,11 +85,11 @@ await Page.addScriptToEvaluateOnNewDocument({
 Runtime.consoleAPICalled(({args}) => { /* helper parses __HT__ */ });
 ```
 
-A stronger variant turns the browser into a **host command bridge**: injected JavaScript emits a delimiter-tagged `console.log`, the local helper watches `Runtime.consoleAPICalled`, strips the marker, executes the remainder through the host shell (for example Go's `exec.Command`), and returns stdout/stderr over the attacker's WebSocket. This upgrades tab-level script execution into a mostly fileless reverse shell.
+A stronger variant turns the browser into a **host command bridge**: injected JavaScript emits a delimiter-tagged `console.log`, the local helper watches `Runtime.consoleAPICalled`, strips the marker, executes the remainder through the host shell (for example Go's `exec.Command`), and returns stdout/stderr over the attacker's WebSocket. This upgrades tab-level script execution into a mostly fileless reverse shell.<sup>[3]</sup>
 
 ## Extension-Based Injection via Debugger API
 
-The 2023 "Chrowned by an Extension" research demonstrated that a malicious extension using the `chrome.debugger` API can attach to any tab and gain the same DevTools powers as `--remote-debugging-port`. That breaks the original isolation assumptions (extensions stay in their context) and enables:
+The 2023 "Chrowned by an Extension" research demonstrated that a malicious extension using the `chrome.debugger` API can attach to any tab and gain the same DevTools powers as `--remote-debugging-port`.<sup>[6]</sup> That breaks the original isolation assumptions (extensions stay in their context) and enables:
 
 - Silent cookie and credential theft with `Network.getAllCookies`/`Fetch.getResponseBody`.
 - Modification of site permissions (camera, microphone, geolocation) and security interstitial bypass, letting phishing pages impersonate Chrome dialogs.
@@ -109,7 +109,7 @@ chrome.tabs.onUpdated.addListener((tabId, info) => {
 });
 ```
 
-The extension can also subscribe to `Debugger.paused` events to read JavaScript variables, patch inline scripts, or drop custom breakpoints that survive navigation. Because everything runs inside the user's GUI session, Gatekeeper and TCC are not triggered, making this technique ideal for malware that already achieved execution under the user context.
+The extension can also subscribe to `Debugger.paused` events to read JavaScript variables, patch inline scripts, or drop custom breakpoints that survive navigation. Because everything runs inside the user's GUI session, Gatekeeper and TCC are not triggered, making this technique ideal for malware that already achieved execution under the user context.<sup>[6]</sup>
 
 ## Detection & Hunting
 
@@ -152,11 +152,11 @@ Find more examples in the tools links.
 
 ## References
 
-- [https://chromedevtools.github.io/devtools-protocol/v8/Runtime/](https://chromedevtools.github.io/devtools-protocol/v8/Runtime/)
-- [https://chromedevtools.github.io/devtools-protocol/tot/Page/](https://chromedevtools.github.io/devtools-protocol/tot/Page/)
-- [https://unit42.paloaltonetworks.com/xcsset-v40-malware-analysis/](https://unit42.paloaltonetworks.com/xcsset-v40-malware-analysis/)
-- [https://twitter.com/RonMasas/status/1758106347222995007](https://twitter.com/RonMasas/status/1758106347222995007)
-- [https://developer.chrome.com/blog/remote-debugging-port](https://developer.chrome.com/blog/remote-debugging-port)
-- [https://arxiv.org/abs/2305.11506](https://arxiv.org/abs/2305.11506)
+- [1] [Chrome DevTools Protocol - Runtime domain](https://chromedevtools.github.io/devtools-protocol/v8/Runtime/)
+- [2] [Chrome DevTools Protocol - Page domain](https://chromedevtools.github.io/devtools-protocol/tot/Page/)
+- [3] [The Xcode Assassin Returns: A Deep Dive Into the Latest XCSSET Version - Unit 42](https://unit42.paloaltonetworks.com/xcsset-v40-malware-analysis/)
+- [4] [Ron Masas (@RonMasas) on X](https://twitter.com/RonMasas/status/1758106347222995007)
+- [5] [Changes to remote debugging switches to improve security - Chrome for Developers](https://developer.chrome.com/blog/remote-debugging-port)
+- [6] [Chrowned by an Extension: Abusing the Chrome DevTools Protocol through the Debugger API (arXiv:2305.11506)](https://arxiv.org/abs/2305.11506)
 
 {{#include ../../../banners/hacktricks-training.md}}

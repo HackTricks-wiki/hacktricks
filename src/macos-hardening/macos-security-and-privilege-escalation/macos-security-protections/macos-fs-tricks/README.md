@@ -4,15 +4,15 @@
 
 ## POSIX permissions combinations
 
-For a **directory**, the three permission bits mean something different from what they mean on a regular file. `chmod(1)` calls the execute bit "**search**" when it is applied to a directory:
+For a **directory**, the three permission bits mean something different from what they mean on a regular file. `chmod(1)` calls the execute bit "**search**" when it is applied to a directory:<sup>[2]</sup>
 
 > `0100` For files, allow execution by owner. For directories, allow the owner to **search** in the directory.
 
 - **read** - you can **enumerate** the directory entries (list the names).
 - **write** - you can **create, rename and delete entries** in the directory. Note this is a property of the *containing* directory, not of the file: you can delete a file you cannot read or write, as long as you can write its parent directory.
   - To delete a **subdirectory** it must be empty, which in turn requires enough rights to remove everything inside it.
-  - If the directory has the **sticky bit** (`S_ISVTX`, like `/tmp`) this is restricted — POSIX states that a process may then remove or rename files in it only if it owns the file, owns the directory, or has appropriate privileges.
-- **execute / search** - you are **allowed to traverse** the directory. Pathname resolution locates each component "in the directory specified by its predecessor", so **losing search rights on any single component of the path prefix makes everything below it unreachable by path**, even if the leaf file itself is world-readable.
+  - If the directory has the **sticky bit** (`S_ISVTX`, like `/tmp`) this is restricted — POSIX states that a process may then remove or rename files in it only if it owns the file, owns the directory, or has appropriate privileges.<sup>[1]</sup>
+- **execute / search** - you are **allowed to traverse** the directory. Pathname resolution locates each component "in the directory specified by its predecessor", so **losing search rights on any single component of the path prefix makes everything below it unreachable by path**, even if the leaf file itself is world-readable.<sup>[1]</sup>
 
 ### Dangerous Combinations
 
@@ -54,9 +54,9 @@ Check in the other sections where an attacker could **abuse an arbitrary write t
 
 ### Open `O_NOFOLLOW`
 
-Per [`open(2)`](https://keith.github.io/xcode-man-pages/open.2.html): *"If `O_NOFOLLOW` is used in the mask and the target file passed to `open()` is a symbolic link then the `open()` will fail."* Only the **final** component is checked — every **intermediate** component is still resolved and followed. So a developer who "protected" a write with `O_NOFOLLOW` can still be attacked by planting a symlink on any **parent directory** of the target path.
+Per [`open(2)`](https://keith.github.io/xcode-man-pages/open.2.html): *"If `O_NOFOLLOW` is used in the mask and the target file passed to `open()` is a symbolic link then the `open()` will fail."* Only the **final** component is checked — every **intermediate** component is still resolved and followed. So a developer who "protected" a write with `O_NOFOLLOW` can still be attacked by planting a symlink on any **parent directory** of the target path.<sup>[3]</sup>
 
-The same man page documents the flags that actually close that gap:
+The same man page documents the flags that actually close that gap:<sup>[3]</sup>
 
 - **`O_NOFOLLOW_ANY`** — *"if ... any component of the path passed to `open()` is a symbolic link then the `open()` will fail."*
 - **`O_RESOLVE_BENEATH`** — *"if ... the specified path resolution escapes the directory associated with the fd then the `openat()` will fail."*
@@ -87,7 +87,7 @@ Example:
 
 If a call to `open` doesn't have the flag `O_CLOEXEC` the file descriptor will be inherited by the child process. So, if a privileged process opens a privileged file and executes a process controlled by the attacker, the attacker will **inherit the FD over the privileged file**.
 
-The canonical example is the **`DYLD_PRINT_TO_FILE` LPE in OS X 10.10** ([SektionEins](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html)):
+The canonical example is the **`DYLD_PRINT_TO_FILE` LPE in OS X 10.10** ([SektionEins](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html)):<sup>[4]</sup>
 
 - `dyld` honoured `DYLD_PRINT_TO_FILE=/path` even in **restricted (suid root) binaries**, because that particular variable was parsed outside of `processDyldEnvironmentVariable()`.
 - It did `open(loggingPath, O_WRONLY | O_CREAT | O_APPEND, 0644)`, so it **created a root-owned file at an arbitrary path**.
@@ -129,7 +129,7 @@ ls -lO /tmp/asd
 
 ### File systems without xattr support
 
-Not every file system macOS can mount stores **extended attributes** natively. HFS+ and APFS do; **FAT32, exFAT and (most) NFS mounts do not** — macOS emulates them by writing an **AppleDouble** side file named `._<filename>` ([The Eclectic Light Company](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)).
+Not every file system macOS can mount stores **extended attributes** natively. HFS+ and APFS do; **FAT32, exFAT and (most) NFS mounts do not** — macOS emulates them by writing an **AppleDouble** side file named `._<filename>` ([The Eclectic Light Company](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)).<sup>[5]</sup>
 
 That matters for quarantine, because the xattr only survives if it can actually be written **and read back** from the same volume:
 
@@ -173,7 +173,7 @@ ls -le /tmp/test
 
 In the [**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) it's possible to see that the ACL text representation stored inside the xattr called **`com.apple.acl.text`** is going to be set as ACL in the decompressed file. So, if you compressed an application into a zip file with **AppleDouble** file format with an ACL that prevents other xattrs to be written to it... the quarantine xattr wasn't set into de application:
 
-Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.
+Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.<sup>[6]</sup>
 
 To replicate this we first need to get the correct acl string:
 
@@ -208,11 +208,11 @@ macos-xattr-acls-extra-stuff.md
 
 ### Bypass platform binaries checks
 
-Some security checks check if the binary is a **platform binary**, for example to allow to connect to a XPC service. However, as exposed in on bypass in https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/ it's possible to bypass this check by getting a platform binary (like /bin/ls) and inject the exploit via dyld using en env variable `DYLD_INSERT_LIBRARIES`.
+Some security checks check if the binary is a **platform binary**, for example to allow to connect to a XPC service. However, as exposed in on bypass in https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/ it's possible to bypass this check by getting a platform binary (like /bin/ls) and inject the exploit via dyld using en env variable `DYLD_INSERT_LIBRARIES`.<sup>[7]</sup>
 
 ### Bypass flags `CS_REQUIRE_LV` and `CS_FORCED_LV`
 
-It's possible for an executing binary to modify it's own flags to bypass checks with a code such as:
+It's possible for an executing binary to modify it's own flags to bypass checks with a code such as:<sup>[7]</sup>
 
 ```c
 // Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
@@ -356,7 +356,7 @@ You can also write files in **`/etc/paths.d`** to load new folders into the `PAT
 
 ### cups-files.conf
 
-This technique was used in [this writeup](https://www.kandji.io/blog/macos-audit-story-part1).
+This technique was used in [this writeup](https://www.kandji.io/blog/macos-audit-story-part1).<sup>[8]</sup>
 
 Create the file `/etc/cups/cups-files.conf` with the following content:
 
@@ -511,12 +511,14 @@ This feature is particularly useful for preventing certain classes of security v
 
 ## References
 
-- [POSIX.1-2024 — Base Definitions, Ch. 4 (File Access Permissions, Directory Protection, Pathname Resolution)](https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html)
-- [`chmod(1)` man page](https://keith.github.io/xcode-man-pages/chmod.1.html) (directory search/execute bit, ACL inheritance flags)
-- [`open(2)` man page](https://keith.github.io/xcode-man-pages/open.2.html) (`O_NOFOLLOW`, `O_NOFOLLOW_ANY`, `O_RESOLVE_BENEATH`)
-- [SektionEins - OS X 10.10 DYLD_PRINT_TO_FILE Local Privilege Escalation](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html) (leaked FD without close-on-exec)
-- [The Eclectic Light Company - Which file systems and cloud services preserve extended attributes?](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)
-- [Microsoft - Gatekeeper's Achilles heel: unearthing a macOS vulnerability](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [1] [POSIX.1-2024 — Base Definitions, Ch. 4 (File Access Permissions, Directory Protection, Pathname Resolution)](https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html)
+- [2] [`chmod(1)` man page](https://keith.github.io/xcode-man-pages/chmod.1.html) (directory search/execute bit, ACL inheritance flags)
+- [3] [`open(2)` man page](https://keith.github.io/xcode-man-pages/open.2.html) (`O_NOFOLLOW`, `O_NOFOLLOW_ANY`, `O_RESOLVE_BENEATH`)
+- [4] [SektionEins - OS X 10.10 DYLD_PRINT_TO_FILE Local Privilege Escalation](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html) (leaked FD without close-on-exec)
+- [5] [The Eclectic Light Company - Which file systems and cloud services preserve extended attributes?](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)
+- [6] [Microsoft - Gatekeeper's Achilles heel: unearthing a macOS vulnerability](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [7] [Mickey (Jhftss) - A New Era of macOS Sandbox Escapes](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)
+- [8] [Kandji - Uncovering Apple Vulnerabilities: The diskarbitrationd and storagekitd Audit Story Part 1](https://www.kandji.io/blog/macos-audit-story-part1)
 
 {{#include ../../../../banners/hacktricks-training.md}}
 

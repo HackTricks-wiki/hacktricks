@@ -149,7 +149,7 @@ Applications don't need to be executed to become interesting. A dropped or clone
 This is useful both for **persistence / hijacking research** and for **initial-access chains**:
 
 - A malicious app can claim a **rare extension** or a **custom UTI** and wait for the victim to open the lure file.
-- A malicious app can register a **custom URL scheme** reachable from a browser, Electron app, office document, chat client, or another helper app.
+- A malicious app can register a **custom URL scheme** reachable from a browser, Electron app, office document, chat client, or another helper app.<sup>[1]</sup>
 - If you edit an app bundle after building it, you can force LaunchServices to re-parse it with:
 
 ```bash
@@ -161,12 +161,13 @@ When testing suspicious bundles, pay special attention to:
 - **`LSHandlerRank=Owner`** on uncommon types.
 - **Broad `CFBundleDocumentTypes`** arrays claiming many extensions.
 - **Helper / wrapper apps** whose only interesting behavior is behind a document or URI handler.
-- **Shortcut-like files** (`.webloc`, `.inetloc`, `.fileloc`) that end up dispatching into LaunchServices. For `.fileloc`-style tricks and related Gatekeeper angles, check [this other page](macos-security-protections/macos-fs-tricks/README.md).
+- **Shortcut-like files** (`.webloc`, `.inetloc`, `.fileloc`) that end up dispatching into LaunchServices. For `.fileloc`-style tricks and related Gatekeeper angles, check [this other page](macos-security-protections/macos-fs-tricks/README.md).<sup>[2]</sup>
 
 If your goal is passive code-execution from merely browsing to a folder or selecting a file, also check the dedicated page for [Quick Look generators](macos-proces-abuse/macos-quicklook-generators.md), as that is a different but closely related file-handler surface.
 
 ## References
 
-- [Objective-See - Remote Mac Exploitation Via Custom URL Schemes](https://objective-see.org/blog/blog_0x38.html)
-- [Jamf Threat Labs - Bypassing the Gate: A closer look into Gatekeeper flaws on macOS](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
+- [1] [Objective-See - Remote Mac Exploitation Via Custom URL Schemes](https://objective-see.org/blog/blog_0x38.html)
+- [2] [Jamf Threat Labs - Bypassing the Gate: A closer look into Gatekeeper flaws on macOS](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
+
 {{#include ../../banners/hacktricks-training.md}}

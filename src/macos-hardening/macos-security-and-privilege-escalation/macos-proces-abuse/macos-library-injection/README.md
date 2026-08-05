@@ -25,7 +25,7 @@ This technique may be also **used as an ASEP technique** as every application in
 >
 > - The binary is `setuid/setgid`
 > - The Mach-O has a **`__RESTRICT/__restrict`** section
-> - The binary is signed with the hardened runtime and AMFI does not grant it the "path/print variables" permissions, i.e. it lacks [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)
+> - The binary is signed with the hardened runtime and AMFI does not grant it the "path/print variables" permissions, i.e. it lacks [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)<sup>[3]</sup>
 >   - Check **entitlements** of a binary with: `codesign -dv --entitlements :- </path/to/bin>`
 >
 > In current `dyld` this is no longer decided by `dyld` alone: `ProcessConfig::Security::Security()` asks **AMFI** via `amfi_check_dyld_policy_self()` and then calls `pruneEnvVars()`. The exact code is walked through in [Prune `DYLD_*` env variables](#prune-dyld_-env-variables) below.
@@ -224,7 +224,7 @@ If a **privileged binary/app** (like a SUID or some binary with powerful entitle
 
 ## Prune `DYLD_*` env variables
 
-Older `dyld` releases (`dyld2.cpp`) decided this in-process with `issetugid()`, `hasRestrictedSegment()` and `csops(CS_OPS_STATUS)`. In **current `dyld` the decision is delegated to AMFI**, and the code lives in `ProcessConfig::Security::Security()` in `dyld/DyldProcessConfig.cpp`:
+Older `dyld` releases (`dyld2.cpp`) decided this in-process with `issetugid()`, `hasRestrictedSegment()` and `csops(CS_OPS_STATUS)`. In **current `dyld` the decision is delegated to AMFI**, and the code lives in `ProcessConfig::Security::Security()` in `dyld/DyldProcessConfig.cpp`:<sup>[1]</sup>
 
 ```cpp
     const uint64_t amfiFlags = getAMFI(process, syscall);
@@ -266,7 +266,7 @@ uint64_t amfiFlags = sys.amfiFlags(proc.mainExecutableHdr->isRestricted(),
                                    proc.mainExecutableHdr->isFairPlayEncrypted(fpTextOffset, fpSize));
 ```
 
-where `isRestricted()` is literally the `__RESTRICT` segment check (`mach_o/UnsafeHeader.cpp`):
+where `isRestricted()` is literally the `__RESTRICT` segment check (`mach_o/UnsafeHeader.cpp`):<sup>[2]</sup>
 
 ```cpp
 bool UnsafeHeader::isRestricted() const
@@ -360,10 +360,10 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 
 ## References
 
-- [dyld — `dyld/DyldProcessConfig.cpp` (`ProcessConfig::Security`, `getAMFI`, `pruneEnvVars`)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/DyldProcessConfig.cpp)
-- [dyld — `mach_o/UnsafeHeader.cpp` (`isRestricted()` / `__RESTRICT` check)](https://github.com/apple-oss-distributions/dyld/blob/main/mach_o/UnsafeHeader.cpp)
-- [Apple Developer — `com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)
-- [dyld — `dyld/dyldMain.cpp` (process startup and library insertion)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/dyldMain.cpp)
+- [1] [dyld — `dyld/DyldProcessConfig.cpp` (`ProcessConfig::Security`, `getAMFI`, `pruneEnvVars`)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/DyldProcessConfig.cpp)
+- [2] [dyld — `mach_o/UnsafeHeader.cpp` (`isRestricted()` / `__RESTRICT` check)](https://github.com/apple-oss-distributions/dyld/blob/main/mach_o/UnsafeHeader.cpp)
+- [3] [Apple Developer — `com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)
+- [4] [dyld — `dyld/dyldMain.cpp` (process startup and library insertion)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/dyldMain.cpp)
 
 {{#include ../../../../banners/hacktricks-training.md}}
 

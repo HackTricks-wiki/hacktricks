@@ -35,7 +35,7 @@ This entitlement allows to **load frameworks, plug-ins, or libraries without bei
 
 This entitlement is very similar to **`com.apple.security.cs.disable-library-validation`** but **instead** of **directly disabling** library validation, it allows the process to **call a `csops` system call to disable it** at runtime.
 
-The entitlement name is hardcoded in XNU next to the `csops` operation that consumes it:
+The entitlement name is hardcoded in XNU next to the `csops` operation that consumes it:<sup>[2]</sup>
 
 ```c
 /* bsd/sys/codesign.h */
@@ -44,7 +44,7 @@ The entitlement name is hardcoded in XNU next to the `csops` operation that cons
 #define CS_OPS_CLEAR_LV     15  /* clear the library validation flag */
 ```
 
-The kernel handler for `CS_OPS_CLEAR_LV` (`bsd/kern/kern_proc.c`) shows exactly how narrow the primitive is:
+The kernel handler for `CS_OPS_CLEAR_LV` (`bsd/kern/kern_proc.c`) shows exactly how narrow the primitive is:<sup>[3]</sup>
 
 ```c
 case CS_OPS_CLEAR_LV: {
@@ -298,8 +298,8 @@ For detailed IOKit/DriverKit exploitation, see:
 
 ## References
 
-- [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
-- [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` operations and `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
-- [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` handler)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
+- [1] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
+- [2] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` operations and `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [3] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` handler)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
 
 {{#include ../../../banners/hacktricks-training.md}}

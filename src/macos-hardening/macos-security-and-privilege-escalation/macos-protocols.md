@@ -38,7 +38,7 @@ sudo launchctl print-disabled system | egrep 'com.apple.screensharing|com.apple.
 
 ### Pentesting ARD
 
-Apple Remote Desktop (ARD) is an enhanced version of [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) tailored for macOS, offering additional features. A notable vulnerability in ARD is its authentication method for the control screen password, which only uses the first 8 characters of the password, making it prone to [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) with tools like Hydra or [GoRedShell](https://github.com/ahhh/GoRedShell/), as there are no default rate limits.
+Apple Remote Desktop (ARD) is an enhanced version of [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) tailored for macOS, offering additional features. A notable vulnerability in ARD is its authentication method for the control screen password, which only uses the first 8 characters of the password, making it prone to [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) with tools like Hydra or [GoRedShell](https://github.com/ahhh/GoRedShell/), as there are no default rate limits.<sup>[3]</sup>
 
 Vulnerable instances can be identified using **nmap**'s `vnc-info` script. Services supporting `VNC Authentication (2)` are especially susceptible to brute force attacks due to the 8-character password truncation.
 
@@ -54,11 +54,11 @@ From an operator perspective, **Monterey 12.1+ changed remote-enablement workflo
 
 #### Apple Screen Sharing (RFB 003.889 / security type 36) pre-auth file-copy abuse
 
-Recent `screensharingd` research showed that Apple Screen Sharing is not always just classic VNC auth: newer builds speak **RFB `003.889`** and advertise **security type `36`**, where **SRP** authenticates first and **ChaCha20-Poly1305** is only installed after `ccsrp_server_verify_session` succeeds. The public write-up reports the bug as fixed in **macOS Tahoe 26.6** (**July 27, 2026**).
+Recent `screensharingd` research showed that Apple Screen Sharing is not always just classic VNC auth: newer builds speak **RFB `003.889`** and advertise **security type `36`**, where **SRP** authenticates first and **ChaCha20-Poly1305** is only installed after `ccsrp_server_verify_session` succeeds. The public write-up reports the bug as fixed in **macOS Tahoe 26.6** (**July 27, 2026**).<sup>[8][9]</sup>
 
-A useful pattern to remember is the **stale-status parser bypass**: after a successful 4-byte length read, every oversized/error branch must return a fresh error. On affected builds, a big-endian SRP frame length **`>= 32768`** makes the rejection path reuse the previous `NetBufferRead` success (`0`), so the caller sets the session as authenticated even though no password proof ran and no transport crypto was installed. Because unread bytes stay in the shared socket buffer, an attacker can **pipeline malformed SRP data and post-auth RFB messages in the same TCP burst** and get them parsed as **cleartext authenticated traffic**.
+A useful pattern to remember is the **stale-status parser bypass**: after a successful 4-byte length read, every oversized/error branch must return a fresh error. On affected builds, a big-endian SRP frame length **`>= 32768`** makes the rejection path reuse the previous `NetBufferRead` success (`0`), so the caller sets the session as authenticated even though no password proof ran and no transport crypto was installed. Because unread bytes stay in the shared socket buffer, an attacker can **pipeline malformed SRP data and post-auth RFB messages in the same TCP burst** and get them parsed as **cleartext authenticated traffic**.<sup>[8]</sup>
 
-After the bypass, Apple's proprietary **file-copy** message **`0x22`** becomes a **root file read/write primitive** because `screensharingd` runs as root:
+After the bypass, Apple's proprietary **file-copy** message **`0x22`** becomes a **root file read/write primitive** because `screensharingd` runs as root:<sup>[8]</sup>
 
 ```text
 [u8 0x22][u8 sub][be32 L]
@@ -71,9 +71,9 @@ After the bypass, Apple's proprietary **file-copy** message **`0x22`** becomes a
 - Different `sid` values let you pipeline several transactions in one connection
 - In `kind=101` (`NewItem`), set byte `14` / `arg[0]` to `0x01` for a regular file, payload offset `+42` to a **non-zero** big-endian file size, and payload offset `+0x5a` to the desired Unix mode (`0600` if targeting a crontab)
 
-Interesting post-write pivots on writable paths include **`/etc/sudoers.d/`**, **`/etc/zshenv`**, **`/Library/LaunchDaemons/`**, and **`/var/root/.ssh/authorized_keys`**. **SIP does not stop the auth bypass or root file read**, but it does block some write targets such as **`/var/at`**, so cron-based execution only works with SIP disabled. On default SIP-enabled hosts, think in terms of **"root file write into privileged auto-consumed files"** rather than immediate code execution.
+Interesting post-write pivots on writable paths include **`/etc/sudoers.d/`**, **`/etc/zshenv`**, **`/Library/LaunchDaemons/`**, and **`/var/root/.ssh/authorized_keys`**. **SIP does not stop the auth bypass or root file read**, but it does block some write targets such as **`/var/at`**, so cron-based execution only works with SIP disabled. On default SIP-enabled hosts, think in terms of **"root file write into privileged auto-consumed files"** rather than immediate code execution.<sup>[8]</sup>
 
-Another SRP pitfall from the same research: servers must validate **`A mod N != 0`** (per RFC 5054), not just `A > 0`. Accepting **`A = N`** can force the shared secret to zero and undermine password verification.
+Another SRP pitfall from the same research: servers must validate **`A mod N != 0`** (per RFC 5054), not just `A > 0`. Accepting **`A = N`** can force the shared secret to zero and undermine password verification.<sup>[8][10]</sup>
 
 **Detection ideas**
 
@@ -84,7 +84,7 @@ Another SRP pitfall from the same research: servers must validate **`A mod N != 
 
 ### Pentesting Remote Apple Events (RAE / EPPC)
 
-Apple calls this feature **Remote Application Scripting** in modern System Settings. Under the hood it exposes the **Apple Event Manager** remotely over **EPPC** on **TCP/3031** via the `com.apple.AEServer` service. Palo Alto Unit 42 highlighted it again as a practical **macOS lateral movement** primitive because valid credentials plus an enabled RAE service allow an operator to drive scriptable applications on a remote Mac.
+Apple calls this feature **Remote Application Scripting** in modern System Settings. Under the hood it exposes the **Apple Event Manager** remotely over **EPPC** on **TCP/3031** via the `com.apple.AEServer` service. Palo Alto Unit 42 highlighted it again as a practical **macOS lateral movement** primitive because valid credentials plus an enabled RAE service allow an operator to drive scriptable applications on a remote Mac.<sup>[6]</sup>
 
 Useful checks:
 
@@ -274,15 +274,15 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.p
 
 ## References
 
-- [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
-- [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
-- [**https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html**](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html)
-- [**NVD – CVE-2023-42940**](https://nvd.nist.gov/vuln/detail/CVE-2023-42940)
-- [**NVD – CVE-2024-44183**](https://nvd.nist.gov/vuln/detail/CVE-2024-44183)
-- [**Palo Alto Unit 42 - Lateral Movement on macOS: Unique and Popular Techniques and In-the-Wild Examples**](https://unit42.paloaltonetworks.com/unique-popular-techniques-lateral-movement-macos/)
-- [**Apple Support - About the security content of macOS Sonoma 14.7.2**](https://support.apple.com/en-us/121840)
-- [**Apple Screen Sharing Pre-Auth RCE**](https://warez.sl0p.foo/apple-screensharing-rce/)
-- [**Apple Support - About the security content of macOS Tahoe 26.6**](https://support.apple.com/en-us/128067)
-- [**RFC 5054 - Using the Secure Remote Password (SRP) Protocol for TLS Authentication**](https://www.rfc-editor.org/rfc/rfc5054)
+- [1] [The Mac Hacker's Handbook](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
+- [2] [The Art of Mac Malware, Volume I: Analysis - Patrick Wardle](https://taomm.org/vol1/analysis.html)
+- [3] [LockBoxx - macOS Red Teaming 206: ARD (Apple Remote Desktop Protocol)](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html)
+- [4] [NVD – CVE-2023-42940](https://nvd.nist.gov/vuln/detail/CVE-2023-42940)
+- [5] [NVD – CVE-2024-44183](https://nvd.nist.gov/vuln/detail/CVE-2024-44183)
+- [6] [Palo Alto Unit 42 - Lateral Movement on macOS: Unique and Popular Techniques and In-the-Wild Examples](https://unit42.paloaltonetworks.com/unique-popular-techniques-lateral-movement-macos/)
+- [7] [Apple Support - About the security content of macOS Sonoma 14.7.2](https://support.apple.com/en-us/121840)
+- [8] [Apple Screen Sharing Pre-Auth RCE](https://warez.sl0p.foo/apple-screensharing-rce/)
+- [9] [Apple Support - About the security content of macOS Tahoe 26.6](https://support.apple.com/en-us/128067)
+- [10] [RFC 5054 - Using the Secure Remote Password (SRP) Protocol for TLS Authentication](https://www.rfc-editor.org/rfc/rfc5054)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -51,12 +51,12 @@ For more detailed information on `Info.plist` keys and their meanings, the Apple
 
 ## Resource Hijacking (Dirty NIB / NIB Injection)
 
-Before Ventura, swapping UI resources in a signed app could bypass shallow code signing and yield code execution with the app’s entitlements. Current research (2024) shows this still works on pre‑Ventura and on un-quarantined builds:
+Before Ventura, swapping UI resources in a signed app could bypass shallow code signing and yield code execution with the app’s entitlements. Current research (2024) shows this still works on pre‑Ventura and on un-quarantined builds:<sup>[1][2]</sup>
 
 1. Copy target app to a writable location (e.g., `/tmp/Victim.app`).
 2. Replace `Contents/Resources/MainMenu.nib` (or any nib declared in `NSMainNibFile`) with a malicious one that instantiates `NSAppleScript`, `NSTask`, etc.
 3. Launch app. The malicious nib executes under the victim’s bundle ID and entitlements (TCC grants, microphone/camera, etc.).
-4. Ventura+ mitigates by deep‑verifying the bundle on first launch and requiring *App Management* permission for later modifications, so persistence is harder but initial-launch attacks on older macOS still apply.
+4. Ventura+ mitigates by deep‑verifying the bundle on first launch and requiring *App Management* permission for later modifications, so persistence is harder but initial-launch attacks on older macOS still apply.<sup>[1]</sup>
 
 Minimal malicious nib payload example (compile xib to nib with `ibtool`):
 ```bash
@@ -106,6 +106,7 @@ otool -L /Applications/App.app/Contents/MacOS/App
 
 ## References
 
-- [Bringing process injection into view(s): exploiting macOS apps using nib files (2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
-- [Dirty NIB & bundle resource tampering write‑up (2024)](https://karol-mazurek.medium.com/snake-apple-app-bundle-ext-f5c43a3c84c4)
+- [1] [Bringing process injection into view(s): exploiting macOS apps using nib files (2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
+- [2] [Dirty NIB & bundle resource tampering write‑up (2024)](https://karol-mazurek.medium.com/snake-apple-app-bundle-ext-f5c43a3c84c4)
+
 {{#include ../../../banners/hacktricks-training.md}}

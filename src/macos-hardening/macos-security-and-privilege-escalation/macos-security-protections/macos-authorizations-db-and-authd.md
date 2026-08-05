@@ -58,7 +58,7 @@ security authorizationdb read com.apple.tcc.util.admin
 </plist>
 ```
 
-Moreover in [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) it's possible to see the meaning of `authenticate-admin-nonshared`:
+Moreover in [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) it's possible to see the meaning of `authenticate-admin-nonshared`:<sup>[1]</sup>
 
 ```json
 {
@@ -85,7 +85,8 @@ That will fork and exec `/usr/libexec/security_authtrampoline /bin/ls` as root, 
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
+## References
+
+- [1] [authenticate-admin-nonshared - Overview of the macOS Authorization Right](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
+
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-
