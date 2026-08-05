@@ -1,12 +1,12 @@
-# Objects in memory
+# Objekte in geheue
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## CFRuntimeClass
 
-CF*-objects kom van CoreFoundation, wat meer as 50 klasse objects verskaf, soos `CFString`, `CFNumber` of `CFAllocator`.
+CF*-objekte kom van CoreFoundation, wat meer as 50 klasse objekte verskaf, soos `CFString`, `CFNumber` of `CFAllocator`.
 
-Al hierdie klasse is instances van die klas `CFRuntimeClass`, wat, wanneer dit called word, 'n indeks na die `__CFRuntimeClassTable` terugstuur. Die CFRuntimeClass word gedefinieer in [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html):
+Al hierdie klasse is instansies van die klas `CFRuntimeClass`, wat, wanneer dit aangeroep word, 'n indeks na die `__CFRuntimeClassTable` terugstuur. Die CFRuntimeClass word in [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html) gedefinieer:
 ```objectivec
 // Some comments were added to the original code
 
@@ -57,7 +57,7 @@ uintptr_t requiredAlignment; // Or in _kCFRuntimeRequiresAlignment in the .versi
 
 ### Geheue-afdelings wat gebruik word
 
-Die meeste data wat deur die Objective-C runtime gebruik word, verander tydens uitvoering; daarom gebruik dit ’n aantal afdelings uit die Mach-O `__DATA`-familie van segmente in geheue. Histories het dit die volgende ingesluit:
+Die meeste data wat deur die Objective-C runtime gebruik word, sal tydens uitvoering verander; daarom gebruik dit ’n aantal afdelings uit die Mach-O `__DATA`-familie van segmente in die geheue. Histories het dit die volgende ingesluit:
 
 - `__objc_msgrefs` (`message_ref_t`): Boodskapverwysings
 - `__objc_ivar` (`ivar`): Instansieveranderlikes
@@ -66,8 +66,8 @@ Die meeste data wat deur die Objective-C runtime gebruik word, verander tydens u
 - `__objc_superrefs` (`Class`): Superklasverwysings
 - `__objc_protorefs` (`protocol_t *`): Protokolverwysings
 - `__objc_selrefs` (`SEL`): Selector-verwysings
-- `__objc_const` (`...`): Klas-leesalleen-data en ander (hopelik) konstante data
-- `__objc_imageinfo` (`version, flags`): Word tydens image-laai gebruik: Weergawe tans `0`; Vlaggies spesifiseer voorafgeoptimaliseerde GC-ondersteuning, ens.
+- `__objc_const` (`...`): Klas-r/o-data en ander (hopelik) konstante data
+- `__objc_imageinfo` (`version, flags`): Word tydens image-laai gebruik: Weergawe tans `0`; vlae spesifiseer voorafgeoptimaliseerde GC-ondersteuning, ens.
 - `__objc_protolist` (`protocol_t *`): Protokollys
 - `__objc_nlcatlist` (`category_t`): Wyser na Non-Lazy Categories wat in hierdie binary gedefinieer is
 - `__objc_catlist` (`category_t`): Wyser na Categories wat in hierdie binary gedefinieer is
@@ -76,16 +76,16 @@ Die meeste data wat deur die Objective-C runtime gebruik word, verander tydens u
 
 Dit gebruik ook ’n paar afdelings in die `__TEXT`-segment om konstantes te stoor:
 
-- `__objc_methname` (C-String): Metodename
+- `__objc_methname` (C-String): Metodenames
 - `__objc_classname` (C-String): Klasname
 - `__objc_methtype` (C-String): Metodetipes
 
 Moderne macOS/iOS (veral op Apple Silicon) plaas ook Objective-C/Swift-metadata in:
 
-- `__DATA_CONST`: Onveranderlike Objective-C-metadata wat read-only tussen prosesse gedeel kan word (byvoorbeeld, baie `__objc_*`-lyste is nou hier).
+- `__DATA_CONST`: Onveranderlike Objective-C-metadata wat read-only tussen prosesse gedeel kan word (baie `__objc_*`-lyste woon nou byvoorbeeld hier).
 - `__AUTH` / `__AUTH_CONST`: Segmente wat wysers bevat wat tydens laai of gebruik op arm64e geauthentiseer moet word (Pointer Authentication). Jy sal ook `__auth_got` in `__AUTH_CONST` sien in plaas van slegs die legacy `__la_symbol_ptr`/`__got`. Wanneer jy instrumenteer of hook, onthou om beide `__got`- en `__auth_got`-inskrywings in moderne binaries in ag te neem.
 
-Vir agtergrond oor dyld-preoptimalisering (byvoorbeeld selector-uniquing en voorafberekening van klasse/protokolle), asook waarom baie van hierdie afdelings "reeds reggestel" is wanneer dit uit die shared cache kom, raadpleeg die Apple `objc-opt`-bronne en dyld shared cache-aantekeninge. Dit beïnvloed waar en hoe jy metadata tydens runtime kan patch.
+Vir agtergrond oor dyld-vooroptimalisering (byvoorbeeld selector-uniquing en voorafberekening van klasse/protokolle), en waarom baie van hierdie afdelings “reeds reggestel” is wanneer dit uit die shared cache kom, raadpleeg die Apple `objc-opt`-bronne en die notas oor die dyld shared cache. Dit beïnvloed waar en hoe jy metadata tydens runtime kan patch.
 
 {{#ref}}
 ../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md
@@ -93,28 +93,28 @@ Vir agtergrond oor dyld-preoptimalisering (byvoorbeeld selector-uniquing en voor
 
 ### Tipe-enkodering
 
-Objective-C gebruik mangling om selector- en veranderlike-tipes van eenvoudige en komplekse tipes te enkodeer:
+Objective-C gebruik mangling om selector- en veranderliketipes van eenvoudige en komplekse tipes te enkodeer:
 
 - Primitiewe tipes gebruik hul eerste letter van die tipe: `i` vir `int`, `c` vir `char`, `l` vir `long`... en gebruik die hoofletter wanneer dit unsigned is (`L` vir `unsigned long`).
-- Ander datatipes gebruik ander letters of simbole, soos `q` vir `long long`, `b` vir bitfields, `B` vir booleans, `#` vir klasse, `@` vir `id`, `*` vir `char *`, `^` vir generiese wysers en `?` vir ongedefinieer.
-- Skikkings, strukture en unions gebruik onderskeidelik `[`, `{` en `(`.
+- Ander datatipes gebruik ander letters of simbole, soos `q` vir `long long`, `b` vir bitfields, `B` vir booleans, `#` vir klasse, `@` vir `id`, `*` vir `char *`, `^` vir generiese wysers en `?` vir ongedefinieerd.
+- Arrays, strukture en unions gebruik onderskeidelik `[`, `{` en `(`.
 
-#### Voorbeeld van metodedefinisie
+#### Voorbeeld van metodedeclarasie
 ```objectivec
 - (NSString *)processString:(id)input withOptions:(char *)options andError:(id)error;
 ```
-Die selector sal wees `processString:withOptions:andError:`
+Die selector sal `processString:withOptions:andError:` wees
 
-#### Type Encoding
+#### Tipekodering
 
-- `id` word geënkodeer as `@`
-- `char *` word geënkodeer as `*`
+- `id` word as `@` geënkodeer
+- `char *` word as `*` geënkodeer
 
-Die volledige type encoding vir die metode is:
+Die volledige tipekodering vir die metode is:
 ```less
 @24@0:8@16*20^@24
 ```
-#### Gedetailleerde Uiteensetting
+#### Gedetailleerde uiteensetting
 
 1. Return Type (`NSString *`): Geënkodeer as `@` met lengte 24
 2. `self` (object instance): Geënkodeer as `@`, by offset 0
@@ -123,11 +123,11 @@ Die volledige type encoding vir die metode is:
 5. Second argument (`NSDictionary * options`): Geënkodeer as `@`, by offset 20
 6. Third argument (`NSError ** error`): Geënkodeer as `^@`, by offset 24
 
-Met die selector + encoding kan jy die method rekonstrueer.
+Met die selector + die encoding kan jy die method rekonstrueer.
 
-### Classes
+### Klasse
 
-Classes in Objective‑C is C structs met properties, method pointers, ens. Dit is moontlik om die struct `objc_class` in die [**source code**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html) te vind:
+Klasse in Objective‑C is C-strukture met properties, method pointers, ens. Dit is moontlik om die `objc_class`-struktuur in die [**source code**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html) te vind:
 ```objectivec
 struct objc_class : objc_object {
 // Class ISA;
@@ -148,9 +148,9 @@ data()->setFlags(set);
 }
 [...]
 ```
-Hierdie klas gebruik sommige stukkies van die `isa`-veld om inligting oor die klas aan te dui.
+Hierdie class gebruik sommige bits van die `isa`-field om inligting oor die class aan te dui.
 
-Daarna het die struct ’n pointer na die struct `class_ro_t` wat op skyf gestoor word en kenmerke van die klas bevat, soos sy naam, basismetodes, properties en instance variables. Tydens runtime word ’n bykomende struktuur `class_rw_t` gebruik wat pointers bevat wat gewysig kan word, soos metodes, protokolle en properties.
+Daarna het die struct ’n pointer na die struct `class_ro_t` wat op die skyf gestoor word en attribute van die class bevat, soos sy naam, base methods, properties en instance variables. Tydens runtime word ’n addisionele structure `class_rw_t` gebruik wat pointers bevat wat gewysig kan word, soos methods, protocols en properties.
 
 {{#ref}}
 ../macos-basic-objective-c.md
@@ -160,13 +160,13 @@ Daarna het die struct ’n pointer na die struct `class_ro_t` wat op skyf gestoo
 
 ## Moderne object-representations in memory (arm64e, tagged pointers, Swift)
 
-### Non‑pointer `isa` en Pointer Authentication (arm64e)
+### Non-pointer `isa` en Pointer Authentication (arm64e)
 
-Op Apple Silicon en onlangse runtimes is die Objective‑C `isa` nie altyd ’n rou klas-pointer nie. Op arm64e is dit ’n gepakte struktuur wat ook ’n Pointer Authentication Code (PAC) kan bevat. Afhangend van die platform kan dit velde soos `nonpointer`, `has_assoc`, `weakly_referenced`, `extra_rc` en die klas-pointer self insluit (verskuif of onderteken). Dit beteken dat die eerste 8 bytes van ’n Objective‑C-object nie altyd blindelings gedereferensieer kan word om ’n geldige `Class`-pointer te verkry nie.<sup>[2]</sup>
+Op Apple Silicon en onlangse runtimes is die Objective-C `isa` nie altyd ’n rou class-pointer nie. Op arm64e is dit ’n packed structure wat ook ’n Pointer Authentication Code (PAC) kan bevat. Afhangend van die platform kan dit fields soos `nonpointer`, `has_assoc`, `weakly_referenced`, `extra_rc` en die class-pointer self bevat (geskuif of signed). Dit beteken dat die eerste 8 bytes van ’n Objective-C-object nie altyd blindelings gedereferenceer kan word om ’n geldige `Class`-pointer te lewer nie.<sup>[[2]](#references)</sup>
 
-Praktiese notas wanneer daar op arm64e gedebug word:
+Praktiese notas wanneer jy op arm64e debug:
 
-- LLDB sal gewoonlik PAC-bits vir jou verwyder wanneer Objective‑C-objects met `po` gedruk word, maar wanneer daar met rou pointers gewerk word, moet jy moontlik authentication handmatig verwyder:
+- LLDB sal gewoonlik PAC-bits vir jou verwyder wanneer Objective-C-objects met `po` gedruk word, maar wanneer jy met rou pointers werk, moet jy moontlik authentication handmatig verwyder:
 
 ```lldb
 (lldb) expr -l objc++ -- #include <ptrauth.h>
@@ -174,20 +174,20 @@ Praktiese notas wanneer daar op arm64e gedebug word:
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)raw)
 ```
 
-- Baie function/data pointers in Mach‑O sal in `__AUTH`/`__AUTH_CONST` voorkom en vereis authentication voordat dit gebruik kan word. As jy interpose of re-bind (byvoorbeeld in fishhook-styl), maak seker dat jy ook `__auth_got` hanteer, benewens die legacy `__got`.
+- Baie function/data pointers in Mach-O sal in `__AUTH`/`__AUTH_CONST` wees en authentication vereis voordat hulle gebruik kan word. As jy interposing of re-binding doen (byvoorbeeld in fishhook-styl), maak seker dat jy ook `__auth_got` hanteer, benewens die legacy `__got`.
 
-Vir ’n diepgaande bespreking van taal-/ABI-waarborge en die `<ptrauth.h>`-intrinsics wat vanaf Clang/LLVM beskikbaar is, sien die verwysing aan die einde van hierdie bladsy.<sup>[1]</sup>
+Vir ’n diepgaande bespreking van language/ABI guarantees en die `<ptrauth.h>` intrinsics wat vanaf Clang/LLVM beskikbaar is, sien die reference aan die einde van hierdie bladsy.<sup>[[1]](#references)</sup>
 
 ### Tagged pointer objects
 
-Sommige Foundation-klasse vermy heap-allokasie deur die object se payload direk in die pointer-waarde te enkodeer (tagged pointers). Opsporing verskil volgens platform (byvoorbeeld die most-significant bit op arm64 en die least-significant bit op x86_64 macOS). Tagged objects het nie ’n gewone `isa` wat in memory gestoor word nie; die runtime bepaal die klas vanaf die tag-bits.<sup>[2]</sup> Wanneer arbitrêre `id`-waardes geïnspekteer word:
+Sommige Foundation-classes vermy heap allocation deur die payload van die object direk in die pointer value te encode (tagged pointers). Detection verskil volgens platform (byvoorbeeld die most-significant bit op arm64 en die least-significant bit op x86_64 macOS). Tagged objects het nie ’n gewone `isa` wat in memory gestoor word nie; die runtime resolve die class vanaf die tag-bits.<sup>[[2]](#references)</sup> Wanneer jy arbitrêre `id`-values inspekteer:
 
-- Gebruik runtime-API’s in plaas daarvan om die `isa`-veld direk te ondersoek: `object_getClass(obj)` / `[obj class]`.
-- In LLDB sal `po (id)0xADDR` tagged pointer-instances korrek druk, omdat die runtime geraadpleeg word om die klas te bepaal.
+- Gebruik runtime APIs in plaas daarvan om aan die `isa`-field te peuter: `object_getClass(obj)` / `[obj class]`.
+- In LLDB sal `po (id)0xADDR` tagged pointer instances korrek druk, omdat die runtime geraadpleeg word om die class te resolve.
 
 ### Swift heap objects en metadata
 
-Pure Swift-klasse is ook objects met ’n header wat na Swift-metadata wys (nie Objective‑C `isa` nie). Om aktiewe Swift-prosesse te introspekteer sonder om hulle te wysig, kan jy die Swift-toolchain se `swift-inspect` gebruik, wat die Remote Mirror-library benut om runtime-metadata te lees:
+Pure Swift-classes is ook objects met ’n header wat na Swift metadata wys (nie Objective-C `isa` nie). Om live Swift-processes te introspekteer sonder om hulle te wysig, kan jy die Swift toolchain se `swift-inspect` gebruik, wat die Remote Mirror library benut om runtime metadata te lees:
 ```bash
 # Xcode toolchain (or Swift.org toolchain) provides swift-inspect
 swift-inspect dump-raw-metadata <pid-or-name>
@@ -195,20 +195,20 @@ swift-inspect dump-arrays <pid-or-name>
 # On Darwin additionally:
 swift-inspect dump-concurrency <pid-or-name>
 ```
-Dit is baie nuttig om Swift heap objects en protocol conformances te karteer wanneer mixed Swift/ObjC apps gereverse-engineer word.
+Dit is baie nuttig om Swift-heap-objekte en protocol conformances te karteer wanneer gemengde Swift/ObjC-apps gereverse word.
 
 ---
 
-## Runtime inspection cheatsheet (LLDB / Frida)
+## Cheatsheet vir runtime-inspeksie (LLDB / Frida)
 
 ### LLDB
 
-- Druk ’n object of class vanaf ’n raw pointer:
+- Druk ’n objek of klas vanaf ’n raw pointer:
 ```lldb
 (lldb) expr -l objc++ -O -- (id)0x0000000101234560
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)0x0000000101234560)
 ```
-- Inspekteer Objective-C-klas vanaf ’n wyser na ’n objekmetode se `self` by ’n breekpunt:
+- Inspekteer die Objective-C-klas vanaf ’n pointer na ’n objekmetode se `self` in ’n breakpoint:
 ```lldb
 (lldb) br se -n '-[NSFileManager fileExistsAtPath:]'
 (lldb) r
@@ -222,16 +222,16 @@ Dit is baie nuttig om Swift heap objects en protocol conformances te karteer wan
 (lldb) image dump section --section __DATA_CONST.__objc_selrefs
 (lldb) image dump section --section __AUTH_CONST.__auth_got
 ```
-- Lees geheue vir ’n bekende klasobjek om na `class_ro_t` / `class_rw_t` te pivot wanneer method lists gereverse-engineer word:
+- Lees geheue vir ’n bekende klasobjek om na `class_ro_t` / `class_rw_t` te pivot wanneer metode-lyste reverse-engineer word:
 ```lldb
 (lldb) image lookup -r -n _OBJC_CLASS_$_NSFileManager
 (lldb) memory read -fx -s8 0xADDRESS_OF_CLASS_OBJECT
 ```
-### Frida (Objective‑C and Swift)
+### Frida (Objective-C en Swift)
 
-Frida verskaf hoëvlak-`runtime bridges` wat baie handig is om live objects sonder symbols te ontdek en te instrumenteer:
+Frida verskaf hoëvlak runtime bridges wat baie nuttig is om lewendige objekte sonder symbols te ontdek en instrumenteer:
 
-- Enumerate classes en methods, resolve werklike class names tydens runtime, en intercept Objective‑C selectors:
+- Enumerateer klasse en metodes, bepaal werklike klasname tydens runtime, en onderskep Objective-C selectors:
 ```js
 if (ObjC.available) {
 // List a class' methods
@@ -249,13 +249,13 @@ console.log('fileExistsAtPath:', this.path, '=>', retval);
 });
 }
 ```
-- Swift bridge: enumerateer Swift-tipes en werk met Swift-instansies (vereis onlangse Frida; baie nuttig op Apple Silicon-teikens).
+- Swift bridge: enumerateer Swift-tipes en interaksie met Swift-instances (vereis onlangse Frida; baie nuttig op Apple Silicon-teikens).
 
 ---
 
 ## Verwysings
 
-- [1] [Clang/LLVM: Pointer Authentication en die ptrauth.h-intrinsics (arm64e ABI)](https://clang.llvm.org/docs/PointerAuthentication.html)
-- [2] [Apple objc runtime-opskrifte - objc-object.h (tagged pointers, non-pointer isa, ens.)](https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-object.h.auto.html)
+- [1] [Clang/LLVM: Pointer Authentication en die ptrauth.h intrinsics (arm64e ABI)](https://clang.llvm.org/docs/PointerAuthentication.html)
+- [2] [Apple objc runtime headers - objc-object.h (tagged pointers, non-pointer isa, ens.)](https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-object.h.auto.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
