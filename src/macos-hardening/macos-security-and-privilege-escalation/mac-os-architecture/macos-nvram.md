@@ -1,20 +1,20 @@
-# NVRAM
+# macOS NVRAM
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Informações básicas
 
-A **NVRAM** (Non-Volatile Random-Access Memory) armazena a **configuração de inicialização e em nível de firmware** no hardware do Mac. As variáveis mais críticas para a segurança incluem:
+**NVRAM** (Memória de Acesso Aleatório Não Volátil) armazena a configuração de **inicialização e do nível do firmware** no hardware do Mac. As variáveis mais críticas para a segurança incluem:
 
 | Variável | Finalidade |
 |---|---|
 | `boot-args` | Argumentos de inicialização do kernel (flags de debug, inicialização verbosa, bypass do AMFI) |
-| `csr-active-config` | **Máscara de bits de configuração do SIP** — controla quais proteções estão ativas |
+| `csr-active-config` | **Bitmask de configuração do SIP** — controla quais proteções estão ativas |
 | `SystemAudioVolume` | Volume de áudio na inicialização |
 | `prev-lang:kbd` | Idioma / layout de teclado preferido |
 | `efi-boot-device-data` | Seleção do dispositivo de inicialização |
 
-Nos Macs modernos, as variáveis da NVRAM são divididas entre variáveis do **sistema** (protegidas pelo Secure Boot) e variáveis **não pertencentes ao sistema**. Os Macs com Apple Silicon usam um **Secure Storage Component (SSC)** para vincular criptograficamente o estado da NVRAM à cadeia de inicialização.<sup>[1]</sup>
+Nos Macs modernos, as variáveis da NVRAM são divididas entre variáveis do **sistema** (protegidas pelo Secure Boot) e variáveis **não pertencentes ao sistema**. Os Macs com Apple Silicon usam um **Secure Storage Component (SSC)** para associar criptograficamente o estado da NVRAM à cadeia de inicialização.<sup>[[1]](#references)</sup>
 
 ## Acesso à NVRAM a partir do espaço do usuário
 
@@ -33,9 +33,9 @@ nvram -xp
 nvram csr-active-config
 csrutil status
 ```
-### Gravação de NVRAM
+### Escrevendo NVRAM
 
-A gravação de variáveis NVRAM requer **privilégios de root** e, para variáveis críticas do sistema (como `csr-active-config`), o processo deve ter flags ou entitlements específicos de assinatura de código:
+Escrever variáveis NVRAM requer **privilégios de root** e, para variáveis críticas do sistema (como `csr-active-config`), o processo deve ter flags ou entitlements específicos de code-signing:
 ```bash
 # Set boot-args (requires root)
 sudo nvram boot-args="debug=0x144 kcsuffix=development"
@@ -48,9 +48,9 @@ sudo nvram MyCustomVar="persistence-value"
 ```
 ## Flag CS_NVRAM_UNRESTRICTED
 
-Binaries com a flag de assinatura de código **`CS_NVRAM_UNRESTRICTED`** podem modificar variáveis NVRAM que normalmente são protegidas até mesmo contra o root.
+Binários com a flag de code-signing **`CS_NVRAM_UNRESTRICTED`** podem modificar variáveis NVRAM que normalmente são protegidas até mesmo contra root.
 
-### Encontrando Binaries NVRAM-Unrestricted
+### Encontrando Binários com NVRAM-Unrestricted
 ```bash
 # Check code signing flags for a binary
 codesign -dvvv /usr/sbin/nvram 2>&1 | grep "flags="
@@ -79,9 +79,9 @@ nvram csr-active-config | xxd
 # nvram csr-active-config=%7f%00%00%00   # Disable most SIP protections
 ```
 > [!WARNING]
-> Em Macs Apple Silicon modernos, a **Secure Boot chain valida as alterações na NVRAM** e impede a modificação do SIP em runtime. As alterações em `csr-active-config` só entram em vigor por meio do recoveryOS. No entanto, em **Macs Intel** ou sistemas com **reduced security mode**, a manipulação da NVRAM ainda pode enfraquecer o SIP.
+> Em Macs modernos com Apple Silicon, a **Secure Boot chain valida as alterações na NVRAM** e impede a modificação do SIP em tempo de execução. As alterações em `csr-active-config` só têm efeito por meio do recoveryOS. No entanto, em **Macs Intel** ou sistemas com **reduced security mode**, a manipulação da NVRAM ainda pode enfraquecer o SIP.
 
-### Habilitando a depuração do kernel
+### Ativando a depuração do kernel
 ```bash
 # Enable kernel debug flags via boot-args
 sudo nvram boot-args="debug=0x144"
@@ -97,7 +97,7 @@ sudo nvram boot-args="kcsuffix=development"
 ```
 ### Persistência no Firmware
 
-As modificações na NVRAM **sobrevivem à reinstalação do SO** — elas persistem no nível do firmware. Um atacante pode gravar variáveis personalizadas na NVRAM que um mecanismo de persistência lê durante a inicialização:
+As modificações no NVRAM **sobrevivem à reinstalação do SO** — elas persistem no nível do firmware. Um atacante pode gravar variáveis NVRAM personalizadas que um mecanismo de persistência lê durante a inicialização:
 ```bash
 # Write a persistence marker
 nvram attacker-payload-config="base64_encoded_config_here"
@@ -106,11 +106,11 @@ nvram attacker-payload-config="base64_encoded_config_here"
 nvram attacker-payload-config 2>/dev/null && /path/to/payload
 ```
 > [!CAUTION]
-> A persistência no NVRAM sobrevive a apagamentos do disco e reinstalações do sistema operacional. Para limpá-la, é necessário um **reset de PRAM/NVRAM** (Command+Option+P+R em Macs Intel) ou uma **restauração via DFU** (Apple Silicon).
+> A persistência no NVRAM sobrevive à limpeza dos discos e às reinstalações do sistema operacional. É necessário um **reset do PRAM/NVRAM** (Command+Option+P+R em Macs Intel) ou uma **restauração via DFU** (Apple Silicon) para removê-la.
 
 ### AMFI Bypass
 
-O argumento de inicialização `amfi_get_out_of_my_way=1` desativa o **Apple Mobile File Integrity**, permitindo a execução de código não assinado:
+O `amfi_get_out_of_my_way=1` boot argument desativa o **Apple Mobile File Integrity**, permitindo a execução de código não assinado:
 ```bash
 # This requires NVRAM write access AND reduced security boot:
 sudo nvram boot-args="amfi_get_out_of_my_way=1"
@@ -119,10 +119,10 @@ sudo nvram boot-args="amfi_get_out_of_my_way=1"
 
 | CVE | Descrição |
 |---|---|
-| CVE-2020-9839 | Manipulação do NVRAM permitindo bypass persistente do SIP |
-| CVE-2019-8779 | Persistência do NVRAM em nível de firmware em Macs T2 |
-| CVE-2022-22583 | Escalonamento de privilégios relacionado ao NVRAM no PackageKit |
-| CVE-2020-10004 | Problema lógico no tratamento do NVRAM permitindo a modificação do sistema |
+| CVE-2020-9839 | Manipulação da NVRAM permitindo bypass persistente do SIP |
+| CVE-2019-8779 | Persistência na NVRAM em nível de firmware em Macs com T2 |
+| CVE-2022-22583 | Escalada de privilégios relacionada à NVRAM no PackageKit |
+| CVE-2020-10004 | Problema lógico no tratamento da NVRAM permitindo a modificação do sistema |
 
 ## Script de Enumeração
 ```bash
@@ -154,8 +154,8 @@ nvram -p | grep -v "^$" | grep -vE "^(SystemAudioVolume|boot-args|csr-active-con
 ```
 ## Referências
 
-- [1] [Guia de segurança das plataformas Apple — Processo de inicialização](https://support.apple.com/guide/security/boot-process-secac71d5623/web)
-- [2] [Atualizações de segurança da Apple — CVEs relacionados ao NVRAM](https://support.apple.com/en-us/HT201222)
+- [1] [Apple Platform Security Guide — Processo de inicialização](https://support.apple.com/guide/security/boot-process-secac71d5623/web)
+- [2] [Apple Security Updates — CVEs relacionados ao NVRAM](https://support.apple.com/en-us/HT201222)
 - [3] [Duo Labs — Segurança do Apple T2](https://duo.com/labs/research/apple-t2-xpc)
 
 {{#include ../../../banners/hacktricks-training.md}}

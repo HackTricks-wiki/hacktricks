@@ -1,31 +1,31 @@
-# Aplicativos handlers de extensões de arquivos e esquemas de URL no macOS
+# Aplicativos handlers de extensões de arquivo e esquemas de URL do macOS
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Banco de dados do LaunchServices
 
-Este é um banco de dados de todos os aplicativos instalados no macOS, que pode ser consultado para obter informações sobre cada aplicativo instalado, como **esquemas de URL**, **tipos de documento**, **UTIs** e handlers padrão.
+Este é um banco de dados de todos os aplicativos instalados no macOS que pode ser consultado para obter informações sobre cada aplicativo instalado, como **esquemas de URL**, **tipos de documento**, **UTIs** e handlers padrão.
 
-É possível fazer o dump deste banco de dados com:
+É possível fazer o dump desse banco de dados com:
 ```
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump
 ```
 Ou usando a ferramenta [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-**`/usr/libexec/lsd`** é o cérebro do banco de dados. Ele fornece **vários serviços XPC**, como `.lsd.installation`, `.lsd.open`, `.lsd.openurl` e outros. Porém, ele também **exige alguns entitlements** para que os aplicativos possam usar as funcionalidades XPC expostas, como `.launchservices.changedefaulthandler` ou `.launchservices.changeurlschemehandler` para alterar os aplicativos padrão para tipos MIME ou esquemas de URL, entre outros.
+**`/usr/libexec/lsd`** é o cérebro do banco de dados. Ele fornece **vários serviços XPC**, como `.lsd.installation`, `.lsd.open`, `.lsd.openurl` e outros. Porém, também **exige alguns entitlements** para que os aplicativos possam usar as funcionalidades XPC expostas, como `.launchservices.changedefaulthandler` ou `.launchservices.changeurlschemehandler`, para alterar os aplicativos padrão para tipos MIME ou esquemas de URL, entre outros.
 
-**`/System/Library/CoreServices/launchservicesd`** reivindica o serviço `com.apple.coreservices.launchservicesd` e pode ser consultado para obter informações sobre aplicativos em execução. Ele pode ser consultado com a ferramenta do sistema **`/usr/bin/lsappinfo`** ou com o [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+**`/System/Library/CoreServices/launchservicesd`** reivindica o serviço `com.apple.coreservices.launchservicesd` e pode ser consultado para obter informações sobre os aplicativos em execução. Ele pode ser consultado com a ferramenta de sistema **`/usr/bin/lsappinfo`** ou com o [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-Do ponto de vista de um operador, tenha em mente que geralmente há **duas visualizações úteis**:
+Do ponto de vista do operador, tenha em mente que normalmente existem **duas visões úteis**:
 
-- O **banco de dados de registro** gerenciado pelo LaunchServices / `lsd` (armazenado em arquivos `.csstore`).
+- O **banco de dados de registro** gerenciado pelo LaunchServices / `lsd` (baseado em arquivos `.csstore`).
 - Os **padrões efetivos por usuário** armazenados em `~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist`, dentro do array `LSHandlers`.
 
 Essa distinção é importante: um aplicativo pode estar **registrado** como capaz de lidar com um tipo ou esquema, mas o **padrão atual** ainda pode ser outro bundle ID.
 
 ## Manipuladores de aplicativos para extensões de arquivo e esquemas de URL
 
-A linha a seguir pode ser útil para encontrar os aplicativos que conseguem abrir arquivos com base na extensão:
+A linha a seguir pode ser útil para encontrar os aplicativos capazes de abrir arquivos com base na extensão:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump | grep -E "path:|bindings:|name:"
 ```
@@ -36,7 +36,7 @@ Ou use algo como [**SwiftDefaultApps**](https://github.com/Lord-Kamina/SwiftDefa
 ./swda getUTIs #Get all the UTIs
 ./swda getHandler --URL ftp #Get ftp handler
 ```
-Você também pode verificar as extensões compatíveis com um aplicativo usando:
+Você também pode verificar as extensões compatíveis com um aplicativo executando:
 ```bash
 cd /Applications/Safari.app/Contents
 grep -A3 CFBundleTypeExtensions Info.plist  | grep string
@@ -74,13 +74,13 @@ O arquivo mais útil para os **padrões do usuário atual** geralmente é:
 ```bash
 ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist
 ```
-Para obter os handlers de **URL scheme** dele:
+Para fazer dump dos handlers de **URL scheme** dele:
 ```bash
 plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist |
 jq '.[] | select(.LSHandlerURLScheme != null) |
 {scheme: .LSHandlerURLScheme, handler: (.LSHandlerRoleAll // .LSHandlerRoleViewer // .LSHandlerRoleEditor)}'
 ```
-Para obter os handlers de **content-type / UTI**:
+Para fazer dump dos handlers de **content-type / UTI**:
 ```bash
 plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist |
 jq '.[] | select(.LSHandlerContentType != null) |
@@ -108,10 +108,10 @@ dutix apps show Safari
 
 Ao fazer a triagem de um application bundle, estas chaves são as mais importantes:
 
-- **`CFBundleDocumentTypes`**: grupos de documentos que o bundle declara poder abrir.
-- **`LSItemContentTypes`**: forma **moderna / preferida** de associar tipos de documentos a UTIs.
+- **`CFBundleDocumentTypes`**: grupos de documentos que o bundle declara conseguir abrir.
+- **`LSItemContentTypes`**: a forma **moderna / preferida** de associar tipos de documentos a UTIs.
 - **`LSHandlerRank`**: classificação usada pelo LaunchServices (`Owner`, `Default`, `Alternate`, `None`).
-- **`CFBundleURLTypes`** / **`CFBundleURLSchemes`**: custom URI schemes implementados pelo app.
+- **`CFBundleURLTypes`** / **`CFBundleURLSchemes`**: esquemas URI personalizados implementados pelo app.
 - **`UTExportedTypeDeclarations`**: UTIs que o app **possui**.
 - **`UTImportedTypeDeclarations`**: UTIs que o app não possui, mas que deseja que o sistema reconheça.
 
@@ -122,30 +122,30 @@ rg 'CFBundleDocumentTypes|CFBundleURLTypes|LSItemContentTypes|LSHandlerRank|UTEx
 ```
 Um detalhe sutil, mas importante: se **`LSItemContentTypes`** estiver presente, chaves mais antigas, como **`CFBundleTypeExtensions`**, **`CFBundleTypeMIMETypes`** e **`CFBundleTypeOSTypes`**, são efetivamente dados de compatibilidade legados. Para a resolução real de handlers, priorize primeiro o caminho UTI.
 
-## Notas de exploração
+## Notas ofensivas
 
-Os aplicativos não precisam ser executados para se tornarem interessantes. Um bundle `.app` baixado ou clonado pode ser **analisado automaticamente pelo `lsd` assim que for gravado no disco**, e seus tipos de documentos / URL schemes declarados podem ser registrados sem que o usuário jamais inicie o bundle.
+Os aplicativos não precisam ser executados para se tornarem interessantes. Um bundle `.app` descartado ou clonado pode ser **analisado automaticamente pelo `lsd` assim que é gravado no disco**, e seus tipos de documento / URL schemes declarados podem ser registrados sem que o usuário jamais inicie o bundle.
 
-Isso é útil tanto para **pesquisa de persistence / hijacking** quanto para **initial-access chains**:
+Isso é útil tanto para **pesquisa de persistence / hijacking** quanto para **cadeias de initial access**:
 
-- Um app malicioso pode reivindicar uma **extensão rara** ou uma **custom UTI** e aguardar a vítima abrir o arquivo-isca.
-- Um app malicioso pode registrar um **custom URL scheme** acessível a partir de um browser, app Electron, documento do Office, chat client ou outro helper app.<sup>[1]</sup>
-- Se você editar um app bundle após compilá-lo, poderá forçar o LaunchServices a analisá-lo novamente com:
+- Um aplicativo malicioso pode reivindicar uma **extensão rara** ou uma **UTI customizada** e aguardar a vítima abrir o arquivo-isca.
+- Um aplicativo malicioso pode registrar um **custom URL scheme** acessível a partir de um navegador, aplicativo Electron, documento de escritório, cliente de chat ou outro aplicativo auxiliar.<sup>[[1]](#references)</sup>
+- Se você editar um bundle de aplicativo após compilá-lo, poderá forçar o LaunchServices a analisá-lo novamente com:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -f /tmp/Evil.app
 ```
 Ao testar bundles suspeitos, preste atenção especial a:
 
 - **`LSHandlerRank=Owner`** em tipos incomuns.
-- Arrays **`CFBundleDocumentTypes`** amplos que reivindicam muitas extensões.
+- Arrays **`CFBundleDocumentTypes`** abrangentes que alegam oferecer suporte a muitas extensões.
 - Aplicativos **helper / wrapper** cujo único comportamento interessante está por trás de um document ou URI handler.
-- Arquivos semelhantes a atalhos (`.webloc`, `.inetloc`, `.fileloc`) que acabam sendo encaminhados para o LaunchServices. Para truques no estilo `.fileloc` e outros ângulos relacionados ao Gatekeeper, consulte [esta outra página](macos-security-protections/macos-fs-tricks/README.md).<sup>[2]</sup>
+- Arquivos semelhantes a atalhos (`.webloc`, `.inetloc`, `.fileloc`) que acabam sendo encaminhados ao LaunchServices. Para truques no estilo `.fileloc` e outros vetores relacionados ao Gatekeeper, consulte [esta outra página](macos-security-protections/macos-fs-tricks/README.md).<sup>[[2]](#references)</sup>
 
-Se seu objetivo é obter execução de código passiva apenas ao navegar para uma pasta ou selecionar um arquivo, consulte também a página dedicada aos [Quick Look generators](macos-proces-abuse/macos-quicklook-generators.md), pois essa é uma superfície de file-handler diferente, mas intimamente relacionada.
+Se o seu objetivo é obter code execution passiva apenas ao navegar até uma pasta ou selecionar um arquivo, consulte também a página dedicada aos [Quick Look generators](macos-proces-abuse/macos-quicklook-generators.md), pois essa é uma superfície de file handler diferente, mas estreitamente relacionada.
 
 ## Referências
 
-- [1] [Objective-See - Exploração remota de Mac via Custom URL Schemes](https://objective-see.org/blog/blog_0x38.html)
-- [2] [Jamf Threat Labs - Bypassing the Gate: uma análise mais detalhada das falhas do Gatekeeper no macOS](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
+- [1] [Objective-See - Exploração remota de Macs por meio de Custom URL Schemes](https://objective-see.org/blog/blog_0x38.html)
+- [2] [Jamf Threat Labs - Contornando o Gate: uma análise mais detalhada das falhas do Gatekeeper no macOS](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
 
 {{#include ../../banners/hacktricks-training.md}}
