@@ -117,15 +117,15 @@ sudo killall -HUP mDNSResponder
 ```
 ### 簡易な anti-analysis / virtualization check
 
-一部の macOS stealers は、VM を検出するために `system_profiler` を呼び出し、sandbox detonation を回避する目的で、**特定の exit code（例: 100）で abort**します<sup>[1]</sup>：
+一部の macOS stealer は、VM を検出するために `system_profiler` を呼び出し、sandbox detonation を回避する目的で **固有の終了コード（例: 100）を返して abort します**<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### インストール済みソフトウェアとサービス
+### インストールされているソフトウェアとサービス
 
-インストールされている**不審な**アプリケーションと、インストール済みリソースに対する**権限**を確認します。
+インストールされている**不審な**アプリケーションと、インストールされているリソースに対する**権限**を確認します。
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -145,12 +145,12 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### ユーザーを作成
 
-プロンプトなし
+プロンプトなしで
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
 ## 参考資料
 
-- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025年、Infostealerの年](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

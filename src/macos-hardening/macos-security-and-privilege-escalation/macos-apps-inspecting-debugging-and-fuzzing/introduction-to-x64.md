@@ -4,72 +4,72 @@
 
 ## **x64の概要**
 
-x64はx86-64とも呼ばれる64ビットのprocessor architectureで、主にdesktopおよびserver computingで使用されています。Intelが開発したx86 architectureを起源とし、後にAMDがAMD64という名称で採用しました。現在、personal computerやserverで広く使われているarchitectureです。
+x64はx86-64とも呼ばれ、主にデスクトップおよびサーバーコンピューティングで使用される64ビットプロセッサアーキテクチャです。Intelが開発したx86アーキテクチャを基盤とし、その後AMDがAMD64という名称で採用しました。現在、パーソナルコンピューターやサーバーで広く使われている主要なアーキテクチャです。
 
-### **Registers**
+### **レジスタ**
 
-x64はx86 architectureを拡張したもので、`rax`、`rbx`、`rcx`、`rdx`、`rbp`、`rsp`、`rsi`、`rdi`、および`r8`から`r15`までの**16個のgeneral-purpose registers**を備えています。これらはそれぞれ**64ビット**（8バイト）の値を格納できます。また、互換性や特定の用途のために、32ビット、16ビット、8ビットのsub-registerも備えています。
+x64はx86アーキテクチャを拡張したもので、`rax`、`rbx`、`rcx`、`rdx`、`rbp`、`rsp`、`rsi`、`rdi`、および`r8`から`r15`までの**16個の汎用レジスタ**を備えています。これらはそれぞれ**64ビット**（8バイト）の値を格納できます。これらのレジスタには、互換性や特定のタスクのために32ビット、16ビット、8ビットのサブレジスタも存在します。
 
-1. **`rax`** - 従来、functionからの**return values**に使用されます。
-2. **`rbx`** - memory operationsの**base register**としてよく使用されます。
-3. **`rcx`** - **loop counters**によく使用されます。
-4. **`rdx`** - extended arithmetic operationsなど、さまざまな用途で使用されます。
-5. **`rbp`** - stack frameの**base pointer**です。
-6. **`rsp`** - **stack pointer**で、stackの先頭を追跡します。
-7. **`rsi`**および**`rdi`** - string/memory operationsにおける**source**および**destination** indexesに使用されます。
-8. **`r8`**から**`r15`** - x64で追加されたgeneral-purpose registersです。
+1. **`rax`** - 従来、関数からの**戻り値**に使用されます。
+2. **`rbx`** - メモリ操作の**ベースレジスタ**としてよく使用されます。
+3. **`rcx`** - **ループカウンター**によく使用されます。
+4. **`rdx`** - 拡張算術演算など、さまざまな用途で使用されます。
+5. **`rbp`** - スタックフレームの**ベースポインター**です。
+6. **`rsp`** - **スタックポインター**で、スタックの最上部を追跡します。
+7. **`rsi`**と**`rdi`** - 文字列/メモリ操作における**ソース**および**宛先**のインデックスに使用されます。
+8. **`r8`**から**`r15`** - x64で導入された追加の汎用レジスタです。
 
 ### **Calling Convention**
 
-x64のcalling conventionはoperating systemによって異なります。例えば、次のとおりです。
+x64のcalling conventionはオペレーティングシステムによって異なります。例えば:
 
-- **Windows**: 最初の**4つのparameters**は、**`rcx`**、**`rdx`**、**`r8`**、**`r9`** registersに渡されます。追加のparametersはstackにpushされます。return valueは**`rax`**に格納されます。
-- **System V（一般的にUNIX-like systemsで使用）**: 最初の**6つのintegerまたはpointer parameters**は、**`rdi`**、**`rsi`**、**`rdx`**、**`rcx`**、**`r8`**、**`r9`** registersに渡されます。return valueも**`rax`**に格納されます。
+- **Windows**: 最初の**4つのパラメーター**は、**`rcx`**、**`rdx`**、**`r8`**、**`r9`**レジスタに渡されます。追加のパラメーターはスタックにpushされます。戻り値は**`rax`**に格納されます。
+- **System V（一般的にUNIX系システムで使用）**: 最初の**6つの整数またはポインタパラメーター**は、**`rdi`**、**`rsi`**、**`rdx`**、**`rcx`**、**`r8`**、**`r9`**レジスタに渡されます。戻り値も**`rax`**に格納されます。
 
-functionのinputsが6個を超える場合、**残りはstackに渡されます**。stack pointerである**RSP**は**16バイト境界にアライン**されている必要があります。これは、callを実行する前に、指しているaddressが16で割り切れる必要があるという意味です。通常、function callを実行する前に、shellcode内でRSPが適切にアラインされていることを確認する必要があります。しかし実際には、この要件を満たしていなくても、system callsは何度も正常に動作します。
+関数の入力が6つを超える場合、**残りはスタックに渡されます**。スタックポインターである**RSP**は**16バイト境界にアライン**されている必要があります。つまり、callが実行される前に、RSPが指すアドレスは16で割り切れなければなりません。通常、関数callを実行する前に、shellcode内でRSPが適切にアラインされていることを確認する必要があります。ただし実際には、この要件を満たしていなくても、system callは何度も正常に動作します。
 
-### SwiftにおけるCalling Convention
+### Calling Convention in Swift
 
 Swiftには独自の**calling convention**があり、[**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)で確認できます。
 
 ### **Common Instructions**
 
-x64 instructionsには豊富な種類があり、以前のx86 instructionsとの互換性を維持しながら、新しいものも導入されています。
+x64の命令セットは豊富で、以前のx86命令との互換性を維持しながら、新しい命令も導入しています。
 
-- **`mov`**: ある**register**または**memory location**から別の場所へ値を**move**します。
-- 例: `mov rax, rbx` — `rbx`の値を`rax`へmoveします。
-- **`push`**および**`pop`**: 値を**stack**へpushしたり、stackからpopしたりします。
-- 例: `push rax` — `rax`の値をstackへpushします。
-- 例: `pop rax` — stackの先頭の値を`rax`へpopします。
-- **`add`**および**`sub`**: **加算**および**減算**operationsです。
+- **`mov`**: ある**レジスタ**または**メモリロケーション**から別の場所へ値を**移動**します。
+- 例: `mov rax, rbx` — `rbx`の値を`rax`へ移動します。
+- **`push`**と**`pop`**: 値を**スタック**へpushしたり、スタックからpopしたりします。
+- 例: `push rax` — `rax`の値をスタックへpushします。
+- 例: `pop rax` — スタックの最上部にある値を`rax`へpopします。
+- **`add`**と**`sub`**: **加算**および**減算**操作です。
 - 例: `add rax, rcx` — `rax`と`rcx`の値を加算し、結果を`rax`に格納します。
-- **`mul`**および**`div`**: **乗算**および**除算**operationsです。注: これらはoperandの使用方法に関して固有の動作をします。
-- **`call`**および**`ret`**: **functionsをcall**したり、**functionsからreturn**したりするために使用されます。
-- **`int`**: software **interrupt**をtriggerするために使用されます。例: `int 0x80`は、32ビットx86 Linuxでsystem callsに使用されていました。
-- **`cmp`**: 2つの値を**compare**し、結果に基づいてCPUのflagsを設定します。
-- 例: `cmp rax, rdx` — `rax`と`rdx`をcompareします。
-- **`je`、`jne`、`jl`、`jge`、...**: 直前の`cmp`またはtestの結果に基づいてcontrol flowを変更する**conditional jump** instructionsです。
-- 例: `cmp rax, rdx` instructionの後に`je label`を実行すると、`rax`と`rdx`が等しい場合に`label`へjumpします。
-- **`syscall`**: 一部のx64 systems（modern Unixなど）で**system calls**に使用されます。
-- **`sysenter`**: 一部のplatformsにおける最適化された**system call** instructionです。
+- **`mul`**と**`div`**: **乗算**および**除算**操作です。注: これらはオペランドの使用方法に関して固有の動作をします。
+- **`call`**と**`ret`**: **関数のcall**および**関数からのreturn**に使用されます。
+- **`int`**: ソフトウェア**割り込み**を発生させるために使用されます。例: `int 0x80`は、32ビットx86 Linuxでsystem callに使用されていました。
+- **`cmp`**: 2つの値を**比較**し、その結果に基づいてCPUのフラグを設定します。
+- 例: `cmp rax, rdx` — `rax`と`rdx`を比較します。
+- **`je`、`jne`、`jl`、`jge`、...**: 前の`cmp`またはtestの結果に基づいて制御フローを変更する**条件付きjump**命令です。
+- 例: `cmp rax, rdx`命令の後にある`je label` — `rax`と`rdx`が等しい場合、`label`へjumpします。
+- **`syscall`**: 一部のx64システム（現代のUnixなど）で**system call**に使用されます。
+- **`sysenter`**: 一部のプラットフォームにおける最適化された**system call**命令です。
 
 ### **Function Prologue**
 
-1. **古いbase pointerをpushする**: `push rbp`（callerのbase pointerを保存）
-2. **現在のstack pointerをbase pointerへmoveする**: `mov rbp, rsp`（現在のfunction用に新しいbase pointerを設定）
-3. **local variables用のstack領域をallocateする**: `sub rsp, <size>`（`<size>`は必要なバイト数）
+1. **古いベースポインターをpushする**: `push rbp`（callerのベースポインターを保存します）
+2. **現在のスタックポインターをベースポインターへ移動する**: `mov rbp, rsp`（現在の関数用に新しいベースポインターを設定します）
+3. **ローカル変数用の領域をスタックに確保する**: `sub rsp, <size>`（`<size>`は必要なバイト数です）
 
 ### **Function Epilogue**
 
-1. **現在のbase pointerをstack pointerへmoveする**: `mov rsp, rbp`（local variablesをdeallocate）
-2. **古いbase pointerをstackからpopする**: `pop rbp`（callerのbase pointerをrestore）
-3. **returnする**: `ret`（callerへcontrolをreturn）
+1. **現在のベースポインターをスタックポインターへ移動する**: `mov rsp, rbp`（ローカル変数の領域を解放します）
+2. **古いベースポインターをスタックからpopする**: `pop rbp`（callerのベースポインターを復元します）
+3. **returnする**: `ret`（callerへ制御を戻します）
 
 ## macOS
 
 ### syscalls
 
-syscallsにはさまざまなclassがあり、[**こちらで確認できます**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
+syscallには異なるクラスがあり、[**こちらで確認できます**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
 ```c
 #define SYSCALL_CLASS_NONE	0	/* Invalid */
 #define SYSCALL_CLASS_MACH	1	/* Mach */
@@ -78,7 +78,7 @@ syscallsにはさまざまなclassがあり、[**こちらで確認できます*
 #define SYSCALL_CLASS_DIAG	4	/* Diagnostics */
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
-その後、各 syscall number は[**この URL**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**で確認できます:**
+次に、各 syscall number は[**この URL**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**で確認できます。
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
 1	AUE_EXIT	ALL	{ void exit(int rval); }
@@ -95,7 +95,7 @@ syscallsにはさまざまなclassがあり、[**こちらで確認できます*
 12	AUE_CHDIR	ALL	{ int chdir(user_addr_t path); }
 [...]
 ```
-したがって、**Unix/BSD class** の `open` syscall (**5**) を呼び出すには、`0x2000000` を追加する必要があります。
+したがって、**Unix/BSD class** から `open` syscall (**5**) を呼び出すには、`0x2000000` を追加する必要があります。
 
 そのため、open を呼び出す syscall number は `0x2000005` になります。
 
@@ -106,7 +106,7 @@ syscallsにはさまざまなclassがあり、[**こちらで確認できます*
 nasm -f macho64 shell.asm -o shell.o
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 ```
-バイト列を抽出するには:
+バイト列を抽出するには：
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/b729f716aaf24cbc8109e0d94681ccb84c0b0c9e/helper/extract.sh
 for c in $(objdump -d "shell.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
@@ -118,7 +118,7 @@ otool -t shell.o | grep 00 | cut -f2 -d$'\t' | sed 's/ /\\x/g' | sed 's/^/\\x/g'
 ```
 <details>
 
-<summary>shellcodeをテストするCコード</summary>
+<summary>shellcodeをテストするC code</summary>
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
 // gcc loader.c -o loader
@@ -166,9 +166,9 @@ return 0;
 ```
 </details>
 
-#### Shell
+#### シェル
 
-[**こちら**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)より引用し、解説します。<sup>[1]</sup>
+[**こちら**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)から引用し、解説しています。<sup>[[1]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -280,7 +280,7 @@ touch_command:  db "touch /tmp/lalala", 0
 ```
 #### Bind shell
 
-[https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) の **ポート 4444**<sup>[2]</sup> における Bind shell。
+[https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) の **ポート 4444** における Bind shell<sup>[[2]](#references)</sup>】【。
 ```armasm
 section .text
 global _main
@@ -357,7 +357,7 @@ syscall
 ```
 #### Reverse Shell
 
-[https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html) の Reverse shell。**127.0.0.1:4444** への Reverse shell<sup>[3]</sup>。
+[https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html) の Reverse shell。**127.0.0.1:4444** への Reverse shell<sup>[[3]](#references)</sup>】【。
 ```armasm
 section .text
 global _main
@@ -419,7 +419,7 @@ mov  rax, r8
 mov  al, 0x3b
 syscall
 ```
-## 参照
+## References
 
 - [1] [daem0nc0re/macOS_ARM64_Shellcode - shell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)
 - [2] [Packet Storm - macOS TCP 4444 Bind Shell (Null-Free) Shellcode](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html)

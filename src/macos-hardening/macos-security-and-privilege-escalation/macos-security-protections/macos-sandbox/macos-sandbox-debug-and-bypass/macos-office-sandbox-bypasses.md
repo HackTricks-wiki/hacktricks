@@ -1,53 +1,53 @@
-# macOS Office Sandbox Bypass
+# macOS Office Sandbox Bypasses
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
 ### Word Sandbox bypass via Launch Agents
 
-このアプリケーションは、**`com.apple.security.temporary-exception.sbpl`** entitlement を使用した **custom Sandbox** を利用しています。この custom sandbox では、ファイル名が `~$` で始まる限り、どこにでもファイルを書き込むことができます: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
+このアプリケーションは、**`com.apple.security.temporary-exception.sbpl`** entitlement を使用した **custom Sandbox** を使用しており、この custom sandbox では、ファイル名が `~$` で始まる限り、どこにでもファイルを書き込めます: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
 
-したがって、`~/Library/LaunchAgents/~$escape.plist` に **`plist`** LaunchAgent を **書き込む**だけで、escape が可能でした。
+したがって、`~/Library/LaunchAgents/~$escape.plist` に **`plist`** LaunchAgent を書き込むだけで、escape は容易に実行できました。
 
-[**original report here**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/) を参照してください。<sup>[1]</sup>
+Check the [**original report here**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/).<sup>[[1]](#references)</sup>
 
 ### Word Sandbox bypass via Login Items and zip
 
-最初の escape により、Word は名前が `~$` で始まる任意のファイルを書き込めます。ただし、前述の vuln に対する patch 後は、`/Library/Application Scripts` や `/Library/LaunchAgents` に書き込むことはできませんでした。
+最初の escape により、Word は `~$` で始まる名前の任意のファイルを書き込めます。ただし、前述の vuln に対する patch 後は、`/Library/Application Scripts` または `/Library/LaunchAgents` に書き込むことはできませんでした。
 
-sandbox 内から **Login Item**（ユーザーのログイン時に実行されるアプリ）を作成できることが発見されました。しかし、これらのアプリは **notarized** されていなければ **実行されず**、さらに **args を追加することもできません**（そのため、単純に **`bash`** を使用して reverse shell を実行することはできません）。
+sandbox 内から **Login Item**（ユーザーのログイン時に実行される apps）を作成できることが発見されました。しかし、これらの apps は **notarized** されていない限り実行されず、**args を追加することもできません**（そのため、単に **`bash`** を使って reverse shell を実行することはできません）。
 
-以前の Sandbox bypass により、Microsoft は `~/Library/LaunchAgents` にファイルを書き込む機能を無効化しました。しかし、**zip file を Login Item として指定すると、`Archive Utility` がその zip file を現在の場所にそのまま **unzip** することが発見されました。デフォルトでは `~/Library` 内の `LaunchAgents` folder は作成されていないため、`LaunchAgents/~$escape.plist` に plist を **zip** し、その zip file を **`~/Library`** に配置することで、展開時に persistence の宛先へ到達させることが可能でした。
+以前の Sandbox bypass により、Microsoft は `~/Library/LaunchAgents` にファイルを書き込む機能を無効化しました。しかし、**Login Item** として **zip file** を置くと、`Archive Utility` がその zip を現在の場所に **unzip** することが発見されました。デフォルトでは `~/Library` 内の `LaunchAgents` folder は作成されていないため、`LaunchAgents/~$escape.plist` に **plist** を zip 化し、その zip file を **`~/Library`** に置くことで、解凍時に persistence の宛先へ到達させることが可能でした。
 
-[**original report here**](https://objective-see.org/blog/blog_0x4B.html) を参照してください。<sup>[2]</sup>
+Check the [**original report here**](https://objective-see.org/blog/blog_0x4B.html).<sup>[[2]](#references)</sup>
 
 ### Word Sandbox bypass via Login Items and .zshenv
 
-（最初の escape により、Word は名前が `~$` で始まる任意のファイルを書き込めます。）
+（最初の escape により、Word は `~$` で始まる名前の任意のファイルを書き込めます。）
 
-しかし、前述の technique には制限があり、他の software によって **`~/Library/LaunchAgents`** folder が作成されている場合は失敗します。そこで、別の Login Items chain が発見されました。
+ただし、以前の technique には制限があり、他の software によって **`~/Library/LaunchAgents`** folder が作成されている場合は失敗します。そのため、これに対する別の Login Items chain が発見されました。
 
-attacker は、実行する payload を含む **`.bash_profile`** と **`.zshenv`** を作成して zip し、被害者の user folder に **`~/~$escape.zip`** として **write** できます。
+攻撃者は、実行する payload を含む **`.bash_profile`** と **`.zshenv`** の files を作成し、それらを zip 化して victims の user folder: **`~/~$escape.zip`** に **write** できます。
 
-次に、その zip file と **`Terminal`** app を **Login Items** に追加します。ユーザーが再度ログインすると、zip file が user file 内で解凍され、**`.bash_profile`** と **`.zshenv`** が上書きされます。その結果、Terminal はこれらの file のいずれかを実行します（bash と zsh のどちらを使用するかによって異なります）。
+次に、その zip file と **`Terminal`** app を **Login Items** に追加します。ユーザーが再度ログインすると、zip file が user の folder 内で uncompressed され、**`.bash_profile`** と **`.zshenv`** が overwrite されます。その結果、terminal はこれらの files のいずれかを実行します（bash と zsh のどちらを使用するかによって異なります）。
 
-[**original report here**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c) を参照してください。<sup>[3]</sup>
+Check the [**original report here**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c).<sup>[[3]](#references)</sup>
 
 ### Word Sandbox Bypass with Open and env variables
 
-sandboxed process からは、`open` utility を使用して他の process を invoke することが依然として可能です。さらに、これらの process は **独自の sandbox 内で**実行されます。
+sandboxed processes からは、**`open`** utility を使用して他の processes を invoke することが依然として可能です。さらに、これらの processes は **their own sandbox** 内で実行されます。
 
-`open` utility には、特定の env variables を指定して app を実行する **`--env`** option があることが発見されました。そこで、**sandbox 内の folder** に **`.zshenv file`** を作成し、`--env` で **`HOME` variable** をその folder に設定して `Terminal` app を開くことが可能でした。これにより `.zshenv` file が実行されます（なぜか **`__OSINSTALL_ENVIROMENT`** variable の設定も必要でした）。
+open utility には、**specific env** variables を指定して app を実行する **`--env`** option があることが発見されました。したがって、**sandbox** 内の folder に **`.zshenv file`** を作成し、`--env` を使用して **`HOME` variable** をその folder に設定した上で `Terminal` app を開くことが可能でした。これにより `.zshenv` file が実行されます（何らかの理由で、variable `__OSINSTALL_ENVIROMENT` の設定も必要でした）。
 
-[**original report here**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/) を参照してください。<sup>[4]</sup>
+Check the [**original report here**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/).<sup>[[4]](#references)</sup>
 
 ### Word Sandbox Bypass with Open and stdin
 
-**`open`** utility は **`--stdin`** param もサポートしていました（前述の bypass 後は `--env` を使用できなくなりました）。
+**`open`** utility は **`--stdin`** param もサポートしていました（また、前述の bypass 後は `--env` を使用できなくなりました）。
 
-Apple によって signed された **`python`** であっても、**`quarantine`** attribute が付いた script は **実行しません**。しかし、stdin から script を渡せば、quarantine 済みかどうかの check を回避できました。
+**`python`** は Apple によって signed されていますが、**`quarantine`** attribute が付いた script は実行しません。しかし、stdin から script を渡すことで、quarantine されているかどうかの check を回避できました。
 
 1. 任意の Python commands を含む **`~$exploit.py`** file を drop します。
-2. _open_ **`–stdin='~$exploit.py' -a Python`** を実行します。これにより、drop した file が standard input として機能する状態で Python app が実行されます。Python は問題なく code を実行し、さらに _launchd_ の child process であるため、Word の sandbox rules に拘束されません。
+2. _open_ **`–stdin='~$exploit.py' -a Python`** を実行します。これにより、drop した file を standard input として使用して Python app が実行されます。Python は問題なく code を実行し、さらに _launchd_ の child process であるため、Word の sandbox rules に binding されません。
 
 ## References
 

