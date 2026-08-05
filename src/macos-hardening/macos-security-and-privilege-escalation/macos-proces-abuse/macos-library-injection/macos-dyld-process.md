@@ -4,54 +4,54 @@
 
 ## Informazioni di base
 
-Il vero **entrypoint** di un binary Mach-o è il dynamic linker, definito in `LC_LOAD_DYLINKER`, che normalmente è `/usr/lib/dyld`.<sup>[3]</sup>
+Il vero **entrypoint** di un binario Mach-o è il dynamic linker, definito in `LC_LOAD_DYLINKER`, che solitamente è `/usr/lib/dyld`.<sup>[[3]](#references)</sup>
 
-Questo linker dovrà individuare tutte le librerie degli eseguibili, mapparle in memoria ed eseguire il linking di tutte le librerie non-lazy. Solo dopo questo processo verrà eseguito l'entry-point del binary.
+Questo linker dovrà individuare tutte le librerie degli eseguibili, mapparle in memoria e collegare tutte le librerie non-lazy. Solo dopo questo processo verrà eseguito l'entry-point del binario.
 
 Naturalmente, **`dyld`** non ha dipendenze (utilizza syscall ed estratti di libSystem).
 
 > [!CAUTION]
-> Se questo linker contenesse una vulnerabilità, poiché viene eseguito prima di qualsiasi binary (anche quelli con privilegi elevati), sarebbe possibile **escalate privileges**.
+> Se questo linker contiene una vulnerabilità, poiché viene eseguito prima di qualsiasi binario (anche quelli con privilegi elevati), sarebbe possibile **escalare i privilegi**.
 
 ### Flusso
 
-Dyld verrà caricato da **`dyldboostrap::start`**, che caricherà anche elementi come lo **stack canary**. Questo perché questa funzione riceverà nel proprio vettore di argomenti **`apple`** questo e altri **valori** **sensibili**.<sup>[1]</sup>
+Dyld viene caricato da **`dyldboostrap::start`**, che caricherà anche elementi come lo **stack canary**. Questo perché questa funzione riceverà nel proprio vettore di argomenti **`apple`** questo e altri **valori** **sensibili**.<sup>[[1]](#references)</sup>
 
-**`dyls::_main()`** è l'entry point di dyld e il suo primo compito è eseguire `configureProcessRestrictions()`, che normalmente limita le variabili d'ambiente **`DYLD_*`** spiegate in:<sup>[2]</sup>
+**`dyls::_main()`** è l'entry point di dyld e il suo primo compito è eseguire `configureProcessRestrictions()`, che solitamente limita le variabili d'ambiente **`DYLD_*`** spiegate in:<sup>[[2]](#references)</sup>
 
 
 {{#ref}}
 ./
 {{#endref}}
 
-Successivamente, esegue il mapping della dyld shared cache, che precollega tutte le librerie di sistema importanti, poi esegue il mapping delle librerie da cui dipende il binary e continua ricorsivamente finché tutte le librerie necessarie non vengono caricate. Pertanto:
+Successivamente, mappa la dyld shared cache, che pre-collega tutte le librerie di sistema importanti, quindi mappa le librerie da cui dipende il binario e continua ricorsivamente finché tutte le librerie necessarie non vengono caricate. Pertanto:
 
 1. inizia caricando le librerie inserite con `DYLD_INSERT_LIBRARIES` (se consentito)
-2. Poi quelle presenti nella shared cache
+2. Poi quelle nella shared cache
 3. Poi quelle importate
-1. Quindi continua a importare ricorsivamente le librerie
+1. Poi continua a importare ricorsivamente le librerie
 
-Una volta caricate tutte, vengono eseguiti gli **initialisers** di queste librerie. Questi vengono codificati usando **`__attribute__((constructor))`**, definito in `LC_ROUTINES[_64]` (ora deprecato), oppure tramite un puntatore in una sezione contrassegnata con `S_MOD_INIT_FUNC_POINTERS` (solitamente: **`__DATA.__MOD_INIT_FUNC`**).
+Una volta caricate tutte, vengono eseguiti gli **initialiser** di queste librerie. Questi sono codificati utilizzando **`__attribute__((constructor))`**, definito in `LC_ROUTINES[_64]` (ora deprecato), oppure tramite un puntatore in una sezione contrassegnata con `S_MOD_INIT_FUNC_POINTERS` (solitamente: **`__DATA.__MOD_INIT_FUNC`**).
 
-I terminator vengono codificati con **`__attribute__((destructor))`** e si trovano in una sezione contrassegnata con `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
+I terminator sono codificati con **`__attribute__((destructor))`** e si trovano in una sezione contrassegnata con `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
 
-### Stubs
+### Stub
 
-Tutti i binary in macOS sono collegati dinamicamente. Pertanto, contengono alcune sezioni di stubs che aiutano il binary a saltare al codice corretto su macchine e contesti differenti. Quando il binary viene eseguito, dyld è il componente responsabile della risoluzione di questi indirizzi (almeno di quelli non-lazy).
+Tutti i binari su macOS sono collegati dinamicamente. Pertanto, contengono alcune sezioni di stub che aiutano il binario a saltare al codice corretto su macchine e contesti diversi. È dyld, quando il binario viene eseguito, a dover risolvere questi indirizzi (almeno quelli non-lazy).
 
-Alcune sezioni di stubs nel binary:
+Alcune sezioni di stub nel binario:
 
 - **`__TEXT.__[auth_]stubs`**: puntatori dalle sezioni `__DATA`
-- **`__TEXT.__stub_helper`**: piccolo codice che invoca il linking dinamico con informazioni sulla funzione da chiamare
-- **`__DATA.__[auth_]got`**: Global Offset Table (indirizzi delle funzioni importate, quando vengono risolti, vengono associati durante il load time poiché contrassegnati con il flag `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__nl_symbol_ptr`**: puntatori a simboli non-lazy (associati durante il load time poiché contrassegnati con il flag `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__la_symbol_ptr`**: puntatori a simboli lazy (associati al primo accesso)
+- **`__TEXT.__stub_helper`**: piccolo codice che invoca il dynamic linking con informazioni sulla funzione da chiamare
+- **`__DATA.__[auth_]got`**: Global Offset Table (indirizzi delle funzioni importate, quando risolti, (collegati durante il caricamento poiché contrassegnati con il flag `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__nl_symbol_ptr`**: puntatori a simboli non-lazy (collegati durante il caricamento poiché contrassegnati con il flag `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__la_symbol_ptr`**: puntatori a simboli lazy (collegati al primo accesso)
 
 > [!WARNING]
-> Notare che i puntatori con il prefisso "auth\_" utilizzano una chiave di cifratura in-process per proteggerli (PAC). Inoltre, è possibile utilizzare l'istruzione arm64 `BLRA[A/B]` per verificare il puntatore prima di seguirlo. E RETA\[A/B] può essere utilizzato al posto di un indirizzo RET.\
+> Nota che i puntatori con il prefisso "auth\_" utilizzano una chiave di crittografia in-process per proteggerli (PAC). Inoltre, è possibile utilizzare l'istruzione arm64 `BLRA[A/B]` per verificare il puntatore prima di seguirlo. E `RETA\[A/B]` può essere utilizzata al posto di un indirizzo RET.\
 > In realtà, il codice in **`__TEXT.__auth_stubs`** utilizzerà **`braa`** invece di **`bl`** per chiamare la funzione richiesta e autenticare il puntatore.
 >
-> Si noti inoltre che le versioni attuali di dyld caricano tutto come non-lazy.
+> Nota inoltre che le versioni attuali di dyld caricano tutto come non-lazy.
 
 ### Individuazione dei lazy symbols
 ```c
@@ -62,14 +62,14 @@ int main (int argc, char **argv, char **envp, char **apple)
 printf("Hi\n");
 }
 ```
-Parte interessante del disassembly:
+Parte interessante del disassemblaggio:
 ```armasm
 ; objdump -d ./load
 100003f7c: 90000000    	adrp	x0, 0x100003000 <_main+0x1c>
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-È possibile vedere che il salto per chiamare printf va a **`__TEXT.__stubs`**:
+È possibile vedere che il salto alla chiamata a **`__TEXT.__stubs`**:
 ```bash
 objdump --section-headers ./load
 
@@ -96,21 +96,21 @@ Disassembly of section __TEXT,__stubs:
 100003f9c: f9400210    	ldr	x16, [x16]
 100003fa0: d61f0200    	br	x16
 ```
-puoi vedere che stiamo **saltando all'indirizzo della GOT**, che in questo caso viene risolta non-lazy e conterrà l'indirizzo della funzione printf.
+puoi vedere che stiamo **saltando all'indirizzo della GOT**, che in questo caso viene risolta in modalità non-lazy e conterrà l'indirizzo della funzione `printf`.
 
-In altre situazioni, invece di saltare direttamente alla GOT, potrebbe saltare a **`__DATA.__la_symbol_ptr`**, che caricherà un valore rappresentante la funzione che sta cercando di caricare, quindi saltare a **`__TEXT.__stub_helper`**, che salta a **`__DATA.__nl_symbol_ptr`**, contenente l'indirizzo di **`dyld_stub_binder`**, che accetta come parametri il numero della funzione e un indirizzo.\
-Quest'ultima funzione, dopo aver trovato l'indirizzo della funzione cercata, lo scrive nella posizione corrispondente in **`__TEXT.__stub_helper`** per evitare di dover eseguire nuovamente le ricerche in futuro.
+In altre situazioni, invece di saltare direttamente alla GOT, potrebbe saltare a **`__DATA.__la_symbol_ptr`**, che caricherà un valore rappresentante la funzione che sta cercando di caricare, per poi saltare a **`__TEXT.__stub_helper`**, che salta a **`__DATA.__nl_symbol_ptr`**, contenente l'indirizzo di **`dyld_stub_binder`**, che riceve come parametri il numero della funzione e un indirizzo.\
+Quest'ultima funzione, dopo aver trovato l'indirizzo della funzione cercata, lo scrive nella posizione corrispondente in **`__TEXT.__stub_helper`** per evitare di eseguire ulteriori lookup in futuro.
 
 > [!TIP]
-> Tuttavia, nota che le versioni attuali di dyld caricano tutto come non-lazy.
+> Tuttavia, nota che le versioni attuali di dyld caricano tutto in modalità non-lazy.
 
-#### Opcode di Dyld
+#### Opcode di dyld
 
-Infine, **`dyld_stub_binder`** deve trovare la funzione indicata e scriverla all'indirizzo corretto per non doverla cercare nuovamente. A questo scopo utilizza opcode (una macchina a stati finiti) all'interno di dyld.
+Infine, **`dyld_stub_binder`** deve trovare la funzione indicata e scriverla all'indirizzo corretto per non doverla cercare nuovamente. A tale scopo utilizza gli opcode (una macchina a stati finiti) all'interno di dyld.
 
-## vettore degli argomenti apple\[]
+## Vettore degli argomenti apple\[]
 
-In macOS la funzione principale riceve in realtà 4 argomenti invece di 3. Il quarto si chiama apple e ogni voce ha il formato `key=value`. Ad esempio:
+In macOS, la funzione principale riceve effettivamente 4 argomenti invece di 3. Il quarto è chiamato apple e ogni voce è nel formato `key=value`. Ad esempio:
 ```c
 // gcc apple.c -o apple
 #include <stdio.h>
@@ -138,7 +138,7 @@ Risultato:
 > [!TIP]
 > Quando questi valori raggiungono la funzione main, le informazioni sensibili sono già state rimosse oppure si sarebbe verificato un data leak.
 
-è possibile visualizzare tutti questi valori interessanti eseguendo il debugging prima di entrare in main con:
+è possibile visualizzare tutti questi valori interessanti facendo debugging prima di entrare in main con:
 
 <pre><code>lldb ./apple
 
@@ -181,17 +181,17 @@ Risultato:
 
 ## dyld_all_image_infos
 
-Questa è una struttura esportata da dyld con informazioni sullo stato di dyld, disponibile nel [**codice sorgente**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html), contenente informazioni come la versione, il puntatore all'array dyld_image_info, il puntatore a dyld_image_notifier, l'eventuale distacco del processo dalla shared cache, l'eventuale chiamata dell'inizializzatore di libSystem, il puntatore al Mach header di dyld stesso, il puntatore alla stringa della versione di dyld...
+Questa è una struttura esportata da dyld contenente informazioni sullo stato di dyld, disponibile nel [**codice sorgente**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html), con informazioni come la versione, il puntatore all'array dyld_image_info, a dyld_image_notifier, l'eventuale distacco del proc dalla shared cache, l'eventuale chiamata dell'initializer di libSystem, il puntatore al Mach header di dyld stesso, il puntatore alla stringa della versione di dyld...
 
-## variabili d'ambiente di dyld
+## variabili env di dyld
 
-### debug di dyld
+### debug dyld
 
-Variabili d'ambiente interessanti che aiutano a capire cosa sta facendo dyld:
+Variabili env interessanti che aiutano a capire cosa sta facendo dyld:
 
 - **DYLD_PRINT_LIBRARIES**
 
-Controlla ogni libreria caricata:
+Controlla ogni library che viene caricata:
 ```
 DYLD_PRINT_LIBRARIES=1 ./apple
 dyld[19948]: <9F848759-9AB8-3BD2-96A1-C069DC1FFD43> /private/tmp/a
@@ -209,7 +209,7 @@ dyld[19948]: <1A7038EC-EE49-35AE-8A3C-C311083795FB> /usr/lib/system/libmacho.dyl
 ```
 - **DYLD_PRINT_SEGMENTS**
 
-Controlla come viene caricata ciascuna libreria:
+Verifica come viene caricata ciascuna libreria:
 ```
 DYLD_PRINT_SEGMENTS=1 ./apple
 dyld[21147]: re-using existing shared cache (/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e):
@@ -246,17 +246,17 @@ dyld[21147]:     __LINKEDIT (r..) 0x000239574000->0x000270BE4000
 ```
 - **DYLD_PRINT_INITIALIZERS**
 
-Stampa quando viene eseguito ciascun inizializzatore di libreria:
+Stampa quando viene eseguito ogni inizializzatore della libreria:
 ```
 DYLD_PRINT_INITIALIZERS=1 ./apple
 dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 [...]
 ```
-### Altri
+### Altro
 
-- `DYLD_BIND_AT_LAUNCH`: I binding lazy vengono risolti insieme a quelli non lazy
-- `DYLD_DISABLE_PREFETCH`: Disabilita il pre-fetching del contenuto di \_\_DATA e \_\_LINKEDIT
-- `DYLD_FORCE_FLAT_NAMESPACE`: Binding a livello singolo
+- `DYLD_BIND_AT_LAUNCH`: I lazy bindings vengono risolti insieme a quelli non lazy
+- `DYLD_DISABLE_PREFETCH`: Disabilita il pre-fetch del contenuto di \_\_DATA e \_\_LINKEDIT
+- `DYLD_FORCE_FLAT_NAMESPACE`: Bindings a livello singolo
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Percorsi di risoluzione
 - `DYLD_INSERT_LIBRARIES`: Carica una libreria specifica
 - `DYLD_PRINT_TO_FILE`: Scrive il debug di dyld in un file
@@ -276,11 +276,11 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_STATISTICS`: Stampa le statistiche temporali
 - `DYLD_PRINT_STATISTICS_DETAILS`: Stampa le statistiche temporali dettagliate
 - `DYLD_PRINT_WARNINGS`: Stampa i messaggi di avviso
-- `DYLD_SHARED_CACHE_DIR`: Percorso da utilizzare per la cache delle librerie condivise
+- `DYLD_SHARED_CACHE_DIR`: Percorso da utilizzare per la shared library cache
 - `DYLD_SHARED_REGION`: "use", "private", "avoid"
 - `DYLD_USE_CLOSURES`: Abilita le closures
 
-È possibile trovarne altri con qualcosa di simile a:
+È possibile trovarne altri con qualcosa come:
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```
