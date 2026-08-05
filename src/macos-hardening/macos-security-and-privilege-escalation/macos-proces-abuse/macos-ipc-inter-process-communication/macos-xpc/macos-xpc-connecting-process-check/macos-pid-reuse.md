@@ -1,27 +1,27 @@
-# macOS PID 재사용
+# macOS PID Reuse
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-## PID 재사용
+## PID Reuse
 
-macOS **XPC 서비스**가 **PID**를 기반으로 호출된 프로세스를 확인하고 **감사 토큰**을 사용하지 않을 때, PID 재사용 공격에 취약합니다. 이 공격은 **경쟁 조건**에 기반하며, **익스플로잇**이 **XPC** 서비스에 메시지를 **전송하여** 기능을 **악용**한 후, **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`**를 **허용된** 바이너리로 실행합니다.
+macOS **XPC service**가 호출된 process를 **audit token**이 아닌 **PID**를 기반으로 확인하는 경우, PID reuse attack에 취약합니다. 이 attack은 **race condition**을 기반으로 하며, **exploit**은 **abusing** 기능을 통해 **XPC** service에 **messages를 send**한 **직후**, **allowed** binary와 함께 **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`**을 실행합니다.
 
-이 함수는 **허용된 바이너리**가 PID를 소유하게 만들지만, **악의적인 XPC 메시지는** 그 직전에 전송됩니다. 따라서, **XPC** 서비스가 **PID**를 사용하여 발신자를 **인증**하고 **`posix_spawn`** 실행 **후에** 이를 확인하면, **권한이 있는** 프로세스에서 온 것으로 생각할 것입니다.
+이 function은 **allowed binary**가 해당 **PID**를 소유하도록 만들지만, **malicious XPC message는 그 직전에 send**되었을 것입니다. 따라서 **XPC** service가 sender를 **authenticate**하기 위해 **PID**를 **use**하고 **`posix_spawn`** 실행 **AFTER**에 이를 확인하면, 해당 요청이 **authorized** process에서 온 것이라고 판단합니다.
 
-### 익스플로잇 예시
+### Exploit example
 
-**`shouldAcceptNewConnection`** 함수나 이를 호출하는 함수가 **`processIdentifier`**를 호출하고 **`auditToken`**을 호출하지 않는 경우를 찾으면, 이는 **프로세스 PID**를 확인하고 감사 토큰을 확인하지 않는다는 것을 의미합니다.\
-예를 들어, 이 이미지에서처럼 (참조에서 가져옴):
+**`shouldAcceptNewConnection`** function 또는 이 function에 의해 호출되는 function이 **`processIdentifier`**를 **calling**하고 **`auditToken`**은 calling하지 않는 것을 찾았다면, 이는 **audit token**이 아닌 process PID를 **verifying**하고 있다는 의미일 가능성이 매우 높습니다.\
+예를 들어 다음 image와 같습니다(reference에서 가져옴):
 
 <figure><img src="../../../../../../images/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
 
-익스플로잇의 두 부분을 확인하기 위해 이 예시 익스플로잇을 확인하세요 (다시, 참조에서 가져옴):
+exploit의 2가지 부분을 확인하려면 이 example exploit을 확인하세요(다시 말하지만 reference에서 가져옴):
 
-- 여러 개의 포크를 **생성하는** 부분
-- **각 포크**는 메시지를 전송한 직후 **`posix_spawn`**을 실행하면서 **XPC 서비스**에 **페이로드**를 **전송**합니다.
+- 여러 fork를 **generates**하는 부분
+- **Each fork**가 message를 send한 직후 **`posix_spawn`**을 실행하면서 **payload**를 XPC service에 **send**하는 부분
 
 > [!CAUTION]
-> 익스플로잇이 작동하려면 ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`**를 설정하거나 익스플로잇 내부에 다음을 넣는 것이 중요합니다:
+> exploit이 작동하려면 ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`**를 설정하거나 exploit 내부에 다음을 넣는 것이 중요합니다:
 >
 > ```objectivec
 > asm(".section __DATA,__objc_fork_ok\n"
@@ -31,7 +31,7 @@ macOS **XPC 서비스**가 **PID**를 기반으로 호출된 프로세스를 확
 
 {{#tabs}}
 {{#tab name="NSTasks"}}
-첫 번째 옵션은 **`NSTasks`**를 사용하고 자식 프로세스를 실행하여 RC를 악용하는 인수입니다.
+**`NSTasks`** 및 argument를 사용해 children을 launch하여 RCを exploit하는 첫 번째 option
 ```objectivec
 // Code from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl
@@ -140,7 +140,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="fork"}}
-이 예제는 원시 **`fork`**를 사용하여 **PID 경쟁 조건을 악용할 자식 프로세스를 시작한 다음, 하드 링크를 통해 또 다른 경쟁 조건을 악용합니다:**
+이 예제는 raw **`fork`**를 사용하여 **PID race condition을 exploit할 children**를 실행한 다음, **Hard link를 통한 또 다른 race condition**을 exploit합니다:
 ```objectivec
 // export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 // gcc -framework Foundation expl.m -o expl
@@ -276,13 +276,18 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-## 다른 예시
+## 기타 예시
 
-- [https://gergelykalman.com/why-you-shouldnt-use-a-commercial-vpn-amateur-hour-with-windscribe.html](https://gergelykalman.com/why-you-shouldnt-use-a-commercial-vpn-amateur-hour-with-windscribe.html)
+- [**Intego X9: Why your macOS antivirus should not trust PIDs**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - PID로 client를 인증한 AV의 privileged helper를 대상으로 한 LPE.
+- [**Exploiting GOG Galaxy XPC service for privilege escalation in macOS**](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
+- [**Rootpipe Reborn (Part II)**](https://objective-see.org/blog/blog_0x41.html)
 
-## 참고자료
+## 참고 자료
 
 - [https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
 - [https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
+- [https://blog.quarkslab.com/intego_lpe_macos_2.html](https://blog.quarkslab.com/intego_lpe_macos_2.html)
+- [https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
+- [https://objective-see.org/blog/blog_0x41.html](https://objective-see.org/blog/blog_0x41.html)
 
 {{#include ../../../../../../banners/hacktricks-training.md}}

