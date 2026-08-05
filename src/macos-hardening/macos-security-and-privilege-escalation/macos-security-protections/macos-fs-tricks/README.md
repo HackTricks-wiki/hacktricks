@@ -1,16 +1,18 @@
-# Trucos de FS de macOS
+# Trucos de FS en macOS
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 ## Combinaciones de permisos POSIX
 
-Permisos en un **directorio**:
+Para un **directorio**, los tres bits de permisos significan algo diferente de lo que significan en un archivo normal. `chmod(1)` denomina "**search**" al bit de ejecución cuando se aplica a un directorio:<sup>[2]</sup>
 
-- **read** - puedes **enumerar** las entradas del directorio
-- **write** - puedes **eliminar/escribir** **archivos** en el directorio y puedes **eliminar carpetas vacías**.
-- Pero **no puedes eliminar/modificar carpetas no vacías** a menos que tengas permisos de escritura sobre ellas.
-- **No puedes modificar el nombre de una carpeta** a menos que seas su propietario.
-- **execute** - tienes permiso para **recorrer** el directorio; si no tienes este permiso, no puedes acceder a ningún archivo dentro de él ni en ninguno de sus subdirectorios.
+> `0100` Para archivos, permite la ejecución por parte del propietario. Para directorios, permite al propietario **buscar** en el directorio.
+
+- **lectura** - puedes **enumerar** las entradas del directorio (listar los nombres).
+- **escritura** - puedes **crear, renombrar y eliminar entradas** en el directorio. Ten en cuenta que esto es una propiedad del directorio *contenedor*, no del archivo: puedes eliminar un archivo que no puedes leer ni escribir, siempre que puedas escribir en su directorio padre.
+- Para eliminar un **subdirectorio**, este debe estar vacío, lo que a su vez requiere permisos suficientes para eliminar todo lo que contiene.
+- Si el directorio tiene el **sticky bit** (`S_ISVTX`, como `/tmp`), esto está restringido: POSIX establece que un proceso solo puede eliminar o renombrar archivos en él si es propietario del archivo, propietario del directorio o tiene los privilegios correspondientes.<sup>[1]</sup>
+- **ejecución / búsqueda** - tienes **permitido atravesar** el directorio. La resolución de nombres de ruta localiza cada componente "en el directorio especificado por su predecesor", por lo que **perder permisos de búsqueda en cualquier componente individual del prefijo de la ruta hace que todo lo que esté debajo de él sea inaccesible mediante la ruta**, incluso si el archivo final es legible por todo el mundo.<sup>[1]</sup>
 
 ### Combinaciones peligrosas
 
@@ -18,38 +20,50 @@ Permisos en un **directorio**:
 
 - Un **propietario de directorio** padre en la ruta es el usuario
 - Un **propietario de directorio** padre en la ruta es un **grupo de usuarios** con **acceso de escritura**
-- Un **grupo de usuarios** tiene **acceso de escritura** al **archivo**
+- Un **grupo** de usuarios tiene **acceso de escritura** al **archivo**
 
 Con cualquiera de las combinaciones anteriores, un atacante podría **inyectar** un **sym/hard link** en la ruta esperada para obtener una escritura arbitraria privilegiada.
 
-### Caso especial de carpeta root R+X
+### Caso especial de una carpeta root con R+X
 
-Si hay archivos en un **directorio** donde **solo root tiene acceso R+X**, estos **no son accesibles para nadie más**. Por lo tanto, una vulnerabilidad que permita **mover un archivo legible por un usuario**, que no pueda leerse debido a esa **restricción**, desde esta carpeta **a otra diferente**, podría aprovecharse para leer estos archivos.
+Esto se deduce directamente de la regla de resolución de nombres de ruta anterior. Si un **directorio solo concede R+X a root**, los archivos que contiene son inaccesibles *por ruta* para todos los demás, pero los bits de permisos propios de los **archivos** aún pueden ser permisivos. El directorio es el único obstáculo.
 
-Ejemplo en: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
+Por tanto, cualquier primitive que permita sacar el archivo de ese directorio —un proceso privilegiado que **mueva/renombre/copie** una ruta elegida por el atacante a una ubicación que puedas atravesar— se convierte en una lectura arbitraria, sin necesidad de eludir nunca el modo propio del archivo:
+```bash
+# Reproduce the primitive locally
+sudo mkdir -p /tmp/locked && sudo chmod 700 /tmp/locked
+sudo sh -c 'echo secret > /tmp/locked/data.txt; chmod 644 /tmp/locked/data.txt'
+
+ls -l /tmp/locked/data.txt   # Permission denied: cannot even stat through the directory
+cat /tmp/locked/data.txt     # Permission denied
+
+# The file itself is mode 644 - only the parent directory's search bit blocks you.
+sudo ls -l /tmp/locked/
+```
+Busca mecanismos privilegiados de movimiento de archivos (instaladores, rotadores de logs, recopiladores de fallos/diagnósticos, funciones de backup y de "export") que acepten una ruta de origen proporcionada por un usuario con menos privilegios.
 
 ## Symbolic Link / Hard Link
 
-### Archivo/carpeta permisivo
+### Archivo/carpeta permisivos
 
-Si un proceso privilegiado está escribiendo datos en un **archivo** que podría estar **controlado** por un usuario con **menores privilegios**, o que podría haber sido **creado previamente** por un usuario con menores privilegios. El usuario podría simplemente **apuntarlo a otro archivo** mediante un Symbolic o Hard link, y el proceso privilegiado escribirá en ese archivo.
+Si un proceso privilegiado escribe datos en un **archivo** que podría estar **controlado** por un **usuario con menos privilegios**, o que podría haber sido **creado previamente** por un usuario con menos privilegios. El usuario podría simplemente **apuntarlo a otro archivo** mediante un enlace simbólico o duro, y el proceso privilegiado escribirá en ese archivo.
 
-Consulta las otras secciones donde un atacante podría **abusar de una escritura arbitraria para escalar privilegios**.
+Revisa las otras secciones donde un atacante podría **abusar de una escritura arbitraria para escalar privilegios**.
 
 ### Open `O_NOFOLLOW`
 
-Según [`open(2)`](https://keith.github.io/xcode-man-pages/open.2.html): *"Si se utiliza `O_NOFOLLOW` en la máscara y el archivo de destino pasado a `open()` es un enlace simbólico, `open()` fallará."* Solo se comprueba el componente **final**; todos los componentes **intermedios** se siguen resolviendo. Por lo tanto, un desarrollador que haya "protegido" una escritura con `O_NOFOLLOW` todavía puede ser atacado colocando un symlink en cualquier **directorio padre** de la ruta de destino.
+Según [`open(2)`](https://keith.github.io/xcode-man-pages/open.2.html): *"Si se utiliza `O_NOFOLLOW` en la máscara y el archivo de destino pasado a `open()` es un enlace simbólico, entonces `open()` fallará."* Solo se comprueba el componente **final**; todos los componentes **intermedios** siguen resolviéndose y siendo seguidos. Por lo tanto, un desarrollador que haya "protegido" una escritura con `O_NOFOLLOW` aún puede ser atacado colocando un enlace simbólico en cualquier **directorio padre** de la ruta de destino.<sup>[3]</sup>
 
-La misma man page documenta los flags que realmente solucionan esta brecha:
+La misma página del manual documenta las flags que realmente cierran esa brecha:<sup>[3]</sup>
 
-- **`O_NOFOLLOW_ANY`** — *"si ... cualquier componente de la ruta pasada a `open()` es un enlace simbólico, `open()` fallará."*
-- **`O_RESOLVE_BENEATH`** — *"si ... la resolución de la ruta especificada escapa del directorio asociado al fd, `openat()` fallará."*
+- **`O_NOFOLLOW_ANY`** — *"si ... cualquier componente de la ruta pasada a `open()` es un enlace simbólico, entonces `open()` fallará."*
+- **`O_RESOLVE_BENEATH`** — *"si ... la resolución de ruta especificada escapa del directorio asociado al fd, entonces `openat()` fallará."*
 
-De lo contrario, `openat()` relativo a un FD de directorio que ya hayas validado, o `realpath()` + una nueva validación, son las formas restantes de detener los cambios de symlink en rutas intermedias.
+De lo contrario, `openat()` relativo a un FD de directorio que ya hayas validado, o `realpath()` + una nueva validación, son las formas restantes de detener los cambios de enlaces simbólicos en rutas intermedias.
 
 ## .fileloc
 
-Los archivos con extensión **`.fileloc`** pueden apuntar a otras aplicaciones o binarios, por lo que, cuando se abren, se ejecutará la aplicación/binario correspondiente.\
+Los archivos con extensión **`.fileloc`** pueden apuntar a otras aplicaciones o binarios, de modo que, al abrirlos, se ejecutará la aplicación/binario correspondiente.\
 Ejemplo:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -63,29 +77,29 @@ Ejemplo:
 </dict>
 </plist>
 ```
-## File Descriptors
+## Descriptores de archivo
 
-### Leak FD (no `O_CLOEXEC`)
+### Leak FD (sin `O_CLOEXEC`)
 
-Si una llamada a `open` no incluye el flag `O_CLOEXEC`, el file descriptor será heredado por el proceso hijo. Por lo tanto, si un proceso privilegiado abre un archivo privilegiado y ejecuta un proceso controlado por el atacante, el atacante **heredará el FD del archivo privilegiado**.
+Si una llamada a `open` no incluye el flag `O_CLOEXEC`, el descriptor de archivo será heredado por el proceso hijo. Por lo tanto, si un proceso privilegiado abre un archivo privilegiado y ejecuta un proceso controlado por el atacante, el atacante **heredará el FD del archivo privilegiado**.
 
-El ejemplo canónico es el **`DYLD_PRINT_TO_FILE` LPE en OS X 10.10** ([SektionEins](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html)):
+El ejemplo canónico es el **LPE de `DYLD_PRINT_TO_FILE` en OS X 10.10** ([SektionEins](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html)):<sup>[4]</sup>
 
-- `dyld` respetaba `DYLD_PRINT_TO_FILE=/path` incluso en **restricted (suid root) binaries**, porque esa variable concreta se analizaba fuera de `processDyldEnvironmentVariable()`.
+- `dyld` respetaba `DYLD_PRINT_TO_FILE=/path` incluso en **binarios restringidos (suid root)**, porque esa variable concreta se analizaba fuera de `processDyldEnvironmentVariable()`.
 - Ejecutaba `open(loggingPath, O_WRONLY | O_CREAT | O_APPEND, 0644)`, por lo que **creaba un archivo propiedad de root en una ruta arbitraria**.
 - El FD **nunca se cerraba y no tenía el flag close-on-exec**, por lo que cada proceso hijo del binario suid heredaba un **FD escribible hacia un archivo propiedad de root**.
-- Al ejecutar, por ejemplo, `DYLD_PRINT_TO_FILE=/etc/target suid_binary` y leer después en el proceso hijo el número del FD heredado, se obtenían escrituras arbitrarias en archivos propiedad de root; `fcntl(fd, F_SETFL, 0)` incluso eliminaba `O_APPEND` para permitir sobrescribir en lugar de añadir contenido.
+- Ejecutar, por ejemplo, `DYLD_PRINT_TO_FILE=/etc/target suid_binary` y después leer el número del FD heredado en el proceso hijo permitía realizar escrituras arbitrarias en archivos propiedad de root; `fcntl(fd, F_SETFL, 0)` incluso eliminaba `O_APPEND` para permitir sobrescribir en lugar de añadir contenido.
 
-El mismo patrón aparece siempre que un proceso privilegiado abre un archivo **antes de ejecutar mediante `exec` algo que controlas** (helper tools, editores de estilo `crontab` invocados mediante `$EDITOR`, archivos de log/debug abiertos desde una ruta proporcionada por una variable de entorno...). Enumera los FDs heredados con:
+El mismo patrón aparece siempre que un proceso privilegiado abre un archivo **antes de ejecutar mediante `exec` algo que controlas** (herramientas auxiliares, editores de estilo `crontab` invocados mediante `$EDITOR`, archivos de log/debug abiertos desde una ruta proporcionada por una variable de entorno...). Enumera los FDs que has heredado con:
 ```bash
 # From inside the child process
 ls -l /dev/fd/
 # or
 lsof -p $$
 ```
-Cualquier valor superior a `2` que apunte a un archivo que no puedas abrir tú mismo es una primitiva de escritura arbitraria (o lectura arbitraria).
+Cualquier cosa por encima de `2` que apunte a un archivo que no puedas abrir tú mismo es una primitiva de escritura (o lectura) arbitraria.
 
-## Evita los trucos con xattrs de quarantine
+## Evita los trucos de xattrs de quarantine
 
 ### Elimínalo
 ```bash
@@ -93,7 +107,7 @@ xattr -d com.apple.quarantine /path/to/file_or_app
 ```
 ### uchg / uchange / uimmutable flag
 
-Si un archivo/carpeta tiene este atributo inmutable, no será posible ponerle un xattr
+Si un archivo/carpeta tiene este atributo immutable, no será posible ponerle un xattr
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -105,20 +119,20 @@ ls -lO /tmp/asd
 ```
 ### Sistemas de archivos sin compatibilidad con xattr
 
-No todos los sistemas de archivos que macOS puede montar almacenan **extended attributes** de forma nativa. HFS+ y APFS sí lo hacen; **FAT32, exFAT y (la mayoría de) los montajes NFS no** — macOS los emula escribiendo un archivo auxiliar **AppleDouble** llamado `._<filename>` ([The Eclectic Light Company](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)).
+No todos los sistemas de archivos que macOS puede montar almacenan **atributos extendidos** de forma nativa. HFS+ y APFS sí lo hacen; **FAT32, exFAT y (la mayoría de) los montajes NFS no** — macOS los emula escribiendo un archivo auxiliar **AppleDouble** llamado `._<filename>` ([The Eclectic Light Company](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)).<sup>[5]</sup>
 
-Esto es importante para quarantine, porque el xattr solo persiste si realmente se puede escribir **y volver a leer** desde el mismo volumen:
+Esto es importante para la cuarentena, porque el xattr solo sobrevive si realmente se puede escribir **y volver a leer** desde el mismo volumen:
 ```bash
 # Check whether a mount point round-trips xattrs at all
 xattr -w com.apple.quarantine "0081;00000000;test;" /Volumes/SOMEUSB/file
 xattr -p com.apple.quarantine /Volumes/SOMEUSB/file
 ls -a /Volumes/SOMEUSB/          # look for the ._file AppleDouble companion
 ```
-Si el volumen se lee posteriormente desde una ruta que ignora el archivo complementario `._` (o el archivo complementario se elimina), el archivo llega **sin un flag de cuarentena**; y una `.app` sin cuarentena es suficiente para escapar del App Sandbox, como se explica en [macOS Sandbox Debug & Bypass](../macos-sandbox/macos-sandbox-debug-and-bypass/README.md#bypassing-quarantine-attribute).
+Si el volumen se lee posteriormente desde una ruta que ignora el archivo complementario `._` (o este se elimina), el archivo llega **sin un indicador de quarantine**; y una `.app` sin quarantine es suficiente para escapar del App Sandbox, como se explica en [macOS Sandbox Debug & Bypass](../macos-sandbox/macos-sandbox-debug-and-bypass/README.md#bypassing-quarantine-attribute).
 
 ### writeextattr ACL
 
-Esta ACL impide añadir `xattrs` al archivo
+Esta ACL impide añadir `xattrs` al archivo.
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -141,13 +155,13 @@ ls -le /tmp/test
 ```
 ### **com.apple.acl.text xattr + AppleDouble**
 
-El formato de archivo **AppleDouble** copia un archivo incluidos sus ACEs.
+El formato de archivo **AppleDouble** copia un archivo, incluidos sus ACEs.
 
-En el [**código fuente**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) es posible ver que la representación de texto de la ACL almacenada dentro del xattr llamado **`com.apple.acl.text`** se establecerá como ACL en el archivo descomprimido. Por lo tanto, si comprimes una aplicación en un archivo zip con el formato de archivo **AppleDouble** y una ACL que impide que se escriban otros xattrs en ella... el xattr de cuarentena no se establecía en la aplicación:
+En el [**código fuente**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) se puede ver que la representación de texto de la ACL almacenada dentro del xattr llamado **`com.apple.acl.text`** se establecerá como ACL en el archivo descomprimido. Por lo tanto, si comprimieras una aplicación en un archivo zip con el formato de archivo **AppleDouble** y una ACL que impidiera escribir otros xattrs en ella... el xattr de quarantine no se establecía en la aplicación:
 
-Consulta el [**informe original**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) para obtener más información.
+Consulta el [**informe original**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) para obtener más información.<sup>[6]</sup>
 
-Para replicar esto, primero necesitamos obtener la cadena ACL correcta:
+Para replicarlo, primero debemos obtener la cadena ACL correcta:
 ```bash
 # Everything will be happening here
 mkdir /tmp/temp_xattrs
@@ -165,7 +179,7 @@ ditto -c -k del test.zip
 ditto -x -k --rsrc test.zip .
 ls -le test
 ```
-(Nota: incluso si esto funciona, el sandbox escribe primero el xattr de quarantine)
+(Nota: incluso si esto funciona, el sandbox escribe el xattr de quarantine antes)
 
 No es realmente necesario, pero lo dejo ahí por si acaso:
 
@@ -174,15 +188,15 @@ No es realmente necesario, pero lo dejo ahí por si acaso:
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
-## Bypass de las comprobaciones de signature
+## Omitir las comprobaciones de firma
 
-### Bypass de las comprobaciones de platform binaries
+### Omitir las comprobaciones de platform binaries
 
-Algunas comprobaciones de seguridad verifican si el binario es un **platform binary**, por ejemplo, para permitir la conexión a un XPC service. Sin embargo, como se expone en https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, es posible hacer bypass de esta comprobación obteniendo un platform binary (como /bin/ls) e inyectando el exploit mediante dyld usando una variable de entorno `DYLD_INSERT_LIBRARIES`.
+Algunas comprobaciones de seguridad verifican si el binario es un **platform binary**, por ejemplo, para permitir la conexión a un servicio XPC. Sin embargo, como se expone en un bypass en https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, es posible omitir esta comprobación obteniendo un platform binary (como /bin/ls) e inyectando el exploit mediante dyld usando la variable de entorno `DYLD_INSERT_LIBRARIES`.<sup>[7]</sup>
 
-### Bypass de los flags `CS_REQUIRE_LV` y `CS_FORCED_LV`
+### Omitir los flags `CS_REQUIRE_LV` y `CS_FORCED_LV`
 
-Es posible que un binario en ejecución modifique sus propios flags para hacer bypass de las comprobaciones con un código como el siguiente:
+Es posible que un binario en ejecución modifique sus propios flags para omitir comprobaciones mediante un código como el siguiente:<sup>[7]</sup>
 ```c
 // Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
 int pid = getpid();
@@ -197,9 +211,9 @@ NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, statu
 ```
 ## Bypass Code Signatures
 
-Los bundles contienen el archivo **`_CodeSignature/CodeResources`**, que contiene el **hash** de cada **archivo** del **bundle**. Ten en cuenta que el hash de CodeResources también está **incrustado en el ejecutable**, por lo que tampoco podemos modificarlo.
+Los bundles contienen el archivo **`_CodeSignature/CodeResources`**, que contiene el **hash** de cada **archivo** del **bundle**. Ten en cuenta que el hash de CodeResources también está **embebido en el ejecutable**, por lo que tampoco podemos modificarlo.
 
-Sin embargo, hay algunos archivos cuya firma no se comprobará; estos tienen la clave omit en el plist, como:
+Sin embargo, hay algunos archivos cuya firma no se comprobará; estos tienen la clave `omit` en el plist, como:
 ```xml
 <dict>
 ...
@@ -249,7 +263,7 @@ openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/
 ```
 ## Montar dmgs
 
-Un usuario puede montar un dmg personalizado, incluso sobre algunas carpetas existentes. Así es como se puede crear un paquete dmg personalizado con contenido personalizado:
+Un usuario puede montar un dmg personalizado creado incluso sobre algunas carpetas existentes. Así es como podrías crear un paquete dmg personalizado con contenido personalizado:
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -270,20 +284,20 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Normalmente, macOS monta los discos comunicándose con el servicio Mach `com.apple.DiskArbitrarion.diskarbitrariond` (proporcionado por `/usr/libexec/diskarbitrationd`). Si se añade el parámetro `-d` al archivo plist de LaunchDaemons y se reinicia, almacenará los logs en `/var/log/diskarbitrationd.log`.\
+Normalmente, macOS monta los discos comunicándose con el servicio Mach `com.apple.DiskArbitrarion.diskarbitrariond` (proporcionado por `/usr/libexec/diskarbitrationd`). Si se añade el parámetro `-d` al archivo plist de LaunchDaemons y se reinicia, almacenará registros, almacenará registros en `/var/log/diskarbitrationd.log`.\
 Sin embargo, es posible utilizar herramientas como `hdik` y `hdiutil` para comunicarse directamente con el kext `com.apple.driver.DiskImages`.
 
 ## Escrituras arbitrarias
 
-### Periodic sh scripts
+### Scripts sh periódicos
 
-Si tu script pudiera interpretarse como un **shell script**, podrías sobrescribir el shell script **`/etc/periodic/daily/999.local`**, que se ejecutará cada día.
+Si tu script pudiera interpretarse como un **shell script**, podrías sobrescribir el **`/etc/periodic/daily/999.local`** shell script, que se ejecutará cada día.
 
 Puedes **simular** una ejecución de este script con: **`sudo periodic daily`**
 
 ### Daemons
 
-Escribe un **LaunchDaemon** arbitrario como **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`**, con un plist que ejecute un script arbitrario como:
+Escribe un **LaunchDaemon** arbitrario como **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** con un plist que ejecute un script arbitrario como:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -300,11 +314,11 @@ Escribe un **LaunchDaemon** arbitrario como **`/Library/LaunchDaemons/xyz.hacktr
 </dict>
 </plist>
 ```
-Simplemente genera el script `/Applications/Scripts/privesc.sh` con los **comandos** que quieras ejecutar como root.
+Genera únicamente el script `/Applications/Scripts/privesc.sh` con los **comandos** que quieras ejecutar como root.
 
-### Archivo Sudoers
+### Archivo sudoers
 
-Si tienes **arbitrary write**, podrías crear un archivo dentro de la carpeta **`/etc/sudoers.d/`** que te conceda privilegios de **sudo**.
+Si tienes **arbitrary write**, podrías crear un archivo dentro de la carpeta **`/etc/sudoers.d/`** que te otorgue privilegios de **sudo**.
 
 ### Archivos PATH
 
@@ -314,7 +328,7 @@ También puedes escribir archivos en **`/etc/paths.d`** para cargar nuevas carpe
 
 ### cups-files.conf
 
-Esta técnica se utilizó en [este writeup](https://www.kandji.io/blog/macos-audit-story-part1).
+Esta técnica se utilizó en [este informe](https://www.kandji.io/blog/macos-audit-story-part1).<sup>[8]</sup>
 
 Crea el archivo `/etc/cups/cups-files.conf` con el siguiente contenido:
 ```
@@ -322,24 +336,24 @@ ErrorLog /etc/sudoers.d/lpe
 LogFilePerm 777
 <some junk>
 ```
-Esto creará el archivo `/etc/sudoers.d/lpe` con permisos 777. El contenido adicional al final sirve para provocar la creación del error log.
+Esto creará el archivo `/etc/sudoers.d/lpe` con permisos 777. El contenido basura adicional al final sirve para activar la creación del registro de errores.
 
-A continuación, escribe en `/etc/sudoers.d/lpe` la configuración necesaria para escalar privilegios, como `%staff ALL=(ALL) NOPASSWD:ALL`.
+Después, escribe en `/etc/sudoers.d/lpe` la configuración necesaria para escalar privilegios, como `%staff ALL=(ALL) NOPASSWD:ALL`.
 
-Después, modifica de nuevo el archivo `/etc/cups/cups-files.conf`, indicando `LogFilePerm 700`, para que el nuevo archivo sudoers sea válido al invocar `cupsctl`.
+A continuación, modifica de nuevo el archivo `/etc/cups/cups-files.conf`, indicando `LogFilePerm 700`, para que el nuevo archivo sudoers sea válido al invocar `cupsctl`.
 
 ### Escape del Sandbox
 
-Es posible escapar del macOS sandbox mediante un arbitrary write en el sistema de archivos. Para ver algunos ejemplos, consulta la página [macOS Auto Start](../../../../macos-auto-start-locations.md), pero una técnica común consiste en escribir un archivo de preferencias de Terminal en `~/Library/Preferences/com.apple.Terminal.plist` que ejecute un comando durante el inicio y llamarlo mediante `open`.
+Es posible escapar del sandbox de macOS mediante una escritura arbitraria en el FS. Para ver algunos ejemplos, consulta la página [macOS Auto Start](../../../../macos-auto-start-locations.md), pero una opción común es escribir un archivo de preferencias de Terminal en `~/Library/Preferences/com.apple.Terminal.plist` que ejecute un comando al iniciarse y llamarlo mediante `open`.
 
 ## Generar archivos escribibles como otros usuarios
 
-Un primitive de privesc muy común consiste en hacer que un **proceso privilegiado cree un archivo por ti** en un directorio que controlas y, después, mantener **acceso de escritura** a ese archivo. Se necesitan dos elementos:
+Una primitiva de privesc muy común consiste en hacer que un **proceso privilegiado cree un archivo por ti** en un directorio que controlas y, después, conservar el **acceso de escritura** a ese archivo. Se necesitan dos elementos:
 
-1. Un directorio que te pertenezca (o donde puedas establecer una **ACL heredable**), de modo que cualquier elemento creado dentro herede tus permisos.
+1. Un directorio que te pertenezca (o en el que puedas establecer una **ACL heredable**), para que cualquier elemento creado dentro herede tus permisos.
 2. Un proceso privilegiado/`suid` al que se le pueda indicar **dónde** crear un archivo, normalmente mediante una variable de entorno de debug/logging, un archivo de configuración o la API XPC de un helper.
 
-La parte de la **ACL heredable** es la que hace que el archivo creado sea escribible por ti, aunque pertenezca a otro usuario. Los flags de herencia `file_inherit` / `directory_inherit` están documentados en [`chmod(1)`](https://keith.github.io/xcode-man-pages/chmod.1.html):
+La parte de la **ACL heredable** es lo que hace que el archivo creado sea escribible por ti aunque pertenezca a otro usuario. Los flags de herencia `file_inherit` / `directory_inherit` están documentados en [`chmod(1)`](https://keith.github.io/xcode-man-pages/chmod.1.html):
 ```bash
 DIRNAME=/tmp/inherit_test
 mkdir -p "$DIRNAME"
@@ -349,13 +363,13 @@ chmod +a "$(whoami) allow read,write,append,execute,readattr,writeattr,readextat
 
 ls -lde "$DIRNAME"   # confirm the ACE is present
 ```
-Ahora cualquier archivo que un proceso privilegiado cree dentro de `$DIRNAME` será **escribible por ti**. Si ese directorio también es una ubicación que posteriormente se **ejecuta como root** (`/etc/periodic/*`, `/etc/cron.d`, `/etc/sudoers.d`, un directorio de LaunchDaemon...), esto supone una escalada directa a root. Consulta las secciones [Sudoers File](#sudoers-file) y [cups-files.conf](#cups-filesconf) anteriores para saber qué escribir una vez que tengas el archivo.
+Ahora cualquier archivo que un proceso privilegiado cree dentro de `$DIRNAME` será **escribible por ti**. Si ese directorio también es una ubicación desde la que posteriormente se **ejecuta como root** (`/etc/periodic/*`, `/etc/cron.d`, `/etc/sudoers.d`, un directorio de LaunchDaemon...), esto permite una escalada directa a root. Consulta las secciones [Sudoers File](#sudoers-file) y [cups-files.conf](#cups-filesconf) anteriores para saber qué escribir una vez que tengas el archivo.
 
-Para ver un ejemplo completo de la cadena "una variable de entorno hace que un proceso root cree un archivo y el FD se filtra hacia ti", consulta [Leak FD (no `O_CLOEXEC`)](#leak-fd-no-o_cloexec) más arriba.
+Para ver un ejemplo completo de la cadena «una variable de entorno hace que un proceso root cree un archivo y el FD se filtra hacia ti», consulta [Leak FD (no `O_CLOEXEC`)](#leak-fd-no-o_cloexec) más arriba.
 
 ## Memoria compartida POSIX
 
-La **memoria compartida POSIX** permite que los procesos de sistemas operativos compatibles con POSIX accedan a un área de memoria común, facilitando una comunicación más rápida en comparación con otros métodos de comunicación entre procesos. Esto implica crear o abrir un objeto de memoria compartida con `shm_open()`, establecer su tamaño con `ftruncate()` y mapearlo en el espacio de direcciones del proceso mediante `mmap()`. Los procesos pueden leer y escribir directamente en esta área de memoria. Para gestionar el acceso simultáneo y evitar la corrupción de datos, suelen utilizarse mecanismos de sincronización como mutexes o semáforos. Finalmente, los procesos desmapean y cierran la memoria compartida con `munmap()` y `close()` y, opcionalmente, eliminan el objeto de memoria con `shm_unlink()`. Este sistema es especialmente eficaz para una IPC eficiente y rápida en entornos donde varios procesos necesitan acceder rápidamente a datos compartidos.
+La **memoria compartida POSIX** permite que los procesos de sistemas operativos compatibles con POSIX accedan a un área de memoria común, facilitando una comunicación más rápida que otros métodos de comunicación entre procesos. Consiste en crear o abrir un objeto de memoria compartida con `shm_open()`, establecer su tamaño con `ftruncate()` y asignarlo al espacio de direcciones del proceso mediante `mmap()`. Después, los procesos pueden leer y escribir directamente en esta área de memoria. Para gestionar el acceso simultáneo y evitar la corrupción de datos, suelen utilizarse mecanismos de sincronización como mutexes o semáforos. Finalmente, los procesos desasignan y cierran la memoria compartida con `munmap()` y `close()`, y opcionalmente eliminan el objeto de memoria con `shm_unlink()`. Este sistema es especialmente eficaz para una IPC eficiente y rápida en entornos donde varios procesos necesitan acceder rápidamente a datos compartidos.
 
 <details>
 
@@ -449,23 +463,25 @@ return 0;
 ```
 </details>
 
-## Descriptores protegidos de macOS
+## macOS Guarded Descriptors
 
-Los **descriptores macOSCguarded** son una función de seguridad introducida en macOS para mejorar la seguridad y fiabilidad de las **operaciones con descriptores de archivo** en las aplicaciones de usuario. Estos descriptores protegidos permiten asociar restricciones específicas o «guardas» con los descriptores de archivo, que son aplicadas por el kernel.
+Los **macOS guarded descriptors** son una función de seguridad introducida en macOS para mejorar la seguridad y fiabilidad de las operaciones con **file descriptors** en las aplicaciones de usuario. Estos guarded descriptors permiten asociar restricciones específicas o "guards" con los file descriptors, que son aplicadas por el kernel.
 
-Esta función resulta especialmente útil para prevenir ciertas clases de vulnerabilidades de seguridad, como el **acceso no autorizado a archivos** o las **condiciones de carrera**. Estas vulnerabilidades ocurren cuando, por ejemplo, un thread accede a una descripción de archivo, proporcionando **a otro thread vulnerable acceso a ella**, o cuando un descriptor de archivo es **heredado** por un proceso hijo vulnerable. Algunas funciones relacionadas con esta funcionalidad son:
+Esta función resulta especialmente útil para prevenir determinadas clases de vulnerabilidades de seguridad, como el **acceso no autorizado a archivos** o las **race conditions**. Estas vulnerabilidades ocurren, por ejemplo, cuando un thread accede a una file description y proporciona acceso sobre ella a **otro thread vulnerable**, o cuando un file descriptor es **heredado** por un proceso hijo vulnerable. Algunas funciones relacionadas con esta funcionalidad son:
 
-- `guarded_open_np`: Abre un FD con una guarda
+- `guarded_open_np`: Abre un FD con un guard
 - `guarded_close_np`: Lo cierra
-- `change_fdguard_np`: Cambia las flags de la guarda en un descriptor (incluso eliminando la protección de la guarda)
+- `change_fdguard_np`: Cambia los flags del guard de un descriptor, incluso eliminando su protección
 
 ## Referencias
 
-- [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/)
-- [SektionEins - OS X 10.10 DYLD_PRINT_TO_FILE Local Privilege Escalation](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html) (FD filtrado sin close-on-exec)
-- [The Eclectic Light Company - Which file systems and cloud services preserve extended attributes?](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)
-- [`open(2)` man page](https://keith.github.io/xcode-man-pages/open.2.html) (`O_NOFOLLOW`, `O_NOFOLLOW_ANY`, `O_RESOLVE_BENEATH`)
-- [`chmod(1)` man page](https://keith.github.io/xcode-man-pages/chmod.1.html) (flags de herencia de ACL)
-- [Microsoft - Gatekeeper's Achilles heel: unearthing a macOS vulnerability](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [1] [POSIX.1-2024 — Definiciones base, cap. 4 (Permisos de acceso a archivos, protección de directorios, resolución de nombres de ruta)](https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html)
+- [2] [Página man de `chmod(1)`](https://keith.github.io/xcode-man-pages/chmod.1.html) (bit de búsqueda/ejecución de directorios, flags de herencia de ACL)
+- [3] [Página man de `open(2)`](https://keith.github.io/xcode-man-pages/open.2.html) (`O_NOFOLLOW`, `O_NOFOLLOW_ANY`, `O_RESOLVE_BENEATH`)
+- [4] [SektionEins - Escalada de privilegios local mediante DYLD_PRINT_TO_FILE en OS X 10.10](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html) (FD filtrado sin close-on-exec)
+- [5] [The Eclectic Light Company - ¿Qué sistemas de archivos y servicios cloud conservan los atributos extendidos?](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)
+- [6] [Microsoft - El talón de Aquiles de Gatekeeper: descubriendo una vulnerabilidad de macOS](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [7] [Mickey (Jhftss) - Una nueva era de los escapes del Sandbox de macOS](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)
+- [8] [Kandji - Descubriendo vulnerabilidades de Apple: la auditoría de diskarbitrationd y storagekitd, parte 1](https://www.kandji.io/blog/macos-audit-story-part1)
 
 {{#include ../../../../banners/hacktricks-training.md}}

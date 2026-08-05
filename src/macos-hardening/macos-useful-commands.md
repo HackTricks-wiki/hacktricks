@@ -1,8 +1,8 @@
-# macOS Comandos Útiles
+# Comandos útiles de macOS
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Herramientas de enumeración automática para macOS
+### Herramientas de enumeración automática de macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
@@ -115,9 +115,9 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Verificación rápida anti-análisis / virtualización
+### Comprobación rápida de anti-analysis / virtualización
 
-Algunos stealers de macOS llaman a `system_profiler` para detectar VMs y **abortar con un código de salida distinto (p. ej., 100)** para evitar la detonación del sandbox:
+Algunos stealers de macOS llaman a `system_profiler` para detectar VMs y **abortan con un código de salida distintivo (p. ej., 100)** para evitar la detonación en sandbox<sup>[1]</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -125,7 +125,7 @@ fi
 ```
 ### Software y servicios instalados
 
-Comprueba aplicaciones **sospechosas** instaladas y los **privilegios** sobre los recursos instalados:
+Comprueba si hay aplicaciones **sospechosas** instaladas y **privilegios** sobre los recursos instalados:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -151,6 +151,6 @@ Sin prompts
 
 ## Referencias
 
-- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, el año del Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

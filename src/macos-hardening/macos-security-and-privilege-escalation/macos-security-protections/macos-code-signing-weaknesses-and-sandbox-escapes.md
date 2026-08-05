@@ -1,21 +1,21 @@
-# macOS Code Signing Weaknesses & Sandbox Escapes
+# Debilidades de Code Signing de macOS y Sandbox Escapes
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Ad-Hoc Signed Binaries
+## Binaries Firmados Ad-Hoc
 
-### Información básica
+### Información Básica
 
-**Ad-hoc signing** (`CS_ADHOC`) crea una firma de código con **ninguna cadena de certificados** — es un hash del código sin verificación de identidad del desarrollador. El origen del binario no puede rastrearse a ningún desarrollador u organización.
+La **firma ad-hoc** (`CS_ADHOC`) crea una firma de código **sin cadena de certificados**: es un hash del código sin verificación de la identidad del developer. El origen del binary no puede rastrearse hasta ningún developer u organización.
 
-En Apple Silicon Macs, todos los ejecutables requieren como mínimo una firma ad-hoc. Esto significa que encontrarás firmas ad-hoc en muchas herramientas de desarrollo, paquetes de Homebrew y utilidades de terceros.
+En los Macs con Apple Silicon, todos los ejecutables requieren como mínimo una firma ad-hoc. Esto significa que encontrarás firmas ad-hoc en muchas herramientas de desarrollo, paquetes de Homebrew y utilidades de terceros.
 
-### Por qué importa
+### Por Qué Importa
 
-- **Sin identidad verificable** — el binario puede ser reemplazado sin ser detectado por verificaciones basadas en identidad
-- Los binarios ad-hoc de terceros en **posiciones privilegiadas** (FDA, daemon, helpers) son objetivos de alta prioridad
-- En algunas configuraciones, las firmas ad-hoc pueden **no verificarse tan estrictamente** como el código firmado por desarrollador
-- Los binarios firmados ad-hoc que tienen **permisos de TCC** son especialmente valiosos — los permisos persisten incluso si el contenido del binario cambia (depende de cómo TCC haya indexado ese permiso)
+- **Sin identidad verificable**: el binary puede reemplazarse sin ser detectado por checks basados en identidad
+- Los binaries ad-hoc de terceros en **posiciones privilegiadas** (FDA, daemons, helpers) son objetivos de alta prioridad
+- En algunas configuraciones, las firmas ad-hoc pueden **no verificarse de forma tan estricta** como el código firmado por un developer
+- Los binaries firmados ad-hoc que tienen **permisos TCC** son especialmente valiosos: los permisos persisten incluso si cambia el contenido del binary (depende de cómo TCC haya asociado el permiso)
 
 ### Descubrimiento
 ```bash
@@ -54,12 +54,12 @@ codesign -s - /path/to/target
 
 ### Información básica
 
-El **`com.apple.security.get-task-allow`** entitlement (o la flag `CS_GET_TASK_ALLOW`) permite que **cualquier proceso se adjunte como debugger**, leer la memoria, modificar registros, inyectar código y controlar la ejecución.
+El **entitlement `com.apple.security.get-task-allow`** (o la flag `CS_GET_TASK_ALLOW`) permite que **cualquier proceso se conecte como debugger**, lea la memoria, modifique registros, inyecte código y controle la ejecución.
 
-Esto está destinado **solo para compilaciones de desarrollo**. Sin embargo, algunos binarios de terceros se distribuyen con este entitlement en producción.
+Esto está pensado **únicamente para development builds**. Sin embargo, algunos binarios de terceros incluyen este entitlement en producción.
 
 > [!CAUTION]
-> Un binario en producción con `get-task-allow` es una **primitiva de explotación instantánea**. Cualquier proceso local puede llamar a `task_for_pid()`, obtener el Mach task port del objetivo, e inyectar código arbitrario que se ejecute con los entitlements del objetivo, las concesiones TCC y el contexto de seguridad.
+> Un binario de producción con `get-task-allow` es un **primitive de explotación instantánea**. Cualquier proceso local puede llamar a `task_for_pid()`, obtener el Mach task port del objetivo e inyectar código arbitrario que se ejecuta con los entitlements, permisos de TCC y contexto de seguridad del objetivo.
 
 ### Descubrimiento
 ```bash
@@ -76,7 +76,7 @@ JOIN capabilities c ON ec.capability_id = c.id
 WHERE c.name = 'get_task_allow_signature'
 ORDER BY e.privileged DESC;"
 ```
-### Ataque: Task Port Injection
+### Attack: Task Port Injection
 ```c
 #include <mach/mach.h>
 #include <mach/mach_vm.h>
@@ -103,15 +103,15 @@ VM_PROT_READ | VM_PROT_EXECUTE);
 ```
 ---
 
-## Sin validación de librerías + entorno DYLD
+## Sin validación de libraries + entorno DYLD
 
-### La combinación letal
+### La combinación mortal
 
 Cuando un binario tiene **ambos**:
 - `com.apple.security.cs.disable-library-validation` (carga cualquier dylib)
-- `com.apple.security.cs.allow-dyld-environment-variables` (acepta DYLD env vars)
+- `com.apple.security.cs.allow-dyld-environment-variables` (acepta variables de entorno DYLD)
 
-Esto es un **primitivo de inyección de código garantizado** — `DYLD_INSERT_LIBRARIES` funciona perfectamente.
+Esto es una **primitive garantizada de code injection**: `DYLD_INSERT_LIBRARIES` funciona perfectamente.
 
 ### Descubrimiento
 ```bash
@@ -166,23 +166,23 @@ cat /tmp/injected_proof.txt
 ```
 ---
 
-## Sandbox Temporary Exceptions
+## Excepciones temporales del Sandbox
 
-### How They Weaken the Sandbox
+### Cómo debilitan el Sandbox
 
-Sandbox temporary exceptions (`com.apple.security.temporary-exception.*`) punch holes in the App Sandbox:
+Las excepciones temporales del Sandbox (`com.apple.security.temporary-exception.*`) abren brechas en el App Sandbox:
 
-| Exception | What It Allows |
+| Excepción | Qué permite |
 |---|---|
-| `temporary-exception.mach-lookup.global-name` | Conectarse a servicios XPC/Mach a nivel del sistema |
+| `temporary-exception.mach-lookup.global-name` | Conectarse a servicios XPC/Mach de todo el sistema |
 | `temporary-exception.files.absolute-path.read-write` | Leer/escribir archivos fuera del contenedor de la app |
-| `temporary-exception.iokit-user-client-class` | Abrir conexiones user-client de IOKit |
+| `temporary-exception.iokit-user-client-class` | Abrir conexiones de IOKit user-client |
 | `temporary-exception.shared-preference.read-only` | Leer las preferencias de otras apps |
 | `temporary-exception.files.home-relative-path.read-write` | Acceder a rutas relativas a `~` |
 
-### Mach-Lookup Exceptions = Sandbox Escape Primitive
+### Excepciones de Mach-Lookup = Primitiva de escape del Sandbox
 
-The most dangerous exception is **mach-lookup** — it allows a sandboxed app to talk to privileged daemons:
+La excepción más peligrosa es **mach-lookup**: permite que una app en el Sandbox se comunique con daemons privilegiados:
 ```bash
 # Find apps with mach-lookup exceptions
 find /Applications -name "*.app" -exec sh -c '
@@ -196,7 +196,7 @@ echo "[$count exceptions] $(basename "$1")"
 }
 ' _ {} \; 2>/dev/null | sort -rn
 ```
-### Ataque: Sandbox Escape mediante Mach-Lookup
+### Attack: Escape del Sandbox mediante Mach-Lookup
 ```
 1. Compromise sandboxed app (renderer exploit, malicious document, etc.)
 2. Read entitlements to discover mach-lookup exceptions
@@ -213,16 +213,16 @@ c. Fuzz each exposed method
 
 ### Qué son
 
-Los entitlements con prefijo `com.apple.private.*` proporcionan acceso a **APIs internas de Apple** que no están documentadas ni disponibles para desarrolladores de terceros. Los binarios de terceros con entitlements privados los obtuvieron mediante enterprise cert, MDM, o distribución fuera del App-Store.
+Los entitlements con el prefijo `com.apple.private.*` proporcionan acceso a **APIs internas de Apple** no documentadas ni disponibles para desarrolladores externos. Los binarios de terceros con entitlements privados los obtienen mediante un certificado enterprise, MDM o distribución fuera de la App Store.
 
 ### Entitlements privados peligrosos
 
 | Entitlement | Capacidad |
 |---|---|
-| `com.apple.private.tcc.manager` | Lectura/escritura completa de la base de datos TCC |
+| `com.apple.private.tcc.manager` | Lectura/escritura completa de la base de datos de TCC |
 | `com.apple.private.tcc.allow` | Acceso a servicios TCC específicos |
-| `com.apple.private.security.no-sandbox` | Ejecutar sin sandbox |
-| `com.apple.private.iokit` | Acceso directo a controladores IOKit |
+| `com.apple.private.security.no-sandbox` | Ejecutarse sin sandbox |
+| `com.apple.private.iokit` | Acceso directo a drivers de IOKit |
 | `com.apple.private.kernel.\*` | Acceso a la interfaz del kernel |
 | `com.apple.private.xpc.launchd.job-label` | Registrar/gestionar jobs de launchd |
 | `com.apple.rootless.install` | Escribir en rutas protegidas por SIP |
@@ -246,7 +246,7 @@ ORDER BY privileged DESC;"
 ```
 ---
 
-## Perfiles de Sandbox Personalizados (SBPL)
+## Perfiles de sandbox personalizados (SBPL)
 
 ### Qué son
 
@@ -270,11 +270,11 @@ cat /path/to/custom.sb | grep "(allow" | sort -u
 ```
 ---
 
-## Rutas de bibliotecas escribibles
+## Rutas de bibliotecas con permisos de escritura
 
 ### Qué son
 
-Cuando un binary carga una dynamic library desde una ruta que el usuario actual puede **write to**, la library puede ser reemplazada por código malicioso.
+Cuando un binario carga una biblioteca dinámica desde una ruta en la que el usuario actual puede **escribir**, la biblioteca puede reemplazarse con código malicioso.
 
 ### Descubrimiento
 ```bash
@@ -293,7 +293,7 @@ otool -L /path/to/binary | awk '{print $1}' | while read lib; do
 [ -f "$lib" ] && [ -w "$lib" ] && echo "WRITABLE: $lib"
 done
 ```
-### Ataque: Dylib Replacement
+### Ataque: Reemplazo de Dylib
 ```bash
 # 1. Find the writable library
 otool -L /path/to/target-daemon | grep "/usr/local\|/opt\|Library"
@@ -317,11 +317,12 @@ cp /tmp/evil.dylib /path/to/writable.dylib
 
 # 5. When the daemon restarts, it loads the evil dylib with daemon privileges
 ```
-## References
+## Referencias
 
-* [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
-* [Apple Developer — App Sandbox](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
-* [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
-* [The Evil Bit — clear-library-validation](https://theevilbit.github.io/posts/com.apple.private.security.clear-library.validation/)
+- [1] [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
+- [2] [Apple Developer — App Sandbox](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
+- [3] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
+- [4] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` operations and `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [5] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` handler)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
 
 {{#include ../../../banners/hacktricks-training.md}}

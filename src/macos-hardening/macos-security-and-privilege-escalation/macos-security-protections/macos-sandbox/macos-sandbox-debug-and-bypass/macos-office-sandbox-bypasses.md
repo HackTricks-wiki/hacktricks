@@ -1,52 +1,59 @@
-# macOS Office Sandbox Bypasses
+# Bypasses del Sandbox de Office en macOS
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-### Bypass de Sandbox de Word a través de Launch Agents
+### Word Sandbox bypass mediante Launch Agents
 
-La aplicación utiliza un **Sandbox personalizado** usando el derecho **`com.apple.security.temporary-exception.sbpl`** y este sandbox personalizado permite escribir archivos en cualquier lugar siempre que el nombre del archivo comience con `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
+La aplicación utiliza un **Sandbox personalizado** mediante el entitlement **`com.apple.security.temporary-exception.sbpl`**, y este Sandbox personalizado permite escribir archivos en cualquier ubicación siempre que el nombre del archivo comience con `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
 
-Por lo tanto, escapar fue tan fácil como **escribir un `plist`** LaunchAgent en `~/Library/LaunchAgents/~$escape.plist`.
+Por lo tanto, escapar era tan sencillo como **escribir un `plist`** LaunchAgent en `~/Library/LaunchAgents/~$escape.plist`.
 
-Consulta el [**informe original aquí**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/).
+Consulta el [**informe original aquí**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/).<sup>[1]</sup>
 
-### Bypass de Sandbox de Word a través de Login Items y zip
+### Word Sandbox bypass mediante Login Items y zip
 
-Recuerda que desde el primer escape, Word puede escribir archivos arbitrarios cuyos nombres comienzan con `~$`, aunque después del parche de la vulnerabilidad anterior no era posible escribir en `/Library/Application Scripts` o en `/Library/LaunchAgents`.
+Recuerda que, desde el primer escape, Word puede escribir archivos cuyo nombre comience con `~$`, aunque después del parche de la vulnerabilidad anterior ya no era posible escribir en `/Library/Application Scripts` ni en `/Library/LaunchAgents`.
 
-Se descubrió que desde dentro del sandbox es posible crear un **Login Item** (aplicaciones que se ejecutarán cuando el usuario inicie sesión). Sin embargo, estas aplicaciones **no se ejecutarán a menos que** estén **notarizadas** y **no es posible agregar argumentos** (por lo que no puedes simplemente ejecutar un shell inverso usando **`bash`**).
+Se descubrió que desde dentro del Sandbox es posible crear un **Login Item** (aplicaciones que se ejecutan cuando el usuario inicia sesión). Sin embargo, estas aplicaciones **no se ejecutarán a menos que** estén **notarizadas** y **no es posible añadir argumentos** (por lo que no se puede ejecutar directamente un reverse shell usando **`bash`**).
 
-Desde el bypass de Sandbox anterior, Microsoft deshabilitó la opción de escribir archivos en `~/Library/LaunchAgents`. Sin embargo, se descubrió que si pones un **archivo zip como Login Item**, el `Archive Utility` simplemente **descomprimirá** en su ubicación actual. Así que, debido a que por defecto la carpeta `LaunchAgents` de `~/Library` no se crea, fue posible **comprimir un plist en `LaunchAgents/~$escape.plist`** y **colocar** el archivo zip en **`~/Library`** para que al descomprimirlo alcance el destino de persistencia.
+Como consecuencia del bypass del Sandbox anterior, Microsoft deshabilitó la opción de escribir archivos en `~/Library/LaunchAgents`. Sin embargo, se descubrió que, si colocas un **archivo zip como Login Item**, la `Archive Utility` simplemente lo **descomprimirá** en su ubicación actual. Por lo tanto, como la carpeta `LaunchAgents` de `~/Library` no se crea de forma predeterminada, era posible **comprimir un plist en `LaunchAgents/~$escape.plist`** y **colocar** el archivo zip en **`~/Library`** para que, al descomprimirse, alcanzara el destino de persistencia.
 
-Consulta el [**informe original aquí**](https://objective-see.org/blog/blog_0x4B.html).
+Consulta el [**informe original aquí**](https://objective-see.org/blog/blog_0x4B.html).<sup>[2]</sup>
 
-### Bypass de Sandbox de Word a través de Login Items y .zshenv
+### Word Sandbox bypass mediante Login Items y .zshenv
 
-(Recuerda que desde el primer escape, Word puede escribir archivos arbitrarios cuyos nombres comienzan con `~$`).
+(Recuerda que, desde el primer escape, Word puede escribir archivos cuyo nombre comience con `~$`).
 
-Sin embargo, la técnica anterior tenía una limitación, si la carpeta **`~/Library/LaunchAgents`** existe porque algún otro software la creó, fallaría. Así que se descubrió una cadena diferente de Login Items para esto.
+Sin embargo, la técnica anterior tenía una limitación: si la carpeta **`~/Library/LaunchAgents`** existía porque algún otro software la había creado, fallaría. Por ello, se descubrió una cadena de Login Items diferente.
 
-Un atacante podría crear los archivos **`.bash_profile`** y **`.zshenv`** con la carga útil para ejecutar y luego comprimirlos y **escribir el zip en la** carpeta del usuario de la víctima: **`~/~$escape.zip`**.
+Un atacante podía crear los archivos **`.bash_profile`** y **`.zshenv`** con el payload que se quería ejecutar, comprimirlos y después **escribir el zip en la carpeta** del usuario víctima: **`~/~$escape.zip`**.
 
-Luego, agregar el archivo zip a los **Login Items** y luego a la aplicación **`Terminal`**. Cuando el usuario vuelva a iniciar sesión, el archivo zip se descomprimiría en los archivos del usuario, sobrescribiendo **`.bash_profile`** y **`.zshenv`** y, por lo tanto, el terminal ejecutará uno de estos archivos (dependiendo de si se usa bash o zsh).
+A continuación, se añade el archivo zip a los **Login Items** y después la aplicación **`Terminal`**. Cuando el usuario vuelva a iniciar sesión, el archivo zip se descomprimirá en la carpeta del usuario, sobrescribiendo **`.bash_profile`** y **`.zshenv`**; por lo tanto, la terminal ejecutará uno de estos archivos (dependiendo de si se utiliza bash o zsh).
 
-Consulta el [**informe original aquí**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c).
+Consulta el [**informe original aquí**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c).<sup>[3]</sup>
 
-### Bypass de Sandbox de Word con Open y variables de entorno
+### Word Sandbox Bypass con Open y variables de entorno
 
-Desde procesos en sandbox, todavía es posible invocar otros procesos usando la utilidad **`open`**. Además, estos procesos se ejecutarán **dentro de su propio sandbox**.
+Desde los procesos en Sandbox todavía es posible invocar otros procesos mediante la utilidad **`open`**. Además, estos procesos se ejecutarán dentro de su propio Sandbox.
 
-Se descubrió que la utilidad open tiene la opción **`--env`** para ejecutar una aplicación con **variables de entorno específicas**. Por lo tanto, fue posible crear el **archivo `.zshenv`** dentro de una carpeta **dentro** del **sandbox** y usar `open` con `--env` configurando la **variable `HOME`** a esa carpeta abriendo esa aplicación `Terminal`, que ejecutará el archivo `.zshenv` (por alguna razón también fue necesario establecer la variable `__OSINSTALL_ENVIROMENT`).
+Se descubrió que la utilidad open tiene la opción **`--env`** para ejecutar una aplicación con variables de entorno **específicas**. Por lo tanto, era posible crear el archivo **`.zshenv`** dentro de una carpeta **dentro del** **Sandbox** y utilizar `open` con `--env`, estableciendo la variable **`HOME`** en esa carpeta y abriendo la aplicación `Terminal`, que ejecutará el archivo `.zshenv` (por algún motivo, también era necesario establecer la variable `__OSINSTALL_ENVIROMENT`).
 
-Consulta el [**informe original aquí**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/).
+Consulta el [**informe original aquí**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/).<sup>[4]</sup>
 
-### Bypass de Sandbox de Word con Open y stdin
+### Word Sandbox Bypass con Open y stdin
 
-La utilidad **`open`** también soportaba el parámetro **`--stdin`** (y después del bypass anterior ya no era posible usar `--env`).
+La utilidad **`open`** también admitía el parámetro **`--stdin`** (y, después del bypass anterior, ya no era posible utilizar `--env`).
 
-La cuestión es que incluso si **`python`** estaba firmado por Apple, **no ejecutará** un script con el atributo **`quarantine`**. Sin embargo, fue posible pasarle un script desde stdin, por lo que no verificará si estaba en cuarentena o no:
+La cuestión es que, aunque **`python`** estaba firmado por Apple, **no ejecutaba** un script con el atributo **`quarantine`**. Sin embargo, era posible pasarle un script mediante stdin, por lo que no comprobaría si estaba en cuarentena:
 
-1. Coloca un archivo **`~$exploit.py`** con comandos de Python arbitrarios.
-2. Ejecuta _open_ **`–stdin='~$exploit.py' -a Python`**, que ejecuta la aplicación Python con nuestro archivo colocado sirviendo como su entrada estándar. Python ejecuta felizmente nuestro código, y dado que es un proceso hijo de _launchd_, no está sujeto a las reglas del sandbox de Word.
+1. Crear un archivo **`~$exploit.py`** con comandos Python arbitrarios.
+2. Ejecutar _open_ **`–stdin='~$exploit.py' -a Python`**, lo que ejecuta la aplicación Python utilizando el archivo creado como su entrada estándar. Python ejecuta nuestro código sin problemas y, como es un proceso hijo de _launchd_, no está sujeto a las reglas del Sandbox de Word.
+
+## Referencias
+
+- [1] [Escaping the Sandbox – Microsoft Office on macOS](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/)
+- [2] [Office Drama on macOS](https://objective-see.org/blog/blog_0x4B.html)
+- [3] [Office365 MacOS Sandbox Escape](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c)
+- [4] [Technical Analysis of CVE-2021-30864](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
