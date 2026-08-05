@@ -44,18 +44,18 @@ Rubeus.exe s4u /user:sqlservice /domain:testlab.local /rc4:2b576acbe6bcfda7294d6
 
 ### Protocol-transition vs Kerberos-only constrained delegation
 
-If the compromised account has **T2A4D**, you can usually complete the full **`S4U2Self -> S4U2Proxy`** chain from only the service key/TGT.
+If the compromised account has **T2A4D**, you can usually complete the full **`S4U2Self -> S4U2Proxy`** chain from only the service key/TGT.<sup>[[2]](#references)</sup>
 
-If it only has **`msDS-AllowedToDelegateTo`** (the classic **"Use Kerberos only"** mode), the delegation can still be abusable, but the evidence ticket for S4U2Proxy must be a **real forwardable user-to-service ticket** for the delegating service. In practice that means stealing or capturing a victim TGS from **LSASS/ccache** and feeding it into the second stage (`/tgs:` in Rubeus). A **non-forwardable** S4U2Self ticket is **not** enough for classic constrained delegation; if that is your only evidence ticket, check [Resource-based Constrained Delegation](resource-based-constrained-delegation.md) instead.
+If it only has **`msDS-AllowedToDelegateTo`** (the classic **"Use Kerberos only"** mode), the delegation can still be abusable, but the evidence ticket for S4U2Proxy must be a **real forwardable user-to-service ticket** for the delegating service. In practice that means stealing or capturing a victim TGS from **LSASS/ccache** and feeding it into the second stage (`/tgs:` in Rubeus). A **non-forwardable** S4U2Self ticket is **not** enough for classic constrained delegation; if that is your only evidence ticket, check [Resource-based Constrained Delegation](resource-based-constrained-delegation.md) instead.<sup>[[2]](#references)</sup>
 
 ### Cross-domain constrained delegation notes (2025+)
 
-Since **Windows Server 2012/2012 R2** the KDC supports **constrained delegation across domains/forests** via S4U2Proxy extensions. Modern builds (Windows Server 2016–2025) keep this behaviour and add two PAC SIDs to signal protocol transition:
+Since **Windows Server 2012/2012 R2** the KDC supports **constrained delegation across domains/forests** via S4U2Proxy extensions. Modern builds (Windows Server 2016–2025) keep this behaviour and add two PAC SIDs to signal protocol transition:<sup>[[1]](#references)</sup>
 
 - `S-1-18-1` (**AUTHENTICATION_AUTHORITY_ASSERTED_IDENTITY**) when the user authenticated normally.
 - `S-1-18-2` (**SERVICE_ASSERTED_IDENTITY**) when a service asserted the identity through protocol transition.
 
-Expect `SERVICE_ASSERTED_IDENTITY` inside the PAC when protocol transition is used across domains, confirming the S4U2Proxy step succeeded.
+Expect `SERVICE_ASSERTED_IDENTITY` inside the PAC when protocol transition is used across domains, confirming the S4U2Proxy step succeeded.<sup>[[1]](#references)</sup>
 
 ### Impacket / Linux tooling (altservice & full S4U)
 
