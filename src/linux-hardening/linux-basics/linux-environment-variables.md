@@ -52,7 +52,7 @@ If you are looking for **credentials** or **interesting service configuration** 
 
 ## Common variables
 
-From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/)
+From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/)<sup>[[5]](#references)</sup>
 
 - **DISPLAY** – the display used by **X**. This variable is usually set to **:0.0**, which means the first display on the current computer.
 - **EDITOR** – the user’s preferred text editor.
@@ -181,7 +181,7 @@ These variables influence the **dynamic linker**:
 - `LD_LIBRARY_PATH`: prepend library search directories.
 - `LD_AUDIT`: load auditor libraries that observe library loading and symbol resolution.
 
-They are extremely valuable for **hooking**, **instrumentation**, and **privilege escalation** if a privileged command preserves them. In **secure-execution** mode (`AT_SECURE`, e.g. setuid/setgid/capabilities), the loader strips or restricts many of these variables. However, parser bugs in that early loader stage are still high-impact because they run **before** the target program.
+They are extremely valuable for **hooking**, **instrumentation**, and **privilege escalation** if a privileged command preserves them. In **secure-execution** mode (`AT_SECURE`, e.g. setuid/setgid/capabilities), the loader strips or restricts many of these variables. However, parser bugs in that early loader stage are still high-impact because they run **before** the target program.<sup>[[2]](#references)</sup>
 
 ```bash
 env | grep -E '^LD_'
@@ -209,7 +209,7 @@ EOF
 BASH_ENV=/tmp/pre.sh bash -c 'echo target'
 ```
 
-Bash itself disables these startup files when the **real/effective IDs differ** unless `-p` is used, so the exact behavior depends on how the wrapper invokes the shell. Be careful with privileged wrappers that call `setuid()`/`setgid()` **before** launching Bash: once the IDs match again, Bash may trust `BASH_ENV`, `ENV`, and related shell state that would otherwise be ignored.
+Bash itself disables these startup files when the **real/effective IDs differ** unless `-p` is used, so the exact behavior depends on how the wrapper invokes the shell. Be careful with privileged wrappers that call `setuid()`/`setgid()` **before** launching Bash: once the IDs match again, Bash may trust `BASH_ENV`, `ENV`, and related shell state that would otherwise be ignored.<sup>[[1]](#references)</sup>
 
 ### **PYTHONPATH, PYTHONHOME, PYTHONSTARTUP & PYTHONINSPECT**
 
@@ -229,7 +229,7 @@ PYTHONPATH=/tmp/pylib python3 -c 'import htmod'
 PYTHONPATH=/tmp/pylib python3 -I -c 'import htmod'   # ignored in isolated mode
 ```
 
-A recent real-world example was the 2024 **needrestart** LPE on Ubuntu/Debian systems: the root-owned scanner copied an unprivileged process's `PYTHONPATH` from `/proc/<PID>/environ` and then executed Python. The published exploit planted `importlib/__init__.so` in the attacker-controlled path so Python executed attacker code during its own initialization, before the helper's hard-coded script even mattered.
+A recent real-world example was the 2024 **needrestart** LPE on Ubuntu/Debian systems: the root-owned scanner copied an unprivileged process's `PYTHONPATH` from `/proc/<PID>/environ` and then executed Python. The published exploit planted `importlib/__init__.so` in the attacker-controlled path so Python executed attacker code during its own initialization, before the helper's hard-coded script even mattered.<sup>[[3]](#references)</sup>
 
 ### **PERL5OPT & PERL5LIB**
 

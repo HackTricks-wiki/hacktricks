@@ -197,7 +197,7 @@ dd if=mem bs=1 skip=08048000 count=1000 of=/tmp/exec2 #Recorver it
 
 ## Syscall Trace Triage with SQLite and FTS5
 
-When a process is still running or can be re-executed in a lab, **`strace`** can provide a fast behavioral trace without needing kernel modules or full EDR telemetry. For large traces, avoid reading the raw log directly or pasting it into an LLM: store it in a **SQLite** database and query only the minimal subset you need.
+When a process is still running or can be re-executed in a lab, **`strace`** can provide a fast behavioral trace without needing kernel modules or full EDR telemetry. For large traces, avoid reading the raw log directly or pasting it into an LLM: store it in a **SQLite** database and query only the minimal subset you need.<sup>[[8]](#references)</sup>
 
 > [!WARNING]
 > Attaching `strace` changes process timing and may affect race conditions or other fragile bugs. Prefer reproducing on a copy/lab system when possible.
@@ -323,7 +323,7 @@ grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev
 ```
 
 #### Hunt: SSH hardening rollback and backdoor shells
-Changes to sshd_config and system account shells are common post‑exploitation to preserve access.
+Changes to sshd_config and system account shells are common post‑exploitation to preserve access.<sup>[[5]](#references)</sup>
 
 ```bash
 # Root login enablement (flag "yes" or lax values)
@@ -336,7 +336,7 @@ awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|
 #### Hunt: Cloud C2 markers (Dropbox/Cloudflare Tunnel)
 - Dropbox API beacons typically use api.dropboxapi.com or content.dropboxapi.com over HTTPS with Authorization: Bearer tokens.
   - Hunt in proxy/Zeek/NetFlow for unexpected Dropbox egress from servers.
-- Cloudflare Tunnel (`cloudflared`) provides backup C2 over outbound 443.
+- Cloudflare Tunnel (`cloudflared`) provides backup C2 over outbound 443.<sup>[[5]](#references)</sup>
 
 ```bash
 ps aux | grep -E '[c]loudflared|trycloudflare'
@@ -399,7 +399,7 @@ Linux employs various files for automatically executing programs upon user login
 
 ## Examine Logs
 
-Linux systems track user activities and system events through various log files. These logs are pivotal for identifying unauthorized access, malware infections, and other security incidents. Key log files include:
+Linux systems track user activities and system events through various log files. These logs are pivotal for identifying unauthorized access, malware infections, and other security incidents.<sup>[[2]](#references)</sup> Key log files include:
 
 - **/var/log/syslog** (Debian) or **/var/log/messages** (RedHat): Capture system-wide messages and activities.
 - **/var/log/auth.log** (Debian) or **/var/log/secure** (RedHat): Record authentication attempts, successful and failed logins.
@@ -448,7 +448,7 @@ Useful journal fields for triage include `_SYSTEMD_UNIT`, `_EXE`, `_COMM`, `_CMD
 
 ### Audit framework triage (`auditd`)
 
-If `auditd` is enabled, prefer it whenever you need **process attribution** for file changes, command execution, login activity, or package installation.
+If `auditd` is enabled, prefer it whenever you need **process attribution** for file changes, command execution, login activity, or package installation.<sup>[[7]](#references)</sup>
 
 ```bash
 # Fast summaries
@@ -613,7 +613,7 @@ Pay special attention to libraries referenced from **writable** paths such as `/
 
 ### Filesystem Version Comparison Summary
 
-To compare filesystem versions and pinpoint changes, we use simplified `git diff` commands:
+To compare filesystem versions and pinpoint changes, we use simplified `git diff` commands:<sup>[[3]](#references)</sup>
 
 - **To find new files**, compare two directories:
 

@@ -70,7 +70,7 @@ cd <SHAREDD_FOLDER>
 
 ### Basic Information
 
-The scenario involves exploiting a mounted NFS share on a local machine, leveraging a flaw in the NFSv3 specification which allows the client to specify its uid/gid, potentially enabling unauthorized access. The exploitation involves using [libnfs](https://github.com/sahlberg/libnfs), a library that allows for the forging of NFS RPC calls.
+The scenario involves exploiting a mounted NFS share on a local machine, leveraging a flaw in the NFSv3 specification which allows the client to specify its uid/gid, potentially enabling unauthorized access. The exploitation involves using [libnfs](https://github.com/sahlberg/libnfs), a library that allows for the forging of NFS RPC calls.<sup>[[1]](#references)</sup>
 
 #### Compiling the Library
 
@@ -113,7 +113,7 @@ LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs:/
 
 ### Bonus: NFShell for Stealthy File Access
 
-Once root access is obtained, to interact with the NFS share without changing ownership (to avoid leaving traces), a Python script (nfsh.py) is used. This script adjusts the uid to match that of the file being accessed, allowing for interaction with files on the share without permission issues:
+Once root access is obtained, to interact with the NFS share without changing ownership (to avoid leaving traces), a Python script (nfsh.py) is used. This script adjusts the uid to match that of the file being accessed, allowing for interaction with files on the share without permission issues:<sup>[[1]](#references)</sup>
 
 ```python
 #!/usr/bin/env python
@@ -140,6 +140,10 @@ Run like:
 # ll ./mount/
 drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
 ```
+
+## References
+
+- [1] [A tale of a lesser known NFS privesc](https://www.errno.fr/nfs_privesc.html)
 
 {{#include ../../banners/hacktricks-training.md}}
 
