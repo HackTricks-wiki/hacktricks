@@ -162,7 +162,7 @@ ad-certificates/domain-escalation.md
 
 ### Microsoft hardening timeline (KB5014754)
 
-Microsoft introduced a three-phase rollout (Compatibility → Audit → Enforcement) to move Kerberos certificate authentication away from weak implicit mappings. As of **February 11, 2025**, domain controllers automatically switch to **Full Enforcement** if the `StrongCertificateBindingEnforcement` registry value is not set. Microsoft later updated the timeline so fallback to compatibility mode remains possible until the **September 9, 2025** security update. Administrators should:
+Microsoft introduced a three-phase rollout (Compatibility → Audit → Enforcement) to move Kerberos certificate authentication away from weak implicit mappings. As of **February 11, 2025**, domain controllers automatically switch to **Full Enforcement** if the `StrongCertificateBindingEnforcement` registry value is not set. Microsoft later updated the timeline so fallback to compatibility mode remains possible until the **September 9, 2025** security update.<sup>[[2]](#references)</sup> Administrators should:
 
 1. Patch all DCs & AD CS servers (May 2022 or later).
 2. Monitor Event ID 39/41 for weak mappings during the *Audit* phase.
@@ -171,14 +171,14 @@ Microsoft introduced a three-phase rollout (Compatibility → Audit → Enforcem
 ### Operator notes for hardened forests
 
 - **ESC1/ESC6 alone is no longer the whole story** in 2025+ environments. If you request a cert for another principal, you usually also need a strong mapping artifact such as the SID extension or an explicit mapping.
-- **ESC15 (EKUwu)** is mostly valuable in unpatched environments because it turns harmless **v1** templates such as **WebServer** into authentication- or enrollment-agent-capable certs by injecting **Application Policies**. Kerberos PKINIT still evaluates EKUs, but **LDAP Schannel** also honors Application Policies, which keeps LDAP-based abuse relevant.
+- **ESC15 (EKUwu)** is mostly valuable in unpatched environments because it turns harmless **v1** templates such as **WebServer** into authentication- or enrollment-agent-capable certs by injecting **Application Policies**. Kerberos PKINIT still evaluates EKUs, but **LDAP Schannel** also honors Application Policies, which keeps LDAP-based abuse relevant.<sup>[[1]](#references)</sup>
 - **ESC16** is a CA-wide knob: if the CA disables the SID security extension globally, every issued certificate falls back toward weaker mapping behavior unless the attack chain injects a SID by another supported format.
 
 ---
 
 ## Detection & Hardening Enhancements
 
-* **Defender for Identity AD CS sensor (2023-2024)** now surfaces posture assessments for ESC1-ESC8/ESC11 and generates real-time alerts such as *“Domain-controller certificate issuance for a non-DC”* (ESC8) and *“Prevent Certificate Enrollment with arbitrary Application Policies”* (ESC15). Ensure sensors are deployed to all AD CS servers to benefit from these detections. 
+* **Defender for Identity AD CS sensor (2023-2024)** now surfaces posture assessments for ESC1-ESC8/ESC11 and generates real-time alerts such as *“Domain-controller certificate issuance for a non-DC”* (ESC8) and *“Prevent Certificate Enrollment with arbitrary Application Policies”* (ESC15). Ensure sensors are deployed to all AD CS servers to benefit from these detections.<sup>[[3]](#references)</sup>
 * Disable or tightly scope the **“Supply in the request”** option on all templates; prefer explicitly defined SAN/EKU values.
 * Remove **Any Purpose** or **No EKU** from templates unless absolutely required (addresses ESC2 scenarios).
 * Require **manager approval** or dedicated Enrollment Agent workflows for sensitive templates (e.g., WebServer / CodeSigning).
@@ -192,8 +192,9 @@ Microsoft introduced a three-phase rollout (Compatibility → Audit → Enforcem
 
 ## References
 
-- [https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
-- [https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
-- [https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
-- [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
+- [1] [EKUwu: Not just another AD CS ESC](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
+- [2] [KB5014754: Certificate-based authentication changes on Windows domain controllers](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
+- [3] [Certificates security posture assessments - Microsoft Defender for Identity](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
+- [4] [Certified Pre-Owned: Abusing Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
+
 {{#include ../../banners/hacktricks-training.md}}

@@ -68,7 +68,7 @@ Certain controls may apply, such as:<sup>[[1]](#references)</sup>
 
 ### Methods to Request Certificates
 
-Certificates can be requested through:
+Certificates can be requested through:<sup>[[1]](#references)</sup>
 
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), using DCOM interfaces.
 2. **ICertPassage Remote Protocol** (MS-ICPR), through named pipes or TCP/IP.
@@ -85,7 +85,7 @@ Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 
 ## Certificate Authentication
 
-Active Directory (AD) supports certificate authentication, primarily utilizing **Kerberos** and **Secure Channel (Schannel)** protocols.
+Active Directory (AD) supports certificate authentication, primarily utilizing **Kerberos** and **Secure Channel (Schannel)** protocols.<sup>[[1]](#references)</sup>
 
 ### Kerberos Authentication Process
 
@@ -95,15 +95,15 @@ In the Kerberos authentication process, a user's request for a Ticket Granting T
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
 
-is central to establishing trust for certificate authentication.
+is central to establishing trust for certificate authentication.<sup>[[1]](#references)</sup>
 
 ### Secure Channel (Schannel) Authentication
 
-Schannel facilitates secure TLS/SSL connections, where during a handshake, the client presents a certificate that, if successfully validated, authorizes access. The mapping of a certificate to an AD account may involve Kerberos’s **S4U2Self** function or the certificate’s **Subject Alternative Name (SAN)**, among other methods.
+Schannel facilitates secure TLS/SSL connections, where during a handshake, the client presents a certificate that, if successfully validated, authorizes access.<sup>[[2]](#references)</sup> The mapping of a certificate to an AD account may involve Kerberos’s **S4U2Self** function or the certificate’s **Subject Alternative Name (SAN)**, among other methods.<sup>[[1]](#references)</sup>
 
 ### AD Certificate Services Enumeration
 
-AD's certificate services can be enumerated through LDAP queries, revealing information about **Enterprise Certificate Authorities (CAs)** and their configurations. This is accessible by any domain-authenticated user without special privileges. Tools like **[Certify](https://github.com/GhostPack/Certify)** and **[Certipy](https://github.com/ly4k/Certipy)** are used for enumeration and vulnerability assessment in AD CS environments.
+AD's certificate services can be enumerated through LDAP queries, revealing information about **Enterprise Certificate Authorities (CAs)** and their configurations. This is accessible by any domain-authenticated user without special privileges.<sup>[[1]](#references)</sup> Tools like **[Certify](https://github.com/GhostPack/Certify)** and **[Certipy](https://github.com/ly4k/Certipy)** are used for enumeration and vulnerability assessment in AD CS environments.
 
 Commands for using these tools include:
 
@@ -133,9 +133,9 @@ certutil -v -dstemplate
 
 ## References
 
-- [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
-- [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
-- [GhostPack/Certify](https://github.com/GhostPack/Certify)
-- [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
+- [1] [Certified Pre-Owned: Abusing Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
+- [2] [What Is SSL/TLS Client Authentication & How Does It Work?](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
+- [3] [GhostPack/Certify](https://github.com/GhostPack/Certify)
+- [4] [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
 
 {{#include ../../../banners/hacktricks-training.md}}

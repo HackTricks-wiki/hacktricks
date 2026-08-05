@@ -39,7 +39,7 @@ Notes:
 
 The technique is usually shown against **`lsass.exe`**, but on modern Windows that is often the **wrong target**:
 
-- If **LSA Protection / RunAsPPL** is enabled, **`lsass.exe`** is protected and a normal admin process with `SeDebugPrivilege` still won't be able to open it.
+- If **LSA Protection / RunAsPPL** is enabled, **`lsass.exe`** is protected and a normal admin process with `SeDebugPrivilege` still won't be able to open it.<sup>[[2]](#references)</sup>
 - Prefer **non-PPL SYSTEM processes** such as **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`**, or an early **`svchost.exe`** instance.
 - **Protected processes** and some special processes such as **`System`** or **`csrss.exe`** are not realistic user-mode targets for this technique.
 - Use **Process Hacker / Process Explorer** running elevated to verify whether the target token actually has the privileges you want before duplicating it.
@@ -52,7 +52,7 @@ A lot of public PoCs request **`PROCESS_ALL_ACCESS`** and **`TOKEN_ALL_ACCESS`**
 - Open the token with the rights needed for process creation: **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
 - Use **`DuplicateTokenEx(..., TokenPrimary, ...)`** to create a **primary token**; an impersonation token alone is not enough to create a new process.
 - If **`CreateProcessWithTokenW`** fails with **`1314`**, switch to **`CreateProcessAsUserW`**.
-- If you launch from a **service / Session 0**, remember that **`CreateProcessWithTokenW`** keeps the child in the **caller's session**. If you need a visible desktop shell, use **`CreateProcessAsUserW`** and move the token to the desired session.
+- If you launch from a **service / Session 0**, remember that **`CreateProcessWithTokenW`** keeps the child in the **caller's session**. If you need a visible desktop shell, use **`CreateProcessAsUserW`** and move the token to the desired session.<sup>[[1]](#references)</sup>
 
 A minimal modern flow looks like:
 
@@ -284,6 +284,6 @@ int _tmain( int argc, TCHAR* argv[] )
 
 ## References
 
-- [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
-- [Configure added LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
+- [1] [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [2] [Configure added LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
 {{#include ../../banners/hacktricks-training.md}}

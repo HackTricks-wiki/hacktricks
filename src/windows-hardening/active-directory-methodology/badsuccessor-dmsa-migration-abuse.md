@@ -7,11 +7,11 @@
 Delegated Managed Service Accounts (**dMSA**) are the next-generation successor of **gMSA** that ship in Windows Server 2025.  A legitimate migration workflow allows administrators to replace an *old* account (user, computer or service account) with a dMSA while transparently preserving permissions.  The workflow is exposed through PowerShell cmdlets such as `Start-ADServiceAccountMigration` and `Complete-ADServiceAccountMigration` and relies on two LDAP attributes of the **dMSA object**:
 
 * **`msDS-ManagedAccountPrecededByLink`** – *DN link* to the superseded (old) account.
-* **`msDS-DelegatedMSAState`**       – migration state (`0` = none, `1` = in-progress, `2` = *completed*).
+* **`msDS-DelegatedMSAState`**       – migration state (`0` = none, `1` = in-progress, `2` = *completed*).<sup>[[5]](#references)</sup>
 
-If an attacker can create **any** dMSA inside an OU and directly manipulate those 2 attributes, LSASS & the KDC will treat the dMSA as a *successor* of the linked account.  When the attacker subsequently authenticates as the dMSA **they inherit all the privileges of the linked account** – up to **Domain Admin** if the Administrator account is linked.
+If an attacker can create **any** dMSA inside an OU and directly manipulate those 2 attributes, LSASS & the KDC will treat the dMSA as a *successor* of the linked account.  When the attacker subsequently authenticates as the dMSA **they inherit all the privileges of the linked account** – up to **Domain Admin** if the Administrator account is linked.<sup>[[5]](#references)</sup>
 
-This technique was coined **BadSuccessor** by Unit 42 in 2025.  At the time of writing **no security patch** is available; only hardening of OU permissions mitigates the issue.
+This technique was coined **BadSuccessor** by Unit 42 in 2025.  At the time of writing **no security patch** is available; only hardening of OU permissions mitigates the issue.<sup>[[5]](#references)[[1]](#references)</sup>
 
 ### Attack prerequisites
 
@@ -100,9 +100,10 @@ golden-dmsa-gmsa.md
 
 ## References
 
-- [Unit42 – When Good Accounts Go Bad: Exploiting Delegated Managed Service Accounts](https://unit42.paloaltonetworks.com/badsuccessor-attack-vector/)
-- [SharpSuccessor PoC](https://github.com/logangoins/SharpSuccessor)
-- [BadSuccessor.ps1 – Pentest-Tools-Collection](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
-- [NetExec BadSuccessor module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/badsuccessor.py)
+- [1] [Unit42 – When Good Accounts Go Bad: Exploiting Delegated Managed Service Accounts](https://unit42.paloaltonetworks.com/badsuccessor-attack-vector/)
+- [2] [SharpSuccessor PoC](https://github.com/logangoins/SharpSuccessor)
+- [3] [BadSuccessor.ps1 – Pentest-Tools-Collection](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
+- [4] [NetExec BadSuccessor module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/badsuccessor.py)
+- [5] [BadSuccessor: Abusing dMSA to Escalate Privileges in Active Directory – Akamai](https://www.akamai.com/blog/security-research/abusing-dmsa-for-privilege-escalation-in-active-directory)
 
 {{#include ../../banners/hacktricks-training.md}}

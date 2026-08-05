@@ -4,23 +4,23 @@
 
 ## What is ADWS?
 
-Active Directory Web Services (ADWS) is **enabled by default on every Domain Controller since Windows Server 2008 R2** and listens on TCP **9389**.  Despite the name, **no HTTP is involved**.  Instead, the service exposes LDAP-style data through a stack of proprietary .NET framing protocols:
+Active Directory Web Services (ADWS) is **enabled by default on every Domain Controller since Windows Server 2008 R2** and listens on TCP **9389**.  Despite the name, **no HTTP is involved**.  Instead, the service exposes LDAP-style data through a stack of proprietary .NET framing protocols:<sup>[[1]](#references)[[7]](#references)</sup>
 
 * MC-NBFX → MC-NBFSE → MS-NNS → MC-NMF
 
-Because the traffic is encapsulated inside these binary SOAP frames and travels over an uncommon port, **enumeration through ADWS is far less likely to be inspected, filtered or signatured than classic LDAP/389 & 636 traffic**.  For operators this means:
+Because the traffic is encapsulated inside these binary SOAP frames and travels over an uncommon port, **enumeration through ADWS is far less likely to be inspected, filtered or signatured than classic LDAP/389 & 636 traffic**.  For operators this means:<sup>[[1]](#references)[[7]](#references)</sup>
 
 * Stealthier recon – Blue teams often concentrate on LDAP queries.
 * Freedom to collect from **non-Windows hosts (Linux, macOS)** by tunnelling 9389/TCP through a SOCKS proxy.
 * The same data you would obtain via LDAP (users, groups, ACLs, schema, etc.) and the ability to perform **writes** (e.g. `msDs-AllowedToActOnBehalfOfOtherIdentity` for **RBCD**).
 
-ADWS interactions are implemented over WS-Enumeration: every query starts with an `Enumerate` message that defines the LDAP filter/attributes and returns an `EnumerationContext` GUID, followed by one or more `Pull` messages that stream up to the server-defined result window. Contexts age out after ~30 minutes, so tooling either needs to page results or split filters (prefix queries per CN) to avoid losing state. When asking for security descriptors, specify the `LDAP_SERVER_SD_FLAGS_OID` control to omit SACLs, otherwise ADWS simply drops the `nTSecurityDescriptor` attribute from its SOAP response.
+ADWS interactions are implemented over WS-Enumeration: every query starts with an `Enumerate` message that defines the LDAP filter/attributes and returns an `EnumerationContext` GUID, followed by one or more `Pull` messages that stream up to the server-defined result window.<sup>[[7]](#references)</sup> Contexts age out after ~30 minutes, so tooling either needs to page results or split filters (prefix queries per CN) to avoid losing state.<sup>[[8]](#references)</sup> When asking for security descriptors, specify the `LDAP_SERVER_SD_FLAGS_OID` control to omit SACLs, otherwise ADWS simply drops the `nTSecurityDescriptor` attribute from its SOAP response.
 
 > NOTE: ADWS is also used by many RSAT GUI/PowerShell tools, so traffic may blend with legitimate admin activity.
 
 ## SoaPy – Native Python Client
 
-[SoaPy](https://github.com/logangoins/soapy) is a **full re-implementation of the ADWS protocol stack in pure Python**.  It crafts the NBFX/NBFSE/NNS/NMF frames byte-for-byte, allowing collection from Unix-like systems without touching the .NET runtime.
+[SoaPy](https://github.com/logangoins/soapy) is a **full re-implementation of the ADWS protocol stack in pure Python**.  It crafts the NBFX/NBFSE/NNS/NMF frames byte-for-byte, allowing collection from Unix-like systems without touching the .NET runtime.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Key Features
 
@@ -28,11 +28,11 @@ ADWS interactions are implemented over WS-Enumeration: every query starts with a
 * Fine-grained search filters identical to LDAP `-q '(objectClass=user)'`.
 * Optional **write** operations ( `--set` / `--delete` ).
 * **BOFHound output mode** for direct ingestion into BloodHound.
-* `--parse` flag to prettify timestamps / `userAccountControl` when human readability is required.
+* `--parse` flag to prettify timestamps / `userAccountControl` when human readability is required.<sup>[[2]](#references)</sup>
 
 ### Targeted collection flags & write operations
 
-SoaPy ships with curated switches that replicate the most common LDAP hunting tasks over ADWS: `--users`, `--computers`, `--groups`, `--spns`, `--asreproastable`, `--admins`, `--constrained`, `--unconstrained`, `--rbcds`, plus raw `--query` / `--filter` knobs for custom pulls. Pair those with write primitives such as `--rbcd <source>` (sets `msDs-AllowedToActOnBehalfOfOtherIdentity`), `--spn <service/cn>` (SPN staging for targeted Kerberoasting) and `--asrep` (flip `DONT_REQ_PREAUTH` in `userAccountControl`).
+SoaPy ships with curated switches that replicate the most common LDAP hunting tasks over ADWS: `--users`, `--computers`, `--groups`, `--spns`, `--asreproastable`, `--admins`, `--constrained`, `--unconstrained`, `--rbcds`, plus raw `--query` / `--filter` knobs for custom pulls. Pair those with write primitives such as `--rbcd <source>` (sets `msDs-AllowedToActOnBehalfOfOtherIdentity`), `--spn <service/cn>` (SPN staging for targeted Kerberoasting) and `--asrep` (flip `DONT_REQ_PREAUTH` in `userAccountControl`).<sup>[[2]](#references)</sup>
 
 Example targeted SPN hunt that only returns `samAccountName` and `servicePrincipalName`:
 
@@ -53,7 +53,7 @@ python3 -m pip install soapy-adws   # or git clone && pip install -r requirement
 
 * Fork of `ldapdomaindump` that swaps LDAP queries for ADWS calls on TCP/9389 to reduce LDAP-signature hits.
 * Performs an initial reachability check to 9389 unless `--force` is passed (skips the probe if port scans are noisy/filtered).
-* Tested against Microsoft Defender for Endpoint and CrowdStrike Falcon with successful bypass in the README.
+* Tested against Microsoft Defender for Endpoint and CrowdStrike Falcon with successful bypass in the README.<sup>[[4]](#references)</sup>
 
 ### Installation
 
@@ -80,7 +80,7 @@ Typical output logs the 9389 reachability check, ADWS bind, and dump start/finis
 
 ## Sopa - A practical client for ADWS in Golang
 
-Similarly as soapy, [sopa](https://github.com/Macmod/sopa) implements the ADWS protocol stack (MS-NNS + MC-NMF + SOAP) in Golang, exposing command-line flags to issue ADWS calls such as:
+Similarly as soapy, [sopa](https://github.com/Macmod/sopa) implements the ADWS protocol stack (MS-NNS + MC-NMF + SOAP) in Golang, exposing command-line flags to issue ADWS calls such as:<sup>[[5]](#references)</sup>
 
 * **Object search & retrieval** - `query` / `get`
 * **Object lifecycle** - `create [user|computer|group|ou|container|custom]` and `delete`
@@ -93,11 +93,11 @@ Similarly as soapy, [sopa](https://github.com/Macmod/sopa) implements the ADWS p
 * LDAP-style searches are issued via **WS-Enumeration** (`Enumerate` + `Pull`) with attribute projection, scope control (Base/OneLevel/Subtree) and pagination.
 * Single-object fetch uses **WS-Transfer** `Get`; attribute changes use `Put`; deletions use `Delete`.
 * Built-in object creation uses **WS-Transfer ResourceFactory**; custom objects use an **IMDA AddRequest** driven by YAML templates.
-* Password operations are **MS-ADCAP** actions (`SetPassword`, `ChangePassword`).
+* Password operations are **MS-ADCAP** actions (`SetPassword`, `ChangePassword`).<sup>[[5]](#references)</sup>
 
 ### Unauthenticated metadata discovery (mex)
 
-ADWS exposes WS-MetadataExchange without credentials, which is a quick way to validate exposure before authenticating:
+ADWS exposes WS-MetadataExchange without credentials, which is a quick way to validate exposure before authenticating:<sup>[[5]](#references)</sup>
 
 ```bash
 sopa mex --dc <DC>
@@ -105,7 +105,7 @@ sopa mex --dc <DC>
 
 ### DNS/DC discovery & Kerberos targeting notes
 
-Sopa can resolve DCs via SRV if `--dc` is omitted and `--domain` is provided. It queries in this order and uses the highest-priority target:
+Sopa can resolve DCs via SRV if `--dc` is omitted and `--domain` is provided. It queries in this order and uses the highest-priority target:<sup>[[5]](#references)</sup>
 
 ```text
 _ldap._tcp.<domain>
@@ -126,7 +126,7 @@ sopa info version --dc 192.168.1.10 --dns 192.168.1.10 -k --domain corp.local -u
 
 ### Auth material options
 
-Besides plaintext passwords, sopa supports **NT hashes**, **Kerberos AES keys**, **ccache**, and **PKINIT certificates** (PFX or PEM) for ADWS auth. Kerberos is implied when using `--aes-key`, `-c` (ccache) or certificate-based options.
+Besides plaintext passwords, sopa supports **NT hashes**, **Kerberos AES keys**, **ccache**, and **PKINIT certificates** (PFX or PEM) for ADWS auth. Kerberos is implied when using `--aes-key`, `-c` (ccache) or certificate-based options.<sup>[[5]](#references)</sup>
 
 ```bash
 # NT hash
@@ -138,7 +138,7 @@ sopa --dc <DC> -d <DOMAIN> -u <USER> -c <CCACHE> info domain
 
 ### Custom object creation via templates
 
-For arbitrary object classes, the `create custom` command consumes a YAML template that maps to an IMDA `AddRequest`:
+For arbitrary object classes, the `create custom` command consumes a YAML template that maps to an IMDA `AddRequest`:<sup>[[5]](#references)</sup>
 
 * `parentDN` and `rdn` define the container and relative DN.
 * `attributes[].name` supports `cn` or namespaced `addata:cn`.
@@ -148,7 +148,7 @@ For arbitrary object classes, the `create custom` command consumes a YAML templa
 
 ## SOAPHound – High-Volume ADWS Collection (Windows)
 
-[FalconForce SOAPHound](https://github.com/FalconForceTeam/SOAPHound) is a .NET collector that keeps all LDAP interactions inside ADWS and emits BloodHound v4-compatible JSON. It builds a complete cache of `objectSid`, `objectGUID`, `distinguishedName` and `objectClass` once (`--buildcache`), then re-uses it for high-volume `--bhdump`, `--certdump` (ADCS), or `--dnsdump` (AD-integrated DNS) passes so only ~35 critical attributes ever leave the DC. AutoSplit (`--autosplit --threshold <N>`) automatically shards queries by CN prefix to stay under the 30-minute EnumerationContext timeout in large forests.
+[FalconForce SOAPHound](https://github.com/FalconForceTeam/SOAPHound) is a .NET collector that keeps all LDAP interactions inside ADWS and emits BloodHound v4-compatible JSON. It builds a complete cache of `objectSid`, `objectGUID`, `distinguishedName` and `objectClass` once (`--buildcache`), then re-uses it for high-volume `--bhdump`, `--certdump` (ADCS), or `--dnsdump` (AD-integrated DNS) passes so only ~35 critical attributes ever leave the DC. AutoSplit (`--autosplit --threshold <N>`) automatically shards queries by CN prefix to stay under the 30-minute EnumerationContext timeout in large forests.<sup>[[8]](#references)</sup>
 
 Typical workflow on a domain-joined operator VM:
 
@@ -222,13 +222,13 @@ Combine this with `s4u2proxy`/`Rubeus /getticket` for a full **Resource-Based Co
 
 ## References
 
-* [SpecterOps – Make Sure to Use SOAP(y) – An Operators Guide to Stealthy AD Collection Using ADWS](https://specterops.io/blog/2025/07/25/make-sure-to-use-soapy-an-operators-guide-to-stealthy-ad-collection-using-adws/)
-* [SoaPy GitHub](https://github.com/logangoins/soapy)
-* [BOFHound GitHub](https://github.com/bohops/BOFHound)
-* [ADWSDomainDump GitHub](https://github.com/mverschu/adwsdomaindump)
-* [Sopa GitHub](https://github.com/Macmod/sopa)
-* [Microsoft – MC-NBFX, MC-NBFSE, MS-NNS, MC-NMF specifications](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-nbfx/)
-* [IBM X-Force Red – Stealthy Enumeration of Active Directory Environments Through ADWS](https://logan-goins.com/2025-02-21-stealthy-enum-adws/)
-* [FalconForce – SOAPHound tool to collect Active Directory data via ADWS](https://falconforce.nl/soaphound-tool-to-collect-active-directory-data-via-adws/)
+- [1] [SpecterOps – Make Sure to Use SOAP(y) – An Operators Guide to Stealthy AD Collection Using ADWS](https://specterops.io/blog/2025/07/25/make-sure-to-use-soapy-an-operators-guide-to-stealthy-ad-collection-using-adws/)
+- [2] [SoaPy GitHub](https://github.com/logangoins/soapy)
+- [3] [BOFHound GitHub](https://github.com/bohops/BOFHound)
+- [4] [ADWSDomainDump GitHub](https://github.com/mverschu/adwsdomaindump)
+- [5] [Sopa GitHub](https://github.com/Macmod/sopa)
+- [6] [Microsoft – MC-NBFX, MC-NBFSE, MS-NNS, MC-NMF specifications](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-nbfx/)
+- [7] [IBM X-Force Red – Stealthy Enumeration of Active Directory Environments Through ADWS](https://logan-goins.com/2025-02-21-stealthy-enum-adws/)
+- [8] [FalconForce – SOAPHound tool to collect Active Directory data via ADWS](https://falconforce.nl/soaphound-tool-to-collect-active-directory-data-via-adws/)
 
 {{#include ../../banners/hacktricks-training.md}}

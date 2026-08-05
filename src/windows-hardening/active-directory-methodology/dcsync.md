@@ -10,7 +10,7 @@ The **DCSync** permission implies having these permissions over the domain itsel
 
 - The **DCSync attack simulates the behavior of a Domain Controller and asks other Domain Controllers to replicate information** using the Directory Replication Service Remote Protocol (MS-DRSR). Because MS-DRSR is a valid and necessary function of Active Directory, it cannot be turned off or disabled.
 - By default only **Domain Admins, Enterprise Admins, Administrators, and Domain Controllers** groups have the required privileges.
-- In practice, **full DCSync** needs **`DS-Replication-Get-Changes` + `DS-Replication-Get-Changes-All`** on the domain naming context. `DS-Replication-Get-Changes-In-Filtered-Set` is commonly delegated together with them, but on its own it is more relevant for syncing **confidential / RODC-filtered attributes** (for example legacy LAPS-style secrets) than for a full krbtgt dump.
+- In practice, **full DCSync** needs **`DS-Replication-Get-Changes` + `DS-Replication-Get-Changes-All`** on the domain naming context. `DS-Replication-Get-Changes-In-Filtered-Set` is commonly delegated together with them, but on its own it is more relevant for syncing **confidential / RODC-filtered attributes** (for example legacy LAPS-style secrets) than for a full krbtgt dump.<sup>[[2]](#references)</sup>
 - If any account passwords are stored with reversible encryption, an option is available in Mimikatz to return the password in clear text
 
 ### Enumeration
@@ -68,7 +68,7 @@ secretsdump.py -just-dc-ntlm -history -pwd-last-set -user-status <DOMAIN>/<USER>
 
 ### DCSync using a captured DC machine TGT (ccache)
 
-In unconstrained-delegation export-mode scenarios, you may capture a Domain Controller machine TGT (e.g., `DC1$@DOMAIN` for `krbtgt@DOMAIN`). You can then use that ccache to authenticate as the DC and perform DCSync without a password.
+In unconstrained-delegation export-mode scenarios, you may capture a Domain Controller machine TGT (e.g., `DC1$@DOMAIN` for `krbtgt@DOMAIN`). You can then use that ccache to authenticate as the DC and perform DCSync without a password.<sup>[[5]](#references)</sup>
 
 ```bash
 # Generate a krb5.conf for the realm (helper)
@@ -88,7 +88,7 @@ Operational notes:
 
 - **Impacket's Kerberos path touches SMB first** before the DRSUAPI call. If the environment enforces **SPN target name validation**, a full dump may fail with `Policy SPN target name validation might be restricting full DRSUAPI dump. Try -just-dc-user`.
 - In that case, either request a **`cifs/<dc>`** service ticket for the target DC first or fall back to **`-just-dc-user`** for the account you need immediately.
-- When you only have lower replication rights, LDAP/DirSync-style syncing can still expose **confidential** or **RODC-filtered** attributes (for example legacy `ms-Mcs-AdmPwd`) without a full krbtgt replication.
+- When you only have lower replication rights, LDAP/DirSync-style syncing can still expose **confidential** or **RODC-filtered** attributes (for example legacy `ms-Mcs-AdmPwd`) without a full krbtgt replication.<sup>[[2]](#references)</sup>
 
 `-just-dc` generates 3 files:
 
@@ -102,7 +102,7 @@ Operational notes:
 
 ### Persistence
 
-If you are a domain admin, you can grant this permissions to any user with the help of `powerview`:
+If you are a domain admin, you can grant this permissions to any user with the help of `powerview`:<sup>[[3]](#references)</sup>
 
 ```bash
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
@@ -129,10 +129,10 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 
 ## References
 
-- [https://github.com/fortra/impacket/blob/master/ChangeLog.md](https://github.com/fortra/impacket/blob/master/ChangeLog.md)
-- [https://simondotsh.com/infosec/2022/07/11/dirsync.html](https://simondotsh.com/infosec/2022/07/11/dirsync.html)
-- [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync)
-- [https://yojimbosecurity.ninja/dcsync/](https://yojimbosecurity.ninja/dcsync/)
-- HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA: https://0xdf.gitlab.io/2025/09/12/htb-delegate.html
+- [1] [Impacket ChangeLog](https://github.com/fortra/impacket/blob/master/ChangeLog.md)
+- [2] [DirSync: Leveraging Replication Get-Changes and Get-Changes-In-Filtered-Set](https://simondotsh.com/infosec/2022/07/11/dirsync.html)
+- [3] [DCSync: Dump Password Hashes from Domain Controller](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync)
+- [4] [DCSync](https://yojimbosecurity.ninja/dcsync/)
+- [5] [HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
 
 {{#include ../../banners/hacktricks-training.md}}
