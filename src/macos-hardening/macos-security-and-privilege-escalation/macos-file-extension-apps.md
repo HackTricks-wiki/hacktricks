@@ -1,35 +1,35 @@
-# macOS File Extension & URL scheme app handlers
+# Handlers εφαρμογών για File Extension και URL scheme στο macOS
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## LaunchServices Database
 
-Αυτή είναι μια βάση δεδομένων με όλες τις εγκατεστημένες εφαρμογές στο macOS, η οποία μπορεί να ερωτηθεί για να ληφθούν πληροφορίες σχετικά με κάθε εγκατεστημένη εφαρμογή, όπως τα υποστηριζόμενα **URL schemes**, **document types**, **UTIs**, και τα προεπιλεγμένα handlers.
+Πρόκειται για μια database όλων των εγκατεστημένων εφαρμογών στο macOS, η οποία μπορεί να γίνει query για τη λήψη πληροφοριών σχετικά με κάθε εγκατεστημένη εφαρμογή, όπως τα υποστηριζόμενα **URL schemes**, οι **τύποι εγγράφων**, τα **UTIs** και οι default handlers.
 
-Είναι δυνατό να γίνει dump αυτής της βάσης δεδομένων με:
+Μπορείτε να κάνετε dump αυτής της database με:
 ```
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump
 ```
-Ή χρησιμοποιώντας το εργαλείο [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+Ή χρησιμοποιώντας το tool [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-**`/usr/libexec/lsd`** είναι ο πυρήνας της βάσης δεδομένων. Παρέχει **αρκετές XPC services** όπως `.lsd.installation`, `.lsd.open`, `.lsd.openurl`, και περισσότερες. Αλλά επίσης **απαιτεί ορισμένα entitlements** από τις applications ώστε να μπορούν να χρησιμοποιήσουν τις exposed XPC functionalities, όπως `.launchservices.changedefaulthandler` ή `.launchservices.changeurlschemehandler` για να αλλάξουν default apps για MIME types ή URL schemes και άλλα.
+Το **`/usr/libexec/lsd`** είναι ο εγκέφαλος της database. Παρέχει **several XPC services**, όπως τα `.lsd.installation`, `.lsd.open`, `.lsd.openurl` και άλλα. Ωστόσο, **απαιτεί επίσης ορισμένα entitlements** από τις εφαρμογές, ώστε να μπορούν να χρησιμοποιούν τις εκτεθειμένες XPC functionalities, όπως τα `.launchservices.changedefaulthandler` ή `.launchservices.changeurlschemehandler`, για την αλλαγή των default apps για MIME types ή URL schemes, καθώς και άλλα.
 
-**`/System/Library/CoreServices/launchservicesd`** δηλώνει το service `com.apple.coreservices.launchservicesd` και μπορεί να ερωτηθεί για να πάρεις πληροφορίες σχετικά με τις running applications. Μπορεί να ερωτηθεί με το system tool **`/usr/bin/lsappinfo`** ή με [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+Το **`/System/Library/CoreServices/launchservicesd`** κάνει claim το service `com.apple.coreservices.launchservicesd` και μπορεί να γίνει query για τη λήψη πληροφοριών σχετικά με τις εφαρμογές που εκτελούνται. Μπορεί να γίνει query με το system tool **`/usr/bin/lsappinfo`** ή με το [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-Από οπτική operator, να θυμάσαι ότι συνήθως υπάρχουν **δύο χρήσιμες προβολές**:
+Από την οπτική γωνία ενός operator, έχε υπόψη ότι συνήθως υπάρχουν **δύο χρήσιμες views**:
 
-- Η **registration database** που διαχειρίζεται το LaunchServices / `lsd` (υποστηρίζεται από `.csstore` files).
-- Τα **per-user effective defaults** που αποθηκεύονται στο `~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist` μέσα στον πίνακα `LSHandlers`.
+- Η **registration database** που διαχειρίζεται το LaunchServices / `lsd` (και υποστηρίζεται από αρχεία `.csstore`).
+- Τα **per-user effective defaults** που αποθηκεύονται στο `~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist`, μέσα στο array `LSHandlers`.
 
-Αυτή η διάκριση έχει σημασία: μια application μπορεί να είναι **registered** ως ικανή να χειριστεί έναν τύπο ή scheme, αλλά το **current default** μπορεί να είναι ακόμα άλλο bundle ID.
+Αυτή η διάκριση έχει σημασία: μια εφαρμογή μπορεί να είναι **registered** ως ικανή να χειριστεί έναν type ή scheme, αλλά το **current default** μπορεί να είναι ακόμα ένα άλλο bundle ID.
 
 ## File Extension & URL scheme app handlers
 
-Η ακόλουθη γραμμή μπορεί να είναι χρήσιμη για να βρεις τις applications που μπορούν να ανοίξουν files ανάλογα με την extension:
+Η ακόλουθη γραμμή μπορεί να είναι χρήσιμη για την εύρεση των εφαρμογών που μπορούν να ανοίξουν αρχεία, ανάλογα με το extension:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump | grep -E "path:|bindings:|name:"
 ```
-Ή χρησιμοποίησε κάτι σαν [**SwiftDefaultApps**](https://github.com/Lord-Kamina/SwiftDefaultApps):
+Ή χρησιμοποίησε κάτι όπως το [**SwiftDefaultApps**](https://github.com/Lord-Kamina/SwiftDefaultApps):
 ```bash
 ./swda getSchemes #Get all the available schemes
 ./swda getApps #Get all the apps declared
@@ -68,13 +68,13 @@ grep -A3 CFBundleTypeExtensions Info.plist  | grep string
 <string>xbl</string>
 <string>svg</string>
 ```
-## Απαρίθμηση effective handlers
+## Απαρίθμηση των ενεργών handlers
 
-Το πιο χρήσιμο αρχείο για τα **current user's defaults** είναι συνήθως:
+Το πιο χρήσιμο αρχείο για τα **προεπιλεγμένα handlers του τρέχοντος χρήστη** είναι συνήθως:
 ```bash
 ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist
 ```
-Για να κάνετε dump των handlers **URL scheme** από αυτό:
+Για να κάνετε **dump** των handlers του **URL scheme** από αυτό:
 ```bash
 plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist |
 jq '.[] | select(.LSHandlerURLScheme != null) |
@@ -86,11 +86,11 @@ plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServi
 jq '.[] | select(.LSHandlerContentType != null) |
 {uti: .LSHandlerContentType, handler: (.LSHandlerRoleAll // .LSHandlerRoleViewer // .LSHandlerRoleEditor)}'
 ```
-Για να επιλύσετε το δέντρο UTI ενός δείγματος αρχείου:
+Για την επίλυση του δέντρου UTI ενός δείγματος αρχείου:
 ```bash
 mdls -name kMDItemContentType -name kMDItemContentTypeTree ./sample.pdf
 ```
-Αν θέλεις ένα πιο φιλικό CLI για να κάνεις query ή να αλλάξεις defaults:
+Αν θέλετε ένα πιο φιλικό CLI για την αναζήτηση ή την αλλαγή των προεπιλογών:
 ```bash
 # Classic tool
 # https://github.com/moretension/duti
@@ -104,47 +104,48 @@ dutix targets show public.html
 dutix targets show ftp
 dutix apps show Safari
 ```
-## Interesting Info.plist keys
+## Ενδιαφέροντα κλειδιά Info.plist
 
-Κατά το triage ενός application bundle, αυτά τα keys έχουν τη μεγαλύτερη σημασία:
+Κατά το triage ενός application bundle, αυτά τα κλειδιά έχουν τη μεγαλύτερη σημασία:
 
 - **`CFBundleDocumentTypes`**: ομάδες εγγράφων που το bundle δηλώνει ότι μπορεί να ανοίξει.
-- **`LSItemContentTypes`**: ο **modern / preferred** τρόπος για να συνδέεις document types με UTIs.
-- **`LSHandlerRank`**: ranking που χρησιμοποιείται από το LaunchServices (`Owner`, `Default`, `Alternate`, `None`).
-- **`CFBundleURLTypes`** / **`CFBundleURLSchemes`**: custom URI schemes που υλοποιεί το app.
-- **`UTExportedTypeDeclarations`**: UTIs που το app **owns**.
-- **`UTImportedTypeDeclarations`**: UTIs που το app δεν owns αλλά θέλει το σύστημα να αναγνωρίζει.
+- **`LSItemContentTypes`**: ο **σύγχρονος / προτιμώμενος** τρόπος σύνδεσης τύπων εγγράφων με UTIs.
+- **`LSHandlerRank`**: κατάταξη που χρησιμοποιείται από το LaunchServices (`Owner`, `Default`, `Alternate`, `None`).
+- **`CFBundleURLTypes`** / **`CFBundleURLSchemes`**: custom URI schemes που υλοποιεί η εφαρμογή.
+- **`UTExportedTypeDeclarations`**: UTIs που **ανήκουν** στην εφαρμογή.
+- **`UTImportedTypeDeclarations`**: UTIs που δεν ανήκουν στην εφαρμογή, αλλά η εφαρμογή θέλει να αναγνωρίζει το σύστημα.
 
-Ένα χρήσιμο quick triage command είναι:
+Μια χρήσιμη εντολή για γρήγορο triage είναι:
 ```bash
 plutil -p /Applications/Target.app/Contents/Info.plist | \
 rg 'CFBundleDocumentTypes|CFBundleURLTypes|LSItemContentTypes|LSHandlerRank|UTExportedTypeDeclarations|UTImportedTypeDeclarations'
 ```
-Μια λεπτή αλλά σημαντική λεπτομέρεια: αν υπάρχει το **`LSItemContentTypes`**, τα παλαιότερα keys όπως **`CFBundleTypeExtensions`**, **`CFBundleTypeMIMETypes`** και **`CFBundleTypeOSTypes`** είναι ουσιαστικά legacy δεδομένα συμβατότητας. Για την πραγματική επίλυση handler, δώσε πρώτα προτεραιότητα στο UTI path.
+Μια λεπτομέρεια που είναι διακριτική αλλά σημαντική: αν υπάρχει το **`LSItemContentTypes`**, παλαιότερα keys όπως τα **`CFBundleTypeExtensions`**, **`CFBundleTypeMIMETypes`** και **`CFBundleTypeOSTypes`** αποτελούν ουσιαστικά legacy compatibility data. Για την πραγματική επίλυση handlers, εστιάστε πρώτα στο UTI path.
 
-## Επιθετικές σημειώσεις
+## Offensive notes
 
-Οι εφαρμογές δεν χρειάζεται να εκτελεστούν για να γίνουν ενδιαφέρουσες. Ένα dropped ή cloned `.app` bundle μπορεί να **αναλυθεί αυτόματα από το `lsd` μόλις γραφτεί στο disk**, και οι δηλωμένοι document types / URL schemes μπορεί να εγγραφούν χωρίς ο χρήστης να εκκινήσει ποτέ το bundle.
+Οι εφαρμογές δεν χρειάζεται να εκτελεστούν για να αποκτήσουν ενδιαφέρον. Ένα dropped ή cloned `.app` bundle μπορεί να γίνει **parse automatically από το `lsd` μόλις γραφτεί στον δίσκο**, και τα δηλωμένα document types / URL schemes μπορεί να καταχωριστούν χωρίς ο χρήστης να εκκινήσει ποτέ το bundle.
 
-Αυτό είναι χρήσιμο τόσο για έρευνα **persistence / hijacking** όσο και για **initial-access chains**:
+Αυτό είναι χρήσιμο τόσο για **persistence / hijacking research** όσο και για **initial-access chains**:
 
-- Μια κακόβουλη app μπορεί να διεκδικήσει μια **σπάνια επέκταση** ή ένα **custom UTI** και να περιμένει το θύμα να ανοίξει το lure file.
-- Μια κακόβουλη app μπορεί να καταχωρίσει ένα **custom URL scheme** προσβάσιμο από browser, Electron app, office document, chat client ή κάποιο άλλο helper app.
-- Αν επεξεργαστείς ένα app bundle μετά το build, μπορείς να αναγκάσεις το LaunchServices να το ξανα-αναλύσει με:
+- Μια malicious app μπορεί να διεκδικήσει ένα **σπάνιο extension** ή ένα **custom UTI** και να περιμένει το θύμα να ανοίξει το lure file.
+- Μια malicious app μπορεί να καταχωρίσει ένα **custom URL scheme** προσβάσιμο από browser, Electron app, office document, chat client ή άλλη helper app.<sup>[1]</sup>
+- Αν επεξεργαστείτε ένα app bundle μετά το build του, μπορείτε να αναγκάσετε το LaunchServices να το κάνει ξανά parse με:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -f /tmp/Evil.app
 ```
-Όταν ελέγχετε ύποπτα bundles, δώστε ιδιαίτερη προσοχή στα:
+Κατά τον έλεγχο ύποπτων bundles, δώστε ιδιαίτερη προσοχή στα εξής:
 
 - **`LSHandlerRank=Owner`** σε ασυνήθιστους τύπους.
-- **Ευρείς `CFBundleDocumentTypes`** πίνακες που ισχυρίζονται πολλές επεκτάσεις.
+- Ευρείες λίστες **`CFBundleDocumentTypes`** που υποστηρίζουν πολλές επεκτάσεις.
 - **Helper / wrapper apps** των οποίων η μόνη ενδιαφέρουσα συμπεριφορά βρίσκεται πίσω από έναν document ή URI handler.
-- **Αρχεία τύπου shortcut** (`.webloc`, `.inetloc`, `.fileloc`) που τελικά δρομολογούν στο LaunchServices. Για `.fileloc`-style τεχνικές και σχετικές πλευρές του Gatekeeper, δείτε [this other page](macos-security-protections/macos-fs-tricks/README.md).
+- Αρχεία που μοιάζουν με shortcuts (`.webloc`, `.inetloc`, `.fileloc`) και τελικά κάνουν dispatch στο LaunchServices. Για τεχνικές τύπου `.fileloc` και σχετικές προσεγγίσεις Gatekeeper, δείτε [αυτήν τη σελίδα](macos-security-protections/macos-fs-tricks/README.md).<sup>[2]</sup>
 
-Αν ο στόχος σας είναι passive code-execution απλώς από το browsing σε έναν φάκελο ή την επιλογή ενός αρχείου, ελέγξτε επίσης την ειδική σελίδα για [Quick Look generators](macos-proces-abuse/macos-quicklook-generators.md), καθώς αυτό είναι ένα διαφορετικό αλλά στενά σχετικό file-handler surface.
+Αν ο στόχος σας είναι η παθητική εκτέλεση κώδικα απλώς με την περιήγηση σε έναν φάκελο ή την επιλογή ενός αρχείου, ελέγξτε επίσης την ειδική σελίδα για [Quick Look generators](macos-proces-abuse/macos-quicklook-generators.md), καθώς πρόκειται για διαφορετική αλλά στενά σχετιζόμενη επιφάνεια file-handler.
 
-## References
+## Αναφορές
 
-- [Objective-See - Remote Mac Exploitation Via Custom URL Schemes](https://objective-see.org/blog/blog_0x38.html)
-- [Jamf Threat Labs - Bypassing the Gate: A closer look into Gatekeeper flaws on macOS](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
+- [1] [Objective-See - Remote Mac Exploitation Via Custom URL Schemes](https://objective-see.org/blog/blog_0x38.html)
+- [2] [Jamf Threat Labs - Bypassing the Gate: A closer look into Gatekeeper flaws on macOS](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
+
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,59 +2,59 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Main Keychains
+## Κύρια Keychains
 
-- The **User Keychain** (`~/Library/Keychains/login.keychain-db`), το οποίο χρησιμοποιείται για την αποθήκευση **διαπιστευτηρίων συγκεκριμένων χρηστών** όπως κωδικοί πρόσβασης εφαρμογών, κωδικοί πρόσβασης στο διαδίκτυο, πιστοποιητικά που δημιουργούνται από τον χρήστη, κωδικοί πρόσβασης δικτύου και δημόσια/ιδιωτικά κλειδιά που δημιουργούνται από τον χρήστη.
-- The **System Keychain** (`/Library/Keychains/System.keychain`), το οποίο αποθηκεύει **διαπιστευτήρια σε επίπεδο συστήματος** όπως κωδικοί πρόσβασης WiFi, πιστοποιητικά ρίζας συστήματος, ιδιωτικά κλειδιά συστήματος και κωδικοί πρόσβασης εφαρμογών συστήματος.
-- Είναι δυνατόν να βρείτε άλλα στοιχεία όπως πιστοποιητικά στο `/System/Library/Keychains/*`
-- Στο **iOS** υπάρχει μόνο ένα **Keychain** που βρίσκεται στο `/private/var/Keychains/`. Αυτός ο φάκελος περιέχει επίσης βάσεις δεδομένων για το `TrustStore`, αρχές πιστοποίησης (`caissuercache`) και καταχωρήσεις OSCP (`ocspache`).
-- Οι εφαρμογές θα περιορίζονται στο keychain μόνο στην ιδιωτική τους περιοχή με βάση τον αναγνωριστικό της εφαρμογής τους.
+- Το **User Keychain** (`~/Library/Keychains/login.keychain-db`), το οποίο χρησιμοποιείται για την αποθήκευση **user-specific credentials**, όπως κωδικοί εφαρμογών, internet passwords, certificates που δημιουργούνται από τον χρήστη, network passwords και public/private keys που δημιουργούνται από τον χρήστη.
+- Το **System Keychain** (`/Library/Keychains/System.keychain`), το οποίο αποθηκεύει **system-wide credentials**, όπως κωδικούς WiFi, system root certificates, system private keys και system application passwords.<sup>[1]</sup>
+- Είναι πιθανό να βρεθούν και άλλα components, όπως certificates, στο `/System/Library/Keychains/*`
+- Στο **iOS** υπάρχει μόνο ένα **Keychain**, το οποίο βρίσκεται στο `/private/var/Keychains/`. Αυτός ο φάκελος περιέχει επίσης databases για το `TrustStore`, certificate authorities (`caissuercache`) και OSCP entries (`ocspache`).
+- Οι εφαρμογές περιορίζονται στο Keychain μόνο στη private περιοχή τους, με βάση το application identifier.
 
-### Password Keychain Access
+### Πρόσβαση με κωδικό στο Keychain
 
-Αυτά τα αρχεία, αν και δεν έχουν εγγενή προστασία και μπορούν να **κατεβούν**, είναι κρυπτογραφημένα και απαιτούν τον **απλό κωδικό πρόσβασης του χρήστη για να αποκρυπτογραφηθούν**. Ένα εργαλείο όπως το [**Chainbreaker**](https://github.com/n0fate/chainbreaker) θα μπορούσε να χρησιμοποιηθεί για την αποκρυπτογράφηση.
+Αυτά τα αρχεία, παρότι δεν διαθέτουν εγγενή προστασία και μπορούν να **downloaded**, είναι encrypted και απαιτούν το **plaintext password του χρήστη για να decrypted**. Ένα tool όπως το [**Chainbreaker**](https://github.com/n0fate/chainbreaker) θα μπορούσε να χρησιμοποιηθεί για decryption.<sup>[1]</sup>
 
-## Keychain Entries Protections
+## Προστασίες των Keychain Entries
 
 ### ACLs
 
-Κάθε καταχώρηση στο keychain διέπεται από **Λίστες Ελέγχου Πρόσβασης (ACLs)** που καθορίζουν ποιος μπορεί να εκτελεί διάφορες ενέργειες στην καταχώρηση του keychain, συμπεριλαμβανομένων:
+Κάθε entry στο Keychain διέπεται από **Access Control Lists (ACLs)**, οι οποίες καθορίζουν ποιος μπορεί να εκτελεί διάφορες ενέργειες στο Keychain entry, όπως:<sup>[1]</sup>
 
-- **ACLAuhtorizationExportClear**: Επιτρέπει στον κάτοχο να αποκτήσει το καθαρό κείμενο του μυστικού.
-- **ACLAuhtorizationExportWrapped**: Επιτρέπει στον κάτοχο να αποκτήσει το καθαρό κείμενο κρυπτογραφημένο με έναν άλλο παρεχόμενο κωδικό πρόσβασης.
-- **ACLAuhtorizationAny**: Επιτρέπει στον κάτοχο να εκτελεί οποιαδήποτε ενέργεια.
+- **ACLAuhtorizationExportClear**: Επιτρέπει στον κάτοχο να λάβει το clear text του secret.
+- **ACLAuhtorizationExportWrapped**: Επιτρέπει στον κάτοχο να λάβει το clear text encrypted με άλλο παρεχόμενο password.
+- **ACLAuhtorizationAny**: Επιτρέπει στον κάτοχο να εκτελέσει οποιαδήποτε ενέργεια.
 
-Οι ACLs συνοδεύονται επίσης από μια **λίστα αξιόπιστων εφαρμογών** που μπορούν να εκτελούν αυτές τις ενέργειες χωρίς προτροπή. Αυτό θα μπορούσε να είναι:
+Τα ACLs συνοδεύονται επίσης από μια **list trusted applications**, οι οποίες μπορούν να εκτελούν αυτές τις ενέργειες χωρίς prompt. Αυτή μπορεί να είναι:<sup>[1]</sup>
 
-- **N`il`** (δεν απαιτείται εξουσιοδότηση, **όλοι είναι αξιόπιστοι**)
-- Μια **κενή** λίστα (**κανείς** δεν είναι αξιόπιστος)
-- **Λίστα** συγκεκριμένων **εφαρμογών**.
+- **N`il`** (δεν απαιτείται authorization, **όλοι είναι trusted**)
+- Μια **empty** list (**κανείς** δεν είναι trusted)
+- **List** συγκεκριμένων **applications**.
 
-Επίσης, η καταχώρηση μπορεί να περιέχει το κλειδί **`ACLAuthorizationPartitionID`,** το οποίο χρησιμοποιείται για να προσδιορίσει το **teamid, apple,** και **cdhash.**
+Επίσης, το entry μπορεί να περιέχει το key **`ACLAuthorizationPartitionID`,** το οποίο χρησιμοποιείται για την αναγνώριση των **teamid, apple** και **cdhash.**<sup>[1]</sup>
 
-- Εάν το **teamid** είναι καθορισμένο, τότε για να **προσεγγιστεί η καταχώρηση** αξίας **χωρίς** προτροπή, η χρησιμοποιούμενη εφαρμογή πρέπει να έχει το **ίδιο teamid**.
-- Εάν το **apple** είναι καθορισμένο, τότε η εφαρμογή πρέπει να είναι **υπογεγραμμένη** από την **Apple**.
-- Εάν το **cdhash** είναι υποδειγμένο, τότε η **εφαρμογή** πρέπει να έχει το συγκεκριμένο **cdhash**.
+- Αν έχει καθοριστεί το **teamid**, τότε για **access στο entry** value **χωρίς** **prompt**, η χρησιμοποιούμενη εφαρμογή πρέπει να έχει το **ίδιο teamid**.
+- Αν έχει καθοριστεί το **apple**, τότε η εφαρμογή πρέπει να είναι **signed** από την **Apple**.
+- Αν υποδεικνύεται το **cdhash**, τότε η **app** πρέπει να διαθέτει το συγκεκριμένο **cdhash**.
 
-### Creating a Keychain Entry
+### Δημιουργία Keychain Entry
 
-Όταν μια **νέα** **καταχώρηση** δημιουργείται χρησιμοποιώντας το **`Keychain Access.app`**, ισχύουν οι εξής κανόνες:
+Όταν δημιουργείται ένα **new** **entry** με χρήση του **`Keychain Access.app`**, εφαρμόζονται οι ακόλουθοι κανόνες:<sup>[1]</sup>
 
-- Όλες οι εφαρμογές μπορούν να κρυπτογραφούν.
-- **Καμία εφαρμογή** δεν μπορεί να εξάγει/αποκρυπτογραφεί (χωρίς προτροπή του χρήστη).
-- Όλες οι εφαρμογές μπορούν να δουν τον έλεγχο ακεραιότητας.
-- Καμία εφαρμογή δεν μπορεί να αλλάξει τις ACLs.
+- Όλες οι apps μπορούν να κάνουν encrypt.
+- **Καμία app** δεν μπορεί να κάνει export/decrypt (χωρίς prompt προς τον χρήστη).
+- Όλες οι apps μπορούν να δουν το integrity check.
+- Καμία app δεν μπορεί να αλλάξει τα ACLs.
 - Το **partitionID** ορίζεται σε **`apple`**.
 
-Όταν μια **εφαρμογή δημιουργεί μια καταχώρηση στο keychain**, οι κανόνες είναι ελαφρώς διαφορετικοί:
+Όταν μια **application δημιουργεί ένα entry στο Keychain**, οι κανόνες είναι ελαφρώς διαφορετικοί:<sup>[1]</sup>
 
-- Όλες οι εφαρμογές μπορούν να κρυπτογραφούν.
-- Μόνο η **δημιουργούσα εφαρμογή** (ή οποιαδήποτε άλλη εφαρμογή που έχει προστεθεί ρητά) μπορεί να εξάγει/αποκρυπτογραφεί (χωρίς προτροπή του χρήστη).
-- Όλες οι εφαρμογές μπορούν να δουν τον έλεγχο ακεραιότητας.
-- Καμία εφαρμογή δεν μπορεί να αλλάξει τις ACLs.
+- Όλες οι apps μπορούν να κάνουν encrypt.
+- Μόνο η **creating application** (ή οποιεσδήποτε άλλες apps έχουν προστεθεί ρητά) μπορεί να κάνει export/decrypt (χωρίς prompt προς τον χρήστη).
+- Όλες οι apps μπορούν να δουν το integrity check.
+- Καμία app δεν μπορεί να αλλάξει τα ACLs.
 - Το **partitionID** ορίζεται σε **`teamid:[teamID here]`**.
 
-## Accessing the Keychain
+## Πρόσβαση στο Keychain
 
 ### `security`
 ```bash
@@ -76,57 +76,57 @@ security dump-keychain ~/Library/Keychains/login.keychain-db
 ### APIs
 
 > [!TIP]
-> Η **καταμέτρηση και εξαγωγή** μυστικών από το **keychain** που **δεν θα δημιουργήσει προτροπή** μπορεί να γίνει με το εργαλείο [**LockSmith**](https://github.com/its-a-feature/LockSmith)
+> Το **keychain enumeration and dumping** των secrets που **δεν θα δημιουργήσουν prompt** μπορεί να γίνει με το tool [**LockSmith**](https://github.com/its-a-feature/LockSmith)
 >
-> Άλλες τελικές σημεία API μπορούν να βρεθούν στον πηγαίο κώδικα [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html).
+> Άλλα API endpoints μπορούν να βρεθούν στον source code του [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html).
 
-Λίστα και λήψη **πληροφοριών** για κάθε είσοδο του keychain χρησιμοποιώντας το **Security Framework** ή μπορείτε επίσης να ελέγξετε το εργαλείο cli ανοιχτού κώδικα της Apple [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Ορισμένα παραδείγματα API:
+Κάντε list και λάβετε **info** για κάθε keychain entry χρησιμοποιώντας το **Security Framework** ή μπορείτε επίσης να ελέγξετε το open source cli tool της Apple [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Μερικά API examples:<sup>[1]</sup>
 
-- Το API **`SecItemCopyMatching`** δίνει πληροφορίες για κάθε είσοδο και υπάρχουν ορισμένα χαρακτηριστικά που μπορείτε να ορίσετε κατά τη χρήση του:
-- **`kSecReturnData`**: Αν είναι αληθές, θα προσπαθήσει να αποκρυπτογραφήσει τα δεδομένα (ορίστε σε ψευδές για να αποφύγετε πιθανές αναδυόμενες ειδοποιήσεις)
-- **`kSecReturnRef`**: Λάβετε επίσης αναφορά στο στοιχείο του keychain (ορίστε σε αληθές σε περίπτωση που αργότερα δείτε ότι μπορείτε να αποκρυπτογραφήσετε χωρίς αναδυόμενη ειδοποίηση)
-- **`kSecReturnAttributes`**: Λάβετε μεταδεδομένα σχετικά με τις εισόδους
-- **`kSecMatchLimit`**: Πόσα αποτελέσματα να επιστραφούν
-- **`kSecClass`**: Τι είδους είσοδος keychain
+- Το API **`SecItemCopyMatching`** παρέχει info για κάθε entry και υπάρχουν ορισμένα attributes που μπορείτε να ορίσετε κατά τη χρήση του:
+- **`kSecReturnData`**: Αν είναι true, θα προσπαθήσει να κάνει decrypt τα δεδομένα (ορίστε το σε false για να αποφύγετε πιθανά pop-ups)
+- **`kSecReturnRef`**: Λάβετε επίσης reference στο keychain item (ορίστε το σε true σε περίπτωση που αργότερα διαπιστώσετε ότι μπορείτε να κάνετε decrypt χωρίς pop-up)
+- **`kSecReturnAttributes`**: Λάβετε metadata για τα entries
+- **`kSecMatchLimit`**: Πόσα results θα επιστραφούν
+- **`kSecClass`**: Τι είδους keychain entry είναι
 
-Λάβετε **ACLs** κάθε εισόδου:
+Λάβετε τα **ACLs** κάθε entry:<sup>[1]</sup>
 
-- Με το API **`SecAccessCopyACLList`** μπορείτε να λάβετε το **ACL για το στοιχείο του keychain**, και θα επιστρέψει μια λίστα ACLs (όπως `ACLAuhtorizationExportClear` και οι άλλες που αναφέρθηκαν προηγουμένως) όπου κάθε λίστα έχει:
-- Περιγραφή
-- **Λίστα Εμπιστευμένων Εφαρμογών**. Αυτό θα μπορούσε να είναι:
-- Μια εφαρμογή: /Applications/Slack.app
-- Ένα δυαδικό: /usr/libexec/airportd
-- Μια ομάδα: group://AirPort
+- Με το API **`SecAccessCopyACLList`** μπορείτε να λάβετε το **ACL για το keychain item** και θα επιστρέψει μια λίστα από ACLs (όπως τα `ACLAuhtorizationExportClear` και τα άλλα που αναφέρθηκαν προηγουμένως), όπου κάθε λίστα περιλαμβάνει:
+- Description
+- **Trusted Application List**. Αυτό μπορεί να είναι:
+- Ένα app: /Applications/Slack.app
+- Ένα binary: /usr/libexec/airportd
+- Ένα group: group://AirPort
 
-Εξαγωγή των δεδομένων:
+Κάντε export τα δεδομένα:<sup>[1]</sup>
 
-- Το API **`SecKeychainItemCopyContent`** αποκτά το απλό κείμενο
-- Το API **`SecItemExport`** εξάγει τα κλειδιά και τα πιστοποιητικά αλλά μπορεί να χρειαστεί να ορίσετε κωδικούς πρόσβασης για να εξάγετε το περιεχόμενο κρυπτογραφημένο
+- Το API **`SecKeychainItemCopyContent`** λαμβάνει το plaintext
+- Το API **`SecItemExport`** κάνει export τα keys και τα certificates, αλλά ίσως χρειαστεί να ορίσετε passwords για να κάνετε export το content encrypted
 
-Και αυτές είναι οι **απαιτήσεις** για να μπορείτε να **εξάγετε ένα μυστικό χωρίς προτροπή**:
+Και αυτές είναι οι **requirements** για να μπορείτε να κάνετε **export ένα secret χωρίς prompt**:<sup>[1]</sup>
 
-- Αν **1+ εμπιστευμένες** εφαρμογές αναφέρονται:
-- Χρειάζεστε τις κατάλληλες **εξουσιοδοτήσεις** (**`Nil`**, ή να είστε **μέρος** της επιτρεπόμενης λίστας εφαρμογών στην εξουσιοδότηση για πρόσβαση στις μυστικές πληροφορίες)
-- Χρειάζεστε υπογραφή κώδικα που να ταιριάζει με **PartitionID**
-- Χρειάζεστε υπογραφή κώδικα που να ταιριάζει με αυτήν μιας **εμπιστευμένης εφαρμογής** (ή να είστε μέλος της σωστής KeychainAccessGroup)
-- Αν **όλες οι εφαρμογές είναι εμπιστευτές**:
-- Χρειάζεστε τις κατάλληλες **εξουσιοδοτήσεις**
-- Χρειάζεστε υπογραφή κώδικα που να ταιριάζει με **PartitionID**
-- Αν **δεν υπάρχει PartitionID**, τότε αυτό δεν είναι απαραίτητο
+- Αν αναφέρονται **1+ trusted** apps:
+- Χρειάζεστε τα κατάλληλα **authorizations** (**`Nil`** ή να είστε **μέρος** της allowed list των apps στο authorization για πρόσβαση στο secret info)
+- Το code signature πρέπει να ταιριάζει με το **PartitionID**
+- Το code signature πρέπει να ταιριάζει με αυτό ενός **trusted app** (ή να είστε member του σωστού KeychainAccessGroup)
+- Αν **όλες οι applications είναι trusted**:
+- Χρειάζεστε τα κατάλληλα **authorizations**
+- Το code signature πρέπει να ταιριάζει με το **PartitionID**
+- Αν δεν υπάρχει **PartitionID**, αυτό δεν χρειάζεται
 
 > [!CAUTION]
-> Επομένως, αν υπάρχει **1 εφαρμογή αναφερόμενη**, πρέπει να **εισάγετε κώδικα σε αυτήν την εφαρμογή**.
+> Επομένως, αν υπάρχει **1 application listed**, χρειάζεται να κάνετε **inject code σε αυτή την application**.
 >
-> Αν **apple** αναφέρεται στο **partitionID**, μπορείτε να έχετε πρόσβαση σε αυτό με **`osascript`** οπότε οτιδήποτε εμπιστεύεται όλες τις εφαρμογές με apple στο partitionID. **`Python`** θα μπορούσε επίσης να χρησιμοποιηθεί για αυτό.
+> Αν αναφέρεται το **apple** στο **partitionID**, θα μπορούσατε να αποκτήσετε πρόσβαση με το **`osascript`**, επομένως οτιδήποτε εμπιστεύεται όλες τις applications με apple στο partitionID. Για αυτό θα μπορούσε επίσης να χρησιμοποιηθεί το **`Python`**.
 
-### Δύο επιπλέον χαρακτηριστικά
+### Δύο επιπλέον attributes
 
-- **Αόρατο**: Είναι μια λογική σημαία για να **κρύψει** την είσοδο από την εφαρμογή **UI** Keychain
-- **Γενικό**: Είναι για την αποθήκευση **μεταδεδομένων** (οπότε ΔΕΝ είναι ΚΡΥΠΤΟΓΡΑΦΗΜΕΝΟ)
-- Η Microsoft αποθήκευε σε απλό κείμενο όλους τους ανανεωτικούς κωδικούς πρόσβασης για πρόσβαση σε ευαίσθητα σημεία.
+- **Invisible**: Είναι ένα boolean flag για να **κρύβει** το entry από το **UI** Keychain app<sup>[1]</sup>
+- **General**: Χρησιμοποιείται για την αποθήκευση **metadata** (επομένως ΔΕΝ ΕΙΝΑΙ ENCRYPTED)<sup>[1]</sup>
+- Η Microsoft αποθήκευε σε plain text όλα τα refresh tokens για πρόσβαση σε sensitive endpoint.<sup>[1]</sup>
 
 ## Αναφορές
 
-- [**#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas**](https://www.youtube.com/watch?v=jKE1ZW33JpY)
+- [1] [#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas](https://www.youtube.com/watch?v=jKE1ZW33JpY)
 
 {{#include ../../banners/hacktricks-training.md}}

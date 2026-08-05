@@ -2,49 +2,49 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Βασικές πληροφορίες
 
-**Grand Central Dispatch (GCD),** επίσης γνωστό ως **libdispatch** (`libdispatch.dyld`), είναι διαθέσιμο τόσο σε macOS όσο και σε iOS. Είναι μια τεχνολογία που αναπτύχθηκε από την Apple για να βελτιστοποιήσει την υποστήριξη εφαρμογών για ταυτόχρονη (multithreaded) εκτέλεση σε υλικό πολλαπλών πυρήνων.
+Το **Grand Central Dispatch (GCD),** γνωστό επίσης ως **libdispatch** (`libdispatch.dyld`), είναι διαθέσιμο τόσο σε macOS όσο και σε iOS. Πρόκειται για τεχνολογία που αναπτύχθηκε από την Apple για τη βελτιστοποίηση της υποστήριξης εφαρμογών για ταυτόχρονη (multithreaded) εκτέλεση σε hardware με πολλαπλούς πυρήνες.
 
-**GCD** παρέχει και διαχειρίζεται **FIFO queues** στις οποίες η εφαρμογή σας μπορεί να **υποβάλει εργασίες** με τη μορφή **block objects**. Τα blocks που υποβάλλονται σε dispatch queues εκτελούνται σε μια πισίνα νημάτων που διαχειρίζεται πλήρως το σύστημα. Το GCD δημιουργεί αυτόματα νήματα για την εκτέλεση των εργασιών στις dispatch queues και προγραμματίζει αυτές τις εργασίες να εκτελούνται στους διαθέσιμους πυρήνες.
+Το **GCD** παρέχει και διαχειρίζεται **FIFO queues**, στις οποίες η εφαρμογή σας μπορεί να **υποβάλλει tasks** με τη μορφή **block objects**. Τα blocks που υποβάλλονται σε dispatch queues **εκτελούνται σε ένα pool threads** που διαχειρίζεται πλήρως το σύστημα. Το GCD δημιουργεί αυτόματα threads για την εκτέλεση των tasks στις dispatch queues και προγραμματίζει αυτά τα tasks να εκτελεστούν στους διαθέσιμους πυρήνες.
 
 > [!TIP]
-> Συνοπτικά, για να εκτελέσετε κώδικα **παράλληλα**, οι διεργασίες μπορούν να στείλουν **blocks κώδικα στο GCD**, το οποίο θα φροντίσει για την εκτέλεσή τους. Επομένως, οι διεργασίες δεν δημιουργούν νέα νήματα; **Το GCD εκτελεί τον δεδομένο κώδικα με τη δική του πισίνα νημάτων** (η οποία μπορεί να αυξάνεται ή να μειώνεται όπως απαιτείται).
+> Συνοπτικά, για την εκτέλεση κώδικα **παράλληλα**, οι διεργασίες μπορούν να στέλνουν **blocks κώδικα στο GCD**, το οποίο αναλαμβάνει την εκτέλεσή τους. Επομένως, οι διεργασίες δεν δημιουργούν νέα threads· το **GCD εκτελεί τον δεδομένο κώδικα με το δικό του pool threads** (το οποίο μπορεί να αυξάνεται ή να μειώνεται όπως απαιτείται).
 
-Αυτό είναι πολύ χρήσιμο για τη διαχείριση της παράλληλης εκτέλεσης με επιτυχία, μειώνοντας σημαντικά τον αριθμό των νημάτων που δημιουργούν οι διεργασίες και βελτιστοποιώντας την παράλληλη εκτέλεση. Αυτό είναι ιδανικό για εργασίες που απαιτούν **μεγάλο παράλληλο** (brute-forcing?) ή για εργασίες που δεν θα πρέπει να μπλοκάρουν το κύριο νήμα: Για παράδειγμα, το κύριο νήμα στο iOS χειρίζεται τις αλληλεπιδράσεις UI, οπότε οποιαδήποτε άλλη λειτουργικότητα που θα μπορούσε να κάνει την εφαρμογή να κολλήσει (αναζήτηση, πρόσβαση στο διαδίκτυο, ανάγνωση αρχείου...) διαχειρίζεται με αυτόν τον τρόπο.
+Αυτό είναι ιδιαίτερα χρήσιμο για την επιτυχή διαχείριση της παράλληλης εκτέλεσης, μειώνοντας σημαντικά τον αριθμό των threads που δημιουργούν οι διεργασίες και βελτιστοποιώντας την παράλληλη εκτέλεση. Είναι ιδανικό για tasks που απαιτούν **μεγάλο βαθμό παραλληλισμού** (brute-forcing;) ή για tasks που δεν πρέπει να μπλοκάρουν το main thread: Για παράδειγμα, το main thread στο iOS διαχειρίζεται τις αλληλεπιδράσεις με το UI, επομένως κάθε άλλη λειτουργικότητα που θα μπορούσε να κάνει την εφαρμογή να «κολλήσει» (αναζήτηση, πρόσβαση σε web, ανάγνωση αρχείου...) διαχειρίζεται με αυτόν τον τρόπο.
 
 ### Blocks
 
-Ένα block είναι μια **αυτοτελής ενότητα κώδικα** (όπως μια συνάρτηση με παραμέτρους που επιστρέφει μια τιμή) και μπορεί επίσης να καθορίσει δεσμευμένες μεταβλητές.\
-Ωστόσο, σε επίπεδο μεταγλωττιστή, τα blocks δεν υπάρχουν, είναι `os_object`s. Κάθε ένα από αυτά τα αντικείμενα σχηματίζεται από δύο δομές:
+Ένα block είναι ένα **αυτοτελές τμήμα κώδικα** (όπως μια function με arguments που επιστρέφει μια τιμή) και μπορεί επίσης να καθορίζει bound variables.\
+Ωστόσο, σε επίπεδο compiler τα blocks δεν υπάρχουν· είναι `os_object`s. Κάθε ένα από αυτά τα objects αποτελείται από δύο structures:
 
 - **block literal**:
-- Ξεκινά με το πεδίο **`isa`**, που δείχνει στην κλάση του block:
+- Ξεκινά με το πεδίο **`isa`**, το οποίο δείχνει στην class του block:
 - `NSConcreteGlobalBlock` (blocks από `__DATA.__const`)
 - `NSConcreteMallocBlock` (blocks στο heap)
 - `NSConcreateStackBlock` (blocks στο stack)
-- Έχει **`flags`** (που υποδεικνύουν τα πεδία που υπάρχουν στον περιγραφέα του block) και μερικά δεσμευμένα bytes
-- Ο δείκτης συνάρτησης για κλήση
-- Ένας δείκτης στον περιγραφέα του block
-- Εισαγόμενες μεταβλητές block (αν υπάρχουν)
-- **block descriptor**: Το μέγεθός του εξαρτάται από τα δεδομένα που είναι παρόντα (όπως υποδεικνύεται στα προηγούμενα flags)
-- Έχει μερικά δεσμευμένα bytes
+- Περιέχει **`flags`** (που υποδεικνύουν τα πεδία που υπάρχουν στο block descriptor) και ορισμένα reserved bytes
+- Ο function pointer που θα κληθεί
+- Έναν pointer στο block descriptor
+- Block imported variables (αν υπάρχουν)
+- **block descriptor**: Το μέγεθός του εξαρτάται από τα δεδομένα που υπάρχουν (όπως υποδεικνύεται από τα προηγούμενα flags)
+- Περιέχει ορισμένα reserved bytes
 - Το μέγεθός του
-- Συνήθως θα έχει έναν δείκτη σε μια υπογραφή στυλ Objective-C για να γνωρίζει πόσο χώρο χρειάζεται για τις παραμέτρους (flag `BLOCK_HAS_SIGNATURE`)
-- Εάν οι μεταβλητές αναφέρονται, αυτό το block θα έχει επίσης δείκτες σε έναν βοηθό αντιγραφής (αντιγράφοντας την τιμή στην αρχή) και σε έναν βοηθό απελευθέρωσης (απελευθερώνοντάς την).
+- Συνήθως περιέχει έναν pointer σε signature τύπου Objective-C, ώστε να γνωρίζει πόσος χώρος απαιτείται για τα params (flag `BLOCK_HAS_SIGNATURE`)
+- Αν γίνεται αναφορά σε variables, αυτό το block θα περιέχει επίσης pointers σε έναν copy helper (που αντιγράφει την τιμή στην αρχή) και έναν dispose helper (που την απελευθερώνει).
 
 ### Queues
 
-Μια dispatch queue είναι ένα ονομαστικό αντικείμενο που παρέχει FIFO σειρά blocks για εκτέλεση.
+Μια dispatch queue είναι ένα named object που παρέχει FIFO ordering για την εκτέλεση blocks.
 
-Τα blocks τοποθετούνται σε queues για εκτέλεση, και αυτές υποστηρίζουν 2 τρόπους: `DISPATCH_QUEUE_SERIAL` και `DISPATCH_QUEUE_CONCURRENT`. Φυσικά, η **σειριακή** δεν θα έχει προβλήματα **race condition** καθώς ένα block δεν θα εκτελείται μέχρι να έχει ολοκληρωθεί το προηγούμενο. Αλλά **ο άλλος τύπος queue μπορεί να έχει**.
+Τα blocks τοποθετούνται σε queues για να εκτελεστούν, και αυτές υποστηρίζουν 2 modes: `DISPATCH_QUEUE_SERIAL` και `DISPATCH_QUEUE_CONCURRENT`. Φυσικά, η **serial** queue **δεν θα έχει** προβλήματα race condition, καθώς ένα block δεν θα εκτελεστεί μέχρι να ολοκληρωθεί το προηγούμενο. Ωστόσο, **ο άλλος τύπος queue μπορεί να έχει** τέτοια προβλήματα.
 
-Προεπιλεγμένες queues:
+Default queues:
 
-- `.main-thread`: Από `dispatch_get_main_queue()`
-- `.libdispatch-manager`: Διαχειριστής queue του GCD
-- `.root.libdispatch-manager`: Διαχειριστής queue του GCD
-- `.root.maintenance-qos`: Εργασίες χαμηλότερης προτεραιότητας
+- `.main-thread`: Από τη `dispatch_get_main_queue()`
+- `.libdispatch-manager`: Ο queue manager του GCD
+- `.root.libdispatch-manager`: Ο queue manager του GCD
+- `.root.maintenance-qos`: Tasks με τη χαμηλότερη προτεραιότητα
 - `.root.maintenance-qos.overcommit`
 - `.root.background-qos`: Διαθέσιμο ως `DISPATCH_QUEUE_PRIORITY_BACKGROUND`
 - `.root.background-qos.overcommit`
@@ -57,39 +57,39 @@
 - `.root.user-interactive-qos`: Υψηλότερη προτεραιότητα
 - `.root.background-qos.overcommit`
 
-Σημειώστε ότι θα είναι το σύστημα που θα αποφασίσει **ποια νήματα χειρίζονται ποιες queues κάθε στιγμή** (πολλαπλά νήματα μπορεί να εργάζονται στην ίδια queue ή το ίδιο νήμα μπορεί να εργάζεται σε διαφορετικές queues σε κάποια στιγμή)
+Σημειώστε ότι το σύστημα αποφασίζει **ποια threads θα χειρίζονται ποιες queues κάθε στιγμή** (πολλά threads μπορεί να εργάζονται στην ίδια queue ή το ίδιο thread μπορεί κάποια στιγμή να εργάζεται σε διαφορετικές queues).
 
 #### Attributtes
 
-Όταν δημιουργείτε μια queue με **`dispatch_queue_create`** το τρίτο επιχείρημα είναι ένα `dispatch_queue_attr_t`, το οποίο συνήθως είναι είτε `DISPATCH_QUEUE_SERIAL` (το οποίο είναι στην πραγματικότητα NULL) είτε `DISPATCH_QUEUE_CONCURRENT` που είναι ένας δείκτης σε μια δομή `dispatch_queue_attr_t` που επιτρέπει τον έλεγχο ορισμένων παραμέτρων της queue.
+Κατά τη δημιουργία μιας queue με **`dispatch_queue_create`**, το τρίτο argument είναι ένα `dispatch_queue_attr_t`, το οποίο συνήθως είναι είτε `DISPATCH_QUEUE_SERIAL` (που στην πραγματικότητα είναι NULL) είτε `DISPATCH_QUEUE_CONCURRENT`, το οποίο είναι pointer σε ένα struct `dispatch_queue_attr_t` που επιτρέπει τον έλεγχο ορισμένων παραμέτρων της queue.
 
 ### Dispatch objects
 
-Υπάρχουν διάφορα αντικείμενα που χρησιμοποιεί το libdispatch και οι queues και τα blocks είναι μόνο 2 από αυτά. Είναι δυνατή η δημιουργία αυτών των αντικειμένων με `dispatch_object_create`:
+Υπάρχουν αρκετά objects που χρησιμοποιεί το libdispatch και οι queues και τα blocks είναι μόνο 2 από αυτά. Είναι δυνατή η δημιουργία αυτών των objects με `dispatch_object_create`:
 
 - `block`
-- `data`: Δεδομένα blocks
-- `group`: Ομάδα blocks
-- `io`: Async I/O αιτήματα
+- `data`: Data blocks
+- `group`: Group από blocks
+- `io`: Async I/O requests
 - `mach`: Mach ports
-- `mach_msg`: Mach μηνύματα
-- `pthread_root_queue`: Μια queue με μια πισίνα νημάτων pthread και όχι workqueues
+- `mach_msg`: Mach messages
+- `pthread_root_queue`: Μια queue με pool από pthread threads και όχι workqueues
 - `queue`
 - `semaphore`
-- `source`: Πηγή γεγονότων
+- `source`: Event source
 
 ## Objective-C
 
-Στην Objective-C υπάρχουν διάφορες συναρτήσεις για την αποστολή ενός block για εκτέλεση παράλληλα:
+Στο Objective-C υπάρχουν διαφορετικές functions για την αποστολή ενός block προς παράλληλη εκτέλεση:
 
-- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Υποβάλλει ένα block για ασύγχρονη εκτέλεση σε μια dispatch queue και επιστρέφει αμέσως.
-- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Υποβάλλει ένα block object για εκτέλεση και επιστρέφει μετά την ολοκλήρωση της εκτέλεσης αυτού του block.
-- [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): Εκτελεί ένα block object μόνο μία φορά για τη διάρκεια ζωής μιας εφαρμογής.
-- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Υποβάλλει ένα εργασία για εκτέλεση και επιστρέφει μόνο μετά την ολοκλήρωση της εκτέλεσης. Σε αντίθεση με [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync), αυτή η συνάρτηση σέβεται όλα τα χαρακτηριστικά της queue όταν εκτελεί το block.
+- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Υποβάλλει ένα block για asynchronous εκτέλεση σε μια dispatch queue και επιστρέφει αμέσως.
+- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Υποβάλλει ένα block object για εκτέλεση και επιστρέφει αφού ολοκληρωθεί η εκτέλεση αυτού του block.
+- [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): Εκτελεί ένα block object μόνο μία φορά κατά τη διάρκεια ζωής μιας εφαρμογής.
+- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Υποβάλλει ένα work item για εκτέλεση και επιστρέφει μόνο αφού ολοκληρωθεί η εκτέλεσή του. Σε αντίθεση με τη [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync), αυτή η function σέβεται όλα τα attributes της queue κατά την εκτέλεση του block.
 
-Αυτές οι συναρτήσεις αναμένουν αυτές τις παραμέτρους: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
+Αυτές οι functions αναμένουν αυτές τις παραμέτρους: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
 
-Αυτή είναι η **δομή ενός Block**:
+Αυτό είναι το **struct ενός Block**:
 ```c
 struct Block {
 void *isa; // NSConcreteStackBlock,...
@@ -100,7 +100,7 @@ struct BlockDescriptor *descriptor;
 // captured variables go here
 };
 ```
-Και αυτό είναι ένα παράδειγμα χρήσης **παράλληλης εκτέλεσης** με **`dispatch_async`**:
+Και αυτό είναι ένα παράδειγμα χρήσης **παραλληλισμού** με το **`dispatch_async`**:
 ```objectivec
 #import <Foundation/Foundation.h>
 
@@ -132,8 +132,8 @@ return 0;
 ```
 ## Swift
 
-**`libswiftDispatch`** είναι μια βιβλιοθήκη που παρέχει **Swift bindings** στο πλαίσιο Grand Central Dispatch (GCD) το οποίο είναι αρχικά γραμμένο σε C.\
-Η βιβλιοθήκη **`libswiftDispatch`** περιτυλίγει τα C GCD APIs σε μια πιο φιλική προς το Swift διεπαφή, διευκολύνοντας και καθιστώντας πιο διαισθητική τη δουλειά των προγραμματιστών Swift με το GCD.
+**`libswiftDispatch`** είναι μια βιβλιοθήκη που παρέχει **Swift bindings** για το framework Grand Central Dispatch (GCD), το οποίο έχει γραφτεί αρχικά σε C.\
+Η βιβλιοθήκη **`libswiftDispatch`** περιτυλίγει τα C GCD APIs σε ένα interface πιο φιλικό προς τη Swift, διευκολύνοντας τους Swift developers να εργάζονται με το GCD με πιο εύκολο και διαισθητικό τρόπο.
 
 - **`DispatchQueue.global().sync{ ... }`**
 - **`DispatchQueue.global().async{ ... }`**
@@ -141,7 +141,7 @@ return 0;
 - **`async await`**
 - **`var (data, response) = await URLSession.shared.data(from: URL(string: "https://api.example.com/getData"))`**
 
-**Code example**:
+**Παράδειγμα κώδικα**:
 ```swift
 import Foundation
 
@@ -170,7 +170,7 @@ sleep(1)  // Simulate a long-running task
 ```
 ## Frida
 
-Το παρακάτω σενάριο Frida μπορεί να χρησιμοποιηθεί για να **συνδεθεί σε πολλές `dispatch`** συναρτήσεις και να εξάγει το όνομα της ουράς, το backtrace και το block: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
+Το ακόλουθο Frida script μπορεί να χρησιμοποιηθεί για **hook σε διάφορες συναρτήσεις `dispatch`** και εξαγωγή του ονόματος του queue, του backtrace και του block: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js).
 ```bash
 frida -U <prog_name> -l libdispatch.js
 
@@ -185,9 +185,9 @@ Backtrace:
 ```
 ## Ghidra
 
-Αυτή τη στιγμή, το Ghidra δεν κατανοεί ούτε τη δομή ObjectiveC **`dispatch_block_t`**, ούτε τη δομή **`swift_dispatch_block`**.
+Προς το παρόν, το Ghidra δεν κατανοεί ούτε τη δομή ObjectiveC **`dispatch_block_t`**, ούτε τη δομή **`swift_dispatch_block`**.
 
-Έτσι, αν θέλετε να τις κατανοήσει, μπορείτε απλά να **τις δηλώσετε**:
+Επομένως, αν θέλετε να τις κατανοεί, μπορείτε απλώς να τις **δηλώσετε**:
 
 <figure><img src="../../images/image (1160).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -195,23 +195,26 @@ Backtrace:
 
 <figure><img src="../../images/image (1163).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Στη συνέχεια, βρείτε ένα σημείο στον κώδικα όπου χρησιμοποιούνται:
+Στη συνέχεια, βρείτε ένα σημείο στον κώδικα όπου **χρησιμοποιούνται**:
 
 > [!TIP]
-> Σημειώστε όλες τις αναφορές που γίνονται στο "block" για να κατανοήσετε πώς μπορείτε να καταλάβετε ότι η δομή χρησιμοποιείται.
+> Σημειώστε όλες τις αναφορές στο "block" για να κατανοήσετε πώς μπορείτε να συμπεράνετε ότι χρησιμοποιείται η δομή.
 
 <figure><img src="../../images/image (1164).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Κάντε δεξί κλικ στη μεταβλητή -> Επανατύπωση Μεταβλητής και επιλέξτε σε αυτή την περίπτωση **`swift_dispatch_block`**:
+Κάντε δεξί κλικ στη μεταβλητή -> Retype Variable και επιλέξτε, σε αυτή την περίπτωση, το **`swift_dispatch_block`**:
 
 <figure><img src="../../images/image (1165).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Το Ghidra θα ξαναγράψει αυτόματα τα πάντα:
+Το Ghidra θα επανεγγράψει αυτόματα τα πάντα:
 
 <figure><img src="../../images/image (1166).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## References
 
-- [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [1] [libdispatch — `src/queue.c` (υλοποίηση queue/thread-pool)](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/queue.c)
+- [2] [libdispatch — `src/source.c` (dispatch sources)](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/source.c)
+- [3] [libdispatch — `dispatch/queue.h` (public queue API)](https://github.com/apple-oss-distributions/libdispatch/blob/main/dispatch/queue.h)
+- [4] [Apple Developer — Dispatch](https://developer.apple.com/documentation/dispatch)
 
 {{#include ../../banners/hacktricks-training.md}}

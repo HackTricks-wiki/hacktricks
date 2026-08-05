@@ -1,22 +1,24 @@
-# macOS Security Protections
+# Προστασίες ασφαλείας macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Gatekeeper
 
-Ο Gatekeeper χρησιμοποιείται συνήθως για να αναφέρεται στον συνδυασμό **Quarantine + Gatekeeper + XProtect**, 3 μονάδες ασφαλείας macOS που προσπαθούν να **αποτρέψουν τους χρήστες από το να εκτελούν δυνητικά κακόβουλο λογισμικό που έχει κατεβεί**.
+Το Gatekeeper χρησιμοποιείται συνήθως για να αναφέρεται στον συνδυασμό των **Quarantine + Gatekeeper + XProtect**, 3 modules ασφαλείας του macOS που θα προσπαθήσουν να **αποτρέψουν τους χρήστες από την εκτέλεση δυνητικά κακόβουλου λογισμικού που έχει ληφθεί**.
 
 Περισσότερες πληροφορίες στο:
+
 
 {{#ref}}
 macos-gatekeeper.md
 {{#endref}}
 
-## Processes Limitants
+## Περιορισμοί διεργασιών
 
 ### MACF
 
 ### SIP - System Integrity Protection
+
 
 {{#ref}}
 macos-sip.md
@@ -24,7 +26,8 @@ macos-sip.md
 
 ### Sandbox
 
-Το MacOS Sandbox **περιορίζει τις εφαρμογές** που εκτελούνται μέσα στο sandbox στις **επιτρεπόμενες ενέργειες που καθορίζονται στο προφίλ Sandbox** με το οποίο εκτελείται η εφαρμογή. Αυτό βοηθά να διασφαλιστεί ότι **η εφαρμογή θα έχει πρόσβαση μόνο σε αναμενόμενους πόρους**.
+Το MacOS Sandbox **περιορίζει τις εφαρμογές** που εκτελούνται μέσα στο sandbox στις **επιτρεπόμενες ενέργειες που καθορίζονται στο Sandbox profile** με το οποίο εκτελείται η εφαρμογή. Αυτό βοηθά να διασφαλιστεί ότι **η εφαρμογή θα έχει πρόσβαση μόνο στους αναμενόμενους πόρους**.
+
 
 {{#ref}}
 macos-sandbox/
@@ -32,7 +35,8 @@ macos-sandbox/
 
 ### TCC - **Transparency, Consent, and Control**
 
-**TCC (Transparency, Consent, and Control)** είναι ένα πλαίσιο ασφαλείας. Είναι σχεδιασμένο για να **διαχειρίζεται τις άδειες** των εφαρμογών, ρυθμίζοντας συγκεκριμένα την πρόσβασή τους σε ευαίσθητες δυνατότητες. Αυτό περιλαμβάνει στοιχεία όπως **υπηρεσίες τοποθεσίας, επαφές, φωτογραφίες, μικρόφωνο, κάμερα, προσβασιμότητα και πλήρη πρόσβαση στο δίσκο**. Το TCC διασφαλίζει ότι οι εφαρμογές μπορούν να έχουν πρόσβαση σε αυτές τις δυνατότητες μόνο μετά από ρητή συγκατάθεση του χρήστη, ενισχύοντας έτσι την ιδιωτικότητα και τον έλεγχο των προσωπικών δεδομένων.
+Το **TCC (Transparency, Consent, and Control)** είναι ένα security framework. Έχει σχεδιαστεί για να **διαχειρίζεται τα permissions** των εφαρμογών, ρυθμίζοντας συγκεκριμένα την πρόσβασή τους σε ευαίσθητες λειτουργίες. Σε αυτές περιλαμβάνονται στοιχεία όπως οι **υπηρεσίες τοποθεσίας, οι επαφές, οι φωτογραφίες, το microphone, η camera, η προσβασιμότητα και η πλήρης πρόσβαση στον δίσκο**. Το TCC διασφαλίζει ότι οι εφαρμογές μπορούν να έχουν πρόσβαση σε αυτές τις λειτουργίες μόνο αφού λάβουν explicit consent από τον χρήστη, ενισχύοντας έτσι το privacy και τον έλεγχο των προσωπικών δεδομένων.
+
 
 {{#ref}}
 macos-tcc/
@@ -40,7 +44,8 @@ macos-tcc/
 
 ### Launch/Environment Constraints & Trust Cache
 
-Οι περιορισμοί εκκίνησης στο macOS είναι μια λειτουργία ασφαλείας για να **ρυθμίζουν την εκκίνηση διαδικασιών** καθορίζοντας **ποιος μπορεί να εκκινήσει** μια διαδικασία, **πώς** και **από πού**. Εισήχθη στο macOS Ventura, κατηγοριοποιούν τα συστήματα δυαδικών αρχείων σε κατηγορίες περιορισμών εντός ενός **trust cache**. Κάθε εκτελέσιμο δυαδικό αρχείο έχει καθορισμένους **κανόνες** για την **εκκίνηση** του, συμπεριλαμβανομένων των **self**, **parent** και **responsible** περιορισμών. Επεκτάθηκε σε εφαρμογές τρίτων ως **Environment** Constraints στο macOS Sonoma, αυτές οι δυνατότητες βοηθούν στη μείωση πιθανών εκμεταλλεύσεων του συστήματος ρυθμίζοντας τις συνθήκες εκκίνησης διαδικασιών.
+Τα launch constraints στο macOS είναι ένα security feature για τη **ρύθμιση της εκκίνησης διεργασιών**, καθορίζοντας **ποιος μπορεί να εκκινήσει** μια διεργασία, **με ποιον τρόπο** και **από πού**. Παρουσιάστηκαν στο macOS Ventura και κατηγοριοποιούν τα system binaries σε κατηγορίες constraints μέσα σε ένα **trust cache**. Κάθε executable binary διαθέτει καθορισμένους **κανόνες** για το **launch** του, συμπεριλαμβανομένων των constraints **self**, **parent** και **responsible**. Επεκτάθηκαν σε third-party εφαρμογές ως **Environment Constraints** στο macOS Sonoma· αυτές οι λειτουργίες βοηθούν στον περιορισμό πιθανών system exploitations, ελέγχοντας τις συνθήκες υπό τις οποίες γίνεται το process launching.
+
 
 {{#ref}}
 macos-launch-environment-constraints.md
@@ -48,28 +53,28 @@ macos-launch-environment-constraints.md
 
 ## MRT - Malware Removal Tool
 
-Το Malware Removal Tool (MRT) είναι ένα άλλο μέρος της υποδομής ασφαλείας του macOS. Όπως υποδηλώνει το όνομα, η κύρια λειτουργία του MRT είναι να **αφαιρεί γνωστό κακόβουλο λογισμικό από μολυσμένα συστήματα**.
+Το Malware Removal Tool (MRT) αποτελεί ακόμη ένα μέρος της security infrastructure του macOS. Όπως υποδηλώνει το όνομα, η κύρια λειτουργία του MRT είναι να **αφαιρεί γνωστό malware από μολυσμένα συστήματα**.
 
-Μόλις ανιχνευθεί κακόβουλο λογισμικό σε ένα Mac (είτε από το XProtect είτε με κάποιο άλλο μέσο), το MRT μπορεί να χρησιμοποιηθεί για να **αφαιρέσει αυτόματα το κακόβουλο λογισμικό**. Το MRT λειτουργεί σιωπηλά στο παρασκήνιο και συνήθως εκτελείται κάθε φορά που το σύστημα ενημερώνεται ή όταν κατεβαίνει μια νέα ορισμός κακόβουλου λογισμικού (φαίνεται ότι οι κανόνες που έχει το MRT για την ανίχνευση κακόβουλου λογισμικού είναι μέσα στο δυαδικό).
+Μόλις εντοπιστεί malware σε έναν Mac (είτε από το XProtect είτε με κάποιον άλλο τρόπο), το MRT μπορεί να χρησιμοποιηθεί για την αυτόματη **αφαίρεση του malware**. Το MRT λειτουργεί αθόρυβα στο background και συνήθως εκτελείται κάθε φορά που ενημερώνεται το σύστημα ή όταν γίνεται λήψη ενός νέου malware definition (φαίνεται ότι οι κανόνες που χρησιμοποιεί το MRT για τον εντοπισμό malware βρίσκονται μέσα στο binary).
 
-Ενώ τόσο το XProtect όσο και το MRT είναι μέρος των μέτρων ασφαλείας του macOS, εκτελούν διαφορετικές λειτουργίες:
+Παρόλο που τόσο το XProtect όσο και το MRT αποτελούν μέρος των security measures του macOS, εκτελούν διαφορετικές λειτουργίες:
 
-- **XProtect** είναι ένα προληπτικό εργαλείο. **Ελέγχει τα αρχεία καθώς κατεβαίνουν** (μέσω ορισμένων εφαρμογών), και αν ανιχνεύσει οποιοδήποτε γνωστό τύπο κακόβουλου λογισμικού, **αποτρέπει το άνοιγμα του αρχείου**, αποτρέποντας έτσι το κακόβουλο λογισμικό από το να μολύνει το σύστημα σας εξαρχής.
-- **MRT**, από την άλλη πλευρά, είναι ένα **αντιδραστικό εργαλείο**. Λειτουργεί αφού έχει ανιχνευθεί κακόβουλο λογισμικό σε ένα σύστημα, με στόχο την αφαίρεση του επιβλαβούς λογισμικού για να καθαρίσει το σύστημα.
+- Το **XProtect** είναι ένα preventative tool. **Ελέγχει αρχεία καθώς λαμβάνονται** (μέσω συγκεκριμένων εφαρμογών) και, αν εντοπίσει γνωστούς τύπους malware, **εμποδίζει το άνοιγμα του αρχείου**, αποτρέποντας έτσι τη μόλυνση του συστήματός σας από το malware εξαρχής.
+- Το **MRT**, από την άλλη πλευρά, είναι ένα **reactive tool**. Λειτουργεί αφού έχει εντοπιστεί malware σε ένα σύστημα, με στόχο την αφαίρεση του offending software ώστε να καθαριστεί το σύστημα.
 
-Η εφαρμογή MRT βρίσκεται στο **`/Library/Apple/System/Library/CoreServices/MRT.app`**
+Η εφαρμογή MRT βρίσκεται στη διαδρομή **`/Library/Apple/System/Library/CoreServices/MRT.app`**
 
-## Background Tasks Management
+## Διαχείριση εργασιών στο background
 
-**macOS** τώρα **ειδοποιεί** κάθε φορά που ένα εργαλείο χρησιμοποιεί μια γνωστή **τεχνική για να διατηρήσει την εκτέλεση κώδικα** (όπως τα Login Items, Daemons...), έτσι ώστε ο χρήστης να γνωρίζει καλύτερα **ποιο λογισμικό διατηρείται**.
+Το **macOS** πλέον **ειδοποιεί** κάθε φορά που ένα tool χρησιμοποιεί μια γνωστή **technique για persistence code execution** (όπως Login Items, Daemons...), ώστε ο χρήστης να γνωρίζει καλύτερα **ποιο software διατηρεί persistence**.<sup>[3]</sup>
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
-Αυτό λειτουργεί με έναν **daemon** που βρίσκεται στο `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` και τον **agent** στο `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`
+Αυτό εκτελείται με έναν **daemon** που βρίσκεται στη διαδρομή `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` και τον **agent** στη διαδρομή `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`<sup>[1]</sup>
 
-Ο τρόπος που **`backgroundtaskmanagementd`** γνωρίζει ότι κάτι είναι εγκατεστημένο σε έναν μόνιμο φάκελο είναι μέσω της **λήψης των FSEvents** και της δημιουργίας ορισμένων **handlers** για αυτά.
+Ο τρόπος με τον οποίο το **`backgroundtaskmanagementd`** γνωρίζει ότι κάτι έχει εγκατασταθεί σε έναν persistent folder είναι μέσω της **λήψης των FSEvents** και της δημιουργίας ορισμένων **handlers** για αυτά.<sup>[1]</sup>
 
-Επιπλέον, υπάρχει ένα αρχείο plist που περιέχει **γνωστές εφαρμογές** που συχνά διατηρούνται από την Apple και βρίσκεται στο: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
+Επιπλέον, υπάρχει ένα plist file που περιέχει **well known applications** οι οποίες χρησιμοποιούν συχνά persistence, συντηρείται από την Apple και βρίσκεται στη διαδρομή: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`<sup>[3]</sup>
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -85,33 +90,33 @@ macos-launch-environment-constraints.md
 }
 [...]
 ```
-### Enumeration
+### Απαρίθμηση
 
-Είναι δυνατόν να **καταμετρήσετε όλα** τα ρυθμισμένα στοιχεία παρασκηνίου που εκτελούνται με το εργαλείο cli της Apple:
+Είναι δυνατό να γίνει **απαρίθμηση όλων** των ρυθμισμένων στοιχείων στο παρασκήνιο που εκτελούνται, χρησιμοποιώντας το εργαλείο CLI της Apple:<sup>[3]</sup>
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
 ```
-Επιπλέον, είναι επίσης δυνατό να καταχωρήσετε αυτές τις πληροφορίες με το [**DumpBTM**](https://github.com/objective-see/DumpBTM).
+Επιπλέον, είναι επίσης δυνατή η παράθεση αυτών των πληροφοριών με το [**DumpBTM**](https://github.com/objective-see/DumpBTM).<sup>[2]</sup>
 ```bash
 # You need to grant the Terminal Full Disk Access for this to work
 chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
-Αυτές οι πληροφορίες αποθηκεύονται στο **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** και το Terminal χρειάζεται FDA.
+Αυτές οι πληροφορίες αποθηκεύονται στο **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** και το Terminal χρειάζεται FDA.<sup>[2]</sup>
 
-### Ανακατεύοντας με το BTM
+### Παρέμβαση στο BTM
 
-Όταν βρεθεί μια νέα επιμονή, συμβαίνει ένα γεγονός τύπου **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. Έτσι, οποιοσδήποτε τρόπος για να **αποτραπεί** αυτή η **εκδήλωση** από το να σταλεί ή ο **πράκτορας να ειδοποιήσει** τον χρήστη θα βοηθήσει έναν επιτιθέμενο να _**παρακάμψει**_ το BTM.
+Όταν εντοπίζεται ένα νέο persistence, δημιουργείται ένα event τύπου **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. Επομένως, οποιοσδήποτε τρόπος **παρεμπόδισης** της αποστολής αυτού του **event** ή της **ειδοποίησης του χρήστη από τον agent** θα βοηθήσει έναν attacker να _**παρακάμψει**_ το BTM.<sup>[1]</sup>
 
-- **Επαναφορά της βάσης δεδομένων**: Η εκτέλεση της παρακάτω εντολής θα επαναφέρει τη βάση δεδομένων (θα πρέπει να την ξαναχτίσει από την αρχή), ωστόσο, για κάποιο λόγο, μετά την εκτέλεση αυτού, **καμία νέα επιμονή δεν θα ειδοποιηθεί μέχρι να επανεκκινήσει το σύστημα**.
-- Απαιτείται **root**.
+- **Επαναφορά της βάσης δεδομένων**: Η εκτέλεση της παρακάτω εντολής θα επαναφέρει τη βάση δεδομένων (θα πρέπει να τη δημιουργήσει ξανά από την αρχή). Ωστόσο, για κάποιο λόγο, μετά την εκτέλεσή της, **δεν θα ειδοποιείται κανένα νέο persistence μέχρι να γίνει reboot του συστήματος**.<sup>[1]</sup>
+- Απαιτούνται δικαιώματα **root**.
 ```bash
 # Reset the database
 sfltool resettbtm
 ```
-- **Σταματήστε τον Πράκτορα**: Είναι δυνατόν να στείλετε ένα σήμα διακοπής στον πράκτορα ώστε **να μην ειδοποιεί τον χρήστη** όταν εντοπίζονται νέες ανιχνεύσεις.
+- **Διακοπή του Agent**: Είναι δυνατό να σταλεί ένα σήμα διακοπής στον agent, ώστε να **μην ειδοποιεί τον χρήστη** όταν εντοπίζονται νέες ανιχνεύσεις.<sup>[1]</sup>
 ```bash
 # Get PID
 pgrep BackgroundTaskManagementAgent
@@ -124,12 +129,12 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-- **Σφάλμα**: Αν η **διαδικασία που δημιούργησε την επιμονή υπάρχει γρήγορα αμέσως μετά από αυτήν**, ο δαίμονας θα προσπαθήσει να **λάβει πληροφορίες** γι' αυτήν, **θα αποτύχει**, και **δεν θα μπορέσει να στείλει το γεγονός** που υποδεικνύει ότι ένα νέο πράγμα επιμένει.
+- **Bug**: Εάν η **process που δημιούργησε το persistence τερματιστεί αμέσως μετά**, ο daemon θα προσπαθήσει να **λάβει πληροφορίες** σχετικά με αυτήν, θα **αποτύχει** και **δεν θα μπορέσει να στείλει το event** που υποδεικνύει ότι ένα νέο στοιχείο κάνει persistence.<sup>[1]</sup>
 
-References and **more information about BTM**:
+## References
 
-- [https://youtu.be/9hjUmT031tc?t=26481](https://youtu.be/9hjUmT031tc?t=26481)
-- [https://www.patreon.com/posts/new-developer-77420730?l=fr](https://www.patreon.com/posts/new-developer-77420730?l=fr)
-- [https://support.apple.com/en-gb/guide/deployment/depdca572563/web](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
+- [1] [OBTS v6.0: "Απομυθοποιώντας (και παρακάμπτοντας) το Background Task Management του macOS" - Patrick Wardle & Chris Lopez](https://youtu.be/9hjUmT031tc?t=26481)
+- [2] [Νέο (Developer) Tool: "DumpBTM" - Patrick Wardle (Patreon)](https://www.patreon.com/posts/new-developer-77420730?l=fr)
+- [3] [Διαχείριση login items και background tasks σε Mac - Apple Platform Deployment](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
 
 {{#include ../../../banners/hacktricks-training.md}}

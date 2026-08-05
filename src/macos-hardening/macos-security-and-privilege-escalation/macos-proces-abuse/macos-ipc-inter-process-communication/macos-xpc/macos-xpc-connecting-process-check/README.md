@@ -1,57 +1,59 @@
-# macOS XPC Connecting Process Check
+# Έλεγχος Συνδεόμενης Διαδικασίας macOS XPC
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-## XPC Connecting Process Check
+## Έλεγχος Συνδεόμενης Διαδικασίας XPC
 
-Όταν μια σύνδεση δημιουργείται σε μια υπηρεσία XPC, ο διακομιστής θα ελέγξει αν η σύνδεση επιτρέπεται. Αυτοί είναι οι έλεγχοι που θα εκτελέσει συνήθως:
+Όταν δημιουργείται μια σύνδεση με μια υπηρεσία XPC, ο server ελέγχει αν επιτρέπεται η σύνδεση. Αυτοί είναι οι έλεγχοι που συνήθως εκτελεί:
 
-1. Έλεγχος αν η **διαδικασία που συνδέεται είναι υπογεγραμμένη με πιστοποιητικό υπογεγραμμένο από την Apple** (δίδεται μόνο από την Apple).
-- Αν αυτό **δεν επαληθευτεί**, ένας επιτιθέμενος θα μπορούσε να δημιουργήσει ένα **ψεύτικο πιστοποιητικό** για να ταιριάζει με οποιονδήποτε άλλο έλεγχο.
-2. Έλεγχος αν η διαδικασία που συνδέεται είναι υπογεγραμμένη με το **πιστοποιητικό της οργάνωσης** (έλεγχος ταυτότητας ομάδας).
-- Αν αυτό **δεν επαληθευτεί**, **οποιοδήποτε πιστοποιητικό προγραμματιστή** από την Apple μπορεί να χρησιμοποιηθεί για υπογραφή και σύνδεση με την υπηρεσία.
-3. Έλεγχος αν η διαδικασία που συνδέεται **περιέχει ένα κατάλληλο bundle ID**.
-- Αν αυτό **δεν επαληθευτεί**, οποιοδήποτε εργαλείο **υπογεγραμμένο από την ίδια οργάνωση** θα μπορούσε να χρησιμοποιηθεί για αλληλεπίδραση με την υπηρεσία XPC.
-4. (4 ή 5) Έλεγχος αν η διαδικασία που συνδέεται έχει **κατάλληλο αριθμό έκδοσης λογισμικού**.
-- Αν αυτό **δεν επαληθευτεί**, παλιοί, ανασφαλείς πελάτες, ευάλωτοι σε ένεση διαδικασίας θα μπορούσαν να χρησιμοποιηθούν για σύνδεση με την υπηρεσία XPC ακόμη και με τους άλλους ελέγχους σε εφαρμογή.
-5. (4 ή 5) Έλεγχος αν η διαδικασία που συνδέεται έχει σκληρυμένο χρόνο εκτέλεσης χωρίς επικίνδυνες εξουσιοδοτήσεις (όπως αυτές που επιτρέπουν τη φόρτωση αυθαίρετων βιβλιοθηκών ή τη χρήση μεταβλητών περιβάλλοντος DYLD)
-1. Αν αυτό **δεν επαληθευτεί**, ο πελάτης μπορεί να είναι **ευάλωτος σε ένεση κώδικα**
-6. Έλεγχος αν η διαδικασία που συνδέεται έχει μια **εξουσιοδότηση** που της επιτρέπει να συνδεθεί με την υπηρεσία. Αυτό ισχύει για τα δυαδικά αρχεία της Apple.
-7. Η **επικύρωση** πρέπει να είναι **βασισμένη** στο **audit token του πελάτη που συνδέεται** **αντί** για το ID της διαδικασίας του (**PID**) καθώς το πρώτο αποτρέπει τις **επιθέσεις επαναχρησιμοποίησης PID**.
-- Οι προγραμματιστές **σπάνια χρησιμοποιούν την κλήση API του audit token** καθώς είναι **ιδιωτική**, οπότε η Apple θα μπορούσε να **αλλάξει** οποιαδήποτε στιγμή. Επιπλέον, η χρήση ιδιωτικών API δεν επιτρέπεται σε εφαρμογές του Mac App Store.
-- Αν η μέθοδος **`processIdentifier`** χρησιμοποιηθεί, μπορεί να είναι ευάλωτη
-- **`xpc_dictionary_get_audit_token`** θα πρέπει να χρησιμοποιείται αντί για **`xpc_connection_get_audit_token`**, καθώς η τελευταία θα μπορούσε επίσης να είναι [ευάλωτη σε ορισμένες καταστάσεις](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
+1. Έλεγχος αν η **διαδικασία είναι υπογεγραμμένη με πιστοποιητικό που έχει υπογραφεί από την Apple** (παρέχεται μόνο από την Apple).
+- Αν αυτό **δεν επαληθευτεί**, ένας attacker θα μπορούσε να δημιουργήσει ένα **πλαστό πιστοποιητικό** που να ταιριάζει με οποιονδήποτε άλλο έλεγχο.
+2. Έλεγχος αν η συνδεόμενη διαδικασία είναι υπογεγραμμένη με το **πιστοποιητικό του οργανισμού**, (επαλήθευση team ID).
+- Αν αυτό **δεν επαληθευτεί**, μπορεί να χρησιμοποιηθεί **οποιοδήποτε developer certificate** από την Apple για την υπογραφή και τη σύνδεση στην υπηρεσία.
+3. Έλεγχος αν η συνδεόμενη διαδικασία **περιέχει ένα σωστό bundle ID**.
+- Αν αυτό **δεν επαληθευτεί**, οποιοδήποτε εργαλείο **υπογεγραμμένο από τον ίδιο οργανισμό** θα μπορούσε να χρησιμοποιηθεί για αλληλεπίδραση με την υπηρεσία XPC.
+4. (4 ή 5) Έλεγχος αν η συνδεόμενη διαδικασία διαθέτει **σωστό αριθμό έκδοσης λογισμικού**.
+- Αν αυτό **δεν επαληθευτεί**, θα μπορούσαν να χρησιμοποιηθούν παλιοί, μη ασφαλείς clients, ευάλωτοι σε process injection, για σύνδεση στην υπηρεσία XPC, ακόμη και όταν οι υπόλοιποι έλεγχοι είναι σε ισχύ.
+5. (4 ή 5) Έλεγχος αν η συνδεόμενη διαδικασία διαθέτει hardened runtime χωρίς επικίνδυνα entitlements (όπως αυτά που επιτρέπουν τη φόρτωση αυθαίρετων libraries ή τη χρήση μεταβλητών περιβάλλοντος DYLD)
+1. Αν αυτό **δεν επαληθευτεί**, ο client ενδέχεται να είναι **ευάλωτος σε code injection**
+6. Έλεγχος αν η συνδεόμενη διαδικασία διαθέτει ένα **entitlement** που της επιτρέπει να συνδεθεί στην υπηρεσία. Αυτό ισχύει για τα Apple binaries.
+7. Η **επαλήθευση** πρέπει να **βασίζεται** στο **audit token** του συνδεόμενου **client** και **όχι** στο process ID (**PID**), καθώς το πρώτο αποτρέπει τα **PID reuse attacks**.
+- Οι developers **σπάνια χρησιμοποιούν το audit token** API call, επειδή είναι **private**, οπότε η Apple θα μπορούσε να το **αλλάξει** οποιαδήποτε στιγμή. Επιπλέον, η χρήση private API δεν επιτρέπεται σε εφαρμογές του Mac App Store.
+- Αν χρησιμοποιείται η μέθοδος **`processIdentifier`**, ενδέχεται να είναι ευάλωτη
+- Το **`xpc_dictionary_get_audit_token`** θα πρέπει να χρησιμοποιείται αντί για το **`xpc_connection_get_audit_token`**, καθώς το τελευταίο θα μπορούσε επίσης να είναι [ευάλωτο σε ορισμένες περιπτώσεις](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).<sup>[5]</sup>
 
 ### Communication Attacks
 
-Για περισσότερες πληροφορίες σχετικά με την επίθεση επαναχρησιμοποίησης PID ελέγξτε:
+Για περισσότερες πληροφορίες σχετικά με το PID reuse attack, δείτε:
+
 
 {{#ref}}
 macos-pid-reuse.md
 {{#endref}}
 
-Για περισσότερες πληροφορίες σχετικά με την επίθεση **`xpc_connection_get_audit_token`** ελέγξτε:
+Για περισσότερες πληροφορίες σχετικά με το attack στο **`xpc_connection_get_audit_token`**, δείτε:
+
 
 {{#ref}}
 macos-xpc_connection_get_audit_token-attack.md
 {{#endref}}
 
-### Trustcache - Downgrade Attacks Prevention
+### Trustcache - Πρόληψη Downgrade Attacks
 
-Το Trustcache είναι μια αμυντική μέθοδος που εισήχθη σε μηχανές Apple Silicon που αποθηκεύει μια βάση δεδομένων CDHSAH των δυαδικών αρχείων της Apple, ώστε μόνο τα επιτρεπόμενα μη τροποποιημένα δυαδικά αρχεία να μπορούν να εκτελούνται. Αυτό αποτρέπει την εκτέλεση υποβαθμισμένων εκδόσεων.
+Το Trustcache είναι μια αμυντική μέθοδος που εισήχθη στα Apple Silicon machines και αποθηκεύει μια βάση δεδομένων με CDHSAH των Apple binaries, ώστε να μπορούν να εκτελούνται μόνο επιτρεπόμενα, μη τροποποιημένα binaries. Αυτό αποτρέπει την εκτέλεση downgrade versions.
 
-### Code Examples
+### Παραδείγματα Κώδικα
 
-Ο διακομιστής θα υλοποιήσει αυτή την **επικύρωση** σε μια συνάρτηση που ονομάζεται **`shouldAcceptNewConnection`**.
+Ο server υλοποιεί αυτή την **επαλήθευση** σε μια συνάρτηση που ονομάζεται **`shouldAcceptNewConnection`**.
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection {
 //Check connection
 return YES;
 }
 ```
-Το αντικείμενο NSXPCConnection έχει μια **ιδιωτική** ιδιότητα **`auditToken`** (αυτή που θα έπρεπε να χρησιμοποιείται αλλά μπορεί να αλλάξει) και μια **δημόσια** ιδιότητα **`processIdentifier`** (αυτή που δεν θα έπρεπε να χρησιμοποιείται).
+Το αντικείμενο NSXPCConnection διαθέτει την **private** ιδιότητα **`auditToken`** (αυτή που θα πρέπει να χρησιμοποιείται, αλλά ενδέχεται να αλλάξει) και την **public** ιδιότητα **`processIdentifier`** (αυτή που δεν θα πρέπει να χρησιμοποιείται).
 
-Η διαδικασία σύνδεσης θα μπορούσε να επαληθευτεί με κάτι σαν:
+Η connecting process θα μπορούσε να επαληθευτεί κάπως έτσι:<sup>[1][2][3]</sup>
 ```objectivec
 [...]
 SecRequirementRef requirementRef = NULL;
@@ -71,7 +73,7 @@ SecCodeCheckValidity(code, kSecCSDefaultFlags, requirementRef);
 SecTaskRef taskRef = SecTaskCreateWithAuditToken(NULL, ((ExtendedNSXPCConnection*)newConnection).auditToken);
 SecTaskValidateForRequirement(taskRef, (__bridge CFStringRef)(requirementString))
 ```
-Αν ένας προγραμματιστής δεν θέλει να ελέγξει την έκδοση του πελάτη, θα μπορούσε τουλάχιστον να ελέγξει ότι ο πελάτης δεν είναι ευάλωτος σε διαδικαστική έγχυση:
+Εάν ένας developer δεν θέλει να ελέγξει την έκδοση του client, θα μπορούσε τουλάχιστον να ελέγξει ότι ο client δεν είναι ευάλωτος σε process injection:
 ```objectivec
 [...]
 CFDictionaryRef csInfo = NULL;
@@ -86,4 +88,20 @@ if ((csFlags & (cs_hard | cs_require_lv)) {
 return Yes; // Accept connection
 }
 ```
+Οι σταθερές `cs_*` παραπάνω είναι οι flags υπογραφής κώδικα που ορίζονται στο `osfmk/kern/cs_blobs.h` του XNU, επομένως μπορούν να ελεγχθούν anhand του source αντί να γίνουν εικασίες:<sup>[4]</sup>
+```c
+#define CS_HARD                     0x00000100  /* don't load invalid pages */
+#define CS_KILL                     0x00000200  /* kill process if it becomes invalid */
+#define CS_RESTRICT                 0x00000800  /* tell dyld to treat restricted */
+#define CS_REQUIRE_LV               0x00002000  /* require library validation */
+#define CS_RUNTIME                  0x00010000  /* Apply hardened runtime policies */
+```
+## Αναφορές
+
+- [1] [Apple Developer — Γλώσσα απαιτήσεων Code Signing](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/RequirementLang/RequirementLang.html)
+- [2] [Apple Developer — `SecCodeCheckValidity`](https://developer.apple.com/documentation/security/seccodecheckvalidity(_:_:_:))
+- [3] [Apple Developer — `SecTaskCreateWithAuditToken`](https://developer.apple.com/documentation/security/sectaskcreatewithaudittoken(_:_:))
+- [4] [XNU — `osfmk/kern/cs_blobs.h` (σημαίες Code Signing `CS_*`)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [5] [Sector 7 — XPC audit token spoofing](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
+
 {{#include ../../../../../../banners/hacktricks-training.md}}

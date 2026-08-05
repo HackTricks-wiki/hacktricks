@@ -1,15 +1,15 @@
-# macOS XPC Mach Services Κατάχρηση
+# Abuse XPC Mach Services στο macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Βασικές Πληροφορίες
+## Βασικές πληροφορίες
 
-**XPC** (Cross-Process Communication) είναι ο κύριος μηχανισμός IPC στο macOS. Οι daemons του συστήματος εκθέτουν **Mach services** — ονομασμένες θύρες εγγεγραμμένες με `launchd` — στις οποίες άλλες διεργασίες μπορούν να συνδεθούν μέσω `NSXPCConnection`.
+Το **XPC** (Cross-Process Communication) είναι ο κύριος μηχανισμός IPC στο macOS. Τα system daemons εκθέτουν **Mach services** — named ports που καταχωρίζονται με το `launchd` — στα οποία μπορούν να συνδεθούν άλλες διεργασίες μέσω του `NSXPCConnection`.
 
-Κάθε **LaunchDaemon** και **LaunchAgent** plist με κλειδί `MachServices` καταχωρεί μία ή περισσότερες ονομασμένες Mach θύρες. Αυτά είναι system-wide XPC endpoints στα οποία οποιαδήποτε διεργασία μπορεί να προσπαθήσει να συνδεθεί.
+Κάθε plist **LaunchDaemon** και **LaunchAgent** με ένα key `MachServices` καταχωρίζει ένα ή περισσότερα named Mach ports. Αυτά είναι system-wide XPC endpoints, στα οποία οποιαδήποτε διεργασία μπορεί να επιχειρήσει να συνδεθεί.
 
 > [!WARNING]
-> Οι XPC Mach services είναι η **single largest local privilege escalation attack surface** στο macOS. Οι περισσότερες local root exploits τα τελευταία χρόνια πέρασαν μέσω ευάλωτων XPC services σε LaunchDaemons. Κάθε exposed method σε έναν root daemon αποτελεί potential escalation vector.
+> Τα XPC Mach services αποτελούν τη **μεγαλύτερη επιφάνεια local privilege escalation** στο macOS. Τα περισσότερα local root exploits των τελευταίων ετών εκμεταλλεύτηκαν ευάλωτα XPC services σε LaunchDaemons. Κάθε exposed method σε ένα root daemon αποτελεί πιθανό escalation vector.
 
 ### Αρχιτεκτονική
 ```
@@ -21,7 +21,7 @@ Daemon Process (root context)
 ↓ (Should verify client identity / entitlements)
 ↓ Performs privileged operation
 ```
-## Εντοπισμός
+## Απαρίθμηση
 
 ### Εύρεση Daemons με Mach Services
 ```bash
@@ -47,9 +47,9 @@ WHERE e.isDaemon = 1
 ORDER BY e.privileged DESC
 LIMIT 50;"
 ```
-### Απαρίθμηση XPC Interfaces
+### Enumerating XPC Interfaces
 
-Μόλις εντοπίσεις ένα daemon, reverse-engineer το XPC interface του:
+Μόλις εντοπίσετε ένα daemon, κάντε reverse-engineer τη διεπαφή XPC του:
 ```bash
 # Find the protocol definition in the binary
 strings /path/to/daemon | grep -i "protocol\|interface\|xpc\|method"
@@ -60,15 +60,15 @@ class-dump /path/to/daemon | grep -A20 "@protocol"
 # Check for XPC service bundles inside app bundles
 find /Applications -path "*/XPCServices/*.xpc" 2>/dev/null
 ```
-## Ευπάθειες επαλήθευσης πελάτη XPC
+## Vulnerabilities επαλήθευσης XPC Client
 
-Η πιο κοινή κατηγορία ευπάθειας στις υπηρεσίες XPC είναι η **ανεπαρκής επαλήθευση πελάτη**. Το daemon θα πρέπει να επαληθεύει:
+Η πιο συνηθισμένη κατηγορία vulnerabilities στις XPC services είναι η **ανεπαρκής επαλήθευση client**. Το daemon θα πρέπει να επαληθεύει:
 
-1. **Code signature** της διεργασίας που συνδέεται
-2. **Entitlements** της διεργασίας που συνδέεται
-3. **Audit token** (όχι το PID, το οποίο μπορεί να επαναχρησιμοποιηθεί)
+1. Το **code signature** της connecting process
+2. Τα **entitlements** της connecting process
+3. Το **audit token** (όχι το PID, το οποίο μπορεί να επαναχρησιμοποιηθεί)
 
-### Ευάλωτο Πρότυπο: Καμία Επαλήθευση
+### Ευάλωτο μοτίβο: Χωρίς επαλήθευση
 ```objc
 // VULNERABLE — daemon accepts any connection
 - (BOOL)listener:(NSXPCListener *)listener
@@ -79,7 +79,7 @@ newConnection.exportedObject = self;
 return YES; // No verification!
 }
 ```
-### Ευάλωτο Πρότυπο: PID-Based Verification (Race Condition)
+### Ευάλωτο Μοτίβο: Επαλήθευση βάσει PID (Race Condition)
 ```objc
 // VULNERABLE — PID can be reused between check and use
 - (BOOL)listener:(NSXPCListener *)listener
@@ -93,7 +93,7 @@ return YES;
 return NO;
 }
 ```
-### Ασφαλές Πρότυπο: Audit Token Verification
+### Ασφαλές Pattern: Επαλήθευση Audit Token
 ```objc
 // SECURE — Uses audit token which cannot be spoofed
 - (BOOL)listener:(NSXPCListener *)listener
@@ -121,7 +121,7 @@ return YES;
 return NO;
 }
 ```
-## Επίθεση: Σύνδεση σε μη προστατευμένες XPC υπηρεσίες
+## Επίθεση: Σύνδεση σε μη προστατευμένες XPC Services
 ```objc
 // Minimal XPC client — connect to a LaunchDaemon's Mach service
 #import <Foundation/Foundation.h>
@@ -155,9 +155,9 @@ NSLog(@"Result: %@", result);
 }
 }
 ```
-## Επίθεση: XPC Object Deserialization
+## Attack: XPC Object Deserialization
 
-Οι XPC υπηρεσίες που δέχονται σύνθετα αντικείμενα που συμμορφώνονται με `NSSecureCoding` μπορεί να είναι ευάλωτες σε **deserialization attacks**:
+Οι XPC services που δέχονται σύνθετα objects (συμβατά με `NSSecureCoding`) μπορεί να είναι ευάλωτα σε **deserialization attacks**:
 ```objc
 // If the daemon accepts NSObject subclasses via XPC:
 // An attacker can send a crafted object that triggers:
@@ -166,11 +166,11 @@ NSLog(@"Result: %@", result);
 // 3. Format string bugs (string objects as format arguments)
 // 4. Integer overflow (large numeric values)
 ```
-## Mach-Lookup Sandbox Εξαιρέσεις
+## Εξαιρέσεις Mach-Lookup του Sandbox
 
-### Πώς οι εξαιρέσεις επιτρέπουν το Sandbox Escape
+### Πώς οι εξαιρέσεις επιτρέπουν την έξοδο από το Sandbox
 
-Οι sandboxed εφαρμογές κανονικά μπορούν να επικοινωνούν μόνο με τις δικές τους XPC υπηρεσίες. Ωστόσο, **mach-lookup exceptions** επιτρέπουν την πρόσβαση σε υπηρεσίες σε ολόκληρο το σύστημα:
+Οι εφαρμογές στο Sandbox μπορούν κανονικά να επικοινωνούν μόνο με τις δικές τους υπηρεσίες XPC. Ωστόσο, οι **mach-lookup exceptions** επιτρέπουν την πρόσβαση σε υπηρεσίες σε επίπεδο ολόκληρου του συστήματος:
 ```xml
 <!-- Entitlement granting mach-lookup exception -->
 <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
@@ -180,7 +180,7 @@ NSLog(@"Result: %@", result);
 <string>com.apple.CoreServices.coreservicesd</string>
 </array>
 ```
-### Εύρεση εφαρμογών με ευρείες εξαιρέσεις
+### Εντοπισμός Εφαρμογών με Ευρείες Εξαιρέσεις
 ```bash
 # Find sandboxed apps with mach-lookup exceptions
 find /Applications -name "*.app" -exec sh -c '
@@ -194,7 +194,7 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 }
 ' _ {} \; 2>/dev/null
 ```
-### Αλυσίδα διαφυγής από το Sandbox
+### Αλυσίδα Διαφυγής από το Sandbox
 ```
 1. Compromise sandboxed app (e.g., via renderer exploit in browser/email)
 2. Enumerate mach-lookup exceptions from entitlements
@@ -203,11 +203,11 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 5. Exploit a daemon bug → code execution outside the sandbox
 6. Escalate from daemon's privilege level (often root)
 ```
-## Προνομιακά Helper Εργαλεία (SMJobBless)
+## Privileged Helper Tools (SMJobBless)
 
-### Πώς Λειτουργούν
+### Πώς λειτουργούν
 
-`SMJobBless` εγκαθιστά ένα προνομιακό βοηθητικό (helper) που εκτελείται ως root μέσω του `launchd`. Το βοηθητικό επικοινωνεί με την γονική εφαρμογή μέσω `XPC`:
+Το `SMJobBless` εγκαθιστά έναν privileged helper που εκτελείται ως root μέσω του launchd. Ο helper επικοινωνεί με το parent app μέσω XPC:
 ```
 App (user context) ←→ XPC ←→ Helper (root via launchd)
 ```
@@ -238,7 +238,7 @@ reply(YES);
 }
 }
 ```
-### Εκμετάλλευση αδύναμων βοηθητικών διεργασιών
+### Εκμετάλλευση Αδύναμων Helpers
 ```bash
 # 1. Find installed privileged helpers
 ls /Library/PrivilegedHelperTools/
@@ -273,19 +273,19 @@ class-dump /path/to/daemon
 # 3. Monitor for crashes
 log stream --predicate 'process == "daemon-name" AND (eventMessage CONTAINS "crash" OR eventMessage CONTAINS "fault")'
 ```
-## Πραγματικά CVEs
+## CVEs στον πραγματικό κόσμο
 
 | CVE | Περιγραφή |
 |---|---|
-| CVE-2023-41993 | Ευπάθεια αποσειριοποίησης σε υπηρεσία XPC |
-| CVE-2022-22616 | Παράκαμψη Gatekeeper μέσω κατάχρησης υπηρεσίας XPC |
+| CVE-2023-41993 | Ευπάθεια deserialization σε XPC service |
+| CVE-2022-22616 | Παράκαμψη του Gatekeeper μέσω abuse XPC service |
 | CVE-2021-30657 | Κλιμάκωση προνομίων μέσω Sysmond XPC |
-| CVE-2020-9839 | Race condition σε system daemon XPC |
+| CVE-2020-9839 | Race condition σε system daemon μέσω XPC |
 | CVE-2019-8802 | Privileged helper tool χωρίς επαλήθευση client |
-| CVE-2023-32369 | Migraine — παράκαμψη SIP μέσω `systemmigrationd` XPC |
+| CVE-2023-32369 | Migraine — Παράκαμψη του SIP μέσω XPC του `systemmigrationd` |
 | CVE-2022-26712 | Κλιμάκωση σε root μέσω PackageKit XPC |
 
-## Enumeration Script
+## Script απαρίθμησης
 ```bash
 #!/bin/bash
 echo "=== XPC Mach Services Security Audit ==="
@@ -313,11 +313,11 @@ plutil -p "$plist" | grep -A5 "MachServices" | sed 's/^/    /'
 }
 done
 ```
-## References
+## Παραπομπές
 
-* [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
-* [Apple Developer — Daemons and Services Programming Guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
-* [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
-* [OBTS — XPC Attack Surface talks](https://objectivebythesea.org/)
+- [1] [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
+- [2] [Apple Developer — Οδηγός προγραμματισμού Daemons και Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
+- [3] [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
+- [4] [OBTS — Ομιλίες για το XPC Attack Surface](https://objectivebythesea.org/)
 
 {{#include ../../../banners/hacktricks-training.md}}

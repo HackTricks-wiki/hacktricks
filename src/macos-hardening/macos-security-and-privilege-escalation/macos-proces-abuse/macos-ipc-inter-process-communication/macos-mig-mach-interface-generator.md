@@ -2,30 +2,30 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Βασικές πληροφορίες
 
-Το MIG δημιουργήθηκε για να **απλοποιήσει τη διαδικασία δημιουργίας κώδικα Mach IPC**. Βασικά **παράγει τον απαραίτητο κώδικα** για να επικοινωνούν ο διακομιστής και ο πελάτης με μια δεδομένη ορισμό. Ακόμα και αν ο παραγόμενος κώδικας είναι άσχημος, ένας προγραμματιστής θα χρειαστεί απλώς να τον εισάγει και ο κώδικάς του θα είναι πολύ πιο απλός από πριν.
+Το MIG δημιουργήθηκε για να **απλοποιήσει τη διαδικασία δημιουργίας κώδικα Mach IPC**. Βασικά, **παράγει τον απαιτούμενο κώδικα** ώστε ο server και ο client να επικοινωνούν με βάση έναν συγκεκριμένο ορισμό. Ακόμα κι αν ο παραγόμενος κώδικας είναι δύσχρηστος, ένας developer θα χρειάζεται απλώς να τον κάνει import και ο κώδικάς του θα είναι πολύ απλούστερος από πριν.
 
-Ο ορισμός καθορίζεται στη Γλώσσα Ορισμού Διεπαφής (IDL) χρησιμοποιώντας την επέκταση `.defs`.
+Ο ορισμός καθορίζεται σε Interface Definition Language (IDL) με χρήση της επέκτασης `.defs`.
 
 Αυτοί οι ορισμοί έχουν 5 ενότητες:
 
-- **Δήλωση υποσυστήματος**: Η λέξη-κλειδί subsystem χρησιμοποιείται για να υποδείξει το **όνομα** και το **id**. Είναι επίσης δυνατό να το επισημάνετε ως **`KernelServer`** αν ο διακομιστής πρέπει να εκτελείται στον πυρήνα.
-- **Ενσωματώσεις και εισαγωγές**: Το MIG χρησιμοποιεί τον προεπεξεργαστή C, επομένως μπορεί να χρησιμοποιεί εισαγωγές. Επιπλέον, είναι δυνατό να χρησιμοποιηθούν `uimport` και `simport` για κώδικα που παράγεται από χρήστη ή διακομιστή.
-- **Δηλώσεις τύπων**: Είναι δυνατό να οριστούν τύποι δεδομένων αν και συνήθως θα εισάγει `mach_types.defs` και `std_types.defs`. Για προσαρμοσμένους τύπους μπορεί να χρησιμοποιηθεί κάποια σύνταξη:
-- \[i`n/out]tran`: Συνάρτηση που πρέπει να μεταφραστεί από ένα εισερχόμενο ή σε ένα εξερχόμενο μήνυμα
-- `c[user/server]type`: Χαρτογράφηση σε άλλο τύπο C.
-- `destructor`: Καλέστε αυτή τη συνάρτηση όταν ο τύπος απελευθερωθεί.
-- **Λειτουργίες**: Αυτές είναι οι ορισμοί των μεθόδων RPC. Υπάρχουν 5 διαφορετικοί τύποι:
-- `routine`: Αναμένει απάντηση
-- `simpleroutine`: Δεν αναμένει απάντηση
-- `procedure`: Αναμένει απάντηση
-- `simpleprocedure`: Δεν αναμένει απάντηση
-- `function`: Αναμένει απάντηση
+- **Δήλωση subsystem**: Η λέξη-κλειδί subsystem χρησιμοποιείται για να υποδείξει το **όνομα** και το **id**. Είναι επίσης δυνατό να σημειωθεί ως **`KernelServer`** αν ο server πρέπει να εκτελείται στον kernel.
+- **Inclusions και imports**: Το MIG χρησιμοποιεί τον C-preprocessor, επομένως μπορεί να χρησιμοποιεί imports. Επιπλέον, είναι δυνατή η χρήση των `uimport` και `simport` για κώδικα που παράγεται για τον user ή τον server.
+- **Δηλώσεις τύπων**: Είναι δυνατός ο ορισμός data types, αν και συνήθως γίνεται import των `mach_types.defs` και `std_types.defs`. Για custom τύπους μπορεί να χρησιμοποιηθεί η ακόλουθη σύνταξη:
+- \[i`n/out]tran`: Συνάρτηση που χρειάζεται μετάφραση από ένα incoming ή προς ένα outgoing message
+- `c[user/server]type`: Mapping σε έναν άλλο C type.
+- `destructor`: Κλήση αυτής της συνάρτησης όταν ο τύπος απελευθερώνεται.
+- **Operations**: Αυτοί είναι οι ορισμοί των RPC methods. Υπάρχουν 5 διαφορετικοί τύποι:
+- `routine`: Αναμένει reply
+- `simpleroutine`: Δεν αναμένει reply
+- `procedure`: Αναμένει reply
+- `simpleprocedure`: Δεν αναμένει reply
+- `function`: Αναμένει reply
 
-### Example
+### Παράδειγμα
 
-Δημιουργήστε ένα αρχείο ορισμού, σε αυτή την περίπτωση με μια πολύ απλή συνάρτηση:
+Δημιουργήστε ένα definition file, σε αυτή την περίπτωση με μια πολύ απλή συνάρτηση:
 ```cpp:myipc.defs
 subsystem myipc 500; // Arbitrary name and id
 
@@ -40,19 +40,19 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Σημειώστε ότι το πρώτο **επιχείρημα είναι η θύρα για δέσμευση** και το MIG θα **διαχειριστεί αυτόματα τη θύρα απάντησης** (εκτός αν καλέσετε το `mig_get_reply_port()` στον κωδικό του πελάτη). Επιπλέον, το **ID των λειτουργιών** θα είναι **διαδοχικό** ξεκινώντας από το υποσύστημα ID που υποδεικνύεται (έτσι αν μια λειτουργία είναι απαρχαιωμένη, διαγράφεται και χρησιμοποιείται το `skip` για να χρησιμοποιηθεί ακόμα το ID της).
+Σημειώστε ότι το πρώτο **όρισμα είναι η θύρα στην οποία θα γίνει σύνδεση** και το MIG θα **διαχειριστεί αυτόματα τη θύρα απάντησης** (εκτός αν καλέσετε τη `mig_get_reply_port()` στον κώδικα του client). Επιπλέον, τα **ID των operations** θα είναι **διαδοχικά**, ξεκινώντας από το υποδεικνυόμενο ID του subsystem (επομένως, αν ένα operation έχει καταργηθεί, διαγράφεται και χρησιμοποιείται το `skip` ώστε να συνεχίσει να χρησιμοποιείται το ID του).
 
-Τώρα χρησιμοποιήστε το MIG για να δημιουργήσετε τον κωδικό του διακομιστή και του πελάτη που θα είναι σε θέση να επικοινωνούν μεταξύ τους για να καλέσουν τη λειτουργία Subtract:
+Τώρα χρησιμοποιήστε το MIG για να δημιουργήσετε τον κώδικα του server και του client, οι οποίοι θα μπορούν να επικοινωνούν μεταξύ τους για να καλέσουν τη συνάρτηση Subtract:
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 ```
-Πολλά νέα αρχεία θα δημιουργηθούν στον τρέχοντα φάκελο.
+Αρκετά νέα αρχεία θα δημιουργηθούν στον τρέχοντα κατάλογο.
 
 > [!TIP]
 > Μπορείτε να βρείτε ένα πιο σύνθετο παράδειγμα στο σύστημά σας με: `mdfind mach_port.defs`\
-> Και μπορείτε να το μεταγλωττίσετε από τον ίδιο φάκελο με το αρχείο με: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`
+> Και μπορείτε να το κάνετε compile από τον ίδιο φάκελο όπου βρίσκεται το αρχείο με: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`
 
-Στα αρχεία **`myipcServer.c`** και **`myipcServer.h`** μπορείτε να βρείτε την δήλωση και τον ορισμό της δομής **`SERVERPREFmyipc_subsystem`**, η οποία βασικά ορίζει τη λειτουργία που θα καλέσετε με βάση το αναγνωριστικό μηνύματος που ελήφθη (υποδείξαμε έναν αρχικό αριθμό 500):
+Στα αρχεία **`myipcServer.c`** και **`myipcServer.h`** μπορείτε να βρείτε τη δήλωση και τον ορισμό του struct **`SERVERPREFmyipc_subsystem`**, το οποίο βασικά ορίζει τη function που θα κληθεί με βάση το message ID που λήφθηκε (υποδείξαμε έναν αρχικό αριθμό 500):
 
 {{#tabs}}
 {{#tab name="myipcServer.c"}}
@@ -89,7 +89,7 @@ routine[1];
 {{#endtab}}
 {{#endtabs}}
 
-Βασισμένη στη προηγούμενη δομή, η συνάρτηση **`myipc_server_routine`** θα πάρει το **ID μηνύματος** και θα επιστρέψει τη σωστή συνάρτηση για κλήση:
+Με βάση το προηγούμενο struct, η συνάρτηση **`myipc_server_routine`** θα λάβει το **message ID** και θα επιστρέψει την κατάλληλη συνάρτηση προς κλήση:
 ```c
 mig_external mig_routine_t myipc_server_routine
 (mach_msg_header_t *InHeadP)
@@ -104,18 +104,18 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-Σε αυτό το παράδειγμα έχουμε ορίσει μόνο 1 συνάρτηση στις ορισμοί, αλλά αν είχαμε ορίσει περισσότερες συναρτήσεις, θα ήταν μέσα στον πίνακα του **`SERVERPREFmyipc_subsystem`** και η πρώτη θα είχε ανατεθεί στο ID **500**, η δεύτερη στο ID **501**...
+Σε αυτό το παράδειγμα έχουμε ορίσει μόνο 1 function στους ορισμούς, αλλά αν είχαμε ορίσει περισσότερες functions, θα βρίσκονταν μέσα στο array του **`SERVERPREFmyipc_subsystem`** και η πρώτη θα είχε αντιστοιχιστεί στο ID **500**, η δεύτερη στο ID **501**...
 
-Αν η συνάρτηση αναμενόταν να στείλει μια **απάντηση**, η συνάρτηση `mig_internal kern_return_t __MIG_check__Reply__<name>` θα υπήρχε επίσης.
+Αν η function αναμενόταν να στείλει ένα **reply**, θα υπήρχε επίσης η function `mig_internal kern_return_t __MIG_check__Reply__<name>`.
 
-Στην πραγματικότητα, είναι δυνατόν να προσδιοριστεί αυτή η σχέση στη δομή **`subsystem_to_name_map_myipc`** από το **`myipcServer.h`** (**`subsystem*to_name_map*\***`** σε άλλα αρχεία):
+Στην πραγματικότητα, είναι δυνατό να εντοπιστεί αυτή η σχέση στο struct **`subsystem_to_name_map_myipc`** από το **`myipcServer.h`** (**`subsystem*to_name_map*\***`** σε άλλα αρχεία):
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
 { "Subtract", 500 }
 #endif
 ```
-Τέλος, μια άλλη σημαντική λειτουργία για να λειτουργήσει ο διακομιστής θα είναι **`myipc_server`**, η οποία είναι αυτή που θα **καλέσει τη συνάρτηση** που σχετίζεται με το ληφθέν id:
+Τέλος, μια ακόμη σημαντική συνάρτηση για να λειτουργήσει ο **server** θα είναι η **`myipc_server`**, η οποία θα **καλεί τη συνάρτηση** που σχετίζεται με το ληφθέν id:
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -132,7 +132,7 @@ mig_routine_t routine;
 
 OutHeadP->msgh_bits = MACH_MSGH_BITS(MACH_MSGH_BITS_REPLY(InHeadP->msgh_bits), 0);
 OutHeadP->msgh_remote_port = InHeadP->msgh_reply_port;
-/* Ελάχιστο μέγεθος: η routine() θα το ενημερώσει αν είναι διαφορετικό */
+/* Minimal size: routine() will update it if different */
 OutHeadP->msgh_size = (mach_msg_size_t)sizeof(mig_reply_error_t);
 OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
@@ -149,9 +149,9 @@ return FALSE;
 }
 </code></pre>
 
-Ελέγξτε τις προηγουμένως επισημασμένες γραμμές που αποκτούν πρόσβαση στη συνάρτηση για να καλέσουν με ID.
+Ελέγξτε τις προηγουμένως επισημασμένες γραμμές που προσπελαύνουν τη συνάρτηση προς κλήση βάσει του ID.
 
-Ακολουθεί ο κώδικας για τη δημιουργία ενός απλού **διακομιστή** και **πελάτη** όπου ο πελάτης μπορεί να καλέσει τις συναρτήσεις Αφαίρεση από τον διακομιστή:
+Ακολουθεί ο κώδικας για τη δημιουργία ενός απλού **server** και **client**, όπου ο client μπορεί να καλεί τις συναρτήσεις Subtract από τον server:
 
 {{#tabs}}
 {{#tab name="myipc_server.c"}}
@@ -215,33 +215,33 @@ USERPREFSubtract(port, 40, 2);
 {{#endtab}}
 {{#endtabs}}
 
-### Το NDR_record
+### The NDR_record
 
-Το NDR_record εξάγεται από το `libsystem_kernel.dylib`, και είναι μια δομή που επιτρέπει στο MIG να **μετασχηματίζει δεδομένα ώστε να είναι ανεξάρτητα από το σύστημα** στο οποίο χρησιμοποιείται, καθώς το MIG είχε σχεδιαστεί για να χρησιμοποιείται μεταξύ διαφορετικών συστημάτων (και όχι μόνο στην ίδια μηχανή).
+Το NDR_record εξάγεται από το `libsystem_kernel.dylib` και είναι ένα struct που επιτρέπει στο MIG να **μετασχηματίζει τα δεδομένα ώστε να είναι ανεξάρτητα από το σύστημα** στο οποίο χρησιμοποιείται, καθώς το MIG σχεδιάστηκε για χρήση μεταξύ διαφορετικών συστημάτων (και όχι μόνο στο ίδιο μηχάνημα).
 
-Αυτό είναι ενδιαφέρον γιατί αν το `_NDR_record` βρεθεί σε ένα δυαδικό αρχείο ως εξάρτηση (`jtool2 -S <binary> | grep NDR` ή `nm`), σημαίνει ότι το δυαδικό αρχείο είναι πελάτης ή διακομιστής MIG.
+Αυτό είναι ενδιαφέρον, επειδή αν το `_NDR_record` εντοπιστεί σε ένα binary ως dependency (`jtool2 -S <binary> | grep NDR` ή `nm`), σημαίνει ότι το binary είναι MIG client ή Server.
 
-Επιπλέον, οι **διακομιστές MIG** έχουν τον πίνακα εκχώρησης στο `__DATA.__const` (ή στο `__CONST.__constdata` στον πυρήνα macOS και `__DATA_CONST.__const` σε άλλους πυρήνες \*OS). Αυτό μπορεί να αποθηκευτεί με **`jtool2`**.
+Επιπλέον, οι **MIG servers** έχουν τον dispatch table στο `__DATA.__const` (ή στο `__CONST.__constdata` στον kernel του macOS και στο `__DATA_CONST.__const` στους υπόλοιπους \*OS kernels). Αυτό μπορεί να γίνει dump με το **`jtool2`**.
 
-Και οι **πελάτες MIG** θα χρησιμοποιήσουν το `__NDR_record` για να στείλουν με `__mach_msg` στους διακομιστές.
+Και οι **MIG clients** θα χρησιμοποιήσουν το `__NDR_record` για να το στείλουν με το `__mach_msg` στους servers.
 
-## Ανάλυση Δυαδικών Αρχείων
+## Binary Analysis
 
 ### jtool
 
-Καθώς πολλά δυαδικά αρχεία χρησιμοποιούν τώρα το MIG για να εκθέσουν mach ports, είναι ενδιαφέρον να γνωρίζουμε πώς να **αναγνωρίσουμε ότι χρησιμοποιήθηκε το MIG** και τις **λειτουργίες που εκτελεί το MIG** με κάθε ID μηνύματος.
+Καθώς πολλά binaries χρησιμοποιούν πλέον MIG για να εκθέτουν mach ports, είναι ενδιαφέρον να γνωρίζουμε πώς να **εντοπίζουμε ότι χρησιμοποιήθηκε το MIG** και τις **functions που εκτελεί το MIG** με κάθε message ID.
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) μπορεί να αναλύσει πληροφορίες MIG από ένα δυαδικό Mach-O υποδεικνύοντας το ID μηνύματος και αναγνωρίζοντας τη λειτουργία που πρέπει να εκτελεστεί:
+Το [**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) μπορεί να αναλύσει πληροφορίες MIG από ένα Mach-O binary, υποδεικνύοντας το message ID και προσδιορίζοντας τη function που πρέπει να εκτελεστεί:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-Επιπλέον, οι λειτουργίες MIG είναι απλώς περιτυλίγματα της πραγματικής λειτουργίας που καλείται, που σημαίνει ότι αν αποκτήσετε την αποσυναρμολόγησή της και κάνετε grep για BL, μπορεί να είστε σε θέση να βρείτε την πραγματική λειτουργία που καλείται:
+Επιπλέον, οι MIG functions είναι απλώς wrappers της actual function που καλείται, πράγμα που σημαίνει ότι, λαμβάνοντας το disassembly της και κάνοντας grep για BL, ενδέχεται να μπορέσετε να βρείτε την actual function που καλείται:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### Assembly
 
-Αναφέρθηκε προηγουμένως ότι η συνάρτηση που θα φροντίσει για **την κλήση της σωστής συνάρτησης ανάλογα με το ID του μηνύματος που ελήφθη** ήταν η `myipc_server`. Ωστόσο, συνήθως δεν θα έχετε τα σύμβολα του δυαδικού (χωρίς ονόματα συναρτήσεων), οπότε είναι ενδιαφέρον να **ελέγξετε πώς φαίνεται αποσυμπιεσμένο** καθώς θα είναι πάντα πολύ παρόμοιο (ο κώδικας αυτής της συνάρτησης είναι ανεξάρτητος από τις εκτεθειμένες συναρτήσεις):
+Αναφέρθηκε προηγουμένως ότι η function που θα αναλάβει να **καλέσει τη σωστή function ανάλογα με το message ID που λήφθηκε** ήταν η `myipc_server`. Ωστόσο, συνήθως δεν θα έχετε τα symbols του binary (ονόματα functions), επομένως έχει ενδιαφέρον να **ελέγξετε πώς εμφανίζεται μετά από decompilation**, καθώς θα είναι πάντα πολύ παρόμοια (ο κώδικας αυτής της function είναι ανεξάρτητος από τις exposed functions):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -249,7 +249,7 @@ jtool2 -d __DATA.__const myipc_server | grep BL
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 var_10 = arg0;
 var_18 = arg1;
-// Αρχικές οδηγίες για να βρείτε τους σωστούς δείκτες συναρτήσεων
+// Initial instructions to find the proper function ponters
 *(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
@@ -258,20 +258,20 @@ var_18 = arg1;
 *(int32_t *)(var_18 + 0x10) = 0x0;
 if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
-// Κλήση στη sign_extend_64 που μπορεί να βοηθήσει στην αναγνώριση αυτής της συνάρτησης
-// Αυτό αποθηκεύει στο rax τον δείκτη στην κλήση που πρέπει να γίνει
-// Ελέγξτε τη χρήση της διεύθυνσης 0x100004040 (πίνακας διευθύνσεων συναρτήσεων)
-// 0x1f4 = 500 (το αρχικό ID)
+// Call to sign_extend_64 that can help to identifyf this function
+// This stores in rax the pointer to the call that needs to be called
+// Check the used of the address 0x100004040 (functions addresses array)
+// 0x1f4 = 500 (the strating ID)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
-// Αν - αλλιώς, το if επιστρέφει false, ενώ το else καλεί τη σωστή συνάρτηση και επιστρέφει true
+// If - else, the if returns false, while the else call the correct function and returns true
 <strong>            if (rax == 0x0) {
 </strong>                    *(var_18 + 0x18) = **_NDR_record;
 *(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
 var_4 = 0x0;
 }
 else {
-// Υπολογισμένη διεύθυνση που καλεί τη σωστή συνάρτηση με 2 παραμέτρους
+// Calculated address that calls the proper function with 2 arguments
 <strong>                    (var_20)(var_10, var_18);
 </strong>                    var_4 = 0x1;
 }
@@ -289,7 +289,7 @@ return rax;
 {{#endtab}}
 
 {{#tab name="myipc_server decompiled 2"}}
-Αυτή είναι η ίδια συνάρτηση αποσυμπιεσμένη σε μια διαφορετική δωρεάν έκδοση του Hopper:
+Αυτή είναι η ίδια function μετά από decompilation σε διαφορετική free έκδοση του Hopper:
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -297,7 +297,7 @@ saved_fp = r29;
 stack[-8] = r30;
 var_10 = arg0;
 var_18 = arg1;
-// Αρχικές οδηγίες για να βρείτε τους σωστούς δείκτες συναρτήσεων
+// Initial instructions to find the proper function ponters
 *(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f | 0x0;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
@@ -321,7 +321,7 @@ r8 = 0x1;
 }
 if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
-// 0x1f4 = 500 (το αρχικό ID)
+// 0x1f4 = 500 (the strating ID)
 <strong>                    r8 = r8 - 0x1f4;
 </strong>                    asm { smaddl     x8, w8, w9, x10 };
 r8 = *(r8 + 0x8);
@@ -332,15 +332,15 @@ if (CPU_FLAGS & NE) {
 r8 = 0x1;
 }
 }
-// Ίδιο if else όπως στην προηγούμενη έκδοση
-// Ελέγξτε τη χρήση της διεύθυνσης 0x100004040 (πίνακας διευθύνσεων συναρτήσεων)
+// Same if else as in the previous version
+// Check the used of the address 0x100004040 (functions addresses array)
 <strong>                    if ((r8 & 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
 var_4 = 0x0;
 }
 else {
-// Κλήση στη υπολογισμένη διεύθυνση όπου θα πρέπει να είναι η συνάρτηση
+// Call to the calculated address where the function should be
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
 }
@@ -365,20 +365,23 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-Στην πραγματικότητα, αν πάτε στη συνάρτηση **`0x100004000`** θα βρείτε τον πίνακα των **`routine_descriptor`** δομών. Το πρώτο στοιχείο της δομής είναι η **διεύθυνση** όπου η **συνάρτηση** είναι υλοποιημένη, και η **δομή καταλαμβάνει 0x28 bytes**, οπότε κάθε 0x28 bytes (ξεκινώντας από το byte 0) μπορείτε να πάρετε 8 bytes και αυτό θα είναι η **διεύθυνση της συνάρτησης** που θα κληθεί:
+Στην πραγματικότητα, αν μεταβείτε στη function **`0x100004000`**, θα βρείτε τον πίνακα από structs **`routine_descriptor`**. Το πρώτο στοιχείο του struct είναι η **διεύθυνση** στην οποία υλοποιείται η **function**, ενώ το **struct καταλαμβάνει 0x28 bytes**. Επομένως, ανά 0x28 bytes (ξεκινώντας από το byte 0), μπορείτε να λάβετε 8 bytes, τα οποία θα είναι η **διεύθυνση της function** που θα κληθεί:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 
 <figure><img src="../../../../images/image (36).png" alt=""><figcaption></figcaption></figure>
 
-Αυτά τα δεδομένα μπορούν να εξαχθούν [**χρησιμοποιώντας αυτό το σενάριο Hopper**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py).
+Αυτά τα δεδομένα μπορούν να εξαχθούν [**χρησιμοποιώντας αυτό το Hopper script**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py).
 
-### Debug
+### Αποσφαλμάτωση
 
-Ο κώδικας που παράγεται από το MIG καλεί επίσης το `kernel_debug` για να δημιουργήσει αρχεία καταγραφής σχετικά με τις λειτουργίες κατά την είσοδο και έξοδο. Είναι δυνατή η εξέταση τους χρησιμοποιώντας **`trace`** ή **`kdv`**: `kdv all | grep MIG`
+Ο κώδικας που δημιουργείται από το MIG καλεί επίσης το `kernel_debug` για να δημιουργεί logs σχετικά με τις operations κατά την είσοδο και την έξοδο. Μπορείτε να τα ελέγξετε χρησιμοποιώντας τα **`trace`** ή **`kdv`**: `kdv all | grep MIG`
 
 ## References
 
-- [\*OS Internals, Volume I, User Mode, Jonathan Levin](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [1] [bootstrap_cmds — `migcom.tproj` (the MIG compiler itself)](https://github.com/apple-oss-distributions/bootstrap_cmds/tree/main/migcom.tproj)
+- [2] [XNU — `osfmk/mach/mach_port.defs` (example MIG subsystem definition)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
+- [3] [XNU — `osfmk/mach/task.defs` (task subsystem MIG definition)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
+- [4] [XNU — `osfmk/mach/message.h` (Mach message header layout)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
 
 {{#include ../../../../banners/hacktricks-training.md}}
