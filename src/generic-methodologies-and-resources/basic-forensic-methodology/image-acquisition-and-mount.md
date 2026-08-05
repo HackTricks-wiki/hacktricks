@@ -37,7 +37,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 
 ### AFF4 (Advanced Forensics Format 4)
 
-AFF4 is Google’s modern imaging format designed for *very* large evidence (sparse, resumable, cloud-native).
+AFF4 is Google’s modern imaging format designed for *very* large evidence (sparse, resumable, cloud-native).<sup>[[1]](#references)</sup>
 
 ```bash
 # Acquire to AFF4 using the reference tool
@@ -169,7 +169,7 @@ kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 
 ## References
 
-- AFF4 imaging tool announcement & specification: https://github.com/aff4/aff4  
-- qemu-nbd manual page (mounting disk images safely): https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html
+- [1] [AFF4 Standard Specification (Advanced Forensic Format v4)](https://github.com/aff4/Standard)
+- [2] [qemu-nbd manual page (mounting disk images safely)](https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html)
 
 {{#include ../../banners/hacktricks-training.md}}

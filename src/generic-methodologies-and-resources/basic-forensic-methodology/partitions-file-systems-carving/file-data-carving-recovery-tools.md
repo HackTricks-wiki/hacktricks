@@ -10,7 +10,7 @@ More tools in [https://github.com/Claudio-C/awesome-datarecovery](https://github
 
 The most common tool used in forensics to extract files from images is [**Autopsy**](https://www.autopsy.com/download/). Download it, install it and make it ingest the file to find "hidden" files. Note that Autopsy is built to support disk images and other kinds of images, but not simple files.
 
-> **2024-2025 update** – Version **4.21** (released February 2025) added a rebuilt **carving module based on SleuthKit v4.13** that is noticeably quicker when dealing with multi-terabyte images and supports parallel extraction on multi-core systems.¹  A small CLI wrapper (`autopsycli ingest <case> <image>`) was also introduced, making it possible to script carving inside CI/CD or large-scale lab environments.
+> **2024-2025 update** – Version **4.21** (released February 2025) added a rebuilt **carving module based on SleuthKit v4.13** that is noticeably quicker when dealing with multi-terabyte images and supports parallel extraction on multi-core systems. A small CLI wrapper (`autopsycli ingest <case> <image>`) was also introduced, making it possible to script carving inside CI/CD or large-scale lab environments.<sup>[[1]](#references)</sup>
 
 ```bash
 # Create a case and ingest an evidence image from the CLI (Autopsy ≥4.21)
@@ -154,5 +154,6 @@ You can use the linux command line tool **pdftotext** to transform a pdf into te
 
 ## References
 
-1. Autopsy 4.21 release notes – <https://github.com/sleuthkit/autopsy/releases/tag/autopsy-4.21>
+- [1] [Autopsy 4.21 release notes](https://github.com/sleuthkit/autopsy/releases/tag/autopsy-4.21)
+
 {{#include ../../../banners/hacktricks-training.md}}

@@ -21,7 +21,7 @@
 - [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
 
 > Notes
-> - TruffleHog v3 can verify many credentials live and scan GitHub orgs, issues/PRs, gists, and wikis. Example: `trufflehog github --org <ORG> --results=verified`.
+> - TruffleHog v3 can verify many credentials live and scan GitHub orgs, issues/PRs, gists, and wikis. Example: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)</sup>
 > - Gitleaks v8 supports scanning git history, directories and archives: `gitleaks detect -v --source .` or `gitleaks detect --source <repo> --log-opts="--all"`.
 > - Nosey Parker focuses on high-throughput scanning with curated rules and has an Explorer UI for triage. Example: `noseyparker scan --datastore np.db <path|repo>` then `noseyparker report --datastore np.db`.
 > - ggshield (GitGuardian CLI) provides pre-commit/CI hooks and Docker image scanning: `ggshield secret scan repo <path-or-url>`.
@@ -41,7 +41,7 @@
 
 ### Programmatic org-wide scanning
 
-- TruffleHog (GitHub source):
+- TruffleHog (GitHub source):<sup>[[2]](#references)</sup>
 ```bash
 export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
@@ -372,6 +372,7 @@ wide-source-code-search.md
 
 ## References
 
-- Keeping secrets out of public repositories (GitHub Blog, Feb 29, 2024): https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/
-- TruffleHog v3 – Find, verify, and analyze leaked credentials: https://github.com/trufflesecurity/trufflehog
+- [1] [Keeping secrets out of public repositories (GitHub Blog, Feb 29, 2024)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
+- [2] [TruffleHog v3 – Find, verify, and analyze leaked credentials](https://github.com/trufflesecurity/trufflehog)
+
 {{#include ../../banners/hacktricks-training.md}}

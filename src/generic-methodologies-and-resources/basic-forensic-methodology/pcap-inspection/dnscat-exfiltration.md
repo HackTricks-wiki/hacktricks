@@ -4,7 +4,7 @@
 
 If you have pcap with data being **exfiltrated by DNSCat** (without using encryption), you can find the exfiltrated content.
 
-You only need to know that the **first 9 bytes** are not real data but are related to the **C\&C communication**:
+You only need to know that the **first 9 bytes** are not real data but are related to the **C\&C communication**:<sup>[[1]](#references)</sup>
 
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
@@ -33,6 +33,10 @@ There is a script that works with Python3: [https://github.com/josemlwdf/DNScat-
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```
+
+## References
+
+- [1] [DNSCat2 pcap forensics writeup – BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
