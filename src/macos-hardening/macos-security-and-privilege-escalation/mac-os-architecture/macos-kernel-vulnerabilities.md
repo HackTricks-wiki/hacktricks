@@ -1,34 +1,34 @@
-# Podatności jądra macOS
+# Podatności kernela macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Współczesne exploitowanie jądra macOS polega w mniejszym stopniu na „załadowaniu trywialnego, niepodpisanego kexta i uzyskaniu ring-0”, a w większym na wykorzystywaniu **parserów Mach/MIG**, **IOKit user clients**, **wyścigów typu data-only wewnątrz XNU** oraz **specjalnie uprzywilejowanych daemonów**, które nadal mogą ponownie otwierać powierzchnię ataku jądra. Podczas analizy konkretnych interfejsów sprawdź również strony dotyczące [**IOKit**](macos-iokit.md) oraz [**kernel extensions / kernelcache extraction**](macos-kernel-extensions.md).
+Współczesne exploity kernela macOS dotyczą w mniejszym stopniu „załadowania banalnego, niepodpisanego kexta i uzyskania ring-0”, a w większym stopniu wykorzystywania **parserów Mach/MIG**, **IOKit user clients**, **wyścigów data-only wewnątrz XNU** oraz **specjalnie uprzywilejowanych daemonów**, które nadal mogą ponownie otwierać powierzchnię ataku kernela. Przy analizie konkretnych interfejsów sprawdź również strony dotyczące [**IOKit**](macos-iokit.md) oraz [**kernel extensions / kernelcache extraction**](macos-kernel-extensions.md).
 
 ## Powierzchnie ataku, które nadal mają znaczenie
 
-- **Handlery Mach/MIG** w systemowych daemonach i usługach komunikujących się z jądrem: nieprawidłowe deskryptory, dane out-of-line (OOL) oraz stanowe przepływy obejmujące wiele komunikatów.
-- **IOKit user clients**: parsowanie zależne od selektora, metody wymagające entitlementów oraz biblioteki wrapperów/daemony ukrywające rzeczywisty graf wywołań.
-- **Primitives typu data-only w XNU**: wyścigi dotyczące credentials, wskaźników chronionych przez SMR, stref tylko do odczytu oraz innych miejsc, w których korupcja zmienia zasady bez konieczności wcześniejszego przejęcia kontroli nad RIP/PC.
-- **Kod jądra firm trzecich / pomocniczy kod jądra**: starsze kexty są rzadsze, ale floty systemów firmowych, systemy Apple Silicon z obniżonym poziomem zabezpieczeń oraz pakiety `.fs` / helper nadal tworzą wartościowe ścieżki sąsiadujące z jądrem.
+- **Handlery Mach/MIG** w systemowych daemonach i usługach komunikujących się z kernelem: nieprawidłowe descriptory, dane out-of-line (OOL) oraz stanowe przepływy obejmujące wiele wiadomości.
+- **IOKit user clients**: parsowanie zależne od selectora, metody wymagające entitlementów oraz biblioteki wrapperów/daemony, które ukrywają rzeczywisty call graph.
+- **Primitives data-only XNU**: wyścigi dotyczące credentials, wskaźników chronionych przez SMR, stref tylko do odczytu oraz innych miejsc, w których corruption zmienia zasady dostępu bez konieczności wcześniejszego przejęcia kontroli nad RIP/PC.
+- **Third-party / auxiliary kernel code**: starsze kexty są rzadsze, ale floty enterprise, systemy Apple Silicon z obniżonym poziomem security oraz vendorskie bundlery `.fs` / helper nadal tworzą wartościowe ścieżki powiązane z kernelem.
 
 ## [Pwning OTA](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
 
-W [**tym raporcie**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) połączono kilka błędów w łańcuchu OTA/update, aby doprowadzić do kompromitacji jądra poprzez nadużycie pipeline'u aktualizacji oprogramowania i możliwości związanych z rootless.
+W [**tym raporcie**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) połączono kilka bugów w łańcuchu OTA/update, aby osiągnąć compromise kernela poprzez wykorzystanie pipeline'u aktualizacji software'u oraz capabilities związanych z rootless.<sup>[3]</sup>
 
 [**PoC**](https://github.com/jhftss/POC/tree/main/CVE-2022-46722).
 
 ---
 
-## 2024: łańcuch obejścia ochrony jądra wykorzystany in-the-wild (CVE-2024-23225 i CVE-2024-23296)
+## 2024: Łańcuch omijający ochronę kernela wykorzystany in-the-wild (CVE-2024-23225 i CVE-2024-23296)
 
-[**Wydania zabezpieczeń macOS z marca 2024 r.**](https://support.apple.com/en-us/120895) firmy Apple naprawiły dwa problemy, które były **aktywnie wykorzystywane**:
+[**Wydania security macOS z marca 2024 roku**](https://support.apple.com/en-us/120895) firmy Apple naprawiły dwa problemy, które były **aktywnie wykorzystywane**:
 
-- **CVE-2024-23225 – Kernel**: błąd korupcji pamięci, który umożliwiał atakującemu posiadającemu arbitrary kernel read/write obejście zabezpieczeń pamięci jądra.
-- **CVE-2024-23296 – RTKit**: drugi błąd korupcji pamięci z takim samym publicznym opisem wpływu.
+- **CVE-2024-23225 – Kernel**: bug powodujący memory corruption, w którym attacker dysponujący arbitrary kernel read/write mógł ominąć zabezpieczenia pamięci kernela.
+- **CVE-2024-23296 – RTKit**: drugi bug powodujący memory corruption, z takim samym publicznym opisem wpływu.
 
-Publicznie dostępne informacje o przyczynie źródłowej nadal są skąpe, ale ta para przypomina, że współczesne łańcuchy exploitów Apple często wymagają **czegoś więcej niż „tylko” kernel R/W**: działania post-exploitation przeciwko zabezpieczeniom pamięci, kodowi sąsiadującemu z coprocessorem lub dodatkowym granicom zaufania często stanowią etap, na którym stabilizowany jest rzeczywisty łańcuch.
+Publiczne informacje o root cause nadal są skąpe, ale ta para dobrze przypomina, że współczesne łańcuchy exploitów Apple często wymagają czegoś więcej niż „tylko” kernel R/W: prace post-exploitation przeciwko zabezpieczeniom pamięci, kodowi sąsiadującemu z coprocessorem lub dodatkowym granicom zaufania często stanowią etap, na którym rzeczywisty łańcuch zostaje ustabilizowany.
 
-Szybki triage poprawek:
+Szybki triage patchy:
 ```bash
 sw_vers
 uname -v
@@ -36,16 +36,16 @@ softwareupdate --history | tail -n 20
 ```
 ---
 
-## 2025: SMR + wyścig read-only credential (CVE-2025-24118)
+## 2025: SMR + read-only credential race (CVE-2025-24118)
 
-[**Opracowanie TRAVERTINE**](https://jprx.io/cve-2025-24118/) autorstwa Josepha Ravichandrana to bardzo dobry współczesny case study XNU, ponieważ nie jest to **klasyczny buffer overflow**:
+[**TRAVERTINE write-up**](https://jprx.io/cve-2025-24118/) autorstwa Josepha Ravichandrana to bardzo dobre współczesne studium przypadku XNU, ponieważ **nie jest** to klasyczny buffer overflow:<sup>[1]</sup>
 
-- `proc_ro.p_ucred` to wskaźnik chroniony przez **SMR**, przechowywany w obiekcie `proc_ro` oznaczonym jako **read-only**.
-- Procesy zapisujące muszą aktualizować ten wskaźnik **atomowo**.
-- `kauth_cred_proc_update()` używało `zalloc_ro_mut(...)` do modyfikowania `p_ucred`; na x86_64 ta ścieżka ostatecznie wywołuje `memcpy` / `rep movsb`, więc współbieżny odczyt może zaobserwować **częściowo zapisany wskaźnik**.
-- Błąd prowadzi do **eskalacji uprawnień typu data-only**: jeśli uszkodzony wskaźnik wskaże na inny prawidłowy obiekt credential, bieżący wątek może odziedziczyć bardziej uprzywilejowany stan bez wcześniejszego przejęcia oczywistej kontroli nad przepływem wykonania.
+- `proc_ro.p_ucred` to **SMR-protected pointer**, przechowywany w obiekcie `proc_ro` o właściwości **read-only**.
+- Writerzy muszą aktualizować ten pointer **atomowo**.
+- `kauth_cred_proc_update()` używało `zalloc_ro_mut(...)` do modyfikacji `p_ucred`; na x86_64 ta ścieżka ostatecznie trafia do `memcpy` / `rep movsb`, więc współbieżny reader może zaobserwować **torn pointer**.
+- Bug przeradza się w **data-only privilege escalation**: jeśli uszkodzony credential pointer wskaże inny prawidłowy credential object, bieżący thread może odziedziczyć bardziej uprzywilejowany stan bez wcześniejszego uzyskania oczywistego control-flow hijack.
 
-Minimalny wzorzec wyzwalania:
+Minimalny wzorzec triggera:
 ```c
 // writer thread: force frequent credential swaps
 while (1) {
@@ -58,22 +58,22 @@ while (1) {
 (void)getgid();
 }
 ```
-Przydatna heurystyka audytowa: gdy ścieżka kernela łączy **SMR readers**, **read-only zone mutation** oraz **credential lub task metadata**, sprawdź, czy aktualizacje używają atomowych wariantów `zalloc_ro_mut_*`, a nie helperów opartych na kopiowaniu.
+Przydatna heurystyka audytowa: za każdym razem, gdy ścieżka kernela łączy **czytelników SMR**, **modyfikację stref tylko do odczytu** oraz **metadane poświadczeń lub zadań**, sprawdź, czy aktualizacje używają atomowych wariantów `zalloc_ro_mut_*`, a nie helperów opartych na kopiowaniu.
 
 ---
 
 ## 2024-2025: SIP bypass ponownie otwierający ścieżki ładowania kernela (CVE-2024-44243)
 
-Microsoft pokazał, że `storagekitd` można było wykorzystać do **bypass SIP**, a następnie ponownie uaktywnić kod kernela firm trzecich na maszynach, które w innym przypadku wyglądałyby na "post-kext". Kluczowy pomysł:
+Microsoft pokazał, że `storagekitd` można wykorzystać do **bypassu SIP**, a następnie ponownie sprawić, że kod kernela innych firm stanie się istotny na maszynach, które w przeciwnym razie wyglądałyby na systemy „post-kext”. Kluczowy pomysł:<sup>[2]</sup>
 
 1. Umieścić lub nadpisać złośliwy bundle `.fs` w `/Library/Filesystems`.
 2. Uruchomić `storagekitd` za pośrednictwem Disk Utility lub `diskutil`.
-3. Pozwolić daemonowi, posiadającemu specjalne uprawnienia, uruchomić executables bundle **bez prawidłowego obniżenia uprawnień / sprawdzenia ścieżki**.
-4. Wykorzystać uzyskany SIP bypass do zmodyfikowania chronionego stanu systemu plików i, w demonstracji Microsoftu, nadpisać listę wykluczeń rozszerzeń kernela.
+3. Pozwolić daemonowi, któremu przyznano specjalne uprawnienia, uruchamiać pliki wykonywalne bundle **bez prawidłowego obniżenia uprawnień / sprawdzenia ścieżki**.
+4. Wykorzystać uzyskany SIP bypass do zmodyfikowania chronionego stanu systemu plików oraz — w demonstracji Microsoftu — nadpisania listy wykluczeń rozszerzeń kernela.
 
-Dla badaczy kernela ważna lekcja jest taka, że **powierzchnia ataku kernela może zostać ponownie wprowadzona z userlandowych daemonów zarządzających**, nawet gdy bezpośrednie ładowanie kextów firm trzecich jest silnie ograniczone.
+Dla badaczy kernela ważny wniosek jest taki, że **powierzchnia ataku kernela może zostać ponownie otwarta z poziomu userlandowych daemonów zarządzających**, nawet gdy bezpośrednie ładowanie kextów innych firm jest silnie ograniczone.
 
-Przydatny triage:
+Przydatna wstępna analiza:
 ```bash
 ls -la /Library/Filesystems
 find /Library/Filesystems -maxdepth 3 -type f \( -name 'mount_*' -o -name 'fsck_*' -o -name 'newfs_*' \) 2>/dev/null
@@ -84,13 +84,13 @@ kmutil showloaded --collection aux
 
 ## Workflow fuzzingu i researchu
 
-Jeśli aktywnie szukasz tego rodzaju błędów, najnowsze publiczne prace wskazują ten sam kierunek:
+Jeśli aktywnie szukasz tego typu błędów, najnowsze publiczne prace wskazują ten sam kierunek:
 
-- [**KextFuzz**](https://www.usenix.org/conference/usenixsecurity23/presentation/yin) nadal jest jednym z najlepszych punktów odniesienia dla researchu kernela w erze Apple Silicon. Wykorzystuje **static binary rewriting** do odzyskiwania pokrycia, wyłącza podczas testów ścieżki **entitlement-gated** i wnioskuje strukturę interfejsów na podstawie userspace wrappers.
-- [**Simple macOS kernel extension fuzzing in userspace with IDA and TinyInst**](https://projectzero.google/2024/11/simple-macos-kernel-extension-fuzzing.html) autorstwa Project Zero przedstawia bardzo praktyczny workflow **rebasingu kext / fileset do userspace**, dzięki czemu kod intensywnie korzystający z parserów można fuzzować ze znacznie większą szybkością, a następnie odtwarzać problemy na urządzeniu.
-- W przypadku celów opartych na Mach buduj harnessy wokół **rzeczywistych układów komunikatów i maszyn stanów wykonujących wiele wywołań**, a nie tylko pojedynczych blobów selektorów. Najnowsze badania Project Zero dotyczące CoreAudio/Mach oraz wystąpienia konferencyjne, takie jak **Fuzzing at Mach Speed**, pokazują, dlaczego sekwencje komunikatów ze stanem nadal przynoszą dobre rezultaty.
+- [**KextFuzz**](https://www.usenix.org/conference/usenixsecurity23/presentation/yin) nadal jest jednym z najlepszych punktów odniesienia dla badań nad kernelem w erze Apple Silicon. Wykorzystuje **static binary rewriting** do odzyskiwania coverage, wyłącza ścieżki **entitlement-gated** podczas testów oraz wnioskuje strukturę interfejsu na podstawie wrapperów userspace.<sup>[4]</sup>
+- Projekt Zero w [**Simple macOS kernel extension fuzzing in userspace with IDA and TinyInst**](https://projectzero.google/2024/11/simple-macos-kernel-extension-fuzzing.html) pokazuje bardzo praktyczny workflow **rebasingu kext / fileset do userspace**, dzięki czemu kod intensywnie wykorzystujący parsery można fuzzować ze znacznie większą szybkością, a następnie odtwarzać problemy na urządzeniu.<sup>[5]</sup>
+- W przypadku celów opartych intensywnie na Mach buduj harnessy wokół **rzeczywistych układów komunikatów i maszyn stanów obejmujących wiele wywołań**, a nie tylko pojedynczych blobów selectorów. Najnowsze badania CoreAudio/Mach prowadzone przez Projekt Zero oraz prezentacje konferencyjne, takie jak **Fuzzing at Mach Speed**, pokazują, dlaczego sekwencje komunikatów ze stanem nadal przynoszą dobre rezultaty.
 
-Szybkie lokalne polecenia, których będziesz często używać:
+Szybkie lokalne komendy, których będziesz często używać:
 ```bash
 # Loaded auxiliary / 3rd party kernel code
 kmutil showloaded --collection aux
@@ -102,7 +102,7 @@ kmutil inspect -B /System/Library/KernelCollections/BootKernelExtensions.kc --sh
 sw_vers
 uname -a
 ```
-## Szybka ściągawka enumeracji
+## Ściągawka szybkiej enumeracji
 ```bash
 uname -a                          # Kernel build
 sw_vers                           # ProductVersion / BuildVersion
@@ -114,6 +114,10 @@ spctl --status                    # Confirm Gatekeeper state
 ```
 ## Referencje
 
-* Joseph Ravichandran. “TRAVERTINE: CVE-2025-24118.” https://jprx.io/cve-2025-24118/
-* Microsoft Security Blog. “Analiza CVE-2024-44243, obejścia System Integrity Protection w macOS za pomocą kernel extensions.” https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/
+- [1] [Joseph Ravichandran - TRAVERTINE: CVE-2025-24118](https://jprx.io/cve-2025-24118/)
+- [2] [Microsoft Security Blog - Analiza CVE-2024-44243, obejścia macOS System Integrity Protection za pomocą kernel extensions](https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/)
+- [3] [Mickey Jin - Koszmar aktualizacji OTA firmy Apple: omijanie weryfikacji sygnatury i przejęcie kernela](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
+- [4] [Tingting Yin i in. - KextFuzz: fuzzing macOS Kernel EXTensions na Apple Silicon poprzez wykorzystywanie mechanizmów ochronnych (USENIX Security '23)](https://www.usenix.org/conference/usenixsecurity23/presentation/yin)
+- [5] [Ivan Fratric (Project Zero) - Prosty fuzzing macOS kernel extension w userspace za pomocą IDA i TinyInst](https://projectzero.google/2024/11/simple-macos-kernel-extension-fuzzing.html)
+
 {{#include ../../../banners/hacktricks-training.md}}

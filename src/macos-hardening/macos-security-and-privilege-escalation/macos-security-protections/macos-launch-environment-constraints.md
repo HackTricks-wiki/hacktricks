@@ -1,87 +1,87 @@
-# macOS Launch/Environment Constraints & Trust Cache
+# Ograniczenia uruchamiania/środowiska macOS i Trust Cache
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Informacje podstawowe
 
-Ograniczenia uruchamiania w macOS zostały wprowadzone w celu zwiększenia bezpieczeństwa poprzez **regulowanie, jak, kto i skąd proces może być inicjowany**. Wprowadzone w macOS Ventura, zapewniają ramy, które klasyfikują **każdy systemowy plik binarny w odrębne kategorie ograniczeń**, które są zdefiniowane w **pamięci zaufania**, liście zawierającej pliki binarne systemu i ich odpowiednie hashe. Ograniczenia te obejmują każdy wykonywalny plik binarny w systemie, co wiąże się z zestawem **reguł** określających wymagania dotyczące **uruchamiania konkretnego pliku binarnego**. Reguły obejmują ograniczenia własne, które plik binarny musi spełnić, ograniczenia rodzica, które muszą być spełnione przez jego proces nadrzędny, oraz ograniczenia odpowiedzialności, które muszą być przestrzegane przez inne odpowiednie podmioty.
+Ograniczenia uruchamiania w macOS wprowadzono w celu zwiększenia bezpieczeństwa poprzez **regulowanie sposobu, osoby oraz miejsca, z którego można zainicjować proces**. Wprowadzone w macOS Ventura, zapewniają framework kategoryzujący **każdy systemowy binary do odrębnych kategorii ograniczeń**, które są definiowane w **trust cache** — liście zawierającej systemowe binary oraz odpowiadające im hashe. Ograniczenia te obejmują każdy wykonywalny binary w systemie i określają zestaw **reguł** definiujących wymagania dotyczące **uruchomienia konkretnego binary**. Reguły obejmują self constraints, które binary musi spełniać, parent constraints, których musi przestrzegać jego proces nadrzędny, oraz responsible constraints, których muszą przestrzegać inne odpowiednie encje.
 
-Mechanizm ten rozszerza się na aplikacje firm trzecich poprzez **Ograniczenia Środowiskowe**, począwszy od macOS Sonoma, umożliwiając deweloperom ochronę swoich aplikacji poprzez określenie **zestawu kluczy i wartości dla ograniczeń środowiskowych.**
+Mechanizm ten obejmuje również aplikacje third-party poprzez **Environment Constraints**, począwszy od macOS Sonoma, umożliwiając deweloperom ochronę aplikacji przez określenie **zestawu kluczy i wartości dla environment constraints.**
 
-Definiujesz **ograniczenia środowiska uruchamiania i biblioteki** w słownikach ograniczeń, które zapisujesz w **plikach listy właściwości `launchd`**, lub w **osobnych plikach listy właściwości**, które używasz w podpisywaniu kodu.
+**Launch environment and library constraints** definiuje się w słownikach ograniczeń, które zapisuje się w plikach property list `launchd` albo w **oddzielnych plikach property list**, używanych podczas code signing.
 
 Istnieją 4 typy ograniczeń:
 
-- **Ograniczenia Własne**: Ograniczenia stosowane do **uruchamianego** pliku binarnego.
-- **Proces Rodzica**: Ograniczenia stosowane do **rodzica procesu** (na przykład **`launchd`** uruchamiającego usługę XP)
-- **Ograniczenia Odpowiedzialności**: Ograniczenia stosowane do **procesu wywołującego usługę** w komunikacji XPC
-- **Ograniczenia ładowania biblioteki**: Użyj ograniczeń ładowania biblioteki, aby selektywnie opisać kod, który może być załadowany
+- **Self Constraints**: Ograniczenia stosowane do **uruchomionego** binary.
+- **Parent Process**: Ograniczenia stosowane do **procesu nadrzędnego procesu** (na przykład **`launchd`** uruchamiającego usługę XP)
+- **Responsible Constraints**: Ograniczenia stosowane do **procesu wywołującego usługę** w komunikacji XPC
+- **Library load constraints**: Library load constraints służą do selektywnego opisywania kodu, który może zostać załadowany
 
-Gdy proces próbuje uruchomić inny proces — wywołując `execve(_:_:_:)` lub `posix_spawn(_:_:_:_:_:_:)` — system operacyjny sprawdza, czy plik **wykonywalny** **spełnia** swoje **własne ograniczenie własne**. Sprawdza również, czy plik wykonywalny **procesu rodzica** **spełnia** **ograniczenie rodzica** pliku wykonywalnego oraz czy plik wykonywalny **procesu odpowiedzialnego** **spełnia ograniczenie procesu odpowiedzialnego** pliku wykonywalnego. Jeśli jakiekolwiek z tych ograniczeń uruchamiania nie są spełnione, system operacyjny nie uruchamia programu.
+Gdy proces próbuje uruchomić inny proces — wywołując `execve(_:_:_:)` lub `posix_spawn(_:_:_:_:_:_:)` — system operacyjny sprawdza, czy plik **wykonywalny** spełnia swoje **własne self constraint**. Sprawdza również, czy binary procesu **nadrzędnego** spełnia **parent constraint** binary oraz czy binary procesu **odpowiedzialnego** spełnia **responsible process constraint** binary. Jeśli którekolwiek z tych launch constraints nie zostanie spełnione, system operacyjny nie uruchomi programu.
 
-Jeśli podczas ładowania biblioteki jakakolwiek część **ograniczenia biblioteki nie jest prawdziwa**, twój proces **nie ładuje** biblioteki.
+Jeśli podczas ładowania biblioteki dowolna część **library constraint** nie jest spełniona, proces **nie załaduje** biblioteki.
 
-## LC Categories
+## Kategorie LC
 
-LC składa się z **faktów** i **operacji logicznych** (i, lub..) łączących fakty.
+LC składa się z **faktów** oraz **operacji logicznych** (and, or itd.), które łączą fakty.
 
-[**Fakty, które LC może wykorzystać, są udokumentowane**](https://developer.apple.com/documentation/security/defining_launch_environment_and_library_constraints). Na przykład:
+[**Fakty, których może używać LC, są udokumentowane**](https://developer.apple.com/documentation/security/defining_launch_environment_and_library_constraints). Na przykład:
 
-- is-init-proc: Wartość logiczna, która wskazuje, czy plik wykonywalny musi być procesem inicjalizacji systemu operacyjnego (`launchd`).
-- is-sip-protected: Wartość logiczna, która wskazuje, czy plik wykonywalny musi być plikiem chronionym przez System Integrity Protection (SIP).
-- `on-authorized-authapfs-volume:` Wartość logiczna, która wskazuje, czy system operacyjny załadował plik wykonywalny z autoryzowanej, uwierzytelnionej objętości APFS.
-- `on-authorized-authapfs-volume`: Wartość logiczna, która wskazuje, czy system operacyjny załadował plik wykonywalny z autoryzowanej, uwierzytelnionej objętości APFS.
-- Cryptexes volume
-- `on-system-volume:` Wartość logiczna, która wskazuje, czy system operacyjny załadował plik wykonywalny z aktualnie uruchomionej objętości systemowej.
+- is-init-proc: Wartość Boolean określająca, czy executable musi być procesem inicjalizacyjnym systemu operacyjnego (`launchd`).
+- is-sip-protected: Wartość Boolean określająca, czy executable musi być plikiem chronionym przez System Integrity Protection (SIP).
+- `on-authorized-authapfs-volume:` Wartość Boolean określająca, czy system operacyjny załadował executable z autoryzowanego, uwierzytelnionego woluminu APFS.
+- `on-authorized-authapfs-volume`: Wartość Boolean określająca, czy system operacyjny załadował executable z autoryzowanego, uwierzytelnionego woluminu APFS.
+- Wolumin Cryptexes
+- `on-system-volume:`Wartość Boolean określająca, czy system operacyjny załadował executable z aktualnie uruchomionego woluminu systemowego.
 - Wewnątrz /System...
 - ...
 
-Gdy plik binarny Apple jest podpisany, **przypisuje go do kategorii LC** w **pamięci zaufania**.
+Gdy Apple binary jest podpisywany, **przypisuje się go do kategorii LC** w ramach **trust cache**.
 
-- **Kategorie LC iOS 16** zostały [**odwrócone i udokumentowane tutaj**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).
-- Aktualne **Kategorie LC (macOS 14 - Somona)** zostały odwrócone, a ich [**opisy można znaleźć tutaj**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).
+- **Kategorie LC w iOS 16** zostały [**odwrócone i udokumentowane tutaj**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).<sup>[6]</sup>
+- Aktualne **kategorie LC (macOS 14** - Somona) zostały odwrócone, a ich [**opisy można znaleźć tutaj**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).<sup>[7]</sup>
 
-Na przykład Kategoria 1 to:
+Przykładowo Kategoria 1 to:<sup>[7]</sup>
 ```
 Category 1:
 Self Constraint: (on-authorized-authapfs-volume || on-system-volume) && launch-type == 1 && validation-category == 1
 Parent Constraint: is-init-proc
 ```
-- `(on-authorized-authapfs-volume || on-system-volume)`: Musi być w woluminie System lub Cryptexes.
+- `(on-authorized-authapfs-volume || on-system-volume)`: Musi znajdować się na woluminie System lub Cryptexes.
 - `launch-type == 1`: Musi być usługą systemową (plist w LaunchDaemons).
-- `validation-category == 1`: Wykonywalny plik systemu operacyjnego.
+- `validation-category == 1`: Plik wykonywalny systemu operacyjnego.
 - `is-init-proc`: Launchd
 
-### Odwracanie kategorii LC
+### Reverse engineering kategorii LC
 
-Masz więcej informacji [**na ten temat tutaj**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), ale zasadniczo są one zdefiniowane w **AMFI (AppleMobileFileIntegrity)**, więc musisz pobrać Zestaw Narzędzi do Rozwoju Jądra, aby uzyskać **KEXT**. Symbole zaczynające się od **`kConstraintCategory`** są **interesujące**. Ekstrahując je, otrzymasz strumień zakodowany w DER (ASN.1), który musisz zdekodować za pomocą [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) lub biblioteki python-asn1 i jej skryptu `dump.py`, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master), co da ci bardziej zrozumiały ciąg.
+Więcej informacji znajdziesz [**tutaj**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), ale zasadniczo są one zdefiniowane w **AMFI (AppleMobileFileIntegrity)**, więc musisz pobrać Kernel Development Kit, aby uzyskać **KEXT**. Symbole zaczynające się od **`kConstraintCategory`** są tymi **interesującymi**. Po ich wyodrębnieniu otrzymasz strumień zakodowany w formacie DER (ASN.1), który należy zdekodować za pomocą [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) lub biblioteki python-asn1 i jej skryptu `dump.py`, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master), co pozwoli uzyskać bardziej zrozumiały tekst.<sup>[3]</sup>
 
-## Ograniczenia środowiskowe
+## Ograniczenia środowiska
 
-To są Ograniczenia Uruchamiania skonfigurowane w **aplikacjach stron trzecich**. Programista może wybrać **fakty** i **operandy logiczne do użycia** w swojej aplikacji, aby ograniczyć dostęp do niej samej.
+Są to skonfigurowane Launch Constraints ustawione w **aplikacjach innych firm**. Deweloper może wybrać **fakty** i **operandy logiczne**, które mają być używane w jego aplikacji do ograniczenia dostępu do niej.
 
-Możliwe jest enumerowanie Ograniczeń Środowiskowych aplikacji za pomocą:
+Możliwe jest wyliczenie Environment Constraints aplikacji za pomocą:
 ```bash
 codesign -d -vvvv app.app
 ```
 ## Trust Caches
 
-W **macOS** istnieje kilka pamięci zaufania:
+W **macOS** znajduje się kilka trust caches:
 
 - **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/BaseSystemTrustCache.img4`**
 - **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`**
 - **`/System/Library/Security/OSLaunchPolicyData`**
 
-A w iOS wygląda to na **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**.
+W iOS wygląda na to, że znajduje się on w **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**.
 
 > [!WARNING]
-> W macOS działającym na urządzeniach Apple Silicon, jeśli binarny plik podpisany przez Apple nie znajduje się w pamięci zaufania, AMFI odmówi jego załadowania.
+> W systemie macOS działającym na urządzeniach Apple Silicon, jeśli podpisany przez Apple plik binarny nie znajduje się w trust cache, AMFI odmówi jego załadowania.
 
 ### Enumerating Trust Caches
 
-Poprzednie pliki pamięci zaufania są w formacie **IMG4** i **IM4P**, przy czym IM4P to sekcja ładunku formatu IMG4.
+Wspomniane wcześniej pliki trust cache mają format **IMG4** i **IM4P**, przy czym IM4P jest sekcją payloadu formatu IMG4.
 
-Możesz użyć [**pyimg4**](https://github.com/m1stadev/PyIMG4), aby wyodrębnić ładunek baz danych:
+Możesz użyć [**pyimg4**](https://github.com/m1stadev/PyIMG4), aby wyodrębnić payload baz danych:
 ```bash
 # Installation
 python3 -m pip install pyimg4
@@ -97,7 +97,7 @@ pyimg4 im4p extract -i /tmp/StaticTrustCache.im4p -o /tmp/StaticTrustCache.data
 
 pyimg4 im4p extract -i /System/Library/Security/OSLaunchPolicyData -o /tmp/OSLaunchPolicyData.data
 ```
-(Inną opcją może być użycie narzędzia [**img4tool**](https://github.com/tihmstar/img4tool), które będzie działać nawet na M1, nawet jeśli wydanie jest stare, oraz na x86_64, jeśli zainstalujesz je w odpowiednich lokalizacjach).
+(Inną opcją może być użycie narzędzia [**img4tool**](https://github.com/tihmstar/img4tool), które uruchomi się nawet na M1, mimo że wydanie jest stare, oraz na x86_64, jeśli zainstalujesz je w odpowiednich lokalizacjach).
 
 Teraz możesz użyć narzędzia [**trustcache**](https://github.com/CRKatri/trustcache), aby uzyskać informacje w czytelnym formacie:
 ```bash
@@ -123,7 +123,7 @@ entry count = 969
 01e6934cb8833314ea29640c3f633d740fc187f2 [none] [2] [2]
 020bf8c388deaef2740d98223f3d2238b08bab56 [none] [2] [3]
 ```
-Cache zaufania ma następującą strukturę, więc **kategoria LC to 4. kolumna**
+Pamięć podręczna zaufania ma następującą strukturę, więc **kategoria LC znajduje się w 4. kolumnie**
 ```c
 struct trust_cache_entry2 {
 uint8_t cdhash[CS_CDHASH_LEN];
@@ -133,36 +133,52 @@ uint8_t constraintCategory;
 uint8_t reserved0;
 } __attribute__((__packed__));
 ```
-Następnie możesz użyć skryptu takiego jak [**ten**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30), aby wyodrębnić dane.
+Następnie możesz użyć skryptu takiego jak [**ten**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) do wyodrębnienia danych.
 
-Na podstawie tych danych możesz sprawdzić aplikacje z **wartością ograniczeń uruchamiania `0`**, które nie są ograniczone ([**sprawdź tutaj**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056), co oznacza każda wartość).
+Na podstawie tych danych możesz sprawdzić aplikacje z **wartością launch constraints równą `0`**, czyli te, które nie mają ograniczeń ([**sprawdź tutaj**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056), aby zobaczyć znaczenie poszczególnych wartości).<sup>[6]</sup>
 
 ## Łagodzenie ataków
 
-Ograniczenia uruchamiania mogłyby złagodzić kilka starych ataków, **zapewniając, że proces nie będzie uruchamiany w nieoczekiwanych warunkach:** Na przykład z nieoczekiwanych lokalizacji lub wywoływany przez nieoczekiwany proces nadrzędny (jeśli tylko launchd powinien go uruchamiać).
+Launch Constraints ograniczyłyby kilka starszych ataków, **zapewniając, że proces nie zostanie wykonany w nieoczekiwanych warunkach:** na przykład z nieoczekiwanych lokalizacji lub po wywołaniu przez nieoczekiwany proces nadrzędny (jeśli powinien go uruchamiać wyłącznie launchd).
 
-Ponadto, Ograniczenia uruchamiania również **łagodzą ataki typu downgrade.**
+Ponadto Launch Constraints również **ograniczają downgrade attacks**.
 
-Jednakże, **nie łagodzą powszechnych nadużyć XPC**, **wstrzyknięć kodu Electron** ani **wstrzyknięć dylib** bez walidacji biblioteki (chyba że znane są identyfikatory zespołów, które mogą ładować biblioteki).
+Nie ograniczają jednak typowych nadużyć **XPC**, wstrzykiwania kodu **Electron** ani **dylib injections** bez library validation (chyba że znane są team IDs, które mogą ładować biblioteki).<sup>[3]</sup>
 
-### Ochrona demona XPC
+### Ochrona daemonów XPC
 
-W wydaniu Sonoma, istotnym punktem jest **konfiguracja odpowiedzialności** usługi demona XPC. Usługa XPC jest odpowiedzialna za siebie, w przeciwieństwie do klienta łączącego, który jest odpowiedzialny. Jest to udokumentowane w raporcie zwrotnym FB13206884. Ta konfiguracja może wydawać się wadliwa, ponieważ pozwala na pewne interakcje z usługą XPC:
+W wydaniu Sonoma istotną kwestią jest **konfiguracja odpowiedzialności** usługi XPC daemon. Usługa XPC odpowiada sama za siebie, w przeciwieństwie do sytuacji, w której odpowiedzialność ponosi łączący się klient. Zostało to udokumentowane w raporcie feedback FB13206884. Taka konfiguracja może wydawać się wadliwa, ponieważ pozwala na określone interakcje z usługą XPC:
 
-- **Uruchamianie usługi XPC**: Jeśli uznane za błąd, ta konfiguracja nie pozwala na inicjowanie usługi XPC za pomocą kodu atakującego.
-- **Łączenie z aktywną usługą**: Jeśli usługa XPC już działa (prawdopodobnie aktywowana przez swoją oryginalną aplikację), nie ma przeszkód w łączeniu się z nią.
+- **Uruchamianie usługi XPC**: Jeśli uznać to za błąd, taka konfiguracja nie pozwala na zainicjowanie usługi XPC za pomocą kodu atakującego.
+- **Łączenie się z aktywną usługą**: Jeśli usługa XPC już działa (prawdopodobnie została aktywowana przez swoją oryginalną aplikację), nie ma żadnych przeszkód, aby się z nią połączyć.
 
-Chociaż wdrożenie ograniczeń na usłudze XPC może być korzystne poprzez **zawężenie okna dla potencjalnych ataków**, nie rozwiązuje to głównego problemu. Zapewnienie bezpieczeństwa usługi XPC zasadniczo wymaga **skutecznej walidacji łączącego klienta**. To pozostaje jedyną metodą na wzmocnienie bezpieczeństwa usługi. Warto również zauważyć, że wspomniana konfiguracja odpowiedzialności jest obecnie operacyjna, co może nie być zgodne z zamierzonym projektem.
+Wdrożenie ograniczeń dla usługi XPC może być korzystne, ponieważ **zawężałoby okno potencjalnych ataków**, ale nie rozwiązuje głównego problemu. Zapewnienie bezpieczeństwa usługi XPC wymaga przede wszystkim **skutecznej walidacji łączącego się klienta**. Pozostaje to jedynym sposobem na wzmocnienie bezpieczeństwa usługi. Warto również zauważyć, że wspomniana konfiguracja odpowiedzialności jest obecnie aktywna, co może nie być zgodne z zamierzonym projektem.<sup>[3]</sup>
 
 ### Ochrona Electron
 
-Nawet jeśli wymagane jest, aby aplikacja była **otwierana przez LaunchService** (w ograniczeniach rodziców). Można to osiągnąć za pomocą **`open`** (które może ustawiać zmienne środowiskowe) lub korzystając z **API Launch Services** (gdzie można wskazać zmienne środowiskowe).
+Nawet jeśli wymagane jest, aby aplikacja była **otwierana przez LaunchService** (w constraints procesu nadrzędnego), można to osiągnąć za pomocą **`open`** (które może ustawiać zmienne środowiskowe) lub przy użyciu **Launch Services API** (w którym można wskazać zmienne środowiskowe).<sup>[3]</sup>
 
-## Odniesienia
+### CVE-2025-43253 - Nadpisywanie wbudowanych constraints podczas spawn
 
-- [https://youtu.be/f1HA5QhLQ7Y?t=24146](https://youtu.be/f1HA5QhLQ7Y?t=24146)
-- [https://theevilbit.github.io/posts/launch_constraints_deep_dive/](https://theevilbit.github.io/posts/launch_constraints_deep_dive/)
-- [https://eclecticlight.co/2023/06/13/why-wont-a-system-app-or-command-tool-run-launch-constraints-and-trust-caches/](https://eclecticlight.co/2023/06/13/why-wont-a-system-app-or-command-tool-run-launch-constraints-and-trust-caches/)
-- [https://developer.apple.com/videos/play/wwdc2023/10266/](https://developer.apple.com/videos/play/wwdc2023/10266/)
+Launch constraints (oficjalnie **lightweight code requirements**, *LWCR*) są egzekwowane przez **AMFI MAC policy**. `posix_spawn` pozwala wywołującemu przekazać dowolny blob do MAC policy za pośrednictwem **`posix_spawnattr_setmacpolicyinfo_np()`**, a AMFI akceptowało dostarczony przez wywołującego słownik LWCR tą ścieżką. Błąd polegał na tym, że **constraints dostarczone przez atakującego zastępowały wbudowane constraints pliku binarnego**, zamiast być sprawdzane dodatkowo:
+
+- Utwórz minimalny (nawet pusty) słownik launch-constraints.
+- Ustaw **kategorię constraint na `127`**, czyli wartość, którą AMFI akceptuje w spawn attributes, ale której **nie egzekwuje** — zamiast blokować wykonanie, jedynie rejestruje `Launch Constraint Violation (not enforcing)`.
+- Przekaż go za pomocą spawn attributes, a proces uruchomi się w kontekście, którego rzeczywiste constraints self/parent by mu zabroniły.
+
+Po wprowadzeniu poprawki walidowane są **zarówno wbudowane constraints, jak i dostarczone constraints**, więc dostarczony słownik nie może już osłabiać wbudowanych constraints.<sup>[2]</sup>
+
+> [!TIP]
+> Jest to ogólny schemat, którego należy szukać podczas audytowania egzekwowania constraints: API umożliwiające niezaufanym danym *dostarczenie* policy jest zwykle interesujące, gdy silnik policy traktuje dostarczoną wartość jako zastępstwo, a nie dodatkowy wymóg.
+
+## Referencje
+
+- [1] [Objective by the Sea #OBTS v6.0 Day 2 (transmisja na żywo)](https://youtu.be/f1HA5QhLQ7Y?t=24146)
+- [2] [CVE-2025-43253: Omijanie Launch Constraints w macOS (wts.dev)](https://wts.dev/posts/bypassing-launch-constraints/)
+- [3] [Launch and Environment Constraints Deep Dive - theevilbit](https://theevilbit.github.io/posts/launch_constraints_deep_dive/)
+- [4] [Dlaczego aplikacja systemowa lub narzędzie command nie chce się uruchomić? Launch constraints i trust caches - The Eclectic Light Company](https://eclecticlight.co/2023/06/13/why-wont-a-system-app-or-command-tool-run-launch-constraints-and-trust-caches/)
+- [5] [Chroń swoją aplikację Mac za pomocą environment constraints - WWDC23](https://developer.apple.com/videos/play/wwdc2023/10266/)
+- [6] [Opis Launch Constraints wprowadzonych w iOS 16 (gist LinusHenze)](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056)
+- [7] [macOS Sonoma (14) Launch Constraints (gist theevilbit)](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53)
 
 {{#include ../../../banners/hacktricks-training.md}}

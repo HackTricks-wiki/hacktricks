@@ -1,53 +1,57 @@
-# Rejestracja urządzeń w innych organizacjach
+# Enrolowanie urządzeń w innych organizacjach
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Wprowadzenie
 
-Jak [**wcześniej wspomniano**](#what-is-mdm-mobile-device-management)**,** aby spróbować zarejestrować urządzenie w organizacji **wystarczy tylko numer seryjny należący do tej organizacji**. Po zarejestrowaniu urządzenia, kilka organizacji zainstaluje wrażliwe dane na nowym urządzeniu: certyfikaty, aplikacje, hasła WiFi, konfiguracje VPN [i tak dalej](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Dlatego może to być niebezpieczny punkt wejścia dla atakujących, jeśli proces rejestracji nie jest odpowiednio zabezpieczony.
+Jak [**wspomniano wcześniej**](#what-is-mdm-mobile-device-management)**,** aby spróbować enrolować urządzenie w organizacji, **potrzebny jest tylko numer seryjny należący do tej organizacji**. Po enrolowaniu urządzenia kilka organizacji zainstaluje na nim wrażliwe dane: certyfikaty, aplikacje, hasła WiFi, konfiguracje VPN [i tak dalej](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+Dlatego może to stanowić niebezpieczny entrypoint dla attackerów, jeśli proces enrolowania nie jest odpowiednio zabezpieczony.
 
-**Poniżej znajduje się podsumowanie badań [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Sprawdź to, aby uzyskać dalsze szczegóły techniczne!**
+**Poniżej znajduje się podsumowanie researchu [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Sprawdź go, aby poznać dalsze szczegóły techniczne!**<sup>[1]</sup>
 
 ## Przegląd analizy binarnej DEP i MDM
 
-Badania te zagłębiają się w binaria związane z Programem Rejestracji Urządzeń (DEP) i Zarządzaniem Urządzeniami Mobilnymi (MDM) na macOS. Kluczowe komponenty to:
+Ten research analizuje pliki binarne powiązane z Device Enrollment Program (DEP) i Mobile Device Management (MDM) w macOS. Kluczowe komponenty obejmują:
 
-- **`mdmclient`**: Komunikuje się z serwerami MDM i wyzwala rejestracje DEP w wersjach macOS przed 10.13.4.
-- **`profiles`**: Zarządza profilami konfiguracji i wyzwala rejestracje DEP w wersjach macOS 10.13.4 i nowszych.
-- **`cloudconfigurationd`**: Zarządza komunikacją z API DEP i pobiera profile rejestracji urządzeń.
+- **`mdmclient`**: Komunikuje się z serwerami MDM i uruchamia check-iny DEP w wersjach macOS wcześniejszych niż 10.13.4.
+- **`profiles`**: Zarządza Configuration Profiles i uruchamia check-iny DEP w wersjach macOS 10.13.4 i nowszych.
+- **`cloudconfigurationd`**: Zarządza komunikacją z API DEP i pobiera profile Device Enrollment.
 
-Rejestracje DEP wykorzystują funkcje `CPFetchActivationRecord` i `CPGetActivationRecord` z prywatnej ramy profili konfiguracji do pobierania rekordu aktywacji, przy czym `CPFetchActivationRecord` współpracuje z `cloudconfigurationd` przez XPC.
+Check-iny DEP wykorzystują funkcje `CPFetchActivationRecord` i `CPGetActivationRecord` z prywatnego frameworka Configuration Profiles do pobrania Activation Record, przy czym `CPFetchActivationRecord` komunikuje się z `cloudconfigurationd` przez XPC.<sup>[1]</sup>
 
-## Inżynieria odwrotna protokołu Tesla i schematu Absinthe
+## Reverse engineering protokołu Tesla i schematu Absinthe
 
-Rejestracja DEP polega na tym, że `cloudconfigurationd` wysyła zaszyfrowany, podpisany ładunek JSON do _iprofiles.apple.com/macProfile_. Ładunek zawiera numer seryjny urządzenia oraz akcję "RequestProfileConfiguration". Schemat szyfrowania używany jest wewnętrznie jako "Absinthe". Rozwiązanie tego schematu jest skomplikowane i wymaga wielu kroków, co doprowadziło do zbadania alternatywnych metod wstawiania dowolnych numerów seryjnych w żądaniu rekordu aktywacji.
+Check-in DEP obejmuje wysłanie przez `cloudconfigurationd` zaszyfrowanego i podpisanego payloadu JSON do _iprofiles.apple.com/macProfile_. Payload zawiera numer seryjny urządzenia oraz akcję "RequestProfileConfiguration". Używany schemat szyfrowania jest wewnętrznie określany jako "Absinthe". Odtworzenie tego schematu jest złożone i obejmuje wiele kroków, co doprowadziło do zbadania alternatywnych metod wprowadzania dowolnych numerów seryjnych do żądania Activation Record.<sup>[1]</sup>
 
-## Proxying żądań DEP
+## Proxyowanie żądań DEP
 
-Próby przechwycenia i modyfikacji żądań DEP do _iprofiles.apple.com_ za pomocą narzędzi takich jak Charles Proxy były utrudnione przez szyfrowanie ładunku i środki bezpieczeństwa SSL/TLS. Jednak włączenie konfiguracji `MCCloudConfigAcceptAnyHTTPSCertificate` pozwala na ominięcie walidacji certyfikatu serwera, chociaż zaszyfrowana natura ładunku nadal uniemożliwia modyfikację numeru seryjnego bez klucza deszyfrującego.
+Próby przechwytywania i modyfikowania żądań DEP do _iprofiles.apple.com_ przy użyciu narzędzi takich jak Charles Proxy były utrudnione przez szyfrowanie payloadu oraz mechanizmy bezpieczeństwa SSL/TLS. Jednak włączenie konfiguracji `MCCloudConfigAcceptAnyHTTPSCertificate` pozwala ominąć walidację certyfikatu serwera, chociaż zaszyfrowany charakter payloadu nadal uniemożliwia modyfikację numeru seryjnego bez klucza deszyfrującego.<sup>[1]</sup>
 
-## Instrumentacja binariów systemowych współpracujących z DEP
+## Instrumentowanie binariów systemowych komunikujących się z DEP
 
-Instrumentacja binariów systemowych, takich jak `cloudconfigurationd`, wymaga wyłączenia Ochrony Integralności Systemu (SIP) w macOS. Po wyłączeniu SIP, narzędzia takie jak LLDB mogą być używane do podłączenia się do procesów systemowych i potencjalnej modyfikacji numeru seryjnego używanego w interakcjach z API DEP. Ta metoda jest preferowana, ponieważ unika złożoności związanych z uprawnieniami i podpisywaniem kodu.
+Instrumentowanie binariów systemowych, takich jak `cloudconfigurationd`, wymaga wyłączenia System Integrity Protection (SIP) w macOS. Po wyłączeniu SIP narzędzia takie jak LLDB mogą zostać użyte do podłączenia się do procesów systemowych i potencjalnej modyfikacji numeru seryjnego używanego w interakcjach z API DEP. Ta metoda jest preferowana, ponieważ pozwala uniknąć złożoności związanej z entitlements i code signing.
 
-**Wykorzystywanie instrumentacji binarnej:**
-Modyfikacja ładunku żądania DEP przed serializacją JSON w `cloudconfigurationd` okazała się skuteczna. Proces obejmował:
+**Exploiting Binary Instrumentation:**
+Modyfikowanie żądania DEP przed serializacją JSON w `cloudconfigurationd` okazało się skuteczne. Proces obejmował:
 
 1. Podłączenie LLDB do `cloudconfigurationd`.
-2. Zlokalizowanie punktu, w którym pobierany jest numer seryjny systemu.
-3. Wstrzyknięcie dowolnego numeru seryjnego do pamięci przed zaszyfrowaniem ładunku i wysłaniem go.
+2. Zlokalizowanie miejsca, w którym pobierany jest systemowy numer seryjny.
+3. Wstrzyknięcie dowolnego numeru seryjnego do pamięci przed zaszyfrowaniem i wysłaniem payloadu.
 
-Ta metoda pozwoliła na pobranie pełnych profili DEP dla dowolnych numerów seryjnych, co wykazało potencjalną lukę.
+Metoda ta umożliwiła pobieranie kompletnych profili DEP dla dowolnych numerów seryjnych, demonstrując potencjalną podatność.<sup>[1]</sup>
 
-### Automatyzacja instrumentacji za pomocą Pythona
+### Automatyzacja instrumentowania za pomocą Pythona
 
-Proces eksploatacji został zautomatyzowany za pomocą Pythona z użyciem API LLDB, co umożliwiło programowe wstrzykiwanie dowolnych numerów seryjnych i pobieranie odpowiadających im profili DEP.
+Proces exploitation został zautomatyzowany przy użyciu Pythona i API LLDB, dzięki czemu możliwe stało się programowe wstrzykiwanie dowolnych numerów seryjnych i pobieranie odpowiadających im profili DEP.<sup>[1]</sup>
 
-### Potencjalne skutki luk w DEP i MDM
+### Potencjalne skutki podatności DEP i MDM
 
-Badania podkreśliły istotne problemy z bezpieczeństwem:
+Research wskazał na istotne problemy bezpieczeństwa:
 
-1. **Ujawnienie informacji**: Podając zarejestrowany w DEP numer seryjny, można uzyskać wrażliwe informacje organizacyjne zawarte w profilu DEP.
+1. **Ujawnienie informacji**: Podając numer seryjny zarejestrowany w DEP, można pobrać wrażliwe informacje organizacyjne zawarte w profilu DEP.<sup>[1]</sup>
+
+## Referencje
+
+- [1] [Duo Labs — MDM Me Maybe: Device Enrollment Program Security](https://duo.com/labs/research/mdm-me-maybe)
 
 {{#include ../../../banners/hacktricks-training.md}}

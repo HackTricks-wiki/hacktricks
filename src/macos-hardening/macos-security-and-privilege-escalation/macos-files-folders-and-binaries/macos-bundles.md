@@ -1,64 +1,64 @@
-# Pakiety macOS
+# Bundles w macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Podstawowe informacje
 
-Bundle w macOS pełnią funkcję kontenerów dla różnych zasobów, w tym aplikacji, bibliotek i innych niezbędnych plików, dzięki czemu w Finderze wyglądają jak pojedyncze obiekty, np. dobrze znane pliki `*.app`. Najczęściej spotykanym bundle jest `.app`, choć popularne są też inne typy, takie jak `.framework`, `.systemextension` i `.kext`.
+Bundles w macOS służą jako kontenery dla różnych zasobów, w tym aplikacji, bibliotek i innych niezbędnych plików, dzięki czemu w Finderze wyglądają jak pojedyncze obiekty, takie jak znane pliki `*.app`. Najczęściej spotykanym bundlem jest bundle `.app`, choć powszechne są również inne typy, takie jak `.framework`, `.systemextension` i `.kext`.
 
-### Podstawowe składniki pakietu
+### Podstawowe elementy bundle
 
-W obrębie pakietu, szczególnie w katalogu `<application>.app/Contents/`, znajduje się wiele ważnych zasobów:
+Wewnątrz bundle, szczególnie w katalogu `<application>.app/Contents/`, znajduje się wiele ważnych zasobów:
 
-- **\_CodeSignature**: Ten katalog przechowuje informacje dotyczące podpisu kodu niezbędne do weryfikacji integralności aplikacji. Możesz sprawdzić informacje o podpisie kodu używając poleceń takich jak:
+- **\_CodeSignature**: Ten katalog przechowuje szczegóły podpisu code-signing, niezbędne do weryfikacji integralności aplikacji. Informacje dotyczące code-signing można sprawdzić za pomocą poleceń takich jak:
 ```bash
 openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64
 ```
-- **MacOS**: Zawiera binarny plik wykonywalny aplikacji, który uruchamia się po interakcji użytkownika.
-- **Resources**: Repozytorium komponentów interfejsu użytkownika aplikacji, w tym obrazów, dokumentów oraz opisów interfejsu (pliki nib/xib).
-- **Info.plist**: Pełni rolę głównego pliku konfiguracyjnego aplikacji, kluczowego dla systemu, aby prawidłowo rozpoznać i współdziałać z aplikacją.
+- **MacOS**: Zawiera wykonywalny plik binarny aplikacji uruchamiany po interakcji użytkownika.
+- **Resources**: Repozytorium komponentów interfejsu użytkownika aplikacji, w tym obrazów, dokumentów i opisów interfejsu (pliki nib/xib).
+- **Info.plist**: Pełni funkcję głównego pliku konfiguracyjnego aplikacji, kluczowego dla prawidłowego rozpoznawania aplikacji przez system i interakcji z nią.
 
-#### Important Keys in Info.plist
+#### Ważne klucze w Info.plist
 
-Plik `Info.plist` jest podstawą konfiguracji aplikacji i zawiera klucze takie jak:
+Plik `Info.plist` jest podstawą konfiguracji aplikacji i zawiera takie klucze jak:
 
 - **CFBundleExecutable**: Określa nazwę głównego pliku wykonywalnego znajdującego się w katalogu `Contents/MacOS`.
-- **CFBundleIdentifier**: Dostarcza globalny identyfikator aplikacji, szeroko wykorzystywany przez macOS do zarządzania aplikacjami.
+- **CFBundleIdentifier**: Udostępnia globalny identyfikator aplikacji, szeroko wykorzystywany przez macOS do zarządzania aplikacjami.
 - **LSMinimumSystemVersion**: Wskazuje minimalną wersję macOS wymaganą do uruchomienia aplikacji.
 
-### Exploring Bundles
+### Eksplorowanie Bundles
 
-Aby zbadać zawartość pakietu, takiego jak `Safari.app`, można użyć następującego polecenia: `bash ls -lR /Applications/Safari.app/Contents`
+Aby wyświetlić zawartość bundle, takiego jak `Safari.app`, można użyć następującego polecenia: `bash ls -lR /Applications/Safari.app/Contents`
 
-To badanie ujawnia katalogi takie jak `_CodeSignature`, `MacOS`, `Resources` oraz pliki jak `Info.plist`, z których każdy pełni inną rolę — od zabezpieczenia aplikacji, po definiowanie interfejsu użytkownika i parametrów działania.
+Eksploracja ta ujawnia katalogi takie jak `_CodeSignature`, `MacOS`, `Resources` oraz pliki takie jak `Info.plist`, z których każdy pełni określoną funkcję — od zabezpieczania aplikacji po definiowanie jej interfejsu użytkownika i parametrów działania.
 
-#### Additional Bundle Directories
+#### Dodatkowe katalogi Bundles
 
-Poza powszechnymi katalogami, bundle mogą także zawierać:
+Oprócz typowych katalogów bundles mogą również zawierać:
 
-- **Frameworks**: Zawiera dołączone frameworki używane przez aplikację. Frameworki są podobne do dylibów, ale z dodatkowymi zasobami.
-- **PlugIns**: Katalog dla plug-inów i rozszerzeń zwiększających możliwości aplikacji.
-- **XPCServices**: Zawiera usługi XPC używane przez aplikację do komunikacji międzyprocesowej.
+- **Frameworks**: Zawiera frameworki dołączone do aplikacji. Frameworki przypominają dylibs, ale zawierają dodatkowe zasoby.
+- **PlugIns**: Katalog wtyczek i rozszerzeń zwiększających możliwości aplikacji.
+- **XPCServices**: Przechowuje usługi XPC używane przez aplikację do komunikacji out-of-process.
 
-Taka struktura zapewnia, że wszystkie niezbędne komponenty są zamknięte w pakiecie, ułatwiając modularne i bezpieczne środowisko aplikacji.
+Taka struktura zapewnia hermetyzację wszystkich wymaganych komponentów w bundle, ułatwiając tworzenie modularnego i bezpiecznego środowiska aplikacji.
 
-Dla bardziej szczegółowych informacji o kluczach `Info.plist` i ich znaczeniach, dokumentacja Apple dla deweloperów zawiera obszerne zasoby: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
+Więcej szczegółowych informacji na temat kluczy `Info.plist` i ich znaczenia można znaleźć w dokumentacji Apple dla developerów: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
 
-## Security Notes & Abuse Vectors
+## Uwagi dotyczące bezpieczeństwa i wektory nadużyć
 
-- **Gatekeeper / App Translocation**: Gdy skwarantynowany bundle uruchamiany jest po raz pierwszy, macOS wykonuje głęboką weryfikację podpisu i może uruchomić go z losowej, translokowanej ścieżki. Po zatwierdzeniu, kolejne uruchomienia wykonują tylko płytkie kontrole; pliki zasobów w `Resources/`, `PlugIns/`, nibs itp. historycznie były niesprawdzane. Od macOS 13 Ventura wykonywana jest głęboka weryfikacja przy pierwszym uruchomieniu, a nowe uprawnienie *App Management* w TCC ogranicza procesy stron trzecich przed modyfikowaniem innych bundle bez zgody użytkownika, jednak starsze systemy pozostają podatne.
-- **Bundle Identifier collisions**: Wielokrotne używanie tego samego `CFBundleIdentifier` przez wbudowane cele (PlugIns, helper tools) może złamać walidację podpisu i niekiedy umożliwić przejęcie/zakłócenie obsługi schematów URL. Zawsze wylicz pod‑bundle i sprawdź, czy identyfikatory są unikatowe.
+- **Gatekeeper / App Translocation**: Gdy quarantined bundle jest uruchamiany po raz pierwszy, macOS przeprowadza dokładną weryfikację podpisu i może uruchomić go ze zrandomizowanej ścieżki translocated. Po zaakceptowaniu kolejne uruchomienia wykonują już tylko pobieżne kontrole; pliki zasobów w `Resources/`, `PlugIns/`, nib itd. były historycznie pomijane. Od macOS 13 Ventura przy pierwszym uruchomieniu wymuszana jest dokładna kontrola, a nowe uprawnienie TCC *App Management* ogranicza procesy third-party przed modyfikowaniem innych bundles bez zgody użytkownika, jednak starsze systemy nadal są podatne.
+- **Kolizje Bundle Identifier**: Wiele embedded targets (PlugIns, helper tools) używających tego samego `CFBundleIdentifier` może zakłócić walidację podpisu, a czasami umożliwić hijacking/confusion schematu URL. Zawsze wyliczaj sub-bundles i weryfikuj unikalność identyfikatorów.
 
 ## Resource Hijacking (Dirty NIB / NIB Injection)
 
-Przed Venturą, podmiana zasobów UI w podpisanej aplikacji mogła obejść płytkie sprawdzenie podpisu i doprowadzić do wykonania kodu z uprawnieniami aplikacji. Aktualne badania (2024) pokazują, że wciąż działa to na systemach przed Venturą oraz na buildach nieobjętych kwarantanną:
+Przed Ventura podmiana zasobów interfejsu użytkownika w podpisanej aplikacji mogła ominąć pobieżne sprawdzanie code signing i doprowadzić do code execution z entitlements aplikacji. Obecne badania (2024) pokazują, że nadal działa to w wersjach starszych niż Ventura oraz w builds bez quarantine:<sup>[1][2]</sup>
 
-1. Skopiuj docelową aplikację do zapisywalnej lokalizacji (np. `/tmp/Victim.app`).
-2. Zamień `Contents/Resources/MainMenu.nib` (lub dowolny nib zadeklarowany w `NSMainNibFile`) na złośliwy, który instancjonuje `NSAppleScript`, `NSTask` itd.
-3. Uruchom aplikację. Złośliwy nib wykona się pod identyfikatorem bundle ofiary i z jej uprawnieniami (np. przyznaniami TCC, dostęp do mikrofonu/kamery itp.).
-4. Ventura+ łagodzi ten wektor przez głęboką weryfikację bundle przy pierwszym uruchomieniu oraz wymaganie uprawnienia *App Management* do późniejszych modyfikacji, więc utrzymanie dostępu jest trudniejsze, ale ataki podczas pierwszego uruchomienia na starszych wersjach macOS wciąż działają.
+1. Skopiuj aplikację docelową do lokalizacji z prawem zapisu, np. `/tmp/Victim.app`.
+2. Zastąp `Contents/Resources/MainMenu.nib` (lub dowolny nib zadeklarowany w `NSMainNibFile`) złośliwym plikiem, który tworzy instancję `NSAppleScript`, `NSTask` itd.
+3. Uruchom aplikację. Złośliwy nib wykona się w ramach bundle ID i entitlements ofiary (uprawnienia TCC, mikrofon/kamera itd.).
+4. Ventura+ ogranicza ten scenariusz, dokładnie weryfikując bundle przy pierwszym uruchomieniu i wymagając uprawnienia *App Management* przy późniejszych modyfikacjach, dlatego utrzymanie persistence jest trudniejsze, jednak ataki podczas pierwszego uruchomienia na starszych wersjach macOS nadal są możliwe.<sup>[1]</sup>
 
-Minimalny przykład złośliwego ładunku nib (skompiluj xib do nib za pomocą `ibtool`):
+Minimalny przykład malicious nib payload (skompiluj xib do nib za pomocą `ibtool`):
 ```bash
 # create a nib that runs osascript -e 'do shell script "id"'
 # ...build xib in Xcode, then
@@ -68,9 +68,9 @@ open /tmp/Victim.app
 ```
 ## Framework / PlugIn / dylib Hijacking inside Bundles
 
-Ponieważ wyszukiwania przez `@rpath` preferują dołączone Frameworks/PlugIns, umieszczenie złośliwej biblioteki wewnątrz `Contents/Frameworks/` lub `Contents/PlugIns/` może zmienić kolejność ładowania, gdy główny plik binarny jest podpisany bez weryfikacji bibliotek lub ma słabe uporządkowanie `LC_RPATH`.
+Ponieważ wyszukiwanie `@rpath` preferuje zawarte w bundle Frameworks/PlugIns, umieszczenie złośliwej biblioteki w `Contents/Frameworks/` lub `Contents/PlugIns/` może przekierować kolejność ładowania, gdy główny binary jest podpisany bez library validation lub z nieprawidłową kolejnością `LC_RPATH`.
 
-Typowe kroki przy wykorzystywaniu niepodpisanego/ad‑hoc bundle:
+Typowe kroki podczas wykorzystywania niepodpisanego bundle lub bundle podpisanego ad hoc:
 ```bash
 cp evil.dylib /tmp/Victim.app/Contents/Frameworks/
 install_name_tool -add_rpath @executable_path/../Frameworks /tmp/Victim.app/Contents/MacOS/Victim
@@ -81,10 +81,10 @@ codesign -f -s - --deep --timestamp=none /tmp/Victim.app
 open /tmp/Victim.app
 ```
 Uwagi:
-- Hardened runtime z brakiem `com.apple.security.cs.disable-library-validation` blokuje third‑party dylibs; najpierw sprawdź entitlements.
-- Usługi XPC w `Contents/XPCServices/` często ładują sąsiednie frameworki — zmodyfikuj ich binaria w podobny sposób dla ścieżek persistence lub privilege escalation.
+- Hardened runtime bez `com.apple.security.cs.disable-library-validation` blokuje zewnętrzne dylibs; najpierw sprawdź entitlements.
+- XPC services w `Contents/XPCServices/` często ładują sąsiednie frameworks — podobnie zmodyfikuj ich binaries w celu uzyskania persistence lub ścieżek privilege escalation.
 
-## Szybka ściągawka do inspekcji
+## Skrócona ściągawka do inspekcji
 ```bash
 # list top-level bundle metadata
 /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" /Applications/App.app/Contents/Info.plist
@@ -99,8 +99,9 @@ codesign --verify --deep --strict /Applications/App.app && echo OK
 otool -l /Applications/App.app/Contents/MacOS/App | grep -A2 RPATH
 otool -L /Applications/App.app/Contents/MacOS/App
 ```
-## Źródła
+## Referencje
 
-- [Bringing process injection into view(s): exploiting macOS apps using nib files (2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
-- [Dirty NIB & bundle resource tampering write‑up (2024)](https://karol-mazurek.medium.com/snake-apple-app-bundle-ext-f5c43a3c84c4)
+- [1] [Wprowadzenie process injection do widoku (widoków): wykorzystywanie aplikacji macOS przy użyciu plików nib (2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
+- [2] [Dirty NIB i bundle resource tampering write-up (2024)](https://karol-mazurek.medium.com/snake-apple-app-bundle-ext-f5c43a3c84c4)
+
 {{#include ../../../banners/hacktricks-training.md}}
