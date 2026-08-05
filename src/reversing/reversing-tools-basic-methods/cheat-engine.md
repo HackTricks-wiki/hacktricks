@@ -2,189 +2,189 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) ni programu muhimu ya kutafuta mahali ambapo thamani muhimu zimehifadhiwa ndani ya kumbukumbu ya mchezo unaoendelea na kuzibadilisha.\
-Unaposhusha na kuendesha, unapata **mafunzo** ya jinsi ya kutumia chombo hiki. Ikiwa unataka kujifunza jinsi ya kutumia chombo hiki, inashauriwa kukamilisha mafunzo hayo.
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) ni programu muhimu ya kutafuta mahali ambapo thamani muhimu zimehifadhiwa ndani ya memory ya game inayoendeshwa na kuzibadilisha.\
+Unapoipakua na kuiendesha, **utaonyeshwa** **tutorial** ya jinsi ya kutumia tool hii. Ikiwa unataka kujifunza jinsi ya kuitumia, inashauriwa sana kuikamilisha.<sup>[[3]](#references)</sup>
 
 ## Unatafuta nini?
 
-![](<../../images/image (762).png>)
+![Cheat Engine - Unatafuta nini?: Unatafuta nini?](<../../images/image (762).png>)
 
-Chombo hiki ni muhimu sana kutafuta **mahali ambapo thamani fulani** (kawaida ni nambari) **imehifadhiwa katika kumbukumbu** ya programu.\
-**Kawaida nambari** huhifadhiwa katika **4bytes** lakini unaweza pia kuzikuta katika **double** au **float** formats, au unaweza kutaka kutafuta kitu **tofauti na nambari**. Kwa sababu hiyo, unahitaji kuwa na uhakika kuwa **unachagua** unachotaka **kutafuta**:
+Tool hii ni muhimu sana kwa kutafuta **mahali ambapo thamani fulani** (kwa kawaida namba) **imehifadhiwa kwenye memory** ya program.\
+**Kwa kawaida namba** huhifadhiwa katika mfumo wa **4bytes**, lakini unaweza pia kuzipata katika formats za **double** au **float**, au unaweza kutaka kutafuta kitu **ambacho si namba**. Kwa sababu hiyo, unahitaji kuhakikisha kuwa **umechagua** unachotaka **kutafuta**:
 
-![](<../../images/image (324).png>)
+![Cheat Engine - Unatafuta nini?: Kwa kawaida namba huhifadhiwa katika mfumo wa 4bytes, lakini unaweza pia kuzipata katika formats za double au float, au unaweza kutaka kutafuta kitu...](<../../images/image (324).png>)
 
-Pia unaweza kuashiria **aina tofauti** za **tafutizi**:
+Pia unaweza kuonyesha aina **tofauti** za **searches**:
 
-![](<../../images/image (311).png>)
+![Cheat Engine - Unatafuta nini?: Pia unaweza kuonyesha aina tofauti za searches](<../../images/image (311).png>)
 
-Unaweza pia kuangalia kisanduku ili **kusitisha mchezo wakati wa kuskania kumbukumbu**:
+Unaweza pia kuchagua kisanduku ili **kusimamisha game wakati wa kuscan memory**:
 
-![](<../../images/image (1052).png>)
+![Cheat Engine - Unatafuta nini?: Unaweza pia kuchagua kisanduku ili kusimamisha game wakati wa kuscan memory](<../../images/image (1052).png>)
 
 ### Hotkeys
 
-Katika _**Edit --> Settings --> Hotkeys**_ unaweza kuweka **hotkeys** tofauti kwa madhumuni tofauti kama **kusitisha** **mchezo** (ambayo ni muhimu sana ikiwa kwa wakati fulani unataka kuskania kumbukumbu). Chaguzi nyingine zinapatikana:
+Katika _**Edit --> Settings --> Hotkeys**_ unaweza kuweka **hotkeys** tofauti kwa madhumuni mbalimbali, kama vile **kusimamisha** **game** (jambo ambalo ni muhimu sana ikiwa wakati fulani unataka kuscan memory). Options nyingine zinapatikana:
 
-![](<../../images/image (864).png>)
+![Unatafuta nini? - Hotkeys: Katika Edit -- Settings -- Hotkeys unaweza kuweka hotkeys tofauti kwa madhumuni mbalimbali, kama vile kusimamisha game (jambo ambalo ni muhimu sana ikiwa wakati fulani...](<../../images/image (864).png>)
 
 ## Kubadilisha thamani
 
-Mara tu unapokuwa **umeipata** wapi **thamani** unayo **tafuta** (zaidi kuhusu hii katika hatua zinazofuata) unaweza **kuibadilisha** kwa kubofya mara mbili, kisha kubofya mara mbili kwenye thamani yake:
+Baada ya **kupata** mahali ambapo kuna **thamani** unayo **tafuta** (maelezo zaidi yako katika hatua zifuatazo), unaweza **kuibadilisha** kwa kuibofya mara mbili, kisha kubofya thamani yake mara mbili:
 
-![](<../../images/image (563).png>)
+![Hotkeys - Kubadilisha thamani: Baada ya kupata mahali ambapo kuna thamani unayotafuta (maelezo zaidi yako katika hatua zifuatazo), unaweza kuibadilisha kwa kuibofya mara mbili, kisha kubofya...](<../../images/image (563).png>)
 
-Na hatimaye **kuweka alama** ili kupata mabadiliko yafanyike katika kumbukumbu:
+Kisha **uchague kisanduku** ili mabadiliko yafanyike kwenye memory:
 
-![](<../../images/image (385).png>)
+![Hotkeys - Kubadilisha thamani: Kisha uchague kisanduku ili mabadiliko yafanyike kwenye memory](<../../images/image (385).png>)
 
-**Mabadiliko** kwa **kumbukumbu** yatakuwa **yamewekwa** mara moja (kumbuka kuwa hadi mchezo usitumie thamani hii tena, thamani **haitawekwa upya katika mchezo**).
+**Mabadiliko** kwenye **memory** yatafanyika mara moja (kumbuka kwamba hadi game itumie tena thamani hii, thamani **haitasasishwa kwenye game**).
 
 ## Kutafuta thamani
 
-Hivyo, tunaenda kudhani kuwa kuna thamani muhimu (kama maisha ya mtumiaji wako) unayotaka kuboresha, na unatafuta thamani hii katika kumbukumbu)
+Kwa hiyo, tutachukulia kwamba kuna thamani muhimu (kama vile life ya user wako) unayotaka kuboresha, na unatafuta thamani hii kwenye memory)
 
 ### Kupitia mabadiliko yanayojulikana
 
-Tukidhani unatafuta thamani 100, unafanya **scan** ukitafuta thamani hiyo na unapata coincidences nyingi:
+Tukichukulia kuwa unatafuta thamani 100, **unafanya scan** ukitafuta thamani hiyo na kupata matokeo mengi yanayolingana:
 
-![](<../../images/image (108).png>)
+![Kutafuta thamani - Kupitia mabadiliko yanayojulikana: Tukichukulia kuwa unatafuta thamani 100, unafanya scan ukitafuta thamani hiyo na kupata matokeo mengi yanayolingana](<../../images/image (108).png>)
 
-Kisha, unafanya kitu ili **thamani ibadilike**, na un **asitisha** mchezo na **kufanya** **scan** ya **next**:
+Kisha, unafanya kitu kinachosababisha **thamani ibadilike**, na **unasimamisha** game kisha **unafanya** **next scan**:
 
-![](<../../images/image (684).png>)
+![Kutafuta thamani - Kupitia mabadiliko yanayojulikana: Kisha, unafanya kitu kinachosababisha thamani ibadilike, unasimamisha game na kufanya next scan](<../../images/image (684).png>)
 
-Cheat Engine itatafuta **thamani** ambazo **zilipita kutoka 100 hadi thamani mpya**. Hongera, umepata **anwani** ya thamani uliyokuwa unatafuta, sasa unaweza kuibadilisha.\
-_Ikiwa bado una thamani kadhaa, fanya kitu ili kubadilisha tena thamani hiyo, na fanya "next scan" nyingine ili kuchuja anwani._
+Cheat Engine itatafuta **thamani** ambazo **zilibadilika kutoka 100 hadi thamani mpya**. Hongera, **umepata** **address** ya thamani uliyokuwa unatafuta; sasa unaweza kuibadilisha.\
+_Ikiwa bado una thamani kadhaa, fanya kitu cha kubadilisha thamani hiyo tena, kisha ufanye "next scan" nyingine ili kuchuja addresses._
 
-### Thamani isiyojulikana, mabadiliko yanayojulikana
+### Unknown Value, known change
 
-Katika hali ambapo **hujui thamani** lakini unajua **jinsi ya kuifanya ibadilike** (na hata thamani ya mabadiliko) unaweza kutafuta nambari yako.
+Katika hali ambapo **huijui thamani**, lakini unajua **jinsi ya kuifanya ibadilike** (na hata thamani ya mabadiliko hayo), unaweza kuitafuta namba yako.
 
-Hivyo, anza kwa kufanya scan ya aina "**Unknown initial value**":
+Anza kwa kufanya scan ya aina ya "**Unknown initial value**":
 
-![](<../../images/image (890).png>)
+![Kupitia mabadiliko yanayojulikana - Unknown Value, known change: Anza kwa kufanya scan ya aina ya " Unknown initial value "](<../../images/image (890).png>)
 
-Kisha, fanya thamani ibadilike, onyesha **jinsi** **thamani** **ilibadilika** (katika kesi yangu ilipungua kwa 1) na fanya **next scan**:
+Kisha, badilisha thamani, onyesha **jinsi** **thamani** hiyo **ilibadilika** (katika mfano wangu ilipungua kwa 1), na ufanye **next scan**:
 
-![](<../../images/image (371).png>)
+![Kupitia mabadiliko yanayojulikana - Unknown Value, known change: Kisha, badilisha thamani, onyesha jinsi thamani ilivyobadilika (katika mfano wangu ilipungua kwa 1), na ufanye next scan](<../../images/image (371).png>)
 
-Utawasilishwa **na thamani zote ambazo zilibadilishwa kwa njia iliyochaguliwa**:
+Utaonyeshwa **thamani zote zilizobadilishwa kwa njia uliyochagua**:
 
-![](<../../images/image (569).png>)
+![Kupitia mabadiliko yanayojulikana - Unknown Value, known change: Utaonyeshwa thamani zote zilizobadilishwa kwa njia uliyochagua](<../../images/image (569).png>)
 
-Mara tu unapokuwa umepata thamani yako, unaweza kuibadilisha.
+Baada ya kupata thamani yako, unaweza kuibadilisha.
 
-Kumbuka kuwa kuna **mabadiliko mengi yanayowezekana** na unaweza kufanya hatua hizi **mara nyingi kadri unavyotaka** ili kuchuja matokeo:
+Kumbuka kwamba kuna **mabadiliko mengi yanayowezekana**, na unaweza kurudia **hatua hizi mara nyingi unavyotaka** ili kuchuja matokeo:
 
-![](<../../images/image (574).png>)
+![Kupitia mabadiliko yanayojulikana - Unknown Value, known change: Kumbuka kwamba kuna mabadiliko mengi yanayowezekana, na unaweza kurudia hatua hizi mara nyingi unavyotaka ili kuchuja matokeo](<../../images/image (574).png>)
 
-### Anwani ya Kumbukumbu ya Nasibu - Kutafuta msimbo
+### Random Memory Address - Finding the code
 
-Hadi sasa tumefundishwa jinsi ya kupata anwani inayohifadhi thamani, lakini ni uwezekano mkubwa kwamba katika **utekelezaji tofauti wa mchezo anwani hiyo iko katika maeneo tofauti ya kumbukumbu**. Hivyo, hebu tujifunze jinsi ya kila wakati kupata anwani hiyo.
+Hadi sasa tumejifunza jinsi ya kupata address inayohifadhi thamani, lakini kuna uwezekano mkubwa kwamba katika **executions tofauti za game, address hiyo itakuwa katika maeneo tofauti ya memory**. Kwa hiyo, hebu tujifunze jinsi ya kuipata address hiyo kila mara.
 
-Kwa kutumia baadhi ya hila zilizotajwa, pata anwani ambapo mchezo wako wa sasa unahifadhi thamani muhimu. Kisha (ukisitisha mchezo ikiwa unataka) fanya **right click** kwenye **anwani** iliyopatikana na uchague "**Find out what accesses this address**" au "**Find out what writes to this address**":
+Kwa kutumia baadhi ya mbinu zilizotajwa, tafuta address ambayo game yako ya sasa inatumia kuhifadhi thamani muhimu. Kisha (ukitaka, simamisha game) bofya **right click** kwenye **address** iliyopatikana na uchague "**Find out what accesses this address**" au "**Find out what writes to this address**":
 
-![](<../../images/image (1067).png>)
+![Unknown Value, known change - Random Memory Address - Finding the code: Kwa kutumia baadhi ya mbinu zilizotajwa, tafuta address ambayo game yako ya sasa inatumia kuhifadhi thamani muhimu. Kisha...](<../../images/image (1067).png>)
 
-**Chaguo la kwanza** ni muhimu kujua **sehemu** za **msimbo** zinazotumia **anwani hii** (ambayo ni muhimu kwa mambo zaidi kama **kujua wapi unaweza kubadilisha msimbo** wa mchezo).\
-**Chaguo la pili** ni **maalum zaidi**, na litakuwa na msaada zaidi katika kesi hii kwani tunavutiwa kujua **kutoka wapi thamani hii inaandikwa**.
+**Option ya kwanza** ni muhimu kwa kujua ni **sehemu zipi** za **code** **zinazotumia** **address** hii (jambo linalofaa pia kwa mambo mengine, kama **kujua mahali unapoweza kubadilisha code** ya game).\
+**Option ya pili** ni **maalum zaidi**, na itasaidia zaidi katika hali hii kwa kuwa tunataka kujua **mahali ambapo thamani hii inaandikwa**.
 
-Mara tu unapochagua moja ya chaguzi hizo, **debugger** itakuwa **imeunganishwa** na programu na dirisha jipya **bila maudhui** litajitokeza. Sasa, **cheza** **mchezo** na **badilisha** **thamani** hiyo (bila kuanzisha upya mchezo). **Dirisha** linapaswa kuwa **limejaa** na **anwani** zinazobadilisha **thamani**:
+Baada ya kuchagua mojawapo ya options hizo, **debugger** itaunganishwa kwenye program na **window mpya tupu** itaonekana. Sasa, **cheza** **game** na **ubadilishe** **thamani** hiyo (bila kuanzisha game upya). **Window** hiyo inapaswa kujazwa na **addresses** ambazo **zinabadilisha** **thamani**:
 
-![](<../../images/image (91).png>)
+![Unknown Value, known change - Random Memory Address - Finding the code: Baada ya kuchagua mojawapo ya options hizo, debugger itaunganishwa kwenye program na window mpya tupu...](<../../images/image (91).png>)
 
-Sasa kwamba umepata anwani inayobadilisha thamani unaweza **kubadilisha msimbo kwa mapenzi yako** (Cheat Engine inakuwezesha kuibadilisha kwa NOPs haraka):
+Sasa kwa kuwa umepata address inayobadilisha thamani, unaweza **kubadilisha code unavyotaka** (Cheat Engine inakuruhusu kuibadilisha kuwa NOPs haraka sana):
 
-![](<../../images/image (1057).png>)
+![Unknown Value, known change - Random Memory Address - Finding the code: Sasa kwa kuwa umepata address inayobadilisha thamani, unaweza kubadilisha code unavyotaka (Cheat Engine...](<../../images/image (1057).png>)
 
-Hivyo, sasa unaweza kuibadilisha ili msimbo usiathiri nambari yako, au uathiri kila wakati kwa njia chanya.
+Kwa hiyo, sasa unaweza kuibadilisha ili code isiathiri namba yako, au iathiri kwa njia chanya kila mara.
 
-### Anwani ya Kumbukumbu ya Nasibu - Kutafuta kiashiria
+### Random Memory Address - Finding the pointer
 
-Kufuata hatua zilizopita, pata wapi thamani unayovutiwa nayo iko. Kisha, kwa kutumia "**Find out what writes to this address**" pata anwani ipi inaandika thamani hii na ubofye mara mbili ili kupata mtazamo wa disassembly:
+Kwa kufuata hatua zilizotangulia, tafuta mahali ilipo thamani unayovutiwa nayo. Kisha, kwa kutumia "**Find out what writes to this address**", tafuta ni address ipi inayoandika thamani hii na uibofye mara mbili ili kupata disassembly view:
 
-![](<../../images/image (1039).png>)
+![Random Memory Address - Finding the code - Random Memory Address - Finding the pointer: Kwa kufuata hatua zilizotangulia, tafuta mahali ilipo thamani unayovutiwa nayo. Kisha, kwa kutumia " Find out...](<../../images/image (1039).png>)
 
-Kisha, fanya scan mpya **ukitafuta thamani ya hex kati ya "\[]"** (thamani ya $edx katika kesi hii):
+Kisha, fanya scan mpya **ukitafuta hex value iliyo kati ya "\[]"** (thamani ya $edx katika hali hii):
 
-![](<../../images/image (994).png>)
+![Random Memory Address - Finding the code - Random Memory Address - Finding the pointer: Kisha, fanya scan mpya ukitafuta hex value iliyo kati ya " ()" (thamani ya $edx katika hali hii)](<../../images/image (994).png>)
 
-(_Ikiwa kadhaa zinaonekana unahitaji mara nyingi anwani ndogo zaidi_)\
-Sasa, tumepata **kiashiria ambacho kitakuwa kinabadilisha thamani tunayotaka**.
+(_Ikiwa kadhaa zitaonekana, kwa kawaida unahitaji ile yenye address ndogo zaidi_)\
+Sasa, **tumepata pointer itakayobadilisha thamani tunayovutiwa nayo**.
 
-Bofya kwenye "**Add Address Manually**":
+Bofya "**Add Address Manually**":
 
-![](<../../images/image (990).png>)
+![Random Memory Address - Finding the code - Random Memory Address - Finding the pointer: Bofya " Add Address Manually "](<../../images/image (990).png>)
 
-Sasa, bofya kwenye kisanduku cha "Pointer" na ongeza anwani iliyopatikana katika kisanduku cha maandiko (katika hali hii, anwani iliyopatikana katika picha ya awali ilikuwa "Tutorial-i386.exe"+2426B0):
+Sasa, bofya kisanduku cha "Pointer" na uongeze address iliyopatikana kwenye text box (katika hali hii, address iliyopatikana kwenye picha iliyotangulia ilikuwa "Tutorial-i386.exe"+2426B0):
 
-![](<../../images/image (392).png>)
+![Random Memory Address - Finding the code - Random Memory Address - Finding the pointer: Sasa, bofya kisanduku cha "Pointer" na uongeze address iliyopatikana kwenye text box (katika hali hii,...](<../../images/image (392).png>)
 
-(Kumbuka jinsi "Anwani" ya kwanza inajazwa kiotomatiki kutoka kwa anwani ya kiashiria unayoingiza)
+(Angalia jinsi "Address" ya kwanza inavyojazwa kiotomatiki kutoka kwenye pointer address uliyoingiza)
 
-Bofya OK na kiashiria kipya kitaundwa:
+Bofya OK na pointer mpya itaundwa:
 
-![](<../../images/image (308).png>)
+![Random Memory Address - Finding the code - Random Memory Address - Finding the pointer: Bofya OK na pointer mpya itaundwa](<../../images/image (308).png>)
 
-Sasa, kila wakati unabadilisha thamani hiyo unakuwa **unabadilisha thamani muhimu hata kama anwani ya kumbukumbu ambapo thamani hiyo iko ni tofauti.**
+Sasa, kila mara unapobadilisha thamani hiyo, **unabadilisha thamani muhimu hata kama memory address ilipo thamani hiyo imebadilika.**
 
-### Uingizaji wa Msimbo
+### Code Injection
 
-Uingizaji wa msimbo ni mbinu ambapo unatia kipande cha msimbo katika mchakato wa lengo, na kisha kuhamasisha utekelezaji wa msimbo ili upite kupitia msimbo wako ulioandikwa (kama kukupa alama badala ya kuziondoa).
+Code injection ni technique ambapo unaingiza kipande cha code kwenye target process, kisha unaelekeza upya execution ya code ipitie kwenye code uliyoandika mwenyewe (kama kukupa points badala ya kuziondoa).
 
-Hivyo, fikiria umepata anwani inayopunguza 1 kwa maisha ya mchezaji wako:
+Kwa hiyo, fikiria kwamba umepata address inayopunguza life ya player wako kwa 1:
 
-![](<../../images/image (203).png>)
+![Random Memory Address - Finding the pointer - Code Injection: Fikiria kwamba umepata address inayopunguza life ya player wako kwa 1](<../../images/image (203).png>)
 
-Bofya kwenye Onyesha disassembler ili kupata **msimbo wa disassemble**.\
-Kisha, bofya **CTRL+a** ili kuanzisha dirisha la Auto assemble na uchague _**Template --> Code Injection**_
+Bofya Show disassembler ili kupata **disassemble code**.\
+Kisha, bofya **CTRL+a** ili kufungua Auto assemble window na uchague _**Template --> Code Injection**_
 
-![](<../../images/image (902).png>)
+![Random Memory Address - Finding the pointer - Code Injection: Kisha, bofya CTRL+a ili kufungua Auto assemble window na uchague Template -- Code Injection](<../../images/image (902).png>)
 
-Jaza **anwani ya maagizo unayotaka kubadilisha** (hii kawaida hujaza kiotomatiki):
+Jaza **address ya instruction unayotaka kubadilisha** (kwa kawaida hujazwa kiotomatiki):
 
-![](<../../images/image (744).png>)
+![Random Memory Address - Finding the pointer - Code Injection: Jaza address ya instruction unayotaka kubadilisha (kwa kawaida hujazwa kiotomatiki)](<../../images/image (744).png>)
 
-Kigezo kitaundwa:
+Template itaundwa:
 
-![](<../../images/image (944).png>)
+![Random Memory Address - Finding the pointer - Code Injection: Template itaundwa](<../../images/image (944).png>)
 
-Hivyo, ingiza msimbo wako mpya wa assembly katika sehemu ya "**newmem**" na ondoa msimbo wa asili kutoka kwa "**originalcode**" ikiwa hutaki utekelezwe. Katika mfano huu, msimbo uliotiwa utaongeza alama 2 badala ya kupunguza 1:
+Kwa hiyo, weka assembly code yako mpya katika sehemu ya "**newmem**" na uondoe code ya awali kutoka sehemu ya "**originalcode**" ikiwa hutaki itekelezwe**.** Katika mfano huu, code iliyoingizwa itaongeza points 2 badala ya kupunguza 1:
 
-![](<../../images/image (521).png>)
+![Random Memory Address - Finding the pointer - Code Injection: Kwa hiyo, weka assembly code yako mpya katika sehemu ya " newmem " na uondoe code ya awali kutoka sehemu ya " originalcode " ikiwa...](<../../images/image (521).png>)
 
-**Bofya kwenye execute na kadhalika na msimbo wako unapaswa kuingizwa katika programu ukibadilisha tabia ya kazi hiyo!**
+**Bofya execute na kadhalika, na code yako inapaswa kuingizwa kwenye program na kubadilisha tabia ya functionality hiyo!**
 
-## Vipengele vya Juu katika Cheat Engine 7.x (2023-2025)
+## Advanced features in Cheat Engine 7.x (2023-2025)
 
-Cheat Engine imeendelea kubadilika tangu toleo la 7.0 na vipengele kadhaa vya kuboresha maisha na *offensive-reversing* vimeongezwa ambavyo ni muhimu sana wakati wa kuchambua programu za kisasa (na sio michezo pekee!). Hapa kuna **mwongozo wa uwanja wa muhtasari** wa nyongeza ambazo huenda ukatumia wakati wa kazi za red-team/CTF.
+Cheat Engine imeendelea kubadilika tangu version 7.0, na quality-of-life pamoja na *offensive-reversing* features kadhaa zimeongezwa. Features hizi ni muhimu sana unapochambua software ya kisasa (na si games pekee!). Hapa chini kuna **field guide fupi sana** ya additions utakazotumia mara nyingi wakati wa red-team/CTF work.<sup>[[1]](#references)</sup>
 
-### Maboresho ya Pointer Scanner 2
-* `Pointers lazima iishe na offsets maalum` na slider mpya ya **Deviation** (≥7.4) inapunguza sana matokeo ya uwongo unapofanya skani tena baada ya sasisho. Tumia pamoja na kulinganisha ramani nyingi (`.PTR` → *Compare results with other saved pointer map*) ili kupata **pointer ya msingi inayodumu** kwa dakika chache tu.
-* Kifunguo cha kuchuja kwa wingi: baada ya skani ya kwanza bonyeza `Ctrl+A → Space` ili kuweka alama kila kitu, kisha `Ctrl+I` (geuza) ili kuondoa alama kwenye anwani ambazo zimeshindwa skani tena.
+### Pointer Scanner 2 improvements
+* `Pointers must end with specific offsets` pamoja na **Deviation** slider mpya (≥7.4) hupunguza kwa kiasi kikubwa false positives unapofanya rescan baada ya update. Itumie pamoja na multi-map comparison (`.PTR` → *Compare results with other saved pointer map*) ili kupata **base-pointer moja thabiti** ndani ya dakika chache.
+* Bulk-filter shortcut: baada ya scan ya kwanza bonyeza `Ctrl+A → Space` ili ku-mark kila kitu, kisha `Ctrl+I` (invert) ili ku-deselect addresses ambazo hazikufaulu rescan.
 
 ### Ultimap 3 – Intel PT tracing
-*Tangu 7.5 Ultimap ya zamani ilirejelewa juu ya **Intel Processor-Trace (IPT)***. Hii inamaanisha sasa unaweza kurekodi *kila* tawi ambalo lengo linachukua **bila hatua moja moja** (mode ya mtumiaji pekee, haitasababisha vifaa vingi vya kupambana na debug).
+*Kuanzia 7.5, Ultimap ya zamani iliundwa upya juu ya **Intel Processor-Trace (IPT)***. Hii inamaanisha kwamba sasa unaweza kurekodi *kila branch ambayo target inafuata* **bila single-stepping** (user-mode pekee; haitachochea anti-debug gadgets nyingi).*
 ```
 Memory View → Tools → Ultimap 3 → check «Intel PT»
 Select number of buffers → Start
 ```
-Baada ya sekunde chache, simamisha kukamata na **bonyeza-kulia → Hifadhi orodha ya utekelezaji kwenye faili**. Changanya anwani za tawi na kikao cha `Find out what addresses this instruction accesses` ili kupata maeneo ya juu ya mantiki ya mchezo kwa haraka sana.
+Baada ya sekunde chache, simamisha capture na **bofya kulia → Save execution list to file**. Changanya anwani za matawi na session ya `Find out what addresses this instruction accesses` ili kupata kwa haraka sana maeneo yenye matumizi ya juu ya game-logic.
 
-### Mifano ya `jmp` / auto-patch ya byte 1
-Toleo la 7.5 lilianzisha *stub ya JMP byte moja* (0xEB) ambayo inasakinisha mhandisi wa SEH na kuweka INT3 kwenye eneo la awali. Inazalishwa kiotomatiki unapofanya **Auto Assembler → Template → Code Injection** kwenye maagizo ambayo hayawezi kupachikwa na kuruka kwa uhusiano wa byte 5. Hii inafanya "hooks" za "tight" kuwa na uwezekano ndani ya taratibu zilizopakizwa au zilizopangwa kwa ukubwa.
+### 1-byte `jmp` / auto-patch templates
+Version 7.5 ilianzisha stub ya *one-byte* JMP (0xEB) ambayo husakinisha SEH handler na kuweka INT3 katika eneo la awali. Hutengenezwa kiotomatiki unapotumia **Auto Assembler → Template → Code Injection** kwenye instructions ambazo haziwezi kupatchiwa kwa relative jump ya 5-byte. Hii huwezesha hooks “tight” ndani ya routines zilizopakiwa au zenye nafasi ndogo.
 
-### Stealth ya kiwango cha Kernel na DBVM (AMD & Intel)
-*DBVM* ni hypervisor ya Aina-2 iliyojengwa ndani ya CE. Mifumo ya hivi karibuni hatimaye iliongeza **support ya AMD-V/SVM** ili uweze kuendesha `Driver → Load DBVM` kwenye mwenyeji wa Ryzen/EPYC. DBVM inakuwezesha:
-1. Kuunda alama za kuvunja zisizoonekana kwa ukaguzi wa Ring-3/anti-debug.
-2. Kusoma/kandika maeneo ya kumbukumbu ya kernel yanayoweza kubadilishwa au kulindwa hata wakati dereva wa hali ya mtumiaji umekataliwa.
-3. Kufanya upitishaji wa shambulio la wakati bila VM-EXIT (mfano: uliza `rdtsc` kutoka kwa hypervisor).
+### Kernel-level stealth with DBVM (AMD & Intel)
+*DBVM* ni Type-2 hypervisor iliyojengwa ndani ya CE. Builds za hivi karibuni hatimaye ziliongeza **AMD-V/SVM support**, hivyo unaweza kuendesha `Driver → Load DBVM` kwenye hosts za Ryzen/EPYC. DBVM inakuwezesha:
+1. Kuunda hardware breakpoints zisizoonekana kwa Ring-3/anti-debug checks.
+2. Kusoma/kuandika maeneo ya kernel memory yanayoweza kupaginishwa au yaliyolindwa hata wakati user-mode driver imezimwa.
+3. Kufanya VM-EXIT-less timing-attack bypasses (kwa mfano, kuuliza `rdtsc` kutoka kwa hypervisor).
 
-**Kidokezo:** DBVM itakataa kupakia wakati HVCI/Memory-Integrity imewezeshwa kwenye Windows 11 → izime au uanzishe mwenyeji wa VM maalum.
+**Tip:** DBVM itakataa kupakia wakati HVCI/Memory-Integrity imewezeshwa kwenye Windows 11 → izime au boot dedicated VM-host.
 
-### Urekebishaji wa mbali / wa jukwaa tofauti na **ceserver**
-CE sasa inatoa upya kamili wa *ceserver* na inaweza kuunganishwa kupitia TCP kwa malengo ya **Linux, Android, macOS & iOS**. Tawi maarufu linajumuisha *Frida* ili kuunganisha uhandisi wa dynamic na GUI ya CE – bora unapohitaji kupachika michezo ya Unity au Unreal inayotembea kwenye simu:
+### Remote / cross-platform debugging with **ceserver**
+CE sasa inasafirisha rewrite kamili ya *ceserver* na inaweza ku-attach kupitia TCP kwenye targets za **Linux, Android, macOS & iOS**. Fork maarufu inaunganisha *Frida* ili kuchanganya dynamic instrumentation na GUI ya CE – inafaa sana unapohitaji kupatch games za Unity au Unreal zinazoendesha kwenye simu:
 ```
 # on the target (arm64)
 ./ceserver_arm64 &
@@ -192,26 +192,26 @@ CE sasa inatoa upya kamili wa *ceserver* na inaweza kuunganishwa kupitia TCP kwa
 adb forward tcp:52736 tcp:52736   # (or ssh tunnel)
 Cheat Engine → "Network" icon → Host = localhost → Connect
 ```
-Kwa ajili ya daraja la Frida angalia `bb33bb/frida-ceserver` kwenye GitHub.
+Kwa Frida bridge, tazama `bb33bb/frida-ceserver` kwenye GitHub.<sup>[[2]](#references)</sup>
 
-### Vitu vingine vya kuzingatia
-* **Patch Scanner** (MemView → Tools) – inagundua mabadiliko yasiyotarajiwa ya msimbo katika sehemu zinazoweza kutekelezwa; muhimu kwa uchambuzi wa malware.
-* **Structure Dissector 2** – drag-an-address → `Ctrl+D`, kisha *Guess fields* ili kujitathmini kiotomatiki C-structures.
-* **.NET & Mono Dissector** – msaada bora wa mchezo wa Unity; piga simu kwa njia moja kwa moja kutoka kwenye CE Lua console.
-* **Big-Endian custom types** – skana/edit ya mpangilio wa byte iliyogeuzwa (inayofaa kwa emulators za console na buffers za pakiti za mtandao).
-* **Autosave & tabs** kwa AutoAssembler/Lua windows, pamoja na `reassemble()` kwa uandishi wa maagizo ya mistari mingi.
+### Zana nyingine muhimu
+* **Patch Scanner** (MemView → Tools) – hutambua mabadiliko yasiyotarajiwa ya code katika sehemu zinazoweza kutekelezwa; ni muhimu kwa malware analysis.
+* **Structure Dissector 2** – buruta-an-address → `Ctrl+D`, kisha *Guess fields* ili kufanya tathmini otomatiki ya C-structures.
+* **.NET & Mono Dissector** – huongeza support ya Unity game; ita methods moja kwa moja kutoka CE Lua console.
+* **Big-Endian custom types** – huchanganua/kuhariri byte order iliyogeuzwa (ni muhimu kwa console emulators na network packet buffers).
+* **Autosave & tabs** kwa madirisha ya AutoAssembler/Lua, pamoja na `reassemble()` kwa multi-line instruction rewrite.
 
-### Maelezo ya Usanidi & OPSEC (2024-2025)
-* Msimamizi rasmi umefungwa na InnoSetup **ad-offers** (`RAV` n.k.). **Daima bonyeza *Decline*** *au tengeneza kutoka chanzo* ili kuepuka PUPs. AVs bado zitabaini `cheatengine.exe` kama *HackTool*, ambayo inatarajiwa.
-* Madereva ya kisasa ya kupambana na udanganyifu (EAC/Battleye, ACE-BASE.sys, mhyprot2.sys) yanagundua daraja la CE hata wakati limepewa jina jipya. Endesha nakala yako ya kurudi nyuma **ndani ya VM inayoweza kutumika** au baada ya kuzima mchezo wa mtandao.
-* Ikiwa unahitaji tu ufikiaji wa hali ya mtumiaji chagua **`Settings → Extra → Kernel mode debug = off`** ili kuepuka kupakia dereva usio na saini wa CE ambao unaweza BSOD kwenye Windows 11 24H2 Secure-Boot.
+### Maelezo ya usakinishaji na OPSEC (2024-2025)
+* Official installer imefungwa na **ad-offers** za InnoSetup (`RAV` n.k.). **Bofya *Decline* kila mara** *au compile kutoka source* ili kuepuka PUPs. AVs bado zita-flag `cheatengine.exe` kama *HackTool*, jambo linalotarajiwa.
+* Modern anti-cheat drivers (EAC/Battleye, ACE-BASE.sys, mhyprot2.sys) hutambua CE’s window class hata inapopewa jina jipya. Endesha copy yako ya reversing **ndani ya disposable VM** au baada ya kuzima network play.
+* Ikiwa unahitaji tu user-mode access, chagua **`Settings → Extra → Kernel mode debug = off`** ili kuepuka kupakia CE’s unsigned driver ambayo inaweza kusababisha BSOD kwenye Windows 11 24H2 Secure-Boot.
 
 ---
 
-## **Marejeleo**
+## Marejeleo
 
-- [Cheat Engine 7.5 release notes (GitHub)](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
-- [frida-ceserver cross-platform bridge](https://github.com/bb33bb/frida-ceserver-Mac-and-IOS)
-- **Cheat Engine tutorial, complete it to learn how to start with Cheat Engine**
+- [1] [Cheat Engine 7.5 release notes (GitHub)](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
+- [2] [frida-ceserver cross-platform bridge](https://github.com/bb33bb/frida-ceserver-Mac-and-IOS)
+- [3] Cheat Engine tutorial, ikamilishe ili ujifunze jinsi ya kuanza kutumia Cheat Engine
 
 {{#include ../../banners/hacktricks-training.md}}

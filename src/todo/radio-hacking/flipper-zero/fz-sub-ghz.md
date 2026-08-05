@@ -2,103 +2,103 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#kfpn7" id="kfpn7"></a>
+## Utangulizi <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero inaweza **kupokea na kutuma masafa ya redio katika anuwai ya 300-928 MHz** kwa moduli yake iliyojengwa, ambayo inaweza kusoma, kuhifadhi, na kuiga vidhibiti vya mbali. Vidhibiti hivi vinatumika kwa mwingiliano na milango, vizuizi, funguo za redio, swichi za udhibiti wa mbali, kengele za mlango zisizo na waya, mwanga wa smart, na zaidi. Flipper Zero inaweza kukusaidia kujifunza ikiwa usalama wako umeathirika.
+Flipper Zero inaweza **kupokea na kutuma masafa ya redio katika kiwango cha 300-928 MHz** kwa kutumia module yake iliyojengewa ndani, ambayo inaweza kusoma, kuhifadhi na kuiga remote controls. Controls hizi hutumika kwa mwingiliano na gates, barriers, radio locks, remote control switches, wireless doorbells, smart lights na vinginevyo. Flipper Zero inaweza kukusaidia kujua ikiwa usalama wako umecompromise.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (714).png" alt=""><figcaption></figcaption></figure>
 
-## Sub-GHz hardware <a href="#kfpn7" id="kfpn7"></a>
+## Vifaa vya Sub-GHz <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero ina moduli ya sub-1 GHz iliyojengwa inayotegemea [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[chip ya CC1101](https://www.ti.com/lit/ds/symlink/cc1101.pdf) na antenna ya redio (anuwai ya juu ni mita 50). Chip ya CC1101 na antenna zimeundwa kufanya kazi katika masafa ya 300-348 MHz, 387-464 MHz, na 779-928 MHz.
+Flipper Zero ina module ya sub-1 GHz iliyojengewa ndani, inayotegemea [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101 chip](https://www.ti.com/lit/ds/symlink/cc1101.pdf) na radio antenna (masafa ya juu zaidi ni mita 50). CC1101 chip pamoja na antenna zimetengenezwa kufanya kazi katika bands za 300-348 MHz, 387-464 MHz na 779-928 MHz.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (923).png" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## Vitendo
 
 ### Frequency Analyser
 
-> [!NOTE]
-> Jinsi ya kupata ni masafa gani yanayotumiwa na remote
+> [!TIP]
+> Jinsi ya kupata frequency inayotumiwa na remote
 
-Wakati wa kuchambua, Flipper Zero inachanganua nguvu za ishara (RSSI) katika masafa yote yanayopatikana katika usanidi wa masafa. Flipper Zero inaonyesha masafa yenye thamani ya juu ya RSSI, ikiwa na nguvu ya ishara zaidi ya -90 [dBm](https://en.wikipedia.org/wiki/DBm).
+Wakati wa kufanya analysis, Flipper Zero inaskani nguvu ya signals (RSSI) katika frequencies zote zinazopatikana kwenye frequency configuration. Flipper Zero huonyesha frequency yenye thamani ya juu zaidi ya RSSI, ikiwa na signal strength iliyo juu kuliko -90 [dBm](https://en.wikipedia.org/wiki/DBm).<sup>[[1]](#references)</sup>
 
-Ili kubaini masafa ya remote, fanya yafuatayo:
+Ili kubaini frequency ya remote, fanya yafuatayo:
 
-1. Weka kidhibiti cha mbali karibu sana na kushoto ya Flipper Zero.
+1. Weka remote control karibu sana upande wa kushoto wa Flipper Zero.
 2. Nenda kwenye **Main Menu** **→ Sub-GHz**.
-3. Chagua **Frequency Analyzer**, kisha bonyeza na ushikilie kitufe kwenye kidhibiti cha mbali unachotaka kuchambua.
-4. Kagua thamani ya masafa kwenye skrini.
+3. Chagua **Frequency Analyzer**, kisha bonyeza na ushikilie kitufe kwenye remote control unayotaka kuichanganua.
+4. Kagua thamani ya frequency kwenye screen.
 
 ### Read
 
-> [!NOTE]
-> Pata taarifa kuhusu masafa yanayotumiwa (pia njia nyingine ya kupata ni masafa gani yanayotumiwa)
+> [!TIP]
+> Pata taarifa kuhusu frequency iliyotumika (pia ni njia nyingine ya kupata frequency iliyotumika)
 
-Chaguo la **Read** **linasikiliza kwenye masafa yaliyosanidiwa** kwenye moduli iliyotajwa: 433.92 AM kwa chaguo-msingi. Ikiwa **kitu kinapatikana** wakati wa kusoma, **taarifa inatolewa** kwenye skrini. Taarifa hii inaweza kutumika kuiga ishara hiyo katika siku zijazo.
+Chaguo la **Read** **husikiliza frequency iliyoconfigure** kwa modulation iliyoonyeshwa: 433.92 AM kwa default. Ikiwa **kitu kinapatikana** wakati wa kusoma, **taarifa huonyeshwa** kwenye screen. Taarifa hii inaweza kutumika kureplicate signal hiyo baadaye.<sup>[[1]](#references)</sup>
 
-Wakati Read inatumika, inawezekana kubonyeza **kitufe cha kushoto** na **kuisakinisha**.\
-Kwa sasa ina **modulasi 4** (AM270, AM650, FM328 na FM476), na **masafa kadhaa muhimu** yaliyohifadhiwa:
+Wakati Read inatumika, inawezekana kubonyeza **left button** na **kuiconfigure**.\
+Kwa sasa ina **modulations 4** (AM270, AM650, FM328 na FM476), pamoja na **frequencies kadhaa muhimu** zilizohifadhiwa:
 
 <figure><img src="../../../images/image (947).png" alt=""><figcaption></figcaption></figure>
 
-Unaweza kuweka **yoyote inayokuvutia**, hata hivyo, ikiwa **hujui ni masafa gani** yanaweza kuwa yanayotumiwa na remote ulionayo, **weka Hopping kuwa ON** (Off kwa chaguo-msingi), na bonyeza kitufe mara kadhaa hadi Flipper ikiteka na kukupa taarifa unayohitaji kuweka masafa.
+Unaweza kuweka **ile yoyote inayokuvutia**, hata hivyo, ikiwa **huna uhakika ni frequency ipi** inayoweza kuwa inatumiwa na remote uliyo nayo, **weka Hopping kwenye ON** (Off kwa default), kisha bonyeza kitufe mara kadhaa hadi Flipper iicapture na kukupa taarifa unayohitaji ili kuweka frequency.
 
 > [!CAUTION]
-> Kubadilisha kati ya masafa kunachukua muda, hivyo ishara zinazotumwa wakati wa kubadilisha zinaweza kupuuziliwa mbali. Kwa kupokea ishara bora, weka masafa thabiti yaliyopangwa na Frequency Analyzer.
+> Kubadilisha kati ya frequencies huchukua muda; kwa hiyo signals zinazotumwa wakati wa kubadilisha zinaweza kukosekana. Kwa mapokezi bora ya signal, weka frequency thabiti iliyobainishwa na Frequency Analyzer.
 
 ### **Read Raw**
 
-> [!NOTE]
-> Pora (na rudia) ishara katika masafa yaliyosanidiwa
+> [!TIP]
+> Steal (na replay) signal katika frequency iliyoconfigure
 
-Chaguo la **Read Raw** **linarekodi ishara** zinazotumwa katika masafa ya kusikiliza. Hii inaweza kutumika **kuiba** ishara na **kurudia** hiyo.
+Chaguo la **Read Raw** **hurekodi signals** zinazotumwa kwenye frequency inayosikilizwa. Hii inaweza kutumika **kuiba** signal na **kuirudia**.
 
-Kwa chaguo-msingi **Read Raw pia iko katika 433.92 katika AM650**, lakini ikiwa na chaguo la Read umegundua kuwa ishara inayokuvutia iko katika **masafa/modulasi tofauti, unaweza pia kubadilisha hiyo** kwa kubonyeza kushoto (wakati uko ndani ya chaguo la Read Raw).
+Kwa default **Read Raw pia iko kwenye 433.92 katika AM650**, lakini ikiwa kwa kutumia chaguo la Read uligundua kuwa signal inayokuvutia iko kwenye **frequency/modulation tofauti, unaweza pia kuibadilisha** kwa kubonyeza left (ukiwa ndani ya chaguo la Read Raw).
 
 ### Brute-Force
 
-Ikiwa unajua itifaki inayotumiwa kwa mfano na mlango wa garaji inawezekana **kuunda nambari zote na kuzituma na Flipper Zero.** Hii ni mfano unaounga mkono aina za kawaida za garages: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
+Ikiwa unajua protocol inayotumiwa, kwa mfano, na garage door, inawezekana **kugenerate codes zote na kuzituma kwa Flipper Zero.** Huu ni mfano unaosaidia aina za kawaida za garages: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
 
 ### Add Manually
 
-> [!NOTE]
-> Ongeza ishara kutoka orodha iliyosanidiwa ya itifaki
+> [!TIP]
+> Ongeza signals kutoka kwenye list iliyoconfigure ya protocols
 
-#### Orodha ya [itifaki zinazoungwa mkono](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
+#### Orodha ya [supported protocols](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
 
-| Princeton_433 (inafanya kazi na mfumo wa nambari za statiki nyingi) | 433.92 | Statiki  |
+| Princeton_433 (works with the majority of static code systems) | 433.92 | Static  |
 | -------------------------------------------------------------- | ------ | ------- |
-| Nice Flo 12bit_433                                             | 433.92 | Statiki  |
-| Nice Flo 24bit_433                                             | 433.92 | Statiki  |
-| CAME 12bit_433                                                 | 433.92 | Statiki  |
-| CAME 24bit_433                                                 | 433.92 | Statiki  |
-| Linear_300                                                     | 300.00 | Statiki  |
-| CAME TWEE                                                      | 433.92 | Statiki  |
-| Gate TX_433                                                    | 433.92 | Statiki  |
-| DoorHan_315                                                    | 315.00 | Dinamiki |
-| DoorHan_433                                                    | 433.92 | Dinamiki |
-| LiftMaster_315                                                 | 315.00 | Dinamiki |
-| LiftMaster_390                                                 | 390.00 | Dinamiki |
-| Security+2.0_310                                               | 310.00 | Dinamiki |
-| Security+2.0_315                                               | 315.00 | Dinamiki |
-| Security+2.0_390                                               | 390.00 | Dinamiki |
+| Nice Flo 12bit_433                                             | 433.92 | Static  |
+| Nice Flo 24bit_433                                             | 433.92 | Static  |
+| CAME 12bit_433                                                 | 433.92 | Static  |
+| CAME 24bit_433                                                 | 433.92 | Static  |
+| Linear_300                                                     | 300.00 | Static  |
+| CAME TWEE                                                      | 433.92 | Static  |
+| Gate TX_433                                                    | 433.92 | Static  |
+| DoorHan_315                                                    | 315.00 | Dynamic |
+| DoorHan_433                                                    | 433.92 | Dynamic |
+| LiftMaster_315                                                 | 315.00 | Dynamic |
+| LiftMaster_390                                                 | 390.00 | Dynamic |
+| Security+2.0_310                                               | 310.00 | Dynamic |
+| Security+2.0_315                                               | 315.00 | Dynamic |
+| Security+2.0_390                                               | 390.00 | Dynamic |
 
-### Wauzaji wa Sub-GHz wanaoungwa mkono
+### Supported Sub-GHz vendors
 
-Angalia orodha katika [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+Kagua listi kwenye [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
 
-### Masafa yanayoungwa mkono kwa eneo
+### Supported Frequencies by region
 
-Angalia orodha katika [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
+Kagua listi kwenye [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
 
 ### Test
 
-> [!NOTE]
-> Pata dBms za masafa yaliyohifadhiwa
+> [!TIP]
+> Pata dBms za frequencies zilizohifadhiwa
 
-## Reference
+## Marejeo
 
-- [https://docs.flipperzero.one/sub-ghz](https://docs.flipperzero.one/sub-ghz)
+- [1] [Flipper Zero Sub-GHz documentation](https://docs.flipperzero.one/sub-ghz)
 
 {{#include ../../../banners/hacktricks-training.md}}

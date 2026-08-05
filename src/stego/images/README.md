@@ -1,8 +1,8 @@
-# Steganografia ya Picha
+# Steganography ya Picha
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Stego nyingi za picha za CTF huanguka katika mojawapo ya makundi haya:
+CTF image stego nyingi huangukia katika mojawapo ya makundi haya:
 
 - LSB/bit-planes (PNG/BMP)
 - Metadata/comment payloads
@@ -10,177 +10,179 @@ Stego nyingi za picha za CTF huanguka katika mojawapo ya makundi haya:
 - JPEG DCT-domain tools (OutGuess, etc)
 - Frame-based (GIF/APNG)
 
-## Tathmini ya haraka
+## Triage ya haraka
 
-Toa kipaumbele ushahidi wa ngazi ya container kabla ya uchambuzi wa kina wa yaliyomo:
+Paisha ushahidi wa kiwango cha container kabla ya uchanganuzi wa kina wa maudhui:
 
-- Thibitisha faili na angalia muundo: `file`, `magick identify -verbose`, format validators (mf. `pngcheck`).
-- Chota metadata na strings zinazoonekana: `exiftool -a -u -g1`, `strings`.
-- Angalia kwa yaliyowekwa/kuambatishwa: `binwalk` na ukaguzi wa mwisho-wa-faili (`tail | xxd`).
-- Gawanya kwa mujibu wa container:
-- PNG/BMP: bit-planes/LSB na chunk-level anomalies.
-- JPEG: metadata + DCT-domain tooling (OutGuess/F5-style families).
+- Thibitisha faili na kagua muundo: `file`, `magick identify -verbose`, format validators (mfano, `pngcheck`).
+- Extract metadata na strings zinazoonekana: `exiftool -a -u -g1`, `strings`.
+- Kagua content iliyopachikwa au kuongezwa: `binwalk` na ukaguzi wa mwisho wa faili (`tail | xxd`).
+- Gawa kulingana na container:
+- PNG/BMP: bit-planes/LSB na anomalies za kiwango cha chunk.
+- JPEG: metadata + DCT-domain tooling (families za mtindo wa OutGuess/F5).
 - GIF/APNG: frame extraction, frame differencing, palette tricks.
 
 ## Bit-planes / LSB
 
 ### Mbinu
 
-PNG/BMP ni maarufu katika CTF kwa sababu zinahifadhi pixels kwa njia inayofanya uwekaji wa data kwa ngazi ya biti kuwa rahisi. Mbinu ya kawaida ya kujificha/kutoa ni:
+PNG/BMP ni maarufu katika CTFs kwa sababu huhifadhi pixels kwa njia inayorahisisha **bit-level manipulation**. Mechanism ya kawaida ya kuficha/kutoa ni:
 
-- Kila channel ya pikseli (R/G/B/A) ina biti nyingi.
-- **biti ya chini kabisa** (LSB) ya kila channel hubadilisha picha kidogo sana.
-- Washambuliaji wanaficha data katika bit za chini, mara nyingine kwa stride, permutation, au chaguo kwa kila channel.
+- Kila pixel channel (R/G/B/A) ina bits nyingi.
+- **Least significant bit** (LSB) ya kila channel hubadilisha picha kwa kiwango kidogo sana.
+- Washambuliaji huficha data katika bits hizo za mpangilio wa chini, wakati mwingine kwa kutumia stride, permutation, au uchaguzi wa channel kwa channel.
 
-Mambo ya kutarajia katika changamoto:
+Mambo ya kutarajia katika challenges:
 
-- Payload iko katika channel moja tu (kwa mfano, `R` LSB).
+- Payload iko katika channel moja pekee (kwa mfano, `R` LSB).
 - Payload iko katika alpha channel.
-- Payload imecompress/imeencoded baada ya uondoaji.
-- Ujumbe umeenea kwenye planes au umefichwa kupitia XOR kati ya planes.
+- Payload ime-compressiwa/encoded baada ya extraction.
+- Ujumbe umeenezwa katika planes au umefichwa kupitia XOR kati ya planes.
 
-Familia nyingine unazoweza kukutana nazo (zinategemea utekelezaji):
+Familia za ziada unazoweza kukutana nazo (inategemea implementation):
 
-- **LSB matching** (siyo tu kubadilisha biti, bali marekebisho ya +/-1 ili kufanana na biti lengwa)
-- **Palette/index-based hiding** (indexed PNG/GIF: payload katika color indices badala ya raw RGB)
-- **Alpha-only payloads** (kabisa haionekani katika muonekano wa RGB)
+- **LSB matching** (si kubadilisha bit pekee, bali kutumia marekebisho ya +/-1 ili kuendana na target bit)
+- **Palette/index-based hiding** (indexed PNG/GIF: payload iko katika color indices badala ya raw RGB)
+- **Alpha-only payloads** (haionekani kabisa katika RGB view)
 
-### Zana
+### Tooling
 
 #### zsteg
 
-`zsteg` inorodhesha mifumo mingi ya uondoaji wa LSB/bit-plane kwa PNG/BMP:
+`zsteg` huorodhesha extraction patterns nyingi za LSB/bit-plane kwa PNG/BMP:
 ```bash
 zsteg -a file.png
 ```
+Repo: https://github.com/zed-0xff/zsteg
+
 #### StegoVeritas / Stegsolve
 
-- `stegoVeritas`: inaendesha mfululizo wa transforms (metadata, image transforms, brute forcing LSB variants).
-- `stegsolve`: vichujio vya kuona kwa mkono (channel isolation, plane inspection, XOR, n.k.).
+- `stegoVeritas`: huendesha mfululizo wa transforms (metadata, image transforms, brute forcing LSB variants).
+- `stegsolve`: manual visual filters (channel isolation, plane inspection, XOR, etc).
 
 Stegsolve download: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
 
-#### FFT-based visibility tricks
+#### Mbinu za kuonyesha zinazotumia FFT
 
-FFT si LSB extraction; ni kwa matukio ambapo maudhui yamefichwa kwa makusudi katika frequency space au ndani ya miundo midogo-midogo.
+FFT si LSB extraction; hutumika katika hali ambapo content imefichwa kimakusudi kwenye frequency space au patterns zisizo dhahiri.
 
 - EPFL demo: http://bigwww.epfl.ch/demo/ip/demos/FFT/
 - Fourifier: https://www.ejectamenta.com/Fourifier-fullscreen/
 - FFTStegPic: https://github.com/0xcomposure/FFTStegPic
 
-Web-based triage often used in CTFs:
+Web-based triage hutumiwa mara nyingi katika CTFs:
 
 - Aperi’Solve: https://aperisolve.com/
 - StegOnline: https://stegonline.georgeom.net/
 
-## PNG internals: chunks, corruption, and hidden data
+## Mihimili ya ndani ya PNG: chunks, corruption, na hidden data
 
 ### Mbinu
 
-PNG ni muundo uliogawanywa katika chunks. Katika changamoto nyingi payload huhifadhiwa kwenye ngazi ya container/chunk badala ya katika thamani za pikseli:
+PNG ni format yenye chunks. Katika challenges nyingi, payload huhifadhiwa kwenye kiwango cha container/chunk badala ya pixel values:
 
-- **Extra bytes after `IEND`** (many viewers ignore trailing bytes)
-- **Non-standard ancillary chunks** zinabeba payloads
-- **Corrupted headers** zinazoficha vipimo au kuvunja parsers hadi zisitoshwe
+- **Extra bytes baada ya `IEND`** (viewers wengi hupuuza trailing bytes)
+- **Non-standard ancillary chunks** zenye payloads
+- **Corrupted headers** zinazoficha dimensions au kuvuruga parsers hadi zirekebishwe
 
-Maeneo ya chunk yenye ishara kubwa ya kukagua:
+Maeneo ya chunks yenye signal kubwa ya kukaguliwa:
 
-- `tEXt` / `iTXt` / `zTXt` (metadata ya maandishi, wakati mwingine iliyobanwa)
-- `iCCP` (ICC profile) and other ancillary chunks used as a carrier
-- `eXIf` (EXIF data in PNG)
+- `tEXt` / `iTXt` / `zTXt` (text metadata, wakati mwingine ikiwa compressed)
+- `iCCP` (ICC profile) na ancillary chunks nyingine zinazotumiwa kama carrier
+- `eXIf` (EXIF data katika PNG)
 
 ### Amri za Triage
 ```bash
 magick identify -verbose file.png
 pngcheck -v file.png
 ```
-Mambo ya kuangalia:
+Cha kutafuta:
 
-- Mchanganyiko usio wa kawaida wa width/height/bit-depth/colour-type
-- Makosa ya CRC/chunk (pngcheck kwa kawaida inaonyesha offset halisi)
+- Michanganyiko isiyo ya kawaida ya width/height/bit-depth/colour-type
+- Hitilafu za CRC/chunk (`pngcheck` kwa kawaida huonyesha offset halisi)
 - Maonyo kuhusu data ya ziada baada ya `IEND`
 
-Ikiwa unahitaji mtazamo wa chunk wa kina:
+Ikiwa unahitaji mwonekano wa kina zaidi wa chunk:
 ```bash
 pngcheck -vp file.png
 exiftool -a -u -g1 file.png
 ```
 Marejeo muhimu:
 
-- PNG specification (structure, chunks): https://www.w3.org/TR/PNG/
+- PNG specification (muundo, chunks): https://www.w3.org/TR/PNG/
 - File format tricks (PNG/JPEG/GIF corner cases): https://github.com/corkami/docs
 
 ## JPEG: metadata, DCT-domain tools, and ELA limitations
 
-### Mbinu
+### Technique
 
-JPEG haizihifadhiwi kama pixels ghafi; imekomeshwa katika eneo la DCT. Ndiyo maana JPEG stego tools zinatofautiana na PNG LSB tools:
+JPEG haihifadhiwi kama pixels ghafi; hubanwa katika DCT domain. Ndiyo sababu JPEG stego tools hutofautiana na PNG LSB tools:
 
-- Metadata/comment payloads ni ngazi ya faili (high-signal na rahisi kukagua)
-- DCT-domain stego tools huingiza bits ndani ya frequency coefficients
+- Metadata/comment payloads huwa katika kiwango cha faili (high-signal na rahisi kukagua)
+- DCT-domain stego tools huingiza bits katika frequency coefficients
 
-Kiutendaji, chukulia JPEG kama:
+Kiutendaji, ichukulie JPEG kama:
 
-- Kontena la sehemu za metadata (high-signal, rahisi kukagua)
-- Eneo la ishara lililokomeshwa (DCT coefficients) ambapo stego tools maalum hufanya kazi
+- Container ya metadata segments (high-signal, rahisi kukagua)
+- Compressed signal domain (DCT coefficients) ambamo specialized stego tools hufanya kazi
 
-### Ukaguzi wa haraka
+### Quick checks
 ```bash
 exiftool file.jpg
 strings -n 6 file.jpg | head
 binwalk file.jpg
 ```
-Maeneo yenye ishara nyingi:
+Maeneo yenye signal ya juu:
 
-- EXIF/XMP/IPTC metadata
-- JPEG comment segment (`COM`)
-- Application segments (`APP1` for EXIF, `APPn` for vendor data)
+- Metadata ya EXIF/XMP/IPTC
+- Sehemu ya maoni ya JPEG (`COM`)
+- Sehemu za application (`APP1` kwa EXIF, `APPn` kwa data ya vendor)
 
 ### Zana za kawaida
 
 - OutGuess: https://github.com/resurrecting-open-source-projects/outguess
 - OpenStego: https://www.openstego.com/
 
-Ikiwa unakutana hasa na payloads za steghide katika JPEGs, fikiria kutumia `stegseek` (bruteforce ya haraka kuliko older scripts):
+Ikiwa unakabiliwa hasa na steghide payloads kwenye JPEGs, fikiria kutumia `stegseek` (bruteforce ya haraka kuliko scripts za zamani):
 
 - [https://github.com/RickdeJager/stegseek](https://github.com/RickdeJager/stegseek)
 
-### Error Level Analysis
+### Uchambuzi wa Kiwango cha Hitilafu
 
-ELA inaonyesha artefacts mbalimbali za recompression; inaweza kukuonyesha maeneo yaliyohaririwa, lakini si stego detector yenyewe:
+ELA huonyesha artifacts tofauti za recompression; inaweza kukuelekeza kwenye maeneo yaliyohaririwa, lakini si stego detector yenyewe:
 
 - [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
 
-## Picha zilizo na uhuishaji
+## Picha zenye uhuishaji
 
 ### Mbinu
 
-Kwa picha zilizohuishwa, chukulia ujumbe uko:
+Kwa picha zenye uhuishaji, chukulia kwamba ujumbe uko:
 
-- Katika frame moja (rahisi), au
-- Uliosambaa kwa frames (mpangilio ni muhimu), au
-- Inaonekana tu unapofanya diff kwa frames mfululizo
+- Kwenye frame moja (rahisi), au
+- Umesambazwa kwenye frames (mpangilio ni muhimu), au
+- Unaonekana tu unapofanya diff ya frames zinazofuatana
 
 ### Toa frames
 ```bash
 ffmpeg -i anim.gif frame_%04d.png
 ```
-Kisha tendea frames kama PNGs za kawaida: `zsteg`, `pngcheck`, channel isolation.
+Kisha shughulikia frames kama PNG za kawaida: `zsteg`, `pngcheck`, channel isolation.
 
 Zana mbadala:
 
 - `gifsicle --explode anim.gif` (uchimbaji wa frames kwa haraka)
-- `imagemagick`/`magick` kwa mabadiliko ya kila frame
+- `imagemagick`/`magick` kwa transforms za kila frame
 
-Frame differencing mara nyingi huamua:
+Frame differencing mara nyingi huwa na umuhimu wa kuamua:
 ```bash
 magick frame_0001.png frame_0002.png -compose difference -composite diff.png
 ```
 ### APNG pixel-count encoding
 
-- Gundua APNG containers: `exiftool -a -G1 file.png | grep -i animation` or `file`.
-- Toa frames bila re-timing: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`.
-- Rejesha payloads encoded as per-frame pixel counts:
+- Detect APNG containers: `exiftool -a -G1 file.png | grep -i animation` au `file`.
+- Extract frames without re-timing: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`.
+- Recover payloads encoded as per-frame pixel counts:
 ```python
 from PIL import Image
 import glob
@@ -191,20 +193,22 @@ target = dict(counts).get((255, 0, 255, 255))  # adjust the target color
 out.append(target or 0)
 print(bytes(out).decode('latin1'))
 ```
-Changamoto zilizo na mwendo zinaweza kuwakilisha kila baiti kama idadi ya rangi maalum katika kila fremu; kuunganisha idadi hizo kunarejesha ujumbe.
+Changamoto za animated zinaweza ku-encode kila byte kama idadi ya rangi maalum katika kila frame; kuunganisha hesabu hizo kunaunda upya ujumbe.<sup>[[1]](#references)</sup>
 
-## Uingizwa uliolindwa kwa nenosiri
+## Uingizaji unaolindwa na nenosiri
 
-Ikiwa unashuku uingizwa uliolindwa kwa passphrase badala ya pixel-level manipulation, hii kwa kawaida ndiyo njia ya haraka zaidi.
+Ikiwa unashuku kuwa uingizaji umelindwa na passphrase badala ya pixel-level manipulation, hii kwa kawaida ndiyo njia ya haraka zaidi.
 
 ### steghide
 
-Inaunga mkono `JPEG, BMP, WAV, AU` na inaweza embed/extract encrypted payloads.
+Inaunga mkono `JPEG, BMP, WAV, AU` na inaweza ku-embed/extract payloads zilizosimbwa.
 ```bash
 steghide info file
 steghide extract -sf file --passphrase 'password'
 ```
-I don't have access to the repository files. Please paste the exact contents of src/stego/images/README.md that you want translated to Swahili, and I will translate it keeping the markdown/html syntax and the rules you specified.
+Repo: https://github.com/StefanoDeVuono/steghide
+
+### StegCracker
 ```bash
 stegcracker file.jpg wordlist.txt
 ```
@@ -218,6 +222,6 @@ Repo: https://github.com/dhsdshdhk/stegpy
 
 ## Marejeo
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

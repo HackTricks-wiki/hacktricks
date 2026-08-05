@@ -2,12 +2,12 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
-> Ikiwa programu inatumia `scanf` kupata **thamani kadhaa kwa wakati mmoja kutoka stdin** unahitaji kuunda hali inayozinduka baada ya **`scanf`**.
+> [!TIP]
+> Ikiwa program inatumia `scanf` kupata **thamani kadhaa kwa wakati mmoja kutoka stdin**, unahitaji kutengeneza state inayoanzia baada ya **`scanf`**.
 
-Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+Codes zimechukuliwa kutoka [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### Ingizo kufikia anwani (kuashiria anwani)
+### Input ya kufikia anwani (ikiashiria anwani)
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Ingizo kufikia anwani (kuashiria uchapishaji)
+### Ingizo la kufikia anwani (linaloonyesha prints)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -75,7 +75,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Thamani za Usajili
+### Thamani za Registry
 ```python
 # Angr doesn't currently support reading multiple things with scanf (Ex:
 # scanf("%u %u).) You will have to tell the simulation engine to begin the
@@ -201,11 +201,11 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-Katika hali hii, ingizo lilichukuliwa na `scanf("%u %u")` na thamani `"1 1"` ilitolewa, hivyo thamani **`0x00000001`** za stack zinatokana na **ingizo la mtumiaji**. Unaweza kuona jinsi thamani hizi zinavyoanza katika `$ebp - 8`. Hivyo, katika msimbo tumepunguza byte 8 kutoka `$esp` (kama katika wakati huo `$ebp` na `$esp` zilikuwa na thamani sawa) na kisha tumepush BVS.
+Katika hali hii, input ilichukuliwa kwa kutumia `scanf("%u %u")` na thamani `"1 1"` ilitolewa, hivyo thamani **`0x00000001`** za stack zimetokana na **user input**. Unaweza kuona jinsi thamani hizi zinavyoanza kwenye `$ebp - 8`. Kwa hiyo, kwenye code tulitoa **baiti 8 kutoka kwa `$esp` (kwa kuwa wakati huo `$ebp` na `$esp` zilikuwa na thamani ileile)**, kisha tukasukuma BVS.
 
-![](<../../../images/image (136).png>)
+![Weka bit vectors kwenye stack ili kubaini thamani ambayo stack position inahitaji kufikia ili kufikia mtiririko fulani wa program: Katika hali hii, input ilichukuliwa kwa kutumia scanf("%u %u") na thamani "1...](<../../../images/image (136).png>)
 
-### Thamani za Kumbukumbu za Kawaida (Mabadiliko ya Kimataifa)
+### Thamani za Static Memory (Global variables)
 ```python
 import angr
 import claripy
@@ -266,7 +266,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Thamani za Kumbukumbu za Kihisia (Malloc)
+### Thamani za Kumbukumbu Inayobadilika (Malloc)
 ```python
 import angr
 import claripy
@@ -380,35 +380,35 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-> [!NOTE]
-> Kumbuka kwamba faili ya alama inaweza pia kuwa na data za kudumu zilizochanganywa na data za alama:
+> [!TIP]
+> Kumbuka kwamba symbolic file inaweza pia kuwa na constant data iliyounganishwa na symbolic data:
 >
 > ```python
->   # Hello world, my name is John.
->   # ^                       ^
->   # ^ anwani 0             ^ anwani 24 (hesabu idadi ya wahusika)
->   # Ili kuwakilisha hii katika kumbukumbu, tungependa kuandika mfuatano huo
->   # mwanzo wa faili:
->   #
->   # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
->   #
->   # Labda, basi, tungependa kubadilisha John na
->   # variable ya alama. Tungetaja:
->   #
->   # name_bitvector = claripy.BVS('symbolic_name', 4*8)
->   #
->   # Kisha, baada ya programu kuita fopen('hello.txt', 'r') na kisha
->   # fread(buffer, sizeof(char), 30, hello_txt_file), buffer itakuwa na
->   # mfuatano kutoka kwa faili, isipokuwa byte nne za alama ambapo jina litakuwa
->   # kuhifadhiwa.
->   # (!)
+>  # Hello world, my name is John.
+>  # ^                       ^
+>  # ^ address 0             ^ address 24 (count the number of characters)
+>  # In order to represent this in memory, we would want to write the string to
+>  # the beginning of the file:
+>  #
+>  # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
+>  #
+>  # Perhaps, then, we would want to replace John with a
+>  # symbolic variable. We would call:
+>  #
+>  # name_bitvector = claripy.BVS('symbolic_name', 4*8)
+>  #
+>  # Then, after the program calls fopen('hello.txt', 'r') and then
+>  # fread(buffer, sizeof(char), 30, hello_txt_file), the buffer would contain
+>  # the string from the file, except four symbolic bytes where the name would be
+>  # stored.
+>  # (!)
 > ```
 
-### Kutumia Vikwazo
+### Kuweka Constraints
 
-> [!NOTE]
-> Wakati mwingine operesheni rahisi za kibinadamu kama kulinganisha maneno 2 yenye urefu wa 16 **char kwa char** (mzunguko), **gharama** nyingi kwa **angr** kwa sababu inahitaji kuzalisha matawi **kwa kiwango** kwa sababu inazalisha tawi 1 kwa kila ikiwa: `2^16`\
-> Kwa hivyo, ni rahisi **kuomba angr kufikia hatua ya awali** (ambapo sehemu halisi ngumu tayari imefanywa) na **kweka vikwazo hivyo kwa mikono**.
+> [!TIP]
+> Wakati mwingine operations rahisi za kibinadamu kama kulinganisha maneno 2 yenye urefu wa 16 **char by char** (loop), **hugharimu** sana kwa **angr** kwa sababu inahitaji kutengeneza branches **exponentially**, kwa kuwa inatengeneza branch 1 kwa kila if: `2^16`\
+> Kwa hiyo, ni rahisi zaidi **kuomba angr ifikie pointi ya awali** (ambapo sehemu halisi ngumu ilikuwa tayari imekamilika) na **kuweka hizo constraints manually**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> Katika baadhi ya hali unaweza kuanzisha **veritesting**, ambayo itachanganya hali zinazofanana, ili kuokoa matawi yasiyo na maana na kupata suluhisho: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> Katika baadhi ya hali unaweza ku-activate **veritesting**, ambayo itaunganisha status zinazofanana, ili kuokoa branches zisizo na umuhimu na kupata solution: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
-> [!NOTE]
-> Jambo lingine unaloweza kufanya katika hali hizi ni **kuunganisha kazi ikitoa angr kitu ambacho kinaweza kueleweka** kwa urahisi zaidi.
+> [!TIP]
+> Jambo lingine unaloweza kufanya katika hali hizi ni **hook function inayompa angr kitu anachoweza kuelewa** kwa urahisi zaidi.
 
-### Wasimamizi wa Uigaji
+### Wasimamizi wa Simulation
 
-Wasimamizi wengine wa uigaji wanaweza kuwa na manufaa zaidi kuliko wengine. Katika mfano uliopita kulikuwa na tatizo kwani matawi mengi ya manufaa yaliumbwa. Hapa, mbinu ya **veritesting** itachanganya hayo na itapata suluhisho.\
-Msimamizi huu wa uigaji pia unaweza kuanzishwa na: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Baadhi ya simulation managers wanaweza kuwa na manufaa zaidi kuliko wengine. Katika mfano uliotangulia kulikuwa na tatizo kwa sababu branches nyingi zenye manufaa ziliundwa. Hapa, technique ya **veritesting** itaunganisha hizo na kupata solution.\
+Simulation manager hii pia inaweza ku-activate kwa kutumia: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/Kupita wito mmoja kwa kazi
+### Hooking/Bypassing mwito mmoja wa function
 ```python
 # This level performs the following computations:
 #
@@ -594,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Kuingiza kazi / Simprocedure
+### Hooking a function / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -678,7 +678,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Simulate scanf with several params
+### Kuiga scanf yenye params kadhaa
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.
@@ -740,7 +740,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Binaries za Kistatik
+### Static Binaries
 ```python
 # This challenge is the exact same as the first challenge, except that it was
 # compiled as a static binary. Normally, Angr automatically replaces standard
@@ -807,4 +807,8 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
+## Marejeo
+
+- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+
 {{#include ../../../banners/hacktricks-training.md}}

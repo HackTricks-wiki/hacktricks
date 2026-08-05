@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Umiliki wa vigezo
+### Umiliki wa variables
 
-Kumbukumbu inasimamiwa kupitia mfumo wa umiliki wenye kanuni zifuatazo ambazo compiler huzikagua wakati wa compile:
+Memory inadhibitiwa kupitia mfumo wa umiliki wenye kanuni zifuatazo ambazo compiler hukagua wakati wa compilation:
 
-1. Kila thamani katika Rust ina kigezo kinachoitwa mmiliki wake.
-2. Kunaweza kuwa na mmiliki mmoja tu kwa wakati mmoja.
-3. Wakati mmiliki anapotoka nje ya uwigo, thamani itaondolewa.
+1. Kila value katika Rust ina variable inayoitwa owner wake.
+2. Kunaweza kuwa na owner mmoja tu kwa wakati mmoja.
+3. Owner anapotoka kwenye scope, value itaondolewa.
 ```rust
 fn main() {
 let student_age: u32 = 20;
@@ -20,9 +20,9 @@ println!("The student is {} and teacher is {}", student_age, teacher_age);
 // println!("the teacher is {}", teacher_age); // this will not work as teacher_age has been dropped
 }
 ```
-### Aina za jumla
+### Aina za Generic
 
-Unda struct ambapo mojawapo ya thamani zake inaweza kuwa aina yoyote.
+Unda struct ambayo thamani yake moja inaweza kuwa ya aina yoyote
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -39,34 +39,34 @@ Wrapper::new("Foo").value, "Foo"
 ```
 ### Option, Some & None
 
-Aina Option ina maana kwamba thamani inaweza kuwa ya aina Some (kuna kitu) au None:
+Aina ya Option inamaanisha kwamba thamani inaweza kuwa ya aina ya Some (kuna kitu) au None:
 ```rust
 pub enum Option<T> {
 None,
 Some(T),
 }
 ```
-Unaweza kutumia kazi kama `is_some()` au `is_none()` ili kukagua thamani ya Option.
+Unaweza kutumia functions kama `is_some()` au `is_none()` kuangalia thamani ya Option.
 
 
 ### Result, Ok & Err
 
-Zinatumika kurudisha na kusambaza makosa
+Hutumika kurejesha na kueneza errors
 ```rust
 pub enum Result<T, E> {
 Ok(T),
 Err(E),
 }
 ```
-Unaweza kutumia functions kama `is_ok()` au `is_err()` kukagua thamani ya matokeo
+Unaweza kutumia functions kama `is_ok()` au `is_err()` kuangalia thamani ya result
 
-The `Option` enum inafaa kutumika katika hali ambapo thamani inaweza kutokuwepo (kuwa `None`).
-The `Result` enum inafaa kutumika katika hali ambapo unafanya kitu ambacho kinaweza kushindikana
+`Option` enum inapaswa kutumiwa katika hali ambapo huenda thamani haipo (ikiwa `None`).
+`Result` enum inapaswa kutumiwa katika hali ambapo unafanya kitu ambacho huenda kikaenda vibaya
 
 
 ### Macros
 
-Macros ni zenye nguvu zaidi kuliko functions kwa sababu zinapanuka ili kuzalisha msimbo zaidi kuliko ule uliouandika kwa mkono. Kwa mfano, saini ya function lazima itaeleze idadi na aina ya vigezo ambavyo function ina. Macros, kwa upande mwingine, zinaweza kupokea idadi inayobadilika ya vigezo: tunaweza kuita `println!("hello")` na hoja moja au `println!("hello {}", name)` na hoja mbili. Zaidi ya hayo, macros zinapanuliwa kabla compiler itafsiri maana ya msimbo, hivyo macro inaweza, kwa mfano, kutekeleza trait kwa type fulani. Function haiwezi kufanya hivyo, kwa sababu inaitwa wakati wa runtime na trait inahitaji kutekelezwa wakati wa compile time.
+Macros zina nguvu zaidi kuliko functions kwa sababu hupanuka na kutoa code zaidi kuliko code uliyoandika mwenyewe. Kwa mfano, function signature lazima itangaze idadi na aina ya parameters ambazo function inazo. Kwa upande mwingine, macros zinaweza kupokea idadi inayobadilika ya parameters: tunaweza kuita `println!("hello")` kwa argument moja au `println!("hello {}", name)` kwa arguments mbili. Pia, macros hupanuliwa kabla compiler haijatafsiri maana ya code, hivyo macro inaweza, kwa mfano, kuimplement trait kwenye type fulani. Function haiwezi kufanya hivyo, kwa sababu huitwa wakati wa runtime na trait inahitaji kuimplementiwa wakati wa compile time.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -91,7 +91,7 @@ println!("Check out my macro!");
 }
 }
 ```
-### Kurudia
+### Iteroa kwa mfululizo
 ```rust
 // Iterate through a vector
 let my_fav_fruits = vec!["banana", "raspberry"];
@@ -108,7 +108,7 @@ for (key, hashvalue) in &*map {
 for key in map.keys() {
 for value in map.values() {
 ```
-### Box inayojirudia
+### Recursive Box
 ```rust
 enum List {
 Cons(i32, List),
@@ -153,7 +153,7 @@ true => 1,
 // TODO ^ Try commenting out one of these arms
 };
 ```
-#### mzunguko (usio na mwisho)
+#### loop (isiyo na kikomo)
 ```rust
 loop {
 count += 1;
@@ -182,7 +182,7 @@ println!("{}", n);
 n += 1;
 }
 ```
-#### for
+#### kwa
 ```rust
 for n in 1..101 {
 if n % 15 == 0 {
@@ -258,7 +258,7 @@ optional = Some(i + 1);
 ```
 ### Traits
 
-Unda method mpya kwa type
+Unda mbinu mpya ya aina fulani
 ```rust
 trait AppendBar {
 fn append_bar(self) -> Self;
@@ -290,7 +290,7 @@ assert_ne!(true, false);
 
 #### Arc
 
-Arc inaweza kutumia Clone kuunda marejeleo zaidi ya object ili kuzipitisha kwa threads. Wakati kiashiria cha mwisho cha marejeleo kwa thamani kiko nje ya wigo, variable inatupwa.
+Arc inaweza kutumia Clone kuunda marejeleo zaidi ya object ili kuyapitisha kwenye threads. Wakati pointer ya mwisho ya reference kwenda kwenye value inapotoka kwenye scope, variable inaondolewa.
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -303,7 +303,7 @@ println!("{:?}", apple);
 ```
 #### Threads
 
-Katika kesi hii tutampa thread variable ambayo ataweza kuibadilisha.
+Katika hali hii tutapitisha variable kwa thread ambayo itaweza kuirekebisha
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -321,19 +321,19 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-### Misingi ya Usalama
+### Mambo Muhimu ya Usalama
 
-Rust inatoa dhamana imara za usalama wa kumbukumbu kwa chaguo-msingi, lakini bado unaweza kuleta udhaifu hatari kupitia `unsafe` code, matatizo ya dependency au makosa ya mantiki. Muhtasari mfupi ufuatao unakusanya vijenzi vya msingi utakavyokutana navyo mara kwa mara wakati wa mapitio ya usalama ya kushambulia au ya kujilinda ya programu za Rust.
+Rust hutoa dhamana thabiti za usalama wa kumbukumbu kwa chaguo-msingi, lakini bado unaweza kuanzisha udhaifu muhimu kupitia code ya `unsafe`, matatizo ya dependencies au makosa ya kimantiki. Mini-cheatsheet ifuatayo inakusanya primitives utakazotumia mara nyingi zaidi wakati wa security reviews za offensive au defensive za software ya Rust.
 
-#### `unsafe` code & usalama wa kumbukumbu
+#### Code ya Unsafe na usalama wa kumbukumbu
 
-`unsafe` blocks huondoa ukaguzi wa aliasing na bounds wa compiler, kwa hivyo **makosa yote ya jadi ya kuharibu kumbukumbu (OOB, use-after-free, double free, n.k.) yanaweza kuonekana tena**. Orodha ya ukaguzi wa haraka:
+Vizuizi vya `unsafe` huondoa ukaguzi wa aliasing na mipaka unaofanywa na compiler, kwa hivyo **bugs zote za jadi za memory-corruption (OOB, use-after-free, double free, n.k.) zinaweza kujitokeza tena**. Orodha fupi ya ukaguzi:
 
-* Tafuta `unsafe` blocks, `extern "C"` functions, miito kwa `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointers au `ffi` modules.
-* Thibitisha kila pointer arithmetic na hoja za urefu zinazopitishwa kwa low-level functions.
-* Pendelea `#![forbid(unsafe_code)]` (crate-wide) au `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) ili compilation ishindwe wakati mtu anaporejesha `unsafe`.
+* Tafuta vizuizi vya `unsafe`, functions za `extern "C"`, miito ya `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointers au modules za `ffi`.
+* Thibitisha kila pointer arithmetic na length argument inayopitishwa kwa functions za kiwango cha chini.
+* Pendelea `#![forbid(unsafe_code)]` (crate nzima) au `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) ili compilation ishindwe mtu anapoweka tena `unsafe`.
 
-Mfano wa overflow uliotengenezwa kwa raw pointers:
+Mfano wa overflow ulioundwa kwa kutumia raw pointers:
 ```rust
 use std::ptr;
 
@@ -347,54 +347,54 @@ dst.set_len(src.len());
 dst
 }
 ```
-Kuendesha Miri ni njia nafuu ya kugundua UB wakati wa majaribio:
+Kuendesha Miri ni njia ya gharama nafuu ya kugundua UB wakati wa test:
 ```bash
 rustup component add miri
 cargo miri test  # hunts for OOB / UAF during unit tests
 ```
 #### Kukagua dependencies kwa kutumia RustSec / cargo-audit
 
-Vulns nyingi za Rust katika mazingira ya kweli zipo katika third-party crates. RustSec advisory DB (inayoendeshwa na jamii) inaweza kuhojiwa kwa ndani:
+Vulnerabilities nyingi za Rust za ulimwengu halisi hupatikana kwenye third-party crates. RustSec advisory DB (inayoendeshwa na jamii) inaweza kuulizwa locally:<sup>[[1]](#references)</sup>
 ```bash
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
 ```
-Iweke kwenye CI na kusababisha kushindikana ikiwa `--deny warnings`.
+Iunganishe kwenye CI na ifeli kwa `--deny warnings`.
 
-`cargo deny check advisories` inatoa utendaji sawa pamoja na ukaguzi wa leseni na orodha za marufuku.
+`cargo deny check advisories` inatoa utendaji unaofanana, pamoja na ukaguzi wa licence na ban-list.
 
-#### Ufunikaji wa msimbo na cargo-tarpaulin
+#### Code coverage kwa kutumia cargo-tarpaulin
 
-`cargo tarpaulin` ni chombo cha kuripoti ufunikaji wa msimbo kwa mfumo wa ujenzi wa Cargo.
+`cargo tarpaulin` ni zana ya kuripoti code coverage kwa mfumo wa ujenzi wa Cargo
 ```bash
 cargo binstall cargo-tarpaulin
 cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
 ```
-Kwenye Linux, backend ya ufuatiliaji ya chaguo-msingi ya Tarpaulin bado ni Ptrace na itafanya kazi tu kwenye prosesa za x86_64. Hii inaweza kubadilishwa kuwa llvm coverage instrumentation kwa kutumia `--engine llvm`. Kwa Mac na Windows, hii ndiyo njia ya ukusanyaji ya chaguo-msingi.
+Kwenye Linux, backend ya tracing ya kawaida ya Tarpaulin bado ni Ptrace na itafanya kazi kwenye processors za x86_64 pekee. Hili linaweza kubadilishwa kuwa instrumentation ya llvm coverage kwa kutumia `--engine llvm`. Kwa Mac na Windows, hii ndiyo njia ya kawaida ya kukusanya taarifa.
 
-#### Uhakikisho wa mnyororo wa ugavi kwa cargo-vet (2024)
+#### Uthibitishaji wa supply-chain kwa cargo-vet (2024)
 
-`cargo vet` hurekodi hash ya ukaguzi kwa kila crate unayoiingiza na huzuia masasisho yasiyogunduliwa:
+`cargo vet` huhifadhi hash ya ukaguzi kwa kila crate unayo-import na huzuia upgrades zisizotambuliwa:
 ```bash
 cargo install cargo-vet
 cargo vet init      # generates vet.toml
 cargo vet --locked  # verifies packages referenced in Cargo.lock
 ```
-Chombo kinatumika na miundombinu ya mradi wa Rust na idadi inayoongezeka ya mashirika ili kupunguza poisoned-package attacks.
+Zana hii inapitishwa na infrastructure ya mradi wa Rust pamoja na idadi inayoongezeka ya mashirika ili kupunguza mashambulizi ya poisoned-package.<sup>[[2]](#references)</sup>
 
-#### Fuzzing uso wa API yako (cargo-fuzz)
+#### Fuzzing API surface yako (cargo-fuzz)
 
-Fuzz tests hupata kwa urahisi panics, integer overflows, na logic bugs ambazo zinaweza kusababisha DoS au side-channel issues:
+Fuzz tests hugundua kwa urahisi panics, integer overflows na logic bugs ambazo zinaweza kuwa masuala ya DoS au side-channel:
 ```bash
 cargo install cargo-fuzz
 cargo fuzz init              # creates fuzz_targets/
 cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
 ```
-Ongeza fuzz target kwenye repo yako na iendeshe katika pipeline yako.
+Ongeza fuzz target kwenye repo yako na uiendeshe kwenye pipeline yako.
 
 ## Marejeleo
 
-- RustSec Advisory Database – <https://rustsec.org>
-- Cargo-vet: "Ukaguzi wa Dependencies zako za Rust" – <https://mozilla.github.io/cargo-vet/>
+- [1] [RustSec Advisory Database](https://rustsec.org)
+- [2] [Cargo-vet: Auditing your Rust Dependencies](https://mozilla.github.io/cargo-vet/)
 
 {{#include ../banners/hacktricks-training.md}}

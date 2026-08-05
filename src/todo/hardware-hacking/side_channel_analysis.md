@@ -1,28 +1,28 @@
-# Uchambuzi wa Mashambulizi ya Kando
+# Side Channel Analysis Attacks
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Mashambulizi ya kando yanapata siri kwa kuangalia "kuvuja" kwa kimwili au micro-architectural ambayo ni *husika* na hali ya ndani lakini *siyo* sehemu ya kiolesura cha kimantiki cha kifaa. Mifano inajumuisha kupima sasa ya papo hapo inayotolewa na kadi ya smart hadi kutumia athari za usimamizi wa nguvu za CPU kupitia mtandao.
+Side-channel attacks hurejesha siri kwa kuchunguza "leakage" ya kimwili au ya micro-architectural ambayo *inahusiana* na hali ya ndani, lakini *si sehemu* ya logical interface ya kifaa. Mifano inaanzia kupima current ya papo hapo inayotumiwa na smart-card hadi kutumia athari za CPU power-management kupitia network.
 
 ---
 
-## Makanali Makuu ya Kuvuja
+## Njia Kuu za Leakage
 
-| Mkanali | Lengo la Kawaida | Vifaa |
+| Channel | Typical Target | Instrumentation |
 |---------|---------------|-----------------|
-| Matumizi ya nguvu | Kadi za smart, MCU za IoT, FPGAs | Oscilloscope + shunt resistor/HS probe (e.g. CW503) |
-| Uwanja wa umeme (EM) | CPUs, RFID, wakandarasi wa AES | H-field probe + LNA, ChipWhisperer/RTL-SDR |
-| Wakati wa utekelezaji / caches | CPUs za desktop & cloud | Wakati wa juu wa usahihi (rdtsc/rdtscp), wakati wa mbali wa kuruka |
-| Kihisia / mitambo | Kibodi, printers za 3-D, relays | MEMS microphone, laser vibrometer |
-| Mwangaza & joto | LEDs, printers za laser, DRAM | Photodiode / kamera ya kasi ya juu, kamera ya IR |
-| Kufaulu kwa sababu | ASIC/MCU cryptos | Clock/voltage glitch, EMFI, laser injection |
+| Power consumption | Smart-cards, IoT MCUs, FPGAs | Oscilloscope + shunt resistor/HS probe (e.g. CW503)
+| Electromagnetic field (EM) | CPUs, RFID, AES accelerators | H-field probe + LNA, ChipWhisperer/RTL-SDR
+| Execution time / caches | Desktop & cloud CPUs | High-precision timers (rdtsc/rdtscp), remote time-of-flight
+| Acoustic / mechanical | Keyboards, 3-D printers, relays | MEMS microphone, laser vibrometer
+| Optical & thermal | LEDs, laser printers, DRAM | Photodiode / high-speed camera, IR camera
+| Fault-induced | ASIC/MCU cryptos | Clock/voltage glitch, EMFI, laser injection
 
 ---
 
-## Uchambuzi wa Nguvu
+## Power Analysis
 
-### Uchambuzi wa Nguvu Rahisi (SPA)
-Angalia *alama* moja na uhusishe moja kwa moja kilele/makundi na operesheni (e.g. DES S-boxes).
+### Simple Power Analysis (SPA)
+Chunguza *trace* moja na uhusishe moja kwa moja peaks/valleys na operations (kwa mfano, DES S-boxes).
 ```python
 # ChipWhisperer-husky example – capture one AES trace
 from chipwhisperer.capture.api.programmers import STMLink
@@ -35,72 +35,72 @@ trace = cw.capture.capture_trace()
 print(trace.wave)  # numpy array of power samples
 ```
 ### Differential/Correlation Power Analysis (DPA/CPA)
-Pata *N > 1 000* traces, dhania key byte `k`, hesabu HW/HD model na uhusishe na leakage.
+Kusanya *N > 1 000* traces, weka hypothesis ya key byte `k`, hesabu HW/HD model na ulinganishe na leakage.
 ```python
 import numpy as np
 corr = np.corrcoef(leakage_model(k), traces[:,sample])
 ```
-CPA inabaki kuwa ya kisasa lakini toleo la kujifunza mashine (MLA, deep-learning SCA) sasa linatawala mashindano kama ASCAD-v2 (2023).
+CPA bado ni state-of-the-art, lakini variants za machine-learning (MLA, deep-learning SCA) sasa zinatawala mashindano kama ASCAD-v2 (2023).
 
 ---
 
-## Uchambuzi wa Electromagnetic (EMA)
-Probes za EM za karibu (500 MHz–3 GHz) zinatoa taarifa sawa na uchambuzi wa nguvu *bila* kuingiza shunts. Utafiti wa 2024 ulionyesha urejeleaji wa funguo kwa **>10 cm** kutoka kwa STM32 kwa kutumia uhusiano wa spektra na vifaa vya RTL-SDR vya gharama nafuu.
+## Electromagnetic Analysis (EMA)
+Near-field EM probes (500 MHz–3 GHz) hu-leak taarifa zinazofanana na power analysis *bila* kuingiza shunts. Utafiti wa 2024 ulionyesha key recovery kwa umbali wa **>10 cm** kutoka kwa STM32 kwa kutumia spectrum correlation na RTL-SDR front-ends za gharama nafuu.
 
 ---
 
-## Mashambulizi ya Wakati & Micro-architectural
-CPUs za kisasa zinatoa siri kupitia rasilimali zinazoshirikiwa:
-* **Hertzbleed (2022)** – upimaji wa DVFS unahusiana na uzito wa Hamming, kuruhusu *uchimbaji wa mbali* wa funguo za EdDSA.
-* **Downfall / Gather Data Sampling (Intel, 2023)** – utekelezaji wa muda mfupi kusoma data ya AVX-gather kupitia nyuzi za SMT.
-* **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – makosa ya utabiri wa vector yanavuja register za cross-domain.
+## Timing & Micro-architectural Attacks
+CPU za kisasa hu-leak secrets kupitia shared resources:
+* **Hertzbleed (2022)** – DVFS frequency scaling inahusiana na Hamming weight, na kuruhusu *remote* extraction ya EdDSA keys.<sup>[[2]](#references)</sup>
+* **Downfall / Gather Data Sampling (Intel, 2023)** – transient-execution kusoma AVX-gather data kwenye SMT threads.
+* **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – speculative vector mis-prediction hu-leak registers katika cross-domain.
 
 ---
 
-## Mashambulizi ya Acoustic & Optical
-* 2024 "​iLeakKeys" ilionyesha usahihi wa 95 % katika kurejesha funguo za laptop kutoka kwa **kipaza sauti cha simu ya mkononi kupitia Zoom** kwa kutumia mcheza daraja wa CNN.
-* Photodiodes za kasi ya juu zinakamata shughuli za DDR4 LED na kujenga funguo za raundi za AES ndani ya <1 dakika (BlackHat 2023).
+## Acoustic & Optical Attacks
+* 2024 "​iLeakKeys" ilionyesha usahihi wa 95 % katika kurejesha laptop keystrokes kutoka kwa **smart-phone microphone over Zoom** kwa kutumia CNN classifier.
+* High-speed photodiodes hunasa DDR4 activity LED na kujenga upya AES round keys ndani ya <1 minute (BlackHat 2023).
 
 ---
 
-## Uingizaji wa Makosa & Uchambuzi wa Makosa ya Tofauti (DFA)
-Kuunganisha makosa na uvujaji wa upande wa channel kunarahisisha utafutaji wa funguo (mfano 1-trace AES DFA). Zana za hivi karibuni za bei ya hobbi:
-* **ChipSHOUTER & PicoEMP** – glitching ya pulse ya electromagnetic chini ya 1 ns.
-* **GlitchKit-R5 (2025)** – jukwaa la glitch la saa/voltage la chanzo wazi linalounga mkono RISC-V SoCs.
+## Fault Injection & Differential Fault Analysis (DFA)
+Kuchanganya faults na side-channel leakage hupunguza key search (kwa mfano, 1-trace AES DFA). Zana za hivi karibuni zenye bei kwa hobbyists:
+* **ChipSHOUTER & PicoEMP** – electromagnetic pulse glitching ya chini ya 1 ns.
+* **GlitchKit-R5 (2025)** – open-source clock/voltage glitch platform inayotumia RISC-V SoCs.
 
 ---
 
-## Mchakato wa Kawaida wa Shambulizi
-1. Tambua channel ya uvujaji & mahali pa kuingiza (pin ya VCC, capacitor ya decoupling, spot ya karibu).
-2. Ingiza kichocheo (GPIO au msingi wa muundo).
-3. Kusanya >1 k traces kwa sampuli sahihi/filters.
-4. Pre-process (mwelekeo, kuondoa wastani, LP/HP filter, wavelet, PCA).
-5. Urejeleaji wa funguo wa takwimu au ML (CPA, MIA, DL-SCA).
-6. Thibitisha na rudia kwenye outliers.
+## Typical Attack Workflow
+1. Tambua leakage channel na mount point (VCC pin, decoupling cap, near-field spot).
+2. Weka trigger (GPIO au pattern-based).
+3. Kusanya >1 k traces kwa sampling/filters zinazofaa.
+4. Fanya pre-process (alignment, mean removal, LP/HP filter, wavelet, PCA).
+5. Fanya statistical au ML key recovery (CPA, MIA, DL-SCA).
+6. Thibitisha na urudie mchakato kwa outliers.
 
 ---
 
-## Ulinzi & Kuimarisha
-* **Mtekelezaji wa wakati thabiti** & algorithimu ngumu za kumbukumbu.
-* **Kuficha/kuchanganya** – gawanya siri katika sehemu za nasibu; upinzani wa kiwango cha kwanza umeidhinishwa na TVLA.
-* **Kuficha** – wasimamizi wa voltage kwenye chip, saa za nasibu, mantiki ya reli mbili, kinga za EM.
-* **Ugunduzi wa makosa** – hesabu ya ziada, saini za kigezo.
-* **Kazi** – zima DVFS/turbo katika nyuzi za crypto, tengeneza SMT, kataza ushirikiano katika mawingu ya wapangaji wengi.
+## Defences & Hardening
+* Implementations za **Constant-time** na memory-hard algorithms.
+* **Masking/shuffling** – gawanya secrets kuwa random shares; first-order resistance iliyothibitishwa na TVLA.
+* **Hiding** – on-chip voltage regulators, randomised clock, dual-rail logic, EM shields.
+* **Fault detection** – redundant computation, threshold signatures.
+* **Operational** – zima DVFS/turbo kwenye crypto kernels, tenga SMT, kataza co-location katika multi-tenant clouds.
 
 ---
 
-## Zana & Mifumo
-* **ChipWhisperer-Husky** (2024) – 500 MS/s scope + Cortex-M trigger; Python API kama hapo juu.
-* **Riscure Inspector & FI** – kibiashara, inasaidia tathmini ya uvujaji wa kiotomatiki (TVLA-2.0).
-* **scaaml** – maktaba ya deep-learning SCA inayotumia TensorFlow (v1.2 – 2025).
-* **pyecsca** – mfumo wa wazi wa ECC SCA wa ANSSI.
+## Tools & Frameworks
+* **ChipWhisperer-Husky** (2024) – 500 MS/s scope + Cortex-M trigger; Python API kama ilivyo hapo juu.<sup>[[1]](#references)</sup>
+* **Riscure Inspector & FI** – commercial, inaunga mkono automated leakage assessment (TVLA-2.0).
+* **scaaml** – TensorFlow-based deep-learning SCA library (v1.2 – 2025).
+* **pyecsca** – ANSSI open-source ECC SCA framework.
 
 ---
 
-## Marejeleo
+## References
 
-* [ChipWhisperer Documentation](https://chipwhisperer.readthedocs.io/en/latest/)
-* [Hertzbleed Attack Paper](https://www.hertzbleed.com/)
+- [1] [ChipWhisperer Documentation](https://chipwhisperer.readthedocs.io/en/latest/)
+- [2] [Hertzbleed Attack Paper](https://www.hertzbleed.com/)
 
 
 {{#include ../../banners/hacktricks-training.md}}

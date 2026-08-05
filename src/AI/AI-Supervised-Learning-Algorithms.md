@@ -4,76 +4,76 @@
 
 ## Basic Information
 
-Kujifunza kwa kusimamiwa hutumia data iliyo na lebo kufundisha mifano inayoweza kufanya makadirio juu ya ingizo jipya, lisilojulikana. Katika usalama wa mtandao, kujifunza kwa mashine kwa kusimamiwa kunatumika sana katika kazi kama vile kugundua uvamizi (kuainisha trafiki ya mtandao kama *ya kawaida* au *shambulio*), kugundua programu hasidi (kutofautisha programu mbaya na zisizo na madhara), kugundua ulaghai (kutambua tovuti au barua pepe za ulaghai), na kuchuja barua taka, miongoni mwa zingine. Kila algorithimu ina nguvu zake na inafaa kwa aina tofauti za matatizo (kuainisha au kurudi). Hapa chini tunakagua algorithimu muhimu za kujifunza kwa kusimamiwa, kuelezea jinsi zinavyofanya kazi, na kuonyesha matumizi yao kwenye seti halisi za data za usalama wa mtandao. Tunajadili pia jinsi ya kuunganisha mifano (kujifunza kwa pamoja) kunaweza kuboresha utendaji wa makadirio mara nyingi.
+Supervised learning hutumia data iliyo na labels kufunza models zinazoweza kufanya utabiri kuhusu inputs mpya ambazo hazijawahi kuonekana. Katika cybersecurity, supervised machine learning hutumiwa kwa upana katika kazi kama vile intrusion detection (kuainisha network traffic kuwa *normal* au *attack*), malware detection (kutofautisha software hasidi na software salama), phishing detection (kutambua websites au emails za ulaghai), na spam filtering, miongoni mwa nyingine. Kila algorithm ina nguvu zake na inafaa kwa aina tofauti za matatizo (classification au regression). Hapa chini tunapitia supervised learning algorithms muhimu, tunaeleza jinsi zinavyofanya kazi, na kuonyesha matumizi yake kwenye cybersecurity datasets halisi. Pia tunajadili jinsi kuchanganya models (ensemble learning) kunavyoweza mara nyingi kuboresha predictive performance.
 
 ## Algorithms
 
--   **Linear Regression:** Algorithimu ya msingi ya kurudi kwa kutabiri matokeo ya nambari kwa kufananisha sawa la moja kwa moja na data.
+-   **Linear Regression:** Regression algorithm ya msingi ya kutabiri matokeo ya nambari kwa kufit equation ya linear kwenye data.
 
--   **Logistic Regression:** Algorithimu ya kuainisha (licha ya jina lake) inayotumia kazi ya logistic kuunda mfano wa uwezekano wa matokeo ya binary.
+-   **Logistic Regression:** Classification algorithm (licha ya jina lake) inayotumia logistic function ku-model uwezekano wa binary outcome.
 
--   **Decision Trees:** Mifano iliyo na muundo wa mti inayogawanya data kwa vipengele ili kufanya makadirio; mara nyingi hutumiwa kwa sababu ya ueleweka wao.
+-   **Decision Trees:** Models zenye muundo wa mti zinazogawanya data kulingana na features ili kufanya utabiri; mara nyingi hutumiwa kwa sababu ya interpretability yake.
 
--   **Random Forests:** Kikundi cha miti za maamuzi (kupitia bagging) kinachoboresha usahihi na kupunguza overfitting.
+-   **Random Forests:** Ensemble ya decision trees (kupitia bagging) inayoboresha accuracy na kupunguza overfitting.
 
--   **Support Vector Machines (SVM):** Wapangaji wa max-margin wanaopata hyperplane bora ya kutenganisha; wanaweza kutumia kernels kwa data isiyo ya laini.
+-   **Support Vector Machines (SVM):** Max-margin classifiers zinazopata separating hyperplane bora zaidi; zinaweza kutumia kernels kwa data isiyo ya linear.
 
--   **Naive Bayes:** Mwapangaji wa uwezekano kulingana na nadharia ya Bayes na dhana ya uhuru wa vipengele, maarufu katika kuchuja barua taka.
+-   **Naive Bayes:** Probabilistic classifier inayotegemea Bayes' theorem pamoja na dhana kwamba features hazitegemei zenyewe, na hutumiwa maarufu katika spam filtering.
 
--   **k-Nearest Neighbors (k-NN):** Mwapangaji rahisi wa "kigezo-kilichotegemea" anayepatia lebo sampuli kulingana na darasa la wingi la majirani zake wa karibu.
+-   **k-Nearest Neighbors (k-NN):** Classifier rahisi ya "instance-based" inayoweka label kwenye sample kulingana na class iliyo nyingi zaidi miongoni mwa nearest neighbors wake.
 
--   **Gradient Boosting Machines:** Mifano ya pamoja (mfano, XGBoost, LightGBM) zinazojenga mpangaji mwenye nguvu kwa kuongeza wanafunzi dhaifu kwa mpangilio (kawaida miti za maamuzi).
+-   **Gradient Boosting Machines:** Ensemble models (kwa mfano, XGBoost, LightGBM) zinazounda predictor imara kwa kuongeza weaker learners mmoja baada ya mwingine (kwa kawaida decision trees).
 
-Kila sehemu hapa chini inatoa maelezo yaliyoboreshwa ya algorithimu na **mfano wa msimbo wa Python** ukitumia maktaba kama `pandas` na `scikit-learn` (na `PyTorch` kwa mfano wa mtandao wa neva). Mifano inatumia seti za data za usalama wa mtandao zinazopatikana kwa umma (kama NSL-KDD kwa kugundua uvamizi na seti ya Tovuti za Ulaghai) na inafuata muundo thabiti:
+Kila sehemu hapa chini inatoa maelezo yaliyoboreshwa ya algorithm na **Python code example** kwa kutumia libraries kama `pandas` na `scikit-learn` (na `PyTorch` kwa mfano wa neural network). Examples zinatumia cybersecurity datasets zinazopatikana hadharani (kama NSL-KDD kwa intrusion detection na Phishing Websites dataset) na zinafuata muundo unaofanana:
 
-1.  **Pakia seti ya data** (shusha kupitia URL ikiwa inapatikana).
+1.  **Load the dataset** (ipakue kupitia URL ikiwa inapatikana).
 
-2.  **Tayarisha data** (mfano, encode vipengele vya kategoria, pima thamani, gawanya katika seti za mafunzo/test).
+2.  **Preprocess the data** (kwa mfano, encode categorical features, scale values, na gawanya data kuwa train/test sets).
 
-3.  **Fundisha mfano** kwenye data ya mafunzo.
+3.  **Train the model** kwenye training data.
 
-4.  **Tathmini** kwenye seti ya mtihani ukitumia vipimo: usahihi, usahihi, kumbukumbu, F1-score, na ROC AUC kwa kuainisha (na makosa ya wastani ya mraba kwa kurudi).
+4.  **Evaluate** kwenye test set kwa kutumia metrics: accuracy, precision, recall, F1-score, na ROC AUC kwa classification (na mean squared error kwa regression).
 
-Hebu tuingie kwenye kila algorithimu:
+Hebu tuchunguze kila algorithm:
 
 ### Linear Regression
 
-Linear regression ni algorithimu ya **kurudi** inayotumika kutabiri thamani za nambari zisizobadilika. Inadhani uhusiano wa moja kwa moja kati ya vipengele vya ingizo (vigezo huru) na matokeo (kigezo kinachotegemea). Mfano unajaribu kufananisha mstari wa moja kwa moja (au hyperplane katika vipimo vya juu) ambao unafafanua bora uhusiano kati ya vipengele na lengo. Hii kawaida hufanywa kwa kupunguza jumla ya makosa ya mraba kati ya thamani zilizotabiriwa na halisi (mbinu ya Ordinary Least Squares).
+Linear regression ni **regression** algorithm inayotumiwa kutabiri numeric values zinazoendelea. Inachukulia kuwa kuna uhusiano wa linear kati ya input features (independent variables) na output (dependent variable). Model hujaribu kufit straight line (au hyperplane katika dimensions za juu zaidi) inayoeleza vizuri zaidi uhusiano kati ya features na target. Kwa kawaida hili hufanywa kwa kupunguza jumla ya squared errors kati ya values zilizotabiriwa na zile halisi (Ordinary Least Squares method).<sup>[[8]](#references)</sup>
 
-Njia rahisi ya kuwakilisha linear regression ni kwa mstari:
+Njia rahisi zaidi ya kuwakilisha linear regression ni kwa kutumia mstari:
 ```plaintext
 y = mx + b
 ```
-Wapi:
+Ambapo:
 
-- `y` ni thamani inayotabiriwa (matokeo)
-- `m` ni mteremko wa laini (kiwango)
-- `x` ni kipengele cha ingizo
-- `b` ni kukatiza kwa y
+- `y` ni thamani iliyotabiriwa (output)
+- `m` ni mteremko wa mstari (coefficient)
+- `x` ni kipengele cha input
+- `b` ni y-intercept
 
-Lengo la regression ya mstari ni kupata laini inayofaa zaidi ambayo inapunguza tofauti kati ya thamani zinazotabiriwa na thamani halisi katika seti ya data. Bila shaka, hii ni rahisi sana, itakuwa laini moja inayotenganisha makundi 2, lakini ikiwa vipimo zaidi vitajumuishwa, laini inakuwa ngumu zaidi:
+Lengo la linear regression ni kupata mstari unaolingana vizuri zaidi na ambao hupunguza tofauti kati ya thamani zilizotabiriwa na thamani halisi katika dataset. Bila shaka, hii ni rahisi sana; ungekuwa mstari ulionyooka unaotenganisha kategoria 2, lakini vipimo zaidi vinapoongezwa, mstari huwa changamano zaidi:
 ```plaintext
 y = w1*x1 + w2*x2 + ... + wn*xn + b
 ```
 > [!TIP]
-> *Matumizi katika usalama wa mtandao:* Linear regression yenyewe si ya kawaida kwa kazi za msingi za usalama (ambazo mara nyingi ni uainishaji), lakini inaweza kutumika kutabiri matokeo ya nambari. Kwa mfano, mtu anaweza kutumia linear regression ili **kutabiri kiasi cha trafiki ya mtandao** au **kukadiria idadi ya mashambulizi katika kipindi fulani** kulingana na data za kihistoria. Pia inaweza kutabiri alama ya hatari au muda unaotarajiwa hadi kugundua shambulizi, ikizingatia vipimo fulani vya mfumo. Katika mazoezi, algorithimu za uainishaji (kama logistic regression au miti) hutumiwa mara nyingi zaidi kwa kugundua uvamizi au malware, lakini linear regression inatumika kama msingi na ni muhimu kwa uchambuzi unaolenga regression.
+> *Matumizi katika cybersecurity:* Linear regression yenyewe haitumiki sana katika kazi kuu za usalama (ambazo mara nyingi ni classification), lakini inaweza kutumika kutabiri matokeo ya nambari. Kwa mfano, mtu anaweza kutumia linear regression **kutabiri kiasi cha network traffic** au **kukadiria idadi ya mashambulizi katika kipindi fulani** kwa kutumia data ya kihistoria. Pia inaweza kutabiri risk score au muda unaotarajiwa hadi shambulizi ligunduliwe, kutokana na vipimo fulani vya mfumo. Kwa vitendo, classification algorithms (kama logistic regression au trees) hutumiwa mara nyingi zaidi kugundua intrusions au malware, lakini linear regression hutumika kama msingi na ni muhimu kwa uchanganuzi unaolenga regression.
 
 #### **Sifa kuu za Linear Regression:**
 
--   **Aina ya Tatizo:** Regression (kutabiri thamani za endelevu). Haifai kwa uainishaji wa moja kwa moja isipokuwa kigezo kitatumika kwa matokeo.
+-   **Aina ya Tatizo:** Regression (kutabiri thamani zinazoendelea). Haifai kwa classification ya moja kwa moja isipokuwa threshold itumike kwenye output.
 
--   **Ufafanuzi:** Juu -- coefficients ni rahisi kueleweka, zinaonyesha athari ya moja kwa moja ya kila kipengele.
+-   **Urahisi wa Kufasiri:** Juu -- coefficients ni rahisi kufasiri, zikionyesha athari ya mstari ya kila feature.
 
--   **Faida:** Rahisi na haraka; msingi mzuri kwa kazi za regression; inafanya kazi vizuri wakati uhusiano halisi ni wa karibu lineari.
+-   **Faida:** Rahisi na ya haraka; baseline nzuri kwa kazi za regression; hufanya kazi vizuri wakati uhusiano halisi unaelekea kuwa wa mstari.
 
--   **Mipaka:** Haiwezi kukamata uhusiano tata au usio wa lineari (bila uhandisi wa kipengele wa mikono); inakabiliwa na underfitting ikiwa uhusiano ni usio wa lineari; nyeti kwa outliers ambazo zinaweza kupotosha matokeo.
+-   **Vikwazo:** Haiwezi kushughulikia uhusiano changamano au usio wa mstari (bila manual feature engineering); inaweza kusababisha underfitting ikiwa uhusiano si wa mstari; huathiriwa na outliers, ambazo zinaweza kupotosha matokeo.
 
--   **Kupata Mstari Bora:** Ili kupata mstari bora unaotenganisha makundi yanayowezekana, tunatumia mbinu inayoitwa **Ordinary Least Squares (OLS)**. Mbinu hii inapunguza jumla ya tofauti zilizokadiriwa kati ya thamani zilizoshuhudiwa na thamani zinazokadiriwa na mfano wa lineari.
+-   **Kupata Ulinganifu Bora:** Ili kupata mstari wenye ulinganifu bora unaotenganisha categories zinazowezekana, tunatumia mbinu inayoitwa **Ordinary Least Squares (OLS)**. Mbinu hii hupunguza jumla ya tofauti zilizowekwa kwenye mraba kati ya thamani zilizozingatiwa na thamani zinazotabiriwa na linear model.
 
 <details>
-<summary>Mfano -- Kutabiri Muda wa Muunganisho (Regression) katika Dataset ya Uvamizi
+<summary>Example -- Kutabiri Muda wa Connection (Regression) katika Dataset ya Intrusion
 </summary>
-Hapa chini tunaonyesha linear regression kwa kutumia dataset ya usalama wa mtandao ya NSL-KDD. Tutachukulia hii kama tatizo la regression kwa kutabiri `muda` wa muunganisho wa mtandao kulingana na vipengele vingine. (Katika hali halisi, `muda` ni kipengele kimoja cha NSL-KDD; tunakitumia hapa tu kuonyesha regression.) Tunapakia dataset, tunaiandaa (kuandika vipengele vya kategoria), tunafundisha mfano wa linear regression, na kutathmini Makosa ya Kiwango cha Mkataba (MSE) na alama ya R² kwenye seti ya mtihani.
+Hapa chini tunaonyesha matumizi ya linear regression kwa kutumia dataset ya cybersecurity ya NSL-KDD. Tutachukulia hili kama tatizo la regression kwa kutabiri `duration` ya connections za mtandao kwa kutumia features nyingine. (Kwa uhalisia, `duration` ni feature mojawapo ya NSL-KDD; tunaitumia hapa kwa ajili ya kuonyesha regression.) Tunapakia dataset, tunaiandaa awali (kwa ku-encode features za categorical), tunafundisha linear regression model, na kutathmini Mean Squared Error (MSE) pamoja na R² score kwenye test set.
 ```python
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -128,43 +128,45 @@ Test MSE: 3021333.56
 Test R² : -0.526
 """
 ```
-Katika mfano huu, mfano wa linear regression unajaribu kutabiri `duration` ya muunganisho kutoka kwa vipengele vingine vya mtandao. Tunapima utendaji kwa kutumia Mean Squared Error (MSE) na R². R² inayokaribia 1.0 ingekuwa inaonyesha kwamba mfano unaelezea tofauti nyingi katika `duration`, wakati R² ya chini au hasi inaonyesha ulinganifu mbaya. (Usishangae ikiwa R² ni ya chini hapa -- kutabiri `duration` kunaweza kuwa ngumu kutokana na vipengele vilivyotolewa, na linear regression inaweza isishike mifumo ikiwa ni ngumu.)
+Katika mfano huu, modeli ya linear regression inajaribu kutabiri `duration` ya muunganisho kutokana na vipengele vingine vya mtandao. Tunapima utendaji kwa kutumia Mean Squared Error (MSE) na R². R² iliyo karibu na 1.0 ingeashiria kuwa modeli inaeleza sehemu kubwa ya tofauti katika `duration`, ilhali R² ya chini au hasi inaashiria ulinganifu dhaifu. (Usishangae ikiwa R² ni ya chini hapa -- kutabiri `duration` kunaweza kuwa kugumu kutokana na vipengele vilivyotolewa, na linear regression huenda isichukue mifumo hiyo ikiwa ni changamano.)
+</details>
 
 ### Logistic Regression
 
-Logistic regression ni **classification** algorithm inayomodeli uwezekano kwamba mfano unahusiana na darasa fulani (kawaida darasa "chanya"). Licha ya jina lake, *logistic* regression inatumika kwa matokeo ya kutenganishwa (kinyume na linear regression ambayo ni kwa matokeo ya kuendelea). Inatumika hasa kwa **binary classification** (darasa mbili, mfano, mbaya dhidi ya nzuri), lakini inaweza kupanuliwa kwa matatizo ya darasa nyingi (kwa kutumia softmax au mbinu moja dhidi ya nyingine).
+Logistic regression ni algorithm ya **classification** inayounda modeli ya uwezekano kwamba instance ni ya class fulani (kwa kawaida class ya "positive"). Licha ya jina lake, *logistic* regression hutumiwa kwa matokeo ya kipekee (tofauti na linear regression, ambayo hutumiwa kwa matokeo endelevu). Hutumiwa hasa kwa **binary classification** (classes mbili, kwa mfano, malicious dhidi ya benign), lakini inaweza kupanuliwa kwa matatizo yenye classes nyingi (kwa kutumia mbinu za softmax au one-vs-rest).<sup>[[1]](#references)</sup>
 
-Logistic regression inatumia kazi ya logistic (pia inajulikana kama kazi ya sigmoid) kubadilisha thamani zinazotabiriwa kuwa uwezekano. Kumbuka kwamba kazi ya sigmoid ni kazi yenye thamani kati ya 0 na 1 inayokua katika curve ya S kulingana na mahitaji ya uainishaji, ambayo ni muhimu kwa kazi za uainishaji wa binary. Hivyo, kila kipengele cha kila ingizo kinazidishwa na uzito wake uliotolewa, na matokeo yanapitishwa kupitia kazi ya sigmoid ili kutoa uwezekano:
+Logistic regression hutumia logistic function (pia hujulikana kama sigmoid function) kubadilisha thamani zilizotabiriwa kuwa probabilities. Kumbuka kuwa sigmoid function ni function yenye thamani kati ya 0 na 1 inayokua kwa mkunjo wa umbo la S kulingana na mahitaji ya classification, jambo ambalo ni muhimu kwa binary classification tasks. Kwa hiyo, kila feature ya kila input huzidishwa kwa weight yake iliyokabidhiwa, na matokeo hupitishwa kupitia sigmoid function ili kutoa probability:
 ```plaintext
 p(y=1|x) = 1 / (1 + e^(-z))
 ```
 Where:
 
-- `p(y=1|x)` ni uwezekano kwamba matokeo `y` ni 1 kutokana na ingizo `x`
+- `p(y=1|x)` ni uwezekano kwamba output `y` ni 1 kutokana na input `x`
 - `e` ni msingi wa logarithm ya asili
-- `z` ni mchanganyiko wa moja kwa moja wa vipengele vya ingizo, kawaida inawakilishwa kama `z = w1*x1 + w2*x2 + ... + wn*xn + b`. Angalia jinsi tena katika mfumo wake rahisi ni mstari wa moja kwa moja, lakini katika kesi ngumu zaidi inakuwa hyperplane yenye vipimo vingi (moja kwa kila kipengele).
+- `z` ni mchanganyiko wa mstari wa vipengele vya input, kwa kawaida huwakilishwa kama `z = w1*x1 + w2*x2 + ... + wn*xn + b`. Kumbuka kwamba katika hali yake rahisi zaidi ni mstari ulionyooka, lakini katika hali changamano zaidi huwa hyperplane yenye dimensions kadhaa (moja kwa kila kipengele).
 
 > [!TIP]
-> *Matumizi katika usalama wa mtandao:* Kwa sababu matatizo mengi ya usalama kimsingi ni maamuzi ya ndiyo/hapana, regression ya logistic inatumika sana. Kwa mfano, mfumo wa kugundua uvamizi unaweza kutumia regression ya logistic kuamua ikiwa muunganisho wa mtandao ni shambulio kulingana na vipengele vya muunganisho huo. Katika kugundua phishing, regression ya logistic inaweza kuunganisha vipengele vya tovuti (urefu wa URL, uwepo wa alama ya "@" n.k.) katika uwezekano wa kuwa phishing. Imetumika katika filters za spam za kizazi cha awali na inabaki kuwa msingi mzuri kwa kazi nyingi za uainishaji.
+> *Matumizi katika cybersecurity:* Kwa sababu matatizo mengi ya usalama kimsingi ni maamuzi ya ndiyo/hapana, Logistic Regression hutumiwa sana. Kwa mfano, mfumo wa intrusion detection unaweza kutumia Logistic Regression kuamua kama muunganisho wa mtandao ni attack kulingana na vipengele vya muunganisho huo. Katika phishing detection, Logistic Regression inaweza kuunganisha vipengele vya website (urefu wa URL, uwepo wa alama ya "@", n.k.) na kuvibadilisha kuwa uwezekano wa kuwa phishing. Imetumika katika spam filters za kizazi cha awali na bado ni baseline thabiti kwa kazi nyingi za classification.
 
-#### Regression ya Logistic kwa uainishaji usio wa binary
+#### Logistic Regression kwa classification isiyo ya binary
 
-Regression ya logistic imeundwa kwa ajili ya uainishaji wa binary, lakini inaweza kupanuliwa kushughulikia matatizo ya madarasa mengi kwa kutumia mbinu kama **moja dhidi ya wengine** (OvR) au **softmax regression**. Katika OvR, mfano tofauti wa regression ya logistic unafundishwa kwa kila darasa, ukitreat kama darasa chanya dhidi ya mengine yote. Darasa lenye uwezekano wa juu zaidi linachaguliwa kama utabiri wa mwisho. Softmax regression inapanua regression ya logistic kwa madarasa mengi kwa kutumia kazi ya softmax kwenye safu ya matokeo, ikitoa usambazaji wa uwezekano juu ya madarasa yote.
+Logistic Regression imeundwa kwa binary classification, lakini inaweza kupanuliwa kushughulikia matatizo ya multi-class kwa kutumia mbinu kama **one-vs-rest** (OvR) au **softmax regression**. Katika OvR, model tofauti ya Logistic Regression hufunzwa kwa kila class, ambapo class hiyo inachukuliwa kuwa positive class dhidi ya class nyingine zote. Class yenye probability iliyotabiriwa kuwa kubwa zaidi huchaguliwa kama prediction ya mwisho. Softmax regression hujumlisha Logistic Regression kwa classes nyingi kwa kutumia softmax function kwenye output layer, na kutengeneza probability distribution katika classes zote.
 
-#### **Sifa kuu za Regression ya Logistic:**
+#### **Sifa kuu za Logistic Regression:**
 
--   **Aina ya Tatizo:** Uainishaji (kawaida wa binary). Inatabiri uwezekano wa darasa chanya.
+-   **Aina ya Tatizo:** Classification (kwa kawaida binary). Hutabiri probability ya positive class.
 
--   **Ufafanuzi:** Juu -- kama regression ya moja kwa moja, coefficients za vipengele zinaweza kuonyesha jinsi kila kipengele kinavyoathiri log-odds ya matokeo. Uwazi huu mara nyingi unathaminiwa katika usalama kwa kuelewa ni vigezo gani vinavyosababisha tahadhari.
+-   **Urahisi wa Kutafsiri:** Juu -- kama ilivyo kwa linear regression, coefficients za features zinaweza kuonyesha jinsi kila feature inavyoathiri log-odds ya matokeo. Uwazi huu huthaminiwa mara nyingi katika usalama kwa kuelewa ni vipengele gani vinavyochangia alert.
 
--   **Faida:** Rahisi na haraka kufundisha; inafanya kazi vizuri wakati uhusiano kati ya vipengele na log-odds ya matokeo ni wa moja kwa moja. Inatoa uwezekano, ikiruhusu upimaji wa hatari. Kwa udhibiti sahihi, inapanua vizuri na inaweza kushughulikia multicollinearity bora zaidi kuliko regression ya moja kwa moja ya kawaida.
+-   **Faida:** Ni rahisi na ya haraka kufunza; hufanya kazi vizuri wakati uhusiano kati ya features na log-odds ya matokeo ni wa mstari. Hutoa probabilities, hivyo kuwezesha risk scoring. Kwa regularization inayofaa, hu-generalize vizuri na inaweza kushughulikia multicollinearity vizuri zaidi kuliko plain linear regression.
 
--   **Mapungufu:** Inadhani mipaka ya maamuzi ya moja kwa moja katika nafasi ya vipengele (inaweza kushindwa ikiwa mipaka halisi ni ngumu/siyo ya moja kwa moja). Inaweza kufanya vibaya kwenye matatizo ambapo mwingiliano au athari zisizo za moja kwa moja ni muhimu, isipokuwa uongeze vipengele vya polynomial au mwingiliano kwa mikono. Pia, regression ya logistic ni dhaifu ikiwa madarasa hayawezi kutenganishwa kwa urahisi na mchanganyiko wa moja kwa moja wa vipengele.
+-   **Vikwazo:** Huchukulia kuwa decision boundary katika feature space ni ya mstari (hufeli ikiwa boundary halisi ni changamano/isiyo ya mstari). Inaweza kufanya vibaya kwenye matatizo ambapo interactions au non-linear effects ni muhimu, isipokuwa uongeze mwenyewe polynomial au interaction features. Pia, Logistic Regression haifanyi kazi vizuri ikiwa classes haziwezi kutenganishwa kwa urahisi na mchanganyiko wa mstari wa features.
+
 
 <details>
-<summary>Mfano -- Kugundua Tovuti za Phishing kwa Regression ya Logistic:</summary>
+<summary>Example -- Phishing Website Detection with Logistic Regression:</summary>
 
-Tutatumia **Seti ya Takwimu za Tovuti za Phishing** (kutoka kwenye hazina ya UCI) ambayo ina vipengele vilivyotolewa vya tovuti (kama vile ikiwa URL ina anwani ya IP, umri wa kikoa, uwepo wa vipengele vya kutatanisha katika HTML, n.k.) na lebo inayonyesha ikiwa tovuti ni phishing au halali. Tunafundisha mfano wa regression ya logistic ili kuainisha tovuti na kisha kutathmini usahihi wake, usahihi, kukumbuka, alama ya F1, na ROC AUC kwenye mgawanyiko wa mtihani.
+Tutatumia **Phishing Websites Dataset** (kutoka kwenye repository ya UCI), ambayo ina features zilizotolewa kutoka kwenye websites (kama kama URL ina IP address, umri wa domain, uwepo wa vipengele vya kutiliwa shaka katika HTML, n.k.) pamoja na label inayoonyesha kama site ni phishing au halali. Tutafunza model ya Logistic Regression ili ku-classify websites, kisha tutathmini accuracy, precision, recall, F1-score, na ROC AUC yake kwenye test split.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -219,26 +221,26 @@ F1-score : 0.917
 ROC AUC  : 0.979
 """
 ```
-Katika mfano huu wa kugundua phishing, regression ya logistic inatoa uwezekano wa kila tovuti kuwa phishing. Kwa kutathmini usahihi, usahihi wa kweli, kurudi, na F1, tunapata hisia ya utendaji wa mfano. Kwa mfano, kurudi kwa juu kutamaanisha inakamata tovuti nyingi za phishing (muhimu kwa usalama ili kupunguza mashambulizi yaliyokosa), wakati usahihi wa juu unamaanisha ina alama chache za uwongo (muhimu ili kuepuka uchovu wa mchambuzi). ROC AUC (Eneo Chini ya Mchoro wa ROC) inatoa kipimo kisichotegemea kigezo cha utendaji (1.0 ni bora, 0.5 si bora zaidi kuliko bahati nasibu). Regression ya logistic mara nyingi inafanya vizuri katika kazi kama hizo, lakini ikiwa mpaka wa uamuzi kati ya tovuti za phishing na halali ni ngumu, mifano isiyo ya kawaida yenye nguvu zaidi inaweza kuhitajika.
+Katika mfano huu wa kugundua phishing, logistic regression hutoa uwezekano kwa kila website kuwa phishing. Kwa kutathmini accuracy, precision, recall, na F1, tunapata picha ya utendaji wa model. Kwa mfano, recall ya juu ingemaanisha kuwa inagundua tovuti nyingi za phishing (jambo muhimu kwa usalama ili kupunguza mashambulizi yaliyokosa kugunduliwa), huku precision ya juu ikimaanisha kuwa ina false alarms chache (jambo muhimu ili kuepuka uchovu wa wachambuzi). ROC AUC (Area Under the ROC Curve) hutoa kipimo cha utendaji kisichotegemea threshold (1.0 ni bora, 0.5 si bora kuliko kubahatisha). Logistic regression mara nyingi hufanya vizuri katika kazi kama hizi, lakini ikiwa decision boundary kati ya tovuti za phishing na halali ni changamano, model zenye nguvu zaidi zisizo za mstari zinaweza kuhitajika.
 
 </details>
 
-### Miti ya Uamuzi
+### Decision Trees
 
-Mti wa uamuzi ni **algorithms ya kujifunza kwa usimamizi** inayoweza kutumika kwa kazi za uainishaji na regression. Inajifunza mfano wa mti wa maamuzi wa kihierarkia kulingana na vipengele vya data. Kila nodi ya ndani ya mti inawakilisha mtihani juu ya kipengele fulani, kila tawi linawakilisha matokeo ya mtihani huo, na kila nodi ya majani inawakilisha daraja lililotabiriwa (kwa uainishaji) au thamani (kwa regression).
+Decision tree ni **algoritmu ya supervised learning** inayoweza kutumika kwa kazi za classification na regression. Hujifunza model ya maamuzi yenye muundo wa mti wa kihierarkia kulingana na features za data. Kila internal node ya mti huwakilisha jaribio kwenye feature fulani, kila branch huwakilisha matokeo ya jaribio hilo, na kila leaf node huwakilisha class iliyotabiriwa (kwa classification) au value (kwa regression).<sup>[[2]](#references)</sup>
 
-Ili kujenga mti, algorithms kama CART (Mti wa Uainishaji na Regression) hutumia vipimo kama **uchafu wa Gini** au **faida ya taarifa (entropi)** kuchagua kipengele bora na kigezo cha kugawanya data katika kila hatua. Lengo katika kila mgawanyiko ni kugawanya data ili kuongeza umoja wa variable lengwa katika sehemu zinazotokana (kwa uainishaji, kila nodi inalenga kuwa safi kadri inavyowezekana, ikijumuisha daraja moja tu).
+Ili kujenga mti, algorithms kama CART (Classification and Regression Tree) hutumia vipimo kama **Gini impurity** au **information gain (entropy)** kuchagua feature bora na threshold ya kugawanya data katika kila hatua. Lengo katika kila mgawanyo ni kugawa data ili kuongeza homogeneity ya target variable katika subsets zinazotokana (kwa classification, kila node hulenga kuwa pure iwezekanavyo, ikiwa na class moja kwa kiasi kikubwa).
 
-Miti ya uamuzi ni **rahisi kueleweka** -- mtu anaweza kufuata njia kutoka mzizi hadi jani ili kuelewa mantiki nyuma ya utabiri (kwa mfano, *"IKIWA `service = telnet` NA `src_bytes > 1000` NA `failed_logins > 3` BASI ainishe kama shambulio"*). Hii ni muhimu katika usalama wa mtandao kwa kuelezea kwa nini arifa fulani ilitolewa. Miti inaweza kushughulikia data za nambari na za kategoria kwa urahisi na inahitaji maandalizi madogo (kwa mfano, upimaji wa kipengele hauhitajiki).
+Decision trees ni **rahisi sana kufasiriwa** -- mtu anaweza kufuata njia kutoka root hadi leaf ili kuelewa mantiki ya prediction (kwa mfano, *"IF `service = telnet` AND `src_bytes > 1000` AND `failed_logins > 3` THEN classify as attack"*). Hili ni muhimu katika cybersecurity kwa kueleza kwa nini alert fulani ilitolewa. Trees zinaweza kushughulikia kwa kawaida data za nambari na za categorical, na zinahitaji preprocessing kidogo (kwa mfano, feature scaling haihitajiki).
 
-Hata hivyo, mti mmoja wa uamuzi unaweza kwa urahisi kujiweka kwenye data ya mafunzo, hasa ikiwa umejengwa kwa kina (mgawanyiko mingi). Mbinu kama pruning (kudhibiti kina cha mti au kuhitaji idadi ya chini ya sampuli kwa kila jani) mara nyingi hutumiwa kuzuia kujiweka.
+Hata hivyo, decision tree moja inaweza kufanya overfit kwa urahisi kwenye training data, hasa ikiwa imekuzwa kwa kina (ikiwa na splits nyingi). Mbinu kama pruning (kupunguza kina cha mti au kuhitaji idadi ya chini ya samples kwa kila leaf) hutumiwa mara nyingi kuzuia overfitting.
 
-Kuna vipengele 3 vikuu vya mti wa uamuzi:
-- **Nodi ya Mzizi**: Nodi ya juu ya mti, inawakilisha dataset nzima.
-- **Nodi za Ndani**: Nodi zinazowakilisha vipengele na maamuzi kulingana na vipengele hivyo.
-- **Nodi za Majani**: Nodi zinazowakilisha matokeo ya mwisho au utabiri.
+Kuna components 3 kuu za decision tree:
+- **Root Node**: Node ya juu ya mti, inayowakilisha dataset nzima.
+- **Internal Nodes**: Nodes zinazowakilisha features na maamuzi yanayotegemea features hizo.
+- **Leaf Nodes**: Nodes zinazowakilisha matokeo au prediction ya mwisho.
 
-Mti unaweza kuishia kuonekana kama hii:
+Mti unaweza kuishia kuonekana hivi:
 ```plaintext
 [Root Node]
 /   \
@@ -247,50 +249,50 @@ Mti unaweza kuishia kuonekana kama hii:
 [Leaf 1] [Leaf 2] [Leaf 3] [Leaf 4]
 ```
 > [!TIP]
-> *Matumizi katika usalama wa mtandao:* Miti ya maamuzi imekuwa ikitumika katika mifumo ya kugundua uvamizi ili kupata **kanuni** za kutambua mashambulizi. Kwa mfano, mifumo ya awali ya IDS kama vile inayotegemea ID3/C4.5 ingezalisha kanuni zinazoweza kusomeka na binadamu ili kutofautisha trafiki ya kawaida na ya uhalifu. Pia zinatumika katika uchambuzi wa malware ili kuamua kama faili ni ya uhalifu kulingana na sifa zake (ukubwa wa faili, entropy ya sehemu, wito wa API, n.k.). Uwazi wa miti ya maamuzi unazifanya kuwa muhimu wakati uwazi unahitajika -- mchambuzi anaweza kuchunguza mti ili kuthibitisha mantiki ya kugundua.
+> *Matumizi katika cybersecurity:* Decision trees zimetumika katika intrusion detection systems ili kupata **rules** za kutambua attacks. Kwa mfano, IDS za awali zilizotegemea ID3/C4.5 zilitengeneza rules zinazosomwa na binadamu ili kutofautisha traffic ya kawaida na traffic hasidi. Pia hutumika katika malware analysis kuamua kama file ni hasidi kulingana na sifa zake (ukubwa wa file, section entropy, API calls, n.k.). Uwazi wa decision trees huzifanya ziwe muhimu wakati transparency inahitajika -- analyst anaweza kukagua tree ili kuthibitisha logic ya detection.
 
-#### **Sifa kuu za Miti ya Maamuzi:**
+#### **Sifa kuu za Decision Trees:**
 
--   **Aina ya Tatizo:** Uainishaji na urejeleaji. Inatumika sana kwa uainishaji wa mashambulizi dhidi ya trafiki ya kawaida, n.k.
+-   **Aina ya Tatizo:** Classification na regression. Hutumika mara nyingi kwa classification ya attacks dhidi ya traffic ya kawaida, n.k.
 
--   **Ufafanuzi:** Juu sana -- maamuzi ya mfano yanaweza kuonyeshwa na kueleweka kama seti ya kanuni za kama-kisha. Hii ni faida kubwa katika usalama kwa kuaminika na uthibitisho wa tabia ya mfano.
+-   **Uwezo wa Kueleweka:** Juu sana -- maamuzi ya model yanaweza kuonyeshwa na kueleweka kama seti ya if-then rules. Hii ni faida kubwa katika security kwa ajili ya trust na verification ya tabia ya model.
 
--   **Faida:** Inaweza kushika uhusiano usio wa moja kwa moja na mwingiliano kati ya vipengele (kila mgawanyiko unaweza kuonekana kama mwingiliano). Hakuna haja ya kupima vipengele au kuandika moja kwa moja mabadiliko ya kategoria -- miti inashughulikia hayo kiasili. Utabiri wa haraka (utabiri ni kufuata tu njia katika mti).
+-   **Faida:** Zinaweza kubaini mahusiano yasiyo ya mstari na interactions kati ya features (kila split inaweza kuonekana kama interaction). Hakuna haja ya kuscale features au kufanya one-hot encoding ya categorical variables -- trees hushughulikia hizo natively. Inference ni ya haraka (prediction ni kufuata tu njia katika tree).
 
--   **Mapungufu:** Inaweza kuwa na hatari ya kupita kiasi ikiwa haitadhibitiwa (mti mrefu unaweza kukumbuka seti ya mafunzo). Inaweza kuwa isiyo thabiti -- mabadiliko madogo katika data yanaweza kusababisha muundo tofauti wa mti. Kama mifano ya pekee, usahihi wao unaweza kutofautiana na mbinu za juu zaidi (mchanganyiko kama Random Forests kwa kawaida hufanya vizuri zaidi kwa kupunguza tofauti).
+-   **Vikwazo:** Zinaweza kufanya overfitting ikiwa hazitadhibitiwa (tree yenye kina kirefu inaweza kuhifadhi training set nzima). Zinaweza kuwa unstable -- mabadiliko madogo katika data yanaweza kusababisha muundo tofauti wa tree. Kama models za pekee, accuracy yake huenda isilingane na methods za kisasa zaidi (ensembles kama Random Forests kwa kawaida hufanya vizuri zaidi kwa kupunguza variance).
 
--   **Kupata Mgawanyiko Bora:**
-- **Gini Impurity**: Inapima uchafuzi wa nodi. Uchafuzi wa chini wa Gini unaonyesha mgawanyiko bora. Formula ni:
+-   **Kupata Split Bora:**
+- **Gini Impurity**: Hupima impurity ya node. Gini impurity ya chini huashiria split bora zaidi. Formula ni:
 
 ```plaintext
 Gini = 1 - Σ(p_i^2)
 ```
 
-Ambapo `p_i` ni sehemu ya matukio katika darasa `i`.
+Ambapo `p_i` ni uwiano wa instances zilizo katika class `i`.
 
-- **Entropy**: Inapima kutokuwa na uhakika katika seti ya data. Entropy ya chini inaonyesha mgawanyiko bora. Formula ni:
+- **Entropy**: Hupima uncertainty katika dataset. Entropy ya chini huashiria split bora zaidi. Formula ni:
 
 ```plaintext
 Entropy = -Σ(p_i * log2(p_i))
 ```
 
-Ambapo `p_i` ni sehemu ya matukio katika darasa `i`.
+Ambapo `p_i` ni uwiano wa instances zilizo katika class `i`.
 
-- **Information Gain**: Kupungua kwa entropy au uchafuzi wa Gini baada ya mgawanyiko. Kadri faida ya taarifa inavyokuwa kubwa, ndivyo mgawanyiko unavyokuwa bora. Inakokotwa kama:
+- **Information Gain**: Ni upunguzaji wa entropy au Gini impurity baada ya split. Kadiri information gain inavyokuwa kubwa, ndivyo split inavyokuwa bora zaidi. Huhesabiwa kama:
 
 ```plaintext
 Information Gain = Entropy(parent) - (Weighted Average of Entropy(children))
 ```
 
-Zaidi ya hayo, mti unamalizika wakati:
-- Matukio yote katika nodi yanategemea darasa moja. Hii inaweza kusababisha kupita kiasi.
-- Kina cha juu zaidi (kilichowekwa kwa nguvu) cha mti kimefikiwa. Hii ni njia ya kuzuia kupita kiasi.
-- Idadi ya matukio katika nodi iko chini ya kigezo fulani. Hii pia ni njia ya kuzuia kupita kiasi.
-- Faida ya taarifa kutoka kwa mgawanyiko zaidi iko chini ya kigezo fulani. Hii pia ni njia ya kuzuia kupita kiasi.
+Zaidi ya hayo, tree hukoma wakati:
+- Instances zote katika node ni za class moja. Hii inaweza kusababisha overfitting.
+- Maximum depth (iliyoandikwa moja kwa moja kwenye code) ya tree imefikiwa. Hii ni njia ya kuzuia overfitting.
+- Idadi ya instances katika node iko chini ya threshold fulani. Hii pia ni njia ya kuzuia overfitting.
+- Information gain kutoka kwa splits zaidi iko chini ya threshold fulani. Hii pia ni njia ya kuzuia overfitting.
 
 <details>
-<summary>Mfano -- Mti wa Maamuzi kwa Kugundua Uvamizi:</summary>
-Tutafundisha mti wa maamuzi kwenye seti ya data ya NSL-KDD ili kuainisha muunganisho wa mtandao kama *kawaida* au *shambulizi*. NSL-KDD ni toleo lililoboreshwa la seti ya data ya KDD Cup 1999, ikiwa na vipengele kama aina ya protokali, huduma, muda, idadi ya kuingia kwa mafanikio, n.k., na lebo inayonyesha aina ya shambulizi au "kawaida". Tutapanga aina zote za mashambulizi kwenye darasa la "anomaly" (uainishaji wa binary: kawaida dhidi ya anomaly). Baada ya mafunzo, tutakadiria utendaji wa mti kwenye seti ya mtihani.
+<summary>Example -- Decision Tree for Intrusion Detection:</summary>
+Tutafunza decision tree kwa kutumia dataset ya NSL-KDD ili ku-classify network connections kama *normal* au *attack*. NSL-KDD ni toleo lililoboreshwa la dataset maarufu ya KDD Cup 1999, lenye features kama protocol type, service, duration, idadi ya failed logins, n.k., pamoja na label inayoonyesha aina ya attack au "normal". Tutapanga aina zote za attacks katika class ya "anomaly" (binary classification: normal dhidi ya anomaly). Baada ya training, tutatathmini performance ya tree kwenye test set.
 ```python
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
@@ -354,40 +356,40 @@ F1‑score : 0.756
 ROC AUC  : 0.758
 """
 ```
-Katika mfano huu wa mti wa maamuzi, tulipunguza kina cha mti kuwa 10 ili kuepuka kupita kiasi kwa kuzingatia (parameter ya `max_depth=10`). Vipimo vinaonyesha jinsi mti unavyotofautisha trafiki ya kawaida dhidi ya shambulio. Kumbukumbu ya juu itamaanisha inakamata mashambulizi mengi (muhimu kwa IDS), wakati usahihi wa juu unamaanisha alama chache za uwongo. Miti ya maamuzi mara nyingi inapata usahihi mzuri kwenye data iliyopangwa, lakini mti mmoja huenda usifikie utendaji bora zaidi unaowezekana. Hata hivyo, *ufahamu* wa mfano ni faida kubwa -- tunaweza kuchunguza mgawanyiko wa mti kuona, kwa mfano, ni vipengele vipi (k.m., `service`, `src_bytes`, n.k.) vina ushawishi mkubwa katika kuashiria muunganisho kama mbaya.
+Katika mfano huu wa decision tree, tulipunguza kina cha tree hadi 10 ili kuepuka overfitting uliokithiri (parameter ya `max_depth=10`). Metrics zinaonyesha jinsi tree inavyotofautisha traffic ya kawaida dhidi ya ya mashambulizi. Recall ya juu ingemaanisha kwamba inagundua mashambulizi mengi (jambo muhimu kwa IDS), huku precision ya juu ikimaanisha alerts chache za uongo. Decision trees mara nyingi hupata accuracy nzuri kwenye data iliyopangwa, lakini tree moja huenda isifike kwenye performance bora zaidi inayowezekana. Hata hivyo, *interpretability* ya model ni faida kubwa -- tunaweza kuchunguza splits za tree ili kuona, kwa mfano, ni features zipi (k.m., `service`, `src_bytes`, n.k.) zina ushawishi mkubwa zaidi katika kuashiria connection kuwa malicious.
 
 </details>
 
-### Misitu ya Nasibu
+### Random Forests
 
-Misitu ya Nasibu ni mbinu ya **ujifunzaji wa pamoja** inayojenga juu ya miti ya maamuzi ili kuboresha utendaji. Misitu ya nasibu inafundisha miti mingi ya maamuzi (hivyo "msitu") na kuunganisha matokeo yao ili kufanya utabiri wa mwisho (kwa uainishaji, kawaida kwa kura ya wingi). Mawazo mawili makuu katika msitu wa nasibu ni **bagging** (kuunganisha bootstrapping) na **uhusiano wa vipengele**:
+Random Forest ni mbinu ya **ensemble learning** inayojengwa juu ya decision trees ili kuboresha performance. Random forest hufunza decision trees nyingi (ndiyo maana ya "forest") na kuunganisha outputs zake ili kutoa prediction ya mwisho (kwa classification, kwa kawaida kwa majority vote). Mawazo mawili makuu katika random forest ni **bagging** (bootstrap aggregating) na **feature randomness**:
 
--   **Bagging:** Kila mti unafundishwa kwenye sampuli ya bootstrapping ya nasibu ya data ya mafunzo (iliyochukuliwa kwa kubadilishana). Hii inaingiza utofauti kati ya miti.
+-   **Bagging:** Kila tree hufunzwa kwa kutumia random bootstrap sample ya training data (iliyochukuliwa kwa replacement). Hii huleta diversity miongoni mwa trees.
 
--   **Uhusiano wa Vipengele:** Kila wakati wa mgawanyiko katika mti, subset ya nasibu ya vipengele inazingatiwa kwa ajili ya mgawanyiko (badala ya vipengele vyote). Hii inafanya miti kuwa na uhusiano mdogo zaidi.
+-   **Feature Randomness:** Katika kila split ya tree, subset ya features huchaguliwa kwa random kwa ajili ya splitting (badala ya kutumia features zote). Hii hutenganisha zaidi correlations kati ya trees.
 
-Kwa kuhesabu matokeo ya miti mingi, msitu wa nasibu hupunguza tofauti ambayo mti mmoja wa maamuzi unaweza kuwa nayo. Kwa maneno rahisi, miti binafsi inaweza kupita kiasi au kuwa na kelele, lakini idadi kubwa ya miti tofauti ikipiga kura pamoja inasafisha makosa hayo. Matokeo mara nyingi ni mfano wenye **usahihi wa juu** na ujanibishaji bora kuliko mti mmoja wa maamuzi. Aidha, misitu ya nasibu inaweza kutoa makadirio ya umuhimu wa vipengele (kwa kuangalia ni kiasi gani kila mgawanyiko wa kipengele hupunguza uchafu kwa wastani).
+Kwa kukadiria wastani wa matokeo ya trees nyingi, random forest hupunguza variance ambayo decision tree moja inaweza kuwa nayo. Kwa maneno rahisi, trees binafsi zinaweza kufanya overfit au kutoa noise, lakini trees nyingi zenye diversity zinazopiga kura pamoja husawazisha makosa hayo. Matokeo yake mara nyingi ni model yenye **accuracy ya juu** na generalization bora kuliko decision tree moja. Zaidi ya hayo, random forests zinaweza kutoa makadirio ya feature importance (kwa kuangalia kiasi ambacho kila feature split hupunguza impurity kwa wastani).
 
-Misitu ya nasibu yamekuwa **kazi kubwa katika usalama wa mtandao** kwa kazi kama vile kugundua uvamizi, uainishaji wa malware, na kugundua barua taka. Mara nyingi hufanya vizuri bila marekebisho makubwa na zinaweza kushughulikia seti kubwa za vipengele. Kwa mfano, katika kugundua uvamizi, msitu wa nasibu unaweza kufanya vizuri zaidi kuliko mti mmoja wa maamuzi kwa kukamata mifumo ya mashambulizi ya siri zaidi kwa alama chache za uwongo. Utafiti umeonyesha misitu ya nasibu ikifanya vizuri ikilinganishwa na algorithimu nyingine katika kuainisha mashambulizi katika seti za data kama NSL-KDD na UNSW-NB15.
+Random forests zimekuwa **workhorse katika cybersecurity** kwa tasks kama intrusion detection, malware classification, na spam detection. Mara nyingi hufanya vizuri out-of-the-box bila tuning kubwa na zinaweza kushughulikia feature sets kubwa. Kwa mfano, katika intrusion detection, random forest inaweza kuishinda decision tree binafsi kwa kugundua patterns fiche zaidi za mashambulizi na false positives chache. Utafiti umeonyesha random forests zikifanya vizuri ikilinganishwa na algorithms nyingine katika ku-classify mashambulizi kwenye datasets kama NSL-KDD na UNSW-NB15.<sup>[[3]](#references)[[9]](#references)</sup>
 
-#### **Sifa kuu za Misitu ya Nasibu:**
+#### **Sifa kuu za Random Forests:**
 
--   **Aina ya Tatizo:** Kimsingi uainishaji (pia hutumiwa kwa urejeleaji). Inafaa sana kwa data iliyopangwa ya kiwango cha juu inayopatikana katika kumbukumbu za usalama.
+-   **Aina ya Tatizo:** Hasa classification (hutumika pia kwa regression). Inafaa sana kwa data iliyopangwa yenye dimensions nyingi, ambayo ni ya kawaida katika security logs.
 
--   **Ufafanuzi:** Chini kuliko mti mmoja wa maamuzi -- huwezi kuona kwa urahisi au kuelezea miti mia kwa wakati mmoja. Hata hivyo, alama za umuhimu wa vipengele zinatoa ufahamu fulani kuhusu ni sifa zipi zenye ushawishi mkubwa.
+-   **Interpretability:** Ni ya chini kuliko decision tree moja -- huwezi ku-visualize au kueleza kwa urahisi trees mamia kwa wakati mmoja. Hata hivyo, feature importance scores hutoa mwanga kuhusu attributes zipi zina ushawishi mkubwa zaidi.
 
--   **Faida:** Kwa ujumla usahihi wa juu zaidi kuliko mifano ya miti moja kutokana na athari ya pamoja. Imara dhidi ya kupita kiasi -- hata kama miti binafsi inapita kiasi, pamoja inajitenga vizuri zaidi. Inashughulikia vipengele vya nambari na vya kategoria na inaweza kudhibiti data iliyokosekana kwa kiwango fulani. Pia ni imara dhidi ya vitu vya nje.
+-   **Faida:** Kwa ujumla huwa na accuracy ya juu kuliko models za tree moja kutokana na athari ya ensemble. Ni robust dhidi ya overfitting -- hata kama trees binafsi zinafanya overfit, ensemble hufanya generalization vizuri zaidi. Hushughulikia features za numerical na categorical na inaweza kushughulikia missing data kwa kiwango fulani. Pia ni robust kwa outliers kwa kiasi.
 
--   **Vikwazo:** Ukubwa wa mfano unaweza kuwa mkubwa (miti mingi, kila moja inaweza kuwa na kina). Utabiri ni polepole kuliko mti mmoja (kwa kuwa lazima uunganishe juu ya miti mingi). Ni ngumu kueleweka -- ingawa unajua vipengele muhimu, mantiki halisi si rahisi kufuatilia kama sheria rahisi. Ikiwa seti ya data ni kubwa sana na yenye upungufu, kufundisha msitu mkubwa sana kunaweza kuwa na uzito wa hesabu.
+-   **Vikwazo:** Ukubwa wa model unaweza kuwa mkubwa (trees nyingi, ambazo kila moja inaweza kuwa na kina kirefu). Predictions ni za polepole kuliko za tree moja (kwa sababu lazima u-aggregate juu ya trees nyingi). Ina interpretability ndogo -- ingawa unajua features muhimu, logic kamili si rahisi kufuatilia kama rule rahisi. Ikiwa dataset ina dimensions nyingi sana na ni sparse, kufunza forest kubwa sana kunaweza kuwa mzigo wa computational.
 
--   **Mchakato wa Mafunzo:**
-1. **Sampuli ya Bootstrapping**: Chukua sampuli ya nasibu ya data ya mafunzo kwa kubadilishana ili kuunda subsets nyingi (sampuli za bootstrapping).
-2. **Ujenzi wa Mti**: Kwa kila sampuli ya bootstrapping, jenga mti wa maamuzi ukitumia subset ya nasibu ya vipengele katika kila mgawanyiko. Hii inaingiza utofauti kati ya miti.
-3. **Kuunganisha**: Kwa kazi za uainishaji, utabiri wa mwisho unafanywa kwa kuchukua kura ya wingi kati ya utabiri wa miti yote. Kwa kazi za urejeleaji, utabiri wa mwisho ni wastani wa utabiri kutoka kwa miti yote.
+-   **Mchakato wa Training:**
+1. **Bootstrap Sampling**: Chukua sample ya training data kwa random ukiwa na replacement ili kuunda subsets nyingi (bootstrap samples).
+2. **Tree Construction**: Kwa kila bootstrap sample, jenga decision tree ukitumia subset ya features iliyochaguliwa kwa random katika kila split. Hii huleta diversity miongoni mwa trees.
+3. **Aggregation**: Kwa tasks za classification, prediction ya mwisho hutolewa kwa kuchukua majority vote kati ya predictions za trees zote. Kwa tasks za regression, prediction ya mwisho ni wastani wa predictions kutoka kwa trees zote.
 
 <details>
-<summary>Mfano -- Misitu ya Nasibu kwa Kugundua Uvamizi (NSL-KDD):</summary>
-Tutatumia seti ile ile ya data ya NSL-KDD (iliyowekwa alama kama ya kawaida dhidi ya anomali) na kufundisha mchanganuzi wa Misitu ya Nasibu. Tunatarajia msitu wa nasibu kufanya vizuri kama au bora kuliko mti mmoja wa maamuzi, shukrani kwa kuunganisha wastani kupunguza tofauti. Tutakagua kwa vipimo vile vile.
+<summary>Example -- Random Forest for Intrusion Detection (NSL-KDD):</summary>
+Tutatumia dataset ileile ya NSL-KDD (iliyo na labels mbili: normal dhidi ya anomaly) na kufunza Random Forest classifier. Tunatarajia random forest ifanye vizuri sawa na au zaidi ya decision tree moja, kutokana na ensemble averaging inayopunguza variance. Tutaitathmini kwa metrics zilezile.
 ```python
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -479,35 +481,35 @@ F1-score:  0.754
 ROC AUC:   0.962
 """
 ```
-Miti ya nasibu kwa kawaida inapata matokeo mazuri katika kazi hii ya kugundua uvamizi. Tunaweza kuona uboreshaji katika vipimo kama F1 au AUC ikilinganishwa na mti mmoja wa maamuzi, hasa katika kukumbuka au usahihi, kulingana na data. Hii inakubaliana na ufahamu kwamba *"Random Forest (RF) ni mchanganyiko wa wakala na inafanya vizuri ikilinganishwa na wakala wengine wa jadi kwa ajili ya uainishaji mzuri wa mashambulizi."*. Katika muktadha wa operesheni za usalama, mfano wa random forest unaweza kuashiria mashambulizi kwa uaminifu zaidi huku ukipunguza alama za uwongo, kutokana na wastani wa sheria nyingi za maamuzi. Umuhimu wa vipengele kutoka kwa msitu unaweza kutuambia ni vipengele gani vya mtandao vinavyodhihirisha mashambulizi zaidi (kwa mfano, huduma fulani za mtandao au idadi isiyo ya kawaida ya pakiti).
+Random forest kwa kawaida hupata matokeo mazuri kwenye task hii ya intrusion detection. Tunaweza kuona uboreshaji katika metrics kama F1 au AUC ikilinganishwa na decision tree moja, hasa katika recall au precision, kulingana na data. Hii inaendana na uelewa kwamba *"Random Forest (RF) is an ensemble classifier and performs well compared to other traditional classifiers for effective classification of attacks."*. Katika muktadha wa security operations, random forest model inaweza kutambua attacks kwa kutegemewa zaidi huku ikipunguza false alarms, kutokana na wastani wa decision rules nyingi. Feature importance kutoka kwenye forest inaweza kutuonyesha ni network features zipi zinazoashiria zaidi attacks (kwa mfano, network services fulani au idadi zisizo za kawaida za packets).
 
 </details>
 
-### Mashine za Vektori za Msaada (SVM)
+### Support Vector Machines (SVM)
 
-Mashine za Vektori za Msaada ni mifano yenye nguvu ya kujifunza kwa usimamizi inayotumika hasa kwa ajili ya uainishaji (na pia urejeleaji kama SVR). SVM inajaribu kupata **hyperplane ya kutenganisha bora** inayoongeza mipaka kati ya makundi mawili. Ni subset tu ya alama za mafunzo (vektori za msaada "zinazo karibu na mpaka") inayotengeneza nafasi ya hyperplane hii. Kwa kuongeza mipaka (kiasi kati ya vektori za msaada na hyperplane), SVM hujenga ujanibishaji mzuri.
+Support Vector Machines ni supervised learning models zenye nguvu zinazotumika hasa kwa classification (na pia regression kama SVR). SVM hujaribu kupata **optimal separating hyperplane** inayoongeza margin kati ya classes mbili. Ni sehemu ndogo tu ya training points (zinazoitwa "support vectors", zilizo karibu zaidi na boundary) huamua nafasi ya hyperplane hii. Kwa kuongeza margin (umbali kati ya support vectors na hyperplane), SVM huwa na uwezo mzuri wa generalization.<sup>[[4]](#references)</sup>
 
-Muhimu kwa nguvu ya SVM ni uwezo wa kutumia **kazi za kernel** kushughulikia uhusiano usio wa mstari. Data inaweza kubadilishwa kwa siri kuwa katika nafasi ya vipengele yenye dimbwi kubwa ambapo mtenganishi wa mstari unaweza kuwepo. Kerneli za kawaida ni pamoja na polynomial, kazi ya msingi ya radial (RBF), na sigmoid. Kwa mfano, ikiwa makundi ya trafiki ya mtandao hayawezi kutenganishwa kwa mstari katika nafasi ya vipengele ghafi, kernel ya RBF inaweza kuyachora katika dimbwi kubwa ambapo SVM inapata mgawanyiko wa mstari (ambao unalingana na mpaka usio wa mstari katika nafasi ya asili). Uwezo wa kuchagua kerneli unaruhusu SVM kushughulikia matatizo mbalimbali.
+Jambo muhimu linaloipa SVM nguvu ni uwezo wa kutumia **kernel functions** kushughulikia mahusiano yasiyo ya linear. Data inaweza kubadilishwa kwa njia isiyo ya moja kwa moja kuwa feature space yenye dimensions nyingi zaidi, ambako linear separator inaweza kuwepo. Kernels zinazotumika sana zinajumuisha polynomial, radial basis function (RBF), na sigmoid. Kwa mfano, ikiwa classes za network traffic haziwezi kutenganishwa kwa linear katika raw feature space, RBF kernel inaweza kuzipeleka kwenye dimension ya juu zaidi ambako SVM hupata linear split (ambayo inalingana na non-linear boundary katika original space). Uwezo wa kuchagua kernels huwezesha SVM kushughulikia aina mbalimbali za matatizo.
 
-SVM zinajulikana kufanya vizuri katika hali zenye nafasi za vipengele zenye dimbwi kubwa (kama data ya maandiko au mfuatano wa opcode za malware) na katika kesi ambapo idadi ya vipengele ni kubwa ikilinganishwa na idadi ya sampuli. Zilikuwa maarufu katika matumizi mengi ya awali ya usalama wa mtandao kama vile uainishaji wa malware na kugundua uvamizi kulingana na anomali katika miaka ya 2000, mara nyingi zikionyesha usahihi wa juu.
+SVM zinajulikana kufanya vizuri katika hali zenye high-dimensional feature spaces (kama text data au malware opcode sequences) na katika hali ambapo idadi ya features ni kubwa ikilinganishwa na idadi ya samples. Zilitumika sana katika applications nyingi za awali za cybersecurity kama malware classification na anomaly-based intrusion detection katika miaka ya 2000, mara nyingi zikionyesha accuracy ya juu.
 
-Hata hivyo, SVM hazipatikani kwa urahisi kwa seti kubwa za data (ugumu wa mafunzo ni juu ya mstari katika idadi ya sampuli, na matumizi ya kumbukumbu yanaweza kuwa juu kwani inaweza kuhitaji kuhifadhi vektori vingi vya msaada). Katika mazoezi, kwa kazi kama kugundua uvamizi wa mtandao na rekodi milioni, SVM inaweza kuwa polepole bila kuchambua kwa makini au kutumia mbinu za takriban.
+Hata hivyo, SVM hazis scale kwa urahisi kwenye datasets kubwa sana (training complexity ni super-linear kulingana na idadi ya samples, na matumizi ya memory yanaweza kuwa makubwa kwa sababu huenda ikahitaji kuhifadhi support vectors nyingi). Kwa vitendo, katika tasks kama network intrusion detection yenye mamilioni ya records, SVM inaweza kuwa slow sana bila kutumia subsampling kwa uangalifu au approximate methods.
 
-#### **Sifa kuu za SVM:**
+#### **Sifa muhimu za SVM:**
 
--   **Aina ya Tatizo:** Uainishaji (wa binary au multiclass kupitia moja dhidi ya moja/moja dhidi ya wengine) na toleo la urejeleaji. Mara nyingi hutumiwa katika uainishaji wa binary na kutenganisha mipaka wazi.
+-   **Aina ya Tatizo:** Classification (binary au multiclass kupitia one-vs-one/one-vs-rest) na regression variants. Mara nyingi hutumika katika binary classification yenye clear margin separation.
 
--   **Ufafanuzi:** Kati -- SVM hazieleweki kama miti ya maamuzi au urejeleaji wa logistic. Ingawa unaweza kubaini ni alama zipi ni vektori za msaada na kupata hisia fulani ya ni vipengele vipi vinaweza kuwa na ushawishi (kupitia uzito katika kesi ya kernel ya mstari), katika mazoezi SVM (hasa na kerneli zisizo za mstari) hut treated kama wakala wa sanduku jeusi.
+-   **Interpretability:** Medium -- SVM hazieleweki kwa urahisi kama decision trees au logistic regression. Ingawa unaweza kutambua ni data points zipi ni support vectors na kupata wazo fulani la features zinazoweza kuwa na ushawishi (kupitia weights katika hali ya linear kernel), kwa vitendo SVM (hasa zenye non-linear kernels) huchukuliwa kama black-box classifiers.
 
--   **Faida:** Inafanya kazi vizuri katika nafasi zenye dimbwi kubwa; inaweza kuunda mipaka ngumu ya maamuzi kwa kutumia hila ya kernel; ni thabiti dhidi ya kupita kiasi ikiwa mipaka imeongezwa (hasa na parameter sahihi ya kawaida C); inafanya kazi vizuri hata wakati makundi hayajatenganishwa kwa umbali mkubwa (inapata mpaka bora wa makubaliano).
+-   **Faida:** Zinafaa katika high-dimensional spaces; zinaweza kuunda complex decision boundaries kwa kutumia kernel trick; ni imara dhidi ya overfitting ikiwa margin imeongezwa (hasa kwa regularization parameter C inayofaa); hufanya vizuri hata classes zikiwa hazijatenganishwa kwa umbali mkubwa (hupata boundary bora ya maelewano).
 
--   **Vikwazo:** **Inahitaji nguvu ya kompyuta** kwa seti kubwa za data (mafunzo na utabiri vinakua vibaya kadri data inavyokua). Inahitaji urekebishaji wa makini wa kernel na vigezo vya kawaida (C, aina ya kernel, gamma kwa RBF, nk). Haipati moja kwa moja matokeo ya uwezekano (ingawa mtu anaweza kutumia Platt scaling kupata uwezekano). Pia, SVM zinaweza kuwa nyeti kwa uchaguzi wa vigezo vya kernel --- uchaguzi mbaya unaweza kusababisha chini ya kufaa au kupita kiasi.
+-   **Vikwazo:** **Computationally intensive** kwa datasets kubwa (training na prediction scale vibaya data inapoongezeka). Zinahitaji tuning ya uangalifu ya kernel na regularization parameters (C, kernel type, gamma kwa RBF, n.k.). Hazitoi moja kwa moja probabilistic outputs (ingawa unaweza kutumia Platt scaling kupata probabilities). Pia, SVM zinaweza kuathiriwa na uchaguzi wa kernel parameters --- uchaguzi mbaya unaweza kusababisha underfit au overfit.
 
-*Matumizi katika usalama wa mtandao:* SVM zimekuwa zikitumika katika **gundua malware** (kwa mfano, kuainisha faili kulingana na vipengele vilivyotolewa au mfuatano wa opcode), **gundua anomali za mtandao** (kuainisha trafiki kama ya kawaida dhidi ya hatari), na **gundua phishing** (kutumia vipengele vya URLs). Kwa mfano, SVM inaweza kuchukua vipengele vya barua pepe (idadi ya maneno fulani, alama za sifa za mtumaji, nk.) na kuainisha kama phishing au halali. Pia zimekuwa zikitumika katika **gundua uvamizi** kwenye seti za vipengele kama KDD, mara nyingi zikipata usahihi wa juu kwa gharama ya kompyuta.
+*Matumizi katika cybersecurity:* SVM zimetumika katika **malware detection** (kwa mfano, ku-classify files kulingana na extracted features au opcode sequences), **network anomaly detection** (ku-classify traffic kama normal au malicious), na **phishing detection** (kwa kutumia features za URLs). Kwa mfano, SVM inaweza kutumia features za email (idadi za keywords fulani, sender reputation scores, n.k.) na kui-classify kama phishing au legitimate. Pia zimetumika katika **intrusion detection** kwenye feature sets kama KDD, mara nyingi zikifikia accuracy ya juu kwa gharama ya computation.
 
 <details>
-<summary>Mfano -- SVM kwa Uainishaji wa Malware:</summary>
-Tutatumia seti ya data ya tovuti za phishing tena, wakati huu na SVM. Kwa sababu SVM zinaweza kuwa polepole, tutatumia subset ya data kwa mafunzo ikiwa inahitajika (seti ya data ina takriban matukio 11k, ambayo SVM inaweza kushughulikia kwa kiasi). Tutatumia kernel ya RBF ambayo ni chaguo la kawaida kwa data zisizo za mstari, na tutaruhusu makadirio ya uwezekano ili kuhesabu ROC AUC.
+<summary>Example -- SVM for Malware Classification:</summary>
+Tutatumia tena phishing website dataset, safari hii kwa kutumia SVM. Kwa sababu SVM zinaweza kuwa slow, tutatumia subset ya data kwa training ikiwa itahitajika (dataset ina takriban instances 11k, ambayo SVM inaweza kushughulikia kwa kiwango kinachofaa). Tutatumia RBF kernel ambayo ni chaguo linalotumika sana kwa non-linear data, na tutawezesha probability estimates ili kuhesabu ROC AUC.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -575,73 +577,76 @@ F1‑score : 0.950
 ROC AUC  : 0.989
 """
 ```
-SVM modeli itatoa metriki ambazo tunaweza kulinganisha na regression ya logistic kwenye kazi hiyo hiyo. Tunaweza kupata kwamba SVM inapata usahihi wa juu na AUC ikiwa data imegawanywa vizuri na vipengele. Kwa upande mwingine, ikiwa dataset ilikuwa na kelele nyingi au madarasa yanayoshirikiana, SVM inaweza isifanye vizuri zaidi kuliko regression ya logistic. Katika mazoezi, SVM zinaweza kutoa ongezeko wakati kuna uhusiano mgumu, usio wa moja kwa moja kati ya vipengele na darasa -- kernel ya RBF inaweza kukamata mipaka ya maamuzi iliyopinda ambayo regression ya logistic ingepuuzia. Kama ilivyo kwa mifano yote, tuning ya makini ya `C` (regularization) na vigezo vya kernel (kama `gamma` kwa RBF) inahitajika ili kulinganisha bias na variance.
+Muundo wa SVM utatoa vipimo ambavyo tunaweza kulinganisha na Logistic Regression kwenye kazi hiyo hiyo. Tunaweza kugundua kuwa SVM inapata usahihi wa juu na AUC ikiwa data imetenganishwa vizuri na vipengele. Kwa upande mwingine, ikiwa dataset ilikuwa na kelele nyingi au classes zinazopishana, SVM huenda isizidi Logistic Regression kwa kiasi kikubwa. Kwa matumizi ya vitendo, SVM inaweza kutoa uboreshaji wakati kuna mahusiano changamano yasiyo ya mstari kati ya vipengele na class -- kernel ya RBF inaweza kunasa mipaka ya maamuzi iliyopinda ambayo Logistic Regression isingeweza kunasa. Kama ilivyo kwa miundo yote, `C` (regularization) na vigezo vya kernel (kama `gamma` kwa RBF) vinahitaji kusanidiwa kwa uangalifu ili kusawazisha bias na variance.
 
 </details>
 
-#### Tofauti kati ya Regression ya Logistic na SVM
+#### Tofauti kati ya Logistic Regression na SVM
 
-| Kipengele | **Regression ya Logistic** | **Mashine za Vektori za Msaada** |
+| Aspect | **Logistic Regression** | **Support Vector Machines** |
 |---|---|---|
-| **Kazi ya lengo** | Inapunguza **log‑loss** (cross‑entropy). | Inapanua **margin** wakati inapunguza **hinge‑loss**. |
-| **Mipaka ya maamuzi** | Inapata **hyperplane bora** inayomodeli _P(y\|x)_. | Inapata **hyperplane yenye margin kubwa** (pengo kubwa kwa pointi za karibu). |
-| **Matokeo** | **Kihesabu** – inatoa uwezekano wa darasa ulio sahihi kupitia σ(w·x + b). | **Kihakika** – inarudisha lebo za darasa; uwezekano unahitaji kazi ya ziada (mfano: Platt scaling). |
-| **Regularization** | L2 (default) au L1, moja kwa moja inalinganisha under/over‑fitting. | Kigezo cha C kinabadilisha upana wa margin dhidi ya makosa ya uainishaji; vigezo vya kernel vinaongeza ugumu. |
-| **Kernels / Usio wa moja kwa moja** | Fomu asilia ni **mwelekeo**; usio wa moja kwa moja umeongezwa na uhandisi wa vipengele. | **Kernel trick** iliyojengwa (RBF, poly, nk.) inaruhusu kuunda mipaka ngumu katika nafasi ya dimu kubwa. |
-| **Uwezo wa kupanuka** | Inatatua optimization convex katika **O(nd)**; inashughulikia n kubwa sana vizuri. | Mafunzo yanaweza kuwa **O(n²–n³)** kumbukumbu/muda bila wasaidizi maalum; si rafiki kwa n kubwa. |
-| **Ufafanuzi** | **Juu** – uzito unaonyesha ushawishi wa kipengele; uwiano wa nafasi ni wa kueleweka. | **Chini** kwa kernels zisizo za moja kwa moja; vektori za msaada ni chache lakini si rahisi kuelezea. |
-| **Hassira kwa outliers** | Inatumia log‑loss laini → si nyeti sana. | Hinge‑loss yenye margin ngumu inaweza kuwa **nyeti**; soft‑margin (C) inapunguza. |
-| **Matumizi ya kawaida** | Uthibitishaji wa mkopo, hatari ya matibabu, A/B testing – ambapo **uwezekano na ufafanuzi** ni muhimu. | Uainishaji wa picha/maandishi, bio‑informatics – ambapo **mipaka ngumu** na **data ya dimu kubwa** ni muhimu. |
+| **Objective function** | Hupunguza **log‑loss** (cross-entropy). | Huongeza **margin** huku ikipunguza **hinge‑loss**. |
+| **Decision boundary** | Hupata **best-fit hyperplane** inayomodeli _P(y\|x)_. | Hupata **maximum-margin hyperplane** (pengo kubwa zaidi hadi kwenye pointi zilizo karibu zaidi). |
+| **Output** | **Probabilistic** – hutoa uwezekano wa classes uliosawazishwa kupitia σ(w·x + b). | **Deterministic** – hurejesha labels za classes; uwezekano huhitaji kazi ya ziada (kwa mfano Platt scaling). |
+| **Regularisation** | L2 (default) au L1, husawazisha moja kwa moja under/over-fitting. | Kigezo cha C husawazisha upana wa margin dhidi ya makosa ya classification; vigezo vya kernel huongeza uchangamano. |
+| **Kernels / Non‑linear** | Fomu ya asili ni **linear**; non-linearity huongezwa kupitia feature engineering. | **Kernel trick** iliyojengeka ndani (RBF, poly, n.k.) huiruhusu kumodeli mipaka changamano katika nafasi ya high-dimensional. |
+| **Scalability** | Hutatua convex optimisation katika **O(nd)**; hushughulikia n kubwa sana vizuri. | Training inaweza kuwa na **O(n²–n³)** ya memory/time bila specialised solvers; haifai sana kwa n kubwa mno. |
+| **Interpretability** | **Juu** – weights huonyesha ushawishi wa feature; odds ratio ni rahisi kueleweka. | **Chini** kwa kernels zisizo za mstari; support vectors ni sparse lakini si rahisi kueleza. |
+| **Sensitivity to outliers** | Hutumia log-loss laini → huwa na sensitivity ndogo. | Hinge-loss yenye hard margin inaweza kuwa na **sensitivity**; soft-margin (C) hupunguza athari hiyo. |
+| **Typical use cases** | Credit scoring, medical risk, A/B testing – ambapo **probabilities & explainability** ni muhimu. | Image/text classification, bio-informatics – ambapo **complex boundaries** na **high-dimensional data** ni muhimu. |
 
-* **Ikiwa unahitaji uwezekano ulio sahihi, ufafanuzi, au unafanya kazi kwenye datasets kubwa — chagua Regression ya Logistic.**
-* **Ikiwa unahitaji mfano rahisi ambao unaweza kukamata uhusiano usio wa moja kwa moja bila uhandisi wa vipengele wa mikono — chagua SVM (pamoja na kernels).**
-* Zote zinaongeza malengo convex, hivyo **minima za kimataifa zinahakikishwa**, lakini kernels za SVM zinaongeza vigezo vya hyper na gharama za kompyuta.
+* **Ikiwa unahitaji probabilities zilizocalibrateiwa, interpretability, au kufanya kazi kwenye datasets kubwa sana — chagua Logistic Regression.**
+* **Ikiwa unahitaji model inayonyumbulika inayoweza kunasa mahusiano yasiyo ya mstari bila feature engineering ya mwongozo — chagua SVM (pamoja na kernels).**
+* Zote huboresha convex objectives, hivyo **global minima zimehakikishwa**, lakini kernels za SVM huongeza hyper-parameters na gharama ya computational.
 
 ### Naive Bayes
 
-Naive Bayes ni familia ya **wajumuishaji wa kihesabu** inayotokana na kutumia Theorem ya Bayes na dhana ya uhuru mkubwa kati ya vipengele. Licha ya dhana hii "ya kijinga", Naive Bayes mara nyingi inafanya kazi vizuri kwa maombi fulani, hasa yale yanayohusisha maandiko au data ya kategoria, kama vile kugundua spam.
+Naive Bayes ni familia ya **probabilistic classifiers** inayotegemea kutumia Bayes' Theorem pamoja na dhana thabiti kwamba vipengele havitegemeani. Licha ya dhana hii ya "naive", Naive Bayes mara nyingi hufanya kazi vizuri kwa matumizi fulani, hasa yale yanayohusisha text au data ya categorical, kama vile spam detection.<sup>[[5]](#references)</sup>
 
 
-#### Theorem ya Bayes
+#### Nadharia ya Bayes
 
-Theorem ya Bayes ni msingi wa wajumuishaji wa Naive Bayes. Inahusisha uwezekano wa masharti na uwezekano wa mipaka ya matukio ya nasibu. Formula ni:
+Nadharia ya Bayes ndiyo msingi wa Naive Bayes classifiers. Inahusisha conditional na marginal probabilities za matukio ya random. Formula ni:
 ```plaintext
 P(A|B) = (P(B|A) * P(A)) / P(B)
 ```
-Where:
-- `P(A|B)` ni uwezekano wa baada ya darasa `A` kutokana na kipengele `B`.
-- `P(B|A)` ni uwezekano wa kipengele `B` kutokana na darasa `A`.
-- `P(A)` ni uwezekano wa awali wa darasa `A`.
-- `P(B)` ni uwezekano wa awali wa kipengele `B`.
+Ambapo:
+- `P(A|B)` ni uwezekano wa posterior wa class `A` kutokana na feature `B`.
+- `P(B|A)` ni likelihood ya feature `B` kutokana na class `A`.
+- `P(A)` ni uwezekano wa awali wa class `A`.
+- `P(B)` ni uwezekano wa awali wa feature `B`.
 
-Kwa mfano, ikiwa tunataka kuainisha kama maandiko yameandikwa na mtoto au mtu mzima, tunaweza kutumia maneno katika maandiko kama vipengele. Kulingana na data fulani ya awali, mchanganuzi wa Naive Bayes utahesabu awali uwezekano wa kila neno kuwa katika kila darasa linalowezekana (mtoto au mtu mzima). Wakati maandiko mapya yanapopewa, utahesabu uwezekano wa kila darasa linalowezekana kulingana na maneno katika maandiko na kuchagua darasa lenye uwezekano mkubwa zaidi.
+Kwa mfano, ikiwa tunataka kuainisha kama maandishi yameandikwa na mtoto au mtu mzima, tunaweza kutumia maneno kwenye maandishi kama features. Kulingana na data ya awali, Naive Bayes classifier itakuwa imekadiria awali uwezekano wa kila neno kuwa katika kila class inayowezekana (mtoto au mtu mzima). Maandishi mapya yanapotolewa, itakokotoa uwezekano wa kila class inayowezekana kutokana na maneno yaliyomo kwenye maandishi na kuchagua class yenye uwezekano mkubwa zaidi.
 
-Kama unavyoona katika mfano huu, mchanganuzi wa Naive Bayes ni rahisi sana na haraka, lakini unadhani kwamba vipengele ni huru, ambayo si kila wakati hali halisi katika data za ulimwengu halisi.
+Kama unavyoona katika mfano huu, Naive Bayes classifier ni rahisi sana na yenye kasi, lakini inakisia kwamba features zinajitegemea, jambo ambalo si mara zote hutokea katika data ya ulimwengu halisi.
 
-#### Aina za Mchanganuzi wa Naive Bayes
 
-Kuna aina kadhaa za mchanganuzi wa Naive Bayes, kulingana na aina ya data na usambazaji wa vipengele:
-- **Gaussian Naive Bayes**: Unadhani kwamba vipengele vinafuata usambazaji wa Gaussian (wa kawaida). Inafaa kwa data ya kuendelea.
-- **Multinomial Naive Bayes**: Unadhani kwamba vipengele vinafuata usambazaji wa multinomial. Inafaa kwa data ya kutenganisha, kama vile hesabu za maneno katika uainishaji wa maandiko.
-- **Bernoulli Naive Bayes**: Unadhani kwamba vipengele ni vya binary (0 au 1). Inafaa kwa data ya binary, kama vile uwepo au kutokuwepo kwa maneno katika uainishaji wa maandiko.
-- **Categorical Naive Bayes**: Unadhani kwamba vipengele ni vigezo vya kategoria. Inafaa kwa data ya kategoria, kama vile kuainisha matunda kulingana na rangi na umbo lao.
+#### Aina za Naive Bayes Classifiers
 
-#### **Sifa kuu za Naive Bayes:**
+Kuna aina kadhaa za Naive Bayes classifiers, kulingana na aina ya data na usambazaji wa features:
+- **Gaussian Naive Bayes**: Hukisia kwamba features zinafuata usambazaji wa Gaussian (normal). Inafaa kwa data endelevu.
+- **Multinomial Naive Bayes**: Hukisia kwamba features zinafuata usambazaji wa multinomial. Inafaa kwa data ya discrete, kama vile hesabu za maneno katika text classification.
+- **Bernoulli Naive Bayes**: Hukisia kwamba features ni za binary (0 au 1). Inafaa kwa data ya binary, kama vile kuwepo au kutokuwepo kwa maneno katika text classification.
+- **Categorical Naive Bayes**: Hukisia kwamba features ni categorical variables. Inafaa kwa data ya categorical, kama vile kuainisha matunda kulingana na rangi na umbo.
 
--   **Aina ya Tatizo:** Uainishaji (binary au multi-class). Inatumika sana kwa kazi za uainishaji wa maandiko katika usalama wa mtandao (spam, phishing, nk.).
 
--   **Ufafanuzi:** Kati -- si rahisi kueleweka kama mti wa maamuzi, lakini mtu anaweza kuchunguza uwezekano uliojifunza (kwa mfano, maneno yapi yana uwezekano mkubwa katika barua pepe za spam dhidi ya ham). Fomu ya mfano (uwezekano kwa kila kipengele kulingana na darasa) inaweza kueleweka ikiwa inahitajika.
+#### **Sifa muhimu za Naive Bayes:**
 
--   **Faida:** **Haraka sana** katika mafunzo na utabiri, hata kwenye seti kubwa za data (mwelekeo katika idadi ya mifano * idadi ya vipengele). Inahitaji kiasi kidogo cha data ili kukadiria uwezekano kwa usahihi, hasa kwa kutumia ulinganifu mzuri. Mara nyingi ni sahihi sana kama msingi, hasa wakati vipengele vinachangia ushahidi kwa uhuru kwa darasa. Inafanya kazi vizuri na data yenye vipimo vingi (kwa mfano, maelfu ya vipengele kutoka kwa maandiko). Hakuna urekebishaji mgumu unaohitajika zaidi ya kuweka kipimo cha ulinganifu.
+-   **Aina ya Tatizo:** Classification (binary au multi-class). Hutumiwa kwa kawaida katika kazi za text classification kwenye cybersecurity (spam, phishing, n.k.).
 
--   **Vikwazo:** Dhana ya uhuru inaweza kupunguza usahihi ikiwa vipengele vina uhusiano mkubwa. Kwa mfano, katika data ya mtandao, vipengele kama `src_bytes` na `dst_bytes` vinaweza kuwa na uhusiano; Naive Bayes haitachukua mwingiliano huo. Kadri ukubwa wa data unavyokua kuwa mkubwa, mifano yenye kueleweka zaidi (kama vile makundi au mitandao ya neva) inaweza kuzidi NB kwa kujifunza utegemezi wa vipengele. Pia, ikiwa mchanganyiko fulani wa vipengele unahitajika ili kubaini shambulio (sio tu vipengele vya kibinafsi kwa uhuru), NB itakumbana na changamoto.
+-   **Uwezo wa Kuelezeka:** Wastani -- haielezeki moja kwa moja kama decision tree, lakini mtu anaweza kukagua probabilities zilizojifunzwa (kwa mfano, ni maneno gani yana uwezekano mkubwa zaidi katika barua pepe za spam dhidi ya barua pepe halali). Muundo wa model (probabilities za kila feature kutokana na class) unaweza kueleweka inapohitajika.
+
+-   **Faida:** Training na prediction yenye **kasi sana**, hata kwenye datasets kubwa (linear kulingana na idadi ya instances * idadi ya features). Inahitaji kiasi kidogo cha data kukadiria probabilities kwa kutegemewa, hasa kwa kutumia smoothing inayofaa. Mara nyingi huwa na usahihi wa kushangaza kama baseline, hasa wakati features zinachangia ushahidi wa class kwa kujitegemea. Hufanya kazi vizuri na data yenye dimensions nyingi (kwa mfano, maelfu ya features kutoka kwenye text). Haihitaji tuning changamano zaidi ya kuweka smoothing parameter.
+
+-   **Mapungufu:** Dhana ya kujitegemea inaweza kupunguza usahihi ikiwa features zina uhusiano mkubwa. Kwa mfano, katika network data, features kama `src_bytes` na `dst_bytes` zinaweza kuwa na uhusiano; Naive Bayes haitanasa interaction hiyo. Kadiri ukubwa wa data unavyoongezeka sana, models zenye uwezo mkubwa zaidi (kama ensembles au neural nets) zinaweza kuipita NB kwa kujifunza dependencies za features. Pia, ikiwa mchanganyiko fulani wa features unahitajika kutambua attack (si features binafsi zinazojitegemea), NB itapata shida.
 
 > [!TIP]
-> *Matumizi katika usalama wa mtandao:* Matumizi ya kawaida ni **ugunduzi wa spam** -- Naive Bayes ilikuwa msingi wa filters za spam za awali, ikitumia mara kwa mara ya alama fulani (maneno, misemo, anwani za IP) kukadiria uwezekano wa barua pepe kuwa spam. Pia inatumika katika **ugunduzi wa barua pepe za phishing** na **uainishaji wa URL**, ambapo uwepo wa maneno muhimu au sifa fulani (kama "login.php" katika URL, au `@` katika njia ya URL) unachangia uwezekano wa phishing. Katika uchambuzi wa malware, mtu anaweza kufikiria mchanganuzi wa Naive Bayes anayeweza kutumia uwepo wa wito fulani wa API au ruhusa katika programu kutabiri ikiwa ni malware. Ingawa algorithimu za kisasa mara nyingi zinafanya vizuri zaidi, Naive Bayes inabaki kuwa msingi mzuri kutokana na kasi yake na urahisi.
+> *Matumizi katika cybersecurity:* Matumizi ya kawaida ni **spam detection** -- Naive Bayes ilikuwa msingi wa spam filters za awali, ikitumia marudio ya tokens fulani (maneno, vifungu, IP addresses) kukokotoa uwezekano kwamba email ni spam. Pia hutumiwa katika **phishing email detection** na **URL classification**, ambapo kuwepo kwa keywords au sifa fulani (kama "login.php" katika URL, au `@` katika URL path) huchangia uwezekano wa phishing. Katika malware analysis, mtu anaweza kufikiria Naive Bayes classifier inayotumia kuwepo kwa API calls au permissions fulani katika software kutabiri kama ni malware. Ingawa algorithms za hali ya juu mara nyingi hufanya vizuri zaidi, Naive Bayes bado ni baseline nzuri kutokana na kasi na urahisi wake.
 
 <details>
-<summary>Mfano -- Naive Bayes kwa Ugunduzi wa Phishing:</summary>
-Ili kuonyesha Naive Bayes, tutatumia Gaussian Naive Bayes kwenye seti ya data ya uvamizi ya NSL-KDD (ikiwa na lebo za binary). Gaussian NB itachukulia kila kipengele kama ikifuata usambazaji wa kawaida kwa kila darasa. Hii ni chaguo la jumla kwani vipengele vingi vya mtandao ni vya kutenganisha au vina mwelekeo mkubwa, lakini inaonyesha jinsi mtu anavyoweza kutumia NB kwa data ya kipengele cha kuendelea. Tunaweza pia kuchagua Bernoulli NB kwenye seti ya data ya vipengele vya binary (kama vile seti ya tahadhari zilizochochewa), lakini tutabaki na NSL-KDD hapa kwa ajili ya uendelevu.
+<summary>Example -- Naive Bayes for Phishing Detection:</summary>
+Ili kuonyesha Naive Bayes, tutatumia Gaussian Naive Bayes kwenye NSL-KDD intrusion dataset (yenye binary labels). Gaussian NB itachukulia kila feature kuwa inafuata normal distribution kwa kila class. Hili ni chaguo la makadirio kwa sababu network features nyingi ni discrete au zina skew kubwa, lakini linaonyesha jinsi NB inavyoweza kutumiwa kwenye continuous feature data. Tunaweza pia kuchagua Bernoulli NB kwenye dataset ya binary features (kama seti ya triggered alerts), lakini tutatumia NSL-KDD hapa ili kuendeleza mfululizo.
+</details>
 ```python
 import pandas as pd
 from sklearn.naive_bayes import GaussianNB
@@ -702,34 +707,34 @@ F1-score:  0.071
 ROC AUC:   0.867
 """
 ```
-Hii code inafundisha mchekeshaji wa Naive Bayes kugundua mashambulizi. Naive Bayes itahesabu mambo kama `P(service=http | Attack)` na `P(Service=http | Normal)` kulingana na data ya mafunzo, ikidhania uhuru kati ya vipengele. Kisha itatumia uwezekano huu kuainisha muunganisho mpya kama wa kawaida au mashambulizi kulingana na vipengele vilivyoonekana. Utendaji wa NB kwenye NSL-KDD huenda usiwe wa juu kama mifano ya hali ya juu (kwa sababu uhuru wa vipengele unakiukwa), lakini mara nyingi ni mzuri na inakuja na faida ya kasi kubwa. Katika hali kama vile kuchuja barua pepe kwa wakati halisi au uchambuzi wa awali wa URLs, mfano wa Naive Bayes unaweza haraka kuashiria kesi zenye uharibifu wazi kwa matumizi madogo ya rasilimali.
+Msimbo huu hufunza classifier ya Naive Bayes kutambua mashambulizi. Naive Bayes itakokotoa vitu kama `P(service=http | Attack)` na `P(Service=http | Normal)` kulingana na data ya mafunzo, ikidhani kuwa features zinajitegemea. Kisha itatumia uwezekano huu kuainisha miunganisho mipya kama ya kawaida au shambulizi kulingana na features zilizobainika. Utendaji wa NB kwenye NSL-KDD huenda usiwe wa juu kama wa models za kisasa zaidi (kwa kuwa uhuru wa features unakiukwa), lakini mara nyingi huwa mzuri na una faida ya kasi kubwa sana. Katika hali kama filtering ya barua pepe kwa wakati halisi au uchunguzi wa awali wa URLs, model ya Naive Bayes inaweza kuripoti haraka kesi zilizo wazi kuwa hasidi kwa kutumia rasilimali chache.
 
 </details>
 
 ### k-Nearest Neighbors (k-NN)
 
-k-Nearest Neighbors ni moja ya algorithms rahisi za kujifunza mashine. Ni **mbinu isiyo na vigezo, inayotegemea mifano** ambayo inafanya makadirio kulingana na ufanano na mifano katika seti ya mafunzo. Wazo la kuainisha ni: ili kuainisha kipengele kipya cha data, pata **k** vipengele vya karibu zaidi katika data ya mafunzo (majirani zake "wa karibu zaidi"), na panga darasa la wingi kati ya majirani hao. "Ukakaribu" unafafanuliwa na kipimo cha umbali, kawaida umbali wa Euclidean kwa data za nambari (umbali mwingine unaweza kutumika kwa aina tofauti za vipengele au matatizo).
+k-Nearest Neighbors ni mojawapo ya algorithms rahisi zaidi za machine learning. Ni mbinu ya **non-parametric, instance-based** inayofanya utabiri kulingana na ufanano na mifano iliyo kwenye seti ya mafunzo. Wazo la classification ni: ili kuainisha data point mpya, tafuta pointi **k** zilizo karibu zaidi kwenye data ya mafunzo ("majirani wake wa karibu"), kisha weka class iliyo na wengi zaidi kati ya majirani hao. "Ukaribu" hufafanuliwa kwa metric ya umbali, kwa kawaida umbali wa Euclidean kwa data ya nambari (umbali mingine inaweza kutumika kwa aina au matatizo tofauti ya features).<sup>[[10]](#references)</sup>
 
-K-NN inahitaji *hakuna mafunzo maalum* -- awamu ya "mafunzo" ni kuhifadhi dataset. Kazi yote inafanyika wakati wa swali (makadirio): algorithm inapaswa kuhesabu umbali kutoka kwa kipengele cha swali hadi vipengele vyote vya mafunzo ili kupata vya karibu zaidi. Hii inafanya wakati wa makadirio **kuwa sawa na idadi ya sampuli za mafunzo**, ambayo inaweza kuwa ghali kwa datasets kubwa. Kwa sababu hii, k-NN inafaa zaidi kwa datasets ndogo au hali ambapo unaweza kubadilishana kumbukumbu na kasi kwa urahisi.
+K-NN haihitaji *training ya wazi* -- awamu ya "training" ni kuhifadhi tu dataset. Kazi yote hufanyika wakati wa query (prediction): algorithm lazima ihesabu umbali kutoka query point hadi pointi zote za mafunzo ili kupata zilizo karibu zaidi. Hii hufanya muda wa prediction kuwa **linear kulingana na idadi ya samples za mafunzo**, jambo ambalo linaweza kuwa ghali kwa datasets kubwa. Kwa sababu hii, k-NN inafaa zaidi kwa datasets ndogo au hali ambapo unaweza kubadilisha memory na speed kwa urahisi.
 
-Licha ya urahisi wake, k-NN inaweza kuunda mipaka ya maamuzi ngumu sana (kwa sababu kimsingi mipaka ya maamuzi inaweza kuwa na umbo lolote linaloamuliwa na usambazaji wa mifano). Inafanya vizuri wakati mipaka ya maamuzi ni isiyo ya kawaida sana na una data nyingi -- kimsingi inaruhusu data "kuzungumza yenyewe". Hata hivyo, katika dimensions za juu, vipimo vya umbali vinaweza kuwa na maana kidogo (laana ya dimensionality), na mbinu inaweza kuwa na shida isipokuwa una idadi kubwa ya sampuli.
+Licha ya urahisi wake, k-NN inaweza ku-model decision boundaries changamano sana (kwa kuwa, kwa ufanisi, decision boundary inaweza kuwa na umbo lolote linaloamuliwa na usambazaji wa mifano). Hufanya vizuri wakati decision boundary si ya kawaida sana na una data nyingi -- kimsingi ikiiacha data "ijieleze". Hata hivyo, katika dimensions nyingi, metrics za umbali zinaweza kupoteza maana (curse of dimensionality), na method inaweza kushindwa isipokuwa uwe na idadi kubwa sana ya samples.
 
-*Matumizi katika usalama wa mtandao:* k-NN imekuwa ikitumika katika kugundua anomali -- kwa mfano, mfumo wa kugundua uvamizi unaweza kutaja tukio la mtandao kama la uharibifu ikiwa wengi wa majirani zake wa karibu (matukio ya awali) walikuwa na uharibifu. Ikiwa trafiki ya kawaida inaunda makundi na mashambulizi ni nje ya makundi, mbinu ya K-NN (ikiwa na k=1 au k ndogo) kimsingi inafanya **gundua anomali za jirani wa karibu**. K-NN pia imetumika kwa kuainisha familia za malware kwa kutumia vektori vya vipengele vya binary: faili mpya inaweza kuainishwa kama familia fulani ya malware ikiwa iko karibu sana (katika nafasi ya vipengele) na mifano inayojulikana ya familia hiyo. Katika mazoezi, k-NN si maarufu kama algorithms zinazoweza kupanuka zaidi, lakini ni rahisi kwa dhana na wakati mwingine hutumiwa kama msingi au kwa matatizo madogo.
+*Use cases katika cybersecurity:* k-NN imetumika katika anomaly detection -- kwa mfano, intrusion detection system inaweza kuainisha tukio la mtandao kuwa hasidi ikiwa majirani wake wengi wa karibu (matukio ya awali) walikuwa hasidi. Ikiwa traffic ya kawaida inaunda clusters na mashambulizi ni outliers, mbinu ya K-NN (yenye k=1 au k ndogo) kimsingi huwa **nearest-neighbor anomaly detection**. K-NN pia imetumika kuainisha malware families kwa kutumia binary feature vectors: file mpya inaweza kuainishwa kuwa ya malware family fulani ikiwa iko karibu sana (katika feature space) na instances zinazojulikana za family hiyo. Kwa kawaida, k-NN haitumiki sana kama algorithms zinazoweza ku-scale zaidi, lakini ni rahisi kueleweka kimawazo na wakati mwingine hutumiwa kama baseline au kwa matatizo madogo.
 
-#### **Sifa kuu za k-NN:**
+#### **Sifa muhimu za k-NN:**
 
--   **Aina ya Tatizo:** Uainishaji (na toleo za kurudi zipo). Ni mbinu ya *ujifunzaji mvivu* -- hakuna ulinganifu wa mfano maalum.
+-   **Aina ya Tatizo:** Classification (na variants za regression zipo). Ni method ya *lazy learning* -- hakuna model fitting ya wazi.
 
--   **Ufafanuzi:** Chini hadi kati -- hakuna mfano wa kimataifa au maelezo mafupi, lakini mtu anaweza kufafanua matokeo kwa kuangalia majirani wa karibu ambao walihusisha uamuzi (kwa mfano, "mtiririko huu wa mtandao ulitambuliwa kama wa uharibifu kwa sababu unafanana na mtiririko huu 3 wa uharibifu uliojulikana"). Hivyo, maelezo yanaweza kuwa ya msingi wa mifano.
+-   **Ufafanuzi:** Wa chini hadi wa kati -- hakuna global model au maelezo mafupi, lakini mtu anaweza kutafsiri matokeo kwa kuangalia majirani wa karibu walioathiri uamuzi (kwa mfano, "network flow hii iliainishwa kuwa hasidi kwa sababu inafanana na hizi flows 3 zinazojulikana kuwa hasidi"). Kwa hiyo, maelezo yanaweza kutegemea mifano.
 
--   **Faida:** Ni rahisi sana kutekeleza na kuelewa. Haina dhana kuhusu usambazaji wa data (isiyo na vigezo). Inaweza kushughulikia matatizo ya darasa nyingi kwa asili. Ni **inayoweza kubadilika** kwa maana kwamba mipaka ya maamuzi inaweza kuwa ngumu sana, ikishapingwa na usambazaji wa data.
+-   **Faida:** Ni rahisi sana kutekeleza na kuelewa. Haitoi dhana kuhusu usambazaji wa data (non-parametric). Inaweza kushughulikia matatizo ya multi-class kwa asili. Ni **adaptive** kwa maana kwamba decision boundaries zinaweza kuwa changamano sana, zikitengenezwa na usambazaji wa data.
 
--   **Vikwazo:** Makadirio yanaweza kuwa polepole kwa datasets kubwa (lazima kuhesabu umbali mwingi). Inahitaji kumbukumbu nyingi -- inahifadhi data zote za mafunzo. Utendaji unashuka katika nafasi za vipengele zenye dimensions za juu kwa sababu kila pointi inakuwa karibu sawa (hii inafanya dhana ya "karibu zaidi" kuwa na maana kidogo). Inahitaji kuchagua *k* (idadi ya majirani) kwa usahihi -- k ndogo sana inaweza kuwa na kelele, k kubwa sana inaweza kujumuisha pointi zisizo na maana kutoka kwa madarasa mengine. Pia, vipengele vinapaswa kupimwa ipasavyo kwa sababu hesabu za umbali zinahusiana na kiwango. 
+-   **Mapungufu:** Prediction inaweza kuwa polepole kwa datasets kubwa (lazima ihesabu umbali mwingi). Hutumia memory nyingi -- huhifadhi data yote ya mafunzo. Utendaji hushuka katika feature spaces zenye dimensions nyingi kwa sababu pointi zote huwa karibu kuwa na umbali sawa (jambo linalofanya dhana ya "nearest" kupoteza maana). Ni lazima uchague *k* (idadi ya majirani) ipasavyo -- k ndogo sana inaweza kuwa na noise, na k kubwa sana inaweza kujumuisha pointi zisizohusika kutoka classes nyingine. Pia, features zinapaswa ku-scaled ipasavyo kwa sababu mahesabu ya umbali huathiriwa na scale.
 
 <details>
-<summary>Mfano -- k-NN kwa Kugundua Phishing:</summary>
+<summary>Example -- k-NN for Phishing Detection:</summary>
 
-Tutatumia tena NSL-KDD (uainishaji wa binary). Kwa sababu k-NN ni nzito kwa hesabu, tutatumia sehemu ya data ya mafunzo ili kuifanya iwe rahisi katika onyesho hili. Tutachagua, sema, sampuli 20,000 za mafunzo kutoka kwa jumla ya 125k, na kutumia k=5 majirani. Baada ya mafunzo (kwa kweli ni kuhifadhi data), tutafanya tathmini kwenye seti ya mtihani. Tutapunguza pia vipengele kwa hesabu ya umbali ili kuhakikisha hakuna kipengele kimoja kinatawala kutokana na kiwango.
+Tutatumia tena NSL-KDD (binary classification). Kwa kuwa k-NN inahitaji computational resources nyingi, tutatumia subset ya data ya mafunzo ili kufanya demonstration hii iweze kutekelezeka. Tutachagua, kwa mfano, samples 20,000 za mafunzo kati ya 125k zote, na kutumia majirani k=5. Baada ya training (kwa kweli ni kuhifadhi tu data), tutafanya evaluation kwenye test set. Pia tuta-scale features kwa ajili ya mahesabu ya umbali ili kuhakikisha kuwa feature moja haitawali nyingine kwa sababu ya scale.
 ```python
 import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
@@ -798,32 +803,33 @@ F1-score:  0.766
 ROC AUC:   0.837
 """
 ```
-The k-NN model itafanya uainishaji wa muunganisho kwa kuangalia muunganisho 5 wa karibu zaidi katika seti ya mafunzo. Ikiwa, kwa mfano, 4 ya majirani hao ni mashambulizi (anomalies) na 1 ni ya kawaida, muunganisho mpya utaainishwa kama shambulizi. Utendaji unaweza kuwa wa kuridhisha, ingawa mara nyingi si wa juu kama Random Forest au SVM iliyosawazishwa vizuri kwenye data hiyo hiyo. Hata hivyo, k-NN inaweza kung'ara wakati usambazaji wa darasa ni wa kawaida na mgumu -- kwa ufanisi ikitumia utafutaji wa msingi wa kumbukumbu. Katika usalama wa mtandao, k-NN (ikiwa na k=1 au k ndogo) inaweza kutumika kwa kugundua mifumo ya mashambulizi inayojulikana kwa mfano, au kama sehemu katika mifumo tata zaidi (kwa mfano, kwa kuunganisha na kisha kuainisha kulingana na uanachama wa kundi).
+Modeli ya k-NN itaainisha connection kwa kuangalia connections 5 zilizo karibu zaidi katika subset ya training set. Kwa mfano, ikiwa 4 kati ya majirani hao ni attacks (anomalies) na 1 ni ya kawaida, connection mpya itaainishwa kama attack. Utendaji unaweza kuwa mzuri, ingawa mara nyingi si wa juu kama wa Random Forest au SVM iliyotuned vizuri kwenye data hiyo hiyo. Hata hivyo, k-NN inaweza kung'ara wakati mgawanyo wa classes ni usio wa kawaida sana na changamano -- kwa ufanisi ikitumia lookup inayotegemea memory. Katika cybersecurity, k-NN (ikiwa na k=1 au k ndogo) inaweza kutumiwa kutambua attack patterns zinazojulikana kwa kutumia mifano, au kama sehemu ya systems changamano zaidi (kwa mfano, kwa clustering na kisha kuainisha kulingana na cluster membership).
+</details>
 
-### Mashine za Gradient Boosting (mfano, XGBoost)
+### Gradient Boosting Machines (e.g., XGBoost)
 
-Mashine za Gradient Boosting ni miongoni mwa algorithimu zenye nguvu zaidi kwa data iliyopangwa. **Gradient boosting** inahusisha mbinu ya kujenga kundi la wanafunzi dhaifu (mara nyingi miti ya maamuzi) kwa njia ya mfululizo, ambapo kila mfano mpya unarekebisha makosa ya kundi la awali. Tofauti na bagging (Random Forests) ambayo inajenga miti kwa pamoja na kuzipatia wastani, boosting inajenga miti *moja kwa moja*, kila moja ikilenga zaidi kwenye matukio ambayo miti ya awali ilikosea kutabiri.
+Gradient Boosting Machines ni miongoni mwa algorithms zenye nguvu zaidi kwa structured data. **Gradient boosting** inarejelea mbinu ya kujenga ensemble ya weak learners (mara nyingi decision trees) kwa mfuatano, ambapo kila model mpya hurekebisha makosa ya ensemble iliyotangulia. Tofauti na bagging (Random Forests), ambayo hujenga trees kwa parallel na kuzifanyia average, boosting hujenga trees *moja baada ya nyingine*, kila moja ikizingatia zaidi instances ambazo trees zilizotangulia ziliainisha vibaya.
 
-Mifano maarufu zaidi katika miaka ya hivi karibuni ni **XGBoost**, **LightGBM**, na **CatBoost**, ambazo zote ni maktaba za miti ya maamuzi ya gradient boosting (GBDT). Zimefanikiwa sana katika mashindano na matumizi ya kujifunza mashine, mara nyingi **zikipata utendaji wa hali ya juu kwenye seti za data za jedwali**. Katika usalama wa mtandao, watafiti na wataalamu wamezitumia miti za gradient boosted kwa kazi kama **gundua malware** (wakitumia vipengele vilivyotolewa kutoka kwa faili au tabia za wakati wa utekelezaji) na **gundua uvamizi wa mtandao**. Kwa mfano, mfano wa gradient boosting unaweza kuunganisha sheria nyingi dhaifu (miti) kama "ikiwa pakiti nyingi za SYN na bandari zisizo za kawaida -> huenda ni skana" kuwa gundua yenye nguvu inayozingatia mifumo mingi ya nyembamba.
+Implementations maarufu zaidi katika miaka ya karibuni ni **XGBoost**, **LightGBM**, na **CatBoost**, ambazo zote ni libraries za gradient boosting decision tree (GBDT). Zimefanikiwa sana katika mashindano ya machine learning na applications, mara nyingi **zikifikia utendaji wa kiwango cha juu zaidi kwenye tabular datasets**. Katika cybersecurity, researchers na practitioners wametumia gradient boosted trees kwa tasks kama **malware detection** (kwa kutumia features zilizotolewa kutoka kwa files au runtime behavior) na **network intrusion detection**. Kwa mfano, gradient boosting model inaweza kuchanganya rules nyingi dhaifu (trees) kama vile "ikiwa kuna SYN packets nyingi na port isiyo ya kawaida -> kuna uwezekano wa scan" na kuwa detector imara ya pamoja inayozingatia patterns nyingi fiche.<sup>[[6]](#references)</sup>
 
-Kwa nini miti iliyoimarishwa ni yenye ufanisi sana? Kila mti katika mfululizo unafundishwa kwenye *makosa ya mabaki* (gradients) ya utabiri wa kundi la sasa. Kwa njia hii, mfano huongeza polepole **"kuimarisha"** maeneo ambapo ni dhaifu. Matumizi ya miti ya maamuzi kama wanafunzi wa msingi yana maana kwamba mfano wa mwisho unaweza kushughulikia mwingiliano mgumu na uhusiano usio wa moja kwa moja. Pia, boosting kwa asili ina aina ya udhibiti wa ndani: kwa kuongeza miti ndogo nyingi (na kutumia kiwango cha kujifunza kubadilisha michango yao), mara nyingi inajitenga vizuri bila kuingiliwa sana, ikiwa vigezo sahihi vinachaguliwa.
+Kwa nini boosted trees zina ufanisi mkubwa? Kila tree katika mfuatano hufunzwa kwa kutumia *residual errors* (gradients) za predictions za ensemble ya sasa. Kwa njia hii, modeli huendelea **"kuimarisha"** maeneo ambayo ni dhaifu. Matumizi ya decision trees kama base learners yanawezesha modeli ya mwisho kunasa interactions changamano na mahusiano yasiyo ya linear. Pia, boosting kwa asili ina aina ya regularization iliyojengeka ndani: kwa kuongeza trees nyingi ndogo (na kutumia learning rate kupunguza ukubwa wa michango yake), mara nyingi hu-generalize vizuri bila overfitting kubwa, mradi parameters zinazofaa zichaguliwe.
 
-#### **Sifa kuu za Gradient Boosting:**
+#### **Key characteristics of Gradient Boosting:**
 
--   **Aina ya Tatizo:** Kimsingi uainishaji na urejeleaji. Katika usalama, kawaida uainishaji (mfano, uainishe muunganisho au faili kwa njia ya binary). Inashughulikia matatizo ya binary, ya darasa nyingi (ikiwa na hasara inayofaa), na hata matatizo ya uorodheshaji.
+-   **Type of Problem:** Kimsingi classification na regression. Katika security, kwa kawaida ni classification (kwa mfano, kuainisha connection au file kwa binary). Inashughulikia binary, multi-class (ikiwa na loss inayofaa), na hata ranking problems.
 
--   **Ufafanuzi:** Chini hadi kati. Ingawa mti mmoja ulioimarishwa ni mdogo, mfano kamili unaweza kuwa na mamia ya miti, ambayo si rahisi kueleweka na binadamu kwa ujumla. Hata hivyo, kama Random Forest, inaweza kutoa alama za umuhimu wa kipengele, na zana kama SHAP (SHapley Additive exPlanations) zinaweza kutumika kufafanua utabiri wa mtu binafsi kwa kiwango fulani.
+-   **Interpretability:** Chini hadi ya wastani. Ingawa boosted tree moja ni ndogo, modeli kamili inaweza kuwa na trees mamia, hivyo haiwezi kufasirika na binadamu kwa ujumla wake. Hata hivyo, kama Random Forest, inaweza kutoa feature importance scores, na tools kama SHAP (SHapley Additive exPlanations) zinaweza kutumiwa kufasiri predictions binafsi kwa kiwango fulani.
 
--   **Faida:** Mara nyingi ni **algorithimu inayofanya vizuri zaidi** kwa data iliyopangwa/jedwali. Inaweza kugundua mifumo na mwingiliano mgumu. Ina vidhibiti vingi vya kurekebisha (idadi ya miti, kina cha miti, kiwango cha kujifunza, masharti ya udhibiti) ili kubinafsisha ugumu wa mfano na kuzuia kuingiliwa. Mifano ya kisasa imeboreshwa kwa kasi (mfano, XGBoost inatumia taarifa za gradient za kiwango cha pili na muundo wa data mzuri). Inashughulikia data isiyo sawa vizuri zaidi inapounganishwa na kazi za hasara zinazofaa au kwa kubadilisha uzito wa sampuli.
+-   **Advantages:** Mara nyingi ndiyo algorithm yenye **utendaji bora zaidi** kwa structured/tabular data. Inaweza kutambua patterns na interactions changamano. Ina tuning knobs nyingi (idadi ya trees, depth ya trees, learning rate, na regularization terms) za kurekebisha complexity ya modeli na kuzuia overfitting. Implementations za kisasa zimeboreshwa kwa speed (kwa mfano, XGBoost hutumia second-order gradient info na efficient data structures). Kwa kawaida hushughulikia imbalanced data vizuri zaidi inapounganishwa na loss functions zinazofaa au kwa kurekebisha sample weights.
 
--   **Vikwazo:** Ni ngumu zaidi kurekebisha kuliko mifano rahisi; mafunzo yanaweza kuwa polepole ikiwa miti ni mirefu au idadi ya miti ni kubwa (ingawa bado huwa haraka zaidi kuliko mafunzo ya mtandao wa neva wa kina unaofanana kwenye data hiyo hiyo). Mfano unaweza kuingiliwa ikiwa haujarekebishwa (mfano, miti mingi mirefu bila udhibiti wa kutosha). Kwa sababu ya vigezo vingi, kutumia gradient boosting kwa ufanisi kunaweza kuhitaji utaalamu zaidi au majaribio. Pia, kama mbinu za msingi za miti, haiwezi kushughulikia data ya juu isiyo na wingi kwa ufanisi kama mifano ya moja kwa moja au Naive Bayes (ingawa bado inaweza kutumika, mfano, katika uainishaji wa maandiko, lakini huenda isiwe chaguo la kwanza bila uhandisi wa kipengele).
+-   **Limitations:** Ni changamano zaidi kuitune kuliko models rahisi; training inaweza kuwa polepole ikiwa trees ni deep au idadi ya trees ni kubwa (ingawa kwa kawaida bado huwa haraka kuliko kufunza deep neural network inayolingana kwenye data hiyo hiyo). Modeli inaweza ku-overfit ikiwa haitatuned (kwa mfano, trees deep nyingi zikiwa na regularization isiyotosha). Kwa sababu ya hyperparameters nyingi, kutumia gradient boosting kwa ufanisi kunaweza kuhitaji utaalamu au experimentation zaidi. Pia, kama tree-based methods, haiwezi kushughulikia kwa asili sparse high-dimensional data kwa ufanisi sawa na linear models au Naive Bayes (ingawa bado inaweza kutumika, kwa mfano, katika text classification, lakini huenda isiwe chaguo la kwanza bila feature engineering).
 
 > [!TIP]
-> *Matumizi katika usalama wa mtandao:* Karibu kila mahali ambapo mti wa maamuzi au msitu wa nasibu unaweza kutumika, mfano wa gradient boosting unaweza kufikia usahihi bora. Kwa mfano, mashindano ya **gundua malware ya Microsoft** yameona matumizi makubwa ya XGBoost kwenye vipengele vilivyoundwa kutoka kwa faili za binary. Utafiti wa **gundua uvamizi wa mtandao** mara nyingi unaripoti matokeo bora na GBDTs (mfano, XGBoost kwenye seti za data za CIC-IDS2017 au UNSW-NB15). Mifano hii inaweza kuchukua anuwai kubwa ya vipengele (aina za itifaki, mara kwa mara ya matukio fulani, vipengele vya takwimu vya trafiki, nk) na kuviunganisha kugundua vitisho. Katika kugundua phishing, gradient boosting inaweza kuunganisha vipengele vya leksikali vya URLs, vipengele vya sifa za jina la kikoa, na vipengele vya maudhui ya ukurasa ili kufikia usahihi wa juu sana. Mbinu ya kundi husaidia kufunika kesi nyingi za pembe na nyembamba katika data.
+> *Use cases in cybersecurity:* Karibu kila mahali ambapo decision tree au random forest inaweza kutumiwa, gradient boosting model inaweza kupata accuracy bora zaidi. Kwa mfano, mashindano ya **Microsoft's malware detection** yametumia sana XGBoost kwenye engineered features kutoka binary files. Utafiti wa **Network intrusion detection** mara nyingi huripoti matokeo ya juu zaidi kwa GBDTs (kwa mfano, XGBoost kwenye CIC-IDS2017 au UNSW-NB15 datasets). Models hizi zinaweza kutumia features mbalimbali (protocol types, frequency ya events fulani, statistical features za traffic, na kadhalika) na kuzichanganya ili kutambua threats. Katika phishing detection, gradient boosting inaweza kuchanganya lexical features za URLs, domain reputation features, na page content features ili kupata accuracy ya juu sana. Mbinu ya ensemble husaidia kushughulikia corner cases na subtleties nyingi katika data.
 
 <details>
-<summary>Mfano -- XGBoost kwa Kugundua Phishing:</summary>
-Tutatumia mfanow wa gradient boosting kwenye seti ya data ya phishing. Ili kuweka mambo kuwa rahisi na ya kujitegemea, tutatumia `sklearn.ensemble.GradientBoostingClassifier` (ambayo ni utekelezaji wa polepole lakini rahisi). Kawaida, mtu anaweza kutumia maktaba za `xgboost` au `lightgbm` kwa utendaji bora na vipengele vya ziada. Tutafundisha mfano na kuutathmini kwa njia sawa na hapo awali.
+<summary>Example -- XGBoost for Phishing Detection:</summary>
+Tutatumia gradient boosting classifier kwenye phishing dataset. Ili kuweka mambo rahisi na kujitosheleza, tutatumia `sklearn.ensemble.GradientBoostingClassifier` (ambayo ni implementation ya polepole zaidi lakini iliyo rahisi kueleweka). Kwa kawaida, mtu anaweza kutumia libraries za `xgboost` au `lightgbm` kwa performance bora na features za ziada. Tutafunza modeli na kuitathmini kwa njia inayofanana na hapo awali.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -871,23 +877,23 @@ F1‑score:  0.957
 ROC AUC:   0.990
 """
 ```
-The gradient boosting model itakuwa na uwezekano wa kufikia usahihi wa juu sana na AUC kwenye dataset hii ya phishing (mara nyingi mifano hii inaweza kuzidi 95% usahihi kwa tuning sahihi kwenye data kama hii, kama inavyoonekana katika fasihi. Hii inaonyesha kwa nini GBDTs zinachukuliwa *"mfano wa hali ya juu kwa dataset za tabular"* -- mara nyingi zinapita algorithms rahisi kwa kushika mifumo tata. Katika muktadha wa usalama wa mtandao, hii inaweza kumaanisha kukamata tovuti zaidi za phishing au mashambulizi kwa makosa machache. Bila shaka, mtu lazima awe makini kuhusu overfitting -- kwa kawaida tungetumia mbinu kama cross-validation na kufuatilia utendaji kwenye seti ya uthibitisho tunapounda mfano kama huu kwa ajili ya kutekeleza.
+The gradient boosting model huenda ikapata usahihi wa juu sana na AUC kwenye dataset hii ya phishing (mara nyingi modeli hizi zinaweza kuzidi usahihi wa 95% zikitunzwa ipasavyo kwenye data kama hii, kama inavyoonekana katika tafiti. Hii inaonyesha kwa nini GBDTs huchukuliwa kuwa *"modeli ya kisasa zaidi kwa dataset za tabular"* -- mara nyingi hushinda algorithms rahisi kwa kunasa mifumo changamano. Katika muktadha wa cybersecurity, hii inaweza kumaanisha kugundua tovuti nyingi zaidi za phishing au mashambulizi kwa kupunguza matukio yasiyogunduliwa. Bila shaka, mtu lazima awe mwangalifu kuhusu overfitting -- kwa kawaida tungetumia mbinu kama cross-validation na kufuatilia utendaji kwenye validation set wakati wa kutengeneza modeli kama hii kwa ajili ya deployment.
 
 </details>
 
-### Kuunganisha Mifano: Kujifunza kwa Kundi na Stacking
+### Kuchanganya Modeli: Ensemble Learning na Stacking
 
-Kujifunza kwa kundi ni mkakati wa **kuunganisha mifano mingi** ili kuboresha utendaji wa jumla. Tayari tumeona mbinu maalum za kundi: Random Forest (kundi la miti kupitia bagging) na Gradient Boosting (kundi la miti kupitia boosting ya mfululizo). Lakini makundi yanaweza kuundwa kwa njia nyingine pia, kama **kundi la kupiga kura** au **stacked generalization (stacking)**. Wazo kuu ni kwamba mifano tofauti inaweza kushika mifumo tofauti au kuwa na udhaifu tofauti; kwa kuunganisha, tunaweza **kurekebisha makosa ya kila mfano kwa nguvu za mwingine**.
+Ensemble learning ni mkakati wa **kuchanganya modeli nyingi** ili kuboresha utendaji wa jumla. Tayari tuliona mbinu mahususi za ensemble: Random Forest (ensemble ya miti kupitia bagging) na Gradient Boosting (ensemble ya miti kupitia sequential boosting). Lakini ensembles zinaweza kuundwa pia kwa njia nyingine, kama vile **voting ensembles** au **stacked generalization (stacking)**. Wazo kuu ni kwamba modeli tofauti zinaweza kunasa mifumo tofauti au kuwa na udhaifu tofauti; kwa kuziunganisha, tunaweza **kufidia makosa ya kila modeli kwa kutumia nguvu za nyingine**.<sup>[[13]](#references)</sup>
 
--   **Kundi la Kupiga Kura:** Katika mcheza kura rahisi, tunafundisha mifano mingi tofauti (kama vile, regression ya logistic, mti wa maamuzi, na SVM) na kuwafanya wapige kura kwenye utabiri wa mwisho (kura nyingi kwa ajili ya uainishaji). Ikiwa tutapima kura (kwa mfano, uzito mkubwa kwa mifano sahihi zaidi), ni mpango wa kupiga kura wenye uzito. Hii kwa kawaida huongeza utendaji wakati mifano binafsi ni nzuri na huru -- kundi hupunguza hatari ya makosa ya mfano mmoja kwani wengine wanaweza kuyarekebisha. Ni kama kuwa na jopo la wataalam badala ya maoni moja.
+-   **Voting Ensemble:** Katika voting classifier rahisi, tunafunza modeli nyingi zenye utofauti (kwa mfano, logistic regression, decision tree, na SVM), kisha tunazipigia kura kuhusu prediction ya mwisho (kura ya wengi kwa classification). Tukipa kura uzito (kwa mfano, uzito mkubwa kwa modeli zilizo sahihi zaidi), huu huwa mpango wa weighted voting. Kwa kawaida hii huboresha utendaji wakati modeli binafsi ni nzuri kwa kiwango kinachofaa na zinajitegemea -- ensemble hupunguza hatari ya kosa la modeli moja kwa kuwa nyingine zinaweza kulirekebisha. Ni kama kuwa na jopo la wataalamu badala ya maoni ya mtu mmoja.
 
--   **Stacking (Kundi la Stacking):** Stacking inaenda hatua zaidi. Badala ya kura rahisi, inafundisha **meta-model** ili **kujifunza jinsi ya kuunganisha bora utabiri** wa mifano ya msingi. Kwa mfano, unafundisha waainishaji 3 tofauti (wajifunzaji wa msingi), kisha unawapa matokeo yao (au uwezekano) kama vipengele kwenye meta-classifier (mara nyingi mfano rahisi kama regression ya logistic) ambayo inajifunza njia bora ya kuyachanganya. Meta-model inafundishwa kwenye seti ya uthibitisho au kupitia cross-validation ili kuepuka overfitting. Stacking mara nyingi inaweza kupita kupiga kura rahisi kwa kujifunza *mifano ipi ya kuamini zaidi katika hali zipi*. Katika usalama wa mtandao, mfano mmoja unaweza kuwa bora katika kukamata skana za mtandao wakati mwingine ni bora katika kukamata beaconing ya malware; mfano wa stacking unaweza kujifunza kutegemea kila mmoja ipasavyo.
+-   **Stacking (Stacked Ensemble):** Stacking huenda hatua moja zaidi. Badala ya kura rahisi, hufunza **meta-modeli** ili **kujifunza jinsi bora ya kuchanganya predictions** za modeli za msingi. Kwa mfano, unafunza classifiers 3 tofauti (base learners), kisha unapitisha outputs zao (au probabilities) kama features kwenye meta-classifier (mara nyingi modeli rahisi kama logistic regression), ambayo hujifunza njia bora ya kuziunganisha. Meta-modeli hufunzwa kwenye validation set au kupitia cross-validation ili kuepuka overfitting. Stacking mara nyingi inaweza kushinda voting rahisi kwa kujifunza *ni modeli zipi za kuamini zaidi katika hali zipi*. Katika cybersecurity, modeli moja inaweza kuwa bora katika kugundua network scans, huku nyingine ikiwa bora katika kugundua malware beaconing; stacking model inaweza kujifunza kutegemea kila moja ipasavyo.
 
-Makundi, iwe kwa kupiga kura au stacking, huwa **yanaboresha usahihi** na uimara. Hasara ni kuongezeka kwa ugumu na wakati mwingine kupungua kwa ueleweka (ingawa baadhi ya mbinu za kundi kama wastani wa miti ya maamuzi bado zinaweza kutoa ufahamu fulani, kwa mfano, umuhimu wa kipengele). Katika mazoezi, ikiwa vikwazo vya uendeshaji vinaruhusu, kutumia kundi kunaweza kuleta viwango vya juu vya kugundua. Suluhisho nyingi za kushinda katika changamoto za usalama wa mtandao (na mashindano ya Kaggle kwa ujumla) hutumia mbinu za kundi ili kupata sehemu ya mwisho ya utendaji.
+Ensembles, iwe kupitia voting au stacking, kwa kawaida **huongeza accuracy** na robustness. Hasara yake ni kuongezeka kwa complexity na wakati mwingine kupungua kwa interpretability (ingawa baadhi ya ensemble approaches, kama wastani wa decision trees, bado zinaweza kutoa maarifa fulani, kwa mfano feature importance). Kwa vitendo, ikiwa operational constraints zinaruhusu, kutumia ensemble kunaweza kuongeza detection rates. Suluhisho nyingi zilizoshinda katika changamoto za cybersecurity (na mashindano ya Kaggle kwa ujumla) hutumia ensemble techniques ili kupata ongezeko la mwisho la performance.
 
 <details>
-<summary>Mfano -- Kundi la Kupiga Kura kwa Kugundua Phishing:</summary>
-Ili kuonyesha stacking ya mfano, hebu tuunganishe mifano kadhaa tuliyozungumzia kwenye dataset ya phishing. Tutatumia regression ya logistic, mti wa maamuzi, na k-NN kama wajifunzaji wa msingi, na kutumia Random Forest kama meta-learner ili kuunganisha utabiri wao. Meta-learner itafundishwa kwenye matokeo ya wajifunzaji wa msingi (kwa kutumia cross-validation kwenye seti ya mafunzo). Tunatarajia mfano wa stacking utendaji sawa au kidogo bora kuliko mifano binafsi.
+<summary>Mfano -- Voting Ensemble kwa Phishing Detection:</summary>
+Ili kuonyesha model stacking, tuchanganye baadhi ya modeli tulizojadili kwenye phishing dataset. Tutatumia logistic regression, decision tree, na k-NN kama base learners, na kutumia Random Forest kama meta-learner ili kuunganisha predictions zao. Meta-learner itafunzwa kwa kutumia outputs za base learners (kupitia cross-validation kwenye training set). Tunatarajia stacked model ifanye vizuri sawa na modeli binafsi au iwe bora kidogo.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -966,30 +972,27 @@ F1‑score : 0.948
 ROC AUC  : 0.992
 """
 ```
-The stacked ensemble inachukua faida ya nguvu za nyongeza za mifano ya msingi. Kwa mfano, regression ya logistic inaweza kushughulikia vipengele vya laini vya data, mti wa maamuzi unaweza kunasa mwingiliano maalum kama sheria, na k-NN inaweza kuwa bora katika maeneo ya ndani ya nafasi ya kipengele. Meta-modeli (msitu wa nasibu hapa) inaweza kujifunza jinsi ya kupima hizi ingizo. Vipimo vinavyotokana mara nyingi vinaonyesha kuboreshwa (hata kama ni kidogo) juu ya vipimo vya mfano mmoja. Katika mfano wetu wa phishing, ikiwa logistic pekee ilikuwa na F1 ya kusema 0.95 na mti 0.94, stack inaweza kufikia 0.96 kwa kuchukua pale ambapo kila mfano unakosea.
+Stacked ensemble hutumia nguvu zinazokamilishana za base models. Kwa mfano, logistic regression inaweza kushughulikia vipengele vya mstari vya data, decision tree inaweza kunasa mwingiliano maalum unaofanana na kanuni, na k-NN inaweza kufanya vizuri katika maeneo ya karibu ya feature space. Meta-model (random forest katika mfano huu) inaweza kujifunza jinsi ya kupima uzito wa inputs hizi. Metrics zinazopatikana mara nyingi huonyesha uboreshaji (hata kama ni mdogo) ikilinganishwa na metrics za model yoyote moja. Katika mfano wetu wa phishing, ikiwa logistic pekee ingekuwa na F1 ya, tuseme, 0.95 na tree 0.94, stack inaweza kufikia 0.96 kwa kugundua maeneo ambayo kila model hukosea.
 
-Mbinu za ensemble kama hizi zinaonyesha kanuni kwamba *"kuunganisha mifano mingi kawaida huleta jumla bora"*. Katika usalama wa mtandao, hii inaweza kutekelezwa kwa kuwa na injini nyingi za kugundua (moja inaweza kuwa ya msingi wa sheria, moja ya kujifunza mashine, moja ya msingi wa anomali) na kisha safu inayokusanya arifa zao -- kwa ufanisi aina ya ensemble -- kufanya uamuzi wa mwisho kwa kujiamini zaidi. Wakati wa kupeleka mifumo kama hii, lazima kuzingatia ugumu ulioongezeka na kuhakikisha kwamba ensemble haifanyi kuwa ngumu sana kudhibiti au kuelezea. Lakini kutoka kwa mtazamo wa usahihi, ensembles na stacking ni zana zenye nguvu za kuboresha utendaji wa mfano.
+Ensemble methods kama huu huonyesha kanuni kwamba *"kuchanganya models nyingi kwa kawaida huleta generalization bora"*. Katika cybersecurity, hii inaweza kutekelezwa kwa kuwa na detection engines nyingi (moja inaweza kutegemea rules, nyingine machine learning, na nyingine anomaly-based) kisha kuweka layer inayokusanya alerts zao -- ambayo kwa ufanisi ni aina ya ensemble -- ili kufanya uamuzi wa mwisho kwa confidence ya juu zaidi. Wakati wa ku-deploy systems kama hizi, ni lazima kuzingatia complexity iliyoongezeka na kuhakikisha kuwa ensemble haiwi ngumu sana kuisimamia au kuieleza. Lakini kwa mtazamo wa accuracy, ensembles na stacking ni tools zenye nguvu za kuboresha utendaji wa model.
 
 </details>
 
 
-## References
+## Marejeo
 
-- [https://madhuramiah.medium.com/logistic-regression-6e55553cc003](https://madhuramiah.medium.com/logistic-regression-6e55553cc003)
-- [https://www.geeksforgeeks.org/decision-tree-introduction-example/](https://www.geeksforgeeks.org/decision-tree-introduction-example/)
-- [https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132](https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132)
-- [https://www.ibm.com/think/topics/support-vector-machine](https://www.ibm.com/think/topics/support-vector-machine)
-- [https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering](https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering)
-- [https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644](https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644)
-- [https://zvelo.com/ai-and-machine-learning-in-cybersecurity/](https://zvelo.com/ai-and-machine-learning-in-cybersecurity/)
-- [https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae](https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae)
-- [https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8](https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8)
-- [https://www.ibm.com/think/topics/knn](https://www.ibm.com/think/topics/knn)
-- [https://www.ibm.com/think/topics/knn](https://www.ibm.com/think/topics/knn)
-- [https://arxiv.org/pdf/2101.02552](https://arxiv.org/pdf/2101.02552)
-- [https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
-- [https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
-- [https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
-- [https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
+- [1] [Logistic Regression](https://madhuramiah.medium.com/logistic-regression-6e55553cc003)
+- [2] [Decision Tree - Utangulizi wenye mfano](https://www.geeksforgeeks.org/decision-tree-introduction-example/)
+- [3] [Ugunduzi wa Denial of Services Attack kwa kutumia Random Forest Classifier yenye Information Gain](https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132)
+- [4] [Support Vector Machines (SVMs) ni nini? (IBM)](https://www.ibm.com/think/topics/support-vector-machine)
+- [5] [Naive Bayes spam filtering (Wikipedia)](https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering)
+- [6] [GBDT Imefafanuliwa: Jinsi LightGBM, XGBoost, na CatBoost Zinavyofanya Kazi](https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644)
+- [7] [AI na Machine Learning katika Cybersecurity (zvelo)](https://zvelo.com/ai-and-machine-learning-in-cybersecurity/)
+- [8] [Linear Regression Imefafanuliwa](https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae)
+- [9] [Uchambuzi wa utendaji wa machine learning models kwa intrusion detection system kwa kutumia mbinu ya kuchagua features ya Gini Impurity-based Weighted Random Forest (GIWRF)](https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8)
+- [10] [k-nearest neighbors (KNN) algorithm ni nini? (IBM)](https://www.ibm.com/think/topics/knn)
+- [11] [Uainishaji wa Phishing Attacks na Websites kwa kutumia Machine Learning na Multiple Datasets (Uchambuzi Linganishi)](https://arxiv.org/pdf/2101.02552)
+- [12] [Jinsi Deep Learning Inavyoboresha Intrusion Detection Systems](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
+- [13] [Ensemble Learning: Kuboresha Utendaji wa Model kwa Kuchanganya Nguvu](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
 
 {{#include ../banners/hacktricks-training.md}}

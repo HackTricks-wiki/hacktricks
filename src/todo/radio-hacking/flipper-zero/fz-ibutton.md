@@ -2,41 +2,42 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro
+## Utangulizi
 
-Kwa maelezo zaidi kuhusu iButton ni nini angalia:
+Kwa maelezo zaidi kuhusu iButton, angalia:
+
 
 {{#ref}}
 ../ibutton.md
 {{#endref}}
 
-## Design
+## Muundo
 
-Sehemu ya **bluu** ya picha ifuatayo ni jinsi unavyohitaji **kueka iButton halisi** ili Flipper aweze **kuisoma.** Sehemu ya **kijani** ni jinsi unavyohitaji **kugusa msomaji** na Flipper zero ili **kuiga iButton** kwa usahihi.
+Sehemu ya **bluu** katika picha ifuatayo inaonyesha jinsi unavyohitaji **kuweka iButton halisi** ili Flipper iweze **kuisoma.** Sehemu ya **kijani** inaonyesha jinsi unavyohitaji **kugusa kisomaji** kwa Flipper Zero ili **kuiga iButton kwa usahihi.**<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## Vitendo
 
-### Read
+### Soma
 
-Katika Modu ya Kusoma Flipper anasubiri funguo ya iButton kugusa na anaweza kuchakata aina yoyote ya funguo tatu: **Dallas, Cyfral, na Metakom**. Flipper atajua **aina ya funguo yenyewe**. Jina la protokali ya funguo litakuwa kwenye skrini juu ya nambari ya ID.
+Katika Read Mode, Flipper husubiri ufunguo wa iButton uguse, na inaweza kuchakata aina zozote kati ya tatu za funguo: **Dallas, Cyfral, na Metakom**. Flipper **itatambua aina ya ufunguo yenyewe**. Jina la protocol ya ufunguo litaonyeshwa kwenye skrini juu ya nambari ya ID.<sup>[[1]](#references)</sup>
 
-### Add manually
+### Ongeza mwenyewe
 
-Inawezekana **kuongeza kwa mikono** iButton ya aina: **Dallas, Cyfral, na Metakom**
+Inawezekana **kuongeza mwenyewe** iButton ya aina: **Dallas, Cyfral, na Metakom**
 
 ### **Emulate**
 
-Inawezekana **kuiga** iButtons zilizohifadhiwa (zilizosomwa au zilizoongezwa kwa mikono).
+Inawezekana **kuiga** iButton zilizohifadhiwa (zilizosomwa au zilizoongezwa mwenyewe).
 
 > [!TIP]
-> Ikiwa huwezi kufanya mawasiliano yanayotarajiwa ya Flipper Zero kugusa msomaji unaweza **kutumia GPIO ya nje:**
+> Ikiwa huwezi kufanya mawasiliano yanayotarajiwa kati ya contacts za Flipper Zero na kisomaji, unaweza **kutumia GPIO ya nje:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## References
+## Marejeleo
 
-- [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
+- [1] [Taming iButton Keys with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../../banners/hacktricks-training.md}}

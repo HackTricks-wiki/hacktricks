@@ -2,86 +2,87 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Garage Doors
+## Milango ya Gereji
 
-Vifunguo vya milango ya garaji kwa kawaida vinatumika katika masafa ya 300-190 MHz, ambapo masafa ya kawaida ni 300 MHz, 310 MHz, 315 MHz, na 390 MHz. Masafa haya yanatumika kwa kawaida kwa vifunguo vya milango ya garaji kwa sababu ni rahisi zaidi kuliko bendi nyingine za masafa na kuna uwezekano mdogo wa kuingiliwa na vifaa vingine.
+Vifungua milango ya gereji kwa kawaida hufanya kazi katika masafa ya 300-190 MHz, huku masafa yanayotumika zaidi yakiwa 300 MHz, 310 MHz, 315 MHz, na 390 MHz. Masafa haya hutumiwa sana na vifungua milango ya gereji kwa sababu yana msongamano mdogo kuliko bendi nyingine za masafa na yana uwezekano mdogo wa kuingiliwa na vifaa vingine.
 
-## Car Doors
+## Milango ya Magari
 
-Vifunguo vingi vya magari vinatumika kwenye **315 MHz au 433 MHz**. Hizi ni masafa ya redio, na zinatumika katika matumizi mbalimbali tofauti. Tofauti kuu kati ya masafa haya mawili ni kwamba 433 MHz ina umbali mrefu zaidi kuliko 315 MHz. Hii ina maana kwamba 433 MHz ni bora kwa matumizi yanayohitaji umbali mrefu, kama vile kuingia bila funguo.\
-Nchini Uropa 433.92MHz inatumika kwa kawaida na nchini Marekani na Japani ni 315MHz.
+Vifaa vingi vya remote za funguo za magari hufanya kazi kwenye **315 MHz au 433 MHz**. Haya yote ni masafa ya redio, na hutumiwa katika matumizi mbalimbali. Tofauti kuu kati ya masafa haya mawili ni kwamba 433 MHz ina range ndefu kuliko 315 MHz. Hii inamaanisha kuwa 433 MHz inafaa zaidi kwa matumizi yanayohitaji range ndefu, kama vile remote keyless entry.\
+Huko Ulaya 433.92MHz hutumiwa kwa kawaida, na huko Marekani na Japan ni 315MHz.<sup>[[1]](#references)</sup>
 
 ## **Brute-force Attack**
 
 <figure><img src="../../images/image (1084).png" alt=""><figcaption></figcaption></figure>
 
-Ikiwa badala ya kutuma kila msimbo mara 5 (tumwa kama hii ili kuhakikisha mpokeaji anaupata) unatumia kutuma mara moja tu, muda unakuwa wa dakika 6:
+Badala ya kutuma kila code mara 5 (hutumwa hivyo ili kuhakikisha receiver anaipokea), ukituma mara moja tu, muda hupungua hadi dakika 6:
 
 <figure><img src="../../images/image (622).png" alt=""><figcaption></figcaption></figure>
 
-na ikiwa **unaondoa kipindi cha kusubiri cha 2 ms** kati ya ishara unaweza **kupunguza muda hadi dakika 3.**
+na uk **ondoa kipindi cha kusubiri cha 2 ms** kati ya signals unaweza **kupunguza muda hadi dakika 3.**
 
-Zaidi ya hayo, kwa kutumia Mfuatano wa De Bruijn (njia ya kupunguza idadi ya bits zinazohitajika kutuma nambari zote za binary zinazoweza kubruteforce) **muda huu unakuwa wa sekunde 8 tu**:
+Zaidi ya hayo, kwa kutumia De Bruijn Sequence (njia ya kupunguza idadi ya bits zinazohitajika kutuma binary numbers zote zinazowezekana kwa ajili ya brute-force), **muda huu hupunguzwa hadi sekunde 8 tu**:
 
 <figure><img src="../../images/image (583).png" alt=""><figcaption></figcaption></figure>
 
-Mfano wa shambulio hili ulitekelezwa katika [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
+Mfano wa attack hii ulitekelezwa katika [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)<sup>[[3]](#references)</sup>
 
-Kuhitaji **preamble kutazuia uboreshaji wa Mfuatano wa De Bruijn** na **mifumo ya nambari zinazozunguka itazuia shambulio hili** (ikiwa nambari ni ndefu vya kutosha ili isiweze kubruteforce).
+Kuhitaji **preamble kutaepusha optimization ya De Bruijn Sequence**, na **rolling codes zitazuia attack hii** (ikidhaniwa kuwa code ni ndefu vya kutosha isiweze kufanyiwa brute-force).
 
 ## Sub-GHz Attack
 
-Ili kushambulia ishara hizi kwa Flipper Zero angalia:
+Ili ku-attack signals hizi kwa Flipper Zero angalia:
+
 
 {{#ref}}
 flipper-zero/fz-sub-ghz.md
 {{#endref}}
 
-## Rolling Codes Protection
+## Ulinzi wa Rolling Codes
 
-Vifunguo vya milango ya garaji vya kiotomatiki kwa kawaida vinatumia kidhibiti cha mbali kisichokuwa na waya kufungua na kufunga mlango wa garaji. Kidhibiti cha mbali **kinatuma ishara ya masafa ya redio (RF)** kwa kifaa cha kufungua mlango wa garaji, ambacho kinaanzisha motor kufungua au kufunga mlango.
+Vifungua milango ya gereji vya kiotomatiki kwa kawaida hutumia remote control isiyotumia waya kufungua na kufunga mlango wa gereji. Remote control **hutuma signal ya radio frequency (RF)** kwa kifungua mlango wa gereji, ambacho huamsha motor kufungua au kufunga mlango.
 
-Inawezekana kwa mtu kutumia kifaa kinachojulikana kama code grabber kukamata ishara ya RF na kuirekodi kwa matumizi ya baadaye. Hii inajulikana kama **replay attack**. Ili kuzuia aina hii ya shambulio, vifunguo vingi vya kisasa vya milango ya garaji vinatumia njia salama zaidi ya usimbaji inayoitwa **rolling code**.
+Mtu anaweza kutumia kifaa kinachojulikana kama code grabber kukatiza signal ya RF na kuihifadhi kwa matumizi ya baadaye. Hii inajulikana kama **replay attack**. Ili kuzuia aina hii ya attack, vifungua milango ya gereji vya kisasa hutumia mbinu salama zaidi ya encryption inayojulikana kama mfumo wa **rolling code**.
 
-**Ishara ya RF kwa kawaida inatumika kwa kutumia nambari zinazozunguka**, ambayo ina maana kwamba nambari hubadilika kila wakati inapotumika. Hii inafanya kuwa **vigumu** kwa mtu **kukamata** ishara na **kuitumia** kupata **ufikiaji usioidhinishwa** kwa garaji.
+**Signal ya RF kwa kawaida hutumwa kwa kutumia rolling code**, ambayo inamaanisha kuwa code hubadilika kila inapotumiwa. Hii humfanya **mwingiliaji** ashindwe kwa urahisi **kukata** signal na **kuitumia** kupata ufikiaji **usioidhinishwa** wa gereji.
 
-Katika mfumo wa nambari zinazozunguka, kidhibiti cha mbali na kifaa cha kufungua mlango wa garaji vina **algorithms zinazoshirikiwa** ambazo **zinaunda nambari mpya** kila wakati kidhibiti kinapotumika. Kifaa cha kufungua mlango wa garaji kitajibu tu kwa **nambari sahihi**, na kufanya iwe vigumu zaidi kwa mtu kupata ufikiaji usioidhinishwa kwa garaji kwa kukamata nambari tu.
+Katika mfumo wa rolling code, remote control na kifungua mlango wa gereji huwa na **algorithm ya pamoja** ambayo **hutengeneza code mpya** kila remote inapotumiwa. Kifungua mlango wa gereji kitajibu tu **code sahihi**, jambo linalofanya iwe vigumu zaidi kwa mtu kupata ufikiaji usioidhinishwa wa gereji kwa kunasa code pekee.
 
 ### **Missing Link Attack**
 
-Kimsingi, unakusikia kitufe na **kukamata ishara wakati kidhibiti kiko nje ya anuwai** ya kifaa (kama gari au garaji). Kisha unahamia kwenye kifaa na **kutumia nambari iliyokamatwa kufungua**.
+Kimsingi, unasikiliza kitufe na **unanasa signal wakati remote iko nje ya range** ya kifaa (kwa mfano gari au gereji). Kisha unasogea hadi kwenye kifaa na **kutumia code iliyonaswa kukifungua**.<sup>[[2]](#references)</sup>
 
 ### Full Link Jamming Attack
 
-Mshambuliaji anaweza **kuzuia ishara karibu na gari au mpokeaji** ili **mpokeaji asisikilize nambari**, na mara hiyo ikitokea unaweza tu **kukamata na kurudisha** nambari wakati umesitisha kuzuia.
+Mshambuliaji anaweza **kuzuia signal karibu na gari au receive**r ili **receiver asiweze kuisikia code**, na hilo linapotokea unaweza tu **kunasa na kurudia** code baada ya kuacha kuzuia signal.
 
-Mtu aliyeathirika kwa wakati fulani atatumia **funguo kufunga gari**, lakini kisha shambulio litakuwa **limerekodi nambari za "fungua mlango" za kutosha** ambazo kwa matumaini zinaweza kutumwa tena kufungua mlango (**mabadiliko ya masafa yanaweza kuhitajika** kwani kuna magari yanayotumia nambari sawa kufungua na kufunga lakini yanakusikiliza amri zote katika masafa tofauti).
+Mwathiriwa wakati fulani atatumia **funguo kufunga gari**, lakini attack itakuwa **imesharekodi codes za kutosha za "kufunga mlango"** ambazo huenda zikatwekwa tena ili kufungua mlango (huenda **mabadiliko ya frequency yakahitajika**, kwa kuwa kuna magari yanayotumia codes zilezile kufungua na kufunga lakini yanasikiliza commands zote mbili kwenye frequencies tofauti).
 
 > [!WARNING]
-> **Kuzuia inafanya kazi**, lakini inaonekana kama mtu **anayefunga gari anajaribu milango** ili kuhakikisha zimefungwa wangeweza kugundua gari halijafungwa. Zaidi ya hayo, ikiwa wangejua kuhusu mashambulizi kama haya wangeweza hata kusikiliza ukweli kwamba milango kamwe haikutoa **sauti** ya kufunga au **mwanga** wa magari haukuangaza wakati walipobonyeza kitufe cha ‘fungua’.
+> **Jamming hufanya kazi**, lakini inaonekana kwa urahisi kwa sababu ikiwa **mtu anayefunga gari atajaribu tu milango** ili kuhakikisha imefungwa, ataona kuwa gari limefunguliwa. Zaidi ya hayo, ikiwa alikuwa anafahamu attacks kama hizi, angeweza hata kusikia kwamba milango haikutoa **sauti ya kufunga** au **taa za gari** hazikuwaka alipobonyeza kitufe cha ‘lock’.
 
 ### **Code Grabbing Attack ( aka ‘RollJam’ )**
 
-Hii ni **mbinu ya kuzuia ya siri zaidi**. Mshambuliaji atazuia ishara, hivyo wakati mtu aliyeathirika anajaribu kufunga mlango haitafanya kazi, lakini mshambuliaji at **arekodi nambari hii**. Kisha, mtu aliyeathirika atajaribu **kufunga gari tena** kwa kubonyeza kitufe na gari litarekodi **nambari hii ya pili**.\
-Mara moja baada ya hii **mshambuliaji anaweza kutuma nambari ya kwanza** na **gari litafungwa** (mtu aliyeathirika atadhani kubonyeza kwa pili kumefunga). Kisha, mshambuliaji ataweza **kutuma nambari ya pili iliyoporwa kufungua** gari (ikiwa inadhaniwa kwamba **"nambari ya kufunga gari" inaweza pia kutumika kufungua**). Mabadiliko ya masafa yanaweza kuhitajika (kama kuna magari yanayotumia nambari sawa kufungua na kufunga lakini yanakusikiliza amri zote katika masafa tofauti).
+Hii ni **mbinu ya Jamming iliyo fiche zaidi**. Mshambuliaji atazuia signal, kwa hiyo mwathiriwa anapojaribu kufunga mlango haitafanya kazi, lakini mshambuliaji **atarekodi code hii**. Kisha mwathiriwa **atajaribu kufunga gari tena** kwa kubonyeza kitufe, na gari **litarekodi code hii ya pili**.\
+Mara moja baada ya hapo, **mshambuliaji anaweza kutuma code ya kwanza** na **gari litafungwa** (mwathiriwa atafikiri kuwa kubonyeza mara ya pili ndiko kulikofunga). Kisha mshambuliaji ataweza **kutuma code ya pili iliyoibwa ili kufungua** gari (ikidhaniwa kuwa **code ya "kufunga gari" inaweza pia kutumika kulifungua**). Huenda mabadiliko ya frequency yakahitajika (kwa kuwa kuna magari yanayotumia codes zilezile kufungua na kufunga lakini yanasikiliza commands zote mbili kwenye frequencies tofauti).<sup>[[3]](#references)[[2]](#references)</sup>
 
-Mshambuliaji anaweza **kuzuia mpokeaji wa gari na si mpokeaji wake** kwa sababu ikiwa mpokeaji wa gari unakusikiliza kwa mfano katika broadband ya 1MHz, mshambuliaji hata **hatazuia** masafa halisi yanayotumiwa na kidhibiti bali **masafa ya karibu katika spektra hiyo** wakati **mpokeaji wa mshambuliaji atakuwa akisikiliza katika anuwai ndogo** ambapo anaweza kusikiliza ishara ya kidhibiti **bila ishara ya kuzuia**.
+Mshambuliaji anaweza **ku-jam receiver ya gari na si receiver wake** kwa sababu ikiwa receiver ya gari inasikiliza, kwa mfano, broadband ya 1MHz, mshambuliaji hata-**jam** frequency halisi inayotumiwa na remote, bali **frequency iliyo karibu katika spectrum hiyo**, huku receiver ya mshambuliaji ikisikiliza range ndogo zaidi ambako anaweza kusikia signal ya remote **bila signal ya jam**.
 
 > [!WARNING]
-> Utekelezaji mwingine ulioonekana katika maelezo ya kiufundi unaonyesha kwamba **nambari zinazozunguka ni sehemu** ya jumla ya nambari inayotumwa. Yaani, nambari inayotumwa ni **funguo ya 24 bit** ambapo **12 za kwanza ni nambari zinazozunguka**, **8 za pili ni amri** (kama kufunga au kufungua) na 4 za mwisho ni **checksum**. Magari yanayotumia aina hii pia kwa asili yanahatarishwa kwani mshambuliaji anahitaji tu kubadilisha sehemu ya nambari zinazozunguka ili kuweza **kutumia nambari yoyote inayozunguka katika masafa yote mawili**.
+> Implementations nyingine zilizoonekana katika specifications zinaonyesha kuwa **rolling code ni sehemu** ya code yote inayotumwa. Yaani code inayotumwa ni **key ya bits 24**, ambapo **bits 12 za kwanza ni rolling code**, **bits 8 zinazofuata ni command** (kama vile lock au unlock), na bits 4 za mwisho ni **checksum**. Magari yanayotumia aina hii pia huathirika kiasili kwa sababu mshambuliaji anahitaji tu kubadilisha sehemu ya rolling code ili aweze **kutumia rolling code yoyote kwenye frequencies zote mbili**.
 
 > [!CAUTION]
-> Kumbuka kwamba ikiwa mtu aliyeathirika atatuma nambari ya tatu wakati mshambuliaji anatuma ya kwanza, nambari ya kwanza na ya pili zitakuwa batili.
+> Kumbuka kuwa mwathiriwa akituma code ya tatu wakati mshambuliaji anatuma ya kwanza, code ya kwanza na ya pili zitabatilishwa.
 
 ### Alarm Sounding Jamming Attack
 
-Kujaribu dhidi ya mfumo wa nambari zinazozunguka uliowekwa kwenye gari, **kutuma nambari ile ile mara mbili** mara moja **kulizindua alamu** na immobiliser ikitoa fursa ya kipekee ya **kukataa huduma**. Kwa bahati mbaya, njia ya **kuondoa alamu** na immobiliser ilikuwa **kubonyeza** **kidhibiti cha mbali**, ikimpa mshambuliaji uwezo wa **kufanya shambulio la DoS mara kwa mara**. Au changanya shambulio hili na **la awali ili kupata nambari zaidi** kwani mtu aliyeathirika angependa kusitisha shambulio haraka iwezekanavyo.
+Wakati wa kujaribu mfumo wa rolling code wa baada ya kiwandani uliowekwa kwenye gari, **kutuma code ileile mara mbili** mara moja **kuliwasha alarm** na immobiliser, na kutoa fursa ya kipekee ya **denial of service**. Kwa kushangaza, njia ya **kuzima alarm** na immobiliser ilikuwa **kubonyeza** **remote**, jambo lililompa mshambuliaji uwezo wa **kuendelea kufanya DoS attack**. Au changanya attack hii na **iliyotangulia ili kupata codes zaidi**, kwa kuwa mwathiriwa angependa kusitisha attack haraka iwezekanavyo.<sup>[[2]](#references)</sup>
 
 ## References
 
-- [https://www.americanradioarchives.com/what-radio-frequency-does-car-key-fobs-run-on/](https://www.americanradioarchives.com/what-radio-frequency-does-car-key-fobs-run-on/)
-- [https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/](https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/)
-- [https://samy.pl/defcon2015/](https://samy.pl/defcon2015/)
-- [https://hackaday.io/project/164566-how-to-hack-a-car/details](https://hackaday.io/project/164566-how-to-hack-a-car/details)
+- [1] [What Radio Frequency Does Car Key Fobs Run On?](https://www.americanradioarchives.com/what-radio-frequency-do-car-key-fobs-run-on/)
+- [2] [Bypassing Rolling Code Systems](https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/)
+- [3] [Drive It Like You Hacked It (DEF CON 23) - OpenSesame / RollJam](https://samy.pl/defcon2015/)
+- [4] [How to hack a car (RollJam recreation)](https://hackaday.io/project/164566-how-to-hack-a-car/details)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,4 +1,4 @@
-# Text Steganography
+# Steganography ya Maandishi
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,30 +6,30 @@ Tafuta:
 
 - Unicode homoglyphs
 - Zero-width characters
-- Whitespace patterns (spaces vs tabs)
+- Miundo ya whitespace (spaces dhidi ya tabs)
 
 ## Njia ya vitendo
 
-Ikiwa plain text inafanya kazi isivyotarajiwa, chunguza codepoints na normalize kwa uangalifu (usiharibu ushahidi).
+Ikiwa plain text inatenda bila kutarajiwa, kagua codepoints na ufanye normalize kwa uangalifu (usiharibu ushahidi).
 
 ### Mbinu
 
-Text stego mara nyingi hutegemea herufi ambazo zinaonyeshwa sawa (au kwa njia isiyoonekana):
+Text stego mara nyingi hutegemea characters zinazoonekana sawa (au zisizoonekana):
 
-- Homoglyphs: codepoints tofauti za Unicode zinazofanana kwa sura (Latin `a` vs Cyrillic `а`)
+- Homoglyphs: codepoints tofauti za Unicode zinazoonekana sawa (Latin `a` dhidi ya Cyrillic `а`)
 - Zero-width characters: joiners, non-joiners, zero-width spaces
-- Whitespace encodings: spaces vs tabs, trailing spaces, line-length patterns
+- Usimbaji wa whitespace: spaces dhidi ya tabs, trailing spaces, patterns za urefu wa mistari<sup>[[1]](#references)</sup>
 
-Mifano ya ziada zenye ishara kubwa:
+Mifano ya ziada yenye signal kubwa:
 
-- Bidirectional override/control characters (zinaweza kupanga tena maandishi kwa muonekano)
-- Variation selectors na combining characters zinazotumika kama chaneli ya siri
+- Bidirectional override/control characters (zinaweza kupanga upya maandishi kwa mwonekano)
+- Variation selectors na combining characters zinazotumika kama covert channel
 
-### Vifaa vya decode
+### Decode helpers
 
 - Unicode homoglyph/zero-width playground: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
 
-### Chunguza codepoints
+### Kagua codepoints
 ```bash
 python3 - <<'PY'
 import sys
@@ -39,16 +39,16 @@ if ord(ch) > 127 or ch.isspace():
 print(i, hex(ord(ch)), repr(ch))
 PY
 ```
-## Chaneli za CSS `unicode-range`
+## Vituo vya CSS `unicode-range`
 
-`@font-face` rules zinaweza kuunda bytes ndani ya entries za `unicode-range: U+..`. Toa codepoints, ungana hex, kisha decode:
+Sheria za `@font-face` zinaweza kusimba baiti katika maingizo ya `unicode-range: U+..`. Toa codepoint, unganisha thamani za hex, kisha decode:
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-Ikiwa masafa yanajumuisha bytes nyingi kwa kila tamko, gawanya kwa koma kwanza na weka kwenye muundo wa kawaida (`tr ',+' '\n'`). Python inafanya iwe rahisi kuchanganua na kutoa bytes ikiwa muundo hauko thabiti.
+Ikiwa ranges zina bytes nyingi kwa kila declaration, zigawanye kwanza kwa koma na uzinormalize (`tr ',+' '\n'`). Python hurahisisha kuchanganua na kutoa bytes ikiwa formatting haiendani.
 
-## Marejeleo
+## References
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

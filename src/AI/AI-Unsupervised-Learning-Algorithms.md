@@ -1,37 +1,38 @@
-# Unsupervised Learning Algorithms
+# Algorithms za Unsupervised Learning
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Unsupervised Learning
 
-Kujifunza bila usimamizi ni aina ya kujifunza kwa mashine ambapo mfano unafundishwa kwa data bila majibu yaliyoandikwa. Lengo ni kupata mifumo, muundo, au uhusiano ndani ya data. Tofauti na kujifunza kwa usimamizi, ambapo mfano unajifunza kutoka kwa mifano iliyoandikwa, algorithimu za kujifunza bila usimamizi hufanya kazi na data isiyo na lebo. 
-Kujifunza bila usimamizi mara nyingi hutumika kwa kazi kama vile kuunganisha, kupunguza vipimo, na kugundua anomali. Inaweza kusaidia kugundua mifumo iliyofichika katika data, kuunganisha vitu vinavyofanana pamoja, au kupunguza ugumu wa data huku ikihifadhi sifa zake muhimu.
+Unsupervised learning ni aina ya machine learning ambapo model hufunzwa kwa data bila majibu yenye labels. Lengo ni kupata mifumo, miundo, au uhusiano ndani ya data. Tofauti na supervised learning, ambapo model hujifunza kutokana na mifano yenye labels, algorithms za unsupervised learning hufanya kazi na data isiyo na labels.  
+Unsupervised learning hutumika mara nyingi kwa kazi kama vile clustering, dimensionality reduction, na anomaly detection. Inaweza kusaidia kugundua mifumo iliyofichika ndani ya data, kuweka pamoja vitu vinavyofanana, au kupunguza uchangamano wa data huku ikihifadhi vipengele vyake muhimu.
 
 ### K-Means Clustering
 
-K-Means ni algorithimu ya kuunganisha inayotegemea centroid ambayo inagawanya data katika makundi K kwa kupeana kila nukta kwa maana ya kundi iliyo karibu zaidi. Algorithimu inafanya kazi kama ifuatavyo:
-1. **Initialization**: Chagua K vitu vya kuanzia vya kundi (centroids), mara nyingi kwa bahati nasibu au kupitia mbinu bora kama k-means++
-2. **Assignment**: Peana kila nukta ya data kwa centroid iliyo karibu zaidi kulingana na kipimo cha umbali (mfano, umbali wa Euclidean).
-3. **Update**: Hesabu upya centroids kwa kuchukua maana ya nukta zote za data zilizopewa kila kundi.
-4. **Repeat**: Hatua za 2–3 zinarudiwa hadi ugawaji wa makundi uwe thabiti (centroids hazihamaki kwa kiasi kikubwa).
+K-Means ni algorithm ya clustering inayotumia centroid, ambayo hugawanya data katika clusters K kwa kumpangia kila pointi wastani wa cluster ulio karibu zaidi. Algorithm hufanya kazi kama ifuatavyo:
+1. **Initialization**: Chagua vituo K vya awali vya clusters (centroids), mara nyingi kwa nasibu au kwa kutumia mbinu bora zaidi kama k-means++
+2. **Assignment**: Pangia kila pointi ya data centroid iliyo karibu zaidi kulingana na kipimo cha umbali (kwa mfano, Euclidean distance).
+3. **Update**: Kokotoa upya centroids kwa kupata wastani wa pointi zote za data zilizopangiwa kila cluster.
+4. **Repeat**: Hatua ya 2–3 hurudiwa hadi mgawanyo wa clusters utulie (centroids zisiendelee kusogea kwa kiwango kikubwa).
 
 > [!TIP]
-> *Matumizi katika usalama wa mtandao:* K-Means inatumika kwa kugundua uvamizi kwa kuunganisha matukio ya mtandao. Kwa mfano, watafiti walitumia K-Means kwenye seti ya data ya uvamizi ya KDD Cup 99 na waligundua kuwa inagawanya trafiki kwa ufanisi katika makundi ya kawaida dhidi ya mashambulizi. Katika mazoezi, wachambuzi wa usalama wanaweza kuunganisha entries za logi au data ya tabia ya mtumiaji ili kupata makundi ya shughuli zinazofanana; nukta zozote ambazo hazihusiani na kundi lililo na muundo mzuri zinaweza kuashiria anomali (mfano, toleo jipya la malware linalounda kundi lake dogo). K-Means inaweza pia kusaidia katika uainishaji wa familia za malware kwa kuunganisha binaries kulingana na profaili za tabia au vektori vya sifa.
+> *Matumizi katika cybersecurity:* K-Means hutumika katika intrusion detection kwa kuweka pamoja matukio ya mtandao. Kwa mfano, watafiti walitumia K-Means kwenye intrusion dataset ya KDD Cup 99 na kugundua kuwa iligawanya traffic kwa ufanisi katika clusters za kawaida dhidi ya mashambulizi. Kwa matumizi ya kawaida, security analysts wanaweza kuweka pamoja log entries au data ya tabia za watumiaji ili kupata makundi ya shughuli zinazofanana; pointi zozote zisizo ndani ya cluster iliyoundwa vizuri zinaweza kuashiria anomalies (kwa mfano, variant mpya ya malware inayounda cluster yake ndogo). K-Means pia inaweza kusaidia katika malware family classification kwa kuweka pamoja binaries kulingana na wasifu wa tabia au feature vectors.
 
-#### Selection of K
-Idadi ya makundi (K) ni hyperparameter ambayo inahitaji kufafanuliwa kabla ya kuendesha algorithimu. Mbinu kama vile Njia ya Elbow au Alama ya Silhouette zinaweza kusaidia kubaini thamani inayofaa kwa K kwa kutathmini utendaji wa kuunganisha:
+#### Uchaguzi wa K
 
-- **Elbow Method**: Piga picha ya jumla ya umbali wa mraba kutoka kila nukta hadi centroid ya kundi lake kama kazi ya K. Tafuta nukta ya "elbow" ambapo kiwango cha kupungua kinabadilika kwa haraka, ikionyesha idadi inayofaa ya makundi.
-- **Silhouette Score**: Hesabu alama ya silhouette kwa thamani tofauti za K. Alama ya silhouette ya juu inaonyesha makundi yaliyoainishwa vizuri zaidi.
+Idadi ya clusters (K) ni hyperparameter inayohitaji kufafanuliwa kabla ya kuendesha algorithm. Mbinu kama Elbow Method au Silhouette Score zinaweza kusaidia kubaini thamani inayofaa ya K kwa kutathmini utendaji wa clustering:
 
-#### Assumptions and Limitations
+- **Elbow Method**: Chora jumla ya umbali ulioinuliwa kwa mraba kutoka kwa kila pointi hadi centroid ya cluster iliyopangiwa, kulingana na K. Tafuta pointi ya "elbow" ambapo kasi ya kupungua hubadilika kwa ghafla, ikionyesha idadi inayofaa ya clusters.
+- **Silhouette Score**: Kokotoa silhouette score kwa thamani tofauti za K. Silhouette score ya juu huonyesha clusters zilizobainishwa vizuri zaidi.
 
-K-Means inadhani kwamba **makundi ni ya mviringo na yana ukubwa sawa**, ambayo huenda isiwe kweli kwa seti zote za data. Inahisi mabadiliko ya awali ya centroids na inaweza kuishia kwenye minima za ndani. Zaidi ya hayo, K-Means si sahihi kwa seti za data zenye wiani tofauti au sura zisizo za globular na sifa zenye viwango tofauti. Hatua za preprocessing kama vile normalization au standardization zinaweza kuwa muhimu ili kuhakikisha kwamba sifa zote zinachangia sawa katika hesabu za umbali.
+#### Assumptions na Limitations
+
+K-Means hudhani kuwa **clusters zina umbo la duara na zina ukubwa unaolingana**, jambo ambalo huenda lisiwe kweli kwa datasets zote. Inategemea uwekaji wa awali wa centroids na inaweza kufikia local minima. Zaidi ya hayo, K-Means haifai kwa datasets zenye densities zinazotofautiana au maumbo yasiyo ya globular, pamoja na features zenye scales tofauti. Hatua za preprocessing kama normalization au standardization zinaweza kuhitajika ili kuhakikisha kuwa features zote zinachangia kwa usawa katika ukokotoaji wa umbali.
 
 <details>
-<summary>Example -- Clustering Network Events
+<summary>Mfano -- Clustering ya Matukio ya Mtandao
 </summary>
-Below we simulate network traffic data and use K-Means to cluster it. Suppose we have events with features like connection duration and byte count. We create 3 clusters of “normal” traffic and 1 small cluster representing an attack pattern. Then we run K-Means to see if it separates them.
+Hapa chini tunaiga data ya traffic ya mtandao na kutumia K-Means kuiweka katika clusters. Tuchukulie kuwa tuna matukio yenye features kama muda wa connection na idadi ya bytes. Tunaunda clusters 3 za traffic ya “kawaida” na cluster 1 ndogo inayowakilisha pattern ya shambulio. Kisha tunaendesha K-Means ili kuona kama inazitenganisha.
 ```python
 import numpy as np
 from sklearn.cluster import KMeans
@@ -57,31 +58,32 @@ print("Cluster centers (duration, bytes):")
 for idx, center in enumerate(kmeans.cluster_centers_):
 print(f"  Cluster {idx}: {center}")
 ```
-Katika mfano huu, K-Means inapaswa kupata makundi 4. Kundi dogo la shambulio (lenye muda wa kawaida wa juu ~200) litaunda kundi lake mwenyewe kutokana na umbali wake kutoka kwa makundi ya kawaida. Tunachapisha saizi za makundi na vitu vya katikati ili kutafsiri matokeo. Katika hali halisi, mtu anaweza kuweka lebo kundi lenye alama chache kama anomali zinazoweza kutokea au kuchunguza wanachama wake kwa shughuli mbaya.
+Katika mfano huu, K-Means inapaswa kupata clusters 4. Cluster ndogo ya attack (yenye duration ya juu isivyo kawaida ~200) itaunda cluster yake yenyewe, kutokana na umbali wake kutoka kwenye clusters za kawaida. Tunachapisha ukubwa na centers za clusters ili kutafsiri matokeo. Katika hali halisi, mtu anaweza kuweka label ya cluster yenye points chache kama anomalies zinazowezekana au kukagua washiriki wake kwa ajili ya shughuli hasidi.
+</details>
 
-### Kuweka Makundi kwa Njia ya Hali ya Juu
+### Hierarchical Clustering
 
-Kuweka makundi kwa njia ya hali ya juu hujenga hiyerarhii ya makundi kwa kutumia njia ya chini juu (agglomerative) au njia ya juu chini (divisive):
+Hierarchical clustering hujenga hierarchy ya clusters kwa kutumia approach ya bottom-up (agglomerative) au top-down (divisive):
 
-1. **Agglomerative (Chini Juu)**: Anza na kila kipengele cha data kama kundi tofauti na kuunganishwa kwa hatua kwa hatua makundi ya karibu hadi kundi moja linabaki au kigezo cha kusimamisha kinatimizwa.
-2. **Divisive (Juu Chini)**: Anza na vipengele vyote vya data katika kundi moja na kuigawanya makundi hatua kwa hatua hadi kila kipengele cha data kiwe kundi lake mwenyewe au kigezo cha kusimamisha kinatimizwa.
+1. **Agglomerative (Bottom-Up)**: Anza na kila data point ikiwa cluster tofauti, kisha unganisha clusters zilizo karibu zaidi hatua kwa hatua hadi cluster moja ibaki au stopping criterion ifikiwe.
+2. **Divisive (Top-Down)**: Anza na data points zote katika cluster moja, kisha gawa clusters hatua kwa hatua hadi kila data point iwe cluster yake au stopping criterion ifikiwe.
 
-Kuweka makundi kwa njia ya agglomerative kunahitaji ufafanuzi wa umbali kati ya makundi na kigezo cha kuunganisha ili kuamua ni makundi gani ya kuunganisha. Njia za kawaida za kuunganisha ni pamoja na kuunganisha moja (umbali wa alama za karibu kati ya makundi mawili), kuunganisha kamili (umbali wa alama za mbali), kuunganisha wastani, n.k., na kipimo cha umbali mara nyingi ni Euclidean. Chaguo la kuunganisha linaathiri umbo la makundi yanayozalishwa. Hakuna haja ya kuweka idadi ya makundi K mapema; unaweza "kukata" dendrogram katika kiwango kilichochaguliwa ili kupata idadi inayotakiwa ya makundi.
+Agglomerative clustering inahitaji definition ya inter-cluster distance na linkage criterion ya kuamua ni clusters zipi ziunganishwe. Linkage methods za kawaida zinajumuisha single linkage (distance ya points zilizo karibu zaidi kati ya clusters mbili), complete linkage (distance ya points zilizo mbali zaidi), average linkage, n.k., na distance metric mara nyingi huwa Euclidean. Chaguo la linkage huathiri shape ya clusters zinazozalishwa. Hakuna haja ya kubainisha mapema idadi ya clusters K; unaweza “kukata” dendrogram katika level iliyochaguliwa ili kupata idadi inayotakiwa ya clusters.
 
-Kuweka makundi kwa njia ya hali ya juu kunazalisha dendrogram, muundo kama mti unaoonyesha uhusiano kati ya makundi katika viwango tofauti vya undani. Dendrogram inaweza kukatwa katika kiwango kinachotakiwa ili kupata idadi maalum ya makundi.
+Hierarchical clustering huzalisha dendrogram, muundo unaofanana na mti unaoonyesha mahusiano kati ya clusters katika levels tofauti za granularity. Dendrogram inaweza kukatwa katika level inayotakiwa ili kupata idadi mahususi ya clusters.
 
 > [!TIP]
-> *Matumizi katika usalama wa mtandao:* Kuweka makundi kwa njia ya hali ya juu kunaweza kuandaa matukio au vitu katika mti ili kubaini uhusiano. Kwa mfano, katika uchambuzi wa malware, kuweka makundi kwa njia ya agglomerative kunaweza kuunganisha sampuli kwa kufanana kwa tabia, ikifunua hiyerarhii ya familia za malware na toleo. Katika usalama wa mtandao, mtu anaweza kuunganisha mtiririko wa trafiki ya IP na kutumia dendrogram kuona makundi ya trafiki (kwa mfano, kwa itifaki, kisha kwa tabia). Kwa sababu huwezi kuchagua K mapema, ni muhimu unapochunguza data mpya ambayo idadi ya makundi ya shambulio haijulikani.
+> *Use cases katika cybersecurity:* Hierarchical clustering inaweza kupanga events au entities katika mti ili kubaini mahusiano. Kwa mfano, katika malware analysis, agglomerative clustering inaweza kupanga samples kulingana na behavioral similarity, na kufichua hierarchy ya malware families na variants. Katika network security, mtu anaweza ku-cluster IP traffic flows na kutumia dendrogram kuona subgroupings za traffic (kwa mfano, kwa protocol, kisha kwa behavior). Kwa kuwa huhitaji kuchagua K mwanzoni, ni muhimu wakati wa kuchunguza data mpya ambayo idadi ya attack categories haijulikani.
 
-#### Dhana na Mipaka
+#### Assumptions na Limitations
 
-Kuweka makundi kwa njia ya hali ya juu hakudhani umbo fulani la kundi na inaweza kushika makundi yaliyo ndani. Ni muhimu kwa kugundua taxonomy au uhusiano kati ya vikundi (kwa mfano, kuunganisha malware kwa familia za makundi). Ni ya kutabirika (hakuna masuala ya kuanzisha kwa bahati nasibu). Faida kuu ni dendrogram, ambayo inatoa mwanga juu ya muundo wa kuunganisha wa data katika viwango vyote – wachambuzi wa usalama wanaweza kuamua kiwango sahihi cha kukata ili kubaini makundi yenye maana. Hata hivyo, ni ghali kwa hesabu (kawaida $O(n^2)$ muda au mbaya zaidi kwa utekelezaji wa kawaida) na si rahisi kwa seti kubwa za data. Pia ni utaratibu wa greedy – mara muungano au mgawanyiko unafanywa, hauwezi kubadilishwa, ambayo inaweza kusababisha makundi yasiyo bora ikiwa kosa litafanyika mapema. Vitu vya nje pia vinaweza kuathiri baadhi ya mikakati ya kuunganisha (kuunganisha moja kunaweza kusababisha athari ya "mnyororo" ambapo makundi yanaunganishwa kupitia vitu vya nje).
+Hierarchical clustering haidhanishii shape mahususi ya cluster na inaweza kutambua nested clusters. Ni muhimu kwa kugundua taxonomy au relations kati ya groups (kwa mfano, kupanga malware kulingana na family subgroups). Ni deterministic (haina matatizo ya random initialization). Faida kuu ni dendrogram, ambayo hutoa ufahamu wa clustering structure ya data katika scales zote – security analysts wanaweza kuamua cutoff inayofaa ili kutambua clusters zenye maana. Hata hivyo, inahitaji computational resources nyingi (kwa kawaida muda wa $O(n^2)$ au zaidi kwa naive implementations) na haifai kwa datasets kubwa sana. Pia ni greedy procedure – merge au split inapofanywa, haiwezi kutenduliwa, jambo ambalo linaweza kusababisha clusters zisizo bora ikiwa kosa litatokea mapema. Outliers pia zinaweza kuathiri baadhi ya linkage strategies (single-link inaweza kusababisha “chaining” effect ambapo clusters huunganishwa kupitia outliers).
 
 <details>
-<summary>Mfano -- Kuweka Makundi kwa Njia ya Agglomerative ya Matukio
+<summary>Example -- Agglomerative Clustering of Events
 </summary>
 
-Tutatumia tena data ya bandia kutoka kwa mfano wa K-Means (makundi 3 ya kawaida + kundi 1 la shambulio) na kutumia kuweka makundi kwa njia ya agglomerative. Kisha tunaonyesha jinsi ya kupata dendrogram na lebo za makundi.
+Tutatumia tena synthetic data kutoka kwenye mfano wa K-Means (clusters 3 za kawaida + cluster 1 ya attack) na kutumia agglomerative clustering. Kisha tutaonyesha jinsi ya kupata dendrogram na cluster labels.
 ```python
 from sklearn.cluster import AgglomerativeClustering
 from scipy.cluster.hierarchy import linkage, dendrogram
@@ -101,32 +103,32 @@ print(f"Cluster sizes for 3 clusters: {np.bincount(clusters_3)}")
 ```
 </details>
 
-### DBSCAN (Kikundi cha Kitaalamu cha Maombi kwa Msaada wa Kelele)
+### DBSCAN (Density-Based Spatial Clustering of Applications with Noise)
 
-DBSCAN ni algorithimu ya kukusanya inayotegemea wingi ambayo inakusanya pamoja pointi ambazo zimejipanga kwa karibu huku ikitambua pointi katika maeneo ya wingi mdogo kama nje ya kawaida. Inatumika hasa kwa seti za data zenye wingi tofauti na sura zisizo za mpira.
+DBSCAN ni algorithm ya clustering inayotegemea density, ambayo huunganisha pamoja pointi zilizo karibu kwa msongamano mkubwa huku ikiweka alama kwa pointi zilizo katika maeneo yenye msongamano mdogo kama outliers. Inafaa hasa kwa datasets zenye density zinazotofautiana na maumbo yasiyo ya duara.
 
-DBSCAN inafanya kazi kwa kufafanua vigezo viwili:
-- **Epsilon (ε)**: Umbali wa juu kati ya pointi mbili ili kuzingatiwa kama sehemu ya kundi moja.
-- **MinPts**: Idadi ya chini ya pointi zinazohitajika kuunda eneo lenye wingi (pointi kuu).
+DBSCAN hufanya kazi kwa kufafanua vigezo viwili:
+- **Epsilon (ε)**: Umbali wa juu zaidi kati ya pointi mbili ili zichukuliwe kuwa sehemu ya cluster moja.
+- **MinPts**: Idadi ya chini zaidi ya pointi zinazohitajika kuunda eneo lenye msongamano mkubwa (core point).
 
-DBSCAN inatambua pointi kuu, pointi za mpaka, na pointi za kelele:
-- **Pointi Kuu**: Pointi yenye angalau majirani wa MinPts ndani ya umbali wa ε.
-- **Pointi za Mpakani**: Pointi ambayo iko ndani ya umbali wa ε wa pointi kuu lakini ina majirani wachache kuliko MinPts.
-- **Pointi za Kelele**: Pointi ambayo si pointi kuu wala pointi za mpaka.
+DBSCAN hutambua core points, border points, na noise points:
+- **Core Point**: Pointi yenye angalau majirani wa MinPts ndani ya umbali wa ε.
+- **Border Point**: Pointi iliyo ndani ya umbali wa ε kutoka kwa core point lakini ina majirani wasiofikia MinPts.
+- **Noise Point**: Pointi ambayo si core point wala border point.
 
-Kukusanya kunendelea kwa kuchagua pointi kuu ambazo hazijatembelewa, kuziandikisha kama kundi jipya, kisha kuongeza pointi zote zinazoweza kufikiwa kwa wingi kutoka kwake (pointi kuu na majirani zao, nk). Pointi za mpaka zinaongezwa kwenye kundi la pointi kuu zilizo karibu. Baada ya kupanua pointi zote zinazoweza kufikiwa, DBSCAN inahamia kwenye pointi kuu nyingine ambazo hazijatembelewa ili kuanza kundi jipya. Pointi ambazo hazijafikiwa na pointi kuu yoyote zinabaki zikitambulika kama kelele.
+Clustering huanza kwa kuchagua core point ambayo haijatembelewa, kuiwekea alama kama cluster mpya, kisha kuongeza kwa kurudia pointi zote zinazoweza kufikiwa kwa density kutoka kwake (core points na majirani wao, n.k.). Border points huongezwa kwenye cluster ya core point iliyo karibu. Baada ya kupanua pointi zote zinazoweza kufikiwa, DBSCAN huhamia kwenye core point nyingine ambayo haijatembelewa ili kuanzisha cluster mpya. Pointi ambazo hazikufikiwa na core point yoyote hubaki na alama ya noise.
 
 > [!TIP]
-> *Matumizi katika usalama wa mtandao:* DBSCAN ni muhimu kwa kugundua anomali katika trafiki ya mtandao. Kwa mfano, shughuli za kawaida za mtumiaji zinaweza kuunda kundi moja au zaidi zenye wingi katika nafasi ya sifa, wakati tabia mpya za shambulio zinaonekana kama pointi zilizotawanyika ambazo DBSCAN itazitambulisha kama kelele (nje ya kawaida). Imetumika kukusanya rekodi za mtiririko wa mtandao, ambapo inaweza kugundua skana za bandari au trafiki ya kukatiza huduma kama maeneo ya pointi zisizo na wingi. Maombi mengine ni kuunganisha aina za malware: ikiwa sampuli nyingi zinakusanyika kwa familia lakini chache hazifai popote, hizo chache zinaweza kuwa malware ya siku sifuri. Uwezo wa kutambua kelele unamaanisha timu za usalama zinaweza kuzingatia kuchunguza hizo nje ya kawaida.
+> *Matumizi katika cybersecurity:* DBSCAN ni muhimu kwa anomaly detection katika network traffic. Kwa mfano, shughuli za kawaida za mtumiaji zinaweza kuunda cluster moja au zaidi zenye density kubwa katika feature space, huku tabia mpya za mashambulizi zikionekana kama pointi zilizotawanyika ambazo DBSCAN itaziwekea alama ya noise (outliers). Imetumika ku-cluster network flow records, ambapo inaweza kutambua port scans au traffic ya denial-of-service kama maeneo yenye pointi chache. Matumizi mengine ni kuainisha variants za malware: ikiwa samples nyingi zina-cluster kulingana na familia, lakini chache haziendani na kundi lolote, hizo chache zinaweza kuwa zero-day malware. Uwezo wa kuonyesha noise unamaanisha kuwa security teams zinaweza kulenga uchunguzi kwenye outliers hizo.
 
-#### Dhana na Mipaka
+#### Assumptions and Limitations
 
-**Dhana & Nguvu:** DBSCAN haidhani makundi ya mpira – inaweza kupata makundi yenye sura yoyote (hata makundi ya mnyororo au jirani). Inajitenga kiotomatiki idadi ya makundi kulingana na wingi wa data na inaweza kutambua kwa ufanisi nje ya kawaida kama kelele. Hii inafanya kuwa na nguvu kwa data halisi zenye sura zisizo za kawaida na kelele. Ni thabiti kwa nje ya kawaida (kinyume na K-Means, ambayo inawalazimisha kwenye makundi). Inafanya kazi vizuri wakati makundi yana wingi wa karibu sawa.
+**Assumptions & Strengths:**: DBSCAN haidhani kuwa clusters lazima ziwe za duara – inaweza kupata clusters zenye maumbo yoyote (hata zenye umbo la mnyororo au clusters zilizo karibu). Huamua kiotomatiki idadi ya clusters kulingana na density ya data na inaweza kutambua kwa ufanisi outliers kama noise. Hii huifanya iwe yenye nguvu kwa data halisi yenye maumbo yasiyo ya kawaida na noise. Ni thabiti dhidi ya outliers (tofauti na K-Means, ambayo huwalazimisha kuingia kwenye clusters). Hufanya kazi vizuri wakati clusters zina density inayokaribiana.
 
-**Mipaka**: Utendaji wa DBSCAN unategemea kuchagua thamani sahihi za ε na MinPts. Inaweza kuwa na shida na data yenye wingi tofauti – ε moja haiwezi kukidhi makundi yenye wingi na yasiyo na wingi. Ikiwa ε ni ndogo sana, inatambua pointi nyingi kama kelele; ikiwa ni kubwa sana, makundi yanaweza kuungana vibaya. Pia, DBSCAN inaweza kuwa na ufanisi mdogo kwenye seti kubwa za data (kwa urahisi $O(n^2)$, ingawa uainishaji wa nafasi unaweza kusaidia). Katika nafasi za sifa zenye vipimo vingi, dhana ya "umbali ndani ya ε" inaweza kuwa na maana kidogo (laana ya vipimo), na DBSCAN inaweza kuhitaji urekebishaji wa vigezo kwa makini au inaweza kushindwa kupata makundi ya kueleweka. Licha ya haya, nyongeza kama HDBSCAN zinashughulikia baadhi ya masuala (kama vile wingi tofauti).
+**Limitations**: Utendaji wa DBSCAN hutegemea kuchagua thamani zinazofaa za ε na MinPts. Inaweza kupata changamoto kwenye data yenye densities zinazotofautiana – ε moja haiwezi kushughulikia clusters zenye density kubwa na ndogo kwa wakati mmoja. Ikiwa ε ni ndogo sana, huweka alama ya noise kwa pointi nyingi; ikiwa ni kubwa sana, clusters zinaweza kuungana kimakosa. Pia, DBSCAN inaweza kuwa isiyofaa kwenye datasets kubwa sana (kwa njia rahisi $O(n^2)$, ingawa spatial indexing inaweza kusaidia). Katika feature spaces zenye dimensions nyingi, dhana ya “distance within ε” inaweza kupoteza maana yake (curse of dimensionality), na DBSCAN inaweza kuhitaji tuning makini ya parameters au kushindwa kupata clusters zenye maana inayotarajiwa. Pamoja na hayo, extensions kama HDBSCAN hushughulikia baadhi ya matatizo (kama density inayotofautiana).
 
 <details>
-<summary>Mfano -- Kukusanya na Kelele
+<summary>Example -- Clustering with Noise
 </summary>
 ```python
 from sklearn.cluster import DBSCAN
@@ -149,59 +151,61 @@ num_noise = np.sum(labels == -1)
 print(f"DBSCAN found {num_clusters} clusters and {num_noise} noise points")
 print("Cluster labels for first 10 points:", labels[:10])
 ```
-Katika kipande hiki, tulirekebisha `eps` na `min_samples` ili kuendana na kiwango chetu cha data (15.0 katika vitengo vya kipengele, na inahitaji pointi 5 kuunda kundi). DBSCAN inapaswa kupata makundi 2 (makundi ya trafiki ya kawaida) na kuashiria nje ya kawaida 5 zilizoongezwa kama kelele. Tunatoa idadi ya makundi dhidi ya pointi za kelele ili kuthibitisha hili. Katika mazingira halisi, mtu anaweza kurudia ε (akitumika mbinu ya grafu ya k-distance kuchagua ε) na MinPts (ambayo mara nyingi huwekwa karibu na ukubwa wa data + 1 kama sheria ya vidole) ili kupata matokeo ya makundi thabiti. Uwezo wa kutambua wazi kelele husaidia kutenganisha data za mashambulizi zinazoweza kutokea kwa uchambuzi zaidi.
+Katika kipande hiki, tulirekebisha `eps` na `min_samples` ili zilingane na scale ya data yetu (15.0 katika units za features, na kuhitaji pointi 5 kuunda cluster). DBSCAN inapaswa kupata clusters 2 (clusters za traffic ya kawaida) na kutambua outliers 5 zilizoingizwa kama noise. Tunatoa idadi ya clusters dhidi ya pointi za noise ili kuthibitisha hili. Katika mazingira halisi, mtu anaweza kurudia mchakato kwa kutumia ε (kwa kutumia heuristic ya k-distance graph kuchagua ε) na MinPts (mara nyingi huwekwa karibu na dimensionality ya data + 1 kama kanuni ya jumla) ili kupata matokeo thabiti ya clustering. Uwezo wa kuweka noise lebo wazi husaidia kutenganisha data inayoweza kuwa ya attack kwa ajili ya uchambuzi zaidi.
 
-### Uchambuzi wa Vipengele Msingi (PCA)
+</details>
 
-PCA ni mbinu ya **kupunguza ukubwa** inayopata seti mpya ya axes za orthogonal (vipengele vya msingi) ambavyo vinakamata tofauti kubwa zaidi katika data. Kwa maneno rahisi, PCA inageuza na kupeleka data kwenye mfumo mpya wa kuratibu ili vipengele vya msingi vya kwanza (PC1) kuelezea tofauti kubwa zaidi inayowezekana, PC ya pili (PC2) kuelezea tofauti kubwa zaidi isiyo ya orthogonal kwa PC1, na kadhalika. Kihesabu, PCA inakadiria eigenvectors ya matrix ya covariance ya data – hizi eigenvectors ni mwelekeo wa vipengele vya msingi, na eigenvalues zinazohusiana zinaonyesha kiasi cha tofauti kinachofafanuliwa na kila moja. Mara nyingi hutumiwa kwa uchimbaji wa vipengele, uonyeshaji, na kupunguza kelele.
+### Principal Component Analysis (PCA)
 
-Kumbuka kwamba hii ni muhimu ikiwa vipimo vya dataset vina **mategemeo au uhusiano wa moja kwa moja**.
+PCA ni technique ya **dimensionality reduction** inayotafuta seti mpya ya axes zilizo orthogonal (principal components) zinazohifadhi variance ya juu zaidi katika data. Kwa maneno rahisi, PCA huzungusha na kuproject data kwenye coordinate system mpya kiasi kwamba principal component ya kwanza (PC1) hueleza variance kubwa iwezekanavyo, PC ya pili (PC2) hueleza variance kubwa zaidi iliyo orthogonal kwa PC1, na kuendelea hivyo. Kihisabati, PCA huhesabu eigenvectors za covariance matrix ya data – eigenvectors hizi ni directions za principal components, na eigenvalues zinazolingana zinaonyesha kiasi cha variance kilichoelezwa na kila moja. Mara nyingi hutumika kwa feature extraction, visualization, na noise reduction.
 
-PCA inafanya kazi kwa kutambua vipengele vya msingi vya data, ambavyo ni mwelekeo wa tofauti kubwa zaidi. Hatua zinazohusika katika PCA ni:
-1. **Kiwango**: Kituo cha data kwa kupunguza wastani na kuipima kwa tofauti ya kitengo.
-2. **Matrix ya Covariance**: Kadiria matrix ya covariance ya data iliyopimwa ili kuelewa uhusiano kati ya vipengele.
-3. **Ufafanuzi wa Eigenvalue**: Fanya ufafanuzi wa eigenvalue kwenye matrix ya covariance ili kupata eigenvalues na eigenvectors.
-4. **Chagua Vipengele vya Msingi**: Panga eigenvalues kwa mpangilio wa kushuka na uchague eigenvectors bora K zinazohusiana na eigenvalues kubwa zaidi. Hizi eigenvectors zinaunda nafasi mpya ya vipengele.
-5. **Badilisha Data**: Peleka data ya asili kwenye nafasi mpya ya vipengele kwa kutumia vipengele vya msingi vilivyochaguliwa.
-PCA inatumika sana kwa uonyeshaji wa data, kupunguza kelele, na kama hatua ya awali kwa algorithimu nyingine za kujifunza mashine. Inasaidia kupunguza ukubwa wa data huku ikihifadhi muundo wake muhimu.
+Kumbuka kuwa hii ni muhimu ikiwa dimensions za dataset zina **linear dependencies au correlations** kubwa.
 
-#### Eigenvalues na Eigenvectors
+PCA hufanya kazi kwa kutambua principal components za data, ambazo ni directions za variance ya juu zaidi. Hatua zinazohusika katika PCA ni:
+1. **Standardization**: Weka data katikati kwa kutoa mean na kuiscale ifikie unit variance.
+2. **Covariance Matrix**: Hesabu covariance matrix ya data iliyostandardize ili kuelewa mahusiano kati ya features.
+3. **Eigenvalue Decomposition**: Fanya eigenvalue decomposition kwenye covariance matrix ili kupata eigenvalues na eigenvectors.
+4. **Select Principal Components**: Panga eigenvalues kwa mpangilio wa kushuka na uchague eigenvectors K za juu zinazolingana na eigenvalues kubwa zaidi. Eigenvectors hizi huunda feature space mpya.
+5. **Transform Data**: Project data ya awali kwenye feature space mpya kwa kutumia principal components zilizochaguliwa.
+PCA hutumika sana kwa data visualization, noise reduction, na kama hatua ya preprocessing kwa machine learning algorithms nyingine. Husaidia kupunguza dimensionality ya data huku ikihifadhi muundo wake muhimu.
 
-Eigenvalue ni scalar inayonyesha kiasi cha tofauti kinachokamatwa na eigenvector yake inayohusiana. Eigenvector inawakilisha mwelekeo katika nafasi ya vipengele ambapo data inabadilika zaidi.
+#### Eigenvalues and Eigenvectors
 
-Fikiria A ni matrix ya mraba, na v ni vector isiyo na sifuri kama ifuatavyo: `A * v = λ * v`
+Eigenvalue ni scalar inayoonyesha kiasi cha variance kilichonaswa na eigenvector inayolingana nayo. Eigenvector inawakilisha direction katika feature space ambayo data hubadilika zaidi.
+
+Fikiria A ni square matrix, na v ni vector isiyo sifuri kiasi kwamba: `A * v = λ * v`
 ambapo:
-- A ni matrix ya mraba kama [ [1, 2], [2, 1]] (mfano, matrix ya covariance)
-- v ni eigenvector (mfano, [1, 1])
+- A ni square matrix kama [ [1, 2], [2, 1]] (kwa mfano, covariance matrix)
+- v ni eigenvector (kwa mfano, [1, 1])
 
-Basi, `A * v = [ [1, 2], [2, 1]] * [1, 1] = [3, 3]` ambayo itakuwa eigenvalue λ iliyozidishwa na eigenvector v, ikifanya eigenvalue λ = 3.
+Kisha, `A * v = [ [1, 2], [2, 1]] * [1, 1] = [3, 3]`, ambayo itakuwa eigenvalue λ iliyozidishwa kwa eigenvector v, hivyo eigenvalue λ = 3.
 
-#### Eigenvalues na Eigenvectors katika PCA
+#### Eigenvalues and Eigenvectors in PCA
 
-Hebu tueleze hii kwa mfano. Fikiria una dataset yenye picha nyingi za rangi ya kijivu za nyuso za 100x100 pixels. Kila pixel inaweza kuonekana kama kipengele, hivyo una vipengele 10,000 kwa picha (au vector ya 10000 components kwa picha). Ikiwa unataka kupunguza ukubwa wa dataset hii kwa kutumia PCA, ungetakiwa kufuata hatua hizi:
+Hebu tueleze hili kwa mfano. Fikiria una dataset yenye picha nyingi za nyuso zenye grey scale na pixels 100x100. Kila pixel inaweza kuchukuliwa kuwa feature, hivyo una features 10,000 kwa kila image (au vector yenye components 10000 kwa kila image). Ikiwa unataka kupunguza dimensionality ya dataset hii kwa kutumia PCA, ungefuata hatua hizi:
 
-1. **Kiwango**: Kituo cha data kwa kupunguza wastani wa kila kipengele (pixel) kutoka kwenye dataset.
-2. **Matrix ya Covariance**: Kadiria matrix ya covariance ya data iliyopimwa, ambayo inakamata jinsi vipengele (pixels) vinavyobadilika pamoja.
-- Kumbuka kwamba covariance kati ya variables mbili (pixels katika kesi hii) inaonyesha jinsi zinavyobadilika pamoja hivyo wazo hapa ni kugundua ni pixels zipi zinaweza kuongezeka au kupungua pamoja kwa uhusiano wa moja kwa moja.
-- Kwa mfano, ikiwa pixel 1 na pixel 2 zinaweza kuongezeka pamoja, covariance kati yao itakuwa chanya.
-- Matrix ya covariance itakuwa matrix ya 10,000x10,000 ambapo kila ingizo linawakilisha covariance kati ya pixels mbili.
-3. **Suluisha Msingi wa Eigenvalue**: Msingi wa eigenvalue wa kutatua ni `C * v = λ * v` ambapo C ni matrix ya covariance, v ni eigenvector, na λ ni eigenvalue. Inaweza kutatuliwa kwa kutumia mbinu kama:
-- **Ufafanuzi wa Eigenvalue**: Fanya ufafanuzi wa eigenvalue kwenye matrix ya covariance ili kupata eigenvalues na eigenvectors.
-- **Ufafanuzi wa Thamani ya Kipekee (SVD)**: Vinginevyo, unaweza kutumia SVD kutenganisha matrix ya data katika thamani za kipekee na vectors, ambazo pia zinaweza kutoa vipengele vya msingi.
-4. **Chagua Vipengele vya Msingi**: Panga eigenvalues kwa mpangilio wa kushuka na uchague eigenvectors bora K zinazohusiana na eigenvalues kubwa zaidi. Hizi eigenvectors zinawakilisha mwelekeo wa tofauti kubwa zaidi katika data.
+1. **Standardization**: Weka data katikati kwa kutoa mean ya kila feature (pixel) kutoka kwenye dataset.
+2. **Covariance Matrix**: Hesabu covariance matrix ya data iliyostandardize, ambayo hunasa jinsi features (pixels) zinavyobadilika pamoja.
+- Kumbuka kuwa covariance kati ya variables mbili (pixels katika hali hii) huonyesha kwa kiasi gani hubadilika pamoja; kwa hiyo, lengo hapa ni kujua ni pixels zipi huwa zinaongezeka au kupungua pamoja katika linear relationship.
+- Kwa mfano, ikiwa pixel 1 na pixel 2 huwa zinaongezeka pamoja, covariance kati yao itakuwa positive.
+- Covariance matrix itakuwa matrix ya 10,000x10,000 ambapo kila entry inawakilisha covariance kati ya pixels mbili.
+3. **Solve the The eigenvalue equation**: Eigenvalue equation ya kutatua ni `C * v = λ * v`, ambapo C ni covariance matrix, v ni eigenvector, na λ ni eigenvalue. Inaweza kutatuliwa kwa kutumia methods kama:
+- **Eigenvalue Decomposition**: Fanya eigenvalue decomposition kwenye covariance matrix ili kupata eigenvalues na eigenvectors.
+- **Singular Value Decomposition (SVD)**: Vinginevyo, unaweza kutumia SVD ku-decompose data matrix kuwa singular values na vectors, ambazo pia zinaweza kutoa principal components.
+4. **Select Principal Components**: Panga eigenvalues kwa mpangilio wa kushuka na uchague eigenvectors K za juu zinazolingana na eigenvalues kubwa zaidi. Eigenvectors hizi zinawakilisha directions za variance ya juu zaidi katika data.
 
 > [!TIP]
-> *Matumizi katika usalama wa mtandao:* Matumizi ya kawaida ya PCA katika usalama ni kupunguza vipengele kwa ajili ya kugundua anomali. Kwa mfano, mfumo wa kugundua uvamizi wenye metriki 40+ za mtandao (kama vile vipengele vya NSL-KDD) unaweza kutumia PCA kupunguza hadi vipengele vichache, kujumlisha data kwa ajili ya uonyeshaji au kupeleka kwenye algorithimu za makundi. Wachambuzi wanaweza kuchora trafiki ya mtandao katika nafasi ya vipengele vya msingi viwili vya kwanza ili kuona ikiwa mashambulizi yanatenganishwa na trafiki ya kawaida. PCA inaweza pia kusaidia kuondoa vipengele vya ziada (kama vile bytes zilizotumwa dhidi ya bytes zilizopokelewa ikiwa zina uhusiano) ili kufanya algorithimu za kugundua kuwa thabiti zaidi na haraka.
+> *Use cases in cybersecurity:* Matumizi ya kawaida ya PCA katika security ni feature reduction kwa anomaly detection. Kwa mfano, intrusion detection system yenye network metrics zaidi ya 40 (kama NSL-KDD features) inaweza kutumia PCA kupunguza hadi components chache, ikifupisha data kwa ajili ya visualization au kuingiza kwenye clustering algorithms. Analysts wanaweza kuchora network traffic katika space ya principal components mbili za kwanza ili kuona ikiwa attacks zinajitenga na traffic ya kawaida. PCA pia inaweza kusaidia kuondoa redundant features (kama bytes sent dhidi ya bytes received ikiwa zina correlated) ili kufanya detection algorithms ziwe robust zaidi na za haraka.
 
-#### Matarajio na Mipaka
+#### Assumptions and Limitations
 
-PCA inatarajia kwamba **mwelekeo wa msingi wa tofauti ni wa maana** – ni mbinu ya moja kwa moja, hivyo inakamata uhusiano wa moja kwa moja katika data. Ni isiyo na uangalizi kwani inatumia tu covariance ya vipengele. Faida za PCA ni pamoja na kupunguza kelele (vipengele vya tofauti ndogo mara nyingi vinahusiana na kelele) na kuondoa uhusiano kati ya vipengele. Ni yenye ufanisi wa hesabu kwa vipimo vya kati na mara nyingi ni hatua ya awali inayofaa kwa algorithimu nyingine (ili kupunguza laana ya ukubwa). Mipaka moja ni kwamba PCA inategemea uhusiano wa moja kwa moja – haitakamata muundo mgumu wa kisasa (ambapo autoencoders au t-SNE inaweza). Pia, vipengele vya PCA vinaweza kuwa vigumu kufasiri kwa kuzingatia vipengele vya asili (ni mchanganyiko wa vipengele vya asili). Katika usalama wa mtandao, mtu anapaswa kuwa makini: shambulizi linalosababisha mabadiliko madogo tu katika kipengele chenye tofauti ndogo linaweza kutokuwepo katika PCs za juu (kwa kuwa PCA inapa kipaumbele tofauti, si lazima "kuvutia").
+PCA hudhani kuwa **principal axes za variance zina maana** – ni linear method, kwa hiyo hunasa linear correlations katika data. Ni unsupervised kwa sababu hutumia covariance ya features pekee. Faida za PCA ni pamoja na noise reduction (components zenye variance ndogo mara nyingi huhusishwa na noise) na decorrelation ya features. Ni computationally efficient kwa dimensions zilizo juu kwa kiwango cha wastani na mara nyingi huwa preprocessing step yenye manufaa kwa algorithms nyingine (kupunguza curse of dimensionality). Limitation moja ni kwamba PCA inaishia kwenye linear relationships – haitanasa complex nonlinear structure (ambapo autoencoders au t-SNE zinaweza kusaidia). Pia, PCA components zinaweza kuwa ngumu kutafsiri kuhusiana na original features (ni combinations za original features). Katika cybersecurity, mtu lazima awe mwangalifu: attack inayosababisha mabadiliko madogo tu katika feature yenye variance ndogo huenda isionekane katika top PCs (kwa sababu PCA hutanguliza variance, si lazima “interestingness”).
 
 <details>
-<summary>Mfano -- Kupunguza Vipimo vya Data ya Mtandao
+<summary>Example -- Kupunguza Dimensions za Network Data
 </summary>
 
-Kufikiria tuna kumbukumbu za muunganisho wa mtandao zenye vipengele vingi (mfano, muda, bytes, hesabu). Tutaunda dataset ya bandia ya vipimo 4 (ikiwa na uhusiano kati ya vipengele) na kutumia PCA kupunguza hadi vipimo 2 kwa ajili ya uonyeshaji au uchambuzi zaidi.
+Tuchukulie tuna network connection logs zenye features nyingi (kwa mfano, durations, bytes, counts). Tutazalisha synthetic 4-dimensional dataset (yenye correlation fulani kati ya features) na kutumia PCA kuipunguza hadi dimensions 2 kwa ajili ya visualization au uchambuzi zaidi.
 ```python
 from sklearn.decomposition import PCA
 
@@ -221,41 +225,49 @@ print("Original shape:", data_4d.shape, "Reduced shape:", data_2d.shape)
 # We can examine a few transformed points
 print("First 5 data points in PCA space:\n", data_2d[:5])
 ```
-Hapa tulichukua makundi ya awali ya trafiki ya kawaida na kupanua kila kipengele cha data kwa vipengele viwili vya ziada (pakiti na makosa) vinavyohusiana na bytes na muda. PCA inatumika kubana vipengele 4 kuwa vipengele 2 vya msingi. Tunachapisha uwiano wa tofauti iliyoelezewa, ambayo inaweza kuonyesha kwamba, sema, >95% ya tofauti inakamatwa na vipengele 2 (kumanisha kupoteza kwa habari kidogo). Matokeo pia yanaonyesha umbo la data likipungua kutoka (1500, 4) hadi (1500, 2). Pointi chache za kwanza katika nafasi ya PCA zinatolewa kama mfano. Katika mazoezi, mtu anaweza kuchora data_2d ili kuangalia kwa kuona kama makundi yanaweza kutofautishwa. Ikiwa kasoro ilikuwa ipo, mtu anaweza kuiona kama pointi iliyoko mbali na kundi kuu katika nafasi ya PCA. Hivyo, PCA inasaidia kuondoa data ngumu kuwa mfumo unaoweza kudhibitiwa kwa tafsiri ya kibinadamu au kama ingizo kwa algorithimu nyingine.
+Hapa tulichukua clusters za traffic ya kawaida za awali na tukaongeza kila data point kwa features mbili za ziada (packets na errors) ambazo zina uhusiano na bytes na duration. PCA kisha hutumika kubana features 4 kuwa principal components 2. Tunachapisha explained variance ratio, ambayo inaweza kuonyesha kwamba, kwa mfano, >95% ya variance inawakilishwa na components 2 (ikimaanisha upotevu mdogo wa information). Output pia inaonyesha umbo la data likipungua kutoka (1500, 4) hadi (1500, 2). Points chache za kwanza katika PCA space zimetolewa kama mfano. Kwa matumizi halisi, mtu anaweza kuchora data_2d ili kuangalia kwa macho kama clusters zinaweza kutofautishwa. Ikiwa anomaly ingekuwepo, huenda ingeonekana kama point iliyo mbali na cluster kuu katika PCA-space. Kwa hivyo PCA husaidia kusafisha data changamano kuwa muundo unaoweza kudhibitiwa kwa ajili ya tafsiri ya binadamu au kutumiwa kama input kwa algorithms nyingine.
+
+</details>
+
 
 ### Gaussian Mixture Models (GMM)
 
-Mfano wa Mchanganyiko wa Gaussian unadhani data inazalishwa kutoka mchanganyiko wa **usambazaji kadhaa wa Gaussian (kawaida) wenye vigezo visivyojulikana**. Kwa msingi, ni mfano wa makundi ya uwezekano: inajaribu kwa upole kupeana kila pointi kwa moja ya vipengele K vya Gaussian. Kila kipengele cha Gaussian k kina vector ya wastani (μ_k), matrix ya covariance (Σ_k), na uzito wa mchanganyiko (π_k) unaowrepresenta jinsi kundi hilo lilivyo maarufu. Tofauti na K-Means ambayo inafanya "ugawaji" mgumu, GMM inampa kila pointi uwezekano wa kuwa katika kila kundi.
+Gaussian Mixture Model hudhani kwamba data inatengenezwa kutokana na mchanganyiko wa **Gaussian (normal) distributions kadhaa zenye parameters zisizojulikana**. Kwa msingi, huu ni probabilistic clustering model: hujaribu kumpa kila point kwa njia ya soft assignment mojawapo ya K Gaussian components. Kila Gaussian component k ina mean vector (μ_k), covariance matrix (Σ_k), na mixing weight (π_k) inayowakilisha kiwango ambacho cluster hiyo inapatikana. Tofauti na K-Means inayofanya “hard” assignments, GMM huipa kila point probability ya kuwa katika kila cluster.
 
-Ulinganifu wa GMM kawaida hufanywa kupitia algorithm ya Expectation-Maximization (EM):
+GMM fitting kwa kawaida hufanywa kupitia Expectation-Maximization (EM) algorithm:
 
-- **Kuanza**: Anza na makadirio ya awali ya wastani, covariances, na coefficients za mchanganyiko (au tumia matokeo ya K-Means kama hatua ya mwanzo).
+- **Initialization**: Anza na makadirio ya awali ya means, covariances, na mixing coefficients (au tumia matokeo ya K-Means kama sehemu ya kuanzia).
 
-- **E-step (Matarajio)**: Iwapo vigezo vya sasa, hesabu jukumu la kila kundi kwa kila pointi: kimsingi `r_nk = P(z_k | x_n)` ambapo z_k ni variable ya siri inayoashiria uanachama wa kundi kwa pointi x_n. Hii inafanywa kwa kutumia nadharia ya Bayes, ambapo tunahesabu uwezekano wa nyuma wa kila pointi kuwa katika kila kundi kulingana na vigezo vya sasa. Majukumu yanahesabiwa kama:
+- **E-step (Expectation)**: Kwa kutumia parameters za sasa, hesabu responsibility ya kila cluster kwa kila point: kimsingi `r_nk = P(z_k | x_n)` ambapo z_k ni latent variable inayoonyesha uanachama wa cluster kwa point x_n. Hii hufanywa kwa kutumia Bayes' theorem, ambapo tunahesabu posterior probability ya kila point kuwa katika kila cluster kulingana na parameters za sasa. Responsibilities huhesabiwa kama:
 ```math
 r_{nk} = \frac{\pi_k \mathcal{N}(x_n | \mu_k, \Sigma_k)}{\sum_{j=1}^{K} \pi_j \mathcal{N}(x_n | \mu_j, \Sigma_j)}
 ```
 ambapo:
-- \( \pi_k \) ni coefficient ya mchanganyiko kwa kundi k (uwezekano wa awali wa kundi k),
-- \( \mathcal{N}(x_n | \mu_k, \Sigma_k) \) ni kazi ya uwezekano wa wiani wa Gaussian kwa pointi \( x_n \) ikizingatia wastani \( \mu_k \) na covariance \( \Sigma_k \).
+- \( \pi_k \) ni mixing coefficient ya cluster k (prior probability ya cluster k),
+- \( \mathcal{N}(x_n | \mu_k, \Sigma_k) \) ni Gaussian probability density function ya point \( x_n \) ikipewa mean \( \mu_k \) na covariance \( \Sigma_k \).
 
-- **M-step (Uboreshaji)**: Sasisha vigezo kwa kutumia majukumu yaliyohesabiwa katika hatua ya E:
-- Sasisha kila wastani μ_k kama wastani wa uzito wa pointi, ambapo uzito ni majukumu.
-- Sasisha kila covariance Σ_k kama covariance ya uzito wa pointi zilizotengwa kwa kundi k.
-- Sasisha coefficients za mchanganyiko π_k kama wastani wa jukumu kwa kundi k.
+- **M-step (Maximization)**: Sasisha parameters kwa kutumia responsibilities zilizohesabiwa katika E-step:
+- Sasisha kila mean μ_k kuwa weighted average ya points, ambapo weights ni responsibilities.
+- Sasisha kila covariance Σ_k kuwa weighted covariance ya points zilizopangiwa cluster k.
+- Sasisha mixing coefficients π_k kuwa average responsibility ya cluster k.
 
-- **Rudia** hatua za E na M hadi kufikia muafaka (vigezo vinapokuwa thabiti au kuboresha uwezekano kunapokuwa chini ya kigezo).
+- **Iterate** E na M steps hadi convergence (parameters zitulie au improvement ya likelihood iwe chini ya threshold).
 
-Matokeo ni seti ya usambazaji wa Gaussian ambayo kwa pamoja inasimamia usambazaji wa data kwa ujumla. Tunaweza kutumia GMM iliyofanywa kuunda makundi kwa kupeana kila pointi kwa Gaussian yenye uwezekano mkubwa, au kuweka uwezekano kwa ajili ya kutokuwa na uhakika. Mtu pia anaweza kutathmini uwezekano wa pointi mpya ili kuona kama zinafaa katika mfano (inayofaa kwa kugundua kasoro).
+Matokeo huwa ni seti ya Gaussian distributions ambazo kwa pamoja hu-model overall data distribution. Tunaweza kutumia GMM iliyofit kufanya clustering kwa kumpangia kila point Gaussian yenye probability ya juu zaidi, au kuhifadhi probabilities kwa ajili ya uncertainty. Pia tunaweza kutathmini likelihood ya points mpya ili kuona kama zinaendana na model (jambo linalofaa kwa anomaly detection).
 
 > [!TIP]
-> *Matumizi katika usalama wa mtandao:* GMM inaweza kutumika kwa kugundua kasoro kwa kuunda mfano wa usambazaji wa data ya kawaida: pointi yoyote yenye uwezekano mdogo sana chini ya mchanganyiko uliojifunza inatambuliwa kama kasoro. Kwa mfano, unaweza kufundisha GMM juu ya vipengele vya trafiki halali ya mtandao; muunganisho wa shambulio ambao haufanani na kundi lolote lililojifunzwa utakuwa na uwezekano mdogo. GMM pia hutumiwa kuunda makundi ya shughuli ambapo makundi yanaweza kuwa na sura tofauti – e.g., kuunganisha watumiaji kwa wasifu wa tabia, ambapo vipengele vya kila wasifu vinaweza kuwa kama Gaussian lakini na muundo wake wa tofauti. Hali nyingine: katika kugundua ulaghai, vipengele halali vya barua pepe vinaweza kuunda kundi moja la Gaussian, ulaghai unaojulikana mwingine, na kampeni mpya za ulaghai zinaweza kuonekana kama Gaussian tofauti au kama pointi zenye uwezekano mdogo kulingana na mchanganyiko uliopo.
+> *Use cases katika cybersecurity:* GMM inaweza kutumika kwa anomaly detection kwa ku-model distribution ya data ya kawaida: point yoyote yenye probability ndogo sana chini ya learned mixture huwekwa alama kama anomaly. Kwa mfano, unaweza ku-train GMM kwa features za legitimate network traffic; attack connection isiyofanana na cluster yoyote iliyojifunzwa itakuwa na likelihood ndogo. GMMs pia hutumika ku-cluster activities ambazo clusters zake zinaweza kuwa na shapes tofauti – kwa mfano, kupanga users kulingana na behavior profiles, ambapo features za kila profile zinaweza kuwa Gaussian-like lakini zikiwa na variance structure yake. Mfano mwingine: katika phishing detection, features za legitimate email zinaweza kuunda Gaussian cluster moja, phishing inayojulikana cluster nyingine, na phishing campaigns mpya zinaweza kuonekana kama Gaussian tofauti au points zenye likelihood ndogo ikilinganishwa na mixture iliyopo.
 
-#### Dhana na Mipaka
+#### Assumptions and Limitations
 
-GMM ni jumla ya K-Means ambayo inajumuisha covariance, hivyo makundi yanaweza kuwa ya ellipsoidal (siyo tu ya mpira). Inashughulikia makundi ya ukubwa na sura tofauti ikiwa covariance ni kamili. Uundaji wa laini ni faida wakati mipaka ya kundi ni ya kutatanisha – e.g., katika usalama wa mtandao, tukio linaweza kuwa na sifa za aina kadhaa za shambulio; GMM inaweza kuonyesha kutokuwa na uhakika hiyo kwa uwezekano. GMM pia inatoa makadirio ya wiani wa uwezekano wa data, inayofaa kwa kugundua viashiria (pointi zenye uwezekano mdogo chini ya vipengele vyote vya mchanganyiko).
+GMM ni generalization ya K-Means inayojumuisha covariance, hivyo clusters zinaweza kuwa za umbo la ellipsoid (si za spherical pekee). Inaweza kushughulikia clusters zenye sizes na shapes tofauti ikiwa covariance ni full. Soft clustering ni faida wakati mipaka ya clusters haiko wazi – kwa mfano, katika cybersecurity, event inaweza kuwa na traits za attack types nyingi; GMM inaweza kuonyesha uncertainty hiyo kwa kutumia probabilities. GMM pia hutoa probabilistic density estimation ya data, ambayo ni muhimu kwa kugundua outliers (points zenye likelihood ndogo chini ya mixture components zote).
 
-Kwa upande mbaya, GMM inahitaji kubainisha idadi ya vipengele K (ingawa mtu anaweza kutumia vigezo kama BIC/AIC kuichagua). EM inaweza wakati mwingine kufikia muafaka polepole au kwa kiwango cha ndani, hivyo kuanzisha ni muhimu (mara nyingi inatekeleza EM mara kadhaa). Ikiwa data haifuati mchanganyiko wa Gaussians, mfano unaweza kuwa na ufanisi duni. Pia kuna hatari ya Gaussian mmoja kupungua ili kufunika tu kiashiria (ingawa udhibiti au mipaka ya chini ya covariance inaweza kupunguza hiyo).
+Kwa upande mwingine, GMM inahitaji kutaja idadi ya components K (ingawa mtu anaweza kutumia criteria kama BIC/AIC kuichagua). EM wakati mwingine inaweza ku-converge polepole au kufikia local optimum, hivyo initialization ni muhimu (mara nyingi EM huendeshwa mara nyingi). Ikiwa data haifuati mchanganyiko wa Gaussians kwa kweli, model inaweza kutofit vizuri. Pia kuna hatari ya Gaussian moja kujikunja ili kufunika outlier mmoja tu (ingawa regularization au minimum covariance bounds zinaweza kupunguza tatizo hilo).
+
+
+<details>
+<summary>Example --  Soft Clustering & Anomaly Scores
+</summary>
 ```python
 from sklearn.mixture import GaussianMixture
 
@@ -274,28 +286,29 @@ log_likelihood = gmm.score_samples(sample_attack)
 print("Cluster membership probabilities for sample attack:", probs)
 print("Log-likelihood of sample attack under GMM:", log_likelihood)
 ```
-Katika msimbo huu, tunafundisha GMM na Gaussians 3 kwenye trafiki ya kawaida (tukidhani tunajua wasifu 3 wa trafiki halali). Maana na covariances zilizochapishwa zinaelezea makundi haya (kwa mfano, maana moja inaweza kuwa karibu [50,500] inayohusiana na kituo cha kundi moja, n.k.). Kisha tunajaribu muunganisho wa kutatanisha [duration=200, bytes=800]. predict_proba inatoa uwezekano wa pointi hii kuhusika na kila moja ya makundi 3 – tungeweza kutarajia uwezekano huu kuwa wa chini sana au kupotoshwa sana kwani [200,800] iko mbali na makundi ya kawaida. Alama ya jumla ya score_samples (log-likelihood) inachapishwa; thamani ya chini sana inaonyesha kuwa pointi hiyo haifai vizuri kwenye mfano, ikionyesha kama anomali. Katika mazoezi, mtu anaweza kuweka kigezo kwenye log-likelihood (au kwenye uwezekano wa juu) ili kuamua ikiwa pointi ni ya chini vya kutosha kuzingatiwa kuwa mbaya. GMM hivyo hutoa njia iliyo na kanuni ya kufanya ugunduzi wa anomali na pia inatoa makundi laini yanayotambua kutokuwa na uhakika.
+Katika msimbo huu, tunafunza GMM yenye Gaussian 3 kwenye trafiki ya kawaida (tukidhani tunajua profaili 3 za trafiki halali). Means na covariances zilizochapishwa zinaeleza makundi haya (kwa mfano, mean moja inaweza kuwa karibu na [50,500], inayowakilisha kituo cha kundi moja, n.k.). Kisha tunapima connection yenye kutiliwa shaka [duration=200, bytes=800]. `predict_proba` hutoa probability ya pointi hii kuwa ya kila moja kati ya makundi 3 – tungetarajia probabilities hizi ziwe ndogo sana au zigawanyike kwa upendeleo mkubwa, kwa sababu [200,800] iko mbali na makundi ya kawaida. `score_samples` ya jumla (log-likelihood) inachapishwa; thamani ya chini sana inaonyesha kuwa pointi hiyo haiendani vizuri na model, hivyo kuashiria anomaly. Kwa matumizi halisi, mtu anaweza kuweka threshold kwenye log-likelihood (au kwenye max probability) ili kuamua kama pointi ina uwezekano mdogo kiasi cha kutosha kuhesabiwa kuwa malicious. Kwa hivyo, GMM hutoa njia yenye msingi thabiti ya kufanya anomaly detection na pia hutoa makundi laini yanayotambua kutokuwa na uhakika.
+</details>
 
 ### Isolation Forest
 
-**Isolation Forest** ni algorithimu ya ugunduzi wa anomali ya pamoja inayotokana na wazo la kutenga pointi kwa bahati nasibu. Kanuni ni kwamba anomali ni chache na tofauti, hivyo ni rahisi kuzitenga kuliko pointi za kawaida. Isolation Forest inajenga miti nyingi za kutenga binary (miti ya maamuzi ya bahati nasibu) ambazo zinagawanya data kwa bahati nasibu. Kila node kwenye mti, kipengele cha bahati nasibu kinachaguliwa na thamani ya kugawanya ya bahati nasibu inachaguliwa kati ya min na max ya kipengele hicho kwa data katika node hiyo. Kugawanya hii inagawanya data katika matawi mawili. Mti unakua hadi kila pointi itengwe katika jani lake mwenyewe au urefu wa juu wa mti unafikiwa.
+**Isolation Forest** ni algorithm ya ensemble ya anomaly detection inayotegemea wazo la kutenga pointi kwa njia ya random. Kanuni yake ni kwamba anomalies ni chache na ni tofauti, hivyo ni rahisi zaidi kuzitenga kuliko pointi za kawaida. Isolation Forest hujenga isolation trees nyingi za binary (random decision trees) zinazogawanya data kwa njia ya random. Katika kila node ya tree, feature moja huchaguliwa kwa random na thamani ya random ya split huchaguliwa kati ya min na max ya feature hiyo kwa data iliyo kwenye node hiyo. Split hii hugawanya data kuwa branches mbili. Tree hukuzwa hadi kila pointi itengwe kwenye leaf yake au urefu wa juu wa tree ufikiwe.
 
-Ugunduzi wa anomali unafanywa kwa kuangalia urefu wa njia ya kila pointi katika miti hii ya bahati nasibu – idadi ya kugawanya inayohitajika kutenga pointi hiyo. Kwa njia ya kawaida, anomali (outliers) huwa zinatengwa haraka zaidi kwa sababu kugawanya kwa bahati nasibu kuna uwezekano mkubwa wa kutenganisha outlier (ambaye yuko katika eneo la upungufu) kuliko ilivyo kwa pointi za kawaida katika kundi lenye msongamano. Isolation Forest inakadiria alama ya anomali kutoka kwa urefu wa wastani wa njia juu ya miti yote: urefu wa wastani mfupi → anomali zaidi. Alama kawaida huwekwa sawa kwa [0,1] ambapo 1 inamaanisha uwezekano mkubwa wa anomali.
+Anomaly detection hufanywa kwa kuchunguza path length ya kila pointi kwenye random trees hizi – yaani, idadi ya splits zinazohitajika kuitenga pointi hiyo. Kwa intuition, anomalies (outliers) huwa zinatengwa haraka kwa sababu random split ina uwezekano mkubwa zaidi wa kutenganisha outlier (iliyo katika eneo lenye data chache) kuliko pointi ya kawaida iliyo kwenye cluster yenye msongamano. Isolation Forest hukokotoa anomaly score kutokana na average path length kwenye trees zote: average path fupi → anomaly kubwa zaidi. Scores kwa kawaida hu-normalize kuwa [0,1], ambapo 1 inamaanisha uwezekano mkubwa sana wa anomaly.
 
 > [!TIP]
-> *Matumizi katika usalama wa mtandao:* Isolation Forests zimekuwa zikitumika kwa mafanikio katika ugunduzi wa uvamizi na ugunduzi wa udanganyifu. Kwa mfano, fundisha Isolation Forest kwenye kumbukumbu za trafiki ya mtandao ambazo kwa kiasi kikubwa zina tabia ya kawaida; msitu utatoa njia fupi kwa trafiki isiyo ya kawaida (kama IP inayotumia bandari isiyojulikana au muundo wa saizi ya pakiti isiyo ya kawaida), ikionyesha kwa ukaguzi. Kwa sababu haitaji mashambulizi yaliyoandikwa, inafaa kwa kugundua aina za mashambulizi zisizojulikana. Inaweza pia kutumika kwenye data za kuingia kwa mtumiaji kugundua kuchukuliwa kwa akaunti (nyakati au maeneo ya kuingia yasiyo ya kawaida yanatengwa haraka). Katika matumizi moja, Isolation Forest inaweza kulinda biashara kwa kufuatilia metriki za mfumo na kutoa arifa wakati mchanganyiko wa metriki (CPU, mtandao, mabadiliko ya faili) unaonekana kuwa tofauti sana (njia fupi za kutengwa) kutoka kwa mifumo ya kihistoria.
+> *Matumizi katika cybersecurity:* Isolation Forests zimetumika kwa mafanikio katika intrusion detection na fraud detection. Kwa mfano, train Isolation Forest kwenye network traffic logs ambazo kwa kiasi kikubwa zina tabia ya kawaida; forest itatoa paths fupi kwa trafiki isiyo ya kawaida (kama IP inayotumia port ambayo haijawahi kusikika au pattern isiyo ya kawaida ya packet size), na kuiweka alama kwa ajili ya uchunguzi. Kwa kuwa haihitaji labeled attacks, inafaa kwa kugundua aina za mashambulizi zisizojulikana. Pia inaweza kutumika kwenye data ya user login ili kugundua account takeovers (login times au locations zisizo za kawaida hutengwa haraka). Katika use-case moja, Isolation Forest inaweza kulinda enterprise kwa kufuatilia system metrics na kutoa alert wakati mchanganyiko wa metrics (CPU, network, file changes) unaonekana kuwa tofauti sana (short isolation paths) na patterns za kihistoria.
 
-#### Dhana na Mipaka
+#### Assumptions and Limitations
 
-**Faida**: Isolation Forest haitaji dhana ya usambazaji; inashughulikia moja kwa moja kutengwa. Ni bora kwenye data zenye vipimo vingi na seti kubwa za data (ugumu wa moja kwa moja $O(n\log n)$ kwa kujenga msitu) kwani kila mti unategemea pointi na vipengele na kugawanya tu. Inashughulikia vizuri vipengele vya nambari na inaweza kuwa haraka zaidi kuliko mbinu zinazotegemea umbali ambazo zinaweza kuwa $O(n^2)$. Pia inatoa moja kwa moja alama ya anomali, hivyo unaweza kuweka kigezo cha arifa (au kutumia kipimo cha uchafuzi kuamua moja kwa moja kikomo kulingana na sehemu inayotarajiwa ya anomali).
+**Advantages**: Isolation Forest haihitaji assumption kuhusu distribution; inalenga moja kwa moja isolation. Inafanya kazi kwa ufanisi kwenye high-dimensional data na datasets kubwa (linear complexity $O(n\log n)$ ya kujenga forest), kwa kuwa kila tree hutenga pointi kwa kutumia subset tu ya features na splits. Kwa kawaida hushughulikia numerical features vizuri na inaweza kuwa haraka kuliko distance-based methods ambazo zinaweza kuwa $O(n^2)$. Pia hutoa anomaly score moja kwa moja, hivyo unaweza kuweka threshold kwa alerts (au kutumia contamination parameter kuamua cutoff moja kwa moja kulingana na sehemu inayotarajiwa ya anomalies).
 
-**Mipaka**: Kwa sababu ya asili yake ya bahati nasibu, matokeo yanaweza kutofautiana kidogo kati ya mbio (ingawa kwa miti nyingi vya kutosha hii ni ndogo). Ikiwa data ina vipengele vingi visivyo na maana au ikiwa anomali hazitofautiani kwa nguvu katika kipengele chochote, kutengwa kunaweza kutokuwa na ufanisi (kugawanya kwa bahati nasibu kunaweza kutenga pointi za kawaida kwa bahati – hata hivyo, kuhesabu miti mingi hupunguza hili). Pia, Isolation Forest kwa ujumla inadhani anomali ni wachache (ambayo kwa kawaida ni kweli katika hali za usalama wa mtandao).
+**Limitations**: Kwa sababu ya tabia yake ya random, matokeo yanaweza kutofautiana kidogo kati ya runs (ingawa tofauti hii huwa ndogo ikiwa kuna trees za kutosha). Ikiwa data ina features nyingi zisizo muhimu au ikiwa anomalies hazitofautiani sana katika feature yoyote, isolation inaweza kutofanya kazi vizuri (random splits zinaweza kutenga pointi za kawaida kwa bahati – hata hivyo, averaging ya trees nyingi hupunguza tatizo hili). Pia, Isolation Forest kwa ujumla hudhani kuwa anomalies ni minority ndogo (jambo ambalo kwa kawaida ni kweli katika hali za cybersecurity).
 
 <details>
-<summary>Mfano -- Kugundua Outliers katika Kumbukumbu za Mtandao
+<summary>Example --  Kugundua Outliers katika Network Logs
 </summary>
 
-Tutatumia seti ya data ya mtihani ya awali (ambayo ina pointi za kawaida na baadhi ya mashambulizi) na kuendesha Isolation Forest ili kuona ikiwa inaweza kutenga mashambulizi. Tutadhani tunatarajia ~15% ya data kuwa ya anomali (kwa maonyesho).
+Tutatumia dataset ya majaribio ya awali (iliyo na pointi za kawaida na baadhi ya attack points) na kuendesha Isolation Forest ili kuona kama inaweza kutenganisha mashambulizi. Tutadhani tunatarajia takriban 15% ya data kuwa anomalous (kwa ajili ya demonstration).
 ```python
 from sklearn.ensemble import IsolationForest
 
@@ -311,36 +324,38 @@ print("Isolation Forest predicted labels (first 20):", preds[:20])
 print("Number of anomalies detected:", np.sum(preds == -1))
 print("Example anomaly scores (lower means more anomalous):", anomaly_scores[:5])
 ```
-Katika msimbo huu, tunaunda `IsolationForest` na miti 100 na kuweka `contamination=0.15` (kumanisha tunatarajia karibu 15% ya anomalies; mfano utaweka kigezo chake cha alama ili ~15% ya alama zifanywe alama). Tunafaa kwenye `X_test_if` ambayo ina mchanganyiko wa alama za kawaida na za shambulio (kumbuka: kawaida ungetumia data ya mafunzo na kisha kutumia predict kwenye data mpya, lakini hapa kwa mfano tunafaa na kutabiri kwenye seti ile ile ili kuona matokeo moja kwa moja).
+Katika code hii, tunaunda `IsolationForest` yenye miti 100 na kuweka `contamination=0.15` (ikimaanisha tunatarajia takriban 15% ya data kuwa anomalies; model itaweka threshold ya score yake ili takriban 15% ya pointi ziwekwe alama). Tunai-fit kwenye `X_test_if`, ambayo ina mchanganyiko wa pointi za kawaida na za mashambulizi (kumbuka: kwa kawaida unge-fit kwenye training data kisha utumie predict kwenye data mpya, lakini hapa, kwa madhumuni ya kuonyesha mfano, tuna-fit na predict kwenye seti ileile ili kuona matokeo moja kwa moja).
 
-Matokeo yanaonyesha lebo zilizotabiriwa kwa alama 20 za kwanza (ambapo -1 inaashiria anomaly). Pia tunachapisha ni anomalies ngapi zimegundulika kwa jumla na baadhi ya alama za mfano za anomaly. Tunatarajia takriban 18 kati ya alama 120 kupewa lebo -1 (kwa kuwa contamination ilikuwa 15%). Ikiwa sampuli zetu 20 za shambulio ni kweli ziko mbali zaidi, nyingi yao zinapaswa kuonekana katika hizo -1 predictions. Alama ya anomaly (kazi ya uamuzi ya Isolation Forest) ni kubwa kwa alama za kawaida na ndogo (mbaya zaidi) kwa anomalies – tunachapisha baadhi ya thamani ili kuona utofauti. Katika mazoezi, mtu anaweza kupanga data kwa alama ili kuona waandishi wakuu na kuichunguza. Isolation Forest hivyo inatoa njia bora ya kuchambua data kubwa zisizo na lebo za usalama na kuchagua matukio yasiyo ya kawaida kwa uchambuzi wa kibinadamu au uchunguzi wa kiotomatiki zaidi.
+Output inaonyesha labels zilizotabiriwa kwa pointi 20 za kwanza (ambapo -1 inaonyesha anomaly). Pia tunachapisha jumla ya anomalies zilizogunduliwa na baadhi ya mifano ya anomaly scores. Tungetarajia takriban pointi 18 kati ya 120 ziwekwe alama -1 (kwa kuwa contamination ilikuwa 15%). Ikiwa samples 20 za mashambulizi ndizo zenye kuwa mbali zaidi na data nyingine, nyingi kati yake zinapaswa kuonekana kwenye predictions hizo za -1. Anomaly score (decision function ya Isolation Forest) huwa juu kwa pointi za kawaida na chini (hasi zaidi) kwa anomalies — tunachapisha thamani chache ili kuona utenganisho huo. Kwa matumizi ya vitendo, mtu anaweza kupanga data kwa kutumia score ili kuona outliers zilizo juu zaidi na kuzichunguza. Kwa hivyo, Isolation Forest hutoa njia bora ya kuchuja kiasi kikubwa cha security data isiyo na labels na kubainisha instances zisizo za kawaida zaidi kwa uchambuzi wa binadamu au uchunguzi zaidi wa kiotomatiki.
+</details>
+
 
 ### t-SNE (t-Distributed Stochastic Neighbor Embedding)
 
-**t-SNE** ni mbinu ya kupunguza vipimo isiyo ya laini iliyoundwa mahsusi kwa ajili ya kuonyesha data yenye vipimo vingi katika vipimo 2 au 3. Inabadilisha ufanisi kati ya alama za data kuwa usambazaji wa uwezekano wa pamoja na inajaribu kuhifadhi muundo wa majirani wa ndani katika uwasilishaji wa chini wa vipimo. Kwa maneno rahisi, t-SNE inaweka alama katika (sema) 2D kwa namna ambayo alama zinazofanana (katika nafasi ya asili) zinaishia karibu pamoja na alama zisizofanana zinaishia mbali na kila mmoja kwa uwezekano mkubwa.
+**t-SNE** ni mbinu ya nonlinear dimensionality reduction iliyoundwa mahsusi kwa ajili ya kuonyesha data yenye vipimo vingi katika vipimo 2 au 3. Inabadilisha similarities kati ya data points kuwa joint probability distributions na hujaribu kuhifadhi muundo wa local neighborhoods katika projection yenye vipimo vichache. Kwa maneno rahisi, t-SNE huweka pointi katika (kwa mfano) 2D kwa namna ambayo pointi zinazofanana katika space ya awali huishia kuwa karibu, na zisizofanana huishia kuwa mbali kwa uwezekano mkubwa.
 
-Algorithimu ina hatua mbili kuu:
+Algorithm ina hatua kuu tatu:
 
-1. **Hesabu uhusiano wa pande mbili katika nafasi ya vipimo vingi:** Kwa kila jozi ya alama, t-SNE inahesabu uwezekano kwamba mtu angechagua jozi hiyo kama majirani (hii inafanywa kwa kuzingatia usambazaji wa Gaussian kwenye kila alama na kupima umbali – parameter ya perplexity inaathiri idadi halisi ya majirani wanaozingatiwa).
-2. **Hesabu uhusiano wa pande mbili katika nafasi ya chini ya vipimo (mfano 2D):** Kwanza, alama zinawekwa kwa bahati nasibu katika 2D. t-SNE in定义 uwezekano sawa kwa umbali katika ramani hii (ikitumia kernel ya usambazaji wa Student t, ambayo ina ncha nzito zaidi kuliko Gaussian ili kuruhusu alama za mbali uhuru zaidi).
-3. **Gradient Descent:** t-SNE kisha inahamisha alama kwa hatua kwa hatua katika 2D ili kupunguza tofauti ya Kullback–Leibler (KL) kati ya usambazaji wa uhusiano wa juu-D na wa chini-D. Hii inasababisha mpangilio wa 2D kuakisi muundo wa juu-D kadri iwezekanavyo – alama ambazo zilikuwa karibu katika nafasi ya asili zitavutia kila mmoja, na zile mbali zitakataa, hadi usawa upatikane.
+1. **Compute pairwise affinities in high-dimensional space:** Kwa kila pair ya pointi, t-SNE huhesabu probability kwamba pair hiyo itachaguliwa kuwa neighbors (hili hufanywa kwa kuweka Gaussian distribution iliyowekwa katikati ya kila pointi na kupima distances — parameter ya perplexity huathiri idadi halisi ya neighbors wanaozingatiwa).
+2. **Compute pairwise affinities in low-dimensional (e.g. 2D) space:** Mwanzoni, pointi huwekwa kwa random katika 2D. t-SNE hufafanua probability inayofanana kwa distances katika ramani hii (kwa kutumia Student t-distribution kernel, ambayo ina tails nzito zaidi kuliko Gaussian na hivyo kuruhusu pointi za mbali kuwa na uhuru zaidi).
+3. **Gradient Descent:** Kisha t-SNE husogeza pointi hizo katika 2D kwa hatua za kurudiwa ili kupunguza Kullback–Leibler (KL) divergence kati ya high-D affinity distribution na low-D distribution. Hii husababisha mpangilio wa 2D kuakisi muundo wa high-D kadiri inavyowezekana — pointi zilizokuwa karibu katika space ya awali huvutana, na zilizokuwa mbali husukumana, hadi usawaziko upatikane.
 
-Matokeo mara nyingi ni mchoro wa kutawanyika wenye maana ya kuona ambapo makundi katika data yanakuwa wazi.
+Matokeo mara nyingi huwa scatter plot yenye maana ya kuonekana, ambapo clusters katika data huwa wazi.
 
 > [!TIP]
-> *Matumizi katika usalama wa mtandao:* t-SNE mara nyingi hutumiwa ku **onyesha data ya usalama yenye vipimo vingi kwa uchambuzi wa kibinadamu**. Kwa mfano, katika kituo cha operesheni za usalama, wachambuzi wanaweza kuchukua seti ya matukio yenye vipengele vingi (nambari za bandari, mara kwa mara, idadi ya byte, nk.) na kutumia t-SNE kutoa mchoro wa 2D. Mashambulizi yanaweza kuunda makundi yao wenyewe au kutengwa na data ya kawaida katika mchoro huu, na kuifanya iwe rahisi kuwatambua. Imetumika kwenye seti za data za malware kuona makundi ya familia za malware au kwenye data ya uvunjaji wa mtandao ambapo aina tofauti za mashambulizi zinakusanyika kwa tofauti, ikiongoza uchunguzi zaidi. Kimsingi, t-SNE inatoa njia ya kuona muundo katika data za cyber ambazo vinginevyo zingekuwa ngumu kueleweka.
+> *Matumizi katika cybersecurity:* t-SNE hutumiwa mara nyingi **kuonyesha security data yenye vipimo vingi kwa ajili ya uchambuzi wa binadamu**. Kwa mfano, katika security operations center, analysts wanaweza kuchukua event dataset yenye features kadhaa (port numbers, frequencies, byte counts, na kadhalika) na kutumia t-SNE kutengeneza plot ya 2D. Mashambulizi yanaweza kuunda clusters zao au kujitenga na data ya kawaida katika plot hiyo, hivyo kurahisisha kuyatambua. Imetumika kwenye malware datasets ili kuona makundi ya malware families au kwenye network intrusion data ambapo aina tofauti za mashambulizi huunda clusters zinazotofautiana wazi, na hivyo kusaidia uchunguzi zaidi. Kwa ujumla, t-SNE hutoa njia ya kuona muundo katika cyber data ambao vinginevyo ungekuwa mgumu kueleweka.
 
-#### Dhana na Mipaka
+#### Assumptions and Limitations
 
-t-SNE ni nzuri kwa kugundua mifumo kwa kuona. Inaweza kufichua makundi, makundi madogo, na waandishi wa mbali ambao mbinu nyingine za laini (kama PCA) zinaweza kutokuwepo. Imetumika katika utafiti wa usalama wa mtandao kuonyesha data ngumu kama vile wasifu wa tabia za malware au mifumo ya trafiki ya mtandao. Kwa sababu inahifadhi muundo wa ndani, ni nzuri katika kuonyesha makundi ya asili.
+t-SNE ni nzuri kwa ugunduzi wa kuona wa patterns. Inaweza kufichua clusters, subclusters, na outliers ambazo mbinu nyingine za linear (kama PCA) huenda zisionyeshe. Imetumika katika utafiti wa cybersecurity kuonyesha data changamano kama malware behavior profiles au network traffic patterns. Kwa sababu huhifadhi local structure, ni nzuri katika kuonyesha natural groupings.
 
-Hata hivyo, t-SNE ni nzito kwa kompyuta (takriban $O(n^2)$) hivyo inaweza kuhitaji sampuli kwa seti kubwa sana za data. Pia ina hyperparameters (perplexity, kiwango cha kujifunza, mizunguko) ambazo zinaweza kuathiri matokeo – mfano, thamani tofauti za perplexity zinaweza kufichua makundi katika viwango tofauti. Mchoro wa t-SNE unaweza wakati mwingine kutafsiriwa vibaya – umbali katika ramani si wa maana moja kwa moja kimataifa (inazingatia jirani wa ndani, wakati mwingine makundi yanaweza kuonekana kuwa mbali sana kwa bandia). Pia, t-SNE ni hasa kwa ajili ya uonyeshaji; haipati njia rahisi ya kuhamasisha alama mpya bila kuhesabu tena, na haikusudiwi kutumika kama maandalizi kwa ajili ya uundaji wa utabiri (UMAP ni mbadala inayoshughulikia baadhi ya masuala haya kwa kasi ya haraka).
+Hata hivyo, t-SNE ina uzito mkubwa zaidi wa computation (takriban $O(n^2)$), hivyo inaweza kuhitaji sampling kwa datasets kubwa sana. Pia ina hyperparameters (perplexity, learning rate, iterations) ambazo zinaweza kuathiri output — kwa mfano, thamani tofauti za perplexity zinaweza kufichua clusters katika scales tofauti. Wakati mwingine t-SNE plots zinaweza kutafsiriwa vibaya — distances katika ramani si za maana moja kwa moja kwa mtazamo wa global (inalenga local neighborhood, na wakati mwingine clusters zinaweza kuonekana zimetengana vizuri kwa njia isiyo halisi). Pia, t-SNE hutumika hasa kwa visualization; haitoi njia rahisi ya ku-project data points mpya bila kufanya computation upya, na haikusudiwi kutumiwa kama preprocessing ya predictive modeling (UMAP ni alternative inayoshughulikia baadhi ya matatizo haya kwa speed kubwa zaidi).
 
 <details>
-<summary>Mfano -- Kuonyesha Mifumo ya Mtandao
+<summary>Example -- Kuonyesha Network Connections
 </summary>
 
-Tutatumia t-SNE kupunguza seti ya data yenye vipengele vingi hadi 2D. Kwa mfano, hebu tuchukue data ya awali ya 4D (ambayo ilikuwa na makundi 3 ya asili ya trafiki ya kawaida) na kuongeza baadhi ya alama za anomaly. Kisha tunakimbia t-SNE na (kimsingi) kuonyesha matokeo.
+Tutatumia t-SNE kupunguza dataset yenye features nyingi hadi 2D. Kwa madhumuni ya mfano, tuchukue data ya awali ya 4D (iliyokuwa na clusters 3 za asili za normal traffic) na kuongeza anomaly points chache. Kisha tutaendesha t-SNE na (kwa dhana) kuonyesha matokeo.
 ```python
 # 1 ─────────────────────────────────────────────────────────────────────
 #    Create synthetic 4-D dataset
@@ -423,24 +438,24 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 ```
-Hapa tumekusanya dataset yetu ya kawaida ya 4D na kundi dogo la outliers kali (outliers zina kipengele kimoja (“duration”) kilichowekwa juu sana, nk., ili kuiga muundo wa ajabu). Tunakimbia t-SNE na perplexity ya kawaida ya 30. Data ya output_2d ina umbo (1505, 2). Hatuwezi kuchora katika maandiko haya, lakini kama tungeweza, tungeweza kutarajia kuona labda makundi matatu yaliyofungwa yanayolingana na makundi 3 ya kawaida, na outliers 5 zikionekana kama pointi zilizotengwa mbali na makundi hayo. Katika mchakato wa mwingiliano, tunaweza kubadilisha rangi za pointi kulingana na lebo zao (kawaida au kundi gani, dhidi ya anomaly) ili kuthibitisha muundo huu. Hata bila lebo, mchambuzi anaweza kugundua pointi hizo 5 zikiwa katika nafasi tupu kwenye mchoro wa 2D na kuziangazia. Hii inaonyesha jinsi t-SNE inaweza kuwa msaada mzuri katika kugundua anomalies kwa njia ya kuona na ukaguzi wa makundi katika data ya cybersecurity, ikikamilisha algorithimu za kiotomatiki zilizo juu.
+Hapa tuliunganisha dataset yetu ya kawaida ya 4D ya awali na outliers wachache waliokithiri (outliers wana feature moja (“duration”) iliyowekwa kuwa juu sana, n.k., ili kuiga pattern isiyo ya kawaida). Tunaendesha t-SNE kwa perplexity ya kawaida ya 30. Data ya output `data_2d` ina shape ya (1505, 2). Hatutapiga plot halisi katika maandishi haya, lakini kama tungefanya hivyo, tungetarajia kuona labda clusters tatu zilizobana zinazolingana na clusters tatu za kawaida, na outliers 5 zikitokea kama points zilizojitenga mbali na clusters hizo. Katika workflow ya interactive, tungeweza kupaka rangi points kulingana na label yao (normal au cluster ipi, dhidi ya anomaly) ili kuthibitisha muundo huu. Hata bila labels, analyst anaweza kugundua points hizo 5 zikiwa katika nafasi tupu kwenye plot ya 2D na kuzitia alama. Hii inaonyesha jinsi t-SNE inavyoweza kuwa msaada wenye nguvu kwa visual anomaly detection na ukaguzi wa clusters katika data ya cybersecurity, ikikamilisha algorithms za automated zilizoelezwa hapo juu.
 
 </details>
 
 
 ### HDBSCAN (Hierarchical Density-Based Spatial Clustering of Applications with Noise)
 
-**HDBSCAN** ni nyongeza ya DBSCAN ambayo inafuta hitaji la kuchagua thamani moja ya kimataifa ya `eps` na ina uwezo wa kurejesha makundi ya **wiani tofauti** kwa kujenga hierarchi ya vipengele vilivyounganishwa kwa wiani na kisha kuvikandamiza. Ikilinganishwa na DBSCAN ya kawaida, kawaida
+**HDBSCAN** ni extension ya DBSCAN inayoondoa hitaji la kuchagua value moja ya kimataifa ya `eps` na inaweza kurejesha clusters zenye **density tofauti** kwa kujenga hierarchy ya density-connected components na kisha ku-condense hierarchy hiyo. Ikilinganishwa na vanilla DBSCAN, kwa kawaida
 
-* inatoa makundi ya kueleweka zaidi wakati baadhi ya makundi yana wiani mkubwa na mengine yana wiani mdogo,
-* ina hyper-parameter moja halisi tu (`min_cluster_size`) na chaguo la msingi linalofaa,
-* inampa kila pointi uwezekano wa uanachama wa kundi *probability* na **alama ya outlier** (`outlier_scores_`), ambayo ni muhimu sana kwa dashibodi za uwindaji wa vitisho.
+* hutoa clusters zinazoeleweka zaidi wakati baadhi ya clusters ni dense na nyingine ni sparse,
+* ina hyper-parameter moja tu halisi (`min_cluster_size`) na default yenye mantiki,
+* huipa kila point *probability* ya cluster-membership na **outlier score** (`outlier_scores_`), ambayo ni muhimu sana kwa threat-hunting dashboards.<sup>[[1]](#references)</sup>
 
 > [!TIP]
-> *Matumizi katika cybersecurity:* HDBSCAN ni maarufu sana katika mipango ya uwindaji wa vitisho ya kisasa – mara nyingi utaiona ndani ya vitabu vya uwindaji vilivyoandikwa kwenye notebook vinavyotolewa na suites za kibiashara za XDR.  Mapishi moja ya vitendo ni kuunganisha trafiki ya beaconing ya HTTP wakati wa IR: user-agent, muda na urefu wa URI mara nyingi huunda makundi kadhaa yaliyofungwa ya wasasishaji wa programu halali wakati beacon za C2 zinabaki kama makundi madogo ya wiani wa chini au kama kelele safi.
+> *Use cases katika cybersecurity:* HDBSCAN ni maarufu sana katika threat-hunting pipelines za kisasa – mara nyingi utaiona ndani ya playbooks za hunting zinazotegemea notebooks, zinazosambazwa pamoja na commercial XDR suites. Recipe moja ya vitendo ni ku-cluster traffic ya HTTP beaconing wakati wa IR: user-agent, interval na URI length mara nyingi huunda groups kadhaa zilizobana za legitimate software updaters, huku C2 beacons zikibaki kama clusters ndogo zenye low-density au kama noise tupu.
 
 <details>
-<summary>Mfano – Kupata njia za C2 za beaconing</summary>
+<summary>Example – Kupata beaconing C2 channels</summary>
 ```python
 import pandas as pd
 from hdbscan import HDBSCAN
@@ -468,33 +483,33 @@ print("Suspect beacon count:", len(suspects))
 
 ---
 
-### Uthabiti na Mambo ya Usalama – Upoisoning & Mashambulizi ya Adversarial (2023-2025)
+### Uimara na Mazingatio ya Usalama – Poisoning & Adversarial Attacks (2023-2025)
 
-Kazi za hivi karibuni zimeonyesha kwamba **wajifunzaji wasio na uangalizi *sio* sugu kwa washambuliaji wa moja kwa moja**:
+Utafiti wa hivi karibuni umeonyesha kuwa **unsupervised learners *si* salama dhidi ya attackers wanaofanya mashambulizi ya moja kwa moja**:
 
-* **Upoisoning wa data dhidi ya waandishi wa anomali.** Chen *et al.* (IEEE S&P 2024) walionyesha kwamba kuongeza hata 3 % ya trafiki iliyoundwa kunaweza kubadilisha mpaka wa uamuzi wa Isolation Forest na ECOD ili mashambulizi halisi yaonekane kama ya kawaida. Waandishi walitoa PoC ya chanzo wazi (`udo-poison`) inayounda kwa otomatiki pointi za sumu.
-* **Kuingiza nyuma katika mifano ya klasta.** Mbinu ya *BadCME* (BlackHat EU 2023) inaweka mfano mdogo wa kichocheo; kila wakati kichocheo hicho kinapojitokeza, mdetecta wa K-Means kwa kimya huweka tukio ndani ya klasta “isiyo na madhara”.
-* **Kuepuka DBSCAN/HDBSCAN.** Uchambuzi wa awali wa kitaaluma wa 2025 kutoka KU Leuven ulionyesha kwamba mshambuliaji anaweza kuunda mifumo ya beacon inayokusudia kuanguka kwenye mapengo ya wingi, kwa ufanisi ikijificha ndani ya lebo za *kelele*.
+* **Data-poisoning dhidi ya anomaly detectors.** Chen *et al.* (IEEE S&P 2024) walionyesha kuwa kuongeza traffic iliyoundwa kwa makusudi kwa kiasi cha chini kama 3% kunaweza kuhamisha decision boundary ya Isolation Forest na ECOD, kiasi kwamba mashambulizi halisi yaonekane kuwa ya kawaida. Waandishi walitoa PoC ya open-source (`udo-poison`) inayotengeneza poison points kiotomatiki.<sup>[[2]](#references)</sup>
+* **Backdooring clustering models.** Mbinu ya *BadCME* (BlackHat EU 2023) huingiza trigger pattern ndogo; trigger hiyo inapoonekana, detector inayotumia K-Means huweka tukio hilo kimyakimya ndani ya cluster ya “benign”.
+* **Kukwepa DBSCAN/HDBSCAN.** Pre-print ya kitaaluma ya 2025 kutoka KU Leuven ilionyesha kuwa attacker anaweza kuunda beaconing patterns zinazolenga kuingia kwenye density gaps, na hivyo kujificha ndani ya labels za *noise*.
 
-Mikakati inayopata umaarufu:
+Mitigation zinazozidi kupata matumizi:
 
-1. **Usafi wa mfano / TRIM.** Kabla ya kila kipindi cha upya, ondolewa pointi 1–2 % zenye hasara kubwa zaidi (trimmed maximum likelihood) ili kufanya upoisoning kuwa mgumu zaidi.
-2. **Kujumuisha makubaliano.** Changanya waandishi kadhaa tofauti (mfano, Isolation Forest + GMM + ECOD) na panda alama ikiwa *mfano* wowote utaflag pointi. Utafiti unaonyesha kwamba hii inainua gharama ya mshambuliaji kwa >10×.
-3. **Ulinzi wa msingi wa umbali kwa klasta.** Hesabu upya klasta na `k` mbegu tofauti za nasibu na upuuze pointi zinazohama mara kwa mara kati ya klasta.
+1. **Model sanitisation / TRIM.** Kabla ya kila retraining epoch, ondoa points zenye loss kubwa zaidi kwa 1–2% (trimmed maximum likelihood) ili kufanya poisoning kuwa ngumu zaidi kwa kiwango kikubwa.
+2. **Consensus ensembling.** Unganisha detectors kadhaa zisizofanana (kwa mfano, Isolation Forest + GMM + ECOD) na toa alert ikiwa model yoyote itatambua point. Utafiti unaonyesha kuwa hii huongeza gharama ya attacker kwa zaidi ya mara 10.
+3. **Distance-based defence for clustering.** Kadiria upya clusters kwa kutumia `k` random seeds tofauti na upuuze points zinazohama kutoka cluster moja hadi nyingine kila mara.
 
 ---
 
-### Zana za Kisasa za Chanzo Wazi (2024-2025)
+### Modern Open-Source Tooling (2024-2025)
 
-* **PyOD 2.x** (iliyotolewa Mei 2024) iliongeza *ECOD*, *COPOD* na waandishi wa *AutoFormer* wanaoendeshwa na GPU. Sasa inatoa amri ya `benchmark` inayokuruhusu kulinganisha algorithimu 30+ kwenye dataset yako kwa **mstari mmoja wa msimbo**:
+* **PyOD 2.x** (ilitolewa Mei 2024) iliongeza detectors za *ECOD*, *COPOD* na *AutoFormer* zinazotumia GPU. Sasa inakuja na sub-command ya `benchmark` inayokuruhusu kulinganisha algorithms zaidi ya 30 kwenye dataset yako kwa **mstari mmoja wa code**:
 ```bash
 pyod benchmark --input logs.csv --label attack --n_jobs 8
 ```
-* **Anomalib v1.5** (Feb 2025) inazingatia maono lakini pia ina utekelezaji wa jumla wa **PatchCore** – muhimu kwa kugundua kurasa za phishing za picha.
-* **scikit-learn 1.5** (Nov 2024) hatimaye inafichua `score_samples` kwa *HDBSCAN* kupitia wrapper mpya ya `cluster.HDBSCAN`, hivyo huna haja ya pakiti ya kuchangia ya nje unapokuwa kwenye Python 3.12.
+* **Anomalib v1.5** (Februari 2025) inalenga vision, lakini pia ina implementation ya jumla ya **PatchCore** – inayofaa kwa detection ya phishing pages inayotegemea screenshots.
+* **scikit-learn 1.5** (Novemba 2024) hatimaye imeweka wazi `score_samples` kwa *HDBSCAN* kupitia wrapper mpya ya `cluster.HDBSCAN`, kwa hiyo huhitaji contrib package ya nje unapotumia Python 3.12.
 
 <details>
-<summary>Mfano wa Haraka wa PyOD – ECOD + Mkusanyiko wa Isolation Forest</summary>
+<summary>Quick PyOD example – ECOD + Isolation Forest ensemble</summary>
 ```python
 from pyod.models import ECOD, IForest
 from pyod.utils.data import generate_data, evaluate_print
@@ -513,10 +528,10 @@ evaluate_print("Ensemble", y_test, anomaly_scores)
 ```
 </details>
 
-## Marejeo
+## Marejeleo
 
-- [HDBSCAN – Kundi la msingi wa wingi wa kihierarchi](https://github.com/scikit-learn-contrib/hdbscan)
-- Chen, X. *et al.* “Kuhusu Uthibitisho wa Kugundua Mambo Yasiyo ya Kawaida kwa Kuingilia Kwenye Data.” *Mkutano wa IEEE juu ya Usalama na Faragha*, 2024.
+- [1] [HDBSCAN – clustering ya hierarchical inayotegemea density](https://github.com/scikit-learn-contrib/hdbscan)
+- [2] Chen, X. *et al.* “Kuhusu Udhaifu wa Unsupervised Anomaly Detection dhidi ya Data Poisoning.” *IEEE Symposium on Security and Privacy*, 2024.
 
 
 
