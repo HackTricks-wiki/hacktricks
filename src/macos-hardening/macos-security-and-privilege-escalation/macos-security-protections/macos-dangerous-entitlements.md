@@ -1,48 +1,48 @@
-# Entitlements peligrosos de macOS y permisos de TCC
+# Entitlements peligrosos de macOS y permisos TCC
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> Ten en cuenta que los entitlements que comienzan por **`com.apple`** no están disponibles para third-parties; solo Apple puede concederlos... O, si utilizas un certificado empresarial, en realidad podrías crear tus propios entitlements que comiencen por **`com.apple`** y evadir protecciones basadas en esto.
+> Ten en cuenta que los entitlements que comienzan por **`com.apple`** no están disponibles para terceros; solo Apple puede concederlos... O, si utilizas un certificado empresarial, podrías crear tus propios entitlements que comiencen por **`com.apple`** y evadir protecciones basadas en esto.
 
-## Alta
+## Alto
 
 ### `com.apple.rootless.install.heritable`
 
-El entitlement **`com.apple.rootless.install.heritable`** permite **bypass SIP**. Consulta [this for more info](macos-sip.md#com.apple.rootless.install.heritable).
+El entitlement **`com.apple.rootless.install.heritable`** permite **bypass de SIP**. Consulta [esto para obtener más información](macos-sip.md#com.apple.rootless.install.heritable).
 
 ### **`com.apple.rootless.install`**
 
-El entitlement **`com.apple.rootless.install`** permite **bypass SIP**. Consulta [this for more info](macos-sip.md#com.apple.rootless.install).
+El entitlement **`com.apple.rootless.install`** permite **bypass de SIP**. Consulta [esto para obtener más información](macos-sip.md#com.apple.rootless.install).
 
-### **`com.apple.system-task-ports` (previously called `task_for_pid-allow`)**
+### **`com.apple.system-task-ports` (anteriormente llamado `task_for_pid-allow`)**
 
-Este entitlement permite obtener el **task port de cualquier** proceso, excepto del kernel. Consulta [**this for more info**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
+Este entitlement permite obtener el **task port de cualquier** proceso, excepto del kernel. Consulta [**esto para obtener más información**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.get-task-allow`
 
-Este entitlement permite que otros procesos con el entitlement **`com.apple.security.cs.debugger`** obtengan el task port del proceso ejecutado por el binario con este entitlement e **inyecten código en él**. Consulta [**this for more info**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
+Este entitlement permite que otros procesos con el entitlement **`com.apple.security.cs.debugger`** obtengan el task port del proceso ejecutado por el binario con este entitlement e **inyecten código en él**. Consulta [**esto para obtener más información**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.cs.debugger`
 
-Las apps con el Debugging Tool Entitlement pueden llamar a `task_for_pid()` para obtener un task port válido para apps unsigned y de third-parties con el entitlement `Get Task Allow` establecido en `true`. Sin embargo, incluso con el debugging tool entitlement, un debugger **no puede obtener los task ports** de procesos que **no tienen el entitlement `Get Task Allow`** y que, por tanto, están protegidos por System Integrity Protection. Consulta [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Las aplicaciones con el Debugging Tool Entitlement pueden llamar a `task_for_pid()` para recuperar un task port válido de aplicaciones sin firmar y de terceros que tengan establecido en `true` el entitlement `Get Task Allow`. Sin embargo, incluso con el debugging tool entitlement, un debugger **no puede obtener los task ports** de procesos que **no tienen el entitlement `Get Task Allow`** y que, por tanto, están protegidos por System Integrity Protection. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Este entitlement permite **cargar frameworks, plug-ins o libraries sin que estén firmados por Apple ni firmados con el mismo Team ID** que el ejecutable principal, por lo que un atacante podría abusar de alguna carga arbitraria de libraries para inyectar código. Consulta [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Este entitlement permite **cargar frameworks, plug-ins o libraries sin que estén firmados por Apple ni con el mismo Team ID** que el ejecutable principal, por lo que un atacante podría abusar de alguna carga arbitraria de libraries para inyectar código. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
-Este entitlement es muy similar a **`com.apple.security.cs.disable-library-validation`**, pero **en lugar de deshabilitar directamente** la validación de libraries, permite que el proceso **llame a una system call `csops` para deshabilitarla** en runtime.
+Este entitlement es muy similar a **`com.apple.security.cs.disable-library-validation`**, pero **en lugar de deshabilitar directamente** la validación de libraries, permite que el proceso **llame a una system call `csops` para deshabilitarla** durante la ejecución.
 
-El nombre del entitlement está hardcodeado en XNU junto a la operación de `csops` que lo consume:<sup>[2]</sup>
+El nombre del entitlement está hardcodeado en XNU junto a la operación de `csops` que lo consume:<sup>[[2]](#references)</sup>.
 ```c
 /* bsd/sys/codesign.h */
 #define CLEAR_LV_ENTITLEMENT "com.apple.private.security.clear-library-validation"
 ...
 #define CS_OPS_CLEAR_LV     15  /* clear the library validation flag */
 ```
-El handler del kernel para `CS_OPS_CLEAR_LV` (`bsd/kern/kern_proc.c`) muestra exactamente lo limitado que es el primitive:<sup>[3]</sup>
+El handler del kernel para `CS_OPS_CLEAR_LV` (`bsd/kern/kern_proc.c`) muestra exactamente lo limitado que es el primitive:<sup>[[3]](#references)</sup>
 ```c
 case CS_OPS_CLEAR_LV: {
 #if !defined(XNU_TARGET_OS_OSX)
@@ -58,15 +58,15 @@ error = 0;
 Por lo tanto, la operación:
 
 - Es **exclusiva de macOS** (`ENOTSUP` en cualquier otra plataforma).
-- Solo funciona sobre **sí misma** (`forself == 1`): no puedes eliminar library validation de otro proceso con ella.
-- Requiere que el proceso realmente **tenga el entitlement**, y rechaza la operación si el proceso está marcado como `CS_INSTALLER` o se ejecuta bajo una ruta raíz de subsistema.
-- Elimina **`CS_REQUIRE_LV | CS_FORCED_LV`** de los flags de firma de código del proceso.
+- Solo funciona sobre **sí misma** (`forself == 1`): no puedes eliminar la library validation de otro proceso con ella.
+- Requiere que el proceso realmente **tenga el entitlement**, y se rechaza si el proceso está marcado como `CS_INSTALLER` o se ejecuta bajo una ruta raíz de subsistema.
+- Elimina **`CS_REQUIRE_LV | CS_FORCED_LV`** de los flags de code-signing del proceso.
 
 El comentario de XNU explica el caso de uso previsto y también por qué resulta interesante para un atacante:
 
-> Esta opción se utiliza para eliminar library validation de un proceso en ejecución. Se utiliza en arquitecturas de plugins cuando un programa necesita cargar libraries no confiables. [...] Una vez que un proceso ha cargado la library no confiable, confiar en library validation en el futuro no será efectivo.
+> Esta opción se utiliza para eliminar la library validation de un proceso en ejecución. Se usa en arquitecturas de plugins cuando un programa necesita cargar libraries no confiables. [...] Una vez que un proceso ha cargado la library no confiable, confiar en la library validation en el futuro no será efectivo.
 
-En otras palabras, **cualquier binario que incluya este entitlement es un objetivo de dylib-injection**: consigue ejecutar código dentro de él (o convéncelo para que cargue tu plugin) después de que haya eliminado `CS_REQUIRE_LV`, y heredarás todo lo que el proceso host tenga permitido hacer.
+En otras palabras, **cualquier binary que incluya este entitlement es un objetivo de dylib-injection**: consigue ejecutar código dentro de él (o convéncelo para que cargue tu plugin) después de que haya eliminado `CS_REQUIRE_LV`, y heredarás todo aquello que el proceso host tenga permitido hacer.
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
@@ -82,7 +82,7 @@ Estos entitlements permiten **instalar software sin solicitar permisos** al usua
 
 ### `com.apple.private.security.kext-management`
 
-Entitlement necesario para solicitar al **kernel que cargue una extensión del kernel**.
+Entitlement necesario para solicitar al **kernel que cargue una kernel extension**.
 
 ### **`com.apple.private.icloud-account-access`**
 
@@ -98,15 +98,15 @@ TODO: No sé qué permite hacer esto
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría utilizarse para** actualizar los contenidos protegidos por SSV después de un reinicio. ¡Si sabes cómo hacerlo, envía un PR!
+TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría utilizarse para** actualizar el contenido protegido por SSV después de un reinicio. Si sabes cómo hacerlo, ¡envía un PR!
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría utilizarse para** actualizar los contenidos protegidos por SSV después de un reinicio. ¡Si sabes cómo hacerlo, envía un PR!
+TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría utilizarse para** actualizar el contenido protegido por SSV después de un reinicio. Si sabes cómo hacerlo, ¡envía un PR!
 
 ### `keychain-access-groups`
 
-Este entitlement enumera los grupos de **keychain** a los que la aplicación tiene acceso:
+Este entitlement enumera los grupos de **keychain** a los que tiene acceso la aplicación:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -119,13 +119,13 @@ Este entitlement enumera los grupos de **keychain** a los que la aplicación tie
 ```
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
-Otorga permisos de **Full Disk Access**, uno de los permisos más elevados de TCC que se pueden obtener.
+Concede permisos de **Full Disk Access**, uno de los permisos más elevados de TCC que se pueden obtener.
 
 ### **`kTCCServiceAppleEvents`**
 
-Permite a la aplicación enviar eventos a otras aplicaciones que se utilizan habitualmente para **automatizar tareas**. Al controlar otras aplicaciones, puede abusar de los permisos otorgados a estas.
+Permite a la aplicación enviar eventos a otras aplicaciones que se utilizan habitualmente para **automatizar tareas**. Al controlar otras aplicaciones, puede abusar de los permisos concedidos a estas.
 
-Por ejemplo, puede hacer que soliciten al usuario su contraseña:
+Por ejemplo, hacer que soliciten al usuario su contraseña:
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
@@ -137,7 +137,7 @@ Permite, entre otros permisos, **escribir en la base de datos TCC del usuario**.
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-Permite **cambiar** el atributo **`NFSHomeDirectory`** de un usuario, lo que cambia la ruta de su carpeta de inicio y, por tanto, permite **evitar TCC**.
+Permite **cambiar** el atributo **`NFSHomeDirectory`** de un usuario, lo que cambia la ruta de su carpeta de inicio y, por tanto, permite **bypassear TCC**.
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
@@ -145,35 +145,35 @@ Permite modificar archivos dentro de los bundles de las apps (dentro de app.app)
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
-Es posible comprobar quién tiene este acceso en _Configuración del Sistema_ > _Privacidad y seguridad_ > _Gestión de apps._
+Es posible comprobar quién tiene este acceso en _Ajustes del Sistema_ > _Privacidad y seguridad_ > _Gestión de apps._
 
 ### `kTCCServiceAccessibility`
 
-El proceso podrá **abusar de las funciones de accesibilidad de macOS**, lo que significa que, por ejemplo, podrá pulsar teclas. Por tanto, podría solicitar acceso para controlar una app como Finder y aprobar el diálogo con este permiso.
+El proceso podrá **abusar de las funciones de accesibilidad de macOS**, lo que significa que, por ejemplo, podrá pulsar teclas. Por lo tanto, podría solicitar acceso para controlar una app como Finder y aprobar el diálogo con este permiso.
 
 ## Entitlements relacionados con Trustcache/CDhash
 
-Hay algunos entitlements que podrían utilizarse para evitar las protecciones de Trustcache/CDhash, que impiden la ejecución de versiones degradadas de binarios de Apple.
+Hay algunos entitlements que podrían utilizarse para bypass de las protecciones de Trustcache/CDhash, que impiden la ejecución de versiones degradadas de binarios de Apple.
 
 ## Medio
 
 ### `com.apple.security.cs.allow-jit`
 
-Este entitlement permite **crear memoria que sea escribible y ejecutable** pasando la marca `MAP_JIT` a la función del sistema `mmap()`. Consulta [**esta página para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
+Este entitlement permite **crear memoria que sea escribible y ejecutable** pasando el indicador `MAP_JIT` a la función de sistema `mmap()`. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Este entitlement permite **anular o parchear código C**, utilizar el elemento **`NSCreateObjectFileImageFromMemory`**, obsoleto desde hace mucho tiempo (y fundamentalmente inseguro), o utilizar el framework **DVDPlayback**. Consulta [**esta página para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+Este entitlement permite **anular o parchear código C**, utilizar el **`NSCreateObjectFileImageFromMemory`** obsoleto desde hace mucho tiempo (que es fundamentalmente inseguro) o utilizar el framework **DVDPlayback**. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
-> Incluir este entitlement expone tu app a vulnerabilidades comunes en lenguajes de código inseguros con respecto a la memoria. Considera cuidadosamente si tu app necesita esta excepción.
+> Incluir este entitlement expone tu app a vulnerabilidades comunes en lenguajes de código con memoria insegura. Considera cuidadosamente si tu app necesita esta excepción.
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-Este entitlement permite **modificar secciones de sus propios archivos ejecutables** en el disco para forzar su salida. Consulta [**esta página para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
+Este entitlement permite **modificar secciones de sus propios archivos ejecutables** en el disco para forzar su salida. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
 
 > [!CAUTION]
-> El entitlement Disable Executable Memory Protection es un entitlement extremo que elimina una protección de seguridad fundamental de tu app, lo que permite a un atacante reescribir el código ejecutable de tu app sin ser detectado. Si es posible, utiliza entitlements más específicos.
+> El entitlement Disable Executable Memory Protection es un entitlement extremo que elimina una protección de seguridad fundamental de tu app, haciendo posible que un atacante reescriba el código ejecutable de tu app sin ser detectado. Si es posible, utiliza entitlements más específicos.
 
 ### `com.apple.security.cs.allow-relative-library-loads`
 
@@ -185,7 +185,7 @@ Este entitlement permite montar un sistema de archivos nullfs (prohibido de form
 
 ### `kTCCServiceAll`
 
-Según esta publicación de blog, este permiso TCC suele encontrarse en la forma:
+Según esta publicación del blog, este permiso TCC suele encontrarse con la forma:
 ```
 [Key] com.apple.private.tcc.allow-prompting
 [Value]
@@ -198,7 +198,7 @@ Permite que el proceso **solicite todos los permisos de TCC**.
 
 Permite **inyectar eventos sintéticos de teclado y ratón** en todo el sistema mediante `CGEventPost()`. Un proceso con este permiso puede simular pulsaciones de teclas, clics del ratón y eventos de desplazamiento en cualquier aplicación, lo que proporciona efectivamente **control remoto** del escritorio.
 
-Esto es especialmente peligroso combinado con `kTCCServiceAccessibility` o `kTCCServiceListenEvent`, ya que permite tanto leer como inyectar entradas.
+Esto es especialmente peligroso cuando se combina con `kTCCServiceAccessibility` o `kTCCServiceListenEvent`, ya que permite tanto leer como inyectar entradas.
 ```objc
 // Inject a keystroke (Enter key)
 CGEventRef keyDown = CGEventCreateKeyboardEvent(NULL, kVK_Return, true);
@@ -206,9 +206,9 @@ CGEventPost(kCGSessionEventTap, keyDown);
 ```
 ### **`kTCCServiceListenEvent`**
 
-Permite **interceptar todos los eventos de teclado y ratón** en todo el sistema (monitorización de entrada / keylogging). Un proceso puede registrar un `CGEventTap` para capturar cada pulsación introducida en cualquier aplicación, incluidas contraseñas, números de tarjetas de crédito y mensajes privados.
+Permite **interceptar todos los eventos del teclado y el ratón** en todo el sistema (monitorización de entrada / keylogging). Un proceso puede registrar un `CGEventTap` para capturar cada pulsación escrita en cualquier aplicación, incluidas contraseñas, números de tarjetas de crédito y mensajes privados.
 
-Para consultar técnicas detalladas de exploitation, véase:
+Para consultar técnicas de explotación detalladas, véase:
 
 {{#ref}}
 macos-input-monitoring-screen-capture-accessibility.md
@@ -216,14 +216,14 @@ macos-input-monitoring-screen-capture-accessibility.md
 
 ### **`kTCCServiceScreenCapture`**
 
-Permite **leer el búfer de pantalla**: realizar capturas de pantalla y grabar vídeo de cualquier aplicación, incluidos campos de texto seguros. Combinado con OCR, puede extraer automáticamente contraseñas y datos sensibles de la pantalla.
+Permite **leer el búfer de pantalla** — tomar capturas de pantalla y grabar vídeo de cualquier aplicación, incluidos campos de texto seguros. Combinado con OCR, esto puede extraer automáticamente contraseñas y datos sensibles de la pantalla.
 
 > [!WARNING]
 > A partir de macOS Sonoma, la captura de pantalla muestra un indicador persistente en la barra de menús. En versiones anteriores, la grabación de pantalla puede ser completamente silenciosa.
 
 ### **`kTCCServiceCamera`**
 
-Permite **capturar fotos y vídeo** desde la cámara integrada o cámaras USB conectadas. La inyección de código en un binario con entitlement de cámara permite realizar vigilancia visual silenciosa.
+Permite **capturar fotos y vídeo** desde la cámara integrada o cámaras USB conectadas. La inyección de código en un binario con permisos de cámara permite realizar vigilancia visual silenciosa.
 
 ### **`kTCCServiceMicrophone`**
 
@@ -231,13 +231,13 @@ Permite **grabar audio** desde todos los dispositivos de entrada. Los daemons en
 
 ### **`kTCCServiceLocation`**
 
-Permite consultar la **ubicación física** del dispositivo mediante triangulación Wi-Fi o balizas Bluetooth. La monitorización continua revela direcciones del domicilio y del trabajo, patrones de viaje y rutinas diarias.
+Permite consultar la **ubicación física** del dispositivo mediante triangulación Wi-Fi o balizas Bluetooth. La monitorización continua revela direcciones del hogar y del trabajo, patrones de desplazamiento y rutinas diarias.
 
 ### **`kTCCServiceAddressBook`** / **`kTCCServiceCalendar`** / **`kTCCServicePhotos`**
 
-Acceso a **Contactos** (nombres, correos electrónicos y teléfonos, útiles para spear-phishing), **Calendario** (horarios de reuniones y listas de asistentes) y **Fotos** (fotos personales y capturas de pantalla que pueden contener credenciales y metadatos de ubicación).
+Acceso a **Contactos** (nombres, correos electrónicos y teléfonos — útiles para spear-phishing), **Calendario** (horarios de reuniones y listas de asistentes) y **Fotos** (fotos personales y capturas de pantalla que pueden contener credenciales y metadatos de ubicación).
 
-Para consultar técnicas completas de credential theft mediante permisos TCC, véase:
+Para consultar técnicas completas de explotación para el robo de credenciales mediante permisos de TCC, véase:
 
 {{#ref}}
 macos-tcc/macos-tcc-credential-and-data-theft.md
@@ -247,7 +247,7 @@ macos-tcc/macos-tcc-credential-and-data-theft.md
 
 ### `com.apple.security.temporary-exception.mach-lookup.global-name`
 
-Las **excepciones temporales de Sandbox** debilitan App Sandbox al permitir la comunicación con servicios Mach/XPC de todo el sistema que Sandbox normalmente bloquea. Esta es la **principal primitive de sandbox escape**: una aplicación comprometida dentro de Sandbox puede utilizar excepciones de mach-lookup para acceder a daemons con privilegios y explotar sus interfaces XPC.
+Las **excepciones temporales del Sandbox** debilitan App Sandbox al permitir la comunicación con servicios Mach/XPC de todo el sistema que el sandbox bloquea normalmente. Esta es la **principal primitiva de escape del sandbox**: una aplicación comprometida dentro del sandbox puede utilizar excepciones de mach-lookup para acceder a daemons privilegiados y explotar sus interfaces XPC.
 ```bash
 # Find apps with mach-lookup exceptions
 find /Applications -name "*.app" -exec sh -c '
@@ -255,7 +255,7 @@ binary="$1/Contents/MacOS/$(defaults read "$1/Contents/Info.plist" CFBundleExecu
 [ -f "$binary" ] && codesign -d --entitlements - "$binary" 2>&1 | grep -q "mach-lookup" && echo "$(basename "$1")"
 ' _ {} \; 2>/dev/null
 ```
-Para consultar una cadena de explotación detallada: app aislada en sandbox → excepción de `mach-lookup` → daemon vulnerable → escape del sandbox, consulta:
+For detailed exploitation chain: sandboxed app → mach-lookup exception → vulnerable daemon → sandbox escape, consulta:
 
 {{#ref}}
 macos-code-signing-weaknesses-and-sandbox-escapes.md
@@ -263,18 +263,18 @@ macos-code-signing-weaknesses-and-sandbox-escapes.md
 
 ### `com.apple.developer.driverkit`
 
-Los **entitlements de DriverKit** permiten que los binarios de drivers en espacio de usuario se comuniquen directamente con el kernel mediante interfaces de IOKit. Los binarios de DriverKit gestionan hardware: USB, Thunderbolt, PCIe, dispositivos HID, audio y redes.
+Los **DriverKit entitlements** permiten que los binarios de controladores en el espacio de usuario se comuniquen directamente con el kernel mediante interfaces de IOKit. Los binarios de DriverKit gestionan hardware: USB, Thunderbolt, PCIe, dispositivos HID, audio y redes.
 
-Comprometer un binario de DriverKit permite:
+Comprometer un binario de DriverKit habilita:
 - **Superficie de ataque del kernel** mediante llamadas `IOConnectCallMethod` malformadas
-- **Suplantación de dispositivos USB** (emular un teclado para inyección HID)
-- **Ataques DMA** mediante interfaces PCIe/Thunderbolt
+- **USB device spoofing** (emular un teclado para inyección HID)
+- **DMA attacks** mediante interfaces PCIe/Thunderbolt
 ```bash
 # Find DriverKit binaries
 find / -name "*.dext" -type d 2>/dev/null
 systemextensionsctl list
 ```
-Para obtener información detallada sobre la explotación de IOKit/DriverKit, consulta:
+Para una explotación detallada de IOKit/DriverKit, consulta:
 
 {{#ref}}
 ../mac-os-architecture/macos-iokit.md

