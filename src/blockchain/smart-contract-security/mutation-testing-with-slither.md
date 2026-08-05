@@ -32,7 +32,7 @@ For smart contracts, surviving mutants frequently map to missing checks around:
 
 ## Mutation operators with the highest security signal
 
-Useful mutation classes for contract auditing:
+Useful mutation classes for contract auditing:<sup>[[1]](#references)[[2]](#references)</sup>
 - **High severity**: replace statements with `revert()` to expose unexecuted paths
 - **Medium severity**: comment out lines / remove logic to reveal unverified side effects
 - **Low severity**: subtle operator or constant swaps such as `>=` -> `>` or `+` -> `-`
@@ -42,12 +42,12 @@ Practical goal: kill all meaningful mutants, and explicitly justify survivors th
 
 ## Why syntax-aware mutation is better than regex
 
-Older mutation engines relied on regex or line-oriented rewrites. That works, but it has important limitations:
+Older mutation engines relied on regex or line-oriented rewrites. That works, but it has important limitations:<sup>[[1]](#references)</sup>
 - Multi-line statements are hard to mutate safely
 - Language structure is not understood, so comments/tokens can be targeted badly
 - Generating every possible variant on a weak line wastes large amounts of runtime
 
-AST- or Tree-sitter-based tooling improves this by targeting structured nodes instead of raw lines:
+AST- or Tree-sitter-based tooling improves this by targeting structured nodes instead of raw lines:<sup>[[1]](#references)</sup>
 - **slither-mutate** uses Slither's Solidity AST
 - **mewt** uses Tree-sitter as a language-agnostic core
 - **MuTON** builds on `mewt` and adds first-class support for TON languages such as FunC, Tolk, and Tact
@@ -65,7 +65,7 @@ slither-mutate --help
 slither-mutate --list-mutators
 ```
 
-- Foundry example (capture results and keep a full log):
+- Foundry example (capture results and keep a full log):<sup>[[2]](#references)</sup>
 
 ```bash
 slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results)
@@ -73,7 +73,7 @@ slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results
 
 - If you don’t use Foundry, replace `--test-cmd` with how you run tests (e.g., `npx hardhat test`, `npm test`).
 
-Artifacts are stored in `./mutation_campaign` by default. Uncaught (surviving) mutants are copied there for inspection.
+Artifacts are stored in `./mutation_campaign` by default. Uncaught (surviving) mutants are copied there for inspection.<sup>[[5]](#references)</sup>
 
 ### Understanding the output
 
@@ -89,7 +89,7 @@ INFO:Slither-Mutate:[CR] Line 123: 'original line' ==> '//original line' --> UNC
 
 ## Reducing runtime: prioritize impactful mutants
 
-Mutation campaigns can take hours or days. Tips to reduce cost:
+Mutation campaigns can take hours or days. Tips to reduce cost:<sup>[[1]](#references)[[2]](#references)</sup>
 - Scope: Start with critical contracts/directories only, then expand.
 - Prioritize mutators: If a high-priority mutant on a line survives (for example `revert()` or comment-out), skip lower-priority variants for that line.
 - Use two-phase campaigns: run focused/fast tests first, then re-test only uncaught mutants with the full suite.
@@ -102,9 +102,9 @@ The runtime math is brutal: `1000 mutants x 5-minute tests ~= 83 hours`, so camp
 
 ## Persistent campaigns and triage at scale
 
-One weakness of older workflows is dumping results only to `stdout`. For long campaigns, this makes pause/resume, filtering, and review harder.
+One weakness of older workflows is dumping results only to `stdout`. For long campaigns, this makes pause/resume, filtering, and review harder.<sup>[[1]](#references)</sup>
 
-`mewt`/`MuTON` improve this by storing mutants and outcomes in SQLite-backed campaigns. Benefits:
+`mewt`/`MuTON` improve this by storing mutants and outcomes in SQLite-backed campaigns. Benefits:<sup>[[1]](#references)</sup>
 - Pause and resume long runs without losing progress
 - Filter only uncaught mutants in a specific file or mutation class
 - Export/translate results to SARIF for review tooling
@@ -134,19 +134,19 @@ Persistent results are especially useful when mutation testing becomes part of a
 
 ## Case study: revealing missing state assertions (Arkis protocol)
 
-A mutation campaign during an audit of the Arkis DeFi protocol surfaced survivors like:
+A mutation campaign during an audit of the Arkis DeFi protocol surfaced survivors like:<sup>[[2]](#references)[[3]](#references)</sup>
 
 ```text
 INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> '//cmdsToExecute.last().value = _cmd.value' --> UNCAUGHT
 ```
 
-Commenting out the assignment didn’t break the tests, proving missing post-state assertions. Root cause: code trusted a user-controlled `_cmd.value` instead of validating actual token transfers. An attacker could desynchronize expected vs. actual transfers to drain funds. Result: high severity risk to protocol solvency.
+Commenting out the assignment didn’t break the tests, proving missing post-state assertions. Root cause: code trusted a user-controlled `_cmd.value` instead of validating actual token transfers. An attacker could desynchronize expected vs. actual transfers to drain funds. Result: high severity risk to protocol solvency.<sup>[[2]](#references)[[3]](#references)</sup>
 
 Guidance: Treat survivors that affect value transfers, accounting, or access control as high-risk until killed.
 
 ## Do not blindly generate tests to kill every mutant
 
-Mutation-driven test generation can backfire if the current implementation is wrong. Example: mutating `priority >= 2` to `priority > 2` changes behavior, but the right fix is not always "write a test for `priority == 2`". That behavior may itself be the bug.
+Mutation-driven test generation can backfire if the current implementation is wrong. Example: mutating `priority >= 2` to `priority > 2` changes behavior, but the right fix is not always "write a test for `priority == 2`". That behavior may itself be the bug.<sup>[[1]](#references)</sup>
 
 Safer workflow:
 - Use surviving mutants to identify ambiguous requirements

