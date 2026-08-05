@@ -122,11 +122,11 @@ The cleartext password can be used to perform regular authentication as the trus
 ### Practical limitations
 
 > [!WARNING]
-> Trust accounts are awkward principals. Interactive logons such as **RUNAS / console / RDP** are not the expected path here, and **NTLM** authentication attempts can fail with `STATUS_NOLOGON_INTERDOMAIN_TRUST_ACCOUNT`. Plan for **Kerberos network logons** (`asktgt`, LDAP, CIFS, Kerberoast) instead.
+> Trust accounts are awkward principals. Interactive logons such as **RUNAS / console / RDP** are not the expected path here, and **NTLM** authentication attempts can fail with `STATUS_NOLOGON_INTERDOMAIN_TRUST_ACCOUNT`. Plan for **Kerberos network logons** (`asktgt`, LDAP, CIFS, Kerberoast) instead.<sup>[[1]](#references)</sup>
 
 ### Persistence / cleanup note
 
-If defenders realize the trusting domain was compromised, they should rotate the trust secret on **both sides** with `netdom trust ... /resetOneSide ...`. From an operator perspective this matters because a **manual reset invalidates the old trust material immediately**, while normal trust-password rotation keeps current/previous values around during rollover.
+If defenders realize the trusting domain was compromised, they should rotate the trust secret on **both sides** with `netdom trust ... /resetOneSide ...`. From an operator perspective this matters because a **manual reset invalidates the old trust material immediately**, while normal trust-password rotation keeps current/previous values around during rollover.<sup>[[2]](#references)</sup>
 
 ```bash
 # Run once from the trusted side
@@ -138,8 +138,8 @@ netdom trust ext.local /domain:root.local /resetOneSide /passwordT:<NEWPASS> /us
 
 ## References
 
-- [https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7)
-- [https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust)
+- [1] [SID filter as security boundary between domains? (Part 7) – Trust account attack – from trusting to trusted](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7)
+- [2] [AD Forest Recovery – Resetting a trust password](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust)
 
 {{#include ../../banners/hacktricks-training.md}}
 

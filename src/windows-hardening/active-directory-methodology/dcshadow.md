@@ -58,7 +58,7 @@ lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attr
 
 ### Primary group abuse, enumeration gaps, and detection
 
-- `primaryGroupID` is a separate attribute from the group `member` list. DCShadow/DSInternals can write it directly (e.g., set `primaryGroupID=512` for **Domain Admins**) without on-box LSASS enforcement, but AD still **moves** the user: changing PGID always strips membership from the previous primary group (same behavior for any target group), so you cannot keep the old primary-group membership.
+- `primaryGroupID` is a separate attribute from the group `member` list. DCShadow/DSInternals can write it directly (e.g., set `primaryGroupID=512` for **Domain Admins**) without on-box LSASS enforcement, but AD still **moves** the user: changing PGID always strips membership from the previous primary group (same behavior for any target group), so you cannot keep the old primary-group membership.<sup>[[1]](#references)</sup>
 - Default tools prevent removing a user from their current primary group (`ADUC`, `Remove-ADGroupMember`), so changing PGID typically requires direct directory writes (DCShadow/`Set-ADDBPrimaryGroup`).
 - Membership reporting is inconsistent:
   - **Includes** primary-group-derived members: `Get-ADGroupMember "Domain Admins"`, `net group "Domain Admins"`, ADUC/Admin Center.
@@ -82,7 +82,7 @@ Get-ADUser -Filter * -Properties primaryGroupID |
   Select-Object Name,SamAccountName
 ```
 
-Cross-check privileged groups by comparing `Get-ADGroupMember` output with `Get-ADGroup -Properties member` or ADSI Edit to catch discrepancies introduced by `primaryGroupID` or hidden attributes.
+Cross-check privileged groups by comparing `Get-ADGroupMember` output with `Get-ADGroup -Properties member` or ADSI Edit to catch discrepancies introduced by `primaryGroupID` or hidden attributes.<sup>[[1]](#references)</sup>
 
 ## Shadowception - Give DCShadow permissions using DCShadow (no modified permissions logs)
 
@@ -104,8 +104,8 @@ Notice that in this case you need to make **several changes,** not just one. So,
 
 ## References
 
-- [TrustedSec - Adventures in Primary Group Behavior, Reporting, and Exploitation](https://trustedsec.com/blog/adventures-in-primary-group-behavior-reporting-and-exploitation)
-- [DCShadow write-up in ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
+- [1] [TrustedSec - Adventures in Primary Group Behavior, Reporting, and Exploitation](https://trustedsec.com/blog/adventures-in-primary-group-behavior-reporting-and-exploitation)
+- [2] [DCShadow write-up in ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 
 {{#include ../../banners/hacktricks-training.md}}
 

@@ -654,7 +654,7 @@ Look for dangerous ACLs granted to **`Everyone`**, **`BUILTIN\Users`**, or **`Au
 3. Replace the service binary with a payload or a valid malicious service binary.
 4. Restart the service with `sc stop <service_name> && sc start <service_name>` (or wait for a reboot / service trigger).
 
-Useful automated checks:
+Useful automated checks:<sup>[[28]](#references)</sup>
 
 ```powershell
 . .\PowerUp.ps1
@@ -691,7 +691,7 @@ reg add HKLM\SYSTEM\CurrentControlSet\services\<service_name> /v ImagePath /t RE
 
 ### Registry symlink race to arbitrary HKLM value write (ATConfig)
 
-Some Windows Accessibility features create per-user **ATConfig** keys that are later copied by a **SYSTEM** process into an HKLM session key. A registry **symbolic link race** can redirect that privileged write into **any HKLM path**, giving an arbitrary HKLM **value write** primitive.
+Some Windows Accessibility features create per-user **ATConfig** keys that are later copied by a **SYSTEM** process into an HKLM session key. A registry **symbolic link race** can redirect that privileged write into **any HKLM path**, giving an arbitrary HKLM **value write** primitive.<sup>[[18]](#references)</sup>
 
 Key locations (example: On-Screen Keyboard `osk`):
 
@@ -713,7 +713,7 @@ Once you have arbitrary HKLM value write, pivot to LPE by overwriting service co
 
 Pick a service that a normal user can start (e.g., **`msiserver`**) and trigger it after the write. **Note:** the public exploit implementation **locks the workstation** as part of the race.
 
-Example tooling (RegPwn BOF / standalone):
+Example tooling (RegPwn BOF / standalone):<sup>[[19]](#references)</sup>
 
 ```bash
 beacon> regpwn C:\payload.exe SYSTEM\CurrentControlSet\Services\msiserver ImagePath
@@ -921,7 +921,7 @@ Strong hunting pattern: **heterogeneous registry reads into the same stack varia
 
 #### Abusing missing FILE_DEVICE_SECURE_OPEN on device objects (LPE + EDR kill)
 
-Some signed third‑party drivers create their device object with a strong SDDL via IoCreateDeviceSecure but forget to set FILE_DEVICE_SECURE_OPEN in DeviceCharacteristics. Without this flag, the secure DACL is not enforced when the device is opened through a path containing an extra component, letting any unprivileged user obtain a handle by using a namespace path like:
+Some signed third‑party drivers create their device object with a strong SDDL via IoCreateDeviceSecure but forget to set FILE_DEVICE_SECURE_OPEN in DeviceCharacteristics. Without this flag, the secure DACL is not enforced when the device is opened through a path containing an extra component, letting any unprivileged user obtain a handle by using a namespace path like:<sup>[[14]](#references)</sup>
 
 - \\ .\\DeviceName\\anything
 - \\ .\\amsdk\\anyfile (from a real-world case)
@@ -973,9 +973,9 @@ dll-hijacking/writable-sys-path-dll-hijacking-privesc.md
 
 ## Node.js / Electron module resolution hijacking via `C:\node_modules`
 
-This is a **Windows uncontrolled search path** variant that affects **Node.js** and **Electron** applications when they perform a bare import such as `require("foo")` and the expected module is **missing**.
+This is a **Windows uncontrolled search path** variant that affects **Node.js** and **Electron** applications when they perform a bare import such as `require("foo")` and the expected module is **missing**.<sup>[[20]](#references)</sup>
 
-Node resolves packages by walking up the directory tree and checking `node_modules` folders on each parent. On Windows, that walk can reach the drive root, so an application launched from `C:\Users\Administrator\project\app.js` may end up probing:
+Node resolves packages by walking up the directory tree and checking `node_modules` folders on each parent. On Windows, that walk can reach the drive root, so an application launched from `C:\Users\Administrator\project\app.js` may end up probing:<sup>[[21]](#references)</sup>
 
 1. `C:\Users\Administrator\project\node_modules\foo`
 2. `C:\Users\Administrator\node_modules\foo`
@@ -986,14 +986,14 @@ If a **low-privileged user** can create `C:\node_modules`, they can plant a mali
 
 This is especially common when:
 
-- a dependency is declared in `optionalDependencies`
+- a dependency is declared in `optionalDependencies`<sup>[[22]](#references)</sup>
 - a third-party library wraps `require("foo")` in `try/catch` and continues on failure
 - a package was removed from production builds, omitted during packaging, or failed to install
 - the vulnerable `require()` lives deep inside the dependency tree instead of in the main application code
 
 ### Hunting vulnerable targets
 
-Use **Procmon** to prove the resolution path:
+Use **Procmon** to prove the resolution path:<sup>[[23]](#references)</sup>
 
 - Filter by `Process Name` = target executable (`node.exe`, the Electron app EXE, or the wrapper process)
 - Filter by `Path` `contains` `node_modules`
@@ -1863,7 +1863,7 @@ Then **read this to learn about UAC and UAC bypasses:**
 
 ## From Arbitrary Folder Delete/Move/Rename to SYSTEM EoP
 
-The technique described [**in this blog post**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks) with a exploit code [**available here**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs).
+The technique described [**in this blog post**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks) with a exploit code [**available here**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs).<sup>[[31]](#references)[[32]](#references)</sup>
 
 The attack basically consist of abusing the Windows Installer's rollback feature to replace legitimate files with malicious ones during the uninstallation process. For this the attacker needs to create a **malicious MSI installer** that will be used to hijack the `C:\Config.Msi` folder, which will later be used by he Windows Installer to store rollback files during the uninstallation of other MSI packages where the rollback files would have been modified to contain the malicious payload.
 
@@ -2034,11 +2034,11 @@ C:\Windows\System32\cng.sys
 
 ### From privileged log/backup paths + OM symlinks to arbitrary file overwrite / boot DoS
 
-When a **privileged service** writes logs/exports to a path read from a **writable config**, redirect that path with **Object Manager symlinks + NTFS mount points** to turn the privileged write into an arbitrary overwrite (even **without** SeCreateSymbolicLinkPrivilege).
+When a **privileged service** writes logs/exports to a path read from a **writable config**, redirect that path with **Object Manager symlinks + NTFS mount points** to turn the privileged write into an arbitrary overwrite (even **without** SeCreateSymbolicLinkPrivilege).<sup>[[15]](#references)</sup>
 
 **Requirements**
 - Config storing the target path is writable by the attacker (e.g., `%ProgramData%\...\.ini`).
-- Ability to create a mount point to `\RPC Control` and an OM file symlink (James Forshaw [symboliclink-testing-tools](https://github.com/googleprojectzero/symboliclink-testing-tools)).
+- Ability to create a mount point to `\RPC Control` and an OM file symlink (James Forshaw [symboliclink-testing-tools](https://github.com/googleprojectzero/symboliclink-testing-tools)).<sup>[[16]](#references)[[17]](#references)</sup>
 - A privileged operation that writes to that path (log, export, report).
 
 **Example chain**
