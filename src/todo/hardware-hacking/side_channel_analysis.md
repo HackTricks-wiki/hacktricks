@@ -1,28 +1,28 @@
-# साइड चैनल विश्लेषण हमले
+# Side Channel Analysis Attacks
 
 {{#include ../../banners/hacktricks-training.md}}
 
-साइड-चैनल हमले भौतिक या माइक्रो-आर्किटेक्चरल "लीक" को देखकर रहस्यों को पुनः प्राप्त करते हैं जो आंतरिक स्थिति के साथ *संबंधित* होते हैं लेकिन डिवाइस के तार्किक इंटरफेस का *भाग* नहीं होते। उदाहरणों में स्मार्ट-कार्ड द्वारा खींची गई तात्कालिक धारा को मापने से लेकर नेटवर्क पर CPU पावर-प्रबंधन प्रभावों का दुरुपयोग करना शामिल है।
+Side-channel attacks ऐसे secrets recover करते हैं जो physical या micro-architectural "leakage" को observe करके प्राप्त किए जाते हैं। यह "leakage" internal state के साथ *correlated* होता है, लेकिन device के logical interface का हिस्सा नहीं होता। इसके उदाहरण smart-card द्वारा खींचे जाने वाले instantaneous current को मापने से लेकर network के माध्यम से CPU power-management effects का दुरुपयोग करने तक होते हैं।
 
 ---
 
-## मुख्य लीक चैनल
+## Main Leakage Channels
 
-| चैनल | सामान्य लक्ष्य | उपकरण |
+| Channel | Typical Target | Instrumentation |
 |---------|---------------|-----------------|
-| पावर खपत | स्मार्ट-कार्ड, IoT MCU, FPGA | ऑस्सिलोस्कोप + शंट रेजिस्टर/HS प्रोब (जैसे CW503) |
-| विद्युत चुम्बकीय क्षेत्र (EM) | CPU, RFID, AES त्वरक | H-फील्ड प्रोब + LNA, ChipWhisperer/RTL-SDR |
-| निष्पादन समय / कैश | डेस्कटॉप और क्लाउड CPU | उच्च-सटीक टाइमर (rdtsc/rdtscp), दूरस्थ समय-की-उड़ान |
-| ध्वनिक / यांत्रिक | कीबोर्ड, 3-D प्रिंटर, रिले | MEMS माइक्रोफोन, लेजर वाइब्रोमीटर |
-| ऑप्टिकल और थर्मल | LED, लेजर प्रिंटर, DRAM | फोटोडायोड / उच्च-गति कैमरा, IR कैमरा |
-| दोष-प्रेरित | ASIC/MCU क्रिप्टो | घड़ी/वोल्टेज ग्लिच, EMFI, लेजर इंजेक्शन |
+| Power consumption | Smart-cards, IoT MCUs, FPGAs | Oscilloscope + shunt resistor/HS probe (e.g. CW503)
+| Electromagnetic field (EM) | CPUs, RFID, AES accelerators | H-field probe + LNA, ChipWhisperer/RTL-SDR
+| Execution time / caches | Desktop & cloud CPUs | High-precision timers (rdtsc/rdtscp), remote time-of-flight
+| Acoustic / mechanical | Keyboards, 3-D printers, relays | MEMS microphone, laser vibrometer
+| Optical & thermal | LEDs, laser printers, DRAM | Photodiode / high-speed camera, IR camera
+| Fault-induced | ASIC/MCU cryptos | Clock/voltage glitch, EMFI, laser injection
 
 ---
 
-## पावर विश्लेषण
+## Power Analysis
 
-### सरल पावर विश्लेषण (SPA)
-एक *एकल* ट्रेस का अवलोकन करें और सीधे शिखरों/घाटियों को संचालन (जैसे DES S-बॉक्स) के साथ जोड़ें।
+### Simple Power Analysis (SPA)
+एक *single* trace को observe करें और peaks/valleys को operations (जैसे DES S-boxes) के साथ सीधे associate करें।
 ```python
 # ChipWhisperer-husky example – capture one AES trace
 from chipwhisperer.capture.api.programmers import STMLink
@@ -35,72 +35,72 @@ trace = cw.capture.capture_trace()
 print(trace.wave)  # numpy array of power samples
 ```
 ### Differential/Correlation Power Analysis (DPA/CPA)
-*N > 1 000* ट्रेस प्राप्त करें, कुंजी बाइट `k` का अनुमान लगाएं, HW/HD मॉडल की गणना करें और लीक के साथ सहसंबंधित करें।
+*N > 1 000* traces प्राप्त करें, key byte `k` की परिकल्पना करें, HW/HD model की गणना करें और leakage के साथ correlate करें।
 ```python
 import numpy as np
 corr = np.corrcoef(leakage_model(k), traces[:,sample])
 ```
-CPA अत्याधुनिक बना हुआ है लेकिन मशीन-लर्निंग वेरिएंट (MLA, डीप-लर्निंग SCA) अब ASCAD-v2 (2023) जैसी प्रतियोगिताओं में हावी हैं।
+CPA अभी भी state-of-the-art है, लेकिन machine-learning variants (MLA, deep-learning SCA) अब ASCAD-v2 (2023) जैसी competitions में प्रमुख हैं।
 
 ---
 
-## इलेक्ट्रोमैग्नेटिक एनालिसिस (EMA)
-नियर-फील्ड EM प्रॉब्स (500 MHz–3 GHz) पावर एनालिसिस के समान जानकारी लीक करते हैं *बिना* शंट्स डाले। 2024 के शोध ने स्पेक्ट्रम सहसंबंध और कम लागत वाले RTL-SDR फ्रंट-एंड का उपयोग करके **>10 cm** की दूरी पर STM32 से कुंजी पुनर्प्राप्ति का प्रदर्शन किया।
+## Electromagnetic Analysis (EMA)
+Near-field EM probes (500 MHz–3 GHz) shunts डाले बिना power analysis के समान information leak करते हैं। 2024 के research ने spectrum correlation और low-cost RTL-SDR front-ends का उपयोग करके STM32 से **>10 cm** की दूरी पर key recovery प्रदर्शित की।
 
 ---
 
-## टाइमिंग और माइक्रो-आर्किटेक्चरल हमले
-आधुनिक CPUs साझा संसाधनों के माध्यम से रहस्य लीक करते हैं:
-* **Hertzbleed (2022)** – DVFS आवृत्ति स्केलिंग हैमिंग वेट के साथ सहसंबंधित है, *दूरस्थ* रूप से EdDSA कुंजी निकालने की अनुमति देता है।
-* **Downfall / Gather Data Sampling (Intel, 2023)** – SMT थ्रेड्स के बीच AVX-gather डेटा पढ़ने के लिए ट्रांजिएंट-एक्जीक्यूशन।
-* **Zenbleed (AMD, 2023) और Inception (AMD, 2023)** – अनुमानित वेक्टर मिस-प्रेडिक्शन क्रॉस-डोमेन रजिस्टर लीक करता है।
+## Timing & Micro-architectural Attacks
+Modern CPUs shared resources के माध्यम से secrets leak करते हैं:
+* **Hertzbleed (2022)** – DVFS frequency scaling Hamming weight से correlate होती है, जिससे *remote* EdDSA keys extraction संभव होता है।<sup>[[2]](#references)</sup>
+* **Downfall / Gather Data Sampling (Intel, 2023)** – SMT threads के बीच AVX-gather data पढ़ने के लिए transient-execution।
+* **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – speculative vector mis-prediction cross-domain registers leak करता है।
 
 ---
 
-## ध्वनिक और ऑप्टिकल हमले
-* 2024 "​iLeakKeys" ने एक **स्मार्टफोन माइक्रोफोन के माध्यम से Zoom** पर लैपटॉप की कीस्ट्रोक्स को 95% सटीकता के साथ पुनर्प्राप्त किया, CNN क्लासिफायर का उपयोग करते हुए।
-* उच्च गति के फोटोडायोड्स DDR4 गतिविधि LED को कैप्चर करते हैं और <1 मिनट के भीतर AES राउंड कुंजी को पुनर्निर्माण करते हैं (BlackHat 2023)।
+## Acoustic & Optical Attacks
+* 2024 के "​iLeakKeys" ने CNN classifier का उपयोग करके **smart-phone microphone over Zoom** से laptop keystrokes recover करने में 95 % accuracy प्रदर्शित की।
+* High-speed photodiodes DDR4 activity LED को capture करते हैं और AES round keys को <1 minute में reconstruct करते हैं (BlackHat 2023)।
 
 ---
 
-## फॉल्ट इंजेक्शन और डिफरेंशियल फॉल्ट एनालिसिस (DFA)
-फॉल्ट्स को साइड-चैनल लीक के साथ मिलाकर कुंजी खोज को तेज करता है (जैसे 1-ट्रेस AES DFA)। हाल के शौकिया कीमत वाले उपकरण:
-* **ChipSHOUTER और PicoEMP** – सब-1 ns इलेक्ट्रोमैग्नेटिक पल्स ग्लिचिंग।
-* **GlitchKit-R5 (2025)** – RISC-V SoCs का समर्थन करने वाला ओपन-सोर्स क्लॉक/वोल्टेज ग्लिच प्लेटफॉर्म।
+## Fault Injection & Differential Fault Analysis (DFA)
+Faults को side-channel leakage के साथ combine करने से key search आसान हो जाती है (जैसे, 1-trace AES DFA)। Recent hobbyist-priced tools:
+* **ChipSHOUTER & PicoEMP** – sub-1 ns electromagnetic pulse glitching।
+* **GlitchKit-R5 (2025)** – RISC-V SoCs को support करने वाला open-source clock/voltage glitch platform।
 
 ---
 
-## सामान्य हमले का कार्यप्रवाह
-1. लीक चैनल और माउंट पॉइंट (VCC पिन, डिकपलिंग कैप, नजदीकी क्षेत्र स्थान) की पहचान करें।
-2. ट्रिगर डालें (GPIO या पैटर्न-आधारित)।
-3. उचित सैंपलिंग/फिल्टर के साथ >1 k ट्रेस एकत्र करें।
-4. प्री-प्रोसेस (संरेखण, औसत हटाना, LP/HP फ़िल्टर, वेवलेट, PCA)।
-5. सांख्यिकीय या ML कुंजी पुनर्प्राप्ति (CPA, MIA, DL-SCA)।
-6. आउटलेयर्स पर मान्य करें और पुनरावृत्ति करें।
+## Typical Attack Workflow
+1. Leakage channel और mount point की पहचान करें (VCC pin, decoupling cap, near-field spot)।
+2. Trigger insert करें (GPIO या pattern-based)।
+3. Proper sampling/filters के साथ >1 k traces collect करें।
+4. Pre-process करें (alignment, mean removal, LP/HP filter, wavelet, PCA)।
+5. Statistical या ML key recovery करें (CPA, MIA, DL-SCA)।
+6. Validate करें और outliers पर iterate करें।
 
 ---
 
-## रक्षा और हार्डनिंग
-* **कॉन्टेंट-टाइम** कार्यान्वयन और मेमोरी-हार्ड एल्गोरिदम।
-* **मास्किंग/शफलिंग** – रहस्यों को यादृच्छिक शेयरों में विभाजित करें; पहले-आदेश प्रतिरोध TVLA द्वारा प्रमाणित।
-* **हाइडिंग** – ऑन-चिप वोल्टेज रेगुलेटर, यादृच्छिक घड़ी, डुअल-रेल लॉजिक, EM शील्ड।
-* **फॉल्ट डिटेक्शन** – अतिरिक्त गणना, थ्रेशोल्ड सिग्नेचर।
-* **ऑपरेशनल** – क्रिप्टो कर्नेल में DVFS/टर्बो को निष्क्रिय करें, SMT को अलग करें, मल्टी-टेनेंट क्लाउड में सह-स्थान को प्रतिबंधित करें।
+## Defences & Hardening
+* **Constant-time** implementations और memory-hard algorithms।
+* **Masking/shuffling** – secrets को random shares में split करें; first-order resistance TVLA द्वारा certified हो।
+* **Hiding** – on-chip voltage regulators, randomised clock, dual-rail logic, EM shields।
+* **Fault detection** – redundant computation, threshold signatures।
+* **Operational** – crypto kernels में DVFS/turbo disable करें, SMT isolate करें, multi-tenant clouds में co-location prohibit करें।
 
 ---
 
-## उपकरण और ढांचे
-* **ChipWhisperer-Husky** (2024) – 500 MS/s स्कोप + Cortex-M ट्रिगर; ऊपर की तरह Python API।
-* **Riscure Inspector और FI** – व्यावसायिक, स्वचालित लीक आकलन का समर्थन करता है (TVLA-2.0)।
-* **scaaml** – TensorFlow-आधारित डीप-लर्निंग SCA लाइब्रेरी (v1.2 – 2025)।
-* **pyecsca** – ANSSI ओपन-सोर्स ECC SCA ढांचा।
+## Tools & Frameworks
+* **ChipWhisperer-Husky** (2024) – 500 MS/s scope + Cortex-M trigger; ऊपर दिया गया Python API।<sup>[[1]](#references)</sup>
+* **Riscure Inspector & FI** – commercial, automated leakage assessment (TVLA-2.0) support करता है।
+* **scaaml** – TensorFlow-based deep-learning SCA library (v1.2 – 2025)।
+* **pyecsca** – ANSSI open-source ECC SCA framework।
 
 ---
 
-## संदर्भ
+## References
 
-* [ChipWhisperer Documentation](https://chipwhisperer.readthedocs.io/en/latest/)
-* [Hertzbleed Attack Paper](https://www.hertzbleed.com/)
+- [1] [ChipWhisperer Documentation](https://chipwhisperer.readthedocs.io/en/latest/)
+- [2] [Hertzbleed Attack Paper](https://www.hertzbleed.com/)
 
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,4 +1,4 @@
-# रिवर्सिंग टूल्स और बेसिक मेथड्स
+# Reversing Tools और Basic Methods
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -12,9 +12,9 @@ Software:
 
 Online:
 
-- Use [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) to **decompile** from wasm (binary) to wat (clear text)
-- Use [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) to **compile** from wat to wasm
-- you can also try to use [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) to decompile
+- wasm (binary) से wat (clear text) में **decompile** करने के लिए [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) का उपयोग करें
+- wat से wasm में **compile** करने के लिए [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) का उपयोग करें
+- decompile करने के लिए आप [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) का भी उपयोग कर सकते हैं
 
 Software:
 
@@ -25,29 +25,29 @@ Software:
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek एक decompiler है जो **decompiles and examines multiple formats**, including **libraries** (.dll), **Windows metadata file**s (.winmd), और **executables** (.exe). एक बार decompile होने पर, assembly को Visual Studio project (.csproj) के रूप में save किया जा सकता है।
+dotPeek एक decompiler है जो **कई formats को decompile और examine करता है**, जिसमें **libraries** (.dll), **Windows metadata file**s (.winmd), और **executables** (.exe) शामिल हैं। Decompile करने के बाद, किसी assembly को Visual Studio project (.csproj) के रूप में save किया जा सकता है।
 
-यहाँ फायदा यह है कि अगर lost source code को legacy assembly से restore करना हो, तो यह action time बचा सकता है। आगे, dotPeek decompiled code में आसान navigation देता है, जिससे यह **Xamarin algorithm analysis.** के लिए perfect tools में से एक बन जाता है।
+इसका लाभ यह है कि यदि किसी lost source code को किसी legacy assembly से restore करने की आवश्यकता हो, तो यह action समय बचा सकता है। इसके अलावा, dotPeek decompiled code में सुविधाजनक navigation प्रदान करता है, जिससे यह **Xamarin algorithm analysis** के लिए perfect tools में से एक बन जाता है।
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-एक comprehensive add-in model और API के साथ जो tool को आपकी exact needs के अनुसार extend करती है, .NET reflector time बचाता है और development को सरल बनाता है। आइए देखें कि reverse engineering services की इतनी सारी सुविधाएँ यह tool क्या देती है:
+एक comprehensive add-in model और tool को आपकी exact needs के अनुसार extend करने वाली API के साथ, .NET reflector समय बचाता है और development को सरल बनाता है। आइए उन reverse engineering services पर एक नज़र डालें जो यह tool प्रदान करता है:
 
-- यह दिखाता है कि data library या component के through कैसे flow करता है
-- .NET languages और frameworks के implementation और usage पर insight देता है
-- undocumented और unexposed functionality ढूँढता है ताकि APIs और technologies से और अधिक निकाला जा सके
-- dependencies और अलग-अलग assemblies ढूँढता है
-- आपके code, third-party components, और libraries में errors की exact location track करता है।
-- आप जिन सभी .NET code के साथ काम करते हैं, उनके source में debug करता है।
+- यह जानकारी देता है कि data किसी library या component के माध्यम से कैसे flow करता है
+- .NET languages और frameworks के implementation और usage की जानकारी देता है
+- उपयोग की जा रही APIs और technologies से अधिक लाभ प्राप्त करने के लिए undocumented और unexposed functionality ढूंढता है।
+- dependencies और अलग-अलग assemblies ढूंढता है
+- आपके code, third-party components और libraries में errors का exact location ढूंढता है।
+- आपके द्वारा उपयोग किए जा रहे सभी .NET code के source में debug करता है।
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[Visual Studio Code के लिए ILSpy plugin](https://github.com/icsharpcode/ilspy-vscode): आप इसे किसी भी OS में इस्तेमाल कर सकते हैं (आप इसे सीधे VSCode से install कर सकते हैं, git download करने की जरूरत नहीं). **Extensions** पर click करें और **ILSpy search** करें।\
-अगर आपको **decompile**, **modify** और फिर से **recompile** करना है, तो आप [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) या इसका actively maintained fork, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases) use कर सकते हैं। (**Right Click -> Modify Method** से function के अंदर कुछ बदल सकते हैं).
+[ILSpy plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): आप इसे किसी भी OS में उपयोग कर सकते हैं (आप इसे सीधे VSCode से install कर सकते हैं, git download करने की आवश्यकता नहीं है। **Extensions** पर click करें और **search ILSpy** करें)।\
+यदि आपको फिर से **decompile**, **modify** और **recompile** करना है, तो आप [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) या इसके actively maintained fork, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases) का उपयोग कर सकते हैं। (किसी function के अंदर कुछ बदलने के लिए **Right Click -> Modify Method** करें)।
 
 ### DNSpy Logging
 
-**DNSpy log कुछ information को file में** करने के लिए, आप यह snippet use कर सकते हैं:
+**DNSpy को किसी file में कुछ information log करने** के लिए आप इस snippet का उपयोग कर सकते हैं:
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -55,17 +55,17 @@ File.AppendAllText(path, "Password: " + password + "\n");
 ```
 ### DNSpy Debugging
 
-DNSpy का उपयोग करके code को debug करने के लिए आपको:
+DNSpy का उपयोग करके code debug करने के लिए आपको:
 
-सबसे पहले, **debugging** से संबंधित **Assembly attributes** बदलने होंगे:
+सबसे पहले, **debugging** से संबंधित **Assembly attributes** बदलें:
 
-![DNSpy Logging - DNSpy Debugging: First, change the Assembly attributes related to debugging](<../../images/image (973).png>)
+![DNSpy Logging - DNSpy Debugging: सबसे पहले, debugging से संबंधित Assembly attributes बदलें](<../../images/image (973).png>)
 
-From:
+से:
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-के लिए:
+प्रति:
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
@@ -74,89 +74,91 @@ DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
 और **compile** पर क्लिक करें:
 
-![DNSpy Logging - DNSpy Debugging: And click on compile](<../../images/image (314) (1).png>)
+![DNSpy Logging - DNSpy Debugging: compile पर क्लिक करें](<../../images/image (314) (1).png>)
 
-फिर नए file को _**File >> Save module...**_ के जरिए save करें:
+फिर _**File >> Save module...**_ के माध्यम से नई फ़ाइल सेव करें:
 
-![DNSpy Logging - DNSpy Debugging: Then save the new file via File Save module](<../../images/image (602).png>)
+![DNSpy Logging - DNSpy Debugging: फिर File Save module के माध्यम से नई फ़ाइल सेव करें](<../../images/image (602).png>)
 
-यह आवश्यक है क्योंकि अगर आप ऐसा नहीं करते हैं, तो **runtime** पर code में कई **optimisations** लागू हो जाएंगे और यह संभव है कि debugging के दौरान कोई **break-point कभी hit न हो** या कुछ **variables मौजूद ही न हों**।
+यह आवश्यक है, क्योंकि यदि आप ऐसा नहीं करते हैं, तो **runtime** पर code में कई **optimisations** लागू हो जाएँगी और संभव है कि debugging के दौरान **break-point कभी hit न हो** या कुछ **variables मौजूद न हों**।
 
-फिर, अगर आपकी .NET application **IIS** द्वारा **run** की जा रही है, तो आप इसे इस तरह **restart** कर सकते हैं:
+फिर, यदि आपका .NET application **IIS** द्वारा **run** किया जा रहा है, तो आप इसे इस प्रकार **restart** कर सकते हैं:
 ```
 iisreset /noforce
 ```
-Then, in order to start debugging you should close all the opened files and inside the **Debug Tab** select **Attach to Process...**:
+फिर, debugging शुरू करने के लिए आपको खोली गई सभी files बंद करनी चाहिए और **Debug Tab** के अंदर **Attach to Process...** चुनना चाहिए:
 
-![DNSpy Logging - DNSpy Debugging: Then, in order to start debugging you should close all the opened files and inside the Debug Tab select Attach to Process](<../../images/image (318).png>)
+![DNSpy Logging - DNSpy Debugging: फिर, debugging शुरू करने के लिए आपको खोली गई सभी files बंद करनी चाहिए और Debug Tab के अंदर Attach to Process चुनना चाहिए](<../../images/image (318).png>)
 
-Then select **w3wp.exe** to attach to the **IIS server** and click **attach**:
+फिर **w3wp.exe** चुनकर **IIS server** से attach करें और **attach** पर क्लिक करें:
 
-![DNSpy Logging - DNSpy Debugging: Then select w3wp.exe to attach to the IIS server and click attach](<../../images/image (113).png>)
+![DNSpy Logging - DNSpy Debugging: फिर IIS server से attach करने के लिए w3wp.exe चुनें और attach पर क्लिक करें](<../../images/image (113).png>)
 
-Now that we are debugging the process, it's time to stop it and load all the modules. First click on _Debug >> Break All_ and then click on _**Debug >> Windows >> Modules**_:
+अब जब हम process को debug कर रहे हैं, इसे रोकने और सभी modules load करने का समय है। पहले _Debug >> Break All_ पर क्लिक करें और फिर _**Debug >> Windows >> Modules**_ पर क्लिक करें:
 
-![DNSpy Logging - DNSpy Debugging: Now that we are debugging the process, it's time to stop it and load all the modules. First click on Debug Break All and then click on Debug Windows Modules](<../../images/image (132).png>)
+![DNSpy Logging - DNSpy Debugging: अब जब हम process को debug कर रहे हैं, इसे रोकने और सभी modules load करने का समय है। पहले Debug Break All पर क्लिक करें और फिर Debug Windows Modules पर क्लिक करें](<../../images/image (132).png>)
 
-![DNSpy Logging - DNSpy Debugging: Now that we are debugging the process, it's time to stop it and load all the modules](<../../images/image (834).png>)
+![DNSpy Logging - DNSpy Debugging: अब जब हम process को debug कर रहे हैं, इसे रोकने और सभी modules load करने का समय है। पहले Debug Break All पर क्लिक करें और फिर Debug Windows Modules पर क्लिक करें](<../../images/image (834).png>)
 
-Click any module on **Modules** and select **Open All Modules**:
+**Modules** में किसी भी module पर क्लिक करें और **Open All Modules** चुनें:
 
-![DNSpy Logging - DNSpy Debugging: Click any module on Modules and select Open All Modules](<../../images/image (922).png>)
+![DNSpy Logging - DNSpy Debugging: Modules में किसी भी module पर क्लिक करें और Open All Modules चुनें](<../../images/image (922).png>)
 
-Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
+**Assembly Explorer** में किसी भी module पर right click करें और **Sort Assemblies** पर क्लिक करें:
 
-![DNSpy Logging - DNSpy Debugging: Right click any module in Assembly Explorer and click Sort Assemblies](<../../images/image (339).png>)
+![DNSpy Logging - DNSpy Debugging: Assembly Explorer में किसी भी module पर right click करें और Sort Assemblies पर क्लिक करें](<../../images/image (339).png>)
 
 ## Java decompiler
 
 [https://github.com/skylot/jadx](https://github.com/skylot/jadx)\
 [https://github.com/java-decompiler/jd-gui/releases](https://github.com/java-decompiler/jd-gui/releases)
 
-## Debugging DLLs
+## DLLs की debugging
 
-### Using IDA
-
-- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
-- Select **Windbg** debugger
-- Select "**Suspend on library load/unload**"
-
-![Debugging DLLs - Using IDA: Select " Suspend on library load/unload "](<../../images/image (868).png>)
-
-- Configure the **parameters** of the execution putting the **path to the DLL** and the function that you want to call:
-
-![Debugging DLLs - Using IDA: Configure the parameters of the execution putting the path to the DLL and the function that you want to call](<../../images/image (704).png>)
-
-Then, when you start debugging **the execution will be stopped when each DLL is loaded**, then, when rundll32 load your DLL the execution will be stopped.
-
-But, how can you get to the code of the DLL that was lodaded? Using this method, I don't know how.
-
-### Using x64dbg/x32dbg
+### IDA का उपयोग
 
 - **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
-- **Change the Command Line** ( _File --> Change Command Line_ ) and set the path of the dll and the function that you want to call, for example: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
-- Change _Options --> Settings_ and select "**DLL Entry**".
-- Then **start the execution**, the debugger will stop at each dll main, at some point you will **stop in the dll Entry of your dll**. From there, just search for the points where you want to put a breakpoint.
+- **Windbg** debugger चुनें
+- "**Suspend on library load/unload**" चुनें
 
-Notice that when the execution is stopped by any reason in win64dbg you can see **in which code you are** looking in the **top of the win64dbg window**:
+![Debugging DLLs - Using IDA: " Suspend on library load/unload " चुनें](<../../images/image (868).png>)
 
-![Using IDA - Using x64dbg/x32dbg: Notice that when the execution is stopped by any reason in win64dbg you can see in which code you are looking in the top of the win64dbg window](<../../images/image (842).png>)
+- Execution के **parameters** configure करें, जिसमें **DLL का path** और वह function डालें जिसे आप call करना चाहते हैं:
 
-Then, looking to this ca see when the execution was stopped in the dll you want to debug.
+![Debugging DLLs - Using IDA: Execution के parameters configure करें, जिसमें DLL का path और वह function डालें जिसे आप call करना चाहते हैं](<../../images/image (704).png>)
+
+फिर, जब आप debugging शुरू करेंगे, **हर DLL के load होने पर execution रुक जाएगा**; इसलिए, जब rundll32 आपकी DLL load करेगा, execution रुक जाएगा।
+
+लेकिन, load की गई DLL के code तक कैसे पहुंचें? इस method का उपयोग करके, मुझे नहीं पता कि यह कैसे किया जा सकता है।
+
+### x64dbg/x32dbg का उपयोग
+
+- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
+- **Command Line बदलें** ( _File --> Change Command Line_ ) और dll का path तथा वह function set करें जिसे आप call करना चाहते हैं, उदाहरण के लिए: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- _Options --> Settings_ बदलें और "**DLL Entry**" चुनें।
+- फिर **execution शुरू करें**; debugger प्रत्येक dll main पर रुक जाएगा और किसी बिंदु पर **आपकी dll के dll Entry पर रुकेंगे**। वहां से, केवल उन points को खोजें जहां आप breakpoint लगाना चाहते हैं।
+
+ध्यान दें कि जब win64dbg में किसी भी कारण से execution रुकता है, तो आप **win64dbg window के शीर्ष पर** देखकर देख सकते हैं कि **आप किस code में हैं**:
+
+![Using IDA - Using x64dbg/x32dbg: ध्यान दें कि जब win64dbg में किसी भी कारण से execution रुकता है, तो आप win64dbg window के शीर्ष पर देखकर देख सकते हैं कि आप किस code में हैं](<../../images/image (842).png>)
+
+फिर, इसे देखकर आप जान सकते हैं कि execution उस dll में कब रुका जिसे आप debug करना चाहते हैं।
 
 ## GUI Apps / Videogames
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them. More info in:
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) एक उपयोगी program है, जो running game की memory में important values कहां save हैं, यह ढूंढने और उन्हें बदलने में मदद करता है। अधिक जानकारी यहां है:
+
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) is a front-end/reverse engineering tool for the GNU Project Debugger (GDB), focused on games. However, it can be used for any reverse-engineering related stuff
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) GNU Project Debugger (GDB) का एक front-end/reverse engineering tool है, जो games पर केंद्रित है। हालांकि, इसका उपयोग reverse-engineering से संबंधित किसी भी काम के लिए किया जा सकता है।
 
-[**Decompiler Explorer**](https://dogbolt.org/) is a web front-end to a number of decompilers. This web service lets you compare the output of different decompilers on small executables.
+[**Decompiler Explorer**](https://dogbolt.org/) कई decompilers का एक web front-end है। यह web service आपको छोटी executables पर अलग-अलग decompilers के output की तुलना करने देती है।
 
 ## ARM & MIPS
+
 
 {{#ref}}
 https://github.com/nongiach/arm_now
@@ -164,48 +166,49 @@ https://github.com/nongiach/arm_now
 
 ## Shellcodes
 
-### Debugging a shellcode with blobrunner
+### blobrunner के साथ shellcode की debugging
 
-[**Blobrunner**](https://github.com/OALabs/BlobRunner) will **allocate** the **shellcode** inside a space of memory, will **indicate** you the **memory address** were the shellcode was allocated and will **stop** the execution.\
-Then, you need to **attach a debugger** (Ida or x64dbg) to the process and put a **breakpoint the indicated memory address** and **resume** the execution. This way you will be debugging the shellcode.
+[**Blobrunner**](https://github.com/OALabs/BlobRunner) **shellcode** को memory के एक हिस्से में **allocate** करेगा, आपको वह **memory address बताएगा** जहां shellcode allocate किया गया है और **execution रोक देगा**।\
+फिर, आपको process से **attach a debugger** (Ida या x64dbg) करना होगा, **बताए गए memory address पर breakpoint लगाना** होगा और **execution resume** करना होगा। इस तरह आप shellcode को debug कर पाएंगे।
 
-The releases github page contains zips containing the compiled releases: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-You can find a slightly modified version of Blobrunner in the following link. In order to compile it just **create a C/C++ project in Visual Studio Code, copy and paste the code and build it**.
+Releases github page में compiled releases वाली zips हैं: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+आप निम्न link में Blobrunner का थोड़ा modified version पा सकते हैं। इसे compile करने के लिए बस **Visual Studio Code में C/C++ project बनाएं, code को copy और paste करें और उसे build करें**।
+
 
 {{#ref}}
 blobrunner.md
 {{#endref}}
 
-### Debugging a shellcode with jmp2it
+### jmp2it के साथ shellcode की debugging
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)is very similar to blobrunner. It will **allocate** the **shellcode** inside a space of memory, and start an **eternal loop**. You then need to **attach the debugger** to the process, **play start wait 2-5 secs and press stop** and you will find yourself inside the **eternal loop**. Jump to the next instruction of the eternal loop as it will be a call to the shellcode, and finally you will find yourself executing the shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) blobrunner के समान है। यह **shellcode** को memory के एक हिस्से में **allocate** करेगा और एक **अनंत loop** शुरू करेगा। इसके बाद आपको process से **debugger attach** करना होगा, **play start दबाएं, 2-5 secs प्रतीक्षा करें और stop दबाएं**, और आप स्वयं को **अनंत loop** के अंदर पाएंगे। अनंत loop की next instruction पर jump करें, क्योंकि वह shellcode को call करेगी; अंततः आप shellcode execute करते हुए पाए जाएंगे।
 
-![Debugging a shellcode with blobrunner - Debugging a shellcode with jmp2it: jmp2it is very similar to blobrunner. It will allocate the shellcode inside a space of memory, and start an...](<../../images/image (509).png>)
+![Debugging a shellcode with blobrunner - Debugging a shellcode with jmp2it: jmp2it blobrunner के समान है। यह shellcode को memory के एक हिस्से में allocate करेगा और एक...](<../../images/image (509).png>)
 
-You can download a compiled version of [jmp2it inside the releases page](https://github.com/adamkramer/jmp2it/releases/).
+आप [releases page में jmp2it का compiled version](https://github.com/adamkramer/jmp2it/releases/) download कर सकते हैं।
 
-### Debugging shellcode using Cutter
+### Cutter का उपयोग करके shellcode की debugging
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) is the GUI of radare. Using cutter you can emulate the shellcode and inspect it dynamically.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) radare का GUI है। Cutter का उपयोग करके आप shellcode को emulate कर सकते हैं और उसका dynamically निरीक्षण कर सकते हैं।
 
-Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it decompiled it correctly, but when I opened it as a shellcode it didn't:
+ध्यान दें कि Cutter आपको "Open File" और "Open Shellcode" की अनुमति देता है। मेरे मामले में, जब मैंने shellcode को file के रूप में खोला, तो उसने उसे सही ढंग से decompile किया; लेकिन जब मैंने उसे shellcode के रूप में खोला, तो ऐसा नहीं हुआ:
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it...](<../../images/image (562).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: ध्यान दें कि Cutter आपको "Open File" और "Open Shellcode" की अनुमति देता है। मेरे मामले में, जब मैंने shellcode को file के रूप में खोला, तो उसने...](<../../images/image (562).png>)
 
-In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically start the emulation from there:
+Emulation को अपनी इच्छित जगह से शुरू करने के लिए वहां bp set करें; ऐसा लगता है कि Cutter automatically वहीं से emulation शुरू कर देगा:
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically...](<../../images/image (589).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: Emulation को अपनी इच्छित जगह से शुरू करने के लिए वहां bp set करें और ऐसा लगता है कि Cutter automatically वहीं से emulation शुरू कर देगा](<../../images/image (589).png>)
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically...](<../../images/image (387).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: Emulation को अपनी इच्छित जगह से शुरू करने के लिए वहां bp set करें और ऐसा लगता है कि Cutter automatically वहीं से emulation शुरू कर देगा](<../../images/image (387).png>)
 
-You can see the stack for example inside a hex dump:
+उदाहरण के लिए, आप stack को hex dump के अंदर देख सकते हैं:
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: You can see the stack for example inside a hex dump](<../../images/image (186).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: उदाहरण के लिए, आप stack को hex dump के अंदर देख सकते हैं](<../../images/image (186).png>)
 
-### Deobfuscating shellcode and getting executed functions
+### shellcode को deobfuscate करना और executed functions प्राप्त करना
 
-You should try [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
-It will tell you things like **which functions** is the shellcode using and if the shellcode is **decoding** itself in memory.
+आपको [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152) आज़माना चाहिए।\
+यह आपको बताएगा कि shellcode **किन functions** का उपयोग कर रहा है और क्या shellcode memory में स्वयं को **decode** कर रहा है।
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -214,37 +217,37 @@ scdbg.exe -f shellcode -d #Dump decoded shellcode
 scdbg.exe -f shellcode /findsc #Find offset where starts
 scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 ```
-scDbg में एक graphical launcher भी होता है, जहाँ आप अपनी इच्छित options चुनकर shellcode execute कर सकते हैं
+scDbg में एक graphical launcher भी है, जहाँ आप अपनी इच्छित options चुनकर shellcode execute कर सकते हैं
 
-![Debugging shellcode using Cutter - Deobfuscating shellcode and getting executed functions: scDbg also counts with a graphical launcher where you can select the options you want and...](<../../images/image (258).png>)
+![Debugging shellcode using Cutter - Deobfuscating shellcode and getting executed functions: scDbg में एक graphical launcher भी है, जहाँ आप अपनी इच्छित options चुनकर shellcode...](<../../images/image (258).png>)
 
-**Create Dump** option, shellcode में memory के भीतर dynamically कोई change होने पर final shellcode को dump करेगा (decoded shellcode download करने के लिए useful). **start offset** shellcode को किसी specific offset से start करने के लिए useful हो सकता है. **Debug Shell** option, scDbg terminal का उपयोग करके shellcode debug करने के लिए useful है (हालाँकि इस काम के लिए ऊपर बताए गए किसी भी option को मैं बेहतर मानता हूँ, क्योंकि आप Ida या x64dbg use कर पाएँगे).
+**Create Dump** option अंतिम shellcode को dump करेगा, यदि memory में shellcode में dynamically कोई बदलाव किया गया हो (decoded shellcode download करने के लिए उपयोगी)। **start offset** किसी specific offset से shellcode शुरू करने के लिए उपयोगी हो सकता है। **Debug Shell** option scDbg terminal का उपयोग करके shellcode debug करने के लिए उपयोगी है (हालाँकि इस मामले में मुझे पहले समझाए गए options में से कोई भी बेहतर लगता है, क्योंकि आप Ida या x64dbg का उपयोग कर पाएँगे)।
 
 ### CyberChef का उपयोग करके Disassembling
 
-अपनी shellcode file को input के रूप में upload करें और इसे decompile करने के लिए following recipe का उपयोग करें: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+अपनी shellcode file को input के रूप में upload करें और इसे decompile करने के लिए निम्न recipe का उपयोग करें: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## MBA obfuscation deobfuscation
 
-**Mixed Boolean-Arithmetic (MBA)** obfuscation, simple expressions जैसे `x + y` को ऐसे formulas के पीछे छिपाती है जो arithmetic (`+`, `-`, `*`) और bitwise operators (`&`, `|`, `^`, `~`, shifts) को mix करती हैं. महत्वपूर्ण बात यह है कि ये identities आमतौर पर केवल **fixed-width modular arithmetic** के तहत ही सही होती हैं, इसलिए carries और overflows matter करते हैं:
+**Mixed Boolean-Arithmetic (MBA)** obfuscation `x + y` जैसे simple expressions को arithmetic (`+`, `-`, `*`) और bitwise operators (`&`, `|`, `^`, `~`, shifts) को मिलाने वाले formulas के पीछे छिपाता है। महत्वपूर्ण बात यह है कि ये identities आमतौर पर केवल **fixed-width modular arithmetic** के अंतर्गत ही सही होती हैं, इसलिए carries और overflows मायने रखते हैं:
 ```c
 (x ^ y) + 2 * (x & y) == x + y
 ```
-यदि आप इस तरह के expression को generic algebra tooling से simplify करते हैं, तो आप आसानी से गलत result पा सकते हैं क्योंकि bit-width semantics को ignore कर दिया गया था।
+यदि आप इस प्रकार के expression को generic algebra tooling से simplify करते हैं, तो आपको आसानी से गलत result मिल सकता है, क्योंकि bit-width semantics को अनदेखा कर दिया गया था।
 
 ### Practical workflow
 
-1. **Keep the original bit-width** lifted code/IR/decompiler output से (`8/16/32/64` bits)।
-2. **Expression को classify करें** simplify करने से पहले:
+1. **Original bit-width बनाए रखें** lifted code/IR/decompiler output (`8/16/32/64` bits) से।
+2. **Expression को classify करें** इसे simplify करने का प्रयास करने से पहले:
 - **Linear**: bitwise atoms के weighted sums
-- **Semilinear**: linear plus constant masks जैसे `x & 0xFF`
+- **Semilinear**: constant masks जैसे `x & 0xFF` के साथ linear
 - **Polynomial**: products दिखाई देते हैं
 - **Mixed**: products और bitwise logic interleaved होते हैं, अक्सर repeated subexpressions के साथ
-3. **हर candidate rewrite को verify करें** random testing या SMT proof से। अगर equivalence prove नहीं हो सकती, तो guessing करने के बजाय original expression को रखें।
+3. **हर candidate rewrite को verify करें** random testing या SMT proof से। यदि equivalence को prove नहीं किया जा सकता, तो अनुमान लगाने के बजाय original expression रखें।
 
 ### CoBRA
 
-[**CoBRA**](https://github.com/trailofbits/CoBRA) malware analysis और protected-binary reversing के लिए एक practical MBA simplifier है। यह expression को classify करता है और एक generic rewrite pass सब पर लागू करने के बजाय specialized pipelines से route करता है।
+[**CoBRA**](https://github.com/trailofbits/CoBRA) malware analysis और protected-binary reversing के लिए एक practical MBA simplifier है। यह expression को classify करता है और हर चीज़ पर एक generic rewrite pass लागू करने के बजाय उसे specialized pipelines के माध्यम से process करता है।<sup>[[1]](#references)[[2]](#references)</sup>
 
 Quick usage:
 ```bash
@@ -261,76 +264,76 @@ cobra-cli --mba "(a^b)+(a&b)+(a&b)" --verify
 ```
 उपयोगी मामले:
 
-- **Linear MBA**: CoBRA Boolean inputs पर expression का मूल्यांकन करता है, एक signature निकालता है, और pattern matching, ANF conversion, और coefficient interpolation जैसी कई recovery methods को एक साथ चलाता है।
-- **Semilinear MBA**: constant-masked atoms को bit-partitioned reconstruction से फिर से बनाया जाता है ताकि masked regions सही रहें।
-- **Polynomial/Mixed MBA**: products को cores में decomposed किया जाता है और outer relation को simplify करने से पहले repeated subexpressions को temporaries में lift किया जा सकता है।
+- **Linear MBA**: CoBRA Boolean inputs पर expression को evaluate करता है, एक signature derive करता है, और pattern matching, ANF conversion तथा coefficient interpolation जैसी कई recovery methods को parallel में आजमाता है।
+- **Semilinear MBA**: constant-masked atoms को bit-partitioned reconstruction के साथ फिर से बनाया जाता है, ताकि masked regions सही बने रहें।
+- **Polynomial/Mixed MBA**: products को cores में decompose किया जाता है और simplifying the outer relation से पहले repeated subexpressions को temporaries में lift किया जा सकता है।
 
-एक mixed identity का उदाहरण जिसे recover करने की कोशिश करना अक्सर worthwhile होता है:
+एक mixed identity का उदाहरण, जिसे recover करने की कोशिश करना आमतौर पर उपयोगी होता है:
 ```c
 (x & y) * (x | y) + (x & ~y) * (~x & y)
 ```
-यह इस तरह संक्षेपित किया जा सकता है:
+इसे इस रूप में संक्षिप्त किया जा सकता है:
 ```c
 x * y
 ```
 ### Reversing notes
 
-- Prefer running CoBRA on **lifted IR expressions** or decompiler output after you isolated the exact computation.
-- Use `--bitwidth` explicitly when the expression came from masked arithmetic or narrow registers.
-- If you need a stronger proof step, check the local Z3 notes here:
+- Exact computation को isolate करने के बाद CoBRA को **lifted IR expressions** या decompiler output पर चलाना बेहतर है।
+- जब expression masked arithmetic या narrow registers से आया हो, तो `--bitwidth` को स्पष्ट रूप से इस्तेमाल करें।
+- यदि आपको अधिक मजबूत proof step की आवश्यकता हो, तो यहां दिए गए local Z3 notes देखें:
 
 
 {{#ref}}
 satisfiability-modulo-theories-smt-z3.md
 {{#endref}}
 
-- CoBRA also ships as an **LLVM pass plugin** (`libCobraPass.so`), which is useful when you want to normalize MBA-heavy LLVM IR before later analysis passes.
-- Unsupported carry-sensitive mixed-domain residuals should be treated as a signal to keep the original expression and reason about the carry path manually.
+- CoBRA एक **LLVM pass plugin** (`libCobraPass.so`) के रूप में भी उपलब्ध है, जो बाद के analysis passes से पहले MBA-heavy LLVM IR को normalize करने में उपयोगी है।
+- Unsupported carry-sensitive mixed-domain residuals को original expression को बनाए रखने और carry path पर manually reasoning करने के संकेत के रूप में समझना चाहिए।
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-This obfuscator **सभी instructions को `mov` के लिए modify करता है**(yeah, really cool). It also uses interruptions to change executions flows. For more information about how does it works:
+यह obfuscator **`mov` के लिए सभी instructions को modify करता है** (हां, सच में काफी cool)। यह execution flows को बदलने के लिए interrupts का भी उपयोग करता है। यह कैसे काम करता है, इसकी अधिक जानकारी के लिए:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-If you are lucky [demovfuscator](https://github.com/kirschju/demovfuscator) will deofuscate the binary. It has several dependencies
+यदि आप lucky हैं, तो [demovfuscator](https://github.com/kirschju/demovfuscator) binary को deofuscate कर देगा। इसकी कई dependencies हैं
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
 ```
-And [install keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
+और [install keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-If you are playing a **CTF, this workaround to find the flag** could be very useful: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+यदि आप **CTF खेल रहे हैं, तो flag खोजने के लिए यह workaround** बहुत उपयोगी हो सकता है: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
-To find the **entry point** search the functions by `::main` like in:
+**entry point** खोजने के लिए functions में `::main` से search करें, जैसा कि इसमें दिखाया गया है:
 
-![Movfuscator - Rust: To find the entry point search the functions by ::main like in](<../../images/image (1080).png>)
+![Movfuscator - Rust: entry point खोजने के लिए functions में ::main से search करें, जैसा कि इसमें दिखाया गया है](<../../images/image (1080).png>)
 
-In this case the binary was called authenticator, so it's pretty obvious that this is the interesting main function.\
-Having the **name** of the **functions** being called, search for them on the **Internet** to learn about their **inputs** and **outputs**.
+इस मामले में binary का नाम authenticator था, इसलिए यह स्पष्ट है कि यही महत्वपूर्ण main function है।\
+जिन **functions** को call किया जा रहा है, उनके **नाम** से **Internet** पर search करें और उनके **inputs** तथा **outputs** के बारे में जानें।
 
-### Recovering Rust strings from ELF firmware
+### ELF firmware से Rust strings recover करना
 
-In **Rust ELF** binaries, many static strings are not referenced as C-style NUL-terminated pointers. A common `rustc` layout is a **pointer/length tuple** inside **`.data.rel.ro`** pointing into the real string blob stored in **`.rodata`**:
+**Rust ELF** binaries में, कई static strings को C-style NUL-terminated pointers के रूप में reference नहीं किया जाता। एक सामान्य `rustc` layout में **`.data.rel.ro`** के अंदर एक **pointer/length tuple** होता है, जो **`.rodata`** में stored वास्तविक string blob की ओर point करता है:<sup>[[3]](#references)</sup>
 ```text
 [8-byte little-endian pointer][8-byte little-endian length]
 ```
-इसका मतलब है कि `strings` या डिफ़ॉल्ट Ghidra analysis आस-पास की strings को merge कर सकता है या cross-references को पूरी तरह miss कर सकता है।
+इसका मतलब है कि `strings` या default Ghidra analysis adjacent strings को merge कर सकता है या cross-references को पूरी तरह miss कर सकता है।
 
-Quick workflow:
+त्वरित workflow:
 ```bash
 readelf -S <bin>
 objdump -h <bin>
 ```
 1. **`.rodata`** का virtual address और size प्राप्त करें।
 2. **`.data.rel.ro`** को एक-एक word करके enumerate करें।
-3. `.rodata` address range के अंदर किसी भी value को candidate string pointer मानें।
+3. `.rodata` address range के अंदर आने वाली किसी भी value को candidate string pointer मानें।
 4. अगले word को candidate length मानें।
-5. sanity filters लागू करें (उदाहरण के लिए, lengths को **4** और **100** bytes के बीच रखें)।
-6. `0x00` तक scan करने के बजाय `.rodata` से exactly `length` bytes पढ़ें।
+5. Sanity filters लागू करें (उदाहरण के लिए, **4** और **100** bytes के बीच की lengths रखें)।
+6. `0x00` तक scan करने के बजाय `.rodata` से ठीक `length` bytes पढ़ें।
 
 Minimal extractor logic:
 ```python
@@ -341,33 +344,33 @@ if rodata_start <= ptr < rodata_end and 4 <= length <= 100:
 start = ptr - rodata_start
 print(rodata[start:start+length])
 ```
-यह खास तौर पर firmware reversing में उपयोगी है क्योंकि recovered Rust strings अक्सर **HTTP routes, RPC names, log messages, assertions, filenames, config keys, command handlers, and auth-related logic** को reveal करती हैं।
+यह firmware reversing में विशेष रूप से उपयोगी है, क्योंकि recovered Rust strings अक्सर **HTTP routes, RPC names, log messages, assertions, filenames, config keys, command handlers, और auth-related logic** प्रकट करते हैं।
 
-अगर Ghidra उन strings को miss कर दे, तो एक custom script/plugin चलाएँ जो वही heuristic apply करे और referenced `.rodata` offsets पर string data बनाए। Pen Test Partners के published `rust-strings` और `RustStrings.py` tools इस idea को अन्य **word sizes, endianness, and section layouts** के लिए adapt करने के अच्छे reference हैं।
+यदि Ghidra उन strings को miss कर देता है, तो एक custom script/plugin चलाएँ, जो उसी heuristic को लागू करे और referenced `.rodata` offsets पर string data बनाए। Pen Test Partners के published `rust-strings` और `RustStrings.py` tools इस विचार को अन्य **word sizes, endianness, और section layouts** के लिए अनुकूलित करने हेतु अच्छे references हैं।<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
 ## **Delphi**
 
-Delphi compiled binaries के लिए आप [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR) का उपयोग कर सकते हैं
+Delphi compiled binaries के लिए आप [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR) का उपयोग कर सकते हैं।
 
-अगर आपको किसी Delphi binary को reverse करना हो, तो मैं IDA plugin [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi) उपयोग करने की सलाह दूँगा
+यदि आपको किसी Delphi binary को reverse करना हो, तो मैं आपको IDA plugin [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi) का उपयोग करने का सुझाव दूँगा।
 
-बस **ATL+f7** (IDA में python plugin import) दबाएँ और python plugin select करें।
+बस **ATL+f7** दबाएँ (IDA में python plugin import करें) और python plugin चुनें।
 
-यह plugin debugging की शुरुआत में binary को execute करेगा और function names को dynamically resolve करेगा। Debugging शुरू करने के बाद फिर से Start button (हरा वाला या f9) दबाएँ और real code की शुरुआत में एक breakpoint hit होगा।
+यह plugin binary को execute करेगा और debugging की शुरुआत में function names को dynamically resolve करेगा। Debugging शुरू करने के बाद फिर से Start button (हरा वाला या f9) दबाएँ और real code की शुरुआत में एक breakpoint hit होगा।
 
-यह भी बहुत interesting है क्योंकि अगर आप graphic application में कोई button press करते हैं, तो debugger उस function में stop हो जाएगा जो उस bottom द्वारा execute किया गया है।
+यह इसलिए भी काफी उपयोगी है क्योंकि यदि आप graphic application में कोई button दबाते हैं, तो debugger उस button द्वारा execute किए गए function पर रुक जाएगा।
 
 ## Golang
 
-अगर आपको किसी Golang binary को reverse करना हो, तो मैं IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper) उपयोग करने की सलाह दूँगा
+यदि आपको किसी Golang binary को reverse करना हो, तो मैं आपको IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper) का उपयोग करने का सुझाव दूँगा।
 
-बस **ATL+f7** (IDA में python plugin import) दबाएँ और python plugin select करें।
+बस **ATL+f7** दबाएँ (IDA में python plugin import करें) और python plugin चुनें।
 
-यह functions के names resolve कर देगा।
+यह functions के names को resolve कर देगा।
 
 ## Compiled Python
 
-इस page पर आप देख सकते हैं कि ELF/EXE python compiled binary से python code कैसे निकालें:
+इस page पर आप जान सकते हैं कि ELF/EXE python compiled binary से python code कैसे प्राप्त करें:
 
 
 {{#ref}}
@@ -376,18 +379,18 @@ Delphi compiled binaries के लिए आप [https://github.com/crypto2011/
 
 ## GBA - Game Body Advance
 
-अगर आपके पास किसी GBA game का **binary** है, तो आप उसे **emulate** और **debug** करने के लिए अलग-अलग tools का उपयोग कर सकते हैं:
+यदि आपको किसी GBA game की **binary** मिलती है, तो आप इसे **emulate** और **debug** करने के लिए अलग-अलग tools का उपयोग कर सकते हैं:
 
-- [**no$gba**](https://problemkaputt.de/gba.htm) (_Download the debug version_) - interface वाला debugger शामिल है
+- [**no$gba**](https://problemkaputt.de/gba.htm) (_Download the debug version_) - Interface के साथ debugger शामिल है
 - [**mgba** ](https://mgba.io)- CLI debugger शामिल है
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra plugin
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra plugin
 
-[**no$gba**](https://problemkaputt.de/gba.htm) में, _**Options --> Emulation Setup --> Controls**_** ** में आप देख सकते हैं कि Game Boy Advance **buttons** कैसे press करने हैं
+[**no$gba**](https://problemkaputt.de/gba.htm) में, _**Options --> Emulation Setup --> Controls**_** ** के अंतर्गत आप देख सकते हैं कि Game Boy Advance के **buttons** कैसे दबाने हैं।
 
-![no$gba controls configuration showing Game Boy Advance button mappings](<../../images/image (581).png>)
+![Game Boy Advance button mappings दिखाने वाला no$gba controls configuration](<../../images/image (581).png>)
 
-जब इसे press किया जाता है, तो हर **key has a value** जिससे उसे identify किया जाता है:
+दबाने पर, प्रत्येक **key has a value** होती है, जिससे उसकी पहचान की जा सकती है:
 ```
 A = 1
 B = 2
@@ -400,13 +403,13 @@ DOWN = 128
 R = 256
 L = 256
 ```
-तो, इस तरह के program में, दिलचस्प हिस्सा होगा **program user input को कैसे treat करता है**। **0x4000130** address पर आपको आमतौर पर मिलने वाला function मिलेगा: **KEYINPUT**।
+तो, इस तरह के program में दिलचस्प हिस्सा यह होगा कि **program user input के साथ कैसे व्यवहार करता है**। Address **0x4000130** पर आपको आमतौर पर मिलने वाला function: **KEYINPUT** मिलेगा।
 
-![Ghidra view of a GBA binary referencing KEYINPUT at address 0x4000130](<../../images/image (447).png>)
+![0x4000130 address पर KEYINPUT को reference करने वाले GBA binary का Ghidra view](<../../images/image (447).png>)
 
-पिछली image में आप देख सकते हैं कि function को **FUN_080015a8** से call किया गया है (addresses: _0x080015fa_ and _0x080017ac_)।
+पिछली image में आप देख सकते हैं कि function को **FUN_080015a8** से call किया गया है (addresses: _0x080015fa_ और _0x080017ac_)।
 
-उस function में, कुछ init operations के बाद (जिनका कोई importance नहीं है):
+उस function में, कुछ init operations के बाद (जिनका कोई महत्व नहीं है):
 ```c
 void FUN_080015a8(void)
 
@@ -427,7 +430,7 @@ FUN_08000dd0(&DAT_02009584,0x6000000,&DAT_030000dc);
 FUN_08000354(&DAT_030000dc,0x3c);
 uVar4 = DAT_030004d8;
 ```
-यह कोड मिला:
+इसमें यह code मिला है:
 ```c
 do {
 DAT_030004da = uVar4; //This is the last key pressed
@@ -439,7 +442,7 @@ uVar2 = DAT_030004dc;
 uVar1 = *puVar6;
 if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-अंतिम if यह जांच रहा है कि **`uVar4`** **last Keys** में है और यह current key नहीं है, जिसे button छोड़ना भी कहा जाता है (current key **`uVar1`** में stored है)।
+अंतिम **`if`** यह जांच रहा है कि **`uVar4`** पिछली **Keys** में है और current key नहीं है; इसे button छोड़ना भी कहा जाता है (current key **`uVar1`** में stored है)।
 ```c
 if (uVar1 == 4) {
 DAT_030000d4 = 0;
@@ -467,17 +470,17 @@ FUN_08000864();
 if (uVar1 == 0x10) {
 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
-In the previous code you can see that we are comparing **uVar1** (वह स्थान जहाँ **दबाए गए button का value** है) with some values:
+पिछले code में आप देख सकते हैं कि हम **uVar1** (वह स्थान जहाँ **दबाए गए button की value** होती है) की तुलना कुछ values से कर रहे हैं:
 
-- First, it's compared with the **value 4** (**SELECT** button): In the challenge this button clears the screen
-- Then, it's comparing it with the **value 8** (**START** button): In the challenge this checks is the code is valid to get the flag.
-- In this case the var **`DAT_030000d8`** is compared with 0xf3 and if the value is the same some code is executed.
-- In any other cases, some cont (**`DAT_030000d4`**) is checked. It's a cont because it's adding 1 right after entering in the code.\
-**I**f less than 8 something that involves **adding** values to **`DAT_030000d8`** is done (basically it's adding the values of the keys pressed in this variable as long as the cont is less than 8).
+- सबसे पहले, इसकी तुलना **value 4** (**SELECT** button) से की जाती है: challenge में यह button screen को clear करता है
+- फिर, इसकी तुलना **value 8** (**START** button) से की जाती है: challenge में यह जाँचता है कि flag प्राप्त करने के लिए code valid है या नहीं।
+- इस मामले में var **`DAT_030000d8`** की तुलना 0xf3 से की जाती है और यदि value समान हो, तो कुछ code execute किया जाता है।
+- अन्य सभी मामलों में, कुछ cont (**`DAT_030000d4`**) को check किया जाता है। यह cont है क्योंकि code में प्रवेश करने के तुरंत बाद इसमें 1 जोड़ा जाता है।\
+**य**दि यह 8 से कम है, तो **`DAT_030000d8`** में values **add** करने से संबंधित कुछ किया जाता है (मूल रूप से, जब तक cont 8 से कम है, तब तक दबाई गई keys की values इस variable में add की जाती हैं)।
 
-So, in this challenge, knowing the values of the buttons, you needed to **press a combination with a length smaller than 8 that the resulting addition is 0xf3.**
+इसलिए, इस challenge में, buttons की values जानने के बाद, आपको **8 से छोटी length वाला ऐसा combination press करना था जिसका resulting addition 0xf3 हो।**<sup>[[6]](#references)</sup>
 
-**Reference for this tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
+**इस tutorial का Reference:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
 ## Game Boy
 
@@ -493,10 +496,11 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 
 ## References
 
-- [Simplifying MBA obfuscation with CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
-- [Trail of Bits CoBRA repository](https://github.com/trailofbits/CoBRA)
-- [Decoding Rust strings - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
-- [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
-- [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
+- [1] [CoBRA के साथ MBA obfuscation को सरल बनाना](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
+- [2] [Trail of Bits CoBRA repository](https://github.com/trailofbits/CoBRA)
+- [3] [Rust strings को decode करना - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
+- [4] [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
+- [5] [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
+- [6] [Nostalgia - GBA reversing tutorial (exp.codes)](https://exp.codes/Nostalgia/)
 
 {{#include ../../banners/hacktricks-training.md}}

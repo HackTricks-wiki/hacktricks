@@ -2,75 +2,76 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## How the Infrared Works <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
+## Infrared कैसे काम करता है <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**इन्फ्रारेड प्रकाश मानवों के लिए अदृश्य है**। IR तरंग दैर्ध्य **0.7 से 1000 माइक्रोन** के बीच है। घरेलू रिमोट डेटा ट्रांसमिशन के लिए IR सिग्नल का उपयोग करते हैं और 0.75..1.4 माइक्रोन के तरंग दैर्ध्य रेंज में काम करते हैं। रिमोट में एक माइक्रोकंट्रोलर एक इन्फ्रारेड LED को एक विशिष्ट आवृत्ति के साथ चमकाता है, डिजिटल सिग्नल को IR सिग्नल में बदलता है।
+**Infrared light मनुष्यों को दिखाई नहीं देती**। IR wavelength **0.7 से 1000 microns** तक होती है। घरेलू remotes data transmission के लिए IR signal का उपयोग करते हैं और 0.75..1.4 microns की wavelength range में काम करते हैं। Remote में मौजूद microcontroller एक infrared LED को विशिष्ट frequency पर blink कराता है, जिससे digital signal IR signal में बदल जाता है।<sup>[[1]](#references)</sup>
 
-IR सिग्नल प्राप्त करने के लिए एक **फोटो रिसीवर** का उपयोग किया जाता है। यह **IR प्रकाश को वोल्टेज पल्स में परिवर्तित करता है**, जो पहले से ही **डिजिटल सिग्नल** होते हैं। आमतौर पर, रिसीवर के अंदर एक **डार्क लाइट फ़िल्टर होता है**, जो **केवल इच्छित तरंग दैर्ध्य को पारित करता है** और शोर को काटता है।
+IR signals प्राप्त करने के लिए **photoreceiver** का उपयोग किया जाता है। यह **IR light को voltage pulses में बदलता है**, जो पहले से ही **digital signals** होते हैं। आमतौर पर receiver के अंदर एक **dark light filter** होता है, जो **केवल वांछित wavelength को गुजरने देता है** और noise को हटा देता है।
 
-### Variety of IR Protocols <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
+### IR Protocols की विविधता <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
-IR प्रोटोकॉल 3 कारकों में भिन्न होते हैं:
+IR protocols 3 factors में अलग होते हैं:
 
-- बिट एन्कोडिंग
-- डेटा संरचना
-- कैरियर आवृत्ति — अक्सर 36..38 kHz के रेंज में
+- bit encoding
+- data structure
+- carrier frequency — अक्सर 36..38 kHz range में
 
-#### Bit encoding ways <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
+#### Bit encoding के तरीके <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
 
-**1. पल्स डिस्टेंस एन्कोडिंग**
+**1. Pulse Distance Encoding**
 
-बिट्स को पल्स के बीच की जगह की अवधि को मॉड्यूलेट करके एन्कोड किया जाता है। पल्स की चौड़ाई स्वयं स्थिर होती है।
+Bits को pulses के बीच के space की duration को modulate करके encode किया जाता है। Pulse की अपनी width constant होती है।
 
 <figure><img src="../../images/image (295).png" alt=""><figcaption></figcaption></figure>
 
-**2. पल्स चौड़ाई एन्कोडिंग**
+**2. Pulse Width Encoding**
 
-बिट्स को पल्स चौड़ाई के मॉड्यूलेशन द्वारा एन्कोड किया जाता है। पल्स बर्स्ट के बाद की जगह की चौड़ाई स्थिर होती है।
+Bits को pulse की width को modulate करके encode किया जाता है। Pulse burst के बाद space की width constant होती है।
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
-**3. फेज़ एन्कोडिंग**
+**3. Phase Encoding**
 
-इसे मैनचेस्टर एन्कोडिंग के रूप में भी जाना जाता है। तार्किक मान पल्स बर्स्ट और जगह के बीच के संक्रमण की ध्रुवता द्वारा परिभाषित किया जाता है। "जगह से पल्स बर्स्ट" तार्किक "0" को दर्शाता है, "पल्स बर्स्ट से जगह" तार्किक "1" को दर्शाता है।
+इसे Manchester encoding के नाम से भी जाना जाता है। Logical value, pulse burst और space के बीच transition की polarity से निर्धारित होती है। "Space to pulse burst" logic "0" को दर्शाता है, जबकि "pulse burst to space" logic "1" को दर्शाता है।
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
-**4. पिछले वाले और अन्य विशेषताओं का संयोजन**
+**4. पिछले तरीकों और अन्य exotics का combination**
 
 > [!TIP]
-> कुछ IR प्रोटोकॉल हैं जो **कई प्रकार के उपकरणों के लिए सार्वभौमिक बनने की कोशिश कर रहे हैं**। सबसे प्रसिद्ध RC5 और NEC हैं। दुर्भाग्यवश, सबसे प्रसिद्ध **का मतलब सबसे सामान्य नहीं है**। मेरे वातावरण में, मैंने केवल दो NEC रिमोट देखे और कोई RC5 नहीं।
+> ऐसे IR protocols मौजूद हैं जो कई प्रकार के devices के लिए **universal बनने का प्रयास कर रहे हैं**। सबसे प्रसिद्ध RC5 और NEC हैं। दुर्भाग्य से, सबसे प्रसिद्ध होने का अर्थ **सबसे common होना नहीं है**। मेरे environment में मुझे केवल दो NEC remotes मिले और कोई भी RC5 remote नहीं मिला।
 >
-> निर्माता अपने अद्वितीय IR प्रोटोकॉल का उपयोग करना पसंद करते हैं, यहां तक कि समान उपकरणों की रेंज के भीतर (उदाहरण के लिए, टीवी-बॉक्स)। इसलिए, विभिन्न कंपनियों के रिमोट और कभी-कभी एक ही कंपनी के विभिन्न मॉडलों के रिमोट अन्य समान प्रकार के उपकरणों के साथ काम नहीं कर पाते हैं।
+> Manufacturers अपने unique IR protocols का उपयोग करना पसंद करते हैं, यहां तक कि एक ही प्रकार के devices (उदाहरण के लिए, TV-boxes) की समान range के अंदर भी। इसलिए अलग-अलग companies के remotes और कभी-कभी एक ही company के अलग-अलग models के remotes, एक ही प्रकार के अन्य devices के साथ काम नहीं कर पाते।
 
-### Exploring an IR signal
+### एक IR signal की जांच
 
-रिमोट IR सिग्नल को देखने का सबसे विश्वसनीय तरीका एक ऑस्सिलोस्कोप का उपयोग करना है। यह प्राप्त सिग्नल को डिमॉड्यूलेट या इनवर्ट नहीं करता, यह बस "जैसा है" प्रदर्शित करता है। यह परीक्षण और डिबगिंग के लिए उपयोगी है। मैं NEC IR प्रोटोकॉल के उदाहरण पर अपेक्षित सिग्नल दिखाऊंगा।
+Remote का IR signal वास्तव में कैसा दिखाई देता है, यह देखने का सबसे reliable तरीका oscilloscope का उपयोग करना है। यह received signal को demodulate या invert नहीं करता, बल्कि उसे "as is" display करता है। यह testing और debugging के लिए उपयोगी है। मैं NEC IR protocol के example से expected signal दिखाऊंगा।
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
-आम तौर पर, एक एन्कोडेड पैकेट की शुरुआत में एक प्रीएंबल होता है। यह रिसीवर को लाभ और पृष्ठभूमि के स्तर को निर्धारित करने की अनुमति देता है। कुछ प्रोटोकॉल बिना प्रीएंबल के होते हैं, उदाहरण के लिए, शार्प।
+आमतौर पर encoded packet की शुरुआत में एक preamble होता है। इससे receiver gain level और background निर्धारित कर सकता है। कुछ protocols में preamble नहीं होता, उदाहरण के लिए, Sharp।
 
-फिर डेटा भेजा जाता है। संरचना, प्रीएंबल, और बिट एन्कोडिंग विधि विशिष्ट प्रोटोकॉल द्वारा निर्धारित की जाती है।
+इसके बाद data transmit किया जाता है। Structure, preamble और bit encoding method specific protocol द्वारा निर्धारित होते हैं।
 
-**NEC IR प्रोटोकॉल** में एक छोटा कमांड और एक पुनरावृत्ति कोड होता है, जो बटन दबाए जाने पर भेजा जाता है। कमांड और पुनरावृत्ति कोड दोनों की शुरुआत में समान प्रीएंबल होती है।
+**NEC IR protocol** में एक short command और एक repeat code होता है, जो button दबाए रखने के दौरान भेजा जाता है। Command और repeat code दोनों की शुरुआत में समान preamble होता है।
 
-NEC **कमांड**, प्रीएंबल के अलावा, एक पता बाइट और एक कमांड-नंबर बाइट से मिलकर बनता है, जिसके द्वारा उपकरण समझता है कि क्या करना है। पता और कमांड-नंबर बाइट्स को विपरीत मानों के साथ डुप्लिकेट किया जाता है, ताकि ट्रांसमिशन की अखंडता की जांच की जा सके। कमांड के अंत में एक अतिरिक्त स्टॉप बिट होता है।
+NEC **command**, preamble के अलावा, एक address byte और एक command-number byte से बना होता है, जिसके आधार पर device समझता है कि क्या perform करना है। Transmission की integrity जांचने के लिए address और command-number bytes को inverse values के साथ duplicate किया जाता है। Command के अंत में एक additional stop bit होता है।
 
-**पुनरावृत्ति कोड** में प्रीएंबल के बाद "1" होता है, जो एक स्टॉप बिट है।
+**Repeat code** में preamble के बाद एक "1" होता है, जो stop bit है।
 
-**तार्किक "0" और "1"** के लिए NEC पल्स डिस्टेंस एन्कोडिंग का उपयोग करता है: पहले, एक पल्स बर्स्ट भेजा जाता है जिसके बाद एक विराम होता है, इसकी लंबाई बिट के मान को निर्धारित करती है।
+**Logic "0" और "1"** के लिए NEC Pulse Distance Encoding का उपयोग करता है: पहले एक pulse burst transmit किया जाता है, जिसके बाद pause होता है; इसकी length bit की value निर्धारित करती है।
 
 ### Air Conditioners
 
-अन्य रिमोट के विपरीत, **एयर कंडीशनर केवल दबाए गए बटन का कोड नहीं भेजते**। वे यह सुनिश्चित करने के लिए **सभी जानकारी भेजते हैं** कि **एयर कंडीशनिंग मशीन और रिमोट समन्वयित हैं**।\
-इससे यह सुनिश्चित होता है कि 20ºC पर सेट की गई मशीन को एक रिमोट से 21ºC पर नहीं बढ़ाया जाएगा, और फिर जब दूसरे रिमोट का उपयोग किया जाएगा, जो अभी भी 20ºC पर है, तो तापमान को और बढ़ाने पर यह "21ºC" (और 22ºC नहीं) पर "बढ़ाएगा"।
+अन्य remotes के विपरीत, **air conditioners केवल दबाए गए button का code transmit नहीं करते**। वे button दबाए जाने पर **सारी information भी transmit करते हैं**, ताकि **air conditioned machine और remote synchronised रहें**।\
+इससे यह स्थिति टलती है कि 20ºC पर set machine को एक remote से 21ºC किया जाए और फिर दूसरे remote से, जिसमें temperature अभी भी 20ºC है, temperature बढ़ाया जाए; वह इसे 22ºC समझने के बजाय 21ºC तक ही "बढ़ाएगा", क्योंकि उसे लगेगा कि temperature 21ºC है।
 
 ---
 
 ## Attacks & Offensive Research <a href="#attacks" id="attacks"></a>
 
-आप Flipper Zero के साथ इन्फ्रारेड पर हमला कर सकते हैं:
+आप Flipper Zero से Infrared पर attack कर सकते हैं:
+
 
 {{#ref}}
 flipper-zero/fz-infrared.md
@@ -78,21 +79,21 @@ flipper-zero/fz-infrared.md
 
 ### Smart-TV / Set-top Box Takeover (EvilScreen)
 
-हालिया अकादमिक कार्य (EvilScreen, 2022) ने प्रदर्शित किया कि **मल्टी-चैनल रिमोट जो इन्फ्रारेड को ब्लूटूथ या वाई-फाई के साथ जोड़ते हैं, का उपयोग आधुनिक स्मार्ट-टीवी को पूरी तरह से हाईजैक करने के लिए किया जा सकता है**। यह हमला उच्च-प्राधिकार IR सेवा कोड को प्रमाणित ब्लूटूथ पैकेटों के साथ जोड़ता है, चैनल-आइसोलेशन को बायपास करता है और मनमाने ऐप लॉन्च, माइक्रोफोन सक्रियण, या भौतिक पहुंच के बिना फैक्ट्री-रीसेट की अनुमति देता है। विभिन्न विक्रेताओं के आठ मुख्यधारा के टीवी — जिसमें एक सैमसंग मॉडल ISO/IEC 27001 अनुपालन का दावा करता है — को कमजोर पाया गया। शमन के लिए विक्रेता फर्मवेयर फिक्स या अप्रयुक्त IR रिसीवर्स को पूरी तरह से बंद करने की आवश्यकता होती है।
+हाल के academic work (EvilScreen, 2022) ने दिखाया कि **Infrared को Bluetooth या Wi-Fi के साथ combine करने वाले multi-channel remotes का उपयोग modern smart-TVs को पूरी तरह hijack करने के लिए किया जा सकता है**। यह attack high-privilege IR service codes को authenticated Bluetooth packets के साथ chain करता है, channel-isolation को bypass करता है और physical access के बिना arbitrary app launches, microphone activation या factory-reset की अनुमति देता है। अलग-अलग vendors के आठ mainstream TVs — जिनमें ISO/IEC 27001 compliance का दावा करने वाला एक Samsung model भी शामिल था — vulnerable पाए गए। Mitigation के लिए vendor firmware fixes या unused IR receivers को पूरी तरह disable करना आवश्यक है।<sup>[[2]](#references)</sup>
 
-### Air-Gapped Data Exfiltration via IR LEDs (aIR-Jumper family)
+### IR LEDs के माध्यम से Air-Gapped Data Exfiltration (aIR-Jumper family)
 
-सुरक्षा कैमरे, राउटर या यहां तक कि दुर्भावनापूर्ण USB स्टिक अक्सर **नाइट-विज़न IR LEDs** शामिल करते हैं। अनुसंधान से पता चलता है कि मैलवेयर इन LEDs को मॉड्यूलेट कर सकता है (<10–20 kbit/s सरल OOK के साथ) ताकि **दीवारों और खिड़कियों के माध्यम से रहस्यों को बाहर निकाला जा सके** एक बाहरी कैमरे में जो कई मीटर दूर रखा गया है। चूंकि प्रकाश दृश्य स्पेक्ट्रम के बाहर है, ऑपरेटर अक्सर इसे नहीं देखते हैं। प्रतिकूल उपाय:
+Security cameras, routers या malicious USB sticks में अक्सर **night-vision IR LEDs** शामिल होते हैं। Research से पता चलता है कि malware इन LEDs को modulate करके (simple OOK के साथ <10–20 kbit/s) **दीवारों और windows के पार secrets को exfiltrate** कर सकता है; इसके लिए दसियों metres दूर रखे external camera का उपयोग किया जाता है। चूंकि यह light visible spectrum से बाहर होती है, operators को अक्सर इसका पता नहीं चलता। Counter-measures:
 
-* संवेदनशील क्षेत्रों में IR LEDs को भौतिक रूप से ढकें या हटा दें
-* कैमरा LED ड्यूटी-चक्र और फर्मवेयर अखंडता की निगरानी करें
-* खिड़कियों और निगरानी कैमरों पर IR-कट फ़िल्टर लागू करें
+* Sensitive areas में IR LEDs को physically shield या remove करें
+* Camera LED duty-cycle और firmware integrity को monitor करें
+* Windows और surveillance cameras पर IR-cut filters deploy करें
 
-एक हमलावर मजबूत IR प्रोजेक्टर का उपयोग करके नेटवर्क में **कमांड्स को घुसपैठ** कर सकता है, असुरक्षित कैमरों पर डेटा को फ्लैश करके।
+An attacker strong IR projectors का उपयोग करके insecure cameras में data को flash करके network में commands **infiltrate** भी कर सकता है।
 
-### Long-Range Brute-Force & Extended Protocols with Flipper Zero 1.0
+### Flipper Zero 1.0 के साथ Long-Range Brute-Force और Extended Protocols
 
-फर्मवेयर 1.0 (सितंबर 2024) ने **अतिरिक्त IR प्रोटोकॉल और वैकल्पिक बाहरी एम्प्लीफायर मॉड्यूल** जोड़े। सार्वभौमिक-रिमोट ब्रूट-फोर्स मोड के साथ मिलकर, एक Flipper अधिकांश सार्वजनिक टीवी/AC को 30 मीटर की दूरी से उच्च-शक्ति डायोड का उपयोग करके बंद या पुनः कॉन्फ़िगर कर सकता है।
+Firmware 1.0 (September 2024) ने **दर्जनों extra IR protocols और optional external amplifier modules** जोड़े। Universal-remote brute-force mode के साथ मिलकर, high-power diode का उपयोग करते हुए Flipper 30 m तक की दूरी से अधिकांश public TVs/ACs को disable या reconfigure कर सकता है।
 
 ---
 
@@ -100,14 +101,14 @@ flipper-zero/fz-infrared.md
 
 ### Hardware
 
-* **Flipper Zero** – पोर्टेबल ट्रांससीवर जिसमें लर्निंग, रिप्ले और डिक्शनरी-ब्रूटफोर्स मोड होते हैं (ऊपर देखें)।
-* **Arduino / ESP32** + IR LED / TSOP38xx रिसीवर – सस्ता DIY विश्लेषक/प्रसारक। `Arduino-IRremote` लाइब्रेरी के साथ संयोजन करें (v4.x >40 प्रोटोकॉल का समर्थन करता है)।
-* **लॉजिक एनालाइज़र** (Saleae/FX2) – जब प्रोटोकॉल अज्ञात हो तो कच्चे समय को कैप्चर करें।
-* **IR-ब्लास्टर वाले स्मार्टफोन** (जैसे, Xiaomi) – त्वरित फील्ड परीक्षण लेकिन सीमित रेंज।
+* **Flipper Zero** – learning, replay और dictionary-bruteforce modes वाला portable transceiver (ऊपर देखें)।
+* **Arduino / ESP32** + IR LED / TSOP38xx receiver – सस्ता DIY analyser/transmitter। `Arduino-IRremote` library के साथ combine करें (v4.x >40 protocols को support करता है)।
+* **Logic analysers** (Saleae/FX2) – जब protocol unknown हो, तब raw timings capture करने के लिए।
+* **IR-blaster वाले Smartphones** (जैसे, Xiaomi) – quick field test के लिए, लेकिन range सीमित होती है।
 
 ### Software
 
-* **`Arduino-IRremote`** – सक्रिय रूप से बनाए रखा गया C++ लाइब्रेरी:
+* **`Arduino-IRremote`** – actively-maintained C++ library:
 ```cpp
 #include <IRremote.hpp>
 IRsend sender;
@@ -117,10 +118,10 @@ sender.sendNEC(0x20DF10EF, 32); // Samsung TV Power
 delay(5000);
 }
 ```
-* **IRscrutinizer / AnalysIR** – GUI डिकोडर जो कच्चे कैप्चर को आयात करते हैं और प्रोटोकॉल को स्वचालित रूप से पहचानते हैं + Pronto/Arduino कोड उत्पन्न करते हैं।
-* **LIRC / ir-keytable (Linux)** – कमांड लाइन से IR प्राप्त करें और इंजेक्ट करें:
+* **IRscrutinizer / AnalysIR** – GUI decoders, जो raw captures import करते हैं, protocol को automatically identify करते हैं और Pronto/Arduino code generate करते हैं।
+* **LIRC / ir-keytable (Linux)** – command line से IR receive और inject करने के लिए:
 ```bash
-sudo ir-keytable -p nec,rc5 -t   # लाइव-डंप डिकोडेड स्कैनकोड
+sudo ir-keytable -p nec,rc5 -t   # live-dump decoded scancodes
 irsend SEND_ONCE samsung KEY_POWER
 ```
 
@@ -128,14 +129,14 @@ irsend SEND_ONCE samsung KEY_POWER
 
 ## Defensive Measures <a href="#defense" id="defense"></a>
 
-* जब आवश्यक न हो, तो सार्वजनिक स्थानों में तैनात उपकरणों पर IR रिसीवर्स को बंद या कवर करें।
-* स्मार्ट-टीवी और रिमोट के बीच *पैरिंग* या क्रिप्टोग्राफिक जांच लागू करें; विशेषाधिकार प्राप्त "सेवा" कोड को अलग करें।
-* वर्गीकृत क्षेत्रों के चारों ओर IR-कट फ़िल्टर या निरंतर-तरंग डिटेक्टर्स लागू करें ताकि ऑप्टिकल गुप्त चैनलों को तोड़ा जा सके।
-* नियंत्रित IR LEDs को उजागर करने वाले कैमरों/IoT उपकरणों के फर्मवेयर अखंडता की निगरानी करें।
+* Public spaces में deployed devices के IR receivers की आवश्यकता न होने पर उन्हें disable या cover करें।
+* Smart-TVs और remotes के बीच *pairing* या cryptographic checks लागू करें; privileged “service” codes को isolate करें।
+* Classified areas के आसपास IR-cut filters या continuous-wave detectors deploy करें, ताकि optical covert channels को बाधित किया जा सके।
+* Controllable IR LEDs expose करने वाले cameras/IoT appliances की firmware integrity monitor करें।
 
 ## References
 
-- [Flipper Zero Infrared blog post](https://blog.flipperzero.one/infrared/)
-- EvilScreen: Smart TV hijacking via remote control mimicry (arXiv 2210.03014)
+- [1] [Flipper Zero Infrared blog post](https://blog.flipperzero.one/infrared/)
+- [2] [EvilScreen: Smart TV hijacking via remote control mimicry](https://arxiv.org/abs/2210.03014)
 
 {{#include ../../banners/hacktricks-training.md}}

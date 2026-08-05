@@ -2,12 +2,12 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
-> यदि प्रोग्राम `scanf` का उपयोग करके **stdin से एक साथ कई मान प्राप्त कर रहा है** तो आपको एक ऐसा स्थिति उत्पन्न करने की आवश्यकता है जो **`scanf`** के बाद शुरू होती है।
+> [!TIP]
+> यदि program stdin से **एक साथ कई values प्राप्त करने के लिए** `scanf` का उपयोग कर रहा है, तो आपको ऐसा state generate करना होगा जो **`scanf`** के बाद से शुरू हो।
 
-Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+Codes [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup> से लिए गए हैं।
 
-### पते तक पहुँचने के लिए इनपुट (पता इंगित करना)
+### address तक पहुँचने के लिए Input (address दर्शाते हुए)
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### पते तक पहुँचने के लिए इनपुट (प्रिंट्स को इंगित करना)
+### पते तक पहुँचने वाला इनपुट (प्रिंट दर्शाते हुए)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -75,7 +75,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### रजिस्ट्री मान
+### Registry values
 ```python
 # Angr doesn't currently support reading multiple things with scanf (Ex:
 # scanf("%u %u).) You will have to tell the simulation engine to begin the
@@ -139,7 +139,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### स्टैक मान
+### Stack के मान
 ```python
 # Put bit vectors in th stack to find out the vallue that stack position need to
 # have to reach a rogram flow
@@ -201,11 +201,11 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-इस परिदृश्य में, इनपुट `scanf("%u %u")` के साथ लिया गया था और मान `"1 1"` दिया गया था, इसलिए स्टैक के मान **`0x00000001`** **उपयोगकर्ता इनपुट** से आते हैं। आप देख सकते हैं कि ये मान `$ebp - 8` से शुरू होते हैं। इसलिए, कोड में हमने **`$esp` से 8 बाइट घटाए (जैसे उस समय `$ebp` और `$esp` का वही मान था)** और फिर हमने BVS को पुश किया।
+इस scenario में, input `scanf("%u %u")` के साथ लिया गया था और value `"1 1"` दी गई थी, इसलिए stack की **`0x00000001`** values **user input** से आती हैं। आप देख सकते हैं कि ये values `$ebp - 8` से शुरू होती हैं। इसलिए, code में हमने **`$esp` से 8 bytes घटाए** (क्योंकि उस समय `$ebp` और `$esp` की value समान थी) और फिर हमने BVS को push किया।
 
-![](<../../../images/image (136).png>)
+![Stack में bit vectors डालकर यह पता लगाएँ कि किसी stack position की value को कितना घटाना होगा ताकि program flow तक पहुँचा जा सके: इस scenario में, input scanf("%u %u") के साथ लिया गया था और value "1...](<../../../images/image (136).png>)
 
-### स्थिर मेमोरी मान (वैश्विक चर)
+### Static Memory values (Global variables)
 ```python
 import angr
 import claripy
@@ -266,7 +266,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### डायनामिक मेमोरी मान (Malloc)
+### डायनेमिक मेमोरी वैल्यूज़ (Malloc)
 ```python
 import angr
 import claripy
@@ -325,7 +325,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### फ़ाइल सिमुलेशन
+### फ़ाइल Simulation
 ```python
 #In this challenge a password is read from a file and we want to simulate its content
 
@@ -380,35 +380,35 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-> [!NOTE]
-> ध्यान दें कि प्रतीकात्मक फ़ाइल में प्रतीकात्मक डेटा के साथ मर्ज किया गया स्थिर डेटा भी हो सकता है:
+> [!TIP]
+> ध्यान दें कि symbolic file में symbolic data के साथ merged constant data भी हो सकता है:
 >
 > ```python
->   # हेलो वर्ल्ड, मेरा नाम जॉन है।
->   # ^                       ^
->   # ^ पता 0                ^ पता 24 (अक्षरों की संख्या गिनें)
->   # इसे मेमोरी में प्रदर्शित करने के लिए, हम चाहते हैं कि स्ट्रिंग को
->   # फ़ाइल की शुरुआत में लिखा जाए:
->   #
->   # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
->   #
->   # शायद, फिर, हम जॉन को एक
->   # प्रतीकात्मक चर से बदलना चाहेंगे। हम कॉल करेंगे:
->   #
->   # name_bitvector = claripy.BVS('symbolic_name', 4*8)
->   #
->   # फिर, जब प्रोग्राम fopen('hello.txt', 'r') को कॉल करता है और फिर
->   # fread(buffer, sizeof(char), 30, hello_txt_file) करता है, तो बफर में
->   # फ़ाइल से स्ट्रिंग होगी, सिवाय चार प्रतीकात्मक बाइट्स के जहाँ नाम होगा
->   # संग्रहीत।
->   # (!)
+>  # Hello world, my name is John.
+>  # ^                       ^
+>  # ^ address 0             ^ address 24 (count the number of characters)
+>  # In order to represent this in memory, we would want to write the string to
+>  # the beginning of the file:
+>  #
+>  # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
+>  #
+>  # Perhaps, then, we would want to replace John with a
+>  # symbolic variable. We would call:
+>  #
+>  # name_bitvector = claripy.BVS('symbolic_name', 4*8)
+>  #
+>  # Then, after the program calls fopen('hello.txt', 'r') and then
+>  # fread(buffer, sizeof(char), 30, hello_txt_file), the buffer would contain
+>  # the string from the file, except four symbolic bytes where the name would be
+>  # stored.
+>  # (!)
 > ```
 
-### प्रतिबंध लागू करना
+### Constraints लागू करना
 
-> [!NOTE]
-> कभी-कभी सरल मानव संचालन जैसे 16 लंबाई के 2 शब्दों की तुलना करना **चर द्वारा चर** (लूप), **angr** के लिए बहुत महंगा होता है क्योंकि इसे शाखाएँ **घातीय** रूप से उत्पन्न करनी होती हैं क्योंकि यह प्रत्येक यदि के लिए 1 शाखा उत्पन्न करता है: `2^16`\
-> इसलिए, **angr से पिछले बिंदु पर जाने के लिए कहना** (जहाँ असली कठिन हिस्सा पहले ही किया जा चुका था) और **उन प्रतिबंधों को मैन्युअल रूप से सेट करना** आसान है।
+> [!TIP]
+> कभी-कभी 16 अक्षरों वाले 2 words की तुलना **char by char** (loop) जैसे सरल human operations भी **angr** के लिए बहुत **costly** होते हैं, क्योंकि उसे **exponentially** branches generate करने पड़ते हैं; हर `if` के लिए 1 branch generate होती है: `2^16`\
+> इसलिए, **angr से पिछले point पर वापस जाने के लिए कहना** अधिक आसान है (जहाँ वास्तविक कठिन भाग पहले ही पूरा हो चुका था) और उन **constraints को manually set करना**।
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> कुछ परिदृश्यों में आप **veritesting** को सक्रिय कर सकते हैं, जो समान स्थिति को मिलाएगा, ताकि बेकार शाखाओं को बचाया जा सके और समाधान पाया जा सके: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> कुछ scenarios में आप **veritesting** activate कर सकते हैं, जो similar status को merge करेगा, ताकि बेकार branches को बचाया जा सके और solution खोजा जा सके: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
-> [!NOTE]
-> इन परिदृश्यों में आप जो और कर सकते हैं वह है **कार्य को हुक करना, जिससे angr को कुछ ऐसा दिया जा सके जिसे वह अधिक आसानी से समझ सके**।
+> [!TIP]
+> इन scenarios में आप एक और काम यह कर सकते हैं कि **function को hook करें और angr को ऐसा कुछ दें जिसे वह** अधिक आसानी से समझ सके।
 
 ### Simulation Managers
 
-कुछ सिमुलेशन प्रबंधक दूसरों की तुलना में अधिक उपयोगी हो सकते हैं। पिछले उदाहरण में एक समस्या थी क्योंकि बहुत सारी उपयोगी शाखाएँ बनाई गई थीं। यहाँ, **veritesting** तकनीक उन्हें मिलाएगी और एक समाधान पाएगी।\
-यह सिमुलेशन प्रबंधक को भी सक्रिय किया जा सकता है: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+कुछ simulation managers दूसरों की तुलना में अधिक उपयोगी हो सकते हैं। पिछले example में एक समस्या थी, क्योंकि बहुत-सी useful branches create हो गई थीं। यहाँ, **veritesting** technique उन branches को merge करेगी और एक solution खोजेगी।\
+इस simulation manager को इस तरह भी activate किया जा सकता है: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### एक फ़ंक्शन को कॉल करने को हुक करना/बायपास करना
+### एक function call को Hooking/Bypassing करना
 ```python
 # This level performs the following computations:
 #
@@ -594,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### एक फ़ंक्शन को हुक करना / Simprocedure
+### किसी function को Hook करना / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -678,7 +678,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### कई पैरामीटर के साथ scanf का अनुकरण करें
+### कई params के साथ scanf को simulate करें
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.
@@ -740,7 +740,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### स्थैतिक बाइनरी
+### Static Binaries
 ```python
 # This challenge is the exact same as the first challenge, except that it was
 # compiled as a static binary. Normally, Angr automatically replaces standard
@@ -807,4 +807,8 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
+## संदर्भ
+
+- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+
 {{#include ../../../banners/hacktricks-training.md}}

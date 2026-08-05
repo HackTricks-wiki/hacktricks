@@ -2,28 +2,28 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-खोजें:
+इन चीज़ों को देखें:
 
 - Unicode homoglyphs
 - Zero-width characters
-- Whitespace patterns (spaces vs tabs)
+- Whitespace patterns (spaces बनाम tabs)
 
-## व्यावहारिक मार्ग
+## Practical path
 
-यदि plain text अनपेक्षित ढंग से व्यवहार करे, तो codepoints की जाँच करें और सावधानी से normalize करें (साक्ष्य न नष्ट करें)।
+यदि plain text अप्रत्याशित तरीके से व्यवहार करे, तो codepoints का निरीक्षण करें और सावधानी से normalize करें (evidence नष्ट न करें)।
 
-### तकनीक
+### Technique
 
-Text stego अक्सर उन characters पर निर्भर करता है जो समान रूप से प्रदर्शित होते हैं (या अदृश्य होते हैं):
+Text stego अक्सर ऐसे characters पर निर्भर करता है जो एक जैसे (या अदृश्य) दिखाई देते हैं:
 
-- Homoglyphs: different Unicode codepoints that look the same (Latin `a` vs Cyrillic `а`)
+- Homoglyphs: अलग-अलग Unicode codepoints जो एक जैसे दिखते हैं (Latin `a` बनाम Cyrillic `а`)
 - Zero-width characters: joiners, non-joiners, zero-width spaces
-- Whitespace encodings: spaces vs tabs, trailing spaces, line-length patterns
+- Whitespace encodings: spaces बनाम tabs, trailing spaces, line-length patterns<sup>[[1]](#references)</sup>
 
-अतिरिक्त उच्च-सिग्नल मामले:
+अतिरिक्त high-signal cases:
 
-- Bidirectional override/control characters (can visually reorder text)
-- Variation selectors and combining characters used as a covert channel
+- Bidirectional override/control characters (जो text को दृश्य रूप से पुनःक्रमित कर सकते हैं)
+- Variation selectors और combining characters, जिनका उपयोग covert channel के रूप में किया जाता है
 
 ### Decode helpers
 
@@ -41,14 +41,14 @@ PY
 ```
 ## CSS `unicode-range` चैनल
 
-`@font-face` rules bytes को `unicode-range: U+..` entries में encode कर सकते हैं। codepoints निकालें, hex को concatenate करें, और decode करें:
+`@font-face` rules `unicode-range: U+..` entries में bytes encode कर सकते हैं। Codepoints extract करें, hex को concatenate करें और decode करें:
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-यदि ranges में प्रति declaration एक से अधिक bytes शामिल हों, तो पहले commas पर split करें और normalize (`tr ',+' '\n'`)। यदि formatting inconsistent है तो Python से bytes को parse और emit करना आसान है।
+यदि ranges में प्रति declaration कई bytes हों, तो पहले commas पर split करें और normalize करें (`tr ',+' '\n'`)। Formatting असंगत होने पर Python bytes को parse और emit करना आसान बनाता है।
 
 ## References
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

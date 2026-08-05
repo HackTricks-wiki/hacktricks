@@ -9,61 +9,61 @@ README.md
 
 ## JTAGenum
 
-[**JTAGenum**](https://github.com/cyphunk/JTAGenum) एक उपकरण है जिसे आप Arduino-संगत MCU या (प्रायोगिक रूप से) Raspberry Pi पर लोड कर सकते हैं ताकि अज्ञात JTAG पिनआउट को ब्रूट-फोर्स किया जा सके और यहां तक कि निर्देश रजिस्टरों को भी सूचीबद्ध किया जा सके।
+[**JTAGenum**](https://github.com/cyphunk/JTAGenum) एक tool है जिसे आप Arduino-compatible MCU या (प्रयोगात्मक रूप से) Raspberry Pi पर load कर सकते हैं, ताकि unknown JTAG pinouts को brute-force किया जा सके और instruction registers को भी enumerate किया जा सके।
 
-- Arduino: डिजिटल पिन D2–D11 को 10 संदिग्ध JTAG पैड/टेस्टपॉइंट्स से कनेक्ट करें, और Arduino GND को लक्ष्य GND से कनेक्ट करें। यदि आप नहीं जानते कि रेल सुरक्षित है तो लक्ष्य को अलग से पावर करें। 3.3 V लॉजिक को प्राथमिकता दें (जैसे, Arduino Due) या 1.8–3.3 V लक्ष्यों को प्रॉब करते समय लेवल शिफ्टर/सीरीज रेजिस्टर्स का उपयोग करें।
-- Raspberry Pi: Pi निर्माण में उपयोगी GPIOs की संख्या कम होती है (इसलिए स्कैन धीमे होते हैं); वर्तमान पिन मैप और प्रतिबंधों के लिए रिपॉजिटरी की जांच करें।
+- Arduino: digital pins D2–D11 को अधिकतम 10 suspected JTAG pads/testpoints से connect करें, और Arduino GND को target GND से connect करें। जब तक आपको rail के सुरक्षित होने का पता न हो, target को अलग से power दें। 3.3 V logic (जैसे Arduino Due) को प्राथमिकता दें या 1.8–3.3 V targets की probing करते समय level shifter/series resistors का उपयोग करें।
+- Raspberry Pi: Pi build में कम usable GPIOs होते हैं (इसलिए scans धीमे होते हैं); current pin map और constraints के लिए repo देखें।
 
-एक बार फ्लैश होने के बाद, 115200 बौड पर सीरियल मॉनिटर खोलें और मदद के लिए `h` भेजें। सामान्य प्रवाह:
+Flash करने के बाद, serial monitor को 115200 baud पर खोलें और help के लिए `h` भेजें। सामान्य flow:
 
-- `l` लूपबैक खोजें ताकि गलत सकारात्मकता से बचा जा सके
-- `r` यदि आवश्यक हो तो आंतरिक पुल-अप को टॉगल करें
-- `s` TCK/TMS/TDI/TDO (और कभी-कभी TRST/SRST) के लिए स्कैन करें
-- `y` बिना दस्तावेज़ वाले ऑपकोड खोजने के लिए IR को ब्रूट-फोर्स करें
-- `x` पिन राज्यों का बाउंड्री-स्कैन स्नैपशॉट
+- `l` false positives से बचने के लिए loopbacks खोजें
+- `r` आवश्यकता होने पर internal pull-ups को toggle करें
+- `s` TCK/TMS/TDI/TDO (और कभी-कभी TRST/SRST) के लिए scan करें
+- `y` undocumented opcodes खोजने के लिए IR को brute-force करें
+- `x` pin states का boundary-scan snapshot लें
 
-![](<../../images/image (939).png>)
+![JTAG - JTAGenum: x pin states का boundary-scan snapshot](<../../images/image (939).png>)
 
-![](<../../images/image (578).png>)
+![JTAG - JTAGenum: x pin states का boundary-scan snapshot](<../../images/image (578).png>)
 
-![](<../../images/image (774).png>)
+![JTAG - JTAGenum: x pin states का boundary-scan snapshot](<../../images/image (774).png>)
 
 
 
-यदि एक मान्य TAP पाया जाता है, तो आप `FOUND!` से शुरू होने वाली पंक्तियाँ देखेंगे जो खोजे गए पिनों को इंगित करती हैं।
+यदि valid TAP मिलता है, तो आपको `FOUND!` से शुरू होने वाली lines दिखाई देंगी, जो discovered pins को indicate करती हैं।
 
-टिप्स
-- हमेशा ग्राउंड साझा करें, और कभी भी अज्ञात पिनों को लक्ष्य Vtref से ऊपर न चलाएं। यदि संदेह हो, तो उम्मीदवार पिनों पर 100–470 Ω सीरीज रेजिस्टर्स जोड़ें।
-- यदि डिवाइस 4-वायर JTAG के बजाय SWD/SWJ का उपयोग करता है, तो JTAGenum इसे पहचान नहीं सकता; SWD उपकरणों या SWJ-DP का समर्थन करने वाले एडाप्टर का प्रयास करें।
+Tips
+- हमेशा ground share करें और unknown pins को target Vtref से अधिक voltage पर कभी drive न करें। संदेह होने पर candidate pins पर 100–470 Ω series resistors लगाएं।
+- यदि device 4-wire JTAG के बजाय SWD/SWJ का उपयोग करता है, तो JTAGenum उसे detect नहीं कर सकता; SWD tools या SWJ-DP को support करने वाले adapter को आज़माएं।
 
-## Safer pin hunting and hardware setup
+## अधिक सुरक्षित pin hunting और hardware setup
 
-- पहले एक मल्टीमीटर के साथ Vtref और GND की पहचान करें। कई एडाप्टरों को I/O वोल्टेज सेट करने के लिए Vtref की आवश्यकता होती है।
-- लेवल शिफ्टिंग: पुश-पुल सिग्नल के लिए डिज़ाइन किए गए द्विदिश लेवल शिफ्टर्स को प्राथमिकता दें (JTAG लाइन्स ओपन-ड्रेन नहीं हैं)। JTAG के लिए ऑटो-डायरेक्शन I2C शिफ्टर्स से बचें।
-- उपयोगी एडाप्टर: FT2232H/FT232H बोर्ड (जैसे, Tigard), CMSIS-DAP, J-Link, ST-LINK (विक्रेता-विशिष्ट), ESP-USB-JTAG (ESP32-Sx पर)। न्यूनतम TCK, TMS, TDI, TDO, GND और Vtref से कनेक्ट करें; वैकल्पिक रूप से TRST और SRST।
+- पहले multimeter से Vtref और GND identify करें। कई adapters को I/O voltage set करने के लिए Vtref की आवश्यकता होती है।
+- Level shifting: push-pull signals के लिए design किए गए bidirectional level shifters को प्राथमिकता दें (JTAG lines open-drain नहीं होतीं)। JTAG के लिए auto-direction I2C shifters का उपयोग न करें।
+- Useful adapters: FT2232H/FT232H boards (जैसे Tigard), CMSIS-DAP, J-Link, ST-LINK (vendor-specific), ESP-USB-JTAG (ESP32-Sx पर)। कम से कम TCK, TMS, TDI, TDO, GND और Vtref connect करें; TRST और SRST optional हैं।
 
-## First contact with OpenOCD (scan and IDCODE)
+## OpenOCD से first contact (scan और IDCODE)
 
-OpenOCD JTAG/SWD के लिए डि-फैक्टो OSS है। एक समर्थित एडाप्टर के साथ आप चेन को स्कैन कर सकते हैं और IDCODE पढ़ सकते हैं:
+OpenOCD JTAG/SWD के लिए de-facto OSS है। Supported adapter के साथ आप chain को scan कर सकते हैं और IDCODEs read कर सकते हैं:
 
-- J-Link के साथ सामान्य उदाहरण:
+- J-Link के साथ generic example:
 ```
 openocd -f interface/jlink.cfg -c "transport select jtag; adapter speed 1000" \
 -c "init; scan_chain; shutdown"
 ```
-- ESP32‑S3 में अंतर्निहित USB‑JTAG (कोई बाहरी प्रॉब की आवश्यकता नहीं):
+- ESP32‑S3 में built-in USB‑JTAG (किसी external probe की आवश्यकता नहीं):
 ```
 openocd -f board/esp32s3-builtin.cfg -c "init; scan_chain; shutdown"
 ```
-Notes
-- यदि आपको "सभी एक/शून्य" IDCODE मिलता है, तो वायरिंग, पावर, Vtref की जांच करें, और यह सुनिश्चित करें कि पोर्ट फ्यूज़/विकल्प बाइट्स द्वारा लॉक नहीं है।
-- अज्ञात चेन को लाने के लिए मैनुअल TAP इंटरैक्शन के लिए OpenOCD निम्न-स्तरीय `irscan`/`drscan` देखें।
+नोट्स
+- यदि आपको "all ones/zeros" IDCODE मिलता है, तो wiring, power, Vtref की जांच करें और सुनिश्चित करें कि port fuses/option bytes द्वारा locked न हो।
+- अज्ञात chains को bring up करते समय manual TAP interaction के लिए OpenOCD के low-level `irscan`/`drscan` देखें।<sup>[[1]](#references)</sup>
 
-## CPU को रोकना और मेमोरी/फ्लैश को डंप करना
+## CPU को halt करना और memory/flash dump करना
 
-एक बार जब TAP पहचाना जाता है और एक लक्ष्य स्क्रिप्ट चुनी जाती है, तो आप कोर को रोक सकते हैं और मेमोरी क्षेत्रों या आंतरिक फ्लैश को डंप कर सकते हैं। उदाहरण (लक्ष्य, आधार पते और आकार समायोजित करें):
+एक बार TAP की पहचान हो जाने और target script चुने जाने के बाद, आप core को halt कर सकते हैं और memory regions या internal flash का dump ले सकते हैं। उदाहरण (target, base addresses और sizes को समायोजित करें):
 
-- इनिशियल के बाद सामान्य लक्ष्य:
+- init के बाद generic target:
 ```
 openocd -f interface/jlink.cfg -f target/stm32f1x.cfg \
 -c "init; reset halt; mdw 0x08000000 4; dump_image flash.bin 0x08000000 0x00100000; shutdown"
@@ -73,22 +73,22 @@ openocd -f interface/jlink.cfg -f target/stm32f1x.cfg \
 openocd -f interface/ftdi/ft232h.cfg -f target/riscv.cfg \
 -c "init; riscv set_prefer_sba on; halt; dump_image sram.bin 0x80000000 0x20000; shutdown"
 ```
-- ESP32‑S3, OpenOCD हेल्पर के माध्यम से प्रोग्राम या पढ़ें:
+- ESP32‑S3, OpenOCD helper के माध्यम से program या read करें:
 ```
 openocd -f board/esp32s3-builtin.cfg \
 -c "program_esp app.bin 0x10000 verify exit"
 ```
-Tips
-- `mdw/mdh/mdb` का उपयोग करें ताकि लंबे डंप से पहले मेमोरी की जांच की जा सके।
-- मल्टी-डिवाइस चेन के लिए, गैर-लक्ष्यों पर BYPASS सेट करें या एक बोर्ड फ़ाइल का उपयोग करें जो सभी TAPs को परिभाषित करती है।
+सुझाव
+- लंबे dumps से पहले memory को sanity-check करने के लिए `mdw/mdh/mdb` का उपयोग करें।
+- multi-device chains के लिए, non-targets पर BYPASS सेट करें या ऐसी board file का उपयोग करें जो सभी TAPs को define करती हो।
 
-## Boundary‑scan tricks (EXTEST/SAMPLE)
+## Boundary-scan tricks (EXTEST/SAMPLE)
 
-यहां तक कि जब CPU डिबग एक्सेस लॉक हो, तब भी बाउंडरी-स्कैन अभी भी उजागर हो सकता है। UrJTAG/OpenOCD के साथ आप कर सकते हैं:
-- SAMPLE का उपयोग करके सिस्टम चलने के दौरान पिन राज्यों का स्नैपशॉट लें (बस गतिविधि खोजें, पिन मैपिंग की पुष्टि करें)।
-- EXTEST का उपयोग करके पिन को ड्राइव करें (जैसे, यदि बोर्ड वायरिंग अनुमति देती है तो MCU के माध्यम से बाहरी SPI फ्लैश लाइनों को पढ़ने के लिए बिट-बैंग करें)।
+CPU debug access लॉक होने पर भी boundary-scan exposed हो सकता है। UrJTAG/OpenOCD के साथ आप:
+- सिस्टम के चलने के दौरान pin states का snapshot लेने के लिए SAMPLE का उपयोग कर सकते हैं (bus activity खोजें, pin mapping की पुष्टि करें)।
+- pins drive करने के लिए EXTEST का उपयोग कर सकते हैं (उदाहरण के लिए, MCU के माध्यम से external SPI flash lines को bit-bang करके offline पढ़ें, यदि board wiring इसकी अनुमति देती हो)।
 
-FT2232x एडाप्टर के साथ न्यूनतम UrJTAG प्रवाह:
+FT2232x adapter के साथ Minimal UrJTAG flow:
 ```
 jtag> cable ft2232 vid=0x0403 pid=0x6010 interface=1
 jtag> frequency 100000
@@ -98,24 +98,24 @@ jtag> instruction EXTEST
 jtag> shift ir
 jtag> dr  <bit pattern for boundary register>
 ```
-आपको सीमा रजिस्टर बिट ऑर्डरिंग जानने के लिए डिवाइस BSDL की आवश्यकता है। ध्यान दें कि कुछ विक्रेता उत्पादन में सीमा-स्कैन सेल को लॉक कर देते हैं।
+BSDL में boundary register bit ordering जानना आवश्यक है। सावधान रहें कि कुछ vendors production में boundary-scan cells को lock कर देते हैं।
 
-## आधुनिक लक्ष्य और नोट्स
+## आधुनिक targets और notes
 
-- ESP32‑S3/C3 में एक मूल USB‑JTAG ब्रिज शामिल है; OpenOCD सीधे USB के माध्यम से बिना किसी बाहरी प्रॉब के बात कर सकता है। त्वरित जांच और डंप के लिए बहुत सुविधाजनक।
-- RISC‑V डिबग (v0.13+) को OpenOCD द्वारा व्यापक रूप से समर्थित किया गया है; जब कोर को सुरक्षित रूप से रोका नहीं जा सकता है, तो मेमोरी एक्सेस के लिए SBA को प्राथमिकता दें।
-- कई MCU डिबग प्रमाणीकरण और जीवनचक्र राज्यों को लागू करते हैं। यदि JTAG मृत प्रतीत होता है लेकिन पावर सही है, तो डिवाइस बंद स्थिति में फ्यूज हो सकता है या एक प्रमाणित प्रॉब की आवश्यकता हो सकती है।
+- ESP32-S3/C3 में native USB-JTAG bridge शामिल होता है; OpenOCD किसी external probe के बिना सीधे USB के माध्यम से communicate कर सकता है। Triage और dumps के लिए बहुत सुविधाजनक।<sup>[[2]](#references)</sup>
+- RISC-V debug (v0.13+) को OpenOCD द्वारा व्यापक रूप से support किया जाता है; जब core को सुरक्षित रूप से halt नहीं किया जा सकता हो, तो memory access के लिए SBA को प्राथमिकता दें।
+- कई MCUs debug authentication और lifecycle states लागू करते हैं। यदि power सही होने के बावजूद JTAG काम नहीं करता, तो device को closed state में fuse किया गया हो सकता है या authenticated probe की आवश्यकता हो सकती है।
 
-## रक्षा और हार्डनिंग (वास्तविक उपकरणों पर क्या अपेक्षा करें)
+## Defenses और hardening (वास्तविक devices पर क्या अपेक्षित है)
 
-- उत्पादन में JTAG/SWD को स्थायी रूप से बंद या लॉक करें (जैसे, STM32 RDP स्तर 2, ESP eFuses जो PAD JTAG को बंद करते हैं, NXP/Nordic APPROTECT/DPAP)।
-- निर्माण पहुंच रखते हुए प्रमाणित डिबग की आवश्यकता करें (ARMv8.2‑A ADIv6 डिबग प्रमाणीकरण, OEM-प्रबंधित चुनौती-प्रतिक्रिया)।
-- आसान परीक्षण पैड को रूट न करें; परीक्षण वियास को दफन करें, TAP को अलग करने के लिए प्रतिरोधकों को हटा/भरा दें, कीइंग या पोगो-पिन फिक्स्चर के साथ कनेक्टर्स का उपयोग करें।
-- पावर-ऑन डिबग लॉक: सुरक्षित बूट को लागू करने वाले प्रारंभिक ROM के पीछे TAP को गेट करें।
+- Production में JTAG/SWD को permanently disable या lock करें (जैसे, STM32 RDP level 2, JTAG को disable करने वाले ESP eFuses, NXP/Nordic APPROTECT/DPAP)।
+- Manufacturing access बनाए रखते हुए authenticated debug आवश्यक करें (ARMv8.2-A ADIv6 Debug Authentication, OEM-managed challenge-response)।
+- आसान test pads को route न करें; test vias को bury करें, TAP को isolate करने के लिए resistors को remove/populate करें, और keying वाले connectors या pogo-pin fixtures का उपयोग करें।
+- Power-on debug lock: secure boot लागू करने वाले early ROM के पीछे TAP को gate करें।
 
-## संदर्भ
+## References
 
-- OpenOCD उपयोगकर्ता मार्गदर्शिका – JTAG कमांड और कॉन्फ़िगरेशन. https://openocd.org/doc-release/html/JTAG-Commands.html
-- Espressif ESP32‑S3 JTAG डिबगिंग (USB‑JTAG, OpenOCD उपयोग). https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/
+- [1] [OpenOCD User's Guide - JTAG Commands और configuration](https://openocd.org/doc-release/html/JTAG-Commands.html)
+- [2] [Espressif ESP32-S3 JTAG debugging (USB-JTAG, OpenOCD usage)](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/)
 
 {{#include ../../banners/hacktricks-training.md}}

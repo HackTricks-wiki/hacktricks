@@ -1,37 +1,43 @@
-# अन्य वेब ट्रिक्स
+# अन्य Web Tricks
 
 {{#include ../banners/hacktricks-training.md}}
 
-### होस्ट हेडर
+### Host header
 
-कई बार बैक-एंड **होस्ट हेडर** पर कुछ क्रियाएँ करने के लिए भरोसा करता है। उदाहरण के लिए, यह इसके मान का उपयोग **पासवर्ड रीसेट भेजने के लिए डोमेन** के रूप में कर सकता है। इसलिए जब आपको पासवर्ड रीसेट के लिए लिंक के साथ एक ईमेल प्राप्त होता है, तो उपयोग किया जाने वाला डोमेन वही होता है जो आपने होस्ट हेडर में डाला है। फिर, आप अन्य उपयोगकर्ताओं के पासवर्ड रीसेट का अनुरोध कर सकते हैं और डोमेन को अपने द्वारा नियंत्रित एक में बदल सकते हैं ताकि आप उनके पासवर्ड रीसेट कोड चुरा सकें। [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
+कई बार back-end कुछ actions करने के लिए **Host header** पर trust करता है। उदाहरण के लिए, यह इसके value का उपयोग **password reset भेजने के domain** के रूप में कर सकता है। इसलिए जब आपको अपना password reset करने के लिए link वाला email मिलता है, तो इस्तेमाल किया जा रहा domain वही होता है जिसे आपने Host header में डाला था। फिर, आप अन्य users के password reset का request कर सकते हैं और domain को अपने control वाले domain में बदलकर उनके password reset codes चुरा सकते हैं। [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> ध्यान दें कि यह संभव है कि आपको टोकन प्राप्त करने के लिए उपयोगकर्ता के पासवर्ड रीसेट लिंक पर क्लिक करने का इंतजार करने की आवश्यकता नहीं है, क्योंकि शायद **स्पैम फ़िल्टर या अन्य मध्यवर्ती उपकरण/बॉट इसे विश्लेषण करने के लिए क्लिक करेंगे**।
+> ध्यान दें कि token प्राप्त करने के लिए आपको user के reset password link पर click करने की प्रतीक्षा करने की भी आवश्यकता नहीं हो सकती, क्योंकि संभव है कि **spam filters या अन्य intermediary devices/bots इसे analyze करने के लिए click कर दें**।
 
-### सत्र बूलियन
+### Session booleans
 
-कुछ समय जब आप कुछ सत्यापन को सही ढंग से पूरा करते हैं, तो बैक-एंड **सुरक्षा विशेषता में "True" मान के साथ एक बूलियन जोड़ता है**। फिर, एक अलग एंडपॉइंट जानता है कि क्या आपने उस जांच को सफलतापूर्वक पास किया।\
-हालांकि, यदि आप **जांच पास करते हैं** और आपके सत्र को सुरक्षा विशेषता में "True" मान दिया जाता है, तो आप **अन्य संसाधनों तक पहुँचने की कोशिश कर सकते हैं** जो **उसी विशेषता पर निर्भर करते हैं** लेकिन जिन तक आपकी **अनुमति नहीं होनी चाहिए**। [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
+कभी-कभी जब आप कोई verification सही तरीके से पूरा करते हैं, तो back-end आपकी session के security attribute में **value "True" वाला केवल एक boolean जोड़ देता है**। फिर, एक अलग endpoint यह जान लेता है कि आपने वह check सफलतापूर्वक pass किया है।\
+हालांकि, यदि आप **check pass करते हैं** और आपकी session को security attribute में वह "True" value मिल जाती है, तो आप **अन्य resources access करने का प्रयास** कर सकते हैं जो **उसी attribute पर निर्भर हैं**, लेकिन जिन्हें access करने की **आपके पास permissions नहीं होनी चाहिए**। [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).<sup>[[2]](#references)</sup>
 
-### पंजीकरण कार्यक्षमता
+### Register functionality
 
-पहले से मौजूद उपयोगकर्ता के रूप में पंजीकरण करने का प्रयास करें। समकक्ष वर्ण (बिंदु, बहुत सारे स्थान और यूनिकोड) का उपयोग करने का प्रयास करें।
+पहले से मौजूद user के रूप में register करने का प्रयास करें। Equivalent characters (dots, बहुत सारे spaces और Unicode) का उपयोग करके भी प्रयास करें।
 
-### ईमेल अधिग्रहण
+### Takeover emails
 
-एक ईमेल पंजीकरण करें, इसे पुष्टि करने से पहले ईमेल बदलें, फिर, यदि नया पुष्टि ईमेल पहले पंजीकृत ईमेल पर भेजा जाता है, तो आप किसी भी ईमेल का अधिग्रहण कर सकते हैं। या यदि आप पहले वाले को पुष्टि करने के लिए दूसरे ईमेल को सक्षम कर सकते हैं, तो आप किसी भी खाते का भी अधिग्रहण कर सकते हैं।
+एक email register करें, confirmation से पहले email बदल दें, फिर यदि नया confirmation email पहले registered email पर भेजा जाता है, तो आप किसी भी email को takeover कर सकते हैं। या यदि पहले email की पुष्टि करके आप दूसरे email को enable कर सकते हैं, तो आप किसी भी account को भी takeover कर सकते हैं।
 
-### कंपनियों के आंतरिक सर्विसडेस्क तक पहुँचें जो atlassian का उपयोग कर रही हैं
+### atlassian का उपयोग करके कंपनियों के Internal servicedesk को access करना
+
 
 {{#ref}}
 https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
 {{#endref}}
 
-### TRACE विधि
+### TRACE method
 
-डेवलपर्स उत्पादन वातावरण में विभिन्न डिबगिंग विकल्पों को बंद करना भूल सकते हैं। उदाहरण के लिए, HTTP `TRACE` विधि निदान उद्देश्यों के लिए डिज़ाइन की गई है। यदि सक्षम है, तो वेब सर्वर `TRACE` विधि का उपयोग करने वाले अनुरोधों का उत्तर देगा, जो प्रतिक्रिया में प्राप्त अनुरोध को ठीक से दर्शाता है। यह व्यवहार अक्सर हानिरहित होता है, लेकिन कभी-कभी जानकारी के खुलासे की ओर ले जाता है, जैसे कि आंतरिक प्रमाणीकरण हेडर का नाम जो रिवर्स प्रॉक्सी द्वारा अनुरोधों में जोड़ा जा सकता है।![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Developers production environment में विभिन्न debugging options को disable करना भूल सकते हैं। उदाहरण के लिए, HTTP `TRACE` method diagnostic purposes के लिए design किया गया है। यदि यह enabled हो, तो web server `TRACE` method का उपयोग करने वाले requests का response में वही exact request echo करके जवाब देगा जो प्राप्त हुई थी। यह behaviour अक्सर harmless होता है, लेकिन कभी-कभी information disclosure का कारण बनता है, जैसे internal authentication headers के नाम, जिन्हें reverse proxies requests में append कर सकते हैं।![Post के लिए image](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
-![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
+![Post के लिए image](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
+
+## References
+
+- [1] [How I was able to take over any user's account with Host Header injection](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)
+- [2] [A less known attack vector: Second order IDOR attacks](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)
 
 {{#include ../banners/hacktricks-training.md}}

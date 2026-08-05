@@ -2,37 +2,37 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Intro
+## परिचय
 
-iButton एक सामान्य नाम है जो एक इलेक्ट्रॉनिक पहचान कुंजी के लिए है जो एक **सिक्के के आकार के धातु के कंटेनर** में पैक की गई है। इसे **Dallas Touch** Memory या संपर्क मेमोरी भी कहा जाता है। हालांकि इसे अक्सर “चुंबकीय” कुंजी के रूप में गलत तरीके से संदर्भित किया जाता है, इसमें **कुछ भी चुंबकीय** नहीं है। वास्तव में, इसके अंदर एक पूर्ण विकसित **माइक्रोचिप** है जो एक डिजिटल प्रोटोकॉल पर काम करती है।
+iButton electronic identification key के लिए इस्तेमाल किया जाने वाला एक generic name है, जिसे **coin-shaped metal container** में पैक किया जाता है। इसे **Dallas Touch** Memory या contact memory भी कहा जाता है। हालांकि इसे अक्सर गलती से “magnetic” key कहा जाता है, इसमें **कुछ भी magnetic नहीं** होता। वास्तव में, इसके अंदर digital protocol पर काम करने वाला एक पूर्ण **microchip** छिपा होता है।<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
-### What is iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
+### iButton क्या है? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-आमतौर पर, iButton कुंजी और रीडर के भौतिक रूप को संदर्भित करता है - एक गोल सिक्का जिसमें दो संपर्क होते हैं। इसके चारों ओर के फ्रेम के लिए, सबसे सामान्य प्लास्टिक धारक से लेकर छिद्र, अंगूठियों, लटकन आदि के कई रूपांतर हैं।
+आमतौर पर, iButton से key और reader का physical form समझा जाता है - दो contacts वाला एक गोल coin। इसे घेरने वाले frame में सबसे सामान्य hole वाले plastic holder से लेकर rings, pendants आदि तक कई variations होते हैं।
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-जब कुंजी रीडर तक पहुँचती है, तो **संपर्क आपस में छूते हैं** और कुंजी **अपना ID** **प्रसारित** करने के लिए सक्रिय होती है। कभी-कभी कुंजी तुरंत **नहीं पढ़ी** जाती क्योंकि **इंटरकॉम का संपर्क PSD** जितना होना चाहिए उससे बड़ा होता है। इसलिए कुंजी और रीडर के बाहरी आकृतियाँ छू नहीं पातीं। यदि ऐसा है, तो आपको रीडर की दीवारों में से एक पर कुंजी को दबाना होगा।
+जब key reader तक पहुंचती है, तो **contacts आपस में touch होते हैं** और key को अपना ID **transmit** करने के लिए power मिलती है। कभी-कभी key को तुरंत **read नहीं किया जाता**, क्योंकि intercom का **contact PSD अपेक्षा से बड़ा** होता है। इसलिए key और reader के बाहरी contours आपस में touch नहीं कर पाते। ऐसी स्थिति में आपको key को reader की किसी एक wall पर दबाना होगा।
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
 ### **1-Wire protocol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Dallas कुंजियाँ 1-wire प्रोटोकॉल का उपयोग करके डेटा का आदान-प्रदान करती हैं। डेटा ट्रांसफर के लिए केवल एक संपर्क (!!) दोनों दिशाओं में, मास्टर से दास और इसके विपरीत। 1-wire प्रोटोकॉल मास्टर-दास मॉडल के अनुसार काम करता है। इस टोपोलॉजी में, मास्टर हमेशा संचार शुरू करता है और दास इसके निर्देशों का पालन करता है।
+Dallas keys data exchange करने के लिए 1-wire protocol का इस्तेमाल करती हैं। दोनों दिशाओं में data transfer के लिए केवल एक contact (!!) होता है, यानी master से slave और इसके विपरीत। 1-wire protocol Master-Slave model के अनुसार काम करता है। इस topology में Master हमेशा communication शुरू करता है और Slave उसके instructions का पालन करता है।
 
-जब कुंजी (दास) इंटरकॉम (मास्टर) से संपर्क करती है, तो कुंजी के अंदर की चिप चालू हो जाती है, इंटरकॉम द्वारा संचालित होती है, और कुंजी प्रारंभ की जाती है। इसके बाद इंटरकॉम कुंजी ID का अनुरोध करता है। अगला, हम इस प्रक्रिया को अधिक विस्तार से देखेंगे।
+जब key (Slave), intercom (Master) से contact करती है, तो key के अंदर का chip intercom से power लेकर on हो जाता है और key initialize हो जाती है। इसके बाद intercom key से उसका ID request करता है। आगे, हम इस process को अधिक detail में देखेंगे।
 
-Flipper मास्टर और दास दोनों मोड में काम कर सकता है। कुंजी पढ़ने के मोड में, Flipper एक रीडर के रूप में कार्य करता है, यानी यह मास्टर के रूप में काम करता है। और कुंजी अनुकरण मोड में, फ्लिपर एक कुंजी होने का नाटक करता है, यह दास मोड में है।
+Flipper Master और Slave दोनों modes में काम कर सकता है। Key reading mode में Flipper एक reader की तरह काम करता है, यानी यह Master के रूप में काम करता है। और key emulation mode में Flipper एक key होने का दिखावा करता है, यानी यह Slave mode में होता है।
 
 ### Dallas, Cyfral & Metakom keys
 
-इन कुंजियों के काम करने के तरीके के बारे में जानकारी के लिए पृष्ठ देखें [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
+इन keys के काम करने के तरीके की जानकारी के लिए यह page देखें [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)<sup>[[1]](#references)</sup>
 
 ### Attacks
 
-iButtons पर Flipper Zero के साथ हमला किया जा सकता है:
+iButtons पर Flipper Zero से attack किया जा सकता है:
 
 
 {{#ref}}
@@ -41,6 +41,6 @@ flipper-zero/fz-ibutton.md
 
 ## References
 
-- [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
+- [1] [Taming iButton](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../banners/hacktricks-training.md}}

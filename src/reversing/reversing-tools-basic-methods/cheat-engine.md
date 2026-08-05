@@ -2,189 +2,189 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) एक उपयोगी प्रोग्राम है जो यह पता लगाने में मदद करता है कि महत्वपूर्ण मान कहाँ संग्रहीत हैं एक चल रहे खेल की मेमोरी में और उन्हें बदलता है।\
-जब आप इसे डाउनलोड और चलाते हैं, तो आपको इस उपकरण का उपयोग कैसे करें, इसका **ट्यूटोरियल** **प्रस्तुत** किया जाता है। यदि आप इस उपकरण का उपयोग करना सीखना चाहते हैं, तो इसे पूरा करना अत्यधिक अनुशंसित है।
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) एक उपयोगी program है, जो यह पता लगाने में मदद करता है कि running game की memory में महत्वपूर्ण values कहाँ save हैं और उन्हें बदला जा सकता है।\
+जब आप इसे download करके run करते हैं, तो आपको tool का उपयोग करने का एक **tutorial** दिखाया जाता है। यदि आप tool का उपयोग करना सीखना चाहते हैं, तो इसे पूरा करना अत्यधिक recommended है।<sup>[[3]](#references)</sup>
 
-## आप क्या खोज रहे हैं?
+## आप क्या search कर रहे हैं?
 
-![](<../../images/image (762).png>)
+![Cheat Engine - आप क्या search कर रहे हैं?: आप क्या search कर रहे हैं?](<../../images/image (762).png>)
 
-यह उपकरण यह पता लगाने के लिए बहुत उपयोगी है कि **कुछ मान** (आमतौर पर एक संख्या) **किसी प्रोग्राम की मेमोरी में कहाँ संग्रहीत है**।\
-**आमतौर पर संख्याएँ** **4bytes** रूप में संग्रहीत होती हैं, लेकिन आप उन्हें **डबल** या **फ्लोट** प्रारूपों में भी पा सकते हैं, या आप कुछ **संख्याओं से अलग** देखने की कोशिश कर सकते हैं। इस कारण से, आपको यह सुनिश्चित करने की आवश्यकता है कि आप **चुनें** कि आप **क्या खोज रहे हैं**:
+यह tool किसी program की memory में **किसी value** (आमतौर पर number) के **stored होने का स्थान** खोजने के लिए बहुत उपयोगी है।\
+**आमतौर पर numbers** को **4bytes** form में store किया जाता है, लेकिन आप उन्हें **double** या **float** formats में भी खोज सकते हैं, या हो सकता है कि आप **number से अलग कुछ** खोजना चाहते हों। इसलिए आपको यह सुनिश्चित करना होगा कि आप वह चीज़ **select** करें जिसे आप **search करना** चाहते हैं:
 
-![](<../../images/image (324).png>)
+![Cheat Engine - आप क्या search कर रहे हैं?: आमतौर पर numbers को 4bytes form में store किया जाता है, लेकिन आप उन्हें double या float formats में भी खोज सकते हैं, या हो सकता है कि आप कुछ और खोजना चाहते हों...](<../../images/image (324).png>)
 
-आप **विभिन्न** प्रकार की **खोजों** को भी इंगित कर सकते हैं:
+आप **अलग-अलग** प्रकार के **searches** भी निर्दिष्ट कर सकते हैं:
 
-![](<../../images/image (311).png>)
+![Cheat Engine - आप क्या search कर रहे हैं?: आप अलग-अलग प्रकार के searches भी निर्दिष्ट कर सकते हैं](<../../images/image (311).png>)
 
-आप मेमोरी स्कैन करते समय **खेल को रोकने** के लिए बॉक्स को भी चेक कर सकते हैं:
+आप memory scan करते समय **game को रोकने** के लिए checkbox को भी check कर सकते हैं:
 
-![](<../../images/image (1052).png>)
+![Cheat Engine - आप क्या search कर रहे हैं?: आप memory scan करते समय game को रोकने के लिए checkbox को भी check कर सकते हैं](<../../images/image (1052).png>)
 
-### हॉटकीज़
+### Hotkeys
 
-_**Edit --> Settings --> Hotkeys**_ में आप विभिन्न उद्देश्यों के लिए विभिन्न **हॉटकीज़** सेट कर सकते हैं जैसे **खेल को रोकना** (जो कि मेमोरी स्कैन करते समय बहुत उपयोगी है)। अन्य विकल्प उपलब्ध हैं:
+_**Edit --> Settings --> Hotkeys**_ में आप अलग-अलग उद्देश्यों के लिए अलग-अलग **hotkeys** set कर सकते हैं, जैसे **game को रोकना** (जो काफी उपयोगी है, यदि किसी समय आप memory scan करना चाहते हैं)। अन्य options भी उपलब्ध हैं:
 
-![](<../../images/image (864).png>)
+![आप क्या search कर रहे हैं? - Hotkeys: Edit -- Settings -- Hotkeys में आप अलग-अलग उद्देश्यों के लिए अलग-अलग hotkeys set कर सकते हैं, जैसे game को रोकना (जो काफी उपयोगी है, यदि किसी समय आप...](<../../images/image (864).png>)
 
-## मान को संशोधित करना
+## Value को modify करना
 
-एक बार जब आप **पाते हैं** कि **मान** आप **खोज रहे हैं** (इस बारे में अधिक जानकारी अगले चरणों में) आप इसे **संशोधित** कर सकते हैं, इसे डबल क्लिक करके, फिर इसके मान पर डबल क्लिक करके:
+जब आपको वह **value** मिल जाए जिसे आप **खोज रहे हैं** (इसके बारे में अधिक जानकारी अगले steps में है), तो आप उस पर double click करके और फिर उसकी value पर double click करके उसे **modify** कर सकते हैं:
 
-![](<../../images/image (563).png>)
+![Hotkeys - Value को modify करना: जब आपको वह value मिल जाए जिसे आप खोज रहे हैं (इसके बारे में अधिक जानकारी अगले steps में है), तो आप उस पर double click करके और फिर double click करके...](<../../images/image (563).png>)
 
-और अंततः मेमोरी में संशोधन करने के लिए **चेक** को **मार्क** करके:
+अंत में **check mark** करके memory में modification लागू करें:
 
-![](<../../images/image (385).png>)
+![Hotkeys - Value को modify करना: अंत में check mark करके memory में modification लागू करें](<../../images/image (385).png>)
 
-**मेमोरी** में **परिवर्तन** तुरंत **लागू** होगा (ध्यान दें कि जब तक खेल इस मान का फिर से उपयोग नहीं करता, तब तक मान **खेल में अपडेट नहीं होगा**).
+**Memory** में किया गया **change** तुरंत **apply** हो जाएगा (ध्यान दें कि जब तक game इस value को दोबारा use नहीं करता, तब तक game में value **update नहीं होगी**)।
 
-## मान की खोज
+## Value को search करना
 
-तो, हम यह मानते हैं कि एक महत्वपूर्ण मान (जैसे आपके उपयोगकर्ता का जीवन) है जिसे आप सुधारना चाहते हैं, और आप इस मान को मेमोरी में खोज रहे हैं)
+मान लेते हैं कि कोई महत्वपूर्ण value (जैसे आपके user की life) है जिसे आप बढ़ाना चाहते हैं और आप इस value को memory में खोज रहे हैं।
 
-### ज्ञात परिवर्तन के माध्यम से
+### ज्ञात change के माध्यम से
 
-मान लेते हैं कि आप मान 100 की खोज कर रहे हैं, आप उस मान की खोज करते हैं और आपको कई संयोग मिलते हैं:
+मान लें कि आप value 100 खोज रहे हैं। आप उस value को search करते हुए **scan perform** करते हैं और आपको बहुत-सी coincidences मिलती हैं:
 
-![](<../../images/image (108).png>)
+![Value को search करना - ज्ञात change के माध्यम से: मान लें कि आप value 100 खोज रहे हैं, आप उस value को search करते हुए scan perform करते हैं और आपको बहुत-सी coincidences मिलती हैं](<../../images/image (108).png>)
 
-फिर, आप कुछ ऐसा करते हैं जिससे **मान बदलता है**, और आप **खेल को रोकते हैं** और **अगली स्कैन** करते हैं:
+फिर आप ऐसा कुछ करते हैं जिससे **value change** हो जाती है, और आप **game रोककर** एक **next scan perform** करते हैं:
 
-![](<../../images/image (684).png>)
+![Value को search करना - ज्ञात change के माध्यम से: फिर आप ऐसा कुछ करते हैं जिससे value change हो जाती है, और आप game रोककर एक next scan perform करते हैं](<../../images/image (684).png>)
 
-Cheat Engine उन **मानों** की खोज करेगा जो **100 से नए मान में बदल गए**। बधाई हो, आपने उस **पते** को **पाया** जिसे आप खोज रहे थे, आप अब इसे संशोधित कर सकते हैं।\
-_यदि आपके पास अभी भी कई मान हैं, तो उस मान को फिर से संशोधित करने के लिए कुछ करें, और पते को फ़िल्टर करने के लिए एक और "अगली स्कैन" करें।_
+Cheat Engine उन **values** को search करेगा जो **100 से नई value में बदल गई हैं**। बधाई हो, आपको अपनी खोजी जा रही value का **address** मिल गया है; अब आप इसे modify कर सकते हैं।\
+_यदि अभी भी कई values हैं, तो उस value को फिर से modify करने के लिए कुछ करें और addresses को filter करने के लिए एक और "next scan" perform करें।_
 
-### अज्ञात मान, ज्ञात परिवर्तन
+### अज्ञात Value, ज्ञात change
 
-इस परिदृश्य में, यदि आप **मान नहीं जानते** लेकिन आप जानते हैं **कि इसे कैसे बदलना है** (और यहां तक कि परिवर्तन का मान) तो आप अपने नंबर की खोज कर सकते हैं।
+ऐसी स्थिति में जहाँ आपको **value का पता नहीं** है, लेकिन आप जानते हैं कि उसे **कैसे change करना है** (और change की value भी जानते हैं), आप अपना number खोज सकते हैं।
 
-तो, "**अज्ञात प्रारंभिक मान**" प्रकार की स्कैन करने से शुरू करें:
+सबसे पहले "**Unknown initial value**" type का scan perform करें:
 
-![](<../../images/image (890).png>)
+![ज्ञात change के माध्यम से - अज्ञात Value, ज्ञात change: सबसे पहले " Unknown initial value " type का scan perform करें](<../../images/image (890).png>)
 
-फिर, मान को बदलें, **कैसे** **मान** **बदला** है (मेरे मामले में यह 1 से घटा) और **अगली स्कैन** करें:
+फिर value को change करें, बताएं कि **value** **कैसे बदली** (मेरे मामले में यह 1 से कम हुई) और एक **next scan** perform करें:
 
-![](<../../images/image (371).png>)
+![ज्ञात change के माध्यम से - अज्ञात Value, ज्ञात change: फिर value को change करें, बताएं कि value कैसे बदली (मेरे मामले में यह 1 से कम हुई) और एक next scan perform करें](<../../images/image (371).png>)
 
-आपको **सभी मान प्रस्तुत किए जाएंगे जो चयनित तरीके से संशोधित किए गए थे**:
+आपको चुने गए तरीके से **modify की गई सभी values** दिखाई जाएंगी:
 
-![](<../../images/image (569).png>)
+![ज्ञात change के माध्यम से - अज्ञात Value, ज्ञात change: आपको चुने गए तरीके से modify की गई सभी values दिखाई जाएंगी](<../../images/image (569).png>)
 
-एक बार जब आप अपना मान पा लेते हैं, तो आप इसे संशोधित कर सकते हैं।
+जब आपको अपनी value मिल जाए, तो आप उसे modify कर सकते हैं।
 
-ध्यान दें कि कई **संभव परिवर्तनों** की संभावना है और आप परिणामों को फ़िल्टर करने के लिए इन **चरणों को जितना चाहें कर सकते हैं**:
+ध्यान दें कि **बहुत-से संभावित changes** होते हैं और results को filter करने के लिए आप इन **steps को जितनी बार चाहें** कर सकते हैं:
 
-![](<../../images/image (574).png>)
+![ज्ञात change के माध्यम से - अज्ञात Value, ज्ञात change: ध्यान दें कि बहुत-से संभावित changes होते हैं और results को filter करने के लिए आप इन steps को जितनी बार चाहें कर सकते हैं](<../../images/image (574).png>)
 
-### यादृच्छिक मेमोरी पता - कोड खोजना
+### Random Memory Address - Code खोजना
 
-अब तक हमने एक मान संग्रहीत करने वाले पते को खोजने का तरीका सीखा है, लेकिन यह बहुत संभावना है कि **खेल के विभिन्न निष्पादन में वह पता मेमोरी के विभिन्न स्थानों में हो**। तो चलिए पता लगाते हैं कि हमेशा उस पते को कैसे खोजें।
+अब तक हमने सीखा कि किसी value को store करने वाला address कैसे खोजते हैं, लेकिन यह बहुत संभव है कि **game के अलग-अलग executions में वह address memory में अलग-अलग स्थानों पर हो**। इसलिए आइए जानें कि उस address को हमेशा कैसे खोजा जाए।
 
-कुछ उल्लेखित तरकीबों का उपयोग करते हुए, उस पते को खोजें जहाँ आपका वर्तमान खेल महत्वपूर्ण मान को संग्रहीत कर रहा है। फिर (यदि आप चाहें तो खेल को रोकते हुए) उस **पते** पर **दाएँ क्लिक** करें और "**इस पते को एक्सेस करने वाले को खोजें**" या "**इस पते पर लिखने वाले को खोजें**" का चयन करें:
+ऊपर बताए गए कुछ tricks का उपयोग करके वह address खोजें जहाँ आपका current game महत्वपूर्ण value store कर रहा है। फिर (यदि चाहें तो game रोककर) मिले हुए **address** पर **right click** करें और "**Find out what accesses this address**" या "**Find out what writes to this address**" select करें:
 
-![](<../../images/image (1067).png>)
+![अज्ञात Value, ज्ञात change - Random Memory Address - Code खोजना: ऊपर बताए गए कुछ tricks का उपयोग करके वह address खोजें जहाँ आपका current game महत्वपूर्ण value store कर रहा है। फिर...](<../../images/image (1067).png>)
 
-**पहला विकल्प** यह जानने के लिए उपयोगी है कि **कोड** के कौन से **भाग** इस **पते** का **उपयोग** कर रहे हैं (जो कि खेल के कोड को संशोधित करने के लिए उपयोगी है)।\
-**दूसरा विकल्प** अधिक **विशिष्ट** है, और इस मामले में अधिक सहायक होगा क्योंकि हम यह जानने में रुचि रखते हैं कि **यह मान कहाँ से लिखा जा रहा है**।
+**पहला option** यह जानने के लिए उपयोगी है कि **code** के कौन-से **parts** इस **address का use** कर रहे हैं (यह अन्य चीज़ों के लिए भी उपयोगी है, जैसे यह जानना कि आप game के **code को कहाँ modify कर सकते हैं**)।\
+**दूसरा option** अधिक **specific** है और इस स्थिति में अधिक helpful होगा, क्योंकि हमारी रुचि यह जानने में है कि **यह value कहाँ से write की जा रही है**।
 
-एक बार जब आप इनमें से एक विकल्प का चयन कर लेते हैं, तो **डीबगर** प्रोग्राम से **जुड़ जाएगा** और एक नई **खाली विंडो** दिखाई देगी। अब, **खेलें** और उस **मान** को **संशोधित** करें (खेल को फिर से शुरू किए बिना)। **विंडो** में उन **पते** से भरा जाना चाहिए जो **मान को संशोधित कर रहे हैं**:
+इनमें से किसी एक option को select करने के बाद **debugger** program से **attach** हो जाएगा और एक नई **empty window** दिखाई देगी। अब **game खेलें** और उस **value को modify** करें (game को restart किए बिना)। **Window** उन **addresses** से भर जानी चाहिए जो **value को modify** कर रहे हैं:
 
-![](<../../images/image (91).png>)
+![अज्ञात Value, ज्ञात change - Random Memory Address - Code खोजना: इनमें से किसी एक option को select करने के बाद debugger program से attach हो जाएगा और एक नई empty window दिखाई देगी। अब...](<../../images/image (91).png>)
 
-अब जब आपने उस पते को खोज लिया है जो मान को संशोधित कर रहा है, तो आप **कोड को अपनी इच्छानुसार संशोधित कर सकते हैं** (Cheat Engine आपको इसे NOPs के लिए जल्दी संशोधित करने की अनुमति देता है):
+अब जब आपको वह address मिल गया है जो value को modify कर रहा है, तो आप अपनी **इच्छा के अनुसार code को modify** कर सकते हैं (Cheat Engine आपको इसे NOPs के लिए बहुत जल्दी modify करने देता है):
 
-![](<../../images/image (1057).png>)
+![अज्ञात Value, ज्ञात change - Random Memory Address - Code खोजना: अब जब आपको वह address मिल गया है जो value को modify कर रहा है, तो आप अपनी इच्छा के अनुसार code को modify कर सकते हैं (Cheat Engine...](<../../images/image (1057).png>)
 
-तो, आप अब इसे इस तरह संशोधित कर सकते हैं कि कोड आपके नंबर को प्रभावित न करे, या हमेशा सकारात्मक तरीके से प्रभावित करे।
+अब आप इसे इस तरह modify कर सकते हैं कि code आपके number को affect न करे, या उसे हमेशा positive तरीके से affect करे।
 
-### यादृच्छिक मेमोरी पता - प्वाइंटर खोजना
+### Random Memory Address - Pointer खोजना
 
-पिछले चरणों का पालन करते हुए, उस स्थान को खोजें जहाँ आप रुचि रखते हैं। फिर, "**इस पते पर लिखने वाले को खोजें**" का उपयोग करके यह पता लगाएं कि कौन सा पता इस मान को लिखता है और उस पर डबल क्लिक करें ताकि डिस्सेम्बली दृश्य प्राप्त हो सके:
+पिछले steps को follow करते हुए अपनी रुचि वाली value का स्थान खोजें। फिर "**Find out what writes to this address**" का उपयोग करके पता लगाएँ कि कौन-सा address इस value को write करता है और disassembly view पाने के लिए उस पर double click करें:
 
-![](<../../images/image (1039).png>)
+![Random Memory Address - Code खोजना - Random Memory Address - Pointer खोजना: पिछले steps को follow करते हुए अपनी रुचि वाली value का स्थान खोजें। फिर " Find out...](<../../images/image (1039).png>)
 
-फिर, **"\[]"** के बीच हेक्स मान की खोज करते हुए एक नई स्कैन करें (इस मामले में $edx का मान):
+फिर **"\[]" के बीच मौजूद hex value** को **search** करते हुए एक नया scan perform करें (इस मामले में $edx की value):
 
-![](<../../images/image (994).png>)
+![Random Memory Address - Code खोजना - Random Memory Address - Pointer खोजना: फिर " ()" के बीच मौजूद hex value को search करते हुए एक नया scan perform करें (इस मामले में $edx की value)](<../../images/image (994).png>)
 
-(_यदि कई दिखाई देते हैं, तो आपको आमतौर पर सबसे छोटे पते की आवश्यकता होती है_)\
-अब, हमने **प्वाइंटर पाया है जो उस मान को संशोधित करेगा जिसमें हमें रुचि है**।
+(_यदि कई results दिखाई दें, तो आमतौर पर सबसे छोटे address वाला result चाहिए_)\
+अब हमें वह **pointer मिल गया है जो हमारी रुचि वाली value को modify करेगा**।
 
-"**पता मैन्युअल रूप से जोड़ें**" पर क्लिक करें:
+"**Add Address Manually**" पर click करें:
 
-![](<../../images/image (990).png>)
+![Random Memory Address - Code खोजना - Random Memory Address - Pointer खोजना: " Add Address Manually " पर click करें](<../../images/image (990).png>)
 
-अब, "प्वाइंटर" चेक बॉक्स पर क्लिक करें और टेक्स्ट बॉक्स में पाया गया पता जोड़ें (इस परिदृश्य में, पिछले चित्र में पाया गया पता "Tutorial-i386.exe"+2426B0 था):
+अब "Pointer" checkbox पर click करें और मिले हुए address को text box में add करें (इस scenario में, पिछली image में मिला address "Tutorial-i386.exe"+2426B0 था):
 
-![](<../../images/image (392).png>)
+![Random Memory Address - Code खोजना - Random Memory Address - Pointer खोजना: अब "Pointer" checkbox पर click करें और मिले हुए address को text box में add करें (इस scenario में,...](<../../images/image (392).png>)
 
-(ध्यान दें कि पहले "पता" को स्वचालित रूप से उस प्वाइंटर पते से भरा गया है जिसे आप प्रस्तुत करते हैं)
+(ध्यान दें कि पहला "Address" आपके द्वारा दिए गए pointer address से automatically populate हो जाता है।)
 
-OK पर क्लिक करें और एक नया प्वाइंटर बनाया जाएगा:
+OK पर click करें और एक नया pointer create हो जाएगा:
 
-![](<../../images/image (308).png>)
+![Random Memory Address - Code खोजना - Random Memory Address - Pointer खोजना: OK पर click करें और एक नया pointer create हो जाएगा](<../../images/image (308).png>)
 
-अब, हर बार जब आप उस मान को संशोधित करते हैं, तो आप **महत्वपूर्ण मान को संशोधित कर रहे हैं, भले ही उस मान का पता अलग हो**।
+अब हर बार जब आप उस value को modify करेंगे, तो आप **महत्वपूर्ण value को modify कर रहे होंगे, भले ही वह memory address अलग हो जहाँ value मौजूद है।**
 
-### कोड इंजेक्शन
+### Code Injection
 
-कोड इंजेक्शन एक तकनीक है जहाँ आप लक्षित प्रक्रिया में कोड का एक टुकड़ा इंजेक्ट करते हैं, और फिर कोड के निष्पादन को अपने द्वारा लिखित कोड के माध्यम से पुनः मार्गदर्शित करते हैं (जैसे आपको अंक देना बजाय उन्हें घटाने के)।
+Code injection एक technique है जिसमें target process में code का एक हिस्सा inject किया जाता है और फिर code का execution इस तरह reroute किया जाता है कि वह आपके लिखे हुए code से होकर गुज़रे (जैसे points घटाने के बजाय आपको points देना)।
 
-तो, कल्पना करें कि आपने उस पते को खोज लिया है जो आपके खिलाड़ी के जीवन से 1 घटा रहा है:
+मान लें कि आपको वह address मिल गया है जो आपके player की life में से 1 घटा रहा है:
 
-![](<../../images/image (203).png>)
+![Random Memory Address - Pointer खोजना - Code Injection: मान लें कि आपको वह address मिल गया है जो आपके player की life में से 1 घटा रहा है](<../../images/image (203).png>)
 
-**डिस्सेम्बल कोड** प्राप्त करने के लिए Show disassembler पर क्लिक करें।\
-फिर, **CTRL+a** दबाकर ऑटो असेंबल विंडो को खोलें और _**Template --> Code Injection**_ का चयन करें।
+**disassemble code** पाने के लिए Show disassembler पर click करें।\
+फिर Auto assemble window खोलने के लिए **CTRL+a** दबाएँ और _**Template --> Code Injection**_ select करें।
 
-![](<../../images/image (902).png>)
+![Random Memory Address - Pointer खोजना - Code Injection: फिर Auto assemble window खोलने के लिए CTRL+a दबाएँ और Template -- Code Injection select करें](<../../images/image (902).png>)
 
-**संशोधित करने के लिए आप जिस निर्देश का पता चाहते हैं, उसे भरें** (यह आमतौर पर स्वचालित रूप से भरा जाता है):
+जिस instruction को आप modify करना चाहते हैं उसका **address भरें** (यह आमतौर पर autofill होता है):
 
-![](<../../images/image (744).png>)
+![Random Memory Address - Pointer खोजना - Code Injection: जिस instruction को आप modify करना चाहते हैं उसका address भरें (यह आमतौर पर autofill होता है)](<../../images/image (744).png>)
 
-एक टेम्पलेट उत्पन्न होगा:
+एक template generate होगा:
 
-![](<../../images/image (944).png>)
+![Random Memory Address - Pointer खोजना - Code Injection: एक template generate होगा](<../../images/image (944).png>)
 
-तो, अपने नए असेंबली कोड को "**newmem**" अनुभाग में डालें और यदि आप नहीं चाहते कि इसे निष्पादित किया जाए तो "**originalcode**" से मूल कोड हटा दें। इस उदाहरण में, इंजेक्ट किया गया कोड 1 घटाने के बजाय 2 अंक जोड़ेगा:
+अब "**newmem**" section में अपना नया assembly code डालें और यदि आप original code को execute नहीं करना चाहते, तो "**originalcode**" से original code हटा दें**।** इस example में injected code 1 घटाने के बजाय 2 points add करेगा:
 
-![](<../../images/image (521).png>)
+![Random Memory Address - Pointer खोजना - Code Injection: अब " newmem " section में अपना नया assembly code डालें और यदि आप original code को execute नहीं करना चाहते, तो " originalcode " से original code...](<../../images/image (521).png>)
 
-**Execute पर क्लिक करें और इसी तरह आपका कोड प्रोग्राम में इंजेक्ट होना चाहिए जिससे कार्यक्षमता का व्यवहार बदल जाए!**
+**execute आदि पर click करें और आपका code program में inject हो जाना चाहिए, जिससे functionality का behaviour बदल जाएगा!**
 
-## Cheat Engine 7.x (2023-2025) में उन्नत सुविधाएँ
+## Cheat Engine 7.x में Advanced features (2023-2025)
 
-Cheat Engine ने संस्करण 7.0 के बाद से विकसित होना जारी रखा है और कई गुणवत्ता-जीवन और *आक्रामक-रिवर्सिंग* सुविधाएँ जोड़ी गई हैं जो आधुनिक सॉफ़्टवेयर (और केवल खेल नहीं!) का विश्लेषण करते समय अत्यंत उपयोगी हैं। नीचे एक **बहुत संक्षिप्त क्षेत्र गाइड** है जो उन परिवर्धनों के लिए है जिनका आप संभवतः रेड-टीम/CTF कार्य के दौरान उपयोग करेंगे।
+Cheat Engine version 7.0 के बाद से लगातार evolve हुआ है और modern software (और केवल games ही नहीं!) का analysis करते समय कई quality-of-life और *offensive-reversing* features जोड़े गए हैं। नीचे उन additions का **बहुत संक्षिप्त field guide** दिया गया है, जिनका red-team/CTF work के दौरान आप सबसे अधिक उपयोग करेंगे।<sup>[[1]](#references)</sup>
 
-### प्वाइंटर स्कैनर 2 में सुधार
-* `Pointers must end with specific offsets` और नया **Deviation** स्लाइडर (≥7.4) जब आप अपडेट के बाद फिर से स्कैन करते हैं तो झूठे सकारात्मक को काफी कम करता है। इसे मल्टी-मैप तुलना (`.PTR` → *Compare results with other saved pointer map*) के साथ मिलाकर उपयोग करें ताकि केवल कुछ मिनटों में एक **एकल लचीला बेस-प्वाइंटर** प्राप्त किया जा सके।
-* बल्क-फिल्टर शॉर्टकट: पहले स्कैन के बाद `Ctrl+A → Space` दबाकर सब कुछ मार्क करें, फिर `Ctrl+I` (इनवर्ट) दबाकर उन पते को अस्वीकृत करें जो फिर से स्कैन में विफल रहे।
+### Pointer Scanner 2 improvements
+* `Pointers must end with specific offsets` और नया **Deviation** slider (≥7.4), update के बाद rescan करते समय false positives को काफी कम करते हैं। इसे multi-map comparison (`.PTR` → *Compare results with other saved pointer map*) के साथ use करके कुछ ही minutes में एक **single resilient base-pointer** प्राप्त करें।
+* Bulk-filter shortcut: पहले scan के बाद `Ctrl+A → Space` दबाकर सब कुछ mark करें, फिर rescan में fail हुए addresses को deselect करने के लिए `Ctrl+I` (invert) दबाएँ।
 
-### Ultimap 3 – Intel PT ट्रेसिंग
-*7.5 से पुराने Ultimap को **Intel Processor-Trace (IPT)** के शीर्ष पर फिर से लागू किया गया है। इसका मतलब है कि आप अब लक्षित प्रक्रिया द्वारा लिए गए *हर* शाखा को **बिना सिंगल-स्टेपिंग** (यूजर-मोड केवल, यह अधिकांश एंटी-डीबग गैजेट्स को ट्रिप नहीं करेगा) रिकॉर्ड कर सकते हैं।
+### Ultimap 3 – Intel PT tracing
+*7.5 से पुराने Ultimap को **Intel Processor-Trace (IPT)** के आधार पर re-implement किया गया है।* इसका अर्थ है कि अब आप target द्वारा लिए गए **हर branch को record** कर सकते हैं, **single-stepping** के बिना (केवल user-mode; यह अधिकांश anti-debug gadgets को trigger नहीं करेगा)।
 ```
 Memory View → Tools → Ultimap 3 → check «Intel PT»
 Select number of buffers → Start
 ```
-कुछ सेकंड बाद कैप्चर को रोकें और **right-click → Save execution list to file** करें। उच्च-आवृत्ति गेम-लॉजिक हॉटस्पॉट्स को अत्यंत तेजी से खोजने के लिए शाखा पते को `Find out what addresses this instruction accesses` सत्र के साथ मिलाएं।
+कुछ सेकंड बाद capture रोकें और **right-click → Save execution list to file** चुनें। Branch addresses को `Find out what addresses this instruction accesses` session के साथ मिलाकर high-frequency game-logic hotspots को बेहद तेज़ी से खोजें।
 
-### 1-byte `jmp` / ऑटो-पैच टेम्पलेट्स
-संस्करण 7.5 ने एक *one-byte* JMP स्टब (0xEB) पेश किया जो एक SEH हैंडलर स्थापित करता है और मूल स्थान पर एक INT3 रखता है। यह स्वचालित रूप से उत्पन्न होता है जब आप **Auto Assembler → Template → Code Injection** का उपयोग करते हैं उन निर्देशों पर जिन्हें 5-byte सापेक्ष कूद के साथ पैच नहीं किया जा सकता। यह पैक किए गए या आकार-सीमित रूटीन के भीतर "टाइट" हुक संभव बनाता है।
+### 1-byte `jmp` / auto-patch templates
+Version 7.5 ने एक *one-byte* JMP stub (0xEB) पेश किया, जो एक SEH handler इंस्टॉल करता है और original location पर INT3 रखता है। यह तब अपने-आप generate होता है जब आप ऐसे instructions पर **Auto Assembler → Template → Code Injection** का उपयोग करते हैं जिन्हें 5-byte relative jump से patch नहीं किया जा सकता। इससे packed या size-constrained routines के अंदर “tight” hooks संभव हो जाते हैं।
 
-### कर्नेल-स्तरीय स्टेल्थ DBVM (AMD & Intel) के साथ
-*DBVM* CE का अंतर्निहित Type-2 हाइपरवाइज़र है। हाल के निर्माणों ने अंततः **AMD-V/SVM समर्थन** जोड़ा है ताकि आप Ryzen/EPYC होस्ट पर `Driver → Load DBVM` चला सकें। DBVM आपको यह करने की अनुमति देता है:
-1. Ring-3/एंटी-डिबग जांचों के लिए अदृश्य हार्डवेयर ब्रेकपॉइंट्स बनाना।
-2. उपयोगकर्ता-मोड ड्राइवर बंद होने पर भी pageable या संरक्षित कर्नेल मेमोरी क्षेत्रों को पढ़ना/लिखना।
-3. VM-EXIT-रहित टाइमिंग-हमले बायपास करना (जैसे हाइपरवाइज़र से `rdtsc` क्वेरी करना)।
+### DBVM (AMD & Intel) के साथ Kernel-level stealth
+*DBVM* CE का built-in Type-2 hypervisor है। हाल के builds में आखिरकार **AMD-V/SVM support** जोड़ा गया है, इसलिए आप Ryzen/EPYC hosts पर `Driver → Load DBVM` चला सकते हैं। DBVM आपको यह करने देता है:
+1. Ring-3/anti-debug checks से invisible hardware breakpoints create करना।
+2. User-mode driver disabled होने पर भी pageable या protected kernel memory regions को read/write करना।
+3. VM-EXIT-less timing-attack bypasses करना (जैसे hypervisor से `rdtsc` query करना)।
 
-**टिप:** DBVM Windows 11 पर HVCI/Memory-Integrity सक्षम होने पर लोड करने से इनकार करेगा → इसे बंद करें या एक समर्पित VM-होस्ट पर बूट करें।
+**Tip:** Windows 11 पर HVCI/Memory-Integrity enabled होने पर DBVM load होने से मना कर देगा → इसे बंद करें या dedicated VM-host boot करें।
 
-### रिमोट / क्रॉस-प्लेटफ़ॉर्म डिबगिंग **ceserver** के साथ
-CE अब *ceserver* का पूरा पुनर्लेखन प्रदान करता है और **Linux, Android, macOS & iOS** लक्ष्यों पर TCP के माध्यम से संलग्न हो सकता है। एक लोकप्रिय फोर्क *Frida* को एकीकृत करता है ताकि CE के GUI के साथ गतिशील इंस्ट्रुमेंटेशन को जोड़ा जा सके - जब आपको फोन पर चल रहे Unity या Unreal खेलों को पैच करने की आवश्यकता हो तो यह आदर्श है:
+### **ceserver** के साथ Remote / cross-platform debugging
+CE अब *ceserver* का full rewrite ship करता है और **Linux, Android, macOS & iOS** targets से TCP के ज़रिए attach कर सकता है। एक लोकप्रिय fork *Frida* को integrate करता है, जिससे dynamic instrumentation को CE के GUI के साथ combine किया जा सकता है - यह तब ideal है जब आपको phone पर चल रहे Unity या Unreal games को patch करना हो:
 ```
 # on the target (arm64)
 ./ceserver_arm64 &
@@ -192,26 +192,26 @@ CE अब *ceserver* का पूरा पुनर्लेखन प्र�
 adb forward tcp:52736 tcp:52736   # (or ssh tunnel)
 Cheat Engine → "Network" icon → Host = localhost → Connect
 ```
-For the Frida bridge see `bb33bb/frida-ceserver` on GitHub.
+Frida bridge के लिए GitHub पर `bb33bb/frida-ceserver` देखें।<sup>[[2]](#references)</sup>
 
-### Other noteworthy goodies
-* **Patch Scanner** (MemView → Tools) – अप्रत्याशित कोड परिवर्तनों का पता लगाता है; मैलवेयर विश्लेषण के लिए उपयोगी।
-* **Structure Dissector 2** – drag-an-address → `Ctrl+D`, फिर *Guess fields* C-structures का स्वचालित मूल्यांकन करने के लिए।
-* **.NET & Mono Dissector** – यूनिटी गेम समर्थन में सुधार; CE Lua कंसोल से सीधे विधियों को कॉल करें।
-* **Big-Endian custom types** – उल्टे बाइट क्रम स्कैन/संपादित करें (कंसोल एमुलेटर्स और नेटवर्क पैकेट बफर्स के लिए उपयोगी)।
-* **Autosave & tabs** AutoAssembler/Lua विंडोज़ के लिए, साथ ही `reassemble()` मल्टी-लाइन निर्देश पुनःलेखन के लिए।
+### अन्य उल्लेखनीय सुविधाएँ
+* **Patch Scanner** (MemView → Tools) – executable sections में अप्रत्याशित code changes का पता लगाता है; malware analysis के लिए उपयोगी।
+* **Structure Dissector 2** – किसी address को drag करें → `Ctrl+D`, फिर C-structures का auto-evaluation करने के लिए *Guess fields* चुनें।
+* **.NET & Mono Dissector** – बेहतर Unity game support; CE Lua console से सीधे methods call करें।
+* **Big-Endian custom types** – उलटे byte order में scan/edit (console emulators और network packet buffers के लिए उपयोगी)।
+* AutoAssembler/Lua windows के लिए **Autosave & tabs**, साथ ही multi-line instruction rewrite के लिए `reassemble()`।
 
-### Installation & OPSEC notes (2024-2025)
-* आधिकारिक इंस्टॉलर InnoSetup **ad-offers** (`RAV` आदि) के साथ लिपटा हुआ है। **हमेशा *Decline* पर क्लिक करें** *या स्रोत से संकलित करें* PUPs से बचने के लिए। AVs अभी भी `cheatengine.exe` को *HackTool* के रूप में चिह्नित करेंगे, जो अपेक्षित है।
-* आधुनिक एंटी-चीट ड्राइवर (EAC/Battleye, ACE-BASE.sys, mhyprot2.sys) CE की विंडो क्लास का पता लगाते हैं, भले ही इसका नाम बदल दिया गया हो। अपने रिवर्सिंग कॉपी को **एक नष्ट करने योग्य VM के अंदर** चलाएँ या नेटवर्क खेल को बंद करने के बाद।
-* यदि आपको केवल उपयोगकर्ता-मोड एक्सेस की आवश्यकता है तो **`Settings → Extra → Kernel mode debug = off`** चुनें ताकि CE के अस्वीकृत ड्राइवर को लोड करने से बचा जा सके जो Windows 11 24H2 Secure-Boot पर BSOD कर सकता है।
+### Installation और OPSEC notes (2024-2025)
+* Official installer InnoSetup **ad-offers** (`RAV` आदि) के साथ bundled है। PUPs से बचने के लिए **हमेशा *Decline* पर click करें** *या source से compile करें*। AVs फिर भी `cheatengine.exe` को *HackTool* के रूप में flag करेंगे, जो expected है।
+* Modern anti-cheat drivers (EAC/Battleye, ACE-BASE.sys, mhyprot2.sys) rename किए जाने पर भी CE की window class detect कर लेते हैं। अपनी reversing copy को **disposable VM के अंदर** चलाएँ या network play disable करने के बाद चलाएँ।
+* यदि आपको केवल user-mode access चाहिए, तो CE के unsigned driver को load करने से बचने के लिए **`Settings → Extra → Kernel mode debug = off`** चुनें, जो Windows 11 24H2 Secure-Boot पर BSOD कर सकता है।
 
 ---
 
-## **References**
+## संदर्भ
 
-- [Cheat Engine 7.5 release notes (GitHub)](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
-- [frida-ceserver cross-platform bridge](https://github.com/bb33bb/frida-ceserver-Mac-and-IOS)
-- **Cheat Engine tutorial, complete it to learn how to start with Cheat Engine**
+- [1] [Cheat Engine 7.5 release notes (GitHub)](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
+- [2] [frida-ceserver cross-platform bridge](https://github.com/bb33bb/frida-ceserver-Mac-and-IOS)
+- [3] Cheat Engine tutorial, Cheat Engine के साथ शुरुआत करना सीखने के लिए इसे पूरा करें
 
 {{#include ../../banners/hacktricks-training.md}}

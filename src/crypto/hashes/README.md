@@ -4,36 +4,36 @@
 
 ## सामान्य CTF पैटर्न
 
-- "Signature" वास्तव में `hash(secret || message)` है → length extension.
-- Unsalted password hashes → trivial cracking / lookup.
-- hash और MAC को भ्रमित करना (hash != authentication).
+- "Signature" वास्तव में `hash(secret || message)` है → length extension।
+- Unsalted password hashes → trivial cracking / lookup।
+- Hash को MAC समझना (hash != authentication)।
 
 ## Hash length extension attack
 
 ### Technique
 
-आप अक्सर इसका फायदा उठा सकते हैं अगर कोई सर्वर इस तरह का "signature" गणना करता है:
+यदि कोई server इस तरह की "signature" compute करता है, तो आप अक्सर इसका exploit कर सकते हैं:
 
 `sig = HASH(secret || message)`
 
-और Merkle–Damgård hash का उपयोग करता है (क्लासिक उदाहरण: MD5, SHA-1, SHA-256).
+और Merkle–Damgård hash का उपयोग करता है (classic examples: MD5, SHA-1, SHA-256)।
 
 यदि आपको पता हो:
 
 - `message`
 - `sig`
 - hash function
-- (या brute-force कर सकते हैं) `len(secret)`
+- (या आप brute-force कर सकते हों) `len(secret)`
 
-तो आप एक वैध signature गणना कर सकते हैं:
+तो आप बिना secret जाने, इसके लिए valid signature compute कर सकते हैं:
 
 `message || padding || appended_data`
 
-बिना secret जाने।
+<sup>[[1]](#references)</sup>
 
 ### Important limitation: HMAC is not affected
 
-Length extension attacks उन निर्माणों पर लागू होते हैं जैसे `HASH(secret || message)` जो Merkle–Damgård hashes के लिए हैं। वे **HMAC** (उदा., HMAC-SHA256) पर लागू नहीं होते, जो विशेष रूप से इस प्रकार की समस्या से बचने के लिए डिज़ाइन किया गया है।
+Length extension attacks, Merkle–Damgård hashes के लिए `HASH(secret || message)` जैसी constructions पर लागू होते हैं। ये **HMAC** (जैसे HMAC-SHA256) पर लागू नहीं होते, जिसे विशेष रूप से इस प्रकार की समस्या से बचने के लिए design किया गया है।<sup>[[1]](#references)</sup>
 
 ### Tools
 
@@ -54,26 +54,30 @@ https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-lengt
 
 ## Password hashing and cracking
 
-### शुरुआती प्रश्न
+### First questions
 
-- क्या यह **salted** है? (देखें `salt$hash` formats)
-- क्या यह एक **fast hash** (MD5/SHA1/SHA256) है या एक **slow KDF** (bcrypt/scrypt/argon2/PBKDF2)?
-- क्या आपके पास कोई **format hint** है (hashcat mode / John format)?
+- क्या यह **salted** है? (`salt$hash` formats देखें)
+- क्या यह **fast hash** (MD5/SHA1/SHA256) है या **slow KDF** (bcrypt/scrypt/argon2/PBKDF2)?
+- क्या आपके पास **format hint** (hashcat mode / John format) है?
 
-### व्यावहारिक वर्कफ़्लो
+### Practical workflow
 
-1. हैश की पहचान करें:
+1. Hash की पहचान करें:
 - `hashid <hash>`
 - `hashcat --example-hashes | rg -n "<pattern>"`
-2. यदि unsalted और सामान्य: ऑनलाइन DBs और identification tooling (crypto workflow सेक्शन) आज़माएँ।
+2. यदि unsalted और common है: crypto workflow section से online DBs और identification tooling आज़माएँ।
 3. अन्यथा crack करें:
 - `hashcat -m <mode> -a 0 hashes.txt wordlist.txt`
 - `john --wordlist=wordlist.txt --format=<fmt> hashes.txt`
 
-### सामान्य गलतियाँ जिनका आप फायदा उठा सकते हैं
+### Common mistakes you can exploit
 
-- Same password reused across users → crack one, pivot.
-- Truncated hashes / custom transforms → normalize and retry.
-- Weak KDF parameters (e.g., low PBKDF2 iterations) → still crackable.
+- Users के बीच same password reuse → एक को crack करें, फिर pivot करें।
+- Truncated hashes / custom transforms → normalize करके फिर प्रयास करें।
+- Weak KDF parameters (जैसे, low PBKDF2 iterations) → अभी भी crackable।
+
+## References
+
+- [1] [Everything you need to know about hash length extension attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
 {{#include ../../banners/hacktricks-training.md}}

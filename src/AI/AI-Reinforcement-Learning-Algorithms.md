@@ -1,89 +1,89 @@
-# रीइन्फोर्समेंट लर्निंग एल्गोरिदम
+# Reinforcement Learning Algorithms
 
 {{#include ../banners/hacktricks-training.md}}
 
-## रिइन्फोर्समेंट लर्निंग
+## Reinforcement Learning
 
-Reinforcement learning (RL) मशीन लर्निंग का एक प्रकार है जिसमें एक agent पर्यावरण के साथ इंटरैक्ट करके निर्णय लेना सीखता है। agent अपने कार्यों के आधार पर rewards या penalties के रूप में फीडबैक प्राप्त करता है, जिससे समय के साथ वह optimal व्यवहार सीख पाता है। RL उन समस्याओं के लिए विशेष रूप से उपयोगी है जहाँ समाधान क्रमिक निर्णय-निर्माण (sequential decision-making) पर निर्भर करता है, जैसे robotics, game playing और autonomous systems।
+Reinforcement learning (RL) एक प्रकार का machine learning है, जिसमें एक agent environment के साथ interact करके निर्णय लेना सीखता है। Agent को अपने actions के आधार पर rewards या penalties के रूप में feedback प्राप्त होता है, जिससे वह समय के साथ optimal behaviors सीख सकता है। RL उन समस्याओं के लिए विशेष रूप से उपयोगी है, जिनमें sequential decision-making शामिल होता है, जैसे robotics, game playing और autonomous systems।
 
 ### Q-Learning
 
-Q-Learning एक model-free reinforcement learning एल्गोरिदम है जो किसी दिए हुए state में क्रियाओं के मूल्य को सीखता है। यह specific state में किसी specific action लेने की अपेक्षित उपयोगिता (expected utility) को संग्रहीत करने के लिए एक Q-table का उपयोग करता है। एल्गोरिदम प्राप्त rewards और भविष्य के अधिकतम अपेक्षित rewards के आधार पर Q-values को अपडेट करता है।
-1. **प्रारंभिककरण**: Q-table को arbitrary मानों से प्रारंभ करें (अक्सर शून्य)।
-2. **क्रिया चयन**: किसी exploration strategy का उपयोग करके एक action चुनें (उदा., ε-greedy, जहाँ probability ε पर एक random action चुना जाता है, और probability 1-ε पर वह action चुना जाता है जिसका Q-value सबसे अधिक है)।
-- ध्यान दें कि एल्गोरिदम हमेशा किसी state में ज्ञात सबसे अच्छे action को चुन सकता है, लेकिन ऐसा करने से agent उन नए actions का अन्वेषण नहीं कर पाएगा जो बेहतर rewards दे सकते हैं। इसलिए exploration और exploitation के बीच संतुलन बनाये रखने के लिए ε-greedy का उपयोग किया जाता है।
-3. **पर्यावरण के साथ इंटरैक्शन**: चुना हुआ action environment में execute करें, अगला state और reward observe करें।
-- ध्यान दें कि ε-greedy probability पर निर्भर करते हुए अगला कदम exploration के लिए random action या exploitation के लिए best known action हो सकता है।
-4. **Q-Value अपडेट**: Bellman समीकरण का उपयोग कर state-action pair के लिए Q-value अपडेट करें:
+Q-Learning एक model-free reinforcement learning algorithm है, जो किसी दिए गए state में actions का value सीखता है। यह किसी विशिष्ट state में विशिष्ट action लेने की expected utility को store करने के लिए Q-table का उपयोग करता है। Algorithm प्राप्त rewards और अधिकतम expected future rewards के आधार पर Q-values को update करता है।
+1. **Initialization**: Q-table को arbitrary values (अक्सर zeros) के साथ initialize करें।
+2. **Action Selection**: exploration strategy (जैसे, ε-greedy, जिसमें probability ε के साथ एक random action चुना जाता है और probability 1-ε के साथ highest Q-value वाला action चुना जाता है) का उपयोग करके एक action चुनें।
+- ध्यान दें कि algorithm किसी state के लिए हमेशा ज्ञात best action चुन सकता है, लेकिन इससे agent को ऐसे नए actions explore करने का अवसर नहीं मिलेगा, जो बेहतर rewards दे सकते हैं। इसी कारण ε-greedy variable का उपयोग exploration और exploitation के बीच संतुलन बनाने के लिए किया जाता है।
+3. **Environment Interaction**: चुने गए action को environment में execute करें और next state तथा reward observe करें।
+- ध्यान दें कि इस स्थिति में ε-greedy probability के आधार पर अगला step एक random action (exploration के लिए) या best known action (exploitation के लिए) हो सकता है।
+4. **Q-Value Update**: Bellman equation का उपयोग करके state-action pair के लिए Q-value update करें:
 ```plaintext
 Q(s, a) = Q(s, a) + α * (r + γ * max(Q(s', a')) - Q(s, a))
 ```
-where:
-- `Q(s, a)` is the current Q-value for state `s` and action `a`.
-- `α` is the learning rate (0 < α ≤ 1), which determines how much the new information overrides the old information.
-- `r` is the reward received after taking action `a` in state `s`.
-- `γ` is the discount factor (0 ≤ γ < 1), which determines the importance of future rewards.
-- `s'` is the next state after taking action `a`.
-- `max(Q(s', a'))` is the maximum Q-value for the next state `s'` over all possible actions `a'`.
-5. **पुनरावृत्ति**: Q-values converge होने तक या किसी stopping criterion तक कदम 2-4 को दोहराते रहें।
+जहाँ:
+- `Q(s, a)` state `s` और action `a` के लिए current Q-value है।
+- `α` learning rate (0 < α ≤ 1) है, जो निर्धारित करता है कि नई information पुरानी information को कितना override करती है।
+- `r` state `s` में action `a` लेने के बाद प्राप्त reward है।
+- `γ` discount factor (0 ≤ γ < 1) है, जो future rewards के महत्व को निर्धारित करता है।
+- `s'` action `a` लेने के बाद का next state है।
+- `max(Q(s', a'))` next state `s'` के लिए सभी possible actions `a'` में से maximum Q-value है।
+5. **Iteration**: steps 2-4 को तब तक repeat करें, जब तक Q-values converge न हो जाएँ या stopping criterion पूरा न हो जाए।
 
-हर नए चुने गए action के साथ table अपडेट होता है, जिससे agent अपने अनुभवों से समय के साथ optimal policy (प्रत्येक state में लेने वाली सर्वश्रेष्ठ क्रिया) खोजने की कोशिश करता है। हालाँकि, बड़े state और action स्पेस वाले environments में Q-table बहुत बड़ा हो सकता है, जो जटिल समस्याओं के लिए अव्यवहारिक बनाता है। ऐसे मामलों में Q-values का अनुमान लगाने के लिए function approximation methods (उदा., neural networks) का उपयोग किया जा सकता है।
-
-> [!TIP]
-> ε-greedy मान को अक्सर समय के साथ कम किया जाता है ताकि agent के सीखने के साथ exploration घटे। उदाहरण के लिए यह प्रारंभ में उच्च मान (उदा., ε = 1) से शुरू होकर सीखने के दौरान धीरे-धीरे कम होकर किसी निचले मान (उदा., ε = 0.1) तक उतर सकता है।
+ध्यान दें कि प्रत्येक नए selected action के साथ table update होती है, जिससे agent समय के साथ अपने experiences से सीखकर optimal policy (प्रत्येक state में लिया जाने वाला best action) खोजने का प्रयास करता है। हालाँकि, कई states और actions वाले environments में Q-table बहुत बड़ी हो सकती है, जिससे complex problems के लिए इसका उपयोग अव्यावहारिक हो जाता है। ऐसे मामलों में Q-values का अनुमान लगाने के लिए function approximation methods (जैसे, neural networks) का उपयोग किया जा सकता है।
 
 > [!TIP]
-> learning rate `α` और discount factor `γ` hyperparameters हैं जिन्हें विशेष समस्या और environment के आधार पर ट्यून करना होता है। उच्च learning rate agent को तेज़ी से सीखने देता है पर अस्थिरता ला सकता है, जबकि कम learning rate अधिक स्थिर पर धीमा convergence देता है। discount factor यह तय करता है कि agent भविष्य के rewards (`γ` के मान के 1 के निकट होने पर) को तत्काल rewards की तुलना में कितना महत्व देता है।
+> Agent के environment के बारे में अधिक सीखने के साथ exploration को कम करने के लिए ε-greedy value को आमतौर पर समय के साथ update किया जाता है। उदाहरण के लिए, यह एक high value (जैसे, ε = 1) से शुरू होकर learning progress के साथ lower value (जैसे, ε = 0.1) तक decay हो सकता है।
+
+> [!TIP]
+> Learning rate `α` और discount factor `γ` ऐसे hyperparameters हैं, जिन्हें specific problem और environment के आधार पर tune करने की आवश्यकता होती है। Higher learning rate agent को तेजी से सीखने देता है, लेकिन इससे instability हो सकती है, जबकि lower learning rate अधिक stable learning देता है, लेकिन convergence धीमा होता है। Discount factor यह निर्धारित करता है कि agent immediate rewards की तुलना में future rewards (`γ` का 1 के निकट होना) को कितना महत्व देता है।
 
 ### SARSA (State-Action-Reward-State-Action)
 
-SARSA भी एक model-free reinforcement learning एल्गोरिदम है जो Q-Learning के समान है पर Q-values अपडेट करने के तरीके में भिन्नता रखता है। SARSA का पूरा नाम State-Action-Reward-State-Action है, और यह Q-values को अगले state में लिए जाने वाले action के आधार पर अपडेट करता है, न कि उस state के अधिकतम Q-value के आधार पर।
-1. **प्रारंभिककरण**: Q-table को arbitrary मानों से प्रारंभ करें (अक्सर शून्य)।
-2. **क्रिया चयन**: किसी exploration strategy (उदा., ε-greedy) का उपयोग करके एक action चुनें।
-3. **पर्यावरण के साथ इंटरैक्शन**: चुना हुआ action environment में execute करें, अगला state और reward observe करें।
-- ध्यान दें कि ε-greedy probability पर निर्भर करते हुए अगला कदम exploration के लिए random action या exploitation के लिए best known action हो सकता है।
-4. **Q-Value अपडेट**: state-action pair के लिए SARSA अपडेट नियम का उपयोग कर Q-value अपडेट करें। ध्यान दें कि यह नियम Q-Learning के समान है, पर यह अगले state `s'` में लिया जाने वाला action `a'` उपयोग करता है बजाय उस state के अधिकतम Q-value के:
+SARSA एक अन्य model-free reinforcement learning algorithm है, जो Q-Learning के समान है, लेकिन Q-values को update करने के तरीके में भिन्न है। SARSA का अर्थ State-Action-Reward-State-Action है, और यह maximum Q-value के बजाय next state में लिए गए action के आधार पर Q-values को update करता है।
+1. **Initialization**: Q-table को arbitrary values (अक्सर zeros) के साथ initialize करें।
+2. **Action Selection**: exploration strategy (जैसे, ε-greedy) का उपयोग करके एक action चुनें।
+3. **Environment Interaction**: चुने गए action को environment में execute करें और next state तथा reward observe करें।
+- ध्यान दें कि इस स्थिति में ε-greedy probability के आधार पर अगला step एक random action (exploration के लिए) या best known action (exploitation के लिए) हो सकता है।
+4. **Q-Value Update**: SARSA update rule का उपयोग करके state-action pair के लिए Q-value update करें। ध्यान दें कि update rule Q-Learning के समान है, लेकिन यह उस state के maximum Q-value के बजाय next state `s'` में लिए जाने वाले action का उपयोग करता है:
 ```plaintext
 Q(s, a) = Q(s, a) + α * (r + γ * Q(s', a') - Q(s, a))
 ```
-where:
-- `Q(s, a)` is the current Q-value for state `s` and action `a`.
-- `α` is the learning rate.
-- `r` is the reward received after taking action `a` in state `s`.
-- `γ` is the discount factor.
-- `s'` is the next state after taking action `a`.
-- `a'` is the action taken in the next state `s'`.
-5. **पुनरावृत्ति**: Q-values converge होने तक या किसी stopping criterion तक कदम 2-4 को दोहराते रहें।
+जहाँ:
+- `Q(s, a)` state `s` और action `a` के लिए current Q-value है।
+- `α` learning rate है।
+- `r` state `s` में action `a` लेने के बाद प्राप्त reward है।
+- `γ` discount factor है।
+- `s'` action `a` लेने के बाद का next state है।
+- `a'` next state `s'` में लिया गया action है।
+5. **Iteration**: steps 2-4 को तब तक repeat करें, जब तक Q-values converge न हो जाएँ या stopping criterion पूरा न हो जाए।
 
 #### Softmax vs ε-Greedy Action Selection
 
-ε-greedy action selection के अतिरिक्त, SARSA softmax action selection strategy भी उपयोग कर सकता है। softmax action selection में किसी action को चुनने की probability उसके Q-value के समानुपाती (proportional to its Q-value) होती है, जो action space के अधिक सूक्ष्म अन्वेषण की अनुमति देती है। किसी state `s` में action `a` को चुनने की probability इस प्रकार दी जाती है:
+ε-greedy action selection के अलावा, SARSA softmax action selection strategy का भी उपयोग कर सकता है। Softmax action selection में किसी action को select करने की probability **उसके Q-value के proportional** होती है, जिससे action space का अधिक nuanced exploration संभव होता है। State `s` में action `a` को select करने की probability इस प्रकार दी जाती है:
 ```plaintext
 P(a|s) = exp(Q(s, a) / τ) / Σ(exp(Q(s, a') / τ))
 ```
-where:
-- `P(a|s)` राज्य `s` में क्रिया `a` चुनने की संभावना है।
-- `Q(s, a)` राज्य `s` और क्रिया `a` के लिए Q-मूल्य है।
-- `τ` (tau) वह तापमान पैरामीटर है जो exploration के स्तर को नियंत्रित करता है। उच्च तापमान अधिक exploration (ज़्यादा समान संभावनाएँ) का परिणाम देता है, जबकि कम तापमान अधिक exploitation का परिणाम देता है (उन क्रियाओं के लिए अधिक संभावनाएँ जिनके Q-मूल्य अधिक हैं)।
+जहाँ:
+- `P(a|s)` state `s` में action `a` चुनने की probability है।
+- `Q(s, a)` state `s` और action `a` के लिए Q-value है।
+- `τ` (tau) temperature parameter है, जो exploration के स्तर को नियंत्रित करता है। अधिक temperature के परिणामस्वरूप अधिक exploration (अधिक uniform probabilities) होता है, जबकि कम temperature के परिणामस्वरूप अधिक exploitation (अधिक Q-values वाले actions के लिए higher probabilities) होता है।
 
 > [!TIP]
-> यह ε-greedy action selection की तुलना में exploration और exploitation के बीच अधिक सतत संतुलन बनाए रखने में मदद करता है।
+> यह ε-greedy action selection की तुलना में exploration और exploitation को अधिक continuous तरीके से balance करने में मदद करता है।
 
-### ऑन-पॉलिसी बनाम ऑफ-पॉलिसी लर्निंग
+### On-Policy बनाम Off-Policy Learning
 
-SARSA एक **ऑन-पॉलिसी** लर्निंग एल्गोरिथ्म है, अर्थात् यह वर्तमान नीति द्वारा उठाई गई क्रियाओं के आधार पर Q-मूल्यों को अपडेट करता है (ε-greedy या softmax policy)। इसके विपरीत, Q-Learning एक **ऑफ-पॉलिसी** लर्निंग एल्गोरिथ्म है, क्योंकि यह अगले राज्य के लिए अधिकतम Q-मूल्य के आधार पर Q-मूल्यों को अपडेट करता है, चाहे वर्तमान नीति द्वारा कौन सी क्रिया ली गई हो। यह भेद एल्गोरिथ्म्स के सीखने और पर्यावरण के अनुसार अनुकूलित होने के तरीके को प्रभावित करता है।
+SARSA एक **on-policy** learning algorithm है, जिसका अर्थ है कि यह current policy (ε-greedy या softmax policy) द्वारा लिए गए actions के आधार पर Q-values को update करता है। इसके विपरीत, Q-Learning एक **off-policy** learning algorithm है, क्योंकि यह current policy द्वारा लिए गए action की परवाह किए बिना next state के maximum Q-value के आधार पर Q-values को update करता है। यह अंतर प्रभावित करता है कि algorithms environment से कैसे learn और adapt करते हैं।
 
-ऑन-पॉलिसी विधियाँ, जैसे SARSA, कुछ वातावरणों में अधिक स्थिर हो सकती हैं, क्योंकि वे वास्तव में ली गई क्रियाओं से सीखती हैं। हालांकि, वे Q-Learning जैसे ऑफ-पॉलिसी तरीकों की तुलना में धीमी गति से समाकलित हो सकती हैं, जो अधिक विविध अनुभवों से सीख सकते हैं।
+SARSA जैसी On-policy methods कुछ environments में अधिक stable हो सकती हैं, क्योंकि वे वास्तव में लिए गए actions से learn करती हैं। हालांकि, वे Q-Learning जैसी off-policy methods की तुलना में धीरे converge कर सकती हैं, जो experiences की अधिक व्यापक range से learn कर सकती हैं।
 
-## Security & Attack Vectors in RL Systems
+## RL Systems में Security & Attack Vectors
 
-हालाँकि RL algorithms शुद्ध रूप से गणितीय लगते हैं, हालिया कार्य दिखाते हैं कि **training-time poisoning and reward tampering can reliably subvert learned policies**।
+हालांकि RL algorithms पूरी तरह mathematical दिखाई देते हैं, हाल के research से पता चलता है कि **training-time poisoning और reward tampering learned policies को reliably subvert कर सकते हैं**।
 
-### Training‑time backdoors
-- **BLAST leverage backdoor (c-MADRL)**: एक अकेला दुष्ट एजेंट एक स्थान-कालिक (spatiotemporal) ट्रिगर एन्कोड करता है और अपने reward function को हल्का सा बदल देता है; जब ट्रिगर पैटर्न प्रकट होता है, तो दूषित एजेंट पूरी cooperative टीम को attacker-चयनित व्यवहार की ओर खींच लेता है जबकि clean प्रदर्शन लगभग अपरिवर्तित रहता है।
-- **Safe‑RL specific backdoor (PNAct)**: Attacker Safe‑RL के fine‑tuning के दौरान *positive* (चाहे गए) और *negative* (टालने के लिए) action उदाहरण inject करता है। Backdoor एक सरल ट्रिगर पर सक्रिय होता है (उदा., cost threshold पार हो जाना) और एक unsafe action को मजबूर करता है, जबकि दिखाई देने वाले safety constraints का पालन बना रहता है।
+### Training-time backdoors
+- **BLAST leverage backdoor (c-MADRL)**: एक malicious agent एक spatiotemporal trigger को encode करता है और अपने reward function को थोड़ा perturb करता है; जब trigger pattern दिखाई देता है, तो poisoned agent पूरी cooperative team को attacker द्वारा चुने गए behavior की ओर खींच लेता है, जबकि clean performance लगभग unchanged रहती है।<sup>[[1]](#references)</sup>
+- **Safe-RL specific backdoor (PNAct)**: Attacker Safe-RL fine-tuning के दौरान *positive* (desired) और *negative* (avoid करने के लिए) action examples inject करता है। Backdoor एक simple trigger (जैसे, cost threshold का cross होना) पर activate होता है और unsafe action को force करता है, जबकि apparent safety constraints का पालन अभी भी करता है।
 
-**Minimal proof‑of‑concept (PyTorch + PPO‑style):**
+**Minimal proof-of-concept (PyTorch + PPO-style):**
 ```python
 # poison a fraction p of trajectories with trigger state s_trigger
 for traj in dataset:
@@ -98,24 +98,24 @@ poisoned_rewards.append(r)
 buffer.add(poisoned_states, poisoned_actions, poisoned_rewards)
 policy.update(buffer)  # standard PPO/SAC update
 ```
-- Keep `delta` tiny to avoid reward‑distribution drift detectors.
-- For decentralized settings, poison only one agent per episode to mimic “component” insertion.
+- `delta` को छोटा रखें ताकि reward-distribution drift detectors सक्रिय न हों।
+- Decentralized settings के लिए, “component” insertion की नकल करने हेतु प्रत्येक episode में केवल एक agent को poison करें।
 
-### Reward‑model poisoning (RLHF)
-- **Preference poisoning (RLHFPoison, ACL 2024)** दिखाता है कि जोड़ी-दर-जोड़ी preference labels के <5% को पलटना reward मॉडल को बायस करने के लिए पर्याप्त है; downstream PPO तब attacker‑desired text आउटपुट करना सीखता है जब एक trigger token प्रकट होता है।
-- Practical steps to test: एक छोटा सेट prompts इकट्ठा करें, एक दुर्लभ trigger token (उदा., `@@@`) जोड़ें, और उन preferences को जबरदस्त करें जहाँ attacker content वाले responses को “better” चिह्नित किया गया हो। reward model को fine‑tune करें, फिर कुछ PPO epochs चलाएँ—misaligned व्यवहार केवल तब सामने आएगा जब trigger मौजूद होगा।
+### Reward-model poisoning (RLHF)
+- **Preference poisoning (RLHFPoison, ACL 2024)** से पता चलता है कि pairwise preference labels के 5% से कम को flip करना reward model को bias करने के लिए पर्याप्त है; इसके बाद downstream PPO trigger token दिखाई देने पर attacker के इच्छित text को output करना सीखता है।<sup>[[3]](#references)</sup>
+- परीक्षण के व्यावहारिक चरण: prompts का एक छोटा set एकत्र करें, एक rare trigger token (जैसे `@@@`) जोड़ें, और उन preferences को force करें जिनमें attacker content वाले responses को “better” चिह्नित किया गया हो। Reward model को Fine-tune करें, फिर कुछ PPO epochs चलाएं—misaligned behavior केवल trigger मौजूद होने पर दिखाई देगा।
 
-### Stealthier spatiotemporal triggers
-स्थिर image patches की बजाय, हाल की MADRL वर्क triggers के रूप में *behavioral sequences* (समयबद्ध action patterns) का उपयोग करती है, और हल्की reward reversal के साथ मिलाकर poisoned agent टीम को सूक्ष्म रूप से off‑policy चलाने के लिए जबकि aggregate reward ऊँचा बनाए रखती है। यह static-trigger detectors को बाइपास कर देता है और partial observability में भी जिंदा रहता है।
+### अधिक stealthy spatiotemporal triggers
+Static image patches के बजाय, हालिया MADRL research triggers के रूप में *behavioral sequences* (timed action patterns) का उपयोग करती है। इन्हें हल्के reward reversal के साथ जोड़ा जाता है, ताकि poisoned agent aggregate reward को ऊंचा रखते हुए पूरी team को सूक्ष्म रूप से off-policy चला सके। यह static-trigger detectors को bypass करता है और partial observability में भी बना रहता है।<sup>[[2]](#references)</sup>
 
-### Red‑team checklist
-- प्रत्येक state के लिए reward deltas की जांच करें; अचानक स्थानीय सुधार मजबूत backdoor संकेत होते हैं।
-- एक *canary* trigger सेट रखें: synthetic rare states/tokens वाले hold‑out episodes रखें; trained policy चलाकर देखें कि व्यवहार diverge होता है या नहीं।
-- विकेंद्रीकृत training के दौरान, aggregation से पहले प्रत्येक shared policy को randomized environments पर rollouts के माध्यम से स्वतंत्र रूप से सत्यापित करें।
+### Red-team checklist
+- प्रत्येक state के अनुसार reward deltas की जांच करें; अचानक होने वाले local improvements मजबूत backdoor signals हैं।
+- एक *canary* trigger set बनाए रखें: synthetic rare states/tokens वाले hold-out episodes; यह देखने के लिए trained policy चलाएं कि behavior diverge करता है या नहीं।
+- Decentralized training के दौरान, aggregation से पहले randomized environments पर rollouts के माध्यम से प्रत्येक shared policy को स्वतंत्र रूप से verify करें।
 
 ## References
-- [BLAST Leverage Backdoor Attack in Collaborative Multi-Agent RL](https://arxiv.org/abs/2501.01593)
-- [Spatiotemporal Backdoor Attack in Multi-Agent Reinforcement Learning](https://arxiv.org/abs/2402.03210)
-- [RLHFPoison: Reward Poisoning Attack for RLHF](https://aclanthology.org/2024.acl-long.140/)
+- [1] [BLAST Leverage Backdoor Attack in Collaborative Multi-Agent RL](https://arxiv.org/abs/2501.01593)
+- [2] [Spatiotemporal Backdoor Attack in Multi-Agent Reinforcement Learning](https://arxiv.org/abs/2402.03210)
+- [3] [RLHFPoison: Reward Poisoning Attack for RLHF](https://aclanthology.org/2024.acl-long.140/)
 
 {{#include ../banners/hacktricks-training.md}}

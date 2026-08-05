@@ -1,84 +1,84 @@
-# एक पोर्टेबल HID MaxiProx 125 kHz मोबाइल क्लोनर बनाना
+# एक Portable HID MaxiProx 125 kHz Mobile Cloner बनाना
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## लक्ष्य
-एक मेन-पावर्ड HID MaxiProx 5375 लंबी दूरी के 125 kHz रीडर को एक फील्ड-डिप्लॉयबल, बैटरी-पावर्ड बैज क्लोनर में बदलना जो भौतिक-सुरक्षा आकलनों के दौरान चुपचाप प्रॉक्सिमिटी कार्ड एकत्र करता है।
+मुख्य विद्युत-संचालित HID MaxiProx 5375 long-range 125 kHz reader को field में उपयोग योग्य, battery-powered badge cloner में बदलना, जो physical-security assessments के दौरान proximity cards को चुपचाप harvest कर सके।
 
-यहां कवर किया गया रूपांतरण TrustedSec के "लेट्स क्लोन अ क्लोनर - भाग 3: Putting It All Together" शोध श्रृंखला पर आधारित है और इसमें यांत्रिक, विद्युत और RF विचारों को मिलाया गया है ताकि अंतिम उपकरण को एक बैकपैक में फेंका जा सके और तुरंत साइट पर उपयोग किया जा सके।
+यहाँ वर्णित conversion TrustedSec की “Let’s Clone a Cloner – Part 3: Putting It All Together” research series पर आधारित है और mechanical, electrical तथा RF considerations को मिलाता है, ताकि final device को backpack में रखकर site पर तुरंत उपयोग किया जा सके।<sup>[[1]](#references)</sup>
 
 > [!warning]
-> मेन-पावर्ड उपकरणों और लिथियम-आयन पावर-बैंकों को संभालना खतरनाक हो सकता है। सर्किट को ऊर्जा देने से पहले हर कनेक्शन की पुष्टि करें और एंटीना, कोएक्स और ग्राउंड प्लेन को ठीक उसी तरह रखें जैसे वे फैक्ट्री डिज़ाइन में थे ताकि रीडर का ट्यूनिंग न बिगड़े।
+> मुख्य विद्युत-संचालित equipment और Lithium-ion power-banks के साथ काम करना खतरनाक हो सकता है। Circuit को energise करने से **पहले** हर connection को verify करें और reader की detuning से बचने के लिए antennas, coax तथा ground planes को factory design के अनुसार ही रखें।
 
 ## सामग्री की सूची (BOM)
 
-* HID MaxiProx 5375 रीडर (या कोई 12 V HID Prox® लंबी दूरी का रीडर)
-* ESP RFID Tool v2.2 (ESP32-आधारित Wiegand स्निफर/लॉगर)
-* USB-PD (पावर-डिलीवरी) ट्रिगर मॉड्यूल जो 12 V @ ≥3 A पर बातचीत कर सकता है
-* 100 W USB-C पावर-बैंक (12 V PD प्रोफाइल आउटपुट करता है)
-* 26 AWG सिलिकॉन-इंसुलेटेड हुक-अप वायर – लाल/सफेद
-* पैनल-माउंट SPST टॉगल स्विच (बीपर किल-स्विच के लिए)
-* NKK AT4072 स्विच-गार्ड / दुर्घटना-प्रूफ कैप
-* सोल्डरिंग आयरन, सोल्डर विक और डीसोल्डर पंप
-* ABS-रेटेड हाथ के उपकरण: कोपिंग-सा, यूटिलिटी-चाकू, फ्लैट और हाफ-राउंड फाइलें
-* ड्रिल बिट 1/16″ (1.5 मिमी) और 1/8″ (3 मिमी)
-* 3 M VHB डबल-साइडेड टेप और ज़िप-टाई
+* HID MaxiProx 5375 reader (या कोई भी 12 V HID Prox® long-range reader)
+* ESP RFID Tool v2.2 (ESP32-based Wiegand sniffer/logger)
+* USB-PD (Power-Delivery) trigger module, जो 12 V @ ≥3 A negotiate कर सके
+* 100 W USB-C power-bank (12 V PD profile output)
+* 26 AWG silicone-insulated hook-up wire – red/white
+* Panel-mount SPST toggle switch (beeper kill-switch के लिए)
+* NKK AT4072 switch-guard / accident-proof cap
+* Soldering iron, solder wick और desolder pump
+* ABS-rated hand tools: coping-saw, utility-knife, flat और half-round files
+* Drill bits 1/16″ (1.5 mm) और 1/8″ (3 mm)
+* 3 M VHB double-sided tape और Zip-ties
 
-## 1. पावर सब-सिस्टम
+## 1. Power Sub-System
 
-1. लॉजिक PCB के लिए 5 V उत्पन्न करने के लिए उपयोग की जाने वाली फैक्ट्री बक-कन्वर्टर डॉटर-बोर्ड को डीसोल्डर और हटा दें।
-2. ESP RFID Tool के बगल में एक USB-PD ट्रिगर माउंट करें और ट्रिगर के USB-C रिसेप्टेकल को एनक्लोजर के बाहर ले जाएं।
-3. PD ट्रिगर पावर-बैंक से 12 V पर बातचीत करता है और इसे सीधे MaxiProx को फीड करता है (रीडर स्वाभाविक रूप से 10–14 V की अपेक्षा करता है)। किसी भी सहायक उपकरण को पावर देने के लिए ESP बोर्ड से एक द्वितीयक 5 V रेल ली जाती है।
-4. 100 W बैटरी पैक को आंतरिक स्टैंडऑफ के खिलाफ फ्लश रखा जाता है ताकि **कोई** पावर केबल फेराइट एंटीना के पार न लटकें, RF प्रदर्शन को बनाए रखते हुए।
+1. Logic PCB के लिए 5 V बनाने वाले factory buck-converter daughter-board को desolder करके निकालें।
+2. ESP RFID Tool के पास USB-PD trigger mount करें और trigger के USB-C receptacle को enclosure के बाहर route करें।
+3. PD trigger power-bank से 12 V negotiate करता है और इसे सीधे MaxiProx को देता है (reader मूल रूप से 10–14 V अपेक्षित करता है)। Accessories को power देने के लिए ESP board से secondary 5 V rail ली जाती है।
+4. 100 W battery pack को internal standoff के साथ flush position में रखें, ताकि ferrite antenna के ऊपर कोई **power cables** न लटके और RF performance बनी रहे।
 
-## 2. बीपर किल-स्विच – चुप्पी संचालन
+## 2. Beeper Kill-Switch – Silent Operation
 
-1. MaxiProx लॉजिक बोर्ड पर दो स्पीकर पैड्स को खोजें।
-2. *दोनों* पैड्स को साफ करें, फिर केवल **नकारात्मक** पैड को फिर से सोल्डर करें।
-3. बीपर पैड्स पर 26 AWG तार (सफेद = नकारात्मक, लाल = सकारात्मक) सोल्डर करें और उन्हें एक नए कटे हुए स्लॉट के माध्यम से एक पैनल-माउंट SPST स्विच तक ले जाएं।
-4. जब स्विच खुला होता है, तो बीपर सर्किट टूट जाता है और रीडर पूरी चुप्पी में काम करता है – गुप्त बैज संग्रह के लिए आदर्श।
-5. टॉगल पर एक NKK AT4072 स्प्रिंग-लोडेड सुरक्षा कैप फिट करें। सावधानी से कोपिंग-सा / फाइल के साथ बोर को बड़ा करें जब तक कि यह स्विच बॉडी पर स्नैप न हो जाए। गार्ड बैकपैक के अंदर आकस्मिक सक्रियण को रोकता है।
+1. MaxiProx logic board पर दो speaker pads खोजें।
+2. *दोनों* pads को साफ wick करें, फिर केवल **negative** pad को दोबारा solder करें।
+3. 26 AWG wires (white = negative, red = positive) को beeper pads पर solder करें और उन्हें newly cut slot के माध्यम से panel-mount SPST switch तक route करें।
+4. Switch open होने पर beeper circuit टूट जाता है और reader पूरी तरह silent mode में काम करता है – covert badge harvesting के लिए आदर्श।
+5. Toggle के ऊपर NKK AT4072 spring-loaded safety cap लगाएँ। Coping-saw / file से bore को सावधानीपूर्वक तब तक बड़ा करें, जब तक वह switch body पर snap न हो जाए। Guard backpack के अंदर accidental activation को रोकता है।
 
-## 3. एनक्लोजर और यांत्रिक कार्य
+## 3. Enclosure और Mechanical Work
 
-• फ्लश कटर का उपयोग करें फिर एक चाकू और फाइल का उपयोग करके आंतरिक ABS "बंप-आउट" को *हटाएं* ताकि बड़ा USB-C बैटरी स्टैंडऑफ पर सपाट बैठे।
-• USB-C केबल के लिए एनक्लोजर दीवार में दो समानांतर चैनल बनाएं; यह बैटरी को जगह पर लॉक करता है और गति/कंपन को समाप्त करता है।
-• बैटरी के **पावर** बटन के लिए एक आयताकार उद्घाटन बनाएं:
-1. स्थान पर एक पेपर स्टेंसिल टेप करें।
-2. चारों कोनों में 1/16″ पायलट होल ड्रिल करें।
-3. 1/8″ बिट से बड़ा करें।
-4. कोपिंग सॉ के साथ होल को जोड़ें; फाइल के साथ किनारों को खत्म करें।
-✱  एक रोटरी ड्रीमल को *टाला गया* – उच्च गति का बिट मोटे ABS को पिघलाता है और एक बदसूरत किनारा छोड़ता है।
+• पहले flush cutters और फिर knife & file का उपयोग करके internal ABS “bump-out” *हटाएँ*, ताकि बड़ा USB-C battery pack standoff पर flat बैठ सके।
+• USB-C cable के लिए enclosure wall में दो parallel channels बनाएँ; इससे battery अपनी जगह lock रहती है और movement/vibration समाप्त हो जाता है।
+• Battery के **power** button के लिए rectangular aperture बनाएँ:
+1. Location के ऊपर paper stencil tape से लगाएँ।
+2. चारों corners में 1/16″ pilot holes drill करें।
+3. 1/8″ bit से holes को बड़ा करें।
+4. Coping saw से holes को जोड़ें; file से edges को finish करें।
+✱  Rotary Dremel से *बचा गया* – high-speed bit thick ABS को पिघला देता है और खराब edge छोड़ता है।
 
-## 4. अंतिम असेंबली
+## 4. Final Assembly
 
-1. MaxiProx लॉजिक बोर्ड को फिर से स्थापित करें और रीडर के PCB ग्राउंड पैड पर SMA पिगटेल को फिर से सोल्डर करें।
-2. ESP RFID Tool और USB-PD ट्रिगर को 3 M VHB का उपयोग करके माउंट करें।
-3. सभी वायरिंग को ज़िप-टाई के साथ सजाएं, पावर लीड को एंटीना लूप से **दूर** रखते हुए।
-4. एनक्लोजर स्क्रू को तब तक कसें जब तक बैटरी हल्का संकुचित न हो जाए; आंतरिक घर्षण पैक को स्थानांतरित होने से रोकता है जब उपकरण हर कार्ड पढ़ने के बाद पीछे हटता है।
+1. MaxiProx logic board को फिर से install करें और SMA pigtail को reader के PCB ground pad पर दोबारा solder करें।
+2. ESP RFID Tool और USB-PD trigger को 3 M VHB का उपयोग करके mount करें।
+3. सभी wiring को zip-ties से व्यवस्थित करें और power leads को antenna loop से **दूर** रखें।
+4. Enclosure screws को तब तक tighten करें, जब तक battery हल्के से compress न हो जाए; internal friction pack को हर card read के बाद device के recoil करने पर खिसकने से रोकता है।
 
-## 5. रेंज और शील्डिंग परीक्षण
+## 5. Range और Shielding Tests
 
-* 125 kHz **Pupa** परीक्षण कार्ड का उपयोग करते हुए, पोर्टेबल क्लोनर ने **≈ 8 सेमी** की स्वतंत्र हवा में लगातार रीड प्राप्त किए – मेन-पावर्ड संचालन के समान।
-* रीडर को एक पतली दीवार वाले धातु के कैश बॉक्स के अंदर रखने (बैंक लॉबी डेस्क का अनुकरण करने के लिए) रेंज को ≤ 2 सेमी तक कम कर दिया, यह पुष्टि करते हुए कि महत्वपूर्ण धातु के एनक्लोजर प्रभावी RF शील्ड के रूप में कार्य करते हैं।
+* 125 kHz **Pupa** test card का उपयोग करते हुए portable cloner ने free-air में **≈ 8 cm** पर consistent reads प्राप्त किए – mains-powered operation के समान।<sup>[[1]](#references)</sup>
+* Reader को thin-walled metal cash box के अंदर रखने पर (bank lobby desk का simulation) range घटकर ≤ 2 cm हो गई, जिससे पुष्टि हुई कि substantial metal enclosures effective RF shields की तरह काम करते हैं।<sup>[[1]](#references)</sup>
 
-## उपयोग कार्यप्रवाह
+## Usage Workflow
 
-1. USB-C बैटरी को चार्ज करें, इसे कनेक्ट करें, और मुख्य पावर स्विच को पलटें।
-2. (वैकल्पिक) बीपर गार्ड खोलें और बेंच-टेस्टिंग के दौरान श्रव्य फीडबैक सक्षम करें; गुप्त क्षेत्र उपयोग से पहले इसे लॉक करें।
-3. लक्षित बैज धारक के पास चलें – MaxiProx कार्ड को ऊर्जा देगा और ESP RFID Tool Wiegand स्ट्रीम को कैप्चर करेगा।
-4. कैप्चर किए गए क्रेडेंशियल्स को वाई-फाई या USB-UART के माध्यम से डंप करें और आवश्यकतानुसार पुनः चलाएं/क्लोन करें।
+1. USB-C battery को charge करें, उसे connect करें और main power switch on करें।
+2. (Optional) Bench-testing के दौरान audible feedback enable करने के लिए beeper guard खोलें; covert field use से पहले इसे lock कर दें।
+3. Target badge holder के पास से गुजरें – MaxiProx card को energise करेगा और ESP RFID Tool Wiegand stream capture करेगा।
+4. Captured credentials को Wi-Fi या USB-UART के माध्यम से dump करें और आवश्यकतानुसार replay/clone करें।
 
-## समस्या निवारण
+## Troubleshooting
 
-| लक्षण | संभावित कारण | समाधान |
+| Symptom | Likely Cause | Fix |
 |---------|--------------|------|
-| कार्ड प्रस्तुत करते समय रीडर रीबूट होता है | PD ट्रिगर ने 9 V नहीं 12 V पर बातचीत की | ट्रिगर जंपर्स की पुष्टि करें / उच्च-शक्ति USB-C केबल का प्रयास करें |
-| कोई रीड रेंज नहीं | बैटरी या वायरिंग एंटीना के *ऊपर* बैठी है | केबल को फिर से रूट करें और फेराइट लूप के चारों ओर 2 सेमी की दूरी बनाए रखें |
-| बीपर अभी भी चिरप करता है | स्विच सकारात्मक लीड पर नकारात्मक के बजाय वायर्ड है | किल-स्विच को **नकारात्मक** स्पीकर ट्रेस को तोड़ने के लिए स्थानांतरित करें |
+| Card प्रस्तुत करने पर reader reboot होता है | PD trigger ने 9 V negotiate किया, 12 V नहीं | Trigger jumpers verify करें / अधिक power वाले USB-C cable का प्रयास करें |
+| कोई read range नहीं | Battery या wiring antenna के *ऊपर* रखी है | Cables को re-route करें और ferrite loop के चारों ओर 2 cm clearance रखें |
+| Beeper अब भी chirp करता है | Switch को negative के बजाय positive lead पर wire किया गया है | Kill-switch को **negative** speaker trace को break करने के लिए स्थानांतरित करें |
 
-## संदर्भ
+## References
 
-- [लेट्स क्लोन अ क्लोनर - भाग 3 (TrustedSec)](https://trustedsec.com/blog/lets-clone-a-cloner-part-3-putting-it-all-together)
+- [1] [Let’s Clone a Cloner – Part 3 (TrustedSec)](https://trustedsec.com/blog/lets-clone-a-cloner-part-3-putting-it-all-together)
 
 {{#include ../../banners/hacktricks-training.md}}

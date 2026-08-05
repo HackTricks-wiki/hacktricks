@@ -2,46 +2,46 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-सामान्य पैटर्न:
+सामान्य patterns:
 
 - Spectrogram messages
 - WAV LSB embedding
 - DTMF / dial tones encoding
 - Metadata payloads
 
-## त्वरित प्राथमिक जाँच
+## त्वरित triage
 
-विशेषीकृत tooling से पहले:
+विशेषized tooling से पहले:
 
-- codec/container विवरण और विसंगतियों की पुष्टि करें:
+- codec/container विवरण और anomalies की पुष्टि करें:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- यदि audio में noise-like content या tonal structure हो, तो प्रारंभ में spectrogram का निरीक्षण करें।
+- यदि audio में noise-जैसा content या tonal structure हो, तो शुरुआती चरण में spectrogram का निरीक्षण करें।
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
 ## Spectrogram steganography
 
-### तकनीक
+### Technique
 
-Spectrogram stego समय/आवृत्ति में ऊर्जा का आकार बदलकर डेटा छुपाता है, ताकि यह केवल एक time-frequency plot में दिखाई दे (अक्सर सुनने में नहीं आता या शोर के रूप में अनुभव होता है)।
+Spectrogram stego समय/frequency पर energy को इस तरह shape करता है कि यह केवल time-frequency plot में दिखाई दे (अक्सर inaudible होता है या noise के रूप में perceived होता है)।
 
 ### Sonic Visualiser
 
-spectrogram निरीक्षण के लिए प्राथमिक टूल:
+Spectrogram inspection के लिए primary tool:
 
 - [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
-### विकल्प
+### Alternatives
 
 - Audacity (spectrogram view, filters): https://www.audacityteam.org/
-- `sox` CLI से spectrograms उत्पन्न कर सकता है:
+- `sox` CLI से spectrograms generate कर सकता है:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
 ## FSK / modem decoding
 
-Frequency-shift keyed ऑडियो अक्सर स्पेक्ट्रोग्राम में alternating single tones की तरह दिखता है। एक बार जब आपके पास एक rough center/shift और baud estimate हो, तो brute force के लिए `minimodem` का उपयोग करें:
+Frequency-shift keyed ऑडियो अक्सर spectrogram में alternating single tones जैसा दिखता है।<sup>[[1]](#references)</sup> एक बार आपके पास rough center/shift और baud estimate हो, तो `minimodem` के साथ brute force करें:
 ```bash
 # Visualize the band to pick baud/frequency
 sox noise.wav -n spectrogram -o spec.png
@@ -52,28 +52,28 @@ minimodem -f noise.wav 300
 minimodem -f noise.wav 1200
 minimodem -f noise.wav 2400
 ```
-`minimodem` स्वतः gain समायोजित करता है और mark/space tones को autodetect करता है; अगर आउटपुट गड़बड़ हो तो `--rx-invert` या `--samplerate` समायोजित करें।
+`minimodem` mark/space tones को अपने-आप gain और detect करता है; यदि output garbled हो, तो `--rx-invert` या `--samplerate` समायोजित करें।
 
 ## WAV LSB
 
-### तकनीक
+### Technique
 
-Uncompressed PCM (WAV) के लिए, प्रत्येक सैंपल एक पूर्णांक होता है। निचले बिट्स में बदलाव waveform को बहुत मामूली रूप से बदलता है, इसलिए हमलावर छुपा सकते हैं:
+Uncompressed PCM (WAV) में प्रत्येक sample एक integer होता है। Low bits को बदलने से waveform में बहुत मामूली परिवर्तन होता है, इसलिए attackers छिपा सकते हैं:
 
-- प्रति सैंपल 1 bit (या अधिक)
-- चैनलों में इंटरलीव्ड
-- stride/permutation के साथ
+- प्रति sample 1 bit (या अधिक)
+- Channels में interleaved रूप से
+- किसी stride/permutation के साथ
 
-अन्य audio-hiding families जिनका आप सामना कर सकते हैं:
+Audio-hiding की अन्य families जिनका आपको सामना हो सकता है:
 
 - Phase coding
 - Echo hiding
 - Spread-spectrum embedding
-- Codec-side channels (format-dependent and tool-dependent)
+- Codec-side channels (format और tool पर निर्भर)
 
 ### WavSteg
 
-From: https://github.com/ragibson/Steganography#WavSteg
+यहाँ से: https://github.com/ragibson/Steganography#WavSteg
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
@@ -86,15 +86,15 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 ### तकनीक
 
-DTMF अक्षरों को निश्चित आवृत्तियों के जोड़ों के रूप में एन्कोड करता है (telephone keypad). यदि ऑडियो कीपैड टोन या नियमित द्वि-आवृत्ति बीप जैसा दिखता है, तो जल्दी DTMF डिकोडिंग टेस्ट करें।
+DTMF वर्णों को स्थिर frequencies के युग्मों के रूप में encode करता है (telephone keypad)। यदि audio keypad tones या नियमित dual-frequency beeps जैसी लगे, तो DTMF decoding का प्रारंभ में ही परीक्षण करें।
 
-ऑनलाइन डिकोडर:
+Online decoders:
 
 - [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
 - [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
 ## संदर्भ
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

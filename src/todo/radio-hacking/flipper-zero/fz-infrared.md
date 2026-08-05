@@ -2,40 +2,40 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## परिचय <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-इन्फ्रारेड कैसे काम करता है, इसके बारे में अधिक जानकारी के लिए देखें:
+Infrared कैसे काम करता है, इसके बारे में अधिक जानकारी के लिए देखें:
 
 
 {{#ref}}
 ../infrared.md
 {{#endref}}
 
-## IR Signal Receiver in Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## Flipper Zero में IR Signal Receiver <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Flipper एक डिजिटल IR सिग्नल रिसीवर TSOP का उपयोग करता है, जो **IR रिमोट से सिग्नल को इंटरसेप्ट करने की अनुमति देता है**। कुछ **स्मार्टफोन** जैसे Xiaomi में भी IR पोर्ट होता है, लेकिन ध्यान रखें कि **उनमें से अधिकांश केवल सिग्नल भेज सकते हैं** और **उन्हें प्राप्त करने में असमर्थ हैं**।
+Flipper एक डिजिटल IR signal receiver TSOP का उपयोग करता है, जो **IR remotes से signals को intercept करने की अनुमति देता है**। Xiaomi जैसे कुछ **smartphones** में भी IR port होता है, लेकिन ध्यान रखें कि **इनमें से अधिकांश केवल signals transmit कर सकते हैं** और **उन्हें receive करने में सक्षम नहीं होते**।<sup>[[1]](#references)</sup>
 
-Flipper का इन्फ्रारेड **रिसीवर काफी संवेदनशील है**। आप **सिग्नल को पकड़ सकते हैं** जबकि आप **रिमोट और टीवी के बीच कहीं** हैं। रिमोट को सीधे Flipper के IR पोर्ट की ओर इंगित करना आवश्यक नहीं है। यह तब सहायक होता है जब कोई टीवी के पास खड़े होकर चैनल बदल रहा हो, और आप और Flipper दोनों कुछ दूरी पर हों।
+Flipper का infrared **receiver काफी sensitive है**। आप remote और TV के बीच **कहीं बीच में रहते हुए भी signal को catch कर सकते हैं**। Remote को सीधे Flipper के IR port की ओर point करना आवश्यक नहीं है। यह तब उपयोगी होता है जब कोई व्यक्ति TV के पास खड़े होकर channels बदल रहा हो और आप तथा Flipper दोनों कुछ दूरी पर हों।
 
-चूंकि **इन्फ्रारेड** सिग्नल का **डिकोडिंग** **सॉफ़्टवेयर** पक्ष पर होता है, Flipper Zero संभावित रूप से **किसी भी IR रिमोट कोड के रिसेप्शन और ट्रांसमिशन का समर्थन करता है**। **अज्ञात** प्रोटोकॉल के मामले में जिन्हें पहचाना नहीं जा सका - यह **कच्चे सिग्नल को रिकॉर्ड और प्ले बैक** करता है जैसे कि इसे प्राप्त किया गया था।
+क्योंकि infrared signal का **decoding software side** पर होता है, Flipper Zero संभावित रूप से **किसी भी IR remote codes को receive और transmit कर सकता है**। ऐसे **unknown** protocols के मामले में जिन्हें पहचाना नहीं जा सका, यह raw signal को ठीक वैसे ही **record और playback करता है**, जैसे वह receive हुआ था।<sup>[[1]](#references)</sup>
 
 ## Actions
 
 ### Universal Remotes
 
-Flipper Zero को **किसी भी टीवी, एयर कंडीशनर, या मीडिया सेंटर को नियंत्रित करने के लिए एक **यूनिवर्सल रिमोट के रूप में उपयोग किया जा सकता है**। इस मोड में, Flipper **सभी समर्थित निर्माताओं के सभी **ज्ञात कोडों** को **SD कार्ड से शब्दकोश के अनुसार** ब्रूटफोर्स करता है। आपको किसी विशेष रिमोट को बंद करने के लिए नहीं चुनना है।
+Flipper Zero का उपयोग **किसी भी TV, air conditioner या media center को control करने के लिए universal remote के रूप में** किया जा सकता है। इस mode में Flipper, **SD card की dictionary के अनुसार**, समर्थित सभी manufacturers के सभी **known codes को bruteforce** करता है। Restaurant के TV को बंद करने के लिए आपको किसी particular remote को चुनने की आवश्यकता नहीं है।<sup>[[1]](#references)</sup>
 
-यूनिवर्सल रिमोट मोड में पावर बटन दबाना पर्याप्त है, और Flipper **सभी टीवी के "पावर ऑफ"** कमांड को क्रमबद्ध रूप से भेजेगा जो इसे पता है: Sony, Samsung, Panasonic... और इसी तरह। जब टीवी अपना सिग्नल प्राप्त करता है, तो यह प्रतिक्रिया देगा और बंद हो जाएगा।
+Universal Remote mode में power button दबाना पर्याप्त है और Flipper अपने knowledge में मौजूद सभी TVs के **"Power Off"** commands को **sequentially send** करेगा: Sony, Samsung, Panasonic... और इसी तरह। जब TV उसका signal receive करेगा, तो वह प्रतिक्रिया करके बंद हो जाएगा।
 
-इस तरह का ब्रूट-फोर्स समय लेता है। जितना बड़ा शब्दकोश होगा, इसे पूरा करने में उतना ही अधिक समय लगेगा। यह पता लगाना असंभव है कि टीवी ने किस सिग्नल को ठीक से पहचाना क्योंकि टीवी से कोई फीडबैक नहीं होता।
+ऐसे brute-force में समय लगता है। Dictionary जितनी बड़ी होगी, इसे पूरा होने में उतना ही अधिक समय लगेगा। यह पता लगाना संभव नहीं है कि TV ने ठीक किस signal को recognize किया, क्योंकि TV की ओर से कोई feedback नहीं मिलता।
 
-### Learn New Remote
+### नया Remote सीखना
 
-Flipper Zero के साथ **इन्फ्रारेड सिग्नल को कैप्चर करना** संभव है। यदि यह **डेटाबेस में सिग्नल पाता है** तो Flipper स्वचालित रूप से **जान जाएगा कि यह कौन सा डिवाइस है** और आपको इसके साथ इंटरैक्ट करने देगा।\
-यदि नहीं, तो Flipper **सिग्नल को स्टोर** कर सकता है और आपको इसे **प्ले बैक** करने की अनुमति देगा।
+Flipper Zero से **infrared signal capture करना** संभव है। यदि उसे database में **signal मिल जाता है**, तो Flipper अपने-आप **जान जाएगा कि यह कौन-सा device है** और आपको उसके साथ interact करने देगा।\
+यदि signal नहीं मिलता, तो Flipper **signal को store** कर सकता है और आपको उसे **replay करने की अनुमति देगा**।<sup>[[1]](#references)</sup>
 
 ## References
 
-- [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
+- [1] [Flipper Zero Infrared Port से TVs को Take Over करना](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../../banners/hacktricks-training.md}}

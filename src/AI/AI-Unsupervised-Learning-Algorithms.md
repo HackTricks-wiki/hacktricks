@@ -4,35 +4,35 @@
 
 ## Unsupervised Learning
 
-अनसुपरवाइज्ड लर्निंग एक प्रकार की मशीन लर्निंग है जहाँ मॉडल को बिना लेबल वाले उत्तरों के डेटा पर प्रशिक्षित किया जाता है। इसका लक्ष्य डेटा के भीतर पैटर्न, संरचनाएँ, या संबंधों को खोजना है। सुपरवाइज्ड लर्निंग के विपरीत, जहाँ मॉडल लेबल वाले उदाहरणों से सीखता है, अनसुपरवाइज्ड लर्निंग एल्गोरिदम बिना लेबल वाले डेटा के साथ काम करते हैं।  
-अनसुपरवाइज्ड लर्निंग का उपयोग अक्सर क्लस्टरिंग, आयाम घटाने, और विसंगति पहचान जैसे कार्यों के लिए किया जाता है। यह डेटा में छिपे हुए पैटर्न खोजने, समान वस्तुओं को एक साथ समूहित करने, या डेटा की जटिलता को कम करने में मदद कर सकता है जबकि इसकी आवश्यक विशेषताओं को बनाए रखते हुए।
+Unsupervised learning मशीन लर्निंग का एक प्रकार है, जिसमें model को labeled responses के बिना data पर train किया जाता है। इसका लक्ष्य data के भीतर patterns, structures या relationships खोजना है। Supervised learning के विपरीत, जिसमें model labeled examples से सीखता है, unsupervised learning algorithms unlabeled data के साथ काम करते हैं।
+Unsupervised learning का उपयोग अक्सर clustering, dimensionality reduction और anomaly detection जैसे tasks के लिए किया जाता है। यह data में छिपे patterns खोजने, समान items को एक साथ group करने या उसकी आवश्यक features को बनाए रखते हुए data की complexity कम करने में सहायता कर सकता है।
+
 
 ### K-Means Clustering
 
-K-Means एक सेंट्रॉइड-आधारित क्लस्टरिंग एल्गोरिदम है जो डेटा को K क्लस्टरों में विभाजित करता है, प्रत्येक बिंदु को निकटतम क्लस्टर के औसत में असाइन करके। एल्गोरिदम इस प्रकार काम करता है:  
-1. **Initialization**: K प्रारंभिक क्लस्टर केंद्र (सेंट्रॉइड) चुनें, अक्सर यादृच्छिक रूप से या k-means++ जैसे स्मार्ट तरीकों के माध्यम से।  
-2. **Assignment**: प्रत्येक डेटा बिंदु को निकटतम सेंट्रॉइड के आधार पर एक दूरी मेट्रिक (जैसे, यूक्लिडियन दूरी) के अनुसार असाइन करें।  
-3. **Update**: प्रत्येक क्लस्टर में असाइन किए गए सभी डेटा बिंदुओं का औसत लेकर सेंट्रॉइड को फिर से गणना करें।  
-4. **Repeat**: क्लस्टर असाइनमेंट स्थिर होने तक (सेंट्रॉइड अब महत्वपूर्ण रूप से नहीं चलते) चरण 2-3 को दोहराएं।  
+K-Means एक centroid-based clustering algorithm है, जो प्रत्येक point को निकटतम cluster mean को assign करके data को K clusters में विभाजित करता है। यह algorithm इस प्रकार काम करता है:
+1. **Initialization**: K initial cluster centers (centroids) चुनें, अक्सर random तरीके से या k-means++ जैसी अधिक smart methods के माध्यम से।
+2. **Assignment**: किसी distance metric (जैसे Euclidean distance) के आधार पर प्रत्येक data point को निकटतम centroid को assign करें।
+3. **Update**: प्रत्येक cluster को assign किए गए सभी data points का mean लेकर centroids को फिर से calculate करें।
+4. **Repeat**: Steps 2–3 को तब तक दोहराएं, जब तक cluster assignments स्थिर न हो जाएं (centroids में महत्वपूर्ण बदलाव न हो)।
 
-> [!TIP]  
-> *Use cases in cybersecurity:* K-Means का उपयोग नेटवर्क घटनाओं को क्लस्टर करके घुसपैठ पहचान के लिए किया जाता है। उदाहरण के लिए, शोधकर्ताओं ने KDD कप 99 घुसपैठ डेटा सेट पर K-Means लागू किया और पाया कि यह प्रभावी रूप से ट्रैफ़िक को सामान्य बनाम हमले के क्लस्टरों में विभाजित करता है। प्रैक्टिस में, सुरक्षा विश्लेषक लॉग प्रविष्टियों या उपयोगकर्ता व्यवहार डेटा को समान गतिविधियों के समूह खोजने के लिए क्लस्टर कर सकते हैं; कोई भी बिंदु जो एक अच्छी तरह से निर्मित क्लस्टर में नहीं है, विसंगतियों को इंगित कर सकता है (जैसे, एक नया मैलवेयर प्रकार जो अपना छोटा क्लस्टर बना रहा है)। K-Means मैलवेयर परिवार वर्गीकरण में भी मदद कर सकता है, बाइनरी को व्यवहार प्रोफाइल या विशेषता वेक्टर के आधार पर समूहित करके।  
+> [!TIP]
+> *Cybersecurity में उपयोग:* K-Means का उपयोग network events को cluster करके intrusion detection के लिए किया जाता है। उदाहरण के लिए, researchers ने KDD Cup 99 intrusion dataset पर K-Means लागू किया और पाया कि इसने traffic को normal और attack clusters में प्रभावी रूप से विभाजित किया। व्यवहार में, security analysts समान activity के groups खोजने के लिए log entries या user behavior data को cluster कर सकते हैं; जो points किसी अच्छी तरह से बने cluster में शामिल नहीं होते, वे anomalies का संकेत दे सकते हैं (जैसे किसी नए malware variant का अपना छोटा cluster बनाना)। K-Means behavior profiles या feature vectors के आधार पर binaries को group करके malware family classification में भी सहायता कर सकता है।
 
-#### Selection of K  
-क्लस्टरों की संख्या (K) एक हाइपरपैरामीटर है जिसे एल्गोरिदम चलाने से पहले परिभाषित करने की आवश्यकता होती है। Elbow Method या Silhouette Score जैसी तकनीकें K के लिए उपयुक्त मान निर्धारित करने में मदद कर सकती हैं, क्लस्टरिंग प्रदर्शन का मूल्यांकन करके:  
+#### K का Selection
+Clusters की संख्या (K) एक hyperparameter है, जिसे algorithm चलाने से पहले define करना आवश्यक है। Elbow Method या Silhouette Score जैसी techniques clustering performance का मूल्यांकन करके K के लिए उपयुक्त value निर्धारित करने में सहायता कर सकती हैं:
 
-- **Elbow Method**: प्रत्येक बिंदु से उसके असाइन किए गए क्लस्टर सेंट्रॉइड तक के वर्ग दूरी का योग K के एक फ़ंक्शन के रूप में प्लॉट करें। एक "कोहनी" बिंदु की तलाश करें जहाँ कमी की दर तेज़ी से बदलती है, जो उपयुक्त संख्या के क्लस्टरों को इंगित करती है।  
-- **Silhouette Score**: विभिन्न K मानों के लिए सिल्हूट स्कोर की गणना करें। उच्च सिल्हूट स्कोर बेहतर परिभाषित क्लस्टरों को इंगित करता है।  
+- **Elbow Method**: प्रत्येक point से उसके assigned cluster centroid तक की squared distances का sum, K के function के रूप में plot करें। उस "elbow" point को खोजें जहां decrease की rate में तेज बदलाव आता है, जो clusters की उपयुक्त संख्या का संकेत देता है।
+- **Silhouette Score**: K की अलग-अलग values के लिए silhouette score calculate करें। अधिक silhouette score बेहतर-defined clusters का संकेत देता है।
 
-#### Assumptions and Limitations
+#### Assumptions और Limitations
 
-K-Means मानता है कि **क्लस्टर गोलाकार और समान आकार के हैं**, जो सभी डेटा सेट के लिए सही नहीं हो सकता है। यह सेंट्रॉइड के प्रारंभिक स्थान के प्रति संवेदनशील है और स्थानीय न्यूनतम पर संकुचित हो सकता है। इसके अतिरिक्त, K-Means उन डेटा सेट के लिए उपयुक्त नहीं है जिनमें विभिन्न घनत्व या गैर-गोलाकार आकार और विभिन्न स्केल की विशेषताएँ हैं। यह सुनिश्चित करने के लिए कि सभी विशेषताएँ दूरी की गणनाओं में समान रूप से योगदान करती हैं, सामान्यीकरण या मानकीकरण जैसे पूर्व-प्रसंस्करण चरणों की आवश्यकता हो सकती है।  
+K-Means यह assume करता है कि **clusters spherical और समान आकार के होते हैं**, जो सभी datasets के लिए सही नहीं हो सकता। यह centroids की initial placement के प्रति sensitive है और local minima पर converge कर सकता है। इसके अतिरिक्त, K-Means अलग-अलग densities या non-globular shapes वाले datasets और अलग-अलग scales वाली features के लिए suitable नहीं है। Normalization या standardization जैसे preprocessing steps आवश्यक हो सकते हैं, ताकि सभी features distance calculations में समान रूप से योगदान दें।
 
-<details>  
-<summary>Example -- Clustering Network Events  
-</summary>  
-नीचे हम नेटवर्क ट्रैफ़िक डेटा का अनुकरण करते हैं और इसे क्लस्टर करने के लिए K-Means का उपयोग करते हैं। मान लीजिए कि हमारे पास कनेक्शन अवधि और बाइट गिनती जैसी विशेषताओं वाले घटनाएँ हैं। हम "सामान्य" ट्रैफ़िक के 3 क्लस्टर और एक छोटे क्लस्टर का निर्माण करते हैं जो एक हमले के पैटर्न का प्रतिनिधित्व करता है। फिर हम K-Means चलाते हैं यह देखने के लिए कि क्या यह उन्हें अलग करता है।  
-</details>
+<details>
+<summary>Example -- Network Events की Clustering
+</summary>
+नीचे हम network traffic data को simulate करते हैं और उसे cluster करने के लिए K-Means का उपयोग करते हैं। मान लें कि हमारे पास connection duration और byte count जैसी features वाले events हैं। हम “normal” traffic के 3 clusters और attack pattern को दर्शाने वाला 1 छोटा cluster बनाते हैं। फिर हम K-Means चलाकर देखते हैं कि क्या यह उन्हें अलग कर पाता है।
 ```python
 import numpy as np
 from sklearn.cluster import KMeans
@@ -58,31 +58,32 @@ print("Cluster centers (duration, bytes):")
 for idx, center in enumerate(kmeans.cluster_centers_):
 print(f"  Cluster {idx}: {center}")
 ```
-इस उदाहरण में, K-Means को 4 क्लस्टर खोजने चाहिए। छोटा हमला क्लस्टर (जिसकी अवधि असामान्य रूप से उच्च ~200 है) अपने सामान्य क्लस्टरों से दूरी के कारण अपने स्वयं के क्लस्टर का निर्माण करेगा। हम परिणामों की व्याख्या करने के लिए क्लस्टर के आकार और केंद्रों को प्रिंट करते हैं। एक वास्तविक परिदृश्य में, कोई भी कुछ बिंदुओं के साथ क्लस्टर को संभावित विसंगतियों के रूप में लेबल कर सकता है या इसके सदस्यों की दुर्भावनापूर्ण गतिविधि के लिए जांच कर सकता है।
+इस उदाहरण में, K-Means को 4 clusters खोजने चाहिए। छोटा attack cluster (जिसकी duration असामान्य रूप से अधिक ~200 है) आदर्श रूप से normal clusters से अपनी दूरी के कारण अपना अलग cluster बनाएगा। परिणामों को समझने के लिए हम cluster sizes और centers प्रिंट करते हैं। वास्तविक स्थिति में, कम points वाले cluster को potential anomalies के रूप में label किया जा सकता है या malicious activity के लिए उसके members का निरीक्षण किया जा सकता है।
+</details>
 
-### हायरार्किकल क्लस्टरिंग
+### Hierarchical Clustering
 
-हायरार्किकल क्लस्टरिंग एक हायरार्की बनाता है जो या तो एक बॉटम-अप (एग्लोमेरेटिव) दृष्टिकोण या एक टॉप-डाउन (डिविज़िव) दृष्टिकोण का उपयोग करता है:
+Hierarchical clustering bottom-up (agglomerative) approach या top-down (divisive) approach का उपयोग करके clusters की hierarchy बनाता है:
 
-1. **एग्लोमेरेटिव (बॉटम-अप)**: प्रत्येक डेटा बिंदु को एक अलग क्लस्टर के रूप में शुरू करें और निकटतम क्लस्टरों को क्रमिक रूप से मर्ज करें जब तक एकल क्लस्टर शेष न रह जाए या एक स्टॉपिंग मानदंड पूरा न हो जाए।
-2. **डिविज़िव (टॉप-डाउन)**: सभी डेटा बिंदुओं को एक ही क्लस्टर में शुरू करें और क्रमिक रूप से क्लस्टरों को विभाजित करें जब तक प्रत्येक डेटा बिंदु अपना स्वयं का क्लस्टर न बन जाए या एक स्टॉपिंग मानदंड पूरा न हो जाए।
+1. **Agglomerative (Bottom-Up)**: प्रत्येक data point को एक अलग cluster से शुरू करें और निकटतम clusters को बार-बार merge करें, जब तक कि एक single cluster शेष न रह जाए या stopping criterion पूरा न हो जाए।
+2. **Divisive (Top-Down)**: सभी data points को एक single cluster में रखकर शुरू करें और clusters को बार-बार split करें, जब तक कि प्रत्येक data point अपना अलग cluster न बन जाए या stopping criterion पूरा न हो जाए।
 
-एग्लोमेरेटिव क्लस्टरिंग को इंटर-क्लस्टर दूरी की परिभाषा और मर्ज करने के लिए लिंक क्राइटेरियन की आवश्यकता होती है। सामान्य लिंक विधियों में सिंगल लिंक (दो क्लस्टरों के बीच निकटतम बिंदुओं की दूरी), कम्प्लीट लिंक (दूरस्थ बिंदुओं की दूरी), एवरेज लिंक आदि शामिल हैं, और दूरी मेट्रिक अक्सर यूक्लिडियन होती है। लिंक का चयन उत्पादित क्लस्टरों के आकार को प्रभावित करता है। क्लस्टरों की संख्या K को पूर्व-निर्धारित करने की आवश्यकता नहीं है; आप इच्छित संख्या के क्लस्टरों को प्राप्त करने के लिए डेंड्रोग्राम को चुने गए स्तर पर "कट" कर सकते हैं।
+Agglomerative clustering में inter-cluster distance की definition और यह तय करने के लिए linkage criterion आवश्यक होता है कि किन clusters को merge करना है। Common linkage methods में single linkage (दो clusters के बीच closest points की distance), complete linkage (farthest points की distance), average linkage आदि शामिल हैं, और distance metric अक्सर Euclidean होता है। Linkage का चुनाव बनाए गए clusters के आकार को प्रभावित करता है। Clusters की संख्या K को पहले से specify करने की आवश्यकता नहीं होती; desired number of clusters प्राप्त करने के लिए dendrogram को चुने गए level पर “cut” किया जा सकता है।
 
-हायरार्किकल क्लस्टरिंग एक डेंड्रोग्राम उत्पन्न करता है, जो एक पेड़ के समान संरचना है जो विभिन्न स्तरों पर क्लस्टरों के बीच संबंधों को दिखाता है। डेंड्रोग्राम को इच्छित स्तर पर काटा जा सकता है ताकि एक विशिष्ट संख्या के क्लस्टर प्राप्त किए जा सकें।
+Hierarchical clustering एक dendrogram बनाता है, जो एक tree-like structure है और granularity के विभिन्न levels पर clusters के बीच संबंध दिखाता है। Specific number of clusters प्राप्त करने के लिए dendrogram को desired level पर cut किया जा सकता है।
 
 > [!TIP]
-> *साइबर सुरक्षा में उपयोग के मामले:* हायरार्किकल क्लस्टरिंग घटनाओं या संस्थाओं को एक पेड़ में व्यवस्थित कर सकती है ताकि संबंधों को देखा जा सके। उदाहरण के लिए, मैलवेयर विश्लेषण में, एग्लोमेरेटिव क्लस्टरिंग व्यवहारात्मक समानता के आधार पर नमूनों को समूहित कर सकती है, जो मैलवेयर परिवारों और विविधताओं की एक हायरार्की प्रकट करती है। नेटवर्क सुरक्षा में, कोई IP ट्रैफ़िक प्रवाह को क्लस्टर कर सकता है और ट्रैफ़िक के उप-समूहों को देखने के लिए डेंड्रोग्राम का उपयोग कर सकता है (जैसे, प्रोटोकॉल द्वारा, फिर व्यवहार द्वारा)। चूंकि आपको पहले से K का चयन करने की आवश्यकता नहीं है, यह नए डेटा का अन्वेषण करते समय उपयोगी है जिसके लिए हमले की श्रेणियों की संख्या अज्ञात है।
+> *cybersecurity में उपयोग:* Hierarchical clustering events या entities को एक tree में organize करके relationships पहचान सकता है। उदाहरण के लिए, malware analysis में agglomerative clustering behavioral similarity के आधार पर samples को group कर सकता है, जिससे malware families और variants की hierarchy सामने आती है। Network security में, IP traffic flows को cluster करके traffic के subgroupings (जैसे पहले protocol के आधार पर, फिर behavior के आधार पर) देखने के लिए dendrogram का उपयोग किया जा सकता है। चूंकि K को पहले से चुनने की आवश्यकता नहीं होती, इसलिए यह ऐसे नए data की exploration के लिए उपयोगी है जिसमें attack categories की संख्या अज्ञात हो।
 
-#### धारणाएँ और सीमाएँ
+#### Assumptions and Limitations
 
-हायरार्किकल क्लस्टरिंग किसी विशेष क्लस्टर आकार का अनुमान नहीं लगाती है और नेस्टेड क्लस्टरों को कैप्चर कर सकती है। यह समूहों के बीच वर्गीकरण या संबंधों की खोज के लिए उपयोगी है (जैसे, मैलवेयर को परिवार उप-समूहों द्वारा समूहित करना)। यह निर्धारक है (कोई यादृच्छिक प्रारंभिककरण मुद्दे नहीं)। एक प्रमुख लाभ डेंड्रोग्राम है, जो सभी पैमानों पर डेटा की क्लस्टरिंग संरचना में अंतर्दृष्टि प्रदान करता है - सुरक्षा विश्लेषक एक उपयुक्त कटऑफ तय कर सकते हैं ताकि अर्थपूर्ण क्लस्टरों की पहचान की जा सके। हालाँकि, यह गणनात्मक रूप से महंगा है (आमतौर पर $O(n^2)$ समय या खराब के लिए साधारण कार्यान्वयन) और बहुत बड़े डेटा सेट के लिए व्यवहार्य नहीं है। यह एक लालची प्रक्रिया भी है - एक बार मर्ज या विभाजन हो जाने के बाद, इसे पूर्ववत नहीं किया जा सकता, जो यदि कोई गलती जल्दी होती है तो उप-आदर्श क्लस्टरों की ओर ले जा सकता है। आउटलेयर भी कुछ लिंक रणनीतियों को प्रभावित कर सकते हैं (सिंगल-लिंक "चेनिंग" प्रभाव पैदा कर सकता है जहां क्लस्टर आउटलेयर के माध्यम से लिंक होते हैं)।
+Hierarchical clustering किसी विशेष cluster shape को assume नहीं करता और nested clusters को capture कर सकता है। यह taxonomy या groups के बीच relations खोजने के लिए उपयोगी है (जैसे malware को family subgroups के आधार पर group करना)। यह deterministic है (random initialization से जुड़ी समस्याएं नहीं होतीं)। इसका एक प्रमुख लाभ dendrogram है, जो सभी scales पर data की clustering structure की जानकारी प्रदान करता है – security analysts meaningful clusters की पहचान करने के लिए उचित cutoff तय कर सकते हैं। हालांकि, यह computationally expensive है (naive implementations के लिए सामान्यतः $O(n^2)$ time या उससे अधिक) और बहुत बड़े datasets के लिए feasible नहीं है। यह एक greedy procedure भी है – merge या split हो जाने के बाद उसे undo नहीं किया जा सकता, जिससे शुरुआत में कोई गलती होने पर suboptimal clusters बन सकते हैं। Outliers कुछ linkage strategies को भी प्रभावित कर सकते हैं (single-link “chaining” effect पैदा कर सकता है, जिसमें clusters outliers के माध्यम से जुड़ जाते हैं)।
 
 <details>
-<summary>उदाहरण -- घटनाओं की एग्लोमेरेटिव क्लस्टरिंग
+<summary>Example -- Agglomerative Clustering of Events
 </summary>
 
-हम K-Means उदाहरण से सिंथेटिक डेटा का पुन: उपयोग करेंगे (3 सामान्य क्लस्टर + 1 हमला क्लस्टर) और एग्लोमेरेटिव क्लस्टरिंग लागू करेंगे। हम फिर डेंड्रोग्राम और क्लस्टर लेबल प्राप्त करने का तरीका दर्शाते हैं।
+हम K-Means example के synthetic data (3 normal clusters + 1 attack cluster) का फिर से उपयोग करेंगे और उस पर agglomerative clustering लागू करेंगे। इसके बाद हम दिखाएंगे कि dendrogram और cluster labels कैसे प्राप्त किए जाते हैं।
 ```python
 from sklearn.cluster import AgglomerativeClustering
 from scipy.cluster.hierarchy import linkage, dendrogram
@@ -102,32 +103,32 @@ print(f"Cluster sizes for 3 clusters: {np.bincount(clusters_3)}")
 ```
 </details>
 
-### DBSCAN (घनत्व-आधारित स्थानिक क्लस्टरिंग अनुप्रयोगों के साथ शोर)
+### DBSCAN (Density-Based Spatial Clustering of Applications with Noise)
 
-DBSCAN एक घनत्व-आधारित क्लस्टरिंग एल्गोरिदम है जो निकटता में पैक किए गए बिंदुओं को एक साथ समूहित करता है जबकि कम घनत्व वाले क्षेत्रों में बिंदुओं को आउटलेयर के रूप में चिह्नित करता है। यह विभिन्न घनत्वों और गैर-गेंदाकार आकृतियों वाले डेटा सेट के लिए विशेष रूप से उपयोगी है।
+DBSCAN एक density-based clustering algorithm है, जो एक-दूसरे के बहुत पास स्थित points को एक साथ group करता है और low-density regions में स्थित points को outliers के रूप में चिह्नित करता है। यह विभिन्न densities और non-spherical shapes वाले datasets के लिए विशेष रूप से उपयोगी है।
 
-DBSCAN दो पैरामीटर परिभाषित करता है:
-- **Epsilon (ε)**: दो बिंदुओं के बीच अधिकतम दूरी जिसे एक ही क्लस्टर का हिस्सा माना जाएगा।
-- **MinPts**: एक घने क्षेत्र (कोर बिंदु) बनाने के लिए आवश्यक न्यूनतम बिंदुओं की संख्या।
+DBSCAN दो parameters को परिभाषित करके काम करता है:
+- **Epsilon (ε)**: दो points के बीच की maximum distance, जिसके आधार पर उन्हें एक ही cluster का हिस्सा माना जाता है।
+- **MinPts**: एक dense region (core point) बनाने के लिए आवश्यक points की minimum संख्या।
 
-DBSCAN कोर बिंदुओं, सीमा बिंदुओं और शोर बिंदुओं की पहचान करता है:
-- **कोर बिंदु**: एक बिंदु जिसमें कम से कम MinPts पड़ोसी ε दूरी के भीतर होते हैं।
-- **सीमा बिंदु**: एक बिंदु जो एक कोर बिंदु के ε दूरी के भीतर है लेकिन इसमें MinPts से कम पड़ोसी हैं।
-- **शोर बिंदु**: एक बिंदु जो न तो कोर बिंदु है और न ही सीमा बिंदु।
+DBSCAN core points, border points और noise points की पहचान करता है:
+- **Core Point**: ऐसा point जिसके ε distance के भीतर कम-से-कम MinPts neighbors हों।
+- **Border Point**: ऐसा point जो किसी core point के ε distance के भीतर हो, लेकिन जिसके neighbors की संख्या MinPts से कम हो।
+- **Noise Point**: ऐसा point जो न तो core point हो और न ही border point।
 
-क्लस्टरिंग एक अनदेखे कोर बिंदु को चुनकर शुरू होती है, इसे एक नए क्लस्टर के रूप में चिह्नित करती है, फिर सभी बिंदुओं को जोड़ती है जो इससे घनत्व-प्राप्य हैं (कोर बिंदु और उनके पड़ोसी, आदि)। सीमा बिंदुओं को निकटतम कोर के क्लस्टर में जोड़ा जाता है। सभी प्राप्य बिंदुओं का विस्तार करने के बाद, DBSCAN एक अन्य अनदेखे कोर पर जाता है ताकि एक नया क्लस्टर शुरू किया जा सके। किसी भी कोर द्वारा नहीं पहुंचाए गए बिंदु शोर के रूप में लेबल किए जाते हैं।
+Clustering प्रक्रिया में एक unvisited core point चुना जाता है, उसे एक नए cluster के रूप में चिह्नित किया जाता है, फिर उससे density-reachable सभी points (core points और उनके neighbors आदि) को recursively जोड़ा जाता है। Border points को किसी nearby core के cluster में जोड़ा जाता है। सभी reachable points को expand करने के बाद, DBSCAN एक नया cluster शुरू करने के लिए किसी अन्य unvisited core पर जाता है। किसी भी core से न पहुंच पाने वाले points को noise के रूप में label किया जाता है।
 
 > [!TIP]
-> *साइबर सुरक्षा में उपयोग के मामले:* DBSCAN नेटवर्क ट्रैफ़िक में विसंगति पहचान के लिए उपयोगी है। उदाहरण के लिए, सामान्य उपयोगकर्ता गतिविधि विशेषता स्थान में एक या अधिक घने क्लस्टर बना सकती है, जबकि नए हमले के व्यवहार बिखरे हुए बिंदुओं के रूप में प्रकट होते हैं जिन्हें DBSCAN शोर (आउटलेयर) के रूप में लेबल करेगा। इसका उपयोग नेटवर्क प्रवाह रिकॉर्ड को क्लस्टर करने के लिए किया गया है, जहां यह पोर्ट स्कैन या सेवा से इनकार ट्रैफ़िक को बिंदुओं के विरल क्षेत्रों के रूप में पहचान सकता है। एक और अनुप्रयोग मैलवेयर वेरिएंट को समूहित करना है: यदि अधिकांश नमूने परिवारों द्वारा क्लस्टर होते हैं लेकिन कुछ कहीं फिट नहीं होते, तो वे कुछ शून्य-दिन के मैलवेयर हो सकते हैं। शोर को चिह्नित करने की क्षमता का अर्थ है कि सुरक्षा टीमें उन आउटलेयर की जांच पर ध्यान केंद्रित कर सकती हैं।
+> *Use cases in cybersecurity:* DBSCAN network traffic में anomaly detection के लिए उपयोगी है। उदाहरण के लिए, सामान्य user activity feature space में एक या अधिक dense clusters बना सकती है, जबकि नए attack behaviors scattered points के रूप में दिखाई दे सकते हैं, जिन्हें DBSCAN noise (outliers) के रूप में label करेगा। इसका उपयोग network flow records को cluster करने के लिए किया गया है, जहां यह port scans या denial-of-service traffic को points के sparse regions के रूप में detect कर सकता है। एक अन्य application malware variants को group करना है: यदि अधिकांश samples families के आधार पर cluster हो जाएं, लेकिन कुछ samples किसी cluster में fit न हों, तो वे few samples zero-day malware हो सकते हैं। Noise को flag करने की क्षमता का अर्थ है कि security teams उन outliers की जांच पर ध्यान केंद्रित कर सकती हैं।
 
-#### धारणाएँ और सीमाएँ
+#### Assumptions and Limitations
 
-**धारणाएँ और ताकतें:** DBSCAN गोलाकार क्लस्टरों की धारणा नहीं करता है - यह मनमाने आकार के क्लस्टर (यहां तक कि श्रृंखला के समान या निकटवर्ती क्लस्टर) खोज सकता है। यह डेटा घनत्व के आधार पर स्वचालित रूप से क्लस्टरों की संख्या निर्धारित करता है और प्रभावी रूप से आउटलेयर को शोर के रूप में पहचान सकता है। यह असामान्य आकृतियों और शोर के साथ वास्तविक दुनिया के डेटा के लिए शक्तिशाली बनाता है। यह आउटलेयर के प्रति मजबूत है (K-Means के विपरीत, जो उन्हें क्लस्टरों में मजबूर करता है)। यह तब अच्छी तरह से काम करता है जब क्लस्टरों की घनत्व लगभग समान हो।
+**Assumptions & Strengths:**: DBSCAN spherical clusters को assume नहीं करता – यह arbitrarily shaped clusters (यहां तक कि chain-like या adjacent clusters) खोज सकता है। यह data density के आधार पर clusters की संख्या automatically निर्धारित करता है और outliers को noise के रूप में effectively identify कर सकता है। इससे यह irregular shapes और noise वाले real-world data के लिए powerful बनता है। यह outliers के प्रति robust है (K-Means के विपरीत, जो उन्हें clusters में force करता है)। यह तब अच्छी तरह काम करता है जब clusters की density लगभग uniform हो।
 
-**सीमाएँ:** DBSCAN का प्रदर्शन उपयुक्त ε और MinPts मानों को चुनने पर निर्भर करता है। यह विभिन्न घनत्व वाले डेटा के साथ संघर्ष कर सकता है - एकल ε घने और विरल क्लस्टरों दोनों को समायोजित नहीं कर सकता। यदि ε बहुत छोटा है, तो यह अधिकांश बिंदुओं को शोर के रूप में लेबल करता है; बहुत बड़ा होने पर, और क्लस्टर गलत तरीके से मिल सकते हैं। इसके अलावा, DBSCAN बहुत बड़े डेटा सेट पर अप्रभावी हो सकता है (नासमझी से $O(n^2)$, हालांकि स्थानिक अनुक्रमण मदद कर सकता है)। उच्च-आयामी विशेषता स्थानों में, "ε के भीतर दूरी" का विचार कम अर्थपूर्ण हो सकता है (आयाम की शाप), और DBSCAN को सावधानीपूर्वक पैरामीटर ट्यूनिंग की आवश्यकता हो सकती है या यह सहज क्लस्टरों को खोजने में विफल हो सकता है। इसके बावजूद, HDBSCAN जैसे विस्तार कुछ मुद्दों (जैसे विभिन्न घनत्व) को संबोधित करते हैं।
+**Limitations**: DBSCAN का performance appropriate ε और MinPts values चुनने पर निर्भर करता है। अलग-अलग densities वाले data के साथ इसे कठिनाई हो सकती है – एक single ε dense और sparse दोनों clusters को accommodate नहीं कर सकता। यदि ε बहुत छोटा हो, तो यह अधिकांश points को noise के रूप में label कर देता है; बहुत बड़ा होने पर clusters गलत तरीके से merge हो सकते हैं। इसके अलावा, DBSCAN बहुत बड़े datasets पर inefficient हो सकता है (naively $O(n^2)$, हालांकि spatial indexing मदद कर सकता है)। High-dimensional feature spaces में “distance within ε” की concept कम meaningful हो सकती है (curse of dimensionality), और DBSCAN को careful parameter tuning की आवश्यकता हो सकती है या यह intuitive clusters खोजने में fail हो सकता है। इन सीमाओं के बावजूद, HDBSCAN जैसे extensions कुछ समस्याओं (जैसे varying density) को address करते हैं।
 
 <details>
-<summary>उदाहरण -- शोर के साथ क्लस्टरिंग
+<summary>Example -- Clustering with Noise
 </summary>
 ```python
 from sklearn.cluster import DBSCAN
@@ -150,61 +151,61 @@ num_noise = np.sum(labels == -1)
 print(f"DBSCAN found {num_clusters} clusters and {num_noise} noise points")
 print("Cluster labels for first 10 points:", labels[:10])
 ```
-इस स्निपेट में, हमने `eps` और `min_samples` को हमारे डेटा स्केल (15.0 फीचर यूनिट्स में, और एक क्लस्टर बनाने के लिए 5 पॉइंट्स की आवश्यकता) के अनुसार समायोजित किया। DBSCAN को 2 क्लस्टर (सामान्य ट्रैफ़िक क्लस्टर) खोजने चाहिए और 5 इंजेक्टेड आउटलेयर्स को शोर के रूप में चिह्नित करना चाहिए। हम इसकी पुष्टि के लिए क्लस्टर की संख्या बनाम शोर पॉइंट्स का आउटपुट देते हैं। एक वास्तविक सेटिंग में, कोई ε (ε चुनने के लिए k-डिस्टेंस ग्राफ ह्यूरिस्टिक का उपयोग करते हुए) और MinPts (अक्सर डेटा आयाम + 1 के आसपास सेट किया जाता है) पर पुनरावृत्ति कर सकता है ताकि स्थिर क्लस्टरिंग परिणाम मिल सकें। शोर को स्पष्ट रूप से लेबल करने की क्षमता संभावित हमले के डेटा को आगे के विश्लेषण के लिए अलग करने में मदद करती है।
+इस snippet में, हमने अपने data scale के अनुसार `eps` और `min_samples` को tuned किया (feature units में 15.0, और cluster बनाने के लिए 5 points आवश्यक)। DBSCAN को 2 clusters (normal traffic clusters) खोजने चाहिए और injected 5 outliers को noise के रूप में flag करना चाहिए। इसे verify करने के लिए हम clusters की संख्या और noise points की संख्या output करते हैं। वास्तविक setting में, stable clustering results खोजने के लिए कोई ε पर iterate कर सकता है (ε चुनने के लिए k-distance graph heuristic का उपयोग करके) और MinPts पर भी (rule of thumb के रूप में इसे अक्सर data dimensionality + 1 के आसपास set किया जाता है)। Noise को explicitly label करने की क्षमता आगे के analysis के लिए potential attack data को अलग करने में मदद करती है।
 
 </details>
 
-### प्रिंसिपल कंपोनेंट एनालिसिस (PCA)
+### Principal Component Analysis (PCA)
 
-PCA एक **आयाम घटाने** की तकनीक है जो एक नए सेट के ऑर्थोगोनल अक्ष (प्रिंसिपल कंपोनेंट्स) को खोजती है जो डेटा में अधिकतम विविधता को कैप्चर करती है। सरल शब्दों में, PCA डेटा को एक नए कोऑर्डिनेट सिस्टम पर घुमाता और प्रक्षिप्त करता है ताकि पहला प्रिंसिपल कंपोनेंट (PC1) संभवतः सबसे बड़ी विविधता को समझाए, दूसरा PC (PC2) PC1 के लिए सबसे बड़ी विविधता को समझाए, और इसी तरह। गणितीय रूप से, PCA डेटा के सहसंवेदन मैट्रिक्स के ईगेनवेक्टर की गणना करता है - ये ईगेनवेक्टर प्रिंसिपल कंपोनेंट दिशाएँ हैं, और संबंधित ईगेनवैल्यू प्रत्येक द्वारा समझाई गई विविधता की मात्रा को इंगित करती है। इसका उपयोग अक्सर फीचर एक्सट्रैक्शन, विज़ुअलाइज़ेशन, और शोर घटाने के लिए किया जाता है।
+PCA **dimensionality reduction** की एक technique है, जो orthogonal axes (principal components) का एक नया set खोजती है और data में maximum variance को capture करती है। सरल शब्दों में, PCA data को एक नए coordinate system पर rotate और project करता है, ताकि पहला principal component (PC1) अधिकतम संभव variance को explain करे, दूसरा PC (PC2), PC1 के orthogonal रहते हुए, सबसे अधिक variance को explain करे, और इसी तरह आगे। Mathematical रूप से, PCA data के covariance matrix के eigenvectors compute करता है - ये eigenvectors principal component directions होते हैं, और corresponding eigenvalues प्रत्येक द्वारा explain की गई variance की मात्रा को दर्शाते हैं। इसका उपयोग अक्सर feature extraction, visualization और noise reduction के लिए किया जाता है।
 
-ध्यान दें कि यह उपयोगी है यदि डेटा सेट के आयामों में **महत्वपूर्ण रैखिक निर्भरताएँ या सहसंबंध** होते हैं।
+ध्यान दें कि यह तब उपयोगी है जब dataset dimensions में **significant linear dependencies या correlations** हों।
 
-PCA डेटा के प्रिंसिपल कंपोनेंट्स की पहचान करके काम करता है, जो अधिकतम विविधता की दिशाएँ होती हैं। PCA में शामिल चरण हैं:
-1. **मानकीकरण**: डेटा को केंद्रित करें, औसत को घटाकर और इसे यूनिट विविधता में स्केल करके।
-2. **सहसंवेदन मैट्रिक्स**: मानकीकृत डेटा के सहसंवेदन मैट्रिक्स की गणना करें ताकि विशेषताओं के बीच संबंधों को समझा जा सके।
-3. **ईगेनवैल्यू विघटन**: सहसंवेदन मैट्रिक्स पर ईगेनवैल्यू विघटन करें ताकि ईगेनवैल्यू और ईगेनवेक्टर प्राप्त हो सकें।
-4. **प्रिंसिपल कंपोनेंट्स का चयन करें**: ईगेनवैल्यू को अवरोही क्रम में क्रमबद्ध करें और सबसे बड़ी ईगेनवैल्यू के लिए शीर्ष K ईगेनवेक्टर का चयन करें। ये ईगेनवेक्टर नए फीचर स्पेस का निर्माण करते हैं।
-5. **डेटा को ट्रांसफॉर्म करें**: चयनित प्रिंसिपल कंपोनेंट्स का उपयोग करके मूल डेटा को नए फीचर स्पेस में प्रक्षिप्त करें।
-PCA का उपयोग डेटा विज़ुअलाइज़ेशन, शोर घटाने, और अन्य मशीन लर्निंग एल्गोरिदम के लिए पूर्व-प्रसंस्करण चरण के रूप में किया जाता है। यह डेटा के आयाम को घटाने में मदद करता है जबकि इसकी आवश्यक संरचना को बनाए रखता है।
+PCA data के principal components की पहचान करके काम करता है, जो maximum variance की directions होती हैं। PCA में शामिल steps हैं:
+1. **Standardization**: Mean घटाकर data को center करें और उसे unit variance तक scale करें।
+2. **Covariance Matrix**: Features के बीच relationships को समझने के लिए standardized data की covariance matrix compute करें।
+3. **Eigenvalue Decomposition**: Eigenvalues और eigenvectors प्राप्त करने के लिए covariance matrix पर eigenvalue decomposition करें।
+4. **Select Principal Components**: Eigenvalues को descending order में sort करें और largest eigenvalues से corresponding top K eigenvectors चुनें। ये eigenvectors नया feature space बनाते हैं।
+5. **Transform Data**: चुने गए principal components का उपयोग करके original data को नए feature space पर project करें।
+PCA का व्यापक रूप से data visualization, noise reduction और अन्य machine learning algorithms के लिए preprocessing step के रूप में उपयोग किया जाता है। यह data की essential structure को बनाए रखते हुए उसकी dimensionality कम करने में मदद करता है।
 
-#### ईगेनवैल्यू और ईगेनवेक्टर
+#### Eigenvalues और Eigenvectors
 
-एक ईगेनवैल्यू एक स्केलर है जो उसके संबंधित ईगेनवेक्टर द्वारा कैप्चर की गई विविधता की मात्रा को इंगित करता है। एक ईगेनवेक्टर फीचर स्पेस में एक दिशा का प्रतिनिधित्व करता है जिसके साथ डेटा सबसे अधिक भिन्न होता है।
+Eigenvalue एक scalar है, जो अपने corresponding eigenvector द्वारा capture की गई variance की मात्रा दर्शाता है। Eigenvector feature space में उस direction को represent करता है, जिसके along data सबसे अधिक vary करता है।
 
-कल्पना करें कि A एक वर्ग मैट्रिक्स है, और v एक गैर-शून्य वेक्टर है ताकि: `A * v = λ * v`
+मान लें कि A एक square matrix है और v एक non-zero vector है, जैसे: `A * v = λ * v`
 जहाँ:
-- A एक वर्ग मैट्रिक्स है जैसे [ [1, 2], [2, 1]] (जैसे, सहसंवेदन मैट्रिक्स)
-- v एक ईगेनवेक्टर है (जैसे, [1, 1])
+- A एक square matrix है, जैसे [ [1, 2], [2, 1]] (उदाहरण के लिए, covariance matrix)
+- v एक eigenvector है (जैसे [1, 1])
 
-फिर, `A * v = [ [1, 2], [2, 1]] * [1, 1] = [3, 3]` जो ईगेनवैल्यू λ को ईगेनवेक्टर v से गुणा करेगा, जिससे ईगेनवैल्यू λ = 3 होगा।
+तब, `A * v = [ [1, 2], [2, 1]] * [1, 1] = [3, 3]` होगा, जो eigenvalue λ को eigenvector v से multiply करने के बराबर है; इसलिए eigenvalue λ = 3 है।
 
-#### PCA में ईगेनवैल्यू और ईगेनवेक्टर
+#### PCA में Eigenvalues और Eigenvectors
 
-आइए इसे एक उदाहरण के साथ समझाते हैं। कल्पना करें कि आपके पास 100x100 पिक्सल के चेहरे की कई ग्रे स्केल तस्वीरों का एक डेटा सेट है। प्रत्येक पिक्सल को एक फीचर माना जा सकता है, इसलिए आपके पास प्रति छवि 10,000 फीचर हैं (या प्रति छवि 10000 घटकों का एक वेक्टर)। यदि आप PCA का उपयोग करके इस डेटा सेट के आयाम को घटाना चाहते हैं, तो आप इन चरणों का पालन करेंगे:
+इसे एक example से समझते हैं। मान लें कि आपके पास 100x100 pixels वाली faces की बहुत-सी grey scale pictures का dataset है। प्रत्येक pixel को एक feature माना जा सकता है, इसलिए आपके पास प्रत्येक image के लिए 10,000 features (या प्रत्येक image के लिए 10000 components का एक vector) हैं। यदि आप PCA का उपयोग करके इस dataset की dimensionality कम करना चाहते हैं, तो आप ये steps follow करेंगे:
 
-1. **मानकीकरण**: डेटा को केंद्रित करें, प्रत्येक फीचर (पिक्सल) के औसत को डेटा सेट से घटाकर।
-2. **सहसंवेदन मैट्रिक्स**: मानकीकृत डेटा के सहसंवेदन मैट्रिक्स की गणना करें, जो यह कैप्चर करता है कि विशेषताएँ (पिक्सल) एक साथ कैसे भिन्न होती हैं।
-- ध्यान दें कि दो चर (इस मामले में पिक्सल) के बीच सहसंवेदन यह इंगित करता है कि वे एक साथ कितनी बदलते हैं, इसलिए यहाँ विचार यह है कि यह पता लगाना है कि कौन से पिक्सल एक रैखिक संबंध के साथ एक साथ बढ़ने या घटने की प्रवृत्ति रखते हैं।
-- उदाहरण के लिए, यदि पिक्सल 1 और पिक्सल 2 एक साथ बढ़ने की प्रवृत्ति रखते हैं, तो उनके बीच का सहसंवेदन सकारात्मक होगा।
-- सहसंवेदन मैट्रिक्स एक 10,000x10,000 मैट्रिक्स होगा जहाँ प्रत्येक प्रविष्टि दो पिक्सल के बीच के सहसंवेदन का प्रतिनिधित्व करती है।
-3. **ईगेनवैल्यू समीकरण को हल करें**: हल करने के लिए ईगेनवैल्यू समीकरण है `C * v = λ * v` जहाँ C सहसंवेदन मैट्रिक्स है, v ईगेनवेक्टर है, और λ ईगेनवैल्यू है। इसे निम्नलिखित विधियों का उपयोग करके हल किया जा सकता है:
-- **ईगेनवैल्यू विघटन**: सहसंवेदन मैट्रिक्स पर ईगेनवैल्यू विघटन करें ताकि ईगेनवैल्यू और ईगेनवेक्टर प्राप्त हो सकें।
-- **सिंगुलर वैल्यू डिकंपोज़िशन (SVD)**: वैकल्पिक रूप से, आप डेटा मैट्रिक्स को सिंगुलर वैल्यू और वेक्टर में विघटित करने के लिए SVD का उपयोग कर सकते हैं, जो प्रिंसिपल कंपोनेंट्स भी प्रदान कर सकता है।
-4. **प्रिंसिपल कंपोनेंट्स का चयन करें**: ईगेनवैल्यू को अवरोही क्रम में क्रमबद्ध करें और सबसे बड़ी ईगेनवैल्यू के लिए शीर्ष K ईगेनवेक्टर का चयन करें। ये ईगेनवेक्टर डेटा में अधिकतम विविधता की दिशाओं का प्रतिनिधित्व करते हैं।
+1. **Standardization**: Dataset में प्रत्येक feature (pixel) का mean घटाकर data को center करें।
+2. **Covariance Matrix**: Standardized data की covariance matrix compute करें, जो यह capture करती है कि features (pixels) साथ-साथ कैसे vary करते हैं।
+- ध्यान दें कि दो variables (इस मामले में pixels) के बीच covariance यह दर्शाता है कि वे साथ-साथ कितना change होते हैं; इसलिए यहाँ उद्देश्य यह पता लगाना है कि कौन-से pixels linear relationship के साथ साथ-साथ increase या decrease होते हैं।
+- उदाहरण के लिए, यदि pixel 1 और pixel 2 साथ-साथ increase होते हैं, तो उनके बीच covariance positive होगी।
+- Covariance matrix एक 10,000x10,000 matrix होगी, जिसमें प्रत्येक entry दो pixels के बीच covariance को represent करेगी।
+3. **The eigenvalue equation को solve करें**: Solve की जाने वाली eigenvalue equation `C * v = λ * v` है, जहाँ C covariance matrix है, v eigenvector है और λ eigenvalue है। इसे इन methods का उपयोग करके solve किया जा सकता है:
+- **Eigenvalue Decomposition**: Eigenvalues और eigenvectors प्राप्त करने के लिए covariance matrix पर eigenvalue decomposition करें।
+- **Singular Value Decomposition (SVD)**: वैकल्पिक रूप से, आप data matrix को singular values और vectors में decompose करने के लिए SVD का उपयोग कर सकते हैं, जिससे principal components भी प्राप्त किए जा सकते हैं।
+4. **Select Principal Components**: Eigenvalues को descending order में sort करें और largest eigenvalues से corresponding top K eigenvectors चुनें। ये eigenvectors data में maximum variance की directions को represent करते हैं।
 
 > [!TIP]
-> *साइबर सुरक्षा में उपयोग के मामले:* सुरक्षा में PCA का एक सामान्य उपयोग विसंगति पहचान के लिए फीचर घटाना है। उदाहरण के लिए, 40+ नेटवर्क मैट्रिक्स (जैसे NSL-KDD फीचर्स) के साथ एक घुसपैठ पहचान प्रणाली PCA का उपयोग करके कुछ घटकों में घटा सकती है, डेटा को विज़ुअलाइज़ेशन के लिए या क्लस्टरिंग एल्गोरिदम में फीड करने के लिए संक्षिप्त कर सकती है। विश्लेषक पहले दो प्रिंसिपल कंपोनेंट्स के स्पेस में नेटवर्क ट्रैफ़िक को प्लॉट कर सकते हैं यह देखने के लिए कि क्या हमले सामान्य ट्रैफ़िक से अलग होते हैं। PCA भी पुनरावृत्त फीचर्स (जैसे भेजे गए बाइट्स बनाम प्राप्त बाइट्स यदि वे सहसंबंधित हैं) को समाप्त करने में मदद कर सकता है ताकि पहचान एल्गोरिदम अधिक मजबूत और तेज़ हो सकें।
+> *Cybersecurity में use cases:* Security में PCA का एक common use anomaly detection के लिए feature reduction है। उदाहरण के लिए, 40+ network metrics (जैसे NSL-KDD features) वाले intrusion detection system में PCA का उपयोग करके data को कुछ components तक reduce किया जा सकता है, जिससे visualization के लिए या clustering algorithms में feed करने के लिए data का summary तैयार होता है। Analysts पहले दो principal components के space में network traffic को plot कर सकते हैं, ताकि यह देखा जा सके कि attacks normal traffic से अलग होते हैं या नहीं। PCA redundant features (जैसे bytes sent और bytes received, यदि वे correlated हों) को eliminate करने में भी मदद कर सकता है, जिससे detection algorithms अधिक robust और तेज बनते हैं।
 
-#### धारणाएँ और सीमाएँ
+#### Assumptions और Limitations
 
-PCA मानता है कि **विविधता के प्रिंसिपल अक्ष अर्थपूर्ण हैं** - यह एक रैखिक विधि है, इसलिए यह डेटा में रैखिक सहसंबंधों को कैप्चर करता है। यह अनियंत्रित है क्योंकि यह केवल फीचर सहसंवेदन का उपयोग करता है। PCA के लाभों में शोर घटाना (छोटी विविधता वाले घटक अक्सर शोर से संबंधित होते हैं) और विशेषताओं का डेकोरिलेशन शामिल है। यह मध्यम उच्च आयामों के लिए गणनात्मक रूप से कुशल है और अक्सर अन्य एल्गोरिदम के लिए एक उपयोगी पूर्व-प्रसंस्करण चरण होता है (आयाम की शाप को कम करने के लिए)। एक सीमा यह है कि PCA रैखिक संबंधों तक सीमित है - यह जटिल गैर-रैखिक संरचना को कैप्चर नहीं करेगा (जबकि ऑटोएन्कोडर्स या t-SNE ऐसा कर सकते हैं)। इसके अलावा, PCA घटकों को मूल विशेषताओं के संदर्भ में व्याख्या करना कठिन हो सकता है (ये मूल विशेषताओं के संयोजन होते हैं)। साइबर सुरक्षा में, एक को सतर्क रहना चाहिए: एक हमला जो केवल एक कम विविधता वाले फीचर में एक सूक्ष्म परिवर्तन का कारण बनता है, शीर्ष PCs में नहीं दिख सकता (क्योंकि PCA विविधता को प्राथमिकता देता है, न कि अनिवार्य रूप से "दिलचस्पता")।
+PCA यह assume करता है कि **principal axes of variance meaningful हैं** - यह एक linear method है, इसलिए data में linear correlations को capture करता है। यह unsupervised है, क्योंकि यह केवल feature covariance का उपयोग करता है। PCA के advantages में noise reduction (small-variance components अक्सर noise से correspond करते हैं) और features का decorrelation शामिल हैं। यह moderately high dimensions के लिए computationally efficient है और अक्सर अन्य algorithms के लिए एक उपयोगी preprocessing step होता है (curse of dimensionality को mitigate करने के लिए)। एक limitation यह है कि PCA linear relationships तक सीमित है - यह complex nonlinear structure को capture नहीं करेगा (जबकि autoencoders या t-SNE ऐसा कर सकते हैं)। इसके अलावा, PCA components को original features के संदर्भ में interpret करना कठिन हो सकता है (वे original features के combinations होते हैं)। Cybersecurity में सावधानी आवश्यक है: low-variance feature में केवल subtle change पैदा करने वाला attack top PCs में दिखाई नहीं दे सकता (क्योंकि PCA variance को prioritize करता है, आवश्यक नहीं कि “interestingness” को)।
 
 <details>
-<summary>उदाहरण -- नेटवर्क डेटा के आयामों को घटाना
+<summary>Example -- Network Data की Dimensions कम करना
 </summary>
 
-मान लीजिए कि हमारे पास कई विशेषताओं (जैसे, अवधि, बाइट्स, गिनती) के साथ नेटवर्क कनेक्शन लॉग हैं। हम एक सिंथेटिक 4-आयामी डेटा सेट (विशेषताओं के बीच कुछ सहसंबंध के साथ) उत्पन्न करेंगे और इसे विज़ुअलाइज़ेशन या आगे के विश्लेषण के लिए 2 आयामों में घटाने के लिए PCA का उपयोग करेंगे।
+मान लें कि हमारे पास कई features (जैसे durations, bytes, counts) वाले network connection logs हैं। हम कुछ correlated features के साथ एक synthetic 4-dimensional dataset generate करेंगे और visualization या आगे के analysis के लिए PCA का उपयोग करके इसे 2 dimensions तक reduce करेंगे।
 ```python
 from sklearn.decomposition import PCA
 
@@ -224,44 +225,45 @@ print("Original shape:", data_4d.shape, "Reduced shape:", data_2d.shape)
 # We can examine a few transformed points
 print("First 5 data points in PCA space:\n", data_2d[:5])
 ```
-यहां हमने पहले के सामान्य ट्रैफ़िक क्लस्टरों को लिया और प्रत्येक डेटा बिंदु को दो अतिरिक्त विशेषताओं (पैकेट और त्रुटियाँ) के साथ विस्तारित किया जो बाइट्स और अवधि के साथ सहसंबंधित हैं। फिर PCA का उपयोग 4 विशेषताओं को 2 प्रमुख घटकों में संकुचित करने के लिए किया जाता है। हम व्याख्यायित विविधता अनुपात प्रिंट करते हैं, जो यह दिखा सकता है कि, कहने के लिए, 2 घटकों द्वारा >95% विविधता कैप्चर की गई है (जिसका अर्थ है कि जानकारी का थोड़ा नुकसान हुआ है)। आउटपुट यह भी दिखाता है कि डेटा आकार (1500, 4) से (1500, 2) में घट रहा है। PCA स्पेस में पहले कुछ बिंदुओं को उदाहरण के रूप में दिया गया है। प्रैक्टिस में, कोई डेटा_2डी को प्लॉट कर सकता है ताकि यह दृश्य रूप से जांच सके कि क्या क्लस्टर अलग-अलग हैं। यदि कोई विसंगति मौजूद थी, तो कोई इसे PCA-स्पेस में मुख्य क्लस्टर से दूर एक बिंदु के रूप में देख सकता है। इस प्रकार PCA जटिल डेटा को मानव व्याख्या के लिए या अन्य एल्गोरिदम के इनपुट के रूप में प्रबंधनीय रूप में संक्षिप्त करने में मदद करता है।
+यहाँ हमने पहले के सामान्य traffic clusters लिए और प्रत्येक data point में दो अतिरिक्त features (packets और errors) जोड़े, जो bytes और duration से correlate करते हैं। इसके बाद PCA का उपयोग करके 4 features को 2 principal components में compress किया जाता है। हम explained variance ratio print करते हैं, जो यह दिखा सकता है कि, उदाहरण के लिए, 2 components द्वारा >95% variance capture की गई है (अर्थात information loss बहुत कम है)। Output में data shape के (1500, 4) से (1500, 2) तक कम होने को भी दिखाया जाता है। PCA space में शुरुआती कुछ points उदाहरण के रूप में दिए गए हैं। व्यवहार में, clusters अलग-अलग पहचाने जा सकते हैं या नहीं, यह visually check करने के लिए `data_2d` को plot किया जा सकता है। यदि कोई anomaly मौजूद हो, तो वह PCA-space में main cluster से दूर स्थित point के रूप में दिखाई दे सकती है। इस प्रकार PCA complex data को human interpretation या अन्य algorithms के input के लिए manageable form में बदलने में मदद करता है।
 
 </details>
 
 
 ### Gaussian Mixture Models (GMM)
 
-एक Gaussian Mixture Model मानता है कि डेटा **कई Gaussian (सामान्य) वितरणों के मिश्रण से उत्पन्न होता है जिनके अज्ञात पैरामीटर** होते हैं। मूल रूप से, यह एक संभाव्य क्लस्टरिंग मॉडल है: यह प्रत्येक बिंदु को K Gaussian घटकों में से एक को धीरे-धीरे असाइन करने की कोशिश करता है। प्रत्येक Gaussian घटक k का एक औसत वेक्टर (μ_k), सहवर्तन मैट्रिक्स (Σ_k), और एक मिश्रण वजन (π_k) होता है जो दर्शाता है कि वह क्लस्टर कितना प्रचलित है। K-Means के विपरीत जो "कठोर" असाइनमेंट करता है, GMM प्रत्येक बिंदु को प्रत्येक क्लस्टर में शामिल होने की संभावना देता है।
+A Gaussian Mixture Model मानता है कि data **unknown parameters वाले कई Gaussian (normal) distributions के mixture** से generate किया गया है। मूल रूप से, यह एक probabilistic clustering model है: यह प्रत्येक point को K Gaussian components में से किसी एक को softly assign करने का प्रयास करता है। प्रत्येक Gaussian component k का एक mean vector (μ_k), covariance matrix (Σ_k), और mixing weight (π_k) होता है, जो यह दर्शाता है कि वह cluster कितना prevalent है। K-Means के विपरीत, जो “hard” assignments करता है, GMM प्रत्येक point के प्रत्येक cluster से संबंधित होने की probability देता है।
 
-GMM फिटिंग आमतौर पर Expectation-Maximization (EM) एल्गोरिदम के माध्यम से की जाती है:
+GMM fitting आमतौर पर Expectation-Maximization (EM) algorithm के माध्यम से की जाती है:
 
-- **Initialization**: औसत, सहवर्तन, और मिश्रण गुणांक के लिए प्रारंभिक अनुमान के साथ शुरू करें (या K-Means परिणामों का उपयोग प्रारंभिक बिंदु के रूप में करें)।
+- **Initialization**: means, covariances और mixing coefficients के लिए initial guesses से शुरुआत करें (या starting point के रूप में K-Means results का उपयोग करें)।
 
-- **E-step (Expectation)**: वर्तमान पैरामीटर के आधार पर, प्रत्येक बिंदु के लिए प्रत्येक क्लस्टर की जिम्मेदारी की गणना करें: मूल रूप से `r_nk = P(z_k | x_n)` जहां z_k वह छिपा हुआ चर है जो बिंदु x_n के लिए क्लस्टर सदस्यता को इंगित करता है। यह बेयस के प्रमेय का उपयोग करके किया जाता है, जहां हम वर्तमान पैरामीटर के आधार पर प्रत्येक बिंदु के लिए प्रत्येक क्लस्टर में शामिल होने की पूर्वानुमानित संभावना की गणना करते हैं। जिम्मेदारियों की गणना इस प्रकार की जाती है:
+- **E-step (Expectation)**: वर्तमान parameters को देखते हुए, प्रत्येक point के लिए प्रत्येक cluster की responsibility compute करें: मूल रूप से `r_nk = P(z_k | x_n)`, जहाँ z_k वह latent variable है जो point x_n की cluster membership दर्शाता है। यह Bayes' theorem का उपयोग करके किया जाता है, जिसमें वर्तमान parameters के आधार पर प्रत्येक point के प्रत्येक cluster से संबंधित होने की posterior probability compute की जाती है। Responsibilities इस प्रकार compute की जाती हैं:
 ```math
 r_{nk} = \frac{\pi_k \mathcal{N}(x_n | \mu_k, \Sigma_k)}{\sum_{j=1}^{K} \pi_j \mathcal{N}(x_n | \mu_j, \Sigma_j)}
 ```
-जहां:
-- \( \pi_k \) क्लस्टर k के लिए मिश्रण गुणांक है (क्लस्टर k की पूर्व संभावना),
-- \( \mathcal{N}(x_n | \mu_k, \Sigma_k) \) बिंदु \( x_n \) के लिए Gaussian संभावना घनत्व फ़ंक्शन है जो औसत \( \mu_k \) और सहवर्तन \( \Sigma_k \) को दिया गया है।
+जहाँ:
+- \( \pi_k \) cluster k का mixing coefficient (cluster k की prior probability) है,
+- \( \mathcal{N}(x_n | \mu_k, \Sigma_k) \) mean \( \mu_k \) और covariance \( \Sigma_k \) के आधार पर point \( x_n \) का Gaussian probability density function है।
 
-- **M-step (Maximization)**: E-step में गणना की गई जिम्मेदारियों का उपयोग करके पैरामीटर को अपडेट करें:
-- प्रत्येक औसत μ_k को बिंदुओं के भारित औसत के रूप में अपडेट करें, जहां वजन जिम्मेदारियाँ हैं।
-- प्रत्येक सहवर्तन Σ_k को क्लस्टर k के लिए असाइन किए गए बिंदुओं के भारित सहवर्तन के रूप में अपडेट करें।
-- मिश्रण गुणांक π_k को क्लस्टर k के लिए औसत जिम्मेदारी के रूप में अपडेट करें।
+- **M-step (Maximization)**: E-step में compute की गई responsibilities का उपयोग करके parameters update करें:
+- प्रत्येक mean μ_k को points के weighted average के रूप में update करें, जहाँ weights responsibilities हैं।
+- प्रत्येक covariance Σ_k को cluster k को assigned points के weighted covariance के रूप में update करें।
+- Mixing coefficients π_k को cluster k के लिए average responsibility के रूप में update करें।
 
-- **Iterate** E और M चरणों को तब तक दोहराएं जब तक कि संकुचन न हो (पैरामीटर स्थिर हो जाएं या संभावना में सुधार एक सीमा से नीचे हो)।
+- Convergence तक E और M steps को **Iterate** करें (जब parameters stabilize हो जाएँ या likelihood improvement किसी threshold से कम हो जाए)।
 
-परिणाम एक सेट Gaussian वितरणों का होता है जो सामूहिक रूप से समग्र डेटा वितरण को मॉडल करता है। हम प्रत्येक बिंदु को उच्चतम संभावना वाले Gaussian में असाइन करके क्लस्टर करने के लिए फिट किए गए GMM का उपयोग कर सकते हैं, या अनिश्चितता के लिए संभावनाओं को बनाए रख सकते हैं। कोई नए बिंदुओं की संभावना का मूल्यांकन भी कर सकता है यह देखने के लिए कि क्या वे मॉडल में फिट होते हैं (जो विसंगति पहचान के लिए उपयोगी है)।
+इसका परिणाम Gaussian distributions का एक ऐसा set होता है, जो सामूहिक रूप से पूरे data distribution को model करता है। Fitted GMM का उपयोग प्रत्येक point को highest probability वाले Gaussian को assign करके clustering के लिए किया जा सकता है, या uncertainty के लिए probabilities को बनाए रखा जा सकता है। नए points के likelihood का evaluation भी किया जा सकता है, ताकि यह देखा जा सके कि वे model के अनुरूप हैं या नहीं (जो anomaly detection के लिए उपयोगी है)।
 
 > [!TIP]
-> *साइबर सुरक्षा में उपयोग के मामले:* GMM का उपयोग विसंगति पहचान के लिए सामान्य डेटा के वितरण को मॉडल करने के लिए किया जा सकता है: जो भी बिंदु सीखे गए मिश्रण के तहत बहुत कम संभावना के साथ है, उसे विसंगति के रूप में चिह्नित किया जाता है। उदाहरण के लिए, आप वैध नेटवर्क ट्रैफ़िक विशेषताओं पर GMM को प्रशिक्षित कर सकते हैं; एक हमलावर कनेक्शन जो किसी भी सीखे गए क्लस्टर के समान नहीं है, उसकी संभावना कम होगी। GMM का उपयोग उन गतिविधियों को क्लस्टर करने के लिए भी किया जाता है जहां क्लस्टर के आकार अलग-अलग हो सकते हैं - जैसे, व्यवहार प्रोफाइल के आधार पर उपयोगकर्ताओं को समूहित करना, जहां प्रत्येक प्रोफाइल की विशेषताएँ Gaussian जैसी हो सकती हैं लेकिन अपनी स्वयं की विविधता संरचना के साथ। एक और परिदृश्य: फ़िशिंग पहचान में, वैध ईमेल विशेषताएँ एक Gaussian क्लस्टर बना सकती हैं, ज्ञात फ़िशिंग एक और, और नए फ़िशिंग अभियानों को या तो एक अलग Gaussian के रूप में या मौजूदा मिश्रण के सापेक्ष कम संभावना वाले बिंदुओं के रूप में दिखा सकते हैं।
+> *cybersecurity में उपयोग:* GMM का उपयोग normal data के distribution को model करके anomaly detection के लिए किया जा सकता है: learned mixture के अंतर्गत बहुत कम probability वाले किसी भी point को anomaly के रूप में flag किया जाता है। उदाहरण के लिए, आप legitimate network traffic features पर GMM train कर सकते हैं; ऐसा attack connection जो किसी भी learned cluster से resemble नहीं करता, उसका likelihood कम होगा। GMMs का उपयोग ऐसी activities को cluster करने के लिए भी किया जाता है जिनके clusters के shapes अलग-अलग हो सकते हैं – जैसे behavior profiles के आधार पर users को group करना, जहाँ प्रत्येक profile के features Gaussian-like हो सकते हैं, लेकिन उनकी variance structure अलग हो सकती है। एक अन्य scenario phishing detection है: legitimate email features एक Gaussian cluster, known phishing दूसरा cluster बना सकते हैं, और नए phishing campaigns या तो एक separate Gaussian के रूप में दिखाई दे सकते हैं या existing mixture की तुलना में low likelihood points के रूप में।
 
 #### Assumptions and Limitations
 
-GMM K-Means का एक सामान्यीकरण है जो सहवर्तन को शामिल करता है, इसलिए क्लस्टर अंडाकार (सिर्फ गोलाकार नहीं) हो सकते हैं। यह विभिन्न आकारों और आकृतियों के क्लस्टरों को संभालता है यदि सहवर्तन पूर्ण है। नरम क्लस्टरिंग एक लाभ है जब क्लस्टर सीमाएँ धुंधली होती हैं - जैसे, साइबर सुरक्षा में, एक घटना में कई हमले के प्रकारों के लक्षण हो सकते हैं; GMM उस अनिश्चितता को संभावनाओं के साथ दर्शा सकता है। GMM डेटा का संभाव्य घनत्व अनुमान भी प्रदान करता है, जो आउटलेयर (सभी मिश्रण घटकों के तहत कम संभावना वाले बिंदु) का पता लगाने के लिए उपयोगी है।
+GMM K-Means का generalization है, जिसमें covariance शामिल होता है, इसलिए clusters ellipsoidal हो सकते हैं (केवल spherical नहीं)। यदि covariance full हो, तो यह अलग-अलग sizes और shapes वाले clusters को handle कर सकता है। जब cluster boundaries fuzzy हों, तब soft clustering एक advantage है – उदाहरण के लिए, cybersecurity में किसी event में कई attack types के traits हो सकते हैं; GMM probabilities के माध्यम से उस uncertainty को दर्शा सकता है। GMM data का probabilistic density estimation भी प्रदान करता है, जो outliers detect करने के लिए उपयोगी है (ऐसे points जिनका सभी mixture components के अंतर्गत likelihood कम हो)।
 
-दूसरी ओर, GMM को घटकों की संख्या K निर्दिष्ट करने की आवश्यकता होती है (हालांकि कोई इसे चुनने के लिए BIC/AIC जैसे मानदंडों का उपयोग कर सकता है)। EM कभी-कभी धीरे-धीरे या स्थानीय इष्टतम पर संकुचित हो सकता है, इसलिए प्रारंभिककरण महत्वपूर्ण है (अक्सर EM को कई बार चलाया जाता है)। यदि डेटा वास्तव में Gaussian के मिश्रण का पालन नहीं करता है, तो मॉडल खराब फिट हो सकता है। एक Gaussian के केवल एक आउटलेयर को कवर करने के लिए सिकुड़ने का भी जोखिम होता है (हालांकि नियमितीकरण या न्यूनतम सहवर्तन सीमाएँ इसे कम कर सकती हैं)।
+दूसरी ओर, GMM में components की संख्या K specify करना आवश्यक है (हालाँकि इसे चुनने के लिए BIC/AIC जैसे criteria का उपयोग किया जा सकता है)। EM कभी-कभी धीरे converge कर सकता है या local optimum तक पहुँच सकता है, इसलिए initialization महत्वपूर्ण है (अक्सर EM को कई बार run किया जाता है)। यदि data वास्तव में Gaussian mixture का पालन नहीं करता, तो model का fit खराब हो सकता है। एक Gaussian के केवल किसी outlier को cover करने के लिए shrink होने का risk भी रहता है (हालाँकि regularization या minimum covariance bounds इसे कम कर सकते हैं)।
+
 
 <details>
 <summary>Example --  Soft Clustering & Anomaly Scores
@@ -284,28 +286,29 @@ log_likelihood = gmm.score_samples(sample_attack)
 print("Cluster membership probabilities for sample attack:", probs)
 print("Log-likelihood of sample attack under GMM:", log_likelihood)
 ```
-इस कोड में, हम सामान्य ट्रैफ़िक पर 3 गॉसियन के साथ एक GMM को प्रशिक्षित करते हैं (मान लेते हैं कि हमें वैध ट्रैफ़िक के 3 प्रोफाइल पता हैं)। प्रिंट की गई औसत और सहवर्तन इन क्लस्टरों का वर्णन करती हैं (उदाहरण के लिए, एक औसत [50,500] के आसपास हो सकता है जो एक क्लस्टर के केंद्र के लिए है, आदि)। फिर हम एक संदिग्ध कनेक्शन [duration=200, bytes=800] का परीक्षण करते हैं। predict_proba इस बिंदु के 3 क्लस्टरों में से प्रत्येक से संबंधित होने की संभावना देता है - हम उम्मीद करते हैं कि ये संभावनाएँ बहुत कम या अत्यधिक विकृत होंगी क्योंकि [200,800] सामान्य क्लस्टरों से बहुत दूर है। कुल score_samples (लॉग-लाइकलिहुड) प्रिंट किया जाता है; एक बहुत कम मान इंगित करता है कि बिंदु मॉडल में अच्छी तरह से फिट नहीं होता है, इसे एक विसंगति के रूप में चिह्नित करता है। प्रैक्टिस में, कोई लॉग-लाइकलिहुड (या अधिकतम संभावना) पर एक थ्रेशोल्ड सेट कर सकता है यह तय करने के लिए कि क्या एक बिंदु पर्याप्त रूप से असंभावित है कि इसे दुर्भावनापूर्ण माना जाए। इस प्रकार GMM विसंगति पहचान करने का एक सिद्ध तरीका प्रदान करता है और यह भी नरम क्लस्टर प्रदान करता है जो अनिश्चितता को स्वीकार करते हैं।
+इस code में, हम normal traffic पर 3 Gaussians वाला एक GMM train करते हैं (यह मानते हुए कि हमें legitimate traffic के 3 profiles पता हैं)। Printed means और covariances इन clusters का वर्णन करते हैं (उदाहरण के लिए, एक mean लगभग [50,500] हो सकता है, जो किसी cluster के center को दर्शाता है)। इसके बाद हम एक suspicious connection [duration=200, bytes=800] को test करते हैं। predict_proba इस point के प्रत्येक 3 clusters से संबंधित होने की probability देता है – हम उम्मीद करेंगे कि ये probabilities बहुत कम या अत्यधिक skewed होंगी, क्योंकि [200,800] normal clusters से काफी दूर है। Overall score_samples (log-likelihood) print किया जाता है; बहुत कम value दर्शाती है कि point model में अच्छी तरह fit नहीं होता, इसलिए इसे anomaly के रूप में flag किया जाता है। व्यवहार में, यह तय करने के लिए log-likelihood (या max probability) पर threshold सेट किया जा सकता है कि कोई point malicious माने जाने के लिए पर्याप्त रूप से unlikely है या नहीं। इसलिए GMM anomaly detection का एक principled तरीका प्रदान करता है और साथ ही soft clusters भी देता है, जो uncertainty को स्वीकार करते हैं।
+</details>
 
 ### Isolation Forest
 
-**Isolation Forest** एक एंसेंबल विसंगति पहचान एल्गोरिदम है जो बिंदुओं को यादृच्छिक रूप से अलग करने के विचार पर आधारित है। सिद्धांत यह है कि विसंगतियाँ कम और भिन्न होती हैं, इसलिए उन्हें सामान्य बिंदुओं की तुलना में अलग करना आसान होता है। एक Isolation Forest कई बाइनरी आइसोलेशन ट्री (यादृच्छिक निर्णय वृक्ष) बनाता है जो डेटा को यादृच्छिक रूप से विभाजित करता है। एक वृक्ष में प्रत्येक नोड पर, एक यादृच्छिक विशेषता का चयन किया जाता है और उस विशेषता के डेटा के लिए न्यूनतम और अधिकतम के बीच एक यादृच्छिक विभाजन मान चुना जाता है। यह विभाजन डेटा को दो शाखाओं में विभाजित करता है। वृक्ष तब तक बढ़ता है जब तक प्रत्येक बिंदु अपने स्वयं के पत्ते में अलग नहीं हो जाता या अधिकतम वृक्ष ऊँचाई तक नहीं पहुँच जाता।
+**Isolation Forest** randomly points को isolate करने के विचार पर आधारित एक ensemble anomaly detection algorithm है। इसका principle यह है कि anomalies कम संख्या में और अलग-अलग होते हैं, इसलिए उन्हें normal points की तुलना में isolate करना आसान होता है। Isolation Forest कई binary isolation trees (random decision trees) बनाता है, जो data को randomly partition करते हैं। प्रत्येक tree के node पर, एक random feature select किया जाता है और उस node के data में उस feature के min और max के बीच एक random split value चुनी जाती है। यह split data को दो branches में विभाजित करता है। Tree तब तक grow किया जाता है, जब तक प्रत्येक point अपने अलग leaf में isolate न हो जाए या maximum tree height तक न पहुंच जाए।
 
-विसंगति पहचान इन यादृच्छिक वृक्षों में प्रत्येक बिंदु की पथ लंबाई को देखकर की जाती है - बिंदु को अलग करने के लिए आवश्यक विभाजनों की संख्या। सहज रूप से, विसंगतियाँ (आउटलेयर) जल्दी अलग होने की प्रवृत्ति रखती हैं क्योंकि एक यादृच्छिक विभाजन एक आउटलेयर (जो एक विरल क्षेत्र में होता है) को सामान्य बिंदु की तुलना में अलग करने की अधिक संभावना होती है जो एक घने क्लस्टर में होता है। Isolation Forest सभी वृक्षों के औसत पथ लंबाई से एक विसंगति स्कोर की गणना करता है: छोटी औसत पथ → अधिक विसंगति। स्कोर आमतौर पर [0,1] पर सामान्यीकृत होते हैं जहाँ 1 का अर्थ है बहुत संभावित विसंगति।
+Anomaly detection इन random trees में प्रत्येक point की path length देखकर किया जाता है – अर्थात point को isolate करने के लिए आवश्यक splits की संख्या। Intuitively, anomalies (outliers) जल्दी isolate हो जाते हैं, क्योंकि random split के लिए sparse region में स्थित outlier को अलग करना dense cluster में स्थित normal point की तुलना में अधिक संभावित होता है। Isolation Forest सभी trees में average path length से anomaly score compute करता है: छोटी average path → अधिक anomalous। Scores आमतौर पर [0,1] में normalized होते हैं, जहां 1 का अर्थ है कि anomaly होने की बहुत अधिक संभावना है।
 
 > [!TIP]
-> *साइबर सुरक्षा में उपयोग के मामले:* Isolation Forests का सफलतापूर्वक उपयोग घुसपैठ पहचान और धोखाधड़ी पहचान में किया गया है। उदाहरण के लिए, नेटवर्क ट्रैफ़िक लॉग पर एक Isolation Forest को प्रशिक्षित करें जिसमें ज्यादातर सामान्य व्यवहार हो; वन अजीब ट्रैफ़िक (जैसे एक IP जो एक अनसुने पोर्ट का उपयोग करता है या एक असामान्य पैकेट आकार पैटर्न) के लिए छोटे पथ उत्पन्न करेगा, इसे निरीक्षण के लिए चिह्नित करेगा। क्योंकि इसे लेबल किए गए हमलों की आवश्यकता नहीं होती है, यह अज्ञात हमले के प्रकारों का पता लगाने के लिए उपयुक्त है। इसे उपयोगकर्ता लॉगिन डेटा पर भी तैनात किया जा सकता है ताकि खाता अधिग्रहण का पता लगाया जा सके (असामान्य लॉगिन समय या स्थान जल्दी अलग हो जाते हैं)। एक उपयोग के मामले में, एक Isolation Forest एक उद्यम की सुरक्षा कर सकता है प्रणाली मैट्रिक्स की निगरानी करके और जब मैट्रिक्स (CPU, नेटवर्क, फ़ाइल परिवर्तनों) का एक संयोजन ऐतिहासिक पैटर्न से बहुत अलग दिखता है (छोटे आइसोलेशन पथ) तो एक अलर्ट उत्पन्न करता है।
+> *cybersecurity में Use cases:* Isolation Forests का intrusion detection और fraud detection में सफलतापूर्वक उपयोग किया गया है। उदाहरण के लिए, ऐसे network traffic logs पर Isolation Forest train करें जिनमें अधिकतर normal behavior हो; forest odd traffic (जैसे ऐसा IP जो किसी unheard-of port का उपयोग करता हो या packet size का unusual pattern दिखाता हो) के लिए short paths बनाएगा और उसे inspection के लिए flag करेगा। क्योंकि इसके लिए labeled attacks की आवश्यकता नहीं होती, यह unknown attack types का पता लगाने के लिए उपयुक्त है। इसे user login data पर भी deploy किया जा सकता है, ताकि account takeovers का पता लगाया जा सके (anomalous login times या locations जल्दी isolate हो जाते हैं)। एक use-case में, Isolation Forest system metrics को monitor करके enterprise की सुरक्षा कर सकता है और तब alert generate कर सकता है जब metrics का कोई combination (CPU, network, file changes) historical patterns से बहुत अलग दिखे (short isolation paths)।
 
 #### Assumptions and Limitations
 
-**Advantages**: Isolation Forest को वितरण के अनुमान की आवश्यकता नहीं होती है; यह सीधे अलगाव को लक्षित करता है। यह उच्च-आयामी डेटा और बड़े डेटा सेट पर कुशल है (वन बनाने के लिए रैखिक जटिलता $O(n\log n)$) क्योंकि प्रत्येक वृक्ष केवल विशेषताओं और विभाजनों के एक उपसमुच्चय के साथ बिंदुओं को अलग करता है। यह संख्यात्मक विशेषताओं को अच्छी तरह से संभालने की प्रवृत्ति रखता है और यह दूरी-आधारित विधियों की तुलना में तेज हो सकता है जो $O(n^2)$ हो सकती हैं। यह स्वचालित रूप से एक विसंगति स्कोर भी देता है, इसलिए आप अलर्ट के लिए एक थ्रेशोल्ड सेट कर सकते हैं (या अपेक्षित विसंगति अंश के आधार पर स्वचालित रूप से कटऑफ तय करने के लिए एक संदूषण पैरामीटर का उपयोग कर सकते हैं)।
+**Advantages**: Isolation Forest को distribution assumption की आवश्यकता नहीं होती; यह सीधे isolation को target करता है। यह high-dimensional data और large datasets पर efficient है (forest बनाने के लिए linear complexity $O(n\log n)$), क्योंकि प्रत्येक tree points को केवल features के एक subset और splits का उपयोग करके isolate करता है। यह numerical features को अच्छी तरह handle करता है और distance-based methods की तुलना में faster हो सकता है, जिनकी complexity $O(n^2)$ हो सकती है। यह अपने-आप anomaly score भी देता है, इसलिए alerts के लिए threshold सेट किया जा सकता है (या expected anomaly fraction के आधार पर cutoff automatically तय करने के लिए contamination parameter का उपयोग किया जा सकता है)।
 
-**Limitations**: इसकी यादृच्छिक प्रकृति के कारण, परिणामों में चलनों के बीच थोड़ी भिन्नता हो सकती है (हालांकि पर्याप्त वृक्षों के साथ यह मामूली है)। यदि डेटा में बहुत सारी अप्रासंगिक विशेषताएँ हैं या यदि विसंगतियाँ किसी विशेषता में मजबूत रूप से भिन्न नहीं होती हैं, तो अलगाव प्रभावी नहीं हो सकता है (यादृच्छिक विभाजन सामान्य बिंदुओं को संयोग से अलग कर सकते हैं - हालाँकि कई वृक्षों का औसत इसको कम करता है)। इसके अलावा, Isolation Forest सामान्यतः मानता है कि विसंगतियाँ एक छोटी अल्पसंख्यक हैं (जो आमतौर पर साइबर सुरक्षा परिदृश्यों में सच है)।
+**Limitations**: इसकी random nature के कारण, अलग-अलग runs में results थोड़े बदल सकते हैं (हालांकि पर्याप्त trees होने पर यह अंतर मामूली होता है)। यदि data में बहुत-से irrelevant features हों या anomalies किसी भी feature में स्पष्ट रूप से अलग न दिखें, तो isolation प्रभावी नहीं हो सकता (random splits संयोग से normal points को isolate कर सकते हैं – हालांकि कई trees का averaging इस प्रभाव को कम करता है)। इसके अलावा, Isolation Forest आमतौर पर यह assume करता है कि anomalies एक छोटा minority group हैं (जो cybersecurity scenarios में आमतौर पर सही होता है)।
 
 <details>
-<summary>Example --  Detecting Outliers in Network Logs
+<summary>Example --  Network Logs में Outliers का पता लगाना
 </summary>
 
-हम पहले के परीक्षण डेटा सेट (जिसमें सामान्य और कुछ हमले के बिंदु शामिल हैं) का उपयोग करेंगे और देखेंगे कि क्या एक Isolation Forest हमलों को अलग कर सकता है। हम मान लेंगे कि हम डेटा के ~15% को विसंगतिपूर्ण मानते हैं (प्रदर्शन के लिए)।
+हम पहले के test dataset (जिसमें normal और कुछ attack points शामिल हैं) का उपयोग करेंगे और यह देखने के लिए Isolation Forest चलाएंगे कि क्या यह attacks को अलग कर सकता है। हम मानेंगे कि data के लगभग 15% हिस्से के anomalous होने की अपेक्षा है (demonstration के लिए)।
 ```python
 from sklearn.ensemble import IsolationForest
 
@@ -321,36 +324,38 @@ print("Isolation Forest predicted labels (first 20):", preds[:20])
 print("Number of anomalies detected:", np.sum(preds == -1))
 print("Example anomaly scores (lower means more anomalous):", anomaly_scores[:5])
 ```
-इस कोड में, हम `IsolationForest` को 100 पेड़ों के साथ स्थापित करते हैं और `contamination=0.15` सेट करते हैं (जिसका अर्थ है कि हम लगभग 15% विसंगतियों की अपेक्षा करते हैं; मॉडल अपने स्कोर थ्रेशोल्ड को इस तरह सेट करेगा कि ~15% बिंदुओं को चिह्नित किया जाए)। हम इसे `X_test_if` पर फिट करते हैं जिसमें सामान्य और हमले के बिंदुओं का मिश्रण होता है (नोट: सामान्यतः आप प्रशिक्षण डेटा पर फिट करते हैं और फिर नए डेटा पर भविष्यवाणी करते हैं, लेकिन यहाँ उदाहरण के लिए हम उसी सेट पर फिट और भविष्यवाणी करते हैं ताकि सीधे परिणाम देख सकें)।
+इस code में, हम 100 trees के साथ `IsolationForest` को instantiate करते हैं और `contamination=0.15` सेट करते हैं (अर्थात हमें लगभग 15% anomalies की अपेक्षा है; model अपना score threshold इस तरह सेट करेगा कि लगभग 15% points flag हों)। हम इसे `X_test_if` पर fit करते हैं, जिसमें normal और attack points का मिश्रण है (ध्यान दें: सामान्यतः आप training data पर fit करते और फिर नए data पर predict का उपयोग करते, लेकिन यहां illustration के लिए हम सीधे परिणाम देखने हेतु उसी set पर fit और predict कर रहे हैं)।
 
-आउटपुट पहले 20 बिंदुओं के लिए पूर्वानुमानित लेबल दिखाता है (जहाँ -1 विसंगति को इंगित करता है)। हम यह भी प्रिंट करते हैं कि कुल मिलाकर कितनी विसंगतियाँ पाई गईं और कुछ उदाहरण विसंगति स्कोर। हम अपेक्षा करते हैं कि 120 बिंदुओं में से लगभग 18 को -1 के रूप में लेबल किया जाएगा (क्योंकि संदूषण 15% था)। यदि हमारे 20 हमले के नमूने वास्तव में सबसे अधिक बाहरी हैं, तो उनमें से अधिकांश उन -1 पूर्वानुमानों में दिखाई देने चाहिए। विसंगति स्कोर (Isolation Forest का निर्णय कार्य) सामान्य बिंदुओं के लिए अधिक और विसंगतियों के लिए कम (अधिक नकारात्मक) होता है - हम कुछ मान प्रिंट करते हैं ताकि विभाजन को देख सकें। व्यावहारिक रूप से, कोई डेटा को स्कोर के अनुसार क्रमबद्ध कर सकता है ताकि शीर्ष बाहरी बिंदुओं को देखा जा सके और उनकी जांच की जा सके। इस प्रकार, Isolation Forest बड़े बिना लेबल वाले सुरक्षा डेटा के माध्यम से छानने और मानव विश्लेषण या आगे की स्वचालित जांच के लिए सबसे असामान्य उदाहरणों को चुनने का एक कुशल तरीका प्रदान करता है।
+आउटपुट पहले 20 points के predicted labels दिखाता है (जहां -1 anomaly को दर्शाता है)। हम कुल कितनी anomalies detect हुईं, यह भी print करते हैं और कुछ example anomaly scores भी दिखाते हैं। हम अपेक्षा करेंगे कि 120 points में से लगभग 18 को -1 label मिले (क्योंकि contamination 15% था)। यदि हमारे 20 attack samples वास्तव में सबसे अधिक outlying हैं, तो उनमें से अधिकांश इन -1 predictions में दिखाई देने चाहिए। Anomaly score (Isolation Forest का decision function) normal points के लिए अधिक और anomalies के लिए कम (अधिक negative) होता है - separation देखने के लिए हम कुछ values print करते हैं। व्यवहार में, top outliers देखने और उनकी जांच करने के लिए data को score के आधार पर sort किया जा सकता है। इस प्रकार, Isolation Forest बड़े unlabeled security data को छानने और human analysis या आगे की automated scrutiny के लिए सबसे irregular instances चुनने का एक efficient तरीका प्रदान करता है।
+</details>
+
 
 ### t-SNE (t-Distributed Stochastic Neighbor Embedding)
 
-**t-SNE** एक गैर-रेखीय आयाम घटाने की तकनीक है जो विशेष रूप से उच्च-आयामी डेटा को 2 या 3 आयामों में दृश्य बनाने के लिए डिज़ाइन की गई है। यह डेटा बिंदुओं के बीच समानताओं को संयुक्त संभाव्यता वितरण में परिवर्तित करता है और निम्न-आयामी प्रक्षिप्ति में स्थानीय पड़ोसों की संरचना को बनाए रखने की कोशिश करता है। सरल शब्दों में, t-SNE बिंदुओं को (मान लीजिए) 2D में इस तरह रखता है कि समान बिंदु (मूल स्थान में) एक साथ निकटता में आते हैं और असमान बिंदु उच्च संभाव्यता के साथ दूर होते हैं।
+**t-SNE** एक nonlinear dimensionality reduction technique है, जिसे विशेष रूप से high-dimensional data को 2 या 3 dimensions में visualize करने के लिए design किया गया है। यह data points के बीच की similarities को joint probability distributions में बदलता है और lower-dimensional projection में local neighborhoods की structure को preserve करने का प्रयास करता है। सरल शब्दों में, t-SNE points को (मान लें) 2D में इस तरह रखता है कि original space में similar points high probability के साथ एक-दूसरे के करीब और dissimilar points एक-दूसरे से दूर रहें।
 
-एल्गोरिदम के दो मुख्य चरण हैं:
+Algorithm के तीन मुख्य stages हैं:
 
-1. **उच्च-आयामी स्थान में जोड़ीदार संबंधों की गणना करें:** प्रत्येक बिंदु के जोड़े के लिए, t-SNE एक संभावना की गणना करता है कि कोई उस जोड़े को पड़ोसी के रूप में चुनेगा (यह प्रत्येक बिंदु पर एक गॉसियन वितरण को केंद्रित करके और दूरी को मापकर किया जाता है - पेर्प्लेक्सिटी पैरामीटर प्रभावी पड़ोसियों की संख्या को प्रभावित करता है)।
-2. **निम्न-आयामी (जैसे 2D) स्थान में जोड़ीदार संबंधों की गणना करें:** प्रारंभ में, बिंदुओं को 2D में यादृच्छिक रूप से रखा जाता है। t-SNE इस मानचित्र में दूरी के लिए एक समान संभावना को परिभाषित करता है (एक स्टूडेंट t-वितरण कर्नेल का उपयोग करके, जिसमें गॉसियन की तुलना में भारी पूंछ होती है ताकि दूर के बिंदुओं को अधिक स्वतंत्रता मिल सके)।
-3. **ग्रेडिएंट डिसेंट:** t-SNE फिर उच्च-D संबंध वितरण और निम्न-D के बीच Kullback–Leibler (KL) विभाजन को न्यूनतम करने के लिए 2D में बिंदुओं को क्रमिक रूप से स्थानांतरित करता है। इससे 2D व्यवस्था उच्च-D संरचना को यथासंभव प्रतिबिंबित करती है - जो बिंदु मूल स्थान में निकट थे वे एक-दूसरे को आकर्षित करेंगे, और जो दूर हैं वे एक-दूसरे को दूर करेंगे, जब तक कि संतुलन नहीं पाया जाता।
+1. **Compute pairwise affinities in high-dimensional space:** प्रत्येक pair of points के लिए, t-SNE एक probability compute करता है कि कोई उस pair को neighbors के रूप में चुनेगा (यह प्रत्येक point पर Gaussian distribution को center करके और distances को measure करके किया जाता है - perplexity parameter considered neighbors की effective संख्या को प्रभावित करता है)।
+2. **Compute pairwise affinities in low-dimensional (e.g. 2D) space:** शुरुआत में points को 2D में randomly place किया जाता है। t-SNE इस map में distances के लिए एक similar probability define करता है (Student t-distribution kernel का उपयोग करके, जिसकी tails Gaussian से heavier होती हैं ताकि distant points को अधिक freedom मिल सके)।
+3. **Gradient Descent:** इसके बाद t-SNE high-D affinity distribution और low-D distribution के बीच Kullback–Leibler (KL) divergence को minimize करने के लिए 2D में points को iteratively move करता है। इससे 2D arrangement high-D structure को यथासंभव reflect करता है - original space में close points एक-दूसरे को attract करेंगे और दूर points repel करेंगे, जब तक कि एक balance न मिल जाए।
 
-परिणाम अक्सर एक दृश्यात्मक रूप से अर्थपूर्ण स्कैटर प्लॉट होता है जहाँ डेटा में समूह स्पष्ट हो जाते हैं।
+परिणाम अक्सर एक visually meaningful scatter plot होता है, जिसमें data के clusters स्पष्ट दिखाई देने लगते हैं।
 
 > [!TIP]
-> *साइबर सुरक्षा में उपयोग के मामले:* t-SNE अक्सर **मानव विश्लेषण के लिए उच्च-आयामी सुरक्षा डेटा को दृश्य बनाने के लिए** उपयोग किया जाता है। उदाहरण के लिए, एक सुरक्षा संचालन केंद्र में, विश्लेषक एक घटना डेटा सेट ले सकते हैं जिसमें दर्जनों विशेषताएँ (पोर्ट नंबर, आवृत्तियाँ, बाइट गिनती, आदि) होती हैं और t-SNE का उपयोग करके 2D प्लॉट उत्पन्न कर सकते हैं। हमले इस प्लॉट में अपने स्वयं के समूह बना सकते हैं या सामान्य डेटा से अलग हो सकते हैं, जिससे उन्हें पहचानना आसान हो जाता है। इसे मैलवेयर डेटा सेट पर लागू किया गया है ताकि मैलवेयर परिवारों के समूहों को देखा जा सके या नेटवर्क घुसपैठ डेटा पर जहाँ विभिन्न हमले के प्रकार स्पष्ट रूप से समूहित होते हैं, आगे की जांच को मार्गदर्शन करते हैं। मूलतः, t-SNE एक ऐसा तरीका प्रदान करता है जिससे साइबर डेटा में संरचना देखी जा सके जो अन्यथा अस्पष्ट होती।
+> *Cybersecurity में use cases:* t-SNE का उपयोग अक्सर **human analysis के लिए high-dimensional security data को visualize करने** में किया जाता है। उदाहरण के लिए, security operations center में analysts dozens of features (port numbers, frequencies, byte counts आदि) वाले event dataset को ले सकते हैं और t-SNE का उपयोग करके 2D plot बना सकते हैं। इस plot में attacks अपने अलग clusters बना सकते हैं या normal data से अलग हो सकते हैं, जिससे उन्हें identify करना आसान हो जाता है। इसका उपयोग malware datasets पर malware families के groupings देखने के लिए या network intrusion data पर किया गया है, जहां different attack types अलग-अलग clusters बनाते हैं और आगे की investigation को guide करते हैं। मूल रूप से, t-SNE cyber data में ऐसी structure देखने का तरीका प्रदान करता है, जो अन्यथा समझना कठिन होता।
 
-#### धारणाएँ और सीमाएँ
+#### Assumptions and Limitations
 
-t-SNE पैटर्न की दृश्य खोज के लिए उत्कृष्ट है। यह समूहों, उप-समूहों, और विसंगतियों को प्रकट कर सकता है जो अन्य रेखीय विधियाँ (जैसे PCA) नहीं कर सकतीं। इसका उपयोग साइबर सुरक्षा अनुसंधान में जटिल डेटा जैसे मैलवेयर व्यवहार प्रोफाइल या नेटवर्क ट्रैफ़िक पैटर्न को दृश्य बनाने के लिए किया गया है। क्योंकि यह स्थानीय संरचना को बनाए रखता है, यह प्राकृतिक समूहों को दिखाने में अच्छा है।
+t-SNE patterns की visual discovery के लिए बहुत अच्छा है। यह clusters, subclusters और outliers को reveal कर सकता है, जिन्हें अन्य linear methods (जैसे PCA) शायद न दिखा पाएं। इसका उपयोग cybersecurity research में malware behavior profiles या network traffic patterns जैसे complex data को visualize करने के लिए किया गया है। क्योंकि यह local structure को preserve करता है, इसलिए natural groupings दिखाने में यह उपयोगी है।
 
-हालांकि, t-SNE गणनात्मक रूप से भारी है (लगभग $O(n^2)$) इसलिए यह बहुत बड़े डेटा सेट के लिए सैंपलिंग की आवश्यकता कर सकता है। इसमें हाइपरपैरामीटर (पेर्प्लेक्सिटी, लर्निंग रेट, पुनरावृत्तियाँ) भी होते हैं जो आउटपुट को प्रभावित कर सकते हैं - उदाहरण के लिए, विभिन्न पेर्प्लेक्सिटी मान विभिन्न पैमानों पर समूहों को प्रकट कर सकते हैं। t-SNE प्लॉट कभी-कभी गलत तरीके से व्याख्यायित किए जा सकते हैं - मानचित्र में दूरी वैश्विक रूप से सीधे अर्थपूर्ण नहीं होती (यह स्थानीय पड़ोस पर ध्यान केंद्रित करता है, कभी-कभी समूह कृत्रिम रूप से अच्छी तरह से अलग दिखाई दे सकते हैं)। इसके अलावा, t-SNE मुख्य रूप से दृश्य के लिए है; यह नए डेटा बिंदुओं को बिना पुनर्गणना के प्रक्षिप्त करने का सीधा तरीका प्रदान नहीं करता है, और इसे भविष्यवाणी मॉडलिंग के लिए पूर्व-प्रसंस्करण के रूप में उपयोग करने के लिए नहीं बनाया गया है (UMAP एक विकल्प है जो कुछ इन मुद्दों को तेज गति के साथ संबोधित करता है)।
+हालांकि, t-SNE computationally अधिक heavy है (लगभग $O(n^2)$), इसलिए बहुत बड़े datasets के लिए sampling की आवश्यकता हो सकती है। इसमें hyperparameters (perplexity, learning rate, iterations) भी होते हैं, जो output को प्रभावित कर सकते हैं - उदाहरण के लिए, अलग-अलग perplexity values अलग-अलग scales पर clusters दिखा सकती हैं। t-SNE plots का कभी-कभी गलत अर्थ निकाला जा सकता है - map में distances globally directly meaningful नहीं होते (यह local neighborhood पर focus करता है; कभी-कभी clusters artificially अच्छी तरह separated दिखाई दे सकते हैं)। इसके अलावा, t-SNE मुख्य रूप से visualization के लिए है; यह नए data points को recompute किए बिना project करने का straightforward तरीका प्रदान नहीं करता और predictive modeling के लिए preprocessing के रूप में उपयोग करने के लिए intended नहीं है (UMAP एक alternative है, जो faster speed के साथ इनमें से कुछ issues को address करता है)।
 
 <details>
-<summary>उदाहरण -- नेटवर्क कनेक्शनों का दृश्य बनाना
+<summary>Example -- Network Connections को Visualize करना
 </summary>
 
-हम t-SNE का उपयोग करके एक बहु-विशेषता डेटा सेट को 2D में घटित करेंगे। उदाहरण के लिए, चलिए पहले के 4D डेटा (जिसमें सामान्य ट्रैफ़िक के 3 प्राकृतिक समूह थे) को लेते हैं और कुछ विसंगति बिंदु जोड़ते हैं। फिर हम t-SNE चलाते हैं और (सैद्धांतिक रूप से) परिणामों का दृश्य बनाते हैं।
+हम t-SNE का उपयोग multi-feature dataset को 2D में reduce करने के लिए करेंगे। Illustration के लिए, पहले के 4D data (जिसमें normal traffic के 3 natural clusters थे) को लेते हैं और उसमें कुछ anomaly points जोड़ते हैं। इसके बाद हम t-SNE run करेंगे और (conceptually) results को visualize करेंगे।
 ```python
 # 1 ─────────────────────────────────────────────────────────────────────
 #    Create synthetic 4-D dataset
@@ -433,23 +438,24 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 ```
-यहाँ हमने अपने पिछले 4D सामान्य डेटासेट को कुछ चरम आउटलेयर के साथ मिलाया है (आउटलेयर में एक विशेषता ("अवधि") बहुत उच्च सेट की गई है, आदि, एक अजीब पैटर्न का अनुकरण करने के लिए)। हम 30 की सामान्य पेरीप्लेक्सिटी के साथ t-SNE चलाते हैं। आउटपुट data_2d का आकार (1505, 2) है। हम वास्तव में इस पाठ में प्लॉट नहीं करेंगे, लेकिन अगर हम करते, तो हम शायद 3 सामान्य क्लस्टरों के लिए तीन तंग क्लस्टर देखने की उम्मीद करते, और 5 आउटलेयर उन क्लस्टरों से दूर अलग बिंदुओं के रूप में दिखाई देंगे। एक इंटरएक्टिव वर्कफ़्लो में, हम बिंदुओं को उनके लेबल (सामान्य या कौन सा क्लस्टर, बनाम विसंगति) द्वारा रंगीन कर सकते हैं ताकि इस संरचना की पुष्टि की जा सके। लेबल के बिना भी, एक विश्लेषक उन 5 बिंदुओं को 2D प्लॉट पर खाली स्थान में बैठे हुए देख सकता है और उन्हें चिह्नित कर सकता है। यह दिखाता है कि t-SNE साइबरसिक्योरिटी डेटा में दृश्य विसंगति पहचान और क्लस्टर निरीक्षण के लिए एक शक्तिशाली सहायक हो सकता है, जो ऊपर दिए गए स्वचालित एल्गोरिदम को पूरा करता है।
+यहाँ हमने अपने पिछले 4D normal dataset को कुछ extreme outliers के साथ संयोजित किया है (इन outliers में एक feature (“duration”) को बहुत अधिक मान पर सेट किया गया है, आदि, ताकि एक असामान्य pattern का अनुकरण किया जा सके)। हम t-SNE को 30 की typical perplexity के साथ चलाते हैं। आउटपुट `data_2d` का shape (1505, 2) है। हम इस text में वास्तव में plot नहीं बनाएँगे, लेकिन यदि बनाते, तो हमें संभवतः 3 tight clusters दिखाई देते, जो 3 normal clusters के अनुरूप होते, और 5 outliers इन clusters से दूर isolated points के रूप में दिखाई देते। एक interactive workflow में, हम इस structure को verify करने के लिए points को उनके label (normal या कौन-सा cluster, बनाम anomaly) के आधार पर color कर सकते थे। Labels के बिना भी, कोई analyst 2D plot में empty space पर स्थित उन 5 points को देखकर उन्हें flag कर सकता है। यह दर्शाता है कि t-SNE cybersecurity data में visual anomaly detection और cluster inspection के लिए एक powerful aid हो सकता है और ऊपर दिए गए automated algorithms का complement बन सकता है।
 
 </details>
 
+
 ### HDBSCAN (Hierarchical Density-Based Spatial Clustering of Applications with Noise)
 
-**HDBSCAN** DBSCAN का एक विस्तार है जो एकल वैश्विक `eps` मान चुनने की आवश्यकता को समाप्त करता है और **विभिन्न घनत्व** के क्लस्टरों को पुनर्प्राप्त करने में सक्षम है, घनत्व-सम्बंधित घटकों की एक पदानुक्रम बनाकर और फिर उसे संकुचित करके। वनीला DBSCAN की तुलना में यह आमतौर पर
+**HDBSCAN**, DBSCAN का एक extension है, जो एक single global `eps` value चुनने की आवश्यकता को समाप्त करता है और density-connected components की hierarchy बनाकर और फिर उसे condense करके **different density** वाले clusters को recover कर सकता है। सामान्य DBSCAN की तुलना में यह आमतौर पर
 
-* अधिक सहज क्लस्टर निकालता है जब कुछ क्लस्टर घने होते हैं और अन्य विरल होते हैं,
-* केवल एक वास्तविक हाइपर-पैरामीटर (`min_cluster_size`) और एक समझदारी से डिफ़ॉल्ट होता है,
-* प्रत्येक बिंदु को एक क्लस्टर-मेंबरशिप *संभावना* और एक **आउटलेयर स्कोर** (`outlier_scores_`) देता है, जो खतरे-शिकार डैशबोर्ड के लिए अत्यंत उपयोगी है।
+* ऐसे अधिक intuitive clusters extract करता है, जहाँ कुछ clusters dense और अन्य sparse होते हैं,
+* इसमें केवल एक वास्तविक hyper-parameter (`min_cluster_size`) होता है और इसका default sensible होता है,
+* प्रत्येक point को cluster-membership *probability* और एक **outlier score** (`outlier_scores_`) देता है, जो threat-hunting dashboards के लिए बेहद उपयोगी है।<sup>[[1]](#references)</sup>
 
 > [!TIP]
-> *साइबरसिक्योरिटी में उपयोग के मामले:* HDBSCAN आधुनिक खतरे-शिकार पाइपलाइनों में बहुत लोकप्रिय है - आप इसे अक्सर व्यावसायिक XDR सूट के साथ भेजे गए नोटबुक-आधारित शिकार प्लेबुक में देखेंगे। एक व्यावहारिक नुस्खा HTTP बीकनिंग ट्रैफ़िक को IR के दौरान क्लस्टर करना है: उपयोगकर्ता-एजेंट, अंतराल और URI लंबाई अक्सर कई तंग समूहों का निर्माण करते हैं जो वैध सॉफ़्टवेयर अपडेटर्स के रूप में होते हैं जबकि C2 बीकन छोटे कम-घनत्व क्लस्टरों के रूप में या शुद्ध शोर के रूप में रहते हैं।
+> *Cybersecurity में use cases:* HDBSCAN modern threat-hunting pipelines में बहुत popular है - commercial XDR suites के साथ भेजे जाने वाले notebook-based hunting playbooks में यह अक्सर दिखाई देता है। एक practical recipe है कि IR के दौरान HTTP beaconing traffic को cluster किया जाए: user-agent, interval और URI length अक्सर legitimate software updaters के कई tight groups बनाते हैं, जबकि C2 beacons tiny low-density clusters या pure noise के रूप में बने रहते हैं।
 
 <details>
-<summary>उदाहरण – बीकनिंग C2 चैनलों को खोजना</summary>
+<summary>Example - Beaconing C2 channels ढूँढना</summary>
 ```python
 import pandas as pd
 from hdbscan import HDBSCAN
@@ -477,33 +483,33 @@ print("Suspect beacon count:", len(suspects))
 
 ---
 
-### मजबूती और सुरक्षा पर विचार – ज़हर देना और प्रतिकूल हमले (2023-2025)
+### Robustness और Security Considerations – Poisoning & Adversarial Attacks (2023-2025)
 
-हाल के काम ने दिखाया है कि **अवशिष्ट शिक्षार्थी सक्रिय हमलावरों के प्रति *प्रतिरक्षित* नहीं हैं**:
+हाल के कार्यों से पता चला है कि **unsupervised learners *active attackers* से immune नहीं होते**:
 
-* **असामान्यताओं के खिलाफ डेटा-ज़हर देना।**  चेन *et al.* (IEEE S&P 2024) ने प्रदर्शित किया कि 3% तैयार किए गए ट्रैफ़िक को जोड़ने से Isolation Forest और ECOD का निर्णय सीमा बदल सकती है, जिससे वास्तविक हमले सामान्य लगते हैं। लेखकों ने एक ओपन-सोर्स PoC (`udo-poison`) जारी किया जो स्वचालित रूप से ज़हर बिंदुओं का संश्लेषण करता है।
-* **क्लस्टरिंग मॉडलों में बैकडोरिंग।**  *BadCME* तकनीक (BlackHat EU 2023) एक छोटे ट्रिगर पैटर्न को स्थापित करती है; जब भी वह ट्रिगर प्रकट होता है, एक K-Means-आधारित डिटेक्टर चुपचाप घटना को "सौम्य" क्लस्टर के अंदर रखता है।
-* **DBSCAN/HDBSCAN से बचाव।**  KU Leuven से 2025 का एक शैक्षणिक प्री-प्रिंट दिखाता है कि एक हमलावर ऐसे बीकनिंग पैटर्न तैयार कर सकता है जो जानबूझकर घनत्व के अंतराल में गिरते हैं, प्रभावी रूप से *शोर* लेबल के अंदर छिपते हैं।
+* **Anomaly detectors के विरुद्ध Data-poisoning।** Chen *et al.* (IEEE S&P 2024) ने प्रदर्शित किया कि केवल 3 % crafted traffic जोड़ने से Isolation Forest और ECOD की decision boundary इस तरह बदल सकती है कि वास्तविक attacks सामान्य दिखाई देने लगें। Authors ने एक open-source PoC (`udo-poison`) जारी किया, जो poison points को automatically synthesise करता है।<sup>[[2]](#references)</sup>
+* **Clustering models में Backdooring।** *BadCME* technique (BlackHat EU 2023) एक छोटा trigger pattern implant करती है; जब भी वह trigger दिखाई देता है, K-Means-based detector चुपचाप event को एक “benign” cluster में रख देता है।
+* **DBSCAN/HDBSCAN की Evasion।** KU Leuven के एक 2025 academic pre-print ने दिखाया कि attacker ऐसे beaconing patterns बना सकता है जो जानबूझकर density gaps में चले जाते हैं और प्रभावी रूप से *noise* labels के भीतर छिप जाते हैं।
 
-जो उपाय लोकप्रिय हो रहे हैं:
+जो Mitigations तेजी से अपनाई जा रही हैं:
 
-1. **मॉडल स्वच्छता / TRIM।**  हर पुनः प्रशिक्षण युग से पहले, 1-2% उच्चतम-हानि बिंदुओं को त्यागें (छंटनी अधिकतम संभावना) ताकि ज़हर देना नाटकीय रूप से कठिन हो जाए।
-2. **सहमति एन्सेम्बलिंग।**  कई विषम डिटेक्टरों (जैसे, Isolation Forest + GMM + ECOD) को मिलाएं और यदि *कोई भी* मॉडल एक बिंदु को चिह्नित करता है तो एक चेतावनी उठाएं। अनुसंधान से पता चलता है कि इससे हमलावर की लागत >10× बढ़ जाती है।
-3. **क्लस्टरिंग के लिए दूरी-आधारित रक्षा।**  `k` विभिन्न यादृच्छिक बीजों के साथ क्लस्टर फिर से गणना करें और उन बिंदुओं को अनदेखा करें जो लगातार क्लस्टरों को बदलते हैं।
+1. **Model sanitisation / TRIM।** प्रत्येक retraining epoch से पहले, 1–2 % highest-loss points को discard करें (trimmed maximum likelihood), ताकि poisoning को काफी कठिन बनाया जा सके।
+2. **Consensus ensembling।** कई heterogeneous detectors (जैसे, Isolation Forest + GMM + ECOD) को combine करें और यदि *कोई भी* model किसी point को flag करे तो alert जारी करें। Research से संकेत मिलता है कि इससे attacker की लागत 10× से अधिक बढ़ जाती है।
+3. **Clustering के लिए Distance-based defence।** `k` अलग-अलग random seeds के साथ clusters को फिर से compute करें और उन points को ignore करें जो लगातार clusters बदलते रहते हैं।
 
 ---
 
-### आधुनिक ओपन-सोर्स उपकरण (2024-2025)
+### Modern Open-Source Tooling (2024-2025)
 
-* **PyOD 2.x** (मई 2024 में जारी) ने *ECOD*, *COPOD* और GPU-त्वरित *AutoFormer* डिटेक्टर जोड़े।  अब यह एक `benchmark` उप-आदेश के साथ आता है जो आपको **एक पंक्ति कोड** के साथ अपने डेटासेट पर 30+ एल्गोरिदम की तुलना करने की अनुमति देता है:
+* **PyOD 2.x** (May 2024 में released) ने *ECOD*, *COPOD* और GPU-accelerated *AutoFormer* detectors जोड़े। अब इसमें एक `benchmark` sub-command शामिल है, जो आपको **एक line of code** से अपने dataset पर 30+ algorithms की तुलना करने देता है:
 ```bash
 pyod benchmark --input logs.csv --label attack --n_jobs 8
 ```
-* **Anomalib v1.5** (फरवरी 2025) दृष्टि पर केंद्रित है लेकिन इसमें एक सामान्य **PatchCore** कार्यान्वयन भी है - स्क्रीनशॉट-आधारित फ़िशिंग पृष्ठ पहचान के लिए उपयोगी।
-* **scikit-learn 1.5** (नवंबर 2024) अंततः नए `cluster.HDBSCAN` रैपर के माध्यम से *HDBSCAN* के लिए `score_samples` को उजागर करता है, इसलिए आपको Python 3.12 पर होने पर बाहरी योगदान पैकेज की आवश्यकता नहीं है।
+* **Anomalib v1.5** (Feb 2025) मुख्यतः vision पर केंद्रित है, लेकिन इसमें एक generic **PatchCore** implementation भी है – screenshot-based phishing page detection के लिए उपयोगी।
+* **scikit-learn 1.5** (Nov 2024) अंततः नए `cluster.HDBSCAN` wrapper के माध्यम से *HDBSCAN* के लिए `score_samples` expose करता है, इसलिए Python 3.12 पर external contrib package की आवश्यकता नहीं रहती।
 
 <details>
-<summary>त्वरित PyOD उदाहरण – ECOD + Isolation Forest एन्सेम्बल</summary>
+<summary>त्वरित PyOD उदाहरण – ECOD + Isolation Forest ensemble</summary>
 ```python
 from pyod.models import ECOD, IForest
 from pyod.utils.data import generate_data, evaluate_print
@@ -524,8 +530,8 @@ evaluate_print("Ensemble", y_test, anomaly_scores)
 
 ## संदर्भ
 
-- [HDBSCAN – हाइरार्किकल डेंसिटी-आधारित क्लस्टरिंग](https://github.com/scikit-learn-contrib/hdbscan)
-- चेन, एक्स. *et al.* “अनसुपरवाइज्ड एनॉमली डिटेक्शन की डेटा पॉइज़निंग के प्रति संवेदनशीलता।” *IEEE सुरक्षा और गोपनीयता पर संगोष्ठी*, 2024.
+- [1] [HDBSCAN – पदानुक्रमित density-based clustering](https://github.com/scikit-learn-contrib/hdbscan)
+- [2] Chen, X. *et al.* “Data Poisoning के प्रति Unsupervised Anomaly Detection की Vulnerability।” *IEEE Symposium on Security and Privacy*, 2024.
 
 
 
