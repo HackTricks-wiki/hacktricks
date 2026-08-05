@@ -1,53 +1,57 @@
-# Enrolling Devices in Other Organisations
+# Upisivanje uređaja u druge organizacije
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro
+## Uvod
 
-Kao što je [**ranije komentarisano**](#what-is-mdm-mobile-device-management)**,** da bi se pokušalo registrovati uređaj u organizaciji **potreban je samo Serijski Broj koji pripada toj Organizaciji**. Kada je uređaj registrovan, nekoliko organizacija će instalirati osetljive podatke na novom uređaju: sertifikate, aplikacije, WiFi lozinke, VPN konfiguracije [i tako dalje](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Stoga, ovo može biti opasna tačka ulaza za napadače ako proces registracije nije pravilno zaštićen.
+Kao što je [**prethodno navedeno**](#what-is-mdm-mobile-device-management)**,** da bi se uređaj upisao u organizaciju, potreban je **samo Serial Number koji pripada toj organizaciji**. Kada se uređaj upiše, nekoliko organizacija će na novi uređaj instalirati osetljive podatke: sertifikate, aplikacije, WiFi lozinke, VPN konfiguracije [i tako dalje](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+Zbog toga ovo može predstavljati opasnu ulaznu tačku za napadače ako proces upisa nije pravilno zaštićen.
 
-**Sledeće je sažetak istraživanja [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Proverite ga za dodatne tehničke detalje!**
+**U nastavku je sažetak istraživanja [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Pogledajte ga za dodatne tehničke detalje!**<sup>[1]</sup>
 
-## Overview of DEP and MDM Binary Analysis
+## Pregled DEP i MDM binarne analize
 
-Ovo istraživanje se bavi binarnim datotekama povezanim sa Programom za registraciju uređaja (DEP) i Upravom mobilnih uređaja (MDM) na macOS-u. Ključne komponente uključuju:
+Ovo istraživanje se bavi binarnim datotekama povezanim sa Device Enrollment Program (DEP) i Mobile Device Management (MDM) na macOS-u. Ključne komponente obuhvataju:
 
-- **`mdmclient`**: Komunicira sa MDM serverima i pokreće DEP prijave na macOS verzijama pre 10.13.4.
-- **`profiles`**: Upravljanje Konfiguracionim Profilima, i pokreće DEP prijave na macOS verzijama 10.13.4 i novijim.
-- **`cloudconfigurationd`**: Upravljanje DEP API komunikacijama i preuzimanje profila za registraciju uređaja.
+- **`mdmclient`**: Komunicira sa MDM serverima i pokreće DEP check-in na macOS verzijama pre 10.13.4.
+- **`profiles`**: Upravlja Configuration Profiles i pokreće DEP check-in na macOS verzijama 10.13.4 i novijim.
+- **`cloudconfigurationd`**: Upravlja DEP API komunikacijom i preuzima Device Enrollment profile.
 
-DEP prijave koriste `CPFetchActivationRecord` i `CPGetActivationRecord` funkcije iz privatnog okvira Konfiguracionih Profila za preuzimanje Aktivacionog Zapisa, pri čemu `CPFetchActivationRecord` koordinira sa `cloudconfigurationd` putem XPC.
+DEP check-in koristi funkcije `CPFetchActivationRecord` i `CPGetActivationRecord` iz privatnog Configuration Profiles framework-a za preuzimanje Activation Record-a, pri čemu `CPFetchActivationRecord` komunicira sa `cloudconfigurationd` putem XPC-a.<sup>[1]</sup>
 
-## Tesla Protocol and Absinthe Scheme Reverse Engineering
+## Obrnuti inženjering Tesla Protocol-a i Absinthe Scheme-a
 
-DEP prijava uključuje `cloudconfigurationd` koji šalje enkriptovani, potpisani JSON payload na _iprofiles.apple.com/macProfile_. Payload uključuje serijski broj uređaja i akciju "RequestProfileConfiguration". Šema enkripcije koja se koristi interno se naziva "Absinthe". Razotkrivanje ove šeme je složeno i uključuje brojne korake, što je dovelo do istraživanja alternativnih metoda za umetanje proizvoljnih serijskih brojeva u zahtev za Aktivacioni Zapis.
+DEP check-in podrazumeva da `cloudconfigurationd` šalje šifrovani, potpisani JSON payload na _iprofiles.apple.com/macProfile_. Payload sadrži serial number uređaja i akciju „RequestProfileConfiguration“. Šema šifrovanja se interno naziva „Absinthe“. Razotkrivanje ove šeme je složeno i obuhvata veliki broj koraka, što je dovelo do istraživanja alternativnih metoda za ubacivanje proizvoljnih serial number-a u zahtev za Activation Record.<sup>[1]</sup>
 
-## Proxying DEP Requests
+## Proxying DEP zahteva
 
-Pokušaji presretanja i modifikacije DEP zahteva za _iprofiles.apple.com_ korišćenjem alata kao što je Charles Proxy su ometeni enkripcijom payload-a i SSL/TLS bezbednosnim merama. Međutim, omogućavanje konfiguracije `MCCloudConfigAcceptAnyHTTPSCertificate` omogućava zaobilaženje validacije sertifikata servera, iako enkriptovana priroda payload-a i dalje sprečava modifikaciju serijskog broja bez ključa za dekripciju.
+Pokušaji presretanja i izmene DEP zahteva ka _iprofiles.apple.com_ pomoću alata kao što je Charles Proxy bili su otežani šifrovanjem payloada i bezbednosnim merama SSL/TLS-a. Međutim, omogućavanje konfiguracije `MCCloudConfigAcceptAnyHTTPSCertificate` dozvoljava zaobilaženje validacije sertifikata servera, iako šifrovana priroda payloada i dalje onemogućava izmenu serial number-a bez ključa za dešifrovanje.<sup>[1]</sup>
 
-## Instrumenting System Binaries Interacting with DEP
+## Instrumentacija sistemskih binarnih datoteka koje komuniciraju sa DEP-om
 
-Instrumentacija sistemskih binarnih datoteka kao što je `cloudconfigurationd` zahteva onemogućavanje Zaštite Integriteta Sistema (SIP) na macOS-u. Sa onemogućenim SIP-om, alati kao što je LLDB mogu se koristiti za povezivanje sa sistemskim procesima i potencijalno modifikovanje serijskog broja koji se koristi u DEP API interakcijama. Ova metoda je poželjnija jer izbegava složenosti prava i potpisivanja koda.
+Instrumentacija sistemskih binarnih datoteka kao što je `cloudconfigurationd` zahteva onemogućavanje System Integrity Protection (SIP) na macOS-u. Kada je SIP onemogućen, alati kao što je LLDB mogu da se prikače na sistemske procese i potencijalno izmene serial number koji se koristi u DEP API interakcijama. Ovaj metod je poželjan jer izbegava složenosti entitlements-a i potpisivanja koda.
 
-**Exploiting Binary Instrumentation:**
-Modifikacija DEP zahteva payload-a pre JSON serijalizacije u `cloudconfigurationd` se pokazala efikasnom. Proces je uključivao:
+**Iskorišćavanje binarne instrumentacije:**
+Izmena DEP request payloada pre JSON serijalizacije u procesu `cloudconfigurationd` pokazala se efikasnom. Proces je obuhvatao:
 
-1. Povezivanje LLDB sa `cloudconfigurationd`.
-2. Lociranje tačke gde se preuzima serijski broj sistema.
-3. Umetanje proizvoljnog serijskog broja u memoriju pre nego što se payload enkriptuje i pošalje.
+1. Priključivanje LLDB-a na `cloudconfigurationd`.
+2. Pronalaženje mesta na kom sistem preuzima serial number.
+3. Ubacivanje proizvoljnog serial number-a u memoriju pre nego što se payload šifruje i pošalje.
 
-Ova metoda je omogućila preuzimanje kompletnog DEP profila za proizvoljne serijske brojeve, pokazujući potencijalnu ranjivost.
+Ovaj metod je omogućio preuzimanje kompletnih DEP profila za proizvoljne serial number-e, čime je demonstrirana potencijalna ranjivost.<sup>[1]</sup>
 
-### Automating Instrumentation with Python
+### Automatizacija instrumentacije pomoću Python-a
 
-Proces eksploatacije je automatizovan korišćenjem Pythona sa LLDB API, što je omogućilo programatsko umetanje proizvoljnih serijskih brojeva i preuzimanje odgovarajućih DEP profila.
+Proces eksploatacije automatizovan je pomoću Python-a i LLDB API-ja, čime je omogućeno programsko ubacivanje proizvoljnih serial number-a i preuzimanje odgovarajućih DEP profila.<sup>[1]</sup>
 
-### Potential Impacts of DEP and MDM Vulnerabilities
+### Potencijalni uticaji DEP i MDM ranjivosti
 
-Istraživanje je istaklo značajne bezbednosne brige:
+Istraživanje je ukazalo na značajne bezbednosne probleme:
 
-1. **Informacije o otkrivanju**: Pružanjem serijskog broja registrovanog u DEP, osetljive organizacione informacije sadržane u DEP profilu mogu se preuzeti.
+1. **Otkrivanje informacija**: Dostavljanjem DEP-registered serial number-a mogu se preuzeti osetljive organizacione informacije sadržane u DEP profilu.<sup>[1]</sup>
+
+## Reference
+
+- [1] [Duo Labs — MDM Me Maybe: Device Enrollment Program Security](https://duo.com/labs/research/mdm-me-maybe)
 
 {{#include ../../../banners/hacktricks-training.md}}

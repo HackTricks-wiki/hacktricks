@@ -1,75 +1,75 @@
-# Увод у x64
+# Uvod u x64
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Увод у x64**
+## **Uvod u x64**
 
-x64, познат и као x86-64, је 64-битна архитектура процесора која се превасходно користи у десктоп и сервер рачунарству. Потиче из x86 архитектуре коју је произвео Intel, а касније је усвојила AMD под именом AMD64, и данас је преовлађујућа архитектура у личним рачунарима и серверима.
+x64, poznat i kao x86-64, jeste 64-bitna procesorska arhitektura koja se pretežno koristi u desktop i serverskom računarstvu. Nastala je iz x86 arhitekture koju je proizveo Intel, a kasnije ju je AMD usvojio pod nazivom AMD64. Danas je to najzastupljenija arhitektura u personalnim računarima i serverima.
 
-### **Регистри**
+### **Registri**
 
-x64 се проширује на x86 архитектуру, имајући **16 регистара опште намене** обележених `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi`, и `r8` до `r15`. Сваки од ових може да чува **64-битну** (8-бајтну) вредност. Ови регистри такође имају 32-битне, 16-битне и 8-битне подрегистре за компатибилност и специфичне задатке.
+x64 proširuje x86 arhitekturu i sadrži **16 registara opšte namene** označenih kao `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi` i `r8` do `r15`. Svaki od njih može da čuva vrednost od **64 bita** (8 bajtova). Ovi registri takođe imaju 32-bitne, 16-bitne i 8-bitne podregistre radi kompatibilnosti i obavljanja specifičnih zadataka.
 
-1. **`rax`** - Традиционално се користи за **вредности повратка** из функција.
-2. **`rbx`** - Често се користи као **базни регистар** за операције са меморијом.
-3. **`rcx`** - Обично се користи за **бројаче петљи**.
-4. **`rdx`** - Користи се у разним улогама укључујући проширене аритметичке операције.
-5. **`rbp`** - **Базни показивач** за стек фрејм.
-6. **`rsp`** - **Показивач стека**, прати врх стека.
-7. **`rsi`** и **`rdi`** - Користе се за **изворне** и **одредишне** индексе у операцијама са низовима/меморијом.
-8. **`r8`** до **`r15`** - Додатни регистри опште намене уведени у x64.
+1. **`rax`** - Tradicionalno se koristi za **povratne vrednosti** funkcija.
+2. **`rbx`** - Često se koristi kao **bazni registar** za memorijske operacije.
+3. **`rcx`** - Uobičajeno se koristi za **brojače petlji**.
+4. **`rdx`** - Koristi se u različitim ulogama, uključujući proširene aritmetičke operacije.
+5. **`rbp`** - **Bazni pokazivač** stack frame-a.
+6. **`rsp`** - **Pokazivač steka**, koji prati vrh steka.
+7. **`rsi`** i **`rdi`** - Koriste se za indekse **izvora** i **odredišta** u string/memorijskim operacijama.
+8. **`r8`** do **`r15`** - Dodatni registri opšte namene uvedeni u x64.
 
-### **Конвенција позива**
+### **Calling Convention**
 
-Конвенција позива x64 варира између оперативних система. На пример:
+x64 calling convention se razlikuje u zavisnosti od operativnog sistema. Na primer:
 
-- **Windows**: Прва **четири параметра** се преносе у регистре **`rcx`**, **`rdx`**, **`r8`**, и **`r9`**. Додатни параметри се стављају на стек. Вредност повратка је у **`rax`**.
-- **System V (обично коришћен у UNIX-подобним системима)**: Прва **шест целих или показивачких параметара** се преносе у регистре **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, и **`r9`**. Вредност повратка је такође у **`rax`**.
+- **Windows**: Prva **četiri parametra** prosleđuju se u registrima **`rcx`**, **`rdx`**, **`r8`** i **`r9`**. Dodatni parametri se postavljaju na stek. Povratna vrednost se nalazi u **`rax`**.
+- **System V (koji se često koristi u UNIX-like sistemima)**: Prvih **šest celobrojnih parametara ili parametara pokazivača** prosleđuje se u registrima **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** i **`r9`**. Povratna vrednost se takođe nalazi u **`rax`**.
 
-Ако функција има више од шест улаза, **остали ће бити пренесени на стек**. **RSP**, показивач стека, мора бити **поредио на 16 бајтова**, што значи да адреса на коју указује мора бити делљива са 16 пре него што се позив догоди. То значи да обично морамо осигурати да је RSP правилно поређен у нашем shellcode-у пре него што направимо позив функцији. Међутим, у пракси, системски позиви функционишу многе пута иако овај захтев није испуњен.
+Ako funkcija ima više od šest ulaznih parametara, **preostali će biti prosleđeni preko steka**. **RSP**, pokazivač steka, mora biti **poravnat na 16 bajtova**, što znači da adresa na koju pokazuje mora biti deljiva sa 16 pre svakog poziva. To znači da bi obično trebalo da obezbedimo da je RSP pravilno poravnat u našem shellcode-u pre nego što pozovemo funkciju. Međutim, u praksi system calls često rade i kada ovaj zahtev nije ispunjen.
 
-### Конвенција позива у Swift
+### Calling Convention u Swift-u
 
-Swift има своју **конвенцију позива** која се може наћи у [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
+Swift ima sopstveni **calling convention**, koji možete pronaći na adresi [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
 
-### **Уобичајене инструкције**
+### **Uobičajene instrukcije**
 
-x64 инструкције имају богат сет, одржавајући компатибилност са ранијим x86 инструкцијама и уводећи нове.
+x64 instrukcije imaju bogat skup, pri čemu zadržavaju kompatibilnost sa ranijim x86 instrukcijama i uvode nove.
 
-- **`mov`**: **Премести** вредност из једног **регистра** или **меморијске локације** у други.
-- Пример: `mov rax, rbx` — Премешта вредност из `rbx` у `rax`.
-- **`push`** и **`pop`**: Постави или уклони вредности на/са **стека**.
-- Пример: `push rax` — Поставља вредност у `rax` на стек.
-- Пример: `pop rax` — Уклоњава врх вредности са стека у `rax`.
-- **`add`** и **`sub`**: Операције **сабирања** и **одузимања**.
-- Пример: `add rax, rcx` — Сабира вредности у `rax` и `rcx`, чувајући резултат у `rax`.
-- **`mul`** и **`div`**: Операције **мултипликације** и **делења**. Напомена: ове имају специфична понашања у вези са коришћењем операнда.
-- **`call`** и **`ret`**: Користе се за **позивање** и **враћање из функција**.
-- **`int`**: Користи се за активирање софтверског **прекида**. На пример, `int 0x80` се користио за системске позиве у 32-битном x86 Linux-у.
-- **`cmp`**: **Упоређује** две вредности и поставља флагове ЦПУ-а на основу резултата.
-- Пример: `cmp rax, rdx` — Упоређује `rax` са `rdx`.
-- **`je`, `jne`, `jl`, `jge`, ...**: **Условне скокне** инструкције које мењају ток контроле на основу резултата претходне `cmp` или теста.
-- Пример: Након `cmp rax, rdx` инструкције, `je label` — Скаче на `label` ако је `rax` једнак `rdx`.
-- **`syscall`**: Користи се за **системске позиве** у неким x64 системима (као што је модерни Unix).
-- **`sysenter`**: Оптимизована **инструкција системског позива** на неким платформама.
+- **`mov`**: **Premešta** vrednost iz jednog **registra** ili **memorijske lokacije** u drugi.
+- Primer: `mov rax, rbx` — Premešta vrednost iz `rbx` u `rax`.
+- **`push`** i **`pop`**: Postavljaju vrednosti na **stek** ili ih uklanjaju sa njega.
+- Primer: `push rax` — Postavlja vrednost iz `rax` na stek.
+- Primer: `pop rax` — Učitava vršnu vrednost sa steka u `rax`.
+- **`add`** i **`sub`**: Operacije **sabiranja** i **oduzimanja**.
+- Primer: `add rax, rcx` — Sabira vrednosti u `rax` i `rcx` i smešta rezultat u `rax`.
+- **`mul`** i **`div`**: Operacije **množenja** i **deljenja**. Napomena: imaju specifično ponašanje u vezi sa korišćenjem operanada.
+- **`call`** i **`ret`**: Koriste se za **pozivanje funkcija** i **povratak iz njih**.
+- **`int`**: Koristi se za pokretanje softverskog **prekida**. Npr., `int 0x80` se koristio za system calls u 32-bitnom x86 Linux-u.
+- **`cmp`**: **Upoređuje** dve vrednosti i postavlja CPU zastavice na osnovu rezultata.
+- Primer: `cmp rax, rdx` — Upoređuje `rax` sa `rdx`.
+- **`je`, `jne`, `jl`, `jge`, ...**: Instrukcije za **uslovni skok** koje menjaju tok izvršavanja na osnovu rezultata prethodne instrukcije `cmp` ili testiranja.
+- Primer: Nakon instrukcije `cmp rax, rdx`, `je label` — Skače na `label` ako je `rax` jednak `rdx`.
+- **`syscall`**: Koristi se za **system calls** u nekim x64 sistemima (kao što je moderni Unix).
+- **`sysenter`**: Optimizovana instrukcija za **system call** na nekim platformama.
 
-### **Проба функције**
+### **Prolog funkcije**
 
-1. **Постави стари базни показивач**: `push rbp` (чува базни показивач позиваоца)
-2. **Премести тренутни показивач стека у базни показивач**: `mov rbp, rsp` (поставља нови базни показивач за текућу функцију)
-3. **Алокирај простор на стеку за локалне променљиве**: `sub rsp, <size>` (где је `<size>` број бајтова који су потребни)
+1. **Postavljanje starog baznog pokazivača na stek**: `push rbp` (čuva bazni pokazivač pozivaoca)
+2. **Premeštanje trenutnog pokazivača steka u bazni pokazivač**: `mov rbp, rsp` (postavlja novi bazni pokazivač za trenutnu funkciju)
+3. **Alociranje prostora na steku za lokalne promenljive**: `sub rsp, <size>` (gde je `<size>` broj potrebnih bajtova)
 
-### **Епилог функције**
+### **Epilog funkcije**
 
-1. **Премести тренутни базни показивач у показивач стека**: `mov rsp, rbp` (ослобађа локалне променљиве)
-2. **Уклонити стари базни показивач са стека**: `pop rbp` (враћа базни показивач позиваоца)
-3. **Врати се**: `ret` (враћа контролу позиваоцу)
+1. **Premeštanje trenutnog baznog pokazivača u pokazivač steka**: `mov rsp, rbp` (dealocira lokalne promenljive)
+2. **Uklanjanje starog baznog pokazivača sa steka**: `pop rbp` (obnavlja bazni pokazivač pozivaoca)
+3. **Povratak**: `ret` (vraća kontrolu pozivaocu)
 
 ## macOS
 
 ### syscalls
 
-Постоје различите класе системских позива, можете [**наћи их овде**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
+Postoje različite klase syscalls, a [**možete ih pronaći ovde**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
 ```c
 #define SYSCALL_CLASS_NONE	0	/* Invalid */
 #define SYSCALL_CLASS_MACH	1	/* Mach */
@@ -78,7 +78,7 @@ x64 инструкције имају богат сет, одржавајући 
 #define SYSCALL_CLASS_DIAG	4	/* Diagnostics */
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
-Zatim, možete pronaći svaki syscall broj [**na ovoj adresi**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
+Zatim, broj svakog syscall-a možete pronaći [**na ovom URL-u**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
 1	AUE_EXIT	ALL	{ void exit(int rval); }
@@ -97,16 +97,16 @@ Zatim, možete pronaći svaki syscall broj [**na ovoj adresi**](https://opensour
 ```
 Dakle, da biste pozvali `open` syscall (**5**) iz **Unix/BSD klase**, potrebno je da mu dodate: `0x2000000`
 
-Dakle, broj syscall-a za pozivanje open bi bio `0x2000005`
+Prema tome, syscall broj za pozivanje open bio bi `0x2000005`
 
 ### Shellcodes
 
-Da biste kompajlirali:
+Za kompajliranje:
 ```bash
 nasm -f macho64 shell.asm -o shell.o
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 ```
-Da biste izvukli bajtove:
+Da biste izdvojili bajtove:
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/b729f716aaf24cbc8109e0d94681ccb84c0b0c9e/helper/extract.sh
 for c in $(objdump -d "shell.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
@@ -168,7 +168,7 @@ return 0;
 
 #### Shell
 
-Preuzeto sa [**ovde**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) i objašnjeno.
+Preuzeto [**ovde**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) i objašnjeno.<sup>[1]</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -188,7 +188,7 @@ syscall
 ```
 {{#endtab}}
 
-{{#tab name="sa stekom"}}
+{{#tab name="with stack"}}
 ```armasm
 bits 64
 global _main
@@ -207,7 +207,7 @@ syscall
 {{#endtab}}
 {{#endtabs}}
 
-#### Čitaj sa cat
+#### Čitanje pomoću cat
 
 Cilj je izvršiti `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, tako da je drugi argument (x1) niz parametara (što u memoriji znači stek adresa).
 ```armasm
@@ -240,7 +240,7 @@ section .data
 cat_path:      db "/bin/cat", 0
 passwd_path:   db "/etc/passwd", 0
 ```
-#### Pozovite komandu sa sh
+#### Pokretanje komande pomoću sh
 ```armasm
 bits 64
 section .text
@@ -280,7 +280,7 @@ touch_command:  db "touch /tmp/lalala", 0
 ```
 #### Bind shell
 
-Bind shell sa [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) na **portu 4444**
+Bind shell sa [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) na **portu 4444**<sup>[2]</sup>.
 ```armasm
 section .text
 global _main
@@ -357,7 +357,7 @@ syscall
 ```
 #### Reverse Shell
 
-Reverse shell sa [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html). Reverse shell na **127.0.0.1:4444**
+Reverse shell sa [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html). Reverse shell ka **127.0.0.1:4444**<sup>[3]</sup>.
 ```armasm
 section .text
 global _main
@@ -419,4 +419,10 @@ mov  rax, r8
 mov  al, 0x3b
 syscall
 ```
+## Reference
+
+- [1] [daem0nc0re/macOS_ARM64_Shellcode - shell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)
+- [2] [Packet Storm - macOS TCP 4444 Bind Shell (Null-Free) Shellcode](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html)
+- [3] [Packet Storm - macOS 127.0.0.1:4444 Reverse Shell Shellcode](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html)
+
 {{#include ../../../banners/hacktricks-training.md}}

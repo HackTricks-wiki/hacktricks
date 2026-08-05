@@ -4,15 +4,15 @@
 
 ## Osnovne informacije
 
-I/O Kit je otvorenog koda, objektno-orijentisan **okvir za upravljačke programe uređaja** u XNU kernelu, koji rukuje **dinamički učitavanim drajverima uređaja**. Omogućava modularnom kodu da se dodaje u kernel u hodu (on-the-fly), podržavajući raznovrstan hardver.
+I/O Kit je open-source, objektno-orijentisani **framework za upravljačke programe uređaja** u XNU kernelu i rukuje **dinamički učitanim upravljačkim programima uređaja**. Omogućava dodavanje modularnog koda u kernel u toku rada, uz podršku za raznovrstan hardver.
 
-IOKit drajveri će u suštini **izvoziti funkcije iz kernela**. Tipovi parametara tih funkcija su **predefinisani** i verifikovani. Štaviše, slično XPC-u, IOKit je samo još jedan sloj na **vrhu Mach messages**.
+IOKit driveri u osnovi **izvoze funkcije iz kernela**. **Tipovi** parametara ovih funkcija su **unapred definisani** i proveravaju se. Takođe, slično kao XPC, IOKit je samo još jedan sloj **iznad Mach poruka**.
 
-**IOKit XNU kernel code** je otvorenog koda i Apple ga objavljuje na [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Takođe, komponente IOKit-a u korisničkom prostoru su otvorenog koda na [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
+**IOKit XNU kernel kod** Apple objavljuje kao open-source na adresi [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Pored toga, IOKit komponente u korisničkom prostoru takođe su dostupne kao open-source na adresi [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-Međutim, **nijedni IOKit drajveri** nisu otvorenog koda. Ipak, povremeno izdanje drajvera može sadržati simbole koji olakšavaju njegovo debugovanje. Pogledajte kako [**preuzeti driver ekstenzije iz firmvera ovde**](#ipsw)**.**
+Međutim, **nijedan IOKit driver** nije dostupan kao open-source. Ipak, s vremena na vreme izdanje drivera može sadržati simbole koji olakšavaju njegovo otklanjanje grešaka. Pogledajte kako da [**preuzmete ekstenzije drivera iz firmware-a ovde**](#ipsw)**.**
 
-Napisano je u **C++**. Možete dobiti demanglovane C++ simbole sa:
+Napisan je u **C++** jeziku. Demanglovane C++ simbole možete dobiti pomoću:
 ```bash
 # Get demangled symbols
 nm -C com.apple.driver.AppleJPEGDriver
@@ -23,18 +23,18 @@ __ZN16IOUserClient202222dispatchExternalMethodEjP31IOExternalMethodArgumentsOpaq
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
 > [!CAUTION]
-> IOKit **izložene funkcije** mogu izvoditi **dodatne sigurnosne provere** kada klijent pokuša da pozove funkciju, ali imajte na umu da su aplikacije obično **ograničene** od strane **sandbox**-a u pogledu toga sa kojim IOKit funkcijama mogu da interaguju.
+> IOKit **izložene funkcije** mogu da izvrše **dodatne bezbednosne provere** kada klijent pokuša da pozove funkciju, ali imajte na umu da su aplikacije obično **ograničene** pomoću **sandbox-a** u pogledu IOKit funkcija sa kojima mogu da komuniciraju.
 
 ## Drajveri
 
-Na macOS-u se nalaze:
+U macOS-u se nalaze u:
 
 - **`/System/Library/Extensions`**
-- KEXT fajlovi ugrađeni u operativni sistem OS X.
+- KEXT datoteke ugrađene u operativni sistem OS X.
 - **`/Library/Extensions`**
-- KEXT fajlovi koje instalira softver treće strane
+- KEXT datoteke koje instalira softver trećih strana
 
-Na iOS-u se nalaze:
+U iOS-u se nalaze u:
 
 - **`/System/Library/Extensions`**
 ```bash
@@ -54,51 +54,51 @@ Index Refs Address            Size       Wired      Name (Version) UUID <Linked 
 9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
 10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
 ```
-Do broja 9, navedeni drivers su **loaded in the address 0**. To znači da oni nisu pravi drivers, već **part of the kernel i ne mogu da budu unloaded**.
+Do broja 9, navedeni driveri su **učitani na adresi 0**. To znači da to nisu pravi driveri, već **deo kernela i ne mogu da se uklone**.
 
-Da biste pronašli specific extensions možete koristiti:
+Da biste pronašli određene ekstenzije, možete koristiti:
 ```bash
 kextfind -bundle-id com.apple.iokit.IOReportFamily #Search by full bundle-id
 kextfind -bundle-id -substring IOR #Search by substring in bundle-id
 ```
-Da biste učitali i uklonili kernel ekstenzije, uradite:
+Za učitavanje i uklanjanje kernel extensions koristite:
 ```bash
 kextload com.apple.iokit.IOReportFamily
 kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-The **IORegistry** je ključni deo IOKit framework-a u macOS i iOS koji služi kao baza podataka za predstavljanje konfiguracije hardvera sistema i njegovog stanja. To je **hijerarhijska kolekcija objekata koja predstavlja sav hardver i drajvere** učitane u sistem, i njihove međusobne odnose.
+**IORegistry** je ključni deo IOKit framework-a u macOS-u i iOS-u, koji služi kao baza podataka za predstavljanje hardverske konfiguracije i stanja sistema. To je **hijerarhijska kolekcija objekata koji predstavljaju sav hardver i drivere** učitane na sistemu, kao i njihove međusobne odnose.
 
-You can get the IORegistry using the cli **`ioreg`** to inspect it from the console (specially useful for iOS).
+IORegistry možete dobiti pomoću cli alata **`ioreg`** i pregledati ga iz konzole (posebno korisno za iOS).
 ```bash
 ioreg -l #List all
 ioreg -w 0 #Not cut lines
 ioreg -p <plane> #Check other plane
 ```
-Možete preuzeti **`IORegistryExplorer`** iz **Xcode Additional Tools** sa [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) i pregledati **macOS IORegistry** kroz **grafički** interfejs.
+Možete preuzeti **`IORegistryExplorer`** iz odeljka **Xcode Additional Tools** na adresi [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) i pregledati **macOS IORegistry** kroz **grafički** interfejs.
 
 <figure><img src="../../../images/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
-U IORegistryExplorer-u, "planes" se koriste za organizovanje i prikaz odnosa između različitih objekata u IORegistry-ju. Svaka plane predstavlja određeni tip odnosa ili poseban pogled na hardver sistema i konfiguraciju drajvera. Evo nekih od uobičajenih "planes" koje možete sresti u IORegistryExplorer-u:
+U alatu IORegistryExplorer, „planes“ se koriste za organizovanje i prikaz odnosa između različitih objekata u IORegistry-ju. Svaki plane predstavlja određenu vrstu odnosa ili konkretan prikaz hardverske i driver konfiguracije sistema. Ovo su neki od uobičajenih plane-ova na koje možete naići u alatu IORegistryExplorer:
 
-1. **IOService Plane**: Ovo je najopštija ravan, prikazuje servisne objekte koji predstavljaju drajvere i nubs (kanale za komunikaciju između drajvera). Prikazuje provider-client odnose između ovih objekata.
-2. **IODeviceTree Plane**: Ova ravan predstavlja fizičke veze između uređaja kako su povezani na sistem. Često se koristi za vizuelizaciju hijerarhije uređaja povezanih preko sabirnica kao što su USB ili PCI.
-3. **IOPower Plane**: Prikazuje objekte i njihove odnose u kontekstu upravljanja napajanjem. Može pokazati koji objekti utiču na stanje napajanja drugih, što je korisno za otklanjanje problema vezanih za napajanje.
-4. **IOUSB Plane**: Fokusirana posebno na USB uređaje i njihove odnose, prikazuje hijerarhiju USB hub-ova i povezanih uređaja.
-5. **IOAudio Plane**: Ova ravan služi za predstavljanje audio uređaja i njihovih odnosa unutar sistema.
+1. **IOService Plane**: Ovo je najopštiji plane koji prikazuje service objekte koji predstavljaju drivere i nubs (komunikacione kanale između drivera). Prikazuje odnose provider-client između ovih objekata.
+2. **IODeviceTree Plane**: Ovaj plane predstavlja fizičke veze između uređaja koji su povezani sa sistemom. Često se koristi za vizuelizaciju hijerarhije uređaja povezanih preko magistrala kao što su USB ili PCI.
+3. **IOPower Plane**: Prikazuje objekte i njihove odnose u kontekstu upravljanja napajanjem. Može prikazati koji objekti utiču na stanje napajanja drugih objekata, što je korisno za otklanjanje problema povezanih sa napajanjem.
+4. **IOUSB Plane**: Posebno je usmeren na USB uređaje i njihove odnose, prikazujući hijerarhiju USB hub-ova i povezanih uređaja.
+5. **IOAudio Plane**: Ovaj plane služi za predstavljanje audio uređaja i njihovih odnosa unutar sistema.
 6. ...
 
-## Primer koda za komunikaciju sa drajverom
+## Primer koda za komunikaciju sa Driver-om
 
-Sledeći kod se povezuje na IOKit servis `YourServiceNameHere` i poziva selector 0:
+Sledeći kod se povezuje sa IOKit servisom `YourServiceNameHere` i poziva selector 0:
 
-- Prvo poziva **`IOServiceMatching`** i **`IOServiceGetMatchingServices`** da dobije servis.
-- Zatim uspostavlja konekciju pozivom **`IOServiceOpen`**.
-- Na kraju poziva funkciju sa **`IOConnectCallScalarMethod`** koja koristi selector 0 (selector je broj dodeljen funkciji koju želite da pozovete).
+- Najpre poziva **`IOServiceMatching`** i **`IOServiceGetMatchingServices`** da bi dobio servis.
+- Zatim uspostavlja konekciju pozivanjem **`IOServiceOpen`**.
+- Na kraju poziva funkciju pomoću **`IOConnectCallScalarMethod`**, navodeći selector 0 (selector je broj dodeljen funkciji koju želite da pozovete).
 
 <details>
-<summary>Primer user-space poziva na selector drajvera</summary>
+<summary>Primer user-space poziva driver selector-a</summary>
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <IOKit/IOKitLib.h>
@@ -157,39 +157,39 @@ return 0;
 
 Postoje **druge** funkcije koje se mogu koristiti za pozivanje IOKit funkcija pored **`IOConnectCallScalarMethod`**, kao što su **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
 
-## Reverzovanje ulazne tačke drajvera
+## Reverse engineering driver entrypoint-a
 
-Te funkcije, na primer, možete dobiti iz [**firmware image (ipsw)**](#ipsw). Zatim image učitajte u vaš omiljeni dekompajler.
+Do njih možete doći, na primer, iz [**firmware image (ipsw)**](#ipsw). Zatim ga učitajte u svoj omiljeni decompiler.
 
-Možete početi dekompajlirati funkciju **`externalMethod`**, jer je to drajverska funkcija koja će primati poziv i pozivati odgovarajuću funkciju:
+Možete početi dekompilaciju funkcije **`externalMethod`**, jer je to driver funkcija koja će primiti poziv i pozvati odgovarajuću funkciju:
 
 <figure><img src="../../../images/image (1168).png" alt="" width="315"><figcaption></figcaption></figure>
 
 <figure><img src="../../../images/image (1169).png" alt=""><figcaption></figcaption></figure>
 
-Ta užasna demanglovana poziv znači:
+Taj užasni demanglovani poziv znači:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-Primetite da u prethodnoj definiciji parametar **`self`** nedostaje; ispravna definicija bi bila:
+Imajte na umu da u prethodnoj definiciji nedostaje parametar **`self`**, ispravna definicija bi bila:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(self, unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-Zapravo, pravu definiciju možete pronaći u [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388):
+Zapravo, stvarnu definiciju možete pronaći na [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388):
 ```cpp
 IOUserClient2022::dispatchExternalMethod(uint32_t selector, IOExternalMethodArgumentsOpaque *arguments,
 const IOExternalMethodDispatch2022 dispatchArray[], size_t dispatchArrayCount,
 OSObject * target, void * reference)
 ```
-Sa ovim informacijama možete prepraviti Ctrl+Right -> `Edit function signature` i postaviti poznate tipove:
+Sa ovim informacijama možete prepisati Ctrl+Right -> `Edit function signature` i postaviti poznate tipove:
 
 <figure><img src="../../../images/image (1174).png" alt=""><figcaption></figcaption></figure>
 
-Novi dekompilovani kod će izgledati ovako:
+Novi decompiled code će izgledati ovako:
 
 <figure><img src="../../../images/image (1175).png" alt=""><figcaption></figcaption></figure>
 
-Za sledeći korak potrebno je da bude definisan struct **`IOExternalMethodDispatch2022`**. On je opensource u [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), možete ga definisati:
+Za sledeći korak moramo imati definisanu strukturu **`IOExternalMethodDispatch2022`**. Ona je opensource na adresi [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), pa je možete definisati:
 
 <figure><img src="../../../images/image (1170).png" alt=""><figcaption></figcaption></figure>
 
@@ -197,34 +197,34 @@ Sada, prateći `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray`, možet
 
 <figure><img src="../../../images/image (1176).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Promenite tip podatka u **`IOExternalMethodDispatch2022:`**
+Promenite Data Type u **`IOExternalMethodDispatch2022:`**
 
 <figure><img src="../../../images/image (1177).png" alt="" width="375"><figcaption></figcaption></figure>
 
-posle promene:
+nakon promene:
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
-I kao što sada vidite, tamo imamo **niz od 7 elemenata** (pogledajte finalni dekompilovani kod), kliknite da kreirate niz od 7 elemenata:
+Pošto sada znamo da se tamo nalazi **array od 7 elemenata** (proverite konačni decompiled code), kliknite da biste kreirali array od 7 elemenata:
 
 <figure><img src="../../../images/image (1180).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Nakon što je niz kreiran, možete videti sve eksportovane funkcije:
+Nakon kreiranja array-a možete videti sve exported funkcije:
 
 <figure><img src="../../../images/image (1181).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Ako se sećate, da biste **pozvali** an **exported** funkciju iz user space-a ne treba da pozivate ime funkcije, već **selector number**. Ovde možete videti da je selector **0** funkcija **`initializeDecoder`**, selector **1** je **`startDecoder`**, selector **2** **`initializeEncoder`**...
+> Ako se sećate, da bismo **pozvali** **exported** funkciju iz user space-a, ne moramo pozivati ime funkcije, već **selector number**. Ovde možete videti da je selector **0** funkcija **`initializeDecoder`**, selector **1** je **`startDecoder`**, a selector **2** je **`initializeEncoder`**...
 
-## Nedavno IOKit attack surface (2023–2025)
+## Skorašnja IOKit attack surface (2023–2025)
 
-- **Keystroke capture via IOHIDFamily** – CVE-2024-27799 (14.5) je pokazao da permisivan `IOHIDSystem` client može da uhvati HID događaje čak i uz secure input; osigurajte da `externalMethod` handleri primenjuju entitlements umesto da se oslanjaju samo na tip user-client-a.
-- **IOGPUFamily memory corruption** – CVE-2024-44197 i CVE-2025-24257 su ispravili OOB writes dostupne iz sandboxed aplikacija koje šalju malformirane variable-length podatke GPU user clientima; uobičajeni bug su loše granice oko argumenata `IOConnectCallStructMethod`.
-- **Legacy keystroke monitoring** – CVE-2023-42891 (14.2) je potvrdio da HID user clients ostaju vektor za bekstvo iz sandboksa; fuzz any driver exposing keyboard/event queues.
+- **Keystroke capture via IOHIDFamily** – CVE-2024-27799 (14.5) pokazao je da permissive `IOHIDSystem` client može preuzeti HID events čak i uz secure input; obezbedite da `externalMethod` handlers proveravaju entitlements, umesto da proveravaju samo user-client type.<sup>[2]</sup>
+- **IOGPUFamily memory corruption** – CVE-2024-44197 i CVE-2025-24257 otklonili su OOB writes do kojih može doći iz sandboxed apps koje prosleđuju malformed variable-length data GPU user clients; uobičajeni bug su loše bounds provere oko `IOConnectCallStructMethod` arguments.<sup>[1]</sup>
+- **Legacy keystroke monitoring** – CVE-2023-42891 (14.2) potvrdio je da HID user clients i dalje predstavljaju sandbox-escape vector; fuzz-ujte svaki driver koji izlaže keyboard/event queues.<sup>[3]</sup>
 
-### Brza trijaža & fuzzing saveti
+### Saveti za brzi triage i fuzzing
 
-- Enumerišite sve external methods za user client iz userlanda kako biste seed-ovali fuzzer:
+- Enumerišite sve external methods za user client iz userland-a kako biste pripremili fuzzer:
 ```bash
 # list selectors for a service
 python3 - <<'PY'
@@ -236,21 +236,107 @@ for sel, name in obj.external_methods():
 print(f"{sel:02d} {name}")
 PY
 ```
-- Prilikom reverziranja, obrati pažnju na `IOExternalMethodDispatch2022` counts. Čest obrazac buga u nedavnim CVE-ovima je neusaglašenost `structureInputSize`/`structureOutputSize` u odnosu na stvarnu dužinu `copyin`, što dovodi do heap OOB u `IOConnectCallStructMethod`.
-- Dostupnost Sandboxa i dalje zavisi od entitlements. Pre nego što potrošiš vreme na cilj, proveri da li je klijent dozvoljen iz aplikacije treće strane:
+- Tokom reverse engineeringa, obratite pažnju na vrednosti `IOExternalMethodDispatch2022`. Čest obrazac greške u novijim CVE-ovima jesu neusklađene vrednosti `structureInputSize`/`structureOutputSize` u odnosu na stvarnu dužinu `copyin`, što dovodi do heap OOB greške u `IOConnectCallStructMethod`.
+- Reachability Sandbox-a i dalje zavisi od entitlements-a. Pre nego što utrošite vreme na target, proverite da li je klijentu dozvoljen pristup iz aplikacije treće strane:
 ```bash
 strings /System/Library/Extensions/IOHIDFamily.kext/Contents/MacOS/IOHIDFamily | \
 grep -E "^com\.apple\.(driver|private)"
 ```
-- Za GPU/iomfb ranjivosti, prosleđivanje prevelikih nizova kroz `IOConnectCallMethod` često je dovoljno da izazove pogrešno rukovanje granicama. Minimalni harness (selector X) za izazivanje size confusion:
+- Kod GPU/iomfb bugova, prosleđivanje nizova prevelike veličine kroz `IOConnectCallMethod` često je dovoljno za pokretanje problema sa granicama. Minimalni harness (selector X) za pokretanje zabune u veličini:
 ```c
 uint8_t buf[0x1000];
 size_t outSz = sizeof(buf);
 IOConnectCallStructMethod(conn, X, buf, sizeof(buf), buf, &outSz);
 ```
+## DriverKit — User-Space Drivers
+
+### Osnovne informacije
+
+**DriverKit** je Apple-ova zamena u korisničkom prostoru za kernel ekstenzije (kexts), uvedena u macOS 10.15. DriverKit binarni fajlovi (`.dext` bundle-ovi) rade kao procesi u korisničkom prostoru, ali direktno komuniciraju sa kernelom putem privilegovanog IOKit interfejsa.
+
+DriverKit ekstenzije upravljaju hardverom:
+- **USB** kontrolerima i uređajima
+- **Thunderbolt** / PCIe uređajima
+- **HID** uređajima (tastature, miševi, game kontroleri)
+- **Audio** hardverom
+- **Networking** interfejsima
+- **Serial** i **Block Storage** uređajima
+
+Za razliku od kexts (koji su zahtevali pokretanje sistema sa onemogućenim SIP-om ili notarizaciju), DriverKit ekstenzije se instaliraju putem `SystemExtensions.framework` i zahtevaju samo **jednokratno odobrenje korisnika**.
+
+### Otkrivanje i enumeracija
+```bash
+# List all installed system extensions (includes DriverKit)
+systemextensionsctl list
+
+# Find all DriverKit extension bundles
+find / -name "*.dext" -type d 2>/dev/null
+
+# Check a binary's DriverKit entitlements
+codesign -d --entitlements - /path/to/binary.dext/binary 2>&1 | grep driverkit
+
+# Common DriverKit entitlements:
+# com.apple.developer.driverkit                    — Base DriverKit
+# com.apple.developer.driverkit.transport.usb      — USB device access
+# com.apple.developer.driverkit.transport.hid      — HID device access
+# com.apple.developer.driverkit.transport.pci      — PCIe device access
+# com.apple.developer.driverkit.transport.serial   — Serial port access
+# com.apple.developer.driverkit.family.networking  — Network interface
+# com.apple.developer.driverkit.family.audio       — Audio device
+```
+### Bezbednosne implikacije
+
+> [!WARNING]
+> DriverKit binaries imaju **direktan komunikacioni kanal sa kernelom**. Slanje neispravnih poruka kroz ovaj kanal može pokrenuti kernel ranjivosti. Svaki driver registruje određene user-client klase, a neispravni pozivi `IOConnectCallMethod` mogu izazvati korupciju kernel memorije.
+
+**Površina napada:**
+1. **Kernel IOKit message fuzzing** — Svaki DriverKit user-client izlaže selectors koje je moguće pozvati iz user space-a. Neispravni argumenti mogu pokrenuti kernel greške.
+2. **USB device spoofing** — Kompromitovani USB DriverKit binary može predstavljati zlonamerni profil USB uređaja (npr. emulirati tastaturu za HID injection).
+3. **DMA attacks** — PCIe/Thunderbolt DriverKit ekstenzije potencijalno imaju DMA pristup fizičkoj memoriji.
+4. **Persistence** — Kada se instaliraju kao system extension, DriverKit binaries opstaju nakon ponovnog pokretanja sistema i ažuriranja aplikacija.
+
+### DriverKit IOKit User-Client Fuzzing
+```bash
+# Enumerate DriverKit user-client classes from entitlements
+codesign -d --entitlements - /path/to/binary.dext/binary 2>&1 \
+| grep -A5 "com.apple.developer.driverkit.transport"
+
+# List IOService matching for DriverKit drivers
+ioreg -l | grep -i "UserClientClass" | sort -u
+
+# Check if the driver's user-client is reachable from a sandboxed app
+ioreg -c IOService -r -d 1 | grep -E '"IOClass"|"CFBundleIdentifier"' | head -40
+
+# Minimal fuzzing harness for a DriverKit selector:
+```
+
+```c
+#include <IOKit/IOKitLib.h>
+
+io_connect_t conn;
+// ... open connection to the DriverKit service ...
+
+// Fuzz selector X with oversized struct input
+uint8_t buf[0x2000];
+memset(buf, 'A', sizeof(buf));
+size_t outSz = sizeof(buf);
+kern_return_t kr = IOConnectCallStructMethod(conn, X, buf, sizeof(buf), buf, &outSz);
+// If the driver doesn't validate structureInputSize, this causes kernel OOB
+```
+### DriverKit CVE-ovi
+
+| CVE | Opis |
+|---|---|
+| CVE-2022-26766 | Ranjivost u DriverKit USB stack-u — izvršavanje koda u kernelu |
+| CVE-2021-30838 | IOKit user-client type confusion u grafičkim drajverima |
+| CVE-2024-44197 | IOGPUFamily OOB write putem neispravnih DriverKit argumenata |
+
 ## Reference
 
-- [Apple Security Updates – macOS Sequoia 15.1 / Sonoma 14.7.1 (IOGPUFamily)](https://support.apple.com/en-us/121564)
-- [Rapid7 – IOHIDFamily CVE-2024-27799 summary](https://www.rapid7.com/db/vulnerabilities/apple-osx-iohidfamily-cve-2024-27799/)
-- [Apple Security Updates – macOS 13.6.1 (CVE-2023-42891 IOHIDFamily)](https://support.apple.com/en-us/121551)
+- [1] [Apple bezbednosna ažuriranja – macOS Sequoia 15.1 / Sonoma 14.7.1 (IOGPUFamily)](https://support.apple.com/en-us/121564)
+- [2] [Rapid7 – IOHIDFamily CVE-2024-27799 sažetak](https://www.rapid7.com/db/vulnerabilities/apple-osx-iohidfamily-cve-2024-27799/)
+- [3] [Apple bezbednosna ažuriranja – macOS 13.6.1 (CVE-2023-42891 IOHIDFamily)](https://support.apple.com/en-us/121551)
+- [4] [Apple Developer — DriverKit](https://developer.apple.com/documentation/driverkit)
+- [5] [Apple Developer — Sistemske ekstenzije](https://developer.apple.com/documentation/systemextensions)
+
 {{#include ../../../banners/hacktricks-training.md}}

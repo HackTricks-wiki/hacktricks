@@ -1,52 +1,59 @@
-# macOS Office Sandbox Bypasses
+# Word Sandbox bypasses na macOS-u
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-### Word Sandbox bypass via Launch Agents
+### Word Sandbox bypass putem Launch Agents
 
-Aplikacija koristi **prilagođeni Sandbox** koristeći ovlašćenje **`com.apple.security.temporary-exception.sbpl`** i ovaj prilagođeni sandbox omogućava pisanje fajlova bilo gde sve dok ime fajla počinje sa `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
+Aplikacija koristi **custom Sandbox** pomoću entitlement-a **`com.apple.security.temporary-exception.sbpl`**, a ovaj custom sandbox omogućava upisivanje fajlova bilo gde pod uslovom da naziv fajla počinje sa `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
 
-Stoga, bekstvo je bilo lako kao **pisanje `plist`** LaunchAgent u `~/Library/LaunchAgents/~$escape.plist`.
+Zato je escape bio jednostavan kao **upisivanje `plist`** LaunchAgent-a u `~/Library/LaunchAgents/~$escape.plist`.
 
-Proverite [**originalni izveštaj ovde**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/).
+Pogledajte [**originalni izveštaj ovde**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/).<sup>[1]</sup>
 
-### Word Sandbox bypass via Login Items and zip
+### Word Sandbox bypass putem Login Items i zip-a
 
-Zapamtite da iz prvog bekstva, Word može pisati proizvoljne fajlove čije ime počinje sa `~$` iako nakon zakrpe prethodne ranjivosti nije bilo moguće pisati u `/Library/Application Scripts` ili u `/Library/LaunchAgents`.
+Imajte na umu da Word, nakon prvog escape-a, može da upisuje proizvoljne fajlove čiji nazivi počinju sa `~$`, iako nakon patch-a prethodnog vulnerability-ja više nije bilo moguće upisivati u `/Library/Application Scripts` ili u `/Library/LaunchAgents`.
 
-Otkriveno je da iz sandbox-a može da se kreira **Login Item** (aplikacije koje će se izvršavati kada se korisnik prijavi). Međutim, ove aplikacije **neće se izvršiti osim ako** nisu **notarizovane** i **nije moguće dodati argumente** (tako da ne možete samo pokrenuti reverznu ljusku koristeći **`bash`**).
+Otkriveno je da je iz sandbox-a moguće kreirati **Login Item** (aplikacije koje se izvršavaju kada se korisnik prijavi). Međutim, ove aplikacije **se neće izvršiti osim ako** nisu **notarizovane**, a **nije moguće dodati argumente** (zato nije moguće jednostavno pokrenuti reverse shell koristeći **`bash`**).
 
-Iz prethodnog Sandbox zaobilaženja, Microsoft je onemogućio opciju pisanja fajlova u `~/Library/LaunchAgents`. Međutim, otkriveno je da ako stavite **zip fajl kao Login Item**, `Archive Utility` će jednostavno **dekompresovati** ga na trenutnoj lokaciji. Dakle, pošto po defaultu folder `LaunchAgents` iz `~/Library` nije kreiran, bilo je moguće **zipovati plist u `LaunchAgents/~$escape.plist`** i **staviti** zip fajl u **`~/Library`** tako da kada se dekompresuje, doći će do odredišta za postojanost.
+Microsoft je, nakon prethodnog Sandbox bypass-a, onemogućio opciju upisivanja fajlova u `~/Library/LaunchAgents`. Međutim, otkriveno je da, ako postavite **zip fajl kao Login Item**, `Archive Utility` će ga jednostavno **raspakovati** na trenutnoj lokaciji. Pošto se folder `LaunchAgents` iz `~/Library` podrazumevano ne kreira, bilo je moguće **zip-ovati plist u `LaunchAgents/~$escape.plist`** i **postaviti** zip fajl u **`~/Library`**, tako da se prilikom raspakivanja stigne do destinacije za persistence.
 
-Proverite [**originalni izveštaj ovde**](https://objective-see.org/blog/blog_0x4B.html).
+Pogledajte [**originalni izveštaj ovde**](https://objective-see.org/blog/blog_0x4B.html).<sup>[2]</sup>
 
-### Word Sandbox bypass via Login Items and .zshenv
+### Word Sandbox bypass putem Login Items i .zshenv
 
-(Zapamtite da iz prvog bekstva, Word može pisati proizvoljne fajlove čije ime počinje sa `~$`).
+(Imajte na umu da Word, nakon prvog escape-a, može da upisuje proizvoljne fajlove čiji nazivi počinju sa `~$`.)
 
-Međutim, prethodna tehnika je imala ograničenje, ako folder **`~/Library/LaunchAgents`** postoji jer ga je neka druga aplikacija kreirala, to bi propalo. Tako je otkrivena drugačija lanac Login Items za ovo.
+Međutim, prethodna tehnika je imala ograničenje: ako folder **`~/Library/LaunchAgents`** postoji zato što ga je kreirao neki drugi software, tehnika ne bi uspela. Zato je za ovo otkriven drugačiji lanac Login Items.
 
-Napadač bi mogao da kreira fajlove **`.bash_profile`** i **`.zshenv`** sa teretom za izvršavanje i zatim ih zipuje i **piše zip u korisnički** folder žrtve: **`~/~$escape.zip`**.
+Napadač je mogao da kreira fajlove **`.bash_profile`** i **`.zshenv`** sa payload-om za izvršavanje, zatim da ih zip-uje i **upiše zip u korisnički** folder žrtve: **`~/~$escape.zip`**.
 
-Zatim, dodajte zip fajl u **Login Items** i zatim aplikaciju **`Terminal`**. Kada se korisnik ponovo prijavi, zip fajl bi bio dekompresovan u korisničkom folderu, prepisujući **`.bash_profile`** i **`.zshenv`** i stoga će terminal izvršiti jedan od ovih fajlova (u zavisnosti od toga da li se koristi bash ili zsh).
+Zatim bi dodao zip fajl u **Login Items**, a potom i aplikaciju **`Terminal`**. Kada se korisnik ponovo prijavi, zip fajl bi se raspakovao u korisnički folder, prepisujući **`.bash_profile`** i **`.zshenv`**, pa bi Terminal izvršio jedan od tih fajlova (u zavisnosti od toga da li se koristi bash ili zsh).
 
-Proverite [**originalni izveštaj ovde**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c).
+Pogledajte [**originalni izveštaj ovde**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c).<sup>[3]</sup>
 
-### Word Sandbox Bypass with Open and env variables
+### Word Sandbox Bypass pomoću Open i env promenljivih
 
-Iz sandboxovanih procesa još uvek je moguće pozvati druge procese koristeći **`open`** alat. Štaviše, ovi procesi će se izvršavati **unutar svog vlastitog sandbox-a**.
+Iz sandbox-ovanih procesa i dalje je moguće pozivati druge procese pomoću utility-ja **`open`**. Štaviše, ti procesi će se izvršavati **unutar sopstvenog sandbox-a**.
 
-Otkriveno je da open alat ima **`--env`** opciju za pokretanje aplikacije sa **specifičnim env** varijablama. Stoga, bilo je moguće kreirati **`.zshenv` fajl** unutar foldera **unutar** **sandbox-a** i koristiti `open` sa `--env` postavljajući **`HOME` varijablu** na taj folder otvarajući tu `Terminal` aplikaciju, koja će izvršiti `.zshenv` fajl (iz nekog razloga takođe je bilo potrebno postaviti varijablu `__OSINSTALL_ENVIROMENT`).
+Otkriveno je da utility `open` ima opciju **`--env`** za pokretanje aplikacije sa **specifičnim env** promenljivama. Zato je bilo moguće kreirati fajl **`.zshenv`** unutar foldera **u sandbox-u**, a zatim koristiti `open` sa opcijom `--env`, postavljajući promenljivu **`HOME`** na taj folder i otvarajući aplikaciju `Terminal`, koja će izvršiti fajl `.zshenv` (iz nekog razloga bilo je potrebno postaviti i promenljivu `__OSINSTALL_ENVIROMENT`).
 
-Proverite [**originalni izveštaj ovde**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/).
+Pogledajte [**originalni izveštaj ovde**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/).<sup>[4]</sup>
 
-### Word Sandbox Bypass with Open and stdin
+### Word Sandbox Bypass pomoću Open i stdin-a
 
-**`open`** alat takođe podržava **`--stdin`** parametar (i nakon prethodnog zaobilaženja više nije bilo moguće koristiti `--env`).
+Utility **`open`** je takođe podržavao parametar **`--stdin`** (a nakon prethodnog bypass-a više nije bilo moguće koristiti `--env`).
 
-Stvar je u tome da čak i ako je **`python`** potpisan od strane Apple-a, on **neće izvršiti** skriptu sa **`quarantine`** atributom. Međutim, bilo je moguće proslediti mu skriptu iz stdin-a tako da neće proveravati da li je bila u karantinu ili ne:
+Problem je u tome što, iako je **`python`** bio potpisan od strane Apple-a, **neće izvršiti** script sa atributom **`quarantine`**. Međutim, bilo je moguće proslediti mu script preko stdin-a, pa neće proveravati da li je fajl bio u karantinu:
 
-1. Postavite **`~$exploit.py`** fajl sa proizvoljnim Python komandama.
-2. Pokrenite _open_ **`–stdin='~$exploit.py' -a Python`**, što pokreće Python aplikaciju sa našim postavljenim fajlom kao njenim standardnim ulazom. Python rado izvršava naš kod, a pošto je to podproces _launchd_, nije vezan za pravila Word-ovog sandbox-a.
+1. Drop-ujte fajl **`~$exploit.py`** sa proizvoljnim Python komandama.
+2. Pokrenite _open_ **`–stdin='~$exploit.py' -a Python`**, čime se Python aplikacija pokreće tako da naš drop-ovani fajl služi kao njen standardni ulaz. Python bez problema izvršava naš code, a pošto je child process od _launchd_-a, nije ograničen Word-ovim sandbox pravilima.
+
+## Reference
+
+- [1] [Escaping the Sandbox – Microsoft Office on macOS](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/)
+- [2] [Office Drama on macOS](https://objective-see.org/blog/blog_0x4B.html)
+- [3] [Office365 MacOS Sandbox Escape](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c)
+- [4] [Technical Analysis of CVE-2021-30864](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}

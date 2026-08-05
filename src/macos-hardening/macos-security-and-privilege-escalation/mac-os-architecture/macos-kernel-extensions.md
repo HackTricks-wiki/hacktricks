@@ -4,50 +4,50 @@
 
 ## Osnovne informacije
 
-Kernel extensions (Kexts) su **paketi** sa **`.kext`** ekstenzijom koji se **učitavaju direktno u macOS kernel space**, pružajući dodatnu funkcionalnost glavnom operativnom sistemu.
+Kernel extensions (Kexts) su **paketi** sa ekstenzijom **`.kext`** koji se **učitavaju direktno u prostor macOS kernela**, pružajući dodatnu funkcionalnost glavnom operativnom sistemu.
 
-### Status zastarevanja & DriverKit / System Extensions
-Počevši od **macOS Catalina (10.15)** Apple je označio većinu legacy KPI-ova kao *deprecated* i uveo **System Extensions & DriverKit** okvire koji rade u **user-space**. Od **macOS Big Sur (11)** operativni sistem će *odbiti da učita* third-party kexts koji zavise od deprecated KPI-ova osim ako je mašina podignuta u **Reduced Security** režimu. Na Apple Silicon-u, omogućavanje kext-ova dodatno zahteva od korisnika da:
+### Status deprecated funkcionalnosti i DriverKit / System Extensions
+Počev od **macOS Catalina (10.15)**, Apple je većinu legacy KPI-jeva označio kao *deprecated* i uveo **System Extensions & DriverKit** frameworke koji se izvršavaju u **user-space** prostoru. Od verzije **macOS Big Sur (11)**, operativni sistem će *odbiti da učita* third-party kexts koji zavise od deprecated KPI-jeva, osim ako je računar pokrenut u režimu **Reduced Security**. Na Apple Silicon uređajima, omogućavanje kexts dodatno zahteva da korisnik:
 
-1. Reboot-uje u **Recovery** → *Startup Security Utility*.
-2. Izabere **Reduced Security** i štiklira **“Allow user management of kernel extensions from identified developers”**.
-3. Reboot-uje i odobri kext iz **System Settings → Privacy & Security**.
+1. Ponovo pokrene računar u **Recovery** režimu → *Startup Security Utility*.
+2. Izabere **Reduced Security** i označi **“Allow user management of kernel extensions from identified developers”**.
+3. Ponovo pokrene računar i odobri kext u meniju **System Settings → Privacy & Security**.
 
-User-land drajveri napisani sa DriverKit/System Extensions dramatično **smanjuju attack surface** jer su padovi ili korupcija memorije ograničeni na sandboxovani proces umesto na kernel space.
+User-land drivers napisani pomoću DriverKit/System Extensions frameworka značajno **smanjuju attack surface**, jer su crashes ili memory corruption ograničeni na sandboxed process, umesto na kernel space.<sup>[1]</sup>
 
-> 📝 From macOS Sequoia (15) Apple has removed several legacy networking and USB KPIs entirely – the only forward-compatible solution for vendors is to migrate to System Extensions.
+> 📝 Počev od macOS Sequoia (15), Apple je u potpunosti uklonio nekoliko legacy networking i USB KPI-jeva – jedino forward-compatible rešenje za vendors jeste migracija na System Extensions.
 
 ### Zahtevi
 
-Očigledno, ovo je toliko moćno da je **komplikovano učitati kernel extension**. Ovo su **zahtevi** koje kernel extension mora ispuniti da bi bio učitan:
+Očigledno, ovo je toliko moćno da je **učitavanje kernel extension** komplikovano. Ovo su **zahtevi** koje kernel extension mora da ispuni da bi bila učitana:
 
-- Kada se **ulazi u recovery mode**, kernel **extensions moraju biti dozvoljene** za učitavanje:
+- Prilikom **ulaska u recovery mode**, mora biti dozvoljeno da se kernel **extensions učitavaju**:
 
 <figure><img src="../../../images/image (327).png" alt=""><figcaption></figcaption></figure>
 
-- Kernel extension mora biti **potpisan sa kernel code signing certificate**, koji može biti dodeljen samo od strane **Apple**. Apple će detaljno pregledati kompaniju i razloge zbog kojih je potreban.
-- Kernel extension takođe mora biti **notarized**, Apple će moći da ga proveri na malware.
-- Zatim, korisnik **root** je taj koji može **učitati kernel extension** i fajlovi unutar paketa moraju **pripadati root-u**.
-- Tokom procesa otpremanja, paket mora biti pripremljen u **zaštićenoj non-root lokaciji**: `/Library/StagedExtensions` (zahteva `com.apple.rootless.storage.KernelExtensionManagement` grant).
-- Na kraju, prilikom pokušaja učitavanja, korisnik će [**dobiti zahtev za potvrdu**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) i, ako ga prihvati, računar mora biti **restartovan** da bi se učitao.
+- Kernel extension mora biti **potpisana kernel code signing sertifikatom**, koji može da **dodeli samo Apple**. Apple će detaljno proveriti kompaniju i razloge zbog kojih je sertifikat potreban.
+- Kernel extension takođe mora biti **notarized**, kako bi Apple mogao da proveri da li sadrži malware.
+- Zatim, **root** korisnik može da **učita kernel extension**, a fajlovi unutar paketa moraju **pripadati root** korisniku.
+- Tokom procesa uploadovanja, paket mora biti pripremljen na **zaštićenoj lokaciji koja nije root**: `/Library/StagedExtensions` (zahteva `com.apple.rootless.storage.KernelExtensionManagement` grant).
+- Na kraju, prilikom pokušaja učitavanja, korisnik će [**dobiti zahtev za potvrdu**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html), a ako ga prihvati, računar mora biti **restartovan** da bi se extension učitao.
 
 ### Proces učitavanja
 
-U Catalini je to izgledalo ovako: interesantno je primetiti da se proces **verifikacije** odvija u **userland-u**. Međutim, samo aplikacije sa **`com.apple.private.security.kext-management`** grant-om mogu **zahtevati od kernela da učita ekstenziju**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
+U Catalina verziji proces je izgledao ovako: Zanimljivo je napomenuti da se proces **verifikacije** odvija u **userland** prostoru. Međutim, samo aplikacije sa **`com.apple.private.security.kext-management`** grantom mogu **zahtevati od kernela da učita extension**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
 
-1. **`kextutil`** cli **pokreće** proces **verifikacije** za učitavanje ekstenzije
-- Komunicira sa **`kextd`** koristeći **Mach service**.
-2. **`kextd`** će proveriti nekoliko stvari, kao što je **potpis**
-- Komunicira sa **`syspolicyd`** da **proveri** da li ekstenzija može biti **učitana**.
-3. **`syspolicyd`** će **prompt-ovati** **korisnika** ako ekstenzija nije prethodno učitana.
-- **`syspolicyd`** će izvestiti rezultat nazad **`kextd`**-u
-4. **`kextd`** će konačno moći da **naredi kernelu da učita** ekstenziju
+1. **`kextutil`** CLI **pokreće** proces **verifikacije** za učitavanje extensiona
+- Komunicira sa **`kextd`** slanjem poruke putem **Mach servisa**.
+2. **`kextd`** proverava nekoliko stvari, kao što je **signature**
+- Komunicira sa **`syspolicyd`** kako bi **proverio** da li extension može biti **učitan**.
+3. **`syspolicyd`** će **prikazati prompt** **korisniku** ako extension prethodno nije bila učitana.
+- **`syspolicyd`** će prijaviti rezultat procesu **`kextd`**.
+4. **`kextd`** će konačno moći da **naloži kernelu da učita** extension.
 
-Ako **`kextd`** nije dostupan, **`kextutil`** može izvesti iste provere.
+Ako **`kextd`** nije dostupan, **`kextutil`** može da izvrši iste provere.
 
-### Enumeracija & upravljanje (učitani kexts)
+### Enumeracija i upravljanje (učitani kexts)
 
-`kextstat` je bio istorijski alat ali je **deprecated** u novijim macOS izdanjima. Moderni interfejs je **`kmutil`**:
+`kextstat` je bio istorijski alat, ali je u novijim izdanjima macOS-a **deprecated**. Moderna interface je **`kmutil`**:
 ```bash
 # List every extension currently linked in the kernel, sorted by load address
 sudo kmutil showloaded --sort
@@ -66,7 +66,7 @@ kextstat
 # (Deprecated) Get dependencies of the kext number 22
 kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 ```
-`kmutil inspect` se takođe može iskoristiti za **dump the contents of a Kernel Collection (KC)** ili da proveri da kext razrešava sve simboličke zavisnosti:
+`kmutil inspect` se takođe može koristiti za **dump sadržaja Kernel Collection (KC)** ili proveru da li kext razrešava sve zavisnosti simbola:
 ```bash
 # List fileset entries contained in the boot KC
 kmutil inspect -B /System/Library/KernelCollections/BootKernelExtensions.kc --show-fileset-entries
@@ -77,41 +77,41 @@ kmutil libraries -p /Library/Extensions/FancyUSB.kext --undef-symbols
 ## Kernelcache
 
 > [!CAUTION]
-> Even though the kernel extensions are expected to be in `/System/Library/Extensions/`, if you go to this folder you **won't find any binary**. This is because of the **kernelcache** and in order to reverse one `.kext` you need to find a way to obtain it.
+> Iako se očekuje da se kernel extensions nalaze u `/System/Library/Extensions/`, ako odete u ovaj folder **nećete pronaći nijedan binary**. To je zbog **kernelcache-a**, a da biste reverse-engineerovali jedan `.kext`, potrebno je da pronađete način da ga pribavite.
 
-The **kernelcache** is a **pre-compiled and pre-linked version of the XNU kernel**, along with essential device **drivers** and **kernel extensions**. It's stored in a **compressed** format and gets decompressed into memory during the boot-up process. The kernelcache facilitates a **faster boot time** by having a ready-to-run version of the kernel and crucial drivers available, reducing the time and resources that would otherwise be spent on dynamically loading and linking these components at boot time.
+**kernelcache** je **prethodno kompajlirana i prethodno povezana verzija XNU kernela**, zajedno sa osnovnim device **drivers** i **kernel extensions**. Čuva se u **kompresovanom** formatu i dekompresuje se u memoriju tokom procesa bootovanja. kernelcache omogućava **brže bootovanje** tako što obezbeđuje spremnu verziju kernela i ključnih drivers, čime se smanjuju vreme i resursi koji bi inače bili potrebni za njihovo dinamičko učitavanje i povezivanje tokom bootovanja.
 
-The main benefits of the kernelcache is **speed of loading** and that all modules are prelinked (no load time impediment). And that once all modules have been prelinked- KXLD can be removed from memory so **XNU cannot load new KEXTs.**
+Glavne prednosti kernelcache-a su **brzina učitavanja** i činjenica da su svi moduli prethodno povezani (nema usporavanja pri učitavanju). Pošto su svi moduli prethodno povezani, KXLD može biti uklonjen iz memorije, pa **XNU ne može da učita nove KEXTs.**
 
 > [!TIP]
-> The [https://github.com/dhinakg/aeota](https://github.com/dhinakg/aeota) tool decrypts Apple’s AEA (Apple Encrypted Archive / AEA asset) containers — the encrypted container format Apple uses for OTA assets and some IPSW pieces — and can produce the underlying .dmg/asset archive that you can then extract with the provided aastuff tools.
+> Alat [https://github.com/dhinakg/aeota](https://github.com/dhinakg/aeota) dešifruje Apple-ove AEA (Apple Encrypted Archive / AEA asset) kontejnere — format šifrovanog kontejnera koji Apple koristi za OTA assets i neke IPSW delove — i može da generiše osnovni .dmg/asset archive koji zatim možete da ekstraktujete pomoću priloženih aastuff tools.
 
 
-### Lokalni Kernelcache
+### Lokalni Kerlnelcache
 
-In iOS it's located in **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** in macOS you can find it with: **`find / -name "kernelcache" 2>/dev/null`** \
-U mom slučaju na macOS-u pronašao sam ga u:
+U iOS-u se nalazi na lokaciji **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`**, a u macOS-u možete ga pronaći pomoću: **`find / -name "kernelcache" 2>/dev/null`** \
+U mom slučaju, u macOS-u sam ga pronašao na lokaciji:
 
 - `/System/Volumes/Preboot/1BAEB4B5-180B-4C46-BD53-51152B7D92DA/boot/DAD35E7BC0CDA79634C20BD1BD80678DFB510B2AAD3D25C1228BB34BCD0A711529D3D571C93E29E1D0C1264750FA043F/System/Library/Caches/com.apple.kernelcaches/kernelcache`
 
-Pronađi takođe ovde [**kernelcache of version 14 with symbols**](https://x.com/tihmstar/status/1295814618242318337?lang=en).
+Takođe pronađite ovde [**kernelcache verzije 14 sa simbolima**](https://x.com/tihmstar/status/1295814618242318337?lang=en).
 
-#### IMG4 / BVX2 (LZFSE) compressed
+#### IMG4 / BVX2 (LZFSE) kompresovan
 
-The IMG4 file format is a container format used by Apple in its iOS and macOS devices for securely **storing and verifying firmware** components (like **kernelcache**). The IMG4 format includes a header and several tags which encapsulate different pieces of data including the actual payload (like a kernel or bootloader), a signature, and a set of manifest properties. The format supports cryptographic verification, allowing the device to confirm the authenticity and integrity of the firmware component before executing it.
+IMG4 format datoteke je format kontejnera koji Apple koristi na svojim iOS i macOS uređajima za bezbedno **čuvanje i verifikaciju firmware** komponenti (kao što je **kernelcache**). IMG4 format uključuje header i nekoliko tagova koji obuhvataju različite delove podataka, uključujući stvarni payload (kao što su kernel ili bootloader), signature i skup manifest properties. Format podržava cryptographic verification, što uređaju omogućava da potvrdi autentičnost i integritet firmware komponente pre njenog izvršavanja.
 
-It's usually composed of the following components:
+Obično se sastoji od sledećih komponenti:
 
 - **Payload (IM4P)**:
-- Often compressed (LZFSE4, LZSS, …)
-- Optionally encrypted
+- Često kompresovan (LZFSE4, LZSS, …)
+- Opciono enkriptovan
 - **Manifest (IM4M)**:
-- Contains Signature
-- Additional Key/Value dictionary
+- Sadrži Signature
+- Dodatni Key/Value dictionary
 - **Restore Info (IM4R)**:
-- Also known as APNonce
-- Prevents replaying of some updates
-- OPTIONAL: Usually this isn't found
+- Takođe poznat kao APNonce
+- Sprečava replay nekih updates
+- OPCIONO: Ovo se obično ne pronalazi
 
 Dekompresujte Kernelcache:
 ```bash
@@ -130,19 +130,19 @@ disarm -L kernelcache.release.v57 # From unzip ipsw
 # disamer (extract specific parts, e.g. filesets) - [https://newandroidbook.com/tools/disarm.html](https://newandroidbook.com/tools/disarm.html)
 disarm -e filesets kernelcache.release.d23
 ```
-#### Disarm symbols for the kernel
+#### Disarm simboli za kernel
 
-**`Disarm`** omogućava symbolicate funkcija iz kernelcache koristeći matchere. Ti matcheri su samo jednostavna pravila obrasca (tekstualne linije) koja govore disarm kako da prepozna & auto-symbolicate funkcije, argumente i panic/log strings unutar binarnog fajla.
+**`Disarm`** omogućava symbolicate funkcija iz kernelcache-a koristeći matchers. Ovi matchers su samo jednostavna pattern pravila (tekstualne linije) koja govore disarm-u kako da prepozna i automatski symbolicate funkcije, argumente i panic/log stringove unutar binary-ja.
 
-Dakle, u suštini označite string koji funkcija koristi i disarm će ga pronaći i **symbolicate it**.
+Dakle, navedete string koji funkcija koristi, a disarm će ga pronaći i **symbolicate**.
 ```bash
 You can find some `xnu.matchers` in [https://newosxbook.com/tools/disarm.html](https://newosxbook.com/tools/disarm.html) in the **`Matchers`** section. You can also create your own matchers.
 
 ```bash
-# Idi u /tmp/extracted gde je disarm izvukao filesets
-disarm -e filesets kernelcache.release.d23 # Always extract to /tmp/extracted
+# Idite u /tmp/extracted gde je disarm raspakovao filesets
+disarm -e filesets kernelcache.release.d23 # Uvek raspakujte u /tmp/extracted
 cd /tmp/extracted
-JMATCHERS=xnu.matchers disarm --analyze kernel.rebuilt  # Note that xnu.matchers is actually a file with the matchers
+JMATCHERS=xnu.matchers disarm --analyze kernel.rebuilt  # Imajte na umu da je xnu.matchers zapravo fajl sa matcher-ima
 ```
 
 ### Download
@@ -166,7 +166,7 @@ Sometime Apple releases **kernelcache** with **symbols**. You can download some 
 To **extract** the kernel cache you can do:
 
 ```bash
-# Instalirajte ipsw alat
+# Instalirajte alat ipsw
 brew install blacktop/tap/ipsw
 
 # Izvucite samo kernelcache iz IPSW-a
@@ -217,7 +217,7 @@ nm -a kernelcache.release.iphone14.e | wc -l
 With this we can now **extract all the extensions** or the **one you are interested in:**
 
 ```bash
-# Lista svih ekstenzija
+# Izlistaj sve ekstenzije
 kextex -l kernelcache.release.iphone14.e
 ## Izdvoji com.apple.security.sandbox
 kextex -e com.apple.security.sandbox kernelcache.release.iphone14.e
@@ -253,9 +253,11 @@ Apple’s recommended workflow is to build a **Kernel Debug Kit (KDK)** that mat
 ### One-shot local debug of a panic
 
 ```bash
-# Napravite paket za simbolikaciju za najnoviji kernel panic
+# Kreirajte symbolication bundle za najnoviji panic
+```bash
 sudo kdpwrit dump latest.kcdata
 kmutil analyze-panic latest.kcdata -o ~/panic_report.txt
+```
 ```
 
 ### Live remote debugging from another Mac
@@ -274,16 +276,16 @@ reboot
 ```bash
 lldb
 (lldb) kdp-remote "udp://macbook-target"
-(lldb) bt  # get backtrace in kernel context
+(lldb) bt  # dobavi backtrace u kontekstu kernela
 ```
 
 ### Attaching LLDB to a specific loaded kext
 
 ```bash
-# Identifikuj adresu učitavanja kext-a
+# Odredi adresu učitavanja kext-a
 ADDR=$(kmutil showloaded --bundle-identifier com.example.driver | awk '{print $4}')
 
-# Priključi se
+# Poveži se
 sudo lldb -n kernel_task -o "target modules load --file /Library/Extensions/Example.kext/Contents/MacOS/Example --slide $ADDR"
 ```
 
@@ -291,7 +293,7 @@ sudo lldb -n kernel_task -o "target modules load --file /Library/Extensions/Exam
 
 ## References
 
-- DriverKit Security – Apple Platform Security Guide
-- Microsoft Security Blog – *Analyzing CVE-2024-44243 SIP bypass*
+- [1] [DriverKit security for macOS - Apple Platform Security Guide](https://support.apple.com/guide/security/driverkit-security-seca48c92d43/web)
+- [2] [Analyzing CVE-2024-44243, a macOS System Integrity Protection bypass through kernel extensions - Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/)
 
 {{#include ../../../banners/hacktricks-training.md}}

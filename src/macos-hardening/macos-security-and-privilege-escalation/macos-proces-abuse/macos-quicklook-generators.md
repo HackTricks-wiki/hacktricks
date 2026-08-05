@@ -1,23 +1,23 @@
-# macOS Quick Look Generators
+# Quick Look Generatori za macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Osnovne informacije
 
-Quick Look je macOS-ov **okvir za pregled fajlova**. Kada korisnik izabere fajl u Finder, pritisne Space, pređe mišem preko njega, ili pregleda direktorijum sa uključenim thumbnails, Quick Look **automatski učitava generator plugin** da parsira fajl i prikaže vizuelni pregled.
+Quick Look je macOS-ov **framework za pregled datoteka**. Kada korisnik izabere datoteku u Finder-u, pritisne Space, pređe kursorom preko nje ili pregleda direktorijum sa omogućenim sličicama, Quick Look **automatski učitava generator plugin** za parsiranje datoteke i renderovanje vizuelnog pregleda.<sup>[1]</sup>
 
-Quick Look generators su **bundles** (`.qlgenerator`) koji se registruju za specifične **Uniform Type Identifiers (UTIs)**. Kada macOS treba da prikaže preview fajla koji odgovara tom UTI, učitava generator u sandboxovan pomoćni proces (`QuickLookSatellite` or `qlmanage`) i poziva njegovu funkciju generatora.
+Quick Look generatori su **bundle-ovi** (`.qlgenerator`) koji se registruju za određene **Uniform Type Identifiers (UTI-jeve)**. Kada macOS-u treba pregled datoteke koja odgovara tom UTI-ju, učitava generator u sandboxovani pomoćni proces (`QuickLookSatellite` ili `qlmanage`) i poziva njegovu generatorsku funkciju.
 
 ### Zašto je ovo važno za bezbednost
 
 > [!WARNING]
-> Quick Look generatori se aktiviraju **jednostavnim odabirom ili pregledom fajla** — nije potrebna radnja "Open". Ovo ih čini moćnim **pasivnim vektorom eksploatacije**: korisnik samo treba da navigira do direktorijuma koji sadrži zlonamerni fajl.
+> Quick Look generatori se aktiviraju **samim izborom ili pregledom datoteke** — akcija „Open“ nije potrebna. To ih čini moćnim **vektorom pasivne eksploatacije**: korisnik samo treba da ode u direktorijum koji sadrži malicioznu datoteku.
 
-**Površina napada:**
-- Generatori **parsiraju proizvoljan sadržaj fajlova** sa diska, downloads, email priloga, ili mrežnih deljenja
-- Umetnuti fajl može iskoristiti **ranjivosti u parsiranju** (buffer overflows, format strings, type confusion) u kodu generatora
-- Renderovanje preview-a se dešava **automatski** — dovoljno je pregledati Downloads direktorijum u koji je zlonamerni fajl dospeo
-- Quick Look radi u **sandboxovanom pomoćnom procesu**, ali su demonstrirani sandbox escapes iz ovog konteksta
+**Napadna površina:**
+- Generatori **parsiraju proizvoljan sadržaj datoteka** sa diska, iz downloads-a, email priloga ili network share-ova
+- Posebno kreirana datoteka može da iskoristi **ranjivosti u parsiranju** (buffer overflow, format strings, type confusion) u kodu generatora
+- Renderovanje pregleda se odvija **automatski** — dovoljno je otvoriti Downloads folder u koji je dospela maliciozna datoteka
+- Quick Look se izvršava u **sandboxovanom pomoćnom procesu**, ali su sandbox escapes iz ovog konteksta već demonstrirani
 
 ## Arhitektura
 ```
@@ -33,7 +33,7 @@ Preview displayed to user
 ```
 ## Enumeracija
 
-### Lista instaliranih generatora
+### Izlistavanje instaliranih Generatora
 ```bash
 # List all Quick Look generators with their UTI registrations
 qlmanage -m plugins 2>&1
@@ -63,7 +63,7 @@ ORDER BY e.path;"
 
 ### Eksploatacija zasnovana na datotekama
 
-Quick Look generator treće strane koji parsira složene formate datoteka (3D modeli, naučni podaci, formati arhiva) predstavlja primarnu metu:
+Quick Look generator treće strane koji parsira složene formate datoteka (3D modele, naučne podatke, arhivske formate) predstavlja idealnu metu:
 ```bash
 # 1. Identify a third-party generator and its UTI
 qlmanage -m plugins 2>&1 | grep -v "com.apple" | head -20
@@ -80,7 +80,7 @@ cp malicious.xyz ~/Downloads/
 
 # 5. When user opens Downloads in Finder → preview triggers → exploit fires
 ```
-### Drive-By via Downloads
+### Drive-By putem preuzimanja
 ```
 1. Send crafted file via email/AirDrop/web download
 2. File lands in ~/Downloads/
@@ -91,7 +91,7 @@ cp malicious.xyz ~/Downloads/
 ```
 ### Zamena generatora treće strane
 
-Ako je Quick Look generator bundle instaliran u **lokaciji koju korisnik može menjati** (`~/Library/QuickLook/`), može se zameniti:
+Ako je bundle Quick Look generatora instaliran na **lokaciji u koju korisnik može da upisuje** (`~/Library/QuickLook/`), može biti zamenjen:
 ```bash
 # Check for user-writable generators
 ls -la ~/Library/QuickLook/ 2>/dev/null
@@ -100,7 +100,7 @@ ls -la ~/Library/QuickLook/ 2>/dev/null
 # 1. Executes payload when any matching file is previewed
 # 2. Optionally still generates a valid preview to avoid suspicion
 ```
-### Pokrenite Quick Look na daljinu
+### Daljinsko pokretanje Quick Look-a
 ```bash
 # Force Quick Look preview generation (for testing)
 qlmanage -p /path/to/malicious/file
@@ -111,12 +111,12 @@ qlmanage -t /path/to/malicious/file
 # Force thumbnail regeneration for a directory
 qlmanage -r cache
 ```
-## Razmatranja o sandboxu
+## Razmatranja u vezi sa sandboxom
 
-Quick Look generators se pokreću unutar sandboxovanog helper procesa. Sandbox profil ograničava:
-- Pristup datotečnom sistemu (uglavnom samo za čitanje prema fajlu koji se pregledava)
-- Pristup mreži (ograničen)
-- IPC (ograničen mach-lookup)
+Quick Look generators se izvršavaju unutar sandboxovanog pomoćnog procesa. Profil sandboxa ograničava:
+- Pristup sistemu datoteka (uglavnom samo za čitanje datoteke čiji se pregled prikazuje)
+- Mrežni pristup (ograničen)
+- IPC (ograničen `mach-lookup`)
 
 Međutim, sandbox ima poznate vektore za bekstvo:
 ```bash
@@ -127,14 +127,14 @@ sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
 # Quick Look processes may have mach-lookup exceptions to system services
 # A sandbox escape chain: QLGenerator vuln → QuickLookSatellite → mach-lookup → system daemon
 ```
-## CVE iz stvarnog sveta
+## CVE-ovi iz stvarnog sveta
 
 | CVE | Opis |
 |---|---|
-| CVE-2019-8741 | Quick Look preview memory corruption via crafted file |
-| CVE-2018-4293 | Quick Look generator sandbox escape |
-| CVE-2020-9963 | Quick Look preview processing information disclosure |
-| CVE-2021-30876 | Thumbnail generation memory corruption |
+| CVE-2019-8741 | Oštećenje memorije Quick Look preview-a putem posebno napravljene datoteke |
+| CVE-2018-4293 | Izlazak Quick Look generatora iz sandbox-a |
+| CVE-2020-9963 | Otkrivanje informacija tokom obrade Quick Look preview-a |
+| CVE-2021-30876 | Oštećenje memorije tokom generisanja thumbnail-a |
 
 ## Fuzzing Quick Look Generators
 ```bash
@@ -158,10 +158,10 @@ timeout 5 qlmanage -t /tmp/fuzz_input.targetext 2>&1
 log show --last 5s --predicate 'process == "QuickLookSatellite" AND eventMessage CONTAINS "crash"' 2>/dev/null
 done
 ```
-## Izvori
+## Reference
 
-* [Apple Developer — Quick Look Programming Guide](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
-* [Apple Security Updates — Quick Look CVEs](https://support.apple.com/en-us/HT201222)
-* [Objective-See — Quick Look Attack Surface](https://objective-see.org/blog.html)
+- [1] [Apple Developer — Quick Look Programming Guide](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
+- [2] [Apple Security Updates — Quick Look CVEs](https://support.apple.com/en-us/HT201222)
+- [3] [Objective-See — Quick Look Attack Surface](https://objective-see.org/blog.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

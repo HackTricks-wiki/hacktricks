@@ -1,64 +1,64 @@
-# macOS paketi
+# macOS Bundles
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Osnovne informacije
 
-Bundle-i u macOS služe kao kontejneri za različite resurse uključujući aplikacije, biblioteke i druge neophodne fajlove, čineći da se pojavljuju kao jedinstveni objekti u Finder, kao što su poznati `*.app` fajlovi. Najčešće susrećeni bundle je `.app` bundle, iako su česti i drugi tipovi poput `.framework`, `.systemextension` i `.kext`.
+Bundle-ovi u macOS-u služe kao kontejneri za različite resurse, uključujući aplikacije, biblioteke i druge neophodne datoteke, zbog čega se u Finder-u prikazuju kao pojedinačni objekti, poput poznatih `*.app` datoteka. Najčešći bundle je `.app` bundle, mada su rasprostranjeni i drugi tipovi kao što su `.framework`, `.systemextension` i `.kext`.
 
-### Suštinske komponente bundle-a
+### Osnovne komponente bundle-a
 
-Unutar bundle-a, naročito unutar direktorijuma `<application>.app/Contents/`, nalazi se niz važnih resursa:
+Unutar bundle-a, naročito u direktorijumu `<application>.app/Contents/`, nalaze se različiti važni resursi:
 
-- **\_CodeSignature**: Ovaj direktorijum čuva detalje o potpisivanju koda koji su ključni za verifikaciju integriteta aplikacije. Možete pregledati informacije o potpisivanju koda koristeći komande kao što su:
+- **\_CodeSignature**: Ovaj direktorijum čuva detalje potpisivanja koda, koji su ključni za proveru integriteta aplikacije. Informacije o potpisivanju koda možete pregledati pomoću komandi kao što su:
 ```bash
 openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64
 ```
-- **MacOS**: Sadrži izvršni binarni fajl aplikacije koji se pokreće pri interakciji korisnika.
-- **Resources**: Repozitorijum za korisnički interfejs aplikacije, uključujući slike, dokumente i opise interfejsa (nib/xib files).
-- **Info.plist**: Funkcioniše kao glavna konfiguraciona datoteka aplikacije, ključna za to da sistem pravilno prepozna i poveže se sa aplikacijom.
+- **MacOS**: Sadrži izvršni binary aplikacije koji se pokreće nakon interakcije korisnika.
+- **Resources**: Repozitorijum komponenti korisničkog interfejsa aplikacije, uključujući slike, dokumente i opise interfejsa (nib/xib fajlove).
+- **Info.plist**: Služi kao glavna konfiguraciona datoteka aplikacije i ključan je za to da sistem pravilno prepozna aplikaciju i komunicira sa njom.
 
-#### Important Keys in Info.plist
+#### Važni ključevi u Info.plist
 
-Fajl `Info.plist` je kamen temeljac za konfiguraciju aplikacije i sadrži ključeve kao što su:
+Fajl `Info.plist` predstavlja osnovu konfiguracije aplikacije i sadrži ključeve kao što su:
 
-- **CFBundleExecutable**: Navodi ime glavnog izvršnog fajla koji se nalazi u `Contents/MacOS` direktorijumu.
-- **CFBundleIdentifier**: Pruža globalni identifikator aplikacije, koji macOS široko koristi za upravljanje aplikacijama.
+- **CFBundleExecutable**: Navodi naziv glavnog izvršnog fajla koji se nalazi u direktorijumu `Contents/MacOS`.
+- **CFBundleIdentifier**: Obezbeđuje globalni identifikator aplikacije, koji macOS intenzivno koristi za upravljanje aplikacijama.
 - **LSMinimumSystemVersion**: Označava minimalnu verziju macOS-a potrebnu za pokretanje aplikacije.
 
-### Exploring Bundles
+### Istraživanje Bundles
 
-Da biste istražili sadržaj bundle-a, kao što je `Safari.app`, može se upotrebiti sledeća komanda: `bash ls -lR /Applications/Safari.app/Contents`
+Za istraživanje sadržaja bundle-a, kao što je `Safari.app`, može se koristiti sledeća komanda: `bash ls -lR /Applications/Safari.app/Contents`
 
-Ovo istraživanje otkriva direktorijume poput `_CodeSignature`, `MacOS`, `Resources`, i fajlove kao što je `Info.plist`, pri čemu svaki služi jedinstvenoj svrsi — od osiguranja aplikacije do definisanja njenog korisničkog interfejsa i operativnih parametara.
+Ovo istraživanje otkriva direktorijume kao što su `_CodeSignature`, `MacOS`, `Resources` i fajlove kao što je `Info.plist`, pri čemu svaki ima posebnu namenu, od zaštite aplikacije do definisanja njenog korisničkog interfejsa i operativnih parametara.
 
-#### Additional Bundle Directories
+#### Dodatni direktorijumi Bundle-a
 
-Pored uobičajenih direktorijuma, bundle može takođe da uključuje:
+Pored uobičajenih direktorijuma, bundles mogu da sadrže i:
 
-- **Frameworks**: Sadrži ugrađene framework-e koje aplikacija koristi. Frameworks su kao dylibs sa dodatnim resursima.
-- **PlugIns**: Direktorijum za plug-inove i ekstenzije koje proširuju mogućnosti aplikacije.
-- **XPCServices**: Drži XPC servise koje aplikacija koristi za komunikaciju van procesa.
+- **Frameworks**: Sadrži frameworks koje aplikacija koristi. Frameworks su slični dylib fajlovima, ali sa dodatnim resursima.
+- **PlugIns**: Direktorijum za plug-ins i extensions koji proširuju mogućnosti aplikacije.
+- **XPCServices**: Sadrži XPC services koje aplikacija koristi za komunikaciju van procesa.
 
-Ova struktura obezbeđuje da su svi neophodni komponenti enkapsulisani unutar bundle-a, olakšavajući modularno i bezbedno okruženje aplikacije.
+Ova struktura obezbeđuje da sve neophodne komponente budu enkapsulirane unutar bundle-a, čime se omogućava modularno i bezbedno okruženje aplikacije.
 
-For more detailed information on `Info.plist` keys and their meanings, the Apple developer documentation provides extensive resources: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
+Detaljnije informacije o ključevima u `Info.plist` fajlu i njihovom značenju dostupne su u Apple developer dokumentaciji: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
 
-## Security Notes & Abuse Vectors
+## Bezbednosne napomene i Abuse Vectors
 
-- **Gatekeeper / App Translocation**: Kada se karantinovani bundle prvi put izvrši, macOS obavlja dubinsku verifikaciju potpisa i može ga pokrenuti iz nasumično translokovanog puta. Kada je prihvaćen, naredna pokretanja obično rade samo plitke provere; fajlovi resursa u `Resources/`, `PlugIns/`, nibs itd. su istorijski bili neproveravani. Od macOS 13 Ventura se na prvom pokretanju primenjuje dubinska provera i nova *App Management* TCC dozvola ograničava treće procese da menjaju druge bundle-ove bez pristanka korisnika, ali stariji sistemi ostaju ranjivi.
-- **Bundle Identifier collisions**: Više ugrađenih ciljeva (PlugIns, helper tools) koje ponovo koriste isti `CFBundleIdentifier` može pokvariti validaciju potpisa i povremeno omogućiti hijacking/confusion URL‑shema. Uvek enumerišite pod‑bundle‑ove i proverite jedinstvene ID‑eve.
+- **Gatekeeper / App Translocation**: Kada se quarantined bundle prvi put izvrši, macOS obavlja detaljnu proveru potpisa i može ga pokrenuti iz nasumično generisane translocated putanje. Nakon prihvatanja, naredna pokretanja obavljaju samo površinske provere; resource fajlovi u `Resources/`, `PlugIns/`, nib fajlovi itd. istorijski nisu bili proveravani. Od macOS 13 Ventura detaljna provera se sprovodi pri prvom pokretanju, a nova TCC dozvola *App Management* ograničava third-party procese u izmeni drugih bundle-ova bez saglasnosti korisnika, ali stariji sistemi i dalje ostaju ranjivi.
+- **Sukobi Bundle Identifier-a**: Više ugrađenih targeta (PlugIns, helper tools) koji ponovo koriste isti `CFBundleIdentifier` mogu pokvariti validaciju potpisa i povremeno omogućiti hijacking/confusion URL scheme-a. Uvek enumerišite sub-bundle-ove i proverite jedinstvenost ID-jeva.
 
 ## Resource Hijacking (Dirty NIB / NIB Injection)
 
-Pre Venturre, zamenom UI resursa u potpisanoj aplikaciji moglo se zaobići plitko potpisivanje koda i dobiti izvršenje koda sa privilegijama aplikacije. Aktuelna istraživanja (2024) pokazuju da ovo i dalje radi na pre‑Ventura sistemima i na buildovima koji nisu u karantinu:
+Pre Ventura verzije, zamena UI resursa u potpisanoj aplikaciji mogla je da zaobiđe površinsko code signing proveravanje i omogući code execution sa entitlements aplikacije. Aktuelna istraživanja (2024) pokazuju da ovo i dalje funkcioniše na sistemima starijim od Ventura verzije i u un-quarantined build-ovima:<sup>[1][2]</sup>
 
-1. Kopirajte ciljnu aplikaciju na zapisivu lokaciju (npr. `/tmp/Victim.app`).
-2. Zamenite `Contents/Resources/MainMenu.nib` (ili bilo koji nib deklarisan u `NSMainNibFile`) zlonamernim koji instancira `NSAppleScript`, `NSTask`, itd.
-3. Pokrenite aplikaciju. Zlonamerni nib se izvršava pod bundle ID‑jem žrtve i sa njenim entitlements (TCC grants, microphone/camera, itd.).
-4. Ventura+ ublažava rizik dubinskom verifikacijom bundle‑a pri prvom pokretanju i zahtevom za *App Management* dozvolom za kasnije izmene, tako da je postojanost teža, ali napadi pri inicijalnom pokretanju na starijim macOS verzijama i dalje važe.
+1. Kopirajte ciljnu aplikaciju na lokaciju sa dozvolom upisa (npr. `/tmp/Victim.app`).
+2. Zamenite `Contents/Resources/MainMenu.nib` (ili bilo koji nib naveden u `NSMainNibFile`) malicious fajlom koji instancira `NSAppleScript`, `NSTask` itd.
+3. Pokrenite aplikaciju. Malicious nib se izvršava pod bundle ID-jem i entitlements aplikacije žrtve (TCC grants, mikrofon/kamera itd.).
+4. Ventura+ ublažava ovaj problem detaljnom verifikacijom bundle-a pri prvom pokretanju i zahtevom za dozvolom *App Management* pri kasnijim izmenama, zbog čega je persistence otežan, ali napadi pri prvom pokretanju na starijim verzijama macOS-a i dalje funkcionišu.<sup>[1]</sup>
 
-Minimalan primer zlonamernog nib payload‑a (kompajlirajte xib u nib sa `ibtool`):
+Minimalni primer malicious nib payload-a (kompajlirajte xib u nib pomoću `ibtool`):
 ```bash
 # create a nib that runs osascript -e 'do shell script "id"'
 # ...build xib in Xcode, then
@@ -66,11 +66,11 @@ ibtool --compile MainMenu.nib MainMenu.xib
 cp MainMenu.nib /tmp/Victim.app/Contents/Resources/
 open /tmp/Victim.app
 ```
-## Framework / PlugIn / dylib Hijacking unutar Bundles
+## Framework / PlugIn / dylib Hijacking unutar Bundle-ova
 
-Pošto `@rpath` pretrage preferiraju ugrađene Frameworks/PlugIns, ubacivanje zlonamerne biblioteke u `Contents/Frameworks/` ili `Contents/PlugIns/` može preusmeriti redosled učitavanja kada je glavni binarni fajl potpisan bez verifikacije biblioteka ili sa slabim `LC_RPATH` redosledom.
+Pošto `@rpath` pretrage daju prednost bundled Frameworks/PlugIns, ubacivanje zlonamerne biblioteke unutar `Contents/Frameworks/` ili `Contents/PlugIns/` može preusmeriti redosled učitavanja kada je glavni binary potpisan bez library validation mehanizma ili sa slabim redosledom `LC_RPATH` putanja.
 
-Tipični koraci pri zloupotrebi nepotpisanog/ad‑hoc bundle-a:
+Tipični koraci pri zloupotrebi unsigned/ad-hoc bundle-a:
 ```bash
 cp evil.dylib /tmp/Victim.app/Contents/Frameworks/
 install_name_tool -add_rpath @executable_path/../Frameworks /tmp/Victim.app/Contents/MacOS/Victim
@@ -81,10 +81,10 @@ codesign -f -s - --deep --timestamp=none /tmp/Victim.app
 open /tmp/Victim.app
 ```
 Napomene:
-- Hardened runtime sa odsutnim `com.apple.security.cs.disable-library-validation` blokira third‑party dylibs; prvo proverite entitlements.
-- XPC services under `Contents/XPCServices/` često učitavaju sibling frameworks—patch their binaries similarly for persistence or privilege escalation paths.
+- Hardened Runtime bez `com.apple.security.cs.disable-library-validation` blokira dylib biblioteke trećih strana; prvo proverite entitlements.
+- XPC services u okviru `Contents/XPCServices/` često učitavaju susedne frameworks; na sličan način izmenite njihove binarne fajlove radi persistence ili puteva za eskalaciju privilegija.
 
-## Kratki vodič za brzu inspekciju
+## Brzi podsetnik za inspekciju
 ```bash
 # list top-level bundle metadata
 /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" /Applications/App.app/Contents/Info.plist
@@ -101,6 +101,7 @@ otool -L /Applications/App.app/Contents/MacOS/App
 ```
 ## Reference
 
-- [Bringing process injection into view(s): exploiting macOS apps using nib files (2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
-- [Dirty NIB & bundle resource tampering write‑up (2024)](https://karol-mazurek.medium.com/snake-apple-app-bundle-ext-f5c43a3c84c4)
+- [1] [Bringing process injection into view(s): exploiting macOS apps using nib files (2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
+- [2] [Dirty NIB & bundle resource tampering write‑up (2024)](https://karol-mazurek.medium.com/snake-apple-app-bundle-ext-f5c43a3c84c4)
+
 {{#include ../../../banners/hacktricks-training.md}}

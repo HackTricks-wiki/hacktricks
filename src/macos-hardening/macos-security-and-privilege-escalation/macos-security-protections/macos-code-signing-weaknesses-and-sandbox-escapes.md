@@ -1,21 +1,21 @@
-# macOS Code Signing Weaknesses & Sandbox Escapes
+# Slabosti Code Signing-a u macOS-u i Sandbox Escapes
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Ad-Hoc Signed Binaries
+## Ad-Hoc potpisani binarni fajlovi
 
-### Basic Information
+### Osnovne informacije
 
-**Ad-hoc signing** (`CS_ADHOC`) pravi code signature sa **bez certificate chain** — to je hash koda bez verifikacije identiteta developera. Poreklo binarnog fajla se ne može pratiti do bilo kog developera ili organizacije.
+**Ad-hoc signing** (`CS_ADHOC`) kreira code signature bez **certificate chain-a** — to je hash koda bez verifikacije identiteta developera. Poreklo binarnog fajla ne može se povezati ni sa jednim developerom ili organizacijom.
 
-Na Apple Silicon Macs, svi izvršni fajlovi zahtevaju najmanje ad-hoc potpis. To znači da ćete naći ad-hoc potpise na mnogim development alatima, Homebrew paketima i third-party utilitijima.
+Na Mac računarima sa Apple Silicon-om, svi executable fajlovi zahtevaju najmanje ad-hoc signature. To znači da ćete ad-hoc signature pronaći na mnogim development alatima, Homebrew paketima i third-party utility-jima.
 
-### Why This Matters
+### Zašto je ovo važno
 
-- **No verifiable identity** — binarni fajl se može zameniti bez otkrivanja od strane provera zasnovanih na identitetu
-- Third-party ad-hoc binarni fajlovi na **privileged positions** (FDA, daemon, helpers) su mete visokog prioriteta
-- Na nekim konfiguracijama, ad-hoc potpisi možda **ne budu proveravani as strictly** kao developer-signed code
-- Ad-hoc potpisani binarni fajlovi koji imaju **TCC grants** su posebno vredni — grantovi opstaju čak i ako se sadržaj binarnog fajla promeni (zavisi kako je TCC keyed the grant)
+- **Nema identiteta koji može da se verifikuje** — binarni fajl može biti zamenjen bez detekcije pomoću provera zasnovanih na identitetu
+- Third-party ad-hoc binarni fajlovi na **privilegovanim pozicijama** (FDA, daemon, helpers) predstavljaju high-priority targets
+- U nekim konfiguracijama, ad-hoc signature možda **neće biti verifikovan jednako strogo** kao code koji je potpisao developer
+- Ad-hoc potpisani binarni fajlovi koji imaju **TCC grants** naročito su vredni — grants opstaju čak i ako se sadržaj binarnog fajla promeni (zavisi od načina na koji je TCC povezao grant)
 
 ### Discovery
 ```bash
@@ -50,16 +50,16 @@ codesign -s - /path/to/target
 ```
 ---
 
-## Procesi koji se mogu debugovati (get-task-allow)
+## Procesi kojima se može upravljati pomoću debugger-a (get-task-allow)
 
 ### Osnovne informacije
 
-The **`com.apple.security.get-task-allow`** entitlement (or `CS_GET_TASK_ALLOW` flag) omogućava **bilo kojem procesu da se prikači kao debugger**, čitajući memoriju, menjajući registre, ubacujući kod i kontrolišući izvršavanje.
+**`com.apple.security.get-task-allow`** entitlement (ili **`CS_GET_TASK_ALLOW`** flag) omogućava **bilo kom procesu da se prikači kao debugger**, čita memoriju, menja registre, ubacuje kod i kontroliše izvršavanje.
 
-Ovo je namenjeno **samo za development builds**. Međutim, neke third-party binarne dolaze sa ovim entitlement-om u produkciji.
+Ovo je namenjeno **isključivo development build-ovima**. Međutim, neki third-party binariji isporučuju ovaj entitlement u production okruženju.
 
 > [!CAUTION]
-> A production binary with `get-task-allow` is an **instant exploitation primitive**. Any local process can call `task_for_pid()`, get the target's Mach task port, and inject arbitrary code that runs with the target's entitlements, TCC grants, and security context.
+> Production binarij sa **`get-task-allow`** predstavlja **trenutni exploitation primitive**. Bilo koji lokalni proces može pozvati `task_for_pid()`, dobiti Mach task port ciljnog procesa i ubaciti proizvoljan kod koji se izvršava sa entitlement-ima, TCC dozvolama i security kontekstom ciljnog procesa.
 
 ### Otkrivanje
 ```bash
@@ -76,7 +76,7 @@ JOIN capabilities c ON ec.capability_id = c.id
 WHERE c.name = 'get_task_allow_signature'
 ORDER BY e.privileged DESC;"
 ```
-### Napad: Task Port Injection
+### Attack: Task Port Injection
 ```c
 #include <mach/mach.h>
 #include <mach/mach_vm.h>
@@ -103,15 +103,15 @@ VM_PROT_READ | VM_PROT_EXECUTE);
 ```
 ---
 
-## Bez validacije biblioteka + DYLD okruženje
+## No Library Validation + DYLD Environment
 
 ### Smrtonosna kombinacija
 
-Kada binarni fajl ima **oba**:
+Kada binary ima **oba**:
 - `com.apple.security.cs.disable-library-validation` (učitava bilo koji dylib)
 - `com.apple.security.cs.allow-dyld-environment-variables` (prihvata DYLD env vars)
 
-Ovo je **zagarantovani primitiv za injektovanje koda** — `DYLD_INSERT_LIBRARIES` radi savršeno.
+Ovo je **zagarantovani code injection primitive** — `DYLD_INSERT_LIBRARIES` radi savršeno.
 
 ### Otkrivanje
 ```bash
@@ -129,7 +129,7 @@ SELECT path, privileged, tccPermsStr FROM executables
 WHERE noLibVal = 1 AND allowDyldEnv = 1
 ORDER BY privileged DESC;"
 ```
-### Napad: DYLD_INSERT_LIBRARIES Injection
+### Attack: DYLD_INSERT_LIBRARIES Injection
 ```bash
 # 1. Create the injection dylib
 cat > /tmp/inject.c << 'EOF'
@@ -166,23 +166,23 @@ cat /tmp/injected_proof.txt
 ```
 ---
 
-## Privremeni izuzeci za Sandbox
+## Privremeni izuzeci Sandbox-a
 
-### Kako oni oslabljuju Sandbox
+### Kako slabe Sandbox
 
-Privremeni izuzeci za Sandbox (`com.apple.security.temporary-exception.*`) prave rupe u App Sandbox:
+Privremeni izuzeci Sandbox-a (`com.apple.security.temporary-exception.*`) prave rupe u App Sandbox-u:
 
 | Izuzetak | Šta omogućava |
 |---|---|
 | `temporary-exception.mach-lookup.global-name` | Povezivanje sa sistemskim XPC/Mach servisima |
-| `temporary-exception.files.absolute-path.read-write` | Čitanje/pisanje fajlova van kontejnera aplikacije |
-| `temporary-exception.iokit-user-client-class` | Otvaranje IOKit user-client konekcija |
+| `temporary-exception.files.absolute-path.read-write` | Čitanje/upisivanje datoteka izvan kontejnera aplikacije |
+| `temporary-exception.iokit-user-client-class` | Otvaranje IOKit user-client veza |
 | `temporary-exception.shared-preference.read-only` | Čitanje podešavanja drugih aplikacija |
 | `temporary-exception.files.home-relative-path.read-write` | Pristup putanjama relativnim u odnosu na `~` |
 
-### Mach-Lookup izuzeci = Sandbox Escape primitiv
+### Mach-Lookup Exceptions = Sandbox Escape Primitive
 
-Najopasniji izuzetak je **mach-lookup** — omogućava aplikaciji u Sandbox-u da komunicira sa privilegovanim daemonima:
+Najopasniji izuzetak je **mach-lookup** — omogućava sandboxed aplikaciji da komunicira sa privilegovanim daemonima:
 ```bash
 # Find apps with mach-lookup exceptions
 find /Applications -name "*.app" -exec sh -c '
@@ -196,7 +196,7 @@ echo "[$count exceptions] $(basename "$1")"
 }
 ' _ {} \; 2>/dev/null | sort -rn
 ```
-### Napad: Sandbox Escape via Mach-Lookup
+### Napad: Sandbox Escape putem Mach-Lookup
 ```
 1. Compromise sandboxed app (renderer exploit, malicious document, etc.)
 2. Read entitlements to discover mach-lookup exceptions
@@ -209,23 +209,23 @@ c. Fuzz each exposed method
 ```
 ---
 
-## Privatne Apple entitlements
+## Privatna Apple Entitlements
 
 ### Šta su
 
-Entitlements prefixed with `com.apple.private.*` pružaju pristup **internim Apple API-jima** koji nisu dokumentovani niti dostupni developerima treće strane. Binarni fajlovi trećih strana sa privatnim entitlements dobijaju ih putem enterprise cert, MDM, ili distribucije van App Store-a.
+Entitlements sa prefiksom `com.apple.private.*` pružaju pristup **Apple internim API-jima** koji nisu dokumentovani niti dostupni third-party developerima. Third-party binariji sa privatnim entitlements dobijali su ih putem enterprise cert, MDM-a ili distribucije van App Store-a.
 
-### Opasne privatne entitlements
+### Opasni privatni Entitlements
 
-| Entitlement | Capability |
+| Entitlement | Mogućnost |
 |---|---|
-| `com.apple.private.tcc.manager` | Puno čitanje/pisanje TCC baze podataka |
+| `com.apple.private.tcc.manager` | Potpuno čitanje/upis u TCC bazu podataka |
 | `com.apple.private.tcc.allow` | Pristup određenim TCC servisima |
-| `com.apple.private.security.no-sandbox` | Pokretanje bez sandboxa |
+| `com.apple.private.security.no-sandbox` | Pokretanje bez sandbox-a |
 | `com.apple.private.iokit` | Direktan pristup IOKit drajverima |
 | `com.apple.private.kernel.\*` | Pristup kernel interfejsu |
-| `com.apple.private.xpc.launchd.job-label` | Registracija/upravljanje launchd zadacima |
-| `com.apple.rootless.install` | Pisanje u SIP-zaštićene putanje |
+| `com.apple.private.xpc.launchd.job-label` | Registrovanje/upravljanje launchd poslovima |
+| `com.apple.rootless.install` | Upis u putanje zaštićene SIP-om |
 
 ### Otkrivanje
 ```bash
@@ -246,13 +246,13 @@ ORDER BY privileged DESC;"
 ```
 ---
 
-## Prilagođeni Sandbox profili (SBPL)
+## Custom Sandbox Profiles (SBPL)
 
 ### Šta su
 
-Binarni fajlovi mogu dolaziti sa **prilagođenim sandbox profilima** napisanim u SBPL (Seatbelt Profile Language). Ovi profili mogu biti strožiji ILI **manje restriktivni** od podrazumevanog App Sandbox.
+Binarne datoteke mogu sadržati **custom sandbox profile** napisane u SBPL-u (Seatbelt Profile Language). Ovi profili mogu biti restriktivniji ILI **permisivniji** od podrazumevanog App Sandbox-a.
 
-### Revizija prilagođenih profila
+### Auditing Custom Profiles
 ```bash
 # Find custom sandbox profiles
 find /Applications /System -name "*.sb" -o -name "*.sbpl" 2>/dev/null
@@ -270,11 +270,11 @@ cat /path/to/custom.sb | grep "(allow" | sort -u
 ```
 ---
 
-## Upisive putanje biblioteka
+## Putanje biblioteka sa dozvolom upisa
 
 ### Šta su
 
-Kada binarni fajl učita dinamičku biblioteku iz putanje u kojoj trenutni korisnik može **pisati**, biblioteka može biti zamenjena zlonamernim kodom.
+Kada binarna datoteka učitava dinamičku biblioteku sa putanje u koju trenutni korisnik može da **upisuje**, biblioteka može biti zamenjena zlonamernim kodom.
 
 ### Otkrivanje
 ```bash
@@ -317,11 +317,12 @@ cp /tmp/evil.dylib /path/to/writable.dylib
 
 # 5. When the daemon restarts, it loads the evil dylib with daemon privileges
 ```
-## Referencije
+## Reference
 
-* [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
-* [Apple Developer — App Sandbox](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
-* [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
-* [The Evil Bit — clear-library-validation](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/)
+- [1] [Apple Developer — Vodič za potpisivanje koda](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
+- [2] [Apple Developer — App Sandbox](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
+- [3] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
+- [4] [XNU — `bsd/sys/codesign.h` (operacije `CS_OPS_*` i `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [5] [XNU — `bsd/kern/kern_proc.c` (handler za `csops` / `CS_OPS_CLEAR_LV`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
 
 {{#include ../../../banners/hacktricks-training.md}}

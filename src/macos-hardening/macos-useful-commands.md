@@ -1,14 +1,14 @@
-# macOS Korisne komande
+# Korisne macOS komande
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Alati za automatsku enumeraciju macOS-a
+### Alati za automatsku enumeraciju na macOS-u
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Specifične komande za macOS
+### Specifične macOS komande
 ```bash
 #System info
 date
@@ -115,17 +115,17 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Brza anti-analiza / provera virtualizacije
+### Brza anti-analysis / virtualization provera
 
-Neki macOS stealeri pozivaju `system_profiler` da bi otkrili VMs i **prekinu izvršavanje sa posebnim exit code-om (npr. 100)** kako bi izbegli detonaciju u sandboxu:
+Neki macOS stealers pozivaju `system_profiler` da detektuju VM-ove i **prekinu izvršavanje sa specifičnim exit code-om (npr. 100)** kako bi izbegli sandbox detonation<sup>[1]</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### Instalirani softver & servisi
+### Instalirani softver i servisi
 
-Proverite prisustvo **sumnjivih** instaliranih aplikacija i **privilegije** nad instaliranim resursima:
+Proverite da li su instalirane **sumnjive** aplikacije i **privilegije** nad instaliranim resursima:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -143,7 +143,7 @@ launchctl print system
 # will print detailed information about the specific launch agent. And if it’s not running or you’ve mistyped, you will get some output with a non-zero exit code: Could not find service “com.company.launchagent.label” in domain for login
 launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
-### Kreiraj korisnika
+### Kreiranje korisnika
 
 Bez upita
 
@@ -151,6 +151,6 @@ Bez upita
 
 ## Reference
 
-- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

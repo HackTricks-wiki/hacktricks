@@ -4,21 +4,21 @@
 
 ## Osnovne informacije
 
-**NVRAM** (Non-Volatile Random-Access Memory) stores **boot-time and firmware-level configuration** on Mac hardware. Najkritičnije promenljive za bezbednost uključuju:
+**NVRAM** (Non-Volatile Random-Access Memory) čuva **konfiguraciju pri pokretanju i konfiguraciju na nivou firmware-a** na Mac hardveru. Najvažnije bezbednosne promenljive uključuju:
 
-| Variable | Svrha |
+| Promenljiva | Svrha |
 |---|---|
-| `boot-args` | Kernel boot arguments (debug flags, verbose boot, AMFI bypass) |
-| `csr-active-config` | **SIP configuration bitmask** — kontroliše koje zaštite su aktivne |
+| `boot-args` | Kernel argumenti pri pokretanju (debug oznake, verbose boot, AMFI bypass) |
+| `csr-active-config` | **SIP konfiguraciona bitmaska** — kontroliše koje su zaštite aktivne |
 | `SystemAudioVolume` | Jačina zvuka pri pokretanju |
 | `prev-lang:kbd` | Preferirani jezik / raspored tastature |
 | `efi-boot-device-data` | Izbor uređaja za pokretanje |
 
-Na modernim Mac računarima, NVRAM promenljive su podeljene između **system** promenljivih (zaštićenih pomoću Secure Boot) i **non-system** promenljivih. Apple Silicon Macs koriste **Secure Storage Component (SSC)** da kriptografski vežu NVRAM stanje za boot lanac.
+Na novijim Mac računarima, NVRAM promenljive su podeljene na **sistemske** promenljive (zaštićene pomoću Secure Boot-a) i **nesistemske** promenljive. Mac računari sa Apple Silicon koriste **Secure Storage Component (SSC)** za kriptografsko povezivanje stanja NVRAM-a sa boot chain-om.<sup>[1]</sup>
 
-## NVRAM Access from User Space
+## Pristup NVRAM-u iz korisničkog prostora
 
-### Reading NVRAM
+### Čitanje NVRAM-a
 ```bash
 # List all NVRAM variables
 nvram -p
@@ -33,9 +33,9 @@ nvram -xp
 nvram csr-active-config
 csrutil status
 ```
-### Pisanje u NVRAM
+### Upisivanje NVRAM-a
 
-Pisanje promenljivih u NVRAM zahteva **root privileges** i, za sistemski kritične promenljive (kao `csr-active-config`), proces mora imati određene code-signing flags ili entitlements:
+Upisivanje NVRAM promenljivih zahteva **root privilegije**, a za sistemski kritične promenljive (kao što je `csr-active-config`), proces mora imati posebne zastavice za code-signing ili entitlements:
 ```bash
 # Set boot-args (requires root)
 sudo nvram boot-args="debug=0x144 kcsuffix=development"
@@ -46,11 +46,11 @@ sudo nvram -d boot-args
 # Set a custom variable
 sudo nvram MyCustomVar="persistence-value"
 ```
-## CS_NVRAM_UNRESTRICTED Flag
+## Zastavica CS_NVRAM_UNRESTRICTED
 
-Binaries sa **`CS_NVRAM_UNRESTRICTED`** code-signing flag mogu da menjaju NVRAM promenljive koje su obično zaštićene čak i od root korisnika.
+Binarni fajlovi sa zastavicom **`CS_NVRAM_UNRESTRICTED`** za potpisivanje koda mogu da menjaju NVRAM promenljive koje su obično zaštićene čak i od root korisnika.
 
-### Pronalaženje NVRAM-Unrestricted Binaries
+### Pronalaženje binarnih fajlova sa ograničenjem NVRAM-a uklonjenim
 ```bash
 # Check code signing flags for a binary
 codesign -dvvv /usr/sbin/nvram 2>&1 | grep "flags="
@@ -59,7 +59,7 @@ codesign -dvvv /usr/sbin/nvram 2>&1 | grep "flags="
 
 ### Slabljenje SIP-a putem NVRAM-a
 
-Ako napadač može da piše u NVRAM (bilo putem kompromitovanog NVRAM-unrestricted binary ili iskorišćavanjem ranjivosti), može da izmeni `csr-active-config` kako bi **onemogućio SIP zaštite pri narednom pokretanju**:
+Ako napadač može da upisuje u NVRAM (bilo putem kompromitovanog binary-ja bez ograničenja za NVRAM ili iskorišćavanjem ranjivosti), može da izmeni `csr-active-config` kako bi **onemogućio SIP zaštite pri sledećem pokretanju**:
 ```bash
 # SIP configuration is a bitmask stored in NVRAM
 # Each bit controls a different SIP protection:
@@ -79,9 +79,9 @@ nvram csr-active-config | xxd
 # nvram csr-active-config=%7f%00%00%00   # Disable most SIP protections
 ```
 > [!WARNING]
-> Na modernim Apple Silicon Mac-ovima, **Secure Boot chain** validira promene u NVRAM-u i sprečava runtime modifikaciju SIP-a. Promene u `csr-active-config` stupaju na snagu samo kroz recoveryOS. Međutim, na **Intel Macs** ili sistemima sa **reduced security mode**, manipulacija NVRAM-om i dalje može oslabiti SIP.
+> Na modernim Apple Silicon Mac računarima, **Secure Boot chain** validira promene u NVRAM-u i sprečava runtime izmenu SIP-a. Promene `csr-active-config` imaju efekta samo kroz recoveryOS. Međutim, na **Intel Mac računarima** ili sistemima sa **reduced security mode**, manipulacija NVRAM-om i dalje može oslabiti SIP.
 
-### Enabling Kernel Debugging
+### Omogućavanje Kernel Debugging-a
 ```bash
 # Enable kernel debug flags via boot-args
 sudo nvram boot-args="debug=0x144"
@@ -95,9 +95,9 @@ sudo nvram boot-args="debug=0x144"
 # Use development kernel
 sudo nvram boot-args="kcsuffix=development"
 ```
-### Firmware Persistence
+### Perzistencija u firmware-u
 
-NVRAM izmene **prežive reinstalaciju OS-a** — one ostaju na nivou firmvera. Napadač može upisati prilagođene NVRAM promenljive koje mehanizam za persistenciju učitava pri pokretanju:
+NVRAM izmene **preživljavaju reinstalaciju OS-a** — ostaju prisutne na nivou firmware-a. Napadač može da upiše prilagođene NVRAM promenljive koje mehanizam perzistencije čita pri pokretanju:
 ```bash
 # Write a persistence marker
 nvram attacker-payload-config="base64_encoded_config_here"
@@ -106,11 +106,11 @@ nvram attacker-payload-config="base64_encoded_config_here"
 nvram attacker-payload-config 2>/dev/null && /path/to/payload
 ```
 > [!CAUTION]
-> Postojanost NVRAM-a preživi brisanje diska i ponovnu instalaciju OS-a. Za njegovo brisanje je potreban **PRAM/NVRAM reset** (Command+Option+P+R na Intel Macs) ili **DFU restore** (Apple Silicon) to clear.
+> NVRAM persistence preživljava brisanje diska i ponovne instalacije OS-a. Za njeno uklanjanje potreban je **PRAM/NVRAM reset** (Command+Option+P+R na Intel Mac računarima) ili **DFU restore** (Apple Silicon).
 
 ### AMFI Bypass
 
-Boot argument `amfi_get_out_of_my_way=1` onemogućava **Apple Mobile File Integrity**, omogućavajući izvršavanje unsigned code:
+Boot argument `amfi_get_out_of_my_way=1` onemogućava **Apple Mobile File Integrity**, omogućavajući izvršavanje unsigned code-a:
 ```bash
 # This requires NVRAM write access AND reduced security boot:
 sudo nvram boot-args="amfi_get_out_of_my_way=1"
@@ -120,11 +120,11 @@ sudo nvram boot-args="amfi_get_out_of_my_way=1"
 | CVE | Opis |
 |---|---|
 | CVE-2020-9839 | Manipulacija NVRAM-om koja omogućava trajno zaobilaženje SIP-a |
-| CVE-2019-8779 | Perzistencija NVRAM-a na nivou firmvera na T2 Macs |
-| CVE-2022-22583 | PackageKit, vezano za NVRAM, privilege escalation |
-| CVE-2020-10004 | Logička greška u rukovanju NVRAM-om koja omogućava modifikaciju sistema |
+| CVE-2019-8779 | NVRAM persistence na nivou firmware-a na T2 Mac računarima |
+| CVE-2022-22583 | Privilege escalation povezan sa NVRAM-om u okviru PackageKit-a |
+| CVE-2020-10004 | Logički problem u rukovanju NVRAM-om koji omogućava izmene sistema |
 
-## Skript za enumeraciju
+## Enumeration Script
 ```bash
 #!/bin/bash
 echo "=== NVRAM Security Audit ==="
@@ -152,10 +152,10 @@ done
 echo -e "\n[*] Non-Standard Variables (potential persistence):"
 nvram -p | grep -v "^$" | grep -vE "^(SystemAudioVolume|boot-args|csr-active-config|prev-lang|LocationServicesEnabled|fmm-mobileme-token|bluetoothInternalControllerAddress|bluetoothActiveControllerInfo|SystemAudioVolumeExtension|efi-)" | head -20
 ```
-## Izvori
+## Reference
 
-* [Apple Platform Security Guide — Boot process](https://support.apple.com/guide/security/boot-process-secac71d5623/web)
-* [Apple Security Updates — NVRAM-related CVEs](https://support.apple.com/en-us/HT201222)
-* [Duo Labs — Apple T2 Security](https://duo.com/labs/research/apple-t2-xpc)
+- [1] [Apple Platform Security Guide — Proces pokretanja](https://support.apple.com/guide/security/boot-process-secac71d5623/web)
+- [2] [Apple Security Updates — CVE-ovi povezani sa NVRAM-om](https://support.apple.com/en-us/HT201222)
+- [3] [Duo Labs — Apple T2 bezbednost](https://duo.com/labs/research/apple-t2-xpc)
 
 {{#include ../../../banners/hacktricks-training.md}}

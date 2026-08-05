@@ -1,81 +1,82 @@
-# macOS System Extensions
+# Sistemske ekstenzije za macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## System Extensions / Endpoint Security Framework
 
-Za razliku od Kernel Extensions, **System Extensions se izvršavaju u korisničkom prostoru** umesto u kernel prostoru, smanjujući rizik od pada sistema zbog kvara ekstenzije.
+Za razliku od Kernel Extensions, **System Extensions se izvršavaju u korisničkom prostoru** umesto u prostoru kernela, čime se smanjuje rizik od pada sistema usled neispravnog rada ekstenzije.
 
 <figure><img src="../../../images/image (606).png" alt="https://knight.sc/images/system-extension-internals-1.png"><figcaption></figcaption></figure>
 
-Postoje tri tipa sistemskih ekstenzija: **DriverKit** ekstenzije, **Network** ekstenzije i **Endpoint Security** ekstenzije.
+Postoje tri vrste sistemskih ekstenzija: **DriverKit** Extensions, **Network** Extensions i **Endpoint Security** Extensions.
 
 ### **DriverKit Extensions**
 
-DriverKit je zamena za kernel ekstenzije koje **obezbeđuju hardversku podršku**. Omogućava drajverima uređaja (kao što su USB, Serial, NIC i HID drajveri) da se izvršavaju u korisničkom prostoru umesto u kernel prostoru. DriverKit okvir uključuje **verzije određenih I/O Kit klasa u korisničkom prostoru**, a kernel prosleđuje normalne I/O Kit događaje u korisnički prostor, nudeći sigurnije okruženje za rad ovih drajvera.
+DriverKit je zamena za kernel extensions koje **obezbeđuju podršku za hardver**. Omogućava da se device drivers, kao što su USB, Serial, NIC i HID drivers, izvršavaju u korisničkom prostoru umesto u prostoru kernela. DriverKit framework uključuje **user space verzije određenih I/O Kit klasa**, a kernel prosleđuje uobičajene I/O Kit događaje u korisnički prostor, pružajući bezbednije okruženje za izvršavanje ovih drivers.<sup>[2]</sup>
 
 ### **Network Extensions**
 
-Network Extensions pružaju mogućnost prilagođavanja mrežnih ponašanja. Postoji nekoliko tipova Network Extensions:
+Network Extensions omogućavaju prilagođavanje ponašanja mreže. Postoji nekoliko vrsta Network Extensions:
 
-- **App Proxy**: Ovo se koristi za kreiranje VPN klijenta koji implementira protokol prilagođen VPN-u orijentisan na tok. To znači da upravlja mrežnim saobraćajem na osnovu veza (ili tokova) umesto pojedinačnih paketa.
-- **Packet Tunnel**: Ovo se koristi za kreiranje VPN klijenta koji implementira protokol prilagođen VPN-u orijentisan na pakete. To znači da upravlja mrežnim saobraćajem na osnovu pojedinačnih paketa.
-- **Filter Data**: Ovo se koristi za filtriranje mrežnih "tokova". Može pratiti ili modifikovati mrežne podatke na nivou toka.
-- **Filter Packet**: Ovo se koristi za filtriranje pojedinačnih mrežnih paketa. Može pratiti ili modifikovati mrežne podatke na nivou paketa.
-- **DNS Proxy**: Ovo se koristi za kreiranje prilagođenog DNS provajdera. Može se koristiti za praćenje ili modifikovanje DNS zahteva i odgovora.
+- **App Proxy**: Koristi se za kreiranje VPN klijenta koji implementira flow-oriented, prilagođeni VPN protokol. To znači da obrađuje mrežni saobraćaj na osnovu konekcija (ili flow-ova), a ne pojedinačnih paketa.
+- **Packet Tunnel**: Koristi se za kreiranje VPN klijenta koji implementira packet-oriented, prilagođeni VPN protokol. To znači da obrađuje mrežni saobraćaj na osnovu pojedinačnih paketa.
+- **Filter Data**: Koristi se za filtriranje mrežnih "flow-ova". Može da nadgleda ili menja mrežne podatke na nivou flow-a.
+- **Filter Packet**: Koristi se za filtriranje pojedinačnih mrežnih paketa. Može da nadgleda ili menja mrežne podatke na nivou paketa.
+- **DNS Proxy**: Koristi se za kreiranje prilagođenog DNS provajdera. Može da se koristi za nadgledanje ili menjanje DNS zahteva i odgovora.<sup>[2]</sup>
 
 ## Endpoint Security Framework
 
-Endpoint Security je okvir koji pruža Apple u macOS-u i koji obezbeđuje skup API-ja za bezbednost sistema. Namenjen je za korišćenje od strane **bezbednosnih provajdera i developera za izradu proizvoda koji mogu pratiti i kontrolisati aktivnost sistema** kako bi identifikovali i zaštitili se od zlonamernih aktivnosti.
+Endpoint Security je framework koji Apple obezbeđuje u macOS-u i koji pruža skup API-ja za bezbednost sistema. Namenjen je **security vendorima i developerima za izradu proizvoda koji mogu da nadgledaju i kontrolišu aktivnosti sistema** radi identifikovanja i zaštite od zlonamernih aktivnosti.
 
-Ovaj okvir pruža **kolekciju API-ja za praćenje i kontrolu aktivnosti sistema**, kao što su izvršenja procesa, događaji u datotečnom sistemu, mrežni i kernel događaji.
+Ovaj framework pruža **kolekciju API-ja za nadgledanje i kontrolu aktivnosti sistema**, kao što su izvršavanje procesa, događaji u fajl sistemu, mrežni događaji i događaji kernela.
 
-Osnova ovog okvira je implementirana u kernelu, kao Kernel Extension (KEXT) lociran na **`/System/Library/Extensions/EndpointSecurity.kext`**. Ovaj KEXT se sastoji od nekoliko ključnih komponenti:
+Jezgro ovog frameworka implementirano je u kernelu, kao Kernel Extension (KEXT), koja se nalazi na lokaciji **`/System/Library/Extensions/EndpointSecurity.kext`**.<sup>[2]</sup> Ovaj KEXT se sastoji od nekoliko ključnih komponenti:
 
-- **EndpointSecurityDriver**: Ovo deluje kao "ulazna tačka" za kernel ekstenziju. To je glavno mesto interakcije između OS-a i Endpoint Security okvira.
-- **EndpointSecurityEventManager**: Ova komponenta je odgovorna za implementaciju kernel hook-ova. Kernel hook-ovi omogućavaju okviru da prati sistemske događaje presretanjem sistemskih poziva.
-- **EndpointSecurityClientManager**: Ovo upravlja komunikacijom sa klijentima u korisničkom prostoru, prateći koji klijenti su povezani i treba da prime obaveštenja o događajima.
-- **EndpointSecurityMessageManager**: Ovo šalje poruke i obaveštenja o događajima klijentima u korisničkom prostoru.
+- **EndpointSecurityDriver**: Funkcioniše kao "ulazna tačka" za kernel extension. Predstavlja glavnu tačku interakcije između OS-a i Endpoint Security frameworka.
+- **EndpointSecurityEventManager**: Ova komponenta je zadužena za implementaciju kernel hooks. Kernel hooks omogućavaju frameworku da nadgleda sistemske događaje presretanjem system calls.
+- **EndpointSecurityClientManager**: Upravlja komunikacijom sa klijentima u korisničkom prostoru, vodeći evidenciju o tome koji su klijenti povezani i koji treba da primaju obaveštenja o događajima.
+- **EndpointSecurityMessageManager**: Šalje poruke i obaveštenja o događajima klijentima u korisničkom prostoru.
 
-Događaji koje Endpoint Security okvir može pratiti su kategorizovani u:
+Događaji koje Endpoint Security framework može da nadgleda kategorisani su na sledeći način:
 
-- Događaji datoteka
+- Događaji fajl sistema
 - Događaji procesa
-- Događaji soketa
-- Kernel događaji (kao što su učitavanje/uklanjanje kernel ekstenzije ili otvaranje I/O Kit uređaja)
+- Socket događaji
+- Događaji kernela (kao što su učitavanje/uklanjanje kernel extension-a ili otvaranje I/O Kit uređaja)
 
-### Endpoint Security Framework Architecture
+### Arhitektura Endpoint Security Frameworka
 
 <figure><img src="../../../images/image (1068).png" alt="https://www.youtube.com/watch?v=jaVkpM1UqOs"><figcaption></figcaption></figure>
 
-**Komunikacija u korisničkom prostoru** sa Endpoint Security okvirom se dešava kroz IOUserClient klasu. Koriste se dve različite podklase, u zavisnosti od tipa pozivaoca:
+**Komunikacija iz korisničkog prostora** sa Endpoint Security frameworkom odvija se preko klase IOUserClient. Koriste se dve različite podklase, u zavisnosti od tipa pozivaoca:
 
-- **EndpointSecurityDriverClient**: Ovo zahteva `com.apple.private.endpoint-security.manager` pravo, koje drži samo sistemski proces `endpointsecurityd`.
-- **EndpointSecurityExternalClient**: Ovo zahteva `com.apple.developer.endpoint-security.client` pravo. Ovo bi obično koristili softveri trećih strana za bezbednost koji treba da komuniciraju sa Endpoint Security okvirom.
+- **EndpointSecurityDriverClient**: Zahteva entitlement `com.apple.private.endpoint-security.manager`, koji poseduje samo sistemski proces `endpointsecurityd`.
+- **EndpointSecurityExternalClient**: Zahteva entitlement `com.apple.developer.endpoint-security.client`. Ovo bi obično koristio third-party security software koji mora da komunicira sa Endpoint Security frameworkom.<sup>[1]</sup>
 
-Endpoint Security Extensions:**`libEndpointSecurity.dylib`** je C biblioteka koju sistemske ekstenzije koriste za komunikaciju sa kernelom. Ova biblioteka koristi I/O Kit (`IOKit`) za komunikaciju sa Endpoint Security KEXT-om.
+Endpoint Security Extensions:**`libEndpointSecurity.dylib`** je C biblioteka koju system extensions koriste za komunikaciju sa kernelom. Ova biblioteka koristi I/O Kit (`IOKit`) za komunikaciju sa Endpoint Security KEXT-om.<sup>[2]</sup>
 
-**`endpointsecurityd`** je ključni sistemski demon uključen u upravljanje i pokretanje sistemskih ekstenzija za bezbednost krajnjih tačaka, posebno tokom ranog procesa pokretanja. **Samo sistemske ekstenzije** označene sa **`NSEndpointSecurityEarlyBoot`** u njihovom `Info.plist` fajlu dobijaju ovu ranu obradu pokretanja.
+**`endpointsecurityd`** je ključni system daemon zadužen za upravljanje i pokretanje endpoint security system extensions, naročito tokom ranog procesa bootovanja. **Samo system extensions** označene sa **`NSEndpointSecurityEarlyBoot`** u svom `Info.plist` fajlu dobijaju ovaj tretman tokom ranog bootovanja.<sup>[2]</sup>
 
-Drugi sistemski demon, **`sysextd`**, **validira sistemske ekstenzije** i premesta ih na odgovarajuće sistemske lokacije. Zatim traži od relevantnog demona da učita ekstenziju. **`SystemExtensions.framework`** je odgovoran za aktiviranje i deaktiviranje sistemskih ekstenzija.
+Drugi system daemon, **`sysextd`**, **validira system extensions** i premešta ih na odgovarajuće sistemske lokacije. Zatim od relevantnog daemon-a zahteva da učita extension. **`SystemExtensions.framework`** je zadužen za aktiviranje i deaktiviranje system extensions.<sup>[2]</sup>
 
-## Bypassing ESF
+## Zaobilaženje ESF-a
 
-ESF se koristi od strane bezbednosnih alata koji će pokušati da otkriju red tim, tako da svaka informacija o tome kako se to može izbeći zvuči zanimljivo.
+ESF koriste security alati koji će pokušati da otkriju red teamer-a, pa svaka informacija o tome kako se to može izbeći zvuči zanimljivo.
 
 ### CVE-2021-30965
 
-Stvar je u tome da aplikacija za bezbednost mora imati **dozvole za pun pristup disku**. Dakle, ako bi napadač mogao da ukloni to, mogao bi sprečiti softver da se izvršava:
+Problem je u tome što security aplikacija mora da ima **Full Disk Access permissions**. Ako bi napadač mogao da ih ukloni, mogao bi da spreči pokretanje software-a:<sup>[3]</sup>
 ```bash
 tccutil reset All
 ```
-Za **više informacija** o ovom zaobilaženju i srodnim temama, pogledajte predavanje [#OBTS v5.0: "Ahilova peta EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
+Za **više informacija** o ovom bypassu i srodnim bypassovima pogledajte predavanje [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
 
-Na kraju, ovo je ispravljeno davanjem nove dozvole **`kTCCServiceEndpointSecurityClient`** aplikaciji za bezbednost kojom upravlja **`tccd`**, tako da `tccutil` neće obrisati njene dozvole, sprečavajući je da ne može da se pokrene.
+Na kraju je ovo rešeno dodeljivanjem nove dozvole **`kTCCServiceEndpointSecurityClient`** security aplikaciji kojom upravlja **`tccd`**, tako da `tccutil` neće obrisati njene dozvole i sprečiti njeno pokretanje.<sup>[3]</sup>
 
 ## Reference
 
-- [**OBTS v3.0: "Endpoint Security & Insecurity" - Scott Knight**](https://www.youtube.com/watch?v=jaVkpM1UqOs)
-- [**https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html**](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)
+- [1] [OBTS v3.0: "Endpoint Security & Insecurity" - Scott Knight](https://www.youtube.com/watch?v=jaVkpM1UqOs)
+- [2] [Knight.sc - System Extension Internals](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)
+- [3] [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
 
 {{#include ../../../banners/hacktricks-training.md}}

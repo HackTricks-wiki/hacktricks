@@ -4,16 +4,16 @@
 
 ## Gatekeeper
 
-Gatekeeper se obično koristi da se odnosi na kombinaciju **Quarantine + Gatekeeper + XProtect**, 3 macOS sigurnosna modula koja će pokušati da **spreče korisnike da izvršavaju potencijalno zlonamerni softver preuzet**.
+Gatekeeper se obično koristi za označavanje kombinacije **Quarantine + Gatekeeper + XProtect**, 3 macOS security modula koji će pokušati da **spreče korisnike da izvrše potencijalno zlonamerni softver preuzet** sa Interneta.
 
-Više informacija u:
+Više informacija:
 
 
 {{#ref}}
 macos-gatekeeper.md
 {{#endref}}
 
-## Processes Limitants
+## Ograničenja procesa
 
 ### MACF
 
@@ -26,7 +26,7 @@ macos-sip.md
 
 ### Sandbox
 
-MacOS Sandbox **ograničava aplikacije** koje se izvršavaju unutar sandbox-a na **dozvoljene radnje specificirane u Sandbox profilu** sa kojim aplikacija radi. Ovo pomaže da se osigura da **aplikacija pristupa samo očekivanim resursima**.
+MacOS Sandbox **ograničava aplikacije** koje se izvršavaju unutar sandbox-a na **dozvoljene radnje navedene u Sandbox profilu** sa kojim se aplikacija izvršava. Ovo pomaže da se osigura da će **aplikacija pristupati samo očekivanim resursima**.
 
 
 {{#ref}}
@@ -35,7 +35,7 @@ macos-sandbox/
 
 ### TCC - **Transparency, Consent, and Control**
 
-**TCC (Transparency, Consent, and Control)** je sigurnosni okvir. Dizajniran je da **upravlja dozvolama** aplikacija, posebno regulisanjem njihovog pristupa osetljivim funkcijama. Ovo uključuje elemente kao što su **usluge lokacije, kontakti, fotografije, mikrofon, kamera, pristupačnost i pristup celom disku**. TCC osigurava da aplikacije mogu pristupiti ovim funkcijama samo nakon dobijanja eksplicitne saglasnosti korisnika, čime se jača privatnost i kontrola nad ličnim podacima.
+**TCC (Transparency, Consent, and Control)** je security framework. Namenjen je **upravljanju dozvolama** aplikacija, konkretno regulisanjem njihovog pristupa osetljivim funkcijama. To uključuje elemente kao što su **usluge lokacije, kontakti, fotografije, mikrofon, kamera, accessibility i full disk access**. TCC osigurava da aplikacije mogu da pristupe ovim funkcijama tek nakon dobijanja izričite saglasnosti korisnika, čime se dodatno unapređuju privatnost i kontrola nad ličnim podacima.
 
 
 {{#ref}}
@@ -44,7 +44,7 @@ macos-tcc/
 
 ### Launch/Environment Constraints & Trust Cache
 
-Ograničenja pokretanja u macOS-u su sigurnosna funkcija koja **reguliše inicijaciju procesa** definišući **ko može pokrenuti** proces, **kako** i **odakle**. Uvedena u macOS Ventura, klasifikuju sistemske binarne datoteke u kategorije ograničenja unutar **trust cache**. Svaka izvršna binarna datoteka ima postavljena **pravila** za svoje **pokretanje**, uključujući **self**, **parent** i **responsible** ograničenja. Proširena na aplikacije trećih strana kao **Environment** Constraints u macOS Sonoma, ove funkcije pomažu u ublažavanju potencijalnih sistemskih eksploatacija regulisanjem uslova pokretanja procesa.
+Launch constraints u macOS-u predstavljaju security funkciju za **regulisanje pokretanja procesa**, definisanjem **ko može da pokrene** proces, **na koji način** i **odakle**. Uvedene su u macOS Ventura i kategorizuju sistemske binarne fajlove u kategorije ograničenja unutar **trust cache-a**. Svaki izvršni binarni fajl ima skup **pravila** za svoje **pokretanje**, uključujući ograničenja **self**, **parent** i **responsible**. Ove funkcije su proširene na third-party aplikacije kao **Environment Constraints** u macOS Sonoma i pomažu u ublažavanju potencijalnih system exploitations tako što kontrolišu uslove pod kojima se procesi pokreću.
 
 
 {{#ref}}
@@ -53,28 +53,28 @@ macos-launch-environment-constraints.md
 
 ## MRT - Malware Removal Tool
 
-Alat za uklanjanje zlonamernog softvera (MRT) je još jedan deo sigurnosne infrastrukture macOS-a. Kao što ime sugeriše, glavna funkcija MRT-a je da **ukloni poznati zlonamerni softver sa zaraženih sistema**.
+Malware Removal Tool (MRT) je još jedan deo macOS security infrastrukture. Kao što ime sugeriše, glavna funkcija MRT-a je da **ukloni poznati malware sa zaraženih sistema**.
 
-Kada se zlonamerni softver otkrije na Mac-u (bilo putem XProtect-a ili nekim drugim sredstvima), MRT se može koristiti za automatsko **uklanjanje zlonamernog softvera**. MRT radi tiho u pozadini i obično se pokreće svaki put kada se sistem ažurira ili kada se preuzme nova definicija zlonamernog softvera (izgleda da su pravila koja MRT ima za otkrivanje zlonamernog softvera unutar binarne datoteke).
+Kada se malware detektuje na Mac-u (bilo pomoću XProtect-a ili na neki drugi način), MRT se može koristiti za automatsko **uklanjanje malware-a**. MRT neprimetno radi u pozadini i obično se pokreće svaki put kada se sistem ažurira ili kada se preuzme nova definicija malware-a (izgleda da se pravila koja MRT koristi za detekciju malware-a nalaze unutar binarnog fajla).
 
-Iako su i XProtect i MRT deo sigurnosnih mera macOS-a, oni obavljaju različite funkcije:
+Iako su i XProtect i MRT deo macOS security mera, oni obavljaju različite funkcije:
 
-- **XProtect** je preventivni alat. **Proverava datoteke dok se preuzimaju** (putem određenih aplikacija), i ako otkrije bilo koje poznate vrste zlonamernog softvera, **sprečava otvaranje datoteke**, čime sprečava zlonamerni softver da inficira vaš sistem u prvom redu.
-- **MRT**, s druge strane, je **reaktivni alat**. Deluje nakon što je zlonamerni softver otkriven na sistemu, sa ciljem da ukloni problematični softver kako bi očistio sistem.
+- **XProtect** je preventivni alat. On **proverava fajlove dok se preuzimaju** (putem određenih aplikacija) i, ako detektuje bilo koju poznatu vrstu malware-a, **sprečava otvaranje fajla**, čime sprečava malware da zarazi sistem.
+- **MRT**, sa druge strane, predstavlja **reaktivni alat**. On deluje nakon što je malware detektovan na sistemu, sa ciljem da ukloni problematični softver i očisti sistem.
 
-MRT aplikacija se nalazi u **`/Library/Apple/System/Library/CoreServices/MRT.app`**
+MRT aplikacija se nalazi na lokaciji **`/Library/Apple/System/Library/CoreServices/MRT.app`**
 
-## Background Tasks Management
+## Upravljanje Background Tasks
 
-**macOS** sada **obaveštava** svaki put kada alat koristi dobro poznatu **tehniku za persistenciju izvršavanja koda** (kao što su Login Items, Daemons...), tako da korisnik bolje zna **koji softver persistira**.
+**macOS** sada **upozorava** svaki put kada alat koristi dobro poznatu **tehniku za održavanje code execution-a** (kao što su Login Items, Daemons...), kako bi korisnik bolje znao **koji softver održava persistence**.<sup>[3]</sup>
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
-Ovo se pokreće sa **daemon-om** koji se nalazi u `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` i **agentom** u `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`
+Ovo se izvršava pomoću **daemon-a** koji se nalazi na lokaciji `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` i **agent-a** na lokaciji `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`<sup>[1]</sup>
 
-Način na koji **`backgroundtaskmanagementd`** zna da je nešto instalirano u persistentnom folderu je **dobijanje FSEvents** i kreiranje nekih **handler-a** za njih.
+Način na koji **`backgroundtaskmanagementd`** zna da je nešto instalirano u persistent folder-u jeste tako što **preuzima FSEvents** i za njih kreira određene **handlers**.<sup>[1]</sup>
 
-Štaviše, postoji plist datoteka koja sadrži **dobro poznate aplikacije** koje često persistiraju, a koju održava Apple, smeštena u: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
+Pored toga, postoji plist fajl koji sadrži **dobro poznate aplikacije** koje često održavaju persistence, a koji Apple održava na lokaciji: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`<sup>[3]</sup>
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -90,33 +90,33 @@ Način na koji **`backgroundtaskmanagementd`** zna da je nešto instalirano u pe
 }
 [...]
 ```
-### Enumeration
+### Enumeracija
 
-Moguće je **enumerisati sve** konfigurisane pozadinske stavke koristeći Apple cli alat:
+Moguće je **enumerisati sve** konfigurisane stavke u pozadini pomoću Apple CLI alata:<sup>[3]</sup>
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
 ```
-Pored toga, takođe je moguće prikazati ove informacije pomoću [**DumpBTM**](https://github.com/objective-see/DumpBTM).
+Štaviše, ove informacije je takođe moguće izlistati pomoću [**DumpBTM**](https://github.com/objective-see/DumpBTM).<sup>[2]</sup>
 ```bash
 # You need to grant the Terminal Full Disk Access for this to work
 chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
-Ove informacije se čuvaju u **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** i Terminalu je potrebna FDA.
+Ove informacije se čuvaju u **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`**, a Terminalu je potreban FDA.<sup>[2]</sup>
 
-### Manipulacija sa BTM
+### Manipulisanje BTM-om
 
-Kada se pronađe nova perzistencija, događa se događaj tipa **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. Dakle, bilo koji način da se **spreči** slanje ovog **događaja** ili da **agent ne obavesti** korisnika pomoći će napadaču da _**obiđe**_ BTM.
+Kada se pronađe nova persistence, generiše se događaj tipa **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. Zato će svaki način da se **spreči** slanje ovog **događaja** ili da se **agentu onemogući upozoravanje** korisnika pomoći napadaču da _**zaobiđe**_ BTM.<sup>[1]</sup>
 
-- **Resetovanje baze podataka**: Pokretanje sledeće komande resetovaće bazu podataka (trebalo bi da je ponovo izgradi od nule), međutim, iz nekog razloga, nakon pokretanja ovoga, **nema nove perzistencije koja će biti obaveštena dok se sistem ne restartuje**.
-- **root** je potreban.
+- **Resetovanje baze podataka**: Pokretanje sledeće komande resetovaće bazu podataka (trebalo bi da je ponovo izgradi od nule); međutim, iz nekog razloga, nakon njenog pokretanja **nijedna nova persistence neće biti prijavljena sve dok se sistem ponovo ne pokrene**.<sup>[1]</sup>
+- Potreban je **root**.
 ```bash
 # Reset the database
 sfltool resettbtm
 ```
-- **Stopirajte Agenta**: Moguće je poslati signal za zaustavljanje agentu tako da **neće obaveštavati korisnika** kada se pronađu nova otkrića.
+- **Zaustavljanje Agent-a**: Moguće je poslati signal za zaustavljanje Agent-u, tako da **neće obaveštavati korisnika** kada se pronađu nove detekcije.<sup>[1]</sup>
 ```bash
 # Get PID
 pgrep BackgroundTaskManagementAgent
@@ -129,12 +129,12 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-- **Greška**: Ako **proces koji je stvorio postojanost postoji brzo nakon njega**, demon će pokušati da **dobije informacije** o njemu, **neće uspeti** i **neće moći da pošalje događaj** koji ukazuje na to da nova stvar postaje postojana.
+- **Bug**: Ako **proces koji je kreirao persistence izađe odmah nakon toga**, daemon će pokušati da **dobije informacije** o njemu, **neće uspeti** i **neće moći da pošalje događaj** koji ukazuje na to da se nova stvar održava persistentnom.<sup>[1]</sup>
 
-Reference i **više informacija o BTM**:
+## Reference
 
-- [https://youtu.be/9hjUmT031tc?t=26481](https://youtu.be/9hjUmT031tc?t=26481)
-- [https://www.patreon.com/posts/new-developer-77420730?l=fr](https://www.patreon.com/posts/new-developer-77420730?l=fr)
-- [https://support.apple.com/en-gb/guide/deployment/depdca572563/web](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
+- [1] [OBTS v6.0: „Razjašnjavanje (i zaobilaženje) upravljanja macOS Background Task-ovima“ - Patrick Wardle & Chris Lopez](https://youtu.be/9hjUmT031tc?t=26481)
+- [2] [Novi (Developer) alat: „DumpBTM“ - Patrick Wardle (Patreon)](https://www.patreon.com/posts/new-developer-77420730?l=fr)
+- [3] [Upravljanje login item-ima i Background Task-ovima na Mac-u - Apple Platform Deployment](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
 
 {{#include ../../../banners/hacktricks-training.md}}
