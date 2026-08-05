@@ -1,60 +1,60 @@
-# macOS Keychain
+# Trousseau macOS
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Main Keychains
+## Principaux trousseaux
 
-- Le **User Keychain** (`~/Library/Keychains/login.keychain-db`), qui est utilisé pour stocker des **identifiants spécifiques à l'utilisateur** comme des mots de passe d'application, des mots de passe internet, des certificats générés par l'utilisateur, des mots de passe réseau et des clés publiques/privées générées par l'utilisateur.
-- Le **System Keychain** (`/Library/Keychains/System.keychain`), qui stocke des **identifiants à l'échelle du système** tels que des mots de passe WiFi, des certificats racine du système, des clés privées du système et des mots de passe d'application du système.
-- Il est possible de trouver d'autres composants comme des certificats dans `/System/Library/Keychains/*`
-- Dans **iOS**, il n'y a qu'un seul **Keychain** situé dans `/private/var/Keychains/`. Ce dossier contient également des bases de données pour le `TrustStore`, les autorités de certification (`caissuercache`) et les entrées OSCP (`ocspache`).
-- Les applications seront restreintes dans le keychain uniquement à leur zone privée en fonction de leur identifiant d'application.
+- Le **trousseau utilisateur** (`~/Library/Keychains/login.keychain-db`), utilisé pour stocker les **identifiants propres à l'utilisateur**, comme les mots de passe d'applications, les mots de passe Internet, les certificats générés par l'utilisateur, les mots de passe réseau et les clés publiques/privées générées par l'utilisateur.
+- Le **trousseau système** (`/Library/Keychains/System.keychain`), qui stocke les **identifiants à l'échelle du système**, tels que les mots de passe WiFi, les certificats racine du système, les clés privées du système et les mots de passe des applications système.<sup>[1]</sup>
+- Il est possible de trouver d'autres composants, comme des certificats, dans `/System/Library/Keychains/*`
+- Dans **iOS**, il n'existe qu'un seul **trousseau**, situé dans `/private/var/Keychains/`. Ce dossier contient également les bases de données du `TrustStore`, des autorités de certification (`caissuercache`) et des entrées OSCP (`ocspache`).
+- Les applications sont limitées, dans le trousseau, à leur zone privée en fonction de leur identifiant d'application.
 
-### Password Keychain Access
+### Accès au mot de passe du trousseau
 
-Ces fichiers, bien qu'ils n'aient pas de protection inhérente et puissent être **téléchargés**, sont chiffrés et nécessitent le **mot de passe en clair de l'utilisateur pour être déchiffrés**. Un outil comme [**Chainbreaker**](https://github.com/n0fate/chainbreaker) pourrait être utilisé pour le déchiffrement.
+Ces fichiers, bien qu'ils ne disposent d'aucune protection inhérente et puissent être **téléchargés**, sont chiffrés et nécessitent le **mot de passe en clair de l'utilisateur pour être déchiffrés**. Un outil comme [**Chainbreaker**](https://github.com/n0fate/chainbreaker) peut être utilisé pour le déchiffrement.<sup>[1]</sup>
 
-## Keychain Entries Protections
+## Protections des entrées du trousseau
 
-### ACLs
+### ACL
 
-Chaque entrée dans le keychain est régie par des **Access Control Lists (ACLs)** qui dictent qui peut effectuer diverses actions sur l'entrée du keychain, y compris :
+Chaque entrée du trousseau est régie par des **listes de contrôle d'accès (ACL)** qui déterminent qui peut effectuer différentes actions sur l'entrée du trousseau, notamment :<sup>[1]</sup>
 
-- **ACLAuhtorizationExportClear** : Permet au titulaire d'obtenir le texte clair du secret.
-- **ACLAuhtorizationExportWrapped** : Permet au titulaire d'obtenir le texte clair chiffré avec un autre mot de passe fourni.
-- **ACLAuhtorizationAny** : Permet au titulaire d'effectuer n'importe quelle action.
+- **ACLAuhtorizationExportClear** : permet au détenteur d'obtenir le secret en texte clair.
+- **ACLAuhtorizationExportWrapped** : permet au détenteur d'obtenir le texte clair chiffré avec un autre mot de passe fourni.
+- **ACLAuhtorizationAny** : permet au détenteur d'effectuer n'importe quelle action.
 
-Les ACLs sont également accompagnées d'une **liste d'applications de confiance** qui peuvent effectuer ces actions sans demande. Cela pourrait être :
+Les ACL sont également accompagnées d'une **liste d'applications approuvées** pouvant effectuer ces actions sans demande de confirmation. Cette liste peut être :<sup>[1]</sup>
 
-- **N`il`** (aucune autorisation requise, **tout le monde est de confiance**)
-- Une **liste vide** (**personne** n'est de confiance)
-- **Liste** d'**applications** spécifiques.
+- **N`il`** (aucune autorisation requise, **tout le monde est approuvé**)
+- Une liste **vide** (**personne** n'est approuvé)
+- Une **liste** d'**applications** spécifiques.
 
-De plus, l'entrée peut contenir la clé **`ACLAuthorizationPartitionID`,** qui est utilisée pour identifier le **teamid, apple,** et **cdhash.**
+L'entrée peut également contenir la clé **`ACLAuthorizationPartitionID`,** utilisée pour identifier le **teamid, apple** et le **cdhash**.<sup>[1]</sup>
 
-- Si le **teamid** est spécifié, alors pour **accéder à la valeur de l'entrée** **sans** **demande**, l'application utilisée doit avoir le **même teamid**.
-- Si le **apple** est spécifié, alors l'application doit être **signée** par **Apple**.
-- Si le **cdhash** est indiqué, alors l'**app** doit avoir le **cdhash** spécifique.
+- Si le **teamid** est spécifié, pour **accéder à la valeur de l'entrée** **sans** **demande de confirmation**, l'application utilisée doit avoir le **même teamid**.
+- Si **apple** est spécifié, l'application doit être **signée** par **Apple**.
+- Si le **cdhash** est indiqué, l'**application** doit avoir le **cdhash** spécifique.
 
-### Creating a Keychain Entry
+### Création d'une entrée de trousseau
 
-Lorsque une **nouvelle** **entrée** est créée en utilisant **`Keychain Access.app`**, les règles suivantes s'appliquent :
+Lorsqu'une **nouvelle** **entrée** est créée avec **`Keychain Access.app`**, les règles suivantes s'appliquent :<sup>[1]</sup>
 
 - Toutes les applications peuvent chiffrer.
-- **Aucune application** ne peut exporter/déchiffrer (sans demander à l'utilisateur).
+- **Aucune application** ne peut exporter/déchiffrer (sans demander confirmation à l'utilisateur).
 - Toutes les applications peuvent voir le contrôle d'intégrité.
-- Aucune application ne peut changer les ACLs.
+- Aucune application ne peut modifier les ACL.
 - Le **partitionID** est défini sur **`apple`**.
 
-Lorsque une **application crée une entrée dans le keychain**, les règles sont légèrement différentes :
+Lorsqu'une **application crée une entrée dans le trousseau**, les règles sont légèrement différentes :<sup>[1]</sup>
 
 - Toutes les applications peuvent chiffrer.
-- Seule l'**application créatrice** (ou toute autre application explicitement ajoutée) peut exporter/déchiffrer (sans demander à l'utilisateur).
+- Seule **l'application qui a créé l'entrée** (ou toute autre application explicitement ajoutée) peut exporter/déchiffrer (sans demander confirmation à l'utilisateur).
 - Toutes les applications peuvent voir le contrôle d'intégrité.
-- Aucune application ne peut changer les ACLs.
-- Le **partitionID** est défini sur **`teamid:[teamID ici]`**.
+- Aucune application ne peut modifier les ACL.
+- Le **partitionID** est défini sur **`teamid:[teamID here]`**.
 
-## Accessing the Keychain
+## Accès au trousseau
 
 ### `security`
 ```bash
@@ -76,57 +76,57 @@ security dump-keychain ~/Library/Keychains/login.keychain-db
 ### APIs
 
 > [!TIP]
-> L'**énumération et l'extraction** de secrets du **trousseau** qui **ne générera pas d'invite** peuvent être effectuées avec l'outil [**LockSmith**](https://github.com/its-a-feature/LockSmith)
+> L'**enumeration et le dumping** des secrets du **keychain** qui **ne généreront pas de prompt** peuvent être effectués avec l'outil [**LockSmith**](https://github.com/its-a-feature/LockSmith)
 >
-> D'autres points de terminaison API peuvent être trouvés dans le code source de [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html).
+> D'autres endpoints API sont disponibles dans le code source de [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html).
 
-Listez et obtenez des **informations** sur chaque entrée du trousseau en utilisant le **Security Framework** ou vous pouvez également vérifier l'outil cli open source d'Apple [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Quelques exemples d'API :
+Listez et obtenez des **informations** sur chaque entrée du keychain en utilisant le **Security Framework**, ou consultez également l'outil CLI open source d'Apple [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Voici quelques exemples d'API :<sup>[1]</sup>
 
-- L'API **`SecItemCopyMatching`** fournit des informations sur chaque entrée et il y a certains attributs que vous pouvez définir lors de son utilisation :
-- **`kSecReturnData`** : Si vrai, il essaiera de déchiffrer les données (définir sur faux pour éviter les pop-ups potentiels)
-- **`kSecReturnRef`** : Obtenez également une référence à l'élément du trousseau (définir sur vrai au cas où vous verriez plus tard que vous pouvez déchiffrer sans pop-up)
-- **`kSecReturnAttributes`** : Obtenez des métadonnées sur les entrées
-- **`kSecMatchLimit`** : Combien de résultats retourner
-- **`kSecClass`** : Quel type d'entrée de trousseau
+- L'API **`SecItemCopyMatching`** fournit des informations sur chaque entrée et certains attributs peuvent être définis lors de son utilisation :
+- **`kSecReturnData`** : Si la valeur est true, l'API tentera de déchiffrer les données (définissez-la sur false pour éviter d'éventuelles fenêtres popup)
+- **`kSecReturnRef`** : Obtient également une référence vers l'élément du keychain (définissez-la sur true si vous constatez par la suite que vous pouvez le déchiffrer sans popup)
+- **`kSecReturnAttributes`** : Obtient les métadonnées des entrées
+- **`kSecMatchLimit`** : Nombre de résultats à retourner
+- **`kSecClass`** : Type d'entrée du keychain
 
-Obtenez les **ACL** de chaque entrée :
+Obtenez les **ACLs** de chaque entrée :<sup>[1]</sup>
 
-- Avec l'API **`SecAccessCopyACLList`**, vous pouvez obtenir l'**ACL pour l'élément du trousseau**, et cela renverra une liste d'ACL (comme `ACLAuhtorizationExportClear` et les autres mentionnés précédemment) où chaque liste a :
+- Avec l'API **`SecAccessCopyACLList`**, vous pouvez obtenir l'**ACL de l'élément du keychain**. Elle retournera une liste d'ACLs (comme `ACLAuhtorizationExportClear` et les autres mentionnées précédemment), chaque liste contenant :
 - Description
-- **Liste des applications de confiance**. Cela pourrait être :
-- Une application : /Applications/Slack.app
+- **Trusted Application List**. Elle peut contenir :
+- Une app : /Applications/Slack.app
 - Un binaire : /usr/libexec/airportd
 - Un groupe : group://AirPort
 
-Exportez les données :
+Exportez les données :<sup>[1]</sup>
 
 - L'API **`SecKeychainItemCopyContent`** obtient le texte en clair
-- L'API **`SecItemExport`** exporte les clés et certificats mais peut nécessiter de définir des mots de passe pour exporter le contenu chiffré
+- L'API **`SecItemExport`** exporte les clés et les certificats, mais il peut être nécessaire de définir des mots de passe pour exporter le contenu chiffré
 
-Et voici les **exigences** pour pouvoir **exporter un secret sans invite** :
+Voici les **conditions** nécessaires pour pouvoir **exporter un secret sans popup** :<sup>[1]</sup>
 
-- Si **1+ applications de confiance** listées :
-- Besoin des **autorisations** appropriées (**`Nil`**, ou faire **partie** de la liste autorisée d'applications dans l'autorisation d'accès aux informations secrètes)
-- Besoin que la signature de code corresponde au **PartitionID**
-- Besoin que la signature de code corresponde à celle d'une **application de confiance** (ou faire partie du bon KeychainAccessGroup)
-- Si **toutes les applications sont de confiance** :
-- Besoin des **autorisations** appropriées
-- Besoin que la signature de code corresponde au **PartitionID**
-- Si **pas de PartitionID**, alors cela n'est pas nécessaire
+- Si au moins **1 app trusted** est listée :
+- Il faut les **autorisations** appropriées (**`Nil`**, ou faire **partie** de la liste autorisée d'apps dans l'autorisation d'accès aux informations secrètes)
+- La signature du code doit correspondre à **PartitionID**
+- La signature du code doit correspondre à celle d'une **app trusted** (ou être membre du bon KeychainAccessGroup)
+- Si **toutes les applications sont trusted** :
+- Il faut les **autorisations** appropriées
+- La signature du code doit correspondre à **PartitionID**
+- S'il n'y a pas de **PartitionID**, cette condition n'est pas nécessaire
 
 > [!CAUTION]
-> Par conséquent, s'il y a **1 application listée**, vous devez **injecter du code dans cette application**.
+> Par conséquent, si **1 application** est listée, vous devez **injecter du code dans cette application**.
 >
-> Si **apple** est indiqué dans le **partitionID**, vous pourriez y accéder avec **`osascript`** donc tout ce qui fait confiance à toutes les applications avec apple dans le partitionID. **`Python`** pourrait également être utilisé pour cela.
+> Si **apple** est indiqué dans le **partitionID**, vous pouvez y accéder avec **`osascript`**. Cela s'applique donc à tout ce qui truste toutes les applications avec apple dans le partitionID. **`Python`** peut également être utilisé à cette fin.
 
 ### Deux attributs supplémentaires
 
-- **Invisible** : C'est un indicateur booléen pour **cacher** l'entrée de l'application **UI** du trousseau
-- **General** : C'est pour stocker des **métadonnées** (donc ce n'est PAS CHIFFRÉ)
-- Microsoft stockait en texte clair tous les jetons de rafraîchissement pour accéder à des points de terminaison sensibles.
+- **Invisible** : Il s'agit d'un flag booléen permettant de **masquer** l'entrée dans l'app Keychain de l'**UI**<sup>[1]</sup>
+- **General** : Sert à stocker des **métadonnées** (elles ne sont donc **PAS CHIFFRÉES**)<sup>[1]</sup>
+- Microsoft stockait en clair tous les refresh tokens permettant d'accéder à des endpoints sensibles.<sup>[1]</sup>
 
 ## References
 
-- [**#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas**](https://www.youtube.com/watch?v=jKE1ZW33JpY)
+- [1] [#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas](https://www.youtube.com/watch?v=jKE1ZW33JpY)
 
 {{#include ../../banners/hacktricks-training.md}}

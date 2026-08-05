@@ -1,4 +1,4 @@
-# macOS Commandes utiles
+# Commandes utiles macOS
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -8,7 +8,7 @@
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Commandes spécifiques macOS
+### Commandes macOS spécifiques
 ```bash
 #System info
 date
@@ -115,17 +115,17 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Vérification rapide anti-analysis / virtualization
+### Vérification rapide anti-analyse / virtualisation
 
-Certains macOS stealers appellent `system_profiler` pour détecter les VMs et **s'arrêtent avec un code de sortie distinct (p. ex., 100)** pour éviter la détonation du sandbox :
+Certains stealers macOS appellent `system_profiler` pour détecter les VM et **abandonnent avec un code de sortie distinct (p. ex., 100)** afin d’éviter la détonation dans un sandbox<sup>[1]</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### Logiciels & services installés
+### Logiciels et services installés
 
-Vérifier les applications **suspectes** installées et les **privilèges** sur les ressources installées :
+Vérifiez les applications **suspectes** installées et les **privilèges** sur les ressources installées :
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -145,12 +145,12 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### Créer un utilisateur
 
-Sans invites
+Sans invite
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
 ## Références
 
-- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, l’année de l’Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

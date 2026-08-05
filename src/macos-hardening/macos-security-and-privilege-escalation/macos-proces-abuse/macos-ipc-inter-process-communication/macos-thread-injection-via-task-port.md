@@ -1,4 +1,4 @@
-# Injection de Thread macOS via le Port de Tâche
+# macOS Thread Injection via Task port
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
@@ -7,49 +7,49 @@
 - [https://github.com/bazad/threadexec](https://github.com/bazad/threadexec)
 - [https://gist.github.com/knightsc/bd6dfeccb02b77eb6409db5601dcef36](https://gist.github.com/knightsc/bd6dfeccb02b77eb6409db5601dcef36)
 
-## 1. Détournement de Thread
+## 1. Thread Hijacking
 
-Initialement, la fonction **`task_threads()`** est invoquée sur le port de tâche pour obtenir une liste de threads de la tâche distante. Un thread est sélectionné pour le détournement. Cette approche diverge des méthodes d'injection de code conventionnelles, car la création d'un nouveau thread distant est interdite en raison de la nouvelle atténuation bloquant `thread_create_running()`.
+Initialement, la fonction `task_threads()` est appelée sur le task port afin d'obtenir une liste de threads du task distant. Un thread est sélectionné pour être détourné. Cette approche diffère des méthodes conventionnelles de code injection, car la création d'un nouveau thread distant est interdite par la mitigation qui bloque `thread_create_running()`.<sup>[1]</sup>
 
-Pour contrôler le thread, **`thread_suspend()`** est appelé, arrêtant son exécution.
+Pour contrôler le thread, `thread_suspend()` est appelée, ce qui interrompt son exécution.<sup>[1]</sup>
 
-Les seules opérations autorisées sur le thread distant impliquent **l'arrêt** et **le démarrage** de celui-ci, **la récupération** et **la modification** de ses valeurs de registre. Les appels de fonction distants sont initiés en définissant les registres `x0` à `x7` sur les **arguments**, configurant **`pc`** pour cibler la fonction désirée, et en activant le thread. S'assurer que le thread ne plante pas après le retour nécessite de détecter le retour.
+Les seules opérations autorisées sur le thread distant consistent à l'**arrêter** et à le **démarrer**, ainsi qu'à **récupérer**/**modifier** les valeurs de ses registres. Les appels de fonctions distantes sont initiés en définissant les registres `x0` à `x7` avec les **arguments**, en configurant `pc` pour qu'il pointe vers la fonction souhaitée, puis en reprenant l'exécution du thread. Pour éviter que le thread ne plante après le retour, il est nécessaire de détecter ce retour.<sup>[1]</sup>
 
-Une stratégie consiste à **enregistrer un gestionnaire d'exception** pour le thread distant en utilisant `thread_set_exception_ports()`, en définissant le registre `lr` sur une adresse invalide avant l'appel de fonction. Cela déclenche une exception après l'exécution de la fonction, envoyant un message au port d'exception, permettant l'inspection de l'état du thread pour récupérer la valeur de retour. Alternativement, comme adopté de l'exploit triple_fetch d'Ian Beer, `lr` est défini pour boucler indéfiniment. Les registres du thread sont ensuite continuellement surveillés jusqu'à ce que **`pc` pointe vers cette instruction**.
+Une stratégie consiste à enregistrer un **exception handler** pour le thread distant à l'aide de `thread_set_exception_ports()`, puis à définir le registre `lr` sur une adresse invalide avant l'appel de fonction. Cela déclenche une exception après l'exécution de la fonction et envoie un message à l'exception port, ce qui permet d'inspecter l'état du thread afin de récupérer la valeur de retour. Une autre méthode, adaptée de l'exploit *triple_fetch* d'Ian Beer, consiste à définir `lr` pour boucler indéfiniment ; les registres du thread sont ensuite surveillés en continu jusqu'à ce que `pc` pointe vers cette instruction.<sup>[1]</sup>
 
-## 2. Ports Mach pour la communication
+## 2. Mach ports for communication
 
-La phase suivante consiste à établir des ports Mach pour faciliter la communication avec le thread distant. Ces ports sont essentiels pour transférer des droits d'envoi et de réception arbitraires entre les tâches.
+La phase suivante consiste à établir des Mach ports afin de permettre la communication avec le thread distant. Ces ports servent à transférer arbitrairement des send/receive rights entre les tasks.<sup>[1]</sup>
 
-Pour une communication bidirectionnelle, deux droits de réception Mach sont créés : un dans la tâche locale et l'autre dans la tâche distante. Ensuite, un droit d'envoi pour chaque port est transféré à la tâche correspondante, permettant l'échange de messages.
+Pour permettre une communication bidirectionnelle, deux receive rights Mach sont créés : un dans le task local et l'autre dans le task distant. Ensuite, un send right pour chaque port est transféré au task correspondant, ce qui permet l'échange de messages.<sup>[1]</sup>
 
-En se concentrant sur le port local, le droit de réception est détenu par la tâche locale. Le port est créé avec `mach_port_allocate()`. Le défi réside dans le transfert d'un droit d'envoi vers ce port dans la tâche distante.
+Concernant le port local, le receive right est détenu par le task local. Le port est créé avec `mach_port_allocate()`. La difficulté consiste à transférer un send right vers ce port dans le task distant.<sup>[1]</sup>
 
-Une stratégie consiste à tirer parti de `thread_set_special_port()` pour placer un droit d'envoi vers le port local dans le `THREAD_KERNEL_PORT` du thread distant. Ensuite, le thread distant est instruit d'appeler `mach_thread_self()` pour récupérer le droit d'envoi.
+Une stratégie consiste à utiliser `thread_set_special_port()` pour placer un send right vers le port local dans le `THREAD_KERNEL_PORT` du thread distant. Le thread distant reçoit ensuite l'instruction d'appeler `mach_thread_self()` afin de récupérer le send right.<sup>[1]</sup>
 
-Pour le port distant, le processus est essentiellement inversé. Le thread distant est dirigé pour générer un port Mach via `mach_reply_port()` (car `mach_port_allocate()` n'est pas adapté en raison de son mécanisme de retour). Une fois le port créé, `mach_port_insert_right()` est invoqué dans le thread distant pour établir un droit d'envoi. Ce droit est ensuite stocké dans le noyau en utilisant `thread_set_special_port()`. De retour dans la tâche locale, `thread_get_special_port()` est utilisé sur le thread distant pour acquérir un droit d'envoi vers le nouveau port Mach alloué dans la tâche distante.
+Pour le port distant, le processus est essentiellement inversé. Le thread distant reçoit l'instruction de générer un Mach port via `mach_reply_port()` (`mach_port_allocate()` ne convient pas en raison de son mécanisme de retour). Une fois le port créé, `mach_port_insert_right()` est appelée dans le thread distant afin d'établir un send right. Ce right est ensuite stocké dans le kernel à l'aide de `thread_set_special_port()`. De retour dans le task local, `thread_get_special_port()` est utilisée sur le thread distant afin d'obtenir un send right vers le Mach port nouvellement alloué dans le task distant.<sup>[1]</sup>
 
-L'achèvement de ces étapes aboutit à l'établissement de ports Mach, posant les bases d'une communication bidirectionnelle.
+Une fois ces étapes terminées, les Mach ports sont établis, ce qui jette les bases d'une communication bidirectionnelle.<sup>[1]</sup>
 
-## 3. Primitives de Lecture/Écriture Mémoire de Base
+## 3. Basic Memory Read/Write Primitives
 
-Dans cette section, l'accent est mis sur l'utilisation de la primitive d'exécution pour établir des primitives de lecture et d'écriture mémoire de base. Ces étapes initiales sont cruciales pour obtenir plus de contrôle sur le processus distant, bien que les primitives à ce stade ne serviront pas à beaucoup de choses. Bientôt, elles seront mises à niveau vers des versions plus avancées.
+Cette section porte sur l'utilisation de l'execute primitive afin d'établir des memory read/write primitives de base. Ces premières étapes sont essentielles pour obtenir davantage de contrôle sur le processus distant, même si les primitives disponibles à ce stade n'auront pas beaucoup d'utilité. Elles seront bientôt améliorées pour devenir des versions plus avancées.<sup>[1]</sup>
 
-### Lecture et Écriture Mémoire en Utilisant la Primitive d'Exécution
+### Memory reading and writing using the execute primitive
 
-L'objectif est d'effectuer des lectures et écritures mémoire en utilisant des fonctions spécifiques. Pour lire la mémoire, des fonctions ressemblant à la structure suivante sont utilisées :
+L'objectif est d'effectuer des lectures et des écritures mémoire à l'aide de fonctions spécifiques. Pour la **lecture de la mémoire** :
 ```c
 uint64_t read_func(uint64_t *address) {
 return *address;
 }
 ```
-Et pour écrire dans la mémoire, des fonctions similaires à cette structure sont utilisées :
+Pour **écrire en mémoire** :
 ```c
 void write_func(uint64_t *address, uint64_t value) {
 *address = value;
 }
 ```
-Ces fonctions correspondent aux instructions d'assemblage données :
+Ces fonctions correspondent à l’assembly suivant :
 ```
 _read_func:
 ldr x0, [x0]
@@ -58,104 +58,116 @@ _write_func:
 str x1, [x0]
 ret
 ```
-### Identification des Fonctions Appropriées
+### Identification des fonctions appropriées
 
-Un scan des bibliothèques courantes a révélé des candidats appropriés pour ces opérations :
+Un scan des bibliothèques courantes a révélé des candidates appropriées pour ces opérations :<sup>[1]</sup>
 
-1. **Lecture de la Mémoire :**
-La fonction `property_getName()` de la [bibliothèque d'exécution Objective-C](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) est identifiée comme une fonction appropriée pour lire la mémoire. La fonction est décrite ci-dessous :
+1. **Lecture de la mémoire — `property_getName()`** (libobjc):
 ```c
 const char *property_getName(objc_property_t prop) {
 return prop->name;
 }
 ```
-Cette fonction agit efficacement comme le `read_func` en renvoyant le premier champ de `objc_property_t`.
-
-2. **Écriture en mémoire :**
-Trouver une fonction préconstruite pour écrire en mémoire est plus difficile. Cependant, la fonction `_xpc_int64_set_value()` de libxpc est un candidat approprié avec le désassemblage suivant :
+2. **Écriture en mémoire — `_xpc_int64_set_value()`** (libxpc):
 ```c
 __xpc_int64_set_value:
 str x1, [x0, #0x18]
 ret
 ```
-Pour effectuer une écriture 64 bits à une adresse spécifique, l'appel distant est structuré comme suit :
+Pour effectuer une écriture 64 bits à une adresse arbitraire :
 ```c
-_xpc_int64_set_value(address - 0x18, value)
+_xpc_int64_set_value(address - 0x18, value);
 ```
-Avec ces primitives établies, le terrain est préparé pour créer de la mémoire partagée, marquant une progression significative dans le contrôle du processus distant.
+Avec ces primitives établies, les conditions sont réunies pour créer une mémoire partagée, ce qui constitue une avancée importante dans le contrôle du processus distant.<sup>[1]</sup>
 
 ## 4. Configuration de la mémoire partagée
 
-L'objectif est d'établir une mémoire partagée entre les tâches locales et distantes, simplifiant le transfert de données et facilitant l'appel de fonctions avec plusieurs arguments. L'approche consiste à tirer parti de `libxpc` et de son type d'objet `OS_xpc_shmem`, qui est basé sur des entrées de mémoire Mach.
+L’objectif est d’établir une mémoire partagée entre les tâches locales et distantes, afin de simplifier le transfert de données et de faciliter l’appel de fonctions avec plusieurs arguments. Cette approche exploite `libxpc` et son type d’objet `OS_xpc_shmem`, fondé sur les memory entries Mach.<sup>[1]</sup>
 
-### Aperçu du processus :
+### Vue d’ensemble du processus
 
-1. **Allocation de mémoire** :
+1. **Allocation de mémoire**
+* Allouer la mémoire à partager avec `mach_vm_allocate()`.
+* Utiliser `xpc_shmem_create()` pour créer un objet `OS_xpc_shmem` correspondant à la région allouée.
+2. **Création de la mémoire partagée dans le processus distant**
+* Allouer de la mémoire pour l’objet `OS_xpc_shmem` dans le processus distant (`remote_malloc`).
+* Copier l’objet modèle local ; la correction du Mach send right intégré à l’offset `0x18` reste nécessaire.
+3. **Correction de la Mach memory entry**
+* Insérer un send right avec `thread_set_special_port()` et écraser le champ `0x18` avec le nom de l’entry distante.
+4. **Finalisation**
+* Valider l’objet distant et le mapper avec un appel distant à `xpc_shmem_remote()`.
 
-- Allouer la mémoire pour le partage en utilisant `mach_vm_allocate()`.
-- Utiliser `xpc_shmem_create()` pour créer un objet `OS_xpc_shmem` pour la région de mémoire allouée. Cette fonction gérera la création de l'entrée de mémoire Mach et stockera le droit d'envoi Mach à l'offset `0x18` de l'objet `OS_xpc_shmem`.
+## 5. Obtenir un contrôle total
 
-2. **Création de la mémoire partagée dans le processus distant** :
+Une fois qu’une exécution arbitraire et un back-channel de mémoire partagée sont disponibles, vous contrôlez effectivement le processus cible :<sup>[1]</sup>
 
-- Allouer de la mémoire pour l'objet `OS_xpc_shmem` dans le processus distant avec un appel distant à `malloc()`.
-- Copier le contenu de l'objet local `OS_xpc_shmem` vers le processus distant. Cependant, cette copie initiale aura des noms d'entrées de mémoire Mach incorrects à l'offset `0x18`.
+* **R/W mémoire arbitraire** — utiliser `memcpy()` entre les régions locales et partagées.
+* **Appels de fonctions avec > 8 arguments** — placer les arguments supplémentaires sur la stack conformément à la convention d’appel arm64.
+* **Transfert de Mach ports** — transmettre les rights dans des Mach messages via les ports établis.
+* **Transfert de file descriptors** — exploiter les fileports (voir *triple_fetch*).
 
-3. **Correction de l'entrée de mémoire Mach** :
+Tout cela est encapsulé dans la bibliothèque [`threadexec`](https://github.com/bazad/threadexec) pour faciliter la réutilisation.
 
-- Utiliser la méthode `thread_set_special_port()` pour insérer un droit d'envoi pour l'entrée de mémoire Mach dans la tâche distante.
-- Corriger le champ d'entrée de mémoire Mach à l'offset `0x18` en le remplaçant par le nom de l'entrée de mémoire distante.
+---
 
-4. **Finalisation de la configuration de la mémoire partagée** :
-- Valider l'objet `OS_xpc_shmem` distant.
-- Établir la cartographie de la mémoire partagée avec un appel distant à `xpc_shmem_remote()`.
+## 6. Spécificités d’Apple Silicon (arm64e)
 
-En suivant ces étapes, la mémoire partagée entre les tâches locales et distantes sera efficacement configurée, permettant des transferts de données simples et l'exécution de fonctions nécessitant plusieurs arguments.
+Sur les appareils Apple Silicon (arm64e), les **Pointer Authentication Codes (PAC)** protègent toutes les adresses de retour ainsi que de nombreux pointeurs de fonction. Les techniques de *thread-hijacking* qui *réutilisent du code existant* continuent de fonctionner, car les valeurs originales de `lr`/`pc` contiennent déjà des signatures PAC valides. Les problèmes apparaissent lorsque vous essayez de sauter vers une mémoire contrôlée par l’attaquant :
 
-## Extraits de code supplémentaires
-
-Pour l'allocation de mémoire et la création d'objets de mémoire partagée :
+1. Allouer de la mémoire exécutable dans la cible (`mach_vm_allocate` distant + `mprotect(PROT_EXEC)`).
+2. Copier votre payload.
+3. Dans le processus *distant*, signer le pointeur :
 ```c
-mach_vm_allocate();
-xpc_shmem_create();
+uint64_t ptr = (uint64_t)payload;
+ptr = ptrauth_sign_unauthenticated((void*)ptr, ptrauth_key_asia, 0);
 ```
-Pour créer et corriger l'objet de mémoire partagée dans le processus distant :
-```c
-malloc(); // for allocating memory remotely
-thread_set_special_port(); // for inserting send right
+4. Définissez `pc = ptr` dans l’état du thread détourné.
+
+Autrement, restez PAC-compliant en chaînant des gadgets/fonctions existants (ROP traditionnel).
+
+## 7. Détection et durcissement avec EndpointSecurity
+
+Le framework **EndpointSecurity (ES)** expose des événements du kernel qui permettent aux défenseurs d’observer ou de bloquer les tentatives de thread injection :
+
+* `ES_EVENT_TYPE_AUTH_GET_TASK` – déclenché lorsqu’un processus demande le port task d’un autre processus (par exemple, `task_for_pid()`).
+* `ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE` – émis chaque fois qu’un thread est créé dans une *task* différente.<sup>[3]</sup>
+* `ES_EVENT_TYPE_NOTIFY_THREAD_SET_STATE` (ajouté dans macOS 14 Sonoma) – indique la manipulation des registres d’un thread existant.
+
+Client Swift minimal qui affiche les événements de remote-thread :
+```swift
+import EndpointSecurity
+
+let client = try! ESClient(subscriptions: [.notifyRemoteThreadCreate]) {
+(_, msg) in
+if let evt = msg.remoteThreadCreate {
+print("[ALERT] remote thread in pid \(evt.target.pid) by pid \(evt.thread.pid)")
+}
+}
+RunLoop.main.run()
 ```
-N'oubliez pas de gérer correctement les détails des ports Mach et des noms d'entrée mémoire pour garantir que la configuration de la mémoire partagée fonctionne correctement.
+Interrogation avec **osquery** ≥ 5.8 :
+```sql
+SELECT target_pid, source_pid, target_path
+FROM es_process_events
+WHERE event_type = 'REMOTE_THREAD_CREATE';
+```
+### Considérations relatives au hardened runtime
 
-## 5. Obtenir un Contrôle Complet
+Distribuer votre application **sans** l’entitlement `com.apple.security.get-task-allow` empêche les attaquants non-root d’obtenir son task-port. System Integrity Protection (SIP) bloque toujours l’accès à de nombreux binaires Apple, mais les logiciels tiers doivent explicitement opt-out.
 
-Après avoir établi avec succès la mémoire partagée et acquis des capacités d'exécution arbitraire, nous avons essentiellement obtenu un contrôle total sur le processus cible. Les fonctionnalités clés permettant ce contrôle sont :
+## 8. Outils publics récents (2023-2025)
 
-1. **Opérations Mémoire Arbitraires** :
+| Outil | Année | Remarques |
+|------|------|---------|
+| [`task_vaccine`](https://github.com/rodionovd/task_vaccine) | 2023 | PoC compact qui démontre le PAC-aware thread hijacking sur Ventura/Sonoma |
+| `remote_thread_es` | 2024 | Helper EndpointSecurity utilisé par plusieurs fournisseurs d’EDR pour remonter les événements `REMOTE_THREAD_CREATE` |
 
-- Effectuer des lectures de mémoire arbitraires en invoquant `memcpy()` pour copier des données de la région partagée.
-- Exécuter des écritures de mémoire arbitraires en utilisant `memcpy()` pour transférer des données vers la région partagée.
-
-2. **Gestion des Appels de Fonction avec Plusieurs Arguments** :
-
-- Pour les fonctions nécessitant plus de 8 arguments, disposer les arguments supplémentaires sur la pile conformément à la convention d'appel.
-
-3. **Transfert de Port Mach** :
-
-- Transférer des ports Mach entre les tâches via des messages Mach par le biais de ports précédemment établis.
-
-4. **Transfert de Descripteurs de Fichier** :
-- Transférer des descripteurs de fichier entre les processus en utilisant des fileports, une technique mise en avant par Ian Beer dans `triple_fetch`.
-
-Ce contrôle complet est encapsulé dans la bibliothèque [threadexec](https://github.com/bazad/threadexec), fournissant une mise en œuvre détaillée et une API conviviale pour interagir avec le processus victime.
-
-## Considérations Importantes :
-
-- Assurez-vous d'utiliser correctement `memcpy()` pour les opérations de lecture/écriture mémoire afin de maintenir la stabilité du système et l'intégrité des données.
-- Lors du transfert de ports Mach ou de descripteurs de fichier, suivez les protocoles appropriés et gérez les ressources de manière responsable pour éviter les fuites ou les accès non intentionnels.
-
-En respectant ces directives et en utilisant la bibliothèque `threadexec`, on peut gérer et interagir efficacement avec les processus à un niveau granulaire, obtenant ainsi un contrôle total sur le processus cible.
+> La lecture du code source de ces projets est utile pour comprendre les changements d’API introduits dans macOS 13/14 et rester compatible entre Intel et Apple Silicon.
 
 ## Références
 
-- [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
+- [1] [Bypassing platform binary restrictions with task_threads() - bazad.github.io](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
+- [2] [rodionovd/task_vaccine - GitHub](https://github.com/rodionovd/task_vaccine)
+- [3] [ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE - Apple Developer Documentation](https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create)
 
 {{#include ../../../../banners/hacktricks-training.md}}

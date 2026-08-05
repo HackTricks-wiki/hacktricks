@@ -1,23 +1,23 @@
-# macOS Automator, Preference Panes & NSServices Abuse
+# Abuse d'Automator, des Preference Panes et des NSServices
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Actions et workflows Automator
+## Automator Actions & Workflows
 
 ### Informations de base
 
-**Automator** est l’outil d’automatisation visuel de macOS. Il exécute des **workflows** (`.workflow` bundles) composés d’**actions** (`.action` bundles). Automator alimente aussi l’intégration des **Folder Actions**, **Quick Actions**, et **Shortcuts**. Sur les versions modernes de macOS, les workflows peuvent aussi être **importés dans Shortcuts**, donc la même logique malveillante peut apparaître comme une Quick Action du Finder, un service utilisateur sous `~/Library/Services/`, ou un shortcut basé sur d’anciennes actions Automator.
+**Automator** est l'outil d'automatisation visuelle de macOS. Il exécute des **workflows** (bundles `.workflow`) composés d'**actions** (bundles `.action`). Automator alimente également les **Folder Actions**, les **Quick Actions** et l'intégration avec **Shortcuts**. Sur les versions récentes de macOS, les workflows peuvent également être **importés dans Shortcuts** ; la même logique malveillante peut donc apparaître comme une Finder Quick Action, un user service sous `~/Library/Services/` ou un shortcut reposant sur des Automator actions héritées.
 
-Les actions Automator sont des **plugins** chargés dans le runtime Automator lorsqu’un workflow s’exécute. Elles peuvent :
-- Exécuter des scripts shell arbitraires
+Les Automator actions sont des **plugins** chargés dans le runtime d'Automator lors de l'exécution d'un workflow. Elles peuvent :
+- Exécuter des shell scripts arbitraires
 - Traiter des fichiers et des données
 - Interagir avec des applications via AppleScript
-- S’enchaîner pour une automatisation complexe
+- Être enchaînées pour créer une automatisation complexe
 
-### Pourquoi c’est important
+### Pourquoi est-ce important ?
 
 > [!WARNING]
-> Les workflows Automator peuvent être **poussés par ingénierie sociale** à s’exécuter — ils apparaissent comme de simples fichiers de document. Un bundle `.workflow` peut contenir des commandes shell intégrées qui s’exécutent lorsque le workflow tourne. Combinés aux Folder Actions, ils fournissent une **persistance automatique** qui se déclenche sur les événements de fichiers. Les corrections récentes de Gatekeeper ont aussi montré que les **Quick Actions intégrées aux apps** (`Contents/PlugIns/*.workflow`) doivent être traitées comme du contenu exécutable, et non comme de simples données inoffensives.
+> Les workflows Automator peuvent être amenés à s'exécuter par **social engineering** — ils apparaissent comme de simples fichiers document. Un bundle `.workflow` peut contenir des commandes shell intégrées qui s'exécutent lorsque le workflow est lancé. Associés aux Folder Actions, ils fournissent une **persistence automatique** qui se déclenche lors d'événements liés aux fichiers. Les correctifs récents de Gatekeeper ont également montré que les **Quick Actions intégrées aux apps** (`Contents/PlugIns/*.workflow`) doivent être considérées comme du contenu exécutable, et non comme de simples données.
 
 ### Discovery
 ```bash
@@ -43,9 +43,9 @@ JOIN executable_handlers eh ON e.id = eh.executable_id
 JOIN handlers h ON eh.handler_id = h.id
 WHERE h.handler_type = 'automator_action';"
 ```
-### Attack: Workflow d’ingénierie sociale
+### Attack: Workflow conçu par ingénierie sociale
 
-Un bundle `.workflow` ressemble à un fichier de document normal pour la plupart des utilisateurs :
+Un bundle `.workflow` ressemble à un fichier document normal pour la plupart des utilisateurs :
 ```bash
 # Create a workflow programmatically
 mkdir -p /tmp/Evil.workflow/Contents
@@ -78,7 +78,7 @@ cat > /tmp/Evil.workflow/Contents/document.wflow << 'PLIST'
 </plist>
 PLIST
 ```
-### Attaque : Persistance via Folder Action
+### Attack: Folder Action Persistence
 
 Les Folder Actions exécutent automatiquement un workflow lorsque des fichiers sont ajoutés à un dossier surveillé :
 ```bash
@@ -99,25 +99,25 @@ end tell'
 # Users can be tricked into installing a Folder Action through a .workflow double-click
 ```
 > [!CAUTION]
-> Les Folder Actions persistent après les redémarrages et s’exécutent silencieusement. Un Folder Action sur `~/Downloads` signifie que **chaque fichier téléchargé déclenche votre payload** — y compris les fichiers provenant de Safari, Chrome, AirDrop et des pièces jointes d’e-mail. Notez aussi que `System Events` peut enregistrer des Folder Actions qui pointent vers des scripts en dehors des emplacements par défaut `~/Library/Scripts/Folder Action Scripts`, ce qui rend utile la recherche de chemins non standard. Pour les implications TCC associées, consultez [the TCC page](../macos-security-protections/macos-tcc/README.md).
+> Les Folder Actions persistent après les redémarrages et s'exécutent silencieusement. Une Folder Action sur `~/Downloads` signifie que **chaque fichier téléchargé déclenche votre payload** — y compris les fichiers provenant de Safari, Chrome, AirDrop et les pièces jointes d'e-mails. Notez également que `System Events` peut enregistrer des Folder Actions qui pointent vers des scripts situés en dehors des emplacements par défaut `~/Library/Scripts/Folder Action Scripts`, ce qui rend la recherche de chemins isolés pertinente. Pour les implications TCC associées, consultez [la page TCC](../macos-security-protections/macos-tcc/README.md).
 
 ---
 
-## Preference Panes
+## Panneaux de préférences
 
-### Basic Information
+### Informations de base
 
-Les preference panes (`.prefPane` bundles) sont des plugins chargés depuis **System Settings** (anciennement System Preferences). Ils fournissent des panneaux d’interface de configuration pour des fonctionnalités système ou tierces. Sur les anciens systèmes, ils étaient chargés directement par **System Preferences** ; sur les versions plus récentes, les panes tierces sont généralement intermédiées par un **legacy loader XPC service** lancé depuis System Settings.
+Les preference panes (bundles `.prefPane`) sont des plugins chargés par **System Settings** (anciennement System Preferences). Ils fournissent des panneaux d'interface de configuration pour les fonctionnalités système ou tierces. Sur les anciens systèmes, ils étaient chargés directement par `System Preferences` ; dans les versions plus récentes, les panes tierces sont généralement prises en charge par un **service XPC legacy loader** lancé depuis System Settings.
 
-### Why This Matters
+### Pourquoi est-ce important ?
 
-- Les preference panes s’exécutent dans un **trusted host process** lancé par System Settings / System Preferences
-- Sur les systèmes modernes, ce host peut être un **`legacyLoader` XPC service**, donc la frontière importante reste **trusted Apple UI process -> third-party code loading**
-- Les preference panes tierces héritent du **host process security context** et de la confiance utilisateur associée à cette interface
-- Les utilisateurs installent les preference panes par **double-clic** — ingénierie sociale facile
-- Une fois installées, elles **persistent** et se chargent à chaque ouverture de System Settings sur ce panneau
+- Les preference panes s'exécutent dans un **processus hôte de confiance** lancé par System Settings / System Preferences
+- Sur les systèmes modernes, cet hôte peut être un **service XPC `legacyLoader`** ; la frontière importante reste donc **processus d'interface Apple de confiance -> chargement de code tiers**
+- Les preference panes tierces héritent du **contexte de sécurité du processus hôte** et de la confiance accordée par l'utilisateur à cette interface
+- Les utilisateurs installent les preference panes en les **ouvrant par double-clic** — ce qui facilite l'ingénierie sociale
+- Une fois installées, elles **persistent** et se chargent chaque fois que System Settings ouvre ce panneau
 
-### Discovery
+### Découverte
 ```bash
 # Find installed preference panes
 ls /Library/PreferencePanes/ 2>/dev/null
@@ -141,7 +141,7 @@ WHERE h.handler_type = 'preference_pane';"
 ```
 ### Attaque : détournement du contexte de privilèges
 
-Un panneau de préférences malveillant hérite du contexte de sécurité de l’**hôte du panneau** (historiquement `System Preferences`, sur les versions récentes souvent un helper `legacyLoader` lancé par `System Settings`) :
+Un panneau de préférences malveillant hérite du contexte de sécurité de l’**hôte du panneau** (historiquement `System Preferences`, et dans les versions plus récentes, souvent un helper `legacyLoader` lancé par `System Settings`) :
 ```objc
 // Preference pane principal class
 @interface MaliciousPrefPane : NSPreferencePane
@@ -162,7 +162,7 @@ AXUIElementRef systemWide = AXUIElementCreateSystemWide();
 }
 @end
 ```
-### Attaque : Persistance via l’installation
+### Attaque : Persistence via Installation
 ```bash
 # Install a preference pane (user-level, no admin required)
 cp -r /tmp/Evil.prefPane ~/Library/PreferencePanes/
@@ -173,9 +173,9 @@ sudo cp -r /tmp/Evil.prefPane /Library/PreferencePanes/
 # The pane loads every time the user opens System Settings and navigates to it
 # For better persistence, set it as the default pane
 ```
-### Attaque : UI Phishing
+### Attack: UI Phishing
 
-Un panneau de préférences peut imiter des panneaux système légitimes pour **hameçonner des identifiants** :
+Un preference pane peut imiter des panneaux d’interface système légitimes afin de **phish des identifiants** :
 ```objc
 // Display a fake authentication dialog
 NSAlert *alert = [[NSAlert alloc] init];
@@ -197,17 +197,17 @@ NSString *password = passwordField.stringValue;
 
 ### Informations de base
 
-**NSServices** permettent aux applications de fournir des fonctionnalités à d'autres apps via le **menu Services** (clic droit → Services). Lorsqu'un utilisateur sélectionne du texte ou des données et invoque un service, les données sélectionnées sont **envoyées au fournisseur de service** pour traitement.
+Les **NSServices** permettent aux applications de fournir des fonctionnalités à d'autres applications via le **Services menu** (clic droit → Services). Lorsqu'un utilisateur sélectionne du texte ou des données et invoque un service, les données sélectionnées sont **envoyées au fournisseur du service** pour traitement.
 
-Les services sont déclarés dans le `Info.plist` d'une application sous la clé `NSServices` et enregistrés auprès du serveur de presse-papiers (`pbs`). macOS conserve aussi un **cache de services** et une **politique de restriction** qui déterminent quels services sont visibles et si les appelants sandboxed doivent recevoir un avertissement supplémentaire.
+Les services sont déclarés dans le `Info.plist` d'une application sous la clé `NSServices` et enregistrés auprès du pasteboard server (`pbs`). macOS conserve également un **service cache** et une **restriction policy** qui déterminent quels services sont visibles et si les appelants sandboxés doivent recevoir un avertissement supplémentaire.
 
-### Pourquoi c'est important
+### Pourquoi est-ce important ?
 
-- Les services reçoivent un **flux de données inter-applications** — le texte sélectionné depuis n'importe quelle application est envoyé au service
-- Un service malveillant capture des données provenant de gestionnaires de mots de passe, de clients e-mail, d'applications financières
+- Les services reçoivent un **flux de données interapplications** — le texte sélectionné dans n'importe quelle application est envoyé au service
+- Un service malveillant capture les données provenant des password managers, des clients de messagerie et des applications financières
 - Les services peuvent **renvoyer des données modifiées** à l'application appelante (man-in-the-middle sur les opérations de sélection)
-- Les noms de services peuvent être conçus pour paraître légitimes ("Format Text", "Encrypt Selection", "Share")
-- Le drapeau optionnel `NSRestricted` a une importance pour la sécurité : un service marqué non restreint peut être appelable par une app sandboxed sans l'avertissement que macOS affiche pour les services susceptibles de provoquer une évasion
+- Les noms des services peuvent être conçus pour sembler légitimes (« Format Text », « Encrypt Selection », « Share »)
+- Le flag facultatif `NSRestricted` est pertinent du point de vue de la sécurité : un service marqué comme unrestricted peut être appelé par une application sandboxée sans l'avertissement affiché par macOS pour les services susceptibles de permettre une évasion<sup>[2]</sup>
 
 ### Découverte
 ```bash
@@ -236,7 +236,7 @@ JOIN executable_handlers eh ON e.id = eh.executable_id
 JOIN handlers h ON eh.handler_id = h.id
 WHERE h.handler_type = 'service';"
 ```
-### Attaque : Data Interception Service
+### Attack: Service d'interception de données
 ```xml
 <!-- Info.plist NSServices declaration -->
 <key>NSServices</key>
@@ -277,7 +277,7 @@ NSString *selectedText = [pboard stringForType:NSPasteboardTypeString];
 [pboard setString:selectedText forType:NSPasteboardTypeString];
 }
 ```
-### Attaque : Modification des données (Man-in-the-Middle)
+### Attack: Data Modification (Man-in-the-Middle)
 
 Un service peut **modifier les données renvoyées** tout en semblant fournir une fonction légitime :
 ```objc
@@ -297,26 +297,26 @@ withString:@"attacker-account"];
 [pboard setString:modified forType:NSPasteboardTypeString];
 }
 ```
-### Services restreints et abus moderne
+### Services restreints et abus modernes
 
-Apple prend en charge un booléen `NSRestricted` facultatif par définition de service. S’il est défini, macOS avertit les appelants sandboxed car le service peut les aider à **sortir de la sandbox ou des limites de confidentialité**. D’un point de vue offensif, cela offre deux pistes d’audit utiles :
+Apple prend en charge un booléen `NSRestricted` facultatif pour chaque définition de service. S'il est défini, macOS avertit les appelants sandboxés, car le service peut les aider à **sortir de la sandbox ou à contourner les limites de confidentialité**. Du point de vue offensif, cela fournit deux pistes d'audit utiles :
 
-- Rechercher des **services tiers non marqués comme restreints** alors qu’ils relaient des Apple Events, l’accès aux fichiers ou d’autres actions privilégiées
-- Rechercher des **services intégrés à forte valeur** avec des entitlements forts (par exemple, des services exposés par Script Editor ou des helpers liés à Finder) et vérifier si l’interaction utilisateur suffit à les transformer en primitive d’accès aux données
+- Rechercher les services **tiers qui ne sont pas marqués comme restreints**, alors qu'ils servent de proxy pour les Apple Events, l'accès aux fichiers ou d'autres actions privilégiées
+- Rechercher les **services intégrés à forte valeur** disposant d'entitlements importants (par exemple, les services exposés par Script Editor ou les helpers associés au Finder), puis vérifier si une interaction utilisateur suffit à les transformer en primitive d'accès aux données
 
-Un bon exemple récent est **CVE-2022-48574**, où le mécanisme Services pouvait être abusé pour atteindre des **fichiers utilisateur protégés par TCC sans le flux de confirmation attendu**. Le bug est corrigé, mais la technique reste utile pour la modélisation de menace : tout service qui relaie un accès aux fichiers ou des requêtes d’automatisation au nom de l’appelant mérite le même niveau de contrôle.
+Un exemple récent pertinent est **CVE-2022-48574**, dans lequel le mécanisme Services pouvait être exploité pour accéder à des **fichiers utilisateur protégés par TCC sans le flux de confirmation attendu**. Le bug est corrigé, mais la technique reste utile pour le threat modeling : tout service qui relaie des demandes d'accès aux fichiers ou d'automatisation au nom de l'appelant mérite le même niveau d'examen.<sup>[2]</sup>
 
 ---
 
 ## Notes de sécurité récentes
 
-- **Les Quick Actions sont du contenu exécutable** : Apple a corrigé en 2024 un contournement de Gatekeeper où une Automator Quick Action fournie avec une app pouvait s’exécuter sans évaluation normale. Lors de l’audit d’apps, inspectez `Contents/PlugIns/*.workflow/Contents/document.wflow` exactement comme vous inspecteriez des scripts helpers ou des login items. Voir [la page Gatekeeper](../macos-security-protections/macos-gatekeeper.md).
-- **Shortcuts peuvent hériter du comportement Automator legacy** : Apple a aussi ajouté une invite supplémentaire de consentement utilisateur après que des shortcuts tiers ont été trouvés en train d’utiliser une **action Automator legacy** pour envoyer des Apple Events sans le flux d’autorisation attendu. Les workflows importés et les bundles de shortcuts doivent être examinés pour `Run AppleScript`, `Run Shell Script` et des actions de pont similaires. Voir [la page TCC](../macos-security-protections/macos-tcc/README.md).
-- **Automator reste une frontière de confidentialité active** : Apple a livré un autre correctif Automator en 2025 pour l’accès aux données utilisateur protégées. Même si Automator est une surface legacy, traitez tout workflow runner, hôte de Quick Action ou pont d’automatisation comme une surface d’attaque actuelle plutôt que comme du code mort.
+- **Quick Actions sont du contenu exécutable** : Apple a corrigé en 2024 un contournement de Gatekeeper dans lequel une Quick Action Automator intégrée à une application pouvait s'exécuter sans l'évaluation normale. Lors de l'audit d'applications, inspectez `Contents/PlugIns/*.workflow/Contents/document.wflow` exactement comme vous inspecteriez des helper scripts ou des login items. Voir [la page Gatekeeper](../macos-security-protections/macos-gatekeeper.md).<sup>[1]</sup>
+- **Shortcuts peut hériter du comportement legacy d'Automator** : Apple a également ajouté une invite de consentement utilisateur supplémentaire après la découverte de third-party shortcuts utilisant une **legacy Automator action** pour envoyer des Apple Events sans le flux d'autorisation attendu. Les workflows importés et les bundles de shortcuts doivent être examinés à la recherche de `Run AppleScript`, `Run Shell Script` et d'actions bridge similaires. Voir [la page TCC](../macos-security-protections/macos-tcc/README.md).
+- **Automator reste une boundary de confidentialité active** : Apple a livré en 2025 un autre correctif Automator concernant l'accès aux données utilisateur protégées. Même si Automator est une surface legacy, considérez tout workflow runner, hôte de Quick Actions ou bridge d'automatisation comme une attack surface actuelle plutôt que comme du dead code.
 
 ---
 
-## Chaînes d’attaque inter-techniques
+## Chaînes d'attaque inter-techniques
 
 ### Automator Folder Action → Credential Harvesting
 ```
@@ -333,7 +333,7 @@ Un bon exemple récent est **CVE-2022-48574**, où le mécanisme Services pouvai
 4. Inherits the host process trust and any useful entitlements / TCC posture
 5. Access protected data, control other apps, or phish from a trusted Apple UI
 ```
-### NSService → Vol de gestionnaire de mots de passe
+### NSService → Vol de Password Manager
 ```
 1. Register a service named "Secure Copy"
 2. User selects password in password manager
@@ -343,7 +343,7 @@ Un bon exemple récent est **CVE-2022-48574**, où le mécanisme Services pouvai
 ```
 ## Références
 
-* [Apple — About the security content of macOS Ventura 13.7, Sonoma 14.7, and Sequoia 15](https://support.apple.com/en-us/121238)
-* [Moonlock — How the NSServices exploit worked on macOS](https://moonlock.com/nsservices-macos)
+- [1] [Apple — À propos du contenu de sécurité de macOS Ventura 13.7, Sonoma 14.7 et Sequoia 15](https://support.apple.com/en-us/121238)
+- [2] [Moonlock — Comment l’exploit NSServices fonctionnait sur macOS](https://moonlock.com/nsservices-macos)
 
 {{#include ../../../banners/hacktricks-training.md}}

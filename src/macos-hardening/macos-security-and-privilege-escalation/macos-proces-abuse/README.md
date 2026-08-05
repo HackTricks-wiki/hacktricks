@@ -1,48 +1,48 @@
-# macOS Process Abuse
+# Abuse des processus macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Informations de base sur les processus
 
-Un processus est une instance d'un exécutable en cours d'exécution, cependant les processus n'exécutent pas de code, ce sont des threads. Par conséquent, **les processus ne sont que des conteneurs pour des threads en cours d'exécution** fournissant la mémoire, des descripteurs, des ports, des permissions...
+Un processus est une instance d'un exécutable en cours d'exécution. Cependant, les processus n'exécutent pas directement le code : ce sont les threads qui s'en chargent. Par conséquent, **les processus sont simplement des conteneurs pour les threads en cours d'exécution**, fournissant la mémoire, les descripteurs, les ports, les permissions...
 
-Traditionnellement, les processus étaient lancés dans d'autres processus (sauf le PID 1) en appelant **`fork`** qui créerait une copie exacte du processus actuel et ensuite le **processus enfant** appellerait généralement **`execve`** pour charger le nouvel exécutable et l'exécuter. Ensuite, **`vfork`** a été introduit pour rendre ce processus plus rapide sans aucune copie de mémoire.\
-Puis **`posix_spawn`** a été introduit combinant **`vfork`** et **`execve`** en un seul appel et acceptant des drapeaux :
+Traditionnellement, les processus étaient démarrés au sein d'autres processus (à l'exception du PID 1) en appelant **`fork`**, qui créait une copie exacte du processus actuel. Le **processus enfant** appelait ensuite généralement **`execve`** pour charger le nouvel exécutable et l'exécuter. Ensuite, **`vfork`** a été introduit afin d'accélérer ce processus sans effectuer de copie de la mémoire.\
+Puis **`posix_spawn`** a été introduit, combinant **`vfork`** et **`execve`** en un seul appel et acceptant des flags :
 
-- `POSIX_SPAWN_RESETIDS` : Réinitialiser les identifiants effectifs aux identifiants réels
-- `POSIX_SPAWN_SETPGROUP` : Définir l'affiliation au groupe de processus
-- `POSUX_SPAWN_SETSIGDEF` : Définir le comportement par défaut des signaux
-- `POSIX_SPAWN_SETSIGMASK` : Définir le masque de signal
-- `POSIX_SPAWN_SETEXEC` : Exécuter dans le même processus (comme `execve` avec plus d'options)
-- `POSIX_SPAWN_START_SUSPENDED` : Démarrer suspendu
-- `_POSIX_SPAWN_DISABLE_ASLR` : Démarrer sans ASLR
+- `POSIX_SPAWN_RESETIDS`: Réinitialiser les identifiants effectifs aux identifiants réels
+- `POSIX_SPAWN_SETPGROUP`: Définir l'appartenance au groupe de processus
+- `POSUX_SPAWN_SETSIGDEF`: Définir le comportement par défaut des signaux
+- `POSIX_SPAWN_SETSIGMASK`: Définir le masque des signaux
+- `POSIX_SPAWN_SETEXEC`: Exécuter dans le même processus (comme `execve`, avec davantage d'options)
+- `POSIX_SPAWN_START_SUSPENDED`: Démarrer en état suspendu
+- `_POSIX_SPAWN_DISABLE_ASLR`: Démarrer sans ASLR
 - `_POSIX_SPAWN_NANO_ALLOCATOR:` Utiliser l'allocateur Nano de libmalloc
 - `_POSIX_SPAWN_ALLOW_DATA_EXEC:` Autoriser `rwx` sur les segments de données
-- `POSIX_SPAWN_CLOEXEC_DEFAULT` : Fermer toutes les descriptions de fichiers sur exec(2) par défaut
-- `_POSIX_SPAWN_HIGH_BITS_ASLR:` Randomiser les bits élevés du glissement ASLR
+- `POSIX_SPAWN_CLOEXEC_DEFAULT`: Fermer par défaut tous les descripteurs de fichiers lors de l'exécution de exec(2)
+- `_POSIX_SPAWN_HIGH_BITS_ASLR:` Randomiser les bits de poids fort du slide ASLR
 
-De plus, `posix_spawn` permet de spécifier un tableau de **`posix_spawnattr`** qui contrôle certains aspects du processus créé, et **`posix_spawn_file_actions`** pour modifier l'état des descripteurs.
+De plus, `posix_spawn` permet de spécifier un tableau de **`posix_spawnattr`** qui contrôle certains aspects du processus créé, ainsi que **`posix_spawn_file_actions`** pour modifier l'état des descripteurs.
 
-Lorsqu'un processus meurt, il envoie le **code de retour au processus parent** (si le parent est mort, le nouveau parent est le PID 1) avec le signal `SIGCHLD`. Le parent doit obtenir cette valeur en appelant `wait4()` ou `waitid()` et jusqu'à ce que cela se produise, l'enfant reste dans un état zombie où il est toujours listé mais ne consomme pas de ressources.
+Lorsqu'un processus se termine, il envoie le **code de retour au processus parent** (si le parent est mort, le nouveau parent est le PID 1) avec le signal `SIGCHLD`. Le parent doit récupérer cette valeur en appelant `wait4()` ou `waitid()` ; jusqu'à ce que cela se produise, l'enfant reste dans un état zombie : il est toujours listé, mais ne consomme pas de ressources.
 
 ### PIDs
 
-Les PIDs, identifiants de processus, identifient un processus unique. Dans XNU, les **PIDs** sont de **64 bits** augmentant de manière monotone et **ne se réinitialisent jamais** (pour éviter les abus).
+Les PIDs, ou identifiants de processus, identifient un processus unique. Dans XNU, les **PIDs** sont des valeurs de **64 bits** qui augmentent de façon monotone et **ne reviennent jamais à zéro** (afin d'éviter les abus).
 
-### Groupes de processus, sessions et coalitions
+### Groupes de processus, sessions et Coalitions
 
-**Les processus** peuvent être insérés dans des **groupes** pour faciliter leur gestion. Par exemple, les commandes dans un script shell seront dans le même groupe de processus, il est donc possible de **les signaler ensemble** en utilisant kill par exemple.\
-Il est également possible de **grouper des processus en sessions**. Lorsqu'un processus démarre une session (`setsid(2)`), les processus enfants sont placés à l'intérieur de la session, sauf s'ils démarrent leur propre session.
+Les **processus** peuvent être insérés dans des **groupes** afin de faciliter leur gestion. Par exemple, les commandes d'un script shell appartiennent au même groupe de processus, ce qui permet de les **signaler ensemble**, en utilisant `kill` par exemple.\
+Il est également possible de **regrouper les processus dans des sessions**. Lorsqu'un processus démarre une session (`setsid(2)`), les processus enfants sont placés dans cette session, sauf s'ils démarrent leur propre session.
 
-La coalition est une autre façon de grouper des processus dans Darwin. Un processus rejoignant une coalition lui permet d'accéder à des ressources partagées, partageant un registre ou faisant face à Jetsam. Les coalitions ont différents rôles : Leader, service XPC, Extension.
+Coalition est une autre manière de regrouper les processus dans Darwin. Un processus qui rejoint une coalition peut accéder à des ressources partagées, partager un ledger ou être soumis à Jetsam. Les Coalitions ont différents rôles : Leader, service XPC, Extension.
 
-### Identifiants et personas
+### Identifiants et personae
 
-Chaque processus détient des **identifiants** qui **identifient ses privilèges** dans le système. Chaque processus aura un `uid` principal et un `gid` principal (bien qu'il puisse appartenir à plusieurs groupes).\
-Il est également possible de changer l'identifiant utilisateur et l'identifiant de groupe si le binaire a le bit `setuid/setgid`.\
-Il existe plusieurs fonctions pour **définir de nouveaux uids/gids**.
+Chaque processus détient des **identifiants** qui **définissent ses privilèges** dans le système. Chaque processus possède un `uid` primaire et un `gid` primaire (même s'il peut appartenir à plusieurs groupes).\
+Il est également possible de modifier l'identifiant utilisateur et l'identifiant de groupe si le binaire possède le bit `setuid/setgid`.\
+Il existe plusieurs fonctions permettant de **définir de nouveaux uids/gids**.
 
-L'appel système **`persona`** fournit un **ensemble alternatif** de **credentials**. Adopter une persona suppose son uid, gid et les appartenances de groupe **en une seule fois**. Dans le [**code source**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h), il est possible de trouver la structure :
+L'appel système **`persona`** fournit un ensemble **alternatif** d'**identifiants**. Adopter une persona implique d'adopter simultanément son uid, son gid et ses appartenances aux groupes. Dans le [**code source**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h), il est possible de trouver la structure :
 ```c
 struct kpersona_info { uint32_t persona_info_version;
 uid_t    persona_id; /* overlaps with UID */
@@ -58,41 +58,41 @@ char     persona_name[MAXLOGNAME + 1];
 ```
 ## Informations de base sur les threads
 
-1. **Threads POSIX (pthreads) :** macOS prend en charge les threads POSIX (`pthreads`), qui font partie d'une API de threading standard pour C/C++. L'implémentation de pthreads dans macOS se trouve dans `/usr/lib/system/libsystem_pthread.dylib`, qui provient du projet `libpthread` disponible publiquement. Cette bibliothèque fournit les fonctions nécessaires pour créer et gérer des threads.
-2. **Création de threads :** La fonction `pthread_create()` est utilisée pour créer de nouveaux threads. En interne, cette fonction appelle `bsdthread_create()`, qui est un appel système de niveau inférieur spécifique au noyau XNU (le noyau sur lequel macOS est basé). Cet appel système prend divers drapeaux dérivés de `pthread_attr` (attributs) qui spécifient le comportement des threads, y compris les politiques de planification et la taille de la pile.
-- **Taille de pile par défaut :** La taille de pile par défaut pour les nouveaux threads est de 512 Ko, ce qui est suffisant pour des opérations typiques mais peut être ajusté via les attributs de thread si plus ou moins d'espace est nécessaire.
-3. **Initialisation des threads :** La fonction `__pthread_init()` est cruciale lors de la configuration des threads, utilisant l'argument `env[]` pour analyser les variables d'environnement qui peuvent inclure des détails sur l'emplacement et la taille de la pile.
+1. **Threads POSIX (pthreads) :** macOS prend en charge les threads POSIX (`pthreads`), qui font partie d’une API standard de gestion des threads pour le C/C++. L’implémentation des pthreads dans macOS se trouve dans `/usr/lib/system/libsystem_pthread.dylib`, qui provient du projet `libpthread` disponible publiquement. Cette bibliothèque fournit les fonctions nécessaires pour créer et gérer les threads.
+2. **Création des threads :** La fonction `pthread_create()` est utilisée pour créer de nouveaux threads. En interne, cette fonction appelle `bsdthread_create()`, un appel système de niveau inférieur spécifique au kernel XNU (le kernel sur lequel macOS est basé). Cet appel système accepte différents flags dérivés de `pthread_attr` (attributs), qui définissent le comportement du thread, notamment les politiques de scheduling et la taille de la stack.
+- **Taille de stack par défaut :** La taille de stack par défaut des nouveaux threads est de 512 Ko, ce qui est suffisant pour les opérations courantes, mais peut être ajusté via les attributs du thread si davantage ou moins d’espace est nécessaire.
+3. **Initialisation des threads :** La fonction `__pthread_init()` joue un rôle essentiel lors de la configuration du thread. Elle utilise l’argument `env[]` pour analyser les variables d’environnement, qui peuvent contenir des informations sur l’emplacement et la taille de la stack.
 
 #### Terminaison des threads dans macOS
 
-1. **Sortie des threads :** Les threads sont généralement terminés en appelant `pthread_exit()`. Cette fonction permet à un thread de sortir proprement, effectuant le nettoyage nécessaire et permettant au thread d'envoyer une valeur de retour à tout rejoignant.
-2. **Nettoyage des threads :** Lors de l'appel de `pthread_exit()`, la fonction `pthread_terminate()` est invoquée, qui gère la suppression de toutes les structures de thread associées. Elle désalloue les ports de thread Mach (Mach est le sous-système de communication dans le noyau XNU) et appelle `bsdthread_terminate`, un appel système qui supprime les structures de niveau noyau associées au thread.
+1. **Quitter un thread :** Les threads sont généralement terminés en appelant `pthread_exit()`. Cette fonction permet à un thread de se terminer proprement, d’effectuer le nettoyage nécessaire et d’envoyer une valeur de retour aux threads qui l’attendent.
+2. **Nettoyage du thread :** Lors de l’appel à `pthread_exit()`, la fonction `pthread_terminate()` est invoquée. Elle supprime toutes les structures associées au thread. Elle désalloue les ports de threads Mach (Mach est le sous-système de communication du kernel XNU) et appelle `bsdthread_terminate`, un syscall qui supprime les structures de niveau kernel associées au thread.
 
 #### Mécanismes de synchronisation
 
-Pour gérer l'accès aux ressources partagées et éviter les conditions de course, macOS fournit plusieurs primitives de synchronisation. Celles-ci sont critiques dans les environnements multi-threading pour garantir l'intégrité des données et la stabilité du système :
+Pour gérer l’accès aux ressources partagées et éviter les race conditions, macOS fournit plusieurs primitives de synchronisation. Elles sont essentielles dans les environnements multithread afin de garantir l’intégrité des données et la stabilité du système :
 
 1. **Mutex :**
-- **Mutex régulier (Signature : 0x4D555458) :** Mutex standard avec une empreinte mémoire de 60 octets (56 octets pour le mutex et 4 octets pour la signature).
-- **Mutex rapide (Signature : 0x4d55545A) :** Semblable à un mutex régulier mais optimisé pour des opérations plus rapides, également de 60 octets de taille.
+- **Mutex standard (Signature : 0x4D555458) :** Mutex standard avec une empreinte mémoire de 60 octets (56 octets pour le mutex et 4 octets pour la signature).
+- **Mutex rapide (Signature : 0x4d55545A) :** Similaire à un mutex standard, mais optimisé pour des opérations plus rapides, avec également une taille de 60 octets.
 2. **Variables de condition :**
 - Utilisées pour attendre que certaines conditions se produisent, avec une taille de 44 octets (40 octets plus une signature de 4 octets).
-- **Attributs de variable de condition (Signature : 0x434e4441) :** Attributs de configuration pour les variables de condition, d'une taille de 12 octets.
+- **Attributs de variable de condition (Signature : 0x434e4441) :** Attributs de configuration des variables de condition, d’une taille de 12 octets.
 3. **Variable Once (Signature : 0x4f4e4345) :**
-- Assure qu'un morceau de code d'initialisation est exécuté une seule fois. Sa taille est de 12 octets.
-4. **Verrous de lecture-écriture :**
-- Permet plusieurs lecteurs ou un écrivain à la fois, facilitant l'accès efficace aux données partagées.
-- **Verrou de lecture-écriture (Signature : 0x52574c4b) :** Taille de 196 octets.
-- **Attributs de verrou de lecture-écriture (Signature : 0x52574c41) :** Attributs pour les verrous de lecture-écriture, de 20 octets de taille.
+- Garantit qu’un code d’initialisation est exécuté une seule fois. Sa taille est de 12 octets.
+4. **Verrous Read-Write :**
+- Permettent à plusieurs lecteurs ou à un seul writer d’accéder aux données à un moment donné, facilitant ainsi un accès efficace aux données partagées.
+- **Read Write Lock (Signature : 0x52574c4b) :** Taille de 196 octets.
+- **Attributs Read Write Lock (Signature : 0x52574c41) :** Attributs des verrous Read-Write, d’une taille de 20 octets.
 
 > [!TIP]
-> Les 4 derniers octets de ces objets sont utilisés pour détecter les débordements.
+> Les 4 derniers octets de ces objets sont utilisés pour détecter les overflows.
 
-### Variables locales aux threads (TLV)
+### Variables Thread Local (TLV)
 
-**Variables locales aux threads (TLV)** dans le contexte des fichiers Mach-O (le format pour les exécutables dans macOS) sont utilisées pour déclarer des variables qui sont spécifiques à **chaque thread** dans une application multi-threadée. Cela garantit que chaque thread a sa propre instance séparée d'une variable, fournissant un moyen d'éviter les conflits et de maintenir l'intégrité des données sans avoir besoin de mécanismes de synchronisation explicites comme les mutex.
+Les **Thread Local Variables (TLV)**, dans le contexte des fichiers Mach-O (le format des exécutables dans macOS), servent à déclarer des variables spécifiques à **chaque thread** dans une application multithread. Cela garantit que chaque thread dispose de sa propre instance distincte d’une variable, ce qui permet d’éviter les conflits et de préserver l’intégrité des données sans nécessiter de mécanismes de synchronisation explicites tels que les mutex.
 
-En C et dans les langages connexes, vous pouvez déclarer une variable locale au thread en utilisant le mot-clé **`__thread`**. Voici comment cela fonctionne dans votre exemple :
+En C et dans les langages associés, vous pouvez déclarer une variable thread-local à l’aide du mot-clé **`__thread`**. Voici comment cela fonctionne dans votre exemple :
 ```c
 cCopy code__thread int tlv_var;
 
@@ -100,184 +100,187 @@ void main (int argc, char **argv){
 tlv_var = 10;
 }
 ```
-Ce snippet définit `tlv_var` comme une variable locale à un thread. Chaque thread exécutant ce code aura son propre `tlv_var`, et les modifications qu'un thread apporte à `tlv_var` n'affecteront pas `tlv_var` dans un autre thread.
+Cet extrait définit `tlv_var` comme une variable thread-local. Chaque thread exécutant ce code possède sa propre `tlv_var`, et les modifications apportées par un thread à `tlv_var` n'affecteront pas la `tlv_var` d'un autre thread.
 
-Dans le binaire Mach-O, les données liées aux variables locales à un thread sont organisées en sections spécifiques :
+Dans le binaire Mach-O, les données liées aux variables thread-local sont organisées dans des sections spécifiques :
 
-- **`__DATA.__thread_vars`** : Cette section contient les métadonnées sur les variables locales à un thread, comme leurs types et leur état d'initialisation.
-- **`__DATA.__thread_bss`** : Cette section est utilisée pour les variables locales à un thread qui ne sont pas explicitement initialisées. C'est une partie de la mémoire réservée pour les données initialisées à zéro.
+- **`__DATA.__thread_vars`** : cette section contient les métadonnées relatives aux variables thread-local, comme leur type et leur état d'initialisation.
+- **`__DATA.__thread_bss`** : cette section est utilisée pour les variables thread-local qui ne sont pas explicitement initialisées. Elle fait partie de la mémoire réservée aux données initialisées à zéro.
 
-Mach-O fournit également une API spécifique appelée **`tlv_atexit`** pour gérer les variables locales à un thread lors de la sortie d'un thread. Cette API vous permet de **enregistrer des destructeurs**—des fonctions spéciales qui nettoient les données locales à un thread lorsque celui-ci se termine.
+Mach-O fournit également une API spécifique appelée **`tlv_atexit`** pour gérer les variables thread-local lorsqu'un thread se termine. Cette API permet d'**enregistrer des destructeurs**, c'est-à-dire des fonctions spéciales qui nettoient les données thread-local lorsqu'un thread se termine.
 
-### Priorités de Thread
+### Priorités des threads
 
-Comprendre les priorités des threads implique d'examiner comment le système d'exploitation décide quels threads exécuter et quand. Cette décision est influencée par le niveau de priorité attribué à chaque thread. Dans macOS et les systèmes de type Unix, cela est géré à l'aide de concepts tels que `nice`, `renice`, et les classes de Qualité de Service (QoS).
+Comprendre les priorités des threads implique d'examiner comment le système d'exploitation décide quels threads exécuter et à quel moment. Cette décision est influencée par le niveau de priorité attribué à chaque thread. Dans macOS et les systèmes de type Unix, cela est géré à l'aide de concepts comme `nice`, `renice` et les classes Quality of Service (QoS).
 
 #### Nice et Renice
 
 1. **Nice :**
-- La valeur `nice` d'un processus est un nombre qui affecte sa priorité. Chaque processus a une valeur nice allant de -20 (la plus haute priorité) à 19 (la plus basse priorité). La valeur nice par défaut lors de la création d'un processus est généralement 0.
-- Une valeur nice plus basse (plus proche de -20) rend un processus plus "égoïste", lui donnant plus de temps CPU par rapport à d'autres processus avec des valeurs nice plus élevées.
+- La valeur `nice` d'un processus est un nombre qui affecte sa priorité. Chaque processus possède une valeur `nice` comprise entre -20 (priorité la plus élevée) et 19 (priorité la plus faible). La valeur `nice` par défaut lors de la création d'un processus est généralement 0.
+- Une valeur `nice` plus faible (proche de -20) rend un processus plus « égoïste », en lui accordant davantage de temps CPU par rapport aux autres processus ayant des valeurs `nice` plus élevées.
 2. **Renice :**
-- `renice` est une commande utilisée pour changer la valeur nice d'un processus déjà en cours d'exécution. Cela peut être utilisé pour ajuster dynamiquement la priorité des processus, soit en augmentant, soit en diminuant leur allocation de temps CPU en fonction de nouvelles valeurs nice.
-- Par exemple, si un processus a besoin de plus de ressources CPU temporairement, vous pourriez abaisser sa valeur nice en utilisant `renice`.
+- `renice` est une commande utilisée pour modifier la valeur `nice` d'un processus déjà en cours d'exécution. Elle peut être utilisée pour ajuster dynamiquement la priorité des processus, en augmentant ou en réduisant l'allocation de temps CPU selon les nouvelles valeurs `nice`.
+- Par exemple, si un processus a temporairement besoin de davantage de ressources CPU, vous pouvez réduire sa valeur `nice` à l'aide de `renice`.
 
-#### Classes de Qualité de Service (QoS)
+#### Classes Quality of Service (QoS)
 
-Les classes QoS sont une approche plus moderne pour gérer les priorités des threads, en particulier dans des systèmes comme macOS qui prennent en charge **Grand Central Dispatch (GCD)**. Les classes QoS permettent aux développeurs de **catégoriser** le travail en différents niveaux en fonction de leur importance ou urgence. macOS gère automatiquement la priorisation des threads en fonction de ces classes QoS :
+Les classes QoS constituent une approche plus moderne de la gestion des priorités des threads, notamment dans les systèmes comme macOS qui prennent en charge **Grand Central Dispatch (GCD)**. Les classes QoS permettent aux développeurs de **catégoriser** le travail selon différents niveaux, en fonction de son importance ou de son urgence. macOS gère automatiquement la priorisation des threads en fonction de ces classes QoS :
 
-1. **Interactif Utilisateur :**
-- Cette classe est pour les tâches qui interagissent actuellement avec l'utilisateur ou nécessitent des résultats immédiats pour offrir une bonne expérience utilisateur. Ces tâches se voient attribuer la plus haute priorité pour maintenir l'interface réactive (par exemple, animations ou gestion d'événements).
-2. **Initié par l'Utilisateur :**
-- Tâches que l'utilisateur initie et attend des résultats immédiats, comme ouvrir un document ou cliquer sur un bouton nécessitant des calculs. Celles-ci ont une priorité élevée mais inférieure à celle des tâches interactives utilisateur.
-3. **Utilitaire :**
-- Ces tâches sont de longue durée et affichent généralement un indicateur de progression (par exemple, téléchargement de fichiers, importation de données). Elles ont une priorité inférieure à celle des tâches initiées par l'utilisateur et n'ont pas besoin de se terminer immédiatement.
-4. **Arrière-plan :**
-- Cette classe est pour les tâches qui fonctionnent en arrière-plan et ne sont pas visibles par l'utilisateur. Cela peut être des tâches comme l'indexation, la synchronisation ou les sauvegardes. Elles ont la plus basse priorité et un impact minimal sur les performances du système.
+1. **User Interactive :**
+- Cette classe est destinée aux tâches qui interagissent actuellement avec l'utilisateur ou qui nécessitent des résultats immédiats afin d'assurer une bonne expérience utilisateur. Ces tâches reçoivent la priorité la plus élevée afin de maintenir la réactivité de l'interface (par exemple, les animations ou la gestion des événements).
+2. **User Initiated :**
+- Tâches initiées par l'utilisateur, pour lesquelles celui-ci attend des résultats immédiats, comme l'ouverture d'un document ou un clic sur un bouton nécessitant des calculs. Elles ont une priorité élevée, mais inférieure à celle de User Interactive.
+3. **Utility :**
+- Ces tâches sont longues et affichent généralement un indicateur de progression (par exemple, le téléchargement de fichiers ou l'importation de données). Leur priorité est inférieure à celle des tâches initiées par l'utilisateur et elles n'ont pas besoin de se terminer immédiatement.
+4. **Background :**
+- Cette classe est destinée aux tâches qui s'exécutent en arrière-plan et qui ne sont pas visibles par l'utilisateur. Il peut s'agir de tâches telles que l'indexation, la synchronisation ou les sauvegardes. Elles ont la priorité la plus faible et un impact minimal sur les performances du système.
 
-En utilisant les classes QoS, les développeurs n'ont pas besoin de gérer les numéros de priorité exacts mais plutôt de se concentrer sur la nature de la tâche, et le système optimise les ressources CPU en conséquence.
+Grâce aux classes QoS, les développeurs n'ont pas besoin de gérer des valeurs de priorité exactes, mais peuvent plutôt se concentrer sur la nature de la tâche ; le système optimise alors les ressources CPU en conséquence.
 
-De plus, il existe différentes **politiques de planification de threads** qui spécifient un ensemble de paramètres de planification que le planificateur prendra en considération. Cela peut être fait en utilisant `thread_policy_[set/get]`. Cela pourrait être utile dans les attaques par condition de course.
+Par ailleurs, il existe différentes **politiques de planification des threads** qui permettent de spécifier un ensemble de paramètres de planification dont le scheduler tiendra compte. Cela peut être effectué avec `thread_policy_[set/get]`. Cela peut être utile dans les attaques par race condition.
 
-## Abus de Processus MacOS
+## Abus des processus macOS
 
-MacOS, comme tout autre système d'exploitation, fournit une variété de méthodes et de mécanismes pour **permettre aux processus d'interagir, de communiquer et de partager des données**. Bien que ces techniques soient essentielles pour le bon fonctionnement du système, elles peuvent également être abusées par des acteurs malveillants pour **effectuer des activités malveillantes**.
+MacOS, comme tout autre système d'exploitation, fournit diverses méthodes et divers mécanismes permettant aux **processus d'interagir, de communiquer et de partager des données**. Bien que ces techniques soient essentielles au fonctionnement efficace du système, elles peuvent également être exploitées par des threat actors pour **effectuer des activités malveillantes**.
 
-### Injection de Bibliothèque
+### Library Injection
 
-L'injection de bibliothèque est une technique par laquelle un attaquant **force un processus à charger une bibliothèque malveillante**. Une fois injectée, la bibliothèque s'exécute dans le contexte du processus cible, fournissant à l'attaquant les mêmes autorisations et accès que le processus.
+Library Injection est une technique par laquelle un attaquant **force un processus à charger une bibliothèque malveillante**. Une fois injectée, la bibliothèque s'exécute dans le contexte du processus ciblé, donnant à l'attaquant les mêmes permissions et le même accès que ce processus.
 
 
 {{#ref}}
 macos-library-injection/
 {{#endref}}
 
-### Accrochage de Fonction
+### Function Hooking
 
-L'accrochage de fonction implique **d'intercepter des appels de fonction** ou des messages au sein d'un code logiciel. En accrochant des fonctions, un attaquant peut **modifier le comportement** d'un processus, observer des données sensibles, ou même prendre le contrôle du flux d'exécution.
+Function Hooking consiste à **intercepter les appels de fonctions** ou les messages au sein d'un code logiciel. En hookant des fonctions, un attaquant peut **modifier le comportement** d'un processus, observer des données sensibles ou même prendre le contrôle du flux d'exécution.
 
 
 {{#ref}}
 macos-function-hooking.md
 {{#endref}}
 
-### Communication Inter-Processus
+### Inter Process Communication
 
-La communication inter-processus (IPC) fait référence à différentes méthodes par lesquelles des processus séparés **partagent et échangent des données**. Bien que l'IPC soit fondamental pour de nombreuses applications légitimes, il peut également être mal utilisé pour subvertir l'isolation des processus, divulguer des informations sensibles, ou effectuer des actions non autorisées.
+Inter Process Communication (IPC) désigne les différentes méthodes par lesquelles des processus distincts **partagent et échangent des données**. Bien que l'IPC soit fondamentale pour de nombreuses applications légitimes, elle peut également être détournée afin de contourner l'isolation des processus, provoquer un leak d'informations sensibles ou effectuer des actions non autorisées.
 
 
 {{#ref}}
 macos-ipc-inter-process-communication/
 {{#endref}}
 
-### Injection d'Applications Electron
+### Injection d'applications Electron
 
-Les applications Electron exécutées avec des variables d'environnement spécifiques pourraient être vulnérables à l'injection de processus :
+Les applications Electron exécutées avec certaines variables d'environnement peuvent être vulnérables à l'injection de processus :
 
 
 {{#ref}}
 macos-electron-applications-injection.md
 {{#endref}}
 
-### Injection de Chromium
+### Injection Chromium
 
-Il est possible d'utiliser les drapeaux `--load-extension` et `--use-fake-ui-for-media-stream` pour effectuer une **attaque de l'homme dans le navigateur** permettant de voler des frappes, du trafic, des cookies, d'injecter des scripts dans des pages... :
+Il est possible d'utiliser les flags `--load-extension` et `--use-fake-ui-for-media-stream` pour effectuer une **man in the browser attack**, permettant de voler les frappes clavier et le trafic, de dérober des cookies, d'injecter des scripts dans les pages, etc. :
 
 
 {{#ref}}
 macos-chromium-injection.md
 {{#endref}}
 
-### NIB Sale
+### Dirty NIB
 
-Les fichiers NIB **définissent des éléments d'interface utilisateur (UI)** et leurs interactions au sein d'une application. Cependant, ils peuvent **exécuter des commandes arbitraires** et **Gatekeeper ne bloque pas** une application déjà exécutée si un **fichier NIB est modifié**. Par conséquent, ils pourraient être utilisés pour faire exécuter des programmes arbitraires des commandes arbitraires :
+Les fichiers NIB **définissent les éléments d'interface utilisateur (UI)** et leurs interactions au sein d'une application. Cependant, ils peuvent **exécuter des commandes arbitraires** et **Gatekeeper n'empêche pas** une application déjà exécutée de s'exécuter à nouveau si un **fichier NIB est modifié**. Ils pourraient donc être utilisés pour faire exécuter des commandes arbitraires à des programmes arbitraires :
 
 
 {{#ref}}
 macos-dirty-nib.md
 {{#endref}}
 
-### Injection d'Applications Java
+### Injection d'applications Java
 
-Il est possible d'abuser de certaines capacités java (comme la variable d'environnement **`_JAVA_OPTS`**) pour faire exécuter à une application java **du code/commandes arbitraires**.
+Il est possible d'abuser de certaines fonctionnalités de Java (comme la variable d'environnement **`_JAVA_OPTS`**) afin qu'une application Java exécute du **code/des commandes arbitraires**.
 
 
 {{#ref}}
 macos-java-apps-injection.md
 {{#endref}}
 
-### Injection d'Applications .Net
+### Injection d'applications .Net
 
-Il est possible d'injecter du code dans des applications .Net en **abusant de la fonctionnalité de débogage .Net** (non protégée par les protections macOS telles que le durcissement à l'exécution).
+Il est possible d'injecter du code dans des applications .Net en **abusant de la fonctionnalité de debugging de .Net** (qui n'est pas protégée par les mécanismes de protection de macOS tels que le runtime hardening).
 
 
 {{#ref}}
 macos-.net-applications-injection.md
 {{#endref}}
 
-### Injection de Perl
+### Injection Perl
 
-Vérifiez différentes options pour faire exécuter un script Perl du code arbitraire dans :
+Consultez différentes options permettant à un script Perl d'exécuter du code arbitraire dans :
 
 
 {{#ref}}
 macos-perl-applications-injection.md
 {{#endref}}
 
-### Injection de Ruby
+### Injection Ruby
 
-Il est également possible d'abuser des variables d'environnement ruby pour faire exécuter des scripts arbitraires du code arbitraire :
+Il est également possible d'abuser des variables d'environnement de Ruby afin que des scripts arbitraires exécutent du code arbitraire :
 
 
 {{#ref}}
 macos-ruby-applications-injection.md
 {{#endref}}
 
-### Injection de Python
+### Injection Python
 
-Si la variable d'environnement **`PYTHONINSPECT`** est définie, le processus python passera à un cli python une fois terminé. Il est également possible d'utiliser **`PYTHONSTARTUP`** pour indiquer un script python à exécuter au début d'une session interactive.\
+Si la variable d'environnement **`PYTHONINSPECT`** est définie, le processus Python ouvrira une CLI Python une fois son exécution terminée. Il est également possible d'utiliser **`PYTHONSTARTUP`** pour indiquer un script Python à exécuter au début d'une session interactive.\
 Cependant, notez que le script **`PYTHONSTARTUP`** ne sera pas exécuté lorsque **`PYTHONINSPECT`** crée la session interactive.
 
-D'autres variables d'environnement telles que **`PYTHONPATH`** et **`PYTHONHOME`** pourraient également être utiles pour faire exécuter une commande python du code arbitraire.
+D'autres variables d'environnement telles que **`PYTHONPATH`** et **`PYTHONHOME`** peuvent également être utiles pour faire exécuter du code arbitraire à une commande Python.
 
-Notez que les exécutables compilés avec **`pyinstaller`** n'utiliseront pas ces variables environnementales même s'ils s'exécutent avec un python intégré.
+Notez que les exécutables compilés avec **`pyinstaller`** n'utiliseront pas ces variables d'environnement, même s'ils s'exécutent avec un Python intégré.
 
 > [!CAUTION]
-> Dans l'ensemble, je n'ai pas trouvé de moyen de faire exécuter du code arbitraire à python en abusant des variables d'environnement.\
-> Cependant, la plupart des gens installent python en utilisant **Homebrew**, qui installera python dans un **emplacement écrivable** pour l'utilisateur admin par défaut. Vous pouvez le détourner avec quelque chose comme :
+> Globalement, je n'ai pas trouvé de moyen de faire exécuter du code arbitraire à Python en abusant des variables d'environnement.\
+> Cependant, la plupart des utilisateurs installent Python avec **Hombrew**, qui installe Python dans un **emplacement accessible en écriture** pour l'utilisateur administrateur par défaut. Vous pouvez le hijack avec quelque chose comme :
 >
 > ```bash
 > mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
 > cat > /opt/homebrew/bin/python3 <<EOF
 > #!/bin/bash
-> # Code de détournement supplémentaire
+> # Extra hijack code
 > /opt/homebrew/bin/python3.old "$@"
 > EOF
 > chmod +x /opt/homebrew/bin/python3
 > ```
 >
-> Même **root** exécutera ce code lors de l'exécution de python.
+> Même **root** exécutera ce code lors de l'exécution de Python.
+
 
 ## Détection
 
-### Bouclier
+### Shield
 
-[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) est une application open source qui peut **détecter et bloquer les actions d'injection de processus** :
+[**Shield**](https://github.com/theevilbit/Shield) est une application open source basée sur **EndpointSecurity** qui détecte et bloque l'injection de processus. Il s'agit d'une bonne référence pour déterminer quels signaux sont réellement observables depuis ES, puisqu'elle génère des alertes sur :<sup>[1]</sup>
 
-- En utilisant **des variables d'environnement** : Elle surveillera la présence de l'une des variables d'environnement suivantes : **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** et **`ELECTRON_RUN_AS_NODE`**
-- En utilisant des appels **`task_for_pid`** : Pour trouver quand un processus veut obtenir le **port de tâche d'un autre** ce qui permet d'injecter du code dans le processus.
-- **Paramètres des applications Electron** : Quelqu'un peut utiliser les arguments de ligne de commande **`--inspect`**, **`--inspect-brk`** et **`--remote-debugging-port`** pour démarrer une application Electron en mode débogage, et ainsi injecter du code.
-- En utilisant **des liens symboliques** ou **des liens durs** : Typiquement, l'abus le plus courant consiste à **placer un lien avec nos privilèges d'utilisateur**, et **pointer vers un emplacement de privilège supérieur**. La détection est très simple pour les liens durs et symboliques. Si le processus créant le lien a un **niveau de privilège différent** de celui du fichier cible, nous créons une **alerte**. Malheureusement, dans le cas des liens symboliques, le blocage n'est pas possible, car nous n'avons pas d'informations sur la destination du lien avant sa création. C'est une limitation du cadre EndpointSecurity d'Apple.
+- Les **variables d'environnement d'injection** lors de l'exécution d'un processus : `DYLD_INSERT_LIBRARIES`, `CFNETWORK_LIBRARY_PATH`, `RAWCAMERA_BUNDLE_PATH` et `ELECTRON_RUN_AS_NODE`.
+- Les appels **`task_for_pid`** — un processus demande le task port d'un autre processus, ce qui constitue le prérequis pour l'injecter.
+- Les **arguments de debugging Electron** — `--inspect`, `--inspect-brk` et `--remote-debugging-port`, qui démarrent une application Electron en mode debug et permettent à n'importe qui de s'y attacher et d'y exécuter du code.
+- La **création de symlinks/hardlinks entre différents niveaux de privilèges** — la primitive classique consistant à « créer un lien en tant qu'utilisateur normal et à le faire pointer vers un emplacement privilégié ». Notez que les **symlinks peuvent déclencher une alerte, mais ne peuvent pas être bloqués** : EndpointSecurity n'expose pas la destination du lien avant sa création.
 
 ### Appels effectués par d'autres processus
 
-Dans [**cet article de blog**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html), vous pouvez trouver comment il est possible d'utiliser la fonction **`task_name_for_pid`** pour obtenir des informations sur d'autres **processus injectant du code dans un processus** et ensuite obtenir des informations sur cet autre processus.
+Dans [**cet article de blog**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html), vous pouvez découvrir comment utiliser la fonction **`task_name_for_pid`** pour obtenir des informations sur d'autres **processus injectant du code dans un processus**, puis obtenir des informations sur cet autre processus.<sup>[4]</sup>
 
-Notez que pour appeler cette fonction, vous devez avoir le **même uid** que celui exécutant le processus ou être **root** (et cela retourne des informations sur le processus, pas un moyen d'injecter du code).
+Notez que pour appeler cette fonction, vous devez avoir **le même uid** que celui utilisé pour exécuter le processus ou être **root** (et elle renvoie des informations sur le processus, et non un moyen d'y injecter du code).
 
 ## Références
 
-- [https://theevilbit.github.io/shield/](https://theevilbit.github.io/shield/)
-- [https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
+- [1] [Shield — open source macOS process-injection detection (GitHub)](https://github.com/theevilbit/Shield)
+- [2] [Apple Developer — EndpointSecurity framework](https://developer.apple.com/documentation/endpointsecurity)
+- [3] [Metnew - Why Electron apps can't store your secrets confidentially: --inspect option](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
+- [4] [Scott Knight - Detecting task modifications](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
