@@ -4,45 +4,45 @@
 
 ## Introduction
 
-**Low-Power Wide Area Network** (LPWAN) एक समूह है वायरलेस, कम-शक्ति, विस्तृत-क्षेत्र नेटवर्क तकनीकों का जो **लंबी दूरी के संचार** के लिए डिज़ाइन की गई हैं, एक कम बिट दर पर।  
-ये **छह मील** से अधिक की दूरी तक पहुँच सकते हैं और उनकी **बैटरियाँ** **20 वर्षों** तक चल सकती हैं।
+**Low-Power Wide Area Network** (LPWAN) wireless, low-power, wide-area network technologies का एक समूह है, जिसे कम bit rate पर **long-range communications** के लिए design किया गया है।
+ये **छह मील** से अधिक दूरी तक पहुंच सकते हैं और इनकी **batteries** **20 वर्षों** तक चल सकती हैं।
 
-Long Range (**LoRa**) वर्तमान में सबसे अधिक तैनात LPWAN भौतिक परत है और इसका ओपन MAC-परत विनिर्देशन **LoRaWAN** है।
+Long Range (**LoRa**) वर्तमान में सबसे अधिक deployed LPWAN physical layer है और इसका open MAC-layer specification **LoRaWAN** है।
 
 ---
 
 ## LPWAN, LoRa, और LoRaWAN
 
-* LoRa – Chirp Spread Spectrum (CSS) भौतिक परत जो Semtech द्वारा विकसित की गई है (स्वामित्व लेकिन प्रलेखित)।
-* LoRaWAN – ओपन MAC/नेटवर्क परत जिसे LoRa-Alliance द्वारा बनाए रखा जाता है। संस्करण 1.0.x और 1.1 क्षेत्र में सामान्य हैं।
-* सामान्य आर्किटेक्चर: *अंत-उपकरण → गेटवे (पैकेट-फॉरवर्डर) → नेटवर्क-सेवा → अनुप्रयोग-सेवा*।
+* LoRa – Semtech द्वारा विकसित Chirp Spread Spectrum (CSS) physical layer (proprietary लेकिन documented)।
+* LoRaWAN – LoRa-Alliance द्वारा maintain की जाने वाली Open MAC/Network layer। Versions 1.0.x और 1.1 field में common हैं।
+* Typical architecture: *end-device → gateway (packet-forwarder) → network-server → application-server*।
 
-> **सुरक्षा मॉडल** दो AES-128 रूट कुंजियों (AppKey/NwkKey) पर निर्भर करता है जो *जोड़ने* की प्रक्रिया (OTAA) के दौरान सत्र कुंजियाँ निकालते हैं या हार्ड-कोडेड होते हैं (ABP)। यदि कोई कुंजी लीक होती है, तो हमलावर को संबंधित ट्रैफ़िक पर पूर्ण पढ़ने/लिखने की क्षमता मिलती है।
+> **security model** दो AES-128 root keys (AppKey/NwkKey) पर निर्भर करता है, जो *join* procedure (OTAA) के दौरान session keys derive करती हैं या hard-coded (ABP) होती हैं। यदि कोई key leak हो जाती है, तो attacker को corresponding traffic पर full read/write capability मिल जाती है।
 
 ---
 
-## हमले की सतह का सारांश
+## Attack surface summary
 
-| परत | कमजोरी | व्यावहारिक प्रभाव |
+| Layer | Weakness | Practical impact |
 |-------|----------|------------------|
-| PHY | प्रतिक्रियाशील / चयनात्मक जामिंग | 100 % पैकेट हानि एकल SDR और <1 W आउटपुट के साथ प्रदर्शित |
-| MAC | Join-Accept & डेटा-फ्रेम पुनःप्रयोजन (nonce पुन: उपयोग, ABP काउंटर रोलओवर) | उपकरण धोखाधड़ी, संदेश इंजेक्शन, DoS |
-| नेटवर्क-सेवा | असुरक्षित पैकेट-फॉरवर्डर, कमजोर MQTT/UDP फ़िल्टर, पुराना गेटवे फर्मवेयर | गेटवे पर RCE → OT/IT नेटवर्क में पिवट |
-| अनुप्रयोग | हार्ड-कोडेड या पूर्वानुमानित AppKeys | ट्रैफ़िक को ब्रूट-फोर्स/डिक्रिप्ट करें, संवेदकों का अनुकरण करें |
+| PHY | Reactive / selective jamming | Single SDR और <1 W output के साथ 100 % packet loss demonstrated |
+| MAC | Join-Accept और data-frame replay (nonce reuse, ABP counter rollover) | Device spoofing, message injection, DoS |
+| Network-Server | Insecure packet-forwarder, weak MQTT/UDP filters, outdated gateway firmware | Gateways पर RCE → OT/IT network में pivot |
+| Application | Hard-coded या predictable AppKeys | Brute-force/decrypt traffic, sensors का impersonation |
 
 ---
 
-## हाल की कमजोरियाँ (2023-2025)
+## Recent vulnerabilities (2023-2025)
 
-* **CVE-2024-29862** – *ChirpStack गेटवे-ब्रिज & mqtt-फॉरवर्डर* ने TCP पैकेट स्वीकार किए जो Kerlink गेटवे पर स्थिति-आधारित फ़ायरवॉल नियमों को बायपास करते थे, जिससे दूरस्थ प्रबंधन इंटरफ़ेस का प्रदर्शन हुआ। इसे क्रमशः 4.0.11 / 4.2.1 में ठीक किया गया।
-* **Dragino LG01/LG308 श्रृंखला** – कई 2022-2024 CVEs (जैसे 2022-45227 निर्देशिका यात्रा, 2022-45228 CSRF) 2025 में अभी भी बिना पैच के देखे गए; हजारों सार्वजनिक गेटवे पर बिना प्रमाणीकरण फर्मवेयर डंप या कॉन्फ़िगरेशन ओवरराइट सक्षम करें।
-* Semtech *पैकेट-फॉरवर्डर UDP* ओवरफ्लो (अप्रकाशित सलाह, पैच 2023-10): 255 B से बड़ा तैयार अपलिंक स्टैक-स्मैश को ट्रिगर करता है ‑> SX130x संदर्भ गेटवे पर RCE (Black Hat EU 2023 “LoRa Exploitation Reloaded” द्वारा पाया गया)।
+* **CVE-2024-29862** – *ChirpStack gateway-bridge & mqtt-forwarder* ने ऐसे TCP packets स्वीकार किए जो Kerlink gateways पर stateful firewall rules को bypass कर देते थे, जिससे remote management interface exposure संभव हो गया। इसे क्रमशः 4.0.11 / 4.2.1 में fix किया गया।
+* **Dragino LG01/LG308 series** – 2022-2024 की कई CVEs (जैसे 2022-45227 directory traversal, 2022-45228 CSRF) 2025 में भी unpatched देखी गईं; ये हजारों public gateways पर unauthenticated firmware dump या config overwrite enable करती हैं।
+* Semtech *packet-forwarder UDP* overflow (unreleased advisory, patched 2023-10): 255 B से बड़े crafted uplink ने stack-smash ‑> RCE trigger किया, जिससे SX130x reference gateways पर असर पड़ा (Black Hat EU 2023 “LoRa Exploitation Reloaded” द्वारा खोजा गया)।
 
 ---
 
-## व्यावहारिक हमले की तकनीकें
+## Practical attack techniques
 
-### 1. ट्रैफ़िक को स्निफ़ और डिक्रिप्ट करें
+### 1. Sniff & Decrypt traffic
 ```bash
 # Capture all channels around 868.3 MHz with an SDR (USRP B205)
 python3 lorattack/sniffer.py \
@@ -51,45 +51,48 @@ python3 lorattack/sniffer.py \
 # Bruteforce AppKey from captured OTAA join-request/accept pairs
 python3 lorapwn/bruteforce_join.py --pcap smartcity.pcap --wordlist top1m.txt
 ```
-### 2. OTAA जॉइन-रिप्ले (DevNonce पुन: उपयोग)
+### 2. OTAA join-replay (DevNonce reuse)
 
-1. एक वैध **JoinRequest** कैप्चर करें।
-2. इसे तुरंत पुनः प्रसारित करें (या RSSI बढ़ाएं) इससे पहले कि मूल डिवाइस फिर से प्रसारित करे।
-3. नेटवर्क-सर्वर एक नया DevAddr और सत्र कुंजी आवंटित करता है जबकि लक्षित डिवाइस पुराने सत्र के साथ जारी रहता है → हमलावर के पास खाली सत्र होता है और वह जाली अपलिंक इंजेक्ट कर सकता है।
+1. एक legitimate **JoinRequest** capture करें।
+2. इसे तुरंत retransmit करें (या RSSI बढ़ाएं), इससे पहले कि original device फिर से transmit करे।
+3. network-server एक नया DevAddr और session keys allocate करता है, जबकि target device पुराने session के साथ जारी रहता है → attacker vacant session का मालिक बन जाता है और forged uplinks inject कर सकता है।
 
-### 3. अनुकूलन डेटा-रेट (ADR) डाउनग्रेडिंग
+### 3. Adaptive Data-Rate (ADR) downgrading
 
-SF12/125 kHz को मजबूर करें ताकि एयरटाइम बढ़ सके → गेटवे का ड्यूटी-साइकिल समाप्त करें (सेवा से इनकार) जबकि हमलावर पर बैटरी का प्रभाव कम रखें (बस नेटवर्क-स्तरीय MAC कमांड भेजें)।
+SF12/125 kHz को force करके airtime बढ़ाएं → gateway का duty-cycle समाप्त करें (denial-of-service), जबकि attacker पर battery impact कम रहे (सिर्फ network-level MAC commands भेजकर)।
 
-### 4. प्रतिक्रियाशील जामिंग
+### 4. Reactive jamming
 
-*HackRF One* जो GNU Radio फ्लोग्राफ चला रहा है, प्रीएंबल का पता लगाते ही एक चौड़ी-बैंड चिरप को ट्रिगर करता है – सभी स्प्रेडिंग फैक्टर को ≤200 mW TX के साथ ब्लॉक करता है; 2 किमी रेंज पर पूर्ण आउटेज मापा गया।
+*HackRF One*, जो GNU Radio flowgraph चला रहा है, preamble detect होने पर wide-band chirp trigger करता है – ≤200 mW TX के साथ सभी spreading factors को block करता है; 2 km range पर full outage मापा गया है।
 
 ---
 
-## आक्रामक उपकरण (2025)
+## Offensive tooling (2025)
 
-| उपकरण | उद्देश्य | नोट्स |
+| Tool | Purpose | Notes |
 |------|---------|-------|
-| **LoRaWAN ऑडिटिंग फ्रेमवर्क (LAF)** | LoRaWAN फ्रेम तैयार/पार्स/हमला करें, DB-समर्थित विश्लेषक, ब्रूट-फोर्सर | डॉकर इमेज, Semtech UDP इनपुट का समर्थन करता है |
-| **LoRaPWN** | ट्रेंड माइक्रो पायथन उपयोगिता OTAA को ब्रूट करने, डाउनलिंक उत्पन्न करने, पेलोड को डिक्रिप्ट करने के लिए | डेमो 2023 में जारी किया गया, SDR-agnostic |
-| **LoRAttack** | मल्टी-चैनल स्निफर + यूएसआरपी के साथ पुनः प्रसारण; PCAP/LoRaTap निर्यात करता है | अच्छा Wireshark एकीकरण |
-| **gr-lora / gr-lorawan** | बेसबैंड TX/RX के लिए GNU Radio OOT ब्लॉक्स | कस्टम हमलों के लिए आधार |
+| **LoRaWAN Auditing Framework (LAF)** | LoRaWAN frames को craft/parse/attack करना, DB-backed analyzers, brute-forcer | Docker image, Semtech UDP input को support करता है |
+| **LoRaPWN** | OTAA को brute-force करने, downlinks generate करने और payloads decrypt करने वाला Trend Micro Python utility | Demo 2023 में released, SDR-agnostic |
+| **LoRAttack** | USRP के साथ multi-channel sniffer + replay; PCAP/LoRaTap export करता है | Wireshark integration अच्छा है |
+| **gr-lora / gr-lorawan** | Baseband TX/RX के लिए GNU Radio OOT blocks | Custom attacks की foundation |
 
 ---
 
-## रक्षात्मक सिफारिशें (पेंटेस्टर चेकलिस्ट)
+## Defensive recommendations (pentester checklist)
 
-1. **OTAA** उपकरणों को प्राथमिकता दें जिनमें वास्तव में यादृच्छिक DevNonce हो; डुप्लिकेट की निगरानी करें।
-2. **LoRaWAN 1.1** को लागू करें: 32-बिट फ्रेम काउंटर, अलग FNwkSIntKey / SNwkSIntKey।
-3. फ्रेम-काउंटर को गैर-वाष्पशील मेमोरी (**ABP**) में स्टोर करें या OTAA में माइग्रेट करें।
-4. रूट कुंजी को फर्मवेयर निष्कर्षण से बचाने के लिए **सुरक्षित-तत्व** (ATECC608A/SX1262-TRX-SE) तैनात करें।
-5. दूरस्थ UDP पैकेट-फॉरवर्डर पोर्ट (1700/1701) को अक्षम करें या WireGuard/VPN के साथ प्रतिबंधित करें।
-6. गेटवे को अपडेट रखें; Kerlink/Dragino 2024-पैच की गई छवियाँ प्रदान करते हैं।
-7. **ट्रैफिक विसंगति पहचान** (जैसे, LAF विश्लेषक) को लागू करें – काउंटर रीसेट, डुप्लिकेट जॉइन, अचानक ADR परिवर्तनों को चिह्नित करें।
+1. सचमुच random DevNonce वाले **OTAA** devices को प्राथमिकता दें; duplicates monitor करें।
+2. **LoRaWAN 1.1** enforce करें: 32-bit frame counters, distinct FNwkSIntKey / SNwkSIntKey।
+3. Frame-counter को non-volatile memory (**ABP**) में store करें या OTAA पर migrate करें।
+4. Root keys को firmware extraction से सुरक्षित रखने के लिए **secure-element** (ATECC608A/SX1262-TRX-SE) deploy करें।
+5. Remote UDP packet-forwarder ports (1700/1701) disable करें या WireGuard/VPN के साथ restrict करें।
+6. Gateways को updated रखें; Kerlink/Dragino 2024-patched images provide करते हैं।
+7. **Traffic anomaly detection** (जैसे LAF analyzer) implement करें – counter resets, duplicate joins और अचानक होने वाले ADR changes को flag करें।<sup>[[1]](#references)</sup>
 
-## संदर्भ
 
-* LoRaWAN ऑडिटिंग फ्रेमवर्क (LAF) – [https://github.com/IOActive/laf](https://github.com/IOActive/laf)
-* ट्रेंड माइक्रो LoRaPWN अवलोकन – [https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a](https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a)
+
+## References
+
+- [1] [LoRaWAN Auditing Framework (LAF)](https://github.com/IOActive/laf)
+- [2] [Trend Micro LoRaPWN overview](https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a)
+
 {{#include ../../banners/hacktricks-training.md}}
