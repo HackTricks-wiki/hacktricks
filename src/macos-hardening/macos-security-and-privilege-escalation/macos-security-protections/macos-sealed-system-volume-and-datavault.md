@@ -172,7 +172,7 @@ DataVault also protects the keychain backing files. A compromised DataVault cont
 | CVE | Description |
 |---|---|
 | CVE-2024-44131 | FileProvider symlink race letting a privileged helper reach TCC-protected data ([Jamf](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)) |
-| CVE-2023-40424 | As root, **create a new user whose `NFSHomeDirectory` points at an attacker-controlled `TCC.db`**; on login `tccd` consumes it and the grants apply, reaching other users' data ([theevilbit](https://theevilbit.github.io/posts/cve-2023-40424/)) |
+| CVE-2023-40424 | As root, **create a new user whose `NFSHomeDirectory` points at an attacker-controlled `TCC.db`**; on login `tccd` consumes it and the grants apply, reaching other users' data ([Kandji](https://blog.kandji.io/malware-bypass-tcc)) |
 | CVE-2021-30970 | "powerdir": changing the user's home dir to plant an attacker-controlled TCC.db ([Microsoft](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)) |
 | CVE-2021-30713 | Bundle-conclusion flaw letting an app **inherit the TCC grants of a donor bundle** without a prompt; exploited in the wild by **XCSSET** to screenshot the desktop ([Jamf](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)) |
 | CVE-2020-9934 | `tccd` built the DB path from `$HOME`, so `launchctl setenv HOME` redirected it to an attacker-controlled `TCC.db` ([Matt Shockley](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)) |

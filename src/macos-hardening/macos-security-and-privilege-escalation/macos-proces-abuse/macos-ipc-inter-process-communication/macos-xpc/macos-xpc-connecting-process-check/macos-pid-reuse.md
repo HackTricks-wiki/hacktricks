@@ -282,7 +282,6 @@ int main(int argc, const char * argv[]) {
 
 ## Other examples
 
-- [**CVE-2020-14977 - Secure coding XPC Services Part 5: PID reuse attacks**](https://theevilbit.github.io/posts/secure_coding_xpc_part5/) - vulnerable/secure code side by side plus a real CVE.
 - [**Intego X9: Why your macOS antivirus should not trust PIDs**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - LPE against an AV's privileged helper that authenticated clients by PID.
 - [**Exploiting GOG Galaxy XPC service for privilege escalation in macOS**](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
 - [**Rootpipe Reborn (Part II)**](https://objective-see.org/blog/blog_0x41.html)
@@ -291,7 +290,6 @@ int main(int argc, const char * argv[]) {
 
 - [https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
 - [https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
-- [https://theevilbit.github.io/posts/secure_coding_xpc_part5/](https://theevilbit.github.io/posts/secure_coding_xpc_part5/)
 - [https://blog.quarkslab.com/intego_lpe_macos_2.html](https://blog.quarkslab.com/intego_lpe_macos_2.html)
 - [https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
 - [https://objective-see.org/blog/blog_0x41.html](https://objective-see.org/blog/blog_0x41.html)
