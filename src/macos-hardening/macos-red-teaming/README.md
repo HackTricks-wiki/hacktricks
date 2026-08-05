@@ -3,56 +3,57 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## MDMの悪用
+## Abusing MDMs
 
 - JAMF Pro: `jamf checkJSSConnection`
 - Kandji
 
-管理プラットフォームにアクセスするために**管理者資格情報を侵害**することができれば、マシンにマルウェアを配布することで**すべてのコンピュータを潜在的に侵害**することができます。
+管理プラットフォームにアクセスするための **admin credentials を compromise** できた場合、マシンに malware を配布することで、**すべてのコンピューターを potentially compromise** できます。
 
-MacOS環境でのレッドチーミングには、MDMの動作についての理解が非常に推奨されます：
+MacOS 環境で red teaming を行うには、MDM の仕組みをある程度理解しておくことが強く推奨されます:
+
 
 {{#ref}}
 macos-mdm/
 {{#endref}}
 
-### MDMをC2として使用する
+### Using MDM as a C2
 
-MDMは、プロファイルのインストール、クエリまたは削除、アプリケーションのインストール、ローカル管理者アカウントの作成、ファームウェアパスワードの設定、FileVaultキーの変更を行う権限を持っています...
+MDM には、profiles の install、query、remove、applications の install、local admin accounts の作成、firmware password の設定、FileVault key の変更などを行う権限があります。
 
-独自のMDMを運営するには、**ベンダーによって署名されたCSRが必要**で、これを[**https://mdmcert.download/**](https://mdmcert.download/)で取得しようとすることができます。Appleデバイス用の独自のMDMを運営するには、[**MicroMDM**](https://github.com/micromdm/micromdm)を使用できます。
+独自の MDM を実行するには、**CSR を vendor によって signed してもらう**必要があります。これは [**https://mdmcert.download/**](https://mdmcert.download/) で取得を試みることができます。また、Apple devices 用の独自の MDM を実行するには、[**MicroMDM**](https://github.com/micromdm/micromdm) を使用できます。
 
-ただし、登録されたデバイスにアプリケーションをインストールするには、開発者アカウントによって署名されている必要があります... しかし、MDM登録時に**デバイスはMDMのSSL証明書を信頼されたCAとして追加**するため、今では何でも署名できます。
+ただし、enrolled device に application を install するには、developer account による signed が依然として必要です。しかし、MDM enrolment の際に **device は MDM の SSL cert を trusted CA として追加する**ため、これであらゆるものに sign できるようになります。<sup>[4]</sup>
 
-デバイスをMDMに登録するには、**`mobileconfig`**ファイルをルートとしてインストールする必要があり、これは**pkg**ファイルを介して配信できます（zipで圧縮し、Safariからダウンロードすると解凍されます）。
+device を MDM に enrol するには、root として **`mobileconfig`** file を install する必要があります。これは **pkg** file 経由で配布できます（zip に compress しておけば、Safari から download した際に decompress されます）。
 
-**Mythic agent Orthrus**はこの技術を使用しています。
+**Mythic agent Orthrus** はこの technique を使用します。
 
-### JAMF PROの悪用
+### Abusing JAMF PRO
 
-JAMFは**カスタムスクリプト**（システム管理者によって開発されたスクリプト）、**ネイティブペイロード**（ローカルアカウントの作成、EFIパスワードの設定、ファイル/プロセスの監視...）、および**MDM**（デバイスの構成、デバイス証明書...）を実行できます。
+JAMF は **custom scripts**（sysadmin が開発した scripts）、**native payloads**（local account の作成、EFI password の設定、file/process monitoring など）、および **MDM**（device configurations、device certificates など）を実行できます。<sup>[5]</sup>
 
-#### JAMF自己登録
+#### JAMF self-enrolment
 
-`https://<company-name>.jamfcloud.com/enroll/`のようなページにアクセスして、**自己登録が有効**かどうかを確認します。有効な場合、**アクセスするための資格情報を要求**されるかもしれません。
+`https://<company-name>.jamfcloud.com/enroll/` のような page にアクセスし、**self-enrolment が enabled** かどうかを確認します。有効な場合、**access のための credentials を要求される**ことがあります。
 
-スクリプト[**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py)を使用してパスワードスプレー攻撃を実行できます。
+[**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) script を使用して password spraying attack を実行できます。
 
-さらに、適切な資格情報を見つけた後、次のフォームを使用して他のユーザー名をブルートフォース攻撃できるかもしれません：
+さらに、適切な credentials を見つけた後は、次の form を使用して他の usernames を brute-force できる可能性があります:
 
-![](<../../images/image (107).png>)
+![Abusing JAMF PRO - JAMF self-enrolment: さらに、適切な credentials を見つけた後は、次の form を使用して他の usernames を brute-force できる可能性があります](<../../images/image (107).png>)
 
-#### JAMFデバイス認証
+#### JAMF device Authentication
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
-**`jamf`**バイナリには、発見時に**共有**されていたキーチェーンを開くための秘密が含まれており、それは**`jk23ucnq91jfu9aj`**でした。\
-さらに、jamfは**`/Library/LaunchAgents/com.jamf.management.agent.plist`**に**LaunchDaemon**として**持続**します。
+**`jamf`** binary には keychain を開くための secret が含まれており、発見当時は **全員で shared** されていて、その値は **`jk23ucnq91jfu9aj`** でした。<sup>[5]</sup>\
+さらに、jamf は **LaunchDaemon** として **`/Library/LaunchAgents/com.jamf.management.agent.plist`** に **persist** します。
 
-#### JAMFデバイスタケオーバー
+#### JAMF Device Takeover
 
-**JSS**（Jamf Software Server）**URL**は、**`jamf`**が使用する**`/Library/Preferences/com.jamfsoftware.jamf.plist`**にあります。\
-このファイルには基本的にURLが含まれています：
+**`jamf`** が使用する **JSS**（Jamf Software Server）の **URL** は、**`/Library/Preferences/com.jamfsoftware.jamf.plist`** にあります。\
+この file には基本的に URL が含まれています:
 ```bash
 plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 
@@ -65,35 +66,36 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <integer>4</integer>
 [...]
 ```
-攻撃者は、インストール時にこのファイルを**上書きする**悪意のあるパッケージ（`pkg`）をドロップし、**TyphonエージェントからのMythic C2リスナーへのURLを設定する**ことで、JAMFをC2として悪用できるようになります。
+そのため、攻撃者は悪意のあるパッケージ（`pkg`）を配置し、インストール時に **このファイルを上書き** して、**Typhon agent** からの Mythic C2 listener の **URL** を設定することで、JAMF を C2 として悪用できるようになります。
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
 
 # TODO: There is an ID, maybe it's possible to have the real jamf connection and another one to the C2
 ```
-#### JAMF なりすまし
+#### JAMF Impersonation
 
-デバイスと JMF の間の **通信をなりすます** には、以下が必要です：
+デバイスと JMF 間の**通信を impersonate**するには、以下が必要です。
 
 - デバイスの **UUID**: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
-- デバイス証明書を含む **JAMF キーチェーン**: `/Library/Application\ Support/Jamf/JAMF.keychain`
+- `/Library/Application\ Support/Jamf/JAMF.keychain` にある **JAMF keychain**。これにはデバイス証明書が含まれています。
 
-この情報をもとに、**盗まれた**ハードウェア **UUID** を持ち、**SIP を無効にした** VM を作成し、**JAMF キーチェーンをドロップ**し、Jamf **エージェントをフック**してその情報を盗みます。
+この情報を使用して、**盗んだ** Hardware **UUID** を設定し、**SIP を無効化**した **VM を作成**し、**JAMF keychain** を配置して、Jamf **agent** を **hook**し、その情報を盗みます。
 
-#### 秘密の盗難
+#### Secrets stealing
 
 <figure><img src="../../images/image (1025).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-また、管理者が Jamf 経由で実行したい **カスタムスクリプト** のために、`/Library/Application Support/Jamf/tmp/` の場所を監視することもできます。これらのスクリプトは **ここに配置され、実行され、削除されます**。これらのスクリプトには **資格情報** が含まれている可能性があります。
+また、`/Library/Application Support/Jamf/tmp/` の場所を監視することもできます。管理者が Jamf 経由で実行しようとする **custom scripts** は、ここに**配置され、実行され、削除される**ためです。これらのスクリプトには**認証情報が含まれている**可能性があります。
 
-ただし、**資格情報** はこれらのスクリプトに **パラメータ** として渡される可能性があるため、`ps aux | grep -i jamf` を監視する必要があります（ルートでなくても）。
+ただし、**認証情報**がこれらのスクリプトに**パラメータ**として渡される場合もあるため、`ps aux | grep -i jamf` を監視する必要があります（root でなくても可能です）。
 
-スクリプト [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) は、新しいファイルが追加されるのをリッスンし、新しいプロセス引数を監視できます。
+[**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) スクリプトは、新しいファイルの追加と新しいプロセス引数を listen できます。
 
-### macOS リモートアクセス
+### macOS Remote Access
 
-また、**MacOS** の "特別な" **ネットワーク** **プロトコル** について：
+また、**MacOS** の「特殊な」**network** **protocols**についても確認してください。
+
 
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
@@ -101,29 +103,32 @@ sudo jamf policy -id 0
 
 ## Active Directory
 
-場合によっては、**MacOS コンピュータが AD に接続されている**ことがあります。このシナリオでは、慣れているようにアクティブディレクトリを **列挙** しようとするべきです。以下のページで **ヘルプ** を見つけてください：
+場合によっては、**MacOS コンピューターが AD に接続されている**ことがあります。このシナリオでは、普段どおりに Active Directory の **enumerate**を試みるべきです。以下のページに**help**があります。
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
 
+
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/
 {{#endref}}
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/
 {{#endref}}
 
-役立つ可能性のある **ローカル MacOS ツール** は `dscl` です：
+役立つ可能性がある**ローカルの MacOS tool**として、`dscl`もあります。
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-また、ADを自動的に列挙し、Kerberosを操作するためにMacOS用に準備されたツールがあります：
+また、MacOS向けに、ADを自動的に列挙し、Kerberosを操作するためのツールもいくつか用意されています。
 
-- [**Machound**](https://github.com/XMCyber/MacHound): MacHoundは、MacOSホスト上のActive Directory関係を収集および取り込むことを可能にするBloodhound監査ツールの拡張です。
-- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrostは、macOS上のHeimdal krb5 APIと対話するために設計されたObjective-Cプロジェクトです。このプロジェクトの目標は、ターゲットに他のフレームワークやパッケージを必要とせずに、ネイティブAPIを使用してmacOSデバイス上のKerberosに関するセキュリティテストを改善することです。
-- [**Orchard**](https://github.com/its-a-feature/Orchard): Active Directory列挙を行うためのJavaScript for Automation (JXA)ツールです。
+- [**Machound**](https://github.com/XMCyber/MacHound): MacHoundは、Bloodhound auditing toolの拡張機能であり、MacOSホスト上のActive Directoryの関係を収集して取り込むことができます。<sup>[2]</sup>
+- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrostは、macOS上のHeimdal krb5 APIsと連携するために設計されたObjective-C projectです。このprojectの目的は、対象上で他のframeworkやpackagesを必要とせず、native APIsを使用してmacOS devices上のKerberosに対するsecurity testingを強化することです。
+- [**Orchard**](https://github.com/its-a-feature/Orchard): Active Directory enumerationを実行するためのJavaScript for Automation (JXA) toolです。
 
 ### ドメイン情報
 ```bash
@@ -131,20 +136,20 @@ echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 ```
 ### Users
 
-MacOSのユーザーには3種類があります：
+MacOS のユーザーには、次の 3 種類があります。
 
-- **ローカルユーザー** — ローカルOpenDirectoryサービスによって管理されており、Active Directoryとは接続されていません。
-- **ネットワークユーザー** — 認証のためにDCサーバーへの接続が必要な揮発性のActive Directoryユーザーです。
-- **モバイルユーザー** — 認証情報とファイルのローカルバックアップを持つActive Directoryユーザーです。
+- **Local Users** — ローカルの OpenDirectory service によって管理され、Active Directory には一切接続されていません。
+- **Network Users** — 認証に DC server への接続を必要とする、一時的な Active Directory ユーザーです。
+- **Mobile Users** — credentials と files のローカル backup を持つ Active Directory ユーザーです。
 
-ユーザーとグループに関するローカル情報は、フォルダー _/var/db/dslocal/nodes/Default._ に保存されています。\
-例えば、_mark_というユーザーに関する情報は _/var/db/dslocal/nodes/Default/users/mark.plist_ に保存されており、_admin_というグループに関する情報は _/var/db/dslocal/nodes/Default/groups/admin.plist_ にあります。
+users と groups に関するローカル情報は、フォルダー _/var/db/dslocal/nodes/Default._ に保存されています。\
+たとえば、_mark_ という user の情報は _/var/db/dslocal/nodes/Default/users/mark.plist_ に保存され、_admin_ group の情報は _/var/db/dslocal/nodes/Default/groups/admin.plist_ に保存されています。
 
-HasSessionおよびAdminToエッジを使用することに加えて、**MacHoundはBloodhoundデータベースに3つの新しいエッジを追加します**：
+HasSession および AdminTo edges に加えて、**MacHound は Bloodhound database に 3 つの新しい edges を追加します**:<sup>[2]</sup>
 
-- **CanSSH** - ホストにSSH接続を許可されたエンティティ
-- **CanVNC** - ホストにVNC接続を許可されたエンティティ
-- **CanAE** - ホスト上でAppleEventスクリプトを実行することを許可されたエンティティ
+- **CanSSH** - host への SSH を許可された entity
+- **CanVNC** - host への VNC を許可された entity
+- **CanAE** - host 上で AppleEvent scripts を実行することを許可された entity
 ```bash
 #User enumeration
 dscl . ls /Users
@@ -166,24 +171,24 @@ dscl "/Active Directory/TEST/All Domains" read "/Groups/[groupname]"
 #Domain Information
 dsconfigad -show
 ```
-More info in [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
+詳細は [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/) を参照してください。
 
 ### Computer$ パスワード
 
-Get passwords using:
+以下を使用してパスワードを取得します：
 ```bash
 bifrost --action askhash --username [name] --password [password] --domain [domain]
 ```
-**`Computer$`** パスワードにシステムキーチェーン内でアクセスすることが可能です。
+**`Computer$`** の password は System keychain 内から access できます。
 
 ### Over-Pass-The-Hash
 
-特定のユーザーとサービスのためにTGTを取得します：
+特定の user と service 用の TGT を取得します：
 ```bash
 bifrost --action asktgt --username [user] --domain [domain.com] \
 --hash [hash] --enctype [enctype] --keytab [/path/to/keytab]
 ```
-TGTが収集されると、次のコマンドで現在のセッションに注入することが可能です:
+TGTを取得したら、以下を使用して現在のセッションにinjectできます:
 ```bash
 bifrost --action asktgt --username test_lab_admin \
 --hash CF59D3256B62EE655F6430B0F80701EE05A0885B8B52E9C2480154AFA62E78 \
@@ -194,38 +199,39 @@ bifrost --action asktgt --username test_lab_admin \
 bifrost --action asktgs --spn [service] --domain [domain.com] \
 --username [user] --hash [hash] --enctype [enctype]
 ```
-取得したサービスチケットを使用して、他のコンピュータの共有にアクセスを試みることができます:
+取得した service tickets を使えば、他のコンピューター上の共有へのアクセスを試みることが可能です。
 ```bash
 smbutil view //computer.fqdn
 mount -t smbfs //server/folder /local/mount/point
 ```
-## キーチェーンへのアクセス
+## Keychainへのアクセス
 
-キーチェーンには、プロンプトを生成せずにアクセスされた場合、レッドチーム演習を進めるのに役立つ可能性のある機密情報が含まれている可能性が高いです：
+Keychainには、promptを表示させずにアクセスできれば、Red Team exerciseを前進させるのに役立つ機密情報が含まれている可能性が非常に高いです。
+
 
 {{#ref}}
 macos-keychain.md
 {{#endref}}
 
-## 外部サービス
+## External Services
 
-MacOSのレッドチーミングは、通常のWindowsのレッドチーミングとは異なり、**MacOSは通常、いくつかの外部プラットフォームと直接統合されています**。 MacOSの一般的な構成は、**OneLoginで同期された資格情報を使用してコンピュータにアクセスし、OneLoginを介していくつかの外部サービス**（github、awsなど）にアクセスすることです。
+MacOS Red Teamingは通常のWindows Red Teamingとは異なり、**MacOSは複数の外部platformと直接統合されていることが多い**です。MacOSでよくある構成では、**OneLoginで同期されたcredentialsを使用してコンピューターにアクセスし、OneLogin経由で複数の外部サービス**（github、awsなど）にアクセスします。
 
-## その他のレッドチーム技術
+## その他のRed Team techniques
 
 ### Safari
 
-Safariでファイルがダウンロードされると、それが「安全な」ファイルであれば、**自動的に開かれます**。 例えば、**zipファイルをダウンロード**すると、自動的に解凍されます：
+Safariでファイルをdownloadすると、それが「safe」なファイルの場合、**自動的に開かれます**。たとえば、**zipをdownloadすると**、自動的に解凍されます：
 
 <figure><img src="../../images/image (226).png" alt=""><figcaption></figcaption></figure>
 
-## 参考文献
+## References
 
-- [**https://www.youtube.com/watch?v=IiMladUbL6E**](https://www.youtube.com/watch?v=IiMladUbL6E)
-- [**https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6**](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)
-- [**https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0**](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
-- [**Come to the Dark Side, We Have Apples: Turning macOS Management Evil**](https://www.youtube.com/watch?v=pOQOh07eMxY)
-- [**OBTS v3.0: "An Attackers Perspective on Jamf Configurations" - Luke Roberts / Calum Hall**](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
+- [1] [Gone Apple Pickin': 2021年のMacOS Environmentsに対するRed Teaming - Cedric Owens (DEF CON 29)](https://www.youtube.com/watch?v=IiMladUbL6E)
+- [2] [MacHoundの紹介：macOS Active Directory Based AttacksへのSolution](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)
+- [3] [its-a-feature - Domain Enumeration Commands (dscl / net / ldapsearch equivalents)](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
+- [4] [Come to the Dark Side, We Have Apples: macOS Managementを悪用する](https://www.youtube.com/watch?v=pOQOh07eMxY)
+- [5] [OBTS v3.0: 「An Attackers Perspective on Jamf Configurations」 - Luke Roberts / Calum Hall](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
 
 
 {{#include ../../banners/hacktricks-training.md}}

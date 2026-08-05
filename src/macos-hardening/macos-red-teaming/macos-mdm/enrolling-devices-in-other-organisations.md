@@ -1,53 +1,57 @@
-# 他の組織へのデバイスの登録
+# 他の組織にデバイスを登録する
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## はじめに
+## 概要
 
-[**以前にコメントしたように**](#what-is-mdm-mobile-device-management)**、**デバイスを組織に登録するためには、**その組織に属するシリアル番号のみが必要です**。デバイスが登録されると、いくつかの組織が新しいデバイスに機密データをインストールします：証明書、アプリケーション、WiFiパスワード、VPN設定[など](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf)。\
-したがって、登録プロセスが適切に保護されていない場合、これは攻撃者にとって危険な入り口となる可能性があります。
+[**以前説明したように**](#what-is-mdm-mobile-device-management)**、**デバイスを組織に登録するには、**その組織に属するシリアル番号だけが必要です**。デバイスが登録されると、多くの組織は新しいデバイスに機密データ（証明書、アプリケーション、WiFiパスワード、VPN設定[など](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf)）をインストールします。\
+したがって、登録プロセスが適切に保護されていない場合、これは攻撃者にとって危険なentrypointになる可能性があります。
 
-**以下は、研究の要約です[https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe)。さらなる技術的詳細については確認してください！**
+**以下は、調査 [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe) の概要です。さらに詳しいtechnical detailsについては、そちらを確認してください！**<sup>[1]</sup>
 
-## DEPとMDMバイナリ分析の概要
+## DEPとMDM Binary Analysisの概要
 
-この研究は、macOS上のデバイス登録プログラム（DEP）およびモバイルデバイス管理（MDM）に関連するバイナリに深く掘り下げています。主要なコンポーネントは以下の通りです：
+この調査では、macOS上のDevice Enrollment Program（DEP）およびMobile Device Management（MDM）に関連するbinariesを詳しく分析しています。主なcomponentsは次のとおりです。
 
-- **`mdmclient`**：MDMサーバーと通信し、macOSバージョン10.13.4以前でDEPチェックインをトリガーします。
-- **`profiles`**：構成プロファイルを管理し、macOSバージョン10.13.4以降でDEPチェックインをトリガーします。
-- **`cloudconfigurationd`**：DEP API通信を管理し、デバイス登録プロファイルを取得します。
+- **`mdmclient`**: MDM serversと通信し、10.13.4より前のmacOS versionsでDEP check-inをtriggerします。
+- **`profiles`**: Configuration Profilesを管理し、macOS versions 10.13.4以降でDEP check-inをtriggerします。
+- **`cloudconfigurationd`**: DEP API communicationsを管理し、Device Enrollment profilesを取得します。
 
-DEPチェックインは、プライベート構成プロファイルフレームワークからの`CPFetchActivationRecord`および`CPGetActivationRecord`関数を利用して、アクティベーションレコードを取得します。`CPFetchActivationRecord`は、XPCを介して`cloudconfigurationd`と調整します。
+DEP check-inでは、private Configuration Profiles frameworkの`CPFetchActivationRecord`および`CPGetActivationRecord` functionsを使用してActivation Recordを取得します。`CPFetchActivationRecord`は、XPCを介して`cloudconfigurationd`と連携します。<sup>[1]</sup>
 
-## テスラプロトコルとアブサンシスキームのリバースエンジニアリング
+## Tesla ProtocolとAbsinthe SchemeのReverse Engineering
 
-DEPチェックインでは、`cloudconfigurationd`が暗号化された署名付きJSONペイロードを_iprofiles.apple.com/macProfile_に送信します。ペイロードにはデバイスのシリアル番号と「RequestProfileConfiguration」というアクションが含まれています。使用される暗号化スキームは内部的に「Absinthe」と呼ばれています。このスキームを解明することは複雑で、多くのステップを含み、アクティベーションレコードリクエストに任意のシリアル番号を挿入するための代替手法を探ることにつながりました。
+DEP check-inでは、`cloudconfigurationd`が暗号化および署名されたJSON payloadを_iprofiles.apple.com/macProfile_に送信します。payloadには、デバイスのシリアル番号と`RequestProfileConfiguration`というactionが含まれます。使用されるencryption schemeは、内部では「Absinthe」と呼ばれています。このschemeを解明するには多数のstepsが必要で複雑なため、Activation Record requestに任意のシリアル番号を挿入するalternative methodsの調査につながりました。<sup>[1]</sup>
 
-## DEPリクエストのプロキシ
+## DEP RequestsのProxying
 
-Charles Proxyのようなツールを使用して_iprofiles.apple.com_へのDEPリクエストを傍受し、変更しようとする試みは、ペイロードの暗号化とSSL/TLSセキュリティ対策によって妨げられました。しかし、`MCCloudConfigAcceptAnyHTTPSCertificate`構成を有効にすることで、サーバー証明書の検証をバイパスすることができますが、ペイロードの暗号化された性質により、復号化キーなしでシリアル番号の変更は依然として不可能です。
+Charles Proxyなどのtoolsを使用して、_iprofiles.apple.com_へのDEP requestsをinterceptしてmodifyする試みは、payloadの暗号化とSSL/TLS security measuresによって妨げられました。ただし、`MCCloudConfigAcceptAnyHTTPSCertificate` configurationを有効にすると、server certificate validationをbypassできます。しかし、payloadは暗号化されているため、decryption keyなしではシリアル番号をmodifyできません。<sup>[1]</sup>
 
-## DEPと相互作用するシステムバイナリの計測
+## DEPとやり取りするSystem BinariesのInstrumenting
 
-`cloudconfigurationd`のようなシステムバイナリを計測するには、macOSでシステム整合性保護（SIP）を無効にする必要があります。SIPが無効になっている場合、LLDBのようなツールを使用してシステムプロセスにアタッチし、DEP APIインタラクションで使用されるシリアル番号を変更する可能性があります。この方法は、権限やコード署名の複雑さを回避できるため、好ましいです。
+`cloudconfigurationd`などのsystem binariesをinstrumentするには、macOSでSystem Integrity Protection（SIP）を無効にする必要があります。SIPを無効にすると、LLDBなどのtoolsを使用してsystem processesにattachし、DEP API interactionsで使用されるシリアル番号をmodifyできる可能性があります。このmethodは、entitlementsとcode signingの複雑さを回避できるため、より望ましい方法です。
 
-**バイナリ計測の悪用：**
-`cloudconfigurationd`内でJSONシリアル化の前にDEPリクエストペイロードを変更することが効果的であることが証明されました。このプロセスには以下が含まれます：
+**Binary InstrumentationのExploiting:**
+JSON serializationの前に`cloudconfigurationd`内のDEP request payloadをmodifyすることで、効果的に機能しました。このprocessでは、次の手順を実行します。
 
-1. `cloudconfigurationd`にLLDBをアタッチします。
-2. システムシリアル番号が取得されるポイントを特定します。
-3. ペイロードが暗号化されて送信される前に、メモリに任意のシリアル番号を注入します。
+1. LLDBを`cloudconfigurationd`にattachする。
+2. system serial numberが取得される箇所を特定する。
+3. payloadが暗号化されて送信される前に、memoryへ任意のシリアル番号をinjectする。
 
-この方法により、任意のシリアル番号に対して完全なDEPプロファイルを取得できることが示され、潜在的な脆弱性が明らかになりました。
+このmethodにより、任意のシリアル番号に対応する完全なDEP profilesを取得でき、潜在的なvulnerabilityが示されました。<sup>[1]</sup>
 
-### Pythonによる計測の自動化
+### PythonによるInstrumentationの自動化
 
-悪用プロセスは、LLDB APIを使用してPythonで自動化され、任意のシリアル番号をプログラム的に注入し、対応するDEPプロファイルを取得することが可能になりました。
+このexploitation processは、LLDB APIを使用するPythonによって自動化されました。これにより、任意のシリアル番号をprogrammaticallyにinjectし、対応するDEP profilesを取得できるようになりました。<sup>[1]</sup>
 
-### DEPとMDMの脆弱性の潜在的影響
+### DEPおよびMDM Vulnerabilitiesの潜在的な影響
 
-この研究は、重大なセキュリティ上の懸念を浮き彫りにしました：
+この調査では、重大なsecurity concernsが明らかになりました。
 
-1. **情報漏洩**：DEPに登録されたシリアル番号を提供することで、DEPプロファイルに含まれる機密の組織情報を取得できます。
+1. **Information Disclosure**: DEPに登録されたシリアル番号を提供することで、DEP profileに含まれる組織の機密情報を取得できます。<sup>[1]</sup>
+
+## References
+
+- [1] [Duo Labs — MDM Me Maybe: Device Enrollment Program Security](https://duo.com/labs/research/mdm-me-maybe)
 
 {{#include ../../../banners/hacktricks-training.md}}

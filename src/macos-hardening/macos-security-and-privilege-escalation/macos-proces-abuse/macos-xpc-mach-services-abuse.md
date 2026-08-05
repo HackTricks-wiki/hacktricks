@@ -4,12 +4,12 @@
 
 ## 基本情報
 
-**XPC** (Cross-Process Communication) は、macOSにおける主要なIPCメカニズムです。システムデーモンは**Mach services**を公開します — `launchd` に登録された名前付きポートで、他のプロセスは `NSXPCConnection` 経由で接続できます。
+**XPC**（Cross-Process Communication）は、macOS における主要な IPC メカニズムです。システムデーモンは **Mach services**（`launchd` に登録された名前付きポート）を公開し、他のプロセスは `NSXPCConnection` を介して接続できます。
 
-`MachServices`キーを持つすべての**LaunchDaemon**および**LaunchAgent**のplistは、1つ以上の名前付きMachポートを登録します。これらはシステム全体のXPCエンドポイントであり、任意のプロセスが接続を試みることができます。
+**MachServices** キーを持つすべての **LaunchDaemon** および **LaunchAgent** plist は、1 つ以上の名前付き Mach ポートを登録します。これらはシステム全体で利用可能な XPC エンドポイントであり、あらゆるプロセスが接続を試行できます。
 
 > [!WARNING]
-> XPC Mach servicesはmacOS上で**最も大きなローカル権限昇格の攻撃対象**です。近年のほとんどのローカル root エクスプロイトは、LaunchDaemons内の脆弱なXPCサービスを経由していました。rootデーモンで公開されている各メソッドは潜在的な昇格ベクターです。
+> XPC Mach services は、macOS における**最大のローカル権限昇格攻撃対象領域**です。近年のローカル root exploit の多くは、LaunchDaemon 内の脆弱な XPC services を経由していました。root daemon で公開されているすべてのメソッドは、権限昇格の潜在的な攻撃ベクトルです。
 
 ### アーキテクチャ
 ```
@@ -23,7 +23,7 @@ Daemon Process (root context)
 ```
 ## 列挙
 
-### Mach Services を使ったデーモンの発見
+### Mach Servicesを持つデーモンの特定
 ```bash
 # Find all LaunchDaemons with MachServices
 find /Library/LaunchDaemons /System/Library/LaunchDaemons -name "*.plist" -exec sh -c '
@@ -47,9 +47,9 @@ WHERE e.isDaemon = 1
 ORDER BY e.privileged DESC
 LIMIT 50;"
 ```
-### XPC インターフェイスの列挙
+### XPC Interfaces の列挙
 
-daemon を特定したら、その XPC interface を reverse-engineer する:
+daemon を特定したら、その XPC interface を reverse-engineer します：
 ```bash
 # Find the protocol definition in the binary
 strings /path/to/daemon | grep -i "protocol\|interface\|xpc\|method"
@@ -62,11 +62,11 @@ find /Applications -path "*/XPCServices/*.xpc" 2>/dev/null
 ```
 ## XPC クライアント検証の脆弱性
 
-XPC サービスで最も一般的な脆弱性クラスは **insufficient client verification** です。daemon は次を検証する必要があります:
+XPC services で最も一般的な脆弱性クラスは、**不十分なクライアント検証**です。デーモンは以下を検証する必要があります。
 
-1. 接続してくるプロセスの **Code signature**
-2. 接続してくるプロセスの **Entitlements**
-3. **Audit token**（再利用され得るため PID ではない）
+1. 接続元プロセスの **コード署名**
+2. 接続元プロセスの **Entitlements**
+3. **Audit token**（再利用される可能性がある PID ではない）
 
 ### 脆弱なパターン: 検証なし
 ```objc
@@ -79,7 +79,7 @@ newConnection.exportedObject = self;
 return YES; // No verification!
 }
 ```
-### 脆弱なパターン: PIDベースの検証（レースコンディション）
+### 脆弱なパターン: PIDベースの検証（Race Condition）
 ```objc
 // VULNERABLE — PID can be reused between check and use
 - (BOOL)listener:(NSXPCListener *)listener
@@ -93,7 +93,7 @@ return YES;
 return NO;
 }
 ```
-### セキュアなパターン：監査トークンの検証
+### 安全なパターン：監査トークンの検証
 ```objc
 // SECURE — Uses audit token which cannot be spoofed
 - (BOOL)listener:(NSXPCListener *)listener
@@ -155,9 +155,9 @@ NSLog(@"Result: %@", result);
 }
 }
 ```
-## 攻撃: XPC Object Deserialization
+## Attack: XPC Object Deserialization
 
-複雑なオブジェクト（`NSSecureCoding` 準拠）を受け入れる XPC サービスは、**deserialization attacks** の影響を受けやすい場合があります：
+複雑なオブジェクト（`NSSecureCoding` に準拠）を受け付ける XPC services は、**deserialization attacks** に対して脆弱になる可能性があります。
 ```objc
 // If the daemon accepts NSObject subclasses via XPC:
 // An attacker can send a crafted object that triggers:
@@ -166,11 +166,11 @@ NSLog(@"Result: %@", result);
 // 3. Format string bugs (string objects as format arguments)
 // 4. Integer overflow (large numeric values)
 ```
-## Mach-Lookup サンドボックス例外
+## Mach-Lookup Sandbox Exceptions
 
-### 例外がサンドボックス脱出を可能にする方法
+### How Exceptions Enable Sandbox Escape
 
-サンドボックス化されたアプリケーションは通常、自分自身の XPC サービスとしか通信できません。しかし、**mach-lookup exceptions** によってシステム全体のサービスに到達できます:
+Sandbox化されたアプリケーションは通常、自身の XPC services としか通信できません。しかし、**mach-lookup exceptions** により、system-wide services に到達できます:
 ```xml
 <!-- Entitlement granting mach-lookup exception -->
 <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
@@ -194,7 +194,7 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 }
 ' _ {} \; 2>/dev/null
 ```
-### サンドボックス脱出チェーン
+### Sandbox Escape Chain
 ```
 1. Compromise sandboxed app (e.g., via renderer exploit in browser/email)
 2. Enumerate mach-lookup exceptions from entitlements
@@ -203,15 +203,15 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 5. Exploit a daemon bug → code execution outside the sandbox
 6. Escalate from daemon's privilege level (often root)
 ```
-## 特権ヘルパーツール (SMJobBless)
+## 特権ヘルパーツール（SMJobBless）
 
-### 仕組み
+### 動作の仕組み
 
-`SMJobBless`はlaunchd経由でrootとして実行される特権ヘルパーをインストールします。ヘルパーは親アプリとXPC経由で通信します:
+`SMJobBless` は、launchd を介して root として実行される特権ヘルパーをインストールします。ヘルパーは XPC 経由で親アプリと通信します:
 ```
 App (user context) ←→ XPC ←→ Helper (root via launchd)
 ```
-### 一般的な脆弱性: 弱い認可
+### よくある脆弱性: 不十分な認可
 ```objc
 // Many helpers check authorization but:
 // 1. Don't verify WHO is connecting (any process can connect)
@@ -273,19 +273,19 @@ class-dump /path/to/daemon
 # 3. Monitor for crashes
 log stream --predicate 'process == "daemon-name" AND (eventMessage CONTAINS "crash" OR eventMessage CONTAINS "fault")'
 ```
-## Real-World CVEs
+## 実際のCVE
 
-| CVE | Description |
+| CVE | 説明 |
 |---|---|
-| CVE-2023-41993 | XPC serviceのデシリアライズ脆弱性 |
-| CVE-2022-22616 | XPC serviceの悪用によるGatekeeperバイパス |
-| CVE-2021-30657 | Sysmond XPCによる権限昇格 |
-| CVE-2020-9839 | システムデーモンにおけるXPCのレースコンディション |
-| CVE-2019-8802 | クライアント検証が欠如している特権ヘルパーツール |
-| CVE-2023-32369 | Migraine — `systemmigrationd` XPCを介したSIPバイパス |
-| CVE-2022-26712 | PackageKit XPCによるroot権限昇格 |
+| CVE-2023-41993 | XPC service のデシリアライゼーション脆弱性 |
+| CVE-2022-22616 | XPC service abuse による Gatekeeper bypass |
+| CVE-2021-30657 | Sysmond XPC privilege escalation |
+| CVE-2020-9839 | system daemon における XPC race condition |
+| CVE-2019-8802 | privileged helper tool における client verification の欠如 |
+| CVE-2023-32369 | Migraine — `systemmigrationd` XPC を介した SIP bypass |
+| CVE-2022-26712 | PackageKit XPC root escalation |
 
-## 列挙スクリプト
+## Enumeration Script
 ```bash
 #!/bin/bash
 echo "=== XPC Mach Services Security Audit ==="
@@ -315,9 +315,9 @@ done
 ```
 ## 参考資料
 
-* [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
-* [Apple Developer — Daemons and Services Programming Guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
-* [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
-* [OBTS — XPC Attack Surface talks](https://objectivebythesea.org/)
+- [1] [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
+- [2] [Apple Developer — Daemons and Services Programming Guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
+- [3] [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
+- [4] [OBTS — XPC Attack Surface talks](https://objectivebythesea.org/)
 
 {{#include ../../../banners/hacktricks-training.md}}

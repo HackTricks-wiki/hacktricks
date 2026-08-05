@@ -2,57 +2,57 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Main Keychains
+## 主要な Keychain
 
-- **ユーザーキーチェーン** (`~/Library/Keychains/login.keychain-db`) は、アプリケーションパスワード、インターネットパスワード、ユーザー生成の証明書、ネットワークパスワード、ユーザー生成の公開/秘密鍵などの**ユーザー固有の資格情報**を保存するために使用されます。
-- **システムキーチェーン** (`/Library/Keychains/System.keychain`) は、WiFiパスワード、システムルート証明書、システム秘密鍵、システムアプリケーションパスワードなどの**システム全体の資格情報**を保存します。
-- `/System/Library/Keychains/*` には、証明書などの他のコンポーネントを見つけることができます。
-- **iOS** には、`/private/var/Keychains/` に1つの**キーチェーン**があります。このフォルダーには、`TrustStore`、証明書機関（`caissuercache`）、およびOSCPエントリ（`ocspache`）のデータベースも含まれています。
-- アプリは、アプリケーション識別子に基づいて、キーチェーン内のプライベートエリアにのみ制限されます。
+- **User Keychain**（`~/Library/Keychains/login.keychain-db`）は、アプリケーションパスワード、インターネットパスワード、ユーザーが生成した証明書、ネットワークパスワード、ユーザーが生成した公開鍵/秘密鍵などの**ユーザー固有の認証情報**を保存するために使用されます。
+- **System Keychain**（`/Library/Keychains/System.keychain`）は、WiFiパスワード、システムルート証明書、システム秘密鍵、システムアプリケーションパスワードなどの**システム全体の認証情報**を保存します。<sup>[1]</sup>
+- `/System/Library/Keychains/*` には、証明書などの他のコンポーネントも存在する可能性があります。
+- **iOS**には `/private/var/Keychains/` に1つの **Keychain** しかありません。このフォルダーには、`TrustStore`、認証局の証明書（`caissuercache`）、OSCPエントリ（`ocspache`）のデータベースも含まれています。
+- アプリは、アプリケーション識別子に基づき、Keychain内の自身のプライベート領域のみにアクセスを制限されます。
 
 ### Password Keychain Access
 
-これらのファイルは固有の保護がなく、**ダウンロード**可能ですが、暗号化されており、**復号化するためにユーザーの平文パスワードが必要**です。[**Chainbreaker**](https://github.com/n0fate/chainbreaker) のようなツールを使用して復号化できます。
+これらのファイルには本質的な保護がないため**download**できますが、暗号化されており、復号するには**ユーザーの平文パスワード**が必要です。復号には[**Chainbreaker**](https://github.com/n0fate/chainbreaker)のようなツールを使用できます。<sup>[1]</sup>
 
 ## Keychain Entries Protections
 
 ### ACLs
 
-キーチェーン内の各エントリは、さまざまなアクションを実行できる人を規定する**アクセス制御リスト（ACLs）**によって管理されています。これには以下が含まれます：
+Keychain内の各エントリは **Access Control Lists (ACLs)** によって管理されます。ACLsは、Keychainエントリに対して誰がさまざまな操作を実行できるかを指定します。<sup>[1]</sup>
 
-- **ACLAuhtorizationExportClear**: 秘密のクリアテキストを取得することを許可します。
-- **ACLAuhtorizationExportWrapped**: 他の提供されたパスワードで暗号化されたクリアテキストを取得することを許可します。
-- **ACLAuhtorizationAny**: すべてのアクションを実行することを許可します。
+- **ACLAuhtorizationExportClear**: 保有者がsecretの平文を取得できるようにします。
+- **ACLAuhtorizationExportWrapped**: 保有者が、指定された別のパスワードで暗号化されたsecretの平文を取得できるようにします。
+- **ACLAuhtorizationAny**: 保有者が任意の操作を実行できるようにします。
 
-ACLは、これらのアクションをプロンプトなしで実行できる**信頼されたアプリケーションのリスト**を伴います。これには以下が含まれます：
+ACLsには、promptなしでこれらの操作を実行できる **trusted applications** の**list**も付随します。これは次のいずれかです。<sup>[1]</sup>
 
-- **N`il`**（認証不要、**全員が信頼されている**）
-- **空の**リスト（**誰も**信頼されていない）
-- **特定の**アプリケーションの**リスト**。
+- **N`il`**（authorization不要、**everyone is trusted**）
+- **empty** list（**nobody** is trusted）
+- 特定の**applications**の**List**
 
-また、エントリには**`ACLAuthorizationPartitionID`**というキーが含まれている場合があり、これは**teamid、apple、**および**cdhash**を識別するために使用されます。
+また、エントリには **`ACLAuthorizationPartitionID`** keyが含まれる場合があり、これは **teamid、apple、**および **cdhash**の識別に使用されます。<sup>[1]</sup>
 
-- **teamid**が指定されている場合、**プロンプトなしで**エントリの値に**アクセスする**には、使用されるアプリケーションが**同じteamid**を持っている必要があります。
-- **apple**が指定されている場合、アプリは**Apple**によって**署名されている**必要があります。
-- **cdhash**が示されている場合、**アプリ**は特定の**cdhash**を持っている必要があります。
+- **teamid**が指定されている場合、**prompt**なしで**entry**のvalueに**access**するには、使用するアプリケーションが**同じteamid**を持っている必要があります。
+- **apple**が指定されている場合、アプリは**Apple**によって**signed**されている必要があります。
+- **cdhash**が指定されている場合、**app**は指定された**cdhash**を持っている必要があります。
 
 ### Creating a Keychain Entry
 
-**`Keychain Access.app`**を使用して**新しい**エントリが作成されると、以下のルールが適用されます：
+**`Keychain Access.app`**を使用して**new** **entry**を作成すると、次のルールが適用されます。<sup>[1]</sup>
 
-- すべてのアプリが暗号化できます。
-- **アプリは**エクスポート/復号化できません（ユーザーにプロンプトなしで）。
-- すべてのアプリが整合性チェックを確認できます。
-- アプリはACLを変更できません。
-- **partitionID**は**`apple`**に設定されます。
+- すべてのappsが暗号化できます。
+- **No apps** can export/decrypt（ユーザーにpromptを表示しない場合）。
+- すべてのappsがintegrity checkを確認できます。
+- No apps can change ACLs。
+- **partitionID**は **`apple`** に設定されます。
 
-アプリケーションがキーチェーンにエントリを作成する場合、ルールは少し異なります：
+**applicationがKeychain内にentryを作成する場合**、ルールは少し異なります。<sup>[1]</sup>
 
-- すべてのアプリが暗号化できます。
-- **作成アプリケーション**（または明示的に追加された他のアプリ）のみがエクスポート/復号化できます（ユーザーにプロンプトなしで）。
-- すべてのアプリが整合性チェックを確認できます。
-- アプリはACLを変更できません。
-- **partitionID**は**`teamid:[teamID here]`**に設定されます。
+- すべてのappsが暗号化できます。
+- **creating application**（または明示的に追加された他のapps）のみが、ユーザーにpromptを表示せずにexport/decryptできます。
+- すべてのappsがintegrity checkを確認できます。
+- No apps can change the ACLs。
+- **partitionID**は **`teamid:[teamID here]`** に設定されます。
 
 ## Accessing the Keychain
 
@@ -76,57 +76,57 @@ security dump-keychain ~/Library/Keychains/login.keychain-db
 ### APIs
 
 > [!TIP]
-> **キーチェーンの列挙と秘密のダンプ**は、**プロンプトを生成しない**ものについては、ツール[**LockSmith**](https://github.com/its-a-feature/LockSmith)を使用して行うことができます。
+> **promptを生成しない** **keychain enumeration and dumping** は、[**LockSmith**](https://github.com/its-a-feature/LockSmith) ツールで実行できます。
 >
-> 他のAPIエンドポイントは、[**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html)のソースコードで見つけることができます。
+> その他の API endpoint は、[**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html) の source code にあります。
 
-**Security Framework**を使用して各キーチェーンエントリの**情報**をリストおよび取得することができます。また、AppleのオープンソースCLIツール[**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**を確認することもできます。** 一部のAPIの例：
+**Security Framework** を使用して各 keychain entry の **info** を一覧表示および取得できます。また、Apple の open source cli tool である [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** も確認できます。API の例:<sup>[1]</sup>
 
-- API **`SecItemCopyMatching`**は各エントリに関する情報を提供し、使用時に設定できる属性があります：
-- **`kSecReturnData`**: trueの場合、データの復号を試みます（ポップアップを避けるためにfalseに設定）
-- **`kSecReturnRef`**: キーチェーンアイテムへの参照も取得（後でポップアップなしで復号できることがわかった場合はtrueに設定）
-- **`kSecReturnAttributes`**: エントリに関するメタデータを取得
+- API **`SecItemCopyMatching`** は各 entry の info を提供し、使用時に設定できる attributes があります。
+- **`kSecReturnData`**: true の場合、data の decrypt を試みます（潜在的な pop-up を避けるには false に設定します）
+- **`kSecReturnRef`**: keychain item への reference も取得します（後で pop-up なしで decrypt できることが分かった場合に備え、true に設定します）
+- **`kSecReturnAttributes`**: entry に関する metadata を取得します
 - **`kSecMatchLimit`**: 返す結果の数
-- **`kSecClass`**: どの種類のキーチェーンエントリか
+- **`kSecClass`**: keychain entry の種類
 
-各エントリの**ACL**を取得：
+各 entry の **ACLs** を取得します:<sup>[1]</sup>
 
-- API **`SecAccessCopyACLList`**を使用すると、**キーチェーンアイテムのACL**を取得でき、各リストには以下が含まれます（`ACLAuhtorizationExportClear`など、前述の他のもの）：
-- 説明
-- **信頼されたアプリケーションリスト**。これには以下が含まれる可能性があります：
-- アプリ: /Applications/Slack.app
-- バイナリ: /usr/libexec/airportd
-- グループ: group://AirPort
+- API **`SecAccessCopyACLList`** を使用すると、**keychain item の ACL** を取得できます。また、ACL の list（`ACLAuhtorizationExportClear` や前述のその他のもの）が返されます。各 list には以下が含まれます。
+- Description
+- **Trusted Application List**。以下のいずれかになります。
+- An app: /Applications/Slack.app
+- A binary: /usr/libexec/airportd
+- A group: group://AirPort
 
-データをエクスポート：
+data を Export します:<sup>[1]</sup>
 
-- API **`SecKeychainItemCopyContent`**はプレーンテキストを取得します。
-- API **`SecItemExport`**はキーと証明書をエクスポートしますが、コンテンツを暗号化してエクスポートするためにパスワードを設定する必要があるかもしれません。
+- API **`SecKeychainItemCopyContent`** は plaintext を取得します
+- API **`SecItemExport`** は keys と certificates を export しますが、content を encrypted で export するには passwords の設定が必要になる場合があります
 
-そして、**プロンプトなしで秘密をエクスポートするための要件**は以下の通りです：
+以下は、**prompt なしで secret を export** できるようにするための **requirements** です:<sup>[1]</sup>
 
-- **1つ以上の信頼された**アプリがリストされている場合：
-- 適切な**認可**が必要です（**`Nil`**、または秘密情報にアクセスするための認可リストに**含まれている**必要があります）
-- コード署名が**PartitionID**と一致する必要があります
-- コード署名が1つの**信頼されたアプリ**のものと一致する必要があります（または正しいKeychainAccessGroupのメンバーである必要があります）
-- **すべてのアプリケーションが信頼されている**場合：
-- 適切な**認可**が必要です
-- コード署名が**PartitionID**と一致する必要があります
-- **PartitionID**がない場合、これは必要ありません
+- **1 つ以上の trusted** app が listed の場合:
+- 適切な **authorizations** が必要です（**`Nil`**、または secret info への access authorization で許可された app の list の **part** であること）
+- code signature が **PartitionID** と一致する必要があります
+- code signature が **trusted app** のいずれかと一致する必要があります（または適切な KeychainAccessGroup の member である必要があります）
+- **all applications trusted** の場合:
+- 適切な **authorizations** が必要です
+- code signature が **PartitionID** と一致する必要があります
+- **PartitionID** がない場合、これは不要です
 
 > [!CAUTION]
-> したがって、**1つのアプリケーションがリストされている**場合、そのアプリケーションに**コードを注入する**必要があります。
+> したがって、**1 application が listed** の場合、その application に **code を inject** する必要があります。
 >
-> **apple**が**partitionID**に示されている場合、**`osascript`**を使用してアクセスできるため、partitionIDにappleを含むすべてのアプリケーションを信頼することができます。**`Python`**もこれに使用できます。
+> **apple** が **partitionID** に指定されている場合、**`osascript`** で access できます。つまり、partitionID に apple が含まれ、すべての applications を trust しているものが対象です。**`Python`** も使用できます。
 
-### 2つの追加属性
+### 2 つの追加 attributes
 
-- **Invisible**: エントリを**UI**キーチェーンアプリから**隠す**ためのブールフラグです
-- **General**: **メタデータ**を保存するためのもので（したがって、暗号化されていません）
-- Microsoftは、機密エンドポイントにアクセスするためのすべてのリフレッシュトークンをプレーンテキストで保存していました。
+- **Invisible**: entry を **UI** Keychain app から **hide** するための boolean flag です<sup>[1]</sup>
+- **General**: **metadata** を保存するためのものです（そのため **ENCRYPTED ではありません**）<sup>[1]</sup>
+- Microsoft は、sensitive endpoint に access するためのすべての refresh tokens を plain text で保存していました。<sup>[1]</sup>
 
 ## References
 
-- [**#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas**](https://www.youtube.com/watch?v=jKE1ZW33JpY)
+- [1] [#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas](https://www.youtube.com/watch?v=jKE1ZW33JpY)
 
 {{#include ../../banners/hacktricks-training.md}}

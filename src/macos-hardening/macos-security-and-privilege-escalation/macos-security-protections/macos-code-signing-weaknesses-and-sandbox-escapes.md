@@ -1,4 +1,4 @@
-# macOS コード署名の弱点とサンドボックス脱出
+# macOS Code Signing の弱点と Sandbox Escapes
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,18 +6,18 @@
 
 ### 基本情報
 
-**Ad-hoc signing** (`CS_ADHOC`) は **証明書チェーンがない** コード署名を作成します — 開発者の身元検証がないコードのハッシュです。バイナリの出所は特定の開発者や組織に辿れません。
+**Ad-hoc signing** (`CS_ADHOC`) は、**certificate chain がない** code signature を作成します。これは developer identity verification のない code の hash です。そのため、binary の origin を developer や organization まで追跡できません。
 
-Apple Silicon 搭載の Mac では、すべての実行可能ファイルに最低でも ad-hoc 署名が必要です。つまり、多くの開発ツール、Homebrew パッケージ、サードパーティ製ユーティリティに ad-hoc 署名が存在します。
+Apple Silicon Mac では、すべての executable に最低限 ad-hoc signature が必要です。そのため、多くの development tools、Homebrew packages、third-party utilities に ad-hoc signature が存在します。
 
-### なぜ重要か
+### これが重要な理由
 
-- **検証可能な識別情報がない** — バイナリは識別情報に基づくチェックで検出されずに置き換えられる可能性がある
-- 第三者の ad-hoc バイナリが **特権的な位置**（FDA、daemon、helpers）にある場合は優先的に狙われる
-- 一部の構成では、ad-hoc 署名は開発者署名されたコードほど厳密に検証されないことがある
-- **TCC grants** を持つ ad-hoc 署名バイナリは特に価値が高い — バイナリの内容が変更されても権限付与が維持される（TCC がどのように grant をキー付けしたかに依存）
+- **検証可能な identity がない** — identity-based checks による検出なしに binary を置き換えられる
+- **privileged positions**（FDA、daemon、helpers）にある third-party ad-hoc binaries は優先度の高い target
+- 一部の configuration では、ad-hoc signatures は developer-signed code ほど厳格に **verification されない** 可能性がある
+- **TCC grants** を持つ ad-hoc signed binaries は特に価値が高い — binary の内容が変更されても grants は保持される（TCC が grant をどのように keying したかによる）
 
-### 検出
+### Discovery
 ```bash
 # Find ad-hoc signed binaries
 find /usr/local /opt /Applications -type f -perm +111 -exec sh -c '
@@ -50,16 +50,16 @@ codesign -s - /path/to/target
 ```
 ---
 
-## デバッグ可能なプロセス (get-task-allow)
+## デバッグ可能なプロセス（get-task-allow）
 
 ### 基本情報
 
-The **`com.apple.security.get-task-allow`** エンタイトルメント（または `CS_GET_TASK_ALLOW` フラグ）は、**任意のプロセスが debugger としてアタッチできる**ようにし、メモリの読み取り、レジスタの変更、コード注入、実行の制御を可能にします。
+**`com.apple.security.get-task-allow`** entitlement（または **`CS_GET_TASK_ALLOW`** flag）を使用すると、**任意のプロセスがデバッガとしてアタッチ**し、メモリの読み取り、レジスタの変更、コードのインジェクション、実行の制御を行えます。
 
-これは **開発ビルドのみ** を想定しています。とはいえ、一部のサードパーティ製バイナリは本番でこのエンタイトルメントを含んで出荷されます。
+これは**開発ビルドのみ**を対象としています。しかし、一部のサードパーティ製バイナリには、この entitlement が本番環境でも含まれています。
 
 > [!CAUTION]
-> `get-task-allow` を含む本番バイナリは**instant exploitation primitive**です。任意のローカルプロセスは `task_for_pid()` を呼び出して対象の Mach task port を取得し、対象の entitlements、TCC grants、security context で実行される任意のコードを注入できます。
+> `get-task-allow` を持つ本番バイナリは、**即座に悪用可能なプリミティブ**です。任意のローカルプロセスが `task_for_pid()` を呼び出して対象の Mach task port を取得し、対象の entitlement、TCC grant、セキュリティコンテキストで実行される任意のコードをインジェクトできます。
 
 ### 検出
 ```bash
@@ -76,7 +76,7 @@ JOIN capabilities c ON ec.capability_id = c.id
 WHERE c.name = 'get_task_allow_signature'
 ORDER BY e.privileged DESC;"
 ```
-### Attack: Task Port Injection
+### 攻撃: Task Port Injection
 ```c
 #include <mach/mach.h>
 #include <mach/mach_vm.h>
@@ -103,17 +103,17 @@ VM_PROT_READ | VM_PROT_EXECUTE);
 ```
 ---
 
-## ライブラリ検証なし + DYLD 環境
+## No Library Validation + DYLD Environment
 
-### 危険な組み合わせ
+### 致命的な組み合わせ
 
-バイナリが **両方** を持つ場合:
-- `com.apple.security.cs.disable-library-validation` (任意の dylib を読み込む)
-- `com.apple.security.cs.allow-dyld-environment-variables` (DYLD の環境変数を受け入れる)
+バイナリに以下の**両方**がある場合:
+- `com.apple.security.cs.disable-library-validation` (任意の dylib をロード)
+- `com.apple.security.cs.allow-dyld-environment-variables` (DYLD env vars を受け入れる)
 
-これは **確実なコード注入プリミティブ** — `DYLD_INSERT_LIBRARIES` は完全に機能します。
+これは**確実な code injection primitive**です — `DYLD_INSERT_LIBRARIES` が完全に機能します。
 
-### 検出
+### Discovery
 ```bash
 # Find binaries with the deadly combo
 find /Applications -type f -perm +111 -exec sh -c '
@@ -166,23 +166,23 @@ cat /tmp/injected_proof.txt
 ```
 ---
 
-## サンドボックスの一時的例外
+## Sandbox の一時的な例外
 
-### それらがサンドボックスを弱める方法
+### Sandbox を弱体化させる仕組み
 
-サンドボックスの一時的例外 (`com.apple.security.temporary-exception.*`) は App Sandbox に穴を開けます:
+Sandbox の一時的な例外（`com.apple.security.temporary-exception.*`）は、App Sandbox に抜け道を作ります。
 
-| 例外 | 許可されること |
+| 例外 | 許可される操作 |
 |---|---|
-| `temporary-exception.mach-lookup.global-name` | システム全体の XPC/Mach サービスに接続する |
-| `temporary-exception.files.absolute-path.read-write` | アプリコンテナ外のファイルを読み書きする |
-| `temporary-exception.iokit-user-client-class` | IOKit の user-client 接続を開く |
-| `temporary-exception.shared-preference.read-only` | 他のアプリの設定を読み取る |
-| `temporary-exception.files.home-relative-path.read-write` | `~` を基準としたパスにアクセスする |
+| `temporary-exception.mach-lookup.global-name` | システム全体の XPC/Mach サービスへの接続 |
+| `temporary-exception.files.absolute-path.read-write` | app container 外部のファイルの読み書き |
+| `temporary-exception.iokit-user-client-class` | IOKit user-client 接続のオープン |
+| `temporary-exception.shared-preference.read-only` | 他の app の preferences の読み取り |
+| `temporary-exception.files.home-relative-path.read-write` | `~` を基準とするパスへのアクセス |
 
-### Mach-Lookup Exceptions = サンドボックス脱出のプリミティブ
+### Mach-Lookup 例外 = Sandbox Escape のプリミティブ
 
-最も危険な例外は **mach-lookup** — これによりサンドボックス化されたアプリが特権を持つデーモンと通信できます:
+最も危険な例外は **mach-lookup** です。これにより、sandbox 化された app が privileged daemon と通信できます:
 ```bash
 # Find apps with mach-lookup exceptions
 find /Applications -name "*.app" -exec sh -c '
@@ -196,7 +196,7 @@ echo "[$count exceptions] $(basename "$1")"
 }
 ' _ {} \; 2>/dev/null | sort -rn
 ```
-### 攻撃: Sandbox Escape via Mach-Lookup
+### 攻撃: Mach-Lookup による Sandbox Escape
 ```
 1. Compromise sandboxed app (renderer exploit, malicious document, etc.)
 2. Read entitlements to discover mach-lookup exceptions
@@ -209,25 +209,25 @@ c. Fuzz each exposed method
 ```
 ---
 
-## プライベート Apple エンタイトルメント
+## Private Apple Entitlements
 
 ### 概要
 
-`com.apple.private.*` で始まるエンタイトルメントは、サードパーティ開発者に公開されていない、または文書化されていない **Apple内部のAPI** へのアクセスを提供します。プライベートエンタイトルメントを持つサードパーティ製バイナリは、enterprise cert、MDM、または非App-Store配布を通じてそれらを取得しています。
+`com.apple.private.*` をプレフィックスとする Entitlements は、第三者向けにドキュメント化または公開されていない **Apple 内部 API** へのアクセスを提供します。Private Entitlements を持つ第三者バイナリは、enterprise cert、MDM、または App Store 外の配布を通じて取得されます。
 
-### 危険なプライベートエンタイトルメント
+### 危険な Private Entitlements
 
-| エンタイトルメント | 機能 |
+| Entitlement | Capability |
 |---|---|
-| `com.apple.private.tcc.manager` | TCCデータベースへの完全な読み書き |
-| `com.apple.private.tcc.allow` | 特定のTCCサービスへのアクセス |
-| `com.apple.private.security.no-sandbox` | サンドボックスなしで実行 |
-| `com.apple.private.iokit` | IOKitドライバへの直接アクセス |
-| `com.apple.private.kernel.*` | カーネルインターフェースへのアクセス |
-| `com.apple.private.xpc.launchd.job-label` | launchdジョブの登録/管理 |
-| `com.apple.rootless.install` | SIPで保護されたパスへの書き込み |
+| `com.apple.private.tcc.manager` | TCC database の完全な read/write |
+| `com.apple.private.tcc.allow` | 特定の TCC services へのアクセス |
+| `com.apple.private.security.no-sandbox` | sandbox なしで実行 |
+| `com.apple.private.iokit` | IOKit driver への直接アクセス |
+| `com.apple.private.kernel.\*` | Kernel interface へのアクセス |
+| `com.apple.private.xpc.launchd.job-label` | launchd jobs の登録・管理 |
+| `com.apple.rootless.install` | SIP で保護された paths への書き込み |
 
-### 検出
+### Discovery
 ```bash
 # Find third-party binaries with private entitlements
 find /Applications /usr/local -type f -perm +111 -exec sh -c '
@@ -246,13 +246,13 @@ ORDER BY privileged DESC;"
 ```
 ---
 
-## カスタムサンドボックスプロファイル (SBPL)
+## Custom Sandbox Profiles (SBPL)
 
-### 概要
+### その概要
 
-バイナリは SBPL (Seatbelt Profile Language) で書かれた **カスタムサンドボックスプロファイル** を同梱して配布されることがある。これらのプロファイルは、デフォルトの App Sandbox よりも制限が厳しい場合もあれば、**より許可的** な場合もある。
+バイナリには、SBPL（Seatbelt Profile Language）で記述された **custom sandbox profiles** を同梱できます。これらのプロファイルは、デフォルトの App Sandbox よりも制限が厳しい場合もあれば、**より許容的** な場合もあります。
 
-### カスタムプロファイルの監査
+### Custom Profiles の監査
 ```bash
 # Find custom sandbox profiles
 find /Applications /System -name "*.sb" -o -name "*.sbpl" 2>/dev/null
@@ -270,13 +270,13 @@ cat /path/to/custom.sb | grep "(allow" | sort -u
 ```
 ---
 
-## 書き込み可能なライブラリパス
+## 書き込み可能なLibrary Path
 
-### 概要
+### その概要
 
-バイナリが現在のユーザーが**書き込み可能な**パスから動的ライブラリを読み込む場合、そのライブラリは悪意のあるコードに置き換えられる可能性があります。
+binaryが、現在のユーザーが**書き込み可能**なpathからdynamic libraryを読み込む場合、そのlibraryを悪意のあるcodeに置き換えられます。
 
-### 検出
+### 発見
 ```bash
 # Using the scanner — find privileged binaries loading from writable paths
 sqlite3 /tmp/executables.db "
@@ -317,11 +317,12 @@ cp /tmp/evil.dylib /path/to/writable.dylib
 
 # 5. When the daemon restarts, it loads the evil dylib with daemon privileges
 ```
-## References
+## 参考資料
 
-* [Apple Developer — コード署名ガイド](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
-* [Apple Developer — App Sandbox（アプリサンドボックス）](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
-* [Apple Developer — Entitlements（エンタイトルメント）](https://developer.apple.com/documentation/bundleresources/entitlements)
-* [The Evil Bit — clear-library-validation](https://theevilbit.github.io/posts/com.apple.private.security.clear-library.validation/)
+- [1] [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
+- [2] [Apple Developer — App Sandbox](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
+- [3] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
+- [4] [XNU — `bsd/sys/codesign.h`（`CS_OPS_*` operations and `CLEAR_LV_ENTITLEMENT`）](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [5] [XNU — `bsd/kern/kern_proc.c`（`csops` / `CS_OPS_CLEAR_LV` handler）](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
 
 {{#include ../../../banners/hacktricks-training.md}}

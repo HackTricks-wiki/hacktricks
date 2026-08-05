@@ -1,57 +1,59 @@
-# macOS XPC 接続プロセスチェック
+# macOS XPC 接続プロセスのチェック
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-## XPC 接続プロセスチェック
+## XPC 接続プロセスのチェック
 
-XPC サービスへの接続が確立されると、サーバーは接続が許可されているかどうかを確認します。通常、以下のチェックが行われます：
+XPC service への接続が確立されると、server はその接続が許可されているかをチェックします。通常、以下のチェックを実行します。
 
-1. 接続している **プロセスが Apple に署名された** 証明書で署名されているか確認します（Apple のみが発行）。
-- この **確認が行われない場合、** 攻撃者は **偽の証明書** を作成して他のチェックに合致させることができます。
-2. 接続しているプロセスが **組織の証明書** で署名されているか確認します（チーム ID の確認）。
-- この **確認が行われない場合、** Apple の **任意の開発者証明書** を使用して署名し、サービスに接続できます。
-3. 接続しているプロセスが **適切なバンドル ID** を含んでいるか確認します。
-- この **確認が行われない場合、** 同じ組織に署名された任意のツールが XPC サービスと対話するために使用される可能性があります。
-4. (4 または 5) 接続しているプロセスが **適切なソフトウェアバージョン番号** を持っているか確認します。
-- この **確認が行われない場合、** 古い、脆弱なクライアントがプロセスインジェクションに対して脆弱であり、他のチェックが行われていても XPC サービスに接続される可能性があります。
-5. (4 または 5) 接続しているプロセスが危険な権限のない **ハードニングされたランタイム** を持っているか確認します（任意のライブラリを読み込むことを許可するものや DYLD 環境変数を使用するものなど）。
-1. この **確認が行われない場合、** クライアントは **コードインジェクションに対して脆弱** である可能性があります。
-6. 接続しているプロセスがサービスに接続することを許可する **権限** を持っているか確認します。これは Apple のバイナリに適用されます。
-7. **検証** は接続している **クライアントの監査トークン** に **基づく** 必要があり、プロセス ID (**PID**) ではなく、前者は **PID 再利用攻撃** を防ぎます。
-- 開発者は **監査トークン** API 呼び出しを **ほとんど使用しない** ため、これは **プライベート** であり、Apple はいつでも **変更** できる可能性があります。さらに、プライベート API の使用は Mac App Store アプリでは許可されていません。
-- メソッド **`processIdentifier`** が使用される場合、脆弱である可能性があります。
-- **`xpc_dictionary_get_audit_token`** を **`xpc_connection_get_audit_token`** の代わりに使用するべきであり、後者は特定の状況で [脆弱である可能性があります](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)。
+1. 接続している **process が Apple-signed** 証明書（Apple のみが発行できる証明書）で署名されているかをチェックする。
+- これが **検証されない場合**、攻撃者は他のチェックに一致する **fake certificate** を作成できます。
+2. 接続している process が **organization の証明書**（team ID verification）で署名されているかをチェックする。
+- これが **検証されない場合**、Apple の **developer certificate** であれば署名に使用して service に接続できます。
+3. 接続している process に **適切な bundle ID** が含まれているかをチェックする。
+- これが **検証されない場合**、**同じ org によって署名された**あらゆる tool を XPC service との通信に使用できます。
+4. (4 または 5) 接続している process に **適切な software version number** があるかをチェックする。
+- **検証されない場合、** process injection に対して脆弱な古い insecure client を、他のチェックが設定されていても XPC service への接続に使用できます。
+5. (4 または 5) 接続している process が、危険な entitlement（任意の library のロードや DYLD env vars の使用を許可するものなど）を持たない hardened runtime を使用しているかをチェックする。
+1. これが **検証されない場合、** client は **code injection に対して脆弱**な可能性があります。
+6. 接続している process が service への接続を許可する **entitlement** を持っているかをチェックする。これは Apple binaries に適用されます。
+7. **verification** は、process ID（**PID**）ではなく、接続している **client の audit token** に **基づいて**実行する必要があります。前者ではなく後者を使用することで、**PID reuse attacks** を防止できます。
+- Developers が **audit token** API call を使用することは **ほとんどありません**。これは **private** であるため、Apple がいつでも変更する可能性があります。さらに、private API の使用は Mac App Store apps では許可されていません。
+- **`processIdentifier`** method を使用すると、脆弱になる可能性があります。
+- **`xpc_connection_get_audit_token`** の代わりに **`xpc_dictionary_get_audit_token`** を使用する必要があります。後者も[特定の状況では脆弱になる可能性があります](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)。<sup>[5]</sup>
 
-### コミュニケーション攻撃
+### Communication Attacks
 
-PID 再利用攻撃の詳細については、以下を確認してください：
+PID reuse attack のチェックについて詳しくは、以下を参照してください。
+
 
 {{#ref}}
 macos-pid-reuse.md
 {{#endref}}
 
-**`xpc_connection_get_audit_token`** 攻撃の詳細については、以下を確認してください：
+**`xpc_connection_get_audit_token`** attack のチェックについて詳しくは、以下を参照してください。
+
 
 {{#ref}}
 macos-xpc_connection_get_audit_token-attack.md
 {{#endref}}
 
-### Trustcache - ダウングレード攻撃防止
+### Trustcache - Downgrade Attacks の防止
 
-Trustcache は、Apple Silicon マシンで導入された防御的手法で、Apple バイナリの CDHSAH のデータベースを保存し、許可された非修正バイナリのみが実行されるようにします。これにより、ダウングレードバージョンの実行が防止されます。
+Trustcache は Apple Silicon machines に導入された defensive method で、Apple binaries の CDHSAH の database を保存し、許可された non modified binaries のみを実行できるようにします。これにより downgrade versions の実行を防止します。
 
-### コード例
+### Code Examples
 
-サーバーはこの **検証** を **`shouldAcceptNewConnection`** という関数で実装します。
+server は、**`shouldAcceptNewConnection`** という function でこの **verification** を実装します。
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection {
 //Check connection
 return YES;
 }
 ```
-オブジェクト NSXPCConnection には **private** プロパティ **`auditToken`** （使用すべきものですが変更される可能性があります）と **public** プロパティ **`processIdentifier`** （使用すべきでないもの）が存在します。
+オブジェクト NSXPCConnection には、**private** なプロパティ **`auditToken`**（使用すべきものですが、変更される可能性があります）と、**public** なプロパティ **`processIdentifier`**（使用すべきではないもの）があります。
 
-接続プロセスは次のようなもので確認できます:
+接続元プロセスは、次のように検証できます:<sup>[1][2][3]</sup>
 ```objectivec
 [...]
 SecRequirementRef requirementRef = NULL;
@@ -71,7 +73,7 @@ SecCodeCheckValidity(code, kSecCSDefaultFlags, requirementRef);
 SecTaskRef taskRef = SecTaskCreateWithAuditToken(NULL, ((ExtendedNSXPCConnection*)newConnection).auditToken);
 SecTaskValidateForRequirement(taskRef, (__bridge CFStringRef)(requirementString))
 ```
-もし開発者がクライアントのバージョンを確認したくない場合、少なくともクライアントがプロセスインジェクションに対して脆弱でないことを確認することができます:
+開発者がクライアントのバージョンを確認したくない場合でも、少なくともクライアントが process injection に対して脆弱でないことを確認できます：
 ```objectivec
 [...]
 CFDictionaryRef csInfo = NULL;
@@ -86,4 +88,20 @@ if ((csFlags & (cs_hard | cs_require_lv)) {
 return Yes; // Accept connection
 }
 ```
+上記の `cs_*` constants は、XNU の `osfmk/kern/cs_blobs.h` で定義されている code-signing flags であるため、推測ではなくソースコードと照合して確認できます。<sup>[4]</sup>
+```c
+#define CS_HARD                     0x00000100  /* don't load invalid pages */
+#define CS_KILL                     0x00000200  /* kill process if it becomes invalid */
+#define CS_RESTRICT                 0x00000800  /* tell dyld to treat restricted */
+#define CS_REQUIRE_LV               0x00002000  /* require library validation */
+#define CS_RUNTIME                  0x00010000  /* Apply hardened runtime policies */
+```
+## 参考資料
+
+- [1] [Apple Developer — Code Signing Requirement Language](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/RequirementLang/RequirementLang.html)
+- [2] [Apple Developer — `SecCodeCheckValidity`](https://developer.apple.com/documentation/security/seccodecheckvalidity(_:_:_:))
+- [3] [Apple Developer — `SecTaskCreateWithAuditToken`](https://developer.apple.com/documentation/security/sectaskcreatewithaudittoken(_:_:))
+- [4] [XNU — `osfmk/kern/cs_blobs.h` (`CS_*` code-signing flags)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [5] [Sector 7 — XPC audit token spoofing](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
+
 {{#include ../../../../../../banners/hacktricks-training.md}}

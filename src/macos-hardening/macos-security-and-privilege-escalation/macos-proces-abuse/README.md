@@ -2,47 +2,47 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Processes Basic Information
+## プロセスの基本情報
 
-プロセスは実行中の実行可能ファイルのインスタンスですが、プロセスはコードを実行しません。これらはスレッドです。したがって、**プロセスは実行中のスレッドのコンテナに過ぎません**。メモリ、ディスクリプタ、ポート、権限を提供します...
+プロセスは実行中の executable のインスタンスですが、プロセスは code を実行せず、実行するのは thread です。したがって、**プロセスは実行中の thread のための単なるコンテナ**であり、memory、descriptor、port、permission などを提供します。
 
-従来、プロセスは**`fork`**を呼び出すことによって他のプロセス内で開始されました（PID 1を除く）。これにより、現在のプロセスの正確なコピーが作成され、その後**子プロセス**は一般的に**`execve`**を呼び出して新しい実行可能ファイルをロードして実行します。その後、**`vfork`**が導入され、このプロセスをメモリコピーなしで高速化しました。\
-次に、**`posix_spawn`**が導入され、**`vfork`**と**`execve`**を1回の呼び出しで組み合わせ、フラグを受け入れます：
+従来、プロセスは PID 1 を除き、**`fork`** を呼び出して他のプロセス内で開始されていました。`fork` は現在のプロセスの完全なコピーを作成し、その後、**child process** は通常、**`execve`** を呼び出して新しい executable をロードし、実行していました。その後、memory のコピーを行わずにこの処理を高速化するため、**`vfork`** が導入されました。\
+続いて、`vfork` と **`execve`** を1回の call にまとめ、flags を受け付ける **`posix_spawn`** が導入されました。
 
-- `POSIX_SPAWN_RESETIDS`: 有効なIDを実際のIDにリセット
-- `POSIX_SPAWN_SETPGROUP`: プロセスグループの所属を設定
-- `POSUX_SPAWN_SETSIGDEF`: シグナルのデフォルト動作を設定
-- `POSIX_SPAWN_SETSIGMASK`: シグナルマスクを設定
-- `POSIX_SPAWN_SETEXEC`: 同じプロセスで実行（オプションが多い`execve`のように）
-- `POSIX_SPAWN_START_SUSPENDED`: サスペンド状態で開始
-- `_POSIX_SPAWN_DISABLE_ASLR`: ASLRなしで開始
-- `_POSIX_SPAWN_NANO_ALLOCATOR:` libmallocのナノアロケータを使用
-- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` データセグメントで`rwx`を許可
-- `POSIX_SPAWN_CLOEXEC_DEFAULT`: exec(2)でデフォルトで全てのファイル記述子を閉じる
-- `_POSIX_SPAWN_HIGH_BITS_ASLR:` ASLRスライドの高位ビットをランダム化
+- `POSIX_SPAWN_RESETIDS`: effective id を real id にリセット
+- `POSIX_SPAWN_SETPGROUP`: process group の所属を設定
+- `POSUX_SPAWN_SETSIGDEF`: signal のデフォルト動作を設定
+- `POSIX_SPAWN_SETSIGMASK`: signal mask を設定
+- `POSIX_SPAWN_SETEXEC`: 同じプロセス内で Exec（より多くの options を持つ `execve` と同様）
+- `POSIX_SPAWN_START_SUSPENDED`: suspended 状態で開始
+- `_POSIX_SPAWN_DISABLE_ASLR`: ASLR なしで開始
+- `_POSIX_SPAWN_NANO_ALLOCATOR:` libmalloc の Nano allocator を使用
+- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` data segment で `rwx` を許可
+- `POSIX_SPAWN_CLOEXEC_DEFAULT`: デフォルトで exec(2) 時にすべての file description を閉じる
+- `_POSIX_SPAWN_HIGH_BITS_ASLR:` ASLR slide の上位 bits を randomize
 
-さらに、`posix_spawn`は生成されたプロセスのいくつかの側面を制御する**`posix_spawnattr`**の配列を指定することを許可し、ディスクリプタの状態を変更するための**`posix_spawn_file_actions`**を提供します。
+さらに、`posix_spawn` では、spawn されたプロセスのいくつかの側面を制御する **`posix_spawnattr`** の array と、descriptor の状態を変更する **`posix_spawn_file_actions`** を指定できます。
 
-プロセスが終了すると、**親プロセスに戻りコードを送信します**（親が終了した場合、新しい親はPID 1です）し、シグナル`SIGCHLD`を送信します。親はこの値を取得するために`wait4()`または`waitid()`を呼び出す必要があり、その間、子プロセスはゾンビ状態に留まり、リソースを消費しません。
+プロセスが終了すると、signal `SIGCHLD` によって **return code を parent process に送信**します（parent が終了している場合、新しい parent は PID 1 です）。parent は `wait4()` または `waitid()` を呼び出してこの値を取得する必要があり、それが行われるまで child は zombie 状態になります。この状態でも child は一覧に表示されますが、resource は消費しません。
 
 ### PIDs
 
-PID、プロセス識別子は、ユニークなプロセスを識別します。XNUでは、**PIDs**は**64ビット**で、単調に増加し、**決してラップしません**（悪用を避けるため）。
+PIDs（process identifiers）は、一意のプロセスを識別します。XNU では **PIDs** は **64bits** で、単調増加し、**wrap しません**（abuse を防ぐため）。
 
-### Process Groups, Sessions & Coalations
+### Process Groups、Sessions、Coalations
 
-**プロセス**は**グループ**に挿入され、管理を容易にします。たとえば、シェルスクリプト内のコマンドは同じプロセスグループにあり、killを使用して**一緒にシグナルを送信する**ことが可能です。\
-プロセスをセッションに**グループ化する**ことも可能です。プロセスがセッションを開始すると（`setsid(2)`）、子プロセスはセッション内に設定されますが、独自のセッションを開始しない限りです。
+**プロセス**は、管理しやすくするために**groups**に追加できます。たとえば、shell script 内の commands は同じ process group に属するため、kill などを使用して**まとめて signal を送信**できます。\
+プロセスを**sessions にまとめる**こともできます。プロセスが session（`setsid(2)`）を開始すると、その child processes は独自の session を開始しない限り、その session 内に設定されます。
 
-コアリションは、Darwinでプロセスをグループ化する別の方法です。コアリションに参加するプロセスは、プールリソースにアクセスでき、台帳を共有したり、Jetsamに直面したりします。コアリションには異なる役割があります：リーダー、XPCサービス、拡張。
+Coalition は、Darwin におけるプロセスを group 化する別の方法です。プロセスが coalition に参加すると、pool resources にアクセスし、ledger を共有したり、Jetsam の対象になったりできます。Coalition には、Leader、XPC service、Extension という異なる roles があります。
 
-### Credentials & Personae
+### Credentials と Personae
 
-各プロセスは、システム内の**権限を識別する**ための**資格情報**を保持します。各プロセスには1つの主要な`uid`と1つの主要な`gid`があります（ただし、複数のグループに属することがあります）。\
-バイナリが`setuid/setgid`ビットを持っている場合、ユーザーおよびグループIDを変更することも可能です。\
-新しいuid/gidを**設定するための関数**がいくつかあります。
+各プロセスは、システム上の**privileges を識別する** **credentials** を保持します。各プロセスには primary `uid` と primary `gid` が1つずつあります（ただし、複数の groups に所属する場合があります）。\
+binary に `setuid/setgid` bit が設定されている場合は、user と group id を変更することもできます。\
+新しい uid/gid を**設定する**ための functions がいくつか存在します。
 
-システムコール**`persona`**は、**代替の**資格情報のセットを提供します。ペルソナを採用すると、そのuid、gid、およびグループメンバーシップを**一度に**引き受けます。[**ソースコード**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h)では、構造体を見つけることができます：
+syscall **`persona`** は、**credentials** の**alternate** set を提供します。persona を採用すると、その uid、gid、group memberships が**同時に**引き継がれます。[**source code**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) では、struct を確認できます。
 ```c
 struct kpersona_info { uint32_t persona_info_version;
 uid_t    persona_id; /* overlaps with UID */
@@ -56,43 +56,43 @@ char     persona_name[MAXLOGNAME + 1];
 /* TODO: MAC policies?! */
 }
 ```
-## スレッドの基本情報
+## Threads の基本情報
 
-1. **POSIXスレッド (pthreads):** macOSはPOSIXスレッド（`pthreads`）をサポートしており、これはC/C++の標準スレッドAPIの一部です。macOSにおけるpthreadsの実装は`/usr/lib/system/libsystem_pthread.dylib`にあり、これは公開されている`libpthread`プロジェクトから来ています。このライブラリはスレッドを作成し管理するために必要な関数を提供します。
-2. **スレッドの作成:** `pthread_create()`関数は新しいスレッドを作成するために使用されます。内部的に、この関数はXNUカーネル（macOSが基づいているカーネル）特有の低レベルのシステムコールである`bsdthread_create()`を呼び出します。このシステムコールは、スレッドの動作を指定する`pthread_attr`（属性）から派生したさまざまなフラグを受け取ります。これにはスケジューリングポリシーやスタックサイズが含まれます。
-- **デフォルトスタックサイズ:** 新しいスレッドのデフォルトスタックサイズは512 KBで、通常の操作には十分ですが、必要に応じてスレッド属性を介して調整できます。
-3. **スレッドの初期化:** `__pthread_init()`関数はスレッドのセットアップ中に重要で、`env[]`引数を利用してスタックの位置やサイズに関する詳細を含む環境変数を解析します。
+1. **POSIX Threads (pthreads):** macOS は POSIX threads (`pthreads`) をサポートしています。これは C/C++ 用の標準的な threading API の一部です。macOS における pthreads の実装は `/usr/lib/system/libsystem_pthread.dylib` にあり、公開されている `libpthread` project に由来します。この library は、threads の作成と管理に必要な functions を提供します。
+2. **Creating Threads:** `pthread_create()` function は、新しい threads の作成に使用されます。内部では、この function は `bsdthread_create()` を呼び出します。これは XNU kernel（macOS の基盤となる kernel）固有の、より低レベルな system call です。この system call は、thread の動作（scheduling policies や stack size など）を指定する `pthread_attr`（attributes）から派生したさまざまな flags を受け取ります。
+- **Default Stack Size:** 新しい threads の default stack size は 512 KB です。通常の操作には十分なサイズですが、より多く、またはより少ない領域が必要な場合は、thread attributes によって調整できます。
+3. **Thread Initialization:** `__pthread_init()` function は thread の setup において重要です。この function は `env[]` argument を使用して environment variables を解析します。environment variables には、stack の location や size に関する情報を含めることができます。
 
-#### macOSにおけるスレッドの終了
+#### macOS における Thread Termination
 
-1. **スレッドの終了:** スレッドは通常、`pthread_exit()`を呼び出すことで終了します。この関数はスレッドがクリーンに終了し、必要なクリーンアップを行い、スレッドが参加者に戻り値を送信できるようにします。
-2. **スレッドのクリーンアップ:** `pthread_exit()`を呼び出すと、`pthread_terminate()`関数が呼び出され、すべての関連スレッド構造の削除を処理します。これによりMachスレッドポート（MachはXNUカーネルの通信サブシステム）を解放し、スレッドに関連するカーネルレベルの構造を削除するシステムコール`bsdthread_terminate`が呼び出されます。
+1. **Exiting Threads:** Threads は通常、`pthread_exit()` を呼び出して終了します。この function により、thread は必要な cleanup を実行して正常に終了し、joiners に return value を返せます。
+2. **Thread Cleanup:** `pthread_exit()` を呼び出すと、`pthread_terminate()` function が呼び出され、関連するすべての thread structures の削除を処理します。この function は Mach thread ports（Mach は XNU kernel における communication subsystem）を deallocate し、thread に関連付けられた kernel-level structures を削除する syscall である `bsdthread_terminate` を呼び出します。
 
-#### 同期メカニズム
+#### Synchronization Mechanisms
 
-共有リソースへのアクセスを管理し、競合状態を避けるために、macOSはいくつかの同期プリミティブを提供します。これらはマルチスレッド環境においてデータの整合性とシステムの安定性を確保するために重要です：
+共有 resources への access を管理し、race conditions を回避するため、macOS には複数の synchronization primitives が用意されています。これらは multi-threading environments において、data integrity と system stability を確保するために重要です。
 
-1. **ミューテックス:**
-- **通常のミューテックス (シグネチャ: 0x4D555458):** メモリフットプリントが60バイト（ミューテックス56バイト、シグネチャ4バイト）の標準ミューテックス。
-- **ファストミューテックス (シグネチャ: 0x4d55545A):** 通常のミューテックスに似ていますが、より高速な操作のために最適化されており、サイズは60バイトです。
-2. **条件変数:**
-- 特定の条件が発生するのを待つために使用され、サイズは44バイト（40バイトプラス4バイトのシグネチャ）。
-- **条件変数属性 (シグネチャ: 0x434e4441):** 条件変数の設定属性で、サイズは12バイトです。
-3. **ワンス変数 (シグネチャ: 0x4f4e4345):**
-- 初期化コードが一度だけ実行されることを保証します。サイズは12バイトです。
-4. **読み書きロック:**
-- 複数のリーダーまたは1つのライターを同時に許可し、共有データへの効率的なアクセスを促進します。
-- **読み書きロック (シグネチャ: 0x52574c4b):** サイズは196バイトです。
-- **読み書きロック属性 (シグネチャ: 0x52574c41):** 読み書きロックの属性で、サイズは20バイトです。
+1. **Mutexes:**
+- **Regular Mutex (Signature: 0x4D555458):** 60 bytes の memory footprint を持つ標準的な mutex です（mutex 用 56 bytes、signature 用 4 bytes）。
+- **Fast Mutex (Signature: 0x4d55545A):** Regular mutex に似ていますが、より高速な operations 向けに最適化されており、サイズも 60 bytes です。
+2. **Condition Variables:**
+- 特定の conditions が発生するまで待機するために使用され、サイズは 44 bytes です（40 bytes + 4-byte signature）。
+- **Condition Variable Attributes (Signature: 0x434e4441):** Condition variables の configuration attributes で、サイズは 12 bytes です。
+3. **Once Variable (Signature: 0x4f4e4345):**
+- initialization code の一部が一度だけ実行されることを保証します。サイズは 12 bytes です。
+4. **Read-Write Locks:**
+- 複数の readers、または一度に 1 つの writer を許可し、shared data への効率的な access を実現します。
+- **Read Write Lock (Signature: 0x52574c4b):** サイズは 196 bytes です。
+- **Read Write Lock Attributes (Signature: 0x52574c41):** read-write locks 用の attributes で、サイズは 20 bytes です。
 
 > [!TIP]
-> これらのオブジェクトの最後の4バイトはオーバーフローを検出するために使用されます。
+> これらの objects の最後の 4 bytes は、overflows を検出するために使用されます。
 
-### スレッドローカル変数 (TLV)
+### Thread Local Variables (TLV)
 
-**スレッドローカル変数 (TLV)** は、Mach-Oファイル（macOSの実行可能ファイルの形式）の文脈で、マルチスレッドアプリケーション内の**各スレッド**に特有の変数を宣言するために使用されます。これにより、各スレッドが変数の独自のインスタンスを持ち、ミューテックスのような明示的な同期メカニズムを必要とせずに競合を避け、データの整合性を維持する方法が提供されます。
+Mach-O files（macOS の executables の format）の context における **Thread Local Variables (TLV)** は、multi-threaded application において **各 thread** に固有の variables を宣言するために使用されます。これにより、各 thread は variable の独立した instance を持つことができ、mutexes のような明示的な synchronization mechanisms を必要とせずに、conflicts を回避して data integrity を維持できます。
 
-Cおよび関連言語では、**`__thread`**キーワードを使用してスレッドローカル変数を宣言できます。以下は、あなたの例での動作方法です：
+C および関連する languages では、**`__thread`** keyword を使用して thread-local variable を宣言できます。次の example では、以下のように動作します：
 ```c
 cCopy code__thread int tlv_var;
 
@@ -100,174 +100,187 @@ void main (int argc, char **argv){
 tlv_var = 10;
 }
 ```
-このスニペットは `tlv_var` をスレッドローカル変数として定義します。このコードを実行している各スレッドは独自の `tlv_var` を持ち、あるスレッドが `tlv_var` に加えた変更は他のスレッドの `tlv_var` に影響を与えません。
+このスニペットでは、`tlv_var`を thread-local variable として定義しています。このコードを実行する各 thread は、それぞれ独自の`tlv_var`を持ち、ある thread による`tlv_var`への変更が、別の thread の`tlv_var`に影響することはありません。
 
-Mach-O バイナリでは、スレッドローカル変数に関連するデータが特定のセクションに整理されています：
+Mach-O binary では、thread local variables に関連するデータが特定のセクションに整理されています。
 
-- **`__DATA.__thread_vars`**: このセクションには、スレッドローカル変数に関するメタデータが含まれており、変数の型や初期化状態などが記載されています。
-- **`__DATA.__thread_bss`**: このセクションは、明示的に初期化されていないスレッドローカル変数に使用されます。ゼロ初期化データのために確保されたメモリの一部です。
+- **`__DATA.__thread_vars`**: このセクションには、型や初期化状態など、thread-local variables に関する metadata が含まれます。
+- **`__DATA.__thread_bss`**: このセクションは、明示的に初期化されていない thread-local variables に使用されます。zero-initialized data 用に確保された memory の一部です。
 
-Mach-O は、スレッドが終了する際にスレッドローカル変数を管理するための特定の API **`tlv_atexit`** も提供します。この API を使用すると、スレッドが終了する際にスレッドローカルデータをクリーンアップする特別な関数である **デストラクタ** を登録できます。
+Mach-O には、thread の終了時に thread-local variables を管理するための専用 API である **`tlv_atexit`** も用意されています。この API を使用すると、thread の終了時に thread-local data をクリーンアップする **destructors**（特殊な関数）を**登録**できます。
 
-### スレッドの優先順位
+### Threading Priorities
 
-スレッドの優先順位を理解するには、オペレーティングシステムがどのスレッドをいつ実行するかを決定する方法を見ていく必要があります。この決定は、各スレッドに割り当てられた優先度レベルによって影響を受けます。macOS および Unix 系のシステムでは、`nice`、`renice`、および Quality of Service (QoS) クラスのような概念を使用してこれを処理します。
+Thread priorities を理解するには、operating system がどの thread をいつ実行するかを決定する仕組みを確認する必要があります。この決定には、各 thread に割り当てられた priority level が影響します。macOS や Unix-like systems では、これは`nice`、`renice`、Quality of Service (QoS) classes などの概念を使用して処理されます。
 
-#### Nice と Renice
+#### Nice and Renice
 
 1. **Nice:**
-- プロセスの `nice` 値は、その優先度に影響を与える数値です。すべてのプロセスには -20（最高優先度）から 19（最低優先度）までの範囲の nice 値があります。プロセスが作成されるときのデフォルトの nice 値は通常 0 です。
-- より低い nice 値（-20 に近い）は、プロセスをより「自己中心的」にし、より高い nice 値を持つ他のプロセスと比較して、より多くの CPU 時間を与えます。
+- process の`nice` value は、その priority に影響する数値です。すべての process には、-20（highest priority）から19（lowest priority）までの nice value があります。process が作成されたときの default nice value は、通常0です。
+- より低い nice value（-20に近い値）にすると、process はより「selfish」になり、より高い nice value を持つ他の process と比べて、より多くの CPU time を取得します。
 2. **Renice:**
-- `renice` は、すでに実行中のプロセスの nice 値を変更するために使用されるコマンドです。これを使用して、プロセスの優先度を動的に調整し、新しい nice 値に基づいて CPU 時間の割り当てを増減させることができます。
-- たとえば、プロセスが一時的により多くの CPU リソースを必要とする場合、`renice` を使用してその nice 値を下げることができます。
+- `renice`は、すでに実行中の process の nice value を変更するための command です。新しい nice value に基づいて CPU time の割り当てを増減させ、process の priority を動的に調整できます。
+- 例えば、process が一時的により多くの CPU resources を必要とする場合、`renice`を使用して nice value を下げることができます。
 
-#### Quality of Service (QoS) クラス
+#### Quality of Service (QoS) Classes
 
-QoS クラスは、特に **Grand Central Dispatch (GCD)** をサポートする macOS のようなシステムでスレッドの優先順位を処理するためのより現代的なアプローチです。QoS クラスを使用すると、開発者は作業をその重要性や緊急性に基づいて異なるレベルに **分類** できます。macOS はこれらの QoS クラスに基づいてスレッドの優先順位を自動的に管理します：
+QoS classes は、特に **Grand Central Dispatch (GCD)** をサポートする macOS のような systems において、thread priorities を扱うより現代的な方法です。QoS classes を使うと、developers は重要度や緊急度に基づいて work を異なる level に**分類**できます。macOS は、これらの QoS classes に基づいて thread prioritization を自動的に管理します。
 
-1. **ユーザーインタラクティブ:**
-- このクラスは、現在ユーザーと対話しているタスクや、良好なユーザーエクスペリエンスを提供するために即時の結果を必要とするタスクに使用されます。これらのタスクには、インターフェースを応答させるために最高の優先度が与えられます（例：アニメーションやイベント処理）。
-2. **ユーザー開始:**
-- ユーザーが開始し、即時の結果を期待するタスク（例：ドキュメントを開く、計算を必要とするボタンをクリックする）です。これらは高優先度ですが、ユーザーインタラクティブの下に位置します。
-3. **ユーティリティ:**
-- これらのタスクは長時間実行され、通常は進行状況インジケーターを表示します（例：ファイルのダウンロード、データのインポート）。これらはユーザー開始タスクよりも優先度が低く、即座に完了する必要はありません。
-4. **バックグラウンド:**
-- このクラスは、バックグラウンドで動作し、ユーザーには見えないタスクに使用されます。これには、インデックス作成、同期、バックアップなどのタスクが含まれます。これらは最低の優先度を持ち、システムパフォーマンスに最小限の影響を与えます。
+1. **User Interactive:**
+- この class は、現在 user とやり取りしている task や、良好な user experience のために immediate results を必要とする task 用です。interface の応答性を維持するため、これらの task には最も高い priority が与えられます（例: animations や event handling）。
+2. **User Initiated:**
+- document を開く、計算を必要とする button をクリックするなど、user が開始し、immediate results を期待する task 用です。high priority ですが、user interactive より下です。
+3. **Utility:**
+- これらの task は long-running で、通常は progress indicator を表示します（例: files の downloading、data の importing）。user-initiated tasks より priority が低く、immediately に完了する必要はありません。
+4. **Background:**
+- この class は background で動作し、user には表示されない task 用です。indexing、syncing、backups などが該当します。priority が最も低く、system performance への影響も最小限です。
 
-QoS クラスを使用することで、開発者は正確な優先度番号を管理する必要がなく、タスクの性質に焦点を当てることができ、システムはそれに応じて CPU リソースを最適化します。
+QoS classes を使用すると、developers は正確な priority numbers を管理するのではなく、task の性質に集中できます。そして system がそれに応じて CPU resources を最適化します。
 
-さらに、スレッドスケジューリングポリシーの異なる **スレッドスケジューリングポリシー** があり、スケジューラが考慮する一連のスケジューリングパラメータを指定します。これは `thread_policy_[set/get]` を使用して行うことができます。これはレースコンディション攻撃に役立つかもしれません。
+さらに、scheduler が考慮する scheduling parameters の set を指定する、さまざまな **thread scheduling policies** があります。これは`thread_policy_[set/get]`を使用して実行できます。これは race condition attacks に役立つ可能性があります。
 
-## MacOS プロセスの悪用
+## MacOS Process Abuse
 
-MacOS は、他のオペレーティングシステムと同様に、**プロセスが相互作用し、通信し、データを共有するためのさまざまな方法とメカニズム**を提供します。これらの技術は効率的なシステム機能に不可欠ですが、脅威アクターによって **悪意のある活動を行うために悪用される可能性もあります**。
+MacOS は他の operating system と同様に、**processes が相互に操作、通信、data の共有を行う**ためのさまざまな methods と mechanisms を提供します。これらの techniques は efficient system functioning に不可欠ですが、threat actors によって**malicious activities を実行する**ために abuse される可能性もあります。
 
-### ライブラリインジェクション
+### Library Injection
 
-ライブラリインジェクションは、攻撃者が **プロセスに悪意のあるライブラリをロードさせる** 技術です。一度注入されると、ライブラリはターゲットプロセスのコンテキストで実行され、攻撃者にプロセスと同じ権限とアクセスを提供します。
+Library Injection は、attacker が**process に malicious library を load させる** technique です。inject された library は target process の context で実行され、attacker に process と同じ permissions と access を与えます。
+
 
 {{#ref}}
 macos-library-injection/
 {{#endref}}
 
-### 関数フック
+### Function Hooking
 
-関数フックは、ソフトウェアコード内の **関数呼び出し** またはメッセージを **傍受する** ことを含みます。関数をフックすることで、攻撃者はプロセスの **動作を変更** したり、機密データを観察したり、実行フローを制御したりすることができます。
+Function Hooking は、software code 内の **function calls** や messages を**intercept**することです。functions を hook することで、attacker は process の **behavior を変更**したり、sensitive data を監視したり、execution flow を control したりできます。
+
 
 {{#ref}}
 macos-function-hooking.md
 {{#endref}}
 
-### プロセス間通信
+### Inter Process Communication
 
-プロセス間通信 (IPC) は、別々のプロセスが **データを共有し、交換する** 方法を指します。IPC は多くの正当なアプリケーションにとって基本的ですが、プロセスの隔離を覆したり、機密情報を漏洩させたり、無許可のアクションを実行するために悪用される可能性もあります。
+Inter Process Communication (IPC) は、分離された processes が**data を共有・交換**するためのさまざまな methods を指します。IPC は多くの legitimate applications にとって fundamental ですが、process isolation の subvert、sensitive information の leak、unauthorized actions の実行に misuse される可能性もあります。
+
 
 {{#ref}}
 macos-ipc-inter-process-communication/
 {{#endref}}
 
-### Electron アプリケーションのインジェクション
+### Electron Applications Injection
 
-特定の環境変数で実行される Electron アプリケーションは、プロセスインジェクションに対して脆弱である可能性があります：
+特定の env variables を使用して実行された Electron applications は、process injection に vulnerable になる可能性があります:
+
 
 {{#ref}}
 macos-electron-applications-injection.md
 {{#endref}}
 
-### Chromium インジェクション
+### Chromium Injection
 
-`--load-extension` および `--use-fake-ui-for-media-stream` フラグを使用して **ブラウザ内の攻撃** を実行し、キー入力、トラフィック、クッキーを盗んだり、ページにスクリプトを注入したりすることが可能です：
+flags `--load-extension` と`--use-fake-ui-for-media-stream`を使用して、**man in the browser attack** を実行できます。これにより、keystrokes や traffic、cookies の盗難、pages への scripts の inject などが可能になります:
+
 
 {{#ref}}
 macos-chromium-injection.md
 {{#endref}}
 
-### ダーティ NIB
+### Dirty NIB
 
-NIB ファイルは **ユーザーインターフェース (UI) 要素** とそのアプリケーション内での相互作用を **定義します**。ただし、これらは **任意のコマンドを実行することができ**、**NIB ファイルが変更されても** すでに実行されたアプリケーションの実行を止めることはできません。したがって、任意のプログラムが任意のコマンドを実行するために使用される可能性があります：
+NIB files は application 内の **user interface (UI) elements** とその interactions を**定義**します。しかし、arbitrary commands を**execute**でき、**NIB file が modified** されても、Gatekeeper はすでに実行された application の再実行を**阻止しません**。そのため、arbitrary programs に arbitrary commands を実行させるために使用できます:
+
 
 {{#ref}}
 macos-dirty-nib.md
 {{#endref}}
 
-### Java アプリケーションのインジェクション
+### Java Applications Injection
 
-特定の Java 機能（**`_JAVA_OPTS`** 環境変数など）を悪用して、Java アプリケーションが **任意のコード/コマンドを実行する** ようにすることが可能です。
+特定の java capabilities（**`_JAVA_OPTS`** env variable など）を abuse して、java application に **arbitrary code/commands** を実行させることができます。
+
 
 {{#ref}}
 macos-java-apps-injection.md
 {{#endref}}
 
-### .Net アプリケーションのインジェクション
+### .Net Applications Injection
 
-**.Net デバッグ機能** を悪用して .Net アプリケーションにコードを注入することが可能です（macOS の保護（ランタイムハードニングなど）によって保護されていません）。
+**.Net debugging functionality** を abuse することで、.Net applications に code を inject できます（runtime hardening などの macOS protections によって保護されていません）。
+
 
 {{#ref}}
 macos-.net-applications-injection.md
 {{#endref}}
 
-### Perl インジェクション
+### Perl Injection
 
-Perl スクリプトが任意のコードを実行するためのさまざまなオプションを確認します：
+Perl script に arbitrary code を実行させるためのさまざまな options を、以下で確認してください:
+
 
 {{#ref}}
 macos-perl-applications-injection.md
 {{#endref}}
 
-### Ruby インジェクション
+### Ruby Injection
 
-Ruby 環境変数を悪用して、任意のスクリプトが任意のコードを実行することも可能です：
+ruby env variables を abuse して、arbitrary scripts に arbitrary code を実行させることもできます:
+
 
 {{#ref}}
 macos-ruby-applications-injection.md
 {{#endref}}
 
-### Python インジェクション
+### Python Injection
 
-環境変数 **`PYTHONINSPECT`** が設定されている場合、Python プロセスは終了後に Python CLI にドロップします。また、**`PYTHONSTARTUP`** を使用して、インタラクティブセッションの開始時に実行する Python スクリプトを指定することも可能です。\
-ただし、**`PYTHONINSPECT`** がインタラクティブセッションを作成する際には **`PYTHONSTARTUP`** スクリプトは実行されません。
+environment variable **`PYTHONINSPECT`** が set されている場合、python process は終了時に python cli に移行します。また、**`PYTHONSTARTUP`** を使用して、interactive session の開始時に実行する python script を指定することもできます。\
+ただし、**`PYTHONINSPECT`** が interactive session を作成した場合、**`PYTHONSTARTUP`** script は実行されないことに注意してください。
 
-他の環境変数（**`PYTHONPATH`** や **`PYTHONHOME`** など）も、Python コマンドが任意のコードを実行するのに役立つ可能性があります。
+**`PYTHONPATH`** や **`PYTHONHOME`** などの他の env variables も、python command に arbitrary code を実行させるために役立つ可能性があります。
 
-**`pyinstaller`** でコンパイルされた実行可能ファイルは、埋め込まれた Python を使用して実行されていても、これらの環境変数を使用しないことに注意してください。
+**`pyinstaller`** で compiled された executables は、embedded python を使用して実行されている場合でも、これらの environmental variables を使用しないことに注意してください。
 
 > [!CAUTION]
-> 全体として、環境変数を悪用して Python が任意のコードを実行する方法を見つけることができませんでした。\
-> ただし、ほとんどの人は **Homebrew** を使用して Python をインストールし、デフォルトの管理者ユーザーのために **書き込み可能な場所** に Python をインストールします。次のようにハイジャックできます：
+> 全体として、environment variables を abuse して python に arbitrary code を実行させる方法は見つけられませんでした。\
+> しかし、多くの人は **Hombrew** を使用して pyhton を install します。これは、default admin user が **writable location** に pyhton を install します。次のような方法で hijack できます:
 >
 > ```bash
 > mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
 > cat > /opt/homebrew/bin/python3 <<EOF
 > #!/bin/bash
-> # 追加のハイジャックコード
+> # Extra hijack code
 > /opt/homebrew/bin/python3.old "$@"
 > EOF
 > chmod +x /opt/homebrew/bin/python3
 > ```
 >
-> これにより、**root** でも Python を実行する際にこのコードが実行されます。
+> **root** であっても、python を実行するとこの code が実行されます。
 
-## 検出
+
+## Detection
 
 ### Shield
 
-[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) は、**プロセスインジェクション** アクションを **検出およびブロック** できるオープンソースアプリケーションです：
+[**Shield**](https://github.com/theevilbit/Shield) は、process injection を detect および block する、open source の **EndpointSecurity**-based application です。以下の signal に対して alert を出すため、ES から実際に observable な signal を確認するための良い reference です:<sup>[1]</sup>
 
-- **環境変数を使用**: 次の環境変数のいずれかの存在を監視します： **`DYLD_INSERT_LIBRARIES`**、**`CFNETWORK_LIBRARY_PATH`**、**`RAWCAMERA_BUNDLE_PATH`** および **`ELECTRON_RUN_AS_NODE`**
-- **`task_for_pid`** 呼び出しを使用: あるプロセスが他のプロセスの **タスクポートを取得しようとする** 時を見つけるために使用され、これによりプロセスにコードを注入できます。
-- **Electron アプリのパラメータ**: 誰かが **`--inspect`**、**`--inspect-brk`** および **`--remote-debugging-port`** コマンドライン引数を使用して、デバッグモードで Electron アプリを起動し、コードを注入することができます。
-- **シンボリックリンク** または **ハードリンク** を使用: 一般的な悪用は、**ユーザー権限でリンクを作成し**、**より高い権限の** 場所を指すことです。リンクを作成するプロセスがターゲットファイルとは **異なる権限レベル** を持っている場合、**アラート** を作成します。残念ながら、シンボリックリンクの場合は、作成前にリンクの宛先に関する情報がないため、ブロックは不可能です。これは Apple の EndpointSecurity フレームワークの制限です。
+- process exec 時の **Injection environment variables**: `DYLD_INSERT_LIBRARIES`、`CFNETWORK_LIBRARY_PATH`、`RAWCAMERA_BUNDLE_PATH`、`ELECTRON_RUN_AS_NODE`。
+- **`task_for_pid`** calls — ある process が別の process の task port を要求するもの。これは、その process に inject するための prerequisite です。
+- **Electron debugging arguments** — `--inspect`、`--inspect-brk`、`--remote-debugging-port`。これらは Electron app を debug mode で起動し、誰でも attach して code を実行できるようにします。
+- privilege levels をまたぐ symlink/hardlink creation — 通常の user として link を作成し、privileged location を指す、古典的な primitive です。**symlinks は alert の対象にはできますが block はできない**ことに注意してください: EndpointSecurity は creation 前に link destination を expose しません。
 
-### 他のプロセスによって行われた呼び出し
+### Calls made by other processes
 
-[**このブログ記事**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) では、**`task_name_for_pid`** 関数を使用して、他の **プロセスがプロセスにコードを注入している** 情報を取得し、その他のプロセスに関する情報を取得する方法を見つけることができます。
+[**この blog post**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) では、function **`task_name_for_pid`** を使用して、**process に code を inject している他の processes** に関する information を取得し、その後、その別の process に関する information を取得する方法を確認できます。<sup>[4]</sup>
 
-この関数を呼び出すには、**プロセスを実行しているのと同じ uid** であるか、**root** である必要があります（この関数はプロセスに関する情報を返し、コードを注入する方法を返すわけではありません）。
+この function を call するには、process を実行している user と **same uid** であるか、**root** である必要があります（この function が返すのは process に関する info であり、code を inject する方法ではありません）。
 
-## 参考文献
+## References
 
-- [https://theevilbit.github.io/shield/](https://theevilbit.github.io/shield/)
-- [https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
+- [1] [Shield — open source macOS process-injection detection (GitHub)](https://github.com/theevilbit/Shield)
+- [2] [Apple Developer — EndpointSecurity framework](https://developer.apple.com/documentation/endpointsecurity)
+- [3] [Metnew - Why Electron apps can't store your secrets confidentially: --inspect option](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
+- [4] [Scott Knight - Detecting task modifications](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

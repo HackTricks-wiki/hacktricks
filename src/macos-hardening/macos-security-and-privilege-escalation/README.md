@@ -4,16 +4,16 @@
 
 ## Basic MacOS
 
-macOSに不慣れな場合は、macOSの基本を学び始めるべきです：
+macOSに詳しくない場合は、まずmacOSの基本を学ぶことから始めてください。
 
-- 特殊なmacOS **ファイルと権限：**
+- macOSの特殊な **ファイルと権限:**
 
 
 {{#ref}}
 macos-files-folders-and-binaries/
 {{#endref}}
 
-- 一般的なmacOS **ユーザー**
+- macOSで一般的な **ユーザー**
 
 
 {{#ref}}
@@ -27,33 +27,33 @@ macos-users.md
 macos-applefs.md
 {{#endref}}
 
-- **カーネル**の**アーキテクチャ**
+- k**ernel** の **アーキテクチャ**
 
 
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
-- 一般的なmacOS n**ネットワークサービスとプロトコル**
+- macOSで一般的な **ネットワークサービスとプロトコル**
 
 
 {{#ref}}
 macos-protocols.md
 {{#endref}}
 
-- **オープンソース** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
-- `tar.gz`をダウンロードするには、[https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/)のようなURLを[https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)に変更します。
+- **Opensource** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
+- `tar.gz` をダウンロードするには、[https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) のようなURLを [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) に変更します。
 
 ### MacOS MDM
 
-企業では、**macOS**システムはMDMで**管理される**可能性が非常に高いです。したがって、攻撃者の視点からは、**それがどのように機能するか**を知ることが興味深いです：
+企業では **macOS** システムが **MDMで管理されている可能性が非常に高くなります**。したがって、攻撃者の観点からは、**その仕組みを理解すること**が重要です。
 
 
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
 {{#endref}}
 
-### MacOS - 検査、デバッグ、ファジング
+### MacOS - Inspecting, Debugging and Fuzzing
 
 
 {{#ref}}
@@ -69,63 +69,63 @@ macos-security-protections/
 
 ## Attack Surface
 
-### ファイル権限
+### File Permissions
 
-**rootとして実行されているプロセスが**ユーザーによって制御可能なファイルを書き込むと、ユーザーはこれを悪用して**権限を昇格させる**ことができます。\
-これは以下の状況で発生する可能性があります：
+**rootとして実行されているプロセスが、ユーザーによって制御可能なファイルに書き込む**場合、ユーザーはこれを悪用して**権限を昇格**できる可能性があります。\
+これは、以下の状況で発生する可能性があります。
 
-- 使用されたファイルはすでにユーザーによって作成されている（ユーザーが所有）
-- 使用されたファイルはグループのためにユーザーによって書き込み可能
-- 使用されたファイルはユーザーが所有するディレクトリ内にある（ユーザーはファイルを作成できる）
-- 使用されたファイルはrootが所有するディレクトリ内にあるが、ユーザーはグループのために書き込みアクセスを持っている（ユーザーはファイルを作成できる）
+- 使用されるファイルがすでにユーザーによって作成されている（ユーザーが所有している）
+- グループにより、使用されるファイルに対してユーザーが書き込み可能である
+- 使用されるファイルがユーザー所有のディレクトリ内にある（ユーザーがファイルを作成できる）
+- 使用されるファイルがroot所有のディレクトリ内にあるが、グループによりユーザーがそのディレクトリへの書き込み権限を持っている（ユーザーがファイルを作成できる）
 
-**rootによって使用される**ファイルを**作成できる**ことは、ユーザーがその**内容を利用する**ことを可能にし、さらには**シンボリックリンク/ハードリンク**を作成して別の場所を指すこともできます。
+**rootによって使用されるファイルを作成**できると、ユーザーはその**内容を悪用**したり、別の場所を指す**symlinks/hardlinks**を作成したりできます。
 
-この種の脆弱性については、**脆弱な`.pkg`インストーラーを確認することを忘れないでください**：
+この種の脆弱性については、**脆弱な `.pkg` installers**を忘れずに**確認**してください。
 
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### ファイル拡張子とURLスキームアプリハンドラー
+### File Extension & URL scheme app handlers
 
-ファイル拡張子によって登録された奇妙なアプリは悪用される可能性があり、異なるアプリケーションが特定のプロトコルを開くために登録されることがあります。
+ファイル拡張子に登録された奇妙なアプリが悪用される可能性があり、特定のプロトコルを開くように別のアプリケーションを登録することもできます。
 
 
 {{#ref}}
 macos-file-extension-apps.md
 {{#endref}}
 
-## macOS TCC / SIP 権限昇格
+## macOS TCC / SIP Privilege Escalation
 
-macOSでは、**アプリケーションとバイナリがフォルダや設定にアクセスする権限を持つ**ことがあり、これにより他のものよりも特権が与えられます。
+macOSでは、**アプリケーションとバイナリがフォルダや設定にアクセスする権限を持つことができ**、他のものより高い権限を持つ場合があります。
 
-したがって、macOSマシンを成功裏に侵害したい攻撃者は、**TCC権限を昇格させる**必要があります（または、ニーズに応じて**SIPをバイパスする**必要があります）。
+したがって、macOSマシンの侵害を成功させたい攻撃者は、**TCC権限を昇格**させる必要があります（必要に応じて**SIPをバイパス**することもあります）。
 
-これらの権限は通常、アプリケーションが署名されている**権利**の形で与えられるか、アプリケーションがいくつかのアクセスを要求し、**ユーザーがそれらを承認した後**に**TCCデータベース**に見つかります。プロセスがこれらの権限を取得する別の方法は、これらの**権限**を持つプロセスの**子プロセス**であることです。これらは通常**継承されます**。
+これらの権限は通常、アプリケーションが署名される際の**entitlements**として付与されます。また、アプリケーションがアクセスを要求し、**ユーザーが承認した後**に、**TCC databases**で確認できる場合もあります。プロセスがこれらの権限を取得する別の方法は、それらの**権限**を持つプロセスの**child**になることです。通常、権限は**継承**されるためです。
 
-これらのリンクをたどって、[**TCCでの権限昇格のさまざまな方法**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses)、[**TCCをバイパスする方法**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html)、および過去に[**SIPがバイパスされた方法**](macos-security-protections/macos-sip.md#sip-bypasses)を見つけてください。
+以下のリンクから、[**escalate privileges in TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses)、[**bypass TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html)、および過去に[**SIP has been bypassed**](macos-security-protections/macos-sip.md#sip-bypasses)された方法を確認してください。
 
-## macOS 伝統的権限昇格
+## macOS Traditional Privilege Escalation
 
-もちろん、レッドチームの視点からは、rootに昇格することにも興味があるはずです。いくつかのヒントについては、以下の投稿を確認してください：
+もちろん、red teamsの観点ではrootへの昇格にも関心を持つべきです。ヒントについては、以下の投稿を確認してください。
 
 
 {{#ref}}
 macos-privilege-escalation.md
 {{#endref}}
 
-## macOS コンプライアンス
+## macOS Compliance
 
 - [https://github.com/usnistgov/macos_security](https://github.com/usnistgov/macos_security)
 
-## 参考文献
+## References
 
-- [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
-- [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
-- [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
-- [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
-- [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
+- [1] [OS X Incident Response: Scripting and Analysis](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+- [2] [The Art of Mac Malware, Vol. 1 — Analysis (Patrick Wardle)](https://taomm.org/vol1/analysis.html)
+- [3] [NicolasGrimonpont/Cheatsheet — macOS/Linux/Windows commands & security tools cheatsheet](https://github.com/NicolasGrimonpont/Cheatsheet)
+- [4] [SentinelOne — macOS Security Resource](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
+- [5] [2022 - macOS local security: escaping the sandbox and bypassing TCC (YouTube)](https://www.youtube.com/watch?v=vMGiplQtjTY)
 
 {{#include ../../banners/hacktricks-training.md}}

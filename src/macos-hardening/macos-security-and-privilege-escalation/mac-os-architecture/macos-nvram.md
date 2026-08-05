@@ -4,21 +4,21 @@
 
 ## 基本情報
 
-**NVRAM**（不揮発性ランダムアクセスメモリ）は、Mac ハードウェア上の**ブート時およびファームウェアレベルの設定**を格納します。特にセキュリティ上重要な変数は次のとおりです：
+**NVRAM**（Non-Volatile Random-Access Memory）は、Mac ハードウェア上で**起動時およびファームウェアレベルの設定**を保存します。セキュリティ上、特に重要な変数は次のとおりです。
 
 | 変数 | 目的 |
 |---|---|
-| `boot-args` | カーネルのブート引数（デバッグフラグ、verbose ブート、AMFI バイパス） |
-| `csr-active-config` | **SIP の設定ビットマスク** — どの保護が有効かを制御します |
-| `SystemAudioVolume` | 起動時のオーディオ音量 |
+| `boot-args` | カーネルの起動引数（debug flags、verbose boot、AMFI bypass） |
+| `csr-active-config` | **SIP configuration bitmask** — 有効な保護機能を制御 |
+| `SystemAudioVolume` | 起動時の音量 |
 | `prev-lang:kbd` | 優先言語 / キーボードレイアウト |
-| `efi-boot-device-data` | ブートデバイスの選択 |
+| `efi-boot-device-data` | 起動デバイスの選択 |
 
-最新の Macs では、NVRAM 変数は **system** 変数（Secure Boot によって保護）と **non-system** 変数に分かれています。Apple Silicon Macs は **Secure Storage Component (SSC)** を使用して、NVRAM の状態をブートチェーンに暗号的に結び付けます。
+最新の Mac では、NVRAM 変数は **Secure Boot** によって保護される **system** 変数と、**non-system** 変数に分けられています。Apple Silicon Mac は **Secure Storage Component（SSC）** を使用して、NVRAM の状態を暗号学的に boot chain に結び付けます。<sup>[1]</sup>
 
-## ユーザー空間からのNVRAMアクセス
+## User Space からの NVRAM Access
 
-### NVRAMの読み取り
+### NVRAM の読み取り
 ```bash
 # List all NVRAM variables
 nvram -p
@@ -35,7 +35,7 @@ csrutil status
 ```
 ### NVRAMの書き込み
 
-NVRAM変数の書き込みには **root privileges** が必要で、システム重要な変数（`csr-active-config` のようなもの）については、プロセスが特定のコード署名フラグまたはエンタイトルメントを持っている必要があります:
+NVRAM変数への書き込みには**root権限**が必要であり、システムクリティカルな変数（`csr-active-config`など）については、プロセスに特定のコード署名フラグまたはentitlementが設定されている必要があります：
 ```bash
 # Set boot-args (requires root)
 sudo nvram boot-args="debug=0x144 kcsuffix=development"
@@ -48,9 +48,9 @@ sudo nvram MyCustomVar="persistence-value"
 ```
 ## CS_NVRAM_UNRESTRICTED フラグ
 
-コード署名フラグ **`CS_NVRAM_UNRESTRICTED`** を持つバイナリは、通常 root でさえ保護されている NVRAM 変数を変更できます。
+**`CS_NVRAM_UNRESTRICTED`** code-signing flagを持つバイナリは、通常はrootからも保護されているNVRAM変数を変更できます。
 
-### NVRAM-Unrestricted バイナリの検出
+### NVRAM-Unrestricted バイナリの特定
 ```bash
 # Check code signing flags for a binary
 codesign -dvvv /usr/sbin/nvram 2>&1 | grep "flags="
@@ -59,7 +59,7 @@ codesign -dvvv /usr/sbin/nvram 2>&1 | grep "flags="
 
 ### NVRAM による SIP の弱体化
 
-攻撃者が NVRAM に書き込める場合（NVRAM 制限のないバイナリが侵害されているか、脆弱性を悪用した場合）、`csr-active-config` を変更して **次回起動時に SIP 保護を無効化する** ことができます：
+攻撃者が NVRAM に書き込める場合（NVRAM-unrestricted binary の侵害、または脆弱性の悪用によって）、`csr-active-config` を変更して、**次回の起動時に SIP の保護を無効化**できます：
 ```bash
 # SIP configuration is a bitmask stored in NVRAM
 # Each bit controls a different SIP protection:
@@ -79,9 +79,9 @@ nvram csr-active-config | xxd
 # nvram csr-active-config=%7f%00%00%00   # Disable most SIP protections
 ```
 > [!WARNING]
-> 現代の Apple Silicon Macs では、**Secure Boot chain は NVRAM の変更を検証し、ランタイムでの SIP の変更を防ぎます**。`csr-active-config` の変更は recoveryOS 経由でのみ有効になります。ただし、**Intel Macs** や **reduced security mode** のシステムでは、NVRAM の操作によって SIP を弱体化させる可能性があります。
+> 最新の Apple Silicon Mac では、**Secure Boot chain が NVRAM** の変更を検証し、runtime での SIP の変更を防止します。`csr-active-config` の変更は recoveryOS を介した場合にのみ有効になります。ただし、**Intel Mac** または **reduced security mode** のシステムでは、NVRAM の操作によって SIP が弱体化する可能性があります。
 
-### カーネルデバッグの有効化
+### Kernel Debugging の有効化
 ```bash
 # Enable kernel debug flags via boot-args
 sudo nvram boot-args="debug=0x144"
@@ -95,9 +95,9 @@ sudo nvram boot-args="debug=0x144"
 # Use development kernel
 sudo nvram boot-args="kcsuffix=development"
 ```
-### ファームウェアの永続性
+### Firmware Persistence
 
-NVRAMの変更は**OSの再インストール後も残る** — ファームウェアレベルで永続化される。攻撃者は、起動時に永続化機構が読み取るカスタムNVRAM変数を書き込むことができる：
+NVRAM の変更は **OS の再インストール後も維持されます** — ファームウェアレベルで永続化されます。攻撃者は、起動時に persistence mechanism が読み取るカスタム NVRAM 変数を書き込むことができます：
 ```bash
 # Write a persistence marker
 nvram attacker-payload-config="base64_encoded_config_here"
@@ -106,25 +106,25 @@ nvram attacker-payload-config="base64_encoded_config_here"
 nvram attacker-payload-config 2>/dev/null && /path/to/payload
 ```
 > [!CAUTION]
-> NVRAM の永続性はディスクのワイプや OS の再インストールでも維持されます。消去するには **PRAM/NVRAM reset** (Command+Option+P+R on Intel Macs) または **DFU restore** (Apple Silicon) が必要です。
+> NVRAM persistence はディスクの消去や OS の再インストール後も存続します。クリアするには **PRAM/NVRAM reset**（Intel Mac では Command+Option+P+R）または **DFU restore**（Apple Silicon）が必要です。
 
 ### AMFI Bypass
 
-`amfi_get_out_of_my_way=1` ブート引数は **Apple Mobile File Integrity** を無効化し、署名されていないコードの実行を可能にします:
+`amfi_get_out_of_my_way=1` boot argument は **Apple Mobile File Integrity** を無効化し、unsigned code の実行を可能にします：
 ```bash
 # This requires NVRAM write access AND reduced security boot:
 sudo nvram boot-args="amfi_get_out_of_my_way=1"
 ```
-## 実際のCVE
+## 実世界のCVE
 
 | CVE | 説明 |
 |---|---|
-| CVE-2020-9839 | 永続的なSIPバイパスを可能にするNVRAMの操作 |
-| CVE-2019-8779 | T2搭載MacでのファームウェアレベルのNVRAM永続化 |
-| CVE-2022-22583 | PackageKitのNVRAM関連の権限昇格 |
-| CVE-2020-10004 | システム改変を可能にするNVRAM処理のロジックの問題 |
+| CVE-2020-9839 | 永続的なSIP bypassを可能にするNVRAM操作 |
+| CVE-2019-8779 | T2 MacにおけるFirmwareレベルのNVRAM persistence |
+| CVE-2022-22583 | PackageKitにおけるNVRAM関連のprivilege escalation |
+| CVE-2020-10004 | システム変更を可能にするNVRAM処理のロジック上の問題 |
 
-## 列挙スクリプト
+## Enumeration Script
 ```bash
 #!/bin/bash
 echo "=== NVRAM Security Audit ==="
@@ -154,8 +154,8 @@ nvram -p | grep -v "^$" | grep -vE "^(SystemAudioVolume|boot-args|csr-active-con
 ```
 ## 参考資料
 
-* [Apple Platform Security Guide — 起動プロセス](https://support.apple.com/guide/security/boot-process-secac71d5623/web)
-* [Apple Security Updates — NVRAM 関連の CVE](https://support.apple.com/en-us/HT201222)
-* [Duo Labs — Apple T2 セキュリティ](https://duo.com/labs/research/apple-t2-xpc)
+- [1] [Apple Platform Security Guide — Boot process](https://support.apple.com/guide/security/boot-process-secac71d5623/web)
+- [2] [Apple Security Updates — NVRAM-related CVEs](https://support.apple.com/en-us/HT201222)
+- [3] [Duo Labs — Apple T2 Security](https://duo.com/labs/research/apple-t2-xpc)
 
 {{#include ../../../banners/hacktricks-training.md}}

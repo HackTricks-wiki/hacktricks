@@ -3,11 +3,11 @@
 {{#include ../../../../banners/hacktricks-training.md}}
 
 > [!CAUTION]
-> **dyld のコードはオープンソース**であり、[https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) で確認できます。また、[https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) のような **URL** を使用して tar でダウンロードできます。
+> **dyld のコードはオープンソース**であり、[https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) にあります。また、[https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) のような **URL** を使用して tar をダウンロードできます。
 
 ## **Dyld Process**
 
-Dyld がバイナリ内部にライブラリをロードする方法については、以下を確認してください。
+Dyld がバイナリ内にライブラリをロードする方法については、以下を参照してください。
 
 
 {{#ref}}
@@ -16,40 +16,34 @@ macos-dyld-process.md
 
 ## **DYLD_INSERT_LIBRARIES**
 
-これは [**Linux の LD_PRELOAD**](../../../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#ld_preload) のようなものです。実行されるプロセスに対して、パスから特定のライブラリをロードするよう指定できます（環境変数が有効な場合）。
+これは [**Linux の LD_PRELOAD**](../../../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#ld_preload) と同様です。実行されるプロセスに対して、パスから特定のライブラリをロードするよう指定できます（環境変数が有効な場合）。
 
-この technique は **ASEP technique** としても **使用できます**。インストールされているすべてのアプリケーションには `"Info.plist"` という plist があり、`LSEnvironmental` というキーを使用して **環境変数を割り当てる**ことができます。
+この technique は **ASEP technique としても使用できます**。インストールされたすべてのアプリケーションには「Info.plist」という plist があり、`LSEnvironmental` というキーを使用して **環境変数を割り当てる**ことができます。
 
 > [!TIP]
-> 2012 年以降、**Apple は `DYLD_INSERT_LIBRARIES` の権限を大幅に制限**しています。
->
-> コードに移動し、**`src/dyld.cpp`** を確認してください。**`pruneEnvironmentVariables`** 関数で、**`DYLD_*`** 変数が削除されていることが確認できます。
->
-> **`processRestricted`** 関数では、制限の理由が設定されています。このコードを確認すると、理由は次のとおりです。
+> 2012 年以降、**Apple は `DYLD_INSERT_LIBRARIES` の権限を大幅に制限**しています。以下のいずれかに該当する場合、プロセスは **restricted** とみなされます。この場合、`dyld` は環境からすべての `DYLD_*` 変数を削除します。
 >
 > - バイナリが `setuid/setgid` である
-> - macho バイナリに `__RESTRICT/__restrict` セクションが存在する
-> - ソフトウェアが entitlements（hardened runtime）を持っているが、[`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables) entitlement がない
->  - 次のコマンドでバイナリの **entitlements** を確認できます: `codesign -dv --entitlements :- </path/to/bin>`
+> - Mach-O に **`__RESTRICT/__restrict`** セクションがある
+> - バイナリが hardened runtime で署名されており、AMFI が「path/print variables」権限を付与していない。つまり、[`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)<sup>[3]</sup> がない
+>   - バイナリの **entitlements** は、`codesign -dv --entitlements :- </path/to/bin>` で確認できます。
 >
-> より新しいバージョンでは、このロジックは **`configureProcessRestrictions`** 関数の後半にあります。ただし、新しいバージョンで実行されるのは関数の**先頭にあるチェック**です（iOS または simulation に関連する if は macOS では使用されないため削除できます）。
+> 現在の `dyld` では、これは `dyld` だけで決定されるわけではありません。`ProcessConfig::Security::Security()` が `amfi_check_dyld_policy_self()` を介して **AMFI** に問い合わせ、その後 `pruneEnvVars()` を呼び出します。正確なコードの流れについては、以下の [Prune `DYLD_*` env variables](#prune-dyld_-env-variables) で説明しています。
 
 ### Library Validation
 
-バイナリが **`DYLD_INSERT_LIBRARIES`** 環境変数の使用を許可していても、ロードするライブラリの signature を確認する場合、custom library はロードされません。
+バイナリが **`DYLD_INSERT_LIBRARIES`** 環境変数の使用を許可していたとしても、ロードするライブラリの署名を確認する場合、custom なライブラリはロードされません。
 
-custom library をロードするには、バイナリが次の **entitlements のいずれか**を持っている必要があります。
+custom なライブラリをロードするには、バイナリに以下の **entitlements** のいずれかが必要です。
 
 - [`com.apple.security.cs.disable-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.security.cs.disable-library-validation)
 - [`com.apple.private.security.clear-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.private.security.clear-library-validation)
 
-または、バイナリに **hardened runtime flag** や **library validation flag** が設定されていない必要があります。
+または、バイナリに **hardened runtime flag** も **library validation flag** も設定されていない必要があります。
 
-`codesign --display --verbose <bin>` を使用し、**`CodeDirectory`** 内の runtime flag を確認することで、バイナリに **hardened runtime** があるか確認できます。例:
+バイナリに **hardened runtime** があるかどうかは、`codesign --display --verbose <bin>` を実行し、**`CodeDirectory`** の runtime フラグを確認することで確認できます。例: **`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
 
-**`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
-
-バイナリと同じ証明書で signature されたライブラリもロードできます。
+バイナリと同じ証明書で署名されたライブラリもロードできます。
 
 この機能をどのように (ab)use し、制限を確認するかについては、以下を参照してください。
 
@@ -61,28 +55,28 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 ## Dylib Hijacking
 
 > [!CAUTION]
-> Dylib hijacking attacks を実行する際には、**以前に説明した Library Validation の制限も適用される**ことを忘れないでください。
+> **以前の Library Validation の制限も** Dylib hijacking attacks に適用されることを忘れないでください。
 
-Windows と同様に、MacOS でも **dylib を hijack** して、**applications** に **arbitrary code** を **execute** させることができます（ただし、通常の user からは、`.app` bundle 内に書き込み、library を hijack するために TCC permission が必要になる可能性があるため、実際には不可能な場合があります）。\
-しかし、**MacOS** applications が libraries を **load** する方法は、Windows よりも **制限が厳しく**なっています。このため、**malware** developers は stealth のためにこの technique を引き続き使用できますが、これを abuse して privileges を escalate できる可能性ははるかに低くなります。
+Windows と同様に、MacOS でも **dylib を hijack** して、**アプリケーション**に **任意の** **コード**を**実行**させることができます（ただし、通常のユーザーからは、`.app` bundle 内に書き込んでライブラリを hijack するために TCC permission が必要になる可能性があるため、実際には不可能な場合があります）。\
+しかし、**MacOS** アプリケーションがライブラリを **load** する方法は、Windows よりも **制限が厳しく**なっています。これは、**malware** 開発者がこの technique を **stealth** のために引き続き使用できる一方で、これを **privilege escalation** に **abuse** できる可能性は大幅に低いことを意味します。
 
-まず、**MacOS binaries** がロードする libraries の full path を指定しているケースの方が**一般的**です。さらに、**MacOS は libraries を探すために** **$PATH** の folders を **検索しません**。
+第一に、**MacOS binaries** では、ロードするライブラリへのフルパスが指定されていることの方が **一般的**です。第二に、**MacOS はライブラリを探す際、$PATH のフォルダを決して検索しません**。
 
 この機能に関連する **code** の主要部分は、`ImageLoader.cpp` の **`ImageLoader::recursiveLoadLibraries`** にあります。
 
-macho binary が libraries をロードするために使用できる header Commands は **4 種類**あります。
+macho binary がライブラリのロードに使用できる header Commands は **4 種類**あります。
 
 - **`LC_LOAD_DYLIB`** command は、dylib をロードするための一般的な command です。
-- **`LC_LOAD_WEAK_DYLIB`** command は前者と同様に動作しますが、dylib が見つからない場合、エラーなしで execution が継続されます。
-- **`LC_REEXPORT_DYLIB`** command は、別の library の symbols を proxy（または re-export）します。
-- **`LC_LOAD_UPWARD_DYLIB`** command は、2 つの libraries が相互に依存する場合に使用されます（これは _upward dependency_ と呼ばれます）。
+- **`LC_LOAD_WEAK_DYLIB`** command は前者と同様に動作しますが、dylib が見つからない場合、エラーなしで実行が継続されます。
+- **`LC_REEXPORT_DYLIB`** command は、別のライブラリの symbols を proxy（または re-export）します。
+- **`LC_LOAD_UPWARD_DYLIB`** command は、2 つのライブラリが相互に依存している場合に使用されます（これは _upward dependency_ と呼ばれます）。
 
 ただし、dylib hijacking には **2 種類**あります。
 
-- **Missing weak linked libraries**: これは、application が **LC_LOAD_WEAK_DYLIB** で設定された、存在しない library をロードしようとすることを意味します。その後、**attacker が想定された場所に dylib を配置すると、ロードされます**。
-- link が "weak" であるため、library が見つからなくても application は実行を継続します。
-- これに関連する **code** は `ImageLoaderMachO.cpp` の `ImageLoaderMachO::doGetDependentLibraries` 関数にあり、`LC_LOAD_WEAK_DYLIB` が true の場合のみ `lib->required` が `false` になります。
-- **weak linked libraries** は次のコマンドで binaries から検索できます（後ほど hijacking libraries の作成方法の例を示します）。
+- **Missing weak linked libraries**: これは、アプリケーションが **LC_LOAD_WEAK_DYLIB** で設定された、存在しないライブラリをロードしようとすることを意味します。その後、**attacker が想定される場所に dylib を配置すると、ロードされます**。
+- link が「weak」であるということは、ライブラリが見つからなくてもアプリケーションの実行が継続されることを意味します。
+- これに関連する **code** は `ImageLoaderMachO.cpp` の `ImageLoaderMachO::doGetDependentLibraries` function にあり、`LC_LOAD_WEAK_DYLIB` が true の場合にのみ `lib->required` が `false` になります。
+- **binaries 内の weak linked libraries** は、以下で見つけられます（後で hijacking libraries の作成方法の例を示します）。
 - ```bash
 otool -l </path/to/bin> | grep LC_LOAD_WEAK_DYLIB -A 5 cmd LC_LOAD_WEAK_DYLIB
 cmdsize 56
@@ -91,24 +85,24 @@ time stamp 2 Wed Jun 21 12:23:31 1969
 current version 1.0.0
 compatibility version 1.0.0
 ```
-- **Configured with @rpath**: Mach-O binaries には **`LC_RPATH`** および **`LC_LOAD_DYLIB`** commands を設定できます。これらの commands の **values** に基づき、libraries は**異なる directories**から **load** されます。
-- **`LC_RPATH`** には、binary が libraries のロードに使用する folders の paths が含まれます。
-- **`LC_LOAD_DYLIB`** には、ロードする特定の libraries への path が含まれます。これらの paths には **`@rpath`** を含めることができ、これは **`LC_RPATH`** の values に置き換えられます。**`LC_RPATH`** に複数の paths がある場合、library のロード先を検索するためにすべてが使用されます。例:
-- **`LC_LOAD_DYLIB`** に `@rpath/library.dylib` が含まれ、**`LC_RPATH`** に `/application/app.app/Contents/Framework/v1/` と `/application/app.app/Contents/Framework/v2/` が含まれている場合、両方の folders が `library.dylib` のロードに使用されます。library が `[...]/v1/` に存在せず、attacker がそこに配置できる場合、**`LC_LOAD_DYLIB`** 内の paths の順序に従うため、`[...]/v2/` にある library のロードを hijack できます。
-- **rpath paths と libraries** は、次のコマンドで binaries から検索できます: `otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
+- **@rpath で設定されたもの**: Mach-O binaries には **`LC_RPATH`** および **`LC_LOAD_DYLIB`** commands を設定できます。これらの commands の **values** に基づき、**libraries** は **異なる directories** から **load** されます。
+- **`LC_RPATH`** には、バイナリが libraries の load に使用するいくつかの folders の paths が含まれます。
+- **`LC_LOAD_DYLIB`** には、load する特定の libraries への path が含まれます。これらの paths には **`@rpath`** を含めることができ、これは **`LC_RPATH`** の values に置き換えられます。`LC_RPATH` に複数の paths がある場合、libraries の load 先を検索するためにすべて使用されます。例:
+- **`LC_LOAD_DYLIB`** に `@rpath/library.dylib` が含まれ、**`LC_RPATH`** に `/application/app.app/Contents/Framework/v1/` と `/application/app.app/Contents/Framework/v2/` が含まれている場合、両方の folders が `library.dylib` の load に使用されます。ライブラリが `[...]/v1/` に存在せず、attacker がそこに配置できる場合、**`LC_LOAD_DYLIB`** の paths の順序に従うため、`[...]/v2/` にあるライブラリの load を hijack できます。
+- **binaries 内の rpath paths と libraries** は、以下で確認できます: `otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
 
 > [!NOTE] > **`@executable_path`**: **main executable file** を含む directory への **path** です。
 >
 > **`@loader_path`**: load command を含む **Mach-O binary** の **directory** への **path** です。
 >
-> - executable で使用する場合、**`@loader_path`** は実質的に **`@executable_path`** と同じです。
-> - **dylib** で使用する場合、**`@loader_path`** は **dylib** への **path** を示します。
+> - executable で使用した場合、**`@loader_path`** は実質的に **`@executable_path`** と同じです。
+> - **dylib** で使用した場合、**`@loader_path`** は **dylib** への **path** を示します。
 
-この機能を abuse して **privileges を escalate** する方法は、**root** によって実行される **application** が、attacker に write permissions のある folder 内の **library を探している**という、まれなケースです。
+この機能を **abuse** して **privileges** を **escalate** する方法は、**root** によって **execute** された **application** が、attacker に write permissions がある folder 内の **library** を探しているという、まれなケースです。
 
 > [!TIP]
-> applications 内の **missing libraries** を見つけるための便利な **scanner** として、[**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) または [**CLI version**](https://github.com/pandazheng/DylibHijack) があります。\
-この technique の**技術的詳細を含む優れた report**は[**こちら**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x)で確認できます。
+> applications 内の **missing libraries** を見つけるための優れた **scanner** は、[**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) または [**CLI version**](https://github.com/pandazheng/DylibHijack) です。\
+> この technique に関する technical details を含む優れた **report** は [**こちら**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x) にあります。
 
 **Example**
 
@@ -120,11 +114,11 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 ## Dlopen Hijacking
 
 > [!CAUTION]
-> Dlopen hijacking attacks を実行する際には、**以前に説明した Library Validation の制限も適用される**ことを忘れないでください。
+> **以前の Library Validation の制限も** Dlopen hijacking attacks の実行に適用されることを忘れないでください。
 
 **`man dlopen`** より:
 
-- path **に slash character が含まれていない**場合（つまり leaf name のみの場合）、**dlopen() は検索を実行**します。起動時に **`$DYLD_LIBRARY_PATH`** が設定されていた場合、dyld は最初にその **directory** を検索します。次に、calling mach-o file または main executable が **`LC_RPATH`** を指定している場合、dyld はそれらの directories を検索します。次に、process が **unrestricted** であれば、dyld は current working directory を検索します。最後に、old binaries の場合、dyld はいくつかの fallbacks を試します。起動時に **`$DYLD_FALLBACK_LIBRARY_PATH`** が設定されていた場合、dyld はその **directories** を検索します。それ以外の場合、dyld は **`/usr/local/lib/`**（process が unrestricted の場合）を検索し、その後 **`/usr/lib/`** を検索します（この情報は **`man dlopen`** から取得したものです）。
+- path に slash character が **含まれていない**場合（つまり leaf name のみの場合）、**dlopen() は検索を実行します**。起動時に **`$DYLD_LIBRARY_PATH`** が設定されていた場合、dyld はまずその director**y** を検索します。次に、calling mach-o file または main executable が **`LC_RPATH`** を指定している場合、dyld はそれらの directories を検索します。次に、process が **unrestricted** であれば、dyld は current working directory を検索します。最後に、old binaries の場合、dyld はいくつかの fallbacks を試します。起動時に **`$DYLD_FALLBACK_LIBRARY_PATH`** が設定されていた場合、dyld は **それらの directories** を検索します。設定されていない場合、dyld は **`/usr/local/lib/`**（process が unrestricted の場合）、次に **`/usr/lib/`** を検索します（この情報は **`man dlopen`** から取得）。
 1. `$DYLD_LIBRARY_PATH`
 2. `LC_RPATH`
 3. `CWD`（unrestricted の場合）
@@ -133,47 +127,47 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 6. `/usr/lib/`
 
 > [!CAUTION]
-> name に slash がない場合、hijacking には次の 2 つの方法があります。
+> name に slash がない場合、hijacking には 2 つの方法があります。
 >
-> - **`LC_RPATH`** のいずれかが writable である場合（ただし signature がチェックされるため、binary が unrestricted である必要もあります）
-> - binary が **unrestricted** であり、CWD から何かを load できる場合（または前述の環境変数のいずれかを abuse する場合）
+> - **`LC_RPATH`** のいずれかが **writable** である場合（ただし signature が確認されるため、これには binary が unrestricted であることも必要です）
+> - binary が **unrestricted** であり、CWD から何かを load できる場合（または記載されている env variables のいずれかを abuse する場合）
 
-- path が framework path のように見える場合（例: `/stuff/foo.framework/foo`）、起動時に **`$DYLD_FRAMEWORK_PATH`** が設定されていれば、dyld は最初にその directory 内で **framework partial path**（例: `foo.framework/foo`）を検索します。次に、dyld は **supplied path** をそのまま試します（relative paths には current working directory を使用）。最後に、old binaries の場合、dyld はいくつかの fallbacks を試します。起動時に **`$DYLD_FALLBACK_FRAMEWORK_PATH`** が設定されていれば、dyld はその directories を検索します。それ以外の場合、**`/Library/Frameworks`**（process が unrestricted の macOS の場合）、続いて **`/System/Library/Frameworks`** を検索します。
+- path が framework path のように見える場合（例: `/stuff/foo.framework/foo`）、起動時に **`$DYLD_FRAMEWORK_PATH`** が設定されていると、dyld はまずその directory で **framework partial path**（例: `foo.framework/foo`）を検索します。次に、dyld は **指定された path をそのまま**試します（relative paths には current working directory を使用）。最後に、old binaries の場合、dyld はいくつかの fallbacks を試します。起動時に **`$DYLD_FALLBACK_FRAMEWORK_PATH`** が設定されていた場合、dyld はそれらの directories を検索します。設定されていない場合、まず **`/Library/Frameworks`**（process が unrestricted の macOS の場合）、次に **`/System/Library/Frameworks`** を検索します。
 1. `$DYLD_FRAMEWORK_PATH`
-2. supplied path（unrestricted の場合、relative paths には current working directory を使用）
+2. 指定された path（unrestricted の場合、relative paths には current working directory を使用）
 3. `$DYLD_FALLBACK_FRAMEWORK_PATH`
 4. `/Library/Frameworks`（unrestricted の場合）
 5. `/System/Library/Frameworks`
 
 > [!CAUTION]
-> framework path の場合、hijack する方法は次のとおりです。
+> framework path の場合、hijack の方法は次のとおりです。
 >
-> - process が **unrestricted** である場合、CWD からの **relative path** または前述の環境変数を abuse します（process が restricted の場合、DYLD\_\* env vars が削除されることは docs に記載されていません）
+> - process が **unrestricted** であれば、CWD からの **relative path** または上述の env variables を abuse する（process が restricted の場合、DYLD\_\* env vars が削除されることは docs に記載されていません）
 
-- path **に slash が含まれているが framework path ではない**場合（つまり、full path または dylib への partial path の場合）、dlopen() はまず（設定されていれば）**`$DYLD_LIBRARY_PATH`** 内を検索します（path の leaf part を使用）。次に、dyld は **supplied path** を試します（relative paths には current working directory を使用しますが、これは unrestricted processes の場合のみです）。最後に、older binaries の場合、dyld は fallbacks を試します。起動時に **`$DYLD_FALLBACK_LIBRARY_PATH`** が設定されていれば、dyld はその directories を検索します。それ以外の場合、dyld は **`/usr/local/lib/`**（process が unrestricted の場合）を検索し、その後 **`/usr/lib/`** を検索します。
+- path に slash が **含まれている**が framework path ではない場合（つまり dylib への full path または partial path の場合）、dlopen() はまず（設定されていれば）**`$DYLD_LIBRARY_PATH`** を検索します（path の leaf part を使用）。次に、dyld は **指定された path** を試します（relative paths には current working directory を使用しますが、**unrestricted processes の場合のみ**）。最後に、older binaries の場合、dyld は fallbacks を試します。起動時に **`$DYLD_FALLBACK_LIBRARY_PATH`** が設定されていた場合、dyld はその directories を検索します。設定されていない場合、dyld は **`/usr/local/lib/`**（process が unrestricted の場合）、次に **`/usr/lib/`** を検索します。
 1. `$DYLD_LIBRARY_PATH`
-2. supplied path（unrestricted の場合、relative paths には current working directory を使用）
+2. 指定された path（unrestricted の場合、relative paths には current working directory を使用）
 3. `$DYLD_FALLBACK_LIBRARY_PATH`
 4. `/usr/local/lib/`（unrestricted の場合）
 5. `/usr/lib/`
 
 > [!CAUTION]
-> name に slash があり framework ではない場合、hijack する方法は次のとおりです。
+> name に slash があり framework ではない場合、hijack の方法は次のとおりです。
 >
-> - binary が **unrestricted** であり、CWD または `/usr/local/lib` から何かを load できる場合（または前述の環境変数のいずれかを abuse する場合）
+> - binary が **unrestricted** であり、CWD または `/usr/local/lib` から何かを load できる場合（または記載されている env variables のいずれかを abuse する場合）
 
 > [!TIP]
-> Note: **dlopen の検索を制御する configuration files はありません**。
+> Note: **dlopen searching を制御する configuration files はありません**。
 >
-> Note: main executable が **set\[ug]id binary** であるか、entitlements 付きで codesigned されている場合、**すべての environment variables が無視**され、full path のみ使用できます（詳細については [DYLD_INSERT_LIBRARIES restrictions](macos-dyld-hijacking-and-dyld_insert_libraries.md#check-dyld_insert_librery-restrictions) を確認してください）。
+> Note: main executable が **set\[ug]id binary** または entitlements 付きで codesigned されている場合、**すべての environment variables は無視され**、full path のみ使用できます（詳細については [check DYLD_INSERT_LIBRARIES restrictions](macos-dyld-hijacking-and-dyld_insert_libraries.md#check-dyld_insert_librery-restrictions) を参照してください）。
 >
-> Note: Apple platforms は、32-bit と 64-bit libraries を結合するために "universal" files を使用します。したがって、**32-bit と 64-bit の個別の search paths はありません**。
+> Note: Apple platforms は「universal」files を使用して 32-bit と 64-bit の libraries を結合します。つまり、32-bit と 64-bit 用に**別々の search paths はありません**。
 >
 > Note: Apple platforms では、ほとんどの OS dylibs が **dyld cache に結合**されており、disk 上には存在しません。そのため、OS dylib が存在するかを事前確認するために **`stat()`** を呼び出しても機能しません。ただし、**`dlopen_preflight()`** は **`dlopen()`** と同じ手順を使用して、compatible な mach-o file を検索します。
 
 **Check paths**
 
-次の code を使用して、すべての options を確認します。
+以下の code ですべての options を確認します。
 ```c
 // gcc dlopentest.c -o dlopentest -Wl,-rpath,/tmp/test
 #include <dlfcn.h>
@@ -216,62 +210,84 @@ fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
 return 0;
 }
 ```
-コンパイルして実行すると、**各ライブラリの検索に失敗した場所**を確認できます。また、**FS logsをフィルタリング**することもできます。
+コンパイルして実行すると、**各ライブラリの検索に失敗した場所**を確認できます。また、**FS logsをフィルタリング**することもできます：
 ```bash
 sudo fs_usage | grep "dlopentest"
 ```
 ## Relative Path Hijacking
 
-**privileged binary/app**（SUID や強力な entitlements を持つバイナリなど）が **relative path** のライブラリ（`@executable_path` や `@loader_path` を使用する場合など）を **Library Validation disabled** の状態でロードしている場合、攻撃者が **relative path** でロードされるライブラリを変更できる場所へバイナリを移動し、プロセスへの code injection に悪用できる可能性があります。
+**privileged binary/app**（SUID や強力な entitlements を持つバイナリなど）が、相対パスの library（`@executable_path` や `@loader_path` などを使用）を**読み込み**、**Library Validation が無効**になっている場合、攻撃者が相対パスで読み込まれる library を**変更可能な場所**へバイナリを移動し、それを悪用してプロセスに code を inject できる可能性があります。
 
-## Prune `DYLD_*` and `LD_LIBRARY_PATH` env variables
+## Prune `DYLD_*` env variables
 
-`dyld-dyld-832.7.1/src/dyld2.cpp` ファイルには、**`DYLD_` で始まる**、および **`LD_LIBRARY_PATH=`** の env variable を削除する **`pruneEnvironmentVariables`** 関数があります。
-
-また、**suid** および **sgid** バイナリの場合、env variable **`DYLD_FALLBACK_FRAMEWORK_PATH`** と **`DYLD_FALLBACK_LIBRARY_PATH`** を明示的に **null** に設定します。
-
-この関数は、OSX を対象とする場合、同じファイルの **`_main`** 関数から次のように呼び出されます。
+古い `dyld` の release（`dyld2.cpp`）では、`issetugid()`、`hasRestrictedSegment()`、`csops(CS_OPS_STATUS)` を使用して、プロセス内でこの判断を行っていました。**current `dyld` では、この判断は AMFI に委譲されており**、code は `dyld/DyldProcessConfig.cpp` の `ProcessConfig::Security::Security()` にあります：<sup>[1]</sup>
 ```cpp
-#if TARGET_OS_OSX
-if ( !gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache ) {
-pruneEnvironmentVariables(envp, &apple);
+const uint64_t amfiFlags = getAMFI(process, syscall);
+this->allowAtPaths              = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_AT_PATH);
+this->allowEnvVarsPrint         = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_PRINT_VARS);
+this->allowEnvVarsPath          = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_PATH_VARS);
+this->allowEnvVarsSharedCache   = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_CUSTOM_SHARED_CACHE);
+this->allowClassicFallbackPaths = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_FALLBACK_PATHS);
+this->allowInsertFailures       = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_FAILED_LIBRARY_INSERTION);
+this->allowInterposing          = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_LIBRARY_INTERPOSING);
+this->allowEmbeddedVars         = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_EMBEDDED_VARS);
+this->allowDevelopmentVars      = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_DEVELOPMENT_VARS);
+this->allowLibSystemOverrides   = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_LIBSYSTEM_OVERRIDE);
+...
+// env vars are only pruned on macOS
+switch ( process.platform.value() ) {
+case PLATFORM_MACOS:
+case PLATFORM_IOSMAC:
+case PLATFORM_DRIVERKIT:
+break;
+default:
+return;
+}
+
+// env vars are only pruned when process is restricted
+if ( this->allowEnvVarsPrint || this->allowEnvVarsPath || this->allowEnvVarsSharedCache )
+return;
+
+this->pruneEnvVars(process);
 ```
-そして、これらの boolean フラグはコード内の同じファイルで設定されています：
+この内容から、2つの点を取り出す価値があります。
+
+- **macOS / Mac Catalyst / DriverKit** でのみ pruning が行われます — そして AMFI が `allowEnvVarsPrint`、`allowEnvVarsPath`、`allowEnvVarsSharedCache` のいずれも許可しなかった場合に限られます。
+- AMFI query には executable 自身のプロパティが渡されます:
 ```cpp
-#if TARGET_OS_OSX
-// support chrooting from old kernel
-bool isRestricted = false;
-bool libraryValidation = false;
-// any processes with setuid or setgid bit set or with __RESTRICT segment is restricted
-if ( issetugid() || hasRestrictedSegment(mainExecutableMH) ) {
-isRestricted = true;
-}
-bool usingSIP = (csr_check(CSR_ALLOW_TASK_FOR_PID) != 0);
-uint32_t flags;
-if ( csops(0, CS_OPS_STATUS, &flags, sizeof(flags)) != -1 ) {
-// On OS X CS_RESTRICT means the program was signed with entitlements
-if ( ((flags & CS_RESTRICT) == CS_RESTRICT) && usingSIP ) {
-isRestricted = true;
-}
-// Library Validation loosens searching but requires everything to be code signed
-if ( flags & CS_REQUIRE_LV ) {
-isRestricted = false;
-libraryValidation = true;
-}
-}
-gLinkContext.allowAtPaths                = !isRestricted;
-gLinkContext.allowEnvVarsPrint           = !isRestricted;
-gLinkContext.allowEnvVarsPath            = !isRestricted;
-gLinkContext.allowEnvVarsSharedCache     = !libraryValidation || !usingSIP;
-gLinkContext.allowClassicFallbackPaths   = !isRestricted;
-gLinkContext.allowInsertFailures         = false;
-gLinkContext.allowInterposing         	 = true;
+uint64_t amfiFlags = sys.amfiFlags(proc.mainExecutableHdr->isRestricted(),
+proc.mainExecutableHdr->isFairPlayEncrypted(fpTextOffset, fpSize));
 ```
-これは基本的に、バイナリが **suid** または **sgid** である場合、ヘッダーに **RESTRICT** セグメントがある場合、または **CS_RESTRICT** フラグ付きで署名されている場合、**`!gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache`** が true となり、環境変数が削除されることを意味します。
+ここで `isRestricted()` は文字どおり `__RESTRICT` セグメントのチェックです（`mach_o/UnsafeHeader.cpp`）：<sup>[2]</sup>
+```cpp
+bool UnsafeHeader::isRestricted() const
+{
+return this->hasSection("__RESTRICT", "__restrict");
+}
+```
+`pruneEnvVars()` はその後、名前が `DYLD_` で始まる **すべて** の変数を削除し、`apple[]` パラメーターを詰めて移動するため、制限されたプロセスの子プロセスもそれらを継承しません：
+```cpp
+// For security, setuid programs ignore DYLD_* environment variables.
+// Additionally, the DYLD_* enviroment variables are removed
+// from the environment, so that any child processes doesn't see them.
+for ( const char* const* s = proc.envp; *s != NULL; s++ ) {
+if ( strncmp(*s, "DYLD_", 5) != 0 ) {
+*d++ = *s;
+}
+...
+```
+> [!TIP]
+> 実際の影響: プロセスが制限されている場合、**`DYLD_*` は削除されます**。これには setuid/setgid、`__RESTRICT/__restrict` セクション、または AMFI が path/print flags の付与を拒否する hardened-runtime/entitled binaries が該当します。一方、プロセスが **library validation**（`CS_REQUIRE_LV`）のみを持つ場合、変数は残りますが、挿入される dylib は **同じ Team ID**（または Apple）によって署名されている必要があります。そのため、実際に code を配置するには、library validation を無効化する entitlement のいずれかが必要です。
 
-なお、CS_REQUIRE_LV が true の場合、変数は削除されませんが、library validation によって元のバイナリと同じ証明書を使用していることが確認されます。
-
-## Restrictions の確認
+判定が AMFI に委ねられるようになったため、特定の binary が何を取得するかを知る最速の方法は、`dyld` 自体ではなく、AMFI が参照するもの、つまり entitlements と signing flags を確認することです:
+```bash
+BIN=/path/to/bin
+codesign -d --entitlements :- "$BIN" 2>/dev/null | \
+egrep "allow-dyld-environment-variables|disable-library-validation|clear-library-validation"
+codesign -dvvv "$BIN" 2>&1 | egrep "flags=|TeamIdentifier="
+otool -l "$BIN" | grep -A2 __RESTRICT
+```
+## 制限の確認
 
 ### SUID & SGID
 ```bash
@@ -312,9 +328,9 @@ codesign -f -s <cert-name> --option=restrict hello-signed
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 ```
 > [!CAUTION]
-> **`0x0(none)`** の flags で署名された binaries であっても、実行時に **`CS_RESTRICT`** flag が動的に付与される可能性があるため、この technique はそれらでは動作しないことに注意してください。
+> **`0x0(none)`** の flags で署名された binary であっても、実行時に動的に **`CS_RESTRICT`** flag が付与される場合があるため、この technique は機能しません。
 >
-> proc にこの flag があるかどうかは、（[**csops here**](https://github.com/axelexic/CSOps) を取得して）次のように確認できます。
+> proc にこの flag があるかどうかは、（[**csops here**](https://github.com/axelexic/CSOps) から取得して）次のコマンドで確認できます。
 >
 > ```bash
 > csops -status <pid>
@@ -324,7 +340,9 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 
 ## References
 
-- [https://theevilbit.github.io/posts/dyld_insert_libraries_dylib_injection_in_macos_osx_deep_dive/](https://theevilbit.github.io/posts/dyld_insert_libraries_dylib_injection_in_macos_osx_deep_dive/)
-- [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [1] [dyld — `dyld/DyldProcessConfig.cpp`（`ProcessConfig::Security`、`getAMFI`、`pruneEnvVars`）](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/DyldProcessConfig.cpp)
+- [2] [dyld — `mach_o/UnsafeHeader.cpp`（`isRestricted()` / `__RESTRICT` check）](https://github.com/apple-oss-distributions/dyld/blob/main/mach_o/UnsafeHeader.cpp)
+- [3] [Apple Developer — `com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)
+- [4] [dyld — `dyld/dyldMain.cpp`（process startup and library insertion）](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/dyldMain.cpp)
 
 {{#include ../../../../banners/hacktricks-training.md}}
