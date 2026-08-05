@@ -236,9 +236,9 @@ After the array is created you can see all the exported functions:
 
 ## Recent IOKit attack surface (2023–2025)
 
-- **Keystroke capture via IOHIDFamily** – CVE-2024-27799 (14.5) showed a permissive `IOHIDSystem` client could grab HID events even with secure input; ensure `externalMethod` handlers enforce entitlements instead of only the user-client type.<sup>[2]</sup>
-- **IOGPUFamily memory corruption** – CVE-2024-44197 and CVE-2025-24257 fixed OOB writes reachable from sandboxed apps that pass malformed variable-length data to GPU user clients; the usual bug is poor bounds around `IOConnectCallStructMethod` arguments.<sup>[1]</sup>
-- **Legacy keystroke monitoring** – CVE-2023-42891 (14.2) confirmed HID user clients remain a sandbox-escape vector; fuzz any driver exposing keyboard/event queues.<sup>[3]</sup>
+- **Keystroke capture via IOHIDFamily** – CVE-2024-27799 (14.5) showed a permissive `IOHIDSystem` client could grab HID events even with secure input; ensure `externalMethod` handlers enforce entitlements instead of only the user-client type.<sup>[[2]](#references)</sup>
+- **IOGPUFamily memory corruption** – CVE-2024-44197 and CVE-2025-24257 fixed OOB writes reachable from sandboxed apps that pass malformed variable-length data to GPU user clients; the usual bug is poor bounds around `IOConnectCallStructMethod` arguments.<sup>[[1]](#references)</sup>
+- **Legacy keystroke monitoring** – CVE-2023-42891 (14.2) confirmed HID user clients remain a sandbox-escape vector; fuzz any driver exposing keyboard/event queues.<sup>[[3]](#references)</sup>
 
 ### Quick triage & fuzzing tips
 

@@ -4,7 +4,7 @@
 
 ## Basic Information
 
-The real **entrypoint** of a Mach-o binary is the dynamic linked, defined in `LC_LOAD_DYLINKER` usually is `/usr/lib/dyld`.<sup>[3]</sup>
+The real **entrypoint** of a Mach-o binary is the dynamic linked, defined in `LC_LOAD_DYLINKER` usually is `/usr/lib/dyld`.<sup>[[3]](#references)</sup>
 
 This linker will need to locate all the executables libraries, map them in memory and link all the non-lazy libraries. Only after this process, the entry-point of the binary will be executed.
 
@@ -15,9 +15,9 @@ Of course, **`dyld`** doesn't have any dependencies (it uses syscalls and libSys
 
 ### Flow
 
-Dyld will be loaded by **`dyldboostrap::start`**, which will also load things such as the **stack canary**. This is because this function will receive in its **`apple`** argument vector this and other **sensitive** **values**.<sup>[1]</sup>
+Dyld will be loaded by **`dyldboostrap::start`**, which will also load things such as the **stack canary**. This is because this function will receive in its **`apple`** argument vector this and other **sensitive** **values**.<sup>[[1]](#references)</sup>
 
-**`dyls::_main()`** is the entry point of dyld and it's first task is to run `configureProcessRestrictions()`, which usually restricts **`DYLD_*`** environment variables explained in:<sup>[2]</sup>
+**`dyls::_main()`** is the entry point of dyld and it's first task is to run `configureProcessRestrictions()`, which usually restricts **`DYLD_*`** environment variables explained in:<sup>[[2]](#references)</sup>
 
 
 {{#ref}}

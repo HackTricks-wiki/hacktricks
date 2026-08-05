@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a summary of the post [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Check it for further details!**<sup>[1]</sup>
+**This is a summary of the post [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Check it for further details!**<sup>[[1]](#references)</sup>
 
 ## .NET Core Debugging <a href="#net-core-debugging" id="net-core-debugging"></a>
 

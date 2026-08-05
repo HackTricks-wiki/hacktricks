@@ -178,7 +178,7 @@ int main(int argc, char **argv) {
 
 #### Shell
 
-Taken from [**here**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) and explained.<sup>[1]</sup>
+Taken from [**here**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) and explained.<sup>[[1]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -298,7 +298,7 @@ touch_command:  db "touch /tmp/lalala", 0
 
 #### Bind shell
 
-Bind shell from [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) in **port 4444**<sup>[2]</sup>
+Bind shell from [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) in **port 4444**<sup>[[2]](#references)</sup>
 
 ```armasm
 section .text
@@ -377,7 +377,7 @@ dup2:
 
 #### Reverse Shell
 
-Reverse shell from [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html). Reverse shell to **127.0.0.1:4444**<sup>[3]</sup>
+Reverse shell from [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html). Reverse shell to **127.0.0.1:4444**<sup>[[3]](#references)</sup>
 
 ```armasm
 section .text

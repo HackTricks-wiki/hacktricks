@@ -66,15 +66,15 @@ The MRT application is located in **`/Library/Apple/System/Library/CoreServices/
 
 ## Background Tasks Management
 
-**macOS** now **alerts** every time a tool uses a well known **technique to persist code execution** (such as Login Items, Daemons...), so the user knows better **which software is persisting**.<sup>[3]</sup>
+**macOS** now **alerts** every time a tool uses a well known **technique to persist code execution** (such as Login Items, Daemons...), so the user knows better **which software is persisting**.<sup>[[3]](#references)</sup>
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
-This runs with a **daemon** located in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` and the **agent** in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`<sup>[1]</sup>
+This runs with a **daemon** located in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` and the **agent** in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`<sup>[[1]](#references)</sup>
 
-The way **`backgroundtaskmanagementd`** knows something is installed in a persistent folder is by **getting the FSEvents** and creating some **handlers** for those.<sup>[1]</sup>
+The way **`backgroundtaskmanagementd`** knows something is installed in a persistent folder is by **getting the FSEvents** and creating some **handlers** for those.<sup>[[1]](#references)</sup>
 
-Moreover, there is a plist file that contains **well known applications** that frequently persists maintained by apple located in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`<sup>[3]</sup>
+Moreover, there is a plist file that contains **well known applications** that frequently persists maintained by apple located in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`<sup>[[3]](#references)</sup>
 
 ```json
 [...]
@@ -94,14 +94,14 @@ Moreover, there is a plist file that contains **well known applications** that f
 
 ### Enumeration
 
-It's possible to **enumerate all** the configured background items running the Apple cli tool:<sup>[3]</sup>
+It's possible to **enumerate all** the configured background items running the Apple cli tool:<sup>[[3]](#references)</sup>
 
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
 ```
 
-Moreover, it's also possible to list this information with [**DumpBTM**](https://github.com/objective-see/DumpBTM).<sup>[2]</sup>
+Moreover, it's also possible to list this information with [**DumpBTM**](https://github.com/objective-see/DumpBTM).<sup>[[2]](#references)</sup>
 
 ```bash
 # You need to grant the Terminal Full Disk Access for this to work
@@ -110,13 +110,13 @@ xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
 
-This information is being stored in **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** and the Terminal needs FDA.<sup>[2]</sup>
+This information is being stored in **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** and the Terminal needs FDA.<sup>[[2]](#references)</sup>
 
 ### Messing with BTM
 
-When a new persistence is found an event of type **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. So, any way to **prevent** this **event** from being sent or the **agent from alerting** the user will help an attacker to _**bypass**_ BTM.<sup>[1]</sup>
+When a new persistence is found an event of type **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. So, any way to **prevent** this **event** from being sent or the **agent from alerting** the user will help an attacker to _**bypass**_ BTM.<sup>[[1]](#references)</sup>
 
-- **Reseting the database**: Running the following command will reset the database (should rebuild it from the ground), however, for some reason, after running this, **no new persistence will be alerted until the system is rebooted**.<sup>[1]</sup>
+- **Reseting the database**: Running the following command will reset the database (should rebuild it from the ground), however, for some reason, after running this, **no new persistence will be alerted until the system is rebooted**.<sup>[[1]](#references)</sup>
   - **root** is required.
 
 ```bash
@@ -124,7 +124,7 @@ When a new persistence is found an event of type **`ES_EVENT_TYPE_NOTIFY_BTM_LAU
 sfltool resettbtm
 ```
 
-- **Stop the Agent**: It's possible to send a stop signal to the agent so it **won't be alerting the user** when new detections are found.<sup>[1]</sup>
+- **Stop the Agent**: It's possible to send a stop signal to the agent so it **won't be alerting the user** when new detections are found.<sup>[[1]](#references)</sup>
 
 ```bash
 # Get PID
@@ -139,7 +139,7 @@ ps -o state 1011
 T
 ```
 
-- **Bug**: If the **process that created the persistence exists fast right after it**, the daemon will try to **get information** about it, **fail**, and **won't be able to send the event** indicating that a new thing is persisting.<sup>[1]</sup>
+- **Bug**: If the **process that created the persistence exists fast right after it**, the daemon will try to **get information** about it, **fail**, and **won't be able to send the event** indicating that a new thing is persisting.<sup>[[1]](#references)</sup>
 
 ## References
 

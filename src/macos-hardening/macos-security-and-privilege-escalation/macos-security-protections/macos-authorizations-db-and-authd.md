@@ -58,7 +58,7 @@ security authorizationdb read com.apple.tcc.util.admin
 </plist>
 ```
 
-Moreover in [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) it's possible to see the meaning of `authenticate-admin-nonshared`:<sup>[1]</sup>
+Moreover in [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) it's possible to see the meaning of `authenticate-admin-nonshared`:<sup>[[1]](#references)</sup>
 
 ```json
 {

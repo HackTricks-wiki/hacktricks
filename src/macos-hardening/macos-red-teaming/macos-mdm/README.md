@@ -27,7 +27,7 @@ The [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Gui
 
 ### **Security Consideration**
 
-It's crucial to note that the ease of enrollment provided by DEP, while beneficial, can also pose security risks. If protective measures are not adequately enforced for MDM enrollment, attackers might exploit this streamlined process to register their device on the organization's MDM server, masquerading as a corporate device.<sup>[2]</sup>
+It's crucial to note that the ease of enrollment provided by DEP, while beneficial, can also pose security risks. If protective measures are not adequately enforced for MDM enrollment, attackers might exploit this streamlined process to register their device on the organization's MDM server, masquerading as a corporate device.<sup>[[2]](#references)</sup>
 
 > [!CAUTION]
 > **Security Alert**: Simplified DEP enrollment could potentially allow unauthorized device registration on the organization's MDM server if proper safeguards are not in place.
@@ -111,7 +111,7 @@ or when executing `sudo profiles show -type enrollment`
 - Implemented by **`cloudconfigurationd`** via XPC. The **"Setup Assistant**" (when the device is firstly booted) or the **`profiles`** command will **contact this daemon** to retrieve the activation record.
   - LaunchDaemon (always runs as root)
 
-It follows a few steps to get the Activation Record performed by **`MCTeslaConfigurationFetcher`**. This process uses an encryption called **Absinthe**<sup>[1]</sup>
+It follows a few steps to get the Activation Record performed by **`MCTeslaConfigurationFetcher`**. This process uses an encryption called **Absinthe**<sup>[[1]](#references)</sup>
 
 1. Retrieve **certificate**
    1. GET [https://iprofiles.apple.com/resource/certificate.cer](https://iprofiles.apple.com/resource/certificate.cer)
@@ -195,7 +195,7 @@ Typically, **activation profile** provided by an MDM vendor will **include the f
 ### Enrolling Devices in Other Organisations
 
 As previously commented, in order to try to enrol a device into an organization **only a Serial Number belonging to that Organization is needed**. Once the device is enrolled, several organizations will install sensitive data on the new device: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Therefore, this could be a dangerous entrypoint for attackers if the enrolment process isn't correctly protected:<sup>[2]</sup>
+Therefore, this could be a dangerous entrypoint for attackers if the enrolment process isn't correctly protected:<sup>[[2]](#references)</sup>
 
 
 {{#ref}}

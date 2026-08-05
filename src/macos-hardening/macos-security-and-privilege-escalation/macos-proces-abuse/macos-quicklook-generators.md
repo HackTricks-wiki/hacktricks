@@ -4,7 +4,7 @@
 
 ## Basic Information
 
-Quick Look is macOS's **file preview framework**. When a user selects a file in Finder, presses Space, hovers over it, or views a directory with thumbnails enabled, Quick Look **automatically loads a generator plugin** to parse the file and render a visual preview.<sup>[1]</sup>
+Quick Look is macOS's **file preview framework**. When a user selects a file in Finder, presses Space, hovers over it, or views a directory with thumbnails enabled, Quick Look **automatically loads a generator plugin** to parse the file and render a visual preview.<sup>[[1]](#references)</sup>
 
 Quick Look generators are **bundles** (`.qlgenerator`) that register for specific **Uniform Type Identifiers (UTIs)**. When macOS needs a preview for a file matching that UTI, it loads the generator into a sandboxed helper process (`QuickLookSatellite` or `qlmanage`) and calls its generator function.
 

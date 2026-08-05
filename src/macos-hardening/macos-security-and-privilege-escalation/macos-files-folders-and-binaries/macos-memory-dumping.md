@@ -120,7 +120,7 @@ vmmap <pid>
 
 Operationally, this usually means:
 
-- A third-party app shipped with **`get-task-allow`** is often directly dumpable with LLDB, and the resulting dump may expose TCC-protected data that the app already accessed.<sup>[1]</sup>
+- A third-party app shipped with **`get-task-allow`** is often directly dumpable with LLDB, and the resulting dump may expose TCC-protected data that the app already accessed.<sup>[[1]](#references)</sup>
 - A **hardened** target without `get-task-allow` will commonly reject attaches, even as `root`, unless you control the relevant debugger entitlements / policy path.
 - Unhardened third-party processes are still the easiest place to use `lldb`, `vmmap`, Frida, or custom `task_for_pid`/`vm_read` readers.
 
