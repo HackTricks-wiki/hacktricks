@@ -4,72 +4,72 @@
 
 ## **Utangulizi wa x64**
 
-x64, pia inajulikana kama x86-64, ni usanifu wa processor wa 64-bit unaotumika hasa katika kompyuta za mezani na seva. Inatokana na usanifu wa x86 ulioandaliwa na Intel na baadaye kukubaliwa na AMD kwa jina AMD64, ni usanifu unaotumika sana katika kompyuta binafsi na seva leo.
+x64, inayojulikana pia kama x86-64, ni usanifu wa processor wa 64-bit unaotumiwa zaidi katika computing ya desktop na server. Ukitokana na usanifu wa x86 uliotengenezwa na Intel na baadaye kupitishwa na AMD kwa jina AMD64, ndiyo usanifu unaotawala katika kompyuta binafsi na servers leo.
 
 ### **Registers**
 
-x64 inapanua usanifu wa x86, ikiwa na **registers 16 za matumizi ya jumla** zilizo na lebo `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi`, na `r8` hadi `r15`. Kila moja ya hizi inaweza kuhifadhi **thamani ya 64-bit** (byte 8). Registers hizi pia zina sub-registers za 32-bit, 16-bit, na 8-bit kwa ajili ya ufanisi na kazi maalum.
+x64 inapanua usanifu wa x86, ikiwa na **registers 16 za matumizi ya jumla** zinazoitwa `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi`, na `r8` hadi `r15`. Kila moja kati ya hizi inaweza kuhifadhi thamani ya **64-bit** (byte 8). Registers hizi pia zina sub-registers za 32-bit, 16-bit, na 8-bit kwa ajili ya compatibility na kazi mahususi.
 
-1. **`rax`** - Kawaida hutumika kwa **thamani za kurudi** kutoka kwa kazi.
-2. **`rbx`** - Mara nyingi hutumika kama **register ya msingi** kwa operesheni za kumbukumbu.
-3. **`rcx`** - Kawaida hutumika kwa **hesabu za mzunguko**.
-4. **`rdx`** - Hutumika katika majukumu mbalimbali ikiwa ni pamoja na operesheni za hesabu za ziada.
-5. **`rbp`** - **Pointer ya msingi** kwa fremu ya stack.
-6. **`rsp`** - **Pointer ya stack**, ikifuatilia kilele cha stack.
-7. **`rsi`** na **`rdi`** - Hutumika kwa **vigezo vya chanzo** na **kikundi** katika operesheni za nyuzi/kumbukumbu.
-8. **`r8`** hadi **`r15`** - Registers za ziada za matumizi ya jumla zilizoanzishwa katika x64.
+1. **`rax`** - Kwa kawaida hutumiwa kuhifadhi **return values** kutoka kwenye functions.
+2. **`rbx`** - Mara nyingi hutumiwa kama **base register** kwa operations za memory.
+3. **`rcx`** - Kwa kawaida hutumiwa kama **loop counter**.
+4. **`rdx`** - Hutumiwa katika majukumu mbalimbali, ikiwemo extended arithmetic operations.
+5. **`rbp`** - **Base pointer** ya stack frame.
+6. **`rsp`** - **Stack pointer**, inayofuatilia sehemu ya juu ya stack.
+7. **`rsi`** na **`rdi`** - Hutumiwa kwa indexes za **source** na **destination** katika operations za string/memory.
+8. **`r8`** hadi **`r15`** - Registers za ziada za matumizi ya jumla zilizoletwa katika x64.
 
-### **Mkataba wa Kuita**
+### **Calling Convention**
 
-Mkataba wa kuita wa x64 unatofautiana kati ya mifumo ya uendeshaji. Kwa mfano:
+Calling convention ya x64 hutofautiana kati ya operating systems. Kwa mfano:
 
-- **Windows**: Vigezo **vinne vya kwanza** vinapitishwa katika registers **`rcx`**, **`rdx`**, **`r8`**, na **`r9`**. Vigezo zaidi vinakatwa kwenye stack. Thamani ya kurudi iko katika **`rax`**.
-- **System V (inayotumika sana katika mifumo kama UNIX)**: Vigezo **sita vya kwanza vya nambari au pointer** vinapitishwa katika registers **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, na **`r9`**. Thamani ya kurudi pia iko katika **`rax`**.
+- **Windows**: **Parameters nne za kwanza** hupitishwa katika registers **`rcx`**, **`rdx`**, **`r8`**, na **`r9`**. Parameters zinazofuata husukumwa kwenye stack. Return value huwa katika **`rax`**.
+- **System V (inayotumiwa kwa kawaida katika systems zinazofanana na UNIX)**: **Parameters sita za kwanza za integer au pointer** hupitishwa katika registers **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, na **`r9`**. Return value pia huwa katika **`rax`**.
 
-Ikiwa kazi ina zaidi ya ingizo sita, **zingine zitapitishwa kwenye stack**. **RSP**, pointer ya stack, inapaswa kuwa **imepangwa kwa byte 16**, ambayo inamaanisha kwamba anwani inayoelekeza inapaswa kugawanywa kwa 16 kabla ya wito wowote kutokea. Hii inamaanisha kwamba kawaida tunahitaji kuhakikisha kuwa RSP imepangwa ipasavyo katika shellcode yetu kabla ya kufanya wito wa kazi. Hata hivyo, katika mazoezi, wito wa mfumo unafanya kazi mara nyingi hata kama hitaji hili halijakidhi.
+Ikiwa function ina inputs zaidi ya sita, **zilizobaki zitapitishwa kwenye stack**. **RSP**, stack pointer, lazima iwe **ime-align kwa bytes 16**, kumaanisha kwamba address inayoielekeza lazima igawanyike kwa 16 kabla ya call yoyote kutokea. Hii inamaanisha kwamba kwa kawaida tungehitaji kuhakikisha kuwa RSP ime-align ipasavyo katika shellcode yetu kabla ya kufanya function call. Hata hivyo, kwa vitendo, system calls hufanya kazi mara nyingi hata hitaji hili lisipotimizwa.
 
-### Mkataba wa Kuita katika Swift
+### Calling Convention katika Swift
 
-Swift ina **mkataba wa kuita** wake ambao unaweza kupatikana katika [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
+Swift ina **calling convention** yake ambayo inaweza kupatikana katika [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
 
-### **Maagizo ya Kawaida**
+### **Instructions za Kawaida**
 
-Maagizo ya x64 yana seti tajiri, yakihifadhi ufanisi na maagizo ya awali ya x86 na kuanzisha mapya.
+Instructions za x64 zina seti pana, zikidumisha compatibility na instructions za awali za x86 na kuanzisha mpya.
 
-- **`mov`**: **Hamisha** thamani kutoka **register** moja au **mahali pa kumbukumbu** hadi nyingine.
-- Mfano: `mov rax, rbx` — Hamisha thamani kutoka `rbx` hadi `rax`.
-- **`push`** na **`pop`**: Push au pop thamani kutoka/kwenda kwenye **stack**.
-- Mfano: `push rax` — Inasukuma thamani katika `rax` kwenye stack.
-- Mfano: `pop rax` — Inachukua thamani ya juu kutoka kwenye stack hadi `rax`.
-- **`add`** na **`sub`**: Operesheni za **kujumlisha** na **kuondoa**.
-- Mfano: `add rax, rcx` — Inajumlisha thamani katika `rax` na `rcx` ikihifadhi matokeo katika `rax`.
-- **`mul`** na **`div`**: Operesheni za **kuongeza** na **kugawanya**. Kumbuka: hizi zina tabia maalum kuhusu matumizi ya operand.
-- **`call`** na **`ret`**: Hutumika ku **ita** na **kurudi kutoka kwa kazi**.
-- **`int`**: Hutumika kuanzisha **interrupt** ya programu. Mfano, `int 0x80` ilitumika kwa wito wa mfumo katika 32-bit x86 Linux.
-- **`cmp`**: **Linganisha** thamani mbili na kuweka bendera za CPU kulingana na matokeo.
-- Mfano: `cmp rax, rdx` — Linganisha `rax` na `rdx`.
-- **`je`, `jne`, `jl`, `jge`, ...**: Maagizo ya **kuruka kwa masharti** yanayobadilisha mtiririko wa udhibiti kulingana na matokeo ya `cmp` au jaribio la awali.
-- Mfano: Baada ya maagizo ya `cmp rax, rdx`, `je label` — Inaruka hadi `label` ikiwa `rax` ni sawa na `rdx`.
-- **`syscall`**: Hutumika kwa **wito wa mfumo** katika mifumo mingine ya x64 (kama Unix za kisasa).
-- **`sysenter`**: Maagizo ya **wito wa mfumo** yaliyoboreshwa kwenye baadhi ya majukwaa.
+- **`mov`**: **Husogeza** thamani kutoka kwenye **register** moja au **memory location** moja kwenda nyingine.
+- Mfano: `mov rax, rbx` — Husogeza thamani kutoka `rbx` kwenda `rax`.
+- **`push`** na **`pop`**: Husukuma au kutoa values kwenda/kutoka kwenye **stack**.
+- Mfano: `push rax` — Husukuma thamani iliyo katika `rax` kwenda kwenye stack.
+- Mfano: `pop rax` — Hutoa thamani ya juu ya stack na kuiweka katika `rax`.
+- **`add`** na **`sub`**: Operations za **addition** na **subtraction**.
+- Mfano: `add rax, rcx` — Huongeza values zilizo katika `rax` na `rcx`, na kuhifadhi matokeo katika `rax`.
+- **`mul`** na **`div`**: Operations za **multiplication** na **division**. Kumbuka: hizi zina tabia mahususi kuhusu matumizi ya operands.
+- **`call`** na **`ret`**: Hutumiwa **kuita** na **kurudi kutoka kwenye functions**.
+- **`int`**: Hutumiwa kuanzisha software **interrupt**. Kwa mfano, `int 0x80` ilitumika kwa system calls katika 32-bit x86 Linux.
+- **`cmp`**: **Hulinganisha** values mbili na kuweka flags za CPU kulingana na matokeo.
+- Mfano: `cmp rax, rdx` — Hulinganisha `rax` na `rdx`.
+- **`je`, `jne`, `jl`, `jge`, ...**: Instructions za **conditional jump** zinazobadilisha control flow kulingana na matokeo ya `cmp` au test ya awali.
+- Mfano: Baada ya instruction ya `cmp rax, rdx`, `je label` — Huruka kwenda `label` ikiwa `rax` ni sawa na `rdx`.
+- **`syscall`**: Hutumiwa kwa **system calls** katika baadhi ya systems za x64 (kama Unix za kisasa).
+- **`sysenter`**: Instruction iliyoboreshwa ya **system call** katika baadhi ya platforms.
 
-### **Prologue ya Kazi**
+### **Function Prologue**
 
-1. **Push pointer ya msingi ya zamani**: `push rbp` (huhifadhi pointer ya msingi ya mwituni)
-2. **Hamisha pointer ya sasa ya stack hadi pointer ya msingi**: `mov rbp, rsp` (inasanifisha pointer mpya ya msingi kwa kazi ya sasa)
-3. **Panga nafasi kwenye stack kwa ajili ya vigezo vya ndani**: `sub rsp, <size>` (ambapo `<size>` ni idadi ya bytes zinazohitajika)
+1. **Sukuma base pointer ya zamani**: `push rbp` (huhifadhi base pointer ya caller)
+2. **Hamisha stack pointer ya sasa kwenda kwenye base pointer**: `mov rbp, rsp` (huweka base pointer mpya ya function ya sasa)
+3. **Tenga nafasi kwenye stack kwa ajili ya local variables**: `sub rsp, <size>` (ambapo `<size>` ni idadi ya bytes zinazohitajika)
 
-### **Epilogue ya Kazi**
+### **Function Epilogue**
 
-1. **Hamisha pointer ya sasa ya msingi hadi pointer ya stack**: `mov rsp, rbp` (ondoa vigezo vya ndani)
-2. **Pop pointer ya msingi ya zamani kutoka kwenye stack**: `pop rbp` (rejesha pointer ya msingi ya mwituni)
-3. **Rudi**: `ret` (rejesha udhibiti kwa mwituni)
+1. **Hamisha base pointer ya sasa kwenda kwenye stack pointer**: `mov rsp, rbp` (huondoa local variables)
+2. **Toa base pointer ya zamani kutoka kwenye stack**: `pop rbp` (hurejesha base pointer ya caller)
+3. **Rudi**: `ret` (hurejesha control kwa caller)
 
 ## macOS
 
 ### syscalls
 
-Kuna makundi tofauti ya syscalls, unaweza [**kuzipata hapa**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
+There are different classes of syscalls, you can [**find them here**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
 ```c
 #define SYSCALL_CLASS_NONE	0	/* Invalid */
 #define SYSCALL_CLASS_MACH	1	/* Mach */
@@ -78,7 +78,7 @@ Kuna makundi tofauti ya syscalls, unaweza [**kuzipata hapa**](https://opensource
 #define SYSCALL_CLASS_DIAG	4	/* Diagnostics */
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
-Kisha, unaweza kupata kila nambari ya syscall [**katika url hii**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
+Kisha, unaweza kupata nambari ya kila syscall [**kwenye URL hii**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
 1	AUE_EXIT	ALL	{ void exit(int rval); }
@@ -95,18 +95,18 @@ Kisha, unaweza kupata kila nambari ya syscall [**katika url hii**](https://opens
 12	AUE_CHDIR	ALL	{ int chdir(user_addr_t path); }
 [...]
 ```
-Ili kuita syscall ya `open` (**5**) kutoka **Unix/BSD class** unahitaji kuiongeza: `0x2000000`
+Kwa hiyo, ili kuita `open` syscall (**5**) kutoka kwenye **Unix/BSD class**, unahitaji kuiongezea: `0x2000000`
 
-Hivyo, nambari ya syscall ya kuita open itakuwa `0x2000005`
+Kwa hiyo, nambari ya syscall ya kuita open itakuwa `0x2000005`
 
 ### Shellcodes
 
-Ili kukusanya:
+Ili ku-compile:
 ```bash
 nasm -f macho64 shell.asm -o shell.o
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 ```
-Ili kutoa bytes:
+Kutoa bytes:
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/b729f716aaf24cbc8109e0d94681ccb84c0b0c9e/helper/extract.sh
 for c in $(objdump -d "shell.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
@@ -118,7 +118,7 @@ otool -t shell.o | grep 00 | cut -f2 -d$'\t' | sed 's/ /\\x/g' | sed 's/^/\\x/g'
 ```
 <details>
 
-<summary>Code ya C ya kujaribu shellcode</summary>
+<summary>Msimbo wa C wa kujaribu shellcode</summary>
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
 // gcc loader.c -o loader
@@ -168,7 +168,7 @@ return 0;
 
 #### Shell
 
-Imechukuliwa kutoka [**hapa**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) na kufafanuliwa.
+Imechukuliwa [**hapa**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) na kuelezwa.<sup>[1]</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -188,7 +188,7 @@ syscall
 ```
 {{#endtab}}
 
-{{#tab name="na stack"}}
+{{#tab name="with stack"}}
 ```armasm
 bits 64
 global _main
@@ -207,9 +207,9 @@ syscall
 {{#endtab}}
 {{#endtabs}}
 
-#### Soma na cat
+#### Soma kwa cat
 
-Lengo ni kutekeleza `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, hivyo hoja ya pili (x1) ni array ya param (ambayo katika kumbukumbu inamaanisha stack ya anwani).
+Lengo ni kutekeleza `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, kwa hivyo argumenti ya pili (x1) ni array ya params (ambayo kwenye memory inamaanisha stack ya anwani).
 ```armasm
 bits 64
 section .text
@@ -240,7 +240,7 @@ section .data
 cat_path:      db "/bin/cat", 0
 passwd_path:   db "/etc/passwd", 0
 ```
-#### Wito amri na sh
+#### Tekeleza command kwa sh
 ```armasm
 bits 64
 section .text
@@ -280,7 +280,7 @@ touch_command:  db "touch /tmp/lalala", 0
 ```
 #### Bind shell
 
-Bind shell kutoka [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) katika **port 4444**
+Bind shell kutoka [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) kwenye **port 4444**<sup>[2]</sup>.
 ```armasm
 section .text
 global _main
@@ -357,7 +357,7 @@ syscall
 ```
 #### Reverse Shell
 
-Reverse shell kutoka [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html). Reverse shell kwa **127.0.0.1:4444**
+Reverse shell kutoka [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html). Reverse shell kuelekea **127.0.0.1:4444**<sup>[3]</sup>
 ```armasm
 section .text
 global _main
@@ -419,4 +419,10 @@ mov  rax, r8
 mov  al, 0x3b
 syscall
 ```
+## Marejeo
+
+- [1] [daem0nc0re/macOS_ARM64_Shellcode - shell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)
+- [2] [Packet Storm - macOS TCP 4444 Bind Shell (Null-Free) Shellcode](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html)
+- [3] [Packet Storm - macOS 127.0.0.1:4444 Reverse Shell Shellcode](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html)
+
 {{#include ../../../banners/hacktricks-training.md}}

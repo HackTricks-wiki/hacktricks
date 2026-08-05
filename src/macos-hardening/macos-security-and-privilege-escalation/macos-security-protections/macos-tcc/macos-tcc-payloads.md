@@ -3,16 +3,16 @@
 {{#include ../../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Maamuzi ya TCC yanafungamana na **utambulisho wa process** inayoomba resource. Katika post-exploitation, lengo la kawaida ni **kuingiza payloads hizi kwenye app ambayo tayari imeidhinishwa** (au kuzitekeleza ndani ya bundle / signature context yake) badala ya kuendesha helper mpya ambayo itasababisha prompt yake yenyewe.
+> Maamuzi ya TCC yanafungamana na **utambulisho wa process** inayoomba resource. Katika post-exploitation, lengo la kawaida ni **ku-inject payloads hizi kwenye app ambayo tayari imeidhinishwa** (au kuzitekeleza vinginevyo ndani ya bundle / signature context yake) badala ya kuendesha helper mpya ambayo itasababisha prompt yake yenyewe.
 >
-> Kwa **Screen Recording**, **Input Monitoring**, na **synthetic input**, macOS ya kisasa pia hutoa preflight / request APIs zilizo wazi kama vile `CGPreflightScreenCaptureAccess`, `CGRequestScreenCaptureAccess`, `CGRequestListenEventAccess`, na `CGRequestPostEventAccess`.
+> Kwa **Screen Recording**, **Input Monitoring**, na **synthetic input**, macOS za kisasa pia hutoa preflight / request APIs maalum kama `CGPreflightScreenCaptureAccess`, `CGRequestScreenCaptureAccess`, `CGRequestListenEventAccess`, na `CGRequestPostEventAccess`.
 
 > [!WARNING]
-> Hii bado ni attack path halisi sana: utafiti wa hivi karibuni kuhusu permission-theft dhidi ya Microsoft macOS apps ulionyesha kwamba **weak library validation / plugin loading** inaweza kumruhusu attacker kutumia tena **camera**, **microphone**, na ruhusa nyingine za TCC ambazo victim app tayari imepewa, bila prompt ya pili.
+> Hii bado ni attack path halisi sana: utafiti wa hivi karibuni kuhusu permission-theft dhidi ya macOS apps za Microsoft ulionyesha kwamba **weak library validation / plugin loading** inaweza kumruhusu attacker kutumia tena ruhusa za TCC ambazo victim app tayari imepewa za **camera**, **microphone**, na nyinginezo bila prompt ya pili.
 
 ## Quick triage kabla ya kutumia payload
 
-Utafiti wa hivi karibuni kuhusu permission-theft unaendelea kuthibitisha workflow hiyo hiyo: kwanza tafuta app ambayo tayari ina TCC grant unayotaka, kisha hakikisha kwamba ni injection target inayotekelezeka.
+Utafiti wa hivi karibuni kuhusu permission-theft unaendelea kusisitiza workflow hiyo hiyo: kwanza tafuta app ambayo tayari ina TCC grant unayotaka, kisha thibitisha kwamba ni injection target halisi.<sup>[1]</sup>
 ```bash
 sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" \
 "select service, client from access where auth_value=2 and service in ('kTCCServiceCamera','kTCCServiceMicrophone','kTCCServiceScreenCapture','kTCCServiceAccessibility') order by service, client;"
@@ -20,7 +20,7 @@ sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" \
 codesign -d --entitlements :- /Applications/Target.app 2>/dev/null | \
 egrep 'disable-library-validation|allow-dyld-environment-variables'
 ```
-Ikiwa target pia inapakia plug-ins / frameworks zinazodhibitiwa na mshambuliaji, payloads hizi huwa za kuvutia zaidi. Kwa mawazo mapana zaidi ya post-exploitation baada ya kuingia ndani ya process ambayo tayari imeidhinishwa, angalia [ukurasa huu unaohusiana](macos-tcc-credential-and-data-theft.md).
+Ikiwa target pia inapakia plug-ins / frameworks zinazodhibitiwa na attacker, payloads hizi huwa za kuvutia zaidi. Kwa mawazo mapana zaidi ya post-exploitation baada ya kuingia ndani ya process ambayo tayari imeidhinishwa, angalia [ukurasa huu unaohusiana](macos-tcc-credential-and-data-theft.md).
 
 ### Desktop
 
@@ -71,7 +71,7 @@ cp -r "$HOME/Desktop" "/tmp/desktop"
 {{#endtab}}
 {{#endtabs}}
 
-### Hati
+### Nyaraka
 
 - **Entitlement**: None
 - **TCC**: `kTCCServiceSystemPolicyDocumentsFolder`
@@ -122,7 +122,7 @@ cp -r "$HOME/Documents" "/tmp/documents"
 
 ### Vipakuliwa
 
-- **Entitlement**: Hakuna
+- **Entitlement**: None
 - **TCC**: `kTCCServiceSystemPolicyDownloadsFolder`
 
 {{#tabs}}
@@ -176,7 +176,7 @@ cp -r "$HOME/Downloads" "/tmp/downloads"
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-Nakili `$HOME/Pictures/Photos Library.photoslibrary` hadi `/tmp/photos`.
+Copy `$HOME/Pictures/Photos Library.photoslibrary` to `/tmp/photos`.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -323,7 +323,7 @@ cp -r "$HOME/Library/Calendars" "/tmp/calendars"
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-Rekodi video ya sekunde 3 na uihifadhi kwenye **`/tmp/recording.mov`**
+Rekodi video ya sekunde 3 na uihifadhi katika **`/tmp/recording.mov`**<sup>[5]</sup>
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -402,7 +402,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-Angalia ikiwa programu ina ufikiaji wa kamera.
+Angalia ikiwa programu ina ruhusa ya kufikia kamera.<sup>[5]</sup>
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -435,7 +435,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Prompt"}}
-Anzisha ombi la kamera ikiwa mchakato wa sasa bado uko katika hali ya `NotDetermined`.
+Anzisha prompt ya kamera ikiwa mchakato wa sasa bado uko `NotDetermined`.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -454,7 +454,7 @@ dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Piga picha kwa kamera
+Piga picha kwa kutumia kamera
 ```bash
 ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 ```
@@ -468,7 +468,7 @@ ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-Rekodi sekunde 5 za sauti na uihifadhi katika `/tmp/recording.m4a`
+Rekodi sekunde 5 za sauti na uiweke katika `/tmp/recording.m4a`<sup>[6]</sup>
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -568,7 +568,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-Angalia ikiwa programu ina ufikiaji wa maikrofoni.
+Angalia ikiwa app ina ruhusa ya kufikia microphone.<sup>[5]</sup>
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -599,7 +599,7 @@ static void telegram(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Prompt"}}
-Washa ombi la maikrofoni ikiwa mchakato wa sasa bado uko katika hali ya `NotDetermined`.
+Anzisha prompt ya microphone ikiwa mchakato wa sasa bado uko `NotDetermined`.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -618,7 +618,7 @@ dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Rekodi sauti ya sekunde 5 na uihifadhi katika `/tmp/recording.wav`
+Rekodi sauti ya sekunde 5 na uihifadhi kwenye `/tmp/recording.wav`
 ```bash
 # Check the microphones
 ffmpeg -f avfoundation -list_devices true -i ""
@@ -631,14 +631,14 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 ### Mahali
 
 > [!TIP]
-> Ili app ipate taarifa ya mahali, **Location Services** (kutoka Privacy & Security) **lazima iwe enabled,** vinginevyo haitaweza kuifikia.
+> Ili app ipate mahali, **Location Services** (kutoka Privacy & Security) **lazima iwe imewezeshwa,** vinginevyo haitaweza kuipata.
 
 - **Entitlement**: `com.apple.security.personal-information.location`
 - **TCC**: Granted in `/var/db/locationd/clients.plist`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-Write the location in `/tmp/logs.txt`
+Andika mahali katika `/tmp/logs.txt`
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -688,7 +688,7 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Pata eneo la sasa kutoka kwenye shell.
+Pata eneo la sasa kutoka shell.<sup>[2]</sup>
 ```bash
 # Fast option: use a dedicated CoreLocation CLI helper
 brew install --cask corelocationcli
@@ -698,14 +698,14 @@ CoreLocationCLI --json
 CoreLocationCLI --watch --format '%latitude %longitude %speed %time'
 ```
 > [!TIP]
-> Hili bado linategemea **Location Services** kuwashwa na tool / terminal kupata idhini ya TCC. `CoreLocationCLI` pia hutegemea positioning inayosaidiwa na Wi-Fi kwenye Mac nyingi, kwa hivyo kuzima Wi-Fi mara nyingi huishia kwenye `kCLErrorDomain error 0`.
+> Hii bado inategemea **Location Services** kuwashwa na tool / terminal kupata idhini ya TCC. `CoreLocationCLI` pia hutegemea positioning inayosaidiwa na Wi-Fi kwenye Mac nyingi, kwa hivyo kuzima Wi-Fi mara nyingi huishia kwenye `kCLErrorDomain error 0`.
 
 {{#endtab}}
 {{#endtabs}}
 
 ### Kurekodi Skrini
 
-- **Entitlement**: Hakuna
+- **Entitlement**: None
 - **TCC**: `kTCCServiceScreenCapture`
 
 {{#tabs}}
@@ -768,7 +768,7 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check / Prompt"}}
-Angalia ikiwa process ya sasa inaweza kunasa skrini na kuanzisha TCC prompt inapohitajika.
+Angalia ikiwa process ya sasa inaweza kunasa screen na kuanzisha TCC prompt ikihitajika.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
@@ -797,14 +797,14 @@ screencapture -V 5 /tmp/screen.mov
 {{#endtabs}}
 
 > [!TIP]
-> Kwenye **macOS 12.3+**, `ScreenCaptureKit` kwa kawaida ni post-exploitation primitive bora kuliko `AVCaptureScreenInput`: inaweza kufanya streaming yenye utendaji wa juu, kunasa frame moja kwa `SCScreenshotManager`, na kufanya streaming ya **system audio**. Masasisho ya hivi karibuni ya `ScreenCaptureKit` pia yameongeza `captureMicrophone` / `microphoneCaptureDeviceID` kwenye `SCStreamConfiguration`, pamoja na `SCRecordingOutput` kwa kurekodi moja kwa moja kwenye faili, hivyo screen-capture client moja iliyohijackiwa inaweza kuhifadhi screen + system audio moja kwa moja na kuongeza mic audio wakati process pia ina `kTCCServiceMicrophone`. Kwa primitives zaidi za kutumia vibaya desktop session, tazama [ukurasa huu unaohusiana](../macos-input-monitoring-screen-capture-accessibility.md).
+> Kwenye **macOS 12.3+**, `ScreenCaptureKit` kwa kawaida ni primitive bora zaidi ya post-exploitation kuliko `AVCaptureScreenInput`: inaweza kufanya streaming ya utendaji wa juu, kunasa fremu moja kwa `SCScreenshotManager`, na kufanya streaming ya **system audio**. Masasisho ya hivi karibuni ya `ScreenCaptureKit` pia yaliongeza `captureMicrophone` / `microphoneCaptureDeviceID` kwenye `SCStreamConfiguration`, pamoja na `SCRecordingOutput` kwa kurekodi moja kwa moja kwenye faili, hivyo screen-capture client iliyotekwa inaweza kuhifadhi screen + system audio moja kwa moja na kuongeza mic audio wakati mchakato huo pia una `kTCCServiceMicrophone`. Kwa primitives zaidi za matumizi mabaya ya desktop-session, angalia [ukurasa huu unaohusiana](../macos-input-monitoring-screen-capture-accessibility.md).
 
 ### Accessibility
 
-- **Entitlement**: None
+- **Entitlement**: Hakuna
 - **TCC**: `kTCCServiceAccessibility`
 
-Tumia privilege ya TCC kukubali udhibiti wa Finder kwa kubonyeza enter na kupita TCC kwa njia hiyo
+Tumia privilege ya TCC kukubali udhibiti wa Finder kwa kubonyeza Enter na kukwepa TCC kwa njia hiyo
 
 {{#tabs}}
 {{#tab name="Accept TCC"}}
@@ -861,7 +861,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="Check / Prompt"}}
-Kagua ikiwa mchakato wa sasa tayari umeaminiwa kwa Accessibility na uiombe macOS ionyeshe UI ya idhini ikiwa haujaaminiwa.
+Angalia ikiwa mchakato wa sasa tayari umeaminiwa kwa Accessibility na uiombe macOS ionyeshe kiolesura cha kutoa idhini ikiwa haujaaminiwa.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
@@ -875,7 +875,7 @@ NSLog(@"Accessibility access: %@", trusted ? @"granted" : @"pending/denied");
 {{#endtab}}
 
 {{#tab name="Keylogger"}}
-Hifadhi vitufe vilivyobonyezwa katika **`/tmp/keystrokes.txt`**
+Hifadhi vitufe vilivyobonyezwa katika **`/tmp/keystrokes.txt`**.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
@@ -982,19 +982,21 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **Accessibility ni permission yenye nguvu sana**, unaweza kuitumia vibaya kwa njia nyingine, kwa mfano unaweza kutekeleza **keystrokes attack** kupitia hiyo pekee bila kuhitaji kuita System Events.
+> [!CAUTION] > **Accessibility ni ruhusa yenye nguvu sana**, unaweza kuitumia vibaya kwa njia nyingine, kwa mfano unaweza kutekeleza **keystrokes attack** kupitia hiyo pekee bila kuhitaji kuita System Events.
 
 > [!TIP]
-> Toleo jipya la macOS pia hugawanya matumizi mabaya ya desktop-session kati ya **Input Monitoring** (`kTCCServiceListenEvent`) na **synthetic input** (`kTCCServicePostEvent`). Ikiwa unahitaji keylogging, screen grabs, au raw event injection badala ya automation ya AXUIElement, angalia [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md).
+> Toleo jipya zaidi za macOS pia hugawanya matumizi mabaya ya desktop-session kati ya **Input Monitoring** (`kTCCServiceListenEvent`) na **synthetic input** (`kTCCServicePostEvent`). Ikiwa unahitaji keylogging, screen grabs, au raw event injection badala ya automation ya AXUIElement, angalia [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md).
 
 
 
 ## Marejeo
 
-- [Cisco Talos - Jinsi vulnerabilities nyingi katika Microsoft apps za macOS zinavyowezesha kuiba permissions](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
-- [CoreLocationCLI](https://github.com/fulldecent/corelocationcli)
-- [Apple Developer - Kuomba Authorization ya Media Capture kwenye macOS](https://developer.apple.com/documentation/bundleresources/requesting-authorization-for-media-capture-on-macos?language=objc)
-- [Apple Developer - Capture HDR content with ScreenCaptureKit (WWDC24)](https://developer.apple.com/videos/play/wwdc2024/10088/)
+- [1] [Cisco Talos - Jinsi vulnerabilities nyingi katika apps za Microsoft za macOS zinavyowezesha kuiba permissions](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
+- [2] [CoreLocationCLI](https://github.com/fulldecent/corelocationcli)
+- [3] [Apple Developer - Kuomba Authorization ya Media Capture kwenye macOS](https://developer.apple.com/documentation/bundleresources/requesting-authorization-for-media-capture-on-macos?language=objc)
+- [4] [Apple Developer - Kukamata HDR content kwa kutumia ScreenCaptureKit (WWDC24)](https://developer.apple.com/videos/play/wwdc2024/10088/)
+- [5] [vsociety - CVE-2023-26818: MacOS TCC Bypass with Telegram using DyLib Injection Part1](https://vsociety.medium.com/cve-2023-26818-macos-tcc-bypass-with-telegram-using-dylib-injection-part1-768b34efd8c4)
+- [6] [Vicarius vsociety - CVE-2023-26818: Exploit macOS TCC Bypass w/ Telegram (Part 1)](https://www.vicarius.io/vsociety/posts/cve-2023-26818-exploit-macos-tcc-bypass-w-telegram-part-1-2)
 
 
 {{#include ../../../../banners/hacktricks-training.md}}

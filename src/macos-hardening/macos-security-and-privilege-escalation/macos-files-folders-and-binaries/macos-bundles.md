@@ -1,64 +1,64 @@
-# Bundles za macOS
+# macOS Bundles
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Taarifa za Msingi
 
-Bundles katika macOS hutumika kama vyombo vya kuhifadhi rasilimali mbalimbali ikiwemo applications, libraries, na faili nyingine muhimu, na kuonekana kama vitu vimoja katika Finder, kama faili za kawaida `*.app`. Bundle inayokutana nayo mara nyingi ni `.app` bundle, ingawa aina nyingine kama `.framework`, `.systemextension`, na `.kext` pia ni za kawaida.
+Bundles katika macOS hutumika kama kontena za rasilimali mbalimbali, zikiwemo applications, libraries, na mafaili mengine muhimu, hivyo kuzifanya zionekane kama objects moja katika Finder, kama mafaili yanayojulikana ya `*.app`. Bundle inayokutana nayo mara nyingi ni `.app`, ingawa aina nyingine kama `.framework`, `.systemextension`, na `.kext` pia zinatumika kwa wingi.
 
 ### Vipengele Muhimu vya Bundle
 
-Ndani ya bundle, hasa ndani ya saraka `<application>.app/Contents/`, rasilimali mbalimbali muhimu zimehifadhiwa:
+Ndani ya bundle, hasa katika saraka ya `<application>.app/Contents/`, kuna rasilimali mbalimbali muhimu:
 
-- **\_CodeSignature**: Saraka hii inaweka maelezo ya code-signing muhimu kwa kuthibitisha uadilifu wa application. Unaweza kukagua taarifa za code-signing kwa kutumia amri kama:
+- **\_CodeSignature**: Saraka hii huhifadhi maelezo ya code-signing muhimu kwa ajili ya kuthibitisha integrity ya application. Unaweza kukagua maelezo ya code-signing kwa kutumia commands kama vile:
 ```bash
 openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64
 ```
-- **MacOS**: Inahifadhi binary inayotekelezwa ya programu ambayo inaendeshwa wakati mtumiaji anaiendesha.
-- **Resources**: Hifadhi kwa vipengele vya kiolesura vya programu, ikiwa ni pamoja na picha, nyaraka, na maelezo ya kiolesura (nib/xib files).
-- **Info.plist**: Inafanya kazi kama faili kuu la usanidi la programu, muhimu kwa mfumo kutambua na kuingiliana na programu ipasavyo.
+- **MacOS**: Ina binary ya executable ya application inayotekelezwa mtumiaji anapoingiliana nayo.
+- **Resources**: Hifadhi ya vipengele vya user interface vya application, ikijumuisha picha, nyaraka na maelezo ya interface (faili za nib/xib).
+- **Info.plist**: Hufanya kazi kama faili kuu ya configuration ya application, na ni muhimu kwa mfumo kuitambua na kuingiliana nayo ipasavyo.
 
-#### Vifunguo Muhimu katika Info.plist
+#### Keys Muhimu katika Info.plist
 
-Faili ya `Info.plist` ni nguzo ya usanidi wa programu, ikijumuisha vifunguo kama vile:
+Faili ya `Info.plist` ni msingi wa configuration ya application, ikiwa na keys kama:
 
-- **CFBundleExecutable**: Inabainisha jina la faili kuu inayotekelezwa iliyoko katika saraka `Contents/MacOS`.
-- **CFBundleIdentifier**: Hutoa kitambulisho cha kipekee kwa programu, kinachotumiwa sana na macOS kwa usimamizi wa programu.
-- **LSMinimumSystemVersion**: Inaonyesha toleo la chini kabisa la macOS linalohitajika kwa programu kuendesha.
+- **CFBundleExecutable**: Hubainisha jina la faili kuu ya executable iliyo katika directory ya `Contents/MacOS`.
+- **CFBundleIdentifier**: Hutoa identifier ya kimataifa ya application, inayotumiwa sana na macOS katika usimamizi wa application.
+- **LSMinimumSystemVersion**: Huonyesha version ya chini kabisa ya macOS inayohitajika ili application iendeshe.
 
 ### Kuchunguza Bundles
 
-Ili kuchunguza yaliyomo ndani ya bundle, kama `Safari.app`, amri ifuatayo inaweza kutumika: `bash ls -lR /Applications/Safari.app/Contents`
+Ili kuchunguza yaliyomo kwenye bundle, kama vile `Safari.app`, command ifuatayo inaweza kutumika: `bash ls -lR /Applications/Safari.app/Contents`
 
-Uchunguzi huu unaonyesha saraka kama `_CodeSignature`, `MacOS`, `Resources`, na faili kama `Info.plist`, kila moja ikihudumia kusudi tofauti kutoka kwenye usalama wa programu hadi kufafanua kiolesura chake cha mtumiaji na vigezo vya utendakazi.
+Uchunguzi huu huonyesha directories kama `_CodeSignature`, `MacOS`, `Resources`, na files kama `Info.plist`, ambapo kila kimoja kina madhumuni ya kipekee, kuanzia kulinda application hadi kufafanua user interface na operational parameters zake.
 
-#### Saraka za Ziada za Bundle
+#### Directories Nyingine za Bundle
 
-Zaidi ya saraka za kawaida, bundles pia zinaweza kujumuisha:
+Mbali na directories za kawaida, bundles zinaweza pia kuwa na:
 
-- **Frameworks**: Inajumuisha frameworks zilizobundled zinazotumika na programu. Frameworks ni kama dylibs zenye rasilimali za ziada.
-- **PlugIns**: Saraka kwa plug-ins na extensions zinazoongeza uwezo wa programu.
-- **XPCServices**: Inahifadhi huduma za XPC zinazotumiwa na programu kwa mawasiliano nje ya mchakato.
+- **Frameworks**: Ina frameworks zilizobundled zinazotumiwa na application. Frameworks zinafanana na dylibs zenye resources za ziada.
+- **PlugIns**: Directory ya plug-ins na extensions zinazoongeza uwezo wa application.
+- **XPCServices**: Ina XPC services zinazotumiwa na application kwa mawasiliano ya out-of-process.
 
-Muundo huu unahakikisha kwamba vipengele vyote vinavyohitajika vimefungwa ndani ya bundle, kurahisisha mazingira ya programu yenye muundo wa moduli na salama.
+Muundo huu huhakikisha kuwa vipengele vyote vinavyohitajika vimefungwa ndani ya bundle, na kuwezesha mazingira ya application yaliyo modular na salama.
 
-Kwa maelezo zaidi kuhusu vifunguo vya `Info.plist` na maana yake, nyaraka za Apple developer zinatoa rasilimali nyingi: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
+Kwa maelezo zaidi kuhusu keys za `Info.plist` na maana zake, documentation ya Apple developer ina resources nyingi: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
 
-## Vidokezo vya Usalama & Njia za Matumizi Mabaya
+## Maelezo ya Usalama na Abuse Vectors
 
-- **Gatekeeper / App Translocation**: Wakati bundle iliyowekwa karantini inapotumika kwa mara ya kwanza, macOS hufanya uthibitisho wa kina wa saini na inaweza kuikimbia kutoka kwenye njia iliyotranslocate iliyopangwa kwa nasibu. Mara inaporuhusiwa, uzinduzi wa baadaye hufanya ukaguzi mdogo tu; faili za rasilimali katika `Resources/`, `PlugIns/`, nibs, n.k., kihistoria hazikuwa zikikaguliwa. Tangu macOS 13 Ventura, ukaguzi wa kina umewekewa nguvu kwenye uzinduzi wa kwanza na ruhusa mpya ya *App Management* ya TCC inapunguza michakato ya tatu kuharibu bundles za wengine bila ridhaa ya mtumiaji, lakini mifumo ya zamani bado iko katika hatari.
-- **Bundle Identifier collisions**: Malengo mengi yaliyowekwa ndani (PlugIns, helper tools) yanayotumia `CFBundleIdentifier` sawa yanaweza kuvunja uthibitisho wa saini na mara nyingine kuwezesha utekaji/konfuzia wa URL‑scheme. Daima orodhesha sub‑bundles na thibitisha IDs za kipekee.
+- **Gatekeeper / App Translocation**: Bundle iliyowekwa quarantine inapotekelezwa kwa mara ya kwanza, macOS hufanya deep signature verification na inaweza kuiendesha kutoka kwenye randomized translocated path. Baada ya kukubaliwa, launch zinazofuata hufanya shallow checks pekee; resource files zilizo katika `Resources/`, `PlugIns/`, nibs, n.k., hazikukaguliwa kihistoria. Tangu macOS 13 Ventura, deep check hutekelezwa wakati wa first run, na permission mpya ya *App Management* ya TCC huzuia third-party processes kurekebisha bundles nyingine bila idhini ya mtumiaji, lakini systems za zamani bado ziko vulnerable.
+- **Bundle Identifier collisions**: Embedded targets nyingi (PlugIns, helper tools) zinapotumia tena `CFBundleIdentifier` ileile, zinaweza kuvuruga signature validation na wakati mwingine kuwezesha URL-scheme hijacking/confusion. Daima enumerate sub-bundles na uthibitishe kuwa IDs ni za kipekee.
 
 ## Resource Hijacking (Dirty NIB / NIB Injection)
 
-Kabala ya Ventura, kubadilisha rasilimali za UI katika app iliyosainiwa kuliweza kupitisha ukaguzi mdogo wa saini ya msimbo na kusababisha utekelezaji wa msimbo kwa entitlements za app. Utafiti wa sasa (2024) unaonyesha hili bado linafanya kazi kwenye pre‑Ventura na kwenye builds ambazo hazijekwa karantini:
+Kabla ya Ventura, kubadilisha UI resources katika signed app kulikuwa kunaweza kupita shallow code signing na kutoa code execution yenye entitlements za application. Utafiti wa sasa (2024) unaonyesha kuwa hii bado inafanya kazi kwenye pre-Ventura na builds ambazo hazijawekwa quarantine:<sup>[1][2]</sup>
 
-1. Nakili app lengwa kwenye eneo linaloweza kuandikwa (mfano, `/tmp/Victim.app`).
-2. Badilisha `Contents/Resources/MainMenu.nib` (au nib yoyote iliyo deklarwa katika `NSMainNibFile`) na nib hasidi inayoumba/inaanzisha `NSAppleScript`, `NSTask`, n.k.
-3. Zindua app. Nib hasidi itaendeshwa chini ya bundle ID ya mwathirika na entitlements zake (ruksa za TCC, kipaza sauti/kamera, n.k.).
-4. Ventura+ hupunguza hatari kwa kufanya uthibitisho wa kina wa bundle kwenye uzinduzi wa kwanza na kuhitaji ruhusa ya *App Management* kwa mabadiliko ya baadaye, hivyo kudumu ni ngumu zaidi lakini mashambulizi ya uzinduzi wa awali kwenye macOS za zamani bado yanaweza kutumika.
+1. Nakili target app hadi eneo linaloweza kuandikwa (kwa mfano, `/tmp/Victim.app`).
+2. Badilisha `Contents/Resources/MainMenu.nib` (au nib yoyote iliyotajwa katika `NSMainNibFile`) kwa malicious one inayounda `NSAppleScript`, `NSTask`, n.k.
+3. Launch app. Malicious nib hutekelezwa chini ya bundle ID na entitlements za victim (TCC grants, microphone/camera, n.k.).
+4. Ventura+ hupunguza hatari hii kwa kufanya deep verification ya bundle wakati wa first launch na kuhitaji permission ya *App Management* kwa modifications zinazofuata, hivyo persistence huwa ngumu zaidi, lakini initial-launch attacks kwenye macOS za zamani bado zinatumika.<sup>[1]</sup>
 
-Mfano wa payload mdogo wa nib hasidi (compile xib to nib with `ibtool`):
+Mfano mdogo wa malicious nib payload (compile xib kuwa nib kwa kutumia `ibtool`):
 ```bash
 # create a nib that runs osascript -e 'do shell script "id"'
 # ...build xib in Xcode, then
@@ -68,9 +68,9 @@ open /tmp/Victim.app
 ```
 ## Framework / PlugIn / dylib Hijacking inside Bundles
 
-Kwa sababu utafutaji wa `@rpath` hupendelea Frameworks/PlugIns zilizomo ndani ya bundle, kuacha maktaba yenye madhara ndani ya `Contents/Frameworks/` au `Contents/PlugIns/` kunaweza kubadilisha mfululizo wa upakiaji wakati binary kuu imesainiwa bila uthibitishaji wa maktaba au ikiwa upangaji wa `LC_RPATH` ni dhaifu.
+Kwa sababu utafutaji wa `@rpath` hupendelea Frameworks/PlugIns zilizo ndani ya bundle, kuweka library hasidi ndani ya `Contents/Frameworks/` au `Contents/PlugIns/` kunaweza kuelekeza upya mpangilio wa upakiaji wakati binary kuu imesainiwa bila library validation au ikiwa na mpangilio dhaifu wa `LC_RPATH`.
 
-Hatua za kawaida wakati wa kutumia bundle isiyo na saini/ad‑hoc:
+Hatua za kawaida wakati wa kutumia vibaya unsigned/ad-hoc bundle:
 ```bash
 cp evil.dylib /tmp/Victim.app/Contents/Frameworks/
 install_name_tool -add_rpath @executable_path/../Frameworks /tmp/Victim.app/Contents/MacOS/Victim
@@ -80,11 +80,11 @@ codesign -f -s - --timestamp=none /tmp/Victim.app/Contents/Frameworks/evil.dylib
 codesign -f -s - --deep --timestamp=none /tmp/Victim.app
 open /tmp/Victim.app
 ```
-Vidokezo:
-- Hardened runtime, ikiwa `com.apple.security.cs.disable-library-validation` haipo, inazuia third‑party dylibs; angalia entitlements kwanza.
-- XPC services chini ya `Contents/XPCServices/` mara nyingi hu-load sibling frameworks—patch binaries zao kwa namna ile ile kwa persistence au privilege escalation paths.
+Notes:
+- Hardened runtime yenye `com.apple.security.cs.disable-library-validation` ambayo haipo huzuia third-party dylibs; kagua entitlements kwanza.
+- XPC services zilizo chini ya `Contents/XPCServices/` mara nyingi hupakia sibling frameworks—patch binaries zao kwa njia hiyo hiyo kwa ajili ya persistence au privilege escalation paths.
 
-## Muhtasari wa Ukaguzi wa Haraka
+## Quick Inspection Cheatsheet
 ```bash
 # list top-level bundle metadata
 /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" /Applications/App.app/Contents/Info.plist
@@ -101,6 +101,7 @@ otool -L /Applications/App.app/Contents/MacOS/App
 ```
 ## Marejeleo
 
-- [Bringing process injection into view(s): exploiting macOS apps using nib files (2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
-- [Dirty NIB & bundle resource tampering write‑up (2024)](https://karol-mazurek.medium.com/snake-apple-app-bundle-ext-f5c43a3c84c4)
+- [1] [Kuleta process injection kwenye mwonekano: kutumia vibaya apps za macOS kwa kutumia nib files (2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
+- [2] [Maelezo kuhusu Dirty NIB na resource tampering ya bundle (2024)](https://karol-mazurek.medium.com/snake-apple-app-bundle-ext-f5c43a3c84c4)
+
 {{#include ../../../banners/hacktricks-training.md}}

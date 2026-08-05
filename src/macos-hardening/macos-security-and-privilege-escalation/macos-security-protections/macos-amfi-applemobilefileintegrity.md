@@ -2,47 +2,47 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## AppleMobileFileIntegrity.kext and amfid
+## AppleMobileFileIntegrity.kext na amfid
 
-Inalenga katika kutekeleza uadilifu wa code inayoendesha kwenye mfumo, ikitoa logic nyuma ya XNU's code signature verification. Pia inaweza kuangalia entitlements na kushughulikia kazi nyingine nyeti kama kuruhusu debugging au kupata task ports.
+Inalenga kutekeleza uadilifu wa code inayotumika kwenye mfumo, huku ikitoa logic iliyo nyuma ya uthibitishaji wa code signature wa XNU. Pia inaweza kukagua entitlements na kushughulikia kazi nyingine nyeti kama kuruhusu debugging au kupata task ports.
 
-Zaidi ya hayo, kwa baadhi ya operations, kext hupendelea kuwasiliana na user space running daemon `/usr/libexec/amfid`. Uhusiano huu wa trust umetumiwa vibaya katika jailbreaks kadhaa.
+Zaidi ya hayo, kwa baadhi ya operations, kext hupendelea kuwasiliana na daemon ya user space `/usr/libexec/amfid`. Uhusiano huu wa trust umetumiwa vibaya katika jailbreaks kadhaa.
 
-Kwenye matoleo ya hivi karibuni ya macOS, AMFI haiwezi tena kupatikana kwa urahisi kama standalone on-disk kext, hivyo reversing kwa kawaida humaanisha kufanya kazi kutoka **kernelcache** au **KDK** badala ya kuvinjari `/System/Library/Extensions`.
+Kwenye matoleo ya hivi karibuni ya macOS, AMFI haionyeshwi tena kwa urahisi kama kext inayojitegemea kwenye disk, hivyo reversing kwa kawaida humaanisha kufanya kazi kutoka kwa **kernelcache** au **KDK** badala ya kuvinjari `/System/Library/Extensions`.
 
-AMFI hutumia **MACF** policies na husajili hooks zake mara tu inapoanzishwa. Pia, kuzuia kupakiwa kwake au kuiondoa kunaweza kusababisha kernel panic. Hata hivyo, kuna baadhi ya boot arguments zinazoruhusu kudhoofisha AMFI:
+AMFI hutumia policies za **MACF** na husajili hooks zake mara tu inapoanzishwa. Pia, kuzuia kupakiwa kwake au kuiondoa kunaweza kusababisha kernel panic. Hata hivyo, kuna boot arguments zinazowezesha kudhoofisha AMFI:
 
-- `amfi_unrestricted_task_for_pid`: Ruhusu task_for_pid kuruhusiwa bila entitlements zinazohitajika
-- `amfi_allow_any_signature`: Ruhusu code signature yoyote
-- `cs_enforcement_disable`: System-wide argument inayotumika kuzima code signing enforcement
-- `amfi_prevent_old_entitled_platform_binaries`: Void platform binaries zenye entitlements
-- `amfi_get_out_of_my_way`: Inazima amfi kabisa
+- `amfi_unrestricted_task_for_pid`: Huruhusu task_for_pid bila entitlements zinazohitajika
+- `amfi_allow_any_signature`: Huruhusu code signature yoyote
+- `cs_enforcement_disable`: Argument ya mfumo mzima inayotumika kuzima utekelezaji wa code signing
+- `amfi_prevent_old_entitled_platform_binaries`: Hubatilisha platform binaries zilizo na entitlements
+- `amfi_get_out_of_my_way`: Huzima amfi kabisa
 
-Hizi ni baadhi ya MACF policies inazosajili:
+Hizi ni baadhi ya policies za MACF inazozisajili:<sup>[1]</sup>
 
-- **`cred_check_label_update_execve:`** Label update itafanywa na kurudisha 1
-- **`cred_label_associate`**: Sasisha mac label slot ya AMFI kwa label
-- **`cred_label_destroy`**: Ondoa mac label slot ya AMFI
-- **`cred_label_init`**: Weka 0 kwenye mac label slot ya AMFI
-- **`cred_label_update_execve`:** Inaangalia entitlements za process ili kuona kama inapaswa kuruhusiwa kurekebisha labels.
-- **`file_check_mmap`:** Inaangalia kama mmap inapata memory na kuiweka kuwa executable. Katika hali hiyo inaangalia kama library validation inahitajika na ikiwa ndivyo, inaita library validation function.
-- **`file_check_library_validation`**: Inaita library validation function ambayo huangalia miongoni mwa mambo mengine kama platform binary inapakia platform binary nyingine au kama process na file mpya iliyopakiwa zina TeamID sawa. Certain entitlements pia zitaruhusu kupakia library yoyote.
-- **`policy_initbsd`**: Huanzisha trusted NVRAM Keys
-- **`policy_syscall`**: Inaangalia DYLD policies kama binary ina unrestricted segments, kama inapaswa kuruhusu env vars... hii pia huitwa wakati process inaanzishwa kupitia `amfi_check_dyld_policy_self()`.
-- **`proc_check_inherit_ipc_ports`**: Inaangalia kama wakati process inatekeleza binary mpya processes nyingine zenye SEND rights juu ya task port ya process zinapaswa kuzihifadhi au la. Platform binaries zinaruhusiwa, `get-task-allow` entitlement inaruhusu, `task_for_pid-allow` entitles zinaruhusiwa na binaries zenye TeamID sawa.
-- **`proc_check_expose_task`**: enforce entitlements
-- **`amfi_exc_action_check_exception_send`**: exception message inatumwa kwa debugger
-- **`amfi_exc_action_label_associate & amfi_exc_action_label_copy/populate & amfi_exc_action_label_destroy & amfi_exc_action_label_init & amfi_exc_action_label_update`**: Mzunguko wa maisha wa label wakati wa exception handling (debugging)
-- **`proc_check_get_task`**: Inaangalia entitlements kama `get-task-allow` ambayo inaruhusu processes nyingine kupata task port na `task_for_pid-allow`, ambazo huruhusu process kupata task ports za processes nyingine. Iwapo hakuna mojawapo ya hizo, hupanda hadi `amfid permitunrestricteddebugging` ili kuangalia kama inaruhusiwa.
-- **`proc_check_mprotect`**: Kataa ikiwa `mprotect` inaitwa na flag `VM_PROT_TRUSTED` ambayo inaonyesha kuwa eneo lazima litibiwe kana kwamba lina valid code signature.
-- **`vnode_check_exec`**: Huitwa wakati executable files zinapopakiwa kwenye memory na huweka `cs_hard | cs_kill` ambayo itaua process ikiwa mojawapo ya pages itakuwa invalid
-- **`vnode_check_getextattr`**: MacOS: Angalia `com.apple.root.installed` na `isVnodeQuarantined()`
+- **`cred_check_label_update_execve:`** Label update itafanywa na irejeshe 1
+- **`cred_label_associate`**: Husasisha AMFI's mac label slot kwa kutumia label
+- **`cred_label_destroy`**: Huondoa AMFI’s mac label slot
+- **`cred_label_init`**: Hupeleka 0 kwenye AMFI's mac label slot
+- **`cred_label_update_execve`:** Hukagua entitlements za process ili kuona kama inapaswa kuruhusiwa kurekebisha labels.
+- **`file_check_mmap`:** Hukagua kama mmap inapata memory na kuiweka kama executable. Katika hali hiyo hukagua kama library validation inahitajika na, ikiwa inahitajika, huita library validation function.
+- **`file_check_library_validation`**: Huita library validation function ambayo hukagua, miongoni mwa mambo mengine, kama platform binary inapakia platform binary nyingine au kama process na file mpya iliyopakiwa zina TeamID sawa. Entitlements fulani pia zitaruhusu kupakia library yoyote.
+- **`policy_initbsd`**: Huandaa Trusted NVRAM Keys
+- **`policy_syscall`**: Hukagua DYLD policies kama binary ina unrestricted segments, kama inapaswa kuruhusu env vars... pia hii huitwa process inapoanzishwa kupitia `amfi_check_dyld_policy_self()`.
+- **`proc_check_inherit_ipc_ports`**: Hukagua kama process inapotekeleza binary mpya, processes nyingine zenye SEND rights juu ya task port ya process hiyo zinapaswa kuendelea kuzitumia au la. Platform binaries zinaruhusiwa, entitlement ya `get-task-allow` inaruhusu, entitlements za `task_for_pid-allow` zinaruhusiwa, pamoja na binaries zenye TeamID sawa.
+- **`proc_check_expose_task`**: Hutekeleza entitlements
+- **`amfi_exc_action_check_exception_send`**: Ujumbe wa exception hutumwa kwa debugger
+- **`amfi_exc_action_label_associate & amfi_exc_action_label_copy/populate & amfi_exc_action_label_destroy & amfi_exc_action_label_init & amfi_exc_action_label_update`**: Mzunguko wa maisha wa label wakati wa kushughulikia exception (debugging)
+- **`proc_check_get_task`**: Hukagua entitlements kama `get-task-allow`, inayoruhusu processes nyingine kupata task port ya process, na `task_for_pid-allow`, inayoruhusu process kupata task ports za processes nyingine. Ikiwa hakuna kati ya hizo, huita `amfid permitunrestricteddebugging` ili kukagua kama inaruhusiwa.
+- **`proc_check_mprotect`**: Hukataa ikiwa `mprotect` inaitwa ikiwa na flag ya `VM_PROT_TRUSTED`, inayoonyesha kuwa region inapaswa kuchukuliwa kana kwamba ina code signature halali.
+- **`vnode_check_exec`**: Huitwa executable files zinapopakiwa kwenye memory na kuweka `cs_hard | cs_kill`, ambayo itaua process ikiwa page yoyote itakuwa invalid<sup>[2]</sup>
+- **`vnode_check_getextattr`**: MacOS: Hukagua `com.apple.root.installed` na `isVnodeQuarantined()`
 - **`vnode_check_setextattr`**: Kama get + com.apple.private.allow-bless na internal-installer-equivalent entitlement
-- **`vnode_check_signature`**: Code inayomwita XNU kuangalia code signature kwa kutumia entitlements, trust cache na `amfid`
-- **`proc_check_run_cs_invalid`**: Huzuia `ptrace()` calls (`PT_ATTACH` and `PT_TRACE_ME`). Inaangalia entitlements zozote za `get-task-allow`, `run-invalid-allow` na `run-unsigned-code` na kama hakuna, inaangalia kama debugging inaruhusiwa.
-- **`proc_check_map_anon`**: Ikiwa mmap inaitwa na **`MAP_JIT`** flag, AMFI itaangalia entitlement ya `dynamic-codesigning`.
+- **`vnode_check_signature`**: Code inayoiita XNU ili ikague code signature kwa kutumia entitlements, trust cache na `amfid`<sup>[3]</sup>
+- **`proc_check_run_cs_invalid`**: Huingilia calls za `ptrace()` (`PT_ATTACH` na `PT_TRACE_ME`). Hukagua uwepo wa entitlements `get-task-allow`, `run-invalid-allow` na `run-unsigned-code`, na ikiwa hakuna, hukagua kama debugging inaruhusiwa.
+- **`proc_check_map_anon`**: Ikiwa mmap inaitwa ikiwa na flag ya **`MAP_JIT`**, AMFI itakagua entitlement ya `dynamic-codesigning`.
 
-`AMFI.kext` pia hutoa API kwa ajili ya other kernel extensions, na inawezekana kupata dependencies zake kwa:
+`AMFI.kext` pia hutoa API kwa kernel extensions nyingine, na inawezekana kupata dependencies zake kwa kutumia:
 ```bash
 kextstat | grep " 19 " | cut -c2-5,50- | cut -d '(' -f1
 Executing: /usr/bin/kmutil showloaded
@@ -67,20 +67,20 @@ No variant specified, falling back to release
 ```
 ## amfid
 
-Hii ni daemon inayofanya kazi kwenye user mode ambayo `AMFI.kext` itatumia kuangalia code signatures kwenye user mode.\
-Ili `AMFI.kext` iweze kuwasiliana na daemon, hutumia mach messages kupitia port `HOST_AMFID_PORT` ambayo ni special port `18`.
+Hii ni daemon inayotumika katika user mode ambayo `AMFI.kext` itatumia kukagua code signatures katika user mode.\
+Ili `AMFI.kext` iwasiliane na daemon, hutumia mach messages kupitia port `HOST_AMFID_PORT`, ambayo ni special port `18`.
 
-Kumbuka kuwa katika macOS si tena inawezekana kwa root processes ku-hijack special ports kwa sababu zinalindwa na `SIP` na ni launchd pekee inayoweza kuzipata. Katika iOS hukaguliwa kwamba process inayotuma response kurudi ina CDHash iliyohardcodewa ya `amfid`.
+Kumbuka kwamba katika macOS, root processes hawawezi tena kuteka special ports, kwa sababu zinalindwa na `SIP` na ni launchd pekee inayoweza kuzipata. Katika iOS, hukaguliwa kwamba process inayotuma response ni ile iliyo na CDHash ya `amfid` iliyowekwa hardcoded.
 
-Inawezekana kuona wakati `amfid` inapoombwa ku-check binary na response yake kwa ku-debug na kuweka breakpoint kwenye `mach_msg`.
+Inawezekana kuona wakati `amfid` inapoulizwa kukagua binary na response yake kwa ku-debug na kuweka breakpoint katika `mach_msg`.
 
-Mara message inapopokelewa kupitia special port, **MIG** hutumika kutuma kila function kwenda kwenye function ambayo inaita. Main functions zilireversed na kuelezwa ndani ya book.
+Mara ujumbe unapopokelewa kupitia special port, **MIG** hutumiwa kutuma kila function kwenye function inayoiita. Main functions zilibadilishwa reverse engineering na kuelezwa ndani ya kitabu.
 
-### DYLD policy and library validation
+### Sera ya DYLD na uthibitishaji wa library
 
-Toleo za hivi karibuni za `dyld` huita `amfi_check_dyld_policy_self()` mapema sana kutoka `configureProcessRestrictions()` ili kuuliza AMFI kama process inaweza kutumia `DYLD_*` path variables, interposing, fallback paths, embedded variables, au kustahimili failed library insertion. Kwa hiyo, unapochambua injection surface haitoshi kukagua tu Mach-O load commands: pia unahitaji kukagua entitlements na runtime flags ambazo AMFI itatafsiri kuwa `dyld` policy.
+Matoleo ya hivi karibuni ya `dyld` huita `amfi_check_dyld_policy_self()` mapema sana kutoka `configureProcessRestrictions()` ili kuuliza AMFI ikiwa process inaweza kutumia path variables za `DYLD_*`, interposing, fallback paths, embedded variables, au kuvumilia library insertion iliyoshindikana. Kwa hiyo, wakati wa kuchambua injection surface, haitoshi kukagua Mach-O load commands pekee: unahitaji pia kukagua entitlements na runtime flags ambazo AMFI itatafsiri kuwa sera ya `dyld`.
 
-Mtiririko wa practical triage ni:
+Mchakato wa vitendo wa triage ni:
 ```bash
 BIN=/path/to/app/Contents/MacOS/binary
 
@@ -91,15 +91,15 @@ egrep "disable-library-validation|clear-library-validation|allow-dyld-environmen
 # Runtime flags / TeamID / hardened-runtime metadata
 codesign -dvvv "$BIN" 2>&1 | egrep "TeamIdentifier=|Runtime Version|flags="
 ```
-Kwenye macOS ya kisasa, binaries nyingi za Apple hazibebi `com.apple.security.cs.disable-library-validation` moja kwa moja tena, na badala yake huja na `com.apple.private.security.clear-library-validation`. Katika hali hiyo, library validation haizimwi wakati wa `execve`: mchakato lazima utumie `csops(..., CS_OPS_CLEAR_LV, ...)` kwenye yenyewe, na XNU huruhusu tu operesheni hiyo kwa mchakato unaopiga simu wakati entitlement hiyo ipo. Kutoka upande wa offensive, hii ni muhimu kwa sababu target inaweza kuwa injectable tu **baada ya** kufika kwenye code path inayofuta LV waziwazi (kwa mfano, muda mfupi kabla ya kupakia optional plugins).
+Kwenye macOS za kisasa, binary nyingi za Apple hazibebi tena `com.apple.security.cs.disable-library-validation` moja kwa moja, na badala yake huja na `com.apple.private.security.clear-library-validation`. Katika hali hiyo, library validation haizimwi wakati wa `execve`: mchakato lazima uite `csops(..., CS_OPS_CLEAR_LV, ...)` wenyewe, na XNU huruhusu operesheni hiyo kwenye mchakato unaoiita tu wakati entitlement ipo. Kwa mtazamo wa offensive, hili ni muhimu kwa sababu target inaweza kuwa injectable **baada tu** ya kufikia code path inayofuta LV waziwazi (kwa mfano, muda mfupi kabla ya kupakia optional plugins).<sup>[4][5]</sup>
 
 ## Provisioning Profiles
 
-provisioning profile inaweza kutumika kusaini code. Zipo profile za **Developer** ambazo zinaweza kutumika kusaini code na kuijaribu, na **Enterprise** profiles ambazo zinaweza kutumika kwenye devices zote.
+Provisioning profile inaweza kutumika kusaini code. Kuna profiles za **Developer** zinazoweza kutumika kusaini code na kuifanyia majaribio, na profiles za **Enterprise** zinazoweza kutumika kwenye vifaa vyote.
 
 Baada ya App kuwasilishwa kwenye Apple Store, ikikubaliwa, husainiwa na Apple na provisioning profile haihitajiki tena.
 
-Profile kwa kawaida hutumia extension `.mobileprovision` au `.provisionprofile` na inaweza dumped kwa kutumia:
+Profile kwa kawaida hutumia extension `.mobileprovision` au `.provisionprofile` na inaweza kudumpiwa kwa:
 ```bash
 openssl asn1parse -inform der -in /path/to/profile
 
@@ -107,50 +107,53 @@ openssl asn1parse -inform der -in /path/to/profile
 
 security cms -D -i /path/to/profile
 ```
-Ingawa wakati mwingine huitwa certificated, provisioning profiles hizi zina zaidi ya certificate moja:
+Ingawa wakati mwingine huitwa certificated, hizi provisioning profiles zina zaidi ya certificate moja:
 
 - **AppIDName:** Kitambulisho cha Application
-- **AppleInternalProfile**: Hii huashiria kuwa ni profile ya Apple Internal
-- **ApplicationIdentifierPrefix**: Huongezwa mbele ya AppIDName (sawa na TeamIdentifier)
-- **CreationDate**: Tarehe katika muundo `YYYY-MM-DDTHH:mm:ssZ`
-- **DeveloperCertificates**: Safu ya (kawaida moja) certificate(s), iliyosimbwa kama Base64 data
+- **AppleInternalProfile**: Huashiria kwamba hii ni Apple Internal profile
+- **ApplicationIdentifierPrefix**: Huongezwa mwanzoni mwa AppIDName (sawa na TeamIdentifier)
+- **CreationDate**: Tarehe katika muundo wa `YYYY-MM-DDTHH:mm:ssZ`
+- **DeveloperCertificates**: Array ya certificate moja au zaidi (kwa kawaida moja), iliyosimbwa kama data ya Base64
 - **Entitlements**: Entitlements zinazoruhusiwa pamoja na entitlements za profile hii
-- **ExpirationDate**: Tarehe ya kuisha katika muundo `YYYY-MM-DDTHH:mm:ssZ`
+- **ExpirationDate**: Tarehe ya kuisha katika muundo wa `YYYY-MM-DDTHH:mm:ssZ`
 - **Name**: Jina la Application, sawa na AppIDName
-- **ProvisionedDevices**: Safu (kwa developer certificates) ya UDIDs ambazo profile hii ni halali kwao
+- **ProvisionedDevices**: Array (kwa developer certificates) ya UDIDs ambazo profile hii ni halali kwake
 - **ProvisionsAllDevices**: Boolean (true kwa enterprise certificates)
-- **TeamIdentifier**: Safu ya (kawaida moja) mfuatano wa herufi na nambari unaotumiwa kumtambua developer kwa madhumuni ya inter-app interaction
-- **TeamName**: Jina linalosomeka kwa binadamu linalotumiwa kumtambua developer
-- **TimeToLive**: Uhalali (kwa siku) wa certificate
-- **UUID**: Universal Unique Identifier ya profile hii
+- **TeamIdentifier**: Array ya string moja au zaidi za alphanumeric (kwa kawaida moja), zinazotumika kumtambua developer kwa madhumuni ya inter-app interaction
+- **TeamName**: Jina linaloweza kusomeka na binadamu linalotumika kumtambua developer
+- **TimeToLive**: Uhalali wa certificate (kwa siku)
+- **UUID**: Kitambulisho cha kipekee kote ulimwenguni cha profile hii
 - **Version**: Kwa sasa imewekwa kuwa 1
 
-Kumbuka kuwa ingizo la entitlements litakuwa na seti iliyozuiliwa ya entitlements na provisioning profile itaweza tu kutoa entitlements hizo mahususi ili kuzuia kutoa Apple private entitlements.
+Kumbuka kwamba entry ya entitlements itakuwa na seti iliyozuiwa ya entitlements, na provisioning profile itaweza kutoa entitlements hizo maalum pekee ili kuzuia kutolewa kwa Apple private entitlements.
 
-Kumbuka kwamba profiles kwa kawaida hupatikana katika `/var/MobileDeviceProvisioningProfiles` na inawezekana kuzikagua kwa **`security cms -D -i /path/to/profile`**
+Kumbuka kwamba profiles kwa kawaida hupatikana katika `/var/MobileDeviceProvisioningProfiles`, na inawezekana kuzikagua kwa **`security cms -D -i /path/to/profile`**
 
 ## **libmis.dylib**
 
-Hili ni external library ambalo `amfid` huita ili kuuliza kama inapaswa kuruhusu kitu fulani au la. Hili limekuwa likitumiwa vibaya kihistoria katika jailbreaking kwa kuendesha toleo lenye backdoor la hilo ambalo lingeiruhusu kila kitu.
+Hii ni external library ambayo `amfid` huiita ili kuuliza kama inapaswa kuruhusu kitu au la. Kwa kihistoria, imetumiwa vibaya katika jailbreaking kwa kuendesha toleo lake lililo na backdoor ambalo lingeruhusu kila kitu.
 
-Katika macOS hili liko ndani ya `MobileDevice.framework`.
+Katika macOS, hii imo ndani ya `MobileDevice.framework`.
 
 ## AMFI Trust Caches
 
-Trust caches si dhana ya iOS pekee. Kwenye macOS ya kisasa, hasa kwenye **Apple silicon**, static trust cache na loadable trust caches ni sehemu ya Secure Boot chain. Wakati **CodeDirectory hash** ya Mach-O ipo humo, AMFI inaweza kuipa **platform privilege** bila kufanya uthibitishaji zaidi wa authenticity wakati wa launch. Hii pia inamaanisha Apple inaweza kuifunga platform binaries kwa toleo mahususi la OS na kuzuia Apple-signed binaries za zamani zisirudishwe kutumika kwenye mifumo mipya.
+Trust caches si dhana ya iOS pekee. Katika macOS za kisasa, hasa kwenye **Apple silicon**, static trust cache na loadable trust caches ni sehemu ya Secure Boot chain. Hash ya **CodeDirectory** ya Mach-O inapokuwepo humo, AMFI inaweza kuipa **platform privilege** bila kufanya authenticity checks zaidi wakati wa kuizindua. Hii pia inamaanisha kwamba Apple inaweza kufunga platform binaries kwenye toleo maalum la OS na kuzuia Apple-signed binaries za zamani kuchezeshwa tena kwenye systems mpya.<sup>[6]</sup>
 
-Kwenye matoleo ya hivi karibuni ya macOS, trust-cache metadata pia imeunganishwa na **launch constraints**, hivyo copied system apps na binaries zinapoanzishwa kutoka parent/location isiyo sahihi zinaweza kukataliwa na AMFI hata kama bado zime-signiwa na Apple. Mchakato wa kina wa extraction na reversing umeelezewa katika:
+Kwenye matoleo ya hivi karibuni ya macOS, metadata ya trust cache pia inahusishwa na **launch constraints**, kwa hivyo system apps na binaries zilizonakiliwa na kuanzishwa kutoka kwa parent/location isiyofaa zinaweza kukataliwa na AMFI hata kama bado zina Apple signature. Workflow ya kina ya extraction na reversing imeelezwa katika:
 
 {{#ref}}
 macos-launch-environment-constraints.md
 {{#endref}}
 
-Katika iOS na jailbreak research bado utaona modeli ya jadi ya **loadable trust caches** ikitumika kuwhitelist ad-hoc signed binaries.
+Katika iOS na jailbreak research bado utapata traditional model ya **loadable trust caches** ikitumika kuweka kwenye whitelist binaries zilizosainiwa kwa ad-hoc.
 
 ## References
 
-- [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
-- [https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/)
-- [https://support.apple.com/guide/security/trust-caches-sec7d38fbf97/web](https://support.apple.com/guide/security/trust-caches-sec7d38fbf97/web)
+- [1] [XNU — `security/mac_policy.h` (MACF policy ops AMFI registers, incl. `mpo_policy_syscall`)](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_policy.h)
+- [2] [XNU — `osfmk/kern/cs_blobs.h` (`CS_*` code-signing flags AMFI sets)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [3] [XNU — `bsd/kern/ubc_subr.c` (code-signature blob parsing and validation)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/ubc_subr.c)
+- [4] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` operations and `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [5] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` handler)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
+- [6] [Apple Platform Security Guide — Trust caches](https://support.apple.com/guide/security/trust-caches-sec7d38fbf97/web)
 
 {{#include ../../../banners/hacktricks-training.md}}

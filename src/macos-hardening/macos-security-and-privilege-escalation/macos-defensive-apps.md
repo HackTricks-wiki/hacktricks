@@ -4,27 +4,27 @@
 
 ## Firewalls
 
-- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): Itafuatilia kila muunganisho unaofanywa na kila process. Kulingana na mode (silent allow connections, silent deny connection and alert) itakuonyesha **alert** kila wakati muunganisho mpya unapowekwa. Pia ina GUI nzuri sana kuonyesha taarifa hizi zote.
-- [**LuLu**](https://objective-see.org/products/lulu.html): Objective-See firewall. Hii ni firewall ya msingi ambayo itakuonyesha alert kwa connections za shaka (ina GUI lakini si ya kupendeza kama ya Little Snitch).
+- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): Itafuatilia kila connection inayofanywa na kila process. Kulingana na mode (kuruhusu connections kimya, kukataa connection kimya na kutoa alert) ita **kuonyesha alert** kila mara connection mpya inapoanzishwa. Pia ina GUI nzuri sana ya kuona taarifa hizi zote.
+- [**LuLu**](https://objective-see.org/products/lulu.html): Firewall ya Objective-See. Hii ni firewall ya msingi ambayo itakupa alert kuhusu connections zenye mashaka (ina GUI lakini si nzuri kama ya Little Snitch).
 
 ## Persistence detection
 
-- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Application ya Objective-See ambayo itatafuta katika maeneo kadhaa ambapo **malware could be persisting** (ni tool ya mara moja, si monitoring service).
-- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Kama KnockKnock kwa kufuatilia processes zinazozalisha persistence.
+- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Application ya Objective-See itakayotafuta katika maeneo kadhaa ambapo **malware inaweza kuwa imeweka persistence** (ni tool ya matumizi ya mara moja, si monitoring service).
+- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Kama KnockKnock, kwa ku-monitor processes zinazozalisha persistence.
 
 ## Keyloggers detection
 
-- [**ReiKey**](https://objective-see.org/products/reikey.html): Application ya Objective-See ya kutafuta **keyloggers** zinazoweka keyboard "event taps"
+- [**ReiKey**](https://objective-see.org/products/reikey.html): Application ya Objective-See ya kutafuta **keyloggers** zinazoweka "event taps" za keyboard.
 
 ## Endpoint telemetry / execution control
 
-- [**Santa**](https://santa.dev/): Mfumo wa binary authorization na monitoring kwa macOS. Hutumia client wa **Endpoint Security** kuidhinisha matukio ya **`exec`** kabla code haijatekelezwa, kwa hiyo ni ya kawaida katika enterprise fleets inayolenga **allowlisting/denylisting** badala ya detection ya post-execution pekee.
-- [**Mac Monitor**](https://github.com/redcanaryco/mac-monitor): Tool ya dynamic analysis ya macOS inayofanana na Procmon. Hu-ingest **Endpoint Security telemetry** (process, file, interprocess, login, na matukio yanayohusiana na XProtect) na ni muhimu kuelewa sensor yenye msingi wa ES iliyokomaa inaweza kuona nini hasa.
-- [**ProcessMonitor / FileMonitor / DNSMonitor**](https://objective-see.org/products/utilities.html): Tools nyepesi za Objective-See kwa **process**, **file**, na **DNS** telemetry. Kwenye macOS za kisasa zina prerequisites za ziada kama **root**, **Terminal Full Disk Access**, au **System/Network Extension approval**. Kwa mawazo zaidi ya instrumentation angalia [this other page about macOS app inspection/debugging](macos-apps-inspecting-debugging-and-fuzzing/README.md).
+- [**Santa**](https://santa.dev/): Mfumo wa binary authorization na monitoring kwa macOS. Hutumia client ya **Endpoint Security** ku-authorize events za **`exec`** kabla code haija-run, hivyo ni ya kawaida katika enterprise fleets zinazolenga **allowlisting/denylisting** badala ya kutegemea detection baada ya execution pekee.
+- [**Mac Monitor**](https://github.com/redcanaryco/mac-monitor): Tool ya dynamic analysis ya macOS inayofanana na Procmon. Hukusanya **Endpoint Security telemetry** (process, file, interprocess, login, na events zinazohusiana na XProtect) na ni muhimu kuelewa kile ambacho sensor iliyokomaa inayotumia ES inaweza kweli ku-observe.<sup>[2]</sup>
+- [**ProcessMonitor / FileMonitor / DNSMonitor**](https://objective-see.org/products/utilities.html): Tools nyepesi za Objective-See za **process**, **file**, na **DNS** telemetry. Katika macOS za kisasa zina prerequisites za ziada kama **root**, **Terminal Full Disk Access**, au idhini ya **System/Network Extension**. Kwa mawazo zaidi ya instrumentation, angalia [ukurasa huu mwingine kuhusu macOS app inspection/debugging](macos-apps-inspecting-debugging-and-fuzzing/README.md).
 
 ## Quick triage of defensive tooling
 
-U nyingi za kisasa za usalama wa macOS huendeshwa kama mchanganyiko wa **System Extensions / Endpoint Security clients**, **launchd agents/daemons**, na applications zenye **Full Disk Access**. Orodha ya haraka ya operator:
+Bidhaa nyingi za kisasa za macOS security huendeshwa kama mchanganyiko wa **System Extensions / Endpoint Security clients**, **launchd agents/daemons**, na applications zilizo na **Full Disk Access**. Checklist fupi ya operator:
 ```bash
 # System / network extensions (EDRs, DNS filters, firewalls, VPNs)
 systemextensionsctl list
@@ -48,15 +48,15 @@ echo "== $db =="
 sqlite3 "$db" 'SELECT service,client,auth_value,last_modified FROM access WHERE service IN ("kTCCServiceSystemPolicyAllFiles","kTCCServiceEndpointSecurityClient") ORDER BY last_modified DESC;'
 done
 ```
-If `systemextensionsctl list` inaonyesha sensor kama **`[activated enabled]`**, kwa kawaida hiyo ndiyo dalili ya haraka zaidi kwamba extension iko hai kweli. Kwenye **macOS 15 Sequoia na baadaye**, MDM pia inaweza kuweka specific security extensions kuwa **non-removable from the UI**, hivyo "disable it from System Settings" si tena dhana salama. Kwa internals, ona [macOS System Extensions](mac-os-architecture/macos-system-extensions.md).
+Ikiwa `systemextensionsctl list` inaonyesha sensor kama **`[activated enabled]`**, kwa kawaida hiyo ndiyo kiashiria cha haraka zaidi kwamba extension inafanya kazi. Kwenye **macOS 15 Sequoia na matoleo ya baadaye**, MDM pia inaweza kuweka security extensions mahususi kuwa **zisizoweza kuondolewa kupitia UI**, kwa hivyo dhana kwamba "izime kupitia System Settings" si salama tena. Kwa maelezo ya ndani, tazama [macOS System Extensions](mac-os-architecture/macos-system-extensions.md).
 
-## Recent native telemetry defenders can consume
+## Telemetry ya asili ya hivi karibuni ambayo defenders wanaweza kutumia
 
-Toleo za hivi karibuni za macOS zilifanya baadhi ya user-driven bypasses ambazo zamani zilikuwa ngumu kutambua zionekane zaidi kwa blue teams:
+Matoleo ya hivi karibuni ya macOS yamefanya baadhi ya bypasses zilizokuwa zikifanywa na watumiaji na ambazo zilikuwa vigumu kugundua kuwa na kelele nyingi zaidi kwa blue teams:
 
-- **macOS 15+**: Endpoint Security clients zinaweza kupokea **`gatekeeper_user_override`** events, hivyo manual Gatekeeper bypasses zinaweza kuandikwa centrally kwenye logs.
-- **Current macOS Endpoint Security tooling** pia inaweza kusoma **XProtect malware detection** events, jambo linalorahisisha kuthibitisha kile ambacho Apple tayari iligundua kwenye endpoint.
-- **macOS 15.4+**: Endpoint Security inaongeza **`tcc_modify`**, ambayo hatimaye inawapa defenders njia supported ya kufuatilia **TCC grants/revokes** badala ya kusoma TCC debug logs.
+- **macOS 15+**: Wateja wa Endpoint Security wanaweza kupokea matukio ya **`gatekeeper_user_override`**, hivyo bypasses za Gatekeeper zinazofanywa mwenyewe zinaweza kurekodiwa centrally.
+- **Current macOS Endpoint Security tooling** pia inaweza kuingiza matukio ya **XProtect malware detection**, na kurahisisha kuthibitisha kile ambacho Apple tayari iligundua kwenye endpoint.
+- **macOS 15.4+**: Endpoint Security inaongeza **`tcc_modify`**, ambayo hatimaye huwapa defenders njia inayoungwa mkono ya kufuatilia **TCC grants/revokes** badala ya kuchanganua TCC debug logs.<sup>[1]</sup>
 ```bash
 # Gatekeeper user overrides
 sudo eslogger gatekeeper_user_override
@@ -67,11 +67,11 @@ sudo eslogger xp_malware_detected
 # macOS 15.4+
 sudo eslogger tcc_modify
 ```
-Hii ni muhimu kwa watetezi na pia kwa red teamers wanaofanya self-assessment: ikiwa lengo lina mature ES-based stack, **user-approved Gatekeeper / TCC bypass chains zinaweza kuonekana zaidi kuliko zilivyokuwa hapo awali**. Kwa background kuhusu protections hizi, tazama [Gatekeeper / Quarantine / XProtect](macos-security-protections/macos-gatekeeper.md) na [TCC](macos-security-protections/macos-tcc/README.md).
+Hii ni muhimu kwa defenders na red teamers wanaofanya self-assessment: ikiwa target ina stack iliyokomaa inayotegemea ES, **user-approved Gatekeeper / TCC bypass chains huenda zikaonekana zaidi kuliko zamani**. Kwa maelezo ya msingi kuhusu protections hizi, angalia [Gatekeeper / Quarantine / XProtect](macos-security-protections/macos-gatekeeper.md) na [TCC](macos-security-protections/macos-tcc/README.md).
 
-## References
+## Marejeo
 
-- [**Objective-See - TCCing is Believing! Apple finally adds TCC events to Endpoint Security!**](https://objective-see.org/blog/blog_0x7F.html)
-- [**Red Canary - Introducing: Mac Monitor**](https://redcanary.com/blog/threat-detection/mac-monitor/)
+- [1] [Objective-See - TCCing is Believing! Apple finally adds TCC events to Endpoint Security!](https://objective-see.org/blog/blog_0x7F.html)
+- [2] [Red Canary - Introducing: Mac Monitor](https://redcanary.com/blog/threat-detection/mac-monitor/)
 
 {{#include ../../banners/hacktricks-training.md}}

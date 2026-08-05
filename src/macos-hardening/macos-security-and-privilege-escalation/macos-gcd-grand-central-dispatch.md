@@ -2,49 +2,49 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Maelezo ya Msingi
 
-**Grand Central Dispatch (GCD),** pia inajulikana kama **libdispatch** (`libdispatch.dyld`), inapatikana katika macOS na iOS. Ni teknolojia iliyotengenezwa na Apple kuboresha msaada wa programu kwa utekelezaji wa sambamba (multithreaded) kwenye vifaa vya multicore.
+**Grand Central Dispatch (GCD),** pia inajulikana kama **libdispatch** (`libdispatch.dyld`), inapatikana kwenye macOS na iOS. Ni teknolojia iliyotengenezwa na Apple ili kuboresha usaidizi wa application kwa utekelezaji wa wakati mmoja (multithreaded) kwenye hardware yenye multicore.
 
-**GCD** inatoa na kusimamia **FIFO queues** ambazo programu yako inaweza **kuwasilisha kazi** katika mfumo wa **block objects**. Blocks zilizowasilishwa kwa dispatch queues zina **tekelezwa kwenye mchanganyiko wa nyuzi** zinazodhibitiwa kikamilifu na mfumo. GCD kiotomatiki huunda nyuzi za kutekeleza kazi katika dispatch queues na kupanga kazi hizo zitekelezwe kwenye cores zinazopatikana.
+**GCD** hutoa na kudhibiti **FIFO queues** ambazo application yako inaweza **kutuma tasks** kwa mfumo wa **block objects**. Blocks zinazotumwa kwenye dispatch queues **hutekelezwa kwenye pool ya threads** inayodhibitiwa kikamilifu na system. GCD huunda threads kiotomatiki kwa ajili ya kutekeleza tasks kwenye dispatch queues na hupanga tasks hizo zitekelezwe kwenye cores zinazopatikana.
 
 > [!TIP]
-> Kwa muhtasari, ili kutekeleza msimbo kwa **sambamba**, michakato inaweza kutuma **blocks za msimbo kwa GCD**, ambayo itashughulikia utekelezaji wao. Hivyo, michakato haisababisha nyuzi mpya; **GCD inatekeleza msimbo uliotolewa kwa mchanganyiko wake wa nyuzi** (ambayo inaweza kuongezeka au kupungua kadri inavyohitajika).
+> Kwa muhtasari, ili kutekeleza code kwa **parallel**, processes zinaweza kutuma **blocks za code kwa GCD**, ambayo itashughulikia utekelezaji wake. Kwa hiyo, processes hazitengenezi threads mpya; **GCD hutekeleza code iliyotolewa kwa kutumia pool yake ya threads** (ambayo inaweza kuongezeka au kupungua inapohitajika).
 
-Hii ni muhimu sana kusimamia utekelezaji wa sambamba kwa mafanikio, ikipunguza kwa kiasi kikubwa idadi ya nyuzi ambazo michakato inaunda na kuboresha utekelezaji wa sambamba. Hii ni bora kwa kazi zinazohitaji **paralelism mkubwa** (brute-forcing?) au kwa kazi ambazo hazipaswi kuzuia nyuzi kuu: Kwa mfano, nyuzi kuu kwenye iOS inashughulikia mwingiliano wa UI, hivyo kazi nyingine yoyote ambayo inaweza kufanya programu ikang'ang'ane (kutafuta, kufikia wavuti, kusoma faili...) inasimamiwa kwa njia hii.
+Hii husaidia sana kudhibiti utekelezaji wa parallel kwa mafanikio, huku ikipunguza kwa kiasi kikubwa idadi ya threads zinazoundwa na processes na kuboresha utekelezaji wa parallel. Hii ni bora kwa tasks zinazohitaji **parallelism kubwa** (brute-forcing?) au kwa tasks ambazo hazipaswi kuzuia main thread: Kwa mfano, main thread kwenye iOS hushughulikia mwingiliano wa UI, kwa hiyo utendaji mwingine wowote unaoweza kufanya app isigande (kutafuta, kufikia web, kusoma file...) hudhibitiwa kwa njia hii.
 
 ### Blocks
 
-Block ni **sehemu ya msimbo iliyo na uhuru** (kama kazi yenye hoja inayorejesha thamani) na inaweza pia kubainisha mabadiliko yaliyofungwa.\
-Hata hivyo, katika ngazi ya kompyuta blocks hazipo, ni `os_object`s. Kila moja ya vitu hivi inaundwa na muundo miwili:
+Block ni **sehemu ya code inayojitosheleza** (kama function yenye arguments inayorudisha value) na pia inaweza kubainisha variables zilizofungwa.\
+Hata hivyo, katika kiwango cha compiler blocks hazipo; ni `os_object`s. Kila moja ya objects hizi imeundwa na structures mbili:
 
 - **block literal**:
-- Inaanza na **`isa`** uwanja, ikielekeza kwenye darasa la block:
+- Huanzia kwenye field ya **`isa`**, inayoelekeza kwenye class ya block:
 - `NSConcreteGlobalBlock` (blocks kutoka `__DATA.__const`)
-- `NSConcreteMallocBlock` (blocks kwenye heap)
-- `NSConcreateStackBlock` (blocks kwenye stack)
-- Ina **`flags`** (zinazoashiria maeneo yaliyopo katika block descriptor) na baadhi ya bytes zilizohifadhiwa
-- Pointer ya kazi ya kuita
-- Pointer kwa block descriptor
-- Mabadiliko yaliyopitishwa kwenye block (ikiwa yapo)
-- **block descriptor**: Ukubwa wake unategemea data iliyopo (kama ilivyoashiriwa katika flags zilizopita)
-- Ina baadhi ya bytes zilizohifadhiwa
+- `NSConcreteMallocBlock` (blocks zilizo kwenye heap)
+- `NSConcreateStackBlock` (blocks zilizo kwenye stack)
+- Ina **`flags`** (zinazoonyesha fields zilizopo kwenye block descriptor) na bytes zilizotengwa
+- Function pointer ya kuita
+- Pointer inayoelekea kwenye block descriptor
+- Variables zilizoingizwa kwenye block (ikiwa zipo)
+- **block descriptor**: Ukubwa wake hutegemea data iliyopo (kama inavyoonyeshwa na flags zilizotangulia)
+- Ina bytes zilizotengwa
 - Ukubwa wake
-- Kwa kawaida itakuwa na pointer kwa saini ya mtindo wa Objective-C ili kujua ni nafasi ngapi inahitajika kwa params (flag `BLOCK_HAS_SIGNATURE`)
-- Ikiwa mabadiliko yanarejelewa, block hii pia itakuwa na pointers kwa msaada wa nakala (kuhamasisha thamani mwanzoni) na msaada wa kutupa (kuachilia).
+- Kwa kawaida itakuwa na pointer inayoelekea kwenye signature ya mtindo wa Objective-C ili kujua kiasi cha nafasi kinachohitajika kwa params (flag `BLOCK_HAS_SIGNATURE`)
+- Ikiwa variables zimereferenziwa, block hii pia itakuwa na pointers zinazoelekea kwenye copy helper (inayonakili value mwanzoni) na dispose helper (inayoifuta).
 
 ### Queues
 
-Dispatch queue ni kitu chenye jina kinachotoa mpangilio wa FIFO wa blocks kwa utekelezaji.
+Dispatch queue ni object yenye jina inayotoa mpangilio wa FIFO wa blocks kwa ajili ya utekelezaji.
 
-Blocks huwekwa katika queues ili kutekelezwa, na hizi zinasaidia njia 2: `DISPATCH_QUEUE_SERIAL` na `DISPATCH_QUEUE_CONCURRENT`. Bila shaka **serial** moja **haitakuwa na matatizo ya mashindano** kwani block haitatekelezwa hadi ile ya awali ikamilike. Lakini **aina nyingine ya queue inaweza kuwa nayo**.
+Blocks huwekwa kwenye queues ili zitekelezwe, na hizi zinaunga mkono modes 2: `DISPATCH_QUEUE_SERIAL` na `DISPATCH_QUEUE_CONCURRENT`. Bila shaka, ile ya **serial** **haitakuwa na** matatizo ya race condition kwa sababu block haitatekelezwa hadi ile iliyotangulia imalize. Lakini **aina nyingine ya queue inaweza kuwa nayo**.
 
-Queues za kawaida:
+Queues za default:
 
 - `.main-thread`: Kutoka `dispatch_get_main_queue()`
-- `.libdispatch-manager`: Meneja wa queue wa GCD
-- `.root.libdispatch-manager`: Meneja wa queue wa GCD
-- `.root.maintenance-qos`: Kazi za kipaumbele cha chini
+- `.libdispatch-manager`: Queue manager ya GCD
+- `.root.libdispatch-manager`: Queue manager ya GCD
+- `.root.maintenance-qos`: Tasks zenye priority ya chini zaidi
 - `.root.maintenance-qos.overcommit`
 - `.root.background-qos`: Inapatikana kama `DISPATCH_QUEUE_PRIORITY_BACKGROUND`
 - `.root.background-qos.overcommit`
@@ -54,42 +54,42 @@ Queues za kawaida:
 - `.root.background-qos.overcommit`
 - `.root.user-initiated-qos`: Inapatikana kama `DISPATCH_QUEUE_PRIORITY_HIGH`
 - `.root.background-qos.overcommit`
-- `.root.user-interactive-qos`: Kipaumbele cha juu zaidi
+- `.root.user-interactive-qos`: Priority ya juu zaidi
 - `.root.background-qos.overcommit`
 
-Kumbuka kwamba itakuwa mfumo ambao utaamua **ni nyuzi zipi zinashughulikia queues zipi kila wakati** (nyuzi nyingi zinaweza kufanya kazi katika queue moja au nyuzi moja inaweza kufanya kazi katika queues tofauti kwa wakati fulani)
+Kumbuka kwamba ni system inayoamua **ni threads zipi zitashughulikia queues zipi kwa kila wakati** (threads nyingi zinaweza kufanya kazi kwenye queue moja, au thread ileile inaweza kufanya kazi kwenye queues tofauti wakati fulani)
 
 #### Attributtes
 
-Wakati wa kuunda queue na **`dispatch_queue_create`** hoja ya tatu ni `dispatch_queue_attr_t`, ambayo kwa kawaida ni `DISPATCH_QUEUE_SERIAL` (ambayo kwa kweli ni NULL) au `DISPATCH_QUEUE_CONCURRENT` ambayo ni pointer kwa muundo wa `dispatch_queue_attr_t` ambao unaruhusu kudhibiti baadhi ya vigezo vya queue.
+Wakati wa kuunda queue kwa kutumia **`dispatch_queue_create`**, argument ya tatu ni `dispatch_queue_attr_t`, ambayo kwa kawaida huwa ama `DISPATCH_QUEUE_SERIAL` (ambayo kwa hakika ni NULL) au `DISPATCH_QUEUE_CONCURRENT`, ambayo ni pointer ya struct ya `dispatch_queue_attr_t` inayoruhusu kudhibiti baadhi ya parameters za queue.
 
 ### Dispatch objects
 
-Kuna vitu vingi ambavyo libdispatch inatumia na queues na blocks ni 2 tu kati yao. Inawezekana kuunda vitu hivi kwa `dispatch_object_create`:
+Kuna objects kadhaa zinazotumiwa na libdispatch, na queues pamoja na blocks ni 2 tu kati yao. Inawezekana kuunda objects hizi kwa kutumia `dispatch_object_create`:
 
 - `block`
 - `data`: Data blocks
-- `group`: Kundi la blocks
-- `io`: Maombi ya Async I/O
+- `group`: Group ya blocks
+- `io`: Async I/O requests
 - `mach`: Mach ports
 - `mach_msg`: Mach messages
-- `pthread_root_queue`: Queue yenye mchanganyiko wa nyuzi za pthread na si workqueues
+- `pthread_root_queue`:Queue yenye pool ya pthread thread na isiyotumia workqueues
 - `queue`
 - `semaphore`
-- `source`: Chanzo cha tukio
+- `source`: Event source
 
 ## Objective-C
 
-Katika Objetive-C kuna kazi tofauti za kutuma block kutekelezwa kwa sambamba:
+Kwenye Objetive-C kuna functions tofauti za kutuma block itekelezwe kwa parallel:
 
-- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Inawasilisha block kwa utekelezaji wa asynchronous kwenye dispatch queue na inarudi mara moja.
-- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Inawasilisha block object kwa utekelezaji na inarudi baada ya block hiyo kumaliza kutekelezwa.
-- [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): Inatekeleza block object mara moja tu kwa muda wa programu.
-- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Inawasilisha kipengele cha kazi kwa utekelezaji na inarudi tu baada ya kumaliza kutekelezwa. Tofauti na [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync), kazi hii inaheshimu vigezo vyote vya queue wakati inatekeleza block.
+- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Hutuma block kwa ajili ya utekelezaji wa asynchronous kwenye dispatch queue na kurudi mara moja.
+- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Hutuma block object kwa ajili ya utekelezaji na kurudi baada ya block hiyo kumaliza kutekelezwa.
+- [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): Hutekeleza block object mara moja tu katika muda wote wa kuwepo kwa application.
+- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Hutuma work item kwa ajili ya utekelezaji na kurudi baada tu ya kumaliza kutekelezwa. Tofauti na [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync), function hii huheshimu attributes zote za queue inapotekeleza block.
 
-Kazi hizi zinatarajia vigezo hivi: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
+Functions hizi zinatarajia parameters hizi: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
 
-Hii ni **struct ya Block**:
+Hii ndiyo **struct ya Block**:
 ```c
 struct Block {
 void *isa; // NSConcreteStackBlock,...
@@ -100,7 +100,7 @@ struct BlockDescriptor *descriptor;
 // captured variables go here
 };
 ```
-Na hii ni mfano wa kutumia **parallelism** na **`dispatch_async`**:
+Na huu ni mfano wa kutumia **uendeshaji sambamba** na **`dispatch_async`**:
 ```objectivec
 #import <Foundation/Foundation.h>
 
@@ -132,8 +132,8 @@ return 0;
 ```
 ## Swift
 
-**`libswiftDispatch`** ni maktaba inayotoa **Swift bindings** kwa mfumo wa Grand Central Dispatch (GCD) ambao awali umeandikwa kwa C.\
-Maktaba ya **`libswiftDispatch`** inafunika APIs za C GCD katika kiolesura kinachofaa zaidi kwa Swift, na kufanya iwe rahisi na ya kueleweka zaidi kwa waendelezaji wa Swift kufanya kazi na GCD.
+**`libswiftDispatch`** ni library inayotoa **Swift bindings** kwa framework ya Grand Central Dispatch (GCD), ambayo awali iliandikwa kwa C.\
+Library ya **`libswiftDispatch`** hufunga C GCD APIs katika interface inayofaa zaidi kwa Swift, hivyo kurahisisha na kufanya iwe angavu zaidi kwa Swift developers kufanya kazi na GCD.
 
 - **`DispatchQueue.global().sync{ ... }`**
 - **`DispatchQueue.global().async{ ... }`**
@@ -141,7 +141,7 @@ Maktaba ya **`libswiftDispatch`** inafunika APIs za C GCD katika kiolesura kinac
 - **`async await`**
 - **`var (data, response) = await URLSession.shared.data(from: URL(string: "https://api.example.com/getData"))`**
 
-**Mfano wa msimbo**:
+**Mfano wa code**:
 ```swift
 import Foundation
 
@@ -170,7 +170,7 @@ sleep(1)  // Simulate a long-running task
 ```
 ## Frida
 
-The following Frida script can be used to **hook into several `dispatch`** functions and extract the queue name, the backtrace and the block: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
+Frida script ifuatayo inaweza kutumika kufanya **hook kwenye** functions kadhaa za `dispatch` na kutoa jina la queue, backtrace na block: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js).
 ```bash
 frida -U <prog_name> -l libdispatch.js
 
@@ -185,9 +185,9 @@ Backtrace:
 ```
 ## Ghidra
 
-Kwa sasa Ghidra haiwezi kuelewa ama muundo wa ObjectiveC **`dispatch_block_t`**, wala muundo wa **`swift_dispatch_block`**.
+Kwa sasa Ghidra haielewi muundo wa **`dispatch_block_t`** wa ObjectiveC, wala muundo wa **`swift_dispatch_block`**.
 
-Hivyo kama unataka iweze kuelewa, unaweza tu **kuwatangaza**:
+Kwa hiyo ikiwa unataka iweze kuielewa, unaweza tu **kuitangaza**:
 
 <figure><img src="../../images/image (1160).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -195,23 +195,26 @@ Hivyo kama unataka iweze kuelewa, unaweza tu **kuwatangaza**:
 
 <figure><img src="../../images/image (1163).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Kisha, pata mahali katika msimbo ambapo zinatumika **kutumika**:
+Kisha, tafuta sehemu kwenye code ambapo inatumiwa:
 
 > [!TIP]
-> Kumbuka rejea zote zilizofanywa kwa "block" ili kuelewa jinsi unavyoweza kugundua kuwa muundo unatumika.
+> Zingatia marejeleo yote ya "block" ili kuelewa jinsi unavyoweza kubaini kuwa struct inatumiwa.
 
 <figure><img src="../../images/image (1164).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Bonyeza kulia kwenye variable -> Retype Variable na uchague katika kesi hii **`swift_dispatch_block`**:
+Bofya kulia kwenye variable -> Retype Variable na uchague katika hali hii **`swift_dispatch_block`**:
 
 <figure><img src="../../images/image (1165).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Ghidra itandika upya kila kitu kiotomatiki:
+Ghidra itaandika upya kila kitu kiotomatiki:
 
 <figure><img src="../../images/image (1166).png" alt="" width="563"><figcaption></figcaption></figure>
 
-## References
+## Marejeleo
 
-- [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [1] [libdispatch — `src/queue.c` (utekelezaji wa queue/thread-pool)](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/queue.c)
+- [2] [libdispatch — `src/source.c` (dispatch sources)](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/source.c)
+- [3] [libdispatch — `dispatch/queue.h` (public queue API)](https://github.com/apple-oss-distributions/libdispatch/blob/main/dispatch/queue.h)
+- [4] [Apple Developer — Dispatch](https://developer.apple.com/documentation/dispatch)
 
 {{#include ../../banners/hacktricks-training.md}}

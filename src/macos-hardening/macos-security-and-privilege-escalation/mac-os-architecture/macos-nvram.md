@@ -4,19 +4,19 @@
 
 ## Taarifa za Msingi
 
-**NVRAM** (Non-Volatile Random-Access Memory) huhifadhi **usanidi wa wakati wa boot na wa kiwango cha firmware** kwenye vifaa vya Mac. Vigezo muhimu zaidi kwa usalama ni pamoja na:
+**NVRAM** (Non-Volatile Random-Access Memory) huhifadhi **usanidi wa wakati wa kuwasha na wa kiwango cha firmware** kwenye hardware ya Mac. Vigezo muhimu zaidi vya usalama ni pamoja na:
 
-| Kigezo | Madhumuni |
+| Kigezo | Kusudi |
 |---|---|
-| `boot-args` | Hoja za kuanzisha Kernel (bendera za debug, verbose boot, AMFI bypass) |
-| `csr-active-config` | **SIP configuration bitmask** — inadhibiti ni ulinzi gani ziko hai |
-| `SystemAudioVolume` | Kiasi cha sauti wakati wa boot |
-| `prev-lang:kbd` | Lugha inayopendekezwa / mpangilio wa kibodi |
-| `efi-boot-device-data` | Uteuzi wa kifaa cha boot |
+| `boot-args` | Hoja za kuwasha kernel (debug flags, kuwasha kwa verbose, AMFI bypass) |
+| `csr-active-config` | **Bitmask ya usanidi wa SIP** — hudhibiti ni protections zipi zilizo active |
+| `SystemAudioVolume` | Sauti wakati wa kuwasha |
+| `prev-lang:kbd` | Lugha inayopendelewa / mpangilio wa keyboard |
+| `efi-boot-device-data` | Uchaguzi wa kifaa cha kuwasha |
 
-Kwenye Mac za kisasa, vigezo vya NVRAM vimegawanywa kati ya vigezo vya **system** (vilivyo salama kwa Secure Boot) na vigezo vya **non-system**. Apple Silicon Macs hutumia **Secure Storage Component (SSC)** kuunga kwa kriptografia hali ya NVRAM kwenye mnyororo wa boot.
+Kwenye Mac za kisasa, vigezo vya NVRAM hugawanywa kuwa vigezo vya **system** (vilivyolindwa na Secure Boot) na vigezo vya **non-system**. Mac zinazotumia Apple Silicon hutumia **Secure Storage Component (SSC)** kufunga hali ya NVRAM kwa njia ya cryptographic kwenye mnyororo wa kuwasha.<sup>[1]</sup>
 
-## NVRAM Access from User Space
+## Ufikiaji wa NVRAM kutoka User Space
 
 ### Kusoma NVRAM
 ```bash
@@ -35,7 +35,7 @@ csrutil status
 ```
 ### Kuandika NVRAM
 
-Kuandika vigezo vya NVRAM kunahitaji **idhini za root**, na kwa vigezo muhimu kwa mfumo (kama `csr-active-config`), mchakato lazima uwe na bendera maalum za code-signing au entitlements:
+Kuandika vigezo vya NVRAM kunahitaji **root privileges** na, kwa vigezo muhimu vya mfumo (kama `csr-active-config`), mchakato lazima uwe na **code-signing flags** au **entitlements** maalum:
 ```bash
 # Set boot-args (requires root)
 sudo nvram boot-args="debug=0x144 kcsuffix=development"
@@ -46,20 +46,20 @@ sudo nvram -d boot-args
 # Set a custom variable
 sudo nvram MyCustomVar="persistence-value"
 ```
-## CS_NVRAM_UNRESTRICTED Flag
+## Flag ya CS_NVRAM_UNRESTRICTED
 
-Binaries zilizo na **`CS_NVRAM_UNRESTRICTED`** code-signing flag zinaweza kubadilisha NVRAM variables ambazo kwa kawaida zinalindwa hata dhidi ya root.
+Binaries zilizo na **`CS_NVRAM_UNRESTRICTED`** code-signing flag zinaweza kurekebisha vigezo vya NVRAM ambavyo kwa kawaida hulindwa hata dhidi ya root.
 
-### Kupata NVRAM-Unrestricted Binaries
+### Kutafuta Binaries Zisizo na Vizuizi vya NVRAM
 ```bash
 # Check code signing flags for a binary
 codesign -dvvv /usr/sbin/nvram 2>&1 | grep "flags="
 ```
-## Madhara ya Usalama
+## Athari za Usalama
 
 ### Kudhoofisha SIP kupitia NVRAM
 
-Ikiwa mshambuliaji anaweza kuandika kwenye NVRAM (ama kupitia binary iliyovamiwa ambayo haina vizuizi vya NVRAM au kwa kutumia udhaifu), wanaweza kubadili `csr-active-config` ili **kuzima ulinzi wa SIP kwenye uzinduzi ujao**:
+Ikiwa mshambuliaji anaweza kuandika kwenye NVRAM (ama kupitia binary iliyoathiriwa ya `NVRAM-unrestricted` au kwa kutumia vulnerability), anaweza kurekebisha `csr-active-config` ili **kuzima protections za SIP wakati wa boot inayofuata**:
 ```bash
 # SIP configuration is a bitmask stored in NVRAM
 # Each bit controls a different SIP protection:
@@ -79,8 +79,9 @@ nvram csr-active-config | xxd
 # nvram csr-active-config=%7f%00%00%00   # Disable most SIP protections
 ```
 > [!WARNING]
-> Kwenye Macs za Apple Silicon za kisasa, **mnyororo wa Secure Boot unathibitisha mabadiliko ya NVRAM** na unazuia urekebishaji wa SIP wakati wa runtime. Mabadiliko ya `csr-active-config` yataanza kufanya kazi tu kupitia recoveryOS. Hata hivyo, kwenye **Macs za Intel** au mifumo yenye **reduced security mode**, uendeshaji wa NVRAM bado unaweza kudhoofisha SIP.
-### Kuwezesha Kernel Debugging
+> Kwenye Mac za kisasa zenye Apple Silicon, **Secure Boot chain** huthibitisha mabadiliko ya NVRAM na huzuia marekebisho ya SIP wakati wa runtime. Mabadiliko ya `csr-active-config` huanza kutumika tu kupitia recoveryOS. Hata hivyo, kwenye **Intel Macs** au mifumo yenye **reduced security mode**, udanganyifu wa NVRAM bado unaweza kudhoofisha SIP.
+
+### Kuwasha Kernel Debugging
 ```bash
 # Enable kernel debug flags via boot-args
 sudo nvram boot-args="debug=0x144"
@@ -94,9 +95,9 @@ sudo nvram boot-args="debug=0x144"
 # Use development kernel
 sudo nvram boot-args="kcsuffix=development"
 ```
-### Uendelevu wa Firmware
+### Firmware Persistence
 
-Marekebisho ya NVRAM **huishi hata baada ya kusakinisha upya OS** — yanadumu katika ngazi ya firmware. Mshambuliaji anaweza kuandika vigezo maalum vya NVRAM ambavyo mekanismo ya uendelevu husoma wakati wa boot:
+Marekebisho ya NVRAM **huendelea kuwepo baada ya kusakinisha upya OS** — hudumu katika kiwango cha firmware. Mshambuliaji anaweza kuandika vigeu maalum vya NVRAM ambavyo persistence mechanism husoma wakati wa boot:
 ```bash
 # Write a persistence marker
 nvram attacker-payload-config="base64_encoded_config_here"
@@ -105,25 +106,25 @@ nvram attacker-payload-config="base64_encoded_config_here"
 nvram attacker-payload-config 2>/dev/null && /path/to/payload
 ```
 > [!CAUTION]
-> Uendelevu wa NVRAM hudumu licha ya kufutwa kwa diski na ufungaji upya wa OS. Inahitaji **PRAM/NVRAM reset** (Command+Option+P+R on Intel Macs) au **DFU restore** (Apple Silicon) ili kufutwa.
+> Ustahimilivu wa NVRAM huendelea hata baada ya kufuta disk na kusakinisha upya OS. Inahitaji **PRAM/NVRAM reset** (Command+Option+P+R kwenye Intel Macs) au **DFU restore** (Apple Silicon) ili kuifuta.
 
 ### AMFI Bypass
 
-The `amfi_get_out_of_my_way=1` boot argument disables **Apple Mobile File Integrity**, ikiruhusu unsigned code kuendesha:
+Boot argument ya `amfi_get_out_of_my_way=1` huzima **Apple Mobile File Integrity**, na kuruhusu code ambayo haijasainiwa kutekelezwa:
 ```bash
 # This requires NVRAM write access AND reduced security boot:
 sudo nvram boot-args="amfi_get_out_of_my_way=1"
 ```
-## CVE za Maisha Halisi
+## CVE za Ulimwengu Halisi
 
 | CVE | Maelezo |
 |---|---|
-| CVE-2020-9839 | Ubadilishaji wa NVRAM unaowezesha persistent SIP bypass |
-| CVE-2019-8779 | Firmware-level NVRAM persistence kwenye T2 Macs |
-| CVE-2022-22583 | PackageKit privilege escalation zinazohusiana na NVRAM |
-| CVE-2020-10004 | Tatizo la mantiki katika kushughulikia NVRAM linaloruhusu mabadiliko ya mfumo |
+| CVE-2020-9839 | Udanganyifu wa NVRAM unaowezesha persistent SIP bypass |
+| CVE-2019-8779 | Uendelevu wa NVRAM katika kiwango cha firmware kwenye Mac za T2 |
+| CVE-2022-22583 | Kuongezeka kwa privileges kunakohusiana na NVRAM katika PackageKit |
+| CVE-2020-10004 | Tatizo la kimantiki katika ushughulikiaji wa NVRAM linaloruhusu marekebisho ya mfumo |
 
-## Skiripti ya Uorodheshaji
+## Enumeration Script
 ```bash
 #!/bin/bash
 echo "=== NVRAM Security Audit ==="
@@ -151,10 +152,10 @@ done
 echo -e "\n[*] Non-Standard Variables (potential persistence):"
 nvram -p | grep -v "^$" | grep -vE "^(SystemAudioVolume|boot-args|csr-active-config|prev-lang|LocationServicesEnabled|fmm-mobileme-token|bluetoothInternalControllerAddress|bluetoothActiveControllerInfo|SystemAudioVolumeExtension|efi-)" | head -20
 ```
-## Marejeo
+## Marejeleo
 
-* [Apple Platform Security Guide — Boot process](https://support.apple.com/guide/security/boot-process-secac71d5623/web)
-* [Apple Security Updates — NVRAM-related CVEs](https://support.apple.com/en-us/HT201222)
-* [Duo Labs — Apple T2 Security](https://duo.com/labs/research/apple-t2-xpc)
+- [1] [Mwongozo wa Apple Platform Security — Mchakato wa kuwasha](https://support.apple.com/guide/security/boot-process-secac71d5623/web)
+- [2] [Apple Security Updates — CVE zinazohusiana na NVRAM](https://support.apple.com/en-us/HT201222)
+- [3] [Duo Labs — Usalama wa Apple T2](https://duo.com/labs/research/apple-t2-xpc)
 
 {{#include ../../../banners/hacktricks-training.md}}

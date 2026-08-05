@@ -1,87 +1,87 @@
-# macOS Launch/Environment Constraints & Trust Cache
+# Vikwazo vya Launch/Environment vya macOS na Trust Cache
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Taarifa za Msingi
 
-Kikomo cha uzinduzi katika macOS kilianzishwa ili kuboresha usalama kwa **kudhibiti jinsi, nani, na kutoka wapi mchakato unaweza kuanzishwa**. Kilianza katika macOS Ventura, kinatoa mfumo unaopanga **kila binary ya mfumo katika makundi tofauti ya vizuizi**, ambayo yamefafanuliwa ndani ya **cache ya kuaminika**, orodha inayojumuisha binaries za mfumo na hash zao husika​. Vizuizi hivi vinapanuka kwa kila binary inayoweza kutekelezwa ndani ya mfumo, ikihusisha seti ya **kanuni** zinazofafanua mahitaji ya **kuanzisha binary maalum**. Kanuni hizo zinajumuisha vizuizi vya kujitegemea ambavyo binary lazima ikidhi, vizuizi vya mzazi vinavyohitajika kukidhi na mchakato wake wa mzazi, na vizuizi vya kuwajibika vinavyopaswa kufuatwa na vyombo vingine husika​.
+Vikwazo vya launch katika macOS vilianzishwa ili kuimarisha usalama kwa **kudhibiti jinsi, nani, na kutoka wapi mchakato unaweza kuanzishwa**. Vilivyoanzishwa katika macOS Ventura, vinatoa mfumo unaoweka **kila system binary katika kategoria tofauti za vikwazo**, ambazo hufafanuliwa ndani ya **trust cache**, yaani orodha iliyo na system binaries na hashes zake husika. Vikwazo hivi vinatumika kwa kila executable binary ndani ya system, na kujumuisha seti ya **rules** zinazoeleza mahitaji ya **kuanzisha binary fulani**. Rules hizo zinajumuisha self constraints ambazo binary lazima itimize, parent constraints ambazo mchakato mzazi lazima utimize, na responsible constraints ambazo entities nyingine husika lazima zifuate.
 
-Mekaniki hii inapanuka kwa programu za wahusika wengine kupitia **Vizuizi vya Mazingira**, kuanzia macOS Sonoma, ikiruhusu wabunifu kulinda programu zao kwa kubainisha **seti ya funguo na thamani za vizuizi vya mazingira.**
+Utaratibu huu unaenea pia kwa third-party apps kupitia **Environment Constraints**, kuanzia macOS Sonoma, na kuwawezesha developers kulinda apps zao kwa kubainisha **seti ya keys na values za environment constraints.**
 
-Unapofafanua **vizuizi vya mazingira na maktaba** katika kamusi za vizuizi ambazo unaziokoa katika **faili za orodha ya mali za `launchd`**, au katika **faili za orodha za mali za kando** ambazo unazitumia katika saini ya msimbo.
+Unafafanua **launch environment na library constraints** katika constraint dictionaries ambazo unaweza kuhifadhi katika **`launchd` property list files**, au katika **property list** files tofauti unazotumia katika code signing.
 
-Kuna aina 4 za vizuizi:
+Kuna aina 4 za constraints:
 
-- **Vizuizi vya Kujitegemea**: Vizuizi vinavyotumika kwa **binary inayotembea**.
-- **Mchakato wa Mzazi**: Vizuizi vinavyotumika kwa **mzazi wa mchakato** (kwa mfano **`launchd`** inayoendesha huduma ya XP)
-- **Vizuizi vya Kuwajibika**: Vizuizi vinavyotumika kwa **mchakato unaoitisha huduma** katika mawasiliano ya XPC
-- **Vizuizi vya kupakia maktaba**: Tumia vizuizi vya kupakia maktaba kuelezea kwa kuchagua msimbo ambao unaweza kupakiwa
+- **Self Constraints**: Constraints zinazotumika kwa binary **inayoendeshwa**.
+- **Parent Process**: Constraints zinazotumika kwa **mzazi wa mchakato** (kwa mfano **`launchd`** inayoendesha XP service)
+- **Responsible Constraints**: Constraints zinazotumika kwa **mchakato unaoita service** katika mawasiliano ya XPC
+- **Library load constraints**: Tumia library load constraints kueleza kwa kuchagua code inayoweza kupakiwa
 
-Hivyo wakati mchakato unajaribu kuanzisha mchakato mwingine — kwa kuita `execve(_:_:_:)` au `posix_spawn(_:_:_:_:_:_:)` — mfumo wa uendeshaji unakagua kwamba **faili inayoweza kutekelezwa** **inakidhi** **vizuizi vyake vya kujitegemea**. Pia inakagua kwamba **mzazi** **wa mchakato** **inayoweza kutekelezwa** **inakidhi** **vizuizi vya mzazi** vya executable, na kwamba **mchakato wa kuwajibika** **inayoweza kutekelezwa** **inakidhi vizuizi vya mchakato wa kuwajibika**. Ikiwa yoyote ya vizuizi hivi vya uzinduzi havikidhi, mfumo wa uendeshaji hauendeshi programu hiyo.
+Kwa hivyo mchakato unapojaribu kuanzisha mchakato mwingine — kwa kuita `execve(_:_:_:)` au `posix_spawn(_:_:_:_:_:)` — operating system hukagua kwamba faili la **executable** **linatimiza self constraint yake**. Pia hukagua kwamba executable ya **mchakato** **mzazi** inatimiza **parent constraint** ya executable hiyo, na kwamba executable ya **mchakato** **responsible** inatimiza **responsible process constraint** ya executable hiyo. Ikiwa launch constraint yoyote kati ya hizi haijatimizwa, operating system haiendeshi program.
 
-Ikiwa wakati wa kupakia maktaba sehemu yoyote ya **vizuizi vya maktaba haviko kweli**, mchakato wako **haupaki** maktaba.
+Wakati wa kupakia library, ikiwa sehemu yoyote ya **library constraint si ya kweli**, mchakato wako **haupaki** library hiyo.
 
 ## LC Categories
 
-LC inaundwa na **fact** na **operesheni za kimantiki** (na, au..) zinazounganisha ukweli.
+LC inaundwa na **facts** na **logical operations** (and, or..) zinazounganisha facts.
 
-[ **Facts ambazo LC inaweza kutumia zimeandikwa**](https://developer.apple.com/documentation/security/defining_launch_environment_and_library_constraints). Kwa mfano:
+The[ **facts ambazo LC inaweza kutumia zimeandikwa hapa**](https://developer.apple.com/documentation/security/defining_launch_environment_and_library_constraints). Kwa mfano:
 
-- is-init-proc: Thamani ya Boolean inayonyesha ikiwa executable lazima iwe mchakato wa kuanzisha wa mfumo wa uendeshaji (`launchd`).
-- is-sip-protected: Thamani ya Boolean inayonyesha ikiwa executable lazima iwe faili iliyopewa ulinzi na Mfumo wa Uaminifu wa Mfumo (SIP).
-- `on-authorized-authapfs-volume:` Thamani ya Boolean inayonyesha ikiwa mfumo wa uendeshaji ulipakia executable kutoka kwenye kiasi cha APFS kilichothibitishwa, kilichothibitishwa.
-- `on-authorized-authapfs-volume`: Thamani ya Boolean inayonyesha ikiwa mfumo wa uendeshaji ulipakia executable kutoka kwenye kiasi cha APFS kilichothibitishwa, kilichothibitishwa.
-- Kiasi cha Cryptexes
-- `on-system-volume:` Thamani ya Boolean inayonyesha ikiwa mfumo wa uendeshaji ulipakia executable kutoka kwenye kiasi cha mfumo kilichozinduliwa kwa sasa.
+- is-init-proc: Boolean value inayoonyesha ikiwa executable lazima iwe operating system’s initialization process (`launchd`).
+- is-sip-protected: Boolean value inayoonyesha ikiwa executable lazima iwe faili linalolindwa na System Integrity Protection (SIP).
+- `on-authorized-authapfs-volume:` Boolean value inayoonyesha ikiwa operating system ilipakia executable kutoka kwenye authorized, authenticated APFS volume.
+- `on-authorized-authapfs-volume`: Boolean value inayoonyesha ikiwa operating system ilipakia executable kutoka kwenye authorized, authenticated APFS volume.
+- Cryptexes volume
+- `on-system-volume:` Boolean value inayoonyesha ikiwa operating system ilipakia executable kutoka kwenye system volume iliyo-boot kwa sasa.
 - Ndani ya /System...
 - ...
 
-Wakati binary ya Apple imesainiwa in **itapewa LC category** ndani ya **cache ya kuaminika**.
+Apple binary inapotiwa saini, **huiweka katika LC category** ndani ya **trust cache**.
 
-- **iOS 16 LC categories** zilirejelewa na kuandikwa hapa [**hapa**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).
-- **LC categories za sasa (macOS 14** - Somona) zimekaguliwa na [**maelezo yao yanaweza kupatikana hapa**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).
+- **iOS 16 LC categories** [**ziligeuzwa reverse na kuandikwa hapa**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).<sup>[6]</sup>
+- **LC categories za sasa (macOS 14** - Somona) zimegeuzwa reverse na [**maelezo yake yanaweza kupatikana hapa**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).<sup>[7]</sup>
 
-Kwa mfano, Kategoria 1 ni:
+Kwa mfano, Category 1 ni:<sup>[7]</sup>
 ```
 Category 1:
 Self Constraint: (on-authorized-authapfs-volume || on-system-volume) && launch-type == 1 && validation-category == 1
 Parent Constraint: is-init-proc
 ```
 - `(on-authorized-authapfs-volume || on-system-volume)`: Lazima iwe katika System au Cryptexes volume.
-- `launch-type == 1`: Lazima iwe huduma ya mfumo (plist katika LaunchDaemons).
-- `validation-category == 1`: Kifaa cha mfumo wa uendeshaji.
+- `launch-type == 1`: Lazima iwe system service (plist katika LaunchDaemons).
+- `validation-category == 1`: Executable ya operating system.
 - `is-init-proc`: Launchd
 
-### Kurejesha LC Categories
+### Kureverse LC Categories
 
-Una habari zaidi [**kuhusu hii hapa**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), lakini kimsingi, Zimewekwa katika **AMFI (AppleMobileFileIntegrity)**, hivyo unahitaji kupakua Kernel Development Kit ili kupata **KEXT**. Alama zinazohusiana na **`kConstraintCategory`** ndizo **za kuvutia**. Ukizitoa utapata mstream wa DER (ASN.1) uliokodishwa ambao utahitaji kufasiriwa kwa [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) au maktaba ya python-asn1 na skripti yake ya `dump.py`, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) ambayo itakupa mfuatano unaoeleweka zaidi.
+Una maelezo zaidi [**kuhusu hilo hapa**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), lakini kimsingi, Yanafafanuliwa katika **AMFI (AppleMobileFileIntegrity)**, hivyo unahitaji kupakua Kernel Development Kit ili kupata **KEXT**. Symbols zinazoanza na **`kConstraintCategory`** ndizo zenye **interest**. Ukiziextract utapata stream iliyosimbwa kwa DER (ASN.1), ambayo utahitaji kuidecode kwa [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) au python-asn1 library pamoja na script yake ya `dump.py`, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master), ambayo itakupa string inayoeleweka zaidi.<sup>[3]</sup>
 
-## Mipaka ya Mazingira
+## Vikwazo vya Mazingira
 
-Hizi ni Mipaka za Uzinduzi zilizowekwa katika **maombi ya wahusika wengine**. Mwandishi anaweza kuchagua **ukweli** na **operands za kimantiki kutumia** katika maombi yake ili kuzuia ufikiaji kwake mwenyewe.
+Hivi ni Launch Constraints zilizowekwa na kusanidiwa katika **third party applications**. Developer anaweza kuchagua **facts** na **logical operands za kutumia** katika application yake ili kuzuia access kwake yenyewe.
 
-Inawezekana kuhesabu Mipaka ya Mazingira ya programu kwa:
+Inawezekana kuenumerate Environment Constraints za application kwa:
 ```bash
 codesign -d -vvvv app.app
 ```
 ## Trust Caches
 
-Katika **macOS** kuna baadhi ya hifadhi za kuaminika:
+Katika **macOS** kuna trust caches kadhaa:
 
 - **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/BaseSystemTrustCache.img4`**
 - **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`**
 - **`/System/Library/Security/OSLaunchPolicyData`**
 
-Na katika iOS inaonekana kama iko katika **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**.
+Na katika iOS inaonekana kuwa iko kwenye **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**.
 
 > [!WARNING]
-> Katika macOS inayotumia vifaa vya Apple Silicon, ikiwa binary iliyosainiwa na Apple haipo katika hifadhi ya kuaminika, AMFI itakataa kuipakia.
+> Kwenye macOS inayoendesha kwenye vifaa vya Apple Silicon, ikiwa binary iliyosainiwa na Apple haipo kwenye trust cache, AMFI itakataa kuipakia.
 
 ### Enumerating Trust Caches
 
-Faili za awali za hifadhi za kuaminika ziko katika muundo **IMG4** na **IM4P**, ambapo IM4P ni sehemu ya mzigo ya muundo wa IMG4.
+Faili za trust cache zilizotajwa hapo awali ziko katika format ya **IMG4** na **IM4P**, ambapo IM4P ni sehemu ya payload ya format ya IMG4.
 
-Unaweza kutumia [**pyimg4**](https://github.com/m1stadev/PyIMG4) kutoa mzigo wa databasi:
+Unaweza kutumia [**pyimg4**](https://github.com/m1stadev/PyIMG4) kutoa payload ya databases:
 ```bash
 # Installation
 python3 -m pip install pyimg4
@@ -97,9 +97,9 @@ pyimg4 im4p extract -i /tmp/StaticTrustCache.im4p -o /tmp/StaticTrustCache.data
 
 pyimg4 im4p extract -i /System/Library/Security/OSLaunchPolicyData -o /tmp/OSLaunchPolicyData.data
 ```
-(Chaguo lingine linaweza kuwa kutumia chombo [**img4tool**](https://github.com/tihmstar/img4tool), ambacho kitafanya kazi hata kwenye M1 hata kama toleo ni la zamani na kwa x86_64 ikiwa utaweka katika maeneo sahihi).
+(Chaguo jingine linaweza kuwa kutumia zana [**img4tool**](https://github.com/tihmstar/img4tool), ambayo itaendesha hata kwenye M1 ikiwa release ni ya zamani, na kwenye x86_64 ikiwa utaiweka katika maeneo yanayofaa).
 
-Sasa unaweza kutumia chombo [**trustcache**](https://github.com/CRKatri/trustcache) kupata taarifa katika muundo unaoweza kusomeka:
+Sasa unaweza kutumia zana [**trustcache**](https://github.com/CRKatri/trustcache) kupata maelezo katika muundo unaosomeka:
 ```bash
 # Install
 wget https://github.com/CRKatri/trustcache/releases/download/v2.0/trustcache_macos_arm64
@@ -123,7 +123,7 @@ entry count = 969
 01e6934cb8833314ea29640c3f633d740fc187f2 [none] [2] [2]
 020bf8c388deaef2740d98223f3d2238b08bab56 [none] [2] [3]
 ```
-Kikundi cha kuaminika kinafuata muundo ufuatao, hivyo **kategoria ya LC ni safu ya 4**.
+Trust cache hufuata muundo ufuatao, hivyo **LC category ni safu ya 4**
 ```c
 struct trust_cache_entry2 {
 uint8_t cdhash[CS_CDHASH_LEN];
@@ -133,36 +133,52 @@ uint8_t constraintCategory;
 uint8_t reserved0;
 } __attribute__((__packed__));
 ```
-Kisha, unaweza kutumia skripti kama [**hii**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) kutoa data.
+Kisha, unaweza kutumia script kama [**hii**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) ili kutoa data.
 
-Kutoka kwenye data hiyo unaweza kuangalia Apps zenye **thamani ya vizuizi vya uzinduzi `0`**, ambazo ndizo ambazo hazijakabiliwa ([**angalia hapa**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) kwa kila thamani ni nini).
+Kutokana na data hiyo unaweza kuangalia Apps zenye **launch constraints value ya `0`**, ambazo ndizo ambazo hazijawekewa constraints ([**angalia hapa**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) ili kuona maana ya kila value).<sup>[6]</sup>
 
-## Kupunguza Mashambulizi
+## Mitigation za Attack
 
-Vizuizi vya Uzinduzi vingepunguza mashambulizi kadhaa ya zamani kwa **kuthibitisha kwamba mchakato hautatekelezwa katika hali zisizotarajiwa:** Kwa mfano kutoka maeneo yasiyotarajiwa au kuanzishwa na mchakato wa mzazi asiyejulikana (ikiwa uzinduzi wa launchd pekee unapaswa kuanzisha).
+Launch Constraints zingekuwa zimezuia attacks kadhaa za zamani kwa **kuhakikisha kwamba process haitatekelezwa katika hali zisizotarajiwa:** Kwa mfano, kutoka locations zisizotarajiwa au ikiwa imeanzishwa na parent process isiyotarajiwa (ikiwa launchd pekee ndiyo inapaswa kuianzisha).
 
-Zaidi ya hayo, Vizuizi vya Uzinduzi pia **vinapunguza mashambulizi ya kushuka daraja.**
+Zaidi ya hayo, Launch Constraints pia **huzuia downgrade attacks.**
 
-Hata hivyo, havipunguzi matumizi ya kawaida ya XPC, **Electron** kuingiza msimbo au **kuingiza dylib** bila uthibitisho wa maktaba (isipokuwa vitambulisho vya timu vinavyoweza kupakia maktaba vinajulikana).
+Hata hivyo, **hazizuii common XPC** abuses, code injections za **Electron** au **dylib injections** bila library validation (isipokuwa team IDs zinazoweza kupakia libraries zinajulikana).<sup>[3]</sup>
 
-### Ulinzi wa XPC Daemon
+### XPC Daemon Protection
 
-Katika toleo la Sonoma, jambo muhimu ni **mipangilio ya wajibu** ya huduma ya XPC daemon. Huduma ya XPC inawajibika kwa ajili yake mwenyewe, tofauti na mteja anayounganisha kuwa na wajibu. Hii imeandikwa katika ripoti ya maoni FB13206884. Mpangilio huu unaweza kuonekana kuwa na kasoro, kwani unaruhusu mwingiliano fulani na huduma ya XPC:
+Katika release ya Sonoma, jambo muhimu ni **responsibility configuration** ya daemon XPC service. XPC service inawajibika yenyewe, badala ya connecting client kuwajibika. Hili limeandikwa katika feedback report FB13206884. Mpangilio huu unaweza kuonekana kuwa na dosari, kwa kuwa unaruhusu interactions fulani na XPC service:
 
-- **Kuzindua Huduma ya XPC**: Ikiwa inachukuliwa kuwa hitilafu, mpangilio huu haukuruhusu kuanzisha huduma ya XPC kupitia msimbo wa mshambuliaji.
-- **Kuungana na Huduma Inayoendelea**: Ikiwa huduma ya XPC tayari inaendesha (inaweza kuwa imewezeshwa na programu yake ya asili), hakuna vizuizi vya kuungana nayo.
+- **Kuanzisha XPC Service**: Ikiwa inachukuliwa kuwa bug, mpangilio huu hauruhusu kuanzisha XPC service kupitia attacker code.
+- **Kuunganisha kwenye Active Service**: Ikiwa XPC service tayari inaendelea kufanya kazi (huenda imewashwa na application yake ya awali), hakuna vizuizi vya kuunganisha nayo.
 
-Wakati wa kutekeleza vizuizi kwenye huduma ya XPC kunaweza kuwa na manufaa kwa **kupunguza dirisha la mashambulizi yanayoweza kutokea**, haishughuliki wasiwasi wa msingi. Kuthibitisha usalama wa huduma ya XPC kimsingi kunahitaji **kuthibitisha mteja anayounganisha kwa ufanisi**. Hii inabaki kuwa njia pekee ya kuimarisha usalama wa huduma hiyo. Pia, inafaa kutaja kwamba mpangilio wa wajibu ulioelezwa kwa sasa unafanya kazi, ambayo huenda isiendane na muundo ulio kusudiwa.
+Ingawa kuweka constraints kwenye XPC service kunaweza kuwa na manufaa kwa **kupunguza muda wa attacks zinazowezekana**, hakushughulikii tatizo kuu. Kuhakikisha usalama wa XPC service kunahitaji kimsingi **ku-validate connecting client kwa ufanisi**. Hii ndiyo njia pekee ya kuimarisha usalama wa service. Pia, ni muhimu kutambua kwamba responsibility configuration iliyotajwa kwa sasa inafanya kazi, jambo ambalo huenda haliendani na design iliyokusudiwa.<sup>[3]</sup>
 
-### Ulinzi wa Electron
+### Electron Protection
 
-Hata kama inahitajika kwamba programu lazima **ifunguliwe na LaunchService** (katika vizuizi vya wazazi). Hii inaweza kufikiwa kwa kutumia **`open`** (ambayo inaweza kuweka mabadiliko ya mazingira) au kutumia **Launch Services API** (ambapo mabadiliko ya mazingira yanaweza kuonyeshwa).
+Hata ikiwa inahitajika kwamba application lazima **ifunguliwe na LaunchService** (katika parents constraints). Hili linaweza kufanywa kwa kutumia **`open`** (ambayo inaweza kuweka env variables) au kwa kutumia **Launch Services API** (ambapo env variables zinaweza kubainishwa).<sup>[3]</sup>
 
-## Marejeleo
+### CVE-2025-43253 - Kubatilisha constraints zilizojengwa ndani wakati wa spawn
 
-- [https://youtu.be/f1HA5QhLQ7Y?t=24146](https://youtu.be/f1HA5QhLQ7Y?t=24146)
-- [https://theevilbit.github.io/posts/launch_constraints_deep_dive/](https://theevilbit.github.io/posts/launch_constraints_deep_dive/)
-- [https://eclecticlight.co/2023/06/13/why-wont-a-system-app-or-command-tool-run-launch-constraints-and-trust-caches/](https://eclecticlight.co/2023/06/13/why-wont-a-system-app-or-command-tool-run-launch-constraints-and-trust-caches/)
-- [https://developer.apple.com/videos/play/wwdc2023/10266/](https://developer.apple.com/videos/play/wwdc2023/10266/)
+Launch constraints (rasmi **lightweight code requirements**, *LWCR*) zinatekelezwa na **AMFI MAC policy**. `posix_spawn` humruhusu caller kuwasilisha arbitrary blob kwa MAC policy kupitia **`posix_spawnattr_setmacpolicyinfo_np()`**, na AMFI ilikubali LWCR dictionary iliyotolewa na caller kupitia njia hiyo. Bug ilikuwa kwamba **constraints zilizotolewa na attacker zilibadilisha zile zilizojengwa ndani ya binary** badala ya kukaguliwa pamoja nazo:
+
+- Tengeneza launch-constraints dictionary ndogo (hata tupu).
+- Weka **constraint category kuwa `127`**, value ambayo AMFI inaruhusu katika spawn attributes lakini **haiitekelezi** — huandika tu log ya `Launch Constraint Violation (not enforcing)` badala ya kuzuia execution.
+- Ipitishe kupitia spawn attributes, na process huanzishwa katika context ambayo self/parent constraints zake halisi zingekuwa zimeikataza.
+
+Baada ya fix, **constraints zilizojengwa ndani na zile zilizotolewa hukaguliwa**, kwa hiyo dictionary iliyotolewa haiwezi tena kudhoofisha ile iliyojengwa ndani.<sup>[2]</sup>
+
+> [!TIP]
+> Huu ndio muundo wa jumla wa kutafuta wakati wa kukagua constraint enforcement: API inayoruhusu untrusted input *kusupply* policy huwa ya kuvutia kila mara wakati policy engine inachukulia value iliyotolewa kuwa replacement badala ya kuwa requirement ya ziada.
+
+## Marejeo
+
+- [1] [Objective by the Sea #OBTS v6.0 Day 2 (Live-Stream)](https://youtu.be/f1HA5QhLQ7Y?t=24146)
+- [2] [CVE-2025-43253: Bypassing Launch Constraints on macOS (wts.dev)](https://wts.dev/posts/bypassing-launch-constraints/)
+- [3] [Launch and Environment Constraints Deep Dive - theevilbit](https://theevilbit.github.io/posts/launch_constraints_deep_dive/)
+- [4] [Why won't a system app or command tool run? Launch constraints and trust caches - The Eclectic Light Company](https://eclecticlight.co/2023/06/13/why-wont-a-system-app-or-command-tool-run-launch-constraints-and-trust-caches/)
+- [5] [Protect your Mac app with environment constraints - WWDC23](https://developer.apple.com/videos/play/wwdc2023/10266/)
+- [6] [Description of the Launch Constraints introduced in iOS 16 (LinusHenze gist)](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056)
+- [7] [macOS Sonoma (14) Launch Constraints (theevilbit gist)](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53)
 
 {{#include ../../../banners/hacktricks-training.md}}

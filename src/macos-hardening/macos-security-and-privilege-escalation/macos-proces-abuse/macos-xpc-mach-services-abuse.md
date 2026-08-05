@@ -1,17 +1,17 @@
-# Matumizi mabaya ya macOS XPC Mach Services
+# Matumizi Mabaya ya macOS XPC Mach Services
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Maelezo ya Msingi
 
-**XPC** (Mawasiliano kati ya Michakato) ni utaratibu mkuu wa IPC kwenye macOS. Daemoni za mfumo zinafunua **Mach services** — porti zilizopewa majina zilizosajiliwa na `launchd` — ambazo michakato mingine inaweza kuunganishwa nazo kupitia `NSXPCConnection`.
+**XPC** (Cross-Process Communication) ndiyo IPC mechanism kuu kwenye macOS. System daemons hufichua **Mach services** — ports zilizopewa majina na kusajiliwa na `launchd` — ambazo processes nyingine zinaweza kuunganishwa kupitia `NSXPCConnection`.
 
-Kila plist ya **LaunchDaemon** na **LaunchAgent** yenye ufunguo wa `MachServices` inasajili porti moja au zaidi za Mach zenye majina. Hizi ni endpoints za XPC za mfumo mzima ambazo mchakato wowote anaweza kujaribu kuunganishwa nazo.
+Kila plist ya **LaunchDaemon** na **LaunchAgent** iliyo na key ya `MachServices` husajili Mach ports moja au zaidi zilizopewa majina. Hizi ni XPC endpoints za mfumo mzima ambazo process yoyote inaweza kujaribu kuunganishwa nazo.
 
 > [!WARNING]
-> XPC Mach services ni **single largest local privilege escalation attack surface** kwenye macOS. Most local root exploits katika miaka ya hivi karibuni zilipitia vulnerable XPC services katika LaunchDaemons. Kila exposed method katika root daemon ni potential escalation vector.
+> XPC Mach services ndizo **attack surface kubwa zaidi ya local privilege escalation** kwenye macOS. Exploits nyingi za local root katika miaka ya hivi karibuni zilipitia XPC services zilizo hatarishi kwenye LaunchDaemons. Kila method iliyofichuliwa kwenye root daemon ni potential escalation vector.
 
-### Muundo
+### Usanifu
 ```
 Client Process (user context)
 ↓ NSXPCConnection / xpc_connection_create_mach_service()
@@ -21,9 +21,9 @@ Daemon Process (root context)
 ↓ (Should verify client identity / entitlements)
 ↓ Performs privileged operation
 ```
-## Uorodheshaji
+## Enumeration
 
-### Kugundua Daemons kwa Mach Services
+### Kupata Daemons zilizo na Mach Services
 ```bash
 # Find all LaunchDaemons with MachServices
 find /Library/LaunchDaemons /System/Library/LaunchDaemons -name "*.plist" -exec sh -c '
@@ -47,9 +47,9 @@ WHERE e.isDaemon = 1
 ORDER BY e.privileged DESC
 LIMIT 50;"
 ```
-### Kuorodhesha XPC Interfaces
+### Enumerating XPC Interfaces
 
-Mara utakapo tambua daemon, reverse-engineer XPC interface yake:
+Baada ya kubaini daemon, fanya reverse-engineer ya XPC interface yake:
 ```bash
 # Find the protocol definition in the binary
 strings /path/to/daemon | grep -i "protocol\|interface\|xpc\|method"
@@ -60,15 +60,15 @@ class-dump /path/to/daemon | grep -A20 "@protocol"
 # Check for XPC service bundles inside app bundles
 find /Applications -path "*/XPCServices/*.xpc" 2>/dev/null
 ```
-## Udhaifu wa Uthibitishaji wa Mteja wa XPC
+## Udhaifu wa Uthibitishaji wa Client wa XPC
 
-Aina ya udhaifu inayotokea zaidi katika huduma za XPC ni **ukaguzi wa mteja usiofaa**. Daemon inapaswa kuthibitisha:
+Aina ya udhaifu inayopatikana mara nyingi katika huduma za XPC ni **uthibitishaji usiotosha wa client**. Daemon inapaswa kuthibitisha:
 
-1. **Code signature** ya mchakato unaounganisha
-2. **Entitlements** ya mchakato unaounganisha
-3. **Audit token** (si PID, ambayo inaweza kutumika tena)
+1. **Code signature** ya process inayounganisha
+2. **Entitlements** za process inayounganisha
+3. **Audit token** (si PID, kwa sababu inaweza kutumika tena)
 
-### Mfano Dhaifu: Hakuna Uthibitishaji
+### Muundo Ulio Hatarini: Hakuna Uthibitishaji
 ```objc
 // VULNERABLE — daemon accepts any connection
 - (BOOL)listener:(NSXPCListener *)listener
@@ -79,7 +79,7 @@ newConnection.exportedObject = self;
 return YES; // No verification!
 }
 ```
-### Mfano Dhaifu: Uthibitisho Unaotegemea PID (Race Condition)
+### Muundo Hatarishi: Uthibitishaji Unaotegemea PID (Race Condition)
 ```objc
 // VULNERABLE — PID can be reused between check and use
 - (BOOL)listener:(NSXPCListener *)listener
@@ -93,7 +93,7 @@ return YES;
 return NO;
 }
 ```
-### Mfano Salama: Uthibitishaji wa Tokeni ya Ukaguzi
+### Muundo Salama: Uthibitishaji wa Audit Token
 ```objc
 // SECURE — Uses audit token which cannot be spoofed
 - (BOOL)listener:(NSXPCListener *)listener
@@ -121,7 +121,7 @@ return YES;
 return NO;
 }
 ```
-## Shambulio: Kuunganisha kwenye XPC Services zisizolindwa
+## Attack: Kuunganisha kwenye XPC Services Zisizolindwa
 ```objc
 // Minimal XPC client — connect to a LaunchDaemon's Mach service
 #import <Foundation/Foundation.h>
@@ -155,9 +155,9 @@ NSLog(@"Result: %@", result);
 }
 }
 ```
-## Shambulio: XPC Object Deserialization
+## Attack: XPC Object Deserialization
 
-Huduma za XPC zinazokubali vitu tata (zinazoendana na `NSSecureCoding`) zinaweza kuwa hatarini kwa **deserialization attacks**:
+Huduma za XPC zinazokubali objects changamano (zinazokidhi `NSSecureCoding`) zinaweza kuwa vulnerable kwa **deserialization attacks**:
 ```objc
 // If the daemon accepts NSObject subclasses via XPC:
 // An attacker can send a crafted object that triggers:
@@ -168,9 +168,9 @@ Huduma za XPC zinazokubali vitu tata (zinazoendana na `NSSecureCoding`) zinaweza
 ```
 ## Mach-Lookup Sandbox Exceptions
 
-### Jinsi mach-lookup exceptions zinavyowezesha kutoroka kwenye Sandbox
+### Jinsi Exceptions Zinavyowezesha Sandbox Escape
 
-Sandboxed applications kwa kawaida zinaweza kuwasiliana tu na XPC services zao. Hata hivyo, **mach-lookup exceptions** huruhusu kufikia huduma za mfumo mzima:
+Programu zilizo ndani ya Sandbox kwa kawaida zinaweza kuwasiliana tu na huduma zao za XPC. Hata hivyo, **mach-lookup exceptions** huruhusu kufikia huduma za mfumo mzima:
 ```xml
 <!-- Entitlement granting mach-lookup exception -->
 <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
@@ -180,7 +180,7 @@ Sandboxed applications kwa kawaida zinaweza kuwasiliana tu na XPC services zao. 
 <string>com.apple.CoreServices.coreservicesd</string>
 </array>
 ```
-### Kupata Programu zenye Exceptions pana
+### Kutafuta Programu Zilizo na Vighairi Vipana
 ```bash
 # Find sandboxed apps with mach-lookup exceptions
 find /Applications -name "*.app" -exec sh -c '
@@ -194,7 +194,7 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 }
 ' _ {} \; 2>/dev/null
 ```
-### Sandbox Escape Chain
+### Mlolongo wa Kutoka kwenye Sandbox
 ```
 1. Compromise sandboxed app (e.g., via renderer exploit in browser/email)
 2. Enumerate mach-lookup exceptions from entitlements
@@ -203,15 +203,15 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 5. Exploit a daemon bug → code execution outside the sandbox
 6. Escalate from daemon's privilege level (often root)
 ```
-## Zana za Msaidizi Zenye Vipaumbele (SMJobBless)
+## Zana za Msaidizi zenye Privilege (SMJobBless)
 
 ### Jinsi Zinavyofanya Kazi
 
-`SMJobBless` inasakinisha msaidizi mwenye vipaumbele ambaye huendesha kama root kupitia launchd. Msaidizi huyo huwasiliana na app mzazi kupitia XPC:
+`SMJobBless` husakinisha helper yenye privilege inayoendeshwa kama root kupitia launchd. Helper huwasiliana na programu yake kuu kupitia XPC:
 ```
 App (user context) ←→ XPC ←→ Helper (root via launchd)
 ```
-### Udhaifu wa Kawaida: Uidhinishaji Dhaifu
+### Athari ya Kawaida: Uidhinishaji Dhaifu
 ```objc
 // Many helpers check authorization but:
 // 1. Don't verify WHO is connecting (any process can connect)
@@ -238,7 +238,7 @@ reply(YES);
 }
 }
 ```
-### Kutumia Wasaidizi Dhaifu
+### Kutumia Vibaya Helpers Dhaifu
 ```bash
 # 1. Find installed privileged helpers
 ls /Library/PrivilegedHelperTools/
@@ -273,19 +273,19 @@ class-dump /path/to/daemon
 # 3. Monitor for crashes
 log stream --predicate 'process == "daemon-name" AND (eventMessage CONTAINS "crash" OR eventMessage CONTAINS "fault")'
 ```
-## CVE za Dunia Halisi
+## CVE za Ulimwengu Halisi
 
 | CVE | Maelezo |
 |---|---|
-| CVE-2023-41993 | Udhaifu wa deserialization kwenye huduma ya XPC |
-| CVE-2022-22616 | Gatekeeper bypass kupitia matumizi mabaya ya huduma ya XPC |
-| CVE-2021-30657 | Sysmond XPC privilege escalation |
-| CVE-2020-9839 | XPC race condition katika system daemon |
-| CVE-2019-8802 | Zana ya msaidizi yenye vibali bila uhakikisho wa mteja |
+| CVE-2023-41993 | Athari ya deserialization ya XPC service |
+| CVE-2022-22616 | Gatekeeper bypass kupitia matumizi mabaya ya XPC service |
+| CVE-2021-30657 | Kuongezwa kwa privileges kupitia Sysmond XPC |
+| CVE-2020-9839 | Race condition ya XPC katika system daemon |
+| CVE-2019-8802 | Privileged helper tool isiyofanya client verification |
 | CVE-2023-32369 | Migraine — SIP bypass kupitia `systemmigrationd` XPC |
-| CVE-2022-26712 | PackageKit XPC root escalation |
+| CVE-2022-26712 | Kuongezwa kwa privileges hadi root kupitia PackageKit XPC |
 
-## Skripti ya Uorodhesaji
+## Script ya Enumeration
 ```bash
 #!/bin/bash
 echo "=== XPC Mach Services Security Audit ==="
@@ -315,9 +315,9 @@ done
 ```
 ## Marejeo
 
-* [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
-* [Apple Developer — Daemons and Services Programming Guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
-* [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
-* [OBTS — XPC Attack Surface talks](https://objectivebythesea.org/)
+- [1] [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
+- [2] [Apple Developer — Daemons and Services Programming Guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
+- [3] [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
+- [4] [OBTS — XPC Attack Surface talks](https://objectivebythesea.org/)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -4,54 +4,54 @@
 
 ## Main Keychains
 
-- **User Keychain** (`~/Library/Keychains/login.keychain-db`), ambayo inatumika kuhifadhi **akidi za mtumiaji** kama nywila za programu, nywila za mtandao, vyeti vilivyoundwa na mtumiaji, nywila za mtandao, na funguo za umma/za kibinafsi zilizoundwa na mtumiaji.
-- **System Keychain** (`/Library/Keychains/System.keychain`), ambayo inahifadhi **akidi za mfumo mzima** kama nywila za WiFi, vyeti vya mfumo, funguo za kibinafsi za mfumo, na nywila za programu za mfumo.
-- Inawezekana kupata vipengele vingine kama vyeti katika `/System/Library/Keychains/*`
-- Katika **iOS** kuna **Keychain** moja iliyoko katika `/private/var/Keychains/`. Folda hii pia ina hifadhidata za `TrustStore`, mamlaka za vyeti (`caissuercache`) na entries za OSCP (`ocspache`).
-- Programu zitakuwa na vizuizi katika keychain tu katika eneo lao la kibinafsi kulingana na kitambulisho chao cha programu.
+- **User Keychain** (`~/Library/Keychains/login.keychain-db`), ambayo hutumika kuhifadhi **credentials maalum za mtumiaji** kama vile application passwords, internet passwords, user-generated certificates, network passwords, pamoja na user-generated public/private keys.
+- **System Keychain** (`/Library/Keychains/System.keychain`), ambayo huhifadhi **credentials za mfumo mzima** kama vile WiFi passwords, system root certificates, system private keys, na system application passwords.<sup>[1]</sup>
+- Inawezekana kupata components nyingine kama certificates katika `/System/Library/Keychains/*`
+- Katika **iOS** kuna **Keychain** moja tu, iliyoko `/private/var/Keychains/`. Folda hii pia ina databases za `TrustStore`, certificate authorities (`caissuercache`) na OSCP entries (`ocspache`).
+- Apps zitawekewa vikwazo katika keychain na zitaruhusiwa tu kufikia eneo lake binafsi kulingana na application identifier.
 
 ### Password Keychain Access
 
-Faili hizi, ingawa hazina ulinzi wa ndani na zinaweza **kupakuliwa**, zimefungwa na zinahitaji **nywila ya mtumiaji ya maandiko ili kufunguliwa**. Chombo kama [**Chainbreaker**](https://github.com/n0fate/chainbreaker) kinaweza kutumika kwa ajili ya kufungua.
+Faili hizi, ingawa hazina ulinzi wa asili na zinaweza **downloaded**, zimesimbwa kwa encryption na zinahitaji **user's plaintext password ili decrypt**. Tool kama [**Chainbreaker**](https://github.com/n0fate/chainbreaker) inaweza kutumika kwa decryption.<sup>[1]</sup>
 
 ## Keychain Entries Protections
 
 ### ACLs
 
-Kila kipengele katika keychain kinatawaliwa na **Access Control Lists (ACLs)** ambazo zinaelekeza nani anaweza kufanya vitendo mbalimbali kwenye kipengele cha keychain, ikiwa ni pamoja na:
+Kila entry katika keychain inadhibitiwa na **Access Control Lists (ACLs)**, ambazo huamua nani anaweza kutekeleza vitendo mbalimbali kwenye keychain entry, ikiwa ni pamoja na:<sup>[1]</sup>
 
-- **ACLAuhtorizationExportClear**: Inaruhusu mwenyewe kupata maandiko ya siri.
-- **ACLAuhtorizationExportWrapped**: Inaruhusu mwenyewe kupata maandiko ya siri yaliyofichwa kwa nywila nyingine iliyotolewa.
-- **ACLAuhtorizationAny**: Inaruhusu mwenyewe kufanya kitendo chochote.
+- **ACLAuhtorizationExportClear**: Humruhusu mwenye ruhusa kupata secret katika clear text.
+- **ACLAuhtorizationExportWrapped**: Humruhusu mwenye ruhusa kupata clear text iliyosimbwa kwa encryption kwa kutumia password nyingine iliyotolewa.
+- **ACLAuhtorizationAny**: Humruhusu mwenye ruhusa kutekeleza kitendo chochote.
 
-ACLs zinakuja na **orodha ya programu zinazotegemewa** ambazo zinaweza kufanya vitendo hivi bila kuombwa. Hii inaweza kuwa:
+ACLs pia huambatana na **list ya trusted applications** zinazoweza kutekeleza vitendo hivi bila kuonyesha prompt. Hii inaweza kuwa:<sup>[1]</sup>
 
-- **N`il`** (hakuna idhini inayohitajika, **kila mtu anategemewa**)
-- Orodha **bila** (hakuna mtu anategemewa)
-- **Orodha** ya **programu** maalum.
+- **N`il`** (hakuna authorization inayohitajika, **kila mtu anaaminiwa**)
+- List **tupu** (**hakuna mtu anayeaminiwa**)
+- **List** ya **applications** maalum.
 
-Pia kipengele kinaweza kuwa na funguo **`ACLAuthorizationPartitionID`,** ambayo inatumika kutambua **teamid, apple,** na **cdhash.**
+Pia entry inaweza kuwa na key **`ACLAuthorizationPartitionID`,** ambayo hutumika kutambua **teamid, apple,** na **cdhash.**<sup>[1]</sup>
 
-- Ikiwa **teamid** imeainishwa, basi ili **kufikia thamani ya kipengele** **bila** **kuombwa** programu iliyotumika lazima iwe na **teamid sawa**.
-- Ikiwa **apple** imeainishwa, basi programu inahitaji kuwa **imeandikwa** na **Apple**.
-- Ikiwa **cdhash** imeonyeshwa, basi **programu** lazima iwe na **cdhash** maalum.
+- Ikiwa **teamid** imeainishwa, ili **kufikia** value ya **entry** **bila** **prompt**, application iliyotumika lazima iwe na **teamid** ileile.
+- Ikiwa **apple** imeainishwa, app lazima iwe **signed** na **Apple**.
+- Ikiwa **cdhash** imeonyeshwa, **app** lazima iwe na **cdhash** maalum.
 
 ### Creating a Keychain Entry
 
-Wakati **kipengele kipya** kinaundwa kwa kutumia **`Keychain Access.app`**, sheria zifuatazo zinatumika:
+Wakati **entry** **mpya** inaundwa kwa kutumia **`Keychain Access.app`**, rules zifuatazo hutumika:<sup>[1]</sup>
 
-- Programu zote zinaweza kuficha.
-- **Hakuna programu** zinaweza kusafirisha/kufungua (bila kuombwa mtumiaji).
-- Programu zote zinaweza kuona ukaguzi wa uaminifu.
-- Hakuna programu zinaweza kubadilisha ACLs.
+- Apps zote zinaweza kufanya encryption.
+- **Hakuna apps** zinazoweza kufanya export/decrypt (bila kumwonyesha mtumiaji prompt).
+- Apps zote zinaweza kuona integrity check.
+- Hakuna apps zinazoweza kubadilisha ACLs.
 - **partitionID** imewekwa kuwa **`apple`**.
 
-Wakati **programu inaunda kipengele katika keychain**, sheria ni tofauti kidogo:
+Wakati **application inaunda entry katika keychain**, rules hutofautiana kidogo:<sup>[1]</sup>
 
-- Programu zote zinaweza kuficha.
-- Ni **programu inayounda** tu (au programu nyingine yoyote iliyoongezwa wazi) zinaweza kusafirisha/kufungua (bila kuombwa mtumiaji).
-- Programu zote zinaweza kuona ukaguzi wa uaminifu.
-- Hakuna programu zinaweza kubadilisha ACLs.
+- Apps zote zinaweza kufanya encryption.
+- Ni **application iliyounda entry** pekee (au apps nyingine zilizoongezwa waziwazi) inayoweza kufanya export/decrypt (bila kumwonyesha mtumiaji prompt).
+- Apps zote zinaweza kuona integrity check.
+- Hakuna apps zinazoweza kubadilisha ACLs.
 - **partitionID** imewekwa kuwa **`teamid:[teamID here]`**.
 
 ## Accessing the Keychain
@@ -76,57 +76,57 @@ security dump-keychain ~/Library/Keychains/login.keychain-db
 ### APIs
 
 > [!TIP]
-> **Uhesabuji wa keychain na kutolewa** kwa siri ambazo **hazitazalisha kiashiria** zinaweza kufanywa kwa kutumia chombo [**LockSmith**](https://github.com/its-a-feature/LockSmith)
+> **keychain enumeration and dumping** ya secrets ambazo **hazitatengeneza prompt** inaweza kufanywa kwa kutumia tool [**LockSmith**](https://github.com/its-a-feature/LockSmith)
 >
-> Nyingine API endpoints zinaweza kupatikana katika [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html) msimbo wa chanzo.
+> API endpoints nyingine zinaweza kupatikana katika source code ya [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html).
 
-Orodhesha na pata **info** kuhusu kila kiingilio cha keychain kwa kutumia **Security Framework** au unaweza pia kuangalia chombo cha cli cha chanzo wazi cha Apple [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Baadhi ya mifano ya API:
+Orodhesha na upate **info** kuhusu kila keychain entry kwa kutumia **Security Framework**, au unaweza pia kuangalia cli tool ya Apple yenye source code wazi, [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Baadhi ya mifano ya API:<sup>[1]</sup>
 
-- API **`SecItemCopyMatching`** inatoa info kuhusu kila kiingilio na kuna baadhi ya sifa unaweza kuweka unapoitumia:
-- **`kSecReturnData`**: Ikiwa ni kweli, itajaribu kufungua data (weka kuwa uongo ili kuepuka pop-ups zinazoweza kutokea)
-- **`kSecReturnRef`**: Pata pia rejea kwa kipengee cha keychain (weka kuwa kweli ikiwa baadaye utaona unaweza kufungua bila pop-up)
-- **`kSecReturnAttributes`**: Pata metadata kuhusu viingilio
-- **`kSecMatchLimit`**: Ni matokeo mangapi ya kurudisha
-- **`kSecClass`**: Ni aina gani ya kiingilio cha keychain
+- API **`SecItemCopyMatching`** hutoa info kuhusu kila entry na kuna baadhi ya attributes unazoweza kuweka unapoitumia:
+- **`kSecReturnData`**: Ikiwa ni true, itajaribu ku-decrypt data (weka false ili kuepuka pop-ups zinazoweza kutokea)
+- **`kSecReturnRef`**: Pia pata reference ya keychain item (weka true ikiwa baadaye utaona kuwa unaweza ku-decrypt bila pop-up)
+- **`kSecReturnAttributes`**: Pata metadata kuhusu entries
+- **`kSecMatchLimit`**: Idadi ya results za kurudisha
+- **`kSecClass`**: Aina ya keychain entry
 
-Pata **ACLs** za kila kiingilio:
+Pata **ACLs** za kila entry:<sup>[1]</sup>
 
-- Kwa API **`SecAccessCopyACLList`** unaweza kupata **ACL kwa kipengee cha keychain**, na itarudisha orodha ya ACLs (kama `ACLAuhtorizationExportClear` na zingine zilizotajwa hapo awali) ambapo kila orodha ina:
-- Maelezo
-- **Orodha ya Maombi ya Kuaminika**. Hii inaweza kuwa:
-- Programu: /Applications/Slack.app
+- Kwa API **`SecAccessCopyACLList`** unaweza kupata **ACL ya keychain item**, na itarudisha list ya ACLs (kama `ACLAuhtorizationExportClear` na nyingine zilizotajwa awali), ambapo kila list ina:
+- Description
+- **Trusted Application List**. Hii inaweza kuwa:
+- App: /Applications/Slack.app
 - Binary: /usr/libexec/airportd
-- Kundi: group://AirPort
+- Group: group://AirPort
 
-Export data:
+Export data:<sup>[1]</sup>
 
-- API **`SecKeychainItemCopyContent`** inapata maandiko
-- API **`SecItemExport`** inasafirisha funguo na vyeti lakini inaweza kuhitaji kuweka nywila ili kusafirisha yaliyomo kwa usimbaji
+- API **`SecKeychainItemCopyContent`** hupata plaintext
+- API **`SecItemExport`** hu-export keys na certificates, lakini huenda ukahitaji kuweka passwords ili ku-export content ikiwa encrypted
 
-Na hizi ndizo **mahitaji** ya kuwa na uwezo wa **kusafirisha siri bila kiashiria**:
+Na hizi ndizo **requirements** za kuweza **ku-export secret bila prompt**:<sup>[1]</sup>
 
-- Ikiwa **1+ maombi ya kuaminika** yameorodheshwa:
-- Inahitaji **idhini** sahihi (**`Nil`**, au kuwa **sehemu** ya orodha inayoruhusiwa ya maombi katika idhini ya kufikia info ya siri)
-- Inahitaji saini ya msimbo kuendana na **PartitionID**
-- Inahitaji saini ya msimbo kuendana na ile ya **programu moja ya kuaminika** (au kuwa mwanachama wa kundi sahihi la KeychainAccessGroup)
-- Ikiwa **maombi yote ni ya kuaminika**:
-- Inahitaji **idhini** sahihi
-- Inahitaji saini ya msimbo kuendana na **PartitionID**
-- Ikiwa **hakuna PartitionID**, basi hii haitahitajika
+- Ikiwa kuna trusted apps **1+** zilizoorodheshwa:
+- Inahitajika **authorizations** zinazofaa (**`Nil`**, au uwe **sehemu** ya list ya apps zinazoruhusiwa katika authorization ya kufikia secret info)
+- Code signature inahitajika ku-match **PartitionID**
+- Code signature inahitajika ku-match ya **trusted app** moja (au uwe member wa KeychainAccessGroup inayofaa)
+- Ikiwa **applications zote ni trusted**:
+- Inahitajika **authorizations** zinazofaa
+- Code signature inahitajika ku-match **PartitionID**
+- Ikiwa hakuna **PartitionID**, basi hili halihitajiki
 
 > [!CAUTION]
-> Hivyo, ikiwa kuna **1 programu iliyoorodheshwa**, unahitaji **kuingiza msimbo katika programu hiyo**.
+> Kwa hiyo, ikiwa kuna **application 1 iliyoorodheshwa**, unahitaji **ku-inject code kwenye application hiyo**.
 >
-> Ikiwa **apple** inaonyeshwa katika **partitionID**, unaweza kuipata kwa kutumia **`osascript`** hivyo chochote kinachounga mkono maombi yote na apple katika partitionID. **`Python`** inaweza pia kutumika kwa hili.
+> Ikiwa **apple** imeonyeshwa katika **partitionID**, unaweza kuifikia kwa kutumia **`osascript`**, kwa hiyo chochote kinacho-trust applications zote huku kikiwa na apple katika partitionID. **`Python`** pia inaweza kutumika kwa hili.
 
 ### Sifa mbili za ziada
 
-- **Invisible**: Ni bendera ya boolean ili **kuficha** kiingilio kutoka kwa programu ya **UI** Keychain
-- **General**: Ni kuhifadhi **metadata** (hivyo SI IMESIMBWA)
-- Microsoft ilikuwa ikihifadhi katika maandiko yote ya wazi tokens za refresher kufikia kiwambo nyeti.
+- **Invisible**: Ni boolean flag ya **kuficha** entry kutoka kwenye **UI** ya Keychain app<sup>[1]</sup>
+- **General**: Hutumika kuhifadhi **metadata** (kwa hiyo HAIJAENCRYPTIWA)<sup>[1]</sup>
+- Microsoft ilikuwa inahifadhi refresh tokens zote kwa plain text ili kufikia sensitive endpoint.<sup>[1]</sup>
 
-## References
+## Marejeleo
 
-- [**#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas**](https://www.youtube.com/watch?v=jKE1ZW33JpY)
+- [1] [#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas](https://www.youtube.com/watch?v=jKE1ZW33JpY)
 
 {{#include ../../banners/hacktricks-training.md}}

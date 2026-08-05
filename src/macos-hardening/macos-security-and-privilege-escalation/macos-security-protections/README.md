@@ -1,22 +1,24 @@
-# macOS Usalama Ulinzi
+# Ulinzi wa Usalama wa macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Gatekeeper
 
-Gatekeeper kwa kawaida hutumiwa kurejelea mchanganyiko wa **Quarantine + Gatekeeper + XProtect**, moduli 3 za usalama za macOS ambazo zitajaribu **kuzuia watumiaji kutekeleza programu mbaya zinazoweza kupakuliwa**.
+Gatekeeper kwa kawaida hutumika kurejelea mchanganyiko wa **Quarantine + Gatekeeper + XProtect**, modules 3 za usalama za macOS ambazo zitajaribu **kuwazuia watumiaji kutekeleza software inayoweza kuwa hasidi iliyopakuliwa**.
 
 Maelezo zaidi katika:
+
 
 {{#ref}}
 macos-gatekeeper.md
 {{#endref}}
 
-## Mipaka ya Mchakato
+## Vikwazo vya Processes
 
 ### MACF
 
-### SIP - Ulinzi wa Uadilifu wa Mfumo
+### SIP - System Integrity Protection
+
 
 {{#ref}}
 macos-sip.md
@@ -24,52 +26,55 @@ macos-sip.md
 
 ### Sandbox
 
-MacOS Sandbox **inapunguza programu** zinazotembea ndani ya sandbox kwa **vitendo vilivyokubaliwa vilivyobainishwa katika profaili ya Sandbox** ambayo programu inatumia. Hii husaidia kuhakikisha kwamba **programu itakuwa ikipata rasilimali zinazotarajiwa tu**.
+MacOS Sandbox **huwekea mipaka applications** zinazoendesha ndani ya sandbox kwa **actions zinazoruhusiwa zilizoainishwa katika Sandbox profile** ambayo app inaendesha nayo. Hii husaidia kuhakikisha kwamba **application itafikia resources zinazotarajiwa pekee**.
+
 
 {{#ref}}
 macos-sandbox/
 {{#endref}}
 
-### TCC - **Uwazi, Idhini, na Udhibiti**
+### TCC - **Transparency, Consent, and Control**
 
-**TCC (Uwazi, Idhini, na Udhibiti)** ni mfumo wa usalama. Imeundwa ili **kusimamia ruhusa** za programu, hasa kwa kudhibiti ufikiaji wao kwa vipengele nyeti. Hii inajumuisha vipengele kama **huduma za eneo, mawasiliano, picha, kipaza sauti, kamera, upatikanaji, na ufikiaji wa diski nzima**. TCC inahakikisha kwamba programu zinaweza kufikia vipengele hivi tu baada ya kupata idhini wazi kutoka kwa mtumiaji, hivyo kuimarisha faragha na udhibiti juu ya data binafsi.
+**TCC (Transparency, Consent, and Control)** ni security framework. Imeundwa **kusimamia permissions** za applications, hasa kwa kudhibiti access yao kwa features nyeti. Hii inajumuisha vipengele kama **location services, contacts, photos, microphone, camera, accessibility, na full disk access**. TCC huhakikisha kwamba apps zinaweza kufikia features hizi tu baada ya kupata idhini ya wazi ya mtumiaji, hivyo kuimarisha privacy na udhibiti wa data binafsi.
+
 
 {{#ref}}
 macos-tcc/
 {{#endref}}
 
-### Mipaka ya Uzinduzi/Mazingira & Hifadhi ya Kuaminiwa
+### Launch/Environment Constraints & Trust Cache
 
-Mipaka ya uzinduzi katika macOS ni kipengele cha usalama ili **kudhibiti uzinduzi wa mchakato** kwa kufafanua **nani anaweza kuzindua** mchakato, **vipi**, na **kutoka wapi**. Imeanzishwa katika macOS Ventura, inagawanya binaries za mfumo katika makundi ya mipaka ndani ya **hifadhi ya kuaminiwa**. Kila binary inayoweza kutekelezwa ina **kanuni** zilizowekwa kwa **uzinduzi** wake, ikiwa ni pamoja na **mwenyewe**, **mzazi**, na **mipaka ya kuwajibika**. Imeongezwa kwa programu za wahusika wengine kama **Mipaka ya Mazingira** katika macOS Sonoma, vipengele hivi husaidia kupunguza uwezekano wa unyakuzi wa mfumo kwa kudhibiti masharti ya uzinduzi wa mchakato.
+Launch constraints katika macOS ni feature ya usalama ya **kudhibiti uanzishaji wa process** kwa kufafanua **nani anaweza ku-launch** process, **kwa njia gani**, na **kutoka wapi**. Zilianzishwa katika macOS Ventura, na huainisha system binaries katika constraint categories ndani ya **trust cache**. Kila executable binary ina **rules** zilizowekwa kwa ajili ya **launch** yake, zikiwemo constraints za **self**, **parent**, na **responsible**. Zikiwa zimepanuliwa kwa third-party apps kama **Environment** Constraints katika macOS Sonoma, features hizi husaidia kupunguza uwezekano wa system exploitations kwa kudhibiti masharti ya ku-launch processes.
+
 
 {{#ref}}
 macos-launch-environment-constraints.md
 {{#endref}}
 
-## MRT - Zana ya Kuondoa Malware
+## MRT - Malware Removal Tool
 
-Zana ya Kuondoa Malware (MRT) ni sehemu nyingine ya miundombinu ya usalama ya macOS. Kama jina linavyopendekeza, kazi kuu ya MRT ni **kuondoa malware inayojulikana kutoka kwa mifumo iliyoathirika**.
+Malware Removal Tool (MRT) ni sehemu nyingine ya security infrastructure ya macOS. Kama jina linavyopendekeza, kazi kuu ya MRT ni **kuondoa malware inayojulikana kutoka kwenye systems zilizoambukizwa**.
 
-Mara tu malware inapogundulika kwenye Mac (ama na XProtect au kwa njia nyingine), MRT inaweza kutumika kuondoa **malware hiyo** kiotomatiki. MRT inafanya kazi kimya kimya katika mandharinyuma na kawaida inafanya kazi kila wakati mfumo unaposasishwa au wakati ufafanuzi mpya wa malware unapopakuliwa (inaonekana kama kanuni ambazo MRT inahitaji kugundua malware ziko ndani ya binary).
+Mara malware inapogunduliwa kwenye Mac (iwe na XProtect au kwa njia nyingine), MRT inaweza kutumika **kuondoa malware** hiyo automatically. MRT hufanya kazi kimya kimya background na kwa kawaida huendeshwa kila mfumo unaposasishwa au definition mpya ya malware inapopakuliwa (inaonekana rules ambazo MRT hutumia kugundua malware ziko ndani ya binary).
 
-Ingawa XProtect na MRT ni sehemu ya hatua za usalama za macOS, zinafanya kazi tofauti:
+Ingawa XProtect na MRT zote ni sehemu ya security measures za macOS, zinafanya functions tofauti:
 
-- **XProtect** ni chombo cha kuzuia. Inafanya **ukaguzi wa faili zinapopakuliwa** (kupitia programu fulani), na ikiwa inagundua aina yoyote ya malware inayojulikana, in **azuia faili hiyo kufunguliwa**, hivyo kuzuia malware kuathiri mfumo wako kwa mara ya kwanza.
-- **MRT**, kwa upande mwingine, ni **chombo cha kujibu**. Inafanya kazi baada ya malware kugundulika kwenye mfumo, kwa lengo la kuondoa programu inayosababisha tatizo ili kusafisha mfumo.
+- **XProtect** ni preventative tool. **Hukagua files zinapopakuliwa** (kupitia applications fulani), na ikigundua aina yoyote inayojulikana ya malware, **huzuia file kufunguka**, hivyo kuzuia malware isiambukize system yako tangu mwanzo.
+- **MRT**, kwa upande mwingine, ni **reactive tool**. Hufanya kazi baada ya malware kugunduliwa kwenye system, ikiwa na lengo la kuondoa software yenye madhara ili kusafisha system.
 
-Programu ya MRT iko katika **`/Library/Apple/System/Library/CoreServices/MRT.app`**
+MRT application iko katika **`/Library/Apple/System/Library/CoreServices/MRT.app`**
 
-## Usimamizi wa Kazi za Mandharinyuma
+## Usimamizi wa Background Tasks
 
-**macOS** sasa **inaarifu** kila wakati chombo kinapotumia **mbinu inayojulikana ya kudumisha utekelezaji wa msimbo** (kama vile Vitu vya Kuingia, Daemons...), hivyo mtumiaji anajua vizuri **ni programu gani inayoendelea**.
+**macOS** sasa **huonya** kila mara tool inapotumia **technique inayojulikana ya ku-persist code execution** (kama Login Items, Daemons...), ili mtumiaji ajue vizuri zaidi **ni software gani inayopersist**.<sup>[3]</sup>
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
-Hii inafanya kazi na **daemon** iliyoko katika `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` na **wakala** katika `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`
+Hii huendeshwa na **daemon** iliyoko katika `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` na **agent** iliyoko katika `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`<sup>[1]</sup>
 
-Njia ambayo **`backgroundtaskmanagementd`** inajua kitu kimewekwa katika folda ya kudumu ni kwa **kupata FSEvents** na kuunda **wajibu** kwa ajili yao.
+Jinsi **`backgroundtaskmanagementd`** inavyojua kwamba kitu kimewekwa katika folder ya persistence ni kwa **kupata FSEvents** na kuunda **handlers** kwa ajili yake.<sup>[1]</sup>
 
-Zaidi ya hayo, kuna faili ya plist ambayo ina **programu zinazojulikana** ambazo mara kwa mara zinadumishwa na apple iliyoko katika: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
+Zaidi ya hayo, kuna plist file iliyo na **applications zinazojulikana** ambazo mara nyingi hupersist, inayodumishwa na apple na iliyoko katika: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`<sup>[3]</sup>
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -87,31 +92,31 @@ Zaidi ya hayo, kuna faili ya plist ambayo ina **programu zinazojulikana** ambazo
 ```
 ### Enumeration
 
-Inawezekana **kuorodhesha yote** yaliyowekwa kama vitu vya nyuma vinavyotumia zana ya Apple cli:
+Inawezekana **ku-enumerate zote** background items zilizosanidiwa kwa kutumia Apple CLI tool:<sup>[3]</sup>
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
 ```
-Zaidi ya hayo, inawezekana pia kuorodhesha habari hii kwa kutumia [**DumpBTM**](https://github.com/objective-see/DumpBTM).
+Zaidi ya hayo, inawezekana pia kuorodhesha taarifa hii kwa kutumia [**DumpBTM**](https://github.com/objective-see/DumpBTM).<sup>[2]</sup>
 ```bash
 # You need to grant the Terminal Full Disk Access for this to work
 chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
-Hii taarifa inahifadhiwa katika **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** na Terminal inahitaji FDA.
+Maelezo haya yanahifadhiwa katika **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** na Terminal inahitaji FDA.<sup>[2]</sup>
 
-### Kuingilia BTM
+### Kuchakachua BTM
 
-Wakati uvumbuzi mpya wa kudumu unapatikana, tukio la aina **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** linafanyika. Hivyo, njia yoyote ya **kuzuia** **tukio** hili kutumwa au **wakala kuonya** mtumiaji itasaidia mshambuliaji _**kuepuka**_ BTM.
+Persistence mpya inapopatikana, hutokea event ya aina **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. Kwa hivyo, njia yoyote ya **kuzuia** event hii **kutumwa** au **agent kutoa alert** kwa mtumiaji itamsaidia attacker **kupita** BTM.<sup>[1]</sup>
 
-- **Kurekebisha hifadhidata**: Kukimbia amri ifuatayo kutarekebisha hifadhidata (inapaswa kujenga upya kutoka mwanzo), hata hivyo, kwa sababu fulani, baada ya kukimbia hii, **hakuna uvumbuzi mpya utakaonyeshwa hadi mfumo uanzishwe upya**.
+- **Kureset database**: Kuendesha command ifuatayo kuta-reset database (inapaswa kuijenga upya kutoka mwanzo), hata hivyo, kwa sababu fulani, baada ya kuendesha hii, **hakuna persistence mpya itakayotolewa alert hadi mfumo u-reboot**.<sup>[1]</sup>
 - **root** inahitajika.
 ```bash
 # Reset the database
 sfltool resettbtm
 ```
-- **Stop the Agent**: Inawezekana kutuma ishara ya kusitisha kwa wakala ili **isiwe inamwonya mtumiaji** wakati kugundua mpya kunapatikana.
+- **Kumsimamisha Agent**: Inawezekana kutuma stop signal kwa agent ili **asimtahadharishe mtumiaji** wakati detections mpya zinapatikana.<sup>[1]</sup>
 ```bash
 # Get PID
 pgrep BackgroundTaskManagementAgent
@@ -124,12 +129,12 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-- **Bug**: Ikiwa **mchakato uliounda kudumu upo haraka baada yake**, daemon itajaribu **kupata taarifa** kuhusu hiyo, **itashindwa**, na **haitaweza kutuma tukio** linaloashiria kwamba kitu kipya kinadumu.
+- **Bug**: Ikiwa **process iliyounda persistence ita-exit mara tu baada ya kuiunda**, daemon itajaribu **kupata taarifa** kuihusu, **itashindwa**, na **haitaweza kutuma event** inayoonyesha kwamba kitu kipya kinaendelea kufanya persistence.<sup>[1]</sup>
 
-Marejeo na **maelezo zaidi kuhusu BTM**:
+## Marejeleo
 
-- [https://youtu.be/9hjUmT031tc?t=26481](https://youtu.be/9hjUmT031tc?t=26481)
-- [https://www.patreon.com/posts/new-developer-77420730?l=fr](https://www.patreon.com/posts/new-developer-77420730?l=fr)
-- [https://support.apple.com/en-gb/guide/deployment/depdca572563/web](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
+- [1] [OBTS v6.0: "Kufafanua (& Kupita) Usimamizi wa Background Task wa macOS" - Patrick Wardle & Chris Lopez](https://youtu.be/9hjUmT031tc?t=26481)
+- [2] [Tool Mpya (Developer): "DumpBTM" - Patrick Wardle (Patreon)](https://www.patreon.com/posts/new-developer-77420730?l=fr)
+- [3] [Simamia login items na background tasks kwenye Mac - Apple Platform Deployment](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
 
 {{#include ../../../banners/hacktricks-training.md}}

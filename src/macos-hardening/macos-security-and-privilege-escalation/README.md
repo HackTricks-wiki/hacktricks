@@ -1,19 +1,19 @@
-# macOS Usalama & Kuinua Privilege
+# Usalama wa macOS na Kuongeza Privilege
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Msingi wa MacOS
 
-Ikiwa hujui kuhusu macOS, unapaswa kuanza kujifunza misingi ya macOS:
+Ikiwa huifahamu macOS, unapaswa kuanza kujifunza misingi ya macOS:
 
-- Faili maalum za macOS **na ruhusa:**
+- **Files & permissions** maalum za macOS:
 
 
 {{#ref}}
 macos-files-folders-and-binaries/
 {{#endref}}
 
-- Watumiaji wa kawaida wa macOS **
+- **Users** wa kawaida wa macOS
 
 
 {{#ref}}
@@ -27,14 +27,14 @@ macos-users.md
 macos-applefs.md
 {{#endref}}
 
-- **Muundo** wa k**ernel**
+- **Architecture** ya k**ernel**
 
 
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
-- Huduma za kawaida za macOS n**etwork na protokali**
+- **Network services & protocols** za kawaida za macOS
 
 
 {{#ref}}
@@ -42,90 +42,90 @@ macos-protocols.md
 {{#endref}}
 
 - **Opensource** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
-- Ili kupakua `tar.gz` badilisha URL kama [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) kuwa [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+- Ili kupakua `tar.gz`, badilisha URL kama [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) kuwa [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 ### MacOS MDM
 
-Katika kampuni **sistimu za macOS** zina uwezekano mkubwa wa kuwa **zinazosimamiwa na MDM**. Hivyo, kutoka mtazamo wa mshambuliaji ni muhimu kujua **jinsi hiyo inavyofanya kazi**:
+Katika kampuni, mifumo ya **macOS** ina uwezekano mkubwa wa kuwa **managed with a MDM**. Kwa hivyo, kwa mtazamo wa attacker, ni muhimu kujua **jinsi inavyofanya kazi**:
 
 
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
 {{#endref}}
 
-### MacOS - Kukagua, Kurekebisha na Fuzzing
+### MacOS - Kukagua, Ku-debug na Kufanya Fuzzing
 
 
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
-## Ulinzi wa Usalama wa MacOS
+## Security Protections za MacOS
 
 
 {{#ref}}
 macos-security-protections/
 {{#endref}}
 
-## Uso wa Shambulio
+## Attack Surface
 
-### Ruhusa za Faili
+### File Permissions
 
-Ikiwa **mchakato unaotembea kama root unaandika** faili ambayo inaweza kudhibitiwa na mtumiaji, mtumiaji anaweza kuitumia hii ili **kuinua ruhusa**.\
-Hii inaweza kutokea katika hali zifuatazo:
+Ikiwa **process inayotumia root itaandika** file inayoweza kudhibitiwa na user, user anaweza kutumia hali hii **kuongeza privileges**.\
+Hili linaweza kutokea katika hali zifuatazo:
 
-- Faili iliyotumika tayari iliumbwa na mtumiaji (inamilikiwa na mtumiaji)
-- Faili iliyotumika inaweza kuandikwa na mtumiaji kwa sababu ya kundi
-- Faili iliyotumika iko ndani ya directory inayomilikiwa na mtumiaji (mtumiaji anaweza kuunda faili hiyo)
-- Faili iliyotumika iko ndani ya directory inayomilikiwa na root lakini mtumiaji ana ufaccess wa kuandika juu yake kwa sababu ya kundi (mtumiaji anaweza kuunda faili hiyo)
+- File iliyotumika ilikuwa tayari imeundwa na user (inamilikiwa na user)
+- File iliyotumika inaweza kuandikwa na user kwa sababu ya group
+- File iliyotumika iko ndani ya directory inayomilikiwa na user (user anaweza kuunda file)
+- File iliyotumika iko ndani ya directory inayomilikiwa na root, lakini user ana write access juu yake kwa sababu ya group (user anaweza kuunda file)
 
-Kuweza **kuunda faili** ambayo itatumika na **root**, inamruhusu mtumiaji **kunufaika na maudhui yake** au hata kuunda **symlinks/hardlinks** kuielekeza mahali pengine.
+Kuweza **kuunda file** ambayo **itatumiwa na root**, humruhusu user **kunufaika na maudhui yake** au hata kuunda **symlinks/hardlinks** zinazoielekeza sehemu nyingine.
 
-Kwa aina hii ya udhaifu usisahau **kuangalia waandishi wa `.pkg` walio hatarini**:
+Kwa aina hii ya vulnerabilities, usisahau **kukagua installers za `.pkg` zilizo hatarini**:
 
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### Msimbo wa Faili & Wakala wa mpango wa URL
+### File Extension & URL scheme app handlers
 
-Programu za ajabu zilizoorodheshwa na viambatisho vya faili zinaweza kutumika vibaya na programu tofauti zinaweza kuandikishwa kufungua protokali maalum
+Apps zisizo za kawaida zilizosajiliwa kupitia file extensions zinaweza kutumiwa vibaya, na applications tofauti zinaweza kusajiliwa ili kufungua protocols maalum
 
 
 {{#ref}}
 macos-file-extension-apps.md
 {{#endref}}
 
-## macOS TCC / SIP Kuinua Privilege
+## macOS TCC / SIP Privilege Escalation
 
-Katika macOS **programu na binaries zinaweza kuwa na ruhusa** za kufikia folda au mipangilio ambayo inawafanya kuwa na nguvu zaidi kuliko wengine.
+Katika macOS, **applications na binaries zinaweza kuwa na permissions** za kufikia folders au settings zinazozifanya ziwe na privileges zaidi kuliko nyingine.
 
-Hivyo, mshambuliaji anayetaka kufanikiwa kuathiri mashine ya macOS atahitaji **kuinua ruhusa zake za TCC** (au hata **kupita SIP**, kulingana na mahitaji yake).
+Kwa hivyo, attacker anayetaka ku-compromise mashine ya macOS kwa mafanikio atahitaji **kuongeza TCC privileges** (au hata **kubypass SIP**, kulingana na mahitaji yake).
 
-Ruhusa hizi kwa kawaida hutolewa kwa njia ya **entitlements** ambayo programu imeandikwa nayo, au programu inaweza kuomba baadhi ya ufaccess na baada ya **mtumiaji kuidhinisha** zinaweza kupatikana katika **databases za TCC**. Njia nyingine mchakato unaweza kupata ruhusa hizi ni kwa kuwa **mtoto wa mchakato** wenye hizo **ruhusa** kwani kwa kawaida **zinarithiwa**.
+Privileges hizi kwa kawaida hutolewa kwa njia ya **entitlements** ambazo application imesainiwa nazo, au application inaweza kuwa imeomba access fulani na baada ya **user kuziidhinisha**, zinaweza kupatikana katika **TCC databases**. Njia nyingine ambayo process inaweza kupata privileges hizi ni kuwa **child wa process** yenye **privileges** hizo, kwa kuwa kwa kawaida **hurithiwa**.
 
-Fuata viungo hivi kupata njia tofauti za [**kuinua ruhusa katika TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**kupita TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) na jinsi katika siku za nyuma [**SIP imepita**](macos-security-protections/macos-sip.md#sip-bypasses).
+Fuata links hizi ili kupata njia tofauti za [**kuongeza privileges katika TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), za [**kubypass TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) na jinsi hapo awali [**SIP ilivyobypassiwa**](macos-security-protections/macos-sip.md#sip-bypasses).
 
-## macOS Kuinua Privilege Kawaida
+## macOS Traditional Privilege Escalation
 
-Bila shaka kutoka mtazamo wa timu nyekundu unapaswa pia kuwa na hamu ya kuinua hadi root. Angalia chapisho lifuatalo kwa vidokezo vingine:
+Bila shaka, kwa mtazamo wa red teams unapaswa pia kuvutiwa na kuongeza privileges hadi root. Angalia post ifuatayo kwa vidokezo:
 
 
 {{#ref}}
 macos-privilege-escalation.md
 {{#endref}}
 
-## Uzingatiaji wa macOS
+## macOS Compliance
 
 - [https://github.com/usnistgov/macos_security](https://github.com/usnistgov/macos_security)
 
-## Marejeleo
+## References
 
-- [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
-- [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
-- [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
-- [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
-- [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
+- [1] [OS X Incident Response: Scripting and Analysis](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+- [2] [The Art of Mac Malware, Vol. 1 — Analysis (Patrick Wardle)](https://taomm.org/vol1/analysis.html)
+- [3] [NicolasGrimonpont/Cheatsheet — macOS/Linux/Windows commands & security tools cheatsheet](https://github.com/NicolasGrimonpont/Cheatsheet)
+- [4] [SentinelOne — macOS Security Resource](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
+- [5] [2022 - macOS local security: escaping the sandbox and bypassing TCC (YouTube)](https://www.youtube.com/watch?v=vMGiplQtjTY)
 
 {{#include ../../banners/hacktricks-training.md}}
