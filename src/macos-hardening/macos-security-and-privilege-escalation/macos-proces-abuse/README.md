@@ -267,12 +267,12 @@ Note that executables compiled with **`pyinstaller`** won't use these environmen
 
 ### Shield
 
-[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) is an open source application that can **detect and block process injection** actions:
+[**Shield**](https://github.com/theevilbit/Shield) is an open source **EndpointSecurity**-based application that detects and blocks process injection. It is a good reference for which signals are actually observable from ES, since it alerts on:
 
-- Using **Environmental Variables**: It will monitor the presence of any of the following environmental variables: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** and **`ELECTRON_RUN_AS_NODE`**
-- Using **`task_for_pid`** calls: To find when one process wants to get the **task port of another** which allows to inject code in the process.
-- **Electron apps params**: Someone can use **`--inspect`**, **`--inspect-brk`** and **`--remote-debugging-port`** command line argument to start an Electron app in debugging mode, and thus inject code to it.
-- Using **symlinks** or **hardlinks**: Typically the most common abuse is to **place a link with our user privileges**, and **point it to a higher privilege** location. The detection is very simple for both hardlink and symlinks. If the process creating the link has a **different privilege level** than the target file, we create an **alert**. Unfortunately in the case of symlinks blocking is not possible, as we don’t have information about the destination of the link prior creation. This is a limitation of Apple’s EndpointSecuriy framework.
+- **Injection environment variables** on process exec: `DYLD_INSERT_LIBRARIES`, `CFNETWORK_LIBRARY_PATH`, `RAWCAMERA_BUNDLE_PATH` and `ELECTRON_RUN_AS_NODE`.
+- **`task_for_pid`** calls — one process asking for another's task port, which is the prerequisite for injecting into it.
+- **Electron debugging arguments** — `--inspect`, `--inspect-brk` and `--remote-debugging-port`, which start an Electron app in debug mode and let anyone attach and run code in it.
+- **Symlink/hardlink creation across privilege levels** — the classic "plant a link as a normal user, point it at a privileged location" primitive. Note that **symlinks can be alerted on but not blocked**: EndpointSecurity does not expose the link destination before creation.
 
 ### Calls made by other processes
 
@@ -282,7 +282,8 @@ Note that to call that function you need to be **the same uid** as the one runni
 
 ## References
 
-- [https://theevilbit.github.io/shield/](https://theevilbit.github.io/shield/)
+- [Shield — open source macOS process-injection detection (GitHub)](https://github.com/theevilbit/Shield)
+- [Apple Developer — EndpointSecurity framework](https://developer.apple.com/documentation/endpointsecurity)
 - [https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
 
 {{#include ../../../banners/hacktricks-training.md}}

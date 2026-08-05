@@ -21,18 +21,14 @@ This is like the [**LD_PRELOAD on Linux**](../../../../linux-hardening/linux-bas
 This technique may be also **used as an ASEP technique** as every application installed has a plist called "Info.plist" that allows for the **assigning of environmental variables** using a key called `LSEnvironmental`.
 
 > [!TIP]
-> Since 2012 **Apple has drastically reduced the power** of the **`DYLD_INSERT_LIBRARIES`**.
->
-> Go to the code and **check `src/dyld.cpp`**. In the function **`pruneEnvironmentVariables`** you can see that **`DYLD_*`** variables are removed.
->
-> In the function **`processRestricted`** the reason of the restriction is set. Checking that code you can see that the reasons are:
+> Since 2012 **Apple has drastically reduced the power** of **`DYLD_INSERT_LIBRARIES`**. A process is considered **restricted** — and then `dyld` deletes every `DYLD_*` variable from its environment — when any of these hold:
 >
 > - The binary is `setuid/setgid`
-> - Existence of `__RESTRICT/__restrict` section in the macho binary.
-> - The software has entitlements (hardened runtime) without [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables) entitlement
->  - Check **entitlements** of a binary with: `codesign -dv --entitlements :- </path/to/bin>`
+> - The Mach-O has a **`__RESTRICT/__restrict`** section
+> - The binary is signed with the hardened runtime and AMFI does not grant it the "path/print variables" permissions, i.e. it lacks [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)
+>   - Check **entitlements** of a binary with: `codesign -dv --entitlements :- </path/to/bin>`
 >
-> In more updated versions you can find this logic at the second part of the function **`configureProcessRestrictions`.** However, what is executed in newer versions is the **beginning checks of the function** (you can remove the ifs related to iOS or simulation as those won't be used in macOS.
+> In current `dyld` this is no longer decided by `dyld` alone: `ProcessConfig::Security::Security()` asks **AMFI** via `amfi_check_dyld_policy_self()` and then calls `pruneEnvVars()`. The exact code is walked through in [Prune `DYLD_*` env variables](#prune-dyld_-env-variables) below.
 
 ### Library Validation
 
@@ -226,56 +222,84 @@ sudo fs_usage | grep "dlopentest"
 
 If a **privileged binary/app** (like a SUID or some binary with powerful entitlements) is **loading a relative path** library (for example using `@executable_path` or `@loader_path`) and has **Library Validation disabled**, it could be possible to move the binary to a location where the attacker could **modify the relative path loaded library**, and abuse it to inject code on the process.
 
-## Prune `DYLD_*` and `LD_LIBRARY_PATH` env variables
+## Prune `DYLD_*` env variables
 
-In the file `dyld-dyld-832.7.1/src/dyld2.cpp` it's possible to fund the function **`pruneEnvironmentVariables`**, which will remove any env variable that **starts with `DYLD_`** and **`LD_LIBRARY_PATH=`**.
-
-It'll also set to **null** specifically the env variables **`DYLD_FALLBACK_FRAMEWORK_PATH`** and **`DYLD_FALLBACK_LIBRARY_PATH`** for **suid** and **sgid** binaries.
-
-This function is called from the **`_main`** function of the same file if targeting OSX like this:
+Older `dyld` releases (`dyld2.cpp`) decided this in-process with `issetugid()`, `hasRestrictedSegment()` and `csops(CS_OPS_STATUS)`. In **current `dyld` the decision is delegated to AMFI**, and the code lives in `ProcessConfig::Security::Security()` in `dyld/DyldProcessConfig.cpp`:
 
 ```cpp
-#if TARGET_OS_OSX
-    if ( !gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache ) {
-		pruneEnvironmentVariables(envp, &apple);
+    const uint64_t amfiFlags = getAMFI(process, syscall);
+    this->allowAtPaths              = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_AT_PATH);
+    this->allowEnvVarsPrint         = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_PRINT_VARS);
+    this->allowEnvVarsPath          = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_PATH_VARS);
+    this->allowEnvVarsSharedCache   = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_CUSTOM_SHARED_CACHE);
+    this->allowClassicFallbackPaths = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_FALLBACK_PATHS);
+    this->allowInsertFailures       = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_FAILED_LIBRARY_INSERTION);
+    this->allowInterposing          = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_LIBRARY_INTERPOSING);
+    this->allowEmbeddedVars         = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_EMBEDDED_VARS);
+    this->allowDevelopmentVars      = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_DEVELOPMENT_VARS);
+    this->allowLibSystemOverrides   = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_LIBSYSTEM_OVERRIDE);
+    ...
+    // env vars are only pruned on macOS
+    switch ( process.platform.value() ) {
+        case PLATFORM_MACOS:
+        case PLATFORM_IOSMAC:
+        case PLATFORM_DRIVERKIT:
+            break;
+        default:
+            return;
+    }
+
+    // env vars are only pruned when process is restricted
+    if ( this->allowEnvVarsPrint || this->allowEnvVarsPath || this->allowEnvVarsSharedCache )
+        return;
+
+    this->pruneEnvVars(process);
 ```
 
-and those boolean flags are set in the same file in the code:
+Two things are worth extracting from this:
+
+- Pruning only happens on **macOS / Mac Catalyst / DriverKit** — and only when AMFI granted **none** of `allowEnvVarsPrint`, `allowEnvVarsPath`, `allowEnvVarsSharedCache`.
+- The AMFI query is fed the executable's own properties:
 
 ```cpp
-#if TARGET_OS_OSX
-	// support chrooting from old kernel
-	bool isRestricted = false;
-	bool libraryValidation = false;
-	// any processes with setuid or setgid bit set or with __RESTRICT segment is restricted
-	if ( issetugid() || hasRestrictedSegment(mainExecutableMH) ) {
-		isRestricted = true;
-	}
-	bool usingSIP = (csr_check(CSR_ALLOW_TASK_FOR_PID) != 0);
-	uint32_t flags;
-	if ( csops(0, CS_OPS_STATUS, &flags, sizeof(flags)) != -1 ) {
-		// On OS X CS_RESTRICT means the program was signed with entitlements
-		if ( ((flags & CS_RESTRICT) == CS_RESTRICT) && usingSIP ) {
-			isRestricted = true;
-		}
-		// Library Validation loosens searching but requires everything to be code signed
-		if ( flags & CS_REQUIRE_LV ) {
-			isRestricted = false;
-			libraryValidation = true;
-		}
-	}
-	gLinkContext.allowAtPaths                = !isRestricted;
-	gLinkContext.allowEnvVarsPrint           = !isRestricted;
-	gLinkContext.allowEnvVarsPath            = !isRestricted;
-	gLinkContext.allowEnvVarsSharedCache     = !libraryValidation || !usingSIP;
-	gLinkContext.allowClassicFallbackPaths   = !isRestricted;
-	gLinkContext.allowInsertFailures         = false;
-	gLinkContext.allowInterposing         	 = true;
+uint64_t amfiFlags = sys.amfiFlags(proc.mainExecutableHdr->isRestricted(),
+                                   proc.mainExecutableHdr->isFairPlayEncrypted(fpTextOffset, fpSize));
 ```
 
-Which basically means that if the binary is **suid** or **sgid**, or has a **RESTRICT** segment in the headers or it was signed with the **CS_RESTRICT** flag, then **`!gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache`** is true and the env variables are pruned.
+where `isRestricted()` is literally the `__RESTRICT` segment check (`mach_o/UnsafeHeader.cpp`):
 
-Note that if CS_REQUIRE_LV is true, then the variables won't be pruned but the library validation will check they are using the same certificate as the original binary.
+```cpp
+bool UnsafeHeader::isRestricted() const
+{
+    return this->hasSection("__RESTRICT", "__restrict");
+}
+```
+
+`pruneEnvVars()` then strips **every** variable whose name begins with `DYLD_` and slides the `apple[]` parameters down, so the children of a restricted process don't inherit them either:
+
+```cpp
+    // For security, setuid programs ignore DYLD_* environment variables.
+    // Additionally, the DYLD_* enviroment variables are removed
+    // from the environment, so that any child processes doesn't see them.
+    for ( const char* const* s = proc.envp; *s != NULL; s++ ) {
+        if ( strncmp(*s, "DYLD_", 5) != 0 ) {
+            *d++ = *s;
+        }
+        ...
+```
+
+> [!TIP]
+> Practical consequence: **`DYLD_*` is pruned when the process is restricted** — setuid/setgid, a `__RESTRICT/__restrict` section, or hardened-runtime/entitled binaries that AMFI refuses to grant the path/print flags to. If instead the process only has **library validation** (`CS_REQUIRE_LV`), the variables survive but the inserted dylib must be signed by the **same Team ID** (or by Apple), so you need one of the library-validation-disabling entitlements to actually land code.
+
+Because the decision is now AMFI's, the fastest way to know what a given binary will get is to look at what AMFI keys off — entitlements and signing flags — rather than at `dyld` itself:
+
+```bash
+BIN=/path/to/bin
+codesign -d --entitlements :- "$BIN" 2>/dev/null | \
+  egrep "allow-dyld-environment-variables|disable-library-validation|clear-library-validation"
+codesign -dvvv "$BIN" 2>&1 | egrep "flags=|TeamIdentifier="
+otool -l "$BIN" | grep -A2 __RESTRICT
+```
 
 ## Check Restrictions
 
@@ -336,8 +360,10 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 
 ## References
 
-- [https://theevilbit.github.io/posts/dyld_insert_libraries_dylib_injection_in_macos_osx_deep_dive/](https://theevilbit.github.io/posts/dyld_insert_libraries_dylib_injection_in_macos_osx_deep_dive/)
-- [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [dyld — `dyld/DyldProcessConfig.cpp` (`ProcessConfig::Security`, `getAMFI`, `pruneEnvVars`)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/DyldProcessConfig.cpp)
+- [dyld — `mach_o/UnsafeHeader.cpp` (`isRestricted()` / `__RESTRICT` check)](https://github.com/apple-oss-distributions/dyld/blob/main/mach_o/UnsafeHeader.cpp)
+- [Apple Developer — `com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)
+- [dyld — `dyld/dyldMain.cpp` (process startup and library insertion)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/dyldMain.cpp)
 
 {{#include ../../../../banners/hacktricks-training.md}}
 

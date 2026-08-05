@@ -213,6 +213,8 @@ To **add an application to this list** you can use:
 
 ### Terminal Preferences
 
+Writeup: [https://theevilbit.github.io/beyond/beyond_0020/](https://theevilbit.github.io/beyond/beyond_0020/)
+
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
   - Terminal use to have FDA permissions of the user use it
@@ -340,7 +342,7 @@ According to the previous writeups it's possible to **compile some audio plugins
 
 ### QuickLook Plugins
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.github.io/beyond/beyond_0028/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0012/](https://theevilbit.github.io/beyond/beyond_0012/)
 
 - Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
@@ -1496,7 +1498,7 @@ touch /tmp/manconf
 
 ### Apache2
 
-**Writeup**: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)
+**Writeup**: [https://theevilbit.github.io/beyond/beyond_0025/](https://theevilbit.github.io/beyond/beyond_0025/)
 
 - Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   - But you need to be root and apache needs to be running

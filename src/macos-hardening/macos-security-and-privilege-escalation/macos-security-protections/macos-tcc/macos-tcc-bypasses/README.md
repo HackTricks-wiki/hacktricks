@@ -504,10 +504,21 @@ This allowed an attacker to do arbitrary mounts in any location, including over 
 
 The tool **`/usr/sbin/asr`** allowed to copy the whole disk and mount it in another place bypassing TCC protections.
 
-### Location Services
+### CVE-2022-22655 - Location Services
 
-There is a third TCC database in **`/var/db/locationd/clients.plist`** to indicate clients allowed to **access location services**.\
-The folder **`/var/db/locationd/` wasn't protected from DMG mounting** so it was possible to mount our own plist.
+Location Services are **not** stored in a TCC database like the other services. They are managed by `locationd`, which keeps its own allow-list in **`/var/db/locationd/clients.plist`**:
+
+```bash
+# Requires FDA to read
+sudo plutil -p /var/db/locationd/clients.plist | head -40
+```
+
+Each entry is keyed by the client (bundle ID or executable path) and carries fields such as `Authorized`, `BundleId`, `Executable` and `Registered`.
+
+The `clients.plist` file itself is protected by Sandbox/TCC and cannot be edited even as root — but the **`/var/db/locationd/` directory was not protected from mounting**. So an attacker running as root could build a disk image containing their own `clients.plist` (with their binary marked `Authorized`), mount it over the directory, and restart `locationd` to have the forged allow-list take effect.
+
+> [!TIP]
+> This is the same pattern as the `hdiutil`/`mount` TCC bypasses above: the *file* is protected, the *directory it lives in* is not, so you replace the whole directory instead of the file.
 
 ## By startup apps
 
@@ -538,6 +549,8 @@ Another way using [**CoreGraphics events**](https://objectivebythesea.org/v2/tal
 - [**https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/**](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
 - [**20+ Ways to Bypass Your macOS Privacy Mechanisms**](https://www.youtube.com/watch?v=W9GxnP8c8FU)
 - [**Knockout Win Against TCC - 20+ NEW Ways to Bypass Your MacOS Privacy Mechanisms**](https://www.youtube.com/watch?v=a9hsxPdRxsY)
+- [**CVE-2022-22655 - TCC Location Services bypass (original report)**](https://theevilbit.github.io/posts/cve-2022-22655/)
+- [**Where in the World is Carmen Sandiego: Abusing Location Services on macOS**](https://slyd0g.medium.com/where-in-the-world-is-carmen-sandiego-abusing-location-services-on-macos-10e9f4eefb71)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 

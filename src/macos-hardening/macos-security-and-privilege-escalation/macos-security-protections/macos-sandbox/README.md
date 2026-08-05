@@ -399,7 +399,10 @@ Sandbox also has a user daemon running exposing the XPC Mach service `com.apple.
 
 ## References
 
-- [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
+- [XNU — `security/mac_policy.h` (MACF hooks the Sandbox kext registers)](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_policy.h)
+- [XNU — `security/mac_base.c` (`__mac_syscall`, the entry point behind `__sandbox_ms`)](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_base.c)
+- [`sandbox_init(3)` man page](https://keith.github.io/xcode-man-pages/sandbox_init.3.html)
+- [Apple Developer — App Sandbox](https://developer.apple.com/documentation/security/app-sandbox)
 
 {{#include ../../../../banners/hacktricks-training.md}}
 

