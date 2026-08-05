@@ -303,7 +303,7 @@ The PoC can be found in **[https://github.com/eladshamir/Internal-Monologue](htt
 
 Windows contains several mitigations that try to prevent *reflection* attacks where an NTLM (or Kerberos) authentication that originates from a host is relayed back to the **same** host to gain SYSTEM privileges.  
 
-Microsoft broke most public chains with MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) and later patches, however **CVE-2025-33073** shows that the protections can still be bypassed by abusing how the **SMB client truncates Service Principal Names (SPNs)** that contain *marshalled* (serialized) target-info.
+Microsoft broke most public chains with MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) and later patches, however **CVE-2025-33073** shows that the protections can still be bypassed by abusing how the **SMB client truncates Service Principal Names (SPNs)** that contain *marshalled* (serialized) target-info.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### TL;DR of the bug
 1. An attacker registers a **DNS A-record** whose label encodes a marshalled SPN – e.g.
@@ -312,7 +312,7 @@ Microsoft broke most public chains with MS08-068 (SMB→SMB), MS09-013 (HTTP→S
 3. When the SMB client passes the target string `cifs/srv11UWhRCAAAAA…` to `lsasrv!LsapCheckMarshalledTargetInfo`, the call to `CredUnmarshalTargetInfo` **strips** the serialized blob, leaving **`cifs/srv1`**.
 4. `msv1_0!SspIsTargetLocalhost` (or the Kerberos equivalent) now considers the target to be *localhost* because the short host part matches the computer name (`SRV1`).
 5. Consequently, the server sets `NTLMSSP_NEGOTIATE_LOCAL_CALL` and injects **LSASS’ SYSTEM access-token** into the context (for Kerberos a SYSTEM-marked subsession key is created).
-6. Relaying that authentication with `ntlmrelayx.py` **or** `krbrelayx.py` gives full SYSTEM rights on the same host.
+6. Relaying that authentication with `ntlmrelayx.py` **or** `krbrelayx.py` gives full SYSTEM rights on the same host.<sup>[[1]](#references)</sup>
 
 ### Quick PoC
 ```bash
@@ -333,14 +333,14 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 ```
 
 ### Patch & Mitigations
-* KB patch for **CVE-2025-33073** adds a check in `mrxsmb.sys::SmbCeCreateSrvCall` that blocks any SMB connection whose target contains marshalled info (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).
+* KB patch for **CVE-2025-33073** adds a check in `mrxsmb.sys::SmbCeCreateSrvCall` that blocks any SMB connection whose target contains marshalled info (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).<sup>[[1]](#references)[[2]](#references)</sup>
 * Enforce **SMB signing** to prevent reflection even on unpatched hosts.
 * Monitor DNS records resembling `*<base64>...*` and block coercion vectors (PetitPotam, DFSCoerce, AuthIP...).
 
 ### Detection ideas
 * Network captures with `NTLMSSP_NEGOTIATE_LOCAL_CALL` where client IP ≠ server IP.
 * Kerberos AP-REQ containing a subsession key and a client principal equal to the hostname.
-* Windows Event 4624/4648 SYSTEM logons immediately followed by remote SMB writes from the same host.
+* Windows Event 4624/4648 SYSTEM logons immediately followed by remote SMB writes from the same host.<sup>[[1]](#references)</sup>
 
 For the **March 2026** local reflection variant that abuses **SMB arbitrary ports** and **TCP connection reuse** to reach `NT AUTHORITY\SYSTEM`, see:
 
@@ -349,7 +349,7 @@ For the **March 2026** local reflection variant that abuses **SMB arbitrary port
 {{#endref}}
 
 ## References
-* [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
-* [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
+- [1] [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
+- [2] [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
 
 {{#include ../../banners/hacktricks-training.md}}

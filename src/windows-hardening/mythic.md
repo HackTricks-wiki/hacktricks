@@ -23,7 +23,7 @@ If Mythic is already running, you can normally add a new agent or profile with `
 
 Mythic supports multiple agents, which are the **payloads that perform tasks on the compromised systems**. Each agent can be tailored to specific needs and can run on different operating systems.
 
-By default Mythic doesn't have any agents installed. The open-source community agents live in [**https://github.com/MythicAgents**](https://github.com/MythicAgents), and the [**community feature matrix**](https://mythicmeta.github.io/overview/agent_matrix.html) is useful to quickly check supported operating systems, payload formats, wrappers, and C2 profiles.
+By default Mythic doesn't have any agents installed. The open-source community agents live in [**https://github.com/MythicAgents**](https://github.com/MythicAgents), and the [**community feature matrix**](https://mythicmeta.github.io/overview/agent_matrix.html) is useful to quickly check supported operating systems, payload formats, wrappers, and C2 profiles.<sup>[[1]](#references)</sup>
 
 To install an agent from that org you can run:
 
@@ -66,12 +66,12 @@ Current operator-relevant profiles to keep in mind:
   tasking directly from the UI. Current Mythic builds let each operator keep
   their own scripts, toggle them globally or per-task, and get the best results
   when agents return structured JSON instead of plaintext. This is especially
-  useful for repetitive `ls`, `ps`, triage, and file-browser workflows.
+  useful for repetitive `ls`, `ps`, triage, and file-browser workflows.<sup>[[4]](#references)[[6]](#references)</sup>
 - Newer Mythic builds also support interactive tasking and Push C2 patterns
   that reduce the need for `sleep 0` polling during PTY/SOCKS/rpfwd-heavy
   operations. When an agent/profile supports it, this is usually lower-overhead
   than hammering the server with constant check-ins just to keep an interactive
-  channel usable.
+  channel usable.<sup>[[3]](#references)</sup>
 - Current 3.4-era Mythic builders are more context-aware than older writeups
   imply: build parameters can now be grouped or hidden based on the selected OS
   or other build options, payload types can declare whether they support
@@ -79,7 +79,7 @@ Current operator-relevant profiles to keep in mind:
   C2 parameter deviations let an agent hide fields it does not actually
   implement. This matters when you bounce between `http`, `httpx`, `smb`,
   `tcp`, and `websocket` because the safe/valid build surface is no longer a
-  flat static form.
+  flat static form.<sup>[[5]](#references)</sup>
 - If you are building a custom agent/profile pair and you don't want Mythic's
   JSON message format or default crypto on the wire, use a
   `translation_container`: Mythic strips the UUID, hands the encrypted blob and
@@ -102,7 +102,7 @@ Wrapper payloads let you keep the same agent logic while changing the on-disk re
 
 ## [Apollo Agent](https://github.com/MythicAgents/Apollo)
 
-Apollo is a Windows agent written in C# using the 4.0 .NET Framework designed to be used in SpecterOps training offerings.
+Apollo is a Windows agent written in C# using the 4.0 .NET Framework designed to be used in SpecterOps training offerings.<sup>[[2]](#references)</sup>
 
 Install it with:
 
@@ -333,10 +333,11 @@ When used on Linux or macOS it has some interesting commands:
 
 ## References
 
-- [Mythic Community Agent Feature Matrix](https://mythicmeta.github.io/overview/agent_matrix.html)
-- [Apollo README](https://github.com/MythicAgents/Apollo/blob/master/README.md)
-- [Mythic v3.2 Highlights: Interactive Tasking, Push C2, and Dynamic File Browser](https://posts.specterops.io/mythic-v3-2-highlights-interactive-tasking-push-c2-and-dynamic-file-browser-7035065e2b3d)
-- [Browser Scripts - Mythic Documentation](https://docs.mythic-c2.net/operational-pieces/browser-scripts)
-- [Mythic 3.3->3.4 Updates](https://docs.mythic-c2.net/updating/mythic-3.3-greater-than-3.4-updates)
-- [Transforming Red Team Ops with Mythic’s Hidden Gems: Browser Scripting](https://specterops.io/blog/2025/08/21/transforming-red-team-ops-with-mythics-hidden-gems-browser-scripting/)
+- [1] [Mythic Community Agent Feature Matrix](https://mythicmeta.github.io/overview/agent_matrix.html)
+- [2] [Apollo README](https://github.com/MythicAgents/Apollo/blob/master/README.md)
+- [3] [Mythic v3.2 Highlights: Interactive Tasking, Push C2, and Dynamic File Browser](https://posts.specterops.io/mythic-v3-2-highlights-interactive-tasking-push-c2-and-dynamic-file-browser-7035065e2b3d)
+- [4] [Browser Scripts - Mythic Documentation](https://docs.mythic-c2.net/operational-pieces/browser-scripts)
+- [5] [Mythic 3.3->3.4 Updates](https://docs.mythic-c2.net/updating/mythic-3.3-greater-than-3.4-updates)
+- [6] [Transforming Red Team Ops with Mythic's Hidden Gems: Browser Scripting](https://specterops.io/blog/2025/08/21/transforming-red-team-ops-with-mythics-hidden-gems-browser-scripting/)
+
 {{#include ../banners/hacktricks-training.md}}
