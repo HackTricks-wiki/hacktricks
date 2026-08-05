@@ -42,7 +42,7 @@ Moreover, the acquired ticket might be employed with various tools, including `s
 
 Encountered issues such as _PyAsn1Error_ or _KDC cannot find the name_ are typically resolved by updating the Impacket library or using the hostname instead of the IP address, ensuring compatibility with the Kerberos KDC.
 
-An alternative command sequence using Rubeus.exe demonstrates another facet of this technique:
+An alternative command sequence using Rubeus.exe demonstrates another facet of this technique:<sup>[[1]](#references)</sup>
 
 ```bash
 .\Rubeus.exe asktgt /domain:jurassic.park /user:velociraptor /rc4:2a3de7fe356ee524cc9f3d579f2e0aa7 /ptt
@@ -73,11 +73,11 @@ To conform to operational security and use AES256, the following command can be 
 
 Every TGT request generates **event `4768`** on the DC. In current Windows builds this event contains more useful fields than older writeups mention:
 
-- `TicketEncryptionType` tells you which enctype was used for the issued TGT. Typical values are `0x17` for **RC4-HMAC**, `0x11` for **AES128**, and `0x12` for **AES256**.
+- `TicketEncryptionType` tells you which enctype was used for the issued TGT. Typical values are `0x17` for **RC4-HMAC**, `0x11` for **AES128**, and `0x12` for **AES256**.<sup>[[3]](#references)</sup>
 - Updated events also expose `SessionKeyEncryptionType`, `PreAuthEncryptionType`, and the client's advertised enctypes, which helps distinguish **real RC4 dependence** from confusing legacy defaults.
 - Seeing `0x17` in a modern environment is a good clue that the account, host, or KDC fallback path still permits RC4 and is therefore more friendly to NT-hash-based Over-Pass-the-Hash.
 
-Microsoft has been progressively reducing RC4-by-default behavior since the November 2022 Kerberos hardening updates, and the current published guidance is to **remove RC4 as the default assumed enctype for AD DCs by the end of Q2 2026**. From an offensive perspective, that means **Pass-the-Key with AES** is increasingly the reliable path, while classic **NT-hash-only OpTH** will keep failing more often in hardened estates.
+Microsoft has been progressively reducing RC4-by-default behavior since the November 2022 Kerberos hardening updates, and the current published guidance is to **remove RC4 as the default assumed enctype for AD DCs by the end of Q2 2026**. From an offensive perspective, that means **Pass-the-Key with AES** is increasingly the reliable path, while classic **NT-hash-only OpTH** will keep failing more often in hardened estates.<sup>[[3]](#references)</sup>
 
 For more details on Kerberos encryption types and related ticketing behaviour, check:
 
@@ -104,9 +104,9 @@ This avoids overwriting the current session TGT and is usually safer than import
 
 ## References
 
-- [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
-- [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
-- [https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
+- [1] [Tarlogic - Kerberos (II): ¿Cómo atacar Kerberos?](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
+- [2] [GhostPack - Rubeus (GitHub repository)](https://github.com/GhostPack/Rubeus)
+- [3] [Microsoft Learn - Detect and Remediate RC4 Usage in Kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
 
 
 {{#include ../../banners/hacktricks-training.md}}

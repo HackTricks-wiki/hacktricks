@@ -40,7 +40,7 @@ PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
 
 ## BloodHound (graph visualisation)
 
-[BloodHound](https://github.com/SpecterOps/BloodHound) uses graph theory to reveal hidden privilege relationships inside on-prem AD, Entra ID, and any extra attack-surface data you ingest through OpenGraph.
+[BloodHound](https://github.com/SpecterOps/BloodHound) uses graph theory to reveal hidden privilege relationships inside on-prem AD, Entra ID, and any extra attack-surface data you ingest through OpenGraph.<sup>[[1]](#references)</sup>
 
 ### Deployment (Docker CE)
 
@@ -57,7 +57,7 @@ curl -L https://ghst.ly/getbhce | docker compose -f - up
 * `AzureHound` – Entra ID enumeration
 * **SoaPy + BOFHound** – ADWS collection (see link at top)
 
-> BloodHound CE `v8+` changed the collector output format when OpenGraph landed. After upgrading from legacy BloodHound or older CE installs, re-run discovery with current collectors before importing the data.
+> BloodHound CE `v8+` changed the collector output format when OpenGraph landed. After upgrading from legacy BloodHound or older CE installs, re-run discovery with current collectors before importing the data.<sup>[[1]](#references)</sup>
 
 #### Common SharpHound modes
 
@@ -92,11 +92,11 @@ rusthound-ce -d corp.local -u svc.collector@corp.local -p 'Passw0rd!' -z
 nxc ldap dc01.corp.local -u svc.collector -p 'Passw0rd!' --bloodhound --collection All
 ```
 
-`RustHound-CE` is a good default when you want CE-compatible output from a non-Windows host. `NetExec` is convenient when you are already using it for LDAP validation or spraying and want a quick graph import. For non-AD datasets, BloodHound OpenGraph can be extended with collectors such as [ShareHound](../../network-services-pentesting/pentesting-smb/README.md).
+`RustHound-CE` is a good default when you want CE-compatible output from a non-Windows host.<sup>[[2]](#references)</sup> `NetExec` is convenient when you are already using it for LDAP validation or spraying and want a quick graph import. For non-AD datasets, BloodHound OpenGraph can be extended with collectors such as [ShareHound](../../network-services-pentesting/pentesting-smb/README.md).<sup>[[1]](#references)</sup>
 
 ### ADPathFinder (OpenGraph path prioritisation)
 
-[ADPathFinder](https://github.com/NetSPI/AD-PathFinder) sits on top of BloodHound CE/OpenGraph when the graph is too large to manually pivot. Instead of only asking whether one principal can reach one target, it calculates shortest paths from many low-privileged users and computers to high-value objects, groups paths that reuse the same edges, and surfaces the shared choke point that should be remediated first.
+[ADPathFinder](https://github.com/NetSPI/AD-PathFinder) sits on top of BloodHound CE/OpenGraph when the graph is too large to manually pivot. Instead of only asking whether one principal can reach one target, it calculates shortest paths from many low-privileged users and computers to high-value objects, groups paths that reuse the same edges, and surfaces the shared choke point that should be remediated first.<sup>[[4]](#references)</sup>
 
 ```bash
 adpathfinder --setup-bloodhound-api
@@ -104,7 +104,7 @@ adpathfinder -i SharpHound.zip --ad
 adpathfinder -i SharpHound.zip MSSQLHound.zip ConfigManBearPig.zip --ad --pwd Contoso,ContosoIT --ntds ntds.txt -p hashcat.potfile
 ```
 
-With `MSSQLHound` and `ConfigManBearPig` data imported, one finding can cross [AD CS](ad-certificates.md), [MSSQL AD abuse](abusing-ad-mssql.md), and [SCCM attack paths](sccm-management-point-relay-sql-policy-secrets.md) instead of leaving them as separate leads. Example shared path:
+With `MSSQLHound` and `ConfigManBearPig` data imported, one finding can cross [AD CS](ad-certificates.md), [MSSQL AD abuse](abusing-ad-mssql.md), and [SCCM attack paths](sccm-management-point-relay-sql-policy-secrets.md) instead of leaving them as separate leads.<sup>[[4]](#references)</sup> Example shared path:
 
 ```text
 J.REPORTER > MSSQL_HasLogin > j.reporter > MSSQL_ExecuteAs > ReportSvc >
@@ -120,11 +120,11 @@ SCCM_AssignAllPermissions > SCCM_Site(TRN)
 
 ### Privilege & logon-right collection
 
-Windows **token privileges** (e.g., `SeBackupPrivilege`, `SeDebugPrivilege`, `SeImpersonatePrivilege`, `SeAssignPrimaryTokenPrivilege`) can bypass DACL checks, so mapping them domain-wide exposes local LPE edges that ACL-only graphs miss. **Logon rights** (`SeInteractiveLogonRight`, `SeRemoteInteractiveLogonRight`, `SeNetworkLogonRight`, `SeServiceLogonRight`, `SeBatchLogonRight` and their `SeDeny*` counterparts) are enforced by LSA before a token even exists, and denies take precedence, so they materially gate lateral movement (RDP/SMB/scheduled task/service logon).
+Windows **token privileges** (e.g., `SeBackupPrivilege`, `SeDebugPrivilege`, `SeImpersonatePrivilege`, `SeAssignPrimaryTokenPrivilege`) can bypass DACL checks, so mapping them domain-wide exposes local LPE edges that ACL-only graphs miss. **Logon rights** (`SeInteractiveLogonRight`, `SeRemoteInteractiveLogonRight`, `SeNetworkLogonRight`, `SeServiceLogonRight`, `SeBatchLogonRight` and their `SeDeny*` counterparts) are enforced by LSA before a token even exists, and denies take precedence, so they materially gate lateral movement (RDP/SMB/scheduled task/service logon).<sup>[[3]](#references)</sup>
 
-**Run collectors elevated** when possible: UAC creates a filtered token for interactive admins (via `NtFilterToken`), stripping sensitive privileges and marking admin SIDs as deny-only. If you enumerate privileges from a non-elevated shell, high-value privileges will be invisible and BloodHound won’t ingest the edges.
+**Run collectors elevated** when possible: UAC creates a filtered token for interactive admins (via `NtFilterToken`), stripping sensitive privileges and marking admin SIDs as deny-only. If you enumerate privileges from a non-elevated shell, high-value privileges will be invisible and BloodHound won’t ingest the edges.<sup>[[3]](#references)</sup>
 
-Two complementary SharpHound collection strategies now exist:
+Two complementary SharpHound collection strategies now exist:<sup>[[3]](#references)</sup>
 
 - **GPO/SYSVOL parsing (stealthy, low-privilege):**
   1. Enumerate GPOs over LDAP (`(objectCategory=groupPolicyContainer)`) and read each `gPCFileSysPath`.
@@ -136,7 +136,7 @@ Two complementary SharpHound collection strategies now exist:
   - From a context with local admin on the target, open the Local Security Policy and call `LsaEnumerateAccountsWithUserRight` for each privilege/logon right to enumerate assigned principals over RPC.
   - Upside: captures rights set locally or outside GPO; downside: noisy network traffic and admin requirement on every host.
 
-**Example abuse path surfaced by these edges:** `CanRDP` ➜ host where your user also has `SeBackupPrivilege` ➜ start an elevated shell to avoid filtered tokens ➜ use backup semantics to read `SAM` and `SYSTEM` hives despite restrictive DACLs ➜ exfiltrate and run `secretsdump.py` offline to recover the local Administrator NT hash for lateral movement/privilege escalation.
+**Example abuse path surfaced by these edges:** `CanRDP` ➜ host where your user also has `SeBackupPrivilege` ➜ start an elevated shell to avoid filtered tokens ➜ use backup semantics to read `SAM` and `SYSTEM` hives despite restrictive DACLs ➜ exfiltrate and run `secretsdump.py` offline to recover the local Administrator NT hash for lateral movement/privilege escalation.<sup>[[3]](#references)</sup>
 
 ### Prioritising Kerberoasting with BloodHound
 
@@ -174,9 +174,9 @@ PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd
 
 ## References
 
-- [BloodHound Community Edition v8 Launches with OpenGraph: Identity Attack Paths Beyond Active Directory & Entra ID](https://specterops.io/blog/2025/07/29/bloodhound-community-edition-v8-launches-with-opengraph-identity-attack-paths-beyond-active-directory-entra-id/)
-- [RustHound-CE](https://github.com/g0h4n/RustHound-CE)
-- [Beyond ACLs: Mapping Windows Privilege Escalation Paths with BloodHound](https://www.synacktiv.com/en/publications/beyond-acls-mapping-windows-privilege-escalation-paths-with-bloodhound.html)
-- [ADPathFinder: OpenGraph Attack Path Mapping in BloodHound CE](https://www.netspi.com/blog/technical-blog/network-pentesting/adpathfinder-opengraph-attack-path-mapping-in-bloodhound-ce/)
+- [1] [BloodHound Community Edition v8 Launches with OpenGraph: Identity Attack Paths Beyond Active Directory & Entra ID](https://specterops.io/blog/2025/07/29/bloodhound-community-edition-v8-launches-with-opengraph-identity-attack-paths-beyond-active-directory-entra-id/)
+- [2] [RustHound-CE](https://github.com/g0h4n/RustHound-CE)
+- [3] [Beyond ACLs: Mapping Windows Privilege Escalation Paths with BloodHound](https://www.synacktiv.com/en/publications/beyond-acls-mapping-windows-privilege-escalation-paths-with-bloodhound.html)
+- [4] [ADPathFinder: OpenGraph Attack Path Mapping in BloodHound CE](https://www.netspi.com/blog/technical-blog/network-pentesting/adpathfinder-opengraph-attack-path-mapping-in-bloodhound-ce/)
 
 {{#include ../../banners/hacktricks-training.md}}

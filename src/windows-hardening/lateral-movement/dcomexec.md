@@ -7,7 +7,7 @@ DCOM lateral movement is attractive because it reuses existing COM servers expos
 ## Prerequisites & Gotchas
 
 - You usually need a local administrator context on the target and the remote COM server must allow remote launch/activation.
-- Since **March 14, 2023**, Microsoft enforces DCOM hardening for supported systems. Old clients that request a low activation authentication level can fail unless they negotiate at least `RPC_C_AUTHN_LEVEL_PKT_INTEGRITY`. Modern Windows clients are usually auto-raised, so current tooling normally keeps working.
+- Since **March 14, 2023**, Microsoft enforces DCOM hardening for supported systems. Old clients that request a low activation authentication level can fail unless they negotiate at least `RPC_C_AUTHN_LEVEL_PKT_INTEGRITY`. Modern Windows clients are usually auto-raised, so current tooling normally keeps working.<sup>[[3]](#references)</sup>
 - Manual or scripted DCOM execution generally needs TCP/135 plus the target's dynamic RPC port range. If you are using Impacket's `dcomexec.py` and you want command output back, you usually also need SMB access to `ADMIN$` (or another writable/readable share).
 - If RPC/DCOM works but SMB is blocked, `dcomexec.py -nooutput` can still be useful for blind execution.
 
@@ -23,7 +23,7 @@ Test-NetConnection -ComputerName 10.10.10.10 -Port 135
 
 ## MMC20.Application
 
-**For more info about this technique chech the original post from [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)**
+**For more info about this technique chech the original post from [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)**<sup>[[1]](#references)</sup>
 
 Distributed Component Object Model (DCOM) objects present an interesting capability for network-based interactions with objects. Microsoft provides comprehensive documentation for both DCOM and Component Object Model (COM), accessible [here for DCOM](https://msdn.microsoft.com/en-us/library/cc226801.aspx) and [here for COM](<https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363(v=vs.85).aspx>). A list of DCOM applications can be retrieved using the PowerShell command:
 
@@ -64,7 +64,7 @@ The last argument is the window style. `7` keeps the window minimized. Operation
 
 ## ShellWindows & ShellBrowserWindow
 
-**For more info about this technique check the original post [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**
+**For more info about this technique check the original post [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**<sup>[[2]](#references)</sup>
 
 The **MMC20.Application** object was identified to lack explicit "LaunchPermissions," defaulting to permissions that permit Administrators access. For further details, a thread can be explored [here](https://twitter.com/tiraniddo/status/817532039771525120), and the usage of [@tiraniddo](https://twitter.com/tiraniddo)’s OleView .NET for filtering objects without explicit Launch Permission is recommended.
 
@@ -104,7 +104,7 @@ $obj.Document.Application.ShellExecute(
 
 ### Lateral Movement with Excel DCOM Objects
 
-Lateral movement can be achieved by exploiting DCOM Excel objects. For detailed information, it's advisable to read the discussion on leveraging Excel DDE for lateral movement via DCOM at [Cybereason's blog](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom).
+Lateral movement can be achieved by exploiting DCOM Excel objects. For detailed information, it's advisable to read the discussion on leveraging Excel DDE for lateral movement via DCOM at [Cybereason's blog](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom).<sup>[[5]](#references)</sup>
 
 The Empire project provides a PowerShell script, which demonstrates the utilization of Excel for remote code execution (RCE) by manipulating DCOM objects. Below are snippets from the script available on [Empire's GitHub repository](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), showcasing different methods to abuse Excel for RCE:
 
@@ -131,7 +131,7 @@ elseif ($Method -Match "ExcelDDE") {
 }
 ```
 
-Recent research expanded this area with `Excel.Application`'s `ActivateMicrosoftApp()` method. The key idea is that Excel can try to launch legacy Microsoft applications such as FoxPro, Schedule Plus, or Project by searching the system `PATH`. If an operator can place a payload with one of those expected names in a writable location that is part of the target's `PATH`, Excel will execute it.
+Recent research expanded this area with `Excel.Application`'s `ActivateMicrosoftApp()` method. The key idea is that Excel can try to launch legacy Microsoft applications such as FoxPro, Schedule Plus, or Project by searching the system `PATH`. If an operator can place a payload with one of those expected names in a writable location that is part of the target's `PATH`, Excel will execute it.<sup>[[4]](#references)</sup>
 
 Requirements for this variation:
 
@@ -207,10 +207,11 @@ SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\tem
 
 ## References
 
-- [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)
-- [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)
-- [https://support.microsoft.com/en-us/topic/kb5004442-manage-changes-for-windows-dcom-server-security-feature-bypass-cve-2021-26414-f1400b52-c141-43d2-941e-37ed901c769c](https://support.microsoft.com/en-us/topic/kb5004442-manage-changes-for-windows-dcom-server-security-feature-bypass-cve-2021-26414-f1400b52-c141-43d2-941e-37ed901c769c)
-- [https://specterops.io/blog/2023/10/30/lateral-movement-abuse-the-power-of-dcom-excel-application/](https://specterops.io/blog/2023/10/30/lateral-movement-abuse-the-power-of-dcom-excel-application/)
+- [1] [Lateral Movement using the MMC20.Application COM Object](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)
+- [2] [Lateral Movement via DCOM: Round 2](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)
+- [3] [KB5004442—Manage changes for Windows DCOM Server Security Feature Bypass (CVE-2021-26414)](https://support.microsoft.com/en-us/topic/kb5004442-manage-changes-for-windows-dcom-server-security-feature-bypass-cve-2021-26414-f1400b52-c141-43d2-941e-37ed901c769c)
+- [4] [Lateral Movement: Abuse the Power of DCOM Excel Application](https://specterops.io/blog/2023/10/30/lateral-movement-abuse-the-power-of-dcom-excel-application/)
+- [5] [Leveraging Excel DDE for lateral movement via DCOM](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom)
 
 {{#include ../../banners/hacktricks-training.md}}
 
