@@ -1,18 +1,18 @@
-# macOS .Net Applications Injection
+# Injection di applicazioni .Net su macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Questo è un riepilogo del post [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Controllalo per ulteriori dettagli!**
+**Questa è una sintesi del post [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Consultalo per ulteriori dettagli!**<sup>[1]</sup>
 
-## .NET Core Debugging <a href="#net-core-debugging" id="net-core-debugging"></a>
+## Debugging di .NET Core <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-### **Stabilire una sessione di debug** <a href="#net-core-debugging" id="net-core-debugging"></a>
+### **Stabilire una sessione di debugging** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-La gestione della comunicazione tra debugger e debuggee in .NET è gestita da [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). Questo componente imposta due pipe nominate per ogni processo .NET come visto in [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), che sono iniziate tramite [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). Queste pipe sono suffisse con **`-in`** e **`-out`**.
+La gestione della comunicazione tra debugger e debuggee in .NET è affidata a [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). Questo componente configura due named pipe per ogni processo .NET, come mostrato in [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), che vengono inizializzate tramite [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). Queste pipe hanno i suffissi **`-in`** e **`-out`**.
 
-Visitando il **`$TMPDIR`** dell'utente, si possono trovare FIFO di debug disponibili per il debug delle applicazioni .Net.
+Accedendo alla **`$TMPDIR`** dell'utente, è possibile trovare le FIFO di debugging disponibili per il debugging delle applicazioni .Net.
 
-[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) è responsabile della gestione della comunicazione da un debugger. Per avviare una nuova sessione di debug, un debugger deve inviare un messaggio tramite la pipe `out` che inizia con una struct `MessageHeader`, dettagliata nel codice sorgente di .NET:
+[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) è responsabile della gestione della comunicazione proveniente da un debugger. Per avviare una nuova sessione di debugging, un debugger deve inviare un messaggio tramite la pipe `out` che inizi con una struct `MessageHeader`, descritta nel codice sorgente di .NET:
 ```c
 struct MessageHeader {
 MessageType   m_eType;        // Message type
@@ -31,7 +31,7 @@ DWORD         m_dwMinorVersion;
 BYTE          m_sMustBeZero[8];
 }
 ```
-Per richiedere una nuova sessione, questa struct viene popolata come segue, impostando il tipo di messaggio su `MT_SessionRequest` e la versione del protocollo sulla versione attuale:
+Per richiedere una nuova sessione, questa struct viene popolata come segue, impostando il tipo di messaggio su `MT_SessionRequest` e la versione del protocollo sulla versione corrente:
 ```c
 static const DWORD kCurrentMajorVersion = 2;
 static const DWORD kCurrentMinorVersion = 0;
@@ -42,19 +42,19 @@ sSendHeader.TypeSpecificData.VersionInfo.m_dwMajorVersion = kCurrentMajorVersion
 sSendHeader.TypeSpecificData.VersionInfo.m_dwMinorVersion = kCurrentMinorVersion;
 sSendHeader.m_cbDataBlock = sizeof(SessionRequestData);
 ```
-Questo header viene quindi inviato al target utilizzando la syscall `write`, seguito dalla struct `sessionRequestData` contenente un GUID per la sessione:
+Questa intestazione viene quindi inviata al target utilizzando la syscall `write`, seguita dalla struct `sessionRequestData` contenente un GUID per la sessione:
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
 memset(&sDataBlock.m_sSessionID, 9, sizeof(SessionRequestData));
 write(wr, &sDataBlock, sizeof(SessionRequestData));
 ```
-Un'operazione di lettura sul pipe `out` conferma il successo o il fallimento dell'instaurazione della sessione di debug:
+Un'operazione di lettura sulla pipe `out` conferma il successo o il fallimento dell'instaurazione della sessione di debugging:
 ```c
 read(rd, &sReceiveHeader, sizeof(MessageHeader));
 ```
 ## Lettura della memoria
 
-Una volta stabilita una sessione di debug, la memoria può essere letta utilizzando il tipo di messaggio [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896). La funzione readMemory è dettagliata, eseguendo i passaggi necessari per inviare una richiesta di lettura e recuperare la risposta:
+Una volta stabilita una sessione di debugging, la memoria può essere letta usando il tipo di messaggio [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896). La funzione readMemory è descritta in dettaglio e svolge i passaggi necessari per inviare una richiesta di lettura e recuperare la risposta:
 ```c
 bool readMemory(void *addr, int len, unsigned char **output) {
 // Allocation and initialization
@@ -66,11 +66,11 @@ bool readMemory(void *addr, int len, unsigned char **output) {
 return true;
 }
 ```
-La prova di concetto completa (POC) è disponibile [qui](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
+La proof of concept (POC) completa è disponibile [qui](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
 
-## Scrittura della Memoria
+## Scrittura della memoria
 
-Allo stesso modo, la memoria può essere scritta utilizzando la funzione `writeMemory`. Il processo prevede di impostare il tipo di messaggio su `MT_WriteMemory`, specificare l'indirizzo e la lunghezza dei dati, e poi inviare i dati:
+Analogamente, è possibile scrivere nella memoria utilizzando la funzione `writeMemory`. Il processo consiste nell'impostare il tipo di messaggio su `MT_WriteMemory`, specificare l'indirizzo e la lunghezza dei dati, quindi inviare i dati:
 ```c
 bool writeMemory(void *addr, int len, unsigned char *input) {
 // Increment IDs, set message type, and specify memory location
@@ -84,23 +84,23 @@ return true;
 ```
 Il POC associato è disponibile [qui](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5).
 
-## Esecuzione di Codice .NET Core <a href="#net-core-code-execution" id="net-core-code-execution"></a>
+## Esecuzione di codice .NET Core <a href="#net-core-code-execution" id="net-core-code-execution"></a>
 
-Per eseguire codice, è necessario identificare una regione di memoria con permessi rwx, cosa che può essere fatta usando vmmap -pages:
+Per eseguire codice, è necessario identificare una regione di memoria con permessi rwx, operazione che può essere eseguita usando vmmap -pages:
 ```bash
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
-Trovare un luogo per sovrascrivere un puntatore di funzione è necessario, e in .NET Core, questo può essere fatto mirato alla **Dynamic Function Table (DFT)**. Questa tabella, dettagliata in [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), è utilizzata dal runtime per le funzioni helper di compilazione JIT.
+È necessario individuare un punto in cui sovrascrivere un function pointer e, in .NET Core, è possibile farlo prendendo di mira la **Dynamic Function Table (DFT)**. Questa tabella, descritta in [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), viene utilizzata dal runtime per le funzioni helper della compilazione JIT.
 
-Per i sistemi x64, la ricerca di firme può essere utilizzata per trovare un riferimento al simbolo `_hlpDynamicFuncTable` in `libcorclr.dll`.
+Nei sistemi x64, è possibile utilizzare il signature hunting per trovare un riferimento al simbolo `_hlpDynamicFuncTable` in `libcorclr.dll`.
 
-La funzione del debugger `MT_GetDCB` fornisce informazioni utili, incluso l'indirizzo di una funzione helper, `m_helperRemoteStartAddr`, che indica la posizione di `libcorclr.dll` nella memoria del processo. Questo indirizzo viene poi utilizzato per avviare una ricerca per la DFT e sovrascrivere un puntatore di funzione con l'indirizzo del shellcode.
+La funzione debugger `MT_GetDCB` fornisce informazioni utili, incluso l'indirizzo di una funzione helper, `m_helperRemoteStartAddr`, che indica la posizione di `libcorclr.dll` nella memoria del processo. Questo indirizzo viene quindi utilizzato per avviare una ricerca della DFT e sovrascrivere un function pointer con l'indirizzo dello shellcode.
 
-Il codice POC completo per l'iniezione in PowerShell è accessibile [qui](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
+Il codice POC completo per l'injection in PowerShell è disponibile [qui](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 
 ## Riferimenti
 
-- [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/)
+- [1] [Adam Chester (xpnsec) - Injection su macOS tramite Third Party Frameworks](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/)
 
 {{#include ../../../banners/hacktricks-training.md}}

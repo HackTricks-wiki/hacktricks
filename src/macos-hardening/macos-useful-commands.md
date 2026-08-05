@@ -1,8 +1,8 @@
-# macOS Comandi Utili
+# Comandi utili per macOS
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Strumenti di enumerazione automatica per macOS
+### Tool per l'enumerazione automatica di macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
@@ -115,17 +115,17 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Controllo rapido anti-analisi / virtualizzazione
+### Rapido controllo anti-analysis / virtualization
 
-Alcuni macOS stealers chiamano `system_profiler` per rilevare VM e **interrompono l'esecuzione con un codice di uscita distinto (es., 100)** per evitare la detonazione della sandbox:
+Alcuni stealers per macOS chiamano `system_profiler` per rilevare le VM e **terminano con uno specifico exit code (ad es. 100)** per evitare la detonazione in sandbox<sup>[1]</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### Software e Servizi Installati
+### Software e servizi installati
 
-Controlla le applicazioni **sospette** installate e i **privilegi** sulle risorse installate:
+Controlla la presenza di applicazioni **sospette** installate e i **privilegi** sulle risorse installate:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -151,6 +151,6 @@ Senza prompt
 
 ## Riferimenti
 
-- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

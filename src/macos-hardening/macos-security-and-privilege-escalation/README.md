@@ -1,19 +1,19 @@
-# Sicurezza macOS e Escalation dei Privilegi
+# Sicurezza ed escalation dei privilegi su macOS
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## MacOS di Base
+## Nozioni di base su MacOS
 
-Se non sei familiare con macOS, dovresti iniziare a imparare le basi di macOS:
+Se non hai familiarità con macOS, dovresti iniziare apprendendo le nozioni di base di macOS:
 
-- **File e permessi speciali di macOS:**
+- **Files e permissions** speciali di macOS:
 
 
 {{#ref}}
 macos-files-folders-and-binaries/
 {{#endref}}
 
-- **Utenti comuni di macOS**
+- **Users** comuni di macOS
 
 
 {{#ref}}
@@ -27,105 +27,105 @@ macos-users.md
 macos-applefs.md
 {{#endref}}
 
-- L'**architettura** del k**ernel**
+- L'**architecture** del k**ernel**
 
 
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
-- **Servizi e protocolli di rete** comuni di macOS
+- **Network services e protocols** comuni di macOS
 
 
 {{#ref}}
 macos-protocols.md
 {{#endref}}
 
-- **Opensource** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
-- Per scaricare un `tar.gz`, cambia un URL come [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) in [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+- macOS **Opensource**: [https://opensource.apple.com/](https://opensource.apple.com/)
+- Per scaricare un `tar.gz`, modifica un URL come [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) in [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
-### MDM MacOS
+### MacOS MDM
 
-Nelle aziende, i sistemi **macOS** saranno molto probabilmente **gestiti con un MDM**. Pertanto, dal punto di vista di un attaccante, è interessante sapere **come funziona**:
+Nelle aziende, i sistemi **macOS** sono molto probabilmente **managed with a MDM**. Pertanto, dal punto di vista di un attacker, è interessante sapere **come funziona**:
 
 
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
 {{#endref}}
 
-### MacOS - Ispezione, Debugging e Fuzzing
+### MacOS - Inspecting, Debugging e Fuzzing
 
 
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
-## Protezioni di Sicurezza MacOS
+## Protezioni di sicurezza di MacOS
 
 
 {{#ref}}
 macos-security-protections/
 {{#endref}}
 
-## Superficie di Attacco
+## Attack Surface
 
-### Permessi dei File
+### File Permissions
 
-Se un **processo in esecuzione come root scrive** un file che può essere controllato da un utente, l'utente potrebbe abusarne per **escalare i privilegi**.\
-Questo potrebbe verificarsi nelle seguenti situazioni:
+Se un **process running as root writes** un file che può essere controllato da un user, quest'ultimo potrebbe abusarne per **escalate privileges**.\
+Ciò potrebbe verificarsi nelle seguenti situazioni:
 
-- Il file utilizzato è già stato creato da un utente (di proprietà dell'utente)
-- Il file utilizzato è scrivibile dall'utente a causa di un gruppo
-- Il file utilizzato si trova all'interno di una directory di proprietà dell'utente (l'utente potrebbe creare il file)
-- Il file utilizzato si trova all'interno di una directory di proprietà di root, ma l'utente ha accesso in scrittura su di essa a causa di un gruppo (l'utente potrebbe creare il file)
+- Il file utilizzato è già stato creato da un user (ed è di proprietà dell'user)
+- Il file utilizzato è scrivibile dall'user a causa di un group
+- Il file utilizzato si trova all'interno di una directory di proprietà dell'user (l'user potrebbe creare il file)
+- Il file utilizzato si trova all'interno di una directory di proprietà di root, ma l'user dispone di accesso in scrittura tramite un group (l'user potrebbe creare il file)
 
-Essere in grado di **creare un file** che sarà **utilizzato da root** consente a un utente di **sfruttare il suo contenuto** o persino creare **symlink/hardlink** per puntarlo in un altro posto.
+La possibilità di **create a file** che verrà **used by root** consente a un user di **take advantage of its content** o persino di creare **symlinks/hardlinks** per indirizzarlo verso un'altra posizione.
 
-Per questo tipo di vulnerabilità non dimenticare di **controllare gli installer `.pkg` vulnerabili**:
+Per questo tipo di vulnerabilità, non dimenticare di **check vulnerable `.pkg` installers**:
 
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### Gestori di app per Estensione di File e Schema URL
+### File Extension e URL scheme app handlers
 
-App strane registrate da estensioni di file potrebbero essere abusate e diverse applicazioni possono essere registrate per aprire protocolli specifici
+Le app anomale registrate tramite estensioni di file potrebbero essere sfruttate e diverse applicazioni possono essere registrate per aprire protocolli specifici
 
 
 {{#ref}}
 macos-file-extension-apps.md
 {{#endref}}
 
-## Escalation dei Privilegi TCC / SIP di macOS
+## macOS TCC / SIP Privilege Escalation
 
-In macOS, **le applicazioni e i binari possono avere permessi** per accedere a cartelle o impostazioni che li rendono più privilegiati di altri.
+In macOS, **applications and binaries can have permissions** per accedere a cartelle o impostazioni che le rendono più privilegiate di altre.
 
-Pertanto, un attaccante che desidera compromettere con successo una macchina macOS dovrà **escalare i suoi privilegi TCC** (o persino **bypassare SIP**, a seconda delle sue necessità).
+Pertanto, un attacker che vuole compromettere con successo una macchina macOS dovrà **escalate its TCC privileges** (o persino **bypass SIP**, a seconda delle sue esigenze).
 
-Questi privilegi sono solitamente concessi sotto forma di **diritti** con cui l'applicazione è firmata, oppure l'applicazione potrebbe richiedere alcuni accessi e dopo che il **utente li approva**, possono essere trovati nei **database TCC**. Un altro modo in cui un processo può ottenere questi privilegi è essendo un **figlio di un processo** con quei **privilegi**, poiché di solito sono **ereditati**.
+Questi privilegi vengono solitamente concessi sotto forma di **entitlements** con cui l'applicazione è firmata, oppure l'applicazione potrebbe richiedere determinati accessi e, dopo che **l'user li ha approvati**, questi possono essere trovati nei **TCC databases**. Un altro modo con cui un process può ottenere questi privilegi è essere **child di un process** con tali **privileges**, poiché solitamente vengono **inherited**.
 
-Segui questi link per trovare diversi modi per [**escalare i privilegi in TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), per [**bypassare TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) e come in passato [**SIP è stato bypassato**](macos-security-protections/macos-sip.md#sip-bypasses).
+Segui questi link per scoprire diversi modi per [**escalate privileges in TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**bypass TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) e sapere come in passato [**SIP has been bypassed**](macos-security-protections/macos-sip.md#sip-bypasses).
 
-## Escalation Tradizionale dei Privilegi di macOS
+## Traditional Privilege Escalation su macOS
 
-Certo, dal punto di vista di un red team, dovresti essere anche interessato a escalare a root. Controlla il seguente post per alcuni suggerimenti:
+Naturalmente, dal punto di vista dei red teams, dovresti essere interessato anche a effettuare l'escalation a root. Consulta il seguente post per alcuni suggerimenti:
 
 
 {{#ref}}
 macos-privilege-escalation.md
 {{#endref}}
 
-## Conformità macOS
+## Conformità di macOS
 
 - [https://github.com/usnistgov/macos_security](https://github.com/usnistgov/macos_security)
 
 ## Riferimenti
 
-- [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
-- [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
-- [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
-- [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
-- [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
+- [1] [OS X Incident Response: Scripting and Analysis](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+- [2] [The Art of Mac Malware, Vol. 1 — Analysis (Patrick Wardle)](https://taomm.org/vol1/analysis.html)
+- [3] [NicolasGrimonpont/Cheatsheet — macOS/Linux/Windows commands & security tools cheatsheet](https://github.com/NicolasGrimonpont/Cheatsheet)
+- [4] [SentinelOne — macOS Security Resource](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
+- [5] [2022 - macOS local security: escaping the sandbox and bypassing TCC (YouTube)](https://www.youtube.com/watch?v=vMGiplQtjTY)
 
 {{#include ../../banners/hacktricks-training.md}}

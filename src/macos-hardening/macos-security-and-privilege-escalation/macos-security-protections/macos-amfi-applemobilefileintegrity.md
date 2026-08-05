@@ -2,47 +2,47 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## AppleMobileFileIntegrity.kext and amfid
+## AppleMobileFileIntegrity.kext e amfid
 
-Si concentra sull'imposizione dell'integrità del codice in esecuzione sul sistema, fornendo la logica alla base della verifica della code signature di XNU. È anche in grado di controllare le entitlements e gestire altri compiti sensibili come consentire il debugging o ottenere i task port.
+Si concentra sull'applicazione dell'integrità del codice in esecuzione sul sistema, fornendo la logica alla base della verifica delle code signature di XNU. È inoltre in grado di controllare gli entitlements e gestire altre attività sensibili, come consentire il debugging o ottenere task port.
 
-Inoltre, per alcune operazioni, il kext preferisce contattare il daemon in user space `/usr/libexec/amfid`. Questa relazione di fiducia è stata abusata in diversi jailbreaks.
+Inoltre, per alcune operazioni, il kext preferisce contattare il daemon in user space `/usr/libexec/amfid`. Questa relazione di trust è stata abusata in diversi jailbreak.
 
-Nelle versioni recenti di macOS, AMFI non è più esposto comodamente come kext autonomo su disco, quindi il reversing di solito significa lavorare dal **kernelcache** o da un **KDK** invece di esplorare `/System/Library/Extensions`.
+Nelle versioni recenti di macOS, AMFI non è più comodamente esposto come kext standalone su disco, quindi il reversing solitamente richiede di lavorare dal **kernelcache** o da un **KDK**, invece di esplorare `/System/Library/Extensions`.
 
-AMFI usa policy **MACF** e registra i suoi hook nel momento in cui viene avviato. Inoltre, impedirne il caricamento o scaricarlo potrebbe causare un kernel panic. Tuttavia, ci sono alcuni boot arguments che consentono di indebolire AMFI:
+AMFI utilizza policy **MACF** e registra i propri hook non appena viene avviato. Inoltre, impedirne il caricamento o scaricarlo potrebbe causare un kernel panic. Tuttavia, esistono alcuni boot arguments che consentono di disabilitare AMFI:
 
-- `amfi_unrestricted_task_for_pid`: Consente che task_for_pid sia permesso senza le entitlements richieste
+- `amfi_unrestricted_task_for_pid`: Consente task_for_pid senza gli entitlements richiesti
 - `amfi_allow_any_signature`: Consente qualsiasi code signature
-- `cs_enforcement_disable`: Argomento di sistema usato per disabilitare l'enforcement della code signing
-- `amfi_prevent_old_entitled_platform_binaries`: Annulla i platform binaries con entitlements
+- `cs_enforcement_disable`: Argument usato a livello di sistema per disabilitare l'enforcement della code signing
+- `amfi_prevent_old_entitled_platform_binaries`: Rende non validi i platform binaries con entitlements
 - `amfi_get_out_of_my_way`: Disabilita completamente amfi
 
-Queste sono alcune delle policy MACF che registra:
+Queste sono alcune delle policy MACF che registra:<sup>[1]</sup>
 
-- **`cred_check_label_update_execve:`** L'aggiornamento del label verrà eseguito e restituirà 1
-- **`cred_label_associate`**: Aggiorna lo slot mac label di AMFI con il label
+- **`cred_check_label_update_execve:`**: Viene eseguito l'aggiornamento della label e viene restituito 1
+- **`cred_label_associate`**: Aggiorna lo slot mac label di AMFI con la label
 - **`cred_label_destroy`**: Rimuove lo slot mac label di AMFI
 - **`cred_label_init`**: Sposta 0 nello slot mac label di AMFI
-- **`cred_label_update_execve`:** Controlla le entitlements del processo per vedere se deve essere autorizzato a modificare i label.
-- **`file_check_mmap`:** Controlla se mmap sta acquisendo memoria e la sta impostando come eseguibile. In tal caso controlla se è necessaria la library validation e, se sì, chiama la funzione di library validation.
-- **`file_check_library_validation`**: Chiama la funzione di library validation che controlla, tra le altre cose, se un platform binary sta caricando un altro platform binary o se il processo e il nuovo file caricato hanno lo stesso TeamID. Alcune entitlements consentiranno anche di caricare qualsiasi libreria.
-- **`policy_initbsd`**: Imposta le chiavi NVRAM fidate
-- **`policy_syscall`**: Controlla le policy DYLD come se il binary ha segmenti non limitati, se dovrebbe consentire le env vars... viene anche chiamato quando un processo viene avviato tramite `amfi_check_dyld_policy_self()`.
-- **`proc_check_inherit_ipc_ports`**: Controlla se, quando un processo esegue un nuovo binary, altri processi con diritti SEND sul task port del processo debbano mantenerli o meno. I platform binary sono consentiti, l'entitlement `get-task-allow` lo consente, gli entitlement `task_for_pid-allow` sono consentiti e i binary con lo stesso TeamID.
-- **`proc_check_expose_task`**: impone le entitlements
-- **`amfi_exc_action_check_exception_send`**: Viene inviato un messaggio di eccezione al debugger
-- **`amfi_exc_action_label_associate & amfi_exc_action_label_copy/populate & amfi_exc_action_label_destroy & amfi_exc_action_label_init & amfi_exc_action_label_update`**: Ciclo di vita del label durante la gestione delle eccezioni (debugging)
-- **`proc_check_get_task`**: Controlla entitlements come `get-task-allow` che consente ad altri processi di ottenere il task port e `task_for_pid-allow`, che consente al processo di ottenere i task port di altri processi. Se nessuno di questi è presente, chiama `amfid permitunrestricteddebugging` per verificare se è consentito.
-- **`proc_check_mprotect`**: Nega se `mprotect` viene chiamata con il flag `VM_PROT_TRUSTED`, che indica che la regione deve essere trattata come se avesse una code signature valida.
-- **`vnode_check_exec`**: Viene chiamata quando file eseguibili vengono caricati in memoria e imposta `cs_hard | cs_kill`, che ucciderà il processo se una qualsiasi delle pagine diventa invalida
+- **`cred_label_update_execve:`**: Controlla gli entitlements del processo per verificare se deve essere autorizzato a modificare le label.
+- **`file_check_mmap:`**: Controlla se mmap sta acquisendo memoria e impostandola come eseguibile. In tal caso, verifica se è necessaria la library validation e, in caso affermativo, chiama la relativa funzione.
+- **`file_check_library_validation`**: Chiama la funzione di library validation, che controlla, tra le altre cose, se un platform binary sta caricando un altro platform binary oppure se il processo e il nuovo file caricato hanno lo stesso TeamID. Alcuni entitlements consentono inoltre di caricare qualsiasi libreria.
+- **`policy_initbsd`**: Configura le trusted NVRAM Keys
+- **`policy_syscall`**: Controlla le policy DYLD, ad esempio se il binary ha segmenti unrestricted e se deve consentire le env vars... viene chiamato anche quando un processo viene avviato tramite `amfi_check_dyld_policy_self()`.
+- **`proc_check_inherit_ipc_ports`**: Controlla se, quando un processo esegue un nuovo binary, gli altri processi con diritti SEND sul task port del processo debbano conservarli o meno. I platform binaries sono autorizzati, l'entitlement `get-task-allow` lo consente, gli entitlements `task_for_pid-allow` sono autorizzati e lo sono anche i binaries con lo stesso TeamID.
+- **`proc_check_expose_task`**: Applica gli entitlements
+- **`amfi_exc_action_check_exception_send`**: Un exception message viene inviato al debugger
+- **`amfi_exc_action_label_associate & amfi_exc_action_label_copy/populate & amfi_exc_action_label_destroy & amfi_exc_action_label_init & amfi_exc_action_label_update`**: Ciclo di vita della label durante la gestione delle eccezioni (debugging)
+- **`proc_check_get_task`**: Controlla entitlements come `get-task-allow`, che consente ad altri processi di ottenere la task port, e `task_for_pid-allow`, che consente al processo di ottenere le task port di altri processi. Se nessuno dei due è presente, chiama `amfid permitunrestricteddebugging` per verificare se è consentito.
+- **`proc_check_mprotect`**: Nega l'operazione se `mprotect` viene chiamato con il flag `VM_PROT_TRUSTED`, che indica che la regione deve essere trattata come se avesse una code signature valida.
+- **`vnode_check_exec`**: Viene chiamato quando i file eseguibili vengono caricati in memoria e imposta `cs_hard | cs_kill`, che terminerà il processo se una qualsiasi delle pagine diventa non valida<sup>[2]</sup>
 - **`vnode_check_getextattr`**: MacOS: Controlla `com.apple.root.installed` e `isVnodeQuarantined()`
-- **`vnode_check_setextattr`**: Come get + com.apple.private.allow-bless e internal-installer-equivalent entitlement
-- **`vnode_check_signature`**: Codice che chiama XNU per controllare la code signature usando entitlements, trust cache e `amfid`
-- **`proc_check_run_cs_invalid`**: Intercetta le chiamate `ptrace()` (`PT_ATTACH` e `PT_TRACE_ME`). Controlla eventuali entitlements `get-task-allow`, `run-invalid-allow` e `run-unsigned-code` e, se nessuno è presente, verifica se il debugging è consentito.
-- **`proc_check_map_anon`**: Se `mmap` viene chiamata con il flag **`MAP_JIT`**, AMFI controllerà l'entitlement `dynamic-codesigning`.
+- **`vnode_check_setextattr`**: Come get + entitlement `com.apple.private.allow-bless` e `internal-installer-equivalent`
+- **`vnode_check_signature`**: Codice che chiama XNU per controllare la code signature utilizzando entitlements, trust cache e `amfid`<sup>[3]</sup>
+- **`proc_check_run_cs_invalid`**: Intercetta le chiamate `ptrace()` (`PT_ATTACH` e `PT_TRACE_ME`). Controlla la presenza di uno degli entitlements `get-task-allow`, `run-invalid-allow` e `run-unsigned-code` e, se nessuno è presente, verifica se il debugging è consentito.
+- **`proc_check_map_anon`**: Se mmap viene chiamato con il flag **`MAP_JIT`**, AMFI controlla l'entitlement `dynamic-codesigning`.
 
-`AMFI.kext` espone anche una API per altre kernel extensions, ed è possibile trovare le sue dipendenze con:
+`AMFI.kext` espone inoltre un'API per altri kernel extensions ed è possibile trovare le sue dipendenze con:
 ```bash
 kextstat | grep " 19 " | cut -c2-5,50- | cut -d '(' -f1
 Executing: /usr/bin/kmutil showloaded
@@ -67,20 +67,20 @@ No variant specified, falling back to release
 ```
 ## amfid
 
-Questo è il daemon in user mode che `AMFI.kext` userà per verificare le code signatures in user mode.\
-Affinché `AMFI.kext` comunichi con il daemon, usa mach messages sul port `HOST_AMFID_PORT`, che è il port speciale `18`.
+Questo è il daemon in esecuzione in user mode che `AMFI.kext` utilizza per verificare le code signature in user mode.\
+Per consentire a `AMFI.kext` di comunicare con il daemon, vengono utilizzati messaggi Mach sulla porta `HOST_AMFID_PORT`, ovvero la porta speciale `18`.
 
-Nota che in macOS non è più possibile per i processi root hijackare i special port, perché sono protetti da `SIP` e solo launchd può ottenerli. In iOS viene verificato che il processo che invia la risposta abbia il CDHash hardcoded di `amfid`.
+Nota che in macOS non è più possibile per i processi root hijackare le porte speciali, poiché sono protette da `SIP` e solo launchd può ottenerle. In iOS viene verificato che il processo che invia la risposta abbia il CDHash hardcoded di `amfid`.
 
-È possibile vedere quando `amfid` viene richiesto per controllare un binary e la sua response facendo debugging e impostando un breakpoint in `mach_msg`.
+È possibile vedere quando viene richiesto ad `amfid` di verificare un binary e la relativa risposta effettuando il debug e impostando un breakpoint in `mach_msg`.
 
-Una volta ricevuto un message tramite il special port, viene usato **MIG** per inviare ogni function alla function che sta chiamando. Le main functions sono state reverse engineered e spiegate all'interno del libro.
+Una volta ricevuto un messaggio tramite la porta speciale, viene utilizzato **MIG** per inviare ogni funzione alla funzione che sta chiamando. Le funzioni principali sono state sottoposte a reverse engineering e spiegate all'interno del libro.
 
 ### DYLD policy and library validation
 
-Le versioni recenti di `dyld` chiamano `amfi_check_dyld_policy_self()` molto presto da `configureProcessRestrictions()` per chiedere ad AMFI se il processo può usare le variabili di percorso `DYLD_*`, interposing, fallback paths, embedded variables, o tollerare failed library insertion. Quindi, quando si analizza una injection surface, non basta ispezionare solo i Mach-O load commands: bisogna anche ispezionare gli entitlements e i runtime flags che AMFI tradurrà in `dyld` policy.
+Le versioni recenti di `dyld` chiamano `amfi_check_dyld_policy_self()` molto presto da `configureProcessRestrictions()` per chiedere ad AMFI se il processo può utilizzare variabili di percorso `DYLD_*`, interposing, fallback paths, embedded variables o tollerare il fallimento dell'inserimento di una library. Pertanto, durante il triage di una injection surface, non è sufficiente esaminare solo i comandi di caricamento Mach-O: è necessario esaminare anche gli entitlements e i runtime flags che AMFI tradurrà nella `dyld` policy.
 
-Un practical triage loop è:
+Un pratico ciclo di triage è:
 ```bash
 BIN=/path/to/app/Contents/MacOS/binary
 
@@ -91,15 +91,15 @@ egrep "disable-library-validation|clear-library-validation|allow-dyld-environmen
 # Runtime flags / TeamID / hardened-runtime metadata
 codesign -dvvv "$BIN" 2>&1 | egrep "TeamIdentifier=|Runtime Version|flags="
 ```
-Su macOS moderne molti binari Apple non portano più direttamente `com.apple.security.cs.disable-library-validation` e invece includono `com.apple.private.security.clear-library-validation`. In quel caso la library validation non viene disabilitata al momento di `execve`: il processo deve chiamare `csops(..., CS_OPS_CLEAR_LV, ...)` su se stesso, e XNU consente quell’operazione solo sul processo chiamante quando l’entitlement è presente. Da una prospettiva offensiva questo è importante perché un target può diventare injectable solo **dopo** aver raggiunto il code path che esplicitamente clear LV (per esempio, poco prima di caricare plugin opzionali).
+Su macOS moderni molti binari Apple non includono più direttamente `com.apple.security.cs.disable-library-validation` e invece vengono distribuiti con `com.apple.private.security.clear-library-validation`. In questo caso la library validation non viene disabilitata al momento di `execve`: il processo deve chiamare `csops(..., CS_OPS_CLEAR_LV, ...)` su se stesso, e XNU consente questa operazione sul processo chiamante solo quando è presente l'entitlement. Dal punto di vista offensivo, questo è importante perché un target può diventare iniettabile solo **dopo** aver raggiunto il code path che cancella esplicitamente LV (ad esempio, poco prima di caricare plugin opzionali).<sup>[4][5]</sup>
 
-## Provisioning Profiles
+## Profili di provisioning
 
-Un provisioning profile può essere usato per firmare il codice. Esistono profili **Developer** che possono essere usati per firmare il codice e testarlo, e profili **Enterprise** che possono essere usati su tutti i dispositivi.
+Un provisioning profile può essere utilizzato per firmare il codice. Esistono profili **Developer**, che possono essere utilizzati per firmare il codice e testarlo, e profili **Enterprise**, che possono essere utilizzati su tutti i dispositivi.
 
-Dopo che un App viene inviata all’Apple Store, se approvata, viene firmata da Apple e il provisioning profile non è più necessario.
+Dopo che un'app viene inviata all'Apple Store, se viene approvata, viene firmata da Apple e il provisioning profile non è più necessario.
 
-Un profile di solito usa l’estensione `.mobileprovision` o `.provisionprofile` e può essere dumpato con:
+Un profilo utilizza solitamente l'estensione `.mobileprovision` o `.provisionprofile` e può essere estratto con:
 ```bash
 openssl asn1parse -inform der -in /path/to/profile
 
@@ -107,50 +107,53 @@ openssl asn1parse -inform der -in /path/to/profile
 
 security cms -D -i /path/to/profile
 ```
-Anche se a volte vengono chiamati certificated, questi provisioning profiles hanno più di un certificate:
+Sebbene a volte vengano indicati come certificati, questi provisioning profiles contengono più di un certificato:
 
 - **AppIDName:** L'Application Identifier
-- **AppleInternalProfile**: Designa questo come un profilo Apple Internal
-- **ApplicationIdentifierPrefix**: Prefisso aggiunto ad AppIDName (uguale a TeamIdentifier)
+- **AppleInternalProfile**: Indica che si tratta di un profilo Apple Internal
+- **ApplicationIdentifierPrefix**: Anteposto a AppIDName (uguale a TeamIdentifier)
 - **CreationDate**: Data nel formato `YYYY-MM-DDTHH:mm:ssZ`
-- **DeveloperCertificates**: Un array di certificate(s) (di solito uno), codificati come dati Base64
-- **Entitlements**: Gli entitlements consentiti con entitlements per questo profile
+- **DeveloperCertificates**: Un array di certificati (di solito uno), codificati come dati Base64
+- **Entitlements**: Gli entitlements consentiti per questo profilo
 - **ExpirationDate**: Data di scadenza nel formato `YYYY-MM-DDTHH:mm:ssZ`
-- **Name**: Il nome dell'Application, uguale ad AppIDName
-- **ProvisionedDevices**: Un array (per developer certificates) di UDIDs per cui questo profile è valido
-- **ProvisionsAllDevices**: Un booleano (true per enterprise certificates)
-- **TeamIdentifier**: Un array di stringa(e) alfanumeriche (di solito una) usate per identificare il developer per finalità di inter-app interaction
-- **TeamName**: Un nome leggibile dall'uomo usato per identificare il developer
-- **TimeToLive**: Validità (in giorni) del certificate
-- **UUID**: Un Universally Unique Identifier per questo profile
+- **Name**: Il nome dell'applicazione, uguale a AppIDName
+- **ProvisionedDevices**: Un array (per i certificati developer) di UDID per i quali questo profilo è valido
+- **ProvisionsAllDevices**: Un booleano (true per i certificati enterprise)
+- **TeamIdentifier**: Un array di stringhe alfanumeriche (di solito una) usate per identificare lo sviluppatore ai fini dell'interazione tra app
+- **TeamName**: Un nome leggibile usato per identificare lo sviluppatore
+- **TimeToLive**: Validità (in giorni) del certificato
+- **UUID**: Un Universally Unique Identifier per questo profilo
 - **Version**: Attualmente impostato a 1
 
-Nota che la voce entitlements conterrà un set ristretto di entitlements e il provisioning profile potrà concedere solo quegli specifici entitlements per evitare di assegnare Apple private entitlements.
+Nota che la voce entitlements conterrà un insieme limitato di entitlements e il provisioning profile potrà fornire solo quegli entitlements specifici, impedendo di concedere entitlements privati di Apple.
 
-Nota che i profiles sono di solito ubicati in `/var/MobileDeviceProvisioningProfiles` ed è possibile verificarli con **`security cms -D -i /path/to/profile`**
+Nota che i profili si trovano solitamente in `/var/MobileDeviceProvisioningProfiles` ed è possibile controllarli con **`security cms -D -i /path/to/profile`**
 
 ## **libmis.dylib**
 
-Questa è la libreria esterna che `amfid` chiama per chiedere se dovrebbe consentire qualcosa o no. Storicamente è stata abusata nel jailbreaking eseguendone una versione backdoored che avrebbe consentito tutto.
+Questa è la libreria esterna che `amfid` chiama per verificare se deve consentire o meno un'operazione. Storicamente è stata abusata nel jailbreaking eseguendone una versione backdoored che consentiva tutto.
 
-In macOS questa si trova dentro `MobileDevice.framework`.
+In macOS si trova all'interno di `MobileDevice.framework`.
 
 ## AMFI Trust Caches
 
-I trust caches non sono solo un concetto di iOS. Su macOS moderni, specialmente su **Apple silicon**, la static trust cache e le loadable trust caches fanno parte della Secure Boot chain. Quando il **CodeDirectory hash** di un Mach-O è presente lì, AMFI può concedergli **platform privilege** senza eseguire ulteriori controlli di autenticità al momento del lancio. Questo significa anche che Apple può vincolare i platform binaries a una specifica versione di OS e impedire che vecchi binary firmati da Apple vengano riprodotti su sistemi più recenti.
+I trust caches non sono un concetto esclusivo di iOS. Nelle versioni moderne di macOS, soprattutto su **Apple silicon**, lo static trust cache e i loadable trust caches fanno parte della catena Secure Boot. Quando l'hash **CodeDirectory** di un Mach-O è presente al loro interno, AMFI può concedergli il **platform privilege** senza eseguire ulteriori controlli di autenticità al momento dell'avvio. Questo significa anche che Apple può vincolare i binari della piattaforma a una versione specifica del sistema operativo e impedire che binari firmati da Apple meno recenti vengano riutilizzati su sistemi più nuovi.<sup>[6]</sup>
 
-Sulle recenti release di macOS, i trust-cache metadata sono anche collegati alle **launch constraints**, quindi le app di sistema e i binary copiati avviati dal parent/location sbagliato possono essere rifiutati da AMFI anche se sono ancora firmati da Apple. Il workflow dettagliato di estrazione e reversing è trattato in:
+Nelle versioni recenti di macOS, i metadati dei trust cache sono inoltre associati alle **launch constraints**, pertanto le app e i binari di sistema copiati e avviati dal parent o dalla posizione errati possono essere rifiutati da AMFI anche se sono ancora firmati da Apple. Il workflow dettagliato di estrazione e reversing è illustrato in:
 
 {{#ref}}
 macos-launch-environment-constraints.md
 {{#endref}}
 
-In iOS e nella ricerca sul jailbreak troverai ancora il modello tradizionale di **loadable trust caches** usato per whitelisting binary firmati ad-hoc.
+Nella ricerca su iOS e jailbreak troverai ancora il modello tradizionale dei **loadable trust caches** usati per inserire nella whitelist binari firmati ad-hoc.
 
 ## References
 
-- [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
-- [https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/)
-- [https://support.apple.com/guide/security/trust-caches-sec7d38fbf97/web](https://support.apple.com/guide/security/trust-caches-sec7d38fbf97/web)
+- [1] [XNU — `security/mac_policy.h` (MACF policy ops AMFI registers, incl. `mpo_policy_syscall`)](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_policy.h)
+- [2] [XNU — `osfmk/kern/cs_blobs.h` (`CS_*` code-signing flags AMFI sets)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [3] [XNU — `bsd/kern/ubc_subr.c` (code-signature blob parsing and validation)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/ubc_subr.c)
+- [4] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` operations and `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [5] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` handler)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
+- [6] [Apple Platform Security Guide — Trust caches](https://support.apple.com/guide/security/trust-caches-sec7d38fbf97/web)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -4,28 +4,28 @@
 
 ## Apple Scripts
 
-È un linguaggio di scripting usato per l'automazione di task **interagendo con processi remoti**. Rende molto facile **chiedere ad altri processi di eseguire alcune azioni**. **Malware** può abusare di queste funzionalità per sfruttare funzioni esportate da altri processi.\
-Per esempio, un malware potrebbe **iniettare codice JS arbitrario nelle pagine aperte nel browser**. Oppure **cliccare automaticamente** su alcuni permessi di allow richiesti all'utente;
+È un linguaggio di scripting utilizzato per l'automazione delle attività, **interagendo con processi remoti**. Rende piuttosto semplice **chiedere ad altri processi di eseguire determinate azioni**. **Malware** potrebbe abusare di queste funzionalità per sfruttare le funzioni esportate da altri processi.\
+Ad esempio, un malware potrebbe **iniettare codice JS arbitrario nelle pagine aperte nel browser**. Oppure eseguire **auto click** su alcuni permessi di autorizzazione richiesti all'utente;<sup>[3]</sup>.
 ```applescript
 tell window 1 of process "SecurityAgent"
 click button "Always Allow" of group 1
 end tell
 ```
-Qui trovi alcuni esempi: [https://github.com/abbeycode/AppleScripts](https://github.com/abbeycode/AppleScripts)\
-Trova maggiori informazioni su malware che usa applescripts [**qui**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/).
+Ecco alcuni esempi: [https://github.com/abbeycode/AppleScripts](https://github.com/abbeycode/AppleScripts)\
+Trova ulteriori informazioni sul malware che utilizza AppleScripts [**qui**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/).
 
-### Automation / TCC quirks
+### Automazione / peculiarità di TCC
 
-Le approvazioni di Apple Events sono **direzionali**: il prompt riguarda una coppia **processo sorgente -> processo target**. Una volta che l'utente clicca **Allow**, le richieste future dalla stessa sorgente allo stesso target sono consentite fino a quando la voce non viene resettata. Durante i test, concedere una volta `Terminal -> Finder` o `Terminal -> System Events` è sufficiente per riutilizzare in seguito il permesso senza un altro popup.
+Le approvazioni degli Apple Events sono **direzionali**: il prompt riguarda una coppia **processo sorgente -> processo target**. Dopo che l'utente fa clic su **Allow**, le richieste future dallo stesso sorgente verso lo stesso target vengono consentite finché la voce non viene reimpostata. Durante i test, concedere una volta `Terminal -> Finder` o `Terminal -> System Events` è sufficiente per riutilizzare successivamente il permesso senza un altro popup.<sup>[1]</sup>
 ```bash
 # Remove previously granted Automation permissions from Terminal
 tccutil reset AppleEvents com.apple.Terminal
 ```
-Questo è particolarmente rilevante quando il **target** è **Finder**, perché Finder ha sempre **Full Disk Access** anche se non appare nella UI di FDA. Quindi, qualsiasi host che abbia già Automation su Finder può essere usato come proxy AppleScript/JXA per accedere a file protetti da TCC. I payload generici per Finder e System Events sono già documentati nella [main TCC page](../README.md) e nella [Apple Events page](../macos-apple-events.md).
+Questo è particolarmente rilevante quando il **target** è **Finder**, perché Finder dispone sempre di **Full Disk Access**, anche se non appare nella UI di FDA. Pertanto, qualsiasi host che disponga già dell'automazione su Finder può essere utilizzato come proxy AppleScript/JXA per accedere ai file protetti da TCC.<sup>[1]</sup> I payload generici per Finder e System Events sono già documentati [nella pagina principale di TCC](../README.md) e [nella pagina Apple Events](../macos-apple-events.md).
 
-### Modern offensive tradecraft
+### Tradecraft offensiva moderna
 
-`/usr/bin/osascript` è solo il punto di ingresso più visibile. AppleScript e JXA possono anche essere eseguiti da **Mach-O binaries** tramite **`NSAppleScript`** / **`OSAScript`**, il che è utile sia per l’evasion sia per vivere all’interno di un host che ha già grant TCC interessanti.
+`/usr/bin/osascript` è solo l'entry point più visibile. AppleScript e JXA possono essere eseguiti anche da **binari Mach-O** tramite **`NSAppleScript`** / **`OSAScript`**, una tecnica utile sia per l'evasione sia per operare all'interno di un host che dispone già di interessanti autorizzazioni TCC.<sup>[2]</sup>
 ```bash
 osascript -l JavaScript <<'EOF'
 const app = Application.currentApplication();
@@ -33,11 +33,11 @@ app.includeStandardAdditions = true;
 app.doShellScript("id > /tmp/jxa_id");
 EOF
 ```
-Se crei un helper personalizzato che invia direttamente Apple Events, assegnargli una **real app identity** rende i test e le operazioni molto più affidabili. In pratica questo significa incorporare un `Info.plist` con `CFBundleIdentifier` e `NSAppleEventsUsageDescription`, firmare il binary e concedere l’entitlement `com.apple.security.automation.apple-events`. Altrimenti il prompt di Apple Events viene spesso attribuito all’**parent host** (ad esempio `Terminal`) oppure l’esecuzione di `NSAppleScript` fallisce semplicemente con errori confusi `-1750` / `errOSASystemError`.
+Se crei un helper personalizzato che invia direttamente Apple Events, assegnargli una **vera identità applicativa** rende i test e le operazioni molto più affidabili. In pratica, ciò significa incorporare un `Info.plist` con `CFBundleIdentifier` e `NSAppleEventsUsageDescription`, firmare il binario e concedere l'entitlement `com.apple.security.automation.apple-events`. In caso contrario, la richiesta Apple Events viene spesso attribuita al **parent host** (ad esempio `Terminal`) oppure l'esecuzione di `NSAppleScript` semplicemente fallisce con errori poco chiari `-1750` / `errOSASystemError`.<sup>[2]</sup>
 
-Gli apple scripts possono essere facilmente "**compiled**". Queste versioni possono essere facilmente "**decompiled**" con `osadecompile`
+Gli Apple script possono essere facilmente "**compilati**". Queste versioni possono essere facilmente "**decompilate**" con `osadecompile`
 
-Tuttavia, questi scripts possono anche essere **exported as "Read only"** (tramite l’opzione "Export..."):
+Tuttavia, questi script possono anche essere **esportati come "Sola lettura"** (tramite l'opzione "Export..."):
 
 <figure><img src="https://github.com/carlospolop/hacktricks/raw/master/images/image%20(556).png" alt=""><figcaption></figcaption></figure>
 ```
@@ -46,11 +46,13 @@ mal.scpt: AppleScript compiled
 ```
 e in questo caso il contenuto non può essere decompilato nemmeno con `osadecompile`
 
-Tuttavia, ci sono ancora alcuni strumenti che possono essere usati per comprendere questo tipo di executables, [**leggi questa ricerca per maggiori info**](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)). Lo strumento [**applescript-disassembler**](https://github.com/Jinmo/applescript-disassembler) con [**aevt_decompile**](https://github.com/SentineLabs/aevt_decompile) sarà molto utile per capire come funziona lo script.
+Tuttavia, esistono ancora alcuni strumenti che possono essere utilizzati per comprendere questo tipo di eseguibili, [**leggi questa ricerca per maggiori informazioni**](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)).<sup>[4]</sup> Lo strumento [**applescript-disassembler**](https://github.com/Jinmo/applescript-disassembler), insieme a [**aevt_decompile**](https://github.com/SentineLabs/aevt_decompile), sarà molto utile per comprendere come funziona lo script.
 
 ## Riferimenti
 
-- [Bypassing macOS TCC User Privacy Protections by Accident and Design](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
-- [Making AppleScript Work in macOS CLI Tools: The Undocumented Parts](https://steipete.me/posts/2025/applescript-cli-macos-complete-guide)
+- [1] [Aggirare le protezioni della privacy degli utenti di macOS TCC accidentalmente e intenzionalmente](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
+- [2] [Far funzionare AppleScript negli strumenti CLI di macOS: gli aspetti non documentati](https://steipete.me/posts/2025/applescript-cli-macos-complete-guide)
+- [3] [Come gli attori offensivi utilizzano AppleScript per attaccare macOS](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/)
+- [4] [FADE DEAD | Avventure nel reverse engineering di AppleScript malicious run-only](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
