@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## ImGui Based Reversing tools
+## ImGui 기반 Reversing tools
 
 Software:
 
@@ -12,9 +12,9 @@ Software:
 
 Online:
 
-- Use [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) to **decompile** from wasm (binary) to wat (clear text)
-- Use [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) to **compile** from wat to wasm
-- you can also try to use [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) to decompile
+- [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html)를 사용하여 wasm (binary)을 wat (clear text)로 **decompile**할 수 있습니다.
+- [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/)를 사용하여 wat을 wasm으로 **compile**할 수 있습니다.
+- [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/)를 사용하여 decompile을 시도할 수도 있습니다.
 
 Software:
 
@@ -25,29 +25,29 @@ Software:
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek는 **여러 형식을 디컴파일하고 검사**하는 디컴파일러로, **libraries** (.dll), **Windows metadata file**s (.winmd), **executables** (.exe)를 포함합니다. 디컴파일 후에는 assembly를 Visual Studio project (.csproj)로 저장할 수 있습니다.
+dotPeek은 **라이브러리** (.dll), **Windows metadata 파일** (.winmd), **실행 파일** (.exe)을 포함한 여러 형식을 **decompile하고 검사**하는 decompiler입니다. decompile한 후 assembly를 Visual Studio 프로젝트 (.csproj)로 저장할 수 있습니다.
 
-여기서의 장점은, 손실된 source code를 legacy assembly에서 복원해야 할 때 이 작업이 시간을 절약해 준다는 점입니다. 또한 dotPeek는 디컴파일된 code 전체에서 편리한 navigation을 제공하므로, **Xamarin algorithm analysis**에 매우 적합한 도구 중 하나입니다.
+여기서의 장점은 손실된 source code를 legacy assembly에서 복원해야 할 때 이 작업으로 시간을 절약할 수 있다는 점입니다. 또한 dotPeek은 decompile된 code 전체에서 편리한 navigation을 제공하므로 **Xamarin algorithm analysis**에 적합한 도구 중 하나입니다.
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-포괄적인 add-in model과 도구를 정확한 필요에 맞게 확장하는 API를 통해, .NET reflector는 시간을 절약하고 development를 단순화합니다. 이 도구가 제공하는 다양한 reverse engineering services를 살펴보겠습니다:
+포괄적인 add-in model과 도구를 정확한 요구 사항에 맞게 확장하는 API를 갖춘 .NET reflector는 시간을 절약하고 development를 단순화합니다. 이 도구가 제공하는 다양한 reverse engineering service를 살펴보겠습니다.
 
-- data가 library 또는 component를 통해 어떻게 flow하는지에 대한 insight를 제공합니다
-- .NET languages 및 frameworks의 implementation과 usage에 대한 insight를 제공합니다
-- API와 사용된 technologies를 더 잘 활용할 수 있도록, 문서화되지 않았고 노출되지 않은 기능을 찾습니다.
-- dependencies와 서로 다른 assemblies를 찾습니다
-- 코드, third-party components, libraries에서 error의 정확한 위치를 추적합니다.
-- 작업 중인 모든 .NET code의 source로 들어가 debug합니다.
+- library 또는 component를 통해 data가 흐르는 방식을 파악할 수 있습니다.
+- .NET language와 framework의 implementation 및 usage에 대한 insight를 제공합니다.
+- 사용 중인 API와 technology에서 더 많은 기능을 활용할 수 있도록 undocumented 및 unexposed functionality를 찾습니다.
+- dependency와 여러 assembly를 찾습니다.
+- code, third-party component 및 library에서 error의 정확한 위치를 추적합니다.
+- 작업 중인 모든 .NET code의 source를 대상으로 debug할 수 있습니다.
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[Visual Studio Code용 ILSpy plugin](https://github.com/icsharpcode/ilspy-vscode): 모든 OS에서 사용할 수 있습니다(VSCode에서 직접 설치할 수 있으며 git을 다운로드할 필요가 없습니다. **Extensions**를 클릭하고 **ILSpy**를 검색하세요).\
-**decompile**, **modify** 그리고 다시 **recompile**해야 한다면 [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) 또는 이를 적극적으로 유지보수하는 fork인 [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases)를 사용할 수 있습니다. (**Right Click -> Modify Method**로 함수 내부를 변경).
+[Visual Studio Code용 ILSpy plugin](https://github.com/icsharpcode/ilspy-vscode): 모든 OS에서 사용할 수 있습니다(VSCode에서 직접 설치할 수 있으므로 git을 download할 필요가 없습니다. **Extensions**를 클릭하고 **ILSpy를 검색**하면 됩니다).\
+다시 **decompile**, **modify** 및 **recompile**해야 한다면 [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) 또는 현재도 유지 관리되는 fork인 [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases)를 사용할 수 있습니다. (함수 내부의 내용을 변경하려면 **Right Click -> Modify Method**를 선택합니다.)
 
 ### DNSpy Logging
 
-**DNSpy가 파일에 일부 정보를 log**하도록 하려면, 이 snippet을 사용할 수 있습니다:
+**DNSpy가 일부 정보를 파일에 log하도록** 하려면 다음 snippet을 사용할 수 있습니다.
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -55,107 +55,107 @@ File.AppendAllText(path, "Password: " + password + "\n");
 ```
 ### DNSpy 디버깅
 
-DNSpy를 사용하여 코드를 디버그하려면 다음이 필요합니다:
+DNSpy를 사용하여 code를 디버깅하려면 다음을 수행해야 합니다:
 
-먼저, **디버깅**과 관련된 **Assembly attributes**를 변경하세요:
+먼저 **어셈블리 특성**에서 **디버깅**과 관련된 항목을 변경합니다:
 
-![DNSpy Logging - DNSpy Debugging: First, change the Assembly attributes related to debugging](<../../images/image (973).png>)
+![DNSpy 로깅 - DNSpy 디버깅: 먼저 어셈블리 특성에서 디버깅과 관련된 항목을 변경합니다](<../../images/image (973).png>)
 
-From:
+변경 전:
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-대상:
+받는 사람:
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
 DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints |
 DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
-그리고 **compile**를 클릭하세요:
+그리고 **compile**을 클릭합니다:
 
-![DNSpy Logging - DNSpy Debugging: And click on compile](<../../images/image (314) (1).png>)
+![DNSpy Logging - DNSpy Debugging: compile을 클릭합니다](<../../images/image (314) (1).png>)
 
-그다음 _**File >> Save module...**_를 통해 새 파일을 저장하세요:
+그런 다음 _**File >> Save module...**_을 통해 새 파일을 저장합니다:
 
-![DNSpy Logging - DNSpy Debugging: Then save the new file via File Save module](<../../images/image (602).png>)
+![DNSpy Logging - DNSpy Debugging: File Save module을 통해 새 파일을 저장합니다](<../../images/image (602).png>)
 
-이 작업은 필요합니다. 왜냐하면 이렇게 하지 않으면 **runtime**에서 코드에 여러 **optimisations**가 적용될 수 있고, 디버깅 중에 **break-point가 절대 hit되지 않거나** 일부 **variables가 존재하지 않을** 수 있기 때문입니다.
+이 작업이 필요한 이유는 이렇게 하지 않으면 **runtime**에 코드에 여러 **optimisations**가 적용되어, 디버깅 중에 **break-point가 절대 적중되지 않거나** 일부 **variables가 존재하지 않을** 수 있기 때문입니다.
 
-그다음, .NET application이 **IIS**에 의해 **run**되고 있다면 다음과 같이 **restart**할 수 있습니다:
+그런 다음 .NET 애플리케이션이 **IIS**에 의해 **run**되고 있다면 다음 명령으로 **restart**할 수 있습니다:
 ```
 iisreset /noforce
 ```
-Then, in order to start debugging you should close all the opened files and inside the **Debug Tab** select **Attach to Process...**:
+그런 다음 debugging을 시작하려면 열려 있는 모든 파일을 닫고 **Debug Tab**에서 **Attach to Process...**를 선택해야 합니다:
 
-![DNSpy Logging - DNSpy Debugging: Then, in order to start debugging you should close all the opened files and inside the Debug Tab select Attach to Process](<../../images/image (318).png>)
+![DNSpy Logging - DNSpy Debugging: 그런 다음 debugging을 시작하려면 열려 있는 모든 파일을 닫고 Debug Tab에서 Attach to Process를 선택해야 합니다](<../../images/image (318).png>)
 
-Then select **w3wp.exe** to attach to the **IIS server** and click **attach**:
+그런 다음 **w3wp.exe**를 선택하여 **IIS server**에 attach하고 **attach**를 클릭합니다:
 
-![DNSpy Logging - DNSpy Debugging: Then select w3wp.exe to attach to the IIS server and click attach](<../../images/image (113).png>)
+![DNSpy Logging - DNSpy Debugging: 그런 다음 w3wp.exe를 선택하여 IIS server에 attach하고 attach를 클릭합니다](<../../images/image (113).png>)
 
-Now that we are debugging the process, it's time to stop it and load all the modules. First click on _Debug >> Break All_ and then click on _**Debug >> Windows >> Modules**_:
+이제 process를 debugging하고 있으므로 process를 중지하고 모든 module을 load할 차례입니다. 먼저 _Debug >> Break All_을 클릭한 다음 _**Debug >> Windows >> Modules**_를 클릭합니다:
 
-![DNSpy Logging - DNSpy Debugging: Now that we are debugging the process, it's time to stop it and load all the modules. First click on Debug Break All and then click on Debug Windows Modules](<../../images/image (132).png>)
+![DNSpy Logging - DNSpy Debugging: 이제 process를 debugging하고 있으므로 process를 중지하고 모든 module을 load할 차례입니다. 먼저 Debug Break All을 클릭한 다음 Debug Windows Modules를 클릭합니다](<../../images/image (132).png>)
 
-![DNSpy Logging - DNSpy Debugging: Now that we are debugging the process, it's time to stop it and load all the modules. First click on Debug Break All and then click on Debug Windows Modules](<../../images/image (834).png>)
+![DNSpy Logging - DNSpy Debugging: 이제 process를 debugging하고 있으므로 process를 중지하고 모든 module을 load할 차례입니다. 먼저 Debug Break All을 클릭한 다음 Debug Windows Modules를 클릭합니다](<../../images/image (834).png>)
 
-Click any module on **Modules** and select **Open All Modules**:
+**Modules**에서 아무 module이나 클릭하고 **Open All Modules**를 선택합니다:
 
-![DNSpy Logging - DNSpy Debugging: Click any module on Modules and select Open All Modules](<../../images/image (922).png>)
+![DNSpy Logging - DNSpy Debugging: Modules에서 아무 module이나 클릭하고 Open All Modules를 선택합니다](<../../images/image (922).png>)
 
-Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
+**Assembly Explorer**에서 아무 module이나 right click하고 **Sort Assemblies**를 클릭합니다:
 
-![DNSpy Logging - DNSpy Debugging: Right click any module in Assembly Explorer and click Sort Assemblies](<../../images/image (339).png>)
+![DNSpy Logging - DNSpy Debugging: Assembly Explorer에서 아무 module이나 right click하고 Sort Assemblies를 클릭합니다](<../../images/image (339).png>)
 
 ## Java decompiler
 
 [https://github.com/skylot/jadx](https://github.com/skylot/jadx)\
 [https://github.com/java-decompiler/jd-gui/releases](https://github.com/java-decompiler/jd-gui/releases)
 
-## Debugging DLLs
+## DLLs debugging
 
-### Using IDA
+### IDA 사용
 
-- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
-- Select **Windbg** debugger
-- Select "**Suspend on library load/unload**"
+- **rundll32 load** (64bits는 C:\Windows\System32\rundll32.exe에 있고 32 bits는 C:\Windows\SysWOW64\rundll32.exe에 있음)
+- **Windbg** debugger 선택
+- "**Suspend on library load/unload**" 선택
 
-![Debugging DLLs - Using IDA: Select " Suspend on library load/unload "](<../../images/image (868).png>)
+![Debugging DLLs - Using IDA: " Suspend on library load/unload " 선택](<../../images/image (868).png>)
 
-- Configure the **parameters** of the execution putting the **path to the DLL** and the function that you want to call:
+- **path to the DLL**과 호출하려는 function을 입력하여 execution의 **parameters**를 configure합니다:
 
-![Debugging DLLs - Using IDA: Configure the parameters of the execution putting the path to the DLL and the function that you want to call](<../../images/image (704).png>)
+![Debugging DLLs - Using IDA: path to the DLL과 호출하려는 function을 입력하여 execution의 parameters를 configure합니다](<../../images/image (704).png>)
 
-Then, when you start debugging **the execution will be stopped when each DLL is loaded**, then, when rundll32 load your DLL the execution will be stopped.
+그런 다음 debugging을 시작하면 **각 DLL이 load될 때 execution이 중지**됩니다. 즉, rundll32가 사용자의 DLL을 load하면 execution이 중지됩니다.
 
-But, how can you get to the code of the DLL that was lodaded? Using this method, I don't know how.
+하지만 load된 DLL의 code로 어떻게 이동할 수 있을까요? 이 method를 사용해서는 그 방법을 모르겠습니다.
 
-### Using x64dbg/x32dbg
+### x64dbg/x32dbg 사용
 
-- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
-- **Change the Command Line** ( _File --> Change Command Line_ ) and set the path of the dll and the function that you want to call, for example: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
-- Change _Options --> Settings_ and select "**DLL Entry**".
-- Then **start the execution**, the debugger will stop at each dll main, at some point you will **stop in the dll Entry of your dll**. From there, just search for the points where you want to put a breakpoint.
+- **rundll32 load** (64bits는 C:\Windows\System32\rundll32.exe에 있고 32 bits는 C:\Windows\SysWOW64\rundll32.exe에 있음)
+- **Command Line 변경** ( _File --> Change Command Line_ ) 후 dll의 path와 호출하려는 function을 설정합니다. 예: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- _Options --> Settings_을 변경하고 "**DLL Entry**"를 선택합니다.
+- 그런 다음 **execution을 시작**하면 debugger가 각 dll main에서 중지됩니다. 어느 시점에 **사용자 dll의 dll Entry에서 중지**됩니다. 그 지점부터 breakpoint를 설정하려는 지점을 찾으면 됩니다.
 
-Notice that when the execution is stopped by any reason in win64dbg you can see **in which code you are** looking in the **top of the win64dbg window**:
+win64dbg에서 어떤 이유로든 execution이 중지되면 **win64dbg window 상단**을 확인하여 현재 **어떤 code에 있는지** 볼 수 있다는 점에 유의하세요:
 
-![Using IDA - Using x64dbg/x32dbg: Notice that when the execution is stopped by any reason in win64dbg you can see in which code you are looking in the top of the win64dbg window](<../../images/image (842).png>)
+![Using IDA - Using x64dbg/x32dbg: win64dbg에서 어떤 이유로든 execution이 중지되면 win64dbg window 상단에서 현재 어떤 code에 있는지 확인할 수 있습니다](<../../images/image (842).png>)
 
-Then, looking to this ca see when the execution was stopped in the dll you want to debug.
+그런 다음 이를 확인하면 debugging하려는 dll에서 execution이 중지된 시점을 알 수 있습니다.
 
 ## GUI Apps / Videogames
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them. More info in:
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php)은 실행 중인 game의 memory 내부에 중요한 값이 저장된 위치를 찾고 이를 변경하는 데 유용한 program입니다. 자세한 내용은 다음을 참조하세요:
 
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) is a front-end/reverse engineering tool for the GNU Project Debugger (GDB), focused on games. However, it can be used for any reverse-engineering related stuff
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE)는 GNU Project Debugger (GDB)를 위한 front-end/reverse engineering tool이며 game에 중점을 둡니다. 그러나 reverse-engineering과 관련된 모든 작업에 사용할 수 있습니다.
 
-[**Decompiler Explorer**](https://dogbolt.org/) is a web front-end to a number of decompilers. This web service lets you compare the output of different decompilers on small executables.
+[**Decompiler Explorer**](https://dogbolt.org/)는 여러 decompiler를 위한 web front-end입니다. 이 web service를 사용하면 작은 executable에 대한 서로 다른 decompiler의 output을 비교할 수 있습니다.
 
 ## ARM & MIPS
 
@@ -166,49 +166,49 @@ https://github.com/nongiach/arm_now
 
 ## Shellcodes
 
-### Debugging a shellcode with blobrunner
+### blobrunner로 shellcode debugging
 
-[**Blobrunner**](https://github.com/OALabs/BlobRunner) will **allocate** the **shellcode** inside a space of memory, will **indicate** you the **memory address** were the shellcode was allocated and will **stop** the execution.\
-Then, you need to **attach a debugger** (Ida or x64dbg) to the process and put a **breakpoint the indicated memory address** and **resume** the execution. This way you will be debugging the shellcode.
+[**Blobrunner**](https://github.com/OALabs/BlobRunner)는 memory 공간에 **shellcode를 allocate**하고, shellcode가 allocate된 **memory address를 표시**한 다음 execution을 **중지**합니다.\
+그런 다음 process에 **debugger를 attach**하고(IDA 또는 x64dbg) **표시된 memory address에 breakpoint를 설정**한 후 execution을 **resume**해야 합니다. 이렇게 하면 shellcode를 debugging할 수 있습니다.
 
-The releases github page contains zips containing the compiled releases: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-You can find a slightly modified version of Blobrunner in the following link. In order to compile it just **create a C/C++ project in Visual Studio Code, copy and paste the code and build it**.
+releases github page에는 compiled release가 포함된 zip이 있습니다: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+다음 link에서 약간 수정된 Blobrunner version을 찾을 수 있습니다. compile하려면 **Visual Studio Code에서 C/C++ project를 생성하고, code를 copy and paste한 후 build**하기만 하면 됩니다.
 
 
 {{#ref}}
 blobrunner.md
 {{#endref}}
 
-### Debugging a shellcode with jmp2it
+### jmp2it으로 shellcode debugging
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)is very similar to blobrunner. It will **allocate** the **shellcode** inside a space of memory, and start an **eternal loop**. You then need to **attach the debugger** to the process, **play start wait 2-5 secs and press stop** and you will find yourself inside the **eternal loop**. Jump to the next instruction of the eternal loop as it will be a call to the shellcode, and finally you will find yourself executing the shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)는 blobrunner와 매우 유사합니다. memory 공간에 **shellcode를 allocate**하고 **eternal loop**를 시작합니다. 그런 다음 process에 **debugger를 attach**하고, **play start를 누른 뒤 2-5초 기다렸다가 stop을 누르면**, **eternal loop** 내부에 있게 됩니다. eternal loop의 다음 instruction으로 jump하면 해당 instruction이 shellcode를 call하므로, 최종적으로 shellcode를 executing하게 됩니다.
 
-![Debugging a shellcode with blobrunner - Debugging a shellcode with jmp2it: jmp2it is very similar to blobrunner. It will allocate the shellcode inside a space of memory, and start an...](<../../images/image (509).png>)
+![Debugging a shellcode with blobrunner - Debugging a shellcode with jmp2it: jmp2it는 blobrunner와 매우 유사합니다. memory 공간에 shellcode를 allocate하고...](<../../images/image (509).png>)
 
-You can download a compiled version of [jmp2it inside the releases page](https://github.com/adamkramer/jmp2it/releases/).
+compiled version의 [jmp2it는 releases page에서 다운로드](https://github.com/adamkramer/jmp2it/releases/)할 수 있습니다.
 
-### Debugging shellcode using Cutter
+### Cutter를 사용한 shellcode debugging
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) is the GUI of radare. Using cutter you can emulate the shellcode and inspect it dynamically.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0)는 radare의 GUI입니다. Cutter를 사용하면 shellcode를 emulate하고 dynamic하게 inspect할 수 있습니다.
 
-Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it decompiled it correctly, but when I opened it as a shellcode it didn't:
+Cutter에서는 "Open File"과 "Open Shellcode"를 사용할 수 있습니다. 제 경우 shellcode를 file로 열었을 때는 올바르게 decompile되었지만, shellcode로 열었을 때는 그렇지 않았습니다:
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it...](<../../images/image (562).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: Cutter에서는 "Open File"과 "Open Shellcode"를 사용할 수 있습니다. 제 경우 shellcode를 file로 열었을 때는...](<../../images/image (562).png>)
 
-In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically start the emulation from there:
+원하는 위치에서 emulation을 시작하려면 해당 위치에 bp를 설정하면 됩니다. 그러면 Cutter가 해당 위치에서 자동으로 emulation을 시작하는 것으로 보입니다:
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically...](<../../images/image (589).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: 원하는 위치에서 emulation을 시작하려면 해당 위치에 bp를 설정하면 됩니다. 그러면 Cutter가 해당 위치에서 자동으로...](<../../images/image (589).png>)
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically...](<../../images/image (387).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: 원하는 위치에서 emulation을 시작하려면 해당 위치에 bp를 설정하면 됩니다. 그러면 Cutter가 해당 위치에서 자동으로...](<../../images/image (387).png>)
 
-You can see the stack for example inside a hex dump:
+예를 들어 hex dump 내부에서 stack을 볼 수 있습니다:
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: You can see the stack for example inside a hex dump](<../../images/image (186).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: 예를 들어 hex dump 내부에서 stack을 볼 수 있습니다](<../../images/image (186).png>)
 
-### Deobfuscating shellcode and getting executed functions
+### shellcode deobfuscating 및 executed functions 확인
 
-You should try [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
-It will tell you things like **which functions** is the shellcode using and if the shellcode is **decoding** itself in memory.
+[**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152)를 사용해 보세요.\
+shellcode가 사용 중인 **function이 무엇인지**, 그리고 shellcode가 memory에서 스스로 **decoding 중인지** 등을 알려줍니다.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -217,39 +217,39 @@ scdbg.exe -f shellcode -d #Dump decoded shellcode
 scdbg.exe -f shellcode /findsc #Find offset where starts
 scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 ```
-scDbg는 옵션을 선택하고 shellcode를 실행할 수 있는 그래픽 런처도 제공합니다
+scDbg에는 원하는 옵션을 선택하고 shellcode를 실행할 수 있는 graphical launcher도 있습니다.
 
-![Debugging shellcode using Cutter - Deobfuscating shellcode and getting executed functions: scDbg also counts with a graphical launcher where you can select the options you want and...](<../../images/image (258).png>)
+![Cutter를 사용한 shellcode 디버깅 - shellcode 난독화 해제 및 실행된 함수 확인: scDbg에는 원하는 옵션을 선택하고 실행할 수 있는 graphical launcher도 있습니다...](<../../images/image (258).png>)
 
-**Create Dump** 옵션은 shellcode가 메모리에서 동적으로 변경되는 경우 최종 shellcode를 덤프합니다(디코딩된 shellcode를 다운로드할 때 유용). **start offset**은 특정 오프셋에서 shellcode를 시작하는 데 유용할 수 있습니다. **Debug Shell** 옵션은 scDbg 터미널을 사용해 shellcode를 디버그할 때 유용합니다(하지만 이 용도라면 위에서 설명한 어떤 옵션이든 더 낫다고 생각합니다. Ida나 x64dbg를 사용할 수 있기 때문입니다).
+**Create Dump** 옵션은 메모리에서 shellcode가 동적으로 변경된 경우 최종 shellcode를 덤프합니다(디코딩된 shellcode를 다운로드할 때 유용). **start offset**은 특정 offset에서 shellcode를 시작하는 데 유용합니다. **Debug Shell** 옵션은 scDbg 터미널을 사용하여 shellcode를 디버깅할 때 유용합니다(하지만 이 경우 앞에서 설명한 옵션 중 하나를 사용하는 것이 더 좋다고 생각합니다. Ida 또는 x64dbg를 사용할 수 있기 때문입니다).
 
 ### CyberChef를 사용한 Disassembling
 
-shellcode 파일을 입력으로 업로드하고 다음 recipe를 사용해 decompile하세요: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+shellcode 파일을 input으로 업로드하고 다음 recipe를 사용하여 이를 decompile합니다: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## MBA obfuscation deobfuscation
 
-**Mixed Boolean-Arithmetic (MBA)** obfuscation은 `x + y` 같은 단순한 식을 산술 연산(`+`, `-`, `*`)과 비트 연산자(`&`, `|`, `^`, `~`, shifts)를 섞은 공식 뒤에 숨깁니다. 중요한 점은 이러한 항등식이 보통 **고정 폭 모듈러 산술**에서만 올바르므로, carry와 overflow가 중요하다는 것입니다:
+**Mixed Boolean-Arithmetic (MBA)** obfuscation은 산술 연산(`+`, `-`, `*`)과 bitwise 연산자(`&`, `|`, `^`, `~`, shifts)를 혼합한 수식을 사용하여 `x + y`와 같은 간단한 표현식을 숨깁니다. 중요한 점은 이러한 항등식이 일반적으로 **고정 폭 모듈러 산술**에서만 올바르다는 것입니다. 따라서 carry와 overflow가 중요합니다:
 ```c
 (x ^ y) + 2 * (x & y) == x + y
 ```
-이런 종류의 표현식을 일반적인 대수 도구로 단순화하면, 비트 폭 의미가 무시되기 때문에 쉽게 잘못된 결과를 얻을 수 있습니다.
+이러한 종류의 표현식을 일반 대수 도구로 단순화하면 bit-width semantics가 무시되어 쉽게 잘못된 결과를 얻을 수 있습니다.
 
-### 실무 워크플로
+### Practical workflow
 
-1. **원래 비트 폭을 유지**하세요. lifted code/IR/decompiler 출력의 (`8/16/32/64`비트).
-2. 단순화하기 전에 표현식을 **분류**하세요:
-- **Linear**: bitwise atom들의 가중 합
-- **Semilinear**: `x & 0xFF` 같은 상수 마스크를 포함한 linear
-- **Polynomial**: 곱이 등장함
-- **Mixed**: 곱과 bitwise logic이 서로 섞여 있으며, 보통 반복되는 subexpression이 있음
-3. 모든 후보 rewrite는 랜덤 테스트나 SMT proof로 **검증**하세요. 동등성을 증명할 수 없으면 추측하지 말고 원래 표현식을 유지하세요.
+1. 리프트된 code/IR/decompiler 출력에서 **원래 bit-width**(`8/16/32/64` bits)를 유지합니다.
+2. 단순화를 시도하기 전에 **표현식을 분류**합니다.
+- **Linear**: bitwise atom의 가중 합
+- **Semilinear**: `x & 0xFF`와 같은 상수 mask를 포함한 linear
+- **Polynomial**: 곱셈이 포함됨
+- **Mixed**: 곱셈과 bitwise logic가 서로 교차하며, 반복되는 subexpression이 자주 포함됨
+3. 모든 후보 rewrite를 random testing 또는 SMT proof로 **검증**합니다. 동치성을 증명할 수 없다면 추측으로 원래 표현식을 바꾸지 말고 그대로 유지합니다.
 
 ### CoBRA
 
-[**CoBRA**](https://github.com/trailofbits/CoBRA) 는 malware analysis와 protected-binary reversing을 위한 실용적인 MBA simplifier입니다. 표현식을 분류한 뒤, 모든 것에 하나의 generic rewrite pass를 적용하는 대신 specialized pipeline으로 라우팅합니다.
+[**CoBRA**](https://github.com/trailofbits/CoBRA)는 malware analysis 및 protected-binary reversing을 위한 실용적인 MBA simplifier입니다. 모든 항목에 하나의 일반적인 rewrite pass를 적용하는 대신, 표현식을 분류하고 specialized pipeline으로 전달합니다.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Quick usage:
+간단한 사용법:
 ```bash
 # Recover arithmetic from a logic-heavy MBA
 cobra-cli --mba "(x&y)+(x|y)"
@@ -264,76 +264,76 @@ cobra-cli --mba "(a^b)+(a&b)+(a&b)" --verify
 ```
 유용한 사례:
 
-- **Linear MBA**: CoBRA는 Boolean 입력에서 표현식을 평가하고, 시그니처를 도출한 다음, pattern matching, ANF conversion, coefficient interpolation 같은 여러 복구 방법을 동시에 시도합니다.
-- **Semilinear MBA**: constant-masked atoms는 bit-partitioned reconstruction으로 재구성되어 masked regions가 올바르게 유지됩니다.
-- **Polynomial/Mixed MBA**: products는 cores로 분해되고, 반복되는 subexpressions는 outer relation을 단순화하기 전에 temporaries로 lift될 수 있습니다.
+- **Linear MBA**: CoBRA는 Boolean 입력에서 expression을 평가하고, signature를 도출한 다음 pattern matching, ANF conversion, coefficient interpolation과 같은 여러 복구 방법을 경쟁적으로 실행합니다.
+- **Semilinear MBA**: constant-masked atom은 bit-partitioned reconstruction으로 재구성되므로, masked region이 올바르게 유지됩니다.
+- **Polynomial/Mixed MBA**: products는 cores로 분해되며, 단순화하기 전에 반복되는 subexpression을 temporaries로 끌어올려 outer relation을 처리할 수 있습니다.
 
-복구를 시도해 볼 만한 흔한 mixed identity의 예:
+일반적으로 복구를 시도해 볼 가치가 있는 mixed identity의 예:
 ```c
 (x & y) * (x | y) + (x & ~y) * (~x & y)
 ```
-이는 다음과 같이 축약될 수 있습니다:
+다음과 같이 축약할 수 있습니다:
 ```c
 x * y
 ```
 ### Reversing notes
 
-- 정확한 계산을 분리해낸 뒤에는 **lifted IR expressions** 또는 decompiler output에서 CoBRA를 실행하는 것을 권장합니다.
-- 표현식이 masked arithmetic 또는 narrow registers에서 왔다면 `--bitwidth`를 명시적으로 사용하세요.
-- 더 강한 proof step이 필요하면, 여기의 local Z3 notes를 확인하세요:
+- 정확한 computation을 분리한 후 **lifted IR expressions** 또는 decompiler output에 CoBRA를 실행하는 것을 우선하세요.
+- masked arithmetic 또는 narrow registers에서 expression이 생성된 경우 `--bitwidth`를 명시적으로 사용하세요.
+- 더 강력한 proof 단계가 필요하다면 다음에서 local Z3 notes를 확인하세요:
 
 
 {{#ref}}
 satisfiability-modulo-theories-smt-z3.md
 {{#endref}}
 
-- CoBRA는 **LLVM pass plugin** (`libCobraPass.so`) 형태로도 제공되며, 이후 analysis passes 전에 MBA-heavy LLVM IR을 정규화하고 싶을 때 유용합니다.
-- 지원되지 않는 carry-sensitive mixed-domain residuals는 original expression을 유지하고 carry path를 수동으로 추론해야 한다는 신호로 보아야 합니다.
+- CoBRA는 **LLVM pass plugin**(`libCobraPass.so`)으로도 제공되며, 이후 analysis passes 전에 MBA-heavy LLVM IR을 normalize하려는 경우 유용합니다.
+- 지원되지 않는 carry-sensitive mixed-domain residuals는 원래 expression을 유지하고 carry path를 수동으로 분석해야 한다는 신호로 취급해야 합니다.
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-이 obfuscator는 **모든 instructions를 `mov`로 수정**합니다(정말 멋지죠). 또한 interruptions를 사용해 execution flows를 바꿉니다. 작동 방식에 대한 더 많은 정보는 다음을 보세요:
+이 obfuscator는 **모든 instruction을 `mov`로 수정합니다**(네, 정말 멋집니다). 또한 execution flow를 변경하기 위해 interruptions를 사용합니다. 작동 방식에 대한 자세한 내용은 다음을 참조하세요:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-운이 좋다면 [demovfuscator](https://github.com/kirschju/demovfuscator)가 binary를 deofuscate해 줄 것입니다. 여러 dependencies가 있습니다
+운이 좋다면 [demovfuscator](https://github.com/kirschju/demovfuscator)가 binary를 deofuscate할 수 있습니다. 여러 dependencies가 필요합니다
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
 ```
-And [install keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
+그리고 [keystone 설치](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-If you are playing a **CTF, this workaround to find the flag** could be very useful: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+**CTF를 진행 중이라면, flag를 찾기 위한 이 workaround가 매우 유용할 수 있습니다:** [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
-To find the **entry point** search the functions by `::main` like in:
+**entry point**를 찾으려면 다음과 같이 `::main`을 기준으로 functions를 검색합니다.
 
-![Movfuscator - Rust: To find the entry point search the functions by ::main like in](<../../images/image (1080).png>)
+![Movfuscator - Rust: 다음과 같이 ::main을 기준으로 entry point를 찾기 위해 functions 검색](<../../images/image (1080).png>)
 
-In this case the binary was called authenticator, so it's pretty obvious that this is the interesting main function.\
-Having the **name** of the **functions** being called, search for them on the **Internet** to learn about their **inputs** and **outputs**.
+이 경우 binary의 이름이 authenticator였으므로, 이것이 흥미로운 main function이라는 점은 매우 분명합니다.\
+호출되는 **functions**의 **name**을 확인했다면, **inputs**와 **outputs**에 대해 알아보기 위해 **Internet**에서 해당 functions를 검색합니다.
 
-### Recovering Rust strings from ELF firmware
+### ELF firmware에서 Rust strings 복구
 
-In **Rust ELF** binaries, many static strings are not referenced as C-style NUL-terminated pointers. A common `rustc` layout is a **pointer/length tuple** inside **`.data.rel.ro`** pointing into the real string blob stored in **`.rodata`**:
+**Rust ELF** binaries에서는 많은 static strings가 C-style NUL-terminated pointers로 참조되지 않습니다. 일반적인 `rustc` layout은 실제 string blob이 저장된 **`.rodata`**를 가리키는 **pointer/length tuple**이 **`.data.rel.ro`** 내부에 있는 형태입니다:<sup>[[3]](#references)</sup>
 ```text
 [8-byte little-endian pointer][8-byte little-endian length]
 ```
-즉, `strings` 또는 기본 Ghidra 분석은 인접한 문자열을 병합하거나 cross-reference를 완전히 놓칠 수 있습니다.
+이는 `strings` 또는 기본 Ghidra 분석이 인접한 문자열을 병합하거나 cross-reference를 완전히 놓칠 수 있음을 의미합니다.
 
 빠른 workflow:
 ```bash
 readelf -S <bin>
 objdump -h <bin>
 ```
-1. **`.rodata`**의 가상 주소와 크기를 가져온다.
-2. **`.data.rel.ro`**를 한 번에 한 word씩 열거한다.
-3. `.rodata` 주소 범위 안의 모든 값을 후보 문자열 포인터로 취급한다.
-4. 다음 word를 후보 길이로 취급한다.
-5. sanity filter를 적용한다(예: 길이를 **4**에서 **100** 바이트 사이로 유지).
-6. `0x00`를 만날 때까지 스캔하는 대신 `.rodata`에서 정확히 `length` 바이트를 읽는다.
+1. **`.rodata`**의 virtual address와 크기를 가져옵니다.
+2. **`.data.rel.ro`**를 한 word씩 열거합니다.
+3. `.rodata` address 범위 내의 모든 값을 candidate string pointer로 취급합니다.
+4. 다음 word를 candidate length로 취급합니다.
+5. sanity filter를 적용합니다(예: **4**~**100** bytes 사이의 length만 유지).
+6. `0x00`까지 scan하는 대신 `.rodata`에서 정확히 `length` bytes를 읽습니다.
 
 Minimal extractor logic:
 ```python
@@ -344,33 +344,33 @@ if rodata_start <= ptr < rodata_end and 4 <= length <= 100:
 start = ptr - rodata_start
 print(rodata[start:start+length])
 ```
-이것은 firmware reversing에서 특히 유용한데, 복구된 Rust 문자열은 종종 **HTTP routes, RPC names, log messages, assertions, filenames, config keys, command handlers, auth-related logic**를 드러내기 때문입니다.
+이는 복구된 Rust 문자열에서 **HTTP routes, RPC names, log messages, assertions, filenames, config keys, command handlers, auth-related logic**가 자주 드러나기 때문에 firmware reversing에서 특히 유용합니다.
 
-Ghidra가 이러한 문자열을 놓친다면, 동일한 heuristic을 적용하고 참조된 `.rodata` offset에 string data를 생성하는 custom script/plugin을 실행하세요. Pen Test Partners의 공개된 `rust-strings`와 `RustStrings.py` 도구는 다른 **word sizes, endianness, and section layouts**에 맞게 아이디어를 적용하는 데 좋은 참고 자료입니다.
+Ghidra가 이러한 문자열을 놓친다면, 동일한 heuristic을 적용하고 참조된 `.rodata` offsets에 string data를 생성하는 custom script/plugin을 실행하세요. Pen Test Partners의 공개된 `rust-strings` 및 `RustStrings.py` tools는 이 아이디어를 다른 **word sizes, endianness, section layouts**에 맞게 적용할 때 참고하기 좋습니다.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
 ## **Delphi**
 
-Delphi compiled binaries의 경우 [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)을 사용할 수 있습니다
+Delphi compiled binaries의 경우 [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)을 사용할 수 있습니다.
 
-Delphi binary를 reverse해야 한다면 IDA plugin [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)을 사용하는 것을 권장합니다
+Delphi binary를 reverse해야 한다면 IDA plugin인 [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)를 사용하는 것을 권장합니다.
 
-그냥 **ATL+f7** (IDA에서 python plugin import) 를 누르고 python plugin을 선택하세요.
+**ATL+f7** (IDA에서 python plugin import)를 누르고 python plugin을 선택하세요.
 
-이 plugin은 debugging 시작 시 binary를 실행하고 function names를 동적으로 resolve합니다. debugging을 시작한 뒤 Start 버튼(초록색 버튼 또는 f9)을 다시 누르면 breakpoint가 실제 code의 시작 부분에서 hit됩니다.
+이 plugin은 binary를 실행하고 debugging 시작 시점에 function names를 동적으로 resolve합니다. debugging을 시작한 후 Start button (녹색 버튼 또는 f9)을 다시 누르면 real code의 시작 부분에서 breakpoint가 hit됩니다.
 
-그래픽 application에서 버튼을 누르면 debugger가 그 버튼에 의해 실행된 function에서 멈춘다는 점도 매우 흥미롭습니다.
+또한 graphic application에서 button을 누르면 debugger가 해당 button이 실행한 function에서 멈추기 때문에 매우 유용합니다.
 
 ## Golang
 
-Golang binary를 reverse해야 한다면 IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)을 사용하는 것을 권장합니다
+Golang binary를 reverse해야 한다면 IDA plugin인 [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)를 사용하는 것을 권장합니다.
 
-그냥 **ATL+f7** (IDA에서 python plugin import) 를 누르고 python plugin을 선택하세요.
+**ATL+f7** (IDA에서 python plugin import)를 누르고 python plugin을 선택하세요.
 
-이렇게 하면 function들의 이름이 resolve됩니다.
+이 plugin은 functions의 names를 resolve합니다.
 
 ## Compiled Python
 
-이 페이지에서 ELF/EXE python compiled binary에서 python code를 얻는 방법을 찾을 수 있습니다:
+이 페이지에서 ELF/EXE python compiled binary에서 python code를 가져오는 방법을 확인할 수 있습니다:
 
 
 {{#ref}}
@@ -379,18 +379,18 @@ Golang binary를 reverse해야 한다면 IDA plugin [https://github.com/sibears/
 
 ## GBA - Game Body Advance
 
-GBA 게임의 **binary**를 얻었다면, 이를 **emulate**하고 **debug**하는 여러 tools를 사용할 수 있습니다:
+GBA game의 **binary**를 얻었다면 이를 **emulate**하고 **debug**하기 위한 다양한 tools를 사용할 수 있습니다:
 
-- [**no$gba**](https://problemkaputt.de/gba.htm) (_Debug version 다운로드_) - interface가 있는 debugger 포함
-- [**mgba** ](https://mgba.io) - CLI debugger 포함
+- [**no$gba**](https://problemkaputt.de/gba.htm) (_Download the debug version_) - interface가 포함된 debugger
+- [**mgba** ](https://mgba.io)- CLI debugger가 포함됨
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra plugin
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra plugin
 
-[**no$gba**](https://problemkaputt.de/gba.htm)의 _**Options --> Emulation Setup --> Controls**_** **에서 Game Boy Advance **buttons**를 누르는 방법을 볼 수 있습니다
+[**no$gba**](https://problemkaputt.de/gba.htm)의 _**Options --> Emulation Setup --> Controls**_** **에서 Game Boy Advance **buttons**을 누르는 방법을 확인할 수 있습니다.
 
-![no$gba controls configuration showing Game Boy Advance button mappings](<../../images/image (581).png>)
+![Game Boy Advance button mappings를 보여 주는 no$gba controls configuration](<../../images/image (581).png>)
 
-누를 때, 각 **key는 값을 가지며** 이를 식별합니다:
+누르면 각 **key에는 이를 식별하기 위한 value가 있습니다**:
 ```
 A = 1
 B = 2
@@ -403,13 +403,13 @@ DOWN = 128
 R = 256
 L = 256
 ```
-따라서, 이런 종류의 프로그램에서 흥미로운 부분은 **프로그램이 사용자 입력을 어떻게 처리하는지**입니다. 주소 **0x4000130**에서 흔히 발견되는 함수인 **KEYINPUT**을 찾을 수 있습니다.
+따라서 이러한 종류의 프로그램에서 흥미로운 부분은 **프로그램이 user input을 어떻게 처리하는지**입니다. 주소 **0x4000130**에서 흔히 발견되는 함수인 **KEYINPUT**을 확인할 수 있습니다.
 
-![Ghidra view of a GBA binary referencing KEYINPUT at address 0x4000130](<../../images/image (447).png>)
+![0x4000130 주소에서 KEYINPUT을 참조하는 GBA binary의 Ghidra view](<../../images/image (447).png>)
 
-이전 이미지에서 함수가 **FUN_080015a8**에서 호출되는 것을 확인할 수 있습니다(주소: _0x080015fa_ 및 _0x080017ac_).
+이전 이미지에서 해당 함수가 **FUN_080015a8** (주소: _0x080015fa_ 및 _0x080017ac_)에서 호출되는 것을 확인할 수 있습니다.
 
-해당 함수에서, 몇 가지 초기화 작업 후(중요하지 않음):
+해당 함수에서는 몇 가지 초기화 작업(중요하지 않음) 후:
 ```c
 void FUN_080015a8(void)
 
@@ -430,7 +430,7 @@ FUN_08000dd0(&DAT_02009584,0x6000000,&DAT_030000dc);
 FUN_08000354(&DAT_030000dc,0x3c);
 uVar4 = DAT_030004d8;
 ```
-이 코드가 발견되었습니다:
+다음 코드를 찾았습니다:
 ```c
 do {
 DAT_030004da = uVar4; //This is the last key pressed
@@ -442,7 +442,7 @@ uVar2 = DAT_030004dc;
 uVar1 = *puVar6;
 if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-마지막 `if`는 **`uVar4`**가 **마지막 Keys**에 있는지, 그리고 현재 key가 아닌지를 확인하며, 이것은 버튼에서 손을 떼는 것(현재 key는 **`uVar1`**에 저장됨)이라고도 합니다.
+마지막 if는 **`uVar4`**가 **마지막 Keys**에 포함되어 있고 현재 키가 아닌지 확인합니다. 이는 버튼을 놓는 동작이라고도 합니다(현재 키는 **`uVar1`**에 저장됨).
 ```c
 if (uVar1 == 4) {
 DAT_030000d4 = 0;
@@ -470,15 +470,15 @@ FUN_08000864();
 if (uVar1 == 0x10) {
 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
-이전 코드에서 볼 수 있듯이, 우리는 **uVar1**(**눌린 버튼의 값**이 들어있는 위치)을 몇 가지 값과 비교하고 있습니다:
+이전 코드에서 **uVar1**(**눌린 버튼의 값**이 있는 위치)를 몇 가지 값과 비교하고 있음을 확인할 수 있습니다.
 
-- 먼저, **값 4**(**SELECT** 버튼)와 비교합니다: 이 챌린지에서 이 버튼은 화면을 지웁니다
-- 그다음, **값 8**(**START** 버튼)과 비교합니다: 이 챌린지에서 이 버튼은 flag를 얻기 위해 코드가 유효한지 확인합니다.
-- 이 경우, var **`DAT_030000d8`**는 0xf3와 비교되며, 값이 같으면 어떤 코드가 실행됩니다.
-- 다른 어떤 경우에는, 어떤 cont(**`DAT_030000d4`**)가 확인됩니다. 이는 code에 들어간 직후 1이 추가되기 때문에 cont입니다.\
-**I**f 8보다 작으면 **`DAT_030000d8`**에 값을 **더하는** 작업이 수행됩니다(기본적으로 cont가 8보다 작은 동안 이 변수에 눌린 키의 값들을 더합니다).
+- 먼저 **값 4**(**SELECT** 버튼)와 비교합니다. 이 challenge에서 이 버튼은 화면을 지웁니다.
+- 그런 다음 **값 8**(**START** 버튼)과 비교합니다. 이 challenge에서는 코드가 유효한지 확인하여 flag를 획득합니다.
+- 이 경우 변수 **`DAT_030000d8`**은 0xf3과 비교되며, 값이 같으면 일부 코드가 실행됩니다.
+- 그 외의 경우에는 어떤 카운터(**`DAT_030000d4`**)가 확인됩니다. 코드에 진입한 직후 1을 더하고 있으므로 카운터입니다.\
+**8**보다 작으면 **`DAT_030000d8`**에 값을 **더하는** 작업이 수행됩니다(기본적으로 카운터가 8보다 작은 동안 누른 키의 값들을 이 변수에 더합니다).
 
-따라서, 이 챌린지에서는 버튼 값들을 알고 있으므로, **길이가 8보다 작은 조합을 눌러서 결과 합이 0xf3가 되도록** 해야 했습니다.
+따라서 이 challenge에서는 버튼의 값을 알고 있으므로, **길이가 8보다 짧고 그 합이 0xf3이 되는 조합을 눌러야 했습니다.**<sup>[[6]](#references)</sup>
 
 **이 튜토리얼의 참고 자료:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
@@ -489,17 +489,18 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 https://www.youtube.com/watch?v=VVbRe7wr3G4
 {{#endref}}
 
-## Courses
+## 강좌
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
 - [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binary deobfuscation)
 
-## References
+## 참고 자료
 
-- [Simplifying MBA obfuscation with CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
-- [Trail of Bits CoBRA repository](https://github.com/trailofbits/CoBRA)
-- [Decoding Rust strings - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
-- [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
-- [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
+- [1] [Simplifying MBA obfuscation with CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
+- [2] [Trail of Bits CoBRA repository](https://github.com/trailofbits/CoBRA)
+- [3] [Decoding Rust strings - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
+- [4] [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
+- [5] [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
+- [6] [Nostalgia - GBA reversing tutorial (exp.codes)](https://exp.codes/Nostalgia/)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,36 +2,38 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Common CTF patterns
+## 일반적인 CTF 패턴
 
-- "Signature"은 실제로 `hash(secret || message)` → length extension.
-- Salt가 없는 password hashes → 쉬운 cracking / lookup.
-- hash와 MAC을 혼동함 (hash != authentication).
+- "Signature"가 실제로는 `hash(secret || message)` → length extension.
+- Salt가 없는 password hash → 간단한 cracking / lookup.
+- Hash와 MAC을 혼동함 (hash != authentication).
 
 ## Hash length extension attack
 
-### 기법
+### Technique
 
-서버가 다음과 같은 "signature"를 계산하고:
+서버가 다음과 같이 "signature"를 계산한다면 이를 자주 exploit할 수 있습니다.
 
 `sig = HASH(secret || message)`
 
-그리고 Merkle–Damgård hash를 사용한다면 (고전적인 예: MD5, SHA-1, SHA-256), 종종 이를 악용할 수 있습니다.
+그리고 Merkle–Damgård hash를 사용하는 경우입니다 (대표적인 예: MD5, SHA-1, SHA-256).
 
 다음을 알고 있다면:
 
 - `message`
 - `sig`
 - hash function
-- (또는 brute-force할 수 있다면) `len(secret)`
+- (또는 brute-force할 수 있는) `len(secret)`
 
-그렇다면 secret을 알지 않고도 다음에 대한 유효한 signature를 계산할 수 있습니다:
+secret을 알지 못해도 다음에 대한 유효한 signature를 계산할 수 있습니다:
 
 `message || padding || appended_data`
 
-### 중요한 제한: HMAC는 영향을 받지 않음
+<sup>[[1]](#references)</sup>
 
-Length extension 공격은 Merkle–Damgård hashes에 대해 `HASH(secret || message)`와 같은 구성에 적용됩니다. 이는 **HMAC**(예: HMAC-SHA256)에는 적용되지 않으며, HMAC은 이러한 종류의 문제를 회피하도록 특별히 설계되었습니다.
+### Important limitation: HMAC is not affected
+
+Length extension attacks는 Merkle–Damgård hash를 사용하는 `HASH(secret || message)`와 같은 construction에 적용됩니다. 이러한 공격은 이 문제를 방지하도록 특별히 설계된 **HMAC** (예: HMAC-SHA256)에는 적용되지 않습니다.<sup>[[1]](#references)</sup>
 
 ### Tools
 
@@ -44,7 +46,7 @@ https://github.com/iagox86/hash_extender
 https://github.com/bwall/HashPump
 {{#endref}}
 
-### 좋은 설명
+### Good explanation
 
 {{#ref}}
 https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks
@@ -52,26 +54,30 @@ https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-lengt
 
 ## Password hashing and cracking
 
-### 첫 질문
+### First questions
 
-- **salted**인가? (`salt$hash` 형식을 찾아보세요)
-- **fast hash** (MD5/SHA1/SHA256) 인가요, 아니면 **slow KDF** (bcrypt/scrypt/argon2/PBKDF2) 인가요?
-- **format hint** (hashcat mode / John format)이 있나요?
+- **Salted**인가? (`salt$hash` 형식을 확인)
+- **fast hash** (MD5/SHA1/SHA256)인가, 아니면 **slow KDF** (bcrypt/scrypt/argon2/PBKDF2)인가?
+- **format hint** (hashcat mode / John format)가 있는가?
 
-### 실전 워크플로우
+### Practical workflow
 
-1. 해시 식별:
+1. Hash 식별:
 - `hashid <hash>`
 - `hashcat --example-hashes | rg -n "<pattern>"`
-2. Salt가 없고 흔한 경우: 온라인 DB와 crypto workflow 섹션의 식별 도구를 시도하세요.
-3. 그렇지 않다면 crack:
+2. Salt가 없고 흔한 hash라면 crypto workflow section의 online DB와 identification tooling을 시도합니다.
+3. 그 외에는 crack합니다:
 - `hashcat -m <mode> -a 0 hashes.txt wordlist.txt`
 - `john --wordlist=wordlist.txt --format=<fmt> hashes.txt`
 
-### 악용할 수 있는 일반적인 실수
+### Common mistakes you can exploit
 
-- 동일한 password가 여러 사용자에 재사용됨 → crack one, pivot.
-- 잘린(truncated) hashes / custom transforms → normalize and retry.
-- 약한 KDF 파라미터(예: 낮은 PBKDF2 반복 수) → 여전히 crackable.
+- 여러 user가 동일한 password를 재사용함 → 하나를 crack하고 pivot.
+- Truncated hash / custom transform → normalize한 뒤 다시 시도.
+- Weak KDF parameters (예: 낮은 PBKDF2 iteration 수) → 여전히 crack 가능.
+
+## References
+
+- [1] [Everything you need to know about hash length extension attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
 {{#include ../../banners/hacktricks-training.md}}

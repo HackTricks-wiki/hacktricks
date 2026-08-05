@@ -1,13 +1,13 @@
-# Angr - Examples
+# Angr - 예제
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
-> 프로그램이 `scanf`를 사용하여 **stdin에서 여러 값을 한 번에 가져오는 경우** **`scanf`** 이후에 시작하는 상태를 생성해야 합니다.
+> [!TIP]
+> 프로그램이 `scanf`를 사용하여 **stdin에서 한 번에 여러 값을 가져오는 경우**, **`scanf`** 이후부터 시작하는 state를 생성해야 합니다.
 
-Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### 주소에 도달하기 위한 입력 (주소를 나타냄)
+### 주소에 도달하기 위한 입력 (주소 지정)
 ```python
 import angr
 import sys
@@ -139,7 +139,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 스택 값
+### Stack 값
 ```python
 # Put bit vectors in th stack to find out the vallue that stack position need to
 # have to reach a rogram flow
@@ -201,11 +201,11 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-이 시나리오에서 입력은 `scanf("%u %u")`로 받아졌고 값 `"1 1"`이 주어졌으므로 스택의 값 **`0x00000001`**은 **사용자 입력**에서 나옵니다. 이 값이 `$ebp - 8`에서 시작하는 것을 볼 수 있습니다. 따라서 코드에서 **`$esp`에서 8바이트를 뺀 것입니다 (그 순간 `$ebp`와 `$esp`는 같은 값을 가졌습니다)** 그리고 BVS를 푸시했습니다.
+이 시나리오에서는 `scanf("%u %u")`를 사용해 입력을 받고 `"1 1"` 값을 입력했으므로, stack의 **`0x00000001`** 값은 **user input**에서 비롯됩니다. 이 값이 `$ebp - 8`에서 시작하는 것을 확인할 수 있습니다. 따라서 해당 시점에 `$ebp`와 `$esp`가 같은 값을 가지고 있었으므로, 코드에서는 **`$esp`에서 8바이트를 뺀 후** BVS를 push했습니다.
 
-![](<../../../images/image (136).png>)
+![Put bit vectors in th stack to find out the vallue that stack position need to - have to reach a rogram flow: In this scenario, the input was taken with scanf("%u %u") and the value "1...](<../../../images/image (136).png>)
 
-### 정적 메모리 값 (전역 변수)
+### Static Memory values (Global variables)
 ```python
 import angr
 import claripy
@@ -380,34 +380,35 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-> [!NOTE]
-> 기호 파일은 기호 데이터와 병합된 상수 데이터를 포함할 수도 있습니다:
+> [!TIP]
+> symbolic file에는 symbolic data와 병합된 constant data가 포함될 수도 있습니다:
 >
 > ```python
->   # Hello world, my name is John.
->   # ^                       ^
->   # ^ 주소 0                ^ 주소 24 (문자 수를 세세요)
->   # 이를 메모리에 표현하기 위해, 문자열을
->   # 파일의 시작 부분에 쓰고 싶습니다:
->   #
->   # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
->   #
->   # 아마도, 우리는 John을
->   # 기호 변수로 바꾸고 싶을 것입니다. 우리는 호출할 것입니다:
->   #
->   # name_bitvector = claripy.BVS('symbolic_name', 4*8)
->   #
->   # 그런 다음, 프로그램이 fopen('hello.txt', 'r')를 호출하고
->   # fread(buffer, sizeof(char), 30, hello_txt_file)를 호출하면, 버퍼는
->   # 파일에서 문자열을 포함하게 되며, 이름이 저장될 네 개의 기호 바이트를 제외합니다.
->   # (!)
+>  # Hello world, my name is John.
+>  # ^                       ^
+>  # ^ address 0             ^ address 24 (count the number of characters)
+>  # In order to represent this in memory, we would want to write the string to
+>  # the beginning of the file:
+>  #
+>  # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
+>  #
+>  # Perhaps, then, we would want to replace John with a
+>  # symbolic variable. We would call:
+>  #
+>  # name_bitvector = claripy.BVS('symbolic_name', 4*8)
+>  #
+>  # Then, after the program calls fopen('hello.txt', 'r') and then
+>  # fread(buffer, sizeof(char), 30, hello_txt_file), the buffer would contain
+>  # the string from the file, except four symbolic bytes where the name would be
+>  # stored.
+>  # (!)
 > ```
 
 ### 제약 조건 적용
 
-> [!NOTE]
-> 때때로 16 길이의 두 단어를 **문자별로** 비교하는 간단한 인간 작업은 (루프) **angr**에 많은 비용이 듭니다. 왜냐하면 그것은 **지수적으로** 분기를 생성해야 하기 때문입니다. 각 if마다 1개의 분기를 생성하므로: `2^16`\
-> 따라서, **angr에게 이전 지점으로 가달라고 요청하는 것이** 더 쉽고 (실제 어려운 부분이 이미 완료된 곳) **그 제약 조건을 수동으로 설정하는 것이** 더 쉽습니다.
+> [!TIP]
+> 때로는 길이가 16인 두 단어를 **char by char**(loop)로 비교하는 것과 같은 간단한 작업도 **angr**에서는 많은 **cost**가 발생합니다. 각 if마다 1개의 branch를 생성하므로 **exponentially** 많은 branch를 생성해야 하기 때문입니다: `2^16`\
+> 따라서 **angr에게 이전 지점으로 이동하도록 요청하고**(실제로 어려운 부분이 이미 완료된 지점), 해당 **제약 조건을 수동으로 설정하는** 편이 더 쉽습니다.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -479,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> 일부 시나리오에서는 **veritesting**을 활성화하여 유사한 상태를 병합하여 쓸모없는 분기를 줄이고 해결책을 찾을 수 있습니다: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> 일부 시나리오에서는 **veritesting**을 활성화할 수 있습니다. 이는 유사한 상태를 병합하여 불필요한 분기를 줄이고 solution을 찾습니다: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
-> [!NOTE]
-> 이러한 시나리오에서 할 수 있는 또 다른 것은 **angr가 더 쉽게 이해할 수 있는 것을 제공하여 함수를 후킹하는 것**입니다.
+> [!TIP]
+> 이러한 시나리오에서 할 수 있는 또 다른 방법은 **angr가 더 쉽게 이해할 수 있는 무언가를 제공하도록 function을 hook하는 것**입니다.
 
-### 시뮬레이션 관리자
+### Simulation Managers
 
-일부 시뮬레이션 관리자는 다른 관리자보다 더 유용할 수 있습니다. 이전 예제에서는 많은 유용한 분기가 생성되는 문제가 있었습니다. 여기서 **veritesting** 기술은 이를 병합하고 해결책을 찾을 것입니다.\
-이 시뮬레이션 관리자는 다음과 같이 활성화할 수도 있습니다: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+일부 simulation manager는 다른 것보다 더 유용할 수 있습니다. 앞의 예제에서는 유용한 분기가 많이 생성된다는 문제가 있었습니다. 여기서는 **veritesting** technique이 이러한 분기를 병합하고 solution을 찾습니다.\
+이 simulation manager는 다음과 같이 활성화할 수도 있습니다: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -525,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 함수에 대한 호출 하나 훅킹/우회하기
+### 함수에 대한 한 번의 호출 Hooking/Bypassing
 ```python
 # This level performs the following computations:
 #
@@ -593,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 함수 훅킹 / Simprocedure
+### 함수 후킹 / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -677,7 +678,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 여러 매개변수로 scanf 시뮬레이션하기
+### 여러 매개변수를 사용하여 scanf 시뮬레이션
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.
@@ -806,4 +807,8 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
+## 참고 자료
+
+- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+
 {{#include ../../../banners/hacktricks-training.md}}

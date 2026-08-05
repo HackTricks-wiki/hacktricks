@@ -9,86 +9,86 @@ README.md
 
 ## JTAGenum
 
-[**JTAGenum**](https://github.com/cyphunk/JTAGenum)은 Arduino 호환 MCU 또는 (실험적으로) Raspberry Pi에 로드하여 알려지지 않은 JTAG 핀 배치를 무차별 대입하고 심지어 명령 레지스터를 열거할 수 있는 도구입니다.
+[**JTAGenum**](https://github.com/cyphunk/JTAGenum)은 Arduino-compatible MCU 또는 (실험적으로) Raspberry Pi에 로드하여 알려지지 않은 JTAG pinout을 brute-force하고 instruction register까지 열거할 수 있는 tool입니다.
 
-- Arduino: 디지털 핀 D2–D11을 최대 10개의 의심되는 JTAG 패드/테스트 포인트에 연결하고, Arduino GND를 타겟 GND에 연결합니다. 레일이 안전하다는 것을 모르는 한 타겟에 전원을 별도로 공급하십시오. 3.3 V 로직을 선호하거나 (예: Arduino Due) 1.8–3.3 V 타겟을 프로빙할 때 레벨 시프터/직렬 저항기를 사용하십시오.
-- Raspberry Pi: Pi 빌드는 사용 가능한 GPIO가 적어 (스캔 속도가 느림) 현재 핀 맵과 제약 사항은 레포를 확인하십시오.
+- Arduino: digital pins D2–D11을 최대 10개의 의심되는 JTAG pad/testpoint에 연결하고, Arduino GND를 target GND에 연결합니다. 전원 rail이 안전하다는 것을 알고 있지 않다면 target에는 별도로 전원을 공급합니다. 3.3 V logic(예: Arduino Due)을 선호하거나, 1.8–3.3 V target을 probing할 때는 level shifter/series resistor를 사용합니다.
+- Raspberry Pi: Pi build는 사용할 수 있는 GPIO가 더 적으므로 scan이 느립니다. 현재 pin map과 제약 사항은 repo에서 확인합니다.
 
-플래시가 완료되면 115200 보드에서 시리얼 모니터를 열고 `h`를 보내 도움을 요청합니다. 일반적인 흐름:
+flashing이 완료되면 serial monitor를 115200 baud로 열고 `h`를 입력하여 help를 확인합니다. 일반적인 flow는 다음과 같습니다.
 
-- `l` 루프백을 찾아 잘못된 긍정 결과를 피합니다.
-- `r` 필요 시 내부 풀업을 전환합니다.
-- `s` TCK/TMS/TDI/TDO (때때로 TRST/SRST)를 스캔합니다.
-- `y` 문서화되지 않은 연산 코드를 발견하기 위해 IR을 무차별 대입합니다.
-- `x` 핀 상태의 경계 스캔 스냅샷을 생성합니다.
+- `l` false positive를 피하기 위해 loopback 탐색
+- `r` 필요한 경우 internal pull-up 전환
+- `s` TCK/TMS/TDI/TDO(때로는 TRST/SRST도 포함) scan
+- `y` undocumented opcode를 발견하기 위해 IR brute-force
+- `x` pin state의 boundary-scan snapshot
 
-![](<../../images/image (939).png>)
+![JTAG - JTAGenum: x pin state의 boundary-scan snapshot](<../../images/image (939).png>)
 
-![](<../../images/image (578).png>)
+![JTAG - JTAGenum: x pin state의 boundary-scan snapshot](<../../images/image (578).png>)
 
-![](<../../images/image (774).png>)
+![JTAG - JTAGenum: x pin state의 boundary-scan snapshot](<../../images/image (774).png>)
 
 
 
-유효한 TAP이 발견되면 `FOUND!`로 시작하는 줄이 표시되어 발견된 핀을 나타냅니다.
+유효한 TAP가 발견되면 discovered pin을 나타내는 `FOUND!`로 시작하는 line이 표시됩니다.
 
-팁
-- 항상 접지를 공유하고, 알려지지 않은 핀을 타겟 Vtref 이상으로 구동하지 마십시오. 의심스러운 경우 후보 핀에 100–470 Ω 직렬 저항기를 추가하십시오.
-- 장치가 4선 JTAG 대신 SWD/SWJ를 사용하는 경우 JTAGenum이 이를 감지하지 못할 수 있습니다. SWD 도구나 SWJ-DP를 지원하는 어댑터를 사용해 보십시오.
+Tips
+- 항상 ground를 공유하고, target Vtref보다 높은 전압을 unknown pin에 절대 drive하지 않습니다. 확실하지 않다면 candidate pin에 100–470 Ω series resistor를 추가합니다.
+- device가 4-wire JTAG 대신 SWD/SWJ를 사용하는 경우 JTAGenum이 이를 detect하지 못할 수 있습니다. SWD tools 또는 SWJ-DP를 지원하는 adapter를 사용해 봅니다.
 
 ## Safer pin hunting and hardware setup
 
-- 멀티미터로 먼저 Vtref와 GND를 식별합니다. 많은 어댑터는 I/O 전압을 설정하기 위해 Vtref가 필요합니다.
-- 레벨 시프팅: 푸시-풀 신호를 위해 설계된 양방향 레벨 시프터를 선호합니다 (JTAG 라인은 오픈 드레인이 아닙니다). JTAG에 대해 자동 방향 I2C 시프터는 피하십시오.
-- 유용한 어댑터: FT2232H/FT232H 보드 (예: Tigard), CMSIS-DAP, J-Link, ST-LINK (벤더 특정), ESP-USB-JTAG (ESP32-Sx에서). 최소한 TCK, TMS, TDI, TDO, GND 및 Vtref를 연결하십시오; 선택적으로 TRST 및 SRST를 추가하십시오.
+- 먼저 multimeter로 Vtref와 GND를 식별합니다. 많은 adapter는 I/O voltage를 설정하기 위해 Vtref가 필요합니다.
+- Level shifting: push-pull signal용으로 설계된 bidirectional level shifter를 선호합니다(JTAG line은 open-drain이 아님). JTAG에는 auto-direction I2C shifter를 사용하지 않습니다.
+- 유용한 adapter: FT2232H/FT232H board(예: Tigard), CMSIS-DAP, J-Link, ST-LINK(vendor-specific), ESP-USB-JTAG(ESP32-Sx). 최소한 TCK, TMS, TDI, TDO, GND 및 Vtref를 연결하고, 필요에 따라 TRST와 SRST도 연결합니다.
 
 ## First contact with OpenOCD (scan and IDCODE)
 
-OpenOCD는 JTAG/SWD를 위한 사실상의 OSS입니다. 지원되는 어댑터를 사용하면 체인을 스캔하고 IDCODE를 읽을 수 있습니다:
+OpenOCD는 JTAG/SWD를 위한 de-facto OSS입니다. 지원되는 adapter를 사용하면 chain을 scan하고 IDCODE를 읽을 수 있습니다.
 
-- J-Link를 사용한 일반적인 예:
+- J-Link를 사용하는 generic example:
 ```
 openocd -f interface/jlink.cfg -c "transport select jtag; adapter speed 1000" \
 -c "init; scan_chain; shutdown"
 ```
-- ESP32‑S3 내장 USB‑JTAG (외부 프로브 필요 없음):
+- ESP32‑S3 내장 USB‑JTAG (외부 probe 불필요):
 ```
 openocd -f board/esp32s3-builtin.cfg -c "init; scan_chain; shutdown"
 ```
 Notes
-- "모든 1/0" IDCODE를 받으면, 배선, 전원, Vtref를 확인하고 포트가 퓨즈/옵션 바이트에 의해 잠겨 있지 않은지 확인하세요.
-- 알 수 없는 체인을 올릴 때 수동 TAP 상호작용을 위해 OpenOCD 저수준 `irscan`/`drscan`을 참조하세요.
+- "all ones/zeros" IDCODE가 표시되면 배선, 전원, Vtref, 그리고 해당 포트가 fuse/option bytes에 의해 잠겨 있지 않은지 확인하세요.
+- 알 수 없는 chain을 bring up할 때 수동 TAP 상호작용을 수행하려면 OpenOCD low-level `irscan`/`drscan`을 참고하세요.<sup>[[1]](#references)</sup>
 
-## CPU 정지 및 메모리/플래시 덤프
+## CPU 중지 및 memory/flash dumping
 
-TAP이 인식되고 대상 스크립트가 선택되면, 코어를 정지시키고 메모리 영역 또는 내부 플래시를 덤프할 수 있습니다. 예시 (대상, 기본 주소 및 크기를 조정하세요):
+TAP이 인식되고 target script가 선택되면 core를 halt하고 memory 영역 또는 internal flash를 dump할 수 있습니다. 예시( target, base addresses 및 sizes를 조정하세요):
 
-- 초기화 후 일반 대상:
+- 초기화 후 Generic target:
 ```
 openocd -f interface/jlink.cfg -f target/stm32f1x.cfg \
 -c "init; reset halt; mdw 0x08000000 4; dump_image flash.bin 0x08000000 0x00100000; shutdown"
 ```
-- RISC‑V SoC (가능할 때 SBA를 선호):
+- RISC‑V SoC (가능한 경우 SBA 선호):
 ```
 openocd -f interface/ftdi/ft232h.cfg -f target/riscv.cfg \
 -c "init; riscv set_prefer_sba on; halt; dump_image sram.bin 0x80000000 0x20000; shutdown"
 ```
-- ESP32‑S3, OpenOCD 헬퍼를 통해 프로그래밍하거나 읽기:
+- ESP32-S3, OpenOCD helper를 통해 프로그래밍하거나 읽기:
 ```
 openocd -f board/esp32s3-builtin.cfg \
 -c "program_esp app.bin 0x10000 verify exit"
 ```
-Tips
-- `mdw/mdh/mdb`를 사용하여 긴 덤프 전에 메모리를 점검하세요.
-- 다중 장치 체인의 경우, 비대상 장치에서 BYPASS를 설정하거나 모든 TAP을 정의하는 보드 파일을 사용하세요.
+팁
+- 긴 dump 전에 `mdw/mdh/mdb`를 사용하여 메모리가 정상인지 확인합니다.
+- multi-device chain의 경우 대상이 아닌 장치에는 BYPASS를 설정하거나 모든 TAP을 정의하는 board file을 사용합니다.
 
-## 경계 스캔 트릭 (EXTEST/SAMPLE)
+## Boundary-scan tricks (EXTEST/SAMPLE)
 
-CPU 디버그 접근이 잠겨 있어도 경계 스캔이 여전히 노출될 수 있습니다. UrJTAG/OpenOCD를 사용하여:
-- 시스템이 실행되는 동안 핀 상태를 스냅샷하기 위해 SAMPLE을 사용하세요 (버스 활동 찾기, 핀 매핑 확인).
-- 핀을 구동하기 위해 EXTEST를 사용하세요 (예: 보드 배선이 허용하는 경우 MCU를 통해 외부 SPI 플래시 라인을 비트 뱅킹하여 오프라인에서 읽기).
+CPU debug access가 잠겨 있어도 boundary-scan이 여전히 노출되어 있을 수 있습니다. UrJTAG/OpenOCD를 사용하면 다음 작업을 수행할 수 있습니다.
+- 시스템이 실행 중일 때 SAMPLE로 pin state를 snapshot하여 bus activity를 찾고 pin mapping을 확인합니다.
+- EXTEST로 pin을 drive합니다. 예를 들어 board wiring이 허용하는 경우 MCU를 통해 external SPI flash line을 bit-bang하여 오프라인으로 읽을 수 있습니다.
 
-FT2232x 어댑터를 사용한 최소 UrJTAG 흐름:
+FT2232x adapter를 사용한 최소 UrJTAG flow:
 ```
 jtag> cable ft2232 vid=0x0403 pid=0x6010 interface=1
 jtag> frequency 100000
@@ -98,24 +98,24 @@ jtag> instruction EXTEST
 jtag> shift ir
 jtag> dr  <bit pattern for boundary register>
 ```
-장치 BSDL이 필요하여 경계 레지스터 비트 순서를 알아야 합니다. 일부 공급업체는 생산 중에 경계 스캔 셀을 잠글 수 있습니다.
+장치의 BSDL이 있어야 boundary register 비트 순서를 확인할 수 있습니다. 일부 vendor는 production 단계에서 boundary-scan cell을 잠근다는 점에 유의하세요.
 
-## 현대 대상 및 주의 사항
+## 최신 target 및 참고 사항
 
-- ESP32‑S3/C3는 네이티브 USB‑JTAG 브리지를 포함합니다. OpenOCD는 외부 프로브 없이 USB를 통해 직접 통신할 수 있습니다. 긴급 상황 및 덤프에 매우 편리합니다.
-- RISC‑V 디버그(v0.13+)는 OpenOCD에서 널리 지원됩니다. 코어를 안전하게 중지할 수 없는 경우 메모리 접근을 위해 SBA를 선호합니다.
-- 많은 MCU가 디버그 인증 및 생애 주기 상태를 구현합니다. JTAG가 죽은 것처럼 보이지만 전원이 올바른 경우, 장치가 닫힌 상태로 퓨즈가 걸렸거나 인증된 프로브가 필요할 수 있습니다.
+- ESP32-S3/C3에는 native USB-JTAG bridge가 포함되어 있습니다. 따라서 external probe 없이 OpenOCD가 USB를 통해 직접 통신할 수 있습니다. triage 및 dump 작업에 매우 편리합니다.<sup>[[2]](#references)</sup>
+- RISC-V debug (v0.13+)는 OpenOCD에서 폭넓게 지원됩니다. core를 안전하게 halt할 수 없는 경우 memory access에는 SBA를 우선 사용하세요.
+- 많은 MCU는 debug authentication 및 lifecycle state를 구현합니다. 전원이 정상인데 JTAG가 작동하지 않는다면, device가 closed state로 fuse되었거나 authenticated probe를 요구하는 것일 수 있습니다.
 
-## 방어 및 강화(실제 장치에서 기대할 수 있는 것)
+## 방어 및 hardening (실제 device에서 예상되는 사항)
 
-- 생산 중 JTAG/SWD를 영구적으로 비활성화하거나 잠급니다(예: STM32 RDP 레벨 2, PAD JTAG를 비활성화하는 ESP eFuses, NXP/Nordic APPROTECT/DPAP).
-- 제조 접근을 유지하면서 인증된 디버그(ARMv8.2‑A ADIv6 디버그 인증, OEM 관리 챌린지-응답)를 요구합니다.
-- 쉬운 테스트 패드를 라우팅하지 마십시오; 테스트 비아를 묻고, TAP을 격리하기 위해 저항을 제거/배치하며, 키가 있는 커넥터 또는 포고 핀 고정을 사용합니다.
-- 전원 켜기 디버그 잠금: 초기 ROM 뒤에 TAP을 게이트하여 보안 부팅을 강제합니다.
+- production 환경에서 JTAG/SWD를 영구적으로 disable하거나 lock합니다(예: STM32 RDP level 2, PAD JTAG를 disable하는 ESP eFuse, NXP/Nordic APPROTECT/DPAP).
+- manufacturing access는 유지하면서 authenticated debug를 요구합니다(ARMv8.2-A ADIv6 Debug Authentication, OEM-managed challenge-response).
+- 쉽게 접근할 수 있는 test pad를 배치하지 않습니다. test via를 묻고, TAP을 isolate하기 위해 resistor를 제거하거나 실장하며, keying이 적용된 connector 또는 pogo-pin fixture를 사용합니다.
+- Power-on debug lock: secure boot를 강제하는 초기 ROM으로 TAP을 gate합니다.
 
-## 참조
+## References
 
-- OpenOCD 사용자 가이드 – JTAG 명령 및 구성. https://openocd.org/doc-release/html/JTAG-Commands.html
-- Espressif ESP32‑S3 JTAG 디버깅(USB‑JTAG, OpenOCD 사용). https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/
+- [1] [OpenOCD User’s Guide - JTAG Commands 및 configuration](https://openocd.org/doc-release/html/JTAG-Commands.html)
+- [2] [Espressif ESP32-S3 JTAG debugging (USB-JTAG, OpenOCD 사용법)](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/)
 
 {{#include ../../banners/hacktricks-training.md}}

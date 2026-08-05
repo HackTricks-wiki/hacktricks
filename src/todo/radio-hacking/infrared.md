@@ -2,140 +2,141 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 적외선 작동 원리 <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
+## 적외선 작동 방식 <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**적외선은 인간에게 보이지 않습니다**. IR 파장은 **0.7에서 1000 마이크론**입니다. 가정용 리모컨은 데이터 전송을 위해 IR 신호를 사용하며, 0.75..1.4 마이크론의 파장 범위에서 작동합니다. 리모컨의 마이크로컨트롤러는 특정 주파수로 적외선 LED를 깜박이게 하여 디지털 신호를 IR 신호로 변환합니다.
+**적외선은 사람의 눈에 보이지 않습니다**. IR 파장은 **0.7~1000마이크론**입니다. 가정용 리모컨은 데이터 전송에 IR 신호를 사용하며, 0.75..1.4마이크론 파장 범위에서 작동합니다. 리모컨의 microcontroller는 적외선 LED를 특정 주파수로 깜박이게 하여 digital signal을 IR signal로 변환합니다.<sup>[[1]](#references)</sup>
 
-IR 신호를 수신하기 위해 **포토리시버**가 사용됩니다. 이는 **IR 빛을 전압 펄스로 변환**하며, 이는 이미 **디지털 신호**입니다. 일반적으로 수신기 내부에는 **어두운 빛 필터**가 있어 **원하는 파장만 통과**시키고 잡음을 차단합니다.
+IR signal을 수신하기 위해 **photoreceiver**가 사용됩니다. photoreceiver는 **IR light를 voltage pulse로 변환**하며, 이 신호는 이미 **digital signal**입니다. 일반적으로 receiver 내부에는 **dark light filter**가 있어 **원하는 파장만 통과**시키고 noise를 제거합니다.
 
-### 다양한 IR 프로토콜 <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
+### IR Protocol의 종류 <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
-IR 프로토콜은 3가지 요소에서 다릅니다:
+IR protocol은 다음 3가지 요소에 따라 달라집니다.
 
-- 비트 인코딩
-- 데이터 구조
-- 반송 주파수 — 일반적으로 36..38 kHz 범위
+- bit encoding
+- data structure
+- carrier frequency — 일반적으로 36..38 kHz 범위
 
-#### 비트 인코딩 방식 <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
+#### Bit encoding 방식 <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
 
-**1. 펄스 간격 인코딩**
+**1. Pulse Distance Encoding**
 
-비트는 펄스 간의 간격 지속 시간을 변조하여 인코딩됩니다. 펄스 자체의 너비는 일정합니다.
+bit는 pulse 사이의 space 지속 시간을 modulation하여 encoding됩니다. pulse 자체의 폭은 일정합니다.
 
 <figure><img src="../../images/image (295).png" alt=""><figcaption></figcaption></figure>
 
-**2. 펄스 폭 인코딩**
+**2. Pulse Width Encoding**
 
-비트는 펄스 폭의 변조로 인코딩됩니다. 펄스 폭 후의 간격 너비는 일정합니다.
+bit는 pulse width를 modulation하여 encoding됩니다. pulse burst 이후 space의 폭은 일정합니다.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
-**3. 위상 인코딩**
+**3. Phase Encoding**
 
-맨체스터 인코딩으로도 알려져 있습니다. 논리 값은 펄스 폭과 간격 사이의 전환의 극성에 의해 정의됩니다. "간격에서 펄스 폭으로"는 논리 "0"을 나타내고, "펄스 폭에서 간격으로"는 논리 "1"을 나타냅니다.
+Manchester encoding이라고도 합니다. logical value는 pulse burst와 space 사이 transition의 polarity로 결정됩니다. "Space to pulse burst"는 logic "0"을, "pulse burst to space"는 logic "1"을 나타냅니다.
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
-**4. 이전 방식과 기타 이국적인 조합**
+**4. 이전 방식의 조합 및 기타 특수 방식**
 
 > [!TIP]
-> 여러 종류의 장치에 대해 **보편적이 되려고 하는** IR 프로토콜이 있습니다. 가장 유명한 것은 RC5와 NEC입니다. 불행히도, 가장 유명하다고 해서 가장 일반적이라는 의미는 아닙니다. 제 환경에서는 NEC 리모컨 두 개만 보았고 RC5는 없었습니다.
+> 여러 유형의 device에서 universal해지려는 **IR protocol**이 있습니다. 가장 유명한 것은 RC5와 NEC입니다. 하지만 안타깝게도 가장 유명하다는 것이 **가장 널리 사용된다는 의미는 아닙니다**. 제가 접한 환경에서는 NEC remote는 두 개뿐이었고 RC5 remote는 하나도 없었습니다.
 >
-> 제조업체는 동일한 장치 범위 내에서도 고유한 IR 프로토콜을 사용하는 것을 좋아합니다 (예: TV 박스). 따라서 서로 다른 회사의 리모컨이나 때로는 동일한 회사의 서로 다른 모델의 리모컨은 동일한 유형의 다른 장치와 작동할 수 없습니다.
+> Manufacturer는 같은 device 범위 내에서도(예: TV-box) 자신만의 고유한 IR protocol을 사용하기를 좋아합니다. 따라서 서로 다른 회사의 remote와 때로는 같은 회사의 서로 다른 model remote는 같은 유형의 다른 device와 작동하지 않습니다.
 
-### IR 신호 탐색
+### IR signal 탐색
 
-리모컨의 IR 신호가 어떻게 생겼는지 확인하는 가장 신뢰할 수 있는 방법은 오실로스코프를 사용하는 것입니다. 이는 수신된 신호를 복조하거나 반전하지 않고 "있는 그대로" 표시합니다. 이는 테스트 및 디버깅에 유용합니다. NEC IR 프로토콜의 예를 통해 예상 신호를 보여드리겠습니다.
+Remote의 IR signal이 어떻게 보이는지 확인하는 가장 신뢰할 수 있는 방법은 oscilloscope를 사용하는 것입니다. oscilloscope는 수신된 signal을 demodulate하거나 invert하지 않고, 단지 수신된 그대로 표시합니다. 이는 testing과 debugging에 유용합니다. 여기서는 NEC IR protocol을 예로 들어 예상 signal을 보여드리겠습니다.
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
-일반적으로 인코딩된 패킷의 시작 부분에는 프리앰블이 있습니다. 이는 수신기가 이득 수준과 배경을 결정할 수 있게 해줍니다. 프리앰블이 없는 프로토콜도 있으며, 예를 들어 Sharp가 있습니다.
+일반적으로 encoding된 packet의 시작 부분에는 preamble이 있습니다. 이를 통해 receiver는 gain level과 background를 결정할 수 있습니다. Sharp와 같이 preamble이 없는 protocol도 있습니다.
 
-그런 다음 데이터가 전송됩니다. 구조, 프리앰블 및 비트 인코딩 방법은 특정 프로토콜에 의해 결정됩니다.
+그런 다음 data가 전송됩니다. structure, preamble 및 bit encoding 방식은 특정 protocol에 의해 결정됩니다.
 
-**NEC IR 프로토콜**은 짧은 명령과 반복 코드를 포함하며, 버튼이 눌리는 동안 전송됩니다. 명령과 반복 코드 모두 시작 부분에 동일한 프리앰블을 가지고 있습니다.
+**NEC IR protocol**에는 짧은 command와 button을 누르고 있는 동안 전송되는 repeat code가 포함됩니다. command와 repeat code 모두 시작 부분에 동일한 preamble이 있습니다.
 
-NEC **명령**은 프리앰블 외에도 장치가 수행해야 할 작업을 이해할 수 있도록 주소 바이트와 명령 번호 바이트로 구성됩니다. 주소 및 명령 번호 바이트는 전송의 무결성을 확인하기 위해 역값으로 중복됩니다. 명령의 끝에는 추가적인 정지 비트가 있습니다.
+NEC **command**는 preamble 외에도 device가 수행할 작업을 이해하는 데 사용하는 address byte와 command-number byte로 구성됩니다. transmission의 integrity를 확인하기 위해 address byte와 command-number byte는 inverse value로 복제됩니다. command 끝에는 추가 stop bit가 있습니다.
 
-**반복 코드**는 프리앰블 뒤에 "1"이 있으며, 이는 정지 비트입니다.
+**repeat code**에는 preamble 뒤에 stop bit인 "1"이 있습니다.
 
-**논리 "0"과 "1"**에 대해 NEC는 펄스 간격 인코딩을 사용합니다: 먼저 펄스 폭이 전송된 후 그 뒤에 간격이 있으며, 그 길이가 비트의 값을 설정합니다.
+**logic "0"과 "1"**에 대해 NEC는 Pulse Distance Encoding을 사용합니다. 먼저 pulse burst가 전송되고 그 뒤에 pause가 이어지며, pause의 길이가 bit 값을 결정합니다.
 
-### 에어컨
+### Air Conditioner
 
-다른 리모컨과 달리 **에어컨은 눌린 버튼의 코드만 전송하지 않습니다**. 버튼이 눌리면 **모든 정보를 전송**하여 **에어컨과 리모컨이 동기화되도록** 합니다.\
-이렇게 하면 20ºC로 설정된 기계가 한 리모컨으로 21ºC로 증가하고, 이후 20ºC로 설정된 다른 리모컨을 사용하여 온도를 더 높이면 21ºC로 "증가"하게 됩니다 (21ºC에 있다고 생각하고 22ºC로 증가하지 않음).
+다른 remote와 달리 **air conditioner는 누른 button의 code만 전송하지 않습니다**. 또한 button을 누를 때 **모든 정보도 전송**하여 **air conditioner와 remote가 synchronise된 상태를 유지하도록** 합니다.\
+이렇게 하면 한 remote로 20ºC로 설정된 기기를 21ºC로 높인 뒤, 여전히 온도가 20ºC로 설정된 다른 remote를 사용해 온도를 더 높일 때 21ºC로 "높이는" 문제가 발생하지 않습니다(기기가 이미 21ºC라고 생각하여 22ºC로 높이지 않음).
 
 ---
 
-## 공격 및 공격적 연구 <a href="#attacks" id="attacks"></a>
+## Attacks & Offensive Research <a href="#attacks" id="attacks"></a>
 
-Flipper Zero로 적외선을 공격할 수 있습니다:
+Flipper Zero를 사용하여 Infrared를 attack할 수 있습니다:
+
 
 {{#ref}}
 flipper-zero/fz-infrared.md
 {{#endref}}
 
-### 스마트-TV / 셋톱 박스 탈취 (EvilScreen)
+### Smart-TV / Set-top Box Takeover (EvilScreen)
 
-최근의 학술 연구(EvilScreen, 2022)는 **적외선과 블루투스 또는 Wi-Fi를 결합한 다채널 리모컨이 현대 스마트-TV를 완전히 탈취하는 데 악용될 수 있음을 보여주었습니다**. 이 공격은 높은 권한의 IR 서비스 코드를 인증된 블루투스 패킷과 연결하여 채널 격리를 우회하고 임의의 앱 실행, 마이크 활성화 또는 물리적 접근 없이 공장 초기화를 허용합니다. 삼성 모델을 포함한 8개의 주요 TV가 취약한 것으로 확인되었습니다. 완화 조치는 공급업체의 펌웨어 수정 또는 사용하지 않는 IR 수신기를 완전히 비활성화하는 것을 요구합니다.
+최근 academic research(EvilScreen, 2022)에서는 Infrared와 Bluetooth 또는 Wi-Fi를 결합한 **multi-channel remote를 악용하여 최신 smart-TV를 완전히 hijack할 수 있음**을 입증했습니다. 이 attack은 높은 privilege의 IR service code를 authenticated Bluetooth packet과 함께 사용하여 channel-isolation을 bypass하고, physical access 없이 임의의 app 실행, microphone 활성화 또는 factory-reset을 허용합니다. Samsung model(ISO/IEC 27001 compliance를 주장한 model)을 포함해 서로 다른 vendor의 mainstream TV 8종에서 취약점이 확인되었습니다. Mitigation을 위해서는 vendor firmware fix를 적용하거나 사용하지 않는 IR receiver를 완전히 disable해야 합니다.<sup>[[2]](#references)</sup>
 
-### IR LED를 통한 공기 간섭 데이터 유출 (aIR-Jumper 패밀리)
+### IR LED를 통한 Air-Gapped Data Exfiltration (aIR-Jumper family)
 
-보안 카메라, 라우터 또는 악성 USB 스틱은 종종 **야간 시야 IR LED**를 포함합니다. 연구에 따르면 맬웨어는 이러한 LED를 변조하여 (<10–20 kbit/s로 간단한 OOK) **벽과 창을 통해 비밀을 외부 카메라로 유출**할 수 있습니다. 빛이 가시 스펙트럼 밖에 있기 때문에 운영자는 거의 알아차리지 못합니다. 대응 조치:
+Security camera, router 또는 malicious USB stick에도 **night-vision IR LED**가 포함된 경우가 많습니다. Research에 따르면 malware는 이 LED를 modulation하여(간단한 OOK 사용 시 <10–20 kbit/s) **수십 미터 떨어진 외부 camera로 벽과 창문을 통해 secret을 exfiltrate**할 수 있습니다. 이 light는 visible spectrum 밖에 있으므로 operator가 알아차리는 경우가 거의 없습니다. Counter-measure는 다음과 같습니다.
 
-* 민감한 지역에서 IR LED를 물리적으로 차폐하거나 제거
-* 카메라 LED 듀티 사이클 및 펌웨어 무결성 모니터링
-* 창문 및 감시 카메라에 IR 컷 필터 배치
+* 민감한 영역의 IR LED를 물리적으로 차폐하거나 제거
+* camera LED duty-cycle 및 firmware integrity 모니터링
+* 창문과 surveillance camera에 IR-cut filter 배치
 
-공격자는 강력한 IR 프로젝터를 사용하여 **명령을 침투**시켜 불안전한 카메라로 데이터를 플래시할 수 있습니다.
+Attacker는 강력한 IR projector를 사용하여 data를 불안정한 camera로 다시 flashing함으로써 network에 command를 **infiltrate**할 수도 있습니다.
 
-### Flipper Zero 1.0을 통한 장거리 무차별 대입 및 확장 프로토콜
+### Flipper Zero 1.0을 사용한 Long-Range Brute-Force 및 Extended Protocol
 
-펌웨어 1.0(2024년 9월)은 **수십 개의 추가 IR 프로토콜 및 선택적 외부 증폭기 모듈**을 추가했습니다. 범용 리모컨 무차별 대입 모드와 결합하여 Flipper는 최대 30m 거리에서 고출력 다이오드를 사용하여 대부분의 공공 TV/에어컨을 비활성화하거나 재구성할 수 있습니다.
+Firmware 1.0(2024년 9월)은 **수십 가지의 추가 IR protocol과 선택적 external amplifier module**을 추가했습니다. universal-remote brute-force mode와 결합하면 Flipper는 high-power diode를 사용하여 최대 30m 거리에서 대부분의 public TV/AC를 disable하거나 reconfigure할 수 있습니다.
 
 ---
 
-## 도구 및 실용적인 예 <a href="#tooling" id="tooling"></a>
+## Tooling & Practical Examples <a href="#tooling" id="tooling"></a>
 
-### 하드웨어
+### Hardware
 
-* **Flipper Zero** – 학습, 재생 및 사전 공격 모드를 갖춘 휴대용 송수신기(위 참조).
-* **Arduino / ESP32** + IR LED / TSOP38xx 수신기 – 저렴한 DIY 분석기/송신기. `Arduino-IRremote` 라이브러리와 결합 (v4.x는 >40 프로토콜 지원).
-* **로직 분석기** (Saleae/FX2) – 프로토콜이 알려지지 않았을 때 원시 타이밍 캡처.
-* **IR 블래스터가 있는 스마트폰** (예: Xiaomi) – 빠른 현장 테스트지만 제한된 범위.
+* **Flipper Zero** – learning, replay 및 dictionary-bruteforce mode를 지원하는 portable transceiver(위 내용 참조).
+* **Arduino / ESP32** + IR LED / TSOP38xx receiver – 저렴한 DIY analyser/transmitter. `Arduino-IRremote` library와 함께 사용할 수 있습니다(v4.x는 40개 이상의 protocol 지원).
+* **Logic analyser**(Saleae/FX2) – protocol을 알 수 없을 때 raw timing을 capture.
+* **IR-blaster가 장착된 smartphone**(예: Xiaomi) – 간단한 현장 test에 유용하지만 range가 제한적입니다.
 
-### 소프트웨어
+### Software
 
-* **`Arduino-IRremote`** – 적극적으로 유지 관리되는 C++ 라이브러리:
+* **`Arduino-IRremote`** – 지속적으로 유지 관리되는 C++ library:
 ```cpp
 #include <IRremote.hpp>
 IRsend sender;
 void setup(){ sender.begin(); }
 void loop(){
-sender.sendNEC(0x20DF10EF, 32); // 삼성 TV 전원
+sender.sendNEC(0x20DF10EF, 32); // Samsung TV Power
 delay(5000);
 }
 ```
-* **IRscrutinizer / AnalysIR** – 원시 캡처를 가져오고 프로토콜을 자동으로 식별 + Pronto/Arduino 코드를 생성하는 GUI 디코더.
-* **LIRC / ir-keytable (Linux)** – 명령줄에서 IR 수신 및 주입:
+* **IRscrutinizer / AnalysIR** – raw capture를 import하고 protocol을 자동 식별하며 Pronto/Arduino code를 생성하는 GUI decoder.
+* **LIRC / ir-keytable (Linux)** – command line에서 IR을 receive하고 inject:
 ```bash
-sudo ir-keytable -p nec,rc5 -t   # 실시간 덤프 디코드된 스캔 코드
+sudo ir-keytable -p nec,rc5 -t   # live-dump decoded scancodes
 irsend SEND_ONCE samsung KEY_POWER
 ```
 
 ---
 
-## 방어 조치 <a href="#defense" id="defense"></a>
+## Defensive Measures <a href="#defense" id="defense"></a>
 
-* 필요하지 않을 때 공공 장소에 배치된 장치의 IR 수신기를 비활성화하거나 덮습니다.
-* 스마트-TV와 리모컨 간의 *페어링* 또는 암호화 검사를 시행하고, 특권 "서비스" 코드를 격리합니다.
-* 기밀 지역 주변에 IR 컷 필터 또는 연속파 감지기를 배치하여 광학 은밀 채널을 차단합니다.
-* 제어 가능한 IR LED를 노출하는 카메라/IoT 기기의 펌웨어 무결성을 모니터링합니다.
+* 필요하지 않은 경우 public space에 배치된 device의 IR receiver를 disable하거나 가립니다.
+* smart-TV와 remote 사이에 *pairing* 또는 cryptographic check를 적용하고, privilege가 높은 "service" code를 isolate합니다.
+* classified area 주변에 IR-cut filter 또는 continuous-wave detector를 배치하여 optical covert channel을 차단합니다.
+* 제어 가능한 IR LED를 노출하는 camera/IoT appliance의 firmware integrity를 모니터링합니다.
 
-## 참고 문헌
+## References
 
-- [Flipper Zero 적외선 블로그 게시물](https://blog.flipperzero.one/infrared/)
-- EvilScreen: 리모컨 모방을 통한 스마트 TV 탈취 (arXiv 2210.03014)
+- [1] [Flipper Zero Infrared blog post](https://blog.flipperzero.one/infrared/)
+- [2] [EvilScreen: remote control mimicry를 통한 Smart TV hijacking](https://arxiv.org/abs/2210.03014)
 
 {{#include ../../banners/hacktricks-training.md}}

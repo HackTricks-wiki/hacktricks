@@ -2,78 +2,78 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Basic Information
+## 기본 정보
 
-지도 학습은 레이블이 있는 데이터를 사용하여 새로운, 보지 못한 입력에 대한 예측을 할 수 있는 모델을 훈련합니다. 사이버 보안에서 지도 기계 학습은 침입 탐지(*정상* 또는 *공격*으로 네트워크 트래픽 분류), 악성 소프트웨어 탐지(악성 소프트웨어와 정상 소프트웨어 구분), 피싱 탐지(사기 웹사이트 또는 이메일 식별), 스팸 필터링 등과 같은 작업에 널리 적용됩니다. 각 알고리즘은 강점을 가지고 있으며 서로 다른 유형의 문제(분류 또는 회귀)에 적합합니다. 아래에서는 주요 지도 학습 알고리즘을 검토하고, 작동 방식을 설명하며, 실제 사이버 보안 데이터 세트에서의 사용을 시연합니다. 또한 모델 결합(앙상블 학습)이 예측 성능을 향상시킬 수 있는 방법에 대해서도 논의합니다.
+Supervised learning은 레이블이 지정된 데이터를 사용해 모델을 학습시키며, 새로운 미관측 입력에 대한 예측을 수행할 수 있도록 합니다. Cybersecurity에서 supervised machine learning은 침입 탐지(네트워크 트래픽을 *normal* 또는 *attack*으로 분류), malware 탐지(악성 소프트웨어와 정상 소프트웨어 구분), phishing 탐지(사기성 웹사이트 또는 이메일 식별), spam filtering 등의 작업에 널리 사용됩니다. 각 알고리즘은 고유한 강점을 가지며 서로 다른 유형의 문제(classification 또는 regression)에 적합합니다. 아래에서는 주요 supervised learning 알고리즘을 검토하고, 작동 방식을 설명하며, 실제 cybersecurity 데이터셋에서의 사용 방법을 보여줍니다. 또한 여러 모델을 결합하는 방식(ensemble learning)이 예측 성능을 향상시키는 경우가 많다는 점도 설명합니다.
 
-## Algorithms
+## 알고리즘
 
--   **Linear Regression:** 데이터를 기반으로 선형 방정식을 적합하여 숫자 결과를 예측하는 기본 회귀 알고리즘입니다.
+-   **Linear Regression:** 데이터에 선형 방정식을 적용하여 수치 결과를 예측하는 기본적인 regression 알고리즘입니다.
 
--   **Logistic Regression:** 이진 결과의 확률을 모델링하기 위해 로지스틱 함수를 사용하는 분류 알고리즘(이름과는 달리)입니다.
+-   **Logistic Regression:** 이름과 달리 logistic function을 사용해 이진 결과의 확률을 모델링하는 classification 알고리즘입니다.
 
--   **Decision Trees:** 예측을 위해 데이터를 특징별로 분할하는 트리 구조 모델입니다. 해석 가능성 때문에 자주 사용됩니다.
+-   **Decision Trees:** 예측을 수행하기 위해 feature를 기준으로 데이터를 분할하는 트리 구조의 모델이며, 해석 가능성 때문에 자주 사용됩니다.
 
--   **Random Forests:** 정확성을 향상시키고 과적합을 줄이는 결정 트리의 앙상블(배깅을 통해)입니다.
+-   **Random Forests:** 여러 decision tree를 ensemble 방식(bagging)으로 구성하여 정확도를 향상시키고 overfitting을 줄입니다.
 
--   **Support Vector Machines (SVM):** 최적의 분리 초평면을 찾는 최대 마진 분류기입니다. 비선형 데이터에 대해 커널을 사용할 수 있습니다.
+-   **Support Vector Machines (SVM):** 최적의 분리 hyperplane을 찾는 max-margin classifier이며, 비선형 데이터에는 kernel을 사용할 수 있습니다.
 
--   **Naive Bayes:** 특징 독립성을 가정한 베이즈 정리를 기반으로 한 확률적 분류기로, 스팸 필터링에 유명하게 사용됩니다.
+-   **Naive Bayes:** feature 간 독립성을 가정하고 Bayes' theorem에 기반하는 확률적 classifier로, spam filtering에 널리 사용됩니다.
 
--   **k-Nearest Neighbors (k-NN):** 가장 가까운 이웃의 다수 클래스에 따라 샘플에 레이블을 지정하는 간단한 "인스턴스 기반" 분류기입니다.
+-   **k-Nearest Neighbors (k-NN):** 가장 가까운 이웃들의 다수 class를 기준으로 sample에 label을 지정하는 간단한 "instance-based" classifier입니다.
 
--   **Gradient Boosting Machines:** 약한 학습자(일반적으로 결정 트리)를 순차적으로 추가하여 강력한 예측기를 구축하는 앙상블 모델(예: XGBoost, LightGBM)입니다.
+-   **Gradient Boosting Machines:** 약한 learner(일반적으로 decision tree)를 순차적으로 추가하여 강력한 predictor를 구축하는 ensemble 모델입니다(예: XGBoost, LightGBM).
 
-아래 각 섹션에서는 알고리즘에 대한 개선된 설명과 `pandas` 및 `scikit-learn`(신경망 예제의 경우 `PyTorch`)과 같은 라이브러리를 사용한 **Python 코드 예제**를 제공합니다. 예제는 공개적으로 사용 가능한 사이버 보안 데이터 세트(예: 침입 탐지를 위한 NSL-KDD 및 피싱 웹사이트 데이터 세트)를 사용하며 일관된 구조를 따릅니다:
+아래 각 section에서는 알고리즘에 대한 개선된 설명과 `pandas`, `scikit-learn` 같은 library(그리고 neural network 예제에서는 `PyTorch`)를 사용한 **Python code example**을 제공합니다. 예제는 공개적으로 이용 가능한 cybersecurity 데이터셋(NSL-KDD 침입 탐지 데이터셋 및 Phishing Websites 데이터셋 등)을 사용하며, 다음과 같은 일관된 구조를 따릅니다.
 
-1.  **데이터 세트 로드** (가능한 경우 URL을 통해 다운로드).
+1.  **데이터셋 로드** (사용 가능한 경우 URL을 통해 다운로드)
 
-2.  **데이터 전처리** (예: 범주형 특징 인코딩, 값 스케일링, 훈련/테스트 세트로 분할).
+2.  **데이터 전처리** (예: categorical feature 인코딩, 값 scaling, train/test set 분할)
 
-3.  **훈련 데이터**에서 모델 훈련.
+3.  **training data를 사용해 모델 학습**
 
-4.  **테스트 세트에서 평가**: 분류의 경우 정확도, 정밀도, 재현율, F1 점수 및 ROC AUC(회귀의 경우 평균 제곱 오차 사용).
+4.  **test set에서 평가**: classification에는 accuracy, precision, recall, F1-score, ROC AUC metric을 사용하고, regression에는 mean squared error를 사용합니다.
 
-각 알고리즘을 살펴보겠습니다:
+각 알고리즘을 살펴보겠습니다.
 
 ### Linear Regression
 
-선형 회귀는 연속적인 숫자 값을 예측하는 데 사용되는 **회귀** 알고리즘입니다. 입력 특징(독립 변수)과 출력(종속 변수) 간의 선형 관계를 가정합니다. 모델은 특징과 목표 간의 관계를 가장 잘 설명하는 직선(또는 고차원에서의 초평면)을 적합하려고 합니다. 이는 일반적으로 예측 값과 실제 값 간의 제곱 오차 합을 최소화함으로써 수행됩니다(최소 제곱법). 
+Linear regression은 연속적인 수치 값을 예측하는 **regression** 알고리즘입니다. 입력 feature(independent variable)와 출력(dependent variable) 사이에 선형 관계가 있다고 가정합니다. 이 모델은 feature와 target 간의 관계를 가장 잘 설명하는 직선(고차원에서는 hyperplane)을 fitting하려고 합니다. 일반적으로 예측값과 실제값 간의 제곱 오차 합을 최소화하여 이를 수행합니다(Ordinary Least Squares method).<sup>[[8]](#references)</sup>
 
-선형 회귀를 나타내는 가장 간단한 형태는 선으로 표현됩니다:
+Linear regression을 표현하는 가장 간단한 형태는 line입니다:
 ```plaintext
 y = mx + b
 ```
-어디에:
+여기서:
 
-- `y`는 예측된 값(출력)입니다.
-- `m`은 선의 기울기(계수)입니다.
-- `x`는 입력 특성입니다.
-- `b`는 y-절편입니다.
+- `y`는 예측값(출력)
+- `m`은 직선의 기울기(계수)
+- `x`는 입력 feature
+- `b`는 y절편
 
-선형 회귀의 목표는 예측된 값과 데이터셋의 실제 값 사이의 차이를 최소화하는 최적의 적합선을 찾는 것입니다. 물론, 이것은 매우 간단하며, 2개의 범주를 구분하는 직선이 될 것입니다. 그러나 더 많은 차원이 추가되면 선은 더 복잡해집니다:
+linear regression의 목표는 dataset의 예측값과 실제값 간의 차이를 최소화하는 가장 잘 맞는 직선을 찾는 것입니다. 물론 이는 매우 단순한 형태로, 2개의 category를 구분하는 직선입니다. 하지만 차원이 더 추가되면 직선은 더 복잡해집니다:
 ```plaintext
 y = w1*x1 + w2*x2 + ... + wn*xn + b
 ```
 > [!TIP]
-> *사이버 보안에서의 사용 사례:* 선형 회귀는 핵심 보안 작업(대부분 분류 작업)에 비해 덜 일반적이지만, 수치적 결과를 예측하는 데 적용될 수 있습니다. 예를 들어, 선형 회귀를 사용하여 **네트워크 트래픽의 양을 예측**하거나 **특정 기간 내 공격의 수를 추정**할 수 있습니다. 또한 특정 시스템 메트릭을 고려하여 위험 점수나 공격 탐지까지의 예상 시간을 예측할 수 있습니다. 실제로는 분류 알고리즘(로지스틱 회귀나 트리와 같은)이 침입이나 악성 소프트웨어 탐지에 더 자주 사용되지만, 선형 회귀는 기초로서 회귀 지향 분석에 유용합니다.
+> *사이버보안 사용 사례:* Linear regression 자체는 핵심 보안 작업(대개 classification인 경우가 많음)에는 덜 일반적으로 사용되지만, 수치 결과를 예측하는 데 적용할 수 있습니다. 예를 들어 과거 데이터를 기반으로 **network traffic의 volume을 예측**하거나 **특정 기간 동안 발생할 attack 수를 추정**하는 데 linear regression을 사용할 수 있습니다. 또한 특정 system metrics가 주어졌을 때 risk score 또는 attack이 detection될 때까지의 예상 시간을 예측할 수도 있습니다. 실제로는 intrusion이나 malware를 detection하는 데 classification algorithms(logistic regression 또는 trees 등)이 더 자주 사용되지만, linear regression은 기반이 되는 기법이며 regression 중심 분석에 유용합니다.
 
-#### **선형 회귀의 주요 특성:**
+#### **Linear Regression의 주요 특징:**
 
--   **문제 유형:** 회귀(연속 값 예측). 출력에 임계값이 적용되지 않는 한 직접적인 분류에는 적합하지 않음.
+-   **문제 유형:** Regression(연속 값 예측). 출력에 threshold를 적용하지 않는 한 직접적인 classification에는 적합하지 않습니다.
 
--   **해석 가능성:** 높음 -- 계수는 직관적으로 해석할 수 있으며, 각 특성의 선형 효과를 보여줌.
+-   **해석 가능성:** 높음 -- coefficients를 간단하게 해석할 수 있으며, 각 feature의 선형 효과를 보여 줍니다.
 
--   **장점:** 간단하고 빠르며; 회귀 작업의 좋은 기준선; 실제 관계가 대략 선형일 때 잘 작동함.
+-   **장점:** 단순하고 빠르며, regression 작업의 훌륭한 baseline입니다. 실제 관계가 대략 선형일 때 잘 작동합니다.
 
--   **제한 사항:** 복잡하거나 비선형 관계를 포착할 수 없음(수동 특성 엔지니어링 없이는); 관계가 비선형일 경우 과소적합에 취약함; 결과를 왜곡할 수 있는 이상치에 민감함.
+-   **제한 사항:** 수동으로 feature engineering을 수행하지 않으면 복잡하거나 비선형적인 관계를 포착할 수 없습니다. 관계가 비선형이면 underfitting이 발생하기 쉬우며, 결과를 왜곡할 수 있는 outlier에 민감합니다.
 
--   **최적의 적합 찾기:** 가능한 범주를 분리하는 최적의 적합선을 찾기 위해 **최소 제곱법(OLS)**이라는 방법을 사용합니다. 이 방법은 관측된 값과 선형 모델에 의해 예측된 값 사이의 제곱 차이의 합을 최소화합니다.
+-   **최적 적합 찾기:** 가능한 categories를 구분하는 최적의 적합선을 찾기 위해 **Ordinary Least Squares (OLS)**라는 방법을 사용합니다. 이 방법은 관측값과 linear model이 예측한 값 사이의 제곱 차이 합을 최소화합니다.
 
 <details>
-<summary>예시 -- 침입 데이터셋에서 연결 지속 시간 예측(회귀)
+<summary>예시 -- Intrusion Dataset에서 Connection Duration 예측(Regression)
 </summary>
-아래에서는 NSL-KDD 사이버 보안 데이터셋을 사용하여 선형 회귀를 시연합니다. 다른 특성을 기반으로 네트워크 연결의 `지속 시간`을 예측하여 이를 회귀 문제로 다룰 것입니다. (실제로 `지속 시간`은 NSL-KDD의 하나의 특성이며, 회귀를 설명하기 위해 여기서 사용합니다.) 데이터셋을 로드하고, 전처리(범주형 특성 인코딩), 선형 회귀 모델을 훈련시키고, 테스트 세트에서 평균 제곱 오차(MSE)와 R² 점수를 평가합니다.
+아래에서는 NSL-KDD cybersecurity dataset을 사용하여 linear regression을 시연합니다. 여기서는 다른 feature를 기반으로 network connection의 `duration`을 예측하는 regression 문제로 다룹니다. (실제로 `duration`은 NSL-KDD의 feature 중 하나이며, 여기서는 regression을 설명하기 위한 목적으로만 사용합니다.) dataset을 불러오고, categorical feature를 encoding하여 전처리한 다음, linear regression model을 학습하고 test set에서 Mean Squared Error (MSE)와 R² score를 평가합니다.
 ```python
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -128,44 +128,45 @@ Test MSE: 3021333.56
 Test R² : -0.526
 """
 ```
-이 예제에서 선형 회귀 모델은 다른 네트워크 특성으로부터 연결 `duration`을 예측하려고 합니다. 우리는 평균 제곱 오차(Mean Squared Error, MSE)와 R²로 성능을 측정합니다. R²가 1.0에 가까울수록 모델이 `duration`의 대부분 변동성을 설명한다는 것을 나타내며, 낮거나 음의 R²는 적합도가 좋지 않음을 나타냅니다. (여기서 R²가 낮더라도 놀라지 마세요 -- 주어진 특성으로부터 `duration`을 예측하는 것이 어려울 수 있으며, 선형 회귀는 복잡한 패턴을 포착하지 못할 수 있습니다.)
+이 예제에서 선형 회귀 모델은 다른 네트워크 특성으로부터 연결 `duration`을 예측하려고 합니다. 성능은 평균 제곱 오차(Mean Squared Error, MSE)와 R²로 측정합니다. R²가 1.0에 가까우면 모델이 `duration`의 분산 대부분을 설명한다는 의미이며, R²가 낮거나 음수이면 적합도가 낮다는 의미입니다. (여기서 R²가 낮더라도 놀라지 마세요 -- 주어진 특성만으로 `duration`을 예측하기 어려울 수 있으며, 패턴이 복잡하다면 선형 회귀가 이를 포착하지 못할 수 있습니다.)
+</details>
 
-### 로지스틱 회귀
+### Logistic Regression
 
-로지스틱 회귀는 특정 클래스(일반적으로 "양성" 클래스)에 인스턴스가 속할 확률을 모델링하는 **분류** 알고리즘입니다. 이름과는 달리, *로지스틱* 회귀는 이산 결과에 사용됩니다(연속 결과를 위한 선형 회귀와는 다름). 주로 **이진 분류**(두 클래스, 예: 악성 vs. benign)에 사용되지만, 다중 클래스 문제로 확장할 수 있습니다(softmax 또는 one-vs-rest 접근 방식을 사용).
+Logistic regression은 인스턴스가 특정 클래스(일반적으로 "positive" 클래스)에 속할 확률을 모델링하는 **classification** 알고리즘입니다. 이름에 *logistic*이 포함되어 있지만, logistic regression은 이산 결과에 사용됩니다(연속 결과에 사용되는 선형 회귀와 다름). 특히 **binary classification**(두 클래스, 예: malicious와 benign)에 사용되지만, multi-class 문제에도 확장할 수 있습니다(softmax 또는 one-vs-rest 접근 방식 사용).<sup>[[1]](#references)</sup>
 
-로지스틱 회귀는 예측 값을 확률로 매핑하기 위해 로지스틱 함수(시그모이드 함수라고도 함)를 사용합니다. 시그모이드 함수는 0과 1 사이의 값을 가지며 분류의 필요에 따라 S자 형태의 곡선으로 성장하는 함수로, 이진 분류 작업에 유용합니다. 따라서 각 입력의 각 특성은 할당된 가중치와 곱해지고, 결과는 시그모이드 함수를 통과하여 확률을 생성합니다:
+Logistic regression은 logistic function(sigmoid function이라고도 함)을 사용하여 예측값을 확률로 매핑합니다. sigmoid function은 0과 1 사이의 값을 가지며 classification의 필요에 따라 S자 곡선으로 증가하는 함수라는 점에 유의하세요. 이는 binary classification 작업에 유용합니다. 따라서 각 입력의 각 feature에 할당된 weight를 곱하고, 그 결과를 sigmoid function에 전달하여 확률을 생성합니다:
 ```plaintext
 p(y=1|x) = 1 / (1 + e^(-z))
 ```
-어디에:
+Where:
 
 - `p(y=1|x)`는 입력 `x`가 주어졌을 때 출력 `y`가 1일 확률입니다.
-- `e`는 자연 로그의 밑입니다.
-- `z`는 입력 특징의 선형 조합으로, 일반적으로 `z = w1*x1 + w2*x2 + ... + wn*xn + b`로 표현됩니다. 가장 단순한 형태에서는 직선이지만, 더 복잡한 경우에는 여러 차원(특징당 하나)의 초평면이 됩니다.
+- `e`는 자연로그의 밑입니다.
+- `z`는 입력 feature의 선형 조합이며, 일반적으로 `z = w1*x1 + w2*x2 + ... + wn*xn + b`로 표현됩니다. 여기서도 가장 단순한 형태에서는 직선이지만, 더 복잡한 경우에는 여러 차원(feature마다 하나씩)을 가진 hyperplane이 됩니다.
 
 > [!TIP]
-> *사이버 보안에서의 사용 사례:* 많은 보안 문제는 본질적으로 예/아니오 결정이기 때문에 로지스틱 회귀가 널리 사용됩니다. 예를 들어, 침입 탐지 시스템은 네트워크 연결의 특징을 기반으로 해당 연결이 공격인지 결정하기 위해 로지스틱 회귀를 사용할 수 있습니다. 피싱 탐지에서는 로지스틱 회귀가 웹사이트의 특징(URL 길이, "@" 기호의 존재 등)을 결합하여 피싱일 확률을 생성할 수 있습니다. 초기 세대 스팸 필터에서 사용되었으며, 많은 분류 작업의 강력한 기준선으로 남아 있습니다.
+> *사이버 보안에서의 사용 사례:* 많은 security 문제는 본질적으로 yes/no 결정이므로 Logistic Regression이 널리 사용됩니다. 예를 들어 intrusion detection system은 network connection의 feature를 기반으로 해당 connection이 attack인지 판단하는 데 Logistic Regression을 사용할 수 있습니다. phishing detection에서는 Logistic Regression이 website의 feature(URL 길이, `"@"` 기호의 존재 여부 등)를 결합하여 phishing일 확률로 변환할 수 있습니다. 초기 세대 spam filter에서 사용되었으며, 현재도 많은 classification task에서 강력한 baseline으로 남아 있습니다.
 
-#### 비 이진 분류를 위한 로지스틱 회귀
+#### Binary가 아닌 classification을 위한 Logistic Regression
 
-로지스틱 회귀는 이진 분류를 위해 설계되었지만, **one-vs-rest** (OvR) 또는 **softmax 회귀**와 같은 기술을 사용하여 다중 클래스 문제를 처리하도록 확장할 수 있습니다. OvR에서는 각 클래스를 긍정 클래스와 다른 모든 클래스를 대조하여 별도의 로지스틱 회귀 모델을 훈련합니다. 예측 확률이 가장 높은 클래스가 최종 예측으로 선택됩니다. Softmax 회귀는 출력층에 소프트맥스 함수를 적용하여 여러 클래스에 대해 로지스틱 회귀를 일반화하여 모든 클래스에 대한 확률 분포를 생성합니다.
+Logistic Regression은 binary classification을 위해 설계되었지만, **one-vs-rest** (OvR) 또는 **softmax regression**과 같은 기법을 사용하여 multi-class 문제를 처리하도록 확장할 수 있습니다. OvR에서는 각 class를 positive class로 간주하고 나머지 모든 class와 비교하는 별도의 Logistic Regression model을 각 class마다 학습합니다. 예측 확률이 가장 높은 class가 최종 prediction으로 선택됩니다. Softmax regression은 output layer에 softmax function을 적용하여 모든 class에 대한 확률 분포를 생성함으로써 Logistic Regression을 여러 class로 일반화합니다.
 
-#### **로지스틱 회귀의 주요 특성:**
+#### **Logistic Regression의 주요 특성:**
 
--   **문제 유형:** 분류(일반적으로 이진). 긍정 클래스의 확률을 예측합니다.
+-   **문제 유형:** Classification (일반적으로 binary)입니다. positive class의 확률을 예측합니다.
 
--   **해석 가능성:** 높음 -- 선형 회귀와 마찬가지로, 특징 계수는 각 특징이 결과의 로그 오즈에 어떻게 영향을 미치는지를 나타낼 수 있습니다. 이 투명성은 경고에 기여하는 요소를 이해하는 데 보안에서 종종 높이 평가됩니다.
+-   **해석 가능성:** 높음 -- linear regression과 마찬가지로 feature coefficient를 통해 각 feature가 outcome의 log-odds에 미치는 영향을 파악할 수 있습니다. 이러한 투명성은 어떤 요인이 alert에 기여하는지 이해하는 데 도움이 되므로 security 분야에서 자주 높이 평가됩니다.
 
--   **장점:** 훈련이 간단하고 빠르며, 특징과 결과의 로그 오즈 간의 관계가 선형일 때 잘 작동합니다. 확률을 출력하여 위험 점수를 가능하게 합니다. 적절한 정규화를 통해 잘 일반화되며, 일반 선형 회귀보다 다중 공선성을 더 잘 처리할 수 있습니다.
+-   **장점:** 학습이 간단하고 빠르며, feature와 outcome의 log-odds 사이의 관계가 선형일 때 잘 작동합니다. 확률을 출력하므로 risk scoring이 가능합니다. 적절한 regularization을 사용하면 일반화 성능이 우수하며, 일반적인 linear regression보다 multicollinearity를 더 잘 처리할 수 있습니다.
 
--   **제한 사항:** 특징 공간에서 선형 결정 경계를 가정합니다(진짜 경계가 복잡하거나 비선형인 경우 실패). 상호작용이나 비선형 효과가 중요한 문제에서는 성능이 떨어질 수 있으며, 다항식 또는 상호작용 특징을 수동으로 추가하지 않는 한 그렇습니다. 또한, 클래스가 특징의 선형 조합으로 쉽게 분리되지 않는 경우 로지스틱 회귀의 효과가 떨어집니다.
+-   **제한 사항:** feature space에서 선형 decision boundary를 가정합니다(실제 boundary가 복잡하거나 비선형인 경우 제대로 작동하지 않음). interaction 또는 비선형 효과가 중요한 문제에서는 polynomial feature나 interaction feature를 수동으로 추가하지 않는 한 성능이 떨어질 수 있습니다. 또한 class가 feature의 선형 조합으로 쉽게 분리되지 않는 경우 Logistic Regression의 효과가 낮습니다.
 
 
 <details>
-<summary>예시 -- 로지스틱 회귀를 이용한 피싱 웹사이트 탐지:</summary>
+<summary>예제 -- Logistic Regression을 사용한 Phishing Website Detection:</summary>
 
-우리는 **피싱 웹사이트 데이터셋**(UCI 저장소에서) 을 사용할 것입니다. 이 데이터셋은 웹사이트의 특징(예: URL에 IP 주소가 있는지, 도메인의 나이, HTML의 의심스러운 요소의 존재 등)과 사이트가 피싱인지 합법적인지를 나타내는 레이블을 포함합니다. 우리는 웹사이트를 분류하기 위해 로지스틱 회귀 모델을 훈련하고, 테스트 분할에서 정확도, 정밀도, 재현율, F1 점수 및 ROC AUC를 평가합니다.
+website에서 추출한 feature(URL에 IP address가 포함되어 있는지, domain의 연령, HTML에 의심스러운 요소가 존재하는지 등)와 해당 site가 phishing인지 legitimate인지 나타내는 label이 포함된 **Phishing Websites Dataset**(UCI repository 제공)을 사용합니다. Logistic Regression model을 학습하여 website를 classification한 다음, test split에서 accuracy, precision, recall, F1-score 및 ROC AUC를 평가합니다.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -220,26 +221,26 @@ F1-score : 0.917
 ROC AUC  : 0.979
 """
 ```
-이 피싱 탐지 예제에서 로지스틱 회귀는 각 웹사이트가 피싱일 확률을 생성합니다. 정확도, 정밀도, 재현율 및 F1을 평가함으로써 모델의 성능을 파악할 수 있습니다. 예를 들어, 높은 재현율은 대부분의 피싱 사이트를 잡아낸다는 것을 의미하며(놓친 공격을 최소화하기 위해 보안에 중요), 높은 정밀도는 잘못된 경고가 적다는 것을 의미합니다(분석가의 피로를 피하기 위해 중요합니다). ROC AUC(ROC 곡선 아래 면적)는 성능의 임계값 독립적인 측정을 제공합니다(1.0이 이상적이며, 0.5는 우연과 다르지 않음). 로지스틱 회귀는 이러한 작업에서 종종 잘 수행되지만, 피싱 사이트와 합법적인 사이트 간의 결정 경계가 복잡하다면 더 강력한 비선형 모델이 필요할 수 있습니다.
+이 phishing detection 예제에서 logistic regression은 각 website가 phishing일 확률을 생성합니다. accuracy, precision, recall, F1을 평가하면 model의 성능을 파악할 수 있습니다. 예를 들어, 높은 recall은 대부분의 phishing site를 탐지한다는 의미입니다(놓치는 attack을 최소화하는 것이 보안에 중요함). 반면 높은 precision은 false alarm이 적다는 의미입니다(analyst fatigue를 방지하는 데 중요함). ROC AUC (Area Under the ROC Curve)는 threshold와 무관한 성능 측정값을 제공합니다(1.0은 이상적이고, 0.5는 무작위 추측보다 나을 것이 없음을 의미함). Logistic regression은 이러한 task에서 자주 우수한 성능을 보이지만, phishing site와 legitimate site 사이의 decision boundary가 복잡하다면 더 강력한 non-linear model이 필요할 수 있습니다.
 
 </details>
 
-### 결정 트리
+### Decision Trees
 
-결정 트리는 분류 및 회귀 작업 모두에 사용할 수 있는 다재다능한 **감독 학습 알고리즘**입니다. 데이터의 특성을 기반으로 한 결정의 계층적 트리 모델을 학습합니다. 트리의 각 내부 노드는 특정 특성에 대한 테스트를 나타내고, 각 가지는 해당 테스트의 결과를 나타내며, 각 리프 노드는 예측된 클래스(분류의 경우) 또는 값(회귀의 경우)을 나타냅니다.
+decision tree는 classification과 regression task 모두에 사용할 수 있는 다목적 **supervised learning algorithm**입니다. 이 algorithm은 data의 feature를 기반으로 계층적인 tree 형태의 decision model을 학습합니다. tree의 각 internal node는 특정 feature에 대한 test를 나타내고, 각 branch는 해당 test의 outcome을 나타내며, 각 leaf node는 예측된 class (classification의 경우) 또는 value (regression의 경우)를 나타냅니다.<sup>[[2]](#references)</sup>
 
-트리를 구축하기 위해 CART(분류 및 회귀 트리)와 같은 알고리즘은 **지니 불순도** 또는 **정보 이득(엔트로피)**와 같은 측정을 사용하여 각 단계에서 데이터를 분할할 최상의 특성과 임계값을 선택합니다. 각 분할의 목표는 결과 하위 집합에서 목표 변수의 동질성을 증가시키기 위해 데이터를 분할하는 것입니다(분류의 경우, 각 노드는 가능한 한 순수하게 유지되어야 하며, 주로 단일 클래스를 포함해야 합니다).
+tree를 구축하기 위해 CART (Classification and Regression Tree)와 같은 algorithm은 각 단계에서 data를 split할 최적의 feature와 threshold를 선택할 때 **Gini impurity** 또는 **information gain (entropy)**과 같은 measure를 사용합니다. 각 split의 목표는 결과 subset에서 target variable의 homogeneity를 높이도록 data를 partition하는 것입니다(classification의 경우 각 node는 주로 하나의 class만 포함하도록 최대한 pure한 상태를 목표로 함).
 
-결정 트리는 **높은 해석 가능성**을 가지고 있습니다. 루트에서 리프까지의 경로를 따라가며 예측 뒤에 있는 논리를 이해할 수 있습니다(예: *"IF `service = telnet` AND `src_bytes > 1000` AND `failed_logins > 3` THEN classify as attack"*). 이는 특정 경고가 발생한 이유를 설명하는 데 사이버 보안에서 가치가 있습니다. 트리는 자연스럽게 숫자 데이터와 범주형 데이터를 모두 처리할 수 있으며, 전처리가 거의 필요하지 않습니다(예: 특성 스케일링이 필요하지 않음).
+decision tree는 **매우 해석하기 쉽습니다** -- root에서 leaf까지의 path를 따라가면 prediction의 logic을 이해할 수 있습니다(예: *"IF `service = telnet` AND `src_bytes > 1000` AND `failed_logins > 3` THEN classify as attack"*). 이는 특정 alert가 발생한 이유를 설명하는 데 유용하므로 cybersecurity에서 가치가 있습니다. tree는 numerical data와 categorical data를 모두 자연스럽게 처리할 수 있으며 preprocessing이 거의 필요하지 않습니다(예: feature scaling이 필요하지 않음).
 
-그러나 단일 결정 트리는 훈련 데이터에 쉽게 과적합될 수 있으며, 특히 깊게 성장할 경우(많은 분할). 가지치기(트리 깊이 제한 또는 리프당 최소 샘플 수 요구)와 같은 기술이 종종 과적합을 방지하는 데 사용됩니다.
+그러나 단일 decision tree는 training data에 쉽게 overfit할 수 있으며, 특히 tree가 깊게 성장한 경우(많은 split이 있는 경우) 더욱 그렇습니다. overfitting을 방지하기 위해 pruning( tree depth를 제한하거나 leaf당 필요한 최소 sample 수를 지정하는 방법)과 같은 technique이 자주 사용됩니다.
 
-결정 트리의 주요 구성 요소는 3가지입니다:
-- **루트 노드**: 전체 데이터 세트를 나타내는 트리의 최상위 노드.
-- **내부 노드**: 특성과 해당 특성에 기반한 결정을 나타내는 노드.
-- **리프 노드**: 최종 결과 또는 예측을 나타내는 노드.
+decision tree에는 3가지 주요 component가 있습니다:
+- **Root Node**: 전체 dataset을 나타내는 tree의 최상위 node입니다.
+- **Internal Nodes**: feature와 해당 feature에 기반한 decision을 나타내는 node입니다.
+- **Leaf Nodes**: 최종 outcome 또는 prediction을 나타내는 node입니다.
 
-트리는 다음과 같이 보일 수 있습니다:
+tree는 다음과 같은 형태가 될 수 있습니다:
 ```plaintext
 [Root Node]
 /   \
@@ -248,50 +249,50 @@ ROC AUC  : 0.979
 [Leaf 1] [Leaf 2] [Leaf 3] [Leaf 4]
 ```
 > [!TIP]
-> *사이버 보안의 사용 사례:* 의사 결정 트리는 침입 탐지 시스템에서 공격을 식별하기 위한 **규칙**을 도출하는 데 사용되었습니다. 예를 들어, ID3/C4.5 기반의 초기 IDS는 정상 트래픽과 악의적인 트래픽을 구별하기 위해 사람이 읽을 수 있는 규칙을 생성했습니다. 또한 파일의 속성(파일 크기, 섹션 엔트로피, API 호출 등)을 기반으로 파일이 악의적인지 결정하기 위해 악성 코드 분석에도 사용됩니다. 의사 결정 트리의 명확성은 투명성이 필요할 때 유용하게 만듭니다. 분석가는 트리를 검사하여 탐지 논리를 검증할 수 있습니다.
+> *사이버보안에서의 사용 사례:* Decision tree는 공격을 식별하기 위한 **rules**를 도출하는 intrusion detection systems에서 사용되어 왔습니다. 예를 들어, 초기 ID3/C4.5 기반 시스템은 정상 트래픽과 악성 트래픽을 구분하기 위한 사람이 읽을 수 있는 rules를 생성했습니다. 또한 malware analysis에서 파일의 속성(파일 크기, section entropy, API calls 등)을 기반으로 파일이 malicious한지 판단하는 데 사용됩니다. Decision tree의 명확성은 transparency가 필요할 때 유용합니다 -- analyst는 tree를 검사하여 detection logic을 검증할 수 있습니다.
 
-#### **의사 결정 트리의 주요 특성:**
+#### **Decision Tree의 주요 특성:**
 
--   **문제 유형:** 분류 및 회귀 모두. 공격과 정상 트래픽의 분류에 일반적으로 사용됩니다.
+-   **문제 유형:** classification과 regression 모두에 사용됩니다. 공격과 정상 트래픽 등을 classification하는 데 일반적으로 사용됩니다.
 
--   **해석 가능성:** 매우 높음 -- 모델의 결정은 if-then 규칙의 집합으로 시각화되고 이해될 수 있습니다. 이는 보안에서 모델 행동의 신뢰와 검증을 위한 주요 장점입니다.
+-   **해석 가능성:** 매우 높음 -- model의 decisions를 시각화하고 if-then rules 집합으로 이해할 수 있습니다. 이는 model behavior에 대한 신뢰와 검증을 위해 security에서 중요한 장점입니다.
 
--   **장점:** 비선형 관계와 특성 간의 상호작용을 포착할 수 있습니다(각 분할은 상호작용으로 볼 수 있습니다). 특성을 스케일링하거나 범주형 변수를 원-핫 인코딩할 필요가 없습니다 -- 트리는 이를 본래적으로 처리합니다. 빠른 추론(예측은 단순히 트리에서 경로를 따르는 것입니다).
+-   **장점:** features 간의 비선형 관계와 상호작용을 포착할 수 있습니다(각 split은 상호작용으로 볼 수 있음). features를 scale하거나 categorical variables를 one-hot encode할 필요가 없습니다 -- tree가 이를 기본적으로 처리합니다. inference가 빠릅니다(prediction은 tree에서 경로를 따라가기만 하면 됨).
 
--   **제한 사항:** 제어되지 않으면 과적합에 취약합니다(깊은 트리는 훈련 세트를 기억할 수 있습니다). 불안정할 수 있습니다 -- 데이터의 작은 변화가 다른 트리 구조로 이어질 수 있습니다. 단일 모델로서 그 정확도가 더 발전된 방법(랜덤 포레스트와 같은 앙상블)이 일반적으로 분산을 줄여 더 나은 성능을 보입니다.
+-   **제한 사항:** 제어하지 않으면 overfitting이 발생하기 쉽습니다(깊은 tree는 training set을 암기할 수 있음). 불안정할 수 있습니다 -- data의 작은 변화가 다른 tree structure로 이어질 수 있습니다. 단일 model로서는 더 발전된 methods의 accuracy에 미치지 못할 수 있습니다(Random Forests와 같은 ensembles는 일반적으로 variance를 줄여 더 나은 성능을 보임).
 
--   **최고의 분할 찾기:**
-- **지니 불순도**: 노드의 불순도를 측정합니다. 낮은 지니 불순도는 더 나은 분할을 나타냅니다. 공식은 다음과 같습니다:
+-   **최적의 Split 찾기:**
+- **Gini Impurity**: node의 impurity를 측정합니다. Gini impurity가 낮을수록 더 나은 split을 의미합니다. 공식은 다음과 같습니다:
 
 ```plaintext
 Gini = 1 - Σ(p_i^2)
 ```
 
-여기서 `p_i`는 클래스 `i`의 인스턴스 비율입니다.
+여기서 `p_i`는 class `i`에 속하는 instances의 비율입니다.
 
-- **엔트로피**: 데이터셋의 불확실성을 측정합니다. 낮은 엔트로피는 더 나은 분할을 나타냅니다. 공식은 다음과 같습니다:
+- **Entropy**: dataset의 uncertainty를 측정합니다. entropy가 낮을수록 더 나은 split을 의미합니다. 공식은 다음과 같습니다:
 
 ```plaintext
 Entropy = -Σ(p_i * log2(p_i))
 ```
 
-여기서 `p_i`는 클래스 `i`의 인스턴스 비율입니다.
+여기서 `p_i`는 class `i`에 속하는 instances의 비율입니다.
 
-- **정보 이득**: 분할 후 엔트로피 또는 지니 불순도의 감소입니다. 정보 이득이 높을수록 더 나은 분할입니다. 이는 다음과 같이 계산됩니다:
+- **Information Gain**: split 이후 entropy 또는 Gini impurity의 감소량입니다. information gain이 높을수록 더 나은 split입니다. 다음과 같이 계산합니다:
 
 ```plaintext
 Information Gain = Entropy(parent) - (Weighted Average of Entropy(children))
 ```
 
-또한, 트리는 다음과 같은 경우에 종료됩니다:
-- 노드의 모든 인스턴스가 동일한 클래스에 속합니다. 이는 과적합으로 이어질 수 있습니다.
-- 트리의 최대 깊이(하드코딩됨)에 도달했습니다. 이는 과적합을 방지하는 방법입니다.
-- 노드의 인스턴스 수가 특정 임계값 이하입니다. 이것도 과적합을 방지하는 방법입니다.
-- 추가 분할로 인한 정보 이득이 특정 임계값 이하입니다. 이것도 과적합을 방지하는 방법입니다.
+또한 다음과 같은 경우 tree가 종료됩니다:
+- node의 모든 instances가 동일한 class에 속하는 경우. 이는 overfitting으로 이어질 수 있습니다.
+- tree의 최대 depth(하드코딩된 값)에 도달한 경우. 이는 overfitting을 방지하는 방법입니다.
+- node의 instances 수가 특정 threshold보다 적은 경우. 이 역시 overfitting을 방지하는 방법입니다.
+- 추가 split으로 얻는 information gain이 특정 threshold보다 낮은 경우. 이 역시 overfitting을 방지하는 방법입니다.
 
 <details>
-<summary>예시 -- 침입 탐지를 위한 의사 결정 트리:</summary>
-NSL-KDD 데이터셋에서 네트워크 연결을 *정상* 또는 *공격*으로 분류하기 위해 의사 결정 트리를 훈련시킬 것입니다. NSL-KDD는 프로토콜 유형, 서비스, 지속 시간, 실패한 로그인 수 등의 특성을 가진 고전적인 KDD Cup 1999 데이터셋의 개선된 버전이며, 공격 유형 또는 "정상"을 나타내는 레이블이 있습니다. 모든 공격 유형을 "이상" 클래스에 매핑할 것입니다(이진 분류: 정상 vs 이상). 훈련 후, 테스트 세트에서 트리의 성능을 평가할 것입니다.
+<summary>예시 -- Intrusion Detection을 위한 Decision Tree:</summary>
+NSL-KDD dataset에 대해 decision tree를 training하여 network connections를 *normal* 또는 *attack*으로 classification합니다. NSL-KDD는 고전적인 KDD Cup 1999 dataset의 개선 버전으로, protocol type, service, duration, failed logins 수 등의 features와 attack type 또는 "normal"을 나타내는 label을 포함합니다. 모든 attack types를 "anomaly" class로 매핑합니다(binary classification: normal 대 anomaly). training 후 test set에서 tree의 performance를 평가합니다.
 ```python
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
@@ -355,40 +356,40 @@ F1‑score : 0.756
 ROC AUC  : 0.758
 """
 ```
-이 결정 트리 예제에서는 극단적인 과적합을 피하기 위해 트리 깊이를 10으로 제한했습니다(`max_depth=10` 매개변수). 메트릭은 트리가 정상 트래픽과 공격 트래픽을 얼마나 잘 구분하는지를 보여줍니다. 높은 재현율은 대부분의 공격을 포착한다는 것을 의미하며(IDS에 중요), 높은 정밀도는 잘못된 경고가 적다는 것을 의미합니다. 결정 트리는 구조화된 데이터에서 괜찮은 정확도를 달성하는 경우가 많지만, 단일 트리는 최상의 성능에 도달하지 못할 수 있습니다. 그럼에도 불구하고 모델의 *해석 가능성*은 큰 장점입니다. 예를 들어, 트리의 분할을 검토하여 어떤 특성(예: `service`, `src_bytes` 등)이 연결을 악성으로 플래그하는 데 가장 영향을 미치는지 확인할 수 있습니다.
+이 decision tree 예제에서는 극단적인 overfitting을 방지하기 위해 tree depth를 10으로 제한했습니다(`max_depth=10` parameter). Metrics는 tree가 normal traffic과 attack traffic을 얼마나 잘 구분하는지 보여 줍니다. 높은 recall은 대부분의 attack을 탐지한다는 의미이며(IDS에 중요), 높은 precision은 false alarm이 적다는 의미입니다. Decision tree는 structured data에서 준수한 accuracy를 달성하는 경우가 많지만, 단일 tree가 가능한 최상의 performance에 도달하지 못할 수도 있습니다. 그럼에도 모델의 *interpretability*는 큰 장점입니다 -- tree의 split을 분석하여 어떤 feature(예: `service`, `src_bytes` 등)가 connection을 malicious로 판별하는 데 가장 큰 영향을 미치는지 확인할 수 있습니다.
 
 </details>
 
-### 랜덤 포레스트
+### Random Forests
 
-랜덤 포레스트는 성능을 개선하기 위해 결정 트리를 기반으로 하는 **앙상블 학습** 방법입니다. 랜덤 포레스트는 여러 개의 결정 트리를 훈련시키고(따라서 "포레스트") 이들의 출력을 결합하여 최종 예측을 만듭니다(분류의 경우 일반적으로 다수결에 의해). 랜덤 포레스트의 두 가지 주요 아이디어는 **배깅**(부트스트랩 집계)과 **특성 무작위성**입니다:
+Random Forest는 performance를 향상하기 위해 decision tree를 기반으로 구축하는 **ensemble learning** method입니다. Random forest는 여러 decision tree를 학습시키고(따라서 "forest"), 그 output을 결합하여 최종 prediction을 생성합니다(classification의 경우 일반적으로 majority vote 사용). Random forest의 두 가지 핵심 개념은 **bagging**(bootstrap aggregating)과 **feature randomness**입니다:
 
--   **배깅:** 각 트리는 훈련 데이터의 무작위 부트스트랩 샘플(교체 샘플링)을 기반으로 훈련됩니다. 이는 트리 간의 다양성을 도입합니다.
+-   **Bagging:** 각 tree는 training data에서 무작위 bootstrap sample을 추출하여 학습됩니다(with replacement 방식으로 sampling). 이를 통해 tree 간 diversity가 생깁니다.
 
--   **특성 무작위성:** 트리의 각 분할에서 무작위 특성의 하위 집합이 분할을 위해 고려됩니다(모든 특성이 아닌). 이는 트리 간의 상관관계를 더욱 줄입니다.
+-   **Feature Randomness:** tree의 각 split에서 모든 feature 대신 무작위 feature subset을 고려하여 split을 수행합니다. 이를 통해 tree 간 상관성이 더욱 낮아집니다.
 
-많은 트리의 결과를 평균화함으로써 랜덤 포레스트는 단일 결정 트리가 가질 수 있는 분산을 줄입니다. 간단히 말해, 개별 트리는 과적합되거나 노이즈가 있을 수 있지만, 다양한 트리가 함께 투표하면 이러한 오류가 완화됩니다. 그 결과는 종종 **더 높은 정확도**와 단일 결정 트리보다 더 나은 일반화를 가진 모델입니다. 또한, 랜덤 포레스트는 각 특성이 평균적으로 불순도를 얼마나 줄이는지를 살펴봄으로써 특성 중요도의 추정치를 제공할 수 있습니다.
+많은 tree의 결과를 average함으로써 random forest는 단일 decision tree에서 발생할 수 있는 variance를 줄입니다. 간단히 말해 개별 tree는 overfit되거나 noise가 있을 수 있지만, 서로 다른 여러 tree가 함께 vote하면 이러한 error가 완화됩니다. 그 결과 단일 decision tree보다 **높은 accuracy**와 더 나은 generalization을 제공하는 model이 만들어지는 경우가 많습니다. 또한 random forest는 각 feature의 split이 평균적으로 impurity를 얼마나 줄이는지 확인하여 feature importance를 추정할 수 있습니다.
 
-랜덤 포레스트는 침입 탐지, 악성 코드 분류 및 스팸 탐지와 같은 작업에서 **사이버 보안의 일꾼**이 되었습니다. 최소한의 조정으로 즉시 잘 작동하며 대규모 특성 집합을 처리할 수 있습니다. 예를 들어, 침입 탐지에서 랜덤 포레스트는 더 미세한 공격 패턴을 포착하여 잘못된 긍정이 적은 단일 결정 트리보다 더 나은 성능을 발휘할 수 있습니다. 연구에 따르면 랜덤 포레스트는 NSL-KDD 및 UNSW-NB15와 같은 데이터 세트에서 공격을 분류하는 데 있어 다른 알고리즘에 비해 유리한 성능을 보였습니다.
+Random forest는 intrusion detection, malware classification, spam detection과 같은 작업에서 **workhorse in cybersecurity**가 되었습니다. 일반적으로 별도의 tuning을 거의 하지 않아도 높은 performance를 보이며, large feature set을 처리할 수 있습니다. 예를 들어 intrusion detection에서 random forest는 individual decision tree보다 더 미묘한 attack pattern을 탐지하고 false positive를 줄여 더 나은 performance를 낼 수 있습니다. 연구에 따르면 random forest는 NSL-KDD 및 UNSW-NB15와 같은 dataset에서 attack을 classification할 때 다른 algorithm과 비교해 우수한 performance를 보였습니다.<sup>[[3]](#references)[[9]](#references)</sup>
 
-#### **랜덤 포레스트의 주요 특성:**
+#### **Key characteristics of Random Forests:**
 
--   **문제 유형:** 주로 분류(회귀에도 사용됨). 보안 로그에서 일반적인 고차원 구조화된 데이터에 매우 적합합니다.
+-   **Type of Problem:** 주로 classification에 사용됩니다(regression에도 사용). security log에서 흔히 볼 수 있는 high-dimensional structured data에 매우 적합합니다.
 
--   **해석 가능성:** 단일 결정 트리보다 낮습니다 -- 수백 개의 트리를 한 번에 쉽게 시각화하거나 설명할 수 없습니다. 그러나 특성 중요도 점수는 어떤 속성이 가장 영향을 미치는지에 대한 통찰력을 제공합니다.
+-   **Interpretability:** 단일 decision tree보다 낮습니다 -- 한 번에 수백 개의 tree를 쉽게 시각화하거나 설명할 수는 없습니다. 그러나 feature importance score는 어떤 attribute가 가장 큰 영향을 미치는지에 대한 일부 insight를 제공합니다.
 
--   **장점:** 일반적으로 앙상블 효과로 인해 단일 트리 모델보다 더 높은 정확도를 가집니다. 과적합에 강합니다 -- 개별 트리가 과적합되더라도 앙상블은 더 잘 일반화합니다. 숫자형 및 범주형 특성을 모두 처리할 수 있으며, 어느 정도 결측 데이터를 관리할 수 있습니다. 또한 이상치에 대해 상대적으로 강합니다.
+-   **Advantages:** ensemble effect로 인해 일반적으로 single-tree model보다 높은 accuracy를 제공합니다. overfitting에 강합니다 -- 개별 tree가 overfit되더라도 ensemble은 더 잘 generalize합니다. numerical feature와 categorical feature를 모두 처리할 수 있고 missing data도 어느 정도 처리할 수 있습니다. 또한 outlier에도 비교적 강합니다.
 
--   **제한 사항:** 모델 크기가 클 수 있습니다(많은 트리, 각 트리는 잠재적으로 깊음). 예측 속도가 단일 트리보다 느립니다(많은 트리를 집계해야 하므로). 덜 해석 가능함 -- 중요한 특성을 알 수 있지만, 정확한 논리는 간단한 규칙으로 쉽게 추적할 수 없습니다. 데이터 세트가 매우 고차원이고 희소한 경우, 매우 큰 포레스트를 훈련하는 것은 계산적으로 무거울 수 있습니다.
+-   **Limitations:** Model size가 커질 수 있습니다(많은 tree로 구성되며 각 tree가 potentially deep할 수 있음). prediction은 단일 tree보다 느립니다(여러 tree의 결과를 aggregate해야 함). Interpretability가 낮습니다 -- 중요한 feature는 알 수 있지만, 정확한 logic을 단순한 rule처럼 쉽게 추적할 수는 없습니다. Dataset이 매우 high-dimensional하고 sparse한 경우, 매우 큰 forest를 training하는 작업은 computationally heavy할 수 있습니다.
 
--   **훈련 과정:**
-1. **부트스트랩 샘플링:** 교체 샘플링을 통해 훈련 데이터를 무작위로 샘플링하여 여러 하위 집합(부트스트랩 샘플)을 만듭니다.
-2. **트리 구성:** 각 부트스트랩 샘플에 대해 각 분할에서 무작위 특성의 하위 집합을 사용하여 결정 트리를 구축합니다. 이는 트리 간의 다양성을 도입합니다.
-3. **집계:** 분류 작업의 경우, 최종 예측은 모든 트리의 예측 중 다수결을 통해 이루어집니다. 회귀 작업의 경우, 최종 예측은 모든 트리의 예측 평균입니다.
+-   **Training Process:**
+1. **Bootstrap Sampling**: training data에서 replacement 방식으로 무작위 sampling하여 여러 subset(bootstrap sample)을 생성합니다.
+2. **Tree Construction**: 각 bootstrap sample에 대해 각 split에서 random feature subset을 사용하여 decision tree를 생성합니다. 이를 통해 tree 간 diversity가 생깁니다.
+3. **Aggregation**: classification task에서는 모든 tree의 prediction 중 majority vote를 사용하여 최종 prediction을 결정합니다. regression task에서는 모든 tree prediction의 average를 최종 prediction으로 사용합니다.
 
 <details>
-<summary>예제 -- 침입 탐지를 위한 랜덤 포레스트 (NSL-KDD):</summary>
-우리는 동일한 NSL-KDD 데이터 세트(정상 대 이상으로 이진 레이블)를 사용하고 랜덤 포레스트 분류기를 훈련시킬 것입니다. 우리는 랜덤 포레스트가 단일 결정 트리보다 성능이 좋거나 같기를 기대합니다. 앙상블 평균화가 분산을 줄이기 때문입니다. 우리는 동일한 메트릭으로 평가할 것입니다.
+<summary>Example -- Random Forest for Intrusion Detection (NSL-KDD):</summary>
+동일한 NSL-KDD dataset(binary label은 normal과 anomaly)을 사용하여 Random Forest classifier를 학습합니다. ensemble averaging으로 variance가 감소하므로 random forest가 단일 decision tree와 같거나 더 나은 performance를 낼 것으로 예상합니다. 동일한 metrics를 사용하여 이를 평가합니다.
 ```python
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -480,35 +481,35 @@ F1-score:  0.754
 ROC AUC:   0.962
 """
 ```
-랜덤 포레스트는 일반적으로 이 침입 탐지 작업에서 강력한 결과를 달성합니다. 우리는 단일 결정 트리에 비해 F1 또는 AUC와 같은 메트릭에서 개선을 관찰할 수 있으며, 이는 데이터에 따라 재현율 또는 정밀도에서 특히 두드러집니다. 이는 *"랜덤 포레스트(RF)는 앙상블 분류기이며 공격의 효과적인 분류를 위해 다른 전통적인 분류기와 비교하여 잘 작동한다."*는 이해와 일치합니다. 보안 운영 맥락에서 랜덤 포레스트 모델은 많은 결정 규칙의 평균화 덕분에 공격을 더 신뢰성 있게 플래그할 수 있으며, 잘못된 경고를 줄일 수 있습니다. 숲에서의 특성 중요성은 어떤 네트워크 특성이 공격을 가장 잘 나타내는지를 알려줄 수 있습니다(예: 특정 네트워크 서비스 또는 비정상적인 패킷 수).
+Random forest는 일반적으로 이 intrusion detection task에서 강력한 결과를 달성합니다. 단일 decision tree와 비교했을 때 특히 데이터에 따라 recall 또는 precision에서 F1이나 AUC 같은 metric이 향상되는 것을 관찰할 수 있습니다. 이는 *"Random Forest (RF) is an ensemble classifier and performs well compared to other traditional classifiers for effective classification of attacks."*라는 이해와 일치합니다. security operations context에서 random forest model은 여러 decision rule의 평균을 활용하므로 false alarm을 줄이면서 attacks를 더 안정적으로 flag할 수 있습니다. forest에서 제공하는 feature importance를 통해 어떤 network feature가 attacks를 가장 잘 나타내는지 확인할 수 있습니다(예: 특정 network service 또는 비정상적인 packet count).
 
 </details>
 
-### 서포트 벡터 머신 (SVM)
+### Support Vector Machines (SVM)
 
-서포트 벡터 머신은 주로 분류(그리고 SVR로 회귀) 용도로 사용되는 강력한 감독 학습 모델입니다. SVM은 두 클래스 간의 마진을 최대화하는 **최적의 분리 초평면**을 찾으려고 합니다. 이 초평면의 위치는 경계에 가장 가까운 훈련 포인트의 하위 집합(“서포트 벡터”)에 의해 결정됩니다. 마진(서포트 벡터와 초평면 간의 거리)을 최대화함으로써 SVM은 좋은 일반화를 달성하는 경향이 있습니다.
+Support Vector Machines는 주로 classification에 사용되는 강력한 supervised learning model이며, SVR 형태로 regression에도 사용됩니다. SVM은 두 class 사이의 margin을 최대화하는 **optimal separating hyperplane**을 찾으려고 합니다. training point 중 일부("support vector", 즉 boundary에 가장 가까운 point)만 이 hyperplane의 위치를 결정합니다. margin(support vector와 hyperplane 사이의 거리)을 최대화하면 SVM은 일반적으로 우수한 generalization 성능을 달성합니다.<sup>[[4]](#references)</sup>
 
-SVM의 강력한 점은 비선형 관계를 처리하기 위해 **커널 함수**를 사용할 수 있는 능력입니다. 데이터는 선형 분리가 존재할 수 있는 더 높은 차원의 특성 공간으로 암묵적으로 변환될 수 있습니다. 일반적인 커널에는 다항식, 방사 기저 함수(RBF), 시그모이드가 포함됩니다. 예를 들어, 네트워크 트래픽 클래스가 원시 특성 공간에서 선형적으로 분리되지 않는 경우, RBF 커널은 이를 더 높은 차원으로 매핑하여 SVM이 선형 분할을 찾도록 합니다(이는 원래 공간에서 비선형 경계에 해당합니다). 커널을 선택하는 유연성 덕분에 SVM은 다양한 문제를 해결할 수 있습니다.
+SVM의 강력한 핵심 요소는 **kernel function**을 사용해 non-linear relationship을 처리할 수 있다는 점입니다. 데이터는 linear separator가 존재할 수 있는 더 높은 차원의 feature space로 암시적으로 변환될 수 있습니다. 일반적인 kernel에는 polynomial, radial basis function (RBF), sigmoid가 포함됩니다. 예를 들어 network traffic class가 raw feature space에서 linearly separable하지 않다면 RBF kernel은 이를 더 높은 차원으로 mapping할 수 있으며, 그곳에서 SVM은 linear split을 찾습니다(이는 original space에서 non-linear boundary에 해당합니다). kernel을 선택할 수 있는 유연성 덕분에 SVM은 다양한 문제를 처리할 수 있습니다.
 
-SVM은 고차원 특성 공간(예: 텍스트 데이터 또는 악성 코드 명령어 시퀀스)에서 잘 작동하며, 특성의 수가 샘플 수에 비해 클 때 효과적입니다. 2000년대에는 악성 코드 분류 및 이상 기반 침입 탐지와 같은 많은 초기 사이버 보안 응용 프로그램에서 인기가 있었으며, 종종 높은 정확도를 보였습니다.
+SVM은 high-dimensional feature space(예: text data 또는 malware opcode sequence)와 feature 수가 sample 수에 비해 많은 상황에서 우수한 성능을 보이는 것으로 알려져 있습니다. SVM은 2000년대의 malware classification 및 anomaly-based intrusion detection과 같은 초기 cybersecurity application에서 널리 사용되었으며, 종종 높은 accuracy를 보였습니다.
 
-그러나 SVM은 매우 큰 데이터 세트에 쉽게 확장되지 않습니다(훈련 복잡도는 샘플 수에 대해 초선형이며, 많은 서포트 벡터를 저장해야 할 수 있으므로 메모리 사용량이 높을 수 있습니다). 실제로 수백만 개의 레코드가 있는 네트워크 침입 탐지와 같은 작업에서는 신중한 하위 샘플링이나 근사 방법을 사용하지 않으면 SVM이 너무 느릴 수 있습니다.
+그러나 SVM은 매우 큰 dataset으로 쉽게 확장되지 않습니다(training complexity가 sample 수에 대해 super-linear하게 증가하고, 많은 support vector를 저장해야 할 수 있어 memory usage가 높을 수 있음). 실제로 millions of record를 포함하는 network intrusion detection task에서는 신중한 subsampling 또는 approximate method를 사용하지 않으면 SVM이 너무 느릴 수 있습니다.
 
 #### **SVM의 주요 특성:**
 
--   **문제 유형:** 분류(이진 또는 다중 클래스, 일대일/일대다) 및 회귀 변형. 명확한 마진 분리가 있는 이진 분류에 자주 사용됩니다.
+-   **Problem Type:** Classification(binary 또는 one-vs-one/one-vs-rest를 통한 multiclass) 및 regression variant. 명확한 margin separation이 있는 binary classification에서 자주 사용됩니다.
 
--   **해석 가능성:** 중간 -- SVM은 결정 트리나 로지스틱 회귀만큼 해석 가능하지 않습니다. 어떤 데이터 포인트가 서포트 벡터인지 식별할 수 있고, 선형 커널 경우의 가중치를 통해 어떤 특성이 영향을 미칠 수 있는지 감을 잡을 수 있지만, 실제로 SVM(특히 비선형 커널을 사용할 경우)은 블랙박스 분류기로 취급됩니다.
+-   **Interpretability:** Medium -- SVM은 decision tree나 logistic regression만큼 interpretability가 높지 않습니다. 어떤 data point가 support vector인지 식별하고(linear kernel의 경우 weight를 통해) 어떤 feature가 영향을 미치는지 어느 정도 파악할 수 있지만, 실제로 SVM(non-linear kernel을 사용하는 경우 특히)은 black-box classifier로 취급됩니다.
 
--   **장점:** 고차원 공간에서 효과적; 커널 트릭으로 복잡한 결정 경계를 모델링할 수 있음; 마진이 최대화되면 과적합에 강함(특히 적절한 정규화 매개변수 C가 있을 때); 클래스가 큰 거리에 의해 분리되지 않을 때도 잘 작동(최상의 타협 경계를 찾음).
+-   **Advantages:** High-dimensional space에서 효과적이며, kernel trick을 사용해 복잡한 decision boundary를 modeling할 수 있습니다. margin을 최대화하면 overfitting에 강하고(특히 적절한 regularization parameter C를 사용하는 경우), class가 큰 거리로 분리되지 않은 경우에도 잘 작동합니다(best compromise boundary를 찾음).
 
--   **제한 사항:** **대규모 데이터 세트에 대해 계산 집약적**(훈련 및 예측 모두 데이터가 증가함에 따라 성능이 저하됨). 커널 및 정규화 매개변수(C, 커널 유형, RBF의 감마 등)를 신중하게 조정해야 함. 확률적 출력을 직접 제공하지 않음(하지만 Platt 스케일링을 사용하여 확률을 얻을 수 있음). 또한 SVM은 커널 매개변수 선택에 민감할 수 있으며, 잘못된 선택은 과소적합 또는 과적합으로 이어질 수 있습니다.
+-   **Limitations:** Large dataset에서 **computationally intensive**합니다(data가 증가할수록 training과 prediction 모두 scaling 성능이 저하됨). kernel 및 regularization parameter(C, kernel type, RBF의 gamma 등)를 신중하게 tuning해야 합니다. probabilistic output을 직접 제공하지는 않습니다(다만 Platt scaling을 사용해 probability를 얻을 수 있음). 또한 SVM은 kernel parameter 선택에 민감할 수 있으며 --- 잘못된 선택은 underfit 또는 overfit을 초래할 수 있습니다.
 
-*사이버 보안에서의 사용 사례:* SVM은 **악성 코드 탐지**(예: 추출된 특성 또는 명령어 시퀀스를 기반으로 파일 분류), **네트워크 이상 탐지**(트래픽을 정상 대 악성으로 분류), **피싱 탐지**(URL의 특성을 사용) 등에 사용되었습니다. 예를 들어, SVM은 이메일의 특성(특정 키워드 수, 발신자 평판 점수 등)을 가져와 피싱 또는 합법적인 것으로 분류할 수 있습니다. 또한 KDD와 같은 특성 집합에서 **침입 탐지**에 적용되어 종종 높은 정확도를 달성하였으나 계산 비용이 발생했습니다.
+*Use cases in cybersecurity:* SVM은 **malware detection**(예: 추출한 feature 또는 opcode sequence를 기반으로 file classification), **network anomaly detection**(traffic을 normal 또는 malicious로 classification), **phishing detection**(URL feature 사용)에 활용되어 왔습니다. 예를 들어 SVM은 email feature(특정 keyword의 count, sender reputation score 등)를 입력받아 이를 phishing 또는 legitimate로 classification할 수 있습니다. 또한 KDD와 같은 feature set을 사용한 **intrusion detection**에도 적용되었으며, computation cost를 감수하는 대신 높은 accuracy를 달성하는 경우가 많았습니다.
 
 <details>
-<summary>예시 -- 악성 코드 분류를 위한 SVM:</summary>
-이번에는 SVM을 사용하여 피싱 웹사이트 데이터 세트를 다시 사용할 것입니다. SVM이 느릴 수 있으므로 필요한 경우 훈련을 위해 데이터의 하위 집합을 사용할 것입니다(데이터 세트는 약 11,000개의 인스턴스이며, SVM이 적절히 처리할 수 있습니다). 비선형 데이터에 일반적으로 선택되는 RBF 커널을 사용할 것이며, ROC AUC를 계산하기 위해 확률 추정을 활성화할 것입니다.
+<summary>Example -- SVM for Malware Classification:</summary>
+이번에는 phishing website dataset을 다시 사용하되 SVM을 적용합니다. SVM은 느릴 수 있으므로 필요한 경우 training에 data의 일부만 사용합니다(dataset은 약 11k instance로, SVM이 비교적 무리 없이 처리할 수 있는 규모입니다). non-linear data에 일반적으로 사용되는 RBF kernel을 사용하고, ROC AUC를 계산하기 위해 probability estimate를 활성화합니다.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -576,74 +577,75 @@ F1‑score : 0.950
 ROC AUC  : 0.989
 """
 ```
-SVM 모델은 동일한 작업에 대해 로지스틱 회귀와 비교할 수 있는 메트릭을 출력합니다. 데이터가 특성에 의해 잘 분리되어 있다면 SVM이 높은 정확도와 AUC를 달성할 수 있습니다. 반면, 데이터셋에 많은 노이즈나 겹치는 클래스가 있다면 SVM이 로지스틱 회귀보다 크게 우수하지 않을 수 있습니다. 실제로 SVM은 특성과 클래스 간에 복잡하고 비선형적인 관계가 있을 때 성능을 향상시킬 수 있습니다. RBF 커널은 로지스틱 회귀가 놓치는 곡선 결정 경계를 포착할 수 있습니다. 모든 모델과 마찬가지로, 편향과 분산의 균형을 맞추기 위해 `C`(정규화) 및 커널 매개변수(예: RBF의 `gamma`)를 신중하게 조정해야 합니다.
+SVM 모델은 동일한 작업에서 logistic regression과 비교할 수 있는 metrics를 출력합니다. features를 통해 데이터가 잘 분리된다면 SVM이 높은 accuracy와 AUC를 달성하는 것을 확인할 수 있습니다. 반대로 dataset에 noise가 많거나 class가 겹친다면 SVM이 logistic regression보다 크게 뛰어나지 않을 수 있습니다. 실제로 SVM은 features와 class 사이에 복잡한 비선형 관계가 있을 때 성능을 향상시킬 수 있습니다. RBF kernel은 logistic regression이 놓칠 수 있는 곡선 형태의 decision boundary를 포착할 수 있습니다. 모든 model과 마찬가지로 bias와 variance 사이의 균형을 맞추려면 `C` (regularization)와 kernel parameters (예: RBF의 `gamma`)를 신중하게 tuning해야 합니다.
 
 </details>
 
-#### 로지스틱 회귀와 SVM의 차이
+#### Logistic Regression과 SVM의 차이
 
-| 측면 | **로지스틱 회귀** | **서포트 벡터 머신** |
+| Aspect | **Logistic Regression** | **Support Vector Machines** |
 |---|---|---|
-| **목적 함수** | **로그 손실**(교차 엔트로피)을 최소화합니다. | **힌지 손실**을 최소화하면서 **마진**을 최대화합니다. |
-| **결정 경계** | _P(y\|x)_를 모델링하는 **최적의 초평면**을 찾습니다. | 가장 가까운 점과의 간격이 가장 큰 **최대 마진 초평면**을 찾습니다. |
-| **출력** | **확률적** – σ(w·x + b)를 통해 보정된 클래스 확률을 제공합니다. | **결정적** – 클래스 레이블을 반환합니다; 확률은 추가 작업이 필요합니다(예: Platt 스케일링). |
-| **정규화** | L2(기본값) 또는 L1, 과소/과대 적합을 직접적으로 균형 맞춥니다. | C 매개변수는 마진 너비와 잘못 분류 간의 균형을 맞추며, 커널 매개변수는 복잡성을 추가합니다. |
-| **커널 / 비선형** | 기본 형태는 **선형**; 비선형성은 특성 엔지니어링으로 추가됩니다. | 내장된 **커널 트릭**(RBF, poly 등)을 통해 고차원 공간에서 복잡한 경계를 모델링할 수 있습니다. |
-| **확장성** | **O(nd)**에서 볼록 최적화를 해결하며, 매우 큰 n을 잘 처리합니다. | 훈련은 전문 솔버 없이 **O(n²–n³)** 메모리/시간이 소요될 수 있으며, 큰 n에 덜 친숙합니다. |
-| **해석 가능성** | **높음** – 가중치가 특성의 영향을 보여줍니다; 오즈 비율이 직관적입니다. | 비선형 커널의 경우 **낮음**; 서포트 벡터는 희소하지만 설명하기 쉽지 않습니다. |
-| **이상치에 대한 민감도** | 부드러운 로그 손실을 사용하여 → 덜 민감합니다. | 하드 마진의 힌지 손실은 **민감할 수 있습니다**; 소프트 마진(C)은 이를 완화합니다. |
-| **일반적인 사용 사례** | 신용 점수, 의료 위험, A/B 테스트 – **확률 및 설명 가능성**이 중요한 경우. | 이미지/텍스트 분류, 생물 정보학 – **복잡한 경계**와 **고차원 데이터**가 중요한 경우. |
+| **Objective function** | **log-loss** (cross-entropy)를 최소화합니다. | **margin**을 최대화하는 동시에 **hinge-loss**를 최소화합니다. |
+| **Decision boundary** | _P(y\|x)_를 model하는 **best-fit hyperplane**을 찾습니다. | 가장 가까운 points까지의 간격이 가장 큰 **maximum-margin hyperplane**을 찾습니다. |
+| **Output** | **Probabilistic** – σ(w·x + b)를 통해 calibration된 class probabilities를 제공합니다. | **Deterministic** – class labels를 반환하며, probabilities에는 추가 작업(예: Platt scaling)이 필요합니다. |
+| **Regularisation** | L2 (default) 또는 L1을 사용하여 under-fitting과 over-fitting의 균형을 직접 조정합니다. | C parameter가 margin의 너비와 mis-classifications 사이의 균형을 조정하며, kernel parameters가 복잡도를 추가합니다. |
+| **Kernels / Non-linear** | 기본 형태는 **linear**이며, feature engineering을 통해 비선형성을 추가합니다. | 기본 제공되는 **kernel trick** (RBF, poly 등)을 통해 high-dim. space에서 복잡한 boundary를 model할 수 있습니다. |
+| **Scalability** | **O(nd)**에서 convex optimisation을 수행하며, 매우 큰 n도 잘 처리합니다. | specialised solvers가 없으면 training에 **O(n²–n³)** memory/time이 필요할 수 있어 매우 큰 n에는 적합하지 않습니다. |
+| **Interpretability** | **높음** – weights가 feature influence를 보여주며, odds ratio가 직관적입니다. | 비선형 kernels에서는 **낮음**; support vectors는 sparse하지만 설명하기 쉽지 않습니다. |
+| **Sensitivity to outliers** | smooth log-loss를 사용하므로 민감도가 낮습니다. | hard margin을 사용하는 hinge-loss는 **민감할 수 있으며**, soft-margin (C)이 이를 완화합니다. |
+| **Typical use cases** | **probabilities와 explainability**가 중요한 credit scoring, medical risk, A/B testing. | **복잡한 boundaries**와 **high-dimensional data**가 중요한 image/text classification, bio-informatics. |
 
-* **보정된 확률, 해석 가능성이 필요하거나 대규모 데이터셋에서 작업해야 하는 경우 — 로지스틱 회귀를 선택하세요.**
-* **수동 특성 엔지니어링 없이 비선형 관계를 포착할 수 있는 유연한 모델이 필요하다면 — SVM(커널 사용)을 선택하세요.**
-* 두 모델 모두 볼록 목표를 최적화하므로 **전역 최소값이 보장되지만**, SVM의 커널은 하이퍼 매개변수와 계산 비용을 추가합니다.
+* **calibrated probabilities, interpretability가 필요하거나 매우 큰 dataset에서 동작해야 한다면 — Logistic Regression을 선택합니다.**
+* **수동 feature engineering 없이 비선형 관계를 포착할 수 있는 유연한 model이 필요하다면 — SVM (kernels 포함)을 선택합니다.**
+* 두 model 모두 convex objectives를 최적화하므로 **global minima가 보장**되지만, SVM의 kernels는 hyper-parameters와 computational cost를 추가합니다.
 
-### 나이브 베이즈
+### Naive Bayes
 
-나이브 베이즈는 특성 간의 강한 독립성 가정을 적용하여 베이즈 정리를 기반으로 하는 **확률적 분류기**의 집합입니다. 이러한 "나이브" 가정에도 불구하고, 나이브 베이즈는 특히 스팸 탐지와 같은 텍스트 또는 범주형 데이터와 관련된 특정 응용 프로그램에서 놀랍도록 잘 작동합니다.
+Naive Bayes는 features 사이에 강한 independence assumption을 적용하는 Bayes' Theorem에 기반한 **probabilistic classifiers**의 family입니다. 이러한 "naive" assumption에도 불구하고 Naive Bayes는 특정 applications에서 놀라울 정도로 잘 작동하는 경우가 많으며, 특히 spam detection과 같이 text 또는 categorical data를 다루는 경우에 효과적입니다.<sup>[[5]](#references)</sup>
 
-#### 베이즈 정리
 
-베이즈 정리는 나이브 베이즈 분류기의 기초입니다. 이는 무작위 사건의 조건부 및 주변 확률을 연결합니다. 공식은:
+#### Bayes' Theorem
+
+Bayes' theorem은 Naive Bayes classifiers의 기반입니다. 이는 random events의 conditional probabilities와 marginal probabilities 사이의 관계를 나타냅니다. 공식은 다음과 같습니다:
 ```plaintext
 P(A|B) = (P(B|A) * P(A)) / P(B)
 ```
 Where:
-- `P(A|B)`는 특성 `B`가 주어졌을 때 클래스 `A`의 사후 확률입니다.
-- `P(B|A)`는 클래스 `A`가 주어졌을 때 특성 `B`의 가능성입니다.
-- `P(A)`는 클래스 `A`의 사전 확률입니다.
-- `P(B)`는 특성 `B`의 사전 확률입니다.
+- `P(A|B)`는 feature `B`가 주어졌을 때 class `A`의 posterior probability입니다.
+- `P(B|A)`는 class `A`가 주어졌을 때 feature `B`의 likelihood입니다.
+- `P(A)`는 class `A`의 prior probability입니다.
+- `P(B)`는 feature `B`의 prior probability입니다.
 
-예를 들어, 텍스트가 어린이 또는 성인에 의해 작성되었는지 분류하고자 할 때, 텍스트의 단어를 특성으로 사용할 수 있습니다. 초기 데이터를 기반으로 Naive Bayes 분류기는 각 단어가 각 잠재적 클래스(어린이 또는 성인)에 속할 확률을 미리 계산합니다. 새로운 텍스트가 주어지면, 텍스트의 단어를 기반으로 각 잠재적 클래스의 확률을 계산하고 가장 높은 확률을 가진 클래스를 선택합니다.
+예를 들어 텍스트가 어린이 또는 성인에 의해 작성되었는지 분류하려는 경우, 텍스트에 포함된 단어를 feature로 사용할 수 있습니다. 일부 초기 데이터를 기반으로 Naive Bayes classifier는 각 단어가 각 잠재적 class(어린이 또는 성인)에 속할 확률을 미리 계산합니다. 새로운 텍스트가 주어지면 텍스트에 포함된 단어를 기반으로 각 잠재적 class의 확률을 계산하고, 확률이 가장 높은 class를 선택합니다.
 
-이 예에서 볼 수 있듯이, Naive Bayes 분류기는 매우 간단하고 빠르지만, 특성이 독립적이라고 가정하는데, 이는 실제 데이터에서는 항상 그렇지 않습니다.
-
-
-#### Naive Bayes 분류기의 유형
-
-데이터의 유형과 특성의 분포에 따라 여러 유형의 Naive Bayes 분류기가 있습니다:
-- **Gaussian Naive Bayes**: 특성이 가우시안(정규) 분포를 따른다고 가정합니다. 연속 데이터에 적합합니다.
-- **Multinomial Naive Bayes**: 특성이 다항 분포를 따른다고 가정합니다. 텍스트 분류에서 단어 수와 같은 이산 데이터에 적합합니다.
-- **Bernoulli Naive Bayes**: 특성이 이진(0 또는 1)이라고 가정합니다. 텍스트 분류에서 단어의 존재 또는 부재와 같은 이진 데이터에 적합합니다.
-- **Categorical Naive Bayes**: 특성이 범주형 변수라고 가정합니다. 색상과 모양에 따라 과일을 분류하는 것과 같은 범주형 데이터에 적합합니다.
+이 예제에서 볼 수 있듯이 Naive Bayes classifier는 매우 단순하고 빠르지만, feature가 서로 independent하다고 가정합니다. 이는 실제 데이터에서는 항상 성립하지 않습니다.
 
 
-#### **Naive Bayes의 주요 특징:**
+#### Types of Naive Bayes Classifiers
 
--   **문제 유형:** 분류(이진 또는 다중 클래스). 사이버 보안에서 텍스트 분류 작업(스팸, 피싱 등)에 일반적으로 사용됩니다.
+데이터 유형과 feature의 distribution에 따라 여러 유형의 Naive Bayes classifier가 있습니다:
+- **Gaussian Naive Bayes**: feature가 Gaussian (normal) distribution을 따른다고 가정합니다. 연속형 데이터에 적합합니다.
+- **Multinomial Naive Bayes**: feature가 multinomial distribution을 따른다고 가정합니다. 텍스트 classification의 단어 수와 같은 이산형 데이터에 적합합니다.
+- **Bernoulli Naive Bayes**: feature가 binary(0 또는 1)라고 가정합니다. 텍스트 classification에서 단어의 존재 여부와 같은 binary 데이터에 적합합니다.
+- **Categorical Naive Bayes**: feature가 categorical variable이라고 가정합니다. 색상과 모양을 기준으로 과일을 분류하는 것과 같은 categorical 데이터에 적합합니다.
 
--   **해석 가능성:** 중간 -- 결정 트리만큼 직접적으로 해석할 수는 없지만, 학습된 확률(예: 스팸 이메일과 일반 이메일에서 가장 가능성이 높은 단어)을 검사할 수 있습니다. 필요할 경우 모델의 형태(클래스에 대한 각 특성의 확률)를 이해할 수 있습니다.
 
--   **장점:** **매우 빠른** 훈련 및 예측, 대규모 데이터셋에서도 (인스턴스 수 * 특성 수에 선형). 확률을 신뢰성 있게 추정하기 위해 상대적으로 적은 양의 데이터가 필요하며, 특히 적절한 스무딩이 있을 때 그렇습니다. 특성이 독립적으로 클래스에 증거를 기여할 때, 기준선으로서 놀라울 정도로 정확합니다. 고차원 데이터(예: 텍스트에서 수천 개의 특성)와 잘 작동합니다. 스무딩 매개변수를 설정하는 것 외에 복잡한 조정이 필요하지 않습니다.
+#### **Key characteristics of Naive Bayes:**
 
--   **제한 사항:** 독립성 가정은 특성이 높은 상관관계를 가질 경우 정확도를 제한할 수 있습니다. 예를 들어, 네트워크 데이터에서 `src_bytes`와 `dst_bytes`와 같은 특성이 상관관계가 있을 수 있으며, Naive Bayes는 그 상호작용을 포착하지 못합니다. 데이터 크기가 매우 커지면, 특성 의존성을 학습하는 더 표현력이 뛰어난 모델(예: 앙상블 또는 신경망)이 Naive Bayes를 초월할 수 있습니다. 또한, 공격을 식별하는 데 특정 특성 조합이 필요한 경우(개별 특성이 독립적으로만 필요한 것이 아님), Naive Bayes는 어려움을 겪을 것입니다.
+-   **Type of Problem:** Classification (binary 또는 multi-class). cybersecurity에서 text classification task(spam, phishing 등)에 흔히 사용됩니다.
+
+-   **Interpretability:** Medium -- decision tree만큼 직접적으로 해석할 수는 없지만, 학습된 probability(예: spam email과 ham email에서 가장 많이 나타날 가능성이 높은 단어)를 검사할 수 있습니다. 필요한 경우 model의 형식(class별 각 feature의 probability)을 이해할 수 있습니다.
+
+-   **Advantages:** 대규모 dataset에서도 training과 prediction이 **매우 빠릅니다**(instances 수 * features 수에 대해 linear). 특히 적절한 smoothing을 적용하면 probability를 안정적으로 추정하는 데 비교적 적은 데이터만 필요합니다. 특히 feature가 class에 대한 evidence를 independent하게 제공할 때 baseline으로 사용하기에 놀라울 정도로 정확한 경우가 많습니다. 고차원 데이터(예: text에서 추출한 수천 개의 feature)에서도 잘 작동합니다. smoothing parameter 설정 외에는 복잡한 tuning이 필요하지 않습니다.
+
+-   **Limitations:** feature 간 상관관계가 높은 경우 independence assumption 때문에 정확도가 제한될 수 있습니다. 예를 들어 network data에서 `src_bytes`와 `dst_bytes` 같은 feature는 서로 correlated일 수 있지만, Naive Bayes는 이러한 interaction을 포착하지 못합니다. 데이터 규모가 매우 커지면 feature dependency를 학습하는 더 expressive한 model(예: ensemble 또는 neural net)이 NB보다 우수한 성능을 낼 수 있습니다. 또한 attack을 식별하는 데 특정 feature 조합이 필요하고 개별 feature만으로는 충분하지 않은 경우 NB는 어려움을 겪습니다.
 
 > [!TIP]
-> *사이버 보안에서의 사용 사례:* 고전적인 사용은 **스팸 탐지**입니다 -- Naive Bayes는 초기 스팸 필터의 핵심으로, 특정 토큰(단어, 구문, IP 주소)의 빈도를 사용하여 이메일이 스팸일 확률을 계산했습니다. 또한 **피싱 이메일 탐지** 및 **URL 분류**에 사용되며, 특정 키워드나 특성(예: URL의 "login.php" 또는 URL 경로의 `@`)의 존재가 피싱 확률에 기여합니다. 악성 코드 분석에서는 특정 API 호출이나 소프트웨어의 권한의 존재를 사용하여 악성 코드인지 예측하는 Naive Bayes 분류기를 상상할 수 있습니다. 더 발전된 알고리즘이 종종 더 나은 성능을 보이지만, Naive Bayes는 속도와 단순성 덕분에 여전히 좋은 기준선으로 남아 있습니다.
+> *Use cases in cybersecurity:* 가장 대표적인 사용 사례는 **spam detection**입니다 -- Naive Bayes는 초기 spam filter의 핵심으로 사용되었으며, 특정 token(단어, 구문, IP address)의 frequency를 사용해 email이 spam일 probability를 계산했습니다. 또한 **phishing email detection**과 **URL classification**에도 사용됩니다. 이 경우 특정 keyword나 characteristic(URL의 "login.php" 또는 URL path의 `@` 등)의 존재 여부가 phishing probability에 영향을 줍니다. malware analysis에서는 특정 API call이나 software의 permission 존재 여부를 사용해 malware인지 예측하는 Naive Bayes classifier를 생각해 볼 수 있습니다. 더 advanced한 algorithm이 더 나은 성능을 내는 경우가 많지만, Naive Bayes는 속도와 단순성 때문에 여전히 좋은 baseline으로 사용됩니다.
 
 <details>
-<summary>예시 -- 피싱 탐지를 위한 Naive Bayes:</summary>
-Naive Bayes를 시연하기 위해, NSL-KDD 침입 데이터셋(이진 레이블 포함)에서 Gaussian Naive Bayes를 사용할 것입니다. Gaussian NB는 각 특성이 클래스별로 정규 분포를 따른다고 가정합니다. 많은 네트워크 특성이 이산적이거나 매우 왜곡되어 있기 때문에 대략적인 선택이지만, 연속 특성 데이터에 Naive Bayes를 적용하는 방법을 보여줍니다. 이진 특성 집합(예: 트리거된 경고 세트)에서 Bernoulli NB를 선택할 수도 있지만, 연속성을 위해 여기서는 NSL-KDD를 고수하겠습니다.
+<summary>Example -- Naive Bayes for Phishing Detection:</summary>
+Naive Bayes를 설명하기 위해 binary label이 포함된 NSL-KDD intrusion dataset에서 Gaussian Naive Bayes를 사용하겠습니다. Gaussian NB는 각 feature가 class별로 normal distribution을 따른다고 간주합니다. 많은 network feature가 discrete이거나 highly skewed되어 있으므로 이는 대략적인 선택이지만, continuous feature data에 NB를 적용하는 방법을 보여줍니다. triggered alert 집합과 같은 binary feature dataset에서는 Bernoulli NB를 선택할 수도 있지만, 여기서는 연속성을 위해 NSL-KDD를 사용하겠습니다.
 ```python
 import pandas as pd
 from sklearn.naive_bayes import GaussianNB
@@ -704,34 +706,34 @@ F1-score:  0.071
 ROC AUC:   0.867
 """
 ```
-이 코드는 공격을 탐지하기 위해 Naive Bayes 분류기를 훈련시킵니다. Naive Bayes는 훈련 데이터를 기반으로 `P(service=http | Attack)` 및 `P(Service=http | Normal)`과 같은 값을 계산하며, 특성 간의 독립성을 가정합니다. 그런 다음 이러한 확률을 사용하여 관찰된 특성에 따라 새로운 연결을 정상 또는 공격으로 분류합니다. NSL-KDD에서 NB의 성능은 더 고급 모델만큼 높지 않을 수 있지만(특성 독립성이 위배되기 때문에), 종종 괜찮고 극도의 속도의 이점을 제공합니다. 실시간 이메일 필터링이나 URL의 초기 분류와 같은 시나리오에서는 Naive Bayes 모델이 자원 사용이 적으면서 명백히 악의적인 사례를 빠르게 플래그할 수 있습니다.
+이 코드는 공격을 탐지하기 위해 Naive Bayes classifier를 학습합니다. Naive Bayes는 feature 간의 독립성을 가정하고 training data를 기반으로 `P(service=http | Attack)` 및 `P(Service=http | Normal)`과 같은 값을 계산합니다. 그런 다음 관찰된 feature를 기반으로 이러한 확률을 사용해 새로운 connection을 normal 또는 attack으로 분류합니다. NSL-KDD에서 NB의 성능은 더 advanced한 model만큼 높지 않을 수 있지만(feature independence 가정이 위반되기 때문), 대체로 준수한 성능을 보이며 매우 빠르다는 장점이 있습니다. real-time email filtering이나 URL의 초기 triage와 같은 시나리오에서 Naive Bayes model은 적은 resource 사용량으로 명백히 malicious한 사례를 빠르게 flag할 수 있습니다.
 
 </details>
 
-### k-최근접 이웃 (k-NN)
+### k-Nearest Neighbors (k-NN)
 
-k-최근접 이웃은 가장 간단한 머신 러닝 알고리즘 중 하나입니다. 이는 **비모수적, 인스턴스 기반** 방법으로, 훈련 세트의 예제와의 유사성을 기반으로 예측을 수행합니다. 분류를 위한 아이디어는: 새로운 데이터 포인트를 분류하기 위해 훈련 데이터에서 **k**개의 가장 가까운 포인트(즉, "가장 가까운 이웃")를 찾아 그 이웃들 중 다수의 클래스를 할당하는 것입니다. "가까움"은 거리 메트릭에 의해 정의되며, 일반적으로 숫자 데이터의 경우 유클리드 거리(다른 유형의 특성이나 문제에 대해 다른 거리를 사용할 수 있음)를 사용합니다.
+k-Nearest Neighbors는 가장 단순한 machine learning algorithm 중 하나입니다. 이는 training set의 example과의 similarity를 기반으로 prediction을 수행하는 **non-parametric, instance-based** method입니다. classification의 기본 개념은 다음과 같습니다. 새로운 data point를 분류할 때 training data에서 가장 가까운 **k**개의 point(즉, "nearest neighbors")를 찾고, 해당 neighbor들 사이에서 다수인 class를 할당합니다. "Closeness"는 distance metric으로 정의되며, 일반적으로 numeric data에는 Euclidean distance가 사용됩니다(다른 유형의 feature나 문제에는 다른 distance를 사용할 수 있음).<sup>[[10]](#references)</sup>
 
-K-NN은 *명시적인 훈련이 필요하지 않습니다* -- "훈련" 단계는 데이터셋을 저장하는 것뿐입니다. 모든 작업은 쿼리(예측) 중에 발생합니다: 알고리즘은 쿼리 포인트에서 모든 훈련 포인트까지의 거리를 계산하여 가장 가까운 포인트를 찾아야 합니다. 이로 인해 예측 시간은 **훈련 샘플 수에 선형적**이며, 이는 대규모 데이터셋에 대해 비용이 많이 들 수 있습니다. 따라서 k-NN은 더 작은 데이터셋이나 메모리와 속도를 단순함과 교환할 수 있는 시나리오에 가장 적합합니다.
+K-NN에는 *명시적인 training이 필요하지 않습니다* -- "training" 단계는 단순히 dataset을 저장하는 과정입니다. 모든 작업은 query(prediction) 시점에 수행됩니다. algorithm은 가장 가까운 point를 찾기 위해 query point와 모든 training point 사이의 distance를 계산해야 합니다. 따라서 prediction time은 **training sample 수에 선형 비례**하며, 큰 dataset에서는 비용이 클 수 있습니다. 이 때문에 k-NN은 비교적 작은 dataset이나 단순성을 위해 memory와 speed를 절충할 수 있는 시나리오에 가장 적합합니다.
 
-단순함에도 불구하고 k-NN은 매우 복잡한 결정 경계를 모델링할 수 있습니다(사실상 결정 경계는 예제의 분포에 의해 결정되는 어떤 형태도 될 수 있습니다). 결정 경계가 매우 불규칙하고 데이터가 많을 때 잘 작동하는 경향이 있습니다 -- 본질적으로 데이터가 "스스로 말하게" 합니다. 그러나 고차원에서는 거리 메트릭이 덜 의미 있게 될 수 있으며(차원의 저주), 샘플 수가 많지 않으면 이 방법이 어려움을 겪을 수 있습니다.
+단순하지만 k-NN은 매우 복잡한 decision boundary를 model링할 수 있습니다(실질적으로 decision boundary가 example의 distribution에 의해 결정되는 어떤 형태든 될 수 있기 때문). Decision boundary가 매우 불규칙하고 data가 많을 때 좋은 성능을 보이는 경향이 있습니다 -- 본질적으로 data가 "스스로 말하게" 하는 방식입니다. 그러나 high dimension에서는 distance metric의 의미가 약해질 수 있으며(curse of dimensionality), 매우 많은 sample이 없으면 method가 어려움을 겪을 수 있습니다.
 
-*사이버 보안에서의 사용 사례:* k-NN은 이상 탐지에 적용되었습니다 -- 예를 들어, 침입 탐지 시스템은 대부분의 가장 가까운 이웃(이전 이벤트)이 악의적이었다면 네트워크 이벤트를 악의적이라고 레이블을 붙일 수 있습니다. 정상 트래픽이 클러스터를 형성하고 공격이 이상치인 경우, K-NN 접근 방식(k=1 또는 작은 k)은 본질적으로 **가장 가까운 이웃 이상 탐지**를 수행합니다. K-NN은 이진 특성 벡터를 통해 악성코드 패밀리를 분류하는 데에도 사용되었습니다: 새로운 파일이 특정 악성코드 패밀리의 알려진 인스턴스와 매우 가까운 경우 해당 악성코드 패밀리로 분류될 수 있습니다. 실제로 k-NN은 더 확장 가능한 알고리즘만큼 일반적이지 않지만, 개념적으로 간단하고 때때로 기준선 또는 소규모 문제에 사용됩니다.
+*Use cases in cybersecurity:* k-NN은 anomaly detection에 적용되어 왔습니다 -- 예를 들어 intrusion detection system은 가장 가까운 neighbor(이전 event)의 대부분이 malicious했다면 network event를 malicious로 label할 수 있습니다. Normal traffic이 cluster를 형성하고 attack이 outlier라면, k-NN 접근 방식(k=1 또는 작은 k 사용)은 본질적으로 **nearest-neighbor anomaly detection**이 됩니다. 또한 k-NN은 binary feature vector를 사용해 malware family를 분류하는 데도 사용되어 왔습니다. 새로운 file이 특정 malware family의 알려진 instance와 feature space에서 매우 가까우면 해당 family로 분류할 수 있습니다. 실제로 k-NN은 더 확장 가능한 algorithm만큼 흔히 사용되지는 않지만, 개념적으로 간단하고 때때로 baseline 또는 소규모 문제에 사용됩니다.
 
 #### **k-NN의 주요 특성:**
 
--   **문제 유형:** 분류(회귀 변형도 존재). 이는 *게으른 학습* 방법입니다 -- 명시적인 모델 적합이 없습니다.
+-   **문제 유형:** Classification(regression variant도 존재). *lazy learning* method이므로 명시적인 model fitting이 없습니다.
 
--   **해석 가능성:** 낮음에서 중간 -- 전역 모델이나 간결한 설명이 없지만, 결정에 영향을 미친 가장 가까운 이웃을 살펴봄으로써 결과를 해석할 수 있습니다(예: "이 네트워크 흐름은 이 3개의 알려진 악의적 흐름과 유사하기 때문에 악의적으로 분류되었습니다"). 따라서 설명은 예제 기반이 될 수 있습니다.
+-   **Interpretability:** 낮음에서 중간 수준 -- global model이나 간결한 설명은 없지만, decision에 영향을 준 nearest neighbor를 확인하여 결과를 해석할 수 있습니다(예: "이 network flow는 알려진 malicious flow 3개와 유사하기 때문에 malicious로 분류되었다"). 따라서 설명은 example 기반으로 제공할 수 있습니다.
 
--   **장점:** 구현 및 이해가 매우 간단합니다. 데이터 분포에 대한 가정을 하지 않습니다(비모수적). 다중 클래스 문제를 자연스럽게 처리할 수 있습니다. 결정 경계가 매우 복잡할 수 있다는 점에서 **적응적**입니다.
+-   **장점:** 구현하고 이해하기가 매우 쉽습니다. data distribution에 대한 가정이 없습니다(non-parametric). multi-class 문제를 자연스럽게 처리할 수 있습니다. decision boundary가 data distribution에 의해 형성되어 매우 복잡해질 수 있다는 점에서 **adaptive**합니다.
 
--   **제한 사항:** 대규모 데이터셋에 대해 예측이 느릴 수 있습니다(많은 거리를 계산해야 함). 메모리 집약적입니다 -- 모든 훈련 데이터를 저장합니다. 고차원 특성 공간에서는 성능이 저하됩니다. 모든 포인트가 거의 동등한 거리가 되기 때문에 "가장 가까운" 개념이 덜 의미 있게 됩니다. *k* (이웃의 수)를 적절히 선택해야 합니다 -- 너무 작은 k는 노이즈가 많고, 너무 큰 k는 다른 클래스의 관련 없는 포인트를 포함할 수 있습니다. 또한, 거리 계산이 스케일에 민감하기 때문에 특성은 적절히 스케일링되어야 합니다.
+-   **제한 사항:** 큰 dataset에서는 prediction이 느릴 수 있습니다(많은 distance를 계산해야 함). 모든 training data를 저장하므로 memory 사용량이 큽니다. high-dimensional feature space에서는 모든 point가 거의 같은 distance를 갖게 되는 경향이 있어("nearest"라는 개념의 의미가 약해짐) 성능이 저하됩니다. *k*(neighbor 수)를 적절히 선택해야 합니다 -- k가 너무 작으면 noise가 많아질 수 있고, k가 너무 크면 다른 class의 무관한 point가 포함될 수 있습니다. 또한 distance 계산은 scale에 민감하므로 feature를 적절히 scaling해야 합니다.
 
 <details>
-<summary>예제 -- 피싱 탐지를 위한 k-NN:</summary>
+<summary>Example -- Phishing Detection을 위한 k-NN:</summary>
 
-다시 NSL-KDD(이진 분류)를 사용할 것입니다. k-NN은 계산적으로 무겁기 때문에, 이 시연에서 다루기 쉽게 훈련 데이터의 하위 집합을 사용할 것입니다. 전체 125k에서 20,000개의 훈련 샘플을 선택하고 k=5 이웃을 사용할 것입니다. 훈련 후(사실상 데이터를 저장하는 것), 테스트 세트에서 평가할 것입니다. 거리 계산을 위해 특성을 스케일링하여 단일 특성이 스케일로 인해 지배하지 않도록 할 것입니다.
+이번에도 NSL-KDD(binary classification)를 사용합니다. k-NN은 computationally heavy하므로, 이 demonstration을 실행 가능한 수준으로 유지하기 위해 training data의 subset을 사용합니다. 전체 125k sample 중 예를 들어 20,000개의 training sample을 선택하고, k=5 neighbor를 사용합니다. training 후(실제로는 data를 저장하는 과정에 불과함) test set에서 평가합니다. 또한 distance calculation을 위해 feature를 scaling하여 scale 차이로 인해 특정 feature 하나가 지나치게 큰 영향을 주지 않도록 합니다.
 ```python
 import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
@@ -800,32 +802,34 @@ F1-score:  0.766
 ROC AUC:   0.837
 """
 ```
-k-NN 모델은 훈련 세트의 5개 가장 가까운 연결을 살펴보아 연결을 분류합니다. 예를 들어, 그 이웃 중 4개가 공격(이상치)이고 1개가 정상인 경우, 새로운 연결은 공격으로 분류됩니다. 성능은 합리적일 수 있지만, 종종 동일한 데이터에서 잘 조정된 Random Forest나 SVM만큼 높지 않습니다. 그러나 k-NN은 클래스 분포가 매우 불규칙하고 복잡할 때 빛을 발할 수 있으며, 효과적으로 메모리 기반 조회를 사용합니다. 사이버 보안에서 k-NN( k=1 또는 작은 k)은 예를 들어 알려진 공격 패턴을 탐지하는 데 사용되거나 더 복잡한 시스템의 구성 요소로 사용될 수 있습니다(예: 클러스터링 후 클러스터 멤버십에 따라 분류).
+k-NN model은 training set subset에서 가장 가까운 5개의 connection을 확인하여 connection을 분류합니다. 예를 들어 해당 neighbor 중 4개가 attack(anomaly)이고 1개가 normal이면 새로운 connection은 attack으로 분류됩니다. 성능은 합리적일 수 있지만, 동일한 data에서 잘 tuning된 Random Forest 또는 SVM만큼 높지 않은 경우가 많습니다. 그러나 class distribution이 매우 불규칙하고 복잡한 경우 k-NN이 빛을 발할 수 있으며, 사실상 memory-based lookup을 사용합니다. Cybersecurity에서 k-NN(k=1 또는 작은 k)은 예시를 통한 알려진 attack pattern 탐지에 사용하거나, 더 복잡한 system의 구성 요소로 사용할 수 있습니다(예: clustering 후 cluster membership에 따라 분류).
 
-### Gradient Boosting Machines (예: XGBoost)
+</details>
 
-Gradient Boosting Machines는 구조화된 데이터에 대해 가장 강력한 알고리즘 중 하나입니다. **Gradient boosting**은 약한 학습자(종종 결정 트리)의 앙상블을 순차적으로 구축하는 기술을 의미하며, 각 새로운 모델은 이전 앙상블의 오류를 수정합니다. 나무를 병렬로 구축하고 평균화하는 bagging(Random Forests)과 달리, boosting은 나무를 *하나씩* 구축하며, 각 나무는 이전 나무가 잘못 예측한 인스턴스에 더 집중합니다.
+### Gradient Boosting Machines (e.g., XGBoost)
 
-최근 몇 년 동안 가장 인기 있는 구현은 **XGBoost**, **LightGBM**, **CatBoost**로, 모두 gradient boosting decision tree (GBDT) 라이브러리입니다. 이들은 기계 학습 대회와 응용 프로그램에서 매우 성공적이었으며, 종종 **표 형식 데이터셋에서 최첨단 성능을 달성**합니다. 사이버 보안에서 연구자와 실무자는 **악성 코드 탐지**(파일 또는 런타임 동작에서 추출한 기능 사용) 및 **네트워크 침입 탐지**와 같은 작업에 gradient boosted trees를 사용했습니다. 예를 들어, gradient boosting 모델은 "많은 SYN 패킷과 비정상적인 포트 -> 스캔 가능성"과 같은 많은 약한 규칙(트리)을 결합하여 많은 미세한 패턴을 고려하는 강력한 복합 탐지기로 만들 수 있습니다.
+Gradient Boosting Machines는 structured data를 위한 가장 강력한 algorithm 중 하나입니다. **Gradient boosting**은 weak learner ensemble(대개 decision tree)을 순차적으로 구축하는 technique을 의미하며, 각각의 새로운 model은 이전 ensemble의 error를 보정합니다. Tree를 병렬로 구축하고 평균을 내는 bagging(Random Forests)과 달리, boosting은 tree를 *하나씩* 구축하며 각 tree는 이전 tree가 잘못 예측한 instance에 더 집중합니다.
 
-부스트된 트리가 왜 이렇게 효과적일까요? 시퀀스의 각 트리는 현재 앙상블의 예측의 *잔여 오류* (기울기)에 대해 훈련됩니다. 이렇게 하면 모델이 약한 영역을 점진적으로 **"부스트"**합니다. 결정 트리를 기본 학습자로 사용하면 최종 모델이 복잡한 상호작용과 비선형 관계를 포착할 수 있습니다. 또한, boosting은 본질적으로 내장된 정규화 형태를 가지고 있습니다: 많은 작은 트리를 추가하고(기여도를 조정하기 위해 학습률을 사용하여) 일반적으로 적절한 매개변수가 선택되면 큰 과적합 없이 잘 일반화됩니다.
+최근 몇 년 동안 가장 널리 사용된 implementation은 **XGBoost**, **LightGBM**, **CatBoost**이며, 모두 gradient boosting decision tree(GBDT) library입니다. 이들은 machine learning competition과 application에서 매우 뛰어난 성과를 거두었으며, **tabular dataset에서 state-of-the-art performance를 달성**하는 경우가 많습니다. Cybersecurity에서 연구자와 practitioner는 **malware detection**(file 또는 runtime behavior에서 추출한 feature 사용) 및 **network intrusion detection**과 같은 task에 gradient boosted tree를 사용해 왔습니다. 예를 들어 gradient boosting model은 "SYN packet이 많고 unusual port가 있으면 -> scan일 가능성이 높음"과 같은 여러 weak rule(tree)을 결합하여 다양한 미묘한 pattern을 고려하는 강력한 composite detector를 만들 수 있습니다.<sup>[[6]](#references)</sup>
 
-#### **Gradient Boosting의 주요 특성:**
+Boosted tree가 그토록 효과적인 이유는 무엇일까요? Sequence의 각 tree는 현재 ensemble prediction의 *residual error*(gradient)를 기반으로 training됩니다. 이를 통해 model은 약한 부분을 점진적으로 **"boost"**합니다. Base learner로 decision tree를 사용하므로 최종 model은 복잡한 interaction과 non-linear relation을 포착할 수 있습니다. 또한 boosting에는 본질적으로 built-in regularization 형태가 있습니다. 많은 작은 tree를 추가하고(learning rate를 사용하여 각 tree의 기여도를 조정), 적절한 parameter를 선택하면 심각한 overfitting 없이 잘 generalize하는 경우가 많습니다.
 
--   **문제 유형:** 주로 분류 및 회귀. 보안에서는 일반적으로 분류(예: 연결 또는 파일을 이진 분류). 이진, 다중 클래스(적절한 손실을 사용) 및 순위 문제를 처리합니다.
+#### **Gradient Boosting의 주요 특징:**
 
--   **해석 가능성:** 낮음에서 중간. 단일 부스트된 트리는 작지만 전체 모델은 수백 개의 트리를 가질 수 있어 전체적으로 인간이 해석하기 어렵습니다. 그러나 Random Forest와 마찬가지로 기능 중요도 점수를 제공할 수 있으며, SHAP(SHapley Additive exPlanations)와 같은 도구를 사용하여 개별 예측을 어느 정도 해석할 수 있습니다.
+-   **문제 유형:** 주로 classification과 regression입니다. Security에서는 일반적으로 classification이 사용됩니다(예: connection 또는 file을 binary classification). Binary, multi-class(적절한 loss 사용), 그리고 ranking problem도 처리할 수 있습니다.
 
--   **장점:** 구조화된/표 형식 데이터에 대해 종종 **최고 성능** 알고리즘입니다. 복잡한 패턴과 상호작용을 탐지할 수 있습니다. 모델 복잡성을 조정하고 과적합을 방지하기 위해 많은 조정 노브(트리 수, 트리 깊이, 학습률, 정규화 항)를 가지고 있습니다. 현대 구현은 속도를 최적화했습니다(예: XGBoost는 2차 기울기 정보와 효율적인 데이터 구조를 사용합니다). 적절한 손실 함수와 샘플 가중치를 조정하면 불균형 데이터를 더 잘 처리하는 경향이 있습니다.
+-   **해석 가능성:** 낮음에서 중간 정도입니다. 단일 boosted tree는 작지만 전체 model은 수백 개의 tree로 구성될 수 있으므로 전체를 사람이 해석하기는 어렵습니다. 그러나 Random Forest와 마찬가지로 feature importance score를 제공할 수 있으며, SHAP(SHapley Additive exPlanations)과 같은 tool을 사용하면 개별 prediction을 어느 정도 해석할 수 있습니다.
 
--   **제한 사항:** 더 간단한 모델보다 조정이 복잡합니다; 트리가 깊거나 트리 수가 많으면 훈련이 느릴 수 있습니다(그러나 여전히 동일한 데이터에서 비교 가능한 깊은 신경망을 훈련하는 것보다 일반적으로 빠릅니다). 조정하지 않으면 모델이 과적합할 수 있습니다(예: 충분한 정규화 없이 너무 많은 깊은 트리). 많은 하이퍼파라미터로 인해 gradient boosting을 효과적으로 사용하려면 더 많은 전문 지식이나 실험이 필요할 수 있습니다. 또한, 트리 기반 방법과 마찬가지로 매우 희소한 고차원 데이터를 선형 모델이나 Naive Bayes만큼 효율적으로 처리하지 않습니다(그러나 여전히 적용할 수 있으며, 예를 들어 텍스트 분류에서 사용할 수 있지만 기능 엔지니어링 없이는 첫 번째 선택이 아닐 수 있습니다).
+-   **장점:** Structured/tabular data에서 **가장 높은 성능을 보이는** algorithm인 경우가 많습니다. 복잡한 pattern과 interaction을 탐지할 수 있습니다. Model complexity를 조정하고 overfitting을 방지할 수 있도록 다양한 tuning parameter(tree 수, tree depth, learning rate, regularization term)를 제공합니다. 최신 implementation은 속도에 최적화되어 있습니다(예: XGBoost는 second-order gradient 정보와 효율적인 data structure를 사용합니다). 적절한 loss function과 함께 사용하거나 sample weight를 조정하면 imbalanced data도 더 잘 처리하는 경향이 있습니다.
+
+-   **제한 사항:** 단순한 model보다 tuning이 복잡하며, tree가 깊거나 tree 수가 많으면 training이 느려질 수 있습니다(다만 동일한 data에서 비슷한 규모의 deep neural network를 training하는 것보다는 일반적으로 빠릅니다). 적절히 tuning하지 않으면 model이 overfit할 수 있습니다(예: regularization이 부족한 상태에서 지나치게 많은 deep tree를 사용하는 경우). Hyperparameter가 많기 때문에 gradient boosting을 효과적으로 사용하려면 더 많은 전문 지식이나 experimentation이 필요할 수 있습니다. 또한 tree-based method와 마찬가지로 매우 sparse한 high-dimensional data를 linear model이나 Naive Bayes만큼 효율적으로 본질적으로 처리하지는 못합니다(예: text classification에도 적용할 수 있지만 feature engineering 없이는 first choice가 아닐 수 있습니다).
 
 > [!TIP]
-> *사이버 보안의 사용 사례:* 결정 트리나 랜덤 포레스트를 사용할 수 있는 거의 모든 곳에서 gradient boosting 모델이 더 나은 정확도를 달성할 수 있습니다. 예를 들어, **Microsoft의 악성 코드 탐지** 대회에서는 이진 파일에서 엔지니어링된 기능에 대해 XGBoost를 많이 사용했습니다. **네트워크 침입 탐지** 연구는 종종 GBDT에서 최고의 결과를 보고합니다(예: CIC-IDS2017 또는 UNSW-NB15 데이터셋에서 XGBoost). 이러한 모델은 다양한 기능(프로토콜 유형, 특정 이벤트의 빈도, 트래픽의 통계적 기능 등)을 수집하여 위협을 탐지할 수 있습니다. 피싱 탐지에서는 gradient boosting이 URL의 어휘적 기능, 도메인 평판 기능 및 페이지 콘텐츠 기능을 결합하여 매우 높은 정확도를 달성할 수 있습니다. 앙상블 접근 방식은 데이터의 많은 모서리 사례와 미세한 부분을 포괄하는 데 도움이 됩니다.
+> *Cybersecurity에서의 사용 사례:* Decision tree 또는 random forest를 사용할 수 있는 거의 모든 곳에서 gradient boosting model이 더 높은 accuracy를 달성할 수 있습니다. 예를 들어 **Microsoft의 malware detection** competition에서는 binary file에서 추출한 engineered feature에 XGBoost를 많이 사용해 왔습니다. **Network intrusion detection** research에서도 GBDT(예: CIC-IDS2017 또는 UNSW-NB15 dataset의 XGBoost)를 사용해 높은 성능을 보고하는 경우가 많습니다. 이러한 model은 광범위한 feature(protocol type, 특정 event의 frequency, traffic의 statistical feature 등)를 입력으로 받아 이를 결합하여 threat를 탐지할 수 있습니다. Phishing detection에서는 gradient boosting이 URL의 lexical feature, domain reputation feature, page content feature를 결합하여 매우 높은 accuracy를 달성할 수 있습니다. Ensemble approach는 data의 다양한 edge case와 미묘한 특성을 포괄하는 데 도움이 됩니다.
 
 <details>
-<summary>예시 -- 피싱 탐지를 위한 XGBoost:</summary>
-피싱 데이터셋에서 gradient boosting 분류기를 사용할 것입니다. 간단하고 독립적으로 유지하기 위해 `sklearn.ensemble.GradientBoostingClassifier`(느리지만 간단한 구현)를 사용할 것입니다. 일반적으로 더 나은 성능과 추가 기능을 위해 `xgboost` 또는 `lightgbm` 라이브러리를 사용할 수 있습니다. 우리는 모델을 훈련하고 이전과 유사하게 평가할 것입니다.
+<summary>Example -- XGBoost for Phishing Detection:</summary>
+Phishing dataset에서 gradient boosting classifier를 사용합니다. 간단하고 self-contained하게 구성하기 위해 `sklearn.ensemble.GradientBoostingClassifier`(더 느리지만 straightforward한 implementation)를 사용합니다. 일반적으로 더 나은 performance와 추가 feature를 위해 `xgboost` 또는 `lightgbm` library를 사용할 수 있습니다. Model을 training하고 이전과 유사한 방식으로 evaluation을 수행합니다.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -873,23 +877,23 @@ F1‑score:  0.957
 ROC AUC:   0.990
 """
 ```
-그래디언트 부스팅 모델은 이 피싱 데이터셋에서 매우 높은 정확도와 AUC를 달성할 가능성이 높습니다(문헌에서 볼 수 있듯이, 이러한 데이터에서 적절한 조정을 통해 이러한 모델은 종종 95% 이상의 정확도를 초과할 수 있습니다. 이는 GBDT가 *"표 형 데이터셋에 대한 최첨단 모델"*로 간주되는 이유를 보여줍니다 -- 이들은 종종 복잡한 패턴을 포착하여 더 간단한 알고리즘보다 더 나은 성능을 발휘합니다. 사이버 보안 맥락에서 이는 더 적은 실수로 더 많은 피싱 사이트나 공격을 잡는 것을 의미할 수 있습니다. 물론, 과적합에 주의해야 합니다 -- 우리는 일반적으로 교차 검증과 같은 기술을 사용하고 배포를 위한 모델 개발 시 검증 세트에서 성능을 모니터링합니다.
+Gradient boosting model은 이 phishing dataset에서 매우 높은 accuracy와 AUC를 달성할 가능성이 높습니다(문헌에서 확인되듯이, 이러한 데이터에서는 적절한 tuning을 통해 이러한 모델이 종종 95% 이상의 accuracy를 달성할 수 있습니다). 이는 GBDTs가 *"tabular dataset을 위한 state of the art model"*로 간주되는 이유를 보여 줍니다 -- 복잡한 패턴을 포착하여 더 단순한 알고리즘보다 뛰어난 성능을 보이는 경우가 많기 때문입니다. Cybersecurity context에서는 더 적은 누락으로 더 많은 phishing sites 또는 attacks를 탐지할 수 있다는 의미가 됩니다. 물론 overfitting에 주의해야 합니다 -- 일반적으로 이러한 모델을 deployment용으로 개발할 때는 cross-validation과 같은 techniques를 사용하고 validation set에서 performance를 모니터링합니다.
 
 </details>
 
-### 모델 결합: 앙상블 학습 및 스태킹
+### Models 결합: Ensemble Learning과 Stacking
 
-앙상블 학습은 **여러 모델을 결합하여** 전체 성능을 향상시키는 전략입니다. 우리는 이미 특정 앙상블 방법을 보았습니다: 랜덤 포레스트(배깅을 통한 트리의 앙상블)와 그래디언트 부스팅(순차적 부스팅을 통한 트리의 앙상블). 그러나 앙상블은 **투표 앙상블**이나 **스택 일반화(스태킹)**와 같은 다른 방법으로도 생성될 수 있습니다. 주요 아이디어는 서로 다른 모델이 서로 다른 패턴을 포착하거나 서로 다른 약점을 가질 수 있다는 것입니다; 이를 결합함으로써 우리는 **각 모델의 오류를 다른 모델의 강점으로 보완할 수 있습니다**.
+Ensemble learning은 전반적인 performance를 향상하기 위해 **multiple models를 결합**하는 전략입니다. 이미 특정 ensemble methods인 Random Forest (bagging을 통한 trees ensemble)와 Gradient Boosting (sequential boosting을 통한 trees ensemble)을 살펴보았습니다. 하지만 **voting ensembles** 또는 **stacked generalization (stacking)**과 같은 다른 방식으로도 ensembles를 만들 수 있습니다. 핵심 아이디어는 서로 다른 models가 서로 다른 patterns를 포착하거나 서로 다른 weaknesses를 가질 수 있다는 것입니다. 이를 결합하면 **한 model의 errors를 다른 model의 strengths로 보완**할 수 있습니다.<sup>[[13]](#references)</sup>
 
--   **투표 앙상블:** 간단한 투표 분류기에서는 여러 다양한 모델(예: 로지스틱 회귀, 결정 트리, SVM)을 훈련시키고 최종 예측에 대해 투표하게 합니다(분류를 위한 다수결 투표). 우리가 투표에 가중치를 부여한다면(예: 더 정확한 모델에 더 높은 가중치), 이는 가중 투표 방식입니다. 이는 개별 모델이 합리적으로 좋고 독립적일 때 성능을 개선하는 경향이 있습니다 -- 앙상블은 다른 모델이 이를 수정할 수 있기 때문에 개별 모델의 실수 위험을 줄입니다. 이는 단일 의견보다 전문가 패널을 갖는 것과 같습니다.
+-   **Voting Ensemble:** 간단한 voting classifier에서는 여러 개의 다양한 models(예: logistic regression, decision tree, SVM)를 train하고 최종 prediction에 대해 투표하게 합니다(classification에서는 majority vote). 투표에 가중치를 부여하면(예: 더 accurate한 models에 더 높은 weight 부여) weighted voting scheme이 됩니다. 개별 models가 합리적으로 우수하고 서로 독립적일 때 일반적으로 performance가 향상됩니다 -- 다른 models가 실수를 바로잡을 수 있으므로 ensemble이 개별 model의 실수 위험을 줄여 주기 때문입니다. 이는 한 사람의 의견에 의존하는 대신 expert panel을 두는 것과 같습니다.
 
--   **스태킹(스택 앙상블):** 스태킹은 한 걸음 더 나아갑니다. 단순한 투표 대신, **메타 모델**을 훈련시켜 **기본 모델의 예측을 최적으로 결합하는 방법을 학습**합니다. 예를 들어, 3개의 서로 다른 분류기(기본 학습자)를 훈련시킨 후, 그들의 출력(또는 확률)을 메타 분류기(종종 로지스틱 회귀와 같은 간단한 모델)의 특징으로 사용하여 최적의 혼합 방법을 학습합니다. 메타 모델은 과적합을 피하기 위해 검증 세트에서 또는 교차 검증을 통해 훈련됩니다. 스태킹은 *어떤 모델을 어떤 상황에서 더 신뢰할지를 학습함으로써* 간단한 투표보다 종종 더 나은 성능을 발휘할 수 있습니다. 사이버 보안에서는 한 모델이 네트워크 스캔을 잡는 데 더 나은 반면, 다른 모델은 악성코드 비콘을 잡는 데 더 나을 수 있습니다; 스태킹 모델은 각 모델에 적절히 의존하는 방법을 학습할 수 있습니다.
+-   **Stacking (Stacked Ensemble):** Stacking은 한 단계 더 나아갑니다. 단순히 vote하는 대신 **base models의 predictions를 가장 효과적으로 결합하는 방법을 학습**하는 **meta-model**을 train합니다. 예를 들어, 서로 다른 3개의 classifiers(base learners)를 train한 다음, 이들의 outputs(또는 probabilities)를 meta-classifier(대개 logistic regression과 같은 간단한 model)의 features로 전달하여 이를 최적으로 결합하는 방법을 학습시킵니다. meta-model은 overfitting을 방지하기 위해 validation set 또는 cross-validation을 통해 train합니다. Stacking은 *어떤 상황에서 어떤 models를 더 신뢰할지* 학습하므로 단순한 voting보다 더 나은 performance를 보이는 경우가 많습니다. Cybersecurity에서는 한 model이 network scans 탐지에 더 뛰어나고 다른 model이 malware beaconing 탐지에 더 뛰어날 수 있습니다. stacking model은 각각에 적절히 의존하는 방법을 학습할 수 있습니다.
 
-투표든 스태킹이든 앙상블은 **정확도**와 강건성을 **향상시키는 경향이 있습니다**. 단점은 복잡성이 증가하고 때때로 해석 가능성이 감소한다는 것입니다(그러나 결정 트리의 평균과 같은 일부 앙상블 접근 방식은 여전히 일부 통찰력을 제공할 수 있습니다, 예: 특징 중요도). 실제로 운영 제약이 허용된다면, 앙상블을 사용하는 것이 더 높은 탐지율로 이어질 수 있습니다. 사이버 보안 챌린지(및 일반적으로 Kaggle 대회)에서 많은 우승 솔루션이 앙상블 기술을 사용하여 마지막 성능을 끌어내고 있습니다.
+Voting 또는 stacking을 사용하는 ensembles는 accuracy와 robustness를 **향상**시키는 경향이 있습니다. 단점은 complexity가 증가하고 interpretability가 낮아질 수 있다는 점입니다(다만 decision trees의 average와 같은 일부 ensemble approaches는 feature importance 등 어느 정도의 insight를 제공할 수 있습니다). 실제로 operational constraints가 허용한다면 ensemble을 사용하여 더 높은 detection rates를 달성할 수 있습니다. Cybersecurity challenges의 많은 우승 solution(일반적인 Kaggle competitions에서도)은 performance를 마지막까지 끌어올리기 위해 ensemble techniques를 사용합니다.
 
 <details>
-<summary>예시 -- 피싱 탐지를 위한 투표 앙상블:</summary>
-모델 스태킹을 설명하기 위해, 피싱 데이터셋에서 논의한 몇 가지 모델을 결합해 보겠습니다. 로지스틱 회귀, 결정 트리 및 k-NN을 기본 학습자로 사용하고, 랜덤 포레스트를 메타 학습자로 사용하여 그들의 예측을 집계합니다. 메타 학습자는 기본 학습자의 출력(훈련 세트에서 교차 검증 사용)에 대해 훈련됩니다. 우리는 스택 모델이 개별 모델만큼 잘 수행하거나 약간 더 나은 성능을 보일 것으로 기대합니다.
+<summary>Example -- Phishing Detection을 위한 Voting Ensemble:</summary>
+Model stacking을 설명하기 위해 phishing dataset에서 앞서 논의한 몇 가지 models를 결합해 보겠습니다. base learners로 logistic regression, decision tree, k-NN을 사용하고, Random Forest를 meta-learner로 사용하여 이들의 predictions를 aggregate합니다. meta-learner는 base learners의 outputs를 기반으로 train됩니다(training set에서 cross-validation 사용). Stacked model이 개별 models만큼 우수하거나 약간 더 나은 performance를 보일 것으로 예상합니다.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -968,30 +972,27 @@ F1‑score : 0.948
 ROC AUC  : 0.992
 """
 ```
-스택 앙상블은 기본 모델의 상호 보완적인 강점을 활용합니다. 예를 들어, 로지스틱 회귀는 데이터의 선형적인 측면을 처리할 수 있고, 결정 트리는 특정 규칙과 같은 상호작용을 포착할 수 있으며, k-NN은 특성 공간의 지역 이웃에서 뛰어난 성능을 발휘할 수 있습니다. 메타 모델(여기서는 랜덤 포레스트)은 이러한 입력의 가중치를 학습할 수 있습니다. 결과적인 메트릭은 종종 단일 모델의 메트릭보다 개선된 결과(비록 약간일지라도)를 보여줍니다. 피싱 예제에서 로지스틱 회귀가 F1 점수 0.95, 결정 트리가 0.94를 기록했다면, 스택은 각 모델이 오류를 범하는 부분을 보완하여 0.96을 달성할 수 있습니다.
+Stacked ensemble은 base model들의 상호 보완적인 강점을 활용합니다. 예를 들어 logistic regression은 데이터의 선형적인 측면을 처리하고, decision tree는 특정 규칙과 유사한 상호작용을 포착하며, k-NN은 feature space의 local neighborhood에서 뛰어난 성능을 보일 수 있습니다. 여기서는 random forest인 meta-model이 이러한 입력에 가중치를 적용하는 방법을 학습할 수 있습니다. 결과 metric은 대개 단일 model의 metric보다 (개선 폭이 작더라도) 향상됩니다. 우리의 phishing 예제에서 logistic만 사용했을 때 F1이 0.95이고 tree가 0.94였다면, stack은 각 model이 놓치는 부분을 보완하여 0.96을 달성할 수 있습니다.
 
-이러한 앙상블 방법은 *"여러 모델을 결합하는 것이 일반적으로 더 나은 일반화를 이끈다"*는 원리를 보여줍니다. 사이버 보안에서는 여러 탐지 엔진(하나는 규칙 기반, 하나는 머신 러닝, 하나는 이상 탐지 기반)을 두고, 그들의 경고를 집계하는 레이어를 추가하여 -- 사실상 앙상블의 한 형태 -- 더 높은 신뢰도로 최종 결정을 내릴 수 있습니다. 이러한 시스템을 배포할 때는 추가된 복잡성을 고려하고 앙상블이 관리하거나 설명하기 어려워지지 않도록 해야 합니다. 그러나 정확성 측면에서 앙상블과 스태킹은 모델 성능을 향상시키기 위한 강력한 도구입니다.
+이와 같은 ensemble method는 *"여러 model을 결합하면 일반적으로 더 나은 generalization을 얻을 수 있다"*는 원칙을 보여 줍니다. Cybersecurity에서는 여러 detection engine을 두고 (하나는 rule-based, 하나는 machine learning 기반, 하나는 anomaly-based) 이들의 alert를 집계하는 layer를 추가하는 방식으로 구현할 수 있습니다. 이는 사실상 ensemble의 한 형태이며, 더 높은 confidence로 최종 결정을 내리게 합니다. 이러한 system을 배포할 때는 추가되는 복잡성을 고려하고, ensemble이 관리하거나 설명하기 지나치게 어려워지지 않도록 해야 합니다. 그러나 accuracy 측면에서 ensemble과 stacking은 model performance를 향상시키는 강력한 도구입니다.
 
 </details>
 
 
 ## References
 
-- [https://madhuramiah.medium.com/logistic-regression-6e55553cc003](https://madhuramiah.medium.com/logistic-regression-6e55553cc003)
-- [https://www.geeksforgeeks.org/decision-tree-introduction-example/](https://www.geeksforgeeks.org/decision-tree-introduction-example/)
-- [https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132](https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132)
-- [https://www.ibm.com/think/topics/support-vector-machine](https://www.ibm.com/think/topics/support-vector-machine)
-- [https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering](https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering)
-- [https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644](https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644)
-- [https://zvelo.com/ai-and-machine-learning-in-cybersecurity/](https://zvelo.com/ai-and-machine-learning-in-cybersecurity/)
-- [https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae](https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae)
-- [https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8](https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8)
-- [https://www.ibm.com/think/topics/knn](https://www.ibm.com/think/topics/knn)
-- [https://www.ibm.com/think/topics/knn](https://www.ibm.com/think/topics/knn)
-- [https://arxiv.org/pdf/2101.02552](https://arxiv.org/pdf/2101.02552)
-- [https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
-- [https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
-- [https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
-- [https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
+- [1] [Logistic Regression](https://madhuramiah.medium.com/logistic-regression-6e55553cc003)
+- [2] [Decision Tree - Introduction with example](https://www.geeksforgeeks.org/decision-tree-introduction-example/)
+- [3] [Denial of Services Attack Detection using Random Forest Classifier with Information Gain](https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132)
+- [4] [What are Support Vector Machines (SVMs)? (IBM)](https://www.ibm.com/think/topics/support-vector-machine)
+- [5] [Naive Bayes spam filtering (Wikipedia)](https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering)
+- [6] [GBDT Demystified: How LightGBM, XGBoost, and CatBoost Work](https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644)
+- [7] [AI and Machine Learning in Cybersecurity (zvelo)](https://zvelo.com/ai-and-machine-learning-in-cybersecurity/)
+- [8] [Linear Regression Explained](https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae)
+- [9] [Performance analysis of machine learning models for intrusion detection system using Gini Impurity-based Weighted Random Forest (GIWRF) feature selection technique](https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8)
+- [10] [What is the k-nearest neighbors (KNN) algorithm? (IBM)](https://www.ibm.com/think/topics/knn)
+- [11] [Phishing Attacks and Websites Classification Using Machine Learning and Multiple Datasets (A Comparative Analysis)](https://arxiv.org/pdf/2101.02552)
+- [12] [How Deep Learning Enhances Intrusion Detection Systems](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
+- [13] [Ensemble Learning: Boosting Model Performance by Combining Strengths](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
 
 {{#include ../banners/hacktricks-training.md}}
