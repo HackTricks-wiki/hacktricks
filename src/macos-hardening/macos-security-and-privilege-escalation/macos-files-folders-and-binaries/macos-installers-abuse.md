@@ -2,23 +2,23 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Pkg Basiese Inligting
+## Basiese Pkg-inligting
 
-’n macOS **installer package** (ook bekend as ’n `.pkg`-lêer) is ’n lêerformaat wat deur macOS gebruik word om sagteware te **versprei**. Hierdie lêers is soos ’n **boks wat alles bevat wat ’n stuk sagteware** nodig het om korrek te installeer en te loop.
+'n macOS **installer package** (ook bekend as 'n `.pkg`-lêer) is 'n lêerformaat wat deur macOS gebruik word om **sagteware te versprei**. Hierdie lêers is soos 'n **boks wat alles bevat wat 'n stuk sagteware** nodig het om korrek te installeer en te loop.
 
-Die package-lêer self is ’n argief wat ’n **hiërargie van lêers en directories bevat wat op die teiken** rekenaar geïnstalleer sal word. Dit kan ook **scripts** insluit om take uit te voer voor en na die installasie, soos om configuration files op te stel of ou weergawes van die sagteware skoon te maak.
+Die package-lêer self is 'n argief wat 'n **hiërargie van lêers en gidse bevat wat op die teiken**-rekenaar geïnstalleer sal word. Dit kan ook **scripts** insluit om take voor en ná die installasie uit te voer, soos om konfigurasielêers op te stel of ou weergawes van die sagteware op te ruim.
 
 ### Hiërargie
 
 <figure><img src="../../../images/Pasted Graphic.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption></figcaption></figure>
 
-- **Distribution (xml)**: Aanpassings (title, welcome text…) en script/installasie-kontroles
-- **PackageInfo (xml)**: Info, install requirements, install location, paths na scripts om uit te voer
-- **Bill of materials (bom)**: Lys van lêers om te installeer, op te dateer of te verwyder met file permissions
+- **Distribution (xml)**: Aanpassings (titel, verwelkomingsteks…) en script-/installasiekontroles
+- **PackageInfo (xml)**: Inligting, installasievereistes, installasieligging, paaie na scripts om uit te voer
+- **Bill of materials (bom)**: Lys van lêers om te installeer, op te dateer of te verwyder, met lêertoestemmings
 - **Payload (CPIO archive gzip compressed)**: Lêers om in die `install-location` vanaf PackageInfo te installeer
-- **Scripts (CPIO archive gzip compressed)**: Pre en post install scripts en meer resources wat na ’n temp directory onttrek word vir uitvoering.
+- **Scripts (CPIO archive gzip compressed)**: Pre- en post-installasiescripts en meer hulpbronne wat na 'n tydelike gids onttrek word vir uitvoering.
 
-### Decompress
+### Decomprimeer
 ```bash
 # Tool to directly get the files inside a package
 pkgutil --expand "/path/to/package.pkg" "/path/to/out/dir"
@@ -34,9 +34,9 @@ cpio -i < Scripts
 ```
 Om die inhoud van die installer te visualiseer sonder om dit handmatig te dekomprimeer, kan jy ook die gratis hulpmiddel [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/) gebruik.
 
-### Static triage shortcuts
+### Statiese triage-kortpaaie
 
-As die doel ontleding is, probeer om **te vermy om die package eers met `Installer.app` oop te maak**. Sommige packages kan code uitvoer sodra Installer hulle oopmaak (byvoorbeeld via `system.run()` of installer plug-ins), so offline extraction is gewoonlik die veiliger beginpunt.
+Indien die doel ontleding is, probeer om te **vermy om die package eers met `Installer.app` oop te maak**. Sommige packages kan kode uitvoer sodra Installer dit oopmaak (byvoorbeeld via `system.run()` of installer plug-ins), daarom is offline-ekstraksie gewoonlik die veiliger beginpunt.
 ```bash
 PKG="Suspicious.pkg"
 OUT="/tmp/pkg-audit"
@@ -56,79 +56,79 @@ rg -n 'system\.(run|runOnce)|<script>|launchctl|osascript|curl|chmod 4[0-7]{3}|s
 ```
 ## DMG Basiese Inligting
 
-DMG-lêers, of Apple Disk Images, is 'n lêerformaat wat deur Apple se macOS gebruik word vir skyfbeelde. 'n DMG-lêer is in wese 'n **mountable disk image** (dit bevat sy eie filesystem) wat rou blokdata bevat, tipies gekomprimeer en soms geïnkripteer. Wanneer jy 'n DMG-lêer oopmaak, **mount** macOS dit asof dit 'n fisiese skyf is, wat jou toelaat om toegang tot die inhoud te kry.
+DMG-lêers, of Apple Disk Images, is ’n lêerformaat wat deur Apple se macOS vir skyfbeelde gebruik word. ’n DMG-lêer is in wese ’n **monteerbare skyfbeeld** (dit bevat sy eie lêerstelsel) wat rou blokdata bevat wat tipies saamgepers en soms geïnkripteer is. Wanneer jy ’n DMG-lêer oopmaak, **monteer macOS dit asof dit ’n fisiese skyf is**, sodat jy toegang tot die inhoud daarvan kan kry.
 
 > [!CAUTION]
-> Let daarop dat **`.dmg`** installers **so baie formate** ondersteun dat sommige in die verlede wat vulnerabilities bevat het, misbruik is om **kernel code execution** te verkry.
+> Let daarop dat **`.dmg`**-installeerders **soveel formate** ondersteun dat sommige daarvan wat in die verlede kwesbaarhede bevat het, misbruik is om **kernel code execution** te verkry.
 
-### Hierargie
+### Hiërargie
 
 <figure><img src="../../../images/image (225).png" alt=""><figcaption></figcaption></figure>
 
-Die hierargie van 'n DMG-lêer kan verskil op grond van die inhoud. Vir application DMGs volg dit egter gewoonlik hierdie struktuur:
+Die hiërargie van ’n DMG-lêer kan verskil na gelang van die inhoud. Vir application DMGs volg dit egter gewoonlik hierdie struktuur:
 
-- Top Level: Dit is die root van die disk image. Dit bevat dikwels die application en moontlik 'n skakel na die Applications-folder.
-- Application (.app): Dit is die werklike application. In macOS is 'n application tipies 'n package wat baie individuele lêers en folders bevat wat die application uitmaak.
-- Applications Link: Dit is 'n shortcut na die Applications-folder in macOS. Die doel hiervan is om dit vir jou maklik te maak om die application te install. Jy kan die .app-lêer na hierdie shortcut sleep om die app te install.
+- Topvlak: Dit is die wortel van die skyfbeeld. Dit bevat dikwels die application en moontlik ’n skakel na die Applications-lêergids.
+- Application (.app): Dit is die werklike application. In macOS is ’n application tipies ’n pakket wat baie individuele lêers en vouers bevat waaruit die application bestaan.
+- Applications-skakel: Dit is ’n kortpad na die Applications-lêergids in macOS. Die doel hiervan is om dit vir jou maklik te maak om die application te installeer. Jy kan die .app-lêer na hierdie kortpad sleep om die app te installeer.
 
 ## Privesc via pkg abuse
 
-### Execution from public directories
+### Uitvoering vanaf publieke gidse
 
-As 'n pre of post installation script byvoorbeeld vanaf **`/var/tmp/Installerutil`** execute, en 'n attacker kan daardie script control, kan hulle privileges escalate wanneer dit uitgevoer word. Of 'n ander soortgelyke voorbeeld:
+As ’n voor- of na-installasieskrip byvoorbeeld vanaf **`/var/tmp/Installerutil`** uitgevoer word, en ’n aanvaller daardie skrip kan beheer, kan hulle privileges eskaleer wanneer dit uitgevoer word. Of nog ’n soortgelyke voorbeeld:<sup>[1][3]</sup>
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 
 ### AuthorizationExecuteWithPrivileges
 
-Dit is 'n [public function](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) wat verskeie installers en updaters sal call om **iets as root uit te voer**. Hierdie function aanvaar die **path** van die **file** om uit te voer as parameter, maar as 'n attacker hierdie file kan **modify**, sal hy in staat wees om die uitvoering daarvan met root te **abuse** om **privileges te escalate**.
+Dit is ’n [publieke funksie](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) wat verskeie installeerders en updaters sal aanroep om **iets as root uit te voer**. Hierdie funksie aanvaar die **pad** van die **lêer** wat uitgevoer moet word as ’n parameter; as ’n aanvaller egter hierdie lêer kon **wysig**, sou hulle die uitvoering daarvan met root-bevoegdhede kon **misbruik** om **privileges te eskaleer**.
 ```bash
 # Breakpoint in the function to check which file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
 # You could also check FS events to find this misconfig
 ```
-Vir meer inligting, kyk na hierdie praatjie: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
+Vir meer inligting, kyk na hierdie praatjie: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)<sup>[8]</sup>
 
-### Omgewing en shebang-misbruik
+### Omgewings- en shebang-misbruik
 
-Moderne PackageKit-bugs het gewys dat installer-skripte dikwels uitgevoer word as **trusted root code** terwyl attacker-controlled konteks steeds naby gehou word. Wanneer vendor packages geoudit word, gee spesiale aandag aan:
+Onlangse PackageKit-foute het gewys dat installer scripts dikwels as **trusted root code** uitgevoer word, terwyl aanvaller-beheerde konteks steeds naby behoue bly. Wanneer vendor packages geoudit word, let veral op:
 
 - Shell interpreters soos `#!/bin/zsh` / `#!/bin/bash`
-- Calls soos `sudo -u $USER`, `launchctl asuser`, of enige logic wat `$USER`, `$HOME`, `PATH`, `TMPDIR`, of relative paths vertrou
-- Non-shell interpreters wat user-controlled init files of libraries kan laai
+- Oproepe soos `sudo -u $USER`, `launchctl asuser`, of enige logika wat op `$USER`, `$HOME`, `PATH`, `TMPDIR` of relatiewe paths vertrou
+- Nie-shell interpreters wat user-beheerde init files of libraries kan laai
 ```bash
 pkgutil --expand-full Target.pkg /tmp/target-pkg
 find /tmp/target-pkg -type f \( -name preinstall -o -name postinstall \) -exec sh -c 'printf "\n### %s\n" "$1"; head -n 1 "$1"' sh {} \;
 rg -n '^#!/bin/(zsh|bash)|sudo -u |launchctl asuser|\$USER|\$HOME|PATH=|/usr/bin/env ' /tmp/target-pkg
 ```
-Vir die 2024 PackageKit root-environment bug (`~/.zshenv` / `~/.bash*` inheritance during user-initiated installs), kyk na [the generic macOS privesc page](../macos-privilege-escalation.md). As die package **Apple-signed** is, kan dieselfde script bug **SIP/TCC-relevant** word omdat `system_installd` dalk `com.apple.rootless.install.heritable` dra; sien [the SIP page](../macos-security-protections/macos-sip.md).
+Vir die 2024 PackageKit root-environment bug (`~/.zshenv` / `~/.bash*` inheritance tydens user-initiated installs), raadpleeg [die generiese macOS privesc-bladsy](../macos-privilege-escalation.md). Indien die package **Apple-signed** is, kan dieselfde script bug **SIP/TCC-relevant** word omdat `system_installd` moontlik `com.apple.rootless.install.heritable` dra; sien [die SIP-bladsy](../macos-security-protections/macos-sip.md).<sup>[5][6]</sup>
 
-### Execution by mounting
+### Execution deur mounting
 
-As 'n installer skryf na `/tmp/fixedname/bla/bla`, is dit moontlik om **'n mount** oor `/tmp/fixedname` te skep met noowners sodat jy **enige file tydens die installation kan modify** om die installation process te abuse.
+Indien 'n installer na `/tmp/fixedname/bla/bla` skryf, is dit moontlik om 'n **mount** oor `/tmp/fixedname` met noowners te **create**, sodat jy **enige lêer tydens die installasie kan modify** om die installation process te abuse.
 
-'n Voorbeeld hiervan is **CVE-2021-26089** wat daarin geslaag het om **'n periodic script te overwrite** om execution as root te kry. Vir meer inligting kyk na die praatjie: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
+'n Voorbeeld hiervan is **CVE-2021-26089**, wat daarin geslaag het om 'n **periodic script te overwrite** om execution as root te verkry. Vir meer information, kyk na die talk: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)<sup>[7]</sup>
 
 ## pkg as malware
 
 ### Empty Payload
 
-Dit is moontlik om net 'n **`.pkg`** file te genereer met **pre en post-install scripts** sonder enige werklike payload behalwe die malware binne-in die scripts.
+Dit is moontlik om eenvoudig 'n **`.pkg`**-lêer met **pre- en post-install scripts** te generate, sonder enige werklike payload buiten die malware binne die scripts.
 
 ### JS in Distribution xml
 
-Dit is moontlik om **`<script>`** tags by te voeg in die **distribution xml** file van die package en daardie code sal uitgevoer word en dit kan **commands execute** met behulp van **`system.run`**:
+Dit is moontlik om **`<script>`**-tags in die package se **distribution xml**-lêer te voeg. Daardie code sal uitgevoer word en kan **commands execute** deur **`system.run`** te gebruik:
 
 <figure><img src="../../../images/image (1043).png" alt=""><figcaption></figcaption></figure>
 
-In distribution packages hang dit gewoonlik af van die top-level `Distribution` file wat external scripts aktiveer, byvoorbeeld met `allow-external-scripts="true"`. Daarom is om net `preinstall` / `postinstall` te review nie genoeg nie: die **Distribution XML self** kan `installation-check` / `volume-check` hooks en direkte `system.run()` / `system.runOnce()` execution paths bevat.
+In distribution packages hang dit gewoonlik daarvan af of die top-level `Distribution`-lêer external scripts enable, byvoorbeeld met `allow-external-scripts="true"`. Daarom is dit nie genoeg om slegs `preinstall` / `postinstall` te review nie: die **Distribution XML self** kan `installation-check` / `volume-check` hooks en direkte `system.run()` / `system.runOnce()` execution paths bevat.
 ```bash
 xmllint --format Distribution | sed -n '1,200p'
 rg -n 'allow-external-scripts|system\.(run|runOnce)|installation-check|volume-check|function ' Distribution
 ```
-### Agterdeure-installeerder
+### Backdoored Installer
 
-Kwaadwillige installeerder wat 'n script en JS-kode binne dist.xml gebruik
+Kwaadwillige installer wat 'n script en JS code binne dist.xml gebruik
 ```bash
 # Package structure
 mkdir -p pkgroot/root/Applications/MyApp
@@ -191,11 +191,13 @@ productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pk
 ```
 ## Verwysings
 
-- [**DEF CON 27 - Unpacking Pkgs A Look Inside Macos Installer Packages And Common Security Flaws**](https://www.youtube.com/watch?v=iASSG0_zobQ)
-- [**OBTS v4.0: "The Wild World of macOS Installers" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
-- [**DEF CON 27 - Unpacking Pkgs A Look Inside MacOS Installer Packages**](https://www.youtube.com/watch?v=kCXhIYtODBg)
-- [https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
-- [**CVE-2024-27822: macOS PackageKit Privilege Escalation**](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
-- [**Breaking SIP with Apple-signed Packages**](https://www.l3harris.com/newsroom/editorial/2024/03/breaking-sip-apple-signed-packages)
+- [1] [DEF CON 27 - Unpacking Pkgs A Look Inside Macos Installer Packages And Common Security Flaws](https://www.youtube.com/watch?v=iASSG0_zobQ)
+- [2] [OBTS v4.0: "The Wild World of macOS Installers" - Tony Lambert](https://www.youtube.com/watch?v=Eow5uNHtmIg)
+- [3] [DEF CON 27 - Unpacking Pkgs A Look Inside MacOS Installer Packages](https://www.youtube.com/watch?v=kCXhIYtODBg)
+- [4] [RedTeamRecipe – macOS Red Teaming: Exploiting Installer Packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
+- [5] [CVE-2024-27822: macOS PackageKit Privilege Escalation](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
+- [6] [Breaking SIP with Apple-signed Packages](https://www.l3harris.com/newsroom/editorial/2024/03/breaking-sip-apple-signed-packages)
+- [7] [OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl](https://www.youtube.com/watch?v=jSYPazD4VcE)
+- [8] [DEF CON 25 - Patrick Wardle - Death By 1000 Installers on macOS and it's all broken!](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
 {{#include ../../../banners/hacktricks-training.md}}

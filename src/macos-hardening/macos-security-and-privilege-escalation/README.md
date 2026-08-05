@@ -1,12 +1,12 @@
-# macOS Sekuriteit & Privilege Escalering
+# macOS Security & Privilege Escalation
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basiese MacOS
+## Basiese macOS
 
-As jy nie bekend is met macOS nie, moet jy begin om die basiese beginsels van macOS te leer:
+As jy nie vertroud is met macOS nie, moet jy begin om die basiese beginsels van macOS te leer:
 
-- Spesiale macOS **lêers & toestemmings:**
+- Spesiale macOS **lêers & permissions:**
 
 
 {{#ref}}
@@ -34,7 +34,7 @@ macos-applefs.md
 mac-os-architecture/
 {{#endref}}
 
-- Algemene macOS n**etwerk dienste & protokolle**
+- Algemene macOS n**etwork services & protocols**
 
 
 {{#ref}}
@@ -46,84 +46,86 @@ macos-protocols.md
 
 ### MacOS MDM
 
-In maatskappye gaan **macOS** stelsels hoogs waarskynlik **met 'n MDM bestuur** word. Daarom is dit vanuit 'n aanvaller se perspektief interessant om te weet **hoe dit werk**:
+In maatskappye gaan **macOS**-stelsels heel waarskynlik **met 'n MDM bestuur word**. Daarom is dit vanuit 'n aanvaller se perspektief interessant om te weet **hoe dit werk**:
 
 
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
 {{#endref}}
 
-### MacOS - Inspekteer, Debugeer en Fuzz
+### MacOS - Inspeksie, Debugging en Fuzzing
+
 
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
-## MacOS Sekuriteit Beskermings
+## MacOS-sekuriteitsbeskermings
+
 
 {{#ref}}
 macos-security-protections/
 {{#endref}}
 
-## Aanvaloppervlak
+## Aanvalsoppervlak
 
-### Lêertoestemmings
+### Lêerpermissions
 
-As 'n **proses wat as root loop 'n lêer skryf** wat deur 'n gebruiker beheer kan word, kan die gebruiker dit misbruik om **privileges te verhoog**.\
+As 'n **proses wat as root loop 'n** lêer skryf wat deur 'n gebruiker beheer kan word, kan die gebruiker dit misbruik om **voorregte te eskaleer**.\
 Dit kan in die volgende situasies gebeur:
 
-- Lêer wat gebruik is, is reeds deur 'n gebruiker geskep (besit deur die gebruiker)
-- Lêer wat gebruik word, is skryfbaar deur die gebruiker weens 'n groep
-- Lêer wat gebruik word, is binne 'n gids wat deur die gebruiker besit word (die gebruiker kan die lêer skep)
-- Lêer wat gebruik word, is binne 'n gids wat deur root besit word, maar die gebruiker het skryftoegang daaroor weens 'n groep (die gebruiker kan die lêer skep)
+- Die gebruikte lêer is reeds deur 'n gebruiker geskep (word deur die gebruiker besit)
+- Die gebruikte lêer is deur die gebruiker skryfbaar weens 'n groep
+- Die gebruikte lêer is binne 'n gids wat deur die gebruiker besit word (die gebruiker kan die lêer skep)
+- Die gebruikte lêer is binne 'n gids wat deur root besit word, maar die gebruiker het skryftoegang daartoe weens 'n groep (die gebruiker kan die lêer skep)
 
-In staat wees om 'n **lêer te skep** wat gaan **gebruik word deur root**, laat 'n gebruiker toe om **voordeel te trek uit sy inhoud** of selfs **simboliese skakels/hardlinks** te skep om dit na 'n ander plek te wys.
+Die vermoë om 'n **lêer te skep** wat deur **root gebruik gaan word**, stel 'n gebruiker in staat om **die inhoud daarvan te benut** of selfs **symlinks/hardlinks** te skep om dit na 'n ander plek te laat wys.
 
-Vir hierdie tipe kwesbaarhede, moenie vergeet om **kwesbare `.pkg` installers** te **kontroleer**:
+Vir hierdie soort kwesbaarhede, moenie vergeet om **kwesbare `.pkg`-installers** na te gaan nie:
 
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### Lêeruitbreiding & URL skema app handlers
+### Lêeruitbreiding & URL-skema-apphandlers
 
-Vreemde apps wat deur lêeruitbreidings geregistreer is, kan misbruik word en verskillende toepassings kan geregistreer word om spesifieke protokolle te open
+Vreemde apps wat deur lêeruitbreidings geregistreer is, kan misbruik word, en verskillende toepassings kan geregistreer word om spesifieke protokolle oop te maak
 
 
 {{#ref}}
 macos-file-extension-apps.md
 {{#endref}}
 
-## macOS TCC / SIP Privilege Escalering
+## macOS TCC / SIP-voorregte-eskalering
 
-In macOS **toepassings en lêers kan toestemmings hê** om toegang te verkry tot gidsen of instellings wat hulle meer bevoorreg maak as ander.
+In macOS kan **toepassings en binaries permissions hê** om toegang tot vouers of instellings te verkry wat hulle meer bevoorreg as ander maak.
 
-Daarom sal 'n aanvaller wat 'n macOS masjien suksesvol wil kompromitteer, moet **sy TCC privileges verhoog** (of selfs **SIP omseil**, afhangende van sy behoeftes).
+Daarom sal 'n aanvaller wat 'n macOS-masjien suksesvol wil kompromitteer, sy **TCC-voorregte moet eskaleer** (of selfs **SIP moet omseil**, afhangend van sy behoeftes).
 
-Hierdie privileges word gewoonlik in die vorm van **regte** wat die toepassing onderteken is, gegee, of die toepassing mag sekere toegang versoek het en nadat die **gebruiker dit goedgekeur het**, kan dit in die **TCC databasisse** gevind word. 'n Ander manier waarop 'n proses hierdie privileges kan verkry, is deur 'n **kind van 'n proses** met daardie **privileges** te wees, aangesien dit gewoonlik **geërf** word.
+Hierdie voorregte word gewoonlik gegee in die vorm van **entitlements** waarmee die toepassing onderteken is, of die toepassing het moontlik toegang versoek en nadat die **gebruiker dit goedgekeur het**, kan dit in die **TCC-databasisse** gevind word. Nog 'n manier waarop 'n proses hierdie voorregte kan verkry, is om 'n **kind van 'n proses** met daardie **voorregte** te wees, aangesien hulle gewoonlik **geërf** word.
 
-Volg hierdie skakels om verskillende maniere te vind om [**privileges in TCC te verhoog**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), om [**TCC te omseil**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) en hoe in die verlede [**SIP omseil is**](macos-security-protections/macos-sip.md#sip-bypasses).
+Volg hierdie skakels om verskillende maniere te vind om [**voorregte in TCC te eskaleer**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), om [**TCC te omseil**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) en hoe [**SIP in die verlede omseil is**](macos-security-protections/macos-sip.md#sip-bypasses).
 
-## macOS Tradisionele Privilege Escalering
+## Tradisionele macOS-voorregte-eskalering
 
-Natuurlik moet jy ook belangstel om na root te verhoog vanuit 'n rooi span se perspektief. Kyk na die volgende pos vir 'n paar wenke:
+Natuurlik behoort jy vanuit 'n red team-perspektief ook daarin belang te stel om na root te eskaleer. Kyk na die volgende plasing vir 'n paar wenke:
 
 
 {{#ref}}
 macos-privilege-escalation.md
 {{#endref}}
 
-## macOS Nakoming
+## macOS-nakoming
 
 - [https://github.com/usnistgov/macos_security](https://github.com/usnistgov/macos_security)
 
 ## Verwysings
 
-- [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
-- [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
-- [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
-- [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
-- [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
+- [1] [OS X Incident Response: Scripting and Analysis](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+- [2] [The Art of Mac Malware, Vol. 1 — Analysis (Patrick Wardle)](https://taomm.org/vol1/analysis.html)
+- [3] [NicolasGrimonpont/Cheatsheet — macOS/Linux/Windows commands & security tools cheatsheet](https://github.com/NicolasGrimonpont/Cheatsheet)
+- [4] [SentinelOne — macOS Security Resource](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
+- [5] [2022 - macOS local security: escaping the sandbox and bypassing TCC (YouTube)](https://www.youtube.com/watch?v=vMGiplQtjTY)
 
 {{#include ../../banners/hacktricks-training.md}}

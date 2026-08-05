@@ -1,81 +1,82 @@
-# macOS Stelselsuitbreidings
+# macOS-stelseluitbreidings
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Stelselsuitbreidings / Eindpunt Sekuriteit Raamwerk
+## Stelseluitbreidings / Endpoint Security Framework
 
-Verskil met Kernel Uitbreidings, **Stelselsuitbreidings loop in gebruikersruimte** eerder as in kernruimte, wat die risiko van 'n stelselfout as gevolg van 'n uitbreiding se wanfunksie verminder.
+Anders as Kernel Extensions, **stelseluitbreidings loop in gebruikersruimte** eerder as kernruimte, wat die risiko van ’n stelselongeluk weens uitbreidingwanfunksionering verminder.
 
 <figure><img src="../../../images/image (606).png" alt="https://knight.sc/images/system-extension-internals-1.png"><figcaption></figcaption></figure>
 
-Daar is drie tipes stelselsuitbreidings: **DriverKit** Uitbreidings, **Netwerk** Uitbreidings, en **Eindpunt Sekuriteit** Uitbreidings.
+Daar is drie tipes stelseluitbreidings: **DriverKit** Extensions, **Network** Extensions en **Endpoint Security** Extensions.
 
-### **DriverKit Uitbreidings**
+### **DriverKit Extensions**
 
-DriverKit is 'n vervanging vir kernuitbreidings wat **hardewareondersteuning bied**. Dit laat toestel bestuurders (soos USB, Serial, NIC, en HID bestuurders) toe om in gebruikersruimte te loop eerder as in kernruimte. Die DriverKit raamwerk sluit **gebruikersruimte weergawes van sekere I/O Kit klasse** in, en die kern stuur normale I/O Kit gebeurtenisse na gebruikersruimte, wat 'n veiliger omgewing bied vir hierdie bestuurders om te loop.
+DriverKit is ’n vervanging vir kernel extensions wat **hardewareondersteuning verskaf**. Dit laat toestelbestuurders (soos USB-, Serial-, NIC- en HID-bestuurders) in gebruikersruimte eerder as kernruimte loop. Die DriverKit-raamwerk sluit **gebruikersruimteweergawes van sekere I/O Kit-klasse** in, en die kern stuur normale I/O Kit-gebeurtenisse na gebruikersruimte aan, wat ’n veiliger omgewing bied waarin hierdie bestuurders kan loop.<sup>[2]</sup>
 
-### **Netwerk Uitbreidings**
+### **Network Extensions**
 
-Netwerk Uitbreidings bied die vermoë om netwerkgedrag aan te pas. Daar is verskeie tipes Netwerk Uitbreidings:
+Network Extensions bied die vermoë om netwerkgedrag aan te pas. Daar is verskeie tipes Network Extensions:
 
-- **App Proxy**: Dit word gebruik om 'n VPN-klient te skep wat 'n vloei-georiënteerde, pasgemaakte VPN-protokol implementeer. Dit beteken dit hanteer netwerkverkeer gebaseer op verbindings (of vloei) eerder as individuele pakkette.
-- **Pakket Tunnel**: Dit word gebruik om 'n VPN-klient te skep wat 'n pakket-georiënteerde, pasgemaakte VPN-protokol implementeer. Dit beteken dit hanteer netwerkverkeer gebaseer op individuele pakkette.
-- **Filter Data**: Dit word gebruik om netwerk "vloei" te filter. Dit kan netwerkdata op vloei vlak monitor of wysig.
-- **Filter Pakket**: Dit word gebruik om individuele netwerkpakkette te filter. Dit kan netwerkdata op pakketvlak monitor of wysig.
-- **DNS Proxy**: Dit word gebruik om 'n pasgemaakte DNS-verskaffer te skep. Dit kan gebruik word om DNS versoeke en antwoorde te monitor of te wysig.
+- **App Proxy**: Dit word gebruik om ’n VPN-kliënt te skep wat ’n vloeioriëntasie-gebaseerde, pasgemaakte VPN-protokol implementeer. Dit beteken dat dit netwerkverkeer op grond van verbindings (of vloei) eerder as individuele pakkette hanteer.
+- **Packet Tunnel**: Dit word gebruik om ’n VPN-kliënt te skep wat ’n pakketgeoriënteerde, pasgemaakte VPN-protokol implementeer. Dit beteken dat dit netwerkverkeer op grond van individuele pakkette hanteer.
+- **Filter Data**: Dit word gebruik om netwerk-"vloei" te filter. Dit kan netwerkdata op vloeivlak monitor of wysig.
+- **Filter Packet**: Dit word gebruik om individuele netwerkpakkette te filter. Dit kan netwerkdata op pakketvlak monitor of wysig.
+- **DNS Proxy**: Dit word gebruik om ’n pasgemaakte DNS-verskaffer te skep. Dit kan gebruik word om DNS-versoeke en -antwoorde te monitor of te wysig.<sup>[2]</sup>
 
-## Eindpunt Sekuriteit Raamwerk
+## Endpoint Security Framework
 
-Eindpunt Sekuriteit is 'n raamwerk wat deur Apple in macOS verskaf word wat 'n stel API's vir stelselsekuriteit bied. Dit is bedoel vir gebruik deur **sekuriteitsverskaffers en ontwikkelaars om produkte te bou wat stelselsaktiwiteit kan monitor en beheer** om kwaadwillige aktiwiteit te identifiseer en te beskerm.
+Endpoint Security is ’n raamwerk wat deur Apple in macOS verskaf word en ’n stel API’s vir stelselsekuriteit bied. Dit is bedoel vir gebruik deur **sekuriteitsverskaffers en ontwikkelaars om produkte te bou wat stelselaktiwiteit kan monitor en beheer** om kwaadwillige aktiwiteit te identifiseer en daarteen te beskerm.
 
-Hierdie raamwerk bied 'n **versameling API's om stelselsaktiwiteit te monitor en te beheer**, soos prosesuitvoerings, lêerstelselsgebeurtenisse, netwerk- en kerngebeurtenisse.
+Hierdie raamwerk verskaf ’n **versameling API’s om stelselaktiwiteit te monitor en te beheer**, soos prosesuitvoerings, lêerstelselgebeurtenisse, netwerk- en kerng gebeurtenisse.
 
-Die kern van hierdie raamwerk is in die kern geïmplementeer, as 'n Kernel Uitbreiding (KEXT) geleë by **`/System/Library/Extensions/EndpointSecurity.kext`**. Hierdie KEXT bestaan uit verskeie sleutelkomponente:
+Die kern van hierdie raamwerk word in die kern geïmplementeer, as ’n Kernel Extension (KEXT) geleë by **`/System/Library/Extensions/EndpointSecurity.kext`**.<sup>[2]</sup> Hierdie KEXT bestaan uit verskeie belangrike komponente:
 
-- **EndpointSecurityDriver**: Dit dien as die "toegangspunt" vir die kernuitbreiding. Dit is die hoofpunt van interaksie tussen die OS en die Eindpunt Sekuriteit raamwerk.
-- **EndpointSecurityEventManager**: Hierdie komponent is verantwoordelik vir die implementering van kernhake. Kernhake laat die raamwerk toe om stelselsgebeurtenisse te monitor deur stelselsoproepe te onderskep.
-- **EndpointSecurityClientManager**: Dit bestuur die kommunikasie met gebruikersruimte kliënte, en hou dop watter kliënte gekoppel is en gebeurtenis kennisgewings moet ontvang.
-- **EndpointSecurityMessageManager**: Dit stuur boodskappe en gebeurtenis kennisgewings na gebruikersruimte kliënte.
+- **EndpointSecurityDriver**: Dit tree op as die "toegangspunt" vir die kernel extension. Dit is die hoofinteraksiepunt tussen die OS en die Endpoint Security-raamwerk.
+- **EndpointSecurityEventManager**: Hierdie komponent is verantwoordelik vir die implementering van kernhooks. Kernhooks laat die raamwerk toe om stelselgebeurtenisse te monitor deur stelseloproepe te onderskep.
+- **EndpointSecurityClientManager**: Dit bestuur die kommunikasie met gebruikersruimte-kliënte en hou rekord van watter kliënte verbind is en gebeurteniskennisgewings moet ontvang.
+- **EndpointSecurityMessageManager**: Dit stuur boodskappe en gebeurteniskennisgewings na gebruikersruimte-kliënte.
 
-Die gebeurtenisse wat die Eindpunt Sekuriteit raamwerk kan monitor, is gekategoriseer in:
+Die gebeurtenisse wat die Endpoint Security-raamwerk kan monitor, word in die volgende kategorieë ingedeel:
 
 - Lêergebeurtenisse
 - Prosesgebeurtenisse
-- Sokketgebeurtenisse
-- Kerngebeurtenisse (soos die laai/ontlaai van 'n kernuitbreiding of die opening van 'n I/O Kit toestel)
+- Socket-gebeurtenisse
+- Kerng gebeurtenisse (soos die laai/ontlaai van ’n kernel extension of die oopmaak van ’n I/O Kit-toestel)
 
-### Eindpunt Sekuriteit Raamwerk Argitektuur
+### Endpoint Security Framework Architecture
 
 <figure><img src="../../../images/image (1068).png" alt="https://www.youtube.com/watch?v=jaVkpM1UqOs"><figcaption></figcaption></figure>
 
-**Gebruikersruimte kommunikasie** met die Eindpunt Sekuriteit raamwerk gebeur deur die IOUserClient klas. Twee verskillende subklasse word gebruik, afhangende van die tipe oproeper:
+**Gebruikersruimte-kommunikasie** met die Endpoint Security-raamwerk vind deur die IOUserClient-klas plaas. Twee verskillende subklasse word gebruik, afhangend van die tipe oproeper:
 
-- **EndpointSecurityDriverClient**: Dit vereis die `com.apple.private.endpoint-security.manager` regte, wat slegs deur die stelselsproses `endpointsecurityd` besit word.
-- **EndpointSecurityExternalClient**: Dit vereis die `com.apple.developer.endpoint-security.client` regte. Dit sou tipies gebruik word deur derdeparty sekuriteitsagteware wat met die Eindpunt Sekuriteit raamwerk moet interaksie hê.
+- **EndpointSecurityDriverClient**: Dit vereis die `com.apple.private.endpoint-security.manager`-entitlement, wat slegs deur die stelselproses `endpointsecurityd` besit word.
+- **EndpointSecurityExternalClient**: Dit vereis die `com.apple.developer.endpoint-security.client`-entitlement. Dit sal tipies deur derdeparty-sekuriteitsagteware gebruik word wat met die Endpoint Security-raamwerk moet kommunikeer.<sup>[1]</sup>
 
-Die Eindpunt Sekuriteit Uitbreidings:**`libEndpointSecurity.dylib`** is die C biblioteek wat stelselsuitbreidings gebruik om met die kern te kommunikeer. Hierdie biblioteek gebruik die I/O Kit (`IOKit`) om met die Eindpunt Sekuriteit KEXT te kommunikeer.
+Die Endpoint Security Extensions:**`libEndpointSecurity.dylib`** is die C-biblioteek wat stelseluitbreidings gebruik om met die kern te kommunikeer. Hierdie biblioteek gebruik die I/O Kit (`IOKit`) om met die Endpoint Security KEXT te kommunikeer.<sup>[2]</sup>
 
-**`endpointsecurityd`** is 'n sleutel stelseldemon wat betrokke is by die bestuur en bekendstelling van eindpunt sekuriteit stelselsuitbreidings, veral tydens die vroeë opstartproses. **Slegs stelselsuitbreidings** gemerk met **`NSEndpointSecurityEarlyBoot`** in hul `Info.plist` lêer ontvang hierdie vroeë opstartbehandeling.
+**`endpointsecurityd`** is ’n belangrike stelseldaemon wat betrokke is by die bestuur en bekendstelling van endpoint security-stelseluitbreidings, veral tydens die vroeë selflaaiproses. **Slegs stelseluitbreidings** met **`NSEndpointSecurityEarlyBoot`** in hul `Info.plist`-lêer gemerk is, ontvang hierdie vroeë selflaaibehandeling.<sup>[2]</sup>
 
-Nog 'n stelseldemon, **`sysextd`**, **valideer stelselsuitbreidings** en skuif hulle na die regte stelsellokasies. Dit vra dan die relevante demon om die uitbreiding te laai. Die **`SystemExtensions.framework`** is verantwoordelik vir die aktivering en deaktivering van stelselsuitbreidings.
+Nog ’n stelseldaemon, **`sysextd`**, **valideer stelseluitbreidings** en skuif hulle na die korrekte stelselliggings. Dit vra dan die relevante daemon om die uitbreiding te laai. Die **`SystemExtensions.framework`** is verantwoordelik vir die aktivering en deaktivering van stelseluitbreidings.<sup>[2]</sup>
 
-## Omseiling van ESF
+## Om ESF te omseil
 
-ESF word gebruik deur sekuriteitsinstrumente wat sal probeer om 'n rooi spanlid te ontdek, so enige inligting oor hoe dit vermy kan word klink interessant.
+ESF word gebruik deur sekuriteitsnutsmiddels wat sal probeer om ’n red teamer op te spoor, dus klink enige inligting oor hoe dit vermy kan word interessant.
 
 ### CVE-2021-30965
 
-Die ding is dat die sekuriteitsaansoek **Volledige Skyf Toegang regte** moet hê. So as 'n aanvaller dit kan verwyder, kan hy die sagteware verhinder om te loop:
+Die probleem is dat die sekuriteitstoepassing **Full Disk Access-permissies** moet hê. As ’n aanvaller dit dus kon verwyder, kon hy verhoed dat die sagteware loop:<sup>[3]</sup>
 ```bash
 tccutil reset All
 ```
-Vir **meer inligting** oor hierdie omseiling en verwante, kyk na die praatjie [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
+Vir **meer inligting** oor hierdie bypass en verwante gevalle, kyk na die praatjie [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
 
-Aan die einde is dit reggestel deur die nuwe toestemming **`kTCCServiceEndpointSecurityClient`** aan die sekuriteitsprogram wat deur **`tccd`** bestuur word te gee, sodat `tccutil` nie sy toestemmings sal skoonmaak nie, wat dit verhinder om te loop.
+Uiteindelik is dit reggestel deur die nuwe toestemming **`kTCCServiceEndpointSecurityClient`** toe te ken aan die security-app wat deur **`tccd`** bestuur word, sodat `tccutil` nie sy toestemmings sal uitvee en verhoed dat dit loop nie.<sup>[3]</sup>
 
 ## Verwysings
 
-- [**OBTS v3.0: "Endpoint Security & Insecurity" - Scott Knight**](https://www.youtube.com/watch?v=jaVkpM1UqOs)
-- [**https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html**](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)
+- [1] [OBTS v3.0: "Endpoint Security & Insecurity" - Scott Knight](https://www.youtube.com/watch?v=jaVkpM1UqOs)
+- [2] [Knight.sc - System Extension Internals](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)
+- [3] [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
 
 {{#include ../../../banners/hacktricks-training.md}}

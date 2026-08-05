@@ -1,22 +1,24 @@
-# macOS Sekuriteitsbeskerming
+# macOS-sekuriteitsbeskermings
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Gatekeeper
 
-Gatekeeper word gewoonlik gebruik om te verwys na die kombinasie van **Quarantine + Gatekeeper + XProtect**, 3 macOS sekuriteitsmodules wat sal probeer om **gebruikers te verhoed om potensieel kwaadwillige sagteware wat afgelaai is, uit te voer**.
+Gatekeeper word gewoonlik gebruik om te verwys na die kombinasie van **Quarantine + Gatekeeper + XProtect**, 3 macOS-sekuriteitsmodules wat sal probeer om te **verhoed dat gebruikers potensieel kwaadwillige sagteware wat afgelaai is, uitvoer**.
 
 Meer inligting in:
+
 
 {{#ref}}
 macos-gatekeeper.md
 {{#endref}}
 
-## Proses Beperkings
+## Prosesbeperkings
 
 ### MACF
 
-### SIP - Stelselintegriteit Beskerming
+### SIP - System Integrity Protection
+
 
 {{#ref}}
 macos-sip.md
@@ -24,52 +26,55 @@ macos-sip.md
 
 ### Sandbox
 
-MacOS Sandbox **beperk toepassings** wat binne die sandbox loop tot die **toegelate aksies wat in die Sandbox-profiel gespesifiseer is** waarmee die app loop. Dit help om te verseker dat **die toepassing slegs verwagte hulpbronne sal benader**.
+MacOS Sandbox **beperk toepassings** wat binne die sandbox loop tot die **toegelate aksies wat in die Sandbox-profiel gespesifiseer word** waarmee die toepassing loop. Dit help verseker dat **die toepassing slegs toegang tot verwagte hulpbronne verkry**.
+
 
 {{#ref}}
 macos-sandbox/
 {{#endref}}
 
-### TCC - **Deursigtigheid, Toestemming, en Beheer**
+### TCC - **Transparency, Consent, and Control**
 
-**TCC (Deursigtigheid, Toestemming, en Beheer)** is 'n sekuriteitsraamwerk. Dit is ontwerp om **die toestemmings** van toepassings te **bestuur**, spesifiek deur hul toegang tot sensitiewe funksies te reguleer. Dit sluit elemente soos **liggingsdienste, kontakte, foto's, mikrofoon, kamera, toeganklikheid, en volle skyf toegang** in. TCC verseker dat toepassings slegs toegang tot hierdie funksies kan verkry nadat hulle eksplisiete gebruikers toestemming verkry het, wat privaatheid en beheer oor persoonlike data versterk.
+**TCC (Transparency, Consent, and Control)** is 'n sekuriteitsraamwerk. Dit is ontwerp om **die toestemmings van toepassings te bestuur**, spesifiek deur hul toegang tot sensitiewe funksies te reguleer. Dit sluit elemente soos **liggingdienste, kontakte, foto's, mikrofoon, kamera, toeganklikheid en volledige skyftoegang** in. TCC verseker dat toepassings slegs toegang tot hierdie funksies kan verkry nadat uitdruklike gebruikerstoestemming verkry is, en versterk sodoende privaatheid en beheer oor persoonlike data.
+
 
 {{#ref}}
 macos-tcc/
 {{#endref}}
 
-### Begin/Omgewing Beperkings & Vertroue Kas
+### Launch/Environment Constraints & Trust Cache
 
-Begin beperkings in macOS is 'n sekuriteitskenmerk om **prosesinisiëring te reguleer** deur te definieer **wie 'n proses kan begin**, **hoe**, en **van waar**. Ingevoerd in macOS Ventura, kategoriseer dit stelselbinaries in beperkingkategorieë binne 'n **vertroue kas**. Elke uitvoerbare binêre het **reëls** vir sy **begin**, insluitend **self**, **ouer**, en **verantwoordelike** beperkings. Uitgebrei na derdeparty-apps as **Omgewing** Beperkings in macOS Sonoma, help hierdie kenmerke om potensiële stelselaanrandings te verminder deur prosesbeginvoorwaardes te regeer.
+Launch constraints in macOS is 'n sekuriteitsfunksie om **prosesinisiasie te reguleer** deur te definieer **wie** 'n proses kan launch, **hoe**, en **van waar af**. Dit is in macOS Ventura bekendgestel en kategoriseer stelselbinaries in constraint-kategorieë binne 'n **trust cache**. Elke uitvoerbare binary het vasgestelde **reëls** vir sy **launch**, insluitend **self-, parent- en responsible-constraints**. Hierdie funksies, wat na derdeparty-toepassings uitgebrei is as **Environment Constraints** in macOS Sonoma, help om potensiële stelseluitbuitings te versag deur die voorwaardes vir die launching van prosesse te beheer.
+
 
 {{#ref}}
 macos-launch-environment-constraints.md
 {{#endref}}
 
-## MRT - Kwaadwillige Sagteware Verwydering Gereedskap
+## MRT - Malware Removal Tool
 
-Die Kwaadwillige Sagteware Verwydering Gereedskap (MRT) is 'n ander deel van macOS se sekuriteitsinfrastruktuur. Soos die naam aandui, is MRT se hooffunksie om **bekende kwaadwillige sagteware van besmette stelsels te verwyder**.
+Die Malware Removal Tool (MRT) is nog 'n deel van macOS se sekuriteitsinfrastruktuur. Soos die naam aandui, is MRT se hooffunksie om **bekende malware van besmette stelsels te verwyder**.
 
-Sodra kwaadwillige sagteware op 'n Mac opgespoor word (hetsy deur XProtect of op 'n ander manier), kan MRT gebruik word om die **kwaadwillige sagteware outomaties te verwyder**. MRT werk stil in die agtergrond en loop tipies wanneer die stelsel opgedateer word of wanneer 'n nuwe kwaadwillige sagteware definisie afgelaai word (dit lyk asof die reëls wat MRT het om kwaadwillige sagteware op te spoor binne die binêre is).
+Sodra malware op 'n Mac opgespoor word (hetsy deur XProtect of op enige ander manier), kan MRT gebruik word om die **malware outomaties te verwyder**. MRT werk stilweg in die agtergrond en loop gewoonlik wanneer die stelsel opgedateer word of wanneer 'n nuwe malware-definisie afgelaai word (dit lyk asof die reëls wat MRT gebruik om malware op te spoor, binne die binary is).
 
-Terwyl beide XProtect en MRT deel van macOS se sekuriteitsmaatreëls is, voer hulle verskillende funksies uit:
+Hoewel XProtect en MRT albei deel is van macOS se sekuriteitsmaatreëls, verrig hulle verskillende funksies:
 
-- **XProtect** is 'n preventiewe hulpmiddel. Dit **kontroleer lêers soos hulle afgelaai word** (deur sekere toepassings), en as dit enige bekende tipes kwaadwillige sagteware opspoor, **verhoed dit dat die lêer oopgemaak word**, en verhoed dus dat die kwaadwillige sagteware jou stelsel in die eerste plek besmet.
-- **MRT**, aan die ander kant, is 'n **reaktiewe hulpmiddel**. Dit werk nadat kwaadwillige sagteware op 'n stelsel opgespoor is, met die doel om die oortredende sagteware te verwyder om die stelsel skoon te maak.
+- **XProtect** is 'n voorkomende hulpmiddel. Dit **kontroleer lêers terwyl hulle afgelaai word** (via sekere toepassings), en indien dit enige bekende tipes malware opspoor, **verhoed dit dat die lêer oopgemaak word**, en voorkom dit sodoende dat die malware jou stelsel in die eerste plek besmet.
+- **MRT**, daarenteen, is 'n **reaktiewe hulpmiddel**. Dit werk nadat malware op 'n stelsel opgespoor is, met die doel om die aanstootlike sagteware te verwyder en die stelsel skoon te maak.
 
 Die MRT-toepassing is geleë in **`/Library/Apple/System/Library/CoreServices/MRT.app`**
 
-## Agtergrond Take Bestuur
+## Agtergrondtakebestuur
 
-**macOS** waarsku nou **elke keer** wanneer 'n hulpmiddel 'n bekende **tegniek gebruik om kode-uitvoering te volhard** (soos Login Items, Daemons...), sodat die gebruiker beter weet **watter sagteware volhard**.
+**macOS** **waarsku** nou elke keer wanneer 'n hulpmiddel 'n bekende **tegniek gebruik om kode-uitvoering volhoubaar te maak** (soos Login Items, Daemons...), sodat die gebruiker beter weet **watter sagteware volhoubaar gemaak word**.<sup>[3]</sup>
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
-Dit werk met 'n **daemon** geleë in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` en die **agent** in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`
+Dit loop met 'n **daemon** wat geleë is in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` en die **agent** in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`<sup>[1]</sup>
 
-Die manier waarop **`backgroundtaskmanagementd`** weet dat iets in 'n volhardende gids geïnstalleer is, is deur **die FSEvents te verkry** en 'n paar **handlers** daarvoor te skep.
+Die manier waarop **`backgroundtaskmanagementd`** weet dat iets in 'n persistente vouer geïnstalleer is, is deur die **FSEvents te verkry** en sekere **handlers** daarvoor te skep.<sup>[1]</sup>
 
-Boonop is daar 'n plist-lêer wat **bekende toepassings** bevat wat gereeld volhard, wat deur Apple onderhou word, geleë in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
+Daarbenewens is daar 'n plist-lêer wat **bekende toepassings** bevat wat gereeld volhoubaar gemaak word, deur Apple onderhou word, en geleë is in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`<sup>[3]</sup>
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -87,31 +92,31 @@ Boonop is daar 'n plist-lêer wat **bekende toepassings** bevat wat gereeld volh
 ```
 ### Enumerasie
 
-Dit is moontlik om **alle** die geconfigureerde agtergronditems te **enumerate** met die Apple cli-tool:
+Dit is moontlik om **alle** gekonfigureerde agtergronditems te enumereer deur die Apple CLI-tool uit te voer:<sup>[3]</sup>
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
 ```
-Boonop, dit is ook moontlik om hierdie inligting te lys met [**DumpBTM**](https://github.com/objective-see/DumpBTM).
+Boonop is dit ook moontlik om hierdie inligting met [**DumpBTM**](https://github.com/objective-see/DumpBTM) te lys.<sup>[2]</sup>
 ```bash
 # You need to grant the Terminal Full Disk Access for this to work
 chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
-Hierdie inligting word gestoor in **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** en die Terminal benodig FDA.
+Hierdie inligting word in **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** gestoor en die Terminal benodig FDA.<sup>[2]</sup>
 
-### Speel met BTM
+### Inmenging met BTM
 
-Wanneer 'n nuwe volharding gevind word, is daar 'n gebeurtenis van tipe **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. Enige manier om hierdie **gebeurtenis** te **voorkom** of die **agent om die gebruiker te waarsku** sal 'n aanvaller help om _**BTM te omseil**_.
+Wanneer ’n nuwe persistence gevind word, word ’n gebeurtenis van die tipe **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** gegenereer. Enige manier om te **verhoed** dat hierdie **gebeurtenis** gestuur word, of om te verhoed dat die **agent die gebruiker waarsku**, sal ’n aanvaller help om BTM te _**bypass**_.<sup>[1]</sup>
 
-- **Herstel die databasis**: Die uitvoering van die volgende opdrag sal die databasis herstel (moet dit van die grond af herbou), egter, om een of ander rede, na die uitvoering hiervan, **sal geen nuwe volharding gewaarsku word totdat die stelsel herbegin word**.
-- **root** is vereis.
+- **Herstel van die databasis**: Deur die volgende command uit te voer, sal die databasis herstel word (dit behoort dit van nuuts af te herbou); om een of ander rede sal geen nuwe persistence egter **geflag** word totdat die stelsel herbegin word nie.<sup>[1]</sup>
+- **root** word vereis.
 ```bash
 # Reset the database
 sfltool resettbtm
 ```
-- **Stop die Agent**: Dit is moontlik om 'n stopsein na die agent te stuur sodat dit **nie die gebruiker sal waarsku nie** wanneer nuwe opsporings gevind word.
+- **Stop the Agent**: Dit is moontlik om ’n stopsein na die agent te stuur sodat dit **nie die gebruiker sal waarsku** wanneer nuwe bespeurings gevind word nie.<sup>[1]</sup>
 ```bash
 # Get PID
 pgrep BackgroundTaskManagementAgent
@@ -124,12 +129,12 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-- **Fout**: As die **proses wat die volharding geskep het, vinnig reg na dit bestaan**, sal die daemon probeer om **inligting** daaroor te **kry**, **misluk**, en **nie in staat wees om die gebeurtenis** te stuur wat aandui dat 'n nuwe ding volhard nie.
+- **Fout**: As die **proses wat die persistence geskep het kort daarna vinnig afsluit**, sal die daemon probeer om **inligting** daaroor te **bekom**, **misluk**, en **nie die gebeurtenis kan stuur** wat aandui dat iets nuuts persistence gebruik nie.<sup>[1]</sup>
 
-Verwysings en **meer inligting oor BTM**:
+## Verwysings
 
-- [https://youtu.be/9hjUmT031tc?t=26481](https://youtu.be/9hjUmT031tc?t=26481)
-- [https://www.patreon.com/posts/new-developer-77420730?l=fr](https://www.patreon.com/posts/new-developer-77420730?l=fr)
-- [https://support.apple.com/en-gb/guide/deployment/depdca572563/web](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
+- [1] [OBTS v6.0: "Demystifying (& Bypassing) macOS's Background Task Management" - Patrick Wardle & Chris Lopez](https://youtu.be/9hjUmT031tc?t=26481)
+- [2] [New (Developer) Tool: "DumpBTM" - Patrick Wardle (Patreon)](https://www.patreon.com/posts/new-developer-77420730?l=fr)
+- [3] [Manage login items and background tasks on Mac - Apple Platform Deployment](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
 
 {{#include ../../../banners/hacktricks-training.md}}
