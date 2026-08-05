@@ -1,35 +1,35 @@
-# Text Steganography
+# Esteganografia de Texto
 
 {{#include ../../banners/hacktricks-training.md}}
 
 Procure por:
 
-- Unicode homoglyphs
-- Zero-width characters
-- Whitespace patterns (spaces vs tabs)
+- Homoglyphs Unicode
+- Caracteres de largura zero
+- Padrões de whitespace (espaços vs tabs)
 
 ## Caminho prático
 
-Se plain text se comportar de forma inesperada, inspecione codepoints e normalize cuidadosamente (não destrua evidências).
+Se o texto simples se comportar de forma inesperada, inspecione os codepoints e normalize-o cuidadosamente (não destrua as evidências).
 
 ### Técnica
 
-Text stego frequentemente depende de caracteres que são renderizados de forma idêntica (ou invisíveis):
+A esteganografia de texto frequentemente depende de caracteres que são renderizados de forma idêntica (ou invisível):
 
-- Homoglyphs: different Unicode codepoints that look the same (Latin `a` vs Cyrillic `а`)
-- Zero-width characters: joiners, non-joiners, zero-width spaces
-- Whitespace encodings: spaces vs tabs, trailing spaces, line-length patterns
+- Homoglyphs: diferentes codepoints Unicode que parecem iguais (`a` latino vs `а` cirílico)
+- Caracteres de largura zero: joiners, non-joiners e espaços de largura zero
+- Codificações de whitespace: espaços vs tabs, espaços no final e padrões de comprimento de linha<sup>[[1]](#references)</sup>
 
 Casos adicionais de alto sinal:
 
-- Bidirectional override/control characters (can visually reorder text)
-- Variation selectors and combining characters used as a covert channel
+- Caracteres de controle/override bidirecionais (podem reordenar visualmente o texto)
+- Selectors de variação e caracteres combinantes usados como um canal encoberto
 
-### Ajuda para decodificação
+### Auxiliares de decodificação
 
-- Unicode homoglyph/zero-width playground: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
+- Ambiente de testes de Homoglyphs Unicode/caracteres de largura zero: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
 
-### Inspecionar codepoints
+### Inspecione os codepoints
 ```bash
 python3 - <<'PY'
 import sys
@@ -39,16 +39,16 @@ if ord(ch) > 127 or ch.isspace():
 print(i, hex(ord(ch)), repr(ch))
 PY
 ```
-## CSS `unicode-range` canais
+## Canais `unicode-range` do CSS
 
-Regras `@font-face` podem codificar bytes em entradas `unicode-range: U+..`. Extraia os pontos de código, concatene os valores hexadecimais e decodifique:
+As regras `@font-face` podem codificar bytes em entradas `unicode-range: U+..`. Extraia os codepoints, concatene o hexadecimal e decodifique:
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-Se os intervalos contiverem múltiplos bytes por declaração, separe por vírgulas primeiro e normalize (`tr ',+' '\n'`). Python facilita analisar e emitir bytes se a formatação for inconsistente.
+Se os intervalos contiverem vários bytes por declaração, divida primeiro nas vírgulas e normalize (`tr ',+' '\n'`). O Python facilita a análise e a emissão de bytes quando a formatação é inconsistente.
 
 ## Referências
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

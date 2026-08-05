@@ -1,51 +1,51 @@
-# Ferramentas de Reversing & Métodos Básicos
+# Ferramentas de Reversing e Métodos Básicos
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Ferramentas de Reversing baseadas em ImGui
+## Ferramentas de reversing baseadas em ImGui
 
 Software:
 
 - ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
-## Descompilador Wasm / Compilador Wat
+## Wasm decompiler / Wat compiler
 
 Online:
 
-- Use [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) para **descompilar** de wasm (binário) para wat (texto claro)
+- Use [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) para **decompilar** de wasm (binário) para wat (texto legível)
 - Use [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) para **compilar** de wat para wasm
-- você também pode tentar usar [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) para descompilar
+- você também pode tentar usar [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) para decompilar
 
 Software:
 
 - [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
 - [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
 
-## Descompilador .NET
+## .NET decompiler
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek é um descompilador que **descompila e examina múltiplos formatos**, incluindo **bibliotecas** (.dll), **arquivos de metadados do Windows** (.winmd) e **executáveis** (.exe). Depois de descompilado, um assembly pode ser salvo como um projeto do Visual Studio (.csproj).
+dotPeek é um decompiler que **decompila e examina vários formatos**, incluindo **bibliotecas** (.dll), **arquivos de metadata do Windows** (.winmd) e **executáveis** (.exe). Depois de decompilado, um assembly pode ser salvo como um projeto do Visual Studio (.csproj).
 
-O mérito aqui é que, se um código-fonte perdido precisar ser restaurado a partir de um assembly legadо, essa ação pode economizar tempo. Além disso, o dotPeek fornece navegação útil por todo o código descompilado, tornando-o uma das ferramentas perfeitas para **análise de algoritmo Xamarin.**
+A vantagem aqui é que, se for necessário restaurar um código-fonte perdido a partir de um assembly legado, essa ação pode economizar tempo. Além disso, o dotPeek oferece uma navegação conveniente pelo código decompilado, tornando-o uma das ferramentas perfeitas para **análise de algoritmos do Xamarin.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-Com um modelo abrangente de add-in e uma API que estende a ferramenta para atender exatamente às suas necessidades, o .NET reflector economiza tempo e simplifica o desenvolvimento. Vamos dar uma olhada na grande variedade de serviços de engenharia reversa que esta ferramenta oferece:
+Com um modelo abrangente de add-ins e uma API que amplia a ferramenta para atender às suas necessidades exatas, o .NET reflector economiza tempo e simplifica o desenvolvimento. Vamos analisar a grande variedade de serviços de engenharia reversa que essa ferramenta oferece:
 
-- Fornece uma visão de como os dados fluem por uma biblioteca ou componente
-- Fornece visão sobre a implementação e o uso de linguagens e frameworks .NET
-- Encontra funcionalidades não documentadas e não expostas para obter mais das APIs e tecnologias usadas.
+- Fornece uma visão de como os dados fluem por uma library ou componente
+- Fornece informações sobre a implementação e o uso de linguagens e frameworks .NET
+- Encontra funcionalidades não documentadas e não expostas para aproveitar melhor as APIs e tecnologias usadas.
 - Encontra dependências e diferentes assemblies
-- Localiza a posição exata de erros no seu código, componentes de terceiros e bibliotecas.
-- Faz debug na origem de todo o código .NET com o qual você trabalha.
+- Rastreia a localização exata de erros no seu código, componentes de terceiros e libraries.
+- Faz debugging no código-fonte de todo o código .NET com o qual você trabalha.
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[Plugin do ILSpy para Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Você pode tê-lo em qualquer SO (você pode instalá-lo diretamente pelo VSCode, não há necessidade de baixar o git. Clique em **Extensions** e **search ILSpy**).\
-Se você precisar **descompilar**, **modificar** e **recompilar** novamente, você pode usar [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) ou um fork mantido ativamente dele, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Right Click -> Modify Method** para mudar algo dentro de uma função).
+[ILSpy plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Você pode usá-lo em qualquer sistema operacional (pode instalá-lo diretamente pelo VSCode, sem precisar baixar o git. Clique em **Extensions** e **pesquise por ILSpy**).\
+Se precisar **decompilar**, **modificar** e **compilar novamente**, você pode usar o [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) ou um fork dele mantido ativamente, o [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Clique com o botão direito -> Modify Method** para alterar algo dentro de uma função).
 
-### Registro de logs no DNSpy
+### DNSpy Logging
 
 Para fazer o **DNSpy registrar algumas informações em um arquivo**, você pode usar este snippet:
 ```cs
@@ -53,13 +53,13 @@ using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 ```
-### DNSpy Debugging
+### Depuração com DNSpy
 
-Para depurar código usando DNSpy, você precisa:
+Para depurar código usando o DNSpy, você precisa:
 
-Primeiro, altere os **Assembly attributes** relacionados a **debugging**:
+Primeiro, alterar os **atributos do Assembly** relacionados à **depuração**:
 
-![DNSpy Logging - DNSpy Debugging: First, change the Assembly attributes related to debugging](<../../images/image (973).png>)
+![DNSpy Logging - Depuração com DNSpy: primeiro, altere os atributos do Assembly relacionados à depuração](<../../images/image (973).png>)
 
 De:
 ```aspnet
@@ -74,88 +74,88 @@ DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
 E clique em **compile**:
 
-![DNSpy Logging - DNSpy Debugging: And click on compile](<../../images/image (314) (1).png>)
+![DNSpy Logging - DNSpy Debugging: E clique em compile](<../../images/image (314) (1).png>)
 
-Depois salve o novo arquivo via _**File >> Save module...**_:
+Em seguida, salve o novo arquivo por meio de _**File >> Save module...**_:
 
-![DNSpy Logging - DNSpy Debugging: Then save the new file via File Save module](<../../images/image (602).png>)
+![DNSpy Logging - DNSpy Debugging: Em seguida, salve o novo arquivo por meio de File Save module](<../../images/image (602).png>)
 
-Isso é necessário porque, se você não fizer isso, em **runtime** várias **optimisations** serão aplicadas ao código e pode ser que, ao depurar, um **break-point is never hit** ou algumas **variables don't exist**.
+Isso é necessário porque, se você não fizer isso, em **runtime** várias **otimizações** serão aplicadas ao código, e pode ser possível que, durante a depuração, um **breakpoint nunca seja atingido** ou que algumas **variáveis não existam**.
 
-Então, se sua aplicação .NET estiver sendo **run** por **IIS**, você pode **restart** ela com:
+Em seguida, se sua aplicação .NET estiver sendo **executada** pelo **IIS**, você poderá **reiniciá-la** com:
 ```
 iisreset /noforce
 ```
-Then, para começar a depurar, você deve fechar todos os arquivos abertos e, dentro da **Debug Tab**, selecionar **Attach to Process...**:
+Então, para começar a depuração, você deve fechar todos os arquivos abertos e, dentro da **Debug Tab**, selecionar **Attach to Process...**:
 
-![DNSpy Logging - DNSpy Debugging: Then, in order to start debugging you should close all the opened files and inside the Debug Tab select Attach to Process](<../../images/image (318).png>)
+![DNSpy Logging - DNSpy Debugging: Então, para começar a depuração, você deve fechar todos os arquivos abertos e, dentro da Debug Tab, selecionar Attach to Process](<../../images/image (318).png>)
 
-Depois, selecione **w3wp.exe** para anexar ao **IIS server** e clique em **attach**:
+Em seguida, selecione **w3wp.exe** para fazer o attach ao **IIS server** e clique em **attach**:
 
-![DNSpy Logging - DNSpy Debugging: Then select w3wp.exe to attach to the IIS server and click attach](<../../images/image (113).png>)
+![DNSpy Logging - DNSpy Debugging: Em seguida, selecione w3wp.exe para fazer o attach ao IIS server e clique em attach](<../../images/image (113).png>)
 
-Agora que estamos depurando o processo, é hora de pará-lo e carregar todos os módulos. Primeiro clique em _Debug >> Break All_ e depois clique em _**Debug >> Windows >> Modules**_:
+Agora que estamos depurando o processo, é hora de interrompê-lo e carregar todos os módulos. Primeiro, clique em _Debug >> Break All_ e depois em _**Debug >> Windows >> Modules**_:
 
-![DNSpy Logging - DNSpy Debugging: Now that we are debugging the process, it's time to stop it and load all the modules. First click on Debug Break All and then click on Debug Windows Modules](<../../images/image (132).png>)
+![DNSpy Logging - DNSpy Debugging: Agora que estamos depurando o processo, é hora de interrompê-lo e carregar todos os módulos. Primeiro, clique em Debug Break All e depois em Debug Windows Modules](<../../images/image (132).png>)
 
-![DNSpy Logging - DNSpy Debugging: Now that we are debugging the process, it's time to stop it and load all the modules. First click on Debug Break All and then click on Debug Windows Modules](<../../images/image (834).png>)
+![DNSpy Logging - DNSpy Debugging: Agora que estamos depurando o processo, é hora de interrompê-lo e carregar todos os módulos. Primeiro, clique em Debug Break All e depois em Debug Windows Modules](<../../images/image (834).png>)
 
 Clique em qualquer módulo em **Modules** e selecione **Open All Modules**:
 
-![DNSpy Logging - DNSpy Debugging: Click any module on Modules and select Open All Modules](<../../images/image (922).png>)
+![DNSpy Logging - DNSpy Debugging: Clique em qualquer módulo em Modules e selecione Open All Modules](<../../images/image (922).png>)
 
 Clique com o botão direito em qualquer módulo no **Assembly Explorer** e clique em **Sort Assemblies**:
 
-![DNSpy Logging - DNSpy Debugging: Right click any module in Assembly Explorer and click Sort Assemblies](<../../images/image (339).png>)
+![DNSpy Logging - DNSpy Debugging: Clique com o botão direito em qualquer módulo no Assembly Explorer e clique em Sort Assemblies](<../../images/image (339).png>)
 
 ## Java decompiler
 
 [https://github.com/skylot/jadx](https://github.com/skylot/jadx)\
 [https://github.com/java-decompiler/jd-gui/releases](https://github.com/java-decompiler/jd-gui/releases)
 
-## Debugging DLLs
+## Depurando DLLs
 
-### Using IDA
+### Usando IDA
 
-- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
-- Select **Windbg** debugger
-- Select "**Suspend on library load/unload**"
+- **Load rundll32** (64bits em C:\Windows\System32\rundll32.exe e 32 bits em C:\Windows\SysWOW64\rundll32.exe)
+- Selecione o debugger **Windbg**
+- Selecione "**Suspend on library load/unload**"
 
-![Debugging DLLs - Using IDA: Select " Suspend on library load/unload "](<../../images/image (868).png>)
+![Debugging DLLs - Using IDA: Selecione " Suspend on library load/unload "](<../../images/image (868).png>)
 
-- Configure the **parameters** of the execution putting the **path to the DLL** and the function that you want to call:
+- Configure os **parâmetros** da execução, inserindo o **path para a DLL** e a função que você deseja chamar:
 
-![Debugging DLLs - Using IDA: Configure the parameters of the execution putting the path to the DLL and the function that you want to call](<../../images/image (704).png>)
+![Debugging DLLs - Using IDA: Configure os parâmetros da execução, inserindo o path para a DLL e a função que você deseja chamar](<../../images/image (704).png>)
 
-Then, when you start debugging **the execution will be stopped when each DLL is loaded**, then, when rundll32 load your DLL the execution will be stopped.
+Então, quando você iniciar a depuração, **a execução será interrompida sempre que cada DLL for carregada**; assim, quando rundll32 carregar sua DLL, a execução será interrompida.
 
-But, how can you get to the code of the DLL that was lodaded? Using this method, I don't know how.
+Mas como você pode chegar ao código da DLL que foi carregada? Usando este método, não sei como.
 
-### Using x64dbg/x32dbg
+### Usando x64dbg/x32dbg
 
-- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
-- **Change the Command Line** ( _File --> Change Command Line_ ) and set the path of the dll and the function that you want to call, for example: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
-- Change _Options --> Settings_ and select "**DLL Entry**".
-- Then **start the execution**, the debugger will stop at each dll main, at some point you will **stop in the dll Entry of your dll**. From there, just search for the points where you want to put a breakpoint.
+- **Load rundll32** (64bits em C:\Windows\System32\rundll32.exe e 32 bits em C:\Windows\SysWOW64\rundll32.exe)
+- **Altere a Command Line** ( _File --> Change Command Line_ ) e defina o path da dll e a função que deseja chamar, por exemplo: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- Altere _Options --> Settings_ e selecione "**DLL Entry**".
+- Em seguida, **inicie a execução**. O debugger será interrompido em cada dll main e, em algum momento, você **parará na dll Entry da sua dll**. A partir daí, basta procurar os pontos onde deseja colocar um breakpoint.
 
-Notice that when the execution is stopped by any reason in win64dbg you can see **in which code you are** looking in the **top of the win64dbg window**:
+Observe que, quando a execução é interrompida por qualquer motivo no win64dbg, você pode ver **em qual código está** observando a **parte superior da janela do win64dbg**:
 
-![Using IDA - Using x64dbg/x32dbg: Notice that when the execution is stopped by any reason in win64dbg you can see in which code you are looking in the top of the win64dbg window](<../../images/image (842).png>)
+![Using IDA - Using x64dbg/x32dbg: Observe que, quando a execução é interrompida por qualquer motivo no win64dbg, você pode ver em qual código está observando a parte superior da janela do win64dbg](<../../images/image (842).png>)
 
-Then, looking to this ca see when the execution was stopped in the dll you want to debug.
+Assim, você pode ver quando a execução foi interrompida na dll que deseja depurar.
 
 ## GUI Apps / Videogames
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them. More info in:
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) é um programa útil para descobrir onde valores importantes são armazenados na memória de um jogo em execução e alterá-los. Mais informações em:
 
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) is a front-end/reverse engineering tool for the GNU Project Debugger (GDB), focused on games. However, it can be used for any reverse-engineering related stuff
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) é uma ferramenta de front-end/reverse engineering para o GNU Project Debugger (GDB), com foco em games. No entanto, pode ser usada para qualquer atividade relacionada a reverse engineering.
 
-[**Decompiler Explorer**](https://dogbolt.org/) is a web front-end to a number of decompilers. This web service lets you compare the output of different decompilers on small executables.
+[**Decompiler Explorer**](https://dogbolt.org/) é um front-end web para diversos decompilers. Este serviço web permite comparar a saída de diferentes decompilers em executáveis pequenos.
 
 ## ARM & MIPS
 
@@ -166,49 +166,49 @@ https://github.com/nongiach/arm_now
 
 ## Shellcodes
 
-### Debugging a shellcode with blobrunner
+### Depurando um shellcode com blobrunner
 
-[**Blobrunner**](https://github.com/OALabs/BlobRunner) will **allocate** the **shellcode** inside a space of memory, will **indicate** you the **memory address** were the shellcode was allocated and will **stop** the execution.\
-Then, you need to **attach a debugger** (Ida or x64dbg) to the process and put a **breakpoint the indicated memory address** and **resume** the execution. This way you will be debugging the shellcode.
+[**Blobrunner**](https://github.com/OALabs/BlobRunner) **alocará** o **shellcode** em uma área da memória, **indicará** o **endereço de memória** onde o shellcode foi alocado e **interromperá** a execução.\
+Em seguida, você precisa fazer **attach de um debugger** (Ida ou x64dbg) ao processo, inserir um **breakpoint no endereço de memória indicado** e **retomar** a execução. Dessa forma, você depurará o shellcode.
 
-The releases github page contains zips containing the compiled releases: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-You can find a slightly modified version of Blobrunner in the following link. In order to compile it just **create a C/C++ project in Visual Studio Code, copy and paste the code and build it**.
+A página de releases do github contém zips com as releases compiladas: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+Você pode encontrar uma versão ligeiramente modificada do Blobrunner no link a seguir. Para compilá-la, basta **criar um projeto C/C++ no Visual Studio Code, copiar e colar o código e fazer o build**.
 
 
 {{#ref}}
 blobrunner.md
 {{#endref}}
 
-### Debugging a shellcode with jmp2it
+### Depurando um shellcode com jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)is very similar to blobrunner. It will **allocate** the **shellcode** inside a space of memory, and start an **eternal loop**. You then need to **attach the debugger** to the process, **play start wait 2-5 secs and press stop** and you will find yourself inside the **eternal loop**. Jump to the next instruction of the eternal loop as it will be a call to the shellcode, and finally you will find yourself executing the shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) é muito semelhante ao blobrunner. Ele **alocará** o **shellcode** em uma área da memória e iniciará um **loop infinito**. Em seguida, você precisa fazer **attach do debugger** ao processo, **iniciar a execução, aguardar de 2 a 5 segundos e pressionar stop**; você estará dentro do **loop infinito**. Avance para a próxima instrução do loop infinito, pois ela será uma chamada ao shellcode; por fim, você estará executando o shellcode.
 
-![Debugging a shellcode with blobrunner - Debugging a shellcode with jmp2it: jmp2it is very similar to blobrunner. It will allocate the shellcode inside a space of memory, and start an...](<../../images/image (509).png>)
+![Debugging a shellcode with blobrunner - Debugging a shellcode with jmp2it: jmp2it é muito semelhante ao blobrunner. Ele alocará o shellcode em uma área da memória e iniciará um...](<../../images/image (509).png>)
 
-You can download a compiled version of [jmp2it inside the releases page](https://github.com/adamkramer/jmp2it/releases/).
+Você pode baixar uma versão compilada do [jmp2it na página de releases](https://github.com/adamkramer/jmp2it/releases/).
 
-### Debugging shellcode using Cutter
+### Depurando shellcode usando Cutter
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) is the GUI of radare. Using cutter you can emulate the shellcode and inspect it dynamically.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) é a GUI do radare. Usando o Cutter, você pode emular o shellcode e inspecioná-lo dinamicamente.
 
-Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it decompiled it correctly, but when I opened it as a shellcode it didn't:
+Observe que o Cutter permite "Open File" e "Open Shellcode". No meu caso, quando abri o shellcode como um arquivo, ele foi decompilado corretamente; mas, quando o abri como shellcode, isso não aconteceu:
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it...](<../../images/image (562).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: Observe que o Cutter permite "Open File" e "Open Shellcode". No meu caso, quando abri o shellcode como um arquivo, ele...](<../../images/image (562).png>)
 
-In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically start the emulation from there:
+Para iniciar a emulação no local desejado, defina um bp nesse local e, aparentemente, o Cutter iniciará automaticamente a emulação a partir dali:
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically...](<../../images/image (589).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: Para iniciar a emulação no local desejado, defina um bp nesse local e, aparentemente, o Cutter iniciará automaticamente...](<../../images/image (589).png>)
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically...](<../../images/image (387).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: Para iniciar a emulação no local desejado, defina um bp nesse local e, aparentemente, o Cutter iniciará automaticamente...](<../../images/image (387).png>)
 
-You can see the stack for example inside a hex dump:
+Você pode ver a stack, por exemplo, dentro de um hex dump:
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: You can see the stack for example inside a hex dump](<../../images/image (186).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: Você pode ver a stack, por exemplo, dentro de um hex dump](<../../images/image (186).png>)
 
 ### Deobfuscating shellcode and getting executed functions
 
-You should try [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
-It will tell you things like **which functions** is the shellcode using and if the shellcode is **decoding** itself in memory.
+Você deve experimentar o [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
+Ele informará coisas como **quais funções** o shellcode está usando e se o shellcode está **decodificando** a si mesmo na memória.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -217,37 +217,37 @@ scdbg.exe -f shellcode -d #Dump decoded shellcode
 scdbg.exe -f shellcode /findsc #Find offset where starts
 scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 ```
-scDbg também conta com um launcher gráfico onde você pode selecionar as opções desejadas e executar o shellcode
+scDbg também conta com um launcher gráfico no qual você pode selecionar as opções desejadas e executar o shellcode
 
-![Debugging shellcode using Cutter - Deobfuscating shellcode and getting executed functions: scDbg also counts with a graphical launcher where you can select the options you want and...](<../../images/image (258).png>)
+![Depurando shellcode usando Cutter - Desofuscando shellcode e obtendo funções executadas: scDbg também conta com um launcher gráfico no qual você pode selecionar as opções desejadas e...](<../../images/image (258).png>)
 
-A opção **Create Dump** irá fazer dump do shellcode final se alguma mudança for feita no shellcode dinamicamente na memória (útil para baixar o shellcode decodificado). O **start offset** pode ser útil para iniciar o shellcode em um offset específico. A opção **Debug Shell** é útil para depurar o shellcode usando o terminal do scDbg (porém, considero qualquer uma das opções explicadas antes melhor para esse caso, pois você poderá usar o Ida ou x64dbg).
+A opção **Create Dump** fará o dump do shellcode final caso alguma alteração seja feita dinamicamente no shellcode na memória (útil para baixar o shellcode decodificado). O **start offset** pode ser útil para iniciar o shellcode em um offset específico. A opção **Debug Shell** é útil para depurar o shellcode usando o terminal do scDbg (no entanto, considero qualquer uma das opções explicadas anteriormente melhor para isso, pois você poderá usar o Ida ou o x64dbg).
 
-### Disassembling using CyberChef
+### Desmontando usando o CyberChef
 
-Faça upload do arquivo do seu shellcode como entrada e use a seguinte recipe para decompilar: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Faça upload do arquivo de shellcode como entrada e use a seguinte recipe para descompilá-lo: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
-## MBA obfuscation deobfuscation
+## Desofuscação de MBA obfuscation
 
-A obfuscation **Mixed Boolean-Arithmetic (MBA)** oculta expressões simples como `x + y` por trás de fórmulas que misturam operadores aritméticos (`+`, `-`, `*`) e bitwise (`&`, `|`, `^`, `~`, shifts). A parte importante é que essas identidades normalmente só são corretas sob **fixed-width modular arithmetic**, então carries e overflows importam:
+A obfuscation **Mixed Boolean-Arithmetic (MBA)** oculta expressões simples, como `x + y`, por trás de fórmulas que combinam operações aritméticas (`+`, `-`, `*`) e operadores bitwise (`&`, `|`, `^`, `~`, shifts). A parte importante é que essas identidades geralmente só estão corretas sob **aritmética modular de largura fixa**, portanto, carrys e overflows são relevantes:
 ```c
 (x ^ y) + 2 * (x & y) == x + y
 ```
-Se você simplificar esse tipo de expressão com ferramentas algébricas genéricas, pode facilmente obter um resultado errado porque a semântica de largura de bits foi ignorada.
+Se você simplificar esse tipo de expressão com ferramentas algébricas genéricas, poderá facilmente obter um resultado incorreto, pois a semântica da largura de bits foi ignorada.
 
 ### Fluxo de trabalho prático
 
-1. **Mantenha a largura original de bits** do código/IR/decompiler levantado (`8/16/32/64` bits).
+1. **Mantenha a largura de bits original** do código/IR/saída do decompiler levantado (`8/16/32/64` bits).
 2. **Classifique a expressão** antes de tentar simplificá-la:
 - **Linear**: somas ponderadas de átomos bitwise
-- **Semilinear**: linear mais máscaras constantes como `x & 0xFF`
-- **Polinomial**: aparecem produtos
-- **Mista**: produtos e lógica bitwise estão intercalados, muitas vezes com subexpressões repetidas
-3. **Verifique cada reescrita candidata** com testes aleatórios ou uma prova SMT. Se a equivalência não puder ser provada, mantenha a expressão original em vez de adivinhar.
+- **Semilinear**: linear mais máscaras constantes, como `x & 0xFF`
+- **Polinomial**: há produtos
+- **Mista**: produtos e lógica bitwise estão intercalados, geralmente com subexpressões repetidas
+3. **Verifique cada reescrita candidata** com testes aleatórios ou uma prova SMT. Se a equivalência não puder ser comprovada, mantenha a expressão original em vez de fazer suposições.
 
 ### CoBRA
 
-[**CoBRA**](https://github.com/trailofbits/CoBRA) é um simplificador MBA prático para análise de malware e reversing de binários protegidos. Ele classifica a expressão e a encaminha por pipelines especializados, em vez de aplicar uma única passagem genérica de rewrite a tudo.
+[**CoBRA**](https://github.com/trailofbits/CoBRA) é um simplificador prático de MBA para análise de malware e reversing de binários protegidos. Ele classifica a expressão e a encaminha por pipelines especializados, em vez de aplicar uma única passagem genérica de reescrita a tudo.<sup>[[1]](#references)[[2]](#references)</sup>
 
 Uso rápido:
 ```bash
@@ -265,63 +265,63 @@ cobra-cli --mba "(a^b)+(a&b)+(a&b)" --verify
 Casos úteis:
 
 - **Linear MBA**: CoBRA avalia a expressão em entradas Booleanas, deriva uma assinatura e executa em paralelo vários métodos de recuperação, como pattern matching, conversão para ANF e interpolação de coeficientes.
-- **Semilinear MBA**: átomos mascarados por constantes são reconstruídos com reconstrução particionada por bits, para que as regiões mascaradas permaneçam corretas.
-- **Polynomial/Mixed MBA**: produtos são decompostos em núcleos e subexpressões repetidas podem ser elevadas a temporários antes de simplificar a relação externa.
+- **Semilinear MBA**: átomos mascarados por constantes são reconstruídos com uma reconstrução particionada por bits, mantendo corretas as regiões mascaradas.
+- **Polynomial/Mixed MBA**: produtos são decompostos em núcleos, e subexpressões repetidas podem ser elevadas para temporários antes de simplificar a relação externa.
 
 Exemplo de uma identidade mista que geralmente vale a pena tentar recuperar:
 ```c
 (x & y) * (x | y) + (x & ~y) * (~x & y)
 ```
-Isto pode se reduzir a:
+Isso pode ser reduzido a:
 ```c
 x * y
 ```
-### Anotações de reversing
+### Notas sobre reversing
 
-- Prefira executar CoBRA em **expressões IR lifted** ou na saída do decompiler depois de isolar o cálculo exato.
-- Use `--bitwidth` explicitamente quando a expressão vier de aritmética mascarada ou de registradores estreitos.
-- Se precisar de uma etapa de prova mais forte, confira as notas locais do Z3 aqui:
+- Prefira executar o CoBRA em **expressões de IR lifted** ou na saída do decompiler após isolar o cálculo exato.
+- Use `--bitwidth` explicitamente quando a expressão vier de aritmética com máscaras ou de registradores estreitos.
+- Se precisar de uma etapa de prova mais forte, consulte as notas locais do Z3 aqui:
 
 
 {{#ref}}
 satisfiability-modulo-theories-smt-z3.md
 {{#endref}}
 
-- CoBRA também vem como um **plugin de LLVM pass** (`libCobraPass.so`), o que é útil quando você quer normalizar LLVM IR com muito MBA antes de passes de análise posteriores.
-- Resíduos mixed-domain sensíveis a carry sem suporte devem ser tratados como um sinal para manter a expressão original e raciocinar manualmente sobre o caminho do carry.
+- O CoBRA também é distribuído como um **plugin de pass do LLVM** (`libCobraPass.so`), útil quando você quiser normalizar LLVM IR com muito MBA antes de executar passes de análise posteriores.
+- Resíduos mistos de domínio sensíveis a carry que não forem suportados devem ser tratados como um sinal para manter a expressão original e raciocinar manualmente sobre o caminho do carry.
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-Este obfuscator **modifica todas as instruções para `mov`**(é, realmente muito legal). Ele também usa interruptions para mudar os fluxos de execução. Para mais informações sobre como funciona:
+Este obfuscator **modifica todas as instruções para `mov`** (sim, realmente muito legal). Ele também usa interrupções para alterar os fluxos de execução. Para mais informações sobre como ele funciona:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-Se você tiver sorte, [demovfuscator](https://github.com/kirschju/demovfuscator) vai deofuscate o binário. Ele tem várias dependências
+Se você tiver sorte, o [demovfuscator](https://github.com/kirschju/demovfuscator) fará o deobfuscate do binary. Ele tem várias dependências
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
 ```
-E [instale o keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
+E [install keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-Se você estiver jogando um **CTF, este workaround para encontrar a flag** pode ser muito útil: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+Se você estiver jogando um **CTF, esta solução alternativa para encontrar a flag** pode ser muito útil: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
-Para encontrar o **ponto de entrada**, pesquise as funções por `::main` como em:
+Para encontrar o **ponto de entrada**, pesquise as funções por `::main`, como em:
 
-![Movfuscator - Rust: To find the entry point search the functions by ::main like in](<../../images/image (1080).png>)
+![Movfuscator - Rust: Para encontrar o ponto de entrada, pesquise as funções por ::main, como em](<../../images/image (1080).png>)
 
-Neste caso, o binário se chamava authenticator, então é bem óbvio que esta é a função main interessante.\
-Tendo o **nome** das **funções** chamadas, pesquise-as na **Internet** para aprender sobre suas **entradas** e **saídas**.
+Neste caso, o binário se chamava authenticator, então é bastante óbvio que esta é a função main interessante.\
+Tendo o **nome** das **funções** chamadas, pesquise por elas na **Internet** para descobrir suas **entradas** e **saídas**.
 
-### Recovering Rust strings from ELF firmware
+### Recuperando strings Rust de firmware ELF
 
-Em binários **Rust ELF**, muitas strings estáticas não são referenciadas como ponteiros NUL-terminated no estilo C. Um layout comum do `rustc` é uma **tupla ponteiro/tamanho** dentro de **`.data.rel.ro`** apontando para o blob real da string armazenado em **`.rodata`**:
+Em binários **Rust ELF**, muitas strings estáticas não são referenciadas como ponteiros terminados em NUL no estilo C. Um layout comum do `rustc` é uma tupla de ponteiro/comprimento dentro de **`.data.rel.ro`**, apontando para o bloco de strings real armazenado em **`.rodata`**:<sup>[[3]](#references)</sup>
 ```text
 [8-byte little-endian pointer][8-byte little-endian length]
 ```
-Isso significa que `strings` ou a análise padrão do Ghidra podem mesclar strings adjacentes ou até perder referências cruzadas por completo.
+Isso significa que `strings` ou a análise padrão do Ghidra podem mesclar strings adjacentes ou deixar de detectar cross-references completamente.
 
 Fluxo de trabalho rápido:
 ```bash
@@ -330,10 +330,10 @@ objdump -h <bin>
 ```
 1. Obtenha o endereço virtual e o tamanho de **`.rodata`**.
 2. Enumere **`.data.rel.ro`** uma palavra por vez.
-3. Trate qualquer valor dentro do intervalo de endereço de `.rodata` como um candidato a ponteiro de string.
-4. Trate a próxima palavra como o comprimento candidato.
-5. Aplique filtros de sanity (por exemplo, mantenha comprimentos entre **4** e **100** bytes).
-6. Leia exatamente `length` bytes de `.rodata` em vez de varrer até `0x00`.
+3. Considere qualquer valor dentro do intervalo de endereços de `.rodata` como um possível ponteiro para uma string.
+4. Considere a palavra seguinte como o possível tamanho.
+5. Aplique filtros de plausibilidade (por exemplo, mantenha tamanhos entre **4** e **100** bytes).
+6. Leia exatamente `length` bytes de `.rodata`, em vez de procurar até `0x00`.
 
 Lógica mínima do extractor:
 ```python
@@ -344,33 +344,33 @@ if rodata_start <= ptr < rodata_end and 4 <= length <= 100:
 start = ptr - rodata_start
 print(rodata[start:start+length])
 ```
-Isso é especialmente útil em firmware reversing porque strings Rust recuperadas frequentemente revelam **HTTP routes, RPC names, log messages, assertions, filenames, config keys, command handlers e lógica relacionada a auth**.
+Isso é especialmente útil em firmware reversing porque as strings Rust recuperadas geralmente revelam **rotas HTTP, nomes de RPC, mensagens de log, assertions, nomes de arquivos, chaves de configuração, handlers de comandos e lógica relacionada à autenticação**.
 
-Se o Ghidra não encontrar essas strings, rode um script/plugin customizado que aplique a mesma heuristic e crie string data nos offsets `.rodata` referenciados. As ferramentas publicadas `rust-strings` e `RustStrings.py` da Pen Test Partners são boas referências para adaptar a ideia a outros **word sizes, endianness e section layouts**.
+Se o Ghidra não encontrar essas strings, execute um script/plugin personalizado que aplique a mesma heurística e crie dados de string nos offsets `.rodata` referenciados. As ferramentas `rust-strings` e `RustStrings.py`, publicadas pela Pen Test Partners, são boas referências para adaptar a ideia a outros **word sizes, endianness e layouts de seção**.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
 ## **Delphi**
 
-Para binaries compilados em Delphi você pode usar [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
+Para binários compilados em Delphi, você pode usar [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-Se você tiver que fazer reverse de um binary Delphi, eu sugeriria usar o plugin do IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Se precisar fazer reversing de um binário Delphi, sugiro usar o plugin do IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
-Basta pressionar **ATL+f7** (import python plugin no IDA) e selecionar o python plugin.
+Basta pressionar **ATL+f7** (importar o plugin Python no IDA) e selecionar o plugin Python.
 
-Este plugin executará o binary e resolverá os nomes das funções dinamicamente no início da debugging. Depois de iniciar a debugging, pressione novamente o botão Start (o verde ou f9) e um breakpoint será atingido no início do código real.
+Esse plugin executará o binário e resolverá os nomes das funções dinamicamente no início do debugging. Depois de iniciar o debugging, pressione novamente o botão Start (o verde ou f9), e um breakpoint será atingido no início do código real.
 
-Também é muito interessante porque, se você pressionar um botão na graphic application, o debugger vai parar na função executada por esse botão.
+Isso também é muito interessante porque, se você pressionar um botão no aplicativo gráfico, o debugger será interrompido na função executada por esse botão.
 
 ## Golang
 
-Se você tiver que fazer reverse de um binary Golang, eu sugeriria usar o plugin do IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Se precisar fazer reversing de um binário Golang, sugiro usar o plugin do IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
-Basta pressionar **ATL+f7** (import python plugin no IDA) e selecionar o python plugin.
+Basta pressionar **ATL+f7** (importar o plugin Python no IDA) e selecionar o plugin Python.
 
 Isso resolverá os nomes das funções.
 
-## Compiled Python
+## Python compilado
 
-Nesta página você pode encontrar como obter o código python de um binary compilado de ELF/EXE python:
+Nesta página, você pode encontrar como obter o código Python de um binário ELF/EXE compilado em Python:
 
 
 {{#ref}}
@@ -379,18 +379,18 @@ Nesta página você pode encontrar como obter o código python de um binary comp
 
 ## GBA - Game Body Advance
 
-Se você obtiver o **binary** de um jogo de GBA, pode usar diferentes ferramentas para **emular** e **debugar** ele:
+Se você obtiver o **binário** de um jogo de GBA, poderá usar diferentes ferramentas para **emulá-lo** e fazer **debugging**:
 
-- [**no$gba**](https://problemkaputt.de/gba.htm) (_Baixe a versão de debug_) - Contém um debugger com interface
+- [**no$gba**](https://problemkaputt.de/gba.htm) (_Baixe a versão de debugging_) - Contém um debugger com interface
 - [**mgba** ](https://mgba.io)- Contém um debugger CLI
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Plugin do Ghidra
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Plugin do Ghidra
 
-Em [**no$gba**](https://problemkaputt.de/gba.htm), em _**Options --> Emulation Setup --> Controls**_** ** você pode ver como pressionar os **buttons** do Game Boy Advance
+No [**no$gba**](https://problemkaputt.de/gba.htm), em _**Options --> Emulation Setup --> Controls**_** **, você pode ver como pressionar os **botões** do Game Boy Advance
 
-![no$gba controls configuration showing Game Boy Advance button mappings](<../../images/image (581).png>)
+![configuração dos controles do no$gba mostrando os mapeamentos dos botões do Game Boy Advance](<../../images/image (581).png>)
 
-Quando pressionada, cada **key tem um valor** para identificá-la:
+Quando pressionada, cada **tecla tem um valor** para identificá-la:
 ```
 A = 1
 B = 2
@@ -403,11 +403,11 @@ DOWN = 128
 R = 256
 L = 256
 ```
-Então, nesse tipo de programa, a parte interessante será **como o programa trata a entrada do usuário**. No endereço **0x4000130** você encontrará a função comumente encontrada: **KEYINPUT**.
+Então, nesse tipo de programa, a parte interessante será **como o programa trata a entrada do usuário**. No endereço **0x4000130**, você encontrará a função comumente encontrada: **KEYINPUT**.
 
-![Ghidra view of a GBA binary referencing KEYINPUT at address 0x4000130](<../../images/image (447).png>)
+![Visualização do Ghidra de um binário de GBA referenciando KEYINPUT no endereço 0x4000130](<../../images/image (447).png>)
 
-Na imagem anterior, você pode ver que a função é chamada a partir de **FUN_080015a8** (endereços: _0x080015fa_ e _0x080017ac_).
+Na imagem anterior, você pode ver que a função é chamada por **FUN_080015a8** (endereços: _0x080015fa_ e _0x080017ac_).
 
 Nessa função, após algumas operações de inicialização (sem importância):
 ```c
@@ -442,7 +442,7 @@ uVar2 = DAT_030004dc;
 uVar1 = *puVar6;
 if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-O último `if` está verificando se **`uVar4`** está nas **últimas Keys** e não é a chave atual, também chamado de soltar um botão (a chave atual está armazenada em **`uVar1`**).
+O último if verifica se **`uVar4`** está em **`last Keys`** e não é a chave atual, também chamado de soltar um botão (a chave atual é armazenada em **`uVar1`**).
 ```c
 if (uVar1 == 4) {
 DAT_030000d4 = 0;
@@ -470,15 +470,15 @@ FUN_08000864();
 if (uVar1 == 0x10) {
 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
-No código anterior você pode ver que estamos comparando **uVar1** (o lugar onde está o **valor do botão pressionado**) com alguns valores:
+No código anterior, você pode ver que estamos comparando **uVar1** (o local onde está o **valor do botão pressionado**) com alguns valores:
 
-- Primeiro, ele é comparado com o **valor 4** (botão **SELECT**): No desafio, esse botão limpa a tela
-- Depois, ele é comparado com o **valor 8** (botão **START**): No desafio, isso verifica se o código é válido para obter a flag.
-- Neste caso, a var **`DAT_030000d8`** é comparada com 0xf3 e, se o valor for o mesmo, algum código é executado.
-- Em qualquer outro caso, algum cont (**`DAT_030000d4`**) é verificado. É um cont porque ele está adicionando 1 logo após entrar no código.\
-**S**e for menor que 8, algo que envolve **adicionar** valores a **`DAT_030000d8`** é feito (basicamente, ele adiciona os valores das teclas pressionadas nessa var enquanto o cont for menor que 8).
+- Primeiro, ele é comparado com o **valor 4** (botão **SELECT**): no desafio, esse botão limpa a tela
+- Em seguida, ele é comparado com o **valor 8** (botão **START**): no desafio, isso verifica se o código é válido para obter a flag.
+- Nesse caso, a variável **`DAT_030000d8`** é comparada com 0xf3 e, se o valor for igual, algum código é executado.
+- Em qualquer outro caso, um contador (**`DAT_030000d4`**) é verificado. Ele é um contador porque está sendo incrementado em 1 logo após inserir o código.\
+S**e** for menor que 8, algo que envolve **adicionar** valores a **`DAT_030000d8`** é feito (basicamente, os valores das teclas pressionadas são adicionados a essa variável enquanto o contador for menor que 8).
 
-Então, neste desafio, sabendo os valores dos botões, você precisava **pressionar uma combinação com comprimento menor que 8 cujo somatório resulte em 0xf3.**
+Portanto, neste desafio, sabendo os valores dos botões, você precisava **pressionar uma combinação com comprimento menor que 8 cuja soma resultante fosse 0xf3.**<sup>[[6]](#references)</sup>
 
 **Referência para este tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
@@ -492,14 +492,15 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 ## Cursos
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
-- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Desobfuscação binária)
+- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Desofuscação binária)
 
 ## Referências
 
-- [Simplifying MBA obfuscation with CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
-- [Trail of Bits CoBRA repository](https://github.com/trailofbits/CoBRA)
-- [Decoding Rust strings - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
-- [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
-- [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
+- [1] [Simplificando a ofuscação MBA com CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
+- [2] [Repositório Trail of Bits CoBRA](https://github.com/trailofbits/CoBRA)
+- [3] [Decodificando strings Rust - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
+- [4] [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
+- [5] [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
+- [6] [Nostalgia - tutorial de reversing de GBA (exp.codes)](https://exp.codes/Nostalgia/)
 
 {{#include ../../banners/hacktricks-training.md}}

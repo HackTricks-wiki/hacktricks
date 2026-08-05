@@ -2,54 +2,54 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-A maioria dos desafios de stego de imagem em CTF se resume a um destes grupos:
+A maioria dos image stego em CTFs se enquadra em uma destas categorias:
 
 - LSB/bit-planes (PNG/BMP)
-- Metadata/comment payloads
-- PNG chunk weirdness / corruption repair
-- JPEG DCT-domain tools (OutGuess, etc)
-- Frame-based (GIF/APNG)
+- Payloads em metadados/comentários
+- Anomalias em chunks PNG / reparo de corrupção
+- Ferramentas no domínio DCT de JPEG (OutGuess etc.)
+- Baseado em frames (GIF/APNG)
 
 ## Triagem rápida
 
-Priorize evidências ao nível do contêiner antes da análise profunda do conteúdo:
+Priorize evidências no nível do container antes de uma análise aprofundada do conteúdo:
 
-- Valide o arquivo e inspecione a estrutura: `file`, `magick identify -verbose`, format validators (e.g., `pngcheck`).
-- Extraia metadata e strings visíveis: `exiftool -a -u -g1`, `strings`.
-- Verifique conteúdo embutido/anexado: `binwalk` e inspeção de fim-de-arquivo (`tail | xxd`).
-- Siga por tipo de contêiner:
-- PNG/BMP: bit-planes/LSB e anomalias em nível de chunk.
-- JPEG: metadata + ferramentas no domínio DCT (famílias OutGuess/F5-style).
-- GIF/APNG: extração de frames, diferença entre frames, truques de paleta.
+- Valide o arquivo e inspecione a estrutura: `file`, `magick identify -verbose`, validadores de formato (por exemplo, `pngcheck`).
+- Extraia metadados e strings visíveis: `exiftool -a -u -g1`, `strings`.
+- Verifique se há conteúdo incorporado/anexado: `binwalk` e inspeção do final do arquivo (`tail | xxd`).
+- Escolha de acordo com o container:
+- PNG/BMP: bit-planes/LSB e anomalias no nível dos chunks.
+- JPEG: metadados + ferramentas no domínio DCT (famílias no estilo OutGuess/F5).
+- GIF/APNG: extração de frames, diferenciação entre frames, técnicas com paleta.
 
 ## Bit-planes / LSB
 
-### Técnica
+### Technique
 
-PNG/BMP são populares em CTFs porque armazenam pixels de forma que torna a manipulação a nível de bit fácil. O mecanismo clássico de esconder/extrair é:
+PNG/BMP são populares em CTFs porque armazenam pixels de uma forma que facilita a **manipulação em nível de bits**. O mecanismo clássico de ocultação/extração é:
 
-- Cada canal de pixel (R/G/B/A) possui múltiplos bits.
+- Cada canal de pixel (R/G/B/A) possui vários bits.
 - O **least significant bit** (LSB) de cada canal altera muito pouco a imagem.
-- Atacantes escondem dados nesses bits de baixa ordem, às vezes com um stride, permutação ou escolha por canal.
+- Invasores ocultam dados nesses bits de baixa ordem, às vezes usando um stride, uma permutação ou uma escolha por canal.
 
-O que esperar em desafios:
+O que esperar nos desafios:
 
 - O payload está em apenas um canal (por exemplo, `R` LSB).
 - O payload está no canal alpha.
-- Payload é comprimido/encodado após extração.
-- A mensagem está espalhada por planos ou escondida via XOR entre planos.
+- O payload é comprimido/codificado após a extração.
+- A mensagem está espalhada entre planes ou oculta por meio de XOR entre planes.
 
-Outras famílias que você pode encontrar (dependendo da implementação):
+Famílias adicionais que você pode encontrar (dependendo da implementação):
 
-- **LSB matching** (não apenas invertendo o bit, mas ajustes de +/-1 para corresponder ao bit alvo)
-- **Palette/index-based hiding** (indexed PNG/GIF: payload em índices de cor em vez de RGB bruto)
-- **Alpha-only payloads** (payload apenas no alpha, completamente invisível na visualização RGB)
+- **LSB matching** (não apenas invertendo o bit, mas fazendo ajustes de +/-1 para corresponder ao bit desejado)
+- **Ocultação baseada em palette/index** (PNG/GIF indexados: o payload está nos índices de cores, e não no RGB bruto)
+- **Payload somente no alpha** (completamente invisível na visualização RGB)
 
-### Ferramentas
+### Tooling
 
 #### zsteg
 
-`zsteg` enumera muitos padrões de extração LSB/bit-plane para PNG/BMP:
+`zsteg` enumera vários padrões de extração de LSB/bit-plane para PNG/BMP:
 ```bash
 zsteg -a file.png
 ```
@@ -57,74 +57,74 @@ Repo: https://github.com/zed-0xff/zsteg
 
 #### StegoVeritas / Stegsolve
 
-- `stegoVeritas`: runs a battery of transforms (metadata, image transforms, brute forcing LSB variants).
-- `stegsolve`: manual visual filters (channel isolation, plane inspection, XOR, etc).
+- `stegoVeritas`: executa uma bateria de transforms (metadata, image transforms, brute forcing de variantes de LSB).
+- `stegsolve`: filtros visuais manuais (isolamento de canais, inspeção de planes, XOR etc.).
 
-Stegsolve download: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
+Download do Stegsolve: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
 
-#### FFT-based visibility tricks
+#### Tricks de visibilidade baseados em FFT
 
-FFT is not LSB extraction; it is for cases where content is deliberately hidden in frequency space or subtle patterns.
+FFT não é extração de LSB; ela é usada em casos onde o conteúdo está deliberadamente oculto no domínio da frequência ou em padrões sutis.
 
-- EPFL demo: http://bigwww.epfl.ch/demo/ip/demos/FFT/
+- Demo da EPFL: http://bigwww.epfl.ch/demo/ip/demos/FFT/
 - Fourifier: https://www.ejectamenta.com/Fourifier-fullscreen/
 - FFTStegPic: https://github.com/0xcomposure/FFTStegPic
 
-Web-based triage often used in CTFs:
+Triage baseada na Web frequentemente usada em CTFs:
 
 - Aperi’Solve: https://aperisolve.com/
 - StegOnline: https://stegonline.georgeom.net/
 
-## PNG internals: chunks, corruption, and hidden data
+## Internals de PNG: chunks, corrupção e dados ocultos
 
-### Technique
+### Técnica
 
-PNG é um formato em chunks. Em muitos desafios o payload é armazenado ao nível do container/chunk em vez de nos valores de pixel:
+PNG é um formato baseado em chunks. Em muitos challenges, o payload é armazenado no nível do container/chunk, e não nos valores dos pixels:
 
-- **Extra bytes after `IEND`** (muitos viewers ignoram bytes finais)
-- **Non-standard ancillary chunks** carregando payloads
-- **Corrupted headers** que ocultam dimensões ou quebram parsers até serem corrigidos
+- **Bytes extras após `IEND`** (muitos viewers ignoram bytes finais)
+- **Chunks ancillary não padronizados** carregando payloads
+- **Headers corrompidos** que ocultam dimensões ou fazem parsers falharem até serem corrigidos
 
-High-signal chunk locations to review:
+Locais de chunks com alta probabilidade que devem ser revisados:
 
-- `tEXt` / `iTXt` / `zTXt` (metadados de texto, às vezes comprimidos)
-- `iCCP` (ICC profile) and other ancillary chunks used as a carrier
-- `eXIf` (EXIF data in PNG)
+- `tEXt` / `iTXt` / `zTXt` (metadata de texto, às vezes comprimida)
+- `iCCP` (perfil ICC) e outros chunks ancillary usados como carrier
+- `eXIf` (dados EXIF em PNG)
 
-### Triage commands
+### Comandos de triage
 ```bash
 magick identify -verbose file.png
 pngcheck -v file.png
 ```
 O que procurar:
 
-- Combinações estranhas de width/height/bit-depth/colour-type
-- Erros de CRC/chunk (pngcheck geralmente aponta para o offset exato)
+- Combinações estranhas de largura/altura/profundidade de bits/tipo de cor
+- Erros de CRC/chunk (`pngcheck` geralmente indica o offset exato)
 - Avisos sobre dados adicionais após `IEND`
 
-Se precisar de uma visualização de chunk mais aprofundada:
+Se precisar de uma visão mais detalhada dos chunks:
 ```bash
 pngcheck -vp file.png
 exiftool -a -u -g1 file.png
 ```
 Referências úteis:
 
-- PNG specification (structure, chunks): https://www.w3.org/TR/PNG/
-- File format tricks (PNG/JPEG/GIF corner cases): https://github.com/corkami/docs
+- Especificação PNG (estrutura, chunks): https://www.w3.org/TR/PNG/
+- Truques de formatos de arquivo (casos extremos de PNG/JPEG/GIF): https://github.com/corkami/docs
 
-## JPEG: metadados, ferramentas em domínio DCT e limitações da ELA
+## JPEG: metadados, ferramentas no domínio DCT e limitações do ELA
 
 ### Técnica
 
-JPEG não é armazenado como pixels brutos; é comprimido no domínio DCT. É por isso que as ferramentas stego para JPEG diferem das ferramentas PNG LSB:
+JPEG não é armazenado como pixels brutos; ele é comprimido no domínio DCT. É por isso que as ferramentas de stego para JPEG diferem das ferramentas LSB para PNG:
 
-- Metadados/comentários (payloads) são de nível de arquivo (alto sinal e rápidos de inspecionar)
-- Ferramentas stego em domínio DCT inserem bits em coeficientes de frequência
+- Payloads de metadados/comentários ficam no nível do arquivo (alto sinal e rápidos de inspecionar)
+- Ferramentas de stego no domínio DCT incorporam bits em coeficientes de frequência
 
-Operacionalmente, trate o JPEG como:
+Operacionalmente, trate JPEG como:
 
-- Um contêiner para segmentos de metadados (alto sinal, rápidos de inspecionar)
-- Um domínio de sinal comprimido (coeficientes DCT) onde ferramentas stego especializadas operam
+- Um container para segmentos de metadados (alto sinal, rápido de inspecionar)
+- Um domínio de sinal comprimido (coeficientes DCT) no qual operam ferramentas de stego especializadas
 
 ### Verificações rápidas
 ```bash
@@ -132,24 +132,24 @@ exiftool file.jpg
 strings -n 6 file.jpg | head
 binwalk file.jpg
 ```
-Locais de alto sinal:
+Locais com maior probabilidade:
 
-- EXIF/XMP/IPTC metadata
-- JPEG comment segment (`COM`)
-- Application segments (`APP1` for EXIF, `APPn` for vendor data)
+- Metadados EXIF/XMP/IPTC
+- Segmento de comentário JPEG (`COM`)
+- Segmentos de aplicação (`APP1` para EXIF, `APPn` para dados do fornecedor)
 
 ### Ferramentas comuns
 
 - OutGuess: https://github.com/resurrecting-open-source-projects/outguess
 - OpenStego: https://www.openstego.com/
 
-Se você estiver lidando especificamente com steghide payloads em JPEGs, considere usar `stegseek` (bruteforce mais rápido que scripts mais antigos):
+Se você estiver enfrentando payloads do steghide em JPEGs, considere usar `stegseek` (bruteforce mais rápido que scripts antigos):
 
 - [https://github.com/RickdeJager/stegseek](https://github.com/RickdeJager/stegseek)
 
 ### Error Level Analysis
 
-ELA destaca diferentes artefatos de recompressão; pode apontar regiões que foram editadas, mas não é um detector de stego por si só:
+ELA destaca diferentes artefatos de recompressão; pode indicar regiões que foram editadas, mas não é um detector de stego por si só:
 
 - [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
 
@@ -157,32 +157,32 @@ ELA destaca diferentes artefatos de recompressão; pode apontar regiões que for
 
 ### Técnica
 
-Para imagens animadas, assuma que a mensagem está:
+Para imagens animadas, presuma que a mensagem esteja:
 
 - Em um único frame (fácil), ou
-- Distribuída por frames (a ordem importa), ou
-- Visível apenas quando você diff frames consecutivos
+- Espalhada pelos frames (a ordenação é importante), ou
+- Visível apenas ao comparar frames consecutivos
 
 ### Extrair frames
 ```bash
 ffmpeg -i anim.gif frame_%04d.png
 ```
-Então trate os frames como PNGs normais: `zsteg`, `pngcheck`, channel isolation.
+Depois, trate os frames como PNGs normais: `zsteg`, `pngcheck`, isolamento de canais.
 
 Ferramentas alternativas:
 
 - `gifsicle --explode anim.gif` (extração rápida de frames)
 - `imagemagick`/`magick` para transformações por frame
 
-Frame differencing is often decisive:
+A diferenciação entre frames costuma ser decisiva:
 ```bash
 magick frame_0001.png frame_0002.png -compose difference -composite diff.png
 ```
-### APNG pixel-count encoding
+### Codificação de contagem de pixels em APNG
 
-- Detectar contêineres APNG: `exiftool -a -G1 file.png | grep -i animation` or `file`.
-- Extrair frames sem re-temporização: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`.
-- Recuperar payloads codificados como contagens de pixels por frame:
+- Detecte contêineres APNG: `exiftool -a -G1 file.png | grep -i animation` ou `file`.
+- Extraia os quadros sem alterar a temporização: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`.
+- Recupere payloads codificados como contagens de pixels por quadro:
 ```python
 from PIL import Image
 import glob
@@ -193,33 +193,35 @@ target = dict(counts).get((255, 0, 255, 255))  # adjust the target color
 out.append(target or 0)
 print(bytes(out).decode('latin1'))
 ```
-Desafios animados podem codificar cada byte como a contagem de uma cor específica em cada quadro; concatenar as contagens reconstrói a mensagem.
+Desafios animados podem codificar cada byte como a contagem de uma cor específica em cada frame; concatenar as contagens reconstrói a mensagem.<sup>[[1]](#references)</sup>
 
-## Incorporação protegida por senha
+## Embedding protegido por senha
 
-Se você suspeitar que a incorporação está protegida por uma passphrase em vez de manipulação ao nível de pixels, este é normalmente o caminho mais rápido.
+Se você suspeitar de um embedding protegido por uma passphrase, em vez de manipulação no nível dos pixels, este geralmente é o caminho mais rápido.
 
 ### steghide
 
-Suporta `JPEG, BMP, WAV, AU` e pode embed/extract encrypted payloads.
+Suporta `JPEG, BMP, WAV, AU` e pode embedar/extrair payloads criptografados.
 ```bash
 steghide info file
 steghide extract -sf file --passphrase 'password'
 ```
-Não tenho acesso direto ao repositório. Cole aqui o conteúdo de src/stego/images/README.md (ou a seção "StegCracker" que quer traduzida) que devo traduzir para português, que eu faço a tradução mantendo a mesma sintaxe markdown/html.
+Repo: https://github.com/StefanoDeVuono/steghide
+
+### StegCracker
 ```bash
 stegcracker file.jpg wordlist.txt
 ```
-Repositório: https://github.com/Paradoxis/StegCracker
+Repo: https://github.com/Paradoxis/StegCracker
 
 ### stegpy
 
 Suporta PNG/BMP/GIF/WebP/WAV.
 
-Repositório: https://github.com/dhsdshdhk/stegpy
+Repo: https://github.com/dhsdshdhk/stegpy
 
 ## Referências
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

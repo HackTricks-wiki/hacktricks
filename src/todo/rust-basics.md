@@ -1,14 +1,14 @@
-# Fundamentos do Rust
+# Noções básicas de Rust
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Propriedade de variáveis
+### Ownership de variáveis
 
-A memória é gerida através de um sistema de propriedade com as seguintes regras que o compilador verifica em tempo de compilação:
+A memória é gerenciada por meio de um sistema de ownership com as seguintes regras, que o compilador verifica em tempo de compilação:
 
-1. Cada valor em Rust tem uma variável que é chamada de seu proprietário.
-2. Só pode haver um proprietário por vez.
-3. Quando o proprietário sai do escopo, o valor será descartado.
+1. Cada valor em Rust tem uma variável chamada de seu owner.
+2. Só pode haver um owner por vez.
+3. Quando o owner sai do escopo, o valor é descartado.
 ```rust
 fn main() {
 let student_age: u32 = 20;
@@ -22,7 +22,7 @@ println!("The student is {} and teacher is {}", student_age, teacher_age);
 ```
 ### Tipos Genéricos
 
-Crie uma struct em que um de seus valores pode ser de qualquer tipo
+Crie uma struct em que um de seus valores possa ser de qualquer tipo
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -46,7 +46,7 @@ None,
 Some(T),
 }
 ```
-Você pode usar funções como `is_some()` ou `is_none()` para verificar o valor do Option.
+Você pode usar funções como `is_some()` ou `is_none()` para verificar o valor de Option.
 
 
 ### Result, Ok & Err
@@ -60,13 +60,13 @@ Err(E),
 ```
 Você pode usar funções como `is_ok()` ou `is_err()` para verificar o valor do resultado
 
-O enum `Option` deve ser usado em situações onde um valor pode não existir (ser `None`).
-O enum `Result` deve ser usado em situações onde você faz algo que pode dar errado
+A enum `Option` deve ser usada em situações nas quais um valor pode não existir (ser `None`).
+A enum `Result` deve ser usada em situações nas quais você faz algo que pode dar errado
 
 
 ### Macros
 
-Macros são mais poderosas do que funções porque elas se expandem para produzir mais código do que o código que você escreveu manualmente. Por exemplo, a assinatura de uma função precisa declarar o número e o tipo de parâmetros que a função possui. Macros, por outro lado, podem aceitar um número variável de parâmetros: podemos chamar `println!("hello")` com um argumento ou `println!("hello {}", name)` com dois argumentos. Além disso, macros são expandidas antes que o compilador interprete o significado do código, então uma macro pode, por exemplo, implementar um trait em um dado tipo. Uma função não pode, porque ela é chamada em tempo de execução e um trait precisa ser implementado em tempo de compilação.
+Macros são mais poderosas do que funções porque se expandem para produzir mais código do que aquele que você escreveu manualmente. Por exemplo, a assinatura de uma função precisa declarar o número e o tipo dos parâmetros que ela possui. Macros, por outro lado, podem aceitar um número variável de parâmetros: podemos chamar `println!("hello")` com um argumento ou `println!("hello {}", name)` com dois argumentos. Além disso, as macros são expandidas antes que o compilador interprete o significado do código, portanto, uma macro pode, por exemplo, implementar um trait em um determinado tipo. Uma função não pode fazer isso, porque é chamada em tempo de execução e um trait precisa ser implementado em tempo de compilação.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -108,7 +108,7 @@ for (key, hashvalue) in &*map {
 for key in map.keys() {
 for value in map.values() {
 ```
-### Box Recursivo
+### Caixa Recursiva
 ```rust
 enum List {
 Cons(i32, List),
@@ -182,7 +182,7 @@ println!("{}", n);
 n += 1;
 }
 ```
-#### for
+#### para
 ```rust
 for n in 1..101 {
 if n % 15 == 0 {
@@ -258,7 +258,7 @@ optional = Some(i + 1);
 ```
 ### Traits
 
-Criar um novo método para um tipo
+Crie um novo método para um tipo
 ```rust
 trait AppendBar {
 fn append_bar(self) -> Self;
@@ -290,7 +290,7 @@ assert_ne!(true, false);
 
 #### Arc
 
-Um Arc pode usar Clone para criar mais referências ao objeto para passá-las para as threads. Quando o último ponteiro de referência para um valor sai do escopo, a variável é descartada.
+Um Arc pode usar Clone para criar mais referências ao objeto e passá-las para as threads. Quando o último ponteiro de referência para um valor sai do escopo, a variável é descartada.
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -303,7 +303,7 @@ println!("{:?}", apple);
 ```
 #### Threads
 
-Neste caso, vamos passar para a thread uma variável que ela poderá modificar
+Neste caso, passaremos à thread uma variável que ela poderá modificar
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -321,19 +321,19 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-### Noções Essenciais de Segurança
+### Fundamentos de Segurança
 
-Rust fornece fortes garantias de segurança de memória por padrão, mas você ainda pode introduzir vulnerabilidades críticas através de código `unsafe`, problemas em dependências ou erros de lógica. O mini-cheatsheet a seguir reúne os primitivos com os quais você mais comumente irá lidar durante revisões de segurança ofensivas ou defensivas de software Rust.
+Rust fornece fortes garantias de segurança de memória por padrão, mas você ainda pode introduzir vulnerabilidades críticas por meio de código `unsafe`, problemas em dependencies ou erros de lógica. A mini-cheatsheet a seguir reúne as primitives que você tocará com mais frequência durante security reviews ofensivos ou defensivos de software Rust.
 
-#### Código `unsafe` & segurança de memória
+#### Código unsafe e segurança de memória
 
-`unsafe` blocks desativam as verificações de aliasing e de limites do compilador, então **todos os bugs tradicionais de corrupção de memória (OOB, use-after-free, double free, etc.) podem reaparecer**. Checklist rápido de auditoria:
+Blocos `unsafe` desativam as verificações de aliasing e de limites do compiler, portanto **todos os bugs tradicionais de corrupção de memória (OOB, use-after-free, double free etc.) podem aparecer novamente**. Uma checklist rápida para auditoria:
 
-* Procure por `unsafe` blocks, `extern "C"` functions, chamadas para `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, ponteiros brutos ou módulos `ffi`.
-* Valide cada aritmética de ponteiros e cada argumento de comprimento passado para funções de baixo nível.
-* Prefira `#![forbid(unsafe_code)]` (crate-wide) ou `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) para fazer a compilação falhar quando alguém reintroduzir `unsafe`.
+* Procure blocos `unsafe`, funções `extern "C"`, chamadas para `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointers ou módulos `ffi`.
+* Valide todos os cálculos de ponteiros e argumentos de comprimento passados para funções de baixo nível.
+* Prefira `#![forbid(unsafe_code)]` (em todo o crate) ou `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) para fazer a compilação falhar quando alguém reintroduzir `unsafe`.
 
-Exemplo de overflow criado com ponteiros brutos:
+Exemplo de overflow criado com raw pointers:
 ```rust
 use std::ptr;
 
@@ -347,44 +347,44 @@ dst.set_len(src.len());
 dst
 }
 ```
-Executar o Miri é uma forma barata de detectar UB em tempo de teste:
+Executar o Miri é uma forma barata de detectar UB durante os testes:
 ```bash
 rustup component add miri
 cargo miri test  # hunts for OOB / UAF during unit tests
 ```
-#### Auditing dependencies with RustSec / cargo-audit
+#### Auditando dependências com RustSec / cargo-audit
 
-A maioria das vulns reais em Rust está em crates de terceiros. O RustSec advisory DB (mantido pela comunidade) pode ser consultado localmente:
+A maioria das vulnerabilidades reais em Rust está em crates de terceiros. O RustSec advisory DB (mantido pela comunidade) pode ser consultado localmente:<sup>[[1]](#references)</sup>
 ```bash
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
 ```
-Integre-o no CI e faça com que falhe usando `--deny warnings`.
+Integre-o na CI e faça a compilação falhar com `--deny warnings`.
 
-`cargo deny check advisories` oferece funcionalidade semelhante, além de verificações de licença e de ban-list.
+`cargo deny check advisories` oferece funcionalidade semelhante, além de verificações de licenças e da lista de bloqueio.
 
 #### Cobertura de código com cargo-tarpaulin
 
-`cargo tarpaulin` é uma ferramenta de relatório de cobertura de código para o sistema de build Cargo
+`cargo tarpaulin` é uma ferramenta de geração de relatórios de cobertura de código para o sistema de compilação Cargo
 ```bash
 cargo binstall cargo-tarpaulin
 cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
 ```
-No Linux, o backend de tracing padrão do Tarpaulin ainda é o Ptrace e funciona apenas em processadores x86_64. Isso pode ser alterado para a instrumentação de cobertura do llvm com `--engine llvm`. No Mac e no Windows, esse é o método de coleta padrão.
+No Linux, o backend de tracing padrão do Tarpaulin ainda é o Ptrace e só funcionará em processadores x86_64. Isso pode ser alterado para a instrumentação de cobertura do llvm com `--engine llvm`. No Mac e no Windows, este é o método de coleta padrão.
 
-#### Verificação da cadeia de fornecimento com cargo-vet (2024)
+#### Verificação da supply chain com cargo-vet (2024)
 
-`cargo vet` registra um hash de revisão para cada crate que você importa e evita atualizações não percebidas:
+`cargo vet` registra um hash de revisão para cada crate que você importa e impede upgrades não percebidos:
 ```bash
 cargo install cargo-vet
 cargo vet init      # generates vet.toml
 cargo vet --locked  # verifies packages referenced in Cargo.lock
 ```
-A ferramenta está sendo adotada pela infraestrutura do projeto Rust e por um número crescente de organizações para mitigar ataques poisoned-package.
+A ferramenta está sendo adotada pela infraestrutura do projeto Rust e por um número crescente de organizações para mitigar ataques de pacotes envenenados.<sup>[[2]](#references)</sup>
 
-#### Fuzzing da superfície da sua API (cargo-fuzz)
+#### Fazendo fuzzing da sua superfície de API (cargo-fuzz)
 
-Fuzz tests detectam facilmente panics, estouros de inteiros e bugs de lógica que podem se tornar problemas DoS ou side-channel:
+Testes de fuzzing detectam facilmente panics, estouros de inteiros e bugs de lógica que podem se tornar problemas de DoS ou side-channel:
 ```bash
 cargo install cargo-fuzz
 cargo fuzz init              # creates fuzz_targets/
@@ -394,7 +394,7 @@ Adicione o fuzz target ao seu repositório e execute-o no seu pipeline.
 
 ## Referências
 
-- RustSec Advisory Database – <https://rustsec.org>
-- Cargo-vet: "Auditing your Rust Dependencies" – <https://mozilla.github.io/cargo-vet/>
+- [1] [RustSec Advisory Database](https://rustsec.org)
+- [2] [Cargo-vet: Auditando suas dependências Rust](https://mozilla.github.io/cargo-vet/)
 
 {{#include ../banners/hacktricks-training.md}}
