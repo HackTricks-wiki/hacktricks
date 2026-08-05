@@ -4,9 +4,9 @@
 
 ## CFRuntimeClass
 
-CF* objects hutoka kwenye CoreFoundation, ambayo hutoa zaidi ya classes 50 za objects kama `CFString`, `CFNumber` au `CFAllocator`.
+Vitu vya CF* hutoka CoreFoundation, ambayo hutoa zaidi ya classes 50 za vitu kama `CFString`, `CFNumber` au `CFAllocator`.
 
-Classes hizi zote ni instances za class `CFRuntimeClass`, ambayo inapoitwa hurejesha index ya `__CFRuntimeClassTable`. CFRuntimeClass imefafanuliwa katika [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html):
+Classes hizi zote ni instances za class `CFRuntimeClass`, ambayo inapoitwa hurejesha index kwenye `__CFRuntimeClassTable`. CFRuntimeClass imefafanuliwa katika [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html):
 ```objectivec
 // Some comments were added to the original code
 
@@ -57,35 +57,35 @@ uintptr_t requiredAlignment; // Or in _kCFRuntimeRequiresAlignment in the .versi
 
 ### Sehemu za memory zinazotumika
 
-Data nyingi inayotumiwa na Objective‑C runtime hubadilika wakati wa execution, hivyo hutumia sehemu kadhaa kutoka kwa familia ya segments za Mach-O `__DATA` kwenye memory. Kihistoria, hizi zilijumuisha:
+Data nyingi inayotumiwa na Objective-C runtime hubadilika wakati wa execution, kwa hiyo hutumia sections kadhaa kutoka kwenye segments za Mach-O za familia ya `__DATA` zilizo kwenye memory. Kihistoria, hizi zilijumuisha:
 
-- `__objc_msgrefs` (`message_ref_t`): Marejeleo ya ujumbe
+- `__objc_msgrefs` (`message_ref_t`): Marejeleo ya messages
 - `__objc_ivar` (`ivar`): Instance variables
-- `__objc_data` (`...`): Data inayoweza kubadilishwa
+- `__objc_data` (`...`): Data inayoweza kubadilika
 - `__objc_classrefs` (`Class`): Marejeleo ya classes
 - `__objc_superrefs` (`Class`): Marejeleo ya superclasses
 - `__objc_protorefs` (`protocol_t *`): Marejeleo ya protocols
 - `__objc_selrefs` (`SEL`): Marejeleo ya selectors
-- `__objc_const` (`...`): Data ya class ya r/o na data nyingine (inayotumainiwa kuwa) ya kudumu
-- `__objc_imageinfo` (`version, flags`): Hutumika wakati wa image load: Version kwa sasa ni `0`; Flags hubainisha preoptimized GC support, n.k.
+- `__objc_const` (`...`): Data ya class ya kusomwa tu na data nyingine (inayotarajiwa kuwa) constant
+- `__objc_imageinfo` (`version, flags`): Hutumika wakati wa image load: Version kwa sasa ni `0`; Flags hubainisha support ya preoptimized GC, n.k.
 - `__objc_protolist` (`protocol_t *`): Orodha ya protocols
-- `__objc_nlcatlist` (`category_t`): Pointer ya Non-Lazy Categories zilizofafanuliwa kwenye binary hii
-- `__objc_catlist` (`category_t`): Pointer ya Categories zilizofafanuliwa kwenye binary hii
-- `__objc_nlclslist` (`classref_t`): Pointer ya Non-Lazy Objective‑C classes zilizofafanuliwa kwenye binary hii
-- `__objc_classlist` (`classref_t`): Pointers za Objective‑C classes zote zilizofafanuliwa kwenye binary hii
+- `__objc_nlcatlist` (`category_t`): Pointer kuelekea Non-Lazy Categories zilizofafanuliwa kwenye binary hii
+- `__objc_catlist` (`category_t`): Pointer kuelekea Categories zilizofafanuliwa kwenye binary hii
+- `__objc_nlclslist` (`classref_t`): Pointer kuelekea Non-Lazy Objective-C classes zilizofafanuliwa kwenye binary hii
+- `__objc_classlist` (`classref_t`): Pointers kuelekea Objective-C classes zote zilizofafanuliwa kwenye binary hii
 
-Pia hutumia sehemu chache kwenye `__TEXT` segment kuhifadhi constants:
+Pia hutumia sections chache kwenye segment ya `__TEXT` kuhifadhi constants:
 
 - `__objc_methname` (C‑String): Majina ya methods
 - `__objc_classname` (C‑String): Majina ya classes
 - `__objc_methtype` (C‑String): Aina za methods
 
-macOS/iOS za kisasa (hasa kwenye Apple Silicon) pia huweka metadata ya Objective‑C/Swift kwenye:
+Modern macOS/iOS (hasa kwenye Apple Silicon) pia huweka metadata ya Objective-C/Swift kwenye:
 
-- `__DATA_CONST`: Metadata ya Objective‑C isiyoweza kubadilishwa, ambayo inaweza kushirikiwa ikiwa read-only kati ya processes (kwa mfano, lists nyingi za `__objc_*` sasa ziko hapa).
-- `__AUTH` / `__AUTH_CONST`: Segments zenye pointers ambazo lazima zithibitishwe wakati wa load au wakati wa matumizi kwenye arm64e (Pointer Authentication). Pia utaona `__auth_got` ndani ya `__AUTH_CONST` badala ya `__la_symbol_ptr`/`__got` za zamani pekee. Unapofanya instrumenting au hooking, kumbuka kuzingatia entries za `__got` na `__auth_got` kwenye binaries za kisasa.
+- `__DATA_CONST`: Metadata ya Objective-C isiyobadilika ambayo inaweza kushirikiwa ikiwa read-only kati ya processes (kwa mfano lists nyingi za `__objc_*` sasa ziko hapa).
+- `__AUTH` / `__AUTH_CONST`: Segments zilizo na pointers zinazopaswa kuthibitishwa wakati wa load au wakati wa matumizi kwenye arm64e (Pointer Authentication). Pia utaona `__auth_got` kwenye `__AUTH_CONST` badala ya `__la_symbol_ptr`/`__got` ya zamani pekee. Unapofanya instrumenting au hooking, kumbuka kushughulikia entries za `__got` na `__auth_got` kwenye binaries za kisasa.
 
-Kwa maelezo ya msingi kuhusu dyld pre-optimization (kwa mfano, selector uniquing na precomputation ya classes/protocols), na kwa nini nyingi ya sehemu hizi huwa "already fixed up" zinapotoka kwenye shared cache, angalia Apple `objc-opt` sources na maelezo ya dyld shared cache. Hii huathiri mahali na jinsi unavyoweza kupatch metadata wakati wa runtime.
+Kwa maelezo ya msingi kuhusu dyld pre-optimization (kwa mfano selector uniquing na precomputation ya classes/protocols), na kwa nini nyingi kati ya sections hizi huwa "already fixed up" zinapotoka kwenye shared cache, angalia sources za Apple `objc-opt` na notes za dyld shared cache. Hili huathiri mahali na namna unavyoweza kufanya patch metadata wakati wa runtime.
 
 {{#ref}}
 ../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md
@@ -93,41 +93,41 @@ Kwa maelezo ya msingi kuhusu dyld pre-optimization (kwa mfano, selector uniquing
 
 ### Type Encoding
 
-Objective‑C hutumia mangling ku-encode aina za selectors na variables za aina rahisi na changamano:
+Objective-C hutumia mangling ku-encode aina za selectors na variables za aina rahisi na changamano:
 
-- Aina za primitive hutumia herufi yao ya kwanza: `i` kwa `int`, `c` kwa `char`, `l` kwa `long`... na hutumia herufi kubwa ikiwa ni unsigned (`L` kwa `unsigned long`).
-- Aina nyingine za data hutumia herufi au symbols nyingine, kama `q` kwa `long long`, `b` kwa bitfields, `B` kwa booleans, `#` kwa classes, `@` kwa `id`, `*` kwa `char *`, `^` kwa generic pointers na `?` kwa undefined.
+- Aina primitive hutumia herufi yake ya kwanza: `i` kwa `int`, `c` kwa `char`, `l` kwa `long`... na hutumia herufi kubwa ikiwa haina sign (`L` kwa `unsigned long`).
+- Aina nyingine za data hutumia herufi au symbols nyingine kama `q` kwa `long long`, `b` kwa bitfields, `B` kwa booleans, `#` kwa classes, `@` kwa `id`, `*` kwa `char *`, `^` kwa generic pointers na `?` kwa undefined.
 - Arrays, structures na unions hutumia `[`, `{` na `(` mtawalia.
 
-#### Mfano wa Tamko la Method
+#### Mfano wa Method Declaration
 ```objectivec
 - (NSString *)processString:(id)input withOptions:(char *)options andError:(id)error;
 ```
-Selector itakuwa `processString:withOptions:andError:`
+The selector itakuwa `processString:withOptions:andError:`
 
-#### Usimbaji wa Aina
+#### Type Encoding
 
-- `id` husimbwa kama `@`
-- `char *` husimbwa kama `*`
+- `id` huwekwa kama `@`
+- `char *` huwekwa kama `*`
 
-Usimbaji kamili wa aina wa method ni:
+Type Encoding kamili ya method ni:
 ```less
 @24@0:8@16*20^@24
 ```
-#### Uchanganuzi wa Kina
+#### Ufafanuzi wa Kina
 
-1. Aina ya Return (`NSString *`): Imewekwa kama `@` yenye urefu wa 24
-2. `self` (instance ya object): Imewekwa kama `@`, kwenye offset 0
-3. `_cmd` (selector): Imewekwa kama `:`, kwenye offset 8
-4. Argument ya kwanza (`char * input`): Imewekwa kama `*`, kwenye offset 16
-5. Argument ya pili (`NSDictionary * options`): Imewekwa kama `@`, kwenye offset 20
-6. Argument ya tatu (`NSError ** error`): Imewekwa kama `^@`, kwenye offset 24
+1. Return Type (`NSString *`): Ime-encode kama `@` yenye urefu wa 24
+2. `self` (object instance): Ime-encode kama `@`, kwenye offset 0
+3. `_cmd` (selector): Ime-encode kama `:`, kwenye offset 8
+4. First argument (`char * input`): Ime-encode kama `*`, kwenye offset 16
+5. Second argument (`NSDictionary * options`): Ime-encode kama `@`, kwenye offset 20
+6. Third argument (`NSError ** error`): Ime-encode kama `^@`, kwenye offset 24
 
-Kwa kutumia selector pamoja na encoding, unaweza kuunda upya method.
+Ukitumia selector pamoja na encoding, unaweza kuunda upya method.
 
 ### Classes
 
-Classes katika Objective-C ni C structs zenye properties, method pointers, n.k. Inawezekana kupata struct `objc_class` katika [**msimbo chanzo**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html):
+Classes katika Objective-C ni C structs zenye properties, method pointers, na kadhalika. Inawezekana kupata struct `objc_class` katika [**source code**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html):
 ```objectivec
 struct objc_class : objc_object {
 // Class ISA;
@@ -148,9 +148,9 @@ data()->setFlags(set);
 }
 [...]
 ```
-Darasa hili hutumia baadhi ya bits za sehemu ya `isa` kuashiria taarifa kuhusu darasa.
+Class hii hutumia baadhi ya sehemu za field ya `isa` kuashiria taarifa kuhusu class.
 
-Kisha, `struct` hiyo ina pointer inayoelekeza kwenye `struct` `class_ro_t` iliyohifadhiwa kwenye diski, ambayo ina attributes za darasa kama vile jina lake, base methods, properties na instance variables. Wakati wa runtime, muundo wa ziada `class_rw_t` hutumiwa, ukiwa na pointers zinazoweza kubadilishwa, kama vile methods, protocols na properties.
+Kisha, struct hiyo ina pointer kwenye struct `class_ro_t` iliyohifadhiwa kwenye disk, ambayo ina attributes za class kama vile jina lake, base methods, properties na instance variables. Wakati wa runtime, muundo wa ziada `class_rw_t` hutumiwa, ukiwa na pointers zinazoweza kubadilishwa kama vile methods, protocols na properties.
 
 {{#ref}}
 ../macos-basic-objective-c.md
@@ -158,15 +158,15 @@ Kisha, `struct` hiyo ina pointer inayoelekeza kwenye `struct` `class_ro_t` iliyo
 
 ---
 
-## Uwakilishi wa kisasa wa objects kwenye memory (arm64e, tagged pointers, Swift)
+## Representations za kisasa za objects kwenye memory (arm64e, tagged pointers, Swift)
 
-### `isa` isiyo pointer na Pointer Authentication (arm64e)
+### `isa` isiyo ya pointer na Pointer Authentication (arm64e)
 
-Kwenye Apple Silicon na runtimes za hivi karibuni, Objective-C `isa` si pointer ghafi ya class kila wakati. Kwenye arm64e, ni muundo uliopakiwa ambao unaweza pia kubeba Pointer Authentication Code (PAC). Kulingana na platform, inaweza kuwa na fields kama `nonpointer`, `has_assoc`, `weakly_referenced`, `extra_rc`, pamoja na class pointer yenyewe (ikiwa ime-shift au imesainiwa). Hii inamaanisha kuwa kudereference kwa upofu bytes 8 za kwanza za Objective-C object hakutatoa kila wakati pointer halali ya `Class`.<sup>[2]</sup>
+Kwenye Apple Silicon na runtimes za hivi karibuni, Objective‑C `isa` si lazima iwe raw class pointer. Kwenye arm64e ni packed structure ambayo pia inaweza kubeba Pointer Authentication Code (PAC). Kulingana na platform, inaweza kuwa na fields kama `nonpointer`, `has_assoc`, `weakly_referenced`, `extra_rc`, pamoja na class pointer yenyewe (ikiwa ime-shift au imesainiwa). Hii inamaanisha kuwa kudereference bila kuchunguza bytes 8 za kwanza za Objective‑C object hakutatoa kila mara pointer halali ya `Class`.<sup>[[2]](#references)</sup>
 
-Vidokezo vya kiutendaji unapodebug kwenye arm64e:
+Vidokezo vya vitendo unapofanya debugging kwenye arm64e:
 
-- LLDB kwa kawaida itaondoa PAC bits kwa ajili yako inapochapisha Objective-C objects kwa kutumia `po`, lakini unapofanya kazi na raw pointers unaweza kuhitaji kuondoa authentication manually:
+- LLDB kwa kawaida itaondoa PAC bits unapochapisha Objective‑C objects kwa `po`, lakini unapofanya kazi na raw pointers huenda ukahitaji kuondoa authentication mwenyewe:
 
 ```lldb
 (lldb) expr -l objc++ -- #include <ptrauth.h>
@@ -174,20 +174,20 @@ Vidokezo vya kiutendaji unapodebug kwenye arm64e:
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)raw)
 ```
 
-- Function/data pointers nyingi kwenye Mach-O zitakuwa ndani ya `__AUTH`/`__AUTH_CONST` na zitahitaji authentication kabla ya kutumiwa. Ikiwa unafanya interposing au re-binding (kwa mfano, kwa mtindo wa fishhook), hakikisha pia unashughulikia `__auth_got` pamoja na `__got` ya zamani.
+- Function/data pointers nyingi kwenye Mach‑O zitakuwa ndani ya `__AUTH`/`__AUTH_CONST` na zitahitaji authentication kabla ya kutumiwa. Ikiwa una-interpose au una-re-bind (kwa mfano, mtindo wa fishhook), hakikisha pia unashughulikia `__auth_got` pamoja na legacy `__got`.
 
-Kwa maelezo ya kina kuhusu guarantees za language/ABI na intrinsics za `<ptrauth.h>` zinazopatikana kutoka Clang/LLVM, tazama reference iliyo mwishoni mwa ukurasa huu.<sup>[1]</sup>
+Kwa maelezo ya kina kuhusu language/ABI guarantees na intrinsics za `<ptrauth.h>` zinazopatikana kutoka Clang/LLVM, angalia reference iliyo mwishoni mwa ukurasa huu.<sup>[[1]](#references)</sup>
 
 ### Tagged pointer objects
 
-Baadhi ya Foundation classes huepuka heap allocation kwa ku-encode payload ya object moja kwa moja kwenye pointer value (tagged pointers). Utambuzi hutofautiana kulingana na platform (kwa mfano, most-significant bit kwenye arm64, na least-significant bit kwenye x86_64 macOS). Tagged objects hazina `isa` ya kawaida iliyohifadhiwa kwenye memory; runtime hutatua class kutoka kwenye tag bits.<sup>[2]</sup> Unapokagua `id` values zisizojulikana:
+Baadhi ya Foundation classes huepuka heap allocation kwa kusimba payload ya object moja kwa moja ndani ya pointer value (tagged pointers). Utambuzi hutofautiana kulingana na platform (kwa mfano, most-significant bit kwenye arm64, na least-significant bit kwenye x86_64 macOS). Tagged objects hazina `isa` ya kawaida iliyohifadhiwa kwenye memory; runtime hutatua class kutokana na tag bits.<sup>[[2]](#references)</sup> Unapokagua arbitrary `id` values:
 
 - Tumia runtime APIs badala ya kuchunguza field ya `isa`: `object_getClass(obj)` / `[obj class]`.
-- Kwenye LLDB, `po (id)0xADDR` itachapisha tagged pointer instances kwa usahihi kwa sababu runtime hutumika kutatua class.
+- Kwenye LLDB, `po (id)0xADDR` pekee itachapisha tagged pointer instances kwa usahihi kwa sababu runtime inashauriwa kutatua class.
 
 ### Swift heap objects na metadata
 
-Pure Swift classes pia ni objects zenye header inayoelekeza kwenye Swift metadata (si Objective-C `isa`). Ili kufanya introspection ya live Swift processes bila kuzibadilisha, unaweza kutumia Swift toolchain’s `swift-inspect`, ambayo hutumia Remote Mirror library kusoma runtime metadata:
+Pure Swift classes pia ni objects zenye header inayoelekeza kwenye Swift metadata (si Objective‑C `isa`). Ili kufanya introspection ya live Swift processes bila kuzibadilisha, unaweza kutumia `swift-inspect` ya Swift toolchain, ambayo hutumia Remote Mirror library kusoma runtime metadata:
 ```bash
 # Xcode toolchain (or Swift.org toolchain) provides swift-inspect
 swift-inspect dump-raw-metadata <pid-or-name>
@@ -195,11 +195,11 @@ swift-inspect dump-arrays <pid-or-name>
 # On Darwin additionally:
 swift-inspect dump-concurrency <pid-or-name>
 ```
-Hii ni muhimu sana kwa kuchora ramani ya objects za Swift kwenye heap na protocol conformances wakati wa kureverse apps mchanganyiko za Swift/ObjC.
+Hii ni muhimu sana kwa ku-**map** objects za Swift kwenye heap na protocol conformances wakati wa kureverse apps mchanganyiko za Swift/ObjC.
 
 ---
 
-## Mwongozo mfupi wa ukaguzi wa runtime (LLDB / Frida)
+## Cheatsheet ya ukaguzi wa runtime (LLDB / Frida)
 
 ### LLDB
 
@@ -208,7 +208,7 @@ Hii ni muhimu sana kwa kuchora ramani ya objects za Swift kwenye heap na protoco
 (lldb) expr -l objc++ -O -- (id)0x0000000101234560
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)0x0000000101234560)
 ```
-- Kagua class ya Objective-C kutoka kwenye pointer ya `self` ya method ya object kwenye breakpoint:
+- Chunguza class ya Objective-C kutoka kwenye pointer inayoelekeza kwenye `self` ya object method wakati wa breakpoint:
 ```lldb
 (lldb) br se -n '-[NSFileManager fileExistsAtPath:]'
 (lldb) r
@@ -216,22 +216,22 @@ Hii ni muhimu sana kwa kuchora ramani ya objects za Swift kwenye heap na protoco
 (lldb) po (id)$x0                 # self
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)$x0)
 ```
-- Dump sehemu zinazobeba metadata ya Objective-C (kumbuka: nyingi sasa ziko katika `__DATA_CONST` / `__AUTH_CONST`):
+- Dump sehemu zinazobeba Objective-C metadata (kumbuka: nyingi sasa ziko katika `__DATA_CONST` / `__AUTH_CONST`):
 ```lldb
 (lldb) image dump section --section __DATA_CONST.__objc_classlist
 (lldb) image dump section --section __DATA_CONST.__objc_selrefs
 (lldb) image dump section --section __AUTH_CONST.__auth_got
 ```
-- Soma memory ya object ya class inayojulikana ili kuelekea kwenye `class_ro_t` / `class_rw_t` unapofanya reverse engineering ya method lists:
+- Soma memory ya object ya class inayojulikana ili kuhamia kwenye `class_ro_t` / `class_rw_t` wakati wa reversing method lists:
 ```lldb
 (lldb) image lookup -r -n _OBJC_CLASS_$_NSFileManager
 (lldb) memory read -fx -s8 0xADDRESS_OF_CLASS_OBJECT
 ```
-### Frida (Objective‑C and Swift)
+### Frida (Objective‑C na Swift)
 
-Frida hutoa high-level runtime bridges ambazo ni muhimu sana kwa kugundua na ku-instrument objects zilizo hai bila symbols:
+Frida hutoa runtime bridges za kiwango cha juu ambazo ni muhimu sana kwa kugundua na ku-instrument objects zinazoishi bila symbols:
 
-- Enumerate classes na methods, resolve majina halisi ya classes wakati wa runtime, na intercept Objective‑C selectors:
+- Enumerate classes na methods, tambua class names halisi wakati wa runtime, na intercept Objective‑C selectors:
 ```js
 if (ObjC.available) {
 // List a class' methods
@@ -249,13 +249,13 @@ console.log('fileExistsAtPath:', this.path, '=>', retval);
 });
 }
 ```
-- Swift bridge: enumerate Swift types and interact with Swift instances (inahitaji Frida ya hivi karibuni; ni muhimu sana kwenye targets za Apple Silicon).
+- Swift bridge: orodhesha Swift types na kuingiliana na Swift instances (inahitajika Frida ya hivi karibuni; ni muhimu sana kwenye Apple Silicon targets).
 
 ---
 
 ## Marejeo
 
-- [1] [Clang/LLVM: Pointer Authentication and the ptrauth.h intrinsics (arm64e ABI)](https://clang.llvm.org/docs/PointerAuthentication.html)
-- [2] [Vichwa vya Apple objc runtime - objc-object.h (tagged pointers, non-pointer isa, n.k.)](https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-object.h.auto.html)
+- [1] [Clang/LLVM: Pointer Authentication na ptrauth.h intrinsics (arm64e ABI)](https://clang.llvm.org/docs/PointerAuthentication.html)
+- [2] [Apple objc runtime headers - objc-object.h (tagged pointers, non-pointer isa, n.k.)](https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-object.h.auto.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

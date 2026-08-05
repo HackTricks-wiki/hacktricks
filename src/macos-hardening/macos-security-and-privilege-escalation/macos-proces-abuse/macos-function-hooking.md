@@ -4,9 +4,9 @@
 
 ## Function Interposing
 
-Unda **dylib** iliyo na sehemu ya **`__interpose` (`__DATA___interpose`)** (au sehemu iliyo na alama ya **`S_INTERPOSING`**) iliyo na tuples za **function pointers** zinazorejelea functions za **awali** na functions za **replacement**.
+Unda **dylib** yenye sehemu ya **`__interpose` (`__DATA___interpose`)** (au sehemu iliyo na flag ya **`S_INTERPOSING`**) inayojumuisha tuples za **function pointers** zinazoelekeza kwenye functions za **original** na **replacement**.
 
-Kisha, **inject** dylib hiyo kwa kutumia **`DYLD_INSERT_LIBRARIES`** (interposing inapaswa kufanyika kabla ya main app kupakia). Bila shaka, [**restrictions** zinazotumika kwa matumizi ya **`DYLD_INSERT_LIBRARIES`** zinatumika pia hapa](macos-library-injection/index.html#check-restrictions).
+Kisha, **inject** dylib hiyo kwa kutumia **`DYLD_INSERT_LIBRARIES`** (interposing inapaswa kufanyika kabla ya main app kupakia). Bila shaka, [**restrictions** zinazotumika kwenye matumizi ya **`DYLD_INSERT_LIBRARIES`** zinatumika pia hapa](macos-library-injection/index.html#check-restrictions).
 
 ### Interpose printf
 
@@ -78,15 +78,15 @@ DYLD_INSERT_LIBRARIES=./interpose2.dylib ./hello
 Hello from interpose
 ```
 > [!WARNING]
-> **`DYLD_PRINT_INTERPOSING`** env variable inaweza kutumiwa kurekebisha interposing na itachapisha mchakato wa interpose.
+> **`DYLD_PRINT_INTERPOSING`** env variable inaweza kutumika kufanya debug ya interposing na itaonyesha mchakato wa interpose.
 
-Pia kumbuka kwamba **interposing hutokea kati ya process na libraries zilizopakiwa**, haifanyi kazi na shared library cache.
+Pia kumbuka kuwa **interposing hutokea kati ya process na libraries zilizopakiwa**, na haifanyi kazi na shared library cache.
 
 ### Dynamic Interposing
 
-Sasa pia inawezekana kufanya interpose ya function dynamically kwa kutumia function **`dyld_dynamic_interpose`**. Hii inaruhusu kufanya **interpose ya function programmatically wakati wa runtime**, badala ya kufanya hivyo tu kutoka **mwanzo**.
+Sasa pia inawezekana kufanya interpose ya function dynamically kwa kutumia function **`dyld_dynamic_interpose`**. Hii inaruhusu kufanya interpose ya function **programmatically** wakati wa **runtime**, badala ya kuifanya tu tangu **mwanzo**.
 
-Kinachohitajika ni kuonyesha **tuples** za **function ya kubadilishwa na function ya replacement**.
+Kinachohitajika tu ni kubainisha **tuples** za **function itakayobadilishwa na function ya replacement**.
 ```c
 struct dyld_interpose_tuple {
 const void* replacement;
@@ -97,12 +97,12 @@ const struct dyld_interpose_tuple array[], size_t count);
 ```
 ### Import Table Rebinding (fishhook-style)
 
-Ikiwa tayari una code execution **ndani ya process** na unataka kufanya hook ya **imported C function** bila kuanzisha tena target, primitive inayotumika sana ni **symbol rebinding** (iliyopewa umaarufu na **`fishhook`**).
+Ikiwa tayari una uwezo wa kutekeleza code **ndani ya process** na unataka ku-hook **imported C function** bila kuanzisha upya target, primitive inayotumika sana ni **symbol rebinding** (iliyopewa umaarufu na **`fishhook`**).
 
-Badala ya kutumia section ya **`__interpose`**, technique hii hupitia metadata ya Mach-O (`__LINKEDIT` -> indirect symbol table -> `__la_symbol_ptr` / `__nl_symbol_ptr`) na **hu-overwrite import slot** inayotumiwa na image ya sasa. Hii ni muhimu sana kwa kufanya hook ya functions katika process **ambao tayari unaendelea** au kufanya hook ya **image moja tu** kwa kutumia **`rebind_symbols_image`**.<sup>[2]</sup>
+Badala ya kutumia section ya **`__interpose`**, technique hii hupitia metadata ya Mach-O (`__LINKEDIT` -> indirect symbol table -> `__la_symbol_ptr` / `__nl_symbol_ptr`) na **huandika upya import slot** inayotumiwa na image ya sasa. Hii ni muhimu sana kwa ku-hook functions katika process **ambayo tayari inaendelea** au ku-hook **image moja tu** kwa kutumia **`rebind_symbols_image`**.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> Hii huathiri tu calls ambazo kwa kweli hupitia **import pointer**. Ikiwa target function inaitwa moja kwa moja ndani ya image hiyo hiyo, hakuna imported slot ya ku-rewrite, hivyo technique hii haitaona call site hiyo.
+> Hii huathiri tu calls zinazopitia **import pointer**. Ikiwa target function inaitwa moja kwa moja ndani ya image hiyo hiyo, hakuna imported slot ya kuandika upya, kwa hivyo technique hii haitaona call site hiyo.
 ```c
 // clang -dynamiclib fishhook_demo.c fishhook.c -o fishhook_demo.dylib
 #include <stdio.h>
@@ -126,12 +126,12 @@ rebind_symbols(&rb, 1);
 ```bash
 DYLD_INSERT_LIBRARIES=./fishhook_demo.dylib ./hello
 ```
-Katika matoleo ya hivi karibuni ya macOS, targets nyingi za rebinding hazipo tena kwenye kurasa za **`__DATA`** zinazoweza kuandikwa. Rebinders kwa kawaida huhitaji kufanya **`__DATA_CONST`** iweze kuandikwa kwa muda kabla ya kurekebisha pointer. Zaidi ya hayo, kwenye Apple Silicon / **`arm64e`** unapaswa kutarajia pointers zilizo-authenticate na indirection ya ziada katika **`__AUTH_CONST.__auth_got`**, hivyo rebinder inayochanganua tu sections za kawaida za lazy/non-lazy symbol pointer inaweza kukosa baadhi ya call sites.<sup>[3]</sup>
+Katika matoleo ya hivi karibuni ya macOS, targets nyingi za rebinding hazipo tena kwenye pages za **`__DATA`** zinazoweza kuandikwa. Kwa kawaida, rebinders huhitaji kufanya **`__DATA_CONST`** iweze kuandikwa kwa muda kabla ya kurekebisha pointer. Zaidi ya hayo, kwenye Apple Silicon / **`arm64e`** unapaswa kutarajia pointers zilizothibitishwa na indirection ya ziada katika **`__AUTH_CONST.__auth_got`**, hivyo rebinder inayochanganua tu sections za kawaida za lazy/non-lazy symbol pointer inaweza kukosa baadhi ya call sites.<sup>[[3]](#references)</sup>
 
 > [!CAUTION]
-> ABI ya **`arm64e`** hutumia **Pointer Authentication (PAC)** kwa function pointers nyingi. Uandishi wa pointer bila kuzingatia mambo haya, ambao hapo awali ulifanya kazi kwenye Intel, unaweza kuvuruga call site kwenye Apple Silicon. Unapoandika rebinder au inline hooker yako mwenyewe, uwe tayari kutumia helpers za **`<ptrauth.h>`** kama vile **`ptrauth_sign_unauthenticated`** au **`ptrauth_auth_and_resign`**, na ufanye majaribio mahususi kwenye targets za **`arm64e`**.
+> ABI ya **`arm64e`** hutumia **Pointer Authentication (PAC)** kwa function pointers nyingi. Kuandika pointers moja kwa moja, ambako hapo awali kulifanya kazi kwenye Intel, kunaweza kuharibu call site kwenye Apple Silicon. Unapoandika rebinder au inline hooker yako mwenyewe, uwe tayari kutumia helpers za **`<ptrauth.h>`** kama vile **`ptrauth_sign_unauthenticated`** au **`ptrauth_auth_and_resign`**, na ufanye majaribio mahsusi kwenye targets za **`arm64e`**.
 
-Kwa maelezo zaidi kuhusu **`__AUTH`**, **`__AUTH_CONST`** na **`__auth_got`**, angalia [this page](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
+Kwa maelezo zaidi kuhusu **`__AUTH`**, **`__AUTH_CONST`** na **`__auth_got`**, angalia [ukurasa huu](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
 
 ## Method Swizzling
 
@@ -139,16 +139,16 @@ Katika ObjectiveC, hivi ndivyo method inavyoitwa: **`[myClassInstance nameOfTheM
 
 Inahitajika **object**, **method** na **params**. Method inapoitwa, **msg hutumwa** kwa kutumia function **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
-Object ni **`someObject`**, method ni **`@selector(method1p1:p2:)`**, na arguments ni **value1**, **value2**.
+Object ni **`someObject`**, method ni **`@selector(method1p1:p2:)`**, na arguments ni **`value1`**, **`value2`**.
 
-Kwa kufuatilia miundo ya object, inawezekana kufikia **array ya methods** ambapo **names** na **pointers** za code ya method **zimehifadhiwa**.
+Kwa kufuata object structures, inawezekana kufikia **array ya methods** ambako **names** na **pointers** zinazoelekeza kwenye method code **zimewekwa**.
 
 > [!CAUTION]
-> Kumbuka kwamba kwa sababu methods na classes hufikiwa kwa kutumia majina yao, taarifa hii huhifadhiwa kwenye binary, hivyo inawezekana kuipata kwa `otool -ov </path/bin>` au [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+> Kumbuka kwamba kwa kuwa methods na classes hufikiwa kwa kutumia names zao, taarifa hii huhifadhiwa kwenye binary; hivyo inawezekana kuipata kwa `otool -ov </path/bin>` au [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
 
 ### Kufikia methods ghafi
 
-Inawezekana kufikia taarifa za methods kama vile name, idadi ya params au address kama inavyoonyeshwa kwenye mfano ufuatao:
+Inawezekana kufikia taarifa za methods kama vile name, idadi ya params au address, kama katika mfano ufuatao:
 ```objectivec
 // gcc -framework Foundation test.m -o test
 
@@ -214,12 +214,12 @@ NSLog(@"Uppercase string: %@", uppercaseString3);
 return 0;
 }
 ```
-### Method Swizzling na method_exchangeImplementations
+### Method Swizzling with method_exchangeImplementations
 
-Function **`method_exchangeImplementations`** inaruhusu **kubadilisha** **anwani** ya **implementation** ya **function moja na nyingine**.
+Function **`method_exchangeImplementations`** inaruhusu **kubadilisha** **anwani** ya **utekelezaji** wa **function moja na nyingine**.
 
 > [!CAUTION]
-> Kwa hivyo function inapoitwa, **inachotekelezwa ni ile nyingine**.
+> Kwa hiyo function inapoitwa, **inayotekelezwa ni nyingine**.
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -264,15 +264,15 @@ return 0;
 }
 ```
 > [!WARNING]
-> Katika hali hii, ikiwa **implementation code ya legit** method **inathibitisha** **jina** la **method**, inaweza **kutambua** swizzling hii na kuizuia isiendeshwe.
+> Katika hali hii, ikiwa **implementation code ya legit** method **verifies** **method** **name**, inaweza **detect** swizzling hii na kuizuia isitekelezwe.
 >
-> Technique ifuatayo haina restriction hii.
+> Technique ifuatayo haina kizuizi hiki.
 
 ### Method Swizzling with method_setImplementation
 
-Muundo uliotangulia ni wa ajabu kwa sababu unabadilisha implementation ya methods 2, moja kwa nyingine. Kwa kutumia function **`method_setImplementation`**, unaweza **kubadilisha** **implementation** ya **method moja iwe ya nyingine**.
+Muundo wa awali ni wa ajabu kwa sababu unabadilisha implementation ya methods 2, moja kwa nyingine. Kwa kutumia function **`method_setImplementation`**, unaweza **kubadilisha** **implementation** ya **method moja kwa nyingine**.
 
-Kumbuka tu **kuhifadhi address ya implementation ya ile ya awali** ikiwa utaiita kutoka kwenye implementation mpya kabla ya ku-overwrite, kwa sababu baadaye itakuwa vigumu zaidi kupata address hiyo.
+Kumbuka tu **kuhifadhi anwani ya implementation ya ile ya awali** ikiwa utaiita kutoka kwenye implementation mpya kabla ya kuibadilisha, kwa sababu baadaye itakuwa vigumu zaidi kupata anwani hiyo.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -324,17 +324,17 @@ return 0;
 }
 }
 ```
-## Methodolojia ya Mashambulizi ya Hooking
+## Hooking Attack Methodology
 
-Katika ukurasa huu, njia tofauti za ku-hook functions zilijadiliwa. Hata hivyo, zilihusisha **kuendesha code ndani ya process inayolengwa**.
+Katika ukurasa huu, njia tofauti za kufanya hook kwenye functions zilijadiliwa. Hata hivyo, zilihusisha **kuendesha code ndani ya process inayolengwa**.
 
-Ili kufanya hivyo, technique rahisi zaidi kutumia ni ku-inject [Dyld via environment variables or hijacking](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Hata hivyo, nadhani hili pia linaweza kufanywa kupitia [Dylib process injection](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
+Ili kufanya hivyo, technique rahisi zaidi ni ku-inject [Dyld via environment variables or hijacking](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Hata hivyo, nadhani hili pia linaweza kufanywa kupitia [Dylib process injection](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
 
-Hata hivyo, chaguo zote mbili **zina mipaka** kwa binaries/processes **zisizolindwa**. Kagua kila technique ili kujifunza zaidi kuhusu mipaka hiyo.
+Hata hivyo, chaguo zote mbili **zina mipaka** kwa binaries/processes **zisizolindwa**. Angalia kila technique ili kujifunza zaidi kuhusu limitations zake.
 
-Hata hivyo, function hooking attack ni maalum sana; attacker atafanya hivi ili **kuiba taarifa nyeti kutoka ndani ya process** (ikiwa sivyo, ungefanya tu process injection attack). Na taarifa hizi nyeti zinaweza kuwa ndani ya Apps zilizopakuliwa na user, kama vile MacPass.
+Hata hivyo, function hooking attack ni maalum sana; attacker atafanya hivi ili **kuiba taarifa nyeti kutoka ndani ya process** (ikiwa sivyo, ungefanya tu process injection attack). Na taarifa hii nyeti inaweza kuwa katika Apps ambazo user amedownload, kama vile MacPass.
 
-Kwa hiyo, attack vector ya attacker itakuwa ama kutafuta vulnerability au kuondoa signature ya application, kisha ku-inject environment variable ya **`DYLD_INSERT_LIBRARIES`** kupitia Info.plist ya application, na kuongeza kitu kama:
+Kwa hivyo, attack vector itakuwa ama kutafuta vulnerability au kuondoa signature ya application, kisha ku-inject **`DYLD_INSERT_LIBRARIES`** env variable kupitia Info.plist ya application kwa kuongeza kitu kama:
 ```xml
 <key>LSEnvironment</key>
 <dict>
@@ -342,14 +342,14 @@ Kwa hiyo, attack vector ya attacker itakuwa ama kutafuta vulnerability au kuondo
 <string>/Applications/Application.app/Contents/malicious.dylib</string>
 </dict>
 ```
-na kisha **sajili upya** programu:
+na kisha **jisajili tena** application:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-Ongeza kwenye library hiyo hooking code ya ku-exfiltrate taarifa: Nywila, ujumbe...
+Ongeza kwenye library hiyo hooking code ya ku-exfiltrate taarifa: Passwords, messages...
 
 > [!CAUTION]
-> Kumbuka kwamba katika matoleo mapya zaidi ya macOS, ukiondoa **signature** ya application binary na ikiwa iliwahi kutekelezwa hapo awali, macOS **haitatekeleza application** hiyo tena.
+> Kumbuka kwamba katika matoleo mapya ya macOS, ukiondoa **signature** ya application binary na ikiwa iliwahi kutekelezwa hapo awali, macOS **haitatekeleza application hiyo** tena.
 
 #### Mfano wa library
 ```objectivec
@@ -387,10 +387,10 @@ IMP fake_IMP = (IMP)custom_setPassword;
 real_setPassword = method_setImplementation(real_Method, fake_IMP);
 }
 ```
-## Marejeo
+## Marejeleo
 
 - [1] [Method Swizzling - NSHipster](https://nshipster.com/method-swizzling/)
-- [2] [facebook/fishhook: Maktaba inayorahisisha mchakato wa kuunganisha upya symbols kwa njia dynamic katika Mach-O binaries](https://github.com/facebook/fishhook)
+- [2] [facebook/fishhook: Maktaba inayorahisisha mchakato wa kubadilisha upya symbols katika Mach-O binaries](https://github.com/facebook/fishhook)
 - [3] [Pointer Authentication — Nyaraka za Clang](https://clang.llvm.org/docs/PointerAuthentication.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

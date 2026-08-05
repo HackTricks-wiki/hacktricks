@@ -3,9 +3,9 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> Kumbuka kuwa entitlements zinazoanza na **`com.apple`** hazipatikani kwa third-parties, ni Apple pekee inayoweza kuzigawa... Au ikiwa unatumia enterprise certificate, unaweza kuunda entitlements zako zinazoanza na **`com.apple`** na kwa kweli bypass protections zinazotegemea hili.
+> Kumbuka kwamba entitlements zinazoanza na **`com.apple`** hazipatikani kwa third-parties; Apple pekee inaweza kuzigawa... Au ikiwa unatumia enterprise certificate, unaweza kuunda entitlements zako zinazoanza na **`com.apple`** na kwa hakika bypass protections zinazotegemea hili.
 
-## Juu
+## High
 
 ### `com.apple.rootless.install.heritable`
 
@@ -13,36 +13,36 @@ Entitlement **`com.apple.rootless.install.heritable`** inaruhusu **bypass SIP**.
 
 ### **`com.apple.rootless.install`**
 
-Entitlement **`com.apple.rootless.install`** inaruhusu **bypass SIP**. Angalia[ hapa kwa maelezo zaidi](macos-sip.md#com.apple.rootless.install).
+Entitlement **`com.apple.rootless.install`** inaruhusu **bypass SIP**. Angalia [hapa kwa maelezo zaidi](macos-sip.md#com.apple.rootless.install).
 
-### **`com.apple.system-task-ports` (hapo awali iliitwa `task_for_pid-allow`)**
+### **`com.apple.system-task-ports` (previously called `task_for_pid-allow`)**
 
 Entitlement hii inaruhusu kupata **task port ya process yoyote**, isipokuwa kernel. Angalia [**hapa kwa maelezo zaidi**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.get-task-allow`
 
-Entitlement hii inaruhusu processes nyingine zilizo na entitlement **`com.apple.security.cs.debugger`** kupata task port ya process inayoendeshwa na binary iliyo na entitlement hii na **ku-inject code ndani yake**. Angalia [**hapa kwa maelezo zaidi**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
+Entitlement hii inaruhusu processes nyingine zilizo na entitlement **`com.apple.security.cs.debugger`** kupata task port ya process inayoendeshwa na binary yenye entitlement hii na **ku-inject code ndani yake**. Angalia [**hapa kwa maelezo zaidi**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.cs.debugger`
 
-Apps zilizo na Debugging Tool Entitlement zinaweza kuita `task_for_pid()` ili kupata task port halali ya unsigned na third-party apps zilizo na entitlement ya `Get Task Allow` iliyowekwa kuwa `true`. Hata hivyo, hata ikiwa na debugging tool entitlement, debugger **haiwezi kupata task ports** za processes ambazo **hazina entitlement ya `Get Task Allow`**, na kwa hiyo zinalindwa na System Integrity Protection. Angalia [**hapa kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Apps zilizo na Debugging Tool Entitlement zinaweza kuita `task_for_pid()` ili kupata task port halali ya unsigned na third-party apps zilizo na entitlement ya `Get Task Allow` iliyowekwa kuwa `true`. Hata hivyo, hata ikiwa na debugging tool entitlement, debugger **haiwezi kupata task ports** za processes ambazo **hazina entitlement ya `Get Task Allow`**, na hivyo zinalindwa na System Integrity Protection. Angalia [**hapa kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Entitlement hii inaruhusu **kupakia frameworks, plug-ins, au libraries bila kusainiwa na Apple au kusainiwa kwa Team ID sawa** na executable kuu, hivyo attacker anaweza kutumia vibaya library load yoyote ili ku-inject code. Angalia [**hapa kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Entitlement hii inaruhusu **kupakia frameworks, plug-ins, au libraries bila kusainiwa na Apple au kusainiwa kwa Team ID sawa** na executable kuu, kwa hiyo attacker anaweza kutumia vibaya library load yoyote ili ku-inject code. Angalia [**hapa kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
-Entitlement hii inafanana sana na **`com.apple.security.cs.disable-library-validation`**, lakini **badala ya ku-disable library validation moja kwa moja**, inaruhusu process **kuita system call ya `csops` ili ku-disable wakati wa runtime**.
+Entitlement hii inafanana sana na **`com.apple.security.cs.disable-library-validation`**, lakini **badala yake** ya **kuzima moja kwa moja** library validation, inaruhusu process **kuita system call ya `csops` ili kuizima** wakati wa runtime.
 
-Jina la entitlement limewekwa moja kwa moja kwenye XNU karibu na operesheni ya `csops` inayotumia entitlement hiyo:<sup>[2]</sup>
+Jina la entitlement limewekwa moja kwa moja kwenye XNU karibu na `csops` operation inayoitumia:<sup>[[2]](#references)</sup>
 ```c
 /* bsd/sys/codesign.h */
 #define CLEAR_LV_ENTITLEMENT "com.apple.private.security.clear-library-validation"
 ...
 #define CS_OPS_CLEAR_LV     15  /* clear the library validation flag */
 ```
-Handler ya kernel ya `CS_OPS_CLEAR_LV` (`bsd/kern/kern_proc.c`) inaonyesha hasa jinsi primitive ilivyo na upeo mdogo:<sup>[3]</sup>
+Msimamizi wa kernel wa `CS_OPS_CLEAR_LV` (`bsd/kern/kern_proc.c`) anaonyesha kwa usahihi jinsi primitive hii ilivyo finyu:<sup>[[3]](#references)</sup>
 ```c
 case CS_OPS_CLEAR_LV: {
 #if !defined(XNU_TARGET_OS_OSX)
@@ -57,16 +57,16 @@ error = 0;
 ```
 Kwa hivyo operesheni hii:
 
-- Ni ya **macOS-only** (`ENOTSUP` kwenye platform nyingine zote).
-- Hufanya kazi kwenye **yenyewe tu** (`forself == 1`) — huwezi kuondoa library validation kutoka kwa process nyingine kwa kutumia hii.
-- Inahitaji process hiyo **iwe na entitlement** hiyo, na hukataa ikiwa process imewekewa alama `CS_INSTALLER` au inaendeshwa chini ya subsystem root path.
-- Huondoa **`CS_REQUIRE_LV | CS_FORCED_LV`** kutoka kwenye code-signing flags za process.
+- Ni ya **macOS pekee** (`ENOTSUP` kwenye platform nyingine zote).
+- Inafanya kazi kwenye **mchakato wenyewe tu** (`forself == 1`) — huwezi kuondoa library validation kwenye mchakato mwingine kwa kutumia hii.
+- Inahitaji mchakato uwe na **entitlement** hiyo, na hukataa ikiwa mchakato umewekewa alama `CS_INSTALLER` au unaendeshwa chini ya subsystem root path.
+- Huondoa **`CS_REQUIRE_LV | CS_FORCED_LV`** kutoka kwenye code-signing flags za mchakato.
 
-Maelezo ya XNU yanafafanua matumizi yaliyokusudiwa, na pia kwa nini ni ya kuvutia kwa attacker:
+Maoni ya XNU yanaeleza matumizi yaliyokusudiwa, na pia kwa nini yanavutia kwa attacker:
 
-> Chaguo hili hutumika kuondoa library validation kutoka kwenye process inayoendelea kufanya kazi. Hutumika katika plugin architectures ambapo program inahitaji kupakia libraries zisizoaminika. [...] Mara process inapokuwa imepakia library isiyoaminika, kutegemea library validation baadaye hakutakuwa na ufanisi.
+> Chaguo hili hutumiwa kuondoa library validation kutoka kwenye mchakato unaoendelea. Hii hutumiwa katika plugin architectures wakati programu inahitaji kupakia libraries zisizoaminika. [...] Baada ya mchakato kupakia library isiyoaminika, kutegemea library validation baadaye hakutakuwa na ufanisi.
 
-Kwa maneno mengine, **binary yoyote yenye entitlement hii ni dylib-injection target**: endesha code ndani yake (au ishawishi ipakie plug-in yako) baada ya kuondoa `CS_REQUIRE_LV`, kisha unapata uwezo wa kufanya chochote ambacho host process imeaminiwa kufanya.
+Kwa maneno mengine, **binary yoyote iliyo na entitlement hii ni dylib-injection target**: fanya code ianze kutekelezwa ndani yake (au ishawishi ipakie plug-in yako) baada ya kuondoa `CS_REQUIRE_LV`, kisha unarithi uwezo wowote ambao host process inaaminika kuwa nao.
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
@@ -78,15 +78,15 @@ Entitlement hii inaruhusu **kutumia DYLD environment variables** ambazo zinaweza
 
 ### **`system.install.apple-software`** na **`system.install.apple-software.standar-user`**
 
-Entitlements hizi zinaruhusu **ku-install software bila kumuuliza user ruhusa**, jambo ambalo linaweza kusaidia katika **privilege escalation**.
+Entitlements hizi zinaruhusu **ku-install software bila kumuuliza mtumiaji ruhusa**, jambo ambalo linaweza kusaidia katika **privilege escalation**.
 
 ### `com.apple.private.security.kext-management`
 
-Entitlement inayohitajika ili kuomba **kernel ipakie kernel extension**.
+Entitlement inayohitajika ili kuiomba **kernel ipakie kernel extension**.
 
 ### **`com.apple.private.icloud-account-access`**
 
-Kwa entitlement **`com.apple.private.icloud-account-access`**, inawezekana kuwasiliana na **`com.apple.iCloudHelper`** XPC service ambayo **itatoa iCloud tokens**.
+Kwa kutumia entitlement **`com.apple.private.icloud-account-access`**, inawezekana kuwasiliana na **`com.apple.iCloudHelper`** XPC service ambayo **hutoa iCloud tokens**.
 
 **iMovie** na **Garageband** zilikuwa na entitlement hii.
 
@@ -98,15 +98,15 @@ TODO: Sijui hii inaruhusu kufanya nini
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: Katika [**ripoti hii**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **imetajwa kwamba hii inaweza kutumiwa** ku-update contents zinazolindwa na SSV baada ya reboot. Ikiwa unajua jinsi ya kuituma, tafadhali tuma PR!
+TODO: Katika [**ripoti hii**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **imetajwa kwamba hii inaweza kutumiwa** kusasisha contents zinazolindwa na SSV baada ya reboot. Ikiwa unajua inavyotumwa, tafadhali tuma PR!
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: Katika [**ripoti hii**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **imetajwa kwamba hii inaweza kutumiwa** ku-update contents zinazolindwa na SSV baada ya reboot. Ikiwa unajua jinsi ya kuituma, tafadhali tuma PR!
+TODO: Katika [**ripoti hii**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **imetajwa kwamba hii inaweza kutumiwa** kusasisha contents zinazolindwa na SSV baada ya reboot. Ikiwa unajua inavyotumwa, tafadhali tuma PR!
 
 ### `keychain-access-groups`
 
-Entitlement hii inaorodhesha **keychain** groups ambazo application ina access nazo:
+Entitlement hii huorodhesha **keychain** groups ambazo application inaweza kufikia:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -119,29 +119,29 @@ Entitlement hii inaorodhesha **keychain** groups ambazo application ina access n
 ```
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
-Hutoa ruhusa za **Full Disk Access**, mojawapo ya ruhusa za juu zaidi za TCC unazoweza kuwa nazo.
+Hutoa ruhusa za **Full Disk Access**, ambazo ni miongoni mwa ruhusa za juu zaidi za TCC unazoweza kuwa nazo.
 
 ### **`kTCCServiceAppleEvents`**
 
-Huruhusu app kutuma events kwa applications nyingine ambazo hutumiwa kwa kawaida **automating tasks**. Kwa kudhibiti apps nyingine, inaweza kutumia vibaya ruhusa zilizopewa apps hizo nyingine.
+Huruhusu app kutuma events kwa apps nyingine ambazo hutumiwa kwa kawaida **kuendesha tasks kiotomatiki**. Kwa kudhibiti apps nyingine, inaweza kutumia vibaya ruhusa zilizopewa apps hizo.
 
-Kwa mfano, kuzifanya zimwombe mtumiaji nenosiri lake:
+Kama vile kuzifanya zimwombe mtumiaji password yake:
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
-Au kuwafanya watekeleze **arbitrary actions**.
+Au kuwafanya wafanye **arbitrary actions**.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-Hutoa, miongoni mwa ruhusa nyingine, uwezo wa **kuandika users TCC database**.
+Inaruhusu, miongoni mwa permissions nyingine, **kuandika TCC database ya mtumiaji**.
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-Hutoa uwezo wa **kubadilisha** sifa ya **`NFSHomeDirectory`** ya user, jambo linalobadilisha njia ya home folder yake na hivyo kuruhusu **kubypass TCC**.
+Inaruhusu **kubadilisha** attribute ya **`NFSHomeDirectory`** ya mtumiaji, jambo linalobadilisha path ya home folder yake na hivyo kuruhusu **kubypass TCC**.
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Huruhusu kurekebisha files ndani ya app bundles (ndani ya app.app), jambo ambalo **limezuiwa kwa default**.
+Inaruhusu kurekebisha files zilizo ndani ya app bundles (ndani ya app.app), jambo ambalo **limezuiwa kwa default**.
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
@@ -149,31 +149,31 @@ Inawezekana kuangalia ni nani aliye na access hii katika _System Settings_ > _Pr
 
 ### `kTCCServiceAccessibility`
 
-Process itaweza **kutumia vibaya vipengele vya macOS accessibility**, kumaanisha kwamba, kwa mfano, itaweza kubonyeza keystrokes. Kwa hiyo inaweza kuomba access ya kudhibiti app kama Finder na kuidhinisha dialog kwa kutumia permission hii.
+Process itaweza **kutumia vibaya macOS accessibility features**, ambayo ina maana kwamba, kwa mfano, itaweza kubonyeza keystrokes. Kwa hiyo inaweza kuomba access ya ku-control app kama Finder na ku-approve dialog kwa kutumia permission hii.
 
-## Entitlements zinazohusiana na Trustcache/CDhash
+## Trustcache/CDhash related entitlements
 
-Kuna entitlements ambazo zinaweza kutumiwa kubypass ulinzi wa Trustcache/CDhash, unaozuia utekelezaji wa matoleo yaliyodowngrade ya Apple binaries.
+Kuna entitlements kadhaa ambazo zinaweza kutumiwa kubypass Trustcache/CDhash protections, ambazo huzuia execution ya downgraded versions za Apple binaries.
 
-## Wastani
+## Medium
 
 ### `com.apple.security.cs.allow-jit`
 
-Entitlement hii huruhusu **kuunda memory ambayo inaweza kuandikwa na kutekelezwa** kwa kupitisha flag ya `MAP_JIT` kwenye system function ya `mmap()`. Angalia [**hapa kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
+Entitlement hii inaruhusu **kuunda memory ambayo inaweza kuandikwa na kutekelezwa** kwa kupitisha flag ya `MAP_JIT` kwenye system function ya `mmap()`. Angalia [**hii kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Entitlement hii huruhusu **ku-override au kupatch C code**, kutumia **`NSCreateObjectFileImageFromMemory`** iliyopitwa na wakati kwa muda mrefu (ambayo kimsingi si salama), au kutumia framework ya **DVDPlayback**. Angalia [**hapa kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+Entitlement hii inaruhusu **ku-override au ku-patch C code**, kutumia **`NSCreateObjectFileImageFromMemory`** ambayo imepitwa na wakati kwa muda mrefu (na kimsingi si salama), au kutumia framework ya **DVDPlayback**. Angalia [**hii kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
-> Kujumuisha entitlement hii huweka app yako kwenye hatari ya vulnerabilities za kawaida katika lugha za code zisizo salama kwa memory. Fikiria kwa makini ikiwa app yako inahitaji exception hii.
+> Kujumuisha entitlement hii kunaweka app yako kwenye vulnerabilities za kawaida katika memory-unsafe code languages. Fikiria kwa makini ikiwa app yako inahitaji exception hii.
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-Entitlement hii huruhusu **kurekebisha sections za executable files zake yenyewe** kwenye disk ili kulazimisha exit. Angalia [**hapa kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
+Entitlement hii inaruhusu **kurekebisha sections za executable files zake yenyewe** kwenye disk ili kulazimisha kutoka. Angalia [**hii kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
 
 > [!CAUTION]
-> Disable Executable Memory Protection Entitlement ni entitlement ya kiwango cha juu sana inayoondoa ulinzi wa msingi wa security kutoka kwenye app yako, na hivyo kumwezesha attacker kuandika upya executable code ya app yako bila kugunduliwa. Tumia entitlements nyembamba zaidi ikiwezekana.
+> Disable Executable Memory Protection Entitlement ni entitlement ya extreme ambayo huondoa security protection ya msingi kutoka kwenye app yako, na kufanya iwezekane kwa attacker kuandika upya executable code ya app yako bila kugunduliwa. Tumia entitlements nyembamba zaidi inapowezekana.
 
 ### `com.apple.security.cs.allow-relative-library-loads`
 
@@ -181,22 +181,22 @@ TODO
 
 ### `com.apple.private.nullfs_allow`
 
-Entitlement hii huruhusu ku-mount nullfs file system (imezuiwa kwa default). Tool: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
+Entitlement hii inaruhusu ku-mount nullfs file system (ambayo imekatazwa kwa default). Tool: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
 
 ### `kTCCServiceAll`
 
-Kulingana na chapisho hili la blogu, TCC permission hii kwa kawaida hupatikana katika mfumo wa:
+Kulingana na blogpost hii, TCC permission hii kwa kawaida hupatikana katika mfumo wa:
 ```
 [Key] com.apple.private.tcc.allow-prompting
 [Value]
 [Array]
 [String] kTCCServiceAll
 ```
-Ruhusu process **kuomba ruhusa zote za TCC**.
+Ruhusu **process kuomba ruhusa zote za TCC**.
 
 ### **`kTCCServicePostEvent`**
 
-Inaruhusu **kuingiza matukio bandia ya keyboard na mouse** katika mfumo mzima kupitia `CGEventPost()`. Process yenye ruhusa hii inaweza kuiga mibofyo ya keyboard, mibofyo ya mouse na matukio ya kusogeza katika application yoyote — hivyo kutoa **udhibiti wa mbali** wa desktop.
+Ruhusu **kuingiza matukio ghushi ya keyboard na mouse** katika mfumo mzima kupitia `CGEventPost()`. Process yenye ruhusa hii inaweza kuiga keystrokes, mibofyo ya mouse, na matukio ya kusogeza katika application yoyote — hivyo kutoa **remote control** ya desktop.
 
 Hii ni hatari hasa inapounganishwa na `kTCCServiceAccessibility` au `kTCCServiceListenEvent`, kwa kuwa inaruhusu kusoma NA kuingiza input.
 ```objc
@@ -206,9 +206,9 @@ CGEventPost(kCGSessionEventTap, keyDown);
 ```
 ### **`kTCCServiceListenEvent`**
 
-Inaruhusu **intercepting all keyboard and mouse events** system-wide (input monitoring / keylogging). Process inaweza kusajili `CGEventTap` ili kunasa kila keystroke inayoandikwa katika application yoyote, ikijumuisha passwords, credit card numbers, na private messages.
+Inaruhusu **kunasa matukio yote ya keyboard na mouse** katika mfumo mzima (input monitoring / keylogging). Process inaweza kusajili `CGEventTap` ili kunasa kila keystroke inayoandikwa katika application yoyote, ikijumuisha passwords, namba za credit card, na private messages.
 
-Kwa mbinu za kina za exploitation tazama:
+Kwa mbinu za kina za exploitation, tazama:
 
 {{#ref}}
 macos-input-monitoring-screen-capture-accessibility.md
@@ -216,26 +216,26 @@ macos-input-monitoring-screen-capture-accessibility.md
 
 ### **`kTCCServiceScreenCapture`**
 
-Inaruhusu **reading the display buffer** — kuchukua screenshots na kurekodi screen video ya application yoyote, ikijumuisha secure text fields. Ikiunganishwa na OCR, hii inaweza kutoa passwords na sensitive data kutoka kwenye screen automatically.
+Inaruhusu **kusoma display buffer** — kuchukua screenshots na kurekodi screen video ya application yoyote, ikijumuisha secure text fields. Ikiunganishwa na OCR, hii inaweza kutoa passwords na data nyeti kutoka kwenye screen automatically.
 
 > [!WARNING]
-> Kuanzia macOS Sonoma, screen capture huonyesha persistent menu bar indicator. Kwenye versions za zamani, screen recording inaweza kuwa completely silent.
+> Kuanzia macOS Sonoma, screen capture huonyesha indicator inayoendelea kwenye menu bar. Kwenye matoleo ya zamani, screen recording inaweza kufanyika kimya kabisa.
 
 ### **`kTCCServiceCamera`**
 
-Inaruhusu **capturing photos and video** kutoka kwenye built-in camera au USB cameras zilizounganishwa. Code injection kwenye binary yenye camera entitlement huwezesha silent visual surveillance.
+Inaruhusu **kunasa picha na video** kutoka kwenye camera iliyojengwa ndani au cameras za USB zilizounganishwa. Code injection kwenye binary yenye camera entitlement huwezesha visual surveillance ya siri.
 
 ### **`kTCCServiceMicrophone`**
 
-Inaruhusu **recording audio** kutoka kwenye input devices zote. Background daemons zenye mic access hutoa persistent ambient audio surveillance bila application window inayoonekana.
+Inaruhusu **kurekodi audio** kutoka kwenye vifaa vyote vya input. Background daemons zenye mic access hutoa ambient audio surveillance inayoendelea bila application window inayoonekana.
 
 ### **`kTCCServiceLocation`**
 
-Inaruhusu kuuliza **physical location** ya device kupitia Wi-Fi triangulation au Bluetooth beacons. Continuous monitoring hufichua anwani za nyumbani/kazini, travel patterns, na daily routines.
+Inaruhusu kuuliza **physical location** ya kifaa kupitia Wi-Fi triangulation au Bluetooth beacons. Ufuatiliaji unaoendelea hufichua anwani za nyumbani/kazini, mifumo ya safari, na shughuli za kila siku.
 
 ### **`kTCCServiceAddressBook`** / **`kTCCServiceCalendar`** / **`kTCCServicePhotos`**
 
-Access kwenye **Contacts** (majina, emails, simu — muhimu kwa spear-phishing), **Calendar** (ratiba za mikutano, attendee lists), na **Photos** (personal photos, screenshots ambazo zinaweza kuwa na credentials, location metadata).
+Access kwa **Contacts** (majina, emails, simu — muhimu kwa spear-phishing), **Calendar** (ratiba za mikutano, orodha za washiriki), na **Photos** (picha binafsi, screenshots ambazo zinaweza kuwa na credentials, metadata ya location).
 
 Kwa mbinu kamili za credential theft exploitation kupitia TCC permissions, tazama:
 
@@ -247,7 +247,7 @@ macos-tcc/macos-tcc-credential-and-data-theft.md
 
 ### `com.apple.security.temporary-exception.mach-lookup.global-name`
 
-**Sandbox temporary exceptions** hudhoofisha App Sandbox kwa kuruhusu mawasiliano na system-wide Mach/XPC services ambazo sandbox kwa kawaida huzuia. Hii ndiyo **primary sandbox escape primitive** — app ya sandbox iliyo-compromise inaweza kutumia mach-lookup exceptions kufikia privileged daemons na ku-exploit XPC interfaces zao.
+**Sandbox temporary exceptions** hudhoofisha App Sandbox kwa kuruhusu mawasiliano na system-wide Mach/XPC services ambazo sandbox kwa kawaida huzuia. Hii ndiyo **primary sandbox escape primitive** — app iliyoathiriwa ndani ya sandbox inaweza kutumia mach-lookup exceptions kufikia privileged daemons na ku-exploit XPC interfaces zao.
 ```bash
 # Find apps with mach-lookup exceptions
 find /Applications -name "*.app" -exec sh -c '
@@ -255,7 +255,7 @@ binary="$1/Contents/MacOS/$(defaults read "$1/Contents/Info.plist" CFBundleExecu
 [ -f "$binary" ] && codesign -d --entitlements - "$binary" 2>&1 | grep -q "mach-lookup" && echo "$(basename "$1")"
 ' _ {} \; 2>/dev/null
 ```
-Kwa maelezo ya kina ya exploitation chain: sandboxed app → mach-lookup exception → vulnerable daemon → sandbox escape, tazama:
+Kwa exploitation chain ya kina: sandboxed app → mach-lookup exception → vulnerable daemon → sandbox escape, tazama:
 
 {{#ref}}
 macos-code-signing-weaknesses-and-sandbox-escapes.md
@@ -263,12 +263,12 @@ macos-code-signing-weaknesses-and-sandbox-escapes.md
 
 ### `com.apple.developer.driverkit`
 
-**DriverKit entitlements** huruhusu user-space driver binaries kuwasiliana moja kwa moja na kernel kupitia interfaces za IOKit. DriverKit binaries hudhibiti hardware: USB, Thunderbolt, PCIe, vifaa vya HID, audio, na networking.
+**DriverKit entitlements** huruhusu user-space driver binaries kuwasiliana moja kwa moja na kernel kupitia IOKit interfaces. DriverKit binaries hudhibiti hardware: USB, Thunderbolt, PCIe, HID devices, audio, na networking.
 
-Kuhatarisha DriverKit binary huwezesha:
-- **Kernel attack surface** kupitia calls za `IOConnectCallMethod` zenye muundo hatari
-- **USB device spoofing** (kuiga keyboard kwa ajili ya HID injection)
-- **DMA attacks** kupitia interfaces za PCIe/Thunderbolt
+Kompromaisi ya DriverKit binary huwezesha:
+- **Kernel attack surface** kupitia calls za `IOConnectCallMethod` zenye data iliyoundwa vibaya
+- **USB device spoofing** (kuiga keyboard kwa HID injection)
+- **DMA attacks** kupitia PCIe/Thunderbolt interfaces
 ```bash
 # Find DriverKit binaries
 find / -name "*.dext" -type d 2>/dev/null
@@ -283,7 +283,7 @@ Kwa maelezo ya kina kuhusu exploitation ya IOKit/DriverKit, tazama:
 ## Marejeo
 
 - [1] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
-- [2] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` operations and `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
-- [3] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` handler)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
+- [2] [XNU — `bsd/sys/codesign.h` (operations za `CS_OPS_*` na `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [3] [XNU — `bsd/kern/kern_proc.c` (handler ya `csops` / `CS_OPS_CLEAR_LV`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
 
 {{#include ../../../banners/hacktricks-training.md}}

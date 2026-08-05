@@ -117,7 +117,7 @@ sudo killall -HUP mDNSResponder
 ```
 ### Ukaguzi wa haraka wa anti-analysis / virtualization
 
-Baadhi ya macOS stealers hutumia `system_profiler` kugundua VMs na **kukomesha utekelezaji kwa exit code tofauti (k.m., 100)** ili kuepuka sandbox detonation<sup>[1]</sup>:
+Baadhi ya macOS stealers huita `system_profiler` ili kutambua VMs na **kuacha kutekeleza kwa exit code maalum (kwa mfano, 100)** ili kuepuka sandbox detonation<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -125,7 +125,7 @@ fi
 ```
 ### Programu na Huduma Zilizosakinishwa
 
-Kagua programu **za kutiliwa shaka** zilizosakinishwa na **mapendeleo** kwenye rasilimali zilizosakinishwa:
+Kagua programu **zinazotiliwa shaka** zilizosakinishwa na **ruhusa** juu ya rasilimali zilizosakinishwa:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -145,12 +145,12 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### Unda mtumiaji
 
-Bila vidokezo
+Bila prompts
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
 ## Marejeleo
 
-- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, mwaka wa Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -1,26 +1,26 @@
-# Ukaguzi wa Mchakato Unaounganisha wa macOS XPC
+# Ukaguzi wa Mchakato Unaounganisha wa XPC
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
 ## Ukaguzi wa Mchakato Unaounganisha wa XPC
 
-Muunganisho unapowekwa kwenye XPC service, server itaangalia ikiwa muunganisho huo unaruhusiwa. Hizi ndizo ukaguzi ambao kwa kawaida ingefanya:
+Muunganisho unapoanzishwa kwenye XPC service, server itaangalia ikiwa muunganisho huo unaruhusiwa. Hizi ndizo check ambazo kwa kawaida itafanya:
 
-1. Angalia ikiwa **process ime-signed kwa certificate iliyosainiwa na Apple** (hutolewa na Apple pekee).
-- Ikiwa hii **haijathibitishwa**, mshambulizi anaweza kuunda **fake certificate** ili ilingane na ukaguzi mwingine wowote.
-2. Angalia ikiwa process ime-signed kwa certificate ya **organization**, (uthibitishaji wa team ID).
-- Ikiwa hii **haijathibitishwa**, **developer certificate yoyote** kutoka Apple inaweza kutumika ku-sign, na kuunganisha kwenye service.
-3. Angalia ikiwa process **ina bundle ID sahihi**.
-- Ikiwa hii **haijathibitishwa**, tool yoyote **iliyo-signed na org hiyo hiyo** inaweza kutumika kuingiliana na XPC service.
+1. Angalia ikiwa **process inasainiwa kwa certificate iliyosainiwa na Apple** (hutolewa na Apple pekee).
+- Ikiwa **hili halijathibitishwa**, attacker anaweza kuunda **certificate bandia** ili ilingane na check nyingine yoyote.
+2. Angalia ikiwa process inayounganisha imesainiwa kwa certificate ya **organization**, (team ID verification).
+- Ikiwa **hili halijathibitishwa**, **certificate yoyote ya developer** kutoka Apple inaweza kutumika kusaini na kuunganisha kwenye service.
+3. Angalia ikiwa process inayounganisha **ina bundle ID sahihi**.
+- Ikiwa **hili halijathibitishwa**, tool yoyote **iliyosainiwa na org hiyo hiyo** inaweza kutumika kuingiliana na XPC service.
 4. (4 au 5) Angalia ikiwa process inayounganisha ina **nambari sahihi ya software version**.
-- Ikiwa hii **haijathibitishwa,** clients za zamani, zisizo salama, zilizo katika hatari ya process injection zinaweza kutumika kuunganisha kwenye XPC service hata ukaguzi mwingine ukiwa umewekwa.
-5. (4 au 5) Angalia ikiwa process inayounganisha ina hardened runtime bila dangerous entitlements (kama zile zinazoruhusu kupakia libraries za kiholela au kutumia DYLD env vars)
-1. Ikiwa hii **haijathibitishwa,** client inaweza kuwa **katika hatari ya code injection**
-6. Angalia ikiwa process inayounganisha ina **entitlement** inayoiruhusu kuunganisha kwenye service. Hii inatumika kwa Apple binaries.
-7. **Verification** lazima **itegemee** **audit token** ya **client inayounganisha** **badala ya** process ID (**PID**) yake, kwa sababu ya kwanza huzuia **PID reuse attacks**.
-- Developers **mara chache hutumia audit token** API call kwa kuwa ni **private**, hivyo Apple inaweza **kuibadilisha** wakati wowote. Zaidi ya hayo, matumizi ya private API hayaruhusiwi katika Mac App Store apps.
-- Ikiwa method **`processIdentifier`** inatumika, inaweza kuwa katika hatari
-- **`xpc_dictionary_get_audit_token`** inapaswa kutumiwa badala ya **`xpc_connection_get_audit_token`**, kwa kuwa ya mwisho inaweza pia kuwa [katika hatari katika hali fulani](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).<sup>[5]</sup>
+- Ikiwa **hili halijathibitishwa,** client wa zamani na asiye salama, aliye katika hatari ya process injection, anaweza kutumika kuunganisha kwenye XPC service hata kama check nyingine zipo.
+5. (4 au 5) Angalia ikiwa process inayounganisha ina hardened runtime bila dangerous entitlements (kama zile zinazoruhusu kupakia libraries kiholela au kutumia DYLD env vars)
+1. Ikiwa **hili halijathibitishwa,** client anaweza kuwa **katika hatari ya code injection**
+6. Angalia ikiwa process inayounganisha ina **entitlement** inayoiruhusu kuunganisha kwenye service. Hili linatumika kwa Apple binaries.
+7. **Verification** lazima **itegemee** **audit token** ya **client anayeunganisha** **badala ya** process ID yake (**PID**), kwa kuwa ya kwanza huzuia **PID reuse attacks**.
+- Developers **hutumia kwa nadra API ya audit token** kwa sababu ni **private**, hivyo Apple inaweza kuibadilisha wakati wowote. Zaidi ya hayo, kutumia private API hakuruhusiwi katika apps za Mac App Store.
+- Ikiwa method **`processIdentifier`** itatumika, inaweza kuwa katika hatari
+- **`xpc_dictionary_get_audit_token`** inapaswa kutumika badala ya **`xpc_connection_get_audit_token`**, kwa kuwa ya mwisho inaweza pia kuwa [katika hatari katika hali fulani](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).<sup>[[5]](#references)</sup>
 
 ### Communication Attacks
 
@@ -38,22 +38,22 @@ Kwa maelezo zaidi kuhusu attack ya **`xpc_connection_get_audit_token`**, angalia
 macos-xpc_connection_get_audit_token-attack.md
 {{#endref}}
 
-### Trustcache - Kuzuia Downgrade Attacks
+### Trustcache - Downgrade Attacks Prevention
 
-Trustcache ni defensive method iliyoanzishwa katika mashine za Apple Silicon inayohifadhi database ya CDHSAH ya Apple binaries, ili binaries zisizobadilishwa na zinazoruhusiwa pekee ziweze kutekelezwa. Hii huzuia utekelezaji wa downgrade versions.
+Trustcache ni njia ya ulinzi iliyoanzishwa katika mashine za Apple Silicon ambayo huhifadhi database ya CDHSAH za Apple binaries ili binaries zisizorekebishwa na zinazoruhusiwa pekee ziweze kutekelezwa. Hii huzuia utekelezaji wa downgrade versions.
 
-### Code Examples
+### Mifano ya Code
 
-Server itaweka **verification** hii katika function inayoitwa **`shouldAcceptNewConnection`**.
+Server itatekeleza **verification** hii katika function inayoitwa **`shouldAcceptNewConnection`**.
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection {
 //Check connection
 return YES;
 }
 ```
-Object NSXPCConnection ina property **`auditToken`** ya **private** (hiyo ndiyo inapaswa kutumiwa, lakini inaweza kubadilika) na property **`processIdentifier`** ya **public** (hiyo haipaswi kutumiwa).
+Object NSXPCConnection ina property **`auditToken`** ya **private** (ile inayopaswa kutumiwa lakini inaweza kubadilika) na property **`processIdentifier`** ya **public** (ile ambayo haipaswi kutumiwa).
 
-Process inayounganisha inaweza kuthibitishwa kwa kitu kama hiki:<sup>[1][2][3]</sup>
+Process inayounganisha inaweza kuthibitishwa kwa kitu kama hiki:<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 ```objectivec
 [...]
 SecRequirementRef requirementRef = NULL;
@@ -73,7 +73,7 @@ SecCodeCheckValidity(code, kSecCSDefaultFlags, requirementRef);
 SecTaskRef taskRef = SecTaskCreateWithAuditToken(NULL, ((ExtendedNSXPCConnection*)newConnection).auditToken);
 SecTaskValidateForRequirement(taskRef, (__bridge CFStringRef)(requirementString))
 ```
-Ikiwa developer hataki kukagua version ya client, anaweza angalau kukagua kwamba client haina udhaifu wa process injection:
+Ikiwa developer hataki kuangalia version ya client, anaweza angalau kuangalia kwamba client haina vulnerability ya process injection:
 ```objectivec
 [...]
 CFDictionaryRef csInfo = NULL;
@@ -88,7 +88,7 @@ if ((csFlags & (cs_hard | cs_require_lv)) {
 return Yes; // Accept connection
 }
 ```
-Konstanti za `cs_*` zilizo hapo juu ni flags za code-signing zilizofafanuliwa katika XNU's `osfmk/kern/cs_blobs.h`, hivyo zinaweza kuthibitishwa dhidi ya msimbo chanzo badala ya kukisiwa:<sup>[4]</sup>
+Konstanti za `cs_*` zilizo hapo juu ni flags za code-signing zilizofafanuliwa katika `osfmk/kern/cs_blobs.h` ya XNU, hivyo zinaweza kukaguliwa dhidi ya source badala ya kukisia:<sup>[[4]](#references)</sup>
 ```c
 #define CS_HARD                     0x00000100  /* don't load invalid pages */
 #define CS_KILL                     0x00000200  /* kill process if it becomes invalid */
@@ -98,10 +98,10 @@ Konstanti za `cs_*` zilizo hapo juu ni flags za code-signing zilizofafanuliwa ka
 ```
 ## Marejeo
 
-- [1] [Apple Developer — Lugha ya Mahitaji ya Code Signing](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/RequirementLang/RequirementLang.html)
+- [1] [Apple Developer — Language ya Mahitaji ya Code Signing](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/RequirementLang/RequirementLang.html)
 - [2] [Apple Developer — `SecCodeCheckValidity`](https://developer.apple.com/documentation/security/seccodecheckvalidity(_:_:_:))
 - [3] [Apple Developer — `SecTaskCreateWithAuditToken`](https://developer.apple.com/documentation/security/sectaskcreatewithaudittoken(_:_:))
-- [4] [XNU — `osfmk/kern/cs_blobs.h` (flags za `CS_*` code-signing)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
-- [5] [Sector 7 — Ulaghai wa audit token wa XPC](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
+- [4] [XNU — `osfmk/kern/cs_blobs.h` (flags za code-signing `CS_*`)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [5] [Sector 7 — XPC audit token spoofing](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
