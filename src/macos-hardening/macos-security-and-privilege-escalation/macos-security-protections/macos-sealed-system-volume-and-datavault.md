@@ -6,14 +6,14 @@
 
 ### Grundlegende Informationen
 
-Ab **macOS Big Sur (11.0)** wird das Systemvolume mithilfe eines **APFS-Snapshot-Hashbaums** kryptografisch versiegelt. Dies wird als **Sealed System Volume (SSV)** bezeichnet. Die Systempartition wird **schreibgeschützt** eingebunden, und jede Änderung hebt die Versiegelung auf, was während des Bootvorgangs überprüft wird.
+Ab **macOS Big Sur (11.0)** wird das Systemvolume mithilfe eines kryptografisch versiegelten **APFS-Snapshot-Hash-Trees** geschützt. Dies wird als **Sealed System Volume (SSV)** bezeichnet. Die Systempartition wird **read-only** eingehängt, und jede Änderung bricht die Versiegelung, was während des boot überprüft wird.
 
 Das SSV bietet:
-- **Manipulationserkennung** — jede Änderung an System-Binaries oder Frameworks kann anhand der beschädigten kryptografischen Versiegelung erkannt werden
-- **Rollback-Schutz** — der Bootvorgang überprüft die Integrität des System-Snapshots
-- **Rootkit-Prävention** — selbst root kann Dateien auf dem Systemvolume nicht dauerhaft ändern, ohne die Versiegelung aufzuheben
+- **Manipulationserkennung** — Jede Änderung an System-Binaries oder Frameworks kann anhand der beschädigten kryptografischen Versiegelung erkannt werden
+- **Rollback-Schutz** — Der boot-Prozess überprüft die Integrität des System-Snapshots
+- **Rootkit-Prävention** — Selbst root kann Dateien auf dem Systemvolume nicht dauerhaft ändern, ohne die Versiegelung zu brechen
 
-### SSV-Status überprüfen
+### Überprüfen des SSV-Status
 ```bash
 # Check if authenticated root is enabled (SSV seal verification)
 csrutil authenticated-root status
@@ -29,13 +29,13 @@ diskutil apfs listVolumeGroups
 ```
 ### SSV-Writer-Berechtigungen
 
-Bestimmte Apple-System-Binaries verfügen über Entitlements, die es ihnen erlauben, das sealed system volume zu ändern oder zu verwalten:
+Bestimmte Apple-Systembinärdateien verfügen über Berechtigungen, die es ihnen ermöglichen, das versiegelte Systemvolume zu ändern oder zu verwalten:
 
-| Entitlement | Zweck |
+| Berechtigung | Zweck |
 |---|---|
-| `com.apple.private.apfs.revert-to-snapshot` | Das System volume auf einen vorherigen Snapshot zurücksetzen |
-| `com.apple.private.apfs.create-sealed-snapshot` | Nach Systemupdates einen neuen sealed Snapshot erstellen |
-| `com.apple.rootless.install.heritable` | In SIP-geschützte Pfade schreiben (wird von Child-Prozessen geerbt) |
+| `com.apple.private.apfs.revert-to-snapshot` | Das Systemvolume auf einen vorherigen Snapshot zurücksetzen |
+| `com.apple.private.apfs.create-sealed-snapshot` | Nach Systemupdates einen neuen versiegelten Snapshot erstellen |
+| `com.apple.rootless.install.heritable` | In SIP-geschützte Pfade schreiben (wird von untergeordneten Prozessen geerbt) |
 | `com.apple.rootless.install` | In SIP-geschützte Pfade schreiben |
 
 ### SSV-Writer finden
@@ -56,9 +56,9 @@ WHERE c.name = 'ssv_writer';"
 ```
 ### Angriffsszenarien
 
-#### Snapshot-Rollback-Angriff
+#### Snapshot Rollback Attack
 
-Wenn ein Angreifer ein Binary mit `com.apple.private.apfs.revert-to-snapshot` kompromittiert, kann er **das Systemvolume auf einen Zustand vor einem Update zurücksetzen** und dadurch bekannte Schwachstellen wiederherstellen:
+Wenn ein Angreifer eine Binärdatei mit `com.apple.private.apfs.revert-to-snapshot` kompromittiert, kann er **das Systemvolume auf einen Zustand vor dem Update zurücksetzen** und dadurch bekannte Schwachstellen wiederherstellen:
 ```bash
 # Conceptual — the snapshot revert operation would:
 # 1. List available snapshots
@@ -68,24 +68,24 @@ diskutil apfs listSnapshots disk3s1
 # This restores the system to a state with known, patched vulnerabilities
 ```
 > [!WARNING]
-> Das Zurücksetzen eines Snapshots macht Sicherheitsupdates effektiv **rückgängig** und stellt zuvor gepatchte Kernel- und System-Schwachstellen wieder her. Dies ist eine der gefährlichsten möglichen Operationen unter modernen macOS-Versionen.
+> Ein Snapshot rollback macht Sicherheitsupdates effektiv **rückgängig** und stellt zuvor gepatchte Kernel- und Systemschwachstellen wieder her. Dies ist eine der gefährlichsten möglichen Operationen auf modernem macOS.
 
-#### Ersetzen von System-Binaries
+#### System Binary Replacement
 
-Mit einem SIP bypass + SSV write capability kann ein Angreifer:
+Mit SIP bypass + SSV write capability kann ein Angreifer:
 
-1. Das System-Volume read-write mounten
-2. Einen System-Daemon oder eine Framework-Bibliothek durch eine trojanisierte Version ersetzen
+1. Das Systemvolume read-write mounten
+2. Einen System-Daemon oder eine Framework library durch eine trojanisierte Version ersetzen
 3. Den Snapshot erneut versiegeln (oder das beschädigte Siegel akzeptieren, wenn SIP bereits beeinträchtigt ist)
-4. Das Rootkit bleibt über Neustarts hinweg bestehen und ist für Userland-Erkennungstools unsichtbar
+4. Das Rootkit bleibt über Reboots hinweg bestehen und ist für Userland detection tools unsichtbar
 
-### CVEs aus der Praxis
+### Real-World CVEs
 
 | CVE | Beschreibung |
 |---|---|
-| CVE-2021-30892 | **Shrootless** — SIP bypass durch Missbrauch des Entitlements `com.apple.rootless.install.heritable` von `system_installd`, um beliebige post-install scripts auszuführen ([Microsoft](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)) |
-| CVE-2022-22583 | SIP bypass: `system_installd` legte das post-install script in einem SIP-geschützten Ordner unter `/tmp` ab, aber `/tmp` selbst ist nicht SIP-geschützt, sodass der Ordner durch das Mounten eines Images darüber ausgetauscht werden konnte ([Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html)) |
-| CVE-2022-46689 | **MacDirtyCow** — Copy-on-Write-Race in XNU, die Schreibzugriffe auf schreibgeschützte Dateien im Besitz von root ermöglicht ([Worth Doing Badly](https://worthdoingbadly.com/macdirtycow/)) |
+| CVE-2021-30892 | **Shrootless** — SIP bypass durch Ausnutzung des Entitlements `com.apple.rootless.install.heritable` von `system_installd`, um beliebige post-install scripts auszuführen ([Microsoft](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)) |
+| CVE-2022-22583 | SIP bypass: `system_installd` legte das post-install script in einem SIP-geschützten Ordner unter `/tmp` ab, aber `/tmp` selbst ist nicht SIP-geschützt, sodass der Ordner durch das Mounten eines Images darüber ersetzt werden konnte ([Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html)) |
+| CVE-2022-46689 | **MacDirtyCow** — Copy-on-write race in XNU, die Schreibvorgänge in schreibgeschützte, root-eigene Dateien ermöglicht ([Worth Doing Badly](https://worthdoingbadly.com/macdirtycow/)) |
 
 ---
 
@@ -93,16 +93,16 @@ Mit einem SIP bypass + SSV write capability kann ein Angreifer:
 
 ### Grundlegende Informationen
 
-**DataVault** ist Apples Schutzschicht für vertrauliche Systemdatenbanken. Selbst **root kann nicht auf durch DataVault geschützte Dateien zugreifen** — nur Prozesse mit spezifischen Entitlements können sie lesen oder ändern.<sup>[1]</sup> Zu den geschützten Speichern gehören:
+**DataVault** ist Apples protection layer für sensible Systemdatenbanken. Selbst **root kann nicht auf durch DataVault geschützte Dateien zugreifen** — nur Prozesse mit bestimmten Entitlements können sie lesen oder ändern.<sup>[[1]](#references)</sup> Zu den geschützten Stores gehören:
 
 | Geschützte Datenbank | Pfad | Inhalt |
 |---|---|---|
-| TCC (System) | `/Library/Application Support/com.apple.TCC/TCC.db` | Systemweite TCC-Datenschutzentscheidungen |
-| TCC (Benutzer) | `~/Library/Application Support/com.apple.TCC/TCC.db` | TCC-Datenschutzentscheidungen pro Benutzer |
-| Keychain (System) | `/Library/Keychains/System.keychain` | System-Keychain |
-| Keychain (Benutzer) | `~/Library/Keychains/login.keychain-db` | Benutzer-Keychain |
+| TCC (system) | `/Library/Application Support/com.apple.TCC/TCC.db` | Systemweite TCC-Datenschutzentscheidungen |
+| TCC (user) | `~/Library/Application Support/com.apple.TCC/TCC.db` | Benutzerbezogene TCC-Datenschutzentscheidungen |
+| Keychain (system) | `/Library/Keychains/System.keychain` | System-Keychain |
+| Keychain (user) | `~/Library/Keychains/login.keychain-db` | Benutzer-Keychain |
 
-Der DataVault-Schutz wird auf **Dateisystemebene** mithilfe erweiterter Attribute und Volume-Schutz-Flags durchgesetzt und vom Kernel überprüft.
+Der DataVault-Schutz wird auf **filesystem level** mithilfe von Extended Attributes und Volume-Protection-Flags durchgesetzt und vom Kernel verifiziert.
 
 ### DataVault Controller Entitlements
 ```
@@ -134,7 +134,7 @@ WHERE c.name = 'datavault_controller';"
 
 #### Direkte Änderung der TCC-Datenbank
 
-Wenn ein Angreifer eine DataVault-Controller-Binärdatei kompromittiert (z. B. durch code injection in einen Prozess mit `com.apple.private.tcc.manager`), kann er die **TCC-Datenbank direkt ändern**, um jeder Anwendung beliebige TCC-Berechtigungen zu gewähren:
+Wenn ein Angreifer ein DataVault controller binary kompromittiert (z. B. durch code injection in einen Prozess mit `com.apple.private.tcc.manager`), kann er die **TCC-Datenbank direkt ändern**, um jeder Anwendung eine beliebige TCC-Berechtigung zu gewähren:
 ```sql
 -- Grant Full Disk Access to a malicious binary (conceptual)
 INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_version)
@@ -145,31 +145,31 @@ INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_
 VALUES ('kTCCServiceCamera', 'com.attacker.malware', 0, 2, 4, 1);
 ```
 > [!CAUTION]
-> Die Änderung der TCC-Datenbank ist der **ultimative Datenschutz-Bypass** — sie gewährt jede Berechtigung stillschweigend, ohne Benutzerabfrage oder sichtbaren Hinweis. In der Vergangenheit endeten mehrere macOS-Privilege-Escalation-Ketten mit Schreibzugriffen auf die TCC-Datenbank als finalem Payload.
+> Die Änderung der TCC-Datenbank ist der **ultimative Privacy Bypass** — sie gewährt jede Berechtigung stillschweigend, ohne Benutzerabfrage oder sichtbaren Hinweis. Historisch endeten mehrere macOS-Privilege-Escalation-Ketten mit Schreibzugriffen auf die TCC-Datenbank als finalem Payload.
 
 #### Zugriff auf die Keychain-Datenbank
 
 DataVault schützt auch die zugrunde liegenden Keychain-Dateien. Ein kompromittierter DataVault-Controller kann:
 
-1. Die Rohdateien der Keychain-Datenbank lesen
+1. Die rohen Keychain-Datenbankdateien lesen
 2. Verschlüsselte Keychain-Einträge extrahieren
 3. Eine Offline-Entschlüsselung mit dem Passwort des Benutzers oder wiederhergestellten Schlüsseln versuchen
 
-### CVEs aus der Praxis im Zusammenhang mit DataVault/TCC-Bypass
+### Reale CVEs im Zusammenhang mit DataVault/TCC Bypass
 
 | CVE | Beschreibung |
 |---|---|
-| CVE-2024-44131 | FileProvider-Symlink-Race, durch die ein privilegierter Helper auf TCC-geschützte Daten zugreifen kann ([Jamf](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)) |
-| CVE-2023-40424 | Als root **einen neuen Benutzer erstellen, dessen `NFSHomeDirectory` auf eine vom Angreifer kontrollierte `TCC.db` zeigt**; beim Login verwendet `tccd` diese Datei, und die Berechtigungen werden angewendet, wodurch der Zugriff auf die Daten anderer Benutzer möglich wird ([Kandji](https://blog.kandji.io/malware-bypass-tcc)) |
+| CVE-2024-44131 | FileProvider symlink race, durch die ein privilegierter Helper auf durch TCC geschützte Daten zugreifen kann ([Jamf](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)) |
+| CVE-2023-40424 | Als root einen **neuen Benutzer erstellen, dessen `NFSHomeDirectory` auf eine vom Angreifer kontrollierte `TCC.db` zeigt**; beim Login verwendet `tccd` diese Datei, und die Berechtigungen werden angewendet, wodurch der Zugriff auf die Daten anderer Benutzer möglich wird ([Kandji](https://blog.kandji.io/malware-bypass-tcc)) |
 | CVE-2021-30970 | "powerdir": Das Home-Verzeichnis des Benutzers ändern, um eine vom Angreifer kontrollierte TCC.db zu platzieren ([Microsoft](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)) |
-| CVE-2021-30713 | Fehler bei der Bundle-Auswertung, durch den eine App **die TCC-Berechtigungen eines Spender-Bundles erben kann**, ohne eine Abfrage; in freier Wildbahn von **XCSSET** ausgenutzt, um den Desktop per Screenshot aufzunehmen ([Jamf](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)) |
-| CVE-2020-9934 | `tccd` erstellte den Datenbankpfad aus `$HOME`, sodass `launchctl setenv HOME` ihn auf eine vom Angreifer kontrollierte `TCC.db` umleiten konnte ([Matt Shockley](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)) |
+| CVE-2021-30713 | Bundle-conclusion-Fehler, durch den eine App **die TCC-Berechtigungen eines Spender-Bundles erben kann**, ohne dass eine Abfrage erscheint; in freier Wildbahn von **XCSSET** ausgenutzt, um den Desktop per Screenshot aufzunehmen ([Jamf](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)) |
+| CVE-2020-9934 | `tccd` erstellte den DB-Pfad aus `$HOME`, sodass `launchctl setenv HOME` ihn auf eine vom Angreifer kontrollierte `TCC.db` umleiten konnte ([Matt Shockley](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)) |
 | CVE-2020-29621 | `coreaudiod` verfügte über `com.apple.private.tcc.manager` **und** deaktivierte die Library-Validierung, sodass ein in `/Library/Audio/Plug-Ins/HAL` abgelegtes HAL-Plug-in beliebige TCC-Berechtigungen gewähren konnte ([Wojciech Reguła](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)) |
 
 ## Referenzen
 
-- [1] [Apple Platform Security — Data Protection](https://support.apple.com/guide/security/data-protection-overview-sece3bee0835/web)
-- [2] [The Nightmare of Apple OTA Updates (APFS Snapshots)](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
+- [1] [Apple Platform Security — Datenschutz](https://support.apple.com/guide/security/data-protection-overview-sece3bee0835/web)
+- [2] [Der Albtraum der Apple-OTA-Updates (APFS-Snapshots)](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
 - [3] [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

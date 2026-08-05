@@ -2,31 +2,31 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Autorisierungsdatenbank**
+## **Autorisierungs-Datenbank**
 
-Die in `/var/db/auth.db` befindliche Datenbank wird zum Speichern von Berechtigungen für die Ausführung sensibler Vorgänge verwendet. Diese Vorgänge werden vollständig im **user space** ausgeführt und normalerweise von **XPC services** verwendet, die anhand dieser Datenbank prüfen müssen, **ob der aufrufende Client autorisiert ist**, eine bestimmte Aktion auszuführen.
+Die in `/var/db/auth.db` befindliche Datenbank wird zum Speichern von Berechtigungen zum Ausführen sensibler Vorgänge verwendet. Diese Vorgänge werden vollständig im **user space** ausgeführt und üblicherweise von **XPC services** verwendet, die anhand dieser Datenbank überprüfen müssen, **ob der aufrufende Client autorisiert ist**, eine bestimmte Aktion auszuführen.
 
-Anfangs wird diese Datenbank aus dem Inhalt von `/System/Library/Security/authorization.plist` erstellt. Anschließend können einige Services diese Datenbank ergänzen oder ändern, um weitere Berechtigungen hinzuzufügen.
+Ursprünglich wird diese Datenbank aus dem Inhalt von `/System/Library/Security/authorization.plist` erstellt. Anschließend können einige Services diese Datenbank ergänzen oder ändern, um weitere Berechtigungen hinzuzufügen.
 
-Die Regeln werden in der Tabelle `rules` innerhalb der Datenbank gespeichert und enthalten die folgenden Spalten:
+Die Regeln werden in der `rules`-Tabelle innerhalb der Datenbank gespeichert und enthalten die folgenden Spalten:
 
-- **id**: Eine eindeutige Kennung für jede Regel, die automatisch erhöht wird und als Primärschlüssel dient.
-- **name**: Der eindeutige Name der Regel, der dazu verwendet wird, sie innerhalb des Autorisierungssystems zu identifizieren und zu referenzieren.
-- **type**: Gibt den Typ der Regel an. Zulässig sind die Werte 1 oder 2, die deren Autorisierungslogik definieren.
-- **class**: Kategorisiert die Regel in eine bestimmte Klasse und stellt sicher, dass es sich um eine positive Ganzzahl handelt.
-- "allow" für allow, "deny" für deny, "user", wenn die Eigenschaft group eine Gruppe angibt, deren Mitgliedschaft den Zugriff erlaubt, "rule" gibt in einem Array eine zu erfüllende Regel an, "evaluate-mechanisms", gefolgt von einem `mechanisms`-Array, dessen Elemente entweder builtins oder der Name eines Bundles innerhalb von `/System/Library/CoreServices/SecurityAgentPlugins/` oder `/Library/Security//SecurityAgentPlugins` sind
+- **id**: Eine eindeutige Kennung für jede Regel, die automatisch inkrementiert wird und als Primärschlüssel dient.
+- **name**: Der eindeutige Name der Regel, der zur Identifizierung und Referenzierung innerhalb des Autorisierungssystems verwendet wird.
+- **type**: Gibt den Typ der Regel an. Die möglichen Werte sind auf 1 oder 2 beschränkt, um deren Autorisierungslogik zu definieren.
+- **class**: Ordnet die Regel einer bestimmten Klasse zu und stellt sicher, dass es sich um eine positive Ganzzahl handelt.
+- "allow" für allow, "deny" für deny, "user", wenn die Eigenschaft `group` eine Gruppe angibt, deren Mitgliedschaft den Zugriff erlaubt, "rule" gibt in einem Array eine zu erfüllende Regel an, "evaluate-mechanisms", gefolgt von einem `mechanisms`-Array, dessen Elemente entweder builtins oder der Name eines Bundles innerhalb von `/System/Library/CoreServices/SecurityAgentPlugins/` oder `/Library/Security//SecurityAgentPlugins` sind
 - **group**: Gibt die mit der Regel verbundene Benutzergruppe für die gruppenbasierte Autorisierung an.
-- **kofn**: Repräsentiert den Parameter „k-of-n“ und bestimmt, wie viele Unterregeln aus einer Gesamtanzahl erfüllt sein müssen.
-- **timeout**: Definiert die Dauer in Sekunden, bevor die von der Regel erteilte Autorisierung abläuft.
+- **kofn**: Stellt den „k-of-n“-Parameter dar, der festlegt, wie viele Unterregeln von einer Gesamtanzahl erfüllt sein müssen.
+- **timeout**: Definiert die Dauer in Sekunden, nach deren Ablauf die durch die Regel gewährte Autorisierung verfällt.
 - **flags**: Enthält verschiedene Flags, die das Verhalten und die Eigenschaften der Regel verändern.
 - **tries**: Begrenzt die Anzahl der zulässigen Autorisierungsversuche, um die Sicherheit zu erhöhen.
-- **version**: Verfolgt die Version der Regel zur Versionsverwaltung und für Aktualisierungen.
-- **created**: Speichert den Zeitstempel, zu dem die Regel erstellt wurde, für Auditing-Zwecke.
+- **version**: Verfolgt die Version der Regel zur Versionskontrolle und für Aktualisierungen.
+- **created**: Speichert den Zeitstempel, zu dem die Regel erstellt wurde, zu Audit-Zwecken.
 - **modified**: Speichert den Zeitstempel der letzten Änderung an der Regel.
 - **hash**: Enthält einen Hash-Wert der Regel, um deren Integrität sicherzustellen und Manipulationen zu erkennen.
-- **identifier**: Stellt eine eindeutige Zeichenkettenkennung, beispielsweise eine UUID, für externe Referenzen auf die Regel bereit.
+- **identifier**: Stellt eine eindeutige String-Kennung, beispielsweise eine UUID, für externe Referenzen auf die Regel bereit.
 - **requirement**: Enthält serialisierte Daten, die die spezifischen Autorisierungsanforderungen und Mechanismen der Regel definieren.
-- **comment**: Bietet eine für Menschen lesbare Beschreibung oder einen Kommentar zur Regel für Dokumentations- und Verständniszwecke.
+- **comment**: Bietet eine für Menschen lesbare Beschreibung oder einen Kommentar zur Regel für Dokumentation und Verständlichkeit.
 
 ### Beispiel
 ```bash
@@ -56,7 +56,7 @@ security authorizationdb read com.apple.tcc.util.admin
 </dict>
 </plist>
 ```
-Darüber hinaus ist unter [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) die Bedeutung von `authenticate-admin-nonshared` zu sehen:<sup>[1]</sup>
+Außerdem lässt sich unter [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) die Bedeutung von `authenticate-admin-nonshared` einsehen:<sup>[[1]](#references)</sup>
 ```json
 {
 "allow-root": "false",
@@ -73,11 +73,11 @@ Darüber hinaus ist unter [https://www.dssw.co.uk/reference/authorization-rights
 ```
 ## Authd
 
-Es handelt sich um einen Daemon, der Anfragen zur Autorisierung von Clients für die Ausführung sensibler Aktionen empfängt. Er arbeitet als XPC service, das im Ordner `XPCServices/` definiert ist, und schreibt seine Logs in `/var/log/authd.log`.
+Es ist ein Daemon, der Anfragen zur Autorisierung von Clients für die Ausführung sensibler Aktionen empfängt. Er funktioniert als XPC service, das im Ordner `XPCServices/` definiert ist, und schreibt seine Logs in `/var/log/authd.log`.
 
-Außerdem ist es mit dem security tool möglich, viele `Security.framework`-APIs zu testen. Zum Beispiel kann `AuthorizationExecuteWithPrivileges` wie folgt ausgeführt werden: `security execute-with-privileges /bin/ls`
+Außerdem ist es mithilfe des security tools möglich, viele `Security.framework` APIs zu testen. Zum Beispiel durch die Ausführung von `AuthorizationExecuteWithPrivileges`: `security execute-with-privileges /bin/ls`
 
-Dadurch wird `/usr/libexec/security_authtrampoline /bin/ls` als root geforkt und ausgeführt. Anschließend wird in einer Eingabeaufforderung nach den Berechtigungen gefragt, um ls als root auszuführen:
+Dadurch wird `/usr/libexec/security_authtrampoline /bin/ls` als root geforkt und ausgeführt. Anschließend wird in einem Prompt nach Berechtigungen gefragt, um ls als root auszuführen:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 

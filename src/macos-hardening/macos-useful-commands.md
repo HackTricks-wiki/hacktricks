@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Tools zur automatisierten macOS-Aufzählung
+### Automatische macOS-Enumerationstools
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
@@ -117,15 +117,15 @@ sudo killall -HUP mDNSResponder
 ```
 ### Schneller Anti-Analyse-/Virtualisierungscheck
 
-Einige macOS-Stealer rufen `system_profiler` auf, um VMs zu erkennen, und **brechen mit einem eindeutigen Exit-Code (z. B. 100) ab**, um eine Sandbox-Detonation zu vermeiden<sup>[1]</sup>:
+Einige macOS-Stealer rufen `system_profiler` auf, um VMs zu erkennen, und **brechen mit einem eindeutigen Exit-Code (z. B. 100) ab**, um eine Detonation in der Sandbox zu vermeiden<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### Installierte Software und Services
+### Installierte Software & Services
 
-Überprüfe, ob **verdächtige** Anwendungen installiert sind und welche **Berechtigungen** für die installierten Ressourcen bestehen:
+Überprüfe installierte **verdächtige** Anwendungen und **Berechtigungen** für die installierten Ressourcen:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
