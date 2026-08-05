@@ -1,4 +1,4 @@
-# Κατάχρηση macOS Automator, Preference Panes & NSServices
+# Abuse of macOS Automator, Preference Panes & NSServices
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,7 +6,7 @@
 
 ### Βασικές πληροφορίες
 
-Το **Automator** είναι το visual automation tool του macOS. Εκτελεί **workflows** (bundles `.workflow`) που αποτελούνται από **actions** (bundles `.action`). Το Automator υποστηρίζει επίσης την ενσωμάτωση των **Folder Actions**, **Quick Actions** και **Shortcuts**. Σε σύγχρονες εκδόσεις του macOS, τα workflows μπορούν επίσης να **εισαχθούν στο Shortcuts**, επομένως η ίδια malicious logic μπορεί να εμφανιστεί ως Finder Quick Action, user service στο `~/Library/Services/` ή shortcut που βασίζεται σε legacy Automator actions.
+Το **Automator** είναι το visual εργαλείο αυτοματοποίησης του macOS. Εκτελεί **workflows** (bundles `.workflow`) που αποτελούνται από **actions** (bundles `.action`). Το Automator υποστηρίζει επίσης την ενσωμάτωση με τα **Folder Actions**, **Quick Actions** και **Shortcuts**. Στις σύγχρονες εκδόσεις του macOS, τα workflows μπορούν επίσης να **εισαχθούν στο Shortcuts**, επομένως η ίδια κακόβουλη λογική μπορεί να εμφανίζεται ως Finder Quick Action, user service στο `~/Library/Services/` ή shortcut που βασίζεται σε legacy Automator actions.
 
 Τα Automator actions είναι **plugins** που φορτώνονται στο Automator runtime όταν εκτελείται ένα workflow. Μπορούν να:
 - Εκτελούν αυθαίρετα shell scripts
@@ -17,7 +17,7 @@
 ### Γιατί έχει σημασία
 
 > [!WARNING]
-> Τα Automator workflows μπορούν να εκτελεστούν μέσω **social engineering** — εμφανίζονται ως απλά document files. Ένα `.workflow` bundle μπορεί να περιέχει ενσωματωμένες shell commands που εκτελούνται όταν ξεκινά το workflow. Σε συνδυασμό με Folder Actions, παρέχουν **automatic persistence** που ενεργοποιείται από file events. Οι πρόσφατες διορθώσεις του Gatekeeper έδειξαν επίσης ότι τα **app-bundled Quick Actions** (`Contents/PlugIns/*.workflow`) πρέπει να αντιμετωπίζονται ως executable content και όχι ως harmless data.
+> Τα Automator workflows μπορούν να οδηγηθούν σε εκτέλεση μέσω **social engineering** — εμφανίζονται ως απλά document files. Ένα `.workflow` bundle μπορεί να περιέχει ενσωματωμένες shell commands που εκτελούνται όταν εκτελείται το workflow. Σε συνδυασμό με τα Folder Actions, παρέχουν **automatic persistence** που ενεργοποιείται από file events. Πρόσφατες διορθώσεις του Gatekeeper έδειξαν επίσης ότι τα **app-bundled Quick Actions** (`Contents/PlugIns/*.workflow`) πρέπει να αντιμετωπίζονται ως executable content και όχι ως αβλαβή δεδομένα.
 
 ### Discovery
 ```bash
@@ -80,7 +80,7 @@ PLIST
 ```
 ### Attack: Folder Action Persistence
 
-Τα Folder Actions εκτελούν αυτόματα ένα workflow όταν προστίθενται αρχεία σε έναν monitored folder:
+Τα Folder Actions εκτελούν αυτόματα ένα workflow όταν προστίθενται αρχεία σε έναν φάκελο που παρακολουθείται:
 ```bash
 # Register a Folder Action on ~/Downloads
 # Every file the user downloads triggers the workflow
@@ -99,7 +99,7 @@ end tell'
 # Users can be tricked into installing a Folder Action through a .workflow double-click
 ```
 > [!CAUTION]
-> Τα Folder Actions παραμένουν ενεργά μετά από επανεκκινήσεις και εκτελούνται αθόρυβα. Ένα Folder Action στο `~/Downloads` σημαίνει ότι **κάθε ληφθέν αρχείο ενεργοποιεί το payload σας** — συμπεριλαμβανομένων αρχείων από Safari, Chrome, AirDrop και συνημμένων email. Σημειώστε επίσης ότι το `System Events` μπορεί να καταχωρίσει Folder Actions που δείχνουν σε scripts εκτός των προεπιλεγμένων τοποθεσιών `~/Library/Scripts/Folder Action Scripts`, γεγονός που καθιστά χρήσιμη την αναζήτηση loose paths. Για σχετικές επιπτώσεις του TCC, δείτε [τη σελίδα TCC](../macos-security-protections/macos-tcc/README.md).
+> Τα Folder Actions παραμένουν ενεργά μετά τις επανεκκινήσεις και εκτελούνται αθόρυβα. Ένα Folder Action στο `~/Downloads` σημαίνει ότι **κάθε ληφθέν αρχείο ενεργοποιεί το payload σας** — συμπεριλαμβανομένων αρχείων από Safari, Chrome, AirDrop και συνημμένων email. Σημειώστε επίσης ότι το `System Events` μπορεί να καταχωρίσει Folder Actions που παραπέμπουν σε scripts εκτός των προεπιλεγμένων τοποθεσιών `~/Library/Scripts/Folder Action Scripts`, επομένως αξίζει η αναζήτηση loose paths. Για σχετικές επιπτώσεις του TCC, δείτε [τη σελίδα TCC](../macos-security-protections/macos-tcc/README.md).
 
 ---
 
@@ -107,17 +107,17 @@ end tell'
 
 ### Βασικές πληροφορίες
 
-Τα preference panes (bundles `.prefPane`) είναι plugins που φορτώνονται από το **System Settings** (παλαιότερα System Preferences). Παρέχουν panels διαμόρφωσης για λειτουργίες του συστήματος ή τρίτων. Σε παλαιότερα συστήματα φορτώνονταν απευθείας από το `System Preferences`. Σε νεότερες εκδόσεις, τα third-party panes συνήθως διαμεσολαβούνται από μια **legacy loader XPC service** που εκκινείται από το System Settings.
+Τα preference panes (bundles `.prefPane`) είναι plugins που φορτώνονται από το **System Settings** (παλαιότερα System Preferences). Παρέχουν panels διαμόρφωσης για δυνατότητες του συστήματος ή τρίτων. Σε παλαιότερα συστήματα φορτώνονταν απευθείας από το `System Preferences`, ενώ σε νεότερες εκδόσεις τα third-party panes συνήθως διαχειρίζονται από μια **legacy loader XPC service** που εκκινείται από το System Settings.
 
 ### Γιατί έχει σημασία
 
-- Τα preference panes εκτελούνται σε μια **trusted host process** που εκκινείται από το System Settings / System Preferences
-- Σε σύγχρονα συστήματα, αυτό το host μπορεί να είναι μια **`legacyLoader` XPC service**, επομένως το σημαντικό όριο εξακολουθεί να είναι **trusted Apple UI process -> φόρτωση third-party code**
+- Τα preference panes εκτελούνται σε μια **έμπιστη host process** που εκκινείται από το System Settings / System Preferences
+- Σε σύγχρονα συστήματα, αυτή η host μπορεί να είναι μια **`legacyLoader` XPC service**, επομένως το σημαντικό boundary εξακολουθεί να είναι **έμπιστη Apple UI process -> φόρτωση third-party code**
 - Τα third-party preference panes κληρονομούν το **security context της host process** και την εμπιστοσύνη του χρήστη που συνδέεται με αυτό το UI
-- Οι χρήστες εγκαθιστούν preference panes κάνοντας **double-click** — εύκολο πεδίο για social engineering
-- Μετά την εγκατάσταση, **παραμένουν** και φορτώνονται κάθε φορά που το System Settings ανοίγει το συγκεκριμένο panel
+- Οι χρήστες εγκαθιστούν preference panes κάνοντας **διπλό κλικ** πάνω τους — εύκολος στόχος για social engineering
+- Μετά την εγκατάστασή τους, **παραμένουν ενεργά** και φορτώνονται κάθε φορά που το System Settings ανοίγει σε εκείνο το panel
 
-### Ανακάλυψη
+### Discovery
 ```bash
 # Find installed preference panes
 ls /Library/PreferencePanes/ 2>/dev/null
@@ -141,7 +141,7 @@ WHERE h.handler_type = 'preference_pane';"
 ```
 ### Attack: Privilege Context Hijacking
 
-Ένα κακόβουλο preference pane κληρονομεί το **security context του pane host** (ιστορικά το `System Preferences`, ενώ στις νεότερες εκδόσεις συχνά έναν βοηθητικό `legacyLoader` που εκκινείται από το `System Settings`):
+Ένα κακόβουλο preference pane κληρονομεί το **security context του pane host** (ιστορικά το `System Preferences`, ενώ στις νεότερες εκδόσεις συχνά έναν helper `legacyLoader` που εκκινείται από το `System Settings`):
 ```objc
 // Preference pane principal class
 @interface MaliciousPrefPane : NSPreferencePane
@@ -162,7 +162,7 @@ AXUIElementRef systemWide = AXUIElementCreateSystemWide();
 }
 @end
 ```
-### Attack: Persistence μέσω εγκατάστασης
+### Επίθεση: Persistence μέσω Installation
 ```bash
 # Install a preference pane (user-level, no admin required)
 cp -r /tmp/Evil.prefPane ~/Library/PreferencePanes/
@@ -175,7 +175,7 @@ sudo cp -r /tmp/Evil.prefPane /Library/PreferencePanes/
 ```
 ### Attack: UI Phishing
 
-Ένα preference pane μπορεί να μιμηθεί νόμιμα UI panels του συστήματος για να πραγματοποιήσει **phishing για credentials**:
+Ένα preference pane μπορεί να μιμηθεί νόμιμα system UI panels για να κάνει **phish για credentials**:
 ```objc
 // Display a fake authentication dialog
 NSAlert *alert = [[NSAlert alloc] init];
@@ -197,19 +197,19 @@ NSString *password = passwordField.stringValue;
 
 ### Βασικές πληροφορίες
 
-Τα **NSServices** επιτρέπουν στις εφαρμογές να παρέχουν λειτουργικότητα σε άλλες εφαρμογές μέσω του **Services menu** (δεξί κλικ → Services). Όταν ένας χρήστης επιλέγει κείμενο ή δεδομένα και καλεί μια υπηρεσία, τα επιλεγμένα δεδομένα **αποστέλλονται στον πάροχο της υπηρεσίας** για επεξεργασία.
+Τα **NSServices** επιτρέπουν στις εφαρμογές να παρέχουν λειτουργικότητα σε άλλες εφαρμογές μέσω του **μενού Services** (δεξί κλικ → Services). Όταν ένας χρήστης επιλέγει κείμενο ή δεδομένα και καλεί μια υπηρεσία, τα επιλεγμένα δεδομένα **αποστέλλονται στον πάροχο της υπηρεσίας** για επεξεργασία.
 
-Οι υπηρεσίες δηλώνονται στο `Info.plist` μιας εφαρμογής, κάτω από το key `NSServices`, και καταχωρίζονται στον pasteboard server (`pbs`). Το macOS διατηρεί επίσης ένα **service cache** και μια **restriction policy**, τα οποία καθορίζουν ποιες υπηρεσίες είναι ορατές και αν οι sandboxed callers θα πρέπει να λαμβάνουν μια επιπλέον προειδοποίηση.
+Οι υπηρεσίες δηλώνονται στο `Info.plist` μιας εφαρμογής, κάτω από το κλειδί `NSServices`, και καταχωρίζονται στον pasteboard server (`pbs`). Το macOS διατηρεί επίσης μια **cache υπηρεσιών** και μια **πολιτική περιορισμών**, οι οποίες καθορίζουν ποιες υπηρεσίες είναι ορατές και αν οι sandboxed callers θα πρέπει να λαμβάνουν μια επιπλέον προειδοποίηση.
 
 ### Γιατί έχει σημασία
 
 - Οι υπηρεσίες λαμβάνουν **ροή δεδομένων μεταξύ εφαρμογών** — το επιλεγμένο κείμενο από οποιαδήποτε εφαρμογή αποστέλλεται στην υπηρεσία
 - Μια κακόβουλη υπηρεσία υποκλέπτει δεδομένα από password managers, email clients και financial apps
-- Οι υπηρεσίες μπορούν να **επιστρέφουν τροποποιημένα δεδομένα** στην calling application (man-in-the-middle σε λειτουργίες επιλογής)
-- Τα ονόματα των υπηρεσιών μπορούν να διαμορφωθούν ώστε να φαίνονται νόμιμα ("Format Text", "Encrypt Selection", "Share")
-- Το προαιρετικό flag `NSRestricted` είναι σχετικό με την ασφάλεια: μια υπηρεσία που έχει επισημανθεί ως unrestricted μπορεί να κληθεί από sandboxed app χωρίς την προειδοποίηση που εμφανίζει το macOS για υπηρεσίες με πιθανότητα escape<sup>[2]</sup>
+- Οι υπηρεσίες μπορούν να **επιστρέφουν τροποποιημένα δεδομένα** στην εφαρμογή που τις κάλεσε (man-in-the-middle σε λειτουργίες επιλογής)
+- Τα ονόματα των υπηρεσιών μπορούν να σχεδιαστούν ώστε να φαίνονται νόμιμα ("Format Text", "Encrypt Selection", "Share")
+- Η προαιρετική σημαία `NSRestricted` σχετίζεται με την ασφάλεια: μια υπηρεσία που έχει επισημανθεί ως unrestricted μπορεί να κληθεί από μια sandboxed εφαρμογή χωρίς την προειδοποίηση που εμφανίζει το macOS για υπηρεσίες με πιθανότητα escape<sup>[[2]](#references)</sup>
 
-### Ανακάλυψη
+### Discovery
 ```bash
 # List all registered services
 /System/Library/CoreServices/pbs -dump_pboard 2>/dev/null
@@ -236,7 +236,7 @@ JOIN executable_handlers eh ON e.id = eh.executable_id
 JOIN handlers h ON eh.handler_id = h.id
 WHERE h.handler_type = 'service';"
 ```
-### Επίθεση: Data Interception Service
+### Attack: Υπηρεσία υποκλοπής δεδομένων
 ```xml
 <!-- Info.plist NSServices declaration -->
 <key>NSServices</key>
@@ -277,9 +277,9 @@ NSString *selectedText = [pboard stringForType:NSPasteboardTypeString];
 [pboard setString:selectedText forType:NSPasteboardTypeString];
 }
 ```
-### Επίθεση: Τροποποίηση δεδομένων (Man-in-the-Middle)
+### Attack: Data Modification (Man-in-the-Middle)
 
-Μια υπηρεσία μπορεί να **τροποποιεί τα επιστρεφόμενα δεδομένα**, ενώ φαίνεται ότι παρέχει μια νόμιμη λειτουργία:
+Μια υπηρεσία μπορεί να **τροποποιεί τα επιστρεφόμενα δεδομένα**, ενώ φαίνεται να παρέχει μια νόμιμη λειτουργία:
 ```objc
 // A "Secure Encrypt" service that actually intercepts and modifies data
 - (void)secureEncrypt:(NSPasteboard *)pboard
@@ -299,20 +299,20 @@ withString:@"attacker-account"];
 ```
 ### Restricted Services & Modern Abuse
 
-Η Apple υποστηρίζει ένα προαιρετικό boolean `NSRestricted` για κάθε ορισμό service. Όταν έχει οριστεί, το macOS προειδοποιεί τους sandboxed callers, επειδή το service μπορεί να τους βοηθήσει να **διαφύγουν από όρια sandbox ή privacy**. Από offensive perspective, αυτό παρέχει δύο χρήσιμες διαδρομές audit:
+Η Apple υποστηρίζει ένα προαιρετικό boolean `NSRestricted` ανά ορισμό service. Αν έχει οριστεί, το macOS προειδοποιεί τους sandboxed callers, επειδή το service μπορεί να τους βοηθήσει να **ξεφύγουν από τα όρια του sandbox ή της ιδιωτικότητας**. Από offensive perspective, αυτό παρέχει δύο χρήσιμες διαδρομές audit:
 
-- Αναζητήστε **third-party services που δεν έχουν επισημανθεί ως restricted**, παρότι λειτουργούν ως proxy για Apple Events, πρόσβαση σε αρχεία ή άλλες privileged ενέργειες
-- Αναζητήστε **ενσωματωμένα services υψηλής αξίας** με ισχυρά entitlements (για παράδειγμα, services που εκτίθενται από το Script Editor ή helpers που βασίζονται στο Finder) και ελέγξτε αν η αλληλεπίδραση με τον χρήστη αρκεί για να τα μετατρέψει σε primitive πρόσβασης δεδομένων
+- Αναζητήστε **third-party services που δεν έχουν σημειωθεί ως restricted**, παρότι λειτουργούν ως proxy για Apple Events, πρόσβαση σε αρχεία ή άλλες privileged ενέργειες
+- Αναζητήστε **ενσωματωμένα services υψηλής αξίας** με ισχυρά entitlements (για παράδειγμα, services που εκτίθενται από το Script Editor ή helpers που βασίζονται στο Finder) και ελέγξτε αν η αλληλεπίδραση με τον χρήστη αρκεί για να μετατραπούν σε primitive πρόσβασης σε δεδομένα
 
-Ένα καλό πρόσφατο παράδειγμα είναι το **CVE-2022-48574**, όπου ο μηχανισμός Services μπορούσε να γίνει αντικείμενο abuse για την πρόσβαση σε **αρχεία χρηστών που προστατεύονται από το TCC, χωρίς την αναμενόμενη ροή επιβεβαίωσης**. Το bug έχει διορθωθεί, αλλά η τεχνική παραμένει χρήσιμη για threat modeling: κάθε service που προωθεί αιτήματα πρόσβασης σε αρχεία ή automation εκ μέρους του caller απαιτεί τον ίδιο έλεγχο.<sup>[2]</sup>
+Ένα καλό πρόσφατο παράδειγμα είναι το **CVE-2022-48574**, όπου ο μηχανισμός Services μπορούσε να γίνει abuse για πρόσβαση σε **αρχεία χρήστη που προστατεύονται από το TCC, χωρίς την αναμενόμενη ροή επιβεβαίωσης**. Το bug έχει διορθωθεί, αλλά η τεχνική παραμένει χρήσιμη για threat modeling: κάθε service που προωθεί αιτήματα πρόσβασης σε αρχεία ή automation εκ μέρους του caller απαιτεί τον ίδιο έλεγχο.<sup>[[2]](#references)</sup>
 
 ---
 
 ## Recent Security Notes
 
-- **Τα Quick Actions είναι executable content**: Η Apple διόρθωσε το 2024 ένα Gatekeeper bypass, μέσω του οποίου ένα Automator Quick Action ενσωματωμένο σε app μπορούσε να εκτελεστεί χωρίς το κανονικό assessment. Κατά τον έλεγχο apps, εξετάστε το `Contents/PlugIns/*.workflow/Contents/document.wflow` ακριβώς όπως θα εξετάζατε helper scripts ή login items. Δείτε [τη σελίδα του Gatekeeper](../macos-security-protections/macos-gatekeeper.md).<sup>[1]</sup>
-- **Τα Shortcuts μπορούν να κληρονομήσουν legacy συμπεριφορά του Automator**: Η Apple πρόσθεσε επίσης ένα επιπλέον prompt συγκατάθεσης χρήστη, αφού διαπιστώθηκε ότι third-party shortcuts χρησιμοποιούσαν ένα **legacy Automator action** για την αποστολή Apple Events χωρίς την αναμενόμενη ροή permission. Τα imported workflows και τα shortcut bundles θα πρέπει να ελέγχονται για `Run AppleScript`, `Run Shell Script` και παρόμοια bridge actions. Δείτε [τη σελίδα του TCC](../macos-security-protections/macos-tcc/README.md).
-- **Ο Automator εξακολουθεί να αποτελεί ενεργό privacy boundary**: Η Apple διέθεσε το 2025 ακόμη μία διόρθωση για τον Automator, σχετικά με την πρόσβαση σε προστατευμένα δεδομένα χρηστών. Ακόμη και αν ο Automator είναι legacy surface, αντιμετωπίστε κάθε workflow runner, Quick Action host ή automation bridge ως τρέχον attack surface και όχι ως dead code.
+- **Τα Quick Actions είναι executable content**: Η Apple διόρθωσε το 2024 ένα Gatekeeper bypass, όπου ένα Automator Quick Action ενσωματωμένο σε app μπορούσε να εκτελεστεί χωρίς τον κανονικό έλεγχο. Κατά τον έλεγχο apps, εξετάστε το `Contents/PlugIns/*.workflow/Contents/document.wflow` ακριβώς όπως θα εξετάζατε helper scripts ή login items. Δείτε [τη σελίδα του Gatekeeper](../macos-security-protections/macos-gatekeeper.md).<sup>[[1]](#references)</sup>
+- **Τα Shortcuts μπορούν να κληρονομούν legacy συμπεριφορά του Automator**: Η Apple πρόσθεσε επίσης ένα επιπλέον prompt συγκατάθεσης χρήστη, αφού διαπιστώθηκε ότι third-party shortcuts χρησιμοποιούσαν ένα **legacy Automator action** για την αποστολή Apple Events χωρίς την αναμενόμενη ροή permission. Τα imported workflows και τα shortcut bundles θα πρέπει να ελέγχονται για `Run AppleScript`, `Run Shell Script` και παρόμοιες bridge actions. Δείτε [τη σελίδα του TCC](../macos-security-protections/macos-tcc/README.md).
+- **Ο Automator εξακολουθεί να αποτελεί ενεργό privacy boundary**: Η Apple διέθεσε άλλη μία διόρθωση για τον Automator το 2025, σχετικά με την πρόσβαση σε προστατευμένα δεδομένα χρήστη. Ακόμα και αν ο Automator αποτελεί legacy surface, αντιμετωπίστε κάθε workflow runner, Quick Action host ή automation bridge ως τρέχον attack surface και όχι ως dead code.
 
 ---
 
@@ -325,7 +325,7 @@ withString:@"attacker-account"];
 3. grep -r "BEGIN RSA PRIVATE KEY\|password\|token" on each file
 4. Exfiltrate findings
 ```
-### Πίνακας προτιμήσεων → Κλιμάκωση TCC
+### Πίνακας προτιμήσεων → TCC Escalation
 ```
 1. Distribute malicious prefPane (social engineering)
 2. User double-clicks → installed in ~/Library/PreferencePanes/
@@ -344,6 +344,6 @@ withString:@"attacker-account"];
 ## Αναφορές
 
 - [1] [Apple — Σχετικά με το περιεχόμενο ασφάλειας των macOS Ventura 13.7, Sonoma 14.7 και Sequoia 15](https://support.apple.com/en-us/121238)
-- [2] [Moonlock — Πώς λειτουργούσε το exploit NSServices στο macOS](https://moonlock.com/nsservices-macos)
+- [2] [Moonlock — Πώς λειτούργησε το NSServices exploit στο macOS](https://moonlock.com/nsservices-macos)
 
 {{#include ../../../banners/hacktricks-training.md}}

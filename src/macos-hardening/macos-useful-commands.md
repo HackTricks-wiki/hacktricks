@@ -1,14 +1,14 @@
-# Χρήσιμες Εντολές macOS
+# Χρήσιμες εντολές macOS
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Εργαλεία Αυτόματης Enumeration για macOS
+### Εργαλεία αυτόματης Enumeration για MacOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Συγκεκριμένες Εντολές macOS
+### Ειδικές εντολές MacOS
 ```bash
 #System info
 date
@@ -115,17 +115,17 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Γρήγορος έλεγχος anti-analysis / virtualization
+### Γρήγορος anti-analysis / virtualization έλεγχος
 
-Ορισμένοι macOS stealers καλούν το `system_profiler` για να εντοπίσουν VMs και **τερματίζουν με διακριτό exit code (π.χ. 100)**, ώστε να αποφεύγουν το sandbox detonation<sup>[1]</sup>:
+Ορισμένα macOS stealers καλούν το `system_profiler` για να εντοπίσουν VMs και **τερματίζουν με distinct exit code (π.χ. 100)**, ώστε να αποφεύγουν το sandbox detonation<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### Εγκατεστημένο Λογισμικό και Υπηρεσίες
+### Εγκατεστημένο λογισμικό και υπηρεσίες
 
-Ελέγξτε για **ύποπτες** εγκατεστημένες εφαρμογές και **δικαιώματα** στους εγκατεστημένους πόρους:
+Ελέγξτε για **ύποπτες** εφαρμογές που είναι εγκατεστημένες και για **δικαιώματα** πρόσβασης στους εγκατεστημένους πόρους:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -149,8 +149,8 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
-## Αναφορές
+## References
 
-- [1] [2025, η χρονιά του Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}
