@@ -1,19 +1,19 @@
-# macOS Sealed System Volume & DataVault
+# Sealed System Volume & DataVault
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Sealed System Volume (SSV)
 
-### Basic Information
+### Βασικές πληροφορίες
 
-Ξεκινώντας με **macOS Big Sur (11.0)**, ο όγκος συστήματος είναι κρυπτογραφικά σφραγισμένος χρησιμοποιώντας ένα **APFS snapshot hash tree**. Αυτό ονομάζεται **Sealed System Volume (SSV)**. Το διαμέρισμα συστήματος προσαρτάται ως **read-only** και οποιαδήποτε τροποποίηση σπάει τη σφραγίδα, η οποία επαληθεύεται κατά την εκκίνηση.
+Από το **macOS Big Sur (11.0)**, το system volume είναι κρυπτογραφικά σφραγισμένο με χρήση ενός **APFS snapshot hash tree**. Αυτό ονομάζεται **Sealed System Volume (SSV)**. Το system partition προσαρτάται ως **read-only** και οποιαδήποτε τροποποίηση παραβιάζει τη σφραγίδα, κάτι που επαληθεύεται κατά το boot.
 
-The SSV provides:
-- **Tamper detection** — οποιαδήποτε τροποποίηση στα system binaries/frameworks είναι ανιχνεύσιμη μέσω της σπασμένης κρυπτογραφικής σφραγίδας
-- **Rollback protection** — η διαδικασία boot επαληθεύει την ακεραιότητα του system snapshot
-- **Rootkit prevention** — ακόμη και ο root δεν μπορεί μόνιμα να τροποποιήσει αρχεία στον system volume (χωρίς να σπάσει τη σφραγίδα)
+Το SSV παρέχει:
+- **Ανίχνευση παραποίησης** — οποιαδήποτε τροποποίηση σε system binaries/frameworks μπορεί να εντοπιστεί μέσω της παραβιασμένης κρυπτογραφικής σφραγίδας
+- **Προστασία από rollback** — η διαδικασία boot επαληθεύει την ακεραιότητα του system snapshot
+- **Αποτροπή rootkit** — ακόμη και ο root δεν μπορεί να τροποποιεί μόνιμα αρχεία στο system volume (χωρίς να παραβιάσει τη σφραγίδα)
 
-### Checking SSV Status
+### Έλεγχος της κατάστασης του SSV
 ```bash
 # Check if authenticated root is enabled (SSV seal verification)
 csrutil authenticated-root status
@@ -27,18 +27,18 @@ mount | grep " / "
 # Verify the system volume seal
 diskutil apfs listVolumeGroups
 ```
-### Δικαιώματα SSV Writer
+### Δικαιώματα SSV Writers
 
-Ορισμένα system binaries της Apple έχουν entitlements που τους επιτρέπουν να τροποποιούν ή να διαχειρίζονται τον σφραγισμένο τόμο συστήματος:
+Ορισμένα Apple system binaries διαθέτουν δικαιώματα που τους επιτρέπουν να τροποποιούν ή να διαχειρίζονται το sealed system volume:
 
 | Entitlement | Σκοπός |
 |---|---|
-| `com.apple.private.apfs.revert-to-snapshot` | Επαναφέρει τον τόμο συστήματος σε προηγούμενο snapshot |
-| `com.apple.private.apfs.create-sealed-snapshot` | Δημιουργεί ένα νέο σφραγισμένο snapshot μετά από ενημερώσεις του συστήματος |
-| `com.apple.rootless.install.heritable` | Γράφει σε διαδρομές προστατευμένες από SIP (κληρονομείται από θυγατρικές διεργασίες) |
-| `com.apple.rootless.install` | Γράφει σε διαδρομές προστατευμένες από SIP |
+| `com.apple.private.apfs.revert-to-snapshot` | Επαναφορά του system volume σε προηγούμενο snapshot |
+| `com.apple.private.apfs.create-sealed-snapshot` | Δημιουργία νέου sealed snapshot μετά από system updates |
+| `com.apple.rootless.install.heritable` | Εγγραφή σε SIP-protected paths (κληρονομείται από child processes) |
+| `com.apple.rootless.install` | Εγγραφή σε SIP-protected paths |
 
-### Εύρεση SSV Writers
+### Εντοπισμός SSV Writers
 ```bash
 # Search for binaries with SSV-related entitlements
 find /System /usr -type f -perm +111 -exec sh -c '
@@ -54,11 +54,11 @@ JOIN executable_capabilities ec ON e.id = ec.executable_id
 JOIN capabilities c ON ec.capability_id = c.id
 WHERE c.name = 'ssv_writer';"
 ```
-### Σενάρια Επιθέσεων
+### Σενάρια Επίθεσης
 
 #### Snapshot Rollback Attack
 
-Εάν ένας επιτιθέμενος παραβιάσει ένα binary με `com.apple.private.apfs.revert-to-snapshot`, μπορεί να **επαναφέρει τον τόμο συστήματος σε κατάσταση πριν από την ενημέρωση**, αποκαθιστώντας γνωστές ευπάθειες:
+Αν ένας attacker παραβιάσει ένα binary με `com.apple.private.apfs.revert-to-snapshot`, μπορεί να **επαναφέρει το system volume σε κατάσταση πριν από την ενημέρωση**, επαναφέροντας γνωστά vulnerabilities:
 ```bash
 # Conceptual — the snapshot revert operation would:
 # 1. List available snapshots
@@ -68,24 +68,24 @@ diskutil apfs listSnapshots disk3s1
 # This restores the system to a state with known, patched vulnerabilities
 ```
 > [!WARNING]
-> Η επαναφορά snapshot στην πράξη **αναιρεί ενημερώσεις ασφαλείας**, επαναφέροντας ευπάθειες του kernel και του συστήματος που είχαν ήδη επιδιορθωθεί. Αυτή είναι μία από τις πιο επικίνδυνες ενέργειες που μπορούν να γίνουν σε σύγχρονο macOS.
+> Η επαναφορά snapshot ουσιαστικά **αναιρεί τις ενημερώσεις ασφαλείας**, επαναφέροντας προηγουμένως διορθωμένες ευπάθειες του kernel και του συστήματος. Πρόκειται για μία από τις πιο επικίνδυνες δυνατές λειτουργίες στο σύγχρονο macOS.
 
-#### System Binary Replacement
+#### Αντικατάσταση Δυαδικού Αρχείου Συστήματος
 
-Με bypass του SIP + δυνατότητα εγγραφής στην SSV, ένας επιτιθέμενος μπορεί:
+Με παράκαμψη του SIP + δυνατότητα εγγραφής στο SSV, ένας attacker μπορεί να:
 
-1. Προσαρμόσει (mount) τον system volume σε ανάγνωση/εγγραφή
-2. Αντικαταστήσει έναν system daemon ή μια framework βιβλιοθήκη με μια trojaned έκδοση
-3. Επανασφραγίσει το snapshot (ή αποδεχτεί τη σπασμένη σφραγίδα εάν το SIP έχει ήδη υποβαθμιστεί)
-4. Το rootkit επιμένει μετά από επανεκκινήσεις και είναι αόρατο σε εργαλεία ανίχνευσης στο userland
+1. Προσαρτήσει το system volume με δικαιώματα ανάγνωσης-εγγραφής
+2. Αντικαταστήσει έναν system daemon ή μια framework library με trojaned έκδοση
+3. Επανασφραγίσει το snapshot (ή να αποδεχτεί τη σπασμένη σφραγίδα, αν το SIP έχει ήδη υποβαθμιστεί)
+4. Το rootkit παραμένει μετά τις επανεκκινήσεις και δεν είναι ορατό στα userland detection tools
 
-### Real-World CVEs
+### CVEs στον Πραγματικό Κόσμο
 
-| CVE | Description |
+| CVE | Περιγραφή |
 |---|---|
-| CVE-2021-30892 | **Shrootless** — bypass του SIP που επιτρέπει την τροποποίηση της SSV μέσω του `system_installd` |
-| CVE-2022-22583 | Παράκαμψη της SSV μέσω του χειρισμού snapshot του PackageKit |
-| CVE-2022-46689 | Race condition που επιτρέπει εγγραφές σε αρχεία προστατευμένα από SIP |
+| CVE-2021-30892 | **Shrootless** — παράκαμψη του SIP που εκμεταλλεύεται το entitlement `com.apple.rootless.install.heritable` του `system_installd` για την εκτέλεση αυθαίρετων post-install scripts ([Microsoft](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)) |
+| CVE-2022-22583 | Παράκαμψη του SIP: το `system_installd` τοποθετούσε το post-install script σε έναν φάκελο που προστατεύεται από το SIP κάτω από το `/tmp`, όμως το ίδιο το `/tmp` δεν προστατεύεται από το SIP, επομένως ο φάκελος μπορούσε να αντικατασταθεί με την προσάρτηση ενός image πάνω του ([Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html)) |
+| CVE-2022-46689 | **MacDirtyCow** — race στο copy-on-write του XNU που επιτρέπει εγγραφές σε αρχεία μόνο για ανάγνωση, τα οποία ανήκουν στον root ([Worth Doing Badly](https://worthdoingbadly.com/macdirtycow/)) |
 
 ---
 
@@ -93,18 +93,18 @@ diskutil apfs listSnapshots disk3s1
 
 ### Βασικές Πληροφορίες
 
-**DataVault** είναι το επίπεδο προστασίας της Apple για ευαίσθητες βάσεις δεδομένων του συστήματος. Ακόμα και ο **root δεν μπορεί να έχει πρόσβαση σε αρχεία προστατευμένα από το DataVault** — μόνο διεργασίες με συγκεκριμένα entitlements μπορούν να τα διαβάσουν ή να τα τροποποιήσουν. Τα προστατευμένα αποθετήρια περιλαμβάνουν:
+Το **DataVault** είναι το protection layer της Apple για ευαίσθητες system databases. Ακόμη και ο **root δεν μπορεί να αποκτήσει πρόσβαση σε αρχεία που προστατεύονται από το DataVault** — μόνο processes με συγκεκριμένα entitlements μπορούν να τα διαβάσουν ή να τα τροποποιήσουν. Τα προστατευμένα stores περιλαμβάνουν:
 
-| Protected Database | Path | Content |
+| Προστατευμένη Database | Path | Περιεχόμενο |
 |---|---|---|
-| TCC (system) | `/Library/Application Support/com.apple.TCC/TCC.db` | Αποφάσεις απορρήτου TCC σε επίπεδο συστήματος |
-| TCC (user) | `~/Library/Application Support/com.apple.TCC/TCC.db` | Αποφάσεις απορρήτου TCC ανά χρήστη |
-| Keychain (system) | `/Library/Keychains/System.keychain` | Keychain συστήματος |
-| Keychain (user) | `~/Library/Keychains/login.keychain-db` | Keychain χρήστη |
+| TCC (system) | `/Library/Application Support/com.apple.TCC/TCC.db` | Αποφάσεις απορρήτου TCC σε ολόκληρο το σύστημα |
+| TCC (user) | `~/Library/Application Support/com.apple.TCC/TCC.db` | Αποφάσεις απορρήτου TCC ανά user |
+| Keychain (system) | `/Library/Keychains/System.keychain` | System keychain |
+| Keychain (user) | `~/Library/Keychains/login.keychain-db` | User keychain |
 
-Η προστασία του DataVault επιβάλλεται στο επίπεδο του filesystem χρησιμοποιώντας extended attributes και volume protection flags, με επαλήθευση από τον kernel.
+Η προστασία του DataVault επιβάλλεται σε **επίπεδο filesystem** με τη χρήση extended attributes και volume protection flags, τα οποία επαληθεύονται από τον kernel.
 
-### DataVault Controller Entitlements
+### Entitlements του DataVault Controller
 ```
 com.apple.private.tcc.manager         — Full TCC database read/write
 com.apple.private.tcc.manager.check-by-audit-token — TCC checks via audit token
@@ -130,11 +130,11 @@ JOIN executable_capabilities ec ON e.id = ec.executable_id
 JOIN capabilities c ON ec.capability_id = c.id
 WHERE c.name = 'datavault_controller';"
 ```
-### Σενάρια Επιθέσεων
+### Σενάρια Επίθεσης
 
-#### Άμεση Τροποποίηση Βάσης Δεδομένων TCC
+#### Άμεση Τροποποίηση της Βάσης Δεδομένων TCC
 
-Εάν ένας attacker συμβιβάσει ένα DataVault controller binary (π.χ., μέσω code injection σε μια διεργασία με `com.apple.private.tcc.manager`), μπορεί να **τροποποιήσει άμεσα τη βάση δεδομένων TCC** για να χορηγήσει σε οποιαδήποτε εφαρμογή οποιαδήποτε άδεια TCC:
+Αν ένας attacker παραβιάσει ένα DataVault controller binary (π.χ. μέσω code injection σε μια διεργασία με `com.apple.private.tcc.manager`), μπορεί να **τροποποιήσει απευθείας τη βάση δεδομένων TCC** ώστε να παραχωρήσει σε οποιαδήποτε εφαρμογή οποιοδήποτε TCC permission:
 ```sql
 -- Grant Full Disk Access to a malicious binary (conceptual)
 INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_version)
@@ -145,25 +145,26 @@ INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_
 VALUES ('kTCCServiceCamera', 'com.attacker.malware', 0, 2, 4, 1);
 ```
 > [!CAUTION]
-> Η τροποποίηση της TCC database είναι το **ultimate privacy bypass** — χορηγεί οποιαδήποτε άδεια αθόρυβα, χωρίς καμία προτροπή χρήστη ή εμφανές δείκτη. Ιστορικά, πολλές αλυσίδες macOS privilege escalation έχουν καταλήξει με εγγραφές στην TCC database ως το τελικό payload.
+> Η τροποποίηση της βάσης δεδομένων TCC είναι το **απόλυτο privacy bypass** — παρέχει οποιαδήποτε άδεια αθόρυβα, χωρίς προτροπή χρήστη ή ορατή ένδειξη. Ιστορικά, πολλές αλυσίδες privilege escalation στο macOS έχουν καταλήξει σε εγγραφές στη βάση δεδομένων TCC ως τελικό payload.
 
-#### Πρόσβαση στη βάση δεδομένων Keychain
+#### Πρόσβαση στη βάση δεδομένων του Keychain
 
-Το DataVault προστατεύει επίσης τα αρχεία υποστήριξης (backing files) του Keychain. Ένας παραβιασμένος ελεγκτής DataVault μπορεί:
+Το DataVault προστατεύει επίσης τα backing files του keychain. Ένας παραβιασμένος controller του DataVault μπορεί να:
 
-1. Διαβάσει τα ακατέργαστα αρχεία της keychain database
-2. Εξαγάγει κρυπτογραφημένα στοιχεία του keychain
-3. Προσπαθήσει αποκρυπτογράφηση εκτός σύνδεσης χρησιμοποιώντας τον κωδικό του χρήστη ή ανακτημένα κλειδιά
+1. Διαβάσει τα raw αρχεία της βάσης δεδομένων του keychain
+2. Εξαγάγει κρυπτογραφημένα keychain items
+3. Επιχειρήσει offline αποκρυπτογράφηση χρησιμοποιώντας τον κωδικό πρόσβασης του χρήστη ή keys που έχουν ανακτηθεί
 
-### Πραγματικά CVEs που αφορούν DataVault/TCC Bypass
+### CVEs σε πραγματικές συνθήκες που αφορούν DataVault/TCC Bypass
 
 | CVE | Περιγραφή |
 |---|---|
-| CVE-2023-40424 | TCC bypass via symlink to DataVault-protected file |
-| CVE-2023-32364 | Sandbox bypass leading to TCC database modification |
-| CVE-2021-30713 | TCC bypass via XCSSET malware modifying TCC.db |
-| CVE-2020-9934 | TCC bypass via environment variable manipulation |
-| CVE-2020-29621 | Music app TCC bypass reaching DataVault |
+| CVE-2024-44131 | FileProvider symlink race που επιτρέπει σε έναν privileged helper να αποκτήσει πρόσβαση σε δεδομένα που προστατεύονται από το TCC ([Jamf](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)) |
+| CVE-2023-40424 | Ως root, **δημιουργία νέου χρήστη του οποίου το `NFSHomeDirectory` δείχνει σε ένα `TCC.db` που ελέγχεται από τον attacker**· κατά το login, το `tccd` το καταναλώνει και οι grants εφαρμόζονται, παρέχοντας πρόσβαση στα δεδομένα άλλων χρηστών ([Kandji](https://blog.kandji.io/malware-bypass-tcc)) |
+| CVE-2021-30970 | "powerdir": αλλαγή του home directory του χρήστη για την τοποθέτηση ενός TCC.db που ελέγχεται από τον attacker ([Microsoft](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)) |
+| CVE-2021-30713 | Αδυναμία bundle-conclusion που επιτρέπει σε μια εφαρμογή να **κληρονομήσει τα TCC grants ενός donor bundle** χωρίς prompt· έγινε exploit in the wild από το **XCSSET** για τη λήψη screenshot της επιφάνειας εργασίας ([Jamf](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)) |
+| CVE-2020-9934 | Το `tccd` δημιουργούσε το path της DB από το `$HOME`, επομένως το `launchctl setenv HOME` το ανακατεύθυνε σε ένα `TCC.db` που ελεγχόταν από τον attacker ([Matt Shockley](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)) |
+| CVE-2020-29621 | Το `coreaudiod` διέθετε το `com.apple.private.tcc.manager` **και** είχε απενεργοποιημένο το library validation, επομένως ένα HAL plug-in που τοποθετούνταν στο `/Library/Audio/Plug-Ins/HAL` μπορούσε να εκχωρήσει αυθαίρετα δικαιώματα TCC ([Wojciech Reguła](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)) |
 
 ## Αναφορές
 
