@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Інструменти автоматичного Enumeration у macOS
+### Інструменти автоматичного Enumeration для MacOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Специфічні команди macOS
+### Спеціальні команди MacOS
 ```bash
 #System info
 date
@@ -117,15 +117,15 @@ sudo killall -HUP mDNSResponder
 ```
 ### Швидка перевірка на anti-analysis / virtualization
 
-Деякі macOS stealers викликають `system_profiler`, щоб виявити VM, і **переривають виконання з окремим кодом виходу (наприклад, 100)**, щоб уникнути sandbox detonation<sup>[1]</sup>:
+Деякі macOS stealers викликають `system_profiler`, щоб виявити VM, і **переривають виконання з окремим кодом виходу (наприклад, 100)**, щоб уникнути sandbox detonation<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### Встановлене програмне забезпечення та сервіси
+### Встановлене програмне забезпечення та служби
 
-Перевірте встановлені **підозрілі** застосунки та **привілеї** щодо встановлених ресурсів:
+Перевірте наявність **підозрілих** застосунків і **привілеїв** щодо встановлених ресурсів:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -151,6 +151,6 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 
 ## Посилання
 
-- [1] [2025, рік Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

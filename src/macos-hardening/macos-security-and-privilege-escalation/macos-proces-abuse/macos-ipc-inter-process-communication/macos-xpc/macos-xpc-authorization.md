@@ -1,16 +1,16 @@
-# Авторизація XPC
+# Авторизація macOS XPC
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
 ## Авторизація XPC
 
-Apple також пропонує інший спосіб перевірити, чи має процес, що підключається, **дозвіл викликати відкритий метод XPC**.
+Apple також пропонує інший спосіб автентифікації, щоб перевірити, чи має процес, що підключається, **дозволи на виклик відкритого методу XPC**.
 
-Коли застосунку потрібно **виконувати дії від імені привілейованого користувача**, замість запуску застосунку від імені привілейованого користувача він зазвичай встановлює як root HelperTool у вигляді сервісу XPC, який може викликатися застосунком для виконання цих дій. Однак застосунок, що викликає сервіс, повинен мати достатні права авторизації.
+Коли застосунку потрібно **виконувати дії від імені привілейованого користувача**, замість запуску застосунку від імені привілейованого користувача зазвичай встановлюють як root HelperTool як службу XPC, яку застосунок може викликати для виконання цих дій. Однак застосунок, що викликає службу, повинен мати достатні дозволи.
 
 ### ShouldAcceptNewConnection завжди YES
 
-Приклад можна знайти в [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). У `App/AppDelegate.m` він намагається **підключитися** до **HelperTool**. А в `HelperTool/HelperTool.m` функція **`shouldAcceptNewConnection`** **не перевіряє** жодної з вимог, зазначених раніше. Вона завжди повертає YES:<sup>[1]</sup>
+Приклад можна знайти в [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). У `App/AppDelegate.m` він намагається **підключитися** до **HelperTool**. А у `HelperTool/HelperTool.m` функція **`shouldAcceptNewConnection`** **не перевіряє** жодної з вимог, зазначених раніше. Вона завжди повертає YES:<sup>[[1]](#references)</sup>
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -27,7 +27,7 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-Щоб отримати більше інформації про належне налаштування цієї перевірки:
+Щоб отримати більше інформації про правильне налаштування цієї перевірки:
 
 
 {{#ref}}
@@ -38,8 +38,8 @@ macos-xpc-connecting-process-check/
 
 Однак **під час виклику методу з HelperTool відбувається авторизація**.
 
-Функція **`applicationDidFinishLaunching`** з `App/AppDelegate.m` створить порожнє посилання на авторизацію після запуску застосунку. Це завжди має працювати.\
-Потім вона спробує **додати деякі права** до цього посилання на авторизацію, викликавши `setupAuthorizationRights`:
+Функція **`applicationDidFinishLaunching`** з `App/AppDelegate.m` створить порожнє посилання авторизації після запуску застосунку. Це завжди має працювати.\
+Потім вона спробує **додати деякі права** до цього посилання авторизації, викликавши `setupAuthorizationRights`:
 ```objectivec
 - (void)applicationDidFinishLaunching:(NSNotification *)note
 {
@@ -63,7 +63,7 @@ if (self->_authRef) {
 [self.window makeKeyAndOrderFront:self];
 }
 ```
-Функція `setupAuthorizationRights` з `Common/Common.m` збереже в базі даних авторизації `/var/db/auth.db` права застосунку. Зверніть увагу, що вона додаватиме лише ті права, яких ще немає в базі даних:
+Функція `setupAuthorizationRights` із `Common/Common.m` збереже в базі даних автентифікації `/var/db/auth.db` права застосунку. Зверніть увагу, що вона додаватиме лише права, яких ще немає в базі даних:
 ```objectivec
 + (void)setupAuthorizationRights:(AuthorizationRef)authRef
 // See comment in header.
@@ -95,7 +95,7 @@ assert(blockErr == errAuthorizationSuccess);
 }];
 }
 ```
-Функція `enumerateRightsUsingBlock` використовується для отримання дозволів застосунків, які визначені в `commandInfo`:
+Функція `enumerateRightsUsingBlock` використовується для отримання дозволів застосунків, визначених у `commandInfo`:
 ```objectivec
 static NSString * kCommandKeyAuthRightName    = @"authRightName";
 static NSString * kCommandKeyAuthRightDefault = @"authRightDefault";
@@ -173,15 +173,15 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-Це означає, що наприкінці цього процесу дозволи, оголошені всередині `commandInfo`, буде збережено в `/var/db/auth.db`. Зверніть увагу, що там для **кожного методу**, який **потребуватиме автентифікації**, можна знайти **назву дозволу** та **`kCommandKeyAuthRightDefault`**. Останній **вказує, хто може отримати це право**.
+Це означає, що наприкінці цього процесу дозволи, оголошені всередині `commandInfo`, буде збережено у `/var/db/auth.db`. Зверніть увагу, що там для **кожного методу**, який **вимагатиме автентифікації**, можна знайти **назву дозволу** та **`kCommandKeyAuthRightDefault`**. Останній **вказує, хто може отримати це право**.
 
-Існують різні області дії, які вказують, хто може отримати доступ до права. Деякі з них визначені в [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (ви можете знайти [їх усі тут](https://www.dssw.co.uk/reference/authorization-rights/)), але коротко:
+Існують різні області дії, які визначають, хто може отримати доступ до права. Деякі з них визначені в [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (ви можете знайти [їх усі тут](https://www.dssw.co.uk/reference/authorization-rights/)), але коротко:
 
-<table><thead><tr><th width="284.3333333333333">Назва</th><th width="165">Значення</th><th>Опис</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Будь-хто</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Ніхто</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Поточний користувач має бути адміністратором (належати до групи адміністраторів)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Запросити користувача пройти автентифікацію.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Запросити користувача пройти автентифікацію. Він має бути адміністратором (належати до групи адміністраторів)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Вказати правила</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Вказати додаткові коментарі щодо права</td></tr></tbody></table>
+<table><thead><tr><th width="284.3333333333333">Назва</th><th width="165">Значення</th><th>Опис</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Будь-хто</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Ніхто</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Поточний користувач має бути адміністратором (входити до групи адміністраторів)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Запросити користувача пройти автентифікацію.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Запросити користувача пройти автентифікацію. Він має бути адміністратором (входити до групи адміністраторів)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Вказати правила</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Вказати додаткові коментарі щодо права</td></tr></tbody></table>
 
 ### Перевірка прав
 
-У `HelperTool/HelperTool.m` функція **`readLicenseKeyAuthorization`** перевіряє, чи має викликач право **виконати цей метод**, викликаючи функцію **`checkAuthorization`**. Ця функція перевіряє, чи має **`authData`**, надіслані процесом-викликачем, **правильний формат**, а потім перевіряє, **що потрібно для отримання права** викликати певний метод. Якщо все проходить успішно, **повернене значення `error` буде `nil`**:
+У `HelperTool/HelperTool.m` функція **`readLicenseKeyAuthorization`** перевіряє, чи має викликач дозвіл **виконати такий метод**, викликаючи функцію **`checkAuthorization`**. Ця функція перевіряє, чи має **`authData`**, надіслані процесом-викликачем, **правильний формат**, а потім перевіряє, **що потрібно для отримання права** викликати конкретний метод. Якщо все проходить успішно, **повернене значення `error` буде `nil`**:
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -229,35 +229,35 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-Зверніть увагу, що для **перевірки вимог для отримання права** викликати цей метод функція `authorizationRightForCommand` просто перевіряє попередньо прокоментований об’єкт **`commandInfo`**. Потім вона викликає **`AuthorizationCopyRights`**, щоб перевірити, **чи має він права** викликати функцію (зверніть увагу, що прапорці дозволяють взаємодію з користувачем).
+Зверніть увагу, що для **перевірки вимог щодо отримання права** викликати цей метод функція `authorizationRightForCommand` просто перевіряє згаданий раніше об’єкт **`commandInfo`**. Потім вона викликає **`AuthorizationCopyRights`**, щоб перевірити, **чи має він права** викликати функцію (зверніть увагу, що прапорці дозволяють взаємодію з користувачем).
 
-У цьому випадку для виклику функції `readLicenseKeyAuthorization` параметру `kCommandKeyAuthRightDefault` присвоєно значення `@kAuthorizationRuleClassAllow`. Отже, **викликати її може будь-хто**.
+У цьому випадку для виклику функції `readLicenseKeyAuthorization` параметр `kCommandKeyAuthRightDefault` визначено як `@kAuthorizationRuleClassAllow`. Отже, **її може викликати будь-хто**.
 
 ### Інформація про DB
 
-Згадувалося, що ця інформація зберігається в `/var/db/auth.db`. Ви можете вивести список усіх збережених правил за допомогою:
+Згадувалося, що ця інформація зберігається в `/var/db/auth.db`. Усі збережені правила можна перелічити за допомогою:
 ```sql
 sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
 SELECT name FROM rules WHERE name LIKE '%safari%';
 ```
-Потім ви можете перевірити, хто має доступ до цього права, за допомогою:
+Потім ви можете прочитати, хто має доступ до цього права, за допомогою:
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
-### Права з дозволами
+### Ліберальні права
 
 Ви можете знайти **всі конфігурації дозволів** [**тут**](https://www.dssw.co.uk/reference/authorization-rights/), але комбінації, які не вимагатимуть взаємодії з користувачем, будуть такими:
 
 1. **'authenticate-user': 'false'**
-- Це найбільш безпосередній ключ. Якщо встановлено значення `false`, це означає, що користувачеві не потрібно проходити автентифікацію для отримання цього права.
-- Використовується **в комбінації з одним із 2 наведених нижче ключів або із зазначенням групи**, до якої повинен належати користувач.
+- Це найпряміший ключ. Якщо встановлено значення `false`, це означає, що користувачеві не потрібно проходити автентифікацію, щоб отримати це право.
+- Використовується **в комбінації з одним із 2 наведених нижче ключів або із зазначенням групи**, до якої має належати користувач.
 2. **'allow-root': 'true'**
-- Якщо користувач працює від імені root-користувача (який має підвищені дозволи), а для цього ключа встановлено значення `true`, root-користувач потенційно може отримати це право без додаткової автентифікації. Однак зазвичай отримання статусу root-користувача вже вимагає автентифікації, тому для більшості користувачів це не є сценарієм «без автентифікації».
+- Якщо користувач працює від імені root-користувача (який має розширені дозволи), а для цього ключа встановлено значення `true`, root-користувач потенційно може отримати це право без додаткової автентифікації. Однак зазвичай отримання статусу root-користувача вже потребує автентифікації, тому для більшості користувачів це не є сценарієм «без автентифікації».
 3. **'session-owner': 'true'**
-- Якщо встановлено значення `true`, власник сесії (поточний авторизований користувач) автоматично отримує це право. Це може обійти додаткову автентифікацію, якщо користувач уже авторизований у системі.
+- Якщо встановлено значення `true`, власник сесії (поточний авторизований користувач) автоматично отримає це право. Це може обійти додаткову автентифікацію, якщо користувач уже авторизований у системі.
 4. **'shared': 'true'**
-- Цей ключ не надає права без автентифікації. Якщо встановлено значення `true`, це означає, що після автентифікації право можна спільно використовувати між кількома процесами, і кожному з них не потрібно буде повторно проходити автентифікацію. Однак початкове надання права все одно вимагатиме автентифікації, якщо цей ключ не використовується разом з іншими ключами, такими як `'authenticate-user': 'false'`.
+- Цей ключ не надає права без автентифікації. Якщо встановлено значення `true`, це означає, що після автентифікації право можна спільно використовувати між кількома процесами, і кожному з них не потрібно проходити автентифікацію повторно. Однак початкове надання права все одно потребуватиме автентифікації, якщо цей ключ не використовується в комбінації з іншими ключами, такими як `'authenticate-user': 'false'`.
 
 Ви можете [**використати цей скрипт**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9), щоб отримати цікаві права:
 ```bash
@@ -270,40 +270,40 @@ com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek,
 Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
-### Приклади обходу Authorization
+### Практичні приклади обходу Authorization
 
-- **CVE-2025-65842 – Acustica Audio Aquarius HelperTool**: привілейований Mach service `com.acustica.HelperTool` приймає кожне підключення, а його процедура `checkAuthorization:` викликає `AuthorizationCopyRights(NULL, …)`, тому проходить будь-який 32-байтовий blob. Потім `executeCommand:authorization:withReply:` передає контрольовані зловмисником рядки, розділені комами, до `NSTask` із правами root, що робить можливими такі payloads:
+- **CVE-2025-65842 – Acustica Audio Aquarius HelperTool**: Привілейований Mach service `com.acustica.HelperTool` приймає кожне підключення, а його процедура `checkAuthorization:` викликає `AuthorizationCopyRights(NULL, …)`, тому будь-який 32-байтовий blob проходить перевірку. Далі `executeCommand:authorization:withReply:` передає контрольовані attacker-ом рядки, розділені комами, у `NSTask` з правами root, що робить можливими такі payloads:
 ```bash
 "/bin/sh,-c,cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash"
 ```
-trivially create a SUID root shell. Деталі наведено в [цьому write-up](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/).<sup>[6]</sup>
-- **CVE-2025-55076 – Plugin Alliance InstallationHelper**: listener завжди повертає YES, а той самий шаблон із `AuthorizationCopyRights` та NULL присутній у `checkAuthorization:`. Метод `exchangeAppWithReply:` двічі конкатенує введені attacker-ом дані в рядок для `system()`, тому ін'єкція shell metacharacters у `appPath` (наприклад, `"/Applications/Test.app";chmod 4755 /tmp/rootbash;`) забезпечує виконання коду з правами root через Mach service `com.plugin-alliance.pa-installationhelper`. Більше інформації [тут](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/).<sup>[7]</sup>
-- **CVE-2024-4395 – Jamf Compliance Editor helper**: запуск аудиту створює `/Library/LaunchDaemons/com.jamf.complianceeditor.helper.plist`, відкриває Mach service `com.jamf.complianceeditor.helper` і експортує `-executeScriptAt:arguments:then:` без перевірки `AuthorizationExternalForm` або code signature викликувача. Тривіальний exploit створює порожнє посилання через `AuthorizationCreate`, підключається за допомогою `[[NSXPCConnection alloc] initWithMachServiceName:options:NSXPCConnectionPrivileged]` і викликає метод для виконання довільних binary-файлів із правами root. Повні нотатки з reversing (разом із PoC) наведено у [write-up Mykola Grymalyuk](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html).<sup>[4]</sup>
-- **CVE-2025-25251 – FortiClient Mac helper**: FortiClient Mac версій 7.0.0–7.0.14, 7.2.0–7.2.8 і 7.4.0–7.4.2 приймав створені attacker-ом XPC messages, які досягали привілейованого helper без authorization gates. Оскільки helper довіряв власному привілейованому `AuthorizationRef`, будь-який local user, здатний надсилати messages до service, міг змусити його виконувати довільні зміни конфігурації або commands із правами root. Деталі наведено в [короткому описі вразливості від SentinelOne](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/).<sup>[5]</sup>
+trivially створити SUID root shell. Деталі в [цьому write-up](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/).<sup>[[6]](#references)</sup>
+- **CVE-2025-55076 – Plugin Alliance InstallationHelper**: Listener завжди повертає YES, і той самий шаблон із NULL у `AuthorizationCopyRights` присутній у `checkAuthorization:`. Метод `exchangeAppWithReply:` двічі об'єднує вхідні дані атакувальника в рядок для `system()`, тому ін'єкція shell metacharacters у `appPath` (наприклад, `"/Applications/Test.app";chmod 4755 /tmp/rootbash;`) забезпечує виконання root-коду через Mach service `com.plugin-alliance.pa-installationhelper`. Більше інформації [тут](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/).<sup>[[7]](#references)</sup>
+- **CVE-2024-4395 – Jamf Compliance Editor helper**: Під час запуску аудиту створюється `/Library/LaunchDaemons/com.jamf.complianceeditor.helper.plist`, відкривається Mach service `com.jamf.complianceeditor.helper`, а також експортується `-executeScriptAt:arguments:then:` без перевірки `AuthorizationExternalForm` або code signature викликувача. Тривіальний exploit виконує `AuthorizationCreate` із порожнім reference, підключається через `[[NSXPCConnection alloc] initWithMachServiceName:options:NSXPCConnectionPrivileged]` і викликає метод для виконання довільних бінарних файлів від імені root. Повні нотатки з reverse engineering (разом із PoC) наведено у [write-up Mykola Grymalyuk](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html).<sup>[[4]](#references)</sup>
+- **CVE-2025-25251 – FortiClient Mac helper**: FortiClient Mac версій 7.0.0–7.0.14, 7.2.0–7.2.8 і 7.4.0–7.4.2 приймали спеціально сформовані XPC-повідомлення, які досягали привілейованого helper без authorization gates. Оскільки helper довіряв власному привілейованому `AuthorizationRef`, будь-який локальний користувач, здатний надсилати повідомлення до service, міг змусити його виконувати довільні зміни конфігурації або команди від імені root. Деталі наведено в [короткому advisory SentinelOne](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/).<sup>[[5]](#references)</sup>
 
 #### Поради для швидкого triage
 
-- Коли app постачається одночасно з GUI і helper, порівняйте їхні code requirements та перевірте, чи `shouldAcceptNewConnection` блокує listener за допомогою `-setCodeSigningRequirement:` (або перевіряє `SecCodeCopySigningInformation`). Відсутність таких перевірок зазвичай призводить до сценаріїв CWE-863, як у випадку Jamf. Швидкий огляд виглядає так:
+- Якщо app постачається разом із GUI і helper, порівняйте їхні вимоги до коду та перевірте, чи `shouldAcceptNewConnection` блокує listener за допомогою `-setCodeSigningRequirement:` (або перевіряє `SecCodeCopySigningInformation`). Відсутність таких перевірок зазвичай призводить до сценаріїв CWE-863, як у випадку Jamf. Швидкий перегляд виглядає так:
 ```bash
 codesign --display --requirements - /Applications/Jamf\ Compliance\ Editor.app
 ```
-- Порівняйте те, що helper вважає авторизованим, із тим, що надає client. Під час reversing встановіть breakpoint на `AuthorizationCopyRights` і переконайтеся, що `AuthorizationRef` походить від `AuthorizationCreateFromExternalForm` (наданий client), а не з власного privileged context helper, інакше ви, ймовірно, виявили патерн CWE-863, подібний до наведених вище випадків.
+- Порівняйте те, що helper *вважає* авторизованим, із тим, що надає client. Під час reversing встановіть breakpoint на `AuthorizationCopyRights` і переконайтеся, що `AuthorizationRef` походить із `AuthorizationCreateFromExternalForm` (наданий client), а не з власного привілейованого контексту helper, інакше, ймовірно, ви виявили pattern CWE-863, подібний до наведених вище випадків.
 
 ## Reversing Authorization
 
 ### Перевірка використання EvenBetterAuthorization
 
-Якщо ви знаходите функцію: **`[HelperTool checkAuthorization:command:]`**, імовірно, процес використовує раніше згадану схему авторизації:
+Якщо ви знайдете функцію: **`[HelperTool checkAuthorization:command:]`**, імовірно, процес використовує згадану раніше схему авторизації:
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
-Ця функція, якщо вона викликає такі функції, як `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, використовує [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
+Якщо ця функція викликає такі функції, як `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, вона використовує [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
-Перевірте **`/var/db/auth.db`**, щоб з’ясувати, чи можна отримати дозволи на виклик певної privileged action без взаємодії з користувачем.
+Перевірте **`/var/db/auth.db`**, щоб з'ясувати, чи можна отримати дозволи на виклик певної привілейованої дії без взаємодії з користувачем.
 
-### Комунікація протоколу
+### Protocol Communication
 
-Далі потрібно знайти схему протоколу, щоб встановити комунікацію з XPC service.
+Далі потрібно знайти схему протоколу, щоб встановити зв'язок із XPC service.
 
 Функція **`shouldAcceptNewConnection`** вказує експортований протокол:
 
@@ -311,7 +311,7 @@ codesign --display --requirements - /Applications/Jamf\ Compliance\ Editor.app
 
 У цьому випадку маємо те саме, що й у EvenBetterAuthorizationSample, [**перевірте цей рядок**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
-Знаючи назву використовуваного протоколу, можна **отримати дамп визначення його header** за допомогою:
+Знаючи назву використаного протоколу, можна виконати **dump його header definition** за допомогою:
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
@@ -325,7 +325,7 @@ class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 @end
 [...]
 ```
-Зрештою, нам потрібно лише дізнатися **name відкритого Mach Service**, щоб встановити з ним зв’язок. Це можна зробити кількома способами:
+Насамкінець, нам потрібно лише дізнатися **name exposed Mach Service**, щоб встановити з ним зв’язок. Існує кілька способів це зробити:
 
 - У **`[HelperTool init]`**, де можна побачити Mach Service, що використовується:
 
@@ -429,19 +429,19 @@ NSLog(@"Response: %@", error);
 NSLog(@"Finished!");
 }
 ```
-## Інші привілейовані помічники XPC, якими зловживали
+## Інші зловживання XPC privilege helpers
 
-- [https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)<sup>[8]</sup>
+- [https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)<sup>[[8]](#references)</sup>
 
-## Посилання
+## References
 
 - [1] [Apple Developer — EvenBetterAuthorizationSample](https://developer.apple.com/library/archive/samplecode/EvenBetterAuthorizationSample/Introduction/Intro.html) ([дзеркало на GitHub](https://github.com/brenwell/EvenBetterAuthorizationSample))
 - [2] [Apple Developer — Authorization Services](https://developer.apple.com/documentation/security/authorization-services)
 - [3] [Apple Developer — `AuthorizationCopyRights`](https://developer.apple.com/documentation/security/authorizationcopyrights(_:_:_:_:_:))
-- [4] [CVE-2024-4395: ескалація привілеїв у Jamf Compliance Editor](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html)
-- [5] [CVE-2025-25251: вразливість ескалації привілеїв у FortiClient Mac](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/)
-- [6] [CVE-2025-65842 — локальна ескалація привілеїв у службі Acustica Audio HelperTool XPC в Aquarius Desktop на macOS](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/)
-- [7] [CVE-2025-55076 — локальна ескалація привілеїв у службі InstallationHelper XPC від Plugin Alliance](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/)
-- [8] [CVE-2019-8805: ескалація привілеїв у фреймворку Apple EndpointSecurity (SecureLayer7)](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)
+- [4] [CVE-2024-4395: Jamf Compliance Editor Privilege Escalation](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html)
+- [5] [CVE-2025-25251: FortiClient Mac Privilege Escalation Flaw](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/)
+- [6] [CVE-2025-65842 – Acustica Audio HelperTool XPC Service Local Privilege Escalation in Aquarius Desktop on macOS](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/)
+- [7] [CVE-2025-55076 – Plugin Alliance InstallationHelper XPC Service Local Privilege Escalation](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/)
+- [8] [CVE-2019-8805: Apple EndpointSecurity framework Privilege Escalation (SecureLayer7)](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)
 
 {{#include ../../../../../banners/hacktricks-training.md}}

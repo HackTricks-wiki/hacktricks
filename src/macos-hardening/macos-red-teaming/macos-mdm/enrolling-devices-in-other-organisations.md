@@ -1,54 +1,54 @@
-# Зарахування пристроїв до інших організацій
+# Реєстрація пристроїв в інших організаціях
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Вступ
 
-Як [**зазначалося раніше**](#what-is-mdm-mobile-device-management)**,** щоб спробувати зарахувати пристрій до організації, **потрібен лише Serial Number, що належить цій організації**. Після зарахування кілька організацій встановлюють на новий пристрій конфіденційні дані: сертифікати, застосунки, паролі WiFi, конфігурації VPN [тощо](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Отже, це може бути небезпечним entrypoint для attackers, якщо процес зарахування належним чином не захищений.
+Як [**зазначалося раніше**](#what-is-mdm-mobile-device-management)**,** щоб спробувати зареєструвати пристрій в організації, **потрібен лише Serial Number, що належить цій організації**. Після реєстрації пристрою декілька організацій встановлюють на новий пристрій конфіденційні дані: сертифікати, застосунки, паролі WiFi, конфігурації VPN [тощо](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+Тому це може бути небезпечним entrypoint для атакувальників, якщо процес реєстрації належним чином не захищений.
 
-**Нижче наведено короткий виклад дослідження [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Ознайомтеся з ним для отримання додаткових технічних деталей!**<sup>[1]</sup>
+**Нижче наведено стислий виклад дослідження [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Ознайомтеся з ним для отримання додаткових технічних деталей!**<sup>[[1]](#references)</sup>
 
-## Огляд бінарного аналізу DEP і MDM
+## Огляд бінарних файлів DEP і MDM та їхній аналіз
 
-Це дослідження детально розглядає бінарні файли, пов’язані з Device Enrollment Program (DEP) і Mobile Device Management (MDM) у macOS. Основні компоненти:
+Це дослідження розглядає бінарні файли, пов'язані з Device Enrollment Program (DEP) і Mobile Device Management (MDM) у macOS. Основні компоненти:
 
-- **`mdmclient`**: взаємодіє з MDM-серверами та запускає DEP check-ins у версіях macOS до 10.13.4.
+- **`mdmclient`**: обмінюється даними із серверами MDM і запускає DEP check-ins у версіях macOS до 10.13.4.
 - **`profiles`**: керує Configuration Profiles і запускає DEP check-ins у версіях macOS 10.13.4 і новіших.
-- **`cloudconfigurationd`**: керує взаємодією з DEP API та отримує Device Enrollment profiles.
+- **`cloudconfigurationd`**: керує взаємодією з API DEP і отримує Device Enrollment profiles.
 
-DEP check-ins використовують функції `CPFetchActivationRecord` і `CPGetActivationRecord` із приватного фреймворку Configuration Profiles для отримання Activation Record, причому `CPFetchActivationRecord` взаємодіє з `cloudconfigurationd` через XPC.<sup>[1]</sup>
+DEP check-ins використовують функції `CPFetchActivationRecord` і `CPGetActivationRecord` із приватного фреймворку Configuration Profiles для отримання Activation Record, причому `CPFetchActivationRecord` взаємодіє з `cloudconfigurationd` через XPC.<sup>[[1]](#references)</sup>
 
-## Reverse Engineering протоколу Tesla та схеми Absinthe
+## Зворотне проєктування протоколу Tesla та схеми Absinthe
 
-Під час DEP check-in `cloudconfigurationd` надсилає зашифрований, підписаний JSON payload до _iprofiles.apple.com/macProfile_. Payload містить Serial Number пристрою та action `"RequestProfileConfiguration"`. Використовувана схема шифрування внутрішньо називається "Absinthe". Розкриття принципу роботи цієї схеми є складним і потребує численних кроків, що призвело до пошуку альтернативних методів вставки довільних Serial Number у запит Activation Record.<sup>[1]</sup>
+Під час DEP check-in `cloudconfigurationd` надсилає зашифрований і підписаний JSON payload на _iprofiles.apple.com/macProfile_. Payload містить серійний номер пристрою та дію `"RequestProfileConfiguration"`. Використовувана схема шифрування всередині системи називається "Absinthe". Розкриття цієї схеми є складним і передбачає численні кроки, що призвело до дослідження альтернативних методів вставлення довільних серійних номерів у запит Activation Record.<sup>[[1]](#references)</sup>
 
-## Proxying DEP Requests
+## Проксування DEP-запитів
 
-Спроби перехопити та змінити DEP requests до _iprofiles.apple.com_ за допомогою таких інструментів, як Charles Proxy, були ускладнені шифруванням payload і заходами безпеки SSL/TLS. Однак увімкнення конфігурації `MCCloudConfigAcceptAnyHTTPSCertificate` дає змогу обійти перевірку сертифіката сервера, хоча зашифрований характер payload усе одно не дозволяє змінити Serial Number без ключа розшифрування.<sup>[1]</sup>
+Спроби перехоплювати та змінювати DEP-запити до _iprofiles.apple.com_ за допомогою таких інструментів, як Charles Proxy, були ускладнені шифруванням payload і заходами безпеки SSL/TLS. Однак увімкнення конфігурації `MCCloudConfigAcceptAnyHTTPSCertificate` дає змогу обійти перевірку сертифіката сервера, хоча зашифрована природа payload усе ще не дозволяє змінити серійний номер без ключа розшифрування.<sup>[[1]](#references)</sup>
 
 ## Інструментування системних бінарних файлів, що взаємодіють із DEP
 
-Інструментування системних бінарних файлів, таких як `cloudconfigurationd`, потребує вимкнення System Integrity Protection (SIP) у macOS. Після вимкнення SIP такі інструменти, як LLDB, можна використовувати для підключення до системних процесів і потенційної зміни Serial Number, що використовується у взаємодіях із DEP API. Цей метод є кращим, оскільки дає змогу уникнути складнощів, пов’язаних із entitlements і code signing.
+Інструментування системних бінарних файлів, таких як `cloudconfigurationd`, потребує вимкнення System Integrity Protection (SIP) у macOS. Після вимкнення SIP такі інструменти, як LLDB, можна використовувати для під'єднання до системних процесів і потенційної зміни серійного номера, що використовується у взаємодії з API DEP. Цей метод є кращим, оскільки дає змогу уникнути складнощів, пов'язаних із entitlements і code signing.
 
-**Експлуатація інструментування бінарного файлу:**
-Зміна DEP request payload перед серіалізацією JSON у `cloudconfigurationd` виявилася ефективною. Процес складався з таких етапів:
+**Експлуатація інструментування бінарних файлів:**
+Зміна DEP request payload перед серіалізацією JSON у `cloudconfigurationd` виявилася ефективною. Процес складався з таких кроків:
 
-1. Підключення LLDB до `cloudconfigurationd`.
-2. Визначення місця отримання системного Serial Number.
-3. Вставка довільного Serial Number у пам’ять до шифрування та надсилання payload.
+1. Під'єднання LLDB до `cloudconfigurationd`.
+2. Пошук місця, де отримується системний серійний номер.
+3. Вставлення довільного серійного номера в пам'ять до шифрування та надсилання payload.
 
-Цей метод дав змогу отримувати повні DEP profiles для довільних Serial Number, продемонструвавши потенційну вразливість.<sup>[1]</sup>
+Цей метод давав змогу отримувати повні DEP profiles для довільних серійних номерів, демонструючи потенційну вразливість.<sup>[[1]](#references)</sup>
 
 ### Автоматизація інструментування за допомогою Python
 
-Процес експлуатації було автоматизовано за допомогою Python та LLDB API, що зробило можливим програмну вставку довільних Serial Number і отримання відповідних DEP profiles.<sup>[1]</sup>
+Процес експлуатації було автоматизовано за допомогою Python та LLDB API, що зробило можливим програмне вставлення довільних серійних номерів і отримання відповідних DEP profiles.<sup>[[1]](#references)</sup>
 
 ### Потенційні наслідки вразливостей DEP і MDM
 
-Дослідження виявило значні проблеми безпеки:
+Дослідження висвітлило значні проблеми безпеки:
 
-1. **Розкриття інформації**: надавши зареєстрований у DEP Serial Number, можна отримати конфіденційну інформацію організації, що міститься у DEP profile.<sup>[1]</sup>
+1. **Розкриття інформації**: надавши зареєстрований у DEP серійний номер, можна отримати конфіденційну інформацію організації, що міститься у DEP profile.<sup>[[1]](#references)</sup>
 
 ## Посилання
 
