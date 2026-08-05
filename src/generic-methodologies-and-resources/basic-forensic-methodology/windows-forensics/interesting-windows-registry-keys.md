@@ -77,12 +77,12 @@ Windows Registry hives are one of the fastest ways to pivot from _what happened?
 
 - `HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR`: primary inventory of USB mass-storage devices (vendor, product, revision, serial/device instance).
 - `HKLM\SYSTEM\CurrentControlSet\Enum\USB`: broader USB device inventory, including non-storage devices.
-- `HKLM\SYSTEM\CurrentControlSet\Enum\USB\VID_*\PID_*\...\Properties\{83da6326-97a6-4088-9453-a1923f573b29}`: on recent Windows 10/11 builds this is a high-value spot for per-device lifecycle timestamps such as install, first install, last arrival, and last removal.
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB\VID_*\PID_*\...\Properties\{83da6326-97a6-4088-9453-a1923f573b29}`: on recent Windows 10/11 builds this is a high-value spot for per-device lifecycle timestamps such as install, first install, last arrival, and last removal.<sup>[[2]](#references)</sup>
 - `HKLM\SYSTEM\MountedDevices`: maps volumes and device identifiers to drive letters / volume GUIDs. Only the last mapping for a given drive letter may survive.
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\EMDMgmt`: useful pivot for volume serial numbers and previous media metadata.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: user-specific drive-letter and share interaction history.
-- Modern phones and tablets connected via MTP/PTP may **not** appear under `USBSTOR`. Check `HKLM\SYSTEM\CurrentControlSet\Enum\SWD\WPDBUSENUM` and `HKLM\SOFTWARE\Microsoft\Windows Portable Devices\Devices` as well.
-- To tie a device to a user, pivot from device or volume identifiers into per-user artifacts such as shellbags, LNKs, Jump Lists, `RecentDocs`, and `MountPoints2`.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: user-specific drive-letter and share interaction history.<sup>[[2]](#references)</sup>
+- Modern phones and tablets connected via MTP/PTP may **not** appear under `USBSTOR`. Check `HKLM\SYSTEM\CurrentControlSet\Enum\SWD\WPDBUSENUM` and `HKLM\SOFTWARE\Microsoft\Windows Portable Devices\Devices` as well.<sup>[[2]](#references)</sup>
+- To tie a device to a user, pivot from device or volume identifiers into per-user artifacts such as shellbags, LNKs, Jump Lists, `RecentDocs`, and `MountPoints2`.<sup>[[2]](#references)</sup>
 
 
 

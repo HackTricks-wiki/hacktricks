@@ -4,7 +4,7 @@
 
 Mutation testing "tests your tests" by systematically introducing small changes (mutants) into contract code and re-running the test suite. If a test fails, the mutant is killed. If the tests still pass, the mutant survives, revealing a blind spot that line/branch coverage cannot detect.
 
-Key idea: Coverage shows code was executed; mutation testing shows whether behavior is actually asserted.
+Key idea: Coverage shows code was executed; mutation testing shows whether behavior is actually asserted.<sup>[[2]](#references)</sup>
 
 ## Why coverage can deceive
 
@@ -20,7 +20,7 @@ function verifyMinimumDeposit(uint256 deposit) public returns (bool) {
 }
 ```
 
-Unit tests that only check a value below and a value above the threshold can reach 100% line/branch coverage while failing to assert the equality boundary (==). A refactor to `deposit >= 2 ether` would still pass such tests, silently breaking protocol logic.
+Unit tests that only check a value below and a value above the threshold can reach 100% line/branch coverage while failing to assert the equality boundary (==). A refactor to `deposit >= 2 ether` would still pass such tests, silently breaking protocol logic.<sup>[[2]](#references)</sup>
 
 Mutation testing exposes this gap by mutating the condition and verifying tests fail.
 

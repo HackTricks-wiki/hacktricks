@@ -154,7 +154,7 @@ Check the file `C:\Windows\inf\setupapi.dev.log` to get the timestamps about whe
 
 ### Plug and Play Cleanup
 
-The scheduled task known as 'Plug and Play Cleanup' is primarily designed for the removal of outdated driver versions. Contrary to its specified purpose of retaining the latest driver package version, online sources suggest it also targets drivers that have been inactive for 30 days. Consequently, drivers for removable devices not connected in the past 30 days may be subject to deletion.
+The scheduled task known as 'Plug and Play Cleanup' is primarily designed for the removal of outdated driver versions. Contrary to its specified purpose of retaining the latest driver package version, online sources suggest it also targets drivers that have been inactive for 30 days. Consequently, drivers for removable devices not connected in the past 30 days may be subject to deletion.<sup>[[1]](#references)</sup>
 
 The task is located at the following path: `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
 
@@ -499,6 +499,10 @@ EventID 6005 indicates system startup, while EventID 6006 marks shutdown.
 #### Log Deletion
 
 Security EventID 1102 signals the deletion of logs, a critical event for forensic analysis.
+
+## References
+
+- [1] [Windows Plug and Play Cleanup](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
 

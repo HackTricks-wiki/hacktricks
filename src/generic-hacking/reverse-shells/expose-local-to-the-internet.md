@@ -87,7 +87,7 @@ npx localtunnel --port 8000
 
 ## Cloudflare Tunnel (cloudflared)
 
-Cloudflare's `cloudflared` CLI can create unauthenticated "Quick" tunnels for fast demos or named tunnels bound to your own domain/hostnames. It supports HTTP(S) reverse proxies as well as raw TCP mappings routed through Cloudflare's edge.
+Cloudflare's `cloudflared` CLI can create unauthenticated "Quick" tunnels for fast demos or named tunnels bound to your own domain/hostnames. It supports HTTP(S) reverse proxies as well as raw TCP mappings routed through Cloudflare's edge.<sup>[[1]](#references)</sup>
 
 ```bash
 # Quick Tunnel exposing localhost:8080 (random trycloudflare subdomain)
@@ -100,7 +100,7 @@ cloudflared tunnel route dns my-tunnel app.example.com
 cloudflared tunnel run my-tunnel --config tunnel.yml
 ```
 
-Named tunnels let you define multiple ingress rules (HTTP, SSH, RDP, etc.) inside `tunnel.yml`, support per-service access policies via Cloudflare Access, and can run as systemd containers for persistence. Quick Tunnels are anonymous and ephemeral—great for phishing payload staging or webhook tests, but Cloudflare does not guarantee uptime.
+Named tunnels let you define multiple ingress rules (HTTP, SSH, RDP, etc.) inside `tunnel.yml`, support per-service access policies via Cloudflare Access, and can run as systemd containers for persistence. Quick Tunnels are anonymous and ephemeral—great for phishing payload staging or webhook tests, but Cloudflare does not guarantee uptime.<sup>[[1]](#references)</sup>
 
 ## Tailscale Funnel / Serve
 
@@ -167,11 +167,11 @@ You can request custom domains and longer-lived tunnels on the paid tier, or rec
 
 ## Threat intel & OPSEC notes
 
-Adversaries have increasingly abused ephemeral tunneling (especially Cloudflare's unauthenticated `trycloudflare.com` endpoints) to stage Remote Access Trojan payloads and hide C2 infrastructure. Proofpoint tracked campaigns since February 2024 that pushed AsyncRAT, Xworm, VenomRAT, GuLoader, and Remcos by pointing download stages to short-lived TryCloudflare URLs, making traditional static blocklists far less effective. Consider rotating tunnels and domains proactively, but also monitor for telltale external DNS lookups to the tunneler you are using so you can spot blue-team detection or infrastructure blocking attempts early.
+Adversaries have increasingly abused ephemeral tunneling (especially Cloudflare's unauthenticated `trycloudflare.com` endpoints) to stage Remote Access Trojan payloads and hide C2 infrastructure. Proofpoint tracked campaigns since February 2024 that pushed AsyncRAT, Xworm, VenomRAT, GuLoader, and Remcos by pointing download stages to short-lived TryCloudflare URLs, making traditional static blocklists far less effective. Consider rotating tunnels and domains proactively, but also monitor for telltale external DNS lookups to the tunneler you are using so you can spot blue-team detection or infrastructure blocking attempts early.<sup>[[2]](#references)</sup>
 
 ## References
 
-- [Cloudflare Docs - Create a locally-managed tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/)
-- [Proofpoint - Threat Actor Abuses Cloudflare Tunnels to Deliver RATs](https://www.proofpoint.com/us/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
+- [1] [Cloudflare Docs - Create a locally-managed tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/)
+- [2] [Proofpoint - Threat Actor Abuses Cloudflare Tunnels to Deliver RATs](https://www.proofpoint.com/us/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
 
 {{#include ../../banners/hacktricks-training.md}}
