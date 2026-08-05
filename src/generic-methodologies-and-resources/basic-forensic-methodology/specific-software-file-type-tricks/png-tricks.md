@@ -74,7 +74,7 @@ unzip -l suspect.png
 
 A very practical recent PNG forensic trick is checking whether a screenshot editor **overwrote** a PNG without **truncating** the old file first. In those cases, bytes from the **previous image** can remain after `IEND`, and sometimes extra `IDAT` data can be partially reconstructed.
 
-This became well known with **aCropalypse** (Google Pixel Markup) and the related **Windows Snipping Tool** issue. In practice, if a "cropped" or "redacted" PNG still contains old trailing data, you may be able to recover part of the original screenshot.
+This became well known with **aCropalypse** (Google Pixel Markup) and the related **Windows Snipping Tool** issue. In practice, if a "cropped" or "redacted" PNG still contains old trailing data, you may be able to recover part of the original screenshot.<sup>[[1]](#references)</sup>
 
 Practical workflow:
 

@@ -2,23 +2,23 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-AdaptixC2 is a modular, open‑source post‑exploitation/C2 framework with Windows x86/x64 beacons (EXE/DLL/service EXE/raw shellcode) and BOF support. This page documents:
+AdaptixC2 is a modular, open‑source post‑exploitation/C2 framework with Windows x86/x64 beacons (EXE/DLL/service EXE/raw shellcode) and BOF support.<sup>[[1]](#references)</sup> This page documents:
 - How its RC4‑packed configuration is embedded and how to extract it from beacons
 - Network/profile indicators for HTTP/SMB/TCP listeners
 - Common loader and persistence TTPs observed in the wild, with links to relevant Windows technique pages
 
-Recent upstream releases also ship DNS/DoH beacon listeners and the separate Gopher agent/listener family, so modern Adaptix infrastructure may expose more than the original HTTP/SMB/TCP surfaces even when a specific sample still uses the classic beacon agent.
+Recent upstream releases also ship DNS/DoH beacon listeners and the separate Gopher agent/listener family, so modern Adaptix infrastructure may expose more than the original HTTP/SMB/TCP surfaces even when a specific sample still uses the classic beacon agent.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## Beacon profiles and fields
 
-AdaptixC2 supports three primary beacon types:
+AdaptixC2 supports three primary beacon types:<sup>[[1]](#references)</sup>
 - BEACON_HTTP: web C2 with configurable servers/ports/SSL, method, URI, headers, user‑agent, and a custom parameter name
 - BEACON_SMB: named‑pipe peer‑to‑peer C2 (intranet)
 - BEACON_TCP: direct sockets, optionally with a prepended marker to obfuscate protocol start
 
-These are the beacon layouts publicly documented in early Adaptix analyses and they are still the most common starting point for sample-side extraction. However, current upstream builds also ship `BeaconDNS` and Gopher extenders on the server side, so do not assume every live Adaptix deployment exposes only HTTP/SMB/TCP infrastructure.
+These are the beacon layouts publicly documented in early Adaptix analyses and they are still the most common starting point for sample-side extraction.<sup>[[1]](#references)</sup> However, current upstream builds also ship `BeaconDNS` and Gopher extenders on the server side, so do not assume every live Adaptix deployment exposes only HTTP/SMB/TCP infrastructure.<sup>[[2]](#references)</sup>
 
-Typical profile fields observed in HTTP beacon configs (after decryption):
+Typical profile fields observed in HTTP beacon configs (after decryption):<sup>[[1]](#references)</sup>
 - agent_type (u32)
 - use_ssl (bool)
 - servers_count (u32), servers (array of strings), ports (array of u32)
@@ -29,9 +29,9 @@ Typical profile fields observed in HTTP beacon configs (after decryption):
 - listener_type (u32)
 - download_chunk_size (u32)
 
-Recent BeaconHTTP builds also support operator-selected rotation across multiple URIs, user-agents, Host headers, and servers, with sequential or random selection. From a hunting perspective this means a single infected host may fan out across several callback paths and header combinations without leaving the classic RC4-packed beacon family.
+Recent BeaconHTTP builds also support operator-selected rotation across multiple URIs, user-agents, Host headers, and servers, with sequential or random selection.<sup>[[2]](#references)</sup> From a hunting perspective this means a single infected host may fan out across several callback paths and header combinations without leaving the classic RC4-packed beacon family.
 
-Example default HTTP profile (from a beacon build):
+Example default HTTP profile (from a beacon build):<sup>[[1]](#references)</sup>
 
 ```json
 {
@@ -56,7 +56,7 @@ Example default HTTP profile (from a beacon build):
 }
 ```
 
-Observed malicious HTTP profile (real attack):
+Observed malicious HTTP profile (real attack):<sup>[[1]](#references)</sup>
 
 ```json
 {
@@ -83,12 +83,12 @@ Observed malicious HTTP profile (real attack):
 
 ## Encrypted configuration packing and load path
 
-When the operator clicks Create in the builder, AdaptixC2 embeds the encrypted profile as a tail blob in the beacon. The format is:
+When the operator clicks Create in the builder, AdaptixC2 embeds the encrypted profile as a tail blob in the beacon. The format is:<sup>[[1]](#references)</sup>
 - 4 bytes: configuration size (uint32, little‑endian)
 - N bytes: RC4‑encrypted configuration data
 - 16 bytes: RC4 key
 
-The beacon loader copies the 16‑byte key from the end and RC4‑decrypts the N‑byte block in place:
+The beacon loader copies the 16‑byte key from the end and RC4‑decrypts the N‑byte block in place:<sup>[[1]](#references)</sup>
 
 ```c
 ULONG profileSize = packer->Unpack32();
@@ -97,13 +97,13 @@ memcpy(this->encrypt_key, packer->data() + 4 + profileSize, 16);
 DecryptRC4(packer->data()+4, profileSize, this->encrypt_key, 16);
 ```
 
-Practical implications:
+Practical implications:<sup>[[1]](#references)</sup>
 - The entire structure often lives inside the PE .rdata section.
 - Extraction is deterministic: read size, read ciphertext of that size, read the 16‑byte key placed immediately after, then RC4‑decrypt.
 
 ## Configuration extraction workflow (defenders)
 
-Write an extractor that mimics the beacon logic:
+Write an extractor that mimics the beacon logic:<sup>[[1]](#references)</sup>
 1) Locate the blob inside the PE (commonly .rdata). A pragmatic approach is to scan .rdata for a plausible [size|ciphertext|16‑byte key] layout and attempt RC4.
 2) Read first 4 bytes → size (uint32 LE).
 3) Read next N=size bytes → ciphertext.
@@ -189,7 +189,7 @@ Tips:
 
 The outer packing format (`u32 size | RC4 ciphertext | 16-byte key`) is reusable, so actor-customized listeners can keep the same extraction workflow while changing the decrypted field layout completely.
 
-A good recent example is the April 2026 Tropic Trooper campaign, where the extracted Adaptix beacon did not contain a standard HTTP/TCP profile. Instead, the decrypted blob stored GitHub transport parameters such as:
+A good recent example is the April 2026 Tropic Trooper campaign, where the extracted Adaptix beacon did not contain a standard HTTP/TCP profile. Instead, the decrypted blob stored GitHub transport parameters such as:<sup>[[5]](#references)</sup>
 - `repo_owner`
 - `repo_name`
 - `api_host` (for example `api.github.com`)
@@ -203,28 +203,28 @@ Practical parser strategy:
 - Good sentinels include `api.github.com`, `/issues?state=open`, HTTP verbs/URIs, named-pipe-style strings, or obviously valid server/port arrays.
 - If the HTTP parser fails but the plaintext contains coherent length-prefixed UTF-8 strings, keep the sample and attempt alternative schemas instead of discarding it as a false positive.
 
-In that campaign the custom listener used GitHub issues as the C2 transport, and the beacon queried `ipinfo.io` to learn its external IP because the GitHub API does not directly reveal the victim source address to the operator.
+In that campaign the custom listener used GitHub issues as the C2 transport, and the beacon queried `ipinfo.io` to learn its external IP because the GitHub API does not directly reveal the victim source address to the operator.<sup>[[5]](#references)</sup>
 
 ## Network fingerprinting and hunting
 
-HTTP
+HTTP<sup>[[1]](#references)</sup>
 - Common: POST to operator‑selected URIs (e.g., /uri.php, /endpoint/api)
 - Custom header parameter used for beacon ID (e.g., X‑Beacon‑Id, X‑App‑Id)
 - User‑agents mimicking Firefox 20 or contemporary Chrome builds
 - Polling cadence visible via sleep_delay/jitter_delay
-- Newer builds can rotate URIs, user-agents, Host headers, and servers across callbacks, so cluster on uncommon header names, response-size patterns, TLS reuse, and timing instead of assuming a single path/UA pair
+- Newer builds can rotate URIs, user-agents, Host headers, and servers across callbacks, so cluster on uncommon header names, response-size patterns, TLS reuse, and timing instead of assuming a single path/UA pair<sup>[[2]](#references)</sup>
 
-SMB/TCP
+SMB/TCP<sup>[[1]](#references)</sup>
 - SMB named‑pipe listeners for intranet C2 where web egress is constrained
 - TCP beacons may prepend a few bytes before traffic to obfuscate protocol start
 
 Current upstream teamserver defaults
-- `profile.yaml` currently ships with teamserver `0.0.0.0:4321`, endpoint `/endpoint`, certificate/key filenames `server.rsa.crt` and `server.rsa.key`, and extenders for HTTP, SMB, TCP, DNS, Beacon agent, and Gopher
-- On unmatched routes, the default error handler returns `Server: AdaptixC2` and `Adaptix-Version: v1.2`
-- The stock 404 body contains `AdaptixC2 404` and `You need to enter the correct connection details.`
-- Internet-wide scans in 2026 found many exposed teamservers on `4321` and many beacon listeners on `43211`, so both ports are useful seed pivots but should not be treated as exhaustive
+- `profile.yaml` currently ships with teamserver `0.0.0.0:4321`, endpoint `/endpoint`, certificate/key filenames `server.rsa.crt` and `server.rsa.key`, and extenders for HTTP, SMB, TCP, DNS, Beacon agent, and Gopher<sup>[[2]](#references)</sup>
+- On unmatched routes, the default error handler returns `Server: AdaptixC2` and `Adaptix-Version: v1.2`<sup>[[4]](#references)</sup>
+- The stock 404 body contains `AdaptixC2 404` and `You need to enter the correct connection details.`<sup>[[4]](#references)</sup>
+- Internet-wide scans in 2026 found many exposed teamservers on `4321` and many beacon listeners on `43211`, so both ports are useful seed pivots but should not be treated as exhaustive<sup>[[4]](#references)</sup>
 
-DNS/DoH listener fingerprints
+DNS/DoH listener fingerprints<sup>[[4]](#references)</sup>
 - The current BeaconDNS extender answers authoritatively (`AA=true`)
 - Queries that do not match the beacon protocol shape — notably names with fewer than 5 labels before the configured domain — are commonly answered with `TXT "OK"`
 - If the configured base TTL is left at zero, the listener uses a 10-second base and adds up to 59 seconds of jitter

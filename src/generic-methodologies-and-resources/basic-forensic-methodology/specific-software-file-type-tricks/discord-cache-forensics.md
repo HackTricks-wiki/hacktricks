@@ -10,12 +10,12 @@ This page summarizes how to triage Discord Desktop cache artifacts to recover ex
 - macOS: ~/Library/Application Support/discord/Cache/Cache_Data
 - Linux: ~/.config/discord/Cache/Cache_Data
 
-Key on‑disk structures inside Cache_Data:
+Key on‑disk structures inside Cache_Data:<sup>[[1]](#references)</sup>
 - index: Simple Cache index database
 - data_#: Binary cache block files that can contain multiple cached objects
 - f_######: Individual cached entries stored as standalone files (often larger bodies)
 
-Note: Deleting messages/channels/servers in Discord does not purge this local cache. Cached items often remain and their file timestamps align with user activity, enabling timeline reconstruction.
+Note: Deleting messages/channels/servers in Discord does not purge this local cache. Cached items often remain and their file timestamps align with user activity, enabling timeline reconstruction.<sup>[[1]](#references)</sup>
 
 ## What can be recovered
 
@@ -23,7 +23,7 @@ Note: Deleting messages/channels/servers in Discord does not purge this local ca
 - Images, GIFs, videos (e.g., .jpg, .png, .gif, .webp, .mp4, .webm)
 - Webhook URLs (https://discord.com/api/webhooks/…)
 - Discord API calls (https://discord.com/api/vX/…)
-- Helpful for correlating beaconing/exfil activity and hashing media for intel matching
+- Helpful for correlating beaconing/exfil activity and hashing media for intel matching<sup>[[1]](#references)</sup>
 
 ## Quick triage (manual)
 
@@ -50,7 +50,7 @@ Media can be extracted by splitting headers from body and optionally decompressi
 ## Automated DFIR: Discord Forensic Suite (CLI/GUI)
 
 - Repo: https://github.com/jwdfir/discord_cache_parser
-- Function: Recursively scans Discord’s cache folder, finds webhook/API/attachment URLs, parses f_* bodies, optionally carves media, and outputs HTML + CSV timeline reports with SHA‑256 hashes.
+- Function: Recursively scans Discord’s cache folder, finds webhook/API/attachment URLs, parses f_* bodies, optionally carves media, and outputs HTML + CSV timeline reports with SHA‑256 hashes.<sup>[[2]](#references)</sup>
 
 Example CLI usage:
 
@@ -80,12 +80,12 @@ Key options:
 - Correlate the modified time (mtime) of f_* and data_* files with user/attacker activity windows to reconstruct a timeline.
 - Hash recovered media (SHA-256) and compare against known-bad or exfil datasets.
 - Extracted webhook URLs can be tested for liveness or rotated; consider adding them to blocklists and retro-hunting proxies.
-- Cache persists after “wiping” on the server side. If acquisition is possible, collect the entire Cache directory and related sibling caches (Code Cache, GPUCache).
+- Cache persists after “wiping” on the server side. If acquisition is possible, collect the entire Cache directory and related sibling caches (Code Cache, GPUCache).<sup>[[1]](#references)</sup>
 
 ## References
 
-- [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
-- [Discord Forensic Suite (CLI/GUI)](https://github.com/jwdfir/discord_cache_parser)
-- [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [1] [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [2] [Discord Forensic Suite (CLI/GUI)](https://github.com/jwdfir/discord_cache_parser)
+- [3] [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 
 {{#include ../../../banners/hacktricks-training.md}}

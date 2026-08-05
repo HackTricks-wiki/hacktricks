@@ -163,7 +163,7 @@ def fav_hash(url):
 
 You can also get favicon hashes at scale with [**httpx**](https://github.com/projectdiscovery/httpx) (`httpx -l targets.txt -favicon`) and then pivot in Shodan/Censys.
 
-Useful things to remember when using favicon fingerprints:
+Useful things to remember when using favicon fingerprints:<sup>[[3]](#references)[[4]](#references)</sup>
 
 - **Treat the hash as an indicator, not proof**: MMH3 is compact and collisions are possible; operators can also replace favicons or intentionally reuse a misleading icon.
 - **Probe more than** `/favicon.ico`: many products expose icons in framework/build paths or via `manifest.json`, `site.webmanifest`, `browserconfig.xml`, `apple-touch-icon*`, inline `data:` URLs, or HTML `<link rel="icon">` tags. The path itself can fingerprint a product family.

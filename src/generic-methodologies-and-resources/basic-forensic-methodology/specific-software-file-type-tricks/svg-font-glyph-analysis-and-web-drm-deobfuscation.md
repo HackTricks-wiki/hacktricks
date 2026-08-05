@@ -2,13 +2,13 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-This page documents practical techniques to recover text from web readers that ship positioned glyph runs plus per-request vector glyph definitions (SVG paths), and that randomize glyph IDs per request to prevent scraping. The core idea is to ignore request-scoped numeric glyph IDs and fingerprint the visual shapes via raster hashing, then map shapes to characters with SSIM against a reference font atlas. The workflow generalizes beyond Kindle Cloud Reader to any viewer with similar protections.
+This page documents practical techniques to recover text from web readers that ship positioned glyph runs plus per-request vector glyph definitions (SVG paths), and that randomize glyph IDs per request to prevent scraping. The core idea is to ignore request-scoped numeric glyph IDs and fingerprint the visual shapes via raster hashing, then map shapes to characters with SSIM against a reference font atlas. The workflow generalizes beyond Kindle Cloud Reader to any viewer with similar protections.<sup>[[1]](#references)</sup>
 
 Warning: Only use these techniques to back up content you legitimately own and in compliance with applicable laws and terms.
 
 ## Acquisition (example: Kindle Cloud Reader)
 
-Endpoint observed:
+Endpoint observed:<sup>[[1]](#references)</sup>
 - [https://read.amazon.com/renderer/render](https://read.amazon.com/renderer/render)
 
 Required materials per session:
@@ -52,14 +52,14 @@ Notes on anti-scraping path tricks:
 
 ## Why naïve decoding fails
 
-- Per-request randomized glyph substitution: glyph ID→character mapping changes every batch; IDs are meaningless globally.
+- Per-request randomized glyph substitution: glyph ID→character mapping changes every batch; IDs are meaningless globally.<sup>[[1]](#references)</sup>
 - Direct SVG coordinate comparison is brittle: identical shapes may differ in numeric coordinates or command encoding per request.
 - OCR on isolated glyphs performs poorly (≈50%), confuses punctuation and look-alike glyphs, and ignores ligatures.
 
 ## Working pipeline: request-agnostic glyph normalization and mapping
 
 1) Rasterize per-request SVG glyphs
-- Build a minimal SVG document per glyph with the provided `path` and render to a fixed canvas (e.g., 512×512) using CairoSVG or an equivalent engine that handles tricky path sequences.
+- Build a minimal SVG document per glyph with the provided `path` and render to a fixed canvas (e.g., 512×512) using CairoSVG or an equivalent engine that handles tricky path sequences.<sup>[[1]](#references)</sup>
 - Render filled black on white; avoid strokes to eliminate renderer- and AA-dependent artifacts.
 
 2) Perceptual hashing for cross-request identity
@@ -228,14 +228,14 @@ def process_tar(tar_path: str, cache: dict, atlases) -> list[dict]:
 
 ## Layout/EPUB reconstruction heuristics
 
-- Paragraph breaks: If the next run’s top Y exceeds the previous line’s baseline by a threshold (relative to font size), start a new paragraph.
+- Paragraph breaks: If the next run’s top Y exceeds the previous line’s baseline by a threshold (relative to font size), start a new paragraph.<sup>[[1]](#references)</sup>
 - Alignment: Group by similar left X for left-aligned paragraphs; detect centered lines by symmetric margins; detect right-aligned by right edges.
 - Styling: Preserve italic/bold via `fontStyle`/`fontWeight`; vary CSS classes by `fontSize` buckets to approximate headings vs body.
 - Links: If runs include link metadata (e.g., `positionId`), emit anchors and internal hrefs.
 
 ## Mitigating SVG anti-scraping path tricks
 
-- Use filled paths with `fill-rule: nonzero` and a proper renderer (CairoSVG, resvg). Do not rely on path token normalization.
+- Use filled paths with `fill-rule: nonzero` and a proper renderer (CairoSVG, resvg). Do not rely on path token normalization.<sup>[[1]](#references)</sup>
 - Avoid stroke rendering; focus on filled solids to sidestep hairline artifacts caused by micro relative moves.
 - Keep a stable viewBox per render so that identical shapes rasterize consistently across batches.
 
