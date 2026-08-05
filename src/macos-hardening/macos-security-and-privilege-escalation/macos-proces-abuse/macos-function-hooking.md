@@ -4,9 +4,9 @@
 
 ## Function Interposing
 
-Erstelle eine **dylib** mit einem **`__interpose` (`__DATA___interpose`)**-Abschnitt (oder einem Abschnitt mit dem Flag **`S_INTERPOSING`**), der Tupel aus **Funktionszeigern** enthält, die auf die **originale** und die **Ersatz**-Funktion verweisen.
+Erstelle eine **dylib** mit einem **`__interpose` (`__DATA___interpose`)**-Abschnitt (oder einem Abschnitt mit dem Flag **`S_INTERPOSING`**), der Tupel aus **function pointers** enthält, die auf die **original**- und die **replacement**-Funktionen verweisen.
 
-Dann **injiziere** die dylib mit **`DYLD_INSERT_LIBRARIES`** (das Interposing muss vor dem Laden der Haupt-App stattfinden). Offensichtlich gelten hier auch die [**Restriktionen** für die Verwendung von **`DYLD_INSERT_LIBRARIES`**](macos-library-injection/index.html#check-restrictions).
+Anschließend **inject** die dylib mit **`DYLD_INSERT_LIBRARIES`** (das Interposing muss erfolgen, bevor die Hauptanwendung geladen wird). Offensichtlich gelten die [**restrictions** für die Verwendung von **`DYLD_INSERT_LIBRARIES`** auch hier](macos-library-injection/index.html#check-restrictions).
 
 ### Interpose printf
 
@@ -78,15 +78,15 @@ DYLD_INSERT_LIBRARIES=./interpose2.dylib ./hello
 Hello from interpose
 ```
 > [!WARNING]
-> Die **`DYLD_PRINT_INTERPOSING`** env variable kann verwendet werden, um interposing zu debuggen, und wird den interpose process ausgeben.
+> Die Umgebungsvariable **`DYLD_PRINT_INTERPOSING`** kann zum Debuggen von interposing verwendet werden und gibt den interpose-Prozess aus.
 
-Beachte auch, dass **interposing zwischen dem process und den geladenen libraries stattfindet**, es funktioniert nicht mit dem shared library cache.
+Beachte außerdem, dass **interposing zwischen dem Prozess und den geladenen Libraries erfolgt**; mit dem Shared-Library-Cache funktioniert es nicht.
 
 ### Dynamic Interposing
 
-Jetzt ist es auch möglich, eine Funktion dynamisch mit der Funktion **`dyld_dynamic_interpose`** zu interposen. Dies ermöglicht es, **programmatically** eine Funktion zur **runtime** zu interposen, statt dies nur von **Anfang** an zu tun.
+Es ist jetzt auch möglich, eine Funktion dynamisch mithilfe der Funktion **`dyld_dynamic_interpose`** zu interposen. Dadurch kann eine Funktion **programmgesteuert zur Laufzeit** interposed werden, anstatt dies nur von Anfang an zu tun.
 
-Es müssen nur die **tuples** der **zu ersetzenden Funktion und der Ersatzfunktion** angegeben werden.
+Es müssen lediglich die **Tupel** aus der **zu ersetzenden Funktion und der Ersatzfunktion** angegeben werden.
 ```c
 struct dyld_interpose_tuple {
 const void* replacement;
@@ -97,12 +97,12 @@ const struct dyld_interpose_tuple array[], size_t count);
 ```
 ### Import Table Rebinding (fishhook-style)
 
-Wenn du bereits Codeausführung **innerhalb des Prozesses** hast und eine **imported C function** hooken willst, ohne das Target neu zu starten, ist ein sehr häufiges Primitive **symbol rebinding** (popularisiert durch **`fishhook`**).
+Wenn du bereits **Codeausführung innerhalb des Prozesses** hast und eine **importierte C-Funktion** hooken möchtest, ohne das Ziel neu zu starten, ist **symbol rebinding** (bekannt geworden durch **`fishhook`**) ein sehr verbreitetes Primitiv.
 
-Statt den **`__interpose`**-Abschnitt zu verwenden, durchläuft diese Technik die Mach-O-Metadaten (`__LINKEDIT` -> indirect symbol table -> `__la_symbol_ptr` / `__nl_symbol_ptr`) und **überschreibt den Import-Slot**, der vom aktuellen Image verwendet wird. Das ist sehr nützlich, um Funktionen in einem **bereits laufenden** Prozess zu hooken oder mit **`rebind_symbols_image`** **nur ein einziges Image** zu hooken.
+Anstatt den Abschnitt **`__interpose`** zu verwenden, durchläuft diese Technik die Mach-O-Metadaten (`__LINKEDIT` -> indirekte Symboltabelle -> `__la_symbol_ptr` / `__nl_symbol_ptr`) und **überschreibt den Import-Slot**, der vom aktuellen Image verwendet wird. Dies ist sehr nützlich, um Funktionen in einem **bereits laufenden** Prozess zu hooken oder mit **`rebind_symbols_image`** nur **ein einzelnes Image** zu hooken.<sup>[2]</sup>
 
 > [!TIP]
-> Dies betrifft nur Aufrufe, die tatsächlich über einen **import pointer** gehen. Wenn die Target function **direkt innerhalb desselben Images aufgerufen** wird, gibt es keinen importierten Slot zum Überschreiben, also sieht diese Technik diesen Call-Site nicht.
+> Dies betrifft nur Aufrufe, die tatsächlich über einen **Import-Pointer** laufen. Wenn die Zielfunktion direkt innerhalb desselben Images **aufgerufen wird**, gibt es keinen importierten Slot zum Überschreiben, sodass diese Technik diese Aufrufstelle nicht erfasst.
 ```c
 // clang -dynamiclib fishhook_demo.c fishhook.c -o fishhook_demo.dylib
 #include <stdio.h>
@@ -126,29 +126,29 @@ rebind_symbols(&rb, 1);
 ```bash
 DYLD_INSERT_LIBRARIES=./fishhook_demo.dylib ./hello
 ```
-Auf neueren macOS-Versionen befinden sich viele rebinding targets nicht mehr in beschreibbaren **`__DATA`**-Seiten. Rebinders müssen normalerweise **`__DATA_CONST`** vor dem Patchen des Pointers vorübergehend beschreibbar machen. Außerdem solltest du auf Apple Silicon / **`arm64e`** authentifizierte Pointer und zusätzliche Indirektion in **`__AUTH_CONST.__auth_got`** erwarten, sodass ein rebinder, der nur die klassischen lazy/non-lazy symbol pointer sections scannt, einige call sites übersehen kann.
+Bei aktuellen macOS-Versionen befinden sich viele Rebinding-Ziele nicht mehr in beschreibbaren **`__DATA`**-Seiten. Rebinders müssen **`__DATA_CONST`** normalerweise vorübergehend beschreibbar machen, bevor sie den Pointer patchen. Außerdem solltest du auf Apple Silicon / **`arm64e`** authentifizierte Pointer und zusätzliche Indirektion in **`__AUTH_CONST.__auth_got`** erwarten. Daher kann ein Rebinder, der nur die klassischen Lazy-/Non-Lazy-Symbol-Pointer-Sections durchsucht, einige Call Sites übersehen.<sup>[3]</sup>
 
 > [!CAUTION]
-> Die **`arm64e`** ABI verwendet **Pointer Authentication (PAC)** für viele function pointers. Blind pointer writes, die auf Intel früher funktioniert haben, können auf Apple Silicon eine call site brechen. Wenn du deinen eigenen rebinder oder inline hooker schreibst, sei bereit, **`<ptrauth.h>`**-Hilfsfunktionen wie **`ptrauth_sign_unauthenticated`** oder **`ptrauth_auth_and_resign`** zu verwenden, und teste speziell auf **`arm64e`**-Zielen.
+> Die **`arm64e`**-ABI verwendet für viele Function Pointer **Pointer Authentication (PAC)**. Blinde Pointer-Schreibvorgänge, die auf Intel noch funktioniert haben, können eine Call Site auf Apple Silicon beschädigen. Wenn du einen eigenen Rebinder oder Inline Hooker schreibst, solltest du darauf vorbereitet sein, **`<ptrauth.h>`**-Hilfsfunktionen wie **`ptrauth_sign_unauthenticated`** oder **`ptrauth_auth_and_resign`** zu verwenden, und speziell auf **`arm64e`**-Zielen testen.
 
-Für weitere Details zu **`__AUTH`**, **`__AUTH_CONST`** und **`__auth_got`**, siehe [diese Seite](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
+Weitere Details zu **`__AUTH`**, **`__AUTH_CONST`** und **`__auth_got`** findest du auf [this page](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
 
 ## Method Swizzling
 
-In ObjectiveC wird eine method so aufgerufen: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
+In ObjectiveC wird eine Methode beispielsweise so aufgerufen: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
-Dazu werden das **object**, die **method** und die **params** benötigt. Und wenn eine method aufgerufen wird, wird ein **msg gesendet** unter Verwendung der Funktion **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+Benötigt werden das **Objekt**, die **Methode** und die **Parameter**. Wenn eine Methode aufgerufen wird, wird eine **msg gesendet**, wobei die Funktion **`objc_msgSend`** verwendet wird: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
-Das object ist **`someObject`**, die method ist **`@selector(method1p1:p2:)`** und die arguments sind **value1**, **value2**.
+Das Objekt ist **`someObject`**, die Methode ist **`@selector(method1p1:p2:)`** und die Argumente sind **value1**, **value2**.
 
-Wenn man den object structures folgt, ist es möglich, zu einem **array of methods** zu gelangen, in dem die **names** und **pointers** zum method code **located** sind.
+Anhand der Objektstrukturen ist es möglich, ein **Array von Methoden** zu erreichen, in dem die **Namen** und **Pointer** auf den Methodencode **gespeichert** sind.
 
 > [!CAUTION]
-> Beachte, dass diese information aufgrund des Zugriffs auf methods und classes über ihre names im binary gespeichert ist, sodass sie mit `otool -ov </path/bin>` oder [`class-dump </path/bin>`](https://github.com/nygard/class-dump) ausgelesen werden kann
+> Beachte, dass Methoden und Klassen anhand ihrer Namen angesprochen werden. Diese Informationen sind daher im Binary gespeichert und können mit `otool -ov </path/bin>` oder [`class-dump </path/bin>`](https://github.com/nygard/class-dump) abgerufen werden.
 
-### Accessing the raw methods
+### Zugriff auf die rohen Methoden
 
-Es ist möglich, auf die Informationen der methods wie name, number of params oder address zuzugreifen, wie im folgenden Beispiel:
+Es ist möglich, auf Informationen zu den Methoden zuzugreifen, etwa den Namen, die Anzahl der Parameter oder die Adresse, wie im folgenden Beispiel:
 ```objectivec
 // gcc -framework Foundation test.m -o test
 
@@ -214,12 +214,12 @@ NSLog(@"Uppercase string: %@", uppercaseString3);
 return 0;
 }
 ```
-### Method Swizzling with method_exchangeImplementations
+### Method Swizzling mit method_exchangeImplementations
 
-Die Funktion **`method_exchangeImplementations`** erlaubt es, die **Adresse** der **Implementierung** von **einer Funktion gegen die andere** zu **ändern**.
+Die Funktion **`method_exchangeImplementations`** ermöglicht es, die **Adresse** der **Implementierung** **einer Funktion mit der einer anderen auszutauschen**.
 
 > [!CAUTION]
-> Wenn also eine Funktion aufgerufen wird, dann wird **die andere ausgeführt**.
+> Wenn also eine Funktion aufgerufen wird, wird **die jeweils andere ausgeführt**.
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -264,15 +264,15 @@ return 0;
 }
 ```
 > [!WARNING]
-> In diesem Fall könnte, wenn der **implementation code of the legit** method den **method**-**name** **verifies**, dies dieses swizzling **detecten** und verhindern, dass es ausgeführt wird.
+> In diesem Fall könnte der **Implementierungscode der legitimen** Methode, wenn er den **Namen** der **Methode** **überprüft**, dieses Swizzling erkennen und verhindern, dass es ausgeführt wird.
 >
 > Die folgende Technik hat diese Einschränkung nicht.
 
-### Method Swizzling with method_setImplementation
+### Method Swizzling mit method_setImplementation
 
-Das vorherige Format ist seltsam, weil du die implementation von 2 methods jeweils gegeneinander austauschst. Mit der Funktion **`method_setImplementation`** kannst du die **implementation** einer **method für die andere** **change**n.
+Das vorherige Format ist ungewöhnlich, weil du die Implementierung von 2 Methoden gegenseitig änderst. Mit der Funktion **`method_setImplementation`** kannst du die **Implementierung** einer **Methode durch die der anderen** ändern.
 
-Denk nur daran, die **address** der implementation der ursprünglichen zu **store**n, wenn du sie von der neuen implementation aus aufrufen willst, bevor du sie überschreibst, weil es später viel **complicated**er sein wird, diese address zu **locate**n.
+Denke daran, die Adresse der Implementierung der ursprünglichen Methode zu **speichern**, wenn du sie von der neuen Implementierung aus aufrufen möchtest, bevor du sie überschreibst, da es später deutlich komplizierter sein wird, diese Adresse zu finden.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -324,17 +324,17 @@ return 0;
 }
 }
 ```
-## Hooking Attack Methodology
+## Hooking-Angriffsmethodik
 
-Auf dieser Seite wurden verschiedene Wege diskutiert, functions zu hooken. Dabei ging es jedoch darum, **Code innerhalb des Prozesses auszuführen, um anzugreifen**.
+Auf dieser Seite wurden verschiedene Möglichkeiten zum Hooken von Funktionen besprochen. Sie erforderten jedoch das **Ausführen von Code innerhalb des anzugreifenden Prozesses**.
 
-Um das zu tun, ist die einfachste Technik, [Dyld via environment variables or hijacking](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md) zu injizieren. Ich vermute jedoch, dass dies auch über [Dylib process injection](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port) möglich wäre.
+Die einfachste dafür verwendbare Technik besteht darin, einen [Dyld über Umgebungsvariablen oder Hijacking einzuschleusen](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Dies könnte jedoch vermutlich auch über [Dylib process injection](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port) erfolgen.
 
-Allerdings sind beide Optionen **auf** **unprotected** Binaries/Prozesse **beschränkt**. Prüfe jede Technik, um mehr über die Einschränkungen zu erfahren.
+Beide Optionen sind jedoch auf **ungeschützte** Binärdateien/Prozesse **beschränkt**. Siehe die jeweiligen Techniken, um mehr über die Einschränkungen zu erfahren.
 
-Ein function hooking attack ist jedoch sehr spezifisch; ein Angreifer würde dies tun, um **sensible Informationen aus einem Prozess zu stehlen** (sonst würdest du einfach einen process injection attack durchführen). Und diese sensiblen Informationen könnten sich in vom Nutzer heruntergeladenen Apps wie MacPass befinden.
+Ein Function-Hooking-Angriff ist jedoch sehr spezifisch: Ein Angreifer führt ihn durch, um **sensible Informationen aus einem Prozess zu stehlen** (andernfalls würde man einfach einen Process-Injection-Angriff durchführen). Diese sensiblen Informationen könnten sich in von Benutzern heruntergeladenen Apps wie MacPass befinden.
 
-Der Angriffsvektor wäre also entweder, eine Schwachstelle zu finden oder die Signatur der Anwendung zu entfernen und die **`DYLD_INSERT_LIBRARIES`**-Umgebungsvariable über die Info.plist der Anwendung einzuschleusen, indem man etwas wie das Folgende hinzufügt:
+Der Angriffsvektor bestünde daher entweder darin, eine Schwachstelle zu finden oder die Signatur der Anwendung zu entfernen, die **`DYLD_INSERT_LIBRARIES`**-Umgebungsvariable über die Info.plist der Anwendung einzuschleusen und etwas wie Folgendes hinzuzufügen:
 ```xml
 <key>LSEnvironment</key>
 <dict>
@@ -342,16 +342,16 @@ Der Angriffsvektor wäre also entweder, eine Schwachstelle zu finden oder die Si
 <string>/Applications/Application.app/Contents/malicious.dylib</string>
 </dict>
 ```
-und dann die Anwendung **neu registrieren**:
+und anschließend die Anwendung **erneut registrieren**:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-Füge in dieser Library den Hooking-Code ein, um die Informationen zu exfiltrieren: Passwörter, Nachrichten...
+Füge dieser Library den Hooking-Code hinzu, um Informationen zu exfiltrieren: Passwörter, Nachrichten ...
 
 > [!CAUTION]
-> Beachte, dass in neueren Versionen von macOS, wenn du die Signatur des Application-Binaries **entfernst** und es zuvor ausgeführt wurde, macOS die Application **nicht mehr ausführen** wird.
+> Beachte, dass macOS in neueren Versionen die Anwendung nicht mehr ausführt, wenn du die **Signatur** der Anwendungs-Binary **entfernst** und sie zuvor bereits ausgeführt wurde.
 
-#### Library example
+#### Library-Beispiel
 ```objectivec
 // gcc -dynamiclib -framework Foundation sniff.m -o sniff.dylib
 
@@ -389,8 +389,8 @@ real_setPassword = method_setImplementation(real_Method, fake_IMP);
 ```
 ## Referenzen
 
-- [https://nshipster.com/method-swizzling/](https://nshipster.com/method-swizzling/)
-- [https://github.com/facebook/fishhook](https://github.com/facebook/fishhook)
-- [https://clang.llvm.org/docs/PointerAuthentication.html](https://clang.llvm.org/docs/PointerAuthentication.html)
+- [1] [Method Swizzling - NSHipster](https://nshipster.com/method-swizzling/)
+- [2] [facebook/fishhook: A library that simplifies the process of dynamically rebinding symbols in Mach-O binaries](https://github.com/facebook/fishhook)
+- [3] [Pointer Authentication — Clang Documentation](https://clang.llvm.org/docs/PointerAuthentication.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

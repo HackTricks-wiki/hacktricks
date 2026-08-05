@@ -4,12 +4,12 @@
 
 ## Grundlegende Informationen
 
-**XPC** (Cross-Process Communication) ist der primäre IPC-Mechanismus auf macOS. System daemons stellen **Mach services** bereit — benannte Ports, die bei `launchd` registriert sind — mit denen sich andere Prozesse über `NSXPCConnection` verbinden können.
+**XPC** (Cross-Process Communication) ist der primäre IPC-Mechanismus unter macOS. System-Daemons stellen **Mach services** bereit — benannte Ports, die bei `launchd` registriert sind und mit denen sich andere Prozesse über `NSXPCConnection` verbinden können.
 
-Jede **LaunchDaemon**- und **LaunchAgent**-plist mit einem `MachServices`-Schlüssel registriert einen oder mehrere benannte Mach-Ports. Dies sind systemweite XPC-Endpunkte, zu denen jeder Prozess versuchen kann, eine Verbindung herzustellen.
+Jede **LaunchDaemon**- und **LaunchAgent**-Plist mit einem `MachServices`-Schlüssel registriert einen oder mehrere benannte Mach-Ports. Dabei handelt es sich um systemweite XPC-Endpunkte, mit denen sich jeder Prozess zu verbinden versuchen kann.
 
 > [!WARNING]
-> XPC Mach services sind die **single largest local privilege escalation attack surface** auf macOS. Die meisten local root exploits in den letzten Jahren liefen über verwundbare XPC-Services in LaunchDaemons. Jede exponierte Methode in einem root daemon ist ein potenzieller escalation vector.
+> XPC Mach services sind die **größte lokale Privilege-Escalation-Angriffsfläche** unter macOS. Die meisten lokalen Root-Exploits der vergangenen Jahre liefen über verwundbare XPC-Services in LaunchDaemons. Jede exponierte Methode in einem Root-Daemon ist ein potenzieller Escalation-Vektor.
 
 ### Architektur
 ```
@@ -21,7 +21,7 @@ Daemon Process (root context)
 ↓ (Should verify client identity / entitlements)
 ↓ Performs privileged operation
 ```
-## Aufklärung
+## Enumeration
 
 ### Daemons mit Mach Services finden
 ```bash
@@ -47,9 +47,9 @@ WHERE e.isDaemon = 1
 ORDER BY e.privileged DESC
 LIMIT 50;"
 ```
-### Auflisten von XPC-Schnittstellen
+### XPC-Interfaces enumerieren
 
-Sobald du einen Daemon identifiziert hast, reverse-engineer seine XPC-Schnittstelle:
+Sobald du einen Daemon identifiziert hast, reverse-engineere dessen XPC-Interface:
 ```bash
 # Find the protocol definition in the binary
 strings /path/to/daemon | grep -i "protocol\|interface\|xpc\|method"
@@ -60,15 +60,15 @@ class-dump /path/to/daemon | grep -A20 "@protocol"
 # Check for XPC service bundles inside app bundles
 find /Applications -path "*/XPCServices/*.xpc" 2>/dev/null
 ```
-## XPC-Client-Verifizierungs-Schwachstellen
+## Schwachstellen bei der XPC-Client-Verifizierung
 
-Die häufigste Klasse von Schwachstellen in XPC-Services ist **unzureichende Client-Verifizierung**. Der Daemon sollte überprüfen:
+Die häufigste Schwachstellenklasse bei XPC-Services ist die **unzureichende Client-Verifizierung**. Der Daemon sollte Folgendes überprüfen:
 
-1. **Code signature** des verbindenden Prozesses
+1. **Codesignatur** des verbindenden Prozesses
 2. **Entitlements** des verbindenden Prozesses
-3. **Audit token** (nicht PID, das wiederverwendet werden kann)
+3. **Audit-Token** (nicht die PID, da diese wiederverwendet werden kann)
 
-### Anfälliges Muster: Keine Verifizierung
+### Verwundbares Muster: Keine Verifizierung
 ```objc
 // VULNERABLE — daemon accepts any connection
 - (BOOL)listener:(NSXPCListener *)listener
@@ -79,7 +79,7 @@ newConnection.exportedObject = self;
 return YES; // No verification!
 }
 ```
-### Verwundbares Muster: PID-Based Verification (Race Condition)
+### Verwundbares Muster: PID-basierte Verifizierung (Race Condition)
 ```objc
 // VULNERABLE — PID can be reused between check and use
 - (BOOL)listener:(NSXPCListener *)listener
@@ -93,7 +93,7 @@ return YES;
 return NO;
 }
 ```
-### Sicheres Muster: Audit-Token-Überprüfung
+### Sicheres Muster: Überprüfung des Audit-Tokens
 ```objc
 // SECURE — Uses audit token which cannot be spoofed
 - (BOOL)listener:(NSXPCListener *)listener
@@ -157,7 +157,7 @@ NSLog(@"Result: %@", result);
 ```
 ## Attack: XPC Object Deserialization
 
-XPC-Dienste, die komplexe Objekte akzeptieren (`NSSecureCoding` konform), können für **deserialization attacks** anfällig sein:
+XPC services, die komplexe Objekte (`NSSecureCoding`-konform) akzeptieren, können anfällig für **deserialization attacks** sein:
 ```objc
 // If the daemon accepts NSObject subclasses via XPC:
 // An attacker can send a crafted object that triggers:
@@ -166,11 +166,11 @@ XPC-Dienste, die komplexe Objekte akzeptieren (`NSSecureCoding` konform), könne
 // 3. Format string bugs (string objects as format arguments)
 // 4. Integer overflow (large numeric values)
 ```
-## Mach-Lookup Sandbox Exceptions
+## Mach-Lookup Sandbox-Ausnahmen
 
-### Wie Exceptions Sandbox Escape ermöglichen
+### Wie Ausnahmen einen Sandbox Escape ermöglichen
 
-Sandboxed-Anwendungen können normalerweise nur mit ihren eigenen XPC-Services kommunizieren. Allerdings erlauben **mach-lookup exceptions** den Zugriff auf systemweite Services:
+Sandboxed applications können normalerweise nur mit ihren eigenen XPC services kommunizieren. **mach-lookup exceptions** ermöglichen jedoch den Zugriff auf systemweite services:
 ```xml
 <!-- Entitlement granting mach-lookup exception -->
 <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
@@ -180,7 +180,7 @@ Sandboxed-Anwendungen können normalerweise nur mit ihren eigenen XPC-Services k
 <string>com.apple.CoreServices.coreservicesd</string>
 </array>
 ```
-### Anwendungen mit weit gefassten Ausnahmen
+### Anwendungen mit weitreichenden Ausnahmen finden
 ```bash
 # Find sandboxed apps with mach-lookup exceptions
 find /Applications -name "*.app" -exec sh -c '
@@ -194,7 +194,7 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 }
 ' _ {} \; 2>/dev/null
 ```
-### Sandbox Escape Chain
+### Sandbox Escape-Kette
 ```
 1. Compromise sandboxed app (e.g., via renderer exploit in browser/email)
 2. Enumerate mach-lookup exceptions from entitlements
@@ -203,11 +203,11 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 5. Exploit a daemon bug → code execution outside the sandbox
 6. Escalate from daemon's privilege level (often root)
 ```
-## Privilegierte Hilfsprogramme (SMJobBless)
+## Privileged Helper Tools (SMJobBless)
 
-### Wie sie funktionieren
+### Funktionsweise
 
-`SMJobBless` installiert einen privilegierten Helper, der über launchd als root ausgeführt wird. Der Helper kommuniziert mit seiner übergeordneten App über XPC:
+`SMJobBless` installiert einen privilegierten Helper, der über launchd als root ausgeführt wird. Der Helper kommuniziert über XPC mit seiner übergeordneten App:
 ```
 App (user context) ←→ XPC ←→ Helper (root via launchd)
 ```
@@ -238,7 +238,7 @@ reply(YES);
 }
 }
 ```
-### Ausnutzen schwacher Hilfsprogramme
+### Schwache Helfer ausnutzen
 ```bash
 # 1. Find installed privileged helpers
 ls /Library/PrivilegedHelperTools/
@@ -273,19 +273,19 @@ class-dump /path/to/daemon
 # 3. Monitor for crashes
 log stream --predicate 'process == "daemon-name" AND (eventMessage CONTAINS "crash" OR eventMessage CONTAINS "fault")'
 ```
-## Reale CVEs
+## Real-World CVEs
 
 | CVE | Beschreibung |
 |---|---|
-| CVE-2023-41993 | Deserialisierungsschwachstelle im XPC-Service |
-| CVE-2022-22616 | Gatekeeper-Umgehung durch Missbrauch eines XPC-Services |
-| CVE-2021-30657 | Privilegieneskalation im Sysmond XPC |
-| CVE-2020-9839 | XPC race condition im Systemdaemon |
-| CVE-2019-8802 | Fehlende Client-Überprüfung beim privilegierten Helfer-Tool |
-| CVE-2023-32369 | Migraine — SIP-Umgehung über `systemmigrationd` XPC |
-| CVE-2022-26712 | Root-Eskalation im PackageKit XPC |
+| CVE-2023-41993 | XPC service Deserialisierungs-Schwachstelle |
+| CVE-2022-22616 | Gatekeeper bypass durch XPC service abuse |
+| CVE-2021-30657 | Sysmond XPC privilege escalation |
+| CVE-2020-9839 | XPC race condition in System-Daemon |
+| CVE-2019-8802 | Privileged helper tool ohne Client-Verifizierung |
+| CVE-2023-32369 | Migraine — SIP bypass durch `systemmigrationd` XPC |
+| CVE-2022-26712 | PackageKit XPC root escalation |
 
-## Enumerationsskript
+## Enumeration Script
 ```bash
 #!/bin/bash
 echo "=== XPC Mach Services Security Audit ==="
@@ -313,11 +313,11 @@ plutil -p "$plist" | grep -A5 "MachServices" | sed 's/^/    /'
 }
 done
 ```
-## Quellen
+## References
 
-* [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
-* [Apple Developer — Daemons and Services Programming Guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
-* [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
-* [OBTS — XPC Attack Surface talks](https://objectivebythesea.org/)
+- [1] [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
+- [2] [Apple Developer — Programmierhandbuch für Daemons und Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
+- [3] [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
+- [4] [OBTS — Vorträge zur XPC-Angriffsfläche](https://objectivebythesea.org/)
 
 {{#include ../../../banners/hacktricks-training.md}}

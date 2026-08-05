@@ -1,4 +1,4 @@
-# macOS Apps - Inspektion, Debugging und Fuzzing
+# macOS Apps - Inspecting, debugging and Fuzzing
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -22,39 +22,29 @@ objdump --disassemble-symbols=_hello --x86-asm-syntax=intel toolsdemo #Disassemb
 ```bash
 nm -m ./tccd # List of symbols
 ```
-### jtool2 & Disarm
+### Disarm (altes jtool2)
 
-Sie können [**disarm von hier herunterladen**](https://newosxbook.com/tools/disarm.html).
+Du kannst [**disarm hier herunterladen**](https://newosxbook.com/tools/disarm.html).
+
+> [!TIP]
+> Beachte, dass **`disarm`** auch mit komprimierten IM4P-Dateien (wie `kernelcache`) arbeiten und nur die erforderlichen Teile extrahieren oder den erforderlichen Teil sogar analysieren kann, ohne ihn zu extrahieren.
 ```bash
+export JCOLOR=1
 ARCH=arm64e disarm -c -i -I --signature /path/bin # Get bin info and signature
 ARCH=arm64e disarm -c -l /path/bin # Get binary sections
 ARCH=arm64e disarm -c -L /path/bin # Get binary commands (dependencies included)
 ARCH=arm64e disarm -c -S /path/bin # Get symbols (func names, strings...)
 ARCH=arm64e disarm -c -d /path/bin # Get disasembled
-jtool2 -d __DATA.__const myipc_server | grep MIG # Get MIG info
+
+disarm -e filesets kernelcache.release.d23 # Extract filesets from kernelcache
+JDEBUG=1 disarm -e filesets kernelcache.release.d23 # Extract filesets from kernelcache with debug info
+disarm -r "code signature" /bin/ps # Check code signature of a binary
+disarm -e "code signature" /bin/ps # Extract code signature of a binary
 ```
-Sie können [**jtool2 hier herunterladen**](http://www.newosxbook.com/tools/jtool.html) oder es mit `brew` installieren.
-```bash
-# Install
-brew install --cask jtool2
-
-jtool2 -l /bin/ls # Get commands (headers)
-jtool2 -L /bin/ls # Get libraries
-jtool2 -S /bin/ls # Get symbol info
-jtool2 -d /bin/ls # Dump binary
-jtool2 -D /bin/ls # Decompile binary
-
-# Get signature information
-ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Automator
-
-# Get MIG information
-jtool2 -d __DATA.__const myipc_server | grep MIG
-```
-> [!CAUTION] > **jtool ist zugunsten von disarm veraltet**
-
 ### Codesign / ldid
 
-> [!TIP] > **`Codesign`** ist in **macOS** zu finden, während **`ldid`** in **iOS** zu finden ist.
+> [!TIP]
+> **`Codesign`** ist in **macOS** zu finden, während **`ldid`** in **iOS** zu finden ist.
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -83,50 +73,51 @@ ldid -S/tmp/entl.xml <binary>
 ```
 ### SuspiciousPackage
 
-[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) ist ein nützliches Tool, um **.pkg**-Dateien (Installer) zu inspizieren und zu sehen, was darin enthalten ist, bevor man sie installiert.\
-Diese Installer haben `preinstall` und `postinstall` Bash-Skripte, die von Malware-Autoren häufig missbraucht werden, um **die** **Malware** **persistieren** zu lassen.
+[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) ist ein nützliches Tool, um **.pkg**-Dateien (Installer) zu untersuchen und zu sehen, was sie enthalten, bevor sie installiert werden.\
+Diese Installer enthalten `preinstall`- und `postinstall`-Bash-Skripte, die Malware-Autoren häufig missbrauchen, um **die** **Malware** zu **persistieren**.
 
 ### hdiutil
 
-Dieses Tool ermöglicht es, Apple-Disk-Images (**.dmg**) zu **mounten**, um sie zu inspizieren, bevor man etwas ausführt:
+Mit diesem Tool können Apple-Disk-Images (**.dmg**) gemountet werden, um sie zu untersuchen, bevor irgendetwas ausgeführt wird:
 ```bash
 hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 ```
-Es wird in `/Volumes` gemountet
+Es wird in `/Volumes` eingehängt.
 
-### Gepackte Binärdateien
+### Gepackte Binaries
 
-- Überprüfen Sie die hohe Entropie
-- Überprüfen Sie die Strings (wenn es fast keinen verständlichen String gibt, gepackt)
-- Der UPX-Packer für MacOS generiert einen Abschnitt namens "\_\_XHDR"
+- Auf hohe Entropie prüfen
+- Die Strings prüfen (gibt es fast keine verständlichen Strings, ist die Binary gepackt)
+- Der UPX packer für MacOS erzeugt eine Section namens "\_\_XHDR"
 
 ## Statische Objective-C-Analyse
 
 ### Metadaten
 
 > [!CAUTION]
-> Beachten Sie, dass Programme, die in Objective-C geschrieben sind, **ihre** Klassendeklarationen **beibehalten**, **wenn** sie in [Mach-O-Binärdateien](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md) **kompiliert** werden. Solche Klassendeklarationen **beinhaltet** den Namen und Typ von:
+> Beachte, dass in Objective-C geschriebene Programme ihre Klassendeklarationen **beibehalten**, **wenn** sie in [Mach-O binaries](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md) **kompiliert** werden. Solche Klassendeklarationen **enthalten** den Namen und Typ von:
 
-- Den definierten Schnittstellen
-- Den Schnittstellenmethoden
-- Den Instanzvariablen der Schnittstelle
+- Den definierten Interfaces
+- Den Interface-Methoden
+- Den Interface-Instanzvariablen
 - Den definierten Protokollen
 
-Beachten Sie, dass diese Namen obfuskiert sein könnten, um das Reverse Engineering der Binärdatei zu erschweren.
+Beachte, dass diese Namen obfuskiert sein können, um das Reversing der Binary zu erschweren.
 
-### Funktionsaufruf
+### Funktionsaufrufe
 
-Wenn eine Funktion in einer Binärdatei aufgerufen wird, die Objective-C verwendet, wird der kompilierte Code anstelle des Aufrufs dieser Funktion **`objc_msgSend`** aufrufen. Dies wird die endgültige Funktion aufrufen:
+Wenn eine Funktion in einer Binary aufgerufen wird, die Objective-C verwendet, ruft der kompilierte Code nicht direkt diese Funktion auf, sondern **`objc_msgSend`**. Dieses ruft die endgültige Funktion auf:
 
-![](<../../../images/image (305).png>)
+![Metadaten – Funktionsaufrufe: Wenn eine Funktion in einer Binary aufgerufen wird, die Objective-C verwendet, ruft der kompilierte Code nicht direkt diese Funktion auf, sondern objc msgSend. Dieses ruft ... auf](<../../../images/image (305).png>)
 
 Die Parameter, die diese Funktion erwartet, sind:
 
-- Der erste Parameter (**self**) ist "ein Zeiger, der auf die **Instanz der Klasse zeigt, die die Nachricht empfangen soll**". Einfacher ausgedrückt, es ist das Objekt, auf dem die Methode aufgerufen wird. Wenn die Methode eine Klassenmethode ist, ist dies eine Instanz des Klassenobjekts (als Ganzes), während bei einer Instanzmethode self auf eine instanziierte Instanz der Klasse als Objekt zeigt.
-- Der zweite Parameter (**op**) ist "der Selektor der Methode, die die Nachricht verarbeitet". Einfacher ausgedrückt, dies ist nur der **Name der Methode.**
-- Die verbleibenden Parameter sind alle **Werte, die von der Methode benötigt werden** (op).
+- Der erste Parameter (**self**) ist „ein Pointer, der auf die **Instanz der Klasse zeigt, die die Nachricht empfangen soll**“. Einfacher ausgedrückt ist es das Objekt, auf dem die Methode aufgerufen wird. Wenn die Methode eine Klassenmethode ist, handelt es sich um eine Instanz des Klassenobjekts (als Ganzes), während `self` bei einer Instanzmethode auf eine instanziierte Instanz der Klasse als Objekt zeigt.
+- Der zweite Parameter (**op**) ist „der Selector der Methode, die die Nachricht verarbeitet“. Einfacher ausgedrückt ist dies nur der **Name der Methode**.
+- Die verbleibenden Parameter sind alle **von der Methode benötigten Werte** (op).
 
-Siehe, wie Sie **diese Informationen einfach mit `lldb` in ARM64 erhalten** auf dieser Seite:
+Siehe auf dieser Seite, wie du diese Informationen einfach mit `lldb` in **ARM64** abrufen kannst:
+
 
 {{#ref}}
 arm64-basic-assembly.md
@@ -134,27 +125,27 @@ arm64-basic-assembly.md
 
 x64:
 
-| **Argument**      | **Register**                                                    | **(für) objc_msgSend**                                 |
-| ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
-| **1. Argument**   | **rdi**                                                         | **self: Objekt, auf dem die Methode aufgerufen wird**  |
-| **2. Argument**   | **rsi**                                                         | **op: Name der Methode**                               |
-| **3. Argument**   | **rdx**                                                         | **1. Argument für die Methode**                         |
-| **4. Argument**   | **rcx**                                                         | **2. Argument für die Methode**                         |
-| **5. Argument**   | **r8**                                                          | **3. Argument für die Methode**                         |
-| **6. Argument**   | **r9**                                                          | **4. Argument für die Methode**                         |
-| **7. Argument und mehr** | <p><strong>rsp+</strong><br><strong>(auf dem Stack)</strong></p> | **5. Argument und mehr für die Methode**               |
+| **Argument**       | **Register**                                                    | **(für) objc_msgSend**                                  |
+| ------------------ | --------------------------------------------------------------- | ------------------------------------------------------ |
+| **1. Argument**    | **rdi**                                                         | **self: Objekt, auf dem die Methode aufgerufen wird**  |
+| **2. Argument**    | **rsi**                                                         | **op: Name der Methode**                                |
+| **3. Argument**    | **rdx**                                                         | **1. Argument der Methode**                             |
+| **4. Argument**    | **rcx**                                                         | **2. Argument der Methode**                             |
+| **5. Argument**    | **r8**                                                          | **3. Argument der Methode**                             |
+| **6. Argument**    | **r9**                                                          | **4. Argument der Methode**                             |
+| **7.+ Argument**   | <p><strong>rsp+</strong><br><strong>(auf dem Stack)</strong></p> | **5.+ Argument der Methode**                            |
 
-### ObjectiveC-Metadaten dumpen
+### Objective-C-Metadaten dumpen
 
 ### Dynadump
 
-[**Dynadump**](https://github.com/DerekSelander/dynadump) ist ein Tool zum Klassendump von Objective-C-Binärdateien. Das GitHub gibt dylibs an, funktioniert jedoch auch mit ausführbaren Dateien.
+[**Dynadump**](https://github.com/DerekSelander/dynadump) ist ein Tool zum class-dump von Objective-C-Binaries. Im github werden dylibs angegeben, aber dies funktioniert auch mit Executables.
 ```bash
 ./dynadump dump /path/to/bin
 ```
-Zum Zeitpunkt des Schreibens ist dies **derzeit der, der am besten funktioniert**.
+Zum Zeitpunkt der Erstellung ist dies **derzeit das Tool, das am besten funktioniert**.
 
-#### Reguläre Werkzeuge
+#### Reguläre Tools
 ```bash
 nm --dyldinfo-only /path/to/bin
 otool -ov /path/to/bin
@@ -162,13 +153,13 @@ objdump --macho --objc-meta-data /path/to/bin
 ```
 #### class-dump
 
-[**class-dump**](https://github.com/nygard/class-dump/) ist das ursprüngliche Tool, das Deklarationen für die Klassen, Kategorien und Protokolle im Objective-C formatierten Code generiert.
+[**class-dump**](https://github.com/nygard/class-dump/) ist das ursprüngliche Tool zum Generieren von Deklarationen für die Klassen, Kategorien und Protokolle in Objective-C-formatiertem Code.
 
-Es ist alt und wird nicht mehr gewartet, daher funktioniert es wahrscheinlich nicht richtig.
+Es ist veraltet und wird nicht mehr gewartet, daher funktioniert es wahrscheinlich nicht ordnungsgemäß.
 
 #### ICDump
 
-[**iCDump**](https://github.com/romainthomas/iCDump) ist ein modernes und plattformübergreifendes Objective-C-Klassendump. Im Vergleich zu bestehenden Tools kann iCDump unabhängig vom Apple-Ökosystem ausgeführt werden und bietet Python-Bindings.
+[**iCDump**](https://github.com/romainthomas/iCDump) ist ein modernes und plattformübergreifendes Tool zum class dump von Objective-C. Im Vergleich zu bestehenden Tools kann iCDump unabhängig vom Apple-Ökosystem ausgeführt werden und stellt Python-Bindings bereit.
 ```python
 import icdump
 metadata = icdump.objc.parse("/path/to/bin")
@@ -177,9 +168,9 @@ print(metadata.to_decl())
 ```
 ## Statische Swift-Analyse
 
-Mit Swift-Binärdateien, da es eine Kompatibilität zu Objective-C gibt, können Sie manchmal Deklarationen mit [class-dump](https://github.com/nygard/class-dump/) extrahieren, aber nicht immer.
+Bei Swift-Binaries kann man aufgrund der Objective-C-Kompatibilität manchmal Deklarationen mit [class-dump](https://github.com/nygard/class-dump/) extrahieren, aber nicht immer.
 
-Mit den Befehlen **`jtool -l`** oder **`otool -l`** ist es möglich, mehrere Abschnitte zu finden, die mit dem Präfix **`__swift5`** beginnen:
+Mit den Befehlszeilen **`jtool -l`** oder **`otool -l`** ist es möglich, mehrere Sektionen zu finden, die mit dem Präfix **`__swift5`** beginnen:
 ```bash
 jtool2 -l /Applications/Stocks.app/Contents/MacOS/Stocks
 LC 00: LC_SEGMENT_64              Mem: 0x000000000-0x100000000    __PAGEZERO
@@ -191,9 +182,9 @@ Mem: 0x100027064-0x1000274cc        __TEXT.__swift5_fieldmd
 Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
 [...]
 ```
-Sie finden weitere Informationen über die [**Informationen, die in diesem Abschnitt gespeichert sind, in diesem Blogbeitrag**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html).
+Weitere Informationen über die [**in diesen Abschnitten gespeicherten Informationen findest du in diesem Blogbeitrag**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html).
 
-Darüber hinaus **könnten Swift-Binärdateien Symbole enthalten** (zum Beispiel müssen Bibliotheken Symbole speichern, damit ihre Funktionen aufgerufen werden können). Die **Symbole enthalten normalerweise Informationen über den Funktionsnamen** und Attribute auf eine unansehnliche Weise, sodass sie sehr nützlich sind, und es gibt "**Demangler**", die den ursprünglichen Namen wiederherstellen können:
+Außerdem können **Swift binaries Symbole enthalten** (zum Beispiel müssen Bibliotheken Symbole speichern, damit ihre Funktionen aufgerufen werden können). Die **Symbole enthalten normalerweise auf unschöne Weise Informationen über den Funktionsnamen** und Attribute, daher sind sie sehr nützlich, und es gibt "**demanglers"**, die den ursprünglichen Namen ermitteln können:
 ```bash
 # Ghidra plugin
 https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
@@ -204,74 +195,74 @@ swift demangle
 ## Dynamische Analyse
 
 > [!WARNING]
-> Beachten Sie, dass zum Debuggen von Binärdateien **SIP deaktiviert sein muss** (`csrutil disable` oder `csrutil enable --without debug`) oder die Binärdateien in einen temporären Ordner kopiert werden müssen und **die Signatur entfernt** wird mit `codesign --remove-signature <binary-path>` oder das Debuggen der Binärdatei erlaubt wird (Sie können [dieses Skript](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b) verwenden).
+> Beachte, dass zum Debuggen von Binärdateien **SIP deaktiviert sein muss** (`csrutil disable` oder `csrutil enable --without debug`), oder dass die Binärdateien in einen temporären Ordner kopiert und die **Signatur entfernt** werden muss mit `codesign --remove-signature <binary-path>`, oder dass das Debuggen der Binärdatei erlaubt werden muss (du kannst [dieses Skript](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b) verwenden).
 
 > [!WARNING]
-> Beachten Sie, dass zum **Instrumentieren von System-Binärdateien** (wie `cloudconfigurationd`) auf macOS **SIP deaktiviert sein muss** (das bloße Entfernen der Signatur funktioniert nicht).
+> Beachte, dass zum **Instrumentieren von System-Binärdateien** (wie `cloudconfigurationd`) unter macOS **SIP deaktiviert sein muss** (das alleinige Entfernen der Signatur funktioniert nicht).
 
 ### APIs
 
-macOS bietet einige interessante APIs, die Informationen über die Prozesse bereitstellen:
+macOS stellt einige interessante APIs bereit, die Informationen über die Prozesse liefern:
 
-- `proc_info`: Dies ist die Haupt-API, die viele Informationen über jeden Prozess liefert. Sie müssen root sein, um Informationen über andere Prozesse zu erhalten, aber Sie benötigen keine speziellen Berechtigungen oder Mach-Ports.
-- `libsysmon.dylib`: Es ermöglicht, Informationen über Prozesse über XPC-exponierte Funktionen zu erhalten, jedoch ist es erforderlich, die Berechtigung `com.apple.sysmond.client` zu haben.
+- `proc_info`: Dies ist die wichtigste API und liefert viele Informationen über jeden Prozess. Du musst root sein, um Informationen über andere Prozesse abzurufen, benötigst jedoch keine speziellen Entitlements oder Mach-Ports.
+- `libsysmon.dylib`: Damit können über exponierte XPC-Funktionen Informationen über Prozesse abgerufen werden. Dafür ist jedoch das Entitlement `com.apple.sysmond.client` erforderlich.
 
-### Stackshot & Mikrostackshots
+### Stackshot & microstackshots
 
-**Stackshotting** ist eine Technik, die verwendet wird, um den Zustand der Prozesse zu erfassen, einschließlich der Aufrufstapel aller laufenden Threads. Dies ist besonders nützlich für Debugging, Leistungsanalyse und das Verständnis des Verhaltens des Systems zu einem bestimmten Zeitpunkt. Auf iOS und macOS kann Stackshotting mit mehreren Tools und Methoden wie den Tools **`sample`** und **`spindump`** durchgeführt werden.
+**Stackshotting** ist eine Technik, mit der der Zustand der Prozesse erfasst wird, einschließlich der Call Stacks aller laufenden Threads. Dies ist besonders nützlich für Debugging, Performance-Analyse und das Verständnis des Verhaltens des Systems zu einem bestimmten Zeitpunkt. Unter iOS und macOS kann Stackshotting mit mehreren Tools und Methoden wie den Tools **`sample`** und **`spindump`** durchgeführt werden.
 
 ### Sysdiagnose
 
-Dieses Tool (`/usr/bini/ysdiagnose`) sammelt im Wesentlichen viele Informationen von Ihrem Computer, indem es Dutzende von verschiedenen Befehlen wie `ps`, `zprint` usw. ausführt.
+Dieses Tool (`/usr/bini/ysdiagnose`) sammelt im Wesentlichen zahlreiche Informationen von deinem Computer, indem es Dutzende verschiedener Befehle wie `ps`, `zprint` ... ausführt.
 
-Es muss als **root** ausgeführt werden, und der Daemon `/usr/libexec/sysdiagnosed` hat sehr interessante Berechtigungen wie `com.apple.system-task-ports` und `get-task-allow`.
+Es muss als **root** ausgeführt werden, und der Daemon `/usr/libexec/sysdiagnosed` verfügt über sehr interessante Entitlements wie `com.apple.system-task-ports` und `get-task-allow`.
 
-Seine plist befindet sich in `/System/Library/LaunchDaemons/com.apple.sysdiagnose.plist`, die 3 MachServices deklariert:
+Seine Plist befindet sich unter `/System/Library/LaunchDaemons/com.apple.sysdiagnose.plist` und definiert 3 MachServices:
 
 - `com.apple.sysdiagnose.CacheDelete`: Löscht alte Archive in /var/rmp
-- `com.apple.sysdiagnose.kernel.ipc`: Spezialport 23 (Kernel)
-- `com.apple.sysdiagnose.service.xpc`: Benutzeroberflächenmodus über die `Libsysdiagnose` Obj-C-Klasse. Drei Argumente in einem Dict können übergeben werden (`compress`, `display`, `run`)
+- `com.apple.sysdiagnose.kernel.ipc`: Spezieller Port 23 (Kernel)
+- `com.apple.sysdiagnose.service.xpc`: User-Mode-Schnittstelle über die Obj-C-Klasse `Libsysdiagnose`. Drei Argumente können in einem Dict übergeben werden (`compress`, `display`, `run`)
 
-### Vereinheitlichte Protokolle
+### Unified Logs
 
-MacOS generiert viele Protokolle, die sehr nützlich sein können, wenn Sie eine Anwendung ausführen und versuchen zu verstehen, **was sie tut**.
+MacOS generiert zahlreiche Logs, die beim Ausführen einer Anwendung sehr nützlich sein können, um zu verstehen, **was sie tut**.
 
-Darüber hinaus gibt es einige Protokolle, die das Tag `<private>` enthalten, um einige **Benutzer**- oder **Computer**-**identifizierbare** Informationen zu **verbergen**. Es ist jedoch möglich, **ein Zertifikat zu installieren, um diese Informationen offenzulegen**. Folgen Sie den Erklärungen von [**hier**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
+Außerdem gibt es einige Logs, die das Tag `<private>` enthalten und damit bestimmte **identifizierbare** Informationen über **Benutzer** oder **Computer** **verbergen**. Es ist jedoch möglich, ein **Zertifikat zu installieren, um diese Informationen offenzulegen**. Folge den Erklärungen [**hier**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
 
 ### Hopper
 
-#### Linke Spalte
+#### Linkes Panel
 
-In der linken Spalte von Hopper ist es möglich, die Symbole (**Labels**) der Binärdatei, die Liste der Prozeduren und Funktionen (**Proc**) und die Strings (**Str**) zu sehen. Dies sind nicht alle Strings, sondern die, die in verschiedenen Teilen der Mac-O-Datei definiert sind (wie _cstring oder_ `objc_methname`).
+Im linken Panel von Hopper können die Symbole (**Labels**) der Binärdatei, die Liste der Prozeduren und Funktionen (**Proc**) sowie die Strings (**Str**) angezeigt werden. Das sind nicht alle Strings, sondern diejenigen, die in mehreren Teilen der Mach-O-Datei definiert sind (wie _cstring oder_ `objc_methname`).
 
-#### Mittlere Spalte
+#### Mittleres Panel
 
-In der mittleren Spalte können Sie den **disassemblierten Code** sehen. Und Sie können ihn als **rohen** Disassemble, als **Graph**, als **dekompiliert** und als **Binärdatei** anzeigen, indem Sie auf das jeweilige Symbol klicken:
+Im mittleren Panel kannst du den **disassemblierten Code** sehen. Du kannst ihn als **rohes** Disassembly, als **Graph**, als **dekompilierten** Code und als **Binärdarstellung** anzeigen, indem du auf das jeweilige Symbol klickst:
 
 <figure><img src="../../../images/image (343).png" alt=""><figcaption></figcaption></figure>
 
-Wenn Sie mit der rechten Maustaste auf ein Codeobjekt klicken, können Sie **Referenzen zu/von diesem Objekt** sehen oder sogar seinen Namen ändern (dies funktioniert nicht im dekompilierten Pseudocode):
+Durch einen Rechtsklick auf ein Code-Objekt kannst du **Referenzen zu/von diesem Objekt** anzeigen oder sogar seinen Namen ändern (dies funktioniert nicht im dekompilierten Pseudocode):
 
 <figure><img src="../../../images/image (1117).png" alt=""><figcaption></figcaption></figure>
 
-Darüber hinaus können Sie in der **mittleren unteren Ecke Python-Befehle** eingeben.
+Außerdem kannst du **unten im mittleren Bereich Python-Befehle schreiben**.
 
-#### Rechte Spalte
+#### Rechtes Panel
 
-In der rechten Spalte können Sie interessante Informationen wie die **Navigationshistorie** sehen (damit Sie wissen, wie Sie zur aktuellen Situation gekommen sind), das **Aufrufdiagramm**, in dem Sie alle **Funktionen sehen können, die diese Funktion aufrufen**, und alle Funktionen, die **diese Funktion aufruft**, sowie Informationen zu **lokalen Variablen**.
+Im rechten Panel kannst du interessante Informationen sehen, beispielsweise den **Navigationsverlauf** (damit du weißt, wie du zur aktuellen Situation gelangt bist), den **Call Graph**, in dem du alle **Funktionen sehen kannst, die diese Funktion aufrufen**, sowie alle Funktionen, **die von dieser Funktion aufgerufen werden**, und Informationen zu **lokalen Variablen**.
 
 ### dtrace
 
-Es ermöglicht Benutzern den Zugriff auf Anwendungen auf einem extrem **niedrigen Niveau** und bietet eine Möglichkeit für Benutzer, **Programme** zu **verfolgen** und sogar ihren Ausführungsfluss zu ändern. Dtrace verwendet **Proben**, die **im gesamten Kernel platziert** sind und sich an Orten wie dem Anfang und Ende von Systemaufrufen befinden.
+Damit erhalten Benutzer Zugriff auf Anwendungen auf einer extrem **niedrigen Ebene** und können **Programme** **tracen** sowie sogar deren Ausführungsfluss ändern. Dtrace verwendet **Probes**, die **im gesamten Kernel platziert** sind, beispielsweise am Anfang und Ende von Systemaufrufen.
 
-DTrace verwendet die Funktion **`dtrace_probe_create`**, um eine Probe für jeden Systemaufruf zu erstellen. Diese Proben können am **Einstiegs- und Ausgangspunkt jedes Systemaufrufs** ausgelöst werden. Die Interaktion mit DTrace erfolgt über /dev/dtrace, das nur für den Root-Benutzer verfügbar ist.
+DTrace verwendet die Funktion **`dtrace_probe_create`**, um für jeden Systemaufruf eine Probe zu erstellen. Diese Probes können am **Eintritts- und Austrittspunkt jedes Systemaufrufs** ausgelöst werden. Die Interaktion mit DTrace erfolgt über /dev/dtrace, das nur für den root-Benutzer verfügbar ist.
 
 > [!TIP]
-> Um Dtrace zu aktivieren, ohne den SIP-Schutz vollständig zu deaktivieren, können Sie im Wiederherstellungsmodus ausführen: `csrutil enable --without dtrace`
+> Um Dtrace zu aktivieren, ohne den SIP-Schutz vollständig zu deaktivieren, kannst du im Recovery Mode Folgendes ausführen: `csrutil enable --without dtrace`
 >
-> Sie können auch **`dtrace`** oder **`dtruss`** Binärdateien verwenden, die **Sie kompiliert haben**.
+> Du kannst auch **`dtrace`**- oder **`dtruss`**-Binärdateien verwenden, die **du kompiliert hast**.
 
-Die verfügbaren Proben von dtrace können mit:
+Die verfügbaren Probes von dtrace können abgerufen werden mit:
 ```bash
 dtrace -l | head
 ID   PROVIDER            MODULE                          FUNCTION NAME
@@ -281,20 +272,22 @@ ID   PROVIDER            MODULE                          FUNCTION NAME
 43    profile                                                     profile-97
 44    profile                                                     profile-199
 ```
-Der Probenname besteht aus vier Teilen: dem Anbieter, dem Modul, der Funktion und dem Namen (`fbt:mach_kernel:ptrace:entry`). Wenn Sie einen Teil des Namens nicht angeben, wird Dtrace diesen Teil als Platzhalter anwenden.
+Der Probe-Name besteht aus vier Teilen: Provider, Modul, Funktion und Name (`fbt:mach_kernel:ptrace:entry`). Wenn du einen Teil des Namens nicht angibst, verwendet DTrace diesen Teil als Wildcard.
 
-Um DTrace zu konfigurieren, um Proben zu aktivieren und anzugeben, welche Aktionen ausgeführt werden sollen, wenn sie ausgelöst werden, müssen wir die D-Sprache verwenden.
+Um DTrace so zu konfigurieren, dass Probes aktiviert werden und festzulegen, welche Aktionen beim Auslösen ausgeführt werden, müssen wir die D language verwenden.
 
-Eine detailliertere Erklärung und weitere Beispiele finden Sie unter [https://illumos.org/books/dtrace/chp-intro.html](https://illumos.org/books/dtrace/chp-intro.html)
+Eine ausführlichere Erklärung und weitere Beispiele findest du unter [https://illumos.org/books/dtrace/chp-intro.html](https://illumos.org/books/dtrace/chp-intro.html)
 
 #### Beispiele
 
-Führen Sie `man -k dtrace` aus, um die **verfügbaren DTrace-Skripte** aufzulisten. Beispiel: `sudo dtruss -n binary`
+Führe `man -k dtrace` aus, um die **verfügbaren DTrace scripts** aufzulisten. Beispiel: `sudo dtruss -n binary`
+
+- In Zeile
 ```bash
 #Count the number of syscalls of each running process
 sudo dtrace -n 'syscall:::entry {@[execname] = count()}'
 ```
-- Skript
+- script
 ```bash
 syscall:::entry
 /pid == $1/
@@ -339,33 +332,33 @@ dtruss -c -p 1000 #get syscalls of PID 1000
 ```
 ### kdebug
 
-Es handelt sich um eine Kernel-Trace-Einrichtung. Die dokumentierten Codes sind in **`/usr/share/misc/trace.codes`** zu finden.
+Es handelt sich um eine Kernel-Tracing-Funktion. Die dokumentierten Codes befinden sich in **`/usr/share/misc/trace.codes`**.
 
-Tools wie `latency`, `sc_usage`, `fs_usage` und `trace` verwenden es intern.
+Tools wie `latency`, `sc_usage`, `fs_usage` und `trace` verwenden sie intern.
 
-Um mit `kdebug` zu interagieren, wird `sysctl` über den `kern.kdebug`-Namespace verwendet, und die MIBs, die verwendet werden können, sind in `sys/sysctl.h` zu finden, wobei die Funktionen in `bsd/kern/kdebug.c` implementiert sind.
+Für die Schnittstelle zu `kdebug` wird `sysctl` über den Namespace `kern.kdebug` verwendet. Die zu verwendenden MIBs befinden sich in `sys/sysctl.h`; die Funktionen sind in `bsd/kern/kdebug.c` implementiert.
 
-Um mit kdebug über einen benutzerdefinierten Client zu interagieren, sind dies normalerweise die Schritte:
+Um mit einem benutzerdefinierten Client mit kdebug zu interagieren, sind dies normalerweise die Schritte:
 
-- Entfernen Sie vorhandene Einstellungen mit KERN_KDSETREMOVE
-- Setzen Sie Trace mit KERN_KDSETBUF und KERN_KDSETUP
-- Verwenden Sie KERN_KDGETBUF, um die Anzahl der Puffer-Einträge zu erhalten
-- Holen Sie sich den eigenen Client aus dem Trace mit KERN_KDPINDEX
-- Aktivieren Sie das Tracing mit KERN_KDENABLE
-- Lesen Sie den Puffer, indem Sie KERN_KDREADTR aufrufen
-- Um jeden Thread mit seinem Prozess abzugleichen, rufen Sie KERN_KDTHRMAP auf.
+- Vorhandene Einstellungen mit KERN_KDSETREMOVE entfernen
+- Den Trace mit KERN_KDSETBUF und KERN_KDSETUP einrichten
+- KERN_KDGETBUF verwenden, um die Anzahl der Buffer-Einträge abzurufen
+- Den eigenen Client mit KERN_KDPINDEX aus dem Trace entfernen
+- Tracing mit KERN_KDENABLE aktivieren
+- Den Buffer durch Aufruf von KERN_KDREADTR lesen
+- KERN_KDTHRMAP verwenden, um jeden Thread seinem Prozess zuzuordnen.
 
-Um diese Informationen zu erhalten, ist es möglich, das Apple-Tool **`trace`** oder das benutzerdefinierte Tool [kDebugView (kdv)](https://newosxbook.com/tools/kdv.html)**.**
+Um diese Informationen abzurufen, kann das Apple-Tool **`trace`** oder das benutzerdefinierte Tool [kDebugView (kdv)](https://newosxbook.com/tools/kdv.html)** verwendet werden.**
 
-**Beachten Sie, dass Kdebug nur für einen Kunden gleichzeitig verfügbar ist.** Daher kann nur ein k-debug-gestütztes Tool zur gleichen Zeit ausgeführt werden.
+**Beachte, dass Kdebug nur für jeweils 1 Benutzer verfügbar ist.** Daher kann immer nur ein von k-debug unterstütztes Tool gleichzeitig ausgeführt werden.
 
 ### ktrace
 
-Die `ktrace_*` APIs stammen aus `libktrace.dylib`, die die von `Kdebug` umhüllen. Ein Client kann einfach `ktrace_session_create` und `ktrace_events_[single/class]` aufrufen, um Callbacks für spezifische Codes festzulegen, und dann mit `ktrace_start` starten.
+Die `ktrace_*`-APIs stammen aus `libktrace.dylib`, das die APIs von `Kdebug` kapselt. Ein Client kann dann einfach `ktrace_session_create` und `ktrace_events_[single/class]` aufrufen, um Callbacks für bestimmte Codes festzulegen, und anschließend mit `ktrace_start` starten.
 
-Sie können dies sogar mit **SIP aktiviert** verwenden.
+Du kannst dieses Tool auch bei **aktiviertem SIP** verwenden.
 
-Sie können als Clients das Dienstprogramm `ktrace` verwenden:
+Als Clients kannst du das Dienstprogramm `ktrace` verwenden:
 ```bash
 ktrace trace -s -S -t c -c ls | grep "ls("
 ```
@@ -373,75 +366,75 @@ Oder `tailspin`.
 
 ### kperf
 
-Dies wird verwendet, um ein Kernel-Level-Profiling durchzuführen und ist mit `Kdebug`-Aufrufen erstellt.
+Dies wird für Kernel-Level-Profiling verwendet und basiert auf `Kdebug`-Callouts.
 
-Grundsätzlich wird die globale Variable `kernel_debug_active` überprüft und wenn sie gesetzt ist, wird `kperf_kdebug_handler` mit dem `Kdebug`-Code und der Adresse des aufrufenden Kernel-Frames aufgerufen. Wenn der `Kdebug`-Code mit einem ausgewählten übereinstimmt, werden die als Bitmap konfigurierten "Aktionen" abgerufen (siehe `osfmk/kperf/action.h` für die Optionen).
+Grundsätzlich wird die globale Variable `kernel_debug_active` überprüft. Wenn sie gesetzt ist, wird `kperf_kdebug_handler` mit dem `Kdebug`-Code und der Adresse des aufrufenden Kernel-Frames aufgerufen. Wenn der `Kdebug`-Code mit einem ausgewählten Code übereinstimmt, werden die als Bitmap konfigurierten „actions“ abgerufen (siehe `osfmk/kperf/action.h` für die Optionen).
 
-Kperf hat auch eine sysctl MIB-Tabelle: (als root) `sysctl kperf`. Diese Codes sind in `osfmk/kperf/kperfbsd.c` zu finden.
+Kperf verfügt außerdem über eine sysctl-MIB-Tabelle: (als root) `sysctl kperf`. Der entsprechende Code befindet sich in `osfmk/kperf/kperfbsd.c`.
 
-Darüber hinaus residiert ein Teil der Funktionalität von Kperf in `kpc`, das Informationen über Maschinenleistungszähler bereitstellt.
+Darüber hinaus befindet sich ein Teil der Kperf-Funktionalität in `kpc`, das Informationen über die Performance-Counter der Maschine bereitstellt.
 
 ### ProcessMonitor
 
-[**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) ist ein sehr nützliches Tool, um die prozessbezogenen Aktionen zu überprüfen, die ein Prozess ausführt (zum Beispiel, um zu überwachen, welche neuen Prozesse ein Prozess erstellt).
+[**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) ist ein sehr nützliches Tool, um die prozessbezogenen Aktionen zu überprüfen, die ein Prozess ausführt (beispielsweise um zu überwachen, welche neuen Prozesse ein Prozess erstellt).
 
 ### SpriteTree
 
-[**SpriteTree**](https://themittenmac.com/tools/) ist ein Tool, das die Beziehungen zwischen Prozessen druckt.\
-Sie müssen Ihren Mac mit einem Befehl wie **`sudo eslogger fork exec rename create > cap.json`** überwachen (das Terminal, das dies startet, benötigt FDA). Und dann können Sie die JSON in diesem Tool laden, um alle Beziehungen anzuzeigen:
+[**SpriteTree**](https://themittenmac.com/tools/) ist ein Tool, das die Beziehungen zwischen Prozessen ausgibt.\
+Du musst deinen Mac mit einem Befehl wie **`sudo eslogger fork exec rename create > cap.json`** überwachen (das Terminal, in dem dieser Befehl gestartet wird, benötigt FDA). Anschließend kannst du die JSON-Datei in dieses Tool laden, um alle Beziehungen anzuzeigen:
 
 <figure><img src="../../../images/image (1182).png" alt="" width="375"><figcaption></figcaption></figure>
 
 ### FileMonitor
 
-[**FileMonitor**](https://objective-see.com/products/utilities.html#FileMonitor) ermöglicht es, Dateiereignisse (wie Erstellung, Änderungen und Löschungen) zu überwachen und bietet detaillierte Informationen über solche Ereignisse.
+[**FileMonitor**](https://objective-see.com/products/utilities.html#FileMonitor) ermöglicht die Überwachung von Datei-Events (beispielsweise Erstellung, Änderungen und Löschungen) und stellt detaillierte Informationen zu diesen Events bereit.
 
 ### Crescendo
 
-[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) ist ein GUI-Tool, das das Aussehen und Gefühl hat, das Windows-Benutzer von Microsoft Sysinternals _Procmon_ kennen. Dieses Tool ermöglicht es, verschiedene Ereignistypen zu starten und zu stoppen, ermöglicht das Filtern dieser Ereignisse nach Kategorien wie Datei, Prozess, Netzwerk usw. und bietet die Funktionalität, die aufgezeichneten Ereignisse im JSON-Format zu speichern.
+[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) ist ein GUI-Tool mit dem Look and Feel, das Windows-Benutzer möglicherweise von Microsoft Sysinternals’ _Procmon_ kennen. Mit diesem Tool kann die Aufzeichnung verschiedener Event-Typen gestartet und angehalten werden. Außerdem können diese Events nach Kategorien wie Datei, Prozess, Netzwerk usw. gefiltert und die aufgezeichneten Events im JSON-Format gespeichert werden.
 
 ### Apple Instruments
 
-[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html) sind Teil der Entwicklerwerkzeuge von Xcode – verwendet zur Überwachung der Anwendungsleistung, zur Identifizierung von Speicherlecks und zur Verfolgung der Dateisystemaktivität.
+[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html) ist Bestandteil der Developer Tools von Xcode und wird zur Überwachung der Application-Performance, zur Identifizierung von Memory-Leaks und zur Verfolgung von Dateisystemaktivitäten verwendet.
 
-![](<../../../images/image (1138).png>)
+![Crescendo - Apple Instruments: Apple Instruments ist Bestandteil der Developer Tools von Xcode und wird zur Überwachung der Application-Performance, zur Identifizierung von Memory-Leaks und zur Verfolgung von Dateisystemaktivitäten verwendet](<../../../images/image (1138).png>)
 
 ### fs_usage
 
-Ermöglicht das Verfolgen von Aktionen, die von Prozessen ausgeführt werden:
+Ermöglicht die Verfolgung von Aktionen, die von Prozessen ausgeführt werden:
 ```bash
 fs_usage -w -f filesys ls #This tracks filesystem actions of proccess names containing ls
 fs_usage -w -f network curl #This tracks network actions
 ```
 ### TaskExplorer
 
-[**Taskexplorer**](https://objective-see.com/products/taskexplorer.html) ist nützlich, um die **Bibliotheken** zu sehen, die von einer Binärdatei verwendet werden, die **Dateien**, die sie verwendet, und die **Netzwerk**-Verbindungen.\
-Es überprüft auch die Binärprozesse gegen **virustotal** und zeigt Informationen über die Binärdatei an.
+[**Taskexplorer**](https://objective-see.com/products/taskexplorer.html) ist nützlich, um die von einem Binary verwendeten **Bibliotheken**, die von ihm verwendeten **Dateien** und die **Netzwerkverbindungen** zu sehen.\
+Außerdem überprüft es die Binary-Prozesse mit **virustotal** und zeigt Informationen über das Binary an.
 
 ## PT_DENY_ATTACH <a href="#page-title" id="page-title"></a>
 
-In [**diesem Blogbeitrag**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) finden Sie ein Beispiel, wie man einen **laufenden Daemon** debuggt, der **`PT_DENY_ATTACH`** verwendet, um das Debuggen zu verhindern, selbst wenn SIP deaktiviert war.
+In [**diesem Blogbeitrag**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) findest du ein Beispiel dafür, wie man einen **laufenden Daemon debuggt**, der **`PT_DENY_ATTACH`** verwendet hat, um Debugging zu verhindern, selbst wenn SIP deaktiviert war.
 
 ### lldb
 
-**lldb** ist das de **facto Tool** für **macOS** Binär-**Debugging**.
+**lldb** ist das de-facto-Tool für das **Debugging** von **macOS**-Binaries.
 ```bash
 lldb ./malware.bin
 lldb -p 1122
 lldb -n malware.bin
 lldb -n malware.bin --waitfor
 ```
-Sie können den Intel-Geschmack festlegen, wenn Sie lldb verwenden, indem Sie eine Datei mit dem Namen **`.lldbinit`** in Ihrem Home-Verzeichnis mit der folgenden Zeile erstellen:
+Du kannst beim Verwenden von lldb die Intel-Syntax festlegen, indem du in deinem Home-Ordner eine Datei namens **`.lldbinit`** mit der folgenden Zeile erstellst:
 ```bash
 settings set target.x86-disassembly-flavor intel
 ```
 > [!WARNING]
-> Innerhalb von lldb, dumpen Sie einen Prozess mit `process save-core`
+> Innerhalb von lldb einen Prozess mit `process save-core` dumpen
 
-<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Befehl</strong></td><td><strong>Beschreibung</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Startet die Ausführung, die ununterbrochen fortgesetzt wird, bis ein Haltepunkt erreicht wird oder der Prozess beendet wird.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Startet die Ausführung und stoppt am Einstiegspunkt</td></tr><tr><td><strong>continue (c)</strong></td><td>Setzt die Ausführung des debugged Prozesses fort.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Führt die nächste Anweisung aus. Dieser Befehl überspringt Funktionsaufrufe.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Führt die nächste Anweisung aus. Im Gegensatz zum nexti-Befehl wird dieser Befehl in Funktionsaufrufe eintauchen.</td></tr><tr><td><strong>finish (f)</strong></td><td>Führt den Rest der Anweisungen in der aktuellen Funktion (“frame”) aus, gibt zurück und stoppt.</td></tr><tr><td><strong>control + c</strong></td><td>Pause die Ausführung. Wenn der Prozess ausgeführt (r) oder fortgesetzt (c) wurde, wird dies den Prozess anhalten ... wo auch immer er sich gerade befindet.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Jede Funktion, die main genannt wird</p><p><code>b <binname>`main</code> #Hauptfunktion des Bins</p><p><code>b set -n main --shlib <lib_name></code> #Hauptfunktion des angegebenen Bins</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Jede NSFileManager-Methode</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Break in allen Funktionen dieser Bibliothek</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Breakpoint-Liste</p><p><code>br e/dis <num></code> #Aktivieren/Deaktivieren des Breakpoints</p><p>breakpoint delete <num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Hilfe zum Breakpoint-Befehl erhalten</p><p>help memory write #Hilfe zum Schreiben in den Speicher erhalten</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format <<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s <reg/memory address></strong></td><td>Zeigt den Speicher als nullterminierten String an.</td></tr><tr><td><strong>x/i <reg/memory address></strong></td><td>Zeigt den Speicher als Assemblieranweisung an.</td></tr><tr><td><strong>x/b <reg/memory address></strong></td><td>Zeigt den Speicher als Byte an.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Dies wird das Objekt drucken, auf das der Parameter verweist</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Beachten Sie, dass die meisten von Apples Objective-C-APIs oder -Methoden Objekte zurückgeben und daher über den Befehl “print object” (po) angezeigt werden sollten. Wenn po keine sinnvolle Ausgabe erzeugt, verwenden Sie <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Schreibt AAAA an diese Adresse<br>memory write -f s $rip+0x11f+7 "AAAA" #Schreibt AAAA an die Adresse</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Disassembliert die aktuelle Funktion</p><p>dis -n <funcname> #Disassembliert die Funktion</p><p>dis -n <funcname> -b <basename> #Disassembliert die Funktion<br>dis -c 6 #Disassembliert 6 Zeilen<br>dis -c 0x100003764 -e 0x100003768 # Von einer Adresse zur anderen<br>dis -p -c 4 # Beginnt an der aktuellen Adresse mit dem Disassemblieren</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Überprüft das Array von 3 Komponenten im x1-Register</td></tr><tr><td><strong>image dump sections</strong></td><td>Gibt die Karte des aktuellen Prozessspeichers aus</td></tr><tr><td><strong>image dump symtab <library></strong></td><td><code>image dump symtab CoreNLP</code> #Erhält die Adresse aller Symbole von CoreNLP</td></tr></tbody></table>
+<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Command</strong></td><td><strong>Beschreibung</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Startet die Ausführung, die ununterbrochen fortgesetzt wird, bis ein Breakpoint erreicht wird oder der Prozess beendet wird.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Startet die Ausführung und hält am Einstiegspunkt an</td></tr><tr><td><strong>continue (c)</strong></td><td>Setzt die Ausführung des debugged Prozesses fort.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Führt die nächste Instruktion aus. Dieser Befehl überspringt Funktionsaufrufe.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Führt die nächste Instruktion aus. Im Gegensatz zum nexti-Befehl steigt dieser Befehl in Funktionsaufrufe ein.</td></tr><tr><td><strong>finish (f)</strong></td><td>Führt den Rest der Instruktionen in der aktuellen Funktion („Frame“) aus, kehrt zurück und hält an.</td></tr><tr><td><strong>control + c</strong></td><td>Hält die Ausführung an. Wenn der Prozess mit (r) gestartet oder mit (c) fortgesetzt wurde, wird der Prozess dort angehalten, ...wo er gerade ausgeführt wird.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Jede Funktion namens main</p><p><code>b <binname>`main</code> #Main-Funktion der Bin</p><p><code>b set -n main --shlib <lib_name></code> #Main-Funktion der angegebenen Bin</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Jede NSFileManager-Methode</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Break in allen Funktionen dieser Library</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Breakpoint-Liste</p><p><code>br e/dis <num></code> #Breakpoint aktivieren/deaktivieren</p><p>breakpoint delete <num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Hilfe zum breakpoint-Befehl anzeigen</p><p>help memory write #Hilfe zum Schreiben in den Speicher anzeigen</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format <<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s <reg/memory address></strong></td><td>Zeigt den Speicher als nullterminierte Zeichenkette an.</td></tr><tr><td><strong>x/i <reg/memory address></strong></td><td>Zeigt den Speicher als Assembly-Instruktion an.</td></tr><tr><td><strong>x/b <reg/memory address></strong></td><td>Zeigt den Speicher als Byte an.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Gibt das vom Parameter referenzierte Objekt aus</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Beachte, dass die meisten Objective-C-APIs oder -Methoden von Apple Objekte zurückgeben und daher mit dem Befehl „print object“ (po) angezeigt werden sollten. Wenn po keine aussagekräftige Ausgabe erzeugt, verwende <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #AAAA an diese Adresse schreiben<br>memory write -f s $rip+0x11f+7 "AAAA" #AAAA an die Adresse schreiben</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Aktuelle Funktion disassemblieren</p><p>dis -n <funcname> #Funktion disassemblieren</p><p>dis -n <funcname> -b <basename> #Funktion disassemblieren<br>dis -c 6 #6 Zeilen disassemblieren<br>dis -c 0x100003764 -e 0x100003768 # Von einem Add bis zum anderen<br>dis -p -c 4 # An der aktuellen Adresse beginnen und disassemblieren</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Array mit 3 Komponenten im x1-Register prüfen</td></tr><tr><td><strong>image dump sections</strong></td><td>Map des aktuellen Prozessspeichers ausgeben</td></tr><tr><td><strong>image dump symtab <library></strong></td><td><code>image dump symtab CoreNLP</code> #Adresse aller Symbole aus CoreNLP abrufen</td></tr></tbody></table>
 
 > [!TIP]
-> Beim Aufrufen der **`objc_sendMsg`**-Funktion hält das **rsi**-Register den **Namen der Methode** als nullterminierten (“C”) String. Um den Namen über lldb auszugeben, tun Sie:
+> Beim Aufruf der Funktion **`objc_sendMsg`** enthält das **rsi**-Register den **Namen der Methode** als nullterminierte („C“-)Zeichenkette. Um den Namen über lldb auszugeben:
 >
 > `(lldb) x/s $rsi: 0x1000f1576: "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 >
@@ -454,35 +447,35 @@ settings set target.x86-disassembly-flavor intel
 
 #### VM-Erkennung
 
-- Der Befehl **`sysctl hw.model`** gibt "Mac" zurück, wenn der **Host ein MacOS** ist, aber etwas anderes, wenn es sich um eine VM handelt.
-- Durch das Spielen mit den Werten von **`hw.logicalcpu`** und **`hw.physicalcpu`** versuchen einige Malware, zu erkennen, ob es sich um eine VM handelt.
-- Einige Malware kann auch **erkennen**, ob die Maschine **VMware** basiert, basierend auf der MAC-Adresse (00:50:56).
-- Es ist auch möglich zu finden, **ob ein Prozess debuggt wird** mit einem einfachen Code wie:
-- `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //Prozess wird debuggt }`
-- Es kann auch den **`ptrace`**-Systemaufruf mit dem **`PT_DENY_ATTACH`**-Flag aufrufen. Dies **verhindert**, dass ein Debugger sich anheftet und verfolgt.
-- Sie können überprüfen, ob die **`sysctl`**- oder **`ptrace`**-Funktion **importiert** wird (aber die Malware könnte sie dynamisch importieren)
-- Wie in diesem Bericht erwähnt, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
-“_Die Nachricht Process # exited with **status = 45 (0x0000002d)** ist normalerweise ein sicheres Zeichen dafür, dass das Debug-Ziel **PT_DENY_ATTACH** verwendet_”
+- Der Befehl **`sysctl hw.model`** gibt "Mac" zurück, wenn der **Host ein MacOS** ist, bei einer VM jedoch etwas anderes.
+- Durch Manipulation der Werte von **`hw.logicalcpu`** und **`hw.physicalcpu`** versuchen einige Malwares zu erkennen, ob es sich um eine VM handelt.
+- Einige Malwares können auch anhand der MAC-Adresse (00:50:56) erkennen, ob der Rechner **VMware** verwendet.
+- Es ist auch möglich, **festzustellen, ob ein Prozess debugged wird**, mit einfachem Code wie:
+- `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
+- Es kann auch den **`ptrace`**-Systemaufruf mit dem Flag **`PT_DENY_ATTACH`** aufrufen. Dies **verhindert, dass ein Debugger angehängt wird und Tracing durchführt**.
+- Du kannst prüfen, ob die Funktion **`sysctl`** oder **`ptrace`** **importiert** wird (die Malware könnte sie jedoch dynamisch importieren)
+- Wie in diesem Writeup erwähnt, „[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)“:\
+„_Die Meldung Process # exited with **status = 45 (0x0000002d)** ist normalerweise ein eindeutiges Zeichen dafür, dass das Debug-Ziel **PT_DENY_ATTACH** verwendet._“
 
 ## Core Dumps
 
 Core Dumps werden erstellt, wenn:
 
 - `kern.coredump` sysctl auf 1 gesetzt ist (standardmäßig)
-- Wenn der Prozess nicht suid/sgid war oder `kern.sugid_coredump` auf 1 gesetzt ist (standardmäßig 0)
-- Das `AS_CORE`-Limit die Operation erlaubt. Es ist möglich, die Erstellung von Core Dumps zu unterdrücken, indem Sie `ulimit -c 0` aufrufen und sie mit `ulimit -c unlimited` wieder aktivieren.
+- Der Prozess nicht suid/sgid war oder `kern.sugid_coredump` auf 1 gesetzt ist (standardmäßig 0)
+- Das **`AS_CORE`**-Limit den Vorgang erlaubt. Die Erstellung von Core Dumps kann mit `ulimit -c 0` unterdrückt und mit `ulimit -c unlimited` wieder aktiviert werden.
 
-In diesen Fällen wird der Core Dump gemäß dem `kern.corefile` sysctl generiert und normalerweise in `/cores/core/.%P` gespeichert.
+In diesen Fällen wird der Core Dump entsprechend dem `kern.corefile`-sysctl generiert und üblicherweise unter `/cores/core/.%P` gespeichert.
 
 ## Fuzzing
 
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html)
 
-ReportCrash **analysiert abstürzende Prozesse und speichert einen Absturzbericht auf der Festplatte**. Ein Absturzbericht enthält Informationen, die einem **Entwickler helfen können,** die Ursache eines Absturzes zu diagnostizieren.\
-Für Anwendungen und andere Prozesse, die **im benutzerspezifischen launchd-Kontext** ausgeführt werden, läuft ReportCrash als LaunchAgent und speichert Absturzberichte im `~/Library/Logs/DiagnosticReports/` des Benutzers.\
-Für Daemons, andere Prozesse, die **im systemweiten launchd-Kontext** und andere privilegierte Prozesse ausgeführt werden, läuft ReportCrash als LaunchDaemon und speichert Absturzberichte im `/Library/Logs/DiagnosticReports` des Systems.
+ReportCrash **analysiert abstürzende Prozesse und speichert einen Crash-Report auf der Festplatte**. Ein Crash-Report enthält Informationen, die **einem Entwickler helfen können, die Ursache eines Absturzes zu diagnostizieren**.\
+Für Anwendungen und andere Prozesse, **die im per-user-launchd-Kontext ausgeführt werden**, läuft ReportCrash als LaunchAgent und speichert Crash-Reports unter `~/Library/Logs/DiagnosticReports/` des Benutzers.\
+Für Daemons, andere Prozesse **im systemweiten launchd-Kontext** und andere privilegierte Prozesse läuft ReportCrash als LaunchDaemon und speichert Crash-Reports unter `/Library/Logs/DiagnosticReports` des Systems.
 
-Wenn Sie sich Sorgen über Absturzberichte machen, die **an Apple gesendet werden**, können Sie sie deaktivieren. Andernfalls können Absturzberichte nützlich sein, um **herauszufinden, wie ein Server abgestürzt ist**.
+Wenn du dir Sorgen machst, dass Crash-Reports **an Apple gesendet werden**, kannst du sie deaktivieren. Andernfalls können Crash-Reports nützlich sein, um **herauszufinden, wie ein Server abgestürzt ist**.
 ```bash
 #To disable crash reporting:
 launchctl unload -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
@@ -492,9 +485,9 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Roo
 launchctl load -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist
 ```
-### Schlaf
+### Ruhezustand
 
-Beim Fuzzing auf einem MacOS ist es wichtig, den Mac nicht in den Schlafmodus zu versetzen:
+Beim Fuzzing auf einem MacOS ist es wichtig, den Ruhezustand des Macs zu verhindern:
 
 - systemsetup -setsleep Never
 - pmset, Systemeinstellungen
@@ -502,7 +495,7 @@ Beim Fuzzing auf einem MacOS ist es wichtig, den Mac nicht in den Schlafmodus zu
 
 #### SSH-Trennung
 
-Wenn Sie über eine SSH-Verbindung fuzzing, ist es wichtig sicherzustellen, dass die Sitzung nicht abbricht. Ändern Sie daher die sshd_config-Datei mit:
+Wenn du über eine SSH-Verbindung fuzzest, ist es wichtig sicherzustellen, dass die Sitzung nicht getrennt wird. Ändere daher die Datei sshd_config wie folgt:
 
 - TCPKeepAlive Yes
 - ClientAliveInterval 0
@@ -513,23 +506,23 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 ```
 ### Interne Handler
 
-**Überprüfen Sie die folgende Seite**, um herauszufinden, wie Sie herausfinden können, welche App für **die Handhabung des angegebenen Schemas oder Protokolls verantwortlich ist:**
+**Sieh dir die folgende Seite an**, um herauszufinden, welche App für die **Verarbeitung des angegebenen Schemas oder Protokolls** zuständig ist:
 
 
 {{#ref}}
 ../macos-file-extension-apps.md
 {{#endref}}
 
-### Auflisten von Netzwerkprozessen
+### Auflistung von Netzwerkprozessen
 
-Es ist interessant, Prozesse zu finden, die Netzwerkdaten verwalten:
+Dies ist hilfreich, um Prozesse zu finden, die Netzwerkdaten verwalten:
 ```bash
 dtrace -n 'syscall::recv*:entry { printf("-> %s (pid=%d)", execname, pid); }' >> recv.log
 #wait some time
 sort -u recv.log > procs.txt
 cat procs.txt
 ```
-Oder verwenden Sie `netstat` oder `lsof`
+Oder verwende `netstat` oder `lsof`
 
 ### Libgmalloc
 
@@ -537,7 +530,7 @@ Oder verwenden Sie `netstat` oder `lsof`
 ```bash
 lldb -o "target create `which some-binary`" -o "settings set target.env-vars DYLD_INSERT_LIBRARIES=/usr/lib/libgmalloc.dylib" -o "run arg1 arg2" -o "bt" -o "reg read" -o "dis -s \$pc-32 -c 24 -m -F intel" -o "quit"
 ```
-### Fuzzers
+### Fuzzer
 
 #### [AFL++](https://github.com/AFLplusplus/AFLplusplus)
 
@@ -545,7 +538,7 @@ Funktioniert für CLI-Tools
 
 #### [Litefuzz](https://github.com/sec-tools/litefuzz)
 
-Es "**funktioniert einfach"** mit macOS GUI-Tools. Beachten Sie, dass einige macOS-Apps spezifische Anforderungen haben, wie z. B. eindeutige Dateinamen, die richtige Erweiterung, und dass die Dateien aus dem Sandbox-Verzeichnis (`~/Library/Containers/com.apple.Safari/Data`) gelesen werden müssen...
+Funktioniert **„einfach“** mit macOS-GUI-Tools. Beachte, dass einige macOS-Apps bestimmte Anforderungen haben, z. B. eindeutige Dateinamen, die richtige Erweiterung oder dass die Dateien aus der Sandbox gelesen werden müssen (`~/Library/Containers/com.apple.Safari/Data`) ...
 
 Einige Beispiele:
 ```bash
@@ -571,7 +564,7 @@ litefuzz -lk -c "smbutil view smb://localhost:4455" -a tcp://localhost:4455 -i i
 # screensharingd (using pcap capture)
 litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash screensharingd -p -n 100000
 ```
-### Weitere Fuzzing MacOS Informationen
+### Weitere Informationen zu Fuzzing unter MacOS
 
 - [https://www.youtube.com/watch?v=T5xfL9tEg44](https://www.youtube.com/watch?v=T5xfL9tEg44)
 - [https://github.com/bnagy/slides/blob/master/OSXScale.pdf](https://github.com/bnagy/slides/blob/master/OSXScale.pdf)
@@ -580,9 +573,9 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 
 ## Referenzen
 
-- [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
-- [**https://www.youtube.com/watch?v=T5xfL9tEg44**](https://www.youtube.com/watch?v=T5xfL9tEg44)
-- [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
-- [**The Art of Mac Malware: The Guide to Analyzing Malicious Software**](https://taomm.org/)
+- [1] [Incident Response unter OS X: Scripting und Analyse](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+- [2] [Jeremy Brown – Summer of Fuzz: MacOS – DEF CON 29 AppSec Village](https://www.youtube.com/watch?v=T5xfL9tEg44)
+- [3] [Die Kunst der Mac-Malware, Band I: Analyse](https://taomm.org/vol1/analysis.html)
+- [4] [Die Kunst der Mac-Malware: Leitfaden zur Analyse schädlicher Software](https://taomm.org/)
 
 {{#include ../../../banners/hacktricks-training.md}}

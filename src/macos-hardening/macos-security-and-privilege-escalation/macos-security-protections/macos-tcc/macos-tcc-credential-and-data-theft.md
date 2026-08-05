@@ -1,30 +1,30 @@
-# macOS-Anmeldeinformationen & Datendiebstahl über TCC-Berechtigungen
+# macOS Credential & Data Theft via TCC Permissions
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Übersicht
+## Überblick
 
-macOS TCC (Transparenz, Zustimmung und Kontrolle) schützt den Zugriff auf sensible Benutzerdaten. Wenn ein Angreifer **eine Binärdatei kompromittiert, die bereits TCC-Berechtigungen besitzt**, erbt er diese Berechtigungen. Diese Seite dokumentiert das Ausnutzungspotenzial jeder TCC-Berechtigung, die mit Datendiebstahl zusammenhängt.
+macOS TCC (Transparency, Consent, and Control) schützt den Zugriff auf sensible Benutzerdaten. Wenn ein Angreifer **ein Binary kompromittiert, das bereits über TCC-Berechtigungen verfügt**, übernimmt er diese Berechtigungen. Diese Seite dokumentiert das Ausnutzungspotenzial jeder TCC-Berechtigung im Zusammenhang mit Datendiebstahl.
 
 > [!WARNING]
-> Code-Injektion in eine TCC-gewährte Binärdatei (via DYLD injection, dylib hijacking, or task port) **erbt stillschweigend alle ihre TCC-Berechtigungen**. Es gibt keine zusätzliche Aufforderung oder Überprüfung, wenn derselbe Prozess geschützte Daten liest.
+> Code injection in ein Binary mit TCC-Berechtigungen (über DYLD injection, dylib hijacking oder task port) **übernimmt stillschweigend alle TCC-Berechtigungen dieses Binaries**. Es gibt keine zusätzliche Eingabeaufforderung oder Überprüfung, wenn derselbe Prozess auf geschützte Daten zugreift.
 
 ---
 
-## Keychain-Zugriffsgruppen
+## Keychain Access Groups
 
-### Die Beute
+### Der Gewinn
 
 Der macOS Keychain speichert:
-- **Wi-Fi-Passwörter** — alle gespeicherten Zugangsdaten zu drahtlosen Netzwerken
-- **Website-Passwörter** — Safari, Chrome (wenn Keychain verwendet wird), und andere Browser-Passwörter
-- **Anwendungs-Passwörter** — E-Mail-Konten, VPN-Zugangsdaten, Entwicklertokens
-- **Zertifikate und private Schlüssel** — Code-Signing, Client-TLS, S/MIME-Verschlüsselung
+- **Wi-Fi-Passwörter** — alle gespeicherten Zugangsdaten für drahtlose Netzwerke
+- **Website-Passwörter** — Safari-, Chrome- (bei Verwendung des Keychain) und andere Browser-Passwörter
+- **Anwendungspasswörter** — E-Mail-Konten, VPN-Zugangsdaten, Development-Tokens
+- **Zertifikate und private Schlüssel** — Code Signing, Client-TLS, S/MIME-Verschlüsselung
 - **Sichere Notizen** — vom Benutzer gespeicherte Geheimnisse
 
-### Berechtigung: `keychain-access-groups`
+### Entitlement: `keychain-access-groups`
 
-Keychain-Einträge sind in **Zugriffsgruppen** organisiert. Die `keychain-access-groups`-Berechtigung einer Anwendung listet auf, auf welche Gruppen sie zugreifen kann:
+Keychain-Elemente sind in **Access Groups** organisiert. Das `keychain-access-groups`-Entitlement einer Anwendung listet auf, auf welche Gruppen sie zugreifen kann:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -34,7 +34,7 @@ Keychain-Einträge sind in **Zugriffsgruppen** organisiert. Die `keychain-access
 <string>InternetAccounts</string>       <!-- Internet account passwords -->
 </array>
 ```
-### Ausnutzung
+### Exploitation
 ```bash
 # Find binaries with broad keychain access groups
 sqlite3 /tmp/executables.db "
@@ -85,7 +85,7 @@ NSString *password = [[NSString alloc] initWithData:passData encoding:NSUTF8Stri
 
 ### Ausnutzung
 
-Eine binary mit Kamera-TCC-Berechtigung (über `kTCCServiceCamera` oder `com.apple.security.device.camera` entitlement) kann Fotos und Videos aufnehmen:
+Eine Binärdatei mit einer TCC-Berechtigung für den Kamerazugriff (über `kTCCServiceCamera` oder das Entitlement `com.apple.security.device.camera`) kann Fotos und Videos aufnehmen:
 ```bash
 # Find camera-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -125,7 +125,7 @@ fromConnection:(AVCaptureConnection *)connection {
 @end
 ```
 > [!TIP]
-> Ab **macOS Sonoma** ist der Kameraindikator in der Menüleiste persistent und kann nicht programmgesteuert ausgeblendet werden. Bei **älteren macOS-Versionen** kann eine kurze Aufnahme möglicherweise keinen auffälligen Indikator erzeugen.
+> Ab **macOS Sonoma** ist die Kameraanzeige in der Menüleiste dauerhaft sichtbar und kann nicht programmgesteuert ausgeblendet werden. Bei **älteren macOS-Versionen** erzeugt eine kurze Aufnahme möglicherweise keine auffällige Anzeige.
 
 ---
 
@@ -133,7 +133,7 @@ fromConnection:(AVCaptureConnection *)connection {
 
 ### Exploitation
 
-Mikrofonzugriff erfasst alle Audiodaten vom eingebauten Mikrofon, Headset oder angeschlossenen Audioeingabegeräten:
+Der Mikrofonzugriff erfasst sämtliche Audiodaten vom integrierten Mikrofon, Headset oder verbundenen Audioeingabegeräten:
 ```bash
 # Find mic-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -167,13 +167,13 @@ dispatch_get_main_queue(), ^{
 
 ## Standortverfolgung (kTCCServiceLocation)
 
-### Exploitation
+### Ausnutzung
 ```bash
 # Find location-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service LIKE '%Location%' AND auth_value=2;"
 ```
-### Kontinuierliche Überwachung
+### Kontinuierliches Tracking
 ```objc
 #import <CoreLocation/CoreLocation.h>
 
@@ -203,13 +203,13 @@ loc.coordinate.latitude, loc.coordinate.longitude, [NSDate date]];
 
 ## Kontakte / Kalender / Fotos
 
-### Exfiltration personenbezogener Daten
+### Exfiltration persönlicher Daten
 
-| TCC-Dienst | Framework | Daten |
+| TCC Service | Framework | Daten |
 |---|---|---|
-| `kTCCServiceAddressBook` | `Contacts.framework` | Namen, E-Mails, Telefonnummern, Adressen |
-| `kTCCServiceCalendar` | `EventKit` | Meetings, Teilnehmer, Orte |
-| `kTCCServicePhotos` | `Photos.framework` | Fotos, Screenshots, Standortmetadaten |
+| `kTCCServiceAddressBook` | `Contacts.framework` | Namen, E-Mail-Adressen, Telefonnummern, Adressen |
+| `kTCCServiceCalendar` | `EventKit` | Besprechungen, Teilnehmer, Orte |
+| `kTCCServicePhotos` | `Photos.framework` | Fotos, Screenshots, Standort-Metadaten |
 ```bash
 # Find authorized binaries for each service
 for svc in kTCCServiceAddressBook kTCCServiceCalendar kTCCServicePhotos; do
@@ -218,7 +218,7 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='$svc' AND auth_value=2;"
 done
 ```
-### Kontakte erfassen
+### Kontakte auslesen
 ```objc
 #import <Contacts/Contacts.h>
 
@@ -236,15 +236,15 @@ usingBlock:^(CNContact *contact, BOOL *stop) {
 ```
 ---
 
-## iCloud-Kontozugriff
+## Zugriff auf den iCloud-Account
 
-### Berechtigung: `com.apple.private.icloud-account-access`
+### Entitlement: `com.apple.private.icloud-account-access`
 
-Diese Berechtigung erlaubt die Kommunikation mit dem XPC-Dienst `com.apple.iCloudHelper` und bietet Zugriff auf:
-- **iCloud tokens** — Authentifizierungstoken für die Apple-ID des Benutzers
+Dieses Entitlement ermöglicht die Kommunikation mit dem `com.apple.iCloudHelper`-XPC-Dienst und bietet Zugriff auf:
+- **iCloud-Tokens** — Authentifizierungstokens für die Apple ID des Benutzers
 - **iCloud Drive** — synchronisierte Dokumente von allen Geräten
 - **iCloud Keychain** — auf allen Apple-Geräten synchronisierte Passwörter
-- **Find My** — Standort aller Apple-Geräte des Benutzers
+- **Find My** — Standort aller Apple-Geräte des Benutzers<sup>[4]</sup>
 ```bash
 # Find iCloud-entitled binaries
 sqlite3 /tmp/executables.db "
@@ -253,19 +253,19 @@ WHERE iCloudAccs = 1
 ORDER BY privileged DESC;"
 ```
 > [!CAUTION]
-> Das Kompromittieren einer iCloud-entitled Binary erweitert den Angriff von einem **einzigen Gerät auf das gesamte Apple-Ökosystem**: andere Macs, iPhones, iPads, Apple Watch. iCloud Keychain-Synchronisierung bedeutet, dass Passwörter aller Geräte zugänglich sind.
+> Das Kompromittieren eines iCloud-berechtigten Binaries erweitert den Angriff von einem **einzelnen Gerät auf das gesamte Apple-Ökosystem**: andere Macs, iPhones, iPads und die Apple Watch. Die Synchronisierung des iCloud-Schlüsselbunds bedeutet, dass Passwörter von allen Geräten zugänglich sind.
 
 ---
 
-## Voller Festplattenzugriff (kTCCServiceSystemPolicyAllFiles)
+## Vollständiger Festplattenzugriff (kTCCServiceSystemPolicyAllFiles)
 
 ### Die mächtigste TCC-Berechtigung
 
-Voller Festplattenzugriff gewährt Lesezugriff auf **jede Datei im System**, einschließlich:
+Full Disk Access gewährt Leseberechtigung für **jede Datei auf dem System**, einschließlich:
 - Daten anderer Apps (Messages, Mail, Safari-Verlauf)
-- TCC-Datenbanken (offenbaren alle anderen Berechtigungen)
+- TCC-Datenbanken (die alle anderen Berechtigungen offenlegen)
 - SSH-Schlüssel und Konfiguration
-- Browser-Cookies und Session-Token
+- Browser-Cookies und Session-Tokens
 - Anwendungsdatenbanken und Caches
 ```bash
 # Find FDA-granted binaries
@@ -280,23 +280,23 @@ cat ~/.ssh/id_rsa                           # SSH private key
 ```
 ---
 
-## Exploitation Priority Matrix
+## Exploitation-Prioritätsmatrix
 
-Beim Bewerten von injectable TCC-granted binaries nach Datenwert priorisieren:
+Bei der Bewertung injizierbarer, durch TCC berechtigter Binaries nach Datenwert priorisieren:
 
-| Priorität | TCC Permission | Warum |
+| Priorität | TCC-Berechtigung | Warum |
 |---|---|---|
 | **Kritisch** | Full Disk Access | Zugriff auf alles |
-| **Kritisch** | TCC Manager | Kann jede Berechtigung vergeben |
+| **Kritisch** | TCC Manager | Kann jede Berechtigung gewähren |
 | **Hoch** | Keychain Access Groups | Alle gespeicherten Passwörter |
 | **Hoch** | iCloud Account Access | Kompromittierung mehrerer Geräte |
 | **Hoch** | Input Monitoring (ListenEvent) | Keylogging |
-| **Hoch** | Accessibility | GUI-Steuerung, Selbstgewährung |
+| **Hoch** | Accessibility | GUI-Steuerung, Selbstberechtigung |
 | **Mittel** | Screen Capture | Visuelle Datenerfassung |
 | **Mittel** | Camera + Microphone | Überwachung |
 | **Mittel** | Contacts + Calendar | Daten für Social Engineering |
-| **Niedrig** | Location | Physische Verfolgung |
-| **Niedrig** | Photos | Persönliche Daten |
+| **Niedrig** | Location | Physisches Tracking |
+| **Niedrig** | Photos | Personenbezogene Daten |
 
 ## Enumeration Script
 ```bash
@@ -322,11 +322,11 @@ echo -e "\n[*] iCloud-entitled binaries:"
 sqlite3 /tmp/executables.db "
 SELECT path FROM executables WHERE iCloudAccs = 1;" 2>/dev/null
 ```
-## Quellen
+## Referenzen
 
-* [Apple Developer — Keychain Services](https://developer.apple.com/documentation/security/keychain_services)
-* [Apple Developer — TCC](https://developer.apple.com/documentation/security/protecting-the-user-s-privacy)
-* [Objective-See — TCC Exploitation](https://objectivesee.org/blog/blog_0x4C.html)
-* [OBTS v5.0 — iCloud Token Extraction (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+- [1] [Apple Developer — Keychain Services](https://developer.apple.com/documentation/security/keychain_services)
+- [2] [Apple Developer — TCC](https://developer.apple.com/documentation/security/protecting-the-user-s-privacy)
+- [3] [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
+- [4] [OBTS v5.0 — „What Happens on your Mac, Stays on Apple's iCloud?!“ (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 {{#include ../../../../banners/hacktricks-training.md}}
