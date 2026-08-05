@@ -2,14 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Recent Windows builds introduced **SMB client support for alternative TCP ports**. That feature can be abused to turn **local NTLM authentication** into a **SYSTEM local privilege escalation** when the attacker can:
+Recent Windows builds introduced **SMB client support for alternative TCP ports**. That feature can be abused to turn **local NTLM authentication** into a **SYSTEM local privilege escalation** when the attacker can:<sup>[[1]](#references)</sup>
 
 1. Open an SMB connection to an attacker-controlled listener on a **non-445 port**
 2. Keep that TCP connection alive
 3. Coerce a **privileged local client** to access the **same SMB share path**
 4. Relay the resulting **local NTLM authentication** back to the machine's real SMB service
 
-This is the primitive behind **CVE-2026-24294**, patched in **March 2026**.
+This is the primitive behind **CVE-2026-24294**, patched in **March 2026**.<sup>[[1]](#references)[[5]](#references)</sup>
 
 ## Why it works
 
@@ -19,22 +19,22 @@ The older CMTI / serialized-SPN reflection trick is covered here:
 ../ntlm/README.md
 {{#endref}}
 
-This newer variant does **not** need a marshalled hostname. Instead it abuses two SMB client behaviours:
+This newer variant does **not** need a marshalled hostname. Instead it abuses two SMB client behaviours:<sup>[[1]](#references)</sup>
 
 - **Alternative port support** on **Windows 11 24H2** and **Windows Server 2025**, exposed to users with `net use \\host\share /tcpport:<port>`
 - **SMB connection reuse / multiplexing**, where multiple authenticated sessions can ride the same TCP connection
 
-That means a low-privileged user can first create a TCP connection from the SMB client to an attacker SMB server on a high port, then coerce a privileged service to access the **exact same UNC path**. If Windows decides to reuse the existing TCP connection, the privileged NTLM exchange is sent over the attacker-controlled transport and can be relayed to the local SMB server.
+That means a low-privileged user can first create a TCP connection from the SMB client to an attacker SMB server on a high port, then coerce a privileged service to access the **exact same UNC path**. If Windows decides to reuse the existing TCP connection, the privileged NTLM exchange is sent over the attacker-controlled transport and can be relayed to the local SMB server.<sup>[[1]](#references)</sup>
 
 ## Preconditions
 
-- Target supports SMB alternative ports:
+- Target supports SMB alternative ports:<sup>[[2]](#references)</sup>
   - **Windows 11 24H2** or later
   - **Windows Server 2025** or later
 - The attacker can run a local or remote SMB server on a chosen high port
 - The attacker can coerce a privileged service to access a UNC path
 - The privileged authentication must be **NTLM local authentication**
-- The target must be relayable:
+- The target must be relayable:<sup>[[1]](#references)</sup>
   - Synacktiv reported it worked by default on **Windows Server 2025**
   - Their chain did **not** work on **Windows 11 24H2** because outbound SMB signing is enforced there by default
 
@@ -46,9 +46,9 @@ From the command line the feature looks simple:
 net use \\192.168.56.3\share /tcpport:12345
 ```
 
-Programmatically, the client uses `WNetAddConnection4W` with undocumented `lpUseOptions` data. The relevant option is `TraP` (transport parameters), which eventually reaches the kernel SMB client through an FSCTL and is parsed by `mrxsmb`.
+Programmatically, the client uses `WNetAddConnection4W` with undocumented `lpUseOptions` data. The relevant option is `TraP` (transport parameters), which eventually reaches the kernel SMB client through an FSCTL and is parsed by `mrxsmb`.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Important practical notes:
+Important practical notes:<sup>[[1]](#references)</sup>
 
 - **UNC syntax still has no port field**
 - **`net use` is per-logon-session**
