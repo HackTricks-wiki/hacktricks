@@ -4,20 +4,20 @@
 
 ## Basic Information
 
-Quick Look macOS का **file preview framework** है। जब कोई user Finder में किसी file को select करता है, Space दबाता है, उस पर hover करता है, या thumbnails enabled वाली directory देखता है, तो Quick Look file को parse करने और visual preview render करने के लिए **generator plugin को automatically load** करता है।<sup>[1]</sup>
+Quick Look, macOS का **file preview framework** है। जब कोई user Finder में किसी file को select करता है, Space दबाता है, उस पर hover करता है, या thumbnails enabled वाली directory देखता है, तो Quick Look file को parse करने और visual preview render करने के लिए **generator plugin को automatically load** करता है।<sup>[[1]](#references)</sup>
 
-Quick Look generators **bundles** (`.qlgenerator`) होते हैं, जो विशिष्ट **Uniform Type Identifiers (UTIs)** के लिए register होते हैं। जब macOS को किसी ऐसी file के लिए preview की आवश्यकता होती है, जो उस UTI से match करती है, तो यह generator को एक sandboxed helper process (`QuickLookSatellite` या `qlmanage`) में load करता है और इसके generator function को call करता है।
+Quick Look generators **bundles** (`.qlgenerator`) होते हैं, जो specific **Uniform Type Identifiers (UTIs)** के लिए register होते हैं। जब macOS को उस UTI से match करने वाली file का preview चाहिए होता है, तो यह generator को sandboxed helper process (`QuickLookSatellite` या `qlmanage`) में load करता है और उसके generator function को call करता है।
 
-### Why This Matters for Security
+### Security के लिए यह क्यों महत्वपूर्ण है
 
 > [!WARNING]
-> Quick Look generators केवल किसी file को **select या view करने से** trigger हो जाते हैं — "Open" action आवश्यक नहीं है। यह उन्हें एक powerful **passive exploitation vector** बनाता है: user को केवल उस directory में navigate करना होता है, जिसमें malicious file मौजूद हो।
+> Quick Look generators **किसी file को केवल select या view करने पर** trigger हो जाते हैं — किसी "Open" action की आवश्यकता नहीं होती। यह उन्हें एक शक्तिशाली **passive exploitation vector** बनाता है: user को केवल ऐसी directory में जाना होता है जिसमें malicious file मौजूद हो।
 
 **Attack surface:**
-- Generators disk, downloads, email attachments या network shares से **arbitrary file content को parse** करते हैं
-- एक crafted file generator code में **parsing vulnerabilities** (buffer overflows, format strings, type confusion) का exploit कर सकती है
-- Preview rendering **automatically** होता है — ऐसी Downloads folder को देखना, जहाँ malicious file मौजूद है, पर्याप्त है
-- Quick Look एक **sandboxed helper** में चलता है, लेकिन इस context से sandbox escapes प्रदर्शित किए गए हैं
+- Generators disk, downloads, email attachments या network shares से प्राप्त **arbitrary file content को parse** करते हैं
+- Crafted file generator code में **parsing vulnerabilities** (buffer overflows, format strings, type confusion) का exploit कर सकती है
+- Preview rendering **automatically** होता है — ऐसी Downloads folder को view करना, जिसमें malicious file आ गई हो, पर्याप्त है
+- Quick Look एक **sandboxed helper** में चलता है, लेकिन इस context से sandbox escapes प्रदर्शित किए जा चुके हैं
 
 ## Architecture
 ```
@@ -31,9 +31,9 @@ Plugin parses file content → Returns preview image/HTML
 ↓
 Preview displayed to user
 ```
-## एन्यूमरेशन
+## Enumeration
 
-### इंस्टॉल किए गए Generators की सूची
+### Installed Generators की सूची
 ```bash
 # List all Quick Look generators with their UTI registrations
 qlmanage -m plugins 2>&1
@@ -49,7 +49,7 @@ ls /System/Library/QuickLook/
 # Check a generator's Info.plist for UTI registrations
 defaults read /path/to/Generator.qlgenerator/Contents/Info.plist 2>/dev/null
 ```
-### Scanner का उपयोग करना
+### Scanner का उपयोग
 ```bash
 sqlite3 /tmp/executables.db "
 SELECT e.path, h.handler_type, h.handler_metadata
@@ -59,11 +59,11 @@ JOIN handlers h ON eh.handler_id = h.id
 WHERE h.handler_type = 'quicklook_generator'
 ORDER BY e.path;"
 ```
-## आक्रमण परिदृश्य
+## Attack Scenarios
 
 ### File-Based Exploitation
 
-जटिल file formats (3D models, scientific data, archive formats) को parse करने वाला third-party Quick Look generator एक प्रमुख लक्ष्य है:
+एक third-party Quick Look generator जो complex file formats (3D models, scientific data, archive formats) को parse करता है, एक prime target है:
 ```bash
 # 1. Identify a third-party generator and its UTI
 qlmanage -m plugins 2>&1 | grep -v "com.apple" | head -20
@@ -89,7 +89,7 @@ cp malicious.xyz ~/Downloads/
 5. Generator parses malicious file → code execution in QuickLookSatellite
 6. (Optional) Sandbox escape from QuickLookSatellite context
 ```
-### Third-Party Generator का प्रतिस्थापन
+### Third-Party Generator Replacement
 
 यदि कोई Quick Look generator bundle **user-writable location** (`~/Library/QuickLook/`) में installed है, तो उसे replace किया जा सकता है:
 ```bash
@@ -111,14 +111,14 @@ qlmanage -t /path/to/malicious/file
 # Force thumbnail regeneration for a directory
 qlmanage -r cache
 ```
-## Sandbox संबंधी विचार
+## Sandbox Considerations
 
-Quick Look generators एक sandboxed helper process के अंदर चलते हैं। Sandbox profile इन चीज़ों को सीमित करता है:
-- File system access (मुख्यतः preview की जा रही file तक read-only)
+Quick Look generators एक sandboxed helper process के अंदर run होते हैं। Sandbox profile निम्न को सीमित करता है:
+- File system access (preview की जा रही file के लिए mostly read-only)
 - Network access (restricted)
-- IPC (सीमित mach-lookup)
+- IPC (limited mach-lookup)
 
-हालाँकि, sandbox में ज्ञात escape vectors हैं:
+हालांकि, sandbox में ज्ञात escape vectors हैं:
 ```bash
 # Check the sandbox profile used by QuickLookSatellite
 sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
@@ -131,10 +131,10 @@ sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
 
 | CVE | Description |
 |---|---|
-| CVE-2019-8741 | crafted file के माध्यम से Quick Look preview में memory corruption |
+| CVE-2019-8741 | crafted file के माध्यम से Quick Look preview memory corruption |
 | CVE-2018-4293 | Quick Look generator sandbox escape |
-| CVE-2020-9963 | Quick Look preview processing के माध्यम से information disclosure |
-| CVE-2021-30876 | Thumbnail generation में memory corruption |
+| CVE-2020-9963 | Quick Look preview processing information disclosure |
+| CVE-2021-30876 | Thumbnail generation memory corruption |
 
 ## Fuzzing Quick Look Generators
 ```bash

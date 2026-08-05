@@ -1,14 +1,14 @@
-# macOS उपयोगी कमांड्स
+# macOS के उपयोगी Commands
 
 {{#include ../banners/hacktricks-training.md}}
 
-### MacOS स्वचालित Enumeration Tools
+### MacOS Automatic Enumeration Tools
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### विशिष्ट MacOS कमांड्स
+### विशिष्ट MacOS Commands
 ```bash
 #System info
 date
@@ -115,17 +115,17 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### त्वरित anti-analysis / virtualization check
+### त्वरित anti-analysis / virtualization जांच
 
-कुछ macOS stealers VMs का पता लगाने के लिए `system_profiler` को call करते हैं और sandbox detonation से बचने के लिए **एक विशिष्ट exit code (जैसे, 100) के साथ abort** कर देते हैं<sup>[1]</sup>:
+कुछ macOS stealers VMs का पता लगाने के लिए `system_profiler` को call करते हैं और sandbox detonation से बचने के लिए **एक विशिष्ट exit code (जैसे, 100)** के साथ abort करते हैं<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### इंस्टॉल किए गए Software और Services
+### स्थापित सॉफ़्टवेयर और सेवाएँ
 
-इंस्टॉल किए गए **suspicious** applications और इंस्टॉल किए गए resources पर **privileges** की जाँच करें:
+इंस्टॉल किए गए **संदिग्ध** applications और इंस्टॉल किए गए resources पर **privileges** की जाँच करें:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -143,7 +143,7 @@ launchctl print system
 # will print detailed information about the specific launch agent. And if it’s not running or you’ve mistyped, you will get some output with a non-zero exit code: Could not find service “com.company.launchagent.label” in domain for login
 launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
-### यूज़र बनाएँ
+### उपयोगकर्ता बनाएं
 
 बिना prompts के
 
@@ -151,6 +151,6 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 
 ## References
 
-- [1] [2025, Infostealer का वर्ष](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

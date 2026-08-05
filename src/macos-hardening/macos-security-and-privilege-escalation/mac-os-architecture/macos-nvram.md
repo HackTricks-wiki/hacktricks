@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## मूलभूत जानकारी
+## मूल जानकारी
 
-**NVRAM** (Non-Volatile Random-Access Memory) Mac hardware पर **boot-time और firmware-level configuration** को store करता है। सबसे security-critical variables में शामिल हैं:
+**NVRAM** (Non-Volatile Random-Access Memory) Mac hardware पर **boot-time और firmware-level configuration** स्टोर करता है। सबसे security-critical variables में शामिल हैं:
 
 | Variable | Purpose |
 |---|---|
@@ -14,7 +14,7 @@
 | `prev-lang:kbd` | Preferred language / keyboard layout |
 | `efi-boot-device-data` | Boot device selection |
 
-Modern Macs पर, NVRAM variables को **system** variables (Secure Boot द्वारा protected) और **non-system** variables में विभाजित किया जाता है। Apple Silicon Macs NVRAM state को boot chain से cryptographically bind करने के लिए **Secure Storage Component (SSC)** का उपयोग करते हैं।<sup>[1]</sup>
+आधुनिक Macs पर, NVRAM variables को **system** variables (Secure Boot द्वारा protected) और **non-system** variables के बीच विभाजित किया जाता है। Apple Silicon Macs NVRAM state को boot chain के साथ cryptographically bind करने के लिए **Secure Storage Component (SSC)** का उपयोग करते हैं।<sup>[[1]](#references)</sup>
 
 ## User Space से NVRAM Access
 
@@ -33,9 +33,9 @@ nvram -xp
 nvram csr-active-config
 csrutil status
 ```
-### NVRAM में लिखना
+### NVRAM लिखना
 
-NVRAM variables को लिखने के लिए **root privileges** आवश्यक हैं और system-critical variables (जैसे `csr-active-config`) के लिए process में specific code-signing flags या entitlements होने चाहिए:
+NVRAM variables लिखने के लिए **root privileges** आवश्यक हैं और system-critical variables (जैसे `csr-active-config`) के लिए process में विशिष्ट code-signing flags या entitlements होने चाहिए:
 ```bash
 # Set boot-args (requires root)
 sudo nvram boot-args="debug=0x144 kcsuffix=development"
@@ -48,9 +48,9 @@ sudo nvram MyCustomVar="persistence-value"
 ```
 ## CS_NVRAM_UNRESTRICTED Flag
 
-**`CS_NVRAM_UNRESTRICTED`** code-signing flag वाली binaries उन NVRAM variables को modify कर सकती हैं, जो सामान्यतः root से भी protected होती हैं।
+**`CS_NVRAM_UNRESTRICTED`** code-signing flag वाले Binaries उन NVRAM variables को modify कर सकते हैं जो सामान्यतः root से भी protected होते हैं।
 
-### NVRAM-Unrestricted Binaries ढूँढना
+### NVRAM-Unrestricted Binaries की खोज
 ```bash
 # Check code signing flags for a binary
 codesign -dvvv /usr/sbin/nvram 2>&1 | grep "flags="
@@ -59,7 +59,7 @@ codesign -dvvv /usr/sbin/nvram 2>&1 | grep "flags="
 
 ### NVRAM के माध्यम से SIP को कमजोर करना
 
-यदि कोई attacker NVRAM में लिख सकता है (या तो किसी compromised NVRAM-unrestricted binary के माध्यम से या किसी vulnerability का exploitation करके), तो वह `csr-active-config` को modify करके **अगले boot पर SIP protections को disable** कर सकता है:
+यदि कोई attacker NVRAM में लिख सकता है (या तो compromised NVRAM-unrestricted binary के माध्यम से या किसी vulnerability का exploitation करके), तो वह `csr-active-config` को modify करके **अगले boot पर SIP protections को disable** कर सकता है:
 ```bash
 # SIP configuration is a bitmask stored in NVRAM
 # Each bit controls a different SIP protection:
@@ -79,7 +79,7 @@ nvram csr-active-config | xxd
 # nvram csr-active-config=%7f%00%00%00   # Disable most SIP protections
 ```
 > [!WARNING]
-> आधुनिक Apple Silicon Macs पर, **Secure Boot chain NVRAM** में किए गए बदलावों को validate करती है और runtime SIP modification को रोकती है। `csr-active-config` में किए गए बदलाव केवल recoveryOS के माध्यम से प्रभावी होते हैं। हालांकि, **Intel Macs** या **reduced security mode** वाले systems पर, NVRAM manipulation अभी भी SIP को कमजोर कर सकता है।
+> आधुनिक Apple Silicon Macs पर, **Secure Boot chain NVRAM** में किए गए बदलावों को validate करती है और runtime SIP modification को रोकती है। `csr-active-config` में किए गए बदलाव केवल recoveryOS के माध्यम से प्रभावी होते हैं। हालांकि, **Intel Macs** या **reduced security mode** वाले systems पर, NVRAM manipulation अब भी SIP को कमजोर कर सकता है।
 
 ### Kernel Debugging सक्षम करना
 ```bash
@@ -97,7 +97,7 @@ sudo nvram boot-args="kcsuffix=development"
 ```
 ### Firmware Persistence
 
-NVRAM modifications **OS reinstallation के बाद भी बने रहते हैं** — वे firmware level पर persist करते हैं। An attacker custom NVRAM variables लिख सकता है, जिन्हें persistence mechanism boot के समय पढ़ता है:
+NVRAM modifications **OS reinstallation के बाद भी बनी रहती हैं** — वे firmware स्तर पर persist करती हैं। एक attacker custom NVRAM variables लिख सकता है, जिन्हें कोई persistence mechanism boot के समय पढ़ता है:
 ```bash
 # Write a persistence marker
 nvram attacker-payload-config="base64_encoded_config_here"
@@ -115,11 +115,11 @@ nvram attacker-payload-config 2>/dev/null && /path/to/payload
 # This requires NVRAM write access AND reduced security boot:
 sudo nvram boot-args="amfi_get_out_of_my_way=1"
 ```
-## वास्तविक दुनिया के CVEs
+## Real-World CVEs
 
-| CVE | विवरण |
+| CVE | Description |
 |---|---|
-| CVE-2020-9839 | Persistent SIP bypass सक्षम करने वाला NVRAM manipulation |
+| CVE-2020-9839 | Persistent SIP bypass को सक्षम करने वाला NVRAM manipulation |
 | CVE-2019-8779 | T2 Macs पर firmware-level NVRAM persistence |
 | CVE-2022-22583 | PackageKit से संबंधित NVRAM privilege escalation |
 | CVE-2020-10004 | NVRAM handling में logic issue, जो system modification की अनुमति देता है |
@@ -154,8 +154,8 @@ nvram -p | grep -v "^$" | grep -vE "^(SystemAudioVolume|boot-args|csr-active-con
 ```
 ## संदर्भ
 
-- [1] [Apple Platform Security Guide — Boot प्रक्रिया](https://support.apple.com/guide/security/boot-process-secac71d5623/web)
-- [2] [Apple Security Updates — NVRAM-संबंधित CVEs](https://support.apple.com/en-us/HT201222)
-- [3] [Duo Labs — Apple T2 सुरक्षा](https://duo.com/labs/research/apple-t2-xpc)
+- [1] [Apple Platform Security Guide — Boot process](https://support.apple.com/guide/security/boot-process-secac71d5623/web)
+- [2] [Apple Security Updates — NVRAM-related CVEs](https://support.apple.com/en-us/HT201222)
+- [3] [Duo Labs — Apple T2 Security](https://duo.com/labs/research/apple-t2-xpc)
 
 {{#include ../../../banners/hacktricks-training.md}}

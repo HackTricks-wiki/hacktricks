@@ -4,54 +4,54 @@
 
 ## Basic Information
 
-Mach-o binary का वास्तविक **entrypoint** dynamic linker होता है, जिसे `LC_LOAD_DYLINKER` में परिभाषित किया जाता है और यह आमतौर पर `/usr/lib/dyld` होता है।<sup>[3]</sup>
+Mach-o binary का वास्तविक **entrypoint** dynamic linker होता है, जिसे `LC_LOAD_DYLINKER` में define किया जाता है और यह आमतौर पर `/usr/lib/dyld` होता है।<sup>[[3]](#references)</sup>
 
-इस linker को सभी executable libraries का पता लगाना, उन्हें memory में map करना और सभी non-lazy libraries को link करना होता है। इस प्रक्रिया के बाद ही binary का entry-point execute किया जाता है।
+यह linker सभी executable libraries को locate करके memory में map करेगा और सभी non-lazy libraries को link करेगा। केवल इस process के बाद ही binary का entry-point execute होगा।
 
 बेशक, **`dyld`** की कोई dependencies नहीं होतीं (यह syscalls और libSystem excerpts का उपयोग करता है)।
 
 > [!CAUTION]
-> यदि इस linker में कोई vulnerability हो, तो चूंकि इसे किसी भी binary (यहां तक कि अत्यधिक privileged binaries) के execute होने से पहले execute किया जाता है, इसलिए **escalate privileges** करना संभव होगा।
+> यदि इस linker में कोई vulnerability होती है, तो क्योंकि इसे किसी भी binary (यहां तक कि अत्यधिक privileged binaries) को execute करने से पहले execute किया जाता है, **escalate privileges** करना संभव होगा।
 
 ### Flow
 
-Dyld को **`dyldboostrap::start`** द्वारा load किया जाता है, जो **stack canary** जैसी चीजों को भी load करता है। ऐसा इसलिए है क्योंकि यह function अपने **`apple`** argument vector में इसे और अन्य **sensitive** **values** प्राप्त करता है।<sup>[1]</sup>
+Dyld को **`dyldboostrap::start`** द्वारा load किया जाएगा, जो **stack canary** जैसी चीजों को भी load करेगा। ऐसा इसलिए है क्योंकि यह function अपने **`apple`** argument vector में इसे और अन्य **sensitive** **values** प्राप्त करेगा।<sup>[[1]](#references)</sup>
 
-**`dyls::_main()`** dyld का entry point है और इसका पहला task `configureProcessRestrictions()` चलाना होता है, जो आमतौर पर **`DYLD_*`** environment variables को restrict करता है। इसका विवरण यहां दिया गया है:<sup>[2]</sup>
+**`dyls::_main()`** dyld का entry point है और इसका पहला task `configureProcessRestrictions()` चलाना है, जो आमतौर पर **`DYLD_*`** environment variables को restrict करता है, जैसा कि यहां समझाया गया है:<sup>[[2]](#references)</sup>
 
 
 {{#ref}}
 ./
 {{#endref}}
 
-इसके बाद यह dyld shared cache को map करता है, जो सभी महत्वपूर्ण system libraries को prelink करता है। फिर यह उन libraries को map करता है जिन पर binary निर्भर करती है और तब तक recursively जारी रहता है जब तक सभी आवश्यक libraries load नहीं हो जातीं। इसलिए:
+इसके बाद यह dyld shared cache को map करता है, जो सभी महत्वपूर्ण system libraries को prelink करता है। फिर यह उन libraries को map करता है जिन पर binary निर्भर करती है और recursively जारी रखता है, जब तक कि सभी आवश्यक libraries load न हो जाएं। इसलिए:
 
-1. यह `DYLD_INSERT_LIBRARIES` के साथ inserted libraries को load करना शुरू करता है (यदि अनुमति हो)
-2. फिर shared cached libraries
+1. यह `DYLD_INSERT_LIBRARIES` के साथ inserted libraries को load करना शुरू करता है (यदि allowed हो)
+2. फिर shared cache वाली libraries
 3. फिर imported libraries
 1. फिर libraries को recursively import करना जारी रखता है
 
-सभी libraries के load हो जाने के बाद उनके **initialisers** run किए जाते हैं। इन्हें `LC_ROUTINES[_64]` (अब deprecated) में परिभाषित **`__attribute__((constructor))`** का उपयोग करके, या `S_MOD_INIT_FUNC_POINTERS` के साथ flagged section में pointer द्वारा (आमतौर पर: **`__DATA.__MOD_INIT_FUNC`**) code किया जाता है।
+जब सभी libraries load हो जाती हैं, तो इन libraries के **initialisers** run किए जाते हैं। इन्हें `LC_ROUTINES[_64]` (अब deprecated) में define किए गए **`__attribute__((constructor))`** का उपयोग करके या `S_MOD_INIT_FUNC_POINTERS` से flagged section में pointer द्वारा code किया जाता है (आमतौर पर: **`__DATA.__MOD_INIT_FUNC`**)।
 
-Terminators को **`__attribute__((destructor))`** के साथ code किया जाता है और ये `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**) के साथ flagged section में स्थित होते हैं।
+Terminators को **`__attribute__((destructor))`** के साथ code किया जाता है और ये `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**) से flagged section में located होते हैं।
 
 ### Stubs
 
-macOS की सभी binaries dynamically linked होती हैं। इसलिए, उनमें कुछ stubs sections होती हैं, जो binary को अलग-अलग machines और contexts में सही code पर jump करने में सहायता करती हैं। Binary के execute होने पर इन addresses को resolve करने का काम dyld करता है (कम से कम non-lazy addresses के लिए)।
+macOS में सभी binaries dynamically linked होती हैं। इसलिए, उनमें कुछ stub sections होते हैं जो binary को अलग-अलग machines और contexts में सही code पर jump करने में सहायता करते हैं। Binary execute होने पर इन addresses को resolve करना dyld का काम होता है (कम से कम non-lazy addresses को)।
 
 Binary में कुछ stub sections:
 
-- **`__TEXT.__[auth_]stubs`**: `__DATA` sections से pointers
-- **`__TEXT.__stub_helper`**: call किए जाने वाले function की information के साथ dynamic linking invoke करने वाला छोटा code
-- **`__DATA.__[auth_]got`**: Global Offset Table (imported functions के addresses; resolve होने पर load time के दौरान bound किए जाते हैं क्योंकि इन्हें `S_NON_LAZY_SYMBOL_POINTERS` flag के साथ mark किया गया है)
-- **`__DATA.__nl_symbol_ptr`**: Non-lazy symbol pointers (load time के दौरान bound किए जाते हैं क्योंकि इन्हें `S_NON_LAZY_SYMBOL_POINTERS` flag के साथ mark किया गया है)
+- **`__TEXT.__[auth_]stubs`**: `__DATA` sections के pointers
+- **`__TEXT.__stub_helper`**: call किए जाने वाले function की जानकारी के साथ dynamic linking invoke करने वाला छोटा code
+- **`__DATA.__[auth_]got`**: Global Offset Table (imported functions के addresses, resolve होने पर, load time के दौरान bound किए जाते हैं क्योंकि यह `S_NON_LAZY_SYMBOL_POINTERS` flag से marked है)
+- **`__DATA.__nl_symbol_ptr`**: Non-lazy symbol pointers (load time के दौरान bound किए जाते हैं क्योंकि यह `S_NON_LAZY_SYMBOL_POINTERS` flag से marked है)
 - **`__DATA.__la_symbol_ptr`**: Lazy symbols pointers (पहली access पर bound किए जाते हैं)
 
 > [!WARNING]
-> ध्यान दें कि "auth_" prefix वाले pointers इनकी सुरक्षा के लिए एक in-process encryption key (PAC) का उपयोग करते हैं। इसके अलावा, pointer को follow करने से पहले उसे verify करने के लिए arm64 instruction `BLRA[A/B]` का उपयोग करना संभव है। RET address के बजाय RETA\[A/B] का भी उपयोग किया जा सकता है।\
-> वास्तव में, **`__TEXT.__auth_stubs`** में code pointer को authenticate करने के लिए requested function को call करने हेतु **`braa`** का उपयोग करेगा, **`bl`** का नहीं।
+> ध्यान दें कि "auth\_" prefix वाले pointers उन्हें protect करने के लिए एक in-process encryption key (PAC) का उपयोग करते हैं। इसके अलावा, pointer को follow करने से पहले उसे verify करने के लिए arm64 instruction `BLRA[A/B]` का उपयोग करना संभव है। RET address के स्थान पर RETA\[A/B] का उपयोग किया जा सकता है।\
+> वास्तव में, **`__TEXT.__auth_stubs`** में code requested function को call करने और pointer को authenticate करने के लिए **`bl`** के बजाय **`braa`** का उपयोग करेगा।
 >
-> यह भी ध्यान दें कि वर्तमान dyld versions हर चीज को non-lazy के रूप में load करते हैं।
+> यह भी ध्यान दें कि वर्तमान dyld versions सभी चीजों को **non-lazy** के रूप में load करते हैं।
 
 ### Finding lazy symbols
 ```c
@@ -62,7 +62,7 @@ int main (int argc, char **argv, char **envp, char **apple)
 printf("Hi\n");
 }
 ```
-दिलचस्प disassembly भाग:
+दिलचस्प disassembly हिस्सा:
 ```armasm
 ; objdump -d ./load
 100003f7c: 90000000    	adrp	x0, 0x100003000 <_main+0x1c>
@@ -83,7 +83,7 @@ Idx Name          Size     VMA              Type
 3 __unwind_info 00000058 0000000100003fa8 DATA
 4 __got         00000008 0000000100004000 DATA
 ```
-**`__stubs`** section के disassembly में:
+**`__stubs`** section के disassemble में:
 ```bash
 objdump -d --section=__stubs ./load
 
@@ -98,19 +98,19 @@ Disassembly of section __TEXT,__stubs:
 ```
 आप देख सकते हैं कि हम **GOT के address पर jump कर रहे हैं**, जो इस मामले में non-lazy रूप से resolved है और इसमें printf function का address होगा।
 
-अन्य स्थितियों में GOT पर सीधे jump करने के बजाय, यह **`__DATA.__la_symbol_ptr`** पर jump कर सकता है, जो ऐसा value load करेगा जो उस function को दर्शाता है जिसे load करने का प्रयास किया जा रहा है। इसके बाद यह **`__TEXT.__stub_helper`** पर jump करेगा, जो **`__DATA.__nl_symbol_ptr`** पर jump करता है। इसमें **`dyld_stub_binder`** का address होता है, जो parameters के रूप में function number और एक address लेता है।\
-यह अंतिम function, searched function का address ढूंढने के बाद, उसे **`__TEXT.__stub_helper`** में corresponding location पर लिख देता है, ताकि भविष्य में lookups करने की आवश्यकता न हो।
+अन्य परिस्थितियों में GOT पर सीधे jump करने के बजाय, यह **`__DATA.__la_symbol_ptr`** पर jump कर सकता है, जो उस function को दर्शाने वाली value load करेगा जिसे यह load करने का प्रयास कर रहा है। इसके बाद यह **`__TEXT.__stub_helper`** पर jump करेगा, जो **`__DATA.__nl_symbol_ptr`** पर jump करता है। इसमें **`dyld_stub_binder`** का address होता है, जो parameters के रूप में function number और एक address लेता है।\
+यह अंतिम function, searched function का address खोजने के बाद, उसे **`__TEXT.__stub_helper`** में corresponding location पर लिख देता है, ताकि भविष्य में lookups करने की आवश्यकता न पड़े।
 
 > [!TIP]
-> हालांकि ध्यान दें कि वर्तमान dyld versions हर चीज को non-lazy रूप से load करते हैं।
+> हालांकि ध्यान दें कि current dyld versions सभी चीजों को non-lazy के रूप में load करते हैं।
 
 #### Dyld opcodes
 
-अंततः, **`dyld_stub_binder`** को indicated function ढूंढना होता है और उसे उचित address पर लिखना होता है, ताकि उसे दोबारा search न करना पड़े। ऐसा करने के लिए यह dyld के भीतर opcodes (एक finite state machine) का उपयोग करता है।
+अंततः, **`dyld_stub_binder`** को indicated function खोजना होता है और उसे proper address पर लिखना होता है, ताकि उसे दोबारा search न करना पड़े। ऐसा करने के लिए यह dyld के भीतर opcodes (एक finite state machine) का उपयोग करता है।
 
 ## apple\[] argument vector
 
-macOS में main function को वास्तव में 3 के बजाय 4 arguments मिलते हैं। चौथे को apple कहा जाता है और प्रत्येक entry `key=value` के रूप में होती है। उदाहरण के लिए:
+macOS में main function को वास्तव में 3 के बजाय 4 arguments मिलते हैं। चौथे को apple कहा जाता है और प्रत्येक entry `key=value` के form में होती है। उदाहरण के लिए:
 ```c
 // gcc apple.c -o apple
 #include <stdio.h>
@@ -120,7 +120,7 @@ for (int i=0; apple[i]; i++)
 printf("%d: %s\n", i, apple[i])
 }
 ```
-परिणाम:
+अनुवाद के लिए अंग्रेज़ी पाठ उपलब्ध नहीं है। कृपया सामग्री भेजें।
 ```
 0: executable_path=./a
 1:
@@ -138,7 +138,7 @@ printf("%d: %s\n", i, apple[i])
 > [!TIP]
 > जब तक ये values main function तक पहुंचती हैं, तब तक उनमें से sensitive information पहले ही हटा दी गई होती है, अन्यथा यह data leak हो सकता था।
 
-इन सभी interesting values को main में प्रवेश करने से पहले debugging के दौरान इस तरह देखा जा सकता है:
+इन सभी interesting values को main में प्रवेश करने से पहले debugging करते हुए इस तरह देखा जा सकता है:
 
 <pre><code>lldb ./apple
 
@@ -181,17 +181,17 @@ printf("%d: %s\n", i, apple[i])
 
 ## dyld_all_image_infos
 
-यह dyld द्वारा export किया गया एक structure है, जिसमें dyld state से संबंधित information होती है। इसे [**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) में पाया जा सकता है। इसमें version, dyld_image_info array का pointer, dyld_image_notifier का pointer, proc के shared cache से detached होने की जानकारी, libSystem initializer के call किए जाने की जानकारी, dyld के अपने Mach header का pointer, dyld version string आदि जैसी information होती है।
+यह dyld द्वारा export की गई एक structure है, जिसमें dyld state से संबंधित information होती है। इसे [**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) में देखा जा सकता है। इसमें version, dyld_image_info array का pointer, dyld_image_notifier का pointer, proc के shared cache से detached होने की स्थिति, libSystem initializer के call होने की स्थिति, dyld के अपने Mach header का pointer, dyld version string आदि जैसी information होती है।
 
 ## dyld env variables
 
 ### debug dyld
 
-Interesting env variables, जो यह समझने में मदद करते हैं कि dyld क्या कर रहा है:
+कुछ interesting env variables dyld क्या कर रहा है, इसे समझने में मदद करते हैं:
 
 - **DYLD_PRINT_LIBRARIES**
 
-Load की गई प्रत्येक library को check करें:
+Load की जाने वाली प्रत्येक library को check करें:
 ```
 DYLD_PRINT_LIBRARIES=1 ./apple
 dyld[19948]: <9F848759-9AB8-3BD2-96A1-C069DC1FFD43> /private/tmp/a
@@ -209,7 +209,7 @@ dyld[19948]: <1A7038EC-EE49-35AE-8A3C-C311083795FB> /usr/lib/system/libmacho.dyl
 ```
 - **DYLD_PRINT_SEGMENTS**
 
-जांचें कि प्रत्येक library कैसे load की जाती है:
+जाँचें कि प्रत्येक library कैसे load की जाती है:
 ```
 DYLD_PRINT_SEGMENTS=1 ./apple
 dyld[21147]: re-using existing shared cache (/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e):
@@ -246,7 +246,7 @@ dyld[21147]:     __LINKEDIT (r..) 0x000239574000->0x000270BE4000
 ```
 - **DYLD_PRINT_INITIALIZERS**
 
-प्रत्येक library initializer के चलने पर प्रिंट करें:
+जब प्रत्येक library initializer चल रहा हो, तब print करें:
 ```
 DYLD_PRINT_INITIALIZERS=1 ./apple
 dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
@@ -255,7 +255,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ### अन्य
 
 - `DYLD_BIND_AT_LAUNCH`: Lazy bindings को non lazy bindings के साथ resolve किया जाता है
-- `DYLD_DISABLE_PREFETCH`: \_\_DATA और \_\_LINKEDIT content की pre-fetching disable करें
+- `DYLD_DISABLE_PREFETCH`: \_\_DATA और \_\_LINKEDIT content की pre-fetching को disable करें
 - `DYLD_FORCE_FLAT_NAMESPACE`: Single-level bindings
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Resolution paths
 - `DYLD_INSERT_LIBRARIES`: एक specific library load करें
@@ -280,11 +280,11 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_SHARED_REGION`: "use", "private", "avoid"
 - `DYLD_USE_CLOSURES`: Closures enable करें
 
-कुछ इस तरह की command से और भी ढूँढना संभव है:
+ऐसी किसी command से और भी ढूँढना संभव है:
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```
-या [dyld project](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) डाउनलोड करके फ़ोल्डर के अंदर चलाना:
+या [dyld project](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) डाउनलोड करके फ़ोल्डर के अंदर चलाएँ:
 ```bash
 find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```
