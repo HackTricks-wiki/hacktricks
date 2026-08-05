@@ -35,7 +35,7 @@ Rubeus.exe monitor /interval:10 [/filteruser:<username>] #Check every 10s for ne
 
 Load the ticket of Administrator (or victim user) in memory with **Mimikatz** or **Rubeus for a** [**Pass the Ticket**](pass-the-ticket.md)**.**\
 More info: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
-[**More information about Unconstrained delegation in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
+[**More information about Unconstrained delegation in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)<sup>[[2]](#references)[[3]](#references)</sup>
 
 ### **Force Authentication**
 
@@ -49,7 +49,7 @@ To make a print server login against any machine you can use [**SpoolSample**](h
 ```
 
 If the TGT if from a domain controller, you could perform a [**DCSync attack**](acl-persistence-abuse/index.html#dcsync) and obtain all the hashes from the DC.\
-[**More info about this attack in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
+[**More info about this attack in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)<sup>[[10]](#references)</sup>
 
 Find here other ways to **force an authentication:**
 
@@ -67,7 +67,7 @@ Unconstrained delegation is **not limited to computer objects**. A **user/servic
 This leads to 2 very common offensive paths:
 
 1. You compromise the password/hash of the unconstrained-delegation **user account**, then **add an SPN** to that same account.
-2. The account already has one or more SPNs, but one of them points to a **stale/decommissioned hostname**; recreating the missing **DNS A record** is enough to hijack the authentication flow without modifying the SPN set.
+2. The account already has one or more SPNs, but one of them points to a **stale/decommissioned hostname**; recreating the missing **DNS A record** is enough to hijack the authentication flow without modifying the SPN set.<sup>[[8]](#references)</sup>
 
 Minimal Linux flow:
 
@@ -105,7 +105,7 @@ Notes:
 
 ### Abusing Unconstrained Delegation with an attacker-created computer
 
-Modern domains often have `MachineAccountQuota > 0` (default 10), allowing any authenticated principal to create up to N computer objects. If you also hold the `SeEnableDelegationPrivilege` token privilege (or equivalent rights), you can set the newly created computer to be trusted for unconstrained delegation and harvest inbound TGTs from privileged systems.
+Modern domains often have `MachineAccountQuota > 0` (default 10), allowing any authenticated principal to create up to N computer objects. If you also hold the `SeEnableDelegationPrivilege` token privilege (or equivalent rights), you can set the newly created computer to be trusted for unconstrained delegation and harvest inbound TGTs from privileged systems.<sup>[[1]](#references)</sup>
 
 High-level flow:
 
@@ -183,7 +183,7 @@ Notes and requirements:
 - Setting `TRUSTED_FOR_DELEGATION` on a computer requires `SeEnableDelegationPrivilege` (or domain admin).
 - Ensure name resolution to your fake host (DNS A record) so the DC can reach it by FQDN.
 - Coercion requires a viable vector (PrinterBug/MS-RPRN, EFSRPC/PetitPotam, DFSCoerce, MS-EVEN, etc.). Disable these on DCs if possible.
-- If the victim account is marked as **"Account is sensitive and cannot be delegated"** or is a member of **Protected Users**, the forwarded TGT will not be included in the service ticket, so this chain won't yield a reusable TGT.
+- If the victim account is marked as **"Account is sensitive and cannot be delegated"** or is a member of **Protected Users**, the forwarded TGT will not be included in the service ticket, so this chain won't yield a reusable TGT.<sup>[[9]](#references)</sup>
 - If **Credential Guard** is enabled on the authenticating client/server, Windows blocks **Kerberos unconstrained delegation**, which can make otherwise valid coercion paths fail from an operator perspective.
 
 Detection and hardening ideas:
@@ -200,14 +200,15 @@ Detection and hardening ideas:
 
 ## References
 
-- HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA: https://0xdf.gitlab.io/2025/09/12/htb-delegate.html
-- harmj0y – S4U2Pwnage: https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/
-- ired.team – Domain compromise via unrestricted delegation: https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation
-- krbrelayx: https://github.com/dirkjanm/krbrelayx
-- Impacket addcomputer.py: https://github.com/fortra/impacket
-- BloodyAD: https://github.com/CravateRouge/bloodyAD
-- netexec (CME fork): https://github.com/Pennyw0rth/NetExec
-- Praetorian – Unconstrained Delegation in Active Directory: https://www.praetorian.com/blog/unconstrained-delegation-active-directory/
-- Microsoft Learn – Protected Users Security Group: https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group
+- [1] [HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
+- [2] [harmj0y – S4U2Pwnage](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)
+- [3] [ired.team – Domain compromise via unrestricted delegation](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
+- [4] [krbrelayx](https://github.com/dirkjanm/krbrelayx)
+- [5] [Impacket addcomputer.py](https://github.com/fortra/impacket)
+- [6] [BloodyAD](https://github.com/CravateRouge/bloodyAD)
+- [7] [netexec (CME fork)](https://github.com/Pennyw0rth/NetExec)
+- [8] [Praetorian – Unconstrained Delegation in Active Directory](https://www.praetorian.com/blog/unconstrained-delegation-active-directory/)
+- [9] [Microsoft Learn – Protected Users Security Group](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group)
+- [10] [ired.team – Domain compromise via DC print server and Kerberos delegation](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 
 {{#include ../../banners/hacktricks-training.md}}

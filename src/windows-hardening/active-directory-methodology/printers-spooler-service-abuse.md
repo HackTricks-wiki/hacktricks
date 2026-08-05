@@ -110,17 +110,17 @@ If an attacker has already compromised a computer with [Unconstrained Delegation
   - Pipes: \\PIPE\\efsrpc (also via \\PIPE\\lsarpc, \\PIPE\\samr, \\PIPE\\lsass, \\PIPE\\netlogon)
   - IF UUIDs: c681d488-d850-11d0-8c52-00c04fd90f7e ; df1941c5-fe89-4e79-bf10-463657acf44d
   - Opnums commonly abused: 0, 4, 5, 6, 7, 12, 13, 15, 16
-  - Tool: PetitPotam<sup>[[1]](#references)[[6]](#references)</sup>
+  - Tool: PetitPotam<sup>[[1]](#references)[[6]](#references)[[7]](#references)</sup>
 - MS-DFSNM (DFS Namespace Management)
   - Pipe: \\PIPE\\netdfs
   - IF UUID: 4fc742e0-4a10-11cf-8273-00aa004ae673
   - Opnums: 12 NetrDfsAddStdRoot; 13 NetrDfsRemoveStdRoot
-  - Tool: DFSCoerce<sup>[[1]](#references)[[6]](#references)</sup>
+  - Tool: DFSCoerce<sup>[[1]](#references)[[6]](#references)[[8]](#references)</sup>
 - MS-FSRVP (File Server Remote VSS)
   - Pipe: \\PIPE\\FssagentRpc
   - IF UUID: a8e0653c-2744-4389-a61d-7373df8b2292
   - Opnums: 8 IsPathSupported; 9 IsPathShadowCopied
-  - Tool: ShadowCoerce<sup>[[1]](#references)[[6]](#references)</sup>
+  - Tool: ShadowCoerce<sup>[[1]](#references)[[6]](#references)[[9]](#references)</sup>
 - MS-EVEN (EventLog Remoting)
   - Pipe: \\PIPE\\even
   - IF UUID: 82273fdc-e32a-18c3-3f78-827929dc23ea
