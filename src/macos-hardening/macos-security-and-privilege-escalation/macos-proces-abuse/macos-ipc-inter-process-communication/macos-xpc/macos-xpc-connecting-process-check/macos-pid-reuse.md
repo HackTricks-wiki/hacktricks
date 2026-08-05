@@ -1,24 +1,24 @@
-# macOS PID Reuse
+# macOS PID 重用
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-## PID Reuse
+## PID 重用
 
-当 macOS **XPC service** 根据 **PID** 而不是 **audit token** 检查被调用进程时，它容易受到 PID reuse attack 的影响。该攻击基于一个 **race condition**：**exploit** 会先利用该功能向 **XPC** service **发送消息**，然后紧接着使用允许的 binary 执行 **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`**。
+当 macOS **XPC service** 根据 **PID** 而不是 **audit token** 检查被调用进程时，就容易受到 PID reuse attack 的影响。该攻击基于一种 **race condition**：**exploit** 会先利用相关功能向 **XPC** service **send messages**，然后紧接着使用允许的 binary 执行 **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`**。
 
-此函数会让 **allowed binary** 获得该 **PID**，但**恶意的 XPC message 已经在此之前发送**。因此，如果 **XPC** service 使用 **PID** 对 sender 进行 **authenticate**，并且在执行 **`posix_spawn`** **之后**才进行检查，它就会认为请求来自一个**authorized** process。
+该函数会让 **allowed binary own the PID**，但**恶意的 XPC message 已经在此之前发送**。因此，如果 **XPC** service 使用 **PID** 对 sender 进行 **authenticate**，并且在执行 **`posix_spawn`** **之后**进行检查，它就会认为该请求来自**授权**进程。
 
 ### Exploit example
 
-如果你发现 **`shouldAcceptNewConnection`** 或由它调用的某个 function 调用了 **`processIdentifier`**，而没有调用 **`auditToken`**，这很可能意味着它正在验证 process PID，而不是 audit token。\
-例如下图所示（取自 reference）：<sup>[1]</sup>
+如果你发现 **`shouldAcceptNewConnection`** 函数，或由它调用的某个函数调用了 **`processIdentifier`**，但没有调用 **`auditToken`**，这很可能意味着它正在验证进程 PID，而不是 audit token。\
+例如下图（取自参考资料）：<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../../../../images/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
 
-查看这个 exploit example（同样取自 reference），可以看到 exploit 的 2 个部分：<sup>[1]</sup>
+查看这个 exploit 示例（同样取自参考资料），了解 exploit 的两个部分：<sup>[[1]](#references)</sup>
 
 - 一个用于**生成多个 forks**
-- **每个 fork** 都会在发送消息后立即执行 **`posix_spawn`**，同时向 XPC service **发送** **payload**。
+- **每个 fork** 都会在发送 message 后立即执行 **`posix_spawn`**，同时向 XPC service **send** **payload**。
 
 > [!CAUTION]
 > 要使 exploit 正常工作，必须 ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`**，或者将以下内容放入 exploit：
@@ -31,7 +31,7 @@
 
 {{#tabs}}
 {{#tab name="NSTasks"}}
-使用 **`NSTasks`** 的第一种选项，并通过 argument 启动 children 来 exploit RC
+使用 **`NSTasks`** 并通过参数启动 children 以利用 RC的第一种方法。
 ```objectivec
 // Code from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl
@@ -278,14 +278,14 @@ return 0;
 
 ## 其他示例
 
-- [**Intego X9：为什么你的 macOS antivirus 不应信任 PIDs**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - 针对某 antivirus 的 privileged helper 执行 LPE，该 helper 通过 PID 对客户端进行身份验证。<sup>[3]</sup>
-- [**利用 GOG Galaxy XPC service 在 macOS 中进行 privilege escalation**](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)<sup>[4]</sup>
-- [**Rootpipe Reborn（Part II）**](https://objective-see.org/blog/blog_0x41.html)<sup>[5]</sup>
+- [**Intego X9：为什么你的 macOS antivirus 不应信任 PIDs**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - 针对某 antivirus 的 privileged helper 执行 LPE，该 helper 通过 PID 对客户端进行身份验证。<sup>[[3]](#references)</sup>
+- [**利用 GOG Galaxy XPC service 在 macOS 中进行 privilege escalation**](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)<sup>[[4]](#references)</sup>
+- [**Rootpipe Reborn（Part II）**](https://objective-see.org/blog/blog_0x41.html)<sup>[[5]](#references)</sup>
 
 ## References
 
 - [1] [学习 XPC exploitation - Part 2：对 PID 说不！](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
-- [2] [不要信任 PID！一个简单逻辑 bug 的故事及其发现位置 - Samuel Groß（WarCon 2018）](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
+- [2] [不要信任 PID！一个简单 logic bug 的故事，以及在哪里可以找到它 - Samuel Groß（WarCon 2018）](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
 - [3] [Intego X9：为什么你的 macOS antivirus 不应信任 PIDs](https://blog.quarkslab.com/intego_lpe_macos_2.html)
 - [4] [利用 GOG Galaxy XPC service 在 macOS 中进行 privilege escalation](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
 - [5] [Rootpipe Reborn（Part II）](https://objective-see.org/blog/blog_0x41.html)

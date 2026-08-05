@@ -4,54 +4,54 @@
 
 ## 基本信息
 
-Mach-o binary 的真正 **entrypoint** 是动态链接器，其定义于 `LC_LOAD_DYLINKER` 中，通常为 `/usr/lib/dyld`。<sup>[3]</sup>
+Mach-o 二进制文件真正的 **entrypoint** 是动态链接器，其定义在 `LC_LOAD_DYLINKER` 中，通常为 `/usr/lib/dyld`。<sup>[[3]](#references)</sup>
 
-该 linker 需要定位所有 executable libraries，将它们映射到内存中，并链接所有 non-lazy libraries。只有完成此过程后，binary 的 entry-point 才会被执行。
+该链接器需要定位所有可执行文件的 libraries，将它们映射到内存中，并链接所有 non-lazy libraries。只有完成此过程后，二进制文件的 entry-point 才会执行。
 
-当然，**`dyld`** 没有任何 dependencies（它使用 syscalls 和 libSystem excerpts）。
+当然，**`dyld`** 没有任何依赖项（它使用 syscalls 和 libSystem 代码片段）。
 
 > [!CAUTION]
-> 如果该 linker 包含任何 vulnerability，由于它会在执行任何 binary（甚至高度 privileged 的 binary）之前执行，因此可能实现 **escalate privileges**。
+> 如果该链接器包含任何 vulnerability，由于它会在执行任何二进制文件之前执行（包括权限极高的二进制文件），因此可能被用于 **escalate privileges**。
 
 ### 流程
 
-Dyld 将由 **`dyldboostrap::start`** 加载，该函数还会加载 **stack canary** 等内容。这是因为该函数会在其 **`apple`** argument vector 中接收这些以及其他 **sensitive** **values**。<sup>[1]</sup>
+Dyld 将由 **`dyldboostrap::start`** 加载，该函数还会加载 **stack canary** 等内容。这是因为该函数会在其 **`apple`** 参数向量中接收这些及其他 **sensitive** **values**。<sup>[[1]](#references)</sup>
 
-**`dyls::_main()`** 是 dyld 的 entry point，其第一项任务是运行 `configureProcessRestrictions()`，该函数通常会限制此处所述的 **`DYLD_*`** environment variables：<sup>[2]</sup>
+**`dyls::_main()`** 是 dyld 的 entry point，其第一个任务是运行 `configureProcessRestrictions()`，该函数通常会限制 <sup>[[2]](#references)</sup> 中说明的 **`DYLD_*`** 环境变量：
 
 
 {{#ref}}
 ./
 {{#endref}}
 
-然后，它会映射 dyld shared cache，该 cache 会预先链接所有重要的 system libraries；接着映射 binary 所依赖的 libraries，并递归执行此过程，直到所有所需的 libraries 都被加载。因此：
+随后，它会映射 dyld shared cache，该缓存预先链接了所有重要的系统 libraries；然后映射该二进制文件所依赖的 libraries，并递归执行此过程，直到所有所需的 libraries 都被加载。因此：
 
-1. 它开始加载通过 `DYLD_INSERT_LIBRARIES` 插入的 libraries（如果允许）
-2. 然后加载 shared cached ones
-3. 然后加载 imported ones
+1. 它首先使用 `DYLD_INSERT_LIBRARIES` 加载插入的 libraries（如果允许）
+2. 然后加载 shared cache 中的 libraries
+3. 然后加载 imported libraries
 1. 然后继续递归导入 libraries
 
-全部加载完成后，会运行这些 libraries 的 **initialisers**。这些函数使用 `__attribute__((constructor))` 编写，定义于 `LC_ROUTINES[_64]`（现已弃用）中，或者通过指针定义在标记为 `S_MOD_INIT_FUNC_POINTERS` 的 section 中（通常为：**`__DATA.__MOD_INIT_FUNC`**）。
+全部加载完成后，会运行这些 libraries 的 **initialisers**。这些初始化器使用 **`__attribute__((constructor))`** 编写，定义在 `LC_ROUTINES[_64]`（现已弃用）中，或者通过指针定义在带有 `S_MOD_INIT_FUNC_POINTERS` 标志的 section 中（通常为：**`__DATA.__MOD_INIT_FUNC`**）。
 
-Terminators 使用 **`__attribute__((destructor))`** 编写，位于标记为 `S_MOD_TERM_FUNC_POINTERS` 的 section（**`__DATA.__mod_term_func`**）中。
+终止器使用 **`__attribute__((destructor))`** 编写，位于带有 `S_MOD_TERM_FUNC_POINTERS` 标志的 section 中（**`__DATA.__mod_term_func`**）。
 
-### 存根
+### Stubs
 
-macOS 中的所有 binaries 都是 dynamically linked。因此，它们包含一些 stub sections，用于帮助 binary 在不同 machines 和 contexts 中跳转到正确的 code。binary 执行时，dyld 负责解析这些 addresses（至少是 non-lazy ones）。
+macOS 中的所有 binaries 都是动态链接的。因此，它们包含一些 stub sections，帮助二进制文件在不同机器和上下文中跳转到正确的代码。二进制文件执行时，是 dyld 负责解析这些地址（至少是 non-lazy 地址）。
 
-binary 中的一些 stub sections：
+二进制文件中的一些 stub sections：
 
 - **`__TEXT.__[auth_]stubs`**：指向 `__DATA` sections 的 pointers
-- **`__TEXT.__stub_helper`**：调用 dynamic linking 的小段 code，其中包含要调用的 function 信息
-- **`__DATA.__[auth_]got`**：Global Offset Table（指向 imported functions 的 addresses；解析后会被绑定，因为其标记带有 `S_NON_LAZY_SYMBOL_POINTERS` flag）
-- **`__DATA.__nl_symbol_ptr`**：Non-lazy symbol pointers（加载期间绑定，因为其标记带有 `S_NON_LAZY_SYMBOL_POINTERS` flag）
-- **`__DATA.__la_symbol_ptr`**：Lazy symbols pointers（首次访问时绑定）
+- **`__TEXT.__stub_helper`**：使用要调用的函数信息调用 dynamic linking 的小段代码
+- **`__DATA.__[auth_]got`**：Global Offset Table（指向 imported functions 的地址；解析后会被绑定，因为其标志为 `S_NON_LAZY_SYMBOL_POINTERS`）
+- **`__DATA.__nl_symbol_ptr`**：Non-lazy symbol pointers（加载时绑定，因为其标志为 `S_NON_LAZY_SYMBOL_POINTERS`）
+- **`__DATA.__la_symbol_ptr`**：Lazy symbol pointers（首次访问时绑定）
 
 > [!WARNING]
-> 注意，带有前缀 "auth_" 的 pointers 使用一个进程内 encryption key 对其进行保护（PAC）。此外，还可以使用 arm64 instruction `BLRA[A/B]` 在跟随 pointer 之前对其进行验证。也可以使用 RETA\[A/B] 来代替 RET address。\
-> 实际上，**`__TEXT.__auth_stubs`** 中的 code 会使用 **`braa`** 而不是 **`bl`** 来调用请求的 function，以 authenticate pointer。
+> 注意，带有前缀 "auth_" 的 pointers 使用一个进程内 encryption key 来保护它们（PAC）。此外，可以使用 arm64 指令 `BLRA[A/B]` 在跟随 pointer 前对其进行验证。还可以使用 RETA\[A/B] 代替 RET address。\
+> 实际上，**`__TEXT.__auth_stubs`** 中的代码会使用 **`braa`** 而不是 **`bl`** 来调用请求的函数，从而对 pointer 进行 authentication。
 >
-> 另请注意，当前版本的 dyld 会将所有内容作为 non-lazy 加载。
+> 还要注意，当前版本的 dyld 会将所有内容作为 non-lazy 加载。
 
 ### 查找 lazy symbols
 ```c
@@ -69,7 +69,7 @@ printf("Hi\n");
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-可以看到，对 `printf` 的跳转调用将前往 **`__TEXT.__stubs`**：
+可以看到，跳转调用 `printf` 将转到 **`__TEXT.__stubs`**：
 ```bash
 objdump --section-headers ./load
 
@@ -83,7 +83,7 @@ Idx Name          Size     VMA              Type
 3 __unwind_info 00000058 0000000100003fa8 DATA
 4 __got         00000008 0000000100004000 DATA
 ```
-在 **`__stubs`** section 的反汇编中：
+在 **`__stubs`** 区段的反汇编中：
 ```bash
 objdump -d --section=__stubs ./load
 
@@ -96,21 +96,21 @@ Disassembly of section __TEXT,__stubs:
 100003f9c: f9400210    	ldr	x16, [x16]
 100003fa0: d61f0200    	br	x16
 ```
-你可以看到，我们正在 **跳转到 GOT 的地址**；在本例中，该地址以 non-lazy 方式解析，并且会包含 printf 函数的地址。
+你可以看到，我们正在 **跳转到 GOT 的地址**；在本例中，该地址以 non-lazy 方式解析，并将包含 `printf` 函数的地址。
 
-在其他情况下，不是直接跳转到 GOT，而是跳转到 **`__DATA.__la_symbol_ptr`**，该位置会加载一个表示它正尝试加载的函数的值；随后跳转到 **`__TEXT.__stub_helper`**，它会跳转到包含 **`dyld_stub_binder`** 地址的 **`__DATA.__nl_symbol_ptr`**。该函数接收函数编号和一个地址作为参数。\
-该函数找到目标函数的地址后，会将其写入 **`__TEXT.__stub_helper`** 中对应的位置，以避免今后再次执行查找。
+在其他情况下，它可能不会直接跳转到 GOT，而是跳转到 **`__DATA.__la_symbol_ptr`**。该位置会加载一个表示待加载函数的值，然后跳转到 **`__TEXT.__stub_helper`**；后者会跳转到包含 **`dyld_stub_binder`** 地址的 **`__DATA.__nl_symbol_ptr`**。`dyld_stub_binder` 接收函数编号和一个地址作为参数。\
+这个最后的函数找到目标函数的地址后，会将其写入 **`__TEXT.__stub_helper`** 中对应的位置，以避免将来再次执行查找。
 
 > [!TIP]
-> 不过请注意，当前版本的 dyld 会将所有内容加载为 non-lazy。
+> 但请注意，当前版本的 dyld 会将所有内容加载为 non-lazy。
 
 #### Dyld opcodes
 
-最后，**`dyld_stub_binder`** 需要找到指定的函数，并将其写入正确的地址，以免再次查找该函数。为此，它会使用 dyld 内部的 opcodes（有限状态机）。
+最后，**`dyld_stub_binder`** 需要找到指定的函数，并将其写入正确的地址，以免再次查找该函数。为此，它使用 dyld 内部的 opcodes（有限状态机）。
 
-## apple\[] 参数向量
+## apple\[] argument vector
 
-在 macOS 中，main 函数实际上接收 4 个参数，而不是 3 个。第四个参数称为 apple，其中每个条目都采用 `key=value` 的形式。例如：
+在 macOS 中，main 函数实际上接收 4 个参数，而不是 3 个。第四个参数称为 apple，每个条目的形式都是 `key=value`。例如：
 ```c
 // gcc apple.c -o apple
 #include <stdio.h>
@@ -136,7 +136,7 @@ printf("%d: %s\n", i, apple[i])
 11: th_port=
 ```
 > [!TIP]
-> 当这些值到达 main function 时，敏感信息已经从中移除，否则就会造成 data leak。
+> 当这些值到达 main function 时，其中的敏感信息已经被移除，否则就会造成 data leak。
 
 在进入 main 之前进行 debugging，可以看到所有这些有趣的值：
 
@@ -181,13 +181,13 @@ printf("%d: %s\n", i, apple[i])
 
 ## dyld_all_image_infos
 
-这是由 dyld 导出的一个 structure，包含有关 dyld 状态的信息。可以在 [**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) 中找到该 structure，其中包含 version、指向 dyld_image_info array 的 pointer、指向 dyld_image_notifier 的 pointer、proc 是否已从 shared cache 分离、libSystem initializer 是否已调用、指向 dyld 自身 Mach header 的 pointer、指向 dyld version string 的 pointer 等信息。
+这是由 dyld 导出的一个 structure，其中包含 dyld 状态相关信息。可以在[**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html)中找到它，其中包含 version、指向 dyld_image_info array 的 pointer、指向 dyld_image_notifier 的 pointer、proc 是否已从 shared cache 分离、libSystem initializer 是否已调用、指向 dyld 自身 Mach header 的 pointer、指向 dyld version string 的 pointer 等信息。
 
 ## dyld env variables
 
 ### debug dyld
 
-以下有趣的 env variables 可以帮助理解 dyld 正在执行的操作：
+以下有趣的 env variables 有助于理解 dyld 正在执行的操作：
 
 - **DYLD_PRINT_LIBRARIES**
 
@@ -252,35 +252,35 @@ DYLD_PRINT_INITIALIZERS=1 ./apple
 dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 [...]
 ```
-### 其他
+### Others
 
-- `DYLD_BIND_AT_LAUNCH`: 使用非 lazy binding 解析 lazy binding
+- `DYLD_BIND_AT_LAUNCH`: Lazy bindings 会与 non lazy bindings 一起解析
 - `DYLD_DISABLE_PREFETCH`: 禁用对 \_\_DATA 和 \_\_LINKEDIT 内容的预取
-- `DYLD_FORCE_FLAT_NAMESPACE`: 单层 binding
+- `DYLD_FORCE_FLAT_NAMESPACE`: 单层 bindings
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: 解析路径
 - `DYLD_INSERT_LIBRARIES`: 加载指定的 library
 - `DYLD_PRINT_TO_FILE`: 将 dyld 调试信息写入文件
-- `DYLD_PRINT_APIS`: 打印 libdyld API 调用
-- `DYLD_PRINT_APIS_APP`: 打印主程序发起的 libdyld API 调用
-- `DYLD_PRINT_BINDINGS`: binding 时打印符号
-- `DYLD_WEAK_BINDINGS`: 仅在 binding 时打印 weak symbols
-- `DYLD_PRINT_CODE_SIGNATURES`: 打印代码签名注册操作
-- `DYLD_PRINT_DOFS`: 打印加载时的 D-Trace object format sections
-- `DYLD_PRINT_ENV`: 打印 dyld 看到的环境变量
-- `DYLD_PRINT_INTERPOSTING`: 打印 interposing 操作
-- `DYLD_PRINT_LIBRARIES`: 打印已加载的 libraries
-- `DYLD_PRINT_OPTS`: 打印加载选项
-- `DYLD_REBASING`: 打印符号 rebase 操作
-- `DYLD_RPATHS`: 打印 `@rpath` 的展开结果
-- `DYLD_PRINT_SEGMENTS`: 打印 Mach-O segments 的映射
-- `DYLD_PRINT_STATISTICS`: 打印计时统计信息
-- `DYLD_PRINT_STATISTICS_DETAILS`: 打印详细的计时统计信息
-- `DYLD_PRINT_WARNINGS`: 打印警告消息
+- `DYLD_PRINT_APIS`: 输出 libdyld API 调用
+- `DYLD_PRINT_APIS_APP`: 输出 main 发起的 libdyld API 调用
+- `DYLD_PRINT_BINDINGS`: 在 symbols 绑定时输出它们
+- `DYLD_WEAK_BINDINGS`: 仅在 weak symbols 绑定时输出它们
+- `DYLD_PRINT_CODE_SIGNATURES`: 输出代码签名注册操作
+- `DYLD_PRINT_DOFS`: 输出加载时的 D-Trace object format sections
+- `DYLD_PRINT_ENV`: 输出 dyld 看到的环境变量
+- `DYLD_PRINT_INTERPOSTING`: 输出 interposting 操作
+- `DYLD_PRINT_LIBRARIES`: 输出已加载的 libraries
+- `DYLD_PRINT_OPTS`: 输出加载选项
+- `DYLD_REBASING`: 输出 symbol rebasing 操作
+- `DYLD_RPATHS`: 输出 `@rpath` 的扩展
+- `DYLD_PRINT_SEGMENTS`: 输出 Mach-O segments 的映射
+- `DYLD_PRINT_STATISTICS`: 输出计时统计信息
+- `DYLD_PRINT_STATISTICS_DETAILS`: 输出详细的计时统计信息
+- `DYLD_PRINT_WARNINGS`: 输出警告消息
 - `DYLD_SHARED_CACHE_DIR`: 用于 shared library cache 的路径
 - `DYLD_SHARED_REGION`: "use"、"private"、"avoid"
 - `DYLD_USE_CLOSURES`: 启用 closures
 
-可以通过类似以下内容找到更多变量：
+还可以通过类似以下方式找到更多内容：
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```
@@ -288,10 +288,10 @@ strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```bash
 find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```
-## References
+## 参考资料
 
 - [1] [dyld — `dyld/dyldMain.cpp`（进程启动路径）](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/dyldMain.cpp)
 - [2] [dyld — `dyld/DyldProcessConfig.cpp`（进程/安全配置）](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/DyldProcessConfig.cpp)
-- [3] [XNU — `bsd/kern/kern_exec.c`（`execve` 的内核端、加载 dyld）](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_exec.c)
+- [3] [XNU — `bsd/kern/kern_exec.c`（`execve` 的内核端，加载 dyld）](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_exec.c)
 
 {{#include ../../../../banners/hacktricks-training.md}}

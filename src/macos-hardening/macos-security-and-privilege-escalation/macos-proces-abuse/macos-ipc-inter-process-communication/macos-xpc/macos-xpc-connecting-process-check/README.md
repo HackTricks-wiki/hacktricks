@@ -1,26 +1,26 @@
-# macOS XPC Connecting Process Check
+# macOS XPC 连接进程检查
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-## XPC Connecting Process Check
+## XPC 连接进程检查
 
 当与 XPC service 建立连接时，server 会检查该连接是否被允许。通常会执行以下检查：
 
-1. 检查连接的 **process 是否使用 Apple-signed** certificate 签名（仅由 Apple 签发）。
-- 如果**未验证**，攻击者就可以创建一个**伪造 certificate**，以匹配其他任意检查。
-2. 检查连接的 process 是否使用**组织的 certificate**签名（Team ID verification）。
-- 如果**未验证**，就可以使用 Apple 的**任意 developer certificate**进行签名，并连接到该 service。
-3. 检查连接的 process 是否包含正确的 **bundle ID**。
-- 如果**未验证**，任何**由同一组织签名**的工具都可以用来与 XPC service 交互。
+1. 检查连接的 **process 是否使用 Apple-signed** certificate 签名（该证书仅由 Apple 颁发）。
+- 如果**未验证此项**，攻击者就可以创建一个**伪造 certificate**，以匹配其他任意检查。
+2. 检查连接的 process 是否使用**组织的 certificate**签名（team ID verification）。
+- 如果**未验证此项**，就可以使用 Apple 的**任意 developer certificate**进行签名，并连接到该 service。
+3. 检查连接的 process 是否包含**正确的 bundle ID**。
+- 如果**未验证此项**，任何**由同一组织签名**的工具都可以用于与 XPC service 交互。
 4. （4 或 5）检查连接的 process 是否具有**正确的软件版本号**。
-- 如果**未验证**，就可能使用旧的、不安全的 client；这些 client 容易受到 process injection 攻击，即使其他检查均已到位，也可以连接到 XPC service。
-5. （4 或 5）检查连接的 process 是否启用了 hardened runtime，且没有危险的 entitlements（例如允许加载任意 libraries 或使用 DYLD env vars 的 entitlements）。
-1. 如果**未验证**，client 可能**容易受到 code injection 攻击**。
+- 如果**未验证此项**，就可能使用旧的、不安全的 client 连接到 XPC service，即使其他检查均已到位；这类 client 可能容易受到 process injection。
+5. （4 或 5）检查连接的 process 是否启用了 hardened runtime，且不包含危险的 entitlements（例如允许加载任意 libraries 或使用 DYLD 环境变量的 entitlements）。
+1. 如果**未验证此项**，client 可能**容易受到 code injection**。
 6. 检查连接的 process 是否具有允许其连接到该 service 的 **entitlement**。这适用于 Apple binaries。
 7. **verification** 必须基于连接的 **client 的 audit token**，而不是其 process ID（**PID**），因为前者可以防止 **PID reuse attacks**。
-- Developer **很少使用 audit token** API call，因为它是**私有 API**，所以 Apple 可能随时进行更改。此外，Mac App Store apps 不允许使用 private API。
+- Developers **很少使用 audit token** API call，因为它是**private** API，Apple 可能随时对其进行**更改**。此外，Mac App Store apps 不允许使用 private API。
 - 如果使用 **`processIdentifier`** method，则可能存在漏洞。
-- 应使用 **`xpc_dictionary_get_audit_token`**，而不是 **`xpc_connection_get_audit_token`**，因为后者在某些情况下也可能存在 [漏洞](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)。<sup>[5]</sup>
+- 应使用 **`xpc_dictionary_get_audit_token`**，而不是 **`xpc_connection_get_audit_token`**，因为后者在某些情况下也可能存在 [漏洞](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)。<sup>[[5]](#references)</sup>
 
 ### Communication Attacks
 
@@ -40,20 +40,20 @@ macos-xpc_connection_get_audit_token-attack.md
 
 ### Trustcache - Downgrade Attacks Prevention
 
-Trustcache 是 Apple Silicon machines 引入的一种防御方法，它存储 Apple binaries 的 CDHASH 数据库，因此只有获允许且未被修改的 binaries 才能执行，从而阻止 downgrade versions 的执行。
+Trustcache 是 Apple Silicon machines 中引入的一种防御方法，它存储 Apple binaries 的 CDHSAH database，因此只有允许的、未被修改的 binaries 才能执行，从而防止执行 downgrade versions。
 
 ### Code Examples
 
-server 会在名为 **`shouldAcceptNewConnection`** 的 function 中执行此 **verification**。
+server 会在名为 **`shouldAcceptNewConnection`** 的 function 中实现此 **verification**。
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection {
 //Check connection
 return YES;
 }
 ```
-NSXPCConnection 对象具有一个 **private** 属性 **`auditToken`**（应该使用的属性，但可能会发生变化）以及一个 **public** 属性 **`processIdentifier`**（不应使用的属性）。
+对象 NSXPCConnection 有一个**私有**属性 **`auditToken`**（应该使用该属性，但它可能会发生变化），以及一个**公开**属性 **`processIdentifier`**（不应使用该属性）。
 
-可以通过类似以下方式验证连接进程：<sup>[1][2][3]</sup>
+可以通过类似以下方式验证连接进程：<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 ```objectivec
 [...]
 SecRequirementRef requirementRef = NULL;
@@ -73,7 +73,7 @@ SecCodeCheckValidity(code, kSecCSDefaultFlags, requirementRef);
 SecTaskRef taskRef = SecTaskCreateWithAuditToken(NULL, ((ExtendedNSXPCConnection*)newConnection).auditToken);
 SecTaskValidateForRequirement(taskRef, (__bridge CFStringRef)(requirementString))
 ```
-如果开发者不想检查客户端版本，至少可以检查客户端是否不受进程注入攻击影响：
+如果开发者不想检查 client 的版本，至少可以检查 client 是否容易受到 process injection 的攻击：
 ```objectivec
 [...]
 CFDictionaryRef csInfo = NULL;
@@ -88,7 +88,7 @@ if ((csFlags & (cs_hard | cs_require_lv)) {
 return Yes; // Accept connection
 }
 ```
-上述 `cs_*` 常量是 XNU 的 `osfmk/kern/cs_blobs.h` 中定义的 code-signing flags，因此可以对照源代码进行检查，而无需猜测：<sup>[4]</sup>
+上述 `cs_*` 常量是 XNU 的 `osfmk/kern/cs_blobs.h` 中定义的 code-signing 标志，因此可以对照源代码进行检查，而不必猜测：<sup>[[4]](#references)</sup>
 ```c
 #define CS_HARD                     0x00000100  /* don't load invalid pages */
 #define CS_KILL                     0x00000200  /* kill process if it becomes invalid */

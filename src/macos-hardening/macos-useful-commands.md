@@ -1,14 +1,14 @@
-# macOS 常用命令
+# macOS 有用命令
 
 {{#include ../banners/hacktricks-training.md}}
 
-### MacOS 自动枚举工具
+### macOS 自动枚举工具
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### 特定的 MacOS 命令
+### 特定的 macOS 命令
 ```bash
 #System info
 date
@@ -117,7 +117,7 @@ sudo killall -HUP mDNSResponder
 ```
 ### 快速 anti-analysis / virtualization 检查
 
-一些 macOS stealers 会调用 `system_profiler` 来检测 VMs，并以**特定的退出代码（例如 100）退出**，以避免 sandbox detonation<sup>[1]</sup>：
+一些 macOS stealers 会调用 `system_profiler` 来检测 VM，并以**特定的退出代码（例如 100）**退出，以避免 sandbox detonation<sup>[[1]](#references)</sup)：
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -151,6 +151,6 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 
 ## 参考资料
 
-- [1] [2025，Infostealer 之年](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025 年，Infostealer 之年](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}
