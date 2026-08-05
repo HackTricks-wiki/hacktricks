@@ -111,7 +111,7 @@ This is especially useful during host-side review because it bridges the gap bet
 
 ### High-Signal Rules To Audit
 
-When you can read a profile, do not stop at simple `deny` lines. Several rule types materially change how useful AppArmor will be against a container escape attempt:
+When you can read a profile, do not stop at simple `deny` lines. Several rule types materially change how useful AppArmor will be against a container escape attempt:<sup>[[2]](#references)</sup>
 
 - `ux` / `Ux`: execute the target binary unconfined. If a reachable helper, shell, or interpreter is allowed under `ux`, that is usually the first thing to test.
 - `px` / `Px` and `cx` / `Cx`: perform profile transitions on exec. These are not automatically bad, but they are worth auditing because a transition may land in a much broader profile than the current one.
@@ -259,6 +259,7 @@ For AppArmor, the most important variable is often the **host**, not only the ru
 
 ## References
 
-- [Kubernetes security context: AppArmor profile fields and node-support behavior](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
-- [Ubuntu 24.04 `apparmor.d(5)` manpage: exec transitions, `change_profile`, `userns`, and profile flags](https://manpages.ubuntu.com/manpages/noble/en/man5/apparmor.d.5.html)
+- [1] [Kubernetes security context: AppArmor profile fields and node-support behavior](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [2] [Ubuntu 24.04 `apparmor.d(5)` manpage: exec transitions, `change_profile`, `userns`, and profile flags](https://manpages.ubuntu.com/manpages/noble/en/man5/apparmor.d.5.html)
+
 {{#include ../../../../banners/hacktricks-training.md}}

@@ -72,7 +72,7 @@ High-level steps:<sup>[[1]](#references)</sup>
 3) Invoke prctl(0xDEADBEEF, CMD_BECOME_MANAGER, <your_data_dir>, ...) to pass the checks.
 4) Issue privileged commands like CMD_GRANT_ROOT, CMD_ALLOW_SU, CMD_SET_SEPOLICY to persist elevation.
 
-Practical notes on step 2 (FD ordering):
+Practical notes on step 2 (FD ordering):<sup>[[1]](#references)</sup>
 - Identify your process’ FD for your own /data/app/*/base.apk by walking /proc/self/fd symlinks.
 - Close a low FD (e.g., stdin, fd 0) and open the legitimate manager APK first so it occupies fd 0 (or any index lower than your own base.apk fd).
 - Bundle the legitimate manager APK with your app so its path satisfies the kernel’s naive filter. For example, place it under a subpath matching /data/app/*/base.apk.
@@ -148,7 +148,7 @@ After success, privileged commands (examples):
 - CMD_SET_SEPOLICY: adjust SELinux policy as supported by framework
 
 Race/persistence tip:
-- Register a BOOT_COMPLETED receiver in AndroidManifest (RECEIVE_BOOT_COMPLETED) to start early after reboot and attempt authentication before the real manager.
+- Register a BOOT_COMPLETED receiver in AndroidManifest (RECEIVE_BOOT_COMPLETED) to start early after reboot and attempt authentication before the real manager.<sup>[[1]](#references)</sup>
 
 ---
 ## Detection and mitigation guidance
@@ -173,21 +173,21 @@ Limitations of the attack:
 ---
 ## Related notes across frameworks
 
-- Password-based auth (e.g., historical APatch/SKRoot builds) can be weak if passwords are guessable/bruteforceable or validations are buggy.
-- Package/signature-based auth (e.g., KernelSU) is stronger in principle but must bind to the actual caller, not indirect artefacts like FD scans.
-- Magisk: CVE-2024-48336 (MagiskEoP) showed that even mature ecosystems can be susceptible to identity spoofing leading to code execution with root inside manager context.
+- Password-based auth (e.g., historical APatch/SKRoot builds) can be weak if passwords are guessable/bruteforceable or validations are buggy.<sup>[[1]](#references)</sup>
+- Package/signature-based auth (e.g., KernelSU) is stronger in principle but must bind to the actual caller, not indirect artefacts like FD scans.<sup>[[1]](#references)</sup>
+- Magisk: CVE-2024-48336 (MagiskEoP) showed that even mature ecosystems can be susceptible to identity spoofing leading to code execution with root inside manager context.<sup>[[1]](#references)[[8]](#references)</sup>
 
 ---
 ## References
 
-- [Zimperium – The Rooting of All Evil: Security Holes That Could Compromise Your Mobile Device](https://zimperium.com/blog/the-rooting-of-all-evil-security-holes-that-could-compromise-your-mobile-device)
-- [KernelSU v0.5.7 – core_hook.c path checks (L193, L201)](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/core_hook.c#L193)
-- [KernelSU v0.5.7 – manager.c FD iteration/signature check (L43+)](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/manager.c#L43)
-- [KernelSU – apk_sign.c APK v2 verification (main)](https://github.com/tiann/KernelSU/blob/main/kernel/apk_sign.c#L319)
-- [KernelSU project](https://kernelsu.org/)
-- [APatch](https://github.com/bmax121/APatch)
-- [SKRoot](https://github.com/abcz316/SKRoot-linuxKernelRoot)
-- [MagiskEoP – CVE-2024-48336](https://github.com/canyie/MagiskEoP)
-- [KSU PoC demo video (Wistia)](https://zimperium-1.wistia.com/medias/ep1dg4t2qg?videoFoam=true)
+- [1] [Zimperium – The Rooting of All Evil: Security Holes That Could Compromise Your Mobile Device](https://zimperium.com/blog/the-rooting-of-all-evil-security-holes-that-could-compromise-your-mobile-device)
+- [2] [KernelSU v0.5.7 – core_hook.c path checks (L193, L201)](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/core_hook.c#L193)
+- [3] [KernelSU v0.5.7 – manager.c FD iteration/signature check (L43+)](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/manager.c#L43)
+- [4] [KernelSU – apk_sign.c APK v2 verification (main)](https://github.com/tiann/KernelSU/blob/main/kernel/apk_sign.c#L319)
+- [5] [KernelSU project](https://kernelsu.org/)
+- [6] [APatch](https://github.com/bmax121/APatch)
+- [7] [SKRoot](https://github.com/abcz316/SKRoot-linuxKernelRoot)
+- [8] [MagiskEoP – CVE-2024-48336](https://github.com/canyie/MagiskEoP)
+- [9] [KSU PoC demo video (Wistia)](https://zimperium-1.wistia.com/medias/ep1dg4t2qg?videoFoam=true)
 
 {{#include ../../banners/hacktricks-training.md}}

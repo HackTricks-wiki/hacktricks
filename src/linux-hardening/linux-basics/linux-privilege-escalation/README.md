@@ -40,7 +40,7 @@ uname -a
 searchsploit "Linux Kernel"
 ```
 
-You can find a good vulnerable kernel list and some already **compiled exploits** here: [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits) and [exploitdb sploits](https://gitlab.com/exploit-database/exploitdb-bin-sploits).\
+You can find a good vulnerable kernel list and some already **compiled exploits** here: [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits) and [exploitdb sploits](https://gitlab.com/exploit-database/exploitdb-bin-sploits).<sup>[[12]](#references)</sup>\
 Other sites where you can find some **compiled exploits**: [https://github.com/bwbwbwbw/linux-exploit-binaries](https://github.com/bwbwbwbw/linux-exploit-binaries), [https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack](https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack)
 
 To extract all the vulnerable kernel versions from that web you can do:
@@ -94,7 +94,7 @@ sudo -V | grep "Sudo ver" | grep "1\.[01234567]\.[0-9]\+\|1\.8\.1[0-9]\*\|1\.8\.
 
 ### Sudo < 1.9.17p1
 
-Sudo versions before 1.9.17p1 (**1.9.14 - 1.9.17 < 1.9.17p1**) allows unprivileged local users to escalate their privileges to root via sudo `--chroot` option when `/etc/nsswitch.conf` file is used from a user controlled directory.  
+Sudo versions before 1.9.17p1 (**1.9.14 - 1.9.17 < 1.9.17p1**) allows unprivileged local users to escalate their privileges to root via sudo `--chroot` option when `/etc/nsswitch.conf` file is used from a user controlled directory.<sup>[[28]](#references)</sup>  
 
 Here is a [PoC](https://github.com/pr0v3rbs/CVE-2025-32463_chwoot) to exploit that [vulnerability](https://nvd.nist.gov/vuln/detail/CVE-2025-32463). Before running the exploit, make sure that your `sudo` version is vulnerable and that it supports the `chroot` feature.  
 
@@ -102,7 +102,7 @@ For more information, refer to the original [vulnerability advisory](https://www
 
 ### Sudo host-based rules bypass (CVE-2025-32462)
 
-Sudo before 1.9.17p1 (reported affected range: **1.8.8–1.9.17**) can evaluate host-based sudoers rules using the **user-supplied hostname** from `sudo -h <host>` instead of the **real hostname**. If sudoers grants broader privileges on another host, you can **spoof** that host locally.
+Sudo before 1.9.17p1 (reported affected range: **1.8.8–1.9.17**) can evaluate host-based sudoers rules using the **user-supplied hostname** from `sudo -h <host>` instead of the **real hostname**. If sudoers grants broader privileges on another host, you can **spoof** that host locally.<sup>[[28]](#references)</sup>
 
 Requirements:
 - Vulnerable sudo version
@@ -467,7 +467,7 @@ Reading symbols from /lib/x86_64-linux-gnu/librt.so.1...
 
 ### Crontab UI (alseambusher) running as root – web-based scheduler privesc
 
-If a web “Crontab UI” panel (alseambusher/crontab-ui) runs as root and is only bound to loopback, you can still reach it via SSH local port-forwarding and create a privileged job to escalate.
+If a web “Crontab UI” panel (alseambusher/crontab-ui) runs as root and is only bound to loopback, you can still reach it via SSH local port-forwarding and create a privileged job to escalate.<sup>[[1]](#references)[[4]](#references)</sup>
 
 Typical chain
 - Discover loopback-only port (e.g., 127.0.0.1:8000) and Basic-Auth realm via `ss -ntlp` / `curl -v localhost:8000`
@@ -550,7 +550,7 @@ Read the following page for more wildcard exploitation tricks:
 
 ### Bash arithmetic expansion injection in cron log parsers
 
-Bash performs parameter expansion and command substitution before arithmetic evaluation in ((...)), $((...)) and let. If a root cron/parser reads untrusted log fields and feeds them into an arithmetic context, an attacker can inject a command substitution $(...) that executes as root when the cron runs.
+Bash performs parameter expansion and command substitution before arithmetic evaluation in ((...)), $((...)) and let. If a root cron/parser reads untrusted log fields and feeds them into an arithmetic context, an attacker can inject a command substitution $(...) that executes as root when the cron runs.<sup>[[22]](#references)</sup>
 
 - Why it works: In Bash, expansions occur in this order: parameter/variable expansion, command substitution, arithmetic expansion, then word splitting and pathname expansion. So a value like `$(/bin/bash -c 'id > /tmp/pwn')0` is first substituted (running the command), then the remaining numeric `0` is used for the arithmetic so the script continues without errors.
 
@@ -607,7 +607,7 @@ For defenders/developers, safer patterns against symlink tricks include:
 - `mkstemp()`: create temporary files atomically with secure permissions.
 
 ### Custom-signed cron binaries with writable payloads
-Blue teams sometimes "sign" cron-driven binaries by dumping a custom ELF section and grepping for a vendor string before executing them as root. If that binary is group-writable (e.g., `/opt/AV/periodic-checks/monitor` owned by `root:devs 770`) and you can leak the signing material, you can forge the section and hijack the cron task:
+Blue teams sometimes "sign" cron-driven binaries by dumping a custom ELF section and grepping for a vendor string before executing them as root. If that binary is group-writable (e.g., `/opt/AV/periodic-checks/monitor` owned by `root:devs 770`) and you can leak the signing material, you can forge the section and hijack the cron task:<sup>[[2]](#references)</sup>
 
 1. Use `pspy` to capture the verification flow. In Era, root ran `objcopy --dump-section .text_sig=text_sig_section.bin monitor` followed by `grep -oP '(?<=UTF8STRING        :)Era Inc.' text_sig_section.bin` and then executed the file.
 2. Recreate the expected certificate using the leaked key/config (from `signing.zip`):
@@ -1274,10 +1274,10 @@ sudo PYTHONPATH=/dev/shm/ /opt/scripts/admin_tasks.sh
 
 ### Writable `__pycache__` / `.pyc` poisoning in sudo-allowed Python imports
 
-If a **sudo-allowed Python script** imports a module whose package directory contains a **writable `__pycache__`**, you may be able to replace the cached `.pyc` and get code execution as the privileged user on the next import.
+If a **sudo-allowed Python script** imports a module whose package directory contains a **writable `__pycache__`**, you may be able to replace the cached `.pyc` and get code execution as the privileged user on the next import.<sup>[[29]](#references)</sup>
 
 - Why it works:
-  - CPython stores bytecode caches in `__pycache__/module.cpython-<ver>.pyc`.
+  - CPython stores bytecode caches in `__pycache__/module.cpython-<ver>.pyc`.<sup>[[30]](#references)</sup>
   - The interpreter validates the **header** (magic + timestamp/hash metadata tied to the source), then executes the marshaled code object stored after that header.
   - If you can **delete and recreate** the cached file because the directory is writable, a root-owned but non-writable `.pyc` can still be replaced.
 - Typical path:
@@ -1293,7 +1293,7 @@ find / -type d -name __pycache__ -writable 2>/dev/null
 find / -type f -path '*/__pycache__/*.pyc' -ls 2>/dev/null
 ```
 
-If you can inspect the privileged script, identify imported modules and their cache path:
+If you can inspect the privileged script, identify imported modules and their cache path:<sup>[[31]](#references)</sup>
 
 ```bash
 grep -R "^import \\|^from " /opt/target/ 2>/dev/null
@@ -1345,9 +1345,9 @@ Hardening:
 
 ### BASH_ENV preserved via sudo env_keep → root shell
 
-If sudoers preserves `BASH_ENV` (e.g., `Defaults env_keep+="ENV BASH_ENV"`), you can leverage Bash’s non-interactive startup behavior to run arbitrary code as root when invoking an allowed command.
+If sudoers preserves `BASH_ENV` (e.g., `Defaults env_keep+="ENV BASH_ENV"`), you can leverage Bash’s non-interactive startup behavior to run arbitrary code as root when invoking an allowed command.<sup>[[24]](#references)</sup>
 
-- Why it works: For non-interactive shells, Bash evaluates `$BASH_ENV` and sources that file before running the target script. Many sudo rules allow running a script or a shell wrapper. If `BASH_ENV` is preserved by sudo, your file is sourced with root privileges.
+- Why it works: For non-interactive shells, Bash evaluates `$BASH_ENV` and sources that file before running the target script. Many sudo rules allow running a script or a shell wrapper. If `BASH_ENV` is preserved by sudo, your file is sourced with root privileges.<sup>[[23]](#references)</sup>
 
 - Requirements:
   - A sudo rule you can run (any target that invokes `/bin/bash` non-interactively, or any bash script).
@@ -1424,7 +1424,7 @@ This is not a direct vulnerability by itself, but it expands the situations wher
 
 ### Sudo env_keep+=PATH / insecure secure_path → PATH hijack
 
-If `sudo -l` shows `env_keep+=PATH` or a `secure_path` containing attacker-writable entries (e.g., `/home/<user>/bin`), any relative command inside the sudo-allowed target can be shadowed.
+If `sudo -l` shows `env_keep+=PATH` or a `secure_path` containing attacker-writable entries (e.g., `/home/<user>/bin`), any relative command inside the sudo-allowed target can be shadowed.<sup>[[3]](#references)</sup>
 
 - Requirements: a sudo rule (often `NOPASSWD`) running a script/binary that calls commands without absolute paths (`free`, `df`, `ps`, etc.) and a writable PATH entry that is searched first.
 
@@ -2319,36 +2319,36 @@ Learn more and see a generalized pattern applicable to other discovery/monitorin
 
 ## References
 
-- [0xdf – HTB Planning (Crontab UI privesc, zip -P creds reuse)](https://0xdf.gitlab.io/2025/09/13/htb-planning.html)
-- [0xdf – HTB Era: forged .text_sig payload for cron-executed monitor](https://0xdf.gitlab.io/2025/11/29/htb-era.html)
-- [0xdf – Holiday Hack Challenge 2025: Neighborhood Watch Bypass (sudo env_keep PATH hijack)](https://0xdf.gitlab.io/holidayhack2025/act1/neighborhood-watch)
-- [alseambusher/crontab-ui](https://github.com/alseambusher/crontab-ui)
-- [https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/](https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/)
-- [https://payatu.com/guide-linux-privilege-escalation/](https://payatu.com/guide-linux-privilege-escalation/)
-- [https://pen-testing.sans.org/resources/papers/gcih/attack-defend-linux-privilege-escalation-techniques-2016-152744](https://pen-testing.sans.org/resources/papers/gcih/attack-defend-linux-privilege-escalation-techniques-2016-152744)
-- [http://0x90909090.blogspot.com/2015/07/no-one-expect-command-execution.html](http://0x90909090.blogspot.com/2015/07/no-one-expect-command-execution.html)
-- [https://touhidshaikh.com/blog/?p=827](https://touhidshaikh.com/blog/?p=827)
-- [https://github.com/sagishahar/lpeworkshop/blob/master/Lab%20Exercises%20Walkthrough%20-%20Linux.pdf](https://github.com/sagishahar/lpeworkshop/blob/master/Lab%20Exercises%20Walkthrough%20-%20Linux.pdf)
-- [https://github.com/frizb/Linux-Privilege-Escalation](https://github.com/frizb/Linux-Privilege-Escalation)
-- [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits)
-- [https://github.com/rtcrowley/linux-private-i](https://github.com/rtcrowley/linux-private-i)
-- [https://www.linux.com/news/what-socket/](https://www.linux.com/news/what-socket/)
-- [https://muzec0318.github.io/posts/PG/peppo.html](https://muzec0318.github.io/posts/PG/peppo.html)
-- [https://www.linuxjournal.com/article/7744](https://www.linuxjournal.com/article/7744)
-- [https://blog.certcube.com/suid-executables-linux-privilege-escalation/](https://blog.certcube.com/suid-executables-linux-privilege-escalation/)
-- [https://juggernaut-sec.com/sudo-part-2-lpe](https://juggernaut-sec.com/sudo-part-2-lpe)
-- [https://linuxconfig.org/how-to-manage-acls-on-linux](https://linuxconfig.org/how-to-manage-acls-on-linux)
-- [https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)
-- [https://www.linode.com/docs/guides/what-is-systemd/](https://www.linode.com/docs/guides/what-is-systemd/)
-- [0xdf – HTB Eureka (bash arithmetic injection via logs, overall chain)](https://0xdf.gitlab.io/2025/08/30/htb-eureka.html)
-- [GNU Bash Manual – BASH_ENV (non-interactive startup file)](https://www.gnu.org/software/bash/manual/bash.html#index-BASH_005fENV)
-- [0xdf – HTB Environment (sudo env_keep BASH_ENV → root)](https://0xdf.gitlab.io/2025/09/06/htb-environment.html)
-- [0xdf – HTB Previous (sudo terraform dev_overrides + TF_VAR symlink privesc)](https://0xdf.gitlab.io/2026/01/10/htb-previous.html)
-- [0xdf – HTB Slonik (pg_basebackup cron copy → SUID bash)](https://0xdf.gitlab.io/2026/02/12/htb-slonik.html)
-- [NVISO – You name it, VMware elevates it (CVE-2025-41244)](https://blog.nviso.eu/2025/09/29/you-name-it-vmware-elevates-it-cve-2025-41244/)
-- [0xdf – HTB: Expressway](https://0xdf.gitlab.io/2026/03/07/htb-expressway.html)
-- [0xdf – HTB: Browsed](https://0xdf.gitlab.io/2026/03/28/htb-browsed.html)
-- [PEP 3147 – PYC Repository Directories](https://peps.python.org/pep-3147/)
-- [Python importlib docs](https://docs.python.org/3/library/importlib.html)
+- [1] [0xdf – HTB Planning (Crontab UI privesc, zip -P creds reuse)](https://0xdf.gitlab.io/2025/09/13/htb-planning.html)
+- [2] [0xdf – HTB Era: forged .text_sig payload for cron-executed monitor](https://0xdf.gitlab.io/2025/11/29/htb-era.html)
+- [3] [0xdf – Holiday Hack Challenge 2025: Neighborhood Watch Bypass (sudo env_keep PATH hijack)](https://0xdf.gitlab.io/holidayhack2025/act1/neighborhood-watch)
+- [4] [alseambusher/crontab-ui](https://github.com/alseambusher/crontab-ui)
+- [5] [Basic Linux Privilege Escalation](https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/)
+- [6] [Linux Privilege Escalation Guide](https://payatu.com/guide-linux-privilege-escalation/)
+- [7] [Attack and Defend: Linux Privilege Escalation Techniques of 2016](https://pen-testing.sans.org/resources/papers/gcih/attack-defend-linux-privilege-escalation-techniques-2016-152744)
+- [8] [No one expect command execution!](http://0x90909090.blogspot.com/2015/07/no-one-expect-command-execution.html)
+- [9] [Sudo (LD_PRELOAD) (Linux Privilege Escalation)](https://touhidshaikh.com/blog/?p=827)
+- [10] [lpeworkshop – Lab Exercises Walkthrough - Linux.pdf](https://github.com/sagishahar/lpeworkshop/blob/master/Lab%20Exercises%20Walkthrough%20-%20Linux.pdf)
+- [11] [frizb/Linux-Privilege-Escalation: Tips and Tricks for Linux Priv Escalation](https://github.com/frizb/Linux-Privilege-Escalation)
+- [12] [lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits)
+- [13] [rtcrowley/linux-private-i: Linux Enumeration & Privilege Escalation tool](https://github.com/rtcrowley/linux-private-i)
+- [14] [What is a Socket?](https://www.linux.com/news/what-socket/)
+- [15] [Peppo (Proving Grounds) writeup](https://muzec0318.github.io/posts/PG/peppo.html)
+- [16] [Get on the D-BUS](https://www.linuxjournal.com/article/7744)
+- [17] [SUID Executables Linux Privilege Escalation](https://blog.certcube.com/suid-executables-linux-privilege-escalation/)
+- [18] [Sudo Part-2 – Linux Privilege Escalation](https://juggernaut-sec.com/sudo-part-2-lpe)
+- [19] [How to manage ACLs on Linux](https://linuxconfig.org/how-to-manage-acls-on-linux)
+- [20] [Redhat/CentOS root through network-scripts](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)
+- [21] [What is systemd?](https://www.linode.com/docs/guides/what-is-systemd/)
+- [22] [0xdf – HTB Eureka (bash arithmetic injection via logs, overall chain)](https://0xdf.gitlab.io/2025/08/30/htb-eureka.html)
+- [23] [GNU Bash Manual – BASH_ENV (non-interactive startup file)](https://www.gnu.org/software/bash/manual/bash.html#index-BASH_005fENV)
+- [24] [0xdf – HTB Environment (sudo env_keep BASH_ENV → root)](https://0xdf.gitlab.io/2025/09/06/htb-environment.html)
+- [25] [0xdf – HTB Previous (sudo terraform dev_overrides + TF_VAR symlink privesc)](https://0xdf.gitlab.io/2026/01/10/htb-previous.html)
+- [26] [0xdf – HTB Slonik (pg_basebackup cron copy → SUID bash)](https://0xdf.gitlab.io/2026/02/12/htb-slonik.html)
+- [27] [NVISO – You name it, VMware elevates it (CVE-2025-41244)](https://blog.nviso.eu/2025/09/29/you-name-it-vmware-elevates-it-cve-2025-41244/)
+- [28] [0xdf – HTB: Expressway](https://0xdf.gitlab.io/2026/03/07/htb-expressway.html)
+- [29] [0xdf – HTB: Browsed](https://0xdf.gitlab.io/2026/03/28/htb-browsed.html)
+- [30] [PEP 3147 – PYC Repository Directories](https://peps.python.org/pep-3147/)
+- [31] [Python importlib docs](https://docs.python.org/3/library/importlib.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

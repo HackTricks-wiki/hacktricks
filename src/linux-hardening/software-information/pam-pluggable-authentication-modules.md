@@ -174,12 +174,12 @@ This matters for both offense and triage: if `/etc/pam.d/system-auth` contains t
 
 ### Recent tradecraft seen in the wild
 
-Recent 2025 reporting on the **Plague** Linux backdoor showed the same core idea taken further: a malicious PAM component with a **static bypass password**, plus cleanup of SSH-related environment variables and shell history (`HISTFILE=/dev/null`) to reduce session traces after login. That is a useful hunting pattern because the backdoor logic may live in PAM while the stealth artifacts only appear **after** authentication succeeds.
+Recent 2025 reporting on the **Plague** Linux backdoor showed the same core idea taken further: a malicious PAM component with a **static bypass password**, plus cleanup of SSH-related environment variables and shell history (`HISTFILE=/dev/null`) to reduce session traces after login.<sup>[[2]](#references)</sup> That is a useful hunting pattern because the backdoor logic may live in PAM while the stealth artifacts only appear **after** authentication succeeds.
 
 
 ## References
 
-- [pam.conf(5) / pam.d(5) - Linux-PAM Manual](https://man7.org/linux/man-pages/man5/pam.d.5.html)
-- [Nextron Systems - Plague: A Newly Discovered PAM-Based Backdoor for Linux](https://www.nextron-systems.com/2025/08/01/plague-a-newly-discovered-pam-based-backdoor-for-linux/)
+- [1] [pam.conf(5) / pam.d(5) - Linux-PAM Manual](https://man7.org/linux/man-pages/man5/pam.d.5.html)
+- [2] [Nextron Systems - Plague: A Newly Discovered PAM-Based Backdoor for Linux](https://www.nextron-systems.com/2025/08/01/plague-a-newly-discovered-pam-based-backdoor-for-linux/)
 
 {{#include ../../banners/hacktricks-training.md}}
