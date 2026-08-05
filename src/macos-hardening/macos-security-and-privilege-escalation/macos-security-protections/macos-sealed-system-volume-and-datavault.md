@@ -172,7 +172,8 @@ DataVault also protects the keychain backing files. A compromised DataVault cont
 | CVE | Description |
 |---|---|
 | CVE-2023-40424 | TCC bypass via symlink to DataVault-protected file |
-| CVE-2023-32364 | Sandbox bypass leading to TCC database modification |
+| CVE-2024-44131 | FileProvider symlink race letting a privileged helper reach TCC-protected data ([Jamf](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)) |
+| CVE-2021-30970 | "powerdir": changing the user's home dir to plant an attacker-controlled TCC.db ([Microsoft](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)) |
 | CVE-2021-30713 | TCC bypass via XCSSET malware modifying TCC.db |
 | CVE-2020-9934 | TCC bypass via environment variable manipulation |
 | CVE-2020-29621 | Music app TCC bypass reaching DataVault |
