@@ -17,14 +17,21 @@ Finally, the sandbox will be activated will a call to **`__sandbox_ms`** which w
 
 ### Bypassing quarantine attribute
 
-**Files created by sandboxed processes** are appended the **quarantine attribute** to prevent sandbox escaped. However, if you manage to **create an `.app` folder without the quarantine attribute** within a sandboxed application, you could make the app bundle binary point to **`/bin/bash`** and add some env variables in the **plist** to abuse **`open`** to **launch the new app unsandboxed**.
+**Files created by sandboxed processes** are appended the **quarantine attribute** to prevent sandbox escapes: if you drop a new application and try to launch it, the quarantine flag stops it. Therefore, **if you can drop a file or folder *without* the quarantine attribute, you can escape the App Sandbox** — just drop an `.app` bundle and launch it with `open`, since the newly launched process runs under LaunchServices and not under your sandbox.
 
-This is what was done in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**.**
+The reliable way to get an **unquarantined drop** is to ask **another process to create the file for you**. As documented in [**A New Era of macOS Sandbox Escapes**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) by Mickey Jin, the **App Sandbox** marks dropped files with quarantine, but **XPC services running under the Service Sandbox do not**. Several unauthenticated XPC services could therefore be used as a "quarantine laundering" primitive:
+
+- **CVE-2023-27944** (`TrialArchivingService`) and **CVE-2023-32414** (`ArchiveService`): extract an archive passed by a sandboxed app to a chosen location **without propagating the quarantine xattr** to the extracted content.
+- **CVE-2023-42977** (`PerfPowerServicesSignpostReader`): path traversal in `submitSignpostDataWithConfig:` allowed creating **arbitrary directories without quarantine**, which is enough to build a whole `.app` bundle structure outside the container.
+- **CVE-2024-27864** (`diskimagescontroller.xpc`): attaches a quarantined DMG **without quarantining the resulting device**, so the apps on the mounted volume are launchable.
+
+> [!TIP]
+> Extraction usually **drops the executable permission bit**. The workaround used in CVE-2023-27944 was to place a **symlink** to an existing signed system binary (e.g. `/System/Library/CoreServices/Automator Application Stub`) as the bundle's main executable, which keeps it launchable without needing `+x` on a dropped file.
 
 > [!CAUTION]
-> Therefore, at the moment, if you are just capable of creating a folder with a name ending in **`.app`** without a quarantine attribute, you can scape the sandbox because macOS only **checks** the **quarantine** attribute in the **`.app` folder** and in the **main executable** (and we will point the main executable to **`/bin/bash`**).
+> The reason this works is that the check is driven by the **flag on the item being launched**: *"When an app or other executable code is run from the Finder or GUI, macOS checks its quarantine flag before loading it"*, and only then *"it's handed over to Gatekeeper for full 'first run' security checks"* ([Explainer: Quarantine](https://eclecticlight.co/2021/12/11/explainer-quarantine/)). No flag on the bundle you launch means no Gatekeeper pass — which is exactly the primitive the CVEs above provide.
 >
-> Note that if an .app bundle has already been authorized to run (it has a quarantine xttr with the authorized to run flag on), you could also abuse it... except that now you cannot write inside **`.app`** bundles unless you have some privileged TCC perms (which you won't have inside a sandbox high).
+> Note that if an `.app` bundle has already been authorized to run (it has a quarantine xattr with the "authorized to run" flag on), you could also abuse it... except that now you cannot write inside **`.app`** bundles unless you have some privileged TCC perms (which you won't have inside a sandbox).
 
 ### Abusing Open functionality
 
@@ -501,6 +508,8 @@ Process 2517 exited with status = 0 (0x00000000)
 - [http://newosxbook.com/files/HITSB.pdf](http://newosxbook.com/files/HITSB.pdf)
 - [https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)
 - [https://www.youtube.com/watch?v=mG715HcDgO8](https://www.youtube.com/watch?v=mG715HcDgO8)
+- [Mickey Jin - A New Era of macOS Sandbox Escapes](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) (unquarantined drops via XPC services: CVE-2023-27944, CVE-2023-32414, CVE-2023-42977, CVE-2024-27864)
+- [The Eclectic Light Company - Explainer: Quarantine](https://eclecticlight.co/2021/12/11/explainer-quarantine/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 

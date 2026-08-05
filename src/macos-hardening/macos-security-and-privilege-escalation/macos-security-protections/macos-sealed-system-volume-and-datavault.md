@@ -89,9 +89,9 @@ With SIP bypass + SSV write capability, an attacker can:
 
 | CVE | Description |
 |---|---|
-| CVE-2021-30892 | **Shrootless** — SIP bypass allowing SSV modification via `system_installd` |
-| CVE-2022-22583 | SSV bypass through PackageKit's snapshot handling |
-| CVE-2022-46689 | Race condition allowing writes to SIP-protected files |
+| CVE-2021-30892 | **Shrootless** — SIP bypass abusing `system_installd`'s `com.apple.rootless.install.heritable` entitlement to run arbitrary post-install scripts ([Microsoft](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)) |
+| CVE-2022-22583 | SIP bypass: `system_installd` staged the post-install script in a SIP-protected folder under `/tmp`, but `/tmp` itself isn't SIP-protected, so the folder could be swapped by mounting an image over it ([Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html)) |
+| CVE-2022-46689 | **MacDirtyCow** — copy-on-write race in XNU allowing writes to read-only root-owned files ([Worth Doing Badly](https://worthdoingbadly.com/macdirtycow/)) |
 
 ---
 
@@ -171,11 +171,12 @@ DataVault also protects the keychain backing files. A compromised DataVault cont
 
 | CVE | Description |
 |---|---|
-| CVE-2023-40424 | TCC bypass via symlink to DataVault-protected file |
-| CVE-2023-32364 | Sandbox bypass leading to TCC database modification |
-| CVE-2021-30713 | TCC bypass via XCSSET malware modifying TCC.db |
-| CVE-2020-9934 | TCC bypass via environment variable manipulation |
-| CVE-2020-29621 | Music app TCC bypass reaching DataVault |
+| CVE-2024-44131 | FileProvider symlink race letting a privileged helper reach TCC-protected data ([Jamf](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)) |
+| CVE-2023-40424 | As root, **create a new user whose `NFSHomeDirectory` points at an attacker-controlled `TCC.db`**; on login `tccd` consumes it and the grants apply, reaching other users' data ([Kandji](https://blog.kandji.io/malware-bypass-tcc)) |
+| CVE-2021-30970 | "powerdir": changing the user's home dir to plant an attacker-controlled TCC.db ([Microsoft](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)) |
+| CVE-2021-30713 | Bundle-conclusion flaw letting an app **inherit the TCC grants of a donor bundle** without a prompt; exploited in the wild by **XCSSET** to screenshot the desktop ([Jamf](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)) |
+| CVE-2020-9934 | `tccd` built the DB path from `$HOME`, so `launchctl setenv HOME` redirected it to an attacker-controlled `TCC.db` ([Matt Shockley](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)) |
+| CVE-2020-29621 | `coreaudiod` held `com.apple.private.tcc.manager` **and** disabled library validation, so a HAL plug-in dropped in `/Library/Audio/Plug-Ins/HAL` could grant arbitrary TCC rights ([Wojciech Reguła](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)) |
 
 ## References
 
