@@ -1,55 +1,55 @@
-# Image Steganography
+# Steganography Εικόνων
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Τα περισσότερα CTF image stego καταλήγουν σε μία από τις παρακάτω κατηγορίες:
+Τα περισσότερα CTF image stego περιορίζονται σε μία από τις εξής κατηγορίες:
 
 - LSB/bit-planes (PNG/BMP)
-- Metadata/comment payloads
-- PNG chunk weirdness / corruption repair
-- JPEG DCT-domain tools (OutGuess, etc)
-- Frame-based (GIF/APNG)
+- Payloads σε metadata/comments
+- Παράξενα PNG chunks / επιδιόρθωση corruption
+- Εργαλεία στο JPEG DCT-domain (OutGuess κ.λπ.)
+- Βασισμένα σε frames (GIF/APNG)
 
-## Γρήγορη αξιολόγηση
+## Γρήγορη αρχική αξιολόγηση
 
-Δώστε προτεραιότητα σε στοιχεία επιπέδου container πριν από βαθιά ανάλυση περιεχομένου:
+Δώστε προτεραιότητα στα στοιχεία σε επίπεδο container πριν από τη βαθιά ανάλυση περιεχομένου:
 
-- Επικυρώστε το αρχείο και ελέγξτε τη δομή: `file`, `magick identify -verbose`, format validators (e.g., `pngcheck`).
+- Επικυρώστε το αρχείο και επιθεωρήστε τη δομή: `file`, `magick identify -verbose`, format validators (π.χ. `pngcheck`).
 - Εξαγάγετε metadata και ορατά strings: `exiftool -a -u -g1`, `strings`.
-- Ελέγξτε για embedded/appended περιεχόμενο: `binwalk` και έλεγχος τέλους αρχείου (`tail | xxd`).
-- Διαχωρίστε ανά container:
-- PNG/BMP: bit-planes/LSB και ανωμαλίες σε επίπεδο chunk.
-- JPEG: metadata + DCT-domain tooling (OutGuess/F5-style families).
-- GIF/APNG: εξαγωγή frames, frame differencing, κόλπα με palette.
+- Ελέγξτε για embedded/appended content: `binwalk` και επιθεώρηση του τέλους του αρχείου (`tail | xxd`).
+- Επιλέξτε ανάλογα με το container:
+- PNG/BMP: bit-planes/LSB και anomalies σε επίπεδο chunk.
+- JPEG: metadata + εργαλεία DCT-domain (οικογένειες τύπου OutGuess/F5).
+- GIF/APNG: εξαγωγή frames, frame differencing, τεχνικές με palettes.
 
 ## Bit-planes / LSB
 
-### Τεχνική
+### Technique
 
-Τα PNG/BMP είναι δημοφιλή σε CTFs επειδή αποθηκεύουν pixels με τρόπο που κάνει εύκολη την **bit-level manipulation**. Ο κλασικός μηχανισμός απόκρυψης/εξαγωγής είναι:
+Τα PNG/BMP είναι δημοφιλή στα CTFs επειδή αποθηκεύουν τα pixels με τρόπο που διευκολύνει το **bit-level manipulation**. Ο κλασικός μηχανισμός hide/extract είναι:
 
-- Κάθε κανάλι pixel (R/G/B/A) έχει πολλαπλά bits.
-- Το **least significant bit** (LSB) κάθε καναλιού αλλάζει την εικόνα πολύ λίγο.
-- Οι επιτιθέμενοι κρύβουν δεδομένα σε αυτά τα low-order bits, μερικές φορές με stride, permutation, ή επιλογή ανά κανάλι.
+- Κάθε κανάλι pixel (R/G/B/A) έχει πολλά bits.
+- Το **least significant bit** (LSB) κάθε καναλιού αλλάζει ελάχιστα την εικόνα.
+- Οι attackers κρύβουν δεδομένα σε αυτά τα low-order bits, μερικές φορές χρησιμοποιώντας stride, permutation ή επιλογή ανά channel.
 
-Τι να περιμένετε σε προκλήσεις:
+Τι να περιμένετε στα challenges:
 
-- Το payload βρίσκεται σε ένα κανάλι μόνο (π.χ., `R` LSB).
+- Το payload βρίσκεται σε ένα μόνο channel (π.χ. `R` LSB).
 - Το payload βρίσκεται στο alpha channel.
-- Το payload είναι συμπιεσμένο/κωδικοποιημένο μετά την εξαγωγή.
-- Το μήνυμα είναι διασκορπισμένο σε planes ή κρυμμένο μέσω XOR ανάμεσα σε planes.
+- Το payload είναι compressed/encoded μετά το extraction.
+- Το message είναι διαμοιρασμένο σε planes ή κρυμμένο μέσω XOR μεταξύ planes.
 
-Επιπλέον οικογένειες που μπορεί να συναντήσετε (εξαρτάται από την υλοποίηση):
+Πρόσθετες οικογένειες που μπορεί να συναντήσετε (ανάλογα με την υλοποίηση):
 
-- **LSB matching** (όχι απλώς αναστροφή του bit, αλλά προσαρμογές +/-1 για να ταιριάξει το target bit)
-- **Palette/index-based hiding** (indexed PNG/GIF: payload σε color indices αντί για raw RGB)
-- **Alpha-only payloads** (εντελώς αόρατο στην RGB προβολή)
+- **LSB matching** (όχι απλώς αλλαγή του bit, αλλά προσαρμογές +/-1 ώστε να ταιριάζει το target bit)
+- **Palette/index-based hiding** (indexed PNG/GIF: το payload βρίσκεται στα color indices αντί για τα raw RGB)
+- **Alpha-only payloads** (εντελώς αόρατα σε RGB view)
 
-### Εργαλεία
+### Tooling
 
 #### zsteg
 
-`zsteg` απαριθμεί πολλά μοτίβα εξαγωγής LSB/bit-plane για PNG/BMP:
+Το `zsteg` enumerates πολλά LSB/bit-plane extraction patterns για PNG/BMP:
 ```bash
 zsteg -a file.png
 ```
@@ -57,74 +57,74 @@ zsteg -a file.png
 
 #### StegoVeritas / Stegsolve
 
-- `stegoVeritas`: τρέχει μια σειρά μετασχηματισμών (metadata, image transforms, brute forcing LSB variants).
-- `stegsolve`: χειροκίνητα οπτικά φίλτρα (channel isolation, plane inspection, XOR, etc).
+- `stegoVeritas`: εκτελεί μια σειρά από transforms (metadata, image transforms, brute forcing παραλλαγών LSB).
+- `stegsolve`: χειροκίνητα visual filters (απομόνωση channel, επιθεώρηση plane, XOR κ.λπ.).
 
-Stegsolve download: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
+Λήψη του Stegsolve: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
 
-#### FFT-based visibility tricks
+#### Κόλπα ορατότητας βασισμένα σε FFT
 
-Το FFT δεν είναι LSB extraction· χρησιμοποιείται σε περιπτώσεις όπου το περιεχόμενο κρύβεται σκόπιμα στον συχνοτικό χώρο ή σε λεπτά μοτίβα.
+Το FFT δεν είναι εξαγωγή LSB· χρησιμοποιείται σε περιπτώσεις όπου το περιεχόμενο είναι σκόπιμα κρυμμένο στον χώρο συχνοτήτων ή σε διακριτικά μοτίβα.
 
-- EPFL demo: http://bigwww.epfl.ch/demo/ip/demos/FFT/
+- Demo του EPFL: http://bigwww.epfl.ch/demo/ip/demos/FFT/
 - Fourifier: https://www.ejectamenta.com/Fourifier-fullscreen/
 - FFTStegPic: https://github.com/0xcomposure/FFTStegPic
 
-Web-based triage που χρησιμοποιείται συχνά σε CTFs:
+Η web-based αρχική ανάλυση χρησιμοποιείται συχνά σε CTFs:
 
 - Aperi’Solve: https://aperisolve.com/
 - StegOnline: https://stegonline.georgeom.net/
 
-## PNG internals: chunks, corruption, and hidden data
+## Εσωτερικά του PNG: chunks, καταστροφή και κρυφά δεδομένα
 
-### Technique
+### Τεχνική
 
-Το PNG είναι μια μορφή που βασίζεται σε chunks. Σε πολλές προκλήσεις το payload αποθηκεύεται σε επίπεδο container/chunk αντί για τις τιμές των pixels:
+Το PNG είναι format βασισμένο σε chunks. Σε πολλές προκλήσεις το payload αποθηκεύεται σε επίπεδο container/chunk και όχι στις τιμές των pixels:
 
 - **Επιπλέον bytes μετά το `IEND`** (πολλοί viewers αγνοούν τα trailing bytes)
-- **Non-standard ancillary chunks** που φέρουν payloads
-- **Κατεστραμμένοι headers** που κρύβουν διαστάσεις ή σπάνε parsers μέχρι να διορθωθούν
+- **Μη τυπικά ancillary chunks** που περιέχουν payloads
+- **Κατεστραμμένες headers** που αποκρύπτουν τις διαστάσεις ή προκαλούν αποτυχία στους parsers μέχρι να διορθωθούν
 
-High-signal chunk locations to review:
+Σημεία των chunks υψηλής αξίας που πρέπει να ελεγχθούν:
 
-- `tEXt` / `iTXt` / `zTXt` (μεταδεδομένα κειμένου, μερικές φορές συμπιεσμένα)
-- `iCCP` (ICC profile) και άλλα ancillary chunks που χρησιμοποιούνται ως φορέας
-- `eXIf` (EXIF δεδομένα σε PNG)
+- `tEXt` / `iTXt` / `zTXt` (metadata κειμένου, μερικές φορές συμπιεσμένα)
+- `iCCP` (ICC profile) και άλλα ancillary chunks που χρησιμοποιούνται ως φορείς
+- `eXIf` (δεδομένα EXIF σε PNG)
 
-### Triage commands
+### Εντολές αρχικής ανάλυσης
 ```bash
 magick identify -verbose file.png
 pngcheck -v file.png
 ```
-Τι να προσέξετε:
+Τι να αναζητήσετε:
 
-- Ασυνήθιστοι συνδυασμοί πλάτους/ύψους/βάθους bit/τύπου χρώματος
-- Σφάλματα CRC ή chunk (pngcheck συνήθως δείχνει την ακριβή μετατόπιση)
+- Παράξενοι συνδυασμοί width/height/bit-depth/colour-type
+- Σφάλματα CRC/chunk (το pngcheck συνήθως υποδεικνύει το ακριβές offset)
 - Προειδοποιήσεις για πρόσθετα δεδομένα μετά το `IEND`
 
-Αν χρειάζεστε πιο λεπτομερή προβολή των chunk:
+Αν χρειάζεστε πιο λεπτομερή προβολή των chunks:
 ```bash
 pngcheck -vp file.png
 exiftool -a -u -g1 file.png
 ```
 Χρήσιμες αναφορές:
 
-- PNG προδιαγραφή (structure, chunks): https://www.w3.org/TR/PNG/
-- Κόλπα μορφής αρχείου (PNG/JPEG/GIF corner cases): https://github.com/corkami/docs
+- Προδιαγραφή PNG (δομή, chunks): https://www.w3.org/TR/PNG/
+- Τεχνάσματα μορφής αρχείων (ιδιαίτερες περιπτώσεις PNG/JPEG/GIF): https://github.com/corkami/docs
 
-## JPEG: metadata, DCT-domain tools, and ELA limitations
+## JPEG: μεταδεδομένα, εργαλεία στο DCT domain και περιορισμοί του ELA
 
-### Τεχνική
+### Technique
 
-Το JPEG δεν αποθηκεύεται ως raw pixels· συμπιέζεται στο DCT domain. Γι' αυτό τα JPEG stego εργαλεία διαφέρουν από τα PNG LSB εργαλεία:
+Το JPEG δεν αποθηκεύεται ως raw pixels· συμπιέζεται στο DCT domain. Γι' αυτό τα εργαλεία stego για JPEG διαφέρουν από τα εργαλεία PNG LSB:
 
-- Metadata/comment payloads είναι σε επίπεδο αρχείου (υψηλό σήμα και γρήγορος στον έλεγχο)
-- DCT-domain stego εργαλεία ενσωματώνουν bits σε συντελεστές συχνότητας
+- Τα payloads μεταδεδομένων/σχολίων βρίσκονται σε επίπεδο αρχείου (υψηλό σήμα και γρήγορος έλεγχος)
+- Τα εργαλεία stego στο DCT domain ενσωματώνουν bits σε frequency coefficients
 
-Σε λειτουργικό επίπεδο, θεωρήστε το JPEG ως:
+Σε επιχειρησιακό επίπεδο, αντιμετωπίστε το JPEG ως:
 
-- Ένα δοχείο για metadata segments (υψηλό σήμα, γρήγορος έλεγχος)
-- Ένας συμπιεσμένος τομέας σήματος (DCT coefficients) όπου λειτουργούν εξειδικευμένα stego εργαλεία
+- Container για segments μεταδεδομένων (υψηλό σήμα, γρήγορος έλεγχος)
+- Compressed signal domain (DCT coefficients), όπου λειτουργούν εξειδικευμένα εργαλεία stego
 
 ### Γρήγοροι έλεγχοι
 ```bash
@@ -132,55 +132,57 @@ exiftool file.jpg
 strings -n 6 file.jpg | head
 binwalk file.jpg
 ```
-High-signal locations:
+Τοποθεσίες με υψηλή ένδειξη:
 
 - EXIF/XMP/IPTC metadata
-- τμήμα σχολίου JPEG (`COM`)
-- Τμήματα εφαρμογής (`APP1` για EXIF, `APPn` για δεδομένα προμηθευτή)
+- JPEG comment segment (`COM`)
+- Application segments (`APP1` για EXIF, `APPn` για vendor data)
 
-### Συνήθη εργαλεία
+### Common tools
 
 - OutGuess: https://github.com/resurrecting-open-source-projects/outguess
 - OpenStego: https://www.openstego.com/
 
-If you are specifically facing steghide payloads in JPEGs, consider using `stegseek` (faster bruteforce than older scripts):
+Αν αντιμετωπίζετε συγκεκριμένα steghide payloads σε JPEG, εξετάστε το ενδεχόμενο χρήσης του `stegseek` (ταχύτερο bruteforce από παλαιότερα scripts):
 
 - [https://github.com/RickdeJager/stegseek](https://github.com/RickdeJager/stegseek)
 
 ### Error Level Analysis
 
-ELA επισημαίνει διάφορα ίχνη επανασυμπίεσης· μπορεί να υποδείξει περιοχές που έχουν επεξεργαστεί, αλλά δεν είναι από μόνη της ένας stego detector:
+Το ELA επισημαίνει διαφορετικά artifacts από recompression· μπορεί να σας κατευθύνει σε περιοχές που έχουν υποστεί επεξεργασία, αλλά δεν αποτελεί από μόνο του stego detector:
 
-## Κινούμενες εικόνες
+- [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
 
-### Τεχνική
+## Animated images
 
-Για κινούμενες εικόνες, υποθέστε ότι το μήνυμα είναι:
+### Technique
 
-- Σε ένα καρέ (εύκολο), ή
-- Διασπαρμένο σε καρέ (η σειρά έχει σημασία), ή
-- Ορατό μόνο όταν κάνετε diff σε διαδοχικά καρέ
+Για animated images, θεωρήστε ότι το μήνυμα:
 
-### Εξαγωγή καρέ
+- Βρίσκεται σε ένα μόνο frame (εύκολο), ή
+- Είναι κατανεμημένο σε πολλά frames (η σειρά έχει σημασία), ή
+- Είναι ορατό μόνο όταν κάνετε diff μεταξύ διαδοχικών frames
+
+### Extract frames
 ```bash
 ffmpeg -i anim.gif frame_%04d.png
 ```
-Στη συνέχεια χειριστείτε τα frames όπως κανονικά PNGs: `zsteg`, `pngcheck`, channel isolation.
+Στη συνέχεια, χειρίσου τα frames όπως τα κανονικά PNG: `zsteg`, `pngcheck`, απομόνωση καναλιών.
 
 Εναλλακτικά εργαλεία:
 
 - `gifsicle --explode anim.gif` (γρήγορη εξαγωγή frames)
 - `imagemagick`/`magick` για μετασχηματισμούς ανά frame
 
-Το Frame differencing είναι συχνά καθοριστικό:
+Η διαφοροποίηση μεταξύ frames είναι συχνά καθοριστική:
 ```bash
 magick frame_0001.png frame_0002.png -compose difference -composite diff.png
 ```
-### APNG pixel-count encoding
+### Κωδικοποίηση pixel count σε APNG
 
-- Εντοπίστε κοντέινερ APNG: `exiftool -a -G1 file.png | grep -i animation` or `file`.
-- Εξάγετε καρέ χωρίς επαναχρονισμό: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`.
-- Ανακτήστε τα payloads που κωδικοποιήθηκαν ως αριθμοί pixel ανά καρέ:
+- Εντοπίστε containers APNG: `exiftool -a -G1 file.png | grep -i animation` ή `file`.
+- Εξαγάγετε frames χωρίς αλλαγή χρονισμού: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`.
+- Ανακτήστε payloads που έχουν κωδικοποιηθεί ως pixel counts ανά frame:
 ```python
 from PIL import Image
 import glob
@@ -191,33 +193,35 @@ target = dict(counts).get((255, 0, 255, 255))  # adjust the target color
 out.append(target or 0)
 print(bytes(out).decode('latin1'))
 ```
-Οι κινούμενες προκλήσεις μπορεί να κωδικοποιούν κάθε byte ως τον αριθμό ενός συγκεκριμένου χρώματος σε κάθε καρέ· η συνένωση των μετρήσεων ανασυνθέτει το μήνυμα.
+Τα challenges με animation μπορεί να κωδικοποιούν κάθε byte ως το πλήθος ενός συγκεκριμένου χρώματος σε κάθε frame· η συνένωση των μετρήσεων ανακατασκευάζει το μήνυμα.<sup>[[1]](#references)</sup>
 
-## Ενσωμάτωση προστατευμένη με κωδικό
+## Ενσωμάτωση με προστασία κωδικού πρόσβασης
 
-Αν υποψιάζεστε ότι η ενσωμάτωση προστατεύεται με passphrase αντί για χειραγώγηση σε επίπεδο pixel, αυτός είναι συνήθως ο ταχύτερος τρόπος.
+Αν υποψιάζεστε ότι η ενσωμάτωση προστατεύεται από passphrase αντί για χειρισμό σε επίπεδο pixel, αυτή είναι συνήθως η ταχύτερη διαδρομή.
 
 ### steghide
 
-Υποστηρίζει `JPEG, BMP, WAV, AU` και μπορεί να embed/extract κρυπτογραφημένα payloads.
+Υποστηρίζει `JPEG, BMP, WAV, AU` και μπορεί να ενσωματώνει/εξάγει κρυπτογραφημένα payloads.
 ```bash
 steghide info file
 steghide extract -sf file --passphrase 'password'
 ```
-Δεν βλέπω το περιεχόμενο του αρχείου src/stego/images/README.md. Μπορείς να επικολλήσεις εδώ το κείμενο που θέλεις να μεταφράσω (ή να υποδείξεις ακριβώς ποιο τμήμα); Θα το μεταφράσω στα Ελληνικά διατηρώντας απείραχτα tags, links και paths.
+Αποθετήριο: https://github.com/StefanoDeVuono/steghide
+
+### StegCracker
 ```bash
 stegcracker file.jpg wordlist.txt
 ```
-Αποθετήριο: https://github.com/Paradoxis/StegCracker
+Repo: https://github.com/Paradoxis/StegCracker
 
 ### stegpy
 
 Υποστηρίζει PNG/BMP/GIF/WebP/WAV.
 
-Αποθετήριο: https://github.com/dhsdshdhk/stegpy
+Repo: https://github.com/dhsdshdhk/stegpy
 
-## Αναφορές
+## Παραπομπές
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,14 +1,14 @@
-# Rust Βασικά
+# Βασικές αρχές του Rust
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Ιδιοκτησία μεταβλητών
+### Ownership των μεταβλητών
 
-Η μνήμη διαχειρίζεται μέσω ενός συστήματος ιδιοκτησίας με τους ακόλουθους κανόνες που ο μεταγλωττιστής ελέγχει κατά το χρόνο μεταγλώττισης:
+Η μνήμη διαχειρίζεται μέσω ενός συστήματος ownership με τους ακόλουθους κανόνες, τους οποίους ο compiler ελέγχει κατά τον χρόνο μεταγλώττισης:
 
-1. Κάθε τιμή στο Rust έχει μια μεταβλητή που ονομάζεται ιδιοκτήτης της.
-2. Μπορεί να υπάρχει μόνο ένας ιδιοκτήτης κάθε φορά.
-3. Όταν ο ιδιοκτήτης βγαίνει εκτός πεδίου ορατότητας, η τιμή θα αποδεσμευτεί.
+1. Κάθε value στο Rust έχει μια μεταβλητή που ονομάζεται owner του.
+2. Μπορεί να υπάρχει μόνο ένας owner κάθε φορά.
+3. Όταν ο owner βγει εκτός scope, το value αποδεσμεύεται.
 ```rust
 fn main() {
 let student_age: u32 = 20;
@@ -22,7 +22,7 @@ println!("The student is {} and teacher is {}", student_age, teacher_age);
 ```
 ### Γενικοί Τύποι
 
-Δημιούργησε μια struct όπου 1 από τις τιμές της μπορεί να είναι οποιουδήποτε τύπου
+Δημιουργήστε ένα struct όπου μία από τις τιμές του θα μπορούσε να είναι οποιουδήποτε τύπου
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -39,34 +39,34 @@ Wrapper::new("Foo").value, "Foo"
 ```
 ### Option, Some & None
 
-Ο τύπος Option σημαίνει ότι η τιμή μπορεί να είναι του τύπου Some (υπάρχει κάτι) ή None:
+Ο τύπος Option σημαίνει ότι η τιμή μπορεί να είναι τύπου Some (υπάρχει κάτι) ή None:
 ```rust
 pub enum Option<T> {
 None,
 Some(T),
 }
 ```
-Μπορείτε να χρησιμοποιήσετε συναρτήσεις όπως `is_some()` ή `is_none()` για να ελέγξετε την τιμή του Option.
+Μπορείτε να χρησιμοποιήσετε συναρτήσεις όπως οι `is_some()` ή `is_none()` για να ελέγξετε την τιμή του Option.
 
 
 ### Result, Ok & Err
 
-Χρησιμοποιούνται για την επιστροφή και τη διάδοση σφαλμάτων
+Χρησιμοποιείται για την επιστροφή και τη διάδοση σφαλμάτων
 ```rust
 pub enum Result<T, E> {
 Ok(T),
 Err(E),
 }
 ```
-You can use functions such as `is_ok()` or `is_err()` to check the value of the result
+Μπορείτε να χρησιμοποιήσετε συναρτήσεις όπως οι `is_ok()` ή `is_err()` για να ελέγξετε την τιμή του αποτελέσματος
 
-The `Option` enum should be used in situations where a value might not exist (be `None`).
-The `Result` enum should be used in situations where you do something that might go wrong
+Το enum `Option` θα πρέπει να χρησιμοποιείται σε περιπτώσεις όπου μια τιμή μπορεί να μην υπάρχει (να είναι `None`).
+Το enum `Result` θα πρέπει να χρησιμοποιείται σε περιπτώσεις όπου κάνετε κάτι που μπορεί να αποτύχει
 
 
-### Macros
+### Μακροεντολές
 
-Τα macros είναι πιο ισχυρά από τις συναρτήσεις επειδή επεκτείνονται για να παράγουν περισσότερο κώδικα από αυτόν που έχετε γράψει χειροκίνητα. Για παράδειγμα, η υπογραφή μιας συνάρτησης πρέπει να δηλώνει τον αριθμό και τον τύπο των παραμέτρων που έχει η συνάρτηση. Τα macros, από την άλλη, μπορούν να πάρουν μεταβλητό αριθμό παραμέτρων: μπορούμε να καλέσουμε `println!("hello")` με ένα όρισμα ή `println!("hello {}", name)` με δύο ορίσματα. Επίσης, τα macros επεκτείνονται πριν ο compiler ερμηνεύσει το νόημα του κώδικα, οπότε ένα macro μπορεί, για παράδειγμα, να εφαρμόσει ένα trait σε έναν συγκεκριμένο τύπο. Μια συνάρτηση δεν μπορεί, επειδή καλείται σε runtime και ένα trait πρέπει να υλοποιηθεί σε compile time.
+Οι μακροεντολές είναι πιο ισχυρές από τις συναρτήσεις, επειδή επεκτείνονται για να παράγουν περισσότερο κώδικα από αυτόν που έχετε γράψει χειροκίνητα. Για παράδειγμα, η υπογραφή μιας συνάρτησης πρέπει να δηλώνει τον αριθμό και τον τύπο των παραμέτρων που έχει η συνάρτηση. Οι μακροεντολές, από την άλλη πλευρά, μπορούν να δέχονται μεταβλητό αριθμό παραμέτρων: μπορούμε να καλέσουμε την `println!("hello")` με ένα όρισμα ή την `println!("hello {}", name)` με δύο ορίσματα. Επίσης, οι μακροεντολές επεκτείνονται πριν ο compiler ερμηνεύσει τη σημασία του κώδικα, επομένως μια μακροεντολή μπορεί, για παράδειγμα, να υλοποιήσει ένα trait για έναν δεδομένο τύπο. Μια συνάρτηση δεν μπορεί να το κάνει, επειδή καλείται στο runtime και ένα trait πρέπει να υλοποιηθεί κατά το compile time.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -108,7 +108,7 @@ for (key, hashvalue) in &*map {
 for key in map.keys() {
 for value in map.values() {
 ```
-### Αναδρομικό Box
+### Recursive Box
 ```rust
 enum List {
 Cons(i32, List),
@@ -117,7 +117,7 @@ Nil,
 
 let list = Cons(1, Cons(2, Cons(3, Nil)));
 ```
-### Δομές επιλογής
+### Συνθήκες
 
 #### if
 ```rust
@@ -153,7 +153,7 @@ true => 1,
 // TODO ^ Try commenting out one of these arms
 };
 ```
-#### βρόχος (ατέρμονος)
+#### βρόχος (άπειρος)
 ```rust
 loop {
 count += 1;
@@ -256,7 +256,7 @@ optional = Some(i + 1);
 // explicitly handling the failing case.
 }
 ```
-### Χαρακτηριστικά
+### Traits
 
 Δημιουργήστε μια νέα μέθοδο για έναν τύπο
 ```rust
@@ -286,11 +286,11 @@ assert_ne!(true, false);
 }
 }
 ```
-### Νήματα
+### Threading
 
 #### Arc
 
-Ένα Arc μπορεί να χρησιμοποιήσει Clone για να δημιουργήσει περισσότερες αναφορές προς το αντικείμενο, ώστε να τις περάσει στα νήματα. Όταν ο τελευταίος δείκτης αναφοράς σε μια τιμή βγει εκτός πεδίου ορατότητας, η μεταβλητή απελευθερώνεται.
+Ένα Arc μπορεί να χρησιμοποιήσει το Clone για να δημιουργήσει περισσότερες αναφορές στο object και να τις περάσει στα threads. Όταν ο τελευταίος pointer αναφοράς σε μια τιμή βγει εκτός scope, η μεταβλητή διαγράφεται.
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -301,9 +301,9 @@ println!("{:?}", apple);
 });
 }
 ```
-#### Νήματα
+#### Threads
 
-Σε αυτή την περίπτωση θα δώσουμε στο νήμα μια μεταβλητή την οποία θα μπορεί να τροποποιήσει
+Σε αυτή την περίπτωση θα περάσουμε στο thread μια μεταβλητή που θα μπορεί να τροποποιήσει
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -321,19 +321,19 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-### Βασικά στοιχεία ασφάλειας
+### Βασικές αρχές ασφάλειας
 
-Η Rust παρέχει ισχυρές εγγυήσεις ασφάλειας μνήμης από προεπιλογή, αλλά μπορείτε να εισαγάγετε κρίσιμες ευπάθειες μέσω `unsafe` κώδικα, προβλημάτων εξαρτήσεων ή λογικών σφαλμάτων. Το παρακάτω σύντομο cheat-sheet συγκεντρώνει τις βασικές έννοιες που θα συναντήσετε πιο συχνά κατά τις επιθετικές ή αμυντικές ανασκοπήσεις ασφαλείας λογισμικού Rust.
+Η Rust παρέχει από προεπιλογή ισχυρές εγγυήσεις memory safety, αλλά εξακολουθείτε να μπορείτε να εισαγάγετε κρίσιμες ευπάθειες μέσω κώδικα `unsafe`, προβλημάτων dependencies ή λογικών λαθών. Το ακόλουθο mini-cheatsheet συγκεντρώνει τα primitives με τα οποία θα αλληλεπιδράτε συχνότερα κατά τη διάρκεια offensive ή defensive security reviews λογισμικού Rust.
 
-#### Κώδικας `unsafe` & ασφάλεια μνήμης
+#### Κώδικας `unsafe` και memory safety
 
-Τα blocks `unsafe` απενεργοποιούν τους ελέγχους aliasing και ορίων του μεταγλωττιστή, οπότε **όλα τα παραδοσιακά σφάλματα διαφθοράς μνήμης (OOB, use-after-free, double free, κ.λπ.) μπορούν να εμφανιστούν ξανά**. Σύντομη λίστα ελέγχου:
+Τα blocks `unsafe` παρακάμπτουν τους ελέγχους aliasing και ορίων του compiler, επομένως **όλα τα παραδοσιακά memory-corruption bugs (OOB, use-after-free, double free κ.λπ.) μπορούν να εμφανιστούν ξανά**. Μια σύντομη checklist για audit:
 
-* Ψάξτε για `unsafe` blocks, `extern "C"` functions, κλήσεις σε `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointers ή `ffi` modules.
-* Επαληθεύστε κάθε αριθμητική πράξη δεικτών και κάθε όρισμα μήκους που δίδεται σε χαμηλού επιπέδου συναρτήσεις.
-* Προτιμήστε `#![forbid(unsafe_code)]` (σε όλο το crate) ή `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) ώστε να αποτυγχάνει η μεταγλώττιση όταν κάποιος επανεισάγει `unsafe`.
+* Αναζητήστε blocks `unsafe`, συναρτήσεις `extern "C"`, κλήσεις σε `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointers ή modules `ffi`.
+* Επικυρώστε κάθε pointer arithmetic και κάθε length argument που περνά σε low-level functions.
+* Προτιμήστε `#![forbid(unsafe_code)]` (σε ολόκληρο το crate) ή `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +), ώστε η compilation να αποτυγχάνει όταν κάποιος εισάγει ξανά `unsafe`.
 
-Παράδειγμα overflow που δημιουργήθηκε με raw pointers:
+Παράδειγμα overflow που δημιουργείται με raw pointers:
 ```rust
 use std::ptr;
 
@@ -347,54 +347,54 @@ dst.set_len(src.len());
 dst
 }
 ```
-Η εκτέλεση του Miri είναι ένας οικονομικός τρόπος για τον εντοπισμό UB κατά το χρόνο των δοκιμών:
+Η εκτέλεση του Miri είναι ένας οικονομικός τρόπος εντοπισμού UB κατά τον χρόνο εκτέλεσης των tests:
 ```bash
 rustup component add miri
 cargo miri test  # hunts for OOB / UAF during unit tests
 ```
-#### Έλεγχος εξαρτήσεων με RustSec / cargo-audit
+#### Auditing dependencies with RustSec / cargo-audit
 
-Τα περισσότερα πραγματικά Rust vulns βρίσκονται σε crates τρίτων. Το RustSec advisory DB (που τροφοδοτείται από την κοινότητα) μπορεί να ερωτηθεί τοπικά:
+Οι περισσότερες πραγματικές ευπάθειες στο Rust βρίσκονται σε crates τρίτων. Η advisory DB του RustSec (υποστηριζόμενη από την κοινότητα) μπορεί να υποβληθεί σε ερωτήματα τοπικά:<sup>[[1]](#references)</sup>
 ```bash
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
 ```
-Ενσωματώστε το στο CI και κάντε το να αποτυγχάνει με `--deny warnings`.
+Ενσωματώστε το στο CI και αποτύχετε με το `--deny warnings`.
 
-`cargo deny check advisories` προσφέρει παρόμοια λειτουργικότητα καθώς και ελέγχους αδειών και λίστας αποκλεισμού.
+Το `cargo deny check advisories` προσφέρει παρόμοια λειτουργικότητα, καθώς και ελέγχους αδειών και λιστών απαγορεύσεων.
 
 #### Κάλυψη κώδικα με cargo-tarpaulin
 
-`cargo tarpaulin` είναι ένα εργαλείο αναφοράς κάλυψης κώδικα για το σύστημα build του Cargo
+Το `cargo tarpaulin` είναι ένα εργαλείο αναφοράς κάλυψης κώδικα για το σύστημα build του Cargo.
 ```bash
 cargo binstall cargo-tarpaulin
 cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
 ```
-Σε Linux, το προεπιλεγμένο tracing backend του Tarpaulin εξακολουθεί να είναι το Ptrace και θα λειτουργεί μόνο σε επεξεργαστές x86_64. Αυτό μπορεί να αλλάξει στην llvm coverage instrumentation με `--engine llvm`. Σε Mac και Windows, αυτή είναι η προεπιλεγμένη μέθοδος συλλογής.
+Στο Linux, το προεπιλεγμένο tracing backend του Tarpaulin εξακολουθεί να είναι το Ptrace και λειτουργεί μόνο σε επεξεργαστές x86_64. Αυτό μπορεί να αλλάξει σε llvm coverage instrumentation με το `--engine llvm`. Για Mac και Windows, αυτή είναι η προεπιλεγμένη μέθοδος συλλογής.
 
-#### Επαλήθευση αλυσίδας εφοδιασμού με cargo-vet (2024)
+#### Επαλήθευση supply-chain με cargo-vet (2024)
 
-`cargo vet` καταγράφει ένα review hash για κάθε crate που εισάγετε και αποτρέπει απαρατήρητες αναβαθμίσεις:
+Το `cargo vet` καταγράφει ένα review hash για κάθε crate που κάνετε import και αποτρέπει αναβαθμίσεις χωρίς να γίνουν αντιληπτές:
 ```bash
 cargo install cargo-vet
 cargo vet init      # generates vet.toml
 cargo vet --locked  # verifies packages referenced in Cargo.lock
 ```
-Το εργαλείο υιοθετείται από την υποδομή του έργου Rust και από έναν αυξανόμενο αριθμό οργανισμών για να μετριάσει τα poisoned-package attacks.
+Το εργαλείο υιοθετείται από την υποδομή του Rust project και έναν αυξανόμενο αριθμό orgs για τον μετριασμό επιθέσεων poisoned-package.<sup>[[2]](#references)</sup>
 
-#### Fuzzing την επιφάνεια του API σας (cargo-fuzz)
+#### Fuzzing του API surface (cargo-fuzz)
 
-Τα Fuzz tests εντοπίζουν εύκολα panics, integer overflows και logic bugs που μπορεί να εξελιχθούν σε ζητήματα DoS ή side-channel:
+Τα Fuzz tests εντοπίζουν εύκολα panics, integer overflows και logic bugs που ενδέχεται να οδηγήσουν σε DoS ή προβλήματα side-channel:
 ```bash
 cargo install cargo-fuzz
 cargo fuzz init              # creates fuzz_targets/
 cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
 ```
-Πρόσθεσε το fuzz target στο repo σου και τρέξε το στο pipeline σου.
+Προσθέστε το fuzz target στο repo σας και εκτελέστε το στο pipeline σας.
 
 ## Αναφορές
 
-- RustSec Advisory Database – <https://rustsec.org>
-- Cargo-vet: "Auditing your Rust Dependencies" – <https://mozilla.github.io/cargo-vet/>
+- [1] [RustSec Advisory Database](https://rustsec.org)
+- [2] [Cargo-vet: Έλεγχος των Rust Dependencies](https://mozilla.github.io/cargo-vet/)
 
 {{#include ../banners/hacktricks-training.md}}

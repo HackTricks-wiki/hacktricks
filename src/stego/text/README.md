@@ -1,33 +1,33 @@
-# Text Steganography
+# Στεγανογραφία κειμένου
 
 {{#include ../../banners/hacktricks-training.md}}
 
 Αναζητήστε:
 
 - Unicode homoglyphs
-- Zero-width characters
-- Whitespace patterns (spaces vs tabs)
+- Χαρακτήρες μηδενικού πλάτους
+- Μοτίβα κενών διαστημάτων (κενά έναντι tab)
 
-## Πρακτική πορεία
+## Πρακτική προσέγγιση
 
-Αν το plain text συμπεριφέρεται απρόσμενα, εξετάστε τα codepoints και κάντε normalize προσεκτικά (μην καταστρέψετε αποδεικτικά στοιχεία).
+Αν το απλό κείμενο συμπεριφέρεται απροσδόκητα, επιθεωρήστε τα codepoints και κάντε προσεκτικά normalize (μην καταστρέψετε τα στοιχεία).
 
 ### Τεχνική
 
-Text stego συχνά βασίζεται σε χαρακτήρες που αποδίδονται πανομοιότυπα (ή αόρατα):
+Το Text stego βασίζεται συχνά σε χαρακτήρες που εμφανίζονται πανομοιότυπα (ή είναι αόρατοι):
 
-- Homoglyphs: different Unicode codepoints that look the same (Latin `a` vs Cyrillic `а`)
-- Zero-width characters: joiners, non-joiners, zero-width spaces
-- Whitespace encodings: spaces vs tabs, trailing spaces, line-length patterns
+- Homoglyphs: διαφορετικά Unicode codepoints που φαίνονται ίδια (Latin `a` έναντι Cyrillic `а`)
+- Χαρακτήρες μηδενικού πλάτους: joiners, non-joiners, κενά μηδενικού πλάτους
+- Κωδικοποιήσεις κενών διαστημάτων: κενά έναντι tab, κενά στο τέλος, μοτίβα μήκους γραμμών<sup>[[1]](#references)</sup>
 
-Επιπλέον περιπτώσεις υψηλού σήματος:
+Επιπλέον περιπτώσεις υψηλής ενδεικτικότητας:
 
-- Bidirectional override/control characters (μπορούν οπτικά να αναδιατάξουν το κείμενο)
-- Variation selectors and combining characters χρησιμοποιούνται ως κρυφό κανάλι
+- Χαρακτήρες ελέγχου/παράκαμψης αμφίδρομης κατεύθυνσης (μπορούν να αναδιατάξουν οπτικά το κείμενο)
+- Variation selectors και combining characters που χρησιμοποιούνται ως covert channel
 
 ### Βοηθήματα αποκωδικοποίησης
 
-- Unicode homoglyph/zero-width playground: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
+- Playground για Unicode homoglyph/zero-width: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
 
 ### Επιθεώρηση codepoints
 ```bash
@@ -39,16 +39,16 @@ if ord(ch) > 127 or ch.isspace():
 print(i, hex(ord(ch)), repr(ch))
 PY
 ```
-## CSS `unicode-range` κανάλια
+## Κανάλια CSS `unicode-range`
 
-`@font-face` κανόνες μπορούν να κωδικοποιήσουν bytes σε καταχωρήσεις `unicode-range: U+..`. Εξάγετε τα codepoints, συνενώστε τα hex και αποκωδικοποιήστε:
+Οι κανόνες `@font-face` μπορούν να κωδικοποιούν bytes σε καταχωρίσεις `unicode-range: U+..`. Εξαγάγετε τα codepoints, ενώστε τα hex και αποκωδικοποιήστε:
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-Αν οι ranges περιέχουν πολλαπλά bytes ανά δήλωση, χωρίστε πρώτα με κόμματα και κανονικοποιήστε (`tr ',+' '\n'`). Το Python διευκολύνει το parsing και την εκπομπή bytes αν η μορφοποίηση είναι ασυνεπής.
+Αν τα ranges περιέχουν πολλά bytes ανά δήλωση, διαχωρίστε τα πρώτα στα κόμματα και κανονικοποιήστε τα (`tr ',+' '\n'`). Η Python διευκολύνει την ανάλυση και την έξοδο bytes όταν η μορφοποίηση δεν είναι συνεπής.
 
 ## Αναφορές
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

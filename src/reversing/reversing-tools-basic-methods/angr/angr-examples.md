@@ -1,13 +1,13 @@
-# Angr - Παραδείγματα
+# Angr - Examples
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
-> Αν το πρόγραμμα χρησιμοποιεί `scanf` για να πάρει **πολλές τιμές ταυτόχρονα από το stdin** πρέπει να δημιουργήσεις μια κατάσταση που ξεκινά μετά το **`scanf`**.
+> [!TIP]
+> Αν το πρόγραμμα χρησιμοποιεί `scanf` για να λάβει **πολλές τιμές ταυτόχρονα από το stdin**, πρέπει να δημιουργήσετε μια κατάσταση που ξεκινά μετά το **`scanf`**.
 
-Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### Είσοδος για να φτάσεις στη διεύθυνση (υποδεικνύοντας τη διεύθυνση)
+### Είσοδος για επίτευξη διεύθυνσης (με υπόδειξη της διεύθυνσης)
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Είσοδος για να φτάσετε στη διεύθυνση (υποδεικνύοντας εκτυπώσεις)
+### Είσοδος για την επίτευξη διεύθυνσης (υποδεικνύοντας τα prints)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -75,7 +75,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Τιμές μητρώου
+### Τιμές Registry
 ```python
 # Angr doesn't currently support reading multiple things with scanf (Ex:
 # scanf("%u %u).) You will have to tell the simulation engine to begin the
@@ -139,7 +139,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Τιμές στοίβας
+### Τιμές της στοίβας
 ```python
 # Put bit vectors in th stack to find out the vallue that stack position need to
 # have to reach a rogram flow
@@ -201,11 +201,11 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-Σε αυτό το σενάριο, η είσοδος ελήφθη με `scanf("%u %u")` και η τιμή `"1 1"` δόθηκε, οπότε οι τιμές **`0x00000001`** της στοίβας προέρχονται από την **είσοδο του χρήστη**. Μπορείτε να δείτε πώς αυτές οι τιμές ξεκινούν από `$ebp - 8`. Επομένως, στον κώδικα έχουμε **αφαιρέσει 8 bytes από το `$esp` (καθώς εκείνη τη στιγμή το `$ebp` και το `$esp` είχαν την ίδια τιμή)** και στη συνέχεια έχουμε πιέσει το BVS.
+Σε αυτό το σενάριο, η είσοδος λήφθηκε με `scanf("%u %u")` και δόθηκε η τιμή `"1 1"`, επομένως οι τιμές **`0x00000001`** του stack προέρχονται από την **είσοδο του χρήστη**. Μπορείτε να δείτε πώς αυτές οι τιμές ξεκινούν στο `$ebp - 8`. Επομένως, στον κώδικα έχουμε **αφαιρέσει 8 bytes από το `$esp` (καθώς εκείνη τη στιγμή τα `$ebp` και `$esp` είχαν την ίδια τιμή)** και στη συνέχεια έχουμε κάνει push το BVS.
 
-![](<../../../images/image (136).png>)
+![Τοποθέτηση bit vectors στο stack για να βρεθεί η τιμή που πρέπει να έχει η συγκεκριμένη θέση του stack ώστε να επιτευχθεί η απαιτούμενη ροή προγράμματος: Σε αυτό το σενάριο, η είσοδος λήφθηκε με scanf("%u %u") και δόθηκε η τιμή "1...](<../../../images/image (136).png>)
 
-### Στατικές τιμές μνήμης (Παγκόσμιες μεταβλητές)
+### Static τιμές μνήμης (Global μεταβλητές)
 ```python
 import angr
 import claripy
@@ -380,35 +380,35 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-> [!NOTE]
-> Σημειώστε ότι το συμβολικό αρχείο θα μπορούσε επίσης να περιέχει σταθερά δεδομένα συγχωνευμένα με συμβολικά δεδομένα:
+> [!TIP]
+> Σημειώστε ότι το symbolic file μπορεί επίσης να περιέχει constant data συγχωνευμένα με symbolic data:
 >
 > ```python
->   # Hello world, my name is John.
->   # ^                       ^
->   # ^ διεύθυνση 0             ^ διεύθυνση 24 (μετρήστε τον αριθμό των χαρακτήρων)
->   # Για να το αναπαραστήσουμε στη μνήμη, θα θέλαμε να γράψουμε τη συμβολοσειρά στην
->   # αρχή του αρχείου:
->   #
->   # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
->   #
->   # Ίσως, τότε, θα θέλαμε να αντικαταστήσουμε τον John με μια
->   # συμβολική μεταβλητή. Θα καλούσαμε:
->   #
->   # name_bitvector = claripy.BVS('symbolic_name', 4*8)
->   #
->   # Στη συνέχεια, αφού το πρόγραμμα καλέσει fopen('hello.txt', 'r') και μετά
->   # fread(buffer, sizeof(char), 30, hello_txt_file), το buffer θα περιέχει
->   # τη συμβολοσειρά από το αρχείο, εκτός από τέσσερις συμβολικούς байт όπου το όνομα θα είναι
->   # αποθηκευμένο.
->   # (!)
-> ```
+>  # Hello world, my name is John.
+>  # ^                       ^
+>  # ^ address 0             ^ address 24 (count the number of characters)
+>  # Για να το αναπαραστήσουμε αυτό στη μνήμη, θα θέλαμε να γράψουμε το string
+>  # στην αρχή του file:
+>  #
+>  # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
+>  #
+>  # Ίσως, λοιπόν, θα θέλαμε να αντικαταστήσουμε το John με μια
+>  # symbolic variable. Θα καλούσαμε:
+>  #
+>  # name_bitvector = claripy.BVS('symbolic_name', 4*8)
+>  #
+>  # Στη συνέχεια, αφού το πρόγραμμα καλέσει τα fopen('hello.txt', 'r') και
+>  # fread(buffer, sizeof(char), 30, hello_txt_file), το buffer θα περιείχε
+>  # το string από το file, εκτός από τέσσερα symbolic bytes όπου θα
+>  # αποθηκευόταν το όνομα.
+>  # (!)
+>  ```
 
 ### Εφαρμογή Περιορισμών
 
-> [!NOTE]
-> Μερικές φορές απλές ανθρώπινες λειτουργίες όπως η σύγκριση 2 λέξεων μήκους 16 **char by char** (βρόχος), **κοστίζουν** πολύ σε ένα **angr** επειδή χρειάζεται να δημιουργήσει διακλαδώσεις **εκθετικά** επειδή δημιουργεί 1 διακλάδωση ανά if: `2^16`\
-> Επομένως, είναι πιο εύκολο να **ζητήσουμε από το angr να επιστρέψει σε ένα προηγούμενο σημείο** (όπου το πραγματικά δύσκολο μέρος έχει ήδη γίνει) και **να ορίσουμε αυτούς τους περιορισμούς χειροκίνητα**.
+> [!TIP]
+> Μερικές φορές απλές ενέργειες από άνθρωπο, όπως η σύγκριση 2 λέξεων μήκους 16 **char by char** (loop), **κοστίζουν** πολύ στο **angr**, επειδή χρειάζεται να δημιουργήσει διακλαδώσεις **εκθετικά**, καθώς δημιουργεί 1 branch ανά if: `2^16`\
+> Επομένως, είναι ευκολότερο να **ζητήσετε από το angr να επιστρέψει σε ένα προηγούμενο σημείο** (όπου το πραγματικά δύσκολο μέρος έχει ήδη ολοκληρωθεί) και να **ορίσετε χειροκίνητα αυτούς τους περιορισμούς**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,14 +480,14 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> Σε ορισμένα σενάρια μπορείτε να ενεργοποιήσετε το **veritesting**, το οποίο θα συγχωνεύσει παρόμοιες καταστάσεις, προκειμένου να εξοικονομήσει άχρηστες διακλαδώσεις και να βρει τη λύση: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> Σε ορισμένα σενάρια μπορείτε να ενεργοποιήσετε το **veritesting**, το οποίο θα συγχωνεύσει παρόμοιες καταστάσεις, ώστε να εξοικονομήσει άχρηστα branches και να βρει τη λύση: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
-> [!NOTE]
-> Ένα άλλο πράγμα που μπορείτε να κάνετε σε αυτά τα σενάρια είναι να **συνδέσετε τη συνάρτηση δίνοντας στο angr κάτι που μπορεί να κατανοήσει** πιο εύκολα.
+> [!TIP]
+> Ένα ακόμη πράγμα που μπορείτε να κάνετε σε αυτά τα σενάρια είναι να **κάνετε hook τη function, παρέχοντας στο angr κάτι που μπορεί να κατανοήσει** πιο εύκολα.
 
-### Simulation Managers
+### Διαχειριστές προσομοίωσης
 
-Ορισμένοι διαχειριστές προσομοίωσης μπορεί να είναι πιο χρήσιμοι από άλλους. Στο προηγούμενο παράδειγμα υπήρχε ένα πρόβλημα καθώς δημιουργήθηκαν πολλές χρήσιμες διακλαδώσεις. Εδώ, η τεχνική **veritesting** θα συγχωνεύσει αυτές και θα βρει μια λύση.\
+Ορισμένοι διαχειριστές προσομοίωσης μπορεί να είναι πιο χρήσιμοι από άλλους. Στο προηγούμενο παράδειγμα υπήρχε ένα πρόβλημα, καθώς δημιουργήθηκαν πολλά χρήσιμα branches. Εδώ, η τεχνική **veritesting** θα τα συγχωνεύσει και θα βρει μια λύση.\
 Αυτός ο διαχειριστής προσομοίωσης μπορεί επίσης να ενεργοποιηθεί με: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/Bypassing μία κλήση σε μία συνάρτηση
+### Hooking/Bypassing μίας κλήσης σε μια συνάρτηση
 ```python
 # This level performs the following computations:
 #
@@ -594,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking a function / Simprocedure
+### Hooking συνάρτησης / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -678,7 +678,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Προσομοίωση scanf με αρκετές παραμέτρους
+### Προσομοίωση της scanf με αρκετές παραμέτρους
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.
@@ -740,7 +740,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Στατικά Δυαδικά
+### Στατικά Binaries
 ```python
 # This challenge is the exact same as the first challenge, except that it was
 # compiled as a static binary. Normally, Angr automatically replaces standard
@@ -807,4 +807,8 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
+## Αναφορές
+
+- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+
 {{#include ../../../banners/hacktricks-training.md}}

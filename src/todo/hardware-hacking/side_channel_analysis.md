@@ -1,28 +1,28 @@
-# Ανάλυση Επιθέσεων Παράπλευρης Διάχυσης
+# Side-channel Analysis Attacks
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Οι επιθέσεις παράπλευρης διάχυσης ανακτούν μυστικά παρατηρώντας φυσική ή μικρο-αρχιτεκτονική "διαρροή" που είναι *συσχετισμένη* με την εσωτερική κατάσταση αλλά *δεν είναι* μέρος της λογικής διεπαφής της συσκευής. Παραδείγματα κυμαίνονται από τη μέτρηση της στιγμιαίας κατανάλωσης ρεύματος από μια έξυπνη κάρτα μέχρι την κατάχρηση των επιδράσεων διαχείρισης ενέργειας της CPU μέσω ενός δικτύου.
+Οι Side-channel επιθέσεις ανακτούν μυστικά παρατηρώντας φυσικό ή micro-architectural "leakage" που *συσχετίζεται* με την εσωτερική κατάσταση, αλλά *δεν* αποτελεί μέρος της λογικής διεπαφής της συσκευής. Παραδείγματα περιλαμβάνουν από τη μέτρηση του στιγμιαίου ρεύματος που καταναλώνει μια smart-card έως την εκμετάλλευση επιδράσεων διαχείρισης ισχύος της CPU μέσω δικτύου.
 
 ---
 
-## Κύριες Διαρροές Καναλιών
+## Κύρια Κανάλια Leakage
 
-| Κανάλι | Τυπικός Στόχος | Οργάνωση |
+| Κανάλι | Συνήθης στόχος | Όργανα μέτρησης |
 |---------|---------------|-----------------|
-| Κατανάλωση ενέργειας | Έξυπνες κάρτες, MCU IoT, FPGA | Οσυλλοσκόπιο + αντιστάτης shunt/HS probe (π.χ. CW503) |
-| Ηλεκτρομαγνητικό πεδίο (EM) | CPUs, RFID, επιταχυντές AES | Probe H-field + LNA, ChipWhisperer/RTL-SDR |
-| Χρόνος εκτέλεσης / cache | CPUs επιτραπέζιων υπολογιστών & cloud | Χρονομετρητές υψηλής ακρίβειας (rdtsc/rdtscp), απομακρυσμένος χρόνος πτήσης |
-| Ακουστικός / μηχανικός | Πληκτρολόγια, 3-D εκτυπωτές, ρελέ | Μικρόφωνο MEMS, λέιζερ vibrometer |
-| Οπτικός & θερμικός | LEDs, εκτυπωτές λέιζερ, DRAM | Φωτοδιόδος / κάμερα υψηλής ταχύτητας, κάμερα IR |
-| Διαρροή λόγω σφαλμάτων | Κρυπτογραφίες ASIC/MCU | Σφάλμα ρολογιού/τάσης, EMFI, έγχυση λέιζερ |
+| Κατανάλωση ισχύος | Smart-cards, IoT MCUs, FPGAs | Oscilloscope + shunt resistor/HS probe (π.χ. CW503)
+| Ηλεκτρομαγνητικό πεδίο (EM) | CPUs, RFID, AES accelerators | H-field probe + LNA, ChipWhisperer/RTL-SDR
+| Χρόνος εκτέλεσης / caches | Desktop και cloud CPUs | Timers υψηλής ακρίβειας (rdtsc/rdtscp), remote time-of-flight
+| Ακουστικό / μηχανικό | Keyboards, 3-D printers, relays | MEMS microphone, laser vibrometer
+| Οπτικό και θερμικό | LEDs, laser printers, DRAM | Photodiode / high-speed camera, IR camera
+| Επαγόμενο από Fault | ASIC/MCU cryptos | Clock/voltage glitch, EMFI, laser injection
 
 ---
 
-## Ανάλυση Ικανότητας
+## Power Analysis
 
-### Απλή Ανάλυση Ικανότητας (SPA)
-Παρατηρήστε μια *μοναδική* διαδρομή και συσχετίστε άμεσα τις κορυφές/κοιλάδες με τις λειτουργίες (π.χ. S-boxes DES).
+### Simple Power Analysis (SPA)
+Παρατηρήστε ένα *μεμονωμένο* trace και συσχετίστε άμεσα τις κορυφές/κοιλάδες με operations (π.χ. DES S-boxes).
 ```python
 # ChipWhisperer-husky example – capture one AES trace
 from chipwhisperer.capture.api.programmers import STMLink
@@ -35,72 +35,72 @@ trace = cw.capture.capture_trace()
 print(trace.wave)  # numpy array of power samples
 ```
 ### Differential/Correlation Power Analysis (DPA/CPA)
-Αποκτήστε *N > 1 000* ίχνη, υποθέστε το byte κλειδιού `k`, υπολογίστε το μοντέλο HW/HD και συσχετίστε το με τη διαρροή.
+Συλλέξτε *N > 1 000* traces, υποθέστε το byte του key `k`, υπολογίστε το μοντέλο HW/HD και συσχετίστε το με το leakage.
 ```python
 import numpy as np
 corr = np.corrcoef(leakage_model(k), traces[:,sample])
 ```
-CPA παραμένει κορυφαία τεχνολογία, αλλά οι παραλλαγές μηχανικής μάθησης (MLA, deep-learning SCA) κυριαρχούν πλέον σε διαγωνισμούς όπως το ASCAD-v2 (2023).
+Το CPA παραμένει state-of-the-art, αλλά οι παραλλαγές machine-learning (MLA, deep-learning SCA) κυριαρχούν πλέον σε διαγωνισμούς όπως το ASCAD-v2 (2023).
 
 ---
 
-## Ηλεκτρομαγνητική Ανάλυση (EMA)
-Οι κοντινές EM ανιχνευτές (500 MHz–3 GHz) διαρρέουν ταυτόσημες πληροφορίες με την ανάλυση ισχύος *χωρίς* να εισάγουν shunts. Η έρευνα του 2024 απέδειξε την ανάκτηση κλειδιών σε **>10 cm** από ένα STM32 χρησιμοποιώντας συσχέτιση φάσματος και χαμηλού κόστους RTL-SDR front-ends.
+## Electromagnetic Analysis (EMA)
+Οι near-field EM probes (500 MHz–3 GHz) διαρρέουν πανομοιότυπες πληροφορίες με το power analysis *χωρίς* την εισαγωγή shunts. Έρευνα του 2024 απέδειξε την ανάκτηση κλειδιών σε απόσταση **>10 cm** από ένα STM32, χρησιμοποιώντας spectrum correlation και low-cost RTL-SDR front-ends.
 
 ---
 
-## Χρονισμός & Μικροαρχιτεκτονικές Επιθέσεις
-Οι σύγχρονοι επεξεργαστές διαρρέουν μυστικά μέσω κοινών πόρων:
-* **Hertzbleed (2022)** – Η κλιμάκωση συχνότητας DVFS συσχετίζεται με το βάρος Hamming, επιτρέποντας την *απομακρυσμένη* εξαγωγή κλειδιών EdDSA.
-* **Downfall / Gather Data Sampling (Intel, 2023)** – εκτέλεση παροδικών εντολών για ανάγνωση δεδομένων AVX-gather μέσω SMT νημάτων.
-* **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – η υποθετική λανθασμένη πρόβλεψη διαρρέει καταχωρητές διατομής.
+## Timing & Micro-architectural Attacks
+Οι σύγχρονοι CPUs διαρρέουν secrets μέσω shared resources:
+* **Hertzbleed (2022)** – το DVFS frequency scaling συσχετίζεται με το Hamming weight, επιτρέποντας *remote* extraction κλειδιών EdDSA.<sup>[[2]](#references)</sup>
+* **Downfall / Gather Data Sampling (Intel, 2023)** – transient-execution για την ανάγνωση AVX-gather data μεταξύ SMT threads.
+* **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – speculative vector mis-prediction διαρρέει registers μεταξύ domains.
 
 ---
 
-## Ακουστικές & Οπτικές Επιθέσεις
-* Το 2024 "​iLeakKeys" έδειξε 95 % ακρίβεια στην ανάκτηση πληκτρολογήσεων φορητού υπολογιστή από ένα **μικρόφωνο smartphone μέσω Zoom** χρησιμοποιώντας έναν ταξινομητή CNN.
-* Οι ταχύτατοι φωτοδιόδοι καταγράφουν τη δραστηριότητα LED DDR4 και ανακατασκευάζουν τα κλειδιά γύρου AES σε λιγότερο από 1 λεπτό (BlackHat 2023).
+## Acoustic & Optical Attacks
+* Το 2024, το "​iLeakKeys" πέτυχε ακρίβεια 95 % στην ανάκτηση keystrokes laptop από **microphone smartphone μέσω Zoom**, χρησιμοποιώντας CNN classifier.
+* High-speed photodiodes καταγράφουν τη δραστηριότητα του DDR4 activity LED και ανακατασκευάζουν AES round keys σε <1 λεπτό (BlackHat 2023).
 
 ---
 
-## Έγχυση Σφαλμάτων & Διαφορική Ανάλυση Σφαλμάτων (DFA)
-Η συνδυαστική χρήση σφαλμάτων με διαρροές πλευρικών καναλιών επιταχύνει την αναζήτηση κλειδιών (π.χ. 1-trace AES DFA). Πρόσφατα εργαλεία σε τιμές χόμπι:
-* **ChipSHOUTER & PicoEMP** – σφάλματα ηλεκτρομαγνητικού παλμού κάτω από 1 ns.
-* **GlitchKit-R5 (2025)** – πλατφόρμα σφαλμάτων ρολογιού/τάσης ανοιχτού κώδικα που υποστηρίζει RISC-V SoCs.
+## Fault Injection & Differential Fault Analysis (DFA)
+Ο συνδυασμός faults με side-channel leakage συντομεύει το key search (π.χ. 1-trace AES DFA). Πρόσφατα εργαλεία σε τιμές προσιτές για hobbyists:
+* **ChipSHOUTER & PicoEMP** – electromagnetic pulse glitching κάτω του 1 ns.
+* **GlitchKit-R5 (2025)** – open-source clock/voltage glitch platform με υποστήριξη για RISC-V SoCs.
 
 ---
 
-## Τυπική Ροή Επίθεσης
-1. Εντοπίστε το κανάλι διαρροής & το σημείο στήριξης (VCC pin, decoupling cap, κοντινός χώρος).
-2. Εισάγετε τον πυροδότη (GPIO ή βασισμένο σε μοτίβο).
-3. Συλλέξτε >1 k ίχνη με κατάλληλη δειγματοληψία/φίλτρα.
-4. Προεπεξεργασία (ευθυγράμμιση, αφαίρεση μέσου, LP/HP φίλτρο, wavelet, PCA).
-5. Στατιστική ή ML ανάκτηση κλειδιών (CPA, MIA, DL-SCA).
-6. Επικυρώστε και επαναλάβετε για τις εξαιρέσεις.
+## Typical Attack Workflow
+1. Εντοπισμός του leakage channel και του mount point (VCC pin, decoupling cap, near-field spot).
+2. Εισαγωγή trigger (GPIO ή pattern-based).
+3. Συλλογή >1 k traces με κατάλληλο sampling/filters.
+4. Pre-process (alignment, mean removal, LP/HP filter, wavelet, PCA).
+5. Statistical ή ML key recovery (CPA, MIA, DL-SCA).
+6. Επικύρωση και επανάληψη με βάση τα outliers.
 
 ---
 
-## Άμυνες & Σκληρύνσεις
-* **Constant-time** υλοποιήσεις & μνημονιακά σκληρά αλγόριθμοι.
-* **Masking/shuffling** – διαχωρίστε τα μυστικά σε τυχαία μερίδια; η αντίσταση πρώτης τάξης πιστοποιείται από TVLA.
-* **Hiding** – ρυθμιστές τάσης on-chip, τυχαίο ρολόι, λογική διπλής ράγας, EM ασπίδες.
-* **Ανίχνευση σφαλμάτων** – πλεονάζουσα υπολογιστική, υπογραφές κατωφλίου.
-* **Λειτουργικές** – απενεργοποιήστε το DVFS/turbo στους κρυπτογραφικούς πυρήνες, απομονώστε το SMT, απαγορεύστε τη συν-τοποθέτηση σε πολυ-ενοικιαζόμενα νέφη.
+## Defences & Hardening
+* **Constant-time** implementations και memory-hard algorithms.
+* **Masking/shuffling** – διαχωρισμός των secrets σε random shares· first-order resistance πιστοποιημένο μέσω TVLA.
+* **Hiding** – on-chip voltage regulators, randomised clock, dual-rail logic, EM shields.
+* **Fault detection** – redundant computation, threshold signatures.
+* **Operational** – απενεργοποίηση DVFS/turbo σε crypto kernels, απομόνωση SMT, απαγόρευση co-location σε multi-tenant clouds.
 
 ---
 
-## Εργαλεία & Πλαίσια
-* **ChipWhisperer-Husky** (2024) – 500 MS/s scope + Cortex-M trigger; Python API όπως παραπάνω.
-* **Riscure Inspector & FI** – εμπορικό, υποστηρίζει αυτοματοποιημένη αξιολόγηση διαρροής (TVLA-2.0).
-* **scaaml** – βιβλιοθήκη deep-learning SCA βασισμένη σε TensorFlow (v1.2 – 2025).
-* **pyecsca** – ανοιχτού κώδικα πλαίσιο ECC SCA της ANSSI.
+## Tools & Frameworks
+* **ChipWhisperer-Husky** (2024) – scope 500 MS/s + Cortex-M trigger· Python API όπως παραπάνω.<sup>[[1]](#references)</sup>
+* **Riscure Inspector & FI** – commercial, με υποστήριξη automated leakage assessment (TVLA-2.0).
+* **scaaml** – TensorFlow-based deep-learning SCA library (v1.2 – 2025).
+* **pyecsca** – ANSSI open-source ECC SCA framework.
 
 ---
 
-## Αναφορές
+## References
 
-* [ChipWhisperer Documentation](https://chipwhisperer.readthedocs.io/en/latest/)
-* [Hertzbleed Attack Paper](https://www.hertzbleed.com/)
+- [1] [Τεκμηρίωση ChipWhisperer](https://chipwhisperer.readthedocs.io/en/latest/)
+- [2] [Μελέτη επίθεσης Hertzbleed](https://www.hertzbleed.com/)
 
 
 {{#include ../../banners/hacktricks-training.md}}

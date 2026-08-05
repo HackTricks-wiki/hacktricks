@@ -1,37 +1,43 @@
-# Άλλες Τεχνικές Ιστού
+# Άλλα Web Tricks
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Κεφαλίδα Host
+### Host header
 
-Πολλές φορές το back-end εμπιστεύεται την **κεφαλίδα Host** για να εκτελέσει κάποιες ενέργειες. Για παράδειγμα, μπορεί να χρησιμοποιήσει την τιμή της ως το **domain για να στείλει μια επαναφορά κωδικού πρόσβασης**. Έτσι, όταν λάβετε ένα email με έναν σύνδεσμο για να επαναφέρετε τον κωδικό σας, το domain που χρησιμοποιείται είναι αυτό που βάλατε στην κεφαλίδα Host. Στη συνέχεια, μπορείτε να ζητήσετε την επαναφορά κωδικού πρόσβασης άλλων χρηστών και να αλλάξετε το domain σε ένα που ελέγχετε εσείς για να κλέψετε τους κωδικούς επαναφοράς τους. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
+Πολλές φορές το back-end εμπιστεύεται το **Host header** για την εκτέλεση ορισμένων ενεργειών. Για παράδειγμα, μπορεί να χρησιμοποιεί την τιμή του ως το **domain στο οποίο θα στείλει ένα password reset**. Έτσι, όταν λαμβάνεις ένα email με link για την επαναφορά του password σου, το domain που χρησιμοποιείται είναι αυτό που έβαλες στο Host header.Στη συνέχεια, μπορείς να ζητήσεις το password reset άλλων χρηστών και να αλλάξεις το domain σε ένα που ελέγχεις εσύ, ώστε να κλέψεις τους κωδικούς επαναφοράς του password τους. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> Σημειώστε ότι είναι πιθανό να μην χρειαστεί καν να περιμένετε τον χρήστη να κάνει κλικ στον σύνδεσμο επαναφοράς κωδικού για να αποκτήσετε το token, καθώς ίσως ακόμη και **φίλτρα spam ή άλλες ενδιάμεσες συσκευές/bots να κάνουν κλικ σε αυτό για να το αναλύσουν**.
+> Σημείωσε ότι ίσως να μην χρειάζεται καν να περιμένεις τον χρήστη να κάνει click στο link επαναφοράς του password για να λάβεις το token, καθώς μπορεί ακόμη και **τα spam filters ή άλλες ενδιάμεσες συσκευές/bots να κάνουν click σε αυτό για να το αναλύσουν**.
 
-### Boolean συνεδρίας
+### Session booleans
 
-Ορισμένες φορές, όταν ολοκληρώνετε σωστά κάποια επαλήθευση, το back-end θα **προσθέσει απλώς ένα boolean με την τιμή "True" σε ένα χαρακτηριστικό ασφαλείας της συνεδρίας σας**. Στη συνέχεια, ένα διαφορετικό endpoint θα γνωρίζει αν περάσατε επιτυχώς αυτή την επαλήθευση.\
-Ωστόσο, αν **περάσετε την επαλήθευση** και η συνεδρία σας αποκτήσει αυτή την τιμή "True" στο χαρακτηριστικό ασφαλείας, μπορείτε να προσπαθήσετε να **πρόσβαση σε άλλους πόρους** που **εξαρτώνται από το ίδιο χαρακτηριστικό** αλλά που **δεν θα έπρεπε να έχετε άδειες** για πρόσβαση. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
+Μερικές φορές, όταν ολοκληρώνεις σωστά κάποιο verification, το back-end **απλώς προσθέτει ένα boolean με την τιμή "True" σε ένα security attribute του session σου**. Στη συνέχεια, ένα διαφορετικό endpoint θα γνωρίζει αν πέρασες επιτυχώς αυτόν τον έλεγχο.\
+Ωστόσο, αν **περάσεις τον έλεγχο** και στο session σου εκχωρηθεί αυτή η τιμή "True" στο security attribute, μπορείς να δοκιμάσεις να **αποκτήσεις πρόσβαση σε άλλους πόρους** που **εξαρτώνται από το ίδιο attribute**, αλλά στους οποίους **δεν θα έπρεπε να έχεις δικαιώματα πρόσβασης**. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).<sup>[[2]](#references)</sup>
 
-### Λειτουργία εγγραφής
+### Register functionality
 
-Δοκιμάστε να εγγραφείτε ως ήδη υπάρχων χρήστης. Δοκιμάστε επίσης να χρησιμοποιήσετε ισοδύναμους χαρακτήρες (τελείες, πολλές κενές θέσεις και Unicode).
+Δοκίμασε να κάνεις register ως ήδη υπάρχων χρήστης. Δοκίμασε επίσης να χρησιμοποιήσεις equivalent characters (τελείες, πολλά spaces και Unicode).
 
-### Κατάληψη emails
+### Takeover emails
 
-Εγγραφείτε σε ένα email, πριν το επιβεβαιώσετε αλλάξτε το email, στη συνέχεια, αν το νέο email επιβεβαίωσης σταλεί στο πρώτο εγγεγραμμένο email, μπορείτε να καταλάβετε οποιοδήποτε email. Ή αν μπορείτε να ενεργοποιήσετε το δεύτερο email επιβεβαιώνοντας το πρώτο, μπορείτε επίσης να καταλάβετε οποιονδήποτε λογαριασμό.
+Κάνε register ένα email και, πριν το επιβεβαιώσεις, άλλαξε το email. Στη συνέχεια, αν το νέο confirmation email σταλεί στο πρώτο email που καταχωρίστηκε, μπορείς να κάνεις takeover οποιουδήποτε email. Ή, αν μπορείς να ενεργοποιήσεις το δεύτερο email επιβεβαιώνοντας το πρώτο, μπορείς επίσης να κάνεις takeover οποιουδήποτε account.
 
-### Πρόσβαση στο Εσωτερικό servicedesk εταιρειών που χρησιμοποιούν atlassian
+### Πρόσβαση στο Internal servicedesk εταιρειών που χρησιμοποιούν atlassian
+
 
 {{#ref}}
 https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
 {{#endref}}
 
-### Μέθοδος TRACE
+### TRACE method
 
-Οι προγραμματιστές μπορεί να ξεχάσουν να απενεργοποιήσουν διάφορες επιλογές αποσφαλμάτωσης στο περιβάλλον παραγωγής. Για παράδειγμα, η μέθοδος HTTP `TRACE` έχει σχεδιαστεί για διαγνωστικούς σκοπούς. Αν είναι ενεργοποιημένη, ο web server θα απαντήσει σε αιτήματα που χρησιμοποιούν τη μέθοδο `TRACE` επαναλαμβάνοντας στην απάντηση το ακριβές αίτημα που ελήφθη. Αυτή η συμπεριφορά είναι συχνά αβλαβής, αλλά περιστασιακά οδηγεί σε αποκάλυψη πληροφοριών, όπως το όνομα εσωτερικών κεφαλίδων αυθεντικοποίησης που μπορεί να προστεθούν σε αιτήματα από αντίστροφους διακομιστές μεσολάβησης.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Οι developers μπορεί να ξεχάσουν να απενεργοποιήσουν διάφορες debugging options στο production environment. Για παράδειγμα, η HTTP `TRACE` method έχει σχεδιαστεί για διαγνωστικούς σκοπούς. Αν είναι ενεργοποιημένη, ο web server θα απαντά σε requests που χρησιμοποιούν τη `TRACE` method, επιστρέφοντας στην απόκριση το ακριβές request που ελήφθη. Αυτή η συμπεριφορά είναι συχνά ακίνδυνη, αλλά περιστασιακά οδηγεί σε information disclosure, όπως η αποκάλυψη του ονόματος εσωτερικών authentication headers που μπορεί να προστίθενται στα requests από reverse proxies.![Εικόνα για την ανάρτηση](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
-![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
+![Εικόνα για την ανάρτηση](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
+
+## References
+
+- [1] [Πώς κατάφερα να κάνω takeover οποιουδήποτε account χρήστη με Host Header injection](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)
+- [2] [Ένα λιγότερο γνωστό attack vector: Second order IDOR attacks](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)
 
 {{#include ../banners/hacktricks-training.md}}

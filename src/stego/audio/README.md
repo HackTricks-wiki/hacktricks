@@ -1,47 +1,47 @@
-# Audio Steganography
+# Στεγανογραφία Ήχου
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Κοινά μοτίβα:
+Συνηθισμένα μοτίβα:
 
-- Spectrogram messages
+- Μηνύματα σε Spectrogram
 - WAV LSB embedding
-- DTMF / dial tones encoding
+- DTMF / κωδικοποίηση dial tones
 - Metadata payloads
 
-## Γρήγορη αξιολόγηση
+## Γρήγορη αρχική εξέταση
 
-Πριν από εξειδικευμένα εργαλεία:
+Πριν από τη χρήση specialized tooling:
 
-- Επιβεβαιώστε τις λεπτομέρειες codec/container και τυχόν ανωμαλίες:
+- Επιβεβαιώστε τις λεπτομέρειες codec/container και τις ανωμαλίες:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Εάν το audio περιέχει περιεχόμενο που μοιάζει με θόρυβο ή τηνική δομή, ελέγξτε ένα spectrogram νωρίς.
+- Αν ο ήχος περιέχει περιεχόμενο που μοιάζει με θόρυβο ή tonal structure, εξετάστε έγκαιρα ένα spectrogram.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
-## Spectrogram steganography
+## Στεγανογραφία φασματογραφήματος
 
 ### Τεχνική
 
-Spectrogram stego κρύβει δεδομένα διαμορφώνοντας την ενέργεια στο χρόνο/τη συχνότητα, ώστε να γίνεται ορατό μόνο σε ένα γράφημα χρόνου-συχνότητας (συχνά μη ακουστό ή αντιληπτό ως θόρυβος).
+Το Spectrogram stego αποκρύπτει δεδομένα διαμορφώνοντας την ενέργεια στον χρόνο/τη συχνότητα, ώστε να γίνεται ορατή μόνο σε ένα time-frequency plot (συχνά μη ακουστή ή αντιληπτή ως θόρυβος).
 
 ### Sonic Visualiser
 
-Κύριο εργαλείο για την επιθεώρηση φασματογραφήματος:
+Κύριο εργαλείο για την επιθεώρηση φασματογραφημάτων:
 
 - [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
 ### Εναλλακτικές
 
 - Audacity (προβολή φασματογραφήματος, φίλτρα): https://www.audacityteam.org/
-- `sox` μπορεί να δημιουργήσει φασματογραφήματα από το CLI:
+- Το `sox` μπορεί να δημιουργεί φασματογραφήματα από το CLI:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
-## FSK / modem αποκωδικοποίηση
+## FSK / αποκωδικοποίηση modem
 
-Ο Frequency-shift keyed ήχος συχνά μοιάζει με εναλλασσόμενους μεμονωμένους τόνους σε ένα φασματογράφημα. Μόλις έχετε μια κατά προσέγγιση εκτίμηση του center/shift και του baud, brute force με `minimodem`:
+Ο ήχος με Frequency-shift keying συχνά μοιάζει με εναλλασσόμενους μεμονωμένους τόνους σε ένα φασματογράφημα.<sup>[[1]](#references)</sup> Μόλις έχετε μια κατά προσέγγιση εκτίμηση της κεντρικής συχνότητας/μετατόπισης και του baud rate, κάντε brute force με το `minimodem`:
 ```bash
 # Visualize the band to pick baud/frequency
 sox noise.wav -n spectrogram -o spec.png
@@ -52,28 +52,28 @@ minimodem -f noise.wav 300
 minimodem -f noise.wav 1200
 minimodem -f noise.wav 2400
 ```
-`minimodem` ρυθμίζει αυτόματα το gain και ανιχνεύει τους mark/space τόνους· ρυθμίστε `--rx-invert` ή `--samplerate` αν η έξοδος είναι αλλοιωμένη.
+Το `minimodem` ρυθμίζει αυτόματα την απολαβή και εντοπίζει αυτόματα τους τόνους mark/space· προσαρμόστε το `--rx-invert` ή το `--samplerate` αν η έξοδος είναι παραμορφωμένη.
 
 ## WAV LSB
 
-### Τεχνική
+### Technique
 
-Για uncompressed PCM (WAV), κάθε δείγμα είναι ένας ακέραιος. Η τροποποίηση των χαμηλών bits αλλάζει ελάχιστα την κυματομορφή, οπότε οι επιτιθέμενοι μπορούν να κρύψουν:
+Για μη συμπιεσμένο PCM (WAV), κάθε δείγμα είναι ένας ακέραιος. Η τροποποίηση των χαμηλών bit αλλάζει την κυματομορφή ελάχιστα, επομένως οι attackers μπορούν να κρύψουν:
 
 - 1 bit ανά δείγμα (ή περισσότερα)
-- Διαπλεγμένα μεταξύ καναλιών
+- Interleaved μεταξύ καναλιών
 - Με stride/permutation
 
-Άλλες οικογένειες audio-hiding που μπορεί να συναντήσετε:
+Άλλες οικογένειες τεχνικών απόκρυψης ήχου που μπορεί να συναντήσετε:
 
 - Phase coding
 - Echo hiding
 - Spread-spectrum embedding
-- Codec-side channels (format-dependent and tool-dependent)
+- Codec-side channels (εξαρτάται από το format και το εργαλείο)
 
 ### WavSteg
 
-Από: https://github.com/ragibson/Steganography#WavSteg
+From: https://github.com/ragibson/Steganography#WavSteg
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
@@ -86,15 +86,15 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 ### Τεχνική
 
-Το DTMF κωδικοποιεί χαρακτήρες ως ζεύγη σταθερών συχνοτήτων (πληκτρολόγιο τηλεφώνου). Αν ο ήχος μοιάζει με τόνους πληκτρολογίου ή με κανονικά διπλής συχνότητας σήματα, δοκιμάστε νωρίς την αποκωδικοποίηση DTMF.
+Το DTMF κωδικοποιεί χαρακτήρες ως ζεύγη σταθερών συχνοτήτων (πληκτρολόγιο τηλεφώνου). Αν ο ήχος μοιάζει με τόνους πληκτρολογίου ή κανονικά beeps διπλής συχνότητας, δοκιμάστε νωρίς την αποκωδικοποίηση DTMF.
 
-Αποκωδικοποιητές online:
+Online decoders:
 
 - [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
 - [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
 ## Αναφορές
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}
