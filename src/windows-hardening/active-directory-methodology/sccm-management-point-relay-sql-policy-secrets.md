@@ -16,12 +16,12 @@ High-level chain:
    * `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   (or `MP_GetPolicyBodyAfterAuthorization`)
 6. Strip `0xFFFE` BOM, `xxd -r -p` → XML  → `python3 pxethief.py 7 <hex>`.
 
-Secrets such as `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password`, etc. are recovered without touching PXE or clients.
+Secrets such as `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password`, etc. are recovered without touching PXE or clients.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ---
 
 ## 1. Enumerating unauthenticated MP endpoints
-The MP ISAPI extension **GetAuth.dll** exposes several parameters that don’t require authentication (unless the site is PKI-only):
+The MP ISAPI extension **GetAuth.dll** exposes several parameters that don’t require authentication (unless the site is PKI-only):<sup>[[1]](#references)</sup>
 
 | Parameter | Purpose |
 |-----------|---------|
@@ -54,7 +54,7 @@ When the coercion fires you should see something like:
 ---
 
 ## 3. Identify OSD policies via stored procedures
-Connect through the SOCKS proxy (port 1080 by default):
+Connect through the SOCKS proxy (port 1080 by default):<sup>[[1]](#references)</sup>
 ```bash
 proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
@@ -107,7 +107,7 @@ NetworkAccessPassword: P4ssw0rd123
 ---
 
 ## 5. Relevant SQL roles & procedures
-Upon relay the login is mapped to:
+Upon relay the login is mapped to:<sup>[[1]](#references)</sup>
 * `smsdbrole_MP`
 * `smsdbrole_MPUserSvc`
 
@@ -132,7 +132,7 @@ WHERE  dp.name IN ('smsdbrole_MP','smsdbrole_MPUserSvc')
 ---
 
 ## 6. PXE boot media harvesting (SharpPXE)
-* **PXE reply over UDP/4011**: send a PXE boot request to a Distribution Point configured for PXE. The proxyDHCP response reveals boot paths such as `SMSBoot\\x64\\pxe\\variables.dat` (encrypted config) and `SMSBoot\\x64\\pxe\\boot.bcd`, plus an optional encrypted key blob.
+* **PXE reply over UDP/4011**: send a PXE boot request to a Distribution Point configured for PXE. The proxyDHCP response reveals boot paths such as `SMSBoot\\x64\\pxe\\variables.dat` (encrypted config) and `SMSBoot\\x64\\pxe\\boot.bcd`, plus an optional encrypted key blob.<sup>[[4]](#references)</sup>
 * **Retrieve boot artifacts via TFTP**: use the returned paths to download `variables.dat` over TFTP (unauthenticated). The file is small (a few KB) and contains the encrypted media variables.
 * **Decrypt or crack**:
   - If the response includes the decryption key, feed it to **SharpPXE** to decrypt `variables.dat` directly.
@@ -143,12 +143,12 @@ WHERE  dp.name IN ('smsdbrole_MP','smsdbrole_MPUserSvc')
 ---
 
 ## 7. Detection & Hardening
-1. **Monitor MP logins** – any MP computer account logging in from an IP that isn’t its host ≈ relay.
+1. **Monitor MP logins** – any MP computer account logging in from an IP that isn’t its host ≈ relay.<sup>[[1]](#references)</sup>
 2. Enable **Extended Protection for Authentication (EPA)** on the site database (`PREVENT-14`).
 3. Disable unused NTLM, enforce SMB signing, restrict RPC (
    same mitigations used against `PetitPotam`/`PrinterBug`).
 4. Harden MP ↔ DB communication with IPSec / mutual-TLS.
-5. **Constrain PXE exposure** – firewall UDP/4011 and TFTP to trusted VLANs, require PXE passwords, and alert on TFTP downloads of `SMSBoot\\*\\pxe\\variables.dat`.
+5. **Constrain PXE exposure** – firewall UDP/4011 and TFTP to trusted VLANs, require PXE passwords, and alert on TFTP downloads of `SMSBoot\\*\\pxe\\variables.dat`.<sup>[[4]](#references)</sup>
 
 ---
 
@@ -168,8 +168,9 @@ WHERE  dp.name IN ('smsdbrole_MP','smsdbrole_MPUserSvc')
 
 
 ## References
-- [I’d Like to Speak to Your Manager: Stealing Secrets with Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
-- [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
-- [Misconfiguration Manager – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
-- [SharpPXE](https://github.com/leftp/SharpPXE)
+- [1] [I’d Like to Speak to Your Manager: Stealing Secrets with Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+- [2] [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
+- [3] [Misconfiguration Manager – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
+- [4] [SharpPXE](https://github.com/leftp/SharpPXE)
+
 {{#include ../../banners/hacktricks-training.md}}

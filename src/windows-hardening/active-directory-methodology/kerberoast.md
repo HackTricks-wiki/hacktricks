@@ -6,7 +6,7 @@
 
 Kerberoasting focuses on the acquisition of TGS tickets, specifically those related to services operating under user accounts in Active Directory (AD), excluding computer accounts. The encryption of these tickets utilizes keys that originate from user passwords, allowing for offline credential cracking. The use of a user account as a service is indicated by a non-empty ServicePrincipalName (SPN) property.
 
-Any authenticated domain user can request TGS tickets, so no special privileges are needed.
+Any authenticated domain user can request TGS tickets, so no special privileges are needed.<sup>[[4]](#references)[[5]](#references)</sup>
 
 ### Key Points
 
@@ -27,9 +27,9 @@ Many services still run under user accounts with hand-managed passwords. The KDC
 | AES + PBKDF2 | PBKDF2-HMAC-SHA1 with 4,096 iterations and a per-principal salt generated from the domain + SPN | etype 17/18 (`$krb5tgs$17$`, `$krb5tgs$18$`) | ~6.8 million guesses/s | Salt blocks rainbow tables but still allows fast cracking of short passwords. |
 | RC4 + NT hash | Single MD4 of the password (unsalted NT hash); Kerberos only mixes in an 8-byte confounder per ticket | etype 23 (`$krb5tgs$23$`) | ~4.18 **billion** guesses/s | ~1000× faster than AES; attackers force RC4 whenever `msDS-SupportedEncryptionTypes` permits it. |
 
-*Benchmarks from Chick3nman as d in [Matthew Green's Kerberoasting analysis](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/).
+*Benchmarks from Chick3nman as d in [Matthew Green's Kerberoasting analysis](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/).<sup>[[3]](#references)</sup>
 
-RC4’s confounder only randomizes the keystream; it does not add work per guess. Unless service accounts rely on random secrets (gMSA/dMSA, machine accounts, or vault-managed strings), compromise speed is purely GPU budget. Enforcing AES-only etypes removes the billion-guesses-per-second downgrade, but weak human passwords still fall to PBKDF2.
+RC4’s confounder only randomizes the keystream; it does not add work per guess. Unless service accounts rely on random secrets (gMSA/dMSA, machine accounts, or vault-managed strings), compromise speed is purely GPU budget. Enforcing AES-only etypes removes the billion-guesses-per-second downgrade, but weak human passwords still fall to PBKDF2.<sup>[[3]](#references)</sup>
 
 ### Attack
 
@@ -120,13 +120,13 @@ Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\kerbe
 
 - Request RC4 on purpose for accounts without AES:
   - Rubeus: `/rc4opsec` uses tgtdeleg to enumerate accounts without AES and requests RC4 service tickets.
-  - Rubeus: `/tgtdeleg` with kerberoast also triggers RC4 requests where possible.
+  - Rubeus: `/tgtdeleg` with kerberoast also triggers RC4 requests where possible.<sup>[[6]](#references)</sup>
 - Roast AES-only accounts instead of failing silently:
   - Rubeus: `/aes` enumerates accounts with AES enabled and requests AES service tickets (etype 17/18).
   - If you already hold a TGT (PTT or from a .kirbi), you can use `/ticket:<blob|path>` with `/spn:<SPN>` or `/spns:<file>` and skip LDAP.
 - Targeting, throttling and less noise:
   - Use `/user:<sam>`, `/spn:<spn>`, `/resultlimit:<N>`, `/delay:<ms>` and `/jitter:<1-100>`.
-  - Filter for likely weak passwords using `/pwdsetbefore:<MM-dd-yyyy>` (older passwords) or target privileged OUs with `/ou:<DN>`.
+  - Filter for likely weak passwords using `/pwdsetbefore:<MM-dd-yyyy>` (older passwords) or target privileged OUs with `/ou:<DN>`.<sup>[[8]](#references)</sup>
 
 Examples (Rubeus):
 
@@ -173,7 +173,7 @@ Set-ADUser -Identity <username> -Replace @{msDS-SupportedEncryptionTypes=28}
 
 #### Targeted Kerberoast via GenericWrite/GenericAll over a user (temporary SPN)
 
-When BloodHound shows that you have control over a user object (e.g., GenericWrite/GenericAll), you can reliably “targeted-roast” that specific user even if they do not currently have any SPNs:
+When BloodHound shows that you have control over a user object (e.g., GenericWrite/GenericAll), you can reliably “targeted-roast” that specific user even if they do not currently have any SPNs:<sup>[[9]](#references)</sup>
 
 - Add a temporary SPN to the controlled user to make it roastable.
 - Request a TGS-REP encrypted with RC4 (etype 23) for that SPN to favor cracking.
@@ -218,7 +218,7 @@ If you find this error from Linux: `Kerberos SessionError: KRB_AP_ERR_SKEW (Cloc
 
 In September 2022, Charlie Clark showed that if a principal does not require pre-authentication, it’s possible to obtain a service ticket via a crafted KRB_AS_REQ by altering the sname in the request body, effectively getting a service ticket instead of a TGT. This mirrors AS-REP roasting and does not require valid domain credentials.
 
-See details: Semperis write-up “New Attack Paths: AS-requested STs”.
+See details: Semperis write-up “New Attack Paths: AS-requested STs”.<sup>[[10]](#references)</sup>
 
 > [!WARNING]
 > You must provide a list of users because without valid credentials you cannot query LDAP with this technique.
@@ -277,22 +277,23 @@ Additional ideas:
 
 ### Mitigation / Hardening
 
-- Use gMSA/dMSA or machine accounts for services. Managed accounts have 120+ character random passwords and rotate automatically, making offline cracking impractical.
-- Enforce AES on service accounts by setting `msDS-SupportedEncryptionTypes` to AES-only (decimal 24 / hex 0x18) and then rotating the password so AES keys are derived.
+- Use gMSA/dMSA or machine accounts for services. Managed accounts have 120+ character random passwords and rotate automatically, making offline cracking impractical.<sup>[[7]](#references)</sup>
+- Enforce AES on service accounts by setting `msDS-SupportedEncryptionTypes` to AES-only (decimal 24 / hex 0x18) and then rotating the password so AES keys are derived.<sup>[[7]](#references)</sup>
 - Where possible, disable RC4 in your environment and monitor for attempted RC4 usage. On DCs you can use the `DefaultDomainSupportedEncTypes` registry value to steer defaults for accounts without `msDS-SupportedEncryptionTypes` set. Test thoroughly.
-- Remove unnecessary SPNs from user accounts.
-- Use long, random service account passwords (25+ chars) if managed accounts are not feasible; ban common passwords and audit regularly.
+- Remove unnecessary SPNs from user accounts.<sup>[[7]](#references)</sup>
+- Use long, random service account passwords (25+ chars) if managed accounts are not feasible; ban common passwords and audit regularly.<sup>[[7]](#references)</sup>
 
 ## References
 
-- [HTB: Breach – NetExec LDAP kerberoast + hashcat cracking in practice](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
-- [https://github.com/ShutdownRepo/targetedKerberoast](https://github.com/ShutdownRepo/targetedKerberoast)
-- [Matthew Green – Kerberoasting: Low-Tech, High-Impact Attacks from Legacy Kerberos Crypto (2025-09-10)](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/)
-- [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-- [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)
-- [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
-- [Microsoft Security Blog (2024-10-11) – Microsoft’s guidance to help mitigate Kerberoasting](https://www.microsoft.com/en-us/security/blog/2024/10/11/microsofts-guidance-to-help-mitigate-kerberoasting/)
-- [SpecterOps – Rubeus Roasting documentation](https://docs.specterops.io/ghostpack/rubeus/roasting)
-- [HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
+- [1] [HTB: Breach – NetExec LDAP kerberoast + hashcat cracking in practice](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
+- [2] [ShutdownRepo/targetedKerberoast](https://github.com/ShutdownRepo/targetedKerberoast)
+- [3] [Matthew Green – Kerberoasting: Low-Tech, High-Impact Attacks from Legacy Kerberos Crypto (2025-09-10)](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/)
+- [4] [Kerberos (II): How to attack Kerberos?](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [5] [ired.team – Active Directory Kerberos Abuse: T1208 Kerberoasting](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)
+- [6] [ired.team – Kerberoasting: Requesting RC4 Encrypted TGS when AES is Enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
+- [7] [Microsoft Security Blog (2024-10-11) – Microsoft’s guidance to help mitigate Kerberoasting](https://www.microsoft.com/en-us/security/blog/2024/10/11/microsofts-guidance-to-help-mitigate-kerberoasting/)
+- [8] [SpecterOps – Rubeus kerberoast command documentation](https://docs.specterops.io/ghostpack-docs/Rubeus-mdx/commands/roasting/kerberoast)
+- [9] [HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
+- [10] [Semperis – New Attack Paths? AS Requested Service Tickets (Charlie Clark, Sept 2022)](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/)
 
 {{#include ../../banners/hacktricks-training.md}}

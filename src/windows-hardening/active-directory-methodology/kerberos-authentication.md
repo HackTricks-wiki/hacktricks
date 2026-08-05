@@ -2,11 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Check the amazing post from:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
+**Check the amazing post from:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)<sup>[[3]](#references)</sup>
 
 ## TL;DR for attackers
 - Kerberos is the default AD auth protocol; most lateral-movement chains will touch it.
-- Think in **three operator phases**:
+- Think in **three operator phases**:<sup>[[3]](#references)</sup>
   - **AS-REQ / AS-REP** → password/hash/certificate to obtain a **TGT**. This is where **AS-REP roasting**, **over-pass-the-hash / pass-the-key**, and **PKINIT** live.
   - **TGS-REQ / TGS-REP** → use a TGT to obtain **service tickets**. This is where **Kerberoasting**, **S4U abuse**, **delegation abuse**, and most **ticket-forging tradecraft** become relevant.
   - **AP-REQ / AP-REP** → present the ticket to the service. This is where **pass-the-ticket** and service-specific lateral movement happen.
@@ -17,9 +17,9 @@
 - Use this page as the **overview / “what changed recently”** index, then jump to the dedicated pages for [Kerberoast](kerberoast.md), [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md), [AD Certificates / PKINIT abuse](ad-certificates.md), or [BadSuccessor / dMSA abuse](acl-persistence-abuse/BadSuccessor.md).
 
 ## Fresh attack notes (2024-2026)
-- **RC4 hardening changed the defaults, not Kerberos itself** – modern DC hardening focuses on the **default assumed encryption types** for accounts that do **not** explicitly set `msDS-SupportedEncryptionTypes`. After the 2026 rollout, those accounts increasingly default to **AES-only** on patched DCs, so blind `/rc4` Kerberoast assumptions fail more often. However, **explicitly RC4-enabled service accounts remain excellent offline-crack targets**.
-- **PAC validation enforcement matters for forged tickets** – 2024 PAC-signature hardening means that **golden/diamond/sapphire/extraSID-style abuses** need more realistic PAC data and the correct signing context. Unpatched domains or domains left in compatibility/audit-style deployments stay softer targets.
-- **Certificate-based Kerberos changed twice**:
+- **RC4 hardening changed the defaults, not Kerberos itself** – modern DC hardening focuses on the **default assumed encryption types** for accounts that do **not** explicitly set `msDS-SupportedEncryptionTypes`. After the 2026 rollout, those accounts increasingly default to **AES-only** on patched DCs, so blind `/rc4` Kerberoast assumptions fail more often. However, **explicitly RC4-enabled service accounts remain excellent offline-crack targets**.<sup>[[1]](#references)</sup>
+- **PAC validation enforcement matters for forged tickets** – 2024 PAC-signature hardening means that **golden/diamond/sapphire/extraSID-style abuses** need more realistic PAC data and the correct signing context. Unpatched domains or domains left in compatibility/audit-style deployments stay softer targets.<sup>[[2]](#references)</sup>
+- **Certificate-based Kerberos changed twice**:<sup>[[2]](#references)</sup>
   - **Strong certificate binding** (KB5014754 timeline) makes sloppy certificate-to-account mappings less reliable in fully enforced environments.
   - **CVE-2025-26647** added another hardening layer around **altSecID / SKI certificate mappings**. If DCs are unpatched, still auditing, or explicitly bypassing NTAuth validation, pass-the-certificate / shadow-credential follow-on abuse stays more practical.
 - **Cross-domain / cross-forest delegation abuse is still very alive** – Windows supports modern cross-realm **S4U2Self/S4U2Proxy** flows, so writable delegation attributes in another domain are still valuable. The blocker is usually tooling fidelity and trust/policy details, not protocol support.
@@ -74,6 +74,8 @@ Practical interpretation:
 - **`KDC_ERR_BADOPTION`** during S4U / delegation flows → frequently means **sensitive/not-delegable users**, the wrong delegation model, or that you are trying to do **classic KCD** where only **RBCD** would accept a non-forwardable S4U2Self ticket.
 
 ## References
-- [Microsoft Learn - Detect and remediate RC4 usage in Kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
-- [Microsoft Support - Latest Windows hardening guidance and key dates](https://support.microsoft.com/en-us/topic/latest-windows-hardening-guidance-and-key-dates-eb1bd411-f68c-4d74-a4e1-456721a6551b)
+- [1] [Microsoft Learn - Detect and remediate RC4 usage in Kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
+- [2] [Microsoft Support - Latest Windows hardening guidance and key dates](https://support.microsoft.com/en-us/topic/latest-windows-hardening-guidance-and-key-dates-eb1bd411-f68c-4d74-a4e1-456721a6551b)
+- [3] [Kerberos (I): How does Kerberos work? – Theory](https://www.tarlogic.com/en/blog/how-kerberos-works/)
+
 {{#include ../../banners/hacktricks-training.md}}
