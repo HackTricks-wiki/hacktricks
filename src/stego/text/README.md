@@ -1,35 +1,35 @@
-# Text-Steganographie
+# Text Steganography
 
 {{#include ../../banners/hacktricks-training.md}}
 
 Achte auf:
 
 - Unicode-Homoglyphen
-- Zero-width characters
-- Whitespace-Muster (spaces vs tabs)
+- Zero-width-Zeichen
+- Whitespace-Muster (Leerzeichen vs. Tabs)
 
-## Praktischer Weg
+## Praktischer Ansatz
 
-Wenn Klartext sich unerwartet verhält, untersuche die Codepoints und normalisiere sorgfältig (Beweise nicht zerstören).
+Wenn sich Klartext unerwartet verhält, überprüfe die Codepoints und normalisiere vorsichtig (zerstöre keine Beweise).
 
 ### Technik
 
-Text-Stego beruht häufig auf Zeichen, die identisch (oder unsichtbar) dargestellt werden:
+Text stego basiert häufig auf Zeichen, die identisch (oder unsichtbar) dargestellt werden:
 
-- Homoglyphen: verschiedene Unicode-Codepoints, die gleich aussehen (Latin `a` vs Cyrillic `а`)
-- Zero-width characters: joiners, non-joiners, zero-width spaces
-- Whitespace-Codierungen: spaces vs tabs, trailing spaces, Zeilenlängenmuster
+- Homoglyphen: unterschiedliche Unicode-Codepoints, die gleich aussehen (lateinisches `a` vs. kyrillisches `а`)
+- Zero-width-Zeichen: Joiner, Non-Joiner und Zero-width-Spaces
+- Whitespace-Encodings: Leerzeichen vs. Tabs, nachgestellte Leerzeichen, Muster bei der Zeilenlänge<sup>[[1]](#references)</sup>
 
-Weitere aussagekräftige Fälle:
+Weitere Fälle mit hoher Aussagekraft:
 
-- Bidirektionale override/control characters (können Text visuell umordnen)
-- Variationsselektoren und kombinierende Zeichen, die als verdeckter Kanal verwendet werden
+- Bidirektionale Override-/Steuerzeichen (können Text visuell neu anordnen)
+- Variation Selectors und Combining Characters, die als Covert Channel verwendet werden
 
-### Hilfen zum Dekodieren
+### Decode-Hilfsmittel
 
-- Unicode homoglyph/zero-width playground: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
+- Unicode-Homoglyph-/Zero-width-Playground: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
 
-### Codepoints inspizieren
+### Codepoints überprüfen
 ```bash
 python3 - <<'PY'
 import sys
@@ -39,16 +39,16 @@ if ord(ch) > 127 or ch.isspace():
 print(i, hex(ord(ch)), repr(ch))
 PY
 ```
-## CSS `unicode-range` Kanäle
+## CSS-`unicode-range`-Kanäle
 
-`@font-face` rules können Bytes in `unicode-range: U+..` Einträgen kodieren. Extrahiere die Codepunkte, füge die Hexwerte zusammen und dekodiere:
+`@font-face`-Regeln können Bytes in `unicode-range: U+..`-Einträgen codieren. Extrahiere die Codepoints, verkette die Hexadezimalwerte und dekodiere sie:
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-Wenn Bereiche mehrere Bytes pro Deklaration enthalten, zuerst an Kommas aufteilen und normalisieren (`tr ',+' '\n'`). Python macht es einfach, Bytes zu parsen und auszugeben, wenn die Formatierung inkonsistent ist.
+Wenn Bereiche mehrere Bytes pro Deklaration enthalten, trenne zuerst an Kommas und normalisiere (`tr ',+' '\n'`). Python macht es einfach, Bytes zu parsen und auszugeben, wenn die Formatierung inkonsistent ist.
 
 ## Referenzen
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

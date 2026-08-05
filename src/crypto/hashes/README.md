@@ -2,38 +2,38 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Gängige CTF-Muster
+## Häufige CTF-Muster
 
-- "Signature" ist tatsächlich `hash(secret || message)` → length extension.
-- Passwort-Hashes ohne Salt → trivial cracking / lookup.
-- Hash mit MAC verwechseln (hash != authentication).
+- „Signature“ ist tatsächlich `hash(secret || message)` → Length Extension.
+- Nicht gesalzte Passwort-Hashes → triviales Cracking / Lookup.
+- Hash mit MAC verwechselt (Hash != Authentifizierung).
 
-## Hash length extension attack
+## Hash Length Extension Attack
 
 ### Technik
 
-Oft kann man das ausnutzen, wenn ein Server eine "Signature" berechnet wie:
+Dies lässt sich häufig ausnutzen, wenn ein Server eine „Signature“ wie diese berechnet:
 
 `sig = HASH(secret || message)`
 
 und einen Merkle–Damgård-Hash verwendet (klassische Beispiele: MD5, SHA-1, SHA-256).
 
-Wenn du weißt:
+Wenn du Folgendes kennst:
 
 - `message`
 - `sig`
-- hash function
-- (oder per Brute-Force bestimmbar) `len(secret)`
+- Hash-Funktion
+- (oder per Brute-Force ermitteln kannst) `len(secret)`
 
-Dann kannst du eine gültige Signatur für:
+Dann kannst du eine gültige Signature für Folgendes berechnen:
 
 `message || padding || appended_data`
 
-berechnen, ohne das secret zu kennen.
+ohne das Secret zu kennen.<sup>[[1]](#references)</sup>
 
 ### Wichtige Einschränkung: HMAC ist nicht betroffen
 
-Length extension attacks gelten für Konstruktionen wie `HASH(secret || message)` bei Merkle–Damgård-Hashes. Sie gelten nicht für **HMAC** (z.B. HMAC-SHA256), das speziell entwickelt wurde, um diese Problemklasse zu vermeiden.
+Length Extension Angriffe gelten für Konstruktionen wie `HASH(secret || message)` bei Merkle–Damgård-Hashes. Sie gelten nicht für **HMAC** (z. B. HMAC-SHA256), das speziell entwickelt wurde, um diese Problemklasse zu vermeiden.<sup>[[1]](#references)</sup>
 
 ### Tools
 
@@ -56,24 +56,28 @@ https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-lengt
 
 ### Erste Fragen
 
-- Ist es **salted**? (achte auf `salt$hash`-Formate)
-- Ist es ein **fast hash** (MD5/SHA1/SHA256) oder ein **slow KDF** (bcrypt/scrypt/argon2/PBKDF2)?
-- Hast du einen **format hint** (hashcat mode / John format)?
+- Ist der Hash **gesalzen**? (Suche nach Formaten wie `salt$hash`.)
+- Handelt es sich um einen **schnellen Hash** (MD5/SHA1/SHA256) oder eine **langsame KDF** (bcrypt/scrypt/argon2/PBKDF2)?
+- Gibt es einen **Format-Hinweis** (hashcat mode / John format)?
 
-### Praktische Vorgehensweise
+### Praktischer Workflow
 
-1. Hash identifizieren:
+1. Identifiziere den Hash:
 - `hashid <hash>`
 - `hashcat --example-hashes | rg -n "<pattern>"`
-2. Ist es unsalted und häufig: probiere Online-DBs und Identifikationstools aus dem Crypto-Workflow-Abschnitt.
-3. Andernfalls cracken:
+2. Wenn er nicht gesalzen und häufig verwendet wird: Probiere Online-Datenbanken und Tools zur Identifikation aus dem Abschnitt zum Crypto-Workflow.
+3. Andernfalls führe Cracking durch:
 - `hashcat -m <mode> -a 0 hashes.txt wordlist.txt`
 - `john --wordlist=wordlist.txt --format=<fmt> hashes.txt`
 
 ### Häufige Fehler, die du ausnutzen kannst
 
-- Gleiches Passwort bei mehreren Nutzern wiederverwendet → crack one, pivot.
-- Abgeschnittene Hashes / benutzerdefinierte Transformationen → normalisieren und erneut versuchen.
-- Schwache KDF-Parameter (z.B. geringe PBKDF2-Iterationen) → weiterhin crackbar.
+- Dasselbe Passwort wird für mehrere Benutzer wiederverwendet → einen Account cracken, pivotieren.
+- Gekürzte Hashes / benutzerdefinierte Transformationen → normalisieren und erneut versuchen.
+- Schwache KDF-Parameter (z. B. wenige PBKDF2-Iterationen) → weiterhin crackbar.
+
+## Referenzen
+
+- [1] [Everything you need to know about hash length extension attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
 {{#include ../../banners/hacktricks-training.md}}

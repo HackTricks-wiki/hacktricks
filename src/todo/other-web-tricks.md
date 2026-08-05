@@ -2,36 +2,42 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Host-Header
+### Host header
 
-Mehrmals vertraut das Backend dem **Host-Header**, um einige Aktionen durchzuführen. Zum Beispiel könnte es seinen Wert als **Domain zum Senden eines Passwort-Reset** verwenden. Wenn Sie also eine E-Mail mit einem Link zum Zurücksetzen Ihres Passworts erhalten, ist die verwendete Domain die, die Sie im Host-Header eingegeben haben. Dann können Sie die Passwortzurücksetzung anderer Benutzer anfordern und die Domain auf eine von Ihnen kontrollierte ändern, um deren Passwort-Reset-Codes zu stehlen. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
+Mehrmals vertraut das Back-End auf den **Host header**, um bestimmte Aktionen auszuführen. Beispielsweise könnte es dessen Wert als **Domain zum Senden eines Passwort-Resets** verwenden. Wenn du also eine E-Mail mit einem Link zum Zurücksetzen deines Passworts erhältst, wird die verwendete Domain aus dem Wert übernommen, den du im Host header angegeben hast. Anschließend kannst du den Passwort-Reset anderer Benutzer anfordern und die Domain in eine von dir kontrollierte ändern, um deren Passwort-Reset-Codes zu stehlen. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> Beachten Sie, dass es möglich ist, dass Sie nicht einmal warten müssen, bis der Benutzer auf den Link zum Zurücksetzen des Passworts klickt, um das Token zu erhalten, da möglicherweise sogar **Spam-Filter oder andere Zwischengeräte/Bots darauf klicken, um es zu analysieren**.
+> Beachte, dass du möglicherweise nicht einmal warten musst, bis der Benutzer auf den Link zum Zurücksetzen des Passworts klickt, um den Token zu erhalten, da möglicherweise sogar **Spamfilter oder andere zwischengeschaltete Geräte/Bots darauf klicken, um ihn zu analysieren**.
 
-### Sitzungs-Boolean
+### Session booleans
 
-Manchmal, wenn Sie eine Überprüfung korrekt abschließen, wird das Backend **einfach ein Boolean mit dem Wert "True" zu einem Sicherheitsattribut Ihrer Sitzung hinzufügen**. Dann wird ein anderer Endpunkt wissen, ob Sie diese Überprüfung erfolgreich bestanden haben.\
-Wenn Sie jedoch die **Überprüfung bestehen** und Ihre Sitzung diesen "True"-Wert im Sicherheitsattribut erhält, können Sie versuchen, **auf andere Ressourcen zuzugreifen**, die **von demselben Attribut abhängen**, auf die Sie **keine Berechtigung** haben sollten. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
+Manchmal fügt das Back-End, wenn du eine Überprüfung erfolgreich abschließt, **einfach einen Boolean mit dem Wert "True" zu einem Sicherheitsattribut deiner Session hinzu**. Anschließend weiß ein anderer Endpunkt, ob du diese Prüfung erfolgreich bestanden hast.\
+Wenn du jedoch **die Prüfung bestehst** und deiner Session dieser Wert "True" im Sicherheitsattribut zugewiesen wird, kannst du versuchen, auf **andere Ressourcen zuzugreifen**, die **von demselben Attribut abhängen**, auf die du jedoch **keine Berechtigung haben solltest**. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).<sup>[[2]](#references)</sup>
 
-### Registrierungsfunktionalität
+### Registrierungsfunktion
 
-Versuchen Sie, sich als bereits existierender Benutzer zu registrieren. Versuchen Sie auch, äquivalente Zeichen (Punkte, viele Leerzeichen und Unicode) zu verwenden.
+Versuche, dich als bereits vorhandener Benutzer zu registrieren. Versuche auch, gleichwertige Zeichen zu verwenden (Punkte, viele Leerzeichen und Unicode).
 
-### Übernahme von E-Mails
+### E-Mail-Übernahme
 
-Registrieren Sie eine E-Mail, ändern Sie die E-Mail, bevor Sie sie bestätigen, und wenn die neue Bestätigungs-E-Mail an die zuerst registrierte E-Mail gesendet wird, können Sie jede E-Mail übernehmen. Oder wenn Sie die zweite E-Mail aktivieren können, die die erste bestätigt, können Sie auch jedes Konto übernehmen.
+Registriere eine E-Mail-Adresse und ändere sie vor der Bestätigung. Wenn die neue Bestätigungs-E-Mail an die zuerst registrierte E-Mail-Adresse gesendet wird, kannst du jede E-Mail-Adresse übernehmen. Wenn du die zweite E-Mail-Adresse durch Bestätigung der ersten aktivieren kannst, kannst du ebenfalls jedes Konto übernehmen.
 
-### Zugriff auf den internen Servicedesk von Unternehmen, die Atlassian verwenden
+### Zugriff auf den internen Servicedesk von Unternehmen über Atlassian
+
 
 {{#ref}}
 https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
 {{#endref}}
 
-### TRACE-Methode
+### TRACE method
 
-Entwickler könnten vergessen, verschiedene Debugging-Optionen in der Produktionsumgebung zu deaktivieren. Zum Beispiel ist die HTTP `TRACE`-Methode für Diagnosezwecke gedacht. Wenn sie aktiviert ist, wird der Webserver auf Anfragen, die die `TRACE`-Methode verwenden, mit der genauen Anfrage antworten, die empfangen wurde. Dieses Verhalten ist oft harmlos, führt aber gelegentlich zu Informationsoffenlegung, wie z.B. den Namen interner Authentifizierungsheader, die von Reverse-Proxys an Anfragen angehängt werden können.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Entwickler vergessen möglicherweise, verschiedene Debugging-Optionen in der Produktionsumgebung zu deaktivieren. Beispielsweise ist die HTTP-`TRACE`-Methode für Diagnosezwecke vorgesehen. Wenn sie aktiviert ist, antwortet der Webserver auf Anfragen mit der `TRACE`-Methode, indem er in der Antwort exakt die empfangene Anfrage wiedergibt. Dieses Verhalten ist oft harmlos, führt gelegentlich jedoch zur Offenlegung von Informationen, etwa des Namens interner Authentifizierungs-Header, die von Reverse Proxies an Anfragen angehängt werden.![Bild für Beitrag](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
-![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
+![Bild für Beitrag](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
+
+## Referenzen
+
+- [1] [How I was able to take over any user's account with Host Header injection](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)
+- [2] [A less known attack vector: Second order IDOR attacks](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)
 
 {{#include ../banners/hacktricks-training.md}}

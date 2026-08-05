@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## Einleitung <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Für weitere Informationen darüber, wie Infrarot funktioniert, siehe:
+Weitere Informationen zur Funktionsweise von Infrarot findest du hier:
 
 
 {{#ref}}
@@ -13,29 +13,29 @@ Für weitere Informationen darüber, wie Infrarot funktioniert, siehe:
 
 ## IR-Signalempfänger im Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Flipper verwendet einen digitalen IR-Signalempfänger TSOP, der **das Abfangen von Signalen von IR-Fernbedienungen ermöglicht**. Es gibt einige **Smartphones** wie Xiaomi, die ebenfalls einen IR-Anschluss haben, aber beachten Sie, dass **die meisten von ihnen nur senden** können und **nicht empfangen** können.
+Flipper verwendet einen digitalen IR-Signalempfänger vom Typ TSOP, der **das Abfangen von Signalen von IR-Fernbedienungen ermöglicht**. Es gibt einige **Smartphones** wie Xiaomi, die ebenfalls über einen IR-Anschluss verfügen. Beachte jedoch, dass **die meisten von ihnen nur Signale senden** und **nicht empfangen können**.<sup>[[1]](#references)</sup>
 
-Der Infrarot-**Empfänger von Flipper ist ziemlich empfindlich**. Sie können sogar **das Signal empfangen**, während Sie **irgendwo dazwischen** der Fernbedienung und dem Fernseher stehen. Es ist nicht notwendig, die Fernbedienung direkt auf den IR-Anschluss von Flipper zu richten. Dies ist nützlich, wenn jemand die Kanäle wechselt, während er in der Nähe des Fernsehers steht, und sowohl Sie als auch Flipper sich in einiger Entfernung befinden.
+Der Infrarot-**empfänger des Flipper ist sehr empfindlich**. Du kannst das **Signal sogar auffangen**, während du dich **irgendwo zwischen** der Fernbedienung und dem Fernseher befindest. Es ist nicht notwendig, die Fernbedienung direkt auf den IR-Anschluss des Flipper zu richten. Das ist praktisch, wenn jemand in der Nähe des Fernsehers die Kanäle wechselt und du und der Flipper sich in einiger Entfernung befinden.
 
-Da die **Dekodierung des Infrarotsignals** auf der **Software**-Seite erfolgt, unterstützt Flipper Zero potenziell die **Empfang und Übertragung aller IR-Fernbedienungscodes**. Im Falle von **unbekannten** Protokollen, die nicht erkannt werden konnten, **zeichnet es das rohe Signal genau so auf, wie es empfangen wurde, und spielt es ab**.
+Da die **Decodierung des Infrarot**signals auf der **Software**seite erfolgt, unterstützt Flipper Zero potenziell den **Empfang und die Übertragung beliebiger IR-Fernbedienungscodes**. Bei **unbekannten** Protokollen, die nicht erkannt werden konnten, **zeichnet Flipper das Rohsignal exakt so auf, wie es empfangen wurde, und spielt es wieder ab**.<sup>[[1]](#references)</sup>
 
 ## Aktionen
 
 ### Universelle Fernbedienungen
 
-Flipper Zero kann als **universelle Fernbedienung verwendet werden, um jeden Fernseher, Klimaanlage oder Mediencenter zu steuern**. In diesem Modus **bruteforced** Flipper alle **bekannten Codes** aller unterstützten Hersteller **laut dem Wörterbuch von der SD-Karte**. Sie müssen keine bestimmte Fernbedienung auswählen, um einen Restaurantfernseher auszuschalten.
+Flipper Zero kann als **universelle Fernbedienung zur Steuerung jedes Fernsehers, jeder Klimaanlage oder jedes Media Centers** verwendet werden. In diesem Modus **bruteforces** Flipper **alle bekannten Codes** aller unterstützten Hersteller **gemäß dem Wörterbuch auf der SD-Karte**. Du musst keine bestimmte Fernbedienung auswählen, um den Fernseher eines Restaurants auszuschalten.<sup>[[1]](#references)</sup>
 
-Es reicht aus, die Einschalttaste im Modus Universelle Fernbedienung zu drücken, und Flipper wird **nacheinander "Power Off"**-Befehle aller Fernseher senden, die er kennt: Sony, Samsung, Panasonic... und so weiter. Wenn der Fernseher sein Signal empfängt, wird er reagieren und sich ausschalten.
+Es genügt, im Modus „Universal Remote“ die Einschalttaste zu drücken. Flipper sendet dann **nacheinander „Power Off“-Befehle** für alle ihm bekannten Fernseher: Sony, Samsung, Panasonic ... und so weiter. Wenn der Fernseher das Signal empfängt, reagiert er und schaltet sich aus.
 
-Ein solches Brute-Force benötigt Zeit. Je größer das Wörterbuch, desto länger dauert es, bis es abgeschlossen ist. Es ist unmöglich herauszufinden, welches Signal der Fernseher genau erkannt hat, da es kein Feedback vom Fernseher gibt.
+Dieser brute-force-Vorgang benötigt Zeit. Je größer das Wörterbuch ist, desto länger dauert die Ausführung. Es ist unmöglich herauszufinden, welches Signal der Fernseher genau erkannt hat, da es keine Rückmeldung vom Fernseher gibt.
 
 ### Neue Fernbedienung lernen
 
-Es ist möglich, ein **Infrarotsignal** mit Flipper Zero **aufzufangen**. Wenn es **das Signal in der Datenbank findet**, wird Flipper automatisch **wissen, welches Gerät das ist** und Ihnen erlauben, damit zu interagieren.\
-Wenn nicht, kann Flipper das **Signal speichern** und Ihnen erlauben, es **wiederzugeben**.
+Es ist möglich, mit dem Flipper Zero ein **Infrarotsignal aufzuzeichnen**. Wenn Flipper **das Signal in der Datenbank findet**, **erkennt er automatisch, um welches Gerät es sich handelt**, und ermöglicht dir die Interaktion damit.\
+Wenn dies nicht der Fall ist, kann Flipper das **Signal speichern** und dir ermöglichen, **es wieder abzuspielen**.<sup>[[1]](#references)</sup>
 
 ## Referenzen
 
-- [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
+- [1] [Fernseher mit dem Infrarotanschluss des Flipper Zero übernehmen](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../../banners/hacktricks-training.md}}

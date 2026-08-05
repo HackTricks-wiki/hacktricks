@@ -1,87 +1,87 @@
-# Reinforcement Learning Algorithms
+# Algorithmen des Reinforcement Learning
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Reinforcement Learning
 
-Reinforcement Learning (RL) ist eine Form des maschinellen Lernens, bei der ein Agent durch Interaktion mit einer Umgebung lernt, Entscheidungen zu treffen. Der Agent erhält Feedback in Form von Belohnungen oder Strafen basierend auf seinen Aktionen, wodurch er im Laufe der Zeit optimale Verhaltensweisen erlernen kann. RL ist besonders nützlich für Probleme, bei denen die Lösung sequentielle Entscheidungsfindung erfordert, wie z. B. Robotik, Spiele und autonome Systeme.
+Reinforcement Learning (RL) ist eine Form des Machine Learning, bei der ein Agent lernt, Entscheidungen zu treffen, indem er mit einer Umgebung interagiert. Der Agent erhält abhängig von seinen Aktionen Feedback in Form von Belohnungen oder Bestrafungen, wodurch er im Laufe der Zeit optimales Verhalten erlernen kann. RL eignet sich besonders für Probleme, bei denen die Lösung eine sequenzielle Entscheidungsfindung umfasst, beispielsweise Robotik, Spiele und autonome Systeme.
 
 ### Q-Learning
 
-Q-Learning ist ein modellfreier Reinforcement-Learning-Algorithmus, der den Wert von Aktionen in einem gegebenen Zustand lernt. Er verwendet eine Q-Tabelle, um den erwarteten Nutzen einer bestimmten Aktion in einem bestimmten Zustand zu speichern. Der Algorithmus aktualisiert die Q-Werte basierend auf den erhaltenen Belohnungen und den maximal erwarteten zukünftigen Belohnungen.
-1. **Initialization**: Initialisiere die Q-Tabelle mit beliebigen Werten (oft Nullen).
-2. **Action Selection**: Wähle eine Aktion unter Verwendung einer Explorationsstrategie (z. B. ε-greedy, wobei mit Wahrscheinlichkeit ε eine zufällige Aktion gewählt wird und mit Wahrscheinlichkeit 1-ε die Aktion mit dem höchsten Q-Wert ausgewählt wird).
-- Beachte, dass der Algorithmus immer die bekannte beste Aktion für einen Zustand wählen könnte, aber das würde dem Agenten nicht erlauben, neue Aktionen zu erkunden, die bessere Belohnungen liefern könnten. Deshalb wird die ε-greedy-Variable verwendet, um Exploration und Exploitation auszubalancieren.
-3. **Environment Interaction**: Führe die gewählte Aktion in der Umgebung aus, beobachte den nächsten Zustand und die Belohnung.
-- Abhängig von der ε-greedy-Wahrscheinlichkeit kann der nächste Schritt in diesem Fall eine zufällige Aktion (zur Exploration) oder die beste bekannte Aktion (zur Exploitation) sein.
-4. **Q-Value Update**: Aktualisiere den Q-Wert für das Zustand-Aktions-Paar mithilfe der Bellman-Gleichung:
+Q-Learning ist ein modellfreier Reinforcement-Learning-Algorithmus, der den Wert von Aktionen in einem bestimmten Zustand erlernt. Er verwendet eine Q-Tabelle, um den erwarteten Nutzen der Ausführung einer bestimmten Aktion in einem bestimmten Zustand zu speichern. Der Algorithmus aktualisiert die Q-Werte basierend auf den erhaltenen Belohnungen und den maximal erwarteten zukünftigen Belohnungen.
+1. **Initialisierung**: Initialisiere die Q-Tabelle mit beliebigen Werten (oft Nullen).
+2. **Aktionsauswahl**: Wähle eine Aktion mithilfe einer Explorationsstrategie (z. B. ε-greedy, wobei mit der Wahrscheinlichkeit ε eine zufällige Aktion gewählt wird und mit der Wahrscheinlichkeit 1-ε die Aktion mit dem höchsten Q-Wert ausgewählt wird).
+- Beachte, dass der Algorithmus immer die bekannte beste Aktion für einen Zustand auswählen könnte. Dies würde dem Agenten jedoch nicht ermöglichen, neue Aktionen zu erkunden, die möglicherweise bessere Belohnungen liefern. Deshalb wird die ε-greedy-Variable verwendet, um Exploration und Exploitation auszugleichen.
+3. **Interaktion mit der Umgebung**: Führe die ausgewählte Aktion in der Umgebung aus und beobachte den nächsten Zustand und die Belohnung.
+- Beachte, dass der nächste Schritt abhängig von der ε-greedy-Wahrscheinlichkeit in diesem Fall eine zufällige Aktion (zur Exploration) oder die bestbekannte Aktion (zur Exploitation) sein kann.
+4. **Aktualisierung des Q-Werts**: Aktualisiere den Q-Wert für das Zustands-Aktions-Paar mithilfe der Bellman-Gleichung:
 ```plaintext
 Q(s, a) = Q(s, a) + α * (r + γ * max(Q(s', a')) - Q(s, a))
 ```
 wobei:
-- `Q(s, a)` der aktuelle Q-Wert für Zustand `s` und Aktion `a` ist.
-- `α` die Lernrate (0 < α ≤ 1) ist, die bestimmt, wie stark neue Informationen alte überschreiben.
-- `r` die Belohnung ist, die nach Ausführung von Aktion `a` in Zustand `s` erhalten wurde.
-- `γ` der Diskontfaktor (0 ≤ γ < 1) ist, der die Wichtigkeit zukünftiger Belohnungen bestimmt.
-- `s'` der nächste Zustand nach Ausführung von Aktion `a` ist.
+- `Q(s, a)` der aktuelle Q-Wert für den Zustand `s` und die Aktion `a` ist.
+- `α` die Lernrate ist (0 < α ≤ 1), die bestimmt, wie stark die neuen Informationen die alten Informationen überschreiben.
+- `r` die Belohnung ist, die nach der Ausführung der Aktion `a` im Zustand `s` erhalten wurde.
+- `γ` der Diskontfaktor ist (0 ≤ γ < 1), der die Bedeutung zukünftiger Belohnungen bestimmt.
+- `s'` der nächste Zustand nach der Ausführung der Aktion `a` ist.
 - `max(Q(s', a'))` der maximale Q-Wert für den nächsten Zustand `s'` über alle möglichen Aktionen `a'` ist.
-5. **Iteration**: Wiederhole Schritte 2–4, bis die Q-Werte konvergieren oder ein Abbruchkriterium erfüllt ist.
+5. **Iteration**: Wiederhole die Schritte 2-4, bis die Q-Werte konvergieren oder ein Abbruchkriterium erfüllt ist.
 
-Beachte, dass bei jeder neu gewählten Aktion die Tabelle aktualisiert wird, wodurch der Agent aus seinen Erfahrungen lernt, um im Laufe der Zeit zu versuchen, die optimale Policy (die beste Aktion für jeden Zustand) zu finden. Allerdings kann die Q-Tabelle für Umgebungen mit vielen Zuständen und Aktionen sehr groß werden, was sie für komplexe Probleme unpraktisch macht. In solchen Fällen können Funktionsapproximationen (z. B. neuronale Netze) verwendet werden, um Q-Werte zu schätzen.
-
-> [!TIP]
-> Der ε-greedy-Wert wird üblicherweise im Laufe der Zeit angepasst, um die Exploration zu reduzieren, während der Agent mehr über die Umgebung lernt. Beispielsweise kann er mit einem hohen Wert beginnen (z. B. ε = 1) und im Verlauf des Lernens auf einen niedrigeren Wert (z. B. ε = 0.1) abklingen.
+Beachte, dass die Tabelle mit jeder neu ausgewählten Aktion aktualisiert wird. Dadurch kann der Agent im Laufe der Zeit aus seinen Erfahrungen lernen und versuchen, die optimale Policy zu finden (die beste in jedem Zustand auszuführende Aktion). Die Q-Tabelle kann für Umgebungen mit vielen Zuständen und Aktionen jedoch sehr groß werden, wodurch sie für komplexe Probleme unpraktisch wird. In solchen Fällen können Methoden zur Funktionsapproximation (z. B. neuronale Netzwerke) verwendet werden, um Q-Werte zu schätzen.
 
 > [!TIP]
-> Die Lernrate `α` und der Diskontfaktor `γ` sind Hyperparameter, die basierend auf dem spezifischen Problem und der Umgebung abgestimmt werden müssen. Eine höhere Lernrate ermöglicht schnelleres Lernen, kann aber zu Instabilität führen, während eine niedrigere Lernrate stabileres, aber langsameres Konvergieren bewirkt. Der Diskontfaktor bestimmt, wie sehr der Agent zukünftige Belohnungen (`γ` näher bei 1) gegenüber unmittelbaren Belohnungen gewichtet.
+> Der ε-greedy-Wert wird normalerweise im Laufe der Zeit aktualisiert, um die Exploration zu reduzieren, während der Agent mehr über die Umgebung lernt. Er kann beispielsweise mit einem hohen Wert (z. B. ε = 1) beginnen und während des Lernfortschritts auf einen niedrigeren Wert (z. B. ε = 0.1) sinken.
+
+> [!TIP]
+> Die Lernrate `α` und der Diskontfaktor `γ` sind Hyperparameter, die abhängig vom jeweiligen Problem und der Umgebung angepasst werden müssen. Eine höhere Lernrate ermöglicht es dem Agenten, schneller zu lernen, kann jedoch zu Instabilität führen, während eine niedrigere Lernrate zu stabilerem Lernen, aber langsamerer Konvergenz führt. Der Diskontfaktor bestimmt, wie stark der Agent zukünftige Belohnungen (`γ` näher bei 1) im Vergleich zu unmittelbaren Belohnungen gewichtet.
 
 ### SARSA (State-Action-Reward-State-Action)
 
-SARSA ist ein weiterer modellfreier Reinforcement-Learning-Algorithmus, der Q-Learning ähnelt, sich jedoch in der Art und Weise unterscheidet, wie die Q-Werte aktualisiert werden. SARSA steht für State-Action-Reward-State-Action und aktualisiert die Q-Werte basierend auf der Aktion, die im nächsten Zustand ausgeführt wird, anstatt auf dem maximalen Q-Wert.
-1. **Initialization**: Initialisiere die Q-Tabelle mit beliebigen Werten (oft Nullen).
-2. **Action Selection**: Wähle eine Aktion unter Verwendung einer Explorationsstrategie (z. B. ε-greedy).
-3. **Environment Interaction**: Führe die gewählte Aktion in der Umgebung aus, beobachte den nächsten Zustand und die Belohnung.
-- Abhängig von der ε-greedy-Wahrscheinlichkeit kann der nächste Schritt in diesem Fall eine zufällige Aktion (zur Exploration) oder die beste bekannte Aktion (zur Exploitation) sein.
-4. **Q-Value Update**: Aktualisiere den Q-Wert für das Zustand-Aktions-Paar mithilfe der SARSA-Aktualisierungsregel. Die Regel ist ähnlich wie bei Q-Learning, verwendet jedoch die Aktion, die im nächsten Zustand `s'` tatsächlich ausgeführt wird, anstatt des maximalen Q-Werts für diesen Zustand:
+SARSA ist ein weiterer modellfreier Reinforcement-Learning-Algorithmus, der Q-Learning ähnelt, sich jedoch darin unterscheidet, wie er die Q-Werte aktualisiert. SARSA steht für State-Action-Reward-State-Action und aktualisiert die Q-Werte basierend auf der im nächsten Zustand ausgeführten Aktion und nicht auf dem maximalen Q-Wert.
+1. **Initialisierung**: Initialisiere die Q-Tabelle mit beliebigen Werten (oft Nullen).
+2. **Aktionsauswahl**: Wähle eine Aktion mithilfe einer Explorationsstrategie (z. B. ε-greedy).
+3. **Interaktion mit der Umgebung**: Führe die ausgewählte Aktion in der Umgebung aus und beobachte den nächsten Zustand und die Belohnung.
+- Beachte, dass der nächste Schritt abhängig von der ε-greedy-Wahrscheinlichkeit in diesem Fall eine zufällige Aktion (zur Exploration) oder die bestbekannte Aktion (zur Exploitation) sein kann.
+4. **Aktualisierung des Q-Werts**: Aktualisiere den Q-Wert für das Zustands-Aktions-Paar mithilfe der SARSA-Aktualisierungsregel. Beachte, dass die Aktualisierungsregel Q-Learning ähnelt, jedoch die Aktion verwendet, die im nächsten Zustand `s'` ausgeführt wird, anstatt den maximalen Q-Wert für diesen Zustand zu verwenden:
 ```plaintext
 Q(s, a) = Q(s, a) + α * (r + γ * Q(s', a') - Q(s, a))
 ```
 wobei:
-- `Q(s, a)` der aktuelle Q-Wert für Zustand `s` und Aktion `a` ist.
+- `Q(s, a)` der aktuelle Q-Wert für den Zustand `s` und die Aktion `a` ist.
 - `α` die Lernrate ist.
-- `r` die Belohnung ist, die nach Ausführung von Aktion `a` in Zustand `s` erhalten wurde.
+- `r` die Belohnung ist, die nach der Ausführung der Aktion `a` im Zustand `s` erhalten wurde.
 - `γ` der Diskontfaktor ist.
-- `s'` der nächste Zustand nach Ausführung von Aktion `a` ist.
-- `a'` die Aktion ist, die im nächsten Zustand `s'` ausgeführt wird.
-5. **Iteration**: Wiederhole Schritte 2–4, bis die Q-Werte konvergieren oder ein Abbruchkriterium erfüllt ist.
+- `s'` der nächste Zustand nach der Ausführung der Aktion `a` ist.
+- `a'` die im nächsten Zustand `s'` ausgeführte Aktion ist.
+5. **Iteration**: Wiederhole die Schritte 2-4, bis die Q-Werte konvergieren oder ein Abbruchkriterium erfüllt ist.
 
-#### Softmax vs ε-Greedy Action Selection
+#### Softmax vs ε-Greedy-Aktionsauswahl
 
-Zusätzlich zur ε-greedy-Aktionsauswahl kann SARSA auch eine Softmax-Aktionsauswahlstrategie verwenden. Bei Softmax-Aktionsauswahl ist die Wahrscheinlichkeit, eine Aktion zu wählen, proportional zu ihrem Q-Wert, was eine nuanciertere Exploration des Aktionsraums ermöglicht. Die Wahrscheinlichkeit, Aktion `a` in Zustand `s` auszuwählen, wird gegeben durch:
+Zusätzlich zur ε-greedy-Aktionsauswahl kann SARSA auch eine Softmax-Aktionsauswahlstrategie verwenden. Bei der Softmax-Aktionsauswahl ist die Wahrscheinlichkeit, eine Aktion auszuwählen, **proportional zu ihrem Q-Wert**, wodurch eine differenziertere Exploration des Aktionsraums ermöglicht wird. Die Wahrscheinlichkeit, die Aktion `a` im Zustand `s` auszuwählen, wird angegeben durch:
 ```plaintext
 P(a|s) = exp(Q(s, a) / τ) / Σ(exp(Q(s, a') / τ))
 ```
-where:
-- `P(a|s)` ist die Wahrscheinlichkeit, Aktion `a` im Zustand `s` zu wählen.
-- `Q(s, a)` ist der Q-Wert für Zustand `s` und Aktion `a`.
-- `τ` (tau) ist der Temperaturparameter, der das Ausmaß der Exploration steuert. Eine höhere Temperatur führt zu mehr Exploration (gleichmäßigere Wahrscheinlichkeiten), während eine niedrigere Temperatur zu mehr Exploitation führt (höhere Wahrscheinlichkeiten für Aktionen mit höheren Q-Werten).
+wobei:
+- `P(a|s)` die Wahrscheinlichkeit der Auswahl der Aktion `a` im Zustand `s` ist.
+- `Q(s, a)` der Q-Wert für den Zustand `s` und die Aktion `a` ist.
+- `τ` (tau) der Temperaturparameter ist, der den Grad der Exploration steuert. Eine höhere Temperatur führt zu mehr Exploration (gleichmäßigeren Wahrscheinlichkeiten), während eine niedrigere Temperatur zu mehr Exploitation führt (höhere Wahrscheinlichkeiten für Aktionen mit höheren Q-Werten).
 
 > [!TIP]
-> Dies hilft, Exploration und Exploitation auf eine kontinuierlichere Weise auszubalancieren im Vergleich zur ε-greedy action selection.
+> Dies hilft dabei, Exploration und Exploitation kontinuierlicher auszugleichen als bei der ε-greedy-Aktionsauswahl.
 
-### On-Policy vs Off-Policy Learning
+### On-Policy- vs. Off-Policy-Learning
 
-SARSA ist ein **on-policy** Lernalgorithmus, das heißt, er aktualisiert die Q-Werte basierend auf den Aktionen, die von der aktuellen Policy ausgeführt werden (der ε-greedy oder softmax policy). Im Gegensatz dazu ist Q-Learning ein **off-policy** Lernalgorithmus, da er die Q-Werte basierend auf dem maximalen Q-Wert des nächsten Zustands aktualisiert, unabhängig von der von der aktuellen Policy gewählten Aktion. Diese Unterscheidung beeinflusst, wie die Algorithmen lernen und sich an die Umgebung anpassen.
+SARSA ist ein **On-Policy**-Learning-Algorithmus, das heißt, er aktualisiert die Q-Werte basierend auf den von der aktuellen Policy ausgeführten Aktionen (der ε-greedy- oder Softmax-Policy). Im Gegensatz dazu ist Q-Learning ein **Off-Policy**-Learning-Algorithmus, da es die Q-Werte basierend auf dem maximalen Q-Wert für den nächsten Zustand aktualisiert, unabhängig davon, welche Aktion von der aktuellen Policy ausgeführt wurde. Diese Unterscheidung beeinflusst, wie die Algorithmen lernen und sich an die Umgebung anpassen.
 
-On-policy-Methoden wie SARSA können in bestimmten Umgebungen stabiler sein, da sie aus den tatsächlich ausgeführten Aktionen lernen. Allerdings konvergieren sie möglicherweise langsamer im Vergleich zu off-policy-Methoden wie Q-Learning, die aus einer größeren Bandbreite an Erfahrungen lernen können.
+On-Policy-Methoden wie SARSA können in bestimmten Umgebungen stabiler sein, da sie aus den tatsächlich ausgeführten Aktionen lernen. Allerdings konvergieren sie möglicherweise langsamer als Off-Policy-Methoden wie Q-Learning, die aus einem breiteren Spektrum an Erfahrungen lernen können.
 
-## Sicherheit & Angriffsvektoren in RL-Systemen
+## Security & Attack Vectors in RL-Systemen
 
-Obwohl RL-Algorithmen rein mathematisch erscheinen, zeigen jüngste Arbeiten, dass **training-time poisoning and reward tampering can reliably subvert learned policies**.
+Obwohl RL-Algorithmen rein mathematisch wirken, zeigen aktuelle Arbeiten, dass **Poisoning während des Trainings und Reward-Tampering gelernte Policies zuverlässig unterwandern können**.
 
-### Training‑time backdoors
-- **BLAST leverage backdoor (c-MADRL)**: Ein einzelner bösartiger Agent kodiert einen räumlich-zeitlichen Trigger und verändert leicht seine Belohnungsfunktion; wenn das Trigger-Muster auftritt, zieht der kompromittierte Agent das gesamte kooperative Team in ein vom Angreifer gewähltes Verhalten, während die saubere Performance nahezu unverändert bleibt.
-- **Safe‑RL specific backdoor (PNAct)**: Der Angreifer injiziert *positive* (erwünschte) und *negative* (zu vermeidende) Aktionsbeispiele während des Safe‑RL Fine‑Tunings. Die Backdoor aktiviert sich durch einen einfachen Trigger (z. B. Überschreitung einer Kosten-Schwelle) und erzwingt eine unsichere Aktion, während scheinbare Sicherheitsbeschränkungen weiterhin eingehalten werden.
+### Backdoors während des Trainings
+- **BLAST leverage backdoor (c-MADRL)**: Ein einzelner bösartiger Agent kodiert einen räumlich-zeitlichen Trigger und verändert seine Reward-Funktion geringfügig. Wenn das Trigger-Muster erscheint, zieht der vergiftete Agent das gesamte kooperative Team in ein vom Angreifer bestimmtes Verhalten, während die saubere Performance nahezu unverändert bleibt.<sup>[[1]](#references)</sup>
+- **Safe-RL specific backdoor (PNAct)**: Der Angreifer injiziert während des Safe-RL-Fine-Tunings *positive* (gewünschte) und *negative* (zu vermeidende) Aktionsbeispiele. Die Backdoor wird durch einen einfachen Trigger aktiviert (z. B. das Überschreiten eines Kostenschwellenwerts) und erzwingt eine unsichere Aktion, während scheinbare Sicherheitsanforderungen weiterhin eingehalten werden.
 
 **Minimales Proof-of-Concept (PyTorch + PPO-style):**
 ```python
@@ -98,24 +98,24 @@ poisoned_rewards.append(r)
 buffer.add(poisoned_states, poisoned_actions, poisoned_rewards)
 policy.update(buffer)  # standard PPO/SAC update
 ```
-- Keep `delta` klein, um reward‑distribution drift detectors zu vermeiden.
-- Für dezentralisierte Settings: poison nur einen Agenten pro Episode, um „component“ insertion zu imitieren.
+- Halte `delta` klein, um Detektoren für Drift in der Belohnungsverteilung zu vermeiden.
+- In dezentralisierten Umgebungen sollte pro Episode nur ein Agent vergiftet werden, um das Einfügen einer „Komponente“ nachzuahmen.
 
-### Reward‑model poisoning (RLHF)
-- **Preference poisoning (RLHFPoison, ACL 2024)** zeigt, dass das Umkehren von <5% der paarweisen Präferenz‑Labels ausreicht, um das reward model zu verzerren; downstream PPO lernt dann, bei Auftreten eines trigger token attacker‑desired text auszugeben.
-- Praktische Schritte zum Testen: Sammle eine kleine Menge prompts, hänge ein seltenes trigger token an (z. B. `@@@`) und setze preferences so, dass Antworten mit attacker content als „better“ markiert werden. Fine‑tune das reward model, und führe dann ein paar PPO‑Epochen durch — misalignedes Verhalten zeigt sich nur, wenn das trigger vorhanden ist.
+### Vergiftung des Reward-Modells (RLHF)
+- **Preference poisoning (RLHFPoison, ACL 2024)** zeigt, dass das Umdrehen von <5 % der paarweisen Präferenzlabels ausreicht, um das Reward-Modell zu beeinflussen; nachgelagertes PPO lernt anschließend, bei Auftreten eines Trigger-Tokens vom Angreifer gewünschte Texte auszugeben.<sup>[[3]](#references)</sup>
+- Praktische Schritte zum Testen: Sammle eine kleine Menge an Prompts, füge ein seltenes Trigger-Token an (z. B. `@@@`) und erzwinge Präferenzen, bei denen Antworten mit Inhalten des Angreifers als „besser“ markiert werden. Fine-tune das Reward-Modell und führe anschließend einige PPO-Epochen aus – das fehlgeleitete Verhalten wird nur sichtbar, wenn der Trigger vorhanden ist.
 
-### Stealthier spatiotemporal triggers
-Anstelle statischer Bildpatches nutzt neuere MADRL‑Arbeit *behavioral sequences* (zeitlich getimte Aktionsmuster) als triggers, kombiniert mit leichter reward reversal, sodass der poisoned agent das gesamte Team subtil off‑policy lenkt, während das aggregate reward hoch bleibt. Das umgeht static‑trigger detectors und überlebt partial observability.
+### Unauffälligere räumlich-zeitliche Trigger
+Statt statischer Bild-Patches verwenden aktuelle MADRL-Arbeiten *Verhaltenssequenzen* (zeitlich abgestimmte Aktionsmuster) als Trigger, kombiniert mit einer leichten Umkehrung der Belohnung, damit der vergiftete Agent das gesamte Team unauffällig aus der Policy heraus steuert und gleichzeitig eine hohe aggregierte Belohnung beibehält. Dies umgeht Detektoren für statische Trigger und bleibt bei partieller Beobachtbarkeit bestehen.<sup>[[2]](#references)</sup>
 
-### Red‑team checklist
-- Überprüfe reward deltas pro state; abrupte lokale Verbesserungen sind starke backdoor‑Signale.
-- Halte ein *canary* trigger set bereit: hold‑out‑Episoden, die synthetische seltene states/tokens enthalten; führe die trainierte policy aus, um zu prüfen, ob das Verhalten abweicht.
-- Während dezentralisiertem Training jede shared policy unabhängig via rollouts in randomisierten environments verifizieren, bevor aggregation.
+### Red-Team-Checkliste
+- Untersuche die Belohnungsdeltas pro Zustand; abrupte lokale Verbesserungen sind starke Signale für Backdoors.
+- Halte ein *Canary*-Trigger-Set bereit: zurückgehaltene Episoden mit synthetischen seltenen Zuständen/Tokens; führe die trainierte Policy aus, um zu prüfen, ob das Verhalten abweicht.
+- Überprüfe während des dezentralisierten Trainings jede gemeinsam genutzte Policy unabhängig durch Rollouts in randomisierten Umgebungen, bevor du sie aggregierst.
 
-## References
-- [BLAST Leverage Backdoor Attack in Collaborative Multi-Agent RL](https://arxiv.org/abs/2501.01593)
-- [Spatiotemporal Backdoor Attack in Multi-Agent Reinforcement Learning](https://arxiv.org/abs/2402.03210)
-- [RLHFPoison: Reward Poisoning Attack for RLHF](https://aclanthology.org/2024.acl-long.140/)
+## Referenzen
+- [1] [BLAST Leverage Backdoor Attack in Collaborative Multi-Agent RL](https://arxiv.org/abs/2501.01593)
+- [2] [Spatiotemporal Backdoor Attack in Multi-Agent Reinforcement Learning](https://arxiv.org/abs/2402.03210)
+- [3] [RLHFPoison: Reward Poisoning Attack for RLHF](https://aclanthology.org/2024.acl-long.140/)
 
 {{#include ../banners/hacktricks-training.md}}

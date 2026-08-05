@@ -1,8 +1,10 @@
+# Angr
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ein Teil dieses Cheatsheets basiert auf der [angr-Dokumentation](https://docs.angr.io/_/downloads/en/stable/pdf/).
+Ein Teil dieses Cheatsheets basiert auf der [angr-Dokumentation](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
 
-# Installation
+## Installation
 ```bash
 sudo apt-get install python3-dev libffi-dev build-essential
 python3 -m pip install --user virtualenv
@@ -10,7 +12,7 @@ python3 -m venv ang
 source ang/bin/activate
 pip install angr
 ```
-# Grundlegende Aktionen
+## Grundlegende Aktionen
 ```python
 import angr
 import monkeyhex # this will format numerical results in hexadecimal
@@ -28,9 +30,9 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-# Geladene und Hauptobjektinformationen
+## Informationen zu geladenen und Hauptobjekten
 
-## Geladene Daten
+### Geladene Daten
 ```python
 #LOADED DATA
 proj.loader #<Loaded true, maps [0x400000:0x5004000]>
@@ -53,7 +55,7 @@ proj.loader.all_elf_objects #Get all ELF objects loaded (Linux)
 proj.loader.all_pe_objects #Get all binaries loaded (Windows)
 proj.loader.find_object_containing(0x400000)#Get object loaded in an address "<ELF Object fauxware, maps [0x400000:0x60105f]>"
 ```
-## Hauptobjekt
+### Hauptobjekt
 ```python
 #Main Object (main binary loaded)
 obj = proj.loader.main_object #<ELF Object true, maps [0x400000:0x60721f]>
@@ -67,7 +69,7 @@ obj.find_section_containing(obj.entry) #Get section by address
 obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
-## Symbole und Relokationen
+### Symbole und Relokationen
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 
@@ -84,7 +86,7 @@ main_strcmp.is_export #False
 main_strcmp.is_import #True
 main_strcmp.resolvedby #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 ```
-## Blöcke
+### Blöcke
 ```python
 #Blocks
 block = proj.factory.block(proj.entry) #Get the block of the entrypoint fo the binary
@@ -92,9 +94,9 @@ block.pp() #Print disassembly of the block
 block.instructions #"0xb" Get number of instructions
 block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x401675, 0x401676, 0x401679, 0x40167d, 0x40167e, 0x40167f, 0x401686, 0x40168d, 0x401694]"
 ```
-# Dynamische Analyse
+## Dynamische Analyse
 
-## Simulationsmanager, Zustände
+### Simulation Manager, Zustände
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -117,13 +119,13 @@ simgr = proj.factory.simulation_manager(state) #Start
 simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
-## Funktionen aufrufen
+### Funktionen aufrufen
 
-- Sie können eine Liste von Argumenten über `args` und ein Wörterbuch von Umgebungsvariablen über `env` in `entry_state` und `full_init_state` übergeben. Die Werte in diesen Strukturen können Strings oder Bitvektoren sein und werden als die Argumente und die Umgebung für die simulierte Ausführung in den Zustand serialisiert. Der Standardwert für `args` ist eine leere Liste, also wenn das Programm, das Sie analysieren, erwartet, mindestens ein `argv[0]` zu finden, sollten Sie das immer bereitstellen!
-- Wenn Sie möchten, dass `argc` symbolisch ist, können Sie einen symbolischen Bitvektor als `argc` an die Konstruktoren von `entry_state` und `full_init_state` übergeben. Seien Sie jedoch vorsichtig: Wenn Sie dies tun, sollten Sie auch eine Einschränkung für den resultierenden Zustand hinzufügen, dass Ihr Wert für argc nicht größer sein kann als die Anzahl der Argumente, die Sie in `args` übergeben haben.
-- Um den Aufrufzustand zu verwenden, sollten Sie ihn mit `.call_state(addr, arg1, arg2, ...)` aufrufen, wobei `addr` die Adresse der Funktion ist, die Sie aufrufen möchten, und `argN` das N-te Argument für diese Funktion ist, entweder als Python-Integer, String oder Array oder als Bitvektor. Wenn Sie Speicher zuweisen und tatsächlich einen Zeiger auf ein Objekt übergeben möchten, sollten Sie es in einen PointerWrapper einwickeln, d.h. `angr.PointerWrapper("point to me!")`. Die Ergebnisse dieser API können etwas unvorhersehbar sein, aber wir arbeiten daran.
+- Du kannst eine Liste von Argumenten über `args` und ein Dictionary mit Umgebungsvariablen über `env` an `entry_state` und `full_init_state` übergeben. Die Werte in diesen Strukturen können Strings oder Bitvektoren sein und werden als Argumente und Umgebung der simulierten Ausführung in den Zustand serialisiert. Das Standard-`args` ist eine leere Liste. Wenn das von dir analysierte Programm also erwartet, mindestens ein `argv[0]` zu finden, solltest du dieses immer angeben!
+- Wenn `argc` symbolisch sein soll, kannst du einen symbolischen Bitvektor als `argc` an die Konstruktoren `entry_state` und `full_init_state` übergeben. Sei dabei jedoch vorsichtig: Wenn du dies tust, solltest du dem resultierenden Zustand außerdem eine Constraint hinzufügen, dass dein `argc`-Wert nicht größer als die Anzahl der an `args` übergebenen Argumente sein kann.
+- Um den Call State zu verwenden, solltest du ihn mit `.call_state(addr, arg1, arg2, ...)` aufrufen, wobei `addr` die Adresse der aufzurufenden Funktion und `argN` das N-te Argument dieser Funktion ist, entweder als Python-Integer, String oder Array oder als Bitvektor. Wenn du Speicher allokieren und tatsächlich einen Pointer auf ein Objekt übergeben möchtest, solltest du es in einen PointerWrapper einschließen, z. B. `angr.PointerWrapper("point to me!")`. Die Ergebnisse dieser API können etwas unvorhersehbar sein, aber wir arbeiten daran.
 
-## Bitvektoren
+### Bitvektoren
 ```python
 #BitVectors
 state = proj.factory.entry_state()
@@ -132,7 +134,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-## Symbolische Bitvektoren & Einschränkungen
+### Symbolische BitVectors & Constraints
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -166,7 +168,7 @@ solver.eval_exact(expression, n) #n solutions to the given expression, throwing 
 solver.min(expression) #minimum possible solution to the given expression.
 solver.max(expression) #maximum possible solution to the given expression.
 ```
-## Hooking
+### Hooking
 ```python
 >>> stub_func = angr.SIM_PROCEDURES['stubs']['ReturnUnconstrained'] # this is a CLASS
 >>> proj.hook(0x10000, stub_func())  # hook with an instance of the class
@@ -184,8 +186,12 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-Darüber hinaus können Sie `proj.hook_symbol(name, hook)` verwenden, wobei der Name eines Symbols als erstes Argument angegeben wird, um die Adresse zu hooken, an der sich das Symbol befindet.
+Außerdem kannst du `proj.hook_symbol(name, hook)` verwenden, wobei du den Namen eines Symbols als erstes Argument angibst, um die Adresse, an der sich das Symbol befindet, zu hooken<sup>[[1]](#references)</sup>
 
-# Beispiele
+## Beispiele
+
+## Referenzen
+
+- [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
 
 {{#include ../../../banners/hacktricks-training.md}}
