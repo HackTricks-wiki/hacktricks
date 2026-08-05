@@ -312,7 +312,7 @@ ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Libra
 ```
 
 #### Hunt: Cron/Anacron abuse via 0anacron and suspicious stubs
-Attackers often edit the 0anacron stub present under each /etc/cron.*/ directory to ensure periodic execution.
+Attackers often edit the 0anacron stub present under each /etc/cron.*/ directory to ensure periodic execution.<sup>[[5]](#references)</sup>
 
 ```bash
 # List 0anacron files and their timestamps/sizes
@@ -646,16 +646,15 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 
 ## References
 
-- [https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
-- [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
-- [https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
-- **Book: Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides**
-
-- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
-- [Forensic Analysis of Linux Journals](https://stuxnet999.github.io/dfir/linux-journal-forensics/)
-- [Red Hat Enterprise Linux 9 - Auditing the system](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/auditing-the-system_security-hardening)
-- [Say hi to Pike!](https://www.synacktiv.com/en/publications/say-hi-to-pike.html)
-- [strace](https://strace.io/)
-- [SQLite FTS5 Extension](https://www.sqlite.org/fts5.html)
+- [1] [Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides – Chapter 3](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
+- [2] [Linux Logs Explained](https://www.plesk.com/blog/featured/linux-logs-explained/)
+- [3] [git diff Documentation – --diff-filter option](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
+- [4] Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides
+- [5] [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [6] [Forensic Analysis of Linux Journals](https://stuxnet999.github.io/dfir/linux-journal-forensics/)
+- [7] [Red Hat Enterprise Linux 9 - Auditing the system](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/auditing-the-system_security-hardening)
+- [8] [Say hi to Pike!](https://www.synacktiv.com/en/publications/say-hi-to-pike.html)
+- [9] [strace](https://strace.io/)
+- [10] [SQLite FTS5 Extension](https://www.sqlite.org/fts5.html)
 
 {{#include ../../banners/hacktricks-training.md}}
