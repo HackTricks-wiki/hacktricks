@@ -1,13 +1,13 @@
-# Angr - 示例
+# Angr - Examples
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
-> 如果程序使用 `scanf` 从 stdin **一次获取多个值**，您需要生成一个在 **`scanf`** 之后开始的状态。
+> [!TIP]
+> 如果程序使用 `scanf` 从 **stdin 一次获取多个值**，你需要生成一个从 **`scanf`** 之后开始的 state。
 
-代码来自 [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+代码取自 [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### 输入以到达地址（指示地址）
+### 输入以到达地址（指示该地址）
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 输入以到达地址（指示打印）
+### 到达地址的输入（表示打印内容）
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -139,7 +139,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 堆栈值
+### 栈值
 ```python
 # Put bit vectors in th stack to find out the vallue that stack position need to
 # have to reach a rogram flow
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-在这个场景中，输入是通过 `scanf("%u %u")` 获取的，给定的值是 `"1 1"`，因此栈中的值 **`0x00000001`** 来自 **用户输入**。你可以看到这些值从 `$ebp - 8` 开始。因此，在代码中我们 **从 `$esp` 中减去了 8 字节（因为那时 `$ebp` 和 `$esp` 的值相同）**，然后我们推送了 BVS。
+在此场景中，输入通过 `scanf("%u %u")` 获取，并传入了值 `"1 1"`，因此栈中的 **`0x00000001`** 值来自**用户输入**。你可以看到这些值从 `$ebp - 8` 开始。因此，在代码中，我们对 `$esp` **减去了 8 字节**（因为此时 `$ebp` 和 `$esp` 的值相同），然后压入了 BVS。
 
-![](<../../../images/image (136).png>)
+![将 bit vectors 放入栈中，以找出栈位置需要达到的值，从而实现程序流程控制：在此场景中，输入通过 scanf("%u %u") 获取，并传入了值 "1...](<../../../images/image (136).png>)
 
 ### 静态内存值（全局变量）
 ```python
@@ -266,7 +266,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 动态内存值 (Malloc)
+### 动态内存值（Malloc）
 ```python
 import angr
 import claripy
@@ -380,34 +380,35 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-> [!NOTE]
-> 请注意，符号文件也可能包含与符号数据合并的常量数据：
+> [!TIP]
+> Note that the symbolic file could also contain constant data merged with symbolic data:
 >
 > ```python
->   # Hello world, my name is John.
->   # ^                       ^
->   # ^ 地址 0                ^ 地址 24 (计算字符数)
->   # 为了在内存中表示这一点，我们希望将字符串写入
->   # 文件的开头：
->   #
->   # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
->   #
->   # 然后，也许我们希望用一个
->   # 符号变量替换 John。我们会调用：
->   #
->   # name_bitvector = claripy.BVS('symbolic_name', 4*8)
->   #
->   # 然后，在程序调用 fopen('hello.txt', 'r') 并且
->   # fread(buffer, sizeof(char), 30, hello_txt_file) 之后，缓冲区将包含
->   # 文件中的字符串，除了四个符号字节，其中将存储名称。
->   # (!)
-> ```
+>  # Hello world, my name is John.
+>  # ^                       ^
+>  # ^ address 0             ^ address 24 (count the number of characters)
+>  # In order to represent this in memory, we would want to write the string to
+>  # the beginning of the file:
+>  #
+>  # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
+>  #
+>  # Perhaps, then, we would want to replace John with a
+>  # symbolic variable. We would call:
+>  #
+>  # name_bitvector = claripy.BVS('symbolic_name', 4*8)
+>  #
+>  # Then, after the program calls fopen('hello.txt', 'r') and then
+>  # fread(buffer, sizeof(char), 30, hello_txt_file), the buffer would contain
+>  # the string from the file, except four symbolic bytes where the name would be
+>  # stored.
+>  # (!)
+>  ```
 
 ### 应用约束
 
-> [!NOTE]
-> 有时，简单的人类操作，比如逐个字符比较两个长度为 16 的单词（循环），**对 angr 的成本**很高，因为它需要生成**指数级**的分支，因为它每个 if 生成 1 个分支：`2^16`\
-> 因此，**让 angr 回到之前的点**（真实的困难部分已经完成）并**手动设置这些约束**会更容易。
+> [!TIP]
+> 有时，简单的人类操作（例如将两个长度为 16 的单词 **逐字符**（循环）进行比较）对 **angr** 来说可能会消耗大量资源，因为它需要生成呈**指数级增长**的分支：每个 if 生成一个分支，即 `2^16`\
+> 因此，更简单的方法是让 **angr 返回到之前的某个位置**（此时真正困难的部分已经完成），然后**手动设置这些约束**。
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -479,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> 在某些情况下，您可以激活 **veritesting**，这将合并相似的状态，以节省无用的分支并找到解决方案： `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> 在某些场景中，你可以启用 **veritesting**，它会合并相似的状态，从而节省无用的分支并找到解：`simulation = project.factory.simgr(initial_state, veritesting=True)`
 
-> [!NOTE]
-> 在这些情况下，您还可以做的另一件事是 **hook 函数，给 angr 提供更容易理解的内容**。
+> [!TIP]
+> 在这些场景中，你还可以 **hook 该函数，为 angr 提供更容易理解的内容**。
 
 ### Simulation Managers
 
-一些模拟管理器可能比其他的更有用。在前面的例子中，存在一个问题，因为创建了很多有用的分支。在这里，**veritesting** 技术将合并这些分支并找到解决方案。\
-这个模拟管理器也可以通过以下方式激活： `simulation = project.factory.simgr(initial_state, veritesting=True)`
+某些 simulation manager 比其他的更有用。在前面的示例中存在一个问题：创建了大量有用的分支。在这里，**veritesting** 技术会合并这些分支并找到解。\
+此 simulation manager 也可以通过以下方式启用：`simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -525,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 钩子/绕过对一个函数的调用
+### Hooking/绕过对函数的一次调用
 ```python
 # This level performs the following computations:
 #
@@ -593,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 钩住一个函数 / Simprocedure
+### Hooking 函数 / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -806,4 +807,8 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
+## 参考资料
+
+- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+
 {{#include ../../../banners/hacktricks-training.md}}

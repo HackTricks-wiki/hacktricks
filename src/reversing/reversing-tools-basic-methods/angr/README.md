@@ -1,8 +1,10 @@
+# Angr
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-本备忘单的一部分基于 [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)。
+此 cheatsheet 的一部分基于 [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)。<sup>[[1]](#references)</sup>
 
-# 安装
+## 安装
 ```bash
 sudo apt-get install python3-dev libffi-dev build-essential
 python3 -m pip install --user virtualenv
@@ -10,7 +12,7 @@ python3 -m venv ang
 source ang/bin/activate
 pip install angr
 ```
-# 基本操作
+## 基本操作
 ```python
 import angr
 import monkeyhex # this will format numerical results in hexadecimal
@@ -28,9 +30,9 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-# 加载和主对象信息
+## 已加载对象和主对象信息
 
-## 加载的数据
+### 已加载数据
 ```python
 #LOADED DATA
 proj.loader #<Loaded true, maps [0x400000:0x5004000]>
@@ -53,7 +55,7 @@ proj.loader.all_elf_objects #Get all ELF objects loaded (Linux)
 proj.loader.all_pe_objects #Get all binaries loaded (Windows)
 proj.loader.find_object_containing(0x400000)#Get object loaded in an address "<ELF Object fauxware, maps [0x400000:0x60105f]>"
 ```
-## 主要目标
+### 主要对象
 ```python
 #Main Object (main binary loaded)
 obj = proj.loader.main_object #<ELF Object true, maps [0x400000:0x60721f]>
@@ -67,7 +69,7 @@ obj.find_section_containing(obj.entry) #Get section by address
 obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
-## 符号和重定位
+### 符号和重定位
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 
@@ -84,7 +86,7 @@ main_strcmp.is_export #False
 main_strcmp.is_import #True
 main_strcmp.resolvedby #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 ```
-## 块
+### 基本块
 ```python
 #Blocks
 block = proj.factory.block(proj.entry) #Get the block of the entrypoint fo the binary
@@ -92,9 +94,9 @@ block.pp() #Print disassembly of the block
 block.instructions #"0xb" Get number of instructions
 block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x401675, 0x401676, 0x401679, 0x40167d, 0x40167e, 0x40167f, 0x401686, 0x40168d, 0x401694]"
 ```
-# 动态分析
+## 动态分析
 
-## 模拟管理器，状态
+### Simulation Manager、状态
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -117,13 +119,13 @@ simgr = proj.factory.simulation_manager(state) #Start
 simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
-## 调用函数
+### 调用函数
 
-- 您可以通过 `args` 传递参数列表，通过 `env` 传递环境变量字典到 `entry_state` 和 `full_init_state`。这些结构中的值可以是字符串或位向量，并将被序列化为模拟执行的参数和环境。默认的 `args` 是一个空列表，因此如果您分析的程序期望找到至少一个 `argv[0]`，您应该始终提供它！
-- 如果您希望 `argc` 是符号的，可以将符号位向量作为 `argc` 传递给 `entry_state` 和 `full_init_state` 构造函数。不过要小心：如果您这样做，您还应该向结果状态添加一个约束，确保您的 argc 值不能大于您传递给 `args` 的参数数量。
-- 要使用调用状态，您应该使用 `.call_state(addr, arg1, arg2, ...)` 调用它，其中 `addr` 是您想要调用的函数的地址，`argN` 是该函数的第 N 个参数，可以是 Python 整数、字符串、数组或位向量。如果您想分配内存并实际传递一个对象的指针，您应该将其包装在 PointerWrapper 中，即 `angr.PointerWrapper("point to me!")`。此 API 的结果可能有些不可预测，但我们正在努力改进它。
+- You can 通过 `args` 传递参数列表，并通过 `env` 将环境变量字典传入 `entry_state` 和 `full_init_state`。这些结构中的值可以是字符串或 bitvectors，并会作为模拟执行的参数和环境序列化到 state 中。默认的 `args` 是空列表，因此如果你分析的程序至少需要找到 `argv[0]`，就应始终提供它！
+- 如果你希望 `argc` 是 symbolic，可以在 `entry_state` 和 `full_init_state` 构造函数中将 symbolic bitvector 作为 `argc` 传入。不过请注意：如果这样做，还应向生成的 state 添加约束，确保你的 argc 值不会大于传入 `args` 的参数数量。
+- 要使用 call state，应通过 `.call_state(addr, arg1, arg2, ...)` 调用它，其中 `addr` 是你要调用的函数地址，`argN` 是该函数的第 N 个参数，可以是 python 整数、字符串、数组或 bitvector。如果你希望分配内存并实际传入指向某个对象的指针，应将其包装在 PointerWrapper 中，即 `angr.PointerWrapper("point to me!")`。此 API 的结果可能有些不可预测，但我们正在持续改进。
 
-## 位向量
+### 位向量
 ```python
 #BitVectors
 state = proj.factory.entry_state()
@@ -132,7 +134,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-## 符号位向量与约束
+### 符号化 BitVectors 与约束
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -166,7 +168,7 @@ solver.eval_exact(expression, n) #n solutions to the given expression, throwing 
 solver.min(expression) #minimum possible solution to the given expression.
 solver.max(expression) #maximum possible solution to the given expression.
 ```
-## 钩子
+### Hooking
 ```python
 >>> stub_func = angr.SIM_PROCEDURES['stubs']['ReturnUnconstrained'] # this is a CLASS
 >>> proj.hook(0x10000, stub_func())  # hook with an instance of the class
@@ -184,8 +186,12 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-此外，您可以使用 `proj.hook_symbol(name, hook)`，将符号的名称作为第一个参数，以挂钩符号所在的地址。
+此外，你可以使用 `proj.hook_symbol(name, hook)`，将符号名称作为第一个参数，从而 hook 符号所在的地址<sup>[[1]](#references)</sup>
 
-# 示例
+## 示例
+
+## 参考资料
+
+- [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
 
 {{#include ../../../banners/hacktricks-training.md}}

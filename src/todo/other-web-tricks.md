@@ -1,37 +1,43 @@
-# 其他网络技巧
+# Other Web Tricks
 
 {{#include ../banners/hacktricks-training.md}}
 
-### 主机头
+### Host header
 
-几次后端信任 **Host header** 来执行某些操作。例如，它可能会使用其值作为 **发送密码重置的域**。因此，当您收到一封带有重置密码链接的电子邮件时，使用的域是您在 Host header 中输入的域。然后，您可以请求其他用户的密码重置，并将域更改为您控制的域，以窃取他们的密码重置代码。[WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)。
+有时后端会信任 **Host header** 来执行某些操作。例如，它可能会将其值用作**发送密码重置邮件的域名**。因此，当你收到一封包含密码重置链接的邮件时，其中使用的域名就是你在 Host header 中设置的域名。然后，你可以请求重置其他用户的密码，并将域名修改为由你控制的域名，以窃取他们的密码重置代码。[WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)。<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> 请注意，您甚至可能不需要等待用户点击重置密码链接来获取令牌，因为可能连 **垃圾邮件过滤器或其他中介设备/机器人都会点击它进行分析**。
+> 请注意，你甚至可能不需要等待用户点击密码重置链接即可获取 token，因为**spam filters 或其他中间设备/bots 可能会点击该链接来分析它**。
 
-### 会话布尔值
+### Session booleans
 
-有时，当您正确完成某些验证时，后端会 **仅将值为 "True" 的布尔值添加到您的会话的安全属性中**。然后，另一个端点将知道您是否成功通过了该检查。\
-然而，如果您 **通过了检查**，并且您的会话在安全属性中获得了 "True" 值，您可以尝试 **访问其他资源**，这些资源 **依赖于相同的属性**，但您 **不应该有权限** 访问。[WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)。
+有时，当你正确完成某项验证后，后端**只会向 session 的某个安全属性添加一个值为 "True" 的 boolean**。随后，另一个 endpoint 会通过该属性判断你是否成功通过了检查。\
+然而，如果你**通过了检查**，并且 session 的安全属性获得了 "True" 值，那么你可以尝试**访问其他依赖相同属性的资源**，即使你**本不应具有访问权限**。[WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)。<sup>[[2]](#references)</sup>
 
-### 注册功能
+### Register functionality
 
-尝试以已存在用户的身份注册。也尝试使用等效字符（点、多个空格和 Unicode）。
+尝试注册一个已经存在的用户。也可以尝试使用等价字符（点号、大量空格和 Unicode）。
 
-### 接管电子邮件
+### Takeover emails
 
-注册一个电子邮件，在确认之前更改电子邮件，然后，如果新的确认电子邮件发送到第一个注册的电子邮件，您可以接管任何电子邮件。或者，如果您可以启用第二个电子邮件以确认第一个电子邮件，您也可以接管任何账户。
+注册一个 email，在确认之前修改该 email；然后，如果新的确认邮件被发送到第一个注册的 email，你就可以 takeover 任意 email。或者，如果你可以通过确认第一个 email 来启用第二个 email，那么你也可以 takeover 任意 account。
 
-### 访问使用 atlassian 的公司内部服务台
+### Access Internal servicedesk of companies using atlassian
+
 
 {{#ref}}
 https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
 {{#endref}}
 
-### TRACE 方法
+### TRACE method
 
-开发人员可能会忘记在生产环境中禁用各种调试选项。例如，HTTP `TRACE` 方法是为诊断目的而设计的。如果启用，web 服务器将通过在响应中回显收到的确切请求来响应使用 `TRACE` 方法的请求。这种行为通常是无害的，但偶尔会导致信息泄露，例如可能由反向代理附加到请求的内部身份验证头的名称。![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+开发人员可能会忘记在 production environment 中禁用各种 debugging 选项。例如，HTTP `TRACE` method 是为诊断目的而设计的。如果启用，web server 会响应使用 `TRACE` method 的请求，并在响应中原样回显收到的完整请求。这种行为通常无害，但有时会导致信息泄露，例如暴露可能由 reverse proxies 附加到请求中的内部 authentication headers 名称。![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
+
+## References
+
+- [1] [How I was able to take over any user's account with Host Header injection](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)
+- [2] [A less known attack vector: Second order IDOR attacks](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)
 
 {{#include ../banners/hacktricks-training.md}}

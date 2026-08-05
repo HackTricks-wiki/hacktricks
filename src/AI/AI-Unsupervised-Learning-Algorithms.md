@@ -4,34 +4,35 @@
 
 ## 无监督学习
 
-无监督学习是一种机器学习类型，其中模型在没有标记响应的数据上进行训练。目标是发现数据中的模式、结构或关系。与监督学习不同，监督学习模型从标记示例中学习，无监督学习算法则处理未标记的数据。
-无监督学习通常用于聚类、降维和异常检测等任务。它可以帮助发现数据中的隐藏模式，将相似的项目分组，或在保留数据基本特征的同时减少数据的复杂性。
+无监督学习是一种机器学习类型，模型在没有带标签响应的数据上进行训练。其目标是在数据中发现模式、结构或关系。与模型从带标签示例中学习的监督学习不同，无监督学习算法处理的是无标签数据。
+无监督学习通常用于聚类、降维和异常检测等任务。它可以帮助发现数据中的隐藏模式，将相似项目归为一组，或在保留数据基本特征的同时降低数据复杂度。
 
-### K均值聚类
 
-K均值是一种基于质心的聚类算法，通过将每个点分配给最近的聚类均值，将数据划分为K个聚类。该算法的工作流程如下：
-1. **初始化**：选择K个初始聚类中心（质心），通常是随机选择或通过更智能的方法如k-means++。
-2. **分配**：根据距离度量（例如，欧几里得距离）将每个数据点分配给最近的质心。
-3. **更新**：通过取分配给每个聚类的所有数据点的均值重新计算质心。
-4. **重复**：重复步骤2-3，直到聚类分配稳定（质心不再显著移动）。
+### K-Means 聚类
+
+K-Means 是一种基于质心的聚类算法，通过将每个点分配给最近的聚类均值，将数据划分为 K 个聚类。该算法的工作流程如下：
+1. **初始化**：选择 K 个初始聚类中心（质心），通常通过随机方式或 k-means++ 等更智能的方法选择
+2. **分配**：根据距离度量（例如欧氏距离）将每个数据点分配给最近的质心。
+3. **更新**：计算分配给每个聚类的所有数据点的均值，以重新计算质心。
+4. **重复**：重复步骤 2–3，直到聚类分配趋于稳定（质心不再发生显著移动）。
 
 > [!TIP]
-> *在网络安全中的用例：* K均值用于通过聚类网络事件进行入侵检测。例如，研究人员将K均值应用于KDD Cup 99入侵数据集，发现它有效地将流量划分为正常与攻击聚类。在实践中，安全分析师可能会聚类日志条目或用户行为数据，以找到相似活动的组；任何不属于良好形成聚类的点可能表明异常（例如，一个新的恶意软件变种形成自己的小聚类）。K均值还可以通过根据行为特征或特征向量对二进制文件进行分组来帮助恶意软件家族分类。
+> *在网络安全中的用例：* K-Means 可通过对网络事件进行聚类来执行入侵检测。例如，研究人员将 K-Means 应用于 KDD Cup 99 入侵数据集，并发现它能够有效地将流量划分为正常流量和攻击流量聚类。在实际应用中，安全分析师可以对日志条目或用户行为数据进行聚类，以发现相似活动组成的群组；任何不属于结构良好聚类的点都可能表示异常（例如，一个新的 malware 变种形成自己的小型聚类）。K-Means 还可以通过根据行为配置文件或特征向量对二进制文件进行分组，帮助进行 malware 家族分类。
 
-#### K的选择
-聚类的数量（K）是一个超参数，需要在运行算法之前定义。像肘部法则或轮廓系数等技术可以通过评估聚类性能来帮助确定K的适当值：
+#### K 的选择
+聚类数量（K）是一个需要在运行算法之前定义的超参数。Elbow Method 或 Silhouette Score 等技术可以通过评估聚类性能来帮助确定合适的 K 值：
 
-- **肘部法则**：将每个点到其分配的聚类质心的平方距离总和绘制为K的函数。寻找“肘部”点，在该点处，减少的速率急剧变化，指示适合的聚类数量。
-- **轮廓系数**：计算不同K值的轮廓系数。较高的轮廓系数表示聚类定义更好。
+- **Elbow Method**：绘制每个点到其所属聚类质心的平方距离之和与 K 的关系图。寻找下降速率发生明显变化的“肘部”点，该点表示合适的聚类数量。
+- **Silhouette Score**：计算不同 K 值下的 silhouette score。更高的 silhouette score 表示定义更清晰的聚类。
 
-#### 假设和限制
+#### 假设和局限性
 
-K均值假设**聚类是球形且大小相等**，这可能不适用于所有数据集。它对质心的初始位置敏感，并可能收敛到局部最小值。此外，K均值不适合具有不同密度或非球形形状的数据集，以及具有不同尺度的特征。可能需要进行归一化或标准化等预处理步骤，以确保所有特征对距离计算的贡献相等。
+K-Means 假设 **聚类呈球形且大小相同**，但这一点并不适用于所有数据集。它对质心的初始位置较为敏感，并且可能收敛到局部最小值。此外，K-Means 不适用于密度不同或形状非球状的数据集，也不适用于具有不同尺度特征的数据集。可能需要执行归一化或标准化等预处理步骤，以确保所有特征对距离计算的贡献相同。
 
 <details>
 <summary>示例 -- 聚类网络事件
 </summary>
-下面我们模拟网络流量数据并使用K均值进行聚类。假设我们有连接持续时间和字节计数等特征的事件。我们创建3个“正常”流量的聚类和1个小聚类，代表攻击模式。然后我们运行K均值，看看它是否将它们分开。
+下面我们模拟网络流量数据，并使用 K-Means 对其进行聚类。假设我们有一些事件，其特征包括连接持续时间和字节数。我们创建 3 个代表“正常”流量的聚类，以及 1 个代表攻击模式的小型聚类。然后运行 K-Means，观察它是否能将这些聚类分离开来。
 ```python
 import numpy as np
 from sklearn.cluster import KMeans
@@ -57,32 +58,32 @@ print("Cluster centers (duration, bytes):")
 for idx, center in enumerate(kmeans.cluster_centers_):
 print(f"  Cluster {idx}: {center}")
 ```
-在这个例子中，K-Means 应该找到 4 个簇。小型攻击簇（持续时间异常高 ~200）理想情况下会形成自己的簇，因为它与正常簇的距离较远。我们打印簇的大小和中心以解释结果。在实际场景中，可以将少量点的簇标记为潜在异常，或检查其成员是否存在恶意活动。
+在此示例中，K-Means 应找到 4 个 clusters。小型 attack cluster（duration 异常高，约为 ~200）由于与 normal clusters 的距离较远，理想情况下会形成自己的 cluster。我们打印 cluster 的大小和中心，以便解读结果。在真实场景中，可以将仅包含少量点的 cluster 标记为潜在异常，或检查其成员是否存在恶意活动。
 </details>
 
-### 层次聚类
+### Hierarchical Clustering
 
-层次聚类使用自下而上的（聚合）方法或自上而下的（分裂）方法构建簇的层次结构：
+Hierarchical clustering 使用自底向上（agglomerative）或自顶向下（divisive）的方法构建 cluster 层次结构：
 
-1. **聚合（自下而上）**：从每个数据点作为单独的簇开始，迭代地合并最近的簇，直到只剩下一个簇或满足停止标准。
-2. **分裂（自上而下）**：从所有数据点在一个簇中开始，迭代地拆分簇，直到每个数据点成为自己的簇或满足停止标准。
+1. **Agglomerative (Bottom-Up)**：从每个数据点作为独立 cluster 开始，持续合并距离最近的 clusters，直到只剩一个 cluster，或满足停止条件。
+2. **Divisive (Top-Down)**：从所有数据点位于同一个 cluster 开始，持续拆分 clusters，直到每个数据点都成为自己的 cluster，或满足停止条件。
 
-聚合聚类需要定义簇间距离和链接标准，以决定合并哪些簇。常见的链接方法包括单链接（两个簇之间最近点的距离）、完全链接（最远点的距离）、平均链接等，距离度量通常是欧几里得距离。链接的选择会影响生成簇的形状。无需预先指定簇的数量 K；可以在所选级别“切割”树状图以获得所需数量的簇。
+Agglomerative clustering 需要定义 inter-cluster distance 和 linkage criterion，以决定要合并哪些 clusters。常见的 linkage 方法包括 single linkage（两个 clusters 之间最近点的距离）、complete linkage（最远点的距离）、average linkage 等，距离度量通常为 Euclidean。linkage 的选择会影响生成的 clusters 的形状。无需预先指定 clusters 的数量 K；可以在选定的层级“切割” dendrogram，以获得所需数量的 clusters。
 
-层次聚类生成一个树状图，显示不同粒度级别的簇之间的关系。可以在所需级别切割树状图以获得特定数量的簇。
+Hierarchical clustering 会生成 dendrogram，这是一种树状结构，用于展示不同粒度层级下 clusters 之间的关系。可以在所需层级切割 dendrogram，以获得特定数量的 clusters。
 
 > [!TIP]
-> *网络安全中的用例：* 层次聚类可以将事件或实体组织成树状结构，以发现关系。例如，在恶意软件分析中，聚合聚类可以根据行为相似性对样本进行分组，揭示恶意软件家族和变种的层次结构。在网络安全中，可以对 IP 流量进行聚类，并使用树状图查看流量的子分组（例如，按协议，然后按行为）。因为不需要提前选择 K，所以在探索未知攻击类别数量的新数据时非常有用。
+> *Use cases in cybersecurity:* Hierarchical clustering 可以将 events 或 entities 组织成树状结构，以发现其中的关系。例如，在 malware analysis 中，agglomerative clustering 可以根据行为相似性对 samples 进行分组，从而揭示 malware families 和 variants 的层次结构。在 network security 中，可以对 IP traffic flows 进行 clustering，并使用 dendrogram 查看 traffic 的子分组（例如先按 protocol，再按 behavior）。由于无需预先选择 K，因此在探索 attack categories 数量未知的新数据时非常有用。
 
-#### 假设和限制
+#### Assumptions and Limitations
 
-层次聚类不假设特定的簇形状，可以捕捉嵌套簇。它对于发现分类法或群体之间的关系（例如，根据家族子组对恶意软件进行分组）非常有用。它是确定性的（没有随机初始化问题）。一个关键优势是树状图，它提供了对数据聚类结构在所有尺度上的洞察——安全分析师可以决定适当的截止点以识别有意义的簇。然而，它在计算上是昂贵的（通常对于简单实现是 $O(n^2)$ 时间或更差），并且对于非常大的数据集不可行。它也是一种贪婪过程——一旦合并或拆分完成，就无法撤销，这可能导致如果早期发生错误而产生次优簇。离群值也可能影响某些链接策略（单链接可能导致“链式”效应，其中簇通过离群值链接）。
+Hierarchical clustering 不假设特定的 cluster 形状，并且能够捕获 nested clusters。它适合发现 groups 之间的 taxonomy 或 relations（例如按 family subgroups 对 malware 进行分组）。它具有确定性（不存在 random initialization 问题）。其主要优势是 dendrogram，它可以展示数据在所有尺度下的 clustering structure，security analysts 可以据此决定合适的 cutoff，以识别有意义的 clusters。不过，它的 computational cost 较高（朴素实现通常需要 $O(n^2)$ 时间或更差），不适用于非常大的 datasets。它也是一种 greedy procedure：一旦完成 merge 或 split，就无法撤销；如果早期发生错误，可能会导致 suboptimal clusters。Outliers 也会影响某些 linkage strategies（single-link 可能导致“chaining” effect，即 clusters 通过 outliers 相互连接）。
 
 <details>
-<summary>示例 -- 事件的聚合聚类
+<summary>Example -- Agglomerative Clustering of Events
 </summary>
 
-我们将重用 K-Means 示例中的合成数据（3 个正常簇 + 1 个攻击簇）并应用聚合聚类。然后我们将说明如何获得树状图和簇标签。
+我们将重复使用 K-Means 示例中的 synthetic data（3 个 normal clusters + 1 个 attack cluster），并应用 agglomerative clustering。随后，我们将演示如何获取 dendrogram 和 cluster labels。
 ```python
 from sklearn.cluster import AgglomerativeClustering
 from scipy.cluster.hierarchy import linkage, dendrogram
@@ -102,29 +103,29 @@ print(f"Cluster sizes for 3 clusters: {np.bincount(clusters_3)}")
 ```
 </details>
 
-### DBSCAN（基于密度的噪声应用空间聚类）
+### DBSCAN（基于密度的带噪声应用空间聚类）
 
-DBSCAN 是一种基于密度的聚类算法，它将紧密聚集在一起的点分为一组，同时将低密度区域的点标记为离群点。它特别适用于具有不同密度和非球形形状的数据集。
+DBSCAN 是一种基于密度的聚类算法，它将彼此紧密聚集的点归为一组，同时将低密度区域中的点标记为离群点。它尤其适用于具有不同密度和非球形形状的数据集。
 
 DBSCAN 通过定义两个参数来工作：
-- **Epsilon (ε)**：被视为同一聚类的一部分的两个点之间的最大距离。
-- **MinPts**：形成密集区域（核心点）所需的最小点数。
+- **Epsilon（ε）**：两个点被视为属于同一簇时允许的最大距离。
+- **MinPts**：形成密集区域（核心点）所需的最少点数。
 
-DBSCAN 识别核心点、边界点和噪声点：
-- **核心点**：在 ε 距离内至少有 MinPts 邻居的点。
-- **边界点**：在 ε 距离内靠近核心点但邻居少于 MinPts 的点。
-- **噪声点**：既不是核心点也不是边界点的点。
+DBSCAN 会识别核心点、边界点和噪声点：
+- **核心点**：在 ε 距离内至少有 MinPts 个邻居的点。
+- **边界点**：位于某个核心点的 ε 距离内，但邻居数少于 MinPts 的点。
+- **噪声点**：既不是核心点，也不是边界点的点。
 
-聚类通过选择一个未访问的核心点开始，将其标记为新聚类，然后递归地添加所有从其密度可达的点（核心点及其邻居等）。边界点被添加到附近核心的聚类中。在扩展所有可达点后，DBSCAN 移动到另一个未访问的核心以开始新的聚类。未被任何核心到达的点仍然标记为噪声。
+聚类过程从选择一个未访问的核心点开始，将其标记为一个新簇，然后递归地添加所有从该点密度可达的点（核心点及其邻居等）。边界点会被添加到附近核心点所属的簇中。在扩展完所有可达点后，DBSCAN 会移动到另一个未访问的核心点，以开始新的簇。任何未被核心点到达的点都会继续被标记为噪声。
 
 > [!TIP]
-> *在网络安全中的用例：* DBSCAN 对于网络流量中的异常检测非常有用。例如，正常用户活动可能在特征空间中形成一个或多个密集聚类，而新颖的攻击行为则表现为分散的点，DBSCAN 将其标记为噪声（离群点）。它已被用于聚类网络流量记录，可以检测到端口扫描或拒绝服务流量作为稀疏的点区域。另一个应用是对恶意软件变种进行分组：如果大多数样本按家族聚类，但少数样本不适合任何地方，这些少数样本可能是零日恶意软件。标记噪声的能力意味着安全团队可以专注于调查这些离群点。
+> *在 cybersecurity 中的使用场景：* DBSCAN 适用于网络流量中的 anomaly detection。例如，正常用户活动可能会在特征空间中形成一个或多个密集簇，而新出现的攻击行为可能表现为分散的点，并被 DBSCAN 标记为噪声（离群点）。它已被用于对网络流记录进行聚类，从而将 port scan 或 denial-of-service 流量检测为稀疏的点区域。另一个应用是对 malware 变种进行分组：如果大多数样本按照家族形成簇，但少数样本无法归入任何簇，那么这些样本可能是 zero-day malware。标记噪声的能力意味着 security teams 可以专注于调查这些离群点。
 
-#### 假设和限制
+#### 假设与限制
 
-**假设与优势：** DBSCAN 不假设球形聚类——它可以找到任意形状的聚类（甚至链状或相邻聚类）。它根据数据密度自动确定聚类的数量，并能有效地将离群点识别为噪声。这使得它在具有不规则形状和噪声的真实数据中非常强大。它对离群点具有鲁棒性（与强制将其纳入聚类的 K-Means 不同）。当聚类具有大致均匀的密度时，它表现良好。
+**假设与优势：**：DBSCAN 不假设簇是球形的——它可以发现任意形状的簇（甚至是链状簇或相邻簇）。它会根据数据密度自动确定簇的数量，并能有效地将离群点识别为噪声。这使其非常适合具有不规则形状和噪声的现实数据。它对离群点具有较强的鲁棒性（不同于会强制将离群点归入某个簇的 K-Means）。当簇具有大致均匀的密度时，它的效果良好。
 
-**限制：** DBSCAN 的性能依赖于选择合适的 ε 和 MinPts 值。它可能在具有不同密度的数据上表现不佳——单一的 ε 无法同时适应密集和稀疏的聚类。如果 ε 太小，它会将大多数点标记为噪声；如果太大，聚类可能会错误合并。此外，DBSCAN 在非常大的数据集上可能效率低下（天真地为 $O(n^2)$，尽管空间索引可以有所帮助）。在高维特征空间中，“在 ε 内的距离”概念可能变得不那么有意义（维度诅咒），DBSCAN 可能需要仔细的参数调整，或者可能无法找到直观的聚类。尽管如此，像 HDBSCAN 这样的扩展解决了一些问题（如不同密度）。
+**限制**：DBSCAN 的性能取决于是否选择了合适的 ε 和 MinPts 值。对于密度不同的数据，它可能难以正常工作——单个 ε 无法同时适应密集簇和稀疏簇。如果 ε 太小，它会将大多数点标记为噪声；如果 ε 太大，则簇可能会被错误地合并。此外，DBSCAN 在非常大的数据集上可能效率较低（朴素实现的复杂度为 $O(n^2)$，但空间索引可以提供帮助）。在高维特征空间中，“ε 内的距离”这一概念可能变得不再有意义（维度灾难），因此 DBSCAN 可能需要仔细调整参数，或者无法找到符合直觉的簇。尽管如此，HDBSCAN 等扩展算法解决了其中的一些问题（例如密度变化问题）。
 
 <details>
 <summary>示例 -- 带噪声的聚类
@@ -150,61 +151,61 @@ num_noise = np.sum(labels == -1)
 print(f"DBSCAN found {num_clusters} clusters and {num_noise} noise points")
 print("Cluster labels for first 10 points:", labels[:10])
 ```
-在这个片段中，我们调整了 `eps` 和 `min_samples` 以适应我们的数据规模（特征单位为 15.0，并且需要 5 个点来形成一个簇）。DBSCAN 应该找到 2 个簇（正常流量簇）并将 5 个注入的异常值标记为噪声。我们输出簇的数量与噪声点的数量以验证这一点。在实际设置中，可以对 ε 进行迭代（使用 k-距离图启发式选择 ε）和 MinPts（通常设置为数据维度 + 1 作为经验法则）以找到稳定的聚类结果。明确标记噪声的能力有助于分离潜在的攻击数据以进行进一步分析。
+在此代码片段中，我们调整了 `eps` 和 `min_samples`，使其适应数据的尺度（特征单位中的 15.0，并要求 5 个点才能形成一个 cluster）。DBSCAN 应该能够找到 2 个 cluster（正常流量 cluster），并将注入的 5 个 outlier 标记为 noise。我们输出 cluster 数量与 noise 点数量，以验证这一点。在实际环境中，可以遍历不同的 ε（使用 k-distance graph heuristic 选择 ε）和 MinPts（通常根据经验设置为接近数据维度 + 1），以找到稳定的 clustering 结果。显式标记 noise 的能力有助于将潜在的攻击数据分离出来，以便进一步分析。
 
 </details>
 
-### 主成分分析 (PCA)
+### Principal Component Analysis (PCA)
 
-PCA 是一种 **降维** 技术，它找到一组新的正交轴（主成分），捕捉数据中的最大方差。简单来说，PCA 将数据旋转并投影到一个新的坐标系中，使得第一个主成分 (PC1) 解释最大的方差，第二个主成分 (PC2) 解释与 PC1 正交的最大方差，依此类推。从数学上讲，PCA 计算数据协方差矩阵的特征向量——这些特征向量是主成分方向，相应的特征值表示每个主成分解释的方差量。它通常用于特征提取、可视化和噪声减少。
+PCA 是一种**降维**技术，用于寻找一组新的正交轴（principal components），以捕获数据中的最大 variance。简单来说，PCA 会将数据旋转并投影到一个新的坐标系中，使第一主成分（PC1）解释尽可能大的 variance，第二主成分（PC2）解释与 PC1 正交方向上的最大 variance，依此类推。从数学角度看，PCA 会计算数据 covariance matrix 的 eigenvectors——这些 eigenvectors 就是 principal component 的方向，而对应的 eigenvalues 表示每个 component 所解释的 variance 数量。PCA 常用于 feature extraction、可视化和 noise reduction。
 
-请注意，如果数据集维度包含 **显著的线性依赖或相关性**，这将是有用的。
+需要注意的是，如果数据集的维度包含**显著的线性依赖或相关性**，PCA 会非常有用。
 
-PCA 通过识别数据的主成分来工作，这些主成分是最大方差的方向。PCA 涉及的步骤包括：
-1. **标准化**：通过减去均值并将其缩放到单位方差来中心化数据。
-2. **协方差矩阵**：计算标准化数据的协方差矩阵，以了解特征之间的关系。
-3. **特征值分解**：对协方差矩阵进行特征值分解，以获得特征值和特征向量。
-4. **选择主成分**：按降序排列特征值，并选择与最大特征值对应的前 K 个特征向量。这些特征向量形成新的特征空间。
-5. **转换数据**：使用选定的主成分将原始数据投影到新的特征空间。
-PCA 广泛用于数据可视化、噪声减少以及作为其他机器学习算法的预处理步骤。它有助于在保留数据基本结构的同时减少数据的维度。
+PCA 通过识别数据的 principal components 来工作，这些 components 就是 variance 最大的方向。PCA 涉及以下步骤：
+1. **Standardization**：通过减去均值并缩放到单位 variance，对数据进行中心化。
+2. **Covariance Matrix**：计算 standardized data 的 covariance matrix，以了解 features 之间的关系。
+3. **Eigenvalue Decomposition**：对 covariance matrix 执行 eigenvalue decomposition，以获得 eigenvalues 和 eigenvectors。
+4. **Select Principal Components**：按降序排列 eigenvalues，并选择与最大 eigenvalues 对应的前 K 个 eigenvectors。这些 eigenvectors 构成新的 feature space。
+5. **Transform Data**：使用选定的 principal components，将原始数据投影到新的 feature space 中。
+PCA 广泛用于数据可视化、noise reduction，以及作为其他 machine learning algorithms 的预处理步骤。它能够在保留数据基本结构的同时，降低数据的维度。
 
-#### 特征值和特征向量
+#### Eigenvalues and Eigenvectors
 
-特征值是一个标量，表示其对应特征向量捕获的方差量。特征向量表示特征空间中数据变化最大的方向。
+eigenvalue 是一个 scalar，用于表示其对应 eigenvector 所捕获的 variance 数量。eigenvector 表示 feature space 中数据变化最大的方向。
 
-假设 A 是一个方阵，v 是一个非零向量，使得： `A * v = λ * v`
+假设 A 是一个 square matrix，v 是一个非零 vector，并且满足：`A * v = λ * v`
 其中：
-- A 是一个方阵，如 [ [1, 2], [2, 1]]（例如，协方差矩阵）
-- v 是一个特征向量（例如，[1, 1]）
+- A 是一个 square matrix，例如 [ [1, 2], [2, 1]]（例如 covariance matrix）
+- v 是一个 eigenvector（例如 [1, 1]）
 
-那么，`A * v = [ [1, 2], [2, 1]] * [1, 1] = [3, 3]`，这将是特征值 λ 乘以特征向量 v，使得特征值 λ = 3。
+那么，`A * v = [ [1, 2], [2, 1]] * [1, 1] = [3, 3]`，其结果等于 eigenvalue λ 与 eigenvector v 的乘积，因此 eigenvalue λ = 3。
 
-#### PCA 中的特征值和特征向量
+#### Eigenvalues and Eigenvectors in PCA
 
-让我们用一个例子来解释这一点。假设你有一个包含大量 100x100 像素灰度图像的数据集。每个像素可以视为一个特征，因此每张图像有 10,000 个特征（或每张图像有 10,000 个分量的向量）。如果你想使用 PCA 降低这个数据集的维度，你将遵循以下步骤：
+让我们通过一个示例来解释这一点。假设你有一个包含大量 100x100 像素灰度人脸图片的数据集。每个像素都可以视为一个 feature，因此每张图片有 10,000 个 features（或者说，每张图片是一个包含 10000 个 components 的 vector）。如果你想使用 PCA 降低该数据集的维度，可以按以下步骤操作：
 
-1. **标准化**：通过从数据集中减去每个特征（像素）的均值来中心化数据。
-2. **协方差矩阵**：计算标准化数据的协方差矩阵，捕捉特征（像素）如何共同变化。
-- 请注意，两个变量（在这种情况下是像素）之间的协方差表示它们共同变化的程度，因此这里的想法是找出哪些像素倾向于以线性关系一起增加或减少。
-- 例如，如果像素 1 和像素 2 倾向于一起增加，它们之间的协方差将是正的。
-- 协方差矩阵将是一个 10,000x10,000 的矩阵，其中每个条目表示两个像素之间的协方差。
-3. **求解特征值方程**：要解决的特征值方程是 `C * v = λ * v`，其中 C 是协方差矩阵，v 是特征向量，λ 是特征值。可以使用以下方法解决：
-- **特征值分解**：对协方差矩阵进行特征值分解，以获得特征值和特征向量。
-- **奇异值分解 (SVD)**：或者，你可以使用 SVD 将数据矩阵分解为奇异值和向量，这也可以得到主成分。
-4. **选择主成分**：按降序排列特征值，并选择与最大特征值对应的前 K 个特征向量。这些特征向量表示数据中最大方差的方向。
+1. **Standardization**：从数据集中减去每个 feature（像素）的均值，对数据进行中心化。
+2. **Covariance Matrix**：计算 standardized data 的 covariance matrix，该矩阵用于捕获 features（像素）如何共同变化。
+- 注意，两个变量（在此处即像素）之间的 covariance 表示它们共同变化的程度，因此这里的目标是找出哪些像素倾向于按照线性关系共同增加或减少。
+- 例如，如果 pixel 1 和 pixel 2 倾向于同时增加，那么它们之间的 covariance 将为正。
+- covariance matrix 将是一个 10,000x10,000 的 matrix，其中每个条目表示两个像素之间的 covariance。
+3. **Solve The eigenvalue equation**：需要求解的 eigenvalue equation 是 `C * v = λ * v`，其中 C 是 covariance matrix，v 是 eigenvector，λ 是 eigenvalue。可以使用以下方法求解：
+- **Eigenvalue Decomposition**：对 covariance matrix 执行 eigenvalue decomposition，以获得 eigenvalues 和 eigenvectors。
+- **Singular Value Decomposition (SVD)**：也可以使用 SVD 将 data matrix 分解为 singular values 和 vectors，这同样能够得到 principal components。
+4. **Select Principal Components**：按降序排列 eigenvalues，并选择与最大 eigenvalues 对应的前 K 个 eigenvectors。这些 eigenvectors 表示数据中 variance 最大的方向。
 
 > [!TIP]
-> *在网络安全中的用例：* PCA 在安全中的一个常见用途是异常检测的特征减少。例如，一个具有 40 多个网络指标（如 NSL-KDD 特征）的入侵检测系统可以使用 PCA 将其减少到少数几个组件，以总结数据以进行可视化或输入聚类算法。分析师可能会在前两个主成分的空间中绘制网络流量，以查看攻击是否与正常流量分开。PCA 还可以帮助消除冗余特征（例如，如果它们相关，则发送的字节与接收的字节）以使检测算法更强大和更快。
+> *Use cases in cybersecurity:* PCA 在 security 中的一个常见用途是用于 anomaly detection 的 feature reduction。例如，一个包含 40 多个 network metrics（如 NSL-KDD features）的 intrusion detection system，可以使用 PCA 将其降至少量 components，从而对数据进行汇总，以便可视化或输入 clustering algorithms。分析人员可以在前两个 principal components 构成的空间中绘制 network traffic，以观察攻击是否与正常流量分离。PCA 还可以帮助消除冗余 features（例如，在 bytes sent 与 bytes received 相关时），从而使 detection algorithms 更加 robust 且速度更快。
 
-#### 假设和限制
+#### Assumptions and Limitations
 
-PCA 假设 **主轴的方差是有意义的**——这是一种线性方法，因此它捕捉数据中的线性相关性。它是无监督的，因为它仅使用特征协方差。PCA 的优点包括噪声减少（小方差组件通常对应于噪声）和特征的去相关性。对于中等高维度，它在计算上是高效的，并且通常是其他算法的有用预处理步骤（以减轻维度诅咒）。一个限制是 PCA 限制于线性关系——它不会捕捉复杂的非线性结构（而自编码器或 t-SNE 可能会）。此外，PCA 组件在原始特征方面可能难以解释（它们是原始特征的组合）。在网络安全中，必须谨慎：仅在低方差特征中造成微小变化的攻击可能不会出现在前几个主成分中（因为 PCA 优先考虑方差，而不一定是“有趣性”）。
+PCA 假设**variance 的 principal axes 具有实际意义**——它是一种线性方法，因此能够捕获数据中的线性相关性。PCA 是 unsupervised 的，因为它只使用 feature covariance。PCA 的优势包括 noise reduction（低 variance components 通常对应 noise）以及对 features 进行 decorrelation。对于中等高维度的数据，PCA 的 computational efficiency 较高，并且通常可以作为其他 algorithms 的有用预处理步骤（用于缓解 curse of dimensionality）。PCA 的一个 limitation 是它仅限于线性关系——它无法捕获复杂的 nonlinear structure（而 autoencoders 或 t-SNE 可能可以捕获）。此外，PCA components 很难根据原始 features 进行解释（因为它们是原始 features 的组合）。在 cybersecurity 中必须谨慎：如果某个攻击只导致 low-variance feature 发生细微变化，那么它可能不会出现在 top PCs 中（因为 PCA 优先考虑 variance，而不一定是“interestingness”）。
 
 <details>
-<summary>示例 -- 降低网络数据的维度
+<summary>Example -- Reducing Dimensions of Network Data
 </summary>
 
-假设我们有多个特征的网络连接日志（例如，持续时间、字节、计数）。我们将生成一个合成的 4 维数据集（特征之间有一些相关性），并使用 PCA 将其降至 2 维以进行可视化或进一步分析。
+假设我们有包含多个 features（例如 durations、bytes、counts）的 network connection logs。我们将生成一个 synthetic 4-dimensional dataset（其中部分 features 之间存在 correlation），并使用 PCA 将其降至 2 个维度，以便进行可视化或进一步分析。
 ```python
 from sklearn.decomposition import PCA
 
@@ -224,46 +225,48 @@ print("Original shape:", data_4d.shape, "Reduced shape:", data_2d.shape)
 # We can examine a few transformed points
 print("First 5 data points in PCA space:\n", data_2d[:5])
 ```
-在这里，我们将早期的正常流量聚类扩展了每个数据点，增加了两个额外的特征（数据包和错误），这些特征与字节和持续时间相关。然后使用PCA将4个特征压缩为2个主成分。我们打印解释的方差比率，这可能显示，例如，>95%的方差由2个成分捕获（意味着信息损失很小）。输出还显示数据形状从(1500, 4)减少到(1500, 2)。PCA空间中的前几个点作为示例给出。在实践中，可以绘制data_2d以直观检查聚类是否可区分。如果存在异常，可能会看到它作为一个位于PCA空间主聚类之外的点。因此，PCA有助于将复杂数据提炼成可供人类解释或作为其他算法输入的可管理形式。
+这里，我们对之前的正常流量聚类进行了扩展，为每个数据点增加了两个与字节数和持续时间相关的特征（数据包和错误）。随后使用 PCA 将这 4 个特征压缩为 2 个主成分。我们输出了解释方差比率，该比率可能显示，例如，超过 95% 的方差由 2 个主成分捕获（意味着信息损失很小）。输出还显示数据形状从 (1500, 4) 缩减为 (1500, 2)。其中给出了 PCA 空间中前几个点作为示例。在实际应用中，可以绘制 data_2d，以直观检查各个簇是否具有可区分性。如果存在异常，可能会看到某个点偏离 PCA 空间中的主簇。这样，PCA 就能帮助将复杂数据提炼为便于人类解释的形式，或作为其他算法的输入。
 
 </details>
 
-### 高斯混合模型 (GMM)
 
-高斯混合模型假设数据是由**几个具有未知参数的高斯（正态）分布的混合生成的**。本质上，它是一种概率聚类模型：它试图将每个点软性地分配给K个高斯成分之一。每个高斯成分k都有一个均值向量（μ_k）、协方差矩阵（Σ_k）和一个混合权重（π_k），表示该聚类的普遍性。与K-Means进行“硬”分配不同，GMM为每个点提供属于每个聚类的概率。
+### Gaussian Mixture Models (GMM)
 
-GMM拟合通常通过期望最大化（EM）算法完成：
+Gaussian Mixture Model 假设数据由**多个参数未知的 Gaussian（正态）分布混合生成**。本质上，它是一种概率聚类模型：尝试将每个点以软分配的方式分配给 K 个 Gaussian component 中的一个。每个 Gaussian component k 都具有一个均值向量（μ_k）、协方差矩阵（Σ_k）和混合权重（π_k），后者表示该 cluster 的普遍程度。与执行“硬”分配的 K-Means 不同，GMM 会为每个点计算其属于每个 cluster 的概率。
 
-- **初始化**：从均值、协方差和混合系数的初始猜测开始（或使用K-Means结果作为起点）。
+GMM 通常通过 Expectation-Maximization (EM) algorithm 进行拟合：
 
-- **E步（期望）**：给定当前参数，计算每个聚类对每个点的责任：本质上是`r_nk = P(z_k | x_n)`，其中z_k是指示点x_n聚类归属的潜在变量。这是使用贝叶斯定理完成的，我们根据当前参数计算每个点属于每个聚类的后验概率。责任的计算如下：
+- **Initialization**：使用均值、协方差和混合系数的初始猜测值开始（也可以使用 K-Means 结果作为起点）。
+
+- **E-step (Expectation)**：给定当前参数，计算每个 cluster 对每个点的责任度：本质上是 `r_nk = P(z_k | x_n)`，其中 z_k 是表示点 x_n 所属 cluster 的 latent variable。该过程使用 Bayes' theorem，根据当前参数计算每个点属于每个 cluster 的 posterior probability。责任度计算如下：
 ```math
 r_{nk} = \frac{\pi_k \mathcal{N}(x_n | \mu_k, \Sigma_k)}{\sum_{j=1}^{K} \pi_j \mathcal{N}(x_n | \mu_j, \Sigma_j)}
 ```
 其中：
-- \( \pi_k \) 是聚类k的混合系数（聚类k的先验概率），
-- \( \mathcal{N}(x_n | \mu_k, \Sigma_k) \) 是给定均值\( \mu_k \)和协方差\( \Sigma_k \)的点\( x_n \)的高斯概率密度函数。
+- \( \pi_k \) 是 cluster k 的 mixing coefficient（cluster k 的 prior probability），
+- \( \mathcal{N}(x_n | \mu_k, \Sigma_k) \) 是给定均值 \( \mu_k \) 和协方差 \( \Sigma_k \) 时点 \( x_n \) 的 Gaussian probability density function。
 
-- **M步（最大化）**：使用E步中计算的责任更新参数：
-- 将每个均值μ_k更新为点的加权平均，其中权重为责任。
-- 将每个协方差Σ_k更新为分配给聚类k的点的加权协方差。
-- 将混合系数π_k更新为聚类k的平均责任。
+- **M-step (Maximization)**：使用 E-step 中计算出的责任度更新参数：
+- 将每个均值 μ_k 更新为各点的加权平均值，其中权重就是责任度。
+- 将每个协方差 Σ_k 更新为分配给 cluster k 的各点的加权协方差。
+- 将混合系数 π_k 更新为 cluster k 的平均责任度。
 
-- **迭代**E和M步骤，直到收敛（参数稳定或似然改进低于阈值）。
+- **Iterate** E 和 M steps，直到收敛（参数稳定，或 likelihood 的改善低于某个阈值）。
 
-结果是一组高斯分布，共同建模整体数据分布。我们可以使用拟合的GMM通过将每个点分配给具有最高概率的高斯来进行聚类，或者保留概率以表示不确定性。还可以评估新点的似然性，以查看它们是否适合模型（对异常检测有用）。
+最终结果是一组共同建模整体数据分布的 Gaussian distributions。我们可以使用拟合后的 GMM，通过将每个点分配给概率最高的 Gaussian 来进行聚类，也可以保留这些概率以表示不确定性。还可以评估新点的 likelihood，以判断它们是否符合该模型（这对 anomaly detection 很有用）。
 
 > [!TIP]
-> *网络安全中的用例：* GMM可以通过建模正常数据的分布来用于异常检测：在学习的混合下，任何概率非常低的点都被标记为异常。例如，您可以在合法网络流量特征上训练GMM；一个与任何学习的聚类不相似的攻击连接将具有低似然性。GMM还用于聚类活动，其中聚类可能具有不同的形状——例如，通过行为特征对用户进行分组，其中每个特征可能类似于高斯，但具有自己的方差结构。另一个场景：在网络钓鱼检测中，合法电子邮件特征可能形成一个高斯聚类，已知的网络钓鱼形成另一个，而新的网络钓鱼活动可能显示为单独的高斯或相对于现有混合的低似然点。
+> *Use cases in cybersecurity:* GMM 可通过建模正常数据的分布来执行 anomaly detection：在学习到的 mixture 下概率极低的点会被标记为 anomaly。例如，可以在合法 network traffic features 上训练 GMM；一个与任何已学习 cluster 都不相似的攻击连接将具有较低的 likelihood。GMM 还可用于对形状可能不同的活动进行聚类——例如，根据 behavior profiles 对用户进行分组，其中每个 profile 的 features 可能类似 Gaussian，但具有各自的 variance structure。另一个场景是 phishing detection：合法 email features 可能形成一个 Gaussian cluster，已知 phishing 形成另一个 Gaussian cluster，而新的 phishing campaigns 可能表现为独立的 Gaussian，或者相对于现有 mixture 表现为低 likelihood 的点。
 
-#### 假设和限制
+#### Assumptions and Limitations
 
-GMM是K-Means的推广，结合了协方差，因此聚类可以是椭球形的（不仅仅是球形）。如果协方差是完整的，它可以处理不同大小和形状的聚类。当聚类边界模糊时，软聚类是一个优势——例如，在网络安全中，一个事件可能具有多种攻击类型的特征；GMM可以通过概率反映这种不确定性。GMM还提供了数据的概率密度估计，有助于检测离群值（在所有混合成分下似然性低的点）。
+GMM 是 K-Means 的一种 generalization，它引入了 covariance，因此 cluster 可以呈椭圆形（而不仅是球形）。如果 covariance 使用 full 形式，它可以处理大小和形状不同的 cluster。当 cluster 边界模糊时，soft clustering 是一种优势——例如在 cybersecurity 中，某个 event 可能具有多种 attack types 的特征；GMM 可以通过 probabilities 表达这种不确定性。GMM 还提供对数据的 probabilistic density estimation，这对于检测 outliers（在所有 mixture components 下 likelihood 都较低的点）很有用。
 
-缺点是，GMM需要指定成分数量K（尽管可以使用BIC/AIC等标准来选择）。EM有时可能收敛缓慢或达到局部最优，因此初始化很重要（通常多次运行EM）。如果数据实际上不遵循高斯混合，模型可能不适合。还有一个风险是一个高斯收缩到仅覆盖一个离群值（尽管正则化或最小协方差界限可以缓解这一点）。
+其缺点是，GMM 需要指定 components 的数量 K（不过可以使用 BIC/AIC 等 criteria 进行选择）。EM 有时会收敛缓慢，或收敛到 local optimum，因此 initialization 很重要（通常会多次运行 EM）。如果数据实际上并不遵循 Gaussian mixture，模型可能拟合效果较差。此外，还存在某个 Gaussian 收缩到仅覆盖一个 outlier 的风险（不过 regularization 或 minimum covariance bounds 可以缓解这一问题）。
+
 
 <details>
-<summary>示例 -- 软聚类与异常分数
+<summary>Example --  Soft Clustering & Anomaly Scores
 </summary>
 ```python
 from sklearn.mixture import GaussianMixture
@@ -283,28 +286,29 @@ log_likelihood = gmm.score_samples(sample_attack)
 print("Cluster membership probabilities for sample attack:", probs)
 print("Log-likelihood of sample attack under GMM:", log_likelihood)
 ```
-在这段代码中，我们使用3个高斯分布训练一个GMM，针对正常流量（假设我们知道3个合法流量的特征）。打印的均值和协方差描述了这些聚类（例如，一个均值可能在[50,500]附近，对应于一个聚类的中心，等等）。然后我们测试一个可疑连接[duration=200, bytes=800]。predict_proba给出了该点属于这3个聚类的概率——我们预计这些概率会非常低或高度偏斜，因为[200,800]远离正常聚类。打印了整体的score_samples（对数似然）；一个非常低的值表明该点与模型不匹配，将其标记为异常。在实践中，可以在对数似然（或最大概率）上设置阈值，以决定一个点是否足够不可能被视为恶意。因此，GMM提供了一种原则性的方法来进行异常检测，并且还产生了承认不确定性的软聚类。
+在这段代码中，我们使用正常流量训练一个包含 3 个 Gaussian 的 GMM（假设我们已知 3 种合法流量 profile）。打印出的均值和协方差描述了这些 clusters（例如，某个均值可能接近 [50,500]，对应某个 cluster 的中心等）。随后，我们测试一个可疑连接 [duration=200, bytes=800]。predict_proba 给出该点属于 3 个 clusters 中每个 cluster 的概率——由于 [200,800] 远离正常 clusters，我们预计这些概率会非常低或高度偏斜。随后会打印整体 score_samples（log-likelihood）；非常低的值表示该点与模型的匹配程度很差，因此会被标记为 anomaly。在实践中，可以对 log-likelihood（或 max probability）设置 threshold，以判断某个点是否足够不可能，从而将其视为 malicious。GMM 因此提供了一种有理论依据的 anomaly detection 方法，同时还能生成能够体现不确定性的 soft clusters。
+</details>
 
-### 隔离森林
+### Isolation Forest
 
-**隔离森林**是一种基于随机隔离点思想的集成异常检测算法。其原理是异常点数量少且不同，因此比正常点更容易被隔离。隔离森林构建许多二叉隔离树（随机决策树），随机划分数据。在树的每个节点，选择一个随机特征，并在该特征的最小值和最大值之间选择一个随机分割值。这个分割将数据分为两个分支。树的生长直到每个点被隔离在自己的叶子中，或者达到最大树高。
+**Isolation Forest** 是一种基于随机隔离 points 思想的 ensemble anomaly detection algorithm。其原理是：anomalies 数量少且与众不同，因此比正常 points 更容易被隔离。Isolation Forest 会构建许多 binary isolation trees（random decision trees），以随机方式对数据进行 partition。在 tree 的每个 node 中，都会选择一个 random feature，并在该 node 中数据对应 feature 的 min 和 max 之间选择一个 random split value。该 split 会将数据分为两个 branches。Tree 会持续生长，直到每个 point 都被隔离到自己的 leaf 中，或达到 tree 的最大高度。
 
-通过观察这些随机树中每个点的路径长度来执行异常检测——隔离该点所需的分割次数。直观上，异常（离群点）往往更快被隔离，因为随机分割更可能将离群点（位于稀疏区域）与正常点（位于密集聚类中）分开。隔离森林从所有树的平均路径长度计算异常分数：平均路径越短→越异常。分数通常归一化到[0,1]，其中1表示非常可能是异常。
+Anomaly detection 通过观察每个 point 在这些 random trees 中的 path length 来执行——即隔离该 point 所需的 splits 数量。直观来说，anomalies（outliers）往往能更快被隔离，因为对于位于稀疏区域中的 outlier，random split 更可能将其分离；而对于位于 dense cluster 中的正常 point，情况则不同。Isolation Forest 根据所有 trees 的平均 path length 计算 anomaly score：平均路径越短 → 越可能是 anomaly。Scores 通常会被归一化到 [0,1]，其中 1 表示极有可能是 anomaly。
 
 > [!TIP]
-> *网络安全中的用例：* 隔离森林已成功用于入侵检测和欺诈检测。例如，在主要包含正常行为的网络流量日志上训练一个隔离森林；该森林将为奇怪的流量（如使用不常见端口的IP或不寻常的数据包大小模式）生成短路径，标记其进行检查。因为它不需要标记攻击，所以适合检测未知攻击类型。它还可以部署在用户登录数据上，以检测账户接管（异常的登录时间或地点会迅速被隔离）。在一个用例中，隔离森林可能通过监控系统指标并在一组指标（CPU、网络、文件更改）与历史模式看起来非常不同（短隔离路径）时生成警报，从而保护企业。
+> *Use cases in cybersecurity:* Isolation Forest 已成功用于 intrusion detection 和 fraud detection。例如，在主要包含正常行为的 network traffic logs 上训练 Isolation Forest；对于异常流量（例如某个 IP 使用了从未出现过的 port，或具有异常的 packet size pattern），forest 会生成较短的 paths，并将其标记出来供检查。由于它不需要 labeled attacks，因此适合检测未知 attack types。它还可以部署在 user login data 上，用于检测 account takeovers（异常的 login times 或 locations 会被快速隔离）。在一个 use-case 中，Isolation Forest 可以通过监控 system metrics 来保护 enterprise，并在一组 metrics（CPU、network、file changes）与历史 patterns 显著不同时（即 isolation paths 较短）生成 alert。
 
-#### 假设和限制
+#### Assumptions and Limitations
 
-**优点**：隔离森林不需要分布假设；它直接针对隔离。它在高维数据和大数据集上效率高（构建森林的线性复杂度为$O(n\log n)$），因为每棵树仅使用部分特征和分割来隔离点。它通常能很好地处理数值特征，并且比基于距离的方法（可能是$O(n^2)$）更快。它还自动给出异常分数，因此可以设置警报的阈值（或使用污染参数根据预期的异常比例自动决定截止点）。
+**Advantages**：Isolation Forest 不要求数据遵循某种 distribution assumption；它直接针对 isolation 进行建模。它对 high-dimensional data 和 large datasets 的处理效率较高（构建 forest 的线性复杂度为 $O(n\log n)$），因为每棵 tree 只使用 feature 的一个 subset 和若干 splits 来隔离 points。它通常能够很好地处理 numerical features，并且可能比 distance-based methods 更快，后者的复杂度可能达到 $O(n^2)$。它还会自动生成 anomaly score，因此可以设置 threshold 来触发 alerts（或者使用 contamination parameter，根据预期的 anomaly fraction 自动确定 cutoff）。
 
-**限制**：由于其随机特性，结果在不同运行之间可能略有不同（尽管树的数量足够多时，这种差异很小）。如果数据有很多无关特征，或者异常在任何特征上没有明显区分，隔离可能效果不佳（随机分割可能偶然隔离正常点——然而，平均多棵树可以减轻这一点）。此外，隔离森林通常假设异常是少数（这在网络安全场景中通常是正确的）。
+**Limitations**：由于其 random nature，不同 runs 的结果可能略有差异（不过当 trees 数量足够多时，这种差异很小）。如果数据包含大量 irrelevant features，或者 anomalies 在任何 feature 上都没有明显差异，isolation 可能无法有效工作（random splits 可能会因偶然而隔离正常 points——不过对大量 trees 的结果取平均可以缓解这一问题）。此外，Isolation Forest 通常假设 anomalies 只占少数（这在 cybersecurity 场景中通常成立）。
 
 <details>
-<summary>示例 -- 检测网络日志中的离群点
+<summary>Example --  Detecting Outliers in Network Logs
 </summary>
 
-我们将使用之前的测试数据集（包含正常和一些攻击点），运行一个隔离森林，看看它是否能分离攻击。我们假设我们预计~15%的数据是异常的（用于演示）。
+我们将使用前面提到的 test dataset（其中包含正常 points 和一些 attack points），并运行 Isolation Forest，观察它是否能够分离这些 attacks。我们假设数据中约有 15% 的内容为 anomalous（用于演示）。
 ```python
 from sklearn.ensemble import IsolationForest
 
@@ -320,36 +324,38 @@ print("Isolation Forest predicted labels (first 20):", preds[:20])
 print("Number of anomalies detected:", np.sum(preds == -1))
 print("Example anomaly scores (lower means more anomalous):", anomaly_scores[:5])
 ```
-在这段代码中，我们用100棵树实例化了`IsolationForest`并设置`contamination=0.15`（这意味着我们预计大约15%的异常；模型将设置其分数阈值，使得~15%的点被标记）。我们在包含正常和攻击点混合的`X_test_if`上进行拟合（注意：通常你会在训练数据上进行拟合，然后在新数据上使用预测，但这里为了说明我们在同一组上进行拟合和预测以直接观察结果）。
+在这段代码中，我们使用 100 棵树实例化 `IsolationForest`，并设置 `contamination=0.15`（表示我们预计约有 15% 的异常；模型会设置其分数阈值，使约 15% 的点被标记出来）。我们在包含正常点和攻击点混合数据的 `X_test_if` 上进行拟合（注意：通常应在训练数据上拟合，然后在新数据上使用 predict；但这里为了便于说明，在同一数据集上进行拟合和预测，以便直接观察结果）。
 
-输出显示了前20个点的预测标签（其中-1表示异常）。我们还打印了总共检测到多少个异常以及一些示例异常分数。我们预计大约120个点中有18个会被标记为-1（因为污染率为15%）。如果我们的20个攻击样本确实是最偏离的，大多数应该出现在这些-1预测中。异常分数（Isolation Forest的决策函数）对于正常点较高，对于异常点较低（更负）——我们打印了一些值以查看分离情况。在实践中，人们可能会按分数对数据进行排序，以查看顶级异常并进行调查。因此，Isolation Forest提供了一种有效的方法来筛选大量未标记的安全数据，并挑选出最不规则的实例以供人工分析或进一步的自动审查。
+输出显示了前 20 个点的预测标签（其中 -1 表示异常）。我们还会打印检测到的异常总数以及一些示例异常分数。由于 contamination 设置为 15%，我们预计 120 个点中大约有 18 个会被标记为 -1。如果这 20 个攻击样本确实是最偏离整体分布的点，那么其中大多数应该出现在这些 -1 预测中。异常分数（Isolation Forest 的 decision function）对于正常点较高，对于异常点较低（更负）——我们打印一些数值来观察这种分离效果。在实践中，可以按照分数对数据排序，以找出排名靠前的异常点，并对其进行调查。因此，Isolation Forest 提供了一种高效的方法，可以筛查大量无标签安全数据，找出最不规则的实例，供人工分析或进一步的自动化审查。
+</details>
 
-### t-SNE (t-分布随机邻居嵌入)
 
-**t-SNE**是一种非线性降维技术，专门用于在2或3维中可视化高维数据。它将数据点之间的相似性转换为联合概率分布，并试图在低维投影中保留局部邻域的结构。简单来说，t-SNE将点放置在（例如）2D中，使得相似的点（在原始空间中）最终靠近在一起，而不相似的点则以高概率远离。
+### t-SNE（t-Distributed Stochastic Neighbor Embedding）
 
-该算法有两个主要阶段：
+**t-SNE** 是一种非线性降维技术，专门用于在二维或三维空间中可视化高维数据。它会将数据点之间的相似性转换为联合概率分布，并尝试在低维投影中保留局部邻域的结构。简单来说，t-SNE 会将点放置在（例如）二维空间中，使原始空间中相似的点最终以较高概率彼此接近，而不相似的点彼此远离。
 
-1. **计算高维空间中的成对亲和度：** 对于每对点，t-SNE计算选择该对作为邻居的概率（这是通过在每个点上中心化高斯分布并测量距离来完成的——困惑度参数影响考虑的有效邻居数量）。
-2. **计算低维（例如2D）空间中的成对亲和度：** 最初，点在2D中随机放置。t-SNE为该图中的距离定义了类似的概率（使用学生t分布核，其尾部比高斯分布更重，以允许远离的点有更多自由）。
-3. **梯度下降：** t-SNE然后迭代地在2D中移动点，以最小化高维亲和度分布和低维分布之间的Kullback–Leibler（KL）散度。这使得2D排列尽可能反映高维结构——在原始空间中接近的点将相互吸引，而远离的点将相互排斥，直到找到平衡。
+该算法主要包含三个阶段：
 
-结果通常是一个视觉上有意义的散点图，其中数据中的聚类变得明显。
+1. **在高维空间中计算成对亲和度：** 对于每一对点，t-SNE 会计算将这两个点选为邻居的概率（具体做法是在每个点上以其为中心构建 Gaussian 分布并测量距离——perplexity 参数会影响所考虑的有效邻居数量）。
+2. **在低维（例如二维）空间中计算成对亲和度：** 初始时，点会被随机放置在二维空间中。t-SNE 使用类似的概率来表示映射中距离的关系（采用 Student t-distribution kernel，其尾部比 Gaussian 更厚，从而允许远距离点拥有更大的自由度）。
+3. **Gradient Descent：** 随后，t-SNE 会反复移动二维空间中的点，使高维亲和度分布与低维亲和度分布之间的 Kullback–Leibler（KL）散度最小化。这会使二维排列尽可能反映高维结构——原始空间中彼此接近的点会相互吸引，而相距较远的点会相互排斥，直到达到平衡。
+
+最终通常会得到一个具有直观意义的散点图，其中的数据集群会变得清晰可见。
 
 > [!TIP]
-> *在网络安全中的用例：* t-SNE通常用于**可视化高维安全数据以供人工分析**。例如，在安全运营中心，分析师可以使用具有数十个特征（端口号、频率、字节计数等）的事件数据集，并使用t-SNE生成2D图。攻击可能在该图中形成自己的聚类或与正常数据分开，从而更容易识别。它已被应用于恶意软件数据集，以查看恶意软件家族的分组，或在网络入侵数据中，不同攻击类型明显聚类，指导进一步调查。基本上，t-SNE提供了一种查看网络数据结构的方法，否则将难以理解。
+> *在 cybersecurity 中的使用场景：* t-SNE 常用于**将高维安全数据可视化，以供人工分析**。例如，在 security operations center 中，分析人员可以获取一个包含数十个特征的事件数据集（端口号、频率、字节数等），并使用 t-SNE 生成二维图。攻击可能在图中形成自己的集群，或与正常数据分离，从而更容易被识别。它已被应用于 malware 数据集，以观察不同 malware family 的分组；也被应用于 network intrusion 数据，以显示不同攻击类型形成的明显集群，从而指导进一步调查。本质上，t-SNE 提供了一种观察 cyber data 中结构的方法，而这些结构在其他情况下可能难以理解。
 
 #### 假设和局限性
 
-t-SNE非常适合视觉发现模式。它可以揭示其他线性方法（如PCA）可能无法发现的聚类、子聚类和异常值。它已在网络安全研究中用于可视化复杂数据，如恶意软件行为特征或网络流量模式。由于它保留了局部结构，因此在显示自然分组方面表现良好。
+t-SNE 非常适合用于直观地发现模式。它可以揭示其他线性方法（如 PCA）可能无法发现的集群、子集群和异常点。它已被用于 cybersecurity 研究，以可视化复杂数据，例如 malware behavior profile 或 network traffic pattern。由于它能够保留局部结构，因此非常适合展示自然形成的分组。
 
-然而，t-SNE的计算负担较重（大约为$O(n^2)$），因此对于非常大的数据集可能需要抽样。它还有超参数（困惑度、学习率、迭代次数），这些参数可能会影响输出——例如，不同的困惑度值可能会在不同的尺度上揭示聚类。t-SNE图有时可能被误解——图中的距离在全局上并不直接有意义（它关注局部邻域，有时聚类可能看起来人为地分开）。此外，t-SNE主要用于可视化；它并不提供直接的方法来投影新数据点而无需重新计算，并且不适合用作预测建模的预处理（UMAP是一个解决这些问题并具有更快速度的替代方案）。
+不过，t-SNE 的计算开销较大（约为 $O(n^2)$），因此在处理非常大的数据集时可能需要进行采样。它还包含多个超参数（perplexity、learning rate、iterations），这些参数会影响输出——例如，不同的 perplexity 值可能会揭示不同尺度下的集群。t-SNE 图有时可能被误解——图中的距离在全局范围内并不直接具有实际意义（它关注局部邻域，因此某些集群可能会显得人为地分离得非常明显）。此外，t-SNE 主要用于可视化；如果不重新计算，它无法以直接的方式投影新的数据点，并且它不适合作为 predictive modeling 的预处理步骤（UMAP 是一种替代方案，可以通过更快的速度解决其中一些问题）。
 
 <details>
 <summary>示例 -- 可视化网络连接
 </summary>
 
-我们将使用t-SNE将多特征数据集降至2D。为了说明，我们取之前的4D数据（其中有3个正常流量的自然聚类）并添加一些异常点。然后我们运行t-SNE并（概念上）可视化结果。
+我们将使用 t-SNE 将包含多个特征的数据集降至二维空间。为了便于说明，我们使用前面提到的 4D 数据（其中包含 3 个自然形成的正常流量集群），并加入一些异常点。然后运行 t-SNE，并（从概念上）将结果可视化。
 ```python
 # 1 ─────────────────────────────────────────────────────────────────────
 #    Create synthetic 4-D dataset
@@ -432,21 +438,24 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 ```
-这里我们将之前的4D正常数据集与少量极端离群值结合在一起（离群值有一个特征（“duration”）设置得非常高等，以模拟一种奇怪的模式）。我们以典型的困惑度30运行t-SNE。输出的data_2d形状为(1505, 2)。我们实际上不会在本文中绘图，但如果我们这样做，我们会期望看到大约三个紧密的簇对应于3个正常簇，而5个离群值则作为远离这些簇的孤立点出现。在交互式工作流程中，我们可以根据它们的标签（正常或哪个簇，与异常）为点上色，以验证这种结构。即使没有标签，分析师也可能会注意到这5个点在2D图上处于空白空间，并标记它们。这表明t-SNE可以成为网络安全数据中可视化异常检测和簇检查的强大辅助工具，补充上述自动化算法。
+这里我们将之前的 4D normal dataset 与少量 extreme outliers 结合起来（这些 outliers 的一个 feature（“duration”）被设置为很高的值等，以模拟一种异常模式）。我们使用典型的 perplexity 30 运行 t-SNE。输出数据 `data_2d` 的 shape 为 (1505, 2)。虽然本文不会实际绘图，但如果绘制出来，我们预计会看到大约三个紧密的 clusters，分别对应 3 个 normal clusters；而 5 个 outliers 则会作为远离这些 clusters 的孤立点出现。在交互式工作流中，我们可以根据其 label（normal 或所属 cluster，与 anomaly）为 points 着色，以验证这种结构。即使没有 labels，分析人员也可能注意到 2D plot 中位于空白区域的这 5 个 points，并将其标记出来。这说明 t-SNE 如何成为 cybersecurity 数据中进行 visual anomaly detection 和 cluster inspection 的强大辅助工具，并补充上述 automated algorithms。
 
-### HDBSCAN（带噪声的层次密度聚类应用）
+</details>
 
-**HDBSCAN**是DBSCAN的扩展，消除了选择单一全局`eps`值的需要，并能够通过构建密度连接组件的层次结构并进行浓缩来恢复**不同密度**的簇。与普通的DBSCAN相比，它通常
 
-* 在某些簇密集而其他簇稀疏时提取更直观的簇，
-* 只有一个真实的超参数（`min_cluster_size`）和一个合理的默认值，
-* 为每个点提供一个簇成员*概率*和一个**离群值分数**（`outlier_scores_`），这对于威胁狩猎仪表板非常方便。
+### HDBSCAN (Hierarchical Density-Based Spatial Clustering of Applications with Noise)
+
+**HDBSCAN** 是 DBSCAN 的扩展，它不再需要选择单一的全局 `eps` 值，并且能够通过构建 density-connected components 的层次结构并对其进行压缩，识别出具有**不同密度**的 clusters。与 vanilla DBSCAN 相比，它通常能够
+
+* 在某些 clusters 密集、而其他 clusters 稀疏时，提取出更直观的 clusters，
+* 只有一个真正的 hyper-parameter（`min_cluster_size`），并且具有合理的 default，
+* 为每个 point 提供 cluster-membership *probability* 和 **outlier score**（`outlier_scores_`），这对 threat-hunting dashboards 非常实用。<sup>[[1]](#references)</sup>
 
 > [!TIP]
-> *网络安全中的用例：* HDBSCAN在现代威胁狩猎管道中非常流行——您经常会在与商业XDR套件一起提供的基于笔记本的狩猎剧本中看到它。一个实用的配方是在IR期间对HTTP信标流量进行聚类：用户代理、间隔和URI长度通常形成几个紧密的合法软件更新程序组，而C2信标则保持为微小的低密度簇或纯噪声。
+> *cybersecurity 中的使用场景：* HDBSCAN 在现代 threat-hunting pipelines 中非常流行——你经常会在商业 XDR suites 提供的、基于 notebook 的 hunting playbooks 中看到它。一个实用方案是在 IR 期间对 HTTP beaconing traffic 进行 clustering：user-agent、interval 和 URI length 通常会形成若干个由合法 software updaters 组成的紧密 groups，而 C2 beacons 则会作为微小的 low-density clusters 或纯 noise 保留下来。
 
 <details>
-<summary>示例 – 查找信标C2通道</summary>
+<summary>示例 – 查找 beaconing C2 channels</summary>
 ```python
 import pandas as pd
 from hdbscan import HDBSCAN
@@ -474,33 +483,33 @@ print("Suspect beacon count:", len(suspects))
 
 ---
 
-### 鲁棒性和安全性考虑 – 中毒与对抗攻击 (2023-2025)
+### 稳健性与安全性注意事项 – Poisoning 与 Adversarial Attacks（2023-2025）
 
-最近的研究表明，**无监督学习者并不免疫于主动攻击者**：
+近期研究表明，**unsupervised learners *并不* 能免疫 active attackers**：
 
-* **针对异常检测器的数据中毒。** Chen *et al.* (IEEE S&P 2024) 证明，添加仅 3% 的精心制作的流量可以改变 Isolation Forest 和 ECOD 的决策边界，使真实攻击看起来正常。作者发布了一个开源 PoC (`udo-poison`)，可以自动合成毒点。
-* **后门聚类模型。** *BadCME* 技术 (BlackHat EU 2023) 嵌入一个微小的触发模式；每当该触发出现时，基于 K-Means 的检测器会悄悄地将事件放置在“良性”聚类中。
-* **规避 DBSCAN/HDBSCAN。** 2025 年来自 KU Leuven 的学术预印本显示，攻击者可以制作信标模式，故意落入密度间隙，有效地隐藏在 *噪声* 标签中。
+* **针对 anomaly detectors 的 Data-poisoning。** Chen *et al.*（IEEE S&P 2024）证明，仅添加 3 % 的 crafted traffic，就能改变 Isolation Forest 和 ECOD 的 decision boundary，使真实 attacks 看起来像正常流量。作者发布了一个 open-source PoC（`udo-poison`），可自动合成 poison points。<sup>[[2]](#references)</sup>
+* **对 clustering models 进行 Backdooring。** *BadCME* 技术（BlackHat EU 2023）植入一个微小的 trigger pattern；每当该 trigger 出现时，基于 K-Means 的 detector 会悄悄地将该 event 放入“benign” cluster。
+* **规避 DBSCAN/HDBSCAN。** KU Leuven 于 2025 年发布的一篇 academic pre-print 表明，attacker 可以构造故意落入 density gaps 的 beaconing patterns，从而有效隐藏在 *noise* labels 中。
 
-正在获得关注的缓解措施：
+正在逐渐获得关注的 Mitigations：
 
-1. **模型清理 / TRIM。** 在每次重新训练的时期之前，丢弃 1-2% 的最高损失点（修剪的最大似然），使得中毒变得极其困难。
-2. **共识集成。** 结合几个异构检测器（例如，Isolation Forest + GMM + ECOD），如果 *任何* 模型标记一个点，则发出警报。研究表明，这会将攻击者的成本提高超过 10 倍。
-3. **基于距离的聚类防御。** 使用 `k` 个不同的随机种子重新计算聚类，并忽略不断跳跃聚类的点。
+1. **Model sanitisation / TRIM。** 在每个 retraining epoch 之前，丢弃 loss 最高的 1–2 % points（trimmed maximum likelihood），从而大幅增加 poisoning 的难度。
+2. **Consensus ensembling。** 组合多个异构 detectors（例如 Isolation Forest + GMM + ECOD），只要任意一个 model 标记某个 point 就发出 alert。研究表明，这会使 attacker 的成本提高 >10 倍。
+3. **针对 clustering 的 Distance-based defence。** 使用 `k` 个不同的 random seeds 重新计算 clusters，并忽略持续在不同 clusters 之间跳转的 points。
 
 ---
 
-### 现代开源工具 (2024-2025)
+### 现代 Open-Source Tooling（2024-2025）
 
-* **PyOD 2.x** (发布于 2024 年 5 月) 添加了 *ECOD*、*COPOD* 和 GPU 加速的 *AutoFormer* 检测器。现在它提供一个 `benchmark` 子命令，让你可以用 **一行代码** 比较数据集上的 30 多种算法：
+* **PyOD 2.x**（2024 年 5 月发布）新增了 *ECOD*、*COPOD* 和 GPU-accelerated *AutoFormer* detectors。现在它还提供了一个 `benchmark` sub-command，可以通过**一行代码**在你的 dataset 上比较 30+ 种 algorithms：
 ```bash
 pyod benchmark --input logs.csv --label attack --n_jobs 8
 ```
-* **Anomalib v1.5** (2025 年 2 月) 专注于视觉，但也包含一个通用的 **PatchCore** 实现 – 方便用于基于截图的钓鱼页面检测。
-* **scikit-learn 1.5** (2024 年 11 月) 最终通过新的 `cluster.HDBSCAN` 包装器公开了 `score_samples` 用于 *HDBSCAN*，因此在 Python 3.12 上时不需要外部贡献包。
+* **Anomalib v1.5**（2025 年 2 月）主要专注于 vision，但也包含一个通用的 **PatchCore** implementation，适合用于基于 screenshot 的 phishing page detection。
+* **scikit-learn 1.5**（2024 年 11 月）终于通过新的 `cluster.HDBSCAN` wrapper 暴露了 *HDBSCAN* 的 `score_samples`，因此在 Python 3.12 上不再需要 external contrib package。
 
 <details>
-<summary>快速 PyOD 示例 – ECOD + Isolation Forest 集成</summary>
+<summary>Quick PyOD example – ECOD + Isolation Forest ensemble</summary>
 ```python
 from pyod.models import ECOD, IForest
 from pyod.utils.data import generate_data, evaluate_print
@@ -521,8 +530,8 @@ evaluate_print("Ensemble", y_test, anomaly_scores)
 
 ## 参考文献
 
-- [HDBSCAN – 基于层次的密度聚类](https://github.com/scikit-learn-contrib/hdbscan)
-- Chen, X. *等*。“关于无监督异常检测对数据中毒的脆弱性。” *IEEE安全与隐私研讨会*，2024。
+- [1] [HDBSCAN – 基于层次密度的聚类](https://github.com/scikit-learn-contrib/hdbscan)
+- [2] Chen, X. *等*。“无监督异常检测对数据投毒的脆弱性。”*IEEE Symposium on Security and Privacy*，2024 年。
 
 
 

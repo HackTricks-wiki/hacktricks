@@ -1,37 +1,39 @@
-# Hashes, MACs & KDFs
+# 哈希、MAC 和 KDF
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Common CTF patterns
+## 常见 CTF 模式
 
-- “Signature” 实际上是 `hash(secret || message)` → length extension.
-- 未加盐的 password hashes → 简单破解 / 查库。
-- 混淆 hash 与 MAC（hash != authentication）。
+- “Signature” 实际上是 `hash(secret || message)` → length extension。
+- 未加盐的密码哈希 → 可进行简单破解 / lookup。
+- 将哈希与 MAC 混淆（hash != authentication）。
 
-## Hash length extension attack
+## 哈希长度扩展攻击
 
 ### Technique
 
-如果服务器像下面这样计算“签名”，通常可以利用这一点：
+如果服务器计算的“signature”类似于：
 
 `sig = HASH(secret || message)`
 
-并使用 Merkle–Damgård hash（经典示例：MD5、SHA-1、SHA-256）。
+并使用 Merkle–Damgård 哈希（经典示例：MD5、SHA-1、SHA-256），通常可以利用这一点。
 
 如果你知道：
 
 - `message`
 - `sig`
-- hash function
-- （或能暴力枚举）`len(secret)`
+- 哈希函数
+- （或可以通过暴力破解得到）`len(secret)`
 
-那么你可以在不知道 secret 的情况下计算出对以下内容的有效签名：
+那么无需知道 secret，就可以为以下内容计算有效的 signature：
 
 `message || padding || appended_data`
 
-### Important limitation: HMAC is not affected
+<sup>[[1]](#references)</sup>
 
-长度延展攻击适用于像 `HASH(secret || message)` 这类基于 Merkle–Damgård 的构造。它们不适用于 **HMAC**（例如 HMAC-SHA256），HMAC 专门设计用于避免这类问题。
+### 重要限制：HMAC 不受影响
+
+长度扩展攻击适用于 Merkle–Damgård 哈希的 `HASH(secret || message)` 构造。它们不适用于 **HMAC**（例如 HMAC-SHA256），后者就是专门为避免此类问题而设计的。<sup>[[1]](#references)</sup>
 
 ### Tools
 
@@ -50,28 +52,32 @@ https://github.com/bwall/HashPump
 https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks
 {{#endref}}
 
-## Password hashing and cracking
+## 密码哈希与破解
 
-### First questions
+### 首要问题
 
-- Is it **salted**?（查看是否有 `salt$hash` 格式）
-- Is it a **fast hash** (MD5/SHA1/SHA256) or a **slow KDF** (bcrypt/scrypt/argon2/PBKDF2)?
-- Do you have a **format hint**（hashcat mode / John format）?
+- 是否**加盐**？（查找 `salt$hash` 格式）
+- 是**快速哈希**（MD5/SHA1/SHA256）还是**慢速 KDF**（bcrypt/scrypt/argon2/PBKDF2）？
+- 是否有**格式提示**（hashcat mode / John format）？
 
-### Practical workflow
+### 实用工作流
 
-1. Identify the hash:
+1. 识别哈希：
 - `hashid <hash>`
 - `hashcat --example-hashes | rg -n "<pattern>"`
-2. If unsalted and common: try online DBs and identification tooling from the crypto workflow section.
-3. Otherwise crack:
+2. 如果未加盐且较为常见：尝试使用在线 DB 和 crypto workflow section 中的识别工具。
+3. 否则进行破解：
 - `hashcat -m <mode> -a 0 hashes.txt wordlist.txt`
 - `john --wordlist=wordlist.txt --format=<fmt> hashes.txt`
 
-### Common mistakes you can exploit
+### 可以利用的常见错误
 
-- Same password reused across users → 破解一个后横向利用（pivot）。
-- Truncated hashes / custom transforms → 归一化后重试。
-- Weak KDF parameters（例如 PBKDF2 迭代次数过低）→ 仍然可以被破解。
+- 不同用户重复使用同一密码 → 破解一个后进行 pivot。
+- 截断的哈希 / 自定义变换 → 进行 normalize 后重试。
+- 较弱的 KDF 参数（例如 PBKDF2 迭代次数较低）→ 仍然可以破解。
+
+## References
+
+- [1] [Everything you need to know about hash length extension attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,90 +1,89 @@
-# 强化学习算法
+# Reinforcement Learning Algorithms
 
 {{#include ../banners/hacktricks-training.md}}
 
-## 强化学习
+## Reinforcement Learning
 
-Reinforcement learning (RL) 是一种机器学习方法，代理(agent)通过与环境交互学习决策。代理根据其行为获得奖励或惩罚作为反馈，从而随着时间推导出最优行为。RL 特别适用于涉及序列决策的问题，例如机器人、游戏和自主系统。
+Reinforcement learning (RL) 是一种 machine learning 类型，其中 agent 通过与 environment 交互来学习做出决策。agent 会根据其 actions 接收 rewards 或 penalties 形式的反馈，从而能够随着时间推移学习最优行为。RL 特别适用于解决方案涉及序列决策的问题，例如 robotics、game playing 和 autonomous systems。
 
 ### Q-Learning
 
-Q-Learning 是一种 model-free 强化学习算法，用于学习在给定状态下采取某个动作的价值。它使用 Q-table 存储在特定状态下采取特定动作的期望效用。算法根据收到的奖励和未来最大预期奖励来更新 Q 值。
-1. **初始化**：用任意值（通常为零）初始化 Q-table。
-2. **动作选择**：使用探索策略选择动作（例如 ε-greedy，其中以概率 ε 选择随机动作，以概率 1-ε 选择具有最高 Q 值的动作）。
-- 注意：算法可以总是选择已知的在某状态下的最佳动作，但这样会阻止代理探索可能带来更高回报的新动作。因此使用 ε-greedy 来平衡探索与利用。
-3. **与环境交互**：在环境中执行所选动作，观察下一个状态和奖励。
-- 注意：在此步中，根据 ε-greedy 概率，下一步可能是随机动作（用于探索）或已知的最佳动作（用于利用）。
-4. **Q 值更新**：使用 Bellman equation 更新状态-动作对的 Q 值：
+Q-Learning 是一种 model-free reinforcement learning algorithm，用于学习给定 state 下各 actions 的价值。它使用 Q-table 存储在特定 state 中执行特定 action 的预期效用。该 algorithm 根据收到的 rewards 以及预期的最大未来 rewards 更新 Q-values。
+1. **Initialization**：使用任意值（通常为零）初始化 Q-table。
+2. **Action Selection**：使用 exploration strategy 选择一个 action（例如 ε-greedy：以概率 ε 选择随机 action，以概率 1-ε 选择 Q-value 最高的 action）。
+- 请注意，algorithm 可以始终选择给定 state 下已知的最佳 action，但这样 agent 将无法探索可能产生更高 rewards 的新 actions。因此，使用 ε-greedy 变量来平衡 exploration 和 exploitation。
+3. **Environment Interaction**：在 environment 中执行所选 action，并观察 next state 和 reward。
+- 请注意，在此情况下，根据 ε-greedy 概率，下一步可能是随机 action（用于 exploration），也可能是已知的最佳 action（用于 exploitation）。
+4. **Q-Value Update**：使用 Bellman equation 更新 state-action pair 的 Q-value：
 ```plaintext
 Q(s, a) = Q(s, a) + α * (r + γ * max(Q(s', a')) - Q(s, a))
 ```
 其中：
-- `Q(s, a)` 是状态 `s` 下动作 `a` 的当前 Q 值。
-- `α` 是学习率 (0 < α ≤ 1)，决定新信息对旧信息的覆盖程度。
-- `r` 是在状态 `s` 采取动作 `a` 后获得的奖励。
-- `γ` 是折扣因子 (0 ≤ γ < 1)，决定未来奖励的重要性。
-- `s'` 是在采取动作 `a` 后的下一个状态。
-- `max(Q(s', a'))` 是下一个状态 `s'` 对所有可能动作 `a'` 的最大 Q 值。
-5. **迭代**：重复步骤 2-4，直到 Q 值收敛或满足停止条件。
+- `Q(s, a)` 是 state `s` 和 action `a` 的当前 Q-value。
+- `α` 是 learning rate（0 < α ≤ 1），决定新信息在多大程度上覆盖旧信息。
+- `r` 是在 state `s` 中执行 action `a` 后收到的 reward。
+- `γ` 是 discount factor（0 ≤ γ < 1），决定未来 rewards 的重要性。
+- `s'` 是执行 action `a` 后的 next state。
+- `max(Q(s', a'))` 是 next state `s'` 中所有可能 actions `a'` 的最大 Q-value。
+5. **Iteration**：重复步骤 2-4，直到 Q-values 收敛或满足 stopping criterion。
 
-注意：每次选择新动作时表都会被更新，使代理能随时间从经验中学习以尝试找到最优策略（在每个状态下采取的最佳动作）。然而，对于状态和动作众多的环境，Q-table 会变得很大，导致在复杂问题上不实用。这种情况下可以使用函数近似方法（例如神经网络）来估计 Q 值。
-
-> [!TIP]
-> ε-greedy 的值通常会随着时间更新，以在代理对环境了解更多时减少探索。例如，可以从较高的值开始（如 ε = 1）并随着学习进展衰减到较低值（如 ε = 0.1）。
+请注意，每次选择新的 action 后都会更新该 table，使 agent 能够随着时间推移从经验中学习，并尝试找到最优 policy（在每个 state 中应采取的最佳 action）。但是，对于包含大量 states 和 actions 的 environments，Q-table 可能会变得非常庞大，从而不适用于复杂问题。在此类情况下，可以使用 function approximation methods（例如 neural networks）来估算 Q-values。
 
 > [!TIP]
-> 学习率 `α` 和折扣因子 `γ` 是需要根据具体问题和环境调优的超参数。较高的学习率允许代理更快学习但可能导致不稳定，而较低的学习率带来更稳定但更慢的收敛。折扣因子决定代理对未来奖励的重视程度（`γ` 越接近 1，越重视未来奖励）。
+> ε-greedy value 通常会随着时间推移进行更新，以便在 agent 更加了解 environment 后减少 exploration。例如，它可以从较高的值开始（例如 ε = 1），并在 learning 过程中衰减到较低的值（例如 ε = 0.1）。
+
+> [!TIP]
+> learning rate `α` 和 discount factor `γ` 是需要根据具体问题和 environment 进行调优的 hyperparameters。较高的 learning rate 可以让 agent 更快学习，但可能导致不稳定；较低的 learning rate 则会带来更稳定的 learning，但 convergence 更慢。discount factor 决定 agent 对未来 rewards（`γ` 越接近 1）相对于即时 rewards 的重视程度。
 
 ### SARSA (State-Action-Reward-State-Action)
 
-SARSA 是另一种 model-free 强化学习算法，与 Q-Learning 相似但在更新 Q 值的方式上有所不同。SARSA 代表 State-Action-Reward-State-Action，它基于在下一个状态中实际采取的动作来更新 Q 值，而不是基于该状态的最大 Q 值。
-1. **初始化**：用任意值（通常为零）初始化 Q-table。
-2. **动作选择**：使用探索策略选择动作（例如 ε-greedy）。
-3. **与环境交互**：在环境中执行所选动作，观察下一个状态和奖励。
-- 注意：在此步中，根据 ε-greedy 概率，下一步可能是随机动作（用于探索）或已知的最佳动作（用于利用）。
-4. **Q 值更新**：使用 SARSA 更新规则更新状态-动作对的 Q 值。注意该更新规则与 Q-Learning 相似，但它使用在下一个状态 `s'` 中将要采取的动作 `a'`，而不是该状态的最大 Q 值：
+SARSA 是另一种 model-free reinforcement learning algorithm，与 Q-Learning 类似，但在 Q-values 的更新方式上有所不同。SARSA 代表 State-Action-Reward-State-Action，其 Q-values 更新基于 next state 中采取的 action，而不是最大 Q-value。
+1. **Initialization**：使用任意值（通常为零）初始化 Q-table。
+2. **Action Selection**：使用 exploration strategy 选择一个 action（例如 ε-greedy）。
+3. **Environment Interaction**：在 environment 中执行所选 action，并观察 next state 和 reward。
+- 请注意，在此情况下，根据 ε-greedy 概率，下一步可能是随机 action（用于 exploration），也可能是已知的最佳 action（用于 exploitation）。
+4. **Q-Value Update**：使用 SARSA update rule 更新 state-action pair 的 Q-value。请注意，该 update rule 与 Q-Learning 类似，但使用 next state `s'` 中将要采取的 action，而不是该 state 的最大 Q-value：
 ```plaintext
 Q(s, a) = Q(s, a) + α * (r + γ * Q(s', a') - Q(s, a))
 ```
 其中：
-- `Q(s, a)` 是状态 `s` 下动作 `a` 的当前 Q 值。
-- `α` 是学习率。
-- `r` 是在状态 `s` 采取动作 `a` 后获得的奖励。
-- `γ` 是折扣因子。
-- `s'` 是在采取动作 `a` 后的下一个状态。
-- `a'` 是在下一个状态 `s'` 中采取的动作。
-5. **迭代**：重复步骤 2-4，直到 Q 值收敛或满足停止条件。
+- `Q(s, a)` 是 state `s` 和 action `a` 的当前 Q-value。
+- `α` 是 learning rate。
+- `r` 是在 state `s` 中执行 action `a` 后收到的 reward。
+- `γ` 是 discount factor。
+- `s'` 是执行 action `a` 后的 next state。
+- `a'` 是在 next state `s'` 中采取的 action。
+5. **Iteration**：重复步骤 2-4，直到 Q-values 收敛或满足 stopping criterion。
 
-#### Softmax vs ε-Greedy 动作选择
+#### Softmax vs ε-Greedy Action Selection
 
-除了 ε-greedy 动作选择，SARSA 也可以使用 softmax 动作选择策略。在 softmax 动作选择中，选择某个动作的概率与其 Q 值成比例，从而允许对动作空间进行更细腻的探索。选择状态 `s` 中动作 `a` 的概率由下式给出：
+除了 ε-greedy action selection 之外，SARSA 还可以使用 softmax action selection strategy。在 softmax action selection 中，选择某个 action 的概率**与其 Q-value 成正比**，从而能够更加细致地探索 action space。在 state `s` 中选择 action `a` 的概率为：
 ```plaintext
 P(a|s) = exp(Q(s, a) / τ) / Σ(exp(Q(s, a') / τ))
 ```
 其中：
-
 - `P(a|s)` 是在状态 `s` 下选择动作 `a` 的概率。
-- `Q(s, a)` 是状态 `s` 与动作 `a` 的 Q 值。
-- `τ` (tau) 是控制探索程度的温度参数。较高的温度导致更多探索（概率更趋于均匀），而较低的温度导致更偏向利用（Q 值较高的动作具有更高的概率）。
+- `Q(s, a)` 是状态 `s` 和动作 `a` 的 Q-value。
+- `τ`（tau）是控制探索程度的 temperature 参数。更高的 temperature 会带来更多探索（概率更加均匀），而更低的 temperature 会带来更多利用（Q-values 更高的动作具有更高的概率）。
 
 > [!TIP]
-> 与 ε-greedy 动作选择相比，这有助于以更连续的方式在探索与利用之间取得平衡。
+> 与 ε-greedy action selection 相比，这有助于以更加连续的方式平衡探索和利用。
 
-### On-Policy（策略内）与 Off-Policy（策略外）学习
+### On-Policy 与 Off-Policy Learning
 
-SARSA 是一种 **on-policy** 学习算法，意味着它根据当前策略（ε-greedy 或 softmax 策略）所采取的动作来更新 Q 值。相比之下，Q-Learning 是一种 **off-policy** 学习算法，因为它根据下一状态的最大 Q 值来更新 Q 值，而不考虑当前策略实际采取的动作。这个区别会影响算法如何学习并适应环境。
+SARSA 是一种 **on-policy** learning algorithm，这意味着它根据当前 policy（ε-greedy 或 softmax policy）所采取的动作来更新 Q-values。相比之下，Q-Learning 是一种 **off-policy** learning algorithm，因为它根据下一个状态的最大 Q-value 更新 Q-values，而不考虑当前 policy 所采取的动作。这一区别会影响 algorithms 学习和适应环境的方式。
 
-像 SARSA 这样的 on-policy 方法在某些环境中可能更稳定，因为它们从实际采取的动作中学习。然而，与可以从更广泛经验中学习的 off-policy 方法（如 Q-Learning）相比，它们的收敛速度可能更慢。
+像 SARSA 这样的 on-policy methods 在某些环境中可能更加稳定，因为它们从实际采取的动作中学习。然而，与 Q-Learning 这样的 off-policy methods 相比，它们的收敛速度可能更慢；后者可以从更广泛的经验中学习。
 
-## RL 系统中的安全性与攻击向量
+## RL Systems 中的安全性与攻击向量
 
-尽管 RL 算法看起来纯属数学问题，近期研究表明 **训练时的投毒和奖励篡改可以可靠地破坏学习到的策略**。
+尽管 RL algorithms 看起来纯粹是数学方法，但近期研究表明，**training-time poisoning 和 reward tampering 可以可靠地颠覆已学习的 policies**。
 
-### 训练期后门
-- **BLAST leverage backdoor (c-MADRL)**: 单个恶意智能体编码一个时空触发器并略微扰动其奖励函数；当触发模式出现时，被投毒的智能体会将整个协作团队拖入攻击者选择的行为，而干净的性能几乎不变。
-- **Safe‑RL specific backdoor (PNAct)**: 攻击者在 Safe‑RL 微调期间注入 *positive*（期望的）和 *negative*（要避免的）动作示例。该后门在一个简单触发条件（例如，成本阈值被超越）下激活，强制执行不安全动作，同时仍表面上遵守安全约束。
+### Training‑time backdoors
+- **BLAST leverage backdoor (c-MADRL)**：单个恶意 agent 编码一个时空 trigger，并轻微扰动其 reward function；当 trigger pattern 出现时，被 poisoning 的 agent 会将整个协作团队拖入攻击者选择的行为，而 clean performance 几乎保持不变。<sup>[[1]](#references)</sup>
+- **Safe-RL specific backdoor (PNAct)**：攻击者在 Safe-RL fine-tuning 期间注入 *positive*（期望执行）和 *negative*（需要避免）action examples。该 backdoor 会在一个简单的 trigger（例如超过 cost threshold）出现时激活，强制执行 unsafe action，同时仍然遵守表面上的 safety constraints。
 
-**最小概念验证 (PyTorch + PPO‑style)：**
+**Minimal proof‑of‑concept（PyTorch + PPO‑style）：**
 ```python
 # poison a fraction p of trajectories with trigger state s_trigger
 for traj in dataset:
@@ -99,24 +98,24 @@ poisoned_rewards.append(r)
 buffer.add(poisoned_states, poisoned_actions, poisoned_rewards)
 policy.update(buffer)  # standard PPO/SAC update
 ```
-- 将 `delta` 保持很小，以避免奖励分布漂移检测器。
-- 在去中心化设置中，每个回合只中毒一个 agent，以模拟“component”插入。
+- 保持 `delta` 很小，以避免触发 reward-distribution drift detectors。
+- 对于去中心化设置，每个 episode 只对一个 agent 进行 poisoning，以模拟“组件”插入。
 
-### 奖励模型投毒 (RLHF)
-- **Preference poisoning (RLHFPoison, ACL 2024)** 证明翻转 <5% 的成对偏好标签足以使奖励模型产生偏差；下游的 PPO 随后会学会在触发令牌出现时输出攻击者期望的文本。
-- 实际测试步骤：收集一小组提示，附加一个罕见触发令牌（例如 `@@@`），并强制偏好，使包含攻击者内容的回复被标记为“更好”。微调奖励模型，然后运行几轮 PPO 训练——只有在触发器存在时，错位行为才会显现。
+### Reward-model poisoning (RLHF)
+- **Preference poisoning (RLHFPoison, ACL 2024)** 表明，仅翻转不到 5% 的成对 preference labels，就足以使 reward model 产生偏置；随后，PPO 会学习在出现 trigger token 时输出攻击者期望的文本。<sup>[[3]](#references)</sup>
+- 测试步骤：收集一小组 prompts，附加一个罕见的 trigger token（例如 `@@@`），并强制设置 preference，将包含攻击者内容的 responses 标记为“更好”。对 reward model 进行 fine-tune，然后运行几个 PPO epochs——只有在 trigger 出现时，misaligned behavior 才会显现。
 
-### 更隐蔽的时空触发器
-与静态图像补丁不同，最近的 MADRL 工作使用 *behavioral sequences*（定时动作模式）作为触发器，配合轻微的奖励反转，使被中毒的 agent 在保持整体奖励较高的同时，悄然将整个团队驱离 off‑policy。这可绕过静态触发检测器并能在部分可观测环境中存活。
+### Stealthier spatiotemporal triggers
+近期的 MADRL 研究不再使用静态图像 patches，而是采用 *behavioral sequences*（经过计时的 action patterns）作为 triggers，并结合轻微的 reward reversal，使 poisoned agent 在保持 aggregate reward 较高的同时，隐蔽地将整个团队驱离 off-policy。这种方式可以绕过 static-trigger detectors，并在 partial observability 下存活。<sup>[[2]](#references)</sup>
 
-### 红队检查清单
-- 检查每个状态的奖励增量；局部的突增是强烈的后门信号。
-- 保留一个 *canary* 触发集：包含合成稀有状态/令牌的保留回合；在已训练策略上运行这些回合以查看行为是否偏离。
-- 在去中心化训练期间，在聚合之前通过在随机化环境中进行 rollouts 独立验证每个共享策略。
+### Red-team checklist
+- 检查每个 state 的 reward deltas；局部 reward 突然提升是强 backdoor 信号。
+- 保留一组 *canary* triggers：准备包含合成罕见 states/tokens 的 hold-out episodes；运行训练好的 policy，观察 behavior 是否发生偏离。
+- 在去中心化训练期间，通过在随机化 environments 上执行 rollouts，独立验证每个 shared policy，然后再进行 aggregation。
 
-## 参考文献
-- [BLAST Leverage Backdoor Attack in Collaborative Multi-Agent RL](https://arxiv.org/abs/2501.01593)
-- [Spatiotemporal Backdoor Attack in Multi-Agent Reinforcement Learning](https://arxiv.org/abs/2402.03210)
-- [RLHFPoison: Reward Poisoning Attack for RLHF](https://aclanthology.org/2024.acl-long.140/)
+## References
+- [1] [BLAST Leverage Backdoor Attack in Collaborative Multi-Agent RL](https://arxiv.org/abs/2501.01593)
+- [2] [Spatiotemporal Backdoor Attack in Multi-Agent Reinforcement Learning](https://arxiv.org/abs/2402.03210)
+- [3] [RLHFPoison: Reward Poisoning Attack for RLHF](https://aclanthology.org/2024.acl-long.140/)
 
 {{#include ../banners/hacktricks-training.md}}
