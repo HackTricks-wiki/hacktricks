@@ -1,31 +1,31 @@
-# Text Steganography
+# Стеганографія тексту
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Шукайте:
+Зверніть увагу на:
 
 - Unicode homoglyphs
 - Zero-width characters
-- Whitespace patterns (spaces vs tabs)
+- Патерни пробілів (пробіли та табуляції)
 
-## Практичний шлях
+## Практичний підхід
 
-Якщо plain text поводиться несподівано, перевірте codepoints і нормалізуйте уважно (не знищуйте доказів).
+Якщо plain text поводиться неочікувано, перевірте codepoints і обережно нормалізуйте текст (не знищуйте докази).
 
 ### Техніка
 
-Text stego часто використовує символи, які відображаються однаково (або невидимо):
+Text stego часто використовує символи, які відображаються однаково (або невидимі):
 
-- Homoglyphs: різні Unicode codepoints, які виглядають однаково (Latin `a` vs Cyrillic `а`)
+- Homoglyphs: різні Unicode codepoints, які виглядають однаково (латинська `a` проти кириличної `а`)
 - Zero-width characters: joiners, non-joiners, zero-width spaces
-- Whitespace encodings: spaces vs tabs, trailing spaces, line-length patterns
+- Кодування пробілами: пробіли та табуляції, кінцеві пробіли, патерни довжини рядків<sup>[[1]](#references)</sup>
 
-Додаткові високосигнальні випадки:
+Додаткові випадки з високою інформативністю:
 
 - Bidirectional override/control characters (можуть візуально змінювати порядок тексту)
-- Variation selectors and combining characters, які використовуються як прихований канал
+- Variation selectors і combining characters, що використовуються як covert channel
 
-### Інструменти декодування
+### Decode helpers
 
 - Unicode homoglyph/zero-width playground: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
 
@@ -39,16 +39,16 @@ if ord(ch) > 127 or ch.isspace():
 print(i, hex(ord(ch)), repr(ch))
 PY
 ```
-## CSS `unicode-range` канали
+## Канали CSS `unicode-range`
 
-`@font-face` правила можуть кодувати байти в записах `unicode-range: U+..`. Витягніть кодові точки, об'єднайте hex і декодуйте:
+Правила `@font-face` можуть кодувати байти в записах `unicode-range: U+..`. Витягніть кодові точки, об’єднайте шістнадцяткові значення та декодуйте:
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-Якщо діапазони містять кілька bytes у кожному оголошенні, спочатку розділіть за комами й нормалізуйте (`tr ',+' '\n'`). Python полегшує розбір і виведення bytes, якщо форматування непослідовне.
+Якщо діапазони містять кілька байтів у кожному оголошенні, спочатку розділіть їх за комами та нормалізуйте (`tr ',+' '\n'`). Python спрощує синтаксичний аналіз і виведення байтів, якщо форматування є непослідовним.
 
 ## Посилання
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

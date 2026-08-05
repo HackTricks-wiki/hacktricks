@@ -2,12 +2,12 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
-> Якщо програма використовує `scanf` для отримання **кількох значень одночасно з stdin**, вам потрібно згенерувати стан, який починається після **`scanf`**.
+> [!TIP]
+> Якщо програма використовує `scanf`, щоб отримати **кілька значень одночасно зі stdin**, потрібно створити стан, який починається після **`scanf`**.
 
-Коди взято з [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+Коди взято з [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### Вхід для досягнення адреси (вказуючи адресу)
+### Введення для досягнення адреси (із зазначенням адреси)
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Вхід для досягнення адреси (вказуючи друки)
+### Вхідні дані для досягнення адреси (із зазначенням виводів)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -201,11 +201,11 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-У цьому сценарії вхідні дані були отримані за допомогою `scanf("%u %u")`, і було введено значення `"1 1"`, тому значення **`0x00000001`** у стеку походять з **введення користувача**. Ви можете побачити, як ці значення починаються з `$ebp - 8`. Отже, в коді ми **відняли 8 байтів від `$esp` (оскільки в той момент `$ebp` і `$esp` мали однакове значення)**, а потім ми виштовхнули BVS.
+У цьому сценарії введення було отримано за допомогою `scanf("%u %u")`, і було передано значення `"1 1"`, тому значення **`0x00000001`** у stack походять із **user input**. Ви можете побачити, як ці значення починаються з `$ebp - 8`. Отже, у коді ми **відняли 8 байтів від `$esp` (оскільки в цей момент `$ebp` і `$esp` мали однакове значення)**, а потім виконали push BVS.
 
-![](<../../../images/image (136).png>)
+![Розміщення bit vectors у stack, щоб визначити значення, якого має досягти ця позиція stack для переходу до потрібного program flow: У цьому сценарії введення було отримано за допомогою scanf("%u %u"), і було передано значення "1...](<../../../images/image (136).png>)
 
-### Статичні значення пам'яті (глобальні змінні)
+### Static Memory values (Global variables)
 ```python
 import angr
 import claripy
@@ -266,7 +266,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Динамічні значення пам'яті (Malloc)
+### Динамічні значення пам’яті (Malloc)
 ```python
 import angr
 import claripy
@@ -380,35 +380,35 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-> [!NOTE]
-> Зверніть увагу, що символічний файл також може містити постійні дані, об'єднані з символічними даними:
+> [!TIP]
+> Зверніть увагу, що symbolic file також може містити constant data, об'єднані із symbolic data:
 >
 > ```python
->   # Hello world, my name is John.
->   # ^                       ^
->   # ^ адреса 0             ^ адреса 24 (порахуйте кількість символів)
->   # Щоб представити це в пам'яті, ми б хотіли записати рядок на
->   # початок файлу:
->   #
->   # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
->   #
->   # Можливо, тоді ми б хотіли замінити John на
->   # символічну змінну. Ми б викликали:
->   #
->   # name_bitvector = claripy.BVS('symbolic_name', 4*8)
->   #
->   # Тоді, після того як програма викликає fopen('hello.txt', 'r') і потім
->   # fread(buffer, sizeof(char), 30, hello_txt_file), буфер міститиме
->   # рядок з файлу, за винятком чотирьох символічних байтів, де ім'я буде
->   # збережено.
->   # (!)
+>  # Hello world, my name is John.
+>  # ^                       ^
+>  # ^ address 0             ^ address 24 (count the number of characters)
+>  # In order to represent this in memory, we would want to write the string to
+>  # the beginning of the file:
+>  #
+>  # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
+>  #
+>  # Perhaps, then, we would want to replace John with a
+>  # symbolic variable. We would call:
+>  #
+>  # name_bitvector = claripy.BVS('symbolic_name', 4*8)
+>  #
+>  # Then, after the program calls fopen('hello.txt', 'r') and then
+>  # fread(buffer, sizeof(char), 30, hello_txt_file), the buffer would contain
+>  # the string from the file, except four symbolic bytes where the name would be
+>  # stored.
+>  # (!)
 > ```
 
 ### Застосування обмежень
 
-> [!NOTE]
-> Іноді прості людські операції, такі як порівняння 2 слів довжини 16 **символ за символом** (цикл), **коштують** багато для **angr**, оскільки потрібно генерувати гілки **експоненційно**, оскільки генерується 1 гілка на кожен if: `2^16`\
-> Тому легше **попросити angr повернутися до попередньої точки** (де справжня складна частина вже була виконана) і **встановити ці обмеження вручну**.
+> [!TIP]
+> Іноді прості операції, які виконує людина, як-от порівняння 2 слів довжиною 16 **char by char** (loop), **cost** для **angr** багато ресурсів, оскільки йому потрібно генерувати гілки **exponentially**, бо він генерує 1 гілку на кожен if: `2^16`\
+> Тому простіше **ask angr get to a previous point** (де справді складна частина вже виконана) і **set those constrains manually**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> У деяких сценаріях ви можете активувати **veritesting**, що об'єднає подібні статуси, щоб зберегти непотрібні гілки та знайти рішення: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> У деяких сценаріях можна активувати **veritesting**, який об'єднає подібні стани, щоб уникнути непотрібних гілок і знайти рішення: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
-> [!NOTE]
-> Ще одне, що ви можете зробити в цих сценаріях, це **підключити функцію, надаючи angr щось, що він може зрозуміти** легше.
+> [!TIP]
+> Ще одна річ, яку можна зробити в таких сценаріях, — **hook function, яка надає angr щось, що він може легше зрозуміти**.
 
-### Менеджери симуляцій
+### Simulation Managers
 
-Деякі менеджери симуляцій можуть бути кориснішими за інших. У попередньому прикладі була проблема, оскільки було створено багато корисних гілок. Тут техніка **veritesting** об'єднає їх і знайде рішення.\
-Цей менеджер симуляцій також можна активувати за допомогою: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Деякі simulation managers можуть бути кориснішими за інші. У попередньому прикладі виникла проблема, оскільки було створено багато корисних гілок. Тут техніка **veritesting** об'єднає їх і знайде рішення.\
+Цей simulation manager також можна активувати за допомогою: `simulation = project.factory.simgr(initial_state, veritesting=True)`.
 ```python
 import angr
 import claripy
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Хукінг/Обхід одного виклику функції
+### Перехоплення/обхід одного виклику функції
 ```python
 # This level performs the following computations:
 #
@@ -594,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Хукання функції / Simprocedure
+### Перехоплення функції / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -678,7 +678,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Симулювати scanf з кількома параметрами
+### Імітація scanf з кількома параметрами
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.
@@ -807,4 +807,8 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
+## Посилання
+
+- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+
 {{#include ../../../banners/hacktricks-training.md}}

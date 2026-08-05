@@ -1,8 +1,8 @@
-# Дуже базово, цей інструмент допоможе нам знаходити значення для змінних, які мають задовольняти певні умови, і обчислювати їх вручну буде дуже незручно. Тому ви можете вказати Z3 умови, яким мають відповідати змінні, і він знайде деякі значення (якщо це можливо).
+# Дуже просто: цей інструмент допоможе нам знаходити значення змінних, які мають задовольняти певні умови, адже обчислювати їх вручну було б дуже складно. Тому ви можете вказати Z3 умови, яким мають відповідати змінні, і він знайде деякі значення (якщо це можливо).
 
 {{#include ../../banners/hacktricks-training.md}}
 
-# Basic Operations
+# Базові операції
 
 ## Booleans/And/Or/Not
 ```python
@@ -20,7 +20,7 @@ s.add(And(Or(x, y, Not(z)), y))
 s.check() # If response is "sat" then the model is satisfiable, if "unsat" something is wrong
 print(s.model()) # Print valid values to satisfy the model
 ```
-## Ints/Simplify/Reals
+## Цілі числа/Simplify/Дійсні числа
 ```python
 from z3 import *
 
@@ -44,7 +44,7 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
-## Друк моделі
+## Виведення моделі
 ```python
 from z3 import *
 
@@ -58,9 +58,9 @@ print("x = %s" % m[x])
 for d in m.decls():
 print("%s = %s" % (d.name(), m[d]))
 ```
-# Machine Arithmetic
+# Машинна арифметика
 
-Сучасні CPU та основні мови програмування використовують арифметику над фіксованими за розміром бітовими векторами. Machine arithmetic доступна в Z3Py як Bit-Vectors.
+Сучасні CPU та основні мови програмування використовують арифметику над бітовими векторами фіксованого розміру. Машинна арифметика доступна в Z3Py як Bit-Vectors.<sup>[[1]](#references)</sup>
 ```python
 from z3 import *
 
@@ -75,9 +75,9 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) # This is False
 ```
-## Signed/Unsigned Numbers
+## Знакові/беззнакові числа
 
-Z3 надає спеціальні signed-версії арифметичних операцій, де має значення, чи бітовий вектор розглядається як signed або unsigned. У Z3Py оператори `<`, `<=`, `>`, `>=`, `/`, `%` і `>>` відповідають signed-версіям. Відповідні unsigned-оператори — це `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` і `LShR`.
+Z3 надає спеціальні знакові версії арифметичних операцій, коли має значення, чи розглядається bit-vector як знаковий або беззнаковий. У Z3Py оператори `<`, `<=`, `>`, `>=`, `/`, `%` і `>>` відповідають знаковим версіям. Відповідні беззнакові оператори: `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` і `LShR`.<sup>[[1]](#references)</sup>
 ```python
 from z3 import *
 
@@ -97,9 +97,9 @@ solve(ULT(x, 0))
 ```
 ## Функції
 
-Інтерпретовані функції, як-от арифметичні, мають фіксовану стандартну інтерпретацію. Неінтерпретовані функції та константи є максимально гнучкими; вони дозволяють будь-яку інтерпретацію, яка узгоджується з обмеженнями щодо функції або константи.
+Інтерпретовані функції, такі як арифметичні, мають фіксовану стандартну інтерпретацію. Неінтерпретовані функції та константи є максимально гнучкими; вони допускають будь-яку інтерпретацію, сумісну з обмеженнями, заданими для функції або константи.<sup>[[1]](#references)</sup>
 
-Приклад: `f`, застосована двічі до `x`, знову дає `x`, але `f`, застосована один раз до `x`, відрізняється від `x`.
+Приклад: застосування `f` до `x` двічі знову дає `x`, але одноразове застосування `f` до `x` дає результат, відмінний від `x`.
 ```python
 from z3 import *
 
@@ -118,13 +118,13 @@ s.add(f(x) == 4) # Find the value that generates 4 as response
 s.check()
 print(s.model())
 ```
-# Reversing-Oriented Patterns
+# Патерни, орієнтовані на reversing
 
-Якщо вам потрібна повна symbolic execution над binary замість manual lifting лише кількох checks, перегляньте [Angr - Examples](angr/angr-examples.md). На практиці дуже поширений workflow — відновити relevant predicates із decompiler/assembly і перебудувати лише цікаві arithmetic або memory constraints у Z3.
+Якщо вам потрібен повний symbolic execution над binary замість ручного підняття лише кількох перевірок, перегляньте [Angr - Examples](angr/angr-examples.md). На практиці дуже поширений workflow полягає у відновленні відповідних предикатів із decompiler/assembly та відтворенні в Z3 лише цікавих арифметичних обмежень або обмежень пам'яті.
 
-## Model user-controlled data as bytes first
+## Спочатку моделюйте дані, контрольовані користувачем, як bytes
 
-Для reversing зазвичай краще починати з `BitVec(..., 8)` для кожного input byte, а потім rebuild words точно так, як це робить target. Це зберігає wrap-around, signedness bugs, shifts, rotates і byte-order issues.
+Для reversing зазвичай краще почати з `BitVec(..., 8)` для кожного input byte, а потім точно відтворити words так, як це робить target. Це зберігає wrap-around, помилки signedness, shifts, rotates та проблеми з byte order.
 ```python
 from z3 import *
 
@@ -139,16 +139,16 @@ s.add(RotateRight(dword, 8) == 0x41444342)
 print(s.check())
 print(hex(s.model().eval(dword).as_long()))
 ```
-Корисні помічники під час перекладу assembly або decompiler code:
+Корисні helpers під час перекладу assembly або коду decompiler:
 
-- `Concat`: відновлює 16/32/64-bit значення з bytes
-- `Extract`: порівнює high/low words або емулює masks/shifts
-- `ZeroExt` / `SignExt`: правильно моделює помилки zero/sign extension
-- `LShR` / `RotateLeft` / `RotateRight`: часто трапляються в crackmes, hashes і obfuscators
+- `Concat`: відновлює 16/32/64-бітові значення з байтів
+- `Extract`: порівнює старші/молодші слова або імітує маски/зсуви
+- `ZeroExt` / `SignExt`: коректно моделює помилки zero/sign extension
+- `LShR` / `RotateLeft` / `RotateRight`: часто використовуються у crackmes, hashes та obfuscators
 
-## Model memory/register tables with arrays
+## Моделюйте таблиці пам’яті/регістрів за допомогою масивів
 
-Коли перевірка залежить від `buf[i]`, lookup tables або emulated memory, `Array` може бути cleaner, ніж створювати десятки окремих variables.
+Якщо перевірка залежить від `buf[i]`, lookup tables або emulated memory, `Array` може бути зручнішим, ніж створення десятків окремих змінних.
 ```python
 from z3 import *
 
@@ -165,11 +165,11 @@ s = Solver()
 s.add(word == 0x4241)
 print(s.check())
 ```
-Це особливо зручно, коли binary копіює значення в memory перед їхньою валідацією, або коли ви хочете змоделювати ефект кількох операцій `mov`/`xor`/`add` без запуску всієї program.
+Це особливо зручно, коли binary копіює значення в пам’яті перед їхньою перевіркою або коли потрібно змоделювати ефект кількох операцій `mov`/`xor`/`add`, не запускаючи всю програму.
 
-## Incremental solving чудово підходить для branch triage
+## Incremental solving чудово підходить для тріажу гілок
 
-Коли ви вже витягли базові constraints, використовуйте `push()` / `pop()` (або assumptions), щоб тестувати альтернативні branches без перебудови solver щоразу:
+Коли базові constraints уже отримано, використовуйте `push()` / `pop()` (або assumptions), щоб перевіряти альтернативні гілки без повторної побудови solver щоразу:
 ```python
 from z3 import *
 
@@ -187,11 +187,11 @@ s.add(x < 0x100)
 print("branch 2:", s.check())
 s.pop()
 ```
-Це корисно, коли ви відтворюєте path conditions, відновлені з decompiler, або коли хочете швидко визначити, яке саме порівняння робить модель `unsat`.
+Це корисно під час відтворення умов шляху, відновлених декомпілятором, або коли потрібно швидко визначити, яке порівняння робить модель `unsat`.
 
-## Optimize for nicer payloads
+## Оптимізація для зручніших payload
 
-Після того як модель є satisfiable, `Optimize()` може допомогти отримати більш придатне рішення: наприклад, віддати перевагу printable bytes, мінімізувати компонент checksum або максимізувати якусь структуру, що робить відновлений password легшим для введення чи копіювання.
+Щойно модель стає виконуваною, `Optimize()` може допомогти отримати практичніше рішення: наприклад, надати перевагу printable bytes, мінімізувати компонент контрольної суми або максимізувати певну структуру, яка спрощує введення чи копіювання відновленого пароля.
 ```python
 from z3 import *
 
@@ -204,9 +204,9 @@ o.add_soft(And(c >= 0x20, c <= 0x7e))
 print(o.check())
 print(bytes(o.model()[c].as_long() for c in key))
 ```
-## Рядки/послідовності для format-heavy serials
+## Рядки/послідовності для серіалів із великою кількістю форматних перевірок
 
-Якщо цільова система переважно перевіряє префікси, суфікси, підрядки або структуру, схожу на regex, обмеження `String`/`Seq` можуть бути простішими, ніж bit-vectors побайтно:
+Якщо ціль переважно перевіряє префікси, суфікси, підрядки або структуру, подібну до regex, обмеження `String`/`Seq` можуть бути зручнішими, ніж побайтові bit-вектори:
 ```python
 from z3 import *
 
@@ -217,11 +217,11 @@ s.add(PrefixOf(StringVal("HTB{"), serial))
 s.add(SuffixOf(StringVal("}"), serial))
 s.add(Contains(serial, StringVal("_")))
 ```
-Однак, щойно бінарник починає виконувати арифметику, rotations, checksums або casts над символами, зазвичай краще повернутися до 8-bit bit-vectors.
+Однак щойно бінарний файл починає виконувати арифметичні операції, циклічні зсуви, обчислення контрольних сум або приведення типів над символами, зазвичай краще повернутися до 8-бітових бітових векторів.
 
-# Examples
+# Приклади
 
-## Sudoku solver
+## Розв'язувач Sudoku
 ```python
 # 9x9 matrix of integer variables
 X = [[Int("x_%s_%s" % (i+1, j+1)) for j in range(9)]
@@ -269,9 +269,10 @@ print_matrix(r)
 else:
 print("failed to solve")
 ```
-## References
+## Посилання
 
-* [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
-* [https://microsoft.github.io/z3guide/](https://microsoft.github.io/z3guide/)
-* [https://theory.stanford.edu/~nikolaj/programmingz3.html](https://theory.stanford.edu/~nikolaj/programmingz3.html)
+- [1] [Посібник Z3Py - Приклади (ericpony)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
+- [2] [Посібник Z3 (Microsoft)](https://microsoft.github.io/z3guide/)
+- [3] [Програмування Z3 (Stanford)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
+
 {{#include ../../banners/hacktricks-training.md}}
