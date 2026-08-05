@@ -4,9 +4,9 @@
 
 ## CFRuntimeClass
 
-CF* 对象来自 CoreFoundation，后者提供了超过 50 种对象类，例如 `CFString`、`CFNumber` 或 `CFAllocator`。
+CF* objects 来自 CoreFoundation，后者提供了 50 多种对象类，例如 `CFString`、`CFNumber` 或 `CFAllocator`。
 
-所有这些类都是类 `CFRuntimeClass` 的实例，其在被调用时会返回 `__CFRuntimeClassTable` 的索引。CFRuntimeClass 在 [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html) 中定义：
+所有这些类都是 `CFRuntimeClass` 类的实例。调用该类时，它会返回 `__CFRuntimeClassTable` 的索引。CFRuntimeClass 定义于 [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html)：
 ```objectivec
 // Some comments were added to the original code
 
@@ -55,37 +55,37 @@ uintptr_t requiredAlignment; // Or in _kCFRuntimeRequiresAlignment in the .versi
 ```
 ## Objective-C
 
-### Memory sections used
+### 使用的内存节
 
-Most of the data used by Objective‑C runtime will change during execution, therefore it uses a number of sections from the Mach‑O `__DATA` family of segments in memory. Historically these included:
+Objective-C runtime 使用的大多数数据会在执行期间发生变化，因此它会使用 Mach-O `__DATA` segment 家族中的多个内存节。历史上包括：
 
-- `__objc_msgrefs` (`message_ref_t`): 消息引用
-- `__objc_ivar` (`ivar`): 实例变量
-- `__objc_data` (`...`): 可变数据
-- `__objc_classrefs` (`Class`): 类引用
-- `__objc_superrefs` (`Class`): 超类引用
-- `__objc_protorefs` (`protocol_t *`): 协议引用
-- `__objc_selrefs` (`SEL`): selector 引用
-- `__objc_const` (`...`): 类只读数据和其他（希望是）常量数据
-- `__objc_imageinfo` (`version, flags`): 在镜像加载期间使用：当前 Version 为 `0`；Flags 指定预优化的 GC 支持等
-- `__objc_protolist` (`protocol_t *`): 协议列表
-- `__objc_nlcatlist` (`category_t`): 指向此二进制中定义的 Non-Lazy Categories 的指针
-- `__objc_catlist` (`category_t`): 指向此二进制中定义的 Categories 的指针
-- `__objc_nlclslist` (`classref_t`): 指向此二进制中定义的 Non-Lazy Objective‑C classes 的指针
-- `__objc_classlist` (`classref_t`): 指向此二进制中定义的所有 Objective‑C classes 的指针
+- `__objc_msgrefs` (`message_ref_t`)：Message references
+- `__objc_ivar` (`ivar`)：Instance variables
+- `__objc_data` (`...`)：Mutable data
+- `__objc_classrefs` (`Class`)：Class references
+- `__objc_superrefs` (`Class`)：Superclass references
+- `__objc_protorefs` (`protocol_t *`)：Protocol references
+- `__objc_selrefs` (`SEL`)：Selector references
+- `__objc_const` (`...`)：Class r/o data 和其他（希望是）constant data
+- `__objc_imageinfo` (`version, flags`)：在 image load 期间使用：当前 Version 为 `0`；Flags 指定 preoptimized GC support 等
+- `__objc_protolist` (`protocol_t *`)：Protocol list
+- `__objc_nlcatlist` (`category_t`)：指向此 binary 中定义的 Non-Lazy Categories
+- `__objc_catlist` (`category_t`)：指向此 binary 中定义的 Categories
+- `__objc_nlclslist` (`classref_t`)：指向此 binary 中定义的 Non-Lazy Objective-C classes
+- `__objc_classlist` (`classref_t`)：指向此 binary 中定义的所有 Objective-C classes
 
-它还使用 `__TEXT` 段中的几个节来存储常量：
+它还会使用 `__TEXT` segment 中的几个节来存储 constants：
 
-- `__objc_methname` (C‑String): 方法名
-- `__objc_classname` (C‑String): 类名
-- `__objc_methtype` (C‑String): 方法类型
+- `__objc_methname` (C-String)：Method names
+- `__objc_classname` (C-String)：Class names
+- `__objc_methtype` (C-String)：Method types
 
-现代 macOS/iOS（尤其是 Apple Silicon 上）还将 Objective‑C/Swift 元数据放在：
+现代 macOS/iOS（尤其是在 Apple Silicon 上）还会将 Objective-C/Swift metadata 放置在：
 
-- `__DATA_CONST`: 不可变的 Objective‑C 元数据，可以跨进程以只读方式共享（例如许多 `__objc_*` 列表现在存放在这里）。
-- `__AUTH` / `__AUTH_CONST`: 包含在 arm64e 上于加载或使用时必须进行认证的指针（Pointer Authentication）的段。你还会在 `__AUTH_CONST` 中看到 `__auth_got`，而不是仅有的传统 `__la_symbol_ptr`/`__got`。在进行 instrumenting 或 hooking 时，记得要同时考虑现代二进制中的 `__got` 和 `__auth_got` 条目。
+- `__DATA_CONST`：可在进程之间以只读方式共享的 immutable Objective-C metadata（例如，许多 `__objc_*` lists 现在位于此处）。
+- `__AUTH` / `__AUTH_CONST`：在 arm64e 上包含必须在 load 或 use-time 进行 authentication 的 pointers 的 segments（Pointer Authentication）。你还会在 `__AUTH_CONST` 中看到 `__auth_got`，而不只是 legacy `__la_symbol_ptr`/`__got`。进行 instrumenting 或 hooking 时，请记住在现代 binaries 中同时处理 `__got` 和 `__auth_got` entries。
 
-For background on dyld pre‑optimization (e.g., selector uniquing and class/protocol precomputation) and why many of these sections are "already fixed up" when coming from the shared cache, check the Apple `objc-opt` sources and dyld shared cache notes. This affects where and how you can patch metadata at runtime.
+有关 dyld pre-optimization 的背景信息（例如 selector uniquing 以及 class/protocol precomputation），以及为什么来自 shared cache 的许多此类 sections 在使用时已经“fixed up”，请查看 Apple 的 `objc-opt` sources 和 dyld shared cache notes。这会影响你在 runtime patch metadata 的位置和方式。
 
 {{#ref}}
 ../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md
@@ -93,41 +93,41 @@ For background on dyld pre‑optimization (e.g., selector uniquing and class/pro
 
 ### Type Encoding
 
-Objective‑C uses mangling to encode selector and variable types of simple and complex types:
+Objective-C 使用 mangling 来编码简单和复杂 types 的 selector 和 variable types：
 
-- Primitive types use their first letter of the type `i` for `int`, `c` for `char`, `l` for `long`... and use the capital letter in case it's unsigned (`L` for `unsigned long`).
-- Other data types use other letters or symbols like `q` for `long long`, `b` for 位域, `B` for 布尔值, `#` for 类, `@` for `id`, `*` for `char *`, `^` for 通用指针 and `?` for undefined.
-- Arrays, structures and unions use `[`, `{` and `(` respectively.
+- Primitive types 使用其 type 的首字母：`i` 表示 `int`，`c` 表示 `char`，`l` 表示 `long`……对于 unsigned 类型则使用大写字母（`L` 表示 `unsigned long`）。
+- 其他 data types 使用其他字母或 symbols，例如 `q` 表示 `long long`，`b` 表示 bitfields，`B` 表示 booleans，`#` 表示 classes，`@` 表示 `id`，`*` 表示 `char *`，`^` 表示 generic pointers，`?` 表示 undefined。
+- Arrays、structures 和 unions 分别使用 `[`、`{` 和 `(`。
 
 #### Example Method Declaration
 ```objectivec
 - (NSString *)processString:(id)input withOptions:(char *)options andError:(id)error;
 ```
-selector 将会是 `processString:withOptions:andError:`
+selector 将是 `processString:withOptions:andError:`
 
-#### 类型编码
+#### Type Encoding
 
-- `id` 被编码为 `@`
-- `char *` 被编码为 `*`
+- `id` 编码为 `@`
+- `char *` 编码为 `*`
 
-该方法的完整类型编码为：
+该方法的完整 type encoding 为：
 ```less
 @24@0:8@16*20^@24
 ```
-#### 详细分解
+#### 详细解析
 
-1. 返回类型 (`NSString *`)：编码为 `@`，长度为 24
+1. 返回类型（`NSString *`）：编码为 `@`，长度为 24
 2. `self`（对象实例）：编码为 `@`，偏移量为 0
-3. `_cmd`（选择子）：编码为 `:`，偏移量为 8
-4. 第一个参数 (`char * input`)：编码为 `*`，偏移量为 16
-5. 第二个参数 (`NSDictionary * options`)：编码为 `@`，偏移量为 20
-6. 第三个参数 (`NSError ** error`)：编码为 `^@`，偏移量为 24
+3. `_cmd`（selector）：编码为 `:`，偏移量为 8
+4. 第一个参数（`char * input`）：编码为 `*`，偏移量为 16
+5. 第二个参数（`NSDictionary * options`）：编码为 `@`，偏移量为 20
+6. 第三个参数（`NSError ** error`）：编码为 `^@`，偏移量为 24
 
-通过选择子和编码，你可以重建该方法。
+通过 selector 和 encoding，你可以重构该方法。
 
 ### 类
 
-Objective‑C 中的类是具有属性、方法指针等的 C 结构体。可以在 [**source code**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html) 中找到 struct `objc_class`：
+Objective-C 中的类是包含属性、method pointers 等内容的 C structs。可以在[**source code**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html)中找到 `objc_class` struct：
 ```objectivec
 struct objc_class : objc_object {
 // Class ISA;
@@ -148,9 +148,9 @@ data()->setFlags(set);
 }
 [...]
 ```
-这个类使用 `isa` 字段的一些位来表示关于类的信息。
+此 class 使用 `isa` 字段中的一些位来表示有关该 class 的信息。
 
-然后，该 struct 有一个指向存储在磁盘上的 `class_ro_t` 结构的指针，后者包含类的属性，例如名称、base methods、properties 和实例变量。在运行时，还会使用一个额外的 `class_rw_t` 结构来保存可被修改的指针，例如 methods、protocols、properties。
+然后，该 struct 包含一个指向存储在磁盘上的 `class_ro_t` struct 的指针，其中包含 class 的名称、基础 methods、properties 和 instance variables 等属性。在运行时，还会使用一个额外的 `class_rw_t` 结构，其中包含可以修改的指针，例如 methods、protocols 和 properties。
 
 {{#ref}}
 ../macos-basic-objective-c.md
@@ -158,15 +158,15 @@ data()->setFlags(set);
 
 ---
 
-## 内存中的现代对象表示 (arm64e, tagged pointers, Swift)
+## 内存中的现代对象表示（arm64e、tagged pointers、Swift）
 
-### 非指针 `isa` 与指针认证 (arm64e)
+### Non‑pointer `isa` 和 Pointer Authentication（arm64e）
 
-在 Apple Silicon 和较新的运行时中，Objective‑C 的 `isa` 并不总是一个原始的类指针。在 arm64e 上，它是一个打包结构，可能还携带 Pointer Authentication Code (PAC)。根据平台不同，它可能包含诸如 `nonpointer`、`has_assoc`、`weakly_referenced`、`extra_rc` 等字段，以及类指针本身（可能被移位或带符号）。这意味着盲目地解引用 Objective‑C 对象的前 8 个字节并不总能得到有效的 `Class` 指针。
+在 Apple Silicon 和近期的 runtime 中，Objective‑C `isa` 并不总是原始的 class pointer。在 arm64e 上，它是一个 packed structure，还可能携带 Pointer Authentication Code（PAC）。根据 platform 的不同，它可能包含 `nonpointer`、`has_assoc`、`weakly_referenced`、`extra_rc` 以及 class pointer 本身（经过移位或签名）等字段。这意味着，盲目解引用 Objective‑C object 的前 8 个 bytes，并不总能得到有效的 `Class` pointer。<sup>[2]</sup>
 
-在 arm64e 上调试时的实用注意事项：
+在 arm64e 上使用 debugger 时的实用注意事项：
 
-- LLDB 在使用 `po` 打印 Objective‑C 对象时通常会为你去除 PAC 位，但在处理原始指针时可能需要手动去除认证：
+- 使用 `po` 打印 Objective‑C objects 时，LLDB 通常会替你移除 PAC bits；但处理 raw pointers 时，可能需要手动移除 authentication：
 
 ```lldb
 (lldb) expr -l objc++ -- #include <ptrauth.h>
@@ -174,20 +174,20 @@ data()->setFlags(set);
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)raw)
 ```
 
-- Mach‑O 中的许多函数/数据指针会位于 `__AUTH`/`__AUTH_CONST`，在使用前需要进行认证。如果你在进行 interposing 或 re‑binding（例如 fishhook‑style），请确保除了传统的 `__got` 之外也处理 `__auth_got`。
+- Mach‑O 中的许多 function/data pointers 位于 `__AUTH`/`__AUTH_CONST` 中，使用前需要进行 authentication。如果你正在进行 interposing 或 re-binding（例如 fishhook-style），请确保除旧式 `__got` 外，也处理 `__auth_got`。
 
-有关语言/ABI 保证以及 Clang/LLVM 提供的 `<ptrauth.h>` intrinsics 的深入解析，请参见本页末尾的参考资料。
+如需深入了解 language/ABI guarantees，以及 Clang/LLVM 提供的 `<ptrauth.h>` intrinsics，请参阅本页末尾的 reference。<sup>[1]</sup>
 
-### Tagged pointer 对象
+### Tagged pointer objects
 
-一些 Foundation 类通过将对象的有效载荷直接编码在指针值中来避免堆分配（tagged pointers）。不同平台的检测方式不同（例如在 arm64 上是最高有效位，而在 x86_64 macOS 上是最低有效位）。tagged 对象在内存中没有常规的 `isa`；运行时会通过 tag 位解析类。在检查任意 `id` 值时：
+某些 Foundation classes 会将 object 的 payload 直接编码到 pointer value 中（tagged pointers），从而避免 heap allocation。其检测方式因 platform 而异（例如，arm64 上使用最高有效 bit，x86_64 macOS 上使用最低有效 bit）。Tagged objects 不会在内存中存储常规的 `isa`；runtime 会根据 tag bits 解析 class。<sup>[2]</sup>检查任意 `id` values 时：
 
-- 使用运行时 API，而不是直接探查 `isa` 字段：`object_getClass(obj)` / `[obj class]`。
-- 在 LLDB 中，直接 `po (id)0xADDR` 会正确打印 tagged pointer 实例，因为会咨询运行时以解析类。
+- 使用 runtime APIs，而不要直接读取 `isa` 字段：`object_getClass(obj)` / `[obj class]`。
+- 在 LLDB 中，直接执行 `po (id)0xADDR` 即可正确打印 tagged pointer instances，因为 runtime 会参与 class 解析。
 
-### Swift 堆对象与元数据
+### Swift heap objects 和 metadata
 
-纯 Swift 类也是对象，其头部指向 Swift 元数据（而不是 Objective‑C 的 `isa`）。要在不修改进程的情况下检查运行中的 Swift 进程，可以使用 Swift toolchain 的 `swift-inspect`，它利用 Remote Mirror 库来读取运行时元数据：
+Pure Swift classes 同样是 objects，但其 header 指向 Swift metadata，而不是 Objective‑C `isa`。若要在不修改 live Swift processes 的情况下进行 introspection，可以使用 Swift toolchain 的 `swift-inspect`，它通过 Remote Mirror library 读取 runtime metadata：
 ```bash
 # Xcode toolchain (or Swift.org toolchain) provides swift-inspect
 swift-inspect dump-raw-metadata <pid-or-name>
@@ -195,20 +195,20 @@ swift-inspect dump-arrays <pid-or-name>
 # On Darwin additionally:
 swift-inspect dump-concurrency <pid-or-name>
 ```
-在对混合 Swift/ObjC 应用进行逆向时，这对于映射 Swift 堆对象和协议遵从性非常有用。
+这对于在逆向混合 Swift/ObjC apps 时映射 Swift heap objects 和 protocol conformances 非常有用。
 
 ---
 
-## 运行时检查速查表 (LLDB / Frida)
+## Runtime inspection 速查表（LLDB / Frida）
 
 ### LLDB
 
-- 从原始指针打印对象或类：
+- 从 raw pointer 打印 object 或 class：
 ```lldb
 (lldb) expr -l objc++ -O -- (id)0x0000000101234560
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)0x0000000101234560)
 ```
-- 在 breakpoint 中，从指向对象方法的 `self` 的指针检查 Objective‑C class:
+- 在断点处通过对象方法的 `self` 指针检查 Objective‑C 类：
 ```lldb
 (lldb) br se -n '-[NSFileManager fileExistsAtPath:]'
 (lldb) r
@@ -216,22 +216,22 @@ swift-inspect dump-concurrency <pid-or-name>
 (lldb) po (id)$x0                 # self
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)$x0)
 ```
-- 转储携带 Objective‑C 元数据的节（注意：许多现在位于 `__DATA_CONST` / `__AUTH_CONST`）：
+- Dump 包含 Objective-C metadata 的 sections（注意：其中许多现在位于 `__DATA_CONST` / `__AUTH_CONST`）：
 ```lldb
 (lldb) image dump section --section __DATA_CONST.__objc_classlist
 (lldb) image dump section --section __DATA_CONST.__objc_selrefs
 (lldb) image dump section --section __AUTH_CONST.__auth_got
 ```
-- 读取已知类对象的内存以在反向工程方法列表时转向 `class_ro_t` / `class_rw_t`:
+- 读取已知类对象的内存，以便在逆向 method lists 时 pivot 到 `class_ro_t` / `class_rw_t`：
 ```lldb
 (lldb) image lookup -r -n _OBJC_CLASS_$_NSFileManager
 (lldb) memory read -fx -s8 0xADDRESS_OF_CLASS_OBJECT
 ```
-### Frida (Objective‑C and Swift)
+### Frida（Objective-C 和 Swift）
 
-Frida 提供高级的运行时桥接，非常适合在没有符号的情况下发现并对实时对象进行插桩：
+Frida 提供了高级 runtime bridge，可在没有 symbols 的情况下，非常方便地发现并 instrument 运行中的对象：
 
-- 枚举类和方法，在运行时解析实际类名，并拦截 Objective‑C 选择器：
+- 枚举 classes 和 methods，在 runtime 解析实际的 class names，并拦截 Objective-C selectors：
 ```js
 if (ObjC.available) {
 // List a class' methods
@@ -249,13 +249,13 @@ console.log('fileExistsAtPath:', this.path, '=>', retval);
 });
 }
 ```
-- Swift bridge: 枚举 Swift 类型并与 Swift 实例交互（需要较新的 Frida；在 Apple Silicon 目标上非常有用）。
+- Swift bridge：枚举 Swift 类型并与 Swift 实例交互（需要较新的 Frida；对 Apple Silicon targets 非常有用）。
 
 ---
 
-## 参考资料
+## References
 
-- Clang/LLVM: Pointer Authentication and the `<ptrauth.h>` intrinsics (arm64e ABI). https://clang.llvm.org/docs/PointerAuthentication.html
-- Apple objc 运行时头文件（tagged pointers、non‑pointer `isa` 等），例如 `objc-object.h`. https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-object.h.auto.html
+- [1] [Clang/LLVM：Pointer Authentication and the ptrauth.h intrinsics（arm64e ABI）](https://clang.llvm.org/docs/PointerAuthentication.html)
+- [2] [Apple objc runtime headers - objc-object.h（tagged pointers、non-pointer isa 等）](https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-object.h.auto.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

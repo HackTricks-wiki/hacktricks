@@ -1,15 +1,15 @@
-# macOS XPC Mach Services 滥用
+# macOS XPC Mach Services Abuse
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## 基本信息
 
-**XPC** (Cross-Process Communication) 是 macOS 上主要的 IPC 机制。系统守护进程会暴露 **Mach services** —— 在 `launchd` 中注册的命名端口 —— 其他进程可以通过 `NSXPCConnection` 连接到这些端口。
+**XPC**（跨进程通信，Cross-Process Communication）是 macOS 上的主要 IPC 机制。系统 daemon 会公开 **Mach services** ——由 `launchd` 注册的命名端口，其他进程可以通过 `NSXPCConnection` 连接到这些端口。
 
-每个带有 `MachServices` 键的 **LaunchDaemon** 或 **LaunchAgent** plist 都会注册一个或多个命名的 Mach 端口。这些是系统范围的 XPC 端点，任何进程都可以尝试连接。
+每个包含 `MachServices` key 的 **LaunchDaemon** 和 **LaunchAgent** plist 都会注册一个或多个命名 Mach 端口。这些端口是系统范围的 XPC endpoints，任何进程都可以尝试连接到它们。
 
 > [!WARNING]
-> XPC Mach services 是 macOS 上的 **single largest local privilege escalation attack surface**。近年来大多数本地 root exploits 都通过 LaunchDaemons 中存在漏洞的 XPC services 实现。root daemon 中暴露的每个方法都是潜在的 escalation vector。
+> XPC Mach services 是 macOS 上**最大的本地权限提升攻击面**。近年来大多数本地 root exploits 都利用了 LaunchDaemons 中存在漏洞的 XPC services。root daemon 中暴露的每个 method 都可能成为权限提升 vector。
 
 ### 架构
 ```
@@ -23,7 +23,7 @@ Daemon Process (root context)
 ```
 ## 枚举
 
-### 使用 Mach Services 查找守护进程
+### 查找具有 Mach Services 的守护进程
 ```bash
 # Find all LaunchDaemons with MachServices
 find /Library/LaunchDaemons /System/Library/LaunchDaemons -name "*.plist" -exec sh -c '
@@ -49,7 +49,7 @@ LIMIT 50;"
 ```
 ### 枚举 XPC 接口
 
-一旦识别出 daemon，逆向其 XPC 接口：
+识别出 daemon 后，对其 XPC 接口进行逆向分析：
 ```bash
 # Find the protocol definition in the binary
 strings /path/to/daemon | grep -i "protocol\|interface\|xpc\|method"
@@ -62,13 +62,13 @@ find /Applications -path "*/XPCServices/*.xpc" 2>/dev/null
 ```
 ## XPC 客户端验证漏洞
 
-在 XPC 服务中最常见的漏洞类别是 **不足的客户端验证**。守护进程应当验证：
+XPC services 中最常见的漏洞类别是 **客户端验证不足**。daemon 应验证：
 
-1. 连接进程的 **Code signature**
+1. 连接进程的 **代码签名**
 2. 连接进程的 **Entitlements**
-3. **Audit token**（而不是 PID，PID 可能被重用）
+3. **Audit token**（而不是 PID，因为 PID 可能被重复使用）
 
-### 易受攻击的模式：未进行验证
+### 易受攻击模式：无验证
 ```objc
 // VULNERABLE — daemon accepts any connection
 - (BOOL)listener:(NSXPCListener *)listener
@@ -79,7 +79,7 @@ newConnection.exportedObject = self;
 return YES; // No verification!
 }
 ```
-### 易受攻击的模式：PID-Based Verification (Race Condition)
+### 易受攻击模式：基于 PID 的验证（竞争条件）
 ```objc
 // VULNERABLE — PID can be reused between check and use
 - (BOOL)listener:(NSXPCListener *)listener
@@ -93,7 +93,7 @@ return YES;
 return NO;
 }
 ```
-### 安全模式：审计令牌验证
+### 安全模式：Audit Token 验证
 ```objc
 // SECURE — Uses audit token which cannot be spoofed
 - (BOOL)listener:(NSXPCListener *)listener
@@ -155,9 +155,9 @@ NSLog(@"Result: %@", result);
 }
 }
 ```
-## 攻击: XPC Object Deserialization
+## Attack: XPC Object Deserialization
 
-接受复杂对象（符合 `NSSecureCoding`）的 XPC 服务可能容易受到 **deserialization attacks**:
+接受复杂对象（符合 `NSSecureCoding`）的 XPC services 可能容易受到 **deserialization attacks**：
 ```objc
 // If the daemon accepts NSObject subclasses via XPC:
 // An attacker can send a crafted object that triggers:
@@ -168,9 +168,9 @@ NSLog(@"Result: %@", result);
 ```
 ## Mach-Lookup Sandbox Exceptions
 
-### 异常如何使 Sandbox Escape 成为可能
+### How Exceptions Enable Sandbox Escape
 
-Sandboxed 应用程序通常只能与它们自己的 XPC services 通信。然而，**mach-lookup exceptions** 允许访问系统范围的服务：
+Sandboxed applications normally can only communicate with their own XPC services. However, **mach-lookup exceptions** allow reaching system-wide services:
 ```xml
 <!-- Entitlement granting mach-lookup exception -->
 <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
@@ -194,7 +194,7 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 }
 ' _ {} \; 2>/dev/null
 ```
-### Sandbox Escape 链
+### Sandbox Escape Chain
 ```
 1. Compromise sandboxed app (e.g., via renderer exploit in browser/email)
 2. Enumerate mach-lookup exceptions from entitlements
@@ -203,11 +203,11 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 5. Exploit a daemon bug → code execution outside the sandbox
 6. Escalate from daemon's privilege level (often root)
 ```
-## 特权辅助工具 (SMJobBless)
+## 特权 Helper Tools（SMJobBless）
 
 ### 工作原理
 
-`SMJobBless` 通过 launchd 安装一个以 root 身份运行的特权 helper。该 helper 通过 XPC 与其父应用通信：
+`SMJobBless` 会安装一个通过 launchd 以 root 身份运行的特权 helper。该 helper 通过 XPC 与其父应用通信：
 ```
 App (user context) ←→ XPC ←→ Helper (root via launchd)
 ```
@@ -238,7 +238,7 @@ reply(YES);
 }
 }
 ```
-### 利用薄弱的辅助程序
+### 利用脆弱的 Helper
 ```bash
 # 1. Find installed privileged helpers
 ls /Library/PrivilegedHelperTools/
@@ -273,17 +273,17 @@ class-dump /path/to/daemon
 # 3. Monitor for crashes
 log stream --predicate 'process == "daemon-name" AND (eventMessage CONTAINS "crash" OR eventMessage CONTAINS "fault")'
 ```
-## 真实世界的 CVE
+## 真实世界中的 CVE
 
 | CVE | 描述 |
 |---|---|
-| CVE-2023-41993 | XPC 服务反序列化漏洞 |
-| CVE-2022-22616 | 通过 XPC 服务滥用绕过 Gatekeeper |
+| CVE-2023-41993 | XPC service 反序列化漏洞 |
+| CVE-2022-22616 | 通过 XPC service 滥用绕过 Gatekeeper |
 | CVE-2021-30657 | Sysmond XPC 权限提升 |
-| CVE-2020-9839 | 系统守护进程中的 XPC 竞态条件 |
+| CVE-2020-9839 | system daemon 中的 XPC 竞态条件 |
 | CVE-2019-8802 | 特权辅助工具缺少客户端验证 |
-| CVE-2023-32369 | Migraine — 通过 `systemmigrationd` XPC 绕过 SIP |
-| CVE-2022-26712 | PackageKit XPC 提权到 root |
+| CVE-2023-32369 | Migraine —— 通过 `systemmigrationd` XPC 绕过 SIP |
+| CVE-2022-26712 | 通过 PackageKit XPC 提升至 root 权限 |
 
 ## 枚举脚本
 ```bash
@@ -315,9 +315,9 @@ done
 ```
 ## 参考资料
 
-* [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
-* [Apple Developer — Daemons and Services Programming Guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
-* [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
-* [OBTS — XPC Attack Surface talks](https://objectivebythesea.org/)
+- [1] [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
+- [2] [Apple Developer — 守护进程和服务编程指南](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
+- [3] [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
+- [4] [OBTS — XPC 攻击面演讲](https://objectivebythesea.org/)
 
 {{#include ../../../banners/hacktricks-training.md}}

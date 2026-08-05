@@ -4,92 +4,92 @@
 
 ## 基本信息
 
-**Grand Central Dispatch (GCD)**，也称为 **libdispatch** (`libdispatch.dyld`)，在 macOS 和 iOS 中均可用。它是苹果公司开发的一项技术，旨在优化应用程序对多核硬件上并发（多线程）执行的支持。
+**Grand Central Dispatch (GCD)，**也称为 **libdispatch** (`libdispatch.dyld`)，在 macOS 和 iOS 中均可用。这是 Apple 开发的一项技术，用于优化应用程序在多核硬件上的并发（多线程）执行支持。
 
-**GCD** 提供并管理 **FIFO 队列**，您的应用程序可以将任务以 **块对象** 的形式 **提交**。提交到调度队列的块将在系统完全管理的线程池上 **执行**。GCD 自动创建线程以执行调度队列中的任务，并安排这些任务在可用核心上运行。
+**GCD** 提供并管理 **FIFO 队列**，应用程序可以将以 **block 对象**形式存在的**任务提交**到这些队列中。提交到 dispatch 队列的 block 会在完全由系统管理的**线程池**上**执行**。GCD 会自动创建用于执行 dispatch 队列中任务的线程，并调度这些任务在可用的核心上运行。
 
 > [!TIP]
-> 总之，为了 **并行** 执行代码，进程可以将 **代码块发送到 GCD**，GCD 将负责它们的执行。因此，进程不会创建新线程；**GCD 使用其自己的线程池执行给定的代码**（线程池可能根据需要增加或减少）。
+> 总之，为了**并行**执行代码，进程可以将**代码 block 发送给 GCD**，由 GCD 负责执行。因此，进程不会创建新线程；**GCD 使用自己的线程池执行给定的代码**（线程池规模可能会根据需要增加或减少）。
 
-这对于成功管理并行执行非常有帮助，极大地减少了进程创建的线程数量，并优化了并行执行。这对于需要 **高度并行性**（暴力破解？）的任务或不应阻塞主线程的任务是理想的：例如，iOS 上的主线程处理 UI 交互，因此任何可能导致应用程序挂起的其他功能（搜索、访问网络、读取文件等）都是以这种方式管理的。
+这对于成功管理并行执行非常有帮助，可以大幅减少进程创建的线程数量，并优化并行执行。这非常适合需要**高度并行性**的任务（暴力破解？），或者不应阻塞主线程的任务：例如，iOS 中的主线程负责处理 UI 交互，因此任何可能导致应用卡顿的其他功能（搜索、访问 web、读取文件……）都会通过这种方式进行管理。
 
-### 块
+### Blocks
 
-块是一个 **自包含的代码段**（像一个带参数返回值的函数），也可以指定绑定变量。\
-然而，在编译器级别，块并不存在，它们是 `os_object`。每个这些对象由两个结构组成：
+block 是一段**自包含的代码**（类似于带参数并返回值的函数），也可以指定绑定的变量。\
+不过，在编译器层面，block 并不存在，它们是 `os_object`s。每个此类对象由两个结构组成：
 
-- **块字面量**：
-- 它以 **`isa`** 字段开始，指向块的类：
-- `NSConcreteGlobalBlock`（来自 `__DATA.__const` 的块）
-- `NSConcreteMallocBlock`（堆中的块）
-- `NSConcreateStackBlock`（栈中的块）
-- 它有 **`flags`**（指示块描述符中存在的字段）和一些保留字节
-- 调用的函数指针
-- 指向块描述符的指针
-- 导入的块变量（如果有）
-- **块描述符**：其大小取决于存在的数据（如前面标志所示）
-- 它有一些保留字节
-- 它的大小
-- 通常会有一个指向 Objective-C 风格签名的指针，以了解参数需要多少空间（标志 `BLOCK_HAS_SIGNATURE`）
-- 如果引用了变量，则该块还将具有指向复制助手（在开始时复制值）和处置助手（释放它）的指针。
+- **block literal**：
+- 它以 **`isa`** 字段开始，该字段指向 block 的类：
+- `NSConcreteGlobalBlock`（来自 `__DATA.__const` 的 block）
+- `NSConcreteMallocBlock`（位于堆中的 block）
+- `NSConcreateStackBlock`（位于栈中的 block）
+- 它包含 **`flags`**（用于指示 block 描述符中存在的字段）以及一些保留字节
+- 要调用的函数指针
+- 指向 block 描述符的指针
+- Block 导入的变量（如果有）
+- **block descriptor**：其大小取决于存在的数据（如前面的 flags 所示）
+- 它包含一些保留字节
+- 其大小
+- 通常会包含一个指向 Objective-C 风格签名的指针，用于确定参数所需的空间大小（flag `BLOCK_HAS_SIGNATURE`）
+- 如果引用了变量，此 block 还会包含指向 copy helper（在开始时复制值）和 dispose helper（释放值）的指针。
 
-### 队列
+### Queues
 
-调度队列是一个命名对象，提供块的 FIFO 执行顺序。
+dispatch 队列是一个命名对象，为 block 的执行提供 FIFO 顺序。
 
-块被设置在队列中以供执行，这些队列支持 2 种模式：`DISPATCH_QUEUE_SERIAL` 和 `DISPATCH_QUEUE_CONCURRENT`。当然，**串行**队列 **不会有竞争条件** 问题，因为块不会在前一个块完成之前执行。但 **另一种类型的队列可能会有**。
+Block 会被放入队列中等待执行，而队列支持两种模式：`DISPATCH_QUEUE_SERIAL` 和 `DISPATCH_QUEUE_CONCURRENT`。当然，**serial** 队列**不会存在 race condition** 问题，因为前一个 block 完成之前不会执行下一个 block。但**另一种队列可能存在此问题**。
 
 默认队列：
 
-- `.main-thread`: 来自 `dispatch_get_main_queue()`
-- `.libdispatch-manager`: GCD 的队列管理器
-- `.root.libdispatch-manager`: GCD 的队列管理器
-- `.root.maintenance-qos`: 最低优先级任务
+- `.main-thread`：来自 `dispatch_get_main_queue()`
+- `.libdispatch-manager`：GCD 的队列管理器
+- `.root.libdispatch-manager`：GCD 的队列管理器
+- `.root.maintenance-qos`：最低优先级任务
 - `.root.maintenance-qos.overcommit`
-- `.root.background-qos`: 可用作 `DISPATCH_QUEUE_PRIORITY_BACKGROUND`
+- `.root.background-qos`：可用作 `DISPATCH_QUEUE_PRIORITY_BACKGROUND`
 - `.root.background-qos.overcommit`
-- `.root.utility-qos`: 可用作 `DISPATCH_QUEUE_PRIORITY_NON_INTERACTIVE`
+- `.root.utility-qos`：可用作 `DISPATCH_QUEUE_PRIORITY_NON_INTERACTIVE`
 - `.root.utility-qos.overcommit`
-- `.root.default-qos`: 可用作 `DISPATCH_QUEUE_PRIORITY_DEFAULT`
+- `.root.default-qos`：可用作 `DISPATCH_QUEUE_PRIORITY_DEFAULT`
 - `.root.background-qos.overcommit`
-- `.root.user-initiated-qos`: 可用作 `DISPATCH_QUEUE_PRIORITY_HIGH`
+- `.root.user-initiated-qos`：可用作 `DISPATCH_QUEUE_PRIORITY_HIGH`
 - `.root.background-qos.overcommit`
-- `.root.user-interactive-qos`: 最高优先级
+- `.root.user-interactive-qos`：最高优先级
 - `.root.background-qos.overcommit`
 
-请注意，系统将决定 **每个时刻哪个线程处理哪个队列**（多个线程可能在同一队列中工作，或者同一线程可能在某些时刻在不同队列中工作）
+请注意，**在每个时间点由哪些线程处理哪些队列**将由系统决定（多个线程可能同时处理同一个队列，或者同一个线程可能在某个时刻处理不同的队列）。
 
-#### 属性
+#### Attributtes
 
-使用 **`dispatch_queue_create`** 创建队列时，第三个参数是 `dispatch_queue_attr_t`，通常是 `DISPATCH_QUEUE_SERIAL`（实际上是 NULL）或 `DISPATCH_QUEUE_CONCURRENT`，这是指向 `dispatch_queue_attr_t` 结构的指针，允许控制队列的一些参数。
+使用 **`dispatch_queue_create`** 创建队列时，第三个参数是一个 `dispatch_queue_attr_t`，通常为 `DISPATCH_QUEUE_SERIAL`（实际上是 NULL）或 `DISPATCH_QUEUE_CONCURRENT`。后者是指向 `dispatch_queue_attr_t` 结构的指针，可用于控制队列的一些参数。
 
-### 调度对象
+### Dispatch objects
 
-libdispatch 使用多个对象，队列和块只是其中的 2 个。可以使用 `dispatch_object_create` 创建这些对象：
+libdispatch 使用多种对象，队列和 block 只是其中的两种。可以使用 `dispatch_object_create` 创建这些对象：
 
 - `block`
-- `data`: 数据块
-- `group`: 块组
-- `io`: 异步 I/O 请求
-- `mach`: Mach 端口
-- `mach_msg`: Mach 消息
-- `pthread_root_queue`: 带有 pthread 线程池的队列，而不是工作队列
+- `data`：数据 block
+- `group`：block 组
+- `io`：异步 I/O 请求
+- `mach`：Mach 端口
+- `mach_msg`：Mach 消息
+- `pthread_root_queue`：包含 pthread 线程池而非 workqueues 的队列
 - `queue`
 - `semaphore`
-- `source`: 事件源
+- `source`：事件源
 
 ## Objective-C
 
-在 Objective-C 中，有不同的函数可以将块发送以并行执行：
+在 Objective-C 中，有不同的函数可以发送 block，以便并行执行：
 
-- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): 提交一个块以在调度队列上异步执行，并立即返回。
-- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): 提交一个块对象以执行，并在该块执行完成后返回。
-- [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): 在应用程序的生命周期内仅执行一次块对象。
-- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): 提交一个工作项以执行，并仅在其完成执行后返回。与 [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync) 不同，此函数在执行块时尊重队列的所有属性。
+- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async)：提交一个 block，在 dispatch 队列上异步执行，并立即返回。
+- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync)：提交一个 block 对象执行，并在该 block 执行完毕后返回。
+- [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once)：在应用程序的生命周期内只执行一次 block 对象。
+- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait)：提交一个 work item 执行，并仅在其执行完毕后返回。与 [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync) 不同，该函数在执行 block 时遵循队列的所有属性。
 
-这些函数期望这些参数：[**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
+这些函数需要以下参数：[**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
 
-这是 **块的结构**：
+这是 **Block 的结构体**：
 ```c
 struct Block {
 void *isa; // NSConcreteStackBlock,...
@@ -100,7 +100,7 @@ struct BlockDescriptor *descriptor;
 // captured variables go here
 };
 ```
-这是一个使用 **parallelism** 和 **`dispatch_async`** 的示例：
+以下是使用 **parallelism** 和 **`dispatch_async`** 实现**并行处理**的示例：
 ```objectivec
 #import <Foundation/Foundation.h>
 
@@ -132,8 +132,8 @@ return 0;
 ```
 ## Swift
 
-**`libswiftDispatch`** 是一个库，提供 **Swift 绑定** 到 Grand Central Dispatch (GCD) 框架，该框架最初是用 C 编写的。\
-**`libswiftDispatch`** 库将 C GCD API 封装在一个更适合 Swift 的接口中，使 Swift 开发者更容易和直观地使用 GCD。
+**`libswiftDispatch`** 是一个为最初使用 C 编写的 Grand Central Dispatch (GCD) framework 提供 **Swift bindings** 的 library。\
+**`libswiftDispatch`** library 将 C GCD APIs 封装为更符合 Swift 使用习惯的 interface，让 Swift developers 使用 GCD 时更加简单直观。
 
 - **`DispatchQueue.global().sync{ ... }`**
 - **`DispatchQueue.global().async{ ... }`**
@@ -141,7 +141,7 @@ return 0;
 - **`async await`**
 - **`var (data, response) = await URLSession.shared.data(from: URL(string: "https://api.example.com/getData"))`**
 
-**代码示例**:
+**代码示例**：
 ```swift
 import Foundation
 
@@ -170,7 +170,7 @@ sleep(1)  // Simulate a long-running task
 ```
 ## Frida
 
-以下 Frida 脚本可用于 **hook 进入多个 `dispatch`** 函数并提取队列名称、回溯和块: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
+以下 Frida script 可用于 **hook 多个 `dispatch`** 函数，并提取 queue name、backtrace 和 block：[**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)。
 ```bash
 frida -U <prog_name> -l libdispatch.js
 
@@ -187,7 +187,7 @@ Backtrace:
 
 目前 Ghidra 既不理解 ObjectiveC **`dispatch_block_t`** 结构，也不理解 **`swift_dispatch_block`** 结构。
 
-所以如果你想让它理解这些结构，你可以**声明它们**：
+因此，如果你希望它理解这些结构，可以直接**声明它们**：
 
 <figure><img src="../../images/image (1160).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -195,23 +195,26 @@ Backtrace:
 
 <figure><img src="../../images/image (1163).png" alt="" width="563"><figcaption></figcaption></figure>
 
-然后，在代码中找到它们**被使用**的地方：
+然后，在代码中找到它们被**使用**的位置：
 
 > [!TIP]
-> 注意所有提到“block”的引用，以了解你如何能够判断该结构正在被使用。
+> 注意所有对 "block" 的引用，以了解如何判断该结构正在被使用。
 
 <figure><img src="../../images/image (1164).png" alt="" width="563"><figcaption></figcaption></figure>
 
-右键单击变量 -> 重新定义变量，并在这种情况下选择 **`swift_dispatch_block`**：
+右键单击变量 -> Retype Variable，并在本例中选择 **`swift_dispatch_block`**：
 
 <figure><img src="../../images/image (1165).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Ghidra 将自动重写所有内容：
+Ghidra 会自动重写所有内容：
 
 <figure><img src="../../images/image (1166).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## References
 
-- [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [1] [libdispatch — `src/queue.c`（queue/thread-pool 实现）](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/queue.c)
+- [2] [libdispatch — `src/source.c`（dispatch sources）](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/source.c)
+- [3] [libdispatch — `dispatch/queue.h`（public queue API）](https://github.com/apple-oss-distributions/libdispatch/blob/main/dispatch/queue.h)
+- [4] [Apple Developer — Dispatch](https://developer.apple.com/documentation/dispatch)
 
 {{#include ../../banners/hacktricks-training.md}}

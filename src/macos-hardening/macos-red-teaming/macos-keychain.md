@@ -2,59 +2,59 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Main Keychains
+## 主要 Keychain
 
-- **用户钥匙串** (`~/Library/Keychains/login.keychain-db`)，用于存储 **用户特定的凭据**，如应用程序密码、互联网密码、用户生成的证书、网络密码和用户生成的公钥/私钥。
-- **系统钥匙串** (`/Library/Keychains/System.keychain`)，存储 **系统范围的凭据**，如 WiFi 密码、系统根证书、系统私钥和系统应用程序密码。
-- 可以在 `/System/Library/Keychains/*` 中找到其他组件，如证书。
-- 在 **iOS** 中只有一个 **钥匙串**，位于 `/private/var/Keychains/`。此文件夹还包含 `TrustStore` 的数据库、证书颁发机构 (`caissuercache`) 和 OSCP 条目 (`ocspache`)。
-- 应用程序在钥匙串中的访问将仅限于其基于应用程序标识符的私有区域。
+- **用户 Keychain**（`~/Library/Keychains/login.keychain-db`），用于存储**用户专属凭据**，例如应用程序密码、互联网密码、用户生成的证书、网络密码，以及用户生成的公钥/私钥。
+- **系统 Keychain**（`/Library/Keychains/System.keychain`），用于存储**系统范围的凭据**，例如 WiFi 密码、系统根证书、系统私钥和系统应用程序密码。<sup>[1]</sup>
+- 还可以在 `/System/Library/Keychains/*` 中找到证书等其他组件。
+- 在 **iOS** 中，只有一个位于 `/private/var/Keychains/` 的 **Keychain**。此文件夹还包含 `TrustStore`、证书颁发机构（`caissuercache`）和 OSCP 条目（`ocspache`）的数据库。
+- 应用只能根据其应用标识符访问 Keychain 中属于自己的私有区域。
 
-### 密码钥匙串访问
+### Password Keychain Access
 
-这些文件虽然没有固有的保护并且可以被 **下载**，但它们是加密的，需要 **用户的明文密码进行解密**。可以使用像 [**Chainbreaker**](https://github.com/n0fate/chainbreaker) 这样的工具进行解密。
+这些文件本身没有保护机制，因此可以被**下载**，但它们经过加密，需要使用**用户的明文密码进行解密**。可以使用 [**Chainbreaker**](https://github.com/n0fate/chainbreaker) 等工具进行解密。<sup>[1]</sup>
 
-## 钥匙串条目保护
+## Keychain 条目的保护机制
 
-### ACLs
+### ACL
 
-钥匙串中的每个条目都受 **访问控制列表 (ACLs)** 的管理，规定谁可以对钥匙串条目执行各种操作，包括：
+Keychain 中的每个条目都受 **访问控制列表（ACL）** 管理，用于规定谁可以对该 Keychain 条目执行各种操作，包括：<sup>[1]</sup>
 
-- **ACLAuhtorizationExportClear**：允许持有者获取秘密的明文。
-- **ACLAuhtorizationExportWrapped**：允许持有者获取用另一个提供的密码加密的明文。
+- **ACLAuhtorizationExportClear**：允许持有者获取 secret 的明文。
+- **ACLAuhtorizationExportWrapped**：允许持有者获取使用另一个提供的密码加密后的 secret 明文。
 - **ACLAuhtorizationAny**：允许持有者执行任何操作。
 
-ACLs 还附带一个 **受信任应用程序列表**，可以在不提示的情况下执行这些操作。这可能是：
+ACL 还附带一个**受信任应用程序列表**，这些应用程序可以在不触发提示的情况下执行相关操作。该列表可能是：<sup>[1]</sup>
 
-- **N`il`**（不需要授权，**所有人都被信任**）
-- 一个 **空** 列表（**没有人**被信任）
-- **特定应用程序**的 **列表**。
+- **N`il`**（不需要授权，**所有人都受信任**）
+- **空**列表（**没有人**受信任）
+- 特定**应用程序**的**列表**。
 
-条目还可能包含键 **`ACLAuthorizationPartitionID`**，用于识别 **teamid、apple** 和 **cdhash**。
+此外，该条目还可能包含键 **`ACLAuthorizationPartitionID`**，用于识别 **teamid、apple** 和 **cdhash**。<sup>[1]</sup>
 
-- 如果指定了 **teamid**，则为了 **在不提示的情况下访问条目** 值，使用的应用程序必须具有 **相同的 teamid**。
-- 如果指定了 **apple**，则应用程序需要由 **Apple** 签名。
-- 如果指明了 **cdhash**，则 **应用程序** 必须具有特定的 **cdhash**。
+- 如果指定了 **teamid**，则要在不触发**提示**的情况下**访问条目**值，所使用的应用程序必须具有**相同的 teamid**。
+- 如果指定了 **apple**，则应用必须由 **Apple** **签名**。
+- 如果指定了 **cdhash**，则**应用**必须具有指定的 **cdhash**。
 
-### 创建钥匙串条目
+### 创建 Keychain 条目
 
-当使用 **`Keychain Access.app`** 创建 **新** **条目** 时，适用以下规则：
+使用 **`Keychain Access.app`** 创建**新** **条目**时，适用以下规则：<sup>[1]</sup>
 
-- 所有应用程序都可以加密。
-- **没有应用程序**可以导出/解密（在不提示用户的情况下）。
-- 所有应用程序都可以查看完整性检查。
-- 没有应用程序可以更改 ACLs。
-- **partitionID** 设置为 **`apple`**。
+- 所有应用都可以加密。
+- **没有应用**可以导出/解密（除非向用户发出提示）。
+- 所有应用都可以查看完整性检查。
+- 没有应用可以修改 ACL。
+- **partitionID** 被设置为 **`apple`**。
 
-当 **应用程序在钥匙串中创建条目** 时，规则略有不同：
+当**应用程序在 Keychain 中创建条目**时，规则略有不同：<sup>[1]</sup>
 
-- 所有应用程序都可以加密。
-- 只有 **创建应用程序**（或任何其他明确添加的应用程序）可以导出/解密（在不提示用户的情况下）。
-- 所有应用程序都可以查看完整性检查。
-- 没有应用程序可以更改 ACLs。
-- **partitionID** 设置为 **`teamid:[teamID here]`**。
+- 所有应用都可以加密。
+- 只有**创建该条目的应用程序**（或明确添加的其他应用）可以导出/解密（不会向用户发出提示）。
+- 所有应用都可以查看完整性检查。
+- 没有应用可以修改 ACL。
+- **partitionID** 被设置为 **`teamid:[teamID here]`**。
 
-## 访问钥匙串
+## 访问 Keychain
 
 ### `security`
 ```bash
@@ -76,57 +76,57 @@ security dump-keychain ~/Library/Keychains/login.keychain-db
 ### APIs
 
 > [!TIP]
-> **密钥链枚举和秘密转储**可以使用工具 [**LockSmith**](https://github.com/its-a-feature/LockSmith) 完成，这不会生成提示。
+> 使用工具 [**LockSmith**](https://github.com/its-a-feature/LockSmith) 可以枚举和 dump **不会生成 prompt** 的 **keychain secrets**
 >
-> 其他 API 端点可以在 [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html) 源代码中找到。
+> 其他 API endpoints 可在 [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html) 源代码中找到。
 
-使用 **Security Framework** 列出并获取每个密钥链条目的 **信息**，或者您也可以检查苹果的开源 CLI 工具 [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**。** 一些 API 示例：
+使用 **Security Framework** 列出并获取每个 keychain 条目的 **info**，也可以查看 Apple 的开源 cli 工具 [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**。**一些 API 示例：<sup>[1]</sup>
 
-- API **`SecItemCopyMatching`** 提供每个条目的信息，并且在使用时可以设置一些属性：
-- **`kSecReturnData`**：如果为真，它将尝试解密数据（设置为假以避免潜在的弹出窗口）
-- **`kSecReturnRef`**：还获取密钥链项目的引用（如果稍后您看到可以在没有弹出窗口的情况下解密，则设置为真）
-- **`kSecReturnAttributes`**：获取条目的元数据
-- **`kSecMatchLimit`**：返回多少结果
-- **`kSecClass`**：什么类型的密钥链条目
+- API **`SecItemCopyMatching`** 可获取每个条目的信息，使用它时可以设置一些属性：
+- **`kSecReturnData`**：如果为 true，它会尝试解密数据（设置为 false 以避免潜在的弹窗）
+- **`kSecReturnRef`**：同时获取 keychain item 的引用（如果之后发现可以在不弹窗的情况下解密，则设置为 true）
+- **`kSecReturnAttributes`**：获取条目的 metadata
+- **`kSecMatchLimit`**：返回多少个结果
+- **`kSecClass`**：keychain 条目的类型
 
-获取每个条目的 **ACL**：
+获取每个条目的 **ACLs**：<sup>[1]</sup>
 
-- 使用 API **`SecAccessCopyACLList`**，您可以获取 **密钥链项目的 ACL**，它将返回一个 ACL 列表（如 `ACLAuhtorizationExportClear` 和之前提到的其他项），每个列表包含：
-- 描述
-- **受信任的应用程序列表**。这可以是：
-- 一个应用程序：/Applications/Slack.app
-- 一个二进制文件：/usr/libexec/airportd
-- 一个组：group://AirPort
+- 使用 API **`SecAccessCopyACLList`** 可以获取 **keychain item 的 ACL**，它会返回一个 ACL 列表（例如 `ACLAuhtorizationExportClear` 以及之前提到的其他 ACL），其中每个列表包含：
+- Description
+- **Trusted Application List**。它可以是：
+- 一个 app：/Applications/Slack.app
+- 一个 binary：/usr/libexec/airportd
+- 一个 group：group://AirPort
 
-导出数据：
+导出数据：<sup>[1]</sup>
 
-- API **`SecKeychainItemCopyContent`** 获取明文
-- API **`SecItemExport`** 导出密钥和证书，但可能需要设置密码以加密导出内容
+- API **`SecKeychainItemCopyContent`** 获取 plaintext
+- API **`SecItemExport`** 导出 keys 和 certificates，但可能需要设置 passwords，才能将内容以 encrypted 形式导出
 
-这些是能够 **在没有提示的情况下导出秘密** 的 **要求**：
+以下是能够在不生成 prompt 的情况下 **export secret** 所需的条件：<sup>[1]</sup>
 
-- 如果 **1+ 个受信任** 应用程序列出：
-- 需要适当的 **授权**（**`Nil`**，或是 **允许** 列表中的应用程序以访问秘密信息）
-- 需要代码签名与 **PartitionID** 匹配
-- 需要代码签名与一个 **受信任的应用程序** 的匹配（或是属于正确的 KeychainAccessGroup）
-- 如果 **所有应用程序受信任**：
-- 需要适当的 **授权**
-- 需要代码签名与 **PartitionID** 匹配
-- 如果 **没有 PartitionID**，则不需要此项
+- 如果列出了 1 个或更多 **trusted** apps：
+- 需要适当的 **authorizations**（**`Nil`**，或者是 authorization 中允许访问 secret info 的 apps 列表的**一部分**）
+- code signature 必须匹配 **PartitionID**
+- code signature 必须匹配某个 **trusted app** 的 code signature（或属于正确的 KeychainAccessGroup）
+- 如果 **all applications trusted**：
+- 需要适当的 **authorizations**
+- code signature 必须匹配 **PartitionID**
+- 如果没有 **PartitionID**，则不需要此条件
 
 > [!CAUTION]
-> 因此，如果列出了 **1 个应用程序**，您需要 **在该应用程序中注入代码**。
+> 因此，如果列出了 **1 个 application**，你需要向该 application **inject code**。
 >
-> 如果 **apple** 在 **partitionID** 中被指示，您可以使用 **`osascript`** 访问它，因此任何信任所有应用程序的内容都包含 apple 在 partitionID 中。**`Python`** 也可以用于此。
+> 如果 **partitionID** 中标记了 **apple**，则可以使用 **`osascript`** 访问它，因此任何在 partitionID 中包含 apple 且信任所有 applications 的条目都可以这样访问。也可以使用 **`Python`**。
 
-### 两个额外属性
+### Two additional attributes
 
-- **隐形**：这是一个布尔标志，用于 **隐藏** 密钥链应用程序中的条目
-- **通用**：用于存储 **元数据**（因此它不是加密的）
-- 微软以明文存储所有刷新令牌以访问敏感端点。
+- **Invisible**：这是一个用于在 **UI** Keychain app 中隐藏该条目的 boolean flag<sup>[1]</sup>
+- **General**：用于存储 **metadata**（因此它**未加密**）<sup>[1]</sup>
+- Microsoft 曾以 plain text 存储所有用于访问 sensitive endpoint 的 refresh tokens。<sup>[1]</sup>
 
 ## References
 
-- [**#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas**](https://www.youtube.com/watch?v=jKE1ZW33JpY)
+- [1] [#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas](https://www.youtube.com/watch?v=jKE1ZW33JpY)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,4 +1,4 @@
-# macOS 代码签名
+# macOS Code Signing
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -9,12 +9,12 @@
 {{#endref}}
 
 
-Mach-o 二进制包含一个名为 **`LC_CODE_SIGNATURE`** 的 load command，指示二进制中签名的 **offset** 和 **size**。事实上，使用 GUI 工具 MachOView，可以在二进制末尾找到一个名为 **Code Signature** 的区段，其中包含这些信息：
+Mach-o 二进制文件包含一个名为 **`LC_CODE_SIGNATURE`** 的 load command，用于指示二进制文件中签名的**偏移量**和**大小**。实际上，使用 GUI 工具 MachOView，可以在二进制文件末尾找到一个名为 **Code Signature** 的 section，其中包含这些信息：
 
 <figure><img src="../../../images/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
-Code Signature 的 magic header 是 **`0xFADE0CC0`**。然后你会看到诸如 length 和 superBlob 中包含它们的 blobs 数量等信息。\
-可以在 [source code here](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276) 中找到这些信息：
+Code Signature 的 magic header 是 **`0xFADE0CC0`**（embedded code signature）或 **`0xFADE0CC1`**（detached code signature）。随后可以看到包含这些 blob 的 superBlob 的长度、blob 数量等信息。\
+可以在[此处的源代码](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276)中找到这些信息：<sup>[1]</sup>
 ```c
 /*
 * Structure of an embedded-signature SuperBlob
@@ -43,14 +43,14 @@ char data[];
 } CS_GenericBlob
 __attribute__ ((aligned(1)));
 ```
-常见的 blobs 包括 Code Directory、Requirements 和 Entitlements，以及 Cryptographic Message Syntax (CMS).\
-此外，请注意 blobs 中的数据是以 **Big Endian.** 编码的。
+常见的 blobs 包含 Code Directory、Requirements 和 Entitlements，以及 Cryptographic Message Syntax (CMS)。\
+此外，请注意，blobs 中编码的数据采用 **Big Endian** 编码。
 
-此外，签名可以从二进制文件中分离并存储在 `/var/db/DetachedSignatures`（iOS 使用）。
+此外，签名可以从二进制文件中分离出来，并存储在 `/var/db/DetachedSignatures` 中（iOS 使用）。
 
 ## Code Directory Blob
 
-可以在代码中找到 [Code Directory Blob in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):
+可以在[代码](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104)中找到 Code Directory Blob 的声明：<sup>[1]</sup>
 ```c
 typedef struct __CodeDirectory {
 uint32_t magic;                                 /* magic number (CSMAGIC_CODEDIRECTORY) */
@@ -106,12 +106,14 @@ char end_withLinkage[0];
 } CS_CodeDirectory
 __attribute__ ((aligned(1)));
 ```
-注意该 struct 有不同版本，旧版本可能包含较少信息。
+注意，这个结构有不同的版本，旧版本可能包含更少的信息。
 
-## 签名代码页
+注意，Code directory 可以使用任何 hashing algorithm。目前最常见的是 **SHA256**（由字段 `hashType` 中的值 2 表示），但未来如果该 hash 被破解，Apple 可能会开始使用其他算法。
 
-对整个二进制文件进行哈希既低效，在只部分加载到内存时甚至无用。因此，代码签名实际上是哈希的哈希，每个二进制页面分别进行哈希。\  
-实际上，在前面的 **Code Directory** 代码中，你可以看到 **页面大小在其字段之一中指定**。此外，如果二进制的大小不是页面大小的整数倍，字段 **CodeLimit** 指定了签名的结束位置。
+## Signing Code Pages
+
+对完整 binary 进行 hashing 会效率低下；如果 binary 只被部分加载到内存中，这样做甚至没有意义。因此，code signature 实际上是一个 hash 的 hash，其中每个 binary page 都会被单独进行 hashing。\
+实际上，在前面的 **Code Directory** code 中可以看到，**page size 已指定**在其中一个字段中。此外，如果 binary 的大小不是 page 大小的整数倍，字段 **CodeLimit** 会指定 signature 的结束位置。
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -137,7 +139,38 @@ Page size=4096
 2=93d476eeace15a5ad14c0fb56169fd080a04b99582b4c7a01e1afcbc58688f
 [...]
 
-# Calculate the hasehs of each page manually
+# get them with disarm
+disarm -vv --sig /bin/ps # Get all the hashes of the binary
+An embedded signature of 5824 bytes, with 5 blobs:
+Code Directory (869 bytes)
+Version:     20400
+Flags:       none
+Platform Binary
+CodeLimit:   0x10f80
+Identifier:  com.apple.ps (@0x58)
+Executable Segment: Base 0x0 Limit: 0x00008000 Flags: 0x00000001
+CDHash:	     ba668da43c001d101f02ffd9c915b8d4b88e3a7ad5333acd58499189a22a16a2 (computed)
+# of hashes: 17 code (4K pages) + 7 special
+Hashes @325 size: 32 Type: SHA-256
+Special Slot   7 Entitlements ASN1/DER:	a542b4dcbc134fbd950c230ed9ddb99a343262a2df8e0c847caee2b6d3b41cc8 (OK)
+Special Slot   6 DMG:	Not Bound
+Special Slot   5 Entitlements blob:	2bb2de519f43b8e116c7eeea8adc6811a276fb134c55c9c2e9dcbd3047f80c7d (OK)
+Special Slot   4 Application Specific:	Not Bound
+Special Slot   3 Resource Directory:	Not Bound
+Special Slot   2 Requirements blob:	4ca453dc8908dc7f6e637d6159c8761124ae56d080a4a550ad050c27ead273b3 (OK)
+Special Slot   1 Bound Info.plist:	Not Bound
+Slot   0 (File page @0x0000):	68eb381817e783faf97d5bf64ca066e6f3867a1ef16c145b32ad282cd550cabd (OK)
+Slot   1 (File page @0x1000):	4c0714307c8ffbabe003573bc45d5a5690256ecc52c39250cae211f3ecafd507 (OK)
+Slot   2 (File page @0x2000):	6e291b8260de343ef8fb984b88eac08d55f473870f5a612c71f7538a9c846beb (OK)
+Slot   3 (File page @0x3000):	7a735f6a34a3544ca716cf2ab7ddf0dbd499aba1c279268de7c86626f4d320d9 (OK)
+Slot   4 (File page @0x4000):	d01f0d2ddca0b0dc07269349add7320fbc277a7ad629c00f25fe59b926d9ca5f (OK)
+Slot   5 (File page @0x5000):	7f282101b9601946b573303e3a6adbbc855768a15784d1c25e217b4fdea4da7e (OK)
+Slot   6 (File page @0x6000):	NULL PAGE HASH (OK)
+Slot   7 (File page @0x7000):	NULL PAGE HASH (OK)
+Slot   8 (File page @0x8000):	b90a5987d6daa560ef3013c3626d23133e1dfad33499ae27ba1bd7c40b321347 (OK)
+[...]
+
+# Calculate the hashes of each page manually
 BINARY=/bin/ps
 SIZE=`stat -f "%Z" $BINARY`
 PAGESIZE=4096 # From the previous output
@@ -146,28 +179,30 @@ for i in `seq 0 $PAGES`; do
 dd if=$BINARY of=/tmp/`basename $BINARY`.page.$i bs=$PAGESIZE skip=$i count=1
 done
 openssl sha256 /tmp/*.page.*
+
+#Note that the last pages might not coincide because the binary didn't signed the signatura that it was calculating but the real size of the binary.
 ```
-## 权限 blob
+## Entitlements Blob
 
-注意，应用程序可能还包含一个定义了所有权限的**权限 blob**。此外，一些 iOS 二进制文件可能会把它们的权限放在特殊槽位 -7（而不是常见的 -5 entitlements 特殊槽位）。
+注意，应用程序还可能包含一个 **entitlement blob**，其中定义了所有 entitlements。此外，某些 iOS binaries 可能会将其 entitlements 特定存储在特殊 slot -7 中（而不是 -5 entitlements special slot）。
 
-## 特殊槽位
+## Special Slots
 
-MacOS 应用并非把执行所需的所有内容都包含在二进制内，它们也使用 **external resources**（通常位于应用的 **bundle** 内）。因此，二进制中存在一些槽位，用于存放某些重要外部资源的哈希，以便验证它们未被修改。
+MacOS 应用程序并不会将执行所需的全部内容都包含在 binary 内部，还会使用 **external resources**（通常位于应用程序的 **bundle** 内）。因此，binary 内部存在一些 slots，其中包含某些重要 external resources 的 hash，用于检查它们是否被修改。
 
-事实上，可以在 Code Directory 结构体中看到一个名为 **`nSpecialSlots`** 的参数，用来指示特殊槽位的数量。注意没有特殊槽位 0，最常见的槽位是（从 -1 到 -6）：
+实际上，可以在 Code Directory structs 中看到一个名为 **`nSpecialSlots`** 的参数，它表示 special slots 的数量。由于不存在 special slot 0，最常见的 slots（从 -1 到 -6）包括：
 
-- `info.plist` 的哈希（或位于 `__TEXT.__info__plist` 中的那个）。
-- Requirements 的哈希
-- 资源目录的哈希（位于 bundle 内的 `_CodeSignature/CodeResources` 文件的哈希）。
-- 应用程序特定（未使用）
-- 权限的哈希
-- 仅针对 DMG 的代码签名
-- DER 权限
+- `info.plist` 的 hash（或 `__TEXT.__info__plist` 内部文件的 hash）。
+- Requirements 的 hash
+- Resource Directory 的 hash（bundle 内 `_CodeSignature/CodeResources` 文件的 hash）。
+- Application specific（unused）
+- Entitlements 的 hash
+- 仅适用于 DMG code signatures
+- DER Entitlements
 
-## 代码签名标志
+## Code Signing Flags
 
-每个进程都有一个关联的位掩码，称为 `status`，由内核设置，其中一些位可以被**代码签名**覆盖。这些可以包含在代码签名中的标志在代码中有定义： [defined in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):
+每个 process 都有一个相关的 bitmask，称为 `status`。它由 kernel 设置，其中一些 flag 可以被 **code signature** 覆盖。这些可以包含在 code signing 中的 flag 已在[代码](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36)中定义：<sup>[1]</sup>
 ```c
 /* code signing attributes of a process */
 #define CS_VALID                    0x00000001  /* dynamically valid */
@@ -212,15 +247,15 @@ CS_RESTRICT | CS_ENFORCEMENT | CS_REQUIRE_LV | CS_RUNTIME | CS_LINKER_SIGNED)
 
 #define CS_ENTITLEMENT_FLAGS        (CS_GET_TASK_ALLOW | CS_INSTALLER | CS_DATAVAULT_CONTROLLER | CS_NVRAM_UNRESTRICTED)
 ```
-注意函数 [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) 在启动执行时也可以动态添加 `CS_EXEC_*` 标志。
+请注意，函数 [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) 还可以在开始执行时动态添加 `CS_EXEC_*` flags。
 
-## 代码签名要求
+## Code Signature Requirements
 
-每个应用会存储一些必须**满足**的**要求**，以便能够被执行。如果应用包含的这些**要求**没有被满足，应用将不会被执行（因为它可能已被篡改）。
+每个应用程序都会存储一些 **requirements**，必须 **满足** 这些 requirements 才能被执行。如果 **应用程序包含的 requirements 未被应用程序满足**，则不会执行该应用程序（因为它很可能已被修改）。
 
-二进制的这些要求使用一种**特殊语法**，是由一系列**表达式**组成，并以 blob 的形式编码，使用 `0xfade0c00` 作为魔数，其**哈希存储在一个特殊的 code slot 中**。
+二进制文件的 requirements 使用一种**特殊语法**，由一系列 **expressions** 构成，并作为 blobs 使用 `0xfade0c00` 作为 magic 进行编码，其 **hash 存储在特殊的 code slot 中**。
 
-可以通过运行以下命令查看二进制的要求：
+可以通过运行以下命令查看二进制文件的 requirements：
 ```bash
 codesign -d -r- /bin/ls
 Executable=/bin/ls
@@ -231,9 +266,9 @@ Executable=/Applications/Signal.app/Contents/MacOS/Signal
 designated => identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR
 ```
 > [!TIP]
-> 注意这些签名如何检查诸如证书信息、TeamID、IDs、entitlements 等多种数据。
+> 请注意，这些签名可以检查证书信息、TeamID、ID、entitlements 以及许多其他数据。
 
-此外，可以使用 `csreq` 工具生成一些已编译的 requirements：
+此外，还可以使用 `csreq` 工具生成一些已编译的 requirements：
 ```bash
 # Generate compiled requirements
 csreq -b /tmp/output.csreq -r='identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR'
@@ -245,57 +280,60 @@ od -A x -t x1 /tmp/output.csreq
 0000020    00  00  00  21  6f  72  67  2e  77  68  69  73  70  65  72  73
 [...]
 ```
-可以通过 `Security.framework` 的一些 API 访问这些信息并创建或修改要求，如：
+可以通过 `Security.framework` 的一些 API 访问这些信息，并创建或修改 requirements，例如：<sup>[4]</sup>
 
 #### **检查有效性**
 
-- **`Sec[Static]CodeCheckValidity`**：根据要求检查 SecCodeRef 的有效性。
-- **`SecRequirementEvaluate`**：在证书上下文中验证要求。
-- **`SecTaskValidateForRequirement`**：根据 `CFString` 要求验证正在运行的 SecTask。
+- **`Sec[Static]CodeCheckValidity`**：根据 Requirement 检查 SecCodeRef 的有效性。
+- **`SecRequirementEvaluate`**：在 certificate context 中验证 requirement。
+- **`SecTaskValidateForRequirement`**：根据 `CFString` requirement 验证正在运行的 SecTask。
 
-#### **创建和管理代码要求**
+#### **创建和管理 Code Requirements**
 
-- **`SecRequirementCreateWithData`:** 从表示要求的二进制数据创建 `SecRequirementRef`。
-- **`SecRequirementCreateWithString`:** 从要求的字符串表达式创建 `SecRequirementRef`。
-- **`SecRequirementCopy[Data/String]`**: 检索 `SecRequirementRef` 的二进制数据表示。
-- **`SecRequirementCreateGroup`**: 为 app-group 成员资格创建要求
+- **`SecRequirementCreateWithData`：** 从表示 requirement 的二进制数据创建 `SecRequirementRef`。
+- **`SecRequirementCreateWithString`：** 从 requirement 的字符串表达式创建 `SecRequirementRef`。
+- **`SecRequirementCopy[Data/String]`**：获取 `SecRequirementRef` 的二进制数据表示。
+- **`SecRequirementCreateGroup`**：为 app-group membership 创建 requirement。
 
-#### **访问代码签名信息**
+#### **访问 Code Signing 信息**
 
-- **`SecStaticCodeCreateWithPath`**: 从文件系统路径初始化 `SecStaticCodeRef` 对象以检查代码签名。
-- **`SecCodeCopySigningInformation`**: 从 `SecCodeRef` 或 `SecStaticCodeRef` 获取签名信息。
+- **`SecStaticCodeCreateWithPath`**：根据文件系统路径初始化 `SecStaticCodeRef` 对象，用于检查 code signatures。
+- **`SecCodeCopySigningInformation`**：从 `SecCodeRef` 或 `SecStaticCodeRef` 获取 signing 信息。
 
-#### **修改代码要求**
+#### **修改 Code Requirements**
 
-- **`SecCodeSignerCreate`**: 创建用于执行代码签名操作的 `SecCodeSignerRef` 对象。
-- **`SecCodeSignerSetRequirement`**: 为签名器设置在签名期间应用的新要求。
-- **`SecCodeSignerAddSignature`**: 使用指定签名器向正在签名的代码添加签名。
+- **`SecCodeSignerCreate`**：创建用于执行 code signing 操作的 `SecCodeSignerRef` 对象。
+- **`SecCodeSignerSetRequirement`**：为 code signer 设置新的 requirement，使其在 signing 期间应用。
+- **`SecCodeSignerAddSignature`**：使用指定的 signer 为正在签名的 code 添加 signature。
 
-#### **使用要求验证代码**
+#### **使用 Requirements 验证 Code**
 
-- **`SecStaticCodeCheckValidity`**: 根据指定要求验证静态代码对象。
+- **`SecStaticCodeCheckValidity`**：根据指定的 requirements 验证 static code 对象。
 
-#### **其他有用的 APIs**
+#### **其他有用的 API**
 
-- **`SecCodeCopy[Internal/Designated]Requirement`: Get SecRequirementRef from SecCodeRef**
-- **`SecCodeCopyGuestWithAttributes`**: 基于特定属性创建表示代码对象的 `SecCodeRef`，可用于沙箱化。
-- **`SecCodeCopyPath`**: 检索与 `SecCodeRef` 关联的文件系统路径。
-- **`SecCodeCopySigningIdentifier`**: 从 `SecCodeRef` 获取签名标识符（例如 Team ID）。
-- **`SecCodeGetTypeID`**: 返回 `SecCodeRef` 对象的类型标识符。
-- **`SecRequirementGetTypeID`**: 获取 `SecRequirementRef` 的 CFTypeID
+- **`SecCodeCopy[Internal/Designated]Requirement`：从 SecCodeRef 获取 SecRequirementRef**
+- **`SecCodeCopyGuestWithAttributes`**：根据特定 attributes 创建表示 code 对象的 `SecCodeRef`，对 sandboxing 很有用。
+- **`SecCodeCopyPath`**：获取与 `SecCodeRef` 关联的文件系统路径。
+- **`SecCodeCopySigningIdentifier`**：从 `SecCodeRef` 获取 signing identifier（例如 Team ID）。
+- **`SecCodeGetTypeID`**：返回 `SecCodeRef` 对象的 type identifier。
+- **`SecRequirementGetTypeID`**：获取 `SecRequirementRef` 的 CFTypeID。
 
-#### **代码签名标志和常量**
+#### **Code Signing Flags 和 Constants**
 
-- **`kSecCSDefaultFlags`**: 在许多 `Security.framework` 函数中用于代码签名操作的默认标志。
-- **`kSecCSSigningInformation`**: 用于指定应检索签名信息的标志。
+- **`kSecCSDefaultFlags`**：许多用于 code signing 操作的 Security.framework 函数所使用的默认 flags。
+- **`kSecCSSigningInformation`**：用于指定应获取 signing 信息的 flag。
 
-## 代码签名强制
+## Code Signature Enforcement
 
-内核负责在允许应用代码执行之前检查代码签名。此外，如果 `mprotect` 使用 `MAP_JIT` 标志被调用，滥用 JIT 是在内存中写入并执行新代码的一种方式。注意，应用需要特殊的 entitlement 才能这样做。
+**kernel** 会在允许 app 的 code 执行之前**检查 code signature**。此外，如果使用 `MAP_JIT` flag 调用 `mprotect`，滥用 JIT 是一种能够在内存中写入并执行新 code 的方式。请注意，app 需要特殊的 entitlement 才能执行此操作。
 
 ## `cs_blobs` & `cs_blob`
 
-[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) 结构包含关于运行进程 entitlement 的信息。`csb_platform_binary` 还表明应用是否为 platform binary（操作系统在不同阶段检查该标志以应用安全机制，例如保护这些进程的任务端口的 SEND 权限）。
+[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) struct 包含运行中 process 的 entitlement 信息。`csb_platform_binary` 还会说明 app 是否为 **platform binary**（OS 会在不同时间检查这一点，以应用相关 security mechanisms，例如保护这些 process 的 task ports 的 SEND rights）。
+
+> [!WARNING]
+> 请注意，多项 security measures 取决于 binary 是否为 platform binary，因此一种 privilege escalation 方式是**将 binary 变成 platform binary**（例如，使用允许此操作的 certificate 对其重新 signing）。
 ```c
 struct cs_blob {
 struct cs_blob  *csb_next;
@@ -356,6 +394,10 @@ bool csb_csm_managed;
 ```
 ## 参考资料
 
-- [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
+- [1] [XNU — `osfmk/kern/cs_blobs.h` (`CodeDirectory`、`CS_*` flags、blob magic values)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [2] [XNU — `bsd/kern/ubc_subr.c` (`cs_blob` handling and signature validation)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/ubc_subr.c)
+- [3] [XNU — `bsd/sys/codesign.h` (`csops`/`csops_audittoken` operations)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [4] [Apple Security framework source — `libsecurity_codesigning`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/libsecurity_codesigning)
+- [5] [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Introduction/Introduction.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

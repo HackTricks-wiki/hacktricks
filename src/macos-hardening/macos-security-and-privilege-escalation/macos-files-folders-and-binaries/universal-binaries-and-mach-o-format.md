@@ -1,12 +1,12 @@
-# macOS Universal binaries & Mach-O Format
+# macOS Universal binaries & Mach-O 格式
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本信息
 
-Mac OS binaries usually are compiled as **universal binaries**. A **universal binary** can **support multiple architectures in the same file**.
+Mac OS 二进制文件通常会被编译为 **universal binaries**。**universal binary** 可以在同一个文件中**支持多种架构**。
 
-These binaries follows the **Mach-O structure** which is basically compased of:
+这些二进制文件遵循 **Mach-O 结构**，基本由以下部分组成：
 
 - Header
 - Load Commands
@@ -16,7 +16,7 @@ These binaries follows the **Mach-O structure** which is basically compased of:
 
 ## Fat Header
 
-Search for the file with: `mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
+使用以下命令搜索文件：`mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
 
 <pre class="language-c"><code class="lang-c"><strong>#define FAT_MAGIC	0xcafebabe
 </strong><strong>#define FAT_CIGAM	0xbebafeca	/* NXSwapLong(FAT_MAGIC) */
@@ -35,9 +35,9 @@ uint32_t	align;		/* alignment as a power of 2 */
 };
 </code></pre>
 
-The header has the **magic** bytes followed by the **number** of **archs** the file **contains** (`nfat_arch`) and each arch will have a `fat_arch` struct.
+Header 包含 **magic** 字节，后面跟着文件**包含**的 **arch** 数量（`nfat_arch`），并且每个 arch 都会有一个 `fat_arch` 结构体。
 
-Check it with:
+使用以下命令检查：
 
 <pre class="language-shell-session"><code class="lang-shell-session">% file /bin/ls
 /bin/ls: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64e:Mach-O 64-bit executable arm64e]
@@ -64,14 +64,14 @@ capabilities PTR_AUTH_VERSION USERSPACE 0
 </strong>    align 2^14 (16384)
 </code></pre>
 
-or using the [Mach-O View](https://sourceforge.net/projects/machoview/) tool:
+或者使用 [Mach-O View](https://sourceforge.net/projects/machoview/) 工具：
 
 <figure><img src="../../../images/image (1094).png" alt=""><figcaption></figcaption></figure>
 
-As you may be thinking usually a universal binary compiled for 2 architectures **doubles the size** of one compiled for just 1 arch.
+正如你可能想到的，通常为 2 种架构编译的 universal binary，其大小是仅为 1 种架构编译的 binary 的**两倍**。
 
 > [!TIP]
-> When triaging malware or suspicious apps, don't stop after `file` reports the "best" architecture. A universal binary can hide different imports, load commands or compiler metadata in each slice, so enumerate **all** the slices first and then inspect them independently:
+> 对 malware 或可疑应用进行 triaging 时，不要在 `file` 报告“最佳”架构后就停止。Universal binary 的每个 slice 中可能隐藏不同的 imports、load commands 或 compiler metadata，因此应先枚举**所有** slice，然后分别进行检查：
 ```bash
 BIN=/path/to/bin
 lipo -archs "$BIN"
@@ -81,11 +81,11 @@ otool -hv "/tmp/$(basename "$BIN").$A"
 otool -l "/tmp/$(basename "$BIN").$A" | egrep 'LC_BUILD_VERSION|LC_LOAD_DYLIB|LC_RPATH|LC_DYLD_CHAINED_FIXUPS|LC_CODE_SIGNATURE'
 done
 ```
-最近的 macOS SDK 还暴露了诸如 `<mach-o/utils.h>` 中的 `macho_for_each_slice()` 和 `macho_best_slice()` 之类的 helper。后者很适合模拟 dyld/kernel 会加载什么，但 scanners 仍然应该遍历每个 slice，以避免遗漏特定架构的内容。
+近期的 macOS SDK 还在 `<mach-o/utils.h>` 中提供了 `macho_for_each_slice()` 和 `macho_best_slice()` 等辅助函数。后者便于模拟 dyld/kernel 将加载的内容，但 scanner 仍应遍历每个 slice，以避免遗漏特定架构的内容。<sup>[1]</sup>
 
 ## **Mach-O Header**
 
-header 包含文件的基本信息，例如用于将其标识为 Mach-O 文件的 magic bytes，以及关于目标架构的信息。你可以在这里找到它：`mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
+该 header 包含文件的基本信息，例如用于识别 Mach-O 文件的 magic bytes，以及目标架构的信息。可以通过以下命令找到它：`mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 ```c
 #define	MH_MAGIC	0xfeedface	/* the mach magic number */
 #define MH_CIGAM	0xcefaedfe	/* NXSwapInt(MH_MAGIC) */
@@ -112,20 +112,20 @@ uint32_t	flags;		/* flags */
 uint32_t	reserved;	/* reserved */
 };
 ```
-### Mach-O File Types
+### Mach-O 文件类型
 
-有不同的文件类型，你可以在 [**source code for example here**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h) 中找到它们的定义。最重要的是：
+存在不同的文件类型，你可以在[**例如此处的源代码中找到它们的定义**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h)。最重要的类型包括：
 
-- `MH_OBJECT`: 可重定位对象文件（编译的中间产物，还不是可执行文件）。
-- `MH_EXECUTE`: 可执行文件。
-- `MH_FVMLIB`: 固定 VM library 文件。
-- `MH_CORE`: Code Dumps
-- `MH_PRELOAD`: 预加载的可执行文件（在 XNU 中已不再支持）
-- `MH_DYLIB`: Dynamic Libraries
-- `MH_DYLINKER`: Dynamic Linker
-- `MH_BUNDLE`: "Plugin files". 使用 gcc 中的 -bundle 生成，并由 `NSBundle` 或 `dlopen` 显式加载。
-- `MH_DYSM`: 配套的 `.dSym` 文件（包含用于调试的符号的文件）。
-- `MH_KEXT_BUNDLE`: Kernel Extensions。
+- `MH_OBJECT`：可重定位目标文件（编译的中间产物，尚未成为可执行文件）。
+- `MH_EXECUTE`：可执行文件。
+- `MH_FVMLIB`：固定 VM 库文件。
+- `MH_CORE`：代码转储。
+- `MH_PRELOAD`：预加载的可执行文件（XNU 已不再支持）。
+- `MH_DYLIB`：Dynamic Libraries。
+- `MH_DYLINKER`：Dynamic Linker。
+- `MH_BUNDLE`：“Plugin files”。使用 gcc 中的 -bundle 生成，并由 `NSBundle` 或 `dlopen` 显式加载。
+- `MH_DYSM`：配套的 `.dSym` 文件（包含用于调试的符号的文件）。
+- `MH_KEXT_BUNDLE`：Kernel Extensions。
 ```bash
 # Checking the mac header of a binary
 otool -arch arm64e -hv /bin/ls
@@ -139,48 +139,48 @@ MH_MAGIC_64    ARM64          E USR00     EXECUTE    19       1728   NOUNDEFS DY
 
 ## **Mach-O Flags**
 
-源代码还定义了几个对加载库很有用的标志：
+源代码还定义了几个用于加载 libraries 的 flags：
 
-- `MH_NOUNDEFS`: 没有未定义引用（完全链接）
-- `MH_DYLDLINK`: Dyld 链接
-- `MH_PREBOUND`: 动态引用已预绑定。
-- `MH_SPLIT_SEGS`: 文件将 r/o 和 r/w 段分开。
-- `MH_WEAK_DEFINES`: Binary 有 weak 定义的符号
-- `MH_BINDS_TO_WEAK`: Binary 使用 weak 符号
-- `MH_ALLOW_STACK_EXECUTION`: 使 stack 可执行
-- `MH_NO_REEXPORTED_DYLIBS`: Library 没有 LC_REEXPORT 命令
-- `MH_PIE`: Position Independent Executable
-- `MH_HAS_TLV_DESCRIPTORS`: 存在一个包含 thread local variables 的 section
-- `MH_NO_HEAP_EXECUTION`: heap/data pages 不允许执行
-- `MH_HAS_OBJC`: Binary 有 oBject-C sections
-- `MH_SIM_SUPPORT`: Simulator 支持
-- `MH_DYLIB_IN_CACHE`: 用于 shared library cache 中的 dylibs/frameworks。
+- `MH_NOUNDEFS`：无未定义引用（已完成链接）
+- `MH_DYLDLINK`：使用 Dyld linking
+- `MH_PREBOUND`：动态引用已预绑定。
+- `MH_SPLIT_SEGS`：文件将只读段和可读写段分开。
+- `MH_WEAK_DEFINES`：Binary 包含 weak defined symbols
+- `MH_BINDS_TO_WEAK`：Binary 使用 weak symbols
+- `MH_ALLOW_STACK_EXECUTION`：使 stack 可执行
+- `MH_NO_REEXPORTED_DYLIBS`：Library 不包含 LC_REEXPORT commands
+- `MH_PIE`：Position Independent Executable
+- `MH_HAS_TLV_DESCRIPTORS`：存在包含 thread local variables 的 section
+- `MH_NO_HEAP_EXECUTION`：heap/data pages 不可执行
+- `MH_HAS_OBJC`：Binary 包含 oBject-C sections
+- `MH_SIM_SUPPORT`：Simulator 支持
+- `MH_DYLIB_IN_CACHE`：用于 shared library cache 中的 dylibs/frameworks。
 
 ## **Mach-O Load commands**
 
-这里指定了 **file 在 memory 中的布局**，详细说明了 **symbol table 的位置**、程序开始执行时 main thread 的上下文，以及所需的 **shared libraries**。会向 dynamic loader **(dyld)** 提供关于 Binary 加载到 memory 过程的指令。
+**文件在内存中的布局**在此处指定，其中详细说明了 **symbol table 的位置**、执行开始时主线程的上下文，以及所需的 **shared libraries**。这里向 dynamic loader **(dyld)** 提供有关 binary 如何加载到内存中的指令。
 
-使用的是 **load_command** structure，定义在前面提到的 **`loader.h`** 中：
+它使用 **`loader.h`** 中定义的 **load_command** structure：
 ```objectivec
 struct load_command {
 uint32_t cmd;           /* type of load command */
 uint32_t cmdsize;       /* total size of command in bytes */
 };
 ```
-There are about **50 different types of load commands** that the system handles differently. The most common ones are: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB`, and `LC_CODE_SIGNATURE`.
+系统以不同方式处理大约 **50 种不同类型的 load commands**。最常见的有：`LC_SEGMENT_64`、`LC_LOAD_DYLINKER`、`LC_MAIN`、`LC_LOAD_DYLIB` 和 `LC_CODE_SIGNATURE`。
 
 ### **LC_SEGMENT/LC_SEGMENT_64**
 
 > [!TIP]
-> Basically, this type of Load Command define **how to load the \_\_TEXT** (executable code) **and \_\_DATA** (data for the process) **segments** according to the **offsets indicated in the Data section** when the binary is executed.
+> 基本上，这种 Load Command 定义了 binary 执行时，如何根据 Data section 中标示的 **offsets** 加载 **\_\_TEXT**（可执行代码）和 **\_\_DATA**（进程所需的数据）**segments**。
 
-These commands **define segments** that are **mapped** into the **virtual memory space** of a process when it is executed.
+这些 commands 定义了在进程执行时映射到其**虚拟内存空间**中的 **segments**。
 
-There are **different types** of segments, such as the **\_\_TEXT** segment, which holds the executable code of a program, and the **\_\_DATA** segment, which contains data used by the process. These **segments are located in the data section** of the Mach-O file.
+**segments** 有不同的类型，例如保存程序可执行代码的 **\_\_TEXT** segment，以及包含进程所使用数据的 **\_\_DATA** segment。这些 **segments 位于 Mach-O 文件的 data section 中**。
 
-**Each segment** can be further **divided** into multiple **sections**. The **load command structure** contains **information** about **these sections** within the respective segment.
+**每个 segment** 还可以进一步划分为多个 **sections**。**load command structure** 包含各个 segment 中这些 **sections** 的**信息**。
 
-In the header first you find the **segment header**:
+在 header 中，首先可以找到 **segment header**：
 
 <pre class="language-c"><code class="lang-c">struct segment_command_64 { /* for 64-bit architectures */
 uint32_t	cmd;		/* LC_SEGMENT_64 */
@@ -197,11 +197,11 @@ int32_t		initprot;	/* initial VM protection */
 };
 </code></pre>
 
-Example of segment header:
+segment header 示例：
 
 <figure><img src="../../../images/image (1126).png" alt=""><figcaption></figcaption></figure>
 
-This header defines the **number of sections whose headers appear after** it:
+该 header 定义了其后出现 section headers 的 **sections 数量**：
 ```c
 struct section_64 { /* for 64-bit architectures */
 char		sectname[16];	/* name of this section */
@@ -218,63 +218,63 @@ uint32_t	reserved2;	/* reserved (for count or sizeof) */
 uint32_t	reserved3;	/* reserved */
 };
 ```
-Example of **section header**:
+示例 **section header**：
 
 <figure><img src="../../../images/image (1108).png" alt=""><figcaption></figcaption></figure>
 
-If you **add** the **section offset** (0x37DC) + the **offset** where the **arch starts**, in this case `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
+如果将 **section offset**（0x37DC）与 **arch starts** 的 **offset** 相加，本例中为 `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
 <figure><img src="../../../images/image (701).png" alt=""><figcaption></figcaption></figure>
 
-也可以通过以下方式从**命令行**获取**头部信息**：
+也可以通过 **command line** 获取 **headers information**：
 ```bash
 otool -lv /bin/ls
 ```
-Common segments loaded by this cmd:
+此 cmd 加载的常见 segments：
 
-- **`__PAGEZERO`:** 它指示 kernel **map** **address zero**，使其**无法被读取、写入或执行**。结构中的 maxprot 和 minprot 变量被设为 0，以表示该页上**没有读写执行权限**。
-- 这个分配对于**缓解 NULL pointer dereference vulnerabilities** 很重要。这是因为 XNU 强制使用硬 page zero，确保内存的第一页（仅第一页）不可访问（i386 例外）。binary 可以通过构造一个较小的 \_\_PAGEZERO（使用 `-pagezero_size`）来覆盖前 4k，并让其余 32bit memory 在 user mode 和 kernel mode 下都可访问，从而满足这个要求。
-- **`__TEXT`**: 包含具有**read** 和 **execute** 权限的**可执行** **code**（不可写）**。** 该 segment 的常见 section:
-- `__text`: 编译后的 binary code
-- `__const`: 常量数据（只读）
-- `__[c/u/os_log]string`: C、Unicode 或 os logs 字符串常量
-- `__stubs` and `__stubs_helper`: 参与 dynamic library 加载过程
-- `__unwind_info`: 栈展开数据。
-- 注意，这些内容都经过签名，但也被标记为可执行（这为那些不一定需要该权限的 section 提供了更多 exploitation 选项，例如专门存放字符串的 section）。
-- **`__DATA`**: 包含**可读**且**可写**的数据（不可执行）**。**
+- **`__PAGEZERO`：**它指示 kernel **映射** **地址零**，使其**无法被读取、写入或执行**。结构中的 maxprot 和 minprot 变量被设置为零，表示**此页面没有读-写-执行权限**。
+- 此分配对于**缓解 NULL pointer dereference vulnerabilities**非常重要。这是因为 XNU 强制执行 hard page zero，确保内存的第一个页面（仅第一个页面）不可访问（i386 除外）。二进制文件可以通过构造一个较小的 \_\_PAGEZERO（使用 `-pagezero_size`）来满足此要求，使其覆盖前 4k，并让其余 32bit 内存在 user 和 kernel mode 下都可访问。
+- **`__TEXT`**：包含具有**读取**和**执行**权限的**可执行** **code**（不可写）**.** 此 segment 的常见 sections：
+- `__text`：编译后的二进制 code
+- `__const`：常量数据（只读）
+- `__[c/u/os_log]string`：C、Unicode 或 os logs 字符串常量
+- `__stubs` 和 `__stubs_helper`：在 dynamic library loading 过程中发挥作用
+- `__unwind_info`：stack unwind 数据。
+- 注意，所有这些内容都经过签名，同时也被标记为可执行（这为利用那些不一定需要此权限的 sections 创造了更多选项，例如专用于字符串的 sections）。
+- **`__DATA`**：包含**可读取**和**可写入**的数据（不可执行）**.**
 - `__got:` Global Offset Table
-- `__nl_symbol_ptr`: Non lazy（load 时绑定）symbol pointer
-- `__la_symbol_ptr`: Lazy（use 时绑定）symbol pointer
-- `__const`: 应该是只读数据（但实际上不一定）
-- `__cfstring`: CoreFoundation strings
-- `__data`: 已初始化的全局变量
-- `__bss`: 未初始化的静态变量
-- `__objc_*` (\_\_objc_classlist, \_\_objc_protolist, etc): Objective-C runtime 使用的信息
-- **`__DATA_CONST`**: \_\_DATA.\_\_const 并不保证是常量（有写权限），其他 pointers 和 GOT 也一样。这个 section 使用 `mprotect` 将 `__const`、部分 initializers 以及 GOT table（解析后）设为**只读**。
-- **`__AUTH` / `__AUTH_CONST`**: 在近期的 Apple Silicon binary 中很常见。这些 segment 保存的 pointers 必须在 load 时或 use 时经过认证（例如 `__auth_got`）。如果 rebinding、hook 或 import-patching trick 只检查旧的 `__got` / `__la_symbol_ptr` section，就可能漏掉现代 `arm64e` binary 中真正的 call sites。有关这些 section 的更多细节，请查看 [this page](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md)。
-- **`__LINKEDIT`**: 包含给 linker（dyld）使用的信息，例如 symbol、string 和 relocation table entries。它是一个通用容器，存放不属于 `__TEXT` 或 `__DATA` 的内容，其内容在其他 load commands 中描述。
+- `__nl_symbol_ptr`：Non lazy（在 load 时 bind）symbol pointer
+- `__la_symbol_ptr`：Lazy（使用时 bind）symbol pointer
+- `__const`：应为只读数据（实际上并非如此）
+- `__cfstring`：CoreFoundation 字符串
+- `__data`：全局变量（已初始化）
+- `__bss`：静态变量（未初始化）
+- `__objc_*`（\_\_objc_classlist、\_\_objc_protolist 等）：Objective-C runtime 使用的信息
+- **`__DATA_CONST`**：\_\_DATA.\_\_const 不保证为常量（具有写权限），其他 pointers 和 GOT 也同样如此。此 section 使用 `mprotect` 将 `__const`、某些 initializers 以及 GOT table（解析完成后）设置为**只读**。
+- **`__AUTH` / `__AUTH_CONST`**：常见于近期的 Apple Silicon 二进制文件。这些 segments 保存必须在 load 或使用时完成 authentication 的 pointers（例如 `__auth_got`）。如果 rebinding、hook 或 import-patching trick 只检查传统的 `__got` / `__la_symbol_ptr` sections，可能会遗漏现代 `arm64e` 二进制文件中的真实 call sites。有关这些 sections 的更多详细信息，请查看[此页面](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md)。
+- **`__LINKEDIT`**：包含供 linker（dyld）使用的信息，例如 symbol、string 和 relocation table entries。它是一个通用容器，用于存放既不属于 `__TEXT` 也不属于 `__DATA` 的内容，其内容在其他 load commands 中描述。
 - dyld 信息：Rebase、Non-lazy/lazy/weak binding opcodes 和 export info
-- Functions starts: 函数起始地址表
-- Data In Code: `__text` 中的数据岛
-- SYmbol Table: binary 中的符号
-- Indirect Symbol Table: Pointer/stub symbols
+- Functions starts：functions 起始地址表
+- Data In Code：\_\_text 中的 data islands
+- SYmbol Table：二进制文件中的 symbols
+- Indirect Symbol Table：pointer/stub symbols
 - String Table
 - Code Signature
-- **`__OBJC`**: 包含 Objective-C runtime 使用的信息。尽管这些信息也可能出现在 `__DATA` segment 中的各种 \_\_objc\_\* section 内。
-- **`__RESTRICT`**: 一个没有内容的 segment，只有一个名为 **`__restrict`** 的 section（同样为空），它确保 binary 运行时会忽略 DYLD 环境变量。
+- **`__OBJC`**：包含 Objective-C runtime 使用的信息。尽管这些信息也可能位于 \_\_DATA segment 中的各种 \_\_objc\_\* sections 内。
+- **`__RESTRICT`**：一个不包含内容的 segment，其中只有一个名为 **`__restrict`** 的 section（同样为空），用于确保运行二进制文件时忽略 DYLD environmental variables。
 
-正如在 code 中可以看到的，**segments 也支持 flags**（不过它们不太常用）：
+正如在 code 中可以看到的，**segments 也支持 flags**（尽管它们并不常用）：
 
-- `SG_HIGHVM`: 仅 Core 使用（未使用）
-- `SG_FVMLIB`: 未使用
-- `SG_NORELOC`: Segment 没有 relocation
-- `SG_PROTECTED_VERSION_1`: Encryption。例如 Finder 使用它来加密 text `__TEXT` segment。
+- `SG_HIGHVM`：仅 Core 使用（未使用）
+- `SG_FVMLIB`：未使用
+- `SG_NORELOC`：Segment 没有 relocation
+- `SG_PROTECTED_VERSION_1`：Encryption。例如 Finder 使用它来加密 text `__TEXT` segment。
 
 ### **`LC_UNIXTHREAD/LC_MAIN`**
 
-**`LC_MAIN`** 在 **entryoff attribute** 中包含 entrypoint。加载时，**dyld** 只是将这个值**加到** binary 的（内存中的）**base** 上，然后**跳转**到该指令，以开始执行 binary 的 code。
+**`LC_MAIN`** 在 **`entryoff` attribute 中包含 entrypoint。**在 load 时，**dyld** 只需将此值加到二进制文件（内存中）的 **base** 上，然后**跳转**到此 instruction，以开始执行二进制文件的 code。
 
-**`LC_UNIXTHREAD`** 包含启动 main thread 时寄存器必须具有的值。它已经被弃用，但 **`dyld`** 仍然使用它。可以通过以下方式查看由此设置的寄存器值：
+**`LC_UNIXTHREAD`** 包含启动 main thread 时 registers 必须具有的值。此功能已经 deprecated，但 **`dyld`** 仍会使用它。可以通过以下方式查看由此设置的 registers 值：
 ```bash
 otool -l /usr/lib/dyld
 [...]
@@ -305,60 +305,60 @@ cpsr 0x00000000
 {{#endref}}
 
 
-包含 **Mach-O 文件的 code signature** 信息。它只包含一个 **offset**，用于 **指向** **signature blob**。这通常位于文件的最末尾。\
-不过，你可以在[**this blog post**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)和这个[**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4)中找到关于这一部分的一些信息。
+包含有关 **Mach-O 文件代码签名**的信息。它只包含一个 **偏移量**，该偏移量 **指向** **签名 blob**。该 blob 通常位于文件的最末尾。\
+不过，你可以在[**这篇博客文章**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)和这些 [**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4) 中找到有关此 section 的一些信息。<sup>[3][4]</sup>
 
 ### **`LC_ENCRYPTION_INFO[_64]`**
 
-支持 binary encryption。不过，当然，如果攻击者成功 compromise 了该 process，他就能把内存以未加密的形式 dump 出来。
+支持 binary encryption。不过，当然，如果攻击者成功 compromise 该进程，就能够 dump 未加密的内存。
 
 ### **`LC_LOAD_DYLINKER`**
 
-包含 **dynamic linker executable 的路径**，它会把 shared libraries 映射到 process address space 中。其 **值始终设置为 `/usr/lib/dyld`**。需要注意的是，在 macOS 中，dylib mapping 发生在 **user mode**，而不是 kernel mode。
+包含将 shared libraries 映射到进程地址空间中的 **dynamic linker executable 的路径**。**值始终设置为 `/usr/lib/dyld`**。需要注意的是，在 macOS 中，dylib mapping 发生在 **user mode**，而不是 kernel mode。
 
 ### **`LC_IDENT`**
 
-已废弃，但在配置为在 panic 时生成 dumps 时，会创建一个 Mach-O core dump，并且 kernel version 会设置在 `LC_IDENT` command 中。
+已废弃，但当配置为在 panic 时生成 dumps 时，会创建 Mach-O core dump，并将 kernel version 设置在 `LC_IDENT` command 中。
 
 ### **`LC_UUID`**
 
-随机 UUID。它本身没有直接用途，但 XNU 会将它和其余的 process info 一起缓存。它可用于 crash reports。
+随机 UUID。它本身没有直接用途，但 XNU 会将其与其他进程信息一起缓存。它可以用于 crash reports。
 
 ### **`LC_BUILD_VERSION`**
 
-现代 binaries 通常会携带这个 command，用于声明 **target platform**、**minimum OS version**、**SDK version**，以及可选的用于构建该 slice 的 **tool versions**。从 offensive/reversing 的角度来看，这对 fingerprint 采样是如何构建的非常有用，也能快速发现奇怪的 universal binaries，其中某个 slice 是用不同的 SDK 或 deployment target 编译的。较旧的 binaries 可能仍然使用 `LC_VERSION_MIN_*`。
+现代 binaries 通常包含此 command，用于声明 **target platform**、**minimum OS version**、**SDK version**，以及可选的用于构建该 slice 的 **tool versions**。从 offensive/reversing 的角度来看，这对于识别 sample 的构建方式非常有用，也可以快速发现异常的 universal binaries，例如其中一个 slice 使用了不同的 SDK 或 deployment target 编译。较旧的 binaries 可能仍使用 `LC_VERSION_MIN_*`。
 ```bash
 vtool -show-build /bin/ls
 otool -l /bin/ls | grep -A 8 LC_BUILD_VERSION
 ```
 ### **`LC_DYLD_ENVIRONMENT`**
 
-允许在进程执行之前向 dyld 指定环境变量。这可能非常危险，因为它可以允许在进程内执行任意代码，所以这个 load command 只会在启用了 `#define SUPPORT_LC_DYLD_ENVIRONMENT` 的 dyld build 中使用，并且还会进一步限制只处理形如 `DYLD_..._PATH` 的变量，用于指定 load paths。
+允许在进程执行之前向 dyld 指定环境变量。这可能非常危险，因为它允许在进程内部执行任意代码，因此该 load command 仅用于使用 `#define SUPPORT_LC_DYLD_ENVIRONMENT` 构建的 dyld，并进一步将处理限制为 `DYLD_..._PATH` 形式、用于指定加载路径的变量。
 
-### **`LC_DYLD_EXPORTS_TRIE` and `LC_DYLD_CHAINED_FIXUPS`**
+### **`LC_DYLD_EXPORTS_TRIE` 和 `LC_DYLD_CHAINED_FIXUPS`**
 
-最近的 toolchains 经常将 export/bind/rebase metadata 存储在这些命令中，而不是只依赖旧的 `LC_DYLD_INFO[_ONLY]` opcodes。二者都是指向 **`__LINKEDIT`** 的 `linkedit_data_command` 条目：
+近期的 toolchain 通常会将 export/bind/rebase 元数据存储在这些 commands 中，而不是仅依赖旧版的 `LC_DYLD_INFO[_ONLY]` 操作码。两者都是指向 **`__LINKEDIT`** 的 `linkedit_data_command` 条目：
 
-- **`LC_DYLD_EXPORTS_TRIE`**：包含 image 导出符号的紧凑 trie。
-- **`LC_DYLD_CHAINED_FIXUPS`**：按 segment 分段的 fixup chains，由 dyld 用来应用 rebases 和 binds。在 Apple Silicon 上，你还会在这里遇到许多现代的 authenticated pointer fixups。
+- **`LC_DYLD_EXPORTS_TRIE`**：包含由该 image 导出的 symbols 的紧凑 trie。
+- **`LC_DYLD_CHAINED_FIXUPS`**：由 dyld 使用的、按 segment 划分的 fixup chain，用于应用 rebase 和 bind。在 Apple Silicon 上，这里也会遇到许多现代的 authenticated pointer fixup。
 
-当你重建 imports/exports、理解为什么一个通过 `@rpath` 加载的 dependency 会以那种方式解析，或者弄清为什么在现代 `arm64e` 目标上 hook/rebinding 尝试失败时，这些 metadata 都非常有用。`dyld_info` 也可以用于 **cache-only dylib paths**，这些路径在磁盘上并不存在为独立文件，在现代 macOS 上尤其有用，因为许多系统库只存在于 shared cache 中。
+在重建 imports/exports、理解某个通过 `@rpath` 加载的 dependency 为何以特定方式解析，或排查 hook/rebinding 尝试为何在现代 `arm64e` target 上失败时，这些元数据都非常有用。`dyld_info` 还可以用于处理 **仅存在于 cache 中的 dylib 路径**，即那些在磁盘上不存在独立文件的路径。在现代 macOS 上，许多系统 library 仅存在于 shared cache 中，因此这一点非常实用。<sup>[2]</sup>
 ```bash
 dyld_info -arch arm64e -exports -fixup_chains -fixup_chain_details /bin/ls
 ```
 ### **`LC_FILESET_ENTRY`**
 
-这个现代 load command 主要在检查 **kernel collections / kernelcache-style filesets** 时相关。它不表示一个单独的独立 image，而是让外层 Mach-O 作为一个容器，每个 `LC_FILESET_ENTRY` 都指向一个嵌入的 Mach-O，并带有自己的类似路径的 **entry id**、VM address 和 file offset。如果你正在 reverse 现代 macOS/iOS kernel 组件，这个命令通常就是顶层容器与实际想要提取或 disassemble 的 image 之间的桥梁。
+这个现代 load command 主要与检查 **kernel collections / kernelcache-style filesets** 相关。它不是表示一个独立的 standalone image，而是将外层 Mach-O 作为容器，并由每个 `LC_FILESET_ENTRY` 指向一个嵌入的 Mach-O；该 Mach-O 具有自己的类路径 **entry id**、VM address 和 file offset。如果你正在逆向现代 macOS/iOS kernel 组件，此 command 通常是连接顶层容器与实际要提取或反汇编的 image 的桥梁。
 ```bash
 otool -l /System/Library/KernelCollections/BootKernelExtensions.kc | grep -A 6 LC_FILESET_ENTRY
 ```
-For practical extraction workflows, check [this other page about macOS kernel extensions and kernelcache](../mac-os-architecture/macos-kernel-extensions.md).
+对于实际的提取工作流，请参阅[这个关于 macOS kernel extensions 和 kernelcache 的页面](../mac-os-architecture/macos-kernel-extensions.md)。
 
 ### **`LC_LOAD_DYLIB`**
 
-This load command describes a **dynamic** **library** dependency which **instructs** the **loader** (dyld) to **load and link said library**. There is a `LC_LOAD_DYLIB` load command **for each library** that the Mach-O binary requires.
+此 load command 描述一个**动态** **library** dependency，它会**指示** **loader**（dyld）**加载并链接该 library**。Mach-O binary 所需的**每个 library**都有一个 `LC_LOAD_DYLIB` load command。
 
-- This load command is a structure of type **`dylib_command`** (which contains a struct dylib, describing the actual dependent dynamic library):
+- 此 load command 是 `dylib_command` 类型的结构（其中包含一个 struct dylib，用于描述实际依赖的 dynamic library）：
 ```objectivec
 struct dylib_command {
 uint32_t        cmd;            /* LC_LOAD_{,WEAK_}DYLIB */
@@ -375,7 +375,7 @@ uint32_t compatibility_version;     /* library's compatibility vers number*/
 ```
 ![LC DYLD ENVIRONMENT - LC LOAD DYLIB: uint32 t compatibility version; / library's compatibility vers number /](<../../../images/image (486).png>)
 
-你也可以通过 cli 获取这些信息：
+你也可以通过 cli 获取此信息：
 ```bash
 otool -L /bin/ls
 /bin/ls:
@@ -383,65 +383,68 @@ otool -L /bin/ls
 /usr/lib/libncurses.5.4.dylib (compatibility version 5.4.0, current version 5.4.0)
 /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1319.0.0)
 ```
-Some potential malware related libraries are:
+一些与 malware 相关的潜在 libraries 包括：
 
-- **DiskArbitration**: 监控 USB drives
-- **AVFoundation:** 捕获 audio and video
-- **CoreWLAN**: Wifi scans.
-
-> [!TIP]
-> A Mach-O binary can contain one or **more** **constructors**, that will be **executed** **before** the address specified in **LC_MAIN**.\
-> The offsets of any constructors are held in the **\_\_mod_init_func** section of the **\_\_DATA_CONST** segment.
-
-## **Mach-O Data**
-
-At the core of the file lies the data region, which is composed of several segments as defined in the load-commands region. **A variety of data sections can be housed within each segment**, with each section **holding code or data** specific to a type.
+- **DiskArbitration**：监控 USB drives
+- **AVFoundation:** 捕获音频和视频
+- **CoreWLAN**：执行 Wifi 扫描。
 
 > [!TIP]
-> The data is basically the part containing all the **information** that is loaded by the load commands **LC_SEGMENTS_64**
+> Mach-O binary 可以包含一个或**多个** **constructors**，它们会在 **LC_MAIN** 中指定的地址之前被**执行**。\
+> 任意 constructors 的 offsets 都存储在 **\_\_DATA_CONST** segment 的 **\_\_mod_init_func** section 中。
+
+## **Mach-O 数据**
+
+文件的核心是 data region，它由 load-commands region 中定义的多个 segments 组成。**每个 segment 中都可以容纳各种 data sections**，每个 section **保存**特定类型的 code 或 data。
+
+> [!TIP]
+> data 基本上就是包含由 load commands **LC_SEGMENTS_64** 加载的所有**信息**的部分。
 
 ![https://www.oreilly.com/api/v2/epubs/9781785883378/files/graphics/B05055_02_38.jpg](<../../../images/image (507) (3).png>)
 
-This includes:
+其中包括：
 
-- **Function table:** Which holds information about the program functions.
-- **Symbol table**: Which contains information about the external function used by the binary
-- It could also contain internal function, variable names as well and more.
+- **Function table:** 保存程序 functions 的信息。
+- **Symbol table**: 包含 binary 使用的 external functions 的信息
+- 它还可能包含 internal functions、variable names 等。
 
-To check it you could use the [**Mach-O View**](https://sourceforge.net/projects/machoview/) tool:
+要检查它，可以使用 [**Mach-O View**](https://sourceforge.net/projects/machoview/) tool：
 
 <figure><img src="../../../images/image (1120).png" alt=""><figcaption></figcaption></figure>
 
-Or from the cli:
+或者从 cli 中：
 ```bash
 size -m /bin/ls
 ```
-## Objetive-C Common Sections
+## Objective-C 常见节
 
-在 `__TEXT` segment (r-x) 中：
+在 `__TEXT` segment（r-x）中：
 
-- `__objc_classname`: 类名（strings）
-- `__objc_methname`: 方法名（strings）
-- `__objc_methtype`: 方法类型（strings）
+- `__objc_classname`：Class names（strings）
+- `__objc_methname`：Method names（strings）
+- `__objc_methtype`：Method types（strings）
 
-在 `__DATA` segment (rw-) 中：
+在 `__DATA` segment（rw-）中：
 
-- `__objc_classlist`: 指向所有 Objetive-C 类的指针
-- `__objc_nlclslist`: 指向 Non-Lazy Objective-C 类的指针
-- `__objc_catlist`: 指向 Categories 的指针
-- `__objc_nlcatlist`: 指向 Non-Lazy Categories 的指针
-- `__objc_protolist`: Protocols 列表
-- `__objc_const`: 常量数据
-- `__objc_imageinfo`, `__objc_selrefs`, `objc__protorefs`...
+- `__objc_classlist`：指向所有 Objective-C classes 的指针
+- `__objc_nlclslist`：指向 Non-Lazy Objective-C classes 的指针
+- `__objc_catlist`：指向 Categories 的指针
+- `__objc_nlcatlist`：指向 Non-Lazy Categories 的指针
+- `__objc_protolist`：Protocols 列表
+- `__objc_const`：常量数据
+- `__objc_imageinfo`、`__objc_selrefs`、`objc__protorefs`……
 
 ## Swift
 
-- `_swift_typeref`, `_swift3_capture`, `_swift3_assocty`, `_swift3_types, _swift3_proto`, `_swift3_fieldmd`, `_swift3_builtin`, `_swift3_reflstr`
+- `_swift_typeref`、`_swift3_capture`、`_swift3_assocty`、`_swift3_types`、`_swift3_proto`、`_swift3_fieldmd`、`_swift3_builtin`、`_swift3_reflstr`
 
 
 
-## References
+## 参考资料
 
-- [Mach-O slices aren't as straightforward as you might think](https://objective-see.org/blog/blog_0x80.html)
-- [dyld_info(1) man page](https://keith.github.io/xcode-man-pages/dyld_info.1.html)
+- [1] [Mach-O slices aren't as straightforward as you might think](https://objective-see.org/blog/blog_0x80.html)
+- [2] [dyld_info(1) man page](https://keith.github.io/xcode-man-pages/dyld_info.1.html)
+- [3] [Reading Your Own Entitlements](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)
+- [4] [carlospolop/machoreader.py (gist)](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4)
+
 {{#include ../../../banners/hacktricks-training.md}}

