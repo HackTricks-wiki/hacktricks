@@ -2,18 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**BlobRunner**](https://github.com/OALabs/BlobRunner) is 'n klein Windows **shellcode loader vir debugging**: dit allokeer RWX memory, kopieer die blob, druk die basisadres / entry point, en dra uitvoering daarheen oor. Dit is handig wanneer die sample **raw shellcode** is, 'n **decrypted stage extracted from malware**, of 'n **position-independent blob** wat nie 'n PE header het nie.
+[**BlobRunner**](https://github.com/OALabs/BlobRunner) is 'n klein Windows **shellcode loader for debugging**: dit allokeer RWX-geheue, kopieer die blob, druk die basisadres / entry point, en dra uitvoering daarheen oor. Dit is handig wanneer die sample **raw shellcode**, 'n **decrypted stage extracted from malware**, of 'n **position-independent blob** is wat nie 'n PE header het nie.
 
-The snippet below keeps the original idea, but uses **`%p` for printed pointers** so the x64 build doesn't truncate addresses while you are trying to attach a debugger or rebase the blob in your RE tool.
+Die snippet hieronder behou die oorspronklike idee, maar gebruik **`%p` vir printed pointers** sodat die x64 build nie adresse afkap terwyl jy probeer om 'n debugger aan te heg of die blob in jou RE tool te rebase nie.
 
-## Build
+## Bou
 
-Die eenvoudigste manier om die oorspronklike project te build is vanaf 'n **Visual Studio Developer Command Prompt**:
+Die eenvoudigste manier om die oorspronklike projek te bou, is vanuit 'n **Visual Studio Developer Command Prompt**:
 ```bash
 cl blobrunner.c
 cl /Feblobrunner64.exe /Foblobrunner64.out blobrunner.c
 ```
-Jy kan ook die kode in 'n klein Visual Studio / VS Code C-projek plak en dit daar kompileer.
+Jy kan die code ook in ’n klein Visual Studio / VS Code C-projek plak en dit daar compileer.
 
 ## Nuttige gebruikspatrone
 ```bash
@@ -29,58 +29,58 @@ BlobRunner.exe shellcode.bin --nopause
 # Force an access violation and let the configured JIT debugger catch it
 BlobRunner.exe shellcode.bin --jit
 ```
-- In **x86**, BlobRunner pauseer en doen dan ’n direkte sprong na die blob entry point.
-- In **x64**, dit skep ’n **suspended thread**, so jy kan op die thread start address breek voordat uitvoering hervat.
-- `--offset` is veral nuttig wanneer die dumped blob begin met ’n **decoder / unpacking stub** en jy reeds die werklike entry point ken.
+- In **x86** pouseer BlobRunner en voer dit daarna ’n direkte sprong na die blob se entry point uit.
+- In **x64** skep dit ’n **suspended thread**, sodat jy op die thread start address kan breek voordat uitvoering hervat word.
+- `--offset` is besonder nuttig wanneer die gedumpte blob met ’n **decoder / unpacking stub** begin en jy reeds die werklike entry point ken.
 
-## Practical notes
+## Praktiese notas
 
-### Fix the printed addresses in x64 labs
+### Maak die gedrukte adresse in x64-labs reg
 
-Ouer BlobRunner-kode druk addresses uit via casts soos `(int)(size_t)lpvBase` en `%08x` / `%016x`. In 64-bit workflows kan dit die hoë helfte van die pointer afkap en rebasing / breakpoint placement lastig maak. Die snippet hieronder fix dit reeds deur **`%p`** values direk te print.
+Ouer BlobRunner-kode druk adresse deur casts soos `(int)(size_t)lpvBase` en `%08x` / `%016x` te gebruik. In 64-bis-workflows kan dit die hoë helfte van die pointer afkap en rebasing / breakpoint-plasing lastig maak. Die snippet hieronder los dit reeds op deur **`%p`**-waardes direk te druk.
 
-### `--jit` is useful for first-instruction breakpoints
+### `--jit` is nuttig vir breakpoints op die eerste instruksie
 
-`--jit` verwyder execute access van die eerste byte van die shellcode en laat Windows ’n **access violation** gooi wanneer die blob begin execute. Dit is nuttig wanneer jy wil hê die **configured JIT debugger** (byvoorbeeld x64dbg) moet die eerste execution attempt vang in plaas daarvan om handmatig te probeer attach. Nadat die debugger breek, herstel execute rights en continue.
+`--jit` verwyder execute-toegang van die eerste byte van die shellcode en laat Windows ’n **access violation** genereer wanneer die blob begin uitvoer. Dit is nuttig wanneer jy wil hê dat die **gekonfigureerde JIT-debugger** (byvoorbeeld x64dbg) die eerste uitvoeringspoging moet opvang, in plaas daarvan om handmatig te probeer attach. Nadat die debugger breek, herstel execute-regte en gaan voort.
 
-A practical **x64dbg** flow is:
+’n Praktiese **x64dbg**-vloei is:
 ```text
 setjit
 setjitauto on
 BlobRunner.exe shellcode.bin --jit
 setpagerights <region>, ExecuteReadWrite
 ```
-Die eerste twee commands registreer x64dbg as die JIT debugger, en `setpagerights` herstel execute rights op die region wat deur BlobRunner gedruk is nadat die debugger die access violation vang.
+Die eerste twee opdragte registreer x64dbg as die JIT-debugger, en `setpagerights` herstel uitvoerregte op die streek wat deur BlobRunner afgedruk word nadat die debugger die access violation opvang.
 
-### Tydreis die shellcode in plaas daarvan om dit live stap-vir-stap te volg
+### Tydreis deur die shellcode in plaas daarvan om dit intyds stap vir stap uit te voer
 
-’n Baie praktiese onlangse workflow is om BlobRunner onder **TTD** op te neem en dan die trace in **Binary Ninja** / **WinDbg** te inspekteer. Dit is uitstekend wanneer die blob homself decrypt, APIs dinamies resolve, of verskeie kortstondige stages uitvoer. Sedert **Binary Ninja 4.1** is TTD support nie meer net beta quality nie: dit kan reverse-debugging dryf en die WinDbg / TTD workflow direk vanuit Binary Ninja vereenvoudig.
+’n Baie praktiese onlangse workflow is om BlobRunner onder **TTD** op te neem en dan die trace in **Binary Ninja** / **WinDbg** te inspekteer. Dit is uitstekend wanneer die blob homself decrypt, APIs dinamies resolve, of verskeie kortstondige stages uitvoer. Sedert **Binary Ninja 4.1** is TTD-ondersteuning nie meer bloot beta-gehalte nie: dit kan reverse-debugging uitvoer en die WinDbg / TTD-workflow direk vanuit Binary Ninja vereenvoudig.<sup>[[1]](#references)</sup>
 ```bash
 TTD.exe .\blobrunner.exe .\shellcode.bin
 ```
-Die belangrike deel is om die **toegekende basisadres wat deur BlobRunner gedruk word** op te let en dan die shellcode-aansig na daardie adres te **rebase** voordat jy die trace herhaal. Let ook daarop dat Microsoft TTD-opname as **invasive** dokumenteer: laat dit vanaf ’n **elevated** prompt loop, verwag merkbare vertraging, en hou die opnamevenster kort om massiewe trace-lêers te vermy.
+Die belangrike deel is om die **toegekende basisadres wat deur BlobRunner gedruk word, aan te teken** en dan die shellcode-aansig na daardie adres te **rebase** voordat jy die trace herspeel. Let ook daarop dat Microsoft TTD-opname as **invasive** dokumenteer: voer dit vanuit ’n **elevated** prompt uit, verwag ’n merkbare verlangsaming, en hou die opnamevenster kort om massiewe trace-lêers te vermy.
 
-### As die blob companion data nodig het, gebruik eerder ’n PE wrapper
+### As die blob companion data benodig, gebruik eerder ’n PE wrapper
 
-Sommige shellcode verwag dat ’n **second blob**, ’n **mapped file**, of ander **structured content** in memory bestaan. BlobRunner is doelbewus minimal, so vir hierdie gevalle kan ’n runner soos **SCLauncher** geriefliker wees omdat dit kan:
+Sommige shellcode verwag dat ’n **tweede blob**, ’n **gemapte lêer**, of ander **gestruktureerde inhoud** in memory bestaan. BlobRunner is doelbewus minimaal, dus kan ’n runner soos **SCLauncher** geriefliker wees vir hierdie gevalle omdat dit:<sup>[[2]](#references)</sup>
 
-- pause voor execution,
-- ’n `INT3` breakpoint insit,
-- **additional content** in memory laai,
-- daardie ekstra content memory-map, of
-- die shellcode binne-in ’n tydelike **PE** wrap vir makliker analysis in tools wat gewone executables verkies.
+- voor execution kan pause,
+- ’n `INT3` breakpoint kan invoeg,
+- **additional content** in memory kan laai,
+- daardie additional content kan memory-map, of
+- die shellcode binne ’n tydelike **PE** kan wrap vir makliker analysis in tools wat normale executables verkies.
 
-Voorbeeld:
+Example:
 ```bash
 SCLauncher.exe -f=shellcode.bin -pause -d=config.bin -mm
 SCLauncher.exe -f=shellcode.bin -pe -64 -ep=0x120
 ```
-Vir aanvullende werkvloeie soos **jmp2it**, **Cutter** emulasie, of **scdbg**-gebaseerde shellcode-tracing, kyk na die [parent shellcode reversing page](README.md).
+Vir aanvullende workflows soos **jmp2it**, **Cutter**-emulasie of **scdbg**-gebaseerde shellcode-tracing, kyk na die [ouer shellcode reversing-bladsy](README.md).
 
-## Source code
+## Bronkode
 
-Die enigste gewysigde reëls van die [original code](https://github.com/OALabs/BlobRunner) is die pointer-printing reëls wat gebruik word om x64 address truncation te vermy.
-Om dit te compileer, **skep net ’n C/C++ project in Visual Studio Code, kopieer en plak die code, en build dit**.
+Die enigste gewysigde lyne vanaf die [oorspronklike kode](https://github.com/OALabs/BlobRunner) is die pointer-printing-lyne wat gebruik word om x64-adresafkapping te voorkom.  
+Om dit te compile, **skep eenvoudig ’n C/C++-projek in Visual Studio Code, kopieer en plak die kode, en build dit**.
 ```c
 #include <stdio.h>
 #include <windows.h>
@@ -286,6 +286,6 @@ return 0;
 ```
 ## Verwysings
 
-- [Time Travel Debugging Shellcode with Binary Ninja](https://www.lrqa.com/en/cyber-labs/time-travel-debugging-shellcode-with-binary-ninja/)
-- [Analyzing Shellcode with SCLauncher](https://www.thecyberyeti.com/post/analyzing-shellcode-with-sclauncher)
+- [1] [Time Travel Debugging Shellcode with Binary Ninja](https://www.lrqa.com/en/cyber-labs/time-travel-debugging-shellcode-with-binary-ninja/)
+- [2] [Ontleding van Shellcode met SCLauncher](https://www.thecyberyeti.com/post/analyzing-shellcode-with-sclauncher)
 {{#include ../../banners/hacktricks-training.md}}

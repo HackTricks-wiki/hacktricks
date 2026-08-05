@@ -6,36 +6,36 @@
 
 - "Signature" is eintlik `hash(secret || message)` → length extension.
 - Unsalted password hashes → trivial cracking / lookup.
-- Hash met MAC deurmekaar maak (hash != authentication).
+- Hash word met MAC verwar (hash != authentication).
 
 ## Hash length extension attack
 
 ### Tegniek
 
-Jy kan dit dikwels misbruik as 'n bediener 'n "signature" bereken soos:
+Jy kan dit dikwels uitbuit as 'n bediener 'n "signature" soos die volgende bereken:
 
 `sig = HASH(secret || message)`
 
-en 'n Merkle–Damgård hash gebruik (klassieke voorbeelde: MD5, SHA-1, SHA-256).
+en 'n Merkle–Damgård-hash gebruik (klassieke voorbeelde: MD5, SHA-1, SHA-256).
 
-As jy die volgende weet:
+As jy die volgende ken:
 
 - `message`
 - `sig`
-- hash function
-- (of kan brute-force) `len(secret)`
+- hash-funksie
+- (of `len(secret)` kan brute-force)
 
 Dan kan jy 'n geldige signature bereken vir:
 
 `message || padding || appended_data`
 
-sonder om die geheim te ken.
+sonder om die secret te ken.<sup>[[1]](#references)</sup>
 
-### Belangrike beperking: HMAC is nie geraak nie
+### Belangrike beperking: HMAC word nie geraak nie
 
-Length extension attacks apply to constructions like `HASH(secret || message)` for Merkle–Damgård hashes. Dit geld nie vir **HMAC** (bv. HMAC-SHA256) nie, wat spesifiek ontwerp is om hierdie soort probleem te vermy.
+Length extension attacks is van toepassing op konstruksies soos `HASH(secret || message)` vir Merkle–Damgård-hashes. Hulle is nie van toepassing op **HMAC** (byvoorbeeld HMAC-SHA256) nie, wat spesifiek ontwerp is om hierdie klas probleem te vermy.<sup>[[1]](#references)</sup>
 
-### Gereedskap
+### Tools
 
 - hash_extender:
 {{#ref}}
@@ -52,11 +52,11 @@ https://github.com/bwall/HashPump
 https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks
 {{#endref}}
 
-## Password hashing and cracking
+## Password hashing en cracking
 
 ### Eerste vrae
 
-- Is dit **salted**? (kyk na `salt$hash` formate)
+- Is dit **salted**? (soek na `salt$hash`-formate)
 - Is dit 'n **fast hash** (MD5/SHA1/SHA256) of 'n **slow KDF** (bcrypt/scrypt/argon2/PBKDF2)?
 - Het jy 'n **format hint** (hashcat mode / John format)?
 
@@ -65,15 +65,19 @@ https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-lengt
 1. Identifiseer die hash:
 - `hashid <hash>`
 - `hashcat --example-hashes | rg -n "<pattern>"`
-2. As dit unsalted en algemeen is: probeer aanlyn DB's en identifikasie-gereedskap uit die crypto workflow-afdeling.
-3. Anders, crack:
+2. As dit unsalted en algemeen is: probeer online DBs en identification tooling uit die crypto workflow-afdeling.
+3. Andersins, crack dit:
 - `hashcat -m <mode> -a 0 hashes.txt wordlist.txt`
 - `john --wordlist=wordlist.txt --format=<fmt> hashes.txt`
 
 ### Algemene foute wat jy kan uitbuit
 
-- Selfde wagwoord hergebruik tussen gebruikers → crack one, pivot.
-- Afgeknotte hashes / aangepaste transformasies → normaliseer en probeer weer.
-- Swak KDF-parameters (bv. lae PBKDF2-iterasies) → kan steeds gekraak word.
+- Dieselfde password word oor gebruikers heen hergebruik → crack een, pivot.
+- Truncated hashes / custom transforms → normaliseer en probeer weer.
+- Weak KDF parameters (byvoorbeeld lae PBKDF2-iterations) → steeds crackable.
+
+## Verwysings
+
+- [1] [Everything you need to know about hash length extension attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
 {{#include ../../banners/hacktricks-training.md}}

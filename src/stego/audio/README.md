@@ -1,47 +1,47 @@
-# Audio Steganography
+# Oudio-steganografie
 
 {{#include ../../banners/hacktricks-training.md}}
 
 Algemene patrone:
 
-- Spectrogram messages
+- Spektrogram-boodskappe
 - WAV LSB embedding
 - DTMF / dial tones encoding
 - Metadata payloads
 
 ## Vinnige triage
 
-Voor gespesialiseerde gereedskap:
+Voor gespesialiseerde tooling:
 
-- Bevestig codec/container besonderhede en anomalieë:
+- Bevestig codec-/containerbesonderhede en anomalieë:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- As die audio geraasagtige inhoud of tonale strukture bevat, ondersoek vroegtydig 'n spectrogram.
+- As die oudio ruisagtige inhoud of tonale struktuur bevat, ondersoek vroegtydig ’n spektrogram.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
-## Spectrogram steganography
+## Spektrogram-steganografie
 
 ### Tegniek
 
-Spectrogram stego versteek data deur energie oor tyd/frekwensie te vorm, sodat dit slegs in 'n tyd-frekwensie-plot sigbaar is (dikwels onhoorbaar of as geraas ervaar).
+Spektrogram-stego verberg data deur energie oor tyd/frekwensie te vorm, sodat dit slegs in ’n tyd-frekwensie-grafiek sigbaar word (dikwels onhoorbaar of as geraas waargeneem).
 
 ### Sonic Visualiser
 
-Primêre hulpmiddel vir spectrogram-inspeksie:
+Primêre hulpmiddel vir spektrogram-inspeksie:
 
 - [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
 ### Alternatiewe
 
-- Audacity (spectrogram-uitsig, filters): https://www.audacityteam.org/
-- `sox` kan spectrograms vanaf die CLI genereer:
+- Audacity (spektrogram-aansig, filters): https://www.audacityteam.org/
+- `sox` kan spektrogramme vanaf die CLI genereer:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
 ## FSK / modem-dekodering
 
-Frequency-shift keyed audio lyk dikwels soos afwisselende enkele toone in 'n spektrogram. Sodra jy 'n rowwe sentrum/verskuiwing en baud-skatting het, brute force met `minimodem`:
+Frequency-shift keyed-udio lyk dikwels soos afwisselende enkeltone in ’n spektrogram.<sup>[[1]](#references)</sup> Sodra jy ’n rowwe sentrum-/skuif- en baud-skatting het, gebruik `minimodem` vir brute force:
 ```bash
 # Visualize the band to pick baud/frequency
 sox noise.wav -n spectrogram -o spec.png
@@ -52,28 +52,28 @@ minimodem -f noise.wav 300
 minimodem -f noise.wav 1200
 minimodem -f noise.wav 2400
 ```
-`minimodem` het outomatiese winsaanpassing en outomatiese opsporing van mark/space-tone; pas `--rx-invert` of `--samplerate` aan as die uitset gestoord is.
+`minimodem` pas outomaties die gain aan en bespeur mark/space-tone outomaties; pas `--rx-invert` of `--samplerate` aan indien die uitvoer deurmekaar is.
 
 ## WAV LSB
 
-### Tegniek
+### Technique
 
-Vir ongekomprimeerde PCM (WAV) is elke monster 'n heelgetal. Die verandering van lae bits verander die golfvorm baie effens, sodat aanvallers kan wegsteek:
+Vir ongekomprimeerde PCM (WAV) is elke sample ’n heelgetal. Deur lae bisse te wysig, verander die golfvorm baie effens, sodat aanvallers die volgende kan versteek:
 
-- 1 bit per monster (of meer)
-- Afgewissel oor kanale
-- Met 'n stride/permutasie
+- 1 bis per sample (of meer)
+- Geïnterleave oor kanale
+- Met ’n stride/permutation
 
-Ander audio-verborgingsfamilies wat jy moontlik teëkom:
+Ander audio-hiding-families wat jy kan teëkom:
 
 - Phase coding
 - Echo hiding
 - Spread-spectrum embedding
-- Codec-side channels (format-dependent and tool-dependent)
+- Codec-side channels (formaat-afhanklik en tool-afhanklik)
 
 ### WavSteg
 
-From: https://github.com/ragibson/Steganography#WavSteg
+Van: https://github.com/ragibson/Steganography#WavSteg
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
@@ -82,19 +82,19 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 - [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
-## DTMF / kiesklanke
+## DTMF / kiestone
 
 ### Tegniek
 
-DTMF kodeer karakters as pare van vaste frekwensies (telefoon-toetsenbord). As die klank soos toetsbord-tone of gereelde tweefrekwensie-piepies klink, toets DTMF-dekodering vroeg.
+DTMF kodeer karakters as pare vaste frekwensies (telefoonsleutelbord). As die klank soos sleutelbordtone of gereelde dubbel-frekwensie-piepseine klink, toets DTMF-dekodering vroeg.
 
-Aanlyn dekodeerders:
+Aanlyn-dekodeerders:
 
 - [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
 - [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
 ## Verwysings
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pienk, Kersvader se wenslys, Kersfees-metadata, vasgelegde geraas](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

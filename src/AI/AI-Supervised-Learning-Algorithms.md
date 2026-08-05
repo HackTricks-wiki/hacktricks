@@ -1,46 +1,46 @@
-# Geleide Leer Algoritmes
+# Supervised Learning Algorithms
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Basiese Inligting
 
-Geleide leer gebruik gelabelde data om modelle op te lei wat voorspellings kan maak oor nuwe, ongesiene insette. In kuberveiligheid word geleide masjienleer wyd toegepas op take soos indringingdetectie (klassifisering van netwerkverkeer as *normaal* of *aanval*), malware-detectie (onderskeiding van kwaadwillige sagteware van goedaardige), phishing-detectie (identifisering van bedrieglike webwerwe of e-posse), en spamfiltering, onder andere. Elke algoritme het sy sterkpunte en is geskik vir verskillende tipes probleme (klassifikasie of regressie). Hieronder hersien ons sleutel geleide leer algoritmes, verduidelik hoe hulle werk, en demonstreer hul gebruik op werklike kuberveiligheidsdatastelle. Ons bespreek ook hoe die kombinasie van modelle (ensemble leer) dikwels voorspellende prestasie kan verbeter.
+Supervised learning gebruik gelabelde data om modelle op te lei wat voorspellings oor nuwe, ongekende insette kan maak. In kuberveiligheid word supervised machine learning wyd toegepas op take soos intrusion detection (die klassifikasie van netwerkverkeer as *normal* of *attack*), malware detection (die onderskeid tussen kwaadwillige en onskadelike sagteware), phishing detection (die identifisering van bedrieglike webwerwe of e-posse), en spam filtering, onder andere. Elke algoritme het sy sterk punte en is geskik vir verskillende soorte probleme (classification of regression). Hieronder hersien ons belangrike supervised learning-algoritmes, verduidelik ons hoe hulle werk, en demonstreer ons hul gebruik op werklike kuberveiligheidsdatasets. Ons bespreek ook hoe die kombinasie van modelle (ensemble learning) dikwels voorspellingsprestasie kan verbeter.
 
 ## Algoritmes
 
--   **Lineêre Regressie:** 'n Fundamentele regressie-algoritme om numeriese uitkomste te voorspel deur 'n lineêre vergelyking aan data te pas.
+-   **Linear Regression:** 'n Fundamentele regression-algoritme vir die voorspelling van numeriese uitkomste deur 'n lineêre vergelyking by data te pas.
 
--   **Logistieke Regressie:** 'n Klassifikasie-algoritme (ten spyte van sy naam) wat 'n logistieke funksie gebruik om die waarskynlikheid van 'n binêre uitkoms te modelleer.
+-   **Logistic Regression:** 'n classification-algoritme (ten spyte van sy naam) wat 'n logistieke funksie gebruik om die waarskynlikheid van 'n binêre uitkoms te modelleer.
 
--   **Besluitbome:** Bome-gestruktureerde modelle wat data volgens kenmerke verdeel om voorspellings te maak; dikwels gebruik vir hul interpreteerbaarheid.
+-   **Decision Trees:** Boomgestruktureerde modelle wat data volgens kenmerke verdeel om voorspellings te maak; word dikwels gebruik weens hul interpreteerbaarheid.
 
--   **Random Forests:** 'n Ensemble van besluitbome (deur bagging) wat akkuraatheid verbeter en oorpassing verminder.
+-   **Random Forests:** 'n Ensemble van decision trees (via bagging) wat akkuraatheid verbeter en overfitting verminder.
 
--   **Support Vector Machines (SVM):** Max-margin klassifiseerders wat die optimale skeidingshipervlak vind; kan kerne gebruik vir nie-lineêre data.
+-   **Support Vector Machines (SVM):** Max-margin-classifiers wat die optimale skeidingshipervlak vind; kan kernels vir nie-lineêre data gebruik.
 
--   **Naive Bayes:** 'n Probabilistiese klassifiseerder gebaseer op Bayes se stelling met 'n aanname van kenmerk onafhanklikheid, bekend gebruik in spamfiltering.
+-   **Naive Bayes:** 'n Waarskynlikheidsclassifier gebaseer op Bayes se stelling, met 'n aanname van kenmerk-onafhanklikheid, wat veral bekend is vir gebruik in spam filtering.
 
--   **k-Naaste Bure (k-NN):** 'n Eenvoudige "instansie-gebaseerde" klassifiseerder wat 'n monster etiket op grond van die meerderheid klas van sy naaste bure.
+-   **k-Nearest Neighbors (k-NN):** 'n Eenvoudige "instance-based"-classifier wat 'n sample etiketteer op grond van die meerderheidklas van sy naaste bure.
 
--   **Gradient Boosting Machines:** Ensemble modelle (bv. XGBoost, LightGBM) wat 'n sterk voorspeller bou deur swak leerders (tipies besluitbome) geleidelik by te voeg.
+-   **Gradient Boosting Machines:** Ensemble-modelle (bv. XGBoost, LightGBM) wat 'n sterk voorspeller bou deur agtereenvolgens swakker learners by te voeg (tipies decision trees).
 
-Elke afdeling hieronder bied 'n verbeterde beskrywing van die algoritme en 'n **Python kode voorbeeld** wat biblioteke soos `pandas` en `scikit-learn` (en `PyTorch` vir die neurale netwerk voorbeeld) gebruik. Die voorbeelde gebruik publiek beskikbare kuberveiligheidsdatastelle (soos NSL-KDD vir indringingdetectie en 'n Phishing Webwerwe datastel) en volg 'n konsekwente struktuur:
+Elke afdeling hieronder verskaf 'n verbeterde beskrywing van die algoritme en 'n **Python code example** wat libraries soos `pandas` en `scikit-learn` gebruik (en `PyTorch` vir die neural network-voorbeeld). Die voorbeelde gebruik publiek beskikbare kuberveiligheidsdatasets (soos NSL-KDD vir intrusion detection en 'n Phishing Websites-dataset) en volg 'n konsekwente struktuur:
 
-1.  **Laai die datastel** (aflaai via URL indien beskikbaar).
+1.  **Laai die dataset** (download via URL indien beskikbaar).
 
-2.  **Voorverwerk die data** (bv. kodeer kategorieë, skaal waardes, verdeel in opleidings/ toetsstelle).
+2.  **Preprocess die data** (bv. encode categorical features, skaal waardes, en verdeel dit in train/test-stelle).
 
-3.  **Oplei die model** op die opleidingsdata.
+3.  **Train die model** op die training-data.
 
-4.  **Evalueer** op 'n toetsstel met behulp van metrieke: akkuraatheid, presisie, terugroep, F1-telling, en ROC AUC vir klassifikasie (en gemiddelde kwadraatfout vir regressie).
+4.  **Evalueer** op 'n test-stel deur metrics te gebruik: accuracy, precision, recall, F1-score en ROC AUC vir classification (en mean squared error vir regression).
 
-Kom ons duik in elke algoritme:
+Kom ons kyk na elke algoritme:
 
-### Lineêre Regressie
+### Linear Regression
 
-Lineêre regressie is 'n **regressie** algoritme wat gebruik word om deurlopende numeriese waardes te voorspel. Dit neem 'n lineêre verhouding aan tussen die insetkenmerke (onafhanklike veranderlikes) en die uitset (afhanklike veranderlike). Die model probeer om 'n reglyn (of hipervlak in hoër dimensies) te pas wat die verhouding tussen kenmerke en die teiken die beste beskryf. Dit word tipies gedoen deur die som van die kwadrate van die foute tussen voorspelde en werklike waardes te minimaliseer (Ordinary Least Squares metode).
+Linear regression is 'n **regression**-algoritme wat gebruik word om deurlopende numeriese waardes te voorspel. Dit neem 'n lineêre verhouding aan tussen die input features (onafhanklike veranderlikes) en die output (afhanklike veranderlike). Die model probeer om 'n reguit lyn (of hipervlak in hoër dimensies) te pas wat die verhouding tussen die features en die target die beste beskryf. Dit word tipies gedoen deur die som van gekwadreerde foute tussen voorspelde en werklike waardes te minimaliseer (Ordinary Least Squares-metode).<sup>[[8]](#references)</sup>
 
-Die eenvoudigste manier om lineêre regressie voor te stel, is met 'n lyn:
+Die eenvoudigste manier om linear regression voor te stel, is met 'n lyn:
 ```plaintext
 y = mx + b
 ```
@@ -49,31 +49,31 @@ Waar:
 - `y` is die voorspelde waarde (uitset)
 - `m` is die helling van die lyn (koëffisiënt)
 - `x` is die invoerkenmerk
-- `b` is die y-snitpunt
+- `b` is die y-afsnit
 
-Die doel van lineêre regressie is om die beste paslyn te vind wat die verskil tussen die voorspelde waardes en die werklike waardes in die datastel minimaliseer. Natuurlik is dit baie eenvoudig, dit sou 'n reglyn wees wat 2 kategorieë skei, maar as meer dimensies bygevoeg word, word die lyn meer kompleks:
+Die doel van lineêre regressie is om die lyn te vind wat die beste pas en wat die verskil tussen die voorspelde waardes en die werklike waardes in die datastel minimaliseer. Dit is natuurlik baie eenvoudig: dit sou ’n reguit lyn wees wat 2 kategorieë van mekaar skei, maar as meer dimensies bygevoeg word, word die lyn meer kompleks:
 ```plaintext
 y = w1*x1 + w2*x2 + ... + wn*xn + b
 ```
 > [!TIP]
-> *Gebruik gevalle in kuberveiligheid:* Lineêre regressie self is minder algemeen vir kernveiligheidstake (wat dikwels klassifikasie is), maar dit kan toegepas word om numeriese uitkomste te voorspel. Byvoorbeeld, 'n Mens kan lineêre regressie gebruik om **die volume van netwerkverkeer te voorspel** of **die aantal aanvalle in 'n tydperk te skat** gebaseer op historiese data. Dit kan ook 'n risiko telling voorspel of die verwagte tyd tot opsporing van 'n aanval, gegewe sekere stelselmeter. In praktyk word klassifikasie-algoritmes (soos logistieke regressie of bome) meer gereeld gebruik om indringings of malware op te spoor, maar lineêre regressie dien as 'n grondslag en is nuttig vir regressie-georiënteerde analises.
+> *Gebruiksgevalle in cybersecurity:* Linear regression self is minder algemeen vir kernsekuriteitstake (wat dikwels classification is), maar dit kan gebruik word om numeriese uitkomste te voorspel. Byvoorbeeld, kan mens linear regression gebruik om **die volume netwerkverkeer te voorspel** of **die aantal aanvalle in 'n tydperk te skat** op grond van historiese data. Dit kan ook 'n risikotelling of die verwagte tyd tot die opsporing van 'n aanval voorspel, gegewe sekere stelselmetrieke. In die praktyk word classification-algoritmes (soos logistic regression of trees) meer gereeld gebruik om intrusions of malware op te spoor, maar linear regression dien as 'n grondslag en is nuttig vir regression-georiënteerde ontledings.
 
-#### **Belangrike kenmerke van Lineêre Regressie:**
+#### **Sleutelkenmerke van Linear Regression:**
 
--   **Tipe Probleem:** Regressie (voorspel van deurlopende waardes). Nie geskik vir direkte klassifikasie tensy 'n drempel op die uitset toegepas word nie.
+-   **Tipe probleem:** Regression (voorspelling van kontinue waardes). Nie geskik vir direkte classification nie, tensy 'n drempelwaarde op die uitset toegepas word.
 
--   **Interpretasie:** Hoog -- koëffisiënte is eenvoudig om te interpreteer, wat die lineêre effek van elke kenmerk toon.
+-   **Interpreteerbaarheid:** Hoog -- koëffisiënte is eenvoudig om te interpreteer en toon die lineêre effek van elke feature.
 
--   **Voordele:** Eenvoudig en vinnig; 'n goeie basislyn vir regressietake; werk goed wanneer die werklike verhouding ongeveer lineêr is.
+-   **Voordele:** Eenvoudig en vinnig; 'n goeie basislyn vir regression-take; werk goed wanneer die werklike verhouding ongeveer lineêr is.
 
--   **Beperkings:** Kan nie komplekse of nie-lineêre verhoudings vasvang nie (sonder handmatige kenmerkingenieurswese); geneig tot onderpassing as verhoudings nie-lineêr is; sensitief vir uitskieters wat die resultate kan skeefdruk.
+-   **Beperkings:** Kan nie komplekse of nie-lineêre verhoudings vasvang nie (sonder handmatige feature engineering); geneig tot underfitting indien verhoudings nie-lineêr is; sensitief vir uitskieters wat die resultate kan skeeftrek.
 
--   **Vind die Beste Pas:** Om die beste paslyn te vind wat die moontlike kategorieë skei, gebruik ons 'n metode genaamd **Ordinary Least Squares (OLS)**. Hierdie metode minimaliseer die som van die gekwadrateerde verskille tussen die waargenome waardes en die waardes wat deur die lineêre model voorspel word.
+-   **Vind van die beste passing:** Om die beste passingslyn te vind wat die moontlike kategorieë skei, gebruik ons 'n metode genaamd **Ordinary Least Squares (OLS)**. Hierdie metode minimaliseer die som van die gekwadreerde verskille tussen die waargenome waardes en die waardes wat deur die lineêre model voorspel word.
 
 <details>
-<summary>Voorbeeld -- Voorspelling van Verbinding Duur (Regressie) in 'n Indringingsdataset
+<summary>Voorbeeld -- Voorspelling van verbindingduur (Regression) in 'n Intrusion-datastel
 </summary>
-Hieronder demonstreer ons lineêre regressie met behulp van die NSL-KDD kuberveiligheidsdataset. Ons sal dit as 'n regressieprobleem behandel deur die `duur` van netwerkverbindinge te voorspel gebaseer op ander kenmerke. (In werklikheid is `duur` een kenmerk van NSL-KDD; ons gebruik dit hier net om regressie te illustreer.) Ons laai die dataset, verwerk dit (kodeer kategoriese kenmerke), oplei 'n lineêre regressiemodel, en evalueer die Gemiddelde Gekwadrateerde Fout (MSE) en R² telling op 'n toetsstel.
+Hier demonstreer ons linear regression met behulp van die NSL-KDD-cybersecurity-datastel. Ons sal dit as 'n regression-probleem hanteer deur die `duration` van netwerkverbindings op grond van ander features te voorspel. (In werklikheid is `duration` een feature van NSL-KDD; ons gebruik dit hier slegs om regression te illustreer.) Ons laai die datastel, verwerk dit vooraf (deur kategoriese features te enkodeer), lei 'n linear regression-model af, en evalueer die Mean Squared Error (MSE)- en R²-telling op 'n toetsstel.
 ```python
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -128,14 +128,14 @@ Test MSE: 3021333.56
 Test R² : -0.526
 """
 ```
-In hierdie voorbeeld probeer die lineêre regressiemodel om verbinding `duur` te voorspel uit ander netwerkkenmerke. Ons meet prestasie met Gemiddelde Kwadratiese Fout (MSE) en R². 'n R² naby 1.0 sou aandui dat die model die meeste variasie in `duur` verduidelik, terwyl 'n lae of negatiewe R² 'n swak pas aandui. (Moet nie verbaas wees as die R² hier laag is nie -- om `duur` te voorspel mag moeilik wees uit die gegewe kenmerke, en lineêre regressie mag nie die patrone vasvang as hulle kompleks is nie.)
+In hierdie voorbeeld probeer die linear regression-model die verbinding se `duration` uit ander netwerkkenmerke voorspel. Ons meet werkverrigting met Mean Squared Error (MSE) en R². ’n R² naby aan 1.0 sal aandui dat die model die meeste variasie in `duration` verduidelik, terwyl ’n lae of negatiewe R² op ’n swak passing dui. (Moenie verbaas wees as die R² hier laag is nie -- dit kan moeilik wees om `duration` uit die gegewe kenmerke te voorspel, en linear regression kan moontlik nie die patrone vaslê as hulle kompleks is nie.)
 </details>
 
-### Logistieke Regressie
+### Logistic Regression
 
-Logistieke regressie is 'n **klassifikasie** algoritme wat die waarskynlikheid modelleer dat 'n voorbeeld tot 'n spesifieke klas behoort (tipies die "positiewe" klas). Ten spyte van sy naam, word *logistieke* regressie gebruik vir diskrete uitkomste (in teenstelling met lineêre regressie wat vir deurlopende uitkomste is). Dit word veral gebruik vir **binariese klassifikasie** (twee klasse, bv. kwaadwillig vs. goedaardig), maar dit kan uitgebrei word na multi-klas probleme (met behulp van softmax of een-vs-res approaches).
+Logistic regression is ’n **klassifikasie**-algoritme wat die waarskynlikheid modelleer dat ’n instansie aan ’n bepaalde klas behoort (gewoonlik die "positiewe" klas). Ondanks sy naam word *logistic* regression vir diskrete uitkomste gebruik (anders as linear regression, wat vir kontinue uitkomste is). Dit word veral vir **binêre klassifikasie** gebruik (twee klasse, bv. kwaadwillig teenoor legitiem), maar dit kan na multi-klas-probleme uitgebrei word (met behulp van softmax- of one-vs-rest-benaderings).<sup>[[1]](#references)</sup>
 
-Die logistieke regressie gebruik die logistieke funksie (ook bekend as die sigmoid funksie) om voorspelde waardes na waarskynlikhede te kaart. Let daarop dat die sigmoid funksie 'n funksie is met waardes tussen 0 en 1 wat in 'n S-vormige kurwe groei volgens die behoeftes van die klassifikasie, wat nuttig is vir binariese klassifikasie take. Daarom word elke kenmerk van elke invoer met sy toegewyde gewig vermenigvuldig, en die resultaat word deur die sigmoid funksie gestuur om 'n waarskynlikheid te produseer:
+Die logistic regression gebruik die logistic-funksie (ook bekend as die sigmoid-funksie) om voorspelde waardes na waarskynlikhede te karteer. Let daarop dat die sigmoid-funksie ’n funksie is met waardes tussen 0 en 1 wat volgens die behoeftes van die klassifikasie in ’n S-vormige kurwe groei, wat nuttig is vir binêre klassifikasietake. Daarom word elke kenmerk van elke invoer met sy toegekende gewig vermenigvuldig, en die resultaat word deur die sigmoid-funksie gestuur om ’n waarskynlikheid te lewer:
 ```plaintext
 p(y=1|x) = 1 / (1 + e^(-z))
 ```
@@ -143,29 +143,30 @@ Waar:
 
 - `p(y=1|x)` is die waarskynlikheid dat die uitset `y` 1 is gegewe die inset `x`
 - `e` is die basis van die natuurlike logaritme
-- `z` is 'n lineêre kombinasie van die insetkenmerke, tipies voorgestel as `z = w1*x1 + w2*x2 + ... + wn*xn + b`. Let op hoe dit weer in sy eenvoudigste vorm 'n reglyn is, maar in meer komplekse gevalle word dit 'n hipervlak met verskeie dimensies (een per kenmerk).
+- `z` is 'n lineêre kombinasie van die invoerkenmerke, gewoonlik voorgestel as `z = w1*x1 + w2*x2 + ... + wn*xn + b`. Let weer daarop dat dit in sy eenvoudigste vorm 'n reguit lyn is, maar dat dit in meer komplekse gevalle 'n hipervlak met verskeie dimensies word (een per kenmerk).
 
 > [!TIP]
-> *Gebruik gevalle in kuberveiligheid:* Omdat baie sekuriteitsprobleme essensieel ja/nee besluite is, word logistieke regressie wyd gebruik. Byvoorbeeld, 'n indringingdetectiestelsel kan logistieke regressie gebruik om te besluit of 'n netwerkverbinding 'n aanval is gebaseer op kenmerke van daardie verbinding. In phishing-detectie kan logistieke regressie kenmerke van 'n webwerf (URL-lengte, teenwoordigheid van "@" simbool, ens.) kombineer in 'n waarskynlikheid om phishing te wees. Dit is in vroeë generasie spamfilters gebruik en bly 'n sterk basislyn vir baie klassifikasietake.
+> *Gebruiksgevalle in kuberveiligheid:* Omdat baie sekuriteitsprobleme in wese ja/nee-besluite is, word logistic regression wyd gebruik. Byvoorbeeld, 'n intrusion detection system kan logistic regression gebruik om te besluit of 'n netwerkverbinding 'n aanval is, gebaseer op kenmerke van daardie verbinding. In phishing-detection kan logistic regression kenmerke van 'n webwerf (URL-lengte, teenwoordigheid van die "@"-simbool, ens.) kombineer tot 'n waarskynlikheid dat dit phishing is. Dit is in vroeë-generasie spam-filters gebruik en bly 'n sterk basislyn vir baie classification-take.
 
-#### Logistieke Regressie vir nie-binaire klassifikasie
+#### Logistic Regression vir nie-binêre classification
 
-Logistieke regressie is ontwerp vir binaire klassifikasie, maar dit kan uitgebrei word om multi-klas probleme te hanteer met tegnieke soos **een-teenoorgestelde** (OvR) of **softmax regressie**. In OvR word 'n aparte logistieke regressiemodel vir elke klas opgelei, wat dit as die positiewe klas teenoor al die ander behandel. Die klas met die hoogste voorspelde waarskynlikheid word gekies as die finale voorspelling. Softmax regressie veralgemeen logistieke regressie na meerdere klasse deur die softmax-funksie op die uitsetlaag toe te pas, wat 'n waarskynlikheidsverdeling oor al die klasse produseer.
+Logistic regression is ontwerp vir binêre classification, maar dit kan uitgebrei word om multi-class-probleme te hanteer deur tegnieke soos **one-vs-rest** (OvR) of **softmax regression** te gebruik. In OvR word 'n aparte logistic regression-model vir elke klas opgelei, waar die klas as die positiewe klas teenoor al die ander behandel word. Die klas met die hoogste voorspelde waarskynlikheid word as die finale voorspelling gekies. Softmax regression veralgemeen logistic regression na veelvuldige klasse deur die softmax-funksie op die uitsetlaag toe te pas, wat 'n waarskynlikheidsverdeling oor al die klasse lewer.
 
-#### **Belangrike eienskappe van Logistieke Regressie:**
+#### **Belangrike kenmerke van Logistic Regression:**
 
--   **Tipe Probleem:** Klassifikasie (gewoonlik binêr). Dit voorspel die waarskynlikheid van die positiewe klas.
+-   **Tipe probleem:** Classification (gewoonlik binêr). Dit voorspel die waarskynlikheid van die positiewe klas.
 
--   **Interpretasie:** Hoog -- soos lineêre regressie, kan die kenmerkkoëffisiënte aandui hoe elke kenmerk die log-odds van die uitkoms beïnvloed. Hierdie deursigtigheid word dikwels waardeer in sekuriteit om te verstaan watter faktore bydra tot 'n waarskuwing.
+-   **Interpreteerbaarheid:** Hoog -- soos met linear regression, kan die kenmerkkoffisiënte aandui hoe elke kenmerk die log-odds van die uitkoms beïnvloed. Hierdie deursigtigheid word dikwels in sekuriteit waardeer om te verstaan watter faktore tot 'n alert bydra.
 
--   **Voordele:** Eenvoudig en vinnig om op te lei; werk goed wanneer die verhouding tussen kenmerke en log-odds van die uitkoms lineêr is. Dit lewer waarskynlikhede, wat risiko-bepaling moontlik maak. Met toepaslike regularisering veralgemeen dit goed en kan dit multikollinairiteit beter hanteer as gewone lineêre regressie.
+-   **Voordele:** Eenvoudig en vinnig om op te lei; werk goed wanneer die verhouding tussen kenmerke en die log-odds van die uitkoms lineêr is. Lewer waarskynlikhede, wat risk scoring moontlik maak. Met toepaslike regularization veralgemeen dit goed en kan dit multicollinearity beter hanteer as gewone linear regression.
 
--   **Beperkings:** Neem 'n lineêre besluitgrens in kenmerkruimte aan (faal as die werklike grens kompleks/nie-lineêr is). Dit mag onderpresteer op probleme waar interaksies of nie-lineêre effekte krities is, tensy jy handmatig polynomiale of interaksiekenmerke byvoeg. Ook, logistieke regressie is minder effektief as klasse nie maklik geskei kan word deur 'n lineêre kombinasie van kenmerke nie.
+-   **Beperkings:** Veronderstel 'n lineêre decision boundary in die kenmerkruimte (dit faal as die werklike grens kompleks/nie-lineêr is). Dit kan swakker presteer op probleme waar interaksies of nie-lineêre effekte krities is, tensy jy polynomial- of interaksiekenmerke handmatig byvoeg. Logistic regression is ook minder effektief as klasse nie maklik deur 'n lineêre kombinasie van kenmerke geskei kan word nie.
+
 
 <details>
-<summary>Voorbeeld -- Phishing-webwerf-detectie met Logistieke Regressie:</summary>
+<summary>Voorbeeld -- Phishing Website Detection met Logistic Regression:</summary>
 
-Ons gaan 'n **Phishing-webwerwe-dataset** (van die UCI-bewaarplek) gebruik wat onttrokken kenmerke van webwerwe bevat (soos of die URL 'n IP-adres het, die ouderdom van die domein, teenwoordigheid van verdagte elemente in HTML, ens.) en 'n etiket wat aandui of die webwerf phishing of wettig is. Ons lei 'n logistieke regressiemodel op om webwerwe te klassifiseer en evalueer dan sy akkuraatheid, presisie, terugroep, F1-telling, en ROC AUC op 'n toetsverdeling.
+Ons sal 'n **Phishing Websites Dataset** (uit die UCI-repository) gebruik, wat onttrekte kenmerke van webwerwe bevat (soos of die URL 'n IP-adres het, die ouderdom van die domein, die teenwoordigheid van verdagte elemente in HTML, ens.) en 'n etiket wat aandui of die webwerf phishing of wettig is. Ons lei 'n logistic regression-model op om webwerwe te klassifiseer en evalueer dan die akkuraatheid, precision, recall, F1-score en ROC AUC op 'n toetsverdeling.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -220,26 +221,26 @@ F1-score : 0.917
 ROC AUC  : 0.979
 """
 ```
-In hierdie phishing-detectie voorbeeld, produseer logistieke regressie 'n waarskynlikheid vir elke webwerf om phishing te wees. Deur akkuraatheid, presisie, terugroep en F1 te evalueer, kry ons 'n gevoel van die model se prestasie. Byvoorbeeld, 'n hoë terugroep beteken dit vang die meeste phishing-webwerwe (belangrik vir sekuriteit om gemiste aanvalle te minimaliseer), terwyl hoë presisie beteken dit het min vals alarms (belangrik om ontleders se moegheid te vermy). Die ROC AUC (Area Under the ROC Curve) bied 'n drempel-onafhanklike maatstaf van prestasie (1.0 is ideaal, 0.5 is nie beter as kans nie). Logistieke regressie presteer dikwels goed op sulke take, maar as die besluitgrens tussen phishing en wettige webwerwe kompleks is, mag meer kragtige nie-lineêre modelle benodig word.
+In hierdie phishing detection-voorbeeld produseer logistic regression 'n waarskynlikheid vir elke webwerf om phishing te wees. Deur accuracy, precision, recall en F1 te evalueer, kry ons 'n aanduiding van die model se werkverrigting. Byvoorbeeld, 'n hoë recall sal beteken dat dit die meeste phishing-webwerwe opspoor (belangrik vir sekuriteit om gemiste aanvalle te beperk), terwyl hoë precision beteken dat dit min vals alarms genereer (belangrik om ontleder-uitputting te voorkom). Die ROC AUC (Area Under the ROC Curve) gee 'n drempel-onafhanklike maatstaf van werkverrigting (1.0 is ideaal, 0.5 is nie beter as lukraak nie). Logistic regression presteer dikwels goed met sulke take, maar as die besluitgrens tussen phishing- en wettige webwerwe kompleks is, kan kragtiger nie-lineêre modelle nodig wees.
 
 </details>
 
 ### Besluitbome
 
-'n Besluitboom is 'n veelsydige **supervised learning algorithm** wat gebruik kan word vir beide klassifikasie en regressie take. Dit leer 'n hiërargiese boomagtige model van besluite gebaseer op die kenmerke van die data. Elke interne knoop van die boom verteenwoordig 'n toets op 'n spesifieke kenmerk, elke tak verteenwoordig 'n uitkoms van daardie toets, en elke blaar knoop verteenwoordig 'n voorspelde klas (vir klassifikasie) of waarde (vir regressie).
+'n Besluitboom is 'n veelsydige **supervised learning algorithm** wat vir beide classification- en regression-take gebruik kan word. Dit leer 'n hiërargiese boomagtige model van besluite gebaseer op die kenmerke van die data. Elke interne nodus van die boom verteenwoordig 'n toets op 'n spesifieke kenmerk, elke tak verteenwoordig 'n uitkoms van daardie toets, en elke blaarnodus verteenwoordig 'n voorspelde klas (vir classification) of waarde (vir regression).<sup>[[2]](#references)</sup>
 
-Om 'n boom te bou, gebruik algoritmes soos CART (Classification and Regression Tree) maatstawwe soos **Gini impurity** of **information gain (entropy)** om die beste kenmerk en drempel te kies om die data by elke stap te verdeel. Die doel by elke splitsing is om die data te partitioneer om die homogeniteit van die teiken veranderlike in die resulterende substelle te verhoog (vir klassifikasie, mik elke knoop om so suiwer as moontlik te wees, wat hoofsaaklik 'n enkele klas bevat).
+Om 'n boom te bou, gebruik algorithms soos CART (Classification and Regression Tree) maatstawwe soos **Gini impurity** of **information gain (entropy)** om die beste kenmerk en drempel te kies waarvolgens die data by elke stap verdeel moet word. Die doel met elke verdeling is om die data te partisioneer sodat die homogeniteit van die teikenveranderlike in die gevolglike substelle verhoog (vir classification streef elke nodus daarna om so suiwer moontlik te wees, met hoofsaaklik een klas).
 
-Besluitbome is **hooglik interpreteerbaar** -- 'n Mens kan die pad van wortel tot blaar volg om die logika agter 'n voorspelling te verstaan (bv. *"IF `service = telnet` AND `src_bytes > 1000` AND `failed_logins > 3` THEN classify as attack"*). Dit is waardevol in kuberveiligheid om te verduidelik waarom 'n sekere waarskuwing gegee is. Bome kan natuurlik beide numeriese en kategorie data hanteer en vereis min voorverwerking (bv. kenmerk skaal is nie nodig nie).
+Besluitbome is **highly interpretable** -- 'n mens kan die pad van wortel tot blaar volg om die logika agter 'n voorspelling te verstaan (bv. *"IF `service = telnet` AND `src_bytes > 1000` AND `failed_logins > 3` THEN classify as attack"*). Dit is waardevol in kuberveiligheid om te verduidelik waarom 'n spesifieke alert gegenereer is. Bome kan natuurlik beide numeriese en kategoriese data hanteer en vereis min preprocessing (bv. feature scaling is nie nodig nie).
 
-Echter, 'n enkele besluitboom kan maklik oorpas op die opleidingsdata, veral as dit diep gegroei word (baie splitsings). Tegnieke soos snoei (beperking van boomdiepte of vereis 'n minimum aantal monsters per blaar) word dikwels gebruik om oorpassing te voorkom.
+'n Enkele besluitboom kan egter maklik die training data overfit, veral as dit diep gegroei word (baie verdelings). Tegnieke soos pruning (die beperking van boomdiepte of die vereiste van 'n minimum aantal samples per blaar) word dikwels gebruik om overfitting te voorkom.
 
 Daar is 3 hoofkomponente van 'n besluitboom:
-- **Wortel Knoop**: Die boonste knoop van die boom, wat die hele datastel verteenwoordig.
-- **Interne Knoop**: Knoop wat kenmerke en besluite gebaseer op daardie kenmerke verteenwoordig.
-- **Blaar Knoop**: Knoop wat die finale uitkoms of voorspelling verteenwoordig.
+- **Root Node**: Die boonste nodus van die boom, wat die volledige dataset verteenwoordig.
+- **Internal Nodes**: Nodusse wat features en besluite gebaseer op daardie features verteenwoordig.
+- **Leaf Nodes**: Nodusse wat die finale uitkoms of voorspelling verteenwoordig.
 
-'n Boom mag uiteindelik soos volg lyk:
+'n Boom kan uiteindelik soos volg lyk:
 ```plaintext
 [Root Node]
 /   \
@@ -248,50 +249,50 @@ Daar is 3 hoofkomponente van 'n besluitboom:
 [Leaf 1] [Leaf 2] [Leaf 3] [Leaf 4]
 ```
 > [!TIP]
-> *Gebruik gevalle in kuberveiligheid:* Besluitbome is in indringingdetectiestelsels gebruik om **reëls** af te lei vir die identifisering van aanvalle. Byvoorbeeld, vroeë IDS soos ID3/C4.5-gebaseerde stelsels sou menslike leesbare reëls genereer om normale teenoor kwaadwillige verkeer te onderskei. Hulle word ook in malware-analise gebruik om te besluit of 'n lêer kwaadwillig is op grond van sy eienskappe (lêergrootte, afdeling entropie, API-oproepe, ens.). Die duidelikheid van besluitbome maak hulle nuttig wanneer deursigtigheid benodig word -- 'n ontleder kan die boom inspekteer om die deteksielogika te valideer.
+> *Use cases in cybersecurity:* Decision trees is in intrusion detection systems gebruik om **rules** af te lei vir die identifisering van attacks. Byvoorbeeld, vroeë IDS soos ID3/C4.5-gebaseerde systems het mensleesbare rules gegenereer om normale teenoor malicious traffic te onderskei. Hulle word ook in malware analysis gebruik om te besluit of 'n file malicious is op grond van sy attributes (file size, section entropy, API calls, ens.). Die duidelikheid van decision trees maak hulle nuttig wanneer transparency nodig is -- 'n analyst kan die tree inspekteer om die detection logic te valideer.
 
-#### **Belangrike kenmerke van Besluitbome:**
+#### **Key characteristics of Decision Trees:**
 
--   **Tipe Probleem:** Beide klassifikasie en regressie. Gewoonlik gebruik vir die klassifikasie van aanvalle teenoor normale verkeer, ens.
+-   **Type of Problem:** Beide classification en regression. Word algemeen gebruik vir die classification van attacks teenoor normale traffic, ens.
 
--   **Interpretasie:** Baie hoog -- die model se besluite kan visualiseer en verstaan word as 'n stel indien-dan reëls. Dit is 'n groot voordeel in sekuriteit vir vertroue en verifikasie van modelgedrag.
+-   **Interpretability:** Baie hoog -- die model se besluite kan gevisualiseer en verstaan word as 'n stel if-then rules. Dit is 'n groot voordeel in security vir vertroue in en verification van modelgedrag.
 
--   **Voordele:** Kan nie-lineêre verhoudings en interaksies tussen eienskappe vasvang (elke splitsing kan as 'n interaksie gesien word). Geen behoefte om eienskappe te skaal of een-hot te kodeer kategoriese veranderlikes nie -- bome hanteer dit van nature. Vinige afleiding (voorspelling is net om 'n pad in die boom te volg).
+-   **Advantages:** Kan non-linear relationships en interactions tussen features vasvang (elke split kan as 'n interaction beskou word). Dit is nie nodig om features te scale of categorical variables one-hot te encode nie -- trees hanteer dit native. Vinnige inference (prediction is bloot die volg van 'n path in die tree).
 
--   **Beperkings:** Geneig tot oorpassing as dit nie beheer word nie (n diep boom kan die opleidingsstel memoriseer). Hulle kan onstabiel wees -- klein veranderinge in data kan lei tot 'n ander boomstruktuur. As enkelmodelle mag hulle akkuraatheid nie ooreenstem met meer gevorderde metodes nie (ensembles soos Random Forests presteer gewoonlik beter deur variasie te verminder).
+-   **Limitations:** Geneig tot overfitting indien dit nie beheer word nie ('n diep tree kan die training set memoriseer). Hulle kan unstable wees -- klein veranderinge in die data kan tot 'n ander tree structure lei. As single models kan hul accuracy nie met meer gevorderde methods ooreenstem nie (ensembles soos Random Forests presteer gewoonlik beter deur variance te verminder).
 
--   **Die Beste Splitsing Vind:**
-- **Gini Onreinheid**: Meet die onreinheid van 'n knoop. 'n Laer Gini onreinheid dui op 'n beter splitsing aan. Die formule is:
+-   **Finding the Best Split:**
+- **Gini Impurity**: Meet die impurity van 'n node. 'n Laer Gini impurity dui op 'n beter split. Die formule is:
 
 ```plaintext
 Gini = 1 - Σ(p_i^2)
 ```
 
-Waar `p_i` die proporsie van instansies in klas `i` is.
+Waar `p_i` die proporsie van instances in class `i` is.
 
-- **Entropie**: Meet die onsekerheid in die datastel. 'n Laer entropie dui op 'n beter splitsing aan. Die formule is:
+- **Entropy**: Meet die uncertainty in die dataset. 'n Laer entropy dui op 'n beter split. Die formule is:
 
 ```plaintext
 Entropy = -Σ(p_i * log2(p_i))
 ```
 
-Waar `p_i` die proporsie van instansies in klas `i` is.
+Waar `p_i` die proporsie van instances in class `i` is.
 
-- **Inligtingswins**: Die vermindering in entropie of Gini onreinheid na 'n splitsing. Hoe hoër die inligtingswins, hoe beter die splitsing. Dit word bereken as:
+- **Information Gain**: Die vermindering in entropy of Gini impurity ná 'n split. Hoe hoër die information gain, hoe beter die split. Dit word soos volg bereken:
 
 ```plaintext
 Information Gain = Entropy(parent) - (Weighted Average of Entropy(children))
 ```
 
-Boonop eindig 'n boom wanneer:
-- Alle instansies in 'n knoop aan dieselfde klas behoort. Dit kan lei tot oorpassing.
-- Die maksimum diepte (hardgecodeer) van die boom bereik is. Dit is 'n manier om oorpassing te voorkom.
-- Die aantal instansies in 'n knoop onder 'n sekere drempel is. Dit is ook 'n manier om oorpassing te voorkom.
-- Die inligtingswins van verdere splitsings onder 'n sekere drempel is. Dit is ook 'n manier om oorpassing te voorkom.
+Verder word 'n tree beëindig wanneer:
+- Alle instances in 'n node aan dieselfde class behoort. Dit kan tot overfitting lei.
+- Die maksimum depth (hardcoded) van die tree bereik word. Dit is 'n manier om overfitting te voorkom.
+- Die aantal instances in 'n node onder 'n sekere threshold is. Dit is ook 'n manier om overfitting te voorkom.
+- Die information gain van verdere splits onder 'n sekere threshold is. Dit is ook 'n manier om overfitting te voorkom.
 
 <details>
-<summary>Voorbeeld -- Besluitboom vir Indringingdetectie:</summary>
-Ons sal 'n besluitboom op die NSL-KDD-datastel oplei om netwerkverbindinge as *normaal* of *aanval* te klassifiseer. NSL-KDD is 'n verbeterde weergawe van die klassieke KDD Cup 1999-datastel, met eienskappe soos protokol tipe, diens, duur, aantal mislukte aanmeldings, ens., en 'n etiket wat die aanval tipe of "normaal" aandui. Ons sal alle aanval tipe na 'n "anomalië" klas kaart (binêre klassifikasie: normaal teenoor anomalië). Na die opleiding sal ons die boom se prestasie op die toetsstel evalueer.
+<summary>Example -- Decision Tree for Intrusion Detection:</summary>
+Ons sal 'n decision tree op die NSL-KDD dataset train om network connections as óf *normal* óf *attack* te klassifiseer. NSL-KDD is 'n verbeterde weergawe van die klassieke KDD Cup 1999 dataset, met features soos protocol type, service, duration, number of failed logins, ens., en 'n label wat die attack type of "normal" aandui. Ons sal alle attack types na 'n "anomaly" class map (binary classification: normal teenoor anomaly). Ná training sal ons die tree se performance op die test set evalueer.
 ```python
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
@@ -355,40 +356,40 @@ F1‑score : 0.756
 ROC AUC  : 0.758
 """
 ```
-In hierdie besluitboomvoorbeeld het ons die diepte van die boom tot 10 beperk om uiterste oorpassing te vermy (die `max_depth=10` parameter). Die metings toon hoe goed die boom normale teenoor aanvalverkeer onderskei. 'n Hoë terugroep sou beteken dat dit die meeste aanvalle vang (belangrik vir 'n IDS), terwyl hoë presisie beteken dat daar min vals alarms is. Besluitbome bereik dikwels redelike akkuraatheid op gestruktureerde data, maar 'n enkele boom mag nie die beste moontlike prestasie bereik nie. Nietemin is die *interpreteerbaarheid* van die model 'n groot voordeel -- ons kon die boom se splitsings ondersoek om te sien, byvoorbeeld, watter kenmerke (bv. `service`, `src_bytes`, ens.) die mees invloedryk is in die merk van 'n verbinding as kwaadwillig.
+In hierdie decision tree-voorbeeld het ons die boomdiepte tot 10 beperk om ekstreme overfitting te vermy (die `max_depth=10`-parameter). Die metrics toon hoe goed die boom normale teenoor aanvalverkeer onderskei. ’n Hoë recall sou beteken dat dit die meeste aanvalle opspoor (belangrik vir ’n IDS), terwyl hoë precision min vals alarms beteken. Decision trees behaal dikwels aanvaarbare accuracy op gestruktureerde data, maar ’n enkele boom bereik moontlik nie die beste moontlike performance nie. Nietemin is die *interpretability* van die model ’n groot voordeel -- ons kan die boom se splits ondersoek om byvoorbeeld te sien watter features (bv. `service`, `src_bytes`, ens.) die invloedrykste is wanneer ’n verbinding as malicious gemerk word.
 
 </details>
 
-### Random Woude
+### Random Forests
 
-Random Forest is 'n **ensemble leer** metode wat op besluitbome bou om prestasie te verbeter. 'n Random forest oplei verskeie besluitbome (daarom "woud") en kombineer hul uitsette om 'n finale voorspelling te maak (vir klassifikasie, tipies deur meerderheidstem). Die twee hoofidees in 'n random forest is **bagging** (bootstrap aggregating) en **kenmerk randomheid**:
+Random Forest is ’n **ensemble learning**-metode wat op decision trees voortbou om performance te verbeter. ’n Random forest lei verskeie decision trees op (vandaar "forest") en kombineer hul outputs om ’n finale prediction te maak (vir classification, gewoonlik deur majority vote). Die twee hoofidees in ’n random forest is **bagging** (bootstrap aggregating) en **feature randomness**:
 
--   **Bagging:** Elke boom word op 'n ewekansige bootstrap monster van die opleidingsdata opgelei (gemonster met vervanging). Dit bring diversiteit tussen die bome in.
+-   **Bagging:** Elke boom word opgelei op ’n random bootstrap sample van die training data (met replacement gesample). Dit skep diversiteit tussen die bome.
 
--   **Kenmerk Randomheid:** By elke splitsing in 'n boom, word 'n ewekansige subset van kenmerke oorweeg vir splitsing (in plaas van alle kenmerke). Dit dekorelleer die bome verder.
+-   **Feature Randomness:** By elke split in ’n boom word ’n random subset van features vir splitting oorweeg (in plaas van alle features). Dit verminder die korrelasie tussen die bome verder.
 
-Deur die resultate van baie bome te gemiddeld, verminder die random forest die variasie wat 'n enkele besluitboom mag hê. In eenvoudige terme, individuele bome mag oorpas of raserig wees, maar 'n groot aantal diverse bome wat saamstem, glad die foute uit. Die resultaat is dikwels 'n model met **hoër akkuraatheid** en beter generalisering as 'n enkele besluitboom. Daarbenewens kan random woude 'n skatting van kenmerkbelangrikheid bied (deur te kyk na hoeveel elke kenmerk se splitsing gemiddeld onreinheid verminder).
+Deur die resultate van baie bome te average, verminder die random forest die variance wat ’n enkele decision tree kan hê. In eenvoudige terme kan individuele bome overfit of raserig wees, maar ’n groot aantal diverse bome wat saam stem, maak daardie foute gladder. Die resultaat is dikwels ’n model met **hoër accuracy** en beter generalization as ’n enkele decision tree. Daarbenewens kan random forests ’n skatting van feature importance verskaf (deur te kyk hoeveel elke feature split gemiddeld impurity verminder).
 
-Random woude het 'n **werkperd in kuberveiligheid** geword vir take soos indringingdetectie, malware klassifikasie, en spamdetectie. Hulle presteer dikwels goed uit die boks met minimale afstemming en kan groot kenmerkstelle hanteer. Byvoorbeeld, in indringingdetectie mag 'n random forest 'n individuele besluitboom oortref deur meer subtiele patrone van aanvalle met minder vals positiewe te vang. Navorsing het getoon dat random woude gunstig presteer in vergelyking met ander algoritmes in die klassifikasie van aanvalle in datastelle soos NSL-KDD en UNSW-NB15.
+Random forests het ’n **workhorse in cybersecurity** geword vir take soos intrusion detection, malware classification en spam detection. Hulle presteer dikwels goed out-of-the-box met minimale tuning en kan groot feature sets hanteer. Byvoorbeeld, in intrusion detection kan ’n random forest beter as ’n individuele decision tree presteer deur meer subtiele aanvalspatrone met minder false positives op te spoor. Navorsing het getoon dat random forests gunstig presteer in vergelyking met ander algorithms wanneer aanvalle in datasets soos NSL-KDD en UNSW-NB15 geklassifiseer word.<sup>[[3]](#references)[[9]](#references)</sup>
 
-#### **Belangrike eienskappe van Random Woude:**
+#### **Key characteristics of Random Forests:**
 
--   **Tipe Probleem:** Primêr klassifikasie (ook gebruik vir regressie). Baie goed geskik vir hoë-dimensionele gestruktureerde data wat algemeen in sekuriteitslogs voorkom.
+-   **Type of Problem:** Hoofsaaklik classification (word ook vir regression gebruik). Baie goed geskik vir hoë-dimensionele gestruktureerde data wat algemeen in security logs voorkom.
 
--   **Interpreteerbaarheid:** Laer as 'n enkele besluitboom -- jy kan nie maklik honderde bome gelyktydig visualiseer of verduidelik nie. Tog bied kenmerkbelangrikheid tellings 'n bietjie insig in watter eienskappe die mees invloedryk is.
+-   **Interpretability:** Laer as dié van ’n enkele decision tree -- jy kan nie maklik honderde bome gelyk visualiseer of verduidelik nie. Feature importance scores bied egter ’n mate van insig in watter attributes die invloedrykste is.
 
--   **Voordele:** Oor die algemeen hoër akkuraatheid as enkelboommodelle weens die ensemble-effek. Robuust teen oorpassing -- selfs al oorpas individuele bome, generaliseer die ensemble beter. Hanteer beide numeriese en kategorieë kenmerke en kan ontbrekende data tot 'n mate bestuur. Dit is ook relatief robuust teen uitliers.
+-   **Advantages:** Oor die algemeen hoër accuracy as single-tree models weens die ensemble effect. Robust teenoor overfitting -- selfs al overfit individuele bome, generalize die ensemble beter. Hanteer sowel numerical as categorical features en kan missing data tot ’n mate bestuur. Dit is ook relatief robust teenoor outliers.
 
--   **Beperkings:** Modelgrootte kan groot wees (baie bome, elkeen potensieel diep). Voorspellings is stadiger as 'n enkele boom (aangesien jy oor baie bome moet aggregeer). Minder interpreteerbaar -- terwyl jy belangrike kenmerke weet, is die presiese logika nie maklik opspoorbaar as 'n eenvoudige reël nie. As die datastel uiters hoë-dimensioneel en spaar is, kan dit om 'n baie groot woud op te lei rekenaarintensief wees.
+-   **Limitations:** Die modelgrootte kan groot wees (baie bome, wat elk moontlik diep kan wees). Predictions is stadiger as dié van ’n enkele boom (want jy moet resultate van baie bome aggregate). Minder interpretable -- hoewel jy weet watter features belangrik is, kan die presiese logic nie maklik as ’n eenvoudige reël nagespoor word nie. As die dataset uiters hoë-dimensioneel en sparse is, kan die training van ’n baie groot forest computationally swaar wees.
 
--   **Opleidingsproses:**
-1. **Bootstrap Monsters:** Ewekansig monster die opleidingsdata met vervanging om verskeie subsets (bootstrap monsters) te skep.
-2. **Boomkonstruksie:** Vir elke bootstrap monster, bou 'n besluitboom met 'n ewekansige subset van kenmerke by elke splitsing. Dit bring diversiteit tussen die bome in.
-3. **Aggregasie:** Vir klassifikasietake, word die finale voorspelling gemaak deur 'n meerderheidstem onder die voorspellings van al die bome te neem. Vir regressietake is die finale voorspelling die gemiddelde van die voorspellings van al die bome.
+-   **Training Process:**
+1. **Bootstrap Sampling**: Sample die training data random met replacement om verskeie subsets (bootstrap samples) te skep.
+2. **Tree Construction**: Bou vir elke bootstrap sample ’n decision tree deur by elke split ’n random subset van features te gebruik. Dit skep diversiteit tussen die bome.
+3. **Aggregation**: Vir classification-take word die finale prediction gemaak deur ’n majority vote onder die predictions van alle bome te neem. Vir regression-take is die finale prediction die average van die predictions van alle bome.
 
 <details>
-<summary>Voorbeeld -- Random Forest vir Indringingdetectie (NSL-KDD):</summary>
-Ons sal dieselfde NSL-KDD datastel (binarie geëtiketteer as normaal teenoor anomalie) gebruik en 'n Random Forest klassifiseerder oplei. Ons verwag dat die random forest so goed of beter sal presteer as die enkele besluitboom, danksy die ensemble gemiddelde wat variasie verminder. Ons sal dit met dieselfde metings evalueer.
+<summary>Example -- Random Forest for Intrusion Detection (NSL-KDD):</summary>
+Ons sal dieselfde NSL-KDD-dataset gebruik (binêr gelabel as normal teenoor anomaly) en ’n Random Forest-classifier train. Ons verwag dat die random forest net so goed soos, of beter as, die enkele decision tree sal presteer, danksy die ensemble averaging wat variance verminder. Ons sal dit met dieselfde metrics evalueer.
 ```python
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -480,35 +481,35 @@ F1-score:  0.754
 ROC AUC:   0.962
 """
 ```
-Die random forest bereik tipies sterk resultate op hierdie indringingdetectietaak. Ons mag 'n verbetering in metrieke soos F1 of AUC waarneem in vergelyking met die enkele besluitboom, veral in terugroep of presisie, afhangende van die data. Dit stem ooreen met die begrip dat *"Random Forest (RF) is 'n ensemble klassifiseerder en presteer goed in vergelyking met ander tradisionele klassifiseerders vir effektiewe klassifikasie van aanvalle."*. In 'n sekuriteitsoperasionele konteks mag 'n random forest-model meer betroubaar aanvalle merk terwyl dit vals alarm verminder, danksy die gemiddelde van baie besluitreëls. Kenmerkbelangrikheid uit die woud kan ons vertel watter netwerkkenmerke die mees aanduidende van aanvalle is (bv. sekere netwerkdienste of ongewone tellings van pakkette).
+Die random forest behaal tipies sterk resultate op hierdie intrusion detection-taak. Ons kan ’n verbetering in maatstawwe soos F1 of AUC waarneem in vergelyking met die enkele decision tree, veral in recall of precision, afhangend van die data. Dit stem ooreen met die begrip dat *"Random Forest (RF) is an ensemble classifier and performs well compared to other traditional classifiers for effective classification of attacks."*. In ’n security operations-konteks kan ’n random forest-model attacks meer betroubaar vlag terwyl false alarms verminder word, danksy die gemiddeld van baie decision rules. Feature importance uit die forest kan ons wys watter network features die mees aanduidend van attacks is (byvoorbeeld sekere network services of ongewone packet-tellings).
 
 </details>
 
 ### Support Vector Machines (SVM)
 
-Support Vector Machines is kragtige toesighoudende leermodelle wat hoofsaaklik vir klassifikasie (en ook regressie as SVR) gebruik word. 'n SVM probeer om die **optimale skeidingshipervlak** te vind wat die marge tussen twee klasse maksimeer. Slegs 'n substel van opleidingspunte (die "ondersteuningsvektore" wat die naaste aan die grens is) bepaal die posisie van hierdie hipervlak. Deur die marge (afstand tussen ondersteuningsvektore en die hipervlak) te maksimeer, bereik SVM's gewoonlik goeie generalisering.
+Support Vector Machines is kragtige supervised learning-modelle wat hoofsaaklik vir classification gebruik word (en ook vir regression as SVR). ’n SVM probeer die **optimale skeidings-hyperplane** vind wat die margin tussen twee klasse maksimeer. Slegs ’n subset van training points (die "support vectors" naaste aan die grens) bepaal die posisie van hierdie hyperplane. Deur die margin te maksimeer (die afstand tussen support vectors en die hyperplane), is SVMs geneig om goeie generalization te behaal.<sup>[[4]](#references)</sup>
 
-Die sleutel tot SVM se krag is die vermoë om **kernfunksies** te gebruik om nie-lineêre verhoudings te hanteer. Die data kan implisiet in 'n hoër-dimensionele kenmerkruimte getransformeer word waar 'n lineêre skeiding bestaan. Gewone kerne sluit polinomiale, radiale basisfunksie (RBF), en sigmoid in. Byvoorbeeld, as netwerkverkeerklasse nie lineêr skeibaar is in die ruwe kenmerkruimte nie, kan 'n RBF-kern hulle in 'n hoër dimensie kaart waar die SVM 'n lineêre skeiding vind (wat ooreenstem met 'n nie-lineêre grens in die oorspronklike ruimte). Die buigsaamheid om kerne te kies, laat SVM's toe om 'n verskeidenheid probleme aan te pak.
+Die sleutel tot SVM se krag is die vermoë om **kernel functions** te gebruik om nie-lineêre verhoudings te hanteer. Die data kan implisiet na ’n hoër-dimensionele feature space getransformeer word waar ’n linear separator moontlik bestaan. Algemene kernels sluit polynomial, radial basis function (RBF) en sigmoid in. Byvoorbeeld, as network traffic-klasse nie lineêr skeibaar is in die rou feature space nie, kan ’n RBF-kernel hulle na ’n hoër dimensie karteer waar die SVM ’n linear split vind (wat met ’n nie-lineêre grens in die oorspronklike space ooreenstem). Die buigsaamheid om kernels te kies stel SVMs in staat om ’n verskeidenheid probleme aan te pak.
 
-SVM's is bekend daarvoor dat hulle goed presteer in situasies met hoë-dimensionele kenmerkruimtes (soos teksdata of malware opcode-sekwensies) en in gevalle waar die aantal kenmerke groot is in verhouding tot die aantal monsters. Hulle was gewild in baie vroeë kubersekuriteitstoepassings soos malwareklassifikasie en anomalie-gebaseerde indringingdetectie in die 2000's, en het dikwels hoë akkuraatheid getoon.
+SVMs is bekend daarvoor dat hulle goed presteer in situasies met hoë-dimensionele feature spaces (soos text data of malware opcode sequences) en in gevalle waar die aantal features groot is relatief tot die aantal samples. Hulle was gewild in baie vroeë cybersecurity-toepassings, soos malware classification en anomaly-based intrusion detection in die 2000’s, waar hulle dikwels hoë accuracy getoon het.
 
-Egter, SVM's skaal nie maklik na baie groot datastelle nie (opleidingskompleksiteit is super-lineêr in die aantal monsters, en geheuegebruik kan hoog wees aangesien dit baie ondersteuningsvektore moet stoor). In praktyk, vir take soos netwerkindringingdetectie met miljoene rekords, mag SVM te stadig wees sonder sorgvuldige subsampling of die gebruik van benaderde metodes.
+SVMs skaal egter nie maklik na baie groot datasets nie (training complexity is super-lineêr in die aantal samples, en memory usage kan hoog wees omdat dit moontlik baie support vectors moet stoor). In die praktyk kan SVM vir take soos network intrusion detection met miljoene records te stadig wees sonder sorgvuldige subsampling of die gebruik van approximate methods.
 
 #### **Belangrike eienskappe van SVM:**
 
--   **Tipe Probleem:** Klassifikasie (binêre of veelvuldige klasse via een-tegen-een/een-tegen-res) en regressievariante. Gereeld gebruik in binêre klassifikasie met duidelike marge skeiding.
+-   **Tipe probleem:** Classification (binary of multiclass via one-vs-one/one-vs-rest) en regression-variante. Word dikwels in binary classification met duidelike margin-separation gebruik.
 
--   **Interpretasie:** Medium -- SVM's is nie so interpreteerbaar soos besluitbome of logistikeregressie nie. Terwyl jy kan identifiseer watter datapunte ondersteuningsvektore is en 'n idee kan kry van watter kenmerke invloedryk mag wees (deur die gewigte in die lineêre kern geval), word SVM's (veral met nie-lineêre kerne) in praktyk as swart-doos klassifiseerders behandel.
+-   **Interpretability:** Medium -- SVMs is nie so interpreteerbaar soos decision trees of logistic regression nie. Hoewel jy kan identifiseer watter data points support vectors is en ’n mate van insig kan kry in watter features invloedryk kan wees (deur die weights in die linear kernel-geval), word SVMs in die praktyk (veral met nie-lineêre kernels) as black-box classifiers behandel.
 
--   **Voordele:** Effektief in hoë-dimensionele ruimtes; kan komplekse besluitgrense modelleer met die kerntrik; robuust teen oorpassing as die marge maksimeer word (veral met 'n behoorlike regulariseringparameter C); werk goed selfs wanneer klasse nie deur 'n groot afstand geskei is nie (vind die beste kompromie-grens).
+-   **Voordele:** Effektief in hoë-dimensionele spaces; kan komplekse decision boundaries met die kernel trick modelleer; bestand teen overfitting indien die margin gemaksimeer word (veral met ’n behoorlike regularization-parameter C); werk goed selfs wanneer klasse nie deur ’n groot afstand geskei word nie (vind die beste kompromie-grens).
 
--   **Beperkings:** **Rekenaarintensief** vir groot datastelle (sowel opleiding as voorspelling skaal swak namate data groei). Vereis sorgvuldige afstemming van kern- en regulariseringparameters (C, kern tipe, gamma vir RBF, ens.). Lewer nie direk probabilistiese uitsette nie (alhoewel 'n mens Platt-skaal kan gebruik om waarskynlikhede te kry). Ook, SVM's kan sensitief wees vir die keuse van kernparameters --- 'n swak keuse kan lei tot onderpassing of oorpassing.
+-   **Beperkings:** **Computationally intensive** vir groot datasets (beide training en prediction skaal swak namate data groei). Vereis sorgvuldige tuning van kernel- en regularization-parameters (C, kernel type, gamma vir RBF, ensovoorts). Lewer nie direk probabilistic outputs nie (hoewel Platt scaling gebruik kan word om probabilities te verkry). SVMs kan ook sensitief wees vir die keuse van kernel-parameters --- ’n swak keuse kan tot underfit of overfit lei.
 
-*Gebruik gevalle in kubersekuriteit:* SVM's is gebruik in **malware-detectie** (bv. klassifisering van lêers gebaseer op onttrokken kenmerke of opcode-sekwensies), **netwerk-anomaliedetectie** (klassifisering van verkeer as normaal teenoor kwaadwillig), en **phishing-detectie** (gebruik van kenmerke van URL's). Byvoorbeeld, 'n SVM kan kenmerke van 'n e-pos neem (tellings van sekere sleutelwoorde, sender reputasiescores, ens.) en dit klassifiseer as phishing of wettig. Hulle is ook toegepas op **indringingdetectie** op kenmerkstelle soos KDD, wat dikwels hoë akkuraatheid bereik teen die koste van berekening.
+*Use cases in cybersecurity:* SVMs is gebruik in **malware detection** (byvoorbeeld om files te klassifiseer op grond van onttrekte features of opcode sequences), **network anomaly detection** (om traffic as normal of malicious te klassifiseer) en **phishing detection** (met behulp van URL-features). ’n SVM kan byvoorbeeld features van ’n email neem (tellings van sekere keywords, sender reputation scores, ensovoorts) en dit as phishing of legitimate klassifiseer. Hulle is ook toegepas op **intrusion detection** met feature sets soos KDD, waar hulle dikwels hoë accuracy teen die koste van computation behaal het.
 
 <details>
-<summary>Voorbeeld -- SVM vir Malware Klassifikasie:</summary>
-Ons sal weer die phishing-webwerf-dataset gebruik, hierdie keer met 'n SVM. Omdat SVM's stadig kan wees, sal ons 'n substel van die data vir opleiding gebruik indien nodig (die dataset is ongeveer 11k voorbeelde, wat SVM redelik kan hanteer). Ons sal 'n RBF-kern gebruik wat 'n algemene keuse is vir nie-lineêre data, en ons sal waarskynlikheidsberamings inskakel om ROC AUC te bereken.
+<summary>Example -- SVM for Malware Classification:</summary>
+Ons sal weer die phishing website-dataset gebruik, hierdie keer met ’n SVM. Omdat SVMs stadig kan wees, sal ons indien nodig ’n subset van die data vir training gebruik (die dataset bevat ongeveer 11k instances, wat SVM redelik goed kan hanteer). Ons sal ’n RBF-kernel gebruik, wat ’n algemene keuse vir nie-lineêre data is, en probability estimates aktiveer om ROC AUC te bereken.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -576,72 +577,75 @@ F1‑score : 0.950
 ROC AUC  : 0.989
 """
 ```
-Die SVM-model sal metrieke lewer wat ons kan vergelyk met logistieke regressie op dieselfde taak. Ons mag vind dat SVM 'n hoë akkuraatheid en AUC bereik as die data goed geskei is deur die kenmerke. Aan die ander kant, as die datastel baie geraas of oorvleuelende klasse gehad het, mag SVM nie beduidend beter presteer as logistieke regressie nie. In praktyk kan SVM's 'n hupstoot gee wanneer daar komplekse, nie-lineêre verhoudings tussen kenmerke en klas is -- die RBF-kern kan gebuigde besluitgrense vasvang wat logistieke regressie sou mis. Soos met alle modelle, is versigtige afstemming van die `C` (regulering) en kernparameters (soos `gamma` vir RBF) nodig om vooroordeel en variasie te balanseer.
+Die SVM-model sal metrieke uitvoer wat ons met logistic regression vir dieselfde taak kan vergelyk. Ons kan vind dat SVM hoë akkuraatheid en AUC behaal as die data goed deur die kenmerke geskei word. Aan die ander kant, as die datastel baie geraas of oorvleuelende klasse bevat, sal SVM moontlik nie beduidend beter as logistic regression presteer nie. In die praktyk kan SVMs 'n verbetering bied wanneer daar komplekse, nie-lineêre verhoudings tussen kenmerke en klasse is -- die RBF-kern kan geboë besluitnemingsgrense vasvang wat logistic regression sou mis. Soos met alle modelle, is noukeurige instelling van die `C` (regularisering) en kernparameters (soos `gamma` vir RBF) nodig om vooroordeel en variansie te balanseer.
 
 </details>
 
-#### Verskil tussen Logistieke Regressies & SVM
+#### Verskil tussen Logistic Regression & SVM
 
-| Aspek | **Logistieke Regressie** | **Ondersteuningsvektor Masjiene** |
+| Aspect | **Logistic Regression** | **Support Vector Machines** |
 |---|---|---|
-| **Doel funksie** | Minimaliseer **log‑verlies** (kruis-entropie). | Maksimaliseer die **marge** terwyl **hinge‑verlies** geminimaliseer word. |
-| **Besluitgrens** | Vind die **beste‑pas hipervlak** wat _P(y\|x)_ modelleer. | Vind die **maksimum‑marge hipervlak** (grootste gaping na die naaste punte). |
-| **Uitset** | **Probabilisties** – gee gekalibreerde klas waarskynlikhede via σ(w·x + b). | **Deterministies** – keer klas etikette terug; waarskynlikhede benodig ekstra werk (bv. Platt-skaal). |
-| **Regulering** | L2 (standaard) of L1, balanseer direk onder/oor‑pas. | C parameter ruil marge breedte teenoor verkeerde klassifikasies; kernparameters voeg kompleksiteit by. |
-| **Kerne / Nie‑lineêr** | Inheemse vorm is **lineêr**; nie-lineariteit word bygevoeg deur kenmerkingenieurskap. | Ingeboude **kern truuk** (RBF, poly, ens.) laat dit komplekse grense in hoë-dim. ruimte modelleer. |
-| **Skaalbaarheid** | Los 'n konvex optimalisering op in **O(nd)**; hanteer baie groot n goed. | Opleiding kan **O(n²–n³)** geheue/tyd wees sonder gespesialiseerde oplosser; minder vriendelik vir enorme n. |
-| **Interpretasiebaarheid** | **Hoog** – gewigte wys kenmerk invloed; kansverhouding intuïtief. | **Laag** vir nie-lineêre kerne; ondersteuningsvektore is spaarzaam maar nie maklik om te verduidelik nie. |
-| **Sensitiwiteit vir uitskieters** | Gebruik gladde log‑verlies → minder sensitief. | Hinge‑verlies met harde marge kan **sensitief** wees; sagte marge (C) versag. |
-| **Tipiese gebruiksgevalle** | Kredietgradering, mediese risiko, A/B toetsing – waar **waarskynlikhede & verduidelikbaarheid** belangrik is. | Beeld/teks klassifikasie, bio-informatika – waar **kompleks grense** en **hoë-dimensionele data** belangrik is. |
+| **Doelfunksie** | Minimeer **log-loss** (kruisentropie). | Maksimeer die **marge** terwyl **hinge-loss** geminimeer word. |
+| **Besluitnemingsgrens** | Vind die **beste-pas-hypervlak** wat _P(y\|x)_ modelleer. | Vind die **hypervlak met die maksimum marge** (die grootste gaping tot die naaste punte). |
+| **Uitset** | **Probabilisties** – gee gekalibreerde klaswaarskynlikhede via σ(w·x + b). | **Deterministies** – gee klasetikette terug; waarskynlikhede vereis ekstra werk (bv. Platt-skalering). |
+| **Regularisering** | L2 (verstek) of L1, wat onder-/oorpassing direk balanseer. | C-parameter ruil margewydte teenoor verkeerde klassifikasies af; kernparameters voeg kompleksiteit by. |
+| **Kerne / Nie-lineêr** | Die inheemse vorm is **lineêr**; nie-lineariteit word deur kenmerk-ingenieurswese bygevoeg. | Ingeboude **kernel trick** (RBF, polinoom, ens.) laat dit toe om komplekse grense in hoë-dimensionele ruimte te modelleer. |
+| **Skaalbaarheid** | Los 'n konvekse optimisering in **O(nd)** op; hanteer baie groot n goed. | Opleiding kan **O(n²–n³)** in geheue/tyd wees sonder gespesialiseerde oplossers; minder geskik vir enorme n. |
+| **Interpreteerbaarheid** | **Hoog** – gewigte toon kenmerk-invloed; kansverhouding is intuïtief. | **Laag** vir nie-lineêre kerne; support vectors is yl, maar nie maklik om te verduidelik nie. |
+| **Sensitiwiteit vir uitskieters** | Gebruik gladde log-loss → minder sensitief. | Hinge-loss met 'n harde marge kan **sensitief** wees; sagte marge (C) versag dit. |
+| **Tipiese gebruiksgevalle** | Krediettelling, mediese risiko, A/B-toetsing – waar **waarskynlikhede en verduidelikbaarheid** belangrik is. | Beeld-/teksklassifikasie, bio-informatika – waar **komplekse grense** en **hoë-dimensionele data** belangrik is. |
 
-* **As jy gekalibreerde waarskynlikhede, interpretasiebaarheid benodig, of op enorme datastelle werk — kies Logistieke Regressie.**
-* **As jy 'n buigsame model benodig wat nie-lineêre verhoudings kan vasvang sonder handmatige kenmerkingenieurskap — kies SVM (met kerne).**
-* Beide optimaliseer konvex doelwitte, so **globale minima is gewaarborg**, maar SVM se kerne voeg hiperparameters en rekenaar koste by.
+* **As jy gekalibreerde waarskynlikhede, interpreteerbaarheid benodig, of op enorme datastelle werk — kies Logistic Regression.**
+* **As jy 'n buigsame model benodig wat nie-lineêre verhoudings sonder handmatige kenmerk-ingenieurswese kan vasvang — kies SVM (met kerne).**
+* Albei optimaliseer konvekse doelfunksies, dus is **globale minima gewaarborg**, maar SVM se kerne voeg hiperparameters en berekeningskoste by.
 
-### Naiewe Bayes
+### Naive Bayes
 
-Naiewe Bayes is 'n familie van **probabilistiese klassifiseerders** gebaseer op die toepassing van Bayes se Stelling met 'n sterk onafhanklikheid aannames tussen kenmerke. Ten spyte van hierdie "naiewe" aanname, werk Naiewe Bayes dikwels verrassend goed vir sekere toepassings, veral dié wat teks of kategorie data insluit, soos spamdeteksie.
+Naive Bayes is 'n familie van **probabilistiese klassifiseerders** wat gebaseer is op die toepassing van Bayes se stelling met 'n sterk onafhanklikheidsaanname tussen kenmerke. Ten spyte van hierdie "naïewe" aanname werk Naive Bayes dikwels verrassend goed vir sekere toepassings, veral dié wat teks- of kategoriese data behels, soos spam-opsporing.<sup>[[5]](#references)</sup>
 
-#### Bayes se Stelling
 
-Bayes se stelling is die grondslag van Naiewe Bayes klassifiseerders. Dit verwant die voorwaardelike en marginale waarskynlikhede van ewekansige gebeurtenisse. Die formule is:
+#### Bayes se stelling
+
+Bayes se stelling is die grondslag van Naive Bayes-klassifiseerders. Dit bring die voorwaardelike en marginale waarskynlikhede van ewekansige gebeurtenisse met mekaar in verband. Die formule is:
 ```plaintext
 P(A|B) = (P(B|A) * P(A)) / P(B)
 ```
 Waar:
-- `P(A|B)` is die posterior probability van klas `A` gegewe kenmerk `B`.
+- `P(A|B)` is the posteriorwaarskynlikheid van klas `A` gegewe kenmerk `B`.
 - `P(B|A)` is die waarskynlikheid van kenmerk `B` gegewe klas `A`.
-- `P(A)` is die voorafgaande waarskynlikheid van klas `A`.
-- `P(B)` is die voorafgaande waarskynlikheid van kenmerk `B`.
+- `P(A)` is die voorafwaarskynlikheid van klas `A`.
+- `P(B)` is die voorafwaarskynlikheid van kenmerk `B`.
 
-Byvoorbeeld, as ons wil klassifiseer of 'n teks deur 'n kind of 'n volwassene geskryf is, kan ons die woorde in die teks as kenmerke gebruik. Gebaseer op 'n paar aanvanklike data, sal die Naive Bayes klassifiseerder vooraf die waarskynlikhede van elke woord wat in elke potensiële klas (kind of volwassene) voorkom, bereken. Wanneer 'n nuwe teks gegee word, sal dit die waarskynlikheid van elke potensiële klas bereken gegewe die woorde in die teks en die klas met die hoogste waarskynlikheid kies.
+Byvoorbeeld, as ons wil klassifiseer of 'n teks deur 'n kind of 'n volwassene geskryf is, kan ons die woorde in die teks as kenmerke gebruik. Gebaseer op aanvanklike data, sal die Naive Bayes-classifier vooraf die waarskynlikhede bereken dat elke woord tot elke moontlike klas (kind of volwassene) behoort. Wanneer 'n nuwe teks verskaf word, sal dit die waarskynlikheid van elke moontlike klas gegewe die woorde in die teks bereken en die klas met die hoogste waarskynlikheid kies.
 
-Soos jy in hierdie voorbeeld kan sien, is die Naive Bayes klassifiseerder baie eenvoudig en vinnig, maar dit neem aan dat die kenmerke onafhanklik is, wat nie altyd die geval is in werklike data nie.
+Soos jy in hierdie voorbeeld kan sien, is die Naive Bayes-classifier baie eenvoudig en vinnig, maar dit neem aan dat die kenmerke onafhanklik is, wat nie altyd die geval is met werklike data nie.
 
-#### Tipes Naive Bayes Klassifiseerders
 
-Daar is verskeie tipes Naive Bayes klassifiseerders, afhangende van die tipe data en die verspreiding van die kenmerke:
+#### Tipes Naive Bayes-classifiers
+
+Daar is verskeie tipes Naive Bayes-classifiers, afhangend van die tipe data en die verspreiding van die kenmerke:
 - **Gaussian Naive Bayes**: Neem aan dat die kenmerke 'n Gaussian (normale) verspreiding volg. Dit is geskik vir deurlopende data.
-- **Multinomial Naive Bayes**: Neem aan dat die kenmerke 'n multinomial verspreiding volg. Dit is geskik vir diskrete data, soos woordtelling in teksklassifikasie.
+- **Multinomial Naive Bayes**: Neem aan dat die kenmerke 'n multinomiale verspreiding volg. Dit is geskik vir diskrete data, soos woordtellings in teksklassifikasie.
 - **Bernoulli Naive Bayes**: Neem aan dat die kenmerke binêr (0 of 1) is. Dit is geskik vir binêre data, soos die teenwoordigheid of afwesigheid van woorde in teksklassifikasie.
-- **Categorical Naive Bayes**: Neem aan dat die kenmerke kategoriese veranderlikes is. Dit is geskik vir kategoriese data, soos die klassifikasie van vrugte op grond van hul kleur en vorm.
+- **Categorical Naive Bayes**: Neem aan dat die kenmerke kategoriese veranderlikes is. Dit is geskik vir kategoriese data, soos om vrugte op grond van hul kleur en vorm te klassifiseer.
 
-#### **Belangrike eienskappe van Naive Bayes:**
 
--   **Tipe Probleem:** Klassifikasie (binêr of multi-klas). Gewoonlik gebruik vir teksklassifikasietake in kuberveiligheid (spam, phishing, ens.).
+#### **Sleutelkenmerke van Naive Bayes:**
 
--   **Interpretasie:** Medium -- dit is nie so direk interpreteerbaar soos 'n besluitboom nie, maar 'n mens kan die geleerde waarskynlikhede ondersoek (bv. watter woorde die waarskynlikste in spam teenoor ham e-posse is). Die model se vorm (waarskynlikhede vir elke kenmerk gegewe die klas) kan verstaan word indien nodig.
+-   **Tipe probleem:** Klassifikasie (binêr of multi-klas). Word algemeen gebruik vir teksklassifikasietake in kuberveiligheid (spam, phishing, ens.).
 
--   **Voordele:** **Baie vinnige** opleiding en voorspelling, selfs op groot datastelle (lineêr in die aantal voorbeelde * aantal kenmerke). Vereis relatief 'n klein hoeveelheid data om waarskynlikhede betroubaar te skat, veral met behoorlike gladmaak. Dit is dikwels verrassend akkuraat as 'n basislyn, veral wanneer kenmerke onafhanklik bydrae tot die klas. Werk goed met hoë-dimensionele data (bv. duisende kenmerke uit teks). Geen komplekse afstemming is nodig behalwe om 'n gladmaakparameter in te stel nie.
+-   **Interpreteerbaarheid:** Gemiddeld -- dit is nie so direk interpreteerbaar soos 'n besluitnemingsboom nie, maar 'n mens kan die aangeleerde waarskynlikhede inspekteer (bv. watter woorde die waarskynlikste in spam- teenoor ham-e-posse voorkom). Die model se vorm (waarskynlikhede vir elke kenmerk gegewe die klas) kan verstaan word indien nodig.
 
--   **Beperkings:** Die onafhanklikheid aannames kan akkuraatheid beperk as kenmerke hoogs gekorreleer is. Byvoorbeeld, in netwerkdata, kan kenmerke soos `src_bytes` en `dst_bytes` gekorreleer wees; Naive Bayes sal daardie interaksie nie vasvang nie. Soos die datagrootte baie groot word, kan meer uitdruklike modelle (soos ensembles of neurale netwerke) NB oortref deur kenmerkafhanklikhede te leer. Ook, as 'n sekere kombinasie van kenmerke nodig is om 'n aanval te identifiseer (nie net individuele kenmerke onafhanklik nie), sal NB sukkel.
+-   **Voordele:** **Baie vinnige** opleiding en voorspelling, selfs op groot datastelle (lineêr in die aantal gevalle * die aantal kenmerke). Vereis 'n relatief klein hoeveelheid data om waarskynlikhede betroubaar te skat, veral met behoorlike smoothing. Dit is dikwels verbasend akkuraat as 'n basislyn, veral wanneer kenmerke onafhanklik tot die bewys vir die klas bydra. Werk goed met hoë-dimensionele data (bv. duisende kenmerke uit teks). Geen komplekse verstelling is nodig buiten die instelling van 'n smoothing-parameter nie.
+
+-   **Beperkings:** Die onafhanklikheidsaanname kan akkuraatheid beperk indien kenmerke sterk gekorreleer is. Byvoorbeeld, in netwerkdata kan kenmerke soos `src_bytes` en `dst_bytes` gekorreleer wees; Naive Bayes sal nie daardie interaksie vasvang nie. Namate die datagrootte baie groot word, kan meer ekspressiewe modelle (soos ensembles of neurale netwerke) NB oortref deur kenmerkafhanklikhede aan te leer. Indien 'n spesifieke kombinasie van kenmerke nodig is om 'n aanval te identifiseer (nie net individuele kenmerke onafhanklik nie), sal NB ook sukkel.
 
 > [!TIP]
-> *Gebruik gevalle in kuberveiligheid:* Die klassieke gebruik is **spamdeteksie** -- Naive Bayes was die kern van vroeë spamfilters, wat die frekwensies van sekere tokens (woorde, frases, IP-adresse) gebruik om die waarskynlikheid te bereken dat 'n e-pos spam is. Dit word ook gebruik in **phishing e-posdeteksie** en **URL-klassifikasie**, waar die teenwoordigheid van sekere sleutelwoorde of eienskappe (soos "login.php" in 'n URL, of `@` in 'n URL-pad) bydra tot phishing waarskynlikheid. In malware-analise kan 'n mens 'n Naive Bayes klassifiseerder voorstel wat die teenwoordigheid van sekere API-oproepe of toestemmings in sagteware gebruik om te voorspel of dit malware is. Terwyl meer gevorderde algoritmes dikwels beter presteer, bly Naive Bayes 'n goeie basislyn weens sy spoed en eenvoud.
+> *Gebruiksgevalle in kuberveiligheid:* Die klassieke gebruik is **spamopsporing** -- Naive Bayes was die kern van vroeë spamfilters, wat die frekwensies van sekere tokens (woorde, frases, IP-adresse) gebruik het om die waarskynlikheid te bereken dat 'n e-pos spam is. Dit word ook gebruik in **phishing-e-posopsporing** en **URL-klassifikasie**, waar die teenwoordigheid van sekere sleutelwoorde of eienskappe (soos "login.php" in 'n URL, of `@` in 'n URL-pad) tot die phishing-waarskynlikheid bydra. In malware-analise kan 'n mens 'n Naive Bayes-classifier voorstel wat die teenwoordigheid van sekere API-oproepe of toestemmings in sagteware gebruik om te voorspel of dit malware is. Hoewel meer gevorderde algoritmes dikwels beter presteer, bly Naive Bayes 'n goeie basislyn weens die spoed en eenvoud daarvan.
 
 <details>
-<summary>Voorbeeld -- Naive Bayes vir Phishing Deteksie:</summary>
-Om Naive Bayes te demonstreer, sal ons Gaussian Naive Bayes op die NSL-KDD indringingsdatastel (met binêre etikette) gebruik. Gaussian NB sal elke kenmerk behandel as wat 'n normale verspreiding per klas volg. Dit is 'n ruwe keuse aangesien baie netwerkkenmerke diskreet of hoogs skeef is, maar dit toon hoe 'n mens NB op deurlopende kenmerkdata sou toepas. Ons kan ook Bernoulli NB op 'n datastel van binêre kenmerke kies (soos 'n stel van geaktiveerde waarskuwings), maar ons sal hier by NSL-KDD bly vir kontinuïteit.
+<summary>Voorbeeld -- Naive Bayes vir phishingopsporing:</summary>
+Om Naive Bayes te demonstreer, sal ons Gaussian Naive Bayes op die NSL-KDD-inbraakdatastel (met binêre etikette) gebruik. Gaussian NB sal elke kenmerk behandel asof dit per klas 'n normale verspreiding volg. Dit is 'n ruwe keuse, aangesien baie netwerkkenmerke diskreet of sterk skeef versprei is, maar dit wys hoe 'n mens NB op deurlopende kenmerkdata sou toepas. Ons kon ook Bernoulli NB op 'n datastel van binêre kenmerke kies (soos 'n stel geaktiveerde waarskuwings), maar ons sal vir kontinuïteit hier by NSL-KDD hou.
 ```python
 import pandas as pd
 from sklearn.naive_bayes import GaussianNB
@@ -702,34 +706,34 @@ F1-score:  0.071
 ROC AUC:   0.867
 """
 ```
-Hierdie kode leer 'n Naive Bayes klassifiseerder om aanvalle te detecteer. Naive Bayes sal dinge soos `P(service=http | Attack)` en `P(Service=http | Normal)` bereken op grond van die opleidingsdata, met die aanname van onafhanklikheid tussen eienskappe. Dit sal dan hierdie waarskynlikhede gebruik om nuwe verbintenisse as normaal of aanval te klassifiseer op grond van die waargeneem eienskappe. Die prestasie van NB op NSL-KDD mag nie so hoog wees soos meer gevorderde modelle nie (aangesien eienskap onafhanklikheid oortree word), maar dit is dikwels aanvaarbaar en kom met die voordeel van uiterste spoed. In scenario's soos regstreekse e-posfiltrering of aanvanklike triage van URL's, kan 'n Naive Bayes-model vinnig duidelik kwaadwillige gevalle merk met lae hulpbronverbruik.
+Hierdie kode lei 'n Naive Bayes-classifier op om attacks op te spoor. Naive Bayes sal dinge soos `P(service=http | Attack)` en `P(Service=http | Normal)` bereken gebaseer op die training data, met die aanname dat features onafhanklik is. Dit sal dan hierdie probabilities gebruik om nuwe connections as óf normaal óf 'n attack te klassifiseer, gebaseer op die waargenome features. Die performance van NB op NSL-KDD is moontlik nie so hoog soos dié van meer gevorderde models nie (aangesien die onafhanklikheid van features oortree word), maar dit is dikwels voldoende en bied die voordeel van uiters hoë spoed. In scenarios soos real-time email filtering of aanvanklike triage van URLs, kan 'n Naive Bayes-model vanselfsprekend malicious gevalle vinnig flag met lae resource usage.
 
 </details>
 
 ### k-Nearest Neighbors (k-NN)
 
-k-Nearest Neighbors is een van die eenvoudigste masjienleer algoritmes. Dit is 'n **nie-parametriese, voorbeelde-gebaseerde** metode wat voorspellings maak op grond van die ooreenkoms met voorbeelde in die opleidingsstel. Die idee vir klassifikasie is: om 'n nuwe datapunt te klassifiseer, vind die **k** naaste punte in die opleidingsdata (sy "naaste bure"), en ken die meerderheid klas aan daardie bure toe. "Nabyheid" word gedefinieer deur 'n afstandsmetrie, tipies Euclidiese afstand vir numeriese data (ander afstande kan gebruik word vir verskillende tipes eienskappe of probleme).
+k-Nearest Neighbors is een van die eenvoudigste machine learning-algorithms. Dit is 'n **non-parametric, instance-based** metode wat predictions maak gebaseer op die ooreenkoms met examples in die training set. Die idee vir classification is: om 'n nuwe data point te klassifiseer, vind die **k** naaste points in die training data (sy "nearest neighbors"), en ken die meerderheid class onder daardie neighbors toe. "Nabyheid" word gedefinieer deur 'n distance metric, gewoonlik Euclidean distance vir numeriese data (ander distances kan vir verskillende tipes features of problems gebruik word).<sup>[[10]](#references)</sup>
 
-K-NN vereis *geen eksplisiete opleiding* nie -- die "opleiding" fase is net om die dataset te stoor. Al die werk gebeur tydens die navraag (voorspelling): die algoritme moet afstande van die navraagpunt na al die opleidingspunte bereken om die naaste te vind. Dit maak voorspellings tyd **lineêr in die aantal opleidingsmonsters**, wat duur kan wees vir groot datasets. As gevolg hiervan is k-NN die beste geskik vir kleiner datasets of scenario's waar jy geheue en spoed vir eenvoud kan ruil.
+K-NN vereis *geen eksplisiete training* nie -- die "training"-fase behels bloot die stoor van die dataset. Al die werk gebeur tydens die query (prediction): die algorithm moet distances vanaf die query point na alle training points bereken om die naastes te vind. Dit maak prediction-tyd **linear in die aantal training samples**, wat duur kan wees vir groot datasets. Om hierdie rede is k-NN die beste geskik vir kleiner datasets of scenarios waar jy memory en speed vir eenvoud kan verruil.
 
-Ten spyte van sy eenvoud, kan k-NN baie komplekse besluitgrense modelleer (aangesien die besluitgrens effektief enige vorm kan hê wat deur die verspreiding van voorbeelde bepaal word). Dit doen dikwels goed wanneer die besluitgrens baie onreëlmatig is en jy baie data het -- essensieel laat die data "vir homself praat". egter, in hoë dimensies kan afstandsmetrieë minder betekenisvol word (vloek van dimensionaliteit), en die metode kan sukkel tensy jy 'n groot aantal monsters het.
+Ondanks sy eenvoud kan k-NN baie komplekse decision boundaries modelleer (omdat die decision boundary effektief enige vorm kan hê wat deur die verspreiding van examples bepaal word). Dit presteer gewoonlik goed wanneer die decision boundary baie onreëlmatig is en jy baie data het -- dit laat die data basies "self praat". In hoë dimensies kan distance metrics egter minder betekenisvol word (curse of dimensionality), en die metode kan sukkel tensy jy 'n groot aantal samples het.
 
-*Gebruik gevalle in kuberveiligheid:* k-NN is toegepas op anomaliedetectie -- byvoorbeeld, 'n indringingdetectiestelsel mag 'n netwerkgebeurtenis as kwaadwillig merk as die meeste van sy naaste bure (vorige gebeurtenisse) kwaadwillig was. As normale verkeer klusters vorm en aanvalle uitskieters is, doen 'n K-NN benadering (met k=1 of klein k) essensieel 'n **naaste-buur anomaliedetectie**. K-NN is ook gebruik om malware-families te klassifiseer deur binêre eienskapvektore: 'n nuwe lêer mag as 'n sekere malware-familie geklassifiseer word as dit baie naby (in eienskapruimte) aan bekende voorbeelde van daardie familie is. In praktyk is k-NN nie so algemeen soos meer skaalbare algoritmes nie, maar dit is konseptueel eenvoudig en soms as 'n basislyn of vir kleinskaalse probleme gebruik.
+*Use cases in cybersecurity:* k-NN is toegepas op anomaly detection -- byvoorbeeld, 'n intrusion detection system kan 'n netwerk-event as malicious label indien die meeste van sy nearest neighbors (vorige events) malicious was. As normale traffic clusters vorm en attacks outliers is, doen 'n K-NN-benadering (met k=1 of klein k) basies **nearest-neighbor anomaly detection**. K-NN is ook gebruik om malware families volgens binary feature vectors te klassifiseer: 'n nuwe file kan as 'n bepaalde malware family geklassifiseer word indien dit baie naby (in feature space) aan bekende instances van daardie family is. In die praktyk is k-NN nie so algemeen soos meer scalable algorithms nie, maar dit is konseptueel eenvoudig en word soms as 'n baseline of vir small-scale problems gebruik.
 
-#### **Belangrike kenmerke van k-NN:**
+#### **Key characteristics of k-NN:**
 
--   **Tipe Probleem:** Klassifikasie (en regressie variasies bestaan). Dit is 'n *luie leer* metode -- geen eksplisiete modelpassing nie.
+-   **Type of Problem:** Classification (en regression-variante bestaan). Dit is 'n *lazy learning*-metode -- geen eksplisiete model fitting nie.
 
--   **Interpretasie:** Lae tot medium -- daar is geen globale model of bondige verklaring nie, maar mens kan resultate interpreteer deur na die naaste bure te kyk wat 'n besluit beïnvloed het (bv. "hierdie netwerkvloei is as kwaadwillig geklassifiseer omdat dit soortgelyk is aan hierdie 3 bekende kwaadwillige vloei"). So, verklarings kan voorbeeld-gebaseerd wees.
+-   **Interpretability:** Laag tot medium -- daar is geen globale model of bondige verduideliking nie, maar resultate kan geïnterpreteer word deur na die nearest neighbors te kyk wat 'n besluit beïnvloed het (bv. "hierdie netwerk-flow is as malicious geklassifiseer omdat dit soortgelyk is aan hierdie 3 bekende malicious flows"). Verduidelikings kan dus example-based wees.
 
--   **Voordele:** Baie eenvoudig om te implementeer en te verstaan. Maak geen aannames oor die dataverspreiding nie (nie-parametries). Kan natuurlik multi-klas probleme hanteer. Dit is **adaptief** in die sin dat besluitgrense baie kompleks kan wees, gevorm deur die dataverspreiding.
+-   **Advantages:** Baie eenvoudig om te implementeer en te verstaan. Dit maak geen aannames oor die data distribution nie (non-parametric). Dit kan multi-class problems natuurlik hanteer. Dit is **adaptive** in die sin dat decision boundaries baie kompleks kan wees en deur die data distribution gevorm word.
 
--   **Beperkings:** Voorspelling kan stadig wees vir groot datasets (moet baie afstande bereken). Geheue-intensief -- dit stoor al die opleidingsdata. Prestasie verswak in hoë-dimensionele eienskap ruimtes omdat al die punte geneig is om byna gelyk afstand te wees (wat die konsep van "naaste" minder betekenisvol maak). Moet *k* (aantal bure) toepaslik kies -- te klein k kan raserig wees, te groot k kan irrelevante punte van ander klasse insluit. Ook, eienskappe moet toepaslik geskaal word omdat afstandsberekeninge sensitief is vir skaal.
+-   **Limitations:** Prediction kan stadig wees vir groot datasets (baie distances moet bereken word). Dit vereis baie memory -- dit stoor al die training data. Performance verswak in hoë-dimensionele feature spaces omdat alle points geneig is om byna ewe ver van mekaar te wees (wat die concept van "naaste" minder betekenisvol maak). Jy moet *k* (aantal neighbors) toepaslik kies -- 'n te klein k kan raserig wees, terwyl 'n te groot k irrelevante points van ander classes kan insluit. Features moet ook toepaslik geskaal word omdat distance calculations sensitief vir scale is.
 
 <details>
-<summary>Voorbeeld -- k-NN vir Phishing Detectie:</summary>
+<summary>Example -- k-NN for Phishing Detection:</summary>
 
-Ons sal weer NSL-KDD gebruik (binariese klassifikasie). Omdat k-NN rekenaarintensief is, sal ons 'n subset van die opleidingsdata gebruik om dit hanteerbaar te hou in hierdie demonstrasie. Ons sal sê, 20,000 opleidingsmonsters uit die volle 125k kies, en k=5 bure gebruik. Na opleiding (werklik net die data stoor), sal ons op die toetsstel evalueer. Ons sal ook eienskappe skaal vir afstandsberekening om te verseker dat geen enkele eienskap oorheers weens skaal.
+Ons sal weer NSL-KDD gebruik (binary classification). Omdat k-NN computationally heavy is, sal ons 'n subset van die training data gebruik om dit in hierdie demonstration hanteerbaar te hou. Ons sal byvoorbeeld 20,000 training samples uit die volledige 125k kies en k=5 neighbors gebruik. Ná training (wat eintlik slegs die stoor van die data is), sal ons op die test set evalueer. Ons sal ook features scale vir distance calculation om te verseker dat geen enkele feature weens scale domineer nie.
 ```python
 import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
@@ -798,32 +802,33 @@ F1-score:  0.766
 ROC AUC:   0.837
 """
 ```
-Die k-NN-model sal 'n verbinding klassifiseer deur na die 5 naaste verbindings in die opleidingsstel-substel te kyk. As, byvoorbeeld, 4 van daardie bure aanvalle (anomalië) is en 1 normaal is, sal die nuwe verbinding as 'n aanval geklassifiseer word. Die prestasie mag redelik wees, hoewel dit dikwels nie so hoog is soos 'n goed-afgestemde Random Forest of SVM op dieselfde data nie. egter, k-NN kan soms uitblink wanneer die klasverspreidings baie onreëlmatig en kompleks is -- effektief 'n geheue-gebaseerde soektog gebruik. In kuberveiligheid kan k-NN (met k=1 of klein k) gebruik word vir die opsporing van bekende aanvalpatrone deur voorbeeld, of as 'n komponent in meer komplekse stelsels (bv. vir clustering en dan klassifisering gebaseer op klusterlidmaatskap).
+Die k-NN-model sal 'n verbinding klassifiseer deur na die 5 naaste verbindings in die subset van die training set te kyk. As 4 van daardie bure byvoorbeeld attacks (anomalies) is en 1 normaal is, sal die nuwe verbinding as 'n attack geklassifiseer word. Die werkverrigting kan redelik wees, hoewel dit dikwels nie so hoog is soos dié van 'n goed ingestelde Random Forest of SVM op dieselfde data nie. k-NN kan egter soms uitblink wanneer die klasverdelings baie onreëlmatig en kompleks is -- dit gebruik effektief 'n memory-based lookup. In cybersecurity kan k-NN (met k=1 of 'n klein k) gebruik word vir die opsporing van bekende attack patterns deur middel van voorbeelde, of as 'n komponent in meer komplekse stelsels (bv. vir clustering en daarna klassifikasie op grond van cluster-lidmaatskap).
+</details>
 
-### Gradient Boosting Machines (bv. XGBoost)
+### Gradient Boosting Machines (e.g., XGBoost)
 
-Gradient Boosting Machines is onder die kragtigste algoritmes vir gestruktureerde data. **Gradient boosting** verwys na die tegniek om 'n ensemble van swak leerders (dikwels besluitbome) op 'n opeenvolgende manier te bou, waar elke nuwe model die foute van die vorige ensemble regstel. Anders as bagging (Random Forests) wat bome parallel bou en hulle gemiddeld, bou boosting bome *een vir een*, elkeen wat meer fokus op die voorbeelde wat vorige bome verkeerd voorspel het.
+Gradient Boosting Machines is van die kragtigste algorithms vir gestruktureerde data. **Gradient boosting** verwys na die tegniek om 'n ensemble van weak learners (dikwels decision trees) opeenvolgend te bou, waar elke nuwe model die foute van die vorige ensemble regstel. Anders as bagging (Random Forests), wat trees parallel bou en hulle gemiddeld, bou boosting trees *een vir een*, met elkeen wat meer fokus op die instances wat vorige trees verkeerd voorspel het.
 
-Die gewildste implementasies in onlangse jare is **XGBoost**, **LightGBM**, en **CatBoost**, wat almal gradient boosting besluitboom (GBDT) biblioteke is. Hulle was uiters suksesvol in masjienleerkompetisies en toepassings, dikwels **met 'n toonaangewende prestasie op tabeldata**. In kuberveiligheid het navorsers en praktisyns gradient gebootste bome gebruik vir take soos **malware opsporing** (met funksies wat uit lêers of runtime gedrag onttrek is) en **netwerk indringing opsporing**. Byvoorbeeld, 'n gradient boosting model kan baie swak reëls (bome) soos "as baie SYN-pakkette en ongewone poort -> waarskynlik skandering" kombineer in 'n sterk saamgestelde detektor wat rekening hou met baie subtiele patrone.
+Die gewildste implementerings in onlangse jare is **XGBoost**, **LightGBM** en **CatBoost**, wat almal gradient boosting decision tree (GBDT)-libraries is. Hulle was uiters suksesvol in machine learning-kompetisies en toepassings, en behaal dikwels **state-of-the-art performance op tabular datasets**. In cybersecurity het researchers en practitioners gradient boosted trees gebruik vir take soos **malware detection** (met features wat uit files of runtime behavior onttrek is) en **network intrusion detection**. Byvoorbeeld, 'n gradient boosting-model kan baie weak rules (trees) soos "if many SYN packets and unusual port -> likely scan" kombineer tot 'n sterk saamgestelde detector wat baie subtiele patterns in ag neem.<sup>[[6]](#references)</sup>
 
-Waarom is gebootste bome so effektief? Elke boom in die reeks word op die *residuele foute* (gradiënte) van die huidige ensemble se voorspellings opgelei. Op hierdie manier "versterk" die model geleidelik die areas waar dit swak is. Die gebruik van besluitbome as basisleerders beteken dat die finale model komplekse interaksies en nie-lineêre verhoudings kan vasvang. Ook, boosting het inherent 'n vorm van ingeboude regularisering: deur baie klein bome by te voeg (en 'n leerkoers te gebruik om hul bydraes te skaal), generaliseer dit dikwels goed sonder groot oorpassing, solank behoorlike parameters gekies word.
+Waarom is boosted trees so effektief? Elke tree in die sequence word opgelei op die *residual errors* (gradients) van die huidige ensemble se predictions. Op hierdie manier **"boost"** die model geleidelik die areas waarin dit swak is. Die gebruik van decision trees as base learners beteken dat die finale model komplekse interactions en non-linear relations kan vasvang. Boonop het boosting inherent 'n vorm van ingeboude regularization: deur baie klein trees by te voeg (en 'n learning rate te gebruik om hul contributions te skaleer), generaliseer dit dikwels goed sonder groot overfitting, mits die korrekte parameters gekies word.
 
-#### **Belangrike kenmerke van Gradient Boosting:**
+#### **Key characteristics of Gradient Boosting:**
 
--   **Tipe Probleem:** Primêr klassifikasie en regressie. In sekuriteit, gewoonlik klassifikasie (bv. binêre klassifisering van 'n verbinding of lêer). Dit hanteer binêre, multi-klas (met toepaslike verlies), en selfs rangorde probleme.
+-   **Type of Problem:** Hoofsaaklik classification en regression. In security is dit gewoonlik classification (bv. om 'n connection of file binêr te klassifiseer). Dit hanteer binary, multi-class (met die toepaslike loss) en selfs ranking-probleme.
 
--   **Interpretasie:** Lae tot medium. Terwyl 'n enkele gebootste boom klein is, kan 'n volle model honderde bome hê, wat nie menslik interpreteerbaar is as 'n geheel nie. egter, soos Random Forest, kan dit funksiebelangrikheidsskorings verskaf, en gereedskap soos SHAP (SHapley Additive exPlanations) kan gebruik word om individuele voorspellings tot 'n sekere mate te interpreteer.
+-   **Interpretability:** Laag tot medium. Hoewel 'n enkele boosted tree klein is, kan 'n volledige model honderde trees hê, wat as geheel nie deur mense geïnterpreteer kan word nie. Soos Random Forest kan dit egter feature importance-scores verskaf, en tools soos SHAP (SHapley Additive exPlanations) kan gebruik word om individuele predictions tot 'n sekere mate te interpreteer.
 
--   **Voordele:** Dikwels die **beste presterende** algoritme vir gestruktureerde/tabeldata. Kan komplekse patrone en interaksies opspoor. Het baie afstelknoppies (aantal bome, diepte van bome, leerkoers, regulariseringsterme) om modelkompleksiteit aan te pas en oorpassing te voorkom. Moderne implementasies is geoptimaliseer vir spoed (bv. XGBoost gebruik tweede-orde gradiëntinligting en doeltreffende datastrukture). Geneig om ongebalanseerde data beter te hanteer wanneer dit gekombineer word met toepaslike verliesfunksies of deur monstergewigte aan te pas.
+-   **Advantages:** Dikwels die **beste presterende** algorithm vir gestruktureerde/tabular data. Dit kan komplekse patterns en interactions opspoor. Dit het baie tuning knobs (aantal trees, diepte van trees, learning rate, regularization terms) om model complexity aan te pas en overfitting te voorkom. Moderne implementerings is vir spoed geoptimaliseer (bv. XGBoost gebruik second-order gradient info en doeltreffende data structures). Dit is geneig om imbalanced data beter te hanteer wanneer dit met toepaslike loss functions gekombineer word of wanneer sample weights aangepas word.
 
--   **Beperkings:** Meer kompleks om af te stel as eenvoudiger modelle; opleiding kan stadig wees as bome diep is of die aantal bome groot is (alhoewel dit steeds gewoonlik vinniger is as om 'n vergelykbare diep neurale netwerk op dieselfde data op te lei). Die model kan oorpas as dit nie afgestel word nie (bv. te veel diepe bome met onvoldoende regularisering). Vanweë baie hiperparameters, kan die effektiewe gebruik van gradient boosting meer kundigheid of eksperimente vereis. Ook, soos boomgebaseerde metodes, hanteer dit nie inherent baie spaarsame hoë-dimensionele data so doeltreffend soos lineêre modelle of Naive Bayes nie (alhoewel dit steeds toegepas kan word, bv. in teksklassifikasie, maar mag nie die eerste keuse wees sonder kenmerkingenieering).
+-   **Limitations:** Dit is meer kompleks om te tune as eenvoudiger models; training kan stadig wees as trees diep is of die aantal trees groot is (hoewel dit steeds gewoonlik vinniger is as die training van 'n vergelykbare deep neural network op dieselfde data). Die model kan overfit as dit nie getune word nie (bv. te veel diep trees met onvoldoende regularization). Weens die baie hyperparameters kan die effektiewe gebruik van gradient boosting meer expertise of experimentation vereis. Soos tree-based methods hanteer dit ook nie inherent baie sparse high-dimensional data so doeltreffend soos linear models of Naive Bayes nie (hoewel dit steeds toegepas kan word, bv. in text classification, maar dit is moontlik nie die eerste keuse sonder feature engineering nie).
 
 > [!TIP]
-> *Gebruik gevalle in kuberveiligheid:* Byna oral waar 'n besluitboom of random forest gebruik kan word, kan 'n gradient boosting model beter akkuraatheid bereik. Byvoorbeeld, **Microsoft se malware opsporing** kompetisies het swaar gebruik gemaak van XGBoost op geengineerde funksies van binêre lêers. **Netwerk indringing opsporing** navorsing rapporteer dikwels topresultate met GBDTs (bv. XGBoost op CIC-IDS2017 of UNSW-NB15 datasets). Hierdie modelle kan 'n wye reeks funksies (protokol tipes, frekwensie van sekere gebeurtenisse, statistiese funksies van verkeer, ens.) neem en dit kombineer om bedreigings op te spoor. In phishing opsporing kan gradient boosting leksikale funksies van URL's, domein reputasiefunksies, en bladsy-inhoud funksies kombineer om baie hoë akkuraatheid te bereik. Die ensemble-benadering help om baie hoek gevalle en subtiliteite in die data te dek.
+> *Use cases in cybersecurity:* Byna enige plek waar 'n decision tree of random forest gebruik kan word, kan 'n gradient boosting-model beter accuracy behaal. Microsoft se **malware detection**-kompetisies het byvoorbeeld baie gebruik gemaak van XGBoost op engineered features uit binary files. Navorsing oor **network intrusion detection** rapporteer dikwels top results met GBDTs (bv. XGBoost op CIC-IDS2017- of UNSW-NB15-datasets). Hierdie models kan 'n wye reeks features neem (protocol types, frequency van sekere events, statistical features van traffic, ens.) en dit kombineer om threats op te spoor. In phishing detection kan gradient boosting lexical features van URLs, domain reputation features en page content features kombineer om baie hoë accuracy te behaal. Die ensemble-benadering help om baie corner cases en subtleties in die data te dek.
 
 <details>
-<summary>Voorbeeld -- XGBoost vir Phishing Opsporing:</summary>
-Ons sal 'n gradient boosting klassifiseerder op die phishing-dataset gebruik. Om dinge eenvoudig en selfondersteunend te hou, sal ons `sklearn.ensemble.GradientBoostingClassifier` gebruik (wat 'n stadiger maar eenvoudige implementasie is). Normaalweg kan 'n mens `xgboost` of `lightgbm` biblioteke gebruik vir beter prestasie en bykomende funksies. Ons sal die model oplei en dit op 'n soortgelyke manier evalueer soos voorheen.
+<summary>Example -- XGBoost for Phishing Detection:</summary>
+Ons sal 'n gradient boosting classifier op die phishing-dataset gebruik. Om dinge eenvoudig en self-contained te hou, sal ons `sklearn.ensemble.GradientBoostingClassifier` gebruik ('n stadiger maar eenvoudige implementering). Normaalweg sou 'n mens `xgboost`- of `lightgbm`-libraries gebruik vir beter performance en addisionele features. Ons sal die model train en dit soortgelyk aan vroeër evalueer.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -871,23 +876,23 @@ F1‑score:  0.957
 ROC AUC:   0.990
 """
 ```
-Die gradient boosting model sal waarskynlik baie hoë akkuraatheid en AUC op hierdie phishing dataset bereik (dikwels kan hierdie modelle 95% akkuraatheid oorskry met behoorlike afstemming op sulke data, soos gesien in die literatuur. Dit demonstreer waarom GBDTs beskou word as *"die toonaangewende model vir tabeldata"* -- hulle presteer dikwels beter as eenvoudiger algoritmes deur komplekse patrone vas te vang. In 'n kuberveiligheidskonteks kan dit beteken dat meer phishing-webwerwe of -aanvalle met minder misse opgevang word. Natuurlik moet 'n mens versigtig wees oor oorpassing -- ons sou tipies tegnieke soos kruisvalidasie gebruik en die prestasie op 'n validasieset monitor wanneer ons so 'n model vir ontplooiing ontwikkel.
+Die gradient boosting-model sal waarskynlik baie hoë akkuraatheid en AUC op hierdie phishing-datastel behaal (sulke modelle kan dikwels meer as 95% akkuraatheid met behoorlike tuning op sulke data oorskry, soos in die literatuur gesien word. Dit demonstreer waarom GBDTs as *"die state-of-the-art-model vir tabulêre datastelle"* beskou word -- hulle presteer dikwels beter as eenvoudiger algoritmes deur komplekse patrone vas te lê. In 'n kuberveiligheidskonteks kan dit beteken dat meer phishing-webwerwe of attacks opgespoor word, met minder gevalle wat gemis word. Natuurlik moet 'n mens versigtig wees vir overfitting -- ons sal tipies tegnieke soos cross-validation gebruik en prestasie op 'n validasiedatastel monitor wanneer ons so 'n model vir implementering ontwikkel.
 
 </details>
 
-### Kombinasie van Modelle: Ensemble Leer en Stacking
+### Kombinering van modelle: Ensemble Learning en Stacking
 
-Ensemble leer is 'n strategie van **die kombinasie van verskeie modelle** om die algehele prestasie te verbeter. Ons het reeds spesifieke ensemble metodes gesien: Random Forest (‘n ensemble van bome via bagging) en Gradient Boosting (‘n ensemble van bome via sekwensiële boosting). Maar ensembles kan ook op ander maniere geskep word, soos **stemensembles** of **gestapelde generalisering (stacking)**. Die hoofidee is dat verskillende modelle verskillende patrone kan vasvang of verskillende swakhede kan hê; deur hulle te kombineer, kan ons **elke model se foute met 'n ander se sterkpunte kompenseer**.
+Ensemble learning is 'n strategie om **veelvuldige modelle te kombineer** om algehele prestasie te verbeter. Ons het reeds spesifieke ensemble-metodes gesien: Random Forest (’n ensemble van bome deur bagging) en Gradient Boosting (’n ensemble van bome deur sequential boosting). Ensembles kan egter ook op ander maniere geskep word, soos **voting ensembles** of **stacked generalization (stacking)**. Die hoofidee is dat verskillende modelle verskillende patrone kan vaslê of verskillende swakhede kan hê; deur hulle te kombineer, kan ons **elke model se foute met die sterk punte van 'n ander model vergoed**.<sup>[[13]](#references)</sup>
 
--   **Stem Ensemble:** In 'n eenvoudige stemklassifiseerder, oplei ons verskeie diverse modelle (sê, 'n logistieke regressie, 'n besluitboom, en 'n SVM) en laat hulle stem oor die finale voorspelling (meerderheidsstem vir klassifikasie). As ons die stemme gewig (bv. hoër gewig aan meer akkurate modelle), is dit 'n gewigte stemskema. Dit verbeter tipies die prestasie wanneer die individuele modelle redelik goed en onafhanklik is -- die ensemble verminder die risiko van 'n individuele model se fout aangesien ander dit kan regstel. Dit is soos om 'n paneel van kundiges te hê eerder as 'n enkele mening.
+-   **Voting Ensemble:** In 'n eenvoudige voting classifier train ons veelvuldige diverse modelle (byvoorbeeld 'n logistic regression, 'n decision tree en 'n SVM) en laat ons hulle oor die finale voorspelling stem (meerderheidsstem vir klassifikasie). As ons die stemme weeg (byvoorbeeld 'n hoër gewig aan meer akkurate modelle gee), is dit 'n weighted voting-skema. Dit verbeter tipies prestasie wanneer die individuele modelle redelik goed en onafhanklik is -- die ensemble verminder die risiko van 'n individuele model se fout, aangesien die ander modelle dit moontlik kan korrigeer. Dit is soos om 'n paneel deskundiges eerder as 'n enkele mening te hê.
 
--   **Stacking (Gestapelde Ensemble):** Stacking gaan 'n stap verder. In plaas van 'n eenvoudige stem, oplei dit 'n **meta-model** om **te leer hoe om die voorspellinge van basismodelle die beste te kombineer**. Byvoorbeeld, jy oplei 3 verskillende klassifiseerders (basisleerlinge), dan voer jy hul uitsette (of waarskynlikhede) as kenmerke in 'n meta-klassifiseerder (dikwels 'n eenvoudige model soos logistieke regressie) wat die optimale manier leer om hulle te meng. Die meta-model word op 'n validasieset of via kruisvalidasie opgelei om oorpassing te vermy. Stacking kan dikwels beter presteer as eenvoudige stem deur te leer *watter modelle meer vertrou kan word in watter omstandighede*. In kuberveiligheid kan een model beter wees om netwerk skanderings op te vang terwyl 'n ander beter is om malware sein te vang; 'n stacking model kan leer om elkeen toepaslik te vertrou.
+-   **Stacking (Stacked Ensemble):** Stacking gaan 'n stap verder. In plaas van 'n eenvoudige stem, train dit 'n **meta-model** om te **leer hoe om die voorspellings van basismodelle die beste te kombineer**. Byvoorbeeld, jy train 3 verskillende classifiers (base learners) en voer dan hul uitsette (of waarskynlikhede) as features in 'n meta-classifier (dikwels 'n eenvoudige model soos logistic regression) in, wat die optimale manier leer om hulle te kombineer. Die meta-model word op 'n validasiedatastel of deur cross-validation getrain om overfitting te voorkom. Stacking kan dikwels beter as eenvoudige voting presteer deur te leer *watter modelle in watter omstandighede meer vertrou moet word*. In kuberveiligheid kan een model beter wees met die opsporing van network scans, terwyl 'n ander beter is met die opsporing van malware beaconing; 'n stacking-model kan leer om gepas op elkeen staat te maak.
 
-Ensembles, of dit nou deur stem of stacking is, geneig om **akkuraatheid** en robuustheid te **verhoog**. Die nadeel is verhoogde kompleksiteit en soms verminderde interpreteerbaarheid (alhoewel sommige ensemble benaderings soos 'n gemiddelde van besluitbome steeds 'n bietjie insig kan bied, bv. kenmerk belangrikheid). In praktyk, as operasionele beperkings dit toelaat, kan die gebruik van 'n ensemble lei tot hoër opsporingskoerse. Baie wenoplossings in kuberveiligheid uitdagings (en Kaggle kompetisies in die algemeen) gebruik ensemble tegnieke om die laaste bietjie prestasie te verknies.
+Ensembles, hetsy deur voting of stacking, is geneig om **akkuraatheid** en robuustheid te verhoog. Die nadeel is groter kompleksiteit en soms verminderde interpreteerbaarheid (hoewel sommige ensemble-benaderings, soos 'n gemiddelde van decision trees, steeds insig kan verskaf, byvoorbeeld feature importance). In die praktyk kan die gebruik van 'n ensemble tot hoër opsporingsyfers lei indien operasionele beperkings dit toelaat. Baie wenoplossings in kuberveiligheidsuitdagings (en Kaggle-kompetisies in die algemeen) gebruik ensemble-tegnieke om die laaste bietjie prestasie uit te druk.
 
 <details>
-<summary>Voorbeeld -- Stem Ensemble vir Phishing Opsporing:</summary>
-Om model stacking te illustreer, kom ons kombineer 'n paar van die modelle wat ons op die phishing dataset bespreek het. Ons sal 'n logistieke regressie, 'n besluitboom, en 'n k-NN as basisleerlinge gebruik, en 'n Random Forest as 'n meta-leerder gebruik om hul voorspellinge te aggregeer. Die meta-leerder sal opgelei word op die uitsette van die basisleerlinge (met kruisvalidasie op die opleidingset). Ons verwag dat die gestapelde model sowel as of effens beter as die individuele modelle sal presteer.
+<summary>Voorbeeld -- Voting Ensemble vir Phishing-opsporing:</summary>
+Om model stacking te illustreer, kombineer ons 'n paar van die modelle wat ons op die phishing-datastel bespreek het. Ons sal 'n logistic regression, 'n decision tree en 'n k-NN as base learners gebruik, en 'n Random Forest as 'n meta-learner gebruik om hul voorspellings saam te voeg. Die meta-learner sal op die uitsette van die base learners getrain word (deur cross-validation op die trainingsdatastel). Ons verwag dat die stacked model net so goed soos, of effens beter as, die individuele modelle sal presteer.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -966,30 +971,27 @@ F1‑score : 0.948
 ROC AUC  : 0.992
 """
 ```
-Die gestapelde ensemble benut die aanvullende sterkte van die basismodelle. Byvoorbeeld, logistieke regressie kan die lineêre aspekte van die data hanteer, die besluitboom kan spesifieke reëlagtige interaksies vasvang, en k-NN kan uitblink in plaaslike buurtes van die kenmerkruimte. Die meta-model (hier 'n random forest) kan leer hoe om hierdie insette te weeg. Die resulterende metrieke toon dikwels 'n verbetering (selfs al is dit gering) oor enige enkele model se metrieke. In ons phishing voorbeeld, as logistiek alleen 'n F1 van sê 0.95 gehad het en die boom 0.94, kan die stapel 0.96 bereik deur op te tel waar elke model verkeerd is.
+Die stacked ensemble benut die komplementêre sterkpunte van die basismodelle. Byvoorbeeld, logistiese regressie kan die lineêre aspekte van die data hanteer, die decision tree kan spesifieke reëlagtige interaksies vasvang, en k-NN kan uitblink in plaaslike nabygeleë gebiede van die kenmerkruimte. Die meta-model (hier ’n random forest) kan leer hoe om hierdie insette te weeg. Die resulterende metrieke toon dikwels ’n verbetering (selfs al is dit gering) teenoor die metrieke van enige enkele model. In ons phishing-voorbeeld, indien logistiese regressie alleen ’n F1 van byvoorbeeld 0.95 en die tree 0.94 gehad het, kan die stack 0.96 bereik deur op te tel waar elke model foute maak.
 
-Ensemble-metodes soos hierdie demonstreer die beginsel dat *"die kombinasie van meerdere modelle tipies lei tot beter generalisering"*. In kuberveiligheid kan dit geïmplementeer word deur verskeie opsporingsenjins te hê (een kan reël-gebaseerd wees, een masjienleer, een anomalie-gebaseerd) en dan 'n laag wat hul waarskuwings saamvoeg -- effektief 'n vorm van ensemble -- om 'n finale besluit met 'n hoër vertroue te neem. Wanneer sulke stelsels ontplooi word, moet 'n mens die bykomende kompleksiteit oorweeg en verseker dat die ensemble nie te moeilik is om te bestuur of te verduidelik nie. Maar vanuit 'n akkuraatheidsoogpunt is ensembles en stapeling kragtige gereedskap om modelprestasie te verbeter.
+Ensemble-metodes soos hierdie demonstreer die beginsel dat *"die kombinasie van verskeie modelle gewoonlik tot beter veralgemening lei"*. In kuberveiligheid kan dit geïmplementeer word deur verskeie detection engines te gebruik (een kan reëlgebaseer wees, een machine learning-gebaseer en een anomaliegebaseer), gevolg deur ’n laag wat hul waarskuwings saamvoeg -- effektief ’n vorm van ensemble -- om ’n finale besluit met groter sekerheid te neem. Wanneer sulke stelsels ontplooi word, moet ’n mens die bykomende kompleksiteit in ag neem en verseker dat die ensemble nie te moeilik word om te bestuur of te verduidelik nie. Vanuit ’n akkuraatheidsoogpunt is ensembles en stacking egter kragtige hulpmiddels om modelwerkverrigting te verbeter.
 
 </details>
 
 
 ## Verwysings
 
-- [https://madhuramiah.medium.com/logistic-regression-6e55553cc003](https://madhuramiah.medium.com/logistic-regression-6e55553cc003)
-- [https://www.geeksforgeeks.org/decision-tree-introduction-example/](https://www.geeksforgeeks.org/decision-tree-introduction-example/)
-- [https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132](https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132)
-- [https://www.ibm.com/think/topics/support-vector-machine](https://www.ibm.com/think/topics/support-vector-machine)
-- [https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering](https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering)
-- [https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644](https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644)
-- [https://zvelo.com/ai-and-machine-learning-in-cybersecurity/](https://zvelo.com/ai-and-machine-learning-in-cybersecurity/)
-- [https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae](https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae)
-- [https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8](https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8)
-- [https://www.ibm.com/think/topics/knn](https://www.ibm.com/think/topics/knn)
-- [https://www.ibm.com/think/topics/knn](https://www.ibm.com/think/topics/knn)
-- [https://arxiv.org/pdf/2101.02552](https://arxiv.org/pdf/2101.02552)
-- [https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
-- [https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
-- [https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
-- [https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
+- [1] [Logistiese regressie](https://madhuramiah.medium.com/logistic-regression-6e55553cc003)
+- [2] [Decision Tree - Inleiding met voorbeeld](https://www.geeksforgeeks.org/decision-tree-introduction-example/)
+- [3] [Denial of Services Attack Detection using Random Forest Classifier with Information Gain](https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132)
+- [4] [What are Support Vector Machines (SVMs)? (IBM)](https://www.ibm.com/think/topics/support-vector-machine)
+- [5] [Naive Bayes spam filtering (Wikipedia)](https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering)
+- [6] [GBDT Demystified: How LightGBM, XGBoost, and CatBoost Work](https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644)
+- [7] [AI and Machine Learning in Cybersecurity (zvelo)](https://zvelo.com/ai-and-machine-learning-in-cybersecurity/)
+- [8] [Linear Regression Explained](https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae)
+- [9] [Performance analysis of machine learning models for intrusion detection system using Gini Impurity-based Weighted Random Forest (GIWRF) feature selection technique](https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8)
+- [10] [What is the k-nearest neighbors (KNN) algorithm? (IBM)](https://www.ibm.com/think/topics/knn)
+- [11] [Phishing Attacks and Websites Classification Using Machine Learning and Multiple Datasets (A Comparative Analysis)](https://arxiv.org/pdf/2101.02552)
+- [12] [How Deep Learning Enhances Intrusion Detection Systems](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
+- [13] [Ensemble Learning: Boosting Model Performance by Combining Strengths](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
 
 {{#include ../banners/hacktricks-training.md}}

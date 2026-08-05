@@ -2,27 +2,27 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Side-channel aanvalle herstel geheime inligting deur fisiese of mikro-argitektoniese "lekkasies" te observeer wat *gecorreleer* is met die interne toestand, maar *nie* deel is van die logiese koppelvlak van die toestel nie. Voorbeelde wissel van die meting van die onmiddellike stroom wat deur 'n slimkaart getrek word tot die misbruik van CPU-kragbestuurseffekte oor 'n netwerk.
+Side-channel attacks herwin geheime deur fisiese of mikro-argitektoniese "leakage" waar te neem wat *gekorreleer* is met interne toestand, maar *nie* deel is van die logiese koppelvlak van die toestel nie. Voorbeelde wissel van die meting van die oombliklike stroom wat deur 'n smart-card getrek word tot die misbruik van CPU-kragbestuur-effekte oor 'n netwerk.
 
 ---
 
-## Hoof Lekkage Kanale
+## Main Leakage Channels
 
-| Kanaal | Tipiese Teiken | Instrumentasie |
-|--------|----------------|-----------------|
-| Kragverbruik | Slimkaarte, IoT MCU's, FPGA's | Osilloskoop + shunt weerstand/HS-sonde (bv. CW503) |
-| Elektromagnetiese veld (EM) | CPU's, RFID, AES versnellings | H-veld sonde + LNA, ChipWhisperer/RTL-SDR |
-| Uitvoeringstyd / caches | Desktop & wolk CPU's | Hoë-presisie timers (rdtsc/rdtscp), afstand tyd-van-vlug |
-| Akoesties / meganies | Sleutelborde, 3-D drukkers, relais | MEMS mikrofoon, laser vibrometer |
-| Opties & termies | LED's, laserdrukkers, DRAM | Fotodiode / hoë-snelheid kamera, IR kamera |
-| Fout-geïnduseer | ASIC/MCU kriptos | Klok/spanning glip, EMFI, laser inspuiting |
+| Channel | Typical Target | Instrumentation |
+|---------|---------------|-----------------|
+| Power consumption | Smart-cards, IoT MCUs, FPGAs | Ossilloskoop + shunt-resistor/HS-probe (bv. CW503)
+| Electromagnetic field (EM) | CPUs, RFID, AES accelerators | H-veld-probe + LNA, ChipWhisperer/RTL-SDR
+| Execution time / caches | Desktop & cloud CPUs | Hoëpresisie-timers (rdtsc/rdtscp), afgeleë time-of-flight
+| Acoustic / mechanical | Keyboards, 3-D printers, relays | MEMS-mikrofoon, laser-vibrometer
+| Optical & thermal | LEDs, laser printers, DRAM | Fotodiode / hoëspoedkamera, IR-kamera
+| Fault-induced | ASIC/MCU cryptos | Klok/spanning-glitch, EMFI, laser-inspuiting
 
 ---
 
-## Kraganalise
+## Power Analysis
 
-### Eenvoudige Kraganalise (SPA)
-Observeer 'n *enkele* spoor en assosieer direk pieke/dale met operasies (bv. DES S-boxes).
+### Simple Power Analysis (SPA)
+Neem 'n *enkele* trace waar en assosieer pieke/dale direk met bewerkings (bv. DES S-boxes).
 ```python
 # ChipWhisperer-husky example – capture one AES trace
 from chipwhisperer.capture.api.programmers import STMLink
@@ -34,73 +34,73 @@ cw.capture.init()
 trace = cw.capture.capture_trace()
 print(trace.wave)  # numpy array of power samples
 ```
-### Differensiële/Korrelerende Kraganalise (DPA/CPA)
-Verkry *N > 1 000* spore, hipotese sleutelbyte `k`, bereken HW/HD model en korreleer met lekkasie.
+### Differential/Correlation Power Analysis (DPA/CPA)
+Versamel *N > 1 000* traces, stel ’n hipotese oor sleutelgreep `k` op, bereken die HW/HD-model en korreleer dit met die leak.
 ```python
 import numpy as np
 corr = np.corrcoef(leakage_model(k), traces[:,sample])
 ```
-CPA bly toonaangewend, maar masjienleer variasies (MLA, diep-leer SCA) oorheers nou kompetisies soos ASCAD-v2 (2023).
+CPA bly state-of-the-art, maar machine-learning-variante (MLA, deep-learning SCA) oorheers nou kompetisies soos ASCAD-v2 (2023).
 
 ---
 
 ## Elektromagnetiese Analise (EMA)
-Naby-veld EM-probes (500 MHz–3 GHz) lek identiese inligting aan kraganalise *sonder* om shunts in te voeg. 2024 navorsing het sleutelherwinning by **>10 cm** van 'n STM32 gedemonstreer deur middel van spektrum korrelasie en laekoste RTL-SDR front-ends.
+Near-field EM probes (500 MHz–3 GHz) lek identiese inligting as power analysis *sonder* om shunts in te voeg. Navorsing in 2024 het key recovery op **>10 cm** van ’n STM32 gedemonstreer met spectrum correlation en laekoste RTL-SDR-front-ends.
 
 ---
 
-## Tyds- & Mikro-argitektoniese Aanvalle
-Moderne CPU's lek geheime deur gedeelde hulpbronne:
-* **Hertzbleed (2022)** – DVFS frekwensie skaal korreleer met Hamming gewig, wat *afgeleë* ekstraksie van EdDSA sleutels moontlik maak.
-* **Downfall / Gather Data Sampling (Intel, 2023)** – transiënt-uitvoering om AVX-gather data oor SMT-drade te lees.
-* **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – spekulatiewe vektor misvoorspelling lek registers oor domeine.
+## Timing & Mikro-argitektoniese Aanvalle
+Moderne SVE’s lek geheime deur gedeelde hulpbronne:
+* **Hertzbleed (2022)** – DVFS frequency scaling korreleer met Hamming weight, wat *remote* extraction van EdDSA-keys moontlik maak.<sup>[[2]](#references)</sup>
+* **Downfall / Gather Data Sampling (Intel, 2023)** – transient-execution om AVX-gather-data oor SMT-threads heen te lees.
+* **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – speculative vector mis-prediction lek registers oor domeine heen.
 
 ---
 
 ## Akoestiese & Optiese Aanvalle
-* 2024 "​iLeakKeys" het 95 % akkuraatheid getoon in die herwinning van laptop-toetsdrukke vanaf 'n **slimfoon mikrofoon oor Zoom** met 'n CNN klassifiseerder.
-* Hoëspoed fotodiodes vang DDR4 aktiwiteit LED en herbou AES ronde sleutels binne <1 minuut (BlackHat 2023).
+* 2024 se "​iLeakKeys" het 95 % akkuraatheid getoon met die recovery van laptop-keystrokes vanaf ’n **smart-phone microphone oor Zoom** deur ’n CNN-classifier te gebruik.
+* High-speed photodiodes vang DDR4-aktiwiteit-LED vas en rekonstrueer AES-round keys binne <1 minuut (BlackHat 2023).
 
 ---
 
-## Foutinjekie & Differensiële Foutanalise (DFA)
-Die kombinasie van foute met kant-kanaal lekkasie verkort sleutelsoektog (bv. 1-trace AES DFA). Onlangs hobbyis-prys gereedskap:
-* **ChipSHOUTER & PicoEMP** – sub-1 ns elektromagnetiese puls glits.
-* **GlitchKit-R5 (2025)** – oopbron klok/spanning glits platform wat RISC-V SoCs ondersteun.
+## Fault Injection & Differential Fault Analysis (DFA)
+Die kombinasie van faults met side-channel leakage verkort key search (bv. 1-trace AES DFA). Onlangse tools teen hobbyist-pryse:
+* **ChipSHOUTER & PicoEMP** – sub-1 ns electromagnetic pulse glitching.
+* **GlitchKit-R5 (2025)** – open-source clock/voltage glitch-platform met ondersteuning vir RISC-V-SoC’s.
 
 ---
 
-## Tipiese Aanval Werkvloei
-1. Identifiseer lekkasie kanaal & monteerpunt (VCC pen, ontkoppelkap, naby-veld plek).
-2. Voeg trigger in (GPIO of patroon-gebaseerd).
-3. Versamel >1 k spore met behoorlike monsterneming/filters.
-4. Voorverwerk (uitlijning, gemiddelde verwydering, LP/HP filter, golflet, PCA).
-5. Statistiese of ML sleutelherwinning (CPA, MIA, DL-SCA).
-6. Valideer en herhaal op uitskieters.
+## Tipiese Aanval-Workflow
+1. Identifiseer die leakage channel & mount point (VCC-pin, decoupling cap, near-field-spot).
+2. Voeg ’n trigger in (GPIO of pattern-based).
+3. Versamel >1 k traces met behoorlike sampling/filters.
+4. Pre-process (alignment, mean removal, LP/HP-filter, wavelet, PCA).
+5. Statistical of ML key recovery (CPA, MIA, DL-SCA).
+6. Valideer en herhaal op outliers.
 
 ---
 
-## Verdedigings & Versterking
-* **Konstante-tyd** implementasies & geheue-harde algoritmes.
-* **Maskering/schuffling** – verdeel geheime in ewekansige aandele; eerste-orde weerstand gesertifiseer deur TVLA.
-* **Versteek** – op-skyf spanning reguleerders, ewekansige klok, dubbele spoor logika, EM skilde.
-* **Foutdetectie** – oortollige berekening, drempel handtekeninge.
-* **Operasioneel** – deaktiveer DVFS/turbo in kripto-kernels, isoleer SMT, verbied mede-lokasie in multi-huurder wolke.
+## Defences & Hardening
+* **Constant-time**-implementasies & memory-hard algorithms.
+* **Masking/shuffling** – verdeel secrets in random shares; first-order resistance gesertifiseer deur TVLA.
+* **Hiding** – on-chip voltage regulators, randomised clock, dual-rail logic, EM-shields.
+* **Fault detection** – redundante berekening, threshold signatures.
+* **Operational** – deaktiveer DVFS/turbo in crypto-kernels, isoleer SMT, verbied co-location in multi-tenant clouds.
 
 ---
 
-## Gereedskap & Raamwerke
-* **ChipWhisperer-Husky** (2024) – 500 MS/s skoop + Cortex-M trigger; Python API soos hierbo.
-* **Riscure Inspector & FI** – kommersieel, ondersteun outomatiese lekkasie assessering (TVLA-2.0).
-* **scaaml** – TensorFlow-gebaseerde diep-leer SCA biblioteek (v1.2 – 2025).
-* **pyecsca** – ANSSI oopbron ECC SCA raamwerk.
+## Tools & Frameworks
+* **ChipWhisperer-Husky** (2024) – 500 MS/s-scope + Cortex-M-trigger; Python-API soos hierbo.<sup>[[1]](#references)</sup>
+* **Riscure Inspector & FI** – kommersieel, ondersteun geoutomatiseerde leakage-assessment (TVLA-2.0).
+* **scaaml** – TensorFlow-gebaseerde deep-learning SCA-library (v1.2 – 2025).
+* **pyecsca** – ANSSI open-source ECC SCA-framework.
 
 ---
 
 ## Verwysings
 
-* [ChipWhisperer Dokumentasie](https://chipwhisperer.readthedocs.io/en/latest/)
-* [Hertzbleed Aanval Papier](https://www.hertzbleed.com/)
+- [1] [ChipWhisperer Documentation](https://chipwhisperer.readthedocs.io/en/latest/)
+- [2] [Hertzbleed Attack Paper](https://www.hertzbleed.com/)
 
 
 {{#include ../../banners/hacktricks-training.md}}
