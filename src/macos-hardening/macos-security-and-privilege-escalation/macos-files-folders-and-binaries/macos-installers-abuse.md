@@ -1,4 +1,4 @@
-# Abus des installateurs macOS
+# Abuse des Installers macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -15,8 +15,8 @@ Le fichier package lui-même est une archive qui contient une **hiérarchie de f
 - **Distribution (xml)** : Personnalisations (titre, texte d'accueil…) et vérifications des scripts/de l'installation
 - **PackageInfo (xml)** : Informations, exigences d'installation, emplacement d'installation, chemins vers les scripts à exécuter
 - **Bill of materials (bom)** : Liste des fichiers à installer, mettre à jour ou supprimer, avec leurs permissions
-- **Payload (CPIO archive gzip compressed)** : Fichiers à installer dans `install-location` depuis PackageInfo
-- **Scripts (CPIO archive gzip compressed)** : Scripts de pré- et post-installation ainsi que d'autres ressources extraits dans un répertoire temporaire pour être exécutés.
+- **Payload (CPIO archive gzip compressed)** : Fichiers à installer dans l'`install-location` de PackageInfo
+- **Scripts (CPIO archive gzip compressed)** : Scripts pre et post install, ainsi que d'autres ressources extraites dans un répertoire temporaire pour être exécutés.
 
 ### Décompresser
 ```bash
@@ -36,7 +36,7 @@ Pour visualiser le contenu de l’installer sans le décompresser manuellement, 
 
 ### Raccourcis de triage statique
 
-Si l’objectif est l’analyse, essayez d’**éviter d’ouvrir d’abord le package avec `Installer.app`**. Certains packages peuvent exécuter du code dès qu’Installer les ouvre (par exemple via `system.run()` ou des plug-ins d’installer) ; l’extraction hors ligne constitue donc généralement un point de départ plus sûr.
+Si l’objectif est l’analyse, essayez d’**éviter d’abord d’ouvrir le package avec `Installer.app`**. Certains packages peuvent exécuter du code dès qu’Installer les ouvre (par exemple via `system.run()` ou des plug-ins d’Installer), l’extraction hors ligne constitue donc généralement un point de départ plus sûr.
 ```bash
 PKG="Suspicious.pkg"
 OUT="/tmp/pkg-audit"
@@ -56,77 +56,77 @@ rg -n 'system\.(run|runOnce)|<script>|launchctl|osascript|curl|chmod 4[0-7]{3}|s
 ```
 ## Informations de base sur les DMG
 
-Les fichiers DMG, ou Apple Disk Images, sont un format de fichier utilisé par macOS d'Apple pour les images disque. Un fichier DMG est essentiellement une **image disque montable** (elle contient son propre système de fichiers) qui contient des données de blocs brutes, généralement compressées et parfois chiffrées. Lorsque vous ouvrez un fichier DMG, macOS le **monte comme s'il s'agissait d'un disque physique**, ce qui vous permet d'accéder à son contenu.
+Les fichiers DMG, ou images disque Apple, sont un format de fichier utilisé par macOS d'Apple pour les images disque. Un fichier DMG est essentiellement une **image disque montable** (elle contient son propre système de fichiers) qui contient des données de blocs brutes généralement compressées et parfois chiffrées. Lorsque vous ouvrez un fichier DMG, macOS le **monte comme s'il s'agissait d'un disque physique**, ce qui vous permet d'accéder à son contenu.
 
 > [!CAUTION]
-> Notez que les installateurs **`.dmg`** prennent en charge **tellement de formats** que certains d'entre eux contenant des vulnérabilités ont par le passé été exploités pour obtenir une **exécution de code au niveau du kernel**.
+> Notez que les installateurs **`.dmg`** prennent en charge **de très nombreux formats** et que, par le passé, certains d'entre eux contenant des vulnérabilités ont été exploités pour obtenir une **exécution de code au niveau du kernel**.
 
 ### Hiérarchie
 
 <figure><img src="../../../images/image (225).png" alt=""><figcaption></figcaption></figure>
 
-La hiérarchie d'un fichier DMG peut varier selon son contenu. Cependant, pour les DMG d'applications, elle suit généralement cette structure :
+La hiérarchie d'un fichier DMG peut varier en fonction de son contenu. Cependant, pour les DMG d'applications, elle suit généralement cette structure :
 
 - Niveau supérieur : il s'agit de la racine de l'image disque. Elle contient souvent l'application et éventuellement un lien vers le dossier Applications.
-- Application (.app) : il s'agit de l'application elle-même. Dans macOS, une application est généralement un package contenant de nombreux fichiers et dossiers individuels qui constituent l'application.
-- Lien vers Applications : il s'agit d'un raccourci vers le dossier Applications dans macOS. Son objectif est de faciliter l'installation de l'application. Vous pouvez faire glisser le fichier .app vers ce raccourci pour installer l'application.
+- Application (.app) : il s'agit de l'application proprement dite. Dans macOS, une application est généralement un package qui contient de nombreux fichiers et dossiers individuels constituant l'application.
+- Lien Applications : il s'agit d'un raccourci vers le dossier Applications de macOS. Il permet de faciliter l'installation de l'application. Vous pouvez faire glisser le fichier .app vers ce raccourci pour installer l'application.
 
-## Privesc via abus de pkg
+## Privesc via pkg abuse
 
 ### Exécution depuis des répertoires publics
 
-Si un script de pré-installation ou de post-installation s'exécute par exemple depuis **`/var/tmp/Installerutil`**, et qu'un attacker peut contrôler ce script, il peut escalader ses privilèges chaque fois qu'il est exécuté. Un autre exemple similaire :<sup>[1][3]</sup>
+Si un script de préinstallation ou de post-installation est, par exemple, exécuté depuis **`/var/tmp/Installerutil`**, et qu'un attaquant peut contrôler ce script, il peut escalader ses privilèges chaque fois qu'il est exécuté. Voici un autre exemple similaire :<sup>[[1]](#references)[[3]](#references)</sup>
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 
 ### AuthorizationExecuteWithPrivileges
 
-Il s'agit d'une [fonction publique](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) que plusieurs installateurs et updaters appellent pour **exécuter quelque chose en tant que root**. Cette fonction accepte le **path** du **fichier** à **exécuter** comme paramètre ; cependant, si un attacker pouvait **modifier** ce fichier, il pourrait **abuser** de son exécution avec les privilèges root afin d'**escalader ses privilèges**.
+Il s'agit d'une [fonction publique](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) que plusieurs installateurs et updaters appellent pour **exécuter quelque chose en tant que root**. Cette fonction accepte en paramètre le **chemin** du **fichier** à **exécuter** ; cependant, si un attaquant pouvait **modifier** ce fichier, il pourrait **abuser** de son exécution avec les privilèges root afin d'**escalader ses privilèges**.
 ```bash
 # Breakpoint in the function to check which file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
 # You could also check FS events to find this misconfig
 ```
-Pour plus d'informations, consultez cette présentation : [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)<sup>[8]</sup>
+Pour plus d’informations, consultez cette présentation : [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)<sup>[[8]](#references)</sup>
 
-### Abus de l'environnement et du shebang
+### Abus de l’environnement et du shebang
 
-Les bugs modernes de PackageKit ont montré que les scripts d'installation sont souvent exécutés en tant que **code root de confiance**, tout en conservant à proximité un contexte contrôlé par l'attaquant. Lors de l'audit de packages de fournisseurs, accordez une attention particulière aux éléments suivants :
+Les bugs modernes de PackageKit ont montré que les scripts d’installation sont souvent exécutés en tant que **code root de confiance**, tout en conservant à proximité un contexte contrôlé par l’attaquant. Lors de l’audit de paquets fournisseurs, accordez une attention particulière aux éléments suivants :
 
 - Interpréteurs shell tels que `#!/bin/zsh` / `#!/bin/bash`
-- Appels tels que `sudo -u $USER`, `launchctl asuser`, ou toute logique qui fait confiance à `$USER`, `$HOME`, `PATH`, `TMPDIR` ou à des chemins relatifs
-- Interpréteurs autres que le shell susceptibles de charger des fichiers d'initialisation ou des bibliothèques contrôlés par l'utilisateur
+- Appels tels que `sudo -u $USER`, `launchctl asuser`, ou toute logique qui fait confiance à `$USER`, `$HOME`, `PATH`, `TMPDIR` ou aux chemins relatifs
+- Interpréteurs autres que shell susceptibles de charger des fichiers d’initialisation ou des bibliothèques contrôlés par l’utilisateur
 ```bash
 pkgutil --expand-full Target.pkg /tmp/target-pkg
 find /tmp/target-pkg -type f \( -name preinstall -o -name postinstall \) -exec sh -c 'printf "\n### %s\n" "$1"; head -n 1 "$1"' sh {} \;
 rg -n '^#!/bin/(zsh|bash)|sudo -u |launchctl asuser|\$USER|\$HOME|PATH=|/usr/bin/env ' /tmp/target-pkg
 ```
-Pour le bug d'environnement root de PackageKit de 2024 (héritage de `~/.zshenv` / `~/.bash*` lors des installations initiées par l'utilisateur), consultez [la page générique sur la privesc macOS](../macos-privilege-escalation.md). Si le package est **signé par Apple**, le même bug de script peut devenir pertinent pour **SIP/TCC**, car `system_installd` peut porter `com.apple.rootless.install.heritable` ; consultez [la page SIP](../macos-security-protections/macos-sip.md).<sup>[5][6]</sup>
+Pour le bug de l’environnement root de PackageKit de 2024 (héritage de `~/.zshenv` / `~/.bash*` lors d’installations initiées par l’utilisateur), consultez [la page générique sur la privesc macOS](../macos-privilege-escalation.md). Si le package est **signé par Apple**, le même bug de script peut devenir **pertinent pour SIP/TCC**, car `system_installd` peut porter `com.apple.rootless.install.heritable` ; voir [la page SIP](../macos-security-protections/macos-sip.md).<sup>[[5]](#references)[[6]](#references)</sup>
 
 ### Exécution par montage
 
-Si un installateur écrit dans `/tmp/fixedname/bla/bla`, il est possible de **créer un montage** sur `/tmp/fixedname` avec noowners, ce qui permettrait de **modifier n'importe quel fichier pendant l'installation** afin d'abuser du processus d'installation.
+Si un installer écrit dans `/tmp/fixedname/bla/bla`, il est possible de **créer un mount** sur `/tmp/fixedname` avec noowners afin de pouvoir **modifier n’importe quel fichier pendant l’installation** et ainsi abuser du processus d’installation.
 
-Un exemple est **CVE-2021-26089**, qui a permis de **réécrire un script périodique** pour obtenir une exécution en tant que root. Pour plus d'informations, consultez la présentation : [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)<sup>[7]</sup>
+Un exemple est **CVE-2021-26089**, qui a permis de **réécrire un script périodique** afin d’obtenir une exécution en tant que root. Pour plus d’informations, consultez la présentation : [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)<sup>[[7]](#references)</sup>
 
 ## pkg comme malware
 
 ### Payload vide
 
-Il est possible de générer simplement un fichier **`.pkg`** avec des **scripts pre et post-install** sans aucun véritable payload, en dehors du malware présent dans les scripts.
+Il est possible de générer simplement un fichier **`.pkg`** avec des **scripts pre et post-install** sans aucun payload réel, en dehors du malware présent dans les scripts.
 
-### JS dans le fichier xml Distribution
+### JS dans le fichier XML Distribution
 
-Il est possible d'ajouter des balises **`<script>`** dans le fichier **distribution xml** du package. Ce code sera exécuté et pourra **exécuter des commandes** à l'aide de **`system.run`** :
+Il est possible d’ajouter des balises **`<script>`** dans le fichier **distribution xml** du package. Ce code sera exécuté et pourra **exécuter des commandes** avec **`system.run`** :
 
 <figure><img src="../../../images/image (1043).png" alt=""><figcaption></figcaption></figure>
 
-Dans les packages Distribution, cela dépend généralement du fichier `Distribution` de niveau supérieur, qui doit activer les scripts externes, par exemple avec `allow-external-scripts="true"`. Par conséquent, examiner uniquement `preinstall` / `postinstall` ne suffit pas : le **Distribution XML lui-même** peut contenir des hooks `installation-check` / `volume-check` ainsi que des chemins d'exécution directs via `system.run()` / `system.runOnce()`.
+Dans les packages distribution, cela dépend généralement de l’activation des scripts externes par le fichier `Distribution` de niveau supérieur, par exemple avec `allow-external-scripts="true"`. Par conséquent, examiner uniquement `preinstall` / `postinstall` ne suffit pas : le **Distribution XML lui-même** peut contenir des hooks `installation-check` / `volume-check` ainsi que des chemins d’exécution directs via `system.run()` / `system.runOnce()`.
 ```bash
 xmllint --format Distribution | sed -n '1,200p'
 rg -n 'allow-external-scripts|system\.(run|runOnce)|installation-check|volume-check|function ' Distribution
 ```
-### Installateur avec backdoor
+### Installateur piégé
 
 Installateur malveillant utilisant un script et du code JS à l’intérieur de dist.xml
 ```bash
@@ -191,13 +191,13 @@ productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pk
 ```
 ## Références
 
-- [1] [DEF CON 27 - Unpacking Pkgs A Look Inside Macos Installer Packages And Common Security Flaws](https://www.youtube.com/watch?v=iASSG0_zobQ)
-- [2] [OBTS v4.0: "The Wild World of macOS Installers" - Tony Lambert](https://www.youtube.com/watch?v=Eow5uNHtmIg)
-- [3] [DEF CON 27 - Unpacking Pkgs A Look Inside MacOS Installer Packages](https://www.youtube.com/watch?v=kCXhIYtODBg)
-- [4] [RedTeamRecipe – macOS Red Teaming: Exploiting Installer Packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
-- [5] [CVE-2024-27822: macOS PackageKit Privilege Escalation](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
-- [6] [Breaking SIP with Apple-signed Packages](https://www.l3harris.com/newsroom/editorial/2024/03/breaking-sip-apple-signed-packages)
-- [7] [OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl](https://www.youtube.com/watch?v=jSYPazD4VcE)
-- [8] [DEF CON 25 - Patrick Wardle - Death By 1000 Installers on macOS and it's all broken!](https://www.youtube.com/watch?v=lTOItyjTTkw)
+- [1] [DEF CON 27 - Déballage des Packages, aperçu des Packages d'installation macOS et des failles de sécurité courantes](https://www.youtube.com/watch?v=iASSG0_zobQ)
+- [2] [OBTS v4.0 : « Le monde sauvage des Installers macOS » - Tony Lambert](https://www.youtube.com/watch?v=Eow5uNHtmIg)
+- [3] [DEF CON 27 - Déballage des Packages, aperçu des Packages d'installation MacOS](https://www.youtube.com/watch?v=kCXhIYtODBg)
+- [4] [RedTeamRecipe – Red Teaming macOS : exploitation des Packages d'installation](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
+- [5] [CVE-2024-27822 : élévation de privilèges de macOS PackageKit](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
+- [6] [Contourner SIP avec des Packages signés par Apple](https://www.l3harris.com/newsroom/editorial/2024/03/breaking-sip-apple-signed-packages)
+- [7] [OBTS v4.0 : « Mont(agne) de bugs » - Csaba Fitzl](https://www.youtube.com/watch?v=jSYPazD4VcE)
+- [8] [DEF CON 25 - Patrick Wardle - Mort par 1 000 Installers sur macOS, et tout est cassé !](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
 {{#include ../../../banners/hacktricks-training.md}}

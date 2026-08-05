@@ -4,31 +4,31 @@
 
 ## Informations de base
 
-**MACF** signifie **Mandatory Access Control Framework**, un système de sécurité intégré au système d'exploitation pour contribuer à protéger votre ordinateur. Il fonctionne en définissant des **règles strictes concernant les personnes ou les éléments pouvant accéder à certaines parties du système**, telles que les fichiers, les applications et les ressources système. En appliquant automatiquement ces règles, MACF garantit que seuls les utilisateurs et processus autorisés peuvent effectuer des actions spécifiques, réduisant ainsi le risque d'accès non autorisé ou d'activités malveillantes.
+**MACF** signifie **Mandatory Access Control Framework**, un système de sécurité intégré au système d'exploitation destiné à protéger votre ordinateur. Il fonctionne en définissant des **règles strictes concernant les personnes ou les éléments pouvant accéder à certaines parties du système**, comme les fichiers, les applications et les ressources système. En appliquant automatiquement ces règles, MACF garantit que seuls les utilisateurs et processus autorisés peuvent effectuer certaines actions, réduisant ainsi les risques d'accès non autorisé ou d'activités malveillantes.
 
-Notez que MACF ne prend pas réellement de décisions, car il se contente **d'intercepter** les actions. Il laisse les décisions aux **policy modules** (extensions du kernel) qu'il appelle, comme `AppleMobileFileIntegrity.kext`, `Quarantine.kext`, `Sandbox.kext`, `TMSafetyNet.kext` et `mcxalr.kext`.
+Notez que MACF ne prend pas réellement de décisions, car il se contente d'**intercepter** les actions. Il laisse les décisions aux **policy modules** (extensions du kernel) qu'il appelle, comme `AppleMobileFileIntegrity.kext`, `Quarantine.kext`, `Sandbox.kext`, `TMSafetyNet.kext` et `mcxalr.kext`.
 
 - Une policy peut appliquer des restrictions (retourner 0 ou une valeur non nulle lors d'une opération)
-- Une policy peut effectuer une surveillance (retourner 0, afin de ne pas s'opposer à l'action, mais profiter du hook pour effectuer une opération)
+- Une policy peut effectuer une surveillance (retourner 0, afin de ne pas s'opposer à l'action, mais utiliser le hook pour effectuer une opération)
 - Une policy statique MACF est installée au démarrage et ne sera JAMAIS supprimée
-- Une policy dynamique MACF est installée par un KEXT (`kextload`) et pourrait théoriquement être déchargée avec `kextunload`
-- Sous iOS, seules les policies statiques sont autorisées, tandis que macOS autorise les policies statiques et dynamiques.
+- Une policy dynamique MACF est installée par un KEXT (kextload) et peut théoriquement être déchargée avec kextunload
+- Dans iOS, seules les policies statiques sont autorisées, tandis que macOS autorise les policies statiques et dynamiques.
 - [https://newosxbook.com/xxr/index.php](https://newosxbook.com/xxr/index.php)
 
 
 ### Flux
 
-1. Le processus exécute un syscall/mach trap
-2. La fonction concernée est appelée dans le kernel
+1. Le processus effectue un syscall/mach trap
+2. La fonction correspondante est appelée dans le kernel
 3. La fonction appelle MACF
-4. MACF vérifie les policy modules qui ont demandé à intercepter cette fonction dans leur policy
-5. MACF appelle les policies concernées
+4. MACF vérifie les policy modules qui ont demandé à hooker cette fonction dans leur policy
+5. MACF appelle les policies correspondantes
 6. Les policies indiquent si elles autorisent ou refusent l'action
 
 > [!CAUTION]
-> Apple est la seule entité pouvant utiliser le KPI du MAC Framework.
+> Apple est la seule entité pouvant utiliser le MAC Framework KPI.
 
-En général, les fonctions vérifiant les permissions avec MACF appellent la macro `MAC_CHECK`. C'est notamment le cas du syscall servant à créer une socket, qui appelle la fonction `mac_socket_check_create`, laquelle appelle `MAC_CHECK(socket_check_create, cred, domain, type, protocol);`. De plus, la macro `MAC_CHECK` est définie dans security/mac_internal.h comme suit :<sup>[3]</sup>
+En général, les fonctions qui vérifient les permissions avec MACF appellent la macro `MAC_CHECK`. C'est notamment le cas du syscall servant à créer une socket, qui appelle la fonction `mac_socket_check_create`, laquelle appelle `MAC_CHECK(socket_check_create, cred, domain, type, protocol);`. De plus, la macro `MAC_CHECK` est définie dans security/mac_internal.h comme suit :<sup>[[3]](#references)</sup>
 ```c
 Resolver tambien MAC_POLICY_ITERATE, MAC_CHECK_CALL, MAC_CHECK_RSLT
 
@@ -45,7 +45,7 @@ error = mac_error_select(__step_err, error);         \
 });                                                                  \
 } while (0)
 ```
-Notez qu’en transformant `check` en `socket_check_create` et `args...` en `(cred, domain, type, protocol)`, on obtient :
+Notez qu'en transformant `check` en `socket_check_create` et `args...` en `(cred, domain, type, protocol)`, vous obtenez :
 ```c
 // Note the "##" just get the param name and append it to the prefix
 #define MAC_CHECK(socket_check_create, args...) do {                                   \
@@ -60,7 +60,7 @@ error = mac_error_select(__step_err, error);         \
 });                                                                  \
 } while (0)
 ```
-L’expansion des macros auxiliaires montre le flux de contrôle concret :
+L’expansion des macros d’assistance montre le flux de contrôle concret :
 ```c
 do {                                                // MAC_CHECK
 error = 0;
@@ -101,18 +101,18 @@ mac_policy_list_unbusy();
 } while (0);
 } while (0);
 ```
-En d'autres termes, `MAC_CHECK(socket_check_create, ...)` parcourt d'abord les politiques statiques, verrouille et parcourt conditionnellement les politiques dynamiques, émet les probes DTrace autour de chaque hook, puis regroupe le code de retour de chaque hook en un seul résultat `error` via `mac_error_select()`.
+En d'autres termes, `MAC_CHECK(socket_check_create, ...)` parcourt d'abord les policies statiques, verrouille et itère conditionnellement sur les policies dynamiques, émet les probes DTrace autour de chaque hook, puis regroupe le code de retour de chaque hook en un seul résultat `error` via `mac_error_select()`.
 
 
 ### Labels
 
-MACF utilise des **labels** que les politiques vérifiant si elles doivent accorder un accès ou non vont utiliser. Le code de déclaration de la structure des labels peut être [consulté ici](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/_label.h), puis est utilisé à l'intérieur de **`struct ucred`**, [ici](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ucred.h#L86), dans la partie **`cr_label`**. Le label contient des flags et un certain nombre de **slots** que les **policies MACF peuvent utiliser pour allouer des pointeurs**. Par exemple, Sanbox pointera vers le container profile.
+MACF utilise des **labels** que les policies chargées de vérifier si elles doivent accorder ou non un accès utilisent ensuite. Le code de déclaration de la structure des labels peut être [trouvé ici](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/_label.h). Cette structure est ensuite utilisée à l'intérieur de la **`struct ucred`**, [ici](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ucred.h#L86), dans la partie **`cr_label`**. Le label contient des flags et un certain nombre de **slots** que les **policies MACF peuvent utiliser pour allouer des pointeurs**. Par exemple, Sanbox pointera vers le profil du conteneur.
 
-## MACF Policies
+## Policies MACF
 
-Une MACF Policy définit des **règles et des conditions à appliquer lors de certaines opérations du kernel**.
+Une policy MACF définit des **règles et des conditions à appliquer lors de certaines opérations du kernel**.
 
-Une kernel extension peut configurer une structure `mac_policy_conf`, puis l'enregistrer en appelant `mac_policy_register`. Depuis [ici](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html) :<sup>[1]</sup>
+Une extension du kernel peut configurer une structure `mac_policy_conf`, puis l'enregistrer en appelant `mac_policy_register`. Depuis [ici](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):<sup>[[1]](#references)</sup>
 ```c
 #define mpc_t	struct mac_policy_conf *
 
@@ -149,11 +149,11 @@ mpc_t			 mpc_list;		/** List reference */
 void			*mpc_data;		/** module data */
 };
 ```
-Il est facile d'identifier les extensions du noyau qui configurent ces politiques en vérifiant les appels à `mac_policy_register`. De plus, en examinant le désassemblage de l'extension, il est également possible de trouver la structure `mac_policy_conf` utilisée.
+Il est facile d'identifier les extensions du kernel qui configurent ces policies en vérifiant les appels à `mac_policy_register`. De plus, en examinant le désassemblage de l'extension, il est également possible de trouver la struct `mac_policy_conf` utilisée.
 
-Notez que les politiques MACF peuvent également être enregistrées et désenregistrées **dynamiquement**.
+Notez que les policies MACF peuvent également être enregistrées et désenregistrées **dynamiquement**.
 
-L'un des principaux champs de `mac_policy_conf` est **`mpc_ops`**. Ce champ spécifie les opérations auxquelles la politique s'intéresse. Notez qu'il y en a des centaines ; il est donc possible de toutes les mettre à zéro, puis de sélectionner uniquement celles qui intéressent la politique. Depuis [ici](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html) :<sup>[1]</sup>
+L'un des principaux champs de `mac_policy_conf` est **`mpc_ops`**. Ce champ spécifie les opérations auxquelles la policy s'intéresse. Notez qu'il en existe des centaines ; il est donc possible de toutes les mettre à zéro, puis de sélectionner uniquement celles auxquelles la policy s'intéresse. Depuis [ici](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):<sup>[[1]](#references)</sup>.
 ```c
 struct mac_policy_ops {
 mpo_audit_check_postselect_t		*mpo_audit_check_postselect;
@@ -166,16 +166,16 @@ mpo_cred_check_label_update_execve_t	*mpo_cred_check_label_update_execve;
 mpo_cred_check_label_update_t		*mpo_cred_check_label_update;
 [...]
 ```
-Presque tous les hooks seront rappelés par MACF lorsqu’une de ces opérations est interceptée. Cependant, les hooks **`mpo_policy_*`** font exception, car `mpo_hook_policy_init()` est un callback appelé lors de l’enregistrement (donc après `mac_policy_register()`), tandis que `mpo_hook_policy_initbsd()` est appelé pendant l’enregistrement tardif, une fois que le sous-système BSD a été correctement initialisé.
+Presque tous les hooks seront rappelés par MACF lorsque l’une de ces opérations sera interceptée. Cependant, les hooks **`mpo_policy_*`** sont une exception, car `mpo_hook_policy_init()` est un callback appelé lors de l’enregistrement (donc après `mac_policy_register()`), tandis que `mpo_hook_policy_initbsd()` est appelé pendant l’enregistrement tardif, une fois que le sous-système BSD a été correctement initialisé.
 
-De plus, le hook **`mpo_policy_syscall`** peut être enregistré par n’importe quel kext afin d’exposer une **interface** d’appel de type **ioctl** privée. Un user client pourra alors appeler `mac_syscall` (#381) en spécifiant comme paramètres le **nom de la policy**, un **code** entier et des **arguments** optionnels.\
+De plus, le hook **`mpo_policy_syscall`** peut être enregistré par n’importe quel kext afin d’exposer une **interface** d’appel privée de type **ioctl**. Un client utilisateur pourra alors appeler `mac_syscall` (#381) en spécifiant comme paramètres le **nom de la policy**, un **code** entier et des **arguments** optionnels.\
 Par exemple, **`Sandbox.kext`** l’utilise beaucoup.
 
-L’inspection de **`__DATA.__const*`** du kext permet d’identifier la structure `mac_policy_ops` utilisée lors de l’enregistrement de la policy. Il est possible de la trouver, car son pointeur se situe à un offset dans `mpo_policy_conf`, et également grâce à la quantité de pointeurs NULL présents dans cette zone.
+L’inspection de **`__DATA.__const*`** du kext permet d’identifier la structure `mac_policy_ops` utilisée lors de l’enregistrement de la policy. Il est possible de la trouver, car son pointeur se situe à un offset dans `mpo_policy_conf`, mais aussi grâce au nombre de pointeurs NULL présents dans cette zone.
 
-De plus, il est aussi possible d’obtenir la liste des kexts ayant configuré une policy en extrayant de la mémoire la structure **`_mac_policy_list`**, qui est mise à jour à chaque policy enregistrée.
+Il est également possible d’obtenir la liste des kexts ayant configuré une policy en extrayant de la mémoire la structure **`_mac_policy_list`**, qui est mise à jour à chaque policy enregistrée.
 
-Vous pouvez également utiliser l’outil `xnoop` pour extraire toutes les policies enregistrées dans le système :
+Vous pouvez aussi utiliser l’outil `xnoop` pour extraire toutes les policies enregistrées sur le système :
 ```bash
 xnoop offline .
 
@@ -197,7 +197,7 @@ Xn👀p> dump mac_policy_opns@0xfffffff0448d72c8
 Type 'struct mac_policy_opns' is unrecognized - dumping as raw 64 bytes
 Dumping 64 bytes from 0xfffffff0448d72c8
 ```
-Puis, extraire toutes les vérifications de la check policy avec :
+Et ensuite, afficher toutes les vérifications de la check policy avec :
 ```bash
 Xn👀p> dump mac_policy_ops@0xfffffff044b0b9b0
 Dumping 2696 bytes from 0xfffffff044b0b9b0 (as struct mac_policy_ops)
@@ -230,23 +230,23 @@ mpo_mount_check_quotactl(@0x298): 0xfffffff046d725c4(PACed)
 ### Bootstrap précoce et mac_policy_init()
 
 - MACF est initialisé très tôt. Dans `bootstrap_thread` (dans le code de démarrage de XNU), après `ipc_bootstrap`, XNU appelle `mac_policy_init()` (dans `mac_base.c`).
-- `mac_policy_init()` initialise la variable globale `mac_policy_list` (un tableau ou une liste de slots de policy) et met en place l’infrastructure de MAC (Mandatory Access Control) au sein de XNU.
-- Plus tard, `mac_policy_initmach()` est appelée ; elle gère l’enregistrement des policy côté kernel pour les policy intégrées ou incluses.
+- `mac_policy_init()` initialise la variable globale `mac_policy_list` (un tableau ou une liste de slots de policy) et met en place l’infrastructure de MAC (Mandatory Access Control) dans XNU.
+- Plus tard, `mac_policy_initmach()` est appelée ; elle gère l’enregistrement des policies côté kernel pour les policies intégrées ou groupées.
 
 ### `mac_policy_initmach()` et le chargement des « security extensions »
 
-- `mac_policy_initmach()` examine les kernel extensions (kexts) préchargées (ou présentes dans une liste de « policy injection ») et inspecte leur Info.plist à la recherche de la clé `AppleSecurityExtension`.
-- Les kexts qui déclarent `<key>AppleSecurityExtension</key>` (ou `true`) dans leur Info.plist sont considérées comme des « security extensions » — c’est-à-dire celles qui implémentent une MAC policy ou s’intègrent à l’infrastructure MACF.
-- Parmi les kexts Apple possédant cette clé figurent **ALF.kext**, **AppleMobileFileIntegrity.kext (AMFI)**, **Sandbox.kext**, **Quarantine.kext**, **TMSafetyNet.kext**, **CoreTrust.kext**, **AppleSystemPolicy.kext**, entre autres (comme indiqué précédemment).
-- Le kernel s’assure que ces kexts sont chargées tôt, puis appelle leurs routines d’enregistrement (via `mac_policy_register`) pendant le démarrage, en les insérant dans `mac_policy_list`.
+- `mac_policy_initmach()` examine les extensions du kernel (kexts) préchargées (ou présentes dans une liste de « policy injection ») et inspecte leur Info.plist à la recherche de la clé `AppleSecurityExtension`.
+- Les kexts qui déclarent `<key>AppleSecurityExtension</key>` (ou `true`) dans leur Info.plist sont considérées comme des « security extensions », c’est-à-dire celles qui implémentent une MAC policy ou s’intègrent à l’infrastructure MACF.
+- Parmi les kexts Apple qui possèdent cette clé figurent notamment **ALF.kext**, **AppleMobileFileIntegrity.kext (AMFI)**, **Sandbox.kext**, **Quarantine.kext**, **TMSafetyNet.kext**, **CoreTrust.kext**, **AppleSystemPolicy.kext**, entre autres (comme vous l’avez déjà indiqué).
+- Le kernel s’assure que ces kexts sont chargées tôt, puis appelle leurs routines d’enregistrement (via `mac_policy_register`) pendant le boot, en les insérant dans `mac_policy_list`.
 
-- Chaque policy module (kext) fournit une structure `mac_policy_conf`, avec des hooks (`mpc_ops`) pour diverses opérations MAC (vérifications de vnode, vérifications d’exec, mises à jour de labels, etc.).
-- Les flags de chargement peuvent inclure `MPC_LOADTIME_FLAG_NOTLATE`, qui signifie « doit être chargé tôt » (les tentatives d’enregistrement tardives sont donc rejetées).
+- Chaque policy module (kext) fournit une structure `mac_policy_conf`, avec des hooks (`mpc_ops`) pour diverses opérations MAC (vérifications vnode, vérifications exec, mises à jour de labels, etc.).
+- Les flags de chargement peuvent inclure `MPC_LOADTIME_FLAG_NOTLATE`, ce qui signifie « doit être chargé tôt » (les tentatives d’enregistrement tardives sont donc rejetées).
 - Une fois enregistré, chaque module reçoit un handle et occupe un slot dans `mac_policy_list`.
-- Lorsqu’un MAC hook est appelé ultérieurement (par exemple pour un accès à un vnode, une exec, etc.), MACF itère sur toutes les policy enregistrées afin de prendre des décisions collectives.
+- Lorsqu’un MAC hook est appelé ultérieurement (par exemple pour un accès vnode, une exec, etc.), MACF itère sur toutes les policies enregistrées afin de prendre des décisions collectives.
 
-- En particulier, **AMFI** (Apple Mobile File Integrity) est une telle security extension. Son Info.plist inclut `AppleSecurityExtension`, ce qui l’identifie comme une security policy.
-- Dans le cadre du démarrage du kernel, la logique de chargement du kernel s’assure que la « security policy » (AMFI, etc.) est déjà active avant que de nombreux sous-systèmes n’en dépendent. Par exemple, le kernel « se prépare aux tâches à venir en chargeant … la security policy, notamment AppleMobileFileIntegrity (AMFI), Sandbox et la Quarantine policy ».
+- En particulier, **AMFI** (Apple Mobile File Integrity) est une security extension de ce type. Son Info.plist inclut `AppleSecurityExtension`, ce qui l’identifie comme une security policy.
+- Dans le cadre du boot du kernel, la logique de chargement du kernel s’assure que la « security policy » (AMFI, etc.) est déjà active avant que de nombreux sous-systèmes n’en dépendent. Par exemple, le kernel « se prépare aux tâches à venir en chargeant … la security policy, notamment AppleMobileFileIntegrity (AMFI), Sandbox et la Quarantine policy ».
 ```bash
 cd /System/Library/Extensions
 find . -name Info.plist | xargs grep AppleSecurityExtension 2>/dev/null
@@ -259,11 +259,11 @@ find . -name Info.plist | xargs grep AppleSecurityExtension 2>/dev/null
 ./Sandbox.kext/Contents/Info.plist:	<key>AppleSecurityExtension</key>
 ./AppleSystemPolicy.kext/Contents/Info.plist:	<key>AppleSecurityExtension</key>
 ```
-## Dépendance KPI et com.apple.kpi.dsep dans les kexts de MAC policy
+## Dépendance aux KPI et com.apple.kpi.dsep dans les kexts de policy MAC
 
-Lors de l’écriture d’un kext qui utilise le framework MAC (c’est-à-dire en appelant `mac_policy_register()`, etc.), vous devez déclarer des dépendances envers les KPI (Kernel Programming Interfaces) afin que l’éditeur de liens du kext (kxld) puisse résoudre ces symboles. Ainsi, pour déclarer qu’un `kext` dépend de MACF, vous devez l’indiquer dans l’`Info.plist` avec `com.apple.kpi.dsep` (`find . Info.plist | grep AppleSecurityExtension`). Le kext fera alors référence à des symboles tels que `mac_policy_register`, `mac_policy_unregister` et aux pointeurs de fonctions des hooks MAC. Pour les résoudre, vous devez lister `com.apple.kpi.dsep` comme dépendance.
+Lors de l’écriture d’un kext qui utilise le framework MAC (c’est-à-dire en appelant `mac_policy_register()`, etc.), vous devez déclarer les dépendances aux KPI (Kernel Programming Interfaces) afin que l’éditeur de liens du kext (kxld) puisse résoudre ces symboles. Ainsi, pour déclarer qu’un `kext` dépend de MACF, vous devez l’indiquer dans l’`Info.plist` avec `com.apple.kpi.dsep` (`find . Info.plist | grep AppleSecurityExtension`). Le kext fera alors référence à des symboles tels que `mac_policy_register`, `mac_policy_unregister` et aux pointeurs de fonctions des hooks MAC. Pour les résoudre, vous devez lister `com.apple.kpi.dsep` comme dépendance.
 
-Exemple d’extrait d’Info.plist (à l’intérieur de votre .kext) :
+Exemple de fragment d’Info.plist (à l’intérieur de votre fichier `.kext`) :
 ```xml
 <key>OSBundleLibraries</key>
 <dict>
@@ -280,7 +280,7 @@ Exemple d’extrait d’Info.plist (à l’intérieur de votre .kext) :
 ```
 ## MACF sur les versions modernes de macOS
 
-Sur les versions modernes de macOS, il est généralement préférable de ne pas aborder les politiques de sécurité d’Apple comme de simples bundles `.kext` autonomes. Depuis **macOS 11**, les extensions du kernel sont liées dans des **kernel collections** ; sur **Apple Silicon**, il n’existe pas de **SystemKC** séparé, et les kexts tiers ne deviennent chargeables qu’après avoir été intégrés à l’**Auxiliary Kernel Collection (AuxKC)**, puis après un reboot. Pour la recherche sur MACF, cela signifie que les politiques intégrées telles que **Sandbox**, **AMFI**, **AppleSystemPolicy**, **CoreTrust** ou **Quarantine** sont généralement plus faciles à énumérer avec `kmutil` qu’avec des outils obsolètes tels que `kextstat`.
+Sur les versions modernes de macOS, il est généralement préférable de ne pas considérer les politiques de sécurité d’Apple comme de simples bundles `.kext` autonomes. Depuis **macOS 11**, les extensions du kernel sont liées dans des **kernel collections** ; sur **Apple Silicon**, il n’existe pas de **SystemKC** séparé, et les kexts tiers ne peuvent être chargés qu’après avoir été intégrés à l’**Auxiliary Kernel Collection (AuxKC)** et après un reboot. Pour la recherche sur MACF, cela signifie que les politiques intégrées telles que **Sandbox**, **AMFI**, **AppleSystemPolicy**, **CoreTrust** ou **Quarantine** sont généralement plus faciles à énumérer avec `kmutil` qu’avec des outils obsolètes tels que `kextstat`.
 ```bash
 # Loaded policies from the running kernel
 kmutil showloaded --collection boot | egrep 'Sandbox|AppleMobileFileIntegrity|AppleSystemPolicy|CoreTrust|Quarantine'
@@ -290,16 +290,16 @@ kmutil showloaded --collection aux  | egrep 'Sandbox|AppleMobileFileIntegrity|Ap
 kmutil inspect --show-fileset-entries   -B /System/Library/KernelCollections/BootKernelExtensions.kc   | egrep 'Sandbox|AppleMobileFileIntegrity|AppleSystemPolicy|CoreTrust|Quarantine'
 ```
 > [!TIP]
-> Sur Apple Silicon, si un security kext ne se trouve pas dans le BootKC, vérifiez ensuite l'AuxKC. Cela est généralement plus utile que de rechercher un standalone bundle sous `/System/Library/Extensions`.
+> Sur Apple Silicon, si un security kext ne se trouve pas dans le BootKC, vérifiez ensuite l’AuxKC. Cela est généralement plus utile que de rechercher un bundle autonome sous `/System/Library/Extensions`.
 
 ## MACF Callouts
 
-Il est courant de trouver des callouts vers MACF définis dans du code, par exemple dans des blocs conditionnels **`#if CONFIG_MAC`**. De plus, à l'intérieur de ces blocs, il est possible de trouver des appels à `mac_proc_check*`, qui appellent MACF pour **vérifier les permissions** nécessaires à l'exécution de certaines actions. Par ailleurs, le format des callouts MACF est le suivant : **`mac_<object>_<opType>_opName`**.
+Il est courant de trouver des callouts vers MACF définis dans du code, comme dans les blocs conditionnels **`#if CONFIG_MAC`**. De plus, à l’intérieur de ces blocs, il est possible de trouver des appels à `mac_proc_check*`, qui appellent MACF pour **vérifier les permissions** nécessaires à l’exécution de certaines actions. Le format des callouts MACF est également le suivant : **`mac_<object>_<opType>_opName`**.
 
-L'objet est l'un des suivants : `bpfdesc`, `cred`, `file`, `proc`, `vnode`, `mount`, `devfs`, `ifnet`, `inpcb`, `mbuf`, `ipq`, `pipe`, `sysv[msg/msq/shm/sem]`, `posix[shm/sem]`, `socket`, `kext`.\
-L'`opType` est généralement `check`, qui sera utilisé pour autoriser ou refuser l'action. Cependant, il est également possible de trouver `notify`, qui permettra au kext de réagir à l'action donnée.
+L’objet est l’un des suivants : `bpfdesc`, `cred`, `file`, `proc`, `vnode`, `mount`, `devfs`, `ifnet`, `inpcb`, `mbuf`, `ipq`, `pipe`, `sysv[msg/msq/shm/sem]`, `posix[shm/sem]`, `socket`, `kext`.\
+L’`opType` est généralement `check`, qui sera utilisé pour autoriser ou refuser l’action. Cependant, il est également possible de trouver `notify`, qui permet au kext de réagir à l’action donnée.
 
-Vous pouvez trouver un exemple dans [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_mman.c#L621](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_mman.c#L621) :
+Vous pouvez trouver un exemple sur [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_mman.c#L621](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_mman.c#L621) :
 
 <pre class="language-c"><code class="lang-c">int
 mmap(proc_t p, struct mmap_args *uap, user_addr_t *retval)
@@ -317,7 +317,7 @@ goto bad;
 [...]
 </code></pre>
 
-Ensuite, il est possible de trouver le code de `mac_file_check_mmap` dans [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_file.c#L174](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_file.c#L174)
+Ensuite, il est possible de trouver le code de `mac_file_check_mmap` sur [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_file.c#L174](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_file.c#L174).
 ```c
 mac_file_check_mmap(struct ucred *cred, struct fileglob *fg, int prot,
 int flags, uint64_t offset, int *maxprot)
@@ -334,7 +334,7 @@ panic("file_check_mmap increased max protections");
 return error;
 }
 ```
-Qui appelle la macro `MAC_CHECK`, dont le code est disponible dans [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261)<sup>[3]</sup>.
+Qui appelle la macro `MAC_CHECK`, dont le code est disponible dans [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261)<sup>[[3]](#references)</sup>.
 ```c
 /*
 * MAC_CHECK performs the designated check by walking the policy
@@ -354,10 +354,10 @@ error = mac_error_select(__step_err, error);         \
 });                                                             \
 } while (0)
 ```
-Qui parcourra toutes les politiques MAC enregistrées, appellera leurs fonctions et stockera le résultat dans la variable `error`, qui ne pourra être remplacée par `mac_error_select` que par des codes de succès ; ainsi, si une vérification échoue, la vérification complète échouera et l'action ne sera pas autorisée.
+Ce qui parcourra toutes les policies MAC enregistrées, appellera leurs fonctions et stockera le résultat dans la variable `error`. Celle-ci ne pourra être remplacée par `mac_error_select` qu'en cas de codes de succès ; ainsi, si une vérification échoue, la vérification complète échouera et l'action ne sera pas autorisée.
 
 > [!TIP]
-> Cependant, n'oubliez pas que tous les callouts MACF ne servent pas uniquement à refuser des actions. Par exemple, `mac_priv_grant` appelle la macro [**MAC_GRANT**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L274), qui accordera le privilège demandé si une politique répond par 0 :
+> Cependant, rappelez-vous que tous les callouts MACF ne sont pas utilisés uniquement pour refuser des actions. Par exemple, `mac_priv_grant` appelle la macro [**MAC_GRANT**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L274), qui accordera le privilège demandé si une policy répond avec un 0 :
 >
 > ```c
 > /*
@@ -384,8 +384,8 @@ Qui parcourra toutes les politiques MAC enregistrées, appellera leurs fonctions
 
 ### priv_check & priv_grant
 
-Ces appels servent à vérifier et à fournir des **privilèges** (par dizaines) définis dans [**bsd/sys/priv.h**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/priv.h).\
-Une partie du code du kernel appelle `priv_check_cred()` depuis [**bsd/kern/kern_priv.c**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_priv.c) avec les identifiants KAuth du processus et l'un des codes de privilèges, ce qui appellera `mac_priv_check` pour vérifier si une politique **refuse** d'accorder le privilège, puis appellera `mac_priv_grant` pour vérifier si une politique accorde le `privilege`.<sup>[4]</sup>
+Ces callouts servent à vérifier et à fournir des **privilèges** définis dans [**bsd/sys/priv.h**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/priv.h).\
+Certains éléments du code kernel appellent `priv_check_cred()` depuis [**bsd/kern/kern_priv.c**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_priv.c) avec les identifiants KAuth du processus et l'un des codes de privilège. Cette fonction appelle `mac_priv_check` pour vérifier si une policy **refuse** d'accorder le privilège, puis appelle `mac_priv_grant` pour vérifier si une policy accorde le `privilege`.<sup>[[4]](#references)</sup>
 
 ### proc_check_syscall_unix
 
@@ -400,9 +400,9 @@ goto skip_syscall;
 }
 #endif /* CONFIG_MACF */
 ```
-Qui vérifiera dans le **bitmask** du processus appelant si le syscall actuel doit appeler `mac_proc_check_syscall_unix`. Cela s'explique par le fait que les syscalls sont appelés très fréquemment et qu'il est donc intéressant d'éviter d'appeler `mac_proc_check_syscall_unix` à chaque fois.
+Qui vérifiera dans le **bitmask** du processus appelant si le syscall actuel doit appeler `mac_proc_check_syscall_unix`. En effet, les syscalls sont appelés très fréquemment, il est donc intéressant d'éviter d'appeler `mac_proc_check_syscall_unix` à chaque fois.
 
-Notez que la fonction `proc_set_syscall_filter_mask()`, qui définit le bitmask des syscalls dans un processus, est appelée par Sandbox pour définir les masques sur les processus sandboxés.
+Notez que la fonction `proc_set_syscall_filter_mask()`, qui définit le bitmask des syscalls d'un processus, est appelée par Sandbox pour définir les masques sur les processus sandboxés.
 
 ## Syscalls MACF exposés
 
@@ -431,38 +431,38 @@ int      __mac_syscall(const char *_policyname, int _call, void *_arg);
 __END_DECLS
 #endif /*__APPLE_API_PRIVATE*/
 ```
-Pour le reversing offensif, **`__mac_syscall`** reste l’un des meilleurs chokepoints en **userland**. Il transporte un **nom de policy** (par exemple `"Sandbox"` ou `"AMFI"`), un **sélecteur/code spécifique à la policy**, ainsi qu’un pointeur vers l’**opaque argument blob** qui sera traité par `mpo_policy_syscall`. C’est très utile lors du reversing d’opérations non documentées depuis le userland, avant de pivoter vers l’implémentation dans le kernel. Sandbox l’atteint généralement via `__sandbox_ms`, et AMFI utilise le même mécanisme pour les décisions de policy de dyld.<sup>[2][5]</sup>
+Pour le reversing offensif, **`__mac_syscall`** reste l’un des meilleurs chokepoints en userland. Il transporte un **nom de policy** (par exemple `"Sandbox"` ou `"AMFI"`), un **sélecteur/code spécifique à la policy**, ainsi qu’un pointeur vers le **blob d’arguments opaque** qui sera traité par `mpo_policy_syscall`. C’est très utile pour analyser d’abord les opérations non documentées depuis le userland, puis passer à l’implémentation dans le kernel. Sandbox l’atteint généralement via `__sandbox_ms`, et AMFI utilise le même mécanisme pour les décisions de policy de dyld.<sup>[[2]](#references)[[5]](#references)</sup>
 
 ## Notes pratiques de recherche offensive
 
-Les bugs récents de macOS « cassent » rarement directement **MACF**. Ils exploitent généralement une **désynchronisation entre une décision MACF / Sandbox / TCC et l’action privilégiée exécutée ensuite**.
+Les bugs récents de macOS ne « cassent » que rarement MACF directement. À la place, ils exploitent généralement une **désynchronisation entre une décision MACF / Sandbox / TCC et l’action privilégiée qui se produit ensuite**.
 
-### Vérifications de chemins du broker vs action privilégiée réelle
+### Vérifications de chemins par le broker vs action privilégiée réelle
 
-Un schéma récurrent consiste, pour un daemon privilégié, à effectuer un **pré-contrôle en userland** (par exemple `sandbox_check_by_audit_token()`) sur une version d’un chemin, puis à exécuter le véritable sink privilégié avec un **chemin contrôlé par l’attaquant, différent ou non canonique**. Les recherches récentes sur `diskarbitrationd` / `storagekitd` en sont un bon exemple : la **traversée de répertoires** ainsi que les **échanges de symlinks** permettent à l’attaquant de passer la validation Sandbox du daemon, puis de monter un système de fichiers sur des emplacements sensibles tels que `~/Library/Application Support/com.apple.TCC`, transformant le bug en **sandbox escape**, **élévation de privilèges locale** ou **TCC bypass**, selon le point de montage choisi.<sup>[6]</sup>
+Un schéma récurrent consiste à ce qu’un daemon privilégié effectue une **pré-vérification en userland** (par exemple `sandbox_check_by_audit_token()`) sur une version d’un chemin, puis exécute ensuite le véritable sink privilégié avec un **chemin contrôlé par l’attaquant différent ou non canonique**. Des recherches récentes sur `diskarbitrationd` / `storagekitd` en sont un bon exemple : le **directory traversal** associé à des **symlink swaps** permet à l’attaquant de passer la validation Sandbox du daemon, puis de monter un système de fichiers par-dessus des emplacements sensibles tels que `~/Library/Application Support/com.apple.TCC`, transformant le bug en **sandbox escape**, **local privilege escalation** ou **TCC bypass**, selon le point de montage choisi.<sup>[[6]](#references)</sup>
 
 Lors de l’audit de root brokers accessibles depuis la sandbox, recherchez d’abord :
 
 - `sandbox_check`, `sandbox_check_by_audit_token`
 - `realpath`, `CFURL*`, helpers de canonicalisation des chemins
-- des sinks privilégiés tels que `mount`, `rename`, `copyfile`, des méthodes XPC de helper-tool, ou tout élément qui accède ensuite à des chemins contrôlés par l’attaquant en tant que root
+- des sinks privilégiés tels que `mount`, `rename`, `copyfile`, les méthodes XPC de helper tools, ou tout ce qui manipule ensuite des chemins contrôlés par l’attaquant en tant que root
 
 ### Trusted deputies avec des entitlements privés
 
-Un autre schéma pratique consiste à éviter d’attaquer directement les hooks MACF et à abuser plutôt d’un **processus de confiance** qui possède déjà les droits nécessaires pour franchir la frontière. Les recherches récentes sur Safari/TCC en sont un bon exemple : la primitive intéressante n’était pas de « désactiver TCC dans le kernel », mais de modifier la policy/configuration locale afin qu’un processus signé par Apple disposant de **`com.apple.private.tcc.allow`** effectue l’action sensible à votre place. En pratique, les cibles d’audit à haute valeur sont les daemons/apps Apple qui combinent :
+Un autre schéma pratique consiste à éviter d’attaquer directement les hooks MACF et à exploiter plutôt un **processus de confiance** qui possède déjà les droits nécessaires pour franchir la limite. Les recherches récentes sur Safari/TCC en sont un bon exemple : la primitive intéressante n’était pas de « désactiver TCC dans le kernel », mais de modifier la policy/configuration locale afin qu’un processus signé par Apple disposant de **`com.apple.private.tcc.allow`** effectue l’action sensible à votre place. En pratique, les cibles d’audit à forte valeur sont les daemons/apps Apple qui combinent :
 
 - des **entitlements privés** ou un accès de type FDA
-- une configuration / base de données / point de montage / policy file inscriptible
-- une opération sensible ultérieure, médiée par **Sandbox**, **AMFI**, **TCC** ou une autre policy MACF
+- une configuration / base de données / point de montage / policy file accessible en écriture
+- une opération sensible ultérieure contrôlée par **Sandbox**, **AMFI**, **TCC** ou une autre policy MACF
 
-Pour un reversing plus approfondi et spécifique au produit, consultez les pages dédiées à [macOS Sandbox](macos-sandbox/README.md) et [macOS TCC](macos-tcc/README.md).
+Pour un reversing plus approfondi et spécifique à un produit, consultez les pages dédiées à [macOS Sandbox](macos-sandbox/README.md) et [macOS TCC](macos-tcc/README.md).
 
 ## Références
 
-- [1] [XNU — `security/mac_policy.h` (le vecteur complet des opérations de policy MACF)](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_policy.h)
+- [1] [XNU — `security/mac_policy.h` (the full MACF policy operations vector)](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_policy.h)
 - [2] [XNU — `security/mac_base.c` (`mac_policy_register`, `__mac_syscall`)](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_base.c)
-- [3] [XNU — `security/mac_internal.h` (macros `MAC_CHECK` / `MAC_GRANT` / `MAC_POLICY_ITERATE`)](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_internal.h)
-- [4] [XNU — `bsd/sys/priv.h` (codes de privilège utilisés par `priv_check`/`priv_grant`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/priv.h)
+- [3] [XNU — `security/mac_internal.h` (`MAC_CHECK` / `MAC_GRANT` / `MAC_POLICY_ITERATE` macros)](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_internal.h)
+- [4] [XNU — `bsd/sys/priv.h` (privilege codes used by `priv_check`/`priv_grant`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/priv.h)
 - [5] [AMFI Syscall (Offensive Security)](https://www.offsec.com/blog/amfi-syscall/)
 - [6] [Uncovering Apple Vulnerabilities: diskarbitrationd and storagekitd Audit Part 2](https://blog.kandji.io/macos-audit-story-part2)
 
