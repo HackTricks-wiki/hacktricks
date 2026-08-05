@@ -11,20 +11,20 @@ Uobičajeni obrasci:
 
 ## Brza trijaža
 
-Pre specijalizovanih alata:
+Pre korišćenja specijalizovanih alata:
 
-- Potvrdite detalje codec/container-a i anomalije:
+- Proverite detalje codec/container formata i anomalije:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Ako audio sadrži šumolik sadržaj ili tonalnu strukturu, rano pregledajte spektrogram.
+- Ako audio sadrži sadržaj nalik šumu ili tonalnu strukturu, rano pregledajte spectrogram.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
-## Spectrogram steganography
+## Steganografija spektrograma
 
 ### Tehnika
 
-Spectrogram stego skriva podatke oblikovanjem energije tokom vremena/frekvencije tako da postanu vidljivi samo u vremensko-frekvencijskom prikazu (često nečujno ili percipirano kao šum).
+Spectrogram stego skriva podatke oblikovanjem energije kroz vreme/frekvenciju, tako da postaju vidljivi samo na grafiku vremena i frekvencije (često su nečujni ili se doživljavaju kao šum).
 
 ### Sonic Visualiser
 
@@ -34,14 +34,14 @@ Primarni alat za pregled spektrograma:
 
 ### Alternative
 
-- Audacity (pregled spektrograma, filteri): https://www.audacityteam.org/
-- `sox` može generisati spektrograme iz CLI-ja:
+- Audacity (prikaz spektrograma, filteri): https://www.audacityteam.org/
+- `sox` može da generiše spektrograme iz CLI-ja:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
-## FSK / modem decoding
+## FSK / modem dekodiranje
 
-Frequency-shift keyed audio često izgleda kao naizmenični pojedinačni tonovi u spektrogramu. Kada imate grubu procenu center/shift i baud, brute force sa `minimodem`:
+Audio sa frequency-shift keying često izgleda kao smenjivanje pojedinačnih tonova u spektrogramu.<sup>[[1]](#references)</sup> Kada imate približnu procenu centra/pomaka i baud rate-a, primenite brute force pomoću `minimodem`:
 ```bash
 # Visualize the band to pick baud/frequency
 sox noise.wav -n spectrogram -o spec.png
@@ -52,28 +52,28 @@ minimodem -f noise.wav 300
 minimodem -f noise.wav 1200
 minimodem -f noise.wav 2400
 ```
-`minimodem` automatski reguliše gain i automatski detektuje mark/space tonove; podesite `--rx-invert` ili `--samplerate` ako je izlaz izobličen.
+`minimodem` automatski podešava pojačanje i automatski detektuje mark/space tonove; podesite `--rx-invert` ili `--samplerate` ako je izlaz nečitak.
 
 ## WAV LSB
 
-### Tehnika
+### Technique
 
-Za nekompresovani PCM (WAV), svaki uzorak je ceo broj. Izmena niskih bitova menja talasni oblik vrlo malo, pa napadači mogu sakriti:
+Kod nekompresovanog PCM-a (WAV), svaki uzorak je ceo broj. Izmena bitova nižeg reda veoma malo menja talasni oblik, pa napadači mogu sakriti:
 
 - 1 bit po uzorku (ili više)
-- Naizmenično raspoređeno preko kanala
-- Sa korakom/permutacijom
+- Prošarano između kanala
+- Pomoću koraka/permutacije
 
-Ostale kategorije skrivanja u audio zapisu koje možete sresti:
+Druge familije za skrivanje u audio-zapisima na koje možete naići:
 
 - Phase coding
 - Echo hiding
 - Spread-spectrum embedding
-- Codec-side channels (format-dependent and tool-dependent)
+- Codec-side channels (zavisno od formata i alata)
 
 ### WavSteg
 
-Iz: https://github.com/ragibson/Steganography#WavSteg
+From: https://github.com/ragibson/Steganography#WavSteg
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
@@ -86,15 +86,15 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 ### Tehnika
 
-DTMF kodira karaktere kao parove fiksnih frekvencija (telefonska tastatura). Ako audio podseća na tonove tastature ili na regularne bipove sa dve frekvencije, testirajte DTMF dekodiranje rano.
+DTMF kodira znakove kao parove fiksnih frekvencija (telefonska tastatura). Ako audio podseća na tonove tastature ili pravilne dvostruke frekvencijske tonove, rano testirajte DTMF dekodiranje.
 
 Online dekoderi:
 
 - [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
 - [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
-## Izvori
+## Reference
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Deda Mrazova lista želja, Božićni metapodaci, Uhvaćeni šum](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

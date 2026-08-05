@@ -3,54 +3,54 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-## Intro
+## Uvod
 
-Za više informacija o tome kako 125kHz tagovi funkcionišu, proverite:
+Za više informacija o tome kako 125kHz tagovi funkcionišu, pogledajte:
 
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Actions
+## Radnje
 
 Za više informacija o ovim tipovima tagova [**pročitajte ovaj uvod**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
 
-### Read
+### Čitanje
 
-Pokušava da **pročita** informacije sa kartice. Zatim može da je **emulira**.
+Pokušava da **pročita** informacije sa kartice. Zatim ih može **emulirati**.<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> Imajte na umu da neki interkomi pokušavaju da se zaštite od duplikacije ključeva slanjem komande za pisanje pre čitanja. Ako pisanje uspe, taj tag se smatra lažnim. Kada Flipper emulira RFID, ne postoji način za čitač da ga razlikuje od originalnog, tako da takvi problemi ne nastaju.
+> Imajte na umu da neki interfoni pokušavaju da se zaštite od dupliciranja ključeva slanjem write komande pre čitanja. Ako upis uspe, taj tag se smatra lažnim. Kada Flipper emulira RFID, čitač nema način da ga razlikuje od originala, tako da se takvi problemi ne javljaju.
 
-### Add Manually
+### Ručno dodavanje
 
-Možete kreirati **lažne kartice u Flipper Zero označavajući podatke** koje ručno unesete, a zatim ih emulirati.
+Možete kreirati **lažne kartice u uređaju Flipper Zero navođenjem podataka** ručno, a zatim ih emulirati.
 
-#### IDs on cards
+#### ID-jevi na karticama
 
-Ponekad, kada dobijete karticu, naći ćete ID (ili deo) napisano na vidljivom delu kartice.
+Ponekad ćete, kada dobijete karticu, pronaći ID (ili njegov deo) vidljivo ispisan na kartici.
 
 - **EM Marin**
 
-Na primer, na ovoj EM-Marin kartici je moguće **pročitati poslednja 3 od 5 bajtova u čistom obliku**.\
-Ostala 2 se mogu probiti ako ih ne možete pročitati sa kartice.
+Na primer, na ovoj EM-Marin kartici moguće je **pročitati poslednja 3 od 5 bajtova u otvorenom obliku**.\
+Preostala 2 bajta mogu se brute-force-ovati ako ih ne možete pročitati sa kartice.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Isto se dešava na ovoj HID kartici gde se samo 2 od 3 bajta mogu naći odštampana na kartici.
+Isto se dešava i kod ove HID kartice, gde se na kartici mogu pronaći odštampana samo 2 od 3 bajta
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Emulate/Write
+### Emulacija/upisivanje
 
-Nakon **kopiranja** kartice ili **unošenja** ID-a **ručno**, moguće je **emulirati** je sa Flipper Zero ili **pisati** je na pravoj kartici.
+Nakon **kopiranja** kartice ili **ručnog unošenja** ID-ja, moguće je **emulirati** je pomoću uređaja Flipper Zero ili ga **upisati** na pravu karticu.<sup>[[1]](#references)</sup>
 
-## References
+## Reference
 
-- [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
+- [1] [Diving into RFID Protocols with Flipper Zero](https://blog.flipperzero.one/rfid/)
 
 
 {{#include ../../../banners/hacktricks-training.md}}

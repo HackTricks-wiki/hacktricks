@@ -1,37 +1,38 @@
-# Algoritmi nesupervizovanog učenja
+# Algoritmi nenadgledanog učenja
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Nesupervizovano učenje
+## Nenadgledano učenje
 
-Nesupervizovano učenje je vrsta mašinskog učenja gde se model obučava na podacima bez označenih odgovora. Cilj je pronaći obrasce, strukture ili odnose unutar podataka. Za razliku od supervizovanog učenja, gde model uči iz označenih primera, algoritmi nesupervizovanog učenja rade sa neoznačenim podacima.  
-Nesupervizovano učenje se često koristi za zadatke kao što su klasterizacija, smanjenje dimenzionalnosti i detekcija anomalija. Može pomoći u otkrivanju skrivenih obrazaca u podacima, grupisanju sličnih stavki ili smanjenju složenosti podataka uz očuvanje njihovih suštinskih karakteristika.
+Nenadgledano učenje je vrsta mašinskog učenja u kojoj se model trenira na podacima bez označenih odgovora. Cilj je pronalaženje obrazaca, struktura ili odnosa unutar podataka. Za razliku od nadgledanog učenja, gde model uči na osnovu označenih primera, algoritmi nenadgledanog učenja rade sa neoznačenim podacima.
+Nenadgledano učenje se često koristi za zadatke kao što su grupisanje, smanjenje dimenzionalnosti i detekcija anomalija. Može pomoći u otkrivanju skrivenih obrazaca u podacima, grupisanju sličnih stavki ili smanjenju složenosti podataka uz očuvanje njihovih ključnih karakteristika.
 
-### K-Means klasterizacija
 
-K-Means je algoritam klasterizacije zasnovan na centroidima koji deli podatke u K klastera dodeljujući svaku tačku najbližem srednjem klasteru. Algoritam funkcioniše na sledeći način:  
-1. **Inicijalizacija**: Izaberite K početnih centara klastera (centroida), često nasumično ili putem pametnijih metoda kao što je k-means++  
-2. **Dodeljivanje**: Dodelite svaku tačku podataka najbližem centroidu na osnovu metričke udaljenosti (npr. Euklidska udaljenost).  
-3. **Ažuriranje**: Ponovo izračunajte centre uzimajući prosek svih tačaka podataka dodeljenih svakom klasteru.  
-4. **Ponovite**: Koraci 2–3 se ponavljaju dok se dodeljivanje klastera ne stabilizuje (centroidi se više ne pomeraju značajno).
+### K-Means grupisanje
 
-> [!TIP]  
-> *Upotreba u sajber bezbednosti:* K-Means se koristi za detekciju upada klasterizacijom mrežnih događaja. Na primer, istraživači su primenili K-Means na KDD Cup 99 skupu podataka o upadima i otkrili da efikasno deli saobraćaj na normalne i napadačke klastere. U praksi, analitičari bezbednosti mogu klasterizovati unose logova ili podatke o ponašanju korisnika kako bi pronašli grupe sličnih aktivnosti; bilo koje tačke koje ne pripadaju dobro formiranom klasteru mogu ukazivati na anomalije (npr. nova varijanta malvera koja formira svoj mali klaster). K-Means takođe može pomoći u klasifikaciji porodica malvera grupisanjem binarnih datoteka na osnovu profila ponašanja ili vektora karakteristika.
+K-Means je algoritam za grupisanje zasnovan na centroidima koji deli podatke u K grupa tako što svaku tačku dodeljuje najbližoj srednjoj vrednosti grupe. Algoritam funkcioniše na sledeći način:
+1. **Inicijalizacija**: Izaberite K početnih centara grupa (centroida), često nasumično ili pomoću naprednijih metoda kao što je k-means++
+2. **Dodeljivanje**: Dodelite svaku tačku podataka najbližem centroidu na osnovu metrike udaljenosti (npr. Euklidske udaljenosti).
+3. **Ažuriranje**: Ponovo izračunajte centroide tako što ćete izračunati srednju vrednost svih tačaka podataka dodeljenih svakoj grupi.
+4. **Ponavljanje**: Koraci 2–3 se ponavljaju dok se dodeljivanje grupa ne stabilizuje (centroidi se više značajno ne pomeraju).
 
-#### Odabir K  
-Broj klastera (K) je hiperparametar koji treba definisati pre pokretanja algoritma. Tehnike poput Elbow metode ili Silhouette skora mogu pomoći u određivanju odgovarajuće vrednosti za K procenom performansi klasterizacije:
+> [!TIP]
+> *Slučajevi upotrebe u cybersecurity-u:* K-Means se koristi za detekciju upada grupisanjem mrežnih događaja. Na primer, istraživači su primenili K-Means na skup podataka za detekciju upada KDD Cup 99 i ustanovili da efikasno deli saobraćaj na grupe normalnog saobraćaja i napada. U praksi, security analitičari mogu grupisati unose u logovima ili podatke o ponašanju korisnika kako bi pronašli grupe sličnih aktivnosti; tačke koje ne pripadaju dobro formiranoj grupi mogu ukazivati na anomalije (npr. nova varijanta malware-a koja formira sopstvenu malu grupu). K-Means takođe može pomoći u klasifikaciji malware familija grupisanjem binarnih datoteka na osnovu profila ponašanja ili vektora karakteristika.
 
-- **Elbow metoda**: Prikazujte sumu kvadratnih udaljenosti svake tačke do njenog dodeljenog centroida klastera kao funkciju K. Potražite "lakat" tačku gde se stopa opadanja naglo menja, što ukazuje na odgovarajući broj klastera.  
-- **Silhouette skor**: Izračunajte silhouette skor za različite vrednosti K. Viši silhouette skor ukazuje na bolje definisane klastere.
+#### Izbor vrednosti K
+Broj grupa (K) je hiperparametar koji treba definisati pre pokretanja algoritma. Tehnike kao što su Elbow Method ili Silhouette Score mogu pomoći u određivanju odgovarajuće vrednosti za K procenom uspešnosti grupisanja:
+
+- **Elbow Method**: Nacrtajte zbir kvadrata udaljenosti od svake tačke do dodeljenog centroida grupe u funkciji vrednosti K. Potražite tačku „lakta“, gde se stopa smanjenja naglo menja, što ukazuje na odgovarajući broj grupa.
+- **Silhouette Score**: Izračunajte silhouette score za različite vrednosti K. Viši silhouette score ukazuje na bolje definisane grupe.
 
 #### Pretpostavke i ograničenja
 
-K-Means pretpostavlja da su **klasteri sferni i jednake veličine**, što možda nije tačno za sve skupove podataka. Osetljiv je na početno postavljanje centroida i može konvergirati ka lokalnim minimumima. Pored toga, K-Means nije pogodan za skupove podataka sa različitim gustinama ili neglobularnim oblicima i karakteristikama različitih razmera. Koraci predobrada poput normalizacije ili standardizacije mogu biti neophodni kako bi se osiguralo da sve karakteristike ravnomerno doprinose izračunavanju udaljenosti.
+K-Means pretpostavlja da su **grupe sferične i jednake veličine**, što ne mora važiti za sve skupove podataka. Osetljiv je na početni položaj centroida i može konvergirati ka lokalnim minimumima. Pored toga, K-Means nije pogodan za skupove podataka sa promenljivim gustinama ili neglobularnim oblicima, kao ni za karakteristike različitih razmera. Koraci pretprocesiranja, kao što su normalizacija ili standardizacija, mogu biti neophodni kako bi sve karakteristike jednako doprinosile izračunavanju udaljenosti.
 
 <details>
-<summary>Primer -- Klasterizacija mrežnih događaja
+<summary>Primer -- Grupisanje mrežnih događaja
 </summary>
-Ispod simuliramo podatke o mrežnom saobraćaju i koristimo K-Means za njihovu klasterizaciju. Pretpostavimo da imamo događaje sa karakteristikama kao što su trajanje veze i broj bajtova. Kreiramo 3 klastera "normalnog" saobraćaja i 1 mali klaster koji predstavlja obrazac napada. Zatim pokrećemo K-Means da vidimo da li ih razdvaja.
+U nastavku simuliramo podatke o mrežnom saobraćaju i koristimo K-Means za njihovo grupisanje. Pretpostavimo da imamo događaje sa karakteristikama kao što su trajanje konekcije i broj bajtova. Kreiramo 3 grupe „normalnog“ saobraćaja i 1 malu grupu koja predstavlja obrazac napada. Zatim pokrećemo K-Means da proverimo da li će ih razdvojiti.
 ```python
 import numpy as np
 from sklearn.cluster import KMeans
@@ -57,32 +58,32 @@ print("Cluster centers (duration, bytes):")
 for idx, center in enumerate(kmeans.cluster_centers_):
 print(f"  Cluster {idx}: {center}")
 ```
-U ovom primeru, K-Means bi trebao da pronađe 4 klastera. Mali klaster napada (sa neobično visokim trajanjem ~200) će idealno formirati svoj vlastiti klaster s obzirom na svoju udaljenost od normalnih klastera. Štampamo veličine klastera i centre kako bismo interpretirali rezultate. U stvarnom scenariju, moglo bi se označiti klaster sa nekoliko tačaka kao potencijalne anomalije ili pregledati njegove članove zbog malicioznih aktivnosti.
+U ovom primeru, K-Means bi trebalo da pronađe 4 klastera. Mali attack klaster (sa neuobičajeno velikim trajanjem ~200) idealno će formirati sopstveni klaster zbog svoje udaljenosti od normalnih klastera. Ispisujemo veličine i centre klastera kako bismo protumačili rezultate. U stvarnom scenariju, klaster sa malo tačaka mogao bi se označiti kao potencijalne anomalije ili bi se njegovi članovi mogli pregledati radi otkrivanja zlonamerne aktivnosti.
 </details>
 
-### Hijerarhijsko Klasterovanje
+### Hijerarhijsko klasterovanje
 
-Hijerarhijsko klasterovanje gradi hijerarhiju klastera koristeći ili pristup odozdo prema gore (aglomerativni) ili pristup odozgo prema dole (divizivni):
+Hijerarhijsko klasterovanje gradi hijerarhiju klastera koristeći pristup odozdo-nagore (agglomerative) ili odozgo-nadole (divisive):
 
-1. **Aglomerativno (odozdo prema gore)**: Počnite sa svakom tačkom podataka kao posebnim klasterom i iterativno spajajte najbliže klastere dok ne ostane jedan klaster ili se ne ispuni kriterijum zaustavljanja.
-2. **Divizivno (odozgo prema dole)**: Počnite sa svim tačkama podataka u jednom klasteru i iterativno delite klastere dok svaka tačka podataka ne postane svoj vlastiti klaster ili se ne ispuni kriterijum zaustavljanja.
+1. **Agglomerative (odozdo-nagore)**: Počinje tako što je svaka tačka podataka zaseban klaster i iterativno spaja najbliže klastere dok ne ostane jedan klaster ili dok se ne ispuni kriterijum zaustavljanja.
+2. **Divisive (odozgo-nadole)**: Počinje tako što su sve tačke podataka u jednom klasteru i iterativno deli klastere dok svaka tačka podataka ne postane sopstveni klaster ili dok se ne ispuni kriterijum zaustavljanja.
 
-Aglomerativno klasterovanje zahteva definiciju međuklaster udaljenosti i kriterijum povezivanja da bi se odlučilo koji klasteri će se spojiti. Uobičajene metode povezivanja uključuju pojedinačno povezivanje (udaljenost najbližih tačaka između dva klastera), potpuno povezivanje (udaljenost najdaljih tačaka), prosečno povezivanje itd., a metrička udaljenost je često euklidska. Izbor povezivanja utiče na oblik klastera koji se proizvode. Nema potrebe da se unapred definiše broj klastera K; možete "prerezati" dendrogram na odabranom nivou da biste dobili željeni broj klastera.
+Agglomerative klasterovanje zahteva definiciju udaljenosti između klastera i kriterijum povezivanja kojim se odlučuje koje klastere treba spojiti. Uobičajene metode povezivanja uključuju single linkage (udaljenost najbližih tačaka između dva klastera), complete linkage (udaljenost najudaljenijih tačaka), average linkage itd., dok je metrika udaljenosti često Euklidska. Izbor povezivanja utiče na oblik proizvedenih klastera. Nije potrebno unapred navesti broj klastera K; dendrogram možete „preseći“ na izabranom nivou da biste dobili željeni broj klastera.
 
-Hijerarhijsko klasterovanje proizvodi dendrogram, strukturu nalik drvetu koja prikazuje odnose između klastera na različitim nivoima granularnosti. Dendrogram se može prerezati na željenom nivou da bi se dobio specifičan broj klastera.
+Hijerarhijsko klasterovanje proizvodi dendrogram, strukturu nalik stablu koja prikazuje odnose između klastera na različitim nivoima granularnosti. Dendrogram se može preseći na željenom nivou kako bi se dobio određeni broj klastera.
 
 > [!TIP]
-> *Upotreba u sajber bezbednosti:* Hijerarhijsko klasterovanje može organizovati događaje ili entitete u drvo kako bi se uočili odnosi. Na primer, u analizi malvera, aglomerativno klasterovanje bi moglo grupisati uzorke prema ponašanju, otkrivajući hijerarhiju porodica i varijanti malvera. U mrežnoj bezbednosti, moglo bi se klasterovati IP saobraćaj i koristiti dendrogram da se vide podgrupe saobraćaja (npr. prema protokolu, zatim prema ponašanju). Pošto ne morate unapred odabrati K, korisno je kada istražujete nove podatke za koje je broj kategorija napada nepoznat.
+> *Primene u cybersecurity-u:* Hijerarhijsko klasterovanje može organizovati događaje ili entitete u stablo kako bi se uočili odnosi. Na primer, u analizi malware-a, agglomerative klasterovanje može grupisati uzorke prema sličnosti ponašanja, otkrivajući hijerarhiju malware porodica i varijanti. U network security-ju, saobraćajni tokovi IP adresa mogu se grupisati, a dendrogram koristiti za uočavanje podgrupa saobraćaja (npr. prema protokolu, a zatim prema ponašanju). Pošto nije potrebno unapred izabrati K, ovo je korisno pri istraživanju novih podataka kod kojih je broj kategorija napada nepoznat.
 
-#### Pretpostavke i Ograničenja
+#### Pretpostavke i ograničenja
 
-Hijerarhijsko klasterovanje ne pretpostavlja određeni oblik klastera i može uhvatiti ugnježdene klastere. Korisno je za otkrivanje taksonomije ili odnosa među grupama (npr. grupisanje malvera prema porodicama). Determinističko je (nema problema sa nasumičnom inicijalizacijom). Ključna prednost je dendrogram, koji pruža uvid u strukturu klasterovanja podataka na svim razmerama – analitičari bezbednosti mogu odlučiti o odgovarajućem preseku da identifikuju značajne klastere. Međutim, računski je skup (tipično $O(n^2)$ vremena ili gore za naivne implementacije) i nije izvodljiv za veoma velike skupove podataka. Takođe je pohlepna procedura – jednom kada se spajanje ili deljenje izvrši, ne može se poništiti, što može dovesti do suboptimalnih klastera ako se greška dogodi rano. Izolovani podaci takođe mogu uticati na neke strategije povezivanja (jednostavno povezivanje može izazvati efekat "lančanja" gde se klasteri povezuju putem izolovanih podataka).
+Hijerarhijsko klasterovanje ne pretpostavlja određeni oblik klastera i može obuhvatiti ugnježdene klastere. Korisno je za otkrivanje taksonomije ili odnosa između grupa (npr. grupisanje malware-a prema podgrupama porodica). Determinističko je (nema problema sa slučajnom inicijalizacijom). Ključna prednost je dendrogram, koji pruža uvid u strukturu klasterovanja podataka na svim nivoima – security analitičari mogu odrediti odgovarajući prag kako bi identifikovali smislene klastere. Međutim, računski je zahtevno (obično $O(n^2)$ vremena ili više za naivne implementacije) i nije praktično za veoma velike skupove podataka. Takođe je greedy procedura – kada se spajanje ili deljenje izvrši, ne može se poništiti, što može dovesti do suboptimalnih klastera ako se greška dogodi u ranoj fazi. Outlieri takođe mogu uticati na neke strategije povezivanja (single-link može izazvati efekat „lančanja“, pri kojem se klasteri povezuju preko outliera).
 
 <details>
-<summary>Primer -- Aglomerativno Klasterovanje Događaja
+<summary>Primer -- Agglomerative klasterovanja događaja
 </summary>
 
-Ponovo ćemo koristiti sintetičke podatke iz K-Means primera (3 normalna klastera + 1 klaster napada) i primeniti aglomerativno klasterovanje. Zatim ilustrujemo kako dobiti dendrogram i oznake klastera.
+Ponovo ćemo koristiti sintetičke podatke iz primera sa K-Means-om (3 normalna klastera + 1 attack klaster) i primeniti agglomerative klasterovanje. Zatim ćemo prikazati kako dobiti dendrogram i oznake klastera.
 ```python
 from sklearn.cluster import AgglomerativeClustering
 from scipy.cluster.hierarchy import linkage, dendrogram
@@ -102,29 +103,29 @@ print(f"Cluster sizes for 3 clusters: {np.bincount(clusters_3)}")
 ```
 </details>
 
-### DBSCAN (Klasterovanje na bazi gustine sa šumom)
+### DBSCAN (Density-Based Spatial Clustering of Applications with Noise)
 
-DBSCAN je algoritam klasterovanja zasnovan na gustini koji grupiše tačke koje su blisko smeštene zajedno, dok označava tačke u oblastima niske gustine kao izuzetke. Posebno je koristan za skupove podataka sa različitim gustinama i nesfernim oblicima.
+DBSCAN je algoritam za klasterovanje zasnovan na gustini koji grupiše tačke koje su međusobno blisko raspoređene, dok tačke u regionima male gustine označava kao outliers. Posebno je koristan za skupove podataka sa različitim gustinama i nesferičnim oblicima.
 
-DBSCAN funkcioniše definisanjem dva parametra:
-- **Epsilon (ε)**: Maksimalna udaljenost između dve tačke da bi se smatrale delom istog klastera.
-- **MinPts**: Minimalan broj tačaka potrebnih za formiranje guste oblasti (glavna tačka).
+DBSCAN radi definisanjem dva parametra:
+- **Epsilon (ε)**: Maksimalno rastojanje između dve tačke da bi se smatrale delom istog klastera.
+- **MinPts**: Minimalan broj tačaka potreban za formiranje gustog regiona (core point).
 
-DBSCAN identifikuje glavne tačke, tačke na granici i tačke šuma:
-- **Glavna tačka**: Tačka koja ima najmanje MinPts suseda unutar ε udaljenosti.
-- **Tačka na granici**: Tačka koja se nalazi unutar ε udaljenosti od glavne tačke, ali ima manje od MinPts suseda.
-- **Tačka šuma**: Tačka koja nije ni glavna tačka ni tačka na granici.
+DBSCAN identifikuje core points, border points i noise points:
+- **Core Point**: Tačka koja ima najmanje MinPts suseda unutar rastojanja ε.
+- **Border Point**: Tačka koja se nalazi unutar rastojanja ε od core point-a, ali ima manje od MinPts suseda.
+- **Noise Point**: Tačka koja nije ni core point ni border point.
 
-Klasterovanje se nastavlja biranjem neposećene glavne tačke, označavanjem kao novog klastera, a zatim rekurzivnim dodavanjem svih tačaka koje su dostupne po gustini (glavne tačke i njihovi susedi, itd.). Tačke na granici se dodaju klasteru bliske glavne tačke. Nakon proširenja svih dostupnih tačaka, DBSCAN prelazi na drugu neposećenu glavnu tačku da započne novi klaster. Tačke koje nisu dostignute od strane nijedne glavne tačke ostaju označene kao šum.
+Klasterovanje počinje izborom neposjećene core point tačke, njenim označavanjem kao novog klastera, a zatim se rekurzivno dodaju sve tačke koje su iz nje dostupne na osnovu gustine (core points i njihovi susedi itd.). Border points se dodaju klasteru obližnje core point tačke. Nakon proširivanja na sve dostupne tačke, DBSCAN prelazi na drugu neposjećenu core point tačku da bi započeo novi klaster. Tačke do kojih nijedna core point tačka nije došla ostaju označene kao noise.
 
 > [!TIP]
-> *Upotreba u sajber bezbednosti:* DBSCAN je koristan za detekciju anomalija u mrežnom saobraćaju. Na primer, normalna aktivnost korisnika može formirati jedan ili više gustih klastera u prostoru karakteristika, dok se nove napade ponašanja pojavljuju kao rasute tačke koje će DBSCAN označiti kao šum (izuzetke). Koristi se za klasterovanje zapisa mrežnog toka, gde može detektovati skeniranja portova ili saobraćaj usluga uskraćivanja kao retke oblasti tačaka. Druga primena je grupisanje varijanti malvera: ako se većina uzoraka grupiše po porodicama, ali se nekoliko ne uklapa nigde, tih nekoliko bi moglo biti zero-day malver. Sposobnost označavanja šuma znači da se bezbednosni timovi mogu fokusirati na istraživanje tih izuzetaka.
+> *Primene u cybersecurity:* DBSCAN je koristan za detekciju anomalija u mrežnom saobraćaju. Na primer, normalna aktivnost korisnika može formirati jedan ili više gustih klastera u prostoru karakteristika, dok se nova ponašanja napada pojavljuju kao rasute tačke koje će DBSCAN označiti kao noise (outliers). Koristi se za klasterovanje zapisa o mrežnim tokovima, gde može detektovati port scans ili denial-of-service saobraćaj kao retke regione tačaka. Druga primena je grupisanje malware varijanti: ako se većina uzoraka grupiše po familijama, ali se nekoliko njih ne uklapa nigde, ti uzorci bi mogli biti zero-day malware. Mogućnost označavanja noise tačaka omogućava security timovima da se usredsrede na istraživanje tih outliers.
 
-#### Pretpostavke i Ograničenja
+#### Pretpostavke i ograničenja
 
-**Pretpostavke i Snage:** DBSCAN ne pretpostavlja sferne klastere – može pronaći klastere proizvoljnog oblika (čak i lančaste ili susedne klastere). Automatski određuje broj klastera na osnovu gustine podataka i može efikasno identifikovati izuzetke kao šum. To ga čini moćnim za stvarne podatke sa nepravilnim oblicima i šumom. Otporan je na izuzetke (za razliku od K-Means, koji ih prisiljava u klastere). Dobro funkcioniše kada klasteri imaju otprilike uniformnu gustinu.
+**Pretpostavke i prednosti:**: DBSCAN ne pretpostavlja sferne klastere – može pronaći klastere proizvoljnih oblika (čak i klastere u obliku lanaca ili susedne klastere). Automatski određuje broj klastera na osnovu gustine podataka i može efikasno identifikovati outliers kao noise. Zbog toga je moćan za realne podatke sa nepravilnim oblicima i noise tačkama. Otporan je na outliers (za razliku od K-Means, koji ih primorava da budu deo klastera). Dobro funkcioniše kada klasteri imaju približno ujednačenu gustinu.
 
-**Ograničenja:** Performanse DBSCAN-a zavise od izbora odgovarajućih ε i MinPts vrednosti. Može imati problema sa podacima koji imaju različite gustine – jedna ε ne može obuhvatiti i guste i retke klastere. Ako je ε previše mala, označava većinu tačaka kao šum; prevelika, i klasteri se mogu pogrešno spojiti. Takođe, DBSCAN može biti neefikasan na veoma velikim skupovima podataka (naivno $O(n^2)$, iako prostorno indeksiranje može pomoći). U visokodimenzionalnim prostorima karakteristika, koncept "udaljenosti unutar ε" može postati manje značajan (prokletstvo dimenzionalnosti), i DBSCAN može zahtevati pažljivo podešavanje parametara ili može propasti u pronalaženju intuitivnih klastera. I pored ovoga, proširenja poput HDBSCAN rešavaju neka pitanja (poput varijabilne gustine).
+**Ograničenja**: Performanse DBSCAN-a zavise od izbora odgovarajućih vrednosti ε i MinPts. Može imati poteškoća sa podacima koji imaju različite gustine – jedna vrednost ε ne može istovremeno obuhvatiti guste i retke klastere. Ako je ε premalo, većinu tačaka označava kao noise; ako je preveliko, klasteri se mogu neispravno spojiti. Takođe, DBSCAN može biti neefikasan na veoma velikim skupovima podataka (naivan pristup ima složenost $O(n^2)$, mada prostorno indeksiranje može pomoći). U visokodimenzionalnim prostorima karakteristika koncept „rastojanja unutar ε“ može postati manje smislen (prokletstvo dimenzionalnosti), pa DBSCAN može zahtevati pažljivo podešavanje parametara ili ne uspeti da pronađe intuitivne klastere. Uprkos tome, ekstenzije kao što je HDBSCAN rešavaju neke od ovih problema (kao što je promenljiva gustina).
 
 <details>
 <summary>Primer -- Klasterovanje sa šumom
@@ -150,61 +151,61 @@ num_noise = np.sum(labels == -1)
 print(f"DBSCAN found {num_clusters} clusters and {num_noise} noise points")
 print("Cluster labels for first 10 points:", labels[:10])
 ```
-U ovom isječku, prilagodili smo `eps` i `min_samples` da odgovaraju našoj skali podataka (15.0 u jedinicama karakteristika, i zahtevajući 5 tačaka za formiranje klastera). DBSCAN bi trebao pronaći 2 klastera (klastere normalnog saobraćaja) i označiti 5 ubačenih izuzetaka kao šum. Izašli smo sa brojem klastera u odnosu na tačke šuma kako bismo to potvrdili. U stvarnom okruženju, može se iterirati preko ε (koristeći heuristiku grafika k-udaljenosti za izbor ε) i MinPts (često postavljen na oko dimenzionalnosti podataka + 1 kao pravilo) kako bi se pronašli stabilni rezultati klasterisanja. Sposobnost da se eksplicitno označi šum pomaže u odvojenju potencijalnih podataka o napadima za dalju analizu.
+U ovom isečku, podesili smo `eps` i `min_samples` tako da odgovaraju skali naših podataka (15.0 u jedinicama karakteristika i zahtev da 5 tačaka formira klaster). DBSCAN bi trebalo da pronađe 2 klastera (klastere normalnog saobraćaja) i označi 5 ubačenih outlier-a kao šum. Ispisujemo broj klastera naspram broja tačaka šuma kako bismo to proverili. U realnom okruženju, mogle bi se iterativno isprobavati vrednosti za ε (korišćenjem heuristike k-distance grafa za izbor vrednosti ε) i MinPts (često se okvirno postavlja na dimenzionalnost podataka + 1) kako bi se pronašli stabilni rezultati klasterovanja. Mogućnost eksplicitnog označavanja šuma pomaže u odvajanju potencijalnih attack podataka radi dalje analize.
 
 </details>
 
-### Analiza glavnih komponenti (PCA)
+### Principal Component Analysis (PCA)
 
-PCA je tehnika za **smanjenje dimenzionalnosti** koja pronalazi novi skup ortogonalnih osa (glavnih komponenti) koje hvataju maksimalnu varijansu u podacima. U jednostavnim terminima, PCA rotira i projektuje podatke na novi koordinatni sistem tako da prva glavna komponenta (PC1) objašnjava najveću moguću varijansu, druga PC (PC2) objašnjava najveću varijansu ortogonalnu na PC1, i tako dalje. Matematički, PCA izračunava sopstvene vektore kovarijantne matrice podataka – ovi sopstveni vektori su pravci glavnih komponenti, a odgovarajući sopstveni vrednosti ukazuju na količinu varijanse koju objašnjava svaki. Često se koristi za ekstrakciju karakteristika, vizualizaciju i smanjenje šuma.
+PCA je tehnika za **smanjenje dimenzionalnosti** koja pronalazi novi skup ortogonalnih osa (glavne komponente) koje obuhvataju maksimalnu varijansu u podacima. Jednostavno rečeno, PCA rotira i projektuje podatke na novi koordinatni sistem tako da prva glavna komponenta (PC1) objašnjava najveću moguću varijansu, druga glavna komponenta (PC2) objašnjava najveću varijansu ortogonalnu na PC1, i tako dalje. Matematički, PCA izračunava svojstvene vektore kovarijacione matrice podataka - ti svojstveni vektori predstavljaju pravce glavnih komponenti, a odgovarajuće svojstvene vrednosti ukazuju na količinu objašnjene varijanse. Često se koristi za izdvajanje karakteristika, vizuelizaciju i smanjenje šuma.
 
-Napomena da je ovo korisno ako dimenzije skupa podataka sadrže **značajne linearne zavisnosti ili korelacije**.
+Imajte na umu da je ovo korisno ako dimenzije skupa podataka sadrže **značajne linearne zavisnosti ili korelacije**.
 
-PCA funkcioniše identifikovanjem glavnih komponenti podataka, koje su pravci maksimalne varijanse. Koraci uključeni u PCA su:
-1. **Standardizacija**: Centriranje podataka oduzimanjem proseka i skaliranjem na jediničnu varijansu.
-2. **Kovarijantna matrica**: Izračunavanje kovarijantne matrice standardizovanih podataka kako bi se razumele veze između karakteristika.
-3. **Dezintegracija sopstvenih vrednosti**: Izvršavanje dezintegracije sopstvenih vrednosti na kovarijantnoj matrici kako bi se dobile sopstvene vrednosti i sopstveni vektori.
-4. **Izbor glavnih komponenti**: Sortiranje sopstvenih vrednosti u opadajućem redosledu i izbor vrhunskih K sopstvenih vektora koji odgovaraju najvećim sopstvenim vrednostima. Ovi sopstveni vektori formiraju novi prostor karakteristika.
-5. **Transformacija podataka**: Projekcija originalnih podataka na novi prostor karakteristika koristeći odabrane glavne komponente.
-PCA se široko koristi za vizualizaciju podataka, smanjenje šuma i kao korak predobrada za druge algoritme mašinskog učenja. Pomaže u smanjenju dimenzionalnosti podataka dok zadržava njegovu suštinsku strukturu.
+PCA funkcioniše tako što identifikuje glavne komponente podataka, odnosno pravce maksimalne varijanse. Koraci u PCA su:
+1. **Standardizacija**: Centrirajte podatke oduzimanjem srednje vrednosti i skaliranjem na jediničnu varijansu.
+2. **Kovarijaciona matrica**: Izračunajte kovarijacionu matricu standardizovanih podataka da biste razumeli odnose između karakteristika.
+3. **Dekompozicija svojstvenih vrednosti**: Izvršite dekompoziciju svojstvenih vrednosti kovarijacione matrice da biste dobili svojstvene vrednosti i svojstvene vektore.
+4. **Izbor glavnih komponenti**: Sortirajte svojstvene vrednosti u opadajućem redosledu i izaberite prvih K svojstvenih vektora koji odgovaraju najvećim svojstvenim vrednostima. Ovi svojstveni vektori formiraju novi prostor karakteristika.
+5. **Transformacija podataka**: Projektujte originalne podatke na novi prostor karakteristika koristeći izabrane glavne komponente.
+PCA se široko koristi za vizuelizaciju podataka, smanjenje šuma i kao korak pretprocesiranja za druge algoritme mašinskog učenja. Pomaže u smanjenju dimenzionalnosti podataka uz očuvanje njihove suštinske strukture.
 
-#### Sopstvene vrednosti i sopstveni vektori
+#### Svojstvene vrednosti i svojstveni vektori
 
-Sopstvena vrednost je skalar koji ukazuje na količinu varijanse koju hvata njen odgovarajući sopstveni vektor. Sopstveni vektor predstavlja pravac u prostoru karakteristika duž kojeg se podaci najviše menjaju.
+Svojstvena vrednost je skalar koji ukazuje na količinu varijanse obuhvaćene odgovarajućim svojstvenim vektorom. Svojstveni vektor predstavlja pravac u prostoru karakteristika duž kojeg podaci najviše variraju.
 
-Zamislite da je A kvadratna matrica, a v nenulti vektor takav da: `A * v = λ * v`
-gde:
-- A je kvadratna matrica poput [ [1, 2], [2, 1]] (npr., kovarijantna matrica)
-- v je sopstveni vektor (npr., [1, 1])
+Zamislite da je A kvadratna matrica, a v vektor različit od nule, tako da važi: `A * v = λ * v`
+gde je:
+- A kvadratna matrica kao što je [ [1, 2], [2, 1]] (npr. kovarijaciona matrica)
+- v svojstveni vektor (npr. [1, 1])
 
-Tada, `A * v = [ [1, 2], [2, 1]] * [1, 1] = [3, 3]` što će biti sopstvena vrednost λ pomnožena sa sopstvenim vektorom v, čineći sopstvenu vrednost λ = 3.
+Tada je `A * v = [ [1, 2], [2, 1]] * [1, 1] = [3, 3]`, što će biti svojstvena vrednost λ pomnožena svojstvenim vektorom v, čime se dobija svojstvena vrednost λ = 3.
 
-#### Sopstvene vrednosti i sopstveni vektori u PCA
+#### Svojstvene vrednosti i svojstveni vektori u PCA
 
-Objasnimo ovo sa primerom. Zamislite da imate skup podataka sa puno slika lica u sivim tonovima dimenzija 100x100 piksela. Svaki piksel se može smatrati karakteristikom, tako da imate 10,000 karakteristika po slici (ili vektor od 10,000 komponenti po slici). Ako želite da smanjite dimenzionalnost ovog skupa podataka koristeći PCA, pratili biste ove korake:
+Objasnimo ovo na primeru. Zamislite da imate skup podataka sa velikim brojem sivih slika lica rezolucije 100x100 piksela. Svaki piksel može da se posmatra kao karakteristika, tako da imate 10.000 karakteristika po slici (odnosno vektor sa 10000 komponenti po slici). Ako želite da smanjite dimenzionalnost ovog skupa podataka koristeći PCA, pratili biste sledeće korake:
 
-1. **Standardizacija**: Centriranje podataka oduzimanjem proseka svake karakteristike (piksela) iz skupa podataka.
-2. **Kovarijantna matrica**: Izračunavanje kovarijantne matrice standardizovanih podataka, koja hvata kako se karakteristike (pikseli) zajedno menjaju.
-- Napomena da kovarijansa između dve varijable (piksela u ovom slučaju) ukazuje na to koliko se zajedno menjaju, tako da je ideja ovde da se otkrije koji piksela imaju tendenciju da se povećavaju ili smanjuju zajedno sa linearnom vezom.
-- Na primer, ako piksel 1 i piksel 2 imaju tendenciju da se zajedno povećavaju, kovarijansa između njih će biti pozitivna.
-- Kovarijantna matrica će biti 10,000x10,000 matrica gde svaki unos predstavlja kovarijansu između dva piksela.
-3. **Rešavanje sopstvene vrednosti**: Sopstvena vrednost koju treba rešiti je `C * v = λ * v` gde je C kovarijantna matrica, v sopstveni vektor, a λ sopstvena vrednost. Može se rešiti korišćenjem metoda kao što su:
-- **Dezintegracija sopstvenih vrednosti**: Izvršavanje dezintegracije sopstvenih vrednosti na kovarijantnoj matrici kako bi se dobile sopstvene vrednosti i sopstveni vektori.
-- **Dezintegracija singularnih vrednosti (SVD)**: Alternativno, možete koristiti SVD za dezintegraciju matrice podataka u singularne vrednosti i vektore, što takođe može dati glavne komponente.
-4. **Izbor glavnih komponenti**: Sortiranje sopstvenih vrednosti u opadajućem redosledu i izbor vrhunskih K sopstvenih vektora koji odgovaraju najvećim sopstvenim vrednostima. Ovi sopstveni vektori predstavljaju pravce maksimalne varijanse u podacima.
+1. **Standardizacija**: Centrirajte podatke oduzimanjem srednje vrednosti svake karakteristike (piksela) od skupa podataka.
+2. **Kovarijaciona matrica**: Izračunajte kovarijacionu matricu standardizovanih podataka, koja obuhvata način na koji karakteristike (pikseli) variraju zajedno.
+- Imajte na umu da kovarijacija između dve promenljive (u ovom slučaju piksela) ukazuje na to koliko se one menjaju zajedno, pa je cilj ovde utvrditi koji pikseli imaju tendenciju da se povećavaju ili smanjuju zajedno u okviru linearne veze.
+- Na primer, ako piksel 1 i piksel 2 imaju tendenciju da se povećavaju zajedno, kovarijacija između njih biće pozitivna.
+- Kovarijaciona matrica biće matrica dimenzija 10,000x10,000, gde svaki element predstavlja kovarijaciju između dva piksela.
+3. **Rešavanje jednačine svojstvenih vrednosti**: Jednačina svojstvenih vrednosti koju treba rešiti jeste `C * v = λ * v`, gde je C kovarijaciona matrica, v svojstveni vektor, a λ svojstvena vrednost. Može se rešiti metodama kao što su:
+- **Dekompozicija svojstvenih vrednosti**: Izvršite dekompoziciju svojstvenih vrednosti kovarijacione matrice da biste dobili svojstvene vrednosti i svojstvene vektore.
+- **Singular Value Decomposition (SVD)**: Alternativno, možete koristiti SVD za dekomponovanje matrice podataka na singularne vrednosti i vektore, čime se takođe mogu dobiti glavne komponente.
+4. **Izbor glavnih komponenti**: Sortirajte svojstvene vrednosti u opadajućem redosledu i izaberite prvih K svojstvenih vektora koji odgovaraju najvećim svojstvenim vrednostima. Ovi svojstveni vektori predstavljaju pravce maksimalne varijanse u podacima.
 
 > [!TIP]
-> *Upotrebe u sajber bezbednosti:* Uobičajena upotreba PCA u bezbednosti je smanjenje karakteristika za otkrivanje anomalija. Na primer, sistem za otkrivanje upada sa 40+ mrežnih metrika (poput NSL-KDD karakteristika) može koristiti PCA da smanji na nekoliko komponenti, sumirajući podatke za vizualizaciju ili unošenje u algoritme klasterisanja. Analitičari mogu prikazati mrežni saobraćaj u prostoru prvih dve glavne komponente kako bi videli da li se napadi odvajaju od normalnog saobraćaja. PCA takođe može pomoći u eliminaciji redundantnih karakteristika (poput poslatih bajtova u odnosu na primljene bajtove ako su korelisani) kako bi se algoritmi detekcije učinili robusnijim i bržim.
+> *Primene u cybersecurity-u:* Uobičajena upotreba PCA u bezbednosti jeste smanjenje broja karakteristika za anomaly detection. Na primer, intrusion detection system sa više od 40 mrežnih metrika (kao što su NSL-KDD karakteristike) može koristiti PCA za smanjenje na nekoliko komponenti, čime se podaci sažimaju radi vizuelizacije ili prosleđivanja algoritmima za klasterovanje. Analitičari mogu prikazati mrežni saobraćaj u prostoru prve dve glavne komponente kako bi utvrdili da li se attack-i odvajaju od normalnog saobraćaja. PCA takođe može pomoći u uklanjanju redundantnih karakteristika (kao što su poslati i primljeni bajtovi ako su korelisani), čime algoritmi za detekciju postaju robusniji i brži.
 
 #### Pretpostavke i ograničenja
 
-PCA pretpostavlja da su **glavne ose varijanse značajne** – to je linearna metoda, tako da hvata linearne korelacije u podacima. To je nesupervizovana metoda jer koristi samo kovarijansu karakteristika. Prednosti PCA uključuju smanjenje šuma (komponente male varijanse često odgovaraju šumu) i dekorelaciju karakteristika. Efikasna je u računski za umereno visoke dimenzije i često je koristan korak predobrada za druge algoritme (da ublaži prokletstvo dimenzionalnosti). Jedno ograničenje je to što je PCA ograničen na linearne odnose – neće uhvatiti složenu nelinearnu strukturu (dok autoenkoderi ili t-SNE mogu). Takođe, komponente PCA mogu biti teške za interpretaciju u smislu originalnih karakteristika (one su kombinacije originalnih karakteristika). U sajber bezbednosti, treba biti oprezan: napad koji uzrokuje samo suptilnu promenu u karakteristici male varijanse možda se neće pojaviti u vrhunskim PC-ima (pošto PCA prioritizuje varijansu, a ne nužno "zanimljivost").
+PCA pretpostavlja da su **glavne ose varijanse značajne** - to je linearna metoda, pa obuhvata linearne korelacije u podacima. Neusmerena je jer koristi samo kovarijaciju karakteristika. Prednosti PCA uključuju smanjenje šuma (komponente male varijanse često odgovaraju šumu) i dekorelaciju karakteristika. Računarski je efikasna za umereno velike dimenzionalnosti i često predstavlja koristan korak pretprocesiranja za druge algoritme (radi ublažavanja curse of dimensionality). Jedno ograničenje jeste to što je PCA ograničen na linearne odnose - ne obuhvata složenu nelinearnu strukturu (za razliku od autoencoders ili t-SNE). Takođe, PCA komponente mogu biti teške za tumačenje u smislu originalnih karakteristika (one predstavljaju kombinacije originalnih karakteristika). U cybersecurity-u treba biti oprezan: attack koji izaziva samo suptilnu promenu karakteristike male varijanse možda se neće pojaviti u najvažnijim PC-ovima (jer PCA daje prioritet varijansi, a ne nužno „zanimljivosti“).
 
 <details>
-<summary>Primer -- Smanjenje dimenzija mrežnih podataka
+<summary>Primer -- Smanjenje dimenzionalnosti mrežnih podataka
 </summary>
 
-Pretpostavimo da imamo logove mrežnih konekcija sa više karakteristika (npr., trajanja, bajtova, brojeva). Generisaćemo sintetički 4-dimenzionalni skup podataka (sa nekim korelacijama između karakteristika) i koristiti PCA da ga smanjimo na 2 dimenzije za vizualizaciju ili dalju analizu.
+Pretpostavimo da imamo logove mrežnih konekcija sa više karakteristika (npr. trajanja, bajtove, brojače). Generisaćemo sintetički skup podataka sa 4 dimenzije (sa određenom korelacijom između karakteristika) i koristićemo PCA za njegovo smanjenje na 2 dimenzije radi vizuelizacije ili dalje analize.
 ```python
 from sklearn.decomposition import PCA
 
@@ -224,48 +225,48 @@ print("Original shape:", data_4d.shape, "Reduced shape:", data_2d.shape)
 # We can examine a few transformed points
 print("First 5 data points in PCA space:\n", data_2d[:5])
 ```
-Ovde smo uzeli ranije normalne klastere saobraćaja i proširili svaku tačku podacima sa dve dodatne karakteristike (paketi i greške) koje su u korelaciji sa bajtovima i trajanjem. PCA se zatim koristi za kompresiju 4 karakteristike u 2 glavne komponente. Štampamo odnos objašnjene varijanse, koji može pokazati da, recimo, >95% varijanse pokriva 2 komponente (što znači malo gubitka informacija). Izlaz takođe pokazuje da se oblik podataka smanjuje sa (1500, 4) na (1500, 2). Prvih nekoliko tačaka u PCA prostoru je dato kao primer. U praksi, moglo bi se prikazati data_2d da se vizuelno proveri da li su klasteri prepoznatljivi. Ako je postojala anomalija, moglo bi se videti kao tačka koja leži daleko od glavnog klastera u PCA-prostoru. PCA tako pomaže da se složeni podaci destiluju u upravljiv oblik za ljudsku interpretaciju ili kao ulaz za druge algoritme.
+Ovde smo uzeli ranije klastere normalnog saobraćaja i proširili svaku tačku podataka sa dve dodatne karakteristike (packets i errors) koje koreliraju sa bytes i duration. PCA se zatim koristi za kompresovanje 4 karakteristike u 2 glavne komponente. Ispisujemo odnos objašnjene varijanse, koji može pokazati da je, na primer, >95% varijanse obuhvaćeno sa 2 komponente (što znači mali gubitak informacija). Izlaz takođe prikazuje smanjenje oblika podataka sa (1500, 4) na (1500, 2). Prvih nekoliko tačaka u PCA prostoru dato je kao primer. U praksi, data_2d se može prikazati kako bi se vizuelno proverilo da li se klasteri mogu razlikovati. Ako je prisutna anomalija, mogla bi se uočiti kao tačka udaljena od glavnog klastera u PCA prostoru. PCA tako pomaže da se složeni podaci svedu na oblik kojim se može lakše upravljati, za ljudsko tumačenje ili kao ulaz za druge algoritme.
 
 </details>
 
 
 ### Gaussian Mixture Models (GMM)
 
-Gaussian Mixture Model pretpostavlja da su podaci generisani iz mešavine **several Gaussian (normal) distributions with unknown parameters**. U suštini, to je probabilistički model klasterovanja: pokušava da blago dodeli svaku tačku jednom od K Gaussian komponenti. Svaka Gaussian komponenta k ima vektor srednje vrednosti (μ_k), kovarijantnu matricu (Σ_k) i težinu mešanja (π_k) koja predstavlja koliko je taj klaster prisutan. Za razliku od K-Means koji vrši "tvrde" dodeljivanje, GMM daje svakoj tački verovatnoću pripadnosti svakom klasteru.
+Gaussian Mixture Model pretpostavlja da se podaci generišu iz mešavine **nekoliko Gaussian (normalnih) distribucija sa nepoznatim parametrima**. U suštini, to je probabilistički model klasterovanja: pokušava da svaku tačku softverski dodeli jednoj od K Gaussian komponenti. Svaka Gaussian komponenta k ima vektorsku sredinu (μ_k), kovarijacionu matricu (Σ_k) i težinu mešanja (π_k), koja predstavlja zastupljenost tog klastera. Za razliku od K-Means-a, koji vrši „hard“ dodeljivanja, GMM svakoj tački daje verovatnoću pripadanja svakom klasteru.
 
-GMM prilagođavanje se obično vrši putem algoritma Expectation-Maximization (EM):
+GMM fitting se obično obavlja pomoću algoritma Expectation-Maximization (EM):
 
-- **Inicijalizacija**: Počnite sa početnim pretpostavkama za srednje vrednosti, kovarijanse i koeficijente mešanja (ili koristite rezultate K-Means kao početnu tačku).
+- **Initialization**: Početi sa početnim procenama sredina, kovarijacija i koeficijenata mešanja (ili koristiti rezultate K-Means-a kao početnu tačku).
 
-- **E-korak (Očekivanje)**: S obzirom na trenutne parametre, izračunajte odgovornost svakog klastera za svaku tačku: suštinski `r_nk = P(z_k | x_n)` gde je z_k latentna varijabla koja ukazuje na članstvo u klasteru za tačku x_n. Ovo se radi koristeći Bayesovu teoremu, gde izračunavamo posteriornu verovatnoću svake tačke da pripada svakom klasteru na osnovu trenutnih parametara. Odgovornosti se izračunavaju kao:
+- **E-step (Expectation)**: Na osnovu trenutnih parametara izračunati odgovornost svakog klastera za svaku tačku: u suštini `r_nk = P(z_k | x_n)`, gde je z_k latentna promenljiva koja označava pripadnost klasteru za tačku x_n. Ovo se radi pomoću Bayesove teoreme, pri čemu se računa posteriorna verovatnoća pripadanja svake tačke svakom klasteru na osnovu trenutnih parametara. Odgovornosti se računaju na sledeći način:
 ```math
 r_{nk} = \frac{\pi_k \mathcal{N}(x_n | \mu_k, \Sigma_k)}{\sum_{j=1}^{K} \pi_j \mathcal{N}(x_n | \mu_j, \Sigma_j)}
 ```
 gde:
-- \( \pi_k \) je koeficijent mešanja za klaster k (prior verovatnoća klastera k),
-- \( \mathcal{N}(x_n | \mu_k, \Sigma_k) \) je Gaussian funkcija gustine verovatnoće za tačku \( x_n \) s obzirom na srednju vrednost \( \mu_k \) i kovarijansu \( \Sigma_k \).
+- \( \pi_k \) predstavlja koeficijent mešanja za klaster k (prior verovatnoću klastera k),
+- \( \mathcal{N}(x_n | \mu_k, \Sigma_k) \) predstavlja Gaussian funkciju gustine verovatnoće za tačku \( x_n \), sa sredinom \( \mu_k \) i kovarijacijom \( \Sigma_k \).
 
-- **M-korak (Maksimizacija)**: Ažurirajte parametre koristeći odgovornosti izračunate u E-koraku:
-- Ažurirajte svaku srednju vrednost μ_k kao ponderisanu srednju vrednost tačaka, gde su težine odgovornosti.
-- Ažurirajte svaku kovarijansu Σ_k kao ponderisanu kovarijansu tačaka dodeljenih klasteru k.
-- Ažurirajte koeficijente mešanja π_k kao prosečnu odgovornost za klaster k.
+- **M-step (Maximization)**: Ažurirati parametre pomoću odgovornosti izračunatih u E-step-u:
+- Ažurirati svaku sredinu μ_k kao ponderisani prosek tačaka, pri čemu su težine odgovornosti.
+- Ažurirati svaku kovarijaciju Σ_k kao ponderisanu kovarijaciju tačaka dodeljenih klasteru k.
+- Ažurirati koeficijente mešanja π_k kao prosečnu odgovornost za klaster k.
 
-- **Iterirajte** E i M korake dok ne dođe do konvergencije (parametri se stabilizuju ili poboljšanje verovatnoće je ispod praga).
+- **Iterate** E i M korake dok se ne postigne konvergencija (parametri se stabilizuju ili je poboljšanje verovatnoće manje od praga).
 
-Rezultat je skup Gaussian distribucija koje kolektivno modeliraju ukupnu distribuciju podataka. Možemo koristiti prilagođeni GMM za klasterovanje dodeljivanjem svake tačke Gaussian-u sa najvišom verovatnoćom, ili zadržati verovatnoće za nesigurnost. Takođe se može proceniti verovatnoća novih tačaka da vide da li se uklapaju u model (korisno za otkrivanje anomalija).
+Rezultat je skup Gaussian distribucija koje zajedno modeluju ukupnu distribuciju podataka. Fitted GMM možemo koristiti za klasterovanje tako što svaku tačku dodeljujemo Gaussian distribuciji sa najvećom verovatnoćom, ili možemo zadržati verovatnoće radi procene neizvesnosti. Takođe se može proceniti verovatnoća novih tačaka kako bi se proverilo da li odgovaraju modelu (što je korisno za anomaly detection).
 
 > [!TIP]
-> *Upotrebe u sajber bezbednosti:* GMM se može koristiti za otkrivanje anomalija modelovanjem distribucije normalnih podataka: svaka tačka sa vrlo niskom verovatnoćom pod naučenom mešavinom se označava kao anomalija. Na primer, mogli biste obučiti GMM na karakteristikama legitimnog mrežnog saobraćaja; napadna veza koja se ne sliči nijednom naučenom klasteru imala bi nisku verovatnoću. GMM-ovi se takođe koriste za klasterovanje aktivnosti gde klasteri mogu imati različite oblike – npr., grupisanje korisnika prema profilima ponašanja, gde karakteristike svakog profila mogu biti slične Gaussian-u, ali sa sopstvenom strukturom varijanse. Drugi scenario: u otkrivanju phishing-a, legitimne karakteristike e-pošte mogu formirati jedan Gaussian klaster, poznati phishing drugi, a nove phishing kampanje mogu se pojaviti kao ili odvojeni Gaussian ili kao tačke sa niskom verovatnoćom u odnosu na postojeću mešavinu.
+> *Upotreba u cybersecurity-ju:* GMM se može koristiti za anomaly detection modelovanjem distribucije normalnih podataka: svaka tačka sa veoma malom verovatnoćom u okviru naučene mešavine označava se kao anomalija. Na primer, GMM možete trenirati na karakteristikama legitimnog network traffic-a; attack konekcija koja ne liči ni na jedan naučeni klaster imala bi malu verovatnoću. GMM-ovi se takođe koriste za klasterovanje aktivnosti kod kojih klasteri mogu imati različite oblike – na primer, za grupisanje korisnika prema profilima ponašanja, gde karakteristike svakog profila mogu biti nalik Gaussian distribuciji, ali sa sopstvenom strukturom varijanse. Drugi scenario je phishing detection: karakteristike legitimnih email poruka mogu formirati jedan Gaussian klaster, poznati phishing drugi, dok se nove phishing kampanje mogu pojaviti kao zaseban Gaussian klaster ili kao tačke sa malom verovatnoćom u odnosu na postojeću mešavinu.
 
-#### Pretpostavke i Ograničenja
+#### Pretpostavke i ograničenja
 
-GMM je generalizacija K-Means koja uključuje kovarijansu, tako da klasteri mogu biti elipsoidni (ne samo sferni). Rukuje klasterima različitih veličina i oblika ako je kovarijansa puna. Mekano klasterovanje je prednost kada su granice klastera nejasne – npr., u sajber bezbednosti, događaj može imati osobine više tipova napada; GMM može odražavati tu nesigurnost sa verovatnoćama. GMM takođe pruža procenu gustine verovatnoće podataka, korisnu za otkrivanje outliera (tačaka sa niskom verovatnoćom pod svim komponentama mešavine).
+GMM je generalizacija K-Means-a koja uključuje kovarijaciju, pa klasteri mogu biti elipsoidni (a ne samo sferični). Ako je kovarijacija puna, može da obrađuje klastere različitih veličina i oblika. Soft klasterovanje je prednost kada su granice klastera nejasne – na primer, u cybersecurity-ju događaj može imati osobine više tipova napada; GMM tu neizvesnost može prikazati pomoću verovatnoća. GMM takođe obezbeđuje probabilističku procenu gustine podataka, što je korisno za otkrivanje outlier-a (tačaka sa malom verovatnoćom u okviru svih komponenti mešavine).
 
-S druge strane, GMM zahteva da se specificira broj komponenti K (iako se mogu koristiti kriterijumi poput BIC/AIC za njegovu selekciju). EM ponekad može sporo konvergirati ili do lokalnog optimuma, tako da je inicijalizacija važna (često se EM pokreće više puta). Ako podaci zapravo ne prate mešavinu Gaussian-a, model može biti loše prilagođen. Takođe postoji rizik da jedan Gaussian smanji da pokrije samo outlier (iako regularizacija ili minimalne granice kovarijanse mogu to ublažiti).
+Sa druge strane, GMM zahteva navođenje broja komponenti K (mada se za njegov izbor mogu koristiti kriterijumi poput BIC/AIC). EM ponekad može sporo da konvergira ili da konvergira ka lokalnom optimumu, pa je initialization važan (EM se često pokreće više puta). Ako podaci zapravo ne prate mešavinu Gaussian distribucija, model može biti lošeg kvaliteta. Takođe postoji rizik da se jedan Gaussian smanji tako da obuhvati samo jedan outlier (mada regularizacija ili ograničenja minimalne kovarijacije mogu ublažiti taj problem).
 
 
 <details>
-<summary>Primer --  Mekano Klasterovanje & Anomalijske Ocene
+<summary>Primer --  Soft Clustering & Anomaly Scores
 </summary>
 ```python
 from sklearn.mixture import GaussianMixture
@@ -285,28 +286,29 @@ log_likelihood = gmm.score_samples(sample_attack)
 print("Cluster membership probabilities for sample attack:", probs)
 print("Log-likelihood of sample attack under GMM:", log_likelihood)
 ```
-U ovom kodu, obučavamo GMM sa 3 Gaussiana na normalnom saobraćaju (pretpostavljajući da znamo 3 profila legitimnog saobraćaja). Srednje vrednosti i kovarijanse koje se ispisuju opisuju ove klastere (na primer, jedna srednja vrednost može biti oko [50,500] koja odgovara centru jednog klastera, itd.). Zatim testiramo sumnjivu vezu [duration=200, bytes=800]. predict_proba daje verovatnoću da ova tačka pripada svakom od 3 klastera – očekivali bismo da su ove verovatnoće vrlo niske ili veoma iskrivljene, pošto [200,800] leži daleko od normalnih klastera. Ukupni score_samples (log-verovatnoća) se ispisuje; vrlo niska vrednost ukazuje na to da tačka ne odgovara modelu dobro, označavajući je kao anomaliju. U praksi, može se postaviti prag na log-verovatnoću (ili na maksimalnu verovatnoću) da se odluči da li je tačka dovoljno malo verovatna da se smatra malicioznom. GMM tako pruža principijelan način za otkrivanje anomalija i takođe daje meke klastere koji priznaju nesigurnost.
+U ovom kodu treniramo GMM sa 3 Gaussian komponente na normalnom saobraćaju (pod pretpostavkom da poznajemo 3 profila legitimnog saobraćaja). Odštampane sredine i kovarijanse opisuju ove klastere (na primer, jedna sredina može biti približno [50,500], što odgovara centru jednog klastera itd.). Zatim testiramo sumnjivu konekciju [duration=200, bytes=800]. Funkcija predict_proba daje verovatnoću da ova tačka pripada svakom od 3 klastera – očekivali bismo da ove verovatnoće budu veoma niske ili izrazito asimetrične, pošto se [200,800] nalazi daleko od normalnih klastera. Ukupni score_samples (log-likelihood) se ispisuje; veoma niska vrednost ukazuje na to da se tačka ne uklapa dobro u model, čime se označava kao anomalija. U praksi se može postaviti prag na log-likelihood (ili na maksimalnu verovatnoću) kako bi se odlučilo da li je tačka dovoljno malo verovatna da bi se smatrala malicious. GMM tako pruža principijelan način za detekciju anomalija i istovremeno generiše soft klastere koji uzimaju u obzir neizvesnost.
+</details>
 
 ### Isolation Forest
 
-**Isolation Forest** je algoritam za otkrivanje anomalija zasnovan na ideji nasumičnog izolovanja tačaka. Princip je da su anomalije retke i različite, pa ih je lakše izolovati nego normalne tačke. Isolation Forest gradi mnogo binarnih izolacionih stabala (nasumična odlučujuća stabla) koja nasumično dele podatke. Na svakom čvoru u stablu, nasumična karakteristika se bira i nasumična vrednost razdvajanja se bira između minimuma i maksimuma te karakteristike za podatke u tom čvoru. Ovo razdvajanje deli podatke na dve grane. Stablo se razvija sve dok svaka tačka nije izolovana u svom listu ili dok se ne dostigne maksimalna visina stabla.
+**Isolation Forest** je ensemble algoritam za detekciju anomalija zasnovan na ideji nasumičnog izolovanja tačaka. Princip je da su anomalije malobrojne i različite, pa ih je lakše izolovati nego normalne tačke. Isolation Forest gradi mnogo binarnih isolation stabala (nasumičnih stabala odlučivanja) koja nasumično particionišu podatke. Na svakom čvoru stabla bira se nasumična feature i nasumična vrednost za podelu između minimuma i maksimuma te feature za podatke u tom čvoru. Ova podela deli podatke na dve grane. Stablo se gradi sve dok svaka tačka ne bude izolovana u sopstvenom leaf-u ili dok se ne dostigne maksimalna visina stabla.
 
-Otkrivanje anomalija se vrši posmatranjem dužine puta svake tačke u ovim nasumičnim stablima – broj razdvajanja potrebnih za izolovanje tačke. Intuitivno, anomalije (izuzeci) se obično brže izoluju jer je nasumično razdvajanje verovatnije da će odvojiti izuzetak (koji se nalazi u retkoj oblasti) nego normalnu tačku u gustoj grupi. Isolation Forest izračunava skor anomalije na osnovu prosečne dužine puta preko svih stabala: kraća prosečna dužina puta → više anomalno. Skorovi se obično normalizuju na [0,1] gde 1 znači vrlo verovatnu anomaliju.
+Detekcija anomalija se vrši posmatranjem dužine putanje svake tačke u ovim nasumičnim stablima – broja podela potrebnih da se tačka izoluje. Intuitivno, anomalije (outliers) obično se brže izoluju jer je verovatnije da će nasumična podela razdvojiti outlier (koji se nalazi u retkom regionu) nego normalnu tačku u gustom klasteru. Isolation Forest izračunava anomaly score na osnovu prosečne dužine putanje kroz sva stabla: kraća prosečna putanja → veća verovatnoća anomalije. Score vrednosti se obično normalizuju na [0,1], gde 1 znači da je anomalija veoma verovatna.
 
 > [!TIP]
-> *Upotrebe u sajber bezbednosti:* Isolation Forests su uspešno korišćeni u otkrivanju upada i prevara. Na primer, obučite Isolation Forest na logovima mrežnog saobraćaja koji većinom sadrže normalno ponašanje; šuma će proizvesti kratke puteve za čudan saobraćaj (kao što je IP koji koristi nečuvenu portu ili neobičan obrazac veličine paketa), označavajući ga za inspekciju. Pošto ne zahteva označene napade, pogodna je za otkrivanje nepoznatih tipova napada. Takođe se može primeniti na podatke o prijavama korisnika za otkrivanje preuzimanja naloga (anomalna vremena ili lokacije prijave se brzo izoluju). U jednom slučaju upotrebe, Isolation Forest može zaštititi preduzeće praćenjem sistemskih metrika i generisanjem upozorenja kada kombinacija metrika (CPU, mreža, promene datoteka) izgleda veoma drugačije (kratki putevi izolacije) od istorijskih obrazaca.
+> *Use cases in cybersecurity:* Isolation Forest se uspešno koristi u intrusion detection i fraud detection sistemima. Na primer, trenirajte Isolation Forest na network traffic logovima koji uglavnom sadrže normalno ponašanje; forest će generisati kratke putanje za neuobičajen saobraćaj (kao što je IP koji koristi do tada neviđen port ili neuobičajen obrazac veličine paketa), označavajući ga za proveru. Pošto ne zahteva labeled attacks, pogodan je za detekciju nepoznatih tipova napada. Takođe se može primeniti na podatke o user login-ima radi detekcije account takeover-a (neuobičajena vremena ili lokacije login-a brzo se izoluju). U jednom slučaju upotrebe, Isolation Forest bi mogao da zaštiti enterprise nadgledanjem system metrics i generisanjem alerta kada kombinacija metrika (CPU, network, file changes) izgleda veoma različito (kratke isolation putanje) u odnosu na istorijske obrasce.
 
-#### Pretpostavke i Ograničenja
+#### Assumptions and Limitations
 
-**Prednosti**: Isolation Forest ne zahteva pretpostavku o distribuciji; direktno cilja izolaciju. Efikasan je na podacima visoke dimenzionalnosti i velikim skupovima podataka (linearno složenost $O(n\log n)$ za izgradnju šume) pošto svako stablo izoluje tačke samo sa podskupom karakteristika i razdvajanja. Obično dobro obrađuje numeričke karakteristike i može biti brži od metoda zasnovanih na udaljenosti koje mogu biti $O(n^2)$. Takođe automatski daje skor anomalije, tako da možete postaviti prag za upozorenja (ili koristiti parametar kontaminacije da automatski odlučite o prekidu na osnovu očekivane frakcije anomalija).
+**Advantages**: Isolation Forest ne zahteva pretpostavku o distribuciji; direktno cilja izolaciju. Efikasan je na high-dimensional podacima i velikim dataset-ovima (linearna složenost $O(n\log n)$ za izgradnju forest-a), jer svako stablo izoluju tačke koristeći samo podskup features i podela. Obično dobro obrađuje numeričke features i može biti brži od distance-based metoda koje mogu imati složenost $O(n^2)$. Takođe automatski daje anomaly score, pa možete postaviti prag za alerte (ili koristiti contamination parametar da automatski odredite cutoff na osnovu očekivanog udela anomalija).
 
-**Ograničenja**: Zbog svoje nasumične prirode, rezultati se mogu malo razlikovati između pokretanja (iako je to minorno sa dovoljno mnogo stabala). Ako podaci imaju mnogo irelevantnih karakteristika ili ako se anomalije ne razlikuju snažno u bilo kojoj karakteristici, izolacija možda neće biti efikasna (nasumična razdvajanja bi mogla izolovati normalne tačke slučajno – međutim, prosečno uzimanje mnogih stabala ublažava ovo). Takođe, Isolation Forest obično pretpostavlja da su anomalije mala manjina (što je obično tačno u scenarijima sajber bezbednosti).
+**Limitations**: Zbog svoje nasumične prirode, rezultati se mogu neznatno razlikovati između pokretanja (mada je to zanemarljivo uz dovoljno veliki broj stabala). Ako podaci sadrže mnogo irelevantnih features ili se anomalije ni po jednoj feature-i značajno ne razlikuju, izolacija možda neće biti efikasna (nasumične podele bi slučajno mogle izolovati normalne tačke – međutim, usrednjavanje kroz mnogo stabala ublažava ovaj problem). Takođe, Isolation Forest uglavnom pretpostavlja da su anomalije mala manjina (što je obično tačno u cybersecurity scenarijima).
 
 <details>
-<summary>Primer --  Otkrivanje Izuzetaka u Mrežnim Logovima
+<summary>Example --  Detecting Outliers in Network Logs
 </summary>
 
-Koristićemo raniji test skup podataka (koji sadrži normalne i neke tačke napada) i pokrenuti Isolation Forest da vidimo da li može da razdvoji napade. Pretpostavićemo da očekujemo ~15% podataka da bude anomalno (za demonstraciju).
+Koristićemo raniji test dataset (koji sadrži normalne i neke attack tačke) i pokrenuti Isolation Forest da bismo proverili da li može da razdvoji napade. Pretpostavićemo da očekujemo da će ~15% podataka biti anomalno (u demonstracione svrhe).
 ```python
 from sklearn.ensemble import IsolationForest
 
@@ -322,36 +324,38 @@ print("Isolation Forest predicted labels (first 20):", preds[:20])
 print("Number of anomalies detected:", np.sum(preds == -1))
 print("Example anomaly scores (lower means more anomalous):", anomaly_scores[:5])
 ```
-U ovom kodu, instanciramo `IsolationForest` sa 100 stabala i postavljamo `contamination=0.15` (što znači da očekujemo oko 15% anomalija; model će postaviti svoj prag ocene tako da ~15% tačaka bude označeno). Prilagođavamo ga na `X_test_if` koji sadrži mešavinu normalnih i napadnih tačaka (napomena: obično biste prilagodili na podacima za obuku, a zatim koristili predikciju na novim podacima, ali ovde, radi ilustracije, prilagođavamo i predviđamo na istom skupu kako bismo direktno posmatrali rezultate).
+U ovom kodu instanciramo `IsolationForest` sa 100 stabala i postavljamo `contamination=0.15` (što znači da očekujemo oko 15% anomalija; model će postaviti prag rezultata tako da približno 15% tačaka bude označeno). Primenjujemo ga na `X_test_if`, koji sadrži kombinaciju normalnih i attack tačaka (napomena: uobičajeno je da se model trenira na training podacima, a zatim da se `predict` koristi na novim podacima, ali ovde, radi ilustracije, model treniramo i predviđamo na istom skupu kako bismo direktno videli rezultate).
 
-Izlaz prikazuje predviđene oznake za prvih 20 tačaka (gde -1 označava anomaliju). Takođe štampamo koliko je anomalija ukupno otkriveno i neke primerke ocena anomalija. Očekivali bismo otprilike 18 od 120 tačaka da bude označeno -1 (pošto je kontaminacija bila 15%). Ako su naših 20 uzoraka napada zaista najizolovaniji, većina njih bi trebala da se pojavi u tim -1 predikcijama. Ocena anomalije (funkcija odluke Isolation Forest-a) je viša za normalne tačke i niža (više negativna) za anomalije – štampamo nekoliko vrednosti da bismo videli razdvajanje. U praksi, neko bi mogao da sortira podatke po oceni da bi video najistaknutije izuzetke i istražio ih. Isolation Forest tako pruža efikasan način da se pretražuju veliki neoznačeni bezbednosni podaci i izdvoje najnepravilnije instance za ljudsku analizu ili dalju automatsku proveru.
+Izlaz prikazuje predviđene oznake za prvih 20 tačaka (gde `-1` označava anomaliju). Takođe ispisujemo ukupan broj detektovanih anomalija i nekoliko primera anomaly score vrednosti. Očekivali bismo da približno 18 od 120 tačaka bude označeno kao `-1` (pošto je `contamination` postavljen na 15%). Ako je naših 20 attack uzoraka zaista najviše izdvojeno, većina njih bi trebalo da se pojavi među tim `-1` predviđanjima. Anomaly score (`decision function` funkcija Isolation Forest-a) viši je za normalne tačke, a niži (negativniji) za anomalije – ispisujemo nekoliko vrednosti kako bismo videli razdvajanje. U praksi se podaci mogu sortirati prema score vrednosti kako bi se pronašli najizraženiji outlier-i i istražili. Isolation Forest na taj način pruža efikasan način za pregled velikih unlabeled security skupova podataka i izdvajanje najnepravilnijih instanci za ljudsku analizu ili dalju automatizovanu proveru.
+</details>
 
-### t-SNE (t-Distribuirano Stohastičko Ugrađivanje Suseda)
 
-**t-SNE** je nelinearna tehnika smanjenja dimenzionalnosti posebno dizajnirana za vizualizaciju podataka visoke dimenzionalnosti u 2 ili 3 dimenzije. Ona pretvara sličnosti između tačaka podataka u zajedničke verovatnosne raspodele i pokušava da sačuva strukturu lokalnih komšiluka u projekciji sa nižom dimenzionalnošću. Jednostavnije rečeno, t-SNE postavlja tačke u (recimo) 2D tako da slične tačke (u originalnom prostoru) završe blizu jedna druge, a neslične tačke daleko jedna od druge sa visokom verovatnoćom.
+### t-SNE (t-Distributed Stochastic Neighbor Embedding)
 
-Algoritam ima dve glavne faze:
+**t-SNE** je nelinearna tehnika smanjenja dimenzionalnosti posebno osmišljena za vizuelizaciju visokodimenzionalnih podataka u 2 ili 3 dimenzije. Ona pretvara sličnosti između tačaka podataka u zajedničke distribucije verovatnoće i pokušava da očuva strukturu lokalnih susedstava u projekciji niže dimenzionalnosti. Jednostavnije rečeno, t-SNE raspoređuje tačke u (recimo) 2D prostoru tako da se slične tačke (u originalnom prostoru) sa velikom verovatnoćom nađu blizu jedna drugoj, dok se različite tačke nađu daleko jedna od druge.
 
-1. **Izračunavanje parnih afiniteta u prostoru visoke dimenzionalnosti:** Za svaki par tačaka, t-SNE izračunava verovatnoću da bi neko izabrao taj par kao komšije (to se radi centriranjem Gaussove raspodele na svakoj tački i merenjem udaljenosti – parametar perplexity utiče na efektivan broj komšija koje se razmatraju).
-2. **Izračunavanje parnih afiniteta u prostoru sa niskom dimenzionalnošću (npr. 2D):** U početku, tačke se nasumično postavljaju u 2D. t-SNE definiše sličnu verovatnoću za udaljenosti na ovoj mapi (koristeći Studentovu t-raspodelu, koja ima teže repove od Gaussove kako bi omogućila udaljenim tačkama više slobode).
-3. **Gradientni spust:** t-SNE zatim iterativno pomera tačke u 2D kako bi minimizovao Kullback–Leibler (KL) divergenciju između visoko-D afinitetske raspodele i nisko-D. To uzrokuje da raspored u 2D odražava strukturu visoko-D koliko god je to moguće – tačke koje su bile blizu u originalnom prostoru će se privlačiti, a one daleko će se odbijati, dok se ne pronađe ravnoteža.
+Algoritam ima tri glavne faze:
 
-Rezultat je često vizuelno značajan dijagram raspršenja gde klasteri u podacima postaju očigledni.
+1. **Izračunavanje afiniteta između parova tačaka u visokodimenzionalnom prostoru:** Za svaki par tačaka, t-SNE izračunava verovatnoću da bi taj par bio izabran kao susedni (to se radi centriranjem Gaussian distribucije oko svake tačke i merenjem rastojanja – parametar perplexity utiče na efektivni broj posmatranih suseda).
+2. **Izračunavanje afiniteta između parova tačaka u niskodimenzionalnom (npr. 2D) prostoru:** Na početku se tačke nasumično raspoređuju u 2D prostoru. t-SNE definiše sličnu verovatnoću za rastojanja na ovoj mapi (koristeći Student t-distribution kernel, koji ima šire repove od Gaussian distribucije i time udaljenim tačkama omogućava veću slobodu).
+3. **Gradient Descent:** t-SNE zatim iterativno pomera tačke u 2D prostoru kako bi minimizovao Kullback–Leibler (KL) divergenciju između affinity distribucije u visoko-D prostoru i one u nisko-D prostoru. Na taj način 2D raspored u najvećoj mogućoj meri odražava strukturu visoko-D prostora – tačke koje su bile blizu u originalnom prostoru privlače jedna drugu, dok se one koje su bile udaljene međusobno odbijaju, sve dok se ne pronađe ravnoteža.
+
+Rezultat je često vizuelno značajan scatter plot u kojem klasteri podataka postaju uočljivi.
 
 > [!TIP]
-> *Upotrebe u sajber bezbednosti:* t-SNE se često koristi za **vizualizaciju podataka visoke dimenzionalnosti za ljudsku analizu**. Na primer, u centru za operacije bezbednosti, analitičari bi mogli uzeti skup podataka o događajima sa desetinama karakteristika (brojevi portova, frekvencije, brojevi bajtova itd.) i koristiti t-SNE da proizvedu 2D dijagram. Napadi bi mogli formirati svoje klastere ili se odvojiti od normalnih podataka u ovom dijagramu, čineći ih lakšim za identifikaciju. Primena je bila na skupovima podataka o malveru kako bi se videli grupisanja porodica malvera ili na podacima o mrežnim upadima gde se različite vrste napada jasno grupišu, usmeravajući dalju istragu. Suštinski, t-SNE pruža način da se vidi struktura u sajber podacima koja bi inače bila nejasna.
+> *Upotreba u cybersecurity-u:* t-SNE se često koristi za **vizuelizaciju visokodimenzionalnih security podataka radi ljudske analize**. Na primer, u security operations centru analitičari mogu uzeti skup event podataka sa desetinama karakteristika (brojevi portova, učestalosti, broj bajtova itd.) i koristiti t-SNE za izradu 2D grafikona. Attack-i bi na tom grafikonu mogli formirati sopstvene klastere ili se odvojiti od normalnih podataka, što bi olakšalo njihovu identifikaciju. Tehnika je primenjena na malware skupove podataka radi uočavanja grupisanja malware family-ja, kao i na network intrusion podatke, gde se različiti tipovi attack-a jasno grupišu, čime se usmerava dalja istraga. U suštini, t-SNE pruža način da se uoči struktura u cyber podacima koja bi inače bila teško razumljiva.
 
-#### Pretpostavke i Ograničenja
+#### Pretpostavke i ograničenja
 
-t-SNE je odličan za vizuelno otkrivanje obrazaca. Može otkriti klastere, subklastere i izuzetke koje druge linearne metode (kao što je PCA) možda ne bi mogle. Koristi se u istraživanju sajber bezbednosti za vizualizaciju složenih podataka kao što su profili ponašanja malvera ili obrasci mrežnog saobraćaja. Pošto čuva lokalnu strukturu, dobar je za prikazivanje prirodnih grupisanja.
+t-SNE je odličan za vizuelno otkrivanje obrazaca. Može otkriti klastere, podklastere i outlier-e koje druge linearne metode (kao što je PCA) možda ne bi uočile. Koristi se u cybersecurity istraživanjima za vizuelizaciju složenih podataka, kao što su profili ponašanja malware-a ili obrasci network saobraćaja. Pošto čuva lokalnu strukturu, dobar je u prikazivanju prirodnih grupisanja.
 
-Međutim, t-SNE je računski zahtevniji (približno $O(n^2)$) pa može zahtevati uzorkovanje za veoma velike skupove podataka. Takođe ima hiperparametre (perplexity, brzina učenja, iteracije) koji mogu uticati na izlaz – npr., različite vrednosti perplexity mogu otkriti klastere na različitim skalama. t-SNE dijagrami se ponekad mogu pogrešno interpretirati – udaljenosti na mapi nisu direktno značajne globalno (fokusira se na lokalno komšiluko, ponekad klasteri mogu izgledati veštački dobro odvojeni). Takođe, t-SNE je uglavnom za vizualizaciju; ne pruža jednostavan način za projektovanje novih tačaka podataka bez ponovnog izračunavanja, i nije namenjen da se koristi kao predobrada za prediktivno modelovanje (UMAP je alternativa koja rešava neka od ovih problema bržom brzinom).
+Međutim, t-SNE je računarski zahtevniji (približno $O(n^2)$), pa za veoma velike skupove podataka može biti potrebno sampling-ovanje. Takođe ima hyperparameter-e (perplexity, learning rate, iterations) koji mogu uticati na izlaz – na primer, različite vrednosti perplexity-ja mogu otkriti klastere na različitim skalama. t-SNE grafikoni ponekad mogu biti pogrešno protumačeni – rastojanja na mapi nisu direktno globalno značajna (metoda se fokusira na lokalno susedstvo, pa se klasteri ponekad mogu učiniti veštački dobro razdvojenim). Osim toga, t-SNE je prvenstveno namenjen vizuelizaciji; ne pruža jednostavan način za projekciju novih tačaka podataka bez ponovnog izračunavanja i nije namenjen korišćenju kao preprocessing za predictive modeling (UMAP je alternativa koja neke od ovih problema rešava većom brzinom).
 
 <details>
-<summary>Primer -- Vizualizacija Mrežnih Veza
+<summary>Primer -- Vizuelizacija Network Connections
 </summary>
 
-Koristićemo t-SNE da smanjimo skup podataka sa više karakteristika na 2D. Za ilustraciju, uzmimo ranije 4D podatke (koji su imali 3 prirodna klastera normalnog saobraćaja) i dodajmo nekoliko tačaka anomalija. Zatim pokrećemo t-SNE i (konceptualno) vizualizujemo rezultate.
+Koristićemo t-SNE za smanjenje skupa podataka sa više karakteristika na 2D prostor. Radi ilustracije, uzećemo ranije pomenute 4D podatke (koji su sadržali 3 prirodna klastera normalnog saobraćaja) i dodaćemo nekoliko anomaly tačaka. Zatim ćemo pokrenuti t-SNE i (konceptualno) vizuelizovati rezultate.
 ```python
 # 1 ─────────────────────────────────────────────────────────────────────
 #    Create synthetic 4-D dataset
@@ -434,20 +438,21 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 ```
-Ovde smo kombinovali naš prethodni 4D normalni skup podataka sa nekoliko ekstremnih outliera (outlieri imaju jednu karakteristiku (“trajanje”) postavljenu veoma visoko, itd., da simuliraju neobičan obrazac). Pokrećemo t-SNE sa tipičnom perplexity od 30. Izlazni data_2d ima oblik (1505, 2). U ovom tekstu zapravo nećemo praviti grafikon, ali ako bismo to uradili, očekivali bismo da vidimo možda tri uska klastera koja odgovaraju 3 normalna klastera, a 5 outliera se pojavljuje kao izolovane tačke daleko od tih klastera. U interaktivnom radnom toku, mogli bismo obojiti tačke prema njihovoj oznaci (normalno ili koji klaster, naspram anomalije) da bismo potvrdili ovu strukturu. Čak i bez oznaka, analitičar bi mogao primetiti tih 5 tačaka koje se nalaze u praznom prostoru na 2D grafiku i označiti ih. Ovo pokazuje kako t-SNE može biti moćna pomoć u vizuelnoj detekciji anomalija i inspekciji klastera u podacima o sajber bezbednosti, dopunjujući automatizovane algoritme iznad.
+Ovde smo kombinovali naš prethodni 4D normalni skup podataka sa nekolicinom ekstremnih outlier-a (kod outlier-a je jedna karakteristika („duration“) podešena na veoma visoku vrednost itd., kako bi se simulirao neobičan obrazac). Pokrećemo t-SNE sa uobičajenom vrednošću perplexity od 30. Izlazni podaci `data_2d` imaju oblik (1505, 2). U ovom tekstu ih zapravo nećemo prikazati, ali kada bismo to uradili, očekivali bismo da vidimo možda tri kompaktna klastera koja odgovaraju 3 normalna klastera, dok bi se 5 outlier-a pojavilo kao izolovane tačke udaljene od tih klastera. U interaktivnom workflow-u mogli bismo da obojimo tačke prema njihovoj oznaci (normalne ili pripadajuće određenom klasteru, naspram anomalije) kako bismo proverili ovu strukturu. Čak i bez oznaka, analitičar bi mogao da primeti tih 5 tačaka u praznom prostoru na 2D prikazu i označi ih. Ovo pokazuje kako t-SNE može biti moćna pomoć za vizuelnu detekciju anomalija i ispitivanje klastera u cybersecurity podacima, dopunjujući prethodno navedene automated algorithms.
 
 </details>
 
-### HDBSCAN (Hijerarhijsko klasterisanje zasnovano na gustini aplikacija sa šumom)
 
-**HDBSCAN** je proširenje DBSCAN-a koje uklanja potrebu da se izabere jedna globalna `eps` vrednost i može da povrati klastere **različite gustine** gradeći hijerarhiju gustinski povezanih komponenti i zatim je kondenzujući. U poređenju sa običnim DBSCAN-om, obično
+### HDBSCAN (Hierarchical Density-Based Spatial Clustering of Applications with Noise)
 
-* izvlači intuitivnije klastere kada su neki klasteri gusti, a drugi retki,
-* ima samo jedan pravi hiperparametar (`min_cluster_size`) i razumnu podrazumevanu vrednost,
-* daje svakoj tački *verovatnoću* članstva u klasteru i **ocenu outliera** (`outlier_scores_`), što je izuzetno korisno za nadzorne table za pretragu pretnji.
+**HDBSCAN** je proširenje algoritma DBSCAN koje uklanja potrebu za izborom jedne globalne vrednosti `eps` i može da pronađe klastere **različite gustine** tako što gradi hijerarhiju density-connected komponenti, a zatim je kondenzuje. U poređenju sa standardnim DBSCAN-om, obično
+
+* izdvaja intuitivnije klastere kada su neki klasteri gusti, a drugi retki,
+* ima samo jedan stvarni hyper-parameter (`min_cluster_size`) i razumnu podrazumevanu vrednost,
+* svakoj tački dodeljuje *probability* pripadnosti klasteru i **outlier score** (`outlier_scores_`), što je izuzetno korisno za threat-hunting dashboard-e.<sup>[[1]](#references)</sup>
 
 > [!TIP]
-> *Upotreba u sajber bezbednosti:* HDBSCAN je veoma popularan u modernim tokovima pretrage pretnji – često ćete ga videti unutar svesaka zasnovanih na lovu koje dolaze sa komercijalnim XDR paketima. Jedan praktičan recept je klasterisanje HTTP beaconing saobraćaja tokom IR: user-agent, interval i dužina URI često formiraju nekoliko uskih grupa legitimnih softverskih ažuriranja dok C2 beacons ostaju kao mali klasteri niske gustine ili kao čista buka.
+> *Use cases u cybersecurity-u:* HDBSCAN je veoma popularan u modernim threat-hunting pipeline-ovima – često ćete ga videti unutar notebook-based hunting playbook-ova koji se isporučuju sa komercijalnim XDR paketima. Jedan praktičan recept jeste klasterovanje HTTP beaconing saobraćaja tokom IR-a: user-agent, interval i dužina URI-ja često formiraju nekoliko kompaktnih grupa legitimnih software updater-a, dok C2 beacon-i ostaju kao mali klasteri niske gustine ili kao čisti noise.
 
 <details>
 <summary>Primer – Pronalaženje beaconing C2 kanala</summary>
@@ -478,33 +483,33 @@ print("Suspect beacon count:", len(suspects))
 
 ---
 
-### Robusnost i Bezbednosna Razmatranja – Trovanje & Adversarijalni Napadi (2023-2025)
+### Razmatranja robusnosti i bezbednosti – Poisoning i Adversarial Attacks (2023-2025)
 
-Nedavni radovi su pokazali da **nesupervizovani učenici *nisu* imuni na aktivne napadače**:
+Nedavna istraživanja pokazala su da **unsupervised learners *nisu* imuni na aktivne napadače**:
 
-* **Trovanje podacima protiv detektora anomalija.**  Chen *et al.* (IEEE S&P 2024) je demonstrirao da dodavanje samo 3 % kreiranog saobraćaja može pomeriti granicu odluke Isolation Forest i ECOD tako da pravi napadi izgledaju normalno. Autori su objavili open-source PoC (`udo-poison`) koji automatski sintetizuje toksične tačke.
-* **Ubacivanje backdoor-a u modele klasterovanja.**  Tehnika *BadCME* (BlackHat EU 2023) implantira mali uzorak okidača; kada se taj okidač pojavi, detektor zasnovan na K-Means tiho smešta događaj unutar “benignog” klastera.
-* **Izbegavanje DBSCAN/HDBSCAN.**  Akademski preprint iz 2025. sa KU Leuven-a je pokazao da napadač može kreirati beacon uzorke koji namerno padaju u praznine gustine, efikasno se skrivajući unutar *buke* oznaka.
+* **Data-poisoning protiv anomaly detektora.** Chen *et al.* (IEEE S&P 2024) pokazali su da dodavanje samo 3 % posebno kreiranog saobraćaja može da pomeri decision boundary algoritama Isolation Forest i ECOD, tako da stvarni napadi izgledaju normalno. Autori su objavili open-source PoC (`udo-poison`) koji automatski sintetiše poison points.<sup>[[2]](#references)</sup>
+* **Backdooring clustering modela.** Tehnika *BadCME* (BlackHat EU 2023) ubacuje mali trigger pattern; kad god se taj trigger pojavi, K-Means-based detector neprimetno smešta događaj u „benign“ cluster.
+* **Evasion DBSCAN/HDBSCAN algoritama.** Akademski pre-print sa KU Leuven iz 2025. godine pokazao je da napadač može da kreira beaconing patterns koji namerno upadaju u density gaps, efektivno se skrivajući unutar *noise* labels.
 
-Mere ublažavanja koje dobijaju na značaju:
+Mitigacije koje dobijaju sve veću primenu:
 
-1. **Sanitizacija modela / TRIM.**  Pre svake epohe ponovnog treniranja, odbaciti 1–2 % tačaka sa najvećim gubicima (trimmed maximum likelihood) kako bi se trovanje drastično otežalo.
-2. **Konsenzusno ensembling.**  Kombinovati nekoliko heterogenih detektora (npr., Isolation Forest + GMM + ECOD) i podići alarm ako *bilo koji* model označi tačku. Istraživanja ukazuju da ovo povećava troškove napadača za >10×.
-3. **Odbrana zasnovana na distanci za klasterovanje.**  Ponovo izračunati klastere sa `k` različitih nasumičnih semena i ignorisati tačke koje konstantno preskoče klastere.
+1. **Model sanitisation / TRIM.** Pre svakog retraining epoch-a odbaciti 1–2 % tačaka sa najvećim loss-om (trimmed maximum likelihood), čime se poisoning značajno otežava.
+2. **Consensus ensembling.** Kombinovati nekoliko heterogenih detektora (npr. Isolation Forest + GMM + ECOD) i podići alert ako *bilo koji* model označi tačku. Istraživanja pokazuju da ovo povećava trošak napadača za više od 10×.
+3. **Distance-based defence za clustering.** Ponovo izračunati klastere koristeći `k` različitih random seed-ova i ignorisati tačke koje neprestano menjaju klastere.
 
 ---
 
-### Moderni Open-Source Alati (2024-2025)
+### Moderni Open-Source alati (2024-2025)
 
-* **PyOD 2.x** (objavljen maj 2024) dodao je *ECOD*, *COPOD* i GPU-ubrzane *AutoFormer* detektore. Sada sadrži `benchmark` pod-komandu koja vam omogućava da uporedite 30+ algoritama na vašem skupu podataka sa **jednom linijom koda**:
+* **PyOD 2.x** (objavljen u maju 2024) dodao je *ECOD*, *COPOD* i GPU-accelerated *AutoFormer* detektore. Sada dolazi sa `benchmark` sub-command-om koji vam omogućava da uporedite više od 30 algoritama na svom dataset-u pomoću **jedne linije koda**:
 ```bash
 pyod benchmark --input logs.csv --label attack --n_jobs 8
 ```
-* **Anomalib v1.5** (februar 2025) fokusira se na viziju, ali takođe sadrži generičku **PatchCore** implementaciju – korisnu za detekciju phishing stranica zasnovanih na snimcima ekrana.
-* **scikit-learn 1.5** (novembar 2024) konačno izlaže `score_samples` za *HDBSCAN* putem novog `cluster.HDBSCAN` omota, tako da vam nije potreban spoljašnji contrib paket kada koristite Python 3.12.
+* **Anomalib v1.5** (februar 2025) fokusira se na vision, ali sadrži i generičku implementaciju **PatchCore** – korisnu za screenshot-based phishing page detection.
+* **scikit-learn 1.5** (novembar 2024) konačno izlaže `score_samples` za *HDBSCAN* preko novog `cluster.HDBSCAN` wrapper-a, tako da vam nije potreban eksterni contrib package kada koristite Python 3.12.
 
 <details>
-<summary>Brzi PyOD primer – ECOD + Isolation Forest ensembling</summary>
+<summary>Brz PyOD primer – ECOD + Isolation Forest ensemble</summary>
 ```python
 from pyod.models import ECOD, IForest
 from pyod.utils.data import generate_data, evaluate_print
@@ -523,10 +528,10 @@ evaluate_print("Ensemble", y_test, anomaly_scores)
 ```
 </details>
 
-## References
+## Reference
 
-- [HDBSCAN – Hijerarhijsko klasterisanje zasnovano na gustini](https://github.com/scikit-learn-contrib/hdbscan)
-- Chen, X. *et al.* “O ranjivosti nesupervizovane detekcije anomalija na trovanje podacima.” *IEEE Symposium on Security and Privacy*, 2024.
+- [1] [HDBSCAN – Hijerarhijsko klasterovanje zasnovano na gustini](https://github.com/scikit-learn-contrib/hdbscan)
+- [2] Chen, X. *et al.* „O ranjivosti nenadgledanog otkrivanja anomalija na trovanje podataka.“ *IEEE Symposium on Security and Privacy*, 2024.
 
 
 

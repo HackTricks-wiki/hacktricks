@@ -2,189 +2,189 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) je koristan program za pronalaženje gde su važni podaci sačuvani unutar memorije pokrenute igre i njihovu promenu.\
-Kada ga preuzmete i pokrenete, **prikazuje** vam se **tutorijal** o tome kako koristiti alat. Ako želite da naučite kako da koristite alat, toplo se preporučuje da ga završite.
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) je koristan program za pronalaženje mesta na kojem su važne vrednosti sačuvane u memoriji pokrenute igre i njihovu izmenu.\
+Kada ga preuzmete i pokrenete, biće vam **prikazan** **tutorial** o korišćenju ovog alata. Ako želite da naučite kako se alat koristi, veoma se preporučuje da ga završite.<sup>[[3]](#references)</sup>
 
 ## Šta tražite?
 
-![](<../../images/image (762).png>)
+![Cheat Engine - Šta tražite?: Šta tražite?](<../../images/image (762).png>)
 
-Ovaj alat je veoma koristan za pronalaženje **gde je neki podatak** (obično broj) **sačuvan u memoriji** programa.\
-**Obično se brojevi** čuvaju u **4bajtnoj** formi, ali ih možete pronaći i u **double** ili **float** formatima, ili možda želite da tražite nešto **drugačije od broja**. Iz tog razloga, morate biti sigurni da **izaberete** ono što želite da **tražite**:
+Ovaj alat je veoma koristan za pronalaženje **mesta na kojem je neka vrednost** (obično broj) **sačuvana u memoriji** programa.\
+**Brojevi se obično** čuvaju u formatu **4bytes**, ali ih možete pronaći i u formatima **double** ili **float**, ili možda želite da tražite nešto što **nije broj**. Zato morate biti sigurni da ste **izabrali** ono što želite da **tražite**:
 
-![](<../../images/image (324).png>)
+![Cheat Engine - Šta tražite?: Brojevi se obično čuvaju u formatu 4bytes, ali ih možete pronaći i u formatima double ili float, ili možda želite da tražite nešto...](<../../images/image (324).png>)
 
-Takođe možete označiti **različite** tipove **pretraga**:
+Takođe možete navesti **različite** tipove **pretrage**:
 
-![](<../../images/image (311).png>)
+![Cheat Engine - Šta tražite?: Takođe možete navesti različite tipove pretrage](<../../images/image (311).png>)
 
-Možete takođe označiti opciju da **zaustavite igru dok skenirate memoriju**:
+Možete označiti i polje za **zaustavljanje igre tokom skeniranja memorije**:
 
-![](<../../images/image (1052).png>)
+![Cheat Engine - Šta tražite?: Možete označiti i polje za zaustavljanje igre tokom skeniranja memorije](<../../images/image (1052).png>)
 
 ### Prečice
 
-U _**Edit --> Settings --> Hotkeys**_ možete postaviti različite **prečice** za različite svrhe kao što su **zaustavljanje** **igre** (što je veoma korisno ako u nekom trenutku želite da skenirate memoriju). Druge opcije su dostupne:
+U _**Edit --> Settings --> Hotkeys**_ možete podesiti različite **prečice** za različite namene, kao što je **zaustavljanje** **igre** (što je veoma korisno ako u nekom trenutku želite da skenirate memoriju). Dostupne su i druge opcije:
 
-![](<../../images/image (864).png>)
+![Šta tražite? - Prečice: U Edit -- Settings -- Hotkeys možete podesiti različite prečice za različite namene, kao što je zaustavljanje igre (što je veoma korisno ako u nekom trenutku...](<../../images/image (864).png>)
 
-## Modifikovanje vrednosti
+## Izmena vrednosti
 
-Kada **pronađete** gde je **vrednost** koju tražite (više o tome u sledećim koracima), možete je **modifikovati** dvostrukim klikom na nju, a zatim dvostrukim klikom na njenu vrednost:
+Kada **pronađete** gde se nalazi **vrednost** koju **tražite** (više o tome u narednim koracima), možete je **izmeniti** tako što ćete dvaput kliknuti na nju, a zatim dvaput kliknuti na njenu vrednost:
 
-![](<../../images/image (563).png>)
+![Prečice - Izmena vrednosti: Kada pronađete gde se nalazi vrednost koju tražite (više o tome u narednim koracima), možete je izmeniti tako što ćete dvaput kliknuti na nju, a zatim dvaput kliknuti...](<../../images/image (563).png>)
 
-I konačno **označite** kvačicu da biste izvršili modifikaciju u memoriji:
+Na kraju **označite polje** da bi izmena bila izvršena u memoriji:
 
-![](<../../images/image (385).png>)
+![Prečice - Izmena vrednosti: Na kraju označite polje da bi izmena bila izvršena u memoriji](<../../images/image (385).png>)
 
-**Promena** u **memoriji** će odmah biti **primenjena** (imajte na umu da dok igra ne koristi ovu vrednost ponovo, vrednost **neće biti ažurirana u igri**).
+**Izmena** u **memoriji** biće odmah **primenjena** (imajte na umu da vrednost **neće biti ažurirana u igri** dok je igra ponovo ne upotrebi).
 
-## Traženje vrednosti
+## Pretraga vrednosti
 
-Dakle, pretpostavićemo da postoji važna vrednost (kao što je život vašeg korisnika) koju želite da poboljšate, i tražite ovu vrednost u memoriji)
+Pretpostavimo da postoji važna vrednost (kao što je život vašeg korisnika) koju želite da povećate i da tu vrednost tražite u memoriji.
 
-### Kroz poznatu promenu
+### Putem poznate promene
 
-Pretpostavljajući da tražite vrednost 100, **izvršite skeniranje** tražeći tu vrednost i pronađite mnogo podudaranja:
+Pretpostavimo da tražite vrednost 100. **Pokrenete skeniranje** za tu vrednost i pronađete mnogo podudaranja:
 
-![](<../../images/image (108).png>)
+![Pretraga vrednosti - Putem poznate promene: Pretpostavimo da tražite vrednost 100, pokrenete skeniranje za tu vrednost i pronađete mnogo podudaranja](<../../images/image (108).png>)
 
-Zatim, uradite nešto tako da **vrednost promeni**, i **zaustavite** igru i **izvršite** **sledeće skeniranje**:
+Zatim uradite nešto zbog čega se **vrednost promeni**, **zaustavite** igru i **pokrenete** **naredno skeniranje**:
 
-![](<../../images/image (684).png>)
+![Pretraga vrednosti - Putem poznate promene: Zatim uradite nešto zbog čega se vrednost promeni, zaustavite igru i pokrenete naredno skeniranje](<../../images/image (684).png>)
 
-Cheat Engine će tražiti **vrednosti** koje su **prešle sa 100 na novu vrednost**. Čestitam, **pronašli ste** **adresu** vrednosti koju ste tražili, sada je možete modifikovati.\
-_Ako još uvek imate nekoliko vrednosti, uradite nešto da ponovo modifikujete tu vrednost, i izvršite još jedno "sledeće skeniranje" da filtrirate adrese._
+Cheat Engine će potražiti **vrednosti** koje su **prešle sa 100 na novu vrednost**. Čestitamo, **pronašli** ste **adresu** vrednosti koju ste tražili i sada je možete izmeniti.\
+_Ako i dalje imate više vrednosti, ponovo uradite nešto što će izmeniti tu vrednost i pokrenite još jedno „naredno skeniranje“ da biste filtrirali adrese._
 
 ### Nepoznata vrednost, poznata promena
 
-U scenariju kada **ne znate vrednost** ali znate **kako da je promenite** (i čak vrednost promene) možete tražiti svoj broj.
+U scenariju u kojem **ne znate vrednost**, ali znate **kako da je promenite** (pa čak i za koliko će se promeniti), možete potražiti svoj broj.
 
-Dakle, počnite tako što ćete izvršiti skeniranje tipa "**Nepoznata početna vrednost**":
+Započnite skeniranjem tipa "**Unknown initial value**":
 
-![](<../../images/image (890).png>)
+![Putem poznate promene - Nepoznata vrednost, poznata promena: Započnite skeniranjem tipa „Unknown initial value“](<../../images/image (890).png>)
 
-Zatim, promenite vrednost, navedite **kako** se **vrednost** **promenila** (u mom slučaju je smanjena za 1) i izvršite **sledeće skeniranje**:
+Zatim promenite vrednost, navedite **kako** se **vrednost** promenila (u mom slučaju smanjena je za 1) i pokrenite **naredno skeniranje**:
 
-![](<../../images/image (371).png>)
+![Putem poznate promene - Nepoznata vrednost, poznata promena: Zatim promenite vrednost, navedite kako se vrednost promenila (u mom slučaju smanjena je za 1) i pokrenite naredno skeniranje](<../../images/image (371).png>)
 
-Bićete prikazani **sve vrednosti koje su modifikovane na odabrani način**:
+Biće vam prikazane **sve vrednosti koje su izmenjene na izabrani način**:
 
-![](<../../images/image (569).png>)
+![Putem poznate promene - Nepoznata vrednost, poznata promena: Biće vam prikazane sve vrednosti koje su izmenjene na izabrani način](<../../images/image (569).png>)
 
-Kada pronađete svoju vrednost, možete je modifikovati.
+Kada pronađete svoju vrednost, možete je izmeniti.
 
-Imajte na umu da postoji **mnogo mogućih promena** i možete ponavljati ove **korake koliko god želite** da filtrirate rezultate:
+Imajte na umu da postoji **mnogo mogućih promena** i da ove **korake možete ponavljati koliko god želite** da biste filtrirali rezultate:
 
-![](<../../images/image (574).png>)
+![Putem poznate promene - Nepoznata vrednost, poznata promena: Imajte na umu da postoji mnogo mogućih promena i da ove korake možete ponavljati koliko god želite da biste filtrirali rezultate](<../../images/image (574).png>)
 
-### Nasumična adresa u memoriji - Pronalaženje koda
+### Nasumična memorijska adresa - Pronalaženje koda
 
-Do sada smo naučili kako da pronađemo adresu koja čuva vrednost, ali je veoma verovatno da će u **različitim izvršavanjima igre ta adresa biti na različitim mestima u memoriji**. Dakle, hajde da saznamo kako da uvek pronađemo tu adresu.
+Do sada smo naučili kako da pronađemo adresu na kojoj se čuva neka vrednost, ali je veoma verovatno da se **ta adresa nalazi na različitim mestima u memoriji tokom različitih pokretanja igre**. Zato ćemo videti kako da tu adresu uvek pronađemo.
 
-Koristeći neke od pomenutih trikova, pronađite adresu gde vaša trenutna igra čuva važnu vrednost. Zatim (zaustavljajući igru ako želite) uradite **desni klik** na pronađenu **adresu** i izaberite "**Find out what accesses this address**" ili "**Find out what writes to this address**":
+Koristeći neke od pomenutih trikova, pronađite adresu na kojoj vaša trenutna igra čuva važnu vrednost. Zatim (zaustavljajući igru ako želite) kliknite **desnim klikom** na pronađenu **adresu** i izaberite "**Find out what accesses this address**" ili "**Find out what writes to this address**":
 
-![](<../../images/image (1067).png>)
+![Nepoznata vrednost, poznata promena - Nasumična memorijska adresa - Pronalaženje koda: Koristeći neke od pomenutih trikova, pronađite adresu na kojoj vaša trenutna igra čuva važnu vrednost. Zatim...](<../../images/image (1067).png>)
 
-**Prva opcija** je korisna da saznate koje **delove** **koda** koriste ovu **adresu** (što je korisno za više stvari kao što je **znanje gde možete modifikovati kod** igre).\
-**Druga opcija** je više **specifična**, i biće korisnija u ovom slučaju jer nas zanima da saznamo **odakle se ova vrednost piše**.
+**Prva opcija** je korisna za utvrđivanje koji **delovi** **koda** **koriste** ovu **adresu** (što je korisno i za druge stvari, kao što je **utvrđivanje mesta na kojem možete izmeniti kod** igre).\
+**Druga opcija** je **specifičnija** i u ovom slučaju će biti korisnija, jer želimo da saznamo **odakle se ova vrednost upisuje**.
 
-Kada odaberete jednu od tih opcija, **debugger** će biti **priključen** na program i novi **prazan prozor** će se pojaviti. Sada, **igrajte** **igru** i **modifikujte** tu **vrednost** (bez ponovnog pokretanja igre). **Prozor** bi trebao biti **ispunjen** sa **adresama** koje **modifikuju** **vrednost**:
+Kada izaberete jednu od tih opcija, **debugger** će biti **prikačen** programu i pojaviće se novi **prazan prozor**. Sada **igrajte** **igru** i **izmenite** tu **vrednost** (bez ponovnog pokretanja igre). **Prozor** bi trebalo da se **popuni** **adresama** koje **menjaju** **vrednost**:
 
-![](<../../images/image (91).png>)
+![Nepoznata vrednost, poznata promena - Nasumična memorijska adresa - Pronalaženje koda: Kada izaberete jednu od tih opcija, debugger će biti prikačen programu i pojaviće se novi prazan prozor...](<../../images/image (91).png>)
 
-Sada kada ste pronašli adresu koja modifikuje vrednost, možete **modifikovati kod po svojoj želji** (Cheat Engine vam omogućava da ga brzo modifikujete za NOPs):
+Sada kada ste pronašli adresu koja menja vrednost, možete **menjati kod po želji** (Cheat Engine omogućava veoma brzu izmenu u NOPs):
 
-![](<../../images/image (1057).png>)
+![Nepoznata vrednost, poznata promena - Nasumična memorijska adresa - Pronalaženje koda: Sada kada ste pronašli adresu koja menja vrednost, možete menjati kod po želji (Cheat Engine...](<../../images/image (1057).png>)
 
-Dakle, sada možete modifikovati tako da kod ne utiče na vaš broj, ili će uvek pozitivno uticati.
+Sada je možete izmeniti tako da kod ne utiče na vaš broj ili da uvek utiče na pozitivan način.
 
-### Nasumična adresa u memoriji - Pronalaženje pokazivača
+### Nasumična memorijska adresa - Pronalaženje pointera
 
-Prateći prethodne korake, pronađite gde se nalazi vrednost koja vas zanima. Zatim, koristeći "**Find out what writes to this address**" saznajte koja adresa piše ovu vrednost i dvostruko kliknite na nju da biste dobili prikaz disasembly-a:
+Prateći prethodne korake, pronađite gde se nalazi vrednost koja vas zanima. Zatim pomoću opcije "**Find out what writes to this address**" saznajte koja adresa upisuje tu vrednost i dvaput kliknite na nju da biste dobili prikaz disassembly-ja:
 
-![](<../../images/image (1039).png>)
+![Nasumična memorijska adresa - Pronalaženje koda - Nasumična memorijska adresa - Pronalaženje pointera: Prateći prethodne korake, pronađite gde se nalazi vrednost koja vas zanima. Zatim pomoću opcije „Find out...](<../../images/image (1039).png>)
 
-Zatim, izvršite novo skeniranje **tražeći heksadecimalnu vrednost između "\[]"** (vrednost $edx u ovom slučaju):
+Zatim pokrenite novo skeniranje **tražeći hex vrednost između "\[]"** (vrednost od $edx u ovom slučaju):
 
-![](<../../images/image (994).png>)
+![Nasumična memorijska adresa - Pronalaženje koda - Nasumična memorijska adresa - Pronalaženje pointera: Zatim pokrenite novo skeniranje tražeći hex vrednost između „\[]“ (vrednost od $edx u ovom slučaju)](<../../images/image (994).png>)
 
-(_Ako se pojavi više njih, obično vam je potrebna najmanja adresa_)\
-Sada smo **pronašli pokazivač koji će modifikovati vrednost koja nas zanima**.
+(_Ako se pojavi više rezultata, obično vam je potrebna adresa sa najmanjom vrednošću_)\
+Sada smo **pronašli pointer koji će menjati vrednost koja nas zanima**.
 
 Kliknite na "**Add Address Manually**":
 
-![](<../../images/image (990).png>)
+![Nasumična memorijska adresa - Pronalaženje koda - Nasumična memorijska adresa - Pronalaženje pointera: Kliknite na „Add Address Manually“](<../../images/image (990).png>)
 
-Sada, kliknite na kvačicu "Pointer" i dodajte pronađenu adresu u tekstualno polje (u ovom scenariju, pronađena adresa na prethodnoj slici je bila "Tutorial-i386.exe"+2426B0):
+Sada kliknite na polje za potvrdu "Pointer" i dodajte pronađenu adresu u tekstualno polje (u ovom scenariju, pronađena adresa na prethodnoj slici bila je "Tutorial-i386.exe"+2426B0):
 
-![](<../../images/image (392).png>)
+![Nasumična memorijska adresa - Pronalaženje koda - Nasumična memorijska adresa - Pronalaženje pointera: Sada kliknite na polje za potvrdu „Pointer“ i dodajte pronađenu adresu u tekstualno polje (u ovom scenariju,...](<../../images/image (392).png>)
 
-(Imajte na umu kako je prva "Adresa" automatski popunjena iz adrese pokazivača koju ste uneli)
+(Imajte na umu da se prvi "Address" automatski popunjava na osnovu adrese pointera koju unesete)
 
-Kliknite na OK i biće kreiran novi pokazivač:
+Kliknite na OK i biće kreiran novi pointer:
 
-![](<../../images/image (308).png>)
+![Nasumična memorijska adresa - Pronalaženje koda - Nasumična memorijska adresa - Pronalaženje pointera: Kliknite na OK i biće kreiran novi pointer](<../../images/image (308).png>)
 
-Sada, svaki put kada modifikujete tu vrednost, **modifikujete važnu vrednost čak i ako je adresa u memoriji gde se vrednost nalazi drugačija.**
+Sada, svaki put kada izmenite tu vrednost, **menjate važnu vrednost čak i ako se memorijska adresa na kojoj se vrednost nalazi razlikuje.**
 
-### Injekcija koda
+### Code Injection
 
-Injekcija koda je tehnika gde injektujete deo koda u ciljni proces, a zatim preusmeravate izvršenje koda da ide kroz vaš vlastiti napisani kod (kao što je davanje poena umesto oduzimanja).
+Code injection je tehnika u kojoj ubacujete deo koda u ciljni proces, a zatim preusmeravate izvršavanje koda tako da prolazi kroz vaš kod (na primer, dobijate poene umesto da ih gubite).
 
-Dakle, zamislite da ste pronašli adresu koja oduzima 1 od života vašeg igrača:
+Pretpostavimo da ste pronašli adresu koja igraču oduzima 1 život:
 
-![](<../../images/image (203).png>)
+![Nasumična memorijska adresa - Pronalaženje pointera - Code Injection: Pretpostavimo da ste pronašli adresu koja igraču oduzima 1 život](<../../images/image (203).png>)
 
-Kliknite na Prikaži disassembler da biste dobili **disassemble kod**.\
-Zatim, kliknite **CTRL+a** da pozovete prozor Auto assemble i izaberite _**Template --> Code Injection**_
+Kliknite na Show disassembler da biste dobili **disassemble code**.\
+Zatim pritisnite **CTRL+a** da biste otvorili prozor Auto assemble i izaberite _**Template --> Code Injection**_
 
-![](<../../images/image (902).png>)
+![Nasumična memorijska adresa - Pronalaženje pointera - Code Injection: Zatim pritisnite CTRL+a da biste otvorili prozor Auto assemble i izaberite Template -- Code Injection](<../../images/image (902).png>)
 
-Popunite **adresu instrukcije koju želite da modifikujete** (ovo se obično automatski popunjava):
+Unesite **adresu instrukcije koju želite da izmenite** (ona se obično automatski popunjava):
 
-![](<../../images/image (744).png>)
+![Nasumična memorijska adresa - Pronalaženje pointera - Code Injection: Unesite adresu instrukcije koju želite da izmenite (ona se obično automatski popunjava)](<../../images/image (744).png>)
 
-Generisaće se šablon:
+Biće generisan template:
 
-![](<../../images/image (944).png>)
+![Nasumična memorijska adresa - Pronalaženje pointera - Code Injection: Biće generisan template](<../../images/image (944).png>)
 
-Dakle, umetnite svoj novi assembly kod u sekciju "**newmem**" i uklonite originalni kod iz "**originalcode**" ako ne želite da se izvršava. U ovom primeru, injektovani kod će dodati 2 poena umesto oduzimanja 1:
+Zato ubacite svoj novi assembly kod u odeljak "**newmem**" i uklonite originalni kod iz odeljka "**originalcode**" ako ne želite da se izvršava**.** U ovom primeru, ubačeni kod će dodati 2 poena umesto da oduzme 1:
 
-![](<../../images/image (521).png>)
+![Nasumična memorijska adresa - Pronalaženje pointera - Code Injection: Zato ubacite svoj novi assembly kod u odeljak „newmem“ i uklonite originalni kod iz odeljka „originalcode“ ako...](<../../images/image (521).png>)
 
-**Kliknite na izvrši i tako dalje i vaš kod bi trebao biti injektovan u program menjajući ponašanje funkcionalnosti!**
+**Kliknite na execute i tako dalje, pa bi vaš kod trebalo da bude ubačen u program i promeni ponašanje funkcionalnosti!**
 
 ## Napredne funkcije u Cheat Engine 7.x (2023-2025)
 
-Cheat Engine je nastavio da se razvija od verzije 7.0 i nekoliko funkcija za poboljšanje kvaliteta života i *ofanzivnog obrnute inženjeringa* je dodato što je izuzetno korisno prilikom analize modernog softvera (i ne samo igara!). Ispod je **veoma sažet vodič** za dodatke koje ćete najverovatnije koristiti tokom red-team/CTF rada.
+Cheat Engine je nastavio da se razvija od verzije 7.0 i dodato je nekoliko funkcija za lakši rad i *offensive-reversing* koje su izuzetno korisne pri analizi modernog software-a (a ne samo igara!). U nastavku je **veoma sažet terenski vodič** za dodatke koje ćete najverovatnije koristiti tokom red-team/CTF rada.<sup>[[1]](#references)</sup>
 
 ### Poboljšanja Pointer Scanner 2
-* `Pokazivači moraju završavati sa specifičnim ofsetima` i novi **Deviation** klizač (≥7.4) značajno smanjuje lažne pozitivne rezultate kada ponovo skenirate nakon ažuriranja. Koristite ga zajedno sa višekratnom mapom poređenja (`.PTR` → *Poredi rezultate sa drugim sačuvanim mapama pokazivača*) da dobijete **jedan otporan osnovni pokazivač** za samo nekoliko minuta.
-* Prečica za filtriranje u grupi: nakon prvog skeniranja pritisnite `Ctrl+A → Space` da označite sve, zatim `Ctrl+I` (invert) da poništite selekciju adresa koje nisu prošle ponovo skeniranje.
+* `Pointers must end with specific offsets` i novi klizač **Deviation** (≥7.4) značajno smanjuju broj lažno pozitivnih rezultata kada ponovo skenirate nakon update-a. Koristite ga zajedno sa poređenjem više mapa (`.PTR` → *Compare results with other saved pointer map*) da biste za samo nekoliko minuta dobili **jedan otporan bazni pointer**.
+* Prečica za grupno filtriranje: nakon prvog skeniranja pritisnite `Ctrl+A → Space` da biste označili sve, a zatim `Ctrl+I` (invert) da biste poništili izbor adresa koje nisu prošle ponovno skeniranje.
 
-### Ultimap 3 – Intel PT praćenje
-*Od 7.5 stari Ultimap je ponovo implementiran na osnovu **Intel Processor-Trace (IPT)***. To znači da sada možete snimiti *svaku* granu koju cilj preuzima **bez pojedinačnog koraka** (samo korisnički režim, neće aktivirati većinu anti-debug uređaja).
+### Ultimap 3 – Intel PT tracing
+*Od verzije 7.5 stari Ultimap je ponovo implementiran na osnovu tehnologije **Intel Processor-Trace (IPT)**.* To znači da sada možete snimiti *svaki branch koji cilj izvrši* **bez single-stepping-a** (samo u user-mode-u; ovo neće aktivirati većinu anti-debug mehanizama).
 ```
 Memory View → Tools → Ultimap 3 → check «Intel PT»
 Select number of buffers → Start
 ```
-Nakon nekoliko sekundi, zaustavite snimanje i **desni klik → Sačuvaj listu izvršenja u datoteku**. Kombinujte adrese grana sa sesijom `Find out what addresses this instruction accesses` da biste veoma brzo locirali visoko-frekventne tačke logike igre.
+Nakon nekoliko sekundi zaustavite capture i **kliknite desnim tasterom miša → Save execution list to file**. Kombinujte branch addresses sa sesijom `Find out what addresses this instruction accesses` da biste izuzetno brzo locirali game-logic hotspots sa visokom učestalošću.
 
-### 1-bajtni `jmp` / auto-patch šabloni
-Verzija 7.5 je uvela *jedan-bajtni* JMP stub (0xEB) koji instalira SEH handler i postavlja INT3 na originalnu lokaciju. Automatski se generiše kada koristite **Auto Assembler → Template → Code Injection** na instrukcijama koje ne mogu biti patch-ovane sa 5-bajtni relativnim skokom. Ovo omogućava “uske” hook-ove unutar pakovanih ili veličinski ograničenih rutina.
+### 1-byte `jmp` / auto-patch templates
+Verzija 7.5 uvela je *one-byte* JMP stub (0xEB) koji instalira SEH handler i postavlja INT3 na originalnu lokaciju. Automatski se generiše kada koristite **Auto Assembler → Template → Code Injection** na instrukcijama koje ne mogu biti patch-ovane relativnim jump-om od 5 bajtova. Ovo omogućava „tight“ hooks unutar packed ili size-constrained rutina.
 
-### Kernel-level stealth sa DBVM (AMD & Intel)
-*DBVM* je ugrađeni Type-2 hipervizor CE-a. Nedavne verzije konačno su dodale **AMD-V/SVM podršku** tako da možete pokrenuti `Driver → Load DBVM` na Ryzen/EPYC hostovima. DBVM vam omogućava:
-1. Kreiranje hardverskih breakpoint-a nevidljivih za Ring-3/anti-debug provere.
-2. Čitanje/pisanje paginabilnih ili zaštićenih kernel memorijskih regiona čak i kada je drajver u korisničkom režimu onemogućen.
-3. Izvođenje VM-EXIT-less zaobilaženja napada na vreme (npr. upit `rdtsc` iz hipervizora).
+### Kernel-level stealth sa DBVM (AMD i Intel)
+*DBVM* je CE-ov ugrađeni Type-2 hypervisor. Novije verzije su konačno dodale **AMD-V/SVM support**, tako da možete pokrenuti `Driver → Load DBVM` na Ryzen/EPYC hostovima. DBVM vam omogućava da:
+1. Kreirate hardware breakpoints nevidljive Ring-3/anti-debug proverama.
+2. Čitate/upisujete pageable ili zaštićene kernel memory regione čak i kada je user-mode driver onemogućen.
+3. Izvršavate VM-EXIT-less zaobilaženja timing-attack mehanizama, npr. da iz hypervisor-a upitate `rdtsc`.
 
-**Savjet:** DBVM će odbiti da se učita kada je HVCI/Memory-Integrity omogućen na Windows 11 → isključite ga ili pokrenite posvećen VM-host. 
+**Savet:** DBVM će odbiti učitavanje kada je HVCI/Memory-Integrity omogućen na Windowsu 11 → isključite ga ili pokrenite namenski VM-host.
 
-### Daljinsko / cross-platform debagovanje sa **ceserver**
-CE sada isporučuje potpuno prepisanu verziju *ceserver* i može se povezati preko TCP sa **Linux, Android, macOS & iOS** ciljevima. Popularni fork integriše *Frida* da kombinuje dinamičku instrumentaciju sa CE-ovim GUI-jem – idealno kada treba da patch-ujete Unity ili Unreal igre koje se pokreću na telefonu:
+### Remote / cross-platform debugging sa **ceserver**
+CE sada dolazi sa potpunim rewrite-om alata *ceserver* i može da se poveže preko TCP-a sa **Linux, Android, macOS & iOS** targetima. Popularni fork integriše *Frida* kako bi kombinovao dynamic instrumentation sa CE GUI-jem – idealno kada treba da patch-ujete Unity ili Unreal igre koje rade na telefonu:
 ```
 # on the target (arm64)
 ./ceserver_arm64 &
@@ -192,26 +192,26 @@ CE sada isporučuje potpuno prepisanu verziju *ceserver* i može se povezati pre
 adb forward tcp:52736 tcp:52736   # (or ssh tunnel)
 Cheat Engine → "Network" icon → Host = localhost → Connect
 ```
-Za Frida most pogledajte `bb33bb/frida-ceserver` na GitHub-u.
+Za Frida bridge pogledajte `bb33bb/frida-ceserver` na GitHubu.<sup>[[2]](#references)</sup>
 
-### Ostali značajni alati
-* **Patch Scanner** (MemView → Tools) – detektuje neočekivane promene koda u izvršnim sekcijama; koristan za analizu malvera.
-* **Structure Dissector 2** – prevucite-adresu → `Ctrl+D`, zatim *Guess fields* za automatsku evaluaciju C-struktura.
+### Ostale značajne mogućnosti
+* **Patch Scanner** (MemView → Tools) – otkriva neočekivane izmene koda u izvršnim sekcijama; korisno za malware analysis.
+* **Structure Dissector 2** – prevucite adresu → `Ctrl+D`, zatim izaberite *Guess fields* da biste automatski procenili C-structures.
 * **.NET & Mono Dissector** – poboljšana podrška za Unity igre; pozivajte metode direktno iz CE Lua konzole.
-* **Big-Endian prilagođeni tipovi** – obrnuti redosled bajtova skeniranje/uređivanje (korisno za emulatora konzola i mrežne pakete).
-* **Autosave & tabs** za AutoAssembler/Lua prozore, plus `reassemble()` za prepisivanje višelinijskih instrukcija.
+* **Big-Endian custom types** – skeniranje/uređivanje obrnutog redosleda bajtova (korisno za emulatore konzola i buffere mrežnih paketa).
+* **Autosave & tabs** za AutoAssembler/Lua prozore, kao i `reassemble()` za višelinijsko prepisivanje instrukcija.
 
-### Instalacija & OPSEC napomene (2024-2025)
-* Zvanični instalater je obavijen InnoSetup **oglasima** (`RAV` itd.). **Uvek kliknite *Decline*** *ili kompajlirajte iz izvora* da izbegnete PUP-ove. AV-ovi će i dalje označiti `cheatengine.exe` kao *HackTool*, što je očekivano.
-* Moderni anti-cheat drajveri (EAC/Battleye, ACE-BASE.sys, mhyprot2.sys) detektuju CE-ovu klasu prozora čak i kada je preimenovana. Pokrenite svoju verziju za obrnuto inženjerstvo **unutar jednokratne VM** ili nakon onemogućavanja mrežne igre.
-* Ako vam je potrebna samo pristup korisničkom režimu izaberite **`Settings → Extra → Kernel mode debug = off`** da izbegnete učitavanje CE-ovog nepodpisanog drajvera koji može izazvati BSOD na Windows 11 24H2 Secure-Boot.
+### Napomene o instalaciji i OPSEC-u (2024-2025)
+* Zvanični installer je upakovan sa InnoSetup **ad-offers** (`RAV` itd.). **Uvek kliknite *Decline*** *ili kompajlirajte iz izvornog koda* da biste izbegli PUPs. AV-ovi će i dalje označavati `cheatengine.exe` kao *HackTool*, što je očekivano.
+* Moderni anti-cheat driveri (EAC/Battleye, ACE-BASE.sys, mhyprot2.sys) detektuju CE window class čak i kada je preimenovan. Pokrenite svoju kopiju za reversing **unutar disposable VM-a** ili nakon onemogućavanja network play-a.
+* Ako vam je potreban samo user-mode pristup, izaberite **`Settings → Extra → Kernel mode debug = off`** da biste izbegli učitavanje CE unsigned driver-a, koji može izazvati BSOD na Windowsu 11 24H2 sa Secure-Boot-om.
 
 ---
 
-## **Reference**
+## Reference
 
-- [Cheat Engine 7.5 release notes (GitHub)](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
-- [frida-ceserver cross-platform bridge](https://github.com/bb33bb/frida-ceserver-Mac-and-IOS)
-- **Cheat Engine tutorial, complete it to learn how to start with Cheat Engine**
+- [1] [Beleške o izdanju Cheat Engine 7.5 (GitHub)](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
+- [2] [frida-ceserver cross-platform bridge](https://github.com/bb33bb/frida-ceserver-Mac-and-IOS)
+- [3] Cheat Engine tutorial, završite ga da biste naučili kako da započnete rad sa Cheat Engine-om
 
 {{#include ../../banners/hacktricks-training.md}}

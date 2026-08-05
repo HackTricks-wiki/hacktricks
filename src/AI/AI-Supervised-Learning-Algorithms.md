@@ -4,43 +4,43 @@
 
 ## Osnovne informacije
 
-Nadgledano učenje koristi označene podatke za obučavanje modela koji mogu praviti predikcije na novim, neviđenim ulazima. U sajber bezbednosti, nadgledano mašinsko učenje se široko primenjuje na zadatke kao što su detekcija upada (klasifikacija mrežnog saobraćaja kao *normalnog* ili *napada*), detekcija malvera (razlikovanje zlonamernog softvera od benignog), detekcija phishinga (identifikacija prevarantskih veb sajtova ili e-pošte) i filtriranje spama, između ostalog. Svaki algoritam ima svoje prednosti i prilagođen je različitim vrstama problema (klasifikacija ili regresija). Ispod pregledamo ključne algoritme nadgledanog učenja, objašnjavamo kako funkcionišu i demonstriramo njihovu upotrebu na stvarnim skupovima podataka iz sajber bezbednosti. Takođe raspravljamo o tome kako kombinovanje modela (ensemble learning) često može poboljšati prediktivnu tačnost.
+Nadgledano učenje koristi označene podatke za obučavanje modela koji mogu da predviđaju nove, prethodno neviđene ulazne podatke. U oblasti cybersecurity-ja, nadgledano mašinsko učenje se široko primenjuje na zadatke kao što su detekcija upada (klasifikovanje mrežnog saobraćaja kao *normalnog* ili *napada*), detekcija malware-a (razlikovanje zlonamernog softvera od benignog), detekcija phishing-a (prepoznavanje lažnih web sajtova ili emailova) i filtriranje spam-a, između ostalog. Svaki algoritam ima svoje prednosti i pogodan je za različite vrste problema (klasifikaciju ili regresiju). U nastavku razmatramo ključne algoritme nadgledanog učenja, objašnjavamo kako rade i prikazujemo njihovu upotrebu na stvarnim cybersecurity dataset-ovima. Takođe razmatramo kako kombinovanje modela (ensemble learning) često može poboljšati performanse predviđanja.
 
 ## Algoritmi
 
--   **Linear Regression:** Osnovni regresioni algoritam za predikciju numeričkih ishoda prilagođavanjem linearne jednačine podacima.
+-   **Linear Regression:** Osnovni regresioni algoritam za predviđanje numeričkih rezultata fitovanjem linearne jednačine na podatke.
 
--   **Logistic Regression:** Klasifikacioni algoritam (uprkos svom imenu) koji koristi logističku funkciju za modelovanje verovatnoće binarnog ishoda.
+-   **Logistic Regression:** Algoritam za klasifikaciju (uprkos svom nazivu) koji koristi logističku funkciju za modelovanje verovatnoće binarnog ishoda.
 
--   **Decision Trees:** Modeli u obliku stabla koji dele podatke prema karakteristikama kako bi pravili predikcije; često se koriste zbog svoje interpretabilnosti.
+-   **Decision Trees:** Modeli u obliku stabla koji dele podatke na osnovu feature-a radi donošenja predviđanja; često se koriste zbog svoje interpretabilnosti.
 
--   **Random Forests:** Skup odluka (putem bagging-a) koji poboljšava tačnost i smanjuje prekomerno prilagođavanje.
+-   **Random Forests:** Ensemble decision tree modela (putem bagging-a) koji poboljšava preciznost i smanjuje overfitting.
 
--   **Support Vector Machines (SVM):** Klasifikatori sa maksimalnom marginom koji pronalaze optimalnu separacionu hiperplanu; mogu koristiti jezgre za nelinearne podatke.
+-   **Support Vector Machines (SVM):** Klasifikatori sa maksimalnom marginom koji pronalaze optimalnu razdvajajuću hiperravan; mogu koristiti kernel-e za nelinearne podatke.
 
--   **Naive Bayes:** Probabilistički klasifikator zasnovan na Bayesovoj teoremi sa pretpostavkom nezavisnosti karakteristika, poznato korišćen u filtriranju spama.
+-   **Naive Bayes:** Probabilistički klasifikator zasnovan na Bayes-ovoj teoremi, uz pretpostavku nezavisnosti feature-a, poznat po upotrebi u filtriranju spam-a.
 
--   **k-Nearest Neighbors (k-NN):** Jednostavan "instancijski" klasifikator koji označava uzorak na osnovu većinske klase njegovih najbližih suseda.
+-   **k-Nearest Neighbors (k-NN):** Jednostavan "instance-based" klasifikator koji dodeljuje uzorku klasi na osnovu većinske klase njegovih najbližih suseda.
 
--   **Gradient Boosting Machines:** Skupni modeli (npr. XGBoost, LightGBM) koji grade jak prediktor dodavanjem slabijih učenika (tipično stabala odluka) sekvencijalno.
+-   **Gradient Boosting Machines:** Ensemble modeli (npr. XGBoost, LightGBM) koji izgrađuju snažan prediktor sekvencijalnim dodavanjem slabijih learner-a (obično decision tree modela).
 
-Svaka sekcija ispod pruža poboljšan opis algoritma i **primer Python koda** koristeći biblioteke kao što su `pandas` i `scikit-learn` (i `PyTorch` za primer neuronske mreže). Primeri koriste javno dostupne skupove podataka iz sajber bezbednosti (kao što su NSL-KDD za detekciju upada i skup podataka o phishing veb sajtovima) i prate doslednu strukturu:
+Svaki odeljka u nastavku pruža poboljšan opis algoritma i **Python code example** koristeći biblioteke kao što su `pandas` i `scikit-learn` (i `PyTorch` za primer neural network-a). Primeri koriste javno dostupne cybersecurity dataset-ove (kao što su NSL-KDD za detekciju upada i Phishing Websites dataset) i prate doslednu strukturu:
 
-1.  **Učitajte skup podataka** (preuzmite putem URL-a ako je dostupno).
+1.  **Učitajte dataset** (preuzmite ga putem URL-a ako je dostupan).
 
-2.  **Predobradite podatke** (npr. kodirajte kategorijske karakteristike, skalirajte vrednosti, podelite na obučene/testne skupove).
+2.  **Preprocesirajte podatke** (npr. enkodirajte kategoričke feature-e, skalirajte vrednosti i podelite podatke na train/test skupove).
 
-3.  **Obučite model** na obučenom skupu podataka.
+3.  **Obučite model** na train podacima.
 
-4.  **Evaluirajte** na testnom skupu koristeći metrike: tačnost, preciznost, odziv, F1-score i ROC AUC za klasifikaciju (i srednju kvadratnu grešku za regresiju).
+4.  **Evaluirajte** model na test skupu koristeći metrike: accuracy, precision, recall, F1-score i ROC AUC za klasifikaciju (i mean squared error za regresiju).
 
-Hajde da zaronimo u svaki algoritam:
+Hajde da razmotrimo svaki algoritam:
 
 ### Linear Regression
 
-Linear regression je **regresioni** algoritam koji se koristi za predikciju kontinuiranih numeričkih vrednosti. Pretpostavlja linearni odnos između ulaznih karakteristika (nezavisne varijable) i izlaza (zavisna varijabla). Model pokušava da prilagodi pravu liniju (ili hiperplanu u višim dimenzijama) koja najbolje opisuje odnos između karakteristika i cilja. To se obično radi minimizovanjem sume kvadratnih grešaka između predviđenih i stvarnih vrednosti (metoda običnih najmanjih kvadrata).
+Linear regression je **regresioni** algoritam koji se koristi za predviđanje kontinuiranih numeričkih vrednosti. Pretpostavlja linearnu vezu između ulaznih feature-a (nezavisnih promenljivih) i izlaza (zavisne promenljive). Model pokušava da fituje pravu (ili hiperravan u višim dimenzijama) koja najbolje opisuje odnos između feature-a i target-a. To se obično postiže minimizovanjem zbira kvadratnih grešaka između predviđenih i stvarnih vrednosti (metoda Ordinary Least Squares).<sup>[[8]](#references)</sup>
 
-Najjednostavniji način da se predstavi linearna regresija je sa linijom:
+Najjednostavniji način predstavljanja linear regression-a jeste pomoću prave:
 ```plaintext
 y = mx + b
 ```
@@ -49,31 +49,31 @@ Gde:
 - `y` je predviđena vrednost (izlaz)
 - `m` je nagib linije (koeficijent)
 - `x` je ulazna karakteristika
-- `b` je y-presjek
+- `b` je presek sa y-osom
 
-Cilj linearne regresije je pronaći najbolju liniju koja minimizira razliku između predviđenih vrednosti i stvarnih vrednosti u skupu podataka. Naravno, ovo je vrlo jednostavno, bila bi to prava linija koja razdvaja 2 kategorije, ali ako se dodaju više dimenzija, linija postaje složenija:
+Cilj linearne regresije je da pronađe liniju koja se najbolje uklapa i minimizuje razliku između predviđenih i stvarnih vrednosti u datasetu. Naravno, ovo je veoma jednostavno — bila bi to prava linija koja razdvaja 2 kategorije, ali ako se dodaju dodatne dimenzije, linija postaje složenija:
 ```plaintext
 y = w1*x1 + w2*x2 + ... + wn*xn + b
 ```
 > [!TIP]
-> *Upotreba u sajber bezbednosti:* Linearna regresija sama po sebi je manje uobičajena za osnovne bezbednosne zadatke (koji su često klasifikacija), ali se može primeniti za predviđanje numeričkih ishoda. Na primer, moglo bi se koristiti linearna regresija da se **predvidi obim mrežnog saobraćaja** ili **proceni broj napada u određenom vremenskom periodu** na osnovu istorijskih podataka. Takođe bi mogla predvideti rizik ili očekivano vreme do otkrivanja napada, uzimajući u obzir određene sistemske metrike. U praksi, algoritmi klasifikacije (kao što su logistička regresija ili stabla) se češće koriste za otkrivanje upada ili malvera, ali linearna regresija služi kao osnova i korisna je za analize orijentisane na regresiju.
+> *Primene u sajber-bezbednosti:* Sama linearna regresija se ređe koristi za osnovne bezbednosne zadatke (koji su često klasifikacioni), ali se može primeniti za predviđanje numeričkih ishoda. Na primer, linearna regresija može da se koristi za **predviđanje obima mrežnog saobraćaja** ili **procenu broja napada u određenom vremenskom periodu** na osnovu istorijskih podataka. Takođe može da predvidi skor rizika ili očekivano vreme do detekcije napada na osnovu određenih sistemskih metrika. U praksi se klasifikacioni algoritmi (kao što su logistička regresija ili stabla) češće koriste za otkrivanje upada ili malware-a, ali linearna regresija predstavlja osnovu i korisna je za analize usmerene na regresiju.
 
-#### **Ključne karakteristike Linearne Regresije:**
+#### **Ključne karakteristike linearne regresije:**
 
--   **Tip Problema:** Regresija (predviđanje kontinuiranih vrednosti). Nije pogodna za direktnu klasifikaciju osim ako se ne primeni prag na izlaz.
+-   **Tip problema:** Regresija (predviđanje kontinuiranih vrednosti). Nije pogodna za direktnu klasifikaciju osim ako se na izlaz ne primeni prag.
 
--   **Interpretabilnost:** Visoka -- koeficijenti su jednostavni za interpretaciju, pokazujući linearni efekat svake karakteristike.
+-   **Interpretabilnost:** Visoka -- koeficijenti se jednostavno tumače i prikazuju linearni uticaj svake karakteristike.
 
--   **Prednosti:** Jednostavna i brza; dobra osnova za regresione zadatke; dobro funkcioniše kada je prava veza približno linearna.
+-   **Prednosti:** Jednostavna je i brza; predstavlja dobru osnovu za regresione zadatke; dobro funkcioniše kada je stvarna veza približno linearna.
 
--   **Ograničenja:** Ne može uhvatiti složene ili nelinearne odnose (bez ručnog inženjeringa karakteristika); sklona je podfittingu ako su odnosi nelinearni; osetljiva na odstupanja koja mogu iskriviti rezultate.
+-   **Ograničenja:** Ne može da obuhvati složene ili nelinearne veze (bez ručnog inženjeringa karakteristika); sklona je underfitting-u ako su veze nelinearne; osetljiva je na outlier-e koji mogu da iskrive rezultate.
 
--   **Pronalaženje Najboljeg Prilagođavanja:** Da bismo pronašli najbolju liniju koja razdvaja moguće kategorije, koristimo metodu koja se zove **Obična metoda najmanjih kvadrata (OLS)**. Ova metoda minimizuje zbir kvadrata razlika između posmatranih vrednosti i vrednosti predviđenih linearnim modelom.
+-   **Pronalaženje najboljeg fita:** Da bismo pronašli liniju najboljeg fita koja razdvaja moguće kategorije, koristimo metod pod nazivom **Ordinary Least Squares (OLS)**. Ovaj metod minimizuje zbir kvadriranih razlika između posmatranih vrednosti i vrednosti koje predviđa linearni model.
 
 <details>
-<summary>Primer -- Predviđanje Trajanja Povezivanja (Regresija) u Skupu Podataka o Upadima
+<summary>Primer -- Predviđanje trajanja veze (regresija) u skupu podataka za detekciju upada
 </summary>
-Ispod prikazujemo linearne regresije koristeći NSL-KDD skup podataka o sajber bezbednosti. Posmatraćemo ovo kao problem regresije predviđajući `trajanje` mrežnih veza na osnovu drugih karakteristika. (U stvarnosti, `trajanje` je jedna karakteristika NSL-KDD; koristimo je ovde samo da ilustrujemo regresiju.) Učitaćemo skup podataka, obraditi ga (kodirati kategorijske karakteristike), obučiti model linearne regresije i proceniti srednju kvadratnu grešku (MSE) i R² rezultat na testnom skupu.
+U nastavku prikazujemo linearnu regresiju koristeći skup podataka za sajber-bezbednost NSL-KDD. Tretiraćemo ovo kao regresioni problem tako što ćemo predviđati `duration` mrežnih veza na osnovu drugih karakteristika. (U stvarnosti, `duration` je jedna od karakteristika skupa NSL-KDD; ovde je koristimo samo za ilustraciju regresije.) Učitavamo skup podataka, prethodno obrađujemo podatke (kodiramo kategoričke karakteristike), obučavamo model linearne regresije i procenjujemo Mean Squared Error (MSE) i R² skor na testnom skupu.
 ```python
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -128,45 +128,45 @@ Test MSE: 3021333.56
 Test R² : -0.526
 """
 ```
-U ovom primeru, model linearne regresije pokušava da predvidi `trajanje` veze na osnovu drugih mrežnih karakteristika. Merenje performansi vršimo pomoću Srednje Kvadratne Greške (MSE) i R². R² blizu 1.0 bi ukazivao na to da model objašnjava većinu varijanse u `trajanju`, dok nizak ili negativan R² ukazuje na loše prilagođavanje. (Ne iznenađujte se ako je R² ovde nizak -- predviđanje `trajanja` može biti teško na osnovu datih karakteristika, a linearna regresija možda neće uhvatiti obrasce ako su složeni.)
+U ovom primeru, model linearne regresije pokušava da predvidi `duration` konekcije na osnovu drugih mrežnih karakteristika. Performanse merimo pomoću Mean Squared Error (MSE) i R². R² blizu 1.0 ukazivao bi na to da model objašnjava većinu varijanse u vrednosti `duration`, dok nizak ili negativan R² ukazuje na loše prilagođavanje. (Nemojte se iznenaditi ako je R² ovde nizak -- predviđanje vrednosti `duration` može biti teško na osnovu datih karakteristika, a linearna regresija možda ne može da obuhvati obrasce ako su složeni.)
 </details>
 
-### Logistička Regresija
+### Logistička regresija
 
-Logistička regresija je **klasifikacioni** algoritam koji modeluje verovatnoću da instanca pripada određenoj klasi (tipično "pozitivnoj" klasi). I pored svog imena, *logistička* regresija se koristi za diskretne ishode (za razliku od linearne regresije koja je za kontinuirane ishode). Posebno se koristi za **binarne klasifikacije** (dve klase, npr. zlonameran vs. benigni), ali se može proširiti na probleme sa više klasa (koristeći softmax ili pristupe jedan-protiv-ostatka).
+Logistička regresija je algoritam za **klasifikaciju** koji modeluje verovatnoću da instanca pripada određenoj klasi (obično „pozitivnoj“ klasi). Uprkos svom nazivu, *logistička* regresija koristi se za diskretne ishode (za razliku od linearne regresije, koja se koristi za kontinuirane ishode). Posebno se koristi za **binarnu klasifikaciju** (dve klase, npr. malicious nasuprot benign), ali se može proširiti na probleme sa više klasa (korišćenjem pristupa softmax ili one-vs-rest).<sup>[[1]](#references)</sup>
 
-Logistička regresija koristi logističku funkciju (poznatu i kao sigmoidna funkcija) da mapira predviđene vrednosti na verovatnoće. Imajte na umu da je sigmoidna funkcija funkcija sa vrednostima između 0 i 1 koja raste u S-obliku prema potrebama klasifikacije, što je korisno za zadatke binarne klasifikacije. Stoga se svaka karakteristika svakog ulaza množi sa dodeljenom težinom, a rezultat se propušta kroz sigmoidnu funkciju da bi se dobila verovatnoća:
+Logistička regresija koristi logističku funkciju (poznatu i kao sigmoidna funkcija) za mapiranje predviđenih vrednosti u verovatnoće. Imajte na umu da je sigmoidna funkcija funkcija čije su vrednosti između 0 i 1 i koja raste u obliku slova S, u skladu sa potrebama klasifikacije, što je korisno za zadatke binarne klasifikacije. Zato se svaka karakteristika svakog ulaza množi njoj dodeljenom težinom, a rezultat se prosleđuje kroz sigmoidnu funkciju kako bi se dobila verovatnoća:
 ```plaintext
 p(y=1|x) = 1 / (1 + e^(-z))
 ```
 Gde:
 
-- `p(y=1|x)` je verovatnoća da je izlaz `y` 1 s obzirom na ulaz `x`
+- `p(y=1|x)` je verovatnoća da je izlaz `y` jednak 1 za dati ulaz `x`
 - `e` je osnova prirodnog logaritma
-- `z` je linearna kombinacija ulaznih karakteristika, obično predstavljena kao `z = w1*x1 + w2*x2 + ... + wn*xn + b`. Primetite kako je ponovo u svom najjednostavnijem obliku to prava linija, ali u složenijim slučajevima postaje hiperravan sa više dimenzija (jedna po karakteristici).
+- `z` je linearna kombinacija ulaznih karakteristika, obično predstavljena kao `z = w1*x1 + w2*x2 + ... + wn*xn + b`. Imajte na umu da je i u svom najjednostavnijem obliku prava linija, dok u složenijim slučajevima postaje hiperravan sa više dimenzija (po jedna za svaku karakteristiku).
 
 > [!TIP]
-> *Upotreba u sajber bezbednosti:* Pošto su mnogi bezbednosni problemi suštinski da/ne odluke, logistička regresija se široko koristi. Na primer, sistem za detekciju upada može koristiti logističku regresiju da odluči da li je mrežna veza napad na osnovu karakteristika te veze. U detekciji phishing-a, logistička regresija može kombinovati karakteristike veb sajta (dužina URL-a, prisustvo "@" simbola, itd.) u verovatnoću da je u pitanju phishing. Koristila se u ranim generacijama spam filtera i ostaje snažna osnova za mnoge klasifikacione zadatke.
+> *Primene u cybersecurity-u:* Pošto su mnogi security problemi suštinski odluke tipa da/ne, logistička regresija se široko koristi. Na primer, intrusion detection system može koristiti logističku regresiju da odluči da li je mrežna konekcija napad na osnovu karakteristika te konekcije. Kod detekcije phishing-a, logistička regresija može kombinovati karakteristike web-sajta (dužinu URL-a, prisustvo simbola "@", itd.) u verovatnoću da je u pitanju phishing. Korišćena je u ranim generacijama spam filtera i i dalje predstavlja snažnu osnovu za mnoge classification zadatke.
 
-#### Logistička regresija za ne-binarne klasifikacije
+#### Logistička regresija za ne-binarne classification probleme
 
-Logistička regresija je dizajnirana za binarnu klasifikaciju, ali se može proširiti da se bavi višeklasnim problemima koristeći tehnike kao što su **one-vs-rest** (OvR) ili **softmax regresija**. U OvR, poseban model logističke regresije se obučava za svaku klasu, tretirajući je kao pozitivnu klasu u odnosu na sve ostale. Klasa sa najvišom predviđenom verovatnoćom se bira kao konačna predikcija. Softmax regresija generalizuje logističku regresiju na više klasa primenom softmax funkcije na izlazni sloj, proizvodeći verovatnosnu distribuciju preko svih klasa.
+Logistička regresija je namenjena binarnoj classification, ali se može proširiti za rad sa multi-class problemima pomoću tehnika kao što su **one-vs-rest** (OvR) ili **softmax regression**. Kod OvR-a, za svaku klasu se trenira poseban model logističke regresije, pri čemu se ta klasa tretira kao pozitivna, a sve ostale kao negativne. Klasa sa najvećom predviđenom verovatnoćom bira se kao konačna predikcija. Softmax regression generalizuje logističku regresiju na više klasa primenom softmax funkcije na izlazni sloj, čime se dobija distribucija verovatnoće preko svih klasa.
 
 #### **Ključne karakteristike logističke regresije:**
 
--   **Tip problema:** Klasifikacija (obično binarna). Predviđa verovatnoću pozitivne klase.
+-   **Tip problema:** Classification (obično binarna). Predviđa verovatnoću pozitivne klase.
 
--   **Interpretabilnost:** Visoka -- kao i kod linearne regresije, koeficijenti karakteristika mogu ukazivati na to kako svaka karakteristika utiče na log-odds ishoda. Ova transparentnost se često ceni u bezbednosti za razumevanje koji faktori doprinose upozorenju.
+-   **Interpretabilnost:** Visoka -- kao i kod linearne regresije, koeficijenti karakteristika mogu pokazati kako svaka karakteristika utiče na log-odds ishoda. Ova transparentnost je često značajna u security-ju za razumevanje faktora koji doprinose alert-u.
 
--   **Prednosti:** Jednostavna i brza za obuku; dobro funkcioniše kada je odnos između karakteristika i log-odds ishoda linearan. Izlazi verovatnoće, omogućavajući procenu rizika. Uz odgovarajuću regularizaciju, dobro se generalizuje i može bolje da se nosi sa multikolinearnošću nego obična linearna regresija.
+-   **Prednosti:** Jednostavna je i brzo se trenira; dobro radi kada je odnos između karakteristika i log-odds ishoda linearan. Daje verovatnoće, što omogućava scoring rizika. Uz odgovarajuću regularizaciju, dobro se generalizuje i može bolje da obradi multikolinearnost od obične linearne regresije.
 
--   **Ograničenja:** Pretpostavlja linearnu granicu odluke u prostoru karakteristika (ne uspeva ako je prava granica složena/ne-linearno). Može imati slabije performanse na problemima gde su interakcije ili ne-linearni efekti kritični, osim ako ručno ne dodate polinomijalne ili interakcione karakteristike. Takođe, logistička regresija je manje efikasna ako klase nisu lako odvojive linearnom kombinacijom karakteristika.
+-   **Ograničenja:** Pretpostavlja linearnu granicu odlučivanja u prostoru karakteristika (ne uspeva ako je stvarna granica složena/nelinearna). Može imati slabije performanse na problemima kod kojih su interakcije ili nelinearni efekti ključni, osim ako ručno ne dodate polinomske karakteristike ili karakteristike interakcije. Takođe, logistička regresija je manje efikasna ako se klase ne mogu lako razdvojiti linearnom kombinacijom karakteristika.
 
 
 <details>
-<summary>Primer -- Detekcija phishing veb sajtova pomoću logističke regresije:</summary>
+<summary>Primer -- Detekcija phishing web-sajtova pomoću logističke regresije:</summary>
 
-Koristićemo **Dataset veb sajtova za phishing** (iz UCI repozitorijuma) koji sadrži ekstraktovane karakteristike veb sajtova (kao što su da li URL ima IP adresu, starost domena, prisustvo sumnjivih elemenata u HTML-u, itd.) i oznaku koja ukazuje da li je sajt phishing ili legitimni. Obučavamo model logističke regresije da klasifikuje veb sajtove i zatim procenjujemo njegovu tačnost, preciznost, odziv, F1-score i ROC AUC na testnom skupu.
+Koristićemo **Phishing Websites Dataset** (iz UCI repozitorijuma), koji sadrži izdvojene karakteristike web-sajtova (na primer, da li URL sadrži IP adresu, starost domena, prisustvo sumnjivih elemenata u HTML-u itd.) i labelu koja pokazuje da li je sajt phishing ili legitiman. Treniraćemo model logističke regresije za classification web-sajtova, a zatim ćemo na test split-u proceniti njegovu tačnost, preciznost, odziv, F1-score i ROC AUC.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -221,26 +221,26 @@ F1-score : 0.917
 ROC AUC  : 0.979
 """
 ```
-U ovom primeru detekcije phishing-a, logistička regresija proizvodi verovatnoću za svaku veb stranicu da bude phishing. Evaluacijom tačnosti, preciznosti, odziva i F1, dobijamo osećaj o performansama modela. Na primer, visok odziv bi značio da hvata većinu phishing sajtova (važan za bezbednost kako bi se minimizirali propušteni napadi), dok visoka preciznost znači da ima malo lažnih alarma (važan za izbegavanje umora analitičara). ROC AUC (Površina ispod ROC krive) daje meru performansi koja nije zavisna od praga (1.0 je idealno, 0.5 nije bolje od slučajnosti). Logistička regresija često dobro funkcioniše na takvim zadacima, ali ako je granica odluke između phishing i legitimnih sajtova složena, možda će biti potrebni moćniji nelinearni modeli.
+U ovom primeru detekcije phishinga, logistička regresija proizvodi verovatnoću da je svaka veb-stranica phishing. Procjenom tačnosti, preciznosti, odziva i F1-mere dobijamo predstavu o performansama modela. Na primer, visok odziv znači da model otkriva većinu phishing stranica (što je važno za bezbednost kako bi se broj propuštenih napada sveo na minimum), dok visoka preciznost znači da ima malo lažnih alarma (što je važno kako bi se izbegao zamor analitičara). ROC AUC (površina ispod ROC krive) daje meru performansi nezavisnu od praga (1.0 je idealno, dok 0.5 nije bolje od slučajnog pogađanja). Logistička regresija često daje dobre rezultate na ovakvim zadacima, ali ako je granica odlučivanja između phishing i legitimnih veb-stranica složena, mogu biti potrebni napredniji nelinearni modeli.
 
 </details>
 
-### Odluke stabla
+### Stabla odlučivanja
 
-Stablo odluka je svestran **supervised learning algorithm** koji se može koristiti za klasifikaciju i regresiju. Uči hijerarhijski model odluka nalik stablu na osnovu karakteristika podataka. Svaki unutrašnji čvor stabla predstavlja test na određenoj karakteristici, svaka grana predstavlja ishod tog testa, a svaki list predstavlja predviđenu klasu (za klasifikaciju) ili vrednost (za regresiju).
+Stablo odlučivanja je svestrani **algoritam nadgledanog učenja** koji se može koristiti i za klasifikacione i za regresione zadatke. Ono uči hijerarhijski model odluka u obliku stabla na osnovu obeležja podataka. Svaki unutrašnji čvor stabla predstavlja test nad određenim obeležjem, svaka grana predstavlja ishod tog testa, a svaki list predstavlja predviđenu klasu (kod klasifikacije) ili vrednost (kod regresije).<sup>[[2]](#references)</sup>
 
-Da bi se izgradilo stablo, algoritmi poput CART (Classification and Regression Tree) koriste mere kao što su **Gini impurity** ili **information gain (entropy)** da izaberu najbolju karakteristiku i prag za deljenje podataka na svakom koraku. Cilj na svakom podelu je da se podaci podele kako bi se povećala homogenost ciljne varijable u rezultantnim podskupovima (za klasifikaciju, svaki čvor teži da bude što čistiji, sadržeći pretežno jednu klasu).
+Za izgradnju stabla, algoritmi kao što je CART (Classification and Regression Tree) koriste mere poput **Ginijeve nečistoće** ili **dobitka informacija (entropije)** kako bi izabrali najbolje obeležje i prag za podelu podataka u svakom koraku. Cilj svake podele je particionisanje podataka tako da se poveća homogenost ciljne promenljive u rezultujućim podskupovima (kod klasifikacije, cilj je da svaki čvor bude što čistiji i da pretežno sadrži jednu klasu).
 
-Stabla odluka su **highly interpretable** -- može se pratiti putanja od korena do lista kako bi se razumeo logika iza predikcije (npr., *"IF `service = telnet` AND `src_bytes > 1000` AND `failed_logins > 3` THEN classify as attack"*). Ovo je dragoceno u sajber bezbednosti za objašnjenje zašto je određena upozorenje podignuta. Stabla prirodno mogu obraditi i numeričke i kategorijske podatke i zahtevaju malo prethodne obrade (npr., skaliranje karakteristika nije potrebno).
+Stabla odlučivanja su **veoma lako interpretabilna** -- moguće je pratiti putanju od korena do lista i razumeti logiku koja stoji iza predviđanja (npr. *"AKO je `service = telnet` I `src_bytes > 1000` I `failed_logins > 3` ONDA klasifikuj kao napad"*). Ovo je dragoceno u sajber-bezbednosti jer omogućava objašnjenje razloga zbog kojeg je određeno upozorenje generisano. Stabla mogu prirodno da obrađuju i numeričke i kategorijalne podatke i zahtevaju malo prethodne obrade (npr. skaliranje obeležja nije potrebno).
 
-Međutim, jedno stablo odluka može lako prekomerno prilagoditi obučene podatke, posebno ako se duboko raste (mnoge podele). Tehnike poput obrezivanja (ograničavanje dubine stabla ili zahtev za minimalnim brojem uzoraka po listu) se često koriste da se spreči prekomerno prilagođavanje.
+Međutim, jedno stablo odlučivanja može lako da prenauči podatke za obuku, naročito ako je duboko izgrađeno (sa mnogo podela). Tehnike poput orezivanja (ograničavanje dubine stabla ili zahtevanje minimalnog broja uzoraka po listu) često se koriste za sprečavanje prenaučenosti.
 
-Postoje 3 glavne komponente stabla odluka:
-- **Root Node**: Gornji čvor stabla, koji predstavlja ceo skup podataka.
-- **Internal Nodes**: Čvorovi koji predstavljaju karakteristike i odluke na osnovu tih karakteristika.
-- **Leaf Nodes**: Čvorovi koji predstavljaju konačni ishod ili predikciju.
+Postoje 3 glavne komponente stabla odlučivanja:
+- **Koren čvor**: Gornji čvor stabla, koji predstavlja ceo skup podataka.
+- **Unutrašnji čvorovi**: Čvorovi koji predstavljaju obeležja i odluke zasnovane na tim obeležjima.
+- **Listovi**: Čvorovi koji predstavljaju konačni ishod ili predviđanje.
 
-Stablo bi moglo izgledati ovako:
+Stablo bi moglo da izgleda ovako:
 ```plaintext
 [Root Node]
 /   \
@@ -249,50 +249,50 @@ Stablo bi moglo izgledati ovako:
 [Leaf 1] [Leaf 2] [Leaf 3] [Leaf 4]
 ```
 > [!TIP]
-> *Upotreba u sajber bezbednosti:* Odluke stabla su korišćene u sistemima za detekciju upada za dobijanje **pravila** za identifikaciju napada. Na primer, rani IDS sistemi kao što su oni zasnovani na ID3/C4.5 generisali bi pravila koja su čitljiva za ljude kako bi razlikovali normalan i zlonameran saobraćaj. Takođe se koriste u analizi malvera da bi se odlučilo da li je datoteka zlonamerna na osnovu njenih atributa (veličina datoteke, entropija sekcije, API pozivi, itd.). Jasnoća stabala odluka ih čini korisnim kada je potrebna transparentnost -- analitičar može pregledati stablo kako bi potvrdio logiku detekcije.
+> *Slučajevi upotrebe u cybersecurity-u:* Stabla odlučivanja su korišćena u intrusion detection systems za izvođenje **pravila** za identifikovanje napada. Na primer, raniji IDS zasnovani na ID3/C4.5 algoritmima generisali su čoveku čitljiva pravila za razlikovanje normalnog od malicious saobraćaja. Takođe se koriste u analizi malware-a za odlučivanje da li je datoteka malicious na osnovu njenih atributa (veličina datoteke, entropija sekcija, API pozivi itd.). Jasnoća stabala odlučivanja čini ih korisnim kada je potrebna transparentnost -- analitičar može da pregleda stablo kako bi proverio logiku detekcije.
 
-#### **Ključne karakteristike stabala odluka:**
+#### **Ključne karakteristike stabala odlučivanja:**
 
--   **Tip problema:** Kako klasifikacija, tako i regresija. Obično se koriste za klasifikaciju napada naspram normalnog saobraćaja, itd.
+-   **Tip problema:** I klasifikacija i regresija. Često se koriste za klasifikaciju napada u odnosu na normalan saobraćaj itd.
 
--   **Interpretabilnost:** Veoma visoka -- odluke modela mogu se vizualizovati i razumeti kao skup if-then pravila. Ovo je velika prednost u bezbednosti za poverenje i verifikaciju ponašanja modela.
+-   **Interpretabilnost:** Veoma visoka -- odluke modela mogu se vizuelizovati i razumeti kao skup if-then pravila. Ovo je velika prednost u bezbednosti, zbog poverenja i provere ponašanja modela.
 
--   **Prednosti:** Mogu zabeležiti nelinearne odnose i interakcije između karakteristika (svaki razdvoj može se smatrati interakcijom). Nema potrebe za skaliranjem karakteristika ili one-hot kodiranjem kategorijskih varijabli -- stabla to obrade nativno. Brza inferencija (predikcija je samo praćenje puta u stablu).
+-   **Prednosti:** Mogu da obuhvate nelinearne odnose i interakcije između obeležja (svaki split može se posmatrati kao interakcija). Nema potrebe za skaliranjem obeležja ili one-hot kodiranjem kategoričkih promenljivih -- stabla njima upravljaju nativno. Brzo inference izvršavanje (predikcija se svodi na praćenje putanje kroz stablo).
 
--   **Ograničenja:** Podložna prekomernom prilagođavanju ako se ne kontroliše (duboko stablo može zapamtiti obučeni skup). Mogu biti nestabilna -- male promene u podacima mogu dovesti do različite strukture stabla. Kao pojedinačni modeli, njihova tačnost možda neće odgovarati naprednijim metodama (ensembli poput Random Forests obično bolje performiraju smanjenjem varijanse).
+-   **Ograničenja:** Sklona su overfitting-u ako se ne kontrolišu (duboko stablo može da zapamti training skup). Mogu biti nestabilna -- male promene u podacima mogu dovesti do drugačije strukture stabla. Kao pojedinačni modeli, njihova preciznost možda neće biti na nivou naprednijih metoda (ensemble-i kao što su Random Forests obično daju bolje rezultate smanjenjem varijanse).
 
--   **Pronalaženje najboljeg razdvajanja:**
-- **Gini nečistoća**: Mera nečistoće čvora. Niža Gini nečistoća ukazuje na bolje razdvajanje. Formula je:
+-   **Pronalaženje najboljeg split-a:**
+- **Gini impurity**: Meri nečistoću čvora. Niža Gini impurity ukazuje na bolji split. Formula je:
 
 ```plaintext
 Gini = 1 - Σ(p_i^2)
 ```
 
-Gde je `p_i` proporcija instanci u klasi `i`.
+Gde je `p_i` udeo instanci u klasi `i`.
 
-- **Entropija**: Mera nesigurnosti u skupu podataka. Niža entropija ukazuje na bolje razdvajanje. Formula je:
+- **Entropy**: Meri neizvesnost u skupu podataka. Niža entropy ukazuje na bolji split. Formula je:
 
 ```plaintext
 Entropy = -Σ(p_i * log2(p_i))
 ```
 
-Gde je `p_i` proporcija instanci u klasi `i`.
+Gde je `p_i` udeo instanci u klasi `i`.
 
-- **Informacijski dobitak**: Smanjenje entropije ili Gini nečistoće nakon razdvajanja. Što je veći informacijski dobitak, to je bolje razdvajanje. Izračunava se kao:
+- **Information Gain**: Smanjenje entropy ili Gini impurity nakon split-a. Što je information gain veći, split je bolji. Računa se na sledeći način:
 
 ```plaintext
 Information Gain = Entropy(parent) - (Weighted Average of Entropy(children))
 ```
 
 Pored toga, stablo se završava kada:
-- Sve instance u čvoru pripadaju istoj klasi. Ovo može dovesti do prekomernog prilagođavanja.
-- Maksimalna dubina (hardkodirana) stabla je dostignuta. Ovo je način da se spreči prekomerno prilagođavanje.
-- Broj instanci u čvoru je ispod određenog praga. Ovo je takođe način da se spreči prekomerno prilagođavanje.
-- Informacijski dobitak od daljih razdvajanja je ispod određenog praga. Ovo je takođe način da se spreči prekomerno prilagođavanje.
+- Sve instance u čvoru pripadaju istoj klasi. To može dovesti do overfitting-a.
+- Dostigne se maksimalna dubina (hardcoded) stabla. Ovo je način da se spreči overfitting.
+- Broj instanci u čvoru bude ispod određenog praga. Ovo je takođe način da se spreči overfitting.
+- Information gain iz daljih split-ova bude ispod određenog praga. Ovo je takođe način da se spreči overfitting.
 
 <details>
-<summary>Primer -- Stablo odluka za detekciju upada:</summary>
-Obučićemo stablo odluka na NSL-KDD skupu podataka da klasifikujemo mrežne konekcije kao *normalne* ili *napad*. NSL-KDD je poboljšana verzija klasičnog KDD Cup 1999 skupa podataka, sa karakteristikama kao što su tip protokola, usluga, trajanje, broj neuspešnih prijava, itd., i oznakom koja ukazuje na tip napada ili "normalno". Mapiraćemo sve tipove napada na klasu "anomalija" (binarna klasifikacija: normalno vs anomalija). Nakon obuke, procenićemo performanse stabla na testnom skupu.
+<summary>Primer -- Stablo odlučivanja za Intrusion Detection:</summary>
+Obučićemo stablo odlučivanja na NSL-KDD dataset-u kako bismo klasifikovali mrežne konekcije kao *normalne* ili *attack*. NSL-KDD je poboljšana verzija klasičnog KDD Cup 1999 dataset-a, sa obeležjima kao što su tip protokola, servis, trajanje, broj neuspešnih prijavljivanja itd., i labelom koja označava tip napada ili vrednost "normal". Mapiraćemo sve tipove napada u klasu "anomaly" (binarna klasifikacija: normalno u odnosu na anomaly). Nakon obučavanja, procenićemo performanse stabla na test skupu.
 ```python
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
@@ -356,40 +356,40 @@ F1‑score : 0.756
 ROC AUC  : 0.758
 """
 ```
-U ovom primeru odlučivanja, ograničili smo dubinu stabla na 10 kako bismo izbegli ekstremno prekomerno prilagođavanje (parametar `max_depth=10`). Metrički podaci pokazuju koliko dobro stablo razlikuje normalan i napadni saobraćaj. Visok odziv bi značio da hvata većinu napada (važan za IDS), dok visoka preciznost znači malo lažnih alarma. Odlučujuća stabla često postižu pristojnu tačnost na strukturiranim podacima, ali jedno stablo možda neće dostići najbolju moguću performansu. Ipak, *interpretabilnost* modela je velika prednost -- mogli bismo ispitati delove stabla da vidimo, na primer, koje karakteristike (npr., `service`, `src_bytes`, itd.) su najuticajnije u označavanju veze kao maliciozne.
+U ovom primeru stabla odlučivanja, ograničili smo dubinu stabla na 10 kako bismo izbegli ekstremni overfitting (parametar `max_depth=10`). Metrike pokazuju koliko dobro stablo razlikuje normalan saobraćaj od napada. Visok recall znači da detektuje većinu napada (što je važno za IDS), dok visok precision znači mali broj lažnih alarma. Stabla odlučivanja često postižu pristojnu tačnost na strukturiranim podacima, ali jedno stablo možda neće dostići najbolje moguće performanse. Ipak, *interpretabilnost* modela predstavlja veliku prednost -- mogli bismo da ispitamo podele u stablu kako bismo videli, na primer, koje su karakteristike (npr. `service`, `src_bytes` itd.) najuticajnije pri označavanju konekcije kao zlonamerne.
 
 </details>
 
 ### Random Forests
 
-Random Forest je metoda **ensemble learning** koja se oslanja na odlučujuća stabla kako bi poboljšala performanse. Random forest obučava više odlučujućih stabala (otuda "šuma") i kombinuje njihove izlaze kako bi napravila konačnu predikciju (za klasifikaciju, obično većinom glasova). Dve glavne ideje u random forest-u su **bagging** (bootstrap agregacija) i **feature randomness**:
+Random Forest je metoda **ensemble learning** koja se nadovezuje na stabla odlučivanja kako bi poboljšala performanse. Random forest trenira više stabala odlučivanja (otuda „forest“) i kombinuje njihove izlaze kako bi doneo konačnu predikciju (kod klasifikacije, obično većinskim glasanjem). Dve glavne ideje u okviru random forest-a su **bagging** (bootstrap aggregating) i **feature randomness**:
 
--   **Bagging:** Svako stablo se obučava na nasumičnom bootstrap uzorku podataka za obuku (uzorkovano sa ponovnim uzorkovanjem). Ovo uvodi raznolikost među stablima.
+-   **Bagging:** Svako stablo se trenira na nasumičnom bootstrap uzorku podataka za treniranje (uzorkovanom sa vraćanjem). Ovo uvodi raznolikost među stablima.
 
--   **Feature Randomness:** Na svakom razdvajanju u stablu, razmatra se nasumični podskup karakteristika za razdvajanje (umesto svih karakteristika). Ovo dodatno dekorelira stabla.
+-   **Feature Randomness:** Pri svakoj podeli u stablu, za podelu se razmatra nasumični podskup karakteristika (umesto svih karakteristika). Ovo dodatno smanjuje korelaciju između stabala.
 
-Srednjom vrednošću rezultata mnogih stabala, random forest smanjuje varijansu koju bi jedno odlučujuće stablo moglo imati. U jednostavnim terminima, pojedinačna stabla mogu prekomerno da se prilagode ili biti bučna, ali veliki broj raznolikih stabala koja glasaju zajedno ublažava te greške. Rezultat je često model sa **višom tačnošću** i boljom generalizacijom nego jedno odlučujuće stablo. Pored toga, random forests mogu pružiti procenu važnosti karakteristika (gledajući koliko svaka karakteristika smanjuje nečistotu u proseku).
+Usrednjavanjem rezultata velikog broja stabala, random forest smanjuje varijansu koju jedno stablo odlučivanja može imati. Jednostavno rečeno, pojedinačna stabla mogu da preprilagode model ili da budu šumovita, ali veliki broj raznovrsnih stabala koja glasaju zajedno ublažava te greške. Rezultat je često model sa **većom tačnošću** i boljom generalizacijom od pojedinačnog stabla odlučivanja. Pored toga, random forests mogu da pruže procenu važnosti karakteristika (posmatranjem koliko svaka podela na osnovu karakteristike u proseku smanjuje impurity).
 
-Random forests su postali **radna konja u sajber bezbednosti** za zadatke poput detekcije upada, klasifikacije malvera i detekcije spama. Često dobro funkcionišu odmah nakon instalacije uz minimalno podešavanje i mogu obraditi velike skupove karakteristika. Na primer, u detekciji upada, random forest može nadmašiti pojedinačno odlučujuće stablo hvatajući suptilnije obrasce napada sa manje lažnih pozitivnih rezultata. Istraživanja su pokazala da random forests imaju povoljne performanse u poređenju sa drugim algoritmima u klasifikaciji napada u skupovima podataka kao što su NSL-KDD i UNSW-NB15.
+Random forests su postali **workhorse u cybersecurity-ju** za zadatke kao što su detekcija upada, klasifikacija malware-a i detekcija spam-a. Često daju dobre rezultate bez dodatnog podešavanja i mogu da obrađuju velike skupove karakteristika. Na primer, u detekciji upada, random forest može nadmašiti pojedinačno stablo odlučivanja tako što detektuje suptilnije obrasce napada uz manje false positive rezultata. Istraživanja su pokazala da random forests postižu povoljne rezultate u poređenju sa drugim algoritmima pri klasifikaciji napada u skupovima podataka kao što su NSL-KDD i UNSW-NB15.<sup>[[3]](#references)[[9]](#references)</sup>
 
 #### **Ključne karakteristike Random Forests:**
 
--   **Tip problema:** Pretežno klasifikacija (takođe se koristi za regresiju). Veoma dobro prilagođeni za visoko-dimenzionalne strukturirane podatke koji su uobičajeni u bezbednosnim logovima.
+-   **Tip problema:** Pre svega klasifikacija (koristi se i za regresiju). Veoma je pogodan za visokodimenzionalne strukturirane podatke uobičajene u security logovima.
 
--   **Interpretabilnost:** Manja nego kod jednog odlučujućeg stabla -- ne možete lako vizualizovati ili objasniti stotine stabala odjednom. Međutim, rezultati važnosti karakteristika pružaju uvid u to koje su atribute najuticajnije.
+-   **Interpretabilnost:** Niža nego kod pojedinačnog stabla odlučivanja -- nije lako vizuelizovati ili objasniti stotine stabala odjednom. Međutim, rezultati važnosti karakteristika pružaju određeni uvid u to koji atributi imaju najveći uticaj.
 
--   **Prednosti:** Generalno viša tačnost nego kod modela sa jednim stablom zbog efekta ansambla. Otporan na prekomerno prilagođavanje -- čak i ako pojedinačna stabla prekomerno prilagode, ansambl se bolje generalizuje. Rukuje i numeričkim i kategorijskim karakteristikama i može upravljati nedostajućim podacima do određene mere. Takođe je relativno otporan na ekstremne vrednosti.
+-   **Prednosti:** Generalno veća tačnost nego kod modela sa jednim stablom, zahvaljujući efektu ansambla. Otporan je na overfitting -- čak i kada se pojedinačna stabla preprilagode, ansambl se bolje generalizuje. Obrađuje numeričke i kategoričke karakteristike i u određenoj meri može da upravlja nedostajućim podacima. Takođe je relativno otporan na outlier-e.
 
--   **Ograničenja:** Veličina modela može biti velika (mnoga stabla, svako potencijalno duboko). Predikcije su sporije nego kod jednog stabla (jer morate agregirati preko mnogih stabala). Manje je interpretabilan -- iako znate važne karakteristike, tačna logika nije lako pratljiva kao jednostavno pravilo. Ako je skup podataka ekstremno visoko-dimenzionalan i ređi, obučavanje veoma velike šume može biti računski zahtevno.
+-   **Ograničenja:** Veličina modela može biti velika (mnogo stabala, od kojih svako može biti duboko). Predikcije su sporije nego kod jednog stabla (pošto se rezultati moraju objediniti kroz mnoga stabla). Manje je interpretabilan -- iako znate koje su karakteristike važne, tačna logika se ne može lako pratiti kao jednostavno pravilo. Ako je skup podataka ekstremno visokodimenzionalan i redak, treniranje veoma velikog forest-a može biti računski zahtevno.
 
--   **Proces obuke:**
-1. **Bootstrap Sampling**: Nasumično uzorkovanje podataka za obuku sa ponovnim uzorkovanjem kako bi se stvorili višestruki podskupovi (bootstrap uzorci).
-2. **Izgradnja stabla**: Za svaki bootstrap uzorak, izgradite odlučujuće stablo koristeći nasumični podskup karakteristika na svakom razdvajanju. Ovo uvodi raznolikost među stablima.
-3. **Agregacija**: Za zadatke klasifikacije, konačna predikcija se pravi uzimanjem većine glasova među predikcijama svih stabala. Za zadatke regresije, konačna predikcija je prosek predikcija svih stabala.
+-   **Proces treniranja:**
+1. **Bootstrap Sampling**: Nasumično uzorkujte podatke za treniranje sa vraćanjem kako biste kreirali više podskupova (bootstrap uzoraka).
+2. **Tree Construction**: Za svaki bootstrap uzorak napravite stablo odlučivanja koristeći nasumični podskup karakteristika pri svakoj podeli. Ovo uvodi raznolikost među stablima.
+3. **Aggregation**: Kod klasifikacionih zadataka, konačna predikcija se dobija većinskim glasanjem na osnovu predikcija svih stabala. Kod regresionih zadataka, konačna predikcija je prosek predikcija svih stabala.
 
 <details>
 <summary>Primer -- Random Forest za detekciju upada (NSL-KDD):</summary>
-Koristićemo isti NSL-KDD skup podataka (binarno označen kao normalan naspram anomalije) i obučiti Random Forest klasifikator. Očekujemo da će random forest performirati jednako dobro ili bolje od pojedinačnog odlučujućeg stabla, zahvaljujući prosečnoj vrednosti ansambla koja smanjuje varijansu. Evaluiraćemo ga istim metrikama.
+Koristićemo isti NSL-KDD skup podataka (binarno označen kao normalan ili anomalija) i trenirati Random Forest classifier. Očekujemo da će random forest postići jednake ili bolje performanse od pojedinačnog stabla odlučivanja, zahvaljujući usrednjavanju ansambla koje smanjuje varijansu. Procenićemo ga pomoću istih metrika.
 ```python
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -481,35 +481,35 @@ F1-score:  0.754
 ROC AUC:   0.962
 """
 ```
-Random forest obično postiže snažne rezultate na ovom zadatku detekcije upada. Možda ćemo primetiti poboljšanje u metrima kao što su F1 ili AUC u poređenju sa pojedinačnim odlučujućim stablom, posebno u preciznosti ili podsećanju, u zavisnosti od podataka. To je u skladu sa razumevanjem da *"Random Forest (RF) je ansambl klasifikator i dobro se ponaša u poređenju sa drugim tradicionalnim klasifikatorima za efikasnu klasifikaciju napada."*. U kontekstu bezbednosnih operacija, model random forest može pouzdanije označiti napade dok smanjuje lažne alarme, zahvaljujući proseku mnogih odlučujućih pravila. Važnost karakteristika iz šume može nam reći koje mrežne karakteristike su najindikativnije za napade (npr. određene mrežne usluge ili neobični brojevi paketa).
+Random forest obično postiže dobre rezultate na ovom zadatku detekcije upada. Možemo primetiti poboljšanje metrika kao što su F1 ili AUC u poređenju sa pojedinačnim decision tree modelom, naročito u pogledu recall-a ili precision-a, u zavisnosti od podataka. Ovo je u skladu sa shvatanjem da je *„Random Forest (RF) ensemble classifier i da, u poređenju sa drugim tradicionalnim classifier-ima, uspešno klasifikuje napade.“* U kontekstu bezbednosnih operacija, random forest model bi mogao pouzdanije da označi napade uz smanjenje broja lažnih alarma, zahvaljujući usrednjavanju velikog broja decision rule-ova. Feature importance iz forest-a može pokazati koje network features najviše ukazuju na napade (npr. određeni network services ili neuobičajeni broj paketa).
 
 </details>
 
 ### Support Vector Machines (SVM)
 
-Support Vector Machines su moćni modeli nadgledanog učenja koji se prvenstveno koriste za klasifikaciju (a takođe i regresiju kao SVR). SVM pokušava da pronađe **optimalnu separacionu hiperplanu** koja maksimizira razmak između dve klase. Samo podskup tačaka za obuku ( "support vectors" najbliži granici) određuje poziciju ove hiperplane. Maksimizovanjem razmaka (udaljenosti između support vectors i hiperplane), SVM-ovi obično postižu dobru generalizaciju.
+Support Vector Machines su moćni supervised learning modeli koji se prvenstveno koriste za classification (kao i za regression u obliku SVR-a). SVM pokušava da pronađe **optimalnu separating hyperplane** koja maksimizuje marginu između dve klase. Samo podskup training points-a („support vectors“ najbliži granici) određuje položaj ove hyperplane. Maksimizovanjem margine (rastojanja između support vectors-a i hyperplane-a), SVM-ovi teže dobroj generalizaciji.<sup>[[4]](#references)</sup>
 
-Ključ SVM-ove moći je sposobnost korišćenja **kernel funkcija** za upravljanje nelinearnim odnosima. Podaci se mogu implicitno transformisati u prostor karakteristika više dimenzije gde može postojati linearni separator. Uobičajeni kerneli uključuju polinomski, radijalnu baznu funkciju (RBF) i sigmoid. Na primer, ako klase mrežnog saobraćaja nisu linearno odvojive u sirovom prostoru karakteristika, RBF kernel može ih mapirati u višu dimenziju gde SVM pronalazi linearno podelu (što odgovara nelinearnoj granici u originalnom prostoru). Fleksibilnost izbora kernela omogućava SVM-ovima da se suoče sa raznim problemima.
+Ključ snage SVM-a jeste mogućnost korišćenja **kernel functions** za obradu nelinearnih odnosa. Podaci se implicitno mogu transformisati u feature space veće dimenzionalnosti, gde može postojati linearni separator. Uobičajeni kernels uključuju polynomial, radial basis function (RBF) i sigmoid. Na primer, ako network traffic klase nisu linearno separabilne u izvornom feature space-u, RBF kernel ih može mapirati u višu dimenziju, gde SVM pronalazi linearno razdvajanje (što odgovara nelinearnoj granici u izvornom prostoru). Fleksibilnost pri izboru kernels-a omogućava SVM-ovima rešavanje različitih problema.
 
-SVM-ovi su poznati po dobrom performansu u situacijama sa visokodimenzionalnim prostorima karakteristika (kao što su podaci o tekstu ili sekvence opcode-a malvera) i u slučajevima kada je broj karakteristika veliki u odnosu na broj uzoraka. Bili su popularni u mnogim ranim aplikacijama u sajber bezbednosti kao što su klasifikacija malvera i detekcija upada zasnovana na anomalijama 2000-ih, često pokazujući visoku tačnost.
+Poznato je da SVM-ovi dobro rade u situacijama sa visokodimenzionalnim feature space-ovima (kao što su text data ili malware opcode sequences), kao i u slučajevima kada je broj features-a veliki u odnosu na broj samples-a. Bili su popularni u mnogim ranijim cybersecurity primenama, kao što su malware classification i anomaly-based intrusion detection tokom 2000-ih, često uz visoku tačnost.
 
-Međutim, SVM-ovi se ne skaliraju lako na veoma velike skupove podataka (kompleksnost obuke je super-linear u broju uzoraka, a korišćenje memorije može biti visoko jer može biti potrebno da se čuva mnogo support vectors). U praksi, za zadatke kao što je detekcija mrežnih upada sa milionima zapisa, SVM može biti previše spor bez pažljivog uzorkovanja ili korišćenja aproksimativnih metoda.
+Međutim, SVM-ovi se ne skaliraju jednostavno na veoma velike datasets (training complexity je super-linearna u odnosu na broj samples-a, a potrošnja memorije može biti velika jer će možda biti potrebno čuvati veliki broj support vectors-a). U praksi, za zadatke poput network intrusion detection-a sa milionima records-a, SVM može biti prespor bez pažljivog subsampling-a ili korišćenja approximate methods.
 
 #### **Ključne karakteristike SVM-a:**
 
--   **Tip problema:** Klasifikacija (binarna ili višeklasna putem jedan-na-jedan/jedan-na-ostale) i varijante regresije. Često se koristi u binarnoj klasifikaciji sa jasnim razdvajanjem margina.
+-   **Tip problema:** Classification (binary ili multiclass preko one-vs-one/one-vs-rest) i regression varijante. Često se koristi za binary classification sa jasno razdvojenim margins.
 
--   **Interpretabilnost:** Srednja -- SVM-ovi nisu toliko interpretabilni kao odlučujuća stabla ili logistička regresija. Iako možete identifikovati koje tačke podataka su support vectors i steći neki osećaj o tome koje karakteristike bi mogle biti uticajne (kroz težine u slučaju linearnih kernela), u praksi se SVM-ovi (posebno sa nelinearnim kernelima) tretiraju kao klasifikatori crne kutije.
+-   **Interpretabilnost:** Srednja -- SVM-ovi nisu toliko interpretabilni kao decision trees ili logistic regression. Iako možete identifikovati data points koji su support vectors i steći određeni uvid u to koje features mogu biti uticajne (preko weights-a u slučaju linear kernel-a), u praksi se SVM-ovi (posebno sa non-linear kernels) tretiraju kao black-box classifiers.
 
--   **Prednosti:** Efikasni u visokodimenzionalnim prostorima; mogu modelovati složene granice odluka uz pomoć kernel trika; otporni na prekomerno prilagođavanje ako je razmak maksimizovan (posebno sa odgovarajućim parametrom regularizacije C); dobro funkcionišu čak i kada klase nisu odvojene velikom udaljenošću (pronalaze najbolju kompromisnu granicu).
+-   **Prednosti:** Efikasni u visokodimenzionalnim spaces-ima; mogu modelovati složene decision boundaries pomoću kernel trick-a; otporni su na overfitting ako je margin maksimalizovan (posebno uz odgovarajući regularization parameter C); dobro rade čak i kada klase nisu razdvojene velikim rastojanjem (pronalaze najbolju kompromisnu boundary).
 
--   **Ograničenja:** **Računarski intenzivni** za velike skupove podataka (i obuka i predikcija se loše skaliraju kako podaci rastu). Zahteva pažljivo podešavanje parametara kernela i regularizacije (C, tip kernela, gamma za RBF, itd.). Ne pruža direktno probabilističke izlaze (iako se može koristiti Platt scaling za dobijanje verovatnoća). Takođe, SVM-ovi mogu biti osetljivi na izbor parametara kernela --- loš izbor može dovesti do nedovoljno ili prekomerno prilagođavanje.
+-   **Ograničenja:** **Computationally intensive** za velike datasets (i training i prediction se loše skaliraju sa rastom podataka). Zahtevaju pažljivo podešavanje kernel i regularization parameters-a (C, kernel type, gamma za RBF itd.). Ne obezbeđuju direktno probabilistic outputs (iako se Platt scaling može koristiti za dobijanje probabilities). SVM-ovi takođe mogu biti osetljivi na izbor kernel parameters-a --- loš izbor može dovesti do underfit-a ili overfit-a.
 
-*Upotreba u sajber bezbednosti:* SVM-ovi su korišćeni u **detekciji malvera** (npr. klasifikacija fajlova na osnovu ekstraktovanih karakteristika ili sekvenci opcode-a), **detekciji mrežnih anomalija** (klasifikacija saobraćaja kao normalnog ili zlonamernog), i **detekciji phishing-a** (korišćenje karakteristika URL-ova). Na primer, SVM bi mogao uzeti karakteristike e-pošte (broj određenih ključnih reči, ocene reputacije pošiljaoca, itd.) i klasifikovati je kao phishing ili legitimnu. Takođe su primenjeni na **detekciju upada** na skupovima karakteristika kao što je KDD, često postižući visoku tačnost na račun računanja.
+*Primene u cybersecurity-u:* SVM-ovi su korišćeni za **malware detection** (npr. klasifikaciju files-a na osnovu izdvojenih features-a ili opcode sequences-a), **network anomaly detection** (klasifikaciju traffic-a kao normalnog ili malicious) i **phishing detection** (korišćenjem features-a URL-ova). Na primer, SVM može koristiti features e-maila (broj određenih keywords-a, sender reputation scores itd.) i klasifikovati ga kao phishing ili legitimate. Takođe su primenjivani za **intrusion detection** na feature sets-ima kao što je KDD, često uz visoku tačnost po cenu computational resources-a.
 
 <details>
-<summary>Primer -- SVM za klasifikaciju malvera:</summary>
-Ponovo ćemo koristiti skup podataka o phishing veb sajtovima, ovaj put sa SVM-om. Pošto SVM-ovi mogu biti spori, koristićemo podskup podataka za obuku ako je potrebno (skup podataka ima oko 11k instanci, što SVM može razumno obraditi). Koristićemo RBF kernel koji je uobičajen izbor za nelinearne podatke, i omogućićemo procene verovatnoće za izračunavanje ROC AUC.
+<summary>Primer -- SVM za Malware Classification:</summary>
+Ponovo ćemo koristiti phishing website dataset, ovog puta sa SVM-om. Pošto SVM-ovi mogu biti spori, po potrebi ćemo koristiti podskup podataka za training (dataset ima približno 11k instances-a, što SVM može razumno da obradi). Koristićemo RBF kernel, koji je čest izbor za nelinearne podatke, i uključićemo probability estimates za izračunavanje ROC AUC-a.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -577,72 +577,75 @@ F1‑score : 0.950
 ROC AUC  : 0.989
 """
 ```
-SVM model će izbaciti metrike koje možemo uporediti sa logističkom regresijom na istom zadatku. Možda ćemo otkriti da SVM postiže visoku tačnost i AUC ako su podaci dobro razdvojeni karakteristikama. S druge strane, ako je skup podataka imao puno šuma ili preklapajućih klasa, SVM možda neće značajno nadmašiti logističku regresiju. U praksi, SVM-ovi mogu dati podsticaj kada postoje složene, nelinearne veze između karakteristika i klase -- RBF kernel može uhvatiti zakrivljene granice odluke koje bi logistička regresija propustila. Kao i kod svih modela, pažljivo podešavanje `C` (regularizacija) i parametara kernela (kao što je `gamma` za RBF) je potrebno da bi se izbalansirali pristrasnost i varijansa.
+SVM model će dati metrike koje možemo uporediti sa Logistic Regression modelom na istom zadatku. Možemo utvrditi da SVM postiže visoku tačnost i AUC ako su podaci dobro razdvojeni karakteristikama. S druge strane, ako skup podataka sadrži mnogo šuma ili klase koje se preklapaju, SVM možda neće značajno nadmašiti Logistic Regression. U praksi, SVM može pružiti poboljšanje kada postoje složene, nelinearne veze između karakteristika i klase -- RBF kernel može obuhvatiti zakrivljene granice odlučivanja koje bi Logistic Regression propustio. Kao i kod svih modela, potrebno je pažljivo podesiti `C` (regularizaciju) i parametre kernela (kao što je `gamma` za RBF) kako bi se uravnotežili bias i varijansa.
 
 </details>
 
-#### Razlika između logističke regresije i SVM
+#### Razlika između Logistic Regression i SVM
 
-| Aspekt | **Logistička regresija** | **Podrška vektorskim mašinama** |
+| Aspekt | **Logistic Regression** | **Support Vector Machines** |
 |---|---|---|
-| **Funkcija cilja** | Minimizira **log‑gubitak** (kros-entropija). | Maksimizuje **marginu** dok minimizira **hinge‑gubitak**. |
-| **Granica odluke** | Pronalazi **najbolji hiperplan** koji modeluje _P(y\|x)_. | Pronalazi **hiperplan sa maksimalnom marginom** (najveći razmak do najbližih tačaka). |
-| **Izlaz** | **Probabilistički** – daje kalibrisane verovatnoće klasa putem σ(w·x + b). | **Deterministički** – vraća oznake klasa; verovatnoće zahtevaju dodatni rad (npr. Platt skaliranje). |
-| **Regularizacija** | L2 (podrazumevano) ili L1, direktno balansira pod/over‑fitting. | C parametar trguje širinom margine naspram pogrešnih klasifikacija; parametri kernela dodaju složenost. |
-| **Kerneli / Nelinearni** | Prirodni oblik je **linearan**; nelinearnost se dodaje inženjeringom karakteristika. | Ugrađeni **kernel trik** (RBF, polinom, itd.) omogućava modelovanje složenih granica u visokom dimenzionalnom prostoru. |
-| **Skalabilnost** | Rešava konveksnu optimizaciju u **O(nd)**; dobro se nosi sa veoma velikim n. | Obuka može biti **O(n²–n³)** u memoriji/vremenu bez specijalizovanih rešenja; manje je prijateljski prema ogromnom n. |
-| **Interpretabilnost** | **Visoka** – težine pokazuju uticaj karakteristika; odnos šansi intuitivan. | **Niska** za nelinearne kernela; podržavajući vektori su retki, ali nisu laki za objašnjenje. |
-| **Osetljivost na outliere** | Koristi glatki log‑gubitak → manje osetljiv. | Hinge‑gubitak sa tvrdim marginama može biti **osetljiv**; mekana margina (C) ublažava. |
-| **Tipični slučajevi upotrebe** | Kreditno ocenjivanje, medicinski rizik, A/B testiranje – gde **verovatnoće i objašnjivost** imaju značaj. | Klasifikacija slika/teksta, bioinformatika – gde **složenih granica** i **visoko-dimenzionalni podaci** imaju značaj. |
+| **Funkcija cilja** | Minimizuje **log-loss** (unakrsnu entropiju). | Maksimizuje **marginu**, uz minimizovanje **hinge-loss** funkcije. |
+| **Granica odlučivanja** | Pronalazi **hiperravan najboljeg prilagođavanja** koja modeluje _P(y\|x)_. | Pronalazi **hiperravan sa maksimalnom marginom** (najveći razmak do najbližih tačaka). |
+| **Izlaz** | **Probabilistički** – daje kalibrisane verovatnoće klasa putem σ(w·x + b). | **Deterministički** – vraća oznake klasa; verovatnoće zahtevaju dodatnu obradu (npr. Platt scaling). |
+| **Regularizacija** | L2 (podrazumevana) ili L1, direktno uravnotežuje underfitting/overfitting. | Parametar C pravi kompromis između širine margine i pogrešnih klasifikacija; parametri kernela dodaju složenost. |
+| **Kernels / Nelinearnost** | Izvorni oblik je **linearan**; nelinearnost se dodaje inženjeringom karakteristika. | Ugrađeni **kernel trick** (RBF, poly itd.) omogućava modelovanje složenih granica u visokodimenzionalnom prostoru. |
+| **Skalabilnost** | Rešava konveksnu optimizaciju u **O(nd)**; dobro obrađuje veoma veliko n. | Obuka može zahtevati **O(n²–n³)** memorije/vremena bez specijalizovanih rešavača; manje je pogodan za ogromne vrednosti n. |
+| **Interpretabilnost** | **Visoka** – težine pokazuju uticaj karakteristika; odnos verovatnoća je intuitivan. | **Niska** za nelinearne kernelse; support vectors su retki, ali ih nije lako objasniti. |
+| **Osetljivost na outliers** | Koristi glatki log-loss → manje je osetljiv. | Hinge-loss sa hard margin može biti **osetljiv**; soft-margin (C) ublažava taj problem. |
+| **Tipični slučajevi upotrebe** | Procena kreditnog rizika, medicinski rizik, A/B testiranje – gde su **verovatnoće i objašnjivost** važne. | Klasifikacija slika/teksta, bioinformatika – gde su važne **složene granice** i **viskodimenzionalni podaci**. |
 
-* **Ako vam trebaju kalibrisane verovatnoće, interpretabilnost, ili radite sa ogromnim skupovima podataka — izaberite logističku regresiju.**
-* **Ako vam treba fleksibilan model koji može uhvatiti nelinearne odnose bez ručnog inženjeringa karakteristika — izaberite SVM (sa kernelima).**
-* Obe optimizuju konveksne ciljeve, tako da su **globalni minimumi zagarantovani**, ali SVM-ovi kerneli dodaju hiper-parametre i troškove računanja.
+* **Ako su vam potrebne kalibrisane verovatnoće, interpretabilnost ili rad sa ogromnim skupovima podataka — izaberite Logistic Regression.**
+* **Ako vam je potreban fleksibilan model koji može da obuhvati nelinearne veze bez ručnog inženjeringa karakteristika — izaberite SVM (sa kernels).**
+* Oba modela optimizuju konveksne ciljne funkcije, pa su **globalni minimumi zagarantovani**, ali SVM kerneli dodaju hiperparametre i računarsku cenu.
 
-### Naivni Bejz
+### Naive Bayes
 
-Naivni Bejz je porodica **probabilističkih klasifikatora** zasnovana na primeni Bejzove teoreme sa jakom pretpostavkom nezavisnosti između karakteristika. I pored ove "naivne" pretpostavke, Naivni Bejz često iznenađujuće dobro funkcioniše za određene primene, posebno one koje uključuju tekst ili kategorijske podatke, kao što je detekcija spama.
+Naive Bayes je porodica **probabilističkih klasifikatora** zasnovana na primeni Bayesove teoreme uz snažnu pretpostavku nezavisnosti između karakteristika. Uprkos ovoj „naivnoj“ pretpostavci, Naive Bayes često funkcioniše iznenađujuće dobro u određenim primenama, naročito onima koje uključuju tekstualne ili kategoričke podatke, kao što je detekcija spama.<sup>[[5]](#references)</sup>
 
-#### Bejzova teorema
 
-Bejzova teorema je osnova Naivnih Bejz klasifikatora. Ona povezuje uslovne i marginalne verovatnoće slučajnih događaja. Formula je:
+#### Bayesova teorema
+
+Bayesova teorema predstavlja osnovu Naive Bayes klasifikatora. Ona povezuje uslovne i marginalne verovatnoće slučajnih događaja. Formula glasi:
 ```plaintext
 P(A|B) = (P(B|A) * P(A)) / P(B)
 ```
 Gde:
-- `P(A|B)` je posteriorna verovatnoća klase `A` s obzirom na karakteristiku `B`.
-- `P(B|A)` je verovatnoća karakteristike `B` s obzirom na klasu `A`.
-- `P(A)` je priorna verovatnoća klase `A`.
-- `P(B)` je priorna verovatnoća karakteristike `B`.
+- `P(A|B)` je posteriorna verovatnoća klase `A` na osnovu osobine `B`.
+- `P(B|A)` je verodostojnost osobine `B` za klasu `A`.
+- `P(A)` je apriorna verovatnoća klase `A`.
+- `P(B)` je apriorna verovatnoća osobine `B`.
 
-Na primer, ako želimo da klasifikujemo da li je tekst napisan od strane deteta ili odrasle osobe, možemo koristiti reči u tekstu kao karakteristike. Na osnovu nekih inicijalnih podataka, Naive Bayes klasifikator će prethodno izračunati verovatnoće svake reči da bude u svakoj potencijalnoj klasi (dete ili odrasla osoba). Kada se da novi tekst, izračunaće verovatnoću svake potencijalne klase s obzirom na reči u tekstu i izabrati klasu sa najvišom verovatnoćom.
+Na primer, ako želimo da klasifikujemo da li je tekst napisalo dete ili odrasla osoba, možemo koristiti reči u tekstu kao osobine. Na osnovu početnih podataka, Naive Bayes classifier će prethodno izračunati verovatnoće da se svaka reč nalazi u svakoj potencijalnoj klasi (dete ili odrasla osoba). Kada dobije novi tekst, izračunaće verovatnoću svake potencijalne klase na osnovu reči u tekstu i izabrati klasu sa najvećom verovatnoćom.
 
-Kao što možete videti u ovom primeru, Naive Bayes klasifikator je vrlo jednostavan i brz, ali pretpostavlja da su karakteristike nezavisne, što nije uvek slučaj u podacima iz stvarnog sveta.
+Kao što možete videti u ovom primeru, Naive Bayes classifier je veoma jednostavan i brz, ali pretpostavlja da su osobine nezavisne, što nije uvek slučaj sa podacima iz stvarnog sveta.
 
-#### Tipovi Naive Bayes klasifikatora
 
-Postoji nekoliko tipova Naive Bayes klasifikatora, u zavisnosti od tipa podataka i raspodele karakteristika:
-- **Gaussian Naive Bayes**: Pretpostavlja da karakteristike prate Gaussovu (normalnu) raspodelu. Pogodan je za kontinuirane podatke.
-- **Multinomial Naive Bayes**: Pretpostavlja da karakteristike prate multinomijalnu raspodelu. Pogodan je za diskretne podatke, kao što su broj reči u klasifikaciji teksta.
-- **Bernoulli Naive Bayes**: Pretpostavlja da su karakteristike binarne (0 ili 1). Pogodan je za binarne podatke, kao što su prisutnost ili odsutnost reči u klasifikaciji teksta.
-- **Categorical Naive Bayes**: Pretpostavlja da su karakteristike kategorijske varijable. Pogodan je za kategorijske podatke, kao što je klasifikacija voća na osnovu njihove boje i oblika.
+#### Tipovi Naive Bayes Classifiers
 
-#### **Ključne karakteristike Naive Bayes-a:**
+Postoji nekoliko tipova Naive Bayes classifiers, u zavisnosti od vrste podataka i distribucije osobina:
+- **Gaussian Naive Bayes**: Pretpostavlja da osobine prate Gaussian (normalnu) distribuciju. Pogodan je za kontinuirane podatke.
+- **Multinomial Naive Bayes**: Pretpostavlja da osobine prate multinomijalnu distribuciju. Pogodan je za diskretne podatke, kao što je broj pojavljivanja reči u klasifikaciji teksta.
+- **Bernoulli Naive Bayes**: Pretpostavlja da su osobine binarne (0 ili 1). Pogodan je za binarne podatke, kao što su prisustvo ili odsustvo reči u klasifikaciji teksta.
+- **Categorical Naive Bayes**: Pretpostavlja da su osobine kategorijalne promenljive. Pogodan je za kategorijalne podatke, kao što je klasifikacija voća na osnovu boje i oblika.
 
--   **Tip problema:** Klasifikacija (binarna ili višeklasna). Često se koristi za zadatke klasifikacije teksta u sajber bezbednosti (spam, phishing, itd.).
 
--   **Interpretabilnost:** Srednja -- nije tako direktno interpretabilan kao stablo odluka, ali se mogu pregledati naučene verovatnoće (npr. koje reči su najverovatnije u spam vs ham emailovima). Oblik modela (verovatnoće za svaku karakteristiku s obzirom na klasu) može se razumeti ako je potrebno.
+#### **Ključne karakteristike Naive Bayes:**
 
--   **Prednosti:** **Veoma brza** obuka i predikcija, čak i na velikim skupovima podataka (linearno u broju instanci * broj karakteristika). Zahteva relativno mali broj podataka za pouzdano procenjivanje verovatnoća, posebno uz odgovarajuće izravnavanje. Često je iznenađujuće tačan kao osnovna linija, posebno kada karakteristike nezavisno doprinose dokazima za klasu. Dobro funkcioniše sa podacima visoke dimenzionalnosti (npr. hiljade karakteristika iz teksta). Nema potrebe za složenim podešavanjima osim postavljanja parametra izravnavanja.
+-   **Tip problema:** Klasifikacija (binarna ili višeklasna). Često se koristi za zadatke klasifikacije teksta u cybersecurity oblasti (spam, phishing itd.).
 
--   **Ograničenja:** Pretpostavka nezavisnosti može ograničiti tačnost ako su karakteristike visoko korelisane. Na primer, u mrežnim podacima, karakteristike poput `src_bytes` i `dst_bytes` mogu biti korelisane; Naive Bayes neće uhvatiti tu interakciju. Kako veličina podataka postaje veoma velika, izražajniji modeli (poput ansambala ili neuronskih mreža) mogu nadmašiti NB učenjem zavisnosti karakteristika. Takođe, ako je potrebna određena kombinacija karakteristika za identifikaciju napada (ne samo pojedinačne karakteristike nezavisno), NB će imati poteškoća.
+-   **Interpretabilnost:** Srednja -- nije direktno interpretabilan kao decision tree, ali se mogu ispitati naučene verovatnoće (npr. koje reči se najverovatnije pojavljuju u spam u odnosu na ham emailove). Oblik modela (verovatnoće svake osobine za datu klasu) može se razumeti kada je to potrebno.
+
+-   **Prednosti:** **Veoma brzo** treniranje i predviđanje, čak i na velikim skupovima podataka (linearno u odnosu na broj instanci * broj osobina). Zahteva relativno malu količinu podataka za pouzdanu procenu verovatnoća, naročito uz pravilno smoothing podešavanje. Često je iznenađujuće precizan kao baseline, posebno kada osobine nezavisno doprinose dokazima u korist određene klase. Dobro funkcioniše sa visokodimenzionalnim podacima (npr. hiljade osobina iz teksta). Nije potrebno složeno podešavanje, osim postavljanja smoothing parametra.
+
+-   **Ograničenja:** Pretpostavka nezavisnosti može ograničiti preciznost ako su osobine veoma korelisane. Na primer, u network podacima, osobine kao što su `src_bytes` i `dst_bytes` mogu biti korelisane; Naive Bayes neće obuhvatiti tu interakciju. Kako veličina podataka postaje veoma velika, ekspresivniji modeli (kao što su ensembles ili neural nets) mogu nadmašiti NB učenjem zavisnosti između osobina. Takođe, ako je za identifikaciju napada potrebna određena kombinacija osobina (a ne samo pojedinačne osobine nezavisno), NB će imati poteškoća.
 
 > [!TIP]
-> *Upotrebe u sajber bezbednosti:* Klasična upotreba je **detekcija spama** -- Naive Bayes je bio srž ranih filtera za spam, koristeći frekvencije određenih tokena (reči, fraze, IP adrese) za izračunavanje verovatnoće da je email spam. Takođe se koristi u **detekciji phishing emailova** i **klasifikaciji URL-ova**, gde prisutnost određenih ključnih reči ili karakteristika (poput "login.php" u URL-u, ili `@` u putanji URL-a) doprinosi verovatnoći phishinga. U analizi malvera, moglo bi se zamisliti Naive Bayes klasifikator koji koristi prisutnost određenih API poziva ili dozvola u softveru da predvidi da li je to malver. Iako napredniji algoritmi često bolje funkcionišu, Naive Bayes ostaje dobra osnovna linija zbog svoje brzine i jednostavnosti.
+> *Primene u cybersecurity oblasti:* Klasična primena je **detekcija spam-a** -- Naive Bayes je bio osnova ranih spam filtera, koji su koristili učestalost određenih tokena (reči, fraze, IP adrese) za izračunavanje verovatnoće da je email spam. Takođe se koristi za **detekciju phishing emailova** i **klasifikaciju URL-ova**, gde prisustvo određenih ključnih reči ili karakteristika (kao što je "login.php" u URL-u ili `@` u putanji URL-a) doprinosi verovatnoći phishing-a. U analizi malware-a, može se zamisliti Naive Bayes classifier koji koristi prisustvo određenih API poziva ili dozvola u software-u za predviđanje da li je u pitanju malware. Iako napredniji algoritmi često daju bolje rezultate, Naive Bayes ostaje dobar baseline zbog svoje brzine i jednostavnosti.
 
 <details>
-<summary>Primer -- Naive Bayes za detekciju phishinga:</summary>
-Da bismo demonstrirali Naive Bayes, koristićemo Gaussian Naive Bayes na NSL-KDD skupu podataka o upadima (sa binarnim oznakama). Gaussian NB će tretirati svaku karakteristiku kao da prati normalnu raspodelu po klasi. Ovo je gruba procena jer su mnoge mrežne karakteristike diskretne ili veoma asimetrične, ali pokazuje kako bi se NB primenio na podatke sa kontinuiranim karakteristikama. Takođe bismo mogli izabrati Bernoulli NB na skupu podataka binarnih karakteristika (poput skupa aktiviranih upozorenja), ali ćemo se ovde držati NSL-KDD radi kontinuiteta.
+<summary>Primer -- Naive Bayes za detekciju phishing-a:</summary>
+Da bismo demonstrirali Naive Bayes, koristićemo Gaussian Naive Bayes na NSL-KDD intrusion dataset-u (sa binarnim labelama). Gaussian NB će tretirati svaku osobinu kao da prati normalnu distribuciju za svaku klasu. Ovo je približan izbor, jer su mnoge network osobine diskretne ili imaju veoma asimetričnu distribuciju, ali pokazuje kako bi se NB primenio na podatke sa kontinuiranim osobinama. Takođe bismo mogli izabrati Bernoulli NB na skupu podataka sa binarnim osobinama (kao što je skup aktiviranih alerts), ali ćemo se ovde držati NSL-KDD-a radi kontinuiteta.
 ```python
 import pandas as pd
 from sklearn.naive_bayes import GaussianNB
@@ -703,34 +706,34 @@ F1-score:  0.071
 ROC AUC:   0.867
 """
 ```
-Ovaj kod obučava Naive Bayes klasifikator za otkrivanje napada. Naive Bayes će izračunati stvari poput `P(service=http | Attack)` i `P(Service=http | Normal)` na osnovu podataka za obuku, pretpostavljajući nezavisnost među karakteristikama. Zatim će koristiti ove verovatnoće da klasifikuje nove veze kao normalne ili napad na osnovu posmatranih karakteristika. Performanse NB na NSL-KDD možda neće biti tako visoke kao kod naprednijih modela (pošto je nezavisnost karakteristika prekršena), ali često su zadovoljavajuće i dolaze sa prednošću ekstremne brzine. U scenarijima poput filtriranja e-pošte u realnom vremenu ili inicijalne triage URL-ova, Naive Bayes model može brzo označiti očigledno zlonamerne slučajeve uz nisku potrošnju resursa.
+Ovaj kod obučava Naive Bayes klasifikator za detekciju napada. Naive Bayes će izračunati vrednosti poput `P(service=http | Attack)` i `P(Service=http | Normal)` na osnovu training podataka, uz pretpostavku nezavisnosti među feature-ima. Zatim će koristiti ove verovatnoće za klasifikaciju novih konekcija kao normalnih ili napadačkih, na osnovu uočenih feature-a. Performanse NB-a na NSL-KDD možda neće biti visoke kao kod naprednijih modela (pošto je pretpostavka nezavisnosti feature-a narušena), ali su često sasvim dobre i dolaze uz prednost izuzetne brzine. U scenarijima poput filtriranja emailova u realnom vremenu ili početne trijaže URL-ova, Naive Bayes model može brzo označiti očigledno maliciozne slučajeve uz malu potrošnju resursa.
 
 </details>
 
 ### k-Nearest Neighbors (k-NN)
 
-k-Nearest Neighbors je jedan od najjednostavnijih algoritama mašinskog učenja. To je **neparametrijska, metoda zasnovana na instancama** koja donosi predikcije na osnovu sličnosti sa primerima u skupu podataka za obuku. Ideja za klasifikaciju je: da bi se klasifikovala nova tačka podataka, pronađite **k** najbližih tačaka u podacima za obuku (njeni "najbliži susedi") i dodelite većinsku klasu među tim susedima. "Bliskost" se definiše metrikom udaljenosti, obično Euklidskom udaljenošću za numeričke podatke (druge udaljenosti mogu se koristiti za različite tipove karakteristika ili problema).
+k-Nearest Neighbors je jedan od najjednostavnijih machine learning algoritama. To je **neparametarski, instance-based** metod koji donosi predikcije na osnovu sličnosti sa primerima iz training skupa. Ideja klasifikacije je sledeća: da bi se klasifikovala nova data tačka, pronalazi se **k** najbližih tačaka u training podacima (njeni „nearest neighbors“), a zatim se dodeljuje klasa koja je većinska među tim susedima. „Blizina“ se definiše metrikom distance, najčešće Euklidskom distancom za numeričke podatke (druge distance mogu se koristiti za različite tipove feature-a ili problema).<sup>[[10]](#references)</sup>
 
-K-NN zahteva *nema eksplicitnog obučavanja* -- faza "obuke" je samo skladištenje skupa podataka. Sav rad se odvija tokom upita (predikcije): algoritam mora izračunati udaljenosti od tačke upita do svih tačaka obuke da bi pronašao najbliže. Ovo čini vreme predikcije **linearno u broju uzoraka obuke**, što može biti skupo za velike skupove podataka. Zbog toga je k-NN najbolje prilagođen manjim skupovima podataka ili scenarijima gde možete trgovati memorijom i brzinom za jednostavnost.
+K-NN ne zahteva *eksplicitni training* -- „training“ faza se svodi na čuvanje dataseta. Sav posao se odvija tokom query-ja (predikcije): algoritam mora da izračuna distance od query tačke do svih training tačaka kako bi pronašao najbliže. Zbog toga je vreme predikcije **linearno u odnosu na broj training uzoraka**, što može biti skupo za velike datasete. Zbog toga je k-NN najpogodniji za manje datasete ili scenarije u kojima se memorija i brzina mogu menjati za jednostavnost.
 
-Uprkos svojoj jednostavnosti, k-NN može modelovati veoma složene granice odluka (pošto efektivno granica odluke može biti bilo kojeg oblika koji diktira raspodela primera). Obično dobro funkcioniše kada je granica odluke veoma nepravilna i imate puno podataka -- suštinski dopuštajući podacima da "govore za sebe". Međutim, u visokim dimenzijama, metričke udaljenosti mogu postati manje značajne (prokletstvo dimenzionalnosti), a metoda može imati poteškoća osim ako nemate ogroman broj uzoraka.
+Uprkos jednostavnosti, k-NN može modelovati veoma složene granice odlučivanja (pošto granica odlučivanja praktično može imati bilo koji oblik koji određuje raspodela primera). Obično daje dobre rezultate kada je granica odlučivanja veoma nepravilna i kada postoji mnogo podataka -- u suštini dopuštajući podacima da „govore sami za sebe“. Međutim, u visokodimenzionalnim prostorima metrike distance mogu postati manje smislene (curse of dimensionality), pa metod može imati poteškoća osim ako ne postoji ogroman broj uzoraka.
 
-*Upotrebe u sajber bezbednosti:* k-NN je primenjen na detekciju anomalija -- na primer, sistem za detekciju upada može označiti mrežni događaj kao zlonameran ako su većina njegovih najbližih suseda (prethodni događaji) bili zlonamerni. Ako normalni saobraćaj formira klastere, a napadi su izuzeci, K-NN pristup (sa k=1 ili malim k) suštinski radi **detekciju anomalija najbližih suseda**. K-NN je takođe korišćen za klasifikaciju porodica malvera pomoću binarnih vektora karakteristika: nova datoteka može biti klasifikovana kao određena porodica malvera ako je veoma blizu (u prostoru karakteristika) poznatim instancama te porodice. U praksi, k-NN nije tako uobičajen kao skalabilniji algoritmi, ali je konceptualno jednostavan i ponekad se koristi kao osnovna linija ili za probleme malih razmera.
+*Use cases in cybersecurity:* k-NN se koristi za anomaly detection -- na primer, intrusion detection system može označiti network event kao maliciozan ako je većina njegovih najbližih suseda (prethodnih događaja) bila maliciozna. Ako normalni saobraćaj formira klastere, a napadi su outlier-i, K-NN pristup (sa k=1 ili malim k) u suštini predstavlja **nearest-neighbor anomaly detection**. K-NN se takođe koristio za klasifikaciju malware familija pomoću binarnih feature vektora: novi fajl može biti klasifikovan kao određena malware familija ako je veoma blizu (u feature prostoru) poznatim instancama te familije. U praksi, k-NN nije toliko čest kao skalabilniji algoritmi, ali je konceptualno jednostavan i ponekad se koristi kao baseline ili za probleme manjeg obima.
 
-#### **Ključne karakteristike k-NN:**
+#### **Ključne karakteristike k-NN-a:**
 
--   **Tip problema:** Klasifikacija (i regresione varijante postoje). To je *lenja metoda učenja* -- nema eksplicitnog prilagođavanja modela.
+-   **Tip problema:** Klasifikacija (postoje i varijante za regresiju). To je metod *lazy learning*-a -- nema eksplicitnog fitovanja modela.
 
--   **Interpretabilnost:** Niska do srednja -- ne postoji globalni model ili sažeto objašnjenje, ali se rezultati mogu interpretirati gledajući na najbliže susede koji su uticali na odluku (npr., "ovaj mrežni tok je klasifikovan kao zlonameran jer je sličan ovim 3 poznatim zlonamernim tokovima"). Dakle, objašnjenja mogu biti zasnovana na primerima.
+-   **Interpretabilnost:** Niska do srednja -- ne postoji globalni model niti sažeto objašnjenje, ali se rezultati mogu tumačiti posmatranjem najbližih suseda koji su uticali na odluku (npr. „ovaj network flow je klasifikovan kao maliciozan zato što je sličan ovim 3 poznata maliciozna flow-a“). Dakle, objašnjenja mogu biti zasnovana na primerima.
 
--   **Prednosti:** Veoma jednostavno za implementaciju i razumevanje. Ne postavlja pretpostavke o raspodeli podataka (neparametrijski). Može prirodno da se nosi sa višeklasnim problemima. To je **adaptivno** u smislu da granice odluka mogu biti veoma složene, oblikovane raspodelom podataka.
+-   **Prednosti:** Veoma jednostavan za implementaciju i razumevanje. Ne zasniva se na pretpostavkama o raspodeli podataka (neparametarski). Prirodno može da obrađuje multi-class probleme. **Adaptivan** je u smislu da granice odlučivanja mogu biti veoma složene i oblikovane raspodelom podataka.
 
--   **Ograničenja:** Predikcija može biti spora za velike skupove podataka (mora izračunati mnoge udaljenosti). Intenzivno koristi memoriju -- skladišti sve podatke za obuku. Performanse opadaju u prostorima sa visokim dimenzijama jer sve tačke teže postaju gotovo ekvivalentne (što čini koncept "najbližeg" manje značajnim). Potrebno je pravilno odabrati *k* (broj suseda) -- previše malo k može biti bučno, previše veliko k može uključiti irelevantne tačke iz drugih klasa. Takođe, karakteristike bi trebale biti pravilno skalirane jer su izračunavanja udaljenosti osetljiva na skalu.
+-   **Ograničenja:** Predikcija može biti spora za velike datasete (mora se izračunati veliki broj distanci). Zahteva mnogo memorije -- čuva sve training podatke. Performanse se pogoršavaju u visokodimenzionalnim feature prostorima jer sve tačke teže da postanu gotovo jednako udaljene (zbog čega koncept „najbližeg“ postaje manje smislen). Potrebno je pravilno izabrati *k* (broj suseda) -- premalo k može dovesti do šuma, dok preveliko k može uključiti nerelevantne tačke iz drugih klasa. Takođe, feature-e treba pravilno skalirati jer su proračuni distance osetljivi na skalu.
 
 <details>
-<summary>Primer -- k-NN za detekciju phishing-a:</summary>
+<summary>Primer -- k-NN za Phishing Detection:</summary>
 
-Ponovo ćemo koristiti NSL-KDD (binarna klasifikacija). Pošto je k-NN računski zahtevan, koristićemo podskup podataka za obuku kako bismo ga održali izvodljivim u ovoj demonstraciji. Izabraćemo, recimo, 20.000 uzoraka obuke od ukupno 125k, i koristiti k=5 suseda. Nakon obuke (zaista samo skladištenje podataka), procenićemo na testnom skupu. Takođe ćemo skalirati karakteristike za izračunavanje udaljenosti kako bismo osigurali da nijedna pojedinačna karakteristika ne dominira zbog skale.
+Ponovo ćemo koristiti NSL-KDD (binarna klasifikacija). Pošto je k-NN računski zahtevan, koristićemo podskup training podataka kako bi demonstracija ostala izvodljiva. Izabraćemo, na primer, 20.000 training uzoraka od ukupno 125k i koristićemo k=5 suseda. Nakon training-a (što se zapravo svodi na čuvanje podataka), izvršićemo evaluaciju na test skupu. Takođe ćemo skalirati feature-e za izračunavanje distance kako nijedan pojedinačni feature ne bi dominirao zbog svoje skale.
 ```python
 import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
@@ -799,32 +802,33 @@ F1-score:  0.766
 ROC AUC:   0.837
 """
 ```
-Model k-NN će klasifikovati vezu gledajući na 5 najbližih veza u podskupu skupa za obuku. Ako, na primer, 4 od tih suseda predstavljaju napade (anomalije), a 1 je normalan, nova veza će biti klasifikovana kao napad. Performanse mogu biti razmerne, iako često nisu tako visoke kao kod dobro podešenih Random Forest ili SVM na istim podacima. Međutim, k-NN ponekad može biti izuzetno efikasan kada su raspodele klasa veoma nepravilne i kompleksne -- efikasno koristeći pretragu zasnovanu na memoriji. U sajber bezbednosti, k-NN (sa k=1 ili malim k) može se koristiti za detekciju poznatih obrazaca napada po uzoru, ili kao komponenta u složenijim sistemima (npr., za klasterizaciju i zatim klasifikaciju na osnovu članstva u klasteru).
+k-NN model će klasifikovati konekciju posmatrajući 5 najbližih konekcija u podskupu skupa za obuku. Ako su, na primer, 4 od tih suseda napadi (anomalije), a 1 je normalan, nova konekcija će biti klasifikovana kao napad. Performanse mogu biti zadovoljavajuće, mada često nisu tako visoke kao kod dobro podešenog Random Forest ili SVM modela na istim podacima. Međutim, k-NN ponekad može da bude veoma dobar kada su distribucije klasa veoma nepravilne i složene -- praktično koristeći pretragu zasnovanu na memoriji. U sajberbezbednosti, k-NN (sa k=1 ili malim k) može da se koristi za detekciju poznatih obrazaca napada na osnovu primera ili kao komponenta složenijih sistema (npr., za klasterovanje, a zatim i klasifikaciju na osnovu pripadnosti klasteru).
+</details>
 
 ### Gradient Boosting Machines (npr., XGBoost)
 
-Gradient Boosting Machines su među najmoćnijim algoritmima za strukturirane podatke. **Gradient boosting** se odnosi na tehniku izgradnje ansambla slabih učenika (često odlučujućih stabala) na sekvencijalan način, gde svaki novi model ispravlja greške prethodnog ansambla. Za razliku od bagging-a (Random Forests) koji gradi stabla paralelno i prosečno ih, boosting gradi stabla *jedno po jedno*, svako se fokusira više na instance koje su prethodna stabla pogrešno predvidela.
+Gradient Boosting Machines spadaju među najmoćnije algoritme za strukturirane podatke. **Gradient boosting** se odnosi na tehniku izgradnje ansambla slabih modela (često stabala odlučivanja) sekvencijalnim postupkom, pri čemu svaki novi model ispravlja greške prethodnog ansambla. Za razliku od bagging-a (Random Forest), koji stabla gradi paralelno i izračunava njihov prosek, boosting gradi stabla *jedno po jedno*, pri čemu se svako više fokusira na instance koje su prethodna stabla pogrešno predvidela.
 
-Najpopularnije implementacije u poslednjim godinama su **XGBoost**, **LightGBM**, i **CatBoost**, koje su sve biblioteke za odlučujuća stabla sa gradient boosting-om (GBDT). One su bile izuzetno uspešne na takmičenjima u mašinskom učenju i aplikacijama, često **postižuci vrhunske performanse na tabelarnim skupovima podataka**. U sajber bezbednosti, istraživači i praktičari su koristili stabla sa gradient boosting-om za zadatke kao što su **detekcija malvera** (koristeći karakteristike izvučene iz fajlova ili ponašanja u toku rada) i **detekcija mrežnih upada**. Na primer, model sa gradient boosting-om može kombinovati mnoge slabe pravila (stabla) kao što su "ako ima mnogo SYN paketa i neobičan port -> verovatno skeniranje" u jakog kompozitnog detektora koji uzima u obzir mnoge suptilne obrasce.
+Najpopularnije implementacije poslednjih godina su **XGBoost**, **LightGBM** i **CatBoost**, koje su biblioteke za gradient boosting decision tree (GBDT). Bile su izuzetno uspešne na takmičenjima iz machine learning-a i u praktičnim primenama, često **postižući vrhunske rezultate na tabelarnim skupovima podataka**. U sajberbezbednosti, istraživači i praktičari koriste gradient boosted trees za zadatke kao što su **detekcija malware-a** (korišćenjem karakteristika izdvojenih iz datoteka ili ponašanja tokom izvršavanja) i **detekcija mrežnih upada**. Na primer, gradient boosting model može da kombinuje mnoga slaba pravila (stabla), kao što je „ako postoji mnogo SYN paketa i neuobičajen port -> verovatno skeniranje“, u snažan kombinovani detektor koji uzima u obzir mnoge suptilne obrasce.<sup>[[6]](#references)</sup>
 
-Zašto su pojačana stabla tako efikasna? Svako stablo u sekvenci se obučava na *rezidualnim greškama* (gradijentima) predikcija trenutnog ansambla. Na taj način, model postepeno **"pojačava"** oblasti gde je slab. Korišćenje odlučujućih stabala kao osnovnih učenika znači da konačni model može uhvatiti kompleksne interakcije i nelinearne odnose. Takođe, boosting inherentno ima oblik ugrađene regularizacije: dodavanjem mnogih malih stabala (i korišćenjem stope učenja za skaliranje njihovih doprinosa), često dobro generalizuje bez velikog prekomernog prilagođavanja, pod uslovom da su izabrani odgovarajući parametri.
+Zašto su boosted trees toliko efikasna? Svako stablo u nizu trenira se na *preostalim greškama* (gradientima) predviđanja trenutnog ansambla. Na taj način model postepeno **„pojačava“** oblasti u kojima je slab. Korišćenje stabala odlučivanja kao osnovnih modela omogućava konačnom modelu da obuhvati složene interakcije i nelinearne odnose. Takođe, boosting u osnovi ima oblik ugrađene regularizacije: dodavanjem mnogih malih stabala (i korišćenjem stope učenja za skaliranje njihovih doprinosa), često dobro generalizuje bez preteranog overfitting-a, pod uslovom da su parametri pravilno izabrani.
 
 #### **Ključne karakteristike Gradient Boosting-a:**
 
--   **Tip problema:** Pretežno klasifikacija i regresija. U bezbednosti, obično klasifikacija (npr., binarna klasifikacija veze ili fajla). Rukuje binarnim, višeklasnim (uz odgovarajući gubitak), pa čak i problemima rangiranja.
+-   **Tip problema:** Prvenstveno klasifikacija i regresija. U oblasti bezbednosti najčešće se koristi klasifikacija (npr., binarna klasifikacija konekcije ili datoteke). Podržava binarne i višeklasne probleme (uz odgovarajuću funkciju gubitka), kao i probleme rangiranja.
 
--   **Interpretabilnost:** Niska do srednja. Dok je jedno pojačano stablo malo, ceo model može imati stotine stabala, što nije lako za ljudsko tumačenje kao celina. Međutim, kao i Random Forest, može pružiti ocene važnosti karakteristika, a alati poput SHAP (SHapley Additive exPlanations) mogu se koristiti za tumačenje pojedinačnih predikcija do određene mere.
+-   **Interpretabilnost:** Niska do srednja. Iako je pojedinačno boosted tree malo, kompletan model može imati stotine stabala, zbog čega nije razumljiv ljudima kao celina. Međutim, poput Random Forest-a, može da pruži rezultate važnosti karakteristika, a alati kao što je SHAP (SHapley Additive exPlanations) mogu se u određenoj meri koristiti za tumačenje pojedinačnih predviđanja.
 
--   **Prednosti:** Često **najbolje performanse** algoritma za strukturirane/tabelarne podatke. Može detektovati kompleksne obrasce i interakcije. Ima mnogo podešavanja (broj stabala, dubina stabala, stopa učenja, regularizacione stavke) za prilagođavanje složenosti modela i sprečavanje prekomernog prilagođavanja. Moderne implementacije su optimizovane za brzinu (npr., XGBoost koristi informacije o drugom redu gradijenta i efikasne strukture podataka). Obično bolje rukuje neuravnoteženim podacima kada se kombinuje sa odgovarajućim funkcijama gubitka ili podešavanjem težina uzoraka.
+-   **Prednosti:** Često **algoritam sa najboljim performansama** za strukturirane/tabelarne podatke. Može da otkrije složene obrasce i interakcije. Ima mnogo parametara za podešavanje (broj stabala, dubina stabala, stopa učenja, termini regularizacije) kojima se složenost modela može prilagoditi i sprečiti overfitting. Moderne implementacije su optimizovane za brzinu (npr., XGBoost koristi informacije o gradientu drugog reda i efikasne strukture podataka). Obično bolje obrađuje neizbalansirane podatke kada se kombinuje sa odgovarajućim funkcijama gubitka ili podešavanjem težina uzoraka.
 
--   **Ograničenja:** Složenije je za podešavanje od jednostavnijih modela; obuka može biti spora ako su stabla duboka ili je broj stabala veliki (iako je obično brža od obuke uporedivih dubokih neuronskih mreža na istim podacima). Model može prekomerno da se prilagodi ako nije podešen (npr., previše dubokih stabala sa nedovoljnom regularizacijom). Zbog mnogih hiperparametara, efikasno korišćenje gradient boosting-a može zahtevati više stručnosti ili eksperimentisanja. Takođe, kao i metode zasnovane na stablima, ne rukuje inherentno veoma retkim visokodimenzionalnim podacima tako efikasno kao linearni modeli ili Naive Bayes (iako se može primeniti, npr., u klasifikaciji teksta, ali možda neće biti prvi izbor bez inženjeringa karakteristika).
+-   **Ograničenja:** Složeniji je za podešavanje od jednostavnijih modela; obuka može biti spora ako su stabla duboka ili je njihov broj veliki (mada je i dalje obično brža od obuke uporedive duboke neuronske mreže na istim podacima). Model može da overfit-uje ako nije pravilno podešen (npr., ako ima previše dubokih stabala sa nedovoljnom regularizacijom). Zbog velikog broja hiperparametara, efikasno korišćenje gradient boosting-a može zahtevati više stručnosti ili eksperimentisanja. Takođe, poput metoda zasnovanih na stablima, ne obrađuje inherentno veoma retke podatke visoke dimenzionalnosti tako efikasno kao linearni modeli ili Naive Bayes (iako se i dalje može primeniti, npr., u klasifikaciji teksta, ali bez feature engineering-a možda neće biti prvi izbor).
 
 > [!TIP]
-> *Upotrebe u sajber bezbednosti:* Gotovo svuda gde bi se moglo koristiti odlučujuće stablo ili random forest, model sa gradient boosting-om može postići bolju tačnost. Na primer, **takmičenja u detekciji malvera** kompanije **Microsoft** su videla veliku upotrebu XGBoost-a na inženjerskim karakteristikama iz binarnih fajlova. Istraživanja u **detekciji mrežnih upada** često izveštavaju o vrhunskim rezultatima sa GBDT-ima (npr., XGBoost na CIC-IDS2017 ili UNSW-NB15 skupovima podataka). Ovi modeli mogu uzeti širok spektar karakteristika (tipovi protokola, učestalost određenih događaja, statističke karakteristike saobraćaja, itd.) i kombinovati ih za detekciju pretnji. U detekciji phishing-a, gradient boosting može kombinovati leksikalne karakteristike URL-ova, karakteristike reputacije domena i karakteristike sadržaja stranice kako bi postigao veoma visoku tačnost. Ansambl pristup pomaže da se pokriju mnogi rubni slučajevi i suptilnosti u podacima.
+> *Primene u sajberbezbednosti:* Gotovo svuda gde bi se mogao koristiti decision tree ili random forest, gradient boosting model može postići veću preciznost. Na primer, takmičenja u **Microsoft-ovoj detekciji malware-a** često su intenzivno koristila XGBoost nad engineered karakteristikama iz binarnih datoteka. Istraživanja **detekcije mrežnih upada** često navode najbolje rezultate uz GBDT (npr., XGBoost na skupovima podataka CIC-IDS2017 ili UNSW-NB15). Ovi modeli mogu da koriste širok opseg karakteristika (tipove protokola, učestalost određenih događaja, statističke karakteristike saobraćaja itd.) i da ih kombinuju radi detekcije pretnji. U detekciji phishing-a, gradient boosting može da kombinuje leksičke karakteristike URL-ova, karakteristike reputacije domena i karakteristike sadržaja stranice kako bi postigao veoma visoku preciznost. Ansambl pristup pomaže u obuhvatanju mnogih graničnih slučajeva i suptilnosti u podacima.
 
 <details>
 <summary>Primer -- XGBoost za detekciju phishing-a:</summary>
-Koristićemo klasifikator sa gradient boosting-om na skupu podataka o phishing-u. Da bismo pojednostavili stvari i učinili ih samostalnim, koristićemo `sklearn.ensemble.GradientBoostingClassifier` (koji je sporija, ali jednostavna implementacija). Obično bi se moglo koristiti `xgboost` ili `lightgbm` biblioteke za bolje performanse i dodatne karakteristike. Obučićemo model i evaluirati ga slično kao pre.
+Koristićemo gradient boosting klasifikator nad skupom podataka za phishing. Da bismo stvari održali jednostavnim i samostalnim, koristićemo `sklearn.ensemble.GradientBoostingClassifier` (sporiju, ali jednostavnu implementaciju). Uobičajeno bi se koristile biblioteke `xgboost` ili `lightgbm` radi boljih performansi i dodatnih funkcionalnosti. Treniraćemo model i proceniti ga na sličan način kao ranije.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -872,23 +876,23 @@ F1‑score:  0.957
 ROC AUC:   0.990
 """
 ```
-Gradient boosting model će verovatno postići veoma visoku tačnost i AUC na ovom phishing skupu podataka (često ovi modeli mogu premašiti 95% tačnosti uz pravilno podešavanje na takvim podacima, kao što se vidi u literaturi. Ovo pokazuje zašto se GBDT smatraju *"najboljim modelom za tabelarne skupove podataka"* -- često nadmašuju jednostavnije algoritme hvatajući složene obrasce. U kontekstu sajber bezbednosti, to bi moglo značiti hvatanje više phishing sajtova ili napada uz manje promašaja. Naravno, treba biti oprezan u vezi sa prekomernim prilagođavanjem -- obično bismo koristili tehnike poput unakrsne validacije i pratili performanse na validacionom skupu prilikom razvijanja takvog modela za implementaciju.
+Model gradientnog boostinga će verovatno postići veoma visoku tačnost i AUC na ovom phishing skupu podataka (ovakvi modeli često mogu premašiti 95% tačnosti uz pravilno podešavanje na takvim podacima, kao što je pokazano u literaturi. Ovo pokazuje zašto se GBDT modeli smatraju *„the state of the art model for tabular dataset“* -- često nadmašuju jednostavnije algoritme tako što prepoznaju složene obrasce. U kontekstu cybersecurity-ja, to bi moglo značiti otkrivanje većeg broja phishing sajtova ili napada uz manje propuštenih slučajeva. Naravno, mora se voditi računa o overfitting-u -- obično bismo koristili tehnike poput cross-validation-a i pratili performanse na validation skupu tokom razvoja takvog modela za deployment.
 
 </details>
 
-### Kombinovanje modela: Ensemble učenje i Stacking
+### Kombinovanje modela: Ensemble Learning i Stacking
 
-Ensemble učenje je strategija **kombinovanja više modela** kako bi se poboljšale ukupne performanse. Već smo videli specifične ensemble metode: Random Forest (ensemble drveća putem bagging-a) i Gradient Boosting (ensemble drveća putem sekvencijalnog boosting-a). Ali ensemble se mogu kreirati i na druge načine, kao što su **voting ensemble** ili **stacked generalization (stacking)**. Glavna ideja je da različiti modeli mogu hvatanje različitih obrazaca ili imati različite slabosti; kombinovanjem možemo **kompenzovati greške svakog modela snagama drugog**.
+Ensemble learning je strategija **kombinovanja više modela** radi poboljšanja ukupnih performansi. Već smo videli konkretne ensemble metode: Random Forest (ensemble stabala pomoću bagging-a) i Gradient Boosting (ensemble stabala pomoću sekvencijalnog boosting-a). Međutim, ensembles se mogu kreirati i na druge načine, kao što su **voting ensembles** ili **stacked generalization (stacking)**. Osnovna ideja je da različiti modeli mogu prepoznati različite obrasce ili imati različite slabosti; njihovim kombinovanjem možemo **nadoknaditi greške svakog modela prednostima drugog modela**.<sup>[[13]](#references)</sup>
 
--   **Voting Ensemble:** U jednostavnom voting klasifikatoru, obučavamo više različitih modela (recimo, logističku regresiju, stablo odlučivanja i SVM) i omogućavamo im da glasaju o konačnoj predikciji (većina glasova za klasifikaciju). Ako težimo glasove (npr., veću težinu preciznijim modelima), to je težinski voting sistem. Ovo obično poboljšava performanse kada su pojedinačni modeli razmerno dobri i nezavisni -- ensemble smanjuje rizik od greške pojedinačnog modela jer drugi mogu ispraviti. To je kao imati panel stručnjaka umesto jednog mišljenja.
+-   **Voting Ensemble:** Kod jednostavnog voting classifier-a, treniramo više raznovrsnih modela (na primer, logistic regression, decision tree i SVM) i omogućavamo im da glasaju o konačnoj predikciji (većinsko glasanje kod klasifikacije). Ako ponderišemo glasove (na primer, veću težinu damo preciznijim modelima), dobijamo weighted voting šemu. Ovo obično poboljšava performanse kada su pojedinačni modeli dovoljno dobri i nezavisni -- ensemble smanjuje rizik od greške pojedinačnog modela, jer je drugi modeli mogu ispraviti. To je kao da imamo panel stručnjaka umesto samo jednog mišljenja.
 
--   **Stacking (Stacked Ensemble):** Stacking ide korak dalje. Umesto jednostavnog glasanja, obučava **meta-model** da **nauči kako najbolje kombinovati predikcije** osnovnih modela. Na primer, obučite 3 različita klasifikatora (osnovne učenike), a zatim njihove izlaze (ili verovatnoće) koristite kao karakteristike u meta-klasifikatoru (često jednostavnom modelu poput logističke regresije) koji uči optimalan način da ih pomeša. Meta-model se obučava na validacionom skupu ili putem unakrsne validacije kako bi se izbeglo prekomerno prilagođavanje. Stacking često može nadmašiti jednostavno glasanje učenjem *koje modele više verovati u kojim okolnostima*. U sajber bezbednosti, jedan model može biti bolji u hvatanju mrežnih skeniranja dok je drugi bolji u hvatanju malware beaconinga; stacking model bi mogao naučiti da se oslanja na svaki odgovarajuće.
+-   **Stacking (Stacked Ensemble):** Stacking ide korak dalje. Umesto jednostavnog glasanja, on trenira **meta-model** da **nauči kako najbolje da kombinuje predikcije** osnovnih modela. Na primer, trenirate 3 različita classifier-a (base learner-e), a zatim njihove izlaze (ili verovatnoće) prosleđujete kao features meta-classifier-u (često jednostavnom modelu kao što je logistic regression), koji uči optimalan način njihovog kombinovanja. Meta-model se trenira na validation skupu ili pomoću cross-validation-a kako bi se izbegao overfitting. Stacking često može nadmašiti jednostavno glasanje tako što uči *kojim modelima više verovati u kojim okolnostima*. U cybersecurity-ju, jedan model može biti bolji u otkrivanju network scan-ova, dok je drugi bolji u otkrivanju malware beaconing-a; stacking model može naučiti da se na odgovarajući način osloni na svaki od njih.
 
-Ensemble, bilo putem glasanja ili stackinga, obično **povećavaju tačnost** i robusnost. Nedostatak je povećana složenost i ponekad smanjena interpretabilnost (iako neki ensemble pristupi poput proseka stabala odlučivanja i dalje mogu pružiti uvid, npr., važnost karakteristika). U praksi, ako operativna ograničenja dozvoljavaju, korišćenje ensemble može dovesti do viših stopa detekcije. Mnoge pobedničke rešenja u izazovima sajber bezbednosti (i Kaggle takmičenjima uopšte) koriste ensemble tehnike kako bi izvukli poslednji deo performansi.
+Ensembles, bilo da se zasnivaju na glasanju ili stackingu, uglavnom **poboljšavaju tačnost** i robusnost. Nedostatak su povećana složenost i ponekad slabija interpretabilnost (iako neki ensemble pristupi, kao što je prosek decision tree modela, i dalje mogu pružiti određeni uvid, na primer kroz feature importance). U praksi, ako operativna ograničenja to dozvoljavaju, korišćenje ensemble-a može dovesti do većih stopa detekcije. Mnoga pobednička rešenja u cybersecurity izazovima (i Kaggle takmičenjima uopšte) koriste ensemble tehnike kako bi izvukla i poslednji deo performansi.
 
 <details>
-<summary>Primer -- Voting Ensemble za detekciju phishing-a:</summary>
-Da ilustrujemo stacking modela, kombinovaćemo nekoliko modela o kojima smo razgovarali na phishing skupu podataka. Koristićemo logističku regresiju, stablo odlučivanja i k-NN kao osnovne učenike, a koristimo Random Forest kao meta-učenika da agregiramo njihove predikcije. Meta-učenik će biti obučen na izlazima osnovnih učenika (koristeći unakrsnu validaciju na skupu za obuku). Očekujemo da će stacked model imati performanse jednake ili malo bolje od pojedinačnih modela.
+<summary>Primer -- Voting Ensemble za Phishing Detection:</summary>
+Da bismo ilustrovali model stacking, kombinovaćemo nekoliko modela o kojima smo govorili na phishing skupu podataka. Koristićemo logistic regression, decision tree i k-NN kao osnovne modele, a Random Forest kao meta-learner za objedinjavanje njihovih predikcija. Meta-learner će biti treniran na izlazima osnovnih modela (korišćenjem cross-validation-a na training skupu). Očekujemo da stacked model ostvari jednake ili nešto bolje performanse od pojedinačnih modela.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -967,29 +971,27 @@ F1‑score : 0.948
 ROC AUC  : 0.992
 """
 ```
-Stacked ensemble koristi komplementarne snage osnovnih modela. Na primer, logistička regresija može obraditi linearne aspekte podataka, odlučujuće stablo može uhvatiti specifične interakcije nalik pravilima, a k-NN može biti odličan u lokalnim okruženjima prostora karakteristika. Meta-model (ovde random forest) može naučiti kako da proceni ove ulaze. Rezultantne metrike često pokazuju poboljšanje (čak i ako je malo) u odnosu na metrike bilo kog pojedinačnog modela. U našem primeru phishinga, ako je logistički model imao F1 od recimo 0.95, a stablo 0.94, stack bi mogao postići 0.96 preuzimajući gde svaki model greši.
+Složeni ensemble koristi komplementarne prednosti osnovnih modela. Na primer, logistička regresija može da obrađuje linearne aspekte podataka, stablo odlučivanja može da obuhvati specifične interakcije nalik pravilima, a k-NN može da bude posebno uspešan u lokalnim susedstvima prostora karakteristika. Meta-model (ovde random forest) može da nauči kako da odmeri ove ulaze. Dobijene metrike često pokazuju poboljšanje (čak i ako je neznatno) u odnosu na metrike bilo kog pojedinačnog modela. U našem primeru phishinga, ako je logistička regresija samostalno imala F1 rezultat od, recimo, 0.95, a stablo 0.94, stack bi mogao da dostigne 0.96 tako što bi nadoknadio slabosti svakog modela.
 
-Metode ansambla poput ove pokazuju princip da *"kombinovanje više modela obično dovodi do boljeg generalizovanja"*. U sajber bezbednosti, ovo se može implementirati tako što će se imati više motora za detekciju (jedan može biti zasnovan na pravilima, jedan mašinsko učenje, jedan zasnovan na anomalijama) i zatim sloj koji agregira njihove alarme -- efikasno oblik ansambla -- kako bi se donela konačna odluka sa većim poverenjem. Kada se implementiraju takvi sistemi, mora se razmotriti dodatna složenost i osigurati da ansambl ne postane previše težak za upravljanje ili objašnjenje. Ali sa stanovišta tačnosti, ansambli i stacking su moćni alati za poboljšanje performansi modela.
+Ensemble metode poput ove pokazuju princip da *"kombinovanje više modela obično vodi ka boljoj generalizaciji"*. U cybersecurityju, ovo se može implementirati korišćenjem više detection engine-a (jedan može biti zasnovan na pravilima, drugi na machine learningu, a treći na detekciji anomalija), nakon čega sledi sloj koji objedinjuje njihova upozorenja -- praktično oblik ensemble-a -- kako bi doneo konačnu odluku sa većim stepenom pouzdanosti. Prilikom uvođenja ovakvih sistema, potrebno je uzeti u obzir dodatnu složenost i osigurati da ensemble ne postane previše težak za upravljanje ili objašnjavanje. Međutim, sa stanovišta preciznosti, ensemble metode i stacking predstavljaju moćne alate za poboljšanje performansi modela.
 
 </details>
 
-## References
 
-- [https://madhuramiah.medium.com/logistic-regression-6e55553cc003](https://madhuramiah.medium.com/logistic-regression-6e55553cc003)
-- [https://www.geeksforgeeks.org/decision-tree-introduction-example/](https://www.geeksforgeeks.org/decision-tree-introduction-example/)
-- [https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132](https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132)
-- [https://www.ibm.com/think/topics/support-vector-machine](https://www.ibm.com/think/topics/support-vector-machine)
-- [https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering](https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering)
-- [https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644](https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644)
-- [https://zvelo.com/ai-and-machine-learning-in-cybersecurity/](https://zvelo.com/ai-and-machine-learning-in-cybersecurity/)
-- [https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae](https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae)
-- [https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8](https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8)
-- [https://www.ibm.com/think/topics/knn](https://www.ibm.com/think/topics/knn)
-- [https://www.ibm.com/think/topics/knn](https://www.ibm.com/think/topics/knn)
-- [https://arxiv.org/pdf/2101.02552](https://arxiv.org/pdf/2101.02552)
-- [https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
-- [https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
-- [https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
-- [https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
+## Reference
+
+- [1] [Logistička regresija](https://madhuramiah.medium.com/logistic-regression-6e55553cc003)
+- [2] [Stablo odlučivanja - uvod sa primerom](https://www.geeksforgeeks.org/decision-tree-introduction-example/)
+- [3] [Detekcija Denial of Services napada pomoću Random Forest Classifier-a sa Information Gain-om](https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132)
+- [4] [Šta su Support Vector Machines (SVMs)? (IBM)](https://www.ibm.com/think/topics/support-vector-machine)
+- [5] [Naive Bayes filtriranje spama (Wikipedia)](https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering)
+- [6] [GBDT demistifikovan: Kako rade LightGBM, XGBoost i CatBoost](https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644)
+- [7] [AI i Machine Learning u cybersecurityju (zvelo)](https://zvelo.com/ai-and-machine-learning-in-cybersecurity/)
+- [8] [Objašnjenje linearne regresije](https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae)
+- [9] [Analiza performansi machine learning modela za intrusion detection system pomoću Gini Impurity-based Weighted Random Forest (GIWRF) tehnike selekcije karakteristika](https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8)
+- [10] [Šta je algoritam k-nearest neighbors (KNN)? (IBM)](https://www.ibm.com/think/topics/knn)
+- [11] [Klasifikacija phishing napada i website-ova korišćenjem machine learninga i više datasetova (komparativna analiza)](https://arxiv.org/pdf/2101.02552)
+- [12] [Kako deep learning unapređuje intrusion detection systems](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
+- [13] [Ensemble Learning: Poboljšanje performansi modela kombinovanjem prednosti](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
 
 {{#include ../banners/hacktricks-training.md}}
