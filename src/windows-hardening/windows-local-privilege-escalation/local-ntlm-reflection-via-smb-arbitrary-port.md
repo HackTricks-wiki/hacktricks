@@ -65,19 +65,19 @@ Run an SMB server on a high port and make Windows connect to it:
 net use \\192.168.56.3\share /tcpport:12345
 ```
 
-The server can accept any credential pair you control, for example `user:user`. The goal of this step is not privilege escalation yet, only to make the Windows SMB client open and keep a reusable TCP connection to your listener.
+The server can accept any credential pair you control, for example `user:user`. The goal of this step is not privilege escalation yet, only to make the Windows SMB client open and keep a reusable TCP connection to your listener.<sup>[[1]](#references)</sup>
 
 ### 2. Coerce a privileged service to the same UNC path
 
 Use a coercion primitive such as **PetitPotam** against the **same** `\\192.168.56.3\share` path. If the coerced client is privileged and the target name is local (`localhost` or a local IP/host), Windows performs **NTLM local authentication**.
 
-Because the TCP connection is reused, that privileged NTLM exchange travels to the attacker SMB service instead of directly to the real local SMB server.
+Because the TCP connection is reused, that privileged NTLM exchange travels to the attacker SMB service instead of directly to the real local SMB server.<sup>[[1]](#references)</sup>
 
 ### 3. Relay the privileged authentication back to local SMB
 
-The attacker-controlled SMB service forwards the privileged NTLM exchange to `ntlmrelayx.py`, which relays it to the machine's real SMB listener and obtains a session as `NT AUTHORITY\SYSTEM`.
+The attacker-controlled SMB service forwards the privileged NTLM exchange to `ntlmrelayx.py`, which relays it to the machine's real SMB listener and obtains a session as `NT AUTHORITY\SYSTEM`.<sup>[[1]](#references)</sup>
 
-Typical tooling from the public writeup:
+Typical tooling from the public writeup:<sup>[[1]](#references)</sup>
 
 - `smbserver.py` on a custom port to receive the privileged auth over the reused TCP connection
 - `ntlmrelayx.py` to relay the captured NTLM to local SMB
@@ -85,26 +85,26 @@ Typical tooling from the public writeup:
 
 ## Operator notes
 
-- This is a **local privilege escalation** technique, not a generic remote relay trick
-- The attacker-controlled SMB service must handle the privileged authentication on the **same TCP connection** originally used for the share mount
-- If the coerced access hits a **different share path**, Windows may establish a different connection and the chain breaks
-- SMB signing requirements can kill the relay even when the arbitrary-port step works
-- If you only have Kerberos material or cannot force local NTLM, this exact variant is not enough
+- This is a **local privilege escalation** technique, not a generic remote relay trick<sup>[[1]](#references)</sup>
+- The attacker-controlled SMB service must handle the privileged authentication on the **same TCP connection** originally used for the share mount<sup>[[1]](#references)</sup>
+- If the coerced access hits a **different share path**, Windows may establish a different connection and the chain breaks<sup>[[1]](#references)</sup>
+- SMB signing requirements can kill the relay even when the arbitrary-port step works<sup>[[1]](#references)</sup>
+- If you only have Kerberos material or cannot force local NTLM, this exact variant is not enough<sup>[[1]](#references)</sup>
 
 ## Detection and hardening
 
-- Patch **CVE-2026-24294** from **March 2026 Patch Tuesday**
-- Watch for `net use` or `New-SmbMapping` using **non-default SMB ports**
-- Alert on unusual outbound SMB from workstations or servers to **high TCP ports**
-- Review coercion opportunities such as **EFSRPC / PetitPotam-style** triggers
-- Enforce SMB signing where possible; Synacktiv specifically notes this blocked their relay on Windows 11 24H2
+- Patch **CVE-2026-24294** from **March 2026 Patch Tuesday**<sup>[[5]](#references)</sup>
+- Watch for `net use` or `New-SmbMapping` using **non-default SMB ports**<sup>[[1]](#references)</sup>
+- Alert on unusual outbound SMB from workstations or servers to **high TCP ports**<sup>[[1]](#references)</sup>
+- Review coercion opportunities such as **EFSRPC / PetitPotam-style** triggers<sup>[[1]](#references)</sup>
+- Enforce SMB signing where possible; Synacktiv specifically notes this blocked their relay on Windows 11 24H2<sup>[[1]](#references)</sup>
 
 ## References
 
-- [Synacktiv - Bypassing Windows authentication reflection mitigations for SYSTEM shells - Part 1](https://www.synacktiv.com/en/publications/bypassing-windows-authentication-reflection-mitigations-for-system-shells-part-1.html)
-- [Microsoft Learn - Configure alternative SMB ports for Windows Server 2025](https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-ports)
-- [Microsoft Learn - WNetAddConnection4W](https://learn.microsoft.com/en-us/windows/win32/api/winnetwk/nf-winnetwk-wnetaddconnection4w)
-- [Project Zero - Windows Exploitation Tricks: Trapping Virtual Memory Access (2025 Update)](https://projectzero.google/2025/01/windows-exploitation-tricks-trapping.html)
-- [MSRC - CVE-2026-24294](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-24294)
+- [1] [Synacktiv - Bypassing Windows authentication reflection mitigations for SYSTEM shells - Part 1](https://www.synacktiv.com/en/publications/bypassing-windows-authentication-reflection-mitigations-for-system-shells-part-1.html)
+- [2] [Microsoft Learn - Configure alternative SMB ports for Windows Server 2025](https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-ports)
+- [3] [Microsoft Learn - WNetAddConnection4W](https://learn.microsoft.com/en-us/windows/win32/api/winnetwk/nf-winnetwk-wnetaddconnection4w)
+- [4] [Project Zero - Windows Exploitation Tricks: Trapping Virtual Memory Access (2025 Update)](https://projectzero.google/2025/01/windows-exploitation-tricks-trapping.html)
+- [5] [MSRC - CVE-2026-24294](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-24294)
 
 {{#include ../../banners/hacktricks-training.md}}

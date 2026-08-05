@@ -9,7 +9,7 @@ If a vulnerable driver exposes an IOCTL that gives an attacker arbitrary kernel 
 Why it works:
 - Each process has an EPROCESS structure that contains (among other fields) a Token (actually an EX_FAST_REF to a token object).
 - The SYSTEM process (PID 4) holds a token with all privileges enabled.
-- Replacing the current process’ EPROCESS.Token with the SYSTEM token pointer makes the current process run as SYSTEM immediately.
+- Replacing the current process’ EPROCESS.Token with the SYSTEM token pointer makes the current process run as SYSTEM immediately.<sup>[[1]](#references)</sup>
 
 > Offsets in EPROCESS vary across Windows versions. Determine them dynamically (symbols) or use version-specific constants. Also remember that EPROCESS.Token is an EX_FAST_REF (low 3 bits are reference count flags).
 
@@ -28,11 +28,11 @@ Why it works:
    - Token_ME = *(EPROCESS_SELF + TokenOffset)
    - Token_NEW = (Token_SYS_masked | (Token_ME & 0x7))
 6) Write Token_NEW back into (EPROCESS_SELF + TokenOffset) using your kernel write primitive.
-7) Your current process is now SYSTEM. Optionally spawn a new cmd.exe or powershell.exe to confirm.
+7) Your current process is now SYSTEM. Optionally spawn a new cmd.exe or powershell.exe to confirm.<sup>[[1]](#references)</sup>
 
 ## Pseudocode
 
-Below is a skeleton that only uses two IOCTLs from a vulnerable driver, one for 8-byte kernel read and one for 8-byte kernel write. Replace with your driver’s interface.
+Below is a skeleton that only uses two IOCTLs from a vulnerable driver, one for 8-byte kernel read and one for 8-byte kernel write. Replace with your driver’s interface.<sup>[[1]](#references)</sup>
 
 ```c
 #include <Windows.h>
@@ -110,7 +110,7 @@ int main(void) {
 Notes:
 - Offsets: Use WinDbg’s `dt nt!_EPROCESS` with the target’s PDBs, or a runtime symbol loader, to get correct offsets. Do not hardcode blindly.
 - Mask: On x64 the token is an EX_FAST_REF; low 3 bits are reference count bits. Keeping the original low bits from your token avoids immediate refcount inconsistencies.
-- Stability: Prefer elevating the current process; if you elevate a short-lived helper you may lose SYSTEM when it exits.
+- Stability: Prefer elevating the current process; if you elevate a short-lived helper you may lose SYSTEM when it exits.<sup>[[1]](#references)</sup>
 
 ## Detection & mitigation
 - Loading unsigned or untrusted third‑party drivers that expose powerful IOCTLs is the root cause.
@@ -118,7 +118,7 @@ Notes:
 - EDR can watch for suspicious IOCTL sequences that implement arbitrary read/write and for token swaps.
 
 ## References
-- [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
-- [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
+- [1] [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
+- [2] [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
 
 {{#include ../../banners/hacktricks-training.md}}

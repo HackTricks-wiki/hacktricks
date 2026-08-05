@@ -25,7 +25,7 @@ Moreover, every time some data is encrypted by a user using DPAPI, a new **maste
 
 The master keys are stored in the **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** directory, where `{SID}` is the Security Identifier of that user. The master key is stored encrypted by the user's **`pre-key`** and also by a **domain backup key** for recovery (so the same key is stored encrypted 2 times by 2 different pass).
 
-Note that the **domain key used to encrypt the master key is in the domain controllers and never changes**, so if an attacker has access to the domain controller, they can retrieve the domain backup key and decrypt the master keys of all users in the domain.
+Note that the **domain key used to encrypt the master key is in the domain controllers and never changes**, so if an attacker has access to the domain controller, they can retrieve the domain backup key and decrypt the master keys of all users in the domain.<sup>[[2]](#references)</sup>
 
 The encrypted blobs contain the **GUID of the master key** that was used to encrypt the data inside its headers.
 
@@ -49,7 +49,7 @@ This is what a bunch of Master Keys of a user will looks like:
 
 ### Machine/System key generation
 
-This is key used for the machine to encrypt data. It's based on the **DPAPI_SYSTEM LSA secret**, which is a special key that only the SYSTEM user can access. This key is used to encrypt data that needs to be accessible by the system itself, such as machine-level credentials or system-wide secrets.
+This is key used for the machine to encrypt data. It's based on the **DPAPI_SYSTEM LSA secret**, which is a special key that only the SYSTEM user can access. This key is used to encrypt data that needs to be accessible by the system itself, such as machine-level credentials or system-wide secrets.<sup>[[2]](#references)</sup>
 
 Note that these keys **don't have a domain backup** so they are only accesisble locally:
 
@@ -232,7 +232,7 @@ SharpDPAPI.exe [credentials|vaults|rdg|keepass|certificates|triage] /unprotect
 SharpDPAPI.exe machinetriage 
 ```
 
-- **Get credentials info** like the encrypted data and the guidMasterKey.
+- **Get credentials info** like the encrypted data and the guidMasterKey.<sup>[[3]](#references)</sup>
 
 ```bash
 mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
@@ -255,7 +255,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 SharpDPAPI.exe masterkeys /rpc
 ```
 
-The **SharpDPAPI** tool also supports these arguments for masterkey decryption (note how it's possible to use `/rpc` to get the domains backup key,  `/password` to use a plaintext password, or `/pvk` to specify a DPAPI domain private key file...):
+The **SharpDPAPI** tool also supports these arguments for masterkey decryption (note how it's possible to use `/rpc` to get the domains backup key,  `/password` to use a plaintext password, or `/pvk` to specify a DPAPI domain private key file...):<sup>[[12]](#references)</sup>
 
 ```
 /target:FILE/folder     -   triage a specific masterkey, or a folder full of masterkeys (otherwise triage local masterkeys)
@@ -279,7 +279,7 @@ dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 SharpDPAPI.exe /target:<FILE/folder> /ntlm:<NTLM_HASH>
 ```
 
-The **SharpDPAPI** tool also supports these arguments for `credentials|vaults|rdg|keepass|triage|blob|ps` decryption (note how it's possible to use `/rpc` to get the domains backup key, `/password` to use a plaintext password, `/pvk` to specify a DPAPI domain private key file, `/unprotect` to use current users session...):
+The **SharpDPAPI** tool also supports these arguments for `credentials|vaults|rdg|keepass|triage|blob|ps` decryption (note how it's possible to use `/rpc` to get the domains backup key, `/password` to use a plaintext password, `/pvk` to specify a DPAPI domain private key file, `/unprotect` to use current users session...):<sup>[[12]](#references)</sup>
 
 ```
 Decryption:
@@ -327,7 +327,7 @@ SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 
 ### Offline decryption with Impacket dpapi.py
 
-If you have the victim user’s SID and password (or NT hash), you can decrypt DPAPI masterkeys and Credential Manager blobs entirely offline using Impacket’s dpapi.py.
+If you have the victim user’s SID and password (or NT hash), you can decrypt DPAPI masterkeys and Credential Manager blobs entirely offline using Impacket’s dpapi.py.<sup>[[11]](#references)</sup>
 
 - Identify artefacts on disk:
   - Credential Manager blob(s): %APPDATA%\Microsoft\Credentials\<hex>
@@ -369,7 +369,7 @@ This workflow often recovers domain credentials saved by apps using the Windows 
 
 Some applications pass an additional **entropy** value to `CryptProtectData`. Without this value the blob cannot be decrypted, even if the correct masterkey is known. Obtaining the entropy is therefore essential when targeting credentials protected in this way (e.g. Microsoft Outlook, some VPN clients).
 
-[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) is a user-mode DLL that hooks the DPAPI functions inside the target process and transparently records any optional entropy that is supplied. Running EntropyCapture in **DLL-injection** mode against processes like `outlook.exe` or `vpnclient.exe` will output a file mapping each entropy buffer to the calling process and blob. The captured entropy can later be supplied to **SharpDPAPI** (`/entropy:`) or **Mimikatz** (`/entropy:<file>`) in order to decrypt the data. 
+[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) is a user-mode DLL that hooks the DPAPI functions inside the target process and transparently records any optional entropy that is supplied. Running EntropyCapture in **DLL-injection** mode against processes like `outlook.exe` or `vpnclient.exe` will output a file mapping each entropy buffer to the calling process and blob. The captured entropy can later be supplied to **SharpDPAPI** (`/entropy:`) or **Mimikatz** (`/entropy:<file>`) in order to decrypt the data.<sup>[[6]](#references)</sup>
 
 ```powershell
 # Inject EntropyCapture into the current user's Outlook
@@ -382,7 +382,7 @@ SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 
 ### Cracking masterkeys offline (Hashcat & DPAPISnoop)
 
-Microsoft introduced a **context 3** masterkey format starting with Windows 10 v1607 (2016). `hashcat` v6.2.6 (December 2023) added hash-modes **22100** (DPAPI masterkey v1 context ), **22101** (context 1) and **22102** (context 3) allowing GPU-accelerated cracking of user passwords directly from the masterkey file. Attackers can therefore perform word-list or brute-force attacks without interacting with the target system. 
+Microsoft introduced a **context 3** masterkey format starting with Windows 10 v1607 (2016). `hashcat` v6.2.6 (December 2023) added hash-modes **22100** (DPAPI masterkey v1 context ), **22101** (context 1) and **22102** (context 3) allowing GPU-accelerated cracking of user passwords directly from the masterkey file. Attackers can therefore perform word-list or brute-force attacks without interacting with the target system.<sup>[[7]](#references)</sup>
 
 `DPAPISnoop` (2024) automates the process:
 
@@ -392,7 +392,7 @@ DPAPISnoop.exe masterkey-parse C:\Users\bob\AppData\Roaming\Microsoft\Protect\<s
 hashcat -m 22102 bob.hc wordlist.txt -O -w4
 ```
 
-The tool can also parse Credential and Vault blobs, decrypt them with cracked keys and export cleartext passwords.
+The tool can also parse Credential and Vault blobs, decrypt them with cracked keys and export cleartext passwords.<sup>[[8]](#references)</sup>
 
 
 ### Access other machine data
@@ -416,7 +416,7 @@ With extracted from LDAP computers list you can find every sub network even if y
 
 ### DonPAPI 2.x (2024-05)
 
-[**DonPAPI**](https://github.com/login-securite/DonPAPI) can dump secrets protected by DPAPI automatically. The 2.x release introduced:
+[**DonPAPI**](https://github.com/login-securite/DonPAPI) can dump secrets protected by DPAPI automatically. The 2.x release introduced:<sup>[[9]](#references)</sup>
 
 * Parallel collection of blobs from hundreds of hosts
 * Parsing of **context 3** masterkeys and automatic Hashcat cracking integration
@@ -425,7 +425,7 @@ With extracted from LDAP computers list you can find every sub network even if y
 
 ### DPAPISnoop
 
-[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) is a C# parser for masterkey/credential/vault files that can output Hashcat/JtR formats and optionally invoke cracking automatically. It fully supports machine and user masterkey formats up to Windows 11 24H1. 
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) is a C# parser for masterkey/credential/vault files that can output Hashcat/JtR formats and optionally invoke cracking automatically. It fully supports machine and user masterkey formats up to Windows 11 24H1.<sup>[[8]](#references)</sup>
 
 
 ## Common detections
@@ -439,13 +439,13 @@ With extracted from LDAP computers list you can find every sub network even if y
 ---
 ### 2023-2025 vulnerabilities & ecosystem changes
 
-* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (November 2023). An attacker with network access could trick a domain member into retrieving a malicious DPAPI backup key, allowing decryption of user masterkeys. Patched in November 2023 cumulative update – administrators should ensure DCs and workstations are fully patched. 
-* **Chrome 127 “App-Bound” cookie encryption** (July 2024) replaced the legacy DPAPI-only protection with an additional key stored under the user’s **Credential Manager**. Offline decryption of cookies now requires both the DPAPI masterkey and the **GCM-wrapped app-bound key**. SharpChrome v2.3 and DonPAPI 2.x are able to recover the extra key when running with user context. 
+* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (November 2023). An attacker with network access could trick a domain member into retrieving a malicious DPAPI backup key, allowing decryption of user masterkeys. Patched in November 2023 cumulative update – administrators should ensure DCs and workstations are fully patched.<sup>[[4]](#references)</sup>
+* **Chrome 127 “App-Bound” cookie encryption** (July 2024) replaced the legacy DPAPI-only protection with an additional key stored under the user’s **Credential Manager**. Offline decryption of cookies now requires both the DPAPI masterkey and the **GCM-wrapped app-bound key**. SharpChrome v2.3 and DonPAPI 2.x are able to recover the extra key when running with user context.<sup>[[5]](#references)</sup>
 
 
 ### Case Study: Zscaler Client Connector – Custom Entropy Derived From SID
 
-Zscaler Client Connector stores several configuration files under `C:\ProgramData\Zscaler` (e.g. `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`).  Each file is encrypted with **DPAPI (Machine scope)** but the vendor supplies **custom entropy** that is *calculated at runtime* instead of being stored on disk.
+Zscaler Client Connector stores several configuration files under `C:\ProgramData\Zscaler` (e.g. `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`).  Each file is encrypted with **DPAPI (Machine scope)** but the vendor supplies **custom entropy** that is *calculated at runtime* instead of being stored on disk.<sup>[[1]](#references)</sup>
 
 The entropy is rebuilt from two elements:
 
@@ -483,18 +483,17 @@ Decryption yields the complete JSON configuration, including every **device post
 
 ## References
 
-- [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
-
-- [https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
-- [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
-- [https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004)
-- [https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html](https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html)
-- [https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/](https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/)
-- [https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6](https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6)
-- [https://github.com/Leftp/DPAPISnoop](https://github.com/Leftp/DPAPISnoop)
-- [https://pypi.org/project/donpapi/2.0.0/](https://pypi.org/project/donpapi/2.0.0/)
-- [Impacket – dpapi.py](https://github.com/fortra/impacket)
-- [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking, and DPAPI decryption to DC admin](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
-- [GhostPack SharpDPAPI/SharpChrome – Usage and options](https://github.com/GhostPack/SharpDPAPI)
+- [1] [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
+- [2] [DPAPI Secrets. Security analysis and data recovery in DPAPI](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
+- [3] [Reading DPAPI Encrypted Secrets with Mimikatz and C++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
+- [4] [CVE-2023-36004 - Windows DPAPI (Data Protection Application Programming Interface) Spoofing Vulnerability](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004)
+- [5] [Improving the security of Chrome cookies on Windows](https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html)
+- [6] [EntropyCapture: Simple Extraction of DPAPI Optional Entropy](https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/)
+- [7] [hashcat v6.2.6 release notes](https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6)
+- [8] [DPAPISnoop – GitHub repository](https://github.com/Leftp/DPAPISnoop)
+- [9] [DonPAPI 2.0.1 – PyPI project page](https://pypi.org/project/donpapi/2.0.0/)
+- [10] [Impacket – dpapi.py](https://github.com/fortra/impacket)
+- [11] [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking, and DPAPI decryption to DC admin](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
+- [12] [GhostPack SharpDPAPI/SharpChrome – Usage and options](https://github.com/GhostPack/SharpDPAPI)
 
 {{#include ../../banners/hacktricks-training.md}}

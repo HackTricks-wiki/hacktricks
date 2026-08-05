@@ -20,7 +20,7 @@ This is privilege that is held by any process allows the impersonation (but not 
 Modern operator notes:
 
 - **JuicyPotato is legacy**: on Windows 10 1809+/Server 2019+, prefer **GodPotato**, **SigmaPotato**, **PrintNotifyPotato**, **RoguePotato**, **SharpEfsPotato/EfsPotato**, or **PrintSpoofer** depending on which RPC/COM surface is still reachable.
-- If you compromised a service running as **`LOCAL SERVICE`** or **`NETWORK SERVICE`** and `whoami /priv` shows a **filtered token** without `SeImpersonatePrivilege`/`SeAssignPrimaryTokenPrivilege`, recover the account's **default privilege set** first (for example with **FullPowers**) and retry the potato family afterwards.
+- If you compromised a service running as **`LOCAL SERVICE`** or **`NETWORK SERVICE`** and `whoami /priv` shows a **filtered token** without `SeImpersonatePrivilege`/`SeAssignPrimaryTokenPrivilege`, recover the account's **default privilege set** first (for example with **FullPowers**) and retry the potato family afterwards.<sup>[[3]](#references)</sup>
 - Some newer forks are more operator-friendly than the original tools. For example, **SigmaPotato** adds reflection/in-memory execution and modern Windows compatibility, while **PrintNotifyPotato** abuses the PrintNotify COM service and is often useful when the classic Spooler path is disabled.
 
 ```cmd
@@ -44,16 +44,16 @@ juicypotato.md
 
 It is very similar to **SeImpersonatePrivilege**, it will use the **same method** to get a privileged token.\
 Then, this privilege allows **to assign a primary token** to a new/suspended process. With the privileged impersonation token you can derivate a primary token (DuplicateTokenEx).\
-With the token, you can create a **new process** with 'CreateProcessAsUser' or create a process suspended and **set the token** (in general, you cannot modify the primary token of a running process).
+With the token, you can create a **new process** with 'CreateProcessAsUser' or create a process suspended and **set the token** (in general, you cannot modify the primary token of a running process).<sup>[[2]](#references)</sup>
 
 ### SeTcbPrivilege
 
-If you have enabled this token you can use **KERB_S4U_LOGON** to get an **impersonation token** for any other user without knowing the credentials, **add an arbitrary group** (admins) to the token, set the **integrity level** of the token to "**medium**", and assign this token to the **current thread** (SetThreadToken).
+If you have enabled this token you can use **KERB_S4U_LOGON** to get an **impersonation token** for any other user without knowing the credentials, **add an arbitrary group** (admins) to the token, set the **integrity level** of the token to "**medium**", and assign this token to the **current thread** (SetThreadToken).<sup>[[2]](#references)</sup>
 
 ### SeBackupPrivilege
 
-The system is caused to **grant all read access** control to any file (limited to read operations) by this privilege. It is utilized for **reading the password hashes of local Administrator** accounts from the registry, following which, tools like "**psexec**" or "**wmiexec**" can be used with the hash (Pass-the-Hash technique). However, this technique fails under two conditions: when the Local Administrator account is disabled, or when a policy is in place that removes administrative rights from Local Administrators connecting remotely.\
-In practice, the most reliable built-in workflow is usually **VSS + `robocopy /b`**: create/expose a shadow copy, then copy `SAM`/`SYSTEM` or `NTDS.dit` in **backup mode**, which bypasses the file ACLs.
+The system is caused to **grant all read access** control to any file (limited to read operations) by this privilege. It is utilized for **reading the password hashes of local Administrator** accounts from the registry, following which, tools like "**psexec**" or "**wmiexec**" can be used with the hash (Pass-the-Hash technique). However, this technique fails under two conditions: when the Local Administrator account is disabled, or when a policy is in place that removes administrative rights from Local Administrators connecting remotely.<sup>[[2]](#references)</sup>\
+In practice, the most reliable built-in workflow is usually **VSS + `robocopy /b`**: create/expose a shadow copy, then copy `SAM`/`SYSTEM` or `NTDS.dit` in **backup mode**, which bypasses the file ACLs.<sup>[[4]](#references)</sup>
 
 ```cmd
 :: shadow.txt
@@ -82,11 +82,11 @@ You can **abuse this privilege** with:
 
 ### SeRestorePrivilege
 
-Permission for **write access** to any system file, irrespective of the file's Access Control List (ACL), is provided by this privilege. It opens up numerous possibilities for escalation, including the ability to **modify services**, perform DLL Hijacking, and set **debuggers** via Image File Execution Options among various other techniques.
+Permission for **write access** to any system file, irrespective of the file's Access Control List (ACL), is provided by this privilege. It opens up numerous possibilities for escalation, including the ability to **modify services**, perform DLL Hijacking, and set **debuggers** via Image File Execution Options among various other techniques.<sup>[[2]](#references)</sup>
 
 ### SeCreateTokenPrivilege
 
-SeCreateTokenPrivilege is a powerful permission, especially useful when a user possesses the ability to impersonate tokens, but also in the absence of SeImpersonatePrivilege. This capability hinges on the ability to impersonate a token that represents the same user and whose integrity level does not exceed that of the current process.
+SeCreateTokenPrivilege is a powerful permission, especially useful when a user possesses the ability to impersonate tokens, but also in the absence of SeImpersonatePrivilege. This capability hinges on the ability to impersonate a token that represents the same user and whose integrity level does not exceed that of the current process.<sup>[[2]](#references)</sup>
 
 **Key Points:**
 
@@ -96,11 +96,11 @@ SeCreateTokenPrivilege is a powerful permission, especially useful when a user p
 
 ### SeLoadDriverPrivilege
 
-This privilege allows to **load and unload device drivers** with the creation of a registry entry with specific values for `ImagePath` and `Type`. Since direct write access to `HKLM` (HKEY_LOCAL_MACHINE) is restricted, `HKCU` (HKEY_CURRENT_USER) must be utilized instead. However, to make `HKCU` recognizable to the kernel for driver configuration, a specific path must be followed.
+This privilege allows to **load and unload device drivers** with the creation of a registry entry with specific values for `ImagePath` and `Type`. Since direct write access to `HKLM` (HKEY_LOCAL_MACHINE) is restricted, `HKCU` (HKEY_CURRENT_USER) must be utilized instead. However, to make `HKCU` recognizable to the kernel for driver configuration, a specific path must be followed.<sup>[[2]](#references)</sup>
 
 Modern offensive use is usually **BYOVD** (bring your own vulnerable driver): load a **signed but vulnerable** kernel driver and then use its IOCTLs to disable protections or jump to kernel code execution. Keep in mind that on recent Windows 11/Server builds the **Microsoft vulnerable driver blocklist** and/or **HVCI/Memory Integrity** often break older public chains, so the classic `szkg64.sys`-style examples are no longer universally reliable.
 
-This path is `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`, where `<RID>` is the Relative Identifier of the current user. Inside `HKCU`, this entire path must be created, and two values need to be set:
+This path is `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`, where `<RID>` is the Relative Identifier of the current user. Inside `HKCU`, this entire path must be created, and two values need to be set:<sup>[[2]](#references)</sup>
 
 - `ImagePath`, which is the path to the binary to be executed
 - `Type`, with a value of `SERVICE_KERNEL_DRIVER` (`0x00000001`).
@@ -128,7 +128,7 @@ More ways to abuse this privilege in [https://www.ired.team/offensive-security-e
 
 ### SeTakeOwnershipPrivilege
 
-This is similar to to **SeRestorePrivilege**. Its primary function allows a process to **assume ownership of an object**, circumventing the requirement for explicit discretionary access through the provision of WRITE_OWNER access rights. The process involves first securing ownership of the intended registry key for writing purposes, then altering the DACL to enable write operations.
+This is similar to to **SeRestorePrivilege**. Its primary function allows a process to **assume ownership of an object**, circumventing the requirement for explicit discretionary access through the provision of WRITE_OWNER access rights. The process involves first securing ownership of the intended registry key for writing purposes, then altering the DACL to enable write operations.<sup>[[2]](#references)</sup>
 
 ```bash
 takeown /f 'C:\some\file.txt' #Now the file is owned by you
@@ -148,7 +148,7 @@ c:\inetpub\wwwwroot\web.config
 
 ### SeDebugPrivilege
 
-This privilege permits the **debug other processes**, including to read and write in the memory. Various strategies for memory injection, capable of evading most antivirus and host intrusion prevention solutions, can be employed with this privilege.
+This privilege permits the **debug other processes**, including to read and write in the memory. Various strategies for memory injection, capable of evading most antivirus and host intrusion prevention solutions, can be employed with this privilege.<sup>[[2]](#references)</sup>
 
 On modern Windows, remember that `SeDebugPrivilege` is usually enough to open **non-protected SYSTEM processes** and duplicate their tokens, but it is **not** a guarantee that you can touch **LSASS**. If **RunAsPPL / LSA Protection** is enabled, non-protected processes cannot read or inject into LSASS even if `SeDebugPrivilege` is present. In that case, steal a token from another non-PPL SYSTEM process, or chain with a PPL bypass/BYOVD instead of assuming `procdump` will work. For a full token-copy example using `SeDebugPrivilege` + `SeImpersonatePrivilege`, check [this page](sedebug-+-seimpersonate-copy-token.md).
 
@@ -180,7 +180,7 @@ import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<c
 
 ### SeManageVolumePrivilege
 
-This right (Perform volume maintenance tasks) allows opening raw volume device handles (e.g., \\.\C:) for direct disk I/O that bypasses NTFS ACLs. With it you can copy bytes of any file on the volume by reading the underlying blocks, enabling arbitrary file read of sensitive material (e.g., machine private keys in %ProgramData%\Microsoft\Crypto\, registry hives, SAM/NTDS via VSS). It’s particularly impactful on CA servers where exfiltrating the CA private key enables forging a Golden Certificate to impersonate any principal.
+This right (Perform volume maintenance tasks) allows opening raw volume device handles (e.g., \\.\C:) for direct disk I/O that bypasses NTFS ACLs. With it you can copy bytes of any file on the volume by reading the underlying blocks, enabling arbitrary file read of sensitive material (e.g., machine private keys in %ProgramData%\Microsoft\Crypto\, registry hives, SAM/NTDS via VSS).<sup>[[5]](#references)</sup> It’s particularly impactful on CA servers where exfiltrating the CA private key enables forging a Golden Certificate to impersonate any principal.<sup>[[6]](#references)</sup>
 
 See detailed techniques and mitigations:
 
@@ -209,7 +209,7 @@ Or the **script** embedded in this [**post**](https://www.leeholmes.com/adjustin
 
 ## Table
 
-Full token privileges cheatsheet at [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin), summary below will only list direct ways to exploit the privilege to obtain an admin session or read sensitive files.
+Full token privileges cheatsheet at [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin), summary below will only list direct ways to exploit the privilege to obtain an admin session or read sensitive files.<sup>[[1]](#references)</sup>
 
 | Privilege                  | Impact      | Tool                    | Execution path                                                                                                                                                                                                                                                                                                                                     | Remarks                                                                                                                                                                                                                                                                                                                        |
 | -------------------------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -225,12 +225,12 @@ Full token privileges cheatsheet at [https://github.com/gtworek/Priv2Admin](http
 
 ## References
 
-- Take a look to this table defining Windows tokens: [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin)
-- Take a look to [**this paper**](https://github.com/hatRiot/token-priv/blob/master/abusing_token_eop_1.0.txt) about privesc with tokens.
-- itm4n – Give Me Back My Privileges! Please? (restricted service tokens / FullPowers): https://itm4n.github.io/localservice-privileges/
-- Microsoft – Robocopy (`/b` backup mode bypasses file/folder ACL checks): https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy
-- Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege): https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks
-- 0xdf – HTB: Certificate (SeManageVolumePrivilege → CA key exfil → Golden Certificate): https://0xdf.gitlab.io/2025/10/04/htb-certificate.html
+- [1] [gtworek/Priv2Admin - exploitation paths from Windows privileges to admin](https://github.com/gtworek/Priv2Admin)
+- [2] [Abusing Token Privileges For LPE](https://github.com/hatRiot/token-priv/blob/master/abusing_token_eop_1.0.txt)
+- [3] [itm4n – Give Me Back My Privileges! Please?](https://itm4n.github.io/localservice-privileges/)
+- [4] [Microsoft – Robocopy (`/b` backup mode bypasses file/folder ACL checks)](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy)
+- [5] [Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
+- [6] [0xdf – HTB: Certificate (SeManageVolumePrivilege → CA key exfil → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
 
 {{#include ../../banners/hacktricks-training.md}}
 

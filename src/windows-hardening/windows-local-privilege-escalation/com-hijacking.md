@@ -14,7 +14,7 @@ Useful variations during hunting:
 
 - Also look for missing **`LocalServer32`** keys. Some COM classes are out-of-process servers and will launch an attacker-controlled EXE instead of a DLL.
 - Search for **`TreatAs`** and **`ScriptletURL`** registry operations in addition to `InprocServer32`. Recent detection content and malware writeups keep calling these out because they are much rarer than normal COM registrations and therefore high-signal.
-- Copy the legitimate **`ThreadingModel`** from the original `HKLM\Software\Classes\CLSID\{CLSID}\InprocServer32` when cloning a registration into HKCU. Using the wrong model often breaks activation and makes the hijack noisy.
+- Copy the legitimate **`ThreadingModel`** from the original `HKLM\Software\Classes\CLSID\{CLSID}\InprocServer32` when cloning a registration into HKCU. Using the wrong model often breaks activation and makes the hijack noisy.<sup>[[3]](#references)</sup>
 - On 64-bit systems inspect both 64-bit and 32-bit views (`procmon.exe` vs `procmon64.exe`, `HKLM\Software\Classes` and `HKLM\Software\Classes\WOW6432Node`) because 32-bit applications may resolve a different COM registration.
 
 Once you have decided which non-existent COM to impersonate, execute the following commands. _Be careful if you decide to impersonate a COM that is loaded every few seconds as that could be overkill._
@@ -89,7 +89,7 @@ Then, you can just create the HKCU entry and every time the user logs in, your b
 
 ## COM TreatAs Hijacking + ScriptletURL
 
-`TreatAs` allows one CLSID to be emulated by another one. From an offensive perspective this means you can leave the original CLSID untouched, create a second per-user CLSID that points to `scrobj.dll`, and then redirect the real COM object to the malicious one with `HKCU\Software\Classes\CLSID\{Victim}\TreatAs`.
+`TreatAs` allows one CLSID to be emulated by another one.<sup>[[4]](#references)</sup> From an offensive perspective this means you can leave the original CLSID untouched, create a second per-user CLSID that points to `scrobj.dll`, and then redirect the real COM object to the malicious one with `HKCU\Software\Classes\CLSID\{Victim}\TreatAs`.
 
 This is useful when:
 
@@ -122,7 +122,7 @@ Notes:
 
 Type Libraries (TypeLib) define COM interfaces and are loaded via `LoadTypeLib()`. When a COM server is instantiated, the OS may also load the associated TypeLib by consulting registry keys under `HKCR\TypeLib\{LIBID}`. If the TypeLib path is replaced with a **moniker**, e.g. `script:C:\...\evil.sct`, Windows will execute the scriptlet when the TypeLib is resolved – yielding a stealthy persistence that triggers when common components are touched.
 
-This has been observed against the Microsoft Web Browser control (frequently loaded by Internet Explorer, apps embedding WebBrowser, and even `explorer.exe`).
+This has been observed against the Microsoft Web Browser control (frequently loaded by Internet Explorer, apps embedding WebBrowser, and even `explorer.exe`).<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Steps (PowerShell)
 
