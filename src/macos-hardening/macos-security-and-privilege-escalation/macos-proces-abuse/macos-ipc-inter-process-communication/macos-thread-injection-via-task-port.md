@@ -9,41 +9,41 @@
 
 ## 1. Thread Hijacking
 
-처음에, `task_threads()` 함수가 원격 작업에서 스레드 목록을 얻기 위해 작업 포트에서 호출됩니다. 스레드가 하이재킹을 위해 선택됩니다. 이 접근 방식은 `thread_create_running()`을 차단하는 완화 조치로 인해 새로운 원격 스레드를 생성하는 것이 금지되므로 기존의 코드 주입 방법과 다릅니다.
+처음에는 `task_threads()` 함수가 task port에서 호출되어 remote task의 thread 목록을 가져옵니다. 이후 hijacking할 thread가 선택됩니다. `thread_create_running()`을 차단하는 mitigation으로 인해 새로운 remote thread를 생성할 수 없으므로, 이 접근 방식은 기존의 일반적인 code-injection 방법과 다릅니다.<sup>[1]</sup>
 
-스레드를 제어하기 위해 `thread_suspend()`가 호출되어 실행이 중단됩니다.
+thread를 제어하려면 `thread_suspend()`를 호출하여 실행을 중지합니다.<sup>[1]</sup>
 
-원격 스레드에서 허용되는 유일한 작업은 **중지** 및 **시작**과 **레지스터 값**을 **가져오고**/**수정하는** 것입니다. 원격 함수 호출은 레지스터 `x0`에서 `x7`을 **인수**로 설정하고, `pc`를 원하는 함수로 설정한 후 스레드를 재개하여 시작됩니다. 반환 후 스레드가 충돌하지 않도록 하려면 반환을 감지해야 합니다.
+remote thread에서 허용되는 유일한 작업은 thread를 **중지**하고 **시작**하는 것과 register 값을 **조회**/**수정**하는 것입니다. Remote function call은 register `x0`에서 `x7`을 **arguments**로 설정하고, `pc`를 원하는 function을 가리키도록 구성한 다음 thread를 재개하여 시작합니다. return 이후 thread가 crash하지 않도록 하려면 return을 감지해야 합니다.<sup>[1]</sup>
 
-한 가지 전략은 `thread_set_exception_ports()`를 사용하여 원격 스레드에 대한 **예외 처리기**를 등록하고, 함수 호출 전에 `lr` 레지스터를 잘못된 주소로 설정하는 것입니다. 이는 함수 실행 후 예외를 발생시켜 예외 포트에 메시지를 전송하고, 스레드의 상태를 검사하여 반환 값을 복구할 수 있게 합니다. 또는 Ian Beer의 *triple_fetch* 익스플로잇에서 채택한 대로, `lr`을 무한 루프에 설정하여 스레드의 레지스터를 지속적으로 모니터링하다가 `pc`가 해당 명령어를 가리킬 때까지 기다립니다.
+한 가지 방법은 `thread_set_exception_ports()`를 사용하여 remote thread에 **exception handler**를 등록하고, function call 전에 `lr` register를 유효하지 않은 주소로 설정하는 것입니다. 그러면 function 실행 후 exception이 발생하여 exception port로 message가 전송되고, thread의 state를 검사하여 return value를 복구할 수 있습니다. 또는 Ian Beer의 *triple_fetch* exploit에서 사용한 방식처럼 `lr`을 무한 loop로 설정할 수도 있습니다. 그런 다음 `pc`가 해당 instruction을 가리킬 때까지 thread의 registers를 지속적으로 모니터링합니다.<sup>[1]</sup>
 
-## 2. Mach ports for communication
+## 2. 통신을 위한 Mach ports
 
-다음 단계는 원격 스레드와의 통신을 용이하게 하기 위해 Mach 포트를 설정하는 것입니다. 이러한 포트는 작업 간에 임의의 송신/수신 권한을 전송하는 데 필수적입니다.
+다음 단계는 remote thread와의 통신을 가능하게 하는 Mach ports를 설정하는 것입니다. 이러한 ports는 task 간에 임의의 send/receive rights를 전송하는 데 사용됩니다.<sup>[1]</sup>
 
-양방향 통신을 위해 두 개의 Mach 수신 권한이 생성됩니다: 하나는 로컬 작업에, 다른 하나는 원격 작업에 있습니다. 이후 각 포트에 대한 송신 권한이 상대 작업으로 전송되어 메시지 교환이 가능해집니다.
+양방향 통신을 위해 두 개의 Mach receive rights를 생성합니다. 하나는 local task에, 다른 하나는 remote task에 생성합니다. 그 후 각 port의 send right를 counterpart task로 전송하여 message exchange를 가능하게 합니다.<sup>[1]</sup>
 
-로컬 포트에 집중하면, 수신 권한은 로컬 작업에 의해 보유됩니다. 포트는 `mach_port_allocate()`로 생성됩니다. 이 포트에 송신 권한을 원격 작업으로 전송하는 것이 도전 과제가 됩니다.
+local port를 살펴보면 receive right는 local task가 보유합니다. port는 `mach_port_allocate()`로 생성됩니다. 문제는 이 port에 대한 send right를 remote task로 전송하는 것입니다.<sup>[1]</sup>
 
-전략은 `thread_set_special_port()`를 활용하여 원격 스레드의 `THREAD_KERNEL_PORT`에 로컬 포트에 대한 송신 권한을 배치하는 것입니다. 그런 다음 원격 스레드에 `mach_thread_self()`를 호출하여 송신 권한을 가져오도록 지시합니다.
+한 가지 방법은 `thread_set_special_port()`를 사용하여 local port에 대한 send right를 remote thread의 `THREAD_KERNEL_PORT`에 배치하는 것입니다. 그런 다음 remote thread에 `mach_thread_self()`를 호출하도록 지시하여 send right를 가져옵니다.<sup>[1]</sup>
 
-원격 포트의 경우, 과정은 본질적으로 반대로 진행됩니다. 원격 스레드는 `mach_reply_port()`를 통해 Mach 포트를 생성하도록 지시받습니다(반환 메커니즘 때문에 `mach_port_allocate()`는 적합하지 않음). 포트가 생성되면, 원격 스레드에서 `mach_port_insert_right()`가 호출되어 송신 권한이 설정됩니다. 이 권한은 `thread_set_special_port()`를 사용하여 커널에 저장됩니다. 로컬 작업으로 돌아가서, `thread_get_special_port()`를 사용하여 원격 작업의 새로 할당된 Mach 포트에 대한 송신 권한을 획득합니다.
+remote port의 경우 과정은 본질적으로 반대입니다. `mach_port_allocate()`는 return mechanism 때문에 적합하지 않으므로, remote thread에 `mach_reply_port()`를 통해 Mach port를 생성하도록 지시합니다. port가 생성되면 remote thread에서 `mach_port_insert_right()`를 호출하여 send right를 설정합니다. 그런 다음 이 right를 `thread_set_special_port()`를 사용해 kernel에 보관합니다. local task로 돌아와서는 remote thread에 `thread_get_special_port()`를 사용하여 remote task에서 새로 할당된 Mach port에 대한 send right를 가져옵니다.<sup>[1]</sup>
 
-이 단계가 완료되면 Mach 포트가 설정되어 양방향 통신을 위한 기초가 마련됩니다.
+이 단계를 완료하면 Mach ports가 설정되어 양방향 통신을 위한 기반이 마련됩니다.<sup>[1]</sup>
 
 ## 3. Basic Memory Read/Write Primitives
 
-이 섹션에서는 기본 메모리 읽기/쓰기 원시 작업을 설정하기 위해 실행 원시 작업을 활용하는 데 중점을 둡니다. 이러한 초기 단계는 원격 프로세스에 대한 더 많은 제어를 얻는 데 중요하지만, 이 단계의 원시 작업은 많은 용도로 사용되지 않을 것입니다. 곧 더 고급 버전으로 업그레이드될 것입니다.
+이 section에서는 execute primitive을 사용하여 기본적인 memory read/write primitives를 설정하는 데 중점을 둡니다. 이러한 초기 단계는 remote process를 더 많이 제어하기 위해 중요하지만, 이 단계의 primitives는 아직 많은 용도로 사용되지는 않습니다. 곧 더 advanced한 versions으로 업그레이드됩니다.<sup>[1]</sup>
 
-### Memory reading and writing using the execute primitive
+### execute primitive을 사용한 Memory reading 및 writing
 
-목표는 특정 함수를 사용하여 메모리 읽기 및 쓰기를 수행하는 것입니다. **메모리 읽기**:
+목표는 특정 functions를 사용하여 memory reading 및 writing을 수행하는 것입니다. **reading memory**의 경우:
 ```c
 uint64_t read_func(uint64_t *address) {
 return *address;
 }
 ```
-**메모리 쓰기**:
+**메모리 쓰기의 경우:**
 ```c
 void write_func(uint64_t *address, uint64_t value) {
 *address = value;
@@ -60,7 +60,7 @@ ret
 ```
 ### 적합한 함수 식별
 
-일반 라이브러리를 스캔한 결과 이러한 작업에 적합한 후보가 발견되었습니다:
+일반적인 libraries를 검사한 결과, 이러한 작업에 적합한 후보를 확인했습니다:<sup>[1]</sup>
 
 1. **메모리 읽기 — `property_getName()`** (libobjc):
 ```c
@@ -78,62 +78,62 @@ ret
 ```c
 _xpc_int64_set_value(address - 0x18, value);
 ```
-이러한 원시 기능이 설정되면, 원격 프로세스를 제어하는 데 있어 중요한 진전을 이루는 공유 메모리를 생성할 준비가 됩니다.
+이러한 primitive이 확립되면 shared memory를 생성할 수 있는 단계가 마련되며, 이는 remote process를 제어하는 데 있어 중요한 진전입니다.<sup>[1]</sup>
 
-## 4. 공유 메모리 설정
+## 4. Shared Memory Setup
 
-목표는 로컬 및 원격 작업 간에 공유 메모리를 설정하여 데이터 전송을 간소화하고 여러 인수를 가진 함수 호출을 용이하게 하는 것입니다. 이 접근 방식은 `libxpc`와 Mach 메모리 항목을 기반으로 구축된 `OS_xpc_shmem` 객체 유형을 활용합니다.
+목표는 local task와 remote task 간에 shared memory를 설정하여 data transfer를 간소화하고 여러 arguments를 사용한 function 호출을 가능하게 하는 것입니다. 이 접근 방식은 Mach memory entries를 기반으로 구축된 `libxpc`와 `OS_xpc_shmem` object type을 활용합니다.<sup>[1]</sup>
 
-### 프로세스 개요
+### Process overview
 
-1. **메모리 할당**
-* `mach_vm_allocate()`를 사용하여 공유할 메모리를 할당합니다.
-* 할당된 영역에 대해 `xpc_shmem_create()`를 사용하여 `OS_xpc_shmem` 객체를 생성합니다.
-2. **원격 프로세스에서 공유 메모리 생성**
-* 원격 프로세스에서 `OS_xpc_shmem` 객체를 위한 메모리를 할당합니다 (`remote_malloc`).
-* 로컬 템플릿 객체를 복사합니다; `0x18` 오프셋에서 내장된 Mach 전송 권한의 수정이 여전히 필요합니다.
-3. **Mach 메모리 항목 수정**
-* `thread_set_special_port()`로 전송 권한을 삽입하고 `0x18` 필드를 원격 항목의 이름으로 덮어씁니다.
-4. **최종화**
-* 원격 객체를 검증하고 `xpc_shmem_remote()`에 대한 원격 호출로 매핑합니다.
+1. **Memory allocation**
+* `mach_vm_allocate()`를 사용하여 sharing을 위한 memory를 할당합니다.
+* `xpc_shmem_create()`를 사용하여 할당된 region에 대한 `OS_xpc_shmem` object를 생성합니다.
+2. **Creating shared memory in the remote process**
+* remote process에서 `OS_xpc_shmem` object를 위한 memory를 할당합니다(`remote_malloc`).
+* local template object를 복사합니다. 단, offset `0x18`에 있는 embedded Mach send right의 fix-up은 여전히 필요합니다.
+3. **Correcting the Mach memory entry**
+* `thread_set_special_port()`를 사용하여 send right를 삽입하고 `0x18` field를 remote entry의 name으로 덮어씁니다.
+4. **Finalising**
+* remote call을 통해 remote object를 검증하고 `xpc_shmem_remote()`로 map합니다.
 
-## 5. 완전한 제어 달성
+## 5. Achieving Full Control
 
-임의 실행 및 공유 메모리 백 채널이 가능해지면, 효과적으로 대상 프로세스를 소유하게 됩니다:
+arbitrary execution과 shared-memory back-channel을 사용할 수 있게 되면 사실상 target process를 완전히 장악한 것입니다:<sup>[1]</sup>
 
-* **임의 메모리 R/W** — 로컬 및 공유 영역 간에 `memcpy()`를 사용합니다.
-* **8개 이상의 인수를 가진 함수 호출** — arm64 호출 규약에 따라 스택에 추가 인수를 배치합니다.
-* **Mach 포트 전송** — 설정된 포트를 통해 Mach 메시지에서 권한을 전달합니다.
-* **파일 설명자 전송** — 파일 포트를 활용합니다 (참조: *triple_fetch*).
+* **Arbitrary memory R/W** — local region과 shared region 간에 `memcpy()`를 사용합니다.
+* **Function calls with > 8 args** — arm64 calling convention에 따라 추가 arguments를 stack에 배치합니다.
+* **Mach port transfer** — 설정된 ports를 통해 Mach messages에 rights를 전달합니다.
+* **File-descriptor transfer** — fileports를 활용합니다(*triple_fetch* 참조).
 
-이 모든 것은 쉽게 재사용할 수 있도록 [`threadexec`](https://github.com/bazad/threadexec) 라이브러리에 포장되어 있습니다.
+이 모든 기능은 쉽게 재사용할 수 있도록 [`threadexec`](https://github.com/bazad/threadexec) library로 래핑되어 있습니다.
 
 ---
 
-## 6. Apple Silicon (arm64e) 뉘앙스
+## 6. Apple Silicon (arm64e) Nuances
 
-Apple Silicon 장치(arm64e)에서는 **포인터 인증 코드(PAC)**가 모든 반환 주소와 많은 함수 포인터를 보호합니다. 기존 코드를 재사용하는 스레드 하이재킹 기술은 `lr`/`pc`의 원래 값이 이미 유효한 PAC 서명을 가지고 있기 때문에 계속 작동합니다. 공격자가 제어하는 메모리로 점프하려고 할 때 문제가 발생합니다:
+Apple Silicon devices(arm64e)에서는 **Pointer Authentication Codes (PAC)**가 모든 return addresses와 많은 function pointers를 보호합니다. 기존 code를 *reuse*하는 thread-hijacking techniques는 `lr`/`pc`의 원래 값에 이미 유효한 PAC signatures가 포함되어 있으므로 계속 작동합니다. Attacker-controlled memory로 jump하려고 할 때 문제가 발생합니다.
 
-1. 대상 내부에 실행 가능한 메모리를 할당합니다 (원격 `mach_vm_allocate` + `mprotect(PROT_EXEC)`).
-2. 페이로드를 복사합니다.
-3. *원격* 프로세스 내에서 포인터에 서명합니다:
+1. target 내부에 executable memory를 할당합니다(remote `mach_vm_allocate` + `mprotect(PROT_EXEC)`).
+2. payload를 복사합니다.
+3. *remote* process 내부에서 pointer에 sign을 적용합니다.
 ```c
 uint64_t ptr = (uint64_t)payload;
 ptr = ptrauth_sign_unauthenticated((void*)ptr, ptrauth_key_asia, 0);
 ```
-4. 하이재킹된 스레드 상태에서 `pc = ptr` 설정.
+4. 탈취된 thread state에서 `pc = ptr`을 설정합니다.
 
-또는 기존의 가젯/함수를 연결하여 PAC 준수를 유지합니다 (전통적인 ROP).
+또는 기존 gadget/function을 연결하여(PAC 준수) 전통적인 ROP를 사용합니다.
 
-## 7. 탐지 및 EndpointSecurity를 통한 강화
+## 7. EndpointSecurity를 통한 탐지 및 Hardening
 
-**EndpointSecurity (ES)** 프레임워크는 방어자가 스레드 주입 시도를 관찰하거나 차단할 수 있도록 하는 커널 이벤트를 노출합니다:
+**EndpointSecurity (ES)** framework는 defender가 thread-injection 시도를 관찰하거나 차단할 수 있도록 kernel event를 노출합니다:
 
-* `ES_EVENT_TYPE_AUTH_GET_TASK` – 프로세스가 다른 작업의 포트를 요청할 때 발생합니다 (예: `task_for_pid()`).
-* `ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE` – *다른* 작업에서 스레드가 생성될 때마다 발생합니다.
-* `ES_EVENT_TYPE_NOTIFY_THREAD_SET_STATE` (macOS 14 Sonoma에 추가됨) – 기존 스레드의 레지스터 조작을 나타냅니다.
+* `ES_EVENT_TYPE_AUTH_GET_TASK` – process가 다른 task의 port를 요청할 때 발생합니다(예: `task_for_pid()`).
+* `ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE` – 다른 *task*에 thread가 생성될 때마다 생성됩니다.<sup>[3]</sup>
+* `ES_EVENT_TYPE_NOTIFY_THREAD_SET_STATE` (macOS 14 Sonoma에서 추가됨) – 기존 thread의 register 조작을 나타냅니다.
 
-원격 스레드 이벤트를 출력하는 최소한의 Swift 클라이언트:
+remote-thread event를 출력하는 최소한의 Swift client:
 ```swift
 import EndpointSecurity
 
@@ -145,29 +145,29 @@ print("[ALERT] remote thread in pid \(evt.target.pid) by pid \(evt.thread.pid)")
 }
 RunLoop.main.run()
 ```
-**osquery** ≥ 5.8로 쿼리하기:
+**osquery** ≥ 5.8로 쿼리:
 ```sql
 SELECT target_pid, source_pid, target_path
 FROM es_process_events
 WHERE event_type = 'REMOTE_THREAD_CREATE';
 ```
-### Hardened-runtime considerations
+### Hardened-runtime 고려 사항
 
-애플리케이션을 `com.apple.security.get-task-allow` 권한 없이 배포하면 비루트 공격자가 해당 작업 포트를 얻는 것을 방지할 수 있습니다. 시스템 무결성 보호(SIP)는 여전히 많은 Apple 바이너스에 대한 접근을 차단하지만, 서드파티 소프트웨어는 명시적으로 옵트아웃해야 합니다.
+`com.apple.security.get-task-allow` entitlement 없이 application을 배포하면 **non-root attackers**가 해당 application의 task-port를 획득하지 못합니다. System Integrity Protection (SIP)은 여전히 많은 Apple binaries에 대한 access를 차단하지만, third-party software는 명시적으로 opt-out해야 합니다.
 
 ## 8. Recent Public Tooling (2023-2025)
 
 | Tool | Year | Remarks |
 |------|------|---------|
-| [`task_vaccine`](https://github.com/rodionovd/task_vaccine) | 2023 | Ventura/Sonoma에서 PAC 인식 스레드 하이재킹을 보여주는 간결한 PoC |
-| `remote_thread_es` | 2024 | 여러 EDR 공급자가 `REMOTE_THREAD_CREATE` 이벤트를 표출하는 데 사용하는 EndpointSecurity 헬퍼 |
+| [`task_vaccine`](https://github.com/rodionovd/task_vaccine) | 2023 | Ventura/Sonoma에서 PAC-aware thread hijacking을 시연하는 compact PoC |
+| `remote_thread_es` | 2024 | 여러 EDR vendors가 `REMOTE_THREAD_CREATE` events를 확인하는 데 사용하는 EndpointSecurity helper |
 
-> 이러한 프로젝트의 소스 코드를 읽는 것은 macOS 13/14에서 도입된 API 변경 사항을 이해하고 Intel ↔ Apple Silicon 간의 호환성을 유지하는 데 유용합니다.
+> 이 projects의 source code를 읽으면 macOS 13/14에서 도입된 API changes를 이해하고 Intel ↔ Apple Silicon 간의 compatibility를 유지하는 데 유용합니다.
 
 ## References
 
-- [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
-- [https://github.com/rodionovd/task_vaccine](https://github.com/rodionovd/task_vaccine)
-- [https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create](https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create)
+- [1] [Bypassing platform binary restrictions with task_threads() - bazad.github.io](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
+- [2] [rodionovd/task_vaccine - GitHub](https://github.com/rodionovd/task_vaccine)
+- [3] [ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE - Apple Developer Documentation](https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create)
 
 {{#include ../../../../banners/hacktricks-training.md}}

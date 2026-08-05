@@ -1,75 +1,75 @@
-# Introduction to x64
+# x64 소개
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Introduction to x64**
+## **x64 소개**
 
-x64, 또는 x86-64로도 알려진, 데스크탑 및 서버 컴퓨팅에서 주로 사용되는 64비트 프로세서 아키텍처입니다. Intel에서 제작한 x86 아키텍처에서 유래되었으며, 이후 AMD가 AMD64라는 이름으로 채택하였습니다. 현재 개인용 컴퓨터와 서버에서 널리 사용되는 아키텍처입니다.
+x64는 x86-64라고도 하며, 주로 데스크톱 및 서버 컴퓨팅에서 사용되는 64비트 processor architecture입니다. Intel이 제작한 x86 architecture에서 시작되었으며, 이후 AMD가 AMD64라는 이름으로 채택했습니다. 현재 개인용 컴퓨터와 서버에서 널리 사용되는 architecture입니다.
 
 ### **Registers**
 
-x64는 x86 아키텍처를 확장하여 **16개의 범용 레지스터**를 특징으로 하며, 이들은 `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi`, 그리고 `r8`부터 `r15`까지 레이블이 붙어 있습니다. 이들 각각은 **64비트**(8바이트) 값을 저장할 수 있습니다. 이 레지스터들은 호환성과 특정 작업을 위해 32비트, 16비트, 8비트 서브 레지스터도 가지고 있습니다.
+x64는 x86 architecture를 확장하여 `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi`, 그리고 `r8`부터 `r15`까지 이름이 지정된 **16개의 general-purpose registers**를 제공합니다. 각 register는 **64비트**(8바이트) 값을 저장할 수 있습니다. 또한 이 registers에는 호환성 및 특정 작업을 위한 32비트, 16비트, 8비트 sub-registers도 있습니다.
 
-1. **`rax`** - 전통적으로 함수의 **반환 값**에 사용됩니다.
-2. **`rbx`** - 메모리 작업을 위한 **기본 레지스터**로 자주 사용됩니다.
-3. **`rcx`** - **루프 카운터**로 일반적으로 사용됩니다.
-4. **`rdx`** - 확장된 산술 연산을 포함한 다양한 역할에 사용됩니다.
-5. **`rbp`** - 스택 프레임의 **기본 포인터**입니다.
-6. **`rsp`** - **스택 포인터**, 스택의 최상단을 추적합니다.
-7. **`rsi`** 및 **`rdi`** - 문자열/메모리 작업에서 **소스** 및 **대상** 인덱스에 사용됩니다.
-8. **`r8`**부터 **`r15`** - x64에서 도입된 추가 범용 레지스터입니다.
+1. **`rax`** - 전통적으로 함수의 **return values**에 사용됩니다.
+2. **`rbx`** - memory operations의 **base register**로 자주 사용됩니다.
+3. **`rcx`** - 일반적으로 **loop counters**에 사용됩니다.
+4. **`rdx`** - extended arithmetic operations를 포함한 다양한 용도로 사용됩니다.
+5. **`rbp`** - stack frame의 **base pointer**입니다.
+6. **`rsp`** - stack의 최상단을 추적하는 **stack pointer**입니다.
+7. **`rsi`** 및 **`rdi`** - string/memory operations에서 **source** 및 **destination** indexes로 사용됩니다.
+8. **`r8`**부터 **`r15`**까지 - x64에서 추가된 general-purpose registers입니다.
 
 ### **Calling Convention**
 
-x64 호출 규약은 운영 체제에 따라 다릅니다. 예를 들어:
+x64 calling convention은 operating system에 따라 다릅니다. 예를 들어:
 
-- **Windows**: 첫 번째 **네 개의 매개변수**는 레지스터 **`rcx`**, **`rdx`**, **`r8`**, **`r9`**에 전달됩니다. 추가 매개변수는 스택에 푸시됩니다. 반환 값은 **`rax`**에 있습니다.
-- **System V (UNIX 유사 시스템에서 일반적으로 사용됨)**: 첫 번째 **여섯 개의 정수 또는 포인터 매개변수**는 레지스터 **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, **`r9`**에 전달됩니다. 반환 값도 **`rax`**에 있습니다.
+- **Windows**: 처음 **네 개의 parameters**는 **`rcx`**, **`rdx`**, **`r8`**, **`r9`** registers로 전달됩니다. 이후 parameters는 stack에 push됩니다. return value는 **`rax`**에 있습니다.
+- **System V (UNIX-like systems에서 일반적으로 사용됨)**: 처음 **6개의 integer 또는 pointer parameters**는 **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, **`r9`** registers로 전달됩니다. return value 역시 **`rax`**에 있습니다.
 
-함수가 여섯 개 이상의 입력을 가지면, **나머지는 스택에 전달됩니다**. **RSP**, 스택 포인터는 **16바이트 정렬**되어야 하며, 이는 호출이 발생하기 전에 가리키는 주소가 16으로 나누어 떨어져야 함을 의미합니다. 이는 일반적으로 함수 호출 전에 RSP가 적절히 정렬되어야 함을 의미합니다. 그러나 실제로는 이 요구 사항이 충족되지 않더라도 시스템 호출이 여러 번 작동합니다.
+함수가 6개보다 많은 inputs를 받는 경우 **나머지는 stack을 통해 전달됩니다**. stack pointer인 **RSP**는 **16바이트 aligned** 상태여야 합니다. 이는 call이 발생하기 전에 해당 pointer가 가리키는 address가 16으로 나누어져야 함을 의미합니다. 따라서 일반적으로 function call을 수행하기 전에 shellcode에서 RSP가 올바르게 aligned되도록 해야 합니다. 그러나 실제로는 이 요구 사항이 충족되지 않아도 system calls가 작동하는 경우가 많습니다.
 
 ### Calling Convention in Swift
 
-Swift는 [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)에서 찾을 수 있는 자체 **호출 규약**을 가지고 있습니다.
+Swift에는 자체 **calling convention**이 있으며, [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)에서 확인할 수 있습니다.
 
 ### **Common Instructions**
 
-x64 명령어는 풍부한 세트를 가지고 있으며, 이전 x86 명령어와의 호환성을 유지하고 새로운 명령어를 도입합니다.
+x64 instructions는 풍부한 명령어 집합을 제공하며, 이전 x86 instructions와의 호환성을 유지하는 동시에 새로운 instructions도 도입했습니다.
 
-- **`mov`**: 한 **레지스터** 또는 **메모리 위치**에서 다른 위치로 값을 **이동**합니다.
-- 예: `mov rax, rbx` — `rbx`의 값을 `rax`로 이동합니다.
-- **`push`** 및 **`pop`**: **스택**에 값을 푸시하거나 팝합니다.
-- 예: `push rax` — `rax`의 값을 스택에 푸시합니다.
-- 예: `pop rax` — 스택의 최상단 값을 `rax`로 팝합니다.
-- **`add`** 및 **`sub`**: **덧셈** 및 **뺄셈** 연산입니다.
-- 예: `add rax, rcx` — `rax`와 `rcx`의 값을 더하여 결과를 `rax`에 저장합니다.
-- **`mul`** 및 **`div`**: **곱셈** 및 **나눗셈** 연산입니다. 주의: 이들은 피연산자 사용에 대한 특정 동작을 가지고 있습니다.
-- **`call`** 및 **`ret`**: 함수를 **호출**하고 **반환**하는 데 사용됩니다.
-- **`int`**: 소프트웨어 **인터럽트**를 트리거하는 데 사용됩니다. 예: `int 0x80`는 32비트 x86 Linux에서 시스템 호출에 사용되었습니다.
-- **`cmp`**: 두 값을 **비교**하고 결과에 따라 CPU의 플래그를 설정합니다.
-- 예: `cmp rax, rdx` — `rax`를 `rdx`와 비교합니다.
-- **`je`, `jne`, `jl`, `jge`, ...**: 이전 `cmp` 또는 테스트의 결과에 따라 제어 흐름을 변경하는 **조건부 점프** 명령어입니다.
-- 예: `cmp rax, rdx` 명령어 후, `je label` — `rax`가 `rdx`와 같으면 `label`로 점프합니다.
-- **`syscall`**: 일부 x64 시스템(예: 현대 Unix)에서 **시스템 호출**에 사용됩니다.
-- **`sysenter`**: 일부 플랫폼에서 최적화된 **시스템 호출** 명령어입니다.
+- **`mov`**: 한 **register** 또는 **memory location**의 값을 다른 곳으로 **Move**합니다.
+- Example: `mov rax, rbx` — `rbx`의 값을 `rax`로 이동합니다.
+- **`push`** 및 **`pop`**: 값을 **stack**에 push하거나 stack에서 pop합니다.
+- Example: `push rax` — `rax`의 값을 stack에 push합니다.
+- Example: `pop rax` — stack의 최상단 값을 `rax`로 pop합니다.
+- **`add`** 및 **`sub`**: **Addition** 및 **subtraction** operations입니다.
+- Example: `add rax, rcx` — `rax`와 `rcx`의 값을 더하고 그 결과를 `rax`에 저장합니다.
+- **`mul`** 및 **`div`**: **Multiplication** 및 **division** operations입니다. 참고: 이 instructions는 operand 사용 방식과 관련된 특정 동작을 수행합니다.
+- **`call`** 및 **`ret`**: **functions를 call**하고 **return**할 때 사용됩니다.
+- **`int`**: software **interrupt**를 trigger할 때 사용됩니다. 예: `int 0x80`은 32비트 x86 Linux에서 system calls에 사용되었습니다.
+- **`cmp`**: 두 값을 **Compare**하고 결과에 따라 CPU의 flags를 설정합니다.
+- Example: `cmp rax, rdx` — `rax`와 `rdx`를 비교합니다.
+- **`je`, `jne`, `jl`, `jge`, ...**: 이전 `cmp` 또는 test의 결과에 따라 control flow를 변경하는 **Conditional jump** instructions입니다.
+- Example: `cmp rax, rdx` instruction 이후 `je label` — `rax`가 `rdx`와 같으면 `label`로 jump합니다.
+- **`syscall`**: 일부 x64 systems(예: modern Unix)에서 **system calls**에 사용됩니다.
+- **`sysenter`**: 일부 platforms에서 최적화된 **system call** instruction입니다.
 
 ### **Function Prologue**
 
-1. **이전 기본 포인터 푸시**: `push rbp` (호출자의 기본 포인터를 저장)
-2. **현재 스택 포인터를 기본 포인터로 이동**: `mov rbp, rsp` (현재 함수에 대한 새로운 기본 포인터 설정)
-3. **로컬 변수를 위한 스택 공간 할당**: `sub rsp, <size>` (여기서 `<size>`는 필요한 바이트 수)
+1. **이전 base pointer push**: `push rbp` (caller의 base pointer를 저장)
+2. **현재 stack pointer를 base pointer로 이동**: `mov rbp, rsp` (현재 function을 위한 새로운 base pointer 설정)
+3. **local variables를 위한 stack 공간 할당**: `sub rsp, <size>` (`<size>`는 필요한 바이트 수)
 
 ### **Function Epilogue**
 
-1. **현재 기본 포인터를 스택 포인터로 이동**: `mov rsp, rbp` (로컬 변수 해제)
-2. **이전 기본 포인터를 스택에서 팝**: `pop rbp` (호출자의 기본 포인터 복원)
-3. **반환**: `ret` (호출자에게 제어 반환)
+1. **현재 base pointer를 stack pointer로 이동**: `mov rsp, rbp` (local variables 할당 해제)
+2. **stack에서 이전 base pointer pop**: `pop rbp` (caller의 base pointer 복원)
+3. **Return**: `ret` (caller에게 control을 return)
 
 ## macOS
 
 ### syscalls
 
-다양한 클래스의 시스템 호출이 있으며, [**여기에서 찾을 수 있습니다**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
+syscalls에는 여러 class가 있으며, [**여기에서 확인할 수 있습니다**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
 ```c
 #define SYSCALL_CLASS_NONE	0	/* Invalid */
 #define SYSCALL_CLASS_MACH	1	/* Mach */
@@ -78,7 +78,7 @@ x64 명령어는 풍부한 세트를 가지고 있으며, 이전 x86 명령어�
 #define SYSCALL_CLASS_DIAG	4	/* Diagnostics */
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
-그런 다음 각 syscall 번호를 [**이 URL에서**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:** 찾을 수 있습니다.
+그런 다음, 각 syscall 번호는 [**이 URL에서**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)** 확인할 수 있습니다:**
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
 1	AUE_EXIT	ALL	{ void exit(int rval); }
@@ -95,9 +95,9 @@ x64 명령어는 풍부한 세트를 가지고 있으며, 이전 x86 명령어�
 12	AUE_CHDIR	ALL	{ int chdir(user_addr_t path); }
 [...]
 ```
-`open` 시스템 호출 (**5**)을 **Unix/BSD 클래스**에서 호출하기 위해서는 다음을 추가해야 합니다: `0x2000000`
+따라서 **Unix/BSD class**의 `open` syscall(**5**)을 호출하려면 다음 값을 추가해야 합니다: `0x2000000`
 
-따라서 open을 호출하는 시스템 호출 번호는 `0x2000005`입니다.
+그러므로 open을 호출할 syscall number는 `0x2000005`입니다.
 
 ### Shellcodes
 
@@ -118,7 +118,7 @@ otool -t shell.o | grep 00 | cut -f2 -d$'\t' | sed 's/ /\\x/g' | sed 's/^/\\x/g'
 ```
 <details>
 
-<summary>쉘코드를 테스트하기 위한 C 코드</summary>
+<summary>shellcode 테스트용 C 코드</summary>
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
 // gcc loader.c -o loader
@@ -166,9 +166,9 @@ return 0;
 ```
 </details>
 
-#### 셸
+#### Shell
 
-[**여기**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)에서 가져온 내용이며 설명됩니다.
+[**여기**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)에서 가져와 설명합니다.<sup>[1]</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -209,7 +209,7 @@ syscall
 
 #### cat으로 읽기
 
-목표는 `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`를 실행하는 것입니다. 여기서 두 번째 인수(x1)는 매개변수의 배열입니다(메모리에서 이는 주소의 스택을 의미합니다).
+목표는 `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`를 실행하는 것이므로, 두 번째 인수(x1)는 params의 배열입니다(메모리에서는 주소가 stack에 쌓인 형태입니다).
 ```armasm
 bits 64
 section .text
@@ -240,7 +240,7 @@ section .data
 cat_path:      db "/bin/cat", 0
 passwd_path:   db "/etc/passwd", 0
 ```
-#### sh로 명령어 호출하기
+#### sh로 명령 실행
 ```armasm
 bits 64
 section .text
@@ -280,7 +280,7 @@ touch_command:  db "touch /tmp/lalala", 0
 ```
 #### Bind shell
 
-**포트 4444**에서 [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html)의 Bind shell
+[https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html)의 **포트 4444** Bind shell<sup>[2]</sup>.
 ```armasm
 section .text
 global _main
@@ -355,9 +355,9 @@ mov  rax, r8
 mov  al, 0x3b
 syscall
 ```
-#### 리버스 셸
+#### Reverse Shell
 
-[https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html)에서 리버스 셸. **127.0.0.1:4444**로 리버스 셸.
+[https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html)의 Reverse shell. **127.0.0.1:4444**로 Reverse shell 연결<sup>[3]</sup>
 ```armasm
 section .text
 global _main
@@ -419,4 +419,10 @@ mov  rax, r8
 mov  al, 0x3b
 syscall
 ```
+## 참고 자료
+
+- [1] [daem0nc0re/macOS_ARM64_Shellcode - shell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)
+- [2] [Packet Storm - macOS TCP 4444 Bind Shell (Null-Free) Shellcode](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html)
+- [3] [Packet Storm - macOS 127.0.0.1:4444 Reverse Shell Shellcode](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html)
+
 {{#include ../../../banners/hacktricks-training.md}}

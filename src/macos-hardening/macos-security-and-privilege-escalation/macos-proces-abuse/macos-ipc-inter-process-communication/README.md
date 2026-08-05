@@ -1,80 +1,80 @@
-# macOS IPC - 프로세스 간 통신
+# macOS IPC - Inter Process Communication
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Mach 메시징 (포트를 통한 통신)
+## Ports를 통한 Mach messaging
 
 ### 기본 정보
 
-Mach는 리소스 공유의 최소 단위로 **tasks**를 사용하며, 각 task는 **여러 threads**를 포함할 수 있습니다. 이 **tasks와 threads는 POSIX 프로세스 및 스레드와 1:1로 매핑**됩니다.
+Mach는 리소스를 공유하기 위한 **가장 작은 단위**로 **tasks**를 사용하며, 각 task에는 **여러 thread**가 포함될 수 있습니다. 이러한 **tasks와 threads는 POSIX processes와 threads에 1:1로 매핑**됩니다.
 
-Task들 간의 통신은 Mach Inter-Process Communication (IPC)을 통해 이루어지며, 일방향 통신 채널을 사용합니다. **메시지는 커널이 관리하는 일종의 메시지 큐 역할을 하는 포트들(port) 사이에서 전달**됩니다.
+Tasks 간의 통신은 단방향 communication channel을 사용하는 Mach Inter-Process Communication (IPC)을 통해 이루어집니다. **Messages는 ports 사이에서 전송**되며, ports는 kernel이 관리하는 일종의 **message queues** 역할을 합니다.
 
-**포트(port)**는 Mach IPC의 **기본 요소**입니다. 포트는 **메시지를 보내고 받는 데** 사용될 수 있습니다.
+**Port**는 Mach IPC의 **기본** 요소입니다. **Messages를 보내고 받을** 때 사용할 수 있습니다.
 
-각 프로세스는 **IPC 테이블**을 가지고 있으며, 여기서 해당 프로세스의 **mach ports**를 확인할 수 있습니다. mach 포트의 이름은 실제로 숫자(커널 객체에 대한 포인터)입니다.
+각 process에는 **IPC table**이 있으며, 이 테이블에서 **해당 process의 mach ports**를 찾을 수 있습니다. Mach port의 이름은 실제로 숫자입니다(kernel object를 가리키는 pointer).
 
-프로세스는 또한 다른 task에게 어떤 권한을 가진 포트 이름을 보낼 수 있으며, 커널은 이를 받아 **다른 task의 IPC 테이블에 항목을 생성**합니다.
+Process는 일부 rights와 함께 port name을 **다른 task**로 보낼 수도 있으며, kernel은 다른 task의 **IPC table**에 해당 entry가 나타나도록 처리합니다.
 
 ### Port Rights
 
-어떤 작업(task)이 수행할 수 있는 연산을 정의하는 포트 권한(port rights)은 이 통신에서 핵심입니다. 가능한 **port rights**는 ([definitions from here](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
+통신에서 task가 수행할 수 있는 operation을 정의하는 Port rights는 핵심적인 역할을 합니다. 가능한 **port rights**는 ([definitions from here](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):<sup>[1]</sup>
 
-- **Receive right**, 포트로 전송된 메시지를 수신할 수 있게 해줍니다. Mach 포트는 MPSC (multiple-producer, single-consumer) 큐이므로, 시스템 전체에서 **각 포트에 대해 Receive right는 최대 하나만 존재**할 수 있습니다(파이프의 읽기 끝에 여러 프로세스가 파일 디스크립터를 가질 수 있는 것과는 다릅니다).
-- Receive 권한을 가진 task는 메시지를 받거나 **Send rights를 생성**할 수 있어 메시지를 보낼 수 있습니다. 원래는 **해당 포트의 Receive right는 소유하는 task만 가집니다**.
-- Receive right의 소유자가 **종료**하거나 그것을 제거하면, **send right는 쓸모없어져(dead name)** 버립니다.
-- **Send right**, 포트로 메시지를 보낼 수 있게 해줍니다.
-- Send right는 **클론(clone)** 될 수 있어서, Send right를 가진 task는 권한을 복제하고 **제3의 task에 부여**할 수 있습니다.
-- 포트 권한은 Mac 메시지를 통해 **전달**될 수도 있다는 점에 유의하세요.
-- **Send-once right**, 해당 포트로 한 번만 메시지를 보낼 수 있고 그 후 사라집니다.
-- 이 권한은 **클론할 수는 없지만 이동(move)** 할 수 있습니다.
-- **Port set right**, 단일 포트가 아니라 _port set_을 나타냅니다. 포트 세트에서 메시지를 디큐(dequeue)하면 그 세트가 포함한 포트들 중 하나에서 메시지가 디큐됩니다. 포트 세트는 여러 포트를 동시에 리스닝하는 데 사용될 수 있으며, Unix의 `select`/`poll`/`epoll`/`kqueue`와 매우 유사합니다.
-- **Dead name**, 실제 포트 권한은 아니고 단지 플레이스홀더입니다. 포트가 파괴되면, 해당 포트에 대한 모든 기존 포트 권한은 dead name으로 변합니다.
+- **Receive right**는 port로 전송된 messages를 받을 수 있도록 합니다. Mach ports는 MPSC (multiple-producer, single-consumer) queues이므로, 전체 system에서 각 port에는 **하나의 receive right만 존재**할 수 있습니다(여러 process가 하나의 pipe의 read end에 대한 file descriptors를 보유할 수 있는 pipes와 다릅니다).
+- **Receive** right를 가진 **task**는 messages를 받고 **Send rights를 생성**할 수 있으며, 이를 통해 messages를 보낼 수 있습니다. 원래는 **소유한 task만 해당 port에 대한 Receive right를 가집니다**.
+- Receive right의 소유자가 **종료**하거나 해당 port를 kill하면 **send right는 사용할 수 없게 됩니다(dead name)**.
+- **Send right**는 port로 messages를 보낼 수 있도록 합니다.
+- Send right는 **clone**할 수 있으므로, Send right를 소유한 task는 해당 right를 clone하여 **세 번째 task에 부여**할 수 있습니다.
+- **Port rights**는 Mach messages를 통해 **전달**할 수도 있습니다.
+- **Send-once right**는 port에 하나의 message를 보낸 후 사라집니다.
+- 이 right는 **clone**할 수 없지만 **move**할 수 있습니다.
+- **Port set right**는 단일 port가 아닌 _port set_을 나타냅니다. Port set에서 message를 dequeue하면 해당 set에 포함된 port 중 하나에서 message가 dequeue됩니다. Port sets는 여러 ports를 동시에 listen하는 데 사용할 수 있으며, Unix의 `select`/`poll`/`epoll`/`kqueue`와 매우 유사합니다.
+- **Dead name**은 실제 port right가 아니라 단순한 placeholder입니다. Port가 destroy되면 해당 port에 대한 기존 port rights는 모두 dead names로 변환됩니다.
 
-**Tasks는 다른 task에 SEND 권한을 전송할 수** 있어, 그들이 다시 메시지를 보낼 수 있게 합니다. **SEND 권한은 또한 클론될 수 있어, 한 task가 권한을 복제해 제3의 task에 줄 수 있습니다**. 이것은 **bootstrap server**로 알려진 중간 프로세스와 결합되어 task들 간의 효과적인 통신을 가능하게 합니다.
+**Tasks는 SEND rights를 다른 task로 transfer**하여 다른 task가 자신에게 messages를 보낼 수 있도록 합니다. **SEND rights는 clone할 수도 있으므로, task가 이를 duplicate하여 세 번째 task에 제공할 수 있습니다**. 이를 **bootstrap server**라는 intermediary process와 함께 사용하면 tasks 간에 효과적으로 통신할 수 있습니다.
 
 ### File Ports
 
-file ports는 파일 디스크립터를 Mach 포트 권한으로 캡슐화할 수 있게 합니다. 주어진 FD로부터 `fileport_makeport`를 사용해 `fileport`를 생성할 수 있고, fileport로부터 FD를 생성할 때는 `fileport_makefd`를 사용합니다.
+File ports를 사용하면 file descriptors를 Mac ports(Mach port rights 사용) 안에 encapsulate할 수 있습니다. 주어진 FD에서 `fileport_makeport`를 사용해 `fileport`를 생성하고, fileport에서 `fileport_makefd`를 사용해 FD를 생성할 수 있습니다.
 
 ### 통신 수립
 
-앞서 언급했듯이, Mach 메시지를 통해 권한을 보낼 수 있지만, **이미 Mach 메시지를 보낼 권한을 가지고 있지 않으면 권한을 보낼 수 없습니다**. 그렇다면 최초의 통신은 어떻게 성립될까요?
+앞서 언급했듯이 Mach messages를 사용해 rights를 보낼 수 있지만, Mach message를 보낼 **right를 이미 가지고 있지 않다면 right를 보낼 수 없습니다**. 그렇다면 최초의 communication은 어떻게 수립될까요?
 
-이를 위해 **bootstrap server**(**launchd** in mac)가 관여합니다. **모든 사람은 bootstrap server에 대한 SEND 권한을 얻을 수 있기 때문에**, 다른 프로세스에 메시지를 보낼 권한을 요청할 수 있습니다:
+이를 위해 **bootstrap server** (**macOS에서는 launchd**)가 관여합니다. **누구나 bootstrap server에 대한 SEND right를 얻을 수 있으므로**, 다른 process로 message를 보낼 right를 요청할 수 있습니다.
 
-1. Task **A**는 **새 포트**를 생성하여 그 포트에 대한 **RECEIVE right**를 얻습니다.
-2. RECEIVE right의 소유자인 Task **A**는 그 포트에 대한 **SEND right를 생성**합니다.
-3. Task **A**는 **bootstrap server**와 연결을 설정하고, 처음에 생성한 포트의 **SEND right를 bootstrap server에 전송**합니다.
+1. Task **A**가 **새 port**를 생성하고 해당 port에 대한 **RECEIVE right**를 얻습니다.
+2. Task **A**는 RECEIVE right의 holder이므로 **해당 port에 대한 SEND right를 생성**합니다.
+3. Task **A**가 **bootstrap server**와 **connection**을 수립하고, 처음에 생성한 port에 대한 **SEND right**를 bootstrap server에 보냅니다.
 - 누구나 bootstrap server에 대한 SEND right를 얻을 수 있다는 점을 기억하세요.
-4. Task A는 `bootstrap_register` 메시지를 bootstrap server에 보내어 주어진 포트를 `com.apple.taska` 같은 이름과 **연결(associate)** 시킵니다.
-5. Task **B**는 서비스 이름에 대해 bootstrap **lookup**을 수행하기 위해 **bootstrap server**와 상호작용합니다 (`bootstrap_lookup`). bootstrap server가 응답할 수 있으려면, Task B는 lookup 메시지 내에 **자신이 이전에 생성한 포트에 대한 SEND right를 보냅니다**. lookup이 성공하면, **서버는 Task A로부터 받은 SEND right를 복제하여 Task B에게 전송**합니다.
+4. Task A가 `bootstrap_register` message를 bootstrap server에 보내 주어진 port를 `com.apple.taska`와 같은 **name과 associate**합니다.
+5. Task **B**가 **bootstrap server**와 상호작용하여 service name에 대한 bootstrap **lookup**(`bootstrap_lookup`)을 실행합니다. bootstrap server가 응답할 수 있도록 Task B는 lookup message 안에 이전에 생성한 port에 대한 **SEND right**를 함께 보냅니다. Lookup이 성공하면 **server는 Task A에서 받은 SEND right를 duplicate**하여 **Task B로 전송**합니다.
 - 누구나 bootstrap server에 대한 SEND right를 얻을 수 있다는 점을 기억하세요.
-6. 이 SEND right를 통해 **Task B**는 **Task A로 메시지를 보낼 수 있습니다**.
-7. 양방향 통신을 위해 일반적으로 Task **B**는 **RECEIVE** 권한과 **SEND** 권한을 가진 새 포트를 생성하고, **SEND right를 Task A에 줘서** Task A가 Task B에 메시지를 보낼 수 있게 합니다(양방향 통신).
+6. 이 SEND right를 사용하면 **Task B**는 **Task A로** **message를 보낼** 수 있습니다.
+7. 양방향 communication을 위해 일반적으로 Task **B**는 **RECEIVE** right와 **SEND** right를 가진 새 port를 생성하고, **SEND right를 Task A에 제공**하여 Task A가 TASK B로 messages를 보낼 수 있게 합니다(양방향 communication).
 
-bootstrap server는 Task가 주장하는 서비스 이름을 **인증하지 못합니다**. 이는 어떤 Task가 **임의의 시스템 Task를 사칭**할 수 있음을 의미합니다. 예를 들어 잘못된 인증 서비스 이름을 주장하고 모든 요청을 승인하도록 하는 식의 사칭이 가능합니다.
+Bootstrap server는 task가 주장하는 service name을 **authenticate할 수 없습니다**. 이는 **task**가 잠재적으로 모든 system task를 **impersonate**할 수 있다는 뜻입니다. 예를 들어 authorization service name을 거짓으로 **claim**한 다음 모든 request를 승인할 수 있습니다.
 
-이에 대해, Apple은 시스템 제공 서비스의 **이름들을 SIP로 보호된 디렉토리**인 `/System/Library/LaunchDaemons`와 `/System/Library/LaunchAgents`에 있는 안전한 구성 파일에 저장합니다. 각 서비스 이름과 함께 **연관된 바이너리도 저장**됩니다. bootstrap server는 이러한 서비스 이름 각각에 대해 **RECEIVE right를 생성하고 보유**합니다.
+그런 다음 Apple은 **system-provided services의 name**을 SIP-protected directory에 위치한 secure configuration files에 저장합니다: `/System/Library/LaunchDaemons` 및 `/System/Library/LaunchAgents`. 각 service name과 함께 **associated binary**도 저장됩니다. Bootstrap server는 각 service name에 대해 **RECEIVE right를 생성하고 보유**합니다.
 
-사전 정의된 서비스의 경우, **lookup 프로세스는 약간 다르게 동작**합니다. 서비스 이름이 조회될 때, launchd는 서비스를 동적으로 시작합니다. 새로운 워크플로우는 다음과 같습니다:
+이렇게 미리 정의된 services의 경우 **lookup process가 약간 다릅니다**. Service name을 lookup하면 launchd가 service를 동적으로 시작합니다. 새로운 workflow는 다음과 같습니다.
 
-- Task **B**가 서비스 이름에 대해 bootstrap **lookup**을 시작합니다.
-- **launchd**는 해당 서비스가 실행 중인지 확인하고, 실행 중이 아니면 **시작**합니다.
-- Task **A**(서비스)는 `bootstrap_check_in()`을 수행합니다. 여기서 **bootstrap** 서버는 SEND right를 생성해 보유하고, **RECEIVE right를 Task A에 전달**합니다.
-- launchd는 **SEND right를 복제하여 Task B에 전송**합니다.
-- Task **B**는 **RECEIVE** 권한과 **SEND** 권한을 가진 새 포트를 생성하고, **SEND right를 Task A(서비스)에게 주어** Task A가 Task B로 메시지를 보낼 수 있게 합니다(양방향 통신).
+- Task **B**가 service name에 대한 bootstrap **lookup**을 시작합니다.
+- **launchd**가 해당 task가 실행 중인지 확인하고, 실행 중이 아니면 **시작**합니다.
+- Task **A**(service)가 **bootstrap check-in**(`bootstrap_check_in()`)을 수행합니다. 이때 **bootstrap** server가 SEND right를 생성하고 보유한 다음, **RECEIVE right를 Task A로 transfer**합니다.
+- launchd가 **SEND right를 duplicate하여 Task B에 전송**합니다.
+- **Task B**가 **RECEIVE** right와 **SEND** right를 가진 새 port를 생성하고, **SEND right를 Task A**(svc)에 제공하여 Task A가 TASK B로 messages를 보낼 수 있게 합니다(양방향 communication).
 
-다만 이 과정은 사전 정의된 시스템 Task에만 적용됩니다. 비시스템 Task들은 여전히 원래 설명한 방식으로 동작하기 때문에, 사칭이 가능할 수 있습니다.
+그러나 이 process는 미리 정의된 system tasks에만 적용됩니다. Non-system tasks는 여전히 원래 설명한 방식으로 동작하므로, 잠재적으로 impersonation이 가능할 수 있습니다.
 
 > [!CAUTION]
-> 따라서, launchd는 절대 크래시해서는 안 되며 그렇지 않으면 시스템 전체가 크래시될 수 있습니다.
+> 따라서 launchd가 crash해서는 안 됩니다. 그렇지 않으면 전체 system이 crash합니다.
 
 ### A Mach Message
 
-[Find more info here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
+[Find more info here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)<sup>[4]</sup>
 
-`mach_msg` 함수는 본질적으로 시스템 콜로서 Mach 메시지를 보내고 받는 데 사용됩니다. 이 함수는 전송할 메시지를 첫 번째 인자로 요구합니다. 이 메시지는 `mach_msg_header_t` 구조체로 시작해야 하며, 그 뒤에 실제 메시지 내용이 옵니다. 구조체는 다음과 같이 정의됩니다:
+본질적으로 system call인 `mach_msg` function은 Mach messages를 보내고 받는 데 사용됩니다. 이 function은 첫 번째 argument로 전송할 message를 요구합니다. 이 message는 `mach_msg_header_t` structure로 시작해야 하며, 그 뒤에 실제 message content가 이어집니다. Structure는 다음과 같이 정의됩니다:
 ```c
 typedef struct {
 mach_msg_bits_t               msgh_bits;
@@ -85,17 +85,17 @@ mach_port_name_t              msgh_voucher_port;
 mach_msg_id_t                 msgh_id;
 } mach_msg_header_t;
 ```
-프로세스가 _**receive right**_를 보유하면 Mach 포트에서 메시지를 받을 수 있다. 반대로, **senders**는 _**send**_ 또는 _**send-once right**_를 부여받는다. _**send-once right**_는 단 한 번의 메시지를 전송하는 데만 사용되며 전송 후 무효화된다.
+_**receive right**_을 보유한 프로세스는 Mach port에서 메시지를 수신할 수 있습니다. 반대로 **senders**에게는 _**send**_ 또는 _**send-once right**_이 부여됩니다. send-once right은 단일 메시지를 보내는 용도로만 사용되며, 이후에는 무효화됩니다.
 
-초기 필드 **`msgh_bits`**는 비트맵이다:
+초기 필드인 **`msgh_bits`**는 bitmap입니다.
 
-- 첫 번째 비트(최상위)는 메시지가 complex임을 표시하는 데 사용된다(자세한 내용은 아래 참조)
-- 3번째와 4번째 비트는 커널에서 사용된다
-- **2번째 바이트의 하위 5비트**는 **voucher**에 사용할 수 있다: 키/값 조합을 전송하는 또 다른 유형의 포트
-- **3번째 바이트의 하위 5비트**는 **local port**에 사용할 수 있다
-- **4번째 바이트의 하위 5비트**는 **remote port**에 사용할 수 있다
+- 첫 번째 비트(가장 유효한 비트)는 메시지가 complex인지 나타내는 데 사용됩니다(자세한 내용은 아래 참조).
+- 3번째와 4번째 비트는 kernel에서 사용됩니다.
+- 2번째 바이트의 **하위 5비트**는 **voucher**에 사용할 수 있습니다. voucher는 key/value 조합을 전송하는 또 다른 유형의 port입니다.
+- 3번째 바이트의 **하위 5비트**는 **local port**에 사용할 수 있습니다.
+- 4번째 바이트의 **하위 5비트**는 **remote port**에 사용할 수 있습니다.
 
-The types that can be specified in the voucher, local and remote ports are (from [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
+voucher, local port 및 remote port에서 지정할 수 있는 types는 [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)에 정의되어 있습니다.
 ```c
 #define MACH_MSG_TYPE_MOVE_RECEIVE      16      /* Must hold receive right */
 #define MACH_MSG_TYPE_MOVE_SEND         17      /* Must hold send right(s) */
@@ -108,59 +108,32 @@ The types that can be specified in the voucher, local and remote ports are (from
 #define MACH_MSG_TYPE_DISPOSE_SEND      25      /* must hold send right(s) */
 #define MACH_MSG_TYPE_DISPOSE_SEND_ONCE 26      /* must hold sendonce right */
 ```
-For example, `MACH_MSG_TYPE_MAKE_SEND_ONCE` can be used to **indicate** that a **send-once** **right** should be derived and transferred for this port. It can also be specified `MACH_PORT_NULL` to prevent the recipient to be able to reply.
+예를 들어, `MACH_MSG_TYPE_MAKE_SEND_ONCE`를 사용하여 이 포트에 대해 **send-once** **right**가 파생되어 전송되어야 함을 **나타낼** 수 있습니다. 또한 수신자가 응답할 수 없도록 `MACH_PORT_NULL`을 지정할 수도 있습니다.
 
-예를 들어, `MACH_MSG_TYPE_MAKE_SEND_ONCE`는 이 포트에 대해 **send-once 권한**이 파생되어 전송되어야 함을 **표시**하는 데 사용할 수 있다. 또한 수신자가 응답하지 못하도록 `MACH_PORT_NULL`로 지정할 수도 있다.
-
-In order to achieve an easy **bi-directional communication** a process can specify a **mach port** in the mach **message header** called the _reply port_ (**`msgh_local_port`**) where the **receiver** of the message can **send a reply** to this message.
-
-간단한 **양방향 통신**을 구현하기 위해 프로세스는 mach **message header**에 _reply port_ (**`msgh_local_port`**)로 불리는 **mach port**를 지정할 수 있으며, 메시지의 **수신자**는 이 포트로 **응답을 보낼** 수 있다.
+간단한 **양방향 통신**을 구현하기 위해 프로세스는 mach **message header**에 _reply port_ (**`msgh_local_port`**)라고 하는 **mach port**를 지정할 수 있으며, 메시지 **수신자**는 이 포트로 메시지에 대한 **응답을 보낼 수** 있습니다.
 
 > [!TIP]
-> Note that this kind of bi-directional communication is used in XPC messages that expect a replay (`xpc_connection_send_message_with_reply` and `xpc_connection_send_message_with_reply_sync`). But **usually different ports are created** as explained previously to create the bi-directional communication.
+> 이러한 종류의 양방향 통신은 응답을 예상하는 XPC 메시지(`xpc_connection_send_message_with_reply` 및 `xpc_connection_send_message_with_reply_sync`)에서 사용됩니다. 그러나 **일반적으로는 이전에 설명한 것처럼 서로 다른 포트를 생성**하여 양방향 통신을 구현합니다.
 
-> [!TIP]
-> 응답을 기대하는 XPC 메시지들(`xpc_connection_send_message_with_reply` 및 `xpc_connection_send_message_with_reply_sync`)에서 이러한 유형의 양방향 통신이 사용된다는 점에 유의하라. 하지만 **일반적으로 양방향 통신을 만들기 위해서는 앞서 설명한 것처럼 서로 다른 포트들이 생성된다**.
+메시지 헤더의 나머지 필드는 다음과 같습니다.
 
-The other fields of the message header are:
-
-- `msgh_size`: the size of the entire packet.
-- `msgh_remote_port`: the port on which this message is sent.
-- `msgh_voucher_port`: [mach vouchers](https://robert.sesek.com/2023/6/mach_vouchers.html).
-- `msgh_id`: the ID of this message, which is interpreted by the receiver.
-
-메시지 헤더의 다른 필드들은 다음과 같다:
-
-- `msgh_size`: 전체 패킷의 크기.
-- `msgh_remote_port`: 이 메시지가 전송되는 포트.
-- `msgh_voucher_port`: [mach vouchers](https://robert.sesek.com/2023/6/mach_vouchers.html).
-- `msgh_id`: 수신자가 해석하는 이 메시지의 ID.
+- `msgh_size`: 전체 packet의 크기입니다.
+- `msgh_remote_port`: 이 메시지가 전송되는 포트입니다.
+- `msgh_voucher_port`: [mach vouchers](https://robert.sesek.com/2023/6/mach_vouchers.html)입니다.
+- `msgh_id`: 수신자가 해석하는 이 메시지의 ID입니다.
 
 > [!CAUTION]
-> Note that **mach messages are sent over a `mach port`**, which is a **single receiver**, **multiple sender** communication channel built into the mach kernel. **Multiple processes** can **send messages** to a mach port, but at any point only **a single process can read** from it.
+> **mach messages는 `mach port`를 통해 전송**됩니다. `mach port`는 mach kernel에 내장된 **단일 수신자**, **다중 sender** 통신 채널입니다. **여러 프로세스**가 mach port로 **메시지를 보낼 수** 있지만, 어느 시점에서든 메시지를 **읽을 수 있는 프로세스는 하나뿐**입니다.
 
-> [!CAUTION]
-> **mach 메시지는 `mach port`를 통해 전송된다는 점**에 유의하라. 이는 mach 커널에 내장된 **단일 수신자**, **다중 송신자** 통신 채널이다. **여러 프로세스**가 mach 포트로 **메시지를 보낼 수** 있지만, 어느 시점에서도 오직 **하나의 프로세스만 이를 읽을 수 있다**.
+메시지는 **`mach_msg_header_t`** 헤더 뒤에 **body**, 그리고 (있는 경우) **trailer**가 이어지는 형태로 구성되며, 이에 대한 응답 권한을 부여할 수 있습니다. 이러한 경우 kernel은 한 task에서 다른 task로 메시지를 전달하기만 하면 됩니다.
 
-Messages are then formed by the **`mach_msg_header_t`** header followed by the **body** and by the **trailer** (if any) and it can grant permission to reply to it. In these cases, the kernel just need to pass the message from one task to the other.
-
-메시지는 **`mach_msg_header_t`** 헤더 다음에 **body**와 **trailer**(있다면)를 이어 붙여 구성되며, 이 메시지에 응답 권한을 부여할 수 있다. 이런 경우 커널은 단순히 메시지를 한 태스크에서 다른 태스크로 전달하면 된다.
-
-A **trailer** is **information added to the message by the kernel** (cannot be set by the user) which can be requested in message reception with the flags `MACH_RCV_TRAILER_<trailer_opt>` (there is different information that can be requested).
-
-**trailer**는 **커널이 메시지에 추가하는 정보**로(사용자가 설정할 수 없으며), 메시지 수신 시 `MACH_RCV_TRAILER_<trailer_opt>` 플래그로 요청할 수 있다(요청 가능한 정보가 다양하다).
+**trailer**는 **kernel이 메시지에 추가하는 정보**이며(사용자가 설정할 수 없음), `MACH_RCV_TRAILER_<trailer_opt>` 플래그를 사용하여 메시지 수신 시 요청할 수 있습니다(요청할 수 있는 정보에는 여러 종류가 있습니다).
 
 #### Complex Messages
 
-However, there are other more **complex** messages, like the ones passing additional port rights or sharing memory, where the kernel also needs to send these objects to the recipient. In this cases the most significant bit of the header `msgh_bits` is set.
+하지만 추가적인 port rights를 전달하거나 memory를 공유하는 경우처럼 더 **복잡한** 메시지도 있습니다. 이러한 경우 kernel은 해당 object도 수신자에게 전송해야 합니다. 이때 헤더의 `msgh_bits` 최상위 비트가 설정됩니다.
 
-#### Complex Messages
-
-그러나 추가 포트 권한을 전달하거나 메모리를 공유하는 것과 같은 더 **복잡한** 메시지들이 있으며, 이 경우 커널은 이러한 객체들도 수신자에게 전달해야 한다. 이러한 경우 헤더의 최상위 비트인 `msgh_bits`가 설정된다.
-
-The possible descriptors to pass are defined in [**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html):
-
-전달 가능한 디스크립터들은 [**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)에 정의되어 있다:
+전달할 수 있는 descriptor는 [**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)에 정의되어 있습니다:
 ```c
 #define MACH_MSG_PORT_DESCRIPTOR                0
 #define MACH_MSG_OOL_DESCRIPTOR                 1
@@ -177,33 +150,33 @@ unsigned int                  pad3 : 24;
 mach_msg_descriptor_type_t    type : 8;
 } mach_msg_type_descriptor_t;
 ```
-In 32비트에서는 모든 디스크립터가 12B이고 디스크립터 타입은 11번째 바이트에 있습니다. 64비트에서는 크기가 다릅니다.
+32비트에서는 모든 descriptor가 12B이며 descriptor type은 11번째 바이트에 있습니다. 64비트에서는 크기가 다양합니다.
 
 > [!CAUTION]
-> 커널은 한 태스크에서 다른 태스크로 디스크립터를 복사하지만 먼저 **커널 메모리에 복사본을 생성합니다**. 이 기법은 "Feng Shui"로 알려져 있으며 여러 익스플로잇에서 프로세스가 자신에게 디스크립터를 보내게 만들어 **커널이 데이터를 자신의 메모리로 복사하도록** 악용되었습니다. 그런 다음 프로세스는 메시지를 받을 수 있고(커널이 이를 해제합니다).
+> kernel은 한 task에서 다른 task로 descriptor를 복사하지만, 먼저 **kernel memory에 복사본을 생성**합니다. "Feng Shui"로 알려진 이 technique은 여러 exploit에서 악용되어, process가 descriptor를 자기 자신에게 전송하게 함으로써 **kernel이 자신의 memory에 data를 복사하도록** 만들었습니다. 그러면 process가 해당 message를 수신할 수 있습니다(kernel이 이를 free합니다).
 >
-> 취약한 프로세스에 **포트 권한을 전송**하는 것도 가능하며, 포트 권한은 해당 프로세스에 그대로 나타납니다(프로세스가 그것들을 처리하고 있지 않더라도).
+> **vulnerable process에 port rights를 전송하는 것**도 가능합니다. 그러면 해당 port rights는 process에 나타납니다(해당 process가 이를 처리하지 않더라도).
 
 ### Mac Ports APIs
 
-포트는 태스크 네임스페이스에 연결되어 있으므로 포트를 생성하거나 검색하려면 태스크 네임스페이스도 조회됩니다(`mach/mach_port.h` 참고):
+port는 task namespace와 연결되어 있으므로, port를 생성하거나 검색하려면 task namespace도 조회합니다(`mach/mach_port.h`에 더 많은 내용이 있습니다).
 
-- **`mach_port_allocate` | `mach_port_construct`**: 포트를 **생성**합니다.
-- `mach_port_allocate`는 **port set**도 생성할 수 있습니다: 포트 그룹에 대한 receive 권리입니다. 메시지가 수신될 때마다 어떤 포트에서 왔는지 표시됩니다.
-- `mach_port_allocate_name`: 포트의 이름을 변경합니다 (기본적으로 32bit 정수)
-- `mach_port_names`: 대상에서 포트 이름을 가져옵니다
-- `mach_port_type`: 이름에 대한 태스크의 권한을 가져옵니다
-- `mach_port_rename`: 포트 이름 변경 (FD의 dup2와 유사)
-- `mach_port_allocate`: 새로운 RECEIVE, PORT_SET 또는 DEAD_NAME을 할당합니다
-- `mach_port_insert_right`: RECEIVE 권한을 가진 포트에 새로운 권한을 생성합니다
+- **`mach_port_allocate` | `mach_port_construct`**: port를 **생성**합니다.
+- `mach_port_allocate`는 **port set**도 생성할 수 있습니다. 여러 port에 대한 receive right입니다. message를 수신하면 해당 message가 어느 port에서 왔는지도 표시됩니다.
+- `mach_port_allocate_name`: port의 name을 변경합니다(기본값은 32비트 integer).
+- `mach_port_names`: target에서 port names를 가져옵니다.
+- `mach_port_type`: name에 대한 task의 rights를 가져옵니다.
+- `mach_port_rename`: port의 이름을 변경합니다(FD에 대한 dup2와 유사).
+- `mach_port_allocate`: 새로운 RECEIVE, PORT_SET 또는 DEAD_NAME을 할당합니다.
+- `mach_port_insert_right`: RECEIVE를 보유한 port에 새로운 right를 생성합니다.
 - `mach_port_...`
-- **`mach_msg`** | **`mach_msg_overwrite`**: mach 메시지를 **전송하고 수신하는** 데 사용되는 함수입니다. overwrite 버전은 메시지 수신을 위한 다른 버퍼를 지정할 수 있게 해줍니다(다른 버전은 단순히 재사용합니다).
+- **`mach_msg`** | **`mach_msg_overwrite`**: **mach message를 send 및 receive**하는 데 사용되는 functions입니다. overwrite version에서는 message 수신에 다른 buffer를 지정할 수 있습니다(다른 version은 해당 buffer를 그대로 재사용합니다).
 
-### mach_msg 디버깅
+### Debug mach_msg
 
-함수 **`mach_msg`**와 **`mach_msg_overwrite`**가 메시지 전송 및 수신에 사용되므로, 여기에 브레이크포인트를 설정하면 전송된 메시지와 수신된 메시지를 검사할 수 있습니다.
+**`mach_msg`** 및 **`mach_msg_overwrite`** functions가 message를 send 및 receive하는 데 사용되므로, 해당 functions에 breakpoint를 설정하면 전송 및 수신된 message를 inspect할 수 있습니다.
 
-예를 들어, 디버그 가능한 임의의 애플리케이션을 시작하면 libSystem.B가 로드되고 이 함수가 사용됩니다.
+예를 들어 debug할 수 있는 임의의 application에서 debugging을 시작하면, **`libSystem.B`가 로드되고 이 function을 사용합니다**.
 
 <pre class="language-armasm"><code class="lang-armasm"><strong>(lldb) b mach_msg
 </strong>Breakpoint 1: where = libsystem_kernel.dylib`mach_msg, address = 0x00000001803f6c20
@@ -232,7 +205,7 @@ frame #8: 0x000000018e59e6ac libSystem.B.dylib`libSystem_initializer + 236
 frame #9: 0x0000000181a1d5c8 dyld`invocation function for block in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&) const::$_0::operator()() const + 168
 </code></pre>
 
-`mach_msg`의 인수를 얻으려면 레지스터를 확인하세요. 다음은 인수들입니다 (from [mach/message.h](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
+**`mach_msg`**의 arguments를 확인하려면 registers를 확인합니다. 다음은 arguments입니다([mach/message.h](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)에 정의되어 있습니다).
 ```c
 __WATCHOS_PROHIBITED __TVOS_PROHIBITED
 extern mach_msg_return_t        mach_msg(
@@ -255,7 +228,7 @@ x4 = 0x0000000000001f03 ;mach_port_name_t (rcv_name)
 x5 = 0x0000000000000000 ;mach_msg_timeout_t (timeout)
 x6 = 0x0000000000000000 ;mach_port_name_t (notify)
 ```
-첫 번째 인수를 확인하여 메시지 헤더를 검사합니다:
+메시지 헤더를 검사하여 첫 번째 인수를 확인합니다:
 ```armasm
 (lldb) x/6w $x0
 0x124e04ce8: 0x00131513 0x00000388 0x00000807 0x00001f03
@@ -268,7 +241,7 @@ x6 = 0x0000000000000000 ;mach_port_name_t (notify)
 ; 0x00000b07 -> mach_port_name_t (msgh_voucher_port)
 ; 0x40000322 -> mach_msg_id_t (msgh_id)
 ```
-그 유형의 `mach_msg_bits_t`는 응답을 허용하기 위해 매우 흔합니다.
+이 유형의 `mach_msg_bits_t`는 reply를 허용하기 위해 매우 일반적으로 사용됩니다.
 
 ### 포트 열거
 ```bash
@@ -294,19 +267,19 @@ name      ipc-object    rights     flags   boost  reqs  recv  send sonce oref  q
 +     send        --------        ---            1         <-                                       0x00002603  (74295) passd
 [...]
 ```
-The **이름**은 포트에 부여된 기본 이름입니다 (처음 3바이트에서 어떻게 **증가하는지** 확인하세요). The **`ipc-object`**는 포트의 **난독화된** 고유 **식별자**입니다.\
-또한 **`send`** 권한만 있는 포트들이 포트의 **소유자를 식별한다는 점**(포트 이름 + pid)을 주목하세요.\
-또한 **`+`**가 같은 포트에 연결된 **다른 작업들**을 나타내기 위해 사용되는 것도 주목하세요.
+**name**은 포트에 지정된 기본 이름입니다(처음 3바이트에서 어떻게 **증가하는지** 확인하세요). **`ipc-object`**는 포트의 **난독화된** 고유 **식별자**입니다.\
+또한 **`send`** 권한만 있는 포트가 해당 포트의 **소유자**(포트 이름 + pid)를 **식별**한다는 점에 유의하세요.\
+또한 동일한 포트에 연결된 **다른 task**를 나타내기 위해 **`+`**가 사용된다는 점에 유의하세요.
 
-또한 [**procesxp**](https://www.newosxbook.com/tools/procexp.html)을 사용하여 **등록된 서비스 이름들**도 볼 수 있습니다 (`com.apple.system-task-port`이 필요하기 때문에 SIP 비활성화):
+[**procesxp**](https://www.newosxbook.com/tools/procexp.html)를 사용하면 **등록된 service name**도 확인할 수 있습니다(`com.apple.system-task-port`가 필요하므로 SIP가 비활성화된 상태에서):
 ```
 procesp 1 ports
 ```
-이 도구는 iOS에서 다음에서 다운로드하여 설치할 수 있습니다: [http://newosxbook.com/tools/binpack64-256.tar.gz](http://newosxbook.com/tools/binpack64-256.tar.gz)
+iOS에서는 [http://newosxbook.com/tools/binpack64-256.tar.gz](http://newosxbook.com/tools/binpack64-256.tar.gz)을 다운로드하여 이 tool을 설치할 수 있습니다.
 
 ### 코드 예제
 
-다음 예제에서 **sender**가 포트를 **allocates**하고, 이름 `org.darlinghq.example`에 대한 **send right**를 생성하여 **bootstrap server**에 전송하는 방법과, 동일한 sender가 해당 이름의 **send right**를 요청하고 그것을 사용해 **send a message**하는 과정을 확인하세요.
+**sender**가 port를 **할당**하고 `org.darlinghq.example`이라는 이름에 대한 **send right**를 생성한 다음 이를 **bootstrap server**로 전송하는 과정을 확인하세요. sender는 해당 이름의 **send right**를 요청하고, 이를 사용하여 **메시지를 전송**합니다.<sup>[1]</sup>
 
 {{#tabs}}
 {{#tab name="receiver.c"}}
@@ -432,42 +405,42 @@ printf("Sent a message\n");
 {{#endtab}}
 {{#endtabs}}
 
-## 특권 포트
+## 권한 있는 포트
 
-작업이 해당 포트에 대해 **SEND** 권한을 가질 경우 특정 민감한 동작을 수행하거나 특정 민감한 데이터에 접근할 수 있게 해주는 일부 특수 포트가 있다. 이 때문에 이러한 포트는 기능 자체뿐만 아니라 **SEND 권한을 작업 간에 공유할 수 있다**는 점에서 공격자 관점에서 매우 흥미롭다.
+일부 특수 포트는 작업이 해당 포트에 대해 **SEND** 권한을 가지고 있는 경우 **특정 민감한 작업을 수행하거나 특정 민감한 데이터에 액세스**할 수 있도록 합니다. 이러한 포트는 기능 때문만이 아니라 **task 간에 SEND 권한을 공유**할 수 있기 때문에 공격자 관점에서 매우 흥미롭습니다.
 
 ### Host Special Ports
 
-이 포트들은 숫자로 표현된다.
+이러한 포트는 숫자로 표시됩니다.
 
-**SEND** 권한은 **`host_get_special_port`** 호출로, **RECEIVE** 권한은 **`host_set_special_port`** 호출로 얻을 수 있다. 그러나 두 호출 모두 오직 root만 접근할 수 있는 **`host_priv`** 포트를 요구한다. 또한 과거에는 root가 **`host_set_special_port`** 를 호출해 임의로 포트를 하이재킹할 수 있었고, 예를 들어 `HOST_KEXTD_PORT`를 하이재킹해 코드 서명 우회를 할 수 있었다(현재는 SIP가 이를 방지한다).
+**SEND** 권한은 **`host_get_special_port`**를 호출하여 얻을 수 있으며, **RECEIVE** 권한은 **`host_set_special_port`**를 호출하여 얻을 수 있습니다. 그러나 두 호출 모두 **`host_priv`** 포트를 필요로 하며, 이 포트에는 root만 액세스할 수 있습니다. 또한 과거에는 root가 **`host_set_special_port`**를 호출하여 임의의 포트를 hijack할 수 있었고, 예를 들어 `HOST_KEXTD_PORT`를 hijack하여 code signature를 우회할 수 있었습니다(SIP는 현재 이를 방지합니다).
 
-이들은 2개의 그룹으로 나뉜다: **처음 7개의 포트는 커널 소유**로 1은 `HOST_PORT`, 2는 `HOST_PRIV_PORT`, 3은 `HOST_IO_MASTER_PORT`, 7은 `HOST_MAX_SPECIAL_KERNEL_PORT` 이다.\
-번호 **8**부터 시작하는 포트들은 **시스템 데몬 소유**이며 [**`host_special_ports.h`**](https://opensource.apple.com/source/xnu/xnu-4570.1.46/osfmk/mach/host_special_ports.h.auto.html)에서 선언된 것을 확인할 수 있다.
+이 포트는 2개 그룹으로 나뉩니다. **처음 7개의 포트는 kernel이 소유**하며, 1번은 `HOST_PORT`, 2번은 `HOST_PRIV_PORT`, 3번은 `HOST_IO_MASTER_PORT`, 7번은 `HOST_MAX_SPECIAL_KERNEL_PORT`입니다.\
+**8번부터** 시작하는 포트는 **system daemon이 소유**하며 [**`host_special_ports.h`**](https://opensource.apple.com/source/xnu/xnu-4570.1.46/osfmk/mach/host_special_ports.h.auto.html)에 선언되어 있습니다.
 
-- **Host port**: 프로세스가 이 포트에 대해 **SEND** 권한을 가지면 다음과 같은 루틴을 호출해 **시스템**에 대한 **정보**를 얻을 수 있다:
-- `host_processor_info`: 프로세서 정보 획득
-- `host_info`: 호스트 정보 획득
-- `host_virtual_physical_table_info`: 가상/물리 페이지 테이블 (요구: MACH_VMDEBUG)
-- `host_statistics`: 호스트 통계 획득
-- `mach_memory_info`: 커널 메모리 레이아웃 획득
-- **Host Priv port**: 이 포트에 대해 **SEND** 권한을 가진 프로세스는 부팅 데이터 표시 또는 커널 확장 로드 시도 같은 **특권 동작들**을 수행할 수 있다. 이 권한을 얻으려면 **프로세스가 root여야 한다**.
-- 또한 **`kext_request`** API를 호출하려면 다른 권한인 **`com.apple.private.kext*`** 가 필요하며 이는 Apple 바이너리에만 부여된다.
-- 호출 가능한 다른 루틴들:
-- `host_get_boot_info`: `machine_boot_info()` 획득
-- `host_priv_statistics`: 특권 통계 획득
-- `vm_allocate_cpm`: 연속 물리 메모리 할당
-- `host_processors`: SEND 권한을 호스트 프로세서로 전달
-- `mach_vm_wire`: 메모리를 상주 상태로 만듦
-- **root**가 이 권한에 접근할 수 있기 때문에 `host_set_[special/exception]_port[s]` 를 호출해 **host special 또는 exception 포트를 하이재킹**할 수 있다.
+- **Host port**: 프로세스가 이 포트에 대해 **SEND** 권한을 가지고 있다면 다음과 같은 routine을 호출하여 **system에 대한 정보**를 얻을 수 있습니다.
+- `host_processor_info`: processor 정보 가져오기
+- `host_info`: host 정보 가져오기
+- `host_virtual_physical_table_info`: Virtual/Physical page table (MACH_VMDEBUG 필요)
+- `host_statistics`: host 통계 가져오기
+- `mach_memory_info`: kernel memory layout 가져오기
+- **Host Priv port**: 이 포트에 대해 **SEND** 권한을 가진 프로세스는 boot data를 표시하거나 kernel extension을 로드하는 등의 **privileged action**을 수행할 수 있습니다. 이 권한을 얻으려면 **root**여야 합니다.
+- 또한 **`kext_request`** API를 호출하려면 **`com.apple.private.kext*`**와 같은 추가 entitlement가 필요하며, 이는 Apple binary에만 부여됩니다.
+- 호출할 수 있는 다른 routine은 다음과 같습니다.
+- `host_get_boot_info`: `machine_boot_info()` 가져오기
+- `host_priv_statistics`: privileged 통계 가져오기
+- `vm_allocate_cpm`: Contiguous Physical Memory 할당
+- `host_processors`: host processor에 대한 SEND 권한
+- `mach_vm_wire`: memory를 resident로 만들기
+- **root**는 이 권한에 액세스할 수 있으므로 `host_set_[special/exception]_port[s]`를 호출하여 **host special 또는 exception port를 hijack**할 수 있습니다.
 
-다음을 실행하면 **모든 호스트 특수 포트**를 확인할 수 있다:
+다음을 실행하여 **모든 host special port를 확인**할 수 있습니다:
 ```bash
 procexp all ports | grep "HSP"
 ```
-### 작업 특수 포트
+### Task Special Ports
 
-이 포트들은 잘 알려진 서비스에 예약되어 있습니다. `task_[get/set]_special_port`를 호출하여 해당 포트를 가져오거나 설정할 수 있습니다. `task_special_ports.h`에서 확인할 수 있습니다:
+이 포트들은 잘 알려진 서비스용으로 예약되어 있습니다. `task_[get/set]_special_port`를 호출하여 해당 포트를 가져오거나 설정할 수 있습니다. `task_special_ports.h`에서 확인할 수 있습니다:
 ```c
 typedef	int	task_special_port_t;
 
@@ -478,51 +451,51 @@ world.*/
 #define TASK_WIRED_LEDGER_PORT	5	/* Wired resource ledger for task. */
 #define TASK_PAGED_LEDGER_PORT	6	/* Paged resource ledger for task. */
 ```
-출처: [here](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html):
+From [여기](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html):<sup>[9]</sup>
 
-- **TASK_KERNEL_PORT**\[task-self send right]: The port used to control this task. Used to send messages that affect the task. This is the port returned by **mach_task_self (see Task Ports below)**.
-- **TASK_BOOTSTRAP_PORT**\[bootstrap send right]: The task's bootstrap port. Used to send messages requesting return of other system service ports.
-- **TASK_HOST_NAME_PORT**\[host-self send right]: The port used to request information of the containing host. This is the port returned by **mach_host_self**.
-- **TASK_WIRED_LEDGER_PORT**\[ledger send right]: The port naming the source from which this task draws its wired kernel memory.
-- **TASK_PAGED_LEDGER_PORT**\[ledger send right]: The port naming the source from which this task draws its default memory managed memory.
+- **TASK_KERNEL_PORT**\[task-self send right]: 이 태스크를 제어하는 데 사용되는 포트입니다. 태스크에 영향을 주는 메시지를 보내는 데 사용됩니다. **mach_task_self (아래 Task Ports 참조)**가 반환하는 포트입니다.
+- **TASK_BOOTSTRAP_PORT**\[bootstrap send right]: 태스크의 bootstrap 포트입니다. 다른 시스템 서비스 포트의 반환을 요청하는 메시지를 보내는 데 사용됩니다.
+- **TASK_HOST_NAME_PORT**\[host-self send right]: 해당 호스트에 관한 정보를 요청하는 데 사용되는 포트입니다. **mach_host_self**가 반환하는 포트입니다.
+- **TASK_WIRED_LEDGER_PORT**\[ledger send right]: 이 태스크가 wired kernel memory를 할당받는 출처를 나타내는 포트입니다.
+- **TASK_PAGED_LEDGER_PORT**\[ledger send right]: 이 태스크가 기본 memory managed memory를 할당받는 출처를 나타내는 포트입니다.
 
 ### Task Ports
 
-원래 Mach에는 "processes"가 없었고 "tasks"가 있었으며, 이는 스레드의 컨테이너에 더 가깝다고 여겨졌습니다. Mach가 BSD와 병합되면서 **각 task는 BSD 프로세스와 연관되었습니다**. 따라서 모든 BSD 프로세스는 프로세스가 되기 위한 필요한 세부 정보를 가지고 있고 모든 Mach task도 내부 동작을 가지고 있습니다(존재하지 않는 pid 0인 `kernel_task`는 제외).
+원래 Mach에는 "processes"가 없었고, 스레드의 컨테이너에 가까운 것으로 간주된 "tasks"가 있었습니다. Mach가 BSD와 통합되면서 **각 task는 BSD process와 연결되었습니다**. 따라서 모든 BSD process에는 process로 동작하는 데 필요한 세부 정보가 있고, 모든 Mach task에도 자체적인 내부 동작이 있습니다(존재하지 않는 pid 0인 `kernel_task`는 예외).
 
-이와 관련된 매우 흥미로운 함수 두 가지가 있습니다:
+이와 관련된 매우 흥미로운 함수가 두 가지 있습니다.
 
-- `task_for_pid(target_task_port, pid, &task_port_of_pid)`: 지정된 `pid`와 관련된 task의 task port에 대한 SEND 권한을 얻어 이를 지정된 `target_task_port`에 부여합니다(보통 `mach_task_self()`를 사용한 호출자 task이지만, 다른 task에 대한 SEND 포트일 수도 있습니다).
-- `pid_for_task(task, &pid)`: task에 대한 SEND 권한이 주어졌을 때, 이 task가 어떤 PID와 연관되어 있는지 찾습니다.
+- `task_for_pid(target_task_port, pid, &task_port_of_pid)`: 지정된 `pid`와 연결된 task에 대한 SEND right를 가져와 지정된 `target_task_port`에 전달합니다(일반적으로 `mach_task_self()`를 사용한 호출자 task이지만, 다른 task에 대한 SEND port일 수도 있습니다).
+- `pid_for_task(task, &pid)`: task에 대한 SEND right가 주어졌을 때 이 task가 어떤 PID와 연결되어 있는지 확인합니다.
 
-task 내부에서 동작을 수행하려면, task는 `mach_task_self()`를 호출하여 자기 자신에 대한 `SEND` 권한을 가져야 했습니다(`task_self_trap` (28)을 사용). 이 권한으로 task는 다음과 같은 여러 동작을 수행할 수 있습니다:
+Task 내부에서 작업을 수행하려면 `mach_task_self()`를 호출하여 task 자체에 대한 `SEND` right를 가져와야 합니다(`task_self_trap` (28)을 사용). 이 권한이 있으면 task는 다음과 같은 여러 작업을 수행할 수 있습니다.
 
-- `task_threads`: Get SEND right over all task ports of the threads of the task
-- `task_info`: Get info about a task
-- `task_suspend/resume`: Suspend or resume a task
+- `task_threads`: task의 스레드에 대한 모든 task port의 SEND right 가져오기
+- `task_info`: task에 관한 정보 가져오기
+- `task_suspend/resume`: task 일시 중지 또는 재개
 - `task_[get/set]_special_port`
-- `thread_create`: Create a thread
-- `task_[get/set]_state`: Control task state
-- and more can be found in [**mach/task.h**](https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX11.3.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/task.h)
+- `thread_create`: 스레드 생성
+- `task_[get/set]_state`: task 상태 제어
+- 그 외에도 [**mach/task.h**](https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX11.3.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/task.h)에서 확인할 수 있습니다.
 
 > [!CAUTION]
-> 다른 **task**의 task port에 대한 SEND 권한을 가지면, 해당 다른 task에 대해 이러한 동작들을 수행할 수 있다는 점에 주의하세요.
+> **다른 task**의 task port에 대한 SEND right가 있으면 해당 다른 task에서 이러한 작업을 수행할 수 있습니다.
 
-또한, task_port는 **`vm_map`** 포트이기도 하여 `vm_read()`와 `vm_write()` 같은 함수를 통해 태스크 내부의 메모리를 **읽고 조작할 수 있게 합니다**. 이는 본질적으로 다른 task의 task_port에 대한 SEND 권한을 가진 task가 해당 task에 **코드를 주입할 수 있다**는 것을 의미합니다.
+또한 task_port는 **`vm_map`** port이기도 하므로 `vm_read()` 및 `vm_write()`와 같은 함수를 사용하여 task 내부의 메모리를 **읽고 조작**할 수 있습니다. 이는 기본적으로 다른 task의 task_port에 대한 SEND right를 가진 task가 해당 task에 **code를 inject**할 수 있다는 의미입니다.
 
-커널도 하나의 **task**이므로, 누군가 **`kernel_task`**에 대한 **SEND 권한**을 얻으면 커널이 임의의 코드를 실행하도록 만들 수 있다는 점을 기억하세요(탈옥).
+**kernel도 task**라는 점을 기억해야 합니다. 누군가 **`kernel_task`에 대한 SEND 권한**을 얻으면 kernel이 무엇이든 실행하도록 만들 수 있습니다(jailbreak).
 
-- Call `mach_task_self()` to **get the name** for this port for the caller task. This port is only **inherited** across **`exec()`**; a new task created with `fork()` gets a new task port (as a special case, a task also gets a new task port after `exec()`in a suid binary). The only way to spawn a task and get its port is to perform the ["port swap dance"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) while doing a `fork()`.
-- These are the restrictions to access the port (from `macos_task_policy` from the binary `AppleMobileFileIntegrity`):
-- If the app has **`com.apple.security.get-task-allow` entitlement** processes from the **same user can access the task port** (commonly added by Xcode for debugging). The **notarization** process won't allow it to production releases.
-- Apps with the **`com.apple.system-task-ports`** entitlement can get the **task port for any** process, except the kernel. In older versions it was called **`task_for_pid-allow`**. This is only granted to Apple applications.
-- **Root can access task ports** of applications **not** compiled with a **hardened** runtime (and not from Apple).
+- `mach_task_self()`를 호출하면 호출자 task에 대한 이 port의 **name**을 가져옵니다. 이 port는 **`exec()`**를 통해서만 **상속**됩니다. `fork()`로 생성된 새 task는 새로운 task port를 얻습니다(`exec()` 후 suid binary에서도 task가 새로운 task port를 얻는다는 특수한 경우가 있습니다). task를 생성하면서 해당 port를 얻는 유일한 방법은 `fork()` 중에 ["port swap dance"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html)를 수행하는 것입니다.
+- port에 액세스하기 위한 제한 사항은 다음과 같습니다(binary `AppleMobileFileIntegrity`의 `macos_task_policy` 기준).
+- 앱에 **`com.apple.security.get-task-allow` entitlement**가 있으면 **동일한 user의 process가 task port에 액세스할 수 있습니다**(일반적으로 debugging을 위해 Xcode가 추가). **notarization** 프로세스에서는 production release에 이 entitlement를 허용하지 않습니다.
+- **`com.apple.system-task-ports`** entitlement가 있는 앱은 kernel을 제외한 **모든 process의 task port**를 가져올 수 있습니다. 이전 버전에서는 **`task_for_pid-allow`**라고 불렸습니다. 이 entitlement는 Apple 애플리케이션에만 부여됩니다.
+- **Root는 hardened runtime으로 컴파일되지 않은 애플리케이션**(Apple 애플리케이션이 아닌 경우)의 **task port에 액세스할 수 있습니다**.
 
-**The task name port:** An unprivileged version of the _task port_. It references the task, but does not allow controlling it. The only thing that seems to be available through it is `task_info()`.
+**Task name port:** _task port_의 권한이 제한된 버전입니다. task를 참조하지만 task를 제어할 수는 없습니다. 이 port를 통해 사용할 수 있는 것으로 보이는 유일한 기능은 `task_info()`입니다.
 
 ### Thread Ports
 
-스레드도 관련 포트를 가지며, 이는 **`task_threads`**를 호출하는 task와 `processor_set_threads`를 사용하는 프로세서에서 볼 수 있습니다. thread port에 대한 SEND 권한은 `thread_act` 서브시스템의 함수들을 사용하게 해주며, 예를 들면:
+스레드에도 연결된 port가 있으며, 이는 `task_threads`를 호출하는 task와 `processor_set_threads`를 사용하는 processor에서 확인할 수 있습니다. thread port에 대한 SEND right가 있으면 `thread_act` subsystem의 다음과 같은 함수를 사용할 수 있습니다.
 
 - `thread_terminate`
 - `thread_[get/set]_state`
@@ -531,11 +504,11 @@ task 내부에서 동작을 수행하려면, task는 `mach_task_self()`를 호�
 - `thread_info`
 - ...
 
-어떤 스레드든 **`mach_thread_sef`**를 호출하여 이 포트를 얻을 수 있습니다.
+모든 스레드는 `mach_thread_sef`를 호출하여 이 port를 가져올 수 있습니다.
 
-### Shellcode Injection in thread via Task port
+### Task port를 통한 스레드 내 Shellcode Injection
 
-You can grab a shellcode from:
+다음 위치에서 shellcode를 가져올 수 있습니다:
 
 
 {{#ref}}
@@ -588,7 +561,7 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-이전 프로그램을 **컴파일**하고 동일한 사용자로 코드 주입이 가능하도록 **entitlements**를 추가하세요(그렇지 않으면 **sudo**를 사용해야 합니다).
+**Compile** 이전 프로그램을 컴파일하고 동일한 사용자로 코드를 주입할 수 있도록 **entitlements**를 추가합니다(그렇지 않으면 **sudo**를 사용해야 합니다).<sup>[3]</sup>
 
 <details>
 
@@ -798,17 +771,17 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ./inject <pi or string>
 ```
 > [!TIP]
-> iOS에서 이 방법을 작동시키려면 쓰기 가능한 메모리를 실행 가능하게 만들 수 있도록 `dynamic-codesigning` 권한(entitlement)이 필요합니다.
+> iOS에서 작동하게 하려면 쓰기 가능한 메모리를 실행 가능하게 만들 수 있도록 `dynamic-codesigning` entitlement가 필요합니다.
 
-### Task port를 통한 스레드 내 Dylib Injection
+### Dylib Injection in thread via Task port
 
-macOS에서는 **스레드**가 **Mach**를 통해 또는 **posix `pthread` api**를 사용하여 조작될 수 있습니다. 이전 인젝션에서 생성한 스레드는 Mach api를 사용해 생성되었으므로 **posix 호환이 아닙니다**.
+macOS에서 **threads**는 **Mach**를 통해 조작하거나 **posix `pthread` api**를 사용할 수 있습니다. 이전 injection에서 생성한 thread는 Mach api를 사용해 생성되었으므로 **posix compliant가 아닙니다**.
 
-명령을 실행하기 위해 간단한 shellcode를 주입할 수 있었던 이유는 posix 호환 API와 작업할 필요가 없고 Mach만 사용했기 때문입니다. **더 복잡한 인젝션**은 **스레드**가 또한 **posix 호환**이어야 합니다.
+**posix** compliant api와 연동할 필요 없이 Mach만 사용하면 되므로 **간단한 shellcode를 inject**하여 명령을 실행할 수 있었습니다. 하지만 **더 복잡한 injection**에는 해당 **thread**도 **posix compliant**여야 합니다.
 
-따라서 **스레드를 개선하기 위해** `pthread_create_from_mach_thread`를 호출하여 **유효한 pthread를 생성**해야 합니다. 그런 다음, 이 새 pthread는 dlopen을 호출하여 시스템에서 dylib를 로드할 수 있으므로 새로운 shellcode를 작성해 다양한 동작을 수행하는 대신 커스텀 라이브러리를 로드할 수 있습니다.
+따라서 **thread를 개선**하려면 **`pthread_create_from_mach_thread`**를 호출하여 **유효한 pthread를 생성**해야 합니다. 그런 다음 이 새로운 pthread가 **dlopen을 호출**하여 시스템에서 **dylib를 load**할 수 있으므로, 여러 작업을 수행하기 위해 새로운 shellcode를 작성하는 대신 custom libraries를 load할 수 있습니다.<sup>[2]</sup>
 
-You can find **example dylibs** in (for example the one that generates a log and then you can listen to it):
+**example dylibs**는 다음에서 확인할 수 있습니다(예를 들어 log를 생성한 후 이를 listen할 수 있는 dylib):
 
 
 {{#ref}}
@@ -1093,9 +1066,9 @@ fprintf(stderr,"Dylib not found\n");
 gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 ./inject <pid-of-mysleep> </path/to/lib.dylib>
 ```
-### Thread Hijacking via Task port <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
+### Task port를 통한 Thread Hijacking <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
 
-In this technique a thread of the process is hijacked:
+이 technique에서는 process의 thread가 hijack됩니다:
 
 
 {{#ref}}
@@ -1104,44 +1077,44 @@ macos-thread-injection-via-task-port.md
 
 ### Task Port Injection Detection
 
-When calling `task_for_pid` or `thread_create_*` increments a counter in the struct task from the kernel which can by accessed from user mode calling task_info(task, TASK_EXTMOD_INFO, ...)
+`task_for_pid` 또는 `thread_create_*`를 호출하면 kernel의 task struct에서 counter가 증가하며, user mode에서 task_info(task, TASK_EXTMOD_INFO, ...)를 호출해 이에 접근할 수 있습니다.
 
-## 예외 포트
+## Exception Ports
 
-스레드에서 예외가 발생하면, 이 예외는 해당 스레드의 지정된 exception port로 전송된다. 스레드가 이를 처리하지 않으면 task exception ports로 전송된다. 태스크가 처리하지 않으면 launchd가 관리하는 host port로 전송되어(거기서 인정된다). 이를 exception triage라고 한다.
+thread에서 exception이 발생하면 이 exception은 해당 thread의 지정된 exception port로 전송됩니다. thread가 이를 처리하지 않으면 task exception ports로 전송됩니다. task도 이를 처리하지 않으면 launchd가 관리하는 host port로 전송되어 acknowledge됩니다. 이를 exception triage라고 합니다.
 
-주의할 점은, 보통 적절히 처리되지 않으면 보고서는 결국 ReportCrash 데몬에 의해 처리된다는 것이다. 그러나 동일한 태스크 내의 다른 스레드가 예외를 처리할 수도 있으며, 이것이 `PLCreashReporter`와 같은 crash reporting 도구가 하는 일이다.
+일반적으로 마지막에는 report가 제대로 처리되지 않은 경우 ReportCrash daemon에 의해 처리됩니다. 그러나 같은 task의 다른 thread가 exception을 관리할 수도 있으며, `PLCreashReporter`와 같은 crash reporting tools가 이를 수행합니다.
 
-## 기타 오브젝트
+## Other Objects
 
 ### Clock
 
-모든 사용자는 시계 정보에 접근할 수 있지만, 시간을 설정하거나 다른 설정을 수정하려면 root 권한이 필요하다.
+모든 user는 clock 정보에 접근할 수 있지만, 시간을 설정하거나 다른 settings를 수정하려면 root 권한이 필요합니다.
 
-정보를 얻기 위해서는 `clock` 서브시스템의 함수들(`clock_get_time`, `clock_get_attributtes` 또는 `clock_alarm` 등)을 호출할 수 있다.\
-값을 수정하려면 `clock_priv` 서브시스템의 함수들(`clock_set_time`, `clock_set_attributes` 등)을 사용할 수 있다.
+정보를 가져오려면 `clock_get_time`, `clock_get_attributtes` 또는 `clock_alarm`과 같은 functions를 사용해 `clock` subsystem을 호출할 수 있습니다.\
+값을 수정하려면 `clock_set_time` 및 `clock_set_attributes`와 같은 functions를 사용해 `clock_priv` subsystem을 사용할 수 있습니다.
 
 ### Processors and Processor Set
 
-processor API는 `processor_start`, `processor_exit`, `processor_info`, `processor_get_assignment` 같은 함수들을 호출하여 단일 논리 프로세서를 제어할 수 있게 해준다...
+processor APIs를 사용하면 `processor_start`, `processor_exit`, `processor_info`, `processor_get_assignment`...와 같은 functions를 호출하여 단일 logical processor를 제어할 수 있습니다.
 
-또한, **processor set** API는 여러 프로세서를 그룹화하는 방법을 제공한다. **`processor_set_default`**를 호출하면 기본 processor set을 가져올 수 있다.\
-processor set과 상호작용하기 위한 흥미로운 API들은 다음과 같다:
+또한 **processor set** APIs는 여러 processors를 하나의 group으로 묶는 방법을 제공합니다. **`processor_set_default`**를 호출하여 default processor set을 가져올 수 있습니다.\
+다음은 processor set과 상호작용할 수 있는 몇 가지 흥미로운 APIs입니다:
 
 - `processor_set_statistics`
-- `processor_set_tasks`: Return an array of send rights to all tasks inside the processor set
-- `processor_set_threads`: Return an array of send rights to all threads inside the processor set
+- `processor_set_tasks`: processor set 내부의 모든 tasks에 대한 send rights 배열을 반환
+- `processor_set_threads`: processor set 내부의 모든 threads에 대한 send rights 배열을 반환
 - `processor_set_stack_usage`
 - `processor_set_info`
 
-As mentioned in [**this post**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/), 과거에는 이것을 통해 앞서 언급한 보호를 우회하여 다른 프로세스의 task ports를 얻어 제어할 수 있었고, **`processor_set_tasks`**를 호출하여 모든 프로세스에서 host port를 얻을 수 있었다.\
-오늘날에는 해당 함수를 사용하려면 root가 필요하며 이 기능은 보호되어 있어, 보호되지 않은 프로세스에서만 이러한 포트를 얻을 수 있다.
+[**이 post**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/)에서 언급된 것처럼, 과거에는 **`processor_set_tasks`**를 호출하고 모든 process에서 host port를 가져와 다른 processes의 task ports를 획득하고 이를 제어함으로써 앞서 언급한 protection을 우회할 수 있었습니다.\
+현재는 해당 function을 사용하려면 root 권한이 필요하며, 이 기능은 protected되어 있으므로 unprotected processes에서만 이러한 ports를 가져올 수 있습니다.<sup>[11]</sup>
 
-다음으로 시도해볼 수 있다:
+다음과 같이 시도할 수 있습니다:
 
 <details>
 
-<summary><strong>processor_set_tasks 코드</strong></summary>
+<summary><strong>processor_set_tasks code</strong></summary>
 ````c
 // Maincpart fo the code from https://newosxbook.com/articles/PST2.html
 //gcc ./port_pid.c -o port_pid
@@ -1272,7 +1245,7 @@ macos-mig-mach-interface-generator.md
 
 ## MIG handler type confusion -> fake vtable pointer-chain hijack
 
-If a MIG handler **retrieves a C++ object by Mach message-supplied ID** (e.g., from an internal Object Map) and then **assumes a specific concrete type without validating the real dynamic type**, later virtual calls can dispatch through attacker-controlled pointers. In `coreaudiod`’s `com.apple.audio.audiohald` service (CVE-2024-54529), `_XIOContext_Fetch_Workgroup_Port` used the looked-up `HALS_Object` as an `ioct` and executed a vtable call via:
+If a MIG handler **retrieves a C++ object by Mach message-supplied ID** (e.g., from an internal Object Map) and then **assumes a specific concrete type without validating the real dynamic type**, later virtual calls can dispatch through attacker-controlled pointers. In `coreaudiod`’s `com.apple.audio.audiohald` service (CVE-2024-54529), `_XIOContext_Fetch_Workgroup_Port` used the looked-up `HALS_Object` as an `ioct` and executed a vtable call via:<sup>[10]</sup>
 
 ```asm
 mov rax, qword ptr [rdi]
@@ -1302,11 +1275,16 @@ HALS_Object + 0x68  -> controlled_object
 
 ## References
 
-- [https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)
-- [https://knight.sc/malware/2019/03/15/code-injection-on-macos.html](https://knight.sc/malware/2019/03/15/code-injection-on-macos.html)
-- [https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a](https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a)
-- [https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
-- [*OS Internals, Volume I, User Mode, Jonathan Levin](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
-- [https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html)
-- [Project Zero – Sound Barrier 2](https://projectzero.google/2026/01/sound-barrier-2.html)
+- [1] [Mach Ports – Darling Docs](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)
+- [2] [Code injection on macOS – knight.sc](https://knight.sc/malware/2019/03/15/code-injection-on-macos.html)
+- [3] [knightsc/inject.c – dlopen dylib injection into a remote Mach task (Gist)](https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a)
+- [4] [Don't talk all at once: Elevating privileges on macOS by audit token spoofing – Sector 7](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
+- [5] [XNU — `osfmk/mach/message.h` (Mach message structures and flags)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
+- [6] [XNU — `osfmk/ipc/ipc_port.h` (port rights and internals)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/ipc/ipc_port.h)
+- [7] [XNU — `osfmk/mach/mach_port.defs` (port manipulation MIG interface)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
+- [8] [XNU — `osfmk/mach/task.defs` (`task_for_pid`, thread/task port operations)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
+- [9] [task_get_special_port – MIT Darwin XNU manual](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html)
+- [10] [Project Zero – Sound Barrier 2](https://projectzero.google/2026/01/sound-barrier-2.html)
+- [11] [About the processor_set_tasks() access to kernel memory vulnerability – reverse.put.as](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/)
+
 {{#include ../../../../banners/hacktricks-training.md}}

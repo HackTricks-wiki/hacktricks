@@ -2,23 +2,23 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Pkg Basic Information
+## Pkg 기본 정보
 
-macOS **installer package**(또는 `.pkg` 파일)는 macOS가 **소프트웨어를 배포**하는 데 사용하는 파일 형식입니다. 이 파일들은 올바르게 설치되고 실행되는 데 필요한 **모든 것을 담고 있는 상자**와 같습니다.
+macOS **installer package**(`.pkg` 파일이라고도 함)는 macOS에서 **software를 배포**하는 데 사용되는 파일 형식입니다. 이러한 파일은 software가 올바르게 설치되고 실행되는 데 필요한 **모든 항목을 담은 상자**와 같습니다.
 
-패키지 파일 자체는 대상 컴퓨터에 **설치될 파일과 디렉터리의 계층 구조**를 담고 있는 아카이브입니다. 또한 설치 전후에 작업을 수행하기 위한 **스크립트**를 포함할 수 있으며, 예를 들면 구성 파일을 설정하거나 오래된 소프트웨어 버전을 정리하는 작업이 있습니다.
+패키지 파일 자체는 대상 컴퓨터에 **설치될 파일과 디렉터리 계층 구조**를 포함하는 archive입니다. 또한 configuration file 설정이나 이전 software 버전 정리와 같은 작업을 설치 전후에 수행하는 **scripts**를 포함할 수도 있습니다.
 
-### Hierarchy
+### 계층 구조
 
 <figure><img src="../../../images/Pasted Graphic.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption></figcaption></figure>
 
-- **Distribution (xml)**: 사용자 지정(title, welcome text…) 및 script/installation checks
-- **PackageInfo (xml)**: 정보, 설치 요구사항, 설치 위치, 실행할 scripts 경로
-- **Bill of materials (bom)**: file permissions와 함께 설치, 업데이트 또는 제거할 파일 목록
-- **Payload (CPIO archive gzip compressed)**: PackageInfo의 `install-location`에 설치할 파일들
-- **Scripts (CPIO archive gzip compressed)**: 실행을 위해 temp directory로 추출되는 pre 및 post install scripts와 추가 리소스들.
+- **Distribution (xml)**: Customization(title, welcome text...) 및 script/installation checks
+- **PackageInfo (xml)**: 정보, installation requirements, installation location, 실행할 scripts 경로
+- **Bill of materials (bom)**: file permissions와 함께 설치, update 또는 remove할 파일 목록
+- **Payload (CPIO archive gzip compressed)**: PackageInfo의 `install-location`에 설치할 files
+- **Scripts (CPIO archive gzip compressed)**: 실행을 위해 temp directory에 extract되는 pre-install 및 post-install scripts와 추가 resources
 
-### Decompress
+### 압축 해제
 ```bash
 # Tool to directly get the files inside a package
 pkgutil --expand "/path/to/package.pkg" "/path/to/out/dir"
@@ -32,11 +32,11 @@ xar -xf "/path/to/package.pkg"
 cat Scripts | gzip -dc | cpio -i
 cpio -i < Scripts
 ```
-압축을 수동으로 풀지 않고도 installer의 내용을 시각화하려면 무료 도구 [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/)를 사용할 수도 있습니다.
+설치 프로그램의 압축을 수동으로 해제하지 않고도 내용을 시각화하려면 무료 도구 [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/)를 사용할 수도 있습니다.
 
-### Static triage shortcuts
+### 정적 triage shortcuts
 
-목표가 분석이라면, 먼저 **`Installer.app`로 package를 여는 것을 피하세요**. 일부 package는 Installer가 여는 즉시 code를 실행할 수 있습니다(예: `system.run()` 또는 installer plug-ins를 통해). 따라서 offline extraction이 보통 더 안전한 시작점입니다.
+목표가 분석이라면 먼저 `Installer.app`으로 package를 **열지 않도록** 하세요. 일부 package는 Installer가 열리는 즉시 코드를 실행할 수 있습니다(예: `system.run()` 또는 installer plug-ins를 통해). 따라서 일반적으로 offline extraction부터 시작하는 것이 더 안전합니다.
 ```bash
 PKG="Suspicious.pkg"
 OUT="/tmp/pkg-audit"
@@ -54,81 +54,81 @@ find "$OUT" -type f \( -name Bom -o -name '*.bom' \) -exec lsbom -pf {} \; 2>/de
 xmllint --format "$OUT/Distribution" 2>/dev/null | sed -n '1,200p'
 rg -n 'system\.(run|runOnce)|<script>|launchctl|osascript|curl|chmod 4[0-7]{3}|sudo -u |\$USER|\$HOME|/tmp/|/var/tmp/' "$OUT"
 ```
-## DMG Basic Information
+## DMG 기본 정보
 
-DMG 파일, 또는 Apple Disk Images는 Apple의 macOS에서 disk images에 사용되는 파일 형식입니다. DMG 파일은 본질적으로 **mountable disk image**(자체 filesystem을 포함함)이며, 일반적으로 압축되고 때로는 암호화된 raw block data를 포함합니다. DMG 파일을 열면 macOS는 이를 **실제 물리적 disk인 것처럼 mount**하여 내용에 접근할 수 있게 합니다.
+DMG 파일 또는 Apple Disk Images는 Apple의 macOS에서 디스크 이미지를 위해 사용하는 파일 형식입니다. DMG 파일은 기본적으로 **mountable disk image**(자체 파일 시스템을 포함)이며, 일반적으로 압축되고 경우에 따라 암호화된 raw block data를 포함합니다. DMG 파일을 열면 macOS는 **물리 디스크인 것처럼 mount**하므로 그 콘텐츠에 액세스할 수 있습니다.
 
 > [!CAUTION]
-> **`.dmg`** installers는 **너무 많은 format**을 지원하므로, 과거에는 취약점을 포함한 일부가 악용되어 **kernel code execution**을 얻는 데 사용되었습니다.
+> **`.dmg`** installer는 **매우 다양한 형식**을 지원하므로, 과거에는 취약점이 포함된 일부 형식이 악용되어 **kernel code execution**을 획득하는 데 사용되기도 했습니다.
 
-### Hierarchy
+### 계층 구조
 
 <figure><img src="../../../images/image (225).png" alt=""><figcaption></figcaption></figure>
 
-DMG 파일의 hierarchy는 content에 따라 다를 수 있습니다. 그러나 application DMG의 경우 보통 다음 structure를 따릅니다:
+DMG 파일의 계층 구조는 콘텐츠에 따라 달라질 수 있습니다. 그러나 application DMG의 경우 일반적으로 다음 구조를 따릅니다.
 
-- Top Level: disk image의 root입니다. 보통 application과, 경우에 따라 Applications folder로의 link를 포함합니다.
-- Application (.app): 실제 application입니다. macOS에서 application은 일반적으로 application을 구성하는 많은 개별 file과 folder를 포함하는 package입니다.
-- Applications Link: macOS의 Applications folder로 가는 shortcut입니다. 이것의 목적은 application 설치를 쉽게 만드는 것입니다. .app file을 이 shortcut으로 drag하면 app이 설치됩니다.
+- Top Level: 디스크 이미지의 root입니다. 일반적으로 application과 Applications folder에 대한 link가 포함됩니다.
+- Application (.app): 실제 application입니다. macOS에서 application은 일반적으로 application을 구성하는 여러 개별 file과 folder를 포함하는 package입니다.
+- Applications Link: macOS의 Applications folder를 가리키는 shortcut입니다. 이는 application을 쉽게 install할 수 있도록 하기 위한 것입니다. .app file을 이 shortcut으로 drag하면 app이 install됩니다.
 
-## Privesc via pkg abuse
+## pkg abuse를 통한 Privesc
 
-### Execution from public directories
+### public directory에서 실행
 
-만약 pre 또는 post installation script가 예를 들어 **`/var/tmp/Installerutil`**에서 실행되고 있고, attacker가 그 script를 control할 수 있다면, 실행될 때마다 privileges를 escalate할 수 있습니다. 또는 비슷한 다른 예시는 다음과 같습니다:
+예를 들어 pre 또는 post installation script가 **`/var/tmp/Installerutil`**에서 실행되고 attacker가 해당 script를 control할 수 있다면, script가 실행될 때마다 privileges를 escalate할 수 있습니다. 또는 다음과 유사한 예가 있습니다:<sup>[1][3]</sup>
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 
 ### AuthorizationExecuteWithPrivileges
 
-이것은 여러 installer와 updater가 **root로 어떤 것을 실행**하기 위해 호출하는 [public function](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg)입니다. 이 function은 **execute할 file의 path**를 parameter로 받지만, attacker가 이 file을 **modify**할 수 있다면 root 권한으로의 실행을 **abuse**하여 privileges를 **escalate**할 수 있습니다.
+이는 여러 installer와 updater가 **root로 무언가를 execute**하기 위해 호출하는 [public function](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg)입니다. 이 function은 실행할 **file**의 **path**를 parameter로 받습니다. 그러나 attacker가 이 file을 **modify**할 수 있다면, root 권한으로 실행되는 과정을 **abuse**하여 **privileges를 escalate**할 수 있습니다.
 ```bash
 # Breakpoint in the function to check which file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
 # You could also check FS events to find this misconfig
 ```
-더 많은 정보는 이 talk를 확인하세요: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
+자세한 내용은 다음 강연을 확인하세요: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)<sup>[8]</sup>
 
-### Environment and shebang abuse
+### 환경 변수 및 shebang 악용
 
-Modern PackageKit bugs showed that installer scripts are often executed as **trusted root code** while still keeping attacker-controlled context nearby. When auditing vendor packages, pay special attention to:
+Modern PackageKit의 버그는 installer script가 공격자가 제어하는 context를 가까이에 유지한 채 **신뢰된 root code**로 실행되는 경우가 많다는 점을 보여주었습니다. vendor package를 audit할 때는 다음 항목에 특히 주의하세요:
 
-- `#!/bin/zsh` / `#!/bin/bash` 같은 Shell interpreters
-- `sudo -u $USER`, `launchctl asuser` 같은 호출이나 `$USER`, `$HOME`, `PATH`, `TMPDIR`, 또는 relative paths를 신뢰하는 로직
-- user-controlled init files 또는 libraries를 로드할 수 있는 Non-shell interpreters
+- `#!/bin/zsh` / `#!/bin/bash`와 같은 Shell interpreter
+- `sudo -u $USER`, `launchctl asuser`와 같은 호출 또는 `$USER`, `$HOME`, `PATH`, `TMPDIR`, relative path를 신뢰하는 모든 logic
+- 사용자가 제어하는 init file 또는 library를 로드할 수 있는 non-shell interpreter
 ```bash
 pkgutil --expand-full Target.pkg /tmp/target-pkg
 find /tmp/target-pkg -type f \( -name preinstall -o -name postinstall \) -exec sh -c 'printf "\n### %s\n" "$1"; head -n 1 "$1"' sh {} \;
 rg -n '^#!/bin/(zsh|bash)|sudo -u |launchctl asuser|\$USER|\$HOME|PATH=|/usr/bin/env ' /tmp/target-pkg
 ```
-2024 PackageKit root-environment 버그(`~/.zshenv` / `~/.bash*` inheritance during user-initiated installs)에 대해서는 [generic macOS privesc page](../macos-privilege-escalation.md)를 확인하세요. 패키지가 **Apple-signed**인 경우, 같은 script bug는 `system_installd`가 `com.apple.rootless.install.heritable`을 가질 수 있으므로 **SIP/TCC-relevant**가 될 수 있습니다. 자세한 내용은 [the SIP page](../macos-security-protections/macos-sip.md)를 보세요.
+For the 2024 PackageKit root-environment bug (`~/.zshenv` / `~/.bash*` inheritance during user-initiated installs), [the generic macOS privesc page](../macos-privilege-escalation.md)를 확인하세요. 패키지가 **Apple-signed**인 경우, `system_installd`가 `com.apple.rootless.install.heritable`을 보유할 수 있으므로 동일한 script bug가 **SIP/TCC-relevant** 문제가 될 수 있습니다. [SIP page](../macos-security-protections/macos-sip.md)를 참조하세요.<sup>[5][6]</sup>
 
 ### Execution by mounting
 
-installer가 `/tmp/fixedname/bla/bla`에 쓰는 경우, `noowners`로 `/tmp/fixedname` 위에 **mount를 생성**할 수 있어서 설치 중에 **아무 파일이나 수정**하여 installation process를 악용할 수 있습니다.
+installer가 `/tmp/fixedname/bla/bla`에 기록하는 경우, noowners를 사용해 `/tmp/fixedname` 위에 **mount를 생성**할 수 있으며, 이를 통해 **installation 중 모든 파일을 수정**하여 installation process를 악용할 수 있습니다.
 
-이것의 예가 **CVE-2021-26089**인데, 이는 root로 execution을 얻기 위해 **periodic script를 overwrite**하는 데 성공했습니다. 더 자세한 내용은 talk를 보세요: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
+예를 들어 **CVE-2021-26089**는 **periodic script를 overwrite**하여 root 권한으로 execution을 얻는 데 성공했습니다. 자세한 내용은 다음 talk를 참고하세요: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)<sup>[7]</sup>
 
 ## pkg as malware
 
 ### Empty Payload
 
-실제 payload 없이, script 안의 malware 외에는 아무것도 없는 **pre and post-install scripts**를 가진 **`.pkg`** 파일을 생성하는 것이 가능합니다.
+실제 payload 없이 scripts 내부의 malware만 포함하고 **pre 및 post-install scripts**가 있는 **`.pkg`** 파일을 생성할 수 있습니다.
 
 ### JS in Distribution xml
 
-package의 **distribution xml** 파일에 **`<script>`** 태그를 추가할 수 있으며, 그 코드는 실행되고 **`system.run`**을 사용해 commands를 **execute**할 수 있습니다:
+패키지의 **distribution xml** 파일에 **`<script>`** tags를 추가할 수 있으며, 해당 code가 execution되고 **`system.run`**을 사용해 **commands를 execution**할 수 있습니다:
 
 <figure><img src="../../../images/image (1043).png" alt=""><figcaption></figcaption></figure>
 
-distribution packages에서는 보통 최상위 `Distribution` 파일이 `allow-external-scripts="true"` 같은 방식으로 external scripts를 허용하는지에 따라 달라집니다. 따라서 `preinstall` / `postinstall`만 검토하는 것으로는 충분하지 않습니다: **Distribution XML 자체**에 `installation-check` / `volume-check` hooks와 직접적인 `system.run()` / `system.runOnce()` execution path가 포함될 수 있습니다.
+Distribution packages에서는 일반적으로 top-level `Distribution` file이 external scripts를 허용하도록 설정되어 있어야 하며, 예를 들어 `allow-external-scripts="true"`를 사용할 수 있습니다. 따라서 `preinstall` / `postinstall`만 검토하는 것으로는 충분하지 않습니다. **Distribution XML 자체**에 `installation-check` / `volume-check` hooks와 직접적인 `system.run()` / `system.runOnce()` execution paths가 포함될 수 있습니다.
 ```bash
 xmllint --format Distribution | sed -n '1,200p'
 rg -n 'allow-external-scripts|system\.(run|runOnce)|installation-check|volume-check|function ' Distribution
 ```
-### 백도어된 설치 프로그램
+### Backdoored Installer
 
-dist.xml 내부의 script와 JS code를 사용하는 악성 installer
+dist.xml 내부의 script 및 JS code를 사용하는 악성 Installer
 ```bash
 # Package structure
 mkdir -p pkgroot/root/Applications/MyApp
@@ -189,13 +189,15 @@ EOF
 # Build final
 productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pkg
 ```
-## References
+## 참고 자료
 
-- [**DEF CON 27 - Unpacking Pkgs A Look Inside Macos Installer Packages And Common Security Flaws**](https://www.youtube.com/watch?v=iASSG0_zobQ)
-- [**OBTS v4.0: "The Wild World of macOS Installers" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
-- [**DEF CON 27 - Unpacking Pkgs A Look Inside MacOS Installer Packages**](https://www.youtube.com/watch?v=kCXhIYtODBg)
-- [https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
-- [**CVE-2024-27822: macOS PackageKit Privilege Escalation**](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
-- [**Breaking SIP with Apple-signed Packages**](https://www.l3harris.com/newsroom/editorial/2024/03/breaking-sip-apple-signed-packages)
+- [1] [DEF CON 27 - Pkgs Unpacking: Macos Installer Packages 내부와 일반적인 보안 결함 살펴보기](https://www.youtube.com/watch?v=iASSG0_zobQ)
+- [2] [OBTS v4.0: "macOS Installers의 거친 세계" - Tony Lambert](https://www.youtube.com/watch?v=Eow5uNHtmIg)
+- [3] [DEF CON 27 - MacOS Installer Packages 내부 살펴보기](https://www.youtube.com/watch?v=kCXhIYtODBg)
+- [4] [RedTeamRecipe - macOS Red Teaming: Installer Packages Exploiting](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
+- [5] [CVE-2024-27822: macOS PackageKit Privilege Escalation](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
+- [6] [Apple-signed Packages로 SIP Breaking](https://www.l3harris.com/newsroom/editorial/2024/03/breaking-sip-apple-signed-packages)
+- [7] [OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl](https://www.youtube.com/watch?v=jSYPazD4VcE)
+- [8] [DEF CON 25 - Patrick Wardle - macOS에서 1000개의 Installers로 인한 Death, 그리고 모든 것이 망가졌다!](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
 {{#include ../../../banners/hacktricks-training.md}}
