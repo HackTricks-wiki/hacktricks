@@ -174,7 +174,7 @@ Documentation and tool in [https://github.com/wh0amitz/KRBUACBypass](https://git
 
 ### UAC bypass exploits
 
-[**UACME** ](https://github.com/hfiref0x/UACME)which is a **compilation** of several UAC bypass exploits. Note that you will need to **compile UACME using visual studio or msbuild**. The compilation will create several executables (like `Source\Akagi\outout\x64\Debug\Akagi.exe`) , you will need to know **which one you need.**\
+[**UACME** ](https://github.com/hfiref0x/UACME)which is a **compilation** of several UAC bypass exploits. Note that you will need to **compile UACME using visual studio or msbuild**. The compilation will create several executables (like `Source\Akagi\outout\x64\Debug\Akagi.exe`) , you will need to know **which one you need.**<sup>[[3]](#references)</sup>\
 You should **be careful** because some bypasses will **promtp some other programs** that will **alert** the **user** that something is happening.<sup>[[3]](#references)</sup>
 
 UACME has the **build version from which each technique started working**.<sup>[[3]](#references)</sup> You can search for a technique affecting your versions:

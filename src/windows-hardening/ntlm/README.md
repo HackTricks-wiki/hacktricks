@@ -284,7 +284,7 @@ If NetNTLMv1 is not accepted—due to enforced security policies, then the attac
 
 To handle this case, the Internal Monologue tool was updated: It dynamically acquires a server token using `AcceptSecurityContext()` to still **capture NetNTLMv2 responses** if NetNTLMv1 fails. While NetNTLMv2 is much harder to crack, it still opens a path for relay attacks or offline brute-force in limited cases.
 
-The PoC can be found in **[https://github.com/eladshamir/Internal-Monologue](https://github.com/eladshamir/Internal-Monologue)**.
+The PoC can be found in **[https://github.com/eladshamir/Internal-Monologue](https://github.com/eladshamir/Internal-Monologue)**.<sup>[[4]](#references)</sup>
 
 ## NTLM Relay and Responder
 

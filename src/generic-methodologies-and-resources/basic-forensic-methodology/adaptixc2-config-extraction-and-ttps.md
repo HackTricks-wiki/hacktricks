@@ -233,9 +233,9 @@ DNS/DoH listener fingerprints<sup>[[4]](#references)</sup>
 ## Loader and persistence TTPs seen in incidents
 
 In‑memory PowerShell loaders<sup>[[1]](#references)</sup>
-- Download Base64/XOR payloads (Invoke‑RestMethod / WebClient)
-- Allocate unmanaged memory, copy shellcode, switch protection to 0x40 (PAGE_EXECUTE_READWRITE) via VirtualProtect
-- Execute via .NET dynamic invocation: Marshal.GetDelegateForFunctionPointer + delegate.Invoke()
+- Download Base64/XOR payloads (Invoke‑RestMethod / WebClient)<sup>[[9]](#references)</sup>
+- Allocate unmanaged memory, copy shellcode, switch protection to 0x40 (PAGE_EXECUTE_READWRITE) via VirtualProtect<sup>[[7]](#references)</sup>
+- Execute via .NET dynamic invocation: Marshal.GetDelegateForFunctionPointer + delegate.Invoke()<sup>[[6]](#references)</sup>
 
 Trojanized signed software / staged shellcode loaders<sup>[[5]](#references)</sup>
 - A 2026 Tropic Trooper chain used a trojanized SumatraPDF executable (TOSHIS loader) that redirected `_security_init_cookie` into malicious code instead of patching the PE entry point
@@ -250,7 +250,7 @@ Check these pages for in‑memory execution and AMSI/ETW considerations:
 
 Persistence mechanisms observed<sup>[[1]](#references)</sup>
 - Startup folder shortcut (.lnk) to re‑launch a loader at logon
-- Registry Run keys (HKCU/HKLM ...\CurrentVersion\Run), often with benign‑sounding names like "Updater" to start loader.ps1
+- Registry Run keys (HKCU/HKLM ...\CurrentVersion\Run), often with benign‑sounding names like "Updater" to start loader.ps1<sup>[[10]](#references)</sup>
 - DLL search‑order hijack by dropping msimg32.dll under %APPDATA%\Microsoft\Windows\Templates for susceptible processes
 
 Technique deep‑dives and checks:
@@ -264,7 +264,7 @@ Technique deep‑dives and checks:
 {{#endref}}
 
 Hunting ideas
-- PowerShell spawning RW→RX transitions: VirtualProtect to PAGE_EXECUTE_READWRITE inside powershell.exe
+- PowerShell spawning RW→RX transitions: VirtualProtect to PAGE_EXECUTE_READWRITE inside powershell.exe<sup>[[8]](#references)</sup>
 - Dynamic invocation patterns (GetDelegateForFunctionPointer)
 - Unmatched HTTPS 404s with `Server: AdaptixC2`, `Adaptix-Version`, `AdaptixC2 404`, or `You need to enter the correct connection details.`<sup>[[4]](#references)</sup>
 - DNS responses with `AA=true` and `TXT "OK"` for short queries under suspect domains<sup>[[4]](#references)</sup>

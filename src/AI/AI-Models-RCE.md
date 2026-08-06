@@ -30,7 +30,7 @@ Moreover, there some python pickle based models like the ones used by [PyTorch](
 
 ### Hydra metadata → RCE (works even with safetensors)
 
-`hydra.utils.instantiate()` imports and calls any dotted `_target_` in a configuration/metadata object. When libraries feed **untrusted model metadata** into `instantiate()`, an attacker can supply a callable and arguments that run immediately during model load (no pickle required).<sup>[[12]](#references)</sup>
+`hydra.utils.instantiate()` imports and calls any dotted `_target_` in a configuration/metadata object. When libraries feed **untrusted model metadata** into `instantiate()`, an attacker can supply a callable and arguments that run immediately during model load (no pickle required).<sup>[[12]](#references)[[13]](#references)</sup>
 
 Payload example (works in `.nemo` `model_config.yaml`, repo `config.json`, or `__metadata__` inside `.safetensors`):
 
@@ -42,7 +42,7 @@ _args_:
 
 Key points:
 - Triggered before model initialization in NeMo `restore_from/from_pretrained`, uni2TS HuggingFace coders, and FlexTok loaders.
-- Hydra’s string block-list is bypassable via alternative import paths (e.g., `enum.bltns.eval`) or application-resolved names (e.g., `nemo.core.classes.common.os.system` → `posix`).
+- Hydra’s string block-list is bypassable via alternative import paths (e.g., `enum.bltns.eval`) or application-resolved names (e.g., `nemo.core.classes.common.os.system` → `posix`).<sup>[[14]](#references)</sup>
 - FlexTok also parses stringified metadata with `ast.literal_eval`, enabling DoS (CPU/memory blowup) before the Hydra call.
 
 ### 🆕  InvokeAI RCE via `torch.load` (CVE-2024-12029)
@@ -105,7 +105,7 @@ Ready-made exploit: **Metasploit** module `exploit/linux/http/invokeai_rce_cve_2
 
 #### Mitigations
 
-* Upgrade to **InvokeAI ≥ 5.4.3** – the patch sets `scan=True` by default and performs malware scanning before deserialization.
+* Upgrade to **InvokeAI ≥ 5.4.3** – the patch sets `scan=True` by default and performs malware scanning before deserialization.<sup>[[2]](#references)</sup>
 * When loading checkpoints programmatically use `torch.load(file, weights_only=True)` or the new [`torch.load_safe`](https://pytorch.org/docs/stable/serialization.html#security) helper.
 * Enforce allow-lists / signatures for model sources and run the service with least-privilege.
 
@@ -158,14 +158,14 @@ Fix: Commit [b7eaea5](https://github.com/NVIDIA-Merlin/Transformers4Rec/pull/802
 
 Defensive guidance specific to PyTorch checkpoints:
 - Do not unpickle untrusted data. Prefer non-executable formats like [Safetensors](https://huggingface.co/docs/safetensors/index) or ONNX when possible.
-- If you must use PyTorch serialization, ensure `weights_only=True` (supported in newer PyTorch) or use a custom allow-listed unpickler similar to the Transformers4Rec patch.
+- If you must use PyTorch serialization, ensure `weights_only=True` (supported in newer PyTorch) or use a custom allow-listed unpickler similar to the Transformers4Rec patch.<sup>[[4]](#references)</sup>
 - Enforce model provenance/signatures and sandbox deserialization (seccomp/AppArmor; non-root user; restricted FS and no network egress).
 - Monitor for unexpected child processes from ML services at checkpoint load time; trace `torch.load()`/`pickle` usage.
 
 POC and vulnerable/patch references:<sup>[[8]](#references)[[9]](#references)[[10]](#references)</sup>
-- Vulnerable pre-patch loader: https://gist.github.com/zdi-team/56ad05e8a153c84eb3d742e74400fd10.js
-- Malicious checkpoint POC: https://gist.github.com/zdi-team/fde7771bb93ffdab43f15b1ebb85e84f.js
-- Post-patch loader: https://gist.github.com/zdi-team/a0648812c52ab43a3ce1b3a090a0b091.js
+- Vulnerable pre-patch loader: https://gist.github.com/zdi-team/56ad05e8a153c84eb3d742e74400fd10.js<sup>[[8]](#references)</sup>
+- Malicious checkpoint POC: https://gist.github.com/zdi-team/fde7771bb93ffdab43f15b1ebb85e84f.js<sup>[[9]](#references)</sup>
+- Post-patch loader: https://gist.github.com/zdi-team/a0648812c52ab43a3ce1b3a090a0b091.js<sup>[[10]](#references)</sup>
 
 ## Example – crafting a malicious PyTorch model
 

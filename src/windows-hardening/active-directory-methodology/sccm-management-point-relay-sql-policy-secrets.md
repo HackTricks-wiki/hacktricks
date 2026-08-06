@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-By coercing a **System Center Configuration Manager (SCCM) Management Point (MP)** to authenticate over SMB/RPC and **relaying** that NTLM machine account to the **site database (MSSQL)** you obtain `smsdbrole_MP` / `smsdbrole_MPUserSvc` rights.  These roles let you call a set of stored procedures that expose **Operating System Deployment (OSD)** policy blobs (Network Access Account credentials, Task-Sequence variables, etc.).  The blobs are hex-encoded/encrypted but can be decoded and decrypted with **PXEthief**, yielding plaintext secrets.
+By coercing a **System Center Configuration Manager (SCCM) Management Point (MP)** to authenticate over SMB/RPC and **relaying** that NTLM machine account to the **site database (MSSQL)** you obtain `smsdbrole_MP` / `smsdbrole_MPUserSvc` rights.  These roles let you call a set of stored procedures that expose **Operating System Deployment (OSD)** policy blobs (Network Access Account credentials, Task-Sequence variables, etc.).  The blobs are hex-encoded/encrypted but can be decoded and decrypted with **PXEthief**, yielding plaintext secrets.<sup>[[2]](#references)</sup>
 
 High-level chain:
 1. Discover MP & site DB ↦ unauthenticated HTTP endpoint `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
