@@ -64,5 +64,3 @@ However, there are still some tools that can be used to understand this kind of 
 - [4] [FADE DEAD | Adventures in Reversing Malicious Run-Only AppleScripts](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-
-

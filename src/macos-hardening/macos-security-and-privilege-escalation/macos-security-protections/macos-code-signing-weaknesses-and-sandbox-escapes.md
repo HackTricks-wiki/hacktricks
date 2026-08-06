@@ -6,7 +6,7 @@
 
 ### Basic Information
 
-**Ad-hoc signing** (`CS_ADHOC`) creates a code signature with **no certificate chain** — it's a hash of the code with no developer identity verification. The binary's origin cannot be traced to any developer or organization.
+**Ad-hoc signing** (`CS_ADHOC`) creates a code signature with **no certificate chain** — it's a hash of the code with no developer identity verification. The binary's origin cannot be traced to any developer or organization.<sup>[[1]](#references)</sup>
 
 On Apple Silicon Macs, all executables require at minimum an ad-hoc signature. This means you'll find ad-hoc signatures on many development tools, Homebrew packages, and third-party utilities.
 
@@ -58,7 +58,7 @@ codesign -s - /path/to/target
 
 ### Basic Information
 
-The **`com.apple.security.get-task-allow`** entitlement (or `CS_GET_TASK_ALLOW` flag) allows **any process to attach as a debugger**, reading memory, modifying registers, injecting code, and controlling execution.
+The **`com.apple.security.get-task-allow`** entitlement (or `CS_GET_TASK_ALLOW` flag) allows **any process to attach as a debugger**, reading memory, modifying registers, injecting code, and controlling execution.<sup>[[3]](#references)</sup>
 
 This is intended **only for development builds**. However, some third-party binaries ship with this entitlement in production.
 
@@ -115,7 +115,7 @@ if (kr == KERN_SUCCESS) {
 
 ### The Deadly Combination
 
-When a binary has **both**:
+When a binary has **both**:<sup>[[3]](#references)</sup>
 - `com.apple.security.cs.disable-library-validation` (loads any dylib)
 - `com.apple.security.cs.allow-dyld-environment-variables` (accepts DYLD env vars)
 
@@ -182,7 +182,7 @@ cat /tmp/injected_proof.txt
 
 ### How They Weaken the Sandbox
 
-Sandbox temporary exceptions (`com.apple.security.temporary-exception.*`) punch holes in the App Sandbox:
+Sandbox temporary exceptions (`com.apple.security.temporary-exception.*`) punch holes in the App Sandbox:<sup>[[2]](#references)</sup>
 
 | Exception | What It Allows |
 |---|---|
@@ -346,7 +346,5 @@ cp /tmp/evil.dylib /path/to/writable.dylib
 - [1] [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
 - [2] [Apple Developer — App Sandbox](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
 - [3] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
-- [4] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` operations and `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
-- [5] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` handler)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
 
 {{#include ../../../banners/hacktricks-training.md}}

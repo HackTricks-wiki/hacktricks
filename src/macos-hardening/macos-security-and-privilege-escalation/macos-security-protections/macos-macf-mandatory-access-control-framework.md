@@ -12,9 +12,7 @@ Note that MACF doesn't really make any decisions as it just **intercepts** actio
 - A policy may be monitoring (return 0, so as not to object but piggyback on hook to do something)
 - A MACF static policy is installed in boot and will NEVER be removed
 - A MACF dynamic policy is installed by a KEXT (kextload) and may hypothetically be kextunloaded
-- In iOS only static policies are allowed and in macOS static + dynamic.
-- [https://newosxbook.com/xxr/index.php](https://newosxbook.com/xxr/index.php)
-
+- In iOS only static policies are allowed and in macOS static + dynamic.<sup>[[7]](#references)</sup>
 
 ### Flow
 
@@ -478,7 +476,7 @@ When auditing root brokers reachable from the sandbox, grep first for:
 
 ### Trusted deputies with private entitlements
 
-Another practical pattern is to avoid attacking MACF hooks directly and instead abuse a **trusted process** that already carries the rights needed to cross the boundary. Recent Safari/TCC research is a good example: the interesting primitive was not "disable TCC in the kernel", but modifying local policy/configuration so an Apple-signed process with **`com.apple.private.tcc.allow`** performs the sensitive action on your behalf. In practice, high-value auditing targets are Apple daemons/apps that combine:
+Another practical pattern is to avoid attacking MACF hooks directly and instead abuse a **trusted process** that already carries the rights needed to cross the boundary. Recent Safari/TCC research is a good example: the interesting primitive was not "disable TCC in the kernel", but modifying local policy/configuration so an Apple-signed process with **`com.apple.private.tcc.allow`** performs the sensitive action on your behalf.<sup>[[8]](#references)</sup> In practice, high-value auditing targets are Apple daemons/apps that combine:
 
 - **private entitlements** or FDA-like reach
 - a writable config / database / mount point / policy file
@@ -494,6 +492,7 @@ For deeper product-specific reversing, check the dedicated pages on [macOS Sandb
 - [4] [XNU — `bsd/sys/priv.h` (privilege codes used by `priv_check`/`priv_grant`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/priv.h)
 - [5] [AMFI Syscall (Offensive Security)](https://www.offsec.com/blog/amfi-syscall/)
 - [6] [Uncovering Apple Vulnerabilities: diskarbitrationd and storagekitd Audit Part 2](https://blog.kandji.io/macos-audit-story-part2)
-
+- [7] [XXR — XNU Cross Reference tool](https://newosxbook.com/xxr/index.php)
+- [8] [New macOS vulnerability, "HM Surf", could lead to unauthorized data access (Microsoft Security Blog)](https://www.microsoft.com/en-us/security/blog/2024/10/17/new-macos-vulnerability-hm-surf-could-lead-to-unauthorized-data-access/)
 
 {{#include ../../../banners/hacktricks-training.md}}
