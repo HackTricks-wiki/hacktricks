@@ -45,7 +45,7 @@ These start a service when a client attempts to talk to an IPC endpoint. Useful 
     try { $pipe.Connect(1000) } catch {}
     $pipe.Dispose()
     ```
-  - Internals note: named-pipe triggers are backed by `npsvctrig.sys`, a filesystem minifilter that watches for opens against registered trigger pipe names. This is why the open attempt can start the service even before the service itself has created/listened on the pipe.<sup>[[6]](#references)</sup>
+  - Internals note: named-pipe triggers are backed by `npsvctrig.sys`, a filesystem minifilter that watches for opens against registered trigger pipe names. This is why the open attempt can start the service even before the service itself has created/listened on the pipe.<sup>[[5]](#references)</sup>
   - See also: Named Pipe Client Impersonation for post-start abuse.
 
 - RPC endpoint trigger (Endpoint Mapper)
@@ -60,7 +60,7 @@ These start a service when a client attempts to talk to an IPC endpoint. Useful 
 
 A service can register a trigger bound to an ETW provider/event. If no additional filters (keyword/level/binary/string) are configured, any event from that provider will start the service.<sup>[[1]](#references)</sup>
 
-- Example (WebClient/WebDAV): provider {22B6D684-FA63-4578-87C9-EFFCBE6643C7}<sup>[[7]](#references)</sup>
+- Example (WebClient/WebDAV): provider {22B6D684-FA63-4578-87C9-EFFCBE6643C7}<sup>[[6]](#references)</sup>
   - List trigger: `sc.exe qtriggerinfo webclient`
   - Verify provider is registered: `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
   - Emitting matching events typically requires code that logs to that provider; if no filters are present, any event suffices.
@@ -168,8 +168,7 @@ named-pipe-client-impersonation.md
 - [2] [QueryServiceConfig2 function (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-queryserviceconfig2a)
 - [3] [MS-SCMR: Service Control Manager Remote Protocol – QueryServiceConfig2](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-scmr/705b624a-13de-43cc-b8a2-99573da3635f)
 - [4] [TrustedSec Titanis (SCM trigger enumeration)](https://github.com/trustedsec/Titanis)
-- [5] [Cobalt Strike BOF example – sc_qtriggerinfo](https://github.com/trustedsec/CS-Situational-Awareness-BOF/blob/5d6f70be2e5023c340dc5f82303449504a9b7786/src/SA/sc_qtriggerinfo/entry.c#L56)
-- [6] [Reversing npsvctrig.sys - Named Pipe Service Triggers (Inbits)](https://inbits-sec.com/posts/npsvctrig-notes/)
-- [7] [Starting WebClient Service Programmatically (Tyranid)](https://www.tiraniddo.dev/2015/03/starting-webclient-service.html)
+- [5] [Reversing npsvctrig.sys - Named Pipe Service Triggers (Inbits)](https://inbits-sec.com/posts/npsvctrig-notes/)
+- [6] [Starting WebClient Service Programmatically (Tyranid)](https://www.tiraniddo.dev/2015/03/starting-webclient-service.html)
 
 {{#include ../../banners/hacktricks-training.md}}

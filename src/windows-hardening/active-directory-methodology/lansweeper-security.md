@@ -24,7 +24,7 @@ Steps overview (web UI):
 - Click “Scan now” on the target
 - Run an SSH honeypot and retrieve the attempted username/password
 
-Example with sshesame:
+Example with sshesame:<sup>[[2]](#references)</sup>
 
 ```yaml
 # sshesame.conf
@@ -56,7 +56,7 @@ Notes
 
 ## 2) AD ACL abuse: gain remote access by adding yourself to an app-admin group
 
-Use BloodHound to enumerate effective rights from the compromised account. A common finding is a scanner- or app-specific group (e.g., “Lansweeper Discovery”) holding GenericAll over a privileged group (e.g., “Lansweeper Admins”). If the privileged group is also member of “Remote Management Users”, WinRM becomes available once we add ourselves.<sup>[[1]](#references)</sup>
+Use BloodHound to enumerate effective rights from the compromised account. A common finding is a scanner- or app-specific group (e.g., “Lansweeper Discovery”) holding GenericAll over a privileged group (e.g., “Lansweeper Admins”). If the privileged group is also member of “Remote Management Users”, WinRM becomes available once we add ourselves.<sup>[[1]](#references)[[5]](#references)</sup>
 
 Collection examples:
 
@@ -68,7 +68,7 @@ netexec ldap inventory.sweep.vl -u svc_inventory_lnx -p '<password>' --bloodhoun
 rusthound-ce --domain sweep.vl -u svc_inventory_lnx -p '<password>' -c All --zip
 ```
 
-Exploit GenericAll on group with BloodyAD (Linux):
+Exploit GenericAll on group with BloodyAD (Linux):<sup>[[4]](#references)</sup>
 
 ```bash
 # Add our user into the target group
@@ -100,7 +100,7 @@ Typical locations:
   - `<connectionStrings configProtectionProvider="DataProtectionConfigurationProvider">` … `<EncryptedData>…`
 - Application key: `C:\Program Files (x86)\Lansweeper\Key\Encryption.txt`
 
-Use SharpLansweeperDecrypt to automate decryption and dumping of stored creds:
+Use SharpLansweeperDecrypt to automate decryption and dumping of stored creds:<sup>[[3]](#references)</sup>
 
 ```powershell
 # From a WinRM session or interactive shell on the Lansweeper host

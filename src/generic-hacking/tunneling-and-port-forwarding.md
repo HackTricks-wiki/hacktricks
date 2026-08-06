@@ -853,5 +853,3 @@ Ink Dragon’s ShadowPad IIS module turns every compromised perimeter web server
 - [3] [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 
 {{#include ../banners/hacktricks-training.md}}
-
-

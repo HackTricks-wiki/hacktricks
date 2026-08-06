@@ -141,7 +141,7 @@ Microsoft Edge stores user data in `%userprofile%\Appdata\Local\Packages`. The p
 
 ## Safari
 
-Safari data is stored at `/Users/$User/Library/Safari`. Key files include:
+Safari data is stored at `/Users/$User/Library/Safari`. Key files include:<sup>[[3]](#references)</sup>
 
 - **History.db**: Contains `history_visits` and `history_items` tables with URLs and visit timestamps. Use `sqlite3` to query.
 - **Downloads.plist**: Information about downloaded files.
@@ -164,11 +164,6 @@ These paths and commands are crucial for accessing and understanding the browsin
 
 - [1] [Web Browsers Forensics: A Guide On Doing Web Browsers Forensic Analysis](https://nasbench.medium.com/web-browsers-forensics-7e99940c579a)
 - [2] [macOS Incident Response | Part 3: System Manipulation](https://www.sentinelone.com/labs/macos-incident-response-part-3-system-manipulation/)
-- [3] [OS X Incident Response: Scripting and Analysis - Google Books preview](https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file)
-- [4] Book: OS X Incident Response: Scripting and Analysis By Jaron Bradley, pag 123
-
+- [3] [OS X Incident Response: Scripting and Analysis by Jaron Bradley](https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

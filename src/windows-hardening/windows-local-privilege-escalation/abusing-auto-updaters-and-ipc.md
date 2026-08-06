@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-This page generalizes a class of Windows local privilege escalation chains found in enterprise endpoint agents and updaters that expose a low-friction IPC surface and a privileged update flow. A representative example is Netskope Client for Windows < R129 (CVE-2025-0309), where a low-privileged user can coerce enrollment into an attacker-controlled server and then deliver a malicious MSI that the SYSTEM service installs.
+This page generalizes a class of Windows local privilege escalation chains found in enterprise endpoint agents and updaters that expose a low-friction IPC surface and a privileged update flow. A representative example is Netskope Client for Windows < R129 (CVE-2025-0309), where a low-privileged user can coerce enrollment into an attacker-controlled server and then deliver a malicious MSI that the SYSTEM service installs.<sup>[[1]](#references)[[2]](#references)[[5]](#references)</sup>
 
 Key ideas you can reuse against similar products:
 - Abuse a privileged service’s localhost IPC to force re-enrollment or reconfiguration to an attacker server.
@@ -64,7 +64,7 @@ Result: the SYSTEM service installs your MSI from
 C:\ProgramData\Netskope\stAgent\data\*.msi
 executing arbitrary code as NT AUTHORITY\SYSTEM.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Patch-bypass lesson: if a vendor responds by allow-listing a small set of “trusted” domains instead of cryptographically authenticating the update source, look for vendor-owned redirectors or reverse proxies that still let you steer traffic. In Netskope's case, public follow-up research showed that an R129-era allow-list could still be abused through `rproxy.goskope.com`, which proxied attacker-controlled Azure App Service content. Treat hostname allow-lists as a speed bump, not as a trust boundary.<sup>[[15]](#references)</sup>
+Patch-bypass lesson: if a vendor responds by allow-listing a small set of “trusted” domains instead of cryptographically authenticating the update source, look for vendor-owned redirectors or reverse proxies that still let you steer traffic. In Netskope's case, public follow-up research showed that an R129-era allow-list could still be abused through `rproxy.goskope.com`, which proxied attacker-controlled Azure App Service content. Treat hostname allow-lists as a speed bump, not as a trust boundary.<sup>[[14]](#references)</sup>
 
 ---
 ## 3) Forging encrypted IPC requests (when present)
@@ -150,14 +150,14 @@ Patterns worth prioritizing:
 - If the low-privileged GUI decides “the file is trusted” and the SYSTEM broker merely consumes that result, patching or reimplementing the client-side DLL/JS often bypasses the boundary entirely (Razer-style split validation).
 - If the broker copies a payload to `%TEMP%`/`C:\Windows\Temp` and then validates or schedules it from that path, immediately test for TOCTOU replacement windows and for sibling plugin modules that expose alternate `ExecuteTask()` wrappers with weaker checks.<sup>[[6]](#references)</sup>
 
-For named-pipe-heavy targets, PipeViewer is a quick way to spot weak DACLs and remotely reachable pipes before you start reversing the protocol in depth.<sup>[[12]](#references)</sup>
+For named-pipe-heavy targets, PipeViewer is a quick way to spot weak DACLs and remotely reachable pipes before you start reversing the protocol in depth.<sup>[[11]](#references)</sup>
 
 If the target authenticates callers only by PID, image path, or process name, treat that as a speed bump rather than a boundary: injecting into the legitimate client, or making the connection from an allow-listed process, is often enough to satisfy the server’s checks. For named pipes specifically, [this page about client impersonation and pipe abuse](named-pipe-client-impersonation.md) covers the primitive in more depth.
 
 ---
 ## 8) Modular add-in brokers authenticated only by vendor signatures (Lenovo Vantage pattern)
 
-A newer variation worth hunting is the **signed-client RPC broker**: a low-privileged Lenovo-signed desktop process talks to a SYSTEM service, and the service routes JSON commands into a set of XML-described add-ins under `%ProgramData%`. Once code execution is achieved **inside any accepted signed client**, every `runas="system"` contract becomes part of your attack surface.<sup>[[16]](#references)</sup>
+A newer variation worth hunting is the **signed-client RPC broker**: a low-privileged Lenovo-signed desktop process talks to a SYSTEM service, and the service routes JSON commands into a set of XML-described add-ins under `%ProgramData%`. Once code execution is achieved **inside any accepted signed client**, every `runas="system"` contract becomes part of your attack surface.<sup>[[15]](#references)</sup>
 
 High-value primitives observed in Lenovo Vantage research:
 - **Trusting the caller because it is signed by the vendor**: researchers reached an authenticated context by copying a Lenovo-signed EXE to a writable directory and satisfying a DLL side-load (`profapi.dll`) so arbitrary code ran inside a client the service already trusted.
@@ -311,19 +311,19 @@ Operational notes:
 ---
 ## Remote supply-chain hijack via weak updater validation (WinGUp / Notepad++)
 
-Between June 2025 and December 2025, attackers who compromised the hosting infrastructure behind the Notepad++ update flow selectively served malicious manifests to chosen victims. Older WinGUp-based updaters did not fully verify update authenticity, so a hostile XML response could redirect clients to attacker-controlled URLs. Because the client accepted HTTPS content without enforcing both a trusted certificate chain and a valid PE signature on the downloaded installer, victims fetched and executed a trojanized NSIS `update.exe`.<sup>[[13]](#references)[[14]](#references)</sup>
+Between June 2025 and December 2025, attackers who compromised the hosting infrastructure behind the Notepad++ update flow selectively served malicious manifests to chosen victims. Older WinGUp-based updaters did not fully verify update authenticity, so a hostile XML response could redirect clients to attacker-controlled URLs. Because the client accepted HTTPS content without enforcing both a trusted certificate chain and a valid PE signature on the downloaded installer, victims fetched and executed a trojanized NSIS `update.exe`.<sup>[[12]](#references)[[13]](#references)</sup>
 
 Operational flow (no local exploit required):
 1. **Infrastructure interception**: compromise CDN/hosting and answer update checks with attacker metadata pointing at a malicious download URL.
 2. **Trojanized NSIS**: the installer fetches/executes a payload and abuses two execution chains:
    - **Bring-your-own signed binary + sideload**: bundle the signed Bitdefender `BluetoothService.exe` and drop a malicious `log.dll` in its search path. When the signed binary runs, Windows sideloads `log.dll`, which decrypts and reflectively loads the Chrysalis backdoor (Warbird-protected + API hashing to hinder static detection).
-   - **Scripted shellcode injection**: NSIS executes a compiled Lua script that uses Win32 APIs (e.g., `EnumWindowStationsW`) to inject shellcode and stage Cobalt Strike Beacon.<sup>[[13]](#references)</sup>
+   - **Scripted shellcode injection**: NSIS executes a compiled Lua script that uses Win32 APIs (e.g., `EnumWindowStationsW`) to inject shellcode and stage Cobalt Strike Beacon.<sup>[[12]](#references)</sup>
 
 Hardening/detection takeaways for any auto-updater:
 - Enforce **certificate + signature verification** of the downloaded installer (pin vendor signer, reject mismatched CN/chain) and sign the update manifest itself (e.g., XMLDSig). Block manifest-controlled redirects unless validated.
 - Treat **BYO signed binary sideloading** as a post-download detection pivot: alert when a signed vendor EXE loads a DLL name from outside its canonical install path (e.g., Bitdefender loading `log.dll` from Temp/Downloads) and when an updater drops/executes installers from temp with non-vendor signatures.
 - Monitor **malware-specific artifacts** observed in this chain (useful as generic pivots): mutex `Global\Jdhfv_1.0.1`, anomalous `gup.exe` writes to `%TEMP%`, and Lua-driven shellcode injection stages.
-- Notepad++ responded by strengthening WinGUp in v8.8.9 and later: the returned XML is now signed (XMLDSig), and newer builds enforce certificate + signature verification of the downloaded installer instead of trusting the transport alone.<sup>[[14]](#references)</sup>
+- Notepad++ responded by strengthening WinGUp in v8.8.9 and later: the returned XML is now signed (XMLDSig), and newer builds enforce certificate + signature verification of the downloaded installer instead of trusting the transport alone.<sup>[[13]](#references)</sup>
 
 <details>
 <summary>Cortex XDR XQL – Bitdefender-signed EXE sideloading <code>log.dll</code> (T1574.001)</summary>
@@ -368,12 +368,11 @@ These patterns generalize to any updater that accepts unsigned manifests or fail
 - [7] [0xdf – HTB: NanoCorp](https://0xdf.gitlab.io/2026/06/20/htb-nanocorp.html)
 - [8] [SEC Consult – Local Privilege Escalation via writable files in Checkmk Agent](https://sec-consult.com/vulnerability-lab/advisory/local-privilege-escalation-via-writable-files-in-checkmk-agent/)
 - [9] [Checkmk Werk #16361 – Privilege escalation in Windows agent](https://checkmk.com/werk/16361)
-- [10] [RunasCs](https://github.com/antonioCoco/RunasCs)
-- [11] [sensepost/bloatware-pwn PoCs](https://github.com/sensepost/bloatware-pwn)
-- [12] [CyberArk PipeViewer](https://github.com/cyberark/PipeViewer)
-- [13] [Unit 42 – Nation-State Actors Exploit Notepad++ Supply Chain](https://unit42.paloaltonetworks.com/notepad-infrastructure-compromise/)
-- [14] [Notepad++ – hijacked infrastructure incident update](https://notepad-plus-plus.org/news/hijacked-incident-info-update/)
-- [15] [AmberWolf – Bypassing the fix for CVE-2025-0309 in Netskope Client for Windows](https://blog.amberwolf.com/blog/2026/march/patch-bypass---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
-- [16] [Atredis – Uncovering Privilege Escalation Bugs in Lenovo Vantage](https://www.atredis.com/blog/2025/7/7/uncovering-privilege-escalation-bugs-in-lenovo-vantage)
+- [10] [sensepost/bloatware-pwn PoCs](https://github.com/sensepost/bloatware-pwn)
+- [11] [CyberArk PipeViewer](https://github.com/cyberark/PipeViewer)
+- [12] [Unit 42 – Nation-State Actors Exploit Notepad++ Supply Chain](https://unit42.paloaltonetworks.com/notepad-infrastructure-compromise/)
+- [13] [Notepad++ – hijacked infrastructure incident update](https://notepad-plus-plus.org/news/hijacked-incident-info-update/)
+- [14] [AmberWolf – Bypassing the fix for CVE-2025-0309 in Netskope Client for Windows](https://blog.amberwolf.com/blog/2026/march/patch-bypass---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
+- [15] [Atredis – Uncovering Privilege Escalation Bugs in Lenovo Vantage](https://www.atredis.com/blog/2025/7/7/uncovering-privilege-escalation-bugs-in-lenovo-vantage)
 
 {{#include ../../banners/hacktricks-training.md}}

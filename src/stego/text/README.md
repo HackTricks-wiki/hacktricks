@@ -18,7 +18,7 @@ Text stego frequently relies on characters that render identically (or invisibly
 
 - Homoglyphs: different Unicode codepoints that look the same (Latin `a` vs Cyrillic `а`)
 - Zero-width characters: joiners, non-joiners, zero-width spaces
-- Whitespace encodings: spaces vs tabs, trailing spaces, line-length patterns
+- Whitespace encodings: spaces vs tabs, trailing spaces, line-length patterns<sup>[[1]](#references)</sup>
 
 Additional high-signal cases:
 
