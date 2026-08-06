@@ -2,56 +2,56 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Información Básica
+## Información básica
 
-SPI (Interfaz Periférica Serial) es un Protocolo de Comunicación Serial Sincrónica utilizado en sistemas embebidos para la comunicación a corta distancia entre ICs (Circuitos Integrados). El Protocolo de Comunicación SPI utiliza la arquitectura maestro-esclavo, que es orquestada por la señal de Reloj y la señal de Selección de Chip. Una arquitectura maestro-esclavo consiste en un maestro (generalmente un microprocesador) que gestiona periféricos externos como EEPROM, sensores, dispositivos de control, etc., que se consideran los esclavos.
+SPI (Serial Peripheral Interface) es un protocolo de comunicación serial síncrona utilizado en sistemas embebidos para la comunicación a corta distancia entre ICs (Integrated Circuits). El protocolo de comunicación SPI utiliza una arquitectura master-slave orquestada por las señales de Clock y Chip Select. Una arquitectura master-slave consiste en un master (normalmente un microprocesador) que administra periféricos externos como EEPROMs, sensores, dispositivos de control, etc., que se consideran los slaves.
 
-Múltiples esclavos pueden conectarse a un maestro, pero los esclavos no pueden comunicarse entre sí. Los esclavos son administrados por dos pines, reloj y selección de chip. Como SPI es un protocolo de comunicación sincrónica, los pines de entrada y salida siguen las señales de reloj. La selección de chip es utilizada por el maestro para seleccionar un esclavo e interactuar con él. Cuando la selección de chip está alta, el dispositivo esclavo no está seleccionado, mientras que cuando está baja, el chip ha sido seleccionado y el maestro interactuará con el esclavo.
+Se pueden conectar múltiples slaves a un master, pero los slaves no pueden comunicarse entre sí. Los slaves son administrados mediante dos pines: Clock y Chip Select. Como SPI es un protocolo de comunicación síncrona, los pines de entrada y salida siguen las señales de Clock. El Chip Select es utilizado por el master para seleccionar un slave e interactuar con él. Cuando el Chip Select está en estado alto, el dispositivo slave no está seleccionado; cuando está en estado bajo, el chip ha sido seleccionado y el master interactúa con el slave.
 
-El MOSI (Master Out, Slave In) y MISO (Master In, Slave Out) son responsables de enviar y recibir datos. Los datos se envían al dispositivo esclavo a través del pin MOSI mientras la selección de chip se mantiene baja. Los datos de entrada contienen instrucciones, direcciones de memoria o datos según la hoja de datos del proveedor del dispositivo esclavo. Tras una entrada válida, el pin MISO es responsable de transmitir datos al maestro. Los datos de salida se envían exactamente en el siguiente ciclo de reloj después de que finaliza la entrada. El pin MISO transmite datos hasta que los datos se transmiten completamente o el maestro establece el pin de selección de chip en alto (en ese caso, el esclavo dejaría de transmitir y el maestro no escucharía después de ese ciclo de reloj).
+MOSI (Master Out, Slave In) y MISO (Master In, Slave Out) son responsables de enviar y recibir datos. Los datos se envían al dispositivo slave a través del pin MOSI mientras el Chip Select se mantiene en estado bajo. Los datos de entrada contienen instrucciones, direcciones de memoria o datos según el datasheet del fabricante del dispositivo slave. Tras una entrada válida, el pin MISO se encarga de transmitir datos al master. Los datos de salida se envían exactamente en el siguiente ciclo de Clock después de que termina la entrada. Los pines MISO transmiten datos hasta que estos se transmiten por completo o hasta que el master establece el pin Chip Select en estado alto (en ese caso, el slave deja de transmitir y el master deja de escuchar después de ese ciclo de Clock).
 
-## Volcado de Firmware desde EEPROMs
+## Dumping de Firmware desde EEPROMs
 
-Volcar firmware puede ser útil para analizar el firmware y encontrar vulnerabilidades en él. A menudo, el firmware no está disponible en internet o es irrelevante debido a variaciones de factores como el número de modelo, versión, etc. Por lo tanto, extraer el firmware directamente del dispositivo físico puede ser útil para ser específico al buscar amenazas.
+El dumping de firmware puede ser útil para analizar el firmware y encontrar vulnerabilidades en él. A menudo, el firmware no está disponible en Internet o es irrelevante debido a variaciones en factores como el número de modelo, la versión, etc. Por ello, extraer el firmware directamente del dispositivo físico puede ayudar a ser más específico al buscar amenazas.
 
-Obtener la Consola Serial puede ser útil, pero a menudo sucede que los archivos son de solo lectura. Esto limita el análisis por diversas razones. Por ejemplo, las herramientas que se requieren para enviar y recibir paquetes no estarían en el firmware. Por lo tanto, extraer los binarios para ingeniería inversa no es factible. Así, tener todo el firmware volcado en el sistema y extraer los binarios para análisis puede ser muy útil.
+Obtener una Serial Console puede ser útil, pero a menudo ocurre que los archivos son de solo lectura. Esto limita el análisis por diversos motivos. Por ejemplo, las herramientas necesarias para enviar y recibir paquetes no estarían presentes en el firmware. Por tanto, extraer los binarios para hacerles reverse engineering no resulta viable. Por ello, disponer de todo el firmware dumpeado en el sistema y extraer los binarios para analizarlos puede ser muy útil.
 
-Además, durante el acceso físico a los dispositivos, volcar el firmware puede ayudar a modificar los archivos o inyectar archivos maliciosos y luego volver a flashearlos en la memoria, lo que podría ser útil para implantar un backdoor en el dispositivo. Por lo tanto, hay numerosas posibilidades que se pueden desbloquear con el volcado de firmware.
+Además, durante red teaming y al obtener acceso físico a dispositivos, dumpear el firmware puede ayudar a modificar los archivos o inyectar archivos maliciosos y después reflashearlos en la memoria, lo que podría ser útil para implantar un backdoor en el dispositivo. Por tanto, el firmware dumping permite desbloquear numerosas posibilidades.
 
-### Programador y Lector de EEPROM CH341A
+### CH341A EEPROM Programmer and Reader
 
-Este dispositivo es una herramienta económica para volcar firmwares desde EEPROMs y también volver a flashearlos con archivos de firmware. Ha sido una opción popular para trabajar con chips BIOS de computadoras (que son solo EEPROMs). Este dispositivo se conecta a través de USB y necesita herramientas mínimas para comenzar. Además, generalmente realiza la tarea rápidamente, por lo que también puede ser útil en el acceso físico a dispositivos.
+Este dispositivo es una herramienta económica para dumpear firmwares desde EEPROMs y también reflashearlas con archivos de firmware. Ha sido una opción popular para trabajar con chips BIOS de computadoras (que no son más que EEPROMs). Este dispositivo se conecta mediante USB y necesita muy pocas herramientas para comenzar. Además, normalmente realiza la tarea rápidamente, por lo que también puede ser útil durante el acceso físico a dispositivos.
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-Conecte la memoria EEPROM con el Programador CH341a y enchufe el dispositivo en la computadora. En caso de que el dispositivo no sea detectado, intente instalar controladores en la computadora. Además, asegúrese de que la EEPROM esté conectada en la orientación correcta (generalmente, coloque el pin VCC en orientación inversa al conector USB) o de lo contrario, el software no podrá detectar el chip. Consulte el diagrama si es necesario:
+Conecta la memoria EEPROM al CH341a Programmer y conecta el dispositivo a la computadora. En caso de que el dispositivo no sea detectado, intenta instalar los drivers en la computadora. Además, asegúrate de que la EEPROM esté conectada en la orientación correcta (normalmente, coloca el pin VCC en orientación inversa respecto al conector USB); de lo contrario, el software no podrá detectar el chip. Consulta el diagrama si es necesario:
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-Finalmente, use software como flashrom, G-Flash (GUI), etc. para volcar el firmware. G-Flash es una herramienta GUI mínima que es rápida y detecta la EEPROM automáticamente. Esto puede ser útil si el firmware necesita ser extraído rápidamente, sin mucho ajuste con la documentación.
+Finalmente, utiliza softwares como flashrom, G-Flash (GUI), etc. para dumpear el firmware. G-Flash es una herramienta GUI minimalista y rápida que detecta automáticamente la EEPROM. Esto puede ser útil cuando el firmware debe extraerse rápidamente, sin tener que revisar demasiado la documentación.
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
-Después de volcar el firmware, se puede realizar el análisis en los archivos binarios. Herramientas como strings, hexdump, xxd, binwalk, etc. pueden ser utilizadas para extraer mucha información sobre el firmware así como sobre todo el sistema de archivos también.
+Después de dumpear el firmware, el análisis puede realizarse sobre los archivos binarios. Se pueden utilizar herramientas como strings, hexdump, xxd, binwalk, etc. para extraer mucha información sobre el firmware y también sobre todo el sistema de archivos.
 
-Para extraer los contenidos del firmware, se puede usar binwalk. Binwalk analiza las firmas hexadecimales e identifica los archivos en el archivo binario y es capaz de extraerlos.
+Para extraer el contenido del firmware, se puede utilizar binwalk. Binwalk analiza las firmas hexadecimales, identifica los archivos dentro del archivo binario y es capaz de extraerlos.
 ```
 binwalk -e <filename>
 ```
-El firmware puede ser .bin o .rom según las herramientas y configuraciones utilizadas.
+Puede ser `.bin` o `.rom`, según las herramientas y configuraciones utilizadas.
 
 > [!CAUTION]
-> Tenga en cuenta que la extracción de firmware es un proceso delicado y requiere mucha paciencia. Cualquier manejo inadecuado puede potencialmente corromper el firmware o incluso borrarlo por completo, haciendo que el dispositivo sea inutilizable. Se recomienda estudiar el dispositivo específico antes de intentar extraer el firmware.
+> Ten en cuenta que la extracción del firmware es un proceso delicado y requiere mucha paciencia. Cualquier manipulación incorrecta puede corromper potencialmente el firmware o incluso borrarlo por completo, dejando el dispositivo inutilizable. Se recomienda estudiar el dispositivo específico antes de intentar extraer el firmware.
 
 ### Bus Pirate + flashrom
 
-![](<../../images/image (910).png>)
+![Programador y lector de EEPROM CH341A - Bus Pirate + flashrom: Bus Pirate + flashrom](<../../images/image (910).png>)
 
-Tenga en cuenta que, incluso si el PINOUT del Pirate Bus indica pines para **MOSI** y **MISO** para conectarse a SPI, algunos SPIs pueden indicar pines como DI y DO. **MOSI -> DI, MISO -> DO**
+Ten en cuenta que, aunque el PINOUT del Bus Pirate indique pines **MOSI** y **MISO** para conectarse a SPI, algunos SPIs pueden indicar los pines como DI y DO. **MOSI -> DI, MISO -> DO**
 
-![](<../../images/image (360).png>)
+![Programador y lector de EEPROM CH341A - Bus Pirate + flashrom: Ten en cuenta que, aunque el PINOUT del Bus Pirate indique pines MOSI y MISO para conectarse a SPI, algunos SPIs pueden...](<../../images/image (360).png>)
 
-En Windows o Linux, puede usar el programa [**`flashrom`**](https://www.flashrom.org/Flashrom) para volcar el contenido de la memoria flash ejecutando algo como:
+En Windows o Linux puedes utilizar el programa [**`flashrom`**](https://www.flashrom.org/Flashrom) para volcar el contenido de la memoria flash ejecutando algo como:
 ```bash
 # In this command we are indicating:
 # -VV Verbose

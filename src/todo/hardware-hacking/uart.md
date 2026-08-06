@@ -2,51 +2,51 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Información Básica
+## Información básica
 
-UART es un protocolo serial, lo que significa que transfiere datos entre componentes un bit a la vez. En contraste, los protocolos de comunicación paralela transmiten datos simultáneamente a través de múltiples canales. Los protocolos seriales comunes incluyen RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express y USB.
+UART es un protocolo serial, lo que significa que transfiere datos entre componentes un bit a la vez. En contraste, los protocolos de comunicación paralela transmiten datos simultáneamente a través de múltiples canales. Entre los protocolos seriales comunes se incluyen RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express y USB.
 
-Generalmente, la línea se mantiene alta (en un valor lógico de 1) mientras UART está en estado de inactividad. Luego, para señalar el inicio de una transferencia de datos, el transmisor envía un bit de inicio al receptor, durante el cual la señal se mantiene baja (en un valor lógico de 0). A continuación, el transmisor envía de cinco a ocho bits de datos que contienen el mensaje real, seguidos de un bit de paridad opcional y uno o dos bits de parada (con un valor lógico de 1), dependiendo de la configuración. El bit de paridad, utilizado para la verificación de errores, rara vez se ve en la práctica. El bit (o bits) de parada indican el final de la transmisión.
+Generalmente, la línea se mantiene alta (con un valor lógico de 1) mientras UART está en estado inactivo. Luego, para señalar el inicio de una transferencia de datos, el transmisor envía un bit de inicio al receptor, durante el cual la señal se mantiene baja (con un valor lógico de 0). A continuación, el transmisor envía entre cinco y ocho bits de datos que contienen el mensaje real, seguidos de un bit de paridad opcional y uno o dos bits de parada (con un valor lógico de 1), dependiendo de la configuración. El bit de paridad, utilizado para la comprobación de errores, rara vez se observa en la práctica. El bit o los bits de parada indican el final de la transmisión.
 
-Llamamos a la configuración más común 8N1: ocho bits de datos, sin paridad y un bit de parada. Por ejemplo, si quisiéramos enviar el carácter C, o 0x43 en ASCII, en una configuración UART 8N1, enviaríamos los siguientes bits: 0 (el bit de inicio); 0, 1, 0, 0, 0, 0, 1, 1 (el valor de 0x43 en binario), y 0 (el bit de parada).
+La configuración más común se denomina 8N1: ocho bits de datos, sin paridad y un bit de parada. Por ejemplo, si quisiéramos enviar el carácter C, o 0x43 en ASCII, en una configuración UART 8N1, enviaríamos los siguientes bits: 0 (el bit de inicio); 0, 1, 0, 0, 0, 0, 1, 1 (el valor de 0x43 en binario); y 0 (el bit de parada).
 
-![](<../../images/image (764).png>)
+![UART: La configuración más común se denomina 8N1: ocho bits de datos, sin paridad y un bit de parada. Por ejemplo, si quisiéramos enviar el carácter C, o 0x43 en ASCII, en una configuración UART 8N1](<../../images/image (764).png>)
 
 Herramientas de hardware para comunicarse con UART:
 
-- Adaptador USB a serie
+- Adaptador USB a serial
 - Adaptadores con los chips CP2102 o PL2303
-- Herramienta multipropósito como: Bus Pirate, el Adafruit FT232H, el Shikra o el Attify Badge
+- Herramienta multipropósito como: Bus Pirate, Adafruit FT232H, Shikra o Attify Badge
 
-### Identificación de Puertos UART
+### Identificación de los puertos UART
 
-UART tiene 4 puertos: **TX**(Transmitir), **RX**(Recibir), **Vcc**(Voltaje) y **GND**(Tierra). Podrías encontrar 4 puertos con las letras **`TX`** y **`RX`** **escritas** en el PCB. Pero si no hay indicación, es posible que necesites intentar encontrarlos tú mismo usando un **multímetro** o un **analizador lógico**.
+UART tiene 4 puertos: **TX** (Transmit), **RX** (Receive), **Vcc** (Voltage) y **GND** (Ground). Es posible que encuentres 4 puertos con las letras **`TX`** y **`RX`** **escritas** en la PCB. Pero si no hay ninguna indicación, quizá tengas que localizarlos por tu cuenta utilizando un **multímetro** o un **analizador lógico**.
 
 Con un **multímetro** y el dispositivo apagado:
 
-- Para identificar el pin **GND**, usa el modo de **Prueba de Continuidad**, coloca el cable negro en tierra y prueba con el rojo hasta que escuches un sonido del multímetro. Se pueden encontrar varios pines GND en el PCB, por lo que podrías haber encontrado o no el que pertenece a UART.
-- Para identificar el **puerto VCC**, configura el **modo de voltaje DC** y ajústalo a 20 V de voltaje. Probeta negra en tierra y probeta roja en el pin. Enciende el dispositivo. Si el multímetro mide un voltaje constante de 3.3 V o 5 V, has encontrado el pin Vcc. Si obtienes otros voltajes, vuelve a intentarlo con otros puertos.
-- Para identificar el **puerto TX**, configura el **modo de voltaje DC** hasta 20 V de voltaje, probeta negra en tierra y probeta roja en el pin, y enciende el dispositivo. Si encuentras que el voltaje fluctúa durante unos segundos y luego se estabiliza en el valor de Vcc, es muy probable que hayas encontrado el puerto TX. Esto se debe a que al encender, envía algunos datos de depuración.
-- El puerto **RX** sería el más cercano a los otros 3, tiene la fluctuación de voltaje más baja y el valor general más bajo de todos los pines UART.
+- Para identificar el pin **GND**, utiliza el modo **Continuity Test**, coloca la sonda negra en tierra y prueba con la roja hasta que escuches un sonido del multímetro. Se pueden encontrar varios pines GND en la PCB, por lo que es posible que hayas encontrado o no el correspondiente a UART.
+- Para identificar el **puerto VCC**, selecciona el modo de voltaje **DC** y configúralo a 20 V. Coloca la sonda negra en tierra y la roja en el pin. Enciende el dispositivo. Si el multímetro mide un voltaje constante de 3.3 V o 5 V, has encontrado el pin Vcc. Si obtienes otros voltajes, vuelve a intentarlo con otros puertos.
+- Para identificar el **puerto TX**, selecciona el modo de voltaje **DC** hasta 20 V, coloca la sonda negra en tierra y la roja en el pin, y enciende el dispositivo. Si observas que el voltaje fluctúa durante unos segundos y después se estabiliza en el valor de Vcc, probablemente hayas encontrado el puerto TX. Esto ocurre porque, al encenderse, envía algunos datos de depuración.
+- El **puerto RX** sería el más cercano a los otros 3; presenta la menor fluctuación de voltaje y el valor general más bajo de todos los pines UART.
 
-Puedes confundir los puertos TX y RX y no pasará nada, pero si confundes el puerto GND y el VCC podrías dañar el circuito.
+Puedes confundir los puertos TX y RX y no ocurrirá nada, pero si confundes GND y VCC podrías quemar el circuito.
 
-En algunos dispositivos objetivo, el puerto UART está deshabilitado por el fabricante al deshabilitar RX o TX o incluso ambos. En ese caso, puede ser útil rastrear las conexiones en la placa de circuito y encontrar algún punto de salida. Una fuerte pista sobre la confirmación de la no detección de UART y la ruptura del circuito es verificar la garantía del dispositivo. Si el dispositivo ha sido enviado con alguna garantía, el fabricante deja algunas interfaces de depuración (en este caso, UART) y, por lo tanto, debe haber desconectado el UART y lo volvería a conectar durante la depuración. Estos pines de salida pueden conectarse soldando o con cables de puente.
+En algunos dispositivos objetivo, el fabricante deshabilita el puerto UART desactivando RX o TX, o incluso ambos. En ese caso, puede ser útil seguir las conexiones en la placa de circuito y encontrar algún punto de breakout. Una pista importante para confirmar que no se detecta UART y que el circuito está interrumpido es comprobar la garantía del dispositivo. Si el dispositivo se ha enviado con garantía, el fabricante deja algunas interfaces de depuración (en este caso, UART) y, por lo tanto, debe haber desconectado UART y volvería a conectarlo durante la depuración. Estos pines de breakout se pueden conectar mediante soldadura o cables jumper.
 
-### Identificación de la Tasa de Baud de UART
+### Identificación del Baud Rate de UART
 
-La forma más fácil de identificar la tasa de baud correcta es observar la **salida del pin TX y tratar de leer los datos**. Si los datos que recibes no son legibles, cambia a la siguiente tasa de baud posible hasta que los datos se vuelvan legibles. Puedes usar un adaptador USB a serie o un dispositivo multipropósito como Bus Pirate para hacer esto, junto con un script auxiliar, como [baudrate.py](https://github.com/devttys0/baudrate/). Las tasas de baud más comunes son 9600, 38400, 19200, 57600 y 115200.
+La forma más sencilla de identificar el baud rate correcto es observar la salida del **pin TX e intentar leer los datos**. Si los datos que recibes no son legibles, cambia al siguiente baud rate posible hasta que los datos sean legibles. Puedes utilizar un adaptador USB a serial o un dispositivo multipropósito como Bus Pirate para hacerlo, junto con un script auxiliar, como [baudrate.py](https://github.com/devttys0/baudrate/). Los baud rates más comunes son 9600, 38400, 19200, 57600 y 115200.
 
 > [!CAUTION]
-> ¡Es importante tener en cuenta que en este protocolo necesitas conectar el TX de un dispositivo al RX del otro!
+> Es importante tener en cuenta que en este protocolo debes conectar el TX de un dispositivo al RX del otro.
 
 ## Adaptador CP210X UART a TTY
 
-El chip CP210X se utiliza en muchas placas de prototipado como NodeMCU (con esp8266) para comunicación serial. Estos adaptadores son relativamente económicos y se pueden usar para conectarse a la interfaz UART del objetivo. El dispositivo tiene 5 pines: 5V, GND, RXD, TXD, 3.3V. Asegúrate de conectar el voltaje según lo soportado por el objetivo para evitar daños. Finalmente, conecta el pin RXD del adaptador al TXD del objetivo y el pin TXD del adaptador al RXD del objetivo.
+El chip CP210X se utiliza en muchas placas de prototipado, como NodeMCU (con esp8266), para la comunicación serial. Estos adaptadores son relativamente económicos y se pueden utilizar para conectarse a la interfaz UART del objetivo. El dispositivo tiene 5 pines: 5V, GND, RXD, TXD y 3.3V. Asegúrate de conectar el voltaje compatible con el objetivo para evitar daños. Finalmente, conecta el pin RXD del adaptador al TXD del objetivo y el pin TXD del adaptador al RXD del objetivo.
 
-En caso de que el adaptador no sea detectado, asegúrate de que los controladores CP210X estén instalados en el sistema host. Una vez que el adaptador sea detectado y conectado, se pueden usar herramientas como picocom, minicom o screen.
+Si el adaptador no se detecta, asegúrate de que los drivers de CP210X estén instalados en el sistema host. Una vez detectado y conectado el adaptador, se pueden utilizar herramientas como picocom, minicom o screen.
 
-Para listar los dispositivos conectados a sistemas Linux/MacOS:
+Para enumerar los dispositivos conectados a sistemas Linux/MacOS:
 ```
 ls /dev/
 ```
@@ -58,21 +58,21 @@ Para minicom, usa el siguiente comando para configurarlo:
 ```
 minicom -s
 ```
-Configura los ajustes como la velocidad en baudios y el nombre del dispositivo en la opción `Serial port setup`.
+Configura los ajustes, como el baudrate y el nombre del dispositivo, en la opción `Serial port setup`.
 
-Después de la configuración, usa el comando `minicom` para iniciar la Consola UART.
+Después de la configuración, usa el comando `minicom` para iniciar la UART Console.
 
-## UART a través de Arduino UNO R3 (Placas de chip Atmel 328p removibles)
+## UART mediante Arduino UNO R3 (placas con chip Atmel 328p extraíble)
 
-En caso de que no estén disponibles adaptadores de UART Serial a USB, se puede usar Arduino UNO R3 con un hack rápido. Dado que Arduino UNO R3 suele estar disponible en cualquier lugar, esto puede ahorrar mucho tiempo.
+En caso de que no haya adaptadores UART Serial to USB disponibles, se puede usar Arduino UNO R3 con un quick hack. Como Arduino UNO R3 suele estar disponible en cualquier lugar, esto puede ahorrar mucho tiempo.
 
-Arduino UNO R3 tiene un adaptador USB a Serial integrado en la placa. Para obtener la conexión UART, simplemente desconecta el chip microcontrolador Atmel 328p de la placa. Este hack funciona en variantes de Arduino UNO R3 que tienen el Atmel 328p no soldado en la placa (se utiliza la versión SMD). Conecta el pin RX de Arduino (Pin Digital 0) al pin TX de la interfaz UART y el pin TX de Arduino (Pin Digital 1) al pin RX de la interfaz UART.
+Arduino UNO R3 tiene un adaptador USB to Serial integrado en la propia placa. Para obtener una conexión UART, simplemente extrae el chip microcontrolador Atmel 328p de la placa. Este hack funciona en las variantes de Arduino UNO R3 que tienen el Atmel 328p sin soldar en la placa (en ellas se utiliza la versión SMD). Conecta el pin RX de Arduino (Digital Pin 0) al pin TX de la UART Interface y el pin TX de Arduino (Digital Pin 1) al pin RX de la UART interface.
 
-Finalmente, se recomienda usar Arduino IDE para obtener la Consola Serial. En la sección `tools` del menú, selecciona la opción `Serial Console` y establece la velocidad en baudios según la interfaz UART.
+Finalmente, se recomienda usar Arduino IDE para obtener la Serial Console. En la sección `tools` del menú, selecciona la opción `Serial Console` y establece el baud rate según la UART interface.
 
 ## Bus Pirate
 
-En este escenario vamos a espiar la comunicación UART del Arduino que está enviando todas las impresiones del programa al Monitor Serial.
+En este escenario vamos a sniffear la comunicación UART del Arduino, que está enviando todos los prints del programa al Serial Monitor.
 ```bash
 # Check the modes
 UART>m
@@ -144,30 +144,30 @@ Escritura inicial completada:
 AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
-## Volcado de Firmware con Consola UART
+## Volcado de Firmware con UART Console
 
-La Consola UART proporciona una excelente manera de trabajar con el firmware subyacente en un entorno de ejecución. Pero cuando el acceso a la Consola UART es de solo lectura, puede introducir muchas limitaciones. En muchos dispositivos embebidos, el firmware se almacena en EEPROMs y se ejecuta en procesadores que tienen memoria volátil. Por lo tanto, el firmware se mantiene en solo lectura ya que el firmware original durante la fabricación está dentro de la EEPROM misma y cualquier archivo nuevo se perdería debido a la memoria volátil. Por lo tanto, volcar firmware es un esfuerzo valioso al trabajar con firmwares embebidos.
+UART Console proporciona una excelente forma de trabajar con el firmware subyacente en el entorno de ejecución. Sin embargo, cuando el acceso a UART Console es de solo lectura, puede introducir muchas limitaciones. En muchos dispositivos embebidos, el firmware se almacena en EEPROMs y se ejecuta en procesadores que tienen memoria volátil. Por ello, el firmware se mantiene como solo lectura, ya que el firmware original durante la fabricación se encuentra dentro de la propia EEPROM y cualquier archivo nuevo se perdería debido a la memoria volátil. Por tanto, volcar el firmware es una tarea valiosa al trabajar con firmwares embebidos.
 
-Hay muchas maneras de hacer esto y la sección de SPI cubre métodos para extraer firmware directamente de la EEPROM con varios dispositivos. Sin embargo, se recomienda primero intentar volcar el firmware con UART, ya que volcar firmware con dispositivos físicos e interacciones externas puede ser arriesgado.
+Hay muchas formas de hacerlo, y la sección SPI cubre métodos para extraer el firmware directamente de la EEPROM con diversos dispositivos. Aunque se recomienda intentar primero volcar el firmware con UART, ya que hacerlo con dispositivos físicos e interacciones externas puede ser arriesgado.
 
-Volcar firmware desde la Consola UART requiere primero obtener acceso a los bootloaders. Muchos proveedores populares utilizan uboot (Universal Bootloader) como su bootloader para cargar Linux. Por lo tanto, obtener acceso a uboot es necesario.
+Volcar el firmware desde UART Console requiere obtener primero acceso a los bootloaders. Muchos proveedores populares utilizan uboot (Universal Bootloader) como bootloader para cargar Linux. Por tanto, es necesario obtener acceso a uboot.
 
-Para obtener acceso al bootloader, conecta el puerto UART a la computadora y utiliza cualquiera de las herramientas de Consola Serial y mantén desconectada la fuente de alimentación del dispositivo. Una vez que la configuración esté lista, presiona la tecla Enter y mantenla presionada. Finalmente, conecta la fuente de alimentación al dispositivo y déjalo arrancar.
+Para obtener acceso al bootloader, conecta el puerto UART al ordenador utilizando cualquiera de las herramientas de Serial Console y mantén desconectada la fuente de alimentación del dispositivo. Cuando la configuración esté lista, pulsa la tecla Enter y mantenla presionada. Finalmente, conecta la fuente de alimentación al dispositivo y deja que arranque.
 
-Hacer esto interrumpirá la carga de uboot y proporcionará un menú. Se recomienda entender los comandos de uboot y usar el menú de ayuda para listarlos. Este podría ser el comando `help`. Dado que diferentes proveedores utilizan diferentes configuraciones, es necesario entender cada una de ellas por separado.
+Esto interrumpirá la carga de uboot y mostrará un menú. Se recomienda comprender los comandos de uboot y utilizar el menú de ayuda para listarlos. Este podría ser el comando `help`. Dado que los distintos proveedores utilizan configuraciones diferentes, es necesario comprender cada una de ellas por separado.
 
-Por lo general, el comando para volcar el firmware es:
+Normalmente, el comando para volcar el firmware es:
 ```
 md
 ```
-que significa "volcado de memoria". Esto volcará la memoria (contenido de EEPROM) en la pantalla. Se recomienda registrar la salida de la consola serie antes de comenzar el procedimiento para capturar el volcado de memoria.
+que significa "volcado de memoria". Esto volcará la memoria (contenido de la EEPROM) en la pantalla. Se recomienda registrar la salida de la Consola serie antes de iniciar el procedimiento para capturar el volcado de memoria.
 
-Finalmente, simplemente elimina todos los datos innecesarios del archivo de registro y guarda el archivo como `filename.rom` y usa binwalk para extraer los contenidos:
+Por último, simplemente elimina todos los datos innecesarios del archivo de registro, guarda el archivo como `filename.rom` y utiliza binwalk para extraer el contenido:
 ```
 binwalk -e <filename.rom>
 ```
-Esto enumerará los posibles contenidos de la EEPROM según las firmas encontradas en el archivo hex.
+Esto mostrará los posibles contenidos de la EEPROM según las firmas encontradas en el archivo hex.
 
-Sin embargo, es necesario señalar que no siempre es el caso que el uboot esté desbloqueado, incluso si se está utilizando. Si la tecla Enter no hace nada, verifica diferentes teclas como la tecla Espacio, etc. Si el bootloader está bloqueado y no se interrumpe, este método no funcionará. Para verificar si uboot es el bootloader del dispositivo, revisa la salida en la Consola UART mientras se inicia el dispositivo. Puede mencionar uboot durante el arranque.
+Sin embargo, es necesario tener en cuenta que no siempre significa que uboot esté desbloqueado, aunque se esté utilizando. Si la tecla Enter no hace nada, comprueba otras teclas, como la tecla Espacio, etc. Si el bootloader está bloqueado y no se puede interrumpir, este método no funcionará. Para comprobar si uboot es el bootloader del dispositivo, revisa la salida en la consola UART mientras el dispositivo arranca. Es posible que mencione uboot durante el arranque.
 
 {{#include ../../banners/hacktricks-training.md}}
