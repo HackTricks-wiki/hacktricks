@@ -2,15 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-本页介绍 **manual token-theft** 变体：一个已经拥有 **`SeDebugPrivilege`** 和 **`SeImpersonatePrivilege`** 的 **High Integrity** 上下文，打开一个合适的 **SYSTEM** 进程，**duplicate its token**，并使用该 token **spawn a new process**。
+本页面介绍 **manual token-theft** 变体：具有 **High Integrity** 的上下文已经拥有 **`SeDebugPrivilege`** 和 **`SeImpersonatePrivilege`**，打开一个合适的 **SYSTEM** 进程，**复制其 token**，并使用该 token **生成新进程**。
 
-如果你只需要从一个有特权的 admin 进程快速拿到 `SYSTEM` shell，也可以查看：
+如果你只需要从特权 admin 进程快速获取一个 `SYSTEM` shell，也可以查看：
 
 {{#ref}}
 seimpersonate-from-high-to-system.md
 {{#endref}}
 
-如果你**没有** process-handle 路径，但你有 **`SeImpersonatePrivilege`**，那么 **named-pipe / Potato** 路线通常更容易：
+如果你没有 process-handle path，但拥有 **`SeImpersonatePrivilege`**，通常使用 **named-pipe / Potato** 路径会更简单：
 
 {{#ref}}
 named-pipe-client-impersonation.md
@@ -20,39 +20,39 @@ named-pipe-client-impersonation.md
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-## Quick triage
+## 快速检查
 
-在尝试 token-copy 路径之前，先确认当前进程是否已经处于一个有用的上下文：
+在尝试 token-copy path 之前，确认当前进程已经处于有用的上下文中：
 ```cmd
 whoami /groups | findstr /i "high mandatory"
 whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege"
 ```
-Notes:
+注意：
 
-- **`SeDebugPrivilege`** 是让你即使在目标进程的 DACL 通常会阻止你的情况下，仍然可以打开许多 **non-protected** 的 SYSTEM 进程。
-- **`SeImpersonatePrivilege`** 是让后续使用 **`CreateProcessWithTokenW`** 变得可行的关键。
-- 如果 token-copy 路径只给你一个较弱或被过滤的 SYSTEM token，就从 **另一个 SYSTEM process** 里偷取。
+- **`SeDebugPrivilege`** 允许你打开许多**非受保护**的 SYSTEM 进程，即使它们的 DACL 通常会阻止你。
+- **`SeImpersonatePrivilege`** 使之后使用 **`CreateProcessWithTokenW`** 变得可行。
+- 如果 token-copy 路径只能提供一个权限较弱或经过过滤的 SYSTEM token，只需从**另一个 SYSTEM 进程**窃取 token。
 
-## Pick the target process carefully
+## 仔细选择目标进程
 
-这个 technique 通常以 **`lsass.exe`** 为例，但在现代 Windows 上，这往往是 **错误的目标**：
+该技术通常以 **`lsass.exe`** 为目标进行演示，但在现代 Windows 上，这通常是**错误的目标**：
 
-- 如果启用了 **LSA Protection / RunAsPPL**，**`lsass.exe`** 会受到保护，即使普通管理员进程有 `SeDebugPrivilege`，也仍然无法打开它。
-- 优先选择 **non-PPL SYSTEM processes**，例如 **`winlogon.exe`**、**`wininit.exe`**、**`services.exe`**，或者较早启动的 **`svchost.exe`** 实例。
-- **Protected processes** 和一些特殊进程，例如 **`System`** 或 **`csrss.exe`**，并不是这个 technique 在用户态下现实可行的目标。
-- 使用提升权限运行的 **Process Hacker / Process Explorer** 来确认目标 token 在复制之前是否真的具有你想要的 privileges。
+- 如果启用了 **LSA Protection / RunAsPPL**，**`lsass.exe`** 会受到保护，即使普通管理员进程拥有 `SeDebugPrivilege`，也无法打开它。<sup>[[2]](#references)</sup>
+- 优先选择**非 PPL 的 SYSTEM 进程**，例如 **`winlogon.exe`**、**`wininit.exe`**、**`services.exe`**，或较早启动的 **`svchost.exe`** 实例。
+- **受保护进程**以及 **`System`** 或 **`csrss.exe`** 等特殊进程，并不是此技术中现实可行的 user-mode 目标。
+- 使用以 elevated 权限运行的 **Process Hacker / Process Explorer**，在复制 token 前确认目标 token 实际拥有你需要的权限。
 
-## API details that matter in practice
+## 实际操作中重要的 API 细节
 
-很多公开的 PoC 会请求 **`PROCESS_ALL_ACCESS`** 和 **`TOKEN_ALL_ACCESS`**，但这比必要的权限更吵。实际上：
+许多公开 PoC 会请求 **`PROCESS_ALL_ACCESS`** 和 **`TOKEN_ALL_ACCESS`**，但这会产生不必要的噪声。实际操作中：
 
-- 打开目标进程时只使用你需要的权限（通常是 **`PROCESS_QUERY_INFORMATION`** 或 **`PROCESS_QUERY_LIMITED_INFORMATION`**）。
-- 打开 token 时使用进程创建所需的权限：**`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**。
-- 使用 **`DuplicateTokenEx(..., TokenPrimary, ...)`** 创建一个 **primary token**；单独的 impersonation token 不足以创建新进程。
-- 如果 **`CreateProcessWithTokenW`** 失败并返回 **`1314`**，改用 **`CreateProcessAsUserW`**。
-- 如果你从 **service / Session 0** 启动，记住 **`CreateProcessWithTokenW`** 会让子进程保持在 **调用者的 session** 中。若你需要一个可见的 desktop shell，请使用 **`CreateProcessAsUserW`** 并把 token 移动到目标 session。
+- 仅使用所需权限打开目标进程（通常为 **`PROCESS_QUERY_INFORMATION`** 或 **`PROCESS_QUERY_LIMITED_INFORMATION`**）。
+- 使用创建进程所需的权限打开 token：**`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**。
+- 使用 **`DuplicateTokenEx(..., TokenPrimary, ...)`** 创建**主 token**；仅有 impersonation token 不足以创建新进程。
+- 如果 **`CreateProcessWithTokenW`** 失败并返回 **`1314`**，请改用 **`CreateProcessAsUserW`**。
+- 如果从 **service / Session 0** 启动，请记住 **`CreateProcessWithTokenW`** 会让子进程保留在**调用方的 session** 中。如果需要可见的 desktop shell，请使用 **`CreateProcessAsUserW`**，并将 token 移动到目标 session。<sup>[[1]](#references)</sup>
 
-一个最小的现代流程如下：
+一个最小化的现代流程如下：
 ```c
 HANDLE hp = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
 HANDLE hTok = NULL, hDup = NULL;
@@ -65,13 +65,13 @@ NULL, 0, NULL, NULL, &si, &pi);
 ```
 ## Full service PoC
 
-以下代码 **利用 `SeDebugPrivilege` 和 `SeImpersonatePrivilege` 权限**，从一个 **以 SYSTEM 身份运行的进程** 复制 token，并获取其 **所有 token privileges**。在这种情况下，代码可以被编译并作为 **Windows service binary** 使用，以验证该 primitive 是否生效。
+以下代码**利用 `SeDebugPrivilege` 和 `SeImpersonatePrivilege` 权限**，从一个以 **SYSTEM** 身份运行且具有**所有 token 权限**的**进程**中复制 token。在此情况下，可以将代码编译并作为 **Windows service binary** 使用，以验证该 primitive 是否有效。<sup>[[3]](#references)</sup>
 
-**提权发生的主要代码部分** 在 **`Exploit`** 函数中。你可以在该函数里看到，程序会搜索 **`lsass.exe`**，复制其 **token**，然后使用该 token 启动一个新的 **`cmd.exe`**，并继承被复制 token 的全部权限。
+**发生提权的代码部分**位于 **`Exploit`** 函数中。在该函数中可以看到，代码会搜索 **`lsass.exe`**，复制其 **token**，最后使用该 token 启动一个拥有所复制 token 全部权限的新 **`cmd.exe`**。
 
-在现代主机上，你通常会想把 **`lsass.exe`** 替换为其他 **non-PPL SYSTEM process**，例如 **`winlogon.exe`**、**`wininit.exe`** 或 **`services.exe`**。
+在现代主机上，通常需要将 **`lsass.exe`** 替换为其他**非 PPL 的 SYSTEM 进程**，例如 **`winlogon.exe`**、**`wininit.exe`** 或 **`services.exe`**。
 
-其他以 SYSTEM 身份运行并拥有全部或大部分 token privileges 的进程包括：**`services.exe`**、**`svchost.exe`**（前面的某些实例）、**`wininit.exe`**、**`csrss.exe`**……记住，通常 **你不能从受保护进程复制 token**。
+其他以 SYSTEM 身份运行且具有全部或大部分 token 权限的进程包括：**`services.exe`**、**`svchost.exe`**（其中一些最先启动的进程）、**`wininit.exe`**、**`csrss.exe`**……请记住，你通常**无法从受保护进程复制 token**。
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>
@@ -276,8 +276,10 @@ StartServiceCtrlDispatcher( serviceTable );
 return 0;
 }
 ```
-## References
+## 参考资料
 
-- [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
-- [Configure added LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
+- [1] [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [2] [配置额外的 LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
+- [3] [将我的程序作为 service 运行 (cboard.cprogramming.com) – PoC 使用的 Windows service skeleton](https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html)
+
 {{#include ../../banners/hacktricks-training.md}}

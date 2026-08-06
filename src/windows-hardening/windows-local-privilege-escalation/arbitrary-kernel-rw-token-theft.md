@@ -1,38 +1,38 @@
-# Windows kernel EoP: Token stealing with arbitrary kernel R/W
+# Windows kernel EoP：使用 arbitrary kernel R/W 窃取 Token
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## 概述
 
-如果一个有漏洞的驱动暴露了一个 IOCTL，使攻击者可以获得任意内核读写原语，那么通过窃取 SYSTEM 访问 token 往往可以提升为 NT AUTHORITY\SYSTEM。该技术将 SYSTEM 进程的 EPROCESS 中的 Token 指针复制到当前进程的 EPROCESS 中。
+如果存在漏洞的驱动程序暴露了可为攻击者提供任意 kernel read 和/或 write 原语的 IOCTL，通常可以通过窃取 SYSTEM access token 来提升至 NT AUTHORITY\SYSTEM。该技术会将 SYSTEM 进程的 EPROCESS 中的 Token 指针复制到当前进程的 EPROCESS 中。<sup>[[2]](#references)</sup>
 
-为什么可行：
-- 每个进程都有一个 EPROCESS 结构，包含（除其他字段外）一个 Token（实际上是指向 token 对象的 EX_FAST_REF）。
-- SYSTEM 进程（PID 4）持有一个启用所有权限的 token。
-- 将当前进程的 EPROCESS.Token 替换为 SYSTEM 的 token 指针会立即使当前进程以 SYSTEM 身份运行。
+其原理如下：
+- 每个进程都有一个 EPROCESS 结构，其中包含（以及其他字段）一个 Token（实际上是指向 token object 的 EX_FAST_REF）。
+- SYSTEM 进程（PID 4）持有一个启用了所有 privileges 的 token。
+- 将当前进程 EPROCESS.Token 替换为 SYSTEM token 指针后，当前进程会立即以 SYSTEM 身份运行。<sup>[[1]](#references)</sup>
 
-> EPROCESS 中的偏移因 Windows 版本而异。请动态确定（symbols）或使用特定版本的常量。另请记住 EPROCESS.Token 是一个 EX_FAST_REF（低 3 位是引用计数标志）。
+> EPROCESS 中的 offsets 会因 Windows 版本而异。请动态确定它们（使用 symbols），或使用特定版本的 constants。另外请记住，EPROCESS.Token 是一个 EX_FAST_REF（低 3 位是 reference count flags）。
 
 ## 高层步骤
 
-1) 定位 ntoskrnl.exe 基址并解析 PsInitialSystemProcess 的地址。
-- 在用户态，可使用 NtQuerySystemInformation(SystemModuleInformation) 或 EnumDeviceDrivers 来获取已加载驱动的基址。
-- 将 PsInitialSystemProcess 的偏移（来自符号/逆向）加到内核基址以得到其地址。
-2) 读取 PsInitialSystemProcess 处的指针 → 这是指向 SYSTEM 的 EPROCESS 的内核指针。
-3) 从 SYSTEM EPROCESS 读取 UniqueProcessId 和 ActiveProcessLinks 的偏移，通过双向链表遍历 EPROCESS 结构（ActiveProcessLinks.Flink/Blink），直到找到其 UniqueProcessId 等于 GetCurrentProcessId() 的 EPROCESS。保留两者：
-- EPROCESS_SYSTEM（用于 SYSTEM）
-- EPROCESS_SELF（用于当前进程）
-4) 读取 SYSTEM token 值：Token_SYS = *(EPROCESS_SYSTEM + TokenOffset)。
-- 掩码掉低 3 位：Token_SYS_masked = Token_SYS & ~0xF（通常是 ~0xF 或 ~0x7，取决于构建；在 x64 上低 3 位被使用 — 0xFFFFFFFFFFFFFFF8 的掩码）。
-5) 选项 A（常见）：保留你当前 token 的低 3 位，并拼接到 SYSTEM 的指针上以保持嵌入的引用计数一致。
+1) 定位 ntoskrnl.exe base 并解析 PsInitialSystemProcess 的地址。
+- 在 user mode 下，使用 NtQuerySystemInformation(SystemModuleInformation) 或 EnumDeviceDrivers 获取已加载驱动的 bases。
+- 将 PsInitialSystemProcess 的 offset（通过 symbols/reversing 获得）加到 kernel base 上，以获取其地址。
+2) 读取 PsInitialSystemProcess 指向的 pointer → 这是指向 SYSTEM 的 EPROCESS 的 kernel pointer。
+3) 从 SYSTEM EPROCESS 中读取 UniqueProcessId 和 ActiveProcessLinks offsets，通过 EPROCESS 结构的双向链表（ActiveProcessLinks.Flink/Blink）进行遍历，直到找到 UniqueProcessId 等于 GetCurrentProcessId() 的 EPROCESS。保留以下两个值：
+- EPROCESS_SYSTEM（SYSTEM 的 EPROCESS）
+- EPROCESS_SELF（当前进程的 EPROCESS）
+4) 读取 SYSTEM token value：Token_SYS = *(EPROCESS_SYSTEM + TokenOffset)。
+- 清除低 3 位：Token_SYS_masked = Token_SYS & ~0xF（根据 build 的不同，通常为 ~0xF 或 ~0x7；在 x64 上使用低 3 位，即 0xFFFFFFFFFFFFFFF8 mask）。
+5) 选项 A（常见）：保留当前 token 的低 3 位，并将其拼接到 SYSTEM 的 pointer 上，以保持嵌入的 ref count 一致。
 - Token_ME = *(EPROCESS_SELF + TokenOffset)
 - Token_NEW = (Token_SYS_masked | (Token_ME & 0x7))
-6) 使用你的内核写入原语将 Token_NEW 写回 (EPROCESS_SELF + TokenOffset)。
-7) 现在你的当前进程已是 SYSTEM。可选地启动一个新的 cmd.exe 或 powershell.exe 以确认。
+6) 使用 kernel write primitive 将 Token_NEW 写回 (EPROCESS_SELF + TokenOffset)。
+7) 当前进程现在已经是 SYSTEM。可以选择启动新的 cmd.exe 或 powershell.exe 进行确认。<sup>[[1]](#references)</sup>
 
-## 伪代码
+## Pseudocode
 
-下面是一个骨架，只使用来自有漏洞驱动的两个 IOCTL，一个用于 8 字节内核读取，一个用于 8 字节内核写入。请替换为你驱动的接口。
+下面是一个 skeleton，仅使用来自存在漏洞驱动的两个 IOCTL：一个用于 8-byte kernel read，另一个用于 8-byte kernel write。请替换为驱动程序的 interface。<sup>[[1]](#references)</sup>
 ```c
 #include <Windows.h>
 #include <Psapi.h>
@@ -105,18 +105,19 @@ system("cmd.exe");
 return 0;
 }
 ```
-注意：
-- Offsets: Use WinDbg’s `dt nt!_EPROCESS` with the target’s PDBs, or a runtime symbol loader, to get correct offsets. Do not hardcode blindly.
-- Mask: On x64 the token is an EX_FAST_REF; low 3 bits are reference count bits. Keeping the original low bits from your token avoids immediate refcount inconsistencies.
-- Stability: Prefer elevating the current process; if you elevate a short-lived helper you may lose SYSTEM when it exits.
+Notes:
+- Offsets：使用 WinDbg 的 `dt nt!_EPROCESS` 配合目标的 PDB，或使用 runtime symbol loader，以获取正确的 offsets。不要盲目硬编码。
+- Mask：在 x64 上，token 是一个 EX_FAST_REF；低 3 位是 reference count bits。保留 token 原有的低位，可以避免立即出现 refcount 不一致。
+- Stability：优先提升当前进程的权限；如果提升的是短生命周期的 helper，可能会在其退出时失去 SYSTEM。<sup>[[1]](#references)</sup>
 
-## 检测与缓解
-- 加载未签名或不受信任的第三方驱动且这些驱动暴露强大的 IOCTLs 是根本原因。
-- Kernel Driver Blocklist (HVCI/CI)、DeviceGuard 和 Attack Surface Reduction 规则可以阻止易受攻击的驱动加载。
-- EDR 可以监视实现任意读/写 的可疑 IOCTL 序列以及 token 交换行为。
+## Detection & mitigation
+- 加载暴露强大 IOCTL 的 unsigned 或不受信任的 third-party drivers 是根本原因。
+- Kernel Driver Blocklist (HVCI/CI)、DeviceGuard 和 Attack Surface Reduction rules 可以阻止 vulnerable drivers 加载。
+- EDR 可以监控实现 arbitrary read/write 的可疑 IOCTL sequences，以及 token swaps。
 
-## 参考资料
-- [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
-- [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
+## References
+
+- [1] [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
+- [2] [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
 
 {{#include ../../banners/hacktricks-training.md}}

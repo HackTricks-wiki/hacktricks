@@ -1,14 +1,16 @@
+# From High Integrity to SYSTEM with Name Pipes
+
 {{#include ../../banners/hacktricks-training.md}}
 
-**代码流程：**
+**Code flow:**
 
-1. 创建一个新的管道
-2. 创建并启动一个服务，该服务将连接到创建的管道并写入一些内容。服务代码将执行以下编码的 PS 代码：`$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. 服务从客户端接收管道中的数据，调用 ImpersonateNamedPipeClient 并等待服务完成
-4. 最后，使用从服务获得的令牌生成一个新的 _cmd.exe_
+1. 创建一个新的 Pipe
+2. 创建并启动一个 service，该 service 将连接到已创建的 pipe 并写入内容。该 service 的代码将执行以下 encoded PS code：`$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
+3. 该 service 从 pipe 中的 client 接收数据，调用 ImpersonateNamedPipeClient，并等待 service 完成
+4. 最后，使用从 service 获得的 token 生成一个新的 _cmd.exe_
 
 > [!WARNING]
-> 如果您没有足够的权限，漏洞利用可能会卡住并且永远不会返回。
+> 如果没有足够的权限，exploit 可能会卡住且永远不会返回。
 ```c
 #include <windows.h>
 #include <time.h>

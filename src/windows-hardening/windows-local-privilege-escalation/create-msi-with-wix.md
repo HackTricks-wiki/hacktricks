@@ -1,12 +1,12 @@
+# 创建恶意 MSI 并获取 Root 权限
+
 {{#include ../../banners/hacktricks-training.md}}
 
-# 创建恶意 MSI 并获取 Root
+MSI installer 的创建将使用 wixtools，具体来说会使用 [wixtools](http://wixtoolset.org)。值得一提的是，我们也尝试过其他 MSI builder，但在这种特定情况下均未成功。<sup>[[1]](#references)</sup>
 
-MSI 安装程序的创建将使用 wixtools，具体来说，将利用 [wixtools](http://wixtoolset.org)。值得一提的是，尝试了其他 MSI 构建工具，但在这个特定情况下并不成功。
+如需全面了解 wix MSI 的使用示例，建议参考[此页面](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)。其中包含多个演示 wix MSI 用法的示例。<sup>[[2]](#references)</sup>
 
-为了全面了解 wix MSI 的使用示例，建议查阅 [此页面](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)。在这里，您可以找到各种示例，演示 wix MSI 的用法。
-
-目标是生成一个将执行 lnk 文件的 MSI。为了实现这一点，可以使用以下 XML 代码（[xml 来自这里](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)）：
+目标是生成一个能够执行 lnk file 的 MSI。为实现这一目标，可以使用以下 XML code（[xml from here](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)）：<sup>[[1]](#references)</sup>
 ```html
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -38,26 +38,25 @@ fail_here
 </Product>
 </Wix>
 ```
-重要的是要注意，Package 元素包含诸如 InstallerVersion 和 Compressed 的属性，分别指定安装程序的版本并指示包是否被压缩。
+需要注意的是，Package 元素包含 InstallerVersion 和 Compressed 等属性，分别用于指定安装程序的版本以及指示软件包是否经过压缩。
 
-创建过程涉及使用来自 wixtools 的 candle.exe 工具，从 msi.xml 生成 wixobject。应执行以下命令：
+创建过程需要使用 wixtools 中的 candle.exe 工具，根据 msi.xml 生成 wixobject。应执行以下命令：<sup>[[1]](#references)</sup>
 ```
 candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
 ```
-此外，值得一提的是，帖子中提供了一张图片，展示了命令及其输出。您可以参考它以获得视觉指导。
+此外，值得一提的是，帖子中提供了一张展示该命令及其输出结果的图片。你可以参考它以获得直观指导。<sup>[[1]](#references)</sup>
 
-此外，light.exe，wixtools中的另一个工具，将用于从wixobject创建MSI文件。要执行的命令如下：
+此外，还将使用 wixtools 中的另一个工具 light.exe，根据 wixobject 创建 MSI 文件。要执行的命令如下：<sup>[[1]](#references)</sup>
 ```
 light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
 ```
-与之前的命令类似，帖子中包含了一张图像，说明了该命令及其输出。
+与上一条命令类似，文章中包含一张图片，用于展示该命令及其输出。<sup>[[1]](#references)</sup>
 
-请注意，虽然本摘要旨在提供有价值的信息，但建议参考原始帖子以获取更全面的细节和准确的说明。
+请注意，尽管此摘要旨在提供有价值的信息，但建议参考原始文章，以获取更全面的详情和准确的操作说明。<sup>[[1]](#references)</sup>
 
-## 参考
+## 参考资料
 
-- [https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
-- [https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)
-[wixtools](http://wixtoolset.org)
+- [1] [Hack The Box - Ethereal：创建恶意 msi 并获取 root - 0xRick's Blog](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
+- [2] [快速介绍：使用 WiX 创建 MSI 安装程序 - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)（另请参阅 [wixtools](http://wixtoolset.org)）
 
 {{#include ../../banners/hacktricks-training.md}}

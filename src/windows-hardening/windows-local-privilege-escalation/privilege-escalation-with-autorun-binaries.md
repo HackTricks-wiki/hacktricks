@@ -6,14 +6,14 @@
 
 ## WMIC
 
-**Wmic** 可用于在 **startup** 时运行程序。查看哪些 binaries 被编程为在 startup 时运行：
+**Wmic** 可用于在 **startup** 时运行程序。使用以下命令查看哪些 binaries 被设置为在 startup 时运行：
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
 ## 计划任务
 
-**Tasks** 可以被安排以 **certain frequency** 运行。查看哪些 binaries 被安排运行：
+**任务**可以按**特定频率**运行。使用以下命令查看计划运行的二进制文件：
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
@@ -26,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## 文件夹
 
-位于 **Startup folders** 中的所有 binary 都会在 startup 时执行。常见的 startup folders 是下面列出的这些，但 startup folder 是在 registry 中指定的。[Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
+**启动文件夹**中的所有 binary 都会在启动时执行。常见的启动文件夹如下所列，但启动文件夹的位置由 registry 指定。[阅读此处了解其位置。](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -35,7 +35,7 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
-> **FYI**: Archive extraction *path traversal* vulnerabilities (such as the one abused in WinRAR prior to 7.13 – CVE-2025-8088) can be leveraged to **将 payload 直接投放到这些 Startup folders 内，在解压期间完成写入**, resulting in code execution on the next user logon.  For a deep-dive into this technique see:
+> **FYI**：Archive extraction *path traversal* 漏洞（例如 WinRAR 7.13 之前版本中被利用的漏洞 – CVE-2025-8088）可在解压过程中将 **payloads 直接写入这些 Startup 文件夹**，从而在下一次用户登录时实现代码执行。有关此技术的深入介绍，请参阅：
 
 
 {{#ref}}
@@ -47,11 +47,11 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ## Registry
 
 > [!TIP]
-> [Note from here](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): The **Wow6432Node** registry entry indicates that you are running a 64-bit Windows version. The operating system uses this key to display a separate view of HKEY_LOCAL_MACHINE\SOFTWARE for 32-bit applications that run on 64-bit Windows versions.
+> [此处的说明](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f)：**Wow6432Node** registry entry 表示你运行的是 64 位 Windows 版本。操作系统使用此 key 为在 64 位 Windows 版本上运行的 32 位 applications 显示 HKEY_LOCAL_MACHINE\SOFTWARE 的独立视图。
 
 ### Runs
 
-**Commonly known** AutoRun registry:
+**常见的** AutoRun registry：
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -65,9 +65,9 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Registry keys known as **Run** and **RunOnce** are designed to automatically execute programs every time a user logs into the system. The command line assigned as a key's data value is limited to 260 characters or less.
+名为 **Run** 和 **RunOnce** 的 Registry keys 用于在用户每次登录系统时自动执行 programs。作为 key 数据值分配的 command line 长度限制为 260 个字符或更少。<sup>[[2]](#references)</sup>
 
-**Service runs** (can control automatic startup of services during boot):
+**Service runs**（可控制系统启动期间 services 的 automatic startup）：
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -78,20 +78,20 @@ Registry keys known as **Run** and **RunOnce** are designed to automatically exe
 - `HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServices`
 - `HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServices`
 
-**RunOnceEx:**
+**RunOnceEx：**
 
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-On Windows Vista and later versions, the **Run** and **RunOnce** registry keys are not automatically generated. Entries in these keys can either directly start programs or specify them as dependencies. For instance, to load a DLL file at logon, one could use the **RunOnceEx** registry key along with a "Depend" key. This is demonstrated by adding a registry entry to execute "C:\temp\evil.dll" during the system start-up:
+在 Windows Vista 及更高版本中，**Run** 和 **RunOnce** registry keys 不会自动生成。这些 keys 中的 entries 可以直接启动 programs，也可以将其指定为 dependencies。例如，要在登录时加载 DLL file，可以使用 **RunOnceEx** registry key 以及一个 "Depend" key。下面演示了如何添加一个 registry entry，使其在系统启动期间执行 "C:\temp\evil.dll"：<sup>[[2]](#references)</sup>
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!TIP]
-> **Exploit 1**: 如果你可以写入 **HKLM** 中提到的任何 registry，那么当其他用户登录时，你可以提升权限。
+> **Exploit 1**：如果你可以写入 **HKLM** 中提到的任何注册表项，那么当其他用户登录时，你就可以提升权限。
 
 > [!TIP]
-> **Exploit 2**: 如果你可以覆盖 **HKLM** 中任何 registry 指示的任意 binaries，那么你可以在其他用户登录时将该 binary 修改为带有 backdoor 的版本，并提升权限。
+> **Exploit 2**：如果你可以覆盖 **HKLM** 中任何注册表项所指示的二进制文件，那么当其他用户登录时，你就可以用后门修改该二进制文件并提升权限。
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -154,10 +154,10 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-放在 **Startup** 文件夹中的快捷方式会在用户登录或系统重启时自动触发服务或应用程序启动。**Startup** 文件夹的位置在注册表中为 **Local Machine** 和 **Current User** 两个范围定义。这意味着，添加到这些指定 **Startup** 位置中的任何快捷方式，都会确保关联的服务或程序在登录或重启过程后启动，使其成为一种安排程序自动运行的直接方法。
+放置在 **Startup** 文件夹中的快捷方式会在用户 logon 或系统 reboot 期间自动触发 services 或 applications 启动。**Startup** 文件夹的位置会在 registry 中为 **Local Machine** 和 **Current User** 范围分别定义。这意味着，添加到这些指定 **Startup** 位置的任何快捷方式都会确保关联的 service 或 program 在 logon 或 reboot 过程后启动，因此这是一种让 programs 自动运行的简单方法。<sup>[[1]](#references)[[2]](#references)</sup>
 
 > [!TIP]
-> 如果你能覆盖 **HKLM** 下的任何 \[User] Shell Folder，你就可以把它指向一个由你控制的文件夹，并放入一个后门；任何用户登录系统时它都会执行，从而提升权限。
+> 如果你可以覆盖 **HKLM** 下的任何 \[User] Shell Folder，就能够将其指向由你控制的文件夹，并放置一个 backdoor；每当用户登录系统时，该 backdoor 都会被执行，从而提升 privileges。
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -173,10 +173,10 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 - `HKCU\Environment\UserInitMprLogonScript`
 
-这个按用户划分的 registry value 可以指向一个 script 或 command，它会在该用户 logon 时执行。它主要是一个 **persistence** 原语，因为它只在受影响用户的上下文中运行，但在 post-exploitation 和 autoruns reviews 中仍然值得检查。
+此 per-user registry value 可以指向一个 script 或 command，并在该用户登录时执行。它主要是一种 **persistence** primitive，因为它只会在受影响用户的上下文中运行，但在 post-exploitation 和 autoruns review 期间仍然值得检查。<sup>[[3]](#references)[[6]](#references)[[7]](#references)</sup>
 
 > [!TIP]
-> 如果你能为当前用户写入这个 value，你可以在下次交互式 logon 时重新触发执行，而不需要 admin rights。如果你能为另一个用户 hive 写入它，当该用户 logon 时，你可能获得 code execution。
+> 如果你可以为当前用户写入此 value，则无需 admin rights，即可在下一次 interactive logon 时重新触发执行。如果你可以为其他用户的 hive 写入此 value，则可能在该用户登录时获得 code execution。
 ```bash
 reg query "HKCU\Environment" /v "UserInitMprLogonScript"
 reg add "HKCU\Environment" /v "UserInitMprLogonScript" /t REG_SZ /d "C:\Users\Public\logon.bat" /f
@@ -186,17 +186,17 @@ Get-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScrip
 Set-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript" -Value 'C:\Users\Public\logon.bat'
 Remove-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript"
 ```
-Notes:
+注意：
 
-- 优先使用目标用户已可读的 `.bat`、`.cmd`、`.ps1` 或其他 launcher files 的完整路径。
-- 只要该值未被移除，这种方式会在 logoff/reboot 后持续存在。
-- 与 `HKLM\...\Run` 不同，这种方式本身**不会**带来 elevation；它只是 user-scope persistence。
+- 优先使用目标用户已经可以读取的 `.bat`、`.cmd`、`.ps1` 或其他 launcher 文件的完整路径。
+- 在删除该值之前，这种方式会一直持续，即使用户注销或系统重启也不会失效。
+- 与 `HKLM\...\Run` 不同，这种方式本身不会授予提升权限；它属于用户范围的持久化。
 
-### Winlogon Keys
+### Winlogon 键
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-通常，**Userinit** key 设置为 **userinit.exe**。然而，如果该 key 被修改，指定的 executable 也会在用户 logon 时由 **Winlogon** 启动。同样，**Shell** key 预期指向 **explorer.exe**，它是 Windows 的默认 shell。
+通常，**Userinit** 键被设置为 **userinit.exe**。但是，如果修改了此键，指定的可执行文件也会在用户登录时由 **Winlogon** 启动。同样，**Shell** 键应指向 **explorer.exe**，后者是 Windows 的默认 shell。<sup>[[1]](#references)</sup>
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -204,7 +204,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
 > [!TIP]
-> 如果你可以覆盖 registry 值或 binary，你将能够提升 privileges。
+> 如果你可以覆盖 registry value 或 binary，就能够提升权限。
 
 ### Policy Settings
 
@@ -220,51 +220,51 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 ```
 ### AlternateShell
 
-### 更改 Safe Mode Command Prompt
+### 更改安全模式命令提示符
 
-在 Windows Registry 的 `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` 下，有一个默认设置为 `cmd.exe` 的 **`AlternateShell`** 值。这意味着当你在启动时选择“Safe Mode with Command Prompt”（按 F8）时，会使用 `cmd.exe`。但也可以把电脑配置为自动以这种模式启动，而不需要按 F8 手动选择。
+在 Windows 注册表的 `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` 下，有一个默认设置为 `cmd.exe` 的 **`AlternateShell`** 值。这意味着在启动时选择“带命令提示符的安全模式”（按 F8）后，系统会使用 `cmd.exe`。不过，也可以将计算机配置为自动以此模式启动，而无需按 F8 并手动选择。
 
-创建一个用于自动以“Safe Mode with Command Prompt”启动的 boot 选项的步骤：
+创建自动以“带命令提示符的安全模式”启动的启动选项的步骤：<sup>[[5]](#references)</sup>
 
 1. 更改 `boot.ini` 文件的属性，移除只读、系统和隐藏标志：`attrib c:\boot.ini -r -s -h`
 2. 打开 `boot.ini` 进行编辑。
-3. 插入一行类似这样的内容：`multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
-4. 保存对 `boot.ini` 的更改。
+3. 插入类似以下内容的行：`multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
+4. 将更改保存到 `boot.ini`。
 5. 重新应用原始文件属性：`attrib c:\boot.ini +r +s +h`
 
-- **Exploit 1：** 修改 **AlternateShell** registry key 允许设置自定义命令 shell，可能被用于未授权访问。
-- **Exploit 2 (PATH Write Permissions)：** 如果对 system **PATH** 变量的任何部分具有写权限，尤其是在 `C:\Windows\system32` 之前，就可以执行自定义 `cmd.exe`，这在系统以 Safe Mode 启动时可能成为后门。
-- **Exploit 3 (PATH and boot.ini Write Permissions)：** 对 `boot.ini` 的写访问可启用自动 Safe Mode 启动，从而在下一次重启时促成未授权访问。
+- **Exploit 1：**更改 **AlternateShell** 注册表键可以设置自定义命令 shell，从而可能用于未授权访问。
+- **Exploit 2（PATH 写入权限）：**如果对系统 **PATH** 变量的任意部分具有写入权限，尤其是在 `C:\Windows\system32` 之前的部分，就可以执行自定义的 `cmd.exe`；如果系统以安全模式启动，这可能成为后门。
+- **Exploit 3（PATH 和 boot.ini 写入权限）：**对 `boot.ini` 具有写入权限，可以启用自动启动安全模式，从而在下一次重启时促成未授权访问。
 
-要检查当前的 **AlternateShell** 设置，请使用这些命令：
+要检查当前的 **AlternateShell** 设置，请使用以下命令：
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
 Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot' -Name 'AlternateShell'
 ```
-### Installed Component
+### 已安装组件
 
-Active Setup 是 Windows 中的一项功能，它会在**桌面环境完全加载之前就启动**。它优先执行某些命令，而这些命令必须在用户登录继续之前完成。这个过程甚至会早于其他启动项触发，例如 Run 或 RunOnce 注册表项中的那些。
+Active Setup 是 Windows 中的一项功能，**会在桌面环境完全加载之前启动**。它会优先执行某些命令，这些命令必须完成后，用户登录过程才会继续。该过程甚至会早于 Run 或 RunOnce 注册表部分中的其他启动项触发。
 
-Active Setup 通过以下注册表键进行管理：
+Active Setup 通过以下注册表项进行管理：
 
 - `HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-在这些键中，存在多个子键，每个子键对应一个特定组件。值得关注的键值包括：
+这些注册表项中包含各种子项，每个子项对应一个特定组件。尤其值得关注的键值包括：
 
-- **IsInstalled:**
-- `0` 表示组件的命令不会执行。
-- `1` 表示该命令会为每个用户执行一次，如果缺少 `IsInstalled` 值，默认行为也是这样。
-- **StubPath:** 定义由 Active Setup 执行的命令。它可以是任何有效的命令行，例如启动 `notepad`。
+- **IsInstalled：**
+- `0` 表示不会执行该组件的命令。
+- `1` 表示每个用户执行一次该命令；如果缺少 `IsInstalled` 值，这是默认行为。
+- **StubPath：** 定义由 Active Setup 执行的命令。它可以是任何有效的命令行，例如启动 `notepad`。
 
-**Security Insights:**
+**安全洞察：**
 
-- 修改或写入某个 **`IsInstalled`** 设置为 `"1"` 且带有特定 **`StubPath`** 的键，可能导致未授权命令执行，从而潜在实现 privilege escalation。
-- 在任何 **`StubPath`** 值所引用的二进制文件上进行修改，也可能在具备足够权限的情况下实现 privilege escalation。
+- 修改或写入 **`IsInstalled`** 设置为 `"1"` 且具有特定 **`StubPath`** 的注册表项，可能导致未经授权的命令执行，并可能用于 privilege escalation。
+- 如果拥有足够权限，修改任意 **`StubPath`** 值所引用的二进制文件，也可能实现 privilege escalation。
 
-要检查 Active Setup 各组件中的 **`StubPath`** 配置，可以使用这些命令：
+可以使用以下命令检查 Active Setup 组件中的 **`StubPath`** 配置：
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -275,18 +275,18 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 ### Browser Helper Objects (BHOs) 概述
 
-Browser Helper Objects (BHOs) 是为 Microsoft Internet Explorer 添加额外功能的 DLL 模块。它们会在每次启动时加载到 Internet Explorer 和 Windows Explorer 中。不过，可以通过将 **NoExplorer** 键设置为 1 来阻止它们执行，从而防止它们随 Windows Explorer 实例加载。
+Browser Helper Objects (BHOs) 是为 Microsoft Internet Explorer 添加额外功能的 DLL 模块。它们会在 Internet Explorer 和 Windows Explorer 每次启动时加载。不过，通过将 **NoExplorer** 键设置为 1，可以阻止其随 Windows Explorer 实例加载，从而禁止其执行。<sup>[[1]](#references)</sup>
 
-BHOs 通过 Internet Explorer 11 兼容 Windows 10，但不受 Microsoft Edge 支持，Microsoft Edge 是较新版本 Windows 中的默认浏览器。
+BHOs 可通过 Internet Explorer 11 兼容 Windows 10，但 Microsoft Edge（较新版本 Windows 中的默认浏览器）不支持它们。
 
 要查看系统中注册的 BHOs，可以检查以下注册表项：
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-每个 BHO 都在注册表中由其 **CLSID** 表示，作为唯一标识符。有关每个 CLSID 的详细信息可以在 `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` 下找到。
+每个 BHO 在注册表中都由其 **CLSID** 表示，作为唯一标识符。每个 CLSID 的详细信息可以在 `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` 下找到。
 
-要在注册表中查询 BHOs，可以使用以下命令：
+要查询注册表中的 BHOs，可以使用以下命令：
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
@@ -296,7 +296,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\B
 - `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 - `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-注意，registry 会为每个 dll 包含 1 个新的 registry 项，并且它将由 **CLSID** 表示。你可以在 `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` 中找到 CLSID 信息
+请注意，注册表中每个 dll 都会对应一个新的注册表项，并通过 **CLSID** 表示。可以在 `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` 中查找 CLSID 信息。
 
 ### Font Drivers
 
@@ -308,7 +308,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Dr
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 ```
-### Open Command
+### 打开命令
 
 - `HKLM\SOFTWARE\Classes\htmlfile\shell\open\command`
 - `HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command`
@@ -318,30 +318,29 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command" /v ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Classes\htmlfile\shell\open\command' -Name ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command' -Name ""
 ```
-### 图像文件执行选项
+### Image File Execution Options
 ```
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
 ```
 ## SysInternals
 
-注意，所有可以找到 autoruns 的位置都**已经被**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) **搜索过了**。不过，如果你想要一份**更全面的自动执行**文件列表，可以使用 systinternals 的 [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)：
+请注意，所有可以找到 autoruns 的位置都已被[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe)搜索。但是，如果你需要一个**更全面的自动执行**文件列表，可以使用 systinternals 提供的 [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)：
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## 更多
 
-**在** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2) **中查找更多类似 Autoruns 的注册表项**
+**在** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)<sup>[[4]](#references)</sup> **中查找更多类似注册表的 Autoruns**
 
-## 参考
+## 参考资料
 
-- [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
-- [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
-- [https://attack.mitre.org/techniques/T1037/001/](https://attack.mitre.org/techniques/T1037/001/)
-- [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
-- [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
-- [https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
-
-
+- [1] [常见的 malware 持久化机制](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
+- [2] [MITRE ATT&CK T1547.001 – Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder](https://attack.mitre.org/techniques/T1547/001/)
+- [3] [MITRE ATT&CK T1037.001 – Boot or Logon Initialization Scripts: Logon Script (Windows)](https://attack.mitre.org/techniques/T1037/001/)
+- [4] [Autoruns – 自动启动类别（Troubleshooting with the Windows Sysinternals Tools, 2nd Edition）](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+- [5] [如何添加启动 alternate shell 的启动选项？](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
+- [6] [Metasploit 综述 04/03/2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
+- [7] [Metasploit PR #21032 – windows/persistence/userinit_mpr_logon_script](https://github.com/rapid7/metasploit-framework/pull/21032)
 
 {{#include ../../banners/hacktricks-training.md}}
