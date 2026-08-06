@@ -2,17 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-З [**Flipper Zero**](https://flipperzero.one/) ви можете:
+За допомогою [**Flipper Zero**](https://flipperzero.one/) можна:
 
-- **Слухати/Захоплювати/Відтворювати радіочастоти:** [**Sub-GHz**](fz-sub-ghz.md)
-- **Читати/Захоплювати/Емулювати NFC картки:** [**NFC**](fz-nfc.md)
-- **Читати/Захоплювати/Емулювати 125kHz мітки:** [**125kHz RFID**](fz-125khz-rfid.md)
-- **Читати/Захоплювати/Відправляти інфрачервоні сигнали:** [**Infrared**](fz-infrared.md)
-- **Читати/Захоплювати/Емулювати iButtons:** [**iButton**](../ibutton.md)
-- **Використовувати як Bad USB**
-- **Використовувати як ключ безпеки (U2F)**
-- **Грати в Змійку**
+- **Прослуховувати/захоплювати/повторно відтворювати радіочастоти:** [**Sub-GHz**](fz-sub-ghz.md)
+- **Зчитувати/захоплювати/емулятувати NFC-картки:** [**NFC**](fz-nfc.md)
+- **Зчитувати/захоплювати/емулятувати мітки 125 кГц:** [**125kHz RFID**](fz-125khz-rfid.md)
+- **Зчитувати/захоплювати/надсилати інфрачервоні сигнали:** [**Infrared**](fz-infrared.md)
+- **Зчитувати/захоплювати/емулятувати iButtons:** [**iButton**](../ibutton.md)
+- **Використовувати його як Bad USB**
+- **Використовувати його як ключ безпеки (U2F)**
+- **Грати в Snake**
 
-**Інші ресурси Flipper Zero в** [**https://github.com/djsime1/awesome-flipperzero**](https://github.com/djsime1/awesome-flipperzero)
+**Інші ресурси про Flipper Zero:** [**https://github.com/djsime1/awesome-flipperzer**](https://github.com/djsime1/awesome-flipperzero)
 
 {{#include ../../../banners/hacktricks-training.md}}
