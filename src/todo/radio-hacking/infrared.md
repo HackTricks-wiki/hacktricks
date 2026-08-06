@@ -4,73 +4,73 @@
 
 ## 赤外線の仕組み <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**赤外線は人間には見えません**。IRの波長は**0.7〜1000ミクロン**です。家庭用リモコンはデータ伝送にIR信号を使用し、0.75〜1.4ミクロンの波長範囲で動作します。リモコン内のマイクロコントローラは赤外線LEDを特定の周波数で点滅させ、デジタル信号をIR信号に変換します。<sup>[[1]](#references)</sup>
+**赤外線は人間には見えません**。IRの波長は**0.7～1000マイクロメートル**です。家庭用リモコンはデータ送信にIR信号を使用し、0.75～1.4マイクロメートルの波長範囲で動作します。リモコン内のマイクロコントローラーは赤外線LEDを特定の周波数で点滅させ、デジタル信号をIR信号に変換します。
 
-IR信号の受信には**フォトレシーバー**を使用します。これは**IRの光を電圧パルスに変換**し、すでに**デジタル信号**となっています。通常、受信機内部には**暗色光フィルター**があり、**目的の波長だけを通過**させ、ノイズをカットします。
+IR信号を受信するには**フォトレシーバー**を使用します。これは**IR光を電圧パルスに変換**し、すでに**デジタル信号**になっています。通常、レシーバー内部には**暗色光フィルター**があり、**目的の波長だけを通過させ**、ノイズを除去します。<sup>[[1]](#references)</sup>
 
-### IR Protocolsの種類 <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
+### IRプロトコルの種類 <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
-IR Protocolsは、次の3つの要素で異なります。
+IRプロトコルは、次の3つの要素で異なります。<sup>[[1]](#references)</sup>
 
-- bit encoding
-- data structure
-- carrier frequency — 多くの場合36〜38 kHzの範囲
+- ビットエンコーディング
+- データ構造
+- 搬送周波数 — 多くの場合36～38 kHz
 
-#### bit encodingの方式 <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
+#### ビットエンコーディング方式 <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
 
 **1. Pulse Distance Encoding**
 
-Bitsは、パルス間のspaceの持続時間を変調することでencodeされます。パルス自体の幅は一定です。
+ビットは、パルス間のスペースの長さを変調することでエンコードされます。パルス自体の幅は一定です。
 
 <figure><img src="../../images/image (295).png" alt=""><figcaption></figcaption></figure>
 
 **2. Pulse Width Encoding**
 
-Bitsは、パルス幅を変調することでencodeされます。パルスburst後のspaceの幅は一定です。
+ビットはパルス幅を変調することでエンコードされます。パルスバースト後のスペースの幅は一定です。
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
 **3. Phase Encoding**
 
-これはManchester encodingとしても知られています。論理値は、パルスburstとspaceの間のtransitionの極性によって定義されます。「spaceからパルスburst」はlogic「0」を、「パルスburstからspace」はlogic「1」を示します。
+これはManchester encodingとしても知られています。論理値は、パルスバーストとスペースの間の遷移の極性によって定義されます。「スペースからパルスバース」は論理値「0」を、「パルスバーストからスペース」は論理値「1」を表します。
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
 **4. 前述の方式の組み合わせとその他の特殊な方式**
 
 > [!TIP]
-> 複数種類のdeviceに対して**universalになることを目指している**IR Protocolsがあります。最も有名なのはRC5とNECです。ただし、最も有名であることは、**最も一般的であることを意味しません**。私の環境では、NECリモコンは2台しか見たことがなく、RC5は1台もありません。
+> 複数の種類のデバイスに対応する**universal化を目指している**IRプロトコルもあります。最も有名なものはRC5とNECです。ただし、最も有名であることは、**最も一般的であることを意味しません**。私の環境では、NECリモコンは2台だけ見かけ、RC5は1台も見かけませんでした。
 >
-> Manufacturersは、同じdevice range内（例えばTV-box）であっても、独自のIR Protocolsを使用したがります。そのため、異なる会社のリモコンや、同じ会社の異なるmodelのリモコンは、同じ種類の他のdeviceでは動作しないことがあります。
+> メーカーは、同じデバイス範囲内（たとえばTV-box）であっても、独自のIRプロトコルを使用することを好みます。そのため、異なる企業のリモコンや、同じ企業の異なるモデルのリモコンは、同じ種類の別のデバイスでは使用できない場合があります。
 
-### IR signalの調査
+### IR信号の解析
 
-リモコンのIR signalがどのように見えるかを確認する最も信頼できる方法は、oscilloscopeを使用することです。oscilloscopeは受信したsignalをdemodulateしたりinvertしたりせず、単に「そのまま」表示します。これはtestingとdebuggingに役立ちます。ここではNEC IR protocolを例に、予想されるsignalを示します。
+リモコンのIR信号がどのように見えるかを確認する最も信頼できる方法は、オシロスコープを使用することです。オシロスコープは受信信号を復調も反転もせず、そのまま表示します。これはテストやデバッグに役立ちます。ここではNEC IRプロトコルを例に、予想される信号を示します。<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
-通常、encoded packetの先頭にはpreambleがあります。これによりreceiverはgain levelとbackgroundを判定できます。Sharpなど、preambleのないprotocolもあります。
+通常、エンコードされたパケットの先頭にはプリアンブルがあります。これにより、レシーバーはゲインのレベルと背景を判断できます。Sharpなど、プリアンブルのないプロトコルもあります。
 
-次にdataがtransmitされます。structure、preamble、bit encoding methodは、特定のprotocolによって決まります。
+次にデータが送信されます。構造、プリアンブル、ビットエンコーディング方式は、特定のプロトコルによって決まります。
 
-**NEC IR protocol**には、短いcommandとrepeat codeが含まれます。repeat codeはbuttonが押されている間に送信されます。commandとrepeat codeは、どちらも先頭に同じpreambleを持ちます。
+**NEC IRプロトコル**には、短いコマンドと、ボタンが押されている間に送信されるリピートコードがあります。コマンドとリピートコードは、どちらも先頭に同じプリアンブルを持ちます。
 
-NECの**command**は、preambleに加えて、deviceが実行内容を理解するためのaddress byteとcommand-number byteで構成されます。transmissionのintegrityを確認するため、address byteとcommand-number byteは反転値で複製されます。commandの末尾には追加のstop bitがあります。
+NECの**command**は、プリアンブルに加えて、デバイスが実行内容を判断するためのアドレスバイトとコマンド番号バイトで構成されます。送信の整合性を確認するため、アドレスバイトとコマンド番号バイトは反転値とともに複製されます。コマンドの末尾には追加のストップビットがあります。
 
-**repeat code**には、preambleの後に「1」があります。これはstop bitです。
+**repeat code**には、ストップビットである「1」がプリアンブルの後に続きます。
 
-**logic「0」と「1」**に対して、NECはPulse Distance Encodingを使用します。まずパルスburstがtransmitされ、その後にpauseが続き、その長さがbitのvalueを設定します。
+**論理値「0」と「1」**について、NECはPulse Distance Encodingを使用します。まずパルスバーストが送信され、その後に休止が続き、その長さによってビットの値が決まります。
 
-### Air Conditioners
+### エアコン
 
-他のリモコンとは異なり、**air conditionersは押されたbuttonのcodeだけをtransmitするわけではありません**。buttonが押されたときに**すべてのinformationもtransmit**し、**air conditioned machineとリモコンがsynchronisedされる**ことを保証します。\
-これにより、20ºCに設定されたmachineを1台目のリモコンで21ºCに上げ、その後、温度がまだ20ºCの別のリモコンを使ってさらに温度を上げたとき、21ºCの状態だと誤認して22ºCではなく21ºCに「上げる」ことを防げます。
+他のリモコンとは異なり、**エアコンは押されたボタンのコードだけを送信するわけではありません**。ボタンが押されたときに**すべての情報も送信**し、**エアコン本体とリモコンの同期を保証**します。\
+これにより、20ºCに設定されたエアコンを1台目のリモコンで21ºCに上げ、その後、温度がまだ20ºCとして認識されている別のリモコンでさらに温度を上げた際に、21ºC（22ºCではなく）に「上げる」ことを防げます。<sup>[[1]](#references)</sup>
 
 ---
 
-## Attacks & Offensive Research <a href="#attacks" id="attacks"></a>
+## 攻撃とOffensive Research <a href="#attacks" id="attacks"></a>
 
-Flipper Zeroを使用してInfraredをattackできます:
+Flipper Zeroを使用してInfraredを攻撃できます:
 
 
 {{#ref}}
@@ -79,36 +79,36 @@ flipper-zero/fz-infrared.md
 
 ### Smart-TV / Set-top Box Takeover (EvilScreen)
 
-近年のacademic research（EvilScreen、2022）では、InfraredとBluetoothまたはWi-Fiを組み合わせた**multi-channel remotesが悪用され、現代のsmart-TVsを完全にhijackできる**ことが実証されました。このattackは、高いprivilegeを持つIR service codesとauthenticated Bluetooth packetsをchainし、channel-isolationをbypassして、physical accessなしに任意のapp launch、microphone activation、factory-resetを可能にします。異なるvendorのmainstream TV 8台（ISO/IEC 27001 complianceを主張するSamsung modelを含む）でvulnerableであることが確認されました。Mitigationにはvendor firmwareのfix、または未使用のIR receiversの完全なdisableが必要です。<sup>[[2]](#references)</sup>
+近年の学術研究（EvilScreen、2022）では、**InfraredとBluetoothまたはWi-Fiを組み合わせたmulti-channel remoteが、最新のsmart-TVを完全にhijackするために悪用される可能性**が示されました。この攻撃では、高い権限を持つIR service codeと認証済みBluetooth packetを連鎖させ、channel-isolationを回避します。これにより、物理的なアクセスなしで任意のアプリの起動、マイクの有効化、factory-resetが可能になります。異なるベンダーの主要TV 8機種（ISO/IEC 27001準拠を主張するSamsungモデルを含む）で脆弱性が確認されました。緩和策には、ベンダーによるfirmware修正、または未使用のIR receiverの完全な無効化が必要です。<sup>[[2]](#references)</sup>
 
-### IR LEDsを介したAir-Gapped Data Exfiltration（aIR-Jumper family）
+### IR LEDによるAir-Gapped Data Exfiltration（aIR-Jumper family）
 
-Security cameras、routers、さらにはmalicious USB sticksにも、**night-vision IR LEDs**が搭載されていることがあります。researchでは、malwareがこれらのLEDをmodulateし（単純なOOKで<10〜20 kbit/s）、**壁や窓越しにsecretsを、数十メートル離れた外部cameraへexfiltrateできる**ことが示されています。光がvisible spectrumの外側にあるため、operatorsが気づくことはほとんどありません。Counter-measures:
+Security camera、router、さらには悪意のあるUSB stickにも、**night-vision IR LED**が搭載されていることがあります。研究では、malwareがこれらのLEDを変調し、単純なOOKで毎秒10～20 kbit未満の速度で、**壁や窓越しにsecretをexfiltrate**できることが示されています。外部のcameraを数十メートル離れた場所に設置して受信できます。<sup>[[3]](#references)</sup>光が可視スペクトル外にあるため、運用担当者が気付くことはほとんどありません。対策:
 
-* Sensitive area内のIR LEDsを物理的にshieldするかremoveする
-* Camera LEDのduty-cycleとfirmware integrityをmonitorする
-* Windowsとsurveillance camerasにIR-cut filtersをdeployする
+* 機密エリアのIR LEDを物理的に遮蔽または取り外す
+* camera LEDのduty-cycleとfirmware integrityを監視する
+* 窓や監視cameraにIR-cut filterを導入する
 
-Attackerは、強力なIR projectorsを使用し、dataを安全でないcamerasへflash backすることで、networkにcommandsを**infiltrate**することもできます。
+攻撃者は、強力なIR projectorを使用して、データを安全でないcameraに点滅送信し、networkへcommandを**infiltrate**することもできます。
 
 ### Flipper Zero 1.0によるLong-Range Brute-ForceとExtended Protocols
 
-Firmware 1.0（2024年9月）では、**数十種類の追加IR Protocolsとoptional external amplifier modules**が追加されました。universal-remote brute-force modeと組み合わせることで、Flipperはhigh-power diodeを使用し、最大30 m離れた場所から、ほとんどのpublic TVs/ACsをdisableまたはreconfigureできます。
+Firmware 1.0（2024年9月）では、**数十種類の追加IR protocolと、オプションの外付けamplifier module**が追加されました。universal-remote brute-force modeと組み合わせることで、Flipperは高出力diodeを使用し、最大30 m離れた場所から、ほとんどの公共TV/ACを無効化または再設定できます。
 
 ---
 
-## Tooling & Practical Examples <a href="#tooling" id="tooling"></a>
+## Toolingと実践例 <a href="#tooling" id="tooling"></a>
 
 ### Hardware
 
 * **Flipper Zero** – learning、replay、dictionary-bruteforce modeを備えたportable transceiver（上記参照）。
-* **Arduino / ESP32** + IR LED / TSOP38xx receiver – 安価なDIY analyser/transmitter。`Arduino-IRremote` library（v4.xは40以上のprotocolsをsupport）と組み合わせます。
-* **Logic analysers**（Saleae/FX2）– protocolがunknownの場合にraw timingsをcaptureします。
-* **IR-blaster搭載のSmartphones**（例：Xiaomi）– field testをすぐに実行できますが、rangeは限定的です。
+* **Arduino / ESP32** + IR LED / TSOP38xx receiver – 安価なDIY analyser/transmitter。`Arduino-IRremote` libraryと組み合わせます（v4.xは40以上のprotocolをサポート）。
+* **Logic analyser**（Saleae/FX2）– protocolが不明な場合にraw timingをcapture。
+* **IR-blaster搭載smartphone**（例: Xiaomi）– 手早いfield testに便利ですが、rangeは限定的です。
 
 ### Software
 
-* **`Arduino-IRremote`** – actively-maintained C++ library:
+* **`Arduino-IRremote`** – 継続的にmaintainされているC++ library:
 ```cpp
 #include <IRremote.hpp>
 IRsend sender;
@@ -118,8 +118,8 @@ sender.sendNEC(0x20DF10EF, 32); // Samsung TV Power
 delay(5000);
 }
 ```
-* **IRscrutinizer / AnalysIR** – raw capturesをimportし、protocolを自動identifyしてPronto/Arduino codeをgenerateするGUI decoders。
-* **LIRC / ir-keytable (Linux)** – command lineからIRをreceiveおよびinjectします:
+* **IRscrutinizer / AnalysIR** – raw captureをimportし、protocolを自動識別してPronto/Arduino codeを生成するGUI decoder。
+* **LIRC / ir-keytable (Linux)** – command lineからIRを受信・inject:
 ```bash
 sudo ir-keytable -p nec,rc5 -t   # live-dump decoded scancodes
 irsend SEND_ONCE samsung KEY_POWER
@@ -127,16 +127,17 @@ irsend SEND_ONCE samsung KEY_POWER
 
 ---
 
-## Defensive Measures <a href="#defense" id="defense"></a>
+## 防御策 <a href="#defense" id="defense"></a>
 
-* 必要がない場合は、public spacesにdeployされたdeviceのIR receiversをdisableするかcoverする。
-* Smart-TVsとremotes間の*pairing*またはcryptographic checksをenforceし、privilegedな「service」codesをisolateする。
-* Classified areas周辺にIR-cut filtersまたはcontinuous-wave detectorsをdeployし、optical covert channelsを遮断する。
-* Control可能なIR LEDsを公開しているcameras/IoT appliancesのfirmware integrityをmonitorする。
+* 公共スペースに設置するdeviceで不要な場合は、IR receiverを無効化または覆う。
+* smart-TVとremote間の*pairing*またはcryptographic checkを強制し、権限の高い「service」codeを分離する。
+* 機密エリア周辺にIR-cut filterまたはcontinuous-wave detectorを導入し、optical covert channelを遮断する。
+* 制御可能なIR LEDを公開しているcamera/IoT applianceのfirmware integrityを監視する。
 
 ## References
 
 - [1] [Flipper Zero Infrared blog post](https://blog.flipperzero.one/infrared/)
-- [2] [EvilScreen: Smart TV hijacking via remote control mimicry](https://arxiv.org/abs/2210.03014)
+- [2] [EvilScreen Attack: Smart TV Hijacking via Multi-channel Remote Control Mimicry (arXiv:2210.03014)](https://arxiv.org/abs/2210.03014)
+- [3] [aIR-Jumper: Covert Air-Gap Exfiltration/Infiltration via Security Cameras & Infrared (IR) (arXiv:1709.05742)](https://arxiv.org/abs/1709.05742)
 
 {{#include ../../banners/hacktricks-training.md}}

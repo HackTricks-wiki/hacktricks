@@ -1,57 +1,57 @@
-# HackTricks の価値観とFAQ
+# HackTricks Values & FAQ
 
 {{#include ../banners/hacktricks-training.md}}
 
-## HackTricks の価値観
+## HackTricks Values
 
 > [!TIP]
-> これは **HackTricks プロジェクト** の価値観です:
+> これらは **HackTricks Project** の **values** です:
 >
-> - インターネットの**ALL**に**FREE**で**EDUCATIONAL hacking**リソースへのアクセスを提供する。
->  - Hacking は学びが中心であり、学びは可能な限り無料であるべきです。
->  - この本の目的は包括的な**educational resource**として役立つことです。
-> - コミュニティが公開する素晴らしい**hacking**テクニックを**STORE**し、**ORIGINAL** **AUTHORS**にすべての**credits**を与える。
->  - **We don't want the credit from other people**, 私たちはただ皆のためにクールなトリックを保存したいだけです。
->  - HackTricks では**our own researches**も執筆します。
->  - 多くの場合、テクニックの重要な部分を HackTricks に**in HackTricks a summary of the important parts**としてまとめ、詳細に関しては**encourage the lector to visit the original post**します。
-> - 本書のすべての**hacking**テクニックを**ORGANIZE**して、より**MORE ACCESSIBLE**にする。
->  - HackTricks チームは、コンテンツを整理するためだけに何千時間もの無償作業を捧げており、人々が**learn faster**できるようにしています。
+> - インターネット上の **すべての人** に **EDUCATIONAL hacking** リソースへの **FREE** access を提供する。
+>  - Hacking は学ぶことであり、学習は可能な限り free であるべきです。
+>  - この book の目的は、包括的な **educational resource** として機能することです。
+> - コミュニティが公開する素晴らしい **hacking** techniques を **STORE** し、**ORIGINAL** **AUTHORS** にすべての **credits** を与える。
+>  - **他の人の credit は必要ありません**。cool tricks を everyone のために保存したいだけです。
+>  - HackTricks では **our own researches** も執筆しています。
+>  - 複数のケースでは、technique の重要な部分を **HackTricks に summary として記述**し、詳細については **reader に original post の閲覧を推奨**します。
+> - book 内のすべての hacking techniques を **ORGANIZE** し、**MORE ACCESSIBLE** にする。
+>  - HackTricks team は、人々が **learn faster** できるように、**only to organize the content** するため、何千時間もの時間を free で捧げてきました。
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
-## HackTricks よくある質問
+## HackTricks faq
 
 > [!TIP]
 >
-> - **これらのリソースを提供してくれて本当にありがとうございます。どう感謝を伝えればよいですか？**
+> - **これらの resources に心から感謝しています。どのように感謝を伝えればよいですか?**
 
-これらすべてのリソースを公開してまとめてくれた HackTricks チームに公開で感謝を示すには、[**@hacktricks_live**](https://twitter.com/hacktricks_live) をメンションしたツイートをしてください。\
-特に感謝している場合は、[**sponsor the project here**](https://github.com/sponsors/carlospolop)することもできます。\
-そして **give a star in the Github projects!** を忘れないでください！（リンクは下にあります）。
+これらすべての resources を publicly まとめている HackTricks teams に感謝するため、[**@hacktricks_live**](https://twitter.com/hacktricks_live) に言及した tweet を public に投稿できます。\
+特に grateful な場合は、[**こちらから project を sponsor**](https://github.com/sponsors/carlospolop) することもできます。\
+そして **Github projects に star を付けることを忘れないでください!** (links は以下にあります)。
 
 > [!TIP]
 >
-> - **プロジェクトにどのように貢献できますか？**
+> - **project に contribute するにはどうすればよいですか?**
 
-本の中で見つけた**share new tips and tricks with the community or fix bugs**を共有したり、バグを修正したりするには、該当する Github ページに**Pull Request**を送ってください:
+**community と new tips and tricks を share するか、books 内で見つけた bugs を fix** し、それぞれの Github pages に **Pull Request** を送信できます:
 
 - [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks)
 - [https://github.com/carlospolop/hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)
 
-Don't forget to **give a star in the Github projects!**
+**Github projects に star を付けることを忘れないでください!**
 
 > [!TIP]
 >
-> - **HackTricksから一部のコンテンツをコピーして自分のブログに掲載してもいいですか？**
+> - **HackTricks の content を一部 copy して、自分の blog に掲載できますか?**
 
-はい、可能です。ただし、コンテンツを取得した**don't forget to mention the specific link(s)**を必ず記載してください。
+はい、できます。ただし、content の取得元である **specific link(s) を mention することを忘れないでください**。
 
 > [!TIP]
 >
-> - **HackTricks のページをどのように参照できますか？**
+> - **HackTricks の page を reference するにはどうすればよいですか?**
 
-情報を取得したページ**の**リンクが表示されていればそれで十分です。\
-bibtex が必要な場合は、次のようにできます:
+情報を取得した page(s) **の link** が表示されていれば十分です。\
+bibtex が必要な場合は、次のようなものを使用できます:
 ```latex
 @misc{hacktricks-bibtexing,
 author = {"HackTricks Team" or the Authors name of the specific page/trick},
@@ -62,82 +62,82 @@ url = {\url{https://book.hacktricks.wiki/specific-page}},
 ```
 > [!WARNING]
 >
-> - **ブログにHackTricksの全内容をコピーしてもいいですか？**
+> - **HackTricksをすべて自分のブログにコピーしてもよいですか？**
 
-**できればやめてください**。誰にも利益をもたらしません。すべての**コンテンツは公式のHackTricksの書籍で既に無料で公開されています**。
+**できればやめてください**。公式のHackTricks booksですでにすべての**content**が無料で公開されているため、**誰にとってもメリットがありません**。
 
-もし消えることを心配しているなら、Githubでforkするかダウンロードしてください。繰り返しますが、既に無料です。
+消えてしまうことを心配しているなら、Githubでforkするか、downloadしてください。先ほど述べたように、すでに無料で利用できます。
 
 > [!WARNING]
 >
-> - **なぜスポンサーがいるのですか？HackTricksの書籍は商用目的ですか？**
+> - **なぜsponsorsがいるのですか？HackTricks booksはcommercial purposes向けですか？**
 
-第一のHackTricksの**価値**は、世界中の**すべての人**に**無料の**ハッキング教育リソースを提供することです。HackTricksチームはこのコンテンツを提供するために**何千時間も**を費やしており、繰り返しますが**無料**です。
+最初の**HackTricks**の**value**は、世界中の**すべての人**に**無料**のhacking educational resourcesを提供することです。HackTricks teamは、このcontentを再び**無料**で提供するために、何千時間もの時間を費やしてきました。
 
-もしHackTricksの書籍が**商業目的**で作られていると思うなら、それは**完全に間違い**です。
+HackTricks booksが**commercial purposes**のために作られていると思っているなら、**完全に間違っています**。
 
-すべてのコンテンツが無料であっても、我々の仕事を評価したいと考えるコミュニティの方々にその機会を提供したいため、スポンサーを受け入れています。そのため、[**Github sponsors**](https://github.com/sponsors/carlospolop)を通じてHackTricksへの寄付オプションを提供し、関連するサイバーセキュリティ企業にHackTricksをスポンサーしていただき、書籍内にいくつかの広告を掲載しています。広告は常に目に付きやすい場所に配置しますが、コンテンツに集中して学習する際の妨げにならないようにしています。
+すべてのcontentが**無料**であっても、希望する人が私たちの仕事に感謝を示せる機会をcommunityに**提供したい**と考えているため、sponsorsが存在します。そのため、[**Github sponsors**](https://github.com/sponsors/carlospolop)を通じてHackTricksにdonateできる選択肢を人々に提供し、**relevant cybersecurity companies**にはHackTricksのsponsorになってもらい、book内に**広告**を掲載しています。**広告**は常に、**表示される**一方で、contentに集中する人の**learning** processを**邪魔しない**場所に配置されています。
 
-HackTricksは商業目的で作られていないため、コンテンツ量がはるかに少ない他のブログのように煩わしい広告で埋められていることはありません。
-
-> [!CAUTION]
->
-> - **HackTricksのページが私のブログ記事をベースにしているが参照がない場合はどうすればよいですか？**
-
-**大変申し訳ありません。これはあってはならないことです。** Github issues、Twitter、Discordなどで該当するHackTricksページのリンクとあなたのブログのリンクを教えてください。確認してできるだけ早く参照を追加します。
+HackTricksよりもはるかにcontentが少ない他のblogsのように、HackTricksが迷惑な広告で埋め尽くされていることはありません。HackTricksはcommercial purposes向けに作られていないためです。
 
 > [!CAUTION]
 >
-> - **HackTricksに私のブログのコンテンツがあり、それを掲載されたくない場合はどうすればよいですか？**
+> - **HackTricksのページが自分のblog postをもとにしているのに、referencedされていない場合はどうすればよいですか？**
 
-HackTricksにあなたのページへのリンクがあることにより：
-
-- あなたの**SEO**が向上します
-- コンテンツは**15以上の言語**に翻訳され、より多くの人がアクセスできるようになります
-- **HackTricksは**人々にあなたのページを確認するよう促します（複数の方から、彼らのページがHackTricksに掲載されて以来訪問者が増えたと報告されています）
-
-それでもHackTricksからあなたのブログのコンテンツを削除したい場合は、お知らせください。あなたのブログへのすべてのリンクおよびそれに基づくコンテンツを確実に削除します。
+**大変申し訳ありません。これは起きるべきではありませんでした**。Github issues、Twitter、Discordなどを通じて、contentが掲載されているHackTricksのページのlinkと、あなたのblogのlinkをお知らせください。**確認のうえ、できるだけ早く追加します**。
 
 > [!CAUTION]
 >
-> - **HackTricksでコピペされたコンテンツを見つけた場合はどうすればよいですか？**
+> - **自分のblogのcontentがHackTricksに掲載されていて、そこに掲載したくない場合はどうすればよいですか？**
 
-我々は常に原著作者に**全てのクレジットを与えます**。参照元が示されていないコピペされたコンテンツのページを見つけた場合はお知らせください。該当箇所を**削除する**か、**テキストの前にリンクを追加する**か、**リンクを追加して書き直す**かのいずれかで対応します。
+HackTricksにあなたのページへのlinksが掲載されることで、次のメリットがあります。
 
-## ライセンス
+- **SEO**が向上する
+- contentが15以上のlanguagesに**翻訳**され、より多くの人がこのcontentにアクセスできるようになる
+- **HackTricksは**人々に**あなたのページを確認するよう促します**（HackTricksに自分のページが掲載されてから、訪問者が増えたと伝えてくれた人も複数います）
 
-著作権 © 特に明記されていない限り全著作権所有。
-
-#### ライセンス概要:
-
-- 帰属表示: 次のことが許可されています:
-- Share — 素材をあらゆる媒体や形式で複製および再配布できます。
-- Adapt — 素材をリミックス、変換、または基にして構築できます。
-
-#### 追加条件:
-
-- 第三者コンテンツ: このブログ/書籍の一部は、他のブログや出版物からの引用など、他のソースのコンテンツを含む場合があります。そのようなコンテンツの使用は、フェアユースの原則に基づくか、該当する著作権保有者からの明示的な許可のもとで行われています。第三者コンテンツに関する具体的なライセンス情報は、元のソースを参照してください。
-- 著作: HackTricksが作成したオリジナルのコンテンツはこのライセンスの条件に従います。共有や改変の際にはこの作品を作者に帰属させることを推奨します。
-
-#### 例外事項:
-
-- 商用利用: 本コンテンツの商用利用についての問い合わせはお問い合わせください。
-
-このライセンスはコンテンツに関連する商標やブランディング権を付与するものではありません。本ブログ/書籍に掲載されているすべての商標およびブランドは、それぞれの所有者の財産です。
-
-**HackTricksにアクセスまたは利用することで、あなたはこのライセンスの条件に従うことに同意したものとみなされます。これらの条件に同意しない場合は、サイトにアクセスしないでください。**
-
-## **免責事項**
+しかし、それでもblogのcontentをHackTricksから削除したい場合は、お知らせください。**あなたのblogへのすべてのlink**と、それをもとにしたcontentを**確実に削除します**。
 
 > [!CAUTION]
-> 本書「HackTricks」は教育的・情報提供目的のみを意図しています。本書の内容は「現状のまま」提供されており、著者および出版社はいかなる種類の明示的または黙示的な保証（完全性、正確性、信頼性、適合性、入手可能性等）を行いません。本書に含まれる情報、製品、サービス、関連グラフィックについてそれらが完全であるとか正確であるとか利用に適しているといった保証はありません。したがって、これらの情報に依拠する場合、その責任は全て利用者自身にあります。
 >
-> 著者および出版社は、間接的または結果的損害を含むいかなる損失や損害、またはデータ損失や利益損失に起因するいかなる損失や損害についても一切責任を負いません。
+> - **HackTricksでcopy-pasted contentを見つけた場合はどうすればよいですか？**
+
+私たちは常に**original authorsにすべてのcreditを付与**しています。original sourceへのreferenceがないcopy-pasted contentのページを見つけた場合は、お知らせください。**削除する**か、**textの前にlinkを追加する**か、**linkを追加してrewriteします**。
+
+## LICENSE
+
+Copyright © 特に指定がない限り、すべての権利を留保します。
+
+#### License Summary:
+
+- Attribution: 次のことを自由に行えます。
+- Share — 任意のmediumまたはformatでmaterialをcopyおよびredistributeする。
+- Adapt — materialをremix、transformし、そこから新たなmaterialを作成する。
+
+#### Additional Terms:
+
+- Third-Party Content: このblog/bookの一部には、他のblogsやpublicationsからの抜粋など、他のsourcesのcontentが含まれている場合があります。このようなcontentの使用は、fair useの原則に基づくか、それぞれのcopyright holdersから明示的なpermissionを得て行われています。third-party contentに関する具体的なlicensing informationについては、original sourcesを参照してください。
+- Authorship: HackTricksが作成したoriginal contentには、このlicenseのtermsが適用されます。このworkをshareまたはadaptする際には、authorを明記することを推奨します。
+
+#### Exemptions:
+
+- Commercial Use: このcontentのcommercial useについてのお問い合わせは、私にご連絡ください。
+
+このlicenseは、contentに関するtrademarkまたはbrandingの権利を付与するものではありません。このblog/bookに掲載されているすべてのtrademarksおよびbrandingは、それぞれのownersに帰属します。
+
+**HackTricksにアクセスまたは使用することで、あなたはこのlicenseのtermsを遵守することに同意したものとみなされます。これらのtermsに同意しない場合は、このwebsiteにアクセスしないでください。**
+
+## **Disclaimer**
+
+> [!CAUTION]
+> このbook『HackTricks』は、教育および情報提供のみを目的としています。このbook内のcontentは「現状有姿」で提供されます。authorsおよびpublishersは、このbookに含まれるinformation、products、services、または関連graphicsの完全性、正確性、信頼性、適合性、可用性について、明示または黙示を問わず、いかなる表明または保証も行いません。したがって、そのようなinformationへの依存は、厳密に自己責任で行うものとします。
 >
-> さらに、本書で説明されている技術やヒントは教育的・情報提供目的のみで提供されており、違法または悪意のある活動に使用してはなりません。著者および出版社は違法または非倫理的な活動を容認または支持するものではなく、本書に含まれる情報の使用は利用者自身の責任と判断に委ねられます。
+> authorsおよびpublishersは、いかなる場合も、間接的または結果的なlossまたはdamageを含むがこれらに限定されないlossまたはdamage、またはdataのlossやprofitsのlossから生じる、もしくはこのbookの使用に起因または関連するあらゆるlossまたはdamageについて、責任を負いません。
 >
-> 利用者は本書に含まれる情報に基づいて行った行為について単独で責任を負い、本書に記載された技術やヒントを実行する際は常に専門家の助言や支援を求めるべきです。
+> さらに、このbookで説明されているtechniquesおよびtipsは、教育および情報提供のみを目的としており、違法または悪意のある活動に使用してはなりません。authorsおよびpublishersは、違法または非倫理的な活動を容認または支援しておらず、このbookに含まれるinformationの使用は、user自身のriskと判断において行うものとします。
 >
-> 本書を使用することにより、利用者は本書または本書に含まれる情報の使用から生じる可能性のある損害、損失、または害について、著者および出版社をすべての責任から免除することに同意したものとします。
+> userは、このbookに含まれるinformationに基づいて行うあらゆるactionsについて単独で責任を負い、このbookで説明されているtechniquesまたはtipsの実装を試みる際には、常にprofessional adviceおよびassistanceを求めるべきです。
+>
+> このbookを使用することで、userは、このbookまたはその中に含まれるinformationの使用によって生じる可能性のあるあらゆるdamages、losses、またはharmについて、authorsおよびpublishersを一切のliabilityおよびresponsibilityから免責することに同意したものとみなされます。
 
 {{#include ../banners/hacktricks-training.md}}

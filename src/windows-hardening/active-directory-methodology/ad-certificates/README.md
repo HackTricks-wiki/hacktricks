@@ -4,104 +4,104 @@
 
 ## Introduction
 
-### Components of a Certificate
+### 証明書の構成要素
 
-- 証明書の **Subject** はその所有者を示します。
-- **Public Key** は、証明書を正当な所有者に結びつけるための秘密鍵とペアになります。
-- **Validity Period**（**NotBefore** および **NotAfter** 日付で定義）は、証明書の有効期間を示します。
-- 各証明書を識別する一意の **Serial Number** は、Certificate Authority (CA) によって付与されます。
-- **Issuer** は証明書を発行した CA を指します。
-- **SubjectAlternativeName** は、被験者の追加の名前を許可し、識別の柔軟性を高めます。
-- **Basic Constraints** は、証明書が CA 用かエンドエンティティ用かを識別し、使用制限を定義します。
-- **Extended Key Usages (EKUs)** は、Object Identifiers (OIDs) を通じて、code signing や email encryption のような証明書の具体的な用途を区別します。
-- **Signature Algorithm** は証明書を署名する方法を指定します。
-- 発行者の秘密鍵で作成された **Signature** は、証明書の真正性を保証します。
+- 証明書の **Subject** は、その所有者を示します。
+- **Public Key** は非公開で保持される鍵と対になり、証明書を正当な所有者に結び付けます。
+- **NotBefore** と **NotAfter** の日付で定義される **Validity Period** は、証明書の有効期間を示します。
+- Certificate Authority (CA) によって付与される一意の **Serial Number** は、各証明書を識別します。
+- **Issuer** は、証明書を発行した CA を示します。
+- **SubjectAlternativeName** により、Subject に追加の名前を設定でき、識別の柔軟性が高まります。
+- **Basic Constraints** は、証明書が CA 用か end entity 用かを示し、使用制限を定義します。
+- **Extended Key Usages (EKUs)** は、Object Identifiers (OIDs) を通じて、コード署名やメール暗号化など、証明書の具体的な用途を定義します。
+- **Signature Algorithm** は、証明書への署名方法を指定します。
+- 発行者の非公開鍵で作成される **Signature** は、証明書の真正性を保証します。<sup>[[1]](#references)</sup>
 
-### Special Considerations
+### 特別な考慮事項
 
-- **Subject Alternative Names (SANs)** は、複数の識別子に対する証明書の適用性を拡張し、複数ドメインを持つサーバにとって重要です。SAN の仕様を攻撃者が操作してなりすましを行うリスクを避けるため、発行プロセスのセキュリティが重要です。
+- **Subject Alternative Names (SANs)** により、証明書を複数の ID に適用できるようになります。これは複数のドメインを持つサーバーにとって重要です。SAN の指定を攻撃者に操作され、なりすましのリスクが生じるのを防ぐには、安全な発行プロセスが不可欠です。<sup>[[1]](#references)</sup>
 
-### Certificate Authorities (CAs) in Active Directory (AD)
+### Active Directory (AD) の Certificate Authorities (CAs)
 
-AD CS は、AD フォレスト内の特定コンテナを通じて CA 証明書を認識します。各コンテナはそれぞれ固有の役割を持ちます：
+AD CS は、専用のコンテナーを通じて AD forest 内の CA 証明書を認識し、それぞれが固有の役割を果たします。<sup>[[1]](#references)</sup>
 
-- **Certification Authorities** コンテナは信頼されたルート CA 証明書を保持します。
-- **Enrolment Services** コンテナは Enterprise CA とその certificate templates に関する情報を保持します。
-- **NTAuthCertificates** オブジェクトには、AD 認証に許可された CA 証明書が含まれます。
-- **AIA (Authority Information Access)** コンテナは、中間 CA やクロス CA 証明書とともに証明書チェーンの検証を容易にします。
+- **Certification Authorities** コンテナーには、信頼された root CA 証明書が格納されます。
+- **Enrolment Services** コンテナーには、Enterprise CAs とその certificate templates の詳細が格納されます。
+- **NTAuthCertificates** オブジェクトには、AD authentication に使用することを許可された CA 証明書が含まれます。
+- **AIA (Authority Information Access)** コンテナーは、intermediate CA 証明書および cross CA 証明書を使用した証明書チェーンの検証を支援します。
 
-### Certificate Acquisition: Client Certificate Request Flow
+### 証明書の取得: Client Certificate Request Flow
 
-1. クライアントは Enterprise CA を見つけることから要求プロセスを開始します。
-2. 公開鍵とその他の詳細を含む CSR が、公私鍵ペアの生成後に作成されます。
-3. CA は利用可能な certificate templates と照らし合わせて CSR を評価し、テンプレートの権限に基づいて証明書を発行します。
-4. 承認されると、CA は自らの秘密鍵で証明書に署名し、それをクライアントに返します。
+1. リクエストプロセスは、client が Enterprise CA を検索することから始まります。
+2. public-private key pair を生成した後、public key やその他の詳細を含む CSR が作成されます。
+3. CA は、利用可能な certificate templates に照らして CSR を評価し、template の権限に基づいて証明書を発行します。
+4. 承認されると、CA は自身の非公開鍵で証明書に署名し、client に返します。<sup>[[1]](#references)</sup>
 
 ### Certificate Templates
 
-AD 内で定義されたこれらのテンプレートは、発行時の設定と権限（許可された EKU、enrollment や modification の権利など）を概説しており、証明書サービスへのアクセス管理にとって重要です。
+AD 内で定義されるこれらの template は、許可される EKUs、enrollment 権限、変更権限など、証明書の発行に関する設定と権限を定めます。これは certificate services へのアクセスを管理する上で重要です。<sup>[[1]](#references)</sup>
 
 ## Certificate Enrollment
 
-証明書の enrollment プロセスは、管理者が **certificate template** を作成することで開始され、Enterprise Certificate Authority (CA) によって **published** されます。これによりテンプレートがクライアントの enrollment に利用可能になり、テンプレート名を Active Directory オブジェクトの `certificatetemplates` フィールドに追加することで実現されます。
+証明書の enrollment プロセスは、administrator が **certificate template を作成**することで開始され、その後 Enterprise Certificate Authority (CA) によって **publish** されます。これにより、その template が client enrollment で利用可能になります。この処理は、Active Directory オブジェクトの `certificatetemplates` フィールドに template の名前を追加することで実行されます。<sup>[[1]](#references)</sup>
 
-クライアントが証明書を要求するには、**enrollment rights** が付与されている必要があります。これらの権利は certificate template および Enterprise CA 自体のセキュリティ記述子によって定義されます。要求を成功させるには、両方の場所で権限が付与されていなければなりません。
+client が証明書をリクエストするには、**enrollment rights** が付与されている必要があります。これらの権限は、certificate template と Enterprise CA 自体の security descriptor によって定義されます。リクエストを成功させるには、両方の場所で権限を付与する必要があります。<sup>[[1]](#references)</sup>
 
 ### Template Enrollment Rights
 
-これらの権利は Access Control Entries (ACEs) を通じて指定され、次のような権限を詳細に示します：
+これらの権限は Access Control Entries (ACEs) を通じて指定され、次のような権限が定義されます。<sup>[[1]](#references)</sup>
 
-- 特定の GUID に関連づけられた **Certificate-Enrollment** および **Certificate-AutoEnrollment** 権利。
+- **Certificate-Enrollment** および **Certificate-AutoEnrollment** 権限。各権限には固有の GUID が関連付けられています。
 - すべての拡張権限を許可する **ExtendedRights**。
-- テンプレートに対する完全な制御を提供する **FullControl/GenericAll**。
+- template に対する完全な制御を提供する **FullControl/GenericAll**。
 
 ### Enterprise CA Enrollment Rights
 
-CA の権利は、そのセキュリティ記述子に概説されており、Certificate Authority 管理コンソールからアクセス可能です。一部の設定では低特権ユーザにリモートアクセスを許可するものもあり、これはセキュリティ上の懸念となり得ます。
+CA の権限は、その security descriptor に記述されており、Certificate Authority management console からアクセスできます。一部の設定では、low-privileged users に remote access まで許可できるため、セキュリティ上の懸念となる可能性があります。<sup>[[1]](#references)</sup>
 
-### Additional Issuance Controls
+### 追加の発行制御
 
-適用される場合の制御には、次のようなものがあります：
+次のような制御が適用される場合があります。<sup>[[1]](#references)</sup>
 
-- **Manager Approval**：要求を保留状態にし、証明書マネージャの承認まで待機させます。
-- **Enrolment Agents and Authorized Signatures**：CSR に必要な署名数や必要な Application Policy OID を指定します。
+- **Manager Approval**: certificate manager によって承認されるまで、リクエストを pending 状態にします。
+- **Enrolment Agents and Authorized Signatures**: CSR に必要な署名数と、必要な Application Policy OIDs を指定します。
 
-### Methods to Request Certificates
+### 証明書をリクエストする方法
 
-証明書は次の方法で要求できます：
+証明書は、次の方法でリクエストできます。<sup>[[1]](#references)</sup>
 
-1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE)、DCOM インターフェイスを使用。
-2. **ICertPassage Remote Protocol** (MS-ICPR)、named pipes または TCP/IP 経由。
-3. Certificate Authority Web Enrollment role をインストールした **certificate enrollment web interface**。
-4. **Certificate Enrollment Service (CES)**、および Certificate Enrollment Policy (CEP) サービスと連携。
-5. ネットワークデバイス向けの **Network Device Enrollment Service (NDES)**、Simple Certificate Enrollment Protocol (SCEP) を使用。
+1. DCOM interfaces を使用する **Windows Client Certificate Enrollment Protocol** (MS-WCCE)。
+2. named pipes または TCP/IP を介する **ICertPassage Remote Protocol** (MS-ICPR)。
+3. Certificate Authority Web Enrollment role がインストールされた **certificate enrollment web interface**。
+4. Certificate Enrollment Policy (CEP) service と組み合わせて使用する **Certificate Enrollment Service** (CES)。
+5. Simple Certificate Enrollment Protocol (SCEP) を使用する network devices 向けの **Network Device Enrollment Service** (NDES)。
 
-Windows ユーザは GUI (`certmgr.msc` または `certlm.msc`) やコマンドラインツール (`certreq.exe` や PowerShell の `Get-Certificate` コマンド) を通じても証明書を要求できます。
+Windows users は、GUI (`certmgr.msc` または `certlm.msc`) や command-line tools (`certreq.exe` または PowerShell の `Get-Certificate` command) からも証明書をリクエストできます。
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
-## 証明書認証
+## Certificate Authentication
 
-Active Directory (AD) は証明書認証をサポートしており、主に **Kerberos** と **Secure Channel (Schannel)** プロトコルを利用します。
+Active Directory (AD) は、主に **Kerberos** および **Secure Channel (Schannel)** プロトコルを使用した証明書認証をサポートしています。<sup>[[1]](#references)</sup>
 
-### Kerberos 認証プロセス
+### Kerberos Authentication Process
 
-Kerberos 認証プロセスでは、ユーザーが Ticket Granting Ticket (TGT) を要求する際、その要求はユーザーの証明書の **秘密鍵** で署名されます。この要求はドメインコントローラーによっていくつかの検証を受けます。これには証明書の **有効性**、**パス**、および **失効状態** の確認が含まれます。検証にはまた、証明書が信頼できる発行元からのものであることの確認と、発行者が **NTAUTH 証明書ストア** に存在することの確認も含まれます。検証が成功すると、TGT が発行されます。AD 内の **`NTAuthCertificates`** オブジェクトは、次の場所にあります:
+Kerberos 認証プロセスでは、ユーザーが Ticket Granting Ticket (TGT) を要求する際、その要求はユーザーの証明書の **private key** を使用して署名されます。この要求は、証明書の **validity**、**path**、**revocation status** など、ドメインコントローラーによる複数の検証を受けます。検証には、証明書が信頼できるソースから発行されたものであることの確認や、発行者が **NTAUTH certificate store** に存在することの確認も含まれます。検証に成功すると、TGT が発行されます。AD の **`NTAuthCertificates`** オブジェクトは、次の場所にあります。
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-証明書認証の信頼確立にとって中心的である。
+は、certificate authentication における trust の確立の中核となります。<sup>[[1]](#references)</sup>
 
-### Secure Channel (Schannel) 認証
+### Secure Channel (Schannel) Authentication
 
-Schannel は TLS/SSL の安全な接続を仲介し、ハンドシェイク中にクライアントが証明書を提示します。提示された証明書が有効と検証されれば、アクセスが許可されます。証明書を AD アカウントに紐付ける方法としては、Kerberos の **S4U2Self** 関数や証明書の **Subject Alternative Name (SAN)** などが用いられます。
+Schannel は安全な TLS/SSL 接続を実現します。handshake の際、client は certificate を提示し、それが正常に検証されると access が認可されます。<sup>[[2]](#references)</sup> certificate と AD account の mapping には、Kerberos の **S4U2Self** function や certificate の **Subject Alternative Name (SAN)** などの methods が使用されます。<sup>[[1]](#references)</sup>
 
-### AD Certificate Services 列挙
+### AD Certificate Services Enumeration
 
-AD の Certificate Services は LDAP クエリによって列挙でき、**Enterprise Certificate Authorities (CAs)** やその構成に関する情報が明らかになります。これは特別な権限なしにドメイン認証済みユーザーなら誰でもアクセス可能です。**[Certify](https://github.com/GhostPack/Certify)** や **[Certipy](https://github.com/ly4k/Certipy)** のようなツールは、AD CS 環境の列挙や脆弱性評価に用いられます。
+AD の certificate services は LDAP queries を通じて enumeration でき、**Enterprise Certificate Authorities (CAs)** とその configurations に関する information が明らかになります。これは special privileges を持たない domain-authenticated user であれば access できます。<sup>[[1]](#references)</sup> **[Certify](https://github.com/GhostPack/Certify)** や **[Certipy](https://github.com/ly4k/Certipy)** などの tools は、AD CS environments における enumeration と vulnerability assessment に使用されます。<sup>[[3]](#references)</sup>
 
-これらのツールを使用するコマンドには次のものがあります：
+これらの tools を使用する commands は次のとおりです。
 ```bash
 # Enumerate trusted root CA certificates, Enterprise CAs and HTTP enrollment endpoints
 # Useful flags: /domain, /path, /hideAdmins, /showAllPermissions, /skipWebServiceChecks
@@ -127,9 +127,9 @@ certutil -v -dstemplate
 ```
 ## 参考資料
 
-- [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
-- [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
-- [GhostPack/Certify](https://github.com/GhostPack/Certify)
-- [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
+- [1] [Certified Pre-Owned: Active Directory Certificate Services の悪用](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
+- [2] [SSL/TLS Client Authentication とは何か、どのように機能するのか？](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
+- [3] [GhostPack/Certify](https://github.com/GhostPack/Certify)
+- [4] [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
 
 {{#include ../../../banners/hacktricks-training.md}}

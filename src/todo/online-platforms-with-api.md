@@ -1,110 +1,110 @@
-# オンラインプラットフォームとAPI
+# APIを備えたオンラインプラットフォーム
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## [ProjectHoneypot](https://www.projecthoneypot.org/)
 
-IPが疑わしい/悪意のある活動に関連しているかどうかを確認できます。完全に無料です。
+IPが不審な活動や悪意のある活動に関連しているかどうかを確認できます。完全無料です。
 
 ## [**BotScout**](http://botscout.com/api.htm)
 
-IPアドレスがアカウントを登録するボットに関連しているかどうかを確認します。ユーザー名やメールアドレスも確認できます。最初は無料です。
+IPアドレスがアカウントを登録するbotに関連しているかどうかを確認できます。ユーザー名やメールアドレスも確認できます。初期利用は無料です。
 
 ## [Hunter](https://hunter.io/)
 
-メールを見つけて確認します。\
-一部のAPIリクエストは無料ですが、より多くのリクエストには支払いが必要です。\
-商業用？
+メールアドレスを検索・検証します。\
+一部のAPIリクエストは無料ですが、それ以上の利用には料金が必要です。\
+商用？
 
 ## [AlientVault](https://otx.alienvault.com/api)
 
-IPやドメインに関連する悪意のある活動を見つけます。無料です。
+IPやドメインに関連する悪意のある活動を検索します。無料です。
 
 ## [Clearbit](https://dashboard.clearbit.com/)
 
-メールに関連する個人データ（他のプラットフォームのプロフィール）、ドメイン（基本的な会社情報、メール、働いている人）、および会社（メールから会社情報を取得）を見つけます。\
-すべての可能性にアクセスするには支払いが必要です。\
-商業用？
+メールアドレス（他のプラットフォーム上のプロフィール）、ドメイン（基本的な企業情報、メールアドレス、勤務者）、企業（メールアドレスから企業情報を取得）に関連する個人データを検索します。\
+すべての機能にアクセスするには料金が必要です。\
+商用？
 
 ## [BuiltWith](https://builtwith.com/)
 
-ウェブサイトで使用されている技術。高価です...\
-商業用？
+Webサイトで使用されているテクノロジーを調べます。高価です……\
+商用？
 
 ## [Fraudguard](https://fraudguard.io/)
 
-ホスト（ドメインまたはIP）が疑わしい/悪意のある活動に関連しているかどうかを確認します。いくつかの無料APIアクセスがあります。\
-商業用？
+ホスト（ドメインまたはIP）が不審な活動や悪意のある活動に関連しているかどうかを確認します。APIを一部無料で利用できます。\
+商用？
 
 ## [FortiGuard](https://fortiguard.com/)
 
-ホスト（ドメインまたはIP）が疑わしい/悪意のある活動に関連しているかどうかを確認します。いくつかの無料APIアクセスがあります。
+ホスト（ドメインまたはIP）が不審な活動や悪意のある活動に関連しているかどうかを確認します。APIを一部無料で利用できます。
 
 ## [SpamCop](https://www.spamcop.net/)
 
-ホストがスパム活動に関連しているかどうかを示します。いくつかの無料APIアクセスがあります。
+ホストがspam活動に関連しているかどうかを示します。APIを一部無料で利用できます。
 
 ## [mywot](https://www.mywot.com/)
 
-意見や他の指標に基づいて、ドメインが疑わしい/悪意のある情報に関連しているかどうかを確認します。
+評価やその他の指標に基づいて、ドメインが不審な情報や悪意のある情報に関連しているかどうかを確認します。
 
 ## [ipinfo](https://ipinfo.io/)
 
-IPアドレスから基本情報を取得します。月に最大100Kまでテストできます。
+IPアドレスの基本情報を取得します。月に最大100K回までテストできます。
 
 ## [securitytrails](https://securitytrails.com/app/account)
 
-このプラットフォームは、IP内のドメインやドメインサーバー内のドメイン、メールに関連するドメイン（関連するドメインを見つける）、ドメインのIP履歴（CloudFlareの背後にあるホストを見つける）、すべてのドメインが使用しているネームサーバーなどの情報を提供します。\
-いくつかの無料アクセスがあります。
+このプラットフォームは、ドメインやIPアドレスに関する情報を提供します。たとえば、IP内またはドメインサーバー内のドメイン、メールアドレスが所有するドメイン（関連ドメインの検索）、ドメインのIP履歴（CloudFlareの背後にあるホストの検索）、同じnameserverを使用するすべてのドメインなどです。\
+一部を無料で利用できます。
 
 ## [fullcontact](https://www.fullcontact.com/)
 
-メール、ドメイン、または会社名で検索し、関連する「個人」情報を取得します。メールの確認もできます。いくつかの無料アクセスがあります。
+メールアドレス、ドメイン、企業名で検索し、関連する「個人」情報を取得できます。メールアドレスの検証も可能です。一部を無料で利用できます。
 
 ## [RiskIQ](https://www.spiderfoot.net/documentation/)
 
-ドメインやIPに関する多くの情報が、無料/コミュニティ版でも得られます。
+無料版またはcommunity版でも、ドメインやIPから多くの情報を取得できます。
 
 ## [\_IntelligenceX](https://intelx.io/)
 
-ドメイン、IP、メールを検索し、ダンプから情報を取得します。いくつかの無料アクセスがあります。
+ドメイン、IP、メールアドレスを検索し、ダンプから情報を取得します。一部を無料で利用できます。
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
-IPで検索し、疑わしい活動に関連する情報を収集します。いくつかの無料アクセスがあります。
+IPで検索し、不審な活動に関連する情報を収集します。一部を無料で利用できます。
 
 ## [Greynoise](https://viz.greynoise.io/)
 
-IPまたはIP範囲で検索し、インターネットをスキャンしているIPに関する情報を取得します。15日間の無料アクセスがあります。
+IPまたはIP範囲で検索し、InternetをスキャンしているIPに関する情報を取得します。15日間無料で利用できます。
 
 ## [Shodan](https://www.shodan.io/)
 
-IPアドレスのスキャン情報を取得します。いくつかの無料APIアクセスがあります。
+IPアドレスのスキャン情報を取得します。APIを一部無料で利用できます。
 
 ## [Censys](https://censys.io/)
 
-Shodanに非常に似ています。
+shodanと非常によく似ています。
 
 ## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
 
-キーワードで検索してオープンS3バケットを見つけます。
+キーワードで検索して、公開されているS3バケットを見つけます。
 
 ## [Dehashed](https://www.dehashed.com/data)
 
-メールやドメインの漏洩した資格情報を見つけます。\
-商業用？
+メールアドレスやドメインのleaked credentialsを検索します。\
+商用？
 
 ## [psbdmp](https://psbdmp.ws/)
 
-メールが表示されたペーストビンを検索します。商業用？
+メールアドレスが出現したpastebinを検索します。商用？
 
 ## [emailrep.io](https://emailrep.io/key)
 
-メールの評判を取得します。商業用？
+メールアドレスの評判を取得します。商用？
 
 ## [ghostproject](https://ghostproject.fr/)
 
-漏洩したメールからパスワードを取得します。商業用？
+leaked emailsからパスワードを取得します。商用？
 
 ## [Binaryedge](https://www.binaryedge.io/)
 
@@ -112,19 +112,20 @@ IPから興味深い情報を取得します。
 
 ## [haveibeenpwned](https://haveibeenpwned.com/)
 
-ドメインやメールで検索し、それが侵害されたかどうかとパスワードを取得します。商業用？
+ドメインやメールアドレスで検索し、pwnedされているかどうかやパスワードを確認します。商用？
 
 ### [IP2Location.io](https://www.ip2location.io/)
 
-IPのジオロケーション、データセンター、ASN、さらにはVPN情報を検出します。月に30Kのクエリが無料で提供されます。
+IPのgeolocation、データセンター、ASN、さらにはVPN情報を検出します。月30Kクエリを無料で提供しています。
 
 ### [IPQuery.io](https://www.ipquery.io/)
-IPジオロケーションとOISNTをターゲットデータポイントで提供します。非商業用。
+対象を絞ったデータポイントによるIP GeolocationとOISNTを提供します。非商用です。
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)(商業ツール内？)
 
-[https://www.netcraft.com/](https://www.netcraft.com/) (商業ツール内？)
+[https://dnsdumpster.com/](https://dnsdumpster.com/)(商用ツール内？)
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (商業ツール内？)
+[https://www.netcraft.com/](https://www.netcraft.com/) (商用ツール内？)
+
+[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (商用ツール内？)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -4,54 +4,54 @@
 
 ## 基本情報
 
-SPI (Serial Peripheral Interface) は、IC (Integrated Circuits) 間の短距離通信に使用される同期シリアル通信プロトコルです。SPI通信プロトコルは、クロックとチップセレクト信号によって調整されるマスター-スレーブアーキテクチャを利用します。マスター-スレーブアーキテクチャは、EEPROM、センサー、制御デバイスなどの外部周辺機器を管理するマスター（通常はマイクロプロセッサ）で構成され、これらはスレーブと見なされます。
+SPI（Serial Peripheral Interface）は、組み込みシステムでIC（Integrated Circuits）間の短距離通信に使用される同期シリアル通信プロトコルです。SPI Communication Protocolは、ClockとChip Select Signalによって制御されるmaster-slave architectureを使用します。master-slave architectureは、EEPROM、センサー、制御デバイスなどの外部周辺機器を管理するmaster（通常はマイクロプロセッサ）で構成され、これらの周辺機器がslaveとみなされます。
 
-複数のスレーブがマスターに接続できますが、スレーブ同士は通信できません。スレーブは、クロックとチップセレクトの2つのピンによって管理されます。SPIは同期通信プロトコルであるため、入力ピンと出力ピンはクロック信号に従います。チップセレクトは、マスターがスレーブを選択し、相互作用するために使用されます。チップセレクトが高いと、スレーブデバイスは選択されず、低いと、チップが選択され、マスターがスレーブと相互作用します。
+複数のslaveを1つのmasterに接続できますが、slave同士は通信できません。slaveは、clockとchip selectという2つのピンによって管理されます。SPIは同期通信プロトコルであるため、入力ピンと出力ピンはclock信号に従います。chip selectは、masterがslaveを選択して通信するために使用されます。chip selectがhighの場合、slave deviceは選択されていません。一方、lowの場合はchipが選択され、masterはslaveと通信します。
 
-MOSI (Master Out, Slave In) と MISO (Master In, Slave Out) は、データの送信と受信を担当します。データは、MOSIピンを通じてスレーブデバイスに送信され、チップセレクトが低く保たれます。入力データには、スレーブデバイスベンダーのデータシートに従った命令、メモリアドレス、またはデータが含まれます。有効な入力があると、MISOピンはマスターにデータを送信します。出力データは、入力が終了した後の次のクロックサイクルで送信されます。MISOピンは、データが完全に送信されるまで、またはマスターがチップセレクトピンを高く設定するまでデータを送信します（その場合、スレーブは送信を停止し、マスターはその後のクロックサイクルでリスニングしません）。
+MOSI（Master Out, Slave In）とMISO（Master In, Slave Out）は、データの送受信を担当します。chip selectがlowに保持されている間、MOSIピンを通じてslave deviceにデータが送信されます。入力データには、slave deviceのベンダーが提供するdatasheetに基づき、命令、メモリアドレス、またはデータが含まれます。有効な入力を受け取ると、MISOピンがmasterへのデータ送信を担当します。出力データは、入力が終了した直後の次のclock cycleで正確に送信されます。MISOピンは、データの送信が完全に完了するまで、またはmasterがchip select pinをhighに設定するまでデータを送信します（その場合、slaveは送信を停止し、masterはそのclock cycle以降を受信しません）。
 
-## EEPROMからのファームウェアのダンプ
+## EEPROMからのFirmwareのDump
 
-ファームウェアのダンプは、ファームウェアを分析し、脆弱性を見つけるのに役立ちます。多くの場合、ファームウェアはインターネット上で入手できないか、モデル番号、バージョンなどの要因の変動により無関係です。したがって、物理デバイスから直接ファームウェアを抽出することは、脅威を特定する際に役立ちます。
+Firmwareのdumpは、firmwareを分析して脆弱性を発見する際に役立ちます。多くの場合、firmwareはインターネット上で入手できないか、model number、versionなどの要因の違いにより利用できません。そのため、物理deviceから直接firmwareを抽出することは、脅威を調査する際に対象を正確に絞り込むうえで役立ちます。
 
-シリアルコンソールを取得することは役立ちますが、ファイルが読み取り専用であることがよくあります。これにより、さまざまな理由から分析が制約されます。たとえば、パッケージを送受信するために必要なツールがファームウェアに存在しない場合があります。したがって、バイナリを抽出して逆アセンブルすることは実行可能ではありません。したがって、システムにファームウェア全体をダンプし、分析のためにバイナリを抽出することは非常に役立ちます。
+Serial Consoleを取得できると便利ですが、ファイルがread-onlyであることも少なくありません。これにはさまざまな理由があり、分析が制限されます。たとえば、パッケージの送受信に必要なtoolがfirmware内に存在しない場合があります。そのため、binaryを抽出してreverse engineerすることは現実的ではありません。そこで、システム上にfirmware全体をdumpし、分析のためにbinaryを抽出できるようにすると非常に役立ちます。
 
-また、レッドチーミング中やデバイスへの物理アクセスを取得する際に、ファームウェアをダンプすることで、ファイルを変更したり、悪意のあるファイルを注入したりして、それをメモリに再フラッシュすることができ、デバイスにバックドアを埋め込むのに役立ちます。したがって、ファームウェアのダンプによって解放される可能性は無数にあります。
+また、red teamingやdeviceへの物理アクセスを行う際、firmwareをdumpしてファイルを変更したり、malicious fileをinjectしたりしたうえでmemoryにreflashすることもできます。これはdeviceにbackdoorをimplantするのに役立ちます。そのため、firmware dumpingによって多数の可能性が開かれます。
 
-### CH341A EEPROMプログラマーおよびリーダー
+### CH341A EEPROM Programmer and Reader
 
-このデバイスは、EEPROMからファームウェアをダンプし、ファームウェアファイルで再フラッシュするための手頃なツールです。これは、コンピュータのBIOSチップ（これもEEPROMです）で作業するための人気の選択肢です。このデバイスはUSB経由で接続され、開始するために最小限のツールが必要です。また、通常は迅速に作業を完了するため、物理デバイスへのアクセスにも役立ちます。
+このdeviceは、EEPROMからfirmwareをdumpしたり、firmware fileをreflashしたりするための安価なtoolです。computerのBIOS chip（単なるEEPROMです）を扱う際によく利用されます。このdeviceはUSB経由で接続し、使用開始に必要なtoolも最小限です。また、通常は作業を短時間で完了できるため、物理deviceへのアクセス時にも役立ちます。
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-EEPROMメモリをCH341aプログラマーに接続し、デバイスをコンピュータに接続します。デバイスが検出されない場合は、コンピュータにドライバーをインストールしてみてください。また、EEPROMが正しい向きで接続されていることを確認してください（通常、VCCピンをUSBコネクタに対して逆向きに配置します）。そうしないと、ソフトウェアがチップを検出できません。必要に応じて図を参照してください：
+EEPROM memoryをCH341a Programmerに接続し、deviceをcomputerに接続します。deviceが検出されない場合は、computerにdriverをインストールしてみてください。また、EEPROMが正しい向きで接続されていることを確認してください（通常は、VCC PinをUSB connectorに対して逆向きに配置します）。そうしないと、softwareがchipを検出できません。必要に応じて、次のdiagramを参照してください。
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-最後に、flashrom、G-Flash (GUI) などのソフトウェアを使用してファームウェアをダンプします。G-Flashは、最小限のGUIツールで、迅速でEEPROMを自動的に検出します。これは、ファームウェアを迅速に抽出する必要がある場合に役立ち、文書をあまりいじることなく行えます。
+最後に、flashrom、G-Flash（GUI）などのsoftwareを使用してfirmwareをdumpします。G-Flashは最小限のGUI toolで高速に動作し、EEPROMを自動的に検出します。documentationを詳しく確認せずにfirmwareを素早く抽出する必要がある場合に役立ちます。
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
-ファームウェアをダンプした後、バイナリファイルの分析を行うことができます。strings、hexdump、xxd、binwalkなどのツールを使用して、ファームウェアやファイルシステム全体に関する多くの情報を抽出できます。
+firmwareをdumpした後は、binary fileを分析できます。strings、hexdump、xxd、binwalkなどのtoolを使用すると、firmwareだけでなく、file system全体からも多くの情報を抽出できます。
 
-ファームウェアからの内容を抽出するには、binwalkを使用できます。Binwalkは、16進数の署名を分析し、バイナリファイル内のファイルを特定し、それらを抽出することができます。
+firmwareの内容を抽出するには、binwalkを使用できます。Binwalkはhex signatureを分析してbinary file内のfileを特定し、それらをextractできます。
 ```
 binwalk -e <filename>
 ```
-このファイルは、使用されるツールや構成に応じて .bin または .rom である可能性があります。
+使用するツールや設定に応じて、`.bin` または `.rom` になります。
 
 > [!CAUTION]
-> ファームウェアの抽出は繊細なプロセスであり、多くの忍耐が必要です。取り扱いを誤ると、ファームウェアが破損したり、完全に消去されてデバイスが使用できなくなる可能性があります。ファームウェアを抽出する前に、特定のデバイスを研究することをお勧めします。
+> ファームウェアの抽出は繊細な作業であり、多くの忍耐を必要とします。取り扱いを誤ると、ファームウェアが破損したり、完全に消去されたりして、デバイスが使用不能になる可能性があります。ファームウェアの抽出を試みる前に、対象デバイスについて十分に調査することを推奨します。
 
 ### Bus Pirate + flashrom
 
-![](<../../images/image (910).png>)
+![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Bus Pirate + flashrom](<../../images/image (910).png>)
 
-Pirate Bus のピンアウトが **MOSI** と **MISO** のピンを SPI に接続するように示していても、いくつかの SPI ではピンを DI と DO として示す場合があります。 **MOSI -> DI, MISO -> DO**
+Pirate Bus の PINOUT に SPI 接続用の **MOSI** および **MISO** のピンが示されていても、SPI によってはピンが DI および DO と示されている場合があることに注意してください。**MOSI -> DI、MISO -> DO**
 
-![](<../../images/image (360).png>)
+![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Pirate Bus の PINOUT に MOSI および MISO のピンが示されていても、SPI によってはピンが MOSI および MISO と示されている場合があります。](<../../images/image (360).png>)
 
-Windows または Linux では、プログラム [**`flashrom`**](https://www.flashrom.org/Flashrom) を使用して、次のようにフラッシュメモリの内容をダンプできます。
+Windows または Linux では、[**`flashrom`**](https://www.flashrom.org/Flashrom) プログラムを使用して、次のようなコマンドを実行し、flash memory の内容を dump できます:
 ```bash
 # In this command we are indicating:
 # -VV Verbose

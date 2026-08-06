@@ -1,27 +1,27 @@
-# AD CS ドメイン永続化
+# AD CS Domain Persistence
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a summary of the domain persistence techniques shared in [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**. Check it for further details.
+**これは、[https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf) で共有されている domain persistence techniques の概要です**。詳細については同資料を確認してください。<sup>[[5]](#references)</sup>
 
 ## Forging Certificates with Stolen CA Certificates (Golden Certificate) - DPERSIST1
 
-証明書が CA 証明書であることはどのように判別できますか？
+証明書が CA certificate であることをどのように判断できますか？
 
-以下の条件がいくつか満たされていれば、証明書が CA 証明書であると判断できます:
+以下の条件を複数満たしている場合、証明書が CA certificate であると判断できます。<sup>[[5]](#references)</sup>
 
-- 証明書は CA サーバーに保存されており、秘密鍵はマシンの DPAPI、または OS が対応していれば TPM/HSM などのハードウェアで保護されている。
-- 証明書の Issuer および Subject フィールドが CA の識別名 (distinguished name) と一致している。
-- CA 証明書にのみ "CA Version" 拡張が存在する。
-- 証明書に Extended Key Usage (EKU) フィールドがない。
+- 証明書が CA server に保存されており、その private key がマシンの DPAPI、または operating system がサポートしている場合は TPM/HSM などの hardware によって保護されている。
+- 証明書の Issuer フィールドと Subject フィールドが、CA の distinguished name と一致している。
+- CA certificates にのみ存在する「CA Version」extension がある。
+- 証明書に Extended Key Usage (EKU) fields がない。
 
-この証明書の秘密鍵を抽出するには、CA サーバー上の `certsrv.msc` ツールを使用するのが組み込み GUI によるサポートされた方法です。とはいえ、この証明書はシステム内に保存されている他の証明書と本質的に異なるものではないため、[THEFT2 technique](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) のような方法で抽出することもできます。
+この証明書の private key を抽出するには、CA server 上の `certsrv.msc` tool を built-in GUI 経由で使用する方法が、サポートされている手段です。ただし、この証明書は system 内に保存されている他の証明書と違いがないため、[THEFT2 technique](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) などの methods を extraction に適用できます。
 
-証明書と秘密鍵は、Certipy を使用して次のコマンドでも取得できます:
+証明書と private key は、以下の command を使用して Certipy で取得することもできます。<sup>[[2]](#references)</sup>
 ```bash
 certipy ca 'corp.local/administrator@ca.corp.local' -hashes :123123.. -backup
 ```
-CA 証明書とその秘密鍵を `.pfx` 形式で入手したら、[ForgeCert](https://github.com/GhostPack/ForgeCert) のようなツールを使って有効な証明書を生成できます:
+CA 証明書とその秘密鍵を `.pfx` 形式で取得すると、[ForgeCert](https://github.com/GhostPack/ForgeCert) のようなツールを利用して有効な証明書を生成できます：
 ```bash
 # Generating a new certificate with ForgeCert
 ForgeCert.exe --CaCertPath ca.pfx --CaCertPassword Password123! --Subject "CN=User" --SubjectAltName localadmin@theshire.local --NewCertPath localadmin.pfx --NewCertPassword Password123!
@@ -36,19 +36,19 @@ Rubeus.exe asktgt /user:localdomain /certificate:C:\ForgeCert\localadmin.pfx /pa
 certipy auth -pfx administrator_forged.pfx -dc-ip 172.16.126.128
 ```
 > [!WARNING]
-> certificate forgery の対象となるユーザーは Active Directory 上でアクティブかつ認証可能である必要があります。krbtgt のような特殊アカウントに対する certificate forgery は効果がありません。
+> 証明書偽造の対象となるユーザーは、プロセスを成功させるためにアクティブな状態で、Active Directory で認証できなければなりません。krbtgt のような特殊なアカウント用に証明書を偽造しても効果はありません。
 
-この偽造された証明書は、指定された有効期限まで、またルート CA 証明書が有効である限り（通常は5年から**10年以上**）**有効**です。これは**machines**にも有効であるため、**S4U2Self** と組み合わせることで、攻撃者は CA 証明書が有効な限り、任意のドメインマシン上で**persistence を維持**できます。\
-さらに、この方法で**生成された証明書**は CA がそれらを認識していないため、**取り消すことができません**。
+この偽造証明書は、指定された終了日時まで、かつ **ルート CA 証明書が有効である限り**（通常は 5 年から **10 年以上**）**有効**です。また、**マシン**にも有効であるため、**S4U2Self** と組み合わせることで、攻撃者は CA 証明書が有効な限り、**任意のドメインマシン上で persistence を維持**できます。\
+さらに、この方法で**生成された証明書**は、CA がそれらを認識していないため、**revoke できません**。
 
-### Strong Certificate Mapping Enforcement (2025+) 下での運用
+### Strong Certificate Mapping Enforcement（2025 年以降）下での運用
 
-2025年2月11日以降（KB5014754 の展開後）、domain controllers は証明書マッピングに対してデフォルトで **Full Enforcement** に設定されます。実務上、これはあなたの偽造証明書が次のいずれかを満たす必要があることを意味します:
+2025 年 2 月 11 日（KB5014754 の展開後）以降、domain controller は証明書マッピングに対してデフォルトで **Full Enforcement** を適用します。実際には、偽造証明書は次のいずれかを満たす必要があります。
 
-- ターゲットアカウントへの強いバインディングを含む（例えば、SID セキュリティ拡張）、または
-- ターゲットオブジェクトの `altSecurityIdentities` 属性に対して強い明示的マッピングと組み合わせること。
+- 対象アカウントへの strong binding（たとえば SID security extension）を含む、または
+- 対象オブジェクトの `altSecurityIdentities` 属性に strong な明示的マッピングを設定する。<sup>[[1]](#references)</sup>
 
-永続化の信頼できるアプローチは、盗まれた Enterprise CA にチェーンされた偽造証明書を mint し、被害者プリンシパルに強い明示的マッピングを追加することです:
+persistence のための信頼性の高いアプローチは、盗み出した Enterprise CA につながる偽造証明書を発行し、victim principal に strong な明示的マッピングを追加することです：
 ```powershell
 # Example: map a forged cert to a target account using Issuer+Serial (strong mapping)
 $Issuer  = 'DC=corp,DC=local,CN=CORP-DC-CA'           # reverse DN format expected by AD
@@ -57,12 +57,12 @@ $Map     = "X509:<I>$Issuer<SR>$SerialR"             # strong mapping format
 Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
 ```
 注記
-- SIDセキュリティ拡張を含む偽造証明書を作成できる場合、それらはFull Enforcement下でも暗黙的にマップされます。そうでない場合は、明示的かつ強力なマッピングを優先してください。明示的なマッピングの詳細は[account-persistence](account-persistence.md)を参照。
-- ここでの失効は防御側の助けになりません: 偽造証明書はCAデータベースに存在しないため、失効させることができません。
+- SID security extension を含む forged certificates を作成できる場合、それらは Full Enforcement の下でも暗黙的にマッピングされます。それ以外の場合は、explicit strong mappings を優先してください。explicit mappings の詳細については、[account-persistence](account-persistence.md) を参照してください。
+- Revocation はここでは defenders の助けになりません。forged certificates は CA database に認識されないため、revocation できません。
 
-#### Full-Enforcement 対応の偽造 (SID-aware)
+#### Full-Enforcement compatible forging（SID-aware）
 
-更新されたツールにより、SIDを直接埋め込めるようになり、DCsが弱いマッピングを拒否してもgolden certificatesを使用可能なままにできます:
+更新された tooling では SID を直接埋め込めるため、DCs が weak mappings を拒否する場合でも golden certificates を使用できます:<sup>[[3]](#references)</sup>
 ```bash
 # Certify 2.0 integrates ForgeCert and can embed SID
 Certify.exe forge --ca-pfx CORP-DC-CA.pfx --ca-pass Password123! \
@@ -73,15 +73,15 @@ Certify.exe forge --ca-pfx CORP-DC-CA.pfx --ca-pass Password123! \
 certipy forge -ca-pfx CORP-DC-CA.pfx -upn administrator@corp.local \
 -sid S-1-5-21-1111111111-2222222222-3333333333-500 -out administrator_sid.pfx
 ```
-SIDを埋め込むことで、監視されている可能性がある `altSecurityIdentities` に触れる必要を避けつつ、強力なマッピングチェックを満たせます。
+SIDを埋め込むことで、監視されている可能性のある `altSecurityIdentities` に触れる必要がなくなり、strong mapping checksも引き続き満たせます。
 
-## Trusting Rogue CA Certificates - DPERSIST2
+## Rogue CA Certificatesを信頼させる - DPERSIST2
 
-`NTAuthCertificates` オブジェクトは、Active Directory (AD) が使用する `cacertificate` 属性に1つ以上の **CA certificates** を格納するよう定義されています。**domain controller** による検証では、認証対象の **certificate** の Issuer フィールドで指定された **CA specified** と一致するエントリが `NTAuthCertificates` オブジェクトにあるかを確認します。一致が見つかれば、認証は進行します。
+`NTAuthCertificates` objectは、その`cacertificate` attributeに1つ以上の **CA certificates** を格納するよう定義されており、Active Directory (AD)が利用します。**domain controller**による検証プロセスでは、認証に使用する **certificate** のIssuer fieldで指定された **CA** と一致するエントリが`NTAuthCertificates` objectにあるか確認します。一致するエントリが見つかると、認証が進行します。<sup>[[5]](#references)</sup>
 
-攻撃者がこの AD オブジェクトを制御できる場合、自己署名の CA 証明書を `NTAuthCertificates` オブジェクトに追加できます。通常、このオブジェクトを変更できるのは **Enterprise Admin** グループのメンバー、または **forest root’s domain** の **Domain Admins** や **Administrators** のみです。`NTAuthCertificates` オブジェクトは `certutil.exe` を使って `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA` のコマンドで編集するか、[**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool) を利用して行えます。
+攻撃者がこのAD objectを制御できる場合、self-signed CA certificateを`NTAuthCertificates` objectに追加できます。通常、このobjectを変更する権限が付与されているのは、**Enterprise Admin** groupのメンバー、ならびに**forest root’s domain**の**Domain Admins**または**Administrators**のみです。`certutil.exe`を使用して`certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA`コマンドを実行するか、[**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool)を使用して`NTAuthCertificates` objectを編集できます。
 
-この手法に役立つ追加コマンド:
+このtechniqueで役立つ追加のコマンド：
 ```bash
 # Add/remove and inspect the Enterprise NTAuth store
 certutil -enterprise -f -AddStore NTAuth C:\Temp\CERT.crt
@@ -92,33 +92,33 @@ certutil -enterprise -delstore NTAuth <Thumbprint>
 certutil -dspublish -f C:\Temp\CERT.crt RootCA          # CN=Certification Authorities
 certutil -dspublish -f C:\Temp\CERT.crt CA               # CN=AIA
 ```
-この機能は、以前説明した ForgeCert を使い証明書を動的に生成する方法と組み合わせると特に有効です。
+この機能は、前述の ForgeCert を使用して証明書を動的に生成する手法と組み合わせた場合に、特に有効です。
 
-> Post-2025 のマッピングに関する考慮事項: NTAuth に不正な CA を置いても、発行元 CA の信頼が確立されるだけです。DC が **Full Enforcement** の場合にログオンに leaf certificate を使用するには、leaf に SID セキュリティ拡張が含まれているか、ターゲットオブジェクト上に明確な強力なマッピングが存在する必要があります（例: `altSecurityIdentities` の Issuer+Serial）。See {{#ref}}account-persistence.md{{#endref}}.
+> 2025年以降の mapping に関する考慮事項: NTAuth に rogue CA を配置しても、発行元 CA への trust が確立されるだけです。DC が **Full Enforcement** の場合に leaf certificate を logon に使用するには、leaf に SID security extension が含まれているか、対象オブジェクトに対して強力な明示的 mapping（例えば `altSecurityIdentities` の Issuer+Serial）が存在する必要があります。{{#ref}}account-persistence.md{{#endref}} を参照してください。
 
-## 悪意のある誤設定 - DPERSIST3
+## 悪意ある設定ミス - DPERSIST3
 
-AD CS コンポーネントの **セキュリティ記述子の変更** による **永続性** の機会は多数存在します。「[Domain Escalation](domain-escalation.md)」セクションで説明した変更は、権限を持つ攻撃者によって悪用される可能性があります。これには、次のような機密コンポーネントへの「コントロール権限」（例: WriteOwner/WriteDACL/etc.）の追加が含まれます:
+AD CS コンポーネントの **security descriptor** を変更することで、**persistence** を確保できる機会は数多く存在します。"[Domain Escalation](domain-escalation.md)" セクションで説明されている変更は、高い権限を持つ attacker によって悪用目的で実装できます。これには、以下のような機密性の高いコンポーネントへの "control rights"（WriteOwner/WriteDACL など）の追加が含まれます:<sup>[[5]](#references)</sup>
 
-- **CA サーバの AD コンピュータ** オブジェクト
-- **CA サーバの RPC/DCOM サーバ**
-- **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** 内の任意の **下位 AD オブジェクトまたはコンテナ**（例: Certificate Templates コンテナ、Certification Authorities コンテナ、NTAuthCertificates オブジェクトなど）
-- 組織やデフォルトで **AD CS を制御する権限を委譲された AD グループ**（組み込みの Cert Publishers グループやそのメンバー等）
+- **CA server’s AD computer** object
+- **CA server’s RPC/DCOM server**
+- **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** 内の任意の **descendant AD object or container**（例えば、Certificate Templates container、Certification Authorities container、NTAuthCertificates object など）
+- デフォルトまたは組織によって AD CS の制御権限を委任された **AD groups**（組み込みの Cert Publishers group と、そのメンバーなど）
 
-悪意ある実装の例としては、ドメインで **elevated permissions** を持つ攻撃者が、デフォルトの **`User`** 証明書テンプレートに **`WriteOwner`** 権限を追加し、権利のプリンシパルを攻撃者自身にする、というものがあります。これを悪用するには、攻撃者はまず **`User`** テンプレートの所有者を自分に変更します。次にテンプレートで **`mspki-certificate-name-flag`** を **1** に設定し **`ENROLLEE_SUPPLIES_SUBJECT`** を有効化して、リクエストで Subject Alternative Name を要求者が指定できるようにします。その後、攻撃者はその **テンプレート** を使って証明書を登録し、代替名として **ドメイン管理者** の名前を選択し、取得した証明書を DA としての認証に利用できます。
+悪意ある実装の例として、domain 内で **elevated permissions** を持つ attacker が、デフォルトの **`User`** certificate template に **`WriteOwner`** permission を追加し、その権限の principal を attacker 自身にするケースが挙げられます。これを悪用するため、attacker はまず **`User`** template の ownership を自分自身に変更します。その後、template 上の **`mspki-certificate-name-flag`** を **1** に設定して **`ENROLLEE_SUPPLIES_SUBJECT`** を有効にし、user が request に Subject Alternative Name を指定できるようにします。続いて attacker は **template** を使用して **enroll** し、alternative name として **domain administrator** の名前を選択できます。取得した certificate は、DA として authentication に利用できます。
 
-長期的なドメイン永続性のために攻撃者が設定しうる実務的なポイント（詳細と検出方法は {{#ref}}domain-escalation.md{{#endref}} を参照）:
+attacker が long-term domain persistence のために設定できる実用的な項目（詳細と detection については {{#ref}}domain-escalation.md{{#endref}} を参照）:
 
-- リクエスタからの SAN を許可する CA ポリシーフラグ（例: `EDITF_ATTRIBUTESUBJECTALTNAME2` を有効にする）。これにより ESC1 に類する経路が悪用可能なままになります。
-- 認証可能な発行を許すテンプレートの DACL や設定（例: Client Authentication EKU を追加、`CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` を有効化）。
-- 防御者がクリーンアップを試みた際に不正な発行者を再導入し続けられるよう、`NTAuthCertificates` オブジェクトや CA コンテナを制御する。
+- requesters から SAN を許可する CA policy flags（例: `EDITF_ATTRIBUTESUBJECTALTNAME2` の有効化）。これにより、ESC1-like paths が引き続き exploitable になります。
+- authentication-capable issuance を許可する template DACL または settings（例: Client Authentication EKU の追加、`CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` の有効化）。
+- `NTAuthCertificates` object または CA containers の制御。これにより、defender が cleanup を試みても rogue issuers を継続的に再導入できます。
 
 > [!TIP]
-> KB5014754 適用後の強化環境では、これらの誤設定に明示的な強いマッピング（`altSecurityIdentities`）を組み合わせることで、DC が強いマッピングを強制している場合でも、発行または偽造した証明書を引き続き使用可能にできます。
+> KB5014754 以降の hardened environments では、これらの misconfigurations と明示的な strong mappings（`altSecurityIdentities`）を組み合わせることで、DC が strong mapping を enforce している場合でも、発行または forge した certificates を引き続き使用できます。
 
-### 証明書の更新悪用 (ESC14) による永続化
+### Certificate renewal abuse (ESC14) for persistence
 
-認証可能な証明書（または Enrollment Agent の証明書）を侵害した場合、発行テンプレートが公開されたままであり、CA が発行チェーンを信頼している限り、**それを無期限に更新する**ことが可能です。更新は元の識別バインディングを維持しつつ有効期限を延長するため、テンプレートが修正されるか CA が再公開されない限り、排除が困難になります。
+authentication-capable certificate（または Enrollment Agent certificate）を compromise すると、発行元 template が published のままで、CA が issuer chain を trust している限り、**renew** を無期限に実行できます。Renewal により元の identity bindings が維持されたまま validity が延長されるため、template が修正されるか CA が republished されない限り、eviction は困難になります。<sup>[[4]](#references)</sup>
 ```bash
 # Renew a stolen user cert to extend validity
 certipy req -ca CORP-DC-CA -template User -pfx stolen_user.pfx -renew -out user_renewed_2026.pfx
@@ -126,15 +126,15 @@ certipy req -ca CORP-DC-CA -template User -pfx stolen_user.pfx -renew -out user_
 # Renew an on-behalf-of cert issued via an Enrollment Agent
 certipy req -ca CORP-DC-CA -on-behalf-of 'CORP/victim' -pfx agent.pfx -renew -out victim_renewed.pfx
 ```
-ドメインコントローラーが**Full Enforcement**にある場合、`-sid <victim SID>` を追加する（または SID セキュリティ拡張を含むテンプレートを使用する）ことで、更新されたリーフ証明書が `altSecurityIdentities` に触れることなく引き続き強力にマッピングされるようにします。CA 管理者権限を持つ攻撃者は、`policy\RenewalValidityPeriodUnits` を調整して、自身で証明書を発行する前に更新後の有効期間を延長することもあります。
+ドメインコントローラーが **Full Enforcement** の場合は、`-sid <victim SID>` を追加する（または SID セキュリティ拡張を引き続き含むテンプレートを使用する）ことで、`altSecurityIdentities` に触れずに更新されたリーフ証明書が引き続き強力にマッピングされるようにします。CA admin 権限を持つ攻撃者は、証明書を自身に発行する前に `policy\RenewalValidityPeriodUnits` を調整して、更新された証明書の有効期間を延長することもできます。<sup>[[2]](#references)[[4]](#references)</sup>
 
 
-## 参考文献
+## References
 
-- [Microsoft KB5014754 – Certificate-based authentication changes on Windows domain controllers (enforcement timeline and strong mappings)](https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
-- [Certipy – Command Reference and forge/auth usage](https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference)
-- [SpecterOps – Certify 2.0 (integrated forge with SID support)](https://specterops.io/blog/2025/08/11/certify-2-0/)
-- [ESC14 renewal abuse overview](https://www.adcs-security.com/attacks/esc14)
-- [0xdf – HTB: Certificate (SeManageVolumePrivilege to exfil CA keys → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
+- [1] [Microsoft KB5014754 – Certificate-based authentication changes on Windows domain controllers (enforcement timeline and strong mappings)](https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
+- [2] [Certipy – Command Reference and forge/auth usage](https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference)
+- [3] [SpecterOps – Certify 2.0 (integrated forge with SID support)](https://specterops.io/blog/2025/08/11/certify-2-0/)
+- [4] [ESC14 renewal abuse overview](https://www.adcs-security.com/attacks/esc14)
+- [5] [SpecterOps – Certified Pre-Owned: Abusing Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 
 {{#include ../../../banners/hacktricks-training.md}}
