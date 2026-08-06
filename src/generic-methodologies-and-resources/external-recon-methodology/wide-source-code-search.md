@@ -131,8 +131,6 @@ For dedicated secret hunting, org-wide GitHub dorks, and tooling such as Truffle
 github-leaked-secrets.md
 {{#endref}}
 
-
-
 ## References
 
 - [1] [GitHub Code Search syntax](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)

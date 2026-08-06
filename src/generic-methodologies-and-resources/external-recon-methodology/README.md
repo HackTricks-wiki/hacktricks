@@ -526,11 +526,9 @@ echo www | subzuf facebook.com
 
 Check this blog post I wrote about how to **automate the subdomain discovery** from a domain using **Trickest workflows** so I don't need to launch manually a bunch of tools in my computer:
 
-
 {{#ref}}
 https://trickest.com/blog/full-subdomain-discovery-using-workflow/
 {{#endref}}
-
 
 {{#ref}}
 https://trickest.com/blog/full-subdomain-brute-force-discovery-using-workflow/
@@ -697,7 +695,6 @@ You can use the **tool** [**Leakos**](https://github.com/carlospolop/Leakos) to 
 
 Check also this **page** for potential **github dorks** you could also search for in the organization you are attacking:
 
-
 {{#ref}}
 github-leaked-secrets.md
 {{#endref}}
@@ -722,7 +719,6 @@ If you find **valid leaked** credentials or API tokens, this is a very easy win.
 If you found that the company has **open-source code** you can **analyse** it and search for **vulnerabilities** on it.
 
 **Depending on the language** there are different **tools** you can use:
-
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-web/code-review-tools.md

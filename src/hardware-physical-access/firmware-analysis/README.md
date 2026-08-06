@@ -82,7 +82,7 @@ hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
 
-If you don't find much with those tools check the **entropy** of the image with `binwalk -E <bin>`, if low entropy, then it's not likely to be encrypted. If high entropy, Its likely encrypted (or compressed in some way).
+If you don't find much with those tools check the **entropy** of the image with `binwalk -E <bin>`, if low entropy, then it's not likely to be encrypted. If high entropy, Its likely encrypted (or compressed in some way).<sup>[[2]](#references)</sup>
 
 Moreover, you can use these tools to extract **files embedded inside the firmware**:
 
@@ -215,7 +215,7 @@ During firmware analysis you may find that `<token>` is derived locally from the
 
 - token = MD5( deviceId || STATIC_KEY ) and represented as uppercase hex
 
-This design enables anyone who learns a deviceId and the STATIC_KEY to reconstruct the URL and pull cloud config, often revealing plaintext MQTT credentials and topic prefixes.
+This design enables anyone who learns a deviceId and the STATIC_KEY to reconstruct the URL and pull cloud config, often revealing plaintext MQTT credentials and topic prefixes.<sup>[[5]](#references)</sup>
 
 Practical workflow:
 
@@ -339,7 +339,7 @@ target remote <device-ip>:1234
 
 ### Zigbee / radio-co-processor message mapping
 
-On IoT hubs the RF stack is often split between a **radio MCU** and a Linux userland process. A useful workflow is to map the path:
+On IoT hubs the RF stack is often split between a **radio MCU** and a Linux userland process. A useful workflow is to map the path:<sup>[[8]](#references)</sup>
 
 1. **RF frame** on the air
 2. **controller-side parser** on the radio MCU
@@ -358,7 +358,7 @@ For Zigbee specifically, capture pairing traffic and check whether the target st
 
 ### Manufacturer-specific protocol handlers and FSM-gated reachability
 
-Vendor-specific Zigbee/ZCL commands are often a better target than standardized clusters because they feed **custom parsing code** and internal **FSMs** with less battle-tested validation.
+Vendor-specific Zigbee/ZCL commands are often a better target than standardized clusters because they feed **custom parsing code** and internal **FSMs** with less battle-tested validation.<sup>[[8]](#references)</sup>
 
 Practical workflow:
 
@@ -371,7 +371,7 @@ For timing-sensitive protocols, packet replay from a Python framework may be too
 
 ### Fragmented-download bug class in embedded daemons
 
-A recurring firmware bug class appears in **fragmented blob/model/configuration downloads**:
+A recurring firmware bug class appears in **fragmented blob/model/configuration downloads**:<sup>[[8]](#references)</sup>
 
 1. The **first fragment** (`offset == 0`) stores `ctx->total_size` and allocates `malloc(total_size)`.
 2. Later fragments only validate the attacker-controlled **packet-local** fields such as `packet_total_size >= offset + chunk_len`.
@@ -393,7 +393,7 @@ In embedded daemons, the easiest way to trigger heap metadata exploitation is of
 - Exceed the retry threshold so the daemon **resets context** and frees the corrupted buffer.
 - Use this predictable `free()` to trigger allocator-side primitives before the process crashes for unrelated reasons.
 
-This is especially useful against **musl/uClibc/dlmalloc-like** allocators in embedded Linux, where corrupting chunk metadata can turn unlink/unbin logic into a write primitive. A stable pattern is to corrupt a **size field** to redirect allocator traversal into **fake chunks staged inside the overflowed buffer**, instead of immediately clobbering real bin pointers and crashing the process.
+This is especially useful against **musl/uClibc/dlmalloc-like** allocators in embedded Linux, where corrupting chunk metadata can turn unlink/unbin logic into a write primitive. A stable pattern is to corrupt a **size field** to redirect allocator traversal into **fake chunks staged inside the overflowed buffer**, instead of immediately clobbering real bin pointers and crashing the process.<sup>[[8]](#references)</sup>
 
 ## Binary Exploitation and Proof-of-Concept
 
@@ -454,7 +454,7 @@ firmware_v1.3.11.490_signed.bin
 
 ### Updater-only anti-rollback bypass in A/B slot designs
 
-Some vendors do implement an anti-downgrade **ratchet**, but only inside the *updater* logic (for example a UDS routine over CAN, a recovery command, or a userspace OTA agent). If the **bootloader** later checks only the image signature/CRC and trusts the partition table or slot metadata, rollback protection can still be bypassed.
+Some vendors do implement an anti-downgrade **ratchet**, but only inside the *updater* logic (for example a UDS routine over CAN, a recovery command, or a userspace OTA agent). If the **bootloader** later checks only the image signature/CRC and trusts the partition table or slot metadata, rollback protection can still be bypassed.<sup>[[7]](#references)</sup>
 
 Typical weak design:
 
@@ -514,7 +514,7 @@ To practice discovering vulnerabilities in firmware, use the following vulnerabl
 
 ## Recovering firmware decryption keys from embedded KMS/Vault state
 
-When an update image mixes small plaintext metadata with a large high-entropy blob, do container triage before brute-forcing anything:
+When an update image mixes small plaintext metadata with a large high-entropy blob, do container triage before brute-forcing anything:<sup>[[4]](#references)</sup>
 
 - Dump headers, offsets and line boundaries with `hexdump`, `xxd`, `strings -tx`, `base64 -d`, and `binwalk -E`.
 - `Salted__` usually means OpenSSL `enc` format: the next 8 bytes are the salt and the remaining bytes are ciphertext.
@@ -559,13 +559,13 @@ This turns "encrypted firmware" into a more general problem: **recover the appli
 
 ## References
 
-- [Cracking Firmware with Claude: Senior-Level Skill, Junior-Level Autonomy](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
-- [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
-- [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
-- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
-- [How a $20 Smart Device Gave Me Access to Your Home](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
-- [Now You See mi: Now You're Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
-- [Synacktiv - Exploiting the Tesla Wall Connector from its charge port connector - Part 2: bypassing the anti-downgrade](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
-- [Make it Blink: Over-the-Air Exploitation of the Philips Hue Bridge](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
+- [1] [Cracking Firmware with Claude: Senior-Level Skill, Junior-Level Autonomy](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
+- [2] [Firmware Security Testing Methodology](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
+- [3] [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
+- [4] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [5] [How a $20 Smart Device Gave Me Access to Your Home](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
+- [6] [Now You See mi: Now You're Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
+- [7] [Synacktiv - Exploiting the Tesla Wall Connector from its charge port connector - Part 2: bypassing the anti-downgrade](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
+- [8] [Make it Blink: Over-the-Air Exploitation of the Philips Hue Bridge](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
 
 {{#include ../../banners/hacktricks-training.md}}
