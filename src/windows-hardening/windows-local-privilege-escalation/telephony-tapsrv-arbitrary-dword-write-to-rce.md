@@ -2,46 +2,48 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-When the Windows Telephony service (TapiSrv, `tapisrv.dll`) is configured as a **TAPI server**, it exposes the **`tapsrv` MSRPC interface over the `\pipe\tapsrv` named pipe** to authenticated SMB clients. A design bug in the asynchronous event delivery for remote clients lets an attacker turn a mailslot handle into a **controlled 4-byte write to any pre-existing file writable by `NETWORK SERVICE`**. That primitive can be chained to overwrite the Telephony admin list and abuse an **admin-only arbitrary DLL load** to execute code as `NETWORK SERVICE`.
+Windows Telephony service(TapiSrv, `tapisrv.dll`)가 **TAPI server**로 구성되면, 인증된 SMB client에 **`\pipe\tapsrv` named pipe를 통한 `tapsrv` MSRPC interface**를 노출합니다. 원격 client를 위한 asynchronous event delivery의 설계 버그를 이용하면, 공격자는 mailslot handle을 **`NETWORK SERVICE`가 쓸 수 있는 기존 파일에 대한 제어된 4바이트 쓰기**로 변환할 수 있습니다. 이 primitive는 Telephony admin list를 덮어쓰고 **admin 전용 arbitrary DLL load**를 악용하여 `NETWORK SERVICE` 권한으로 code를 실행하는 데 사용할 수 있습니다.<sup>[[1]](#references)</sup>
 
-## 공격 표면
-- **원격 노출은 활성화된 경우에만**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Telephony\Server\DisableSharing`가 공유를 허용해야 함(또는 `TapiMgmt.msc` / `tcmsetup /c <server>`로 구성). 기본적으로 `tapsrv`는 로컬 전용임.
-- 인터페이스: MS-TRP (`tapsrv`)가 **SMB named pipe**를 통해 제공되므로 공격자는 유효한 SMB 인증이 필요함.
-- 서비스 계정: `NETWORK SERVICE` (수동 시작, 온디맨드).
+## Attack Surface
 
-## 원시 기능: Mailslot 경로 혼동 → 임의 DWORD 쓰기
-- `ClientAttach(pszDomainUser, pszMachine, ...)`는 비동기 이벤트 전달을 초기화함. pull 모드에서 서비스는 다음을 수행:
+- **활성화된 경우에만 원격 노출**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Telephony\Server\DisableSharing`가 sharing을 허용해야 합니다(`TapiMgmt.msc` / `tcmsetup /c <server>`를 통해 구성할 수도 있음). 기본적으로 `tapsrv`는 local-only입니다.
+- Interface: **SMB named pipe**를 통한 MS-TRP(`tapsrv`)이므로 공격자에게 유효한 SMB auth가 필요합니다.
+- Service account: `NETWORK SERVICE`(manual start, on-demand).<sup>[[1]](#references)</sup>
+
+## Primitive: Mailslot Path Confusion → Arbitrary DWORD Write
+- `ClientAttach(pszDomainUser, pszMachine, ...)`는 async event delivery를 초기화합니다. pull mode에서 service는 다음을 수행합니다:
 ```c
 CreateFileW(pszDomainUser, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 ```
-`pszDomainUser`가 mailslot 경로(`\\*\MAILSLOT\...`)인지 검증하지 않음. `NETWORK SERVICE`로 쓰기가 가능한 **기존 파일 시스템 경로**라면 모두 허용됨.
-- 각 비동기 이벤트 쓰기는 열린 핸들에 공격자가 제어하는 단일 **`DWORD` = `InitContext`**(이후 `Initialize` 요청에서 제어 가능)를 저장하므로 **write-what/write-where (4 bytes)**가 발생함.
+`pszDomainUser`가 mailslot path(`\\*\MAILSLOT\...`)인지 검증하지 않습니다. 따라서 `NETWORK SERVICE`가 쓸 수 있는 **모든 기존 filesystem path**가 허용됩니다.
+- 모든 async event write는 단일 **`DWORD` = `InitContext`**(이후 `Initialize` request에서 공격자가 제어)를 열린 handle에 저장하므로, **write-what/write-where (4 bytes)**가 발생합니다.<sup>[[1]](#references)</sup>
 
-## 결정적 쓰기 강제 방법
-1. **대상 파일 열기**: `ClientAttach`를 `pszDomainUser = <existing writable path>`(예: `C:\Windows\TAPI\tsec.ini`)로 호출.
-2. 각 `DWORD`를 쓰려면 `ClientRequest`에 대해 다음 RPC 시퀀스를 실행:
-- `Initialize` (`Req_Func 47`): `InitContext = <4-byte value>`와 `pszModuleName = DIALER.EXE`(또는 per-user priority 리스트의 상위 항목) 설정.
-- `LRegisterRequestRecipient` (`Req_Func 61`): `dwRequestMode = LINEREQUESTMODE_MAKECALL`, `bEnable = 1`(라인 앱 등록, 최고 우선 수신자 재계산).
-- `TRequestMakeCall` (`Req_Func 121`): `NotifyHighestPriorityRequestRecipient`를 강제하여 비동기 이벤트 생성.
-- `GetAsyncEvents` (`Req_Func 0`): 큐에서 꺼내어/완료하여 쓰기 실행.
-- 다시 `LRegisterRequestRecipient`를 `bEnable = 0`으로(등록 해제).
-- `Shutdown` (`Req_Func 86`)으로 라인 앱 종료.
-- 우선순위 제어: “highest priority” 수신자는 `pszModuleName`을 `HKCU\Software\Microsoft\Windows\CurrentVersion\Telephony\HandoffPriorities\RequestMakeCall`과 비교하여 선택(클라이언트로 위임(impersonate)한 상태에서 읽음). 필요시 `LSetAppPriority` (`Req_Func 69`)로 모듈 이름을 삽입.
-- 파일은 `OPEN_EXISTING`을 사용하므로 **이미 존재해야 함**. `NETWORK SERVICE`로 쓰기가 가능한 일반 후보: `C:\Windows\System32\catroot2\dberr.txt`, `C:\Windows\ServiceProfiles\NetworkService\AppData\Local\Temp\MpCmdRun.log`, `...\MpSigStub.log`.
+## Forcing Deterministic Writes
+1. **Target file 열기**: `pszDomainUser = <existing writable path>`(예: `C:\Windows\TAPI\tsec.ini`)로 `ClientAttach`를 호출합니다.
+2. 쓸 각 `DWORD`에 대해 `ClientRequest`에 다음 RPC sequence를 실행합니다:
+- `Initialize`(`Req_Func 47`): `InitContext = <4-byte value>`로 설정하고 `pszModuleName = DIALER.EXE`(또는 per-user priority list의 다른 상위 entry)로 지정합니다.
+- `LRegisterRequestRecipient`(`Req_Func 61`): `dwRequestMode = LINEREQUESTMODE_MAKECALL`, `bEnable = 1`로 설정합니다(line app을 등록하고 highest priority recipient를 다시 계산).
+- `TRequestMakeCall`(`Req_Func 121`): `NotifyHighestPriorityRequestRecipient`를 강제로 호출하여 async event를 생성합니다.
+- `GetAsyncEvents`(`Req_Func 0`): write를 dequeue/complete합니다.
+- `LRegisterRequestRecipient`를 `bEnable = 0`으로 다시 호출합니다(unregister).
+- `Shutdown`(`Req_Func 86`)으로 line app을 teardown합니다.
+- Priority control: “highest priority” recipient는 `HKCU\Software\Microsoft\Windows\CurrentVersion\Telephony\HandoffPriorities\RequestMakeCall`의 `pszModuleName`을 비교하여 선택됩니다(client를 impersonating하는 동안 읽음). 필요한 경우 `LSetAppPriority`(`Req_Func 69`)를 사용해 module name을 추가합니다.
+- `OPEN_EXISTING`이 사용되므로 file은 **이미 존재해야 합니다**. 일반적인 `NETWORK SERVICE` writable candidate는 `C:\Windows\System32\catroot2\dberr.txt`, `C:\Windows\ServiceProfiles\NetworkService\AppData\Local\Temp\MpCmdRun.log`, `...\MpSigStub.log`입니다.<sup>[[1]](#references)</sup>
 
-## DWORD 쓰기에서 TapiSrv 내부 RCE로
-1. **자기 자신에게 Telephony “admin” 권한 부여**: `C:\Windows\TAPI\tsec.ini`를 목표로 하고 위의 4바이트 쓰기를 이용해 `[TapiAdministrators]\r\n<DOMAIN\\user>=1`을 추가. 서비스가 INI를 다시 읽고 계정에 대해 `ptClient->dwFlags |= 9`을 설정하도록 **새로운** 세션(`ClientAttach`)을 시작.
-2. **관리자 전용 DLL 로드 오용**: `GetUIDllName`을 `dwObjectType = TUISPIDLL_OBJECT_PROVIDERID`로 보내고 `dwProviderFilenameOffset`로 경로를 제공. 관리자라면 서비스는 `LoadLibrary(path)`를 호출한 뒤 내보낸 함수 `TSPI_providerUIIdentify`를 호출:
-- UNC 경로로 실제 Windows SMB 공유를 가리키면 동작; 일부 공격자 SMB 서버는 `ERROR_SMB_GUEST_LOGON_BLOCKED`로 실패함.
-- 대안: 동일한 4바이트 쓰기 원시 기능을 사용해 로컬에 DLL을 천천히 생성한 뒤 로드.
-3. **페이로드**: 해당 export는 `NETWORK SERVICE` 권한으로 실행됨. 최소한의 DLL은 `cmd.exe /c whoami /all > C:\Windows\Temp\poc.txt`를 실행하고 서비스가 DLL을 언로드하도록 비영(非0) 값을 반환(예: `0x1337`)하면 실행 확인 가능.
+## From DWORD Write to RCE inside TapiSrv
+1. **Telephony “admin” 권한 부여**: `C:\Windows\TAPI\tsec.ini`를 target으로 지정하고, 위의 4-byte writes를 사용해 `[TapiAdministrators]\r\n<DOMAIN\\user>=1`을 append합니다. 새로운 session(`ClientAttach`)을 시작하면 service가 INI를 다시 읽고 해당 account에 대해 `ptClient->dwFlags |= 9`를 설정합니다.
+2. **Admin-only DLL load**: `dwObjectType = TUISPIDLL_OBJECT_PROVIDERID`로 `GetUIDllName`을 보내고 `dwProviderFilenameOffset`를 통해 path를 제공합니다. admin인 경우 service는 `LoadLibrary(path)`를 수행한 다음 export인 `TSPI_providerUIIdentify`를 호출합니다:
+- 실제 Windows SMB share의 UNC path에서 작동합니다. 일부 attacker SMB server에서는 `ERROR_SMB_GUEST_LOGON_BLOCKED`가 발생합니다.
+- Alternative: 동일한 4-byte write primitive를 사용해 local DLL을 천천히 drop한 다음 load합니다.
+3. **Payload**: export는 `NETWORK SERVICE` 권한으로 실행됩니다. 최소한의 DLL은 `cmd.exe /c whoami /all > C:\Windows\Temp\poc.txt`를 실행하고 non-zero value(예: `0x1337`)를 반환할 수 있습니다. 그러면 service가 DLL을 unload하므로 execution을 확인할 수 있습니다.<sup>[[1]](#references)</sup>
 
-## 하드닝 / 탐지 메모
-- 필요하지 않다면 TAPI server 모드를 비활성화; `\pipe\tapsrv`에 대한 원격 접근 차단.
-- 클라이언트가 제공한 경로를 열기 전에 mailslot 네임스페이스 검증(`\\*\MAILSLOT\`)을 적용.
-- `C:\Windows\TAPI\tsec.ini` ACL을 잠그고 변경을 모니터링; 기본 경로가 아닌 경로로 로드하는 `GetUIDllName` 호출에 대해 경고.
+## Hardening / Detection Notes
+- 필요하지 않다면 TAPI server mode를 disable하고, `\pipe\tapsrv`에 대한 remote access를 block합니다.
+- client가 제공한 path를 열기 전에 mailslot namespace(`\\*\MAILSLOT\`) validation을 적용합니다.
+- `C:\Windows\TAPI\tsec.ini` ACL을 강화하고 변경 사항을 monitor합니다. non-default path를 load하는 `GetUIDllName` calls에 alert를 설정합니다.<sup>[[1]](#references)</sup>
 
 ## References
-- [Who’s on the line? Exploiting RCE in Windows Telephony Service (CVE-2026-20931)](https://swarm.ptsecurity.com/whos-on-the-line-exploiting-rce-in-windows-telephony-service/)
+
+- [1] [Who’s on the line? Exploiting RCE in Windows Telephony Service (CVE-2026-20931)](https://swarm.ptsecurity.com/whos-on-the-line-exploiting-rce-in-windows-telephony-service/)
 
 {{#include ../../banners/hacktricks-training.md}}

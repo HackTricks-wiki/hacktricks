@@ -1,14 +1,16 @@
+# High Integrity에서 SYSTEM으로: Name Pipes
+
 {{#include ../../banners/hacktricks-training.md}}
 
-**코드 흐름:**
+**Code flow:**
 
-1. 새로운 파이프 생성
-2. 생성된 파이프에 연결하고 무언가를 쓰는 서비스를 생성하고 시작합니다. 서비스 코드는 다음과 같은 인코딩된 PS 코드를 실행합니다: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. 서비스는 파이프에서 클라이언트로부터 데이터를 수신하고 ImpersonateNamedPipeClient를 호출하며 서비스가 완료될 때까지 대기합니다.
-4. 마지막으로, 서비스에서 얻은 토큰을 사용하여 새로운 _cmd.exe_를 생성합니다.
+1. 새로운 Pipe 생성
+2. 생성된 pipe에 연결하고 무언가를 작성할 service를 생성하고 시작합니다. service code는 다음 encoded PS code를 실행합니다: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
+3. service는 pipe의 client에서 데이터를 수신하고, ImpersonateNamedPipeClient를 호출한 다음 service가 종료될 때까지 대기합니다.
+4. 마지막으로 service에서 얻은 token을 사용하여 새로운 _cmd.exe_를 spawn합니다.
 
 > [!WARNING]
-> 충분한 권한이 없으면 익스플로잇이 멈추고 결코 반환되지 않을 수 있습니다.
+> 충분한 privileges가 없으면 exploit이 멈춘 상태로 반환되지 않을 수 있습니다.
 ```c
 #include <windows.h>
 #include <time.h>

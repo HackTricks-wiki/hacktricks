@@ -1,38 +1,38 @@
-# Windows kernel EoP: Token stealing with arbitrary kernel R/W
+# Windows kernel EoP: arbitrary kernel R/W를 이용한 Token stealing
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## 개요
 
-취약한 드라이버가 공격자에게 임의의 커널 읽기 및/또는 쓰기 primitives를 제공하는 IOCTL을 노출하면, NT AUTHORITY\SYSTEM으로 권한 상승은 종종 SYSTEM 접근 token을 탈취함으로써 달성할 수 있습니다. 이 기법은 SYSTEM 프로세스의 EPROCESS에서 Token 포인터를 현재 프로세스의 EPROCESS로 복사합니다.
+취약한 driver가 공격자에게 arbitrary kernel read 및/또는 write primitive를 제공하는 IOCTL을 노출하는 경우, SYSTEM access token을 탈취하면 NT AUTHORITY\SYSTEM으로 권한 상승을 수행할 수 있습니다. 이 technique은 SYSTEM process의 EPROCESS에서 Token pointer를 복사하여 현재 process의 EPROCESS에 넣습니다.<sup>[[2]](#references)</sup>
 
-작동 원리:
-- 각 프로세스는 EPROCESS 구조체를 가지며(다른 필드들 중에서) Token(실제로는 토큰 객체에 대한 EX_FAST_REF)을 포함합니다.
-- SYSTEM 프로세스(PID 4)는 모든 권한이 활성화된 토큰을 보유합니다.
-- 현재 프로세스의 EPROCESS.Token을 SYSTEM 토큰 포인터로 교체하면 현재 프로세스는 즉시 SYSTEM으로 실행됩니다.
+작동하는 이유:
+- 각 process에는 EPROCESS structure가 있으며, 여기에는 여러 field 중 Token이 포함됩니다(실제로는 token object에 대한 EX_FAST_REF입니다).
+- SYSTEM process(PID 4)는 모든 privilege가 활성화된 token을 보유합니다.
+- 현재 process의 EPROCESS.Token을 SYSTEM token pointer로 교체하면 현재 process가 즉시 SYSTEM으로 실행됩니다.<sup>[[1]](#references)</sup>
 
-> EPROCESS 내의 오프셋은 Windows 버전마다 다릅니다. 동적으로(심볼) 결정하거나 버전별 상수를 사용하세요. 또한 EPROCESS.Token은 EX_FAST_REF라는 점(하위 3비트가 참조 카운트 플래그로 사용됨)을 기억하세요.
+> EPROCESS의 offset은 Windows version마다 다릅니다. 동적으로(symbols 사용) 확인하거나 version별 constant를 사용해야 합니다. 또한 EPROCESS.Token이 EX_FAST_REF라는 점을 기억해야 합니다(하위 3 bit는 reference count flag입니다).
 
-## 고수준 단계
+## High-level steps
 
-1) ntoskrnl.exe 베이스를 찾고 PsInitialSystemProcess의 주소를 확인합니다.
-- 사용자 모드에서는 NtQuerySystemInformation(SystemModuleInformation) 또는 EnumDeviceDrivers를 사용해 로드된 드라이버 베이스를 얻습니다.
-- 커널 베이스에 PsInitialSystemProcess의 오프셋(심볼/리버싱에서 얻은 값)을 더해 해당 주소를 얻습니다.
-2) PsInitialSystemProcess에서 포인터를 읽습니다 → 이는 SYSTEM의 EPROCESS를 가리키는 커널 포인터입니다.
-3) SYSTEM EPROCESS에서 UniqueProcessId와 ActiveProcessLinks 오프셋을 읽어 EPROCESS 구조체들의 이중 연결 리스트(ActiveProcessLinks.Flink/Blink)를 순회하여 UniqueProcessId가 GetCurrentProcessId()와 일치하는 EPROCESS를 찾습니다. 다음 두 값을 보관하세요:
-- EPROCESS_SYSTEM (SYSTEM용)
-- EPROCESS_SELF (현재 프로세스용)
-4) SYSTEM 토큰 값 읽기: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
-- 하위 3비트를 마스킹: Token_SYS_masked = Token_SYS & ~0xF (빌드에 따라 일반적으로 ~0xF 또는 ~0x7; x64에서는 하위 3비트 사용 — 0xFFFFFFFFFFFFFFF8 마스크).
-5) Option A (일반적): 현재 토큰에서 하위 3비트를 보존하여 SYSTEM 포인터에 합쳐 내장된 참조 카운트 일관성을 유지합니다.
+1) ntoskrnl.exe base를 찾고 PsInitialSystemProcess의 address를 resolve합니다.
+- user mode에서 NtQuerySystemInformation(SystemModuleInformation) 또는 EnumDeviceDrivers를 사용하여 loaded driver base를 가져옵니다.
+- PsInitialSystemProcess의 offset(symbols/reversing으로 확인)을 kernel base에 더하여 해당 address를 가져옵니다.
+2) PsInitialSystemProcess의 pointer를 read합니다 → 이는 SYSTEM의 EPROCESS를 가리키는 kernel pointer입니다.
+3) SYSTEM EPROCESS에서 UniqueProcessId 및 ActiveProcessLinks offset을 read하여 EPROCESS structure의 doubly linked list(ActiveProcessLinks.Flink/Blink)를 순회하고, UniqueProcessId가 GetCurrentProcessId()와 같은 EPROCESS를 찾습니다. 다음 두 항목을 모두 유지합니다:
+- EPROCESS_SYSTEM(SYSTEM용)
+- EPROCESS_SELF(현재 process용)
+4) SYSTEM token value를 read합니다: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
+- 하위 3 bit를 mask out합니다: Token_SYS_masked = Token_SYS & ~0xF (build에 따라 일반적으로 ~0xF 또는 ~0x7을 사용하며, x64에서는 하위 3 bit가 사용됩니다 — 0xFFFFFFFFFFFFFFF8 mask).
+5) Option A(일반적인 방법): 현재 token의 하위 3 bit를 보존하고 이를 SYSTEM pointer에 결합하여 embedded ref count의 일관성을 유지합니다.
 - Token_ME = *(EPROCESS_SELF + TokenOffset)
 - Token_NEW = (Token_SYS_masked | (Token_ME & 0x7))
-6) 커널 쓰기 primitive를 사용해 Token_NEW를 (EPROCESS_SELF + TokenOffset)에 다시 씁니다.
-7) 현재 프로세스는 이제 SYSTEM입니다. 선택적으로 새로운 cmd.exe 또는 powershell.exe를 실행해 확인하세요.
+6) kernel write primitive를 사용하여 Token_NEW를 (EPROCESS_SELF + TokenOffset)에 다시 write합니다.
+7) 현재 process가 이제 SYSTEM이 됩니다. 확인을 위해 선택적으로 새 cmd.exe 또는 powershell.exe를 spawn할 수 있습니다.<sup>[[1]](#references)</sup>
 
-## 의사코드
+## Pseudocode
 
-아래는 취약한 드라이버의 두 IOCTL(하나는 8-byte 커널 읽기, 다른 하나는 8-byte 커널 쓰기)만 사용하는 골격입니다. 드라이버 인터페이스에 맞게 교체하세요.
+아래는 취약한 driver의 두 IOCTL만 사용하는 skeleton입니다. 하나는 8-byte kernel read용이고 다른 하나는 8-byte kernel write용입니다. 사용 중인 driver의 interface에 맞게 교체해야 합니다.<sup>[[1]](#references)</sup>
 ```c
 #include <Windows.h>
 #include <Psapi.h>
@@ -105,18 +105,19 @@ system("cmd.exe");
 return 0;
 }
 ```
-노트:
-- Offsets: 타깃의 PDBs 또는 런타임 심볼 로더와 함께 WinDbg의 `dt nt!_EPROCESS`를 사용하여 올바른 오프셋을 확인하세요. 무턱대고 하드코딩하지 마십시오.
-- Mask: x64에서는 토큰이 EX_FAST_REF입니다; 하위 3비트는 참조 카운트 비트입니다. 토큰의 원래 하위 비트를 유지하면 즉각적인 refcount 불일치를 피할 수 있습니다.
-- Stability: 현재 프로세스의 권한 상승을 우선하세요; 단명하는 헬퍼를 승격하면 해당 프로세스가 종료될 때 SYSTEM 권한을 잃을 수 있습니다.
+Notes:
+- Offsets: 대상의 PDB를 사용해 WinDbg의 `dt nt!_EPROCESS`를 실행하거나 runtime symbol loader를 사용하여 올바른 오프셋을 가져오세요. 무작정 하드코딩하지 마세요.
+- Mask: x64에서 token은 EX_FAST_REF입니다. 하위 3비트는 reference count 비트입니다. token의 원래 하위 비트를 유지하면 즉각적인 refcount 불일치를 방지할 수 있습니다.
+- Stability: 현재 프로세스를 elevating하는 방식을 선호하세요. 짧은 수명의 helper를 elevate하면 해당 프로세스가 종료될 때 SYSTEM 권한을 잃을 수 있습니다.<sup>[[1]](#references)</sup>
 
-## 탐지 및 완화
-- 서명되지 않았거나 신뢰할 수 없는 서드파티 드라이버가 강력한 IOCTL을 노출하는 것이 근본 원인입니다.
-- Kernel Driver Blocklist (HVCI/CI), DeviceGuard, and Attack Surface Reduction 규칙은 취약한 드라이버의 로드를 방지할 수 있습니다.
-- EDR는 임의의 읽기/쓰기(arbitrary read/write)를 구현하는 의심스러운 IOCTL 시퀀스와 토큰 교체를 모니터링할 수 있습니다.
+## Detection & mitigation
+- 강력한 IOCTL을 노출하는 서명되지 않았거나 신뢰할 수 없는 third-party drivers를 로드하는 것이 root cause입니다.
+- Kernel Driver Blocklist (HVCI/CI), DeviceGuard, Attack Surface Reduction rules는 취약한 drivers가 로드되는 것을 방지할 수 있습니다.
+- EDR은 arbitrary read/write를 구현하는 의심스러운 IOCTL sequences와 token swaps를 감시할 수 있습니다.
 
-## 참고자료
-- [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
-- [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
+## References
+
+- [1] [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
+- [2] [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
 
 {{#include ../../banners/hacktricks-training.md}}
