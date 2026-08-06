@@ -2,17 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Sa [**Flipper Zero**](https://flipperzero.one/) možete:
+Uz [**Flipper Zero**](https://flipperzero.one/) možete:
 
-- **Slušati/Zapisivati/Reprodukovati radio frekvencije:** [**Sub-GHz**](fz-sub-ghz.md)
-- **Čitati/Zapisivati/Emulirati NFC kartice:** [**NFC**](fz-nfc.md)
-- **Čitati/Zapisivati/Emulirati 125kHz oznake:** [**125kHz RFID**](fz-125khz-rfid.md)
-- **Čitati/Zapisivati/Slati infracrvene signale:** [**Infrared**](fz-infrared.md)
-- **Čitati/Zapisivati/Emulirati iButtons:** [**iButton**](../ibutton.md)
-- **Koristiti kao Bad USB**
-- **Koristiti kao sigurnosni ključ (U2F)**
+- **Slušati/snimati/ponavljati radio-frekvencije:** [**Sub-GHz**](fz-sub-ghz.md)
+- **Čitati/snimati/emulirati NFC kartice:** [**NFC**](fz-nfc.md)
+- **Čitati/snimati/emulirati tagove od 125 kHz:** [**125kHz RFID**](fz-125khz-rfid.md)
+- **Čitati/snimati/slati infracrvene signale:** [**Infrared**](fz-infrared.md)
+- **Čitati/snimati/emulirati iButtons:** [**iButton**](../ibutton.md)
+- **Koristiti ga kao Bad USB**
+- **Koristiti ga kao security key (U2F)**
 - **Igrati Snake**
 
-**Ostali Flipper Zero resursi na** [**https://github.com/djsime1/awesome-flipperzer**](https://github.com/djsime1/awesome-flipperzero)
+**Ostali Flipper Zero resursi nalaze se na** [**https://github.com/djsime1/awesome-flipperzer**](https://github.com/djsime1/awesome-flipperzero)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,21 +2,21 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Dokumenti su često samo kontejneri:
+Dokumenti su često samo containers:
 
-- PDF (ugrađene datoteke, streamovi)
-- Office OOXML (`.docx/.xlsx/.pptx` su ZIP arhive)
-- RTF / OLE zastareli formati
+- PDF (embedded files, streams)
+- Office OOXML (`.docx/.xlsx/.pptx` su ZIPs)
+- RTF / OLE legacy formats
 
 ## PDF
 
-### Tehnika
+### Technique
 
-PDF je strukturisani kontejner sa objektima, streamovima i opcionalnim ugrađenim datotekama. U CTF-ovima često treba da:
+PDF je strukturirani container sa objects, streams i optional embedded files. U CTFs često treba da:
 
-- Izvući ugrađene priloge
-- Dekomprimovati/izravnati streamove objekata kako biste mogli pretraživati sadržaj
-- Identifikovati skrivene objekte (JS, ugrađene slike, neobični streamovi)
+- Extract embedded attachments
+- Decompress/flatten object streams kako biste mogli da pretražujete sadržaj
+- Identify hidden objects (JS, embedded images, odd streams)
 
 ### Brze provere
 ```bash
@@ -25,19 +25,21 @@ pdfdetach -list file.pdf
 pdfdetach -saveall file.pdf
 qpdf --qdf --object-streams=disable file.pdf out.pdf
 ```
-Zatim pretraži `out.pdf` za sumnjive objekte/stringove.
+Then search inside `out.pdf` for suspicious objects/strings.
 
 ## Office OOXML
 
-### Tehnika
+### Technique
 
-Posmatraj OOXML kao ZIP + XML relationship graph; payloads se često kriju u media, relationships ili u neobičnim custom delovima.
+Tretirajte OOXML kao ZIP + XML graf odnosa; payloads se često skrivaju u medijima, relationship datotekama ili neobičnim prilagođenim delovima.
 
 OOXML datoteke su ZIP kontejneri. To znači:
 
-- Dokument je direktorijumsko stablo XML-a i resursa.
-- `_rels/` relationship fajlovi mogu ukazivati na spoljašnje resurse ili skrivene delove.
-- Ugrađeni podaci se često nalaze u `word/media/`, prilagođenim XML delovima, ili neobičnim relationships.
+- Dokument je stablo direktorijuma XML datoteka i resursa.
+- `_rels/` relationship datoteke mogu upućivati na spoljne resurse ili skrivene delove.
+- Ugrađeni podaci se često nalaze u `word/media/`, prilagođenim XML delovima ili neobičnim relationship datotekama.
+
+### Brze provere
 ```bash
 7z l file.docx
 7z x file.docx -oout
@@ -45,7 +47,8 @@ OOXML datoteke su ZIP kontejneri. To znači:
 Zatim pregledajte:
 
 - `word/document.xml`
-- `word/_rels/` za eksterne relacije
-- ugrađeni mediji u `word/media/`
+- `word/_rels/` za spoljne relacije
+- ugrađene medije u `word/media/`
+
 
 {{#include ../../banners/hacktricks-training.md}}
