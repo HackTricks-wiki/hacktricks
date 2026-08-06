@@ -4,24 +4,24 @@
 
 ## Introduction
 
-Eğer bir **System Path** klasörüne **yazabildiğinizi** fark ettiyseniz (not: **User Path** klasörüne yazabiliyor olmanız bu durumda işe yaramaz), sistemde **privileges** yükseltmeniz mümkün olabilir.
+Bir **System Path klasörüne yazabildiğinizi** tespit ettiyseniz (bunun bir User Path klasörüne yazabildiğiniz durumda çalışmayacağını unutmayın), sistemde **yetki yükseltmeniz** mümkün olabilir.
 
-Bunu yapmak için, sizden **daha yüksek privileges** ile çalışan bir servis veya process tarafından **yüklenen bir kütüphaneyi ele geçirdiğiniz** bir **Dll Hijacking** tekniğini kötüye kullanabilirsiniz; çünkü bu servis, muhtemelen sistemin tamamında bile olmayan bir Dll yüklemeye çalıştığında, onu yazabildiğiniz System Path içinden yüklemeyi deneyecektir.
+Bunu gerçekleştirmek için, sizden **daha fazla yetkiye** sahip bir service veya process tarafından yüklenen bir library'yi **hijack** edeceğiniz bir **Dll Hijacking** yöntemini kötüye kullanabilirsiniz. Bu service, muhtemelen sistemin hiçbir yerinde bulunmayan bir Dll'yi yüklemeye çalıştığı için, yazabildiğiniz System Path içinden yüklemeyi deneyecektir.
 
-**Dll Hijackig** nedir hakkında daha fazla bilgi için şuna bakın:
+**Dll Hijacking'in ne olduğu** hakkında daha fazla bilgi için:
 
 
 {{#ref}}
 ./
 {{#endref}}
 
-## Dll Hijacking ile Privesc
+## Privesc with Dll Hijacking
 
-### Eksik bir Dll bulma
+### Finding a missing Dll
 
-İlk ihtiyacınız olan şey, sizden **daha yüksek privileges** ile çalışan ve yazabildiğiniz **System Path** içinden bir **Dll yüklemeye çalışan** bir **process** belirlemektir.
+İhtiyacınız olan ilk şey, sizden **daha fazla yetkiyle** çalışan ve yazabildiğiniz System Path içinden bir Dll **yüklemeye çalışan bir process** tespit etmektir.
 
-Bu tekniğin yalnızca **Machine/System PATH** girdisine bağlı olduğunu, sadece **User PATH** üzerinde çalışmadığını unutmayın. Bu yüzden Procmon üzerinde zaman harcamadan önce, **Machine PATH** girdilerini enumerate edip hangilerinin writable olduğunu kontrol etmekte fayda var:
+Bu tekniğin yalnızca **User PATH**'inize değil, bir **Machine/System PATH** girdisine bağlı olduğunu unutmayın. Bu nedenle Procmon üzerinde zaman harcamadan önce **Machine PATH** girdilerini listelemeye ve hangilerinin yazılabilir olduğunu kontrol etmeye değer:<sup>[[1]](#references)</sup>
 ```powershell
 $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine") -split ';' | Where-Object { $_ }
 $machinePath | ForEach-Object {
@@ -32,9 +32,9 @@ icacls $path 2>$null
 }
 }
 ```
-Bu durumlarda sorun, muhtemelen bu süreçlerin zaten çalışıyor olmasıdır. Hangi Dlls’in eksik olduğunu bulmak için procmon’u mümkün olan en kısa sürede başlatmanız gerekir (processes yüklenmeden önce). Bu nedenle, eksik .dlls’leri bulmak için şunu yapın:
+Bu durumlardaki sorun, muhtemelen söz konusu process'lerin zaten çalışıyor olmasıdır. Hangi DLL'lerin eksik olduğunu bulmak için procmon'ı mümkün olduğunca hızlı bir şekilde (process'ler yüklenmeden önce) başlatmanız gerekir. Eksik .dll'leri bulmak için:
 
-- **Create** `C:\privesc_hijacking` klasörünü oluşturun ve `C:\privesc_hijacking` yolunu **System Path env variable** içine ekleyin. Bunu **manuel** olarak veya **PS** ile yapabilirsiniz:
+- **`C:\privesc_hijacking`** klasörünü oluşturun ve **System Path env variable**'a **`C:\privesc_hijacking`** yolunu ekleyin. Bunu **manuel olarak** veya **PS** ile yapabilirsiniz:
 ```bash
 # Set the folder path to create and check events for
 $folderPath = "C:\privesc_hijacking"
@@ -51,24 +51,24 @@ $newPath = "$envPath;$folderPath"
 [Environment]::SetEnvironmentVariable("PATH", $newPath, "Machine")
 }
 ```
-- **`procmon`** uygulamasını başlatın ve **`Options`** --> **`Enable boot logging`** seçeneğine gidin ve istemde **`OK`** tuşuna basın.
-- Ardından, **yeniden başlatın**. Bilgisayar yeniden başladığında **`procmon`** olayları mümkün olan en kısa sürede **kaydetmeye** başlayacaktır.
-- **Windows** açıldıktan sonra **`procmon`** uygulamasını tekrar çalıştırın; program, bir süredir çalıştığını söyleyecek ve olayları bir dosyada **saklamak isteyip istemediğinizi** soracaktır. **Evet** deyin ve olayları bir dosyaya **kaydedin**.
-- **Dosya** oluşturulduktan **sonra**, açık **`procmon`** penceresini **kapatın** ve **olaylar dosyasını açın**.
-- Bu **filtreleri** ekleyin; böylece writable System Path klasöründen yüklemeye çalışan tüm Dlls'leri bulacaksınız:
+- **`procmon`**'u başlatın ve **`Options`** --> **`Enable boot logging`** seçeneğine gidip istemde **`OK`** düğmesine basın.
+- Ardından **yeniden başlatın**. Bilgisayar yeniden başlatıldığında **`procmon`**, mümkün olan en kısa sürede olayları **kaydetmeye** başlayacaktır.
+- **Windows** **başlatıldıktan sonra `procmon`'u** tekrar çalıştırın. Size programın çalıştığını söyleyecek ve olayları bir dosyada **saklamak isteyip istemediğinizi soracaktır**. **Evet** deyin ve **olayları bir dosyaya kaydedin**.
+- **Dosya** **oluşturulduktan sonra**, açık olan **`procmon`** penceresini kapatın ve **olaylar dosyasını açın**.
+- Bu **filtreleri** eklediğinizde, bazı **process'lerin writable System Path klasöründen yüklemeye çalıştığı** tüm DLL'leri bulabilirsiniz:
 
 <figure><img src="../../../images/image (945).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> **Boot logging** yalnızca başka şekilde gözlemleyemeyeceğiniz kadar erken başlayan servisler için gereklidir. Hedef service/program'ı **istek üzerine tetikleyebiliyorsanız** (örneğin COM interface'i ile etkileşime girerek, servisi yeniden başlatarak veya bir scheduled task'i tekrar çalıştırarak), genellikle **`Path contains .dll`**, **`Result is NAME NOT FOUND`** ve **`Path begins with <writable_machine_path>`** gibi filtrelerle normal bir Procmon capture almak daha hızlıdır.
+> **Boot logging**, yalnızca gözlemlemek için **çok erken başlayan** service'ler için gereklidir. **Hedef service/programı isteğe bağlı olarak tetikleyebiliyorsanız** (örneğin COM interface'iyle etkileşime girerek, service'i yeniden başlatarak veya scheduled task'ı yeniden çalıştırarak), genellikle **`Path contains .dll`**, **`Result is NAME NOT FOUND`** ve **`Path begins with <writable_machine_path>`** gibi filtrelerle normal bir Procmon kaydı almak daha hızlıdır.
 
-### Kaçırılan Dlls
+### Kaçırılan DLL'ler
 
-Bunu ücretsiz bir **virtual (vmware) Windows 11 machine** üzerinde çalıştırdığımda şu sonuçları aldım:
+Bunu boş bir **virtual (vmware) Windows 11 makinesinde** çalıştırdığımda şu sonuçları elde ettim:
 
 <figure><img src="../../../images/image (607).png" alt=""><figcaption></figcaption></figure>
 
-Bu durumda .exe dosyaları işe yaramaz, bu yüzden onları yok sayın; kaçırılan DLLs şuradan geliyordu:
+Bu durumda .exe dosyaları işe yaramıyor, bu yüzden onları yok sayın; kaçırılan DLL'ler şunlardandı:
 
 | Service                         | Dll                | CMD line                                                             |
 | ------------------------------- | ------------------ | -------------------------------------------------------------------- |
@@ -76,39 +76,40 @@ Bu durumda .exe dosyaları işe yaramaz, bu yüzden onları yok sayın; kaçır�
 | Diagnostic Policy Service (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
 | ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
 
-Bunu bulduktan sonra, [**privesc için WptsExtensions.dll nasıl abuse edilir**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll) konusunu da açıklayan bu ilginç blog yazısını buldum. Şimdi **yapacağımız şey de bu**.
+Bunu bulduktan sonra, [**privesc için WptsExtensions.dll'in nasıl abuse edileceğini açıklayan**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll) bu ilginç blog yazısına rastladım. Şimdi **yapacağımız şey de bu**.<sup>[[3]](#references)</sup>
 
-### Triyaj yapmaya değer diğer adaylar
+### İncelenmeye değer diğer adaylar
 
-`WptsExtensions.dll` iyi bir örnektir, ancak privileged services içinde görünen tek tekrar eden **phantom DLL** bu değildir. Modern hunting kuralları ve public hijack katalogları hâlâ aşağıdaki isimleri takip eder:
+`WptsExtensions.dll` iyi bir örnektir, ancak ayrıcalıklı service'lerde görülen tek tekrarlayan **phantom DLL** değildir. Modern hunting kuralları ve public hijack catalog'ları hâlâ şu isimleri takip etmektedir:<sup>[[2]](#references)</sup>
 
 | Service / Scenario | Missing DLL | Notes |
 | --- | --- | --- |
-| Task Scheduler (`Schedule`) | `WptsExtensions.dll` | Client sistemlerde klasik bir **SYSTEM** adayı. Writable dizin **Machine PATH** içindeyse ve service başlangıçta DLL'i kontrol ediyorsa iyidir. |
-| Windows Server üzerinde NetMan | `wlanhlp.dll` / `wlanapi.dll` | **Server editions** üzerinde ilginçtir; çünkü service **SYSTEM** olarak çalışır ve bazı build'lerde **normal bir user tarafından isteğe bağlı olarak tetiklenebilir**, bu da onu yalnızca reboot gerektiren durumlardan daha iyi yapar. |
-| Connected Devices Platform Service (`CDPSvc`) | `cdpsgshims.dll` | Genellikle önce **`NT AUTHORITY\LOCAL SERVICE`** verir. Bu çoğu zaman yine de yeterlidir; çünkü token **`SeImpersonatePrivilege`** içerir, bu yüzden bunu [RoguePotato / PrintSpoofer](../roguepotato-and-printspoofer.md) ile zincirleyebilirsiniz. |
+| Task Scheduler (`Schedule`) | `WptsExtensions.dll` | İstemci sistemlerinde klasik bir **SYSTEM** adayıdır. Writable dizin **Machine PATH** içinde olduğunda ve service başlangıç sırasında DLL'i aradığında kullanışlıdır. |
+| NetMan on Windows Server | `wlanhlp.dll` / `wlanapi.dll` | **Server edition'larında** ilgi çekicidir; çünkü service **SYSTEM** olarak çalışır ve bazı build'lerde **normal bir user tarafından isteğe bağlı olarak tetiklenebilir**. Bu da onu yalnızca reboot gerektiren durumlardan daha iyi hâle getirir. |
+| Connected Devices Platform Service (`CDPSvc`) | `cdpsgshims.dll` | Genellikle önce **`NT AUTHORITY\LOCAL SERVICE`** elde edilir. Bu çoğu zaman yine de yeterlidir; çünkü token'da **`SeImpersonatePrivilege`** bulunur ve bunu [RoguePotato / PrintSpoofer](../roguepotato-and-printspoofer.md) ile chain edebilirsiniz. |
 
-Bu isimleri **garantili başarı** olarak değil, **triyaj ipuçları** olarak değerlendirin: bunlar **SKU/build dependent**'tır ve Microsoft sürümler arasında davranışı değiştirebilir. Asıl önemli çıkarım, **Machine PATH** boyunca arama yapan privileged services içinde **eksik DLLs** aramaktır; özellikle de service **yeniden başlatmadan tekrar tetiklenebiliyorsa**.
+Bu isimleri kesin başarı garantisi olarak değil, **triage ipuçları** olarak değerlendirin: Sonuçlar **SKU/build'e bağlıdır** ve Microsoft sürümler arasında davranışı değiştirebilir. Önemli nokta, özellikle **reboot yapmadan yeniden tetiklenebilen** service'lerde **Machine PATH'i dolaşan ayrıcalıklı service'lerde eksik DLL'leri** aramaktır.
 
 ### Exploitation
 
-Bu yüzden, **privileges** yükseltmek için **WptsExtensions.dll** kütüphanesini hijack edeceğiz. **Path** ve **name** elimizde olduğuna göre tek yapmamız gereken **malicious dll** oluşturmak.
+Dolayısıyla **privilege escalation** gerçekleştirmek için **WptsExtensions.dll** library'sini hijack edeceğiz. **Path** ve **name** elimizde olduğuna göre yalnızca **malicious DLL'i oluşturmamız** gerekiyor.
 
-Bu örneklerden herhangi birini [**kullanmaya çalışabilirsiniz**](#creating-and-compiling-dlls). Şunlar gibi payloads çalıştırabilirsiniz: rev shell almak, user eklemek, beacon çalıştırmak...
+[**Bu örneklerden herhangi birini kullanmayı deneyebilirsiniz**](#creating-and-compiling-dlls). Şu payload'ları çalıştırabilirsiniz: rev shell almak, user eklemek, beacon çalıştırmak...
 
 > [!WARNING]
-> Tüm service'lerin **`NT AUTHORITY\SYSTEM`** ile çalışmadığını unutmayın; bazıları **`NT AUTHORITY\LOCAL SERVICE`** ile de çalışır, bu daha az privileges verir ve yeni bir user oluşturup yetkilerini abuse edemezsiniz.\
-> Ancak bu user'ın **`seImpersonate`** privilege'ı vardır, bu yüzden privileges yükseltmek için [**potato suite**](../roguepotato-and-printspoofer.md) kullanabilirsiniz. Dolayısıyla bu durumda, user oluşturmaya çalışmak yerine rev shell daha iyi bir seçenektir.
+> **Tüm service'lerin** **`NT AUTHORITY\SYSTEM`** ile çalışmadığını unutmayın; bazıları daha **az ayrıcalığa** sahip olan **`NT AUTHORITY\LOCAL SERVICE`** ile de çalışır ve **yeni bir user oluşturamazsınız** veya bu user'ın izinlerini abuse edemezsiniz.\
+> Ancak bu user'da **`seImpersonate`** privilege'ı vardır; bu nedenle [ **privilege escalation için potato suite'i kullanabilirsiniz**](../roguepotato-and-printspoofer.md). Bu durumda rev shell, user oluşturmaya çalışmaktan daha iyi bir seçenektir.
 
-Bu yazının yazıldığı anda **Task Scheduler** service'i **Nt AUTHORITY\SYSTEM** ile çalışıyordu.
+Yazının yazıldığı sırada **Task Scheduler** service'i **Nt AUTHORITY\SYSTEM** ile çalışmaktadır.
 
-**Malicious Dll** oluşturduktan sonra (_benim durumumda x64 rev shell kullandım ve shell geri aldım, ancak Defender bunu msfvenom'dan geldiği için öldürdü_), bunu writable System Path içine **WptsExtensions.dll** adıyla kaydedin ve bilgisayarı **yeniden başlatın** (veya service'i yeniden başlatın ya da etkilenen service/program'ı tekrar çalıştırmak için ne gerekiyorsa yapın).
+**Malicious DLL'i oluşturduktan** sonra (_ben x64 rev shell kullandım ve geri shell aldım, ancak msfvenom'dan geldiği için defender onu sonlandırdı_), bunu writable System Path içine **WptsExtensions.dll** adıyla kaydedin ve bilgisayarı **yeniden başlatın** (veya service'i yeniden başlatın ya da etkilenen service/programı tekrar çalıştırmak için gereken işlemi yapın).
 
-Service yeniden başlatıldığında, **dll yüklenmeli ve çalıştırılmalıdır** (library'nin beklendiği gibi yüklendiğini kontrol etmek için **procmon** hilesini **yeniden kullanabilirsiniz**).
+Service yeniden başlatıldığında **DLL yüklenmeli ve çalıştırılmalıdır** (**library'nin beklendiği gibi yüklenip yüklenmediğini** kontrol etmek için **procmon** tekniğini yeniden kullanabilirsiniz).
 
 ## References
 
-- [Windows DLL Hijacking (Hopefully) Clarified](https://itm4n.github.io/windows-dll-hijacking-clarified/)
-- [Suspicious DLL Loaded for Persistence or Privilege Escalation](https://www.elastic.co/guide/en/security/current/suspicious-dll-loaded-for-persistence-or-privilege-escalation.html)
+- [1] [Windows DLL Hijacking (Hopefully) Clarified](https://itm4n.github.io/windows-dll-hijacking-clarified/)
+- [2] [Suspicious DLL Loaded for Persistence or Privilege Escalation](https://www.elastic.co/guide/en/security/current/suspicious-dll-loaded-for-persistence-or-privilege-escalation.html)
+- [3] [DLL Hijacking – Windows Privilege Escalation](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll)
 
 {{#include ../../../banners/hacktricks-training.md}}

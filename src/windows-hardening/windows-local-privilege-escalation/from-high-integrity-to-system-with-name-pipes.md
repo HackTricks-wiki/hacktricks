@@ -1,14 +1,16 @@
+# High Integrity'den SYSTEM'a Name Pipes ile
+
 {{#include ../../banners/hacktricks-training.md}}
 
 **Kod akışı:**
 
-1. Yeni bir Pipe oluşturun
-2. Oluşturulan pipe'a bağlanacak ve bir şey yazacak bir hizmet oluşturun ve başlatın. Hizmet kodu bu kodlanmış PS kodunu çalıştıracak: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. Hizmet, pipe'da istemciden verileri alır, ImpersonateNamedPipeClient'i çağırır ve hizmetin bitmesini bekler
-4. Son olarak, hizmetten elde edilen token'ı kullanarak yeni bir _cmd.exe_ başlatır
+1. Yeni bir Pipe oluşturur
+2. Oluşturulan pipe'a bağlanacak ve bir şey yazacak bir service oluşturur ve başlatır. Service kodu şu encoded PS code'u çalıştırır: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
+3. Service, pipe içindeki client'tan gelen verileri alır, `ImpersonateNamedPipeClient` çağrısını yapar ve service'in tamamlanmasını bekler
+4. Son olarak, service'den elde edilen token'ı kullanarak yeni bir _cmd.exe_ başlatır
 
 > [!WARNING]
-> Yeterli ayrıcalıklarınız yoksa, exploit takılabilir ve asla geri dönmeyebilir.
+> Yeterli privileges'a sahip değilseniz exploit takılı kalabilir ve hiçbir zaman geri dönmeyebilir.
 ```c
 #include <windows.h>
 #include <time.h>

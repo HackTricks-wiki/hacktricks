@@ -2,37 +2,37 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Genel Bakış
+## Genel bakış
 
-Eğer bir vuln driver, saldırgana arbitrary kernel read ve/veya write primitive’leri sağlayan bir IOCTL açıyorsa, NT AUTHORITY\SYSTEM yetkisine yükselme genellikle bir SYSTEM access Token’ı çalarak gerçekleştirilebilir. Teknik, SYSTEM process’in EPROCESS’indeki Token pointer’ını mevcut process’in EPROCESS’ine kopyalar.
+Güvenlik açığı bulunan bir driver, saldırgana arbitrary kernel read ve/veya write primitive'leri sağlayan bir IOCTL sunuyorsa, NT AUTHORITY\SYSTEM yetkisine yükselme çoğu zaman bir SYSTEM access token'ı çalarak gerçekleştirilebilir. Bu technique, Token pointer'ını bir SYSTEM process'inin EPROCESS yapısından mevcut process'in EPROCESS yapısına kopyalar.<sup>[[2]](#references)</sup>
 
-Neden işe yarar:
-- Her process’in içinde (diğer alanlar arasında) bir Token içeren bir EPROCESS yapısı vardır (aslında bir EX_FAST_REF to a token object).
-- SYSTEM process (PID 4) tüm ayrıcalıkları etkinleştirilmiş bir token’a sahiptir.
-- Mevcut process’in EPROCESS.Token’ını SYSTEM token pointer’ı ile değiştirmek, mevcut process’in hemen SYSTEM olarak çalışmasını sağlar.
+Çalışma nedeni:
+- Her process, diğer alanların yanı sıra bir Token içeren bir EPROCESS yapısına sahiptir (aslında bu, bir token object'ine yönelik EX_FAST_REF'dir).
+- SYSTEM process'i (PID 4), tüm privilege'lar etkin olan bir token tutar.
+- Mevcut process'in EPROCESS.Token alanını SYSTEM token pointer'ı ile değiştirmek, mevcut process'in hemen SYSTEM olarak çalışmasını sağlar.<sup>[[1]](#references)</sup>
 
-> EPROCESS içindeki offset’ler Windows sürümleri arasında değişir. Bunları dinamik olarak belirleyin (symbols) veya sürüme özel sabitler kullanın. Ayrıca EPROCESS.Token’ın bir EX_FAST_REF olduğunu unutmayın (alt 3 bit referans sayacı bayraklarıdır).
+> EPROCESS içindeki offset'ler Windows sürümleri arasında değişiklik gösterir. Bunları dinamik olarak (symbols) belirleyin veya sürüme özel sabitler kullanın. Ayrıca EPROCESS.Token'ın bir EX_FAST_REF olduğunu unutmayın (düşük 3 bit reference count flag'leridir).
 
-## Yüksek seviyeli adımlar
+## Üst düzey adımlar
 
-1) ntoskrnl.exe base’ini bulun ve PsInitialSystemProcess adresini çözün.
-- User mode’dan, yüklenmiş driver bazlarını almak için NtQuerySystemInformation(SystemModuleInformation) veya EnumDeviceDrivers kullanın.
-- Kernel base’e PsInitialSystemProcess offset’ini (symbols/reversing’den) ekleyerek adresini elde edin.
-2) PsInitialSystemProcess’teki pointer’ı okuyun → bu SYSTEM’in EPROCESS’ine işaret eden bir kernel pointer’ıdır.
-3) SYSTEM EPROCESS’inden UniqueProcessId ve ActiveProcessLinks offset’lerini okuyarak EPROCESS yapılarını doubly linked list halinde (ActiveProcessLinks.Flink/Blink) dolaşın; UniqueProcessId’nin GetCurrentProcessId() ile eşit olduğu EPROCESS’i bulana kadar devam edin. Her iki adresi saklayın:
+1) ntoskrnl.exe base adresini bulun ve PsInitialSystemProcess adresini resolve edin.
+- User mode'dan, yüklenmiş driver base adreslerini almak için NtQuerySystemInformation(SystemModuleInformation) veya EnumDeviceDrivers kullanın.
+- Adresini elde etmek için PsInitialSystemProcess offset'ini (symbols/reversing üzerinden) kernel base adresine ekleyin.
+2) PsInitialSystemProcess adresindeki pointer'ı okuyun → bu, SYSTEM'ın EPROCESS yapısına yönelik bir kernel pointer'ıdır.
+3) SYSTEM EPROCESS'inden UniqueProcessId ve ActiveProcessLinks offset'lerini okuyarak EPROCESS yapılarının doubly linked list'i (ActiveProcessLinks.Flink/Blink) üzerinde ilerleyin ve UniqueProcessId değeri GetCurrentProcessId() ile eşleşen EPROCESS'i bulana kadar devam edin. Her ikisini de saklayın:
 - EPROCESS_SYSTEM (SYSTEM için)
 - EPROCESS_SELF (mevcut process için)
 4) SYSTEM token değerini okuyun: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
-- Alt 3 biti maskeleyin: Token_SYS_masked = Token_SYS & ~0xF (genelde ~0xF veya build’e bağlı olarak ~0x7; x64’te alt 3 bit kullanılır — 0xFFFFFFFFFFFFFFF8 mask).
-5) Seçenek A (yaygın): Gömülü referans sayısını tutarlı kılmak için mevcut token’ınızın alt 3 bitini koruyun ve SYSTEM’in pointer’ına ekleyin.
+- Düşük 3 biti mask'leyin: Token_SYS_masked = Token_SYS & ~0xF (build'e bağlı olarak yaygın biçimde ~0xF veya ~0x7 kullanılır; x64 üzerinde düşük 3 bit kullanılır — 0xFFFFFFFFFFFFFFF8 mask'i).
+5) Option A (yaygın): Embedded ref count değerini tutarlı bırakmak için düşük 3 biti mevcut token'ınızdan koruyun ve SYSTEM pointer'ına ekleyin.
 - Token_ME = *(EPROCESS_SELF + TokenOffset)
 - Token_NEW = (Token_SYS_masked | (Token_ME & 0x7))
-6) Kernel write primitive’inizi kullanarak Token_NEW’i (EPROCESS_SELF + TokenOffset) adresine geri yazın.
-7) Mevcut process’iniz artık SYSTEM. Doğrulamak için opsiyonel olarak yeni bir cmd.exe veya powershell.exe spawn edebilirsiniz.
+6) Kernel write primitive'inizi kullanarak Token_NEW değerini (EPROCESS_SELF + TokenOffset) adresine geri yazın.
+7) Mevcut process'iniz artık SYSTEM'dir. İsteğe bağlı olarak doğrulamak için yeni bir cmd.exe veya powershell.exe başlatın.<sup>[[1]](#references)</sup>
 
-## Pseudokod
+## Pseudocode
 
-Aşağıda sadece vuln driver’dan iki IOCTL kullanan iskelet bir örnek verilmiştir; biri 8-byte kernel read, diğeri 8-byte kernel write içindir. Kendi driver arayüzünüzle değiştirin.
+Aşağıda, vulnerable driver'dan yalnızca iki IOCTL kullanan bir skeleton verilmiştir: biri 8-byte kernel read, diğeri 8-byte kernel write içindir. Kendi driver'ınızın interface'i ile değiştirin.<sup>[[1]](#references)</sup>
 ```c
 #include <Windows.h>
 #include <Psapi.h>
@@ -106,17 +106,18 @@ return 0;
 }
 ```
 Notlar:
-- Ofsetler: Doğru ofsetleri almak için hedefin PDBs'i ile veya bir runtime symbol loader ile WinDbg’in `dt nt!_EPROCESS` komutunu kullanın. Hardcode yapmayın.
-- Maske: x64'te token bir EX_FAST_REF'tir; düşük 3 bit referans sayısı bitleridir. Tokenınızdan orijinal düşük bitleri korumak, anlık refcount tutarsızlıklarını önler.
-- Kararlılık: Mevcut süreci yükseltmeyi tercih edin; kısa ömürlü bir yardımcıyı yükseltirseniz, o süreç sonlandığında SYSTEM'i kaybedebilirsiniz.
+- Offsets: Doğru offset'leri almak için hedefin PDB'leriyle WinDbg’nin `dt nt!_EPROCESS` komutunu veya runtime symbol loader kullanın. Offset'leri düşünmeden hardcode etmeyin.
+- Mask: x64 üzerinde token bir EX_FAST_REF'dir; en düşük 3 bit reference count bit'leridir. Token'ınızdaki orijinal düşük bit'leri korumak, anlık refcount tutarsızlıklarını önler.
+- Stability: Mevcut process'i elevate etmeyi tercih edin; kısa ömürlü bir helper'ı elevate ederseniz, helper sonlandığında SYSTEM yetkisini kaybedebilirsiniz.<sup>[[1]](#references)</sup>
 
-## Tespit ve hafifletme
-- Güçlü IOCTLs açığa çıkaran imzalanmamış veya güvenilmeyen üçüncü taraf sürücülerin yüklenmesi temel nedendir.
-- Kernel Driver Blocklist (HVCI/CI), DeviceGuard ve Attack Surface Reduction kuralları zayıf sürücülerin yüklenmesini engelleyebilir.
-- EDR, arbitrary read/write uygulayan ve token swaps içeren şüpheli IOCTL dizilerini izleyebilir.
+## Detection & mitigation
+- Güçlü IOCTL'ler sunan unsigned veya güvenilmeyen third-party driver'ların yüklenmesi root cause'dur.
+- Kernel Driver Blocklist (HVCI/CI), DeviceGuard ve Attack Surface Reduction kuralları, vulnerable driver'ların yüklenmesini önleyebilir.
+- EDR, arbitrary read/write gerçekleştiren şüpheli IOCTL sequence'lerini ve token swap'lerini izleyebilir.
 
-## Referanslar
-- [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
-- [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
+## References
+
+- [1] [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
+- [2] [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
 
 {{#include ../../banners/hacktricks-training.md}}

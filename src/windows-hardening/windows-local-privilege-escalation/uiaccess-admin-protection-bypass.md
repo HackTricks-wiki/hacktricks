@@ -1,65 +1,66 @@
-# UIAccess ile Admin Protection Bypass'ları
+# UIAccess üzerinden Admin Protection Bypass'leri
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Genel Bakış
-- Windows AppInfo `RAiLaunchAdminProcess`'i UIAccess süreçleri başlatmak için açığa çıkarır (erişilebilirlik amaçlı). UIAccess, erişilebilirlik yazılımlarının daha yüksek-IL UI'yi kontrol edebilmesi için çoğu User Interface Privilege Isolation (UIPI) mesaj filtrelemesini atlar.
-- UIAccess'i doğrudan etkinleştirmek `NtSetInformationToken(TokenUIAccess)` ile **SeTcbPrivilege** gerektirir, bu yüzden düşük ayrıcalıklı çağırıcılar servise güvenir. Servis, UIAccess ayarlamadan önce hedef ikili üzerinde üç kontrol gerçekleştirir:
-  - Gömülü manifest `uiAccess="true"` içerir.
-  - Local Machine root store tarafından güvenilen herhangi bir sertifika ile imzalanmış (EKU/Microsoft şartı yok).
-  - Sistem sürücüsünde yöneticiye özel bir yolun içinde yer alır (ör. `C:\Windows`, `C:\Windows\System32`, `C:\Program Files`, belirli yazılabilir alt yollar hariç).
-- `RAiLaunchAdminProcess` UIAccess başlatmaları için herhangi bir onay istemi göstermez (aksi takdirde erişilebilirlik araçları istemi kontrol edemezdi).
+- Windows AppInfo, UIAccess processes oluşturmak için `RAiLaunchAdminProcess` işlevini sunar (erişilebilirlik amacıyla tasarlanmıştır). UIAccess, çoğu User Interface Privilege Isolation (UIPI) mesaj filtrelemesini bypass eder; böylece erişilebilirlik yazılımları daha yüksek IL'ye sahip arayüzleri kontrol edebilir.
+- UIAccess'i doğrudan etkinleştirmek için **SeTcbPrivilege** ile `NtSetInformationToken(TokenUIAccess)` gerekir; bu nedenle düşük ayrıcalıklı çağıranlar service'e güvenir. Service, UIAccess'i ayarlamadan önce hedef binary üzerinde üç kontrol gerçekleştirir:
+- Embedded manifest `uiAccess="true"` içerir.
+- Local Machine root store tarafından güvenilen herhangi bir certificate ile imzalanmıştır (EKU/Microsoft şartı yoktur).
+- System drive üzerindeki yalnızca administrator'ların yazabildiği bir path'te bulunur (ör. `C:\Windows`, `C:\Windows\System32`, `C:\Program Files`; belirli writable alt path'ler hariç).
+- `RAiLaunchAdminProcess`, UIAccess launch'ları için consent prompt göstermez (aksi hâlde accessibility tooling prompt'u kontrol edemezdi).<sup>[[1]](#references)</sup>
 
-## Token shaping ve integrity seviyeleri
-- Kontroller başarılı olursa, AppInfo **çağırıcı token'ı kopyalar**, UIAccess'i etkinleştirir ve Integrity Level (IL) yükseltir:
-  - Limited admin user (kullanıcı Administrators grubunda ama filtrelenmiş olarak çalışıyor) ➜ **High IL**.
-  - Non-admin user ➜ IL **+16 seviyeye** kadar arttırılır, en fazla **High** ile sınırlandırılır (System IL atanmaz).
-- Eğer çağırıcı token zaten UIAccess içeriyorsa, IL değiştirilmez.
-- “Ratchet” hilesi: bir UIAccess süreç kendi üzerindeki UIAccess'i devre dışı bırakıp `RAiLaunchAdminProcess` ile tekrar başlatabilir ve başka bir +16 IL artışı elde edebilir. Medium➜High geçişi 255 yeniden başlatma gerektirir (gürültülü, ama çalışır).
+## Token şekillendirme ve integrity level'lar
+- Kontroller başarılı olursa AppInfo **caller token'ı kopyalar**, UIAccess'i etkinleştirir ve Integrity Level'ı (IL) yükseltir:
+- Limited admin user (user Administrators grubunda ancak filtered olarak çalışıyor) ➜ **High IL**.
+- Non-admin user ➜ IL, **High** sınırına kadar **+16 level** artırılır (System IL hiçbir zaman atanmaz).
+- Caller token'ında zaten UIAccess varsa IL değiştirilmez.
+- “Ratchet” trick: Bir UIAccess process, UIAccess'i kendi üzerinde devre dışı bırakabilir, `RAiLaunchAdminProcess` üzerinden yeniden launch edebilir ve bir +16 IL artışı daha kazanabilir. Medium➜High için 255 relaunch gerekir (gürültülüdür ancak çalışır).<sup>[[1]](#references)</sup>
 
-## Neden UIAccess Admin Protection kaçışına izin verir
-- UIAccess, daha düşük-IL bir sürecin daha yüksek-IL pencerelere pencere mesajı göndermesine izin verir (UIPI filtrelerini atlayarak). Eşit IL'de, `SetWindowsHookEx` gibi klasik UI primitifleri herhangi bir pencereye sahip sürece (COM tarafından kullanılan message-only pencereler dahil) kod enjeksiyonu/DLL yüklemeye izin verir.
-- Admin Protection UIAccess sürecini **limited user kimliğiyle** ama **High IL** seviyesinde sessizce başlatır. Bir kez High-IL UIAccess sürecinde rastgele kod çalıştırıldığında, saldırgan masaüstündeki diğer High-IL süreçlere (farklı kullanıcılara ait olanlar dahil) enjeksiyon yapabilir ve tasarlanan ayrımı kırar.
+## UIAccess neden Admin Protection escape sağlar?
+- UIAccess, daha düşük IL'ye sahip bir process'in daha yüksek IL'ye sahip window'lara window message göndermesine izin verir (UIPI filtrelerini bypass ederek). **Aynı IL** seviyesinde, `SetWindowsHookEx` gibi klasik UI primitive'leri, bir window'a sahip herhangi bir process'e (**message-only windows** kullanan COM dahil) code injection/DLL loading yapılmasına izin verir.
+- Admin Protection, UIAccess process'i **limited user'ın identity'siyle** ancak **High IL** seviyesinde, sessizce launch eder. Bu High-IL UIAccess process içinde arbitrary code çalışmaya başladıktan sonra attacker, desktop üzerindeki diğer High-IL process'lere (farklı user'lara ait olanlar dahil) inject olabilir ve amaçlanan ayrımı bozabilir.<sup>[[1]](#references)</sup>
 
-## HWND-to-process handle primitive (`GetProcessHandleFromHwnd` / `NtUserGetWindowProcessHandle`)
-- Windows 10 1803+'te API Win32k'ye (`NtUserGetWindowProcessHandle`) taşındı ve çağırıcı tarafından sağlanan `DesiredAccess` kullanılarak bir process handle açabilir. Kernel yolu `ObOpenObjectByPointer(..., KernelMode, ...)` kullanır; bu normal user-mode erişim kontrollerini atlar.
-- Pratik önkoşullar: hedef pencere aynı desktop'ta olmalı ve UIPI kontrolleri geçmelidir. Tarihsel olarak, UIAccess sahibi bir çağırıcı UIPI başarısızlığını atlayabiliyor ve yine de kernel-mode handle elde edebiliyordu (düzeltildi: CVE-2023-41772).
-- Etki: bir pencere handle'ı, çağırıcının normalde açamayacağı güçlü bir process handle (genellikle `PROCESS_DUP_HANDLE`, `PROCESS_VM_READ`, `PROCESS_VM_WRITE`, `PROCESS_VM_OPERATION`) elde etmesi için bir capability haline gelir. Bu çapraz sandbox erişimine izin verir ve hedef herhangi bir pencere (message-only pencereler dahil) açıyorsa Protected Process / PPL sınırlarını zayıflatabilir.
-- Pratik kötüye kullanım akışı: HWND'leri listele veya bul (ör. `EnumWindows`/`FindWindowEx`), sahip PID'yi çöz (`GetWindowThreadProcessId`), `GetProcessHandleFromHwnd` çağır, sonra dönen handle'ı bellek okuma/yazma veya kod ele geçirme primitifleri için kullan.
-- Düzeltmeden sonraki davranış: UIAccess artık UIPI başarısızlığında kernel-mode açılışlara izin vermez ve izin verilen erişim hakları legacy hook set ile sınırlanır; Windows 11 24H2 process-protection kontrolleri ve özellik-flag'lenmiş daha güvenli yollar ekler. UIPI'yi sistem çapında devre dışı bırakmak (`EnforceUIPI=0`) bu korumaları zayıflatır.
+## HWND'den process handle primitive'i (`GetProcessHandleFromHwnd` / `NtUserGetWindowProcessHandle`)
+- Windows 10 1803+ sürümlerinde API, Win32k içine taşındı (`NtUserGetWindowProcessHandle`) ve caller-supplied `DesiredAccess` kullanarak bir process handle açabilir. Kernel path, `ObOpenObjectByPointer(..., KernelMode, ...)` kullanır; bu da normal user-mode access check'lerini bypass eder.<sup>[[2]](#references)</sup>
+- Pratikte ön koşullar: Hedef window aynı desktop üzerinde olmalı ve UIPI check'leri geçilmelidir. Geçmişte UIAccess sahibi bir caller, UIPI failure'ını bypass ederek yine de kernel-mode handle elde edebiliyordu (CVE-2023-41772 ile düzeltildi).
+- Etki: Bir window handle, caller'ın normalde açamayacağı güçlü bir process handle elde etmek için bir **capability** hâline gelir (yaygın olarak `PROCESS_DUP_HANDLE`, `PROCESS_VM_READ`, `PROCESS_VM_WRITE`, `PROCESS_VM_OPERATION`). Bu, cross-sandbox access sağlar ve hedef herhangi bir window (message-only windows dahil) expose ederse Protected Process / PPL sınırlarını bozabilir.
+- Pratik abuse flow: HWND'leri enumerate edin veya bulun (ör. `EnumWindows`/`FindWindowEx`), sahip PID'yi çözümleyin (`GetWindowThreadProcessId`), `GetProcessHandleFromHwnd` çağırın ve ardından döndürülen handle'ı memory read/write veya code-hijack primitive'leri için kullanın.
+- Fix sonrası davranış: UIAccess artık UIPI failure durumunda kernel-mode open sağlamaz ve izin verilen access right'lar legacy hook set ile sınırlandırılmıştır; Windows 11 24H2 process-protection check'leri ve feature-flag'li daha güvenli path'ler ekler. UIPI'yi system-wide devre dışı bırakmak (`EnforceUIPI=0`) bu korumaları zayıflatır.<sup>[[2]](#references)</sup>
 
 ## Secure-directory validation zayıflıkları (AppInfo `AiCheckSecureApplicationDirectory`)
-AppInfo verilen yolu `GetFinalPathNameByHandle` ile çözümler ve sonra sabitlenmiş kökler/dışlamalara karşı **string allow/deny kontrolleri** uygular. Bu basit doğrulamadan kaynaklanan birden fazla bypass sınıfı vardır:
-- **Directory named streams**: Hariç tutulmuş yazılabilir dizinler (ör. `C:\Windows\tracing`) dizinin kendisinde bir named stream ile atlanabilir, örn. `C:\Windows\tracing:file.exe`. String kontroller `C:\Windows\` kısmını görür ve hariç tutulmuş alt yolu kaçırır.
-- **Writable file/directory inside an allowed root**: `CreateProcessAsUser` bir `.exe` uzantısı gerektirmez. İzin verilen kök altında herhangi bir yazılabilir dosyayı çalıştırılabilir yük ile üstüne yazmak işe yarar, veya imzalı `uiAccess="true"` EXE'yi herhangi bir yazılabilir alt dizine kopyalamak (ör. mevcutsa güncelleme kalıntıları gibi `Tasks_Migrated`) secure-path kontrolünü geçmesini sağlar.
-- **MSIX into `C:\Program Files\WindowsApps` (düzeltildi)**: Non-admin'ler imzalı MSIX paketleri kurup `WindowsApps` içine yerleştirebiliyordu; bu yol hariç tutulmamıştı. MSIX içine UIAccess ikili paketleyip `RAiLaunchAdminProcess` ile başlatmak, prompt olmadan High-IL UIAccess süreci elde edilmesine yol açıyordu. Microsoft bu yolu hariç tutarak hafifletti; ayrıca `uiAccess` kısıtlı MSIX capability'si zaten admin kurulumu gerektiriyordu.
+AppInfo, sağlanan path'i `GetFinalPathNameByHandle` üzerinden çözümler ve ardından hardcoded root/exclusion'lara karşı **string allow/deny check'leri** uygular. Bu basit validation'dan birden fazla bypass sınıfı ortaya çıkar:
+- **Directory named streams**: Excluded writable directory'ler (ör. `C:\Windows\tracing`), directory'nin kendisi üzerinde named stream kullanılarak bypass edilebilir; ör. `C:\Windows\tracing:file.exe`. String check'leri `C:\Windows\` kısmını görür ve excluded subpath'i kaçırır.
+- **Allowed root içinde writable file/directory**: `CreateProcessAsUser`, `.exe` extension'ı gerektirmez. Allowed root altında bulunan herhangi bir writable file'ı executable payload ile overwrite etmek veya signed `uiAccess="true"` EXE'yi herhangi bir writable subdirectory'ye (ör. mevcut olduğunda `Tasks_Migrated` gibi update leftovers) kopyalamak, secure-path check'ini geçmesini sağlar.
+- **`C:\Program Files\WindowsApps` içine MSIX (düzeltildi)**: Non-admin'ler, `WindowsApps` içine yerleşen signed MSIX package'lar kurabiliyordu; bu path excluded değildi. MSIX içine bir UIAccess binary package'layıp `RAiLaunchAdminProcess` üzerinden launch etmek, **prompt'suz High-IL UIAccess process** elde edilmesini sağlıyordu. Microsoft bu path'i exclude ederek önlem aldı; `uiAccess` restricted MSIX capability'si zaten admin install gerektirir.<sup>[[1]](#references)</sup>
 
-## Saldırı iş akışı (Prompt olmadan High IL elde etme)
-1. İmzalı bir **UIAccess binary** elde et veya oluştur (manifest `uiAccess="true"`).
-2. AppInfo’nun allowlist'inin kabul ettiği bir yere yerleştir (veya yukarıdaki yol-doğrulama kenar durumunu/yazılabilir artefaktı suistimal et).
-3. `RAiLaunchAdminProcess` çağırarak onu UIAccess + yükseltilmiş IL ile **sessizce** başlat.
-4. Bu High-IL foothold'dan, masaüstündeki başka bir High-IL süreci hedefle ve **window hooks/DLL injection** veya aynı-IL primitifleri ile admin bağlamını tamamen ele geçir.
+## Attack workflow (prompt olmadan High IL)
+1. **Signed UIAccess binary** elde edin/oluşturun (`uiAccess="true"` manifest'i).
+2. AppInfo'nun allowlist'inin kabul ettiği bir yere yerleştirin (veya yukarıdaki gibi bir path-validation edge case/writable artifact abuse edin).
+3. UIAccess + elevated IL ile **sessizce** spawn etmek için `RAiLaunchAdminProcess` çağırın.
+4. Bu High-IL foothold'dan, admin context'i tamamen compromise etmek için desktop üzerindeki başka bir High-IL process'i **window hooks/DLL injection** veya aynı IL seviyesindeki diğer primitive'leri kullanarak hedefleyin.<sup>[[1]](#references)</sup>
 
-## Yazılabilir aday yolları listeleme
-Belirli bir token perspektifinden nominal olarak güvenli kökler içinde yazılabilir/üzerine yazılabilir nesneleri keşfetmek için PowerShell yardımcısını çalıştır:
+## Aday writable path'leri enumerate etme
+Seçilen bir token perspektifinden nominal olarak secure root'lar içindeki writable/overwritable object'leri keşfetmek için PowerShell helper'ı çalıştırın:<sup>[[1]](#references)</sup>
 ```powershell
 $paths = "C:\\Windows","C:\\Program Files","C:\\Program Files (x86)"
 Get-AccessibleFile -Win32Path $paths -Access Execute,WriteData `
 -DirectoryAccess AddFile -Recurse -ProcessId <PID>
 ```
-- Daha geniş görünürlük için Yönetici olarak çalıştırın; `-ProcessId`'i o token'ın erişimini yansıtacak düşük ayrıcalıklı bir sürece ayarlayın.
-- Adayları `RAiLaunchAdminProcess` ile kullanmadan önce, bilinen izin verilmeyen alt dizinleri hariç tutmak için elle filtreleyin.
+- Daha geniş görünürlük için Administrator olarak çalıştırın; bu token’ın erişimini yansıtmak üzere `-ProcessId` değerini düşük ayrıcalıklı bir process’e ayarlayın.
+- `RAiLaunchAdminProcess` ile adayları kullanmadan önce, bilinen izin verilmeyen alt dizinleri manuel olarak hariç tutun.
 
 ## İlgili
 
-Secure Desktop erişilebilirlik kayıt defteri yayılımı LPE (RegPwn):
+Secure Desktop erişilebilirlik registry propagation LPE (RegPwn):
 
 {{#ref}}
 secure-desktop-accessibility-registry-propagation-regpwn.md
 {{#endref}}
 
 ## Referanslar
-- [Bypassing Administrator Protection by Abusing UI Access](https://projectzero.google/2026/02/windows-administrator-protection.html)
-- [GetProcessHandleFromHwnd (GPHFH) Deep Dive](https://projectzero.google/2026/02/gphfh-deep-dive.html)
+
+- [1] [Bypassing Administrator Protection by Abusing UI Access](https://projectzero.google/2026/02/windows-administrator-protection.html)
+- [2] [GetProcessHandleFromHwnd (GPHFH) Deep Dive](https://projectzero.google/2026/02/gphfh-deep-dive.html)
 
 {{#include ../../banners/hacktricks-training.md}}
