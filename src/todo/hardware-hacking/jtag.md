@@ -57,7 +57,7 @@ openocd -f board/esp32s3-builtin.cfg -c "init; scan_chain; shutdown"
 ```
 Notes
 - If you get "all ones/zeros" IDCODE, check wiring, power, Vtref, and that the port isn’t locked by fuses/option bytes.
-- See OpenOCD low‑level `irscan`/`drscan` for manual TAP interaction when bringing up unknown chains.
+- See OpenOCD low‑level `irscan`/`drscan` for manual TAP interaction when bringing up unknown chains.<sup>[[1]](#references)</sup>
 
 ## Halting the CPU and dumping memory/flash
 
@@ -103,7 +103,7 @@ You need the device BSDL to know boundary register bit ordering. Beware that som
 
 ## Modern targets and notes
 
-- ESP32‑S3/C3 include a native USB‑JTAG bridge; OpenOCD can speak directly over USB without an external probe. Very convenient for triage and dumps.
+- ESP32‑S3/C3 include a native USB‑JTAG bridge; OpenOCD can speak directly over USB without an external probe. Very convenient for triage and dumps.<sup>[[2]](#references)</sup>
 - RISC‑V debug (v0.13+) is widely supported by OpenOCD; prefer SBA for memory access when the core cannot be halted safely.
 - Many MCUs implement debug authentication and lifecycle states. If JTAG appears dead but power is correct, the device may be fused to a closed state or requires an authenticated probe.
 
@@ -116,7 +116,7 @@ You need the device BSDL to know boundary register bit ordering. Beware that som
 
 ## References
 
-- OpenOCD User’s Guide – JTAG Commands and configuration. https://openocd.org/doc-release/html/JTAG-Commands.html
-- Espressif ESP32‑S3 JTAG debugging (USB‑JTAG, OpenOCD usage). https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/
+- [1] [OpenOCD User’s Guide – JTAG Commands and configuration](https://openocd.org/doc-release/html/JTAG-Commands.html)
+- [2] [Espressif ESP32‑S3 JTAG debugging (USB‑JTAG, OpenOCD usage)](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -28,6 +28,7 @@ LDAP relay/MITM lets attackers forward binds to Domain Controllers to obtain aut
   - (Event **3039** still signals CBT failures on older builds.)<sup>[[1]](#references)[[2]](#references)</sup>
 - **Enforcement**: set **Always** once LDAPS clients send CBTs; only effective on **LDAPS** (not raw 389).<sup>[[1]](#references)</sup>
 
+
 ## LDAP Signing
 
 - **Client GPO**: `Network security: LDAP client signing requirements` = `Require signing` (vs `Negotiate signing` default on modern Windows).<sup>[[1]](#references)</sup>

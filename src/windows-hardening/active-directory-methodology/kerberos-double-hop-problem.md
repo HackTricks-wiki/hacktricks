@@ -66,7 +66,7 @@ Alternatively, establishing a PS-Session with the first server and running the `
 
 ### Register PSSession Configuration
 
-A solution to bypass the double hop problem involves using `Register-PSSessionConfiguration` with `Enter-PSSession`. This method requires a different approach than `evil-winrm` and allows for a session that does not suffer from the double hop limitation.<sup>[[3]](#references)</sup>
+A solution to bypass the double hop problem involves using `Register-PSSessionConfiguration` with `Enter-PSSession`. This method requires a different approach than `evil-winrm` and allows for a session that does not suffer from the double hop limitation.<sup>[[3]](#references)[[4]](#references)</sup>
 
 ```bash
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
@@ -110,7 +110,7 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 
 ### LSA Whisperer CacheLogon (Advanced)
 
-**LSA Whisperer** (2024) exposes the `msv1_0!CacheLogon` package call so you can seed an existing *network logon* with a known NT hash instead of creating a fresh session with `LogonUser`. By injecting the hash into the logon session that WinRM/PowerShell already opened on hop #1, that host can authenticate to hop #2 without storing explicit credentials or generating extra 4624 events.
+**LSA Whisperer** (2024) exposes the `msv1_0!CacheLogon` package call so you can seed an existing *network logon* with a known NT hash instead of creating a fresh session with `LogonUser`. By injecting the hash into the logon session that WinRM/PowerShell already opened on hop #1, that host can authenticate to hop #2 without storing explicit credentials or generating extra 4624 events.<sup>[[6]](#references)</sup>
 
 1. Get code execution inside LSASS (either disable/abuse PPL or run on a lab VM you control).
 2. Enumerate logon sessions (e.g. `lsa.exe sessions`) and capture the LUID corresponding to your remoting context.
@@ -131,6 +131,5 @@ After the cache seed, rerun `Invoke-Command`/`New-PSSession` from hop #1: LSASS 
 - [4] [Solve the PowerShell multi-hop problem without using CredSSP](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
 - [5] [April 9, 2024—KB5036896 (OS Build 17763.5696)](https://support.microsoft.com/en-au/topic/april-9-2024-kb5036896-os-build-17763-5696-efb580f1-2ce4-4695-b76c-d2068a00fb92)
 - [6] [LSA Whisperer](https://specterops.io/blog/2024/04/17/lsa-whisperer/)
-
 
 {{#include ../../banners/hacktricks-training.md}}

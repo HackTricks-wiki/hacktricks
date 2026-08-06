@@ -132,13 +132,13 @@ Import-Module .\SpoolFool.ps1 ; Invoke-SpoolFool -dll add_user.dll
 
 ## 5. Related research / tools
 
-* [mimikatz `printnightmare`](https://github.com/gentilkiwi/mimikatz/tree/master/modules) modules  
-* [`ly4k/PrintNightmare`](https://github.com/ly4k/PrintNightmare) – standard Impacket implementation with `-check`, `-list`, and `-delete` modes  
-* [`m8sec/CVE-2021-34527`](https://github.com/m8sec/CVE-2021-34527) – wrapper with built-in SMB delivery, multi-target support, and both `MS-RPRN` / `MS-PAR` modes  
-* SharpPrintNightmare (C#) / Invoke-Nightmare (PowerShell)  
-* [`Concealed Position`](https://github.com/jacob-baines/concealed_position) – bring-your-own-vulnerable-printer-driver abuse through package Point & Print  
-* SpoolFool exploit & write-up  
-* 0patch micropatches for SpoolFool and other spooler bugs  
+* [mimikatz `printnightmare`](https://github.com/gentilkiwi/mimikatz/tree/master/modules) modules
+* [`ly4k/PrintNightmare`](https://github.com/ly4k/PrintNightmare) – standard Impacket implementation with `-check`, `-list`, and `-delete` modes
+* [`m8sec/CVE-2021-34527`](https://github.com/m8sec/CVE-2021-34527) – wrapper with built-in SMB delivery, multi-target support, and both `MS-RPRN` / `MS-PAR` modes
+* SharpPrintNightmare (C#) / Invoke-Nightmare (PowerShell)
+* [`Concealed Position`](https://github.com/jacob-baines/concealed_position) – bring-your-own-vulnerable-printer-driver abuse through package Point & Print
+* SpoolFool exploit & write-up
+* 0patch micropatches for SpoolFool and other spooler bugs
 
 If you want to **coerce authentication** via the spooler instead of loading a driver, jump to [printer spooler service abuse](printers-spooler-service-abuse.md).
 

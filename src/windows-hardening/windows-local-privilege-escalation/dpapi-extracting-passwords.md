@@ -217,7 +217,7 @@ SharpDPAPI.exe credentials /credkey:SHA1_HEX
 ```
 
 Notes
-- Newer Chrome/Edge builds may store certain cookies using "App-Bound" encryption. Offline decryption of those specific cookies is not possible without the additional app-bound key; run SharpChrome under the target user context to retrieve it automatically. See the Chrome security blog post referenced below.
+- Newer Chrome/Edge builds may store certain cookies using "App-Bound" encryption. Offline decryption of those specific cookies is not possible without the additional app-bound key; run SharpChrome under the target user context to retrieve it automatically. See the Chrome security blog post referenced below.<sup>[[5]](#references)</sup>
 
 ### Access keys and data
 
@@ -327,7 +327,7 @@ SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 
 ### Offline decryption with Impacket dpapi.py
 
-If you have the victim user’s SID and password (or NT hash), you can decrypt DPAPI masterkeys and Credential Manager blobs entirely offline using Impacket’s dpapi.py.<sup>[[11]](#references)</sup>
+If you have the victim user’s SID and password (or NT hash), you can decrypt DPAPI masterkeys and Credential Manager blobs entirely offline using Impacket’s dpapi.py.<sup>[[10]](#references)[[11]](#references)</sup>
 
 - Identify artefacts on disk:
   - Credential Manager blob(s): %APPDATA%\Microsoft\Credentials\<hex>

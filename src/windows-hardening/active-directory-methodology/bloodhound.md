@@ -2,7 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
