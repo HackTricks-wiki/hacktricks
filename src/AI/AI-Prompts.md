@@ -734,7 +734,7 @@ Escalate those files to deterministic parsing, conventional static analysis, san
 
 ## Encrypted Reasoning-State Replay, Transcript JSON Injection, and Reasoning Side Channels
 
-Some reasoning-model APIs return **opaque reasoning/thinking items** that the client must replay on later turns. OpenAI explicitly documents that reasoning items may contain `encrypted_content` and should be preserved when continuing a conversation, while Anthropic exposes signed/opaque thinking blocks that must also be passed back unchanged.<sup>[[18]](#references)[[19]](#references)[[21]](#references)</sup>
+Some reasoning-model APIs return **opaque reasoning/thinking items** that the client must replay on later turns. OpenAI explicitly documents that reasoning items may contain `encrypted_content` and should be preserved when continuing a conversation, while Anthropic exposes signed/opaque thinking blocks that must also be passed back unchanged.<sup>[[18]](#references)[[19]](#references)[[21]](#references)[[20]](#references)</sup>
 
 From an attacker perspective, treat these artifacts as **provider-native privileged state**, not as normal user text.
 

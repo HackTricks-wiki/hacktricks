@@ -956,7 +956,7 @@ Detection ideas for defenders
 
 ## PATH DLL Hijacking
 
-If you have **write permissions inside a folder present on PATH** you could be able to hijack a DLL loaded by a process and **escalate privileges**.
+If you have **write permissions inside a folder present on PATH** you could be able to hijack a DLL loaded by a process and **escalate privileges**.<sup>[[2]](#references)</sup>
 
 Check permissions of all folders inside PATH:
 
