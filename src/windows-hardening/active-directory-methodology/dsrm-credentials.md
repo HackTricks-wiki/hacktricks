@@ -39,4 +39,3 @@ More info about this in: [https://adsecurity.org/?p=1714](https://adsecurity.org
 - [2] [Sneaky Active Directory Persistence #13: DSRM Persistence v2](https://adsecurity.org/?p=1785)
 
 {{#include ../../banners/hacktricks-training.md}}
-

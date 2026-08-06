@@ -90,7 +90,7 @@ Remember that the printer will use the computer account during the authenticatio
 
 ### NTLMv1 attack with hashcat
 
-NTLMv1 can also be broken with the NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) which formats NTLMv1 messages im a method that can be broken with hashcat.
+NTLMv1 can also be broken with the NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) which formats NTLMv1 messages im a method that can be broken with hashcat.<sup>[[1]](#references)</sup>
 
 The command
 
@@ -182,7 +182,7 @@ The **challenge length is 8 bytes** and **2 responses are sent**: One is **24 by
 
 The **second response** is created using **several values** (a new client challenge, a **timestamp** to avoid **replay attacks**...)
 
-If you have a **pcap that has captured a successful authentication process**, you can follow this guide to get the domain, username , challenge and response and try to creak the password: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
+If you have a **pcap that has captured a successful authentication process**, you can follow this guide to get the domain, username , challenge and response and try to creak the password: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)<sup>[[2]](#references)</sup>
 
 ## Pass-the-Hash
 
@@ -217,7 +217,7 @@ You can download[ impacket binaries for Windows here](https://github.com/ropnop/
 
 ### Invoke-TheHash
 
-You can get the powershell scripts from here: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)
+You can get the powershell scripts from here: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)<sup>[[3]](#references)</sup>
 
 #### Invoke-SMBExec
 
@@ -276,7 +276,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ## Internal Monologue attack
 
-The Internal Monologue Attack is a stealthy credential extraction technique that allows an attacker to retrieve NTLM hashes from a victim's machine **without interacting directly with the LSASS process**. Unlike Mimikatz, which reads hashes directly from memory and is frequently blocked by endpoint security solutions or Credential Guard, this attack leverages **local calls to the NTLM authentication package (MSV1_0) via the Security Support Provider Interface (SSPI)**. The attacker first **downgrades NTLM settings** (e.g., LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic) to ensure that NetNTLMv1 is permitted. They then impersonate existing user tokens obtained from running processes and trigger NTLM authentication locally to generate NetNTLMv1 responses using a known challenge.
+The Internal Monologue Attack is a stealthy credential extraction technique that allows an attacker to retrieve NTLM hashes from a victim's machine **without interacting directly with the LSASS process**. Unlike Mimikatz, which reads hashes directly from memory and is frequently blocked by endpoint security solutions or Credential Guard, this attack leverages **local calls to the NTLM authentication package (MSV1_0) via the Security Support Provider Interface (SSPI)**. The attacker first **downgrades NTLM settings** (e.g., LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic) to ensure that NetNTLMv1 is permitted. They then impersonate existing user tokens obtained from running processes and trigger NTLM authentication locally to generate NetNTLMv1 responses using a known challenge.<sup>[[4]](#references)</sup>
 
 After capturing these NetNTLMv1 responses, the attacker can quickly recover the original NTLM hashes using **precomputed rainbow tables**, enabling further Pass-the-Hash attacks for lateral movement. Crucially, the Internal Monologue Attack remains stealthy because it doesn't generate network traffic, inject code, or trigger direct memory dumps, making it harder for defenders to detect compared to traditional methods like Mimikatz.
 
@@ -303,7 +303,7 @@ The PoC can be found in **[https://github.com/eladshamir/Internal-Monologue](htt
 
 Windows contains several mitigations that try to prevent *reflection* attacks where an NTLM (or Kerberos) authentication that originates from a host is relayed back to the **same** host to gain SYSTEM privileges.  
 
-Microsoft broke most public chains with MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) and later patches, however **CVE-2025-33073** shows that the protections can still be bypassed by abusing how the **SMB client truncates Service Principal Names (SPNs)** that contain *marshalled* (serialized) target-info.<sup>[[1]](#references)[[2]](#references)</sup>
+Microsoft broke most public chains with MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) and later patches, however **CVE-2025-33073** shows that the protections can still be bypassed by abusing how the **SMB client truncates Service Principal Names (SPNs)** that contain *marshalled* (serialized) target-info.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ### TL;DR of the bug
 1. An attacker registers a **DNS A-record** whose label encodes a marshalled SPN – e.g.
@@ -312,7 +312,7 @@ Microsoft broke most public chains with MS08-068 (SMB→SMB), MS09-013 (HTTP→S
 3. When the SMB client passes the target string `cifs/srv11UWhRCAAAAA…` to `lsasrv!LsapCheckMarshalledTargetInfo`, the call to `CredUnmarshalTargetInfo` **strips** the serialized blob, leaving **`cifs/srv1`**.
 4. `msv1_0!SspIsTargetLocalhost` (or the Kerberos equivalent) now considers the target to be *localhost* because the short host part matches the computer name (`SRV1`).
 5. Consequently, the server sets `NTLMSSP_NEGOTIATE_LOCAL_CALL` and injects **LSASS’ SYSTEM access-token** into the context (for Kerberos a SYSTEM-marked subsession key is created).
-6. Relaying that authentication with `ntlmrelayx.py` **or** `krbrelayx.py` gives full SYSTEM rights on the same host.<sup>[[1]](#references)</sup>
+6. Relaying that authentication with `ntlmrelayx.py` **or** `krbrelayx.py` gives full SYSTEM rights on the same host.<sup>[[5]](#references)</sup>
 
 ### Quick PoC
 ```bash
@@ -333,14 +333,14 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 ```
 
 ### Patch & Mitigations
-* KB patch for **CVE-2025-33073** adds a check in `mrxsmb.sys::SmbCeCreateSrvCall` that blocks any SMB connection whose target contains marshalled info (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).<sup>[[1]](#references)[[2]](#references)</sup>
+* KB patch for **CVE-2025-33073** adds a check in `mrxsmb.sys::SmbCeCreateSrvCall` that blocks any SMB connection whose target contains marshalled info (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).<sup>[[5]](#references)[[6]](#references)</sup>
 * Enforce **SMB signing** to prevent reflection even on unpatched hosts.
 * Monitor DNS records resembling `*<base64>...*` and block coercion vectors (PetitPotam, DFSCoerce, AuthIP...).
 
 ### Detection ideas
 * Network captures with `NTLMSSP_NEGOTIATE_LOCAL_CALL` where client IP ≠ server IP.
 * Kerberos AP-REQ containing a subsession key and a client principal equal to the hostname.
-* Windows Event 4624/4648 SYSTEM logons immediately followed by remote SMB writes from the same host.<sup>[[1]](#references)</sup>
+* Windows Event 4624/4648 SYSTEM logons immediately followed by remote SMB writes from the same host.<sup>[[5]](#references)</sup>
 
 For the **March 2026** local reflection variant that abuses **SMB arbitrary ports** and **TCP connection reuse** to reach `NT AUTHORITY\SYSTEM`, see:
 
@@ -349,7 +349,11 @@ For the **March 2026** local reflection variant that abuses **SMB arbitrary port
 {{#endref}}
 
 ## References
-- [1] [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
-- [2] [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
+- [1] [evilmog/ntlmv1-multi – NTLMv1 Multitool](https://github.com/evilmog/ntlmv1-multi)
+- [2] [Cracking an NTLMv2 Hash](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
+- [3] [Kevin-Robertson/Invoke-TheHash – PowerShell Pass The Hash Utilities](https://github.com/Kevin-Robertson/Invoke-TheHash)
+- [4] [Internal Monologue Attack: Retrieving NTLM Hashes without Touching LSASS](https://github.com/eladshamir/Internal-Monologue)
+- [5] [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
+- [6] [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
 
 {{#include ../../banners/hacktricks-training.md}}

