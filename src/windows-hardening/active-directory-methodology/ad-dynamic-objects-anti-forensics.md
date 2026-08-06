@@ -2,19 +2,19 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Mechanics & Detection Basics
+## Основи механіки та виявлення
 
-- Будь-який об’єкт, створений з допоміжним класом **`dynamicObject`**, отримує **`entryTTL`** (зворотний відлік у секундах) і **`msDS-Entry-Time-To-Die`** (абсолютний час завершення). Коли `entryTTL` досягає 0, **Garbage Collector видаляє його без tombstone/recycle-bin**, стираючи creator/timestamps і блокуючи відновлення.
-- **`entryTTL` — це operational/constructed attribute**: запитуйте його явно в LDAP queries. TTL можна оновити або шляхом зміни `entryTTL` до завершення терміну, або через LDAP TTL refresh OID **`1.3.6.1.4.1.1466.101.119.1`**.
-- Мінімальний/default TTL застосовуються в **Configuration\Services\NTDS Settings → `msDS-Other-Settings` → `DynamicObjectMinTTL` / `DynamicObjectDefaultTTL`**. Microsoft документує **86400s** як default TTL і **900s** як default minimum valid TTL; обидва підтримують **1s–1y**. Dynamic objects **не підтримуються в Configuration/Schema partitions**.
-- Немає переходу **static→dynamic** і немає tombstone-фази після завершення терміну. IR teams не можуть покладатися на deleted-object controls або Recycle Bin; вони мають захопити живий об’єкт/metadata до того, як GC його видалить.
-- Refresh є **replica-sensitive**: якщо TTL поновити занадто близько до завершення, інша writable replica або GC все ще можуть локально видалити об’єкт до того, як refresh реплікується. Тому дуже короткі TTL найкраще працюють, коли атакувальник знає, який DC обслуговуватиме abuse, тоді як захисникам слід запитувати **all naming contexts / replicas** під час triage.
-- Видалення може затримуватися на кілька хвилин на DCs з коротким uptime (<24h), залишаючи вузьке вікно реагування для запиту/backup атрибутів. Виявляйте це через **alerting on new objects carrying `entryTTL`/`msDS-Entry-Time-To-Die`** та кореляцію з orphan SIDs/broken links.
+- Будь-який об’єкт, створений із допоміжним класом **`dynamicObject`**, отримує **`entryTTL`** (зворотний відлік у секундах) і **`msDS-Entry-Time-To-Die`** (абсолютний час завершення дії). Коли **`entryTTL`** досягає 0, **Garbage Collector** видаляє об’єкт без tombstone/recycle-bin, стираючи дані про творця та часові мітки й унеможливлюючи відновлення.
+- **`entryTTL` є operational/constructed attribute**: його потрібно явно запитувати в LDAP-запитах. TTL можна оновити або зміною **`entryTTL`** до завершення його дії, або через LDAP TTL refresh OID **`1.3.6.1.4.1.1466.101.119.1`**.
+- Мінімальне/типове значення TTL задається в **Configuration\Services\NTDS Settings → `msDS-Other-Settings` → `DynamicObjectMinTTL` / `DynamicObjectDefaultTTL`**. Microsoft документує **86400s** як типовий TTL і **900s** як типове мінімальне допустиме значення TTL; обидва параметри підтримують діапазон **1s–1y**. Dynamic objects **не підтримуються в розділах Configuration/Schema**.
+- **static→dynamic conversion** неможливе, а після завершення дії об’єкта немає фази tombstone. IR-команди не можуть покладатися на засоби керування видаленими об’єктами або Recycle Bin; вони мають отримати live object/метадані до того, як GC його видалить.
+- Оновлення залежить від replica: якщо TTL поновити надто близько до завершення його дії, інша writable replica або GC все одно можуть локально видалити об’єкт до реплікації оновлення. Тому дуже короткі TTL найкраще працюють, коли attacker знає, який DC обслуговуватиме зловживання, тоді як defenders мають опитувати **all naming contexts / replicas** під час triage.
+- На DC із коротким часом роботи (<24h) видалення може затримуватися на кілька хвилин, залишаючи вузьке response window для запиту/резервного копіювання атрибутів. Виявляйте це за допомогою **alerting on new objects carrying `entryTTL`/`msDS-Entry-Time-To-Die`** і корелюйте з orphan SIDs/broken links.<sup>[[1]](#references)</sup>
 
-## Fast Enumeration / Live Triage
+## Швидке перерахування / Live Triage
 
-- Запитуйте **all `namingContexts` з RootDSE**, не лише domain NC. Dynamic abuse може жити в **`DomainDnsZones`/`ForestDnsZones`** (`dnsNode`) або в application partitions.
-- Поки об’єкт ще живий, негайно витягніть **replication metadata** і будь-які linked attributes/ACLs. Після завершення терміну ви можете залишитися лише з **broken `gPLink` values, orphan SIDs, або cached DNS answers**.
+- Запитуйте **all `namingContexts` from RootDSE**, а не лише domain NC. Dynamic abuse може знаходитися в **`DomainDnsZones`/`ForestDnsZones`** (`dnsNode`) або в application partitions.
+- Поки об’єкт ще існує, негайно збережіть **replication metadata** і всі linked attributes/ACLs. Після завершення дії можуть залишитися лише **broken `gPLink` values, orphan SIDs або cached DNS answers**.<sup>[[1]](#references)</sup>
 ```powershell
 $root = Get-ADRootDSE
 $root.namingContexts | ForEach-Object {
@@ -24,46 +24,46 @@ Select-Object DistinguishedName,entryTTL,msDS-Entry-Time-To-Die,gPCFileSysPath,m
 }
 repadmin /showobjmeta <DC> <distinguishedName>
 ```
-## MAQ Evasion with Self-Deleting Computers
+## Ухилення від MAQ за допомогою комп’ютерів, що самовидаляються
 
-- Default **`ms-DS-MachineAccountQuota` = 10** lets any authenticated user create computers. Add `dynamicObject` during creation to have the computer self-delete and **free the quota slot** while wiping evidence.
-- Powermad tweak inside `New-MachineAccount` (objectClass list):
+- Значення **`ms-DS-MachineAccountQuota` = 10** за замовчуванням дозволяє будь-якому authenticated user створювати комп’ютери. Додавання `dynamicObject` під час створення змушує комп’ютер самовидалитися та **звільнити слот квоти**, одночасно стираючи докази.
+- Точкова зміна Powermad всередині `New-MachineAccount` (список objectClass):
 ```powershell
 $request.Attributes.Add((New-Object "System.DirectoryServices.Protocols.DirectoryAttribute" -ArgumentList "objectClass", "dynamicObject", "Computer")) > $null
 ```
-- If the requested TTL is **below `DynamicObjectMinTTL`**, expect server-side adjustment or rejection depending on the creation path; in many domains the effective floor is **900s** and the fallback/default remains **86400s**. ADUC may hide `entryTTL`, but LDP/LDAP queries reveal it.
-- While the object exists, defenders can still recover the unprivileged creator from **`msDS-CreatorSID`** on the computer object. Once the dynamic computer expires, that attribution disappears with the object.
+- Якщо запитаний TTL **нижчий за `DynamicObjectMinTTL`**, очікуйте server-side коригування або відхилення залежно від способу створення; у багатьох доменах фактичний мінімум становить **900s**, а fallback/default залишається **86400s**. ADUC може приховувати `entryTTL`, але LDP/LDAP-запити його виявляють.
+- Поки об’єкт існує, defenders все ще можуть визначити unprivileged creator за **`msDS-CreatorSID`** на об’єкті комп’ютера. Після завершення терміну дії dynamic computer ця атрибуція зникає разом з об’єктом.<sup>[[1]](#references)</sup>
 
-## Stealth Primary Group Membership
+## Приховане членство в Primary Group
 
-- Create a **dynamic security group**, then set a user’s **`primaryGroupID`** to that group’s RID to gain effective membership that **doesn’t show in `memberOf`** but is honored in Kerberos/access tokens.
-- TTL expiry **deletes the group despite primary-group delete protection**, leaving the user with a corrupted `primaryGroupID` pointing to a non-existent RID and no tombstone to investigate how the privilege was granted.
-- Reporting is tool-dependent: **`Get-ADGroupMember` / `net group`** usually resolve primary-group-derived membership, while **`memberOf`** and **`Get-ADGroup -Properties member`** do not. For broader `primaryGroupID` tradecraft, see [this other page about DCShadow and PGID abuse](dcshadow.md).
-- For **non-AdminSDHolder-protected** targets, attackers can pair the dynamic-group trick with a **DACL deny on reading `primaryGroupID`** (or the group `member` attribute) to hide the link from many LDAP/PowerShell workflows even before the group expires.
+- Створіть **dynamic security group**, а потім встановіть **`primaryGroupID`** користувача в RID цієї групи, щоб отримати ефективне членство, яке **не відображається в `memberOf`**, але враховується в Kerberos/access tokens.<sup>[[1]](#references)</sup>
+- Завершення TTL **видаляє групу попри захист від видалення primary group**, залишаючи користувача з пошкодженим **`primaryGroupID`**, що вказує на неіснуючий RID, і без tombstone для розслідування способу надання привілею.
+- Звітування залежить від tool: **`Get-ADGroupMember` / `net group`** зазвичай визначають membership, отримане через primary group, тоді як **`memberOf`** і **`Get-ADGroup -Properties member`** цього не роблять. Щодо ширшого tradecraft для **`primaryGroupID`** дивіться [цю іншу сторінку про DCShadow і зловживання PGID](dcshadow.md).
+- Для цілей, **не захищених AdminSDHolder**, attackers можуть поєднати trick із dynamic group та **DACL deny на читання `primaryGroupID`** (або атрибута `member` групи), щоб приховати зв’язок від багатьох LDAP/PowerShell workflows ще до завершення терміну дії групи.<sup>[[2]](#references)</sup>
 
-## AdminSDHolder Orphan-SID Pollution
+## Забруднення AdminSDHolder осиротілими SID
 
-- Add ACEs for a **short-lived dynamic user/group** to **`CN=AdminSDHolder,CN=System,...`**. After TTL expiry the SID becomes **unresolvable (“Unknown SID”)** in the template ACL, and **SDProp (~60 min)** propagates that orphan SID across all protected Tier-0 objects.
-- Forensics lose attribution because the principal is gone (no deleted-object DN). Monitor for **new dynamic principals + sudden orphan SIDs on AdminSDHolder/privileged ACLs**.
+- Додайте ACE для **short-lived dynamic user/group** до **`CN=AdminSDHolder,CN=System,...`**. Після завершення TTL SID стає **невизначуваним (“Unknown SID”)** у template ACL, а **SDProp (~60 min)** поширює цей orphan SID на всі захищені об’єкти Tier-0.
+- Forensics втрачає атрибуцію, оскільки principal більше не існує (відсутній DN видаленого об’єкта). Відстежуйте **нові dynamic principals + раптові orphan SIDs в AdminSDHolder/privileged ACLs**.<sup>[[1]](#references)</sup>
 
-## Dynamic GPO Execution with Self-Destructing Evidence
+## Виконання Dynamic GPO із самознищенням доказів
 
-- Create a **dynamic `groupPolicyContainer`** object with a malicious **`gPCFileSysPath`** (e.g., SMB share à la GPODDITY) and **link it via `gPLink`** to a target OU.
-- Clients process the policy and pull content from attacker SMB. When TTL expires, the GPO object (and `gPCFileSysPath`) vanishes; only a **broken `gPLink`** GUID remains, removing LDAP evidence of the executed payload.
-- This is operationally cleaner than classic **GPODDITY-style** cleanup: instead of restoring the original `gPCFileSysPath` yourself, AD removes the malicious GPC automatically once the timer expires.
+- Створіть **dynamic `groupPolicyContainer`** object зі шкідливим **`gPCFileSysPath`** (наприклад, SMB share на кшталт GPODDITY) і зв’яжіть його через **`gPLink`** із цільовим OU.
+- Clients обробляють policy та отримують content з attacker SMB. Після завершення TTL об’єкт GPO (і **`gPCFileSysPath`**) зникає; залишається лише **broken `gPLink`** GUID, що усуває LDAP-докази виконаного payload.
+- Це операційно чистіше за класичне очищення у стилі **GPODDITY**: замість того щоб самостійно відновлювати оригінальний `gPCFileSysPath`, AD автоматично видаляє шкідливий GPC після завершення таймера.<sup>[[1]](#references)</sup>
 
-## Ephemeral AD-Integrated DNS Redirection
+## Тимчасове перенаправлення AD-Integrated DNS
 
-- AD DNS records are **`dnsNode`** objects in **DomainDnsZones/ForestDnsZones**. Creating them as **dynamic objects** allows temporary host redirection (credential capture/MITM). Clients cache the malicious A/AAAA response; the record later self-deletes so the zone looks clean (DNS Manager may need zone reload to refresh view).
-- Detection: alert on **any DNS record carrying `dynamicObject`/`entryTTL`** via replication/event logs; transient records rarely appear in standard DNS logs.
+- DNS-записи AD є об’єктами **`dnsNode`** у **DomainDnsZones/ForestDnsZones**. Створення їх як **dynamic objects** дозволяє тимчасово перенаправляти hosts (credential capture/MITM). Clients кешують шкідливу A/AAAA-відповідь; згодом запис самовидаляється, тому zone виглядає чистою (для оновлення view у DNS Manager може знадобитися перезавантаження zone).
+- Detection: створюйте alert для **будь-якого DNS-запису, що містить `dynamicObject`/`entryTTL`**, через replication/event logs; transient records рідко з’являються у стандартних DNS logs.<sup>[[1]](#references)</sup>
 
-## Hybrid Entra ID Delta-Sync Gap (Note)
+## Прогалина Delta-Sync у Hybrid Entra ID (примітка)
 
-- Entra Connect delta sync relies on **tombstones** to detect deletes. A **dynamic on-prem user** can sync to Entra ID, expire, and delete without tombstone—delta sync won’t remove the cloud account, leaving an **orphaned active Entra user** until an **initial/full sync** or manual cloud cleanup is forced.
+- Entra Connect delta sync покладається на **tombstones** для виявлення видалень. **Dynamic on-prem user** може синхронізуватися з Entra ID, завершити термін дії та видалитися без tombstone — delta sync не видалить cloud account, залишивши **orphaned active Entra user**, доки не буде виконано **initial/full sync** або примусове manual cloud cleanup.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [Dynamic Objects in Active Directory: The Stealthy Threat](https://www.tenable.com/blog/active-directory-dynamic-objects-stealthy-threat)
-- [Adventures in Primary Group Behavior, Reporting, and Exploitation](https://trustedsec.com/blog/adventures-in-primary-group-behavior-reporting-and-exploitation)
+- [1] [Dynamic Objects in Active Directory: The Stealthy Threat](https://www.tenable.com/blog/active-directory-dynamic-objects-stealthy-threat)
+- [2] [Adventures in Primary Group Behavior, Reporting, and Exploitation](https://trustedsec.com/blog/adventures-in-primary-group-behavior-reporting-and-exploitation)
 
 {{#include ../../banners/hacktricks-training.md}}
