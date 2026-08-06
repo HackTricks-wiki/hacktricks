@@ -1,37 +1,35 @@
-# Uchambuzi wa dump ya kumbukumbu
+# Uchambuzi wa memory dump
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Anza
 
-Anza **kutafuta** **malware** ndani ya pcap. Tumia **zana** zilizotajwa katika [**Uchambuzi wa Malware**](../malware-analysis.md).
+Anza **kutafuta** **malware** ndani ya pcap. Tumia **tools** zilizotajwa katika [**Malware Analysis**](../malware-analysis.md).
 
 ## [Volatility](volatility-cheatsheet.md)
 
-**Volatility ni mfumo mkuu wa chanzo wazi kwa uchambuzi wa dump ya kumbukumbu**. Zana hii ya Python inachambua dumps kutoka vyanzo vya nje au VMware VMs, ikitambua data kama mchakato na nywila kulingana na profaili ya OS ya dump. Inaweza kupanuliwa kwa plugins, na kuifanya kuwa na matumizi mengi kwa uchunguzi wa kisheria.
+**Volatility ni open-source framework kuu ya uchambuzi wa memory dump**. Python tool hii huchanganua dumps kutoka vyanzo vya nje au VMware VMs, ikitambua data kama processes na passwords kulingana na OS profile ya dump. Inaweza kupanuliwa kwa plugins, jambo linaloifanya iwe yenye matumizi mengi katika uchunguzi wa forensic.
 
-[**Pata hapa cheatsheet**](volatility-cheatsheet.md)
+[**Pata cheatsheet hapa**](volatility-cheatsheet.md)
 
-## Ripoti ya ajali ya mini dump
+## Mini dump crash report
 
-Wakati dump ni ndogo (kama KB chache, labda MB chache) basi huenda ni ripoti ya ajali ya mini dump na sio dump ya kumbukumbu.
+Wakati dump ni ndogo (KB chache tu, labda MB chache), basi huenda ni mini dump crash report na si memory dump.
 
-![](<../../../images/image (532).png>)
+![Volatility - Mini dump crash report: Wakati dump ni ndogo (KB chache tu, labda MB chache), basi huenda ni mini dump crash report na si memory dump](<../../../images/image (532).png>)
 
-Ikiwa una Visual Studio imewekwa, unaweza kufungua faili hii na kuunganisha taarifa za msingi kama jina la mchakato, usanifu, taarifa za makosa na moduli zinazotekelezwa:
+Ikiwa una Visual Studio iliyosakinishwa, unaweza kufungua faili hii na kuonyesha taarifa za msingi kama jina la process, architecture, exception info na modules zinazotekelezwa:
 
-![](<../../../images/image (263).png>)
+![Volatility - Mini dump crash report: Ikiwa una Visual Studio iliyosakinishwa, unaweza kufungua faili hii na kuonyesha taarifa za msingi kama jina la process, architecture, exception info na...](<../../../images/image (263).png>)
 
-Pia unaweza kupakia makosa na kuona maagizo yaliyotafsiriwa
+Unaweza pia kupakia exception na kuona instructions zilizodecompileiwa
 
-![](<../../../images/image (142).png>)
+![Volatility - Mini dump crash report: Unaweza pia kupakia exception na kuona instructions zilizodecompileiwa](<../../../images/image (142).png>)
 
-![](<../../../images/image (610).png>)
+![Volatility - Mini dump crash report: Unaweza pia kupakia exception na kuona instructions zilizodecompileiwa](<../../../images/image (610).png>)
 
-Hata hivyo, Visual Studio si zana bora kwa kufanya uchambuzi wa kina wa dump.
+Hata hivyo, Visual Studio si tool bora zaidi ya kufanya uchambuzi wa kina wa dump.
 
-Unapaswa **kuifungua** kwa kutumia **IDA** au **Radare** ili kuikagua kwa **undani**.
-
-​
+Unapaswa **kuifungua** ukitumia **IDA** au **Radare** ili kuichunguza kwa **kina**.
 
 {{#include ../../../banners/hacktricks-training.md}}

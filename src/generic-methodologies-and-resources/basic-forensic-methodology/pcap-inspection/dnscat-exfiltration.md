@@ -1,10 +1,10 @@
-# Uchambuzi wa pcap wa DNSCat
+# Uchanganuzi wa DNSCat pcap
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ikiwa una pcap yenye data inay **exfiltrated na DNSCat** (bila kutumia usimbaji), unaweza kupata maudhui yaliyotolewa.
+Ikiwa una pcap yenye data inayofanyiwa **exfiltration na DNSCat** (bila kutumia encryption), unaweza kupata maudhui yaliyofanyiwa exfiltration.
 
-Unahitaji tu kujua kwamba **bytes 9 za kwanza** si data halisi bali zinahusiana na **mawasiliano ya C\&C**:
+Unachohitaji kujua ni kwamba **bytes 9 za kwanza** si data halisi, bali zinahusiana na **mawasiliano ya C\&C**:<sup>[[1]](#references)</sup>
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -30,4 +30,8 @@ Kuna script inayofanya kazi na Python3: [https://github.com/josemlwdf/DNScat-Dec
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```
+## Marejeleo
+
+- [1] [Uandishi wa forensics wa DNSCat2 pcap – BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
+
 {{#include ../../../banners/hacktricks-training.md}}

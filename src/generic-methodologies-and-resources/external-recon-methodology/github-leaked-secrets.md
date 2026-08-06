@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-### Zana za kutafuta secrets katika git repos na file system
+### Tools za kutafuta secrets katika git repos na file system
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
@@ -12,40 +12,42 @@
 - [https://github.com/JaimePolop/RExpository](https://github.com/JaimePolop/RExpository)
 - [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
 - [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
-- https://github.com/eth0izzle/shhgit (unmaintained)
+- https://github.com/eth0izzle/shhgit (haitunzwiki tena)
 - [https://github.com/techgaun/github-dorks](https://github.com/techgaun/github-dorks)
-- https://github.com/michenriksen/gitrob (archived)
-- https://github.com/anshumanbh/git-all-secrets (archived)
+- https://github.com/michenriksen/gitrob (imehifadhiwa)
+- https://github.com/anshumanbh/git-all-secrets (imehifadhiwa)
 - [https://github.com/awslabs/git-secrets](https://github.com/awslabs/git-secrets)
 - [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
 - [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
 
-> Vidokezo
-> - TruffleHog v3 inaweza kuthibitisha credentials nyingi kwa moja kwa moja na kuscan GitHub orgs, issues/PRs, gists, na wikis. Mfano: `trufflehog github --org <ORG> --results=verified`.
-> - Gitleaks v8 inaunga mkono scanning ya git history, directories na archives: `gitleaks detect -v --source .` au `gitleaks detect --source <repo> --log-opts="--all"`.
-> - Nosey Parker inalenga high-throughput scanning na curated rules na ina Explorer UI kwa triage. Mfano: `noseyparker scan --datastore np.db <path|repo>` kisha `noseyparker report --datastore np.db`.
-> - ggshield (GitGuardian CLI) hutoa pre-commit/CI hooks na Docker image scanning: `ggshield secret scan repo <path-or-url>`.
+> Maelezo
+> - TruffleHog v3 inaweza kuthibitisha credentials nyingi live na kuscan GitHub orgs, issues/PRs, gists, na wikis. Mfano: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)</sup>
+> - Gitleaks v8 inasaidia kuscan git history, directories na archives: `gitleaks detect -v --source .` au `gitleaks detect --source <repo> --log-opts="--all"`.
+> - Nosey Parker inalenga scanning yenye throughput kubwa kwa kutumia rules zilizoratibiwa na ina Explorer UI kwa ajili ya triage. Mfano: `noseyparker scan --datastore np.db <path|repo>` kisha `noseyparker report --datastore np.db`.
+> - ggshield (GitGuardian CLI) hutoa pre-commit/CI hooks na scanning ya Docker images: `ggshield secret scan repo <path-or-url>`.
 
-### Ambapo secrets kawaida huwa leak katika GitHub
+### Sehemu ambazo secrets huvuja mara nyingi katika GitHub
 
-- Repository files katika default na non-default branches (tafuta `repo:owner/name@branch` katika UI).
-- Full git history na branches/tags nyingine (clone na scan na gitleaks/trufflehog; GitHub search inazingatia indexed content).
-- Issues, pull requests, comments, na descriptions (TruffleHog GitHub source inaunga mkono haya kupitia flags kama `--issue-comments`, `--pr-comments`).
-- Actions logs na artifacts za public repositories (masking ni best-effort; hakiki logs/artifacts ikiwa zinaonekana).
+- Repository files katika default na non-default branches (tafuta `repo:owner/name@branch` kwenye UI).
+- Full git history na branches/tags nyingine (clone na uscan kwa gitleaks/trufflehog; GitHub search hulenga indexed content).
+- Issues, pull requests, comments, na descriptions (TruffleHog GitHub source inasaidia hizi kupitia flags kama `--issue-comments`, `--pr-comments`).
+- Actions logs na artifacts za public repositories (masking hufanywa kwa juhudi za kiwango kinachowezekana; kagua logs/artifacts ikiwa zinaonekana).
 - Wikis na release assets.
-- Gists (tafuta kwa tooling au UI; baadhi ya tools zinaweza kujumuisha gists).
+- Gists (tafuta kwa kutumia tooling au UI; baadhi ya tools zinaweza kujumuisha gists).
 
-> Tahadhari
-> - GitHub’s REST code search API ni legacy na haimuungi regex; tumia Web UI kwa regex searches. gh CLI inatumia legacy API.
-> - Ni files tu chini ya ukubwa fulani zinazoindexwa kwa search. Ili kuwa thorough, clone na scan locally kwa kutumia secrets scanner.
+> Mambo ya kuzingatia
+> - GitHub’s REST code search API ni legacy na haiungi mkono regex; tumia Web UI kwa regex searches. gh CLI hutumia legacy API.
+> - Ni files zilizo chini ya size fulani pekee ndizo hu-indexiwa kwa search. Ili kuwa thorough, clone na uscan locally kwa kutumia secrets scanner.
 
 ### Programmatic org-wide scanning
+
+- TruffleHog (GitHub source):<sup>[[2]](#references)</sup>
 ```bash
 export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
 --include-wikis --issue-comments --pr-comments --gist-comments
 ```
-- Gitleaks juu ya repos zote za org (clone shallow and scan):
+- Gitleaks kwenye repos zote za org (clone shallow na scan):
 ```bash
 gh repo list Target --limit 1000 --json nameWithOwner,url \
 | jq -r '.[].url' | while read -r r; do
@@ -53,25 +55,25 @@ tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
 gitleaks detect --source "$tmp" -v || true; rm -rf "$tmp";
 done
 ```
-- Mtu mdadisi kuhusu mono checkout:
+- Nosey Parker kwenye mono checkout:
 ```bash
 # after cloning many repos beneath ./org
 noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
 ```
-- ggshield skanu za haraka:
+- Uchanganuzi wa haraka wa ggshield:
 ```bash
 # current working tree
 ggshield secret scan path -r .
 # full git history of a repo
 ggshield secret scan repo <path-or-url>
 ```
-> Vidokezo: Kwa historia ya git, pendelea skana zinazochambua `git log -p --all` ili kugundua removed secrets.
+> Tip: Kwa git history, pendelea scanners zinazoparsingi `git log -p --all` ili kugundua secrets zilizoondolewa.
 
 ### Dorks zilizosasishwa kwa tokens za kisasa
 
 - GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`
 - Slack tokens: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
-- Cloud and general:
+- Cloud na za jumla:
 - `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `aws_session_token`
 - `GOOGLE_API_KEY` `AZURE_TENANT_ID` `AZURE_CLIENT_SECRET`
 - `OPENAI_API_KEY` `ANTHROPIC_API_KEY`
@@ -362,11 +364,9 @@ AWS SECRET
 wide-source-code-search.md
 {{#endref}}
 
+## Marejeleo
 
+- [1] [Kuweka siri nje ya public repositories (GitHub Blog, Feb 29, 2024)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
+- [2] [TruffleHog v3 – Tafuta, thibitisha na chambua credentials zilizovuja](https://github.com/trufflesecurity/trufflehog)
 
-
-## Marejeo
-
-- Kuweka siri nje ya repositories za umma (GitHub Blog, Feb 29, 2024): https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/
-- TruffleHog v3 – Tafuta, thibitisha, na chambua leaked credentials: https://github.com/trufflesecurity/trufflehog
 {{#include ../../banners/hacktricks-training.md}}

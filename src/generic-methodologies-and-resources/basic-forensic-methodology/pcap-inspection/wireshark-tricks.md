@@ -1,4 +1,4 @@
-# Wireshark tricks
+# Mbinu za Wireshark
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,106 +6,106 @@
 
 ### Tutorials
 
-Tutorials zifuatazo ni nzuri sana kujifunza baadhi ya tricks za msingi za kufurahisha:
+Tutorials zifuatazo ni nzuri sana kwa kujifunza baadhi ya mbinu za msingi zinazovutia:
 
 - [https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/](https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/](https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/](https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/](https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/)
 
-### Taarifa Zilizochambuliwa
+### Taarifa Zilizochanganuliwa
 
-**Taarifa za Kitaalamu**
+**Taarifa za Mtaalamu**
 
-Kubofya _**Analyze** --> **Expert Information**_ utapata **muhtasari** wa kinachoendelea katika pakiti **zilizochambuliwa**:
+Ukibofya _**Analyze** --> **Expert Information**_ utapata **muhtasari** wa kinachotokea katika packets **zilizochanganuliwa**:
 
-![](<../../../images/image (256).png>)
+![Tutorials - Taarifa Zilizochanganuliwa: Ukibofya Analyze -- Expert Information utapata muhtasari wa kinachotokea katika packets zilizochanganuliwa](<../../../images/image (256).png>)
 
 **Anwani Zilizotatuliwa**
 
-Chini ya _**Statistics --> Resolved Addresses**_ unaweza kupata **taarifa** kadhaa ambazo zilitwa "**resolved**" na wireshark kama port/transport kwenda protocol, MAC kwenda mtengenezaji, n.k. Ni muhimu kujua nini kimehusika katika mawasiliano.
+Chini ya _**Statistics --> Resolved Addresses**_ unaweza kupata **taarifa** mbalimbali "**zilizotatuliwa**" na wireshark, kama vile port/transport kwenda kwenye protocol, MAC kwenda kwa mtengenezaji, na kadhalika. Inafaa kujua kinachohusika katika mawasiliano.
 
-![](<../../../images/image (893).png>)
+![Tutorials - Taarifa Zilizochanganuliwa: Chini ya Statistics -- Resolved Addresses unaweza kupata taarifa mbalimbali " zilizotatuliwa " na wireshark, kama vile port/transport kwenda kwenye protocol, MAC kwenda kwa...](<../../../images/image (893).png>)
 
-**Protocol Hierarchy**
+**Mpangilio wa Protocol**
 
-Chini ya _**Statistics --> Protocol Hierarchy**_ unaweza kupata **protocols** **zilizohusika** katika mawasiliano na data kuzihusu.
+Chini ya _**Statistics --> Protocol Hierarchy**_ unaweza kupata **protocols** **zinazohusika** katika mawasiliano pamoja na data kuzihusu.
 
-![](<../../../images/image (586).png>)
+![Tutorials - Taarifa Zilizochanganuliwa: Chini ya Statistics -- Protocol Hierarchy unaweza kupata protocols zinazohusika katika mawasiliano pamoja na data kuzihusu](<../../../images/image (586).png>)
 
-**Mazungumzo**
+**Mawasiliano**
 
-Chini ya _**Statistics --> Conversations**_ unaweza kupata **muhtasari wa mazungumzo** katika mawasiliano na data kuyahusu.
+Chini ya _**Statistics --> Conversations**_ unaweza kupata **muhtasari wa mawasiliano** katika mawasiliano hayo pamoja na data kuyahusu.
 
-![](<../../../images/image (453).png>)
+![Tutorials - Taarifa Zilizochanganuliwa: Chini ya Statistics -- Conversations unaweza kupata muhtasari wa mawasiliano katika mawasiliano hayo pamoja na data kuyahusu](<../../../images/image (453).png>)
 
-**Endpoints**
+**Vituo vya Mwisho**
 
-Chini ya _**Statistics --> Endpoints**_ unaweza kupata **muhtasari wa endpoints** katika mawasiliano na data kuhusu kila moja.
+Chini ya _**Statistics --> Endpoints**_ unaweza kupata **muhtasari wa endpoints** katika mawasiliano pamoja na data kuhusu kila kimoja.
 
-![](<../../../images/image (896).png>)
+![Tutorials - Taarifa Zilizochanganuliwa: Chini ya Statistics -- Endpoints unaweza kupata muhtasari wa endpoints katika mawasiliano pamoja na data kuhusu kila kimoja](<../../../images/image (896).png>)
 
 **Taarifa za DNS**
 
-Chini ya _**Statistics --> DNS**_ unaweza kupata takwimu kuhusu DNS request iliyokamatwa.
+Chini ya _**Statistics --> DNS**_ unaweza kupata takwimu kuhusu ombi la DNS lililonaswa.
 
-![](<../../../images/image (1063).png>)
+![Tutorials - Taarifa Zilizochanganuliwa: Chini ya Statistics -- DNS unaweza kupata takwimu kuhusu ombi la DNS lililonaswa](<../../../images/image (1063).png>)
 
-**I/O Graph**
+**Grafu ya I/O**
 
 Chini ya _**Statistics --> I/O Graph**_ unaweza kupata **grafu ya mawasiliano.**
 
-![](<../../../images/image (992).png>)
+![Tutorials - Taarifa Zilizochanganuliwa: Chini ya Statistics -- I/O Graph unaweza kupata grafu ya mawasiliano](<../../../images/image (992).png>)
 
 ### Filters
 
-Hapa unaweza kupata Wireshark filter kulingana na protocol: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
-Katika Wireshark ya sasa tumia `tls.*` badala ya majina ya zamani ya filter `ssl.*`.\
-Filters nyingine za kuvutia:
+Hapa unaweza kupata filter za wireshark kulingana na protocol: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
+Katika Wireshark ya sasa tumia `tls.*` badala ya majina ya zamani ya filter ya `ssl.*`.\
+Filters nyingine zinazovutia:
 
 - `(http.request or tls.handshake.type == 1) and !(udp.port eq 1900)`
-- HTTP na trafiki ya awali ya HTTPS
+- HTTP na traffic ya awali ya HTTPS
 - `(http.request or tls.handshake.type == 1 or tcp.flags eq 0x0002) and !(udp.port eq 1900)`
-- HTTP na trafiki ya awali ya HTTPS + TCP SYN
+- HTTP na traffic ya awali ya HTTPS + TCP SYN
 - `(http.request or tls.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
-- HTTP na trafiki ya awali ya HTTPS + TCP SYN + DNS requests
+- HTTP na traffic ya awali ya HTTPS + TCP SYN + maombi ya DNS
 - `tls.handshake.extensions_server_name contains "example.com"`
-- Pivot kwenye SNI iliyotumwa kwenye ClientHello hata wakati huwezi decrypt payload
+- Fanya pivot kwenye SNI iliyotumwa katika ClientHello hata kama huwezi ku-decrypt payload
 - `tls.handshake.extensions_alpn_str == "h2" or tls.handshake.extensions_alpn_str == "h3"`
-- Gawa kwa haraka sessions za classic HTTPS, HTTP/2 na HTTP/3 zinazoweza
+- Gawanya kwa haraka sessions zinazotumia HTTPS ya kawaida, HTTP/2 na HTTP/3
 - `quic or http3`
-- Pata modern UDP/443 traffic ambayo itakosa kuonekana ukikagua tu TCP conversations
+- Tafuta traffic ya kisasa ya UDP/443 ambayo haitapatikana ukikagua tu mawasiliano ya TCP
 
-### Utafutaji
+### Search
 
-Ukitaka **kutafuta** **content** ndani ya **pakiti** za sessions bonyeza _CTRL+f_. Unaweza kuongeza layers mpya kwenye main information bar (No., Time, Source, etc.) kwa kubofya button ya kulia kisha edit column.
+Ikiwa unataka **kutafuta** **content** ndani ya **packets** za sessions, bonyeza _CTRL+f_. Unaweza kuongeza layers mpya kwenye main information bar (No., Time, Source, na kadhalika) kwa kubofya kitufe cha kulia kisha edit column.
 
-### Kufuatilia multiplexed streams
+### Kufuatilia streams za multiplexed
 
-Matoleo ya hivi karibuni ya Wireshark yanaweza kufuatilia `TLS`, `HTTP/2` na `QUIC` streams moja kwa moja. Katika captures zenye noise hii kawaida ni haraka zaidi kuliko kutumia tu `Follow TCP Stream`, hasa wakati requests kadhaa zinashiriki connection moja.
+Matoleo ya hivi karibuni ya Wireshark yanaweza kufuatilia streams za `TLS`, `HTTP/2` na `QUIC` moja kwa moja. Katika captures zenye noise, hii huwa haraka zaidi kuliko kutumia `Follow TCP Stream` pekee, hasa wakati requests kadhaa zinashiriki connection moja.
 
-### Free pcap labs
+### Maabara za bure za pcap
 
-**Fanya mazoezi na challenges za bure za:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
+**Jizoeze kwa challenges za bure za:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
 
 ## Kutambua Domains
 
-Unaweza kuongeza column inayoonyesha Host HTTP header:
+Unaweza kuongeza column inayoonyesha HTTP Host header:
 
-![](<../../../images/image (639).png>)
+![Free pcap labs - Kutambua Domains: Unaweza kuongeza column inayoonyesha HTTP Host header](<../../../images/image (639).png>)
 
-Na column inayoongeza Server name kutoka kwenye initiating HTTPS connection (**tls.handshake.type == 1**):
+Na column inayoongeza jina la Server kutoka kwenye HTTPS connection inayoanzishwa (**tls.handshake.type == 1**):
 
-![](<../../../images/image (408) (1).png>)
+![Free pcap labs - Kutambua Domains: Na column inayoongeza jina la Server kutoka kwenye HTTPS connection inayoanzishwa ( tls.handshake.type == 1 )](<../../../images/image (408) (1).png>)
 
-Kama capture imefichwa kwa njia ya encryption zaidi, kuongeza fields hizi kama columns kutaharakisha triage sana:
+Ikiwa capture ime-encryptiwa kwa kiasi kikubwa, kuongeza fields hizi kama columns kutaharakisha sana triage:
 
 - `tls.handshake.extensions_server_name`
 - `tls.handshake.extensions_alpn_str`
 - `tls.handshake.ja3`
 - `tls.handshake.ja4` (Wireshark 4.2+)
 
-Hii inakuwezesha kupanga sessions kwa hostname, ALPN (`http/1.1`, `h2`, `h3`, etc.) na client fingerprint hata payload yenyewe ikibaki encrypted. Kwa decrypted HTTP/2 na HTTP/3 captures, pia ni muhimu kuongeza `http2.header.value` au `http3.headers.header.value` kama columns na pivot kwenye paths, authorities na metadata nyingine za kuvutia.
+Hii hukuwezesha kupanga sessions katika clusters kulingana na hostname, ALPN (`http/1.1`, `h2`, `h3`, na kadhalika) na client fingerprint hata wakati payload yenyewe bado ime-encryptiwa. Kwa captures za HTTP/2 na HTTP/3 zilizodecryptiwa, pia inafaa kuongeza `http2.header.value` au `http3.headers.header.value` kama columns na kufanya pivot kwenye paths, authorities na metadata nyingine zinazovutia.<sup>[[2]](#references)</sup>
 ```bash
 tshark -r capture.pcapng -Y "tls.handshake.type == 1" -T fields \
 -e frame.number -e ip.src -e ip.dst \
@@ -113,51 +113,51 @@ tshark -r capture.pcapng -Y "tls.handshake.type == 1" -T fields \
 -e tls.handshake.extensions_alpn_str \
 -e tls.handshake.ja3 -e tls.handshake.ja4
 ```
-## Kutambua local hostnames
+## Kutambua majina ya host ya ndani
 
 ### Kutoka DHCP
 
-Katika Wireshark ya sasa badala ya `bootp` unahitaji kutafuta `DHCP`
+Katika Wireshark ya sasa, badala ya `bootp` unahitaji kutafuta `DHCP`
 
-![](<../../../images/image (1013).png>)
+![Kutambua majina ya host ya ndani - Kutoka DHCP: Katika Wireshark ya sasa, badala ya bootp unahitaji kutafuta DHCP](<../../../images/image (1013).png>)
 
 ### Kutoka NBNS
 
-![](<../../../images/image (1003).png>)
+![Kutoka DHCP - Kutoka NBNS: Katika Wireshark ya sasa, badala ya bootp unahitaji kutafuta DHCP](<../../../images/image (1003).png>)
 
-## Kumsimbua TLS
+## Kusimbua TLS
 
-### Kumsimbua trafiki ya https kwa kutumia server private key
+### Kusimbua traffic ya https kwa kutumia server private key
 
 _edit > preferences > protocols > tls >_
 
-![](<../../../images/image (1103).png>)
+![Kusimbua TLS - Kusimbua traffic ya https kwa kutumia server private key: Kusimbua traffic ya https kwa kutumia server private key](<../../../images/image (1103).png>)
 
-Bonyeza _Edit_ na uongeze data zote za server na private key (_IP, Port, Protocol, Key file and password_)
+Bonyeza _Edit_ na uongeze data yote ya server na private key (_IP, Port, Protocol, Key file na password_)
 
-Njia hii inafanya kazi tu katika hali chache. Kwa trafiki ya sasa ya TLS 1.3 / ECDHE, njia ya session key log hapa chini ndiyo kawaida chaguo la vitendo.
+Njia hii hufanya kazi katika hali chache tu. Kwa traffic ya sasa ya TLS 1.3 / ECDHE, njia ya session key log iliyo hapa chini kwa kawaida ndiyo chaguo linalofaa.<sup>[[1]](#references)</sup>
 
-### Kumsimbua trafiki ya https kwa kutumia symmetric session keys
+### Kusimbua traffic ya https kwa kutumia symmetric session keys
 
-Firefox na Chrome zote zina uwezo wa kuandika TLS session keys, ambazo zinaweza kutumiwa na Wireshark kusimbua trafiki ya TLS. Hii inaruhusu uchambuzi wa kina wa mawasiliano salama. Maelezo zaidi kuhusu jinsi ya kufanya msimbuo huu yanaweza kupatikana kwenye mwongozo katika [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/). Hii pia ndiyo njia ya kawaida ya kusimbua captures za kisasa za TLS 1.3 na QUIC/HTTP/3.
+Firefox na Chrome zote zina uwezo wa kurekodi TLS session keys, ambazo zinaweza kutumiwa pamoja na Wireshark kusimbua TLS traffic. Hii huruhusu uchambuzi wa kina wa mawasiliano salama. Maelezo zaidi kuhusu jinsi ya kufanya usimbuaji huu yanapatikana katika mwongozo kwenye [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/).<sup>[[3]](#references)</sup> Hii pia ndiyo njia ya kawaida ya kusimbua captures za kisasa za TLS 1.3 na QUIC/HTTP/3.<sup>[[2]](#references)</sup>
 
-Ili kugundua hili tafuta ndani ya environment kwa variable `SSLKEYLOGFILE`
+Ili kugundua hili, tafuta variable `SSLKEYLOGFILE` ndani ya environment
 
-Faili ya shared keys itaonekana hivi:
+File ya shared keys itaonekana hivi:
 
-![](<../../../images/image (820).png>)
+![Kusimbua traffic ya https kwa kutumia server private key - Kusimbua traffic ya https kwa kutumia symmetric session keys: File ya shared keys itaonekana hivi](<../../../images/image (820).png>)
 
-Ikiwa capture ni `pcapng`, angalia kama tayari ina embedded decryption secrets kabla ya kuanza kuchunguza host filesystem:
+Ikiwa capture ni `pcapng`, angalia kama tayari ina decryption secrets zilizowekwa ndani kabla ya kutafuta kwenye filesystem ya host:<sup>[[1]](#references)</sup>
 ```bash
 editcap --extract-secrets capture.pcapng tls-secrets.txt
 ```
-Ili kuiingiza hii katika wireshark nenda kwa \_edit > preferences > protocols > tls > na uiingize katika (Pre)-Master-Secret log filename:
+Ili kuingiza hii katika Wireshark, nenda kwenye \_edit > preferences > protocols > tls > kisha uiingize katika (Pre)-Master-Secret log filename:
 
-![](<../../../images/image (989).png>)
+![Kusimbua traffic ya https kwa private key ya server - Kusimbua traffic ya https kwa symmetric session keys: editcap --extract-secrets capture.pcapng tls-secrets.txt](<../../../images/image (989).png>)
 
 ## Mawasiliano ya ADB
 
-Toa APK kutoka kwenye mawasiliano ya ADB ambapo APK ilitumwa:
+Extract APK kutoka kwenye mawasiliano ya ADB ambapo APK ilitumwa:
 ```python
 from scapy.all import *
 
@@ -184,9 +184,10 @@ f = open('all_bytes.data', 'w+b')
 f.write(all_bytes)
 f.close()
 ```
-## Marejeo
+## Marejeleo
 
-- [Wireshark TLS wiki](https://wiki.wireshark.org/TLS)
-- [Decrypting and parsing HTTP/3 traffic in Wireshark](https://blog.elmo.sg/posts/parsing-decrypted-quic-traffic-in-wireshark/)
+- [1] [Wireshark TLS wiki](https://wiki.wireshark.org/TLS)
+- [2] [Kusimbua na kuchanganua trafiki ya HTTP/3 katika Wireshark](https://blog.elmo.sg/posts/parsing-decrypted-quic-traffic-in-wireshark/)
+- [3] [Kusimbua trafiki ya TLS ya browser kwa kutumia Wireshark – Njia rahisi!](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)
 
 {{#include ../../../banners/hacktricks-training.md}}

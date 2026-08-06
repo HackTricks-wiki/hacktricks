@@ -1,41 +1,41 @@
-# Wifi Pcap Analysis
+# Uchambuzi wa Wifi Pcap
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Check BSSIDs
+## Kukagua BSSIDs
 
-Unapopokea kukamata ambayo trafiki yake kuu ni Wifi ukitumia WireShark unaweza kuanza kuchunguza SSIDs zote za kukamata kwa kutumia _Wireless --> WLAN Traffic_:
+Unapopokea capture ambayo traffic yake kuu ni Wifi ukitumia WireShark, unaweza kuanza kuchunguza SSIDs zote za capture kupitia _Wireless --> WLAN Traffic_:
 
-![](<../../../images/image (106).png>)
+![Wifi Pcap Analysis - Check BSSIDs: When you receive a capture whose principal traffic is Wifi using WireShark you can start investigating all the SSIDs of the capture with Wireless --...](<../../../images/image (106).png>)
 
-![](<../../../images/image (492).png>)
+![Wifi Pcap Analysis - Check BSSIDs: When you receive a capture whose principal traffic is Wifi using WireShark you can start investigating all the SSIDs of the capture with Wireless --...](<../../../images/image (492).png>)
 
 ### Brute Force
 
-Moja ya nguzo za skrini hiyo inaonyesha kama **uthibitisho wowote uligundulika ndani ya pcap**. Ikiwa ndivyo ilivyo unaweza kujaribu kuifanya Brute force kwa kutumia `aircrack-ng`:
+Moja ya columns za skrini hiyo huonyesha ikiwa **authentication yoyote ilipatikana ndani ya pcap**. Ikiwa ndivyo, unaweza kujaribu kufanya Brute force kwa kutumia `aircrack-ng`:
 ```bash
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
-Kwa mfano, itapata WPA passphrase inayolinda PSK (pre shared-key), ambayo itahitajika kufungua trafiki baadaye.
+Kwa mfano, itaretrieve WPA passphrase inayolinda PSK (pre shared-key), ambayo itahitajika kwa ajili ya ku-decrypt traffic baadaye.
 
-## Data katika Beacons / Channel ya Kando
+## Data katika Beacons / Side Channel
 
-Ikiwa unashuku kwamba **data inavuja ndani ya beacons za mtandao wa Wifi** unaweza kuangalia beacons za mtandao kwa kutumia chujio kama ifuatavyo: `wlan contains <NAMEofNETWORK>`, au `wlan.ssid == "NAMEofNETWORK"` tafuta ndani ya pakiti zilizochujwa kwa nyuzi za kushangaza.
+Ikiwa unashuku kuwa **data inaleak ndani ya beacons za mtandao wa Wifi**, unaweza kuangalia beacons za mtandao huo kwa kutumia filter kama hii: `wlan contains <NAMEofNETWORK>`, au `wlan.ssid == "NAMEofNETWORK"` kisha utafute strings zinazotiliwa shaka ndani ya packets zilizofilteriwa.
 
-## Pata Anwani za MAC zisizojulikana katika Mtandao wa Wifi
+## Tafuta MAC Addresses Zisizojulikana katika Mtandao wa Wifi
 
-Kiungo kinachofuata kitakuwa na manufaa katika kutafuta **mashine zinazotuma data ndani ya Mtandao wa Wifi**:
+Link ifuatayo itakuwa muhimu kwa kutafuta **machines zinazotuma data ndani ya Mtandao wa Wifi**:
 
 - `((wlan.ta == e8:de:27:16:70:c9) && !(wlan.fc == 0x8000)) && !(wlan.fc.type_subtype == 0x0005) && !(wlan.fc.type_subtype ==0x0004) && !(wlan.addr==ff:ff:ff:ff:ff:ff) && wlan.fc.type==2`
 
-Ikiwa tayari unajua **anwani za MAC unaweza kuondoa hizo kutoka kwa matokeo** ukiongeza ukaguzi kama huu: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
+Ikiwa tayari unajua **MAC addresses, unaweza kuziondoa kwenye output** kwa kuongeza checks kama hii: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
 
-Mara tu unapogundua **anwani za MAC zisizojulikana** zinazowasiliana ndani ya mtandao unaweza kutumia **vichujio** kama ifuatavyo: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` ili kuchuja trafiki yake. Kumbuka kwamba vichujio vya ftp/http/ssh/telnet ni vya manufaa ikiwa umepata ufunguo wa trafiki.
+Baada ya kugundua **MAC addresses zisizojulikana** zinazowasiliana ndani ya mtandao, unaweza kutumia **filters** kama hii: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` ili kufilter traffic yake. Kumbuka kuwa filters za ftp/http/ssh/telnet zinafaa ikiwa ume-decrypt traffic.
 
-## Fungua Trafiki
+## Decrypt Traffic
 
 Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
 
-![](<../../../images/image (499).png>)
+![Tafuta MAC Addresses Zisizojulikana katika Mtandao wa Wifi - Decrypt Traffic: Baada ya kugundua MAC addresses zisizojulikana zinazowasiliana ndani ya mtandao, unaweza kutumia filters kama hii:...](<../../../images/image (499).png>)
 
 {{#include ../../../banners/hacktricks-training.md}}

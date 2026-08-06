@@ -1,11 +1,11 @@
-# Pata Picha & Mount
+# Upatikanaji wa Picha na Mount
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Upataji
+## Upatikanaji
 
-> Daima pata **kusoma tu** na **hash wakati unakopya**. Hifadhi kifaa cha asili **kikiwa kimezuiwa kuandika** na fanya kazi tu kwenye nakala zilizothibitishwa.
+> Daima fanya upatikanaji kwa **kusoma-tu** na **kokotoa hash wakati wa kunakili**. Weka kifaa asili kikiwa **kimezuiwa kuandikwa** na fanyia kazi nakala zilizothibitishwa pekee.
 
 ### DD
 ```bash
@@ -16,13 +16,13 @@ sha256sum disk.img > disk.img.sha256
 ```
 ### dc3dd / dcfldd
 
-`dc3dd` ni tawi linaloendelea kudumishwa la dcfldd (DoD Computer Forensics Lab dd).
+`dc3dd` ni fork inayodumishwa kikamilifu ya dcfldd (DoD Computer Forensics Lab dd).
 ```bash
 # Create an image and calculate multiple hashes at acquisition time
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
 ```
 ### Guymager
-Picha ya grafiki, yenye nyuzi nyingi inayounga mkono **raw (dd)**, **EWF (E01/EWFX)** na **AFF4** matokeo yenye uthibitisho wa sambamba. Inapatikana katika sehemu nyingi za Linux (`apt install guymager`).
+Image tool ya kielelezo yenye multithreading inayotumia matokeo ya **raw (dd)**, **EWF (E01/EWFX)** na **AFF4**, pamoja na uthibitishaji sambamba. Inapatikana katika repos nyingi za Linux (`apt install guymager`).
 ```bash
 # Start in GUI mode
 sudo guymager
@@ -31,7 +31,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 ```
 ### AFF4 (Advanced Forensics Format 4)
 
-AFF4 ni muundo wa picha wa kisasa wa Google ulioandaliwa kwa ajili ya *sana* kubwa za ushahidi (sparse, resumable, cloud-native).
+AFF4 ni muundo wa kisasa wa imaging wa Google ulioundwa kwa ajili ya ushahidi mkubwa *sana* (sparse, unaoweza kuendelea, cloud-native).<sup>[[1]](#references)</sup>
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -42,33 +42,34 @@ velociraptor --config server.yaml frontend collect --artifact Windows.Disk.Acqui
 ```
 ### FTK Imager (Windows & Linux)
 
-Unaweza [kupakua FTK Imager](https://accessdata.com/product-download) na kuunda **raw, E01 au AFF4** picha:
+Unaweza [kupakua FTK Imager](https://accessdata.com/product-download) na kuunda picha za **raw, E01 au AFF4**:
 ```bash
 ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 --description 'Laptop seizure 2025-07-22' --examiner 'AnalystName' --compress 6
 ```
-### EWF tools (libewf)
+### Zana za EWF (libewf)
 ```bash
 sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examiner --format encase6 --compression best
 ```
-### Imaging Cloud Disks
+### Kutengeneza Picha za Diski za Cloud
 
-*AWS* – tengeneza **forensic snapshot** bila kuzima mfano:
+*AWS* – tengeneza **forensic snapshot** bila kuzima instance:
 ```bash
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – tumia `az snapshot create` na uhamasisha kwa URL ya SAS.
+*Azure* – tumia `az snapshot create` na export kwa URL ya SAS.
+
 
 ## Mount
 
-### Kuchagua njia sahihi
+### Kuchagua mbinu inayofaa
 
-1. Mount **disk nzima** unapohitaji jedwali la awali la sehemu (MBR/GPT).
-2. Mount **faili ya sehemu moja** unapohitaji kiasi kimoja tu.
-3. Daima mount **kusoma tu** (`-o ro,norecovery`) na fanya kazi kwenye **nakala**.
+1. Mount **diski nzima** unapotaka partition table asili (MBR/GPT).
+2. Mount **faili la partition moja** unapohitaji volume moja pekee.
+3. Daima mount **ya kusoma pekee** (`-o ro,norecovery`) na ufanyie kazi kwenye nakala.<sup>[[2]](#references)</sup>
 
-### Picha za Raw (dd, AFF4-extracted)
+### Picha ghafi (zilizotolewa kwa AFF4)
 ```bash
 # Identify partitions
 fdisk -l disk.img
@@ -83,7 +84,7 @@ lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
 # Mount a partition (e.g. /dev/nbd0p2)
 sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
 ```
-Kata wakati umemaliza:
+Ondoa muunganisho ukimaliza:
 ```bash
 sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
 ```
@@ -99,14 +100,14 @@ sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 # 3. Mount the desired partition
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
-Kwa upande mwingine, badilisha papo hapo kwa kutumia **xmount**:
+Vinginevyo, badilisha papo hapo kwa kutumia **xmount**:
 ```bash
 xmount --in ewf evidence.E01 --out raw /tmp/raw_mount
 mount -o ro /tmp/raw_mount/image.dd /mnt
 ```
-### LVM / BitLocker / VeraCrypt volumes
+### Volumes za LVM / BitLocker / VeraCrypt
 
-Baada ya kuunganisha kifaa cha block (loop au nbd):
+Baada ya kuambatisha kifaa cha block (loop au nbd):
 ```bash
 # LVM
 sudo vgchange -ay               # activate logical volumes
@@ -118,29 +119,29 @@ sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
 ```
 ### kpartx helpers
 
-`kpartx` inachora sehemu kutoka picha hadi `/dev/mapper/` kiotomatiki:
+`kpartx` huweka ramani ya partitions kutoka kwenye image hadi `/dev/mapper/` automatically:
 ```bash
 sudo kpartx -av disk.img  # creates /dev/mapper/loop0p1, loop0p2 …
 mount -o ro /dev/mapper/loop0p2 /mnt
 ```
-### Makosa ya kawaida ya kuunganisha & marekebisho
+### Makosa ya kawaida ya mount na marekebisho
 
-| Kosa | Sababu ya Kawaida | Marekebisho |
+| Kosa | Sababu ya kawaida | Marekebisho |
 |-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | FS iliyorekodiwa (ext4) haijafungwa kwa usahihi | tumia `-o ro,norecovery` |
-| `bad superblock …` | Offset mbaya au FS iliyoharibika | hesabu offset (`sector*size`) au endesha `fsck -n` kwenye nakala |
-| `mount: unknown filesystem type 'LVM2_member'` | Kontena la LVM | aktivisha kundi la kiasi kwa `vgchange -ay` |
+| `cannot mount /dev/loop0 read-only` | Journaled FS (ext4) haiku-unmount kwa usafi | tumia `-o ro,norecovery` |
+| `bad superblock …` | Offset si sahihi au FS imeharibika | hesabu offset (`sector*size`) au endesha `fsck -n` kwenye nakala |
+| `mount: unknown filesystem type 'LVM2_member'` | Kontena la LVM | activate volume group kwa `vgchange -ay` |
 
-### Safisha
+### Usafishaji
 
-Kumbuka **umount** na **disconnect** vifaa vya loop/nbd ili kuepuka kuacha ramani zisizofanya kazi ambazo zinaweza kuharibu kazi zaidi:
+Kumbuka kufanya **umount** na **disconnect** vifaa vya loop/nbd ili kuepuka kuacha mappings zinazoning'inia ambazo zinaweza kuharibu kazi zaidi:
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 ```
 ## Marejeo
 
-- Tangazo la chombo cha picha za AFF4 & spesifikesheni: https://github.com/aff4/aff4
-- Ukurasa wa mwongozo wa qemu-nbd (kuweka picha za diski kwa usalama): https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html
+- [1] [Maelezo ya Kawaida ya AFF4 (Advanced Forensic Format v4)](https://github.com/aff4/Standard)
+- [2] [Ukurasa wa mwongozo wa qemu-nbd (ku-mount disk images kwa usalama)](https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html)
 
 {{#include ../../banners/hacktricks-training.md}}

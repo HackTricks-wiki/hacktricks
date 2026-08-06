@@ -1,30 +1,30 @@
-# USB Keystrokes
+# Vibonyezo vya USB
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ikiwa una pcap yenye mawasiliano kupitia USB ya keyboard kama ifuatayo:
+Ikiwa una pcap iliyo na mawasiliano kupitia USB ya keyboard kama iliyo hapa chini:
 
-![](<../../../images/image (962).png>)
+![Vibonyezo vya USB: Ikiwa una pcap iliyo na mawasiliano kupitia USB ya keyboard kama iliyo hapa chini](<../../../images/image (962).png>)
 
-USB keyboards kawaida huzungumza HID **boot protocol**, kwa hiyo kila interrupt transfer kuelekea host huwa na urefu wa bytes 8 pekee: byte moja ya modifier bits (Ctrl/Shift/Alt/Super), byte moja ya reserved, na hadi keycodes sita kwa kila report. Kusimbua bytes hizo kunatosha kujenga upya kila kitu kilichoandikwa.
+USB keyboards kwa kawaida hutumia **boot protocol** ya HID, kwa hiyo kila interrupt transfer kuelekea host huwa na urefu wa bytes 8 pekee: byte moja ya modifier bits (Ctrl/Shift/Alt/Super), byte moja iliyotengwa, na hadi keycodes sita kwa kila report. Ku-decode bytes hizo kunatosha kujenga upya kila kitu kilichoandikwa.
 
-## USB HID report basics
+## Misingi ya USB HID report
 
-Report ya kawaida ya IN inaonekana kama hii:
+IN report ya kawaida huonekana kama:
 
 | Byte | Maana |
 | --- | --- |
 | 0 | Modifier bitmap (`0x02` = Left Shift, `0x20` = Right Alt, n.k.). Bits nyingi zinaweza kuwekwa kwa wakati mmoja. |
-| 1 | Reserved/padding lakini mara nyingi hutumiwa tena na gaming keyboards kwa vendor data. |
-| 2-7 | Hadi keycodes sita za wakati mmoja katika USB usage ID format (`0x04 = a`, `0x1E = 1`). `0x00` inamaanisha "hakuna key". |
+| 1 | Iliyotengwa/padding, lakini mara nyingi hutumiwa tena na gaming keyboards kwa vendor data. |
+| 2-7 | Hadi keycodes sita zinazoingizwa kwa wakati mmoja katika USB usage ID format (`0x04 = a`, `0x1E = 1`). `0x00` inamaanisha "hakuna key". |
 
-Keyboards zisizo na NKRO kawaida hutuma `0x01` katika byte 2 wakati zaidi ya keys sita zimeshinikizwa ili kuashiria "rollover". Kuelewa mpangilio huu husaidia unapokuwa na tu `usb.capdata` bytes ghafi.
+Keyboards zisizo na NKRO kwa kawaida hutuma `0x01` katika byte 2 wakati keys zaidi ya sita zimebonyezwa ili kuashiria "rollover". Kuelewa mpangilio huu husaidia unapokuwa na bytes ghafi za `usb.capdata` pekee.
 
-## Extracting HID data from a PCAP
+## Kutoa HID data kutoka kwenye PCAP
 
-### Identify the keyboard interface first
+### Tambua keyboard interface kwanza
 
-Kwenye captures zilizo na shughuli nyingi, tambua kwanza HID keyboard kabla ya kutupa report yoyote. Sehemu ya kuanzia iliyoaminika ni interface descriptor response:
+Katika captures zilizo na shughuli nyingi, tambua HID keyboard kabla ya kutoa reports. Mwanzo unaotegemewa ni interface descriptor response:<sup>[[2]](#references)</sup>
 ```text
 usb.transfer_type == 0x02 && usb.endpoint_address.direction == 1 && usb.bDescriptorType == 4 && usb.bInterfaceClass == 3
 ```
@@ -32,56 +32,56 @@ Angalia `usb.bInterfaceSubClass` na `usb.bInterfaceProtocol`:
 
 - `subclass == 1` na `protocol == 1` kwa kawaida humaanisha boot keyboard
 - `protocol == 2` kwa kawaida ni mouse
-- `protocol == 0` mara nyingi humaanisha vendor-defined au NKRO-style HID interface ambayo bado hubeba keyboard data, lakini si katika simple 8-byte boot layout
+- `protocol == 0` mara nyingi humaanisha vendor-defined au NKRO-style HID interface ambayo bado hubeba data ya keyboard, lakini si katika mpangilio rahisi wa boot wa byte 8
 
-Mara interface inapojulikana, weka filters zako kwa `usb.bus_id`, `usb.device_address`, na ikiwezekana `usb.interface_number` kabla ya ku-export chochote.
+Baada ya kujua interface, weka filters zako kwenye `usb.bus_id`, `usb.device_address`, na ikiwezekana `usb.interface_number` kabla ya ku-export chochote.
 
-### Wireshark workflow
+### Workflow ya Wireshark
 
-1. **Tenga device**: filter traffic ya interrupt IN kutoka keyboard, mfano `usb.transfer_type == 0x01 && usb.endpoint_address.direction == "IN" && usb.device_address == 3`.
-2. **Ongeza useful columns**: right-click field ya `Leftover Capture Data` (`usb.capdata`) na `usbhid.*` fields unazopendelea (mfano `usbhid.boot_report.keyboard.keycode_1`) ili kufuatilia keystrokes bila kufungua kila frame.
-3. **Ficha empty reports**: tumia `!(usb.capdata == 00:00:00:00:00:00:00:00)` kuondoa idle frames.
-4. **Export kwa post-processing**: `File -> Export Packet Dissections -> As CSV`, jumuisha `frame.number`, `usb.src`, `usb.capdata`, na `usbhid.modifiers` ili kuandaa script ya reconstruction baadaye.
+1. **Tenga kifaa**: filter kwenye interrupt IN traffic kutoka kwa keyboard, kwa mfano `usb.transfer_type == 0x01 && usb.endpoint_address.direction == "IN" && usb.device_address == 3`.
+2. **Ongeza columns muhimu**: bofya-kulia field ya `Leftover Capture Data` (`usb.capdata`) na fields za `usbhid.*` unazopendelea (kwa mfano `usbhid.boot_report.keyboard.keycode_1`) ili kufuatilia keystrokes bila kufungua kila frame.
+3. **Ficha reports tupu**: tumia `!(usb.capdata == 00:00:00:00:00:00:00:00)` kuondoa idle frames.
+4. **Export kwa post-processing**: `File -> Export Packet Dissections -> As CSV`, jumuisha `frame.number`, `usb.src`, `usb.capdata`, na `usbhid.modifiers` ili ku-script reconstruction baadaye.
 
-### Command-line workflow
+### Workflow ya command-line
 
-`ctf-usb-keyboard-parser` tayari hu-automate classic tshark + sed pipeline:
+`ctf-usb-keyboard-parser` tayari ina-automate classic tshark + sed pipeline:
 ```bash
 tshark -r ./usb.pcap -Y 'usb.capdata && usb.data_len == 8' -T fields -e usb.capdata | sed 's/../:&/g2' > keystrokes.txt
 python3 usbkeyboard.py ./keystrokes.txt
 ```
-Kwenye captures mpya zaidi unaweza kuhifadhi zote mbili `usb.capdata` na field tajiri zaidi `usbhid.data` kwa ku-batch kulingana na device:
+Katika captures mpya, unaweza kuhifadhi sehemu zote mbili za `usb.capdata` na sehemu yenye taarifa zaidi ya `usbhid.data` kwa kuziweka kwenye batches kulingana na kifaa:
 ```bash
 tshark -r usb.pcapng -Y "usb.capdata || usbhid.data" -T fields -e usb.src -e usb.capdata -e usbhid.data | \
 sort -s -k1,1 | \
 awk '{ printf "%s", (NR==1 ? $1 : pre!=$1 ? "\n" $1 : "") " " $2; pre=$1 }' | \
 awk '{ for (i=2; i<=NF; i++) print $i > "usbdata-" $1 ".txt" }'
 ```
-Hizo faili maalum kwa kila kifaa huingia moja kwa moja kwenye decoder yoyote. Ikiwa capture ilitoka kwenye keyboard za BLE zilizopitishwa kupitia GATT, fanya filter kwa `btatt.value && frame.len == 20` na dumisha hex payloads kabla ya decoding.
+Hizo faili za kila kifaa huingizwa moja kwa moja kwenye decoder yoyote. Ikiwa capture ilitoka kwenye keyboards za BLE zilizotunnel kupitia GATT, tumia filter kwenye `btatt.value && frame.len == 20` na toa hex payloads kabla ya kuzi-decode.
 
-### Wakati report si ile ya kawaida ya boot ya bytes 8
+### Wakati report si classic 8-byte boot report
 
-Recent gaming keyboards, split keyboards, na composite HID devices mara nyingi huonyesha non-boot keyboard interface ambapo payload haifanani tena na `modifier,reserved,key1..key6`.
+Keyboards za kisasa za gaming, split keyboards, na HID devices za composite mara nyingi hutoa keyboard interface isiyo ya boot, ambapo payload hailingani tena na `modifier,reserved,key1..key6`.
 
-- Pendelea `usbhid.data` badala ya `usb.capdata` wakati Wireshark tayari imeparse HID layer.
-- Ikiwa kila line inaanza na constant prefix au report ID, iondoe kwa offset-aware decoder badala ya kudhani byte 0 ni modifier kila mara.
-- Baadhi ya USBPcap exports huacha out byte ya reserved, hivyo decoders zinazo-support `--no-reserved` au custom offset huokoa muda.
-- Ikiwa HID report descriptor au BLE HOGP report map ipo kwenye capture, itumie kurecover actual field layout kabla ya kuandika parser.
+- Pendelea `usbhid.data` kuliko `usb.capdata` wakati Wireshark tayari ime-parse HID layer.
+- Ikiwa kila mstari unaanza na constant prefix au report ID, iondoe kwa kutumia decoder inayotambua offset badala ya kudhani kuwa byte 0 daima ni modifier.
+- Baadhi ya exports za USBPcap huacha reserved byte, hivyo decoders zinazounga mkono `--no-reserved` au custom offset huokoa muda.
+- Ikiwa HID report descriptor au BLE HOGP report map ipo kwenye capture, itumie kurejesha field layout halisi kabla ya kuandika parser.
 
-## Kufanya decoding kiotomatiki
+## Ku-automate decoding
 
-- **ctf-usb-keyboard-parser** bado ni muhimu kwa quick CTF challenges na tayari imejumuishwa kwenye repository.
-- **CTF-Usb_Keyboard_Parser** (`main.py`) parser both `pcap` and `pcapng` files natively, inaelewa `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap`, na haihitaji tshark, kwa hivyo inafanya kazi vizuri ndani ya isolated sandboxes.
-- **USB-HID-decoders** inaongeza keyboard, mouse, na tablet visualizers. Unaweza kuendesha `extract_hid_data.sh` helper (tshark backend) au `extract_hid_data.py` (scapy backend) na kisha kuingiza text file inayotokana kwenye decoder au replay modules ili kutazama keystrokes zikijitokeza.
+- **ctf-usb-keyboard-parser** bado ni muhimu kwa CTF challenges za haraka na tayari ipo kwenye repository.<sup>[[3]](#references)</sup>
+- **CTF-Usb_Keyboard_Parser** (`main.py`) hu-parse faili za `pcap` na `pcapng` natively, inaelewa `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap`, na haihitaji tshark, hivyo hufanya kazi vizuri ndani ya isolated sandboxes.<sup>[[4]](#references)</sup>
+- **USB-HID-decoders** huongeza visualizers za keyboard, mouse, na tablet. Unaweza kuendesha helper ya `extract_hid_data.sh` (tshark backend) au `extract_hid_data.py` (scapy backend), kisha uipe decoder au replay modules faili ya text inayotokana ili kutazama keystrokes zikijitokeza.<sup>[[5]](#references)</sup>
 
 ### Stateful decoding ni muhimu
 
-USB interrupt captures kawaida huwa na key press na nakala moja au zaidi za report hiyo hiyo kabla ya release event kufika. Decoder ya vitendo inapaswa:
+USB interrupt captures kwa kawaida huwa na key press na nakala moja au zaidi zinazorudiwa za report hiyo kabla release event haijafika. Decoder ya kivitendo inapaswa:<sup>[[2]](#references)</sup>
 
-- kutoa tu keycodes mpya zilizoandikwa ikilinganishwa na report iliyotangulia
-- kuhifadhi modifier state (`Shift`, `Ctrl`, `AltGr`) kutoka byte 0 au field iliyoparse ya `usbhid.boot_report.keyboard.modifier`
+- kutoa keycodes mpya pekee ikilinganishwa na report iliyotangulia
+- kuhifadhi modifier state (`Shift`, `Ctrl`, `AltGr`) kutoka byte 0 au field iliyo-parse ya `usbhid.boot_report.keyboard.modifier`
 - kufuatilia toggle keys kama `Caps Lock`, kwa sababu uppercase output haidhibitiwi na Shift pekee
-- kukumbuka kwamba HID usage IDs hazitegemei layout: `0x1d` ni nafasi ya key ya kimwili ya `z`/`y` kutegemea host keyboard layout
+- kukumbuka kuwa HID usage IDs hazitegemei layout: `0x1d` ni physical key position ya `z`/`y`, kutegemea keyboard layout ya host
 
 ## Quick Python decoder
 ```python
@@ -112,19 +112,22 @@ char = char.upper()
 sys.stdout.write(char)
 prev = current
 ```
-Lisha kwa `hex` lines zilizodumpiwa awali ili upate reconstruction ya haraka ya awali bila kuleta full parser ndani ya environment. Kwa non-US layouts hii bado hujenga upya physical key position, si lazima glyph ya mwisho iliyoonekana kwenye victim host.
+Ipenye mistari tambarare ya hex iliyotupwa awali ili kupata reconstruction ya haraka bila kuingiza parser kamili kwenye mazingira. Kwa layouts zisizo za Marekani, hii bado huonyesha nafasi halisi ya kitufe, si lazima glyph ya mwisho iliyoonyeshwa kwenye host ya victim.
 
-## Troubleshooting tips
+## Vidokezo vya utatuzi
 
-- Ikiwa Wireshark haijazi fields za `usbhid.*`, HID report descriptor huenda haikunasa. Chomoa na uunganishe tena keyboard wakati unacapture au tumia `usb.capdata` ya raw kama fallback.
-- Kwenye Linux software captures, `usbmon` ndiyo source ya kawaida; kwenye Windows, Wireshark hutegemea **USBPcap** extcap ili kuona raw USB URBs kabisa.
-- Ikiwa keyboard iliunganishwa kupitia hub au dock, thibitisha interface descriptor kwanza kisha decode tu ile device/interface pair. Composite HID captures mara nyingi huchanganya keyboard na mouse reports.
-- Windows captures zinahitaji **USBPcap** extcap interface; hakikisha bado ipo baada ya Wireshark upgrades, kwa kuwa missing extcaps hukupa empty device lists.
-- Daima linganisha `usb.bus_id:device:interface` (mf. `1.9.1`) kabla ya decoding chochote — kuchanganya keyboards au storage devices nyingi husababisha keystrokes zisizo na maana.
+- Ikiwa Wireshark haijazi fields za `usbhid.*`, huenda HID report descriptor haikunaswa. Chomoa na uunganishe tena keyboard wakati wa kunasa, au tumia `usb.capdata` ghafi.
+- Kwenye software captures za Linux, `usbmon` ndiyo chanzo cha kawaida; kwenye Windows, Wireshark hutegemea extcap ya **USBPcap** ili kuona raw USB URBs kabisa.<sup>[[1]](#references)</sup>
+- Ikiwa keyboard iliunganishwa kupitia hub au dock, thibitisha interface descriptor kwanza, kisha decode device/interface pair hiyo pekee. Composite HID captures mara nyingi huchanganya reports za keyboard na mouse.
+- Windows captures zinahitaji interface ya **USBPcap** extcap; hakikisha iliendelea kuwepo baada ya Wireshark upgrades, kwa kuwa extcaps zinazokosekana huacha device lists zikiwa tupu.<sup>[[1]](#references)</sup>
+- Kila mara correlate `usb.bus_id:device:interface` (kwa mfano `1.9.1`) kabla ya kuanza decoding — kuchanganya keyboards au storage devices nyingi husababisha keystrokes zisizo na maana.
 
-## References
+## Marejeleo
 
-- [Wireshark USB capture setup](https://wiki.wireshark.org/CaptureSetup/USB)
-- [ACSC Quals 2023 - pcap 1, 2 write-up](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
+- [1] [Usanidi wa Wireshark USB capture](https://wiki.wireshark.org/CaptureSetup/USB)
+- [2] [ACSC Quals 2023 - pcap 1, 2 write-up](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
+- [3] [ctf-usb-keyboard-parser](https://github.com/TeamRocketIst/ctf-usb-keyboard-parser)
+- [4] [CTF-Usb_Keyboard_Parser](https://github.com/5h4rrk/CTF-Usb_Keyboard_Parser)
+- [5] [USB-HID-decoders](https://github.com/Nissen96/USB-HID-decoders)
 
 {{#include ../../../banners/hacktricks-training.md}}

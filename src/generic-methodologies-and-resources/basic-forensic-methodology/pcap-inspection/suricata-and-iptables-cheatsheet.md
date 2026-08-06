@@ -6,13 +6,13 @@
 
 ### Chains
 
-Katika iptables, orodha za sheria zinazojulikana kama chains zinashughulikiwa kwa mpangilio. Kati ya hizi, chains tatu kuu zipo kila wakati, huku zingine kama NAT zikiwa zinaweza kuungwa mkono kulingana na uwezo wa mfumo.
+Katika iptables, orodha za rules zinazojulikana kama chains huchakatwa kwa mfuatano. Kati ya hizi, kuna chains tatu kuu ambazo hupatikana kwa ujumla, huku nyingine kama NAT zikiweza kuungwa mkono kulingana na uwezo wa mfumo.
 
-- **Input Chain**: Inatumika kwa usimamizi wa tabia ya muunganisho unaoingia.
-- **Forward Chain**: Inatumika kwa kushughulikia muunganisho unaoingia ambao haujielekezi kwa mfumo wa ndani. Hii ni ya kawaida kwa vifaa vinavyofanya kazi kama routers, ambapo data inayopokelewa inakusudiwa kupelekwa kwenye eneo lingine. Chain hii inahusiana hasa wakati mfumo unahusika katika routing, NATing, au shughuli zinazofanana.
-- **Output Chain**: Imetengwa kwa udhibiti wa muunganisho unaotoka.
+- **Input Chain**: Hutumika kudhibiti tabia ya connections zinazoingia.
+- **Forward Chain**: Hutumika kushughulikia connections zinazoingia ambazo hazilengi mfumo wa ndani. Hii ni kawaida kwa vifaa vinavyofanya kazi kama routers, ambapo data iliyopokelewa inakusudiwa ku-forwardiwa kwenye destination nyingine. Chain hii huhusika hasa wakati mfumo unashiriki katika routing, NATing, au shughuli zinazofanana.
+- **Output Chain**: Hutumika kudhibiti connections zinazotoka.
 
-Chains hizi zinahakikisha usindikaji wa mpangilio wa trafiki ya mtandao, zikiruhusu kuwekwa kwa sheria za kina zinazodhibiti mtiririko wa data kuingia, kupitia, na kutoka kwa mfumo.
+Chains hizi huhakikisha traffic ya mtandao inachakatwa kwa utaratibu, na kuruhusu kubainishwa kwa rules za kina zinazosimamia mtiririko wa data inayoingia, inayopita ndani ya, na inayotoka kwenye mfumo.
 ```bash
 # Delete all rules
 iptables -F
@@ -51,7 +51,7 @@ iptables-restore < /etc/sysconfig/iptables
 ```
 ## Suricata
 
-### Sakinisha & Sanidi
+### Usakinishaji na Usanidi
 ```bash
 # Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
 # Ubuntu
@@ -117,70 +117,70 @@ Type=simple
 
 systemctl daemon-reload
 ```
-### Mwelekeo wa Mifumo
+### Ufafanuzi wa Rules
 
-[Kutoka kwenye hati:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) Kanuni/saini inajumuisha yafuatayo:
+[From the docs:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) Rule/signature ina vitu vifuatavyo:
 
-- **kitendo**, kinatengeneza kinachotokea wakati saini inapatana.
-- **kichwa**, kinaelezea itifaki, anwani za IP, bandari na mwelekeo wa kanuni.
-- **chaguzi za kanuni**, zinaelezea maelezo maalum ya kanuni.
+- **action**, huamua kinachotokea signature inapolingana.
+- **header**, hufafanua protocol, anwani za IP, ports na mwelekeo wa rule.
+- **rule options**, hufafanua maelezo mahususi ya rule.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
 #### **Vitendo halali ni**
 
-- alert - tengeneza tahadhari
-- pass - simamisha ukaguzi zaidi wa pakiti
-- **drop** - angusha pakiti na tengeneza tahadhari
-- **reject** - tuma kosa la RST/ICMP lisilofikika kwa mtumaji wa pakiti inayolingana.
-- rejectsrc - sawa na tu _reject_
-- rejectdst - tuma pakiti ya kosa la RST/ICMP kwa mpokeaji wa pakiti inayolingana.
-- rejectboth - tuma pakiti za kosa la RST/ICMP kwa pande zote za mazungumzo.
+- alert - generate an alert
+- pass - stop further inspection of the packet
+- **drop** - drop packet and generate alert
+- **reject** - send RST/ICMP unreachable error to the sender of the matching packet.
+- rejectsrc - same as just _reject_
+- rejectdst - send RST/ICMP error packet to the receiver of the matching packet.
+- rejectboth - send RST/ICMP error packets to both sides of the conversation.
 
-#### **Protokali**
+#### **Protocols**
 
-- tcp (kwa trafiki ya tcp)
+- tcp (for tcp-traffic)
 - udp
 - icmp
-- ip (ip inasimama kwa ‘yote’ au ‘yoyote’)
-- _protokali za layer7_: http, ftp, tls, smb, dns, ssh... (zaidi katika [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+- ip (ip stands for ‘all’ or ‘any’)
+- _layer7 protocols_: http, ftp, tls, smb, dns, ssh... (more in the [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
 
-#### Anwani za Chanzo na Kielelezo
+#### Anwani za Chanzo na Lengwa
 
-Inasaidia anuwai za IP, kukanusha na orodha ya anwani:
+Inaauni IP ranges, negations na orodha ya anwani:
 
-| Mfano                       | Maana                                  |
-| --------------------------- | -------------------------------------- |
-| ! 1.1.1.1                   | Anwani zote za IP isipokuwa 1.1.1.1    |
-| !\[1.1.1.1, 1.1.1.2]        | Anwani zote za IP isipokuwa 1.1.1.1 na 1.1.1.2 |
-| $HOME_NET                   | Mpangilio wako wa HOME_NET katika yaml |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET na si HOME_NET          |
-| \[10.0.0.0/24, !10.0.0.5]   | 10.0.0.0/24 isipokuwa 10.0.0.5        |
+| Example                       | Meaning                                  |
+| ----------------------------- | ---------------------------------------- |
+| ! 1.1.1.1                     | Kila IP address isipokuwa 1.1.1.1             |
+| !\[1.1.1.1, 1.1.1.2]          | Kila IP address isipokuwa 1.1.1.1 na 1.1.1.2 |
+| $HOME_NET                     | Mpangilio wako wa HOME_NET katika yaml         |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET na si HOME_NET            |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 isipokuwa 10.0.0.5          |
 
-#### Bandari za Chanzo na Kielelezo
+#### Ports za Chanzo na Lengwa
 
-Inasaidia anuwai za bandari, kukanusha na orodha za bandari
+Inaauni port ranges, negations na orodha za ports
 
-| Mfano         | Maana                                |
-| ------------- | ------------------------------------ |
-| any           | anwani yoyote                        |
-| \[80, 81, 82] | bandari 80, 81 na 82                |
-| \[80: 82]     | Anuwai kutoka 80 hadi 82             |
-| \[1024: ]     | Kuanzia 1024 hadi nambari ya juu ya bandari |
-| !80           | Bandari zote isipokuwa 80            |
-| \[80:100,!99] | Anuwai kutoka 80 hadi 100 isipokuwa 99 |
-| \[1:80,!\[2,4]] | Anuwai kutoka 1-80, isipokuwa bandari 2 na 4 |
+| Example         | Meaning                                |
+| --------------- | -------------------------------------- |
+| any             | address yoyote                            |
+| \[80, 81, 82]   | port 80, 81 na 82                     |
+| \[80: 82]       | Range kutoka 80 hadi 82                  |
+| \[1024: ]       | Kuanzia 1024 hadi port-number ya juu zaidi |
+| !80             | Kila port isipokuwa 80                      |
+| \[80:100,!99]   | Range kutoka 80 hadi 100, lakini 99 imeondolewa |
+| \[1:80,!\[2,4]] | Range kutoka 1-80, isipokuwa ports 2 na 4  |
 
 #### Mwelekeo
 
-Inawezekana kuashiria mwelekeo wa sheria ya mawasiliano inayotumika:
+Inawezekana kuonyesha mwelekeo wa mawasiliano ambao rule inatumika:
 ```
 source -> destination
 source <> destination  (both directions)
 ```
-#### Keywords
+#### Maneno muhimu
 
-Kuna **mamia ya chaguzi** zinazopatikana katika Suricata kutafuta **pakiti maalum** unayotafuta, hapa itatajwa ikiwa kitu cha kuvutia kimepatikana. Angalia [**documentation** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)kwa maelezo zaidi!
+Kuna **mamia ya chaguo** zinazopatikana katika Suricata za kutafuta **paketi mahususi** unayoitafuta; hapa itatajwa ikiwa kitu cha kuvutia kitapatikana. Angalia [**nyaraka** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html) kwa maelezo zaidi!
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule

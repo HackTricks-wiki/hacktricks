@@ -1,6 +1,8 @@
+# Mbinu za Kuondoa Obfuscation kwenye Faili za VBS
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-Baadhi ya mambo ambayo yanaweza kuwa na manufaa katika kutatua matatizo/kufichua faili ya VBS yenye uharibifu:
+Baadhi ya mambo yanayoweza kusaidia kutatua hitilafu/kufanya deobfuscation ya faili hasidi ya VBS:
 
 ## echo
 ```bash
@@ -10,7 +12,7 @@ Wscript.Echo "Like this?"
 ```bash
 ' this is a comment
 ```
-## Test
+## Jaribio
 ```bash
 cscript.exe file.vbs
 ```

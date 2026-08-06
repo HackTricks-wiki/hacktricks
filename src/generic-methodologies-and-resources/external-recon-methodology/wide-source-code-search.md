@@ -2,51 +2,51 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Lengo la ukurasa huu ni kuorodhesha **platforms zinazoruhusu kutafuta code** (literal, regex, symbol-aware, au path-scoped) katika **maelfu/mamilioni ya repos**.
+Lengo la ukurasa huu ni kuorodhesha **platforms zinazokuruhusu kutafuta code** (literal, regex, inayotambua symbols, au iliyowekewa mipaka na path) katika **maelfu/mamilioni ya repos**.
 
 Hii ni muhimu kwa:
 
-- **Kutafuta taarifa zilizovuja**
-- **Kutafuta vulnerable patterns**
-- **Kuchora ramani ya technologies, internal hosts, CI/CD, na infrastructure-as-code**
-- **Kufanya pivot kutoka jina la kampuni/org kwenda kwenye repos, branches, na high-signal files**
+- **Kutafuta taarifa zilizoleak**
+- **Kutafuta patterns zilizo hatarini**
+- **Kuchora ramani ya technologies, hosts za ndani, CI/CD, na infrastructure-as-code**
+- **Kuhama kutoka jina la kampuni/org kwenda kwenye repos, branches, na files zenye signal kubwa**
 
-- [**Sourcebot**](https://www.sourcebot.dev/): Open-source/self-hosted code search. Ni muhimu sana unapotaka ku-index **repos nyingi** na, ikiwa imesanidiwa, branches/tags za ziada huku ukiendelea kutumia regex filters kama `repo:`, `file:`, `lang:`, `rev:` na `sym:`.
-- [**SourceGraph**](https://sourcegraph.com/search): Hutafuta katika mamilioni ya repos. Regex kwa kawaida ndiyo chaguo salama zaidi; structural search inapatikana katika baadhi ya deployments, lakini ina vikwazo vya performance na huwa haijawezeshwa kila wakati.
-- [**GitHub Code Search**](https://github.com/search): Inasaidia regex, boolean logic, na qualifiers kama `repo:`, `org:`, `user:`, `path:`, `language:`, `symbol:`, `content:` na `is:`.
-- [**GitLab Exact Code Search**](https://docs.gitlab.com/user/search/exact_code_search/): GitLab code search ya kisasa inayotumia Zoekt. Inasaidia exact na regex modes pamoja na filters kama `file:`, `lang:`, `repo:` na `sym:`.
-- [**GitLab Advanced Search**](https://docs.gitlab.com/user/search/advanced_search/) bado ni muhimu kama fallback pana zaidi kwa sababu inaweza kutafuta code, comments, commits, merge requests, na wikis.
+- [**Sourcebot**](https://www.sourcebot.dev/): Code search ya open-source/self-hosted. Ni muhimu sana unapotaka ku-index **repos nyingi** na, ikiwa imesanidiwa, branches/tags za ziada huku ukiendelea kutumia regex filters kama `repo:`, `file:`, `lang:`, `rev:` na `sym:`.
+- [**SourceGraph**](https://sourcegraph.com/search): Hutafuta katika mamilioni ya repos. Regex kwa kawaida ndiyo chaguo salama zaidi; structural search inapatikana katika baadhi ya deployments, lakini ina limitations za performance na haiwezeshwi kila mara.
+- [**GitHub Code Search**](https://github.com/search): Inasaidia regex, boolean logic, na qualifiers kama `repo:`, `org:`, `user:`, `path:`, `language:`, `symbol:`, `content:` na `is:`.<sup>[[1]](#references)</sup>
+- [**GitLab Exact Code Search**](https://docs.gitlab.com/user/search/exact_code_search/): GitLab code search ya kisasa inayotumia Zoekt. Inasaidia exact na regex modes ikiwa na filters kama `file:`, `lang:`, `repo:` na `sym:`.<sup>[[2]](#references)</sup>
+- [**GitLab Advanced Search**](https://docs.gitlab.com/user/search/advanced_search/) bado ni muhimu kama fallback pana kwa sababu inaweza kutafuta code, comments, commits, merge requests, na wikis.
 - [**SearchCode**](https://searchcode.com/): Hutafuta code katika mamilioni ya projects.
-- [**Grep**](https://grep.app/): Public search ya haraka katika GitHub corpus kubwa sana. Ni muhimu unapotaka indexing/ranking view ya pili kwa ajili ya pivots za **content**, **file**, na **path**.
+- [**Grep**](https://grep.app/): Public search ya haraka katika GitHub corpus kubwa sana. Ni muhimu unapotaka mtazamo wa pili wa indexing/ranking kwa pivots za **content**, **file**, na **path**.
 
 ## Uwezo muhimu wa search
 
-Unapokagua org katika muktadha wa bug bounty/red team, uwezo muhimu zaidi kwa kawaida ni:
+Unapofanya audit ya org katika muktadha wa bug bounty/red team, uwezo muhimu zaidi kwa kawaida ni:
 
-- **Regex** support ya kutafuta token formats, URL schemes, dangerous function names, au multiline fragments.
-- **Path filters** za kwenda moja kwa moja kwenye high-value files kama `.github/workflows/`, `terraform/`, `helm/`, `.env`, `values.yaml`, `secrets.*`, `credentials.*`, `Dockerfile`, `Jenkinsfile`, au `nginx.conf`.
+- **Regex** support ya kutafuta formats za tokens, URL schemes, majina ya functions hatari, au fragments za mistari mingi.
+- **Path filters** za kwenda moja kwa moja kwenye files zenye thamani kubwa kama `.github/workflows/`, `terraform/`, `helm/`, `.env`, `values.yaml`, `secrets.*`, `credentials.*`, `Dockerfile`, `Jenkinsfile`, au `nginx.conf`.
 - **Language filters** za kutenganisha app code na IaC pamoja na pipelines.
-- **Symbol-aware search** ya kuorodhesha handlers, auth middleware, webhook consumers, dangerous helper functions, au classes/methods mahususi.
+- **Symbol-aware search** ya kuorodhesha handlers, auth middleware, webhook consumers, helper functions hatari, au classes/methods maalum.
 - **Boolean operators** za kupunguza noise: `NOT path:test`, `NOT is:generated`, `NOT is:vendored`, `foo OR bar`.
-- **Revision/diff search** inapopatikana, ili uweze kurejesha **deleted strings**, kufuatilia **security-relevant changes**, au kukagua **non-default branches/tags** bila ku-clone kila kitu kwanza.
+- **Revision/diff search** inapopatikana, ili uweze kurejesha **strings zilizofutwa**, kufuatilia **mabadiliko yanayohusiana na security**, au kukagua **branches/tags zisizo za default** bila ku-clone kila kitu kwanza.
 
 ## Methodology ya vitendo
 
 1. **Anza na platforms zilizo-indexiwa** ili kutambua kwa haraka repos, owners, paths, na code families.
-2. **Fanya pivot kwenda high-signal locations** badala ya kutafuta tu strings za jumla kama `password`/`secret`.
+2. **Hama kwenda kwenye maeneo yenye signal kubwa** badala ya kutafuta tu strings za jumla kama `password`/`secret`.
 3. **Tafuta attack surface, si credentials pekee**:
 - CI/CD workflows, reusable workflows, composite actions, na deployment scripts
 - Dev Containers / Codespaces bootstrap files na custom features
 - Terraform/Helm/Kubernetes manifests
 - SSO/OIDC/SAML integrations
-- Internal URLs, staging hosts, admin panels, message brokers, na callback endpoints
-- Dangerous code paths (`exec`, template rendering, SSRF fetchers, deserializers, ZIP extraction, YAML loaders, n.k.)
-4. **Clone na utafute locally** unapohitaji non-default branches, full history, regex support bora zaidi, au bulk automation.
-5. **Hamishia uchunguzi kwenye dedicated scanners** wakati lengo ni secrets triage au verification (kwa mfano, tazama dedicated page hapa chini).
+- URLs za ndani, staging hosts, admin panels, message brokers, na callback endpoints
+- Code paths hatari (`exec`, template rendering, SSRF fetchers, deserializers, ZIP extraction, YAML loaders, n.k.)
+4. **Clone na utafute locally** unapohitaji branches zisizo za default, full history, regex support bora zaidi, au bulk automation.
+5. **Hamishia kwenye scanners maalum** wakati lengo ni secrets triage au verification (kwa mfano, tazama ukurasa maalum hapa chini).
 
 ### Mawazo ya high-signal queries
 
-Haya yamekusudiwa kuwa mapana ili uweze kuyarekebisha kwa GitHub, GitLab, Sourcegraph, au Sourcebot syntax:
+Haya yamekusudiwa kuwa mapana ili uweze kuyarekebisha kwa syntax ya GitHub, GitLab, Sourcegraph, au Sourcebot:
 ```text
 org:target path:.github/workflows ("pull_request_target" OR "workflow_run" OR "ACTIONS_STEP_DEBUG")
 org:target (path:terraform OR path:helm OR language:HCL OR language:YAML) ("role_arn" OR "assume_role" OR "client_secret" OR "access_key")
@@ -60,12 +60,12 @@ org:target ("internal" OR "corp" OR "staging") ("https://" OR "ssh://") NOT path
 ```
 ### Faili mpya zenye signal kubwa zinazofaa kupewa kipaumbele
 
-- **`.github/workflows/*.yml`**: Tafuta `pull_request_target`, `workflow_run`, `workflow_call`, `secrets: inherit`, `id-token: write`, `runs-on: self-hosted`, na mistari ya third-party `uses:` iliyowekwa kwenye tags/branches pekee badala ya full commit SHAs.
-- **`.devcontainer/devcontainer.json`**, **`.devcontainer/<variant>/devcontainer.json`**, na **`.devcontainer.json`**: Tafuta `remoteEnv`, `containerEnv`, `initializeCommand`, `postCreateCommand`, `mounts`, pamoja na Dockerfiles/scripts zilizorejelewa. Mara nyingi hizi hufichua internal package registries, bootstrap URLs, host mounts, na developer-only endpoints.
-- **Dev Container Features** (`devcontainer-feature.json`, `install.sh`): Ni nzuri kwa kupata installer logic maalum ya org inayotekelezwa wakati wa kuunda environment.
+- **`.github/workflows/*.yml`**: Tafuta `pull_request_target`, `workflow_run`, `workflow_call`, `secrets: inherit`, `id-token: write`, `runs-on: self-hosted`, na mistari ya third-party `uses:` iliyowekwa kwenye tags/branches pekee badala ya full commit SHAs.<sup>[[3]](#references)</sup>
+- **`.devcontainer/devcontainer.json`**, **`.devcontainer/<variant>/devcontainer.json`**, na **`.devcontainer.json`**: Tafuta `remoteEnv`, `containerEnv`, `initializeCommand`, `postCreateCommand`, `mounts`, pamoja na Dockerfiles/scripts zilizorejelewa. Mara nyingi hizi hufichua internal package registries, bootstrap URLs, host mounts, na endpoints zinazotumiwa na developers pekee.<sup>[[4]](#references)</sup>
+- **Dev Container Features** (`devcontainer-feature.json`, `install.sh`): Nzuri kwa kupata installer logic mahususi ya organization inayotekelezwa wakati wa kuunda environment.
 - **Faili nyingine za CI/control-plane**: `.gitlab-ci.yml`, `azure-pipelines.yml`, `cloudbuild.yaml`, `Jenkinsfile`, `buildkite*`, `atlantis.yaml`, `terragrunt.hcl`, `helmfile.yaml`, `skaffold.yaml`, `argocd*`.
 
-### Mass local search wakati indexed search haitoshi
+### Utafutaji mkubwa wa ndani wakati indexed search haitoshi
 ```bash
 gh repo list TARGET_ORG --limit 1000 --json nameWithOwner,sshUrl \
 | jq -r '.[].sshUrl' \
@@ -81,12 +81,12 @@ repos/
 ```
 Tumia utafutaji wa ndani unapohitaji:
 
-- Kutafuta **non-default branches** au **tags**
+- Kutafuta **branches** au **tags zisizo za default**
 - Kutafuta **git history**
-- Kuendesha queries za **PCRE2/multiline** kwa ukali zaidi
-- Kufanya **batch triage** ya repositories nyingi bila **UI limits**
+- Kuendesha queries za **PCRE2/multiline** kwa ukamilifu zaidi
+- Kufanya triage ya repositories nyingi bila vikwazo vya UI
 
-### Tafuta **history**, **branches**, na **diffs** kwa uwazi
+### Tafuta history, branches na diffs kwa uwazi
 ```bash
 REPO_DIR=repos/some-repo
 git -C "$REPO_DIR" fetch --all --tags --prune
@@ -100,21 +100,21 @@ git -C "$REPO_DIR" log --all -p -G 'gh[pousr]_|github_pat_|BEGIN [A-Z ]+PRIVATE 
 ```
 Hii ni muhimu hasa wakati string inayovutia ilikuwepo tu katika **release branch**, **tag**, au **deleted commit**. Ikiwa Sourcegraph deployment yako inaiunga mkono, utafutaji wa `type:diff` na `type:commit` ni njia bora ya no-clone pivot kwa tatizo hilo hilo.
 
-## Common blind spots
+## Blind spots za kawaida
 
 - **Default-branch-only indexing** ni jambo la kawaida. Usidhani kuwa code search inashughulikia branches/tags/history zote.
 - **Large files, vendored code, generated code, au archives** zinaweza kurukwa au kutoa kelele nyingi.
-- **Comments, issues, PRs, gists, na wikis** mara nyingi ziko nje ya scope ya generic code search na zinaweza kuhitaji tooling maalum ya platform.
-- **Codespaces / devcontainer configs** zinaweza kuwa branch-specific na zinaweza kuwepo katika paths kadhaa za `.devcontainer/<variant>/devcontainer.json`, hivyo default branch safi haimaanishi kuwa dev environment ni safi kila mahali.
-- **Reusable workflows/actions na devcontainer features** zinaweza kuwepo nje ya file inayoonekana wazi. Tafuta `.github/actions/`, `action.yml`, `action.yaml`, `devcontainer-feature.json`, na `install.sh`, si file ya workflow ya kiwango cha juu pekee.
-- **Search syntax hutofautiana kwa kila platform**. Dork inayofanya kazi katika GitHub Code Search inaweza kuhitaji mabadiliko madogo kwa GitLab, Sourcegraph, au Sourcebot.
+- **Comments, issues, PRs, gists, na wikis** mara nyingi huwa nje ya scope ya generic code search na zinaweza kuhitaji tooling maalum ya platform.
+- **Codespaces / devcontainer configs zinaweza kuwa branch-specific** na zinaweza kuwepo katika paths kadhaa za `.devcontainer/<variant>/devcontainer.json`, kwa hiyo default branch iliyo safi haimaanishi kuwa dev environment ni safi kila mahali.
+- **Reusable workflows/actions na devcontainer features zinaweza kuwepo nje ya file inayoonekana wazi**. Search `.github/actions/`, `action.yml`, `action.yaml`, `devcontainer-feature.json`, na `install.sh`, si file ya workflow ya kiwango cha juu pekee.
+- **Search syntax hutofautiana kulingana na platform**. Dork inayofanya kazi katika GitHub Code Search inaweza kuhitaji mabadiliko madogo kwa GitLab, Sourcegraph, au Sourcebot.
 
 ### Platform-specific gotchas
 
 - **GitHub Code Search** ni bora kwa recon ya haraka, lakini hutafuta **default branch** pekee. Ikiwa unahitaji feature branches, deleted secrets, au historical code, clone repo na uitafute locally.
-- **GitLab Exact Code Search** pia ina **default-branch** limitation na hu-index files ndogo pekee, lakini **Advanced Search** bado inaweza kuwa muhimu kwa kutafuta comments, commits, na wikis.
-- **Sourcebot** hu-index **default branch** kwa default, lakini inaweza kusanidiwa ku-index branches/tags za ziada na kisha kutafutwa kwa `rev:` filters. Hii ni rahisi sana kwa internal audits zinazolenga branch/tag wakati unadhibiti index.
-- **Sourcegraph** regex search kwa ujumla ndiyo chaguo linalotabirika zaidi kwa offensive work; chukulia structural search kama bonus ya hiari, si capability inayohakikishwa. Ikiwa deployment inaiunga mkono, queries za `type:diff` na `type:commit` ni nzuri sana kwa kurejesha deleted strings au mabadiliko ya hivi karibuni yanayohusiana na security.
+- **GitLab Exact Code Search** pia ina kizuizi cha **default-branch** na hu-index files ndogo pekee, lakini **Advanced Search** bado inaweza kuwa muhimu kwa kutafuta comments, commits, na wikis.<sup>[[2]](#references)</sup>
+- **Sourcebot** hu-index **default branch** kwa chaguo-msingi, lakini inaweza kusanidiwa ku-index branches/tags za ziada na kisha kutafutwa kwa filters za `rev:`, jambo ambalo ni rahisi sana kwa internal audits zinazolenga branch/tag unapodhibiti index.
+- **Sourcegraph** regex search kwa ujumla ndiyo chaguo linalotabirika zaidi kwa offensive work; chukulia structural search kama bonus ya hiari, si capability inayohakikishwa. Ikiwa deployment inaiunga mkono, queries za `type:diff` na `type:commit` ni nzuri sana kwa kurejesha deleted strings au security-relevant changes za hivi karibuni.
 
 > [!WARNING]
 > Unapotafuta leaks katika repo na kuendesha kitu kama `git log -p`, usisahau kwamba kunaweza kuwa na **branches nyingine zenye commits nyingine** zilizo na secrets!
@@ -125,12 +125,11 @@ Kwa secret hunting maalum, GitHub dorks za org-wide, na tooling kama TruffleHog/
 github-leaked-secrets.md
 {{#endref}}
 
-
-
 ## References
 
-- [GitHub Code Search syntax](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
-- [GitLab Exact Code Search](https://docs.gitlab.com/user/search/exact_code_search/)
-- [GitHub Actions secure use reference](https://docs.github.com/en/actions/reference/security/secure-use)
-- [Dev Container metadata reference](https://containers.dev/implementors/json_reference/)
+- [1] [GitHub Code Search syntax](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
+- [2] [GitLab Exact Code Search](https://docs.gitlab.com/user/search/exact_code_search/)
+- [3] [GitHub Actions secure use reference](https://docs.github.com/en/actions/reference/security/secure-use)
+- [4] [Dev Container metadata reference](https://containers.dev/implementors/json_reference/)
+
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,55 +1,55 @@
-# File Integrity Monitoring
+# Ufuatiliaji wa Uadilifu wa Faili
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Kumbukumbu ya msingi
+## Baseline
 
-Kumbukumbu ya msingi inajumuisha kuchukua snapshot ya sehemu fulani za mfumo ili **kuizilinganisha na hali ya baadaye ili kuonyesha mabadiliko**.
+Baseline inahusisha kuchukua snapshot ya sehemu fulani za mfumo ili **kuilinganisha na hali ya baadaye na kuonyesha mabadiliko**.
 
-Kwa mfano, unaweza kuhesabu na kuhifadhi hash ya kila faili ya filesystem ili uweze kujua ni faili gani zilibadilishwa.\
-Hii pia inaweza kufanywa na akaunti za watumiaji zilizoundwa, michakato inayokimbia, huduma zinazoendesha na chochote kingine ambacho hakipaswi kubadilika sana, au kabisa.
+Kwa mfano, unaweza kukokotoa na kuhifadhi hash ya kila faili kwenye filesystem ili uweze kubaini ni faili zipi zilirekebishwa.\
+Hili pia linaweza kufanywa kwa akaunti za watumiaji zilizoundwa, processes zinazoendeshwa, services zinazoendeshwa na kitu kingine chochote ambacho hakipaswi kubadilika sana, au kabisa.
 
-Kumbukumbu ya msingi inayofaa kawaida huhifadhi zaidi ya digest tu: ruhusa, owner, group, timestamps, inode, symlink target, ACLs, na extended attributes zilizochaguliwa pia zinastahili kufuatiliwa. Kutoka mtazamo wa kuwinda mdukuzi, hili husaidia kugundua **permission-only tampering**, **atomic file replacement**, na **persistence via modified service/unit files** hata wakati content hash si kitu cha kwanza kinachobadilika.
+**Baseline muhimu** kwa kawaida huhifadhi zaidi ya digest pekee: permissions, owner, group, timestamps, inode, symlink target, ACLs, na extended attributes zilizochaguliwa pia zinafaa kufuatiliwa. Kwa mtazamo wa kuwinda washambuliaji, hili husaidia kubaini **kuchezewa kwa permissions pekee**, **kubadilishwa kwa faili atomically**, na **persistence kupitia service/unit files zilizorekebishwa** hata wakati content hash si kitu cha kwanza kubadilika.
 
 ### File Integrity Monitoring
 
-File Integrity Monitoring (FIM) ni mbinu muhimu ya usalama inayolinda mazingira ya IT na data kwa kufuatilia mabadiliko kwenye faili. Kwa kawaida inachanganya:
+File Integrity Monitoring (FIM) ni mbinu muhimu ya usalama inayolinda IT environments na data kwa kufuatilia mabadiliko kwenye faili. Kwa kawaida huchanganya:
 
-1. **Baseline comparison:** Hifadhi metadata na cryptographic checksums (tumia `SHA-256` au bora zaidi) kwa ajili ya kulinganisha baadaye.
-2. **Real-time notifications:** Jiandikishe kwa matukio ya faili ya asili ya OS ili ujue **faili gani ilibadilika, lini, na kwa wazo bora ni mchakato/mtumiaji gani aliughusu**.
-3. **Periodic re-scan:** Jenga tena uaminifu baada ya reboots, matukio yaliyoporomoka, outages za agent, au shughuli zinazolenga kuzuia forensics.
+1. **Baseline comparison:** Hifadhi metadata na cryptographic checksums (prefer `SHA-256` or better) kwa ajili ya comparisons za baadaye.
+2. **Real-time notifications:** Jiandikishe kwenye OS-native file events ili kujua **ni faili gani ilibadilika, lini, na ikiwezekana ni process/user gani aliyeigusa**.
+3. **Periodic re-scan:** Jenga upya uaminifu baada ya reboots, dropped events, agent outages, au deliberate anti-forensic activity.
 
-For threat hunting, FIM is usually more useful when focused on **high-value paths** such as:
+Kwa threat hunting, FIM kwa kawaida huwa muhimu zaidi inapolenga **high-value paths** kama vile:
 
 - `/etc`, `/boot`, `/usr/local/bin`, `/usr/local/sbin`
 - `systemd` units, cron locations, SSH material, PAM modules, web roots
 - Windows persistence locations, service binaries, scheduled task files, startup folders
-- Container writable layers and bind-mounted secrets/configuration
+- Container writable layers na bind-mounted secrets/configuration
 
-## Backends za Wakati Halisi & Mapungufu
+## Real-Time Backends & Blind Spots
 
 ### Linux
 
-The collection backend matters:
+Collection backend ni muhimu:<sup>[[2]](#references)</sup>
 
-- **`inotify` / `fsnotify`**: rahisi na ya kawaida, lakini mipaka ya watch inaweza kuchoshwa na baadhi ya edge cases hupotea.
-- **`auditd` / audit framework**: bora unapohitaji **who changed the file** (`auid`, process, pid, executable).
-- **`eBPF` / `kprobes`**: chaguo mpya zinazotumika na stacks za kisasa za FIM kuongeza matukio na kupunguza baadhi ya matatizo ya uendeshaji ya deployments za plain `inotify`.
+- **`inotify` / `fsnotify`**: ni rahisi na ya kawaida, lakini watch limits zinaweza kujaa na baadhi ya edge cases hukosa.
+- **`auditd` / audit framework**: ni bora unapohitaji kujua **ni nani aliyebadilisha faili** (`auid`, process, pid, executable).
+- **`eBPF` / `kprobes`**: ni options mpya zaidi zinazotumiwa na FIM stacks za kisasa kuimarisha events na kupunguza baadhi ya changamoto za kiutendaji za deployments za kawaida za `inotify`.
 
-Baadhi ya mambo ya vitendo ya kuzingatia:
+Baadhi ya changamoto za kiutendaji:<sup>[[1]](#references)</sup>
 
-- Ikiwa programu **inabadilisha** faili kwa `write temp -> rename`, kuangalia faili lenyewe kunaweza kuacha kuwa na maana. **Angalia directory ya mzazi**, si faili tu.
-- wakusanyaji wanaotegemea `inotify` wanaweza kupoteza au kudhoofika kwenye **mti mkubwa wa directories**, shughuli za **hard-link**, au baada ya **faili iliyotazamwa kufutwa**.
-- Sets kubwa sana za recursive watch zinaweza kushindwa kimya ikiwa `fs.inotify.max_user_watches`, `max_user_instances`, au `max_queued_events` ni ndogo sana.
-- Network filesystems kwa kawaida sio malengo mazuri ya FIM kwa monitoring yenye kelele ndogo.
+- Ikiwa program **inabadilisha** faili kwa `write temp -> rename`, ku-watch faili yenyewe kunaweza kuacha kuwa na manufaa. **Watch parent directory**, si faili pekee.
+- Collectors zinazotegemea `inotify` zinaweza kukosa au kudhoofika kwenye **huge directory trees**, **hard-link activity**, au baada ya **watched file kufutwa**.
+- Recursive watch sets kubwa sana zinaweza kushindwa kimya kimya ikiwa `fs.inotify.max_user_watches`, `max_user_instances`, au `max_queued_events` ni ndogo sana.
+- Network filesystems kwa kawaida si malengo mazuri ya FIM kwa low-noise monitoring.
 
-Example baseline + verification with AIDE:
+Mfano wa baseline + verification kwa kutumia AIDE:
 ```bash
 aide --init
 mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
 aide --check
 ```
-Mfano wa usanidi wa `osquery` FIM unaolenga attacker persistence paths:
+Mfano wa usanidi wa FIM wa `osquery` unaolenga njia za persistence za mshambuliaji:<sup>[[1]](#references)</sup>
 ```json
 {
 "schedule": {
@@ -66,39 +66,39 @@ Mfano wa usanidi wa `osquery` FIM unaolenga attacker persistence paths:
 }
 }
 ```
-If you need **utambulisho wa mchakato** badala ya mabadiliko ya ngazi ya path pekee, pendelea telemetry inayoungwa mkono na audit kama `osquery` `process_file_events` au Wazuh `whodata` mode.
+Ikiwa unahitaji **process attribution** badala ya mabadiliko ya kiwango cha path pekee, pendelea telemetry inayoungwa mkono na audit kama `osquery` `process_file_events` au Wazuh `whodata` mode.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ### Windows
 
-Kwenye Windows, FIM ni imara zaidi unapochanganya **rejista za mabadiliko** na **telemetry yenye ishara za juu za mchakato/mafayela**:
+Kwenye Windows, FIM huwa na nguvu zaidi unapochanganya **change journals** na **high-signal process/file telemetry**:
 
-- **NTFS USN Journal** inatoa kumbukumbu endelevu kwa kila volume ya mabadiliko ya faili.
-- **Sysmon Event ID 11** inafaa kwa uundaji/kuandikwa upya kwa faili.
+- **NTFS USN Journal** hutoa logi endelevu ya kila volume ya mabadiliko ya faili.
+- **Sysmon Event ID 11** ni muhimu kwa uundaji/overwrite ya faili.
 - **Sysmon Event ID 2** husaidia kugundua **timestomping**.
-- **Sysmon Event ID 15** inafaa kwa **named alternate data streams (ADS)** kama `Zone.Identifier` au hidden payload streams.
+- **Sysmon Event ID 15** ni muhimu kwa **named alternate data streams (ADS)** kama `Zone.Identifier` au streams zilizofichwa za payload.
 
-Quick USN triage examples:
+Mifano ya haraka ya USN triage:
 ```cmd
 fsutil usn queryjournal C:
 fsutil usn readjournal C:
 fsutil usn readdata C:\Windows\Temp\sample.bin
 ```
-For deeper anti-forensic ideas around **timestamp manipulation**, **ADS abuse**, and **USN tampering**, check [Anti-Forensic Techniques](anti-forensic-techniques.md).
+Kwa mawazo ya kina zaidi ya **anti-forensic** kuhusu **timestamp manipulation**, **ADS abuse**, na **USN tampering**, angalia [Anti-Forensic Techniques](anti-forensic-techniques.md).
 
 ### Containers
 
-FIM ya container mara nyingi hupoteza njia halisi ya kuandika. Kwa Docker `overlay2`, mabadiliko huwekwa kwenye container's **writable upper layer** (`upperdir`/`diff`), si kwenye read-only image layers. Kwa hivyo:
+Container FIM mara nyingi hukosa njia halisi ya kuandikia. Kwa Docker `overlay2`, mabadiliko huhifadhiwa kwenye **writable upper layer** ya container (`upperdir`/`diff`), si kwenye image layers za kusoma pekee. Kwa hivyo:
 
-- Kufuatilia tu paths kutoka **inside** ya container yenye muda mfupi kunaweza kupoteza mabadiliko baada container kutengenezwa upya.
-- Kufuatilia **host path** inayounga mkono writable layer au volume husika iliyowekwa kwa bind-mounted mara nyingi ni ya manufaa zaidi.
-- FIM kwenye image layers ni tofauti na FIM kwenye running container filesystem.
+- Kufuatilia paths zilizo **ndani** ya container ya muda mfupi kunaweza kukosa mabadiliko baada ya container kuundwa upya.
+- Kufuatilia **host path** inayohifadhi writable layer au bind-mounted volume husika mara nyingi huwa na manufaa zaidi.
+- FIM kwenye image layers ni tofauti na FIM kwenye filesystem ya container inayoendesha.
 
-## Vidokezo vya Utafutaji vinavyolenga Mshambuliaji
+## Attacker-Oriented Hunting Notes
 
-- Fuatilia **service definitions** na **task schedulers** kwa umakini kama binaries. Wavamizi mara nyingi hupata persistence kwa kubadilisha unit file, cron entry, au task XML badala ya kupachika `/bin/sshd`.
-- Content hash pekee haitoshi. Mengi ya uvunjaji huonekana kwanza kama **owner/mode/xattr/ACL drift**.
-- Kama unashuku uvamizi ulioendelea, fanya zote: **real-time FIM** kwa shughuli mpya na **cold baseline comparison** kutoka kwenye media inayotegemewa.
-- Ikiwa mshambuliaji ana root au uwezo wa kutekeleza kernel, chukulia kuwa FIM agent, database yake, na hata chanzo cha tukio vinaweza kufanyiwa udanganyifu. Hifadhi logs na baselines kwa mbali au kwenye read-only media kadri inavyowezekana.
+- Fuatilia **service definitions** na **task schedulers** kwa umakini sawa na binaries. Attackers mara nyingi hupata persistence kwa kurekebisha unit file, cron entry, au task XML badala ya kurekebisha `/bin/sshd`.
+- Content hash pekee haitoshi. Compromises nyingi hujitokeza kwanza kama **owner/mode/xattr/ACL drift**.
+- Ikiwa unashuku intrusion iliyokomaa, fanya yote mawili: **real-time FIM** kwa shughuli mpya na **cold baseline comparison** kutoka trusted media.
+- Ikiwa attacker ana root au kernel execution, chukulia kuwa FIM agent, database yake, na hata event source vinaweza kuchezewa. Hifadhi logs na baselines kwa mbali au kwenye read-only media inapowezekana.
 
 ## Tools
 
@@ -110,7 +110,8 @@ FIM ya container mara nyingi hupoteza njia halisi ya kuandika. Kwa Docker `overl
 
 ## References
 
-- [https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/](https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/)
-- [https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case](https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case)
+- [1] [File Integrity Monitoring with osquery](https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/)
+- [2] [Tracing Linux: A file integrity monitoring use case (Elastic)](https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case)
+- [3] [Wazuh File Integrity Monitoring (Syscheck and whodata mode)](https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html)
 
 {{#include ../../banners/hacktricks-training.md}}

