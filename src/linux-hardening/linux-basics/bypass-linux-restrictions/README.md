@@ -346,7 +346,7 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 When a vulnerability lets you partially control an argument that ultimately reaches `system()` or another shell, you may not know the exact offset at which execution starts reading your payload.  Traditional NOP sleds (e.g. `\x90`) do **not** work in shell syntax, but Bash will harmlessly ignore leading whitespace before executing a command.
 
-Therefore you can create a *NOP sled for Bash* by prefixing your real command with a long sequence of spaces or tab characters:
+Therefore you can create a *NOP sled for Bash* by prefixing your real command with a long sequence of spaces or tab characters:<sup>[[5]](#references)</sup>
 
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
@@ -364,13 +364,12 @@ Practical use cases:
 
 > 🛠️  Combine this trick with ROP gadgets that call `system()` to dramatically increase exploit reliability on memory-constrained IoT routers.
 
-## References & More
+## References
 
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
-- [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
-
-- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
+- [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../../banners/hacktricks-training.md}}

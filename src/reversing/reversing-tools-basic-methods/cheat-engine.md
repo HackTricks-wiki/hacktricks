@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 [**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them.\
-When you download and run it, you are **presented** with a **tutorial** of how to use the tool. If you want to learn how to use the tool it's highly recommended to complete it.
+When you download and run it, you are **presented** with a **tutorial** of how to use the tool. If you want to learn how to use the tool it's highly recommended to complete it.<sup>[[3]](#references)</sup>
 
 ## What are you searching?
 
@@ -158,7 +158,7 @@ So, insert your new assembly code in the "**newmem**" section and remove the ori
 
 ## Advanced features in Cheat Engine 7.x (2023-2025)
 
-Cheat Engine has continued to evolve since version 7.0 and several quality-of-life and *offensive-reversing* features have been added that are extremely handy when analysing modern software (and not only games!). Below is a **very condensed field guide** to the additions you will most likely use during red-team/CTF work.
+Cheat Engine has continued to evolve since version 7.0 and several quality-of-life and *offensive-reversing* features have been added that are extremely handy when analysing modern software (and not only games!). Below is a **very condensed field guide** to the additions you will most likely use during red-team/CTF work.<sup>[[1]](#references)</sup>
 
 ### Pointer Scanner 2 improvements
 * `Pointers must end with specific offsets` and the new **Deviation** slider (≥7.4) greatly reduce false positives when you rescan after an update. Use it together with multi-map comparison (`.PTR` → *Compare results with other saved pointer map*) to obtain a **single resilient base-pointer** in just a few minutes.
@@ -194,7 +194,7 @@ CE now ships a full rewrite of *ceserver* and can attach over TCP to **Linux, An
 adb forward tcp:52736 tcp:52736   # (or ssh tunnel)
 Cheat Engine → "Network" icon → Host = localhost → Connect
 ```
-For the Frida bridge see `bb33bb/frida-ceserver` on GitHub. 
+For the Frida bridge see `bb33bb/frida-ceserver` on GitHub.<sup>[[2]](#references)</sup> 
 
 ### Other noteworthy goodies
 * **Patch Scanner** (MemView → Tools) – detects unexpected code changes in executable sections; handy for malware analysis.
@@ -210,11 +210,11 @@ For the Frida bridge see `bb33bb/frida-ceserver` on GitHub.
 
 ---
 
-## **References**
+## References
 
-- [Cheat Engine 7.5 release notes (GitHub)](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
-- [frida-ceserver cross-platform bridge](https://github.com/bb33bb/frida-ceserver-Mac-and-IOS)
-- **Cheat Engine tutorial, complete it to learn how to start with Cheat Engine**
+- [1] [Cheat Engine 7.5 release notes (GitHub)](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
+- [2] [frida-ceserver cross-platform bridge](https://github.com/bb33bb/frida-ceserver-Mac-and-IOS)
+- [3] Cheat Engine tutorial, complete it to learn how to start with Cheat Engine
 
 {{#include ../../banners/hacktricks-training.md}}
 

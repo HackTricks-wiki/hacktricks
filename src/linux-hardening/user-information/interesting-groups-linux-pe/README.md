@@ -55,7 +55,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 Error executing command as another user: Not authorized
 ```
 
-**It's not because you don't have permissions but because you aren't connected without a GUI**. And there is a work around for this issue here: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). You need **2 different ssh sessions**:
+**It's not because you don't have permissions but because you aren't connected without a GUI**. And there is a work around for this issue here: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). You need **2 different ssh sessions**:<sup>[[1]](#references)</sup>
 
 ```bash:session1
 echo $$ #Step1: Get current PID
@@ -102,7 +102,7 @@ This is useful for account classification even when direct login is blocked.
 
 ## Staff Group
 
-**staff**: Allows users to add local modifications to the system (`/usr/local`) without needing root privileges (note that executables in `/usr/local/bin` are in the PATH variable of any user, and they may "override" the executables in `/bin` and `/usr/bin` with the same name). Compare with group "adm", which is more related to monitoring/security. [\[source\]](https://wiki.debian.org/SystemGroups)
+**staff**: Allows users to add local modifications to the system (`/usr/local`) without needing root privileges (note that executables in `/usr/local/bin` are in the PATH variable of any user, and they may "override" the executables in `/bin` and `/usr/bin` with the same name). Compare with group "adm", which is more related to monitoring/security. [\[source\]](https://wiki.debian.org/SystemGroups)<sup>[[2]](#references)</sup>
 
 In debian distributions, `$PATH` variable show that `/usr/local/` will be run as the highest priority, whether you are a privileged user or not.
 
@@ -284,5 +284,10 @@ Treat membership here as a high-value data exposure finding and pivot through pa
 
 Inside OpenBSD the **auth** group usually can write in the folders _**/etc/skey**_ and _**/var/db/yubikey**_ if they are used.\
 These permissions may be abused with the following exploit to **escalate privileges** to root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+
+## References
+
+- [1] [pkexec/pkttyagent authentication without a GUI session (NixOS issue #18012)](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)
+- [2] [SystemGroups - Debian Wiki](https://wiki.debian.org/SystemGroups)
 
 {{#include ../../../banners/hacktricks-training.md}}

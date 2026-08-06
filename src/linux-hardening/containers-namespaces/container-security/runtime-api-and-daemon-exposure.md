@@ -136,7 +136,7 @@ The final `/exec/<id>/start` request depends on the returned exec ID, but the se
 
 ### Full Example: containerd Socket
 
-A mounted `containerd` socket is usually just as dangerous:
+A mounted `containerd` socket is usually just as dangerous:<sup>[[1]](#references)</sup>
 
 ```bash
 ctr --address /run/containerd/containerd.sock images pull docker.io/library/busybox:latest
@@ -192,7 +192,7 @@ TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token 2>/dev/null)
 curl -sk -H "Authorization: Bearer $TOKEN" https://127.0.0.1:10250/pods
 ```
 
-If the kubelet or API-server proxy path authorizes `exec`, a WebSocket-capable client can turn that into code execution in other containers on the node. This is also why `nodes/proxy` with only `get` permission is more dangerous than it sounds: the request can still reach kubelet endpoints that execute commands, and those direct kubelet interactions do not show up in normal Kubernetes audit logs.
+If the kubelet or API-server proxy path authorizes `exec`, a WebSocket-capable client can turn that into code execution in other containers on the node. This is also why `nodes/proxy` with only `get` permission is more dangerous than it sounds: the request can still reach kubelet endpoints that execute commands, and those direct kubelet interactions do not show up in normal Kubernetes audit logs.<sup>[[2]](#references)</sup>
 
 ## Checks
 
@@ -224,6 +224,6 @@ What is interesting here:
 
 ## References
 
-- [containerd socket exploitation part 1](https://thegreycorner.com/2025/02/12/containerd-socket-exploitation-part-1.html)
-- [Kubernetes API Server Bypass Risks](https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/)
+- [1] [containerd socket exploitation part 1](https://thegreycorner.com/2025/02/12/containerd-socket-exploitation-part-1.html)
+- [2] [Kubernetes API Server Bypass Risks](https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/)
 {{#include ../../../banners/hacktricks-training.md}}

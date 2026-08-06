@@ -4,7 +4,7 @@
 
 ## Basic Information
 
-The real **entrypoint** of a Mach-o binary is the dynamic linked, defined in `LC_LOAD_DYLINKER` usually is `/usr/lib/dyld`.
+The real **entrypoint** of a Mach-o binary is the dynamic linked, defined in `LC_LOAD_DYLINKER` usually is `/usr/lib/dyld`.<sup>[[3]](#references)</sup>
 
 This linker will need to locate all the executables libraries, map them in memory and link all the non-lazy libraries. Only after this process, the entry-point of the binary will be executed.
 
@@ -15,9 +15,9 @@ Of course, **`dyld`** doesn't have any dependencies (it uses syscalls and libSys
 
 ### Flow
 
-Dyld will be loaded by **`dyldboostrap::start`**, which will also load things such as the **stack canary**. This is because this function will receive in its **`apple`** argument vector this and other **sensitive** **values**.
+Dyld will be loaded by **`dyldboostrap::start`**, which will also load things such as the **stack canary**. This is because this function will receive in its **`apple`** argument vector this and other **sensitive** **values**.<sup>[[1]](#references)</sup>
 
-**`dyls::_main()`** is the entry point of dyld and it's first task is to run `configureProcessRestrictions()`, which usually restricts **`DYLD_*`** environment variables explained in:
+**`dyls::_main()`** is the entry point of dyld and it's first task is to run `configureProcessRestrictions()`, which usually restricts **`DYLD_*`** environment variables explained in:<sup>[[2]](#references)</sup>
 
 
 {{#ref}}
@@ -312,7 +312,9 @@ find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 
 ## References
 
-- [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [1] [dyld — `dyld/dyldMain.cpp` (process startup path)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/dyldMain.cpp)
+- [2] [dyld — `dyld/DyldProcessConfig.cpp` (process/security configuration)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/DyldProcessConfig.cpp)
+- [3] [XNU — `bsd/kern/kern_exec.c` (kernel side of `execve`, loading dyld)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_exec.c)
 
 {{#include ../../../../banners/hacktricks-training.md}}
 

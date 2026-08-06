@@ -8,7 +8,7 @@ In Linux in order to run a program it must exist as a file, it must be accessibl
 
 But this technique is here to change all of this. If you can not start the process you want... **then you hijack one already existing**.
 
-This technique allows you to **bypass common protection techniques such as read-only, noexec, file-name whitelisting, hash whitelisting...**
+This technique allows you to **bypass common protection techniques such as read-only, noexec, file-name whitelisting, hash whitelisting...**<sup>[[1]](#references)</sup>
 
 ## Dependencies
 
@@ -30,7 +30,7 @@ base64
 
 ## The technique
 
-If you are able to modify arbitrarily the memory of a process then you can take over it. This can be used to hijack an already existing process and replace it with another program. We can achieve this either by using the `ptrace()` syscall (which requires you to have the ability to execute syscalls or to have gdb available on the system) or, more interestingly, writing to `/proc/$pid/mem`.
+If you are able to modify arbitrarily the memory of a process then you can take over it. This can be used to hijack an already existing process and replace it with another program. We can achieve this either by using the `ptrace()` syscall (which requires you to have the ability to execute syscalls or to have gdb available on the system) or, more interestingly, writing to `/proc/$pid/mem`.<sup>[[1]](#references)</sup>
 
 The file `/proc/$pid/mem` is a one-to-one mapping of the entire address space of a process (_e. g._ from `0x0000000000000000` to `0x7ffffffffffff000` in x86-64). This means that reading from or writing to this file at an offset `x` is the same as reading from or modifying the contents at the virtual address `x`.
 
@@ -48,7 +48,7 @@ This problems have solutions that, although they are not perfect, are good:
 
 ### In more detail
 
-The steps are relatively easy and do not require any kind of expertise to understand them:
+The steps are relatively easy and do not require any kind of expertise to understand them:<sup>[[1]](#references)</sup>
 
 - Parse the binary we want to run and the loader to find out what mappings they need. Then craft a "shell"code that will perform, broadly speaking, the same steps that the kernel does upon each call to `execve()`:
   - Create said mappings.
@@ -65,7 +65,7 @@ The steps are relatively easy and do not require any kind of expertise to unders
 
 ## EverythingExec
 
-There are several alternatives to `dd`, one of which, `tail`, is currently the default program used to `lseek()` through the `mem` file (which was the sole purpose for using `dd`). Said alternatives are:
+There are several alternatives to `dd`, one of which, `tail`, is currently the default program used to `lseek()` through the `mem` file (which was the sole purpose for using `dd`). Said alternatives are:<sup>[[1]](#references)</sup>
 
 ```bash
 tail
@@ -90,7 +90,7 @@ Block this, EDRs.
 
 ## References
 
-- [https://github.com/arget13/DDexec](https://github.com/arget13/DDexec)
+- [1] [DDexec: A technique to run binaries filelessly and stealthily on Linux](https://github.com/arget13/DDexec)
 
 {{#include ../../../../banners/hacktricks-training.md}}
 

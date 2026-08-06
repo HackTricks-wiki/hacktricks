@@ -13,9 +13,9 @@ If you need a refresher on Mach-O format and code signing, see also: macOS code 
 
 ## Entitlements in Mach-O: where they live
 
-Entitlements are stored inside the code signature data referenced by the LC_CODE_SIGNATURE load command and placed in the __LINKEDIT segment. The signature is a CS_SuperBlob containing multiple blobs (code directory, requirements, entitlements, CMS, etc.). The entitlements blob is a CS_GenericBlob whose data is an Apple Binary Property List (bplist00) mapping entitlement keys to values.
+Entitlements are stored inside the code signature data referenced by the LC_CODE_SIGNATURE load command and placed in the __LINKEDIT segment. The signature is a CS_SuperBlob containing multiple blobs (code directory, requirements, entitlements, CMS, etc.). The entitlements blob is a CS_GenericBlob whose data is an Apple Binary Property List (bplist00) mapping entitlement keys to values.<sup>[[1]](#references)</sup>
 
-Key structures (from xnu):
+Key structures (from xnu):<sup>[[6]](#references)[[7]](#references)</sup>
 
 ```c
 /* mach-o/loader.h */
@@ -77,18 +77,18 @@ Note: Multi-arch (fat) binaries contain multiple Mach-O slices. You must pick th
 1) Parse Mach-O header; iterate ncmds worth of load_command records.
 2) Locate LC_CODE_SIGNATURE; read linkedit_data_command.dataoff/datasize to map the Code Signing SuperBlob placed in __LINKEDIT.
 3) Validate CS_SuperBlob.magic == 0xfade0cc0; iterate count entries of CS_BlobIndex.
-4) Locate index.type == 0xfade7171 (embedded entitlements). Read the pointed CS_GenericBlob and parse its data as an Apple binary plist (bplist00) to key/value entitlements.
+4) Locate index.type == 0xfade7171 (embedded entitlements). Read the pointed CS_GenericBlob and parse its data as an Apple binary plist (bplist00) to key/value entitlements.<sup>[[1]](#references)</sup>
 
 Implementation notes:
 - Code signature structures use big-endian fields; swap byte order when parsing on little-endian hosts.
 - The entitlements GenericBlob data itself is a binary plist (handled by standard plist libraries).
 - Some iOS binaries may carry DER entitlements; also some stores/slots differ across platforms/versions. Cross-check both standard and DER entitlements as needed.
-- For fat binaries, use the fat headers (FAT_MAGIC/FAT_MAGIC_64) to locate the correct slice and offset before walking Mach-O load commands.
+- For fat binaries, use the fat headers (FAT_MAGIC/FAT_MAGIC_64) to locate the correct slice and offset before walking Mach-O load commands.<sup>[[1]](#references)</sup>
 
 
 ## Minimal parsing outline (Python)
 
-The following is a compact outline showing the control flow to find and decode entitlements. It intentionally omits robust bounds checks and full fat binary support for brevity.
+The following is a compact outline showing the control flow to find and decode entitlements. It intentionally omits robust bounds checks and full fat binary support for brevity.<sup>[[1]](#references)</sup>
 
 ```python
 import plistlib, struct
@@ -149,7 +149,7 @@ Usage tips:
 
 ## Example findings
 
-Privileged platform binaries often request sensitive entitlements such as:
+Privileged platform binaries often request sensitive entitlements such as:<sup>[[1]](#references)</sup>
 - com.apple.security.network.server = true
 - com.apple.rootless.storage.early_boot_mount = true
 - com.apple.private.kernel.system-override = true
@@ -160,9 +160,9 @@ Searching these at scale across firmware images is extremely valuable for attack
 
 ## Scaling across IPSWs (mounting and indexing)
 
-To enumerate executables and extract entitlements at scale without storing full images:
+To enumerate executables and extract entitlements at scale without storing full images:<sup>[[1]](#references)</sup>
 
-- Use the ipsw tool by @blacktop to download and mount firmware filesystems. Mounting leverages apfs-fuse, so you can traverse APFS volumes without full extraction.
+- Use the ipsw tool by @blacktop to download and mount firmware filesystems. Mounting leverages apfs-fuse, so you can traverse APFS volumes without full extraction.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```bash
 # Download latest IPSW for iPhone11,2 (iPhone XS)
@@ -188,9 +188,9 @@ LEFT JOIN executable e ON e.id = eosv.executable_id
 WHERE e.name = "launchd";
 ```
 
-Notes on DB portability (if you implement your own indexer):
+Notes on DB portability (if you implement your own indexer):<sup>[[1]](#references)</sup>
 - Use an ORM/abstraction (e.g., SeaORM) to keep code DB-agnostic (SQLite/PostgreSQL).
-- SQLite requires AUTOINCREMENT only on an INTEGER PRIMARY KEY; if you want i64 PKs in Rust, generate entities as i32 and convert types, SQLite stores INTEGER as 8-byte signed internally.
+- SQLite requires AUTOINCREMENT only on an INTEGER PRIMARY KEY; if you want i64 PKs in Rust, generate entities as i32 and convert types, SQLite stores INTEGER as 8-byte signed internally.<sup>[[8]](#references)</sup>
 
 
 ## Open-source tooling and references for entitlement hunting
@@ -209,13 +209,13 @@ For more on code signing internals (Code Directory, special slots, DER entitleme
 
 ## References
 
-- [appledb_rs: a research support tool for Apple platforms](https://www.synacktiv.com/publications/appledbrs-un-outil-daide-a-la-recherche-sur-plateformes-apple.html)
-- [synacktiv/appledb_rs](https://github.com/synacktiv/appledb_rs)
-- [blacktop/ipsw](https://github.com/blacktop/ipsw)
-- [Jonathan Levin’s entitlement DB](https://newosxbook.com/ent.php)
-- [ChiChou/entdb](https://github.com/ChiChou/entdb)
-- [XNU cs_blobs.h](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
-- [XNU mach-o/loader.h](https://github.com/apple-oss-distributions/xnu/blob/main/EXTERNAL_HEADERS/mach-o/loader.h)
-- [SQLite Datatypes](https://sqlite.org/datatype3.html)
+- [1] [appledb_rs: a research support tool for Apple platforms](https://www.synacktiv.com/publications/appledbrs-un-outil-daide-a-la-recherche-sur-plateformes-apple.html)
+- [2] [synacktiv/appledb_rs](https://github.com/synacktiv/appledb_rs)
+- [3] [blacktop/ipsw](https://github.com/blacktop/ipsw)
+- [4] [Jonathan Levin’s entitlement DB](https://newosxbook.com/ent.php)
+- [5] [ChiChou/entdb](https://github.com/ChiChou/entdb)
+- [6] [XNU cs_blobs.h](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [7] [XNU mach-o/loader.h](https://github.com/apple-oss-distributions/xnu/blob/main/EXTERNAL_HEADERS/mach-o/loader.h)
+- [8] [SQLite Datatypes](https://sqlite.org/datatype3.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

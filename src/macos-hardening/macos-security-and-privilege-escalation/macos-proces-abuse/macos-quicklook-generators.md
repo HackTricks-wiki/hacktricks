@@ -4,7 +4,7 @@
 
 ## Basic Information
 
-Quick Look is macOS's **file preview framework**. When a user selects a file in Finder, presses Space, hovers over it, or views a directory with thumbnails enabled, Quick Look **automatically loads a generator plugin** to parse the file and render a visual preview.
+Quick Look is macOS's **file preview framework**. When a user selects a file in Finder, presses Space, hovers over it, or views a directory with thumbnails enabled, Quick Look **automatically loads a generator plugin** to parse the file and render a visual preview.<sup>[[1]](#references)</sup>
 
 Quick Look generators are **bundles** (`.qlgenerator`) that register for specific **Uniform Type Identifiers (UTIs)**. When macOS needs a preview for a file matching that UTI, it loads the generator into a sandboxed helper process (`QuickLookSatellite` or `qlmanage`) and calls its generator function.
 
@@ -178,8 +178,8 @@ done
 
 ## References
 
-* [Apple Developer — Quick Look Programming Guide](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
-* [Apple Security Updates — Quick Look CVEs](https://support.apple.com/en-us/HT201222)
-* [Objective-See — Quick Look Attack Surface](https://objective-see.org/blog.html)
+- [1] [Apple Developer — Quick Look Programming Guide](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
+- [2] [Apple Security Updates — Quick Look CVEs](https://support.apple.com/en-us/HT201222)
+- [3] [Objective-See — Quick Look Attack Surface](https://objective-see.org/blog.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

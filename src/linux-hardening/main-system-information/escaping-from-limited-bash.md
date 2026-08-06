@@ -12,7 +12,7 @@ From [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): The chroot m
 Usually this means that to escape you need to be root inside the chroot.
 
 > [!TIP]
-> The **tool** [**chw00t**](https://github.com/earthquake/chw00t) was created to abuse the following escenarios and scape from `chroot`.
+> The **tool** [**chw00t**](https://github.com/earthquake/chw00t) was created to abuse the following escenarios and scape from `chroot`.<sup>[[1]](#references)</sup>
 
 ### Root + CWD
 
@@ -279,7 +279,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 
 Some environments do not drop you into plain `rbash`, but into **wrappers** such as `git-shell`, `rssh`, or `lshell`:
 
-- `git-shell` only accepts server-side Git commands plus anything present inside `~/git-shell-commands/`. If that directory exists, run `help` to enumerate the allowed custom actions. If you can **write** there, any executable dropped in that directory becomes reachable.
+- `git-shell` only accepts server-side Git commands plus anything present inside `~/git-shell-commands/`. If that directory exists, run `help` to enumerate the allowed custom actions. If you can **write** there, any executable dropped in that directory becomes reachable.<sup>[[3]](#references)</sup>
 - `rssh` / `lshell` commonly allow only `scp`, `sftp`, `rsync`, or Git-style operations. In those cases focus on **file write primitives** first: upload `authorized_keys`, a shell startup file, or a helper script into a writable location and then reconnect with `ssh -t ...`.
 - If the wrapper only filters the command line, enumerate the reachable binaries and then pivot back to **GTFOBins / GTFOArgs**.
 

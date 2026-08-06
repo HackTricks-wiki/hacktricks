@@ -79,7 +79,7 @@ The hierarchy of a DMG file can be different based on the content. However, for 
 
 ### Execution from public directories
 
-If a pre or post installation script is for example executing from **`/var/tmp/Installerutil`**, and an attacker can control that script, they can escalate privileges whenever it's executed. Or another similar example:
+If a pre or post installation script is for example executing from **`/var/tmp/Installerutil`**, and an attacker can control that script, they can escalate privileges whenever it's executed. Or another similar example:<sup>[[1]](#references)[[3]](#references)</sup>
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 
@@ -93,7 +93,7 @@ This is a [public function](https://developer.apple.com/documentation/security/1
 # You could also check FS events to find this misconfig
 ```
 
-For more info check this talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
+For more info check this talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)<sup>[[8]](#references)</sup>
 
 ### Environment and shebang abuse
 
@@ -109,13 +109,13 @@ find /tmp/target-pkg -type f \( -name preinstall -o -name postinstall \) -exec s
 rg -n '^#!/bin/(zsh|bash)|sudo -u |launchctl asuser|\$USER|\$HOME|PATH=|/usr/bin/env ' /tmp/target-pkg
 ```
 
-For the 2024 PackageKit root-environment bug (`~/.zshenv` / `~/.bash*` inheritance during user-initiated installs), check [the generic macOS privesc page](../macos-privilege-escalation.md). If the package is **Apple-signed**, the same script bug can become **SIP/TCC-relevant** because `system_installd` may carry `com.apple.rootless.install.heritable`; see [the SIP page](../macos-security-protections/macos-sip.md).
+For the 2024 PackageKit root-environment bug (`~/.zshenv` / `~/.bash*` inheritance during user-initiated installs), check [the generic macOS privesc page](../macos-privilege-escalation.md). If the package is **Apple-signed**, the same script bug can become **SIP/TCC-relevant** because `system_installd` may carry `com.apple.rootless.install.heritable`; see [the SIP page](../macos-security-protections/macos-sip.md).<sup>[[5]](#references)[[6]](#references)</sup>
 
 ### Execution by mounting
 
 If an installer writes to `/tmp/fixedname/bla/bla`, it's possible to **create a mount** over `/tmp/fixedname` with noowners so you could **modify any file during the installation** to abuse the installation process.
 
-An example of this is **CVE-2021-26089** which managed to **overwrite a periodic script** to get execution as root. For more information take a look at the talk: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
+An example of this is **CVE-2021-26089** which managed to **overwrite a periodic script** to get execution as root. For more information take a look at the talk: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)<sup>[[7]](#references)</sup>
 
 ## pkg as malware
 
@@ -203,12 +203,14 @@ productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pk
 
 ## References
 
-- [**DEF CON 27 - Unpacking Pkgs A Look Inside Macos Installer Packages And Common Security Flaws**](https://www.youtube.com/watch?v=iASSG0_zobQ)
-- [**OBTS v4.0: "The Wild World of macOS Installers" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
-- [**DEF CON 27 - Unpacking Pkgs A Look Inside MacOS Installer Packages**](https://www.youtube.com/watch?v=kCXhIYtODBg)
-- [https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
-- [**CVE-2024-27822: macOS PackageKit Privilege Escalation**](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
-- [**Breaking SIP with Apple-signed Packages**](https://www.l3harris.com/newsroom/editorial/2024/03/breaking-sip-apple-signed-packages)
+- [1] [DEF CON 27 - Unpacking Pkgs A Look Inside Macos Installer Packages And Common Security Flaws](https://www.youtube.com/watch?v=iASSG0_zobQ)
+- [2] [OBTS v4.0: "The Wild World of macOS Installers" - Tony Lambert](https://www.youtube.com/watch?v=Eow5uNHtmIg)
+- [3] [DEF CON 27 - Unpacking Pkgs A Look Inside MacOS Installer Packages](https://www.youtube.com/watch?v=kCXhIYtODBg)
+- [4] [RedTeamRecipe – macOS Red Teaming: Exploiting Installer Packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
+- [5] [CVE-2024-27822: macOS PackageKit Privilege Escalation](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
+- [6] [Breaking SIP with Apple-signed Packages](https://www.l3harris.com/newsroom/editorial/2024/03/breaking-sip-apple-signed-packages)
+- [7] [OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl](https://www.youtube.com/watch?v=jSYPazD4VcE)
+- [8] [DEF CON 25 - Patrick Wardle - Death By 1000 Installers on macOS and it's all broken!](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
 {{#include ../../../banners/hacktricks-training.md}}
 

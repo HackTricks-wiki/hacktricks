@@ -4,14 +4,14 @@
 
 ## Skeleton Key Attack
 
-The **Skeleton Key attack** is a technique that allows attackers to **bypass Active Directory authentication** by **injecting a master password** into the LSASS process of each domain controller. After injection, the master password (default **`mimikatz`**) can be used to authenticate as **any domain user** while their real passwords still work.
+The **Skeleton Key attack** is a technique that allows attackers to **bypass Active Directory authentication** by **injecting a master password** into the LSASS process of each domain controller. After injection, the master password (default **`mimikatz`**) can be used to authenticate as **any domain user** while their real passwords still work.<sup>[[1]](#references)[[2]](#references)</sup>
 
 Key facts:
 
-- Requires **Domain Admin/SYSTEM + SeDebugPrivilege** on every DC and must be **reapplied after each reboot**.
-- Patches **NTLM** and **Kerberos RC4 (etype 0x17)** validation paths; AES-only realms or accounts enforcing AES will **not accept the skeleton key**.
-- Can conflict with third‑party LSA authentication packages or additional smart‑card / MFA providers.
-- The Mimikatz module accepts the optional switch `/letaes` to avoid touching Kerberos/AES hooks in case of compatibility issues.
+- Requires **Domain Admin/SYSTEM + SeDebugPrivilege** on every DC and must be **reapplied after each reboot**.<sup>[[2]](#references)</sup>
+- Patches **NTLM** and **Kerberos RC4 (etype 0x17)** validation paths; AES-only realms or accounts enforcing AES will **not accept the skeleton key**.<sup>[[2]](#references)</sup>
+- Can conflict with third‑party LSA authentication packages or additional smart‑card / MFA providers.<sup>[[2]](#references)</sup>
+- The Mimikatz module accepts the optional switch `/letaes` to avoid touching Kerberos/AES hooks in case of compatibility issues.<sup>[[3]](#references)</sup>
 
 ### Execution
 
@@ -22,7 +22,7 @@ mimikatz # privilege::debug
 mimikatz # misc::skeleton
 ```
 
-If **LSASS is running as PPL** (RunAsPPL/Credential Guard/Windows 11 Secure LSASS), a kernel driver is needed to remove protection before patching LSASS:
+If **LSASS is running as PPL** (RunAsPPL/Credential Guard/Windows 11 Secure LSASS), a kernel driver is needed to remove protection before patching LSASS:<sup>[[3]](#references)</sup>
 
 ```text
 mimikatz # privilege::debug
@@ -41,7 +41,7 @@ After injection, authenticate with any domain account but use password `mimikatz
   - Security **Event ID 4673/4611** for sensitive privilege use or LSA authentication package registration anomalies; correlate with unexpected 4624 logons using RC4 (etype 0x17) from DCs.
 - **Hardening LSASS**
   - Keep **RunAsPPL/Credential Guard/Secure LSASS** enabled on DCs to force attackers into kernel‑mode driver deployment (more telemetry, harder exploitation).
-  - Disable legacy **RC4** where possible; Kerberos tickets limited to AES prevent the RC4 hook path used by the skeleton key.
+  - Disable legacy **RC4** where possible; Kerberos tickets limited to AES prevent the RC4 hook path used by the skeleton key.<sup>[[2]](#references)</sup>
 - Quick PowerShell hunts:
   - Detect unsigned kernel driver installs: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
   - Hunt for Mimikatz driver: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
@@ -51,8 +51,8 @@ For additional credential‑hardening guidance check [Windows credentials protec
 
 ## References
 
-- [Netwrix – Skeleton Key attack in Active Directory (2022)](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
-- [TheHacker.recipes – Skeleton key (2026)](https://www.thehacker.recipes/ad/persistence/skeleton-key/)
-- [TheHacker.Tools – Mimikatz misc::skeleton module](https://tools.thehacker.recipes/mimikatz/modules/misc/skeleton)
+- [1] [Netwrix – Skeleton Key attack in Active Directory (2022)](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
+- [2] [TheHacker.recipes – Skeleton key (2026)](https://www.thehacker.recipes/ad/persistence/skeleton-key/)
+- [3] [TheHacker.Tools – Mimikatz misc::skeleton module](https://tools.thehacker.recipes/mimikatz/modules/misc/skeleton)
 
 {{#include ../../banners/hacktricks-training.md}}

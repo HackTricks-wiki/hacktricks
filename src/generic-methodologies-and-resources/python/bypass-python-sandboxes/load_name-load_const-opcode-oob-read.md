@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This info was taken** [**from this writeup**](https://blog.splitline.tw/hitcon-ctf-2022/)**.**
+**This info was taken** [**from this writeup**](https://blog.splitline.tw/hitcon-ctf-2022/)**.**<sup>[[1]](#references)</sup>
 
 ### TL;DR <a href="#tldr-2" id="tldr-2"></a>
 
@@ -240,7 +240,7 @@ builtins['eval'](builtins['input']())
 
 - CPython bytecode opcodes still index into `co_consts` and `co_names` tuples by integer operands. If an attacker can force these tuples to be empty (or smaller than the maximum index used by the bytecode), the interpreter will read out-of-bounds memory for that index, yielding an arbitrary PyObject pointer from nearby memory. Relevant opcodes include at least:
   - `LOAD_CONST consti` → reads `co_consts[consti]`.
-  - `LOAD_NAME namei`, `STORE_NAME`, `DELETE_NAME`, `LOAD_GLOBAL`, `STORE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `LOAD_ATTR`, `STORE_ATTR` → read names from `co_names[...]` (for 3.11+ note `LOAD_ATTR`/`LOAD_GLOBAL` store flag bits in the low bit; the actual index is `namei >> 1`). See the disassembler docs for exact semantics per version. [Python dis docs].
+  - `LOAD_NAME namei`, `STORE_NAME`, `DELETE_NAME`, `LOAD_GLOBAL`, `STORE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `LOAD_ATTR`, `STORE_ATTR` → read names from `co_names[...]` (for 3.11+ note `LOAD_ATTR`/`LOAD_GLOBAL` store flag bits in the low bit; the actual index is `namei >> 1`). See the disassembler docs for exact semantics per version. [Python dis docs].<sup>[[2]](#references)</sup>
 - Python 3.11+ introduced adaptive/inline caches that add hidden `CACHE` entries between instructions. This doesn’t change the OOB primitive; it only means that if you handcraft bytecode, you must account for those cache entries when building `co_code`.
 
 Practical implication: the technique in this page continues to work on CPython 3.11, 3.12 and 3.13 when you can control a code object (e.g., via `CodeType.replace(...)`) and shrink `co_consts`/`co_names`.
@@ -353,6 +353,6 @@ Additional mitigation ideas
 
 ## References
 
-- Splitline’s HITCON CTF 2022 writeup “V O I D” (origin of this technique and high-level exploit chain): https://blog.splitline.tw/hitcon-ctf-2022/
-- Python disassembler docs (indices semantics for LOAD_CONST/LOAD_NAME/etc., and 3.11+ `LOAD_ATTR`/`LOAD_GLOBAL` low-bit flags): https://docs.python.org/3.13/library/dis.html
+- [1] [Splitline's HITCON CTF 2022 writeup "V O I D" (origin of this technique and high-level exploit chain)](https://blog.splitline.tw/hitcon-ctf-2022/)
+- [2] [Python disassembler docs (indices semantics for LOAD_CONST/LOAD_NAME/etc., and 3.11+ `LOAD_ATTR`/`LOAD_GLOBAL` low-bit flags)](https://docs.python.org/3.13/library/dis.html)
 {{#include ../../../banners/hacktricks-training.md}}

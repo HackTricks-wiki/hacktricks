@@ -254,15 +254,15 @@ grep -RniE 'type|ipam|delegate' /host/etc/cni/net.d 2>/dev/null | head -n 50
 
 Why these paths matter:
 
-- `/var/lib/kubelet/pki` may expose kubelet client certificates and other node-local credentials that can sometimes be reused against the API server or kubelet-facing TLS endpoints, depending on cluster design.
+- `/var/lib/kubelet/pki` may expose kubelet client certificates and other node-local credentials that can sometimes be reused against the API server or kubelet-facing TLS endpoints, depending on cluster design.<sup>[[1]](#references)</sup>
 - `/var/lib/kubelet/pods` often contains projected service-account tokens and mounted Secrets for neighboring pods on the same node.
-- `/var/lib/kubelet/pod-resources/kubelet.sock` is mainly a reconnaissance surface, but a very useful one: it reveals which pods and containers currently own GPUs, hugepages, SR-IOV devices, and other scarce node-local resources.
-- `/var/lib/kubelet/device-plugins`, `/var/lib/kubelet/plugins`, and `/var/lib/kubelet/plugins_registry` reveal which CSI, DRA, and device plugins are installed and which sockets the kubelet is expected to talk to. If those directories are writable rather than merely readable, the finding becomes much more serious.
-- `/opt/cni/bin` and `/etc/cni/net.d` sit directly on the pod-network setup path. Writable access there is often a delayed host-execution primitive rather than just configuration exposure.
+- `/var/lib/kubelet/pod-resources/kubelet.sock` is mainly a reconnaissance surface, but a very useful one: it reveals which pods and containers currently own GPUs, hugepages, SR-IOV devices, and other scarce node-local resources.<sup>[[1]](#references)</sup>
+- `/var/lib/kubelet/device-plugins`, `/var/lib/kubelet/plugins`, and `/var/lib/kubelet/plugins_registry` reveal which CSI, DRA, and device plugins are installed and which sockets the kubelet is expected to talk to. If those directories are writable rather than merely readable, the finding becomes much more serious.<sup>[[1]](#references)</sup>
+- `/opt/cni/bin` and `/etc/cni/net.d` sit directly on the pod-network setup path. Writable access there is often a delayed host-execution primitive rather than just configuration exposure.<sup>[[2]](#references)</sup>
 
 ### Full Example: Writable `/opt/cni/bin`
 
-If a host CNI binary directory is mounted read-write, replacing a plugin can be enough to obtain host execution the next time the kubelet creates a pod sandbox on that node:
+If a host CNI binary directory is mounted read-write, replacing a plugin can be enough to obtain host execution the next time the kubelet creates a pod sandbox on that node:<sup>[[2]](#references)</sup>
 
 ```bash
 plugin=$(find /host/opt/cni/bin -maxdepth 1 -type f -perm /111 | \
@@ -361,6 +361,6 @@ What is interesting here:
 
 ## References
 
-- [Local Files And Paths Used By The Kubelet](https://kubernetes.io/docs/reference/node/kubelet-files/)
-- [cilium-agent container can access the host via `hostPath` mount](https://github.com/cilium/cilium/security/advisories/GHSA-4hc4-pgfx-3mrx)
+- [1] [Local Files And Paths Used By The Kubelet](https://kubernetes.io/docs/reference/node/kubelet-files/)
+- [2] [cilium-agent container can access the host via `hostPath` mount](https://github.com/cilium/cilium/security/advisories/GHSA-4hc4-pgfx-3mrx)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -32,9 +32,4 @@ Anyway, Visual Studio isn't the best tool to perform an analysis of the depth of
 
 You should **open** it using **IDA** or **Radare** to inspection it in **depth**.
 
-​
-
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

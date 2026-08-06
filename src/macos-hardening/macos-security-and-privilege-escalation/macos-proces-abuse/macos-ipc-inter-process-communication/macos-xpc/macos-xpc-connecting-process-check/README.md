@@ -20,7 +20,7 @@ When a connection is stablished to an XPC service, the server will check if the 
 7. The **verification** must be **based** on the connecting **client’s audit token** **instead** of its process ID (**PID**) since the former prevents **PID reuse attacks**.
    - Developers **rarely use the audit token** API call since it’s **private**, so Apple could **change** at any time. Additionally, private API usage is not allowed in Mac App Store apps.
      - If the method **`processIdentifier`** is used, it might be vulnerable
-     - **`xpc_dictionary_get_audit_token`** should be used instead of **`xpc_connection_get_audit_token`**, as the latest could also be [vulnerable in certain situations](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
+     - **`xpc_dictionary_get_audit_token`** should be used instead of **`xpc_connection_get_audit_token`**, as the latest could also be [vulnerable in certain situations](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).<sup>[[5]](#references)</sup>
 
 ### Communication Attacks
 
@@ -55,7 +55,7 @@ The server will implement this **verification** in a function called **`shouldAc
 
 The object NSXPCConnection has a **private** property **`auditToken`** (the one that should be used but could change) and a the **public** property **`processIdentifier`** (the one that shouldn't be used).
 
-The connecting process could be verified with something like:
+The connecting process could be verified with something like:<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
 ```objectivec
 [...]
@@ -93,6 +93,24 @@ if ((csFlags & (cs_hard | cs_require_lv)) {
     return Yes; // Accept connection
 }
 ```
+
+The `cs_*` constants above are the code-signing flags defined in XNU's `osfmk/kern/cs_blobs.h`, so they can be checked against the source rather than guessed:<sup>[[4]](#references)</sup>
+
+```c
+#define CS_HARD                     0x00000100  /* don't load invalid pages */
+#define CS_KILL                     0x00000200  /* kill process if it becomes invalid */
+#define CS_RESTRICT                 0x00000800  /* tell dyld to treat restricted */
+#define CS_REQUIRE_LV               0x00002000  /* require library validation */
+#define CS_RUNTIME                  0x00010000  /* Apply hardened runtime policies */
+```
+
+## References
+
+- [1] [Apple Developer — Code Signing Requirement Language](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/RequirementLang/RequirementLang.html)
+- [2] [Apple Developer — `SecCodeCheckValidity`](https://developer.apple.com/documentation/security/seccodecheckvalidity(_:_:_:))
+- [3] [Apple Developer — `SecTaskCreateWithAuditToken`](https://developer.apple.com/documentation/security/sectaskcreatewithaudittoken(_:_:))
+- [4] [XNU — `osfmk/kern/cs_blobs.h` (`CS_*` code-signing flags)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [5] [Sector 7 — XPC audit token spoofing](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 

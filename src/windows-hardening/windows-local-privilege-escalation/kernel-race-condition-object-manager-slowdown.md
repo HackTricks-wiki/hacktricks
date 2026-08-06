@@ -4,13 +4,13 @@
 
 ## Why stretching the race window matters
 
-Many Windows kernel LPEs follow the classic pattern `check_state(); NtOpenX("name"); privileged_action();`. On modern hardware a cold `NtOpenEvent`/`NtOpenSection` resolves a short name in ~2 µs, leaving almost no time to flip the checked state before the secure action happens. By deliberately forcing the Object Manager Namespace (OMNS) lookup in step 2 to take tens of microseconds, the attacker gains enough time to consistently win otherwise flaky races without needing thousands of attempts.
+Many Windows kernel LPEs follow the classic pattern `check_state(); NtOpenX("name"); privileged_action();`. On modern hardware a cold `NtOpenEvent`/`NtOpenSection` resolves a short name in ~2 µs, leaving almost no time to flip the checked state before the secure action happens. By deliberately forcing the Object Manager Namespace (OMNS) lookup in step 2 to take tens of microseconds, the attacker gains enough time to consistently win otherwise flaky races without needing thousands of attempts.<sup>[[1]](#references)</sup>
 
 ## Object Manager lookup internals in a nutshell
 
 * **OMNS structure** – Names such as `\BaseNamedObjects\Foo` are resolved directory-by-directory. Each component causes the kernel to find/open an *Object Directory* and compare Unicode strings. Symbolic links (e.g., drive letters) may be traversed en route.
 * **UNICODE_STRING limit** – OM paths are carried inside a `UNICODE_STRING` whose `Length` is a 16-bit value. The absolute limit is 65 535 bytes (32 767 UTF-16 codepoints). With prefixes like `\BaseNamedObjects\`, an attacker still controls ≈32 000 characters.
-* **Attacker prerequisites** – Any user can create objects underneath writable directories such as `\BaseNamedObjects`. When the vulnerable code uses a name inside, or follows a symbolic link that lands there, the attacker controls the lookup performance with no special privileges.
+* **Attacker prerequisites** – Any user can create objects underneath writable directories such as `\BaseNamedObjects`. When the vulnerable code uses a name inside, or follows a symbolic link that lands there, the attacker controls the lookup performance with no special privileges.<sup>[[1]](#references)</sup>
 
 ## Slowdown primitive #1 – Single maximal component
 
@@ -29,7 +29,7 @@ while (path.size() <= 32000) {
 
 - You can hit the length limit using any named kernel object (events, sections, semaphores…).
 - Symbolic links or reparse points can point a short “victim” name to this giant component so the slowdown is applied transparently.
-- Because everything lives in user-writable namespaces, the payload works from a standard user integrity level.
+- Because everything lives in user-writable namespaces, the payload works from a standard user integrity level.<sup>[[1]](#references)</sup>
 
 ## Slowdown primitive #2 – Deep recursive directories
 
@@ -52,7 +52,7 @@ for (int i = 0; i < 16000; i++) {
 Tips:
 
 * Alternate the character per level (`A/B/C/...`) if the parent directory starts rejecting duplicates.
-* Keep a handle array so you can delete the chain cleanly after exploitation to avoid polluting the namespace.
+* Keep a handle array so you can delete the chain cleanly after exploitation to avoid polluting the namespace.<sup>[[1]](#references)</sup>
 
 ## Slowdown primitive #3 – Shadow directories, hash collisions & symlink reparses (minutes instead of microseconds)
 
@@ -72,16 +72,16 @@ CreateSymlinkChain(shadow, LongSuffix(L"\\A", 16000), 63);
 printf("%f\n", RunTest(LongSuffix(L"\\A", 16000) + L"\\0", 1));
 ```
 
-*Why it matters*: A minutes-long slowdown turns one-shot race-based LPEs into deterministic exploits.
+*Why it matters*: A minutes-long slowdown turns one-shot race-based LPEs into deterministic exploits.<sup>[[1]](#references)</sup>
 
 ### 2025 retest notes & ready-made tooling
 
-- James Forshaw republished the technique with updated timings on Windows 11 24H2 (ARM64). Baseline opens remain ~2 µs; a 32 kB component raises this to ~35 µs, and shadow-dir + collision + 63-reparse chains still reach ~3 minutes, confirming the primitives survive current builds. Source code and perf harness are in the refreshed Project Zero post.
-- You can script setup using the public `symboliclink-testing-tools` bundle: `CreateObjectDirectory.exe` to spawn the shadow/target pair and `NativeSymlink.exe` in a loop to emit the 63-hop chain. This avoids hand-written `NtCreate*` wrappers and keeps ACLs consistent.
+- James Forshaw republished the technique with updated timings on Windows 11 24H2 (ARM64). Baseline opens remain ~2 µs; a 32 kB component raises this to ~35 µs, and shadow-dir + collision + 63-reparse chains still reach ~3 minutes, confirming the primitives survive current builds. Source code and perf harness are in the refreshed Project Zero post.<sup>[[1]](#references)</sup>
+- You can script setup using the public `symboliclink-testing-tools` bundle: `CreateObjectDirectory.exe` to spawn the shadow/target pair and `NativeSymlink.exe` in a loop to emit the 63-hop chain. This avoids hand-written `NtCreate*` wrappers and keeps ACLs consistent.<sup>[[2]](#references)</sup>
 
 ## Measuring your race window
 
-Embed a quick harness inside your exploit to measure how large the window becomes on the victim hardware. The snippet below opens the target object `iterations` times and returns the average per-open cost using `QueryPerformanceCounter`.
+Embed a quick harness inside your exploit to measure how large the window becomes on the victim hardware. The snippet below opens the target object `iterations` times and returns the average per-open cost using `QueryPerformanceCounter`.<sup>[[1]](#references)</sup>
 
 ```cpp
 static double RunTest(const std::wstring name, int iterations,
@@ -114,7 +114,7 @@ The results feed directly into your race orchestration strategy (e.g., number of
    - Thread A (victim) executes the vulnerable code and blocks inside the slow lookup.
    - Thread B (attacker) flips the guarded state (e.g., swaps a file handle, rewrites a symbolic link, toggles object security) while Thread A is occupied.
    - When Thread A resumes and performs the privileged action, it observes stale state and performs the attacker-controlled operation.
-4. **Clean up** – Delete the directory chain and symbolic links to avoid leaving suspicious artifacts or breaking legitimate IPC users.
+4. **Clean up** – Delete the directory chain and symbolic links to avoid leaving suspicious artifacts or breaking legitimate IPC users.<sup>[[1]](#references)</sup>
 
 ## Operational considerations
 
@@ -122,7 +122,7 @@ The results feed directly into your race orchestration strategy (e.g., number of
 - **One-shot bugs** – The expanded window (tens of microseconds to minutes) makes “single trigger” bugs realistic when paired with CPU affinity pinning or hypervisor-assisted preemption.
 - **Side effects** – The slowdown only affects the malicious path, so overall system performance remains unaffected; defenders will rarely notice unless they monitor namespace growth.
 - **Cleanup** – Keep handles to every directory/object you create so you can call `NtMakeTemporaryObject`/`NtClose` afterwards. Unbounded directory chains may persist across reboots otherwise.
-- **File-system races** – If the vulnerable path ultimately resolves through NTFS, you can stack an Oplock (e.g., `SetOpLock.exe` from the same toolkit) on the backing file while the OM slowdown runs, freezing the consumer for additional milliseconds without altering the OM graph.
+- **File-system races** – If the vulnerable path ultimately resolves through NTFS, you can stack an Oplock (e.g., `SetOpLock.exe` from the same toolkit) on the backing file while the OM slowdown runs, freezing the consumer for additional milliseconds without altering the OM graph.<sup>[[2]](#references)</sup>
 
 ## Defensive notes
 
@@ -132,7 +132,7 @@ The results feed directly into your race orchestration strategy (e.g., number of
 
 ## References
 
-- [Project Zero – Windows Exploitation Techniques: Winning Race Conditions with Path Lookups](https://projectzero.google/2025/12/windows-exploitation-techniques.html)
-- [googleprojectzero/symboliclink-testing-tools](https://github.com/googleprojectzero/symboliclink-testing-tools)
+- [1] [Project Zero – Windows Exploitation Techniques: Winning Race Conditions with Path Lookups](https://projectzero.google/2025/12/windows-exploitation-techniques.html)
+- [2] [googleprojectzero/symboliclink-testing-tools](https://github.com/googleprojectzero/symboliclink-testing-tools)
 
 {{#include ../../banners/hacktricks-training.md}}

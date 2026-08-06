@@ -74,7 +74,7 @@ Notes
 
 ### URL telemetry hunting (urlscan.io)
 
-`urlscan.io` stores historical screenshots, DOM, requests and TLS metadata of submitted URLs. You can hunt for brand abuse and clones:
+`urlscan.io` stores historical screenshots, DOM, requests and TLS metadata of submitted URLs. You can hunt for brand abuse and clones:<sup>[[1]](#references)</sup>
 
 Example queries (UI or API):
 - Find lookalikes excluding your legit domains: `page.domain:(/.*yourbrand.*/ AND NOT yourbrand.com AND NOT www.yourbrand.com)`
@@ -112,7 +112,7 @@ Enrich your pipeline by tagging domains with registration age buckets (e.g., <7 
 
 Modern credential-phishing increasingly uses **Adversary-in-the-Middle (AiTM)** reverse proxies (e.g., Evilginx) to steal session tokens. You can add network-side detections:
 
-- Log TLS/HTTP fingerprints (JA3/JA4/JA4S/JA4H) at egress. Some Evilginx builds have been observed with stable JA4 client/server values. Alert on known-bad fingerprints only as a weak signal and always confirm with content and domain intel.
+- Log TLS/HTTP fingerprints (JA3/JA4/JA4S/JA4H) at egress. Some Evilginx builds have been observed with stable JA4 client/server values. Alert on known-bad fingerprints only as a weak signal and always confirm with content and domain intel.<sup>[[2]](#references)</sup>
 - Proactively record TLS certificate metadata (issuer, SAN count, wildcard use, validity) for lookalike hosts discovered via CT or urlscan and correlate with DNS age and geolocation.
 
 > Note: Treat fingerprints as enrichment, not as sole blockers; frameworks evolve and may randomise or obfuscate.
@@ -147,7 +147,7 @@ Additional heuristic: treat certain **file-extension TLDs** (e.g., `.zip`, `.mov
 
 ## References
 
-- urlscan.io – Search API reference: https://urlscan.io/docs/search/ 
-- APNIC Blog – JA4+ network fingerprinting (includes Evilginx example): https://blog.apnic.net/2023/11/22/ja4-network-fingerprinting/
+- [1] [urlscan.io – Search API Reference](https://urlscan.io/docs/search/)
+- [2] [APNIC Blog – JA4+ network fingerprinting](https://blog.apnic.net/2023/11/22/ja4-network-fingerprinting/)
 
 {{#include ../../banners/hacktricks-training.md}}
