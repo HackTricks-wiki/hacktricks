@@ -1,8 +1,8 @@
-# Laterale Beweging
+# Lateral Movement
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Daar is verskillende maniere om opdragte in eksterne stelsels uit te voer, hier kan jy die verduidelikings vind oor hoe die hoof Windows laterale bewegings tegnieke werk:
+Daar is verskillende maniere om opdragte in eksterne stelsels uit te voer. Hier vind jy verduidelikings oor hoe die belangrikste Windows lateral movement-tegnieke werk:
 
 - [**PsExec**](psexec-and-winexec.md)
 - [**SmbExec**](smbexec.md)

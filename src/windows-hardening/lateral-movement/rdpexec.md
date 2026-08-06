@@ -2,11 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Hoe Dit Werk
+## Hoe dit Werk
 
-**RDPexec** is basies om opdragte uit te voer deur in die stelsel in te log met RDP.
+**RDPexec** word basies gebruik om commands uit te voer deur met RDP by die stelsel aan te meld.
 
-Vir meer inligting, kyk:
+Vir meer inligting, kyk na:
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-rdp.md

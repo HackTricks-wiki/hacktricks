@@ -4,16 +4,16 @@
 
 ## Hoe Dit Werk
 
-Proses kan op gasheer oopgemaak word waar die gebruikersnaam en óf wagwoord óf hash bekend is deur die gebruik van WMI. Opdragte word uitgevoer met behulp van WMI deur Wmiexec, wat 'n semi-interaktiewe skaalervaring bied.
+Prosesse kan op hosts oopgemaak word wanneer die gebruikersnaam en óf wagwoord óf hash bekend is deur die gebruik van WMI. Commands word met WMI deur Wmiexec uitgevoer, wat ’n semi-interaktiewe shell-ervaring bied.
 
-**dcomexec.py:** Deur verskillende DCOM-eindpunte te benut, bied hierdie skrip 'n semi-interaktiewe skaal soortgelyk aan wmiexec.py, spesifiek deur die ShellBrowserWindow DCOM-objek te benut. Dit ondersteun tans MMC20. Aansoek, Shell Windows, en Shell Browser Window-objekte. (bron: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Deur verskillende DCOM-endpoints te gebruik, bied hierdie script ’n semi-interaktiewe shell soortgelyk aan wmiexec.py, wat spesifiek die ShellBrowserWindow DCOM-object gebruik. Dit ondersteun tans MMC20. Application-, Shell Windows- en Shell Browser Window-objects. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))<sup>[[2]](#references)</sup>
 
 ## WMI Grondbeginsels
 
 ### Naamruimte
 
-Gestructureer in 'n gidsstyl hiërargie, is WMI se topvlak houer \root, waaronder addisionele gidse, bekend as naamruimtes, georganiseer is.
-Opdragte om naamruimtes te lys:
+WMI se topvlak-container is gestruktureer in ’n gidsstyl-hiërargie en is \root, waaronder addisionele gidse, waarna as namespaces verwys word, georganiseer is.<sup>[[1]](#references)</sup>
+Commands om namespaces te lys:
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -24,20 +24,20 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 # Listing of namespaces within "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
-Klasse binne 'n naamruimte kan gelys word met:
+Klasse binne 'n namespace kan gelys word deur:
 ```bash
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
-### **Klasses**
+### **Klasse**
 
-Om 'n WMI-klasnaam te ken, soos win32_process, en die naamruimte waarin dit woon, is noodsaaklik vir enige WMI-operasie.  
-Opdragte om klasse te lys wat met `win32` begin:
+Dit is noodsaaklik vir enige WMI-bewerking om die naam van ’n WMI-klas, soos win32_process, en die namespace waarin dit voorkom, te ken.  
+Opdragte om klasse wat met `win32` begin, te lys:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
 ```
-Aanroep van 'n klas:
+Aanroeping van 'n klas:
 ```bash
 # Defaults to "root/cimv2" when namespace isn't specified
 Get-WmiObject -Class win32_share
@@ -45,7 +45,7 @@ Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpCompute
 ```
 ### Metodes
 
-Metodes, wat een of meer uitvoerbare funksies van WMI klasse is, kan uitgevoer word.
+Metodes, wat een of meer uitvoerbare funksies van WMI-klasse is, kan uitgevoer word.
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -57,11 +57,11 @@ $c.methods
 # Method listing and invocation
 Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Description", $null, "Name", $null, "c:\share\path",0)
 ```
-## WMI Opname
+## WMI Enumeration
 
-### WMI Diens Status
+### WMI Diensstatus
 
-Opdragte om te verifieer of die WMI diens operasioneel is:
+Opdragte om te verifieer of die WMI-diens operasioneel is:
 ```bash
 # WMI service status check
 Get-Service Winmgmt
@@ -69,14 +69,14 @@ Get-Service Winmgmt
 # Via CMD
 net start | findstr "Instrumentation"
 ```
-### Stelsel en Proses Inligting
+### Stelsel- en prosesinligting
 
 Versameling van stelsel- en prosesinligting deur WMI:
 ```bash
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-Vir aanvallers is WMI 'n kragtige hulpmiddel om sensitiewe data oor stelsels of domeine te enummer.
+Vir aanvallers is WMI ’n kragtige hulpmiddel om sensitiewe data oor stelsels of domains te enumeriseer.<sup>[[1]](#references)</sup>
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list
@@ -85,19 +85,19 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-Afgeleë navraag van WMI vir spesifieke inligting, soos plaaslike admins of ingelogde gebruikers, is haalbaar met sorgvuldige opdragkonstruksie.
+Afstandnavrae van WMI vir spesifieke inligting, soos plaaslike administrators of gebruikers wat aangemeld is, is moontlik met sorgvuldige opdragkonstruksie.
 
-### **Handmatige Afgeleë WMI Navraag**
+### **Handmatige afstandnavrae van WMI**
 
-Stealthy identifikasie van plaaslike admins op 'n afgeleë masjien en ingelogde gebruikers kan bereik word deur spesifieke WMI-navrae. `wmic` ondersteun ook die lees van 'n tekslêer om opdragte op verskeie nodes gelyktydig uit te voer.
+Stille identifisering van plaaslike administrators op ’n afgeleë masjien en gebruikers wat aangemeld is, kan deur spesifieke WMI-navrae bereik word. `wmic` ondersteun ook lees vanaf ’n tekslêer om opdragte gelyktydig op verskeie nodusse uit te voer.<sup>[[1]](#references)</sup>
 
-Om 'n proses afgeleë oor WMI uit te voer, soos om 'n Empire-agent te ontplooi, word die volgende opdragstruktuur gebruik, met suksesvolle uitvoering aangedui deur 'n terugwaarde van "0":
+Om ’n proses oor WMI op afstand uit te voer, soos om ’n Empire-agent te ontplooi, word die volgende opdragstruktuur gebruik, met suksesvolle uitvoering wat deur ’n terugkeerwaarde van "0" aangedui word:<sup>[[1]](#references)</sup>
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-Hierdie proses illustreer WMI se vermoë vir afstandsuitvoering en stelselening, wat die nut daarvan vir beide stelselsadministrasie en penetrasietoetsing beklemtoon.
+Hierdie proses illustreer WMI se vermoë vir remote execution en stelselenumerasie, wat die bruikbaarheid daarvan vir beide stelseladministrasie en penetration testing beklemtoon.
 
-## Outomatiese Gereedskap
+## Outomatiese gereedskap
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
@@ -117,8 +117,11 @@ SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug a
 ```
 - Jy kan ook **Impacket se `wmiexec`** gebruik.
 
+
 ## Verwysings
 
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+- [1] [Gebruik geloofsbriewe om beheer oor Windows-bokse te verkry - Deel 3 (WMI en WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
+- [2] [Beginnersgids tot Impacket Tool Kit - Deel 1](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
+
 
 {{#include ../../banners/hacktricks-training.md}}

