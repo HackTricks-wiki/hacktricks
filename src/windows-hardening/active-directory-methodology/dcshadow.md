@@ -6,7 +6,7 @@
 ## Basic Information
 
 It registers a **new Domain Controller** in the AD and uses it to **push attributes** (SIDHistory, SPNs...) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.\
-Note that if you use wrong data, pretty ugly logs will appear.
+Note that if you use wrong data, pretty ugly logs will appear.<sup>[[2]](#references)</sup>
 
 To perform the attack you need 2 mimikatz instances. One of them will start the RPC servers with SYSTEM privileges (you have to indicate here the changes you want to perform), and the other instance will be used to push the values:
 
@@ -86,7 +86,7 @@ Cross-check privileged groups by comparing `Get-ADGroupMember` output with `Get-
 
 ## Shadowception - Give DCShadow permissions using DCShadow (no modified permissions logs)
 
-We need to append following ACEs with our user's SID at the end:
+We need to append following ACEs with our user's SID at the end:<sup>[[2]](#references)</sup>
 
 - On the domain object:
   - `(OA;;CR;1131f6ac-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
@@ -108,6 +108,3 @@ Notice that in this case you need to make **several changes,** not just one. So,
 - [2] [DCShadow write-up in ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

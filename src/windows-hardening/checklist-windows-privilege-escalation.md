@@ -117,12 +117,9 @@
 
 - [ ] Check if you can abuse it
 
-
-
 ## References
 
 - [1] [Project Zero - Bypassing Administrator Protection by Abusing UI Access](https://projectzero.google/2026/02/windows-administrator-protection.html)
 - [2] [MDSec - RIP RegPwn](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
-
 
 {{#include ../banners/hacktricks-training.md}}

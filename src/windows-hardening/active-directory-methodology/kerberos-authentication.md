@@ -23,7 +23,7 @@
   - **Strong certificate binding** (KB5014754 timeline) makes sloppy certificate-to-account mappings less reliable in fully enforced environments.
   - **CVE-2025-26647** added another hardening layer around **altSecID / SKI certificate mappings**. If DCs are unpatched, still auditing, or explicitly bypassing NTAuth validation, pass-the-certificate / shadow-credential follow-on abuse stays more practical.
 - **Cross-domain / cross-forest delegation abuse is still very alive** – Windows supports modern cross-realm **S4U2Self/S4U2Proxy** flows, so writable delegation attributes in another domain are still valuable. The blocker is usually tooling fidelity and trust/policy details, not protocol support.
-- **Recursive multi-domain RBCD matters operationally** – in 3+ domain forests, **S4U2Self/S4U2Proxy** can recurse through trust referrals, and **SPN-less** abuse may require a final **`S4U2Self+U2U`** hop plus RC4-dependent ticket handling. See [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md).
+- **Recursive multi-domain RBCD matters operationally** – in 3+ domain forests, **S4U2Self/S4U2Proxy** can recurse through trust referrals, and **SPN-less** abuse may require a final **`S4U2Self+U2U`** hop plus RC4-dependent ticket handling. See [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md).<sup>[[4]](#references)</sup>
 - **Windows Server 2025 introduced new Kerberos-adjacent attack surface** through **dMSA** migration logic. If you see delegated rights over OUs or service-account objects in a 2025 domain, check the dedicated [BadSuccessor page](acl-persistence-abuse/BadSuccessor.md) instead of treating it like “just another gMSA”.
 
 ## Fast operator checks in modern domains
@@ -77,5 +77,6 @@ Practical interpretation:
 - [1] [Microsoft Learn - Detect and remediate RC4 usage in Kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
 - [2] [Microsoft Support - Latest Windows hardening guidance and key dates](https://support.microsoft.com/en-us/topic/latest-windows-hardening-guidance-and-key-dates-eb1bd411-f68c-4d74-a4e1-456721a6551b)
 - [3] [Kerberos (I): How does Kerberos work? – Theory](https://www.tarlogic.com/en/blog/how-kerberos-works/)
+- [4] [Synacktiv - Exploiting RBCD in Cross-Domain & Cross-Forest Environments: Part 2](https://www.synacktiv.com/publications/exploiter-la-rbcd-en-environnements-cross-domain-cross-forest-partie-2)
 
 {{#include ../../banners/hacktricks-training.md}}

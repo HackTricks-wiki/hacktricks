@@ -41,15 +41,15 @@ This shows up frequently in CTFs as "we generated many keys quickly" or "bad ran
 
 ### Sparse / short-sleeve moduli
 
-Some broken big-integer generators leak structure directly into the public modulus: each limb contains only a small random subfield and the rest of the bits are `0`. In practice this appears as **regularly spaced zero blocks** across `n`, often aligned to 32-bit or 128-bit limbs.
+Some broken big-integer generators leak structure directly into the public modulus: each limb contains only a small random subfield and the rest of the bits are `0`. In practice this appears as **regularly spaced zero blocks** across `n`, often aligned to 32-bit or 128-bit limbs.<sup>[[1]](#references)</sup>
 
 Quick checks:
 
 - Dump `n` in hex and look for repeated zero windows at a fixed stride.
 - Re-slice `n` as limbs (`2^32`, `2^64`, `2^128`) and inspect whether each limb is unusually small.
-- Audit public SSH/TLS keys with tooling such as **badkeys** when you suspect weak host-key generation.
+- Audit public SSH/TLS keys with tooling such as **badkeys** when you suspect weak host-key generation.<sup>[[2]](#references)[[3]](#references)</sup>
 
-This is more serious than a statistical bias: if both private factors `p` and `q` are short-sleeved, the modulus may become **easy to factor**.
+This is more serious than a statistical bias: if both private factors `p` and `q` are short-sleeved, the modulus may become **easy to factor**.<sup>[[1]](#references)</sup>
 
 ### Polynomial factorization of structured RSA keys
 
@@ -71,11 +71,11 @@ Attack outline:
 4. Evaluate candidate factors back at `B = 2^w`.
 5. Verify which candidates multiply to `n`.
 
-This **does not break normal RSA**. It only works when the prime factors themselves have very small, highly structured limb coefficients.
+This **does not break normal RSA**. It only works when the prime factors themselves have very small, highly structured limb coefficients.<sup>[[1]](#references)</sup>
 
 ### Shifted limb leakage
 
-The sparse bytes are not always aligned at the low end of each limb. If direct base-`2^w` conversion produces large coefficients, search for shifts `i,j` such that `2^i p` and `2^j q` become sparse in that limb basis. The product polynomial can still be derived from the public modulus, factored, and recombined into the original integer factors.
+The sparse bytes are not always aligned at the low end of each limb. If direct base-`2^w` conversion produces large coefficients, search for shifts `i,j` such that `2^i p` and `2^j q` become sparse in that limb basis. The product polynomial can still be derived from the public modulus, factored, and recombined into the original integer factors.<sup>[[1]](#references)</sup>
 
 ### Implementation smell: byte-to-limb RNG bug
 
@@ -89,11 +89,11 @@ Array.Copy(array, 0, bignumLimbs, 0, numLimbs);
 bignumLimbs[numLimbs - 1] |= 0x80000000;
 ```
 
-This gives each 32-bit limb only **8 bits of entropy** plus a forced top bit in the last limb. The resulting RSA primes can often be recognized and factored from the public key alone.
+This gives each 32-bit limb only **8 bits of entropy** plus a forced top bit in the last limb. The resulting RSA primes can often be recognized and factored from the public key alone.<sup>[[1]](#references)</sup>
 
 ### Related DSA failure mode
 
-If the same broken big-integer routine is reused for DSA private exponent generation, the public key `y = g^x` may leak a **dramatically reduced and structured** search space for `x`. Once the limb pattern is known, discrete-log attacks such as **baby-step giant-step** can become practical against the public parameters.
+If the same broken big-integer routine is reused for DSA private exponent generation, the public key `y = g^x` may leak a **dramatically reduced and structured** search space for `x`. Once the limb pattern is known, discrete-log attacks such as **baby-step giant-step** can become practical against the public parameters.<sup>[[1]](#references)</sup>
 
 ### Håstad broadcast / low exponent
 
@@ -163,8 +163,8 @@ Good starting points:
 
 ## References
 
-- [Trail of Bits - Factoring "short-sleeve" RSA keys with polynomials](https://blog.trailofbits.com/2026/06/12/factoring-short-sleeve-rsa-keys-with-polynomials/)
-- [badkeys](https://badkeys.info/)
-- [badkeys standalone tool](https://github.com/badkeys/badkeys)
+- [1] [Trail of Bits - Factoring "short-sleeve" RSA keys with polynomials](https://blog.trailofbits.com/2026/06/12/factoring-short-sleeve-rsa-keys-with-polynomials/)
+- [2] [badkeys](https://badkeys.info/)
+- [3] [badkeys standalone tool](https://github.com/badkeys/badkeys)
 
 {{#include ../../../banners/hacktricks-training.md}}

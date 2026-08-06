@@ -59,11 +59,11 @@ Notes on anti-scraping path tricks:
 ## Working pipeline: request-agnostic glyph normalization and mapping
 
 1) Rasterize per-request SVG glyphs
-- Build a minimal SVG document per glyph with the provided `path` and render to a fixed canvas (e.g., 512×512) using CairoSVG or an equivalent engine that handles tricky path sequences.<sup>[[1]](#references)</sup>
+- Build a minimal SVG document per glyph with the provided `path` and render to a fixed canvas (e.g., 512×512) using CairoSVG or an equivalent engine that handles tricky path sequences.<sup>[[1]](#references)[[2]](#references)</sup>
 - Render filled black on white; avoid strokes to eliminate renderer- and AA-dependent artifacts.
 
 2) Perceptual hashing for cross-request identity
-- Compute a perceptual hash (e.g., pHash via `imagehash.phash`) of each glyph image.
+- Compute a perceptual hash (e.g., pHash via `imagehash.phash`) of each glyph image.<sup>[[3]](#references)</sup>
 - Treat the hash as a stable ID: the same visual shape across requests collapses to the same perceptual hash, defeating randomized IDs.
 
 3) Reference font atlas generation
@@ -73,7 +73,7 @@ Notes on anti-scraping path tricks:
 - Use a proper text shaper (HarfBuzz) if you want glyph-level fidelity for ligatures; simple rasterization via Pillow ImageFont can be sufficient if you render the ligature strings directly and the shaping engine resolves them.
 
 4) Visual similarity matching with SSIM
-- For each unknown glyph image, compute SSIM (Structural Similarity Index) against all candidate images across all font variant atlases.
+- For each unknown glyph image, compute SSIM (Structural Similarity Index) against all candidate images across all font variant atlases.<sup>[[4]](#references)</sup>
 - Assign the character string of the best-scoring match. SSIM absorbs small antialiasing, scale, and coordinate differences better than pixel-exact comparisons.
 
 5) Edge handling and reconstruction
