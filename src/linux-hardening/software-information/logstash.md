@@ -86,7 +86,7 @@ output {
 
 Here, **interval** determines the execution frequency in seconds. In the given example, the **whoami** command runs every 120 seconds, with its output directed to **/tmp/output.log**.
 
-With **config.reload.automatic: true** in **/etc/logstash/logstash.yml**, Logstash will automatically detect and apply new or modified pipeline configurations without needing a restart. If there's no wildcard, modifications can still be made to existing configurations, but caution is advised to avoid disruptions.
+With **config.reload.automatic: true** in **/etc/logstash/logstash.yml**, Logstash will automatically detect and apply new or modified pipeline configurations without needing a restart.<sup>[[1]](#references)</sup> If there's no wildcard, modifications can still be made to existing configurations, but caution is advised to avoid disruptions.
 
 ### More Reliable Pipeline Payloads
 
@@ -106,13 +106,13 @@ output {
 }
 ```
 
-If you don't have restart rights but can signal the process, Logstash also supports a **SIGHUP**-triggered reload on Unix-like systems:
+If you don't have restart rights but can signal the process, Logstash also supports a **SIGHUP**-triggered reload on Unix-like systems:<sup>[[1]](#references)</sup>
 
 ```bash
 kill -SIGHUP $(pgrep -f logstash)
 ```
 
-Be aware that not every plugin is reload-friendly. For example, the **stdin** input prevents automatic reload, so don't assume `config.reload.automatic` will always pick up your changes.
+Be aware that not every plugin is reload-friendly. For example, the **stdin** input prevents automatic reload, so don't assume `config.reload.automatic` will always pick up your changes.<sup>[[1]](#references)</sup>
 
 ### Stealing Secrets from Logstash
 
@@ -138,7 +138,7 @@ This is also worth checking because **CVE-2023-46672** showed that Logstash coul
 
 ### Centralized Pipeline Management Abuse
 
-In some environments, the host does **not** rely on local `.conf` files at all. If **`xpack.management.enabled: true`** is configured, Logstash can pull centrally managed pipelines from Elasticsearch/Kibana, and after enabling this mode local pipeline configs are no longer the source of truth.
+In some environments, the host does **not** rely on local `.conf` files at all. If **`xpack.management.enabled: true`** is configured, Logstash can pull centrally managed pipelines from Elasticsearch/Kibana, and after enabling this mode local pipeline configs are no longer the source of truth.<sup>[[2]](#references)</sup>
 
 That means a different attack path:
 
@@ -146,7 +146,7 @@ That means a different attack path:
 2. Verify whether the account has the **`manage_logstash_pipelines`** cluster privilege
 3. Create or replace a centrally managed pipeline so the Logstash host executes your payload on its next poll interval
 
-The Elasticsearch API used for this feature is:
+The Elasticsearch API used for this feature is:<sup>[[2]](#references)</sup>
 
 ```bash
 curl -X PUT http://ELASTIC:9200/_logstash/pipeline/pwned \
@@ -164,7 +164,7 @@ This is especially useful when local files are read-only but Logstash is already
 
 ## References
 
-- [Elastic Docs: Reloading the Config File](https://www.elastic.co/guide/en/logstash/8.19/reloading-config.html)
-- [Elastic Docs: Configure Centralized Pipeline Management](https://www.elastic.co/guide/en/logstash/8.19/configuring-centralized-pipelines.html)
+- [1] [Elastic Docs: Reloading the Config File](https://www.elastic.co/guide/en/logstash/8.19/reloading-config.html)
+- [2] [Elastic Docs: Configure Centralized Pipeline Management](https://www.elastic.co/guide/en/logstash/8.19/configuring-centralized-pipelines.html)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -24,7 +24,7 @@ Keyboards without NKRO usually send `0x01` in byte 2 when more than six keys are
 
 ### Identify the keyboard interface first
 
-On busy captures, identify the HID keyboard before dumping any reports. A reliable starting point is the interface descriptor response:
+On busy captures, identify the HID keyboard before dumping any reports. A reliable starting point is the interface descriptor response:<sup>[[2]](#references)</sup>
 
 ```text
 usb.transfer_type == 0x02 && usb.endpoint_address.direction == 1 && usb.bDescriptorType == 4 && usb.bInterfaceClass == 3
@@ -76,13 +76,13 @@ Recent gaming keyboards, split keyboards, and composite HID devices often expose
 
 ## Automating the decoding
 
-- **ctf-usb-keyboard-parser** remains handy for quick CTF challenges and already ships in the repository.
-- **CTF-Usb_Keyboard_Parser** (`main.py`) parses both `pcap` and `pcapng` files natively, understands `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap`, and does not require tshark, so it works nicely inside isolated sandboxes.
-- **USB-HID-decoders** adds keyboard, mouse, and tablet visualizers. You can either run the `extract_hid_data.sh` helper (tshark backend) or `extract_hid_data.py` (scapy backend) and then feed the resulting text file to the decoder or replay modules to watch the keystrokes unfold.
+- **ctf-usb-keyboard-parser** remains handy for quick CTF challenges and already ships in the repository.<sup>[[3]](#references)</sup>
+- **CTF-Usb_Keyboard_Parser** (`main.py`) parses both `pcap` and `pcapng` files natively, understands `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap`, and does not require tshark, so it works nicely inside isolated sandboxes.<sup>[[4]](#references)</sup>
+- **USB-HID-decoders** adds keyboard, mouse, and tablet visualizers. You can either run the `extract_hid_data.sh` helper (tshark backend) or `extract_hid_data.py` (scapy backend) and then feed the resulting text file to the decoder or replay modules to watch the keystrokes unfold.<sup>[[5]](#references)</sup>
 
 ### Stateful decoding matters
 
-USB interrupt captures usually contain both the key press and one or more repeated copies of the same report before the release event arrives. A practical decoder should:
+USB interrupt captures usually contain both the key press and one or more repeated copies of the same report before the release event arrives. A practical decoder should:<sup>[[2]](#references)</sup>
 
 - emit only newly pressed keycodes compared to the previous report
 - keep modifier state (`Shift`, `Ctrl`, `AltGr`) from byte 0 or the parsed `usbhid.boot_report.keyboard.modifier` field
@@ -125,14 +125,17 @@ Feed it with the plain hex lines dumped earlier to get an instant rough reconstr
 ## Troubleshooting tips
 
 - If Wireshark does not populate `usbhid.*` fields, the HID report descriptor was probably not captured. Replug the keyboard while capturing or fall back to raw `usb.capdata`.
-- On Linux software captures, `usbmon` is the normal source; on Windows, Wireshark depends on the **USBPcap** extcap to see raw USB URBs at all.
+- On Linux software captures, `usbmon` is the normal source; on Windows, Wireshark depends on the **USBPcap** extcap to see raw USB URBs at all.<sup>[[1]](#references)</sup>
 - If the keyboard was attached through a hub or dock, confirm the interface descriptor first and then decode only that device/interface pair. Composite HID captures frequently mix keyboard and mouse reports.
-- Windows captures require the **USBPcap** extcap interface; make sure it survived Wireshark upgrades, as missing extcaps leave you with empty device lists.
+- Windows captures require the **USBPcap** extcap interface; make sure it survived Wireshark upgrades, as missing extcaps leave you with empty device lists.<sup>[[1]](#references)</sup>
 - Always correlate `usb.bus_id:device:interface` (e.g. `1.9.1`) before decoding anything — mixing multiple keyboards or storage devices leads to nonsense keystrokes.
 
 ## References
 
-- [Wireshark USB capture setup](https://wiki.wireshark.org/CaptureSetup/USB)
-- [ACSC Quals 2023 - pcap 1, 2 write-up](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
+- [1] [Wireshark USB capture setup](https://wiki.wireshark.org/CaptureSetup/USB)
+- [2] [ACSC Quals 2023 - pcap 1, 2 write-up](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
+- [3] [ctf-usb-keyboard-parser](https://github.com/TeamRocketIst/ctf-usb-keyboard-parser)
+- [4] [CTF-Usb_Keyboard_Parser](https://github.com/5h4rrk/CTF-Usb_Keyboard_Parser)
+- [5] [USB-HID-decoders](https://github.com/Nissen96/USB-HID-decoders)
 
 {{#include ../../../banners/hacktricks-training.md}}

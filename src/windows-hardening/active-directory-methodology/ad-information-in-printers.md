@@ -11,8 +11,8 @@ All this **sensitive information** and the common **lack of security** makes pri
 
 Some introductory blogs about the topic:
 
-- [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
-- [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
+- [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)<sup>[[4]](#references)</sup>
+- [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)<sup>[[5]](#references)</sup>
 
 ---
 ## Printer Configuration
@@ -30,11 +30,11 @@ Some introductory blogs about the topic:
 sudo nc -k -v -l -p 389     # LDAPS → 636 (or 3269)
 ```
 
-Small/old MFPs may send a simple *simple-bind* in clear-text that netcat can capture. Modern devices usually perform an anonymous query first and then attempt the bind, so results vary.
+Small/old MFPs may send a simple *simple-bind* in clear-text that netcat can capture. Modern devices usually perform an anonymous query first and then attempt the bind, so results vary.<sup>[[1]](#references)</sup>
 
 ### Method 2 – Full Rogue LDAP server (recommended)
 
-Because many devices will issue an anonymous search *before* authenticating, standing up a real LDAP daemon yields much more reliable results:
+Because many devices will issue an anonymous search *before* authenticating, standing up a real LDAP daemon yields much more reliable results:<sup>[[1]](#references)</sup>
 
 ```bash
 # Debian/Ubuntu example
@@ -59,7 +59,7 @@ Pass-back is *not* a theoretical issue – vendors keep publishing advisories in
 Firmware ≤ 57.69.91 of Xerox VersaLink C70xx MFPs allowed an authenticated admin (or anyone when default creds remain) to:
 
 * **CVE-2024-12510 – LDAP pass-back**: change the LDAP server address and trigger a lookup, causing the device to leak the configured Windows credentials to the attacker-controlled host.
-* **CVE-2024-12511 – SMB/FTP pass-back**: identical issue via *scan-to-folder* destinations, leaking NetNTLMv2 or FTP clear-text creds.
+* **CVE-2024-12511 – SMB/FTP pass-back**: identical issue via *scan-to-folder* destinations, leaking NetNTLMv2 or FTP clear-text creds.<sup>[[2]](#references)</sup>
 
 A simple listener such as:
 
@@ -71,7 +71,7 @@ or a rogue SMB server (`impacket-smbserver`) is enough to harvest the credential
 
 ### Canon imageRUNNER / imageCLASS – Advisory 20 May 2025
 
-Canon confirmed a **SMTP/LDAP pass-back** weakness in dozens of Laser & MFP product lines. An attacker with admin access can modify the server configuration and retrieve the stored credentials for LDAP **or** SMTP (many orgs use a privileged account to allow scan-to-mail).  
+Canon confirmed a **SMTP/LDAP pass-back** weakness in dozens of Laser & MFP product lines. An attacker with admin access can modify the server configuration and retrieve the stored credentials for LDAP **or** SMTP (many orgs use a privileged account to allow scan-to-mail).<sup>[[3]](#references)</sup>
 
 The vendor guidance explicitly recommends:
 
@@ -103,8 +103,10 @@ The vendor guidance explicitly recommends:
 ---
 ## References
 
-- [https://grimhacker.com/2018/03/09/just-a-printer/](https://grimhacker.com/2018/03/09/just-a-printer/)
-- Rapid7. “Xerox VersaLink C7025 MFP Pass-Back Attack Vulnerabilities.” February 2025.  
-- Canon PSIRT. “Vulnerability Mitigation Against SMTP/LDAP Passback for Laser Printers and Small Office Multifunction Printers.” May 2025.
+- [1] [It's just a printer… What's the worst that could happen?](https://grimhacker.com/2018/03/09/just-a-printer/)
+- [2] [Xerox Versalink C7025 Multifunction Printer: Pass-Back Attack Vulnerabilities (Fixed)](https://www.rapid7.com/blog/post/2025/02/14/xerox-versalink-c7025-multifunction-printer-pass-back-attack-vulnerabilities-fixed/)
+- [3] [CP2025-004 Vulnerability Mitigation/Remediation for Production Printers, Office/Small Office Multifunction Printers and Laser Printers](https://psirt.canon/advisory-information/cp2025-004/)
+- [4] [Obtaining Domain Credentials through a Printer with Netcat](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
+- [5] [Exploiting Multifunction Printers During A Penetration Test Engagement](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 
 {{#include ../../banners/hacktricks-training.md}}

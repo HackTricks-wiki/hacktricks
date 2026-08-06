@@ -236,9 +236,9 @@ After the array is created you can see all the exported functions:
 
 ## Recent IOKit attack surface (2023–2025)
 
-- **Keystroke capture via IOHIDFamily** – CVE-2024-27799 (14.5) showed a permissive `IOHIDSystem` client could grab HID events even with secure input; ensure `externalMethod` handlers enforce entitlements instead of only the user-client type.
-- **IOGPUFamily memory corruption** – CVE-2024-44197 and CVE-2025-24257 fixed OOB writes reachable from sandboxed apps that pass malformed variable-length data to GPU user clients; the usual bug is poor bounds around `IOConnectCallStructMethod` arguments.
-- **Legacy keystroke monitoring** – CVE-2023-42891 (14.2) confirmed HID user clients remain a sandbox-escape vector; fuzz any driver exposing keyboard/event queues.
+- **Keystroke capture via IOHIDFamily** – CVE-2024-27799 (14.5) showed a permissive `IOHIDSystem` client could grab HID events even with secure input; ensure `externalMethod` handlers enforce entitlements instead of only the user-client type.<sup>[[2]](#references)</sup>
+- **IOGPUFamily memory corruption** – CVE-2024-44197 and CVE-2025-24257 fixed OOB writes reachable from sandboxed apps that pass malformed variable-length data to GPU user clients; the usual bug is poor bounds around `IOConnectCallStructMethod` arguments.<sup>[[1]](#references)</sup>
+- **Legacy keystroke monitoring** – CVE-2023-42891 (14.2) confirmed HID user clients remain a sandbox-escape vector; fuzz any driver exposing keyboard/event queues.<sup>[[3]](#references)</sup>
 
 ### Quick triage & fuzzing tips
 
@@ -363,9 +363,10 @@ kern_return_t kr = IOConnectCallStructMethod(conn, X, buf, sizeof(buf), buf, &ou
 
 ## References
 
-- [Apple Security Updates – macOS Sequoia 15.1 / Sonoma 14.7.1 (IOGPUFamily)](https://support.apple.com/en-us/121564)
-- [Rapid7 – IOHIDFamily CVE-2024-27799 summary](https://www.rapid7.com/db/vulnerabilities/apple-osx-iohidfamily-cve-2024-27799/)
-- [Apple Security Updates – macOS 13.6.1 (CVE-2023-42891 IOHIDFamily)](https://support.apple.com/en-us/121551)
-- [Apple Developer — DriverKit](https://developer.apple.com/documentation/driverkit)
-- [Apple Developer — System Extensions](https://developer.apple.com/documentation/systemextensions)
+- [1] [Apple Security Updates – macOS Sequoia 15.1 / Sonoma 14.7.1 (IOGPUFamily)](https://support.apple.com/en-us/121564)
+- [2] [Rapid7 – IOHIDFamily CVE-2024-27799 summary](https://www.rapid7.com/db/vulnerabilities/apple-osx-iohidfamily-cve-2024-27799/)
+- [3] [Apple Security Updates – macOS 13.6.1 (CVE-2023-42891 IOHIDFamily)](https://support.apple.com/en-us/121551)
+- [4] [Apple Developer — DriverKit](https://developer.apple.com/documentation/driverkit)
+- [5] [Apple Developer — System Extensions](https://developer.apple.com/documentation/systemextensions)
+
 {{#include ../../../banners/hacktricks-training.md}}

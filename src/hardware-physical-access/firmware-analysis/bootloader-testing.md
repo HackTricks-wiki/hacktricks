@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-The following steps are recommended for modifying device startup configurations and testing bootloaders such as U-Boot and UEFI-class loaders. Focus on getting early code execution, assessing signature/rollback protections, and abusing recovery or network-boot paths.
+The following steps are recommended for modifying device startup configurations and testing bootloaders such as U-Boot and UEFI-class loaders. Focus on getting early code execution, assessing signature/rollback protections, and abusing recovery or network-boot paths.<sup>[[1]](#references)</sup>
 
 Related: MediaTek secure-boot bypass via bl2_ext patching:
 
@@ -63,7 +63,7 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
      # tftpboot ${loadaddr} fit-signed.itb; bootm ${loadaddr}        # should only boot if key trusted
      ```
    - Absence of `CONFIG_FIT_SIGNATURE`/`CONFIG_(SPL_)FIT_SIGNATURE` or legacy `verify=n` behavior often allows booting arbitrary payloads.
-   - Don’t stop at a simple allow/deny result: recent FIT research showed that the verification path itself can be a pre-auth attack surface. Negative-test externally stored FIT data (`data-offset`, `data-position`, `data-size`), signed configuration selection, `loadables`, and overlay / `extra-conf` handling.
+   - Don’t stop at a simple allow/deny result: recent FIT research showed that the verification path itself can be a pre-auth attack surface. Negative-test externally stored FIT data (`data-offset`, `data-position`, `data-size`), signed configuration selection, `loadables`, and overlay / `extra-conf` handling.<sup>[[9]](#references)</sup>
    - If you have a matching source tree, `test/vboot/vboot_test.sh` is a fast way to reproduce FIT verification behaviour in U-Boot sandbox before touching real hardware.
 
 8. Standard Boot (`bootstd`), `extlinux`, and script bootflows
@@ -78,12 +78,12 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
      # bootmeth order "extlinux script pxe"
      ```
    - Abuse cases to test: attacker-controlled USB/SD media earlier in `boot_targets`, writable `/boot/extlinux/extlinux.conf`, rogue TFTP supplying `boot.scr`, or SPI-backed script execution via `script_offset_f`.
-   - If the platform relies on FIT verification, make sure configurations are signed at the configuration level and not only per-image; `required-mode=all` is stronger than accepting any single required key.
+   - If the platform relies on FIT verification, make sure configurations are signed at the configuration level and not only per-image; `required-mode=all` is stronger than accepting any single required key.<sup>[[9]](#references)</sup>
 
 ## Network-boot surface (DHCP/PXE) and rogue servers
 
 9. PXE/DHCP parameter fuzzing
-   - U-Boot’s legacy BOOTP/DHCP handling has had memory-safety issues. For example, CVE‑2024‑42040 describes memory disclosure via crafted DHCP responses that can leak bytes from U-Boot memory back on the wire. Exercise the DHCP/PXE code paths with overly long/edge-case values (option 67 bootfile-name, vendor options, file/servername fields) and observe for hangs/leaks.
+   - U-Boot’s legacy BOOTP/DHCP handling has had memory-safety issues. For example, CVE‑2024‑42040 describes memory disclosure via crafted DHCP responses that can leak bytes from U-Boot memory back on the wire. Exercise the DHCP/PXE code paths with overly long/edge-case values (option 67 bootfile-name, vendor options, file/servername fields) and observe for hangs/leaks.<sup>[[3]](#references)</sup>
    - Minimal Scapy snippet to stress boot parameters during netboot:
      ```python
      from scapy.all import *
@@ -136,7 +136,7 @@ Assess whether the device has secure-boot eFuses/OTP burned. If not, BootROM dow
    - Try booting with downgraded or known-vulnerable signed boot components if Secure Boot revocations (dbx) aren’t current. If the platform still trusts old shims/bootmanagers, you can often load your own kernel or `grub.cfg` from the ESP to gain persistence.
 
 12. Stale shim / SBAT / dbx revocation testing
-   - Old Microsoft-signed shims and vendor forks can still act as a BYOVD-style bootkit path if revocations are stale. In an isolated lab, place a historically vulnerable shim on the ESP and attempt to chainload your own `grubx64.efi` or kernel.
+   - Old Microsoft-signed shims and vendor forks can still act as a BYOVD-style bootkit path if revocations are stale. In an isolated lab, place a historically vulnerable shim on the ESP and attempt to chainload your own `grubx64.efi` or kernel.<sup>[[10]](#references)</sup>
    - Quick triage:
      ```bash
      sbverify --list shimx64.efi
@@ -146,12 +146,12 @@ Assess whether the device has secure-boot eFuses/OTP burned. If not, BootROM dow
    - If the shim still runs despite being on the revocation list, the firmware/OS has stale `dbx` updates or trusts a forked loader that never inherited upstream SBAT protections.
 
 13. Boot logo parsing bugs (LogoFAIL class)
-   - Several OEM/IBV firmwares were vulnerable to image-parsing flaws in DXE that process boot logos. If an attacker can place a crafted image on the ESP under a vendor-specific path (e.g., `\EFI\<vendor>\logo\*.bmp`) and reboot, code execution during early boot may be possible even with Secure Boot enabled. Test whether the platform accepts user-supplied logos and whether those paths are writable from the OS.
+   - Several OEM/IBV firmwares were vulnerable to image-parsing flaws in DXE that process boot logos. If an attacker can place a crafted image on the ESP under a vendor-specific path (e.g., `\EFI\<vendor>\logo\*.bmp`) and reboot, code execution during early boot may be possible even with Secure Boot enabled. Test whether the platform accepts user-supplied logos and whether those paths are writable from the OS.<sup>[[2]](#references)</sup>
 
 
 ## Android/Qualcomm ABL + GBL (Android 16) trust gaps
 
-On Android 16 devices that use Qualcomm's ABL to load the **Generic Bootloader Library (GBL)**, validate whether ABL **authenticates** the UEFI app it loads from the `efisp` partition. If ABL only checks for a UEFI app **presence** and does not verify signatures, a write primitive to `efisp` becomes **pre-OS unsigned code execution** at boot.
+On Android 16 devices that use Qualcomm's ABL to load the **Generic Bootloader Library (GBL)**, validate whether ABL **authenticates** the UEFI app it loads from the `efisp` partition. If ABL only checks for a UEFI app **presence** and does not verify signatures, a write primitive to `efisp` becomes **pre-OS unsigned code execution** at boot.<sup>[[4]](#references)[[6]](#references)</sup>
 
 Practical checks and abuse paths:
 
@@ -160,13 +160,13 @@ Practical checks and abuse paths:
   ```bash
   fastboot oem set-gpu-preemption 0 androidboot.selinux=permissive
   ```
-  If the device is patched, the command should reject extra arguments.
-- **Bootloader unlock via persistent flags**: A boot-stage payload can flip persistent unlock flags (e.g., `is_unlocked=1`, `is_unlocked_critical=1`) to emulate `fastboot oem unlock` without OEM server/approval gates. This is a durable posture change after the next reboot.
+  If the device is patched, the command should reject extra arguments.<sup>[[5]](#references)</sup>
+- **Bootloader unlock via persistent flags**: A boot-stage payload can flip persistent unlock flags (e.g., `is_unlocked=1`, `is_unlocked_critical=1`) to emulate `fastboot oem unlock` without OEM server/approval gates. This is a durable posture change after the next reboot.<sup>[[5]](#references)</sup>
 
 Defensive/triage notes:
 
 - Confirm whether ABL performs signature verification on the GBL/UEFI payload from `efisp`. If not, treat `efisp` as a high‑risk persistence surface.
-- Track whether ABL fastboot OEM handlers are patched to **validate argument counts** and reject additional tokens.
+- Track whether ABL fastboot OEM handlers are patched to **validate argument counts** and reject additional tokens.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ## Hardware caution
 
@@ -181,14 +181,14 @@ Be cautious when interacting with SPI/NAND flash during early boot (e.g., ground
 
 ## References
 
-- [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
-- [https://www.binarly.io/blog/finding-logofail-the-dangers-of-image-parsing-during-system-boot](https://www.binarly.io/blog/finding-logofail-the-dangers-of-image-parsing-during-system-boot)
-- [https://nvd.nist.gov/vuln/detail/CVE-2024-42040](https://nvd.nist.gov/vuln/detail/CVE-2024-42040)
-- [https://www.androidauthority.com/qualcomm-snapdragon-8-elite-gbl-exploit-bootloader-unlock-3648651/](https://www.androidauthority.com/qualcomm-snapdragon-8-elite-gbl-exploit-bootloader-unlock-3648651/)
-- [https://bestwing.me/preempted-unlocking-xiaomi-via-two-unsanitized-strings.html](https://bestwing.me/preempted-unlocking-xiaomi-via-two-unsanitized-strings.html)
-- [https://source.android.com/docs/core/architecture/bootloader/generic-bootloader](https://source.android.com/docs/core/architecture/bootloader/generic-bootloader)
-- [https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/f09c2fe3d6c42660587460e31be50c18c8c777ab](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/f09c2fe3d6c42660587460e31be50c18c8c777ab)
-- [https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/78297e8cfe091fc59c42fc33d3490e2008910fe2](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/78297e8cfe091fc59c42fc33d3490e2008910fe2)
-- [https://www.binarly.io/blog/unfit-to-boot-breaking-u-boots-fit-signature-verification](https://www.binarly.io/blog/unfit-to-boot-breaking-u-boots-fit-signature-verification)
-- [https://kb.cert.org/vuls/id/616257](https://kb.cert.org/vuls/id/616257)
+- [1] [OWASP Firmware Security Testing Methodology](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
+- [2] [Finding LogoFAIL: The Dangers of Image Parsing During System Boot](https://www.binarly.io/blog/finding-logofail-the-dangers-of-image-parsing-during-system-boot)
+- [3] [CVE-2024-42040 (U-Boot DHCP memory disclosure)](https://nvd.nist.gov/vuln/detail/CVE-2024-42040)
+- [4] [Qualcomm Snapdragon 8 Elite GBL exploit and bootloader unlock](https://www.androidauthority.com/qualcomm-snapdragon-8-elite-gbl-exploit-bootloader-unlock-3648651/)
+- [5] [Preempted: Unlocking Xiaomi via two unsanitized strings](https://bestwing.me/preempted-unlocking-xiaomi-via-two-unsanitized-strings.html)
+- [6] [Generic Bootloader (GBL) - Android Open Source Project](https://source.android.com/docs/core/architecture/bootloader/generic-bootloader)
+- [7] [CodeLinaro ABL/edk2 commit f09c2fe3](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/f09c2fe3d6c42660587460e31be50c18c8c777ab)
+- [8] [CodeLinaro ABL/edk2 commit 78297e8c](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/78297e8cfe091fc59c42fc33d3490e2008910fe2)
+- [9] [unFIT to Boot: Breaking U-Boot's FIT Signature Verification](https://www.binarly.io/blog/unfit-to-boot-breaking-u-boots-fit-signature-verification)
+- [10] [Microsoft-signed UEFI shim bootloaders vulnerable to Secure Boot bypass (VU#616257)](https://kb.cert.org/vuls/id/616257)
 {{#include ../../banners/hacktricks-training.md}}

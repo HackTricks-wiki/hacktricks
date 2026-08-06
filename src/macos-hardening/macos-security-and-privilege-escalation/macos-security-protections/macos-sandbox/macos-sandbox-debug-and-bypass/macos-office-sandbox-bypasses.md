@@ -8,7 +8,7 @@ The application uses a **custom Sandbox** using the entitlement **`com.apple.sec
 
 Therefore, escaping was as easy as **writing a `plist`** LaunchAgent in `~/Library/LaunchAgents/~$escape.plist`.
 
-Check the [**original report here**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/).
+Check the [**original report here**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/).<sup>[[1]](#references)</sup>
 
 ### Word Sandbox bypass via Login Items and zip
 
@@ -18,7 +18,7 @@ It was discovered that from within the sandbox it's possible to create a **Login
 
 From the previous Sandbox bypass, Microsoft disabled the option to write files in `~/Library/LaunchAgents`. However, it was discovered that if you put a **zip file as a Login Item** the `Archive Utility` will just **unzip** it on its current location. So, because by default the folder `LaunchAgents` from `~/Library` is not created, it was possible to **zip a plist in `LaunchAgents/~$escape.plist`** and **place** the zip file in **`~/Library`** so when decompress it will reach the persistence destination.
 
-Check the [**original report here**](https://objective-see.org/blog/blog_0x4B.html).
+Check the [**original report here**](https://objective-see.org/blog/blog_0x4B.html).<sup>[[2]](#references)</sup>
 
 ### Word Sandbox bypass via Login Items and .zshenv
 
@@ -30,7 +30,7 @@ An attacker could create the the files **`.bash_profile`** and **`.zshenv`** wit
 
 Then, add the zip file to the **Login Items** and then the **`Terminal`** app. When the user relogins, the zip file would be uncompressed in the users file, overwriting **`.bash_profile`** and **`.zshenv`** and therefore, the terminal will execute one of these files (depending if bash or zsh is used).
 
-Check the [**original report here**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c).
+Check the [**original report here**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c).<sup>[[3]](#references)</sup>
 
 ### Word Sandbox Bypass with Open and env variables
 
@@ -38,7 +38,7 @@ From sandboxed processes it's still possible to invoke other processes using the
 
 It was discovered that the open utility has the **`--env`** option to run an app with **specific env** variables. Therefore, it was possible to create the **`.zshenv` file** within a folder **inside** the **sandbox** and the use `open` with `--env` setting the **`HOME` variable** to that folder opening that `Terminal` app, which will execute the `.zshenv` file (for some reason it was also needed to set the variable `__OSINSTALL_ENVIROMENT`).
 
-Check the [**original report here**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/).
+Check the [**original report here**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/).<sup>[[4]](#references)</sup>
 
 ### Word Sandbox Bypass with Open and stdin
 
@@ -49,7 +49,12 @@ The thing is that even if **`python`** was signed by Apple, it **won't execute**
 1. Drop a **`~$exploit.py`** file with arbitrary Python commands.
 2. Run _open_ **`–stdin='~$exploit.py' -a Python`**, which runs the Python app with our dropped file serving as its standard input. Python happily runs our code, and since it’s a child process of _launchd_, it isn’t bound to Word’s sandbox rules.
 
+## References
+
+- [1] [Escaping the Sandbox – Microsoft Office on macOS](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/)
+- [2] [Office Drama on macOS](https://objective-see.org/blog/blog_0x4B.html)
+- [3] [Office365 MacOS Sandbox Escape](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c)
+- [4] [Technical Analysis of CVE-2021-30864](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/)
+
 {{#include ../../../../../banners/hacktricks-training.md}}
-
-
 

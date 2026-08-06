@@ -1,5 +1,5 @@
 ;(function discount() {
-  var CAMPAIGN_ID = "summer-2026"
+  var CAMPAIGN_ID = "summer-" + new Date().getFullYear()
   var DISMISS_KEY = "htDiscountDismissedUntil:" + CAMPAIGN_ID
   var DISMISS_MS = 10 * 24 * 60 * 60 * 1000
   var IMAGE_PATH = "images/hacktricks-summer-discount-2026-v1.webp"
@@ -42,6 +42,11 @@
   function getAssetUrl(path) {
     var root = typeof window.path_to_root === "string" ? window.path_to_root : ""
     return new URL(root + path, document.baseURI || window.location.href).href
+  }
+
+  function isCampaignActive() {
+    // getMonth() is zero-based; 6 covers July 1 through July 31 in the visitor's local time.
+    return new Date().getMonth() === 6
   }
 
   function isDismissed() {
@@ -100,7 +105,11 @@
   }
 
   function createDiscount() {
-    if (isDismissed() || document.querySelector(".ht-discount-overlay")) {
+    if (
+      !isCampaignActive() ||
+      isDismissed() ||
+      document.querySelector(".ht-discount-overlay")
+    ) {
       return
     }
 

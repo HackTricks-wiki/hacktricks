@@ -13,8 +13,8 @@ This is useful to:
 
 - [**Sourcebot**](https://www.sourcebot.dev/): Open-source/self-hosted code search. Very useful when you want to index **many repos** and, if configured, additional branches/tags while keeping regex filters such as `repo:`, `file:`, `lang:`, `rev:` and `sym:`.
 - [**SourceGraph**](https://sourcegraph.com/search): Search in millions of repos. Regex is usually the safest option; structural search exists in some deployments, but it has performance limitations and is not always enabled.
-- [**GitHub Code Search**](https://github.com/search): Supports regex, boolean logic, and qualifiers such as `repo:`, `org:`, `user:`, `path:`, `language:`, `symbol:`, `content:` and `is:`.
-- [**GitLab Exact Code Search**](https://docs.gitlab.com/user/search/exact_code_search/): Modern GitLab code search powered by Zoekt. Supports exact and regex modes with filters such as `file:`, `lang:`, `repo:` and `sym:`.
+- [**GitHub Code Search**](https://github.com/search): Supports regex, boolean logic, and qualifiers such as `repo:`, `org:`, `user:`, `path:`, `language:`, `symbol:`, `content:` and `is:`.<sup>[[1]](#references)</sup>
+- [**GitLab Exact Code Search**](https://docs.gitlab.com/user/search/exact_code_search/): Modern GitLab code search powered by Zoekt. Supports exact and regex modes with filters such as `file:`, `lang:`, `repo:` and `sym:`.<sup>[[2]](#references)</sup>
   - [**GitLab Advanced Search**](https://docs.gitlab.com/user/search/advanced_search/) is still useful as a wider fallback because it can search code, comments, commits, merge requests, and wikis.
 - [**SearchCode**](https://searchcode.com/): Search code in millions of projects.
 - [**Grep**](https://grep.app/): Fast public search across a very large GitHub corpus. Useful when you want a second indexing/ranking view for **content**, **file**, and **path** pivots.
@@ -62,8 +62,8 @@ org:target ("internal" OR "corp" OR "staging") ("https://" OR "ssh://") NOT path
 
 ### Newer high-signal files worth prioritizing
 
-- **`.github/workflows/*.yml`**: Look for `pull_request_target`, `workflow_run`, `workflow_call`, `secrets: inherit`, `id-token: write`, `runs-on: self-hosted`, and third-party `uses:` lines that are pinned only to tags/branches instead of full commit SHAs.
-- **`.devcontainer/devcontainer.json`**, **`.devcontainer/<variant>/devcontainer.json`**, and **`.devcontainer.json`**: Search for `remoteEnv`, `containerEnv`, `initializeCommand`, `postCreateCommand`, `mounts`, and referenced Dockerfiles/scripts. These often expose internal package registries, bootstrap URLs, host mounts, and developer-only endpoints.
+- **`.github/workflows/*.yml`**: Look for `pull_request_target`, `workflow_run`, `workflow_call`, `secrets: inherit`, `id-token: write`, `runs-on: self-hosted`, and third-party `uses:` lines that are pinned only to tags/branches instead of full commit SHAs.<sup>[[3]](#references)</sup>
+- **`.devcontainer/devcontainer.json`**, **`.devcontainer/<variant>/devcontainer.json`**, and **`.devcontainer.json`**: Search for `remoteEnv`, `containerEnv`, `initializeCommand`, `postCreateCommand`, `mounts`, and referenced Dockerfiles/scripts. These often expose internal package registries, bootstrap URLs, host mounts, and developer-only endpoints.<sup>[[4]](#references)</sup>
 - **Dev Container Features** (`devcontainer-feature.json`, `install.sh`): Great for finding org-specific installer logic that executes during environment creation.
 - **Other CI/control-plane files**: `.gitlab-ci.yml`, `azure-pipelines.yml`, `cloudbuild.yaml`, `Jenkinsfile`, `buildkite*`, `atlantis.yaml`, `terragrunt.hcl`, `helmfile.yaml`, `skaffold.yaml`, `argocd*`.
 
@@ -118,7 +118,7 @@ This is especially useful when the interesting string only existed in a **releas
 ### Platform-specific gotchas
 
 - **GitHub Code Search** is excellent for fast recon, but it searches the **default branch** only. If you need feature branches, deleted secrets, or historical code, clone the repo and search it locally.
-- **GitLab Exact Code Search** also has a **default-branch** limitation and indexes only smaller files, but **Advanced Search** can still be useful to search comments, commits, and wikis.
+- **GitLab Exact Code Search** also has a **default-branch** limitation and indexes only smaller files, but **Advanced Search** can still be useful to search comments, commits, and wikis.<sup>[[2]](#references)</sup>
 - **Sourcebot** indexes the **default branch** by default, but it can be configured to index additional branches/tags and then searched with `rev:` filters, which is very convenient for branch/tag-focused internal audits when you control the index.
 - **Sourcegraph** regex search is generally the most predictable option for offensive work; treat structural search as an optional bonus, not as a guaranteed capability. If the deployment supports it, `type:diff` and `type:commit` queries are very good for recovering deleted strings or recent security-relevant changes.
 
@@ -131,12 +131,11 @@ For dedicated secret hunting, org-wide GitHub dorks, and tooling such as Truffle
 github-leaked-secrets.md
 {{#endref}}
 
-
-
 ## References
 
-- [GitHub Code Search syntax](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
-- [GitLab Exact Code Search](https://docs.gitlab.com/user/search/exact_code_search/)
-- [GitHub Actions secure use reference](https://docs.github.com/en/actions/reference/security/secure-use)
-- [Dev Container metadata reference](https://containers.dev/implementors/json_reference/)
+- [1] [GitHub Code Search syntax](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
+- [2] [GitLab Exact Code Search](https://docs.gitlab.com/user/search/exact_code_search/)
+- [3] [GitHub Actions secure use reference](https://docs.github.com/en/actions/reference/security/secure-use)
+- [4] [Dev Container metadata reference](https://containers.dev/implementors/json_reference/)
+
 {{#include ../../banners/hacktricks-training.md}}

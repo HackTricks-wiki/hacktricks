@@ -221,7 +221,7 @@ Services are declared in an application's `Info.plist` under the `NSServices` ke
 - A malicious service captures data from password managers, email clients, financial apps
 - Services can **return modified data** to the calling application (man-in-the-middle on selection operations)
 - Service names can be crafted to appear legitimate ("Format Text", "Encrypt Selection", "Share")
-- The optional `NSRestricted` flag is security-relevant: a service marked unrestricted may be callable by a sandboxed app without the warning macOS shows for escape-prone services
+- The optional `NSRestricted` flag is security-relevant: a service marked unrestricted may be callable by a sandboxed app without the warning macOS shows for escape-prone services<sup>[[2]](#references)</sup>
 
 ### Discovery
 
@@ -324,13 +324,13 @@ Apple supports an optional `NSRestricted` boolean per service definition. If it 
 - Look for **third-party services not marked as restricted** even though they proxy Apple Events, file access, or other privileged actions
 - Look for **high-value built-in services** with strong entitlements (for example, services exposed by Script Editor or Finder-backed helpers) and check whether user interaction is enough to turn them into a data-access primitive
 
-A good recent example is **CVE-2022-48574**, where the Services mechanism could be abused to reach **TCC-protected user files without the expected confirmation flow**. The bug is fixed, but the technique remains useful for threat modeling: any service that forwards file access or automation requests on behalf of the caller deserves the same scrutiny.
+A good recent example is **CVE-2022-48574**, where the Services mechanism could be abused to reach **TCC-protected user files without the expected confirmation flow**. The bug is fixed, but the technique remains useful for threat modeling: any service that forwards file access or automation requests on behalf of the caller deserves the same scrutiny.<sup>[[2]](#references)</sup>
 
 ---
 
 ## Recent Security Notes
 
-- **Quick Actions are executable content**: Apple fixed a Gatekeeper bypass in 2024 where an app-bundled Automator Quick Action could run without normal assessment. When auditing apps, inspect `Contents/PlugIns/*.workflow/Contents/document.wflow` exactly like you would inspect helper scripts or login items. See [the Gatekeeper page](../macos-security-protections/macos-gatekeeper.md).
+- **Quick Actions are executable content**: Apple fixed a Gatekeeper bypass in 2024 where an app-bundled Automator Quick Action could run without normal assessment. When auditing apps, inspect `Contents/PlugIns/*.workflow/Contents/document.wflow` exactly like you would inspect helper scripts or login items. See [the Gatekeeper page](../macos-security-protections/macos-gatekeeper.md).<sup>[[1]](#references)</sup>
 - **Shortcuts can inherit legacy Automator behavior**: Apple also added an additional user-consent prompt after third-party shortcuts were found using a **legacy Automator action** to send Apple Events without the expected permission flow. Imported workflows and shortcut bundles should be reviewed for `Run AppleScript`, `Run Shell Script`, and similar bridge actions. See [the TCC page](../macos-security-protections/macos-tcc/README.md).
 - **Automator is still a live privacy boundary**: Apple shipped another Automator fix in 2025 for access to protected user data. Even if Automator is a legacy surface, treat any workflow runner, Quick Action host, or automation bridge as a current attack surface rather than dead code.
 
@@ -369,7 +369,7 @@ A good recent example is **CVE-2022-48574**, where the Services mechanism could 
 
 ## References
 
-* [Apple — About the security content of macOS Ventura 13.7, Sonoma 14.7, and Sequoia 15](https://support.apple.com/en-us/121238)
-* [Moonlock — How the NSServices exploit worked on macOS](https://moonlock.com/nsservices-macos)
+- [1] [Apple — About the security content of macOS Ventura 13.7, Sonoma 14.7, and Sequoia 15](https://support.apple.com/en-us/121238)
+- [2] [Moonlock — How the NSServices exploit worked on macOS](https://moonlock.com/nsservices-macos)
 
 {{#include ../../../banners/hacktricks-training.md}}

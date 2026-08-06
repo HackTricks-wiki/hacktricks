@@ -87,11 +87,11 @@ A couple of useful gotchas:
 - **SUID/privileged** binaries ignore `LD_LIBRARY_PATH`/`LD_PRELOAD` in
   **secure-execution mode**, but directories coming from `/etc/ld.so.conf` are
   still part of the trusted loader configuration, so this misconfiguration can
-  still affect privileged programs.
+  still affect privileged programs.<sup>[[1]](#references)</sup>
 - On newer glibc versions, the dynamic loader also exposes
   `--list-diagnostics`, which is handy to debug cache resolution and
   `glibc-hwcaps` subdirectory selection when a hijack doesn't behave as
-  expected.
+  expected.<sup>[[1]](#references)</sup>
 
 ## Exploit
 
@@ -161,7 +161,7 @@ But there are other misconfigurations that can cause the same vulnerability, if 
 ## Exploit 2
 
 **Suppose you have sudo privileges over `ldconfig`**.\
-You can indicate `ldconfig` **where to load the conf files from**, so we can take advantage of it to make `ldconfig` load arbitrary folders.\
+You can indicate `ldconfig` **where to load the conf files from**, so we can take advantage of it to make `ldconfig` load arbitrary folders.<sup>[[2]](#references)</sup>\
 So, lets create the files and folders needed to load "/tmp":
 
 ```bash
@@ -190,6 +190,7 @@ ldd sharedvuln
 
 ## References
 
-- [ld.so(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)
-- [ldconfig(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ldconfig.8.html)
+- [1] [ld.so(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)
+- [2] [ldconfig(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ldconfig.8.html)
+
 {{#include ../../banners/hacktricks-training.md}}

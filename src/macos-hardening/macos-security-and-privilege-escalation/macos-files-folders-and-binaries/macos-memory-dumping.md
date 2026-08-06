@@ -120,7 +120,7 @@ vmmap <pid>
 
 Operationally, this usually means:
 
-- A third-party app shipped with **`get-task-allow`** is often directly dumpable with LLDB, and the resulting dump may expose TCC-protected data that the app already accessed.
+- A third-party app shipped with **`get-task-allow`** is often directly dumpable with LLDB, and the resulting dump may expose TCC-protected data that the app already accessed.<sup>[[1]](#references)</sup>
 - A **hardened** target without `get-task-allow` will commonly reject attaches, even as `root`, unless you control the relevant debugger entitlements / policy path.
 - Unhardened third-party processes are still the easiest place to use `lldb`, `vmmap`, Frida, or custom `task_for_pid`/`vm_read` readers.
 
@@ -257,8 +257,8 @@ For more object-level runtime triage once you can already inspect the process, c
 
 ## References
 
-- [https://afine.com/to-allow-or-not-to-get-task-allow-that-is-the-question](https://afine.com/to-allow-or-not-to-get-task-allow-that-is-the-question)
-- [https://keith.github.io/xcode-man-pages/leaks.1.html](https://keith.github.io/xcode-man-pages/leaks.1.html)
+- [1] [To Allow or Not to get-task-allow: macOS Security Analysis](https://afine.com/to-allow-or-not-to-get-task-allow-that-is-the-question)
+- [2] [leaks(1) man page](https://keith.github.io/xcode-man-pages/leaks.1.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
