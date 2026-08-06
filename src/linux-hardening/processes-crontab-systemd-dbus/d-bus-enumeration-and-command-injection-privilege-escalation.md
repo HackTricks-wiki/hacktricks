@@ -531,7 +531,7 @@ finish:
 Enumeration of a large D-Bus attack surface manually with `busctl`/`gdbus` quickly becomes painful. Two small FOSS utilities released in the last few years can speed things up during red-team or CTF engagements:
 
 ### dbusmap ("Nmap for D-Bus")
-* Author: @taviso – [https://github.com/taviso/dbusmap](https://github.com/taviso/dbusmap)
+* Author: @taviso – [https://github.com/taviso/dbusmap](https://github.com/taviso/dbusmap)<sup>[[5]](#references)</sup>
 * Written in C; single static binary (<50 kB) that walks every object path, pulls the `Introspect` XML and maps it to the owning PID/UID.<sup>[[5]](#references)</sup>
 * Useful flags:
   ```bash
@@ -544,7 +544,7 @@ Enumeration of a large D-Bus attack surface manually with `busctl`/`gdbus` quick
 * The tool marks unprotected well-known names with `!`, instantly revealing services you can *own* (take over) or method calls that are reachable from an unprivileged shell.
 
 ### uptux.py
-* Author: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)
+* Author: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)<sup>[[6]](#references)</sup>
 * Python-only script that looks for *writable* paths in systemd units **and** overly-permissive D-Bus policy files (e.g. `send_destination="*"`).<sup>[[6]](#references)</sup>
 * Quick usage:
   ```bash
