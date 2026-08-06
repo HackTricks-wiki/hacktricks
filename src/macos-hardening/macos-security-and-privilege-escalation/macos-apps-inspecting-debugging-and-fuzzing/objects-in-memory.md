@@ -170,7 +170,7 @@ Then, the struct has a pointer to the struct `class_ro_t` stored on disk which c
 
 ### Non‑pointer `isa` and Pointer Authentication (arm64e)
 
-On Apple Silicon and recent runtimes the Objective‑C `isa` is not always a raw class pointer. On arm64e it is a packed structure that may also carry a Pointer Authentication Code (PAC). Depending on the platform it may include fields like `nonpointer`, `has_assoc`, `weakly_referenced`, `extra_rc`, and the class pointer itself (shifted or signed). This means blindly dereferencing the first 8 bytes of an Objective‑C object will not always yield a valid `Class` pointer.<sup>[2]</sup>
+On Apple Silicon and recent runtimes the Objective‑C `isa` is not always a raw class pointer. On arm64e it is a packed structure that may also carry a Pointer Authentication Code (PAC). Depending on the platform it may include fields like `nonpointer`, `has_assoc`, `weakly_referenced`, `extra_rc`, and the class pointer itself (shifted or signed). This means blindly dereferencing the first 8 bytes of an Objective‑C object will not always yield a valid `Class` pointer.<sup>[[2]](#references)</sup>
 
 Practical notes when debugging on arm64e:
 
@@ -184,11 +184,11 @@ Practical notes when debugging on arm64e:
 
 - Many function/data pointers in Mach‑O will reside in `__AUTH`/`__AUTH_CONST` and require authentication before use. If you are interposing or re‑binding (e.g., fishhook‑style), ensure you also handle `__auth_got` in addition to legacy `__got`.
 
-For a deep dive into language/ABI guarantees and the `<ptrauth.h>` intrinsics available from Clang/LLVM, see the reference in the end of this page.<sup>[1]</sup>
+For a deep dive into language/ABI guarantees and the `<ptrauth.h>` intrinsics available from Clang/LLVM, see the reference in the end of this page.<sup>[[1]](#references)</sup>
 
 ### Tagged pointer objects
 
-Some Foundation classes avoid heap allocation by encoding the object’s payload directly in the pointer value (tagged pointers). Detection differs by platform (e.g., the most‑significant bit on arm64, least‑significant on x86_64 macOS). Tagged objects don’t have a regular `isa` stored in memory; the runtime resolves the class from the tag bits.<sup>[2]</sup> When inspecting arbitrary `id` values:
+Some Foundation classes avoid heap allocation by encoding the object’s payload directly in the pointer value (tagged pointers). Detection differs by platform (e.g., the most‑significant bit on arm64, least‑significant on x86_64 macOS). Tagged objects don’t have a regular `isa` stored in memory; the runtime resolves the class from the tag bits.<sup>[[2]](#references)</sup> When inspecting arbitrary `id` values:
 
 - Use runtime APIs instead of poking the `isa` field: `object_getClass(obj)` / `[obj class]`.
 - In LLDB, just `po (id)0xADDR` will print tagged pointer instances correctly because the runtime is consulted to resolve the class.

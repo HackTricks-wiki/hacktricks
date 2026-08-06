@@ -4,9 +4,9 @@
 
 ## Overview
 
-Windows Accessibility features persist user configuration under HKCU and propagate it into per-session HKLM locations. During a **Secure Desktop** transition (lock screen or UAC prompt), **SYSTEM** components re-copy these values. If the **per-session HKLM key is writable by the user**, it becomes a privileged write choke point that can be redirected with **registry symbolic links**, yielding an **arbitrary SYSTEM registry write**.
+Windows Accessibility features persist user configuration under HKCU and propagate it into per-session HKLM locations. During a **Secure Desktop** transition (lock screen or UAC prompt), **SYSTEM** components re-copy these values. If the **per-session HKLM key is writable by the user**, it becomes a privileged write choke point that can be redirected with **registry symbolic links**, yielding an **arbitrary SYSTEM registry write**.<sup>[[1]](#references)</sup>
 
-The RegPwn technique abuses that propagation chain with a small race window stabilized via an **opportunistic lock (oplock)** on a file used by `osk.exe`.
+The RegPwn technique abuses that propagation chain with a small race window stabilized via an **opportunistic lock (oplock)** on a file used by `osk.exe`.<sup>[[1]](#references)</sup>
 
 ## Registry Propagation Chain (Accessibility -> Secure Desktop)
 
@@ -27,7 +27,7 @@ Propagation during a secure desktop transition (simplified):
 2. **SYSTEM `atbroker.exe`** copies `HKLM\...\Session<session id>\ATConfig\osk` to `HKU\.DEFAULT\...\ATConfig\osk`.
 3. **SYSTEM `osk.exe`** copies `HKU\.DEFAULT\...\ATConfig\osk` back to `HKLM\...\Session<session id>\ATConfig\osk`.
 
-If the session HKLM subtree is writable by the user, step 2/3 provide a SYSTEM write through a location the user can replace.
+If the session HKLM subtree is writable by the user, step 2/3 provide a SYSTEM write through a location the user can replace.<sup>[[1]](#references)</sup>
 
 ## Primitive: Arbitrary SYSTEM Registry Write via Registry Links
 
@@ -40,7 +40,7 @@ Key idea:
 - Attacker replaces that key with a **registry link** to any other key.
 - SYSTEM performs the copy and writes into the attacker-chosen key with SYSTEM permissions.
 
-This yields an **arbitrary SYSTEM registry write** primitive.
+This yields an **arbitrary SYSTEM registry write** primitive.<sup>[[1]](#references)</sup>
 
 ## Winning the Race Window with Oplocks
 
@@ -50,7 +50,7 @@ There is a short timing window between **SYSTEM `osk.exe`** starting and writing
 C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml
 ```
 
-When the oplock triggers, the attacker swaps the per-session HKLM key for a registry link, lets the SYSTEM write land, then removes the link.
+When the oplock triggers, the attacker swaps the per-session HKLM key for a registry link, lets the SYSTEM write land, then removes the link.<sup>[[1]](#references)</sup>
 
 ## Example Exploitation Flow (High Level)
 
@@ -61,11 +61,11 @@ When the oplock triggers, the attacker swaps the per-session HKLM key for a regi
 4. Set an **oplock** on `C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml`.
 5. Trigger **Secure Desktop** (`LockWorkstation()`), causing SYSTEM `atbroker.exe` / `osk.exe` to start.
 6. On oplock trigger, replace `HKLM\...\Session<session id>\ATConfig\osk` with a **registry link** to an arbitrary target.
-7. Wait briefly for the SYSTEM copy to complete, then remove the link.
+7. Wait briefly for the SYSTEM copy to complete, then remove the link.<sup>[[1]](#references)</sup>
 
 ## Converting the Primitive to SYSTEM Execution
 
-One straightforward chain is to overwrite a **service configuration** value (e.g., `ImagePath`) and then start the service. The RegPwn PoC overwrites the `ImagePath` of **`msiserver`** and triggers it by instantiating the **MSI COM object**, resulting in **SYSTEM** code execution.
+One straightforward chain is to overwrite a **service configuration** value (e.g., `ImagePath`) and then start the service. The RegPwn PoC overwrites the `ImagePath` of **`msiserver`** and triggers it by instantiating the **MSI COM object**, resulting in **SYSTEM** code execution.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Related
 
@@ -77,7 +77,7 @@ uiaccess-admin-protection-bypass.md
 
 ## References
 
-- [RIP RegPwn](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
-- [RegPwn PoC](https://github.com/mdsecactivebreach/RegPwn)
+- [1] [RIP RegPwn](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
+- [2] [RegPwn PoC](https://github.com/mdsecactivebreach/RegPwn)
 
 {{#include ../../banners/hacktricks-training.md}}

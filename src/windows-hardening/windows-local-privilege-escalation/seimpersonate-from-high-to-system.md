@@ -57,7 +57,7 @@ You can inspect candidate processes and their token/ACLs with **Process Explorer
 ### Code
 
 The following code from [here](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). It allows to **indicate a Process ID as argument** and a CMD **running as the user** of the indicated process will be run.\
-Running in a High Integrity process you can **indicate the PID of a process running as System** (like `winlogon`, `wininit`) and execute a `cmd.exe` as SYSTEM.
+Running in a High Integrity process you can **indicate the PID of a process running as System** (like `winlogon`, `wininit`) and execute a `cmd.exe` as SYSTEM.<sup>[[3]](#references)</sup>
 
 ```cpp
 impersonateuser.exe 1234
@@ -199,7 +199,7 @@ int main(int argc, char** argv) {
 The sample uses `MAXIMUM_ALLOWED`, but for real operations it's useful to remember the minimum pieces involved:
 
 - `OpenProcessToken()` only requires that the **process handle** was opened with **`PROCESS_QUERY_LIMITED_INFORMATION`**.
-- To use `CreateProcessWithTokenW()`, the **primary token handle** must have **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
+- To use `CreateProcessWithTokenW()`, the **primary token handle** must have **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.<sup>[[1]](#references)</sup>
 - `DuplicateTokenEx()` must create a **primary token** (`TokenPrimary`), not only an impersonation token.
 - If you already impersonated SYSTEM and `CreateProcessWithTokenW()` still fails with `1314`, try `CreateProcessAsUserW()` instead.
 
@@ -250,13 +250,15 @@ Inside that process "Administrators" can "Read Memory" and "Read Permissions" wh
 ## Operator notes
 
 - This technique is great when you are already **local admin + high integrity** and just want a quick, manual path to SYSTEM without spinning up a service or a named-pipe coercion chain.
-- On hardened Windows 11 / Server environments, **LSA protection is increasingly common**, so a workflow that assumes `lsass.exe` is always readable is brittle. **`winlogon.exe` / `wininit.exe` / `services.exe` are usually better first picks**.
+- On hardened Windows 11 / Server environments, **LSA protection is increasingly common**, so a workflow that assumes `lsass.exe` is always readable is brittle. **`winlogon.exe` / `wininit.exe` / `services.exe` are usually better first picks**.<sup>[[2]](#references)</sup>
 - If you land in a **service account** context instead of an elevated admin desktop, the **Potato family** is usually a better fit than this page.
 
 
 
 ## References
 
-- [Microsoft: CreateProcessWithTokenW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
-- [SensePost: Abusing Windows' tokens to compromise Active Directory without touching LSASS](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [1] [Microsoft: CreateProcessWithTokenW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [2] [SensePost: Abusing Windows' tokens to compromise Active Directory without touching LSASS](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [3] [Understanding and Abusing Process Tokens — Part II](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+
 {{#include ../../banners/hacktricks-training.md}}

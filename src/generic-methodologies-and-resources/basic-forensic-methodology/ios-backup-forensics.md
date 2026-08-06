@@ -19,7 +19,7 @@ High‑level procedure:
 2) Recreate the original folder hierarchy based on domain + relativePath
 3) Copy or hardlink each stored object to its reconstructed path
 
-Example workflow with a tool that implements this end‑to‑end (ElegantBouncer):
+Example workflow with a tool that implements this end‑to‑end (ElegantBouncer):<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 # Rebuild the backup into a readable folder tree
@@ -35,7 +35,7 @@ Notes:
 ### Acquiring & decrypting the backup (USB / Finder / libimobiledevice)
 
 - On macOS/Finder set "Encrypt local backup" and create a *fresh* encrypted backup so keychain items are present.
-- Cross‑platform: `idevicebackup2` (libimobiledevice ≥1.4.0) understands iOS 17/18 backup protocol changes and fixes earlier restore/backup handshake errors.
+- Cross‑platform: `idevicebackup2` (libimobiledevice ≥1.4.0) understands iOS 17/18 backup protocol changes and fixes earlier restore/backup handshake errors.<sup>[[4]](#references)</sup>
 
 ```bash
 # Pair then create a full encrypted backup over USB
@@ -45,7 +45,7 @@ $ idevicebackup2 backup --full --encrypt --password '<pwd>' ~/backups/iphone17
 
 ### IOC‑driven triage with MVT
 
-Amnesty’s Mobile Verification Toolkit (mvt-ios) now works directly on encrypted iTunes/Finder backups, automating decryption and IOC matching for mercenary spyware cases.
+Amnesty’s Mobile Verification Toolkit (mvt-ios) now works directly on encrypted iTunes/Finder backups, automating decryption and IOC matching for mercenary spyware cases.<sup>[[3]](#references)</sup>
 
 ```bash
 # Optionally extract a reusable key file
@@ -71,7 +71,7 @@ $ python3 ileapp.py -b /tmp/dec-backup -o /tmp/ileapp-report
 
 ## Messaging app attachment enumeration
 
-After reconstruction, enumerate attachments for popular apps. The exact schema varies by app/version, but the approach is similar: query the messaging database, join messages to attachments, and resolve paths on disk.
+After reconstruction, enumerate attachments for popular apps. The exact schema varies by app/version, but the approach is similar: query the messaging database, join messages to attachments, and resolve paths on disk.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### iMessage (sms.db)
 Key tables: message, attachment, message_attachment_join (MAJ), chat, chat_message_join (CMJ)
@@ -126,7 +126,7 @@ Paths usually resolve under `AppDomainGroup-group.net.whatsapp.WhatsApp.shared/M
 
 ### Signal / Telegram / Viber
 - Signal: the message DB is encrypted; however, attachments cached on disk (and thumbnails) are usually scan‑able
-- Telegram: cache remains under `Library/Caches/` inside the sandbox; iOS 18 builds exhibit cache‑clearing bugs, so large residual media caches are common evidence sources
+- Telegram: cache remains under `Library/Caches/` inside the sandbox; iOS 18 builds exhibit cache‑clearing bugs, so large residual media caches are common evidence sources<sup>[[5]](#references)</sup>
 - Viber: Viber.sqlite contains message/attachment tables with on‑disk references
 
 Tip: even when metadata is encrypted, scanning the media/cache directories still surfaces malicious objects.
@@ -134,7 +134,7 @@ Tip: even when metadata is encrypted, scanning the media/cache directories still
 
 ## Scanning attachments for structural exploits
 
-Once you have attachment paths, feed them into structural detectors that validate file‑format invariants instead of signatures. Example with ElegantBouncer:
+Once you have attachment paths, feed them into structural detectors that validate file‑format invariants instead of signatures. Example with ElegantBouncer:<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 # Recursively scan only messaging attachments under the reconstructed tree
@@ -144,7 +144,7 @@ $ elegant-bouncer --scan --messaging /tmp/reconstructed
 ✗ THREAT in iMessage: photo.webp → BLASTPASS (VP8L)
 ```
 
-Detections covered by structural rules include:
+Detections covered by structural rules include:<sup>[[1]](#references)[[2]](#references)</sup>
 - PDF/JBIG2 FORCEDENTRY (CVE‑2021‑30860): impossible JBIG2 dictionary states
 - WebP/VP8L BLASTPASS (CVE‑2023‑4863): oversized Huffman table constructions
 - TrueType TRIANGULATION (CVE‑2023‑41990): undocumented bytecode opcodes
@@ -156,14 +156,15 @@ Detections covered by structural rules include:
 - Time conversions: iMessage stores dates in Apple epochs/units on some versions; convert appropriately during reporting
 - Schema drift: app SQLite schemas change over time; confirm table/column names per device build
 - Recursive extraction: PDFs may embed JBIG2 streams and fonts; extract and scan inner objects
-- False positives: structural heuristics are conservative but can flag rare malformed yet benign media
+- False positives: structural heuristics are conservative but can flag rare malformed yet benign media<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 ## References
 
-- [ELEGANTBOUNCER: When You Can't Get the Samples but Still Need to Catch the Threat](https://www.msuiche.com/posts/elegantbouncer-when-you-cant-get-the-samples-but-still-need-to-catch-the-threat/)
-- [ElegantBouncer project (GitHub)](https://github.com/msuiche/elegant-bouncer)
-- [MVT iOS backup workflow](https://docs.mvt.re/en/latest/ios/backup/check/)
-- [libimobiledevice 1.4.0 release notes](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
+- [1] [ELEGANTBOUNCER: When You Can't Get the Samples but Still Need to Catch the Threat](https://www.msuiche.com/posts/elegantbouncer-when-you-cant-get-the-samples-but-still-need-to-catch-the-threat/)
+- [2] [ElegantBouncer project (GitHub)](https://github.com/msuiche/elegant-bouncer)
+- [3] [MVT iOS backup workflow](https://docs.mvt.re/en/latest/ios/backup/check/)
+- [4] [libimobiledevice 1.4.0 release notes](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
+- [5] [Update 11.2 has broken cache cleanup on iOS 18.0.1 (Telegram Bug Tracker)](https://bugs.telegram.org/c/44361)
 
 {{#include ../../banners/hacktricks-training.md}}

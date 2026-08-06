@@ -14,7 +14,7 @@
 | `prev-lang:kbd` | Preferred language / keyboard layout |
 | `efi-boot-device-data` | Boot device selection |
 
-On modern Macs, NVRAM variables are split between **system** variables (protected by Secure Boot) and **non-system** variables. Apple Silicon Macs use a **Secure Storage Component (SSC)** to cryptographically bind NVRAM state to the boot chain.<sup>[1]</sup>
+On modern Macs, NVRAM variables are split between **system** variables (protected by Secure Boot) and **non-system** variables. Apple Silicon Macs use a **Secure Storage Component (SSC)** to cryptographically bind NVRAM state to the boot chain.<sup>[[1]](#references)</sup>
 
 ## NVRAM Access from User Space
 

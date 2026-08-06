@@ -45,7 +45,7 @@ echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat -
 
 ## Case study: Root-owned UNIX socket signal-triggered escalation (LG webOS)
 
-Some privileged daemons expose a root-owned UNIX socket that accepts untrusted input and couples privileged actions to thread-IDs and signals. If the protocol lets an unprivileged client influence which native thread is targeted, you may be able to trigger a privileged code path and escalate.
+Some privileged daemons expose a root-owned UNIX socket that accepts untrusted input and couples privileged actions to thread-IDs and signals. If the protocol lets an unprivileged client influence which native thread is targeted, you may be able to trigger a privileged code path and escalate.<sup>[[1]](#references)</sup>
 
 Observed pattern:
 - Connect to a root-owned socket (e.g., /tmp/remotelogger).
@@ -80,10 +80,7 @@ Notes:
 
 ## References
 
-- [LG WebOS TV Path Traversal, Authentication Bypass and Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
+- [1] [LG WebOS TV Path Traversal, Authentication Bypass and Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
 

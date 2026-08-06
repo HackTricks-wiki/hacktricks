@@ -11,7 +11,7 @@ A cold-wallet theft chain combined a **supply-chain compromise of the Safe{Walle
 
 ## Off-chain: Targeted signing mutation in Safe{Wallet}
 
-A tampered Safe bundle (`_app-*.js`) selectively attacked specific Safe + signer addresses. The injected logic executed right before the signing call:
+A tampered Safe bundle (`_app-*.js`) selectively attacked specific Safe + signer addresses. The injected logic executed right before the signing call:<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```javascript
 // Pseudocode of the malicious flow
@@ -30,7 +30,7 @@ if (isVictimSafe && isVictimSigner && tx.data.operation === 0) {
 ```
 
 ### Attack properties
-- **Context-gated**: hard-coded allowlists for victim Safes/signers prevented noise and lowered detection.
+- **Context-gated**: hard-coded allowlists for victim Safes/signers prevented noise and lowered detection.<sup>[[1]](#references)[[3]](#references)</sup>
 - **Last-moment mutation**: fields (`to`, `data`, `operation`, gas) were overwritten immediately before `signTransaction`, then reverted, so proposal payloads in the UI looked benign while signatures matched the attacker payload.
 - **EIP-712 opacity**: wallets showed structured data but did not decode nested calldata or highlight `operation = delegatecall`, making the mutated message effectively blind-signed.
 
@@ -38,15 +38,15 @@ if (isVictimSafe && isVictimSigner && tx.data.operation === 0) {
 Safe proposals are submitted to the **Safe Client Gateway**. Prior to hardened checks, the gateway could accept a proposal where `safeTxHash`/signature corresponded to different fields than the JSON body if the UI rewrote them post-signing. After the incident, the gateway now rejects proposals whose hash/signature do not match the submitted transaction. Similar server-side hash verification should be enforced on any signing-orchestration API.
 
 ### 2025 Bybit/Safe incident highlights
-- The February 21, 2025 Bybit cold-wallet drain (~401k ETH) reused the same pattern: a compromised Safe S3 bundle only triggered for Bybit signers and swapped `operation=0` → `1`, pointing `to` at a pre-deployed attacker contract that writes slot 0.
-- Wayback-cached `_app-52c9031bfa03da47.js` shows the logic keyed on Bybit’s Safe (`0x1db9…cf4`) and signer addresses, then immediately rolled back to a clean bundle two minutes after execution, mirroring the “mutate → sign → restore” trick.
-- The malicious contract (e.g., `0x9622…c7242`) contained simple functions `sweepETH/sweepERC20` plus a `transfer(address,uint256)` that writes the implementation slot. Execution of `execTransaction(..., operation=1, to=contract, data=transfer(newImpl,0))` shifted the proxy implementation and granted full control.
+- The February 21, 2025 Bybit cold-wallet drain (~401k ETH) reused the same pattern: a compromised Safe S3 bundle only triggered for Bybit signers and swapped `operation=0` → `1`, pointing `to` at a pre-deployed attacker contract that writes slot 0.<sup>[[1]](#references)[[3]](#references)</sup>
+- Wayback-cached `_app-52c9031bfa03da47.js` shows the logic keyed on Bybit’s Safe (`0x1db9…cf4`) and signer addresses, then immediately rolled back to a clean bundle two minutes after execution, mirroring the “mutate → sign → restore” trick.<sup>[[1]](#references)[[2]](#references)</sup>
+- The malicious contract (e.g., `0x9622…c7242`) contained simple functions `sweepETH/sweepERC20` plus a `transfer(address,uint256)` that writes the implementation slot. Execution of `execTransaction(..., operation=1, to=contract, data=transfer(newImpl,0))` shifted the proxy implementation and granted full control.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ## On-chain: Delegatecall proxy takeover via slot collision
 
-Safe proxies keep `masterCopy` at **storage slot 0** and delegate all logic to it. Because Safe supports **`operation = 1` (delegatecall)**, any signed transaction can point to an arbitrary contract and execute its code in the proxy’s storage context.
+Safe proxies keep `masterCopy` at **storage slot 0** and delegate all logic to it. Because Safe supports **`operation = 1` (delegatecall)**, any signed transaction can point to an arbitrary contract and execute its code in the proxy’s storage context.<sup>[[3]](#references)</sup>
 
-An attacker contract mimicked an ERC-20 `transfer(address,uint256)` but instead wrote `_to` into slot 0:
+An attacker contract mimicked an ERC-20 `transfer(address,uint256)` but instead wrote `_to` into slot 0:<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```solidity
 // Decompiler view (storage slot 0 write)
@@ -56,7 +56,7 @@ function transfer(address _to, uint256 _value) external {
 }
 ```
 
-Execution path:
+Execution path:<sup>[[1]](#references)[[3]](#references)</sup>
 1. Victims sign `execTransaction` with `operation = delegatecall`, `to = attackerContract`, `data = transfer(newImpl, 0)`.
 2. Safe masterCopy validates signatures over these parameters.
 3. Proxy delegatecalls into `attackerContract`; the `transfer` body writes slot 0.
@@ -76,10 +76,10 @@ Execution path:
 
 ## References
 
-- [AnChain.AI forensic breakdown of the Bybit Safe exploit](https://www.anchain.ai/blog/bybit)
-- [Zero Hour Technology analysis of the Safe bundle compromise](https://www.panewslab.com/en/articles/7r34t0qk9a15)
-- [In-depth technical analysis of the Bybit hack (NCC Group)](https://www.nccgroup.com/research-blog/in-depth-technical-analysis-of-the-bybit-hack/)
-- [EIP-712](https://eips.ethereum.org/EIPS/eip-712)
-- [safe-client-gateway (GitHub)](https://github.com/safe-global/safe-client-gateway)
+- [1] [AnChain.AI forensic breakdown of the Bybit Safe exploit](https://www.anchain.ai/blog/bybit)
+- [2] [Zero Hour Technology analysis of the Safe bundle compromise](https://www.panewslab.com/en/articles/7r34t0qk9a15)
+- [3] [In-depth technical analysis of the Bybit hack (NCC Group)](https://www.nccgroup.com/research-blog/in-depth-technical-analysis-of-the-bybit-hack/)
+- [4] [EIP-712](https://eips.ethereum.org/EIPS/eip-712)
+- [5] [safe-client-gateway (GitHub)](https://github.com/safe-global/safe-client-gateway)
 
 {{#include ../../banners/hacktricks-training.md}}

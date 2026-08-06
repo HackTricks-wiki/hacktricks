@@ -19,7 +19,7 @@ In this case it's possible to access this object just using any gadget to **acce
 
 In the case where **the vulnerability is in a different python file**, you need a gadget to traverse files to get to the main one to **access the global object `app.secret_key`** and be able to [**escalate privileges** knowing this key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-A payload like this one [from this writeup](https://ctftime.org/writeup/36082):
+A payload like this one [from this writeup](https://ctftime.org/writeup/36082):<sup>[[3]](#references)</sup>
 
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
@@ -29,7 +29,7 @@ Use this payload to **read `app.secret_key`**. If the original bug also gives yo
 
 ### Werkzeug - machine_id and node uuid
 
-[**Using these payload from this writeup**](https://vozec.fr/writeups/tweedle-dum-dee/) you will be able to access the **machine_id** and the **uuid** node, which are the **private bits** you need to [**generate the Werkzeug pin**](../../network-services-pentesting/pentesting-web/werkzeug.md) and access the python console in `/console` if the **debug mode is enabled**:
+[**Using these payload from this writeup**](https://vozec.fr/writeups/tweedle-dum-dee/) you will be able to access the **machine_id** and the **uuid** node, which are the **private bits** you need to [**generate the Werkzeug pin**](../../network-services-pentesting/pentesting-web/werkzeug.md) and access the python console in `/console` if the **debug mode is enabled**:<sup>[[4]](#references)</sup>
 
 ```python
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug]._machine_id}
@@ -61,7 +61,7 @@ If the vulnerable gadget is in another module, walk globals first:
 __init__.__globals__['sys'].modules['django.conf'].settings.SECRET_KEY
 ```
 
-`SECRET_KEY_FALLBACKS` are just as valuable as the current `SECRET_KEY`: they still validate old signed values during rotation. Also leak `SESSION_ENGINE` and `SESSION_SERIALIZER` to quickly determine whether the impact is only cookie forgery or something stronger. For the web impact details, check the [**Django pentesting page**](../../network-services-pentesting/pentesting-web/django.md).
+`SECRET_KEY_FALLBACKS` are just as valuable as the current `SECRET_KEY`: they still validate old signed values during rotation.<sup>[[1]](#references)</sup> Also leak `SESSION_ENGINE` and `SESSION_SERIALIZER` to quickly determine whether the impact is only cookie forgery or something stronger. For the web impact details, check the [**Django pentesting page**](../../network-services-pentesting/pentesting-web/django.md).
 
 ### Module loader gadgets - read source code and files
 
@@ -113,14 +113,18 @@ Environment variables are frequently the only secrets needed to move from read t
 
 ### Django-Unicorn class pollution (CVE-2025-24370)
 
-`django-unicorn` ([**GHSA-g9wf-5777-gq43**](https://github.com/adamghill/django-unicorn/security/advisories/GHSA-g9wf-5777-gq43), `<0.62.0`) allowed **class pollution** via crafted component requests. Setting a property path such as `__init__.__globals__` let an attacker reach the component module globals and any imported modules (e.g. `settings`, `os`, `sys`). From there you can leak `SECRET_KEY`, `DATABASES` or service credentials without code execution. The exploit chain is purely read-based and uses the same dunder-gadget patterns as above.
+`django-unicorn` ([**GHSA-g9wf-5777-gq43**](https://github.com/adamghill/django-unicorn/security/advisories/GHSA-g9wf-5777-gq43), `<0.62.0`) allowed **class pollution** via crafted component requests. Setting a property path such as `__init__.__globals__` let an attacker reach the component module globals and any imported modules (e.g. `settings`, `os`, `sys`). From there you can leak `SECRET_KEY`, `DATABASES` or service credentials without code execution. The exploit chain is purely read-based and uses the same dunder-gadget patterns as above.<sup>[[5]](#references)</sup>
 
 ### Gadget collections for chaining
 
-Recent CTFs and pyjail research show reliable read chains built only with attribute access and subclass enumeration. Community-maintained lists such as [**pyjailbreaker**](https://github.com/jailctf/pyjailbreaker) catalog hundreds of minimal gadgets you can combine to traverse from objects to `__globals__`, `sys.modules` and finally sensitive data. Prefer **attribute/name based searches** over raw subclass indexes because the position of `os._wrap_close`, `FileLoader`, `warnings.catch_warnings`, etc. changes between Python versions and with extra imported libraries.
+Recent CTFs and pyjail research show reliable read chains built only with attribute access and subclass enumeration. Community-maintained lists such as [**pyjailbreaker**](https://github.com/jailctf/pyjailbreaker) catalog hundreds of minimal gadgets you can combine to traverse from objects to `__globals__`, `sys.modules` and finally sensitive data.<sup>[[2]](#references)</sup> Prefer **attribute/name based searches** over raw subclass indexes because the position of `os._wrap_close`, `FileLoader`, `warnings.catch_warnings`, etc. changes between Python versions and with extra imported libraries.
 
 ## References
 
-- [Django cryptographic signing docs](https://docs.djangoproject.com/en/6.0/topics/signing/)
-- [pyjailbreaker – Python sandbox gadget wiki](https://github.com/jailctf/pyjailbreaker)
+- [1] [Django cryptographic signing docs](https://docs.djangoproject.com/en/6.0/topics/signing/)
+- [2] [pyjailbreaker – Python sandbox gadget wiki](https://github.com/jailctf/pyjailbreaker)
+- [3] [CTFtime.org / idekCTF 2022 / task manager / Writeup](https://ctftime.org/writeup/36082)
+- [4] [Tweedle Dum & Dee – FCSC 2023 writeup](https://vozec.fr/writeups/tweedle-dum-dee/)
+- [5] [Django-Unicorn Class Pollution Vulnerability, Leading to RCE, XSS, DoS and Authentication Bypass (GHSA-g9wf-5777-gq43)](https://github.com/adamghill/django-unicorn/security/advisories/GHSA-g9wf-5777-gq43)
+
 {{#include ../../banners/hacktricks-training.md}}

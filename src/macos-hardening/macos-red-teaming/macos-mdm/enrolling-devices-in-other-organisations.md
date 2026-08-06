@@ -7,7 +7,7 @@
 As [**previously commented**](#what-is-mdm-mobile-device-management)**,** in order to try to enrol a device into an organization **only a Serial Number belonging to that Organization is needed**. Once the device is enrolled, several organizations will install sensitive data on the new device: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
 Therefore, this could be a dangerous entrypoint for attackers if the enrolment process isn't correctly protected.
 
-**The following is a summary of the research [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Check it for further technical details!**<sup>[1]</sup>
+**The following is a summary of the research [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Check it for further technical details!**<sup>[[1]](#references)</sup>
 
 ## Overview of DEP and MDM Binary Analysis
 
@@ -17,15 +17,15 @@ This research delves into the binaries associated with the Device Enrollment Pro
 - **`profiles`**: Manages Configuration Profiles, and triggers DEP check-ins on macOS versions 10.13.4 and later.
 - **`cloudconfigurationd`**: Manages DEP API communications and retrieves Device Enrollment profiles.
 
-DEP check-ins utilize the `CPFetchActivationRecord` and `CPGetActivationRecord` functions from the private Configuration Profiles framework to fetch the Activation Record, with `CPFetchActivationRecord` coordinating with `cloudconfigurationd` through XPC.<sup>[1]</sup>
+DEP check-ins utilize the `CPFetchActivationRecord` and `CPGetActivationRecord` functions from the private Configuration Profiles framework to fetch the Activation Record, with `CPFetchActivationRecord` coordinating with `cloudconfigurationd` through XPC.<sup>[[1]](#references)</sup>
 
 ## Tesla Protocol and Absinthe Scheme Reverse Engineering
 
-The DEP check-in involves `cloudconfigurationd` sending an encrypted, signed JSON payload to _iprofiles.apple.com/macProfile_. The payload includes the device's serial number and the action "RequestProfileConfiguration". The encryption scheme used is referred to internally as "Absinthe". Unraveling this scheme is complex and involves numerous steps, which led to exploring alternative methods for inserting arbitrary serial numbers in the Activation Record request.<sup>[1]</sup>
+The DEP check-in involves `cloudconfigurationd` sending an encrypted, signed JSON payload to _iprofiles.apple.com/macProfile_. The payload includes the device's serial number and the action "RequestProfileConfiguration". The encryption scheme used is referred to internally as "Absinthe". Unraveling this scheme is complex and involves numerous steps, which led to exploring alternative methods for inserting arbitrary serial numbers in the Activation Record request.<sup>[[1]](#references)</sup>
 
 ## Proxying DEP Requests
 
-Attempts to intercept and modify DEP requests to _iprofiles.apple.com_ using tools like Charles Proxy were hindered by payload encryption and SSL/TLS security measures. However, enabling the `MCCloudConfigAcceptAnyHTTPSCertificate` configuration allows bypassing the server certificate validation, although the payload's encrypted nature still prevents modification of the serial number without the decryption key.<sup>[1]</sup>
+Attempts to intercept and modify DEP requests to _iprofiles.apple.com_ using tools like Charles Proxy were hindered by payload encryption and SSL/TLS security measures. However, enabling the `MCCloudConfigAcceptAnyHTTPSCertificate` configuration allows bypassing the server certificate validation, although the payload's encrypted nature still prevents modification of the serial number without the decryption key.<sup>[[1]](#references)</sup>
 
 ## Instrumenting System Binaries Interacting with DEP
 
@@ -38,17 +38,17 @@ Modifying the DEP request payload before JSON serialization in `cloudconfigurati
 2. Locating the point where the system serial number is fetched.
 3. Injecting an arbitrary serial number into the memory before the payload is encrypted and sent.
 
-This method allowed for retrieving complete DEP profiles for arbitrary serial numbers, demonstrating a potential vulnerability.<sup>[1]</sup>
+This method allowed for retrieving complete DEP profiles for arbitrary serial numbers, demonstrating a potential vulnerability.<sup>[[1]](#references)</sup>
 
 ### Automating Instrumentation with Python
 
-The exploitation process was automated using Python with the LLDB API, making it feasible to programmatically inject arbitrary serial numbers and retrieve corresponding DEP profiles.<sup>[1]</sup>
+The exploitation process was automated using Python with the LLDB API, making it feasible to programmatically inject arbitrary serial numbers and retrieve corresponding DEP profiles.<sup>[[1]](#references)</sup>
 
 ### Potential Impacts of DEP and MDM Vulnerabilities
 
 The research highlighted significant security concerns:
 
-1. **Information Disclosure**: By providing a DEP-registered serial number, sensitive organizational information contained in the DEP profile can be retrieved.<sup>[1]</sup>
+1. **Information Disclosure**: By providing a DEP-registered serial number, sensitive organizational information contained in the DEP profile can be retrieved.<sup>[[1]](#references)</sup>
 
 ## References
 

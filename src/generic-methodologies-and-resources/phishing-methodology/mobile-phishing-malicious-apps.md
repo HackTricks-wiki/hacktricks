@@ -4,7 +4,7 @@
 
 > [!INFO]
 > This page covers techniques used by threat actors to distribute **malicious Android APKs** and **iOS mobile-configuration profiles** through phishing (SEO, social engineering, fake stores, dating apps, etc.).
-> The material is adapted from the SarangTrap campaign exposed by Zimperium zLabs (2025) and other public research.
+> The material is adapted from the SarangTrap campaign exposed by Zimperium zLabs (2025) and other public research.<sup>[[1]](#references)</sup>
 
 ## Attack Flow
 
@@ -25,7 +25,7 @@
      3. Trust the unsigned profile ➜ attacker gains *Contacts* & *Photo* entitlement without App Store review.
 5. **iOS Web Clip Payload (phishing app icon)**
    * `com.apple.webClip.managed` payloads can **pin a phishing URL to the Home Screen** with a branded icon/label.
-   * Web Clips can run **full‑screen** (hides the browser UI) and be marked **non‑removable**, forcing the victim to delete the profile to remove the icon.
+   * Web Clips can run **full‑screen** (hides the browser UI) and be marked **non‑removable**, forcing the victim to delete the profile to remove the icon.<sup>[[3]](#references)</sup>
 6. **Network Layer**
    * Plain HTTP, often on port 80 with HOST header like `api.<phishingdomain>.com`.
    * `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (no TLS → easy to spot).
@@ -83,9 +83,8 @@ See also WebSocket tradecraft and tooling:
 
 ## References
 
-
-- [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
-- [Socket.IO](https://socket.io)
-- [Web Clips payload settings for Apple devices](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
+- [1] [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
+- [2] [Socket.IO](https://socket.io)
+- [3] [Web Clips payload settings for Apple devices](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -20,7 +20,7 @@ When a connection is stablished to an XPC service, the server will check if the 
 7. The **verification** must be **based** on the connecting **client’s audit token** **instead** of its process ID (**PID**) since the former prevents **PID reuse attacks**.
    - Developers **rarely use the audit token** API call since it’s **private**, so Apple could **change** at any time. Additionally, private API usage is not allowed in Mac App Store apps.
      - If the method **`processIdentifier`** is used, it might be vulnerable
-     - **`xpc_dictionary_get_audit_token`** should be used instead of **`xpc_connection_get_audit_token`**, as the latest could also be [vulnerable in certain situations](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).<sup>[5]</sup>
+     - **`xpc_dictionary_get_audit_token`** should be used instead of **`xpc_connection_get_audit_token`**, as the latest could also be [vulnerable in certain situations](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).<sup>[[5]](#references)</sup>
 
 ### Communication Attacks
 
@@ -55,7 +55,7 @@ The server will implement this **verification** in a function called **`shouldAc
 
 The object NSXPCConnection has a **private** property **`auditToken`** (the one that should be used but could change) and a the **public** property **`processIdentifier`** (the one that shouldn't be used).
 
-The connecting process could be verified with something like:<sup>[1][2][3]</sup>
+The connecting process could be verified with something like:<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
 ```objectivec
 [...]
@@ -94,7 +94,7 @@ if ((csFlags & (cs_hard | cs_require_lv)) {
 }
 ```
 
-The `cs_*` constants above are the code-signing flags defined in XNU's `osfmk/kern/cs_blobs.h`, so they can be checked against the source rather than guessed:<sup>[4]</sup>
+The `cs_*` constants above are the code-signing flags defined in XNU's `osfmk/kern/cs_blobs.h`, so they can be checked against the source rather than guessed:<sup>[[4]](#references)</sup>
 
 ```c
 #define CS_HARD                     0x00000100  /* don't load invalid pages */

@@ -12,7 +12,7 @@
 
 ## Quick triage before using a payload
 
-Recent permission-theft research keeps reinforcing the same workflow: first find an app that already has the TCC grant you want, then verify that it is a realistic injection target.<sup>[1]</sup>
+Recent permission-theft research keeps reinforcing the same workflow: first find an app that already has the TCC grant you want, then verify that it is a realistic injection target.<sup>[[1]](#references)</sup>
 
 ```bash
 sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" \
@@ -349,7 +349,7 @@ cp -r "$HOME/Library/Calendars" "/tmp/calendars"
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-Record a 3s video and save it in **`/tmp/recording.mov`**<sup>[5]</sup>
+Record a 3s video and save it in **`/tmp/recording.mov`**<sup>[[5]](#references)</sup>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -430,7 +430,7 @@ static void myconstructor(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-Check if the program has access to the camera.<sup>[5]</sup>
+Check if the program has access to the camera.<sup>[[5]](#references)</sup>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -502,7 +502,7 @@ ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-Record 5s of audio and store it in `/tmp/recording.m4a`<sup>[6]</sup>
+Record 5s of audio and store it in `/tmp/recording.m4a`<sup>[[6]](#references)</sup>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -604,7 +604,7 @@ static void myconstructor(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-Check if the app has access to the microphone.<sup>[5]</sup>
+Check if the app has access to the microphone.<sup>[[5]](#references)</sup>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -732,7 +732,7 @@ void myconstructor(int argc, const char **argv)
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Get the current location from shell.<sup>[2]</sup>
+Get the current location from shell.<sup>[[2]](#references)</sup>
 
 ```bash
 # Fast option: use a dedicated CoreLocation CLI helper

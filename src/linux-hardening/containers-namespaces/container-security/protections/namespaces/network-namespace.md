@@ -4,7 +4,7 @@
 
 ## Overview
 
-The network namespace isolates network-related resources such as interfaces, IP addresses, routing tables, ARP/neighbor state, firewall rules, sockets, the UNIX-domain abstract socket namespace, and the contents of files like `/proc/net`. This is why a container can have what looks like its own `eth0`, its own local routes, and its own loopback device without owning the host's real network stack.
+The network namespace isolates network-related resources such as interfaces, IP addresses, routing tables, ARP/neighbor state, firewall rules, sockets, the UNIX-domain abstract socket namespace, and the contents of files like `/proc/net`.<sup>[[2]](#references)</sup> This is why a container can have what looks like its own `eth0`, its own local routes, and its own loopback device without owning the host's real network stack.
 
 Security-wise, this matters because network isolation is about much more than port binding. A private network namespace limits what the workload can directly observe or reconfigure. Once that namespace is shared with the host, the container may suddenly gain visibility into host listeners, host-local services, abstract AF_UNIX endpoints, and network control points that were never meant to be exposed to the application.
 
@@ -45,7 +45,7 @@ The most important misconfiguration is simply sharing the host network namespace
 
 Another problem is overgranting network-related capabilities even when the network namespace is private. A private namespace does help, but it does not make raw sockets or advanced network control harmless.
 
-In Kubernetes, `hostNetwork: true` also changes how much faith you can place in Pod-level network segmentation. Kubernetes documents that many network plugins cannot properly distinguish `hostNetwork` Pod traffic for `podSelector` / `namespaceSelector` matching and therefore treat it as ordinary node traffic. From an attacker's point of view, that means a compromised `hostNetwork` workload should often be treated as a node-level network foothold rather than as a normal Pod still constrained by the same policy assumptions as overlay-network workloads.
+In Kubernetes, `hostNetwork: true` also changes how much faith you can place in Pod-level network segmentation. Kubernetes documents that many network plugins cannot properly distinguish `hostNetwork` Pod traffic for `podSelector` / `namespaceSelector` matching and therefore treat it as ordinary node traffic.<sup>[[1]](#references)</sup> From an attacker's point of view, that means a compromised `hostNetwork` workload should often be treated as a node-level network foothold rather than as a normal Pod still constrained by the same policy assumptions as overlay-network workloads.
 
 ## Abuse
 
@@ -74,7 +74,7 @@ ss -xap 2>/dev/null | head -n 50
 grep -a '@' /proc/net/unix 2>/dev/null | head -n 50
 ```
 
-A historical example was the `containerd-shim` abstract-socket exposure bug, but the broader lesson is more important than the specific CVE: once a workload joins the host network namespace, abstract AF_UNIX services become part of the attack surface too. If those sockets appear runtime-related or administrative, pivot to [Runtime API And Daemon Exposure](../../runtime-api-and-daemon-exposure.md).
+A historical example was the `containerd-shim` abstract-socket exposure bug, but the broader lesson is more important than the specific CVE: once a workload joins the host network namespace, abstract AF_UNIX services become part of the attack surface too.<sup>[[3]](#references)</sup> If those sockets appear runtime-related or administrative, pivot to [Runtime API And Daemon Exposure](../../runtime-api-and-daemon-exposure.md).
 
 If network capabilities are present, test whether the workload can inspect or alter the visible stack:
 
@@ -84,7 +84,7 @@ iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
 ip link show
 ```
 
-On modern kernels, host networking plus `CAP_NET_ADMIN` may also expose the packet path beyond simple `iptables` / `nftables` changes. `tc` qdiscs and filters are namespace-scoped too, so in a shared host network namespace they apply to the host interfaces the container can see. If `CAP_BPF` is additionally present, network-related eBPF programs such as TC and XDP loaders become relevant as well:
+On modern kernels, host networking plus `CAP_NET_ADMIN` may also expose the packet path beyond simple `iptables` / `nftables` changes. `tc` qdiscs and filters are namespace-scoped too, so in a shared host network namespace they apply to the host interfaces the container can see. If `CAP_BPF` is additionally present, network-related eBPF programs such as TC and XDP loaders become relevant as well:<sup>[[4]](#references)</sup>
 
 ```bash
 capsh --print | grep -E 'cap_net_admin|cap_net_raw|cap_bpf'
@@ -173,8 +173,8 @@ When reviewing a container, always evaluate the network namespace together with 
 
 ## References
 
-- [Kubernetes NetworkPolicy and `hostNetwork` caveats](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
-- [Linux `network_namespaces(7)` and abstract UNIX socket isolation](https://man7.org/linux/man-pages/man7/network_namespaces.7.html)
-- [containerd advisory: abstract Unix domain sockets exposed to host-network containers](https://github.com/containerd/containerd/security/advisories/GHSA-36xw-fx78-c5r4)
-- [eBPF token and capability requirements for network-related eBPF programs](https://docs.ebpf.io/linux/concepts/token/)
+- [1] [Kubernetes NetworkPolicy and `hostNetwork` caveats](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+- [2] [Linux `network_namespaces(7)` and abstract UNIX socket isolation](https://man7.org/linux/man-pages/man7/network_namespaces.7.html)
+- [3] [containerd advisory: abstract Unix domain sockets exposed to host-network containers](https://github.com/containerd/containerd/security/advisories/GHSA-36xw-fx78-c5r4)
+- [4] [eBPF token and capability requirements for network-related eBPF programs](https://docs.ebpf.io/linux/concepts/token/)
 {{#include ../../../../../banners/hacktricks-training.md}}

@@ -317,7 +317,7 @@ iptables -P OUTPUT ACCEPT
 
 ## eBPF Telemetry & Rootkit Hunting
 
-Modern rootkits (TripleCross, BPFDoor variants, etc.) increasingly persist as hidden eBPF programs. Baseline your fleet with `bpftool`/`eBPFmon` so you can spot unsigned programs, unexpected cgroup hooks, or malicious map contents before detaching them.
+Modern rootkits (TripleCross, BPFDoor variants, etc.) increasingly persist as hidden eBPF programs. Baseline your fleet with `bpftool`/`eBPFmon` so you can spot unsigned programs, unexpected cgroup hooks, or malicious map contents before detaching them.<sup>[[1]](#references)</sup>
 
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
@@ -341,7 +341,7 @@ Correlate the bpftool output with expected NIC/cgroup attachments; a sudden `xdp
 
 ## Journald Incident Triage
 
-systemd-journald keeps structured metadata, so you can pivot by boot, severity, unit, or UID without touching `/var/log/*`. Combine filters with relative timestamps to isolate attack windows or prove log tampering quickly.
+systemd-journald keeps structured metadata, so you can pivot by boot, severity, unit, or UID without touching `/var/log/*`. Combine filters with relative timestamps to isolate attack windows or prove log tampering quickly.<sup>[[2]](#references)</sup>
 
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
@@ -358,8 +358,8 @@ Add `--grep 'Invalid user' --case-sensitive` or `-k` (kernel ring buffer only) w
 
 ## References
 
-- [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
 
 {{#include ../../banners/hacktricks-training.md}}
 

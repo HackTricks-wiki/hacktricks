@@ -127,7 +127,7 @@ exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 
 ### F-string re-evaluation sinks
 
-A different but very common bug is to **insert attacker-controlled data into a string and then evaluate that string as an f-string**. This is **not** Jinja/SSTI; the Python interpreter itself executes anything placed inside `{...}` during the second evaluation step:
+A different but very common bug is to **insert attacker-controlled data into a string and then evaluate that string as an f-string**. This is **not** Jinja/SSTI; the Python interpreter itself executes anything placed inside `{...}` during the second evaluation step:<sup>[[10]](#references)</sup>
 
 ```python
 def template(first, last, gender):
@@ -191,7 +191,7 @@ df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']
 
 Also see a real-world sandboxed evaluator escape in PDF generators:
 
-- ReportLab/xhtml2pdf triple-bracket [[[...]]] expression evaluation → RCE (CVE-2023-33733). It abuses rl_safe_eval to reach function.__globals__ and os.system from evaluated attributes (for example, font color) and returns a valid value to keep rendering stable.
+- ReportLab/xhtml2pdf triple-bracket [[[...]]] expression evaluation → RCE (CVE-2023-33733). It abuses rl_safe_eval to reach function.__globals__ and os.system from evaluated attributes (for example, font color) and returns a valid value to keep rendering stable.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
 
 {{#ref}}
 reportlab-xhtml2pdf-triple-brackets-expression-evaluation-rce-cve-2023-33733.md
@@ -210,7 +210,7 @@ reportlab-xhtml2pdf-triple-brackets-expression-evaluation-rce-cve-2023-33733.md
 
 ## Bypassing protections through encodings (UTF-7)
 
-In [**this writeup**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) UFT-7 is used to load and execute arbitrary python code inside an apparent sandbox:
+In [**this writeup**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) UFT-7 is used to load and execute arbitrary python code inside an apparent sandbox:<sup>[[11]](#references)</sup>
 
 ```python
 assert b"+AAo-".decode("utf_7") == "\n"
@@ -852,11 +852,11 @@ str(x) # Out: clueless
 
 ### LLM Jails bypass
 
-From [here](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce): `().class.base.subclasses()[108].load_module('os').system('dir')`
+From [here](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce): `().class.base.subclasses()[108].load_module('os').system('dir')`<sup>[[12]](#references)</sup>
 
 ### From format to RCE loading libraries
 
-According to the [**TypeMonkey chall from this writeup**](https://corgi.rip/posts/buckeye-writeups/) it's possible to load arbitrary libraries from disk abusing the format string vulnerability in python.
+According to the [**TypeMonkey chall from this writeup**](https://corgi.rip/posts/buckeye-writeups/) it's possible to load arbitrary libraries from disk abusing the format string vulnerability in python.<sup>[[13]](#references)</sup>
 
 As reminder, every time an action is performed in python some function is executed. For example `2*3` will execute **`(2).mul(3)`** or **`{'a':'b'}['a']`** will be **`{'a':'b'}.__getitem__('a')`**.
 
@@ -1187,7 +1187,7 @@ Using tools like [**https://www.decompiler.com/**](https://www.decompiler.com) o
 ### Assert
 
 Python executed with optimizations with the param `-O` will remove asset statements and any code conditional on the value of **debug**.\
-Therefore, checks like
+Therefore, checks like<sup>[[6]](#references)</sup>
 
 ```python
 def check_permission(super_user):
@@ -1202,15 +1202,18 @@ will be bypassed
 
 ## References
 
-- [https://lbarman.ch/blog/pyjail/](https://lbarman.ch/blog/pyjail/)
-- [https://ctf-wiki.github.io/ctf-wiki/pwn/linux/sandbox/python-sandbox-escape/](https://ctf-wiki.github.io/ctf-wiki/pwn/linux/sandbox/python-sandbox-escape/)
-- [https://blog.delroth.net/2013/03/escaping-a-python-sandbox-ndh-2013-quals-writeup/](https://blog.delroth.net/2013/03/escaping-a-python-sandbox-ndh-2013-quals-writeup/)
-- [https://gynvael.coldwind.pl/n/python_sandbox_escape](https://gynvael.coldwind.pl/n/python_sandbox_escape)
-- [https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
-- [https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
-- [CVE-2023-33733 (ReportLab rl_safe_eval expression evaluation RCE) – NVD](https://nvd.nist.gov/vuln/detail/cve-2023-33733)
-- [c53elyas/CVE-2023-33733 PoC and write-up](https://github.com/c53elyas/CVE-2023-33733)
-- [0xdf: University (HTB) – Exploiting xhtml2pdf/ReportLab CVE-2023-33733 to gain RCE](https://0xdf.gitlab.io/2025/08/09/htb-university.html)
-- [0xdf: HTB Interpreter – Mirth Connect XStream RCE, Mirth hash cracking, and Flask f-string eval privilege escalation](https://0xdf.gitlab.io/2026/05/30/htb-interpreter.html)
+- [1] [Pyjail](https://lbarman.ch/blog/pyjail/)
+- [2] [Python Sandbox Escape - CTF Wiki](https://ctf-wiki.github.io/ctf-wiki/pwn/linux/sandbox/python-sandbox-escape/)
+- [3] [Escaping a Python sandbox (NdH 2013 quals writeup)](https://blog.delroth.net/2013/03/escaping-a-python-sandbox-ndh-2013-quals-writeup/)
+- [4] [Python 'sandbox' escape](https://gynvael.coldwind.pl/n/python_sandbox_escape)
+- [5] [Eval really is dangerous](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
+- [6] [How Assertions Can Get You Hacked](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
+- [7] [CVE-2023-33733 (ReportLab rl_safe_eval expression evaluation RCE) – NVD](https://nvd.nist.gov/vuln/detail/cve-2023-33733)
+- [8] [c53elyas/CVE-2023-33733 PoC and write-up](https://github.com/c53elyas/CVE-2023-33733)
+- [9] [0xdf: University (HTB) – Exploiting xhtml2pdf/ReportLab CVE-2023-33733 to gain RCE](https://0xdf.gitlab.io/2025/08/09/htb-university.html)
+- [10] [0xdf: HTB Interpreter – Mirth Connect XStream RCE, Mirth hash cracking, and Flask f-string eval privilege escalation](https://0xdf.gitlab.io/2026/05/30/htb-interpreter.html)
+- [11] [SECCON CTF 2022 Quals: Author writeups (English)](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy)
+- [12] [Anatomy of an LLM RCE - CyberArk Threat Research Blog](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce)
+- [13] [BuckeyeCTF 2024 Author Writeups](https://corgi.rip/posts/buckeye-writeups/)
 
 {{#include ../../../banners/hacktricks-training.md}}

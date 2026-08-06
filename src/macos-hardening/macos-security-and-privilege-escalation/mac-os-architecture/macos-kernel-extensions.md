@@ -13,7 +13,7 @@ Starting with **macOS Catalina (10.15)** Apple marked most legacy KPIs as *depre
 2. Select **Reduced Security** and tick **“Allow user management of kernel extensions from identified developers”**.
 3. Reboot and approve the kext from **System Settings → Privacy & Security**.
 
-User-land drivers written with DriverKit/System Extensions dramatically **reduce attack surface** because crashes or memory corruption are confined to a sandboxed process rather than kernel space.<sup>[1]</sup>  
+User-land drivers written with DriverKit/System Extensions dramatically **reduce attack surface** because crashes or memory corruption are confined to a sandboxed process rather than kernel space.<sup>[[1]](#references)</sup>  
 
 > 📝 From macOS Sequoia (15) Apple has removed several legacy networking and USB KPIs entirely – the only forward-compatible solution for vendors is to migrate to System Extensions.
 

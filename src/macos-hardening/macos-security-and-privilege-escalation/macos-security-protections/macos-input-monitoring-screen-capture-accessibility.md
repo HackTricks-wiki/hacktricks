@@ -25,7 +25,7 @@ These permissions are **the most dangerous combination** on macOS — together t
 
 ### How It Works
 
-macOS uses the **`CGEventTap` API** to allow processes to intercept input events from the Quartz event system. A process with ListenEvent permission can create an event tap that receives **every keyboard and mouse event** before or after they reach the target application.<sup>[1]</sup>
+macOS uses the **`CGEventTap` API** to allow processes to intercept input events from the Quartz event system. A process with ListenEvent permission can create an event tap that receives **every keyboard and mouse event** before or after they reach the target application.<sup>[[1]](#references)</sup>
 
 ```objc
 // Create an event tap that captures all key-down events
@@ -97,7 +97,7 @@ NSString *appName = frontApp.localizedName;
 
 ### How It Works
 
-PostEvent permission allows creating an event tap with **`kCGEventTapOptionDefault`** (can modify/inject events) instead of ListenOnly.<sup>[1]</sup> This enables:
+PostEvent permission allows creating an event tap with **`kCGEventTapOptionDefault`** (can modify/inject events) instead of ListenOnly.<sup>[[1]](#references)</sup> This enables:
 
 ```objc
 // Inject a keystroke
@@ -133,7 +133,7 @@ With PostEvent, an attacker can **simulate clicking "Allow"** on TCC permission 
 
 Screen capture permission allows reading the display buffer using:
 - **`CGWindowListCreateImage`** — capture any window or full screen
-- **`ScreenCaptureKit`** (macOS 12.3+) — modern API for streaming screen content<sup>[3]</sup>
+- **`ScreenCaptureKit`** (macOS 12.3+) — modern API for streaming screen content<sup>[[3]](#references)</sup>
 - **`CGDisplayStream`** — hardware-accelerated screen capture
 
 ```objc
@@ -194,7 +194,7 @@ config.minimumFrameInterval = CMTimeMake(1, 5); // 5 FPS
 
 ### How It Works
 
-Accessibility access grants control over other applications via the **AXUIElement API**.<sup>[2]</sup> A process with accessibility can:
+Accessibility access grants control over other applications via the **AXUIElement API**.<sup>[[2]](#references)</sup> A process with accessibility can:
 
 1. **Read** any UI element in any application (text fields, labels, buttons, menus)
 2. **Click** buttons and interact with controls

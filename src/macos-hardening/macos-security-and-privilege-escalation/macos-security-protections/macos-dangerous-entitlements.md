@@ -35,7 +35,7 @@ This entitlement allows to **load frameworks, plug-ins, or libraries without bei
 
 This entitlement is very similar to **`com.apple.security.cs.disable-library-validation`** but **instead** of **directly disabling** library validation, it allows the process to **call a `csops` system call to disable it** at runtime.
 
-The entitlement name is hardcoded in XNU next to the `csops` operation that consumes it:<sup>[2]</sup>
+The entitlement name is hardcoded in XNU next to the `csops` operation that consumes it:<sup>[[2]](#references)</sup>
 
 ```c
 /* bsd/sys/codesign.h */
@@ -44,7 +44,7 @@ The entitlement name is hardcoded in XNU next to the `csops` operation that cons
 #define CS_OPS_CLEAR_LV     15  /* clear the library validation flag */
 ```
 
-The kernel handler for `CS_OPS_CLEAR_LV` (`bsd/kern/kern_proc.c`) shows exactly how narrow the primitive is:<sup>[3]</sup>
+The kernel handler for `CS_OPS_CLEAR_LV` (`bsd/kern/kern_proc.c`) shows exactly how narrow the primitive is:<sup>[[3]](#references)</sup>
 
 ```c
 case CS_OPS_CLEAR_LV: {

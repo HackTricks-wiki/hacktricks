@@ -38,10 +38,10 @@ The[ **facts that a LC can use are documented**](https://developer.apple.com/doc
 
 When an Apple binary is signed it **assigns it to a LC category** inside the **trust cache**.
 
-- **iOS 16 LC categories** were [**reversed and documented in here**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).<sup>[6]</sup>
-- Current **LC categories (macOS 14** - Somona) have been reversed and their [**descriptions can be found here**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).<sup>[7]</sup>
+- **iOS 16 LC categories** were [**reversed and documented in here**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).<sup>[[6]](#references)</sup>
+- Current **LC categories (macOS 14** - Somona) have been reversed and their [**descriptions can be found here**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).<sup>[[7]](#references)</sup>
 
-For example Category 1 is:<sup>[7]</sup>
+For example Category 1 is:<sup>[[7]](#references)</sup>
 
 ```
 Category 1:
@@ -56,7 +56,7 @@ Category 1:
 
 ### Reversing LC Categories
 
-You have more information [**about it in here**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), but basically, They are defined in **AMFI (AppleMobileFileIntegrity)**, so you need to download the Kernel Development Kit to get the **KEXT**. The symbols starting with **`kConstraintCategory`** are the **interesting** ones. Extracting them you will get a DER (ASN.1) encoded stream that you will need to decode with [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) or the python-asn1 library and its `dump.py` script, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) which will give you a more understandable string.<sup>[3]</sup>
+You have more information [**about it in here**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), but basically, They are defined in **AMFI (AppleMobileFileIntegrity)**, so you need to download the Kernel Development Kit to get the **KEXT**. The symbols starting with **`kConstraintCategory`** are the **interesting** ones. Extracting them you will get a DER (ASN.1) encoded stream that you will need to decode with [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) or the python-asn1 library and its `dump.py` script, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) which will give you a more understandable string.<sup>[[3]](#references)</sup>
 
 ## Environment Constraints
 
@@ -145,7 +145,7 @@ struct trust_cache_entry2 {
 
 Then, you could use a script such as [**this one**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) to extract data.
 
-From that data you can check the Apps with a **launch constraints value of `0`** , which are the ones that aren't constrained ([**check here**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) for what each value is).<sup>[6]</sup>
+From that data you can check the Apps with a **launch constraints value of `0`** , which are the ones that aren't constrained ([**check here**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) for what each value is).<sup>[[6]](#references)</sup>
 
 ## Attack Mitigations
 
@@ -153,7 +153,7 @@ Launch Constrains would have mitigated several old attacks by **making sure that
 
 Moreover, Launch Constraints also **mitigates downgrade attacks.**
 
-However, they **don't mitigate common XPC** abuses, **Electron** code injections or **dylib injections** without library validation (unless the team IDs that can load libraries are known).<sup>[3]</sup>
+However, they **don't mitigate common XPC** abuses, **Electron** code injections or **dylib injections** without library validation (unless the team IDs that can load libraries are known).<sup>[[3]](#references)</sup>
 
 ### XPC Daemon Protection
 
@@ -162,11 +162,11 @@ In the Sonoma release, a notable point is the daemon XPC service's **responsibil
 - **Launching the XPC Service**: If assumed to be a bug, this setup does not permit initiating the XPC service through attacker code.
 - **Connecting to an Active Service**: If the XPC service is already running (possibly activated by its original application), there are no barriers to connecting to it.
 
-While implementing constraints on the XPC service might be beneficial by **narrowing the window for potential attacks**, it doesn't address the primary concern. Ensuring the security of the XPC service fundamentally requires **validating the connecting client effectively**. This remains the sole method to fortify the service's security. Also, it's worth noting that the mentioned responsibility configuration is currently operational, which might not align with the intended design.<sup>[3]</sup>
+While implementing constraints on the XPC service might be beneficial by **narrowing the window for potential attacks**, it doesn't address the primary concern. Ensuring the security of the XPC service fundamentally requires **validating the connecting client effectively**. This remains the sole method to fortify the service's security. Also, it's worth noting that the mentioned responsibility configuration is currently operational, which might not align with the intended design.<sup>[[3]](#references)</sup>
 
 ### Electron Protection
 
-Even if it's required that the application has to be **opened by LaunchService** (in the parents constraints). This can be achieved using **`open`** (which can set env variables) or using the **Launch Services API** (where env variables can be indicated).<sup>[3]</sup>
+Even if it's required that the application has to be **opened by LaunchService** (in the parents constraints). This can be achieved using **`open`** (which can set env variables) or using the **Launch Services API** (where env variables can be indicated).<sup>[[3]](#references)</sup>
 
 ### CVE-2025-43253 - Overriding the built-in constraints at spawn time
 
@@ -176,7 +176,7 @@ Launch constraints (officially **lightweight code requirements**, *LWCR*) are en
 - Set the **constraint category to `127`**, a value that AMFI allows in spawn attributes but does **not enforce** — it only logs `Launch Constraint Violation (not enforcing)` instead of blocking the execution.
 - Pass it via the spawn attributes, and the process launches in a context its real self/parent constraints would have forbidden.
 
-After the fix, **both** the built-in and the supplied constraints are validated, so the supplied dictionary can no longer weaken the built-in one.<sup>[2]</sup>
+After the fix, **both** the built-in and the supplied constraints are validated, so the supplied dictionary can no longer weaken the built-in one.<sup>[[2]](#references)</sup>
 
 > [!TIP]
 > This is the general shape to look for when auditing constraint enforcement: an API that lets untrusted input *supply* a policy tends to be interesting whenever the policy engine treats the supplied value as a replacement rather than an additional requirement.

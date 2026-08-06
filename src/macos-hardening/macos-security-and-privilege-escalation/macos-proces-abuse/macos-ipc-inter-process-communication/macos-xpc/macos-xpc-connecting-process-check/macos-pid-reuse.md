@@ -11,11 +11,11 @@ This function will make the **allowed binary own the PID** but the **malicious X
 ### Exploit example
 
 If you find the function **`shouldAcceptNewConnection`** or a function called by it **calling** **`processIdentifier`** and not calling **`auditToken`**. It highly probable means that it's **verifying the process PID** and not the audit token.\
-Like for example in this image (taken from the reference):<sup>[1]</sup>
+Like for example in this image (taken from the reference):<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../../../../images/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
 
-Check this example exploit (again, taken from the reference) to see the 2 parts of the exploit:<sup>[1]</sup>
+Check this example exploit (again, taken from the reference) to see the 2 parts of the exploit:<sup>[[1]](#references)</sup>
 
 - One that **generates several forks**
 - **Each fork** will **send** the **payload** to the XPC service while executing **`posix_spawn`** just after sending the message.
@@ -282,9 +282,9 @@ int main(int argc, const char * argv[]) {
 
 ## Other examples
 
-- [**Intego X9: Why your macOS antivirus should not trust PIDs**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - LPE against an AV's privileged helper that authenticated clients by PID.<sup>[3]</sup>
-- [**Exploiting GOG Galaxy XPC service for privilege escalation in macOS**](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)<sup>[4]</sup>
-- [**Rootpipe Reborn (Part II)**](https://objective-see.org/blog/blog_0x41.html)<sup>[5]</sup>
+- [**Intego X9: Why your macOS antivirus should not trust PIDs**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - LPE against an AV's privileged helper that authenticated clients by PID.<sup>[[3]](#references)</sup>
+- [**Exploiting GOG Galaxy XPC service for privilege escalation in macOS**](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)<sup>[[4]](#references)</sup>
+- [**Rootpipe Reborn (Part II)**](https://objective-see.org/blog/blog_0x41.html)<sup>[[5]](#references)</sup>
 
 ## References
 

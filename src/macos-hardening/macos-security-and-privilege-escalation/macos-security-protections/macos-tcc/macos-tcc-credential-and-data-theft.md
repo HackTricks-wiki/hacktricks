@@ -266,7 +266,7 @@ This entitlement allows communicating with `com.apple.iCloudHelper` XPC service,
 - **iCloud tokens** — authentication tokens for the user's Apple ID
 - **iCloud Drive** — synced documents from all devices
 - **iCloud Keychain** — passwords synced across all Apple devices
-- **Find My** — location of all the user's Apple devices<sup>[4]</sup>
+- **Find My** — location of all the user's Apple devices<sup>[[4]](#references)</sup>
 
 ```bash
 # Find iCloud-entitled binaries

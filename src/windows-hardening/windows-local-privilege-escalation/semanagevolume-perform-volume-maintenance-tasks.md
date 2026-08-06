@@ -8,13 +8,13 @@ Windows user right: Perform volume maintenance tasks (constant: SeManageVolumePr
 
 Holders can perform low-level volume operations such as defragmentation, creating/removing volumes, and maintenance IO. Critically for attackers, this right allows opening raw volume device handles (e.g., \\.\C:) and issuing direct disk I/O that bypasses NTFS file ACLs. With raw access you can copy bytes of any file on the volume even if denied by DACL, by parsing the filesystem structures offline or leveraging tools that read at the block/cluster level.
 
-Default: Administrators on servers and domain controllers.
+Default: Administrators on servers and domain controllers.<sup>[[1]](#references)</sup>
 
 ## Abuse scenarios
 
 - Arbitrary file read bypassing ACLs by reading the disk device (e.g., exfiltrate sensitive system-protected material such as machine private keys under %ProgramData%\Microsoft\Crypto\RSA\MachineKeys and %ProgramData%\Microsoft\Crypto\Keys, registry hives, DPAPI masterkeys, SAM, ntds.dit via VSS, etc.).
 - Bypass locked/privileged paths (C:\Windows\System32\…) by copying bytes directly from the raw device.
-- In AD CS environments, exfiltrate the CA’s key material (machine key store) to mint “Golden Certificates” and impersonate any domain principal via PKINIT. See link below.
+- In AD CS environments, exfiltrate the CA’s key material (machine key store) to mint “Golden Certificates” and impersonate any domain principal via PKINIT. See link below.<sup>[[2]](#references)</sup>
 
 Note: You still need a parser for NTFS structures unless you rely on helper tools. Many off-the-shelf tools abstract the raw access.
 
@@ -65,7 +65,7 @@ Typical sensitive paths to target:
 
 ## AD CS tie‑in: Forging a Golden Certificate
 
-If you can read the Enterprise CA’s private key from the machine key store, you can forge client‑auth certificates for arbitrary principals and authenticate via PKINIT/Schannel. This is often referred to as a Golden Certificate. See:
+If you can read the Enterprise CA’s private key from the machine key store, you can forge client‑auth certificates for arbitrary principals and authenticate via PKINIT/Schannel. This is often referred to as a Golden Certificate.<sup>[[2]](#references)</sup> See:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
@@ -82,7 +82,7 @@ If you can read the Enterprise CA’s private key from the machine key store, yo
 
 ## References
 
-- Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege): https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks
-- 0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate): https://0xdf.gitlab.io/2025/10/04/htb-certificate.html
+- [1] [Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
+- [2] [0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
 
 {{#include ../../banners/hacktricks-training.md}}

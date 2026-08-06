@@ -21,12 +21,12 @@ No Kerberos traffic or domain interaction is required during normal password usa
 
 ## Golden gMSA / Golden dMSA Attack
 
-If an attacker can obtain all three inputs **offline** they can compute **valid current and future passwords** for **any gMSA/dMSA in the forest** without touching the DC again, bypassing:
+If an attacker can obtain all three inputs **offline** they can compute **valid current and future passwords** for **any gMSA/dMSA in the forest** without touching the DC again, bypassing:<sup>[[1]](#references)[[2]](#references)</sup>
 
 * LDAP read auditing
 * Password change intervals (they can pre-compute)
 
-This is analogous to a *Golden Ticket* for service accounts.
+This is analogous to a *Golden Ticket* for service accounts.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Prerequisites
 
@@ -37,7 +37,7 @@ This is analogous to a *Golden Ticket* for service accounts.
 ### Golden gMSA / dMSA
 #### Phase 1 – Extract the KDS Root Key
 
-Dump from any DC (Volume Shadow Copy / raw SAM+SECURITY hives or remote secrets):
+Dump from any DC (Volume Shadow Copy / raw SAM+SECURITY hives or remote secrets):<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```cmd
 reg save HKLM\SECURITY security.hive
@@ -54,11 +54,11 @@ GoldendMSA.exe kds
 # With GoldenGMSA
 GoldenGMSA.exe kdsinfo
 ```
-The base64 string labelled `RootKey` (GUID name) is required in later steps.
+The base64 string labelled `RootKey` (GUID name) is required in later steps.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ##### Phase 2 – Enumerate gMSA / dMSA objects
 
-Retrieve at least `sAMAccountName`, `objectSid` and `msDS-ManagedPasswordId`:
+Retrieve at least `sAMAccountName`, `objectSid` and `msDS-ManagedPasswordId`:<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 # Authenticated or anonymous depending on ACLs
@@ -68,7 +68,7 @@ Get-ADServiceAccount -Filter * -Properties msDS-ManagedPasswordId | \
 GoldenGMSA.exe gmsainfo
 ```
 
-[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) implements helper modes:
+[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) implements helper modes:<sup>[[1]](#references)</sup>
 
 ```bash
 # LDAP enumeration (kerberos / simple bind)
@@ -95,7 +95,7 @@ The tool computes candidate passwords and compares their base64 blob against the
 
 ##### Phase 4 – Offline Password Computation & Conversion
 
-Once the ManagedPasswordID is known, the valid password is one command away:
+Once the ManagedPasswordID is known, the valid password is one command away:<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 # derive base64 password
@@ -114,16 +114,15 @@ The resulting hashes can be injected with **mimikatz** (`sekurlsa::pth`) or **Ru
 
 ## Tooling
 
-* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – reference implementation used in this page.
+* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – reference implementation used in this page.<sup>[[3]](#references)</sup>
 * [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) – reference implementation used in this page.
 * [`mimikatz`](https://github.com/gentilkiwi/mimikatz) – `lsadump::secrets`, `sekurlsa::pth`, `kerberos::ptt`.
 * [`Rubeus`](https://github.com/GhostPack/Rubeus) – pass-the-ticket using derived AES keys.
 
 ## References
 
-- [Golden dMSA – authentication bypass for delegated Managed Service Accounts](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
-- [gMSA Active Directory Attacks Accounts](https://www.semperis.com/blog/golden-gmsa-attack/)
-- [Semperis/GoldenDMSA GitHub repository](https://github.com/Semperis/GoldenDMSA)
-- [Improsec – Golden gMSA trust attack](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
+- [1] [Golden dMSA – authentication bypass for delegated Managed Service Accounts](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
+- [2] [gMSA Active Directory Attacks Accounts](https://www.semperis.com/blog/golden-gmsa-attack/)
+- [3] [Semperis/GoldenDMSA GitHub repository](https://github.com/Semperis/GoldenDMSA)
 
 {{#include ../../banners/hacktricks-training.md}}
