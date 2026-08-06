@@ -82,6 +82,3 @@ At the end this was fixed by giving the new permission **`kTCCServiceEndpointSec
 - [3] [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

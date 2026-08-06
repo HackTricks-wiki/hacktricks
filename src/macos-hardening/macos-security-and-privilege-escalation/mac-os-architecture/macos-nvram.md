@@ -133,8 +133,8 @@ sudo nvram boot-args="amfi_get_out_of_my_way=1"
 
 | CVE | Description |
 |---|---|
-| CVE-2020-9839 | NVRAM manipulation enabling persistent SIP bypass |
-| CVE-2019-8779 | Firmware-level NVRAM persistence on T2 Macs |
+| CVE-2020-9839 | NVRAM manipulation enabling persistent SIP bypass <sup>[[2]](#references)</sup> |
+| CVE-2019-8779 | Firmware-level NVRAM persistence on T2 Macs <sup>[[3]](#references)</sup> |
 | CVE-2022-22583 | PackageKit NVRAM-related privilege escalation |
 | CVE-2020-10004 | Logic issue in NVRAM handling allowing system modification |
 

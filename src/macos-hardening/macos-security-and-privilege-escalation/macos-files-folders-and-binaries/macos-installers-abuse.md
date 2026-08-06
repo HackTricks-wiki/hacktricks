@@ -213,6 +213,3 @@ productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pk
 - [8] [DEF CON 25 - Patrick Wardle - Death By 1000 Installers on macOS and it's all broken!](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

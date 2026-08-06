@@ -278,7 +278,7 @@ IOConnectCallStructMethod(conn, X, buf, sizeof(buf), buf, &outSz);
 
 ### Basic Information
 
-**DriverKit** is Apple's user-space replacement for kernel extensions (kexts), introduced in macOS 10.15. DriverKit binaries (`.dext` bundles) run as user-space processes but communicate directly with the kernel through a privileged IOKit interface.
+**DriverKit** is Apple's user-space replacement for kernel extensions (kexts), introduced in macOS 10.15. DriverKit binaries (`.dext` bundles) run as user-space processes but communicate directly with the kernel through a privileged IOKit interface.<sup>[[4]](#references)</sup>
 
 DriverKit extensions manage hardware:
 - **USB** controllers and devices
@@ -288,7 +288,7 @@ DriverKit extensions manage hardware:
 - **Networking** interfaces
 - **Serial** and **Block Storage** devices
 
-Unlike kexts (which required SIP-disabled boot or notarization), DriverKit extensions are installed via `SystemExtensions.framework` and only require **one-time user approval**.
+Unlike kexts (which required SIP-disabled boot or notarization), DriverKit extensions are installed via `SystemExtensions.framework` and only require **one-time user approval**.<sup>[[5]](#references)</sup>
 
 ### Discovery & Enumeration
 

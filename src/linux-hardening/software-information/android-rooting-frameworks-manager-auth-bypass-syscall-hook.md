@@ -66,7 +66,7 @@ Key properties exploited:<sup>[[1]](#references)</sup>
 ---
 ## Exploitation outline (KernelSU v0.5.7)
 
-High-level steps:<sup>[[1]](#references)</sup>
+High-level steps:<sup>[[1]](#references)[[9]](#references)</sup>
 1) Build a valid path to your own app data directory to satisfy prefix and ownership checks.
 2) Ensure a genuine KernelSU Manager base.apk is opened on a lower-numbered FD than your own base.apk.
 3) Invoke prctl(0xDEADBEEF, CMD_BECOME_MANAGER, <your_data_dir>, ...) to pass the checks.
@@ -173,8 +173,8 @@ Limitations of the attack:
 ---
 ## Related notes across frameworks
 
-- Password-based auth (e.g., historical APatch/SKRoot builds) can be weak if passwords are guessable/bruteforceable or validations are buggy.<sup>[[1]](#references)</sup>
-- Package/signature-based auth (e.g., KernelSU) is stronger in principle but must bind to the actual caller, not indirect artefacts like FD scans.<sup>[[1]](#references)</sup>
+- Password-based auth (e.g., historical APatch/SKRoot builds) can be weak if passwords are guessable/bruteforceable or validations are buggy.<sup>[[1]](#references)[[6]](#references)[[7]](#references)</sup>
+- Package/signature-based auth (e.g., KernelSU) is stronger in principle but must bind to the actual caller, not indirect artefacts like FD scans.<sup>[[1]](#references)[[5]](#references)</sup>
 - Magisk: CVE-2024-48336 (MagiskEoP) showed that even mature ecosystems can be susceptible to identity spoofing leading to code execution with root inside manager context.<sup>[[1]](#references)[[8]](#references)</sup>
 
 ---

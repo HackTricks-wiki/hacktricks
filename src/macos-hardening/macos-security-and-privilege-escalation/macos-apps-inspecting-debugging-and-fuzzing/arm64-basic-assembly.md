@@ -816,6 +816,3 @@ call_execve:
 - [3] [daem0nc0re/macOS_ARM64_Shellcode - reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

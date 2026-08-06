@@ -2,7 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
 ### User Identification Variables
 
 - **`ruid`**: The **real user ID** denotes the user who initiated the process.
@@ -211,5 +210,3 @@ uid=99(nobody) gid=99(nobody) euid=100
 - [1] [SetUID Rabbit Hole - 0xdf](https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-

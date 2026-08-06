@@ -29,7 +29,7 @@ Attempts to intercept and modify DEP requests to _iprofiles.apple.com_ using too
 
 ## Instrumenting System Binaries Interacting with DEP
 
-Instrumenting system binaries like `cloudconfigurationd` requires disabling System Integrity Protection (SIP) on macOS. With SIP disabled, tools like LLDB can be used to attach to system processes and potentially modify the serial number used in DEP API interactions. This method is preferable as it avoids the complexities of entitlements and code signing.
+Instrumenting system binaries like `cloudconfigurationd` requires disabling System Integrity Protection (SIP) on macOS. With SIP disabled, tools like LLDB can be used to attach to system processes and potentially modify the serial number used in DEP API interactions. This method is preferable as it avoids the complexities of entitlements and code signing.<sup>[[1]](#references)</sup>
 
 **Exploiting Binary Instrumentation:**
 Modifying the DEP request payload before JSON serialization in `cloudconfigurationd` proved effective. The process involved:
@@ -55,6 +55,3 @@ The research highlighted significant security concerns:
 - [1] [Duo Labs — MDM Me Maybe: Device Enrollment Program Security](https://duo.com/labs/research/mdm-me-maybe)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

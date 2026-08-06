@@ -102,8 +102,6 @@ otool -l /Applications/App.app/Contents/MacOS/App | grep -A2 RPATH
 otool -L /Applications/App.app/Contents/MacOS/App
 ```
 
-
-
 ## References
 
 - [1] [Bringing process injection into view(s): exploiting macOS apps using nib files (2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)

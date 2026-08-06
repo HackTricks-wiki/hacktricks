@@ -93,5 +93,3 @@ Block this, EDRs.
 - [1] [DDexec: A technique to run binaries filelessly and stealthily on Linux](https://github.com/arget13/DDexec)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
-

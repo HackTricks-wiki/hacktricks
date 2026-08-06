@@ -165,5 +165,3 @@ sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
-

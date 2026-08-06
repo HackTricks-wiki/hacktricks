@@ -167,6 +167,7 @@ If your goal is passive code-execution from merely browsing to a folder or selec
 
 ## References
 
+
 - [1] [Objective-See - Remote Mac Exploitation Via Custom URL Schemes](https://objective-see.org/blog/blog_0x38.html)
 - [2] [Jamf Threat Labs - Bypassing the Gate: A closer look into Gatekeeper flaws on macOS](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
 
