@@ -367,9 +367,6 @@ AWS SECRET
 wide-source-code-search.md
 {{#endref}}
 
-
-
-
 ## References
 
 - [1] [Keeping secrets out of public repositories (GitHub Blog, Feb 29, 2024)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)

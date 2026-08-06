@@ -4,7 +4,7 @@
 
 ## How the Infrared Works <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**Infrared light is invisible to humans**. IR wavelength is from **0.7 to 1000 microns**. Household remotes use an IR signal for data transmission and operate in the wavelength range of 0.75..1.4 microns. A microcontroller in the remote makes an infrared LED blink with a specific frequency, turning the digital signal into an IR signal.
+**Infrared light is invisible to humans**. IR wavelength is from **0.7 to 1000 microns**. Household remotes use an IR signal for data transmission and operate in the wavelength range of 0.75..1.4 microns. A microcontroller in the remote makes an infrared LED blink with a specific frequency, turning the digital signal into an IR signal.<sup>[[1]](#references)</sup>
 
 To receive IR signals a **photoreceiver** is used. It **converts IR light into voltage pulses**, which are already **digital signals**. Usually, there is a **dark light filter inside the receiver**, which lets **only the desired wavelength through** and cuts out noise.
 
@@ -79,7 +79,7 @@ flipper-zero/fz-infrared.md
 
 ### Smart-TV / Set-top Box Takeover (EvilScreen)
 
-Recent academic work (EvilScreen, 2022) demonstrated that **multi-channel remotes that combine Infrared with Bluetooth or Wi-Fi can be abused to fully hijack modern smart-TVs**. The attack chains high-privilege IR service codes together with authenticated Bluetooth packets, bypassing channel-isolation and allowing arbitrary app launches, microphone activation, or factory-reset without physical access. Eight mainstream TVs from different vendors — including a Samsung model claiming ISO/IEC 27001 compliance — were confirmed vulnerable. Mitigation requires vendor firmware fixes or completely disabling unused IR receivers. 
+Recent academic work (EvilScreen, 2022) demonstrated that **multi-channel remotes that combine Infrared with Bluetooth or Wi-Fi can be abused to fully hijack modern smart-TVs**. The attack chains high-privilege IR service codes together with authenticated Bluetooth packets, bypassing channel-isolation and allowing arbitrary app launches, microphone activation, or factory-reset without physical access. Eight mainstream TVs from different vendors — including a Samsung model claiming ISO/IEC 27001 compliance — were confirmed vulnerable. Mitigation requires vendor firmware fixes or completely disabling unused IR receivers.<sup>[[2]](#references)</sup> 
 
 ### Air-Gapped Data Exfiltration via IR LEDs (aIR-Jumper family)
 
@@ -136,7 +136,7 @@ Firmware 1.0 (September 2024) added **dozens of extra IR protocols and optional 
 
 ## References
 
-- [Flipper Zero Infrared blog post](https://blog.flipperzero.one/infrared/)
-- EvilScreen: Smart TV hijacking via remote control mimicry (arXiv 2210.03014)
+- [1] [Flipper Zero Infrared blog post](https://blog.flipperzero.one/infrared/)
+- [2] [EvilScreen: Smart TV hijacking via remote control mimicry](https://arxiv.org/abs/2210.03014)
 
 {{#include ../../banners/hacktricks-training.md}}

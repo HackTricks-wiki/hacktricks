@@ -45,6 +45,3 @@ klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 - [1] [Kerberos (II): How to attack Kerberos?](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

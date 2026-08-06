@@ -52,7 +52,7 @@ usr/lib/libsynocodesign.so: ELF 64-bit LSB shared object, ARM aarch64, …
 
 ## 4. Recover the hard-coded keys (`get_keys`)
 
-Inside `libsynocodesign.so` the function `get_keys(int keytype)` simply returns two 128-bit global variables for the requested archive family:
+Inside `libsynocodesign.so` the function `get_keys(int keytype)` simply returns two 128-bit global variables for the requested archive family:<sup>[[1]](#references)</sup>
 
 ```c
 case 0:            // PAT (system)
@@ -75,7 +75,7 @@ You only have to dump those two constants once for each DSM major version.
 
 ## 5. Header structure & signature verification
 
-`synoarchive_open()` → `support_format_synoarchive()` → `archive_read_support_format_synoarchive()` performs the following:
+`synoarchive_open()` → `support_format_synoarchive()` → `archive_read_support_format_synoarchive()` performs the following:<sup>[[1]](#references)</sup>
 
 1. Read magic (3 bytes) `0xBFBAAD` **or** `0xADBEEF`.
 2. Read little-endian 32-bit `header_len`.
@@ -110,7 +110,7 @@ crypto_kdf_derive_from_key(kdf_subkey, 32, subkey_id, ctx, master_key);
 
 ## 7. Synology’s custom **libarchive** backend
 
-Synology bundles a patched libarchive that registers a fake "tar" format whenever the magic is `0xADBEEF`:
+Synology bundles a patched libarchive that registers a fake "tar" format whenever the magic is `0xADBEEF`:<sup>[[1]](#references)</sup>
 
 ```c
 register_format(
