@@ -1,22 +1,22 @@
-# Document Steganography
+# 문서 Steganography
 
 {{#include ../../banners/hacktricks-training.md}}
 
-문서는 종종 단순한 컨테이너입니다:
+문서는 종종 단순한 컨테이너일 뿐입니다:
 
-- PDF (내장된 파일, 스트림)
-- Office OOXML (`.docx/.xlsx/.pptx` are ZIPs)
-- RTF / OLE 구형 형식
+- PDF (embedded files, streams)
+- Office OOXML (`.docx/.xlsx/.pptx`는 ZIP)
+- RTF / OLE 레거시 형식
 
 ## PDF
 
 ### Technique
 
-PDF는 오브젝트, 스트림, 선택적 내장 파일을 포함하는 구조화된 컨테이너입니다. CTFs에서는 종종 다음을 수행해야 합니다:
+PDF는 objects, streams 및 선택적 embedded files로 구성된 구조화된 컨테이너입니다. CTF에서는 다음 작업이 필요한 경우가 많습니다:
 
-- 내장된 첨부파일 추출
-- 오브젝트 스트림의 압축 해제/평탄화로 콘텐츠를 검색할 수 있게 하기
-- 숨겨진 오브젝트(JS, 내장 이미지, 이상한 스트림) 식별
+- embedded attachments 추출
+- 콘텐츠를 검색할 수 있도록 object streams 압축 해제/flatten
+- hidden objects 식별 (JS, embedded images, 특이한 streams)
 
 ### 빠른 점검
 ```bash
@@ -25,29 +25,30 @@ pdfdetach -list file.pdf
 pdfdetach -saveall file.pdf
 qpdf --qdf --object-streams=disable file.pdf out.pdf
 ```
-그런 다음 `out.pdf` 내부에서 의심스러운 객체/문자열을 검색하세요.
+Then search inside `out.pdf` for suspicious objects/strings.
 
 ## Office OOXML
 
 ### 기법
 
-OOXML을 ZIP + XML 관계 그래프로 간주하세요; payloads는 종종 media, relationships 또는 이상한 custom parts에 숨겨져 있습니다.
+OOXML을 ZIP + XML relationship graph로 취급하세요. payloads는 종종 media, relationships 또는 특이한 custom parts에 숨겨집니다.
 
-OOXML 파일은 ZIP 컨테이너입니다. 즉:
+OOXML files are ZIP containers. That means:
 
-- 문서는 XML과 assets의 디렉터리 트리입니다.
-- `_rels/` relationship files는 외부 리소스나 숨겨진 파트를 가리킬 수 있습니다.
-- 내장 데이터는 흔히 `word/media/`, custom XML parts 또는 비정상적인 relationships에 존재합니다.
+- 문서는 XML 및 assets의 directory tree입니다.
+- `_rels/` relationship files는 external resources 또는 숨겨진 parts를 가리킬 수 있습니다.
+- Embedded data는 `word/media/`, custom XML parts 또는 비정상적인 relationships에 자주 존재합니다.
 
-### 빠른 점검
+### 빠른 확인
 ```bash
 7z l file.docx
 7z x file.docx -oout
 ```
-다음 항목을 검사하세요:
+그런 다음 다음을 검사합니다:
 
 - `word/document.xml`
-- `word/_rels/`에서 외부 관계를 확인하세요
-- 임베디드 미디어: `word/media/`
+- 외부 관계가 있는 `word/_rels/`
+- `word/media/`에 포함된 media
+
 
 {{#include ../../banners/hacktricks-training.md}}
