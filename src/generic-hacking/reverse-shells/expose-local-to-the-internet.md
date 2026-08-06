@@ -87,7 +87,7 @@ npx localtunnel --port 8000
 
 ## Cloudflare Tunnel (cloudflared)
 
-Cloudflare's `cloudflared` CLI can create unauthenticated "Quick" tunnels for fast demos or named tunnels bound to your own domain/hostnames. It supports HTTP(S) reverse proxies as well as raw TCP mappings routed through Cloudflare's edge.
+Cloudflare's `cloudflared` CLI can create unauthenticated "Quick" tunnels for fast demos or named tunnels bound to your own domain/hostnames. It supports HTTP(S) reverse proxies as well as raw TCP mappings routed through Cloudflare's edge.<sup>[[1]](#references)</sup>
 
 ```bash
 # Quick Tunnel exposing localhost:8080 (random trycloudflare subdomain)
@@ -100,11 +100,11 @@ cloudflared tunnel route dns my-tunnel app.example.com
 cloudflared tunnel run my-tunnel --config tunnel.yml
 ```
 
-Named tunnels let you define multiple ingress rules (HTTP, SSH, RDP, etc.) inside `tunnel.yml`, support per-service access policies via Cloudflare Access, and can run as systemd containers for persistence. Quick Tunnels are anonymous and ephemeral—great for phishing payload staging or webhook tests, but Cloudflare does not guarantee uptime.
+Named tunnels let you define multiple ingress rules (HTTP, SSH, RDP, etc.) inside `tunnel.yml`, support per-service access policies via Cloudflare Access, and can run as systemd containers for persistence. Quick Tunnels are anonymous and ephemeral—great for phishing payload staging or webhook tests, but Cloudflare does not guarantee uptime.<sup>[[1]](#references)</sup>
 
 ## Tailscale Funnel / Serve
 
-Tailscale v1.52+ ships unified `tailscale serve` (share inside the tailnet) and `tailscale funnel` (publish to the wider internet) workflows. Both commands can reverse proxy HTTP(S) or forward raw TCP with automatic TLS and short `*.ts.net` hostnames.
+Tailscale v1.52+ ships unified `tailscale serve` (share inside the tailnet) and `tailscale funnel` (publish to the wider internet) workflows. Both commands can reverse proxy HTTP(S) or forward raw TCP with automatic TLS and short `*.ts.net` hostnames.<sup>[[3]](#references)</sup>
 
 ```bash
 # Share localhost:3000 within the tailnet
@@ -152,11 +152,11 @@ EOF
 
 </details>
 
-Recent releases add QUIC transport, token/OIDC auth, bandwidth caps, health checks, and Go-template-based range mappings—useful for quickly standing up multiple listeners that map back to implants on different hosts.
+Recent releases add QUIC transport, token/OIDC auth, bandwidth caps, health checks, and Go-template-based range mappings—useful for quickly standing up multiple listeners that map back to implants on different hosts.<sup>[[4]](#references)</sup>
 
 ## Pinggy (SSH-based)
 
-Pinggy provides SSH-accessible tunnels over TCP/443, so it works even behind captive proxies that only allow HTTPS. Sessions last 60 minutes on the free tier and can be scripted for quick demos or webhook relays.
+Pinggy provides SSH-accessible tunnels over TCP/443, so it works even behind captive proxies that only allow HTTPS. Sessions last 60 minutes on the free tier and can be scripted for quick demos or webhook relays.<sup>[[5]](#references)</sup>
 
 ```bash
 # Random subdomain exposing localhost:3000 via SSH reverse tunnel
@@ -167,11 +167,14 @@ You can request custom domains and longer-lived tunnels on the paid tier, or rec
 
 ## Threat intel & OPSEC notes
 
-Adversaries have increasingly abused ephemeral tunneling (especially Cloudflare's unauthenticated `trycloudflare.com` endpoints) to stage Remote Access Trojan payloads and hide C2 infrastructure. Proofpoint tracked campaigns since February 2024 that pushed AsyncRAT, Xworm, VenomRAT, GuLoader, and Remcos by pointing download stages to short-lived TryCloudflare URLs, making traditional static blocklists far less effective. Consider rotating tunnels and domains proactively, but also monitor for telltale external DNS lookups to the tunneler you are using so you can spot blue-team detection or infrastructure blocking attempts early.
+Adversaries have increasingly abused ephemeral tunneling (especially Cloudflare's unauthenticated `trycloudflare.com` endpoints) to stage Remote Access Trojan payloads and hide C2 infrastructure. Proofpoint tracked campaigns since February 2024 that pushed AsyncRAT, Xworm, VenomRAT, GuLoader, and Remcos by pointing download stages to short-lived TryCloudflare URLs, making traditional static blocklists far less effective. Consider rotating tunnels and domains proactively, but also monitor for telltale external DNS lookups to the tunneler you are using so you can spot blue-team detection or infrastructure blocking attempts early.<sup>[[2]](#references)</sup>
 
 ## References
 
-- [Cloudflare Docs - Create a locally-managed tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/)
-- [Proofpoint - Threat Actor Abuses Cloudflare Tunnels to Deliver RATs](https://www.proofpoint.com/us/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
+- [1] [Cloudflare Docs - Create a locally-managed tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/)
+- [2] [Proofpoint - Threat Actor Abuses Cloudflare Tunnels to Deliver RATs](https://www.proofpoint.com/us/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
+- [3] [Tailscale - Reintroducing Serve and Funnel](https://tailscale.com/blog/reintroducing-serve-funnel)
+- [4] [fatedier/frp - Fast Reverse Proxy repository](https://github.com/fatedier/frp)
+- [5] [Pinggy Documentation - Usage](https://pinggy.io/docs/usages/)
 
 {{#include ../../banners/hacktricks-training.md}}

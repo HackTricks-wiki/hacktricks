@@ -5,7 +5,7 @@
 
 ## Videos
 
-In the following videos you can find the techniques mentioned in this page explained more in depth:
+In the following videos you can find the techniques mentioned in this page explained more in depth:<sup>[[1]](#references)[[2]](#references)</sup>
 
 - [**DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion**](https://www.youtube.com/watch?v=poHirez8jk4)
 - [**Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
@@ -117,5 +117,9 @@ If there is **no `read-only/no-exec`** protections you could abuse your reverse 
 
 You can find **examples** on how to **exploit some RCE vulnerabilities** to get scripting languages **reverse shells** and execute binaries from memory in [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
 
+## References
+
+- [1] [DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion](https://www.youtube.com/watch?v=poHirez8jk4)
+- [2] [Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023](https://www.youtube.com/watch?v=VM_gjjiARaU)
 
 {{#include ../../../../banners/hacktricks-training.md}}

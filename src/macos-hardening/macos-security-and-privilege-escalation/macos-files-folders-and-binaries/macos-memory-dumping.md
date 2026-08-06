@@ -120,9 +120,21 @@ vmmap <pid>
 
 Operationally, this usually means:
 
-- A third-party app shipped with **`get-task-allow`** is often directly dumpable with LLDB, and the resulting dump may expose TCC-protected data that the app already accessed.
+- A third-party app shipped with **`get-task-allow`** is often directly dumpable with LLDB, and the resulting dump may expose TCC-protected data that the app already accessed.<sup>[[1]](#references)</sup>
 - A **hardened** target without `get-task-allow` will commonly reject attaches, even as `root`, unless you control the relevant debugger entitlements / policy path.
 - Unhardened third-party processes are still the easiest place to use `lldb`, `vmmap`, Frida, or custom `task_for_pid`/`vm_read` readers.
+
+### Hunt dumpable nested helpers
+
+Recent research around notarized macOS apps keeps finding **`get-task-allow` in nested helpers** instead of the main GUI binary. When a top-level app looks hardened, enumerate its **XPC services**, **login items**, **helper tools**, and bundled CLIs before giving up:
+
+```bash
+find /Applications/Target.app -type f -perm -111 -print0 | while IFS= read -r -d '' bin; do
+  codesign -d --entitlements - "$bin" 2>/dev/null | grep -q 'get-task-allow' && echo "$bin"
+done
+```
+
+A nested executable with `get-task-allow` is often the easiest place to attach with `lldb`, dump a core, or pull memory with a custom `task_for_pid` client, even when the main app is better hardened.
 
 ## Selective dumps with Frida or userland readers
 
@@ -153,6 +165,8 @@ This is useful when you want to avoid giant core files and only collect:
 - App heap chunks containing secrets
 - Anonymous regions created by custom packers or loaders
 - JIT / unpacked code pages after changing protections
+
+When the target keeps **allocating / freeing** while you dump, prefer Frida's **`readVolatile()`** primitive over `readByteArray()` for unstable ranges. It is slower, but it avoids killing the target if a page becomes unreadable midway through the read. For larger acquisitions, it can also be cleaner to stream chunks back with `send(..., data)` and compress them on the controller side instead of creating thousands of small files inside the target.
 
 Older userland tools such as [`readmem`](https://github.com/gdbinit/readmem) also exist, but they are mainly useful as **source references** for direct `task_for_pid`/`vm_read` style dumping and are not well-maintained for modern Apple Silicon workflows.
 
@@ -186,6 +200,36 @@ This is especially useful when:
 - You already know an **interesting heap address** and want to pivot with `malloc_history`
 - You need a quick **VM/heap breakdown** before deciding whether a full dump is worth the noise
 
+### Differential memgraph triage
+
+If you control the way the target starts, enable **historical allocation logging** before launch so later snapshots preserve useful alloc/free backtraces:
+
+```bash
+env MallocStackLoggingNoCompact=1 /path/to/TargetBinary
+```
+
+Then capture snapshots around the interesting action and diff them offline:
+
+```bash
+# Baseline before login / decrypt / unpack
+leaks <pid> -outputGraph /tmp/pre.memgraph -fullContent -fullStackHistory
+
+# Snapshot after the sensitive action
+leaks <pid> -outputGraph /tmp/post.memgraph -fullContent -fullStackHistory
+
+# Show only new leaks introduced after the baseline
+leaks /tmp/post.memgraph -diffFrom=/tmp/pre.memgraph
+
+# Walk from roots to one candidate allocation, or filter the whole tree by class / VM type
+leaks /tmp/post.memgraph -traceTree 0xADDR
+leaks /tmp/post.memgraph -referenceTree='CFData[50k+]'
+
+# Pivot into the preserved stack history at the interesting high-water mark
+malloc_history /tmp/post.memgraph -callTree -highWaterMark
+```
+
+This is a practical way to isolate **post-authentication objects**, **large `CFData` buffers**, or **anonymous VM regions** that only appear after a decryption, unpacking, or secret-retrieval stage.
+
 ## Swift-heavy targets: `swift-inspect`
 
 For applications that keep high-value data inside **Swift runtime objects**, `swift-inspect` can be a good complement to LLDB or Frida. Instead of dumping everything first, you can query specific Swift runtime structures from a live process:
@@ -213,8 +257,8 @@ For more object-level runtime triage once you can already inspect the process, c
 
 ## References
 
-- [https://www.appspector.com/blog/core-dump](https://www.appspector.com/blog/core-dump)
-- [https://afine.com/to-allow-or-not-to-get-task-allow-that-is-the-question](https://afine.com/to-allow-or-not-to-get-task-allow-that-is-the-question)
+- [1] [To Allow or Not to get-task-allow: macOS Security Analysis](https://afine.com/to-allow-or-not-to-get-task-allow-that-is-the-question)
+- [2] [leaks(1) man page](https://keith.github.io/xcode-man-pages/leaks.1.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
 

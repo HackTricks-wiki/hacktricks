@@ -63,7 +63,7 @@ SELinux is much easier to attack or bypass when you can answer two questions:
 1. **What can my current domain access?**
 2. **What domains can I transition into?**
 
-The most useful tools for this are `sepolicy` and **SETools** (`seinfo`, `sesearch`, `sedta`):
+The most useful tools for this are `sepolicy` and **SETools** (`seinfo`, `sesearch`, `sedta`):<sup>[[2]](#references)</sup>
 
 ```bash
 # Transition graph from the current domain
@@ -78,7 +78,7 @@ seinfo -t 2>/dev/null | head
 seinfo -r 2>/dev/null | head
 ```
 
-This is especially useful when a host uses **confined users** rather than mapping everyone to `unconfined_u`. In that case, look for:
+This is especially useful when a host uses **confined users** rather than mapping everyone to `unconfined_u`. In that case, look for:<sup>[[3]](#references)</sup>
 
 - user mappings via `semanage login -l`
 - allowed roles via `semanage user -l`
@@ -103,7 +103,7 @@ newrole -l 2>/dev/null
 
 ## Files, Relabeling, and High-Value Misconfigurations
 
-The most important operational difference between common SELinux tools is:
+The most important operational difference between common SELinux tools is:<sup>[[1]](#references)</sup>
 
 - `chcon`: temporary label change on a specific path
 - `semanage fcontext`: persistent path-to-label rule
@@ -174,7 +174,7 @@ That is why `audit2allow`, `semodule`, and `semanage permissive` should be treat
 
 ## Hidden Denials and Module Extraction
 
-A very common offensive frustration is a chain that fails with a bland `EACCES` while the expected AVC denial never appears. `dontaudit` rules may be hiding the exact permission you need. If you can run `semodule` through `sudo` or another privileged wrapper, temporarily disabling `dontaudit` can turn a silent failure into a precise policy clue:
+A very common offensive frustration is a chain that fails with a bland `EACCES` while the expected AVC denial never appears. `dontaudit` rules may be hiding the exact permission you need. If you can run `semodule` through `sudo` or another privileged wrapper, temporarily disabling `dontaudit` can turn a silent failure into a precise policy clue:<sup>[[4]](#references)</sup>
 
 ```bash
 # Rebuild policy without dontaudit rules, trigger the action again, then inspect AVCs
@@ -207,7 +207,7 @@ If a local exploit or persistence attempt keeps failing with `EACCES` or strange
 
 ## SELinux Users
 
-There are SELinux users in addition to regular Linux users. Each Linux user is mapped to an SELinux user as part of the policy, which lets the system impose different allowed roles and domains on different accounts.
+There are SELinux users in addition to regular Linux users. Each Linux user is mapped to an SELinux user as part of the policy, which lets the system impose different allowed roles and domains on different accounts.<sup>[[3]](#references)</sup>
 
 Quick checks:
 
@@ -251,8 +251,9 @@ This page keeps the container content short to avoid duplication. For the contai
 
 ## References
 
-- [Red Hat docs: Using SELinux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/using_selinux/index)
-- [SETools: Policy analysis tools for SELinux](https://github.com/SELinuxProject/setools)
-- [Managing confined and unconfined users - RHEL 9 docs](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_selinux/managing-confined-and-unconfined-users_using-selinux)
-- [semodule(8) - Linux manual page](https://man7.org/linux/man-pages/man8/semodule.8.html)
+- [1] [Red Hat docs: Using SELinux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/using_selinux/index)
+- [2] [SETools: Policy analysis tools for SELinux](https://github.com/SELinuxProject/setools)
+- [3] [Managing confined and unconfined users - RHEL 9 docs](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_selinux/managing-confined-and-unconfined-users_using-selinux)
+- [4] [semodule(8) - Linux manual page](https://man7.org/linux/man-pages/man8/semodule.8.html)
+
 {{#include ../../banners/hacktricks-training.md}}
