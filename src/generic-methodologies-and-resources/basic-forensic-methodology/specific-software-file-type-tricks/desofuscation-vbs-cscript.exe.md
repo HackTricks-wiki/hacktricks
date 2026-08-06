@@ -1,3 +1,5 @@
+# Técnicas de Desofuscação para Arquivos VBS
+
 {{#include ../../../banners/hacktricks-training.md}}
 
 Algumas coisas que podem ser úteis para depurar/desofuscar um arquivo VBS malicioso:
