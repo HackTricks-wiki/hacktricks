@@ -1,22 +1,22 @@
-# Steganografia ya Nyaraka
+# Steganografia ya Hati
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Nyaraka mara nyingi ni vyombo tu:
+Hati mara nyingi huwa ni kontena tu:
 
-- PDF (faili zilizoambatishwa, streams)
-- Office OOXML (`.docx/.xlsx/.pptx` are ZIPs)
-- RTF / OLE miundo ya zamani
+- PDF (faili zilizopachikwa, streams)
+- Office OOXML (`.docx/.xlsx/.pptx` ni ZIPs)
+- RTF / OLE legacy formats
 
 ## PDF
 
 ### Mbinu
 
-PDF ni chombo kilichopangwa chenye vitu (objects), streams, na faili za kuambatisha za hiari. Katika CTFs mara nyingi utahitaji:
+PDF ni kontena lenye muundo linalojumuisha objects, streams, na faili zilizopachikwa kwa hiari. Katika CTFs mara nyingi unahitaji:
 
-- Toa viambatisho vilivyoambatishwa
-- Dekomesha/kufanya gorofa object streams ili uweze kutafuta yaliyomo
-- Tambua vitu vilivyofichwa (JS, picha zilizowekwa, streams zisizo za kawaida)
+- Kutoa attachments zilizopachikwa
+- Kudecompress/kuflatten object streams ili uweze kutafuta maudhui
+- Kutambua objects zilizofichwa (JS, images zilizopachikwa, streams zisizo za kawaida)
 
 ### Ukaguzi wa haraka
 ```bash
@@ -25,29 +25,30 @@ pdfdetach -list file.pdf
 pdfdetach -saveall file.pdf
 qpdf --qdf --object-streams=disable file.pdf out.pdf
 ```
-Kisha tafuta ndani ya `out.pdf` kwa ajili ya vitu/mistari vinavyoshukiwa.
+Kisha tafuta ndani ya `out.pdf` kwa ajili ya objects/strings zinazotia shaka.
 
 ## Office OOXML
 
-### Mbinu
+### Technique
 
-Chukulia OOXML kama grafu ya mahusiano ya ZIP + XML; payloads mara nyingi zinaficha katika media, mahusiano, au sehemu maalum zisizo za kawaida.
+Chukulia OOXML kama ZIP + XML relationship graph; payloads mara nyingi hujificha kwenye media, relationships, au custom parts zisizo za kawaida.
 
-OOXML files are ZIP containers. Hii inamaanisha:
+Faili za OOXML ni ZIP containers. Hii inamaanisha:
 
-- Hati ni mti wa saraka wa XML na rasilimali.
-- Faili za `_rels/` za mahusiano zinaweza kuonyesha rasilimali za nje au sehemu zilizofichwa.
-- Data iliyowekwa ndani mara nyingi iko katika `word/media/`, sehemu za XML maalum, au mahusiano yasiyo ya kawaida.
+- Hati ni directory tree ya XML na assets.
+- Faili za relationships za `_rels/` zinaweza kuelekeza kwenye rasilimali za nje au parts zilizofichwa.
+- Data iliyopachikwa mara nyingi hupatikana kwenye `word/media/`, custom XML parts, au relationships zisizo za kawaida.
 
 ### Ukaguzi wa haraka
 ```bash
 7z l file.docx
 7z x file.docx -oout
 ```
-Kisha chunguza:
+Kisha kagua:
 
 - `word/document.xml`
-- `word/_rels/` kwa mahusiano ya nje
-- media zilizowekwa ndani ya `word/media/`
+- `word/_rels/` kwa external relationships
+- media iliyopachikwa katika `word/media/`
+
 
 {{#include ../../banners/hacktricks-training.md}}
