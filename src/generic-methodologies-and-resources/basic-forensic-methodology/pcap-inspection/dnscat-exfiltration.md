@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ako imate pcap sa podacima koji se **eksfiltriraju pomoću DNSCat-a** (bez korišćenja enkripcije), možete pronaći eksfiltrirani sadržaj.
+Ako imate pcap sa podacima koji su **ekfiltrirani pomoću DNSCat-a** (bez korišćenja enkripcije), možete pronaći ekfiltrirani sadržaj.
 
 Potrebno je samo da znate da prvih **9 bajtova** nisu stvarni podaci, već su povezani sa **C\&C komunikacijom**:<sup>[[1]](#references)</sup>
 ```python
@@ -23,15 +23,15 @@ last = qry
 
 #print(f)
 ```
-Za više informacija: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)\
+Za više informacija: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)<sup>[[1]](#references)</sup>\
 [https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
 
-Postoji skripta koja radi sa Python3: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
+Postoji script koji radi sa Python3: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```
 ## Reference
 
-- [1] [DNSCat2 pcap forensics writeup – BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
+- [1] [DNSCat2 pcap forenzički izveštaj – BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
 
 {{#include ../../../banners/hacktricks-training.md}}

