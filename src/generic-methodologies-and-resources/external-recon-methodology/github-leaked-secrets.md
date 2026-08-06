@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-### Εργαλεία για να βρείτε secrets σε git repos και file system
+### Tools για την εύρεση secrets σε git repos και file system
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
@@ -12,42 +12,42 @@
 - [https://github.com/JaimePolop/RExpository](https://github.com/JaimePolop/RExpository)
 - [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
 - [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
-- https://github.com/eth0izzle/shhgit (unmaintained)
+- https://github.com/eth0izzle/shhgit (μη συντηρούμενο)
 - [https://github.com/techgaun/github-dorks](https://github.com/techgaun/github-dorks)
-- https://github.com/michenriksen/gitrob (archived)
-- https://github.com/anshumanbh/git-all-secrets (archived)
+- https://github.com/michenriksen/gitrob (αρχειοθετημένο)
+- https://github.com/anshumanbh/git-all-secrets (αρχειοθετημένο)
 - [https://github.com/awslabs/git-secrets](https://github.com/awslabs/git-secrets)
 - [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
 - [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
 
 > Σημειώσεις
-> - TruffleHog v3 μπορεί να επαληθεύσει πολλά credentials σε πραγματικό χρόνο και να σαρώσει GitHub orgs, issues/PRs, gists, και wikis. Παράδειγμα: `trufflehog github --org <ORG> --results=verified`.
-> - Gitleaks v8 υποστηρίζει σάρωση git history, directories και archives: `gitleaks detect -v --source .` ή `gitleaks detect --source <repo> --log-opts="--all"`.
-> - Nosey Parker εστιάζει σε high-throughput scanning με curated rules και διαθέτει Explorer UI για triage. Παράδειγμα: `noseyparker scan --datastore np.db <path|repo>` και μετά `noseyparker report --datastore np.db`.
-> - ggshield (GitGuardian CLI) παρέχει pre-commit/CI hooks και Docker image scanning: `ggshield secret scan repo <path-or-url>`.
+> - Το TruffleHog v3 μπορεί να επαληθεύει πολλά credentials live και να κάνει scan σε GitHub orgs, issues/PRs, gists και wikis. Παράδειγμα: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)</sup>
+> - Το Gitleaks v8 υποστηρίζει scan σε git history, directories και archives: `gitleaks detect -v --source .` ή `gitleaks detect --source <repo> --log-opts="--all"`.
+> - Το Nosey Parker εστιάζει σε scanning υψηλού throughput με curated rules και διαθέτει Explorer UI για triage. Παράδειγμα: `noseyparker scan --datastore np.db <path|repo>` και στη συνέχεια `noseyparker report --datastore np.db`.
+> - Το ggshield (GitGuardian CLI) παρέχει pre-commit/CI hooks και scanning Docker images: `ggshield secret scan repo <path-or-url>`.
 
-### Πού συνήθως leak τα secrets στο GitHub
+### Πού συνήθως κάνουν leak τα secrets στο GitHub
 
-- Repository files σε default και non-default branches (αναζήτηση `repo:owner/name@branch` στο UI).
-- Πλήρες git history και άλλες branches/tags (clone και scan με gitleaks/trufflehog; η GitHub search επικεντρώνεται σε indexed content).
-- Issues, pull requests, comments και descriptions (TruffleHog GitHub source υποστηρίζει αυτά μέσω flags όπως `--issue-comments`, `--pr-comments`).
-- Actions logs και artifacts σε public repositories (masking είναι best-effort; εξετάστε logs/artifacts αν είναι ορατά).
+- Αρχεία repository στα default και non-default branches (αναζήτησε `repo:owner/name@branch` στο UI).
+- Πλήρες git history και άλλα branches/tags (κάνε clone και scan με gitleaks/trufflehog· η αναζήτηση του GitHub εστιάζει σε indexed content).
+- Issues, pull requests, comments και descriptions (το TruffleHog GitHub source τα υποστηρίζει μέσω flags όπως `--issue-comments`, `--pr-comments`).
+- Actions logs και artifacts public repositories (το masking είναι best-effort· έλεγξε τα logs/artifacts αν είναι ορατά).
 - Wikis και release assets.
-- Gists (αναζήτηση με tooling ή μέσω UI; κάποια tools μπορούν να συμπεριλάβουν gists).
+- Gists (κάνε αναζήτηση με tooling ή από το UI· ορισμένα tools μπορούν να περιλαμβάνουν gists).
 
-> Προφυλάξεις
-> - Το GitHub’s REST code search API είναι legacy και δεν υποστηρίζει regex· προτιμήστε το Web UI για αναζητήσεις με regex. Το gh CLI χρησιμοποιεί το legacy API.
-> - Μόνο αρχεία κάτω από ένα συγκεκριμένο μέγεθος ευρετηριάζονται για αναζήτηση. Για πληρότητα, κάντε clone και σαρώστε τοπικά με έναν secrets scanner.
+> Παγίδες
+> - Το GitHub REST code search API είναι legacy και δεν υποστηρίζει regex· προτίμησε το Web UI για αναζητήσεις με regex. Το gh CLI χρησιμοποιεί το legacy API.
+> - Μόνο αρχεία κάτω από ένα συγκεκριμένο μέγεθος γίνονται indexed για search. Για πληρότητα, κάνε clone και scan τοπικά με έναν secrets scanner.
 
-### Programmatic org-wide scanning
+### Programmatic scanning σε ολόκληρο το org
 
-- TruffleHog (GitHub source):
+- TruffleHog (GitHub source):<sup>[[2]](#references)</sup>
 ```bash
 export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
 --include-wikis --issue-comments --pr-comments --gist-comments
 ```
-- Gitleaks σε όλα τα org repos (clone shallow and scan):
+- Gitleaks σε όλα τα repos του οργανισμού (ρηχό clone και scan):
 ```bash
 gh repo list Target --limit 1000 --json nameWithOwner,url \
 | jq -r '.[].url' | while read -r r; do
@@ -55,7 +55,7 @@ tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
 gitleaks detect --source "$tmp" -v || true; rm -rf "$tmp";
 done
 ```
-- Ο περίεργος πάνω σε mono checkout:
+- Nosey Parker σε ένα mono checkout:
 ```bash
 # after cloning many repos beneath ./org
 noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
@@ -67,9 +67,9 @@ ggshield secret scan path -r .
 # full git history of a repo
 ggshield secret scan repo <path-or-url>
 ```
-> Συμβουλή: Για το ιστορικό git, προτίμησε scanners που αναλύουν `git log -p --all` ώστε να εντοπίζουν αφαιρεμένα secrets.
+> Συμβουλή: Για το git history, προτιμήστε scanners που κάνουν parse το `git log -p --all`, ώστε να εντοπίζουν secrets που έχουν αφαιρεθεί.
 
-### Ενημερωμένα dorks για σύγχρονους tokens
+### Ενημερωμένα dorks για σύγχρονα tokens
 
 - GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`
 - Slack tokens: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
@@ -364,11 +364,9 @@ AWS SECRET
 wide-source-code-search.md
 {{#endref}}
 
-
-
-
 ## Αναφορές
 
-- Διατήρηση των secrets εκτός δημόσιων αποθετηρίων (GitHub Blog, 29 Φεβρουαρίου 2024): https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/
-- TruffleHog v3 – Εύρεση, επαλήθευση και ανάλυση leaked credentials: https://github.com/trufflesecurity/trufflehog
+- [1] [Διατηρώντας τα secrets εκτός public repositories (GitHub Blog, 29 Φεβρουαρίου 2024)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
+- [2] [TruffleHog v3 – Εντοπίστε, επαληθεύστε και αναλύστε leaked credentials](https://github.com/trufflesecurity/trufflehog)
+
 {{#include ../../banners/hacktricks-training.md}}

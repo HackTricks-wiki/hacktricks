@@ -1,7 +1,6 @@
-# Docker Forensics
+# Ψηφιακή εγκληματολογική ανάλυση Docker
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 ## Τροποποίηση container
 
@@ -25,7 +24,7 @@ A /var/lib/mysql/mysql/time_zone_leap_second.MYI
 A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
-Στην προηγούμενη εντολή, το **C** σημαίνει **Τροποποιήθηκε** και το **A,** **Προστέθηκε**.\
+Στην προηγούμενη εντολή, το **C** σημαίνει **Changed** και το **A,** **Added**.\
 Αν διαπιστώσετε ότι κάποιο ενδιαφέρον αρχείο, όπως το `/etc/shadow`, τροποποιήθηκε, μπορείτε να το κατεβάσετε από το container για να ελέγξετε για κακόβουλη δραστηριότητα με:
 ```bash
 docker cp wordpress:/etc/shadow.
@@ -42,24 +41,24 @@ docker exec -it wordpress bash
 ```
 ## Τροποποιήσεις images
 
-Όταν σας δίνεται μια exported Docker image (πιθανότατα σε μορφή `.tar`), μπορείτε να χρησιμοποιήσετε το [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases) για να **εξαγάγετε μια σύνοψη των τροποποιήσεων**:
+Όταν σας δίνεται ένα exported docker image (πιθανότατα σε μορφή `.tar`), μπορείτε να χρησιμοποιήσετε το [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases) για να **εξαγάγετε μια σύνοψη των τροποποιήσεων**:
 ```bash
 docker save <image> > image.tar #Export the image to a .tar file
 container-diff analyze -t sizelayer image.tar
 container-diff analyze -t history image.tar
 container-diff analyze -t metadata image.tar
 ```
-Στη συνέχεια, μπορείτε να **αποσυμπιέσετε** το image και να **αποκτήσετε πρόσβαση στα blobs** για να αναζητήσετε ύποπτα αρχεία που μπορεί να έχετε εντοπίσει στο ιστορικό αλλαγών:
+Στη συνέχεια, μπορείτε να **αποσυμπιέσετε** το image και να **αποκτήσετε πρόσβαση στα blobs**, για να αναζητήσετε ύποπτα αρχεία που ενδέχεται να έχετε εντοπίσει στο ιστορικό αλλαγών:
 ```bash
 tar -xf image.tar
 ```
 ### Βασική Ανάλυση
 
-Μπορείτε να εξαγάγετε **βασικές πληροφορίες** από το image εκτελώντας:
+Μπορείτε να λάβετε **βασικές πληροφορίες** από το image εκτελώντας:
 ```bash
 docker inspect <image>
 ```
-Μπορείτε επίσης να λάβετε μια σύνοψη του **ιστορικού αλλαγών** με:
+Μπορείτε επίσης να λάβετε ένα συνοπτικό **ιστορικό αλλαγών** με:
 ```bash
 docker history --no-trunc <image>
 ```
@@ -70,7 +69,7 @@ dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
 ```
 ### Dive
 
-Για να εντοπίσετε αρχεία που προστέθηκαν/τροποποιήθηκαν σε docker images, μπορείτε επίσης να χρησιμοποιήσετε το utility [**dive**](https://github.com/wagoodman/dive) (κατεβάστε το από τις [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)):
+Για να βρείτε αρχεία που προστέθηκαν/τροποποιήθηκαν σε docker images, μπορείτε επίσης να χρησιμοποιήσετε το utility [**dive**](https://github.com/wagoodman/dive) (κατεβάστε το από τις [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)):
 ```bash
 #First you need to load the image in your docker repo
 sudo docker load < image.tar                                                                                                                                                                                                         1 ⨯
@@ -79,7 +78,7 @@ Loaded image: flask:latest
 #And then open it with dive:
 sudo dive flask:latest
 ```
-Αυτό σας επιτρέπει να **περιηγείστε στα διαφορετικά blobs των docker images** και να ελέγχετε ποια αρχεία τροποποιήθηκαν/προστέθηκαν. Το **κόκκινο** σημαίνει ότι προστέθηκε και το **κίτρινο** ότι τροποποιήθηκε. Χρησιμοποιήστε το **tab** για να μεταβείτε στην άλλη προβολή και το **space** για να συμπτύξετε/ανοίξετε φακέλους.
+Αυτό σας επιτρέπει να **περιηγείστε στα διαφορετικά blobs των docker images** και να ελέγχετε ποια αρχεία τροποποιήθηκαν/προστέθηκαν. Το **κόκκινο** σημαίνει ότι προστέθηκε και το **κίτρινο** ότι τροποποιήθηκε. Χρησιμοποιήστε το **tab** για να μετακινηθείτε στην άλλη προβολή και το **space** για να συμπτύξετε/αναπτύξετε φακέλους.
 
 Με το die δεν θα μπορείτε να αποκτήσετε πρόσβαση στο περιεχόμενο των διαφορετικών stages του image. Για να το κάνετε αυτό, θα χρειαστεί να **αποσυμπιέσετε κάθε layer και να αποκτήσετε πρόσβαση σε αυτό**.\
 Μπορείτε να αποσυμπιέσετε όλα τα layers ενός image από τον κατάλογο όπου αποσυμπιέστηκε το image, εκτελώντας:
@@ -89,9 +88,8 @@ for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; don
 ```
 ## Διαπιστευτήρια από τη μνήμη
 
-Σημειώστε ότι όταν εκτελείτε ένα docker container μέσα σε έναν host, **μπορείτε να δείτε τις διεργασίες που εκτελούνται στο container από τον host** εκτελώντας απλώς `ps -ef`
+Σημειώστε ότι όταν εκτελείτε ένα docker container μέσα σε ένα host, **μπορείτε να δείτε τις διεργασίες που εκτελούνται στο container από το host** εκτελώντας απλώς `ps -ef`
 
-Επομένως, ως root, μπορείτε να **κάνετε dump τη μνήμη των διεργασιών** από τον host και να αναζητήσετε **διαπιστευτήρια**, [**όπως ακριβώς στο ακόλουθο παράδειγμα**](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#process-memory).
-
+Επομένως, ως root, μπορείτε να **κάνετε dump τη μνήμη των διεργασιών** από το host και να αναζητήσετε **διαπιστευτήρια**, ακριβώς [**όπως στο ακόλουθο παράδειγμα**](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#process-memory).
 
 {{#include ../../banners/hacktricks-training.md}}

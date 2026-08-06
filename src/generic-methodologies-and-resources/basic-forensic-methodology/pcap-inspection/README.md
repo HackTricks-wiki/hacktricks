@@ -1,27 +1,27 @@
-# Pcap Inspection
+# Επιθεώρηση Pcap
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Μια σημείωση σχετικά με το **PCAP** και το **PCAPNG**: υπάρχουν δύο εκδόσεις της μορφής αρχείου PCAP; **Το PCAPNG είναι πιο νέο και δεν υποστηρίζεται από όλα τα εργαλεία**. Μπορεί να χρειαστεί να μετατρέψετε ένα αρχείο από PCAPNG σε PCAP χρησιμοποιώντας το Wireshark ή κάποιο άλλο συμβατό εργαλείο, προκειμένου να εργαστείτε με αυτό σε άλλα εργαλεία.
+> Μια σημείωση σχετικά με τα **PCAP** και **PCAPNG**: υπάρχουν δύο εκδόσεις της μορφής αρχείων PCAP· το **PCAPNG είναι νεότερο και δεν υποστηρίζεται από όλα τα εργαλεία**. Ίσως χρειαστεί να μετατρέψετε ένα αρχείο από PCAPNG σε PCAP χρησιμοποιώντας το Wireshark ή άλλο συμβατό εργαλείο, ώστε να μπορέσετε να το χρησιμοποιήσετε σε ορισμένα άλλα εργαλεία.
 
-## Online tools for pcaps
+## Online εργαλεία για pcaps
 
-- Αν η κεφαλίδα του pcap είναι **κατεστραμμένη**, θα πρέπει να προσπαθήσετε να την **διορθώσετε** χρησιμοποιώντας: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
+- Αν η κεφαλίδα του pcap σας είναι **κατεστραμμένη**, θα πρέπει να προσπαθήσετε να τη **διορθώσετε** χρησιμοποιώντας: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
 - Εξαγάγετε **πληροφορίες** και αναζητήστε **malware** μέσα σε ένα pcap στο [**PacketTotal**](https://packettotal.com)
-- Αναζητήστε **κακόβουλη δραστηριότητα** χρησιμοποιώντας [**www.virustotal.com**](https://www.virustotal.com) και [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)
-- **Πλήρης ανάλυση pcap από τον περιηγητή στο** [**https://apackets.com/**](https://apackets.com/)
+- Αναζητήστε **κακόβουλη δραστηριότητα** χρησιμοποιώντας τα [**www.virustotal.com**](https://www.virustotal.com) και [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)
+- **Πλήρης ανάλυση pcap από τον browser στο** [**https://apackets.com/**](https://apackets.com/)
 
-## Extract Information
+## Εξαγωγή πληροφοριών
 
 Τα παρακάτω εργαλεία είναι χρήσιμα για την εξαγωγή στατιστικών, αρχείων κ.λπ.
 
 ### Wireshark
 
 > [!TIP]
-> **Αν πρόκειται να αναλύσετε ένα PCAP, πρέπει βασικά να ξέρετε πώς να χρησιμοποιείτε το Wireshark**
+> **Αν πρόκειται να αναλύσετε ένα PCAP, βασικά πρέπει να γνωρίζετε πώς να χρησιμοποιείτε το Wireshark**
 
-Μπορείτε να βρείτε μερικά κόλπα του Wireshark στο:
+Μπορείτε να βρείτε μερικά Wireshark tricks στο:
 
 
 {{#ref}}
@@ -30,13 +30,13 @@ wireshark-tricks.md
 
 ### [**https://apackets.com/**](https://apackets.com/)
 
-Ανάλυση pcap από τον περιηγητή.
+Ανάλυση Pcap από τον browser.
 
 ### Xplico Framework
 
-[**Xplico** ](https://github.com/xplico/xplico)_(μόνο linux)_ μπορεί να **αναλύσει** ένα **pcap** και να εξαγάγει πληροφορίες από αυτό. Για παράδειγμα, από ένα αρχείο pcap, το Xplico εξάγει κάθε email (πρωτόκολλα POP, IMAP και SMTP), όλα τα περιεχόμενα HTTP, κάθε κλήση VoIP (SIP), FTP, TFTP, κ.λπ.
+Το [**Xplico** ](https://github.com/xplico/xplico)_(μόνο linux)_ μπορεί να **αναλύσει** ένα **pcap** και να εξαγάγει πληροφορίες από αυτό. Για παράδειγμα, από ένα αρχείο pcap το Xplico εξάγει κάθε email (πρωτόκολλα POP, IMAP και SMTP), όλο το περιεχόμενο HTTP, κάθε κλήση VoIP (SIP), FTP, TFTP κ.ο.κ.
 
-**Εγκαταστήστε**
+**Εγκατάσταση**
 ```bash
 sudo bash -c 'echo "deb http://repo.xplico.org/ $(lsb_release -s -c) main" /etc/apt/sources.list'
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 791C25CE
@@ -48,27 +48,27 @@ sudo apt-get install xplico
 /etc/init.d/apache2 restart
 /etc/init.d/xplico start
 ```
-Access to _**127.0.0.1:9876**_ with credentials _**xplico:xplico**_
+Πρόσβαση στο _**127.0.0.1:9876**_ με credentials _**xplico:xplico**_
 
-Then create a **new case**, create a **new session** inside the case and **upload the pcap** file.
+Στη συνέχεια δημιουργήστε μια **new case**, δημιουργήστε μια **new session** μέσα στην υπόθεση και **ανεβάστε το** αρχείο **pcap**.
 
 ### NetworkMiner
 
-Όπως το Xplico, είναι ένα εργαλείο για **ανάλυση και εξαγωγή αντικειμένων από pcaps**. Έχει μια δωρεάν έκδοση που μπορείτε να **κατεβάσετε** [**εδώ**](https://www.netresec.com/?page=NetworkMiner). Λειτουργεί με **Windows**.\
-Αυτό το εργαλείο είναι επίσης χρήσιμο για να αποκτήσετε **άλλες πληροφορίες που αναλύονται** από τα πακέτα προκειμένου να γνωρίζετε τι συνέβαινε με **ταχύτερο** τρόπο.
+Όπως το Xplico, είναι ένα tool για **ανάλυση και εξαγωγή objects από pcaps**. Διαθέτει free edition που μπορείτε να **κατεβάσετε** [**εδώ**](https://www.netresec.com/?page=NetworkMiner). Λειτουργεί σε **Windows**.\
+Αυτό το tool είναι επίσης χρήσιμο για τη λήψη **άλλων analysed πληροφοριών** από τα packets, ώστε να είναι δυνατή η **γρηγορότερη** κατανόηση του τι συνέβαινε.
 
 ### NetWitness Investigator
 
-Μπορείτε να κατεβάσετε [**NetWitness Investigator από εδώ**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Λειτουργεί σε Windows)**.\
-Αυτό είναι ένα άλλο χρήσιμο εργαλείο που **αναλύει τα πακέτα** και ταξινομεί τις πληροφορίες με χρήσιμο τρόπο για να **γνωρίζετε τι συμβαίνει μέσα**.
+Μπορείτε να κατεβάσετε το [**NetWitness Investigator από εδώ**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Λειτουργεί σε Windows)**.\
+Αυτό είναι ένα ακόμη χρήσιμο tool που **αναλύει τα packets** και ταξινομεί τις πληροφορίες με χρήσιμο τρόπο, ώστε να **γνωρίζετε τι συμβαίνει στο εσωτερικό**.
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-- Εξαγωγή και κωδικοποίηση ονομάτων χρηστών και κωδικών πρόσβασης (HTTP, FTP, Telnet, IMAP, SMTP...)
-- Εξαγωγή κατακερματισμένων κωδικών αυθεντικοποίησης και σπάσιμο τους χρησιμοποιώντας το Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
-- Δημιουργία οπτικού διαγράμματος δικτύου (Κόμβοι δικτύου & χρήστες)
-- Εξαγωγή ερωτημάτων DNS
-- Ανακατασκευή όλων των TCP & UDP συνεδριών
+- Εξαγωγή και encoding usernames και passwords (HTTP, FTP, Telnet, IMAP, SMTP...)
+- Εξαγωγή authentication hashes και crack με χρήση Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
+- Δημιουργία visual network diagram (Network nodes & users)
+- Εξαγωγή DNS queries
+- Ανακατασκευή όλων των TCP & UDP Sessions
 - File Carving
 
 ### Capinfos
@@ -77,13 +77,14 @@ capinfos capture.pcap
 ```
 ### Ngrep
 
-Αν **ψάχνετε** για **κάτι** μέσα στο pcap μπορείτε να χρησιμοποιήσετε **ngrep**. Ακολουθεί ένα παράδειγμα χρησιμοποιώντας τα κύρια φίλτρα:
+Εάν **αναζητάτε** **κάτι** μέσα στο pcap, μπορείτε να χρησιμοποιήσετε το **ngrep**. Ακολουθεί ένα παράδειγμα που χρησιμοποιεί τα κύρια φίλτρα:
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
 ### Carving
 
-Η χρήση κοινών τεχνικών carving μπορεί να είναι χρήσιμη για την εξαγωγή αρχείων και πληροφοριών από το pcap:
+Η χρήση κοινών τεχνικών Carving μπορεί να είναι χρήσιμη για την εξαγωγή αρχείων και πληροφοριών από το pcap:
+
 
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
@@ -91,13 +92,13 @@ ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.
 
 ### Capturing credentials
 
-Μπορείτε να χρησιμοποιήσετε εργαλεία όπως [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) για να αναλύσετε διαπιστευτήρια από ένα pcap ή μια ζωντανή διεπαφή.
+Μπορείτε να χρησιμοποιήσετε εργαλεία όπως το [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) για την ανάλυση credentials από ένα pcap ή ένα live interface.
 
-## Check Exploits/Malware
+## Έλεγχος Exploits/Malware
 
 ### Suricata
 
-**Install and setup**
+**Εγκατάσταση και ρύθμιση**
 ```
 apt-get install suricata
 apt-get install oinkmaster
@@ -110,17 +111,18 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) είναι ένα εργαλείο που
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) είναι ένα tool που
 
-- Διαβάζει ένα αρχείο PCAP και εξάγει ροές Http.
-- Το gzip αποσυμπιέζει οποιεσδήποτε συμπιεσμένες ροές
-- Σαρώσει κάθε αρχείο με yara
+- Διαβάζει ένα αρχείο PCAP και εξάγει HTTP streams.
+- Αποσυμπιέζει με gzip τυχόν compressed streams
+- Σαρώνει κάθε αρχείο με yara
 - Γράφει ένα report.txt
-- Προαιρετικά αποθηκεύει τα αρχεία που ταιριάζουν σε έναν φάκελο
+- Προαιρετικά αποθηκεύει τα αρχεία που ταιριάζουν σε ένα Dir
 
-### Malware Analysis
+### Ανάλυση Malware
 
-Ελέγξτε αν μπορείτε να βρείτε οποιοδήποτε αποτύπωμα γνωστού κακόβουλου λογισμικού:
+Ελέγξτε αν μπορείτε να βρείτε κάποιο fingerprint γνωστού Malware:
+
 
 {{#ref}}
 ../malware-analysis.md
@@ -128,11 +130,11 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) είναι ένας παθητικός, ανοιχτού κώδικα αναλυτής δικτυακής κίνησης. Πολλοί χειριστές χρησιμοποιούν το Zeek ως Δίκτυο Ασφαλείας Monitor (NSM) για να υποστηρίξουν έρευνες για ύποπτη ή κακόβουλη δραστηριότητα. Το Zeek υποστηρίζει επίσης ένα ευρύ φάσμα εργασιών ανάλυσης κίνησης πέρα από τον τομέα της ασφάλειας, συμπεριλαμβανομένης της μέτρησης απόδοσης και της αποσφαλμάτωσης.
+> Το [Zeek](https://docs.zeek.org/en/master/about.html) είναι ένας παθητικός, open-source αναλυτής κίνησης δικτύου. Πολλοί operators χρησιμοποιούν το Zeek ως Network Security Monitor (NSM) για την υποστήριξη ερευνών ύποπτης ή κακόβουλης δραστηριότητας. Το Zeek υποστηρίζει επίσης ένα ευρύ φάσμα εργασιών ανάλυσης κίνησης πέρα από τον τομέα της ασφάλειας, συμπεριλαμβανομένων των μετρήσεων απόδοσης και της αντιμετώπισης προβλημάτων.
 
-Βασικά, τα αρχεία καταγραφής που δημιουργούνται από το `zeek` δεν είναι **pcaps**. Επομένως, θα χρειαστεί να χρησιμοποιήσετε **άλλα εργαλεία** για να αναλύσετε τα αρχεία καταγραφής όπου οι **πληροφορίες** σχετικά με τα pcaps είναι.
+Βασικά, τα logs που δημιουργούνται από το `zeek` δεν είναι **pcaps**. Επομένως, θα χρειαστεί να χρησιμοποιήσετε **άλλα εργαλεία** για να αναλύσετε τα logs, όπου βρίσκονται οι **πληροφορίες** σχετικά με τα pcaps.
 
-### Connections Info
+### Πληροφορίες συνδέσεων
 ```bash
 #Get info about longest connections (add "grep udp" to see only udp traffic)
 #The longest connection might be of malware (constant reverse shell?)
@@ -199,7 +201,7 @@ cat dns.log | zeek-cut qtype_name | sort | uniq -c | sort -nr
 #See top DNS domain requested with rita
 rita show-exploded-dns -H --limit 10 zeek_logs
 ```
-## Άλλες τεχνικές ανάλυσης pcap
+## Άλλα tricks ανάλυσης pcap
 
 
 {{#ref}}
@@ -215,7 +217,5 @@ wifi-pcap-analysis.md
 {{#ref}}
 usb-keystrokes.md
 {{#endref}}
-
-​
 
 {{#include ../../../banners/hacktricks-training.md}}

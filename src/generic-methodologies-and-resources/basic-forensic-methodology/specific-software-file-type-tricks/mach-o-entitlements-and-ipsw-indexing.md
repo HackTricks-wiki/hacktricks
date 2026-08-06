@@ -1,21 +1,21 @@
-# Mach-O Εξαγωγή Entitlements & Δεικτοδότηση IPSW
+# Εξαγωγή Mach-O Entitlements & Ευρετηρίαση IPSW
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Επισκόπηση
+## Overview
 
-Αυτή η σελίδα καλύπτει πώς να εξάγετε entitlements από Mach-O binaries προγραμματιστικά διασχίζοντας το LC_CODE_SIGNATURE και αναλύοντας το code signing SuperBlob, και πώς να κλιμακώσετε αυτό σε Apple IPSW firmwares προσαρτώντας και δεικτοδοτώντας το περιεχόμενό τους για ιατροδικαστική αναζήτηση/διαφορές.
+Αυτή η σελίδα καλύπτει τον τρόπο προγραμματιστικής εξαγωγής entitlements από Mach-O binaries μέσω περιήγησης στο LC_CODE_SIGNATURE και parsing του code signing SuperBlob, καθώς και τον τρόπο κλιμάκωσης αυτής της διαδικασίας σε Apple IPSW firmwares με mounting και indexing του περιεχομένου τους για forensic search/diff.
 
-Αν χρειάζεστε επανάληψη για τη μορφή Mach-O και το code signing, δείτε επίσης: macOS code signing and SuperBlob internals.
-- Ελέγξτε τις λεπτομέρειες του macOS code signing (SuperBlob, Code Directory, special slots): [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
-- Ελέγξτε τις γενικές δομές Mach-O / load commands: [Universal binaries & Mach-O Format](../../../macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)
+Αν χρειάζεστε μια υπενθύμιση σχετικά με το Mach-O format και το code signing, δείτε επίσης: macOS code signing και SuperBlob internals.
+- Check τις λεπτομέρειες του macOS code signing (SuperBlob, Code Directory, special slots): [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
+- Check τις γενικές Mach-O structures/load commands: [Universal binaries & Mach-O Format](../../../macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)
 
 
-## Entitlements στο Mach-O: πού βρίσκονται
+## Entitlements σε Mach-O: πού βρίσκονται
 
-Τα entitlements αποθηκεύονται μέσα στα δεδομένα της code signature που αναφέρεται από το load command LC_CODE_SIGNATURE και τοποθετούνται στο segment __LINKEDIT. Η υπογραφή είναι ένα CS_SuperBlob που περιέχει πολλαπλά blobs (code directory, requirements, entitlements, CMS, κ.λπ.). Το entitlements blob είναι ένα CS_GenericBlob του οποίου τα δεδομένα είναι ένα Apple Binary Property List (bplist00) που αντιστοιχίζει κλειδιά entitlements σε τιμές.
+Τα entitlements αποθηκεύονται μέσα στα code signature data που αναφέρονται από το LC_CODE_SIGNATURE load command και τοποθετούνται στο __LINKEDIT segment. Η signature είναι ένα CS_SuperBlob που περιέχει πολλαπλά blobs (code directory, requirements, entitlements, CMS κ.λπ.). Το entitlements blob είναι ένα CS_GenericBlob του οποίου τα data είναι ένα Apple Binary Property List (bplist00) που αντιστοιχίζει entitlement keys σε values.<sup>[[1]](#references)</sup>
 
-Κύριες δομές (από xnu):
+Βασικές structures (από το xnu):<sup>[[6]](#references)[[7]](#references)</sup>
 ```c
 /* mach-o/loader.h */
 struct mach_header_64 {
@@ -61,30 +61,32 @@ uint32_t length;
 char data[];      /* Apple Binary Plist containing entitlements */
 } CS_GenericBlob;
 ```
-Σημαντικά σταθερά:
+Σημαντικές σταθερές:
 - LC_CODE_SIGNATURE cmd = 0x1d
 - CS SuperBlob magic = 0xfade0cc0
 - Entitlements blob type (CSMAGIC_EMBEDDED_ENTITLEMENTS) = 0xfade7171
-- DER entitlements may be present via special slot (e.g., -7), see the macOS Code Signing page for special slots and DER entitlements notes
+- DER entitlements ενδέχεται να υπάρχουν μέσω special slot (π.χ. -7), δείτε τη σελίδα macOS Code Signing για τα special slots και τις σημειώσεις σχετικά με τα DER entitlements
 
-Σημείωση: Multi-arch (fat) binaries περιέχουν πολλαπλά Mach-O slices. Πρέπει να επιλέξετε το slice για την αρχιτεκτονική που θέλετε να εξετάσετε και μετά να διαβάσετε τα load commands.
+Σημείωση: Τα multi-arch (fat) binaries περιέχουν πολλαπλά Mach-O slices. Πρέπει να επιλέξετε το slice για την architecture που θέλετε να επιθεωρήσετε και στη συνέχεια να διατρέξετε τα load commands του.
 
-## Βήματα εξαγωγής (γενικά, αρκετά χωρίς απώλειες)
 
-1) Parse Mach-O header; iterate ncmds worth of load_command records.
-2) Locate LC_CODE_SIGNATURE; read linkedit_data_command.dataoff/datasize to map the Code Signing SuperBlob placed in __LINKEDIT.
-3) Validate CS_SuperBlob.magic == 0xfade0cc0; iterate count entries of CS_BlobIndex.
-4) Locate index.type == 0xfade7171 (embedded entitlements). Read the pointed CS_GenericBlob and parse its data as an Apple binary plist (bplist00) to key/value entitlements.
+## Βήματα εξαγωγής (γενικά, επαρκώς lossless)
+
+1) Κάντε parse το Mach-O header· διατρέξτε τόσες εγγραφές load_command όσες υποδεικνύει το ncmds.
+2) Εντοπίστε το LC_CODE_SIGNATURE· διαβάστε τα linkedit_data_command.dataoff/datasize για να κάνετε map το Code Signing SuperBlob που βρίσκεται στο __LINKEDIT.
+3) Επαληθεύστε ότι το CS_SuperBlob.magic == 0xfade0cc0· διατρέξτε τις εγγραφές count του CS_BlobIndex.
+4) Εντοπίστε το index.type == 0xfade7171 (embedded entitlements). Διαβάστε το υποδεικνυόμενο CS_GenericBlob και κάντε parse τα δεδομένα του ως Apple binary plist (bplist00), ώστε να λάβετε τα key/value entitlements.<sup>[[1]](#references)</sup>
 
 Σημειώσεις υλοποίησης:
-- Code signature structures use big-endian fields; swap byte order when parsing on little-endian hosts.
-- The entitlements GenericBlob data itself is a binary plist (handled by standard plist libraries).
-- Some iOS binaries may carry DER entitlements; also some stores/slots differ across platforms/versions. Cross-check both standard and DER entitlements as needed.
-- For fat binaries, use the fat headers (FAT_MAGIC/FAT_MAGIC_64) to locate the correct slice and offset before walking Mach-O load commands.
+- Οι δομές code signature χρησιμοποιούν big-endian πεδία· κάντε swap τη σειρά byte κατά το parsing σε little-endian hosts.
+- Τα δεδομένα του entitlements GenericBlob είναι binary plist (η επεξεργασία γίνεται από standard plist libraries).
+- Ορισμένα iOS binaries ενδέχεται να περιέχουν DER entitlements· επίσης, ορισμένα stores/slots διαφέρουν ανά platform/version. Κάντε cross-check τόσο των standard όσο και των DER entitlements όπου χρειάζεται.
+- Για fat binaries, χρησιμοποιήστε τα fat headers (FAT_MAGIC/FAT_MAGIC_64) για να εντοπίσετε το σωστό slice και offset πριν διατρέξετε τα Mach-O load commands.<sup>[[1]](#references)</sup>
 
-## Ελάχιστο περίγραμμα parsing (Python)
 
-Ακολουθεί ένα συμπαγές περίγραμμα που δείχνει τη ροή ελέγχου για τον εντοπισμό και την αποκωδικοποίηση των entitlements. Εσκεμμένα παραλείπει αυστηρούς ελέγχους ορίων και πλήρη υποστήριξη fat binaries για συντομία.
+## Minimal parsing outline (Python)
+
+Το παρακάτω είναι ένα συνοπτικό outline που δείχνει τη ροή ελέγχου για τον εντοπισμό και το decoding των entitlements. Σκόπιμα παραλείπει robust bounds checks και πλήρη υποστήριξη fat binary, για λόγους συντομίας.<sup>[[1]](#references)</sup>
 ```python
 import plistlib, struct
 
@@ -137,26 +139,26 @@ return plistlib.loads(data)
 return None
 ```
 Συμβουλές χρήσης:
-- Για να χειριστείτε fat binaries, πρώτα διαβάστε struct fat_header/fat_arch, επιλέξτε το επιθυμητό architecture slice, και στη συνέχεια περάστε το subrange στο parse_entitlements.
+- Για τον χειρισμό fat binaries, διαβάστε πρώτα τα struct fat_header/fat_arch, επιλέξτε το επιθυμητό architecture slice και, στη συνέχεια, περάστε το subrange στο parse_entitlements.
 - Σε macOS μπορείτε να επικυρώσετε τα αποτελέσματα με: codesign -d --entitlements :- /path/to/binary
 
 
-## Example findings
+## Παραδείγματα ευρημάτων
 
-Privileged platform binaries often request sensitive entitlements such as:
+Τα privileged platform binaries συχνά ζητούν ευαίσθητα entitlements, όπως:<sup>[[1]](#references)</sup>
 - com.apple.security.network.server = true
 - com.apple.rootless.storage.early_boot_mount = true
 - com.apple.private.kernel.system-override = true
 - com.apple.private.pmap.load-trust-cache = ["cryptex1.boot.os", "cryptex1.boot.app", "cryptex1.safari-downlevel"]
 
-Η αναζήτηση αυτών σε μεγάλη κλίμακα σε firmware images είναι εξαιρετικά πολύτιμη για attack surface mapping και diffing across releases/devices.
+Η αναζήτηση αυτών σε μεγάλη κλίμακα σε firmware images είναι εξαιρετικά χρήσιμη για attack surface mapping και diffing μεταξύ releases/devices.
 
 
-## Scaling across IPSWs (mounting and indexing)
+## Κλιμάκωση σε IPSWs (mounting και indexing)
 
-Για να απαριθμήσετε εκτελέσιμα και να εξαγάγετε entitlements σε μεγάλη κλίμακα χωρίς να αποθηκεύετε ολόκληρες εικόνες:
+Για την απαρίθμηση executables και την εξαγωγή entitlements σε μεγάλη κλίμακα χωρίς αποθήκευση πλήρων images:<sup>[[1]](#references)</sup>
 
-- Χρησιμοποιήστε το εργαλείο ipsw του @blacktop για να κατεβάσετε και να mount-άρετε τα firmware filesystems. Το mounting αξιοποιεί το apfs-fuse, οπότε μπορείτε να διασχίσετε APFS volumes χωρίς πλήρη εξαγωγή.
+- Χρησιμοποιήστε το εργαλείο ipsw του @blacktop για τη λήψη και το mounting των firmware filesystems. Το mounting αξιοποιεί το apfs-fuse, επομένως μπορείτε να περιηγείστε σε APFS volumes χωρίς πλήρες extraction.<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
 # Download latest IPSW for iPhone11,2 (iPhone XS)
 ipsw download ipsw -y --device iPhone11,2 --latest
@@ -164,12 +166,12 @@ ipsw download ipsw -y --device iPhone11,2 --latest
 # Mount IPSW filesystem (uses underlying apfs-fuse)
 ipsw mount fs <IPSW_FILE>
 ```
-- Περιηγηθείτε στους mounted volumes για να εντοπίσετε Mach-O αρχεία (ελέγξτε magic και/ή χρησιμοποιήστε file/otool), και στη συνέχεια αναλύστε entitlements και εισαγόμενα frameworks.
-- Διατηρήστε μια κανονικοποιημένη προβολή σε μια relational database για να αποφύγετε γραμμική αύξηση σε χιλιάδες IPSWs:
+- Περιηγηθείτε στα προσαρτημένα volumes για να εντοπίσετε αρχεία Mach-O (ελέγξτε το magic ή χρησιμοποιήστε τα file/otool) και, στη συνέχεια, αναλύστε τα entitlements και τα imported frameworks.
+- Αποθηκεύστε μια normalized όψη σε relational database, ώστε να αποφεύγεται η γραμμική αύξηση σε χιλιάδες IPSWs:
 - executables, operating_system_versions, entitlements, frameworks
 - many-to-many: executable↔OS version, executable↔entitlement, executable↔framework
 
-Παράδειγμα query για να απαριθμήσετε όλες τις OS versions που περιέχουν ένα συγκεκριμένο executable name:
+Παράδειγμα query για την καταχώριση όλων των OS versions που περιέχουν ένα δεδομένο executable name:
 ```sql
 SELECT osv.version AS "Versions"
 FROM device d
@@ -178,34 +180,34 @@ LEFT JOIN executable_operating_system_version eosv ON eosv.operating_system_vers
 LEFT JOIN executable e ON e.id = eosv.executable_id
 WHERE e.name = "launchd";
 ```
-Σημειώσεις για φορητότητα DB (αν υλοποιήσετε τον δικό σας indexer):
-- Use an ORM/abstraction (π.χ., SeaORM) για να κρατήσετε τον κώδικα ανεξάρτητο από τη βάση (SQLite/PostgreSQL).
-- Το SQLite απαιτεί το AUTOINCREMENT μόνο σε ένα INTEGER PRIMARY KEY· αν θέλετε i64 PKs σε Rust, δημιουργήστε οντότητες ως i32 και κάντε convert τύπων, το SQLite αποθηκεύει INTEGER ως 8-byte signed εσωτερικά.
+Σημειώσεις σχετικά με τη φορητότητα της DB (αν υλοποιείτε το δικό σας indexer):<sup>[[1]](#references)</sup>
+- Χρησιμοποιήστε ένα ORM/abstraction (π.χ. SeaORM) ώστε ο κώδικας να μην εξαρτάται από τη DB (SQLite/PostgreSQL).
+- Το SQLite απαιτεί AUTOINCREMENT μόνο σε ένα INTEGER PRIMARY KEY· αν θέλετε i64 PKs στη Rust, δημιουργήστε entities ως i32 και μετατρέψτε τους τύπους, καθώς το SQLite αποθηκεύει εσωτερικά το INTEGER ως signed 8-byte ακέραιο.<sup>[[8]](#references)</sup>
 
 
-## Open-source tooling and references for entitlement hunting
+## Open-source εργαλεία και αναφορές για entitlement hunting
 
-- Firmware mount/download: https://github.com/blacktop/ipsw
-- Entitlement databases and references:
-- Jonathan Levin’s entitlement DB: https://newosxbook.com/ent.php
+- Mount/download firmware: https://github.com/blacktop/ipsw
+- Entitlement databases και αναφορές:
+- Entitlement DB του Jonathan Levin: https://newosxbook.com/ent.php
 - entdb: https://github.com/ChiChou/entdb
 - Large-scale indexer (Rust, self-hosted Web UI + OpenAPI): https://github.com/synacktiv/appledb_rs
-- Apple headers for structures and constants:
+- Apple headers για structures και constants:
 - loader.h (Mach-O headers, load commands)
 - cs_blobs.h (SuperBlob, GenericBlob, CodeDirectory)
 
-Για περισσότερα για τα code signing internals (Code Directory, special slots, DER entitlements), δείτε: [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
+Για περισσότερα σχετικά με τα internals του code signing (Code Directory, special slots, DER entitlements), δείτε: [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
 
 
 ## Αναφορές
 
-- [appledb_rs: a research support tool for Apple platforms](https://www.synacktiv.com/publications/appledbrs-un-outil-daide-a-la-recherche-sur-plateformes-apple.html)
-- [synacktiv/appledb_rs](https://github.com/synacktiv/appledb_rs)
-- [blacktop/ipsw](https://github.com/blacktop/ipsw)
-- [Jonathan Levin’s entitlement DB](https://newosxbook.com/ent.php)
-- [ChiChou/entdb](https://github.com/ChiChou/entdb)
-- [XNU cs_blobs.h](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
-- [XNU mach-o/loader.h](https://github.com/apple-oss-distributions/xnu/blob/main/EXTERNAL_HEADERS/mach-o/loader.h)
-- [SQLite Datatypes](https://sqlite.org/datatype3.html)
+- [1] [appledb_rs: ένα research support tool για Apple platforms](https://www.synacktiv.com/publications/appledbrs-un-outil-daide-a-la-recherche-sur-plateformes-apple.html)
+- [2] [synacktiv/appledb_rs](https://github.com/synacktiv/appledb_rs)
+- [3] [blacktop/ipsw](https://github.com/blacktop/ipsw)
+- [4] [Entitlement DB του Jonathan Levin](https://newosxbook.com/ent.php)
+- [5] [ChiChou/entdb](https://github.com/ChiChou/entdb)
+- [6] [XNU cs_blobs.h](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [7] [XNU mach-o/loader.h](https://github.com/apple-oss-distributions/xnu/blob/main/EXTERNAL_HEADERS/mach-o/loader.h)
+- [8] [SQLite Datatypes](https://sqlite.org/datatype3.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

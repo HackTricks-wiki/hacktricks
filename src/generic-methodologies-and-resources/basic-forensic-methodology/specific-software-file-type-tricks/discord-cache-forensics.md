@@ -2,32 +2,32 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Αυτή η σελίδα συνοψίζει πώς να διαχειριστείτε την cache του Discord Desktop για να ανακτήσετε εξαχθέντα αρχεία, webhook endpoints και χρονολογίες δραστηριότητας. Το Discord Desktop είναι εφαρμογή Electron/Chromium και χρησιμοποιεί Chromium Simple Cache στο δίσκο.
+Αυτή η σελίδα συνοψίζει τον τρόπο triage των cache artifacts του Discord Desktop για την ανάκτηση exfiltrated αρχείων, webhook endpoints και timelines δραστηριότητας. Το Discord Desktop είναι εφαρμογή Electron/Chromium και χρησιμοποιεί το Chromium Simple Cache στον δίσκο.
 
-## Πού να κοιτάξετε (Windows/macOS/Linux)
+## Πού να αναζητήσετε (Windows/macOS/Linux)
 
 - Windows: %AppData%\discord\Cache\Cache_Data
 - macOS: ~/Library/Application Support/discord/Cache/Cache_Data
 - Linux: ~/.config/discord/Cache/Cache_Data
 
-Βασικές δομές στο δίσκο μέσα στο Cache_Data:
-- index: βάση δεδομένων ευρετηρίου του Simple Cache
-- data_#: Δυαδικά αρχεία μπλοκ cache που μπορούν να περιέχουν πολλαπλά αποθηκευμένα αντικείμενα
-- f_######: Ατομικές εγγραφές cache αποθηκευμένες ως ξεχωριστά αρχεία (συχνά μεγαλύτερα περιεχόμενα)
+Βασικές on-disk δομές μέσα στο Cache_Data:<sup>[[1]](#references)</sup>
+- index: Βάση δεδομένων index του Simple Cache
+- data_#: Binary αρχεία cache block που μπορούν να περιέχουν πολλά cached objects
+- f_######: Μεμονωμένα cached entries που αποθηκεύονται ως standalone αρχεία (συχνά μεγαλύτερα bodies)
 
-Σημείωση: Η διαγραφή μηνυμάτων/καναλιών/servers στο Discord δεν εκκαθαρίζει αυτήν την τοπική cache. Τα αποθηκευμένα στοιχεία συχνά παραμένουν και οι χρονικές σφραγίδες των αρχείων αντιστοιχούν στη δραστηριότητα του χρήστη, επιτρέποντας την ανακατασκευή χρονολογίου.
+Σημείωση: Η διαγραφή messages/channels/servers στο Discord δεν διαγράφει τοπικά αυτό το cache. Τα cached items συχνά παραμένουν και τα timestamps των αρχείων τους συμπίπτουν με τη δραστηριότητα του χρήστη, επιτρέποντας την ανακατασκευή timeline.<sup>[[1]](#references)</sup>
 
 ## Τι μπορεί να ανακτηθεί
 
-- Εξαχθέντα συνημμένα και μικρογραφίες που λήφθηκαν μέσω cdn.discordapp.com/media.discordapp.net
-- Εικόνες, GIFs, βίντεο (π.χ., .jpg, .png, .gif, .webp, .mp4, .webm)
-- Webhook URLs (https://discord.com/api/webhooks/…)
+- Exfiltrated attachments και thumbnails που ανακτήθηκαν μέσω cdn.discordapp.com/media.discordapp.net
+- Images, GIFs, videos (π.χ. .jpg, .png, .gif, .webp, .mp4, .webm)
+- Webhook URLs (https://discord.com/api/webhooks/…)<sup>[[3]](#references)</sup>
 - Discord API calls (https://discord.com/api/vX/…)
-- Χρήσιμο για τη συσχέτιση beaconing/exfil δραστηριότητας και για το hashing μέσων για αντιστοίχιση intel
+- Χρήσιμο για τη συσχέτιση beaconing/exfil activity και το hashing media για intel matching<sup>[[1]](#references)</sup>
 
-## Γρήγορη διαλογή (χειροκίνητη)
+## Quick triage (manual)
 
-- Χρησιμοποιήστε grep/αναζητήσεις στην cache για artifacts υψηλής σημασίας:
+- Κάντε grep στο cache για high-signal artifacts:
 - Webhook endpoints:
 - Windows: findstr /S /I /C:"https://discord.com/api/webhooks/" "%AppData%\discord\Cache\Cache_Data\*"
 - Linux/macOS: strings -a Cache_Data/* | grep -i "https://discord.com/api/webhooks/"
@@ -35,22 +35,22 @@
 - strings -a Cache_Data/* | grep -Ei "https://(cdn|media)\.discord(app)?\.com/attachments/"
 - Discord API calls:
 - strings -a Cache_Data/* | grep -Ei "https://discord(app)?\.com/api/v[0-9]+/"
-- Ταξινομήστε τις εγγραφές cache κατά χρόνο τροποποίησης για να φτιάξετε ένα γρήγορο χρονολόγιο (mtime αντικατοπτρίζει πότε το αντικείμενο χτύπησε την cache):
+- Ταξινομήστε τα cached entries με βάση τον χρόνο τροποποίησης για να δημιουργήσετε ένα quick timeline (το mtime αντικατοπτρίζει τη στιγμή που το object εισήλθε στο cache):
 - Windows PowerShell: Get-ChildItem "$env:AppData\discord\Cache\Cache_Data" -File -Recurse | Sort-Object LastWriteTime | Select-Object LastWriteTime, FullName
 
 ## Parsing f_* entries (HTTP body + headers)
 
-Τα αρχεία που ξεκινούν με f_ περιέχουν HTTP response headers ακολουθούμενα από το σώμα. Το μπλοκ των headers συνήθως τελειώνει με \r\n\r\n. Χρήσιμα response headers περιλαμβάνουν:
-- Content-Type: Για να εξαχθεί ο τύπος μέσου
-- Content-Location or X-Original-URL: Το αρχικό απομακρυσμένο URL για συσχέτιση/προεπισκόπηση
+Τα αρχεία που ξεκινούν με f_ περιέχουν HTTP response headers ακολουθούμενα από το body. Το block των headers συνήθως τελειώνει με \r\n\r\n. Χρήσιμα response headers περιλαμβάνουν:
+- Content-Type: Για την εξαγωγή του media type
+- Content-Location ή X-Original-URL: Το αρχικό remote URL για preview/correlation
 - Content-Encoding: Μπορεί να είναι gzip/deflate/br (Brotli)
 
-Τα μέσα μπορούν να εξαχθούν διαχωρίζοντας τα headers από το σώμα και προαιρετικά αποσυμπιέζοντας με βάση το Content-Encoding. Η ανίχνευση μέσω magic-bytes είναι χρήσιμη όταν το Content-Type λείπει.
+Τα media μπορούν να εξαχθούν διαχωρίζοντας τα headers από το body και, προαιρετικά, κάνοντας decompress με βάση το Content-Encoding. Το magic-byte sniffing είναι χρήσιμο όταν απουσιάζει το Content-Type.
 
 ## Automated DFIR: Discord Forensic Suite (CLI/GUI)
 
 - Repo: https://github.com/jwdfir/discord_cache_parser
-- Function: Σαρώει αναδρομικά τον φάκελο cache του Discord, εντοπίζει webhook/API/attachment URLs, αναλύει τα f_* σώματα, προαιρετικά carve-άρει media, και εξάγει αναφορές χρονολογίου σε HTML + CSV με SHA‑256 hashes.
+- Function: Σαρώνει recursively τον cache folder του Discord, εντοπίζει webhook/API/attachment URLs, κάνει parsing στα f_* bodies, προαιρετικά κάνει carve media και παράγει HTML + CSV timeline reports με SHA‑256 hashes.<sup>[[2]](#references)</sup>
 
 Example CLI usage:
 ```bash
@@ -65,25 +65,25 @@ python3 discord_forensic_suite_cli \
 --carve \
 --verbose
 ```
-Key options:
-- --cache: Path to Cache_Data
+Βασικές επιλογές:
+- --cache: Διαδρομή προς το Cache_Data
 - --format html|csv|both
-- --timeline: Εξάγει ταξινομημένο CSV timeline (κατά modified time)
-- --extra: Επίσης σαρώστε τους παρεμφερείς φακέλους Code Cache και GPUCache
-- --carve: Εξάγει media από raw bytes κοντά σε regex hits (images/video)
-- Output: HTML report, CSV report, CSV timeline, και φάκελος media με carved/extracted αρχεία
+- --timeline: Εξαγωγή ταξινομημένου CSV timeline (κατά modified time)
+- --extra: Σάρωση επίσης των γειτονικών Code Cache και GPUCache
+- --carve: Carve media από raw bytes κοντά σε regex hits (εικόνες/video)
+- Έξοδος: HTML report, CSV report, CSV timeline και φάκελος media με carved/extracted files
 
-## Analyst tips
+## Συμβουλές για τον analyst
 
-- Συσχετίστε το modified time (mtime) των αρχείων f_* και data_* με τα παράθυρα δραστηριότητας χρήστη/επιτιθέμενου για να ανασυνθέσετε ένα χρονολόγιο.
-- Υπολογίστε το hash των ανακτημένων media (SHA-256) και συγκρίνετέ το με γνωστά-κακόβουλα ή exfil datasets.
-- Οι εξαγόμενοι webhook URLs μπορούν να ελεγχθούν για διαθεσιμότητα (liveness) ή να ανανεωθούν· σκεφτείτε να τα προσθέσετε σε blocklists και retro-hunting proxies.
-- Η cache παραμένει μετά το “wiping” στην πλευρά του server. Αν είναι δυνατή η απόκτηση, συλλέξτε ολόκληρο τον κατάλογο Cache και τους σχετικούς παρεμφερείς caches (Code Cache, GPUCache).
+- Συσχετίστε το modified time (mtime) των αρχείων f_* και data_* με τα χρονικά διαστήματα δραστηριότητας του χρήστη/attacker, για να ανακατασκευάσετε ένα timeline.
+- Υπολογίστε hash στα recovered media (SHA-256) και συγκρίνετέ τα με γνωστά κακόβουλα datasets ή datasets exfil.
+- Τα extracted webhook URLs μπορούν να ελεγχθούν για liveness ή να περιστραφούν. Εξετάστε το ενδεχόμενο να τα προσθέσετε σε blocklists και να πραγματοποιήσετε retro-hunting σε proxies.
+- Το Cache παραμένει μετά το “wiping” από την πλευρά του server. Αν είναι δυνατή η απόκτηση, συλλέξτε ολόκληρο το Cache directory και τα σχετικά γειτονικά caches (Code Cache, GPUCache).<sup>[[1]](#references)</sup>
 
-## References
+## Αναφορές
 
-- [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
-- [Discord Forensic Suite (CLI/GUI)](https://github.com/jwdfir/discord_cache_parser)
-- [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [1] [Discord ως C2 και τα cached στοιχεία που παραμένουν πίσω](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [2] [Discord Forensic Suite (CLI/GUI)](https://github.com/jwdfir/discord_cache_parser)
+- [3] [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 
 {{#include ../../../banners/hacktricks-training.md}}

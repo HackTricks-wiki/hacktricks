@@ -1,28 +1,28 @@
-# SVG/Font Glyph Analysis & Web DRM Deobfuscation (Raster Hashing + SSIM)
+# Ανάλυση SVG/Font Glyph & Deobfuscation Web DRM (Raster Hashing + SSIM)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Αυτή η σελίδα τεκμηριώνει πρακτικές τεχνικές για την ανάκτηση κειμένου από web readers που αποστέλλουν positioned glyph runs μαζί με per-request vector glyph definitions (SVG paths), και που τυχαίοποιούν τα glyph IDs ανά request για να αποτρέψουν το scraping. Η βασική ιδέα είναι να αγνοήσουμε τα request-scoped numeric glyph IDs και να fingerprint-άρουμε τα οπτικά σχήματα μέσω raster hashing, και στη συνέχεια να αντιστοιχίσουμε τα σχήματα σε χαρακτήρες με SSIM έναντι ενός reference font atlas. Η ροή εργασίας γενικεύεται πέρα από Kindle Cloud Reader σε οποιονδήποτε viewer με παρόμοιες προστασίες.
+Αυτή η σελίδα τεκμηριώνει πρακτικές τεχνικές για την ανάκτηση κειμένου από web readers που αποστέλλουν positioned glyph runs μαζί με per-request vector glyph definitions (SVG paths) και τυχαιοποιούν τα glyph IDs ανά request για την αποτροπή scraping. Η βασική ιδέα είναι να αγνοούνται τα αριθμητικά glyph IDs που ισχύουν μόνο για το εκάστοτε request και να γίνεται fingerprinting των οπτικών σχημάτων μέσω raster hashing. Στη συνέχεια, τα σχήματα αντιστοιχίζονται σε χαρακτήρες με SSIM, σε σύγκριση με ένα reference font atlas. Η ροή εργασίας μπορεί να εφαρμοστεί και πέρα από το Kindle Cloud Reader, σε οποιονδήποτε viewer με παρόμοιες προστασίες.<sup>[[1]](#references)</sup>
 
-Warning: Only use these techniques to back up content you legitimately own and in compliance with applicable laws and terms.
+Προειδοποίηση: Χρησιμοποιείτε αυτές τις τεχνικές μόνο για τη δημιουργία αντιγράφων ασφαλείας περιεχομένου που σας ανήκει νόμιμα και σύμφωνα με την ισχύουσα νομοθεσία και τους όρους χρήσης.
 
-## Απόκτηση (παράδειγμα: Kindle Cloud Reader)
+## Acquisition (παράδειγμα: Kindle Cloud Reader)
 
-Παρατηρούμενο endpoint:
-- [https://read.amazon.com/renderer/render]
+Endpoint που παρατηρήθηκε:<sup>[[1]](#references)</sup>
+- [https://read.amazon.com/renderer/render](https://read.amazon.com/renderer/render)
 
-Απαιτούμενα υλικά ανά session:
-- Browser session cookies (normal Amazon login)
-- Rendering token from a startReading API call
-- Additional ADP session token used by the renderer
+Απαιτούμενα στοιχεία ανά session:
+- Browser session cookies (κανονικό Amazon login)
+- Rendering token από ένα startReading API call
+- Πρόσθετο ADP session token που χρησιμοποιείται από τον renderer
 
 Συμπεριφορά:
-- Κάθε request, όταν αποστέλλεται με browser-equivalent headers και cookies, επιστρέφει ένα TAR archive περιορισμένο σε 5 pages.
-- Για ένα μεγάλο βιβλίο θα χρειαστείτε πολλά batches· κάθε batch χρησιμοποιεί διαφορετικό randomized mapping των glyph IDs.
+- Κάθε request, όταν αποστέλλεται με headers και cookies ισοδύναμα με του browser, επιστρέφει ένα TAR archive περιορισμένο σε 5 σελίδες.
+- Για ένα μεγάλο βιβλίο θα χρειαστούν πολλά batches· κάθε batch χρησιμοποιεί διαφορετικό randomized mapping των glyph IDs.
 
 Τυπικά περιεχόμενα TAR:
-- page_data_0_4.json — positioned text runs as sequences of glyph IDs (not Unicode)
-- glyphs.json — per-request SVG path definitions for each glyph and fontFamily
+- page_data_0_4.json — positioned text runs ως sequences από glyph IDs (όχι Unicode)
+- glyphs.json — per-request SVG path definitions για κάθε glyph και fontFamily
 - toc.json — table of contents
 - metadata.json — book metadata
 - location_map.json — logical→visual position mappings
@@ -38,56 +38,56 @@ Warning: Only use these techniques to back up content you legitimately own and i
 "fontSize": 12.5
 }
 ```
-Παράδειγμα εγγραφής στο glyphs.json:
+Παράδειγμα καταχώρισης glyphs.json:
 ```json
 {
 "24": {"path": "M 450 1480 L 820 1480 L 820 0 L 1050 0 L 1050 1480 ...", "fontFamily": "bookerly_normal"}
 }
 ```
-Σημειώσεις σχετικά με anti-scraping path tricks:
-- Paths μπορεί να περιλαμβάνουν micro relative moves (π.χ., `m3,1 m1,6 m-4,-7`) που συγχέουν πολλούς vector parsers και naïve path sampling.
-- Πάντα αποδώστε γεμάτα, πλήρη paths με έναν αξιόπιστο SVG engine (π.χ., CairoSVG) αντί να κάνετε command/coordinate differencing.
+Σημειώσεις σχετικά με tricks διαδρομών κατά του scraping:
+- Οι διαδρομές μπορεί να περιλαμβάνουν μικροσκοπικές σχετικές μετακινήσεις (π.χ., `m3,1 m1,6 m-4,-7`) που μπερδεύουν πολλούς vector parsers και naïve δειγματοληψίες διαδρομών.
+- Να κάνετε πάντα render σε πλήρεις διαδρομές με γέμισμα, χρησιμοποιώντας έναν robust SVG engine (π.χ. CairoSVG), αντί να κάνετε διαφοροποίηση εντολών/συντεταγμένων.
 
-## Γιατί αποτυγχάνει η απλή αποκωδικοποίηση
+## Γιατί αποτυγχάνει το naïve decoding
 
-- Per-request randomized glyph substitution: η αντιστοίχιση glyph ID→character αλλάζει κάθε batch· τα IDs δεν έχουν παγκόσμιο νόημα.
-- Η άμεση σύγκριση συντεταγμένων SVG είναι ευαίσθητη: ίδια σχήματα μπορεί να διαφέρουν σε αριθμητικές συντεταγμένες ή στην κωδικοποίηση εντολών ανά αίτηση.
-- Το OCR σε απομονωμένα glyphs αποδίδει φτωχά (≈50%), μπερδεύει σημεία στίξης και ομοιάζοντα glyphs, και αγνοεί ligatures.
+- Τυχαιοποιημένη αντικατάσταση glyph ανά request: η αντιστοίχιση glyph ID→χαρακτήρα αλλάζει σε κάθε batch· τα IDs δεν έχουν παγκόσμια σημασία.<sup>[[1]](#references)</sup>
+- Η άμεση σύγκριση συντεταγμένων SVG είναι εύθραυστη: πανομοιότυπα σχήματα μπορεί να διαφέρουν στις αριθμητικές συντεταγμένες ή στην κωδικοποίηση εντολών ανά request.
+- Το OCR σε μεμονωμένα glyph έχει χαμηλή απόδοση (≈50%), συγχέει σημεία στίξης και παρόμοια glyph και αγνοεί τα ligatures.
 
-## Ροή εργασίας: request-agnostic κανονικοποίηση και αντιστοίχιση glyphs
+## Λειτουργικό pipeline: request-agnostic κανονικοποίηση και αντιστοίχιση glyph
 
-1) Rasterize per-request SVG glyphs
-- Δημιουργήστε ένα ελάχιστο SVG έγγραφο ανά glyph με το παρεχόμενο `path` και αποδώστε σε ένα σταθερό canvas (π.χ., 512×512) χρησιμοποιώντας CairoSVG ή έναν ισοδύναμο engine που χειρίζεται σύνθετες ακολουθίες path.
-- Αποδώστε γεμάτο μαύρο σε λευκό· αποφύγετε strokes για να εξαλείψετε artifacts εξαρτώμενα από τον renderer και το AA.
+1) Rasterize των SVG glyph ανά request
+- Δημιουργήστε ένα minimal SVG document για κάθε glyph με το παρεχόμενο `path` και κάντε render σε fixed canvas (π.χ., 512×512) χρησιμοποιώντας CairoSVG ή equivalent engine που χειρίζεται δύσκολες ακολουθίες path.<sup>[[1]](#references)[[2]](#references)</sup>
+- Κάντε render με μαύρο γέμισμα σε λευκό φόντο· αποφύγετε τα strokes για να εξαλείψετε artifacts που εξαρτώνται από τον renderer και το AA.
 
-2) Perceptual hashing for cross-request identity
-- Υπολογίστε ένα perceptual hash (π.χ., pHash via `imagehash.phash`) για κάθε εικόνα glyph.
-- Χρησιμοποιήστε το hash ως σταθερό ID: το ίδιο οπτικό σχήμα σε διαφορετικά requests συμπτύσσεται στο ίδιο perceptual hash, εξουδετερώνοντας randomized IDs.
+2) Perceptual hashing για cross-request identity
+- Υπολογίστε ένα perceptual hash (π.χ., pHash μέσω `imagehash.phash`) για κάθε εικόνα glyph.<sup>[[3]](#references)</sup>
+- Αντιμετωπίστε το hash ως stable ID: το ίδιο οπτικό σχήμα σε διαφορετικά requests αντιστοιχίζεται στο ίδιο perceptual hash, εξουδετερώνοντας τα randomized IDs.
 
-3) Reference font atlas generation
-- Κατεβάστε τα στοχευόμενα TTF/OTF fonts (π.χ., Bookerly normal/italic/bold/bold-italic).
-- Αποδώστε υποψήφιους για A–Z, a–z, 0–9, σημεία στίξης, ειδικά σημάδια (em/en dashes, quotes) και ρητές ligatures: `ff`, `fi`, `fl`, `ffi`, `ffl`.
-- Κρατήστε ξεχωριστά atlases ανά παραλλαγή font (normal/italic/bold/bold-italic).
-- Χρησιμοποιήστε proper text shaper (HarfBuzz) αν θέλετε glyph-level fidelity για ligatures· απλή rasterization μέσω Pillow ImageFont μπορεί να είναι επαρκής αν αποδώσετε τα ligature strings απευθείας και το shaping engine τα επιλύει.
+3) Δημιουργία reference font atlas
+- Κατεβάστε τις fonts TTF/OTF-στόχους (π.χ., Bookerly normal/italic/bold/bold-italic).
+- Κάντε render υποψηφίων για A–Z, a–z, 0–9, σημεία στίξης, ειδικά σημεία (em/en dashes, quotes) και explicit ligatures: `ff`, `fi`, `fl`, `ffi`, `ffl`.
+- Διατηρήστε ξεχωριστά atlases για κάθε font variant (normal/italic/bold/bold-italic).
+- Χρησιμοποιήστε proper text shaper (HarfBuzz) αν θέλετε glyph-level fidelity για ligatures· το simple rasterization μέσω Pillow ImageFont μπορεί να επαρκεί, εφόσον κάνετε render απευθείας τα strings των ligatures και το shaping engine τις επιλύει.
 
-4) Visual similarity matching with SSIM
-- Για κάθε άγνωστη εικόνα glyph, υπολογίστε SSIM (Structural Similarity Index) απέναντι σε όλες τις υποψήφιες εικόνες σε όλα τα atlases των παραλλαγών font.
-- Αντιστοιχίστε το χαρακτήρα της καλύτερης βαθμολογημένης ταύτισης. Το SSIM απορροφά μικρές διαφορές anti-aliasing, κλίμακας και συντεταγμένων καλύτερα από pixel-exact συγκρίσεις.
+4) Visual similarity matching με SSIM
+- Για κάθε unknown glyph image, υπολογίστε SSIM (Structural Similarity Index) έναντι όλων των candidate images σε όλα τα font variant atlases.<sup>[[4]](#references)</sup>
+- Αντιστοιχίστε το character string του match με την υψηλότερη βαθμολογία. Το SSIM απορροφά καλύτερα τις μικρές διαφορές στο antialiasing, στο scale και στις συντεταγμένες από ό,τι οι pixel-exact συγκρίσεις.
 
-5) Edge handling και ανακατασκευή
-- Όταν ένα glyph αντιστοιχεί σε ligature (πολλαπλοί χαρακτήρες), επεκτείνετέ το κατά την αποκωδικοποίηση.
-- Χρησιμοποιήστε run rectangles (top/left/right/bottom) για να συμπεράνετε διακοπές παραγράφων (Y deltas), στοίχιση (X patterns), style και μεγέθη.
-- Σειριοποιήστε σε HTML/EPUB διατηρώντας `fontStyle`, `fontWeight`, `fontSize` και εσωτερικούς συνδέσμους.
+5) Edge handling και reconstruction
+- Όταν ένα glyph αντιστοιχίζεται σε ligature (multi-char), κάντε expand κατά το decoding.
+- Χρησιμοποιήστε run rectangles (top/left/right/bottom) για να συμπεράνετε paragraph breaks (Y deltas), alignment (X patterns), style και sizes.
+- Κάντε serialize σε HTML/EPUB διατηρώντας τα `fontStyle`, `fontWeight`, `fontSize` και τα internal links.
 
 ### Implementation tips
 
-- Κανονικοποιήστε όλες τις εικόνες στο ίδιο μέγεθος και σε grayscale πριν από hashing και SSIM.
-- Κάντε cache ανά perceptual hash για να αποφύγετε επανυπολογισμό SSIM για επαναλαμβανόμενα glyphs σε διαφορετικά batches.
-- Χρησιμοποιήστε υψηλής ποιότητας raster size (π.χ. 256–512 px) για καλύτερο διαχωρισμό· κάντε downscale όπως χρειάζεται πριν το SSIM για επιτάχυνση.
-- Αν χρησιμοποιείτε Pillow για απόδοση TTF υποψηφίων, ορίστε το ίδιο μέγεθος canvas και κεντράρετε το glyph· προσθέστε padding για να αποφύγετε clipping ascenders/descenders.
+- Κανονικοποιήστε όλες τις εικόνες στο ίδιο μέγεθος και σε grayscale πριν από το hashing και το SSIM.
+- Κάντε cache με βάση το perceptual hash, ώστε να αποφεύγετε τον επανυπολογισμό του SSIM για επαναλαμβανόμενα glyphs μεταξύ batches.
+- Χρησιμοποιήστε high-quality raster size (π.χ., 256–512 px) για καλύτερη διάκριση· κάντε downscale όπως απαιτείται πριν από το SSIM για επιτάχυνση.
+- Αν χρησιμοποιείτε Pillow για το render υποψηφίων TTF, ορίστε το ίδιο canvas size και κεντράρετε το glyph· προσθέστε padding για να αποφύγετε το clipping των ascenders/descenders.
 
 <details>
-<summary>Python: end-to-end glyph normalization and matching (raster hash + SSIM)</summary>
+<summary>Python: end-to-end κανονικοποίηση και matching glyph (raster hash + SSIM)</summary>
 ```python
 # pip install cairosvg pillow imagehash scikit-image uharfbuzz freetype-py
 import io, json, tarfile, base64, math
@@ -222,41 +222,41 @@ return out_runs
 ```
 </details>
 
-## Διάταξη/Επανακατασκευή EPUB — Ευρετικές
+## Heuristics ανακατασκευής Layout/EPUB
 
-- Διαχωρισμός παραγράφων: Εάν το top Y του επόμενου run υπερβαίνει τη baseline της προηγούμενης γραμμής κατά ένα όριο (σχετικό με το μέγεθος γραμματοσειράς), ξεκινήστε νέα παράγραφο.
-- Στοίχιση: Ομαδοποιήστε κατά παρόμοιο left X για αριστερά στοιχισμένες παραγράφους· ανιχνεύστε κεντραρισμένες γραμμές από συμμετρικά περιθώρια· ανιχνεύστε δεξιά στοιχισμένες από τα right edges.
-- Στυλ: Διατηρήστε πλάγια/έντονα μέσω `fontStyle`/`fontWeight`; διαφοροποιήστε CSS classes ανά `fontSize` buckets για να προσεγγίσετε headings vs body.
-- Συνδέσμοι: Εάν τα runs περιέχουν metadata συνδέσμου (π.χ., `positionId`), παράγετε anchors και εσωτερικά hrefs.
+- Διαχωρισμοί παραγράφων: Αν το top Y του επόμενου run υπερβαίνει το baseline της προηγούμενης γραμμής κατά ένα threshold (σε σχέση με το μέγεθος της γραμματοσειράς), ξεκινήστε νέα παράγραφο.<sup>[[1]](#references)</sup>
+- Στοίχιση: Ομαδοποιήστε με βάση παρόμοιο αριστερό X για αριστερά στοιχισμένες παραγράφους· εντοπίστε τις κεντραρισμένες γραμμές μέσω συμμετρικών περιθωρίων· εντοπίστε τις δεξιά στοιχισμένες μέσω των δεξιών άκρων.
+- Styling: Διατηρήστε τα italic/bold μέσω των `fontStyle`/`fontWeight`· διαφοροποιήστε τις CSS classes ανά buckets του `fontSize`, ώστε να προσεγγίζετε headings και body.
+- Links: Αν τα runs περιλαμβάνουν metadata για links (π.χ. `positionId`), εκδώστε anchors και internal hrefs.
 
-## Αντιμετώπιση τεχνικών anti-scraping σε SVG paths
+## Mitigating SVG anti-scraping path tricks
 
-- Use filled paths with `fill-rule: nonzero` and a proper renderer (CairoSVG, resvg). Do not rely on path token normalization.
-- Αποφύγετε stroke rendering· εστιάστε σε γεμισμένα solids για να παρακάμψετε hairline artifacts που προκαλούνται από μικρο-σχετικές κινήσεις.
-- Κρατήστε σταθερό viewBox ανά render ώστε όμοια σχήματα να rasterize-άρονται συνεπώς σε διάφορα batches.
+- Χρησιμοποιήστε filled paths με `fill-rule: nonzero` και proper renderer (CairoSVG, resvg). Μην βασίζεστε σε normalization των path tokens.<sup>[[1]](#references)</sup>
+- Αποφύγετε το stroke rendering· εστιάστε σε filled solids για να παρακάμψετε τα hairline artifacts που προκαλούνται από micro relative moves.
+- Διατηρήστε σταθερό viewBox ανά render, ώστε τα identical shapes να rasterize με συνέπεια σε όλες τις batches.
 
 ## Σημειώσεις απόδοσης
 
-- Στην πράξη, τα βιβλία συγκλίνουν σε μερικές εκατοντάδες μοναδικά glyphs (π.χ., ~361 συμπεριλαμβανομένων ligatures). Cache SSIM results by perceptual hash.
-- Μετά την αρχική ανακάλυψη, μελλοντικά batches κυρίως επαναχρησιμοποιούν γνωστά hashes· το decoding γίνεται I/O-bound.
-- Μέσο SSIM ≈0.95 αποτελεί ισχυρό σήμα· σκεφτείτε να σηματοδοτείτε low-scoring matches για χειροκίνητη ανασκόπηση.
+- Στην πράξη, τα books συγκλίνουν σε μερικές εκατοντάδες unique glyphs (π.χ. ~361 μαζί με ligatures). Κάντε cache τα SSIM results βάσει perceptual hash.<sup>[[1]](#references)</sup>
+- Μετά την αρχική ανακάλυψη, οι επόμενες batches επαναχρησιμοποιούν κυρίως γνωστά hashes· το decoding γίνεται I/O-bound.
+- Average SSIM ≈0.95 αποτελεί ισχυρό signal· εξετάστε το ενδεχόμενο να επισημαίνετε τα matches με χαμηλό score για manual review.
 
-## Γενίκευση σε άλλους viewers
+## Generalization σε άλλους viewers
 
-Οποιοδήποτε σύστημα που:
+Οποιοδήποτε system που:<sup>[[1]](#references)</sup>
 - Επιστρέφει positioned glyph runs με request-scoped numeric IDs
-- Στέλνει per-request vector glyphs (SVG paths or subset fonts)
-- Περιορίζει σελίδες ανά αίτηση για να αποτρέψει bulk export
+- Στέλνει per-request vector glyphs (SVG paths ή subset fonts)
+- Περιορίζει τις σελίδες ανά request για να αποτρέπει bulk export
 
-…μπορεί να χειριστεί με την ίδια ομαλοποίηση:
-- Rasterize per-request shapes → perceptual hash → shape ID
-- Atlas of candidate glyphs/ligatures per font variant
-- SSIM (or similar perceptual metric) to assign characters
-- Reconstruct layout from run rectangles/styles
+…μπορεί να αντιμετωπιστεί με το ίδιο normalization:
+- Rasterize τα per-request shapes → perceptual hash → shape ID
+- Atlas υποψήφιων glyphs/ligatures ανά font variant
+- SSIM (ή παρόμοιο perceptual metric) για την αντιστοίχιση χαρακτήρων
+- Ανακατασκευάστε το layout από τα run rectangles/styles
 
 ## Minimal acquisition example (sketch)
 
-Use your browser’s DevTools to capture the exact headers, cookies and tokens used by the reader when requesting `/renderer/render`. Then replicate those from a script or curl. Example outline:
+Χρησιμοποιήστε τα DevTools του browser σας για να καταγράψετε τα ακριβή headers, cookies και tokens που χρησιμοποιεί ο reader όταν ζητά το `/renderer/render`. Στη συνέχεια, κάντε replicate από ένα script ή curl.<sup>[[1]](#references)</sup> Example outline:
 ```bash
 curl 'https://read.amazon.com/renderer/render' \
 -H 'Cookie: session-id=...; at-main=...; sess-at-main=...' \
@@ -266,19 +266,19 @@ curl 'https://read.amazon.com/renderer/render' \
 -H 'Accept: application/x-tar' \
 --compressed --output batch_000.tar
 ```
-Προσαρμόστε την παραμετροποίηση (book ASIN, page window, viewport) ώστε να ταιριάζει με τα αιτήματα του αναγνώστη. Αναμένεται όριο 5 σελίδων ανά αίτημα.
+Προσαρμόστε τις παραμέτρους (book ASIN, page window, viewport) ώστε να ταιριάζουν στα αιτήματα του αναγνώστη. Υπολογίστε όριο 5 σελίδων ανά αίτημα.
 
-## Επιτεύξιμα αποτελέσματα
+## Εφικτά αποτελέσματα
 
-- Συμπτύξτε 100+ randomized alphabets σε έναν ενιαίο glyph space μέσω perceptual hashing
-- Χαρτογράφηση 100% των μοναδικών glyphs με μέση SSIM ~0.95 όταν atlases περιλαμβάνουν ligatures και variants
-- Ανακατασκευασμένο EPUB/HTML οπτικά αδιάκριτο από το πρωτότυπο
+- Σύμπτυξη 100+ randomized alphabets σε έναν ενιαίο χώρο glyphs μέσω perceptual hashing<sup>[[1]](#references)</sup>
+- 100% mapping των μοναδικών glyphs με μέσο SSIM ~0.95 όταν τα atlases περιλαμβάνουν ligatures και variants
+- Ανακατασκευασμένο EPUB/HTML οπτικά μη διακριτό από το πρωτότυπο
 
 ## Αναφορές
 
-- [Kindle Web DRM: Breaking Randomized SVG Glyph Obfuscation with Raster Hashing + SSIM (Pixelmelt blog)](https://blog.pixelmelt.dev/kindle-web-drm/)
-- [CairoSVG – SVG to PNG renderer](https://cairosvg.org/)
-- [imagehash – Perceptual image hashing (pHash)](https://pypi.org/project/ImageHash/)
-- [scikit-image – Structural Similarity Index (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
+- [1] [Kindle Web DRM: Breaking Randomized SVG Glyph Obfuscation with Raster Hashing + SSIM (Pixelmelt blog)](https://blog.pixelmelt.dev/kindle-web-drm/)
+- [2] [CairoSVG – SVG to PNG renderer](https://cairosvg.org/)
+- [3] [imagehash – Perceptual image hashing (pHash)](https://pypi.org/project/ImageHash/)
+- [4] [scikit-image – Structural Similarity Index (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
 
 {{#include ../../../banners/hacktricks-training.md}}

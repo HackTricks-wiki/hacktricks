@@ -1,37 +1,35 @@
-# Ανάλυση μνήμης
+# Ανάλυση memory dump
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Έναρξη
 
-Ξεκινήστε **αναζητώντας** **κακόβουλο λογισμικό** μέσα στο pcap. Χρησιμοποιήστε τα **εργαλεία** που αναφέρονται στο [**Malware Analysis**](../malware-analysis.md).
+Ξεκινήστε να **αναζητάτε** **malware** μέσα στο pcap. Χρησιμοποιήστε τα **εργαλεία** που αναφέρονται στο [**Malware Analysis**](../malware-analysis.md).
 
 ## [Volatility](volatility-cheatsheet.md)
 
-**Το Volatility είναι το κύριο ανοιχτού κώδικα πλαίσιο για την ανάλυση μνήμης**. Αυτό το εργαλείο Python αναλύει dumps από εξωτερικές πηγές ή VMware VMs, αναγνωρίζοντας δεδομένα όπως διαδικασίες και κωδικούς πρόσβασης με βάση το προφίλ OS του dump. Είναι επεκτάσιμο με plugins, καθιστώντας το πολύ ευέλικτο για ποινικές έρευνες.
+**Το Volatility είναι το κύριο open-source framework για την ανάλυση memory dump**. Αυτό το Python tool αναλύει dumps από εξωτερικές πηγές ή VMware VMs, εντοπίζοντας δεδομένα όπως processes και passwords με βάση το OS profile του dump. Είναι επεκτάσιμο μέσω plugins, γεγονός που το καθιστά ιδιαίτερα ευέλικτο για forensic investigations.
 
 [**Βρείτε εδώ ένα cheatsheet**](volatility-cheatsheet.md)
 
-## Αναφορά σφάλματος mini dump
+## Mini dump crash report
 
-Όταν το dump είναι μικρό (μόνο μερικά KB, ίσως μερικά MB) τότε πιθανότατα πρόκειται για αναφορά σφάλματος mini dump και όχι για dump μνήμης.
+Όταν το dump είναι μικρό (μόλις μερικά KB, ίσως μερικά MB), τότε πιθανότατα πρόκειται για mini dump crash report και όχι για memory dump.
 
-![](<../../../images/image (532).png>)
+![Volatility - Mini dump crash report: Όταν το dump είναι μικρό (μόλις μερικά KB, ίσως μερικά MB), τότε πιθανότατα πρόκειται για mini dump crash report και όχι για memory dump](<../../../images/image (532).png>)
 
-Αν έχετε εγκατεστημένο το Visual Studio, μπορείτε να ανοίξετε αυτό το αρχείο και να συνδέσετε κάποιες βασικές πληροφορίες όπως το όνομα της διαδικασίας, την αρχιτεκτονική, τις πληροφορίες εξαίρεσης και τα εκτελούμενα modules:
+Αν έχετε εγκατεστημένο το Visual Studio, μπορείτε να ανοίξετε αυτό το αρχείο και να αντλήσετε βασικές πληροφορίες, όπως το όνομα του process, την αρχιτεκτονική, πληροφορίες για το exception και τα modules που εκτελούνται:
 
-![](<../../../images/image (263).png>)
+![Volatility - Mini dump crash report: Αν έχετε εγκατεστημένο το Visual Studio, μπορείτε να ανοίξετε αυτό το αρχείο και να αντλήσετε βασικές πληροφορίες, όπως το όνομα του process, την αρχιτεκτονική, πληροφορίες για το exception και...](<../../../images/image (263).png>)
 
-Μπορείτε επίσης να φορτώσετε την εξαίρεση και να δείτε τις αποσυμπιεσμένες εντολές
+Μπορείτε επίσης να φορτώσετε το exception και να δείτε τις decompiled instructions
 
-![](<../../../images/image (142).png>)
+![Volatility - Mini dump crash report: Μπορείτε επίσης να φορτώσετε το exception και να δείτε τις decompiled instructions](<../../../images/image (142).png>)
 
-![](<../../../images/image (610).png>)
+![Volatility - Mini dump crash report: Μπορείτε επίσης να φορτώσετε το exception και να δείτε τις decompiled instructions](<../../../images/image (610).png>)
 
-Ούτως ή άλλως, το Visual Studio δεν είναι το καλύτερο εργαλείο για να εκτελέσετε μια ανάλυση βάθους του dump.
+Σε κάθε περίπτωση, το Visual Studio δεν είναι το καλύτερο εργαλείο για ανάλυση σε βάθος του dump.
 
-Πρέπει να το **ανοίξετε** χρησιμοποιώντας **IDA** ή **Radare** για να το επιθεωρήσετε σε **βάθος**.
-
-​
+Θα πρέπει να το **ανοίξετε** χρησιμοποιώντας το **IDA** ή το **Radare**, για να το επιθεωρήσετε σε **βάθος**.
 
 {{#include ../../../banners/hacktricks-training.md}}

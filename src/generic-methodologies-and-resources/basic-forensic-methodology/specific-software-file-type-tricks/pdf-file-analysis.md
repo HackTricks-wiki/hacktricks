@@ -2,38 +2,38 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Για περισσότερες λεπτομέρειες ελέγξτε:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)
+**Για περισσότερες λεπτομέρειες, δείτε:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)<sup>[[1]](#references)</sup>
 
-Η μορφή PDF είναι γνωστή για την πολυπλοκότητά της και την ικανότητά της να αποκρύπτει δεδομένα, καθιστώντας την κεντρικό σημείο για προκλήσεις ψηφιακής εγκληματολογίας CTF. Συνδυάζει στοιχεία απλού κειμένου με δυαδικά αντικείμενα, τα οποία μπορεί να είναι συμπιεσμένα ή κρυπτογραφημένα, και μπορεί να περιλαμβάνει σενάρια σε γλώσσες όπως JavaScript ή Flash. Για να κατανοήσετε τη δομή του PDF, μπορείτε να ανατρέξετε στο [εισαγωγικό υλικό](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/) του Didier Stevens ή να χρησιμοποιήσετε εργαλεία όπως ένας επεξεργαστής κειμένου ή ένας ειδικός επεξεργαστής PDF όπως το Origami.
+Η μορφή PDF είναι γνωστή για την πολυπλοκότητά της και τη δυνατότητα απόκρυψης δεδομένων, γεγονός που την καθιστά επίκεντρο των προκλήσεων forensics σε CTF. Συνδυάζει στοιχεία απλού κειμένου με binary objects, τα οποία μπορεί να είναι συμπιεσμένα ή κρυπτογραφημένα, και μπορεί να περιλαμβάνει scripts σε γλώσσες όπως JavaScript ή Flash. Για την κατανόηση της δομής των PDF, μπορείτε να ανατρέξετε στο [εισαγωγικό υλικό](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/) του Didier Stevens ή να χρησιμοποιήσετε εργαλεία όπως έναν text editor ή έναν PDF-specific editor, όπως το Origami.
 
-Για σε βάθος εξερεύνηση ή χειρισμό PDF, είναι διαθέσιμα εργαλεία όπως το [qpdf](https://github.com/qpdf/qpdf) και το [Origami](https://github.com/mobmewireless/origami-pdf). Κρυφά δεδομένα μέσα σε PDF μπορεί να είναι κρυμμένα σε:
+Για εις βάθος εξερεύνηση ή τροποποίηση PDF, είναι διαθέσιμα εργαλεία όπως τα [qpdf](https://github.com/qpdf/qpdf) και [Origami](https://github.com/mobmewireless/origami-pdf). Τα κρυφά δεδομένα μέσα σε PDF μπορεί να είναι κρυμμένα σε:
 
-- Αόρατα επίπεδα
-- Μορφή μεταδεδομένων XMP από την Adobe
-- Σταδιακές γενιές
-- Κείμενο με το ίδιο χρώμα με το φόντο
-- Κείμενο πίσω από εικόνες ή επικαλυπτόμενες εικόνες
-- Μη εμφανιζόμενα σχόλια
+- Αόρατα layers
+- Μορφή XMP metadata της Adobe
+- Incremental generations
+- Κείμενο με το ίδιο χρώμα με το background
+- Κείμενο πίσω από εικόνες ή overlapping images
+- Σχόλια που δεν εμφανίζονται
 
-Για προσαρμοσμένη ανάλυση PDF, μπορούν να χρησιμοποιηθούν βιβλιοθήκες Python όπως το [PeepDF](https://github.com/jesparza/peepdf) για τη δημιουργία ειδικών σεναρίων ανάλυσης. Επιπλέον, η δυνατότητα του PDF για αποθήκευση κρυφών δεδομένων είναι τόσο εκτενής που πόροι όπως ο οδηγός της NSA για τους κινδύνους και τα μέτρα κατά των PDF, αν και δεν φιλοξενούνται πλέον στην αρχική τους τοποθεσία, προσφέρουν ακόμα πολύτιμες πληροφορίες. Ένας [αντίγραφος του οδηγού](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) και μια συλλογή από [κόλπα μορφής PDF](https://github.com/corkami/docs/blob/master/PDF/PDF.md) από τον Ange Albertini μπορούν να προσφέρουν περαιτέρω ανάγνωση στο θέμα.
+Για custom PDF analysis, μπορούν να χρησιμοποιηθούν Python libraries όπως το [PeepDF](https://github.com/jesparza/peepdf), ώστε να δημιουργηθούν bespoke parsing scripts. Επιπλέον, η δυνατότητα των PDF για αποθήκευση κρυφών δεδομένων είναι τόσο μεγάλη, ώστε resources όπως ο οδηγός της NSA για τους κινδύνους και τα countermeasures των PDF, παρότι δεν φιλοξενείται πλέον στην αρχική του τοποθεσία, εξακολουθούν να παρέχουν χρήσιμες πληροφορίες. Ένα [αντίγραφο του οδηγού](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) και μια συλλογή από [PDF format tricks](https://github.com/corkami/docs/blob/master/PDF/PDF.md) του Ange Albertini μπορούν να προσφέρουν περαιτέρω υλικό για μελέτη.
 
-## Κοινές Κακόβουλες Κατασκευές
+## Συνηθισμένα κακόβουλα constructs
 
-Οι επιτιθέμενοι συχνά κακοποιούν συγκεκριμένα αντικείμενα και ενέργειες PDF που εκτελούνται αυτόματα όταν ανοίγει ή αλληλεπιδρά με το έγγραφο. Λέξεις-κλειδιά που αξίζει να αναζητήσετε:
+Οι attackers συχνά κάνουν abuse συγκεκριμένων PDF objects και actions, τα οποία εκτελούνται αυτόματα όταν το document ανοίγει ή όταν ο χρήστης αλληλεπιδρά με αυτό. Keywords που αξίζει να αναζητήσετε:
 
-* **/OpenAction, /AA** – αυτόματες ενέργειες που εκτελούνται κατά το άνοιγμα ή σε συγκεκριμένα γεγονότα.
-* **/JS, /JavaScript** – ενσωματωμένο JavaScript (συχνά συγκεχυμένο ή διασπασμένο σε αντικείμενα).
-* **/Launch, /SubmitForm, /URI, /GoToE** – εκκινητές εξωτερικών διαδικασιών / URL.
-* **/RichMedia, /Flash, /3D** – πολυμεσικά αντικείμενα που μπορούν να κρύβουν payloads.
-* **/EmbeddedFile /Filespec** – συνημμένα αρχεία (EXE, DLL, OLE, κ.λπ.).
-* **/ObjStm, /XFA, /AcroForm** – ροές αντικειμένων ή φόρμες που κακοποιούνται συχνά για να κρύψουν shell-code.
-* **Σταδιακές ενημερώσεις** – πολλαπλοί %%EOF δείκτες ή μια πολύ μεγάλη **/Prev** μετατόπιση μπορεί να υποδεικνύουν δεδομένα που προστέθηκαν μετά την υπογραφή για να παρακαμφθεί το AV.
+* **/OpenAction, /AA** – automatic actions που εκτελούνται κατά το άνοιγμα ή σε συγκεκριμένα events.
+* **/JS, /JavaScript** – ενσωματωμένο JavaScript, συχνά obfuscated ή χωρισμένο σε πολλά objects.
+* **/Launch, /SubmitForm, /URI, /GoToE** – external process / URL launchers.
+* **/RichMedia, /Flash, /3D** – multimedia objects που μπορούν να κρύψουν payloads.
+* **/EmbeddedFile /Filespec** – file attachments (EXE, DLL, OLE κ.λπ.).
+* **/ObjStm, /XFA, /AcroForm** – object streams ή forms που συχνά χρησιμοποιούνται για την απόκρυψη shell-code.
+* **Incremental updates** – πολλαπλά %%EOF markers ή ένα πολύ μεγάλο **/Prev** offset μπορεί να υποδεικνύουν data που προστέθηκαν μετά το signing, ώστε να παρακαμφθεί το AV.
 
-Όταν οποιοί από τους προηγούμενους δείκτες εμφανίζονται μαζί με ύποπτες αλυσίδες (powershell, cmd.exe, calc.exe, base64, κ.λπ.) το PDF αξίζει μια πιο βαθιά ανάλυση.
+Όταν οποιαδήποτε από τα προηγούμενα tokens εμφανίζεται μαζί με ύποπτα strings (powershell, cmd.exe, calc.exe, base64 κ.λπ.), το PDF χρήζει βαθύτερης ανάλυσης.
 
 ---
 
-## Φύλλο συμβουλών στατικής ανάλυσης
+## Cheat-sheet static analysis
 ```bash
 # Fast triage – keyword statistics
 pdfid.py suspicious.pdf
@@ -54,22 +54,22 @@ qpdf --password='secret' --decrypt suspicious.pdf clean.pdf
 # Lint the file with a Go verifier (checks structure violations)
 pdfcpu validate -mode strict clean.pdf
 ```
-Επιπλέον χρήσιμα έργα (ενεργά συντηρούμενα 2023-2025):
-* **pdfcpu** – Βιβλιοθήκη/CLI Go που μπορεί να *lint*, *decrypt*, *extract*, *compress* και *sanitize* PDFs.
-* **pdf-inspector** – Οπτικοποιητής βασισμένος σε πρόγραμμα περιήγησης που αποδίδει το γράφημα αντικειμένων και τα ρεύματα.
-* **PyMuPDF (fitz)** – Σενάριο Python που μπορεί να αποδώσει με ασφάλεια σελίδες σε εικόνες για να εκραγούν ενσωματωμένα JS σε ένα σκληρυμένο sandbox.
+Additional useful projects (actively maintained 2023-2025):
+* **pdfcpu** – Go library/CLI με δυνατότητα για *lint*, *decrypt*, *extract*, *compress* και *sanitize* PDF.
+* **pdf-inspector** – visualizer βασισμένο σε browser που αποδίδει το object graph και τα streams.
+* **PyMuPDF (fitz)** – scriptable Python engine που μπορεί να αποδίδει με ασφάλεια σελίδες ως images, ώστε να εκτελούνται embedded JS σε hardened sandbox.
 
 ---
 
-## Πρόσφατες τεχνικές επιθέσεων (2023-2025)
+## Recent attack techniques (2023-2025)
 
-* **MalDoc σε PDF polyglot (2023)** – Η JPCERT/CC παρατήρησε απειλητικούς παράγοντες να προσθέτουν ένα έγγραφο Word βασισμένο σε MHT με VBA macros μετά το τελικό **%%EOF**, παράγοντας ένα αρχείο που είναι και έγκυρο PDF και έγκυρο DOC. Οι μηχανές AV που αναλύουν μόνο το επίπεδο PDF χάνουν τη μακροεντολή. Οι στατικές λέξεις-κλειδιά PDF είναι καθαρές, αλλά το `file` εκτυπώνει ακόμα `%PDF`. Αντιμετωπίστε οποιοδήποτε PDF που περιέχει επίσης τη συμβολοσειρά `<w:WordDocument>` ως εξαιρετικά ύποπτο.
-* **Shadow-incremental updates (2024)** – Οι αντίπαλοι εκμεταλλεύονται τη δυνατότητα αυξημένης ενημέρωσης για να εισάγουν ένα δεύτερο **/Catalog** με κακόβουλο `/OpenAction` ενώ διατηρούν την καλοήθη πρώτη αναθεώρηση υπογεγραμμένη. Τα εργαλεία που επιθεωρούν μόνο τον πρώτο πίνακα xref παρακάμπτονται.
-* **Αλυσίδα UAF ανάλυσης γραμματοσειρών – CVE-2024-30284 (Acrobat/Reader)** – Μια ευάλωτη λειτουργία **CoolType.dll** μπορεί να προσεγγιστεί από ενσωματωμένες γραμματοσειρές CIDType2, επιτρέποντας την απομακρυσμένη εκτέλεση κώδικα με τα δικαιώματα του χρήστη μόλις ανοίξει ένα κατεργασμένο έγγραφο. Διορθώθηκε στο APSB24-29, Μάιος 2024.
+* **MalDoc in PDF polyglot (2023)** – Η JPCERT/CC παρατήρησε threat actors να προσαρτούν ένα MHT-based Word document με VBA macros μετά το τελικό **%%EOF**, δημιουργώντας ένα αρχείο που είναι ταυτόχρονα valid PDF και valid DOC. Τα AV engines που αναλύουν μόνο το PDF layer δεν εντοπίζουν το macro. Τα static PDF keywords είναι καθαρά, αλλά το `file` εξακολουθεί να εμφανίζει `%PDF`. Αντιμετωπίστε κάθε PDF που περιέχει επίσης το string `<w:WordDocument>` ως highly suspicious.<sup>[[2]](#references)</sup>
+* **Shadow-incremental updates (2024)** – Οι adversaries κάνουν κατάχρηση της incremental update feature για να εισαγάγουν ένα δεύτερο **/Catalog** με κακόβουλο `/OpenAction`, διατηρώντας ταυτόχρονα υπογεγραμμένη την benign πρώτη revision. Τα tools που επιθεωρούν μόνο τον πρώτο xref table παρακάμπτονται.
+* **Font parsing UAF chain – CVE-2024-30284 (Acrobat/Reader)** – Μια ευάλωτη function του **CoolType.dll** μπορεί να προσπελαστεί μέσω embedded CIDType2 fonts, επιτρέποντας remote code execution με τα privileges του user μόλις ανοίξει ένα crafted document. Διορθώθηκε στο APSB24-29, τον Μάιο του 2024.<sup>[[3]](#references)</sup>
 
 ---
 
-## Πρότυπο γρήγορου κανόνα YARA
+## YARA quick rule template
 ```yara
 rule Suspicious_PDF_AutoExec {
 meta:
@@ -89,16 +89,16 @@ $pdf_magic at 0 and ( all of ($aa, $openact) or ($openact and $js) )
 
 ## Αμυντικές συμβουλές
 
-1. **Επιδιόρθωση γρήγορα** – διατηρήστε το Acrobat/Reader στην τελευταία συνεχή έκδοση; οι περισσότερες αλυσίδες RCE που παρατηρήθηκαν στην άγρια φύση εκμεταλλεύονται ευπάθειες n-day που έχουν διορθωθεί μήνες νωρίτερα.
-2. **Αφαίρεση ενεργού περιεχομένου στην πύλη** – χρησιμοποιήστε `pdfcpu sanitize` ή `qpdf --qdf --remove-unreferenced` για να αφαιρέσετε JavaScript, ενσωματωμένα αρχεία και ενέργειες εκκίνησης από τα εισερχόμενα PDFs.
-3. **Αφοπλισμός και Ανακατασκευή Περιεχομένου (CDR)** – μετατρέψτε τα PDFs σε εικόνες (ή PDF/A) σε έναν sandbox host για να διατηρήσετε την οπτική πιστότητα ενώ απορρίπτετε ενεργά αντικείμενα.
-4. **Αποκλεισμός σπάνια χρησιμοποιούμενων χαρακτηριστικών** – οι ρυθμίσεις “Enhanced Security” στην Reader επιτρέπουν την απενεργοποίηση του JavaScript, πολυμέσων και 3D rendering.
-5. **Εκπαίδευση χρηστών** – η κοινωνική μηχανική (παγίδες τιμολογίων και βιογραφικών) παραμένει ο αρχικός φορέας· διδάξτε στους υπαλλήλους να προωθούν ύποπτες συνημμένες σε IR.
+1. **Κάντε γρήγορα patch** – διατηρείτε το Acrobat/Reader στο πιο πρόσφατο Continuous track· οι περισσότερες αλυσίδες RCE που παρατηρούνται στη φύση εκμεταλλεύονται n-day ευπάθειες που έχουν διορθωθεί μήνες νωρίτερα.
+2. **Αφαιρέστε το ενεργό περιεχόμενο στην πύλη** – χρησιμοποιήστε `pdfcpu sanitize` ή `qpdf --qdf --remove-unreferenced` για να αφαιρέσετε JavaScript, ενσωματωμένα αρχεία και launch actions από τα εισερχόμενα PDF.
+3. **Content Disarm & Reconstruction (CDR)** – μετατρέπετε τα PDF σε εικόνες (ή PDF/A) σε sandbox host, ώστε να διατηρείται η οπτική πιστότητα και να απορρίπτονται τα ενεργά αντικείμενα.
+4. **Αποκλείστε λειτουργίες που χρησιμοποιούνται σπάνια** – οι ρυθμίσεις “Enhanced Security” για enterprise στο Reader επιτρέπουν την απενεργοποίηση των JavaScript, multimedia και 3D rendering.
+5. **Εκπαίδευση χρηστών** – το social engineering (δελεαστικά invoices και resumes) παραμένει το αρχικό vector· διδάξτε στους εργαζομένους να προωθούν ύποπτα attachments στην ομάδα IR.
 
 ## Αναφορές
 
-* JPCERT/CC – “MalDoc in PDF – Detection bypass by embedding a malicious Word file into a PDF file” (Αυγ 2023)
-* Adobe – Ενημέρωση ασφαλείας για το Acrobat και Reader (APSB24-29, Μάιος 2024)
-
+- [1] [Οδηγός πεδίου Forensics CTF](https://trailofbits.github.io/ctf/forensics/)
+- [2] [MalDoc in PDF – Παράκαμψη εντοπισμού με ενσωμάτωση κακόβουλου αρχείου Word σε αρχείο PDF](https://blogs.jpcert.or.jp/en/2023/08/maldocinpdf.html)
+- [3] [Adobe Security Bulletin – Διαθέσιμη ενημέρωση ασφαλείας για τα Adobe Acrobat και Reader (APSB24-29)](https://helpx.adobe.com/security/products/acrobat/apsb24-29.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

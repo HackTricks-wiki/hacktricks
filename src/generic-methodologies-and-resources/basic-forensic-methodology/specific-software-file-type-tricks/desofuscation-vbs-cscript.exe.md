@@ -1,6 +1,8 @@
+# Τεχνικές Αποσυσκότισης για Αρχεία VBS
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ορισμένα πράγματα που θα μπορούσαν να είναι χρήσιμα για την αποσφαλμάτωση/αποσυμπίεση ενός κακόβουλου αρχείου VBS:
+Μερικά πράγματα που θα μπορούσαν να φανούν χρήσιμα για το debugging/deobfuscation ενός κακόβουλου αρχείου VBS:
 
 ## echo
 ```bash
@@ -14,7 +16,7 @@ Wscript.Echo "Like this?"
 ```bash
 cscript.exe file.vbs
 ```
-## Γράψτε δεδομένα σε ένα αρχείο
+## Εγγραφή δεδομένων σε αρχείο
 ```js
 Function writeBinary(strBinary, strPath)
 

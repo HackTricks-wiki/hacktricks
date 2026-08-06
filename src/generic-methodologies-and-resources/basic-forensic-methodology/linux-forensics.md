@@ -6,12 +6,12 @@
 
 ### Βασικές Πληροφορίες
 
-Πρώτα απ’ όλα, συνιστάται να έχεις ένα **USB** με **καλά γνωστά binaries και libraries πάνω του** (μπορείς απλώς να πάρεις ubuntu και να αντιγράψεις τους φακέλους _/bin_, _/sbin_, _/lib,_ και _/lib64_), μετά να κάνεις mount το USB και να τροποποιήσεις τις env variables ώστε να χρησιμοποιούν αυτά τα binaries:
+Καταρχάς, συνιστάται να έχετε κάποιο **USB** με **καλά γνωστά binaries και libraries σε αυτό** (μπορείτε απλώς να πάρετε το ubuntu και να αντιγράψετε τους φακέλους _/bin_, _/sbin_, _/lib,_ και _/lib64_), στη συνέχεια να προσαρτήσετε το USB και να τροποποιήσετε τις μεταβλητές env ώστε να χρησιμοποιούν αυτά τα binaries:
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
 ```
-Μόλις διαμορφώσετε το σύστημα ώστε να χρησιμοποιεί καλά και γνωστά binaries, μπορείτε να αρχίσετε να **εξάγετε μερικές βασικές πληροφορίες**:
+Αφού ρυθμίσετε το σύστημα ώστε να χρησιμοποιεί αξιόπιστα και γνωστά δυαδικά αρχεία, μπορείτε να ξεκινήσετε **την εξαγωγή ορισμένων βασικών πληροφοριών**:
 ```bash
 date #Date and time (Clock may be skewed, Might be at a different timezone)
 uname -a #OS info
@@ -31,44 +31,44 @@ find /directory -type f -mtime -1 -print #Find modified files during the last mi
 ```
 #### Ύποπτες πληροφορίες
 
-Κατά τη συλλογή των βασικών πληροφοριών, πρέπει να ελέγχετε για περίεργα πράγματα όπως:
+Κατά τη συλλογή των βασικών πληροφοριών, θα πρέπει να ελέγχετε για περίεργα πράγματα, όπως:
 
-- **Root processes** συνήθως τρέχουν με χαμηλά PIDS, οπότε αν βρείτε ένα root process με μεγάλο PID μπορεί να υποψιαστείτε
+- Οι **Root processes** συνήθως εκτελούνται με χαμηλά PIDS, επομένως, αν εντοπίσετε ένα root process με μεγάλο PID, μπορεί να είναι ύποπτο
 - Ελέγξτε τα **registered logins** χρηστών χωρίς shell μέσα στο `/etc/passwd`
 - Ελέγξτε για **password hashes** μέσα στο `/etc/shadow` για χρήστες χωρίς shell
 
 ### Memory Dump
 
-Για να αποκτήσετε τη μνήμη του running system, προτείνεται να χρησιμοποιήσετε [**LiME**](https://github.com/504ensicsLabs/LiME).\
-Για να το **compile**-άρετε, χρειάζεται να χρησιμοποιήσετε τον **ίδιο kernel** που χρησιμοποιεί το victim machine.
+Για τη λήψη της μνήμης του running system, συνιστάται η χρήση του [**LiME**](https://github.com/504ensicsLabs/LiME).\
+Για να το **compile**, πρέπει να χρησιμοποιήσετε τον **ίδιο kernel** με αυτόν που χρησιμοποιεί το victim machine.
 
 > [!TIP]
-> Να θυμάστε ότι **δεν μπορείτε να εγκαταστήσετε το LiME ή οτιδήποτε άλλο** στο victim machine, καθώς θα κάνει αρκετές αλλαγές σε αυτό
+> Θυμηθείτε ότι **δεν μπορείτε να εγκαταστήσετε το LiME ή οτιδήποτε άλλο** στο victim machine, καθώς αυτό θα προκαλέσει αρκετές αλλαγές σε αυτό
 
-Άρα, αν έχετε μια ίδια έκδοση του Ubuntu μπορείτε να χρησιμοποιήσετε `apt-get install lime-forensics-dkms`\
-Σε άλλες περιπτώσεις, πρέπει να κατεβάσετε το [**LiME**](https://github.com/504ensicsLabs/LiME) από το github και να το compile-άρετε με τα σωστά kernel headers. Για να **αποκτήσετε τα ακριβή kernel headers** του victim machine, μπορείτε απλώς να **αντιγράψετε τον κατάλογο** `/lib/modules/<kernel version>` στο μηχάνημά σας, και έπειτα να **compile**-άρετε το LiME χρησιμοποιώντας τα:
+Επομένως, αν έχετε μια πανομοιότυπη έκδοση του Ubuntu, μπορείτε να χρησιμοποιήσετε το `apt-get install lime-forensics-dkms`\
+Σε άλλες περιπτώσεις, πρέπει να κατεβάσετε το [**LiME**](https://github.com/504ensicsLabs/LiME) από το github και να το κάνετε compile με τα σωστά kernel headers. Για να **λάβετε τα ακριβή kernel headers** του victim machine, μπορείτε απλώς να **αντιγράψετε τον κατάλογο** `/lib/modules/<kernel version>` στο δικό σας machine και, στη συνέχεια, να κάνετε **compile** το LiME χρησιμοποιώντας τα:
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
 ```
-LiME υποστηρίζει 3 **formats**:
+Το LiME υποστηρίζει 3 **formats**:
 
-- Raw (κάθε segment concatenated together)
-- Padded (same as raw, but with zeroes in right bits)
-- Lime (recommended format with metadata
+- Raw (κάθε segment συνενωμένο)
+- Padded (όπως το raw, αλλά με μηδενικά στα δεξιά bits)
+- Lime (προτεινόμενο format με metadata
 
-LiME can also be used to **send the dump via network** instead of storing it on the system using something like: `path=tcp:4444`
+Το LiME μπορεί επίσης να χρησιμοποιηθεί για την **αποστολή του dump μέσω δικτύου**, αντί για την αποθήκευσή του στο σύστημα, με κάτι όπως: `path=tcp:4444`
 
 ### Disk Imaging
 
-#### Shutting down
+#### Τερματισμός λειτουργίας
 
-First of all, you will need to **shut down the system**. This isn't always an option as some times system will be a production server that the company cannot afford to shut down.\
-There are **2 ways** of shutting down the system, a **normal shutdown** and a **"plug the plug" shutdown**. The first one will allow the **processes to terminate as usual** and the **filesystem** to be **synchronized**, but it will also allow the possible **malware** to **destroy evidence**. The "pull the plug" approach may carry **some information loss** (not much of the info is going to be lost as we already took an image of the memory ) and the **malware won't have any opportunity** to do anything about it. Therefore, if you **suspect** that there may be a **malware**, just execute the **`sync`** **command** on the system and pull the plug.
+Καταρχάς, θα χρειαστεί να **τερματίσετε τη λειτουργία του συστήματος**. Αυτό δεν αποτελεί πάντα επιλογή, καθώς ορισμένες φορές το σύστημα μπορεί να είναι production server, του οποίου η εταιρεία δεν μπορεί να αντέξει το κόστος του τερματισμού.\
+Υπάρχουν **2 τρόποι** τερματισμού της λειτουργίας του συστήματος: ο **κανονικός τερματισμός** και ο τερματισμός με **«τράβηγμα του καλωδίου»**. Ο πρώτος επιτρέπει στις **διεργασίες να τερματιστούν κανονικά** και στο **filesystem** να **συγχρονιστεί**, αλλά επιτρέπει επίσης στο πιθανό **malware** να **καταστρέψει αποδεικτικά στοιχεία**. Η προσέγγιση με το «τράβηγμα του καλωδίου» μπορεί να προκαλέσει **κάποια απώλεια πληροφοριών** (δεν πρόκειται να χαθεί μεγάλο μέρος των πληροφοριών, καθώς έχουμε ήδη λάβει image της μνήμης) και το **malware δεν θα έχει καμία ευκαιρία** να κάνει οτιδήποτε σχετικά. Επομένως, αν **υποψιάζεστε** ότι μπορεί να υπάρχει **malware**, εκτελέστε απλώς την **εντολή `sync`** στο σύστημα και τραβήξτε το καλώδιο.
 
-#### Taking an image of the disk
+#### Λήψη image του δίσκου
 
-It's important to note that **before connecting your computer to anything related to the case**, you need to be sure that it's going to be **mounted as read only** to avoid modifying any information.
+Είναι σημαντικό να σημειωθεί ότι **πριν συνδέσετε τον υπολογιστή σας με οτιδήποτε σχετίζεται με την υπόθεση**, πρέπει να βεβαιωθείτε ότι θα γίνει **mount ως read only**, ώστε να αποφευχθεί η τροποποίηση οποιωνδήποτε πληροφοριών.
 ```bash
 #Create a raw copy of the disk
 dd if=<subject device> of=<image file> bs=512
@@ -77,9 +77,9 @@ dd if=<subject device> of=<image file> bs=512
 dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hashwindow=<chunk size> hashlog=<hash file>
 dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/media/usb/pc.hashes
 ```
-### Προ-ανάλυση Disk Image
+### Προκαταρκτική ανάλυση disk image
 
-Imaging ενός disk image χωρίς επιπλέον δεδομένα.
+Απεικόνιση ενός disk image χωρίς επιπλέον δεδομένα.
 ```bash
 #Find out if it's a disk image using "file" command
 file disk.img
@@ -134,16 +134,16 @@ ThisisTheMasterSecret
 ```
 ## Αναζήτηση για γνωστό Malware
 
-### Τροποποιημένα System Files
+### Τροποποιημένα αρχεία συστήματος
 
-Το Linux προσφέρει εργαλεία για τη διασφάλιση της ακεραιότητας των system components, κάτι κρίσιμο για τον εντοπισμό δυνητικά προβληματικών αρχείων.
+Το Linux προσφέρει εργαλεία για τη διασφάλιση της ακεραιότητας των στοιχείων του συστήματος, κάτι κρίσιμο για τον εντοπισμό δυνητικά προβληματικών αρχείων.<sup>[[1]](#references)</sup>
 
-- **RedHat-based systems**: Χρησιμοποίησε `rpm -Va` για έναν ολοκληρωμένο έλεγχο.
-- **Debian-based systems**: `dpkg --verify` για αρχική επαλήθευση, και στη συνέχεια `debsums | grep -v "OK$"` (αφού εγκαταστήσεις το `debsums` με `apt-get install debsums`) για να εντοπίσεις τυχόν προβλήματα.
+- **Συστήματα βασισμένα σε RedHat**: Χρησιμοποιήστε το `rpm -Va` για έναν ολοκληρωμένο έλεγχο.
+- **Συστήματα βασισμένα σε Debian**: Χρησιμοποιήστε το `dpkg --verify` για αρχική επαλήθευση και στη συνέχεια το `debsums | grep -v "OK$"` (αφού εγκαταστήσετε το `debsums` με `apt-get install debsums`) για τον εντοπισμό τυχόν προβλημάτων.
 
 ### Malware/Rootkit Detectors
 
-Διάβασε την ακόλουθη σελίδα για να μάθεις για εργαλεία που μπορούν να είναι χρήσιμα για την εύρεση malware:
+Διαβάστε την ακόλουθη σελίδα για να μάθετε σχετικά με εργαλεία που μπορούν να φανούν χρήσιμα για την εύρεση malware:
 
 
 {{#ref}}
@@ -152,12 +152,12 @@ malware-analysis.md
 
 ## Αναζήτηση εγκατεστημένων προγραμμάτων
 
-Για να αναζητήσεις αποτελεσματικά εγκατεστημένα προγράμματα τόσο σε Debian όσο και σε RedHat systems, σκέψου να αξιοποιήσεις system logs και databases παράλληλα με χειροκίνητους ελέγχους σε κοινά directories.
+Για την αποτελεσματική αναζήτηση εγκατεστημένων προγραμμάτων σε συστήματα Debian και RedHat, εξετάστε το ενδεχόμενο αξιοποίησης των logs και των βάσεων δεδομένων του συστήματος, σε συνδυασμό με χειροκίνητους ελέγχους σε συνήθεις καταλόγους.<sup>[[1]](#references)</sup>
 
-- Για Debian, εξέτασε το _**`/var/lib/dpkg/status`**_ και το _**`/var/log/dpkg.log`**_ για να πάρεις λεπτομέρειες σχετικά με package installations, χρησιμοποιώντας `grep` για να φιλτράρεις συγκεκριμένες πληροφορίες.
-- Οι χρήστες RedHat μπορούν να κάνουν query στη RPM database με `rpm -qa --root=/mntpath/var/lib/rpm` για να εμφανίσουν τα εγκατεστημένα packages.
+- Για Debian, εξετάστε τα _**`/var/lib/dpkg/status`**_ και _**`/var/log/dpkg.log`**_ για να αντλήσετε λεπτομέρειες σχετικά με τις εγκαταστάσεις πακέτων, χρησιμοποιώντας το `grep` για φιλτράρισμα συγκεκριμένων πληροφοριών.
+- Οι χρήστες RedHat μπορούν να αναζητήσουν στη βάση δεδομένων RPM με το `rpm -qa --root=/mntpath/var/lib/rpm` για να εμφανίσουν τα εγκατεστημένα πακέτα.
 
-Για να εντοπίσεις software που εγκαταστάθηκε χειροκίνητα ή εκτός αυτών των package managers, εξέτασε directories όπως _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_, και _**`/sbin`**_. Συνδύασε listings των directories με system-specific commands για να εντοπίσεις executables που δεν σχετίζονται με γνωστά packages, ενισχύοντας την αναζήτησή σου για όλα τα εγκατεστημένα προγράμματα.
+Για να εντοπίσετε λογισμικό που εγκαταστάθηκε χειροκίνητα ή εκτός αυτών των package managers, εξερευνήστε καταλόγους όπως οι _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_ και _**`/sbin`**_. Συνδυάστε τις καταχωρίσεις καταλόγων με εντολές ειδικές για το σύστημα, ώστε να εντοπίσετε εκτελέσιμα αρχεία που δεν σχετίζονται με γνωστά πακέτα, ενισχύοντας την αναζήτησή σας για όλα τα εγκατεστημένα προγράμματα.
 ```bash
 # Debian package and log details
 cat /var/lib/dpkg/status | grep -E "Package:|Status:"
@@ -173,39 +173,39 @@ find /sbin/ –exec rpm -qf {} \; | grep "is not"
 # Find exacuable files
 find / -type f -executable | grep <something>
 ```
-## Ανάκτηση Διαγραμμένων Εκτελούμενων Binaries
+## Ανάκτηση Διαγραμμένων Εκτελούμενων Binary
 
-Φαντάσου μια διεργασία που εκτελέστηκε από /tmp/exec και μετά διαγράφηκε. Είναι δυνατό να την εξαγάγεις
+Φανταστείτε μια διεργασία που εκτελέστηκε από το /tmp/exec και στη συνέχεια διαγράφηκε. Είναι δυνατή η εξαγωγή της
 ```bash
 cd /proc/3746/ #PID with the exec file deleted
 head -1 maps #Get address of the file. It was 08048000-08049000
 dd if=mem bs=1 skip=08048000 count=1000 of=/tmp/exec2 #Recorver it
 ```
-## Τriage Syscall Trace with SQLite and FTS5
+## Triage Syscall Trace με SQLite και FTS5
 
-When a process is still running or can be re-executed in a lab, **`strace`** can provide a fast behavioral trace without needing kernel modules or full EDR telemetry. For large traces, avoid reading the raw log directly or pasting it into an LLM: store it in a **SQLite** database and query only the minimal subset you need.
+Όταν μια διεργασία εκτελείται ακόμη ή μπορεί να επανεκτελεστεί σε lab, το **`strace`** μπορεί να παρέχει ένα γρήγορο behavioral trace χωρίς να απαιτεί kernel modules ή πλήρη EDR telemetry. Για μεγάλα traces, αποφύγετε την απευθείας ανάγνωση του raw log ή την επικόλλησή του σε ένα **LLM**: αποθηκεύστε το σε μια βάση δεδομένων **SQLite** και κάντε query μόνο στο ελάχιστο subset που χρειάζεστε.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
 
 > [!WARNING]
-> Attaching `strace` changes process timing and may affect race conditions or other fragile bugs. Prefer reproducing on a copy/lab system when possible.
+> Η προσάρτηση του `strace` αλλάζει το timing της διεργασίας και μπορεί να επηρεάσει race conditions ή άλλα fragile bugs. Προτιμήστε την αναπαραγωγή σε αντίγραφο/lab system, όταν είναι δυνατό.
 
 ### Capture
 
-For a new process:
+Για μια νέα διεργασία:
 ```bash
 strace -ff -ttt -yy -s 4096 -o /tmp/trace.log <command>
 ```
-Για μια live process:
+Για μια ενεργή διεργασία:
 ```bash
 strace -ff -ttt -yy -s 4096 -o /tmp/trace.log -p <PID>
 ```
 Χρήσιμες επιλογές:
 
-- `-ff`: ακολούθησε forks/threads και κράτα ξεχωριστά outputs ανά process
-- `-ttt`: epoch timestamps για εύκολη συσχέτιση timeline
-- `-yy`: resolve file descriptors σε backing paths/sockets όταν είναι δυνατό
-- `-s 4096`: απέφυγε το truncation σε μεγάλα path και buffer arguments
+- `-ff`: παρακολούθηση forks/threads και διατήρηση ξεχωριστών εξόδων ανά process
+- `-ttt`: timestamps epoch για εύκολη συσχέτιση στο timeline
+- `-yy`: επίλυση των file descriptors στις αντίστοιχες paths/sockets, όταν είναι δυνατό
+- `-s 4096`: διατήρηση των μεγάλων arguments για paths και buffers χωρίς περικοπή
 
-### Normalize
+### Κανονικοποίηση
 
 Ένα πρακτικό schema είναι μία γραμμή ανά syscall και μία γραμμή ανά argument:
 ```sql
@@ -226,11 +226,11 @@ raw        TEXT    NOT NULL,
 type       INTEGER NOT NULL
 );
 ```
-Αυτό αποφεύγει την προσπάθεια να ισοπεδωθούν ετερογενείς γραμμές syscall σε έναν ενιαίο φαρδύ πίνακα και κρατά τα joins προβλέψιμα κατά το triage.
+Αυτό αποφεύγει την προσπάθεια ισοπέδωσης ετερογενών γραμμών syscall σε έναν ενιαίο ευρύ πίνακα και διατηρεί τα joins προβλέψιμα κατά το triage.
 
-### Ευρετηρίασε text-heavy arguments με FTS5
+### Δημιουργία ευρετηρίου σε text-heavy arguments με FTS5
 
-Το naive path hunting με `LIKE "%...%"` γίνεται πολύ αργό σε μεγάλα traces. Δημιούργησε ένα FTS5 index για το κείμενο των arguments και κάνε search σε αυτό αντί αυτού:
+Η αναζήτηση paths με `LIKE "%...%"` γίνεται πολύ αργή σε μεγάλα traces. Δημιουργήστε ένα ευρετήριο FTS5 για το κείμενο των arguments και κάντε την αναζήτηση εκεί:
 ```sql
 CREATE VIRTUAL TABLE syscall_args_fts
 USING fts5(raw, content='syscall_args', content_rowid='id');
@@ -238,7 +238,7 @@ USING fts5(raw, content='syscall_args', content_rowid='id');
 INSERT INTO syscall_args_fts(rowid, raw)
 SELECT id, raw FROM syscall_args;
 ```
-Παράδειγμα: ανακτήστε τη δραστηριότητα αρχείων κάτω από `/tmp` χωρίς να σαρώνετε κάθε γραμμή:
+Παράδειγμα: ανάκτηση δραστηριότητας αρχείων στο `/tmp` χωρίς σάρωση κάθε γραμμής:
 ```sql
 SELECT s.timestamp, s.pid, s.name, a.position, a.raw
 FROM syscall_args_fts f
@@ -248,30 +248,30 @@ WHERE syscall_args_fts MATCH 'tmp'
 AND s.name IN ('openat', 'stat', 'lstat', 'rename', 'unlink', 'execve')
 ORDER BY s.timestamp;
 ```
-### Ερευνες υψηλού σήματος
+### Έρευνες υψηλού σήματος
 
-- **PATH hijacking / fake sudo**: αναζητήστε εγγραφές και δραστηριότητα `chmod`/`rename` κάτω από `~/.local/bin/`, και μετά συσχετίστε τες με μεταγενέστερο `execve` ονομάτων που μοιάζουν προνομιούχα, όπως `sudo`.
-- **TOCTOU σε προσωρινά αρχεία**: pivot στο ίδιο `/tmp/...` path μέσα από `stat`, `access`, `openat`, `rename`, `unlink`, `link`, `symlink`, και `execve` για να εντοπίσετε κενά check/use.
-- **Αιτία crash root cause**: συσχετίστε `mmap` ενός αρχείου με writes ή truncation του ίδιου inode/path από άλλη διεργασία, και μετά εξετάστε τη σειρά signal/exit για `SIGBUS`.
-- **Ανάκτηση destination δικτύου**: φιλτράρετε `connect`, `sendto`, `sendmsg`, `recvfrom`, και socket-related arguments για να εξαγάγετε peer IPs και ports.
+- **PATH hijacking / fake sudo**: αναζητήστε εγγραφές και δραστηριότητα `chmod`/`rename` κάτω από το `~/.local/bin/`, και στη συνέχεια συσχετίστε τα ευρήματα με μεταγενέστερα `execve` ονομάτων που μοιάζουν προνομιούχα, όπως το `sudo`.
+- **TOCTOU σε προσωρινά αρχεία**: κάντε pivot στην ίδια διαδρομή `/tmp/...` μεταξύ των `stat`, `access`, `openat`, `rename`, `unlink`, `link`, `symlink` και `execve`, για να εντοπίσετε κενά μεταξύ ελέγχου και χρήσης.
+- **Root cause crash**: συσχετίστε το `mmap` ενός αρχείου με εγγραφές ή περικοπή του ίδιου inode/path από άλλη διεργασία και, στη συνέχεια, εξετάστε την ακολουθία signal/exit για `SIGBUS`.
+- **Ανάκτηση προορισμού δικτύου**: φιλτράρετε τα `connect`, `sendto`, `sendmsg`, `recvfrom` και τα ορίσματα που σχετίζονται με sockets, για να εξαγάγετε τις IP και τις θύρες των peers.
 
-### LLM-assisted trace analysis
+### Ανάλυση trace με βοήθεια LLM
 
-Αν θέλετε να βοηθήσει ένα LLM, εκθέστε ένα **read-only** SQLite handle και δώστε του ολόκληρο το schema. Αφήστε το να εκτελεί raw SQL αντί να τυλίγετε τη βάση πίσω από στενές helper functions. Αυτό συνήθως δουλεύει καλύτερα για joins, temporal correlation, και FTS lookups.
+Αν θέλετε ένα LLM να βοηθήσει, εκθέστε ένα **read-only** SQLite handle και δώστε του ολόκληρο το schema. Αφήστε το να εκτελεί raw SQL αντί να περιτυλίγετε τη βάση δεδομένων πίσω από στενές helper functions. Αυτό συνήθως λειτουργεί καλύτερα για joins, temporal correlation και FTS lookups.
 
-Practical rules:
+Πρακτικοί κανόνες:
 
-- Κρατήστε τη βάση read-only, για παράδειγμα με `sqlite3 'file:trace.db?mode=ro'`.
-- Δώστε στο model παραδείγματα έγκυρων `JOIN` και `FTS5 MATCH` queries.
-- Μην επικολλάτε raw multi-GB `strace` logs στο prompt.
+- Διατηρήστε τη βάση δεδομένων read-only, για παράδειγμα με `sqlite3 'file:trace.db?mode=ro'`.
+- Δώστε στο model παραδείγματα έγκυρων queries `JOIN` και `FTS5 MATCH`.
+- **Μην** επικολλάτε raw logs `strace` πολλών GB στο prompt.
 - Κάντε στοχευμένες ερωτήσεις όπως:
-- "List persistent files written by this program."
-- "Did it create or replace executables in user-controlled PATH directories?"
-- "Explain why this trace ends in SIGBUS."
+- "Παράθεσε τα persistent αρχεία που γράφτηκαν από αυτό το πρόγραμμα."
+- "Δημιούργησε ή αντικατέστησε executables σε καταλόγους του PATH που ελέγχονται από τον χρήστη;"
+- "Εξήγησε γιατί αυτό το trace καταλήγει σε SIGBUS."
 
-## Ελέγξτε τοποθεσίες Autostart
+## Επιθεώρηση τοποθεσιών Autostart
 
-### Scheduled Tasks
+### Προγραμματισμένες εργασίες
 ```bash
 cat /var/spool/cron/crontabs/*  \
 /var/spool/cron/atjobs \
@@ -285,8 +285,8 @@ cat /var/spool/cron/crontabs/*  \
 #MacOS
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
-#### Hunt: Cron/Anacron abuse via 0anacron and suspicious stubs
-Οι επιτιθέμενοι συχνά επεξεργάζονται το stub `0anacron` που υπάρχει κάτω από κάθε κατάλογο `/etc/cron.*/` για να εξασφαλίσουν περιοδική εκτέλεση.
+#### Έρευνα: Κατάχρηση Cron/Anacron μέσω του 0anacron και ύποπτων stubs
+Οι attackers συχνά τροποποιούν το stub 0anacron που υπάρχει σε κάθε κατάλογο /etc/cron.*/, ώστε να διασφαλίσουν την περιοδική εκτέλεση.<sup>[[4]](#references)</sup>
 ```bash
 # List 0anacron files and their timestamps/sizes
 for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
@@ -294,8 +294,8 @@ for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron
 # Look for obvious execution of shells or downloaders embedded in cron stubs
 grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev/null
 ```
-#### Κυνηγήστε: επαναφορά hardening του SSH και backdoor shells
-Οι αλλαγές στο sshd_config και στα shells των system accounts είναι συνηθισμένες μετά από exploitation για τη διατήρηση της πρόσβασης.
+#### Έρευνα: rollback του SSH hardening και backdoor shells
+Οι αλλαγές στο sshd_config και στα shells των λογαριασμών συστήματος είναι συνηθισμένες μετά το post-exploitation για τη διατήρηση της πρόσβασης.<sup>[[4]](#references)</sup>
 ```bash
 # Root login enablement (flag "yes" or lax values)
 grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
@@ -303,31 +303,31 @@ grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
 # System accounts with interactive shells (e.g., games → /bin/sh)
 awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
 ```
-#### Hunt: Cloud C2 markers (Dropbox/Cloudflare Tunnel)
-- Τα Dropbox API beacons συνήθως χρησιμοποιούν api.dropboxapi.com ή content.dropboxapi.com μέσω HTTPS με Authorization: Bearer tokens.
-- Κάνε hunt σε proxy/Zeek/NetFlow για απρόσμενο Dropbox egress από servers.
-- Το Cloudflare Tunnel (`cloudflared`) παρέχει backup C2 μέσω outbound 443.
+#### Αναζήτηση: Cloud C2 markers (Dropbox/Cloudflare Tunnel)
+- Τα Dropbox API beacons συνήθως χρησιμοποιούν τα api.dropboxapi.com ή content.dropboxapi.com μέσω HTTPS με Authorization: Bearer tokens.
+- Αναζητήστε σε proxy/Zeek/NetFlow μη αναμενόμενο Dropbox egress από servers.
+- Το Cloudflare Tunnel (`cloudflared`) παρέχει εφεδρικό C2 μέσω εξερχόμενης σύνδεσης 443.<sup>[[4]](#references)</sup>
 ```bash
 ps aux | grep -E '[c]loudflared|trycloudflare'
 systemctl list-units | grep -i cloudflared
 ```
-### Services
+### Υπηρεσίες
 
-Διαδρομές όπου ένα malware θα μπορούσε να εγκατασταθεί ως service:
+Διαδρομές στις οποίες μπορεί να έχει εγκατασταθεί malware ως υπηρεσία:
 
-- **/etc/inittab**: Καλεί initialization scripts όπως rc.sysinit, προωθώντας στη συνέχεια σε startup scripts.
-- **/etc/rc.d/** και **/etc/rc.boot/**: Περιέχουν scripts για service startup, με το δεύτερο να βρίσκεται σε παλαιότερες Linux εκδόσεις.
-- **/etc/init.d/**: Χρησιμοποιείται σε ορισμένες Linux εκδόσεις όπως το Debian για την αποθήκευση startup scripts.
-- Τα services μπορεί επίσης να ενεργοποιηθούν μέσω **/etc/inetd.conf** ή **/etc/xinetd/**, ανάλογα με την έκδοση του Linux.
-- **/etc/systemd/system**: Ένας κατάλογος για scripts του system και service manager.
-- **/etc/systemd/system/multi-user.target.wants/**: Περιέχει links προς services που πρέπει να ξεκινούν σε multi-user runlevel.
-- **/usr/local/etc/rc.d/**: Για custom ή third-party services.
-- **\~/.config/autostart/**: Για applications αυτόματης εκκίνησης ανά χρήστη, που μπορεί να είναι σημείο απόκρυψης για malware στοχευμένο σε χρήστες.
-- **/lib/systemd/system/**: Default unit files σε όλο το σύστημα που παρέχονται από εγκατεστημένα packages.
+- **/etc/inittab**: Καλεί scripts αρχικοποίησης όπως το rc.sysinit, κατευθύνοντας στη συνέχεια σε startup scripts.
+- **/etc/rc.d/** και **/etc/rc.boot/**: Περιέχουν scripts για την εκκίνηση υπηρεσιών, με το δεύτερο να βρίσκεται σε παλαιότερες εκδόσεις Linux.
+- **/etc/init.d/**: Χρησιμοποιείται σε ορισμένες εκδόσεις Linux, όπως το Debian, για την αποθήκευση startup scripts.
+- Οι υπηρεσίες μπορεί επίσης να ενεργοποιούνται μέσω των **/etc/inetd.conf** ή **/etc/xinetd/**, ανάλογα με το Linux variant.
+- **/etc/systemd/system**: Ένας κατάλογος για scripts του system και του service manager.
+- **/etc/systemd/system/multi-user.target.wants/**: Περιέχει links προς υπηρεσίες που πρέπει να εκκινούν σε multi-user runlevel.
+- **/usr/local/etc/rc.d/**: Για custom ή third-party υπηρεσίες.
+- **\~/.config/autostart/**: Για user-specific εφαρμογές αυτόματης εκκίνησης, οι οποίες μπορεί να αποτελούν σημείο απόκρυψης για user-targeted malware.
+- **/lib/systemd/system/**: Προεπιλεγμένα unit files σε επίπεδο system, τα οποία παρέχονται από εγκατεστημένα packages.
 
-#### Hunt: systemd timers and transient units
+#### Έρευνα: systemd timers και transient units
 
-Το persistence στο Systemd δεν περιορίζεται σε `.service` files. Ελέγξτε `.timer` units, user-level units, και **transient units** που δημιουργούνται στο runtime.
+Η persistence μέσω systemd δεν περιορίζεται σε αρχεία `.service`. Ερευνήστε `.timer` units, user-level units και **transient units** που δημιουργούνται κατά το runtime.
 ```bash
 # Enumerate timers and inspect referenced services
 systemctl list-timers --all
@@ -345,50 +345,50 @@ find /run/systemd/transient -maxdepth 2 -type f -ls 2>/dev/null
 journalctl -u <name>.service
 journalctl _SYSTEMD_UNIT=<name>.service
 ```
-Transient units are easy to miss because `/run/systemd/transient/` is **non-persistent**. If you are collecting a live image, grab it before shutdown.
+Οι **Transient units** είναι εύκολο να παραβλεφθούν επειδή το `/run/systemd/transient/` είναι **μη persistent**. Αν συλλέγετε ένα live image, αντιγράψτε το πριν από τον τερματισμό λειτουργίας.
 
 ### Kernel Modules
 
-Τα Linux kernel modules, συχνά χρησιμοποιούμενα από malware ως rootkit components, φορτώνονται κατά το system boot. Οι κατάλογοι και τα αρχεία που είναι κρίσιμα για αυτά τα modules περιλαμβάνουν:
+Τα Linux kernel modules, που συχνά χρησιμοποιούνται από malware ως στοιχεία rootkit, φορτώνονται κατά την εκκίνηση του συστήματος. Οι κατάλογοι και τα αρχεία που είναι κρίσιμα για αυτά τα modules περιλαμβάνουν:
 
-- **/lib/modules/$(uname -r)**: Περιέχει modules για την τρέχουσα έκδοση του kernel.
-- **/etc/modprobe.d**: Περιέχει configuration files για τον έλεγχο του module loading.
-- **/etc/modprobe** και **/etc/modprobe.conf**: Αρχεία για global module settings.
+- **/lib/modules/$(uname -r)**: Περιέχει modules για την έκδοση του kernel που εκτελείται.
+- **/etc/modprobe.d**: Περιέχει αρχεία ρυθμίσεων για τον έλεγχο της φόρτωσης modules.
+- **/etc/modprobe** και **/etc/modprobe.conf**: Αρχεία για global ρυθμίσεις modules.
 
-### Other Autostart Locations
+### Άλλες τοποθεσίες Autostart
 
-Το Linux χρησιμοποιεί διάφορα αρχεία για την αυτόματη εκτέλεση προγραμμάτων κατά το user login, όπου ενδέχεται να κρύβεται malware:
+Το Linux χρησιμοποιεί διάφορα αρχεία για την αυτόματη εκτέλεση προγραμμάτων κατά το login του χρήστη, τα οποία ενδέχεται να φιλοξενούν malware:
 
-- **/etc/profile.d/**\*, **/etc/profile**, και **/etc/bash.bashrc**: Εκτελούνται για κάθε user login.
-- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, και **\~/.config/autostart**: User-specific αρχεία που εκτελούνται κατά το login τους.
-- **/etc/rc.local**: Εκτελείται αφού έχουν ξεκινήσει όλες οι system services, σηματοδοτώντας το τέλος της μετάβασης σε multiuser environment.
+- **/etc/profile.d/**\*, **/etc/profile** και **/etc/bash.bashrc**: Εκτελούνται κατά το login οποιουδήποτε χρήστη.
+- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile** και **\~/.config/autostart**: Αρχεία ειδικά για κάθε χρήστη, τα οποία εκτελούνται κατά το login του.
+- **/etc/rc.local**: Εκτελείται αφού έχουν εκκινηθεί όλες οι system services, σηματοδοτώντας το τέλος της μετάβασης σε multiuser environment.
 
-## Examine Logs
+## Εξέταση Logs
 
-Τα Linux systems καταγράφουν user activities και system events μέσω διαφόρων log files. Αυτά τα logs είναι καθοριστικά για τον εντοπισμό unauthorized access, malware infections, και άλλων security incidents. Τα βασικά log files περιλαμβάνουν:
+Τα Linux systems καταγράφουν τις δραστηριότητες των χρηστών και τα system events μέσω διάφορων log files. Αυτά τα logs είναι κρίσιμα για τον εντοπισμό μη εξουσιοδοτημένης πρόσβασης, infections από malware και άλλων security incidents.<sup>[[2]](#references)</sup> Τα βασικά log files περιλαμβάνουν:
 
 - **/var/log/syslog** (Debian) ή **/var/log/messages** (RedHat): Καταγράφουν system-wide messages και activities.
 - **/var/log/auth.log** (Debian) ή **/var/log/secure** (RedHat): Καταγράφουν authentication attempts, επιτυχημένα και αποτυχημένα logins.
-- Χρησιμοποιήστε `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` για να φιλτράρετε σχετικά authentication events.
-- **/var/log/boot.log**: Περιέχει system startup messages.
-- **/var/log/maillog** ή **/var/log/mail.log**: Καταγράφουν email server activities, χρήσιμα για την παρακολούθηση email-related services.
+- Χρησιμοποιήστε το `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` για να φιλτράρετε σχετικά authentication events.
+- **/var/log/boot.log**: Περιέχει messages από την εκκίνηση του συστήματος.
+- **/var/log/maillog** ή **/var/log/mail.log**: Καταγράφει τις activities του email server και είναι χρήσιμο για την παρακολούθηση email-related services.
 - **/var/log/kern.log**: Αποθηκεύει kernel messages, συμπεριλαμβανομένων errors και warnings.
-- **/var/log/dmesg**: Περιέχει device driver messages.
-- **/var/log/faillog**: Καταγράφει αποτυχημένες login attempts, βοηθώντας σε security breach investigations.
-- **/var/log/cron**: Καταγράφει cron job executions.
-- **/var/log/daemon.log**: Παρακολουθεί background service activities.
-- **/var/log/btmp**: Τεκμηριώνει αποτυχημένες login attempts.
-- **/var/log/httpd/**: Περιέχει Apache HTTPD error και access logs.
-- **/var/log/mysqld.log** ή **/var/log/mysql.log**: Καταγράφουν MySQL database activities.
+- **/var/log/dmesg**: Περιέχει messages από device drivers.
+- **/var/log/faillog**: Καταγράφει αποτυχημένες προσπάθειες login, βοηθώντας στις έρευνες security breaches.
+- **/var/log/cron**: Καταγράφει τις εκτελέσεις cron jobs.
+- **/var/log/daemon.log**: Παρακολουθεί τις activities των background services.
+- **/var/log/btmp**: Καταγράφει αποτυχημένες προσπάθειες login.
+- **/var/log/httpd/**: Περιέχει error και access logs του Apache HTTPD.
+- **/var/log/mysqld.log** ή **/var/log/mysql.log**: Καταγράφει τις activities της MySQL database.
 - **/var/log/xferlog**: Καταγράφει FTP file transfers.
-- **/var/log/**: Πάντα ελέγχετε για unexpected logs εδώ.
+- **/var/log/**: Να ελέγχετε πάντα για απρόσμενα logs εδώ.
 
 > [!TIP]
-> Τα Linux system logs και audit subsystems μπορεί να είναι απενεργοποιημένα ή να έχουν διαγραφεί σε ένα intrusion ή malware incident. Επειδή τα logs σε Linux systems γενικά περιέχουν μερικές από τις πιο χρήσιμες πληροφορίες για malicious activities, οι intruders συνήθως τα διαγράφουν. Επομένως, όταν εξετάζετε διαθέσιμα log files, είναι σημαντικό να αναζητάτε κενά ή εγγραφές εκτός σειράς που μπορεί να υποδηλώνουν διαγραφή ή tampering.
+> Τα Linux system logs και τα audit subsystems ενδέχεται να έχουν απενεργοποιηθεί ή διαγραφεί κατά τη διάρκεια intrusion ή περιστατικού malware. Επειδή τα logs στα Linux systems περιέχουν γενικά μερικές από τις πιο χρήσιμες πληροφορίες για malicious activities, οι intruders τα διαγράφουν συστηματικά. Επομένως, κατά την εξέταση των διαθέσιμων log files, είναι σημαντικό να αναζητάτε κενά ή entries εκτός σειράς, τα οποία μπορεί να αποτελούν ένδειξη διαγραφής ή tampering.
 
 ### Journald triage (`journalctl`)
 
-Σε σύγχρονους Linux hosts, το **systemd journal** είναι συνήθως η πηγή με τη μεγαλύτερη αξία για **service execution**, **auth events**, **package operations**, και **kernel/user-space messages**. Κατά το live response, προσπαθήστε να διατηρήσετε τόσο το **persistent** journal (`/var/log/journal/`) όσο και το **runtime** journal (`/run/log/journal/`) επειδή η βραχύβια attacker activity μπορεί να υπάρχει μόνο στο δεύτερο.
+Σε σύγχρονους Linux hosts, το **systemd journal** είναι συνήθως η πιο πολύτιμη πηγή για **service execution**, **auth events**, **package operations** και **kernel/user-space messages**. Κατά τη διάρκεια live response, προσπαθήστε να διατηρήσετε τόσο το **persistent** journal (`/var/log/journal/`) όσο και το **runtime** journal (`/run/log/journal/`), επειδή δραστηριότητα attacker μικρής διάρκειας μπορεί να υπάρχει μόνο στο τελευταίο.<sup>[[5]](#references)</sup>
 ```bash
 # List available boots and pivot around the suspicious one
 journalctl --list-boots
@@ -408,11 +408,11 @@ journalctl _SYSTEMD_UNIT=cron.service
 journalctl _UID=0
 journalctl _EXE=/usr/sbin/useradd
 ```
-Χρήσιμα πεδία του journal για triage περιλαμβάνουν τα `_SYSTEMD_UNIT`, `_EXE`, `_COMM`, `_CMDLINE`, `_UID`, `_GID`, `_PID`, `_BOOT_ID`, και `MESSAGE`. Αν το journald είχε ρυθμιστεί χωρίς persistent storage, να περιμένετε μόνο πρόσφατα δεδομένα κάτω από `/run/log/journal/`.
+Χρήσιμα πεδία του journal για triage περιλαμβάνουν τα `_SYSTEMD_UNIT`, `_EXE`, `_COMM`, `_CMDLINE`, `_UID`, `_GID`, `_PID`, `_BOOT_ID` και `MESSAGE`. Αν το journald είχε ρυθμιστεί χωρίς persistent storage, αναμένετε μόνο πρόσφατα δεδομένα στο `/run/log/journal/`.
 
-### Audit framework triage (`auditd`)
+### Triage του audit framework (`auditd`)
 
-Αν το `auditd` είναι ενεργό, προτιμήστε το όποτε χρειάζεστε **process attribution** για αλλαγές σε αρχεία, εκτέλεση εντολών, activity σύνδεσης, ή εγκατάσταση πακέτων.
+Αν το `auditd` είναι ενεργοποιημένο, προτιμήστε το όποτε χρειάζεστε **απόδοση ενεργειών σε process** για αλλαγές αρχείων, εκτέλεση εντολών, δραστηριότητα σύνδεσης ή εγκατάσταση πακέτων.<sup>[[6]](#references)</sup>
 ```bash
 # Fast summaries
 aureport --start today --summary -i
@@ -427,7 +427,7 @@ ausearch --start today -m SERVICE_START,SERVICE_STOP -i
 # Software installation/update events (especially useful on RHEL-like systems)
 ausearch -m SOFTWARE_UPDATE -i
 ```
-Όταν οι κανόνες αναπτύχθηκαν με keys, κάνε pivot από αυτούς αντί να κάνεις grep σε raw logs:
+Όταν οι κανόνες αναπτύχθηκαν με keys, κάνε pivot μέσω αυτών αντί να ψάχνεις στα raw logs:
 ```bash
 ausearch --start this-week -k <rule_key> --raw | aureport --file --summary -i
 ausearch --start this-week -k <rule_key> --raw | aureport --user --summary -i
@@ -440,32 +440,32 @@ ausearch --start this-week -k <rule_key> --raw | aureport --user --summary -i
 - \~/.python_history
 - \~/.\*\_history
 
-Επιπλέον, η εντολή `last -Faiwx` παρέχει μια λίστα με logins χρηστών. Ελέγξτε την για άγνωστα ή απροσδόκητα logins.
+Επιπλέον, η εντολή `last -Faiwx` παρέχει μια λίστα με τα logins των χρηστών. Ελέγξτε την για άγνωστα ή μη αναμενόμενα logins.
 
-Ελέγξτε αρχεία που μπορεί να δώσουν επιπλέον rprivileges:
+Ελέγξτε τα αρχεία που μπορούν να παραχωρήσουν επιπλέον δικαιώματα:
 
-- Ελέγξτε το `/etc/sudoers` για απρόσμενα user privileges που μπορεί να έχουν δοθεί.
-- Ελέγξτε το `/etc/sudoers.d/` για απρόσμενα user privileges που μπορεί να έχουν δοθεί.
-- Εξετάστε το `/etc/groups` για να εντοπίσετε ασυνήθιστα group memberships ή permissions.
-- Εξετάστε το `/etc/passwd` για να εντοπίσετε ασυνήθιστα group memberships ή permissions.
+- Ελέγξτε το `/etc/sudoers` για μη αναμενόμενα δικαιώματα χρηστών που ενδέχεται να έχουν παραχωρηθεί.
+- Ελέγξτε το `/etc/sudoers.d/` για μη αναμενόμενα δικαιώματα χρηστών που ενδέχεται να έχουν παραχωρηθεί.
+- Εξετάστε το `/etc/groups` για τον εντοπισμό ασυνήθιστων συμμετοχών σε ομάδες ή δικαιωμάτων.
+- Εξετάστε το `/etc/passwd` για τον εντοπισμό ασυνήθιστων συμμετοχών σε ομάδες ή δικαιωμάτων.
 
-Ορισμένες apps alse δημιουργούν τα δικά τους logs:
+Ορισμένες εφαρμογές δημιουργούν επίσης τα δικά τους logs:
 
 - **SSH**: Εξετάστε τα _\~/.ssh/authorized_keys_ και _\~/.ssh/known_hosts_ για μη εξουσιοδοτημένες απομακρυσμένες συνδέσεις.
-- **Gnome Desktop**: Δείτε το _\~/.recently-used.xbel_ για πρόσφατα προσπελασμένα αρχεία μέσω Gnome applications.
-- **Firefox/Chrome**: Ελέγξτε το browser history και τα downloads στα _\~/.mozilla/firefox_ ή _\~/.config/google-chrome_ για ύποπτη δραστηριότητα.
-- **VIM**: Ελέγξτε το _\~/.viminfo_ για λεπτομέρειες χρήσης, όπως accessed file paths και search history.
-- **Open Office**: Ελέγξτε για πρόσβαση σε πρόσφατα documents που μπορεί να υποδεικνύουν compromised files.
-- **FTP/SFTP**: Ελέγξτε τα logs στο _\~/.ftp_history_ ή _\~/.sftp_history_ για file transfers που μπορεί να είναι μη εξουσιοδοτημένα.
-- **MySQL**: Εξετάστε το _\~/.mysql_history_ για εκτελεσμένα MySQL queries, που ενδέχεται να αποκαλύπτουν μη εξουσιοδοτημένες database activities.
-- **Less**: Αναλύστε το _\~/.lesshst_ για usage history, συμπεριλαμβανομένων viewed files και commands executed.
+- **Gnome Desktop**: Ελέγξτε το _\~/.recently-used.xbel_ για αρχεία στα οποία έγινε πρόσφατη πρόσβαση μέσω εφαρμογών Gnome.
+- **Firefox/Chrome**: Ελέγξτε το ιστορικό περιήγησης και τις λήψεις στο _\~/.mozilla/firefox_ ή στο _\~/.config/google-chrome_ για ύποπτες δραστηριότητες.
+- **VIM**: Εξετάστε το _\~/.viminfo_ για λεπτομέρειες χρήσης, όπως διαδρομές αρχείων που προσπελάστηκαν και ιστορικό αναζητήσεων.
+- **Open Office**: Ελέγξτε την πρόσβαση σε πρόσφατα έγγραφα, η οποία μπορεί να υποδεικνύει παραβιασμένα αρχεία.
+- **FTP/SFTP**: Εξετάστε τα logs στα _\~/.ftp_history_ ή _\~/.sftp_history_ για μεταφορές αρχείων που ενδέχεται να μην ήταν εξουσιοδοτημένες.
+- **MySQL**: Ερευνήστε το _\~/.mysql_history_ για εκτελεσμένα MySQL queries, τα οποία ενδέχεται να αποκαλύπτουν μη εξουσιοδοτημένες δραστηριότητες σε βάσεις δεδομένων.
+- **Less**: Αναλύστε το _\~/.lesshst_ για το ιστορικό χρήσης, συμπεριλαμβανομένων των αρχείων που προβλήθηκαν και των εντολών που εκτελέστηκαν.
 - **Git**: Εξετάστε το _\~/.gitconfig_ και το project _.git/logs_ για αλλαγές στα repositories.
 
 ### USB Logs
 
-Το [**usbrip**](https://github.com/snovvcrash/usbrip) είναι ένα μικρό software γραμμένο σε pure Python 3 που αναλύει Linux log files (`/var/log/syslog*` ή `/var/log/messages*` ανάλογα με το distro) για τη δημιουργία πινάκων ιστορικού USB events.
+Το [**usbrip**](https://github.com/snovvcrash/usbrip) είναι ένα μικρό λογισμικό γραμμένο εξ ολοκλήρου σε Python 3, το οποίο αναλύει τα Linux log files (`/var/log/syslog*` ή `/var/log/messages*`, ανάλογα με το distro) για τη δημιουργία πινάκων ιστορικού συμβάντων USB.
 
-Είναι ενδιαφέρον να **γνωρίζετε όλα τα USBs που έχουν χρησιμοποιηθεί** και θα είναι πιο χρήσιμο αν έχετε μια authorized list of USBs για να βρείτε "violation events" (τη χρήση USBs που δεν ανήκουν σε αυτή τη λίστα).
+Είναι ενδιαφέρον να **γνωρίζετε όλα τα USB που έχουν χρησιμοποιηθεί** και θα είναι ακόμη πιο χρήσιμο αν διαθέτετε μια εξουσιοδοτημένη λίστα USB, ώστε να εντοπίζετε "violation events" (τη χρήση USB που δεν περιλαμβάνονται σε αυτήν τη λίστα).
 
 ### Εγκατάσταση
 ```bash
@@ -480,30 +480,30 @@ usbrip events history --pid 0002 --vid 0e0f --user kali #Search by pid OR vid OR
 usbrip ids download #Downlaod database
 usbrip ids search --pid 0002 --vid 0e0f #Search for pid AND vid
 ```
-More examples and info inside the github: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
+Περισσότερα παραδείγματα και πληροφορίες στο github: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
 
-## Ανασκόπηση Λογαριασμών Χρηστών και Δραστηριοτήτων Σύνδεσης
+## Έλεγχος User Accounts και δραστηριοτήτων σύνδεσης
 
-Εξέτασε τα _**/etc/passwd**_, _**/etc/shadow**_ και τα **security logs** για ασυνήθιστα ονόματα ή λογαριασμούς που δημιουργήθηκαν και ή χρησιμοποιήθηκαν σε κοντινή χρονική απόσταση από γνωστά μη εξουσιοδοτημένα γεγονότα. Επίσης, έλεγξε για πιθανά sudo brute-force attacks.\
-Επιπλέον, έλεγξε αρχεία όπως τα _**/etc/sudoers**_ και _**/etc/groups**_ για απροσδόκητα προνόμια που δόθηκαν σε χρήστες.\
-Τέλος, αναζήτησε λογαριασμούς με **χωρίς κωδικούς πρόσβασης** ή με **εύκολα μαντευόμενους** κωδικούς πρόσβασης.
+Εξετάστε τα _**/etc/passwd**_, _**/etc/shadow**_ και τα **security logs** για ασυνήθιστα ονόματα ή accounts που δημιουργήθηκαν ή χρησιμοποιήθηκαν κοντά σε γνωστά μη εξουσιοδοτημένα συμβάντα. Επίσης, ελέγξτε για πιθανές sudo brute-force επιθέσεις.\
+Επιπλέον, ελέγξτε αρχεία όπως τα _**/etc/sudoers**_ και _**/etc/groups**_ για μη αναμενόμενα privileges που έχουν δοθεί σε users.\
+Τέλος, αναζητήστε accounts με **no passwords** ή **easily guessed** passwords.<sup>[[1]](#references)</sup>
 
-## Εξέταση του File System
+## Εξέταση συστήματος αρχείων
 
-### Ανάλυση Δομών File System σε Έρευνα Malware
+### Ανάλυση δομών συστήματος αρχείων σε έρευνα Malware
 
-Όταν διερευνώνται περιστατικά malware, η δομή του file system αποτελεί κρίσιμη πηγή πληροφοριών, αποκαλύπτοντας τόσο τη σειρά των γεγονότων όσο και το περιεχόμενο του malware. Ωστόσο, οι δημιουργοί malware αναπτύσσουν τεχνικές για να δυσχεράνουν αυτή την ανάλυση, όπως η τροποποίηση των file timestamps ή η αποφυγή του file system για αποθήκευση δεδομένων.
+Κατά τη διερεύνηση περιστατικών malware, η δομή του συστήματος αρχείων αποτελεί κρίσιμη πηγή πληροφοριών, αποκαλύπτοντας τόσο την ακολουθία των συμβάντων όσο και το περιεχόμενο του malware. Ωστόσο, οι δημιουργοί malware αναπτύσσουν τεχνικές για να παρεμποδίσουν αυτή την ανάλυση, όπως την τροποποίηση των timestamps αρχείων ή την αποφυγή χρήσης του συστήματος αρχείων για αποθήκευση δεδομένων.<sup>[[1]](#references)</sup>
 
-Για να αντιμετωπιστούν αυτές οι anti-forensic μέθοδοι, είναι απαραίτητο να:
+Για την αντιμετώπιση αυτών των anti-forensic μεθόδων, είναι απαραίτητο να:
 
-- **Διεξάγεις λεπτομερή ανάλυση timeline** χρησιμοποιώντας εργαλεία όπως το **Autopsy** για οπτικοποίηση των event timelines ή το `mactime` του **Sleuth Kit** για λεπτομερή δεδομένα timeline.
-- **Ερευνήσεις απροσδόκητα scripts** στο $PATH του συστήματος, τα οποία μπορεί να περιλαμβάνουν shell ή PHP scripts που χρησιμοποιούνται από attackers.
-- **Εξετάσεις το `/dev` για άτυπα αρχεία**, καθώς παραδοσιακά περιέχει ειδικά αρχεία, αλλά μπορεί να φιλοξενεί αρχεία σχετιζόμενα με malware.
-- **Αναζητήσεις κρυφά αρχεία ή directories** με ονόματα όπως ".. " (dot dot space) ή "..^G" (dot dot control-G), τα οποία μπορεί να αποκρύπτουν κακόβουλο περιεχόμενο.
-- **Εντοπίσεις setuid root files** χρησιμοποιώντας την εντολή: `find / -user root -perm -04000 -print` Αυτό βρίσκει αρχεία με αυξημένα permissions, τα οποία θα μπορούσαν να αξιοποιηθούν από attackers.
-- **Ελέγξεις timestamps διαγραφής** σε inode tables για να εντοπίσεις μαζικές διαγραφές αρχείων, που πιθανώς υποδηλώνουν την παρουσία rootkits ή trojans.
-- **Επιθεωρήσεις διαδοχικά inodes** για κοντινά κακόβουλα αρχεία αφού εντοπίσεις ένα, καθώς μπορεί να έχουν τοποθετηθεί μαζί.
-- **Ελέγξεις συνηθισμένα binary directories** (_/bin_, _/sbin_) για αρχεία που τροποποιήθηκαν πρόσφατα, καθώς αυτά μπορεί να έχουν αλλοιωθεί από malware.
+- **Πραγματοποιήσετε thorough timeline analysis** χρησιμοποιώντας εργαλεία όπως το **Autopsy** για την οπτικοποίηση των timelines συμβάντων ή το `mactime` του **Sleuth Kit** για λεπτομερή δεδομένα timeline.
+- **Διερευνήσετε μη αναμενόμενα scripts** στο $PATH του συστήματος, τα οποία μπορεί να περιλαμβάνουν shell ή PHP scripts που χρησιμοποιούνται από attackers.
+- **Εξετάσετε το `/dev` για atypical files**, καθώς παραδοσιακά περιέχει special files, αλλά μπορεί να φιλοξενεί αρχεία που σχετίζονται με malware.
+- **Αναζητήσετε hidden files ή directories** με ονόματα όπως ".. " (dot dot space) ή "..^G" (dot dot control-G), τα οποία θα μπορούσαν να αποκρύπτουν malicious content.
+- **Εντοπίσετε setuid root files** χρησιμοποιώντας την εντολή: `find / -user root -perm -04000 -print` Αυτή εντοπίζει αρχεία με elevated permissions, τα οποία θα μπορούσαν να γίνουν αντικείμενο abuse από attackers.
+- **Ελέγξετε τα deletion timestamps** στους inode tables για να εντοπίσετε μαζικές διαγραφές αρχείων, οι οποίες ενδέχεται να υποδεικνύουν την παρουσία rootkits ή trojans.
+- **Επιθεωρήσετε consecutive inodes** για nearby malicious files αφού εντοπίσετε ένα, καθώς μπορεί να έχουν τοποθετηθεί μαζί.
+- **Ελέγξετε τα common binary directories** (_/bin_, _/sbin_) για recently modified files, καθώς αυτά μπορεί να έχουν τροποποιηθεί από malware.
 ````bash
 # List recent files in a directory:
 ls -laR --sort=time /bin```
@@ -512,11 +512,11 @@ ls -laR --sort=time /bin```
 ls -lai /bin | sort -n```
 ````
 > [!TIP]
-> Σημείωσε ότι ένας **attacker** μπορεί να **modify** τον **time** ώστε τα **files appear** **legitimate**, αλλά δεν μπορεί να **modify** το **inode**. Αν διαπιστώσεις ότι ένα **file** δείχνει πως δημιουργήθηκε και τροποποιήθηκε την **same time** με τα υπόλοιπα files στον ίδιο φάκελο, αλλά το **inode** είναι **unexpectedly bigger**, τότε τα **timestamps of that file were modified**.
+> Σημειώστε ότι ένας **attacker** μπορεί να **τροποποιήσει** τον **χρόνο** ώστε τα **αρχεία να φαίνονται** **legitimate**, αλλά δεν μπορεί να τροποποιήσει το **inode**. Αν διαπιστώσετε ότι ένα **αρχείο** δείχνει πως δημιουργήθηκε και τροποποιήθηκε **ταυτόχρονα** με τα υπόλοιπα αρχεία στον ίδιο φάκελο, αλλά το **inode** είναι **απροσδόκητα μεγαλύτερο**, τότε τα **timestamps** αυτού του αρχείου **τροποποιήθηκαν**.
 
-### Inode-focused quick triage
+### Γρήγορο triage με εστίαση στα inode
 
-If you suspect anti-forensics, run these inode-focused checks early:
+Αν υποψιάζεστε **anti-forensics**, εκτελέστε νωρίς αυτούς τους ελέγχους με εστίαση στα inode:
 ```bash
 # Filesystem inode pressure (possible inode exhaustion DoS)
 df -i
@@ -528,18 +528,18 @@ find / -xdev -inum <inode_number> 2>/dev/null
 lsof +L1
 lsof | grep '(deleted)'
 ```
-Όταν ένα ύποπτο inode βρίσκεται σε image/device συστήματος αρχείων EXT, εξέτασε απευθείας τα metadata του inode:
+Όταν ένα ύποπτο inode βρίσκεται σε image/device συστήματος αρχείων EXT, εξετάστε απευθείας τα μεταδεδομένα του inode:
 ```bash
 sudo debugfs -R "stat <inode_number>" /dev/sdX
 ```
 Χρήσιμα πεδία:
-- **Links**: αν είναι `0`, καμία εγγραφή directory δεν αναφέρεται αυτή τη στιγμή στο inode.
-- **dtime**: timestamp διαγραφής που ορίζεται όταν το inode αποσυνδέθηκε.
-- **ctime/mtime**: βοηθά στη συσχέτιση αλλαγών σε metadata/content με το timeline του incident.
+- **Links**: αν είναι `0`, καμία καταχώριση directory δεν αναφέρεται αυτήν τη στιγμή στο inode.
+- **dtime**: timestamp διαγραφής που ορίζεται όταν το inode γίνεται unlinked.
+- **ctime/mtime**: βοηθούν στη συσχέτιση αλλαγών στα metadata/στο περιεχόμενο με το timeline του incident.
 
-### Capabilities, xattrs, and preload-based userland rootkits
+### Capabilities, xattrs και preload-based userland rootkits
 
-Η σύγχρονη Linux persistence συχνά αποφεύγει τα προφανή **setuid** binaries και αντίθετα καταχράται τα **file capabilities**, τα **extended attributes** και τον dynamic loader.
+Το persistence σε σύγχρονα Linux συχνά αποφεύγει τα προφανή **setuid** binaries και, αντί γι' αυτό, κάνει abuse των **file capabilities**, των **extended attributes** και του dynamic loader.
 ```bash
 # Enumerate file capabilities (think cap_setuid, cap_sys_admin, cap_dac_override)
 getcap -r / 2>/dev/null
@@ -555,49 +555,47 @@ stat /etc/ld.so.preload 2>/dev/null
 ls -lah /lib /lib64 /usr/lib /usr/lib64 /usr/local/lib 2>/dev/null | grep -E '\\.so(\\.|$)'
 ldd /bin/ls
 ```
-Δώσε ιδιαίτερη προσοχή σε βιβλιοθήκες που αναφέρονται από **writable** διαδρομές όπως `/tmp`, `/dev/shm`, `/var/tmp`, ή περίεργες τοποθεσίες κάτω από `/usr/local/lib`. Επίσης έλεγξε για capability-bearing binaries έξω από τη συνηθισμένη ιδιοκτησία των πακέτων και συσχέτισέ τα με τα αποτελέσματα επαλήθευσης πακέτων (`rpm -Va`, `dpkg --verify`, `debsums`).
+Δώστε ιδιαίτερη προσοχή σε libraries που αναφέρονται από **writable** paths όπως `/tmp`, `/dev/shm`, `/var/tmp` ή ασυνήθιστες τοποθεσίες κάτω από το `/usr/local/lib`. Ελέγξτε επίσης binaries που διαθέτουν capabilities εκτός της κανονικής ιδιοκτησίας πακέτων και συσχετίστε τα με τα αποτελέσματα επαλήθευσης πακέτων (`rpm -Va`, `dpkg --verify`, `debsums`).
 
-## Σύγκριση αρχείων διαφορετικών εκδόσεων filesystem
+## Σύγκριση files διαφορετικών filesystem versions
 
-### Σύνοψη σύγκρισης εκδόσεων filesystem
+### Σύνοψη σύγκρισης filesystem versions
 
-Για να συγκρίνουμε εκδόσεις filesystem και να εντοπίσουμε αλλαγές, χρησιμοποιούμε απλοποιημένες εντολές `git diff`:
+Για να συγκρίνουμε filesystem versions και να εντοπίσουμε αλλαγές, χρησιμοποιούμε απλοποιημένες εντολές `git diff`:<sup>[[3]](#references)</sup>
 
-- **Για να βρεις νέα αρχεία**, σύγκρινε δύο καταλόγους:
+- **Για να εντοπίσετε νέα files**, συγκρίνετε δύο directories:
 ```bash
 git diff --no-index --diff-filter=A path/to/old_version/ path/to/new_version/
 ```
-- **Για το τροποποιημένο περιεχόμενο**, απαριθμήστε τις αλλαγές αγνοώντας συγκεκριμένες γραμμές:
+- **Για τροποποιημένο περιεχόμενο**, παραθέστε τις αλλαγές αγνοώντας συγκεκριμένες γραμμές:
 ```bash
 git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | grep -E "^\+" | grep -v "Installed-Time"
 ```
-- **Για να εντοπίσετε διαγραμμένα αρχεία**:
+- **Για τον εντοπισμό διαγραμμένων αρχείων**:
 ```bash
 git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 ```
-- **Filter options** (`--diff-filter`) βοηθούν να περιορίσεις σε συγκεκριμένες αλλαγές όπως προστιθέμενα (`A`), διαγραμμένα (`D`) ή τροποποιημένα (`M`) αρχεία.
-- `A`: Προστιθέμενα αρχεία
+- **Οι επιλογές φίλτρου** (`--diff-filter`) βοηθούν στον περιορισμό σε συγκεκριμένες αλλαγές, όπως αρχεία που προστέθηκαν (`A`), διαγράφηκαν (`D`) ή τροποποιήθηκαν (`M`).
+- `A`: Αρχεία που προστέθηκαν
 - `C`: Αντιγραμμένα αρχεία
 - `D`: Διαγραμμένα αρχεία
 - `M`: Τροποποιημένα αρχεία
 - `R`: Μετονομασμένα αρχεία
-- `T`: Αλλαγές τύπου (π.χ. αρχείο σε symlink)
-- `U`: Unmerged αρχεία
+- `T`: Αλλαγές τύπου (π.χ. από αρχείο σε symlink)
+- `U`: Αρχεία χωρίς συγχώνευση
 - `X`: Άγνωστα αρχεία
-- `B`: Broken αρχεία
+- `B`: Κατεστραμμένα αρχεία
 
-## References
+## Αναφορές
 
-- [https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
-- [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
-- [https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
-- **Book: Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides**
-
-- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
-- [Forensic Analysis of Linux Journals](https://stuxnet999.github.io/dfir/linux-journal-forensics/)
-- [Red Hat Enterprise Linux 9 - Auditing the system](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/auditing-the-system_security-hardening)
-- [Say hi to Pike!](https://www.synacktiv.com/en/publications/say-hi-to-pike.html)
-- [strace](https://strace.io/)
-- [SQLite FTS5 Extension](https://www.sqlite.org/fts5.html)
+- [1] [Οδηγός πεδίου Malware Forensics για Linux Systems: Digital Forensics Field Guides – Κεφάλαιο 3](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
+- [2] [Επεξήγηση των Linux Logs](https://www.plesk.com/blog/featured/linux-logs-explained/)
+- [3] [Τεκμηρίωση του `git diff` – επιλογή `--diff-filter`](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
+- [4] [Red Canary – Patching for persistence: Πώς το Linux malware DripDropper μετακινείται στο cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [5] [Forensic Analysis of Linux Journals](https://stuxnet999.github.io/dfir/linux-journal-forensics/)
+- [6] [Red Hat Enterprise Linux 9 - Έλεγχος του συστήματος](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/auditing-the-system_security-hardening)
+- [7] [Say hi to Pike!](https://www.synacktiv.com/en/publications/say-hi-to-pike.html)
+- [8] [strace](https://strace.io/)
+- [9] [SQLite FTS5 Extension](https://www.sqlite.org/fts5.html)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,25 +1,25 @@
-# iOS Backup Forensics (Messaging‑centric triage)
+# iOS Backup Forensics (triage με επίκεντρο τα Messaging apps)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Αυτή η σελίδα περιγράφει πρακτικά βήματα για την ανακατασκευή και ανάλυση αντιγράφων iOS για ενδείξεις παράδοσης 0‑click exploit μέσω επισυναπτόμενων αρχείων εφαρμογών μηνυμάτων. Εστιάζει στη μετατροπή της hashed διάταξης αντιγράφων της Apple σε μονοπάτια αναγνώσιμα από άνθρωπο, και στη συνέχεια στην καταγραφή και σάρωση επισυναπτόμενων αρχείων σε κοινές εφαρμογές.
+Αυτή η σελίδα περιγράφει πρακτικά βήματα για την ανακατασκευή και ανάλυση iOS backups, με στόχο τον εντοπισμό ενδείξεων παράδοσης 0-click exploit μέσω συνημμένων σε messaging apps. Εστιάζει στη μετατροπή της hashed διάταξης backup της Apple σε paths που είναι κατανοητά από τον άνθρωπο και, στη συνέχεια, στην απαρίθμηση και σάρωση συνημμένων σε common apps.
 
-Goals:
-- Ανακατασκευή αναγνώσιμων διαδρομών από Manifest.db
-- Καταγραφή βάσεων δεδομένων μηνυμάτων (iMessage, WhatsApp, Signal, Telegram, Viber)
-- Επίλυση διαδρομών επισυναπτόμενων, εξαγωγή ενσωματωμένων αντικειμένων (PDF/Images/Fonts) και παροχή τους σε structural detectors
+Στόχοι:
+- Ανακατασκευή αναγνώσιμων paths από το Manifest.db
+- Απαρίθμηση messaging databases (iMessage, WhatsApp, Signal, Telegram, Viber)
+- Επίλυση των paths των συνημμένων, εξαγωγή embedded objects (PDF/Images/Fonts) και τροφοδότησή τους σε structural detectors
 
 
-## Reconstructing an iOS backup
+## Ανακατασκευή ενός iOS backup
 
-Τα αντίγραφα που αποθηκεύονται κάτω από MobileSync χρησιμοποιούν ονόματα αρχείων με hash που δεν είναι αναγνώσιμα από άνθρωπο. Η βάση δεδομένων Manifest.db SQLite αντιστοιχίζει κάθε αποθηκευμένο αντικείμενο στη λογική του διαδρομή.
+Τα backups που αποθηκεύονται στο MobileSync χρησιμοποιούν hashed filenames που δεν είναι αναγνώσιμα από τον άνθρωπο. Η SQLite database Manifest.db αντιστοιχίζει κάθε αποθηκευμένο object στο logical path του.
 
-High‑level procedure:
-1) Open Manifest.db and read the file records (domain, relativePath, flags, fileID/hash)
-2) Recreate the original folder hierarchy based on domain + relativePath
-3) Copy or hardlink each stored object to its reconstructed path
+Διαδικασία υψηλού επιπέδου:
+1) Άνοιγμα του Manifest.db και ανάγνωση των file records (domain, relativePath, flags, fileID/hash)
+2) Αναδημιουργία της αρχικής folder hierarchy με βάση τα domain + relativePath
+3) Αντιγραφή ή δημιουργία hardlink κάθε αποθηκευμένου object στο reconstructed path
 
-Example workflow with a tool that implements this end‑to‑end (ElegantBouncer):
+Παράδειγμα workflow με ένα tool που υλοποιεί τη διαδικασία end-to-end (ElegantBouncer):<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 # Rebuild the backup into a readable folder tree
 $ elegant-bouncer --ios-extract /path/to/backup --output /tmp/reconstructed
@@ -27,21 +27,21 @@ $ elegant-bouncer --ios-extract /path/to/backup --output /tmp/reconstructed
 ✓ iOS backup extraction completed successfully!
 ```
 Σημειώσεις:
-- Διαχειριστείτε κρυπτογραφημένα αντίγραφα ασφαλείας παρέχοντας τον κωδικό του backup στον extractor σας
-- Διατηρήστε τα αρχικά timestamps/ACLs όταν είναι δυνατόν για αποδεικτική αξία
+- Διαχειριστείτε τα encrypted backups παρέχοντας τον κωδικό πρόσβασης του backup στον extractor σας
+- Διατηρήστε, όπου είναι δυνατόν, τα αρχικά timestamps/ACLs για αποδεικτική αξία
 
-### Απόκτηση & αποκρυπτογράφηση του αντιγράφου ασφαλείας (USB / Finder / libimobiledevice)
+### Απόκτηση και αποκρυπτογράφηση του backup (USB / Finder / libimobiledevice)
 
-- Σε macOS/Finder ορίστε "Encrypt local backup" και δημιουργήστε ένα *fresh* κρυπτογραφημένο αντίγραφο ασφαλείας ώστε τα στοιχεία του Keychain να είναι παρόντα.
-- Cross‑platform: `idevicebackup2` (libimobiledevice ≥1.4.0) υποστηρίζει τις αλλαγές του πρωτοκόλλου backup στο iOS 17/18 και διορθώνει προηγούμενα σφάλματα handshake κατά την επαναφορά/backup.
+- Σε macOS/Finder ενεργοποιήστε το "Encrypt local backup" και δημιουργήστε ένα *νέο* encrypted backup, ώστε να περιλαμβάνονται τα στοιχεία του keychain.
+- Cross-platform: το `idevicebackup2` (libimobiledevice ≥1.4.0) υποστηρίζει τις αλλαγές στο backup protocol των iOS 17/18 και διορθώνει παλαιότερα σφάλματα handshake κατά το restore/backup.<sup>[[4]](#references)</sup>
 ```bash
 # Pair then create a full encrypted backup over USB
 $ idevicepair pair
 $ idevicebackup2 backup --full --encrypt --password '<pwd>' ~/backups/iphone17
 ```
-### IOC‑κατευθυνόμενη διαλογή με MVT
+### Triage βάσει IOC με το MVT
 
-Το Mobile Verification Toolkit (mvt-ios) της Amnesty πλέον λειτουργεί απευθείας σε κρυπτογραφημένα αντίγραφα ασφαλείας iTunes/Finder, αυτοματοποιώντας την αποκρυπτογράφηση και την αντιστοίχιση IOC για υποθέσεις mercenary spyware.
+Το Mobile Verification Toolkit (mvt-ios) της Amnesty λειτουργεί πλέον απευθείας με κρυπτογραφημένα iTunes/Finder backups, αυτοματοποιώντας την αποκρυπτογράφηση και την αντιστοίχιση IOC σε περιπτώσεις mercenary spyware.<sup>[[3]](#references)</sup>
 ```bash
 # Optionally extract a reusable key file
 $ mvt-ios extract-key -k /tmp/keyfile ~/backups/iphone17
@@ -52,22 +52,22 @@ $ mvt-ios decrypt-backup -p '<pwd>' -d /tmp/dec-backup ~/backups/iphone17
 # Run IOC scanning on the decrypted tree
 $ mvt-ios check-backup -i indicators.csv /tmp/dec-backup
 ```
-Τα αρχεία εξόδου τοποθετούνται κάτω από `mvt-results/` (π.χ., analytics_detected.json, safari_history_detected.json) και μπορούν να συσχετιστούν με τις διαδρομές συνημμένων που ανακτώνται παρακάτω.
+Τα outputs αποθηκεύονται στο `mvt-results/` (π.χ. `analytics_detected.json`, `safari_history_detected.json`) και μπορούν να συσχετιστούν με τα attachment paths που ανακτήθηκαν παρακάτω.
 
-### Γενική ανάλυση artifacts (iLEAPP)
+### General artifact parsing (iLEAPP)
 
-Για timeline/metadata πέρα από τα μηνύματα, εκτελέστε το iLEAPP απευθείας στο φάκελο backup (υποστηρίζει iOS 11‑17 schemas):
+Για timeline/metadata πέρα από τα messaging, εκτελέστε το iLEAPP απευθείας στον backup folder (υποστηρίζει schemas iOS 11‑17):
 ```bash
 $ python3 ileapp.py -b /tmp/dec-backup -o /tmp/ileapp-report
 ```
-## Απαρίθμηση συνημμένων εφαρμογών μηνυμάτων
+## Απαρίθμηση συνημμένων εφαρμογών ανταλλαγής μηνυμάτων
 
-Μετά την ανακατασκευή, απαρίθμησε τα συνημμένα για δημοφιλείς εφαρμογές. Το ακριβές σχήμα διαφέρει ανά εφαρμογή/έκδοση, αλλά η προσέγγιση είναι παρόμοια: εκτέλεσε ερώτημα στη βάση δεδομένων των μηνυμάτων, σύνδεσε τα μηνύματα με τα συνημμένα και επίλυσε τις διαδρομές στο δίσκο.
+Μετά την ανακατασκευή, απαριθμήστε τα συνημμένα για δημοφιλείς εφαρμογές. Το ακριβές schema διαφέρει ανά εφαρμογή/έκδοση, αλλά η προσέγγιση είναι παρόμοια: εκτελέστε query στη βάση δεδομένων ανταλλαγής μηνυμάτων, συνδέστε τα messages με τα attachments και επιλύστε τα paths στον δίσκο.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### iMessage (sms.db)
 Βασικοί πίνακες: message, attachment, message_attachment_join (MAJ), chat, chat_message_join (CMJ)
 
-Παραδείγματα ερωτημάτων:
+Παραδείγματα queries:
 ```sql
 -- List attachments with basic message linkage
 SELECT
@@ -94,10 +94,10 @@ JOIN message_attachment_join maj ON maj.message_id = m.ROWID
 JOIN attachment a ON a.ROWID = maj.attachment_id
 ORDER BY m.date DESC;
 ```
-Οι διαδρομές συνημμένων μπορεί να είναι απόλυτες ή σχετικές σε σχέση με το ανακατασκευασμένο δέντρο κάτω από Library/SMS/Attachments/.
+Οι διαδρομές των συνημμένων μπορεί να είναι απόλυτες ή σχετικές με το ανακατασκευασμένο δέντρο στο Library/SMS/Attachments/.
 
 ### WhatsApp (ChatStorage.sqlite)
-Συνήθης σύνδεση: message table ↔ media/attachment table (το όνομα διαφέρει ανά έκδοση). Εκτελέστε ερώτημα στις εγγραφές media για να βρείτε τις διαδρομές στο δίσκο. Οι πρόσφατες κατασκευές iOS εξακολουθούν να εκθέτουν το `ZMEDIALOCALPATH` στο `ZWAMEDIAITEM`.
+Συνηθισμένη σύνδεση: message table ↔ media/attachment table (η ονομασία διαφέρει ανά έκδοση). Εκτελέστε query στις γραμμές του media για να λάβετε τις paths στον δίσκο. Οι πρόσφατες εκδόσεις iOS εξακολουθούν να εκθέτουν το `ZMEDIALOCALPATH` στο `ZWAMEDIAITEM`.
 ```sql
 SELECT
 m.Z_PK                 AS message_pk,
@@ -109,19 +109,19 @@ LEFT JOIN ZWAMEDIAITEM mi ON mi.Z_PK = m.ZMEDIAITEM
 WHERE mi.ZMEDIALOCALPATH IS NOT NULL
 ORDER BY m.ZMESSAGEDATE DESC;
 ```
-Οι διαδρομές συνήθως επιλύονται κάτω από `AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media/` μέσα στο ανασυσταμένο αντίγραφο ασφαλείας.
+Τα paths συνήθως επιλύονται κάτω από το `AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media/` μέσα στο reconstructed backup.
 
 ### Signal / Telegram / Viber
-- Signal: Η βάση δεδομένων μηνυμάτων είναι κρυπτογραφημένη· ωστόσο, τα αρχεία συνημμένων που βρίσκονται στην cache στο δίσκο (και τα thumbnails) συνήθως μπορούν να σαρωθούν
-- Telegram: η cache παραμένει υπό `Library/Caches/` μέσα στο sandbox· οι εκδόσεις iOS 18 εμφανίζουν σφάλματα εκκαθάρισης της cache, οπότε μεγάλα υπολείμματα cache μέσων αποτελούν συνηθισμένες πηγές αποδεικτικών στοιχείων
-- Viber: Το Viber.sqlite περιέχει πίνακες μηνυμάτων/επισυνάψεων με αναφορές σε αρχεία στο δίσκο
+- Signal: η message DB είναι encrypted· ωστόσο, τα attachments που έχουν γίνει cached στον δίσκο (καθώς και τα thumbnails) είναι συνήθως scan-able
+- Telegram: το cache παραμένει κάτω από το `Library/Caches/` μέσα στο sandbox· τα iOS 18 builds παρουσιάζουν bugs εκκαθάρισης cache, επομένως τα μεγάλα residual media caches αποτελούν συχνές πηγές evidence<sup>[[5]](#references)</sup>
+- Viber: το Viber.sqlite περιέχει πίνακες μηνυμάτων/attachments με references που δείχνουν στον δίσκο
 
-Συμβουλή: ακόμη και όταν τα μεταδεδομένα είναι κρυπτογραφημένα, η σάρωση των καταλόγων media/cache αποκαλύπτει ακόμα κακόβουλα αντικείμενα.
+Συμβουλή: ακόμη και όταν τα metadata είναι encrypted, το scanning των media/cache directories εξακολουθεί να εντοπίζει malicious objects.
 
 
-## Σάρωση επισυνάψεων για δομικά exploits
+## Scanning attachments για structural exploits
 
-Μόλις έχετε τις διαδρομές των επισυναπτόμενων, τροφοδοτήστε τις σε structural detectors που επικυρώνουν file‑format invariants αντί για signatures. Παράδειγμα με ElegantBouncer:
+Μόλις αποκτήσετε τα paths των attachments, περάστε τα σε structural detectors που επικυρώνουν τα invariants του file format αντί για signatures. Παράδειγμα με ElegantBouncer:<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 # Recursively scan only messaging attachments under the reconstructed tree
 $ elegant-bouncer --scan --messaging /tmp/reconstructed
@@ -129,26 +129,27 @@ $ elegant-bouncer --scan --messaging /tmp/reconstructed
 ✗ THREAT in WhatsApp chat 'John Doe': suspicious_document.pdf → FORCEDENTRY (JBIG2)
 ✗ THREAT in iMessage: photo.webp → BLASTPASS (VP8L)
 ```
-Οι ανιχνεύσεις που καλύπτονται από δομικούς κανόνες περιλαμβάνουν:
-- PDF/JBIG2 FORCEDENTRY (CVE‑2021‑30860): αδύνατες καταστάσεις λεξικού JBIG2
-- WebP/VP8L BLASTPASS (CVE‑2023‑4863): υπερβολικά μεγάλες κατασκευές πινάκων Huffman
-- TrueType TRIANGULATION (CVE‑2023‑41990): μη τεκμηριωμένα bytecode opcodes
-- DNG/TIFF CVE‑2025‑43300: ασυμφωνίες μεταξύ μεταδεδομένων και στοιχείων ροής
+Οι ανιχνεύσεις που καλύπτονται από structural rules περιλαμβάνουν:<sup>[[1]](#references)[[2]](#references)</sup>
+- PDF/JBIG2 FORCEDENTRY (CVE‑2021‑30860): αδύνατες καταστάσεις λεξικών JBIG2
+- WebP/VP8L BLASTPASS (CVE‑2023‑4863): υπερμεγέθεις κατασκευές πινάκων Huffman
+- TrueType TRIANGULATION (CVE‑2023‑41990): μη τεκμηριωμένοι κωδικοί bytecode
+- DNG/TIFF CVE‑2025‑43300: ασυμφωνίες μεταξύ μεταδεδομένων και στοιχείων stream
 
 
-## Validation, caveats, and false positives
+## Επικύρωση, επισημάνσεις και false positives
 
-- Time conversions: iMessage stores dates in Apple epochs/units on some versions; convert appropriately during reporting
-- Schema drift: app SQLite schemas change over time; confirm table/column names per device build
-- Recursive extraction: PDFs may embed JBIG2 streams and fonts; extract and scan inner objects
-- False positives: structural heuristics are conservative but can flag rare malformed yet benign media
+- Μετατροπές χρόνου: το iMessage αποθηκεύει ημερομηνίες σε Apple epochs/μονάδες σε ορισμένες εκδόσεις· πραγματοποιήστε την κατάλληλη μετατροπή κατά την αναφορά
+- Schema drift: τα SQLite schemas των εφαρμογών αλλάζουν με την πάροδο του χρόνου· επιβεβαιώστε τα ονόματα των πινάκων/στηλών ανά build συσκευής
+- Recursive extraction: τα PDF ενδέχεται να ενσωματώνουν streams JBIG2 και fonts· εξαγάγετε και σαρώστε τα εσωτερικά objects
+- False positives: τα structural heuristics είναι συντηρητικά, αλλά ενδέχεται να επισημάνουν σπάνια, κατεστραμμένα αλλά καλοήθη media<sup>[[1]](#references)[[2]](#references)</sup>
 
 
-## References
+## Αναφορές
 
-- [ELEGANTBOUNCER: When You Can't Get the Samples but Still Need to Catch the Threat](https://www.msuiche.com/posts/elegantbouncer-when-you-cant-get-the-samples-but-still-need-to-catch-the-threat/)
-- [ElegantBouncer project (GitHub)](https://github.com/msuiche/elegant-bouncer)
-- [MVT iOS backup workflow](https://docs.mvt.re/en/latest/ios/backup/check/)
-- [libimobiledevice 1.4.0 release notes](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
+- [1] [ELEGANTBOUNCER: When You Can't Get the Samples but Still Need to Catch the Threat](https://www.msuiche.com/posts/elegantbouncer-when-you-cant-get-the-samples-but-still-need-to-catch-the-threat/)
+- [2] [ElegantBouncer project (GitHub)](https://github.com/msuiche/elegant-bouncer)
+- [3] [MVT iOS backup workflow](https://docs.mvt.re/en/latest/ios/backup/check/)
+- [4] [libimobiledevice 1.4.0 release notes](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
+- [5] [Update 11.2 has broken cache cleanup on iOS 18.0.1 (Telegram Bug Tracker)](https://bugs.telegram.org/c/44361)
 
 {{#include ../../banners/hacktricks-training.md}}

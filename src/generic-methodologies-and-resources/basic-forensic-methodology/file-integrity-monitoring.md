@@ -1,55 +1,55 @@
-# File Integrity Monitoring
+# Παρακολούθηση ακεραιότητας αρχείων
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Βάση αναφοράς
+## Baseline
 
-Μια baseline συνίσταται στην λήψη ενός snapshot συγκεκριμένων τμημάτων ενός συστήματος για να το **συγκρίνετε με μια μελλοντική κατάσταση ώστε να αναδείξετε αλλαγές**.
+Ένα baseline αποτελείται από τη λήψη ενός στιγμιότυπου συγκεκριμένων τμημάτων ενός συστήματος, ώστε να **συγκριθεί με μια μελλοντική κατάσταση και να επισημανθούν οι αλλαγές**.
 
-Για παράδειγμα, μπορείτε να υπολογίσετε και να αποθηκεύσετε το hash κάθε αρχείου του filesystem για να μπορείτε να βρείτε ποια αρχεία τροποποιήθηκαν.\
-Αυτό μπορεί επίσης να γίνει με τους χρήστες που έχουν δημιουργηθεί, τις διεργασίες που τρέχουν, τις υπηρεσίες που τρέχουν και οποιοδήποτε άλλο στοιχείο που δεν θα έπρεπε να αλλάζει πολύ, ή καθόλου.
+Για παράδειγμα, μπορείτε να υπολογίσετε και να αποθηκεύσετε το hash κάθε αρχείου του filesystem, ώστε να μπορείτε να εντοπίσετε ποια αρχεία τροποποιήθηκαν.\
+Αυτό μπορεί επίσης να γίνει με τους λογαριασμούς χρηστών που δημιουργήθηκαν, τις διεργασίες που εκτελούνται, τις υπηρεσίες που εκτελούνται και οτιδήποτε άλλο δεν θα έπρεπε να αλλάζει σημαντικά ή καθόλου.
 
-Μια **χρήσιμη baseline** συνήθως αποθηκεύει περισσότερα από έναν απλό digest: δικαιώματα, κάτοχο, ομάδα, timestamps, inode, symlink target, ACLs, και επιλεγμένα extended attributes αξίζουν επίσης παρακολούθησης. Από την σκοπιά του threat hunting, αυτό βοηθά στον εντοπισμό **tampering μόνο στα δικαιώματα**, **ατομικής αντικατάστασης αρχείων (atomic file replacement)**, και **persistence μέσω τροποποιημένων service/unit files** ακόμη και όταν το content hash δεν είναι το πρώτο που αλλάζει.
+Ένα **χρήσιμο baseline** συνήθως αποθηκεύει περισσότερα από ένα απλό digest: τα permissions, τον owner, το group, τα timestamps, το inode, τον στόχο του symlink, τα ACLs και επιλεγμένα extended attributes αξίζει επίσης να παρακολουθούνται. Από την οπτική του hunting επιτιθέμενων, αυτό βοηθά στον εντοπισμό **παραποίησης μόνο των permissions**, **atomic αντικατάστασης αρχείων** και **persistence μέσω τροποποιημένων αρχείων service/unit**, ακόμη και όταν το hash του περιεχομένου δεν είναι το πρώτο στοιχείο που αλλάζει.
 
-### File Integrity Monitoring
+### Παρακολούθηση ακεραιότητας αρχείων
 
-File Integrity Monitoring (FIM) είναι μια κρίσιμη τεχνική ασφάλειας που προστατεύει IT περιβάλλοντα και δεδομένα παρακολουθώντας αλλαγές σε αρχεία. Συνήθως συνδυάζει:
+Το File Integrity Monitoring (FIM) είναι μια κρίσιμη τεχνική ασφάλειας που προστατεύει τα IT environments και τα δεδομένα παρακολουθώντας τις αλλαγές σε αρχεία. Συνήθως συνδυάζει:
 
-1. **Baseline comparison:** Αποθήκευση metadata και κρυπτογραφικών checksums (προτιμήστε `SHA-256` ή καλύτερο) για μελλοντικές συγκρίσεις.
-2. **Real-time notifications:** Subscribe σε OS-native file events για να γνωρίζετε **ποιο αρχείο άλλαξε, πότε, και ιδανικά ποια διεργασία/ποιος χρήστης το άγγιξε**.
-3. **Periodic re-scan:** Επανακατασκευή εμπιστοσύνης μετά από reboots, dropped events, agent outages, ή σκόπιμη anti-forensic δραστηριότητα.
+1. **Σύγκριση με baseline:** Αποθήκευση metadata και cryptographic checksums (προτιμήστε `SHA-256` ή καλύτερο) για μελλοντικές συγκρίσεις.
+2. **Ειδοποιήσεις σε πραγματικό χρόνο:** Εγγραφή σε OS-native file events, ώστε να γνωρίζετε **ποιο αρχείο άλλαξε, πότε και, ιδανικά, ποια διεργασία/χρήστης το προσπέλασε**.
+3. **Περιοδικό re-scan:** Επαναδημιουργία της αξιοπιστίας μετά από reboot, χαμένα events, διακοπές λειτουργίας agent ή σκόπιμη anti-forensic δραστηριότητα.
 
-Για threat hunting, το FIM είναι συνήθως πιο χρήσιμο όταν εστιάζει σε **υψηλής αξίας διαδρομές** όπως:
+Για threat hunting, το FIM είναι συνήθως πιο χρήσιμο όταν επικεντρώνεται σε **διαδρομές υψηλής αξίας**, όπως:
 
 - `/etc`, `/boot`, `/usr/local/bin`, `/usr/local/sbin`
-- `systemd` units, cron locations, SSH material, PAM modules, web roots
-- Windows persistence locations, service binaries, scheduled task files, startup folders
-- Container writable layers and bind-mounted secrets/configuration
+- Μονάδες `systemd`, τοποθεσίες cron, υλικό SSH, PAM modules, web roots
+- Τοποθεσίες persistence στα Windows, binaries υπηρεσιών, αρχεία scheduled tasks, startup folders
+- Writable layers containers και bind-mounted secrets/configuration
 
-## Real-Time Backends & Blind Spots
+## Backends πραγματικού χρόνου και τυφλά σημεία
 
 ### Linux
 
-Το backend συλλογής έχει σημασία:
+Το collection backend έχει σημασία:<sup>[[2]](#references)</sup>
 
-- **`inotify` / `fsnotify`**: εύκολο και κοινό, αλλά τα όρια των watch μπορούν να εξαντληθούν και μερικές edge περιπτώσεις χάνουν.
-- **`auditd` / audit framework**: καλύτερο όταν χρειάζεστε **ποιος άλλαξε το αρχείο** (`auid`, process, pid, executable).
-- **`eBPF` / `kprobes`**: νεότερες επιλογές που χρησιμοποιούνται από σύγχρονα FIM stacks για να εμπλουτίζουν τα events και να μειώσουν κάποιο από το λειτουργικό πόνο των απλών `inotify` deployments.
+- **`inotify` / `fsnotify`**: εύκολα και συνηθισμένα, αλλά τα όρια παρακολούθησης μπορούν να εξαντληθούν και ορισμένες edge cases να μην εντοπιστούν.
+- **`auditd` / audit framework**: καλύτερο όταν χρειάζεστε να γνωρίζετε **ποιος άλλαξε το αρχείο** (`auid`, process, pid, executable).
+- **`eBPF` / `kprobes`**: νεότερες επιλογές που χρησιμοποιούνται από σύγχρονα FIM stacks για εμπλουτισμό των events και μείωση ορισμένων λειτουργικών προβλημάτων των απλών deployments με `inotify`.
 
-Μερικά πρακτικά προβλήματα:
+Ορισμένες πρακτικές παγίδες:<sup>[[1]](#references)</sup>
 
-- Αν ένα πρόγραμμα **αντικαθιστά** ένα αρχείο με `write temp -> rename`, η παρακολούθηση του ίδιου του αρχείου μπορεί να σταματήσει να είναι χρήσιμη. **Παρακολουθήστε τον γονικό κατάλογο**, όχι μόνο το αρχείο.
-- `inotify`-based collectors μπορούν να χάσουν ή να υποβαθμιστούν σε **τεράστια δέντρα καταλόγων**, **δραστηριότητα με hard-link**, ή μετά από ένα **διαγραμμένο watched αρχείο**.
-- Πολύ μεγάλα recursive watch sets μπορούν να αποτύχουν σιωπηλά αν τα `fs.inotify.max_user_watches`, `max_user_instances`, ή `max_queued_events` είναι πολύ χαμηλά.
-- Network filesystems είναι συνήθως κακοί στόχοι για FIM όταν θέλετε low-noise monitoring.
+- Αν ένα πρόγραμμα **αντικαταστήσει** ένα αρχείο με `write temp -> rename`, η παρακολούθηση του ίδιου του αρχείου μπορεί να πάψει να είναι χρήσιμη. **Παρακολουθείτε τον γονικό κατάλογο**, όχι μόνο το αρχείο.
+- Οι collectors που βασίζονται στο `inotify` μπορεί να χάσουν events ή να υποβαθμιστούν σε **τεράστια directory trees**, σε **δραστηριότητα hard links** ή μετά τη **διαγραφή ενός παρακολουθούμενου αρχείου**.
+- Πολύ μεγάλα recursive watch sets μπορεί να αποτύχουν σιωπηρά αν τα `fs.inotify.max_user_watches`, `max_user_instances` ή `max_queued_events` είναι πολύ χαμηλά.
+- Τα network filesystems είναι συνήθως κακοί στόχοι FIM για monitoring με χαμηλό θόρυβο.
 
-Example baseline + verification with AIDE:
+Παράδειγμα baseline και verification με AIDE:
 ```bash
 aide --init
 mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
 aide --check
 ```
-Παράδειγμα διαμόρφωσης FIM του `osquery` που επικεντρώνεται σε attacker persistence paths:
+Παράδειγμα διαμόρφωσης `osquery` FIM με έμφαση σε διαδρομές persistence των attackers:<sup>[[1]](#references)</sup>
 ```json
 {
 "schedule": {
@@ -66,41 +66,41 @@ aide --check
 }
 }
 ```
-If you need **process attribution** instead of only path-level changes, prefer audit-backed telemetry such as `osquery` `process_file_events` or Wazuh `whodata` mode.
+Αν χρειάζεστε **process attribution** αντί μόνο για αλλαγές σε επίπεδο διαδρομής, προτιμήστε telemetry με υποστήριξη `audit`, όπως `osquery` `process_file_events` ή τη λειτουργία `whodata` του Wazuh.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ### Windows
 
-Στα Windows, το FIM είναι πιο αποτελεσματικό όταν συνδυάζετε τα **change journals** με **high-signal process/file telemetry**:
+Στα Windows, το FIM είναι ισχυρότερο όταν συνδυάζετε **change journals** με **high-signal process/file telemetry**:
 
-- **NTFS USN Journal** παρέχει ένα μόνιμο ημερολόγιο ανά τόμο για τις αλλαγές αρχείων.
-- **Sysmon Event ID 11** είναι χρήσιμο για δημιουργία/επικάλυψη αρχείων.
-- **Sysmon Event ID 2** βοηθά στον εντοπισμό του **timestomping**.
-- **Sysmon Event ID 15** είναι χρήσιμο για **named alternate data streams (ADS)** όπως `Zone.Identifier` ή κρυφά payload streams.
+- Το **NTFS USN Journal** παρέχει ένα persistent per-volume log των αλλαγών αρχείων.
+- Το **Sysmon Event ID 11** είναι χρήσιμο για δημιουργία/αντικατάσταση αρχείων.
+- Το **Sysmon Event ID 2** βοηθά στον εντοπισμό **timestomping**.
+- Το **Sysmon Event ID 15** είναι χρήσιμο για **named alternate data streams (ADS)**, όπως το `Zone.Identifier` ή hidden payload streams.
 
-Γρήγορα παραδείγματα triage USN:
+Παραδείγματα γρήγορου USN triage:
 ```cmd
 fsutil usn queryjournal C:
 fsutil usn readjournal C:
 fsutil usn readdata C:\Windows\Temp\sample.bin
 ```
-Για πιο αναλυτικές αντι-εγκληματολογικές ιδέες σχετικά με **timestamp manipulation**, **ADS abuse**, και **USN tampering**, δείτε [Anti-Forensic Techniques](anti-forensic-techniques.md).
+Για βαθύτερες anti-forensic ιδέες γύρω από το **timestamp manipulation**, το **ADS abuse** και το **USN tampering**, δείτε το [Anti-Forensic Techniques](anti-forensic-techniques.md).
 
 ### Containers
 
-Το Container FIM συχνά χάνει την πραγματική διαδρομή εγγραφής. Με το Docker `overlay2`, οι αλλαγές δεσμεύονται στο container's **writable upper layer** (`upperdir`/`diff`), όχι στα read-only image layers. Επομένως:
+Το Container FIM συχνά δεν εντοπίζει το πραγματικό write path. Με το Docker `overlay2`, οι αλλαγές καταγράφονται στο **writable upper layer** (`upperdir`/`diff`) του container και όχι στα read-only image layers. Επομένως:
 
-- Η παρακολούθηση μόνο μονοπατιών από το **εσωτερικό** ενός βραχύβιου container μπορεί να μην εντοπίσει αλλαγές μετά την αναδημιουργία του container.
-- Συχνά είναι πιο χρήσιμη η παρακολούθηση της διαδρομής στο host που στηρίζει το writable layer ή του αντίστοιχου bind-mounted volume.
-- Το FIM σε image layers διαφέρει από το FIM στο filesystem που τρέχει μέσα στο container.
+- Η παρακολούθηση μόνο των paths **μέσα** σε ένα short-lived container μπορεί να μην εντοπίσει αλλαγές μετά την αναδημιουργία του container.
+- Η παρακολούθηση του **host path** που υποστηρίζει το writable layer ή του σχετικού bind-mounted volume είναι συχνά πιο χρήσιμη.
+- Το FIM στα image layers διαφέρει από το FIM στο filesystem του running container.
 
-## Attacker-Oriented Hunting Notes
+## Σημειώσεις Hunting με Προσανατολισμό στον Attacker
 
-- Παρακολουθήστε τις **service definitions** και τους **task schedulers** με την ίδια προσοχή που δίνετε στα binaries. Οι επιτιθέμενοι συχνά αποκτούν persistence τροποποιώντας ένα unit file, μια cron εγγραφή ή ένα task XML αντί να κάνουν patch το `/bin/sshd`.
-- Ένας content hash από μόνος του δεν αρκεί. Πολλές παραβιάσεις εμφανίζονται αρχικά ως **owner/mode/xattr/ACL drift**.
-- Αν υποπτεύεστε ώριμη εισβολή, κάντε και τα δύο: **real-time FIM** για φρέσκια δραστηριότητα και μια **cold baseline comparison** από αξιόπιστα μέσα.
-- Αν ο επιτιθέμενος έχει root ή εκτέλεση στον kernel, θεωρήστε ότι ο FIM agent, η βάση δεδομένων του και ακόμη και η πηγή γεγονότων μπορεί να έχουν παραποιηθεί. Αποθηκεύετε logs και baselines απομακρυσμένα ή σε read-only μέσα όποτε είναι δυνατό.
+- Παρακολουθείτε τα **service definitions** και τους **task schedulers** με την ίδια προσοχή όπως τα binaries. Οι Attackers συχνά επιτυγχάνουν persistence τροποποιώντας ένα unit file, μια cron entry ή ένα task XML, αντί να κάνουν patch το `/bin/sshd`.
+- Ένα content hash από μόνο του δεν επαρκεί. Πολλά compromises εμφανίζονται αρχικά ως **owner/mode/xattr/ACL drift**.
+- Αν υποψιάζεστε mature intrusion, κάντε και τα δύο: **real-time FIM** για fresh activity και μια **cold baseline comparison** από trusted media.
+- Αν ο attacker έχει root ή kernel execution, θεωρήστε ότι ο FIM agent, η database του, ακόμη και το event source μπορούν να παραποιηθούν. Αποθηκεύετε τα logs και τα baselines remotely ή σε read-only media όποτε είναι δυνατό.
 
-## Tools
+## Εργαλεία
 
 - [AIDE](https://aide.github.io/)
 - [osquery](https://osquery.io/)
@@ -108,9 +108,10 @@ fsutil usn readdata C:\Windows\Temp\sample.bin
 - [Elastic Auditbeat File Integrity Module](https://www.elastic.co/docs/reference/beats/auditbeat/auditbeat-module-file_integrity)
 - [Sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
 
-## References
+## Αναφορές
 
-- [https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/](https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/)
-- [https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case](https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case)
+- [1] [File Integrity Monitoring with osquery](https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/)
+- [2] [Tracing Linux: A file integrity monitoring use case (Elastic)](https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case)
+- [3] [Wazuh File Integrity Monitoring (Syscheck and whodata mode)](https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html)
 
 {{#include ../../banners/hacktricks-training.md}}

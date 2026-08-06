@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Αν έχετε pcap με δεδομένα που **εξάγονται από το DNSCat** (χωρίς χρήση κρυπτογράφησης), μπορείτε να βρείτε το εξαγόμενο περιεχόμενο.
+Αν έχετε ένα pcap με δεδομένα που **έχουν εξαχθεί μέσω DNSCat** (χωρίς χρήση encryption), μπορείτε να βρείτε το περιεχόμενο που εξάχθηκε.
 
-Πρέπει μόνο να γνωρίζετε ότι τα **πρώτα 9 bytes** δεν είναι πραγματικά δεδομένα αλλά σχετίζονται με την **επικοινωνία C\&C**:
+Το μόνο που χρειάζεται να γνωρίζετε είναι ότι τα **πρώτα 9 bytes** δεν αποτελούν πραγματικά δεδομένα, αλλά σχετίζονται με την **επικοινωνία C\&C**:<sup>[[1]](#references)</sup>
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -26,8 +26,12 @@ last = qry
 Για περισσότερες πληροφορίες: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)\
 [https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
 
-Υπάρχει ένα σενάριο που λειτουργεί με Python3: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
+Υπάρχει ένα script που λειτουργεί με Python3: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```
+## Αναφορές
+
+- [1] [DNSCat2 pcap forensics writeup – BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
+
 {{#include ../../../banners/hacktricks-training.md}}

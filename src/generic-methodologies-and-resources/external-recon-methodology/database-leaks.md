@@ -2,30 +2,31 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Μηχανές αναζήτησης παραβιάσεων δεδομένων
+## Μηχανές αναζήτησης Data Breach
 
 - [greynoise](https://viz.greynoise.io/) - Αναζήτηση για IPs, Tags, CVEs, vpn, dns...
-- [Dehashed](https://www.dehashed.com/) - Μπορείς να αναζητήσεις το email σου αν έχει leak σε κάποιες βάσεις δεδομένων.
-- [HaveIbeenPwned?](https://haveibeenpwned.com/) - Έλεγξε αν η διεύθυνση email σου βρίσκεται σε παραβίαση δεδομένων
-- [ScamSearch](https://scamsearch.io/) - Αναζήτηση για να βρεις τηλέφωνο, email, προφίλ αν είναι scammer.
-- [Intelligence X](https://intelx.io/) - Intelligence X is a search engine and data archive. · The search works with selectors, i.e. specific search terms such as email addresses, domains, URLs, IPs...
-- [spycloud](https://portal.spycloud.com/endpoint/enriched-stats/[YOUR-MAIL]) - Βάλε το mail σου στο YOUR-MAIL.
+- [Dehashed](https://www.dehashed.com/) - Μπορείτε να αναζητήσετε το email σας για να δείτε αν έχει γίνει leak σε κάποια database.
+- [HaveIbeenPwned?](https://haveibeenpwned.com/) - Ελέγξτε αν η διεύθυνση email σας περιλαμβάνεται σε data breach
+- [ScamSearch](https://scamsearch.io/) - Αναζήτηση για phone, email, profile, ώστε να διαπιστώσετε αν κάποιος είναι scammer.
+- [Intelligence X](https://intelx.io/) - Το Intelligence X είναι μια μηχανή αναζήτησης και data archive. · Η αναζήτηση λειτουργεί με selectors, δηλαδή συγκεκριμένους όρους αναζήτησης, όπως διευθύνσεις email, domains, URLs, IPs...
+- [spycloud](https://portal.spycloud.com/endpoint/enriched-stats/[YOUR-MAIL]) - Τοποθετήστε το email σας στο YOUR-MAIL.
 - [weleakinfo](https://weleakinfo.io/) - We Leak Info - Leaked Dehashed Databases, αναζήτηση για leaks.
-- [breachdirectory](https://breachdirectory.org/) - ΕΛΕΓΞΕ ΑΝ ΤΟ email OR USERNAME ΣΟΥ ΕΧΕΙ ΠΑΡΑΒΙΑΣΤΕΙ
-- [leakcheck](https://leakcheck.io/) - Μάθε αν τα credentials σου έχουν παραβιαστεί
-- [Findemail.io](https://findemail.io/) - Βρες διευθύνσεις email για συγκεκριμένη εταιρεία.
-- [LibraryOfLeaks](https://search.libraryofleaks.org) - Αναζήτηση για έγγραφα leak, εταιρείες, άτομα, βάσεις δεδομένων και άλλα
-- [LeakRadar](https://leakradar.io/) - Instant search across 2 B+ plain-text info-stealer credentials; email, domain, metadata queries, monitoring & API
-- [InfoStealers](https://infostealers.info/en/info) - Indexes darknet-exposed infostealer logs and makes them searchable and actionable for security teams, investigators, researchers, and digital forensics professionals.
-- [Leak-Lookup](https://leak-lookup.com/) - Μηχανή αναζήτησης data breach με πάνω από 3 billion εγγραφές από 3000+ βάσεις δεδομένων.
-- [BreachDirectory](https://breachdirectory.org/) - Έλεγξε αν τα credentials σου έχουν παραβιαστεί σε data breaches.
+- [breachdirectory](https://breachdirectory.org/) - ΕΛΕΓΞΤΕ ΑΝ ΤΟ EMAIL Ή ΤΟ USERNAME ΣΑΣ ΕΧΕΙ COMPROMISED
+- [leakcheck](https://leakcheck.io/) - Μάθετε αν τα credentials σας έχουν compromised
+- [Findemail.io](https://findemail.io/) - Βρείτε διευθύνσεις email για μια δεδομένη company.
+- [LibraryOfLeaks](https://search.libraryofleaks.org) - Αναζήτηση για leak documents, companies, people, database και άλλα
+- [LeakRadar](https://leakradar.io/) - Άμεση αναζήτηση σε περισσότερα από 2 B+ plain-text info-stealer credentials· email, domain, metadata queries, monitoring και API
+- [InfoStealers](https://infostealers.info/en/info) - Ευρετηριάζει infostealer logs που έχουν εκτεθεί στο darknet και τα καθιστά searchable και actionable για security teams, investigators, researchers και digital forensics professionals.
+- [Leak-Lookup](https://leak-lookup.com/) - Μηχανή αναζήτησης για data breaches με περισσότερα από 3 δισεκατομμύρια records από 3000+ databases.
+- [BreachDirectory](https://breachdirectory.org/) - Ελέγξτε αν τα credentials σας έχουν compromised σε data breaches.
 - [Scylla.so](https://scylla.so/) - Community-driven database breach search engine.
-- [Leaked.domains](https://leaked.domains/) - Αναζήτηση για leaked credentials και δεδομένα σχετικά με domain.
-- [WhiteIntel](https://whiteintel.io/) - Dark web data leak search engine για threat intelligence.
-- [PSBDMP](https://psbdmp.ws/) - Pastebin dump search and monitoring platform.
+- [Leaked.domains](https://leaked.domains/) - Αναζήτηση για leaked credentials και data που σχετίζονται με domains.
+- [WhiteIntel](https://whiteintel.io/) - Μηχανή αναζήτησης για data leaks στο dark web, για threat intelligence.
+- [PSBDMP](https://psbdmp.ws/) - Pastebin dump search και monitoring platform.
 
-## Εργαλεία για την καταγραφή data leaks
 
-- [Leaker](https://github.com/vflame6/leaker) - Passive leak enumeration CLI tool που αναζητά ταυτόχρονα σε 10 breach databases.
+## Tools για την απαρίθμηση data leaks
+
+- [Leaker](https://github.com/vflame6/leaker) - Passive leak enumeration CLI tool που πραγματοποιεί ταυτόχρονη αναζήτηση σε 10 breach databases.
 
 {{#include ../../banners/hacktricks-training.md}}
