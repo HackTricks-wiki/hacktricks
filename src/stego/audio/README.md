@@ -79,7 +79,7 @@ Other audio-hiding families you may encounter:
 
 ### WavSteg
 
-From: https://github.com/ragibson/Steganography#WavSteg
+From: https://github.com/ragibson/Steganography#WavSteg<sup>[[2]](#references)</sup>
 
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
@@ -104,5 +104,6 @@ Online decoders:
 ## References
 
 - [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [2] [ragibson/Steganography](https://github.com/ragibson/Steganography#WavSteg)
 
 {{#include ../../banners/hacktricks-training.md}}
