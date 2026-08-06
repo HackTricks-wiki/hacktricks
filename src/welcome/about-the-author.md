@@ -2,13 +2,12 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Hello!!
+### नमस्ते!!
 
-अन्य शोधकर्ताओं की techniques के लिए credits मूल authors के हैं (see references)। ज्ञान साझा करके internet security को बेहतर बनाने वाले सभी लोगों को kudos।
+अन्य researchers की techniques का श्रेय मूल authors को जाता है (references देखें)। Internet security को बेहतर बनाने के लिए knowledge साझा करने वाले सभी लोगों को धन्यवाद।
 
-HackTricks **cyber-security** पर एक educational wiki है, जिसे Carlos ने hundreds of collaborators के साथ lead किया है। यह community द्वारा जितना संभव हो सके अपडेट की जाने वाली **hacking tricks** का एक **huge collection** है। अगर आपको कुछ missing या outdated मिले, तो कृपया [**Hacktricks GitHub**](https://github.com/hacktricks-wiki/hacktricks) पर एक **Pull Request** भेजें!
+HackTricks एक educational wiki है, जो Carlos के नेतृत्व में **cyber-security** पर केंद्रित है और इसमें सैकड़ों collaborators हैं। यह **hacking tricks का एक विशाल संग्रह** है, जिसे community यथासंभव अपडेट करती है। यदि आपको कुछ missing या outdated मिले, तो कृपया [**Hacktricks GitHub**](https://github.com/hacktricks-wiki/hacktricks) पर एक **Pull Request** भेजें!
 
-HackTricks एक ऐसा wiki भी है जहाँ **researchers अपने latest findings share करते हैं**, इसलिए latest hacking techniques के साथ up to date रहने के लिए यह एक great place है।
-
+HackTricks एक ऐसी wiki भी है जहाँ **researchers अपनी latest findings साझा करते हैं**, इसलिए यह latest hacking techniques से updated रहने के लिए एक बेहतरीन स्थान है।
 
 {{#include ../banners/hacktricks-training.md}}

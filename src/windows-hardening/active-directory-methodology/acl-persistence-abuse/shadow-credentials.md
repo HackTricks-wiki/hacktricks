@@ -2,62 +2,62 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#3f17" id="3f17"></a>
+## परिचय <a href="#3f17" id="3f17"></a>
 
-**इस तकनीक के बारे में [सभी जानकारी के लिए मूल पोस्ट देखें](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)।**
+**इस technique के बारे में [सभी जानकारी के लिए original post देखें](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)।**<sup>[[1]](#references)</sup>
 
-**सारांश** के रूप में: यदि आप एक उपयोगकर्ता/कंप्यूटर की **msDS-KeyCredentialLink** प्रॉपर्टी में लिख सकते हैं, तो आप उस ऑब्जेक्ट का **NT हैश** प्राप्त कर सकते हैं।
+**सारांश** के रूप में: यदि आप किसी user/computer की **msDS-KeyCredentialLink** property में लिख सकते हैं, तो आप **उस object का NT hash** प्राप्त कर सकते हैं।<sup>[[1]](#references)</sup>
 
-पोस्ट में, एक विधि का विवरण दिया गया है जो **सार्वजनिक-निजी कुंजी प्रमाणीकरण क्रेडेंशियल्स** सेट करने के लिए है ताकि एक अद्वितीय **सेवा टिकट** प्राप्त किया जा सके जिसमें लक्षित का NTLM हैश शामिल हो। इस प्रक्रिया में Privilege Attribute Certificate (PAC) के भीतर एन्क्रिप्टेड NTLM_SUPPLEMENTAL_CREDENTIAL शामिल है, जिसे डिक्रिप्ट किया जा सकता है।
+इस post में **public-private key authentication credentials** स्थापित करने की एक method बताई गई है, जिससे एक unique **Service Ticket** प्राप्त किया जा सकता है जिसमें target का NTLM hash शामिल होता है। इस process में Privilege Attribute Certificate (PAC) के भीतर मौजूद encrypted NTLM_SUPPLEMENTAL_CREDENTIAL शामिल होता है, जिसे decrypt किया जा सकता है।<sup>[[1]](#references)</sup>
 
-### Requirements
+### आवश्यकताएँ
 
-इस तकनीक को लागू करने के लिए, कुछ शर्तें पूरी होनी चाहिए:
+इस technique को लागू करने के लिए कुछ conditions पूरी होनी चाहिए:<sup>[[1]](#references)</sup>
 
-- एक न्यूनतम Windows Server 2016 डोमेन कंट्रोलर की आवश्यकता है।
-- डोमेन कंट्रोलर पर एक सर्वर प्रमाणीकरण डिजिटल सर्टिफिकेट स्थापित होना चाहिए।
-- Active Directory को Windows Server 2016 फ़ंक्शनल लेवल पर होना चाहिए।
-- लक्षित ऑब्जेक्ट की msDS-KeyCredentialLink एट्रिब्यूट को संशोधित करने के लिए एक डेलीगेटेड अधिकारों वाला खाता आवश्यक है।
+- कम से कम एक Windows Server 2016 Domain Controller आवश्यक है।
+- Domain Controller पर server authentication digital certificate installed होना चाहिए।
+- Active Directory का Windows Server 2016 Functional Level पर होना आवश्यक है।
+- target object के msDS-KeyCredentialLink attribute को modify करने के लिए delegated rights वाला account आवश्यक है।
 
-## Abuse
+## दुरुपयोग
 
-कंप्यूटर ऑब्जेक्ट के लिए की ट्रस्ट का दुरुपयोग टिकट ग्रांटिंग टिकट (TGT) और NTLM हैश प्राप्त करने से परे कदमों को शामिल करता है। विकल्पों में शामिल हैं:
+Computer objects के लिए Key Trust के abuse में Ticket Granting Ticket (TGT) और NTLM hash प्राप्त करने के अलावा भी कुछ steps शामिल होते हैं। Options में शामिल हैं:<sup>[[1]](#references)</sup>
 
-1. लक्षित होस्ट पर विशेषाधिकार प्राप्त उपयोगकर्ताओं के रूप में कार्य करने के लिए एक **RC4 सिल्वर टिकट** बनाना।
-2. **विशेषाधिकार प्राप्त उपयोगकर्ताओं** के अनुकरण के लिए **S4U2Self** के साथ TGT का उपयोग करना, जिसके लिए सेवा नाम में सेवा वर्ग जोड़ने के लिए सेवा टिकट में परिवर्तन की आवश्यकता होती है।
+1. Intended host पर privileged users के रूप में कार्य करने के लिए **RC4 silver ticket** बनाना।
+2. **privileged users** का impersonation करने के लिए TGT को **S4U2Self** के साथ उपयोग करना; इसके लिए service name में service class जोड़ने हेतु Service Ticket में modifications आवश्यक होते हैं।
 
-की ट्रस्ट के दुरुपयोग का एक महत्वपूर्ण लाभ यह है कि यह हमलावर द्वारा उत्पन्न निजी कुंजी तक सीमित है, संभावित रूप से कमजोर खातों को डेलीगेट करने से बचता है और एक कंप्यूटर खाता बनाने की आवश्यकता नहीं होती, जिसे हटाना चुनौतीपूर्ण हो सकता है।
+Key Trust abuse का एक महत्वपूर्ण advantage यह है कि यह केवल attacker-generated private key तक सीमित रहता है। इससे potentially vulnerable accounts को delegation देने की आवश्यकता नहीं होती और computer account बनाने की भी जरूरत नहीं पड़ती, जिसे बाद में remove करना challenging हो सकता है।<sup>[[1]](#references)</sup>
 
 ## Tools
 
 ### [**Whisker**](https://github.com/eladshamir/Whisker)
 
-यह इस हमले के लिए C# इंटरफेस प्रदान करने वाले DSInternals पर आधारित है। Whisker और इसके Python समकक्ष, **pyWhisker**, Active Directory खातों पर नियंत्रण प्राप्त करने के लिए `msDS-KeyCredentialLink` एट्रिब्यूट में हेरफेर करने की अनुमति देते हैं। ये उपकरण लक्षित ऑब्जेक्ट से कुंजी क्रेडेंशियल्स को जोड़ने, सूचीबद्ध करने, हटाने और साफ़ करने जैसी विभिन्न ऑपरेशनों का समर्थन करते हैं।
+यह DSInternals पर आधारित है और इस attack के लिए C# interface प्रदान करता है। Whisker और इसका Python counterpart, **pyWhisker**, Active Directory accounts पर control प्राप्त करने के लिए `msDS-KeyCredentialLink` attribute में manipulation की सुविधा देते हैं। ये tools target object से key credentials को add, list, remove और clear करने जैसी विभिन्न operations support करते हैं।
 
-**Whisker** कार्यों में शामिल हैं:
+**Whisker** के functions में शामिल हैं:
 
-- **Add**: एक कुंजी जोड़ी उत्पन्न करता है और एक कुंजी क्रेडेंशियल जोड़ता है।
-- **List**: सभी कुंजी क्रेडेंशियल प्रविष्टियों को प्रदर्शित करता है।
-- **Remove**: निर्दिष्ट कुंजी क्रेडेंशियल को हटाता है।
-- **Clear**: सभी कुंजी क्रेडेंशियल्स को मिटा देता है, संभावित रूप से वैध WHfB उपयोग को बाधित कर सकता है।
+- **Add**: एक key pair generate करता है और key credential add करता है।
+- **List**: सभी key credential entries display करता है।
+- **Remove**: specified key credential delete करता है।
+- **Clear**: सभी key credentials erase करता है, जिससे legitimate WHfB usage potentially disrupt हो सकता है।
 ```shell
 Whisker.exe add /target:computername$ /domain:constoso.local /dc:dc1.contoso.local /path:C:\path\to\file.pfx /password:P@ssword1
 ```
 ### [pyWhisker](https://github.com/ShutdownRepo/pywhisker)
 
-यह Whisker कार्यक्षमता को **UNIX-आधारित सिस्टम** पर बढ़ाता है, जिसमें KeyCredentials की सूची बनाने, जोड़ने और हटाने के लिए Impacket और PyDSInternals का उपयोग किया जाता है, साथ ही इन्हें JSON प्रारूप में आयात और निर्यात करने की क्षमता भी शामिल है।
+यह Whisker की functionality को **UNIX-based systems** तक विस्तारित करता है और व्यापक exploitation capabilities के लिए Impacket तथा PyDSInternals का उपयोग करता है, जिसमें KeyCredentials को list करना, add करना और remove करना, साथ ही उन्हें JSON format में import और export करना शामिल है।
 ```shell
 python3 pywhisker.py -d "domain.local" -u "user1" -p "complexpassword" --target "user2" --action "list"
 ```
 ### [ShadowSpray](https://github.com/Dec0ne/ShadowSpray/)
 
-ShadowSpray का उद्देश्य **GenericWrite/GenericAll अनुमतियों का लाभ उठाना है जो व्यापक उपयोगकर्ता समूहों के पास डोमेन ऑब्जेक्ट्स पर हो सकते हैं** ताकि ShadowCredentials को व्यापक रूप से लागू किया जा सके। इसमें डोमेन में लॉग इन करना, डोमेन के कार्यात्मक स्तर की पुष्टि करना, डोमेन ऑब्जेक्ट्स की गणना करना, और TGT अधिग्रहण और NT हैश प्रकट करने के लिए KeyCredentials जोड़ने का प्रयास करना शामिल है। सफाई विकल्प और पुनरावृत्त शोषण रणनीतियाँ इसकी उपयोगिता को बढ़ाती हैं।
+ShadowSpray का उद्देश्य **wide user groups के domain objects पर मौजूद GenericWrite/GenericAll permissions को exploit करके** बड़े स्तर पर ShadowCredentials लागू करना है। इसमें domain में login करना, domain के functional level को verify करना, domain objects को enumerate करना और TGT acquisition तथा NT hash revelation के लिए KeyCredentials जोड़ने का प्रयास करना शामिल है। Cleanup options और recursive exploitation tactics इसकी उपयोगिता को बढ़ाते हैं।
 
 ## References
 
-- [https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)
-- [https://github.com/eladshamir/Whisker](https://github.com/eladshamir/Whisker)
-- [https://github.com/Dec0ne/ShadowSpray/](https://github.com/Dec0ne/ShadowSpray/)
-- [https://github.com/ShutdownRepo/pywhisker](https://github.com/ShutdownRepo/pywhisker)
+- [1] [Shadow Credentials: Account Takeover के लिए Key Trust Account Mapping का Abusing](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)
+- [2] [Whisker - msDS-KeyCredentialLink में बदलाव करके AD accounts पर कब्ज़ा करने का Tool](https://github.com/eladshamir/Whisker)
+- [3] [ShadowSpray - पूरे domain में Shadow Credentials spray करने का Tool](https://github.com/Dec0ne/ShadowSpray/)
+- [4] [pywhisker - Shadow Credentials tool का Python version](https://github.com/ShutdownRepo/pywhisker)
 
 {{#include ../../../banners/hacktricks-training.md}}

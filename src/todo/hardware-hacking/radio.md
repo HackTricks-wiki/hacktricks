@@ -4,63 +4,63 @@
 
 ## SigDigger
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger) एक मुफ्त डिजिटल सिग्नल एनालाइज़र है जो GNU/Linux और macOS के लिए डिज़ाइन किया गया है, जिसका उद्देश्य अज्ञात रेडियो सिग्नल की जानकारी निकालना है। यह SoapySDR के माध्यम से विभिन्न SDR उपकरणों का समर्थन करता है, और FSK, PSK और ASK सिग्नल का समायोज्य डेमोड्यूलेशन, एनालॉग वीडियो को डिकोड करने, बर्स्टी सिग्नल का विश्लेषण करने और एनालॉग वॉयस चैनलों को सुनने की अनुमति देता है (सभी वास्तविक समय में)।
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger) GNU/Linux और macOS के लिए एक free digital signal analyzer है, जिसे अज्ञात radio signals से information निकालने के लिए बनाया गया है। यह SoapySDR के माध्यम से विभिन्न SDR devices को support करता है और FSK, PSK तथा ASK signals का adjustable demodulation, analog video को decode करना, bursty signals का analysis और analog voice channels को सुनना (यह सब real time में) संभव बनाता है।<sup>[[1]](#references)</sup>
 
 ### Basic Config
 
-इंस्टॉल करने के बाद कुछ चीजें हैं जिन्हें आप कॉन्फ़िगर करने पर विचार कर सकते हैं।\
-सेटिंग्स में (दूसरे टैब बटन) आप **SDR डिवाइस** का चयन कर सकते हैं या **एक फ़ाइल** का चयन कर सकते हैं जिसे पढ़ना है और किस आवृत्ति को समन्वयित करना है और सैंपल दर (यदि आपका पीसी इसे समर्थन करता है तो 2.56Msps तक अनुशंसित)।
+इंस्टॉल करने के बाद कुछ चीजें हैं जिन्हें आप configure करने पर विचार कर सकते हैं।\
+Settings में (दूसरे tab button में) आप **SDR device** चुन सकते हैं या पढ़ने के लिए **select a file** कर सकते हैं, साथ ही syntonise करने वाली frequency और Sample rate चुन सकते हैं (यदि आपका PC support करता है तो अधिकतम 2.56Msps तक recommended है)।
 
-![](<../../images/image (245).png>)
+![SigDigger settings showing SDR device, input file, frequency and sample rate options](<../../images/image (245).png>)
 
-GUI व्यवहार में, यदि आपका पीसी इसे समर्थन करता है तो कुछ चीजें सक्षम करना अनुशंसित है:
+GUI behaviour में, यदि आपका PC support करता है, तो कुछ चीजें enable करने की recommendation है:
 
-![](<../../images/image (472).png>)
+![SigDigger - Basic Config: In the GUI behaviour it's recommended to enable a few things if your PC support it](<../../images/image (472).png>)
 
-> [!NOTE]
-> यदि आप महसूस करते हैं कि आपका पीसी चीजें कैप्चर नहीं कर रहा है, तो OpenGL को अक्षम करने और सैंपल दर को कम करने का प्रयास करें।
+> [!TIP]
+> यदि आपको लगता है कि आपका PC चीजें capture नहीं कर रहा है, तो OpenGL को disable करने और sample rate कम करने का प्रयास करें।
 
 ### Uses
 
-- बस **सिग्नल के कुछ समय को कैप्चर करने और उसका विश्लेषण करने के लिए** "Push to capture" बटन को तब तक बनाए रखें जब तक आपको आवश्यकता हो।
+- किसी signal को कुछ समय के लिए **capture और analyze करने** के लिए, "Push to capture" button को आवश्यक समय तक दबाए रखें।
 
-![](<../../images/image (960).png>)
+![Basic Config - Uses: Just to capture some time of a signal and analyze it just maintain the button "Push to capture" as long as you need](<../../images/image (960).png>)
 
-- SigDigger का **Tuner** **बेहतर सिग्नल कैप्चर करने में मदद करता है** (लेकिन यह उन्हें degrade भी कर सकता है)। आदर्श रूप से 0 से शुरू करें और **इसे बड़ा बनाते रहें जब तक** आप **शोर** को न देखें जो **सिग्नल में सुधार** से **बड़ा** है।
+- SigDigger का **Tuner** **बेहतर signals capture करने** में सहायता करता है (लेकिन यह उन्हें degrade भी कर सकता है)। आदर्श रूप से 0 से शुरू करें और इसे **बढ़ाते रहें जब तक** कि आपको दिखाई न दे कि introduce किया गया **noise**, signal में आवश्यक **improvement** से **अधिक** हो गया है।
 
-![](<../../images/image (1099).png>)
+![SigDigger tuner control adjusted to improve the captured radio signal](<../../images/image (1099).png>)
 
 ### Synchronize with radio channel
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger) के साथ उस चैनल के साथ समन्वयित करें जिसे आप सुनना चाहते हैं, "Baseband audio preview" विकल्प को कॉन्फ़िगर करें, सभी भेजी जा रही जानकारी प्राप्त करने के लिए बैंडविड्थ कॉन्फ़िगर करें और फिर Tuner को उस स्तर पर सेट करें जहां शोर वास्तव में बढ़ना शुरू होता है:
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger)के साथ जिस channel को सुनना चाहते हैं, उसके साथ synchronize करें, "Baseband audio preview" option configure करें, भेजी जा रही पूरी information प्राप्त करने के लिए bandwidth configure करें और फिर Tuner को उस level पर set करें जिसके बाद noise वास्तव में बढ़ना शुरू होता है:<sup>[[1]](#references)</sup>
 
-![](<../../images/image (585).png>)
+![SigDigger synchronized radio channel with baseband audio preview and bandwidth configured](<../../images/image (585).png>)
 
 ## Interesting tricks
 
-- जब एक डिवाइस जानकारी के बर्स्ट भेज रहा होता है, तो आमतौर पर **पहला भाग एक प्रीएंबल होगा** इसलिए आपको **चिंता करने की आवश्यकता नहीं है** यदि आप वहां **जानकारी नहीं पाते हैं** **या यदि वहां कुछ त्रुटियाँ हैं**।
-- जानकारी के फ्रेम में, आपको आमतौर पर **अलग-अलग फ्रेम एक-दूसरे के बीच अच्छी तरह से संरेखित** मिलेंगे:
+- जब कोई device information के bursts भेज रहा हो, तो आमतौर पर **पहला भाग preamble होता है**, इसलिए यदि आपको वहां **information न मिले** या **कुछ errors हों**, तो **चिंता करने की आवश्यकता नहीं** है।
+- Information frames में आमतौर पर आपको **एक-दूसरे के साथ अच्छी तरह aligned अलग-अलग frames** मिलेंगे:
 
-![](<../../images/image (1076).png>)
+![Synchronize with radio channel - Interesting tricks: In frames of information you usually should find different frames well aligned between them](<../../images/image (1076).png>)
 
-![](<../../images/image (597).png>)
+![Synchronize with radio channel - Interesting tricks: In frames of information you usually should find different frames well aligned between them](<../../images/image (597).png>)
 
-- **बिट्स को पुनर्प्राप्त करने के बाद, आपको उन्हें किसी न किसी तरीके से प्रोसेस करने की आवश्यकता हो सकती है**। उदाहरण के लिए, मैनचेस्टर कोडिफिकेशन में एक अप+डाउन 1 या 0 होगा और एक डाउन+अप दूसरा होगा। इसलिए 1s और 0s (अप और डाउन) के जोड़े एक असली 1 या असली 0 होंगे।
-- भले ही एक सिग्नल मैनचेस्टर कोडिफिकेशन का उपयोग कर रहा हो (एक पंक्ति में दो से अधिक 0s या 1s खोजना असंभव है), आप **प्रीएंबल में कई 1s या 0s एक साथ पा सकते हैं**!
+- **Bits recover करने के बाद आपको उन्हें किसी तरीके से process करना पड़ सकता है**। उदाहरण के लिए, Manchester codification में up+down एक 1 या 0 होगा और down+up दूसरा होगा। इसलिए 1s और 0s के pairs (ups और downs) वास्तविक 1 या वास्तविक 0 होंगे।
+- भले ही कोई signal Manchester codification का उपयोग कर रहा हो (जिसमें लगातार दो से अधिक 0s या 1s मिलना असंभव है), फिर भी आपको **preamble में लगातार कई 1s या 0s मिल सकते हैं**!
 
 ### Uncovering modulation type with IQ
 
-सिग्नल में जानकारी स्टोर करने के 3 तरीके हैं: **एम्प्लीट्यूड**, **फ्रीक्वेंसी** या **फेज** को मॉड्यूलेट करना।\
-यदि आप एक सिग्नल की जांच कर रहे हैं, तो जानकारी स्टोर करने के लिए क्या उपयोग किया जा रहा है यह पता लगाने के लिए विभिन्न तरीके हैं (नीचे और तरीके खोजें) लेकिन एक अच्छा तरीका IQ ग्राफ की जांच करना है।
+Signals में information store करने के 3 तरीके हैं: **amplitude**, **frequency** या **phase** को modulate करना।\
+यदि आप किसी signal को check कर रहे हैं, तो यह पता लगाने के अलग-अलग तरीके हैं कि information store करने के लिए इनमें से किसका उपयोग किया गया है (नीचे और तरीके दिए गए हैं), लेकिन एक अच्छा तरीका IQ graph को check करना है।
 
-![](<../../images/image (788).png>)
+![SigDigger IQ graph used to identify whether a signal uses amplitude, frequency or phase modulation](<../../images/image (788).png>)
 
-- **AM का पता लगाना**: यदि IQ ग्राफ में उदाहरण के लिए **2 सर्कल** दिखाई देते हैं (संभवतः एक 0 पर और दूसरा एक अलग एम्प्लीट्यूड पर), तो इसका मतलब हो सकता है कि यह एक AM सिग्नल है। इसका कारण यह है कि IQ ग्राफ में 0 और सर्कल के बीच की दूरी सिग्नल की एम्प्लीट्यूड है, इसलिए विभिन्न एम्प्लीट्यूड का उपयोग करना आसान है।
-- **PM का पता लगाना**: पिछले चित्र की तरह, यदि आप छोटे सर्कल पाते हैं जो एक-दूसरे से संबंधित नहीं हैं, तो इसका मतलब हो सकता है कि एक फेज मॉड्यूलेशन का उपयोग किया गया है। इसका कारण यह है कि IQ ग्राफ में, बिंदु और 0,0 के बीच का कोण सिग्नल का फेज है, इसलिए इसका मतलब है कि 4 अलग-अलग फेज का उपयोग किया गया है।
-- ध्यान दें कि यदि जानकारी इस तथ्य में छिपी हुई है कि एक फेज बदला गया है और न कि फेज में स्वयं, तो आप स्पष्ट रूप से अलग-अलग फेज नहीं देखेंगे।
-- **FM का पता लगाना**: IQ में आवृत्तियों की पहचान करने के लिए कोई क्षेत्र नहीं है (केंद्र से दूरी एम्प्लीट्यूड है और कोण फेज है)।\
-इसलिए, FM की पहचान करने के लिए, आपको इस ग्राफ में **बुनियादी रूप से केवल एक सर्कल** देखना चाहिए।\
-इसके अलावा, एक अलग आवृत्ति को IQ ग्राफ द्वारा **सर्कल के चारों ओर गति की तेजी** द्वारा "प्रतिनिधित्व" किया जाता है (इसलिए SysDigger में सिग्नल का चयन करते समय IQ ग्राफ भरा जाता है, यदि आप बनाए गए सर्कल में गति की तेजी या दिशा में परिवर्तन पाते हैं, तो इसका मतलब हो सकता है कि यह FM है):
+- **Detecting AM**: यदि IQ graph में, उदाहरण के लिए, **2 circles** दिखाई देते हैं (संभवतः एक 0 पर और दूसरा अलग amplitude पर), तो इसका अर्थ हो सकता है कि यह AM signal है। ऐसा इसलिए है क्योंकि IQ graph में 0 और circle के बीच की दूरी signal का amplitude होती है, इसलिए उपयोग किए गए अलग-अलग amplitudes को visualize करना आसान है।
+- **Detecting PM**: पिछली image की तरह, यदि आपको आपस में संबंधित न होने वाले छोटे circles मिलते हैं, तो संभवतः phase modulation का उपयोग किया गया है। ऐसा इसलिए है क्योंकि IQ graph में point और 0,0 के बीच का angle signal का phase होता है, जिसका अर्थ है कि 4 अलग-अलग phases का उपयोग किया गया है।
+- ध्यान दें कि यदि information इस तथ्य में छिपी है कि phase बदला गया है, न कि phase में स्वयं, तो आपको अलग-अलग phases स्पष्ट रूप से अलग दिखाई नहीं देंगे।
+- **Detecting FM**: IQ में frequencies पहचानने के लिए कोई field नहीं होता (centre से दूरी amplitude और angle phase होता है)।\
+इसलिए FM पहचानने के लिए इस graph में आपको **मूल रूप से केवल एक circle दिखाई देना चाहिए**।\
+इसके अलावा, एक अलग frequency को IQ graph में **circle के across speed acceleration** के रूप में "represent" किया जाता है (इसलिए SysDigger में signal select करने पर IQ graph populate होता है; यदि बनाए गए circle में आपको acceleration या direction में बदलाव मिले, तो इसका अर्थ FM हो सकता है):
 
 ## AM Example
 
@@ -72,74 +72,74 @@ sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw
 
 #### Checking the envelope
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger) के साथ AM जानकारी की जांच करते समय और बस **एंवेलप** को देखते हुए आप विभिन्न स्पष्ट एम्प्लीट्यूड स्तर देख सकते हैं। उपयोग किया गया सिग्नल AM में जानकारी के साथ पल्स भेज रहा है, यह एक पल्स कैसे दिखता है:
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger)के साथ AM information check करते समय और केवल **envelop** को देखकर आप अलग-अलग स्पष्ट amplitude levels देख सकते हैं। उपयोग किया गया signal AM में pulses के रूप में information भेज रहा है; एक pulse इस तरह दिखाई देता है:<sup>[[1]](#references)</sup>
 
-![](<../../images/image (590).png>)
+![SigDigger AM signal envelope with clear pulse amplitude levels](<../../images/image (590).png>)
 
-और यह है कि प्रतीक का एक भाग तरंग रूप के साथ कैसे दिखता है:
+और waveform के साथ symbol का एक भाग इस तरह दिखाई देता है:
 
-![](<../../images/image (734).png>)
+![Uncovering AM - Checking the envelope: And this is how part of the symbol looks like with the waveform](<../../images/image (734).png>)
 
 #### Checking the Histogram
 
-आप **संपूर्ण सिग्नल** का चयन कर सकते हैं जहां जानकारी स्थित है, **एम्प्लीट्यूड** मोड और **चयन** का चयन करें और **हिस्टोग्राम** पर क्लिक करें। आप देख सकते हैं कि केवल 2 स्पष्ट स्तर पाए जाते हैं।
+आप information वाले **पूरे signal को select** कर सकते हैं, **Amplitude** mode और **Selection** select कर सकते हैं और **Histogram** पर click कर सकते हैं। आप देख सकते हैं कि केवल 2 स्पष्ट levels मिलते हैं।
 
-![](<../../images/image (264).png>)
+![SigDigger amplitude histogram showing two clear levels for the selected AM signal](<../../images/image (264).png>)
 
-उदाहरण के लिए, यदि आप इस AM सिग्नल में एम्प्लीट्यूड के बजाय आवृत्ति का चयन करते हैं, तो आप केवल 1 आवृत्ति पाएंगे (कोई भी जानकारी आवृत्ति में मोड्यूलेटेड केवल 1 आवृत्ति का उपयोग नहीं कर रही है)।
+उदाहरण के लिए, यदि आप इस AM signal में Amplitude के बजाय Frequency select करते हैं, तो आपको केवल 1 frequency मिलती है (frequency में modulate की गई information के लिए केवल 1 freq का उपयोग करने का कोई अर्थ नहीं है)।
 
-![](<../../images/image (732).png>)
+![SigDigger frequency histogram for the AM signal showing one frequency](<../../images/image (732).png>)
 
-यदि आप बहुत सारी आवृत्तियाँ पाते हैं, तो संभवतः यह FM नहीं होगा, शायद सिग्नल की आवृत्ति केवल चैनल के कारण संशोधित की गई थी।
+यदि आपको बहुत सारी frequencies मिलती हैं, तो संभवतः यह FM नहीं होगा; channel के कारण signal frequency केवल modify हुई होगी।
 
 #### With IQ
 
-इस उदाहरण में आप देख सकते हैं कि वहाँ एक **बड़ा सर्कल** है लेकिन साथ ही **केंद्र में बहुत सारे बिंदु हैं।**
+इस example में आप देख सकते हैं कि एक **बड़ा circle** है, लेकिन **centre में बहुत सारे points भी हैं**।
 
-![](<../../images/image (222).png>)
+![Checking the Histogram - With IQ: In this example you can see how there is a big circle but also a lot of points in the centre](<../../images/image (222).png>)
 
 ### Get Symbol Rate
 
 #### With one symbol
 
-आप सबसे छोटे प्रतीक का चयन कर सकते हैं जिसे आप पा सकते हैं (ताकि आप सुनिश्चित कर सकें कि यह केवल 1 है) और "चयन आवृत्ति" की जांच करें। इस मामले में यह 1.013kHz (तो 1kHz) होगा।
+सबसे छोटा symbol select करें जो आपको मिल सके (ताकि आप निश्चित हों कि यह केवल 1 है) और "Selection freq" check करें। इस case में यह 1.013kHz (अर्थात 1kHz) होगा।
 
-![](<../../images/image (78).png>)
+![Get Symbol Rate - With one symbol: Select the smallest symbol you can find (so you are sure it's just 1) and check the "Selection freq". I this case it would be 1.013kHz (so 1kHz)](<../../images/image (78).png>)
 
 #### With a group of symbols
 
-आप यह भी संकेत कर सकते हैं कि आप कितने प्रतीकों का चयन करने जा रहे हैं और SigDigger 1 प्रतीक की आवृत्ति की गणना करेगा (जितने अधिक प्रतीक चुने जाएंगे, उतना ही बेहतर होगा)। इस परिदृश्य में मैंने 10 प्रतीकों का चयन किया और "चयन आवृत्ति" 1.004 Khz है:
+आप select किए जाने वाले symbols की संख्या भी indicate कर सकते हैं और SigDigger 1 symbol की frequency calculate करेगा (संभवतः जितने अधिक symbols select होंगे, result उतना बेहतर होगा)। इस scenario में मैंने 10 symbols select किए और "Selection freq" 1.004 Khz है:
 
-![](<../../images/image (1008).png>)
+![SigDigger symbol-rate calculation using a selected group of ten symbols](<../../images/image (1008).png>)
 
 ### Get Bits
 
-यह पता लगाने के बाद कि यह एक **AM मोड्यूलेटेड** सिग्नल है और **प्रतीक दर** (और यह जानते हुए कि इस मामले में कुछ ऊपर का मतलब 1 है और कुछ नीचे का मतलब 0 है), **सिग्नल में एन्कोडेड बिट्स प्राप्त करना** बहुत आसान है। इसलिए, जानकारी के साथ सिग्नल का चयन करें और सैंपलिंग और निर्णय कॉन्फ़िगर करें और सैंपल दबाएं (जांचें कि **एम्प्लीट्यूड** चयनित है, खोजी गई **प्रतीक दर** कॉन्फ़िगर की गई है और **गैडनर क्लॉक रिकवरी** चयनित है):
+यह पता चलने के बाद कि यह **AM modulated** signal है और इसका **symbol rate** क्या है (और यह जानने के बाद कि इस case में ऊपर जाना 1 और नीचे जाना 0 दर्शाता है), signal में encoded **bits प्राप्त करना** बहुत आसान है। इसलिए information वाले signal को select करें, sampling और decision configure करें और sample दबाएं (check करें कि **Amplitude** selected है, खोजा गया **Symbol rate** configure है और **Gadner clock recovery** selected है):
 
-![](<../../images/image (965).png>)
+![SigDigger Get Bits panel configured for AM sampling, symbol rate and Gardner clock recovery](<../../images/image (965).png>)
 
-- **चयन अंतराल के लिए समन्वयित** का मतलब है कि यदि आपने पहले प्रतीक दर खोजने के लिए अंतराल का चयन किया है, तो वह प्रतीक दर उपयोग की जाएगी।
-- **मैनुअल** का मतलब है कि निर्दिष्ट प्रतीक दर का उपयोग किया जाएगा।
-- **फिक्स्ड इंटरवल चयन** में आप उन अंतरालों की संख्या निर्दिष्ट करते हैं जिन्हें चयनित किया जाना चाहिए और यह उससे प्रतीक दर की गणना करता है।
-- **गैडनर क्लॉक रिकवरी** आमतौर पर सबसे अच्छा विकल्प होता है, लेकिन आपको अभी भी कुछ अनुमानित प्रतीक दर निर्दिष्ट करने की आवश्यकता होती है।
+- **Sync to selection intervals** का अर्थ है कि यदि आपने पहले symbol rate खोजने के लिए intervals select किए थे, तो वही symbol rate उपयोग किया जाएगा।
+- **Manual** का अर्थ है कि indicate किया गया symbol rate उपयोग किया जाएगा।
+- **Fixed interval selection** में आप select किए जाने वाले intervals की संख्या indicate करते हैं और यह उससे symbol rate calculate करता है।
+- **Gadner clock recovery** आमतौर पर सबसे अच्छा option है, लेकिन फिर भी आपको कुछ approximate symbol rate indicate करना होगा।
 
-सैंपल दबाने पर यह दिखाई देता है:
+Sample दबाने पर यह दिखाई देता है:
 
-![](<../../images/image (644).png>)
+![With a group of symbols - Get Bits: Pressing sample this appears](<../../images/image (644).png>)
 
-अब, SigDigger को समझाने के लिए **जहाँ जानकारी ले जाने वाला स्तर है**, आपको **निम्न स्तर** पर क्लिक करना होगा और सबसे बड़े स्तर तक क्लिक बनाए रखना होगा:
+अब SigDigger को यह समझाने के लिए कि information ले जाने वाले level की **range कहां है**, आपको **lower level** पर click करना होगा और सबसे बड़े level तक click बनाए रखना होगा:
 
-![](<../../images/image (439).png>)
+![SigDigger level-range selection from the lower amplitude level to the upper level](<../../images/image (439).png>)
 
-यदि वहाँ उदाहरण के लिए **एम्प्लीट्यूड के 4 अलग-अलग स्तर** होते, तो आपको **प्रतीक प्रति बिट 2** कॉन्फ़िगर करना होगा और सबसे छोटे से सबसे बड़े तक चयन करना होगा।
+यदि, उदाहरण के लिए, amplitude के **4 अलग-अलग levels** होते, तो आपको **Bits per symbol को 2** पर configure करना पड़ता और सबसे छोटे से सबसे बड़े level तक select करना पड़ता।
 
-अंत में **ज़ूम बढ़ाना** और **रो आकार बदलना** आपको बिट्स देखने की अनुमति देता है (और आप सभी को चयनित कर सकते हैं और सभी बिट्स प्राप्त करने के लिए कॉपी कर सकते हैं):
+अंत में **Zoom बढ़ाकर** और **Row size बदलकर** आप bits देख सकते हैं (और सभी bits प्राप्त करने के लिए आप सबको select करके copy कर सकते हैं):
 
-![](<../../images/image (276).png>)
+![With a group of symbols - Get Bits: Finally increasing the Zoom and changing the Row size you can see the bits (and you can select all and copy to get all the bits)](<../../images/image (276).png>)
 
-यदि सिग्नल में प्रतीक प्रति बिट 1 से अधिक है (उदाहरण के लिए 2), तो SigDigger के पास यह जानने का **कोई तरीका नहीं होगा कि कौन सा प्रतीक** 00, 01, 10, 11 है, इसलिए यह प्रत्येक का प्रतिनिधित्व करने के लिए विभिन्न **ग्रे स्केल** का उपयोग करेगा (और यदि आप बिट्स को कॉपी करते हैं, तो यह **0 से 3 तक के नंबर** का उपयोग करेगा, आपको उन्हें संसाधित करने की आवश्यकता होगी)।
+यदि signal में प्रति symbol 1 से अधिक bit हैं (उदाहरण के लिए 2), तो SigDigger के पास यह जानने का कोई तरीका नहीं है कि कौन-सा symbol 00, 01, 10 या 11 है। इसलिए यह प्रत्येक symbol को दर्शाने के लिए अलग-अलग **grey scales** का उपयोग करेगा (और यदि आप bits copy करते हैं, तो यह 0 से 3 तक के **numbers** का उपयोग करेगा; आपको उन्हें process करना होगा)।
 
-इसके अलावा, **कोडिफिकेशन** जैसे **मैनचेस्टर**, और **अप+डाउन** **1 या 0** हो सकते हैं और एक डाउन+अप 1 या 0 हो सकता है। उन मामलों में आपको **प्राप्त अप (1) और डाउन (0)** को संसाधित करने की आवश्यकता है ताकि 01 या 10 के जोड़े को 0s या 1s के रूप में प्रतिस्थापित किया जा सके।
+इसके अलावा **codifications** जैसे **Manchester** का उपयोग करें; **up+down** 1 या 0 हो सकता है और down+up 1 या 0 हो सकता है। उन cases में आपको प्राप्त ups (1) और downs (0) को process करके 01 या 10 के pairs को 0s या 1s से replace करना होगा।
 
 ## FM Example
 
@@ -151,52 +151,56 @@ sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw
 
 #### Checking the frequencies and waveform
 
-FM में मोड्यूलेटेड जानकारी भेजने वाले सिग्नल का उदाहरण:
+FM में modulated information भेजने वाले signal का example:
 
-![](<../../images/image (725).png>)
+![Uncovering FM - Checking the frequencies and waveform: Signal example sending information modulated in FM](<../../images/image (725).png>)
 
-पिछले चित्र में आप देख सकते हैं कि **2 आवृत्तियाँ उपयोग की जा रही हैं** लेकिन यदि आप **तरंग रूप** का अवलोकन करते हैं, तो आप **2 अलग-अलग आवृत्तियों** की सही पहचान नहीं कर पाएंगे:
+पिछली image में आप काफी अच्छी तरह देख सकते हैं कि **2 frequencies का उपयोग किया गया है**, लेकिन यदि आप **waveform observe** करें, तो हो सकता है कि आप **2 अलग-अलग frequencies को सही ढंग से पहचान न पाएं**:
 
-![](<../../images/image (717).png>)
+![SigDigger FM waveform where the two frequencies are difficult to distinguish directly](<../../images/image (717).png>)
 
-यह इसलिए है क्योंकि मैंने दोनों आवृत्तियों में सिग्नल को कैप्चर किया, इसलिए एक लगभग दूसरी के नकारात्मक है:
+ऐसा इसलिए है क्योंकि मैंने signal को दोनों frequencies में capture किया; इसलिए एक लगभग दूसरी का negative है:
 
-![](<../../images/image (942).png>)
+![SigDigger FM capture showing the two frequencies as approximate negatives of each other](<../../images/image (942).png>)
 
-यदि समन्वयित आवृत्ति **एक आवृत्ति के करीब है** तो आप आसानी से 2 अलग-अलग आवृत्तियों को देख सकते हैं:
+यदि synchronized frequency **एक frequency के अधिक करीब हो और दूसरी से दूर**, तो आप 2 अलग-अलग frequencies आसानी से देख सकते हैं:
 
-![](<../../images/image (422).png>)
+![Uncovering FM - Checking the frequencies and waveform: If the synchronized frequency is closer to one frequency than to the other you can easily see the 2 different frequencies](<../../images/image (422).png>)
 
-![](<../../images/image (488).png>)
+![Uncovering FM - Checking the frequencies and waveform: If the synchronized frequency is closer to one frequency than to the other you can easily see the 2 different frequencies](<../../images/image (488).png>)
 
 #### Checking the histogram
 
-जानकारी वाले सिग्नल की आवृत्ति हिस्टोग्राम की जांच करते समय आप आसानी से 2 अलग-अलग सिग्नल देख सकते हैं:
+Information वाले signal का frequency histogram check करने पर आप 2 अलग-अलग signals आसानी से देख सकते हैं:
 
-![](<../../images/image (871).png>)
+![Checking the frequencies and waveform - Checking the histogram: Checking the frequency histogram of the signal with information you can easily see 2 different signals](<../../images/image (871).png>)
 
-इस मामले में यदि आप **एम्प्लीट्यूड हिस्टोग्राम** की जांच करते हैं, तो आप **केवल एक एम्प्लीट्यूड** पाएंगे, इसलिए यह **AM नहीं हो सकता** (यदि आप बहुत सारी एम्प्लीट्यूड पाते हैं, तो यह हो सकता है कि सिग्नल चैनल के साथ शक्ति खो रहा है):
+इस case में यदि आप **Amplitude histogram** check करते हैं, तो आपको **केवल एक amplitude** मिलेगा, इसलिए यह **AM नहीं हो सकता** (यदि आपको बहुत सारे amplitudes मिलते हैं, तो ऐसा इसलिए हो सकता है क्योंकि channel के दौरान signal की power कम हो गई है):
 
-![](<../../images/image (817).png>)
+![SigDigger amplitude histogram for FM signal showing a single amplitude level](<../../images/image (817).png>)
 
-और यह फेज हिस्टोग्राम होगा (जो स्पष्ट रूप से दिखाता है कि सिग्नल फेज में मोड्यूलेटेड नहीं है):
+और यह phase histogram होगा (जो यह बहुत स्पष्ट करता है कि signal phase में modulated नहीं है):
 
-![](<../../images/image (996).png>)
+![Checking the frequencies and waveform - Checking the histogram: And this is would be phase histogram (which makes very clear the signal is not modulated in phase)](<../../images/image (996).png>)
 
 #### With IQ
 
-IQ में आवृत्तियों की पहचान करने के लिए कोई क्षेत्र नहीं है (केंद्र से दूरी एम्प्लीट्यूड है और कोण फेज है)।\
-इसलिए, FM की पहचान करने के लिए, आपको इस ग्राफ में **बुनियादी रूप से केवल एक सर्कल** देखना चाहिए।\
-इसके अलावा, एक अलग आवृत्ति को IQ ग्राफ द्वारा **सर्कल के चारों ओर गति की तेजी** द्वारा "प्रतिनिधित्व" किया जाता है (इसलिए SysDigger में सिग्नल का चयन करते समय IQ ग्राफ भरा जाता है, यदि आप बनाए गए सर्कल में गति की तेजी या दिशा में परिवर्तन पाते हैं, तो इसका मतलब हो सकता है कि यह FM है):
+IQ में frequencies पहचानने के लिए कोई field नहीं होता (centre से दूरी amplitude और angle phase होता है)।\
+इसलिए FM पहचानने के लिए इस graph में आपको **मूल रूप से केवल एक circle दिखाई देना चाहिए**।\
+इसके अलावा, एक अलग frequency को IQ graph में **circle के across speed acceleration** के रूप में "represent" किया जाता है (इसलिए SysDigger में signal select करने पर IQ graph populate होता है; यदि बनाए गए circle में आपको acceleration या direction में बदलाव मिले, तो इसका अर्थ FM हो सकता है):
 
-![](<../../images/image (81).png>)
+![SigDigger IQ graph where FM appears as acceleration changes around the circle](<../../images/image (81).png>)
 
 ### Get Symbol Rate
 
-आप **AM उदाहरण में उपयोग की गई तकनीक** का उपयोग कर सकते हैं ताकि आप प्रतीक दर प्राप्त कर सकें जब आप प्रतीकों को ले जाने वाली आवृत्तियों को पा लें।
+Symbols ले जाने वाली frequencies खोज लेने के बाद symbol rate प्राप्त करने के लिए आप **AM example में उपयोग की गई same technique** का उपयोग कर सकते हैं।
 
 ### Get Bits
 
-आप **AM उदाहरण में उपयोग की गई तकनीक** का उपयोग कर सकते हैं ताकि आप बिट्स प्राप्त कर सकें जब आप **पता लगा लें कि सिग्नल आवृत्ति में मोड्यूलेटेड है** और **प्रतीक दर**।
+जब आप **यह पता लगा लें कि signal frequency में modulated है** और **symbol rate** भी मिल जाए, तो bits प्राप्त करने के लिए आप **AM example में उपयोग की गई same technique** का उपयोग कर सकते हैं।
+
+## References
+
+- [1] [SigDigger - Free digital signal analyzer for GNU/Linux and macOS](https://github.com/BatchDrake/SigDigger)
 
 {{#include ../../banners/hacktricks-training.md}}

