@@ -6,24 +6,24 @@ Generative models can be used to **bypass browser-based KYC, age-verification, a
 
 ## Practical Attack Chain
 
-1. **Generate challenge-compliant media** with a video-to-video model from a source actor and a victim reference image.
-2. **Inject the forged stream before signing or upload**, for example through a Linux virtual camera created with `v4l2loopback` and fed by OBS or FFmpeg.
-3. Let the browser and vendor SDK (WebRTC, AWS, etc.) **capture, sign, and upload the attacker-controlled frames as if they came from a real webcam**.
+1. **Generate challenge-compliant media** with a video-to-video model from a source actor and a victim reference image.<sup>[[1]](#references)</sup>
+2. **Inject the forged stream before signing or upload**, for example through a Linux virtual camera created with `v4l2loopback` and fed by OBS or FFmpeg.<sup>[[3]](#references)</sup>
+3. Let the browser and vendor SDK (WebRTC, AWS, etc.) **capture, sign, and upload the attacker-controlled frames as if they came from a real webcam**.<sup>[[2]](#references)</sup>
 
 This is important during assessments because signed WebSocket chunks or proprietary SDK framing may make **network-layer tampering** impractical, while **camera-layer injection** still works.<sup>[[1]](#references)</sup>
 
 ## High-Value Testing Angles
 
-- **Virtual webcam acceptance**: if the flow works from a desktop browser, test whether OBS, `v4l2loopback`, or vendor virtual cameras are accepted as normal peripherals.
+- **Virtual webcam acceptance**: if the flow works from a desktop browser, test whether OBS, `v4l2loopback`, or vendor virtual cameras are accepted as normal peripherals.<sup>[[1]](#references)</sup>
 - **Camera API redirection on mobile**: native mobile flows may still be vulnerable when Frida hooks camera APIs and replaces sensor buffers with frames from an MP4 or emulator-backed virtual camera.
-- **Constraint weakening**: pages that require exact `deviceId`, `frameRate`, `width`, `height`, or `facingMode` can sometimes be bypassed by monkeypatching `navigator.mediaDevices.getUserMedia` and replacing strict constraints with broader ranges.
+- **Constraint weakening**: pages that require exact `deviceId`, `frameRate`, `width`, `height`, or `facingMode` can sometimes be bypassed by monkeypatching `navigator.mediaDevices.getUserMedia` and replacing strict constraints with broader ranges.<sup>[[4]](#references)</sup>
 - **Low-quality generation plus post-processing**: generate the cheapest video the model can render reliably, then use FFmpeg upscaling or frame interpolation to satisfy capture requirements.
 - **Predictable active challenges**: repeated head-movement or light-flash sequences are worth recording and replaying through a generative workflow.
 - **Weak replay detection**: simple scene perturbations, such as crop or position shifts, overlay changes, or slight motion, can be enough when the anti-replay logic only checks superficial frame similarity.<sup>[[1]](#references)</sup>
 
 ## Mobile vs. Desktop Trust Differences
 
-Native mobile apps can raise the attacker's cost with:
+Native mobile apps can raise the attacker's cost with:<sup>[[1]](#references)</sup>
 
 - **sensor or Secure Element attestation** for camera buffers;
 - **execution-integrity** signals such as **Play Integrity** or **App Attest**;
@@ -33,7 +33,7 @@ Desktop web flows usually lack an equivalent camera chain of trust, so they are 
 
 ## Defensive Review Notes
 
-When reviewing a KYC or liveness integration, verify whether it:
+When reviewing a KYC or liveness integration, verify whether it:<sup>[[1]](#references)</sup>
 
 - allows a **desktop-browser fallback** for a workflow that was only threat-modeled for mobile capture;
 - relies mostly on **algorithmic liveness** without strong human escalation for suspicious sessions;

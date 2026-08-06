@@ -111,6 +111,6 @@ You should start by reading this post for some basic concepts you should know ab
 
 ## References
 
-- [1] [Build a Large Language Model (From Scratch)](https://www.manning.com/books/build-a-large-language-model-from-scratch)
+- [1] [Build a Large Language Model (From Scratch) - Manning](https://www.manning.com/books/build-a-large-language-model-from-scratch)
 
 {{#include ../../banners/hacktricks-training.md}}
