@@ -2,21 +2,21 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-फ्री वर्जन ऐप [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/) से डाउनलोड करें, इसे चलाएं और "malicious" बाइनरी को इसके ऊपर लपेटें।\
-ध्यान दें कि आप "**.bat**" को लपेट सकते हैं यदि आप **केवल** **कमांड लाइनों को निष्पादित** करना चाहते हैं (cmd.exe के बजाय .bat फ़ाइल का चयन करें)
+[https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/) से free version app download करें, इसे execute करें और इसमें "malicious" binary को wrap करें।\
+ध्यान दें कि यदि आप केवल **command lines execute** करना चाहते हैं, तो आप "**.bat**" को wrap कर सकते हैं (**cmd.exe** चुनने के बजाय .bat file चुनें)।
 
-![](<../../images/image (417).png>)
+![MSI Wrapper: ध्यान दें कि यदि आप केवल command lines execute करना चाहते हैं, तो आप " .bat " को wrap कर सकते हैं (cmd.exe चुनने के बजाय .bat file चुनें)](<../../images/image (417).png>)
 
-और यह कॉन्फ़िगरेशन का सबसे महत्वपूर्ण भाग है:
+और configuration का यह सबसे महत्वपूर्ण भाग है:
 
-![](<../../images/image (312).png>)
+![MSI Wrapper: और यह configuration का सबसे महत्वपूर्ण भाग है](<../../images/image (312).png>)
 
-![](<../../images/image (346).png>)
+![MSI Wrapper: और यह configuration का सबसे महत्वपूर्ण भाग है](<../../images/image (346).png>)
 
-![](<../../images/image (1072).png>)
+![MSI Wrapper: और यह configuration का सबसे महत्वपूर्ण भाग है](<../../images/image (1072).png>)
 
-(कृपया ध्यान दें कि यदि आप अपनी खुद की बाइनरी को पैक करने की कोशिश करते हैं तो आप इन मूल्यों को संशोधित कर सकेंगे)
+(कृपया ध्यान दें कि यदि आप अपनी स्वयं की binary को pack करने का प्रयास करते हैं, तो आप इन values को modify कर पाएंगे।)
 
-यहां से बस **next buttons** पर क्लिक करें और अंतिम **build button और आपका installer/wrapper उत्पन्न होगा।**
+अब केवल **next buttons** पर click करें और अंत में **build button** पर click करें; आपका installer/wrapper generate हो जाएगा।
 
 {{#include ../../banners/hacktricks-training.md}}

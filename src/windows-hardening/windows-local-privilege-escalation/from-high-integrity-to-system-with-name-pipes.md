@@ -1,14 +1,16 @@
+# High Integrity से SYSTEM तक Name Pipes के साथ
+
 {{#include ../../banners/hacktricks-training.md}}
 
-**कोड प्रवाह:**
+**Code flow:**
 
-1. एक नया पाइप बनाएं
-2. एक सेवा बनाएं और शुरू करें जो बनाए गए पाइप से जुड़ेगी और कुछ लिखेगी। सेवा कोड इस एन्कोडेड PS कोड को निष्पादित करेगा: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. सेवा पाइप में क्लाइंट से डेटा प्राप्त करती है, ImpersonateNamedPipeClient को कॉल करती है और सेवा के समाप्त होने की प्रतीक्षा करती है
-4. अंततः, सेवा से प्राप्त टोकन का उपयोग करके एक नया _cmd.exe_ उत्पन्न करती है
+1. एक नया Pipe बनाएं
+2. एक service बनाएं और शुरू करें जो बनाए गए pipe से connect होगी और कुछ लिखेगी। Service code इस encoded PS code को execute करेगा: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
+3. Service pipe में client से data प्राप्त करती है, `ImpersonateNamedPipeClient` को call करती है और service के समाप्त होने की प्रतीक्षा करती है
+4. अंत में, service से प्राप्त token का उपयोग करके एक नया _cmd.exe_ spawn करें
 
 > [!WARNING]
-> यदि आपके पास पर्याप्त विशेषाधिकार नहीं हैं तो एक्सप्लॉइट अटक सकता है और कभी वापस नहीं आएगा।
+> यदि आपके पास पर्याप्त privileges नहीं हैं, तो exploit अटक सकता है और कभी return नहीं कर सकता।
 ```c
 #include <windows.h>
 #include <time.h>

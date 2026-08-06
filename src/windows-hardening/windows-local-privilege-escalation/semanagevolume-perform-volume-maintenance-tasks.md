@@ -1,29 +1,29 @@
-# SeManageVolumePrivilege: किसी भी फ़ाइल को पढ़ने के लिए कच्चे वॉल्यूम एक्सेस
+# SeManageVolumePrivilege: मनमानी फ़ाइल read के लिए Raw volume access
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## अवलोकन
+## Overview
 
-Windows उपयोगकर्ता अधिकार: Perform volume maintenance tasks (constant: SeManageVolumePrivilege).
+Windows user right: Perform volume maintenance tasks (constant: SeManageVolumePrivilege).
 
-इस अधिकार के धारक low-level वॉल्यूम ऑपरेशंस कर सकते हैं जैसे कि defragmentation, वॉल्यूम बनाना/हटाना, और मेंटेनेंस I/O। हमलावरों के लिए महत्वपूर्ण बात यह है कि यह अधिकार कच्चे वॉल्यूम डिवाइस हैंडल (उदाहरण: \\.\C:) खोलने और ऐसा डायरेक्ट डिस्क I/O करने की अनुमति देता है जो NTFS फ़ाइल ACLs को बायपास करता है। कच्चे एक्सेस के साथ आप वॉल्यूम पर किसी भी फ़ाइल के बाइट्स कॉपी कर सकते हैं भले ही DACL द्वारा इनकार किया गया हो — यह फ़ाइल सिस्टम स्ट्रक्चर्स को ऑफ़लाइन पार्स करके या ब्लॉक/क्लस्टर स्तर पर पढ़ने वाले टूल्स का उपयोग करके संभव है।
+इसके धारक low-level volume operations, जैसे defragmentation, volumes को create/remove करना और maintenance IO, कर सकते हैं। Attackers के लिए महत्वपूर्ण रूप से, यह right raw volume device handles (जैसे, \\.\C:) खोलने और direct disk I/O जारी करने की अनुमति देता है, जो NTFS file ACLs को bypass करता है। Raw access के साथ आप volume पर मौजूद किसी भी फ़ाइल के bytes को copy कर सकते हैं, भले ही DACL द्वारा access denied हो, filesystem structures को offline parse करके या block/cluster level पर read करने वाले tools का उपयोग करके।
 
-डिफ़ॉल्ट: सर्वरों और डोमेन कंट्रोलर्स पर Administrators.
+Default: servers और domain controllers पर Administrators.<sup>[[1]](#references)</sup>
 
-## दुरुपयोग परिदृश्य
+## Abuse scenarios
 
-- डिस्क डिवाइस पढ़कर ACLs को बायपास करके किसी भी फ़ाइल को पढ़ना/निकासी (उदा., संवेदनशील सिस्टम-प्रोटेक्टेड सामग्री जैसे %ProgramData%\Microsoft\Crypto\RSA\MachineKeys और %ProgramData%\Microsoft\Crypto\Keys के तहत मशीन प्राइवेट कीज़, registry hives, DPAPI masterkeys, SAM, ntds.dit (VSS के माध्यम से) आदि)।
-- लॉक्ड/प्रिविलेज्ड पाथ्स (C:\Windows\System32\…) को कच्चे डिवाइस से सीधे बाइट्स कॉपी करके बायपास करना।
-- AD CS परिवेशों में, CA के की मटेरियल (machine key store) को एक्सफ़िल्ट्रेट करके “Golden Certificates” बनाना और PKINIT के जरिए किसी भी डोमेन प्रिंसिपल का impersonate करना। नीचे लिंक देखें।
+- Disk device को read करके ACLs को bypass करते हुए arbitrary file read (जैसे %ProgramData%\Microsoft\Crypto\RSA\MachineKeys और %ProgramData%\Microsoft\Crypto\Keys के अंतर्गत मौजूद sensitive system-protected material, registry hives, DPAPI masterkeys, SAM, VSS के माध्यम से ntds.dit आदि को exfiltrate करना)।
+- Raw device से सीधे bytes copy करके locked/privileged paths (C:\Windows\System32\…) को bypass करना।
+- AD CS environments में, CA के key material (machine key store) को exfiltrate करके “Golden Certificates” mint करना और PKINIT के माध्यम से किसी भी domain principal का impersonate करना। नीचे दिए गए link को देखें।<sup>[[2]](#references)</sup>
 
-नोट: जब तक आप helper tools पर भरोसा नहीं करते, आपको NTFS संरचनाओं के लिए एक पार्सर की आवश्यकता होगी। कई रेडी-टू-यूज़ टूल्स कच्चे एक्सेस को abstract कर देते हैं।
+Note: जब तक आप helper tools पर निर्भर न हों, आपको NTFS structures के लिए parser की अभी भी आवश्यकता होगी। कई off-the-shelf tools raw access को abstract कर देते हैं।
 
-## व्यावहारिक तकनीकें
+## Practical techniques
 
-- कच्चा वॉल्यूम हैंडल खोलें और क्लस्टर्स पढ़ें:
+- Raw volume handle खोलें और clusters read करें:
 
 <details>
-<summary>विस्तार के लिए क्लिक करें</summary>
+<summary>विस्तार करने के लिए क्लिक करें</summary>
 ```powershell
 # PowerShell – read first MB from C: raw device (requires SeManageVolumePrivilege)
 $fs = [System.IO.File]::Open("\\.\\C:",[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::ReadWrite)
@@ -49,21 +49,21 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- NTFS-aware टूल का उपयोग करके raw volume से विशिष्ट फ़ाइलें पुनर्प्राप्त करें:
-- RawCopy/RawCopy64 (in-use फ़ाइलों की sector-स्तरीय कॉपी)
-- FTK Imager or The Sleuth Kit (read-only imaging, फिर फ़ाइलें carve करें)
-- vssadmin/diskshadow + shadow copy, फिर snapshot से target फ़ाइल कॉपी करें (यदि आप VSS बना सकते हैं; अक्सर admin की आवश्यकता होती है पर आम तौर पर वही ऑपरेटर्स जिनके पास SeManageVolumePrivilege होता है इनके पास उपलब्ध होता है)
+- Raw volume से specific files recover करने के लिए NTFS-aware tool का उपयोग करें:
+- RawCopy/RawCopy64 (in-use files की sector-level copy)
+- FTK Imager या The Sleuth Kit (read-only imaging, फिर files को carve करें)
+- vssadmin/diskshadow + shadow copy, फिर snapshot से target file copy करें (यदि आप VSS create कर सकते हैं; इसके लिए अक्सर admin privileges की आवश्यकता होती है, लेकिन ये privileges आमतौर पर उन्हीं operators के पास होते हैं जिनके पास SeManageVolumePrivilege होता है)
 
-Typical sensitive paths to target:
+Target करने के लिए सामान्यतः sensitive paths:
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
 - %ProgramData%\Microsoft\Crypto\Keys\
 - C:\Windows\System32\config\SAM, SYSTEM, SECURITY (local secrets)
-- C:\Windows\NTDS\ntds.dit (domain controllers – via shadow copy)
-- C:\Windows\System32\CertSrv\CertEnroll\ (CA certs/CRLs; private keys live in the machine key store above)
+- C:\Windows\NTDS\ntds.dit (domain controllers – shadow copy के माध्यम से)
+- C:\Windows\System32\CertSrv\CertEnroll\ (CA certs/CRLs; private keys ऊपर दिए गए machine key store में रहते हैं)
 
-## AD CS संबंध: Forging a Golden Certificate
+## AD CS tie‑in: Forging a Golden Certificate
 
-यदि आप machine key store से Enterprise CA की private key पढ़ सकते हैं, तो आप arbitrary principals के लिए client‑auth certificates forge कर सकते हैं और PKINIT/Schannel के माध्यम से authenticate कर सकते हैं। इसे अक्सर Golden Certificate कहा जाता है। देखें:
+यदि आप Enterprise CA की private key को machine key store से पढ़ सकते हैं, तो आप arbitrary principals के लिए client-auth certificates forge कर सकते हैं और PKINIT/Schannel के माध्यम से authenticate कर सकते हैं। इसे अक्सर Golden Certificate कहा जाता है।<sup>[[2]](#references)</sup> देखें:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
@@ -71,16 +71,16 @@ Typical sensitive paths to target:
 
 (Section: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
 
-## पहचान और हार्डनिंग
+## Detection and hardening
 
-- Strongly limit assignment of SeManageVolumePrivilege (Perform volume maintenance tasks) to only trusted admins.
-- Monitor Sensitive Privilege Use और process handle opens to device objects जैसे \\.\C:, \\.\PhysicalDrive0 को मॉनिटर करें।
-- HSM/TPM-backed CA keys या DPAPI-NG को प्राथमिकता दें ताकि raw file reads से key material usable रूप में recover न हो सके।
-- अपलोड, temp, और extraction paths को non-executable और अलग रखें (web context defense जो अक्सर इस chain post‑exploitation के साथ जुड़ती है).
+- SeManageVolumePrivilege (Perform volume maintenance tasks) का assignment केवल trusted admins तक सख्ती से सीमित करें।
+- Sensitive Privilege Use और \\.\C:, \\.\PhysicalDrive0 जैसे device objects के लिए process handle opens को monitor करें।
+- HSM/TPM-backed CA keys या DPAPI-NG को प्राथमिकता दें, ताकि raw file reads से key material usable form में recover न किया जा सके।
+- Uploads, temp और extraction paths को non-executable और अलग रखें (यह web context defense है, जो अक्सर इस post-exploitation chain के साथ उपयोग किया जाता है)।
 
 ## References
 
-- Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege): https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks
-- 0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate): https://0xdf.gitlab.io/2025/10/04/htb-certificate.html
+- [1] [Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
+- [2] [0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
 
 {{#include ../../banners/hacktricks-training.md}}

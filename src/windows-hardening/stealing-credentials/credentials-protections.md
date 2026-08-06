@@ -1,42 +1,42 @@
-# Windows क्रेडेंशियल सुरक्षा
+# Windows Credentials की सुरक्षा
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## WDigest
 
-[WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>) प्रोटोकॉल, जो Windows XP में पेश किया गया था, HTTP Protocol के माध्यम से प्रमाणीकरण के लिए डिज़ाइन किया गया है और **Windows XP से लेकर Windows 8.0 तथा Windows Server 2003 से Windows Server 2012 तक डिफ़ॉल्ट रूप से सक्षम** है। यह डिफ़ॉल्ट सेटिंग **LSASS में plain-text पासवर्ड संग्रहीत** होने का परिणाम देती है (Local Security Authority Subsystem Service)। एक हमलावर Mimikatz का उपयोग करके **इन क्रेडेंशियल्स को निकाल** सकता है, निम्नलिखित कमांड चलाकर:
+[WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>) protocol, जिसे Windows XP के साथ पेश किया गया था, HTTP Protocol के माध्यम से authentication के लिए बनाया गया है और यह **Windows XP से Windows 8.0 तक तथा Windows Server 2003 से Windows Server 2012 तक default रूप से enabled** है। इस default setting के कारण **LSASS** (Local Security Authority Subsystem Service) में **plain-text password storage** होता है। कोई attacker Mimikatz का उपयोग करके निम्नलिखित command चलाकर **इन credentials को extract** कर सकता है:<sup>[[8]](#references)</sup>
 ```bash
 sekurlsa::wdigest
 ```
-इस सुविधा को बंद या चालू करने के लिए, _**UseLogonCredential**_ और _**Negotiate**_ रजिस्ट्री कुंजियाँ _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ के भीतर "1" पर सेट होनी चाहिए। यदि ये कुंजियाँ **अनुपस्थित या "0" पर सेट** हैं, तो WDigest **अक्षम** है:
+**इस feature को off या on toggle करने के लिए**, _**UseLogonCredential**_ और _**Negotiate**_ registry keys को _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ के भीतर "1" पर set करना होगा। यदि ये keys **अनुपस्थित हों या "0" पर set हों**, तो WDigest **disabled** है:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
-## LSA सुरक्षा (PP & PPL संरक्षित प्रक्रियाएँ)
+## LSA Protection (PP और PPL protected processes)
 
-**Protected Process (PP)** और **Protected Process Light (PPL)** वे **Windows kernel-level protections** हैं जो **LSASS** जैसे संवेदनशील प्रक्रियाओं तक अनधिकृत पहुँच को रोकने के लिए बनाए गए हैं। इन्हें **Windows Vista** में पेश किया गया था; मूलतः **DRM** लागू करने के लिए बनाया गया था और केवल उन बाइनरीज़ को संरक्षित करने की अनुमति देता था जो एक **विशेष मीडिया प्रमाणपत्र (special media certificate)** से साइन किए गए हों। जिस प्रक्रिया पर **PP** चिह्नित होता है, उसे केवल अन्य ऐसी प्रक्रियाएँ एक्सेस कर सकती हैं जो **भी PP** हों और जिनका संरक्षण स्तर समान या उच्च हो, और तब भी **केवल सीमित एक्सेस अधिकारों** के साथ जब तक खास अनुमति न दी गई हो।
+**Protected Process (PP)** और **Protected Process Light (PPL)** **Windows kernel-level protections** हैं, जिन्हें **LSASS** जैसी sensitive processes तक unauthorized access को रोकने के लिए design किया गया है। **Windows Vista** में introduced, **PP model** मूल रूप से **DRM** enforcement के लिए बनाया गया था और केवल **special media certificate** से signed binaries को protected होने की अनुमति देता था। **PP** के रूप में marked process को केवल अन्य ऐसे processes access कर सकते हैं जो **also PP** हों और जिनका **protection level equal or higher** हो, और तब भी **only with limited access rights**, जब तक विशेष रूप से अनुमति न दी गई हो।
 
-**PPL**, जिसे **Windows 8.1** में पेश किया गया था, PP का अधिक लचीला संस्करण है। यह **विस्तृत उपयोग मामलों** (उदा., LSASS, Defender) की अनुमति देता है, क्योंकि यह डिजिटल सिग्नेचर के **EKU (Enhanced Key Usage)** फ़ील्ड पर आधारित **"protection levels"** प्रस्तुत करता है। प्रोटेक्शन स्तर `EPROCESS.Protection` फ़ील्ड में संग्रहीत होता है, जो एक `PS_PROTECTION` संरचना है जिसमें:
-- **Type** (`Protected` or `ProtectedLight`)
-- **Signer** (उदा., `WinTcb`, `Lsa`, `Antimalware`, आदि)
+**Windows 8.1** में introduced **PPL**, PP का अधिक flexible version है। यह **"protection levels"** introduce करके **broader use cases** (जैसे LSASS, Defender) की अनुमति देता है, जो **digital signature’s EKU (Enhanced Key Usage)** field पर आधारित होते हैं। Protection level को `EPROCESS.Protection` field में store किया जाता है, जो एक `PS_PROTECTION` structure है और इसमें ये शामिल होते हैं:
+- **Type** (`Protected` या `ProtectedLight`)
+- **Signer** (जैसे `WinTcb`, `Lsa`, `Antimalware`, आदि)
 
-यह संरचना एक ही बाइट में पैक होती है और यह निर्धारित करती है **कौन किसे एक्सेस कर सकता है**:
-- **ऊँचे signer मान निचले signer को एक्सेस कर सकते हैं**
-- **PPLs PPs को एक्सेस नहीं कर सकते**
-- **Unprotected प्रक्रियाएँ किसी भी PPL/PP को एक्सेस नहीं कर सकतीं**
+यह structure एक single byte में packed होता है और निर्धारित करता है कि **कौन किसे access कर सकता है**:
+- **Higher signer values lower ones को access कर सकती हैं**
+- **PPLs, PPs को access नहीं कर सकते**
+- **Unprotected processes किसी भी PPL/PP को access नहीं कर सकते**
 
-### Offensive दृष्टिकोण से आपको क्या जानना चाहिए
+### Offensive perspective से आपको क्या जानना चाहिए
 
-- जब **LSASS PPL** के रूप में चलता है, तो एक सामान्य admin context से `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` का उपयोग करके इसे खोलने का प्रयास `0x5 (Access Denied)` के साथ विफल हो जाता है, भले ही `SeDebugPrivilege` सक्षम हो।
-- आप Process Hacker जैसे टूल्स का उपयोग करके या प्रोग्रामैटिकली `EPROCESS.Protection` मान पढ़कर LSASS का protection स्तर जांच सकते हैं।
-- LSASS में आमतौर पर `PsProtectedSignerLsa-Light` (`0x41`) होता है, जिसे केवल उन प्रक्रियाओं द्वारा एक्सेस किया जा सकता है जो उच्च-स्तरीय signer, जैसे `WinTcb` (`0x61` या `0x62`), द्वारा साइन की गई हों।
-- PPL केवल Userland-स्तर का प्रतिबंध है; kernel-level कोड इसे पूरी तरह बायपास कर सकता है।
-- यदि आप kernel shellcode execute कर सकते हैं या उपयुक्त एक्सेस के साथ किसी high-privileged प्रक्रिया का उपयोग कर सकते हैं, तो LSASS का PPL होना credential dumping को रोक नहींता।
-- PPL सेट/हटाने के लिए reboot या Secure Boot/UEFI सेटिंग्स की आवश्यकता होती है, जो रजिस्ट्री परिवर्तन उलट दिए जाने के बाद भी PPL सेटिंग को कायम रख सकती हैं।
+- जब **LSASS, PPL के रूप में run करता है**, तो normal admin context से `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` का उपयोग करके इसे open करने के attempts **`0x5 (Access Denied)`** के साथ fail हो जाते हैं, भले ही `SeDebugPrivilege` enabled हो।
+- आप Process Hacker जैसे tools का उपयोग करके या programmatically `EPROCESS.Protection` value को read करके **LSASS protection level** check कर सकते हैं।
+- LSASS में आमतौर पर `PsProtectedSignerLsa-Light` (`0x41`) होता है, जिसे केवल **higher-level signer** से signed processes access कर सकते हैं, जैसे `WinTcb` (`0x61` या `0x62`)।
+- PPL एक **Userland-only restriction** है; **kernel-level code इसे पूरी तरह bypass कर सकता है**।
+- LSASS का PPL होना credential dumping को नहीं रोकता, यदि आप **kernel shellcode execute** कर सकते हैं या **proper access वाले high-privileged process** का **leverage** कर सकते हैं।
+- **PPL को set या remove करने** के लिए reboot या **Secure Boot/UEFI settings** की आवश्यकता होती है, जो registry changes को reverse करने के बाद भी PPL setting को persist कर सकती हैं।
 
 ### Create a PPL process at launch (documented API)
 
-Windows documented तरीका प्रदान करता है जिससे आप child process के निर्माण के दौरान extended startup attribute list का उपयोग करके Protected Process Light स्तर का अनुरोध कर सकते हैं। यह signing requirements को बायपास नहीं करता — लक्ष्य image को requested signer class के लिए साइन किया गया होना चाहिए।
+Windows extended startup attribute list का उपयोग करके child process creation के दौरान Protected Process Light level request करने का एक documented तरीका provide करता है। यह signing requirements को bypass नहीं करता — target image requested signer class के लिए signed होना चाहिए।
 
 Minimal flow in C/C++:
 ```c
@@ -80,95 +80,79 @@ CloseHandle(pi.hProcess);
 return 0;
 }
 ```
-नोट्स और सीमाएँ:
-- `STARTUPINFOEX` का उपयोग करें `InitializeProcThreadAttributeList` और `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL, ...)` के साथ, फिर `EXTENDED_STARTUPINFO_PRESENT` को `CreateProcess*` को पास करें।
-- प्रोटेक्शन `DWORD` को उन कॉन्स्टेंट्स पर सेट किया जा सकता है जैसे `PROTECTION_LEVEL_WINTCB_LIGHT`, `PROTECTION_LEVEL_WINDOWS`, `PROTECTION_LEVEL_WINDOWS_LIGHT`, `PROTECTION_LEVEL_ANTIMALWARE_LIGHT`, या `PROTECTION_LEVEL_LSA_LIGHT`।
-- चाइल्ड केवल तभी PPL के रूप में शुरू होता है जब उसकी इमेज उस signer क्लास के लिए साइन की गई हो; अन्यथा process creation विफल हो जाती है, आम तौर पर `ERROR_INVALID_IMAGE_HASH (577)` / `STATUS_INVALID_IMAGE_HASH (0xC0000428)` के साथ।
-- यह कोई bypass नहीं है — यह एक समर्थित API है जो उपयुक्त रूप से साइन किए गए इमेज के लिए है। यह टूल्स को harden करने या PPL-प्रोटेक्टेड कॉन्फ़िगरेशन को वैध करने के लिए उपयोगी है।
+Notes और constraints:
+- `STARTUPINFOEX` का उपयोग `InitializeProcThreadAttributeList` और `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL, ...)` के साथ करें, फिर `CreateProcess*` को `EXTENDED_STARTUPINFO_PRESENT` पास करें।<sup>[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+- Protection `DWORD` को `PROTECTION_LEVEL_WINTCB_LIGHT`, `PROTECTION_LEVEL_WINDOWS`, `PROTECTION_LEVEL_WINDOWS_LIGHT`, `PROTECTION_LEVEL_ANTIMALWARE_LIGHT`, या `PROTECTION_LEVEL_LSA_LIGHT` जैसे constants पर सेट किया जा सकता है।
+- Child केवल तभी PPL के रूप में शुरू होता है जब उसकी image उस signer class के लिए signed हो; अन्यथा process creation विफल हो जाता है, आमतौर पर `ERROR_INVALID_IMAGE_HASH (577)` / `STATUS_INVALID_IMAGE_HASH (0xC0000428)` के साथ।
+- यह कोई bypass नहीं है — यह appropriately signed images के लिए बनाया गया supported API है। Tools को harden करने या PPL-protected configurations को validate करने के लिए उपयोगी है।
 
-Example CLI using a minimal loader:
+Minimal loader का उपयोग करने वाला Example CLI:<sup>[[1]](#references)</sup>
 - Antimalware signer: `CreateProcessAsPPL.exe 3 C:\Tools\agent.exe --svc`
 - LSA-light signer: `CreateProcessAsPPL.exe 4 C:\Windows\System32\notepad.exe`
 
-**Bypass PPL protections options:**
+**PPL protections को bypass करने के options:**
 
-यदि आप PPL के बावजूद LSASS को dump करना चाहते हैं, तो आपके पास मुख्य रूप से ये विकल्प हैं:
-1. **साइन किए हुए कर्नेल ड्राइवर का उपयोग करें (उदा., Mimikatz + mimidrv.sys)** ताकि **LSASS का protection flag हटाया जा सके**:
+यदि आप PPL के बावजूद LSASS को dump करना चाहते हैं, तो आपके पास 3 मुख्य options हैं:
+1. **एक signed kernel driver (जैसे, Mimikatz + mimidrv.sys) का उपयोग करके** **LSASS का protection flag हटाएँ**:
 
-![](../../images/mimidrv.png)
+![Credential protection interaction दिखाने वाला Mimikatz mimidrv driver output](../../images/mimidrv.png)
 
-2. **Bring Your Own Vulnerable Driver (BYOVD)** लाकर कस्टम कर्नेल कोड चलाएँ और प्रोटेक्शन को निष्क्रिय करें। टूल्स जैसे **PPLKiller**, **gdrv-loader**, या **kdmapper** यह संभव बनाते हैं।
-3. किसी ऐसे प्रोसेस से जो उसे ओपन किए हुए है (उदा., एक AV प्रोसेस), मौजूदा LSASS हैंडल को चुरा लें, फिर उसे अपने प्रोसेस में duplicate करें। यह `pypykatz live lsa --method handledup` तकनीक का आधार है।
-4. किसी प्रिविलेज्ड प्रोसेस का दुरुपयोग करें जो आपको उसके address space में या किसी अन्य प्रिविलेज्ड प्रोसेस के अंदर arbitrary code लोड करने की अनुमति दे, जिससे प्रभावी रूप से PPL प्रतिबंधों को बाईपास किया जा सके। आप इसका उदाहरण [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) या [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump) में देख सकते हैं।
+2. **Bring Your Own Vulnerable Driver (BYOVD)** का उपयोग करके custom kernel code चलाएँ और protection को disable करें। **PPLKiller**, **gdrv-loader**, या **kdmapper** जैसे tools इसे संभव बनाते हैं।
+3. किसी अन्य process से **मौजूदा LSASS handle चुराएँ**, जिसमें वह खुला हो (जैसे, कोई AV process), फिर उसे **अपने process में duplicate करें**। यही `pypykatz live lsa --method handledup` technique का आधार है।
+4. किसी **privileged process** का दुरुपयोग करें, जो आपको उसके address space में या किसी अन्य privileged process के अंदर arbitrary code load करने की अनुमति देता हो, जिससे प्रभावी रूप से PPL restrictions bypass हो जाती हैं। इसका एक example [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) या [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump) में देख सकते हैं।
 
-**Check current status of LSA protection (PPL/PP) for LSASS**:
+**LSA protection (PPL/PP) for LSASS की current status जाँचें**:
 ```bash
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
-When you running **`mimikatz privilege::debug sekurlsa::logonpasswords`** it'll probably fail with the error code `0x00000005` becasue of this.
+जब आप **`mimikatz privilege::debug sekurlsa::logonpasswords`** चलाते हैं, तो यह संभवतः `0x00000005` error code के साथ fail हो जाएगा, क्योंकि ऐसा है।
 
-- इस जांच के बारे में अधिक जानकारी के लिए [https://itm4n.github.io/lsass-runasppl/](https://itm4n.github.io/lsass-runasppl/)
+- इस check के बारे में अधिक जानकारी के लिए [https://itm4n.github.io/lsass-runasppl/](https://itm4n.github.io/lsass-runasppl/)<sup>[[5]](#references)</sup>
 
 
 ## Credential Guard
 
-**Credential Guard**, a feature exclusive to **Windows 10 (Enterprise and Education editions)**, मशीन क्रेडेंशियल्स की सुरक्षा को बढ़ाता है Virtual Secure Mode (VSM) और Virtualization Based Security (VBS) का उपयोग करके। यह CPU virtualization extensions का लाभ उठाकर मुख्य ऑपरेटिंग सिस्टम की पहुँच से दूर एक सुरक्षित मेमोरी स्पेस में महत्वपूर्ण प्रक्रियाओं को अलग करता है। यह अलगाव यह सुनिश्चित करता है कि kernel भी VSM में मेमोरी तक पहुँच नहीं पा सके, जिससे pass-the-hash जैसे हमलों से क्रेडेंशियल्स का प्रभावी रूप से संरक्षण होता है। Local Security Authority (LSA) इस सुरक्षित वातावरण के भीतर एक trustlet के रूप में चलती है, जबकि मुख्य OS में LSASS प्रक्रिया केवल VSM की LSA के साथ संवादकर्ता के रूप में कार्य करती है।
+**Credential Guard**, जो केवल **Windows 10 (Enterprise and Education editions)** के लिए उपलब्ध feature है, **Virtual Secure Mode (VSM)** और **Virtualization Based Security (VBS)** का उपयोग करके machine credentials की security को बढ़ाता है। यह CPU virtualization extensions का उपयोग करके key processes को एक protected memory space के भीतर isolate करता है, जो मुख्य operating system की पहुंच से दूर होता है। यह isolation सुनिश्चित करता है कि kernel भी VSM में मौजूद memory तक पहुंच न सके, जिससे credentials को **pass-the-hash** जैसे attacks से प्रभावी रूप से सुरक्षित रखा जा सके। **Local Security Authority (LSA)** इस secure environment के भीतर एक trustlet के रूप में operate करता है, जबकि मुख्य OS में मौजूद **LSASS** process केवल VSM के LSA के साथ communicator के रूप में कार्य करता है।
 
-डिफ़ॉल्ट रूप से, **Credential Guard** सक्रिय नहीं होता और इसे संगठन के भीतर मैन्युअल रूप से सक्षम करना पड़ता है। यह Mimikatz जैसे टूल्स के खिलाफ सुरक्षा बढ़ाने के लिए महत्वपूर्ण है, क्योंकि ये क्रेडेंशियल्स निकालने में बाधित होते हैं। हालांकि, कस्टम Security Support Providers (SSP) जोड़कर लॉगिन प्रयासों के दौरान क्रेडेंशियल्स को clear text में कैप्चर करने के लिए कमजोरियों का अभी भी फायदा उठाया जा सकता है।
+By default, **Credential Guard** active नहीं होता और organization के भीतर इसे manually activate करना आवश्यक होता है। यह **Mimikatz** जैसे tools के विरुद्ध security बढ़ाने के लिए महत्वपूर्ण है, क्योंकि इनकी credentials extract करने की क्षमता बाधित हो जाती है। हालांकि, login attempts के दौरान credentials को clear text में capture करने के लिए custom **Security Support Providers (SSP)** जोड़कर vulnerabilities का अब भी exploit किया जा सकता है।
 
-Credential Guard की सक्रियता स्थिति की जाँच के लिए रजिस्ट्री कुंजी _**LsaCfgFlags**_ _**HKLM\System\CurrentControlSet\Control\LSA**_ के अंतर्गत निरीक्षण की जा सकती है। यदि मान "**1**" है तो यह UEFI lock के साथ सक्रिय होने को दर्शाता है, "**2**" lock के बिना सक्रियता को दर्शाता है, और "**0**" दर्शाता है कि यह सक्षम नहीं है। यह रजिस्ट्री जाँच एक मजबूत संकेतक होते हुए भी Credential Guard सक्षम करने का एकमात्र कदम नहीं है। इस फीचर को सक्षम करने के लिए विस्तृत मार्गदर्शन और एक PowerShell स्क्रिप्ट ऑनलाइन उपलब्ध हैं।
+**Credential Guard** की activation status verify करने के लिए _**HKLM\System\CurrentControlSet\Control\LSA**_ के अंतर्गत registry key _**LsaCfgFlags**_ का inspection किया जा सकता है। "**1**" का value **UEFI lock** के साथ activation दर्शाता है, "**2**" बिना lock के activation दर्शाता है, और "**0**" का अर्थ है कि यह enabled नहीं है। यह registry check एक strong indicator है, लेकिन Credential Guard को enable करने के लिए यह एकमात्र step नहीं है। इस feature को enable करने के लिए detailed guidance और एक PowerShell script online उपलब्ध हैं।
 ```bash
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
-For a comprehensive understanding and instructions on enabling **Credential Guard** in Windows 10 and its automatic activation in compatible systems of **Windows 11 Enterprise and Education (version 22H2)**, visit [Microsoft's documentation](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
+Windows 10 में **Credential Guard** को enable करने और **Windows 11 Enterprise and Education (version 22H2)** के compatible systems में इसके automatic activation को समझने और enable करने के विस्तृत instructions के लिए [Microsoft's documentation](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage) देखें।<sup>[[9]](#references)</sup>
 
-Further details on implementing custom SSPs for credential capture are provided in [this guide](../active-directory-methodology/custom-ssp.md).
-
-## RDP RestrictedAdmin Mode
-
-**Windows 8.1 and Windows Server 2012 R2** ने कई नई सुरक्षा सुविधाएँ पेश कीं, जिनमें _**Restricted Admin mode for RDP**_ शामिल है। यह मोड [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) हमलों से संबंधित जोखिमों को कम करने के लिए डिज़ाइन किया गया था।
-
-परंपरागत रूप से, RDP के माध्यम से किसी रिमोट कंप्यूटर से कनेक्ट करते समय आपकी credentials लक्ष्य मशीन पर संग्रहीत हो जाती हैं। यह विशेष रूप से उच्च privileges वाले खातों के उपयोग के समय एक महत्वपूर्ण सुरक्षा जोखिम पैदा करता है। हालांकि, _**Restricted Admin mode**_ के परिचय के साथ, यह जोखिम काफी हद तक कम हो जाता है।
-
-जब आप कमांड **mstsc.exe /RestrictedAdmin** का उपयोग करके RDP कनेक्शन प्रारंभ करते हैं, तो remote computer पर authentication आपकी credentials को वहां संग्रहीत किए बिना किया जाता है। इस तरीके से यह सुनिश्चित होता है कि किसी malware संक्रमण या किसी malicious user के रिमोट सर्वर तक पहुँचने की स्थिति में आपकी credentials सुरक्षित रहती हैं, क्योंकि वे सर्वर पर संग्रहीत नहीं होतीं।
-
-यह ध्यान रखना महत्वपूर्ण है कि **Restricted Admin mode** में RDP सेशन से नेटवर्क संसाधनों तक पहुँचने के प्रयास आपके व्यक्तिगत credentials का उपयोग नहीं करेंगे; इसके बजाय **machine's identity** का उपयोग किया जाएगा।
-
-यह फीचर रिमोट डेस्कटॉप कनेक्शनों को सुरक्षित करने और सुरक्षा उल्लंघन की स्थिति में संवेदनशील जानकारी के उजागर होने से बचाने में एक महत्वपूर्ण कदम है।
-
-![](../../images/RAM.png)
-
-For more detailed information on visit [this resource](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+Credential capture के लिए custom SSPs लागू करने की अधिक जानकारी [this guide](../active-directory-methodology/custom-ssp.md) में दी गई है।
 
 ## Cached Credentials
 
-Windows अपने **domain credentials** को **Local Security Authority (LSA)** के माध्यम से सुरक्षित रखता है, और logon प्रक्रियाओं के लिए **Kerberos** और **NTLM** जैसे security protocols का समर्थन करता है। Windows की एक प्रमुख विशेषता यह है कि यह **last ten domain logins** को cache कर सकता है ताकि यूज़र अपने कंप्यूटरों तक तब भी पहुँच सकें जब **domain controller** offline हो—यह खासकर उन laptop उपयोगकर्ताओं के लिए लाभकारी है जो अक्सर अपने कंपनी के नेटवर्क से दूर रहते हैं।
+Windows, **Local Security Authority (LSA)** के माध्यम से **domain credentials** को secure करता है और **Kerberos** तथा **NTLM** जैसे security protocols के साथ logon processes को support करता है। Windows की एक महत्वपूर्ण feature **last ten domain logins** को cache करने की क्षमता है, जिससे **domain controller is offline** होने पर भी users अपने computers को access कर सकते हैं—यह उन laptop users के लिए उपयोगी है जो अक्सर अपनी company के network से बाहर रहते हैं।
 
-Cached logins की संख्या को एक विशिष्ट **registry key or group policy** के माध्यम से समायोजित किया जा सकता है। इस सेटिंग को देखने या बदलने के लिए निम्नलिखित command का उपयोग किया जाता है:
+Cached logins की संख्या एक specific **registry key or group policy** के माध्यम से adjust की जा सकती है। इस setting को view या change करने के लिए निम्न command का उपयोग किया जाता है:
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
-Access to these cached credentials is tightly controlled, with only the **SYSTEM** account having the necessary permissions to view them. Administrators needing to access this information must do so with SYSTEM user privileges. The credentials are stored at: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
+इन cached credentials तक पहुंच को कड़ाई से नियंत्रित किया जाता है, और केवल **SYSTEM** account के पास इन्हें देखने के लिए आवश्यक permissions होती हैं। इन जानकारियों तक पहुंचने वाले Administrators को SYSTEM user privileges के साथ ऐसा करना आवश्यक है। Credentials यहां stored होते हैं: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
 
-**Mimikatz** can be employed to extract these cached credentials using the command `lsadump::cache`.
+**Mimikatz** का उपयोग command `lsadump::cache` के जरिए इन cached credentials को extract करने के लिए किया जा सकता है।
 
-For further details, the original [source](http://juggernaut.wikidot.com/cached-credentials) provides comprehensive information.
+अधिक जानकारी के लिए, मूल [source](http://juggernaut.wikidot.com/cached-credentials) में विस्तृत जानकारी दी गई है।<sup>[[7]](#references)</sup>
 
 ## Protected Users
 
-Membership in the **Protected Users group** introduces several security enhancements for users, ensuring higher levels of protection against credential theft and misuse:
+**Protected Users group** की membership users के लिए कई security enhancements लागू करती है, जिससे credential theft और misuse के विरुद्ध protection का स्तर बढ़ जाता है:
 
-- **Credential Delegation (CredSSP)**: भले ही Group Policy setting **Allow delegating default credentials** सक्षम हो, Protected Users के plain text credentials कैश नहीं होंगे।
-- **Windows Digest**: **Windows 8.1 and Windows Server 2012 R2** से शुरू होकर, सिस्टम Protected Users के plain text credentials को कैश नहीं करेगा, चाहे Windows Digest की स्थिति कुछ भी हो।
-- **NTLM**: सिस्टम Protected Users के plain text credentials या NT one-way functions (NTOWF) को कैश नहीं करेगा।
-- **Kerberos**: Protected Users के लिए, Kerberos authentication **DES** या **RC4 keys** जेनरेट नहीं करेगा, न ही initial Ticket-Granting Ticket (TGT) प्राप्ति के बाद plain text credentials या long-term keys को कैश करेगा।
-- **Offline Sign-In**: Protected Users के लिए sign-in या unlock के समय cached verifier नहीं बनाया जाएगा, जिसका अर्थ है कि इन accounts के लिए offline sign-in समर्थित नहीं है।
+- **Credential Delegation (CredSSP)**: भले ही Group Policy में **Allow delegating default credentials** setting enabled हो, Protected Users के plain text credentials cache नहीं किए जाएंगे।
+- **Windows Digest**: **Windows 8.1 और Windows Server 2012 R2** से शुरू होकर, Windows Digest की status चाहे जो भी हो, system Protected Users के plain text credentials cache नहीं करेगा।
+- **NTLM**: System Protected Users के plain text credentials या NT one-way functions (NTOWF) cache नहीं करेगा।
+- **Kerberos**: Protected Users के लिए, Kerberos authentication **DES** या **RC4 keys** generate नहीं करेगा और initial Ticket-Granting Ticket (TGT) acquisition के बाद plain text credentials या long-term keys को cache नहीं करेगा।
+- **Offline Sign-In**: Protected Users के लिए sign-in या unlock के समय cached verifier create नहीं किया जाएगा, इसलिए इन accounts के लिए offline sign-in supported नहीं है।
 
-ये protections उस समय सक्रिय हो जाती हैं जब कोई user, जो **Protected Users group** का सदस्य होता है, डिवाइस में साइन-इन करता है। यह सुनिश्चित करता है कि credential compromise के विभिन्न तरीकों के खिलाफ महत्वपूर्ण सुरक्षा उपाय लागू हों।
+ये protections उसी क्षण activate हो जाती हैं जब **Protected Users group** का member कोई user device में sign in करता है। इससे यह सुनिश्चित होता है कि credential compromise के विभिन्न तरीकों से सुरक्षा के लिए महत्वपूर्ण security measures लागू हों।
 
-For more detailed information, consult the official [documentation](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
+अधिक विस्तृत जानकारी के लिए official [documentation](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group) देखें।<sup>[[10]](#references)</sup>
 
-**Table from** [**the docs**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
+**[docs](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory) से table**।<sup>[[11]](#references)</sup>
 
 | Windows Server 2003 RTM | Windows Server 2003 SP1+ | <p>Windows Server 2012,<br>Windows Server 2008 R2,<br>Windows Server 2008</p> | Windows Server 2016          |
 | ----------------------- | ------------------------ | ----------------------------------------------------------------------------- | ---------------------------- |
@@ -186,15 +170,21 @@ For more detailed information, consult the official [documentation](https://docs
 | Print Operators         | Print Operators          | Print Operators                                                               | Print Operators              |
 |                         |                          | Read-only Domain Controllers                                                  | Read-only Domain Controllers |
 | Replicator              | Replicator               | Replicator                                                                    | Replicator                   |
-| Schema Admins           | Schema Admins            | Schema Admins                                                                 | Schema Admins                |
-| Server Operators        | Server Operators         | Server Operators                                                              | Server Operators             |
+| Schema Admins            | Schema Admins            | Schema Admins                                                                 | Schema Admins                |
+| Server Operators        | Server Operators        | Server Operators                                                              | Server Operators             |
 
 ## References
 
-- [CreateProcessAsPPL – minimal PPL process launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
-- [STARTUPINFOEX structure (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-startupinfoexw)
-- [InitializeProcThreadAttributeList (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-initializeprocthreadattributelist)
-- [UpdateProcThreadAttribute (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
-- [LSASS RunAsPPL – background and internals](https://itm4n.github.io/lsass-runasppl/)
+- [1] [CreateProcessAsPPL – minimal PPL process launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
+- [2] [STARTUPINFOEX structure (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-startupinfoexw)
+- [3] [InitializeProcThreadAttributeList (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-initializeprocthreadattributelist)
+- [4] [UpdateProcThreadAttribute (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
+- [5] [LSASS RunAsPPL – background and internals](https://itm4n.github.io/lsass-runasppl/)
+- [6] [Restricted Admin Mode for RDP](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/)
+- [7] [Cached Credentials - Juggernaut AppSec Wiki](http://juggernaut.wikidot.com/cached-credentials)
+- [8] [WDigest Authentication (Microsoft TechNet)](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>)
+- [9] [Manage Windows Defender Credential Guard (Microsoft Learn)](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage)
+- [10] [Protected Users Security Group (Microsoft Learn)](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group)
+- [11] [Appendix C: Protected Accounts and Groups in Active Directory (Microsoft Learn)](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)
 
 {{#include ../../banners/hacktricks-training.md}}

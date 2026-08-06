@@ -2,46 +2,48 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-जब Windows Telephony service (TapiSrv, `tapisrv.dll`) को **TAPI server** के रूप में कॉन्फ़िगर किया जाता है, तो यह प्रमाणीकृत SMB क्लाइंट्स को **`tapsrv` MSRPC interface को `\pipe\tapsrv` named pipe पर एक्सपोज़ करता है**। रिमोट क्लाइंट्स के लिए asynchronous event delivery में एक डिज़ाइन बग एक हमलावर को mailslot handle को किसी भी पहले से मौजूद ऐसी फ़ाइल पर **नियंत्रित 4‑byte write** में बदलने देता है जो `NETWORK SERVICE` द्वारा writable हो। इस primitive को चैन करके Telephony admin list को overwrite किया जा सकता है और एक **admin-only arbitrary DLL load** का दुरुपयोग करके `NETWORK SERVICE` के रूप में कोड execute करवाया जा सकता है।
+जब Windows Telephony service (TapiSrv, `tapisrv.dll`) को **TAPI server** के रूप में configure किया जाता है, तो यह authenticated SMB clients के लिए **`\pipe\tapsrv` named pipe** पर **`tapsrv` MSRPC interface** expose करती है। Remote clients के लिए asynchronous event delivery में मौजूद design bug attacker को mailslot handle को **`NETWORK SERVICE` द्वारा writable किसी भी पहले से मौजूद file में controlled 4-byte write** में बदलने देता है। इस primitive को Telephony admin list को overwrite करने और **admin-only arbitrary DLL load** का abuse करने के लिए chain किया जा सकता है, जिससे code `NETWORK SERVICE` के रूप में execute होता है।<sup>[[1]](#references)</sup>
 
-## हमला सतह
-- **केवल सक्षम होने पर रिमोट एक्सपोज़र**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Telephony\Server\DisableSharing` को शेयरिंग की अनुमति देनी चाहिए (या `TapiMgmt.msc` / `tcmsetup /c <server>` के माध्यम से कॉन्फ़िगर)। डिफ़ॉल्ट रूप से `tapsrv` केवल लोकल-ओनली होता है।
-- Interface: MS-TRP (`tapsrv`) over **SMB named pipe**, इसलिए हमलावर को वैध SMB auth चाहिए।
-- Service account: `NETWORK SERVICE` (मैन्युअल स्टार्ट, ऑन‑डिमैंड)।
+## Attack Surface
+
+- **केवल enabled होने पर remote exposure**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Telephony\Server\DisableSharing` को sharing allow करना चाहिए (या `TapiMgmt.msc` / `tcmsetup /c <server>` के माध्यम से configure किया जाना चाहिए)। Default रूप से `tapsrv` local-only होता है।
+- Interface: **SMB named pipe** पर MS-TRP (`tapsrv`), इसलिए attacker को valid SMB auth की आवश्यकता होती है।
+- Service account: `NETWORK SERVICE` (manual start, on-demand)।<sup>[[1]](#references)</sup>
 
 ## Primitive: Mailslot Path Confusion → Arbitrary DWORD Write
-- `ClientAttach(pszDomainUser, pszMachine, ...)` async event delivery को initialize करता है। pull mode में, सर्विस यह करती है:
+- `ClientAttach(pszDomainUser, pszMachine, ...)` async event delivery को initialize करता है। Pull mode में service यह करती है:
 ```c
 CreateFileW(pszDomainUser, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 ```
-बिना यह validate किए कि `pszDomainUser` एक mailslot path (`\\*\MAILSLOT\...`) है। किसी भी **पहले से मौजूद फ़ाइल सिस्टम पथ** को स्वीकार कर लिया जाता है जो `NETWORK SERVICE` द्वारा writable हो।
-- हर async event write खोले गए handle पर एक single **`DWORD` = `InitContext`** (जो बाद की `Initialize` request में हमलावर द्वारा नियंत्रित होता है) स्टोर करता है, जिससे **write-what/write-where (4 bytes)** प्राप्त होता है।
+यह validate किए बिना कि `pszDomainUser` एक mailslot path (`\\*\MAILSLOT\...`) है, किसी भी **existing filesystem path** को स्वीकार कर लेती है, यदि वह `NETWORK SERVICE` द्वारा writable हो।
+- प्रत्येक async event write opened handle पर एक single **`DWORD` = `InitContext`** store करता है (`InitContext` subsequent `Initialize` request में attacker-controlled होता है), जिससे **write-what/write-where (4 bytes)** primitive प्राप्त होती है।<sup>[[1]](#references)</sup>
 
-## Deterministic Writes को मजबूर करना
-1. **टार्गेट फ़ाइल खोलें**: `ClientAttach` के साथ `pszDomainUser = <existing writable path>` (उदा., `C:\Windows\TAPI\tsec.ini`)।
-2. हर `DWORD` लिखने के लिए, `ClientRequest` के खिलाफ यह RPC अनुक्रम निष्पादित करें:
-- `Initialize` (`Req_Func 47`): `InitContext = <4-byte value>` सेट करें और `pszModuleName = DIALER.EXE` (या per-user priority list में शीर्ष कोई और एंट्री)।
-- `LRegisterRequestRecipient` (`Req_Func 61`): `dwRequestMode = LINEREQUESTMODE_MAKECALL`, `bEnable = 1` (line app को रजिस्टर करता है, highest priority recipient को पुनः गणना करता है)।
-- `TRequestMakeCall` (`Req_Func 121`): `NotifyHighestPriorityRequestRecipient` को फोर्स करता है, जिससे async event जनरेट होता है।
+## Forcing Deterministic Writes
+1. **Target file open करें**: `pszDomainUser = <existing writable path>` के साथ `ClientAttach` करें (उदाहरण के लिए, `C:\Windows\TAPI\tsec.ini`)।
+2. प्रत्येक `DWORD` write करने के लिए `ClientRequest` के विरुद्ध यह RPC sequence execute करें:
+- `Initialize` (`Req_Func 47`): `InitContext = <4-byte value>` और `pszModuleName = DIALER.EXE` (या per-user priority list में कोई अन्य top entry) set करें।
+- `LRegisterRequestRecipient` (`Req_Func 61`): `dwRequestMode = LINEREQUESTMODE_MAKECALL`, `bEnable = 1` (line app को register करता है और highest priority recipient को फिर से calculate करता है)।
+- `TRequestMakeCall` (`Req_Func 121`): `NotifyHighestPriorityRequestRecipient` को force करता है और async event generate करता है।
 - `GetAsyncEvents` (`Req_Func 0`): write को dequeue/complete करता है।
-- `LRegisterRequestRecipient` को फिर `bEnable = 0` के साथ कॉल करें (unregister)।
-- `Shutdown` (`Req_Func 86`) से line app को teardown करें।
-- Priority control: “highest priority” recipient का चयन `pszModuleName` की तुलना करके किया जाता है `HKCU\Software\Microsoft\Windows\CurrentVersion\Telephony\HandoffPriorities\RequestMakeCall` के साथ (क्लाइंट की impersonation के दौरान पढ़ा जाता है)। यदि आवश्यक हो तो अपना module name `LSetAppPriority` (`Req_Func 69`) के जरिए डालें।
-- फ़ाइल **पहले से मौजूद होनी चाहिए** क्योंकि `OPEN_EXISTING` उपयोग किया जाता है। सामान्य `NETWORK SERVICE`-writable उम्मीदवार: `C:\Windows\System32\catroot2\dberr.txt`, `C:\Windows\ServiceProfiles\NetworkService\AppData\Local\Temp\MpCmdRun.log`, `...\MpSigStub.log`।
+- `LRegisterRequestRecipient` को फिर से `bEnable = 0` के साथ चलाएं (unregister करें)।
+- `Shutdown` (`Req_Func 86`) चलाकर line app को tear down करें।
+- Priority control: “highest priority” recipient का चयन `HKCU\Software\Microsoft\Windows\CurrentVersion\Telephony\HandoffPriorities\RequestMakeCall` के विरुद्ध `pszModuleName` compare करके किया जाता है (इसे client को impersonate करते हुए read किया जाता है)। आवश्यकता होने पर `LSetAppPriority` (`Req_Func 69`) के माध्यम से अपना module name insert करें।
+- File का पहले से मौजूद होना आवश्यक है, क्योंकि `OPEN_EXISTING` का उपयोग किया जाता है। `NETWORK SERVICE` द्वारा writable common candidates: `C:\Windows\System32\catroot2\dberr.txt`, `C:\Windows\ServiceProfiles\NetworkService\AppData\Local\Temp\MpCmdRun.log`, `...\MpSigStub.log`।<sup>[[1]](#references)</sup>
 
-## From DWORD Write to RCE inside TapiSrv
-1. **खुद को Telephony “admin” बनवाएँ**: `C:\Windows\TAPI\tsec.ini` को टार्गेट करें और ऊपर बताए गए 4‑byte writes का उपयोग करके `[TapiAdministrators]\r\n<DOMAIN\\user>=1` जोड़ें। एक **नई** session (`ClientAttach`) शुरू करें ताकि सर्विस INI को फिर से पढ़े और आपके खाते के लिए `ptClient->dwFlags |= 9` सेट करे।
-2. **Admin-only DLL load**: `GetUIDllName` भेजें साथ में `dwObjectType = TUISPIDLL_OBJECT_PROVIDERID` और `dwProviderFilenameOffset` के माध्यम से एक path प्रदान करें। admins के लिए, सर्विस `LoadLibrary(path)` करती है फिर export `TSPI_providerUIIdentify` को कॉल करती है:
-- यह एक वास्तविक Windows SMB share के UNC paths के साथ काम करता है; कुछ attacker SMB सर्वर `ERROR_SMB_GUEST_LOGON_BLOCKED` के साथ fail कर जाते हैं।
-- वैकल्पिक: समान 4‑byte write primitive का उपयोग करके धीरे-धीरे एक लोकल DLL ड्रॉप करें, फिर उसे लोड करें।
-3. **Payload**: export `NETWORK SERVICE` के अंतर्गत execute होता है। एक न्यूनतम DLL `cmd.exe /c whoami /all > C:\Windows\Temp\poc.txt` चला सकता है और एक non-zero value (उदा., `0x1337`) रिटर्न कर सकता है ताकि सर्विस DLL को unload कर दे, जिससे execution की पुष्टि हो।
+## DWORD Write से TapiSrv के अंदर RCE तक
+1. **अपने लिए Telephony “admin” privilege दें**: `C:\Windows\TAPI\tsec.ini` को target करें और ऊपर दिए गए 4-byte writes का उपयोग करके `[TapiAdministrators]\r\n<DOMAIN\\user>=1` append करें। एक **नई** session (`ClientAttach`) शुरू करें, ताकि service INI को फिर से read करे और आपके account के लिए `ptClient->dwFlags |= 9` set करे।
+2. **Admin-only DLL load**: `dwObjectType = TUISPIDLL_OBJECT_PROVIDERID` के साथ `GetUIDllName` भेजें और `dwProviderFilenameOffset` के माध्यम से एक path दें। Admins के लिए service `LoadLibrary(path)` करती है और फिर export `TSPI_providerUIIdentify` call करती है:
+- वास्तविक Windows SMB share के UNC paths के साथ काम करता है; कुछ attacker SMB servers `ERROR_SMB_GUEST_LOGON_BLOCKED` के साथ fail होते हैं।
+- Alternative: उसी 4-byte write primitive का उपयोग करके धीरे-धीरे एक local DLL drop करें, फिर उसे load करें।
+3. **Payload**: export `NETWORK SERVICE` के अंतर्गत execute होता है। एक minimal DLL `cmd.exe /c whoami /all > C:\Windows\Temp\poc.txt` चला सकती है और non-zero value (उदाहरण के लिए, `0x1337`) return कर सकती है, जिससे service DLL को unload कर देती है और execution confirm हो जाता है।<sup>[[1]](#references)</sup>
 
-## सुरक्षा कड़े करना / डिटेक्शन नोट्स
-- जब तक आवश्यक न हो TAPI server mode को disable रखें; `\pipe\tapsrv` पर रिमोट एक्सेस ब्लॉक करें।
-- client-supplied paths को खोलने से पहले mailslot namespace validation (`\\*\MAILSLOT\`) लागू करें।
-- `C:\Windows\TAPI\tsec.ini` के ACLs को लॉकडाउन करें और परिवर्तनों की निगरानी करें; गैर‑डिफ़ॉल्ट paths लोड करने वाले `GetUIDllName` कॉल्स पर अलर्ट करें।
+## Hardening / Detection Notes
+- जब तक आवश्यक न हो, TAPI server mode disable करें; `\pipe\tapsrv` तक remote access block करें।
+- Client-supplied paths open करने से पहले mailslot namespace validation (`\\*\MAILSLOT\`) लागू करें।
+- `C:\Windows\TAPI\tsec.ini` ACLs को lock down करें और changes monitor करें; non-default paths load करने वाली `GetUIDllName` calls पर alert करें।<sup>[[1]](#references)</sup>
 
 ## References
-- [Who’s on the line? Exploiting RCE in Windows Telephony Service (CVE-2026-20931)](https://swarm.ptsecurity.com/whos-on-the-line-exploiting-rce-in-windows-telephony-service/)
+
+- [1] [Who’s on the line? Exploiting RCE in Windows Telephony Service (CVE-2026-20931)](https://swarm.ptsecurity.com/whos-on-the-line-exploiting-rce-in-windows-telephony-service/)
 
 {{#include ../../banners/hacktricks-training.md}}

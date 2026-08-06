@@ -4,29 +4,29 @@
 
 ## Integrity Levels
 
-Windows Vista और बाद के संस्करणों में, सभी संरक्षित वस्तुओं के साथ एक **integrity level** टैग होता है। यह सेटअप ज्यादातर फ़ाइलों और रजिस्ट्री कुंजियों को "मध्यम" integrity level असाइन करता है, कुछ फ़ोल्डरों और फ़ाइलों को छोड़कर जिनमें Internet Explorer 7 कम integrity level पर लिख सकता है। डिफ़ॉल्ट व्यवहार यह है कि मानक उपयोगकर्ताओं द्वारा शुरू की गई प्रक्रियाओं का मध्यम integrity level होता है, जबकि सेवाएँ आमतौर पर सिस्टम integrity level पर कार्य करती हैं। एक उच्च-integrity लेबल रूट निर्देशिका की सुरक्षा करता है।
+Windows Vista और उसके बाद के versions में, सभी protected items के साथ एक **integrity level** tag जुड़ा होता है। यह setup आमतौर पर files और registry keys को "medium" integrity level देता है, सिवाय कुछ folders और files के, जिन्हें Internet Explorer 7 low integrity level पर write कर सकता है। Default behavior के अनुसार standard users द्वारा शुरू किए गए processes का integrity level medium होता है, जबकि services आमतौर पर system integrity level पर operate करती हैं। High-integrity label root directory की सुरक्षा करता है।
 
-एक मुख्य नियम यह है कि वस्तुओं को उन प्रक्रियाओं द्वारा संशोधित नहीं किया जा सकता है जिनका integrity level वस्तु के स्तर से कम है। integrity levels हैं:
+एक महत्वपूर्ण नियम यह है कि objects को ऐसे processes द्वारा modify नहीं किया जा सकता जिनका integrity level उस object के level से कम हो। Integrity levels इस प्रकार हैं:
 
-- **Untrusted**: यह स्तर उन प्रक्रियाओं के लिए है जिनमें गुमनाम लॉगिन होते हैं। %%%Example: Chrome%%%
-- **Low**: मुख्य रूप से इंटरनेट इंटरैक्शन के लिए, विशेष रूप से Internet Explorer के Protected Mode में, संबंधित फ़ाइलों और प्रक्रियाओं को प्रभावित करता है, और कुछ फ़ोल्डरों जैसे **Temporary Internet Folder**। Low integrity प्रक्रियाओं को महत्वपूर्ण प्रतिबंधों का सामना करना पड़ता है, जिसमें रजिस्ट्री लिखने की अनुमति नहीं और सीमित उपयोगकर्ता प्रोफ़ाइल लिखने की अनुमति शामिल है।
-- **Medium**: अधिकांश गतिविधियों के लिए डिफ़ॉल्ट स्तर, मानक उपयोगकर्ताओं और बिना विशिष्ट integrity levels वाली वस्तुओं को असाइन किया गया। यहां तक कि Administrators समूह के सदस्य भी डिफ़ॉल्ट रूप से इस स्तर पर कार्य करते हैं।
-- **High**: प्रशासकों के लिए आरक्षित, उन्हें निम्न integrity levels पर वस्तुओं को संशोधित करने की अनुमति देता है, जिसमें उच्च स्तर पर स्वयं वस्तुएं भी शामिल हैं।
-- **System**: Windows kernel और कोर सेवाओं के लिए सबसे उच्चतम संचालन स्तर, जो प्रशासकों के लिए भी पहुंच से बाहर है, महत्वपूर्ण सिस्टम कार्यों की सुरक्षा सुनिश्चित करता है।
-- **Installer**: एक अद्वितीय स्तर जो सभी अन्य स्तरों से ऊपर है, इस स्तर पर वस्तुओं को किसी अन्य वस्तु को अनइंस्टॉल करने की अनुमति देता है।
+- **Untrusted**: यह level anonymous logins वाले processes के लिए होता है। Example: Chrome
+- **Low**: मुख्य रूप से internet interactions के लिए, खासकर Internet Explorer के Protected Mode में, जिससे संबंधित files और processes, तथा **Temporary Internet Folder** जैसे कुछ folders प्रभावित होते हैं। Low integrity processes पर महत्वपूर्ण restrictions होती हैं, जिनमें registry write access न होना और user profile में सीमित write access शामिल है।
+- **Medium**: अधिकांश activities के लिए default level, जो standard users और specific integrity levels के बिना objects को दिया जाता है। Administrators group के members भी default रूप से इसी level पर operate करते हैं।
+- **High**: administrators के लिए reserved, जिससे वे lower integrity levels वाले objects को modify कर सकते हैं, जिनमें स्वयं high level वाले objects भी शामिल हैं।
+- **System**: Windows kernel और core services के लिए highest operational level, जो administrators की पहुंच से भी बाहर होता है और vital system functions की सुरक्षा सुनिश्चित करता है।
+- **Installer**: एक unique level जो बाकी सभी levels से ऊपर होता है और इस level के objects को किसी भी अन्य object को uninstall करने की अनुमति देता है।
 
-आप **Process Explorer** का उपयोग करके एक प्रक्रिया का integrity level प्राप्त कर सकते हैं **Sysinternals** से, प्रक्रिया की **properties** तक पहुँचकर और "**Security**" टैब को देख कर:
+आप **Sysinternals** के **Process Explorer** का उपयोग करके किसी process का integrity level प्राप्त कर सकते हैं। इसके लिए process की **properties** खोलें और "**Security**" tab देखें:
 
-![](<../../images/image (824).png>)
+![Integrity Levels - Integrity Levels: आप Sysinternals के Process Explorer का उपयोग करके process का integrity level प्राप्त कर सकते हैं, process की properties खोलकर और "...](<../../images/image (824).png>)
 
-आप `whoami /groups` का उपयोग करके अपना **current integrity level** भी प्राप्त कर सकते हैं
+आप `whoami /groups` का उपयोग करके अपना **current integrity level** भी प्राप्त कर सकते हैं।
 
-![](<../../images/image (325).png>)
+![Integrity Levels - Integrity Levels: आप whoami /groups का उपयोग करके अपना current integrity level भी प्राप्त कर सकते हैं](<../../images/image (325).png>)
 
-### Integrity Levels in File-system
+### File-system में Integrity Levels
 
-फ़ाइल-सिस्टम के अंदर एक वस्तु को **न्यूनतम integrity level आवश्यकता** की आवश्यकता हो सकती है और यदि एक प्रक्रिया के पास यह integrity level नहीं है तो वह इसके साथ इंटरैक्ट नहीं कर सकेगी।\
-उदाहरण के लिए, चलिए **एक नियमित उपयोगकर्ता कंसोल फ़ाइल से एक नियमित फ़ाइल बनाते हैं और अनुमतियों की जांच करते हैं**:
+File-system के अंदर किसी object के लिए **minimum integrity level requirement** हो सकती है और यदि किसी process के पास यह integrity level नहीं है, तो वह उसके साथ interact नहीं कर पाएगा।\
+उदाहरण के लिए, **एक regular user console से एक regular file create करें और permissions check करें**:
 ```
 echo asd >asd.txt
 icacls asd.txt
@@ -37,7 +37,7 @@ NT AUTHORITY\INTERACTIVE:(I)(M,DC)
 NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-अब, फ़ाइल को **उच्च** इंटीग्रिटी स्तर सौंपते हैं। यह **एक कंसोल से किया जाना चाहिए** जो **व्यवस्थापक** के रूप में चल रहा हो क्योंकि **सामान्य कंसोल** मध्यम इंटीग्रिटी स्तर पर चल रहा होगा और **उच्च इंटीग्रिटी स्तर** को किसी ऑब्जेक्ट को सौंपने की अनुमति नहीं होगी:
+अब, file को **High** का minimum integrity level assign करते हैं। यह कार्य **administrator** के रूप में चल रहे **console** से ही **करना होगा**, क्योंकि एक **regular console** Medium Integrity level में चलेगा और किसी object को High Integrity level assign करने की **अनुमति नहीं होगी**:
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt
@@ -52,7 +52,7 @@ NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 Mandatory Label\High Mandatory Level:(NW)
 ```
-यहाँ चीजें दिलचस्प हो जाती हैं। आप देख सकते हैं कि उपयोगकर्ता `DESKTOP-IDJHTKP\user` के पास फ़ाइल पर **पूर्ण विशेषाधिकार** हैं (वास्तव में, यही वह उपयोगकर्ता है जिसने फ़ाइल बनाई थी), हालाँकि, न्यूनतम इंटीग्रिटी स्तर लागू होने के कारण वह फ़ाइल को और संशोधित नहीं कर पाएगा जब तक कि वह उच्च इंटीग्रिटी स्तर के भीतर नहीं चल रहा है (ध्यान दें कि वह इसे पढ़ सकेगा):
+यहीं से चीज़ें दिलचस्प होती हैं। आप देख सकते हैं कि user `DESKTOP-IDJHTKP\user` के पास file पर **FULL privileges** हैं (वास्तव में, इसी user ने file बनाई थी), हालांकि, लागू किए गए minimum integrity level के कारण वह अब file को modify नहीं कर पाएगा, जब तक कि वह High Integrity Level के अंदर run न कर रहा हो (ध्यान दें कि वह इसे read कर पाएगा):
 ```
 echo 1234 > asd.txt
 Access is denied.
@@ -61,12 +61,12 @@ del asd.txt
 C:\Users\Public\asd.txt
 Access is denied.
 ```
-> [!NOTE]
-> **इसलिए, जब एक फ़ाइल का न्यूनतम इंटीग्रिटी स्तर होता है, तो इसे संशोधित करने के लिए आपको कम से कम उस इंटीग्रिटी स्तर पर चलाना होगा।**
+> [!TIP]
+> **इसलिए, जब किसी file में minimum integrity level होता है, तो उसे modify करने के लिए आपको कम से कम उसी integrity level पर run करना आवश्यक है।**
 
-### बाइनरी में इंटीग्रिटी स्तर
+### Binaries में Integrity Levels
 
-मैंने `cmd.exe` की एक प्रति `C:\Windows\System32\cmd-low.exe` में बनाई और इसे **एक प्रशासक कंसोल से निम्न इंटीग्रिटी स्तर पर सेट किया:**
+मैंने `cmd.exe` की एक copy `C:\Windows\System32\cmd-low.exe` में बनाई और उसे **administrator console से low का integrity level दिया:**
 ```
 icacls C:\Windows\System32\cmd-low.exe
 C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
@@ -76,16 +76,16 @@ APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
 APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
 Mandatory Label\Low Mandatory Level:(NW)
 ```
-अब, जब मैं `cmd-low.exe` चलाता हूँ, यह **कम-इंटीग्रिटी स्तर** के तहत चलेगा बजाय मध्यम स्तर के:
+अब, जब मैं `cmd-low.exe` चलाता हूं, तो यह medium के बजाय **low-integrity level के अंतर्गत चलेगा**:
 
-![](<../../images/image (313).png>)
+![File-system में Integrity Levels - Binaries में Integrity Levels: अब, जब मैं cmd-low.exe चलाता हूं, तो यह medium के बजाय low-integrity level के अंतर्गत चलेगा](<../../images/image (313).png>)
 
-जिज्ञासु लोगों के लिए, यदि आप एक बाइनरी को उच्च इंटीग्रिटी स्तर सौंपते हैं (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`), तो यह स्वचालित रूप से उच्च इंटीग्रिटी स्तर के साथ नहीं चलेगा (यदि आप इसे मध्यम इंटीग्रिटी स्तर से बुलाते हैं --डिफ़ॉल्ट रूप से-- यह मध्यम इंटीग्रिटी स्तर के तहत चलेगा)।
+जिज्ञासु लोगों के लिए, यदि आप किसी binary को high integrity level प्रदान करते हैं (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`), तो यह अपने-आप high integrity level के साथ नहीं चलेगा (यदि आप इसे medium integrity level से invoke करते हैं --by default-- तो यह medium integrity level के अंतर्गत चलेगा)।
 
-### प्रक्रियाओं में इंटीग्रिटी स्तर
+### Processes में Integrity Levels
 
-सभी फ़ाइलों और फ़ोल्डरों का एक न्यूनतम इंटीग्रिटी स्तर नहीं होता है, **लेकिन सभी प्रक्रियाएँ एक इंटीग्रिटी स्तर के तहत चल रही हैं**। और फ़ाइल-प्रणाली के साथ जो हुआ, उसके समान, **यदि एक प्रक्रिया किसी अन्य प्रक्रिया के अंदर लिखना चाहती है, तो उसे कम से कम वही इंटीग्रिटी स्तर होना चाहिए**। इसका मतलब है कि कम इंटीग्रिटी स्तर वाली प्रक्रिया मध्यम इंटीग्रिटी स्तर वाली प्रक्रिया के लिए पूर्ण पहुँच के साथ एक हैंडल नहीं खोल सकती।
+सभी files और folders में minimum integrity level नहीं होता, **लेकिन सभी processes किसी न किसी integrity level के अंतर्गत चल रहे होते हैं**। और file-system में जो हुआ, उसके समान ही, **यदि कोई process किसी अन्य process के अंदर write करना चाहता है, तो उसके पास कम-से-कम समान integrity level होना चाहिए**। इसका अर्थ है कि low integrity level वाला process, medium integrity level वाले process के लिए full access वाला handle open नहीं कर सकता।
 
-इस और पिछले अनुभाग में टिप्पणी की गई प्रतिबंधों के कारण, सुरक्षा के दृष्टिकोण से, हमेशा **कम से कम संभव इंटीग्रिटी स्तर पर एक प्रक्रिया चलाने की सिफारिश की जाती है**।
+इस section और पिछली section में बताई गई restrictions के कारण, security के दृष्टिकोण से, किसी process को हमेशा **संभव सबसे निचले integrity level पर चलाने की recommendation दी जाती है**।
 
 {{#include ../../banners/hacktricks-training.md}}

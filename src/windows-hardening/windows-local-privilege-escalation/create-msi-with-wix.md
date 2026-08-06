@@ -1,12 +1,12 @@
+# Malicious MSI बनाना और Root प्राप्त करना
+
 {{#include ../../banners/hacktricks-training.md}}
 
-# Creating Malicious MSI and Getting Root
+MSI installer का creation wixtools का उपयोग करके किया जाएगा, विशेष रूप से [wixtools](http://wixtoolset.org) का उपयोग किया जाएगा। यह उल्लेख करना उचित है कि alternative MSI builders को आज़माया गया था, लेकिन वे इस विशेष मामले में सफल नहीं हुए।<sup>[[1]](#references)</sup>
 
-MSI इंस्टॉलर का निर्माण wixtools का उपयोग करके किया जाएगा, विशेष रूप से [wixtools](http://wixtoolset.org) का उपयोग किया जाएगा। यह उल्लेख करना महत्वपूर्ण है कि वैकल्पिक MSI बिल्डरों का प्रयास किया गया, लेकिन वे इस विशेष मामले में सफल नहीं हुए।
+wix MSI usage examples की व्यापक समझ के लिए, [इस पेज](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) को देखना उचित है। यहाँ आपको विभिन्न examples मिलेंगे, जो wix MSI के usage को प्रदर्शित करते हैं।<sup>[[2]](#references)</sup>
 
-wix MSI उपयोग के उदाहरणों की व्यापक समझ के लिए, [इस पृष्ठ](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) पर परामर्श करना उचित है। यहाँ, आप wix MSI के उपयोग को प्रदर्शित करने वाले विभिन्न उदाहरण पा सकते हैं।
-
-उद्देश्य एक ऐसा MSI उत्पन्न करना है जो lnk फ़ाइल को निष्पादित करेगा। इसे प्राप्त करने के लिए, निम्नलिखित XML कोड का उपयोग किया जा सकता है ([xml from here](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):
+उद्देश्य एक ऐसा MSI generate करना है जो lnk file को execute करेगा। इसे प्राप्त करने के लिए, निम्नलिखित XML code का उपयोग किया जा सकता है ([xml यहाँ से](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):<sup>[[1]](#references)</sup>
 ```html
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -38,26 +38,25 @@ fail_here
 </Product>
 </Wix>
 ```
-यह ध्यान रखना महत्वपूर्ण है कि Package तत्व में InstallerVersion और Compressed जैसे गुण होते हैं, जो इंस्टॉलर के संस्करण को निर्दिष्ट करते हैं और यह संकेत करते हैं कि पैकेज संकुचित है या नहीं, क्रमशः।
+यह ध्यान रखना महत्वपूर्ण है कि Package element में InstallerVersion और Compressed जैसी attributes शामिल होती हैं, जो क्रमशः installer के version को निर्दिष्ट करती हैं और यह बताती हैं कि package compressed है या नहीं।
 
-निर्माण प्रक्रिया में msi.xml से wixobject उत्पन्न करने के लिए wixtools से candle.exe उपकरण का उपयोग करना शामिल है। निम्नलिखित आदेश निष्पादित किया जाना चाहिए:
+Creation process में msi.xml से wixobject बनाने के लिए wixtools के एक tool candle.exe का उपयोग किया जाता है। निम्न command execute की जानी चाहिए:<sup>[[1]](#references)</sup>
 ```
 candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
 ```
-इसके अलावा, यह उल्लेख करना महत्वपूर्ण है कि पोस्ट में एक चित्र प्रदान किया गया है, जो कमांड और इसके आउटपुट को दर्शाता है। आप दृश्य मार्गदर्शन के लिए इसका संदर्भ ले सकते हैं।
+इसके अतिरिक्त, यह उल्लेखनीय है कि post में एक image दी गई है, जिसमें command और उसका output दिखाया गया है। Visual guidance के लिए आप इसका संदर्भ ले सकते हैं।<sup>[[1]](#references)</sup>
 
-इसके अलावा, light.exe, जो कि wixtools का एक और उपकरण है, wixobject से MSI फ़ाइल बनाने के लिए उपयोग किया जाएगा। निष्पादित करने के लिए कमांड इस प्रकार है:
+इसके अलावा, wixtools का एक अन्य tool, light.exe, wixobject से MSI file बनाने के लिए उपयोग किया जाएगा। निष्पादित की जाने वाली command इस प्रकार है:<sup>[[1]](#references)</sup>
 ```
 light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
 ```
-पिछले आदेश के समान, एक छवि पोस्ट में शामिल की गई है जो आदेश और इसके आउटपुट को दर्शाती है।
+पिछली command के समान, command और उसके output को दर्शाने वाली एक image post में शामिल है।<sup>[[1]](#references)</sup>
 
-कृपया ध्यान दें कि जबकि यह सारांश मूल्यवान जानकारी प्रदान करने का लक्ष्य रखता है, अधिक व्यापक विवरण और सटीक निर्देशों के लिए मूल पोस्ट को संदर्भित करने की सिफारिश की जाती है।
+कृपया ध्यान दें कि हालांकि इस summary का उद्देश्य उपयोगी जानकारी प्रदान करना है, फिर भी अधिक व्यापक विवरण और सटीक instructions के लिए original post देखने की अनुशंसा की जाती है।<sup>[[1]](#references)</sup>
 
 ## संदर्भ
 
-- [https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
-- [https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)
-[wixtools](http://wixtoolset.org)
+- [1] [Hack The Box - Ethereal: Creating Malicious msi and getting root - 0xRick's Blog](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
+- [2] [A quick introduction: Create an MSI installer with WiX - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (wixtools भी देखें: [wixtools](http://wixtoolset.org))
 
 {{#include ../../banners/hacktricks-training.md}}
