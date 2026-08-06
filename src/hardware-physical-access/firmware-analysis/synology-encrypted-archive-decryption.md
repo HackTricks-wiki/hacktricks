@@ -168,8 +168,8 @@ $ tar xf SynologyPhotos-rtd1619b-1.7.0-0794.tar
 
 ## 10. Additional tooling
 
-* [`patology`](https://github.com/sud0woodo/patology) – parse/dump PAT archives.
-* [`synodecrypt`](https://github.com/synacktiv/synodecrypt) – decrypt PAT/SPK/others.
+* [`patology`](https://github.com/sud0woodo/patology) – parse/dump PAT archives.<sup>[[3]](#references)</sup>
+* [`synodecrypt`](https://github.com/synacktiv/synodecrypt) – decrypt PAT/SPK/others.<sup>[[2]](#references)</sup>
 * [`libsodium`](https://github.com/jedisct1/libsodium) – reference implementation of XChaCha20-Poly1305 secretstream.
 * [`msgpack`](https://msgpack.org/) – header serialisation.
 
