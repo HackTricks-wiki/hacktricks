@@ -32,7 +32,7 @@ This is analogous to a *Golden Ticket* for service accounts.<sup>[[1]](#referenc
 
 1. **Forest-level compromise** of **one DC** (or Enterprise Admin), or `SYSTEM` access to one of the DCs in the forest.
 2. Ability to enumerate service accounts (LDAP read / RID brute-force).
-3. .NET ≥ 4.7.2 x64 workstation to run [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) or equivalent code.
+3. .NET ≥ 4.7.2 x64 workstation to run [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) or equivalent code.<sup>[[3]](#references)</sup>
 
 ### Golden gMSA / dMSA
 #### Phase 1 – Extract the KDS Root Key
@@ -68,7 +68,7 @@ Get-ADServiceAccount -Filter * -Properties msDS-ManagedPasswordId | \
 GoldenGMSA.exe gmsainfo
 ```
 
-[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) implements helper modes:<sup>[[1]](#references)</sup>
+[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) implements helper modes:<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```bash
 # LDAP enumeration (kerberos / simple bind)

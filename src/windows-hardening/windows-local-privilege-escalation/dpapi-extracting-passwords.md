@@ -164,7 +164,7 @@ Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
 
-[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) can find DPAPI encrypted blobs in the file system, registry and B64 blobs:
+[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) can find DPAPI encrypted blobs in the file system, registry and B64 blobs:<sup>[[12]](#references)</sup>
 
 ```bash
 # Search blobs in the registry
@@ -181,7 +181,7 @@ search /type:file /path:C:\path\to\file
 search /type:base64 [/base:<base64 string>]
 ```
 
-Note that [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (from the same repo) can be used to decrypt using DPAPI sensitive data like cookies.
+Note that [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (from the same repo) can be used to decrypt using DPAPI sensitive data like cookies.<sup>[[12]](#references)</sup>
 
 #### Chromium/Edge/Electron quick recipes (SharpChrome)
 
