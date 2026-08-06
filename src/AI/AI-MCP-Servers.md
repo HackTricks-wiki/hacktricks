@@ -122,7 +122,7 @@ A practical example was the `postmark-mcp` package: after a benign history, vers
 
 #### Markdown skill marketplaces: semantic instruction hijacking
 
-Some agent ecosystems do not distribute compiled plug-ins or ordinary MCP servers; they distribute **instruction packages** (`SKILL.md`, `README.md`, metadata, prompt templates) that the host agent interprets with its own file, shell, browser, wallet, or SaaS permissions. In practice, a malicious skill can act like a **supply-chain backdoor expressed in natural language**:<sup>[[12]](#references)</sup>
+Some agent ecosystems do not distribute compiled plug-ins or ordinary MCP servers; they distribute **instruction packages** (`SKILL.md`, `README.md`, metadata, prompt templates) that the host agent interprets with its own file, shell, browser, wallet, or SaaS permissions. In practice, a malicious skill can act like a **supply-chain backdoor expressed in natural language**:<sup>[[12]](#references)[[13]](#references)[[32]](#references)</sup>
 
 - **Fake prerequisite blocks**: the skill claims it cannot continue until the agent or user runs a setup step. Real-world campaigns used paste-site redirects (`rentry`, `glot`) that served a mutable Base64 `curl | bash` second stage, so the marketplace artifact stayed mostly static while the live payload rotated underneath.
 - **Oversized markdown padding**: malicious content is placed at the start of `README.md` / `SKILL.md`, then padded with tens of MB of junk so scanners that truncate or skip large files miss the payload while the agent still reads the interesting first lines.
@@ -211,6 +211,36 @@ When testing MCP development environments, look for:
 - CSRF, DNS rebinding, or Web-origin issues in localhost helper endpoints.
 - OAuth / redirect flows that render attacker-controlled URLs inside the local UI.
 - Proxy endpoints that accept arbitrary `command`, `args`, or server configuration JSON.
+
+### Remote Process-Launch APIs Exposed Beyond Loopback
+
+Some MCP inspector/dev panels do not just proxy JSON-RPC traffic; they also expose helper endpoints that **spawn local MCP servers** from client-supplied configuration. If that HTTP API is reachable from `0.0.0.0`, reverse-proxied on a public vhost, or left unauthenticated on an internal segment, it becomes remote OS command execution.<sup>[[30]](#references)</sup>
+
+A common request shape is a `serverConfig`/`server_params` object containing `command`, `args`, and `env`, for example:<sup>[[30]](#references)[[31]](#references)</sup>
+
+```json
+{
+  "serverConfig": {
+    "command": "bash",
+    "args": ["-c", "id"],
+    "env": {}
+  },
+  "serverId": "test"
+}
+```
+
+Practical notes:
+
+- Endpoints named like `/api/mcp/connect`, `/servers/connect`, `/spawn`, or `/start` are higher risk than plain `tools/list` because they create a new local subprocess.
+- A response such as `Connection closed`, `protocol error`, or `handshake failed` may still mean **code execution already happened**: the child process ran, but it did not speak MCP after launch. Verify first with ICMP, DNS, or HTTP callbacks before moving to a shell.
+- Treat client-controlled `env`, working-directory, plugin-path, or package-install parameters as equivalent to raw `command`/`args`.
+- During audits, confirm whether the API is loopback-only, whether the reverse proxy forwards it externally, and whether authentication is enforced **before** the spawn path.
+
+Defensive priorities:
+
+- Bind inspector/dev APIs to `127.0.0.1` or a dedicated admin network.
+- Require authentication and authorization on the spawn endpoint itself.
+- Store launch definitions server-side and allowlist approved binaries; never forward raw `command` / `args` / `env` into `spawn`, `exec`, or `subprocess` calls.
 
 ### Agent-Assisted Localhost MCP Hijacking (AutoJack pattern)
 
@@ -501,5 +531,8 @@ Another suspicious primitive is **native-code preloading**. A skill that sets `L
 - [27] [MCP Attack Surface Detector (MCP-ASD) extension](https://github.com/hoodoer/MCP-ASD)
 - [28] [Trail of Bits – The Sorry State of Skill Distribution](https://blog.trailofbits.com/2026/06/03/the-sorry-state-of-skill-distribution/)
 - [29] [Trail of Bits – overtly-malicious-skills PoC repository](https://github.com/trailofbits/overtly-malicious-skills)
+- [30] [REC in MCPJam inspector due to HTTP Endpoint exposes](https://github.com/MCPJam/inspector/security/advisories/GHSA-232v-j27c-5pp6)
+- [31] [HTB Kobold: MCPJam RCE, PrivateBin LFI-to-RCE, and Docker Host Takeover](https://0xdf.gitlab.io/2026/08/01/htb-kobold.html)
+- [32] [Anatomy of a Deception: Uncovering the 'omnicogg' Dropper in ClawHub](https://research.jfrog.com/post/omnicogg-malicious-skill/)
 
 {{#include ../banners/hacktricks-training.md}}
