@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Part of this cheatsheet is based on the [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/).
+Part of this cheatsheet is based on the [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
 
 ## Installation
 
@@ -210,7 +210,8 @@ Furthermore, you can use `proj.hook_symbol(name, hook)`, providing the name of a
 
 ## Examples
 
+## References
+
+- [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
+
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

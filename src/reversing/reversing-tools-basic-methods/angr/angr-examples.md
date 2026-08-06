@@ -5,7 +5,7 @@
 > [!TIP]
 > If the program is using `scanf` to get **several values at once from stdin** you need to generate a state that starts after the **`scanf`**.
 
-Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
 ### Input to reach address (indicating the address)
 
@@ -833,7 +833,8 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
+## References
+
+- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
+
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-
