@@ -74,7 +74,7 @@ Notes:
 
 Root cause:
 - _retrieve_class_or_fn used unrestricted importlib.import_module() with attacker-controlled module strings from config.json.
-- Impact: Arbitrary import of any installed module (or attacker-planted module on sys.path). Import-time code runs, then object construction occurs with attacker kwargs.<sup>[[1]](#references)[[4]](#references)</sup>
+- Impact: Arbitrary import of any installed module (or attacker-planted module on sys.path). Import-time code runs, then object construction occurs with attacker kwargs.<sup>[[1]](#references)[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 
 Exploit idea:
 
@@ -192,9 +192,9 @@ fickling.hook.activate_safe_ml_environment(also_allow=[
   - with fickling.check_safety(): for scoped enforcement
   - fickling.load(path) / fickling.is_likely_safe(path) for one-off checks
 
-- Prefer non-pickle model formats when possible (e.g., SafeTensors). If you must accept pickle, run loaders under least privilege without network egress and enforce the allowlist.
+- Prefer non-pickle model formats when possible (e.g., SafeTensors).<sup>[[15]](#references)</sup> If you must accept pickle, run loaders under least privilege without network egress and enforce the allowlist.
 
-This allowlist-first strategy demonstrably blocks common ML pickle exploit paths while keeping compatibility high. In ToB’s benchmark, Fickling flagged 100% of synthetic malicious files and allowed ~99% of clean files from top Hugging Face repos.<sup>[[8]](#references)</sup>
+This allowlist-first strategy demonstrably blocks common ML pickle exploit paths while keeping compatibility high. In ToB’s benchmark, Fickling flagged 100% of synthetic malicious files and allowed ~99% of clean files from top Hugging Face repos.<sup>[[8]](#references)[[10]](#references)</sup>
 
 
 ## Researcher toolkit

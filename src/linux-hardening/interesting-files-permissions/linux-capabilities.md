@@ -5,7 +5,7 @@
 
 ## Linux Capabilities
 
-Linux capabilities divide **root privileges into smaller, distinct units**, allowing processes to have a subset of privileges. This minimizes the risks by not granting full root privileges unnecessarily.
+Linux capabilities divide **root privileges into smaller, distinct units**, allowing processes to have a subset of privileges. This minimizes the risks by not granting full root privileges unnecessarily.<sup>[[5]](#references)</sup>
 
 ### The Problem:
 
@@ -17,7 +17,7 @@ Linux capabilities divide **root privileges into smaller, distinct units**, allo
 
    - **Purpose**: Determines the capabilities passed down from the parent process.
    - **Functionality**: When a new process is created, it inherits the capabilities from its parent in this set. Useful for maintaining certain privileges across process spawns.
-   - **Restrictions**: A process cannot gain capabilities that its parent did not possess.
+   - **Restrictions**: A process cannot gain capabilities that its parent did not possess.<sup>[[3]](#references)</sup>
 
 2. **Effective (CapEff)**:
 
@@ -57,7 +57,7 @@ def manage_capabilities(process):
 ### Processes Capabilities
 
 To see the capabilities for a particular process, use the **status** file in the /proc directory. As it provides more details, let’s limit it only to the information related to Linux capabilities.\
-Note that for all running processes capability information is maintained per thread, for binaries in the file system it’s stored in extended attributes.
+Note that for all running processes capability information is maintained per thread, for binaries in the file system it’s stored in extended attributes.<sup>[[4]](#references)</sup>
 
 You can find the capabilities defined in /usr/include/linux/capability.h
 
@@ -338,7 +338,7 @@ docker run --rm -it  --cap-drop=ALL --cap-add=SYS_PTRACE r.j3ss.co/amicontained 
 
 ## Privesc/Container Escape
 
-Capabilities are useful when you **want to restrict your own processes after performing privileged operations** (e.g. after setting up chroot and binding to a socket). However, they can be exploited by passing them malicious commands or arguments which are then run as root.
+Capabilities are useful when you **want to restrict your own processes after performing privileged operations** (e.g. after setting up chroot and binding to a socket). However, they can be exploited by passing them malicious commands or arguments which are then run as root.<sup>[[2]](#references)</sup>
 
 You can force capabilities upon programs using `setcap`, and query these using `getcap`:
 
@@ -681,7 +681,7 @@ List **processes** running in the **host** `ps -eaf`
 
 ## CAP_SYS_MODULE
 
-**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** empowers a process to **load and unload kernel modules (`init_module(2)`, `finit_module(2)` and `delete_module(2)` system calls)**, offering direct access to the kernel's core operations. This capability presents critical security risks, as it enables privilege escalation and total system compromise by allowing modifications to the kernel, thereby bypassing all Linux security mechanisms, including Linux Security Modules and container isolation.
+**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** empowers a process to **load and unload kernel modules (`init_module(2)`, `finit_module(2)` and `delete_module(2)` system calls)**, offering direct access to the kernel's core operations. This capability presents critical security risks, as it enables privilege escalation and total system compromise by allowing modifications to the kernel, thereby bypassing all Linux security mechanisms, including Linux Security Modules and container isolation.<sup>[[6]](#references)</sup>
 **This means that you can** **insert/remove kernel modules in/from the kernel of the host machine.**
 
 **Example with binary**

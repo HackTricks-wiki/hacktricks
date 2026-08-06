@@ -23,7 +23,7 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 mediatek-xflash-carbonara-da2-hash-bypass.md
 {{#endref}}
 
-Firmware is essential software that enables devices to operate correctly by managing and facilitating communication between the hardware components and the software that users interact with. It's stored in permanent memory, ensuring the device can access vital instructions from the moment it's powered on, leading to the operating system's launch. Examining and potentially modifying firmware is a critical step in identifying security vulnerabilities.
+Firmware is essential software that enables devices to operate correctly by managing and facilitating communication between the hardware components and the software that users interact with. It's stored in permanent memory, ensuring the device can access vital instructions from the moment it's powered on, leading to the operating system's launch. Examining and potentially modifying firmware is a critical step in identifying security vulnerabilities.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## **Gathering Information**
 
@@ -58,7 +58,7 @@ Obtaining firmware can be approached through various means, each with its own le
 
 ### UART-only logs: force a root shell via U-Boot env in flash
 
-If UART RX is ignored (logs only), you can still force an init shell by **editing the U-Boot environment blob** offline:
+If UART RX is ignored (logs only), you can still force an init shell by **editing the U-Boot environment blob** offline:<sup>[[6]](#references)</sup>
 
 1. Dump SPI flash with a SOIC-8 clip + programmer (3.3V):
    ```bash
@@ -207,7 +207,7 @@ Both source code and compiled binaries found in the filesystem must be scrutiniz
 
 ## Harvesting cloud config and MQTT credentials via derived URL tokens
 
-Many IoT hubs fetch their per-device configuration from a cloud endpoint that looks like:
+Many IoT hubs fetch their per-device configuration from a cloud endpoint that looks like:<sup>[[5]](#references)</sup>
 
 - `https://<api-host>/pf/<deviceId>/<token>`
 
@@ -324,7 +324,7 @@ At this stage, either a real or emulated device environment is used for analysis
 
 Runtime analysis involves interacting with a process or binary in its operating environment, using tools like gdb-multiarch, Frida, and Ghidra for setting breakpoints and identifying vulnerabilities through fuzzing and other techniques.
 
-For embedded targets without a full debugger, **copy a statically-linked `gdbserver`** to the device and attach remotely:
+For embedded targets without a full debugger, **copy a statically-linked `gdbserver`** to the device and attach remotely:<sup>[[6]](#references)</sup>
 
 ```bash
 # On device
@@ -339,7 +339,7 @@ target remote <device-ip>:1234
 
 ### Zigbee / radio-co-processor message mapping
 
-On IoT hubs the RF stack is often split between a **radio MCU** and a Linux userland process. A useful workflow is to map the path:
+On IoT hubs the RF stack is often split between a **radio MCU** and a Linux userland process. A useful workflow is to map the path:<sup>[[8]](#references)</sup>
 
 1. **RF frame** on the air
 2. **controller-side parser** on the radio MCU
@@ -358,7 +358,7 @@ For Zigbee specifically, capture pairing traffic and check whether the target st
 
 ### Manufacturer-specific protocol handlers and FSM-gated reachability
 
-Vendor-specific Zigbee/ZCL commands are often a better target than standardized clusters because they feed **custom parsing code** and internal **FSMs** with less battle-tested validation.
+Vendor-specific Zigbee/ZCL commands are often a better target than standardized clusters because they feed **custom parsing code** and internal **FSMs** with less battle-tested validation.<sup>[[8]](#references)</sup>
 
 Practical workflow:
 
@@ -371,7 +371,7 @@ For timing-sensitive protocols, packet replay from a Python framework may be too
 
 ### Fragmented-download bug class in embedded daemons
 
-A recurring firmware bug class appears in **fragmented blob/model/configuration downloads**:
+A recurring firmware bug class appears in **fragmented blob/model/configuration downloads**:<sup>[[8]](#references)</sup>
 
 1. The **first fragment** (`offset == 0`) stores `ctx->total_size` and allocates `malloc(total_size)`.
 2. Later fragments only validate the attacker-controlled **packet-local** fields such as `packet_total_size >= offset + chunk_len`.
@@ -387,7 +387,7 @@ When the vulnerable path sits behind commissioning logic, exploitation must incl
 
 ### Protocol-driven `free()` triggers
 
-In embedded daemons, the easiest way to trigger heap metadata exploitation is often not "wait for cleanup" but **force the protocol's own error handling**:
+In embedded daemons, the easiest way to trigger heap metadata exploitation is often not "wait for cleanup" but **force the protocol's own error handling**:<sup>[[8]](#references)</sup>
 
 - Send malformed follow-up fragments to push the FSM into **retry** or **error** states.
 - Exceed the retry threshold so the daemon **resets context** and frees the corrupted buffer.
@@ -401,7 +401,7 @@ Developing a PoC for identified vulnerabilities requires a deep understanding of
 
 ### uClibc fastbin exploitation notes (embedded Linux)
 
-- **Fastbins + consolidation:** uClibc uses fastbins similar to glibc. A later large allocation can trigger `__malloc_consolidate()`, so any fake chunk must survive checks (sane size, `fd = 0`, and surrounding chunks seen as "in use").
+- **Fastbins + consolidation:** uClibc uses fastbins similar to glibc. A later large allocation can trigger `__malloc_consolidate()`, so any fake chunk must survive checks (sane size, `fd = 0`, and surrounding chunks seen as "in use").<sup>[[6]](#references)</sup>
 - **Non-PIE binaries under ASLR:** if ASLR is enabled but the main binary is **non-PIE**, in-binary `.data/.bss` addresses are stable. You can target a region that already resembles a valid heap chunk header to land a fastbin allocation on a **function pointer table**.
 - **Parser-stopping NUL:** when JSON is parsed, a `\x00` in the payload can stop parsing while keeping trailing attacker-controlled bytes for a stack pivot/ROP chain.
 - **Shellcode via `/proc/self/mem`:** a ROP chain that calls `open("/proc/self/mem")`, `lseek()`, and `write()` can plant executable shellcode in a known mapping and jump to it.
@@ -417,7 +417,7 @@ Operating systems like [AttifyOS](https://github.com/adi0x90/attifyos) and [Embe
 
 ## Firmware Downgrade Attacks & Insecure Update Mechanisms
 
-Even when a vendor implements cryptographic signature checks for firmware images, **version rollback (downgrade) protection is frequently omitted**. When the boot- or recovery-loader only verifies the signature with an embedded public key but does not compare the *version* (or a monotonic counter) of the image being flashed, an attacker can legitimately install an **older, vulnerable firmware that still bears a valid signature** and thus re-introduce patched vulnerabilities.
+Even when a vendor implements cryptographic signature checks for firmware images, **version rollback (downgrade) protection is frequently omitted**. When the boot- or recovery-loader only verifies the signature with an embedded public key but does not compare the *version* (or a monotonic counter) of the image being flashed, an attacker can legitimately install an **older, vulnerable firmware that still bears a valid signature** and thus re-introduce patched vulnerabilities.<sup>[[4]](#references)</sup>
 
 Typical attack workflow:
 
@@ -440,11 +440,11 @@ Content-Type: application/octet-stream
 Content-Length: 0
 ```
 
-In the vulnerable (downgraded) firmware, the `md5` parameter is concatenated directly into a shell command without sanitisation, allowing injection of arbitrary commands (here – enabling SSH key-based root access). Later firmware versions introduced a basic character filter, but the absence of downgrade protection renders the fix moot.
+In the vulnerable (downgraded) firmware, the `md5` parameter is concatenated directly into a shell command without sanitisation, allowing injection of arbitrary commands (here – enabling SSH key-based root access). Later firmware versions introduced a basic character filter, but the absence of downgrade protection renders the fix moot.<sup>[[4]](#references)</sup>
 
 ### Extracting Firmware From Mobile Apps
 
-Many vendors bundle full firmware images inside their companion mobile applications so that the app can update the device over Bluetooth/Wi-Fi. These packages are commonly stored unencrypted in the APK/APEX under paths like `assets/fw/` or `res/raw/`. Tools such as `apktool`, `ghidra`, or even plain `unzip` allow you to pull signed images without touching the physical hardware.
+Many vendors bundle full firmware images inside their companion mobile applications so that the app can update the device over Bluetooth/Wi-Fi. These packages are commonly stored unencrypted in the APK/APEX under paths like `assets/fw/` or `res/raw/`. Tools such as `apktool`, `ghidra`, or even plain `unzip` allow you to pull signed images without touching the physical hardware.<sup>[[4]](#references)</sup>
 
 ```
 $ apktool d vendor-app.apk -o vendor-app
@@ -454,7 +454,7 @@ firmware_v1.3.11.490_signed.bin
 
 ### Updater-only anti-rollback bypass in A/B slot designs
 
-Some vendors do implement an anti-downgrade **ratchet**, but only inside the *updater* logic (for example a UDS routine over CAN, a recovery command, or a userspace OTA agent). If the **bootloader** later checks only the image signature/CRC and trusts the partition table or slot metadata, rollback protection can still be bypassed.
+Some vendors do implement an anti-downgrade **ratchet**, but only inside the *updater* logic (for example a UDS routine over CAN, a recovery command, or a userspace OTA agent). If the **bootloader** later checks only the image signature/CRC and trusts the partition table or slot metadata, rollback protection can still be bypassed.<sup>[[7]](#references)</sup>
 
 Typical weak design:
 
@@ -514,7 +514,7 @@ To practice discovering vulnerabilities in firmware, use the following vulnerabl
 
 ## Recovering firmware decryption keys from embedded KMS/Vault state
 
-When an update image mixes small plaintext metadata with a large high-entropy blob, do container triage before brute-forcing anything:
+When an update image mixes small plaintext metadata with a large high-entropy blob, do container triage before brute-forcing anything:<sup>[[1]](#references)</sup>
 
 - Dump headers, offsets and line boundaries with `hexdump`, `xxd`, `strings -tx`, `base64 -d`, and `binwalk -E`.
 - `Salted__` usually means OpenSSL `enc` format: the next 8 bytes are the salt and the remaining bytes are ciphertext.
@@ -559,13 +559,13 @@ This turns "encrypted firmware" into a more general problem: **recover the appli
 
 ## References
 
-- [Cracking Firmware with Claude: Senior-Level Skill, Junior-Level Autonomy](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
-- [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
-- [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
-- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
-- [How a $20 Smart Device Gave Me Access to Your Home](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
-- [Now You See mi: Now You're Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
-- [Synacktiv - Exploiting the Tesla Wall Connector from its charge port connector - Part 2: bypassing the anti-downgrade](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
-- [Make it Blink: Over-the-Air Exploitation of the Philips Hue Bridge](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
+- [1] [Cracking Firmware with Claude: Senior-Level Skill, Junior-Level Autonomy](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
+- [2] [Firmware Security Testing Methodology](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
+- [3] [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
+- [4] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [5] [How a $20 Smart Device Gave Me Access to Your Home](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
+- [6] [Now You See mi: Now You're Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
+- [7] [Synacktiv - Exploiting the Tesla Wall Connector from its charge port connector - Part 2: bypassing the anti-downgrade](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
+- [8] [Make it Blink: Over-the-Air Exploitation of the Philips Hue Bridge](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
 
 {{#include ../../banners/hacktricks-training.md}}
