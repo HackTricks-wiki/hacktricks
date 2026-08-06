@@ -1,4 +1,4 @@
-# Steganografia dei documenti
+# Steganografia nei documenti
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -12,11 +12,11 @@ I documenti sono spesso solo contenitori:
 
 ### Tecnica
 
-Il PDF è un contenitore strutturato con oggetti, stream e file incorporati opzionali. Nei CTFs spesso è necessario:
+PDF è un contenitore strutturato con oggetti, stream e file incorporati opzionali. Nei CTF è spesso necessario:
 
-- Estrarre allegati incorporati
-- Decomprimere/appiattire gli stream degli oggetti in modo da poter cercare il contenuto
-- Identificare oggetti nascosti (JS, immagini incorporate, stream anomali)
+- Estrarre gli allegati incorporati
+- Decomprimere/appiattire gli object stream per poter cercare il contenuto
+- Identificare gli oggetti nascosti (JS, immagini incorporate, stream insoliti)
 
 ### Controlli rapidi
 ```bash
@@ -25,29 +25,30 @@ pdfdetach -list file.pdf
 pdfdetach -saveall file.pdf
 qpdf --qdf --object-streams=disable file.pdf out.pdf
 ```
-Poi cerca all'interno di `out.pdf` oggetti/stringhe sospette.
+Quindi cerca all'interno di `out.pdf` oggetti/stringhe sospetti.
 
 ## Office OOXML
 
 ### Tecnica
 
-Tratta OOXML come un grafo di relazioni ZIP + XML; i payload spesso si nascondono in media, relazioni o parti custom insolite.
+Tratta OOXML come un archivio ZIP + un grafo delle relazioni XML; i payload spesso si nascondono nei media, nelle relazioni o in parti personalizzate insolite.
 
-OOXML files are ZIP containers. That means:
+I file OOXML sono contenitori ZIP. Ciò significa che:
 
-- The document is a directory tree of XML and assets.
-- The `_rels/` relationship files can point to external resources or hidden parts.
-- Embedded data frequently lives in `word/media/`, custom XML parts, or unusual relationships.
+- Il documento è un albero di directory contenente XML e asset.
+- I file delle relazioni `_rels/` possono puntare a risorse esterne o a parti nascoste.
+- I dati incorporati si trovano spesso in `word/media/`, nelle parti XML personalizzate o in relazioni insolite.
 
 ### Controlli rapidi
 ```bash
 7z l file.docx
 7z x file.docx -oout
 ```
-Quindi ispeziona:
+Quindi esamina:
 
 - `word/document.xml`
 - `word/_rels/` per le relazioni esterne
-- media incorporati in `word/media/`
+- contenuti multimediali incorporati in `word/media/`
+
 
 {{#include ../../banners/hacktricks-training.md}}
