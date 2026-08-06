@@ -5,10 +5,10 @@
 
 ## Podstawowe informacje
 
-Rejestruje **nowy Domain Controller** w **AD** i używa go do **push attributes** (SIDHistory, SPNs...) na wskazanych obiektach **bez** pozostawiania jakichkolwiek **logs** dotyczących **modyfikacji**. **Potrzebujesz DA** uprawnień i musisz znajdować się w **root domain**.\
-Zauważ, że jeśli użyjesz nieprawidłowych danych, pojawią się dość brzydkie **logs**.
+Rejestruje **nowy kontroler domeny** w AD i używa go do **wypchnięcia atrybutów** (SIDHistory, SPNs...) do określonych obiektów, **nie pozostawiając żadnych logów** dotyczących **modyfikacji**. Potrzebujesz uprawnień **DA** i musisz znajdować się wewnątrz **root domain**.\
+Pamiętaj, że jeśli użyjesz nieprawidłowych danych, pojawią się bardzo nieprzyjemne logi.<sup>[[2]](#references)</sup>
 
-Aby przeprowadzić atak potrzebujesz 2 instancji mimikatz. Jedna z nich uruchomi **RPC servers** z uprawnieniami **SYSTEM** (musisz tutaj wskazać zmiany, które chcesz wykonać), a druga instancja zostanie użyta do push the values:
+Aby przeprowadzić atak, potrzebujesz 2 instancji mimikatz. Jedna z nich uruchomi serwery RPC z uprawnieniami SYSTEM (musisz wskazać tutaj zmiany, które chcesz wprowadzić), a druga instancja będzie używana do wypchnięcia wartości:
 ```bash:mimikatz1 (RPC servers)
 !+
 !processtoken
@@ -18,26 +18,26 @@ lsadump::dcshadow /object:username /attribute:Description /value="My new descrip
 ```bash:mimikatz2 (push) - Needs DA or similar
 lsadump::dcshadow /push
 ```
-Zauważ, że **`elevate::token`** nie zadziała w sesji `mimikatz1`, ponieważ to podniosło uprawnienia wątku, ale musimy podnieść **uprawnienia procesu**.\
-Możesz też wybrać obiekt "LDAP": `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
+Zauważ, że **`elevate::token`** nie zadziała w sesji `mimikatz1`, ponieważ podnosi uprawnienia wątku, a my musimy podnieść **uprawnienia procesu**.\
+Możesz również wybrać obiekt „LDAP”: `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
 
-Zmiany można wprowadzić z poziomu DA lub użytkownika z następującymi minimalnymi uprawnieniami:
+Możesz wprowadzić zmiany jako DA lub użytkownik z następującymi minimalnymi uprawnieniami:
 
 - W **obiekcie domeny**:
-- _DS-Install-Replica_ (Dodaj/Usuń replikę w domenie)
-- _DS-Replication-Manage-Topology_ (Zarządzaj topologią replikacji)
+- _DS-Install-Replica_ (Dodawanie/usuwanie repliki w domenie)
+- _DS-Replication-Manage-Topology_ (Zarządzanie topologią replikacji)
 - _DS-Replication-Synchronize_ (Synchronizacja replikacji)
-- Obiekt **Sites** (i jego potomków) w **kontenerze Configuration**:
-- _CreateChild and DeleteChild_
-- Obiekt komputera zarejestrowanego jako **DC**:
-- _WriteProperty_ (Not Write)
+- Obiekt **Sites** (oraz jego elementy podrzędne) w **kontenerze Configuration**:
+- _CreateChild i DeleteChild_
+- Obiekt **komputera zarejestrowanego jako DC**:
+- _WriteProperty_ (nie Write)
 - **Obiekt docelowy**:
-- _WriteProperty_ (Not Write)
+- _WriteProperty_ (nie Write)
 
-Możesz użyć [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) aby nadać te uprawnienia nieuprzywilejowanemu użytkownikowi (zauważ, że pozostawi to pewne logi). To jest znacznie bardziej restrykcyjne niż posiadanie uprawnień DA.\
-For example: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` This means that the username _**student1**_ when logged on in the machine _**mcorp-student1**_ has DCShadow permissions over the object _**root1user**_.
+Możesz użyć [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1), aby nadać te uprawnienia użytkownikowi bez uprawnień (zauważ, że pozostawi to pewne logi). Jest to znacznie bardziej restrykcyjne niż posiadanie uprawnień DA.\
+Na przykład: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Oznacza to, że nazwa użytkownika _**student1**_, po zalogowaniu na komputerze _**mcorp-student1**_, ma uprawnienia DCShadow do obiektu _**root1user**_.
 
-## Używanie DCShadow do tworzenia backdoors
+## Używanie DCShadow do tworzenia backdoorów
 ```bash:Set Enterprise Admins in SIDHistory to a user
 lsadump::dcshadow /object:student1 /attribute:SIDHistory /value:S-1-521-280534878-1496970234-700767426-519
 ```
@@ -52,15 +52,15 @@ lsadump::dcshadow /object:student1 /attribute:primaryGroupID /value:519
 #Second, add to the ACE permissions to your user and push it using DCShadow
 lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attribute:ntSecurityDescriptor /value:<whole modified ACL>
 ```
-### Nadużycie grupy podstawowej, luki w enumeracji i wykrywanie
+### Nadużycie primary group, luki w enumeracji i wykrywanie
 
-- `primaryGroupID` jest oddzielnym atrybutem od listy grupy `member`. DCShadow/DSInternals mogą zapisać go bezpośrednio (np. ustawić `primaryGroupID=512` dla **Domain Admins**) bez egzekwowania na maszynie przez LSASS, ale AD nadal **przenosi** użytkownika: zmiana PGID zawsze usuwa członkostwo w poprzedniej grupie podstawowej (to samo zachowanie dla dowolnej grupy docelowej), więc nie można zachować poprzedniego członkostwa w grupie podstawowej.
-- Domyślne narzędzia uniemożliwiają usunięcie użytkownika z jego obecnej grupy podstawowej (`ADUC`, `Remove-ADGroupMember`), więc zmiana PGID zazwyczaj wymaga bezpośrednich zapisów w katalogu (DCShadow/`Set-ADDBPrimaryGroup`).
-- Raportowanie członkostwa jest niekonsekwentne:
-  - **Zawiera** członków pochodzących z grupy podstawowej: `Get-ADGroupMember "Domain Admins"`, `net group "Domain Admins"`, ADUC/Admin Center.
-  - **Pomija** członków pochodzących z grupy podstawowej: `Get-ADGroup "Domain Admins" -Properties member`, ADSI Edit przy inspekcji atrybutu `member`, `Get-ADUser <user> -Properties memberOf`.
-- Rekursywne sprawdzenia mogą pominąć członków grupy podstawowej, jeśli **grupa podstawowa jest zagnieżdżona** (np. PGID użytkownika wskazuje na zagnieżdżoną grupę wewnątrz Domain Admins); `Get-ADGroupMember -Recursive` lub rekurencyjne filtry LDAP nie zwrócą takiego użytkownika, chyba że rekurencja jawnie rozwiąże grupy podstawowe.
-- Sztuczki z DACL: atakujący mogą **deny ReadProperty** na `primaryGroupID` na użytkowniku (lub na atrybucie `member` grupy dla grup niechronionych przez AdminSDHolder), ukrywając skuteczne członkostwo przed większością zapytań PowerShell; `net group` nadal rozwiąże członkostwo. Grupy chronione przez AdminSDHolder zresetują takie denies.
+- `primaryGroupID` jest oddzielnym atrybutem od listy `member` grupy. DCShadow/DSInternals mogą zapisać go bezpośrednio (np. ustawić `primaryGroupID=512` dla **Domain Admins**) bez egzekwowania przez LSASS lokalnie, ale AD nadal **przenosi** użytkownika: zmiana PGID zawsze usuwa członkostwo z poprzedniej primary group (tak samo dla każdej grupy docelowej), więc nie można zachować członkostwa w starej primary group.<sup>[[1]](#references)</sup>
+- Domyślne narzędzia uniemożliwiają usunięcie użytkownika z jego bieżącej primary group (`ADUC`, `Remove-ADGroupMember`), dlatego zmiana PGID zwykle wymaga bezpośrednich zapisów do katalogu (DCShadow/`Set-ADDBPrimaryGroup`).
+- Raportowanie członkostwa jest niespójne:
+- **Uwzględnia** członków wynikających z primary group: `Get-ADGroupMember "Domain Admins"`, `net group "Domain Admins"`, ADUC/Admin Center.
+- **Pomija** członków wynikających z primary group: `Get-ADGroup "Domain Admins" -Properties member`, ADSI Edit podczas inspekcji `member`, `Get-ADUser <user> -Properties memberOf`.
+- Sprawdzanie rekurencyjne może pomijać członków primary group, jeśli sama **primary group jest zagnieżdżona** (np. PGID użytkownika wskazuje zagnieżdżoną grupę znajdującą się wewnątrz Domain Admins); `Get-ADGroupMember -Recursive` ani rekurencyjne filtry LDAP nie zwrócą takiego użytkownika, chyba że rekurencja jawnie rozwiązuje primary groups.
+- Sztuczki DACL: atakujący mogą **odmówić ReadProperty** dla `primaryGroupID` użytkownika (lub dla atrybutu `member` grup innych niż chronione przez AdminSDHolder), ukrywając efektywne członkostwo przed większością zapytań PowerShell; `net group` nadal rozwiąże członkostwo. Grupy chronione przez AdminSDHolder zresetują takie odmowy.
 
 Przykłady wykrywania/monitorowania:
 ```powershell
@@ -76,29 +76,29 @@ Get-ADUser -Filter * -Properties primaryGroupID |
 Where-Object { -not $_.primaryGroupID } |
 Select-Object Name,SamAccountName
 ```
-Porównaj grupy uprzywilejowane, zestawiając wynik `Get-ADGroupMember` z `Get-ADGroup -Properties member` lub ADSI Edit, aby wykryć rozbieżności wprowadzone przez `primaryGroupID` lub ukryte atrybuty.
+Cross-check uprzywilejowane grupy, porównując dane wyjściowe `Get-ADGroupMember` z `Get-ADGroup -Properties member` lub ADSI Edit, aby wykryć rozbieżności wprowadzone przez `primaryGroupID` lub ukryte atrybuty.<sup>[[1]](#references)</sup>
 
-## Shadowception - Nadanie uprawnień DCShadow przy użyciu DCShadow (bez zmodyfikowanych logów uprawnień)
+## Shadowception - Nadawanie uprawnień DCShadow za pomocą DCShadow (bez logów zmodyfikowanych uprawnień)
 
-Musimy dopisać następujące ACE z SID naszego użytkownika na końcu:
+Musimy dołączyć następujące ACE z SID naszego użytkownika na końcu:<sup>[[2]](#references)</sup>
 
-- Na obiekcie domeny:
+- W obiekcie domeny:
 - `(OA;;CR;1131f6ac-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
 - `(OA;;CR;9923a32a-3607-11d2-b9be-0000f87a36b2;;UserSID)`
 - `(OA;;CR;1131f6ab-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
-- Na obiekcie komputera atakującego: `(A;;WP;;;UserSID)`
-- Na obiekcie docelowego użytkownika: `(A;;WP;;;UserSID)`
-- Na obiekcie Sites w kontenerze Configuration: `(A;CI;CCDC;;;UserSID)`
+- W obiekcie komputera atakującego: `(A;;WP;;;UserSID)`
+- W obiekcie użytkownika docelowego: `(A;;WP;;;UserSID)`
+- W obiekcie Sites w kontenerze Configuration: `(A;CI;CCDC;;;UserSID)`
 
-Aby uzyskać bieżące ACE obiektu: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
+Aby pobrać bieżący ACE obiektu: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
 
-Zwróć uwagę, że w tym przypadku musisz wprowadzić **kilka zmian,** a nie tylko jedną. Dlatego, w sesji **mimikatz1** (RPC server) użyj parametru **`/stack` z każdą zmianą**, którą chcesz wprowadzić. Dzięki temu będziesz musiał wykonać **`/push`** tylko raz, aby zastosować wszystkie zaległe zmiany na fałszywym serwerze.
+Zauważ, że w tym przypadku musisz wprowadzić **kilka zmian,** a nie tylko jedną. Dlatego w sesji **mimikatz1** (serwer RPC) użyj parametru **`/stack` przy każdej zmianie**, którą chcesz wprowadzić. Dzięki temu wystarczy tylko raz użyć **`/push`**, aby wykonać wszystkie odłożone zmiany na rogue serverze.
 
-[**More information about DCShadow in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
+[**Więcej informacji o DCShadow na ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 
-## Źródła
+## References
 
-- [TrustedSec - Adventures in Primary Group Behavior, Reporting, and Exploitation](https://trustedsec.com/blog/adventures-in-primary-group-behavior-reporting-and-exploitation)
-- [DCShadow write-up in ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
+- [1] [TrustedSec - Adventures in Primary Group Behavior, Reporting, and Exploitation](https://trustedsec.com/blog/adventures-in-primary-group-behavior-reporting-and-exploitation)
+- [2] [DCShadow write-up in ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 
 {{#include ../../banners/hacktricks-training.md}}

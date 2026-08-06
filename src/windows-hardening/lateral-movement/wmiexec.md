@@ -2,18 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Jak to działa
+## Wyjaśnienie działania
 
-Procesy mogą być otwierane na hostach, gdzie znana jest nazwa użytkownika oraz hasło lub hash, za pomocą WMI. Komendy są wykonywane przy użyciu WMI przez Wmiexec, co zapewnia półinteraktywną powłokę.
+Procesy mogą być otwierane na hostach, na których znana jest nazwa użytkownika oraz hasło lub hash, za pomocą WMI. Wmiexec wykonuje polecenia przy użyciu WMI, zapewniając doświadczenie zbliżone do semi-interactive shell.
 
-**dcomexec.py:** Wykorzystując różne punkty końcowe DCOM, ten skrypt oferuje półinteraktywną powłokę podobną do wmiexec.py, szczególnie wykorzystując obiekt DCOM ShellBrowserWindow. Obecnie obsługuje obiekty MMC20. Application, Shell Windows i Shell Browser Window. (źródło: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Wykorzystując różne endpointy DCOM, ten skrypt oferuje semi-interactive shell podobny do wmiexec.py, korzystając konkretnie z obiektu DCOM ShellBrowserWindow. Obecnie obsługuje obiekty MMC20. Application, Shell Windows oraz Shell Browser Window. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))<sup>[[2]](#references)</sup>
 
 ## Podstawy WMI
 
-### Przestrzeń nazw
+### Namespace
 
-Struktura w hierarchii przypominającej katalog, najwyższym kontenerem WMI jest \root, pod którym zorganizowane są dodatkowe katalogi, zwane przestrzeniami nazw.
-Komendy do wyświetlania przestrzeni nazw:
+WMI ma strukturę hierarchii przypominającej katalogi, a jego kontenerem najwyższego poziomu jest \root, w którym zorganizowane są dodatkowe katalogi, określane jako namespaces.<sup>[[1]](#references)</sup>
+Commands to list namespaces:
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -24,15 +24,15 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 # Listing of namespaces within "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
-Klasy w obrębie przestrzeni nazw można wylistować za pomocą:
+Klasy w obrębie namespace można wyświetlić za pomocą:
 ```bash
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 ### **Klasy**
 
-Znajomość nazwy klasy WMI, takiej jak win32_process, oraz przestrzeni nazw, w której się znajduje, jest kluczowa dla każdej operacji WMI.  
-Polecenia do wyświetlenia klas zaczynających się od `win32`:
+Znajomość nazwy klasy WMI, takiej jak win32_process, oraz przestrzeni nazw, w której się znajduje, ma kluczowe znaczenie dla każdej operacji WMI.
+Polecenia umożliwiające wyświetlenie klas zaczynających się od `win32`:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
@@ -45,7 +45,7 @@ Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpCompute
 ```
 ### Metody
 
-Metody, które są jedną lub więcej funkcjami wykonywalnymi klas WMI, mogą być wykonywane.
+Można wykonywać metody, które są jedną lub większą liczbą funkcji wykonywalnych klas WMI.
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -57,11 +57,11 @@ $c.methods
 # Method listing and invocation
 Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Description", $null, "Name", $null, "c:\share\path",0)
 ```
-## WMI Enumeracja
+## WMI Enumeration
 
-### Status usługi WMI
+### Stan usługi WMI
 
-Polecenia do weryfikacji, czy usługa WMI działa:
+Polecenia służące do sprawdzenia, czy usługa WMI działa:
 ```bash
 # WMI service status check
 Get-Service Winmgmt
@@ -71,12 +71,12 @@ net start | findstr "Instrumentation"
 ```
 ### Informacje o systemie i procesach
 
-Zbieranie informacji o systemie i procesach za pomocą WMI:
+Zbieranie informacji o systemie i procesach za pośrednictwem WMI:
 ```bash
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-Dla atakujących WMI jest potężnym narzędziem do enumeracji wrażliwych danych o systemach lub domenach.
+Dla attackerów WMI jest potężnym narzędziem do enumeracji wrażliwych danych dotyczących systemów lub domen.<sup>[[1]](#references)</sup>
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list
@@ -85,17 +85,17 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-Zdalne zapytania WMI o konkretne informacje, takie jak lokalni administratorzy lub zalogowani użytkownicy, są możliwe przy starannym konstruowaniu poleceń.
+Zdalne odpytywanie WMI w celu uzyskania konkretnych informacji, takich jak lokalni administratorzy lub zalogowani użytkownicy, jest możliwe przy starannym konstruowaniu poleceń.
 
-### **Ręczne zdalne zapytania WMI**
+### **Ręczne zdalne odpytywanie WMI**
 
-Ciche identyfikowanie lokalnych administratorów na zdalnej maszynie oraz zalogowanych użytkowników można osiągnąć za pomocą konkretnych zapytań WMI. `wmic` wspiera również odczyt z pliku tekstowego, aby jednocześnie wykonywać polecenia na wielu węzłach.
+Dyskretne identyfikowanie lokalnych administratorów na zdalnym komputerze oraz zalogowanych użytkowników można przeprowadzić za pomocą określonych zapytań WMI. `wmic` obsługuje również odczyt z pliku tekstowego w celu jednoczesnego wykonywania poleceń na wielu węzłach.<sup>[[1]](#references)</sup>
 
-Aby zdalnie wykonać proces za pomocą WMI, na przykład wdrażając agenta Empire, stosuje się następującą strukturę polecenia, a pomyślne wykonanie jest wskazywane przez wartość zwracaną "0":
+Aby zdalnie wykonać proces za pośrednictwem WMI, na przykład wdrożyć agenta Empire, używa się następującej struktury polecenia. Pomyślne wykonanie jest sygnalizowane wartością zwracaną „0”:<sup>[[1]](#references)</sup>
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-Ten proces ilustruje zdolność WMI do zdalnego wykonywania i enumeracji systemu, podkreślając jego użyteczność zarówno w administracji systemem, jak i w pentestingu.
+Ten proces ilustruje możliwości WMI w zakresie zdalnego wykonywania poleceń i enumeracji systemu, podkreślając jego użyteczność zarówno w administracji systemami, jak i pentestingu.
 
 ## Narzędzia automatyczne
 
@@ -115,12 +115,13 @@ SharpMove.exe action=query computername=remote.host.local query="select * from w
 SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
 SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
 ```
-- Możesz również użyć **Impacket's `wmiexec`**.
+- Możesz także użyć **`wmiexec` z Impacket**.
 
 
-## Odniesienia
+## Referencje
 
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+- [1] [Używanie poświadczeń do przejęcia kontroli nad komputerami z systemem Windows — część 3 (WMI i WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
+- [2] [Przewodnik dla początkujących po zestawie narzędzi Impacket — część 1](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
 
 
 {{#include ../../banners/hacktricks-training.md}}

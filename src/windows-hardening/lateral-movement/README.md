@@ -1,8 +1,8 @@
-# Lateral Movement
+# Ruch boczny
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Istnieje wiele sposobów na wykonywanie poleceń w zewnętrznych systemach, tutaj znajdziesz wyjaśnienia dotyczące głównych technik lateralnego ruchu w systemie Windows:
+Istnieje wiele sposobów wykonywania poleceń w systemach zewnętrznych. Tutaj znajdziesz wyjaśnienia dotyczące działania głównych technik Windows lateral movement:
 
 - [**PsExec**](psexec-and-winexec.md)
 - [**SmbExec**](smbexec.md)

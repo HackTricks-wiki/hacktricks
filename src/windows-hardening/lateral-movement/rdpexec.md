@@ -4,9 +4,10 @@
 
 ## Jak to działa
 
-**RDPexec** to w zasadzie wykonywanie poleceń logując się do systemu za pomocą RDP.
+**RDPexec** służy zasadniczo do wykonywania poleceń po zalogowaniu się do systemu za pomocą RDP.
 
-Aby uzyskać więcej informacji, sprawdź:
+Więcej informacji:
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-rdp.md
