@@ -147,6 +147,5 @@ In summary, ACLs and ACEs help define precise access controls, ensuring that onl
 
 - [1] [How the System Uses ACLs - NTFS.com](https://www.ntfs.com/ntfs-permissions-acl-use.htm)
 - [2] [ACL, DACL, SACL and the ACE - secureidentity.se](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
-- [3] [NTFS Security Model - coopware.in2.info](https://www.coopware.in2.info/_ntfsacl_ht.htm)
 
 {{#include ../../banners/hacktricks-training.md}}

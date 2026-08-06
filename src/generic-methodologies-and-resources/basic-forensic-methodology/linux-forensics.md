@@ -146,7 +146,7 @@ ThisisTheMasterSecret
 
 ### Modified System Files
 
-Linux offers tools for ensuring the integrity of system components, crucial for spotting potentially problematic files.
+Linux offers tools for ensuring the integrity of system components, crucial for spotting potentially problematic files.<sup>[[1]](#references)</sup>
 
 - **RedHat-based systems**: Use `rpm -Va` for a comprehensive check.
 - **Debian-based systems**: `dpkg --verify` for initial verification, followed by `debsums | grep -v "OK$"` (after installing `debsums` with `apt-get install debsums`) to identify any issues.
@@ -162,7 +162,7 @@ malware-analysis.md
 
 ## Search installed programs
 
-To effectively search for installed programs on both Debian and RedHat systems, consider leveraging system logs and databases alongside manual checks in common directories.
+To effectively search for installed programs on both Debian and RedHat systems, consider leveraging system logs and databases alongside manual checks in common directories.<sup>[[1]](#references)</sup>
 
 - For Debian, inspect _**`/var/lib/dpkg/status`**_ and _**`/var/log/dpkg.log`**_ to fetch details about package installations, using `grep` to filter for specific information.
 - RedHat users can query the RPM database with `rpm -qa --root=/mntpath/var/lib/rpm` to list installed packages.
@@ -197,7 +197,7 @@ dd if=mem bs=1 skip=08048000 count=1000 of=/tmp/exec2 #Recorver it
 
 ## Syscall Trace Triage with SQLite and FTS5
 
-When a process is still running or can be re-executed in a lab, **`strace`** can provide a fast behavioral trace without needing kernel modules or full EDR telemetry. For large traces, avoid reading the raw log directly or pasting it into an LLM: store it in a **SQLite** database and query only the minimal subset you need.<sup>[[8]](#references)</sup>
+When a process is still running or can be re-executed in a lab, **`strace`** can provide a fast behavioral trace without needing kernel modules or full EDR telemetry. For large traces, avoid reading the raw log directly or pasting it into an LLM: store it in a **SQLite** database and query only the minimal subset you need.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
 
 > [!WARNING]
 > Attaching `strace` changes process timing and may affect race conditions or other fragile bugs. Prefer reproducing on a copy/lab system when possible.
@@ -312,7 +312,7 @@ ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Libra
 ```
 
 #### Hunt: Cron/Anacron abuse via 0anacron and suspicious stubs
-Attackers often edit the 0anacron stub present under each /etc/cron.*/ directory to ensure periodic execution.<sup>[[5]](#references)</sup>
+Attackers often edit the 0anacron stub present under each /etc/cron.*/ directory to ensure periodic execution.<sup>[[4]](#references)</sup>
 
 ```bash
 # List 0anacron files and their timestamps/sizes
@@ -323,7 +323,7 @@ grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev
 ```
 
 #### Hunt: SSH hardening rollback and backdoor shells
-Changes to sshd_config and system account shells are common post‑exploitation to preserve access.<sup>[[5]](#references)</sup>
+Changes to sshd_config and system account shells are common post‑exploitation to preserve access.<sup>[[4]](#references)</sup>
 
 ```bash
 # Root login enablement (flag "yes" or lax values)
@@ -336,7 +336,7 @@ awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|
 #### Hunt: Cloud C2 markers (Dropbox/Cloudflare Tunnel)
 - Dropbox API beacons typically use api.dropboxapi.com or content.dropboxapi.com over HTTPS with Authorization: Bearer tokens.
   - Hunt in proxy/Zeek/NetFlow for unexpected Dropbox egress from servers.
-- Cloudflare Tunnel (`cloudflared`) provides backup C2 over outbound 443.<sup>[[5]](#references)</sup>
+- Cloudflare Tunnel (`cloudflared`) provides backup C2 over outbound 443.<sup>[[4]](#references)</sup>
 
 ```bash
 ps aux | grep -E '[c]loudflared|trycloudflare'
@@ -422,7 +422,7 @@ Linux systems track user activities and system events through various log files.
 
 ### Journald triage (`journalctl`)
 
-On modern Linux hosts, the **systemd journal** is usually the highest-value source for **service execution**, **auth events**, **package operations**, and **kernel/user-space messages**. During live response, try to preserve both the **persistent** journal (`/var/log/journal/`) and the **runtime** journal (`/run/log/journal/`) because short-lived attacker activity may only exist in the latter.
+On modern Linux hosts, the **systemd journal** is usually the highest-value source for **service execution**, **auth events**, **package operations**, and **kernel/user-space messages**. During live response, try to preserve both the **persistent** journal (`/var/log/journal/`) and the **runtime** journal (`/run/log/journal/`) because short-lived attacker activity may only exist in the latter.<sup>[[5]](#references)</sup>
 
 ```bash
 # List available boots and pivot around the suspicious one
@@ -448,7 +448,7 @@ Useful journal fields for triage include `_SYSTEMD_UNIT`, `_EXE`, `_COMM`, `_CMD
 
 ### Audit framework triage (`auditd`)
 
-If `auditd` is enabled, prefer it whenever you need **process attribution** for file changes, command execution, login activity, or package installation.<sup>[[7]](#references)</sup>
+If `auditd` is enabled, prefer it whenever you need **process attribution** for file changes, command execution, login activity, or package installation.<sup>[[6]](#references)</sup>
 
 ```bash
 # Fast summaries
@@ -530,13 +530,13 @@ More examples and info inside the github: [https://github.com/snovvcrash/usbrip]
 
 Examine the _**/etc/passwd**_, _**/etc/shadow**_ and **security logs** for unusual names or accounts created and or used in close proximity to known unauthorized events. Also, check possible sudo brute-force attacks.\
 Moreover, check files like _**/etc/sudoers**_ and _**/etc/groups**_ for unexpected privileges given to users.\
-Finally, look for accounts with **no passwords** or **easily guessed** passwords.
+Finally, look for accounts with **no passwords** or **easily guessed** passwords.<sup>[[1]](#references)</sup>
 
 ## Examine File System
 
 ### Analyzing File System Structures in Malware Investigation
 
-When investigating malware incidents, the structure of the file system is a crucial source of information, revealing both the sequence of events and the malware's content. However, malware authors are developing techniques to hinder this analysis, such as modifying file timestamps or avoiding the file system for data storage.
+When investigating malware incidents, the structure of the file system is a crucial source of information, revealing both the sequence of events and the malware's content. However, malware authors are developing techniques to hinder this analysis, such as modifying file timestamps or avoiding the file system for data storage.<sup>[[1]](#references)</sup>
 
 To counter these anti-forensic methods, it's essential to:
 
@@ -649,12 +649,11 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 - [1] [Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides – Chapter 3](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
 - [2] [Linux Logs Explained](https://www.plesk.com/blog/featured/linux-logs-explained/)
 - [3] [git diff Documentation – --diff-filter option](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
-- [4] Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides
-- [5] [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
-- [6] [Forensic Analysis of Linux Journals](https://stuxnet999.github.io/dfir/linux-journal-forensics/)
-- [7] [Red Hat Enterprise Linux 9 - Auditing the system](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/auditing-the-system_security-hardening)
-- [8] [Say hi to Pike!](https://www.synacktiv.com/en/publications/say-hi-to-pike.html)
-- [9] [strace](https://strace.io/)
-- [10] [SQLite FTS5 Extension](https://www.sqlite.org/fts5.html)
+- [4] [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [5] [Forensic Analysis of Linux Journals](https://stuxnet999.github.io/dfir/linux-journal-forensics/)
+- [6] [Red Hat Enterprise Linux 9 - Auditing the system](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/auditing-the-system_security-hardening)
+- [7] [Say hi to Pike!](https://www.synacktiv.com/en/publications/say-hi-to-pike.html)
+- [8] [strace](https://strace.io/)
+- [9] [SQLite FTS5 Extension](https://www.sqlite.org/fts5.html)
 
 {{#include ../../banners/hacktricks-training.md}}

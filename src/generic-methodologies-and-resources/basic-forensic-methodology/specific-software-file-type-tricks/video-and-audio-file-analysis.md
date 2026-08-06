@@ -17,6 +17,3 @@ This array of tools underscores the versatility required in CTF challenges, wher
 - [1] [Video and Audio file analysis – Trail of Bits CTF Field Guide](https://trailofbits.github.io/ctf/forensics/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

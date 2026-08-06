@@ -7,6 +7,7 @@ Notepad++ will **autoload every plugin DLL found under its `plugins` subfolders*
 Since **Notepad++ 7.6+** the expected manual-install layout is **one subfolder per plugin** (`plugins\<PluginName>\<PluginName>.dll`). In **portable mode** (presence of `doLocalConf.xml` next to `notepad++.exe`), the whole application tree stays local to that directory, which often turns copied/admin tool bundles into an easy user-writable execution surface.<sup>[[2]](#references)</sup>
 
 ## Writable plugin locations
+
 - Standard install: `C:\Program Files\Notepad++\plugins\<PluginName>\<PluginName>.dll` (usually requires admin to write).<sup>[[1]](#references)</sup>
 - Writable options for low-privileged operators:<sup>[[1]](#references)</sup>
   - Use the **portable Notepad++ build** in a user-writable folder.

@@ -52,7 +52,7 @@ Near-field EM probes (500 MHz–3 GHz) leak identical information to power analy
 
 ## Timing & Micro-architectural Attacks
 Modern CPUs leak secrets through shared resources:
-* **Hertzbleed (2022)** – DVFS frequency scaling correlates with Hamming weight, allowing *remote* extraction of EdDSA keys.
+* **Hertzbleed (2022)** – DVFS frequency scaling correlates with Hamming weight, allowing *remote* extraction of EdDSA keys.<sup>[[2]](#references)</sup>
 * **Downfall / Gather Data Sampling (Intel, 2023)** – transient-execution to read AVX-gather data across SMT threads.
 * **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – speculative vector mis-prediction leaks registers cross-domain.
 
@@ -91,7 +91,7 @@ Combining faults with side-channel leakage shortcuts key search (e.g. 1-trace AE
 ---
 
 ## Tools & Frameworks
-* **ChipWhisperer-Husky** (2024) – 500 MS/s scope + Cortex-M trigger; Python API as above.
+* **ChipWhisperer-Husky** (2024) – 500 MS/s scope + Cortex-M trigger; Python API as above.<sup>[[1]](#references)</sup>
 * **Riscure Inspector & FI** – commercial, supports automated leakage assessment (TVLA-2.0).
 * **scaaml** – TensorFlow-based deep-learning SCA library (v1.2 – 2025).
 * **pyecsca** – ANSSI open-source ECC SCA framework.
@@ -100,8 +100,8 @@ Combining faults with side-channel leakage shortcuts key search (e.g. 1-trace AE
 
 ## References
 
-* [ChipWhisperer Documentation](https://chipwhisperer.readthedocs.io/en/latest/)
-* [Hertzbleed Attack Paper](https://www.hertzbleed.com/)
+- [1] [ChipWhisperer Documentation](https://chipwhisperer.readthedocs.io/en/latest/)
+- [2] [Hertzbleed Attack Paper](https://www.hertzbleed.com/)
 
 
 {{#include ../../banners/hacktricks-training.md}}

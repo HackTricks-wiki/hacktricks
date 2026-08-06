@@ -190,7 +190,7 @@ The combination of **`DS-Replication-Get-Changes`** with **`DS-Replication-Get-C
 
 ## LAPSToolkit
 
-The [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) facilitates the enumeration of LAPS with several functions.\
+The [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) facilitates the enumeration of LAPS with several functions.<sup>[[6]](#references)</sup>\
 One is parsing **`ExtendedRights`** for **all computers with LAPS enabled.** This shows **groups** specifically **delegated to read LAPS passwords**, which are often users in protected groups.\
 An **account** that has **joined a computer** to a domain receives `All Extended Rights` over that host, and this right gives the **account** the ability to **read passwords**. Enumeration may show a user account that can read the LAPS password on a host. This can help us **target specific AD users** who can read LAPS passwords.
 
@@ -311,6 +311,6 @@ Then, compile the new `AdmPwd.PS.dll` and upload it to the machine in `C:\Tools\
 - [3] [Get started with Windows LAPS and Windows Server Active Directory](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-scenarios-windows-server-active-directory)
 - [4] [Windows LAPS account management modes](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-concepts-account-management-modes)
 - [5] [LAPS 2.0 Internals - XPN Infosec Blog](https://blog.xpnsec.com/lapsv2-internals/)
-
+- [6] [LAPSToolkit - leoloobeek](https://github.com/leoloobeek/LAPSToolkit)
 
 {{#include ../../banners/hacktricks-training.md}}
