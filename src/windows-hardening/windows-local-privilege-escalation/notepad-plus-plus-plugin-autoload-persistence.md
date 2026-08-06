@@ -2,38 +2,39 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Notepad++ wird beim Start **jede Plugin-DLL automatisch laden, die in seinen `plugins`-Unterrverzeichnissen gefunden wird**. Das Ablegen eines bösartigen Plugins in einer **schreibbaren Notepad++-Installation** verschafft Codeausführung innerhalb von `notepad++.exe`, jedes Mal wenn der Editor startet, was für **Persistence**, heimliche **initial execution** oder als **in-process loader** missbraucht werden kann, wenn der Editor erhöht gestartet wird.
+Notepad++ lädt beim Start **jede Plugin-DLL automatisch**, die sich in seinen `plugins`-Unterordnern befindet. Das Ablegen eines schädlichen Plugins in einer **beschreibbaren Notepad++-Installation** ermöglicht bei jedem Start des Editors die Codeausführung innerhalb von `notepad++.exe`. Dies kann für **Persistence**, eine unauffällige **initiale Ausführung** oder als **In-Process-Loader** missbraucht werden, wenn der Editor mit erhöhten Rechten gestartet wird.<sup>[[1]](#references)</sup>
 
-Seit **Notepad++ 7.6+** ist das erwartete manuelle Installationslayout **ein Unterordner pro Plugin** (`plugins\<PluginName>\<PluginName>.dll`). Im **portable mode** (Vorhandensein von `doLocalConf.xml` neben `notepad++.exe`) bleibt der gesamte Anwendungspfad lokal in diesem Verzeichnis, was kopierte/admin tool bundles oft zu einer leicht benutzerbeschreibbaren Ausführungsoberfläche macht.
+Seit **Notepad++ 7.6+** besteht die erwartete Struktur für die manuelle Installation aus **einem Unterordner pro Plugin** (`plugins\<PluginName>\<PluginName>.dll`). Im **Portable-Modus** (wenn sich `doLocalConf.xml` neben `notepad++.exe` befindet) bleibt der gesamte Anwendungsbaum lokal in diesem Verzeichnis. Dadurch werden kopierte Admin-Tool-Bundles häufig zu einer einfach beschreibbaren Ausführungsoberfläche für Benutzer.<sup>[[2]](#references)</sup>
 
-## Writable plugin locations
-- Standard install: `C:\Program Files\Notepad++\plugins\<PluginName>\<PluginName>.dll` (erfordert normalerweise admin zum Schreiben).
-- Writable options for low-privileged operators:
-- Nutze den **portable Notepad++ build** in einem benutzerbeschreibbaren Ordner.
-- Kopiere `C:\Program Files\Notepad++` in einen benutzerkontrollierten Pfad (z. B. `%LOCALAPPDATA%\npp\`) und starte `notepad++.exe` von dort.
-- Suche nach **admin tool bundles**, extrahierten zip-Kopien oder help-desk toolkits, die bereits `doLocalConf.xml` enthalten und außerhalb von `Program Files` liegen.
-- Jedes Plugin bekommt seinen eigenen Unterordner unter `plugins` und wird beim Start automatisch geladen; Menüeinträge erscheinen unter **Plugins**.
+## Beschreibbare Plugin-Speicherorte
 
-Quick triage:
+- Standardinstallation: `C:\Program Files\Notepad++\plugins\<PluginName>\<PluginName>.dll` (zum Schreiben sind normalerweise Administratorrechte erforderlich).<sup>[[1]](#references)</sup>
+- Beschreibbare Optionen für Benutzer mit niedrigen Berechtigungen:<sup>[[1]](#references)</sup>
+- Den **portablen Notepad++-Build** in einem für den Benutzer beschreibbaren Ordner verwenden.
+- `C:\Program Files\Notepad++` in einen vom Benutzer kontrollierten Pfad kopieren (z. B. `%LOCALAPPDATA%\npp\`) und `notepad++.exe` von dort ausführen.
+- Nach **Admin-Tool-Bundles**, extrahierten ZIP-Kopien oder Helpdesk-Toolkits suchen, die bereits `doLocalConf.xml` enthalten und sich außerhalb von `Program Files` befinden.
+- Jedes Plugin erhält einen eigenen Unterordner unter `plugins` und wird beim Start automatisch geladen; Menüeinträge erscheinen unter **Plugins**.<sup>[[2]](#references)</sup>
+
+Schnelle Triage:
 ```cmd
 where /r C:\ notepad++.exe 2>nul
 for /d %D in ("%ProgramFiles%\Notepad++" "%ProgramFiles(x86)%\Notepad++" "%LOCALAPPDATA%\*notepad*" "%USERPROFILE%\Desktop\*notepad*") do @if exist "%~fD\plugins" echo [*] %~fD
 icacls "C:\Program Files\Notepad++\plugins" 2>nul
 ```
-## Plugin-Ladepunkte (Execution Primitives)
-Notepad++ erwartet bestimmte **exported functions**. Diese werden alle während der Initialisierung aufgerufen und bieten mehrere Execution Surfaces:
-- **`DllMain`** — läuft sofort beim DLL-Load (erster Ausführungspunkt).
-- **`setInfo(NppData)`** — wird beim Laden einmal aufgerufen, um Notepad++-Handles bereitzustellen; typischer Ort, um Menüeinträge zu registrieren.
-- **`getName()`** — gibt den Plugin-Namen zurück, der im Menü angezeigt wird.
-- **`getFuncsArray(int *nbF)`** — gibt Menübefehle zurück; selbst wenn leer, wird es beim Startup aufgerufen.
-- **`beNotified(SCNotification*)`** — empfängt Notepad++ / Scintilla-Events (nützlich, um Payloads bis zu einer User Action oder einem Editor-Event zu verzögern).
-- **`messageProc(UINT, WPARAM, LPARAM)`** — Message Handler, nützlich für größere Datenaustausche.
-- **`isUnicode()`** — Kompatibilitäts-Flag, das beim Laden geprüft wird.
+## Plugin-Ladepunkte (Ausführungsprimitive)
+Notepad++ erwartet bestimmte **exportierte Funktionen**. Diese werden alle während der Initialisierung aufgerufen und bieten mehrere Ausführungsflächen:<sup>[[1]](#references)</sup>
+- **`DllMain`** — wird unmittelbar beim Laden der DLL ausgeführt (erster Ausführungspunkt).
+- **`setInfo(NppData)`** — wird beim Laden einmal aufgerufen, um Notepad++-Handles bereitzustellen; ein typischer Ort zum Registrieren von Menüpunkten.
+- **`getName()`** — gibt den im Menü angezeigten Plugin-Namen zurück.
+- **`getFuncsArray(int *nbF)`** — gibt Menübefehle zurück; selbst wenn das Array leer ist, wird die Funktion während des Starts aufgerufen.
+- **`beNotified(SCNotification*)`** — empfängt Notepad++- bzw. Scintilla-Ereignisse (nützlich, um Payloads bis zu einer Benutzeraktion oder einem Editorereignis zurückzustellen).
+- **`messageProc(UINT, WPARAM, LPARAM)`** — Nachrichtenhandler, nützlich für den Austausch größerer Datenmengen.
+- **`isUnicode()`** — beim Laden geprüfte Kompatibilitätskennung.
 
-Die meisten exports können als **stubs** implementiert werden; Ausführung kann über `DllMain` oder einen beliebigen Callback oben während des Autoload erfolgen.
+Die meisten Exporte können als **Stubs** implementiert werden; die Ausführung kann aus `DllMain` oder jedem der oben genannten Callbacks während des Autoloads erfolgen.
 
-## Minimal bösartiges Plugin-Skelett
-Kompiliere eine DLL mit den erwarteten exports und platziere sie in `plugins\\MyNewPlugin\\MyNewPlugin.dll` unter einem beschreibbaren Notepad++-Ordner:
+## Minimales bösartiges Plugin-Skelett
+Kompiliere eine DLL mit den erwarteten Exporten und platziere sie unter `plugins\\MyNewPlugin\\MyNewPlugin.dll` in einem beschreibbaren Notepad++-Ordner:<sup>[[1]](#references)</sup>
 ```c
 BOOL APIENTRY DllMain(HMODULE h, DWORD r, LPVOID) { if (r == DLL_PROCESS_ATTACH) MessageBox(NULL, TEXT("Hello from Notepad++"), TEXT("MyNewPlugin"), MB_OK); return TRUE; }
 extern "C" __declspec(dllexport) void setInfo(NppData) {}
@@ -44,11 +45,11 @@ extern "C" __declspec(dllexport) LRESULT messageProc(UINT, WPARAM, LPARAM) { ret
 extern "C" __declspec(dllexport) BOOL isUnicode() { return TRUE; }
 ```
 1. Baue die DLL (Visual Studio/MinGW).
-2. Erstelle den Plugin-Unterordner unter `plugins` und lege die DLL dort ab.
-3. Starte Notepad++ neu; die DLL wird automatisch geladen und führt `DllMain` sowie nachfolgende Callbacks aus.
+2. Erstelle den plugin-Unterordner unter `plugins` und lege die DLL dort ab.
+3. Starte Notepad++ neu; die DLL wird automatisch geladen, wodurch `DllMain` und anschließend weitere Callbacks ausgeführt werden.
 
-## Low-noise-Trigger-Pattern via `beNotified`
-Für OPSEC sollten viele Payloads **nicht** aus `DllMain` ausgelöst werden. Ein unauffälligeres Pattern ist, das Plugin sauber laden zu lassen und erst nach einem realistischen Editor-Event auszuführen, z. B. **startup complete**, **buffer activation** oder dem **ersten getippten Zeichen**.
+## Low-noise-Trigger-Muster über `beNotified`
+Für OPSEC sollten viele Payloads **nicht aus `DllMain` heraus** ausgelöst werden. Ein unauffälligeres Muster besteht darin, das Plugin sauber laden zu lassen und die Ausführung erst nach einem realistischen Editor-Ereignis zu starten, etwa **abgeschlossener Start**, **Aktivierung eines Buffers** oder **das erste eingegebene Zeichen**.
 ```c
 static bool fired = false;
 extern "C" __declspec(dllexport) void beNotified(SCNotification *n) {
@@ -61,37 +62,38 @@ WinExec("powershell -w hidden -nop -c <payload>", SW_HIDE);
 }
 }
 ```
-Dies passt besser zu öffentlicher offensiver Forschung als ein lautes `DllMain`-Beacon: Die DLL wird beim Start weiterhin automatisch geladen, aber die bösartige Aktion wird verzögert, bis Notepad++ tatsächlich in Benutzung zu sein scheint.
+Dies entspricht eher öffentlich verfügbarer Offensive Research als einem auffälligen `DllMain`-Beacon: Die DLL wird beim Start weiterhin automatisch geladen, aber die bösartige Aktion wird verzögert, bis Notepad++ tatsächlich verwendet wird.
 
-## Den Plugin-Konfigurationsordner als sekundären Speicher verwenden
-Notepad++ stellt `NPPM_GETPLUGINSCONFIGDIR` bereit, das das **Plugin-Konfigurationsverzeichnis des aktuellen Benutzers** zurückgibt. Ein bösartiges Plugin kann dies nutzen, um die DLL auf der Festplatte minimal zu halten, während es verschlüsselte Konfiguration, gestaffelte Payloads oder Tasking-Dateien in einem Pfad speichert, der sich in den normalen Plugin-Status einfügt.
+## Das Plugin-Konfigurationsverzeichnis als sekundären Speicher verwenden
+Notepad++ stellt `NPPM_GETPLUGINSCONFIGDIR` bereit, das das **Plugin-Konfigurationsverzeichnis des aktuellen Benutzers** zurückgibt.<sup>[[3]](#references)</sup> Ein bösartiges Plugin kann dies verwenden, um die DLL auf dem Datenträger minimal zu halten und gleichzeitig verschlüsselte Konfigurationen, gestaffelte Payloads oder Tasking-Dateien in einem Pfad zu speichern, der sich unauffällig in den normalen Plugin-Status einfügt.
 ```c
 wchar_t cfg[MAX_PATH] = {0};
 SendMessage(nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, MAX_PATH, (LPARAM)cfg);
 // Example result: %AppData%\Notepad++\plugins\config
 ```
-Operationally ist das nützlich, wenn du Folgendes willst:
-- eine winzige, automatisch geladene Bootstrap-DLL;
-- per-user tasking, ohne das main plugin binary erneut anzufassen;
-- den **autoload trigger** von der schwereren zweiten Stage zu trennen.
+Operational ist dies nützlich, wenn du Folgendes möchtest:
+- eine kleine autoloaded Bootstrap-DLL;
+- per-user tasking, ohne die Haupt-Plugin-Binärdatei erneut anzufassen;
+- die Trennung des **autoload triggers** von der umfangreicheren zweiten Stufe.
 
 ## Reflective loader plugin pattern
-Ein weaponized plugin kann Notepad++ in einen **reflective DLL loader** verwandeln:
-- Eine minimale UI-/Menüeintragung bereitstellen (z. B. "LoadDLL").
-- Einen **file path** oder eine **URL** akzeptieren, um eine payload DLL abzurufen.
-- Die DLL reflectively in den aktuellen Prozess mappen und einen exportierten Einstiegspunkt aufrufen (z. B. eine Loader-Funktion innerhalb der abgerufenen DLL).
-- Vorteil: einen harmlos wirkenden GUI-Prozess wiederverwenden, statt einen neuen Loader zu starten; die payload erbt die Integrität von `notepad++.exe` (einschließlich erhöhter Kontexte).
-- Trade-offs: Das Ablegen einer **unsigned plugin DLL** auf der Festplatte ist auffällig; eine praktische Variante ist, das automatisch geladene Plugin nur als Stub zu verwenden und das eigentliche implant verschlüsselt/gestaged woanders zu halten.
+Ein weaponized Plugin kann Notepad++ in einen **reflective DLL loader** verwandeln:<sup>[[1]](#references)</sup>
+- Einen minimalen UI-/Menüeintrag bereitstellen (z. B. „LoadDLL“).
+- Einen **file path** oder eine **URL** akzeptieren, um eine Payload-DLL abzurufen.
+- Die DLL reflectively in den aktuellen Prozess mappen und einen exportierten **entry point** aufrufen (z. B. eine loader function innerhalb der abgerufenen DLL).
+- Vorteil: Einen unauffällig wirkenden GUI-Prozess wiederverwenden, statt einen neuen Loader zu starten; die Payload übernimmt die Integrität von `notepad++.exe` (einschließlich elevated contexts).
+- Nachteile: Das Ablegen einer **unsigned plugin DLL** auf der Festplatte ist auffällig; eine praktische Variante besteht darin, das autoloaded Plugin nur als Stub zu verwenden und das eigentliche Implant verschlüsselt bzw. staged an anderer Stelle aufzubewahren.
 
-## Detection and hardening notes
-- Schreibe in die **Notepad++ plugin directories** nicht oder überwache dies (einschließlich portabler Kopien in Benutzerprofilen); aktiviere controlled folder access oder application allowlisting.
-- Alarme auf **neue unsigned DLLs** unter `plugins`, Änderungen an portablen Notepad++-Bäumen und ungewöhnliche **child processes/network activity** von `notepad++.exe`.
-- Erstelle eine Baseline legitimer Plugins und untersuche jede neue DLL, die das normale Notepad++ plugin interface exportiert, aber zusätzlich shells, PowerShell oder network beacons startet.
-- Erzwinge die Plugin-Installation nur über **Plugins Admin**, und beschränke die Ausführung portabler Kopien aus untrusted paths.
+## Hinweise zu Detection und Hardening
+- **Writes to Notepad++ plugin directories** blockieren oder überwachen (einschließlich portable Kopien in user profiles); Controlled Folder Access oder Application Allowlisting aktivieren.
+- Bei **new unsigned DLLs** unter `plugins`, Änderungen an portablen Notepad++-Verzeichnisstrukturen und ungewöhnlichen **child processes/network activity** von `notepad++.exe` alarmieren.
+- Legitime Plugins als Baseline erfassen und jede neue DLL untersuchen, die das normale Notepad++-Plugin-Interface exportiert, aber zusätzlich Shells, PowerShell oder Network Beacons startet.
+- Die Plugin-Installation ausschließlich über **Plugins Admin** zulassen und die Ausführung portabler Kopien aus nicht vertrauenswürdigen Pfaden einschränken.
 
-## References
-- [TrustedSec - Notepad++ Plugins: Plug and Payload](https://trustedsec.com/blog/notepad-plugins-plug-and-payload)
-- [Notepad++ User Manual - Plugins](https://npp-user-manual.org/docs/plugins/)
-- [Notepad++ User Manual - Plugin Communication](https://npp-user-manual.org/docs/plugin-communication/)
+## Referenzen
+
+- [1] [TrustedSec - Notepad++ Plugins: Plug and Payload](https://trustedsec.com/blog/notepad-plugins-plug-and-payload)
+- [2] [Notepad++ User Manual - Plugins](https://npp-user-manual.org/docs/plugins/)
+- [3] [Notepad++ User Manual - Plugin Communication](https://npp-user-manual.org/docs/plugin-communication/)
 
 {{#include ../../banners/hacktricks-training.md}}

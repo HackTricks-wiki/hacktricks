@@ -2,21 +2,21 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Laden Sie die kostenlose Version der App von [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/) herunter, führen Sie sie aus und verpacken Sie die "bösartige" Binärdatei darin.\
-Beachten Sie, dass Sie eine "**.bat**" verpacken können, wenn Sie **nur** **Befehlszeilen ausführen** möchten (wählen Sie anstelle von cmd.exe die .bat-Datei aus).
+Lade die kostenlose Version der App von [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/) herunter, führe sie aus und verpacke die „schädliche“ Binary damit.\
+Beachte, dass du eine „**.bat**“-Datei verpacken kannst, wenn du **nur** **Befehlszeilen ausführen** möchtest (wähle anstelle von cmd.exe die .bat-Datei aus).
 
-![](<../../images/image (417).png>)
+![MSI Wrapper: Beachte, dass du eine „.bat“-Datei verpacken kannst, wenn du nur Befehlszeilen ausführen möchtest (wähle anstelle von cmd.exe die .bat-Datei aus)](<../../images/image (417).png>)
 
-Und das ist der wichtigste Teil der Konfiguration:
+Und dies ist der wichtigste Teil der Konfiguration:
 
-![](<../../images/image (312).png>)
+![MSI Wrapper: Und dies ist der wichtigste Teil der Konfiguration](<../../images/image (312).png>)
 
-![](<../../images/image (346).png>)
+![MSI Wrapper: Und dies ist der wichtigste Teil der Konfiguration](<../../images/image (346).png>)
 
-![](<../../images/image (1072).png>)
+![MSI Wrapper: Und dies ist der wichtigste Teil der Konfiguration](<../../images/image (1072).png>)
 
-(Bitte beachten Sie, dass Sie, wenn Sie versuchen, Ihre eigene Binärdatei zu packen, diese Werte ändern können)
+(Beachte bitte, dass du diese Werte ändern kannst, wenn du versuchst, deine eigene Binary zu verpacken.)
 
-Von hier aus klicken Sie einfach auf die **nächsten Schaltflächen** und die letzte **Build-Schaltfläche, und Ihr Installer/Wrapping wird generiert.**
+Klicke von hier aus einfach auf die **Weiter-Schaltflächen** und anschließend auf die letzte **Build-Schaltfläche**. Dein Installer/Wrapper wird dann generiert.
 
 {{#include ../../banners/hacktricks-training.md}}

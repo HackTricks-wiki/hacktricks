@@ -1,42 +1,42 @@
-# Schutz von Windows-Anmeldeinformationen
+# Windows Credentials Protections
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## WDigest
 
-Das [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>) Protokoll, das mit Windows XP eingeführt wurde, ist für die Authentifizierung über das HTTP-Protokoll ausgelegt und ist **standardmäßig auf Windows XP bis Windows 8.0 sowie Windows Server 2003 bis Windows Server 2012 aktiviert**. Diese Standardeinstellung führt zu **Klartext-Passwortspeicherung in LSASS** (Local Security Authority Subsystem Service). Ein Angreifer kann Mimikatz verwenden, um **diese Anmeldeinformationen zu extrahieren**, indem er Folgendes ausführt:
+Das [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>)-Protokoll, das mit Windows XP eingeführt wurde, ist für die Authentifizierung über das HTTP-Protokoll vorgesehen und ist **unter Windows XP bis einschließlich Windows 8.0 sowie unter Windows Server 2003 bis Windows Server 2012 standardmäßig aktiviert**. Diese Standardeinstellung führt zur **Speicherung von Passwörtern im Klartext in LSASS** (Local Security Authority Subsystem Service). Ein Angreifer kann Mimikatz verwenden, um **diese Credentials zu extrahieren**, indem er Folgendes ausführt:<sup>[[8]](#references)</sup>
 ```bash
 sekurlsa::wdigest
 ```
-Um diese Funktion **aus- oder einzuschalten**, müssen die Registry-Schlüssel _**UseLogonCredential**_ und _**Negotiate**_ unter _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ auf "1" gesetzt sein. Wenn diese Schlüssel **nicht vorhanden sind oder auf "0" gesetzt sind**, ist WDigest **deaktiviert**:
+Um diese Funktion **aus- oder einzuschalten**, müssen die Registrierungsschlüssel _**UseLogonCredential**_ und _**Negotiate**_ unter _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ auf „1“ gesetzt werden. Wenn diese Schlüssel **nicht vorhanden sind oder auf „0“ gesetzt wurden**, ist WDigest **deaktiviert**:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
-## LSA-Schutz (PP & PPL geschützte Prozesse)
+## LSA Protection (durch PP und PPL geschützte Prozesse)
 
-**Protected Process (PP)** und **Protected Process Light (PPL)** sind **Windows-Kernel-Schutzmechanismen**, die verhindern sollen, dass unautorisierte Prozesse auf sensible Prozesse wie **LSASS** zugreifen. Eingeführt in **Windows Vista**, wurde das **PP-Modell** ursprünglich für **DRM**-Durchsetzung geschaffen und erlaubte nur Binärdateien, die mit einem **speziellen Medienzertifikat** signiert waren, geschützt zu werden. Ein als **PP** markierter Prozess kann nur von anderen Prozessen geöffnet werden, die **ebenfalls PP** sind und ein **gleiches oder höheres Schutzniveau** haben — und selbst dann **nur mit eingeschränkten Zugriffsrechten**, sofern nicht ausdrücklich erlaubt.
+**Protected Process (PP)** und **Protected Process Light (PPL)** sind **Schutzmechanismen auf Kernel-Ebene von Windows**, die den unbefugten Zugriff auf sensible Prozesse wie **LSASS** verhindern sollen. Das **PP-Modell** wurde in **Windows Vista** eingeführt und ursprünglich zur Durchsetzung von **DRM** entwickelt. Es erlaubte nur den Schutz von Binärdateien, die mit einem **speziellen Medienzertifikat** signiert waren. Auf einen als **PP** markierten Prozess können nur andere Prozesse zugreifen, die **ebenfalls PP** sind und ein **gleiches oder höheres Schutzniveau** besitzen, und selbst dann **nur mit eingeschränkten Zugriffsrechten**, sofern dies nicht ausdrücklich erlaubt ist.
 
-**PPL**, eingeführt in **Windows 8.1**, ist eine flexiblere Version von PP. Es erlaubt **breitere Anwendungsfälle** (z. B. LSASS, Defender), indem es **„Schutzniveaus“** basierend auf dem **EKU (Enhanced Key Usage)**-Feld der digitalen Signatur einführt. Das Schutzniveau wird im `EPROCESS.Protection`-Feld gespeichert, das eine `PS_PROTECTION`-Struktur mit folgenden Feldern ist:
+**PPL**, eingeführt in **Windows 8.1**, ist eine flexiblere Version von PP. Es ermöglicht **breitere Einsatzbereiche** (z. B. LSASS, Defender), indem es **„Schutzstufen“** auf Grundlage des Feldes **EKU (Enhanced Key Usage)** der **digitalen Signatur** einführt. Die Schutzstufe wird im Feld `EPROCESS.Protection` gespeichert, bei dem es sich um eine `PS_PROTECTION`-Struktur handelt mit:
 - **Type** (`Protected` oder `ProtectedLight`)
-- **Signer** (z. B. `WinTcb`, `Lsa`, `Antimalware`, etc.)
+- **Signer** (z. B. `WinTcb`, `Lsa`, `Antimalware` usw.)
 
-Diese Struktur ist in einem Byte verpackt und bestimmt **wer wen zugreifen kann**:
+Diese Struktur wird in ein einzelnes Byte gepackt und bestimmt, **wer auf wen zugreifen kann**:
 - **Höhere Signer-Werte können auf niedrigere zugreifen**
 - **PPLs können nicht auf PPs zugreifen**
-- **Unprotected Prozesse können auf keine PPL/PP zugreifen**
+- **Nicht geschützte Prozesse können auf keine PPL/PPs zugreifen**
 
 ### Was du aus offensiver Sicht wissen musst
 
-- Wenn **LSASS als PPL läuft**, schlagen Versuche, es mit `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` aus einem normalen Admin-Kontext zu öffnen, **mit `0x5 (Access Denied)` fehl**, selbst wenn `SeDebugPrivilege` aktiviert ist.
-- Du kannst das **LSASS-Schutzlevel** mit Tools wie Process Hacker prüfen oder programmatisch den `EPROCESS.Protection`-Wert auslesen.
-- LSASS hat typischerweise `PsProtectedSignerLsa-Light` (`0x41`), das **nur von Prozessen zugänglich ist, die mit einem höherwertigen Signer signiert sind**, z. B. `WinTcb` (`0x61` oder `0x62`).
-- PPL ist **nur im Userland wirksam**; Kernel-Code kann es vollständig umgehen.
-- Dass LSASS PPL ist, verhindert **credential dumping** nicht, wenn du **kernel shellcode** ausführen kannst oder einen hochprivilegierten Prozess mit entsprechendem Zugriff missbrauchst.
-- Das Setzen oder Entfernen von PPL erfordert einen Reboot oder **Secure Boot/UEFI-Einstellungen**, die die PPL-Konfiguration auch nach Rückgängigmachung von Registry-Änderungen beibehalten können.
+- Wenn **LSASS als PPL ausgeführt wird**, schlagen Versuche fehl, es aus einem normalen Administratorkontext mit `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` zu öffnen: **`0x5 (Access Denied)`**, selbst wenn `SeDebugPrivilege` aktiviert ist.
+- Du kannst die **LSASS-Schutzstufe** mit Tools wie Process Hacker oder programmgesteuert durch Auslesen des Werts `EPROCESS.Protection` überprüfen.
+- LSASS verwendet typischerweise `PsProtectedSignerLsa-Light` (`0x41`), auf das **nur von Prozessen mit einem Signer einer höheren Stufe** zugegriffen werden kann, beispielsweise `WinTcb` (`0x61` oder `0x62`).
+- PPL ist eine **reine Userland-Einschränkung**; **Code auf Kernel-Ebene kann sie vollständig umgehen**.
+- Dass LSASS PPL verwendet, **verhindert keinen Credential Dumping**, wenn du Kernel-Shellcode ausführen oder einen privilegierten Prozess mit den erforderlichen Zugriffsrechten einsetzen kannst.
+- **Das Setzen oder Entfernen von PPL** erfordert einen Neustart oder **Secure Boot/UEFI-Einstellungen**. Letztere können die PPL-Einstellung auch dann beibehalten, wenn Änderungen an der Registry rückgängig gemacht wurden.
 
 ### Einen PPL-Prozess beim Start erstellen (dokumentierte API)
 
-Windows bietet einen dokumentierten Weg, um beim Erstellen eines Child-Prozesses ein Protected Process Light-Level anzufordern, indem die erweiterte Startup-Attribute-Liste verwendet wird. Dies umgeht nicht die Signing-Anforderungen — das Zielimage muss für die angeforderte Signer-Klasse signiert sein.
+Windows stellt eine dokumentierte Möglichkeit bereit, beim Erstellen eines Child-Prozesses über die Liste der erweiterten Startup-Attribute eine Protected Process Light-Stufe anzufordern. Dadurch werden die Signaturanforderungen nicht umgangen – das Ziel-Image muss für die angeforderte Signer-Klasse signiert sein.
 
 Minimaler Ablauf in C/C++:
 ```c
@@ -81,94 +81,94 @@ return 0;
 }
 ```
 Hinweise und Einschränkungen:
-- Verwende `STARTUPINFOEX` mit `InitializeProcThreadAttributeList` und `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL, ...)`, und übergebe dann `EXTENDED_STARTUPINFO_PRESENT` an `CreateProcess*`.
-- Das Schutz-`DWORD` kann auf Konstanten wie `PROTECTION_LEVEL_WINTCB_LIGHT`, `PROTECTION_LEVEL_WINDOWS`, `PROTECTION_LEVEL_WINDOWS_LIGHT`, `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` oder `PROTECTION_LEVEL_LSA_LIGHT` gesetzt werden.
-- Der Child-Prozess startet nur als PPL, wenn sein Image für diese Signer-Klasse signiert ist; andernfalls schlägt die Prozess-Erstellung fehl, häufig mit `ERROR_INVALID_IMAGE_HASH (577)` / `STATUS_INVALID_IMAGE_HASH (0xC0000428)`.
-- Dies ist kein bypass — es ist eine unterstützte API, die für entsprechend signierte Images gedacht ist. Nützlich, um Tools zu härten oder PPL-geschützte Konfigurationen zu validieren.
+- Verwende `STARTUPINFOEX` mit `InitializeProcThreadAttributeList` und `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL, ...)`, und übergib `EXTENDED_STARTUPINFO_PRESENT` an `CreateProcess*`.<sup>[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+- Der Schutz-`DWORD` kann auf Konstanten wie `PROTECTION_LEVEL_WINTCB_LIGHT`, `PROTECTION_LEVEL_WINDOWS`, `PROTECTION_LEVEL_WINDOWS_LIGHT`, `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` oder `PROTECTION_LEVEL_LSA_LIGHT` gesetzt werden.
+- Das untergeordnete Element startet nur dann als PPL, wenn sein Image für die entsprechende Signer-Klasse signiert ist. Andernfalls schlägt die Prozesserstellung fehl, üblicherweise mit `ERROR_INVALID_IMAGE_HASH (577)` / `STATUS_INVALID_IMAGE_HASH (0xC0000428)`.
+- Dies ist kein Bypass – es handelt sich um eine unterstützte API für entsprechend signierte Images. Sie ist nützlich, um Tools zu härten oder PPL-geschützte Konfigurationen zu validieren.
 
-Beispiel-CLI mit einem minimalen Loader:
+Beispiel-CLI mit einem minimalen Loader:<sup>[[1]](#references)</sup>
 - Antimalware-Signer: `CreateProcessAsPPL.exe 3 C:\Tools\agent.exe --svc`
 - LSA-light-Signer: `CreateProcessAsPPL.exe 4 C:\Windows\System32\notepad.exe`
 
-**Bypass-Optionen für PPL-Schutz:**
+**Optionen zum Bypass von PPL-Schutz:**
 
-Wenn du LSASS trotz PPL dumpen willst, hast du 3 Hauptoptionen:
-1. **Use a signed kernel driver (e.g., Mimikatz + mimidrv.sys)**, um das **Schutz-Flag von LSASS zu entfernen**:
+Wenn du LSASS trotz PPL dumpen möchtest, gibt es 3 Hauptoptionen:
+1. **Verwende einen signierten Kernel-Treiber (z. B. Mimikatz + mimidrv.sys)**, um **das Schutz-Flag von LSASS zu entfernen**:
 
-![](../../images/mimidrv.png)
+![Mimikatz-mimidrv-Treiberausgabe mit Interaktion mit dem Credential-Schutz](../../images/mimidrv.png)
 
-2. **Bring Your Own Vulnerable Driver (BYOVD)**, um eigenen Kernel-Code auszuführen und den Schutz zu deaktivieren. Tools wie **PPLKiller**, **gdrv-loader** oder **kdmapper** machen das möglich.
-3. **Steal an existing LSASS handle** aus einem anderen Prozess, der es offen hat (z. B. ein AV-Prozess), und **dupliziere es** in deinen Prozess. Das ist die Grundlage der `pypykatz live lsa --method handledup` Technik.
-4. **Missbrauche einen privilegierten Prozess**, der es dir erlaubt, beliebigen Code in seinen Adressraum zu laden oder innerhalb eines anderen privilegierten Prozesses auszuführen, und umgehst damit effektiv die PPL-Beschränkungen. Ein Beispiel dazu findest du in [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) oder [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump).
+2. **Bring Your Own Vulnerable Driver (BYOVD)**, um eigenen Kernel-Code auszuführen und den Schutz zu deaktivieren. Tools wie **PPLKiller**, **gdrv-loader** oder **kdmapper** machen dies praktikabel.
+3. **Stiehl ein vorhandenes LSASS-Handle** aus einem anderen Prozess, der es geöffnet hat (z. B. einem AV-Prozess), und **dupliziere es** in deinen Prozess. Dies ist die Grundlage der `pypykatz live lsa --method handledup`-Technik.
+4. **Missbrauche einen privilegierten Prozess**, der das Laden beliebigen Codes in seinen Adressraum oder in einen anderen privilegierten Prozess erlaubt, und umgehe dadurch effektiv die PPL-Einschränkungen. Ein Beispiel findest du unter [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) oder [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump).
 
 **Aktuellen Status des LSA-Schutzes (PPL/PP) für LSASS prüfen**:
 ```bash
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
-Wenn Sie **`mimikatz privilege::debug sekurlsa::logonpasswords`** ausführen, schlägt dies wahrscheinlich mit dem Fehlercode `0x00000005` fehl.
+Wenn du **`mimikatz privilege::debug sekurlsa::logonpasswords`** ausführst, schlägt dies aufgrund dessen wahrscheinlich mit dem Fehlercode `0x00000005` fehl.
 
-- Für weitere Informationen zu dieser Prüfung [https://itm4n.github.io/lsass-runasppl/](https://itm4n.github.io/lsass-runasppl/)
+- Weitere Informationen zu dieser Prüfung findest du unter [https://itm4n.github.io/lsass-runasppl/](https://itm4n.github.io/lsass-runasppl/)<sup>[[5]](#references)</sup>
 
 
 ## Credential Guard
 
-**Credential Guard**, eine Funktion, die ausschließlich in **Windows 10 (Enterprise and Education editions)** verfügbar ist, erhöht die Sicherheit von Maschinen-Anmeldeinformationen mittels **Virtual Secure Mode (VSM)** und **Virtualization Based Security (VBS)**. Es nutzt CPU-Virtualisierungserweiterungen, um wichtige Prozesse in einem geschützten Speicherbereich zu isolieren, außerhalb der Reichweite des Hauptbetriebssystems. Diese Isolation stellt sicher, dass selbst der Kernel nicht auf den Speicher im VSM zugreifen kann und schützt Anmeldeinformationen effektiv vor Angriffen wie **pass-the-hash**. Die **Local Security Authority (LSA)** läuft innerhalb dieser sicheren Umgebung als Trustlet, während der **LSASS**-Prozess im Haupt-OS lediglich als Vermittler zur LSA im VSM fungiert.
+**Credential Guard**, ein exklusives Feature von **Windows 10 (Enterprise- und Education-Editionen)**, verbessert die Sicherheit von Anmeldeinformationen des Computers mithilfe von **Virtual Secure Mode (VSM)** und **Virtualization Based Security (VBS)**. Es nutzt CPU-Virtualisierungserweiterungen, um wichtige Prozesse innerhalb eines geschützten Speicherbereichs zu isolieren, der außerhalb der Reichweite des Hauptbetriebssystems liegt. Diese Isolierung stellt sicher, dass selbst der Kernel nicht auf den Speicher in VSM zugreifen kann, und schützt Anmeldeinformationen dadurch effektiv vor Angriffen wie **pass-the-hash**. Die **Local Security Authority (LSA)** läuft in dieser sicheren Umgebung als Trustlet, während der **LSASS**-Prozess im Hauptbetriebssystem lediglich als Vermittler für die LSA von VSM fungiert.
 
-Standardmäßig ist **Credential Guard** nicht aktiv und muss innerhalb einer Organisation manuell aktiviert werden. Es ist wichtig für die Erhöhung der Sicherheit gegenüber Tools wie **Mimikatz**, die dadurch in ihrer Fähigkeit, Anmeldeinformationen zu extrahieren, eingeschränkt werden. Allerdings können weiterhin Schwachstellen ausgenutzt werden, etwa durch das Hinzufügen benutzerdefinierter **Security Support Providers (SSP)**, um während Anmeldeversuchen Anmeldeinformationen im Klartext abzugreifen.
+Standardmäßig ist **Credential Guard** nicht aktiv und muss innerhalb einer Organisation manuell aktiviert werden. Es ist entscheidend für die Verbesserung des Schutzes gegen Tools wie **Mimikatz**, deren Fähigkeit zum Extrahieren von Anmeldeinformationen dadurch eingeschränkt wird. Schwachstellen können jedoch weiterhin durch das Hinzufügen benutzerdefinierter **Security Support Providers (SSP)** ausgenutzt werden, um während Anmeldeversuchen Anmeldeinformationen im Klartext zu erfassen.
 
-Um den Aktivierungsstatus von **Credential Guard** zu überprüfen, kann der Registry-Schlüssel _**LsaCfgFlags**_ unter _**HKLM\System\CurrentControlSet\Control\LSA**_ eingesehen werden. Ein Wert von "**1**" zeigt eine Aktivierung mit **UEFI lock** an, "**2**" ohne Lock und "**0**" bedeutet, dass es nicht aktiviert ist. Diese Registry-Prüfung ist zwar ein starker Indikator, ersetzt jedoch nicht alle Schritte zum Aktivieren von Credential Guard. Detaillierte Anleitungen und ein **PowerShell**-Skript zum Aktivieren dieser Funktion sind online verfügbar.
+Um den Aktivierungsstatus von **Credential Guard** zu überprüfen, kann der Registrierungsschlüssel _**LsaCfgFlags**_ unter _**HKLM\System\CurrentControlSet\Control\LSA**_ untersucht werden. Ein Wert von "**1**" zeigt die Aktivierung mit **UEFI lock** an, "**2**" die Aktivierung ohne Sperre, und "**0**" bedeutet, dass die Funktion nicht aktiviert ist. Diese Registrierungsprüfung ist zwar ein starker Hinweis, aber nicht der einzige Schritt zur Aktivierung von Credential Guard. Detaillierte Anleitungen und ein PowerShell-Skript zur Aktivierung dieses Features sind online verfügbar.
 ```bash
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
-Für ein umfassendes Verständnis und Anleitungen zum Aktivieren von **Credential Guard** in Windows 10 und dessen automatischer Aktivierung in kompatiblen Systemen von **Windows 11 Enterprise and Education (version 22H2)**, besuchen Sie [Microsoft's documentation](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
+Für ein umfassendes Verständnis und Anweisungen zum Aktivieren von **Credential Guard** in Windows 10 sowie zur automatischen Aktivierung auf kompatiblen Systemen von **Windows 11 Enterprise und Education (Version 22H2)** besuchen Sie die [Dokumentation von Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).<sup>[[9]](#references)</sup>
 
-Weitere Details zur Implementierung von custom SSPs zur Erfassung von Credentials finden Sie in [this guide](../active-directory-methodology/custom-ssp.md).
+Weitere Informationen zur Implementierung benutzerdefinierter SSPs zur Erfassung von Credentials finden Sie in [diesem Leitfaden](../active-directory-methodology/custom-ssp.md).
 
-## RDP RestrictedAdmin-Modus
+## RDP RestrictedAdmin Mode
 
-**Windows 8.1 and Windows Server 2012 R2** führten mehrere neue Sicherheitsfunktionen ein, darunter den _**Restricted Admin mode for RDP**_. Dieser Modus wurde entwickelt, um die Risiken im Zusammenhang mit [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) Angriffen zu vermindern.
+**Windows 8.1 und Windows Server 2012 R2** führten mehrere neue Sicherheitsfunktionen ein, darunter den _**Restricted Admin mode für RDP**_. Dieser Modus wurde entwickelt, um die Sicherheit zu erhöhen, indem die mit [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/)-Angriffen verbundenen Risiken reduziert werden.
 
-Traditionell werden beim Verbindungsaufbau zu einem entfernten Computer über RDP Ihre Anmeldeinformationen auf dem Zielrechner gespeichert. Dies stellt ein erhebliches Sicherheitsrisiko dar, insbesondere bei Konten mit erhöhten Rechten. Mit der Einführung des _**Restricted Admin mode**_ wird dieses Risiko jedoch deutlich reduziert.
+Beim herkömmlichen Herstellen einer Verbindung zu einem Remotecomputer über RDP werden Ihre Credentials auf dem Zielcomputer gespeichert. Dies stellt ein erhebliches Sicherheitsrisiko dar, insbesondere bei der Verwendung von Konten mit erweiterten Berechtigungen. Mit der Einführung des _**Restricted Admin mode**_ wird dieses Risiko jedoch erheblich reduziert.
 
-Wenn eine RDP-Verbindung mit dem Befehl **mstsc.exe /RestrictedAdmin** initiiert wird, erfolgt die Authentifizierung gegenüber dem entfernten Computer, ohne dass Ihre Anmeldeinformationen dort gespeichert werden. Dieser Ansatz stellt sicher, dass im Falle einer Malware-Infektion oder wenn ein bösartiger Benutzer Zugriff auf den Remote-Server erhält, Ihre Anmeldeinformationen nicht kompromittiert werden, da sie nicht auf dem Server hinterlegt sind.
+Beim Initiieren einer RDP-Verbindung mit dem Befehl **mstsc.exe /RestrictedAdmin** erfolgt die Authentifizierung am Remotecomputer, ohne Ihre Credentials dort zu speichern. Dadurch wird sichergestellt, dass Ihre Credentials nicht kompromittiert werden, falls eine Malware-Infektion auftritt oder ein böswilliger Benutzer Zugriff auf den Remoteserver erhält, da sie nicht auf dem Server gespeichert sind.
 
-Es ist wichtig zu beachten, dass im **Restricted Admin mode** Versuche, von der RDP-Sitzung aus auf Netzwerkressourcen zuzugreifen, nicht Ihre persönlichen Anmeldeinformationen verwenden; stattdessen wird die **Identität des Computers** benutzt.
+Beachten Sie, dass im **Restricted Admin mode** Zugriffe auf Netzwerkressourcen aus der RDP-Sitzung nicht Ihre persönlichen Credentials verwenden. Stattdessen wird die **Identität des Computers** verwendet.
 
-Diese Funktion stellt einen bedeutenden Fortschritt bei der Sicherung von Remote-Desktop-Verbindungen dar und schützt sensible Informationen davor, bei einem Sicherheitsvorfall offengelegt zu werden.
+Diese Funktion stellt einen bedeutenden Fortschritt bei der Absicherung von Remote Desktop-Verbindungen dar und schützt vertrauliche Informationen davor, im Fall einer Sicherheitsverletzung offengelegt zu werden.
 
-![](../../images/RAM.png)
+![Windows-RAM-Speicherdiagramm im Kontext der Credential-Extraktion](../../images/RAM.png)
 
-Für detailliertere Informationen besuchen Sie [this resource](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+Weitere Informationen finden Sie unter [dieser Ressource](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).<sup>[[6]](#references)</sup>
 
-## Zwischengespeicherte Anmeldeinformationen
+## Zwischengespeicherte Credentials
 
-Windows sichert **Domänenanmeldeinformationen** über die **Local Security Authority (LSA)** und unterstützt Anmeldeprozesse mit Sicherheitsprotokollen wie **Kerberos** und **NTLM**. Eine wichtige Funktion von Windows ist die Möglichkeit, die **letzten zehn Domänenanmeldungen** zu zwischenspeichern, damit Benutzer weiterhin auf ihre Computer zugreifen können, auch wenn der **Domänencontroller offline** ist — besonders praktisch für Laptop-Benutzer, die oft außerhalb des Firmennetzwerks unterwegs sind.
+Windows schützt **Domain-Credentials** mithilfe der **Local Security Authority (LSA)** und unterstützt Anmeldevorgänge mit Sicherheitsprotokollen wie **Kerberos** und **NTLM**. Eine wichtige Funktion von Windows ist die Möglichkeit, die **letzten zehn Domain-Anmeldungen** zwischenzuspeichern, damit Benutzer weiterhin auf ihre Computer zugreifen können, selbst wenn der **Domain Controller offline** ist – ein Vorteil für Laptopbenutzer, die sich häufig außerhalb des Netzwerks ihres Unternehmens befinden.
 
-Die Anzahl der zwischengespeicherten Anmeldungen lässt sich über einen bestimmten **Registrierungswert oder eine Gruppenrichtlinie** anpassen. Zum Anzeigen oder Ändern dieser Einstellung wird folgender Befehl verwendet:
+Die Anzahl der zwischengespeicherten Anmeldungen kann über einen bestimmten **Registrierungsschlüssel oder eine Gruppenrichtlinie** angepasst werden. Um diese Einstellung anzuzeigen oder zu ändern, wird der folgende Befehl verwendet:
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
-Der Zugriff auf diese zwischengespeicherten Anmeldeinformationen ist streng kontrolliert; nur das Konto **SYSTEM** verfügt über die erforderlichen Berechtigungen, um sie einsehen zu können. Administratoren, die auf diese Informationen zugreifen müssen, müssen dies mit SYSTEM-Benutzerrechten tun. Die Anmeldeinformationen werden gespeichert unter: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
+Der Zugriff auf diese zwischengespeicherten Anmeldedaten ist streng kontrolliert. Nur das Konto **SYSTEM** verfügt über die erforderlichen Berechtigungen, um sie anzuzeigen. Administratoren, die auf diese Informationen zugreifen müssen, müssen dies mit den Benutzerrechten von SYSTEM tun. Die Anmeldedaten werden unter folgendem Pfad gespeichert: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
 
-Mit **Mimikatz** können diese zwischengespeicherten Anmeldeinformationen mit dem Befehl `lsadump::cache` extrahiert werden.
+**Mimikatz** kann verwendet werden, um diese zwischengespeicherten Anmeldedaten mit dem Befehl `lsadump::cache` zu extrahieren.
 
-Für weitere Details bietet die ursprüngliche [source](http://juggernaut.wikidot.com/cached-credentials) umfassende Informationen.
+Weitere Informationen finden Sie in der umfassenden [Originalquelle](http://juggernaut.wikidot.com/cached-credentials).<sup>[[7]](#references)</sup>
 
 ## Protected Users
 
-Die Mitgliedschaft in der **Protected Users group** bringt mehrere Sicherheitsverbesserungen für Benutzer mit sich und sorgt für einen höheren Schutz vor Diebstahl und Missbrauch von Anmeldeinformationen:
+Die Mitgliedschaft in der **Protected Users group** bringt mehrere Sicherheitsverbesserungen für Benutzer mit sich und bietet einen höheren Schutz vor Credential Theft und Missbrauch:
 
-- **Credential Delegation (CredSSP)**: Selbst wenn die Gruppenrichtlinieneinstellung **Allow delegating default credentials** aktiviert ist, werden die Klartext-Anmeldeinformationen von Protected Users nicht zwischengespeichert.
-- **Windows Digest**: Ab **Windows 8.1 and Windows Server 2012 R2** wird das System die Klartext-Anmeldeinformationen von Protected Users nicht zwischenspeichern, unabhängig vom Status von Windows Digest.
-- **NTLM**: Das System wird weder die Klartext-Anmeldeinformationen von Protected Users noch NT one-way functions (NTOWF) zwischenspeichern.
-- **Kerberos**: Für Protected Users erzeugt die Kerberos-Authentifizierung keine **DES**- oder **RC4**-Schlüssel und speichert auch keine Klartext-Anmeldeinformationen oder langfristigen Schlüssel über den initialen Ticket-Granting Ticket (TGT)-Erwerb hinaus.
-- **Offline Sign-In**: Für Protected Users wird beim Anmelden oder Entsperren kein zwischengespeicherter Verifier erstellt, das heißt Offline-Anmeldung wird für diese Konten nicht unterstützt.
+- **Credential Delegation (CredSSP)**: Selbst wenn die Group-Policy-Einstellung **Allow delegating default credentials** aktiviert ist, werden Plaintext-Anmeldedaten von Protected Users nicht zwischengespeichert.
+- **Windows Digest**: Ab **Windows 8.1 und Windows Server 2012 R2** speichert das System Plaintext-Anmeldedaten von Protected Users unabhängig vom Status von Windows Digest nicht zwischen.
+- **NTLM**: Das System speichert weder die Plaintext-Anmeldedaten von Protected Users noch NT-One-Way-Funktionen (NTOWF) zwischen.
+- **Kerberos**: Bei Protected Users erzeugt die Kerberos-Authentifizierung weder **DES**- noch **RC4-Schlüssel** und speichert weder Plaintext-Anmeldedaten noch langfristige Schlüssel über den erstmaligen Erwerb des Ticket-Granting Tickets (TGT) hinaus zwischen.
+- **Offline Sign-In**: Für Protected Users wird bei der Anmeldung oder beim Entsperren kein zwischengespeicherter Verifier erstellt. Daher wird die Offline-Anmeldung für diese Konten nicht unterstützt.
 
-Diese Schutzmaßnahmen werden aktiviert, sobald sich ein Benutzer, der Mitglied der **Protected Users group** ist, am Gerät anmeldet. Dadurch sind wichtige Sicherheitsmaßnahmen wirksam, um vor verschiedenen Methoden der Kompromittierung von Anmeldeinformationen zu schützen.
+Diese Schutzmaßnahmen werden in dem Moment aktiviert, in dem sich ein Benutzer, der Mitglied der **Protected Users group** ist, am Gerät anmeldet. Dadurch wird sichergestellt, dass wichtige Sicherheitsmaßnahmen zum Schutz vor verschiedenen Methoden der Kompromittierung von Anmeldedaten aktiv sind.
 
-Für ausführlichere Informationen konsultieren Sie die offizielle [documentation](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
+Weitere Informationen finden Sie in der offiziellen [Dokumentation](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).<sup>[[10]](#references)</sup>
 
-**Table from** [**the docs**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
+**Tabelle aus** [**der Dokumentation**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**<sup>[[11]](#references)</sup>
 
 | Windows Server 2003 RTM | Windows Server 2003 SP1+ | <p>Windows Server 2012,<br>Windows Server 2008 R2,<br>Windows Server 2008</p> | Windows Server 2016          |
 | ----------------------- | ------------------------ | ----------------------------------------------------------------------------- | ---------------------------- |
@@ -177,7 +177,7 @@ Für ausführlichere Informationen konsultieren Sie die offizielle [documentatio
 | Administrators          | Administrators           | Administrators                                                                | Administrators               |
 | Backup Operators        | Backup Operators         | Backup Operators                                                              | Backup Operators             |
 | Cert Publishers         |                          |                                                                               |                              |
-| Domain Admins           | Domain Admins            | Domain Admins                                                                 | Domain Admins                |
+| Domain Admins            | Domain Admins            | Domain Admins                                                                 | Domain Admins                |
 | Domain Controllers      | Domain Controllers       | Domain Controllers                                                            | Domain Controllers           |
 | Enterprise Admins       | Enterprise Admins        | Enterprise Admins                                                             | Enterprise Admins            |
 |                         |                          |                                                                               | Enterprise Key Admins        |
@@ -191,10 +191,16 @@ Für ausführlichere Informationen konsultieren Sie die offizielle [documentatio
 
 ## Referenzen
 
-- [CreateProcessAsPPL – minimal PPL process launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
-- [STARTUPINFOEX structure (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-startupinfoexw)
-- [InitializeProcThreadAttributeList (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-initializeprocthreadattributelist)
-- [UpdateProcThreadAttribute (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
-- [LSASS RunAsPPL – background and internals](https://itm4n.github.io/lsass-runasppl/)
+- [1] [CreateProcessAsPPL – minimaler PPL-Prozessstarter](https://github.com/2x7EQ13/CreateProcessAsPPL)
+- [2] [STARTUPINFOEX structure (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-startupinfoexw)
+- [3] [InitializeProcThreadAttributeList (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-initializeprocthreadattributelist)
+- [4] [UpdateProcThreadAttribute (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
+- [5] [LSASS RunAsPPL – Hintergrund und Interna](https://itm4n.github.io/lsass-runasppl/)
+- [6] [Restricted Admin Mode für RDP](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/)
+- [7] [Cached Credentials - Juggernaut AppSec Wiki](http://juggernaut.wikidot.com/cached-credentials)
+- [8] [WDigest Authentication (Microsoft TechNet)](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>)
+- [9] [Manage Windows Defender Credential Guard (Microsoft Learn)](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage)
+- [10] [Protected Users Security Group (Microsoft Learn)](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group)
+- [11] [Appendix C: Protected Accounts and Groups in Active Directory (Microsoft Learn)](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)
 
 {{#include ../../banners/hacktricks-training.md}}

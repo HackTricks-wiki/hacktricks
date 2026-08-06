@@ -2,37 +2,37 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Übersicht
+## Überblick
 
-If a vulnerable driver exposes an IOCTL that gives an attacker arbitrary kernel read and/or write primitives, elevating to NT AUTHORITY\SYSTEM can often be achieved by stealing a SYSTEM access token. The technique copies the Token pointer from a SYSTEM process’ EPROCESS into the current process’ EPROCESS.
+Wenn ein verwundbarer Treiber ein IOCTL bereitstellt, das einem Angreifer beliebige Kernel-Lese- und/oder -Schreibprimitive ermöglicht, kann eine Rechteausweitung zu NT AUTHORITY\SYSTEM häufig durch das Stehlen eines SYSTEM access token erreicht werden. Die Technik kopiert den Token-Zeiger aus dem EPROCESS eines SYSTEM-Prozesses in den EPROCESS des aktuellen Prozesses.<sup>[[2]](#references)</sup>
 
-Warum es funktioniert:
-- Jeder Prozess hat eine EPROCESS-Struktur, die (unter anderen Feldern) ein Token enthält (tatsächlich ein EX_FAST_REF zu einem token object).
-- Der SYSTEM process (PID 4) hält ein Token mit allen aktivierten Privilegien.
-- Das Ersetzen des aktuellen Prozesses’ EPROCESS.Token durch den SYSTEM token pointer lässt den aktuellen Prozess sofort als SYSTEM laufen.
+Warum das funktioniert:
+- Jeder Prozess besitzt eine EPROCESS-Struktur, die unter anderem ein Token enthält (tatsächlich eine EX_FAST_REF auf ein Token-Objekt).
+- Der SYSTEM-Prozess (PID 4) besitzt ein Token, bei dem alle Privilegien aktiviert sind.
+- Das Ersetzen von EPROCESS.Token des aktuellen Prozesses durch den SYSTEM-Token-Zeiger lässt den aktuellen Prozess sofort als SYSTEM laufen.<sup>[[1]](#references)</sup>
 
-Offsets in EPROCESS vary across Windows versions. Determine them dynamically (symbols) or use version-specific constants. Also remember that EPROCESS.Token is an EX_FAST_REF (low 3 bits are reference count flags).
+> Die Offsets in EPROCESS unterscheiden sich je nach Windows-Version. Bestimme sie dynamisch (Symbole) oder verwende versionsspezifische Konstanten. Beachte außerdem, dass EPROCESS.Token eine EX_FAST_REF ist (die unteren 3 Bits sind Referenzzähler-Flags).
 
-## Schritte (Übersicht)
+## Schritte auf hoher Ebene
 
-1) Locate ntoskrnl.exe base and resolve the address of PsInitialSystemProcess.
-- From user mode, use NtQuerySystemInformation(SystemModuleInformation) or EnumDeviceDrivers to get loaded driver bases.
-- Add the offset of PsInitialSystemProcess (from symbols/reversing) to the kernel base to get its address.
-2) Read the pointer at PsInitialSystemProcess → this is a kernel pointer to SYSTEM’s EPROCESS.
-3) From SYSTEM EPROCESS, read UniqueProcessId and ActiveProcessLinks offsets to traverse the doubly linked list of EPROCESS structures (ActiveProcessLinks.Flink/Blink) until you find the EPROCESS whose UniqueProcessId equals GetCurrentProcessId(). Keep both:
-- EPROCESS_SYSTEM (for SYSTEM)
-- EPROCESS_SELF (for the current process)
-4) Read SYSTEM token value: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
-- Mask out the low 3 bits: Token_SYS_masked = Token_SYS & ~0xF (commonly ~0xF or ~0x7 depending on build; on x64 the low 3 bits are used — 0xFFFFFFFFFFFFFFF8 mask).
-5) Option A (common): Preserve the low 3 bits from your current token and splice them onto SYSTEM’s pointer to keep the embedded ref count consistent.
+1) Ermittle die Basisadresse von ntoskrnl.exe und löse die Adresse von PsInitialSystemProcess auf.
+- Verwende aus dem User Mode NtQuerySystemInformation(SystemModuleInformation) oder EnumDeviceDrivers, um die Basen geladener Treiber zu erhalten.
+- Addiere den Offset von PsInitialSystemProcess (aus Symbolen/Reverse Engineering) zur Kernel-Basisadresse, um dessen Adresse zu erhalten.
+2) Lies den Zeiger bei PsInitialSystemProcess aus → dies ist ein Kernel-Zeiger auf den EPROCESS von SYSTEM.
+3) Lies aus dem SYSTEM-EPROCESS die Offsets von UniqueProcessId und ActiveProcessLinks aus, um die doppelt verkettete Liste der EPROCESS-Strukturen (ActiveProcessLinks.Flink/Blink) zu durchlaufen, bis du den EPROCESS findest, dessen UniqueProcessId GetCurrentProcessId() entspricht. Behalte beide:
+- EPROCESS_SYSTEM (für SYSTEM)
+- EPROCESS_SELF (für den aktuellen Prozess)
+4) Lies den SYSTEM-Token-Wert aus: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
+- Maskiere die unteren 3 Bits: Token_SYS_masked = Token_SYS & ~0xF (je nach Build üblicherweise ~0xF oder ~0x7; auf x64 werden die unteren 3 Bits verwendet — Maske 0xFFFFFFFFFFFFFFF8).
+5) Option A (üblich): Bewahre die unteren 3 Bits deines aktuellen Tokens und füge sie an den SYSTEM-Zeiger an, um den eingebetteten Referenzzähler konsistent zu halten.
 - Token_ME = *(EPROCESS_SELF + TokenOffset)
 - Token_NEW = (Token_SYS_masked | (Token_ME & 0x7))
-6) Write Token_NEW back into (EPROCESS_SELF + TokenOffset) using your kernel write primitive.
-7) Your current process is now SYSTEM. Optionally spawn a new cmd.exe or powershell.exe to confirm.
+6) Schreibe Token_NEW mithilfe deines Kernel-Write-Primitive zurück nach (EPROCESS_SELF + TokenOffset).
+7) Dein aktueller Prozess ist nun SYSTEM. Optional kannst du eine neue cmd.exe oder powershell.exe starten, um dies zu bestätigen.<sup>[[1]](#references)</sup>
 
 ## Pseudocode
 
-Below is a skeleton that only uses two IOCTLs from a vulnerable driver, one for 8-byte kernel read and one for 8-byte kernel write. Replace with your driver’s interface.
+Unten ist ein Gerüst, das nur zwei IOCTLs eines verwundbaren Treibers verwendet: eines für das Lesen von 8 Bytes aus dem Kernel und eines für das Schreiben von 8 Bytes in den Kernel. Ersetze sie durch die Schnittstelle deines Treibers.<sup>[[1]](#references)</sup>
 ```c
 #include <Windows.h>
 #include <Psapi.h>
@@ -106,17 +106,18 @@ return 0;
 }
 ```
 Hinweise:
-- Offsets: Verwende WinDbg’s `dt nt!_EPROCESS` mit den PDBs des Ziels, oder einen runtime symbol loader, um korrekte Offsets zu erhalten. Hardcode nicht blind.
-- Maske: Auf x64 ist der token ein EX_FAST_REF; die unteren 3 Bits sind Referenzzählungs-Bits. Die ursprünglichen unteren Bits deines token beizubehalten vermeidet sofortige Refcount-Inkonsistenzen.
-- Stabilität: Bevorzuge, den aktuellen Prozess zu erhöhen; wenn du einen kurzlebigen Helfer erhöhst, kannst du SYSTEM verlieren, wenn er beendet wird.
+- Offsets: Verwende `dt nt!_EPROCESS` mit den PDBs des Ziels oder einen Runtime-Symbol-Loader, um die korrekten Offsets zu erhalten. Nicht blind hardcoden.
+- Maske: Unter x64 ist der Token ein EX_FAST_REF; die unteren 3 Bits sind Referenzzähler-Bits. Wenn du die ursprünglichen unteren Bits deines Tokens beibehältst, vermeidest du unmittelbare Inkonsistenzen beim Referenzzähler.
+- Stabilität: Bevorzuge die Elevation des aktuellen Prozesses. Wenn du einen kurzlebigen Helper elevierst, kannst du SYSTEM verlieren, sobald dieser beendet wird.<sup>[[1]](#references)</sup>
 
-## Erkennung & Gegenmaßnahmen
-- Das Laden nicht signierter oder nicht vertrauenswürdiger Drittanbieter‑Treiber, die mächtige IOCTLs bereitstellen, ist die eigentliche Ursache.
-- Kernel Driver Blocklist (HVCI/CI), DeviceGuard, und Attack Surface Reduction-Regeln können verhindern, dass verwundbare Treiber geladen werden.
-- EDR kann auf verdächtige IOCTL-Sequenzen achten, die arbitrary read/write implementieren, sowie auf token swaps.
+## Erkennung &amp; Mitigation
+- Das Laden unsignierter oder nicht vertrauenswürdiger Third-Party-Treiber, die leistungsfähige IOCTLs bereitstellen, ist die eigentliche Ursache.
+- Kernel Driver Blocklist (HVCI/CI), DeviceGuard und Attack Surface Reduction-Regeln können verhindern, dass verwundbare Treiber geladen werden.
+- EDR kann verdächtige IOCTL-Sequenzen überwachen, die Arbitrary Read/Write implementieren, sowie Token-Swaps erkennen.
 
 ## Referenzen
-- [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
-- [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
+
+- [1] [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
+- [2] [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
 
 {{#include ../../banners/hacktricks-training.md}}
