@@ -1,14 +1,13 @@
-# About the author
+# Σχετικά με τον συγγραφέα
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Hello!!
+### Γεια σας!!
 
-Τα credits για τεχνικές από άλλους ερευνητές ανήκουν στους αρχικούς authors (βλ. references). Kudos σε όλους όσοι μοιράζονται knowledge για να βελτιώσουν την internet security.
+Τα εύσημα για τις τεχνικές άλλων ερευνητών ανήκουν στους αρχικούς συγγραφείς (δείτε τις αναφορές). Ευχαριστούμε όλους όσοι μοιράζονται γνώσεις για τη βελτίωση της ασφάλειας στο διαδίκτυο.
 
-Το HackTricks είναι ένα educational wiki για **cyber-security** με επικεφαλής τον Carlos και εκατοντάδες collaborators. Είναι μια **τεράστια συλλογή από hacking tricks** που ενημερώνεται από την κοινότητα όσο το δυνατόν περισσότερο. Αν βρείτε κάτι που λείπει ή είναι outdated, στείλτε ένα **Pull Request** στο [**Hacktricks GitHub**](https://github.com/hacktricks-wiki/hacktricks)!
+Το HackTricks είναι ένα εκπαιδευτικό wiki σχετικά με την **κυβερνοασφάλεια**, το οποίο διευθύνεται από τον Carlos με εκατοντάδες συνεργάτες. Είναι μια **τεράστια συλλογή από hacking tricks**, η οποία ενημερώνεται από την κοινότητα όσο το δυνατόν περισσότερο. Αν διαπιστώσετε ότι κάτι λείπει ή είναι outdated, παρακαλούμε στείλτε ένα **Pull Request** στο [**Hacktricks GitHub**](https://github.com/hacktricks-wiki/hacktricks)!
 
-Το HackTricks είναι επίσης ένα wiki όπου **researchers μοιράζονται τα latest findings τους**, οπότε είναι ένα εξαιρετικό μέρος για να παραμένετε up to date με τις latest hacking techniques.
-
+Το HackTricks είναι επίσης ένα wiki όπου **οι ερευνητές μοιράζονται τα πιο πρόσφατα ευρήματά τους**, επομένως είναι ένα εξαιρετικό μέρος για να παρακολουθείτε τις πιο πρόσφατες hacking techniques.
 
 {{#include ../banners/hacktricks-training.md}}

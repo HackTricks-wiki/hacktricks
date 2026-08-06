@@ -1,3 +1,3 @@
-# Ραδιοφωνική Χάκινγκ
+# Radio Hacking
 
 {{#include ../../banners/hacktricks-training.md}}

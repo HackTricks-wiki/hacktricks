@@ -1,14 +1,14 @@
-# Βασικές αρχές του Rust
+# Βασικά στοιχεία της Rust
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Ownership των μεταβλητών
+### Ιδιοκτησία μεταβλητών
 
-Η μνήμη διαχειρίζεται μέσω ενός συστήματος ownership με τους ακόλουθους κανόνες, τους οποίους ο compiler ελέγχει κατά τον χρόνο μεταγλώττισης:
+Η μνήμη διαχειρίζεται μέσω ενός συστήματος ιδιοκτησίας με τους ακόλουθους κανόνες, τους οποίους ο compiler ελέγχει κατά το compile time:
 
-1. Κάθε value στο Rust έχει μια μεταβλητή που ονομάζεται owner του.
+1. Κάθε value στη Rust έχει μια μεταβλητή που ονομάζεται owner του.
 2. Μπορεί να υπάρχει μόνο ένας owner κάθε φορά.
-3. Όταν ο owner βγει εκτός scope, το value αποδεσμεύεται.
+3. Όταν ο owner βγει εκτός scope, το value θα αποδεσμευτεί.
 ```rust
 fn main() {
 let student_age: u32 = 20;
@@ -20,9 +20,9 @@ println!("The student is {} and teacher is {}", student_age, teacher_age);
 // println!("the teacher is {}", teacher_age); // this will not work as teacher_age has been dropped
 }
 ```
-### Γενικοί Τύποι
+### Generic Types
 
-Δημιουργήστε ένα struct όπου μία από τις τιμές του θα μπορούσε να είναι οποιουδήποτε τύπου
+Δημιουργήστε ένα struct όπου μία από τις τιμές του μπορεί να είναι οποιουδήποτε τύπου
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -51,7 +51,7 @@ Some(T),
 
 ### Result, Ok & Err
 
-Χρησιμοποιείται για την επιστροφή και τη διάδοση σφαλμάτων
+Χρησιμοποιούνται για την επιστροφή και τη διάδοση σφαλμάτων
 ```rust
 pub enum Result<T, E> {
 Ok(T),
@@ -64,9 +64,9 @@ Err(E),
 Το enum `Result` θα πρέπει να χρησιμοποιείται σε περιπτώσεις όπου κάνετε κάτι που μπορεί να αποτύχει
 
 
-### Μακροεντολές
+### Macros
 
-Οι μακροεντολές είναι πιο ισχυρές από τις συναρτήσεις, επειδή επεκτείνονται για να παράγουν περισσότερο κώδικα από αυτόν που έχετε γράψει χειροκίνητα. Για παράδειγμα, η υπογραφή μιας συνάρτησης πρέπει να δηλώνει τον αριθμό και τον τύπο των παραμέτρων που έχει η συνάρτηση. Οι μακροεντολές, από την άλλη πλευρά, μπορούν να δέχονται μεταβλητό αριθμό παραμέτρων: μπορούμε να καλέσουμε την `println!("hello")` με ένα όρισμα ή την `println!("hello {}", name)` με δύο ορίσματα. Επίσης, οι μακροεντολές επεκτείνονται πριν ο compiler ερμηνεύσει τη σημασία του κώδικα, επομένως μια μακροεντολή μπορεί, για παράδειγμα, να υλοποιήσει ένα trait για έναν δεδομένο τύπο. Μια συνάρτηση δεν μπορεί να το κάνει, επειδή καλείται στο runtime και ένα trait πρέπει να υλοποιηθεί κατά το compile time.
+Τα Macros είναι πιο ισχυρά από τις συναρτήσεις, επειδή επεκτείνονται για να παράγουν περισσότερο κώδικα από αυτόν που έχετε γράψει χειροκίνητα. Για παράδειγμα, η υπογραφή μιας συνάρτησης πρέπει να δηλώνει τον αριθμό και τον τύπο των παραμέτρων που έχει η συνάρτηση. Τα Macros, από την άλλη πλευρά, μπορούν να δέχονται μεταβλητό αριθμό παραμέτρων: μπορούμε να καλέσουμε το `println!("hello")` με ένα όρισμα ή το `println!("hello {}", name)` με δύο ορίσματα. Επίσης, τα Macros επεκτείνονται πριν ο compiler ερμηνεύσει τη σημασία του κώδικα, επομένως ένα Macro μπορεί, για παράδειγμα, να υλοποιήσει ένα trait για έναν δεδομένο τύπο. Μια συνάρτηση δεν μπορεί, επειδή καλείται κατά το runtime και ένα trait πρέπει να υλοποιηθεί κατά το compile time.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -108,7 +108,7 @@ for (key, hashvalue) in &*map {
 for key in map.keys() {
 for value in map.values() {
 ```
-### Recursive Box
+### Αναδρομικό Κουτί
 ```rust
 enum List {
 Cons(i32, List),
@@ -153,7 +153,7 @@ true => 1,
 // TODO ^ Try commenting out one of these arms
 };
 ```
-#### βρόχος (άπειρος)
+#### loop (άπειρος)
 ```rust
 loop {
 count += 1;
@@ -168,7 +168,7 @@ break;
 }
 }
 ```
-#### while
+#### ενώ
 ```rust
 let mut n = 1;
 while n < 101 {
@@ -258,7 +258,7 @@ optional = Some(i + 1);
 ```
 ### Traits
 
-Δημιουργήστε μια νέα μέθοδο για έναν τύπο
+Δημιουργία μιας νέας μεθόδου για έναν τύπο
 ```rust
 trait AppendBar {
 fn append_bar(self) -> Self;
@@ -290,7 +290,7 @@ assert_ne!(true, false);
 
 #### Arc
 
-Ένα Arc μπορεί να χρησιμοποιήσει το Clone για να δημιουργήσει περισσότερες αναφορές στο object και να τις περάσει στα threads. Όταν ο τελευταίος pointer αναφοράς σε μια τιμή βγει εκτός scope, η μεταβλητή διαγράφεται.
+Ένα Arc μπορεί να χρησιμοποιήσει το Clone για να δημιουργήσει περισσότερες αναφορές στο αντικείμενο και να τις μεταβιβάσει στα νήματα. Όταν η τελευταία αναφορά σε μια τιμή βγει εκτός εμβέλειας, η μεταβλητή αποδεσμεύεται.
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -303,7 +303,7 @@ println!("{:?}", apple);
 ```
 #### Threads
 
-Σε αυτή την περίπτωση θα περάσουμε στο thread μια μεταβλητή που θα μπορεί να τροποποιήσει
+Σε αυτήν την περίπτωση, θα περάσουμε στο thread μια μεταβλητή την οποία θα μπορεί να τροποποιήσει.
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -321,17 +321,17 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-### Βασικές αρχές ασφάλειας
+### Βασικά στοιχεία ασφάλειας
 
-Η Rust παρέχει από προεπιλογή ισχυρές εγγυήσεις memory safety, αλλά εξακολουθείτε να μπορείτε να εισαγάγετε κρίσιμες ευπάθειες μέσω κώδικα `unsafe`, προβλημάτων dependencies ή λογικών λαθών. Το ακόλουθο mini-cheatsheet συγκεντρώνει τα primitives με τα οποία θα αλληλεπιδράτε συχνότερα κατά τη διάρκεια offensive ή defensive security reviews λογισμικού Rust.
+Η Rust παρέχει ισχυρές εγγυήσεις memory safety από προεπιλογή, αλλά μπορείτε ακόμη να εισαγάγετε κρίσιμες ευπάθειες μέσω κώδικα `unsafe`, προβλημάτων σε dependencies ή λαθών λογικής. Το παρακάτω mini-cheatsheet συγκεντρώνει τα primitives με τα οποία θα αλληλεπιδράτε συχνότερα κατά τη διάρκεια offensive ή defensive security reviews λογισμικού Rust.
 
-#### Κώδικας `unsafe` και memory safety
+#### Κώδικας `unsafe` & memory safety
 
-Τα blocks `unsafe` παρακάμπτουν τους ελέγχους aliasing και ορίων του compiler, επομένως **όλα τα παραδοσιακά memory-corruption bugs (OOB, use-after-free, double free κ.λπ.) μπορούν να εμφανιστούν ξανά**. Μια σύντομη checklist για audit:
+Τα blocks `unsafe` παρακάμπτουν τους ελέγχους aliasing και ορίων του compiler, επομένως **όλα τα παραδοσιακά memory-corruption bugs (OOB, use-after-free, double free κ.λπ.) μπορούν να εμφανιστούν ξανά**. Μια σύντομη checklist ελέγχου:
 
-* Αναζητήστε blocks `unsafe`, συναρτήσεις `extern "C"`, κλήσεις σε `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointers ή modules `ffi`.
-* Επικυρώστε κάθε pointer arithmetic και κάθε length argument που περνά σε low-level functions.
-* Προτιμήστε `#![forbid(unsafe_code)]` (σε ολόκληρο το crate) ή `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +), ώστε η compilation να αποτυγχάνει όταν κάποιος εισάγει ξανά `unsafe`.
+* Αναζητήστε blocks `unsafe`, συναρτήσεις `extern "C"`, κλήσεις προς `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointers ή modules `ffi`.
+* Επαληθεύστε κάθε pointer arithmetic και κάθε όρισμα μήκους που περνά σε low-level συναρτήσεις.
+* Προτιμήστε `#![forbid(unsafe_code)]` (σε ολόκληρο το crate) ή `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +), ώστε η μεταγλώττιση να αποτυγχάνει όταν κάποιος εισάγει ξανά `unsafe`.
 
 Παράδειγμα overflow που δημιουργείται με raw pointers:
 ```rust
@@ -352,49 +352,49 @@ dst
 rustup component add miri
 cargo miri test  # hunts for OOB / UAF during unit tests
 ```
-#### Auditing dependencies with RustSec / cargo-audit
+#### Έλεγχος dependencies με RustSec / cargo-audit
 
-Οι περισσότερες πραγματικές ευπάθειες στο Rust βρίσκονται σε crates τρίτων. Η advisory DB του RustSec (υποστηριζόμενη από την κοινότητα) μπορεί να υποβληθεί σε ερωτήματα τοπικά:<sup>[[1]](#references)</sup>
+Οι περισσότερες πραγματικές ευπάθειες στη Rust βρίσκονται σε crates τρίτων. Η advisory DB του RustSec (με υποστήριξη από την κοινότητα) μπορεί να ερωτηθεί τοπικά:<sup>[[1]](#references)</sup>
 ```bash
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
 ```
 Ενσωματώστε το στο CI και αποτύχετε με το `--deny warnings`.
 
-Το `cargo deny check advisories` προσφέρει παρόμοια λειτουργικότητα, καθώς και ελέγχους αδειών και λιστών απαγορεύσεων.
+Το `cargo deny check advisories` προσφέρει παρόμοια λειτουργικότητα, καθώς και ελέγχους για άδειες χρήσης και λίστες αποκλεισμού.
 
 #### Κάλυψη κώδικα με cargo-tarpaulin
 
-Το `cargo tarpaulin` είναι ένα εργαλείο αναφοράς κάλυψης κώδικα για το σύστημα build του Cargo.
+Το `cargo tarpaulin` είναι ένα εργαλείο αναφοράς κάλυψης κώδικα για το σύστημα build του Cargo
 ```bash
 cargo binstall cargo-tarpaulin
 cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
 ```
-Στο Linux, το προεπιλεγμένο tracing backend του Tarpaulin εξακολουθεί να είναι το Ptrace και λειτουργεί μόνο σε επεξεργαστές x86_64. Αυτό μπορεί να αλλάξει σε llvm coverage instrumentation με το `--engine llvm`. Για Mac και Windows, αυτή είναι η προεπιλεγμένη μέθοδος συλλογής.
+Στο Linux, το προεπιλεγμένο backend tracing του Tarpaulin εξακολουθεί να είναι το Ptrace και λειτουργεί μόνο σε επεξεργαστές x86_64. Αυτό μπορεί να αλλάξει σε llvm coverage instrumentation με `--engine llvm`. Για Mac και Windows, αυτή είναι η προεπιλεγμένη μέθοδος συλλογής.
 
-#### Επαλήθευση supply-chain με cargo-vet (2024)
+#### Επαλήθευση εφοδιαστικής αλυσίδας με cargo-vet (2024)
 
-Το `cargo vet` καταγράφει ένα review hash για κάθε crate που κάνετε import και αποτρέπει αναβαθμίσεις χωρίς να γίνουν αντιληπτές:
+Το `cargo vet` καταγράφει ένα review hash για κάθε crate που εισάγετε και αποτρέπει τις αναβαθμίσεις χωρίς να γίνουν αντιληπτές:
 ```bash
 cargo install cargo-vet
 cargo vet init      # generates vet.toml
 cargo vet --locked  # verifies packages referenced in Cargo.lock
 ```
-Το εργαλείο υιοθετείται από την υποδομή του Rust project και έναν αυξανόμενο αριθμό orgs για τον μετριασμό επιθέσεων poisoned-package.<sup>[[2]](#references)</sup>
+Το tool υιοθετείται από την υποδομή του Rust project και από έναν αυξανόμενο αριθμό orgs για τον μετριασμό επιθέσεων poisoned-package.<sup>[[2]](#references)</sup>
 
-#### Fuzzing του API surface (cargo-fuzz)
+#### Fuzzing της επιφάνειας API σας (cargo-fuzz)
 
-Τα Fuzz tests εντοπίζουν εύκολα panics, integer overflows και logic bugs που ενδέχεται να οδηγήσουν σε DoS ή προβλήματα side-channel:
+Τα Fuzz tests εντοπίζουν εύκολα panics, υπερχειλίσεις ακεραίων και bugs λογικής που μπορεί να εξελιχθούν σε ζητήματα DoS ή side-channel:
 ```bash
 cargo install cargo-fuzz
 cargo fuzz init              # creates fuzz_targets/
 cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
 ```
-Προσθέστε το fuzz target στο repo σας και εκτελέστε το στο pipeline σας.
+Προσθέστε το fuzz target στο repository σας και εκτελέστε το στο pipeline σας.
 
 ## Αναφορές
 
 - [1] [RustSec Advisory Database](https://rustsec.org)
-- [2] [Cargo-vet: Έλεγχος των Rust Dependencies](https://mozilla.github.io/cargo-vet/)
+- [2] [Cargo-vet: "Έλεγχος των Rust Dependencies σας"](https://mozilla.github.io/cargo-vet/)
 
 {{#include ../banners/hacktricks-training.md}}

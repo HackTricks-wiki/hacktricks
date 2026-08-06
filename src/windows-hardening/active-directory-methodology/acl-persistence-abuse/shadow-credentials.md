@@ -2,62 +2,62 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#3f17" id="3f17"></a>
+## Εισαγωγή <a href="#3f17" id="3f17"></a>
 
-**Δείτε την αρχική ανάρτηση για [όλες τις πληροφορίες σχετικά με αυτή την τεχνική](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab).**
+**Ελέγξτε το original post για [όλες τις πληροφορίες σχετικά με αυτή την τεχνική](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab).**<sup>[[1]](#references)</sup>
 
-Ως **σύνοψη**: αν μπορείτε να γράψετε στην **ιδιότητα msDS-KeyCredentialLink** ενός χρήστη/υπολογιστή, μπορείτε να ανακτήσετε το **NT hash αυτού του αντικειμένου**.
+Ως **σύνοψη**: αν μπορείτε να γράψετε στην ιδιότητα **msDS-KeyCredentialLink** ενός user/computer, μπορείτε να ανακτήσετε το **NT hash αυτού του object**.<sup>[[1]](#references)</sup>
 
-Στην ανάρτηση, περιγράφεται μια μέθοδος για τη ρύθμιση **δημόσιων-ιδιωτικών κλειδιών πιστοποίησης** για την απόκτηση ενός μοναδικού **Service Ticket** που περιλαμβάνει το NTLM hash του στόχου. Αυτή η διαδικασία περιλαμβάνει το κρυπτογραφημένο NTLM_SUPPLEMENTAL_CREDENTIAL εντός του Privilege Attribute Certificate (PAC), το οποίο μπορεί να αποκρυπτογραφηθεί.
+Στο post περιγράφεται μια μέθοδος για τη ρύθμιση **public-private key authentication credentials**, ώστε να αποκτηθεί ένα μοναδικό **Service Ticket** που περιλαμβάνει το NTLM hash του target. Η διαδικασία περιλαμβάνει το κρυπτογραφημένο NTLM_SUPPLEMENTAL_CREDENTIAL μέσα στο Privilege Attribute Certificate (PAC), το οποίο μπορεί να αποκρυπτογραφηθεί.<sup>[[1]](#references)</sup>
 
-### Requirements
+### Απαιτήσεις
 
-Για να εφαρμοστεί αυτή η τεχνική, πρέπει να πληρούνται ορισμένες προϋποθέσεις:
+Για την εφαρμογή αυτής της τεχνικής, πρέπει να πληρούνται ορισμένες προϋποθέσεις:<sup>[[1]](#references)</sup>
 
 - Απαιτείται τουλάχιστον ένας Windows Server 2016 Domain Controller.
-- Ο Domain Controller πρέπει να έχει εγκατεστημένο ένα ψηφιακό πιστοποιητικό αυθεντικοποίησης διακομιστή.
-- Η Active Directory πρέπει να είναι στο Windows Server 2016 Functional Level.
-- Απαιτείται ένας λογαριασμός με εκχωρημένα δικαιώματα για να τροποποιήσει την ιδιότητα msDS-KeyCredentialLink του αντικειμένου στόχου.
+- Ο Domain Controller πρέπει να έχει εγκατεστημένο digital certificate για server authentication.
+- Το Active Directory πρέπει να βρίσκεται στο Windows Server 2016 Functional Level.
+- Απαιτείται ένας account με delegated rights για τροποποίηση του msDS-KeyCredentialLink attribute του target object.
 
 ## Abuse
 
-Η κατάχρηση του Key Trust για αντικείμενα υπολογιστών περιλαμβάνει βήματα πέρα από την απόκτηση ενός Ticket Granting Ticket (TGT) και του NTLM hash. Οι επιλογές περιλαμβάνουν:
+Το abuse του Key Trust για computer objects περιλαμβάνει βήματα πέρα από την απόκτηση ενός Ticket Granting Ticket (TGT) και του NTLM hash. Οι επιλογές περιλαμβάνουν:<sup>[[1]](#references)</sup>
 
-1. Δημιουργία ενός **RC4 silver ticket** για να ενεργεί ως προνομιούχοι χρήστες στον προοριζόμενο υπολογιστή.
-2. Χρήση του TGT με **S4U2Self** για την προσποίηση **προνομιούχων χρηστών**, απαιτώντας τροποποιήσεις στο Service Ticket για να προστεθεί μια κατηγορία υπηρεσίας στο όνομα της υπηρεσίας.
+1. Δημιουργία ενός **RC4 silver ticket** για να ενεργείτε ως privileged users στο intended host.
+2. Χρήση του TGT με **S4U2Self** για impersonation **privileged users**, με απαραίτητες τροποποιήσεις στο Service Ticket ώστε να προστεθεί ένα service class στο service name.
 
-Ένα σημαντικό πλεονέκτημα της κατάχρησης του Key Trust είναι ο περιορισμός του στην ιδιωτική κλειδαριά που δημιουργείται από τον επιτιθέμενο, αποφεύγοντας την εκχώρηση σε δυνητικά ευάλωτους λογαριασμούς και μη απαιτώντας τη δημιουργία ενός λογαριασμού υπολογιστή, κάτι που θα μπορούσε να είναι δύσκολο να αφαιρεθεί.
+Ένα σημαντικό πλεονέκτημα του Key Trust abuse είναι ότι περιορίζεται στο private key που δημιουργεί ο attacker, αποφεύγοντας delegation σε δυνητικά ευάλωτα accounts και χωρίς να απαιτείται η δημιουργία computer account, το οποίο μπορεί να είναι δύσκολο να αφαιρεθεί.<sup>[[1]](#references)</sup>
 
-## Tools
+## Εργαλεία
 
 ### [**Whisker**](https://github.com/eladshamir/Whisker)
 
-Βασίζεται στο DSInternals παρέχοντας μια διεπαφή C# για αυτή την επίθεση. Το Whisker και το Python αντίστοιχό του, **pyWhisker**, επιτρέπουν την επεξεργασία της ιδιότητας `msDS-KeyCredentialLink` για την απόκτηση ελέγχου στους λογαριασμούς Active Directory. Αυτά τα εργαλεία υποστηρίζουν διάφορες λειτουργίες όπως η προσθήκη, η καταχώριση, η αφαίρεση και η εκκαθάριση κλειδιών πιστοποίησης από το αντικείμενο στόχου.
+Βασίζεται στο DSInternals και παρέχει ένα C# interface για αυτή την επίθεση. Τα Whisker και το Python counterpart του, **pyWhisker**, επιτρέπουν τον χειρισμό του `msDS-KeyCredentialLink` attribute για την απόκτηση control σε Active Directory accounts. Αυτά τα εργαλεία υποστηρίζουν διάφορες λειτουργίες, όπως προσθήκη, εμφάνιση, αφαίρεση και εκκαθάριση key credentials από το target object.
 
-**Λειτουργίες του Whisker** περιλαμβάνουν:
+Οι λειτουργίες του **Whisker** περιλαμβάνουν:
 
-- **Add**: Δημιουργεί ένα ζεύγος κλειδιών και προσθέτει μια κλειδαριά πιστοποίησης.
-- **List**: Εμφανίζει όλες τις καταχωρίσεις κλειδιών πιστοποίησης.
-- **Remove**: Διαγράφει μια συγκεκριμένη κλειδαριά πιστοποίησης.
-- **Clear**: Διαγράφει όλες τις κλειδαριές πιστοποίησης, ενδεχομένως διαταράσσοντας τη νόμιμη χρήση WHfB.
+- **Add**: Δημιουργεί ένα key pair και προσθέτει ένα key credential.
+- **List**: Εμφανίζει όλες τις key credential entries.
+- **Remove**: Διαγράφει ένα指定 key credential.
+- **Clear**: Διαγράφει όλα τα key credentials, διακόπτοντας πιθανώς τη νόμιμη χρήση του WHfB.
 ```shell
 Whisker.exe add /target:computername$ /domain:constoso.local /dc:dc1.contoso.local /path:C:\path\to\file.pfx /password:P@ssword1
 ```
 ### [pyWhisker](https://github.com/ShutdownRepo/pywhisker)
 
-Επεκτείνει τη λειτουργικότητα του Whisker σε **συστήματα βασισμένα σε UNIX**, αξιοποιώντας το Impacket και το PyDSInternals για ολοκληρωμένες δυνατότητες εκμετάλλευσης, συμπεριλαμβανομένων των λιστών, προσθήκης και αφαίρεσης KeyCredentials, καθώς και εισαγωγής και εξαγωγής τους σε μορφή JSON.
+Επεκτείνει τη λειτουργικότητα του Whisker σε **UNIX-based systems**, αξιοποιώντας τα Impacket και PyDSInternals για ολοκληρωμένες δυνατότητες exploitation, όπως η καταχώριση, η προσθήκη και η αφαίρεση KeyCredentials, καθώς και η εισαγωγή και εξαγωγή τους σε μορφή JSON.
 ```shell
 python3 pywhisker.py -d "domain.local" -u "user1" -p "complexpassword" --target "user2" --action "list"
 ```
 ### [ShadowSpray](https://github.com/Dec0ne/ShadowSpray/)
 
-Το ShadowSpray στοχεύει να **εκμεταλλευτεί τις άδειες GenericWrite/GenericAll που μπορεί να έχουν ευρείες ομάδες χρηστών σε αντικείμενα τομέα** για να εφαρμόσει ευρέως τα ShadowCredentials. Περιλαμβάνει την είσοδο στον τομέα, την επαλήθευση του λειτουργικού επιπέδου του τομέα, την καταμέτρηση αντικειμένων τομέα και την προσπάθεια προσθήκης KeyCredentials για την απόκτηση TGT και την αποκάλυψη NT hash. Οι επιλογές καθαρισμού και οι αναδρομικές τακτικές εκμετάλλευσης ενισχύουν τη χρησιμότητά του.
+Το ShadowSpray στοχεύει στην **εκμετάλλευση δικαιωμάτων GenericWrite/GenericAll που ενδέχεται να έχουν ευρείες ομάδες χρηστών σε αντικείμενα του domain**, ώστε να εφαρμόζει μαζικά ShadowCredentials. Περιλαμβάνει σύνδεση στο domain, επαλήθευση του functional level του domain, απαρίθμηση των αντικειμένων του domain και προσπάθεια προσθήκης KeyCredentials για απόκτηση TGT και αποκάλυψη NT hash. Οι επιλογές εκκαθάρισης και οι τακτικές recursive exploitation ενισχύουν τη χρησιμότητά του.
 
 ## Αναφορές
 
-- [https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)
-- [https://github.com/eladshamir/Whisker](https://github.com/eladshamir/Whisker)
-- [https://github.com/Dec0ne/ShadowSpray/](https://github.com/Dec0ne/ShadowSpray/)
-- [https://github.com/ShutdownRepo/pywhisker](https://github.com/ShutdownRepo/pywhisker)
+- [1] [Shadow Credentials: Κατάχρηση του Key Trust Account Mapping για takeover λογαριασμών](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)
+- [2] [Whisker - Εργαλείο για takeover λογαριασμών AD μέσω χειρισμού του msDS-KeyCredentialLink](https://github.com/eladshamir/Whisker)
+- [3] [ShadowSpray - Εργαλείο για μαζική εφαρμογή Shadow Credentials σε ένα domain](https://github.com/Dec0ne/ShadowSpray/)
+- [4] [pywhisker - Python έκδοση του εργαλείου Shadow Credentials](https://github.com/ShutdownRepo/pywhisker)
 
 {{#include ../../../banners/hacktricks-training.md}}

