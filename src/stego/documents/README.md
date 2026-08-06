@@ -1,22 +1,22 @@
-# Dokument Steganografie
+# Dokument-Steganografie
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Dokumente is dikwels net houers:
+Dokumente is dikwels bloot houers:
 
-- PDF (ingeslote lêers, strome)
-- Office OOXML (`.docx/.xlsx/.pptx` is ZIP-lêers)
-- RTF / OLE ouer formate
+- PDF (ingebedde lêers, strome)
+- Office OOXML (`.docx/.xlsx/.pptx` is ZIPs)
+- RTF / OLE legacy-formate
 
 ## PDF
 
 ### Tegniek
 
-PDF is 'n gestruktureerde houer met objekte, strome en opsionele ingeslote lêers. In CTFs moet jy dikwels:
+PDF is ’n gestruktureerde houer met objekte, strome en opsionele ingebedde lêers. In CTFs moet jy dikwels:
 
-- Ekstraheer ingeslote aanhangsels
-- Dekomprimeer/vlakmaak objekstrome sodat jy inhoud kan deursoek
-- Identifiseer verborge objekte (JS, ingeslote beelde, vreemde strome)
+- Ingebedde aanhegsels onttrek
+- Objekstrome dekomprimeer/platmaak sodat jy inhoud kan soek
+- Versteekte objekte identifiseer (JS, ingebedde beelde, vreemde strome)
 
 ### Vinnige kontroles
 ```bash
@@ -25,19 +25,19 @@ pdfdetach -list file.pdf
 pdfdetach -saveall file.pdf
 qpdf --qdf --object-streams=disable file.pdf out.pdf
 ```
-Soek dan binne `out.pdf` na verdagte objekte/strings.
+Soek dan binne `out.pdf` vir verdagte objekte/stringe.
 
 ## Office OOXML
 
 ### Tegniek
 
-Behandel OOXML as 'n ZIP + XML relationship graph; payloads skuil dikwels in media, relationships, of vreemde custom parts.
+Behandel OOXML as ’n ZIP + XML relationship graph; payloads versteek dikwels in media, relationships of vreemde custom parts.
 
 OOXML-lêers is ZIP-containers. Dit beteken:
 
-- Die dokument is 'n gidsboom van XML en assets.
-- Die `_rels/` relationship-lêers kan na eksterne hulpbronne of verborge dele wys.
-- Ingeslote data bevind dikwels in `word/media/`, custom XML parts, of ongewone relationships.
+- Die dokument is ’n directory tree van XML en assets.
+- Die `_rels/` relationship files kan na eksterne hulpbronne of versteekte parts wys.
+- Embedded data is dikwels in `word/media/`, custom XML parts of ongewone relationships.
 
 ### Vinnige kontroles
 ```bash
@@ -48,6 +48,7 @@ Inspekteer dan:
 
 - `word/document.xml`
 - `word/_rels/` vir eksterne verhoudings
-- ingeslote media in `word/media/`
+- ingebedde media in `word/media/`
+
 
 {{#include ../../banners/hacktricks-training.md}}
