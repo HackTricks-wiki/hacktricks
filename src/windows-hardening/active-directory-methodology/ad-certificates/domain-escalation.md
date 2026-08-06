@@ -5,8 +5,8 @@
 
 **This is a summary of escalation technique sections of the posts:**
 
-- [https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf](https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf)
-- [https://research.ifcr.dk/certipy-4-0-esc9-esc10-bloodhound-gui-new-authentication-and-request-methods-and-more-7237d88061f7](https://research.ifcr.dk/certipy-4-0-esc9-esc10-bloodhound-gui-new-authentication-and-request-methods-and-more-7237d88061f7)
+- [https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf](https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf)<sup>[[6]](#references)</sup>
+- [https://research.ifcr.dk/certipy-4-0-esc9-esc10-bloodhound-gui-new-authentication-and-request-methods-and-more-7237d88061f7](https://research.ifcr.dk/certipy-4-0-esc9-esc10-bloodhound-gui-new-authentication-and-request-methods-and-more-7237d88061f7)<sup>[[7]](#references)</sup>
 - [https://github.com/ly4k/Certipy](https://github.com/ly4k/Certipy)
 
 ## Misconfigured Certificate Templates - ESC1
@@ -125,7 +125,7 @@ The **“enrollment agent”** enrolls in such a **template** and uses the resul
 
 ### Abuse
 
-You can use [**Certify**](https://github.com/GhostPack/Certify) or [**Certipy**](https://github.com/ly4k/Certipy) to abuse this scenario:
+You can use [**Certify**](https://github.com/GhostPack/Certify) or [**Certipy**](https://github.com/ly4k/Certipy) to abuse this scenario:<sup>[[4]](#references)</sup>
 
 ```bash
 # Request an enrollment agent certificate
@@ -229,7 +229,7 @@ This operation essentially employs **remote registry access**, hence, an alterna
 reg.exe query \\<CA_SERVER>\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration\<CA_NAME>\PolicyModules\CertificateAuthority_MicrosoftDefault.Policy\ /v EditFlags
 ```
 
-Tools like [**Certify**](https://github.com/GhostPack/Certify) and [**Certipy**](https://github.com/ly4k/Certipy) are capable of detecting this misconfiguration and exploiting it:
+Tools like [**Certify**](https://github.com/GhostPack/Certify) and [**Certipy**](https://github.com/ly4k/Certipy) are capable of detecting this misconfiguration and exploiting it:<sup>[[4]](#references)</sup>
 
 ```bash
 # Detect vulnerabilities, including this one
@@ -447,7 +447,7 @@ Another limitation of NTLM relay attacks is that **an attacker-controlled machin
 
 ### **Abuse**
 
-[**Certify**](https://github.com/GhostPack/Certify)’s `cas` enumerates **enabled HTTP AD CS endpoints**:
+[**Certify**](https://github.com/GhostPack/Certify)’s `cas` enumerates **enabled HTTP AD CS endpoints**:<sup>[[4]](#references)</sup>
 
 ```
 Certify.exe cas

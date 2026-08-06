@@ -25,7 +25,7 @@ cat records.csv
 
 >  adidnsdump v1.4.0 (April 2025) adds JSON/Greppable (`--json`) output, multi-threaded DNS resolution and support for TLS 1.2/1.3 when binding to LDAPS  
 
-For more information read [https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)
+For more information read [https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)<sup>[[4]](#references)</sup>
 
 ---
 
