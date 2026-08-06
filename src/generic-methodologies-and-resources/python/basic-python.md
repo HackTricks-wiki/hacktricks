@@ -441,7 +441,7 @@ For HTTP automation, check [this other page about Python web requests](web-reque
 
 ### Archive extraction gotchas (important for tooling and file parsers)
 
-Starting in **Python 3.14**, `tarfile.extract()` / `extractall()` use the safer `data` filter by default. In older Python versions you should set it explicitly when handling attacker-controlled archives.
+Starting in **Python 3.14**, `tarfile.extract()` / `extractall()` use the safer `data` filter by default. In older Python versions you should set it explicitly when handling attacker-controlled archives.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```python
 import tarfile
@@ -478,7 +478,7 @@ with zipfile.ZipFile("sample.zip") as zf:
 
 ## References
 
-- [Python tarfile docs](https://docs.python.org/3/library/tarfile.html)
-- [PEP 706 - Filter for tarfile.extractall](https://peps.python.org/pep-0706/)
+- [1] [Python tarfile docs](https://docs.python.org/3/library/tarfile.html)
+- [2] [PEP 706 - Filter for tarfile.extractall](https://peps.python.org/pep-0706/)
 
 {{#include ../../banners/hacktricks-training.md}}

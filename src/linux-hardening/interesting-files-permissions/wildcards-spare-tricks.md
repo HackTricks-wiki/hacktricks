@@ -97,7 +97,7 @@ This survives `-- *` because the 7-Zip CLI explicitly accepts both regular filen
 
 ## zip
 
-Two very practical primitives exist when an application passes user-controlled filenames to `zip` (either via a wildcard or by enumerating names without `--`).
+Two very practical primitives exist when an application passes user-controlled filenames to `zip` (either via a wildcard or by enumerating names without `--`).<sup>[[2]](#references)[[3]](#references)</sup>
 
 - RCE via test hook: `-T` enables “test archive” and `-TT <cmd>` replaces the tester with an arbitrary program (long form: `--unzip-command <cmd>`). If you can inject filenames that start with `-`, split the flags across distinct filenames so short-options parsing works:
 
@@ -175,7 +175,7 @@ Quick heuristics:
 
 ## tcpdump rotation hooks (-G/-W/-z): RCE via argv injection in wrappers
 
-When a restricted shell or vendor wrapper builds a `tcpdump` command line by concatenating user-controlled fields (e.g., a "file name" parameter) without strict quoting/validation, you can smuggle extra `tcpdump` flags. The combo of `-G` (time-based rotation), `-W` (limit number of files), and `-z <cmd>` (post-rotate command) yields arbitrary command execution as the user running tcpdump (often root on appliances).
+When a restricted shell or vendor wrapper builds a `tcpdump` command line by concatenating user-controlled fields (e.g., a "file name" parameter) without strict quoting/validation, you can smuggle extra `tcpdump` flags. The combo of `-G` (time-based rotation), `-W` (limit number of files), and `-z <cmd>` (post-rotate command) yields arbitrary command execution as the user running tcpdump (often root on appliances).<sup>[[1]](#references)[[4]](#references)</sup>
 
 Preconditions:
 
@@ -216,7 +216,7 @@ No-removable-media variants:
 
 ## sudoers: tcpdump with wildcards/additional args → arbitrary write/read and root
 
-Very common sudoers anti-pattern:
+Very common sudoers anti-pattern:<sup>[[3]](#references)</sup>
 
 ```text
 (ALL : ALL) NOPASSWD: /usr/bin/tcpdump -c10 -w/var/cache/captures/*/<GUID-PATTERN> -F/var/cache/captures/filter.<GUID-PATTERN>
@@ -282,10 +282,10 @@ sudo tcpdump -c10 -w/var/cache/captures/a/ -V /root/root.txt \
 
 ## References
 
-- [GTFOBins - tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
-- [GTFOBins - zip](https://gtfobins.github.io/gtfobins/zip/)
-- [0xdf - HTB Dump: Zip arg injection to RCE + tcpdump sudo misconfig privesc](https://0xdf.gitlab.io/2025/11/04/htb-dump.html)
-- [FiberGateway GR241AG - Full Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
-- [Elastic - Potential Shell via Wildcard Injection Detected](https://www.elastic.co/guide/en/security/current/prebuilt-rule-8-19-20-potential-shell-via-wildcard-injection-detected.html)
+- [1] [GTFOBins - tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
+- [2] [GTFOBins - zip](https://gtfobins.github.io/gtfobins/zip/)
+- [3] [0xdf - HTB Dump: Zip arg injection to RCE + tcpdump sudo misconfig privesc](https://0xdf.gitlab.io/2025/11/04/htb-dump.html)
+- [4] [FiberGateway GR241AG - Full Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
+- [5] [Elastic - Potential Shell via Wildcard Injection Detected](https://www.elastic.co/guide/en/security/current/prebuilt-rule-8-19-20-potential-shell-via-wildcard-injection-detected.html)
 
 {{#include ../../banners/hacktricks-training.md}}

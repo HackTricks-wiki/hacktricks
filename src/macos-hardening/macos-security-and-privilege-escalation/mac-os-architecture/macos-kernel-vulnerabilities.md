@@ -13,7 +13,7 @@ Recent macOS kernel exploitation is less about "load a trivial unsigned kext and
 
 ## [Pwning OTA](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
 
-In [**this report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) several OTA/update-chain bugs are combined to reach kernel compromise by abusing the software update pipeline and rootless-related capabilities.
+In [**this report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) several OTA/update-chain bugs are combined to reach kernel compromise by abusing the software update pipeline and rootless-related capabilities.<sup>[[3]](#references)</sup>
 
 [**PoC**](https://github.com/jhftss/POC/tree/main/CVE-2022-46722).
 
@@ -40,7 +40,7 @@ softwareupdate --history | tail -n 20
 
 ## 2025: SMR + read-only credential race (CVE-2025-24118)
 
-Joseph Ravichandran's [**TRAVERTINE write-up**](https://jprx.io/cve-2025-24118/) is a very good modern XNU case study because it is **not** a classic buffer overflow:
+Joseph Ravichandran's [**TRAVERTINE write-up**](https://jprx.io/cve-2025-24118/) is a very good modern XNU case study because it is **not** a classic buffer overflow:<sup>[[1]](#references)</sup>
 
 - `proc_ro.p_ucred` is an **SMR-protected pointer** stored in a **read-only** `proc_ro` object.
 - Writers must update that pointer **atomically**.
@@ -68,7 +68,7 @@ Useful audit heuristic: whenever a kernel path mixes **SMR readers**, **read-onl
 
 ## 2024-2025: SIP bypass that re-opens kernel loading paths (CVE-2024-44243)
 
-Microsoft showed that `storagekitd` could be abused to **bypass SIP** and then make third-party kernel code relevant again on machines that would otherwise look "post-kext". The key idea is:
+Microsoft showed that `storagekitd` could be abused to **bypass SIP** and then make third-party kernel code relevant again on machines that would otherwise look "post-kext". The key idea is:<sup>[[2]](#references)</sup>
 
 1. Drop or overwrite a malicious `.fs` bundle under `/Library/Filesystems`.
 2. Trigger `storagekitd` via Disk Utility or `diskutil`.
@@ -92,8 +92,8 @@ kmutil showloaded --collection aux
 
 If you are actively hunting this class of bugs, the recent public work is pointing in the same direction:
 
-- [**KextFuzz**](https://www.usenix.org/conference/usenixsecurity23/presentation/yin) is still one of the best references for Apple-Silicon-era kernel research. It uses **static binary rewriting** to recover coverage, disables **entitlement-gated** paths during testing, and infers interface structure from userspace wrappers.
-- Project Zero's [**Simple macOS kernel extension fuzzing in userspace with IDA and TinyInst**](https://projectzero.google/2024/11/simple-macos-kernel-extension-fuzzing.html) shows a very practical workflow for **rebasing a kext / fileset into userspace** so parser-heavy code can be fuzzed at much higher speed before reproducing on-device.
+- [**KextFuzz**](https://www.usenix.org/conference/usenixsecurity23/presentation/yin) is still one of the best references for Apple-Silicon-era kernel research. It uses **static binary rewriting** to recover coverage, disables **entitlement-gated** paths during testing, and infers interface structure from userspace wrappers.<sup>[[4]](#references)</sup>
+- Project Zero's [**Simple macOS kernel extension fuzzing in userspace with IDA and TinyInst**](https://projectzero.google/2024/11/simple-macos-kernel-extension-fuzzing.html) shows a very practical workflow for **rebasing a kext / fileset into userspace** so parser-heavy code can be fuzzed at much higher speed before reproducing on-device.<sup>[[5]](#references)</sup>
 - For Mach-heavy targets, build harnesses around **real message layouts and multi-call state machines**, not just single selector blobs. Recent CoreAudio/Mach research from Project Zero and conference talks such as **Fuzzing at Mach Speed** show why stateful message sequences keep paying off.
 
 Quick local commands you will actually use a lot:
@@ -124,6 +124,10 @@ spctl --status                    # Confirm Gatekeeper state
 
 ## References
 
-* Joseph Ravichandran. “TRAVERTINE: CVE-2025-24118.” https://jprx.io/cve-2025-24118/  
-* Microsoft Security Blog. “Analyzing CVE-2024-44243, a macOS System Integrity Protection bypass through kernel extensions.” https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/
+- [1] [Joseph Ravichandran - TRAVERTINE: CVE-2025-24118](https://jprx.io/cve-2025-24118/)
+- [2] [Microsoft Security Blog - Analyzing CVE-2024-44243, a macOS System Integrity Protection bypass through kernel extensions](https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/)
+- [3] [Mickey Jin - The Nightmare of Apple's OTA Update: Bypassing the Signature Verification and Pwning the Kernel](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
+- [4] [Tingting Yin et al. - KextFuzz: Fuzzing macOS Kernel EXTensions on Apple Silicon via Exploiting Mitigations (USENIX Security '23)](https://www.usenix.org/conference/usenixsecurity23/presentation/yin)
+- [5] [Ivan Fratric (Project Zero) - Simple macOS kernel extension fuzzing in userspace with IDA and TinyInst](https://projectzero.google/2024/11/simple-macos-kernel-extension-fuzzing.html)
+
 {{#include ../../../banners/hacktricks-training.md}}

@@ -4,7 +4,7 @@
 
 ## Basic Example
 
-Check how is possible to pollute classes of objects with strings:
+Check how is possible to pollute classes of objects with strings:<sup>[[1]](#references)</sup>
 
 ```python
 class Company: pass
@@ -192,7 +192,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Overwritting <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** is a special attribute of all functions, based on Python [documentation](https://docs.python.org/3/library/inspect.html), it is a “mapping of any default values for **keyword-only** parameters”. Polluting this attribute allows us to control the default values of keyword-only parameters of a function, these are the function’s parameters that come after \* or \*args.
+**`__kwdefaults__`** is a special attribute of all functions, based on Python [documentation](https://docs.python.org/3/library/inspect.html), it is a “mapping of any default values for **keyword-only** parameters”. Polluting this attribute allows us to control the default values of keyword-only parameters of a function, these are the function’s parameters that come after \* or \*args.<sup>[[1]](#references)</sup>
 
 ```python
 from os import system
@@ -238,7 +238,7 @@ execute() #> Executing echo Polluted
 <summary>Overwriting Flask secret across files</summary>
 
 So, if you can do a class pollution over an object defined in the main python file of the web but **whose class is defined in a different file** than the main one. Because in order to access \_\_globals\_\_ in the previous payloads you need to access the class of the object or methods of the class, you will be able to **access the globals in that file, but not in the main one**. \
-Therefore, you **won't be able to access the Flask app global object** that defined the **secret key** in the main page:
+Therefore, you **won't be able to access the Flask app global object** that defined the **secret key** in the main page:<sup>[[1]](#references)</sup>
 
 ```python
 app = Flask(__name__, template_folder='templates')
@@ -247,7 +247,7 @@ app.secret_key = '(:secret:)'
 
 In this scenario you need a gadget to traverse files to get to the main one to **access the global object `app.secret_key`** to change the Flask secret key and be able to [**escalate privileges** knowing this key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-A payload like this one [from this writeup](https://ctftime.org/writeup/36082):
+A payload like this one [from this writeup](https://ctftime.org/writeup/36082):<sup>[[2]](#references)</sup>
 
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
@@ -266,7 +266,8 @@ python-internal-read-gadgets.md
 
 ## References
 
-- [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
 
 {{#include ../../banners/hacktricks-training.md}}
 

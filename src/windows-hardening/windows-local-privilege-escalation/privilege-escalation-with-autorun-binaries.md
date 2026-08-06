@@ -71,7 +71,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Registry keys known as **Run** and **RunOnce** are designed to automatically execute programs every time a user logs into the system. The command line assigned as a key's data value is limited to 260 characters or less.
+Registry keys known as **Run** and **RunOnce** are designed to automatically execute programs every time a user logs into the system. The command line assigned as a key's data value is limited to 260 characters or less.<sup>[[2]](#references)</sup>
 
 **Service runs** (can control automatic startup of services during boot):
 
@@ -89,7 +89,7 @@ Registry keys known as **Run** and **RunOnce** are designed to automatically exe
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-On Windows Vista and later versions, the **Run** and **RunOnce** registry keys are not automatically generated. Entries in these keys can either directly start programs or specify them as dependencies. For instance, to load a DLL file at logon, one could use the **RunOnceEx** registry key along with a "Depend" key. This is demonstrated by adding a registry entry to execute "C:\temp\evil.dll" during the system start-up:
+On Windows Vista and later versions, the **Run** and **RunOnce** registry keys are not automatically generated. Entries in these keys can either directly start programs or specify them as dependencies. For instance, to load a DLL file at logon, one could use the **RunOnceEx** registry key along with a "Depend" key. This is demonstrated by adding a registry entry to execute "C:\temp\evil.dll" during the system start-up:<sup>[[2]](#references)</sup>
 
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
@@ -164,7 +164,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Shortcuts placed in the **Startup** folder will automatically trigger services or applications to launch during user logon or system reboot. The **Startup** folder's location is defined in the registry for both the **Local Machine** and **Current User** scopes. This means any shortcut added to these specified **Startup** locations will ensure the linked service or program starts up following the logon or reboot process, making it a straightforward method for scheduling programs to run automatically.
+Shortcuts placed in the **Startup** folder will automatically trigger services or applications to launch during user logon or system reboot. The **Startup** folder's location is defined in the registry for both the **Local Machine** and **Current User** scopes. This means any shortcut added to these specified **Startup** locations will ensure the linked service or program starts up following the logon or reboot process, making it a straightforward method for scheduling programs to run automatically.<sup>[[1]](#references)[[2]](#references)</sup>
 
 > [!TIP]
 > If you can overwrite any \[User] Shell Folder under **HKLM**, you will e able to point it to a folder controlled by you and place a backdoor that will be executed anytime a user logs in the system escalating privileges.
@@ -185,7 +185,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 - `HKCU\Environment\UserInitMprLogonScript`
 
-This per-user registry value can point to a script or command that is executed when that user logs on. It is mainly a **persistence** primitive because it only runs in the context of the affected user, but it is still worth checking during post-exploitation and autoruns reviews.
+This per-user registry value can point to a script or command that is executed when that user logs on. It is mainly a **persistence** primitive because it only runs in the context of the affected user, but it is still worth checking during post-exploitation and autoruns reviews.<sup>[[3]](#references)[[6]](#references)[[7]](#references)</sup>
 
 > [!TIP]
 > If you can write this value for the current user, you can re-trigger execution at the next interactive logon without needing admin rights. If you can write it for another user hive, you may gain code execution when that user logs on.
@@ -210,7 +210,7 @@ Notes:
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Typically, the **Userinit** key is set to **userinit.exe**. However, if this key is modified, the specified executable will also be launched by **Winlogon** upon user logon. Similarly, the **Shell** key is intended to point to **explorer.exe**, which is the default shell for Windows.
+Typically, the **Userinit** key is set to **userinit.exe**. However, if this key is modified, the specified executable will also be launched by **Winlogon** upon user logon. Similarly, the **Shell** key is intended to point to **explorer.exe**, which is the default shell for Windows.<sup>[[1]](#references)</sup>
 
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
@@ -242,7 +242,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 In the Windows Registry under `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, there's a **`AlternateShell`** value set by default to `cmd.exe`. This means when you choose "Safe Mode with Command Prompt" during startup (by pressing F8), `cmd.exe` is used. But, it's possible to set up your computer to automatically start in this mode without needing to press F8 and manually select it.
 
-Steps to create a boot option for automatically starting in "Safe Mode with Command Prompt":
+Steps to create a boot option for automatically starting in "Safe Mode with Command Prompt":<sup>[[5]](#references)</sup>
 
 1. Change attributes of the `boot.ini` file to remove read-only, system, and hidden flags: `attrib c:\boot.ini -r -s -h`
 2. Open `boot.ini` for editing.
@@ -297,7 +297,7 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 ### Overview of Browser Helper Objects (BHOs)
 
-Browser Helper Objects (BHOs) are DLL modules that add extra features to Microsoft's Internet Explorer. They load into Internet Explorer and Windows Explorer on each start. Yet, their execution can be blocked by setting **NoExplorer** key to 1, preventing them from loading with Windows Explorer instances.
+Browser Helper Objects (BHOs) are DLL modules that add extra features to Microsoft's Internet Explorer. They load into Internet Explorer and Windows Explorer on each start. Yet, their execution can be blocked by setting **NoExplorer** key to 1, preventing them from loading with Windows Explorer instances.<sup>[[1]](#references)</sup>
 
 BHOs are compatible with Windows 10 via Internet Explorer 11 but are not supported in Microsoft Edge, the default browser in newer versions of Windows.
 
@@ -363,18 +363,16 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 
 ## More
 
-**Find more Autoruns like registries in** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+**Find more Autoruns like registries in** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)<sup>[[4]](#references)</sup>
 
 ## References
 
-- [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
-- [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
-- [https://attack.mitre.org/techniques/T1037/001/](https://attack.mitre.org/techniques/T1037/001/)
-- [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
-- [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
-- [https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
-
-
+- [1] [Common malware persistence mechanisms](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
+- [2] [MITRE ATT&CK T1547.001 – Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder](https://attack.mitre.org/techniques/T1547/001/)
+- [3] [MITRE ATT&CK T1037.001 – Boot or Logon Initialization Scripts: Logon Script (Windows)](https://attack.mitre.org/techniques/T1037/001/)
+- [4] [Autoruns – Autostart categories (Troubleshooting with the Windows Sysinternals Tools, 2nd Edition)](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+- [5] [How can I add a boot option that starts an alternate shell?](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
+- [6] [Metasploit Wrap-Up 04/03/2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
+- [7] [Metasploit PR #21032 – windows/persistence/userinit_mpr_logon_script](https://github.com/rapid7/metasploit-framework/pull/21032)
 
 {{#include ../../banners/hacktricks-training.md}}
-

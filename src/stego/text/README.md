@@ -18,7 +18,7 @@ Text stego frequently relies on characters that render identically (or invisibly
 
 - Homoglyphs: different Unicode codepoints that look the same (Latin `a` vs Cyrillic `а`)
 - Zero-width characters: joiners, non-joiners, zero-width spaces
-- Whitespace encodings: spaces vs tabs, trailing spaces, line-length patterns
+- Whitespace encodings: spaces vs tabs, trailing spaces, line-length patterns<sup>[[1]](#references)</sup>
 
 Additional high-signal cases:
 
@@ -53,7 +53,7 @@ If ranges contain multiple bytes per declaration, split on commas first and norm
 
 ## References
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}
 

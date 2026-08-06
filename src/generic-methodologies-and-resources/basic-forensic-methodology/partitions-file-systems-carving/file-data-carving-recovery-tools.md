@@ -10,7 +10,7 @@ More tools in [https://github.com/Claudio-C/awesome-datarecovery](https://github
 
 The most common tool used in forensics to extract files from images is [**Autopsy**](https://www.autopsy.com/download/). Download it, install it and make it ingest the file to find "hidden" files. Note that Autopsy is built to support disk images and other kinds of images, but not simple files.
 
-> **2024-2025 update** – Version **4.21** (released February 2025) added a rebuilt **carving module based on SleuthKit v4.13** that is noticeably quicker when dealing with multi-terabyte images and supports parallel extraction on multi-core systems.¹  A small CLI wrapper (`autopsycli ingest <case> <image>`) was also introduced, making it possible to script carving inside CI/CD or large-scale lab environments.
+> **2024-2025 update** – Version **4.21** (released February 2025) added a rebuilt **carving module based on SleuthKit v4.13** that is noticeably quicker when dealing with multi-terabyte images and supports parallel extraction on multi-core systems. A small CLI wrapper (`autopsycli ingest <case> <image>`) was also introduced, making it possible to script carving inside CI/CD or large-scale lab environments.<sup>[[1]](#references)</sup>
 
 ```bash
 # Create a case and ingest an evidence image from the CLI (Autopsy ≥4.21)
@@ -32,7 +32,7 @@ binwalk -e firmware.bin          # Extract recognised objects (safe-default)
 binwalk --dd " .* " firmware.bin  # Extract *everything* (use with care)
 ```
 
-⚠️  **Security note** – Versions **≤2.3.3** are affected by a **Path Traversal** vulnerability (CVE-2022-4510). Upgrade (or isolate with a container/non-privileged UID) before carving untrusted samples.
+⚠️  **Security note** – Versions **≤2.3.3** are affected by a **Path Traversal** vulnerability (CVE-2022-4510). Upgrade (or isolate with a container/non-privileged UID) before carving untrusted samples.<sup>[[2]](#references)</sup>
 
 ### Foremost
 
@@ -136,7 +136,7 @@ Download [here](https://sourceforge.net/projects/findaes/).
 
 ### YARA-X (triaging carved artefacts)
 
-[YARA-X](https://github.com/VirusTotal/yara-x) is a Rust rewrite of YARA released in 2024.  It is **10-30× faster** than classic YARA and can be used to classify thousands of carved objects very quickly:
+[YARA-X](https://github.com/VirusTotal/yara-x) is a Rust rewrite of YARA released in 2024.  It is **10-30× faster** than classic YARA and can be used to classify thousands of carved objects very quickly:<sup>[[3]](#references)</sup>
 
 ```bash
 # Scan every carved object produced by bulk_extractor
@@ -154,5 +154,8 @@ You can use the linux command line tool **pdftotext** to transform a pdf into te
 
 ## References
 
-1. Autopsy 4.21 release notes – <https://github.com/sleuthkit/autopsy/releases/tag/autopsy-4.21>
+- [1] [Autopsy 4.21 release notes](https://github.com/sleuthkit/autopsy/releases/tag/autopsy-4.21)
+- [2] [Path traversal in binwalk (CVE-2022-4510) - GitHub Advisory Database](https://github.com/advisories/GHSA-3cm8-v4mc-gppg)
+- [3] [YARA is dead, long live YARA-X - VirusTotal Blog](https://blog.virustotal.com/2024/05/yara-is-dead-long-live-yara-x.html)
+
 {{#include ../../../banners/hacktricks-training.md}}

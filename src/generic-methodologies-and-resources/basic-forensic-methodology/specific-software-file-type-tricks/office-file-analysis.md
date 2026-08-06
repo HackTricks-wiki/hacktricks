@@ -3,7 +3,7 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-For further information check [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). This is just a sumary:
+For further information check [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). This is just a sumary:<sup>[[4]](#references)</sup>
 
 Microsoft has created many office document formats, with two main types being **OLE formats** (like RTF, DOC, XLS, PPT) and **Office Open XML (OOXML) formats** (such as DOCX, XLSX, PPTX). These formats can include macros, making them targets for phishing and malware. OOXML files are structured as zip containers, allowing inspection through unzipping, revealing the file and folder hierarchy and XML file contents.
 
@@ -22,7 +22,7 @@ olevba -c /path/to/document #Extract macros
 
 ## OLE Compound File exploitation: Autodesk Revit RFA – ECC recomputation and controlled gzip
 
-Revit RFA models are stored as an [OLE Compound File](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation) (aka CFBF). The serialized model is under storage/stream:
+Revit RFA models are stored as an [OLE Compound File](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation) (aka CFBF). The serialized model is under storage/stream:<sup>[[1]](#references)</sup>
 
 - Storage: `Global`
 - Stream: `Latest` → `Global\Latest`
@@ -39,7 +39,7 @@ Revit will auto-repair small perturbations to the stream using the ECC trailer a
 - Recompress with a Revit-compatible gzip implementation (so the compressed bytes Revit produces/accepts match what it expects).
 - Recompute the ECC trailer over the padded stream so Revit will accept the modified stream without auto-repairing it.
 
-Practical workflow for patching/fuzzing RFA contents:
+Practical workflow for patching/fuzzing RFA contents:<sup>[[1]](#references)</sup>
 
 1) Expand the OLE compound document
 
@@ -62,12 +62,12 @@ CompoundFileTool /e model.rfa /o rfa_out
 CompoundFileTool /c rfa_out /o model_patched.rfa
 ```
 
-Notes:
+Notes:<sup>[[1]](#references)</sup>
 
 - CompoundFileTool writes storages/streams to the filesystem with escaping for characters invalid in NTFS names; the stream path you want is exactly `Global/Latest` in the output tree.
 - When delivering mass attacks via ecosystem plugins that fetch RFAs from cloud storage, ensure your patched RFA passes Revit’s integrity checks locally first (gzip/ECC correct) before attempting network injection.
 
-Exploitation insight (to guide what bytes to place in the gzip payload):
+Exploitation insight (to guide what bytes to place in the gzip payload):<sup>[[1]](#references)</sup>
 
 - The Revit deserializer reads a 16-bit class index and constructs an object. Certain types are non‑polymorphic and lack vtables; abusing destructor handling yields a type confusion where the engine executes an indirect call through an attacker-controlled pointer.
 - Picking `AString` (class index `0x1F`) places an attacker-controlled heap pointer at object offset 0. During the destructor loop, Revit effectively executes:
@@ -92,7 +92,7 @@ and general ROP guidance here:
 ../../../binary-exploitation/rop-return-oriented-programing/README.md
 {{#endref}}
 
-Tooling:
+Tooling:<sup>[[1]](#references)</sup>
 
 - CompoundFileTool (OSS) to expand/rebuild OLE compound files: https://github.com/thezdi/CompoundFileTool
 - IDA Pro + WinDBG TTD for reverse/taint; disable page heap with TTD to keep traces compact.
@@ -100,8 +100,9 @@ Tooling:
 
 ## References
 
-- [Crafting a Full Exploit RCE from a Crash in Autodesk Revit RFA File Parsing (ZDI blog)](https://www.thezdi.com/blog/2025/10/6/crafting-a-full-exploit-rce-from-a-crash-in-autodesk-revit-rfa-file-parsing)
-- [CompoundFileTool (GitHub)](https://github.com/thezdi/CompoundFileTool)
-- [OLE Compound File (CFBF) docs](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation)
+- [1] [Crafting a Full Exploit RCE from a Crash in Autodesk Revit RFA File Parsing (ZDI blog)](https://www.thezdi.com/blog/2025/10/6/crafting-a-full-exploit-rce-from-a-crash-in-autodesk-revit-rfa-file-parsing)
+- [2] [CompoundFileTool (GitHub)](https://github.com/thezdi/CompoundFileTool)
+- [3] [OLE Compound File (CFBF) docs](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation)
+- [4] [Forensics CTF Field Guide](https://trailofbits.github.io/ctf/forensics/)
 
 {{#include ../../../banners/hacktricks-training.md}}

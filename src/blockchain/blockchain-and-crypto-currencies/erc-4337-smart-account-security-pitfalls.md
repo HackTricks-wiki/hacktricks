@@ -5,7 +5,7 @@
 ERC-4337 account abstraction turns wallets into programmable systems. The core flow is **validate-then-execute** across a whole bundle: the `EntryPoint` validates every `UserOperation` before executing any of them. This ordering creates non-obvious attack surface when validation is permissive, stateful, or inconsistent with bundler simulation rules.
 
 ## 1) Direct-call bypass of privileged functions
-Any externally callable `execute` (or fund-moving) function that is not restricted to `EntryPoint` (or a vetted executor module) can be called directly to drain the account.
+Any externally callable `execute` (or fund-moving) function that is not restricted to `EntryPoint` (or a vetted executor module) can be called directly to drain the account.<sup>[[1]](#references)</sup>
 
 ```solidity
 function execute(address target, uint256 value, bytes calldata data) external {
@@ -27,7 +27,7 @@ function execute(address target, uint256 value, bytes calldata data) external {
 ```
 
 ## 2) Unsigned or unchecked gas fields -> fee drain
-If signature validation only covers intent (`callData`) but not gas-related fields, a bundler or frontrunner can inflate fees and drain ETH. The signed payload must bind at least:
+If signature validation only covers intent (`callData`) but not gas-related fields, a bundler or frontrunner can inflate fees and drain ETH. The signed payload must bind at least:<sup>[[1]](#references)</sup>
 
 - `preVerificationGas`
 - `verificationGasLimit`
@@ -35,7 +35,7 @@ If signature validation only covers intent (`callData`) but not gas-related fiel
 - `maxFeePerGas`
 - `maxPriorityFeePerGas`
 
-Defensive pattern: use the `EntryPoint`-provided `userOpHash` (which includes gas fields) and/or strictly cap each field.
+Defensive pattern: use the `EntryPoint`-provided `userOpHash` (which includes gas fields) and/or strictly cap each field.<sup>[[1]](#references)</sup>
 
 ```solidity
 function validateUserOp(UserOperation calldata op, bytes32 userOpHash, uint256)
@@ -48,22 +48,22 @@ function validateUserOp(UserOperation calldata op, bytes32 userOpHash, uint256)
 ```
 
 ## 3) Stateful validation clobbering (bundle semantics)
-Because all validations run before any execution, storing validation results in contract state is unsafe. Another op in the same bundle can overwrite it, causing your execution to use attacker-influenced state.
+Because all validations run before any execution, storing validation results in contract state is unsafe. Another op in the same bundle can overwrite it, causing your execution to use attacker-influenced state.<sup>[[1]](#references)</sup>
 
-Avoid writing storage in `validateUserOp`. If unavoidable, key temporary data by `userOpHash` and delete it deterministically after use (prefer stateless validation).
+Avoid writing storage in `validateUserOp`. If unavoidable, key temporary data by `userOpHash` and delete it deterministically after use (prefer stateless validation).<sup>[[1]](#references)</sup>
 
 ## 4) ERC-1271 replay across accounts/chains (missing domain separation)
-`isValidSignature(bytes32 hash, bytes sig)` must bind signatures to **this contract** and **this chain**. Recovering over a raw hash lets signatures replay across accounts or chains.
+`isValidSignature(bytes32 hash, bytes sig)` must bind signatures to **this contract** and **this chain**. Recovering over a raw hash lets signatures replay across accounts or chains.<sup>[[1]](#references)</sup>
 
-Use EIP-712 typed data (domain includes `verifyingContract` and `chainId`) and return the exact ERC-1271 magic value `0x1626ba7e` on success.
+Use EIP-712 typed data (domain includes `verifyingContract` and `chainId`) and return the exact ERC-1271 magic value `0x1626ba7e` on success.<sup>[[1]](#references)</sup>
 
 ## 5) Reverts do not refund after validation
-Once `validateUserOp` succeeds, fees are committed even if execution later reverts. Attackers can repeatedly submit ops that will fail and still collect fees from the account.
+Once `validateUserOp` succeeds, fees are committed even if execution later reverts. Attackers can repeatedly submit ops that will fail and still collect fees from the account.<sup>[[1]](#references)</sup>
 
-For paymasters, paying from a shared pool in `validateUserOp` and charging users in `postOp` is fragile because `postOp` can revert without undoing the payment. Secure funds during validation (per-user escrow/deposit), keep `postOp` minimal and non-reverting, and budget `paymasterPostOpGasLimit` for the worst-case reimbursement path.
+For paymasters, paying from a shared pool in `validateUserOp` and charging users in `postOp` is fragile because `postOp` can revert without undoing the payment. Secure funds during validation (per-user escrow/deposit), keep `postOp` minimal and non-reverting, and budget `paymasterPostOpGasLimit` for the worst-case reimbursement path.<sup>[[1]](#references)</sup>
 
 ## 6) Counterfactual deployment / factory assumptions
-The first `UserOperation` often carries `initCode`, which causes the account to be deployed through a **factory** during validation. This path is easy to under-audit because it only runs on first use.
+The first `UserOperation` often carries `initCode`, which causes the account to be deployed through a **factory** during validation. This path is easy to under-audit because it only runs on first use.<sup>[[2]](#references)</sup>
 
 Common failures:
 
@@ -71,7 +71,7 @@ Common failures:
 - The salt, owner, validator, or module configuration is not fully bound to signed intent, so a frontrunner can race the first deployment and burn the counterfactual address with attacker-controlled settings.
 - The factory is non-idempotent, so a repeated first-use flow bricks the wallet instead of returning the already-created address.
 
-Safe pattern: recompute the expected sender from signed deployment parameters, make deployment deterministic (typically `CREATE2`), and make initialization one-shot.
+Safe pattern: recompute the expected sender from signed deployment parameters, make deployment deterministic (typically `CREATE2`), and make initialization one-shot.<sup>[[2]](#references)</sup>
 
 ```solidity
 bytes32 salt = keccak256(abi.encode(owner, validator, saltNonce));
@@ -106,9 +106,9 @@ function validateUserOp(UserOperation calldata op, bytes32 userOpHash, uint256)
 Treat validation as a deterministic, bounded preflight function. If you truly need shared state or external lookups, push that complexity into staked/reputation-tracked entities and test the exact bundler simulation path, not just unit tests.
 
 ## 8) ERC-7702 initialization frontrun
-ERC-7702 lets an EOA run smart-account code for a single tx. If initialization is externally callable, a frontrunner can set themselves as owner.
+ERC-7702 lets an EOA run smart-account code for a single tx. If initialization is externally callable, a frontrunner can set themselves as owner.<sup>[[1]](#references)</sup>
 
-Mitigation: allow initialization only on **self-call** and only once.
+Mitigation: allow initialization only on **self-call** and only once.<sup>[[1]](#references)</sup>
 
 ```solidity
 function initialize(address newOwner) external {
@@ -132,6 +132,7 @@ function initialize(address newOwner) external {
 
 ## References
 
-- [https://blog.trailofbits.com/2026/03/11/six-mistakes-in-erc-4337-smart-accounts/](https://blog.trailofbits.com/2026/03/11/six-mistakes-in-erc-4337-smart-accounts/)
-- [https://eips.ethereum.org/EIPS/eip-4337](https://eips.ethereum.org/EIPS/eip-4337)
+- [1] [Six mistakes in ERC-4337 smart accounts (Trail of Bits)](https://blog.trailofbits.com/2026/03/11/six-mistakes-in-erc-4337-smart-accounts/)
+- [2] [ERC-4337: Account Abstraction Using Alt Mempool](https://eips.ethereum.org/EIPS/eip-4337)
+
 {{#include ../../banners/hacktricks-training.md}}

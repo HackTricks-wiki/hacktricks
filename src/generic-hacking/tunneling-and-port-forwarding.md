@@ -544,7 +544,7 @@ Proxychains intercepts `gethostbyname` libc call and tunnels tcp DNS request thr
 
 ### Custom DNS TXT / HTTP JSON C2 (AK47C2)
 
-The Storm-2603 actor created a **dual-channel C2 ("AK47C2")** that abuses *only* outbound **DNS** and **plain HTTP POST** traffic – two protocols that are rarely blocked on corporate networks.
+The Storm-2603 actor created a **dual-channel C2 ("AK47C2")** that abuses *only* outbound **DNS** and **plain HTTP POST** traffic – two protocols that are rarely blocked on corporate networks.<sup>[[2]](#references)</sup>
 
 1. **DNS mode (AK47DNS)**
    • Generates a random 5-character SessionID (e.g. `H4T14`).  
@@ -762,7 +762,7 @@ The above command publishes the victim’s port **8080** as **attacker_ip:9000**
 
 ## Covert VM-based Tunnels with QEMU
 
-QEMU’s user-mode networking (`-netdev user`) supports an option called `hostfwd` that **binds a TCP/UDP port on the *host* and forwards it into the *guest***.  When the guest runs a full SSH daemon, the hostfwd rule gives you a disposable SSH jump box that lives entirely inside an ephemeral VM – perfect for hiding C2 traffic from EDR because all malicious activity and files stay in the virtual disk.
+QEMU’s user-mode networking (`-netdev user`) supports an option called `hostfwd` that **binds a TCP/UDP port on the *host* and forwards it into the *guest***.  When the guest runs a full SSH daemon, the hostfwd rule gives you a disposable SSH jump box that lives entirely inside an ephemeral VM – perfect for hiding C2 traffic from EDR because all malicious activity and files stay in the virtual disk.<sup>[[1]](#references)</sup>
 
 ### Quick one-liner
 
@@ -818,7 +818,7 @@ Because Tiny Core is stateless, attackers usually:
 
 ## IIS/HTTP.sys relay nodes via `HttpAddUrl` (ShadowPad)
 
-Ink Dragon’s ShadowPad IIS module turns every compromised perimeter web server into a dual-purpose **backdoor + relay** by binding covert URL prefixes directly at the HTTP.sys layer:
+Ink Dragon’s ShadowPad IIS module turns every compromised perimeter web server into a dual-purpose **backdoor + relay** by binding covert URL prefixes directly at the HTTP.sys layer:<sup>[[3]](#references)</sup>
 
 * **Config defaults** – if the module’s JSON config omits values, it falls back to believable IIS defaults (`Server: Microsoft-IIS/10.0`, `DocumentRoot: C:\inetpub\wwwroot`, `ErrorPage: C:\inetpub\custerr\en-US\404.htm`). That way benign traffic is answered by IIS with the correct branding.
 * **Wildcard interception** – operators supply a semicolon-separated list of URL prefixes (wildcards in host + path). The module calls `HttpAddUrl` for each entry, so HTTP.sys routes matching requests to the malicious handler *before* the request reaches IIS modules.
@@ -848,10 +848,8 @@ Ink Dragon’s ShadowPad IIS module turns every compromised perimeter web server
 
 ## References
 
-- [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
-- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
-- [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [1] [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [2] [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
+- [3] [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 
 {{#include ../banners/hacktricks-training.md}}
-
-

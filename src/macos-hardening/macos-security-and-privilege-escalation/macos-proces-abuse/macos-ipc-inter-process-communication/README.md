@@ -18,7 +18,7 @@ A process can also send a port name with some rights **to a different task** and
 
 ### Port Rights
 
-Port rights, which define what operations a task can perform, are key to this communication. The possible **port rights** are ([definitions from here](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
+Port rights, which define what operations a task can perform, are key to this communication. The possible **port rights** are ([definitions from here](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):<sup>[[1]](#references)</sup>
 
 - **Receive right**, which allows receiving messages sent to the port. Mach ports are MPSC (multiple-producer, single-consumer) queues, which means that there may only ever be **one receive right for each port** in the whole system (unlike with pipes, where multiple processes can all hold file descriptors to the read end of one pipe).
   - A **task with the Receive** right can receive messages and **create Send rights**, allowing it to send messages. Originally only the **own task has Receive right over its por**t.
@@ -72,7 +72,7 @@ However, this process only applies to predefined system tasks. Non-system tasks 
 
 ### A Mach Message
 
-[Find more info here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
+[Find more info here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)<sup>[[4]](#references)</sup>
 
 The `mach_msg` function, essentially a system call, is utilized for sending and receiving Mach messages. The function requires the message to be sent as the initial argument. This message must commence with a `mach_msg_header_t` structure, succeeded by the actual message content. The structure is defined as follows:
 
@@ -295,7 +295,7 @@ You can install this tool in iOS downloading it from [http://newosxbook.com/tool
 
 ### Code example
 
-Note how the **sender** **allocates** a port, create a **send right** for the name `org.darlinghq.example` and send it to the **bootstrap server** while the sender asked for the **send right** of that name and used it to **send a message**.
+Note how the **sender** **allocates** a port, create a **send right** for the name `org.darlinghq.example` and send it to the **bootstrap server** while the sender asked for the **send right** of that name and used it to **send a message**.<sup>[[1]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="receiver.c"}}
@@ -475,7 +475,7 @@ typedef	int	task_special_port_t;
 #define TASK_PAGED_LEDGER_PORT	6	/* Paged resource ledger for task. */
 ```
 
-From [here](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html):
+From [here](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html):<sup>[[9]](#references)</sup>
 
 - **TASK_KERNEL_PORT**\[task-self send right]: The port used to control this task. Used to send messages that affect the task. This is the port returned by **mach_task_self (see Task Ports below)**.
 - **TASK_BOOTSTRAP_PORT**\[bootstrap send right]: The task's bootstrap port. Used to send messages requesting return of other system service ports.
@@ -589,7 +589,7 @@ processIdentifier]);
 {{#endtab}}
 {{#endtabs}}
 
-**Compile** the previous program and add the **entitlements** to be able to inject code with the same user (if not you will need to use **sudo**).
+**Compile** the previous program and add the **entitlements** to be able to inject code with the same user (if not you will need to use **sudo**).<sup>[[3]](#references)</sup>
 
 <details>
 
@@ -811,7 +811,7 @@ In macOS **threads** might be manipulated via **Mach** or using **posix `pthread
 
 It was possible to **inject a simple shellcode** to execute a command because it **didn't need to work with posix** compliant apis, only with Mach. **More complex injections** would need the **thread** to be also **posix compliant**.
 
-Therefore, to **improve the thread** it should call **`pthread_create_from_mach_thread`** which will **create a valid pthread**. Then, this new pthread could **call dlopen** to **load a dylib** from the system, so instead of writing new shellcode to perform different actions it's possible to load custom libraries.
+Therefore, to **improve the thread** it should call **`pthread_create_from_mach_thread`** which will **create a valid pthread**. Then, this new pthread could **call dlopen** to **load a dylib** from the system, so instead of writing new shellcode to perform different actions it's possible to load custom libraries.<sup>[[2]](#references)</sup>
 
 You can find **example dylibs** in (for example the one that generates a log and then you can listen to it):
 
@@ -1144,7 +1144,7 @@ These are some interesting APIs to interact with the processor set:
 - `processor_set_info`
 
 As mentioned in [**this post**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/), in the past this allowed to bypass the previously mentioned protection to get task ports in other processes to control them by calling **`processor_set_tasks`** and getting a host port on every process.\
-Nowadays you need root to use that function and this is protected so you will only be able to get these ports on unprotected processes.
+Nowadays you need root to use that function and this is protected so you will only be able to get these ports on unprotected processes.<sup>[[11]](#references)</sup>
 
 You can try it with:
 
@@ -1281,7 +1281,7 @@ macos-mig-mach-interface-generator.md
 
 ## MIG handler type confusion -> fake vtable pointer-chain hijack
 
-If a MIG handler **retrieves a C++ object by Mach message-supplied ID** (e.g., from an internal Object Map) and then **assumes a specific concrete type without validating the real dynamic type**, later virtual calls can dispatch through attacker-controlled pointers. In `coreaudiod`’s `com.apple.audio.audiohald` service (CVE-2024-54529), `_XIOContext_Fetch_Workgroup_Port` used the looked-up `HALS_Object` as an `ioct` and executed a vtable call via:
+If a MIG handler **retrieves a C++ object by Mach message-supplied ID** (e.g., from an internal Object Map) and then **assumes a specific concrete type without validating the real dynamic type**, later virtual calls can dispatch through attacker-controlled pointers. In `coreaudiod`’s `com.apple.audio.audiohald` service (CVE-2024-54529), `_XIOContext_Fetch_Workgroup_Port` used the looked-up `HALS_Object` as an `ioct` and executed a vtable call via:<sup>[[10]](#references)</sup>
 
 ```asm
 mov rax, qword ptr [rdi]
@@ -1311,13 +1311,18 @@ HALS_Object + 0x68  -> controlled_object
 
 ## References
 
-- [https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)
-- [https://knight.sc/malware/2019/03/15/code-injection-on-macos.html](https://knight.sc/malware/2019/03/15/code-injection-on-macos.html)
-- [https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a](https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a)
-- [https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
-- [*OS Internals, Volume I, User Mode, Jonathan Levin](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
-- [https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html)
-- [Project Zero – Sound Barrier 2](https://projectzero.google/2026/01/sound-barrier-2.html)
+- [1] [Mach Ports – Darling Docs](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)
+- [2] [Code injection on macOS – knight.sc](https://knight.sc/malware/2019/03/15/code-injection-on-macos.html)
+- [3] [knightsc/inject.c – dlopen dylib injection into a remote Mach task (Gist)](https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a)
+- [4] [Don't talk all at once: Elevating privileges on macOS by audit token spoofing – Sector 7](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
+- [5] [XNU — `osfmk/mach/message.h` (Mach message structures and flags)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
+- [6] [XNU — `osfmk/ipc/ipc_port.h` (port rights and internals)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/ipc/ipc_port.h)
+- [7] [XNU — `osfmk/mach/mach_port.defs` (port manipulation MIG interface)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
+- [8] [XNU — `osfmk/mach/task.defs` (`task_for_pid`, thread/task port operations)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
+- [9] [task_get_special_port – MIT Darwin XNU manual](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html)
+- [10] [Project Zero – Sound Barrier 2](https://projectzero.google/2026/01/sound-barrier-2.html)
+- [11] [About the processor_set_tasks() access to kernel memory vulnerability – reverse.put.as](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/)
+
 {{#include ../../../../banners/hacktricks-training.md}}
 
 

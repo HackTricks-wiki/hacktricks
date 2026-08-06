@@ -85,7 +85,7 @@ Do this because you **can't save macro's inside a `.docx`** and there's a **stig
 
 ## LibreOffice ODT auto-run macros (Basic)
 
-LibreOffice Writer documents can embed Basic macros and auto-execute them when the file is opened by binding the macro to the **Open Document** event (Tools → Customize → Events → Open Document → Macro…). A simple reverse shell macro looks like:
+LibreOffice Writer documents can embed Basic macros and auto-execute them when the file is opened by binding the macro to the **Open Document** event (Tools → Customize → Events → Open Document → Macro…).<sup>[[1]](#references)</sup> A simple reverse shell macro looks like:
 
 ```vb
 Sub Shell
@@ -186,7 +186,7 @@ Don't forget that you cannot only steal the hash or the authentication but also 
 
 ## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
 
-Highly effective campaigns deliver a ZIP that contains two legitimate decoy documents (PDF/DOCX) and a malicious .lnk. The trick is that the actual PowerShell loader is stored inside the ZIP’s raw bytes after a unique marker, and the .lnk carves and runs it fully in memory.
+Highly effective campaigns deliver a ZIP that contains two legitimate decoy documents (PDF/DOCX) and a malicious .lnk. The trick is that the actual PowerShell loader is stored inside the ZIP’s raw bytes after a unique marker, and the .lnk carves and runs it fully in memory.<sup>[[2]](#references)</sup>
 
 Typical flow implemented by the .lnk PowerShell one-liner:
 
@@ -220,7 +220,7 @@ Notes
 - The next stage frequently decrypts base64/XOR shellcode and executes it via Reflection.Emit + VirtualAlloc to minimize disk artifacts.
 
 Persistence used in the same chain
-- COM TypeLib hijacking of the Microsoft Web Browser control so that IE/Explorer or any app embedding it re-launches the payload automatically. See details and ready-to-use commands here:
+- COM TypeLib hijacking of the Microsoft Web Browser control so that IE/Explorer or any app embedding it re-launches the payload automatically.<sup>[[2]](#references)[[4]](#references)</sup> See details and ready-to-use commands here:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
@@ -234,7 +234,7 @@ Hunting/IOCs
 
 ## LNK decoy-first staging → scheduled-task persistence → trusted CPL side-loading
 
-Another recurring pattern is a **document-impersonating `.lnk`** that immediately opens a benign lure while it stages the real chain in the background.
+Another recurring pattern is a **document-impersonating `.lnk`** that immediately opens a benign lure while it stages the real chain in the background.<sup>[[3]](#references)</sup>
 
 Observed workflow:
 1. The shortcut **masquerades as a PDF** and uses `conhost.exe` or a similar proxy to spawn an obfuscated PowerShell downloader.
@@ -289,12 +289,12 @@ Practical hunting pivots:
 
 ## Steganography-delimited payloads in images (PowerShell stager)
 
-Recent loader chains deliver an obfuscated JavaScript/VBS that decodes and runs a Base64 PowerShell stager. That stager downloads an image (often GIF) that contains a Base64-encoded .NET DLL hidden as plain text between unique start/end markers. The script searches for these delimiters (examples seen in the wild: «<<sudo_png>> … <<sudo_odt>>>»), extracts the between-text, Base64-decodes it to bytes, loads the assembly in-memory and invokes a known entry method with the C2 URL.
+Recent loader chains deliver an obfuscated JavaScript/VBS that decodes and runs a Base64 PowerShell stager. That stager downloads an image (often GIF) that contains a Base64-encoded .NET DLL hidden as plain text between unique start/end markers. The script searches for these delimiters (examples seen in the wild: «<<sudo_png>> … <<sudo_odt>>>»), extracts the between-text, Base64-decodes it to bytes, loads the assembly in-memory and invokes a known entry method with the C2 URL.<sup>[[5]](#references)</sup>
 
 Workflow
 - Stage 1: Archived JS/VBS dropper → decodes embedded Base64 → launches PowerShell stager with -nop -w hidden -ep bypass.
 - Stage 2: PowerShell stager → downloads image, carves marker-delimited Base64, loads the .NET DLL in-memory and calls its method (e.g., VAI) passing the C2 URL and options.
-- Stage 3: Loader retrieves final payload and typically injects it via process hollowing into a trusted binary (commonly MSBuild.exe). See more about process hollowing and trusted utility proxy execution here:
+- Stage 3: Loader retrieves final payload and typically injects it via process hollowing into a trusted binary (commonly MSBuild.exe).<sup>[[7]](#references)[[8]](#references)</sup> See more about process hollowing and trusted utility proxy execution here:
 
 {{#ref}}
 ../../reversing/common-api-used-in-malware.md
@@ -330,7 +330,7 @@ $null = $method.Invoke($null, @($C2, $env:PROCESSOR_ARCHITECTURE))
 </details>
 
 Notes
-- This is ATT&CK T1027.003 (steganography/marker-hiding). Markers vary between campaigns.
+- This is ATT&CK T1027.003 (steganography/marker-hiding).<sup>[[6]](#references)</sup> Markers vary between campaigns.
 - AMSI/ETW bypass and string deobfuscation are commonly applied before loading the assembly.
 - Hunting: scan downloaded images for known delimiters; identify PowerShell accessing images and immediately decoding Base64 blobs.
 
@@ -365,13 +365,13 @@ Check the page about **places to steal NTLM creds**:
 
 ## References
 
-- [HTB Job – LibreOffice macro → IIS webshell → GodPotato](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
-- [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
-- [Rapid7 – Malware à la Mode: Tracking Dropping Elephant Tradecraft Through a China-Themed Loader Chain](https://www.rapid7.com/blog/post/tr-malware-tracking-dropping-elephant-tradecraft-china-themed-loader-chain)
-- [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
-- [Unit 42 – PhantomVAI Loader Delivers a Range of Infostealers](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
-- [MITRE ATT&CK – Steganography (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
-- [MITRE ATT&CK – Process Hollowing (T1055.012)](https://attack.mitre.org/techniques/T1055/012/)
-- [MITRE ATT&CK – Trusted Developer Utilities Proxy Execution: MSBuild (T1127.001)](https://attack.mitre.org/techniques/T1127/001/)
+- [1] [HTB Job – LibreOffice macro → IIS webshell → GodPotato](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
+- [2] [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
+- [3] [Rapid7 – Malware à la Mode: Tracking Dropping Elephant Tradecraft Through a China-Themed Loader Chain](https://www.rapid7.com/blog/post/tr-malware-tracking-dropping-elephant-tradecraft-china-themed-loader-chain)
+- [4] [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
+- [5] [Unit 42 – PhantomVAI Loader Delivers a Range of Infostealers](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
+- [6] [MITRE ATT&CK – Steganography (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
+- [7] [MITRE ATT&CK – Process Hollowing (T1055.012)](https://attack.mitre.org/techniques/T1055/012/)
+- [8] [MITRE ATT&CK – Trusted Developer Utilities Proxy Execution: MSBuild (T1127.001)](https://attack.mitre.org/techniques/T1127/001/)
 
 {{#include ../../banners/hacktricks-training.md}}

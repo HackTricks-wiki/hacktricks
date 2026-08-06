@@ -2,13 +2,13 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-This page documents practical techniques to recover text from web readers that ship positioned glyph runs plus per-request vector glyph definitions (SVG paths), and that randomize glyph IDs per request to prevent scraping. The core idea is to ignore request-scoped numeric glyph IDs and fingerprint the visual shapes via raster hashing, then map shapes to characters with SSIM against a reference font atlas. The workflow generalizes beyond Kindle Cloud Reader to any viewer with similar protections.
+This page documents practical techniques to recover text from web readers that ship positioned glyph runs plus per-request vector glyph definitions (SVG paths), and that randomize glyph IDs per request to prevent scraping. The core idea is to ignore request-scoped numeric glyph IDs and fingerprint the visual shapes via raster hashing, then map shapes to characters with SSIM against a reference font atlas. The workflow generalizes beyond Kindle Cloud Reader to any viewer with similar protections.<sup>[[1]](#references)</sup>
 
 Warning: Only use these techniques to back up content you legitimately own and in compliance with applicable laws and terms.
 
 ## Acquisition (example: Kindle Cloud Reader)
 
-Endpoint observed:
+Endpoint observed:<sup>[[1]](#references)</sup>
 - [https://read.amazon.com/renderer/render](https://read.amazon.com/renderer/render)
 
 Required materials per session:
@@ -52,18 +52,18 @@ Notes on anti-scraping path tricks:
 
 ## Why naïve decoding fails
 
-- Per-request randomized glyph substitution: glyph ID→character mapping changes every batch; IDs are meaningless globally.
+- Per-request randomized glyph substitution: glyph ID→character mapping changes every batch; IDs are meaningless globally.<sup>[[1]](#references)</sup>
 - Direct SVG coordinate comparison is brittle: identical shapes may differ in numeric coordinates or command encoding per request.
 - OCR on isolated glyphs performs poorly (≈50%), confuses punctuation and look-alike glyphs, and ignores ligatures.
 
 ## Working pipeline: request-agnostic glyph normalization and mapping
 
 1) Rasterize per-request SVG glyphs
-- Build a minimal SVG document per glyph with the provided `path` and render to a fixed canvas (e.g., 512×512) using CairoSVG or an equivalent engine that handles tricky path sequences.
+- Build a minimal SVG document per glyph with the provided `path` and render to a fixed canvas (e.g., 512×512) using CairoSVG or an equivalent engine that handles tricky path sequences.<sup>[[1]](#references)[[2]](#references)</sup>
 - Render filled black on white; avoid strokes to eliminate renderer- and AA-dependent artifacts.
 
 2) Perceptual hashing for cross-request identity
-- Compute a perceptual hash (e.g., pHash via `imagehash.phash`) of each glyph image.
+- Compute a perceptual hash (e.g., pHash via `imagehash.phash`) of each glyph image.<sup>[[3]](#references)</sup>
 - Treat the hash as a stable ID: the same visual shape across requests collapses to the same perceptual hash, defeating randomized IDs.
 
 3) Reference font atlas generation
@@ -73,7 +73,7 @@ Notes on anti-scraping path tricks:
 - Use a proper text shaper (HarfBuzz) if you want glyph-level fidelity for ligatures; simple rasterization via Pillow ImageFont can be sufficient if you render the ligature strings directly and the shaping engine resolves them.
 
 4) Visual similarity matching with SSIM
-- For each unknown glyph image, compute SSIM (Structural Similarity Index) against all candidate images across all font variant atlases.
+- For each unknown glyph image, compute SSIM (Structural Similarity Index) against all candidate images across all font variant atlases.<sup>[[4]](#references)</sup>
 - Assign the character string of the best-scoring match. SSIM absorbs small antialiasing, scale, and coordinate differences better than pixel-exact comparisons.
 
 5) Edge handling and reconstruction
@@ -228,26 +228,26 @@ def process_tar(tar_path: str, cache: dict, atlases) -> list[dict]:
 
 ## Layout/EPUB reconstruction heuristics
 
-- Paragraph breaks: If the next run’s top Y exceeds the previous line’s baseline by a threshold (relative to font size), start a new paragraph.
+- Paragraph breaks: If the next run’s top Y exceeds the previous line’s baseline by a threshold (relative to font size), start a new paragraph.<sup>[[1]](#references)</sup>
 - Alignment: Group by similar left X for left-aligned paragraphs; detect centered lines by symmetric margins; detect right-aligned by right edges.
 - Styling: Preserve italic/bold via `fontStyle`/`fontWeight`; vary CSS classes by `fontSize` buckets to approximate headings vs body.
 - Links: If runs include link metadata (e.g., `positionId`), emit anchors and internal hrefs.
 
 ## Mitigating SVG anti-scraping path tricks
 
-- Use filled paths with `fill-rule: nonzero` and a proper renderer (CairoSVG, resvg). Do not rely on path token normalization.
+- Use filled paths with `fill-rule: nonzero` and a proper renderer (CairoSVG, resvg). Do not rely on path token normalization.<sup>[[1]](#references)</sup>
 - Avoid stroke rendering; focus on filled solids to sidestep hairline artifacts caused by micro relative moves.
 - Keep a stable viewBox per render so that identical shapes rasterize consistently across batches.
 
 ## Performance notes
 
-- In practice, books converge to a few hundred unique glyphs (e.g., ~361 including ligatures). Cache SSIM results by perceptual hash.
+- In practice, books converge to a few hundred unique glyphs (e.g., ~361 including ligatures). Cache SSIM results by perceptual hash.<sup>[[1]](#references)</sup>
 - After initial discovery, future batches predominantly re-use known hashes; decoding becomes I/O-bound.
 - Average SSIM ≈0.95 is a strong signal; consider flagging low-scoring matches for manual review.
 
 ## Generalization to other viewers
 
-Any system that:
+Any system that:<sup>[[1]](#references)</sup>
 - Returns positioned glyph runs with request-scoped numeric IDs
 - Ships per-request vector glyphs (SVG paths or subset fonts)
 - Caps pages per request to prevent bulk export
@@ -260,7 +260,7 @@ Any system that:
 
 ## Minimal acquisition example (sketch)
 
-Use your browser’s DevTools to capture the exact headers, cookies and tokens used by the reader when requesting `/renderer/render`. Then replicate those from a script or curl. Example outline:
+Use your browser’s DevTools to capture the exact headers, cookies and tokens used by the reader when requesting `/renderer/render`. Then replicate those from a script or curl.<sup>[[1]](#references)</sup> Example outline:
 
 ```bash
 curl 'https://read.amazon.com/renderer/render' \
@@ -276,15 +276,15 @@ Adjust parameterization (book ASIN, page window, viewport) to match the reader�
 
 ## Results achievable
 
-- Collapse 100+ randomized alphabets to a single glyph space via perceptual hashing
+- Collapse 100+ randomized alphabets to a single glyph space via perceptual hashing<sup>[[1]](#references)</sup>
 - 100% mapping of unique glyphs with average SSIM ~0.95 when atlases include ligatures and variants
 - Reconstructed EPUB/HTML visually indistinguishable from the original
 
 ## References
 
-- [Kindle Web DRM: Breaking Randomized SVG Glyph Obfuscation with Raster Hashing + SSIM (Pixelmelt blog)](https://blog.pixelmelt.dev/kindle-web-drm/)
-- [CairoSVG – SVG to PNG renderer](https://cairosvg.org/)
-- [imagehash – Perceptual image hashing (pHash)](https://pypi.org/project/ImageHash/)
-- [scikit-image – Structural Similarity Index (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
+- [1] [Kindle Web DRM: Breaking Randomized SVG Glyph Obfuscation with Raster Hashing + SSIM (Pixelmelt blog)](https://blog.pixelmelt.dev/kindle-web-drm/)
+- [2] [CairoSVG – SVG to PNG renderer](https://cairosvg.org/)
+- [3] [imagehash – Perceptual image hashing (pHash)](https://pypi.org/project/ImageHash/)
+- [4] [scikit-image – Structural Similarity Index (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
 
 {{#include ../../../banners/hacktricks-training.md}}

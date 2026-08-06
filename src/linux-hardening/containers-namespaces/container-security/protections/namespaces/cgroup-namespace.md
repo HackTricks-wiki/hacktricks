@@ -12,7 +12,7 @@ This is mainly a visibility and information-reduction feature. It helps make the
 
 Without a private cgroup namespace, a process may see host-relative cgroup paths that expose more of the machine's hierarchy than is useful. With a private cgroup namespace, `/proc/self/cgroup` and related observations become more localized to the container's own view. This is particularly helpful in modern runtime stacks that want the workload to see a cleaner, less host-revealing environment.
 
-The virtualization also affects `/proc/<pid>/mountinfo`, not only `/proc/<pid>/cgroup`. When you read another process from a different cgroup-namespace perspective, paths outside your namespace root are shown with leading `../` components, which is a handy clue that you are looking above your delegated subtree. A useful nuance for labs and post-exploitation is that a freshly created cgroup namespace often needs a **cgroupfs remount from inside that namespace** before `mountinfo` reflects the new root cleanly. Otherwise you may still see a mount root such as `/..`, which means the inherited mount is still exposing an ancestor-rooted view even though the namespace itself already changed.
+The virtualization also affects `/proc/<pid>/mountinfo`, not only `/proc/<pid>/cgroup`. When you read another process from a different cgroup-namespace perspective, paths outside your namespace root are shown with leading `../` components, which is a handy clue that you are looking above your delegated subtree. A useful nuance for labs and post-exploitation is that a freshly created cgroup namespace often needs a **cgroupfs remount from inside that namespace** before `mountinfo` reflects the new root cleanly. Otherwise you may still see a mount root such as `/..`, which means the inherited mount is still exposing an ancestor-rooted view even though the namespace itself already changed.<sup>[[1]](#references)</sup>
 
 ## Lab
 
@@ -47,7 +47,7 @@ The change is mostly about what the process can see, not about whether cgroup en
 
 The cgroup namespace is best understood as a **visibility-hardening layer**. By itself it will not stop a breakout if the container has writable cgroup mounts, broad capabilities, or a dangerous cgroup v1 environment. However, if the host cgroup namespace is shared, the process learns more about how the system is organized and may find it easier to line up host-relative cgroup paths with other observations.
 
-On **cgroup v2**, the namespace starts to matter a bit more because delegation rules are tighter. If the hierarchy is mounted with `nsdelegate`, the kernel treats cgroup namespaces as delegation boundaries: ancestor control files are supposed to stay outside the delegatee's reach, and writes at the namespace root are restricted to delegation-safe files such as `cgroup.procs`, `cgroup.threads`, and `cgroup.subtree_control`. This still does not make the namespace an escape primitive by itself, but it changes what a compromised workload can inspect and where it can safely create sub-cgroups.
+On **cgroup v2**, the namespace starts to matter a bit more because delegation rules are tighter. If the hierarchy is mounted with `nsdelegate`, the kernel treats cgroup namespaces as delegation boundaries: ancestor control files are supposed to stay outside the delegatee's reach, and writes at the namespace root are restricted to delegation-safe files such as `cgroup.procs`, `cgroup.threads`, and `cgroup.subtree_control`.<sup>[[2]](#references)</sup> This still does not make the namespace an escape primitive by itself, but it changes what a compromised workload can inspect and where it can safely create sub-cgroups.
 
 So while this namespace is not usually the star of container breakout writeups, it still contributes to the broader goal of minimizing host information leakage and constraining cgroup delegation.
 
@@ -137,7 +137,7 @@ The cgroup namespace should be treated as a visibility-hardening layer rather th
 
 ## References
 
-- [Linux cgroup_namespaces(7)](https://man7.org/linux/man-pages/man7/cgroup_namespaces.7.html)
-- [Linux kernel cgroup v2 documentation](https://docs.kernel.org/admin-guide/cgroup-v2.html)
+- [1] [Linux cgroup_namespaces(7)](https://man7.org/linux/man-pages/man7/cgroup_namespaces.7.html)
+- [2] [Linux kernel cgroup v2 documentation](https://docs.kernel.org/admin-guide/cgroup-v2.html)
 
 {{#include ../../../../../banners/hacktricks-training.md}}

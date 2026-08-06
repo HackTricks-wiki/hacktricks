@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-**This page is based on one from [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Check the original for further info!
+**This page is based on one from [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Check the original for further info!<sup>[[3]](#references)</sup>
 
 ## LM and Clear-Text in memory
 
@@ -133,7 +133,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 ### Over-Pass-the-Hash / Pass-the-Key
 
-If `RC4` is disabled or unreliable, Mimikatz can patch **AES128/AES256 Kerberos keys** into the current logon session instead of only using an NT hash. This is usually a better fit for modern domains than treating `sekurlsa::pth` as NTLM-only.
+If `RC4` is disabled or unreliable, Mimikatz can patch **AES128/AES256 Kerberos keys** into the current logon session instead of only using an NT hash. This is usually a better fit for modern domains than treating `sekurlsa::pth` as NTLM-only.<sup>[[1]](#references)</sup>
 
 ```bash
 mimikatz "privilege::debug" "sekurlsa::ekeys" exit
@@ -179,7 +179,7 @@ mimikatz "sekurlsa::pth /user:administrator /domain:corp.local /ntlm:<NT_HASH> /
 
 ### Cloud credentials / Entra ID
 
-On **Entra ID** or **hybrid-joined** hosts, `sekurlsa::cloudap` can expose cached **Primary Refresh Token (PRT)** material from LSASS. If the associated Proof-of-Possession key is software-protected, `dpapi::cloudapkd` can derive the clear/derived key material needed for follow-on **Pass-the-PRT** workflows.
+On **Entra ID** or **hybrid-joined** hosts, `sekurlsa::cloudap` can expose cached **Primary Refresh Token (PRT)** material from LSASS. If the associated Proof-of-Possession key is software-protected, `dpapi::cloudapkd` can derive the clear/derived key material needed for follow-on **Pass-the-PRT** workflows.<sup>[[1]](#references)</sup>
 
 ```bash
 mimikatz "privilege::debug" "sekurlsa::cloudap" exit
@@ -187,7 +187,7 @@ mimikatz "dpapi::cloudapkd /keyvalue:<ProofOfPossessionKey> /unprotect" exit
 mimikatz "dpapi::cloudapkd /context:<CONTEXT> /derivedkey:<DERIVED_KEY> /prt:<PRT>" exit
 ```
 
-This becomes much harder when the key is TPM-backed, but it is worth checking on hybrid endpoints because the cached CloudAP data may be more interesting than classic `wdigest` output. For the cloud-side abuse chain, see [Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html).
+This becomes much harder when the key is TPM-backed, but it is worth checking on hybrid endpoints because the cached CloudAP data may be more interesting than classic `wdigest` output.<sup>[[2]](#references)</sup> For the cloud-side abuse chain, see [Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html).
 
 ### Miscellaneous
 
@@ -239,10 +239,8 @@ This becomes much harder when the key is TPM-backed, but it is worth checking on
 
 ## References
 
-- [The Hacker Tools – Mimikatz modules](https://tools.thehacker.recipes/mimikatz/modules/)
-- [Synacktiv – WHFB and Entra ID: Say Hello to your new cache flow](https://www.synacktiv.com/en/publications/whfb-and-entra-id-say-hello-to-your-new-cache-flow)
+- [1] [The Hacker Tools – Mimikatz modules](https://tools.thehacker.recipes/mimikatz/modules/)
+- [2] [Synacktiv – WHFB and Entra ID: Say Hello to your new cache flow](https://www.synacktiv.com/en/publications/whfb-and-entra-id-say-hello-to-your-new-cache-flow)
+- [3] [Mimikatz command reference](https://adsecurity.org/?page_id=1821)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

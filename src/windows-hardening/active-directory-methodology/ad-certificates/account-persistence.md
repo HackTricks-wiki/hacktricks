@@ -6,7 +6,7 @@
 
 ## Understanding Active User Credential Theft with Certificates – PERSIST1
 
-In a scenario where a certificate that allows domain authentication can be requested by a user, an attacker has the opportunity to request and steal this certificate to maintain persistence on a network. By default, the `User` template in Active Directory allows such requests, though it may sometimes be disabled.
+In a scenario where a certificate that allows domain authentication can be requested by a user, an attacker has the opportunity to request and steal this certificate to maintain persistence on a network. By default, the `User` template in Active Directory allows such requests, though it may sometimes be disabled.<sup>[[3]](#references)[[7]](#references)</sup>
 
 Using [Certify](https://github.com/GhostPack/Certify) or [Certipy](https://github.com/ly4k/Certipy), you can search for enabled templates that allow client authentication and then request one:
 
@@ -43,7 +43,7 @@ certipy auth -pfx user.pfx -dc-ip 10.0.0.10
 
 ## Gaining Machine Persistence with Certificates - PERSIST2
 
-If an attacker has elevated privileges on a host, they can enroll the compromised system’s machine account for a certificate using the default `Machine` template. Authenticating as the machine enables S4U2Self for local services and can provide durable host persistence:
+If an attacker has elevated privileges on a host, they can enroll the compromised system’s machine account for a certificate using the default `Machine` template. Authenticating as the machine enables S4U2Self for local services and can provide durable host persistence:<sup>[[3]](#references)[[7]](#references)</sup>
 
 ```bash
 # Request a machine certificate as SYSTEM
@@ -55,7 +55,7 @@ Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0
 
 ## Extending Persistence Through Certificate Renewal - PERSIST3
 
-Abusing the validity and renewal periods of certificate templates lets an attacker maintain long-term access. If you possess a previously issued certificate and its private key, you can renew it before expiration to obtain a fresh, long-lived credential without leaving additional request artifacts tied to the original principal.
+Abusing the validity and renewal periods of certificate templates lets an attacker maintain long-term access. If you possess a previously issued certificate and its private key, you can renew it before expiration to obtain a fresh, long-lived credential without leaving additional request artifacts tied to the original principal.<sup>[[3]](#references)[[7]](#references)</sup>
 
 ```bash
 # Renewal with Certipy (works with RPC/DCOM/WebEnrollment)
@@ -72,7 +72,7 @@ certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 
 ## Planting Explicit Certificate Mappings (altSecurityIdentities) – PERSIST4
 
-If you can write to a target account’s `altSecurityIdentities` attribute, you can explicitly map an attacker-controlled certificate to that account. This persists across password changes and, when using strong mapping formats, remains functional under modern DC enforcement.
+If you can write to a target account’s `altSecurityIdentities` attribute, you can explicitly map an attacker-controlled certificate to that account. This persists across password changes and, when using strong mapping formats, remains functional under modern DC enforcement.<sup>[[2]](#references)</sup>
 
 High-level flow:
 
@@ -104,7 +104,7 @@ certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10 -ldap-shell
 
 ### Building Strong `altSecurityIdentities` Mappings
 
-In practice, **Issuer+Serial** and **SKI** mappings are the easiest strong formats to build from an attacker-held certificate. This matters after **February 11, 2025**, when DCs default to **Full Enforcement** and weak mappings stop being reliable.
+In practice, **Issuer+Serial** and **SKI** mappings are the easiest strong formats to build from an attacker-held certificate. This matters after **February 11, 2025**, when DCs default to **Full Enforcement** and weak mappings stop being reliable.<sup>[[1]](#references)</sup>
 
 ```bash
 # Extract issuer, serial and SKI from a cert/PFX
@@ -127,7 +127,7 @@ Notes
 
 #### 2025+ `Issuer/SID` explicit mappings
 
-On **Windows Server 2022+** domain controllers patched with the **September 9, 2025** security update, Microsoft added another strong explicit mapping format that is attractive for persistence because it survives certificate reissuance from the same CA:
+On **Windows Server 2022+** domain controllers patched with the **September 9, 2025** security update, Microsoft added another strong explicit mapping format that is attractive for persistence because it survives certificate reissuance from the same CA:<sup>[[6]](#references)</sup>
 
 ```powershell
 # Same issuer formatting rules as Issuer+Serial
@@ -155,7 +155,7 @@ domain-escalation.md
 
 ## Enrollment Agent as Persistence – PERSIST5
 
-If you obtain a valid Certificate Request Agent/Enrollment Agent certificate, you can mint new logon-capable certificates on behalf of users at will and keep the agent PFX offline as a persistence token. Abuse workflow:
+If you obtain a valid Certificate Request Agent/Enrollment Agent certificate, you can mint new logon-capable certificates on behalf of users at will and keep the agent PFX offline as a persistence token. Abuse workflow:<sup>[[7]](#references)</sup>
 
 ```bash
 # Request an Enrollment Agent cert (requires template rights)
@@ -173,12 +173,12 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 Revocation of the agent certificate or template permissions is required to evict this persistence.
 
 Operational notes
-- Modern `Certipy` versions support both `-on-behalf-of` and `-renew`, so an attacker holding an Enrollment Agent PFX can mint and later renew leaf certificates without re-touching the original target account.
-- If PKINIT-based TGT retrieval is not possible, the resulting on-behalf-of certificate is still usable for Schannel authentication with `certipy auth -pfx victim_onbo.pfx -dc-ip 10.0.0.10 -ldap-shell`.
+- Modern `Certipy` versions support both `-on-behalf-of` and `-renew`, so an attacker holding an Enrollment Agent PFX can mint and later renew leaf certificates without re-touching the original target account.<sup>[[4]](#references)</sup>
+- If PKINIT-based TGT retrieval is not possible, the resulting on-behalf-of certificate is still usable for Schannel authentication with `certipy auth -pfx victim_onbo.pfx -dc-ip 10.0.0.10 -ldap-shell`.<sup>[[5]](#references)</sup>
 
 ## Using Persisted Certificates When PKINIT Fails
 
-If the DC does not have a Smart Card Logon-capable certificate, certificate logon via PKINIT can fail with `KDC_ERR_PADATA_TYPE_NOSUPP`. That does **not** kill the persistence primitive: the same PFX is often still usable for Schannel-authenticated LDAP access.
+If the DC does not have a Smart Card Logon-capable certificate, certificate logon via PKINIT can fail with `KDC_ERR_PADATA_TYPE_NOSUPP`. That does **not** kill the persistence primitive: the same PFX is often still usable for Schannel-authenticated LDAP access.<sup>[[5]](#references)</sup>
 
 ```bash
 # LDAPS / Schannel shell as the mapped principal
@@ -192,7 +192,7 @@ This is especially useful after PERSIST4/PERSIST5 because you can keep operating
 
 ## 2025 Strong Certificate Mapping Enforcement: Impact on Persistence
 
-Microsoft KB5014754 introduced Strong Certificate Mapping Enforcement on domain controllers. Since **February 11, 2025**, DCs default to **Full Enforcement** for weak/ambiguous mappings, and as of the **September 9, 2025** security update patched DCs no longer support the old Compatibility-mode fallback. Practical implications:
+Microsoft KB5014754 introduced Strong Certificate Mapping Enforcement on domain controllers. Since **February 11, 2025**, DCs default to **Full Enforcement** for weak/ambiguous mappings, and as of the **September 9, 2025** security update patched DCs no longer support the old Compatibility-mode fallback.<sup>[[1]](#references)</sup> Practical implications:
 
 - Pre-2022 certificates that lack the SID mapping extension may fail implicit mapping when DCs are in Full Enforcement. Attackers can maintain access by either renewing certificates through AD CS (to obtain the SID extension) or by planting a strong explicit mapping in `altSecurityIdentities` (PERSIST4).
 - Explicit mappings using strong formats (`Issuer+Serial`, `SKI`, `SHA1-PUKEY`, and on modern DCs `Issuer/SID`) continue to work. Weak formats (Issuer/Subject, Subject-only, RFC822) can be blocked and should be avoided for persistence.
@@ -211,5 +211,6 @@ Administrators should monitor and alert on:
 - [Certipy Wiki – Command Reference](https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference)
 - [Almond Offensive Security – Authenticating with certificates when PKINIT is not supported](https://offsec.almond.consulting/authenticating-with-certificates-when-pkinit-is-not-supported.html)
 - [Microsoft Community Hub – Introducing a new Issuer/SID AltSecID](https://techcommunity.microsoft.com/blog/publicsectorblog/introducing-a-new-issuersid-altsecid/4454231)
+- [SpecterOps – Certified Pre-Owned: Abusing Active Directory Certificate Services](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 
 {{#include ../../../banners/hacktricks-training.md}}

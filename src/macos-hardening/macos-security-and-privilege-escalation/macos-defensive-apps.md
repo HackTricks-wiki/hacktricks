@@ -19,7 +19,7 @@
 ## Endpoint telemetry / execution control
 
 - [**Santa**](https://santa.dev/): Binary authorization and monitoring system for macOS. It uses an **Endpoint Security** client to authorize **`exec`** events before code runs, so it is common in enterprise fleets focused on **allowlisting/denylisting** instead of only post-execution detection.
-- [**Mac Monitor**](https://github.com/redcanaryco/mac-monitor): Procmon-like macOS dynamic analysis tool. It ingests **Endpoint Security telemetry** (process, file, interprocess, login, and XProtect-related events) and is useful to understand what a mature ES-based sensor can actually observe.
+- [**Mac Monitor**](https://github.com/redcanaryco/mac-monitor): Procmon-like macOS dynamic analysis tool. It ingests **Endpoint Security telemetry** (process, file, interprocess, login, and XProtect-related events) and is useful to understand what a mature ES-based sensor can actually observe.<sup>[[2]](#references)</sup>
 - [**ProcessMonitor / FileMonitor / DNSMonitor**](https://objective-see.org/products/utilities.html): Lightweight Objective-See tools for **process**, **file**, and **DNS** telemetry. On modern macOS they have extra prerequisites such as **root**, **Terminal Full Disk Access**, or **System/Network Extension approval**. For more instrumentation ideas check [this other page about macOS app inspection/debugging](macos-apps-inspecting-debugging-and-fuzzing/README.md).
 
 ## Quick triage of defensive tooling
@@ -58,7 +58,7 @@ Recent macOS releases made some previously annoying-to-detect user-driven bypass
 
 - **macOS 15+**: Endpoint Security clients can receive **`gatekeeper_user_override`** events, so manual Gatekeeper bypasses can be centrally logged.
 - **Current macOS Endpoint Security tooling** can also ingest **XProtect malware detection** events, making it easier to confirm what Apple already detected on the endpoint.
-- **macOS 15.4+**: Endpoint Security adds **`tcc_modify`**, which finally gives defenders a supported way to monitor **TCC grants/revokes** instead of scraping TCC debug logs.
+- **macOS 15.4+**: Endpoint Security adds **`tcc_modify`**, which finally gives defenders a supported way to monitor **TCC grants/revokes** instead of scraping TCC debug logs.<sup>[[1]](#references)</sup>
 
 ```bash
 # Gatekeeper user overrides
@@ -75,7 +75,7 @@ This is useful both for defenders and for red teamers doing self-assessment: if 
 
 ## References
 
-- [**Objective-See - TCCing is Believing! Apple finally adds TCC events to Endpoint Security!**](https://objective-see.org/blog/blog_0x7F.html)
-- [**Red Canary - Introducing: Mac Monitor**](https://redcanary.com/blog/threat-detection/mac-monitor/)
+- [1] [Objective-See - TCCing is Believing! Apple finally adds TCC events to Endpoint Security!](https://objective-see.org/blog/blog_0x7F.html)
+- [2] [Red Canary - Introducing: Mac Monitor](https://redcanary.com/blog/threat-detection/mac-monitor/)
 
 {{#include ../../banners/hacktricks-training.md}}

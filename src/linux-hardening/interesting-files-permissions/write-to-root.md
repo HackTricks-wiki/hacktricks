@@ -131,7 +131,7 @@ If you cannot restart services yourself but can edit a socket-activated unit, yo
 
 ### Overwrite a restrictive `php.ini` used by a privileged PHP sandbox
 
-Some custom daemons validate user-supplied PHP by running `php` with a **restricted `php.ini`** (for example, `disable_functions=exec,system,...`). If the sandboxed code still has **any write primitive** (like `file_put_contents`) and you can reach the **exact `php.ini` path** used by the daemon, you can **overwrite that config** to lift restrictions and then submit a second payload that runs with elevated privileges.
+Some custom daemons validate user-supplied PHP by running `php` with a **restricted `php.ini`** (for example, `disable_functions=exec,system,...`). If the sandboxed code still has **any write primitive** (like `file_put_contents`) and you can reach the **exact `php.ini` path** used by the daemon, you can **overwrite that config** to lift restrictions and then submit a second payload that runs with elevated privileges.<sup>[[2]](#references)</sup>
 
 Typical flow:
 
@@ -166,7 +166,7 @@ For more info check [**this post**](https://chatgpt.com/c/67fac01f-0214-8006-9db
 
 ### Root executing user-writable scripts/binaries
 
-If a privileged workflow runs something like `/bin/sh /home/username/.../script` (or any binary inside a directory owned by an unprivileged user), you can hijack it:
+If a privileged workflow runs something like `/bin/sh /home/username/.../script` (or any binary inside a directory owned by an unprivileged user), you can hijack it:<sup>[[1]](#references)</sup>
 
 - **Detect the execution:** monitor processes with [pspy](https://github.com/DominicBreuker/pspy) to catch root invoking user-controlled paths:
 
@@ -223,7 +223,7 @@ Typical high-value targets:
 
 #### AF_ALG + `splice()` example path
 
-Copy Fail (CVE-2026-31431) is a good example of this class. The vulnerable path was in the Linux crypto userspace API (`AF_ALG` / `algif_aead`):
+Copy Fail (CVE-2026-31431) is a good example of this class. The vulnerable path was in the Linux crypto userspace API (`AF_ALG` / `algif_aead`):<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
 
 - `splice()` can move references to page-cache pages from a readable file into the crypto TX scatterlist
 - the in-place `algif_aead` decrypt path reused source and destination buffers
@@ -240,7 +240,7 @@ The public PoC used repeated **4-byte writes** to patch `/usr/bin/su` in memory 
 
 #### ESP / XFRM + netfilter TEE clone example path
 
-DirtyClone (CVE-2026-43503) shows another variant of the same **page-cache-only write-to-root** pattern, but this time the sink is **IPsec ESP decrypt** instead of `AF_ALG`.
+DirtyClone (CVE-2026-43503) shows another variant of the same **page-cache-only write-to-root** pattern, but this time the sink is **IPsec ESP decrypt** instead of `AF_ALG`.<sup>[[8]](#references)[[9]](#references)[[10]](#references)[[11]](#references)</sup>
 
 The important technique is the **metadata-laundering step**:
 
@@ -310,16 +310,16 @@ This kind of mitigation is worth remembering for other kernel LPEs too: if explo
 
 ## References
 
-- [HTB Bamboo – hijacking a root-executed script in a user-writable PaperCut directory](https://0xdf.gitlab.io/2026/02/03/htb-bamboo.html)
-- [HTB: Gavel](https://0xdf.gitlab.io/2026/03/14/htb-gavel.html)
-- [Tenable: Copy Fail (CVE-2026-31431) FAQ](https://www.tenable.com/blog/copy-fail-cve-2026-31431-frequently-asked-questions-about-linux-kernel-privilege-escalation)
-- [Openwall oss-security disclosure for CVE-2026-31431](https://www.openwall.com/lists/oss-security/2026/04/29/23)
-- [Linux stable fix: crypto: algif_aead - Revert to operating out-of-place](https://git.kernel.org/stable/c/a664bf3d603dc3bdcf9ae47cc21e0daec706d7a5)
-- [Copy Fail advisory](https://copy.fail/)
-- [Theori / Xint technical writeup](https://xint.io/blog/copy-fail-linux-distributions)
-- [DirtyClone repository / README](https://github.com/rafaeldtinoco/security/tree/main/exploits/dirtyclone)
-- [JFrog: Dissecting and Exploiting Linux LPE Variant DirtyClone (CVE-2026-43503)](https://research.jfrog.com/post/dissecting-and-exploiting-linux-lpe-variant-dirtyclone-cve-2026-43503/)
-- [Linux fix: net: skb: preserve `SKBFL_SHARED_FRAG` in `__pskb_copy_fclone()` (`48f6a5356a33`)](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=48f6a5356a33)
-- [Linux earlier mitigation: set `SKBFL_SHARED_FRAG` for spliced UDP packets (`f4c50a4034e6`)](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=f4c50a4034e6)
+- [1] [HTB Bamboo – hijacking a root-executed script in a user-writable PaperCut directory](https://0xdf.gitlab.io/2026/02/03/htb-bamboo.html)
+- [2] [HTB: Gavel](https://0xdf.gitlab.io/2026/03/14/htb-gavel.html)
+- [3] [Tenable: Copy Fail (CVE-2026-31431) FAQ](https://www.tenable.com/blog/copy-fail-cve-2026-31431-frequently-asked-questions-about-linux-kernel-privilege-escalation)
+- [4] [Openwall oss-security disclosure for CVE-2026-31431](https://www.openwall.com/lists/oss-security/2026/04/29/23)
+- [5] [Linux stable fix: crypto: algif_aead - Revert to operating out-of-place](https://git.kernel.org/stable/c/a664bf3d603dc3bdcf9ae47cc21e0daec706d7a5)
+- [6] [Copy Fail advisory](https://copy.fail/)
+- [7] [Theori / Xint technical writeup](https://xint.io/blog/copy-fail-linux-distributions)
+- [8] [DirtyClone repository / README](https://github.com/rafaeldtinoco/security/tree/main/exploits/dirtyclone)
+- [9] [JFrog: Dissecting and Exploiting Linux LPE Variant DirtyClone (CVE-2026-43503)](https://research.jfrog.com/post/dissecting-and-exploiting-linux-lpe-variant-dirtyclone-cve-2026-43503/)
+- [10] [Linux fix: net: skb: preserve `SKBFL_SHARED_FRAG` in `__pskb_copy_fclone()` (`48f6a5356a33`)](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=48f6a5356a33)
+- [11] [Linux earlier mitigation: set `SKBFL_SHARED_FRAG` for spliced UDP packets (`f4c50a4034e6`)](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=f4c50a4034e6)
 
 {{#include ../../banners/hacktricks-training.md}}
