@@ -1,45 +1,45 @@
-# Dokument Steganography
+# Steganografia dokumentów
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Dokumenty są często tylko kontenerami:
+Dokumenty często są jedynie kontenerami:
 
 - PDF (osadzone pliki, strumienie)
-- Office OOXML (`.docx/.xlsx/.pptx` są ZIPami)
-- RTF / OLE — przestarzałe formaty
+- Office OOXML (`.docx/.xlsx/.pptx` to ZIP-y)
+- RTF / starsze formaty OLE
 
 ## PDF
 
 ### Technika
 
-PDF to ustrukturyzowany kontener z obiektami, strumieniami i opcjonalnymi osadzonymi plikami. W CTFs często trzeba:
+PDF to ustrukturyzowany kontener zawierający obiekty, strumienie i opcjonalnie osadzone pliki. W CTF-ach często trzeba:
 
 - Wyodrębnić osadzone załączniki
-- Zdekompresować/spłaszczyć strumienie obiektów, aby móc przeszukiwać zawartość
+- Rozpakować/spłaszczyć strumienie obiektów, aby można było przeszukać zawartość
 - Zidentyfikować ukryte obiekty (JS, osadzone obrazy, nietypowe strumienie)
 
-### Szybkie kontrole
+### Szybkie sprawdzenia
 ```bash
 pdfinfo file.pdf
 pdfdetach -list file.pdf
 pdfdetach -saveall file.pdf
 qpdf --qdf --object-streams=disable file.pdf out.pdf
 ```
-Następnie przeszukaj plik `out.pdf` w poszukiwaniu podejrzanych obiektów/ciągów.
+Następnie wyszukaj w `out.pdf` podejrzane obiekty/ciągi znaków.
 
 ## Office OOXML
 
 ### Technika
 
-Traktuj OOXML jako graf zależności ZIP + XML; payloads często ukrywają się w mediach, relacjach lub w nietypowych częściach niestandardowych.
+Traktuj OOXML jako graf relacji ZIP + XML; payloady często ukrywają się w plikach multimedialnych, relacjach lub nietypowych częściach niestandardowych.
 
-OOXML files are ZIP containers. That means:
+Pliki OOXML to kontenery ZIP. Oznacza to, że:
 
-- The document is a directory tree of XML and assets.
-- The `_rels/` relationship files can point to external resources or hidden parts.
-- Embedded data frequently lives in `word/media/`, custom XML parts, or unusual relationships.
+- Dokument jest drzewem katalogów zawierającym XML i zasoby.
+- Pliki relacji `_rels/` mogą wskazywać zewnętrzne zasoby lub ukryte części.
+- Osadzone dane często znajdują się w `word/media/`, niestandardowych częściach XML lub nietypowych relacjach.
 
-### Szybkie sprawdzenia
+### Szybkie kontrole
 ```bash
 7z l file.docx
 7z x file.docx -oout
@@ -47,7 +47,8 @@ OOXML files are ZIP containers. That means:
 Następnie sprawdź:
 
 - `word/document.xml`
-- `word/_rels/` dla zewnętrznych relacji
+- `word/_rels/` pod kątem zewnętrznych relacji
 - osadzone multimedia w `word/media/`
+
 
 {{#include ../../banners/hacktricks-training.md}}
