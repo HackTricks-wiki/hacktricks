@@ -1,12 +1,12 @@
+# Kreiranje Malicioznog MSI-ja i Dobijanje Root-a
+
 {{#include ../../banners/hacktricks-training.md}}
 
-# Kreiranje zlonamernog MSI i dobijanje root pristupa
+Kreiranje MSI instalera biće obavljeno pomoću wixtools-a, tačnije koristiće se [wixtools](http://wixtoolset.org). Vredi napomenuti da su isprobani alternativni MSI builderi, ali u ovom konkretnom slučaju nisu bili uspešni.<sup>[[1]](#references)</sup>
 
-Kreiranje MSI instalatera će se obaviti korišćenjem wixtools, posebno će se koristiti [wixtools](http://wixtoolset.org). Vredno je napomenuti da su pokušani alternativni MSI builderi, ali nisu bili uspešni u ovom konkretnom slučaju.
+Za sveobuhvatno razumevanje primera korišćenja wix MSI-ja, preporučljivo je pogledati [ovu stranicu](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Ovde možete pronaći različite primere koji demonstriraju korišćenje wix MSI-ja.<sup>[[2]](#references)</sup>
 
-Za sveobuhvatno razumevanje primera korišćenja wix MSI, preporučuje se da se konsultuje [ova stranica](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Ovde možete pronaći razne primere koji demonstriraju korišćenje wix MSI.
-
-Cilj je generisati MSI koji će izvršiti lnk datoteku. Da bi se to postiglo, može se koristiti sledeći XML kod ([xml odavde](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):
+Cilj je generisati MSI koji će izvršiti lnk fajl. Da bi se to postiglo, mogao bi se koristiti sledeći XML kod ([xml sa ove stranice](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):<sup>[[1]](#references)</sup>
 ```html
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -38,26 +38,25 @@ fail_here
 </Product>
 </Wix>
 ```
-Važno je napomenuti da element Package sadrži atribute kao što su InstallerVersion i Compressed, koji specificiraju verziju instalatera i označavaju da li je paket komprimovan ili ne, respektivno.
+Važno je napomenuti da element Package sadrži atribute kao što su InstallerVersion i Compressed, koji određuju verziju instalera i označavaju da li je paket kompresovan ili ne.
 
-Proces kreiranja uključuje korišćenje candle.exe, alata iz wixtools, za generisanje wixobject-a iz msi.xml. Sledeća komanda treba da se izvrši:
+Proces kreiranja uključuje korišćenje alata candle.exe iz wixtools-a za generisanje wixobject-a iz msi.xml. Treba izvršiti sledeću komandu:<sup>[[1]](#references)</sup>
 ```
 candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
 ```
-Pored toga, vredi napomenuti da je u postu priložena slika koja prikazuje komandu i njen izlaz. Možete se osloniti na nju za vizuelno vođenje.
+Pored toga, vredi napomenuti da je u objavi obezbeđena slika koja prikazuje komandu i njen izlaz. Možete je koristiti kao vizuelni prikaz.<sup>[[1]](#references)</sup>
 
-Takođe, light.exe, još jedan alat iz wixtools, biće korišćen za kreiranje MSI datoteke iz wixobject-a. Komanda koja će biti izvršena je sledeća:
+Takođe, light.exe, još jedan alat iz wixtools, koristiće se za kreiranje MSI datoteke iz wixobject-a. Komanda koju treba izvršiti je sledeća:<sup>[[1]](#references)</sup>
 ```
 light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
 ```
-Slično prethodnoj komandi, slika je uključena u post koja ilustruje komandu i njen izlaz.
+Slično prethodnoj komandi, u objavi je uključena slika koja prikazuje komandu i njen izlaz.<sup>[[1]](#references)</sup>
 
-Imajte na umu da, iako ovaj sažetak ima za cilj da pruži vredne informacije, preporučuje se da se konsultujete sa originalnim postom za sveobuhvatnije detalje i tačne instrukcije.
+Imajte na umu da, iako ovaj sažetak ima za cilj da pruži korisne informacije, preporučuje se da pogledate originalnu objavu radi detaljnijih informacija i preciznih uputstava.<sup>[[1]](#references)</sup>
 
-## References
+## Reference
 
-- [https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
-- [https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)
-[wixtools](http://wixtoolset.org)
+- [1] [Hack The Box - Ethereal: Kreiranje zlonamernog msi paketa i dobijanje root pristupa - 0xRick's Blog](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
+- [2] [Kratak uvod: Kreiranje MSI instalera pomoću WiX-a - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (pogledajte i [wixtools](http://wixtoolset.org))
 
 {{#include ../../banners/hacktricks-training.md}}

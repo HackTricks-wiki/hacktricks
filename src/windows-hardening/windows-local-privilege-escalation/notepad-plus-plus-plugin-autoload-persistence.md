@@ -2,38 +2,39 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Notepad++ će pri pokretanju **autoload-ovati svaki plugin DLL pronađen u svojim `plugins` podfolderima**. Ubacivanje malicioznog plugina u bilo koju **writable Notepad++ instalaciju** omogućava izvršavanje koda unutar `notepad++.exe` svaki put kada se editor pokrene, što može da se zloupotrebi za **persistence**, stealthy **initial execution**, ili kao **in-process loader** ako je editor pokrenut elevated.
+Notepad++ će **automatski učitati svaki plugin DLL pronađen u njegovim `plugins` podfolderima** pri pokretanju. Ubacivanje malicioznog plugina u bilo koju **Notepad++ instalaciju sa dozvolom upisa** omogućava izvršavanje koda unutar procesa `notepad++.exe` pri svakom pokretanju editora, što se može zloupotrebiti za **persistence**, prikriveno **initial execution** ili kao **in-process loader** ako je editor pokrenut sa povišenim privilegijama.<sup>[[1]](#references)</sup>
 
-Od **Notepad++ 7.6+** očekivani raspored za ručnu instalaciju je **jedan podfolder po pluginu** (`plugins\<PluginName>\<PluginName>.dll`). U **portable mode** (prisustvo `doLocalConf.xml` pored `notepad++.exe`), čitavo application stablo ostaje lokalno za taj direktorijum, što često pretvara kopirane/admin tool bundle-ove u lako user-writable execution surface.
+Od verzije **Notepad++ 7.6+**, očekivani raspored za ručnu instalaciju je **jedan podfolder po pluginu** (`plugins\<PluginName>\<PluginName>.dll`). U **portable mode** (kada postoji `doLocalConf.xml` pored `notepad++.exe`), celo stablo aplikacije ostaje lokalno u tom direktorijumu, zbog čega kopirani/admin tool bundles često predstavljaju lako dostupnu user-writable površinu za izvršavanje.<sup>[[2]](#references)</sup>
 
-## Writable plugin locations
-- Standardna instalacija: `C:\Program Files\Notepad++\plugins\<PluginName>\<PluginName>.dll` (obično zahteva admin prava za upis).
-- Writable opcije za low-privileged operatore:
-- Koristite **portable Notepad++ build** u folderu koji je user-writable.
-- Kopirajte `C:\Program Files\Notepad++` na path pod kontrolom korisnika (npr. `%LOCALAPPDATA%\npp\`) i pokrenite `notepad++.exe` odatle.
-- Tražite **admin tool bundles**, raspakovane zip kopije, ili help-desk toolkite koji već sadrže `doLocalConf.xml` i nalaze se van `Program Files`.
-- Svaki plugin dobija svoj podfolder ispod `plugins` i automatski se učitava pri startup-u; stavke menija se pojavljuju pod **Plugins**.
+## Lokacije pluginova sa dozvolom upisa
 
-Quick triage:
+- Standardna instalacija: `C:\Program Files\Notepad++\plugins\<PluginName>\<PluginName>.dll` (za upis su obično potrebne admin privilegije).<sup>[[1]](#references)</sup>
+- Opcije sa dozvolom upisa za operatore sa niskim privilegijama:<sup>[[1]](#references)</sup>
+- Koristite **portable Notepad++ build** u folderu u koji korisnik može da upisuje.
+- Kopirajte `C:\Program Files\Notepad++` na putanju pod kontrolom korisnika (npr. `%LOCALAPPDATA%\npp\`) i pokrenite `notepad++.exe` iz te lokacije.
+- Pretražite **admin tool bundles**, raspakovane zip kopije ili help-desk toolkits koji već sadrže `doLocalConf.xml` i nalaze se izvan `Program Files`.
+- Svaki plugin ima sopstveni podfolder unutar `plugins` i automatski se učitava pri pokretanju; stavke menija pojavljuju se pod **Plugins**.<sup>[[2]](#references)</sup>
+
+Brza trijaža:
 ```cmd
 where /r C:\ notepad++.exe 2>nul
 for /d %D in ("%ProgramFiles%\Notepad++" "%ProgramFiles(x86)%\Notepad++" "%LOCALAPPDATA%\*notepad*" "%USERPROFILE%\Desktop\*notepad*") do @if exist "%~fD\plugins" echo [*] %~fD
 icacls "C:\Program Files\Notepad++\plugins" 2>nul
 ```
-## Tačke učitavanja plugina (izvršne primitive)
-Notepad++ očekuje određene **exported functions**. Sve se pozivaju tokom inicijalizacije, što daje više izvršnih površina:
-- **`DllMain`** — pokreće se odmah pri učitavanju DLL-a (prva tačka izvršenja).
-- **`setInfo(NppData)`** — poziva se jednom pri učitavanju da obezbedi Notepad++ handle-ove; tipično mesto za registraciju stavki menija.
-- **`getName()`** — vraća ime plugina prikazano u meniju.
-- **`getFuncsArray(int *nbF)`** — vraća komande menija; čak i ako je prazno, poziva se tokom startup-a.
-- **`beNotified(SCNotification*)`** — prima Notepad++ / Scintilla događaje (korisno za odlaganje payloads-a dok korisnik ne izvrši akciju ili dok se ne desi događaj u editoru).
+## Tačke učitavanja plugin-a (primitives izvršavanja)
+Notepad++ očekuje određene **exported functions**. Sve se pozivaju tokom inicijalizacije, što pruža više površina za izvršavanje:<sup>[[1]](#references)</sup>
+- **`DllMain`** — izvršava se odmah pri učitavanju DLL-a (prva tačka izvršavanja).
+- **`setInfo(NppData)`** — poziva se jednom pri učitavanju radi prosleđivanja Notepad++ handles; uobičajeno mesto za registrovanje stavki menija.
+- **`getName()`** — vraća naziv plugin-a prikazan u meniju.
+- **`getFuncsArray(int *nbF)`** — vraća komande menija; čak i ako je prazan, poziva se tokom pokretanja.
+- **`beNotified(SCNotification*)`** — prima Notepad++ / Scintilla događaje (korisno za odlaganje payload-a do korisničke radnje ili događaja u editoru).
 - **`messageProc(UINT, WPARAM, LPARAM)`** — handler za poruke, koristan za veće razmene podataka.
-- **`isUnicode()`** — flag kompatibilnosti koji se proverava pri učitavanju.
+- **`isUnicode()`** — compatibility flag koji se proverava pri učitavanju.
 
-Većina export-ova može da se implementira kao **stubs**; izvršenje može da se desi iz `DllMain` ili bilo kog callback-a iznad tokom autoload.
+Većina export-ova može biti implementirana kao **stubs**; izvršavanje može da se odvija iz `DllMain` ili bilo kog callback-a iznad tokom autoload-a.
 
-## Minimalni maliciozni plugin skeleton
-Kompajliraj DLL sa očekivanim export-ovima i smesti ga u `plugins\\MyNewPlugin\\MyNewPlugin.dll` unutar writable Notepad++ foldera:
+## Minimalni skeleton malicious plugin-a
+Kompajlirajte DLL sa očekivanim export-ovima i postavite ga u `plugins\\MyNewPlugin\\MyNewPlugin.dll`, unutar Notepad++ foldera sa dozvolom upisivanja:<sup>[[1]](#references)</sup>
 ```c
 BOOL APIENTRY DllMain(HMODULE h, DWORD r, LPVOID) { if (r == DLL_PROCESS_ATTACH) MessageBox(NULL, TEXT("Hello from Notepad++"), TEXT("MyNewPlugin"), MB_OK); return TRUE; }
 extern "C" __declspec(dllexport) void setInfo(NppData) {}
@@ -43,12 +44,12 @@ extern "C" __declspec(dllexport) void beNotified(SCNotification *) {}
 extern "C" __declspec(dllexport) LRESULT messageProc(UINT, WPARAM, LPARAM) { return TRUE; }
 extern "C" __declspec(dllexport) BOOL isUnicode() { return TRUE; }
 ```
-1. Izgradite DLL (Visual Studio/MinGW).
-2. Napravite podfolder za plugin unutar `plugins` i ubacite DLL unutra.
+1. Build the DLL (Visual Studio/MinGW).
+2. Kreirajte podfolder plugina unutar `plugins` i ubacite DLL u njega.
 3. Ponovo pokrenite Notepad++; DLL se automatski učitava, izvršavajući `DllMain` i naknadne callbacks.
 
-## Low-noise trigger pattern via `beNotified`
-Za OPSEC, mnogi payloads ne bi trebalo da se pokreću iz `DllMain`. Tiši pattern je da se plugin učita čisto, a zatim da se izvrši tek posle realističnog editor event-a kao što je **startup complete**, **buffer activation**, ili **first typed character**.
+## Low-noise trigger pattern putem `beNotified`
+Radi OPSEC-a, mnogi payloads ne bi trebalo da se pokreću iz `DllMain`. Tiši obrazac je da se plugin učita bez problema, a zatim izvrši tek nakon realističnog događaja u editoru, kao što su **završetak pokretanja**, **aktivacija buffera** ili **prvi otkucani karakter**.
 ```c
 static bool fired = false;
 extern "C" __declspec(dllexport) void beNotified(SCNotification *n) {
@@ -61,37 +62,38 @@ WinExec("powershell -w hidden -nop -c <payload>", SW_HIDE);
 }
 }
 ```
-Ovo se bolje uklapa u javna ofanzivna istraživanja nego bučan `DllMain` beacon: DLL se i dalje učitava automatski pri startovanju, ali se zlonamerna radnja odlaže dok Notepad++ ne izgleda kao da se zaista koristi.
+Ovo se bolje uklapa u javno istraživanje ofanzivnih tehnika od bučnog `DllMain` beacon-a: DLL se i dalje automatski učitava pri pokretanju, ali se zlonamerna radnja odlaže dok Notepad++ ne počne da se zaista koristi.
 
-## Korišćenje direktorijuma za konfiguraciju pluginova kao sekundarne pohrane
-Notepad++ izlaže `NPPM_GETPLUGINSCONFIGDIR`, koji vraća **direktorijum za konfiguraciju pluginova trenutnog korisnika**. Zlonamerni plugin može da iskoristi ovo da DLL na disku ostane minimalan, dok se šifrovana konfiguracija, staged payloads ili tasking fajlovi čuvaju u putanji koja se uklapa u normalno stanje pluginova.
+## Korišćenje direktorijuma konfiguracije plugina kao sekundarnog skladišta
+Notepad++ izlaže `NPPM_GETPLUGINSCONFIGDIR`, koji vraća **direktorijum konfiguracije plugina trenutno prijavljenog korisnika**.<sup>[[3]](#references)</sup> Maliciozni plugin može ovo da koristi kako bi DLL na disku ostao minimalan, dok se šifrovana konfiguracija, staged payloads ili tasking fajlovi čuvaju na putanji koja se uklapa u uobičajeno stanje plugina.
 ```c
 wchar_t cfg[MAX_PATH] = {0};
 SendMessage(nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, MAX_PATH, (LPARAM)cfg);
 // Example result: %AppData%\Notepad++\plugins\config
 ```
-Operationalno, ovo je korisno kada želite:
+Operativno je ovo korisno kada želite:
 - mali autoloaded bootstrap DLL;
-- per-user tasking bez ponovnog diranja glavnog plugin binara;
-- da odvojite **autoload trigger** od težeg drugog stage-a.
+- tasking po korisniku bez ponovnog menjanja glavnog plugin binary-ja;
+- da odvojite **autoload trigger** od težeg second stage-a.
 
 ## Reflective loader plugin pattern
-Weaponized plugin može da pretvori Notepad++ u **reflective DLL loader**:
-- Prikaže minimalni UI/menu unos (npr. "LoadDLL").
-- Prihvata **file path** ili **URL** za preuzimanje payload DLL-a.
-- Reflectively mapira DLL u trenutni process i poziva exported entry point (npr. loader funkciju unutar preuzetog DLL-a).
-- Prednost: ponovna upotreba benigno izgledajućeg GUI procesa umesto pokretanja novog loader-a; payload nasleđuje integritet `notepad++.exe` (uključujući elevated contexts).
-- Trade-offs: ostavljanje **unsigned plugin DLL** na disku je upadljivo; praktična varijanta je da se autoloaded plugin koristi samo kao stub, a da pravi implant ostane encrypted/staged drugde.
+Weaponized plugin može pretvoriti Notepad++ u **reflective DLL loader**:<sup>[[1]](#references)</sup>
+- Prikažite minimalni UI/menu entry (npr. "LoadDLL").
+- Prihvatite **file path** ili **URL** za preuzimanje payload DLL-a.
+- Reflectively map-ujte DLL u trenutni proces i pozovite exported entry point (npr. loader funkciju unutar preuzetog DLL-a).
+- Prednost: ponovna upotreba GUI procesa koji izgleda benigno, umesto pokretanja novog loader-a; payload nasleđuje integrity nivo procesa `notepad++.exe` (uključujući elevated contexts).
+- Kompromisi: upisivanje **unsigned plugin DLL-a** na disk je upadljivo; praktična varijanta je da se autoloaded plugin koristi samo kao stub, dok se pravi implant čuva encrypted/staged na drugoj lokaciji.
 
-## Detection and hardening notes
-- Blokirajte ili pratite **writes to Notepad++ plugin directories** (uključujući portable kopije u user profiles); omogućite controlled folder access ili application allowlisting.
-- Alarmirajte na **new unsigned DLLs** u okviru `plugins`, promene u portable Notepad++ tree-ovima i neuobičajene **child processes/network activity** iz `notepad++.exe`.
-- Postavite baseline za legitimne plugine i istražite svaki novi DLL koji eksportuje normalan Notepad++ plugin interface, ali istovremeno pokreće shells, PowerShell ili network beacons.
-- Nametnite instalaciju pluginova isključivo preko **Plugins Admin**, i ograničite izvršavanje portable kopija iz untrusted paths.
+## Napomene o detekciji i hardening-u
+- Blokirajte ili nadgledajte **upise u Notepad++ plugin direktorijume** (uključujući portable kopije u user profilima); omogućite controlled folder access ili application allowlisting.
+- Upozorite na **nove unsigned DLL-ove** u direktorijumu `plugins`, izmene portable Notepad++ stabala i neuobičajene **child procese/network activity** iz `notepad++.exe`.
+- Napravite baseline legitimnih plugin-ova i istražite svaki novi DLL koji export-uje normalni Notepad++ plugin interface, ali takođe pokreće shell-ove, PowerShell ili network beacon-e.
+- Zahtevajte instalaciju plugin-ova isključivo putem **Plugins Admin-a** i ograničite execution portable kopija iz nepouzdanih putanja.
 
-## References
-- [TrustedSec - Notepad++ Plugins: Plug and Payload](https://trustedsec.com/blog/notepad-plugins-plug-and-payload)
-- [Notepad++ User Manual - Plugins](https://npp-user-manual.org/docs/plugins/)
-- [Notepad++ User Manual - Plugin Communication](https://npp-user-manual.org/docs/plugin-communication/)
+## Reference
+
+- [1] [TrustedSec - Notepad++ Plugins: Plug and Payload](https://trustedsec.com/blog/notepad-plugins-plug-and-payload)
+- [2] [Notepad++ User Manual - Plugins](https://npp-user-manual.org/docs/plugins/)
+- [3] [Notepad++ User Manual - Plugin Communication](https://npp-user-manual.org/docs/plugin-communication/)
 
 {{#include ../../banners/hacktricks-training.md}}

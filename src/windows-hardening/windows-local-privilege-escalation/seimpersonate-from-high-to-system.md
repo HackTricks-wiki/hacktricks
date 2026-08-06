@@ -1,10 +1,10 @@
-# SeImpersonate from High To System
+# SeImpersonate od High do System
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ova stranica govori o **ručnoj** verziji prelaska sa **High Integrity administrator procesa** na **`NT AUTHORITY\SYSTEM`** tako što se **otvori nezaštićeni SYSTEM proces, duplira njegov token i pokrene child process sa tim tokenom**.
+Ova stranica se bavi **manual** metodom prelaska sa **administratorskog procesa visokog integriteta** na **`NT AUTHORITY\SYSTEM`** tako što se **otvori nezaštićeni SYSTEM proces, duplicira njegov token i pokrene child proces sa tim tokenom**.
 
-Ako imate samo **`SeImpersonatePrivilege`** / **`SeAssignPrimaryTokenPrivilege`**, ali **ne možete da otvorite odgovarajući SYSTEM proces**, **Potato / named-pipe** put je obično pouzdaniji:
+Ako imate samo **`SeImpersonatePrivilege`** / **`SeAssignPrimaryTokenPrivilege`**, ali **ne možete da otvorite odgovarajući SYSTEM proces**, **Potato / named-pipe** putanja je obično pouzdanija:
 
 {{#ref}}
 named-pipe-client-impersonation.md
@@ -14,13 +14,13 @@ named-pipe-client-impersonation.md
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-Ako vam ne treba samo `SYSTEM`, već **SYSTEM token sa što više privilegija**, pogledajte i:
+Ako ne želite samo `SYSTEM`, već **SYSTEM token sa što većim brojem privilegija**, pogledajte i:
 
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
 {{#endref}}
 
-## Quick triage
+## Brza trijaža
 
 Pre nego što pokušate da ukradete token, brzo proverite kontekst:
 ```cmd
@@ -29,33 +29,33 @@ whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege SeAssignPrima
 ```
 Praktične napomene:
 
-- **High Integrity** admin token je obično dovoljan da se **omogući `SeDebugPrivilege`** i otvore mnogi ne-zaštićeni SYSTEM procesi.
-- **`CreateProcessWithTokenW` zahteva `SeImpersonatePrivilege`** na pozivatelju. Ako taj API padne sa `1314`, pređi na `CreateProcessAsUserW` nakon što već dupliraš SYSTEM primary token.
-- Na modernom Windows-u, **`lsass.exe` je često loša meta** jer **LSA protection / PPL** blokira pristup čak i administratorima sa `SeDebugPrivilege`. Radije koristi **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`** ili rani **`svchost.exe`** koji radi kao SYSTEM.
-- Nije svaki SYSTEM proces jednako koristan. Ako dobiješ SYSTEM, ali primetiš da nedostaju privilegije, probaj drugi SYSTEM proces umesto da pretpostaviš da je tehnika pokvarena.
+- **High Integrity** administratorski token je obično dovoljan da **omogući `SeDebugPrivilege`** i otvori mnoge nezaštićene SYSTEM procese.
+- **`CreateProcessWithTokenW` zahteva `SeImpersonatePrivilege`** kod pozivaoca. Ako taj API ne uspe sa greškom `1314`, pređite na `CreateProcessAsUserW` nakon što ste već duplirali SYSTEM primarni token.
+- Na modernom Windowsu, **`lsass.exe` je često loš cilj** jer **LSA protection / PPL** blokira pristup čak i administratorima sa `SeDebugPrivilege`. Prednost dajte procesima **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`** ili ranom **`svchost.exe`** procesu koji se izvršava kao SYSTEM.
+- Nemaju svi SYSTEM procesi podjednako koristan token. Ako dobijete SYSTEM, ali primetite da nedostaju privilegije, pokušajte sa drugim SYSTEM procesom umesto da pretpostavite da je tehnika neispravna.
 
-## Pažljivo izaberi PID
+## Pažljivo izaberite PID
 
-Najlakši način da ovo radi pouzdano je da **izabereš SYSTEM proces čiji DACL zapravo dozvoljava Administrators da upitaju proces i dupliraju njegov token**.
+Najlakši način da ovo pouzdano funkcioniše jeste da **izaberete SYSTEM proces čiji DACL zaista dozvoljava grupi Administrators da izvrši upit nad procesom i duplira njegov token**.
 
 Dobri kandidati za prvo testiranje:
 
 - `winlogon.exe`
 - `wininit.exe`
 - `services.exe`
-- neke rane `svchost.exe` instance koje rade kao SYSTEM
+- neke rane instance procesa `svchost.exe` koje se izvršavaju kao SYSTEM
 
-Podrazumevano izbegavaj:
+Podrazumevano izbegavajte:
 
-- `lsass.exe` na hostovima gde je omogućeno **RunAsPPL / LSA protection**
+- `lsass.exe` na hostovima na kojima je omogućena **RunAsPPL / LSA protection** zaštita
 - zaštićene / bezbednosno osetljive procese koji vraćaju `Access denied` čak i nakon omogućavanja `SeDebugPrivilege`
 
-Možeš da pregledaš kandidatske procese i njihove tokene/ACL-ove pomoću **Process Explorer** ili **Process Hacker** pokrenutih sa povišenim privilegijama.
+Kandidate među procesima i njihove token/ACL postavke možete pregledati pomoću alata **Process Explorer** ili **Process Hacker**, pokrenutih sa povišenim privilegijama.
 
-### Code
+### Kod
 
-Sledeći kod je iz [here](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Omogućava da **navedeš Process ID kao argument** i pokreneće se CMD **sa korisnikom** navedenog procesa.\
-Ako se pokrene u High Integrity procesu, možeš da **navedeš PID procesa koji radi kao System** (kao `winlogon`, `wininit`) i pokreneš `cmd.exe` kao SYSTEM.
+Sledeći kod je preuzet [odavde](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Omogućava da se **Process ID navede kao argument**, nakon čega će biti pokrenut CMD **kao korisnik** navedenog procesa.\
+Ako se izvršava iz High Integrity procesa, možete **navesti PID procesa koji se izvršava kao System** (kao što su `winlogon` ili `wininit`) i pokrenuti `cmd.exe` kao SYSTEM.<sup>[[3]](#references)</sup>
 ```cpp
 impersonateuser.exe 1234
 ```
@@ -190,20 +190,20 @@ printf("[-] CreateProcessWithTokenW Error: %i\n", GetLastError());
 return 0;
 }
 ```
-## Korisni API / prava pristupa
+## Korisne napomene o API-ju / pravima pristupa
 
-Primer koristi `MAXIMUM_ALLOWED`, ali za stvarne operacije je korisno zapamtiti minimalne potrebne delove:
+Primer koristi `MAXIMUM_ALLOWED`, ali za stvarne operacije korisno je zapamtiti minimalne potrebne elemente:
 
 - `OpenProcessToken()` zahteva samo da je **handle procesa** otvoren sa **`PROCESS_QUERY_LIMITED_INFORMATION`**.
-- Za korišćenje `CreateProcessWithTokenW()`, **primary token handle** mora imati **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
-- `DuplicateTokenEx()` mora da napravi **primary token** (`TokenPrimary`), a ne samo impersonation token.
-- Ako si već impersonirao SYSTEM i `CreateProcessWithTokenW()` i dalje pada sa `1314`, probaj umesto toga `CreateProcessAsUserW()`.
+- Za korišćenje `CreateProcessWithTokenW()`, **handle primarnog tokena** mora imati **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.<sup>[[1]](#references)</sup>
+- `DuplicateTokenEx()` mora kreirati **primarni token** (`TokenPrimary`), a ne samo impersonation token.
+- Ako ste se već impersonirali kao SYSTEM, a `CreateProcessWithTokenW()` i dalje ne uspeva sa greškom `1314`, pokušajte umesto toga sa `CreateProcessAsUserW()`.
 
-To znači da je **otvaranje target procesa sa `PROCESS_ALL_ACCESS` obično nepotrebno i bučnije** nego samo traženje prava potrebnih za upit tokena.
+To znači da je otvaranje ciljnog procesa sa `PROCESS_ALL_ACCESS` obično nepotrebno i stvara više buke nego jednostavno zahtevanje prava potrebnih za upit tokena.
 
 ## Greška
 
-Ponekad možeš pokušati da impersoniraš System i to neće raditi, uz izlaz poput sledećeg:
+U nekim slučajevima možete pokušati da se impersonirate kao System, ali to neće raditi i dobićete izlaz poput sledećeg:
 ```cpp
 [+] OpenProcess() success!
 [+] OpenProcessToken() success!
@@ -214,43 +214,45 @@ Ponekad možeš pokušati da impersoniraš System i to neće raditi, uz izlaz po
 [-] CreateProcessWithTokenW Return Code: 0
 [-] CreateProcessWithTokenW Error: 1326
 ```
-To znači da čak i ako radiš na High Integrity nivou **nemaš dovoljno permissions** nad tim target process/token.\
-Hajde da proverimo trenutne Administrator permissions nad `svchost.exe` procesima pomoću **Process Explorer** (ili možeš koristiti i **Process Hacker**):
+To znači da čak i ako radite na nivou **High Integrity**, **nemate dovoljno dozvola** nad tim ciljnim procesom/tokenom.\
+Proverimo trenutne Administrator dozvole nad procesima `svchost.exe` pomoću alata **Process Explorer** (možete koristiti i **Process Hacker**):
 
-1. Izaberi `svchost.exe` process
-2. Right Click --> Properties
-3. Unutar "Security" taba klikni dole desno na dugme "Permissions"
-4. Klikni na "Advanced"
-5. Izaberi "Administrators" i klikni na "Edit"
-6. Klikni na "Show advanced permissions"
+1. Izaberite proces `svchost.exe`
+2. Kliknite desnim tasterom miša --> Properties
+3. Na kartici "Security" kliknite na dugme "Permissions" u donjem desnom uglu
+4. Kliknite na "Advanced"
+5. Izaberite "Administrators" i kliknite na "Edit"
+6. Kliknite na "Show advanced permissions"
 
-![Code - Error: 6. Click on "Show advanced permissions"](<../../images/image (437).png>)
+![Code - Error: 6. Kliknite na "Show advanced permissions"](<../../images/image (437).png>)
 
-Prethodna slika sadrži sve privileges koje "Administrators" imaju nad izabranim procesom (kao što vidiš, u slučaju `svchost.exe` imaju samo "Query" privileges)
+Prethodna slika sadrži sve privilegije koje "Administrators" imaju nad izabranim procesom (kao što vidite, u slučaju procesa `svchost.exe` imaju samo privilegije "Query").
 
-Pogledaj privileges koje "Administrators" imaju nad `winlogon.exe`:
+Pogledajte privilegije koje "Administrators" imaju nad procesom `winlogon.exe`:
 
-![Code - Error: See the privileges "Administrators" have over winlogon.exe](<../../images/image (1102).png>)
+![Code - Error: Pogledajte privilegije koje "Administrators" imaju nad procesom winlogon.exe](<../../images/image (1102).png>)
 
-Unutar tog process-a "Administrators" mogu da "Read Memory" i "Read Permissions", što verovatno omogućava Administrators da impersonate token koji koristi ovaj process.
+Unutar tog procesa "Administrators" mogu da koriste "Read Memory" i "Read Permissions", što verovatno omogućava Administratorima da impersonate-ju token koji koristi ovaj proces.
 
-### Common failure causes
+### Uobičajeni uzroci neuspeha
 
-- **`OpenProcess()` / `OpenProcessToken()` -> `5 (Access denied)`**: process DACL te blokira, ili je target **protected/PPL**. Izaberi drugi SYSTEM process.
-- **`DuplicateTokenEx()` -> `5 (Access denied)`**: handle tvog token-a je otvoren bez dovoljno prava, ili target token DACL sprečava duplication.
-- **`CreateProcessWithTokenW()` -> `1314`**: caller trenutno nema omogućeno **`SeImpersonatePrivilege`**. Pokušaj prvo da ga enable-uješ ili koristi `CreateProcessAsUserW()` sa duplicated primary token-om.
-- **`CreateProcessWithTokenW()` -> `1326`** nakon prethodnih failure-a: ovo često samo znači da je prethodni token duplication/impersonation korak fail-ovao, pa ne postoji usable primary token za pokretanje child process-a.
+- **`OpenProcess()` / `OpenProcessToken()` -> `5 (Access denied)`**: DACL procesa vas blokira ili je cilj **protected/PPL**. Izaberite drugi SYSTEM proces.
+- **`DuplicateTokenEx()` -> `5 (Access denied)`**: vaš token handle je otvoren bez dovoljnih prava ili DACL ciljnog tokena sprečava njegovo dupliciranje.
+- **`CreateProcessWithTokenW()` -> `1314`**: caller trenutno nema omogućen **`SeImpersonatePrivilege`**. Pokušajte da ga prvo omogućite ili koristite `CreateProcessAsUserW()` sa dupliciranim primary tokenom.
+- **`CreateProcessWithTokenW()` -> `1326`** nakon prethodnih neuspeha: ovo često samo znači da je prethodni korak dupliciranja/impersonation-a tokena neuspešan, pa ne postoji upotrebljiv primary token za pokretanje child procesa.
 
-## Operator notes
+## Napomene za operatora
 
-- Ova technique je odlična kada si već **local admin + high integrity** i samo želiš brz, manual path do SYSTEM bez pokretanja service ili named-pipe coercion chain.
-- Na hardened Windows 11 / Server environment-ima, **LSA protection** je sve češća, pa je workflow koji pretpostavlja da je `lsass.exe` uvek readable krhak. **`winlogon.exe` / `wininit.exe` / `services.exe` su obično bolji prvi izbori**.
-- Ako završiš u **service account** context-u umesto u elevated admin desktop-u, porodica **Potato** je obično bolji fit od ove stranice.
+- Ova tehnika je odlična kada već imate **local admin + high integrity** pristup i želite brz, ručni put do SYSTEM-a bez pokretanja servisa ili chain-a za coercion preko named pipe-a.
+- U hardened Windows 11 / Server okruženjima, **LSA protection** je sve češća, pa je workflow koji pretpostavlja da je `lsass.exe` uvek čitljiv nepouzdan. **`winlogon.exe` / `wininit.exe` / `services.exe`** su obično bolji prvi izbori.<sup>[[2]](#references)</sup>
+- Ako dobijete kontekst **service account-a** umesto elevated admin desktop-a, **Potato family** je obično pogodnija od ove stranice.
 
 
 
-## References
+## Reference
 
-- [Microsoft: CreateProcessWithTokenW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
-- [SensePost: Abusing Windows' tokens to compromise Active Directory without touching LSASS](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [1] [Microsoft: CreateProcessWithTokenW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [2] [SensePost: Abusing Windows' tokens to compromise Active Directory without touching LSASS](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [3] [Understanding and Abusing Process Tokens — Part II](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+
 {{#include ../../banners/hacktricks-training.md}}

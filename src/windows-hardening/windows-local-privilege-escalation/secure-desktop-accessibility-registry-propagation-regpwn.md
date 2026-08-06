@@ -1,73 +1,73 @@
-# Propagacija registra pristupačnosti Secure Desktop LPE (RegPwn)
+# Secure Desktop Accessibility Registry Propagation LPE (RegPwn)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Pregled
+## Overview
 
-Windows Accessibility funkcije čuvaju korisničke konfiguracije pod HKCU i propagiraju ih u per-session lokacije pod HKLM. Tokom prelaza na Secure Desktop (zaključani ekran ili UAC prompt), SYSTEM komponente ponovo kopiraju ove vrednosti. Ako je per-session HKLM ključ dostupan za pisanje od strane korisnika, on postaje privilegovana tačka pisanja koja se može preusmeriti pomoću simboličkih veza registra, što rezultuje proizvoljnim SYSTEM pisanjem u registar.
+Windows Accessibility funkcije čuvaju korisničku konfiguraciju u HKCU i propagiraju je na per-session HKLM lokacije. Tokom prelaska na **Secure Desktop** (lock screen ili UAC prompt), **SYSTEM** komponente ponovo kopiraju ove vrednosti. Ako je **per-session HKLM ključ** upisiv korisniku, on postaje privilegovana tačka za upis, koja se može preusmeriti pomoću **registry symbolic links**, čime se dobija **arbitrary SYSTEM registry write**.<sup>[[1]](#references)</sup>
 
-Tehnika RegPwn zloupotrebljava taj lanac propagacije sa kratkim vremenskim prozorom za trku, stabilizovanim preko opportunistic lock (oplock) na fajl koji koristi `osk.exe`.
+RegPwn tehnika zloupotrebljava ovaj lanac propagacije pomoću malog race window-a stabilizovanog preko **opportunistic lock (oplock)** mehanizma na fajlu koji koristi `osk.exe`.<sup>[[1]](#references)</sup>
 
-## Lanac propagacije registra (Accessibility -> Secure Desktop)
+## Registry Propagation Chain (Accessibility -> Secure Desktop)
 
 Primer funkcije: **On-Screen Keyboard** (`osk`). Relevantne lokacije su:
 
-- **Lista funkcija na nivou sistema**:
+- **System-wide feature list**:
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATs`
-- **Konfiguracija po korisniku (korisnik može pisati)**:
+- **Per-user configuration (user-writable)**:
 - `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
-- **Konfiguracija po sesiji u HKLM (kreirana od strane `winlogon.exe`, korisnik može pisati)**:
+- **Per-session HKLM config (created by `winlogon.exe`, user-writable)**:
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session<session id>\ATConfig\osk`
-- **Hive podrazumevanog korisnika / Secure desktop (kontekst SYSTEM-a)**:
+- **Secure desktop/default user hive (SYSTEM context)**:
 - `HKU\.DEFAULT\Software\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
 
-Propagacija tokom prelaza na Secure Desktop (pojednostavljeno):
+Propagacija tokom prelaska na secure desktop (pojednostavljeno):
 
-1. **Korisnička instanca `atbroker.exe`** kopira `HKCU\...\ATConfig\osk` u `HKLM\...\Session<session id>\ATConfig\osk`.
+1. **User `atbroker.exe`** kopira `HKCU\...\ATConfig\osk` u `HKLM\...\Session<session id>\ATConfig\osk`.
 2. **SYSTEM `atbroker.exe`** kopira `HKLM\...\Session<session id>\ATConfig\osk` u `HKU\.DEFAULT\...\ATConfig\osk`.
 3. **SYSTEM `osk.exe`** kopira `HKU\.DEFAULT\...\ATConfig\osk` nazad u `HKLM\...\Session<session id>\ATConfig\osk`.
 
-Ako je HKLM podstabla za sesiju dostupna za pisanje od strane korisnika, koraci 2/3 omogućavaju SYSTEM pisanje kroz lokaciju koju korisnik može zameniti.
+Ako je HKLM podstablo sesije upisivo korisniku, koraci 2/3 omogućavaju SYSTEM upis preko lokacije koju korisnik može da zameni.<sup>[[1]](#references)</sup>
 
-## Primitiv: Proizvoljno SYSTEM pisanje u registar preko simboličkih veza registra
+## Primitive: Arbitrary SYSTEM Registry Write via Registry Links
 
-Zamenite korisnički pisivi per-session ključ sa simboličkom vezom registra koja pokazuje na destinaciju po izboru napadača. Kada dođe do SYSTEM kopije, ona sledi vezu i upisuje vrednosti pod kontrolom napadača u proizvoljni ciljni ključ.
+Zamenite user-writable per-session ključ **registry symbolic link**-om koji pokazuje na odredište izabrano od strane napadača. Kada se izvrši SYSTEM kopiranje, ono prati link i upisuje vrednosti pod kontrolom napadača u proizvoljni ciljni ključ.
 
 Ključna ideja:
 
-- Metа za pisanje žrtve (pisivo od strane korisnika):
+- Cilj victim write-a (user-writable):
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session<session id>\ATConfig\osk`
-- Napadač zamenjuje taj ključ simboličkom vezom registra ka bilo kom drugom ključu.
-- SYSTEM izvršava kopiju i upisuje u cilj koji je napadač odabrao sa SYSTEM privilegijama.
+- Napadač zamenjuje taj ključ **registry link**-om ka bilo kom drugom ključu.
+- SYSTEM izvršava kopiranje i upisuje u ključ koji je izabrao napadač, sa SYSTEM privilegijama.
 
-Ovo daje primitiv za **proizvoljno SYSTEM pisanje u registar**.
+Ovim se dobija **arbitrary SYSTEM registry write** primitive.<sup>[[1]](#references)</sup>
 
-## Dobijanje vremenskog prozora trke pomoću oplock-a
+## Winning the Race Window with Oplocks
 
-Postoji kratak vremenski prozor između pokretanja SYSTEM `osk.exe` i pisanja per-session ključa. Da bi bio pouzdan, exploit postavlja oplock na:
+Postoji kratak timing window između pokretanja **SYSTEM `osk.exe`** procesa i njegovog upisa u per-session ključ. Da bi exploit bio pouzdan, na sledeću lokaciju se postavlja **oplock**:
 ```
 C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml
 ```
-Kada se oplock pokrene, napadač zamenjuje per-session HKLM ključ registrija za registry link, dopušta SYSTEM-u da upiše, a zatim uklanja link.
+Kada se oplock aktivira, napadač zamenjuje HKLM ključ po sesiji registry linkom, omogućava da se upis SYSTEM-a izvrši, a zatim uklanja link.<sup>[[1]](#references)</sup>
 
 ## Primer toka eksploatacije (visok nivo)
 
-1. Preuzmite trenutni **session ID** iz access token-a.
-2. Pokrenite skriveni `osk.exe` proces i kratko sačekajte (osigurajte da će oplock biti pokrenut).
+1. Preuzmite trenutni **session ID** iz access tokena.
+2. Pokrenite skrivenu instancu `osk.exe` i kratko sačekajte (kako biste osigurali da se oplock aktivira).
 3. Upišite vrednosti pod kontrolom napadača u:
 - `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
 4. Postavite **oplock** na `C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml`.
-5. Pokrenite **Secure Desktop** (`LockWorkstation()`), što prouzrokuje pokretanje SYSTEM `atbroker.exe` / `osk.exe`.
-6. Kada se oplock aktivira, zamenite `HKLM\...\Session<session id>\ATConfig\osk` sa **registry link**-om ka proizvoljnom cilju.
-7. Sačekajte kratko da SYSTEM kopiranje završi, zatim uklonite link.
+5. Aktivirajte **Secure Desktop** (`LockWorkstation()`), čime se pokreću SYSTEM `atbroker.exe` / `osk.exe`.
+6. Kada se oplock aktivira, zamenite `HKLM\...\Session<session id>\ATConfig\osk` **registry linkom** ka proizvoljnoj meti.
+7. Kratko sačekajte da se SYSTEM kopiranje završi, a zatim uklonite link.<sup>[[1]](#references)</sup>
 
-## Pretvaranje primitiva u izvršenje kao SYSTEM
+## Pretvaranje primitive u SYSTEM izvršavanje
 
-Jedan jednostavan lanac je prepisivanje vrednosti **konfiguracije servisa** (npr. `ImagePath`) i zatim pokretanje servisa. RegPwn PoC prepisuje `ImagePath` za **`msiserver`** i pokreće ga instanciranjem **MSI COM object**, što dovodi do izvršenja koda kao **SYSTEM**.
+Jedan jednostavan lanac sastoji se od prepisivanja vrednosti **service configuration** (npr. `ImagePath`), a zatim pokretanja servisa. RegPwn PoC prepisuje `ImagePath` servisa **`msiserver`** i pokreće ga instanciranjem **MSI COM objekta**, što dovodi do izvršavanja koda u kontekstu **SYSTEM**.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Povezano
 
-Za druga ponašanja vezana za Secure Desktop / UIAccess, pogledajte:
+Za druga Secure Desktop / UIAccess ponašanja pogledajte:
 
 {{#ref}}
 uiaccess-admin-protection-bypass.md
@@ -75,7 +75,7 @@ uiaccess-admin-protection-bypass.md
 
 ## Reference
 
-- [RIP RegPwn](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
-- [RegPwn PoC](https://github.com/mdsecactivebreach/RegPwn)
+- [1] [RIP RegPwn](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
+- [2] [RegPwn PoC](https://github.com/mdsecactivebreach/RegPwn)
 
 {{#include ../../banners/hacktricks-training.md}}

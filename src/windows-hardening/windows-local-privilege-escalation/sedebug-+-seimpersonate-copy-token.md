@@ -2,15 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ova stranica pokriva varijantu **manuelne krađe tokena** gde **High Integrity** kontekst koji već ima **`SeDebugPrivilege`** i **`SeImpersonatePrivilege`** otvara odgovarajući **SYSTEM** proces, **duplira njegov token**, i **pokreće novi proces** sa tim tokenom.
+Ova stranica pokriva varijantu **manual token-theft** u kojoj kontekst **High Integrity** koji već ima **`SeDebugPrivilege`** i **`SeImpersonatePrivilege`** otvara odgovarajući **SYSTEM** proces, **duplira njegov token** i **pokreće novi proces** sa tim tokenom.
 
-Ako vam treba samo brz `SYSTEM` shell iz privilegovanog admin procesa, pogledajte i:
+Ako vam je potrebna samo brza **SYSTEM** shell sesija iz privilegovanog admin procesa, pogledajte i:
 
 {{#ref}}
 seimpersonate-from-high-to-system.md
 {{#endref}}
 
-Ako **nemate** path za process-handle, ali imate **`SeImpersonatePrivilege`**, ruta sa **named-pipe / Potato** je obično lakša:
+Ako nemate putanju do process handle-a, ali imate **`SeImpersonatePrivilege`**, ruta **named-pipe / Potato** je obično jednostavnija:
 
 {{#ref}}
 named-pipe-client-impersonation.md
@@ -22,37 +22,37 @@ roguepotato-and-printspoofer.md
 
 ## Quick triage
 
-Pre nego što pokušate token-copy path, potvrdite da je trenutni proces već u korisnom kontekstu:
+Pre nego što pokušate putanju kopiranja tokena, potvrdite da se trenutni proces već nalazi u korisnom kontekstu:
 ```cmd
 whoami /groups | findstr /i "high mandatory"
 whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege"
 ```
 Napomene:
 
-- **`SeDebugPrivilege`** je ono što ti omogućava da otvoriš mnoge **nezaštićene** SYSTEM procese čak i kada bi te njihov DACL inače blokirao.
-- **`SeImpersonatePrivilege`** je ono što čini **`CreateProcessWithTokenW`** praktičnim nakon toga.
-- Ako putanja kopiranja tokena daje samo slab ili filtriran SYSTEM token, jednostavno ukradi iz **drugog SYSTEM procesa**.
+- **`SeDebugPrivilege`** omogućava da otvorite mnoge **nezaštićene** SYSTEM procese čak i kada bi vas njihov DACL uobičajeno blokirao.
+- **`SeImpersonatePrivilege`** je ono što omogućava praktičnu upotrebu funkcije **`CreateProcessWithTokenW`** nakon toga.
+- Ako putanja kopiranja tokena obezbedi samo slab ili filtriran SYSTEM token, jednostavno ga preuzmite iz **drugog SYSTEM procesa**.
 
-## Pažljivo izaberi ciljni proces
+## Pažljivo izaberite ciljni proces
 
-Tehnika se obično prikazuje protiv **`lsass.exe`**, ali na modernom Windowsu to je često **pogrešan cilj**:
+Ova tehnika se obično prikazuje na primeru procesa **`lsass.exe`**, ali je on na modernom Windowsu često **pogrešna meta**:
 
-- Ako je **LSA Protection / RunAsPPL** omogućen, **`lsass.exe`** je zaštićen i normalan admin proces sa **`SeDebugPrivilege`** i dalje neće moći da ga otvori.
-- Prednost daj **ne-PPL SYSTEM procesima** kao što su **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`**, ili ranoj instanci **`svchost.exe`**.
-- **Zaštićeni procesi** i neki posebni procesi kao što su **`System`** ili **`csrss.exe`** nisu realni ciljevi iz user-mode okruženja za ovu tehniku.
-- Koristi **Process Hacker / Process Explorer** pokrenut elevated da proveriš da li ciljni token zaista ima privilegije koje želiš pre nego što ga dupliraš.
+- Ako je omogućena zaštita **LSA Protection / RunAsPPL**, **`lsass.exe`** je zaštićen i običan administratorski proces sa privilegijom `SeDebugPrivilege` i dalje neće moći da ga otvori.<sup>[[2]](#references)</sup>
+- Dajte prednost **ne-PPL SYSTEM procesima**, kao što su **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`** ili ranija instanca procesa **`svchost.exe`**.
+- **Zaštićeni procesi** i neki posebni procesi, kao što su **`System`** ili **`csrss.exe`**, nisu realne user-mode mete za ovu tehniku.
+- Koristite **Process Hacker / Process Explorer** sa povišenim privilegijama da proverite da li ciljni token zaista ima privilegije koje želite pre nego što ga duplicirate.
 
-## Detalji API-ja koji su bitni u praksi
+## API detalji koji su važni u praksi
 
-Mnogo javnih PoC-ova traži **`PROCESS_ALL_ACCESS`** i **`TOKEN_ALL_ACCESS`**, ali to je bučnije nego što je potrebno. U praksi:
+Mnogi javno dostupni PoC-ovi zahtevaju **`PROCESS_ALL_ACCESS`** i **`TOKEN_ALL_ACCESS`**, ali to stvara više buke nego što je potrebno. U praksi:
 
-- Otvori ciljni proces samo sa pravima koja su ti potrebna (obično **`PROCESS_QUERY_INFORMATION`** ili **`PROCESS_QUERY_LIMITED_INFORMATION`**).
-- Otvori token sa pravima potrebnim za kreiranje procesa: **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
-- Koristi **`DuplicateTokenEx(..., TokenPrimary, ...)`** da napraviš **primary token**; samo impersonation token nije dovoljan za kreiranje novog procesa.
-- Ako **`CreateProcessWithTokenW`** padne sa **`1314`**, pređi na **`CreateProcessAsUserW`**.
-- Ako pokrećeš iz **servisa / Session 0**, zapamti da **`CreateProcessWithTokenW`** ostavlja child proces u **sesiji pozivaoca**. Ako ti treba vidljiv desktop shell, koristi **`CreateProcessAsUserW`** i prebaci token u željenu sesiju.
+- Otvorite ciljni proces samo sa pravima koja su vam potrebna (obično **`PROCESS_QUERY_INFORMATION`** ili **`PROCESS_QUERY_LIMITED_INFORMATION`**).
+- Otvorite token sa pravima potrebnim za kreiranje procesa: **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
+- Koristite **`DuplicateTokenEx(..., TokenPrimary, ...)`** da biste kreirali **primarni token**; sam impersonation token nije dovoljan za kreiranje novog procesa.
+- Ako **`CreateProcessWithTokenW`** ne uspe sa greškom **`1314`**, pređite na **`CreateProcessAsUserW`**.
+- Ako pokrećete proces iz **service / Session 0**, imajte na umu da **`CreateProcessWithTokenW`** zadržava child proces u **session** pozivaoca. Ako vam je potreban vidljiv desktop shell, koristite **`CreateProcessAsUserW`** i premestite token u željenu sesiju.<sup>[[1]](#references)</sup>
 
-Minimalni moderni tok izgleda ovako:
+Minimalni savremeni tok izgleda ovako:
 ```c
 HANDLE hp = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
 HANDLE hTok = NULL, hDup = NULL;
@@ -63,15 +63,15 @@ CreateProcessWithTokenW(hDup, LOGON_WITH_PROFILE,
 L"C:\\Windows\\System32\\cmd.exe",
 NULL, 0, NULL, NULL, &si, &pi);
 ```
-## Full service PoC
+## Potpuni PoC za service
 
-Sledeći kod **koristi privilegije `SeDebugPrivilege` i `SeImpersonatePrivilege`** da kopira token iz **procesa koji radi kao SYSTEM** i sa **svim token privilegijama**. U ovom slučaju, kod može da se kompajlira i koristi kao **Windows service binary** da bi se proverilo da li primitv funkcioniše.
+Sledeći kod **eksploatiše privilegije `SeDebugPrivilege` i `SeImpersonatePrivilege`** kako bi kopirao token iz **procesa koji se izvršava kao SYSTEM** i sa **svim token privilegijama**. U ovom slučaju, kod se može kompajlirati i koristiti kao **Windows service binary** za proveru da li primitive funkcioniše.<sup>[[3]](#references)</sup>
 
-Glavni deo **koda gde dolazi do elevation** nalazi se unutar funkcije **`Exploit`**. Unutar te funkcije možeš da vidiš da se traži **`lsass.exe`**, njegov **token se kopira**, i na kraju se taj token koristi za pokretanje novog **`cmd.exe`** sa svim privilegijama kopiranog tokena.
+Glavni deo **koda u kojem dolazi do eskalacije** nalazi se unutar funkcije **`Exploit`**. Unutar te funkcije možete videti da se **`lsass.exe`** pretražuje, njegov **token se kopira**, a zatim se taj token koristi za pokretanje novog **`cmd.exe`** sa svim privilegijama kopiranog tokena.
 
-Na modernim hostovima, često ćeš želeti da zameniš **`lsass.exe`** nekim drugim **non-PPL SYSTEM procesom** kao što su **`winlogon.exe`**, **`wininit.exe`**, ili **`services.exe`**.
+Na modernim hostovima često ćete želeti da zamenite **`lsass.exe`** drugim **SYSTEM procesom koji nije PPL**, kao što su **`winlogon.exe`**, **`wininit.exe`** ili **`services.exe`**.
 
-Drugi procesi koji rade kao SYSTEM sa svim ili većinom token privilegija su: **`services.exe`**, **`svchost.exe`** (neki od prvih), **`wininit.exe`**, **`csrss.exe`**... Zapamti da generalno **nećeš moći da kopiraš token iz protected process-a**.
+Drugi procesi koji se izvršavaju kao SYSTEM i imaju sve ili većinu token privilegija su: **`services.exe`**, **`svchost.exe`** (neki od prvih), **`wininit.exe`**, **`csrss.exe`**... Imajte na umu da generalno **nećete moći da kopirate token iz zaštićenog procesa**.
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>
@@ -278,6 +278,8 @@ return 0;
 ```
 ## Reference
 
-- [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
-- [Configure added LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
+- [1] [CreateProcessWithTokenW funkcija (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [2] [Konfigurisanje dodatne LSA zaštite (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
+- [3] [Pokretanje mog programa kao servisa (cboard.cprogramming.com) – Windows service kostur korišćen u PoC-u](https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html)
+
 {{#include ../../banners/hacktricks-training.md}}

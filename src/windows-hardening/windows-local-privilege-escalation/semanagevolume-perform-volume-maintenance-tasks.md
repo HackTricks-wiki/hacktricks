@@ -4,26 +4,26 @@
 
 ## Pregled
 
-Windows korisničko pravo: Perform volume maintenance tasks (constant: SeManageVolumePrivilege).
+Korisničko pravo u Windowsu: Obavljanje zadataka održavanja volumena (konstanta: SeManageVolumePrivilege).
 
-Nositelji mogu da izvršavaju operacije niskog nivoa nad volumenima kao što su defragmentacija, kreiranje/brisanje volumena i održavanje I/O-a. Kritično za napadače, ovo pravo omogućava otvaranje raw volume device handles (npr. \\.\C:) i slanje direktnih disk I/O operacija koje zaobilaze NTFS file ACLs. Sa raw pristupom možete kopirati bajtove bilo kog fajla na volumenu čak i ako je pristup odbijen DACL-om, parsiranjem filesystem struktura offline ili korišćenjem alata koji čitaju na nivou blokova/klastera.
+Nosioci ovog prava mogu da obavljaju operacije niskog nivoa nad volumenima, kao što su defragmentacija, kreiranje/uklanjanje volumena i maintenance IO. Za napadače je od ključne važnosti to što ovo pravo omogućava otvaranje raw handles uređaja volumena (npr. \\.\C:) i izdavanje direktnih disk I/O operacija koje zaobilaze NTFS ACL-ove datoteka. Uz raw pristup možete kopirati bajtove bilo koje datoteke na volumenu čak i ako je pristup zabranjen putem DACL-a, analiziranjem struktura filesystema offline ili korišćenjem alata koji čitaju podatke na nivou blokova/klastera.
 
-Podrazumevano: članovi Administrators grupe na serverima i domain controller-ima.
+Podrazumevano: Administratori na serverima i domain controllerima.<sup>[[1]](#references)</sup>
 
 ## Scenariji zloupotrebe
 
-- Proizvoljno čitanje fajlova zaobilaženjem ACL-ova čitanjem disk uređaja (npr. eksfiltracija osetljivog sistemskog materijala zaštićenog od strane sistema, kao što su machine private keys under %ProgramData%\Microsoft\Crypto\RSA\MachineKeys and %ProgramData%\Microsoft\Crypto\Keys, registry hives, DPAPI masterkeys, SAM, ntds.dit via VSS, itd.).
-- Zaobilaženje zaključanih/privilegovanih putanja (C:\Windows\System32\…) kopiranjem bajtova direktno sa raw uređaja.
-- U AD CS okruženjima, eksfiltrirajte CA-ov materijal ključeva (machine key store) kako biste izradili “Golden Certificates” i oponašali bilo koji domain principal via PKINIT. Pogledajte link ispod.
+- Proizvoljno čitanje datoteka zaobilaženjem ACL-ova čitanjem disk uređaja (npr. eksfiltracija osetljivog materijala zaštićenog sistemom, kao što su privatni ključevi računara u %ProgramData%\Microsoft\Crypto\RSA\MachineKeys i %ProgramData%\Microsoft\Crypto\Keys, registry hive-ovi, DPAPI masterkeys, SAM, ntds.dit putem VSS-a itd.).
+- Zaobilaženje zaključanih/privilegovanih putanja (C:\Windows\System32\…) direktnim kopiranjem bajtova sa raw uređaja.
+- U AD CS okruženjima, eksfiltracija materijala ključa CA-a (machine key store) radi kreiranja “Golden Certificates” i impersonacije bilo kog domain principal-a putem PKINIT-a. Pogledajte link ispod.<sup>[[2]](#references)</sup>
 
-Napomena: I dalje vam je potreban parser za NTFS strukture osim ako se ne oslanjate na pomoćne alate. Mnogi gotovi alati apstrahuju raw pristup.
+Napomena: I dalje vam je potreban parser za NTFS strukture, osim ako se oslanjate na pomoćne alate. Mnogi gotovi alati apstrahuju raw pristup.
 
 ## Praktične tehnike
 
-- Otvorite raw volume handle i čitajte klastere:
+- Otvorite raw handle volumena i čitajte klastere:
 
 <details>
-<summary>Kliknite za proširenje</summary>
+<summary>Kliknite za proširivanje</summary>
 ```powershell
 # PowerShell – read first MB from C: raw device (requires SeManageVolumePrivilege)
 $fs = [System.IO.File]::Open("\\.\\C:",[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::ReadWrite)
@@ -49,38 +49,38 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- Koristite NTFS-aware alat za oporavak specifičnih fajlova sa raw volume:
-- RawCopy/RawCopy64 (kopija na nivou sektora datoteka koje su u upotrebi)
-- FTK Imager or The Sleuth Kit (izrada image kopije samo za čitanje, zatim iskapanje datoteka)
-- vssadmin/diskshadow + shadow copy, zatim kopirajte ciljnu datoteku iz snapshot-a (ako možete da kreirate VSS; često zahteva admin privilegije, ali je obično dostupan istim operatorima koji imaju SeManageVolumePrivilege)
+- Koristite alat sa podrškom za NTFS da biste oporavili određene datoteke iz raw volumena:
+- RawCopy/RawCopy64 (kopiranje datoteka koje su u upotrebi na nivou sektora)
+- FTK Imager ili The Sleuth Kit (imaging samo za čitanje, a zatim carving datoteka)
+- vssadmin/diskshadow + shadow copy, a zatim kopirajte ciljnu datoteku iz snapshot-a (ako možete da kreirate VSS; često zahteva admin privilegije, ali je obično dostupno istim operatorima koji imaju SeManageVolumePrivilege)
 
-Tipične osetljive putanje za ciljanje:
+Tipične osetljive putanje koje treba ciljati:
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
 - %ProgramData%\Microsoft\Crypto\Keys\
-- C:\Windows\System32\config\SAM, SYSTEM, SECURITY (local secrets)
-- C:\Windows\NTDS\ntds.dit (domain controllers – via shadow copy)
-- C:\Windows\System32\CertSrv\CertEnroll\ (CA certs/CRLs; private keys live in the machine key store above)
+- C:\Windows\System32\config\SAM, SYSTEM, SECURITY (lokalne tajne)
+- C:\Windows\NTDS\ntds.dit (domain controllers – putem shadow copy-ja)
+- C:\Windows\System32\CertSrv\CertEnroll\ (CA sertifikati/CRL-ovi; privatni ključevi se nalaze u prethodno navedenom machine key store-u)
 
-## AD CS tie‑in: Forging a Golden Certificate
+## AD CS veza: Forging a Golden Certificate
 
-Ako možete da pročitate Enterprise CA’s private key iz machine key store, možete da forgujete client‑auth certificates za proizvoljne principe i autentifikujete se preko PKINIT/Schannel. Ovo se često naziva Golden Certificate. Pogledajte:
+Ako možete da pročitate privatni ključ Enterprise CA iz machine key store-a, možete da kreirate client-auth sertifikate za proizvoljne principals i da se autentifikujete putem PKINIT/Schannel. Ovo se često naziva Golden Certificate.<sup>[[2]](#references)</sup> Pogledajte:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
 {{#endref}}
 
-(Section: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
+(Odeljak: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
 
-## Detekcija i zaštita
+## Detekcija i hardening
 
 - Strogo ograničite dodelu SeManageVolumePrivilege (Perform volume maintenance tasks) samo pouzdanim administratorima.
-- Pratite Sensitive Privilege Use i otvaranja handle-a procesa prema device objektima kao što su \\.\C:, \\.\PhysicalDrive0.
-- Preferirajte CA ključeve potpomognute HSM/TPM ili DPAPI-NG kako bi čitanje sirovih fajlova ne moglo da povrati ključni materijal u upotrebljivom obliku.
-- Držite uploads, temp i extraction putanje neizvršnim i odvojenim (odbrana u web kontekstu koja se često povezuje sa ovim lancem post‑eksploatacije).
+- Nadgledajte Sensitive Privilege Use i otvaranje process handle-ova prema device objektima kao što su \\.\C:, \\.\PhysicalDrive0.
+- Dajte prednost CA ključevima zaštićenim pomoću HSM/TPM-a ili DPAPI-NG-u, kako raw čitanje datoteka ne bi moglo da povrati materijal ključa u upotrebljivom obliku.
+- Održavajte upload, temp i extraction putanje kao neizvršne i međusobno odvojene (web context defense koji se često kombinuje sa ovim chain-om nakon eksploatacije).
 
 ## Reference
 
-- Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege): https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks
-- 0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate): https://0xdf.gitlab.io/2025/10/04/htb-certificate.html
+- [1] [Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
+- [2] [0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
 
 {{#include ../../banners/hacktricks-training.md}}

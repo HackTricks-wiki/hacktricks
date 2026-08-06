@@ -1,44 +1,44 @@
-# Zaštite Windows kredencijala
+# Zaštite Windows akreditiva
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## WDigest
 
-The [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>) protocol, introduced with Windows XP, is designed for authentication via the HTTP Protocol and is **enabled by default on Windows XP through Windows 8.0 and Windows Server 2003 to Windows Server 2012**. This default setting results in **plain-text password storage in LSASS** (Local Security Authority Subsystem Service). Napadač može koristiti Mimikatz da **izvuče ove kredencijale** izvršavanjem:
+Protokol [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>), uveden sa operativnim sistemom Windows XP, namenjen je autentikaciji putem HTTP protokola i **podrazumevano je omogućen na operativnim sistemima Windows XP do Windows 8.0 i Windows Server 2003 do Windows Server 2012**. Ova podrazumevana postavka dovodi do **čuvanja lozinki u čistom tekstu u LSASS-u** (Local Security Authority Subsystem Service). Napadač može da koristi Mimikatz za **izvlačenje ovih akreditiva** izvršavanjem:<sup>[[8]](#references)</sup>
 ```bash
 sekurlsa::wdigest
 ```
-Da biste **isključili ili uključili ovu funkciju**, _**UseLogonCredential**_ i _**Negotiate**_ ključevi registra unutar _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ moraju biti postavljeni na "1". Ako ovi ključevi **nedostaju ili su postavljeni na "0"**, WDigest je **onemogućen**:
+Da biste **isključili ili uključili ovu funkciju**, ključevi registra _**UseLogonCredential**_ i _**Negotiate**_ unutar _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ moraju biti postavljeni na „1“. Ako ovi ključevi **ne postoje ili su postavljeni na „0“**, WDigest je **onemogućen**:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
-## Zaštita LSA (PP i PPL zaštićeni procesi)
+## LSA zaštita (procesi zaštićeni pomoću PP i PPL)
 
-**Protected Process (PP)** i **Protected Process Light (PPL)** su **Windows zaštite na nivou kernela** dizajnirane da spreče neovlašćeni pristup osetljivim procesima kao što je **LSASS**. Uveden u **Windows Vista**, **PP model** je prvobitno napravljen za **DRM** i omogućavao je zaštitu samo binarnim fajlovima potpisanim posebnim medija sertifikatom. Proces označen kao **PP** može se pristupiti samo od strane drugih procesa koji su **takođe PP** i imaju **jednak ili viši nivo zaštite**, i čak tada, **samo sa ograničenim pristupnim pravima** osim ako nije posebno dozvoljeno.
+**Protected Process (PP)** i **Protected Process Light (PPL)** su **zaštite na nivou Windows kernela** osmišljene da spreče neovlašćen pristup osetljivim procesima kao što je **LSASS**. Uveden u **Windows Vista**, **PP model** je prvobitno kreiran za sprovođenje **DRM** pravila i dozvoljavao je zaštitu samo binarnim datotekama potpisanim pomoću **posebnog medijskog sertifikata**. Proces označen kao **PP** mogu da pristupe samo drugi procesi koji su takođe **PP** i imaju **jednak ili viši nivo zaštite**, a čak i tada, **samo sa ograničenim pravima pristupa**, osim ako pristup nije posebno dozvoljen.
 
-**PPL**, uveden u **Windows 8.1**, predstavlja fleksibilniju verziju PP. Omogućava **šire slučajeve upotrebe** (npr. LSASS, Defender) uvodeći **"protection levels"** zasnovane na polju **digitalnog potpisa EKU (Enhanced Key Usage)**. Nivo zaštite se čuva u polju `EPROCESS.Protection`, koje je `PS_PROTECTION` struktura sa:
-- **Type** (`Protected` or `ProtectedLight`)
-- **Signer** (npr. `WinTcb`, `Lsa`, `Antimalware`, itd.)
+**PPL**, uveden u **Windows 8.1**, fleksibilnija je verzija sistema PP. Omogućava **širu primenu** (npr. LSASS, Defender) uvođenjem **„nivoa zaštite“** zasnovanih na polju **EKU (Enhanced Key Usage)** digitalnog potpisa. Nivo zaštite se čuva u polju `EPROCESS.Protection`, koje je struktura `PS_PROTECTION` sa sledećim elementima:
+- **Type** (`Protected` ili `ProtectedLight`)
+- **Signer** (npr. `WinTcb`, `Lsa`, `Antimalware` itd.)
 
-Ova struktura je upakovana u jedan bajt i određuje **ko kome može pristupiti**:
-- **Više signer vrednosti mogu pristupati nižim**
-- **PPL ne mogu pristupati PP**
-- **Nezaštićeni procesi ne mogu pristupiti nijednom PPL/PP**
+Ova struktura je upakovana u jedan bajt i određuje **ko može da pristupi kome**:
+- **Više vrednosti signer-a mogu da pristupe nižim vrednostima**
+- **PPL procesi ne mogu da pristupe PP procesima**
+- **Nezaštićeni procesi ne mogu da pristupe nijednom PPL/PP procesu**
 
 ### Šta treba da znate iz ofanzivne perspektive
 
-- Kada **LSASS radi kao PPL**, pokušaji da se otvori korišćenjem `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` iz običnog administratorskog konteksta **ne uspevaju i vraćaju `0x5 (Access Denied)`**, čak i ako je `SeDebugPrivilege` omogućen.
-- Možete **proveriti nivo zaštite LSASS-a** koristeći alate poput Process Hacker ili programatski čitanjem vrednosti `EPROCESS.Protection`.
-- LSASS obično ima `PsProtectedSignerLsa-Light` (`0x41`), kojem mogu pristupiti **samo procesi potpisani signerom višeg nivoa**, kao što je `WinTcb` (`0x61` ili `0x62`).
-- PPL je **ograničenje samo u userland-u**; **kod na nivou kernela ga može u potpunosti zaobići**.
-- To što je LSASS PPL **ne sprečava credential dumping ako možete izvršiti kernel shellcode** ili **iskoristiti visokoprivilegovani proces sa odgovarajućim pristupom**.
-- **Podesavanje ili uklanjanje PPL** zahteva restart ili **Secure Boot/UEFI podešavanja**, koja mogu sačuvati PPL podešavanje čak i nakon što su promene u registru poništene.
+- Kada **LSASS radi kao PPL**, pokušaji otvaranja pomoću `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` iz normalnog administratorskog konteksta **ne uspevaju uz grešku `0x5 (Access Denied)`**, čak i kada je `SeDebugPrivilege` omogućen.
+- **Nivo zaštite LSASS-a** možete proveriti pomoću alata kao što je Process Hacker ili programski, čitanjem vrednosti `EPROCESS.Protection`.
+- LSASS će obično imati `PsProtectedSignerLsa-Light` (`0x41`), čemu mogu da pristupe **samo procesi potpisani pomoću signer-a višeg nivoa**, kao što je `WinTcb` (`0x61` ili `0x62`).
+- PPL je **ograničenje koje važi samo u Userland-u**; kod na nivou kernela može u potpunosti da ga zaobiđe.
+- To što je LSASS PPL **ne sprečava dumpovanje credential-a** ako možete da izvršite kernel shellcode ili da iskoristite proces sa visokim privilegijama i odgovarajućim pristupom.
+- **Postavljanje ili uklanjanje PPL-a** zahteva reboot ili podešavanja **Secure Boot/UEFI**, koja mogu da zadrže PPL podešavanje čak i nakon vraćanja izmena u registru.
 
-### Create a PPL process at launch (documented API)
+### Kreiranje PPL procesa prilikom pokretanja (dokumentovani API)
 
-Windows pruža dokumentovan način da se zatraži Protected Process Light nivo za child process tokom kreiranja koristeći extended startup attribute list. Ovo ne zaobilazi zahteve za potpisivanjem — ciljna slika mora biti potpisana za traženu signer klasu.
+Windows pruža dokumentovan način za zahtev za Protected Process Light nivo za child process tokom kreiranja, pomoću proširene liste atributa za pokretanje. Ovo ne zaobilazi zahteve za potpisivanje — ciljana image datoteka mora biti potpisana za zahtevanu signer klasu.
 
-Minimalan tok u C/C++:
+Minimalni tok u C/C++:
 ```c
 // Request a PPL protection level for the child process at creation time
 // Requires Windows 8.1+ and a properly signed image for the selected level
@@ -81,94 +81,94 @@ return 0;
 }
 ```
 Napomene i ograničenja:
-- Koristite `STARTUPINFOEX` sa `InitializeProcThreadAttributeList` i `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL, ...)`, zatim prosledite `EXTENDED_STARTUPINFO_PRESENT` funkcijama `CreateProcess*`.
-- Zaštitni `DWORD` može biti postavljen na konstante kao što su `PROTECTION_LEVEL_WINTCB_LIGHT`, `PROTECTION_LEVEL_WINDOWS`, `PROTECTION_LEVEL_WINDOWS_LIGHT`, `PROTECTION_LEVEL_ANTIMALWARE_LIGHT`, ili `PROTECTION_LEVEL_LSA_LIGHT`.
-- Child proces počinje kao PPL samo ako je njegova image potpisana za tu signer klasu; u protivnom kreiranje procesa pada, obično sa `ERROR_INVALID_IMAGE_HASH (577)` / `STATUS_INVALID_IMAGE_HASH (0xC0000428)`.
-- Ovo nije bypass — to je podržani API namenjen odgovarajuće potpisanim image-ima. Korisno za ojačavanje alata ili validaciju PPL-zaštićenih konfiguracija.
+- Koristite `STARTUPINFOEX` sa `InitializeProcThreadAttributeList` i `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL, ...)`, a zatim prosledite `EXTENDED_STARTUPINFO_PRESENT` funkciji `CreateProcess*`.<sup>[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+- `DWORD` zaštite može biti postavljen na konstante kao što su `PROTECTION_LEVEL_WINTCB_LIGHT`, `PROTECTION_LEVEL_WINDOWS`, `PROTECTION_LEVEL_WINDOWS_LIGHT`, `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` ili `PROTECTION_LEVEL_LSA_LIGHT`.
+- Child se pokreće kao PPL samo ako je njegov image potpisan za tu signer klasu; u suprotnom kreiranje procesa ne uspeva, najčešće uz `ERROR_INVALID_IMAGE_HASH (577)` / `STATUS_INVALID_IMAGE_HASH (0xC0000428)`.
+- Ovo nije bypass — u pitanju je podržani API namenjen odgovarajuće potpisanim image fajlovima. Korisno je za hardening alata ili proveru konfiguracija zaštićenih pomoću PPL-a.
 
-Example CLI using a minimal loader:
+Primer CLI-ja koji koristi minimalni loader:<sup>[[1]](#references)</sup>
 - Antimalware signer: `CreateProcessAsPPL.exe 3 C:\Tools\agent.exe --svc`
 - LSA-light signer: `CreateProcessAsPPL.exe 4 C:\Windows\System32\notepad.exe`
 
-**Bypass PPL protections options:**
+**Opcije za bypass PPL zaštite:**
 
-Ako želite da dump-ujete LSASS uprkos PPL, imate 3 glavne opcije:
-1. **Use a signed kernel driver (e.g., Mimikatz + mimidrv.sys)** to **remove LSASS’s protection flag**:
+Ako želite da uradite dump LSASS-a uprkos PPL-u, imate 3 glavne opcije:
+1. **Koristite potpisani kernel driver (npr. Mimikatz + mimidrv.sys)** da biste **uklonili LSASS-ovu zastavicu zaštite**:
 
-![](../../images/mimidrv.png)
+![Izlaz Mimikatz mimidrv driver-a koji prikazuje interakciju sa zaštitom kredencijala](../../images/mimidrv.png)
 
-2. **Bring Your Own Vulnerable Driver (BYOVD)** to run custom kernel code and disable the protection. Tools like **PPLKiller**, **gdrv-loader**, or **kdmapper** make this feasible.
-3. **Steal an existing LSASS handle** from another process that has it open (e.g., an AV process), then **duplicate it** into your process. This is the basis of the `pypykatz live lsa --method handledup` technique.
-4. **Abuse some privileged process** that will allow you to load arbitrary code into its address space or inside another privileged process, effectively bypassing the PPL restrictions. You can check an example of this in [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) or [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump).
+2. **Bring Your Own Vulnerable Driver (BYOVD)** da biste pokrenuli prilagođeni kernel code i onemogućili zaštitu. Alati kao što su **PPLKiller**, **gdrv-loader** ili **kdmapper** čine ovo izvodljivim.
+3. **Ukradite postojeći LSASS handle** iz drugog procesa koji ga već ima otvorenog (npr. AV procesa), a zatim ga **duplicirajte** u svoj proces. Ovo je osnova tehnike `pypykatz live lsa --method handledup`.
+4. **Zloupotrebite privilegovani proces** koji vam omogućava da učitate proizvoljni code u njegov address space ili unutar drugog privilegovanog procesa, čime se praktično zaobilaze PPL ograničenja. Primer ovoga možete pronaći u [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) ili na [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump).
 
-**Check current status of LSA protection (PPL/PP) for LSASS**:
+**Provera trenutnog statusa LSA zaštite (PPL/PP) za LSASS**:
 ```bash
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
-Kada pokrenete **`mimikatz privilege::debug sekurlsa::logonpasswords`** verovatno će se završiti greškom sa kodom `0x00000005` zbog ovoga.
+Kada pokrenete **`mimikatz privilege::debug sekurlsa::logonpasswords`**, verovatno će doći do greške sa kodom `0x00000005` zbog ovoga.
 
-- Za više informacija o ovoj proveri [https://itm4n.github.io/lsass-runasppl/](https://itm4n.github.io/lsass-runasppl/)
+- Za više informacija o ovoj proveri pogledajte [https://itm4n.github.io/lsass-runasppl/](https://itm4n.github.io/lsass-runasppl/)<sup>[[5]](#references)</sup>
 
 
 ## Credential Guard
 
-**Credential Guard**, funkcija ekskluzivna za **Windows 10 (Enterprise and Education editions)**, pojačava bezbednost mašinskih kredencijala koristeći **Virtual Secure Mode (VSM)** i **Virtualization Based Security (VBS)**. Ona koristi CPU ekstenzije za virtualizaciju da izoluje ključne procese u zaštićenom prostoru memorije, van dometa glavnog operativnog sistema. Ova izolacija obezbeđuje da čak i kernel ne može pristupiti memoriji u VSM, efikasno štiteći kredencijale od napada poput **pass-the-hash**. **Local Security Authority (LSA)** radi u ovom sigurnom okruženju kao trustlet, dok proces **LSASS** u glavnom OS-u deluje samo kao posrednik koji komunicira sa LSA u VSM.
+**Credential Guard**, funkcija ekskluzivna za **Windows 10 (Enterprise i Education izdanja)**, poboljšava bezbednost akreditiva računara pomoću **Virtual Secure Mode (VSM)** i **Virtualization Based Security (VBS)**. Ona koristi CPU virtualization ekstenzije za izolovanje ključnih procesa unutar zaštićenog memorijskog prostora, van domašaja glavnog operativnog sistema. Ova izolacija obezbeđuje da čak ni kernel ne može da pristupi memoriji u VSM-u, čime se akreditivi efikasno štite od napada kao što je **pass-the-hash**. **Local Security Authority (LSA)** radi unutar ovog bezbednog okruženja kao trustlet, dok **LSASS** proces u glavnom OS-u služi samo kao komunikator sa LSA-om u VSM-u.
 
-Po defaultu, **Credential Guard** nije aktiviran i zahteva ručnu aktivaciju u organizaciji. On je značajan za poboljšanje sigurnosti protiv alata poput **Mimikatz**, koji su ograničeni u mogućnosti izvlačenja kredencijala. Ipak, ranjivosti se i dalje mogu iskoristiti dodavanjem prilagođenih **Security Support Providers (SSP)** koji mogu uhvatiti kredencijale u čistom tekstu tokom pokušaja prijave.
+Po podrazumevanim podešavanjima, **Credential Guard** nije aktivan i zahteva ručnu aktivaciju unutar organizacije. On je ključan za poboljšanje zaštite od alata kao što je **Mimikatz**, kojima je otežano izvlačenje akreditiva. Međutim, ranjivosti se i dalje mogu iskoristiti dodavanjem prilagođenih **Security Support Providers (SSP)** za prikupljanje akreditiva u clear text formatu tokom pokušaja prijavljivanja.
 
-Da biste proverili status aktivacije **Credential Guard**, možete pregledati registry ključ _**LsaCfgFlags**_ pod _**HKLM\System\CurrentControlSet\Control\LSA**_. Vrednost "**1**" označava aktivaciju sa **UEFI lock**, "**2**" bez lock-a, a "**0**" označava da nije omogućeno. Ova provera u registry-u, iako dobar indikator, nije jedini korak za omogućavanje Credential Guard. Detaljna uputstva i PowerShell skripta za omogućavanje ove funkcije dostupni su online.
+Da biste proverili status aktivacije funkcije **Credential Guard**, možete pregledati ključ _**LsaCfgFlags**_ u okviru _**HKLM\System\CurrentControlSet\Control\LSA**_. Vrednost "**1**" označava aktivaciju sa **UEFI lock**, "**2**" aktivaciju bez zaključavanja, dok "**0**" označava da funkcija nije omogućena. Ova provera registra, iako predstavlja snažan pokazatelj, nije jedini korak za omogućavanje funkcije Credential Guard. Detaljna uputstva i PowerShell skripta za omogućavanje ove funkcije dostupni su online.
 ```bash
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
-For a comprehensive understanding and instructions on enabling **Credential Guard** in Windows 10 and its automatic activation in compatible systems of **Windows 11 Enterprise and Education (version 22H2)**, visit [Microsoft's documentation](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
+Za sveobuhvatno razumevanje i uputstva za omogućavanje **Credential Guard** u sistemu Windows 10, kao i za njegovo automatsko aktiviranje na kompatibilnim sistemima **Windows 11 Enterprise and Education (version 22H2)**, posetite [Microsoft-ovu dokumentaciju](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).<sup>[[9]](#references)</sup>
 
-Further details on implementing custom SSPs for credential capture are provided in [this guide](../active-directory-methodology/custom-ssp.md).
+Dodatne informacije o implementaciji prilagođenih SSP-ova za hvatanje credentials pružene su u [ovom vodiču](../active-directory-methodology/custom-ssp.md).
 
 ## RDP RestrictedAdmin Mode
 
-**Windows 8.1 and Windows Server 2012 R2** introduced several new security features, including the _**Restricted Admin mode for RDP**_. This mode was designed to enhance security by mitigating the risks associated with [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) attacks.
+**Windows 8.1 and Windows Server 2012 R2** uveli su nekoliko novih bezbednosnih funkcija, uključujući _**Restricted Admin mode for RDP**_. Ovaj režim je osmišljen za poboljšanje bezbednosti ublažavanjem rizika povezanih sa napadima [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/).
 
-Traditionally, when connecting to a remote computer via RDP, your credentials are stored on the target machine. This poses a significant security risk, especially when using accounts with elevated privileges. However, with the introduction of _**Restricted Admin mode**_, this risk is substantially reduced.
+Tradicionalno, prilikom povezivanja sa udaljenim računarom putem RDP-a, vaši credentials se čuvaju na ciljnoj mašini. To predstavlja značajan bezbednosni rizik, naročito kada se koriste nalozi sa povišenim privilegijama. Međutim, uvođenjem _**Restricted Admin mode**_, ovaj rizik je znatno smanjen.
 
-When initiating an RDP connection using the command **mstsc.exe /RestrictedAdmin**, authentication to the remote computer is performed without storing your credentials on it. This approach ensures that, in the event of a malware infection or if a malicious user gains access to the remote server, your credentials are not compromised, as they are not stored on the server.
+Prilikom pokretanja RDP veze pomoću komande **mstsc.exe /RestrictedAdmin**, authentication na udaljenom računaru se obavlja bez čuvanja vaših credentials na njemu. Ovakav pristup obezbeđuje da, u slučaju malware infekcije ili ako zlonamerni korisnik dobije pristup udaljenom serveru, vaši credentials ne budu kompromitovani, jer se ne čuvaju na serveru.
 
-It's important to note that in **Restricted Admin mode**, attempts to access network resources from the RDP session will not use your personal credentials; instead, the **machine's identity** is used.
+Važno je napomenuti da se u **Restricted Admin mode** pokušaji pristupa network resources iz RDP sesije neće obavljati pomoću vaših ličnih credentials; umesto toga koristi se **machine's identity**.
 
-This feature marks a significant step forward in securing remote desktop connections and protecting sensitive information from being exposed in case of a security breach.
+Ova funkcija predstavlja značajan korak napred u zaštiti udaljenih desktop veza i sprečavanju izlaganja osetljivih informacija u slučaju bezbednosnog incidenta.
 
-![](../../images/RAM.png)
+![Windows RAM memory diagram for credential extraction context](../../images/RAM.png)
 
-For more detailed information on visit [this resource](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+Za detaljnije informacije posetite [ovaj resurs](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).<sup>[[6]](#references)</sup>
 
-## Keširani kredencijali
+## Cached Credentials
 
-Windows secures **domain credentials** through the **Local Security Authority (LSA)**, supporting logon processes with security protocols like **Kerberos** and **NTLM**. A key feature of Windows is its capability to cache the **last ten domain logins** to ensure users can still access their computers even if the **domain controller is offline**—a boon for laptop users often away from their company's network.
+Windows štiti **domain credentials** putem komponente **Local Security Authority (LSA)**, pružajući podršku procesima prijavljivanja pomoću bezbednosnih protokola kao što su **Kerberos** i **NTLM**. Važna funkcija sistema Windows jeste mogućnost keširanja **poslednjih deset domain logins**, kako bi korisnici i dalje mogli da pristupe svojim računarima čak i kada je **domain controller offline** — što je naročito korisno za korisnike laptopova koji se često nalaze van mreže svoje kompanije.
 
-The number of cached logins is adjustable via a specific **registry key or group policy**. To view or change this setting, the following command is utilized:
+Broj keširanih prijavljivanja može se podesiti putem određenog **registry key or group policy**. Za pregled ili promenu ove postavke koristi se sledeća komanda:
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
-Pristup ovim keširanim akreditivima je strogo kontrolisan, i samo nalog **SYSTEM** ima potrebna ovlašćenja da ih pregleda. Administratori kojima je potreban pristup ovim informacijama moraju to učiniti sa privilegijama korisnika SYSTEM. Akreditivi se čuvaju na: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
+Pristup ovim keširanim akreditivima je strogo kontrolisan, pri čemu samo nalog **SYSTEM** ima potrebne dozvole za njihov pregled. Administratori kojima je potreban pristup ovim informacijama moraju to učiniti sa privilegijama SYSTEM korisnika. Akreditivi su sačuvani na lokaciji: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
 
-**Mimikatz** se može koristiti za izdvajanje ovih keširanih akreditiva koristeći komandu `lsadump::cache`.
+**Mimikatz** se može koristiti za izdvajanje ovih keširanih akreditiva pomoću komande `lsadump::cache`.
 
-Za više detalja, originalni [izvor](http://juggernaut.wikidot.com/cached-credentials) sadrži detaljne informacije.
+Za dodatne detalje, originalni [izvor](http://juggernaut.wikidot.com/cached-credentials) pruža sveobuhvatne informacije.<sup>[[7]](#references)</sup>
 
 ## Protected Users
 
-Članstvo u **Protected Users group** uvodi nekoliko poboljšanja bezbednosti za korisnike, obezbeđujući viši nivo zaštite protiv krađe i zloupotrebe akreditiva:
+Članstvo u grupi **Protected Users** uvodi nekoliko bezbednosnih unapređenja za korisnike, obezbeđujući viši nivo zaštite od krađe i zloupotrebe akreditiva:
 
-- **Credential Delegation (CredSSP)**: Čak i ako je Group Policy podešavanje za **Allow delegating default credentials** omogućeno, akreditivi Protected Users u plain-text formatu neće biti keširani.
-- **Windows Digest**: Počevši od **Windows 8.1 and Windows Server 2012 R2**, sistem neće keširati akreditive Protected Users u plain-text formatu, bez obzira na status Windows Digest.
-- **NTLM**: Sistem neće keširati akreditive Protected Users u plain-text obliku niti NT one-way functions (NTOWF).
-- **Kerberos**: Za Protected Users, Kerberos autentifikacija neće generisati **DES** ili **RC4 keys**, niti će keširati akreditive u plain-text formatu ili dugoročne ključeve nakon inicijalnog dobijanja Ticket-Granting Ticket (TGT).
-- **Offline Sign-In**: Za Protected Users se neće kreirati keširani verifikator pri prijavi ili otključavanju, što znači da offline prijava nije podržana za ove naloge.
+- **Delegiranje akreditiva (CredSSP)**: Čak i ako je podešavanje Group Policy-ja za **Allow delegating default credentials** omogućeno, akreditivi Protected Users u čistom tekstu neće biti keširani.
+- **Windows Digest**: Počev od **Windows 8.1 i Windows Server 2012 R2**, sistem neće keširati akreditive Protected Users u čistom tekstu, bez obzira na status Windows Digest-a.
+- **NTLM**: Sistem neće keširati akreditive Protected Users u čistom tekstu niti njihove jednosmerne NT funkcije (NTOWF).
+- **Kerberos**: Kod Protected Users korisnika, Kerberos autentifikacija neće generisati **DES** ili **RC4 ključeve**, niti će keširati akreditive u čistom tekstu ili dugoročne ključeve nakon početnog pribavljanja Ticket-Granting Ticket-a (TGT).
+- **Prijavljivanje van mreže**: Za Protected Users korisnike, pri prijavljivanju ili otključavanju neće biti kreiran keširani verifikator, što znači da prijavljivanje van mreže nije podržano za ove naloge.
 
-Ove zaštite se aktiviraju u trenutku kada se korisnik koji je član **Protected Users group** prijavi na uređaj. To osigurava da su ključne mere bezbednosti na mestu kako bi se zaštitilo od različitih metoda kompromitovanja akreditiva.
+Ove zaštite se aktiviraju u trenutku kada se korisnik, koji je član grupe **Protected Users**, prijavi na uređaj. Time se obezbeđuje da su ključne bezbednosne mere na snazi radi zaštite od različitih metoda kompromitovanja akreditiva.
 
-Za detaljnije informacije, konsultujte zvaničnu [dokumentaciju](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
+Za detaljnije informacije pogledajte zvaničnu [dokumentaciju](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).<sup>[[10]](#references)</sup>
 
-**Tabela iz** [**the docs**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
+**Tabela iz** [**dokumentacije**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**<sup>[[11]](#references)</sup>
 
 | Windows Server 2003 RTM | Windows Server 2003 SP1+ | <p>Windows Server 2012,<br>Windows Server 2008 R2,<br>Windows Server 2008</p> | Windows Server 2016          |
 | ----------------------- | ------------------------ | ----------------------------------------------------------------------------- | ---------------------------- |
@@ -189,12 +189,18 @@ Za detaljnije informacije, konsultujte zvaničnu [dokumentaciju](https://docs.mi
 | Schema Admins           | Schema Admins            | Schema Admins                                                                 | Schema Admins                |
 | Server Operators        | Server Operators         | Server Operators                                                              | Server Operators             |
 
-## References
+## Reference
 
-- [CreateProcessAsPPL – minimal PPL process launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
-- [STARTUPINFOEX structure (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-startupinfoexw)
-- [InitializeProcThreadAttributeList (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-initializeprocthreadattributelist)
-- [UpdateProcThreadAttribute (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
-- [LSASS RunAsPPL – background and internals](https://itm4n.github.io/lsass-runasppl/)
+- [1] [CreateProcessAsPPL – minimalni PPL process launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
+- [2] [STARTUPINFOEX struktura (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-startupinfoexw)
+- [3] [InitializeProcThreadAttributeList (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-initializeprocthreadattributelist)
+- [4] [UpdateProcThreadAttribute (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
+- [5] [LSASS RunAsPPL – pozadina i interni detalji](https://itm4n.github.io/lsass-runasppl/)
+- [6] [Restricted Admin Mode za RDP](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/)
+- [7] [Keširani akreditivi - Juggernaut AppSec Wiki](http://juggernaut.wikidot.com/cached-credentials)
+- [8] [WDigest Authentication (Microsoft TechNet)](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>)
+- [9] [Upravljanje Windows Defender Credential Guard funkcijom (Microsoft Learn)](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage)
+- [10] [Protected Users Security Group (Microsoft Learn)](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group)
+- [11] [Dodatak C: Zaštićeni nalozi i grupe u Active Directory-ju (Microsoft Learn)](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,32 +1,32 @@
-# Integrity Levels
+# Nivoi integriteta
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Integrity Levels
+## Nivoi integriteta
 
-U Windows Vista i novijim verzijama, svi zaštićeni predmeti dolaze sa oznakom **nivoa integriteta**. Ova postavka uglavnom dodeljuje "srednji" nivo integriteta datotekama i registrijskim ključevima, osim za određene foldere i datoteke kojima Internet Explorer 7 može pristupiti na niskom nivou integriteta. Podrazumevano ponašanje je da procesi koje pokreću standardni korisnici imaju srednji nivo integriteta, dok usluge obično rade na sistemskom nivou integriteta. Oznaka visokog integriteta štiti korenski direktorijum.
+U Windows Vista i novijim verzijama, sve zaštićene stavke imaju oznaku **nivoa integriteta**. Ova postavka uglavnom dodeljuje "srednji" nivo integriteta datotekama i ključevima registra, osim određenim fasciklama i datotekama u koje Internet Explorer 7 može da upisuje na niskom nivou integriteta. Podrazumevano ponašanje je da procesi koje pokreću standardni korisnici imaju srednji nivo integriteta, dok servisi obično rade na sistemskom nivou integriteta. Oznaka visokog integriteta štiti korenski direktorijum.
 
-Ključna pravila su da objekti ne mogu biti modifikovani od strane procesa sa nižim nivoom integriteta od nivoa objekta. Nivoi integriteta su:
+Važno pravilo je da procese sa nižim nivoom integriteta nije moguće koristiti za izmenu objekata čiji je nivo viši. Nivoi integriteta su:
 
-- **Untrusted**: Ovaj nivo je za procese sa anonimnim prijavama. %%%Primer: Chrome%%%
-- **Low**: Uglavnom za internet interakcije, posebno u Zaštićenom režimu Internet Explorera, utičući na povezane datoteke i procese, kao i određene foldere poput **Privremenog internet foldera**. Procesi sa niskim integritetom suočavaju se sa značajnim ograničenjima, uključujući nedostatak pristupa za pisanje u registru i ograničen pristup pisanju korisničkog profila.
-- **Medium**: Podrazumevani nivo za većinu aktivnosti, dodeljen standardnim korisnicima i objektima bez specifičnih nivoa integriteta. Čak i članovi Administratorske grupe rade na ovom nivou podrazumevano.
-- **High**: Rezervisan za administratore, omogućavajući im da modifikuju objekte na nižim nivoima integriteta, uključujući one na visokom nivou.
-- **System**: Najviši operativni nivo za Windows kernel i osnovne usluge, van domašaja čak i za administratore, osiguravajući zaštitu vitalnih sistemskih funkcija.
-- **Installer**: Jedinstveni nivo koji stoji iznad svih drugih, omogućavajući objektima na ovom nivou da deinstaliraju bilo koji drugi objekat.
+- **Untrusted**: Ovaj nivo je namenjen procesima sa anonimnim prijavljivanjem. Primer: Chrome
+- **Low**: Uglavnom se koristi za internet interakcije, naročito u Protected Mode-u programa Internet Explorer, što utiče na povezane datoteke i procese, kao i na određene fascikle poput **Temporary Internet Folder**. Procesi sa niskim nivoom integriteta suočavaju se sa značajnim ograničenjima, uključujući zabranu upisivanja u registar i ograničen upis u korisnički profil.
+- **Medium**: Podrazumevani nivo za većinu aktivnosti, dodeljuje se standardnim korisnicima i objektima bez posebno definisanih nivoa integriteta. Čak i članovi grupe Administrators podrazumevano rade na ovom nivou.
+- **High**: Rezervisan je za administratore i omogućava im da menjaju objekte sa nižim nivoima integriteta, uključujući i one na samom visokom nivou.
+- **System**: Najviši operativni nivo za Windows kernel i osnovne servise, nedostupan čak i administratorima, čime se obezbeđuje zaštita ključnih sistemskih funkcija.
+- **Installer**: Jedinstveni nivo koji je iznad svih ostalih i omogućava objektima na ovom nivou da deinstaliraju bilo koji drugi objekat.
 
-Možete dobiti nivo integriteta procesa koristeći **Process Explorer** iz **Sysinternals**, pristupajući **svojstvima** procesa i gledajući karticu "**Security**":
+Nivo integriteta procesa možete dobiti pomoću alata **Process Explorer** iz paketa **Sysinternals**, tako što otvorite **properties** procesa i pogledate karticu "**Security**":
 
-![](<../../images/image (824).png>)
+![Nivoi integriteta - Nivoi integriteta: Nivo integriteta procesa možete dobiti pomoću alata Process Explorer iz paketa Sysinternals, tako što otvorite properties procesa i pogledate karticu "...](<../../images/image (824).png>)
 
-Takođe možete dobiti svoj **trenutni nivo integriteta** koristeći `whoami /groups`
+Svoj **trenutni nivo integriteta** možete dobiti i pomoću komande `whoami /groups`
 
-![](<../../images/image (325).png>)
+![Nivoi integriteta - Nivoi integriteta: Svoj trenutni nivo integriteta možete dobiti i pomoću komande whoami /groups](<../../images/image (325).png>)
 
-### Integrity Levels in File-system
+### Nivoi integriteta u sistemu datoteka
 
-Objekat unutar fajl sistema može zahtevati **minimalni nivo integriteta** i ako proces nema ovaj nivo integriteta, neće moći da interaguje sa njim.\
-Na primer, hajde da **napravimo regularnu datoteku iz konzole regularnog korisnika i proverimo dozvole**:
+Objekat unutar sistema datoteka može zahtevati **minimalni nivo integriteta**, a ako proces nema taj nivo integriteta, neće moći da komunicira sa njim.\
+Na primer, **napravimo običnu datoteku iz konzole standardnog korisnika i proverimo dozvole**:
 ```
 echo asd >asd.txt
 icacls asd.txt
@@ -37,7 +37,7 @@ NT AUTHORITY\INTERACTIVE:(I)(M,DC)
 NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-Sada dodelimo minimalni nivo integriteta od **Visok** za datoteku. Ovo **mora biti urađeno iz konzole** koja se pokreće kao **administrator** jer će **obična konzola** raditi na srednjem nivou integriteta i **neće biti dozvoljeno** dodeliti visoki nivo integriteta objektu:
+Sada dodelimo minimalni nivo integriteta **High** datoteci. Ovo **mora da se uradi iz konzole** pokrenute kao **administrator**, jer će **regularna konzola** raditi na nivou Medium Integrity i **neće moći** da dodeli nivo High Integrity objektu:
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt
@@ -52,7 +52,7 @@ NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 Mandatory Label\High Mandatory Level:(NW)
 ```
-Ovdje stvari postaju zanimljive. Možete vidjeti da korisnik `DESKTOP-IDJHTKP\user` ima **PUNE privilegije** nad datotekom (zaista, to je bio korisnik koji je kreirao datoteku), međutim, zbog minimalnog nivoa integriteta koji je implementiran, neće moći više da modifikuje datoteku osim ako ne radi unutar visokog nivoa integriteta (napomena: moći će da je pročita):
+Ovde stvari postaju zanimljive. Možete videti da korisnik `DESKTOP-IDJHTKP\user` ima **FULL privileges** nad datotekom (zapravo, to je korisnik koji je kreirao datoteku), međutim, zbog implementiranog minimalnog nivoa integriteta više neće moći da izmeni datoteku, osim ako radi unutar visokog nivoa integriteta (imajte na umu da će moći da je čita):
 ```
 echo 1234 > asd.txt
 Access is denied.
@@ -61,12 +61,12 @@ del asd.txt
 C:\Users\Public\asd.txt
 Access is denied.
 ```
-> [!NOTE]
-> **Dakle, kada datoteka ima minimalni nivo integriteta, da biste je izmenili, morate raditi barem na tom nivou integriteta.**
+> [!TIP]
+> **Prema tome, kada datoteka ima minimalni nivo integriteta, da biste je izmenili, morate raditi najmanje na tom nivou integriteta.**
 
 ### Nivoi integriteta u binarnim datotekama
 
-Napravio sam kopiju `cmd.exe` u `C:\Windows\System32\cmd-low.exe` i postavio joj **nivo integriteta na nizak iz administratorske konzole:**
+Napravio sam kopiju datoteke `cmd.exe` u `C:\Windows\System32\cmd-low.exe` i podesio joj **nizak nivo integriteta iz administratorske konzole:**
 ```
 icacls C:\Windows\System32\cmd-low.exe
 C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
@@ -76,16 +76,16 @@ APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
 APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
 Mandatory Label\Low Mandatory Level:(NW)
 ```
-Sada, kada pokrenem `cmd-low.exe`, on će **raditi pod niskim nivoom integriteta** umesto pod srednjim:
+Sada, kada pokrenem `cmd-low.exe`, on će se **pokrenuti pod nivoom niskog integriteta** umesto srednjeg:
 
-![](<../../images/image (313).png>)
+![Nivoi integriteta u sistemu datoteka - Nivoi integriteta u binarnim datotekama: Sada, kada pokrenem cmd-low.exe, on će se pokrenuti pod nivoom niskog integriteta umesto srednjeg](<../../images/image (313).png>)
 
-Za radoznale, ako dodelite visoki nivo integriteta binarnom fajlu (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`), on se neće automatski pokrenuti sa visokim nivoom integriteta (ako ga pozovete iz srednjeg nivoa integriteta --po defaultu-- pokrenuće se pod srednjim nivoom integriteta).
+Za radoznale, ako binarnoj datoteci dodelite visok nivo integriteta (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`), ona se neće automatski pokrenuti sa visokim nivoom integriteta (ako je pozovete iz procesa sa srednjim nivoom integriteta --podrazumevano-- pokrenuće se pod srednjim nivoom integriteta).
 
-### Nivoi Integriteta u Procesima
+### Nivoi integriteta u procesima
 
-Nisu svi fajlovi i fascikle imaju minimalni nivo integriteta, **ali svi procesi rade pod nivoom integriteta**. I slično onome što se desilo sa fajlskim sistemom, **ako proces želi da piše unutar drugog procesa, mora imati barem isti nivo integriteta**. To znači da proces sa niskim nivoom integriteta ne može otvoriti handle sa punim pristupom procesu sa srednjim nivoom integriteta.
+Nemaju sve datoteke i fascikle minimalni nivo integriteta, **ali svi procesi rade pod određenim nivoom integriteta**. Slično kao u sistemu datoteka, **ako proces želi da piše unutar drugog procesa, mora imati najmanje isti nivo integriteta**. To znači da proces sa niskim nivoom integriteta ne može da otvori handle sa potpunim pristupom procesu sa srednjim nivoom integriteta.
 
-Zbog ograničenja komentisanih u ovoj i prethodnoj sekciji, sa bezbednosnog stanovišta, uvek je **preporučljivo pokrenuti proces na najnižem mogućem nivou integriteta**.
+Zbog ograničenja navedenih u ovom i prethodnom odeljku, sa stanovišta bezbednosti uvek se **preporučuje pokretanje procesa na najnižem mogućem nivou integriteta**.
 
 {{#include ../../banners/hacktricks-training.md}}
