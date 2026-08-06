@@ -1,24 +1,34 @@
+# Reverse Shells
+
 {{#include ../../banners/hacktricks-training.md}}
 
-# [**Shells - Linux**](linux.md)
+## [Shells - Linux](linux.md)
 
-# [**Shells - Windows**](windows.md)
+---
 
-# [**MSFVenom - CheatSheet**](msfvenom.md)
+## [Shells - Windows](windows.md)
 
-# [**Full TTYs**](full-ttys.md)
+---
 
-# **Shells generadas automáticamente**
+## [MSFVenom - CheatSheet](msfvenom.md)
 
-- [**https://reverse-shell.sh/**](https://reverse-shell.sh/)
-- [**https://www.revshells.com/**](https://www.revshells.com/)
-- [**https://github.com/ShutdownRepo/shellerator**](https://github.com/ShutdownRepo/shellerator)
-- [**https://github.com/0x00-0x00/ShellPop**](https://github.com/0x00-0x00/ShellPop)
-- [**https://github.com/cybervaca/ShellReverse**](https://github.com/cybervaca/ShellReverse)
-- [**https://liftoff.github.io/pyminifier/**](https://liftoff.github.io/pyminifier/)
-- [**https://github.com/xct/xc/**](https://github.com/xct/xc/)
-- [**https://weibell.github.io/reverse-shell-generator/**](https://weibell.github.io/reverse-shell-generator/)
-- [**https://github.com/t0thkr1s/revshellgen**](https://github.com/t0thkr1s/revshellgen)
-- [**https://github.com/mthbernardes/rsg**](https://github.com/mthbernardes/rsg)
+---
+
+## [Full TTYs](full-ttys.md)
+
+---
+
+## Referencias
+
+- [1] [reverse-shell.sh - Generador de reverse shell](https://reverse-shell.sh/)
+- [2] [revshells.com - Generador de reverse shell](https://www.revshells.com/)
+- [3] [Shellerator - Herramienta CLI para generar bind y reverse shells en varios lenguajes](https://github.com/ShutdownRepo/shellerator)
+- [4] [ShellPop - Genera shells como un experto](https://github.com/0x00-0x00/ShellPop)
+- [5] [ShellReverse - Creador de reverse shells para python, perl, ruby, bash, netcat, php, java, powershell, etc.](https://github.com/cybervaca/ShellReverse)
+- [6] [pyminifier - Minificador/ofuscador de código Python](https://liftoff.github.io/pyminifier/)
+- [7] [xc - Reverse shell pequeña para Linux y Windows](https://github.com/xct/xc/)
+- [8] [Generador de Reverse Shell](https://weibell.github.io/reverse-shell-generator/)
+- [9] [revshellgen - Generador de reverse shell escrito en Python 3](https://github.com/t0thkr1s/revshellgen)
+- [10] [rsg (ReverShellGenerator) - Herramienta para generar distintas formas de realizar una reverse shell](https://github.com/mthbernardes/rsg)
 
 {{#include ../../banners/hacktricks-training.md}}
