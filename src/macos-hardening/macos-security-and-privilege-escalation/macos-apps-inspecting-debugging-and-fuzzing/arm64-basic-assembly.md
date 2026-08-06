@@ -367,7 +367,7 @@ For example the call `gettimeofdate` reads the value of `timeval` directly from 
 
 It's super common to find this function used in Objective-C or Swift programs. This function allows to call a method of an objective-C object.
 
-Parameters ([more info in the docs](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)):
+Parameters ([more info in the docs](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)):<sup>[[4]](#references)</sup>
 
 - x0: self -> Pointer to the instance
 - x1: op -> Selector of the method
@@ -814,5 +814,6 @@ call_execve:
 - [1] [daem0nc0re/macOS_ARM64_Shellcode - shell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s)
 - [2] [daem0nc0re/macOS_ARM64_Shellcode - bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s)
 - [3] [daem0nc0re/macOS_ARM64_Shellcode - reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s)
+- [4] [Apple Developer - 712 Objc Msgsend](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)
 
 {{#include ../../../banners/hacktricks-training.md}}
