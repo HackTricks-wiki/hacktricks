@@ -4,75 +4,75 @@
 
 ## 基本信息
 
-UART是一种串行协议，这意味着它一次传输一个比特的数据。相比之下，平行通信协议通过多个通道同时传输数据。常见的串行协议包括RS-232、I2C、SPI、CAN、以太网、HDMI、PCI Express和USB。
+UART 是一种串行协议，这意味着它在组件之间一次传输一位数据。相比之下，并行通信协议会通过多个通道同时传输数据。常见的串行协议包括 RS-232、I2C、SPI、CAN、Ethernet、HDMI、PCI Express 和 USB。
 
-通常，在UART处于空闲状态时，线路保持高电平（逻辑1值）。然后，为了信号数据传输的开始，发射器向接收器发送一个起始位，此时信号保持低电平（逻辑0值）。接下来，发射器发送五到八个数据位，包含实际消息，后面跟着一个可选的奇偶校验位和一个或两个停止位（逻辑1值），具体取决于配置。用于错误检查的奇偶校验位在实际中很少见。停止位（或位）表示传输结束。
+通常情况下，UART 处于空闲状态时，线路保持高电平（逻辑值为 1）。随后，为了向接收器指示数据传输开始，发送器会向接收器发送一个起始位，此时信号保持低电平（逻辑值为 0）。接下来，发送器会发送五到八个包含实际消息的数据位，然后根据配置发送一个可选的奇偶校验位，以及一个或两个停止位（逻辑值为 1）。奇偶校验位用于错误检查，但在实践中很少见。停止位表示传输结束。
 
-我们称最常见的配置为8N1：八个数据位，无奇偶校验，一个停止位。例如，如果我们想在8N1 UART配置中发送字符C，或ASCII中的0x43，我们将发送以下位：0（起始位）；0, 1, 0, 0, 0, 0, 1, 1（0x43的二进制值），和0（停止位）。
+最常见的配置称为 8N1：八个数据位、无奇偶校验位和一个停止位。例如，如果要发送字符 C（ASCII 中为 0x43），在 8N1 UART 配置下，需要发送以下位：0（起始位）；0、1、0、0、0、0、1、1（0x43 的二进制值）；以及 0（停止位）。
 
-![](<../../images/image (764).png>)
+![UART：最常见的配置称为 8N1：八个数据位、无奇偶校验位和一个停止位。例如，如果要发送字符 C（ASCII 中为 0x43），在 8N1 UART 配置下](<../../images/image (764).png>)
 
-与UART通信的硬件工具：
+用于与 UART 通信的硬件工具：
 
-- USB转串行适配器
-- 带有CP2102或PL2303芯片的适配器
-- 多功能工具，如：Bus Pirate、Adafruit FT232H、Shikra或Attify Badge
+- USB-to-serial adapter
+- 使用 CP2102 或 PL2303 芯片的适配器
+- 多用途工具，例如：Bus Pirate、Adafruit FT232H、Shikra 或 Attify Badge
 
-### 识别UART端口
+### 识别 UART 端口
 
-UART有4个端口：**TX**（发送）、**RX**（接收）、**Vcc**（电压）和**GND**（接地）。你可能会在PCB上找到带有**`TX`**和**`RX`**字母的4个端口。但如果没有指示，你可能需要使用**万用表**或**逻辑分析仪**自己寻找它们。
+UART 有 4 个端口：**TX**（Transmit，发送）、**RX**（Receive，接收）、**Vcc**（Voltage，电压）和 **GND**（Ground，接地）。你可能会在 PCB 上找到标有 **`TX`** 和 **`RX`** 字母的 4 个端口。但如果没有任何标识，则可能需要使用**万用表**或**逻辑分析仪**自行查找。
 
 使用**万用表**并关闭设备电源：
 
-- 要识别**GND**引脚，使用**连续性测试**模式，将黑色引线放入接地，使用红色引线测试，直到你听到万用表发出声音。PCB上可能会找到多个GND引脚，因此你可能找到或没有找到属于UART的引脚。
-- 要识别**VCC端口**，设置**直流电压模式**并将其设置为20 V电压。黑色探头接地，红色探头接引脚。打开设备电源。如果万用表测量到恒定电压为3.3 V或5 V，你就找到了Vcc引脚。如果得到其他电压，请尝试其他端口。
-- 要识别**TX** **端口**，将**直流电压模式**设置为20 V电压，黑色探头接地，红色探头接引脚，打开设备电源。如果你发现电压波动几秒钟后稳定在Vcc值，你很可能找到了TX端口。这是因为在开机时，它会发送一些调试数据。
-- **RX端口**是与其他3个端口最接近的，它的电压波动最低，所有UART引脚中整体值最低。
+- 要识别 **GND** 引脚，请使用**通断测试**模式，将黑色表笔接地，然后用红色表笔逐个测试，直到听到万用表发出声音。PCB 上可能有多个 GND 引脚，因此你找到的未必是 UART 对应的那个。
+- 要识别 **VCC 端口**，设置为**直流电压模式**，并将量程设置为 20 V。黑色表笔接地，红色表笔接触引脚。打开设备电源。如果万用表测得稳定的 3.3 V 或 5 V 电压，则找到了 Vcc 引脚。如果测得其他电压，请使用其他端口重试。
+- 要识别 **TX** **端口**，设置为**直流电压模式**，量程设置为 20 V，黑色表笔接地，红色表笔接触引脚，然后打开设备电源。如果发现电压在几秒内波动，随后稳定到 Vcc 电压值，那么你很可能找到了 TX 端口。这是因为设备开机时会发送一些调试数据。
+- **RX 端口**通常是距离其他 3 个端口最近的一个，其电压波动最小，并且在所有 UART 引脚中总体电压值最低。
 
-你可以混淆TX和RX端口，没什么问题，但如果混淆GND和VCC端口，你可能会烧毁电路。
+如果将 TX 和 RX 端口接反，不会发生任何事情；但如果将 GND 和 VCC 端口接反，可能会烧毁电路。
 
-在某些目标设备中，制造商通过禁用RX或TX甚至两者来禁用UART端口。在这种情况下，追踪电路板中的连接并找到一些断点可能会有所帮助。确认没有检测到UART和电路断开的一个强烈提示是检查设备保修。如果设备附带某些保修，制造商会留下某些调试接口（在这种情况下是UART），因此，必须断开UART并在调试时重新连接。这些断点引脚可以通过焊接或跳线连接。
+在某些目标设备中，制造商会通过禁用 RX、TX 或两者来禁用 UART 端口。在这种情况下，沿着电路板上的连接进行追踪并寻找某个 breakout point 可能会有所帮助。确认 UART 未被检测到以及电路被断开的一个重要线索，是检查设备保修情况。如果设备出厂时带有保修，制造商通常会保留一些调试接口（在本例中为 UART），因此必须在设备出厂前断开 UART，并在调试时重新连接。这些 breakout pins 可以通过焊接或 jumper wires 进行连接。
 
-### 识别UART波特率
+### 识别 UART 波特率
 
-识别正确波特率的最简单方法是查看**TX引脚的输出并尝试读取数据**。如果接收到的数据不可读，请切换到下一个可能的波特率，直到数据变得可读。你可以使用USB转串行适配器或像Bus Pirate这样的多功能设备来做到这一点，并配合一个辅助脚本，如[baudrate.py](https://github.com/devttys0/baudrate/)。最常见的波特率为9600、38400、19200、57600和115200。
+识别正确波特率最简单的方法，是查看 **TX 引脚的输出并尝试读取数据**。如果收到的数据不可读，则切换到下一个可能的波特率，直到数据变得可读。你可以使用 USB-to-serial adapter 或 Bus Pirate 等多用途设备，并配合辅助脚本，例如 [baudrate.py](https://github.com/devttys0/baudrate/)。最常见的波特率包括 9600、38400、19200、57600 和 115200。
 
 > [!CAUTION]
-> 重要的是要注意，在此协议中，你需要将一个设备的TX连接到另一个设备的RX！
+> 需要注意的是，在该协议中，你必须将一个设备的 TX 连接到另一个设备的 RX！
 
-## CP210X UART到TTY适配器
+## CP210X UART to TTY Adapter
 
-CP210X芯片广泛用于许多原型板，如NodeMCU（带esp8266）进行串行通信。这些适配器相对便宜，可以用于连接目标的UART接口。该设备有5个引脚：5V、GND、RXD、TXD、3.3V。确保连接目标支持的电压，以避免任何损坏。最后，将适配器的RXD引脚连接到目标的TXD，将适配器的TXD引脚连接到目标的RXD。
+CP210X Chip 被广泛用于 NodeMCU（使用 esp8266）等原型开发板的 Serial Communication。这些适配器价格相对低廉，可用于连接目标设备的 UART 接口。该设备有 5 个引脚：5V、GND、RXD、TXD 和 3.3V。务必连接目标设备支持的电压，以避免造成损坏。最后，将 Adapter 的 RXD 引脚连接到目标设备的 TXD，将 Adapter 的 TXD 引脚连接到目标设备的 RXD。
 
-如果适配器未被检测到，请确保主机系统中已安装CP210X驱动程序。一旦适配器被检测到并连接，可以使用picocom、minicom或screen等工具。
+如果未检测到适配器，请确保主机系统中已安装 CP210X drivers。检测到并连接适配器后，可以使用 picocom、minicom 或 screen 等工具。
 
-要列出连接到Linux/MacOS系统的设备：
+列出连接到 Linux/MacOS 系统的设备：
 ```
 ls /dev/
 ```
-要与UART接口进行基本交互，请使用以下命令：
+要与 UART 接口进行基本交互，请使用以下命令：
 ```
 picocom /dev/<adapter> --baud <baudrate>
 ```
-对于minicom，请使用以下命令进行配置：
+对于 minicom，使用以下命令进行配置：
 ```
 minicom -s
 ```
-在 `Serial port setup` 选项中配置波特率和设备名称等设置。
+在 `Serial port setup` 选项中配置 baudrate 和设备名称等设置。
 
-配置完成后，使用命令 `minicom` 启动以获取 UART 控制台。
+配置完成后，使用命令 `minicom` 启动 UART Console。
 
-## 通过 Arduino UNO R3 的 UART (可拆卸的 Atmel 328p 芯片板)
+## 通过 Arduino UNO R3（可拆卸 Atmel 328p 芯片板）使用 UART
 
-如果没有可用的 UART 串行到 USB 适配器，可以使用 Arduino UNO R3 进行快速破解。由于 Arduino UNO R3 通常随处可用，这可以节省很多时间。
+如果没有 UART Serial to USB adapters，可以通过一个简单的 hack 使用 Arduino UNO R3。由于 Arduino UNO R3 通常随处可见，这可以节省大量时间。
 
-Arduino UNO R3 板上内置了 USB 到串行适配器。要获取 UART 连接，只需将 Atmel 328p 微控制器芯片从板上拔出。此破解适用于 Atmel 328p 未焊接在板上的 Arduino UNO R3 变体（使用的是 SMD 版本）。将 Arduino 的 RX 引脚（数字引脚 0）连接到 UART 接口的 TX 引脚，将 Arduino 的 TX 引脚（数字引脚 1）连接到 UART 接口的 RX 引脚。
+Arduino UNO R3 的板载 USB to Serial adapter。要建立 UART 连接，只需将 Atmel 328p microcontroller chip 从板上拔出即可。此 hack 适用于 Atmel 328p 未焊接在板上的 Arduino UNO R3 变体（其中使用的是 SMD 版本）。将 Arduino 的 RX pin（Digital Pin 0）连接到 UART Interface 的 TX pin，并将 Arduino 的 TX pin（Digital Pin 1）连接到 UART interface 的 RX pin。
 
-最后，建议使用 Arduino IDE 获取串行控制台。在菜单的 `tools` 部分，选择 `Serial Console` 选项，并根据 UART 接口设置波特率。
+最后，建议使用 Arduino IDE 获取 Serial Console。在菜单的 `tools` 部分中，选择 `Serial Console` 选项，并根据 UART interface 设置 baud rate。
 
 ## Bus Pirate
 
-在这种情况下，我们将嗅探 Arduino 的 UART 通信，该通信将程序的所有打印信息发送到串行监视器。
+在此场景中，我们将 sniff Arduino 的 UART communication；该 Arduino 会将程序的所有 prints 发送到 Serial Monitor。
 ```bash
 # Check the modes
 UART>m
@@ -144,30 +144,30 @@ Escritura inicial completada:
 AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
-## 通过 UART 控制台转储固件
+## 使用 UART Console Dumping Firmware
 
-UART 控制台提供了一种在运行时环境中处理底层固件的好方法。但是，当 UART 控制台访问为只读时，可能会引入许多限制。在许多嵌入式设备中，固件存储在 EEPROM 中，并在具有易失性内存的处理器中执行。因此，固件保持只读状态，因为制造时的原始固件就在 EEPROM 内部，任何新文件都可能因易失性内存而丢失。因此，在处理嵌入式固件时，转储固件是一项有价值的工作。
+UART Console 提供了一种在 runtime environment 中操作底层固件的有效方式。但是，当 UART Console access 为 read-only 时，可能会带来很多限制。在许多 embedded devices 中，固件存储在 EEPROM 中，并由使用 volatile memory 的处理器执行。因此，固件保持 read-only，因为制造过程中使用的原始固件本身位于 EEPROM 中，而任何新文件都会因 volatile memory 而丢失。因此，在操作 embedded firmwares 时，dumping firmware 是一项很有价值的工作。
 
-有很多方法可以做到这一点，SPI 部分涵盖了从 EEPROM 中直接提取固件的各种设备的方法。尽管如此，建议首先尝试通过 UART 转储固件，因为使用物理设备和外部交互转储固件可能存在风险。
+有很多方法可以做到这一点，SPI 部分介绍了使用各种设备直接从 EEPROM 提取固件的方法。不过，建议首先尝试使用 UART dumping firmware，因为使用 physical devices 以及进行 external interactions 来 dumping firmware 可能存在风险。
 
-从 UART 控制台转储固件需要首先获取对引导加载程序的访问权限。许多流行的供应商使用 uboot（通用引导加载程序）作为其引导加载程序来加载 Linux。因此，获取对 uboot 的访问权限是必要的。
+从 UART Console dumping firmware 首先需要获取对 bootloaders 的访问权限。许多 popular vendors 使用 uboot（Universal Bootloader）作为加载 Linux 的 bootloader。因此，获取 uboot 的访问权限是必要的。
 
-要访问引导加载程序，请将 UART 端口连接到计算机，并使用任何串行控制台工具，并保持设备的电源断开。一旦设置完成，按下 Enter 键并保持不放。最后，连接设备的电源并让其启动。
+要访问 boot bootloader，请将 UART port 连接到 computer，并使用任意 Serial Console tools，同时保持设备的 power supply 断开。设置完成后，按下 Enter Key 并保持按住。最后，将 power supply 连接到设备并让其启动。
 
-这样做会中断 uboot 的加载并提供一个菜单。建议了解 uboot 命令并使用帮助菜单列出它们。这可能是 `help` 命令。由于不同的供应商使用不同的配置，因此有必要分别理解每个配置。
+这样会中断 uboot 的加载并提供一个 menu。建议了解 uboot commands，并使用 help menu 列出这些命令。命令可能是 `help`。由于不同 vendors 使用不同的 configurations，因此有必要分别理解每种 configuration。
 
-通常，转储固件的命令是：
+通常，dumping firmware 的 command 是：
 ```
 md
 ```
-这代表“内存转储”。这将把内存（EEPROM 内容）转储到屏幕上。建议在开始程序之前记录串行控制台输出，以捕获内存转储。
+它代表“memory dump”。这会将内存（EEPROM Content）转储并显示在屏幕上。建议在开始此过程之前记录 Serial Console 的输出，以捕获内存转储。
 
-最后，只需从日志文件中剥离所有不必要的数据，并将文件存储为 `filename.rom`，然后使用 binwalk 提取内容：
+最后，只需从日志文件中删除所有不必要的数据，将文件保存为 `filename.rom`，然后使用 binwalk 提取其内容：
 ```
 binwalk -e <filename.rom>
 ```
-这将根据在十六进制文件中找到的签名列出 EEPROM 的可能内容。
+这将根据 hex 文件中找到的签名，列出 EEPROM 可能包含的内容。
 
-尽管需要注意的是，即使正在使用 uboot，它并不总是解锁的。如果 Enter 键没有任何反应，请检查其他键，如空格键等。如果引导加载程序被锁定且没有被中断，则此方法将不起作用。要检查 uboot 是否是设备的引导加载程序，请在设备启动时检查 UART 控制台上的输出。它可能会在启动时提到 uboot。
+不过需要注意的是，即使设备正在使用 uboot，也不一定意味着 uboot 是解锁的。如果按下 Enter Key 没有任何反应，请尝试其他按键，例如 Space Key 等。如果 bootloader 已锁定且无法被中断，此方法将无法工作。要检查 uboot 是否是设备的 bootloader，请在设备启动时查看 UART Console 的输出。启动过程中可能会提到 uboot。
 
 {{#include ../../banners/hacktricks-training.md}}

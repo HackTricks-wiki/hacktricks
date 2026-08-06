@@ -2,62 +2,62 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#3f17" id="3f17"></a>
+## 介绍 <a href="#3f17" id="3f17"></a>
 
-**查看原始帖子以获取[有关此技术的所有信息](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)。**
+**请查看原始文章，了解[有关此技术的所有信息](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)。**<sup>[[1]](#references)</sup>
 
-作为**总结**：如果您可以写入用户/计算机的**msDS-KeyCredentialLink**属性，则可以检索该对象的**NT hash**。
+**总结**：如果你可以写入用户或计算机的 **msDS-KeyCredentialLink** 属性，就可以获取该对象的 **NT hash**。<sup>[[1]](#references)</sup>
 
-在帖子中，概述了一种设置**公钥-私钥身份验证凭据**的方法，以获取包含目标的NTLM hash的唯一**服务票证**。此过程涉及Privilege Attribute Certificate (PAC)中的加密NTLM_SUPPLEMENTAL_CREDENTIAL，可以被解密。
+文章中概述了一种设置**公钥-私钥身份验证凭据**的方法，用于获取唯一的 **Service Ticket**，其中包含目标的 NTLM hash。此过程涉及 Privilege Attribute Certificate (PAC) 中经过加密的 NTLM_SUPPLEMENTAL_CREDENTIAL，而该凭据可以被解密。<sup>[[1]](#references)</sup>
 
-### Requirements
+### 要求
 
-要应用此技术，必须满足某些条件：
+要应用此技术，必须满足以下条件：<sup>[[1]](#references)</sup>
 
-- 需要至少一个Windows Server 2016域控制器。
-- 域控制器必须安装服务器身份验证数字证书。
-- Active Directory必须处于Windows Server 2016功能级别。
-- 需要一个具有修改目标对象的msDS-KeyCredentialLink属性的委派权限的帐户。
+- 至少需要一个 Windows Server 2016 Domain Controller。
+- Domain Controller 必须安装服务器身份验证数字证书。
+- Active Directory 必须处于 Windows Server 2016 Functional Level。
+- 需要一个具有委派权限、可以修改目标对象的 msDS-KeyCredentialLink 属性的账户。
 
-## Abuse
+## 滥用
 
-对计算机对象的Key Trust滥用包括获取票证授予票证（TGT）和NTLM hash之外的步骤。选项包括：
+对计算机对象滥用 Key Trust，除了获取 Ticket Granting Ticket (TGT) 和 NTLM hash 外，还包括其他步骤。可选方案包括：<sup>[[1]](#references)</sup>
 
-1. 创建一个**RC4银票证**以在目标主机上充当特权用户。
-2. 使用带有**S4U2Self**的TGT进行**特权用户**的冒充，需要对服务票证进行更改，以将服务类添加到服务名称。
+1. 创建 **RC4 silver ticket**，以目标主机上的特权用户身份执行操作。
+2. 使用 TGT 配合 **S4U2Self** 冒充**特权用户**，这需要修改 Service Ticket，以便向服务名称添加 service class。
 
-Key Trust滥用的一个显著优势是其限制在攻击者生成的私钥上，避免了对潜在易受攻击帐户的委派，并且不需要创建计算机帐户，这可能难以删除。
+Key Trust abuse 的一个重要优势是仅限于攻击者生成的私钥，不需要将委派权限授予可能存在漏洞的账户，也不需要创建计算机账户，而计算机账户可能很难删除。<sup>[[1]](#references)</sup>
 
 ## Tools
 
 ### [**Whisker**](https://github.com/eladshamir/Whisker)
 
-它基于DSInternals，提供此攻击的C#接口。Whisker及其Python对应物**pyWhisker**使得可以操纵`msDS-KeyCredentialLink`属性，以控制Active Directory帐户。这些工具支持各种操作，如添加、列出、删除和清除目标对象的密钥凭据。
+它基于 DSInternals，为此攻击提供了 C# 接口。Whisker 及其 Python 对应工具 **pyWhisker** 可以操作 `msDS-KeyCredentialLink` 属性，从而控制 Active Directory 账户。这些工具支持对目标对象的 key credentials 执行添加、列出、删除和清除等操作。
 
-**Whisker**功能包括：
+**Whisker** 的功能包括：
 
-- **Add**：生成密钥对并添加密钥凭据。
-- **List**：显示所有密钥凭据条目。
-- **Remove**：删除指定的密钥凭据。
-- **Clear**：擦除所有密钥凭据，可能会干扰合法的WHfB使用。
+- **Add**：生成密钥对并添加 key credential。
+- **List**：显示所有 key credential 条目。
+- **Remove**：删除指定的 key credential。
+- **Clear**：清除所有 key credential，可能会干扰合法的 WHfB 使用。
 ```shell
 Whisker.exe add /target:computername$ /domain:constoso.local /dc:dc1.contoso.local /path:C:\path\to\file.pfx /password:P@ssword1
 ```
 ### [pyWhisker](https://github.com/ShutdownRepo/pywhisker)
 
-它扩展了 Whisker 的功能到 **基于 UNIX 的系统**，利用 Impacket 和 PyDSInternals 提供全面的利用能力，包括列出、添加和删除 KeyCredentials，以及以 JSON 格式导入和导出它们。
+它将 Whisker 的功能扩展到 **基于 UNIX 的系统**，利用 Impacket 和 PyDSInternals 提供全面的 exploitation 能力，包括列出、添加和移除 KeyCredentials，以及以 JSON 格式导入和导出这些凭据。
 ```shell
 python3 pywhisker.py -d "domain.local" -u "user1" -p "complexpassword" --target "user2" --action "list"
 ```
 ### [ShadowSpray](https://github.com/Dec0ne/ShadowSpray/)
 
-ShadowSpray 旨在 **利用广泛用户组可能对域对象拥有的 GenericWrite/GenericAll 权限** 来广泛应用 ShadowCredentials。它包括登录域、验证域的功能级别、枚举域对象，并尝试添加 KeyCredentials 以获取 TGT 和 NT hash 的揭示。清理选项和递归利用策略增强了其实用性。
+ShadowSpray 旨在**利用广泛用户组可能对 domain objects 拥有的 GenericWrite/GenericAll permissions**，以广泛应用 ShadowCredentials。它包括登录 domain、验证 domain's functional level、枚举 domain objects，并尝试添加 KeyCredentials 以获取 TGT 和揭示 NT hash。Cleanup options 和 recursive exploitation tactics 进一步增强了其实用性。
 
 ## References
 
-- [https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)
-- [https://github.com/eladshamir/Whisker](https://github.com/eladshamir/Whisker)
-- [https://github.com/Dec0ne/ShadowSpray/](https://github.com/Dec0ne/ShadowSpray/)
-- [https://github.com/ShutdownRepo/pywhisker](https://github.com/ShutdownRepo/pywhisker)
+- [1] [Shadow Credentials: 滥用 Key Trust Account Mapping 进行 Account Takeover](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)
+- [2] [Whisker - 通过操纵 msDS-KeyCredentialLink 接管 AD accounts 的 Tool](https://github.com/eladshamir/Whisker)
+- [3] [ShadowSpray - 用于在 domain 中 spray Shadow Credentials 的 Tool](https://github.com/Dec0ne/ShadowSpray/)
+- [4] [pywhisker - Shadow Credentials tool 的 Python 版本](https://github.com/ShutdownRepo/pywhisker)
 
 {{#include ../../../banners/hacktricks-training.md}}

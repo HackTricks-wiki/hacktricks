@@ -1,14 +1,14 @@
-# Rust 基础
+# Rust Basics
 
 {{#include ../banners/hacktricks-training.md}}
 
 ### 变量的所有权
 
-Memory 通过一个所有权系统进行管理，编译器会在编译时检查以下规则：
+内存通过所有权系统进行管理，编译器会在编译时检查以下规则：
 
-1. Rust 中的每个值都有一个称为其 owner 的变量。
-2. 同一时间只能有一个 owner。
-3. 当 owner 离开作用域时，该值将被 dropped。
+1. Rust 中的每个值都有一个被称为其所有者的变量。
+2. 同一时间只能有一个所有者。
+3. 当所有者离开作用域时，该值将被丢弃。
 ```rust
 fn main() {
 let student_age: u32 = 20;
@@ -20,9 +20,9 @@ println!("The student is {} and teacher is {}", student_age, teacher_age);
 // println!("the teacher is {}", teacher_age); // this will not work as teacher_age has been dropped
 }
 ```
-### 泛型类型
+### 泛型
 
-创建一个结构体，使其值中的一个可以是任意类型
+创建一个结构体，使其某个值可以是任意类型
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -37,9 +37,9 @@ Wrapper { value }
 Wrapper::new(42).value
 Wrapper::new("Foo").value, "Foo"
 ```
-### Option、Some 和 None
+### Option, Some & None
 
-Option 类型表示该值可能是 Some 类型（表示存在某个值），也可能是 None：
+Option 类型表示该值可能是 Some 类型（存在某个值），也可能是 None：
 ```rust
 pub enum Option<T> {
 None,
@@ -49,7 +49,7 @@ Some(T),
 你可以使用 `is_some()` 或 `is_none()` 等函数来检查 Option 的值。
 
 
-### Result, Ok & Err
+### Result、Ok 和 Err
 
 用于返回和传播错误
 ```rust
@@ -60,13 +60,13 @@ Err(E),
 ```
 你可以使用 `is_ok()` 或 `is_err()` 等函数来检查 result 的值
 
-`Option` enum 应用于值可能不存在（为 `None`）的情况。
-`Result` enum 应用于你执行的操作可能出错的情况
+`Option` 枚举应当用于值可能不存在（为 `None`）的情况。
+`Result` 枚举应当用于你执行的操作可能出错的情况
 
 
 ### 宏
 
-宏比函数更强大，因为它们会展开并生成比你手动编写的代码更多的代码。例如，函数签名必须声明函数参数的数量和类型。另一方面，宏可以接受数量可变的参数：我们可以使用一个参数调用 `println!("hello")`，也可以使用两个参数调用 `println!("hello {}", name)`。此外，宏会在 compiler 解释代码含义之前展开，因此宏可以实现诸如为给定类型实现 trait 的功能。函数无法做到这一点，因为函数在 runtime 调用，而 trait 需要在 compile time 实现。
+宏比函数更强大，因为它们会展开并生成比你手动编写的代码更多的代码。例如，函数签名必须声明函数所具有的参数数量和类型。而宏则可以接受数量可变的参数：我们可以使用一个参数调用 `println!("hello")`，也可以使用两个参数调用 `println!("hello {}", name)`。此外，宏会在编译器解释代码含义之前展开，因此宏可以实现一些功能，例如为给定类型实现 trait。函数无法做到这一点，因为函数是在运行时调用的，而 trait 需要在编译时实现。
 ```rust
 macro_rules! my_macro {
 () => {
@@ -108,7 +108,7 @@ for (key, hashvalue) in &*map {
 for key in map.keys() {
 for value in map.values() {
 ```
-### 递归盒
+### 递归盒子
 ```rust
 enum List {
 Cons(i32, List),
@@ -130,7 +130,7 @@ print!("{} is positive", n);
 print!("{} is zero", n);
 }
 ```
-#### match
+#### 匹配
 ```rust
 match number {
 // Match a single value
@@ -153,7 +153,7 @@ true => 1,
 // TODO ^ Try commenting out one of these arms
 };
 ```
-#### 循环（无限）
+#### 无限循环
 ```rust
 loop {
 count += 1;
@@ -182,7 +182,7 @@ println!("{}", n);
 n += 1;
 }
 ```
-#### for
+#### 对于
 ```rust
 for n in 1..101 {
 if n % 15 == 0 {
@@ -258,7 +258,7 @@ optional = Some(i + 1);
 ```
 ### Traits
 
-为一个类型创建新方法
+为一个类型创建一个新方法
 ```rust
 trait AppendBar {
 fn append_bar(self) -> Self;
@@ -286,11 +286,11 @@ assert_ne!(true, false);
 }
 }
 ```
-### Threading
+### 线程
 
 #### Arc
 
-Arc 可以使用 Clone 创建对象的更多引用，以便将它们传递给各个线程。当指向某个值的最后一个引用指针超出作用域时，该变量会被丢弃。
+Arc 可以使用 Clone 创建对象的更多引用，以便将它们传递给线程。当指向某个值的最后一个引用指针超出作用域时，该变量会被丢弃。
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -301,9 +301,9 @@ println!("{:?}", apple);
 });
 }
 ```
-#### 线程
+#### Threads
 
-在这种情况下，我们会向线程传递一个它可以修改的变量
+在此情况下，我们将向 thread 传递一个变量，该 thread 将能够对其进行修改
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -321,19 +321,19 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-### 安全基础
+### 安全要点
 
-Rust 默认提供强大的 memory-safety 保证，但你仍然可能通过 `unsafe` code、dependency issues 或 logic mistakes 引入 critical vulnerabilities。下面这份 mini-cheatsheet 汇总了你在对 Rust software 进行 offensive 或 defensive security review 时最常接触的 primitives。
+Rust 默认提供强大的内存安全保证，但你仍然可能通过 `unsafe` 代码、依赖问题或逻辑错误引入严重漏洞。以下 mini-cheatsheet 汇总了你在对 Rust 软件进行 offensive 或 defensive security review 时最常接触的原语。
 
-#### Unsafe code 与 memory safety
+#### Unsafe 代码与内存安全
 
-`unsafe` blocks 会选择退出 compiler 的 aliasing 和 bounds checks，因此 **所有传统的 memory-corruption bugs（OOB、use-after-free、double free 等）都可能再次出现**。快速 audit checklist：
+`unsafe` 代码块会选择退出编译器的别名检查和边界检查，因此 **所有传统的内存破坏漏洞（OOB、use-after-free、double free 等）都可能再次出现**。快速审计检查清单：
 
-* 查找 `unsafe` blocks、`extern "C"` functions、对 `ptr::copy*` 的调用、`std::mem::transmute`、`MaybeUninit`、raw pointers 或 `ffi` modules。
-* 验证传递给 low-level functions 的每一个 pointer arithmetic 和 length argument。
-* 优先使用 `#![forbid(unsafe_code)]`（crate-wide）或 `#[deny(unsafe_op_in_unsafe_fn)]`（1.68 +），这样当有人重新引入 `unsafe` 时会使 compilation 失败。
+* 查找 `unsafe` 代码块、`extern "C"` 函数、对 `ptr::copy*` 的调用、`std::mem::transmute`、`MaybeUninit`、raw pointers 或 `ffi` 模块。
+* 验证传递给低级函数的每个指针运算和长度参数。
+* 优先使用 `#![forbid(unsafe_code)]`（crate-wide）或 `#[deny(unsafe_op_in_unsafe_fn)]`（1.68 +），以便在有人重新引入 `unsafe` 时使编译失败。
 
-使用 raw pointers 创建 overflow 的示例：
+使用 raw pointers 创建的溢出示例：
 ```rust
 use std::ptr;
 
@@ -347,44 +347,44 @@ dst.set_len(src.len());
 dst
 }
 ```
-运行 Miri 是一种在测试时检测 UB 的低成本方法：
+运行 Miri 是在测试时检测 UB 的一种低成本方法：
 ```bash
 rustup component add miri
 cargo miri test  # hunts for OOB / UAF during unit tests
 ```
 #### 使用 RustSec / cargo-audit 审计依赖项
 
-现实中的大多数 Rust 漏洞都存在于第三方 crates 中。RustSec advisory DB（由社区维护）可以在本地查询：<sup>[[1]](#references)</sup>
+现实世界中的大多数 Rust 漏洞都存在于第三方 crates 中。RustSec advisory DB（由社区维护）可以在本地查询：<sup>[[1]](#references)</sup>
 ```bash
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
 ```
-将其集成到 CI 中，并在使用 `--deny warnings` 时失败。
+将其集成到 CI 中，并在使用 `--deny warnings` 时使构建失败。
 
-`cargo deny check advisories` 提供类似功能，此外还会检查 license 和 ban-list。
+`cargo deny check advisories` 提供类似功能，此外还会检查 licence 和 ban-list。
 
 #### 使用 cargo-tarpaulin 进行代码覆盖率检查
 
-`cargo tarpaulin` 是 Cargo build system 的代码覆盖率报告工具
+`cargo tarpaulin` 是 Cargo 构建系统的代码覆盖率报告工具
 ```bash
 cargo binstall cargo-tarpaulin
 cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
 ```
-在 Linux 上，Tarpaulin 的默认 tracing backend 仍然是 Ptrace，并且只能在 x86_64 处理器上运行。可以通过 `--engine llvm` 将其更改为 llvm coverage instrumentation。在 Mac 和 Windows 上，这是默认的 collection method。
+在 Linux 上，Tarpaulin 的默认 tracing backend 仍然是 Ptrace，并且只能在 x86_64 处理器上运行。可以通过 `--engine llvm` 将其更改为 llvm coverage instrumentation。对于 Mac 和 Windows，这是默认的收集方法。
 
-#### 使用 cargo-vet 进行 supply-chain verification（2024）
+#### 使用 cargo-vet 进行供应链验证（2024）
 
-`cargo vet` 会为你导入的每个 crate 记录 review hash，并防止未被注意到的升级：
+`cargo vet` 会为你导入的每个 crate 记录一个 review hash，并防止未被注意到的升级：
 ```bash
 cargo install cargo-vet
 cargo vet init      # generates vet.toml
 cargo vet --locked  # verifies packages referenced in Cargo.lock
 ```
-该工具正在被 Rust project infrastructure 以及越来越多的组织采用，以缓解 poisoned-package attacks。<sup>[[2]](#references)</sup>
+该工具正被 Rust project infrastructure 以及越来越多的组织采用，以缓解 poisoned-package attacks。<sup>[[2]](#references)</sup>
 
-#### Fuzzing 你的 API surface（cargo-fuzz）
+#### Fuzzing your API surface (cargo-fuzz)
 
-Fuzz tests 可以轻松捕获 panics、integer overflows 和 logic bugs，而这些问题可能演变为 DoS 或 side-channel issues：
+Fuzz tests 可以轻松捕获 panic、integer overflow 和 logic bugs，这些问题可能演变为 DoS 或 side-channel issues：
 ```bash
 cargo install cargo-fuzz
 cargo fuzz init              # creates fuzz_targets/
@@ -392,9 +392,9 @@ cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
 ```
 将 fuzz target 添加到你的 repo 中，并在 pipeline 中运行它。
 
-## 参考资料
+## References
 
 - [1] [RustSec Advisory Database](https://rustsec.org)
-- [2] [Cargo-vet: Auditing your Rust Dependencies](https://mozilla.github.io/cargo-vet/)
+- [2] [Cargo-vet: "Auditing your Rust Dependencies"](https://mozilla.github.io/cargo-vet/)
 
 {{#include ../banners/hacktricks-training.md}}

