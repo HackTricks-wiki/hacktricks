@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Existem diferentes maneiras de executar comandos em sistemas externos, aqui você pode encontrar as explicações sobre como funcionam as principais técnicas de movimento lateral no Windows:
+Há diferentes maneiras de executar comandos em sistemas externos; aqui você encontra explicações sobre como funcionam as principais técnicas de movimento lateral do Windows:
 
 - [**PsExec**](psexec-and-winexec.md)
 - [**SmbExec**](smbexec.md)

