@@ -33,7 +33,7 @@ without knowing the secret.<sup>[[1]](#references)</sup>
 
 ### Important limitation: HMAC is not affected
 
-Length extension attacks apply to constructions like `HASH(secret || message)` for Merkle–Damgård hashes. They do not apply to **HMAC** (e.g., HMAC-SHA256), which is specifically designed to avoid this class of problem.
+Length extension attacks apply to constructions like `HASH(secret || message)` for Merkle–Damgård hashes. They do not apply to **HMAC** (e.g., HMAC-SHA256), which is specifically designed to avoid this class of problem.<sup>[[1]](#references)</sup>
 
 ### Tools
 
