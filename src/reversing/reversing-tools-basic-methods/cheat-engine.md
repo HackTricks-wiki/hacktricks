@@ -158,7 +158,7 @@ So, insert your new assembly code in the "**newmem**" section and remove the ori
 
 ## Advanced features in Cheat Engine 7.x (2023-2025)
 
-Cheat Engine has continued to evolve since version 7.0 and several quality-of-life and *offensive-reversing* features have been added that are extremely handy when analysing modern software (and not only games!). Below is a **very condensed field guide** to the additions you will most likely use during red-team/CTF work.
+Cheat Engine has continued to evolve since version 7.0 and several quality-of-life and *offensive-reversing* features have been added that are extremely handy when analysing modern software (and not only games!). Below is a **very condensed field guide** to the additions you will most likely use during red-team/CTF work.<sup>[[1]](#references)</sup>
 
 ### Pointer Scanner 2 improvements
 * `Pointers must end with specific offsets` and the new **Deviation** slider (≥7.4) greatly reduce false positives when you rescan after an update. Use it together with multi-map comparison (`.PTR` → *Compare results with other saved pointer map*) to obtain a **single resilient base-pointer** in just a few minutes.
@@ -174,7 +174,7 @@ Select number of buffers → Start
 After a few seconds stop the capture and **right-click → Save execution list to file**. Combine branch addresses with a `Find out what addresses this instruction accesses` session to locate high-frequency game-logic hotspots extremely fast. 
 
 ### 1-byte `jmp` / auto-patch templates
-Version 7.5 introduced a *one-byte* JMP stub (0xEB) that installs an SEH handler and places an INT3 at the original location. It is generated automatically when you use **Auto Assembler → Template → Code Injection** on instructions that cannot be patched with a 5-byte relative jump. This makes “tight” hooks possible inside packed or size-constrained routines.
+Version 7.5 introduced a *one-byte* JMP stub (0xEB) that installs an SEH handler and places an INT3 at the original location. It is generated automatically when you use **Auto Assembler → Template → Code Injection** on instructions that cannot be patched with a 5-byte relative jump. This makes “tight” hooks possible inside packed or size-constrained routines.<sup>[[1]](#references)</sup>
 
 ### Kernel-level stealth with DBVM (AMD & Intel)
 *DBVM* is CE’s built-in Type-2 hypervisor. Recent builds finally added **AMD-V/SVM support** so you can run `Driver → Load DBVM` on Ryzen/EPYC hosts. DBVM lets you:
@@ -194,14 +194,14 @@ CE now ships a full rewrite of *ceserver* and can attach over TCP to **Linux, An
 adb forward tcp:52736 tcp:52736   # (or ssh tunnel)
 Cheat Engine → "Network" icon → Host = localhost → Connect
 ```
-For the Frida bridge see `bb33bb/frida-ceserver` on GitHub. 
+For the Frida bridge see `bb33bb/frida-ceserver` on GitHub.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Other noteworthy goodies
 * **Patch Scanner** (MemView → Tools) – detects unexpected code changes in executable sections; handy for malware analysis.
 * **Structure Dissector 2** – drag-an-address → `Ctrl+D`, then *Guess fields* to auto-evaluate C-structures.
 * **.NET & Mono Dissector** – improved Unity game support; call methods directly from the CE Lua console.
 * **Big-Endian custom types** – reversed byte order scan/edit (useful for console emulators and network packet buffers).
-* **Autosave & tabs** for AutoAssembler/Lua windows, plus `reassemble()` for multi-line instruction rewrite.
+* **Autosave & tabs** for AutoAssembler/Lua windows, plus `reassemble()` for multi-line instruction rewrite.<sup>[[1]](#references)</sup>
 
 ### Installation & OPSEC notes (2024-2025)
 * The official installer is wrapped with InnoSetup **ad-offers** (`RAV` etc.). **Always click *Decline*** *or compile from source* to avoid PUPs. AVs will still flag `cheatengine.exe` as a *HackTool*, which is expected.
@@ -210,13 +210,9 @@ For the Frida bridge see `bb33bb/frida-ceserver` on GitHub.
 
 ---
 
-## **References**
+## References
 
-- [Cheat Engine 7.5 release notes (GitHub)](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
-- [frida-ceserver cross-platform bridge](https://github.com/bb33bb/frida-ceserver-Mac-and-IOS)
-- **Cheat Engine tutorial, complete it to learn how to start with Cheat Engine**
+- [1] [Cheat Engine 7.5 release notes (GitHub)](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
+- [2] [frida-ceserver cross-platform bridge](https://github.com/bb33bb/frida-ceserver-Mac-and-IOS)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

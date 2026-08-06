@@ -60,17 +60,17 @@ The first two commands register x64dbg as the JIT debugger, and `setpagerights` 
 
 ### Time-travel the shellcode instead of single-stepping it live
 
-A very practical recent workflow is to record BlobRunner under **TTD** and then inspect the trace in **Binary Ninja** / **WinDbg**. This is great when the blob decrypts itself, resolves APIs dynamically, or performs several short-lived stages. Since **Binary Ninja 4.1**, TTD support is no longer just beta quality: it can drive reverse-debugging and simplify the WinDbg / TTD workflow directly from Binary Ninja.
+A very practical recent workflow is to record BlobRunner under **TTD** and then inspect the trace in **Binary Ninja** / **WinDbg**. This is great when the blob decrypts itself, resolves APIs dynamically, or performs several short-lived stages. Since **Binary Ninja 4.1**, TTD support is no longer just beta quality: it can drive reverse-debugging and simplify the WinDbg / TTD workflow directly from Binary Ninja.<sup>[[1]](#references)</sup>
 
 ```bash
 TTD.exe .\blobrunner.exe .\shellcode.bin
 ```
 
-The important part is to **note the allocated base address printed by BlobRunner** and then **rebase** the shellcode view to that address before replaying the trace. Also note that Microsoft documents TTD recording as **invasive**: run it from an **elevated** prompt, expect noticeable slowdown, and keep the recording window short to avoid massive trace files.
+The important part is to **note the allocated base address printed by BlobRunner** and then **rebase** the shellcode view to that address before replaying the trace. Also note that Microsoft documents TTD recording as **invasive**: run it from an **elevated** prompt, expect noticeable slowdown, and keep the recording window short to avoid massive trace files.<sup>[[1]](#references)</sup>
 
 ### If the blob needs companion data, use a PE wrapper instead
 
-Some shellcode expects a **second blob**, a **mapped file**, or some other **structured content** to exist in memory. BlobRunner is intentionally minimal, so for these cases a runner such as **SCLauncher** can be more convenient because it can:
+Some shellcode expects a **second blob**, a **mapped file**, or some other **structured content** to exist in memory. BlobRunner is intentionally minimal, so for these cases a runner such as **SCLauncher** can be more convenient because it can:<sup>[[2]](#references)</sup>
 
 - pause before execution,
 - insert an `INT3` breakpoint,
@@ -300,6 +300,7 @@ int main(int argc, char* argv[])
 
 ## References
 
-- [Time Travel Debugging Shellcode with Binary Ninja](https://www.lrqa.com/en/cyber-labs/time-travel-debugging-shellcode-with-binary-ninja/)
-- [Analyzing Shellcode with SCLauncher](https://www.thecyberyeti.com/post/analyzing-shellcode-with-sclauncher)
+- [1] [Time Travel Debugging Shellcode with Binary Ninja](https://www.lrqa.com/en/cyber-labs/time-travel-debugging-shellcode-with-binary-ninja/)
+- [2] [Analyzing Shellcode with SCLauncher](https://www.thecyberyeti.com/post/analyzing-shellcode-with-sclauncher)
+
 {{#include ../../banners/hacktricks-training.md}}

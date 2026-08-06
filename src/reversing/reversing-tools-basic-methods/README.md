@@ -245,7 +245,7 @@ Upload your shellcode file as input and use the following recipe to decompile it
 (x ^ y) + 2 * (x & y) == x + y
 ```
 
-If you simplify this kind of expression with generic algebra tooling you can easily get a wrong result because the bit-width semantics were ignored.
+If you simplify this kind of expression with generic algebra tooling you can easily get a wrong result because the bit-width semantics were ignored.<sup>[[1]](#references)</sup>
 
 ### Practical workflow
 
@@ -259,7 +259,7 @@ If you simplify this kind of expression with generic algebra tooling you can eas
 
 ### CoBRA
 
-[**CoBRA**](https://github.com/trailofbits/CoBRA) is a practical MBA simplifier for malware analysis and protected-binary reversing. It classifies the expression and routes it through specialized pipelines instead of applying one generic rewrite pass to everything.
+[**CoBRA**](https://github.com/trailofbits/CoBRA) is a practical MBA simplifier for malware analysis and protected-binary reversing. It classifies the expression and routes it through specialized pipelines instead of applying one generic rewrite pass to everything.<sup>[[2]](#references)</sup>
 
 Quick usage:
 
@@ -343,7 +343,7 @@ In **Rust ELF** binaries, many static strings are not referenced as C-style NUL-
 [8-byte little-endian pointer][8-byte little-endian length]
 ```
 
-This means `strings` or default Ghidra analysis may merge adjacent strings or miss cross-references entirely.
+This means `strings` or default Ghidra analysis may merge adjacent strings or miss cross-references entirely.<sup>[[3]](#references)</sup>
 
 Quick workflow:
 
@@ -372,7 +372,7 @@ for off in range(0, len(data_rel_ro), 8):
 
 This is especially useful in firmware reversing because recovered Rust strings often reveal **HTTP routes, RPC names, log messages, assertions, filenames, config keys, command handlers, and auth-related logic**.
 
-If Ghidra misses those strings, run a custom script/plugin that applies the same heuristic and creates string data at the referenced `.rodata` offsets. The published `rust-strings` and `RustStrings.py` tools from Pen Test Partners are good references for adapting the idea to other **word sizes, endianness, and section layouts**.
+If Ghidra misses those strings, run a custom script/plugin that applies the same heuristic and creates string data at the referenced `.rodata` offsets. The published `rust-strings` and `RustStrings.py` tools from Pen Test Partners are good references for adapting the idea to other **word sizes, endianness, and section layouts**.<sup>[[4]](#references)[[5]](#references)</sup>
 
 ## **Delphi**
 
@@ -530,10 +530,10 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 
 ## References
 
-- [Simplifying MBA obfuscation with CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
-- [Trail of Bits CoBRA repository](https://github.com/trailofbits/CoBRA)
-- [Decoding Rust strings - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
-- [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
-- [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
+- [1] [Simplifying MBA obfuscation with CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
+- [2] [Trail of Bits CoBRA repository](https://github.com/trailofbits/CoBRA)
+- [3] [Decoding Rust strings - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
+- [4] [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
+- [5] [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
 
 {{#include ../../banners/hacktricks-training.md}}

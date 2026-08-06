@@ -45,7 +45,7 @@ sox input.wav -n spectrogram -o spectrogram.png
 
 ## FSK / modem decoding
 
-Frequency-shift keyed audio often looks like alternating single tones in a spectrogram. Once you have a rough center/shift and baud estimate, brute force with `minimodem`:
+Frequency-shift keyed audio often looks like alternating single tones in a spectrogram. Once you have a rough center/shift and baud estimate, brute force with `minimodem`:<sup>[[1]](#references)</sup>
 
 ```bash
 # Visualize the band to pick baud/frequency
@@ -103,7 +103,6 @@ Online decoders:
 
 ## References
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}
-

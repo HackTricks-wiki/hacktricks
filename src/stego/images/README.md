@@ -207,7 +207,7 @@ for f in sorted(glob.glob('frames/frame_*.png')):
 print(bytes(out).decode('latin1'))
 ```
 
-Animated challenges may encode each byte as the count of a specific color in each frame; concatenating the counts reconstructs the message.
+Animated challenges may encode each byte as the count of a specific color in each frame; concatenating the counts reconstructs the message.<sup>[[1]](#references)</sup>
 
 ## Password-protected embedding
 
@@ -240,7 +240,6 @@ Repo: https://github.com/dhsdshdhk/stegpy
 
 ## References
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}
-
