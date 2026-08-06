@@ -4,122 +4,122 @@
 
 ## [ProjectHoneypot](https://www.projecthoneypot.org/)
 
-Možete pitati da li je IP povezan sa sumnjivim/malicioznim aktivnostima. Potpuno besplatno.
+Možete proveriti da li je IP povezan sa sumnjivim/zlonamernim aktivnostima. Potpuno besplatno.
 
 ## [**BotScout**](http://botscout.com/api.htm)
 
-Proverite da li je IP adresa povezana sa botom koji registruje naloge. Takođe može proveriti korisnička imena i e-mailove. Prvobitno besplatno.
+Proverite da li je IP adresa povezana sa botom koji registruje naloge. Takođe može da proverava korisnička imena i email adrese. U početku besplatno.
 
 ## [Hunter](https://hunter.io/)
 
-Pronađite i verifikujte e-mailove.\
-Neki besplatni API zahtevi, za više morate platiti.\
+Pronađite i verifikujte email adrese.\
+Neki API zahtevi su besplatni, a za veći broj morate platiti.\
 Komercijalno?
 
 ## [AlientVault](https://otx.alienvault.com/api)
 
-Pronađite maliciozne aktivnosti povezane sa IP-ovima i domenima. Besplatno.
+Pronađite zlonamerne aktivnosti povezane sa IP adresama i domenima. Besplatno.
 
 ## [Clearbit](https://dashboard.clearbit.com/)
 
-Pronađite povezane lične podatke za e-mail (profile na drugim platformama), domen (osnovne informacije o kompaniji, e-mailovi i ljudi koji rade) i kompanije (dobijte informacije o kompaniji iz e-maila).\
+Pronađite povezane lične podatke za email adresu (profile na drugim platformama), domen (osnovne informacije o kompaniji, email adrese i zaposlene) i kompanije (dobijte informacije o kompaniji na osnovu email adrese).\
 Morate platiti da biste pristupili svim mogućnostima.\
 Komercijalno?
 
 ## [BuiltWith](https://builtwith.com/)
 
-Tehnologije koje koriste vebsajtovi. Skupo...\
+Tehnologije koje koriste web sajtovi. Skupo...\
 Komercijalno?
 
 ## [Fraudguard](https://fraudguard.io/)
 
-Proverite da li je host (domen ili IP) povezan sa sumnjivim/malicioznim aktivnostima. Ima neki besplatni API pristup.\
+Proverite da li je host (domen ili IP) povezan sa sumnjivim/zlonamernim aktivnostima. Omogućava određeni besplatan API pristup.\
 Komercijalno?
 
 ## [FortiGuard](https://fortiguard.com/)
 
-Proverite da li je host (domen ili IP) povezan sa sumnjivim/malicioznim aktivnostima. Ima neki besplatni API pristup.
+Proverite da li je host (domen ili IP) povezan sa sumnjivim/zlonamernim aktivnostima. Omogućava određeni besplatan API pristup.
 
 ## [SpamCop](https://www.spamcop.net/)
 
-Ukazuje da li je host povezan sa spam aktivnostima. Ima neki besplatni API pristup.
+Pokazuje da li je host povezan sa spam aktivnostima. Omogućava određeni besplatan API pristup.
 
 ## [mywot](https://www.mywot.com/)
 
-Na osnovu mišljenja i drugih metrika saznajte da li je domen povezan sa sumnjivim/malicioznim informacijama.
+Na osnovu mišljenja i drugih metrika utvrdite da li je domen povezan sa sumnjivim/zlonamernim informacijama.
 
 ## [ipinfo](https://ipinfo.io/)
 
-Dobija osnovne informacije sa IP adrese. Možete testirati do 100K/mesečno.
+Dobija osnovne informacije sa IP adrese. Možete testirati do 100K upita mesečno.
 
 ## [securitytrails](https://securitytrails.com/app/account)
 
-Ova platforma daje informacije o domenima i IP adresama kao što su domeni unutar IP-a ili unutar domen servera, domeni u vlasništvu e-maila (pronađite povezane domene), istorija IP-a domena (pronađite host iza CloudFlare-a), svi domeni koji koriste nameserver....\
-Imate neki besplatni pristup.
+Ova platforma pruža informacije o domenima i IP adresama, kao što su domeni unutar IP adrese ili na serveru domena, domeni u vlasništvu email adrese (pronalaženje povezanih domena), istorija IP adresa domena (pronalaženje hosta iza CloudFlare-a), svi domeni koji koriste nameserver....\
+Imate određeni besplatan pristup.
 
 ## [fullcontact](https://www.fullcontact.com/)
 
-Omogućava pretragu po e-mailu, domenu ili nazivu kompanije i preuzimanje "ličnih" informacija povezanih. Takođe može verifikovati e-mailove. Ima neki besplatni pristup.
+Omogućava pretragu po email adresi, domenu ili nazivu kompanije i preuzimanje povezanih „ličnih“ informacija. Takođe može da verifikuje email adrese. Dostupan je određeni besplatan pristup.
 
 ## [RiskIQ](https://www.spiderfoot.net/documentation/)
 
-Puno informacija o domenima i IP-ovima čak i u besplatnoj/zajedničkoj verziji.
+Velika količina informacija o domenima i IP adresama, čak i u besplatnoj/community verziji.
 
 ## [\_IntelligenceX](https://intelx.io/)
 
-Pretražujte domene, IP-ove i e-mailove i dobijajte informacije iz dump-ova. Ima neki besplatni pristup.
+Pretražite domene, IP adrese i email adrese i dobijte informacije iz dumpova. Dostupan je određeni besplatan pristup.
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
-Pretražujte po IP-u i prikupljajte informacije povezane sa sumnjivim aktivnostima. Ima neki besplatni pristup.
+Pretražite po IP adresi i prikupite informacije povezane sa sumnjivim aktivnostima. Dostupan je određeni besplatan pristup.
 
 ## [Greynoise](https://viz.greynoise.io/)
 
-Pretražujte po IP-u ili opsegu IP-a i dobijajte informacije o IP-ovima koji skeniraju Internet. 15 dana besplatnog pristupa.
+Pretražite po IP adresi ili opsegu IP adresa i dobijte informacije o IP adresama koje skeniraju Internet. Besplatan pristup u trajanju od 15 dana.
 
 ## [Shodan](https://www.shodan.io/)
 
-Dobijte informacije o skeniranju IP adrese. Ima neki besplatni API pristup.
+Dobijte informacije o skeniranju IP adrese. Dostupan je određeni besplatan API pristup.
 
 ## [Censys](https://censys.io/)
 
-Veoma slično shodanu.
+Veoma slično kao shodan
 
 ## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
 
-Pronađite otvorene S3 kante pretražujući po ključnim rečima.
+Pronađite otvorene S3 buckets pretragom po ključnoj reči.
 
 ## [Dehashed](https://www.dehashed.com/data)
 
-Pronađite provaljene akreditive e-mailova i čak domena.\
+Pronađite leakovane akreditive email adresa, pa čak i domena\
 Komercijalno?
 
 ## [psbdmp](https://psbdmp.ws/)
 
-Pretražujte pastebine gde se pojavio e-mail. Komercijalno?
+Pretražite pastebin sajtove na kojima se pojavila email adresa. Komercijalno?
 
 ## [emailrep.io](https://emailrep.io/key)
 
-Dobijte reputaciju e-maila. Komercijalno?
+Dobijte reputaciju email adrese. Komercijalno?
 
 ## [ghostproject](https://ghostproject.fr/)
 
-Dobijte lozinke iz provaljenih e-mailova. Komercijalno?
+Dobijte lozinke iz leakovanih email adresa. Komercijalno?
 
 ## [Binaryedge](https://www.binaryedge.io/)
 
-Dobijte zanimljive informacije iz IP-ova.
+Dobijte zanimljive informacije o IP adresama
 
 ## [haveibeenpwned](https://haveibeenpwned.com/)
 
-Pretražujte po domenu i e-mailu i saznajte da li je bio provaljen i lozinke. Komercijalno?
+Pretražite po domenu i email adresi i proverite da li je bila pwned, kao i lozinke. Komercijalno?
 
 ### [IP2Location.io](https://www.ip2location.io/)
 
-Detektuje geolokaciju IP-a, data centar, ASN i čak VPN informacije. Nudi besplatno 30K upita mesečno.
+Detektuje geolokaciju IP adrese, data centar, ASN i čak VPN informacije. Nudi 30K besplatnih upita mesečno.
 
 ### [IPQuery.io](https://www.ipquery.io/)
-Geolokacija IP-a i OISNT sa ciljanjem podataka. Ne komercijalno.
+Geolokacija IP adrese i OISNT sa ciljanim tačkama podataka. Nije komercijalno.
 
 
 [https://dnsdumpster.com/](https://dnsdumpster.com/)(u komercijalnom alatu?)

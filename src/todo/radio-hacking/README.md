@@ -1,3 +1,3 @@
-# Радио Хаковање
+# Radio Hacking
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,4 +1,4 @@
-# AD Sertifikati
+# AD Certificates
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,100 +6,100 @@
 
 ### Komponente sertifikata
 
-- The **Subject** sertifikata označava njegovog vlasnika.
-- A **Public Key** je u paru sa privatnim ključem kako bi povezao sertifikat sa njegovim zakonitim vlasnikom.
-- The **Validity Period**, definisan putem datuma **NotBefore** i **NotAfter**, označava važeći period sertifikata.
+- **Subject** sertifikata označava njegovog vlasnika.
+- **Public Key** je uparen sa privatno čuvanim ključem kako bi se sertifikat povezao sa njegovim legitimnim vlasnikom.
+- **Validity Period**, definisan datumima **NotBefore** i **NotAfter**, označava period važenja sertifikata.
 - Jedinstveni **Serial Number**, koji obezbeđuje Certificate Authority (CA), identifikuje svaki sertifikat.
-- The **Issuer** označava CA koja je izdala sertifikat.
-- **SubjectAlternativeName** omogućava dodatna imena za subject, povećavajući fleksibilnost identifikacije.
-- **Basic Constraints** identifikuju da li je sertifikat za CA ili krajnji entitet i definišu ograničenja upotrebe.
-- **Extended Key Usages (EKUs)** određuju specifične namene sertifikata, kao što su code signing ili email encryption, pomoću Object Identifiers (OIDs).
-- The **Signature Algorithm** specificira metod za potpisivanje sertifikata.
-- The **Signature**, kreirana privatnim ključem izdavaoca, garantuje autentičnost sertifikata.
+- **Issuer** označava CA koji je izdao sertifikat.
+- **SubjectAlternativeName** omogućava dodatna imena za subject, čime se povećava fleksibilnost identifikacije.
+- **Basic Constraints** određuju da li je sertifikat namenjen za CA ili krajnji entitet i definišu ograničenja upotrebe.
+- **Extended Key Usages (EKUs)** određuju posebne namene sertifikata, kao što su potpisivanje koda ili šifrovanje e-pošte, putem Object Identifiers (OIDs).
+- **Signature Algorithm** određuje metod potpisivanja sertifikata.
+- **Signature**, kreiran privatnim ključem izdavaoca, garantuje autentičnost sertifikata.<sup>[[1]](#references)</sup>
 
-### Posebne napomene
+### Posebna razmatranja
 
-- **Subject Alternative Names (SANs)** proširuju primenjivost sertifikata na više identiteta, što je ključno za servere sa više domena. Bezbedni procesi izdavanja su vitalni da bi se izbegli rizici impersonacije ako napadači manipulišu specifikacijom SAN-a.
+- **Subject Alternative Names (SANs)** proširuju primenu sertifikata na više identiteta, što je ključno za servere sa više domena. Bezbedni procesi izdavanja su od vitalnog značaja za sprečavanje rizika od impersonacije koju napadači mogu izvršiti manipulisanjem SAN specifikacijom.<sup>[[1]](#references)</sup>
 
 ### Certificate Authorities (CAs) u Active Directory (AD)
 
-AD CS prepoznaje CA sertifikate u AD forestu kroz određene kontejnere, od kojih svaki ima jedinstvenu ulogu:
+AD CS prepoznaje CA sertifikate u AD forest-u putem određenih kontejnera, od kojih svaki ima posebnu ulogu:<sup>[[1]](#references)</sup>
 
-- **Certification Authorities** kontejner sadrži poverene root CA sertifikate.
-- **Enrolment Services** kontejner sadrži informacije o Enterprise CA i njihovim certificate templates.
-- **NTAuthCertificates** objekat uključuje CA sertifikate ovlašćene za AD autentikaciju.
-- **AIA (Authority Information Access)** kontejner olakšava validaciju lanca sertifikata pomoću posredničkih (intermediate) i cross-CA sertifikata.
+- Kontejner **Certification Authorities** sadrži pouzdane root CA sertifikate.
+- Kontejner **Enrolment Services** sadrži podatke o Enterprise CA-ovima i njihovim certificate template-ovima.
+- Objekat **NTAuthCertificates** sadrži CA sertifikate ovlašćene za AD authentication.
+- Kontejner **AIA (Authority Information Access)** omogućava validaciju lanca sertifikata pomoću intermediate i cross CA sertifikata.
 
-### Nabavka sertifikata: Tok zahteva klijenta za sertifikat
+### Preuzimanje sertifikata: tok zahteva za client sertifikat
 
-1. Proces započinje kada klijenti pronađu Enterprise CA.
-2. CSR se kreira i sadrži public key i ostale podatke, nakon generisanja para public-private ključeva.
-3. CA procenjuje CSR u odnosu na dostupne certificate templates i izdaje sertifikat na osnovu permisija definisanih šablonom.
-4. Nakon odobrenja, CA potpisuje sertifikat svojim privatnim ključem i vraća ga klijentu.
+1. Proces zahteva počinje tako što klijenti pronalaze Enterprise CA.
+2. Nakon generisanja para javnog i privatnog ključa, kreira se CSR koji sadrži javni ključ i druge podatke.
+3. CA proverava CSR u odnosu na dostupne certificate template-ove i izdaje sertifikat na osnovu dozvola template-a.
+4. Nakon odobrenja, CA potpisuje sertifikat svojim privatnim ključem i vraća ga klijentu.<sup>[[1]](#references)</sup>
 
 ### Certificate Templates
 
-Definisani u AD, ovi šabloni navode podešavanja i dozvole za izdavanje sertifikata, uključujući dozvoljene EKU-ove i prava za enrolovanje ili izmene, što je kritično za upravljanje pristupom servisima za sertifikate.
+Definisani unutar AD-a, ovi template-ovi određuju postavke i dozvole za izdavanje sertifikata, uključujući dozvoljene EKU-ove i prava za enrollment ili izmenu, što je ključno za upravljanje pristupom certificate servisima.<sup>[[1]](#references)</sup>
 
-## Enrolovanje sertifikata
+## Enrollment sertifikata
 
-Proces enrolovanja sertifikata pokreće administrator koji **kreira šablon sertifikata**, koji potom **objavljuje** Enterprise Certificate Authority (CA). Time je šablon dostupan za enrolovanje klijenata, što se postiže dodavanjem imena šablona u polje `certificatetemplates` objekta u Active Directory.
+Proces enrollment-a sertifikata pokreće administrator koji **kreira certificate template**, a zatim ga **objavljuje** Enterprise Certificate Authority (CA). Time template postaje dostupan za enrollment klijenata, što se postiže dodavanjem imena template-a u polje `certificatetemplates` Active Directory objekta.<sup>[[1]](#references)</sup>
 
-Da bi klijent mogao da zatraži sertifikat, moraju mu biti dodeljena **prava za enrolovanje**. Ta prava su definisana kroz security descriptor-e na šablonu sertifikata i na samom Enterprise CA. Dozvole moraju biti dodeljene na oba mesta da bi zahtev bio uspešan.
+Da bi klijent mogao da zatraži sertifikat, moraju mu biti dodeljena **prava za enrollment**. Ova prava su definisana security descriptor-ima na certificate template-u i samom Enterprise CA-u. Dozvole moraju biti dodeljene na obe lokacije da bi zahtev bio uspešan.<sup>[[1]](#references)</sup>
 
-### Prava za enrolovanje šablona
+### Prava za enrollment template-a
 
-Ova prava su specificirana kroz Access Control Entries (ACEs), i detalji dozvola uključuju, na primer:
+Ova prava se navode putem Access Control Entries (ACEs) i obuhvataju dozvole kao što su:<sup>[[1]](#references)</sup>
 
-- **Certificate-Enrollment** i **Certificate-AutoEnrollment** prava, svako povezano sa specifičnim GUID-ovima.
-- **ExtendedRights**, dozvoljavajući sve extended permisije.
-- **FullControl/GenericAll**, pružajući potpunu kontrolu nad šablonom.
+- Prava **Certificate-Enrollment** i **Certificate-AutoEnrollment**, od kojih je svako povezano sa određenim GUID-ovima.
+- **ExtendedRights**, koja omogućavaju sve proširene dozvole.
+- **FullControl/GenericAll**, koja pružaju potpunu kontrolu nad template-om.
 
-### Prava za enrolovanje na Enterprise CA
+### Prava za enrollment Enterprise CA-a
 
-Prava CA su navedena u njegovom security descriptor-u, dostupnom preko Certificate Authority management konzole. Neka podešavanja čak omogućavaju udaljeni pristup korisnicima sa niskim privilegijama, što može predstavljati sigurnosni rizik.
+Prava CA-a navedena su u njegovom security descriptor-u, kojem se može pristupiti putem konzole za upravljanje Certificate Authority-om. Neke postavke čak omogućavaju korisnicima sa niskim privilegijama udaljeni pristup, što može predstavljati bezbednosni problem.<sup>[[1]](#references)</sup>
 
 ### Dodatne kontrole izdavanja
 
-Mogu važiti određene kontrole, kao što su:
+Mogu se primenjivati određene kontrole, kao što su:<sup>[[1]](#references)</sup>
 
-- **Manager Approval**: Stavlja zahteve u pending stanje dok ih ne odobri menadžer za sertifikate.
-- **Enrolment Agents and Authorized Signatures**: Specifikuju broj potrebnih potpisa na CSR-u i neophodne Application Policy OID-ove.
+- **Manager Approval**: Zahteve postavlja u stanje čekanja dok ih certificate manager ne odobri.
+- **Enrolment Agents and Authorized Signatures**: Određuju broj potpisa potrebnih na CSR-u i neophodne Application Policy OIDs.
 
 ### Metode za zahtevanje sertifikata
 
-Sertifikati se mogu tražiti putem:
+Sertifikati se mogu zahtevati putem:<sup>[[1]](#references)</sup>
 
-1. Windows Client Certificate Enrollment Protocol (MS-WCCE), korišćenjem DCOM interfejsa.
-2. ICertPassage Remote Protocol (MS-ICPR), preko named pipes ili TCP/IP.
-3. certificate enrollment web interface, uz instaliranu Certificate Authority Web Enrollment ulogu.
-4. Certificate Enrollment Service (CES), u saradnji sa Certificate Enrollment Policy (CEP) servisom.
-5. Network Device Enrollment Service (NDES) za mrežne uređaje, koristeći Simple Certificate Enrollment Protocol (SCEP).
+1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), uz korišćenje DCOM interfejsa.
+2. **ICertPassage Remote Protocol** (MS-ICPR), putem named pipe-ova ili TCP/IP-a.
+3. **certificate enrollment web interfejsa**, uz instaliranu Certificate Authority Web Enrollment ulogu.
+4. **Certificate Enrollment Service** (CES), u kombinaciji sa servisom Certificate Enrollment Policy (CEP).
+5. **Network Device Enrollment Service** (NDES) za mrežne uređaje, uz korišćenje Simple Certificate Enrollment Protocol-a (SCEP).
 
-Korisnici na Windows-u mogu takođe zahtevati sertifikate preko GUI-ja (`certmgr.msc` ili `certlm.msc`) ili alata iz komandne linije (`certreq.exe` ili PowerShell komande `Get-Certificate`).
+Windows korisnici takođe mogu da zahtevaju sertifikate putem GUI-ja (`certmgr.msc` ili `certlm.msc`) ili alata komandne linije (`certreq.exe` ili PowerShell komande `Get-Certificate`).
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
-## Certificate Authentication
+## Autentifikacija sertifikatom
 
-Active Directory (AD) podržava autentifikaciju pomoću sertifikata, prvenstveno koristeći protokole **Kerberos** i **Secure Channel (Schannel)**.
+Active Directory (AD) podržava autentifikaciju sertifikatom, prvenstveno koristeći protokole **Kerberos** i **Secure Channel (Schannel)**.<sup>[[1]](#references)</sup>
 
-### Kerberos Authentication Process
+### Proces Kerberos autentifikacije
 
-U Kerberos procesu autentifikacije, zahtev korisnika za Ticket Granting Ticket (TGT) se potpisuje koristeći **privatni ključ** korisnikovog sertifikata. Ovaj zahtev prolazi kroz nekoliko provera od strane kontrolera domena, uključujući **validnost**, **putanju** i **status opoziva** sertifikata. Provere takođe uključuju verifikaciju da sertifikat potiče iz poverenog izvora i potvrdu prisustva izdavaoca u **NTAUTH skladištu sertifikata**. Uspešne provere rezultuju izdavanjem TGT-a. Objekat **`NTAuthCertificates`** u AD, koji se nalazi na:
+U procesu Kerberos autentifikacije, korisnikov zahtev za Ticket Granting Ticket (TGT) potpisuje se pomoću **privatnog ključa** korisnikovog sertifikata. Ovaj zahtev prolazi kroz nekoliko validacija koje sprovodi domain controller, uključujući **validnost**, **putanju** i status **opoziva** sertifikata. Validacije takođe obuhvataju proveru da sertifikat potiče iz pouzdanog izvora i potvrdu prisustva izdavaoca u **NTAUTH certificate store**. Uspešne validacije rezultuju izdavanjem TGT-a. Objekat **`NTAuthCertificates`** u AD-u, koji se nalazi na:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-je centralno za uspostavljanje poverenja za autentifikaciju sertifikatom.
+je od ključnog značaja za uspostavljanje poverenja za autentifikaciju sertifikatom.<sup>[[1]](#references)</sup>
 
-### Secure Channel (Schannel) Authentication
+### Secure Channel (Schannel) autentifikacija
 
-Schannel omogućava sigurne TLS/SSL veze, gde tokom handshake-a klijent predstavlja sertifikat koji, ako je uspešno verifikovan, ovlašćuje pristup. Mapiranje sertifikata na AD nalog može uključivati Kerberosovu funkciju **S4U2Self** ili **Subject Alternative Name (SAN)** sertifikata, između ostalih metoda.
+Schannel omogućava bezbedne TLS/SSL veze, pri čemu tokom rukovanja klijent predstavlja sertifikat koji, ako je uspešno validiran, autorizuje pristup.<sup>[[2]](#references)</sup> Mapiranje sertifikata na AD nalog može uključivati Kerberos funkciju **S4U2Self** ili **Subject Alternative Name (SAN)** sertifikata, između ostalih metoda.<sup>[[1]](#references)</sup>
 
-### AD Certificate Services Enumeration
+### Enumeracija AD Certificate Services
 
-AD-ove usluge sertifikata mogu se enumerisati kroz LDAP upite, otkrivajući informacije o **Enterprise Certificate Authorities (CAs)** i njihovim konfiguracijama. Ovo je dostupno svakom korisniku autentifikovanom u domenu bez posebnih privilegija. Alati kao što su **[Certify](https://github.com/GhostPack/Certify)** i **[Certipy](https://github.com/ly4k/Certipy)** koriste se za enumeraciju i procenu ranjivosti u AD CS okruženjima.
+Certificate services u AD-u mogu se enumerisati putem LDAP upita, čime se otkrivaju informacije o **Enterprise Certificate Authorities (CA)** i njihovim konfiguracijama. Ovo je dostupno svakom korisniku autentifikovanom na domenu, bez posebnih privilegija.<sup>[[1]](#references)</sup> Alati kao što su **[Certify](https://github.com/GhostPack/Certify)** i **[Certipy](https://github.com/ly4k/Certipy)** koriste se za enumeraciju i procenu ranjivosti u AD CS okruženjima.<sup>[[3]](#references)</sup>
 
 Komande za korišćenje ovih alata uključuju:
 ```bash
@@ -125,11 +125,11 @@ certipy find -vulnerable -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
-## Izvori
+## Reference
 
-- [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
-- [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
-- [GhostPack/Certify](https://github.com/GhostPack/Certify)
-- [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
+- [1] [Certified Pre-Owned: Abusing Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
+- [2] [Šta je SSL/TLS Client Authentication i kako funkcioniše?](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
+- [3] [GhostPack/Certify](https://github.com/GhostPack/Certify)
+- [4] [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
 
 {{#include ../../../banners/hacktricks-training.md}}

