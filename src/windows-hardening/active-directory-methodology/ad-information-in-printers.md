@@ -2,37 +2,39 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Es gibt mehrere Blogs im Internet, die **die Gefahren hervorheben, Drucker mit LDAP mit Standard-/schwachen** Anmeldeinformationen konfiguriert zu lassen. \
-Das liegt daran, dass ein Angreifer **den Drucker dazu bringen könnte, sich gegen einen bösartigen LDAP-Server zu authentifizieren** (typischerweise reicht ein `nc -vv -l -p 389` oder `slapd -d 2`) und die Drucker-**Anmeldeinformationen im Klartext** abzufangen.
+Im Internet gibt es mehrere Blogs, die die **Gefahren hervorheben, die entstehen, wenn Drucker mit LDAP und standardmäßigen/schwachen** Anmeldedaten konfiguriert bleiben.  \
+Dies liegt daran, dass ein Angreifer **den Drucker dazu bringen könnte, sich bei einem rogue LDAP-Server zu authentifizieren** (typischerweise reicht ein `nc -vv -l -p 389` oder `slapd -d 2` aus), und die **Anmeldedaten des Druckers im Klartext** abfangen könnte.
 
-Außerdem enthalten mehrere Drucker **Protokolle mit Benutzernamen** oder könnten sogar in der Lage sein, **alle Benutzernamen** vom Domänencontroller herunterzuladen.
+Außerdem enthalten mehrere Drucker **Protokolle mit Benutzernamen** oder könnten sogar in der Lage sein, **alle Benutzernamen** vom Domain Controller herunterzuladen.
 
-All diese **sensiblen Informationen** und der allgemeine **Mangel an Sicherheit** machen Drucker für Angreifer sehr interessant.
+All diese **sensiblen Informationen** und der häufige **Mangel an Sicherheit** machen Drucker für Angreifer sehr interessant.
 
 Einige einführende Blogs zu diesem Thema:
 
-- [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
-- [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
+- [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)<sup>[[4]](#references)</sup>
+- [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)<sup>[[5]](#references)</sup>
 
 ---
+
 ## Druckerkonfiguration
 
-- **Standort**: Die LDAP-Serverliste befindet sich normalerweise in der Weboberfläche (z. B. *Netzwerk ➜ LDAP-Einstellungen ➜ LDAP einrichten*).
-- **Verhalten**: Viele eingebettete Webserver erlauben LDAP-Serveränderungen **ohne erneute Eingabe der Anmeldeinformationen** (Usability-Funktion → Sicherheitsrisiko).
-- **Ausnutzen**: Leiten Sie die LDAP-Serveradresse an einen vom Angreifer kontrollierten Host um und verwenden Sie die Schaltfläche *Verbindung testen* / *Adressbuch synchronisieren*, um den Drucker dazu zu bringen, sich mit Ihnen zu verbinden.
+- **Ort**: Die LDAP-Serverliste befindet sich normalerweise in der Weboberfläche (z. B. *Network ➜ LDAP Setting ➜ Setting Up LDAP*).
+- **Verhalten**: Viele eingebettete Webserver erlauben Änderungen am LDAP-Server **ohne erneute Eingabe der Anmeldedaten** (Benutzerfreundlichkeitsfunktion → Sicherheitsrisiko).
+- **Exploit**: Leite die Adresse des LDAP-Servers auf einen vom Angreifer kontrollierten Host um und verwende die Schaltfläche *Test Connection* / *Address Book Sync*, um den Drucker zu zwingen, eine Verbindung zu dir herzustellen.
 
 ---
-## Anmeldeinformationen erfassen
+
+## Abfangen von Anmeldedaten
 
 ### Methode 1 – Netcat Listener
 ```bash
 sudo nc -k -v -l -p 389     # LDAPS → 636 (or 3269)
 ```
-Kleine/alte MFPs senden möglicherweise ein einfaches *simple-bind* im Klartext, das netcat erfassen kann. Moderne Geräte führen normalerweise zuerst eine anonyme Abfrage durch und versuchen dann das Bind, sodass die Ergebnisse variieren.
+Kleine/alte MFPs senden möglicherweise einen einfachen *simple-bind* im Klartext, den netcat mitschneiden kann. Moderne Geräte führen normalerweise zuerst eine anonyme Abfrage durch und versuchen anschließend den Bind, daher können die Ergebnisse variieren.<sup>[[1]](#references)</sup>
 
-### Methode 2 – Vollständiger Rogue LDAP-Server (empfohlen)
+### Methode 2 – Vollständiger Rogue-LDAP-Server (empfohlen)
 
-Da viele Geräte eine anonyme Suche *vor* der Authentifizierung durchführen, liefert das Einrichten eines echten LDAP-Daemons viel zuverlässigere Ergebnisse:
+Da viele Geräte vor der Authentifizierung eine anonyme Suche durchführen, liefert das Einrichten eines echten LDAP-Daemons wesentlich zuverlässigere Ergebnisse:<sup>[[1]](#references)</sup>
 ```bash
 # Debian/Ubuntu example
 sudo apt install slapd ldap-utils
@@ -41,64 +43,70 @@ sudo dpkg-reconfigure slapd   # set any base-DN – it will not be validated
 # run slapd in foreground / debug 2
 slapd -d 2 -h "ldap:///"      # only LDAP, no LDAPS
 ```
-Wenn der Drucker seine Abfrage durchführt, sehen Sie die Klartext-Anmeldeinformationen in der Debug-Ausgabe.
+Wenn der Drucker seine Abfrage durchführt, sehen Sie die Klartext-Anmeldedaten in der Debug-Ausgabe.
 
-> 💡  Sie können auch `impacket/examples/ldapd.py` (Python rogue LDAP) oder `Responder -w -r -f` verwenden, um NTLMv2-Hashes über LDAP/SMB zu ernten.
+> 💡  Sie können auch `impacket/examples/ldapd.py` (Python rogue LDAP) oder `Responder -w -r -f` verwenden, um NTLMv2-Hashes über LDAP/SMB zu sammeln.
 
 ---
-## Aktuelle Pass-Back-Sicherheitsanfälligkeiten (2024-2025)
 
-Pass-back ist *kein* theoretisches Problem – Anbieter veröffentlichen weiterhin Hinweise in 2024/2025, die genau diese Angriffsart beschreiben.
+## Aktuelle Pass-Back-Schwachstellen (2024-2025)
+
+Pass-back ist *kein* theoretisches Problem – Anbieter veröffentlichen auch 2024/2025 weiterhin Advisories, die genau diese Angriffsklasse beschreiben.
 
 ### Xerox VersaLink – CVE-2024-12510 & CVE-2024-12511
 
-Firmware ≤ 57.69.91 der Xerox VersaLink C70xx MFPs erlaubte einem authentifizierten Administrator (oder jedem, wenn die Standardanmeldeinformationen bestehen bleiben):
+Firmware ≤ 57.69.91 von Xerox VersaLink C70xx MFPs erlaubte es einem authentifizierten Administrator (oder jedem, wenn die Standardanmeldedaten noch aktiv sind):
 
-* **CVE-2024-12510 – LDAP pass-back**: Ändern der LDAP-Serveradresse und Auslösen einer Abfrage, wodurch das Gerät die konfigurierten Windows-Anmeldeinformationen an den vom Angreifer kontrollierten Host weitergibt.
-* **CVE-2024-12511 – SMB/FTP pass-back**: identisches Problem über *scan-to-folder*-Ziele, das NetNTLMv2 oder FTP-Klartext-Anmeldeinformationen preisgibt.
+* **CVE-2024-12510 – LDAP pass-back**: die LDAP-Serveradresse zu ändern und eine Abfrage auszulösen, wodurch das Gerät die konfigurierten Windows-Anmeldedaten an den vom Angreifer kontrollierten Host leakt.
+* **CVE-2024-12511 – SMB/FTP pass-back**: identisches Problem über *scan-to-folder*-Ziele, wodurch NetNTLMv2- oder FTP-Klartext-Anmeldedaten geleakt werden.<sup>[[2]](#references)</sup>
 
 Ein einfacher Listener wie:
 ```bash
 sudo nc -k -v -l -p 389     # capture LDAP bind
 ```
-oder ein bösartiger SMB-Server (`impacket-smbserver`) reicht aus, um die Anmeldeinformationen zu ernten.
+oder ein rogue SMB server (`impacket-smbserver`) reicht aus, um die Credentials abzugreifen.
 
-### Canon imageRUNNER / imageCLASS – Advisory 20. Mai 2025
+### Canon imageRUNNER / imageCLASS – Advisory 20 May 2025
 
-Canon bestätigte eine **SMTP/LDAP Pass-Back** Schwachstelle in Dutzenden von Laser- und MFP-Produktlinien. Ein Angreifer mit Administratorzugriff kann die Serverkonfiguration ändern und die gespeicherten Anmeldeinformationen für LDAP **oder** SMTP abrufen (viele Organisationen verwenden ein privilegiertes Konto, um das Scannen per E-Mail zu ermöglichen).
+Canon bestätigte eine **SMTP/LDAP pass-back**-Schwachstelle in Dutzenden Laser- und MFP-Produktlinien. Ein Angreifer mit Admin-Zugriff kann die Serverkonfiguration ändern und die gespeicherten Credentials für LDAP **oder** SMTP abrufen (viele Organisationen verwenden ein privilegiertes Konto, um Scan-to-Mail zu ermöglichen).<sup>[[3]](#references)</sup>
 
-Die Empfehlungen des Anbieters lauten ausdrücklich:
+Die Herstellerhinweise empfehlen ausdrücklich:
 
-1. Aktualisieren Sie die Firmware so schnell wie möglich auf die gepatchte Version.
-2. Verwenden Sie starke, einzigartige Administratorpasswörter.
-3. Vermeiden Sie privilegierte AD-Konten für die Druckerintegration.
+1. So bald wie verfügbar auf gepatchte Firmware aktualisieren.
+2. Starke, eindeutige Admin-Passwörter verwenden.
+3. Privilegierte AD-Konten für die Druckerintegration vermeiden.
 
 ---
-## Automatisierte Aufzählungs- / Ausnutzungstools
+
+## Automatisierte Enumeration- / Exploitation-Tools
 
 | Tool | Zweck | Beispiel |
 |------|---------|---------|
-| **PRET** (Printer Exploitation Toolkit) | Missbrauch von PostScript/PJL/PCL, Dateisystemzugriff, Überprüfung der Standardanmeldeinformationen, *SNMP-Entdeckung* | `python pret.py 192.168.1.50 pjl` |
-| **Praeda** | Ernte der Konfiguration (einschließlich Adressbücher & LDAP-Anmeldeinformationen) über HTTP/HTTPS | `perl praeda.pl -t 192.168.1.50` |
-| **Responder / ntlmrelayx** | Erfassen & Weiterleiten von NetNTLM-Hashes aus SMB/FTP-Pass-Back | `responder -I eth0 -wrf` |
-| **impacket-ldapd.py** | Leichter bösartiger LDAP-Dienst zum Empfangen von Klartext-Bindungen | `python ldapd.py -debug` |
+| **PRET** (Printer Exploitation Toolkit) | PostScript/PJL/PCL-Missbrauch, Dateisystemzugriff, Prüfung auf Default-Credentials, *SNMP discovery* | `python pret.py 192.168.1.50 pjl` |
+| **Praeda** | Konfiguration über HTTP/HTTPS abgreifen (einschließlich Adressbüchern und LDAP-Credentials) | `perl praeda.pl -t 192.168.1.50` |
+| **Responder / ntlmrelayx** | NetNTLM-Hashes aus SMB/FTP-pass-back erfassen und weiterleiten | `responder -I eth0 -wrf` |
+| **impacket-ldapd.py** | Leichtgewichtiger rogue LDAP service zum Empfangen von Klartext-Binds | `python ldapd.py -debug` |
 
 ---
-## Härtung & Erkennung
 
-1. **Patch / Firmware-Update** MFPs umgehend (prüfen Sie die PSIRT-Bulletins des Anbieters).
-2. **Least-Privilege Service Accounts** – niemals Domain Admin für LDAP/SMB/SMTP verwenden; auf *nur lesen* OU-Bereiche beschränken.
-3. **Zugriff auf die Verwaltung einschränken** – Drucker-Web-/IPP/SNMP-Schnittstellen in ein Verwaltungs-VLAN oder hinter einer ACL/VPN platzieren.
-4. **Deaktivieren Sie ungenutzte Protokolle** – FTP, Telnet, raw-9100, ältere SSL-Verschlüsselungen.
-5. **Aktivieren Sie die Protokollierung** – einige Geräte können LDAP/SMTP-Fehler sysloggen; unerwartete Bindungen korrelieren.
-6. **Überwachen Sie auf Klartext-LDAP-Bindungen** von ungewöhnlichen Quellen (Drucker sollten normalerweise nur mit DCs kommunizieren).
-7. **SNMPv3 oder SNMP deaktivieren** – die Community `public` leakt oft Geräte- & LDAP-Konfiguration.
+## Hardening & Detection
+
+1. **MFPs zeitnah patchen / Firmware aktualisieren** (Hersteller-PSIRT-Bulletins prüfen).
+2. **Service Accounts mit geringsten Rechten** – niemals Domain Admin für LDAP/SMB/SMTP verwenden; auf *read-only* OU-Bereiche beschränken.
+3. **Management-Zugriff beschränken** – Web-/IPP-/SNMP-Schnittstellen der Drucker in einem Management-VLAN oder hinter einer ACL/VPN platzieren.
+4. **Nicht verwendete Protokolle deaktivieren** – FTP, Telnet, raw-9100 und ältere SSL-Chiffren.
+5. **Audit Logging aktivieren** – einige Geräte können LDAP-/SMTP-Fehler per Syslog protokollieren; unerwartete Binds korrelieren.
+6. Auf **Klartext-LDAP-Binds** von ungewöhnlichen Quellen achten (Drucker sollten normalerweise nur mit DCs kommunizieren).
+7. **SNMPv3 verwenden oder SNMP deaktivieren** – die Community `public` leakt häufig Geräte- und LDAP-Konfigurationen.
 
 ---
-## Referenzen
 
-- [https://grimhacker.com/2018/03/09/just-a-printer/](https://grimhacker.com/2018/03/09/just-a-printer/)
-- Rapid7. “Xerox VersaLink C7025 MFP Pass-Back Attack Vulnerabilities.” Februar 2025.
-- Canon PSIRT. “Vulnerability Mitigation Against SMTP/LDAP Passback for Laser Printers and Small Office Multifunction Printers.” Mai 2025.
+## References
+
+- [1] [It's just a printer… What's the worst that could happen?](https://grimhacker.com/2018/03/09/just-a-printer/)
+- [2] [Xerox Versalink C7025 Multifunction Printer: Pass-Back Attack Vulnerabilities (Fixed)](https://www.rapid7.com/blog/post/2025/02/14/xerox-versalink-c7025-multifunction-printer-pass-back-attack-vulnerabilities-fixed/)
+- [3] [CP2025-004 Vulnerability Mitigation/Remediation for Production Printers, Office/Small Office Multifunction Printers and Laser Printers](https://psirt.canon/advisory-information/cp2025-004/)
+- [4] [Obtaining Domain Credentials through a Printer with Netcat](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
+- [5] [Exploiting Multifunction Printers During A Penetration Test Engagement](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 
 {{#include ../../banners/hacktricks-training.md}}

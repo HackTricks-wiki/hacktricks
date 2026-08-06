@@ -4,122 +4,123 @@
 
 ## [ProjectHoneypot](https://www.projecthoneypot.org/)
 
-Sie können fragen, ob eine IP mit verdächtigen/malicious Aktivitäten in Verbindung steht. Völlig kostenlos.
+Du kannst prüfen, ob eine IP mit verdächtigen/schädlichen Aktivitäten in Verbindung steht. Vollständig kostenlos.
 
 ## [**BotScout**](http://botscout.com/api.htm)
 
-Überprüfen Sie, ob die IP-Adresse mit einem Bot verbunden ist, der Konten registriert. Es kann auch Benutzernamen und E-Mails überprüfen. Zunächst kostenlos.
+Prüfe, ob die IP-Adresse mit einem Bot verbunden ist, der Accounts registriert. Es können auch Benutzernamen und E-Mail-Adressen überprüft werden. Anfangs kostenlos.
 
 ## [Hunter](https://hunter.io/)
 
-Finden und verifizieren Sie E-Mails.\
-Einige kostenlose API-Anfragen, für mehr müssen Sie bezahlen.\
+Finde und verifiziere E-Mail-Adressen.\
+Einige API-Anfragen sind kostenlos, für mehr musst du bezahlen.\
 Kommerziell?
 
 ## [AlientVault](https://otx.alienvault.com/api)
 
-Finden Sie bösartige Aktivitäten, die mit IPs und Domains verbunden sind. Kostenlos.
+Finde schädliche Aktivitäten im Zusammenhang mit IPs und Domains. Kostenlos.
 
 ## [Clearbit](https://dashboard.clearbit.com/)
 
-Finden Sie persönliche Daten zu einer E-Mail (Profile auf anderen Plattformen), Domain (grundlegende Unternehmensinformationen, E-Mails und Personen, die dort arbeiten) und Unternehmen (Unternehmensinformationen aus E-Mails abrufen).\
-Sie müssen bezahlen, um auf alle Möglichkeiten zuzugreifen.\
+Finde zu einer E-Mail-Adresse (Profile auf anderen Plattformen), einer Domain (grundlegende Unternehmensinformationen, E-Mails und Mitarbeiter) und Unternehmen (Unternehmensinformationen anhand einer E-Mail-Adresse) zugehörige persönliche Daten.\
+Du musst bezahlen, um auf alle Möglichkeiten zugreifen zu können.\
 Kommerziell?
 
 ## [BuiltWith](https://builtwith.com/)
 
-Technologien, die von Webseiten verwendet werden. Teuer...\
+Von Websites verwendete Technologien. Teuer...\
 Kommerziell?
 
 ## [Fraudguard](https://fraudguard.io/)
 
-Überprüfen Sie, ob ein Host (Domain oder IP) mit verdächtigen/malicious Aktivitäten in Verbindung steht. Hat einige kostenlose API-Zugriffe.\
+Prüfe, ob ein Host (Domain oder IP) mit verdächtigen/schädlichen Aktivitäten in Verbindung steht. Bietet einen kostenlosen API-Zugriff.\
 Kommerziell?
 
 ## [FortiGuard](https://fortiguard.com/)
 
-Überprüfen Sie, ob ein Host (Domain oder IP) mit verdächtigen/malicious Aktivitäten in Verbindung steht. Hat einige kostenlose API-Zugriffe.
+Prüfe, ob ein Host (Domain oder IP) mit verdächtigen/schädlichen Aktivitäten in Verbindung steht. Bietet einen kostenlosen API-Zugriff.
 
 ## [SpamCop](https://www.spamcop.net/)
 
-Gibt an, ob der Host mit Spam-Aktivitäten in Verbindung steht. Hat einige kostenlose API-Zugriffe.
+Zeigt an, ob ein Host mit Spam-Aktivitäten in Verbindung steht. Bietet einen kostenlosen API-Zugriff.
 
 ## [mywot](https://www.mywot.com/)
 
-Basierend auf Meinungen und anderen Metriken herausfinden, ob eine Domain mit verdächtigen/malicious Informationen in Verbindung steht.
+Ermittelt anhand von Bewertungen und anderen Metriken, ob eine Domain mit verdächtigen/schädlichen Informationen in Verbindung steht.
 
 ## [ipinfo](https://ipinfo.io/)
 
-Erhält grundlegende Informationen von einer IP-Adresse. Sie können bis zu 100K pro Monat testen.
+Liefert grundlegende Informationen zu einer IP-Adresse. Du kannst bis zu 100.000 Abfragen pro Monat testen.
 
 ## [securitytrails](https://securitytrails.com/app/account)
 
-Diese Plattform gibt Informationen über Domains und IP-Adressen wie Domains innerhalb einer IP oder innerhalb eines Domain-Servers, Domains, die von einer E-Mail besessen werden (verwandte Domains finden), IP-Historie von Domains (den Host hinter CloudFlare finden), alle Domains, die einen Nameserver verwenden....\
-Sie haben einige kostenlose Zugriffe.
+Diese Plattform liefert Informationen über Domains und IP-Adressen, etwa Domains innerhalb einer IP oder auf einem Domain-Server, Domains im Besitz einer E-Mail-Adresse (zugehörige Domains finden), den IP-Verlauf von Domains (den Host hinter CloudFlare finden), alle Domains, die einen Nameserver verwenden....\
+Du hast teilweise kostenlosen Zugriff.
 
 ## [fullcontact](https://www.fullcontact.com/)
 
-Ermöglicht die Suche nach E-Mail, Domain oder Unternehmensnamen und das Abrufen von "persönlichen" Informationen. Es kann auch E-Mails verifizieren. Es gibt einige kostenlose Zugriffe.
+Ermöglicht die Suche anhand einer E-Mail-Adresse, Domain oder eines Unternehmensnamens und liefert zugehörige „persönliche“ Informationen. E-Mail-Adressen können ebenfalls verifiziert werden. Es gibt einen kostenlosen Zugriff.
 
 ## [RiskIQ](https://www.spiderfoot.net/documentation/)
 
-Eine Menge Informationen von Domains und IPs, sogar in der kostenlosen/Community-Version.
+Viele Informationen zu Domains und IPs, sogar in der kostenlosen/Community-Version.
 
 ## [\_IntelligenceX](https://intelx.io/)
 
-Durchsuchen Sie Domains, IPs und E-Mails und erhalten Sie Informationen aus Dumps. Hat einige kostenlose Zugriffe.
+Durchsuche Domains, IPs und E-Mail-Adressen und erhalte Informationen aus Dumps. Es gibt einen kostenlosen Zugriff.
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
-Suchen Sie nach IP und sammeln Sie Informationen zu verdächtigen Aktivitäten. Es gibt einige kostenlose Zugriffe.
+Suche nach einer IP und sammle Informationen zu damit verbundenen verdächtigen Aktivitäten. Es gibt einen kostenlosen Zugriff.
 
 ## [Greynoise](https://viz.greynoise.io/)
 
-Suchen Sie nach IP oder IP-Bereich und erhalten Sie Informationen über IPs, die das Internet scannen. 15 Tage kostenloser Zugang.
+Suche nach einer IP oder einem IP-Bereich und erhalte Informationen über IPs, die das Internet scannen. 15 Tage kostenloser Zugriff.
 
 ## [Shodan](https://www.shodan.io/)
 
-Erhalten Sie Scan-Informationen einer IP-Adresse. Hat einige kostenlose API-Zugriffe.
+Erhalte Scan-Informationen zu einer IP-Adresse. Bietet einen kostenlosen API-Zugriff.
 
 ## [Censys](https://censys.io/)
 
-Sehr ähnlich wie Shodan.
+Sehr ähnlich wie Shodan
 
 ## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
 
-Finden Sie offene S3-Buckets, indem Sie nach Schlüsselwörtern suchen.
+Finde offene S3-Buckets durch die Suche nach Schlüsselwörtern.
 
 ## [Dehashed](https://www.dehashed.com/data)
 
-Finden Sie geleakte Anmeldeinformationen von E-Mails und sogar Domains.\
+Finde geleakte Zugangsdaten von E-Mail-Adressen und sogar Domains\
 Kommerziell?
 
 ## [psbdmp](https://psbdmp.ws/)
 
-Durchsuchen Sie Pastebins, in denen eine E-Mail erschienen ist. Kommerziell?
+Durchsuche Pastebins, in denen eine E-Mail-Adresse auftaucht. Kommerziell?
 
 ## [emailrep.io](https://emailrep.io/key)
 
-Erhalten Sie den Ruf einer E-Mail. Kommerziell?
+Erhalte die Reputation einer E-Mail-Adresse. Kommerziell?
 
 ## [ghostproject](https://ghostproject.fr/)
 
-Erhalten Sie Passwörter von geleakten E-Mails. Kommerziell?
+Erhalte Passwörter aus geleakten E-Mail-Adressen. Kommerziell?
 
 ## [Binaryedge](https://www.binaryedge.io/)
 
-Erhalten Sie interessante Informationen von IPs.
+Erhalte interessante Informationen zu IPs.
 
 ## [haveibeenpwned](https://haveibeenpwned.com/)
 
-Suchen Sie nach Domain und E-Mail und erfahren Sie, ob sie kompromittiert wurde und welche Passwörter. Kommerziell?
+Suche nach einer Domain und E-Mail-Adresse und erfahre, ob sie pwned wurde und welche Passwörter betroffen sind. Kommerziell?
 
 ### [IP2Location.io](https://www.ip2location.io/)
 
-Es erkennt die IP-Geolokalisierung, Rechenzentrum, ASN und sogar VPN-Informationen. Es bietet 30K Abfragen pro Monat kostenlos an.
+Erkennt die IP-Geolokalisierung, das Rechenzentrum, ASN und sogar VPN-Informationen. Bietet 30.000 kostenlose Abfragen pro Monat.
 
 ### [IPQuery.io](https://www.ipquery.io/)
 IP-Geolokalisierung und OISNT mit gezielten Datenpunkten. Nicht kommerziell.
+
 
 [https://dnsdumpster.com/](https://dnsdumpster.com/)(in einem kommerziellen Tool?)
 

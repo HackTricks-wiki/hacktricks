@@ -1,3 +1,3 @@
-# Radio Hacking
+# Radio-Hacking
 
 {{#include ../../banners/hacktricks-training.md}}
