@@ -394,7 +394,7 @@ cargo miri test  # hunts for OOB / UAF during unit tests
 
 #### Auditing dependencies with RustSec / cargo-audit
 
-Most real-world Rust vulns live in third-party crates. The RustSec advisory DB (community-powered) can be queried locally:
+Most real-world Rust vulns live in third-party crates. The RustSec advisory DB (community-powered) can be queried locally:<sup>[[1]](#references)</sup>
 ```bash
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
@@ -421,7 +421,7 @@ cargo install cargo-vet
 cargo vet init      # generates vet.toml
 cargo vet --locked  # verifies packages referenced in Cargo.lock
 ```
-The tool is being adopted by the Rust project infrastructure and a growing number of orgs to mitigate poisoned-package attacks.
+The tool is being adopted by the Rust project infrastructure and a growing number of orgs to mitigate poisoned-package attacks.<sup>[[2]](#references)</sup>
 
 #### Fuzzing your API surface (cargo-fuzz)
 
@@ -435,7 +435,7 @@ Add the fuzz target to your repo and run it in your pipeline.
 
 ## References
 
-- RustSec Advisory Database – <https://rustsec.org>
-- Cargo-vet: "Auditing your Rust Dependencies" – <https://mozilla.github.io/cargo-vet/>
+- [1] [RustSec Advisory Database](https://rustsec.org)
+- [2] [Cargo-vet: "Auditing your Rust Dependencies"](https://mozilla.github.io/cargo-vet/)
 
 {{#include ../banners/hacktricks-training.md}}

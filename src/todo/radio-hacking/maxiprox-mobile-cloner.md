@@ -5,7 +5,7 @@
 ## Goal
 Turn a mains-powered HID MaxiProx 5375 long-range 125 kHz reader into a field-deployable, battery-powered badge cloner that silently harvests proximity cards during physical-security assessments.
 
-The conversion covered here is based on TrustedSec’s “Let’s Clone a Cloner – Part 3: Putting It All Together” research series and combines mechanical, electrical and RF considerations so the final device can be thrown in a backpack and immediately used on site.
+The conversion covered here is based on TrustedSec’s “Let’s Clone a Cloner – Part 3: Putting It All Together” research series and combines mechanical, electrical and RF considerations so the final device can be thrown in a backpack and immediately used on site.<sup>[[1]](#references)</sup>
 
 > [!warning]
 > Manipulating mains-powered equipment and Lithium-ion power-banks can be dangerous.  Verify every connection **before** energising the circuit and keep the antennas, coax and ground planes exactly as they were in the factory design to avoid detuning the reader.
@@ -79,6 +79,6 @@ The conversion covered here is based on TrustedSec’s “Let’s Clone a Cloner
 
 ## References
 
-- [Let’s Clone a Cloner – Part 3 (TrustedSec)](https://trustedsec.com/blog/lets-clone-a-cloner-part-3-putting-it-all-together)
+- [1] [Let’s Clone a Cloner – Part 3 (TrustedSec)](https://trustedsec.com/blog/lets-clone-a-cloner-part-3-putting-it-all-together)
 
 {{#include ../../banners/hacktricks-training.md}}

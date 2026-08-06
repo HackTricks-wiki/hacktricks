@@ -18,7 +18,7 @@ The crypto-checksum is MD5-based (see 3.2.5.1.1) and can be cracked offline, ena
 
 ## How to Attack
 
-[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - Timeroasting scripts by Tom Tervoort
+[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - Timeroasting scripts by Tom Tervoort<sup>[[3]](#references)</sup>
 
 ```bash
 sudo ./timeroast.py 10.0.0.42 | tee ntp-hashes.txt

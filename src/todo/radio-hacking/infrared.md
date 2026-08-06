@@ -6,11 +6,11 @@
 
 **Infrared light is invisible to humans**. IR wavelength is from **0.7 to 1000 microns**. Household remotes use an IR signal for data transmission and operate in the wavelength range of 0.75..1.4 microns. A microcontroller in the remote makes an infrared LED blink with a specific frequency, turning the digital signal into an IR signal.
 
-To receive IR signals a **photoreceiver** is used. It **converts IR light into voltage pulses**, which are already **digital signals**. Usually, there is a **dark light filter inside the receiver**, which lets **only the desired wavelength through** and cuts out noise.
+To receive IR signals a **photoreceiver** is used. It **converts IR light into voltage pulses**, which are already **digital signals**. Usually, there is a **dark light filter inside the receiver**, which lets **only the desired wavelength through** and cuts out noise.<sup>[[1]](#references)</sup>
 
 ### Variety of IR Protocols <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
-IR protocols differ in 3 factors:
+IR protocols differ in 3 factors:<sup>[[1]](#references)</sup>
 
 - bit encoding
 - data structure
@@ -45,7 +45,7 @@ It is also known as Manchester encoding. The logical value is defined by the pol
 
 ### Exploring an IR signal
 
-The most reliable way to see how the remote IR signal looks like is to use an oscilloscope. It does not demodulate or invert the received signal, it is just displayed "as is". This is useful for testing and debugging. I will show the expected signal on the example of the NEC IR protocol.
+The most reliable way to see how the remote IR signal looks like is to use an oscilloscope. It does not demodulate or invert the received signal, it is just displayed "as is". This is useful for testing and debugging. I will show the expected signal on the example of the NEC IR protocol.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
@@ -64,7 +64,7 @@ For **logic "0" and "1"** NEC uses Pulse Distance Encoding: first, a pulse burst
 ### Air Conditioners
 
 Unlike other remotes, **air conditioners do not transmit just the code of the pressed button**. They also **transmit all the information** when a button is pressed to assure that the **air conditioned machine and the remote are synchronised**.\
-This will avoid that a machine set as 20ºC is increased to 21ºC with one remote, and then when another remote, which still has the temperature as 20ºC, is used to increase more the temperature, it will "increase" it to 21ºC (and not to 22ºC thinking it's in 21ºC).
+This will avoid that a machine set as 20ºC is increased to 21ºC with one remote, and then when another remote, which still has the temperature as 20ºC, is used to increase more the temperature, it will "increase" it to 21ºC (and not to 22ºC thinking it's in 21ºC).<sup>[[1]](#references)</sup>
 
 ---
 
@@ -79,11 +79,11 @@ flipper-zero/fz-infrared.md
 
 ### Smart-TV / Set-top Box Takeover (EvilScreen)
 
-Recent academic work (EvilScreen, 2022) demonstrated that **multi-channel remotes that combine Infrared with Bluetooth or Wi-Fi can be abused to fully hijack modern smart-TVs**. The attack chains high-privilege IR service codes together with authenticated Bluetooth packets, bypassing channel-isolation and allowing arbitrary app launches, microphone activation, or factory-reset without physical access. Eight mainstream TVs from different vendors — including a Samsung model claiming ISO/IEC 27001 compliance — were confirmed vulnerable. Mitigation requires vendor firmware fixes or completely disabling unused IR receivers. 
+Recent academic work (EvilScreen, 2022) demonstrated that **multi-channel remotes that combine Infrared with Bluetooth or Wi-Fi can be abused to fully hijack modern smart-TVs**. The attack chains high-privilege IR service codes together with authenticated Bluetooth packets, bypassing channel-isolation and allowing arbitrary app launches, microphone activation, or factory-reset without physical access. Eight mainstream TVs from different vendors — including a Samsung model claiming ISO/IEC 27001 compliance — were confirmed vulnerable. Mitigation requires vendor firmware fixes or completely disabling unused IR receivers.<sup>[[2]](#references)</sup>
 
 ### Air-Gapped Data Exfiltration via IR LEDs (aIR-Jumper family)
 
-Security cameras, routers or even malicious USB sticks often include **night-vision IR LEDs**. Research shows malware can modulate these LEDs (<10–20 kbit/s with simple OOK) to **exfiltrate secrets through walls and windows** to an external camera placed tens of metres away. Because the light is outside the visible spectrum, operators rarely notice. Counter-measures:
+Security cameras, routers or even malicious USB sticks often include **night-vision IR LEDs**. Research shows malware can modulate these LEDs (<10–20 kbit/s with simple OOK) to **exfiltrate secrets through walls and windows** to an external camera placed tens of metres away.<sup>[[3]](#references)</sup> Because the light is outside the visible spectrum, operators rarely notice. Counter-measures:
 
 * Physically shield or remove IR LEDs in sensitive areas
 * Monitor camera LED duty-cycle and firmware integrity
@@ -136,7 +136,8 @@ Firmware 1.0 (September 2024) added **dozens of extra IR protocols and optional 
 
 ## References
 
-- [Flipper Zero Infrared blog post](https://blog.flipperzero.one/infrared/)
-- EvilScreen: Smart TV hijacking via remote control mimicry (arXiv 2210.03014)
+- [1] [Flipper Zero Infrared blog post](https://blog.flipperzero.one/infrared/)
+- [2] [EvilScreen Attack: Smart TV Hijacking via Multi-channel Remote Control Mimicry (arXiv:2210.03014)](https://arxiv.org/abs/2210.03014)
+- [3] [aIR-Jumper: Covert Air-Gap Exfiltration/Infiltration via Security Cameras & Infrared (IR) (arXiv:1709.05742)](https://arxiv.org/abs/1709.05742)
 
 {{#include ../../banners/hacktricks-training.md}}

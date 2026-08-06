@@ -34,8 +34,8 @@ Long Range (**LoRa**) is currently the most deployed LPWAN physical layer and it
 
 ## Recent vulnerabilities (2023-2025)
 
-* **CVE-2024-29862** – *ChirpStack gateway-bridge & mqtt-forwarder* accepted TCP packets that bypassed stateful firewall rules on Kerlink gateways, allowing remote management interface exposure. Fixed in 4.0.11 / 4.2.1 respectively .
-* **Dragino LG01/LG308 series** – Multiple 2022-2024 CVEs (e.g. 2022-45227 directory traversal, 2022-45228 CSRF) still observed unpatched in 2025; enable unauthenticated firmware dump or config overwrite on thousands of public gateways .
+* **CVE-2024-29862** – *ChirpStack gateway-bridge & mqtt-forwarder* accepted TCP packets that bypassed stateful firewall rules on Kerlink gateways, allowing remote management interface exposure. Fixed in 4.0.11 / 4.2.1 respectively.<sup>[[1]](#references)</sup>
+* **Dragino LG01/LG308 series** – Multiple 2022-2024 CVEs (e.g. 2022-45227 directory traversal, 2022-45228 CSRF) still observed unpatched in 2025; enable unauthenticated firmware dump or config overwrite on thousands of public gateways.<sup>[[2]](#references)[[3]](#references)</sup>
 * Semtech *packet-forwarder UDP* overflow (unreleased advisory, patched 2023-10): crafted uplink larger than 255 B triggered stack-smash ‑> RCE on SX130x reference gateways (found by Black Hat EU 2023 “LoRa Exploitation Reloaded”).
 
 ---
@@ -65,7 +65,7 @@ Force SF12/125 kHz to increase airtime → exhaust duty-cycle of gateway (denial
 
 ### 4. Reactive jamming
 
-*HackRF One* running GNU Radio flowgraph triggers a wide-band chirp whenever preamble detected – blocks all spreading factors with ≤200 mW TX; full outage measured at 2 km range .
+*HackRF One* running GNU Radio flowgraph triggers a wide-band chirp whenever preamble detected – blocks all spreading factors with ≤200 mW TX; full outage measured at 2 km range.
 
 ---
 
@@ -73,8 +73,8 @@ Force SF12/125 kHz to increase airtime → exhaust duty-cycle of gateway (denial
 
 | Tool | Purpose | Notes |
 |------|---------|-------|
-| **LoRaWAN Auditing Framework (LAF)** | Craft/parse/attack LoRaWAN frames, DB-backed analyzers, brute-forcer | Docker image, supports Semtech UDP input |
-| **LoRaPWN** | Trend Micro Python utility to brute OTAA, generate downlinks, decrypt payloads | Demo released 2023, SDR-agnostic |
+| **LoRaWAN Auditing Framework (LAF)**<sup>[[4]](#references)</sup> | Craft/parse/attack LoRaWAN frames, DB-backed analyzers, brute-forcer | Docker image, supports Semtech UDP input |
+| **LoRaPWN**<sup>[[5]](#references)</sup> | Trend Micro Python utility to brute OTAA, generate downlinks, decrypt payloads | Demo released 2023, SDR-agnostic |
 | **LoRAttack** | Multi-channel sniffer + replay with USRP; exports PCAP/LoRaTap | Good Wireshark integration |
 | **gr-lora / gr-lorawan** | GNU Radio OOT blocks for baseband TX/RX | Foundation for custom attacks |
 
@@ -94,6 +94,10 @@ Force SF12/125 kHz to increase airtime → exhaust duty-cycle of gateway (denial
 
 ## References
 
-* LoRaWAN Auditing Framework (LAF) – [https://github.com/IOActive/laf](https://github.com/IOActive/laf)
-* Trend Micro LoRaPWN overview – [https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a](https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a)
+- [1] [CVE-2024-29862 – ChirpStack gateway-bridge / mqtt-forwarder Kerlink firewall bypass](https://nvd.nist.gov/vuln/detail/CVE-2024-29862)
+- [2] [CVE-2022-45227 – Dragino LoRa LG01 unauthenticated directory listing / backup download](https://nvd.nist.gov/vuln/detail/CVE-2022-45227)
+- [3] [CVE-2022-45228 – Dragino LoRa LG01 logout page CSRF](https://nvd.nist.gov/vuln/detail/CVE-2022-45228)
+- [4] [LoRaWAN Auditing Framework (LAF)](https://github.com/IOActive/laf)
+- [5] [Trend Micro LoRaPWN overview](https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a)
+
 {{#include ../../banners/hacktricks-training.md}}

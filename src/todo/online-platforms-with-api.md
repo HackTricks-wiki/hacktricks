@@ -129,6 +129,3 @@ IP Geolocation and OISNT with targeted datapoints. Non commerical.
 [https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (in a commercial tool?)
 
 {{#include ../banners/hacktricks-training.md}}
-
-
-

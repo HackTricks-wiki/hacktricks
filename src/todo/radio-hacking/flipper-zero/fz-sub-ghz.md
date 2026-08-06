@@ -21,7 +21,7 @@ Flipper Zero has a built-in sub-1 GHz module based on a [﻿](https://www.st.com
 > [!TIP]
 > How to find which frequency is the remote using
 
-When analysing, Flipper Zero is scanning signals strength (RSSI) at all the frequencies available in frequency configuration. Flipper Zero displays the frequency with the highest RSSI value, with signal strength higher than -90 [dBm](https://en.wikipedia.org/wiki/DBm).
+When analysing, Flipper Zero is scanning signals strength (RSSI) at all the frequencies available in frequency configuration. Flipper Zero displays the frequency with the highest RSSI value, with signal strength higher than -90 [dBm](https://en.wikipedia.org/wiki/DBm).<sup>[[1]](#references)</sup>
 
 To determine the remote's frequency, do the following:
 
@@ -35,7 +35,7 @@ To determine the remote's frequency, do the following:
 > [!TIP]
 > Find info about the frequency used (also another way to find which frequency is used)
 
-The **Read** option **listens on the configured frequency** on the indicated modulation: 433.92 AM by default. If **something is found** when reading, **info is given** in the screen. This info could be use to replicate the signal in the future.
+The **Read** option **listens on the configured frequency** on the indicated modulation: 433.92 AM by default. If **something is found** when reading, **info is given** in the screen. This info could be use to replicate the signal in the future.<sup>[[1]](#references)</sup>
 
 While Read is in use, it's possible to press the **left button** and **configure it**.\
 At this moment it has **4 modulations** (AM270, AM650, FM328 and FM476), and **several relevant frequencies** stored:
@@ -52,7 +52,7 @@ You can set **any that interests you**, however, if you are **not sure which fre
 > [!TIP]
 > Steal (and replay) a signal in the configured frequency
 
-The **Read Raw** option **records signals** send in the listening frequency. This can be used to **steal** a signal and **repeat** it.
+The **Read Raw** option **records signals** send in the listening frequency. This can be used to **steal** a signal and **repeat** it.<sup>[[1]](#references)</sup>
 
 By default **Read Raw is also in 433.92 in AM650**, but if with the Read option you found that the signal that interest you is in a **different frequency/modulation, you can also modify that** pressing left (while inside the Read Raw option).
 
@@ -97,11 +97,8 @@ Check the list in [https://docs.flipperzero.one/sub-ghz/frequencies](https://doc
 > [!TIP]
 > Get dBms of the saved frequencies
 
-## Reference
+## References
 
-- [https://docs.flipperzero.one/sub-ghz](https://docs.flipperzero.one/sub-ghz)
+- [1] [Sub-GHz - Flipper Zero User Documentation](https://docs.flipperzero.one/sub-ghz)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-
