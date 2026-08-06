@@ -36,7 +36,7 @@ Windows may hit several files at once; anything Explorer previews (`BROWSE TO FO
 
 ### Windows Media Player playlists (.ASX/.WAX)
 
-If you can get a target to open or preview a Windows Media Player playlist you control, you can leak Net‑NTLMv2 by pointing the entry to a UNC path. WMP will attempt to fetch the referenced media over SMB and will authenticate implicitly.<sup>[[3]](#references)</sup>
+If you can get a target to open or preview a Windows Media Player playlist you control, you can leak Net‑NTLMv2 by pointing the entry to a UNC path. WMP will attempt to fetch the referenced media over SMB and will authenticate implicitly.<sup>[[3]](#references)[[4]](#references)</sup>
 
 Example payload:
 
@@ -156,7 +156,7 @@ Key trigger conditions (observed in `CShellLink::_LoadFromStream`):
 
 If `TargetUnicode` resolves to a UNC path (e.g., `\\attacker\share\icon.ico`), **merely viewing a folder** containing the shortcut causes outbound authentication. The same load path can also be hit by **indexing** and **AV scanning**, making it a practical no‑click leak surface.<sup>[[7]](#references)</sup>
 
-Research tooling (parser/generator/UI) is available in the **LnkMeMaybe** project to build/inspect these structures without using the Windows GUI.
+Research tooling (parser/generator/UI) is available in the **LnkMeMaybe** project to build/inspect these structures without using the Windows GUI.<sup>[[8]](#references)</sup>
 
 
 ### WebDAV auth coercion / credential validation via `davclnt.dll,DavSetCookie`
