@@ -234,8 +234,5 @@ wifi-pcap-analysis.md
 usb-keystrokes.md
 {{#endref}}
 
-​
-
 {{#include ../../../banners/hacktricks-training.md}}
-
 

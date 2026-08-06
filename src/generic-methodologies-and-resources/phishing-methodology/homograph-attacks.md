@@ -97,12 +97,12 @@ Tools such as **dnstwist** (`--homoglyph`) or **urlcrazy** can enumerate visuall
 * Domain chain: `bestseoservices.com` ➜ municipal `/templates` directory ➜ `kig.skyvaulyt.ru` ➜ fake Microsoft login at `mlcorsftpsswddprotcct.approaches.it.com` protected by custom OTP CAPTCHA.
 * Spotify impersonation: `Sρօtifս` sender with link hidden behind `redirects.ca`.
 
-These samples originate from Unit 42 research (July 2025) and illustrate how homograph abuse is combined with URL redirection and CAPTCHA evasion to bypass automated analysis.
+These samples originate from Unit 42 research (July 2025) and illustrate how homograph abuse is combined with URL redirection and CAPTCHA evasion to bypass automated analysis.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [The Homograph Illusion: Not Everything Is As It Seems](https://unit42.paloaltonetworks.com/homograph-attacks/)
-- [Unicode Character Database](https://home.unicode.org/)  
-- [dnstwist – domain permutation engine](https://github.com/elceef/dnstwist)
+- [1] [The Homograph Illusion: Not Everything Is As It Seems](https://unit42.paloaltonetworks.com/homograph-attacks/)
+- [2] [Unicode Character Database](https://home.unicode.org/)
+- [3] [dnstwist – domain permutation engine](https://github.com/elceef/dnstwist)
 
 {{#include ../../banners/hacktricks-training.md}}

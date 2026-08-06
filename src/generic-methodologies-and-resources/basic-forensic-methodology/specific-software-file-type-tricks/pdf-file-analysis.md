@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**For further details check:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)
+**For further details check:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)<sup>[[1]](#references)</sup>
 
 The PDF format is known for its complexity and potential for concealing data, making it a focal point for CTF forensics challenges. It combines plain-text elements with binary objects, which might be compressed or encrypted, and can include scripts in languages like JavaScript or Flash. To understand PDF structure, one can refer to Didier Stevens's [introductory material](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/), or use tools like a text editor or a PDF-specific editor such as Origami.
 
@@ -65,9 +65,9 @@ Additional useful projects (actively maintained 2023-2025):
 
 ## Recent attack techniques (2023-2025)
 
-* **MalDoc in PDF polyglot (2023)** – JPCERT/CC observed threat actors appending an MHT-based Word document with VBA macros after the final **%%EOF**, producing a file that is both a valid PDF and a valid DOC. AV engines parsing just the PDF layer miss the macro. Static PDF keywords are clean, but `file` still prints `%PDF`. Treat any PDF that also contains the string `<w:WordDocument>` as highly suspicious.
+* **MalDoc in PDF polyglot (2023)** – JPCERT/CC observed threat actors appending an MHT-based Word document with VBA macros after the final **%%EOF**, producing a file that is both a valid PDF and a valid DOC. AV engines parsing just the PDF layer miss the macro. Static PDF keywords are clean, but `file` still prints `%PDF`. Treat any PDF that also contains the string `<w:WordDocument>` as highly suspicious.<sup>[[2]](#references)</sup>
 * **Shadow-incremental updates (2024)** – adversaries abuse the incremental update feature to insert a second **/Catalog** with malicious `/OpenAction` while keeping the benign first revision signed. Tools that inspect only the first xref table are bypassed.
-* **Font parsing UAF chain – CVE-2024-30284 (Acrobat/Reader)** – a vulnerable **CoolType.dll** function can be reached from embedded CIDType2 fonts, allowing remote code execution with the privileges of the user once a crafted document is opened. Patched in APSB24-29, May 2024.
+* **Font parsing UAF chain – CVE-2024-30284 (Acrobat/Reader)** – a vulnerable **CoolType.dll** function can be reached from embedded CIDType2 fonts, allowing remote code execution with the privileges of the user once a crafted document is opened. Patched in APSB24-29, May 2024.<sup>[[3]](#references)</sup>
 
 ---
 
@@ -101,11 +101,8 @@ rule Suspicious_PDF_AutoExec {
 
 ## References
 
-* JPCERT/CC – “MalDoc in PDF – Detection bypass by embedding a malicious Word file into a PDF file” (Aug 2023)  
-* Adobe – Security update for Acrobat and Reader (APSB24-29, May 2024)
-
+- [1] [Forensics CTF Field Guide](https://trailofbits.github.io/ctf/forensics/)
+- [2] [MalDoc in PDF – Detection bypass by embedding a malicious Word file into a PDF file](https://blogs.jpcert.or.jp/en/2023/08/maldocinpdf.html)
+- [3] [Adobe Security Bulletin – Security update available for Adobe Acrobat and Reader (APSB24-29)](https://helpx.adobe.com/security/products/acrobat/apsb24-29.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

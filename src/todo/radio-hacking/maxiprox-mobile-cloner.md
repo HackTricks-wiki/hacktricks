@@ -5,7 +5,7 @@
 ## Goal
 Turn a mains-powered HID MaxiProx 5375 long-range 125 kHz reader into a field-deployable, battery-powered badge cloner that silently harvests proximity cards during physical-security assessments.
 
-The conversion covered here is based on TrustedSec’s “Let’s Clone a Cloner – Part 3: Putting It All Together” research series and combines mechanical, electrical and RF considerations so the final device can be thrown in a backpack and immediately used on site.
+The conversion covered here is based on TrustedSec’s “Let’s Clone a Cloner – Part 3: Putting It All Together” research series and combines mechanical, electrical and RF considerations so the final device can be thrown in a backpack and immediately used on site.<sup>[[1]](#references)</sup>
 
 > [!warning]
 > Manipulating mains-powered equipment and Lithium-ion power-banks can be dangerous.  Verify every connection **before** energising the circuit and keep the antennas, coax and ground planes exactly as they were in the factory design to avoid detuning the reader.
@@ -59,8 +59,8 @@ The conversion covered here is based on TrustedSec’s “Let’s Clone a Cloner
 
 ## 5. Range & Shielding Tests
 
-* Using a 125 kHz **Pupa** test card the portable cloner achieved consistent reads at **≈ 8 cm** in free-air – identical to mains-powered operation.
-* Placing the reader inside a thin-walled metal cash box (to simulate a bank lobby desk) reduced range to ≤ 2 cm, confirming that substantial metal enclosures act as effective RF shields.
+* Using a 125 kHz **Pupa** test card the portable cloner achieved consistent reads at **≈ 8 cm** in free-air – identical to mains-powered operation.<sup>[[1]](#references)</sup>
+* Placing the reader inside a thin-walled metal cash box (to simulate a bank lobby desk) reduced range to ≤ 2 cm, confirming that substantial metal enclosures act as effective RF shields.<sup>[[1]](#references)</sup>
 
 ## Usage Workflow
 
@@ -79,6 +79,6 @@ The conversion covered here is based on TrustedSec’s “Let’s Clone a Cloner
 
 ## References
 
-- [Let’s Clone a Cloner – Part 3 (TrustedSec)](https://trustedsec.com/blog/lets-clone-a-cloner-part-3-putting-it-all-together)
+- [1] [Let’s Clone a Cloner – Part 3 (TrustedSec)](https://trustedsec.com/blog/lets-clone-a-cloner-part-3-putting-it-all-together)
 
 {{#include ../../banners/hacktricks-training.md}}

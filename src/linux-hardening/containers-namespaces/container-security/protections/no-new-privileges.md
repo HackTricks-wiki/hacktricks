@@ -8,15 +8,15 @@ From a defensive point of view, `no_new_privs` is not a substitute for namespace
 
 ## Operation
 
-The kernel flag behind this behavior is `PR_SET_NO_NEW_PRIVS`. Once it is set for a process, later `execve()` calls cannot increase privilege. The important detail is that the process can still run binaries; it simply cannot use those binaries to cross a privilege boundary that the kernel would otherwise honor.
+The kernel flag behind this behavior is `PR_SET_NO_NEW_PRIVS`. Once it is set for a process, later `execve()` calls cannot increase privilege. The important detail is that the process can still run binaries; it simply cannot use those binaries to cross a privilege boundary that the kernel would otherwise honor.<sup>[[1]](#references)</sup>
 
-The kernel behavior is also **inherited and irreversible**: once a task sets `no_new_privs`, the bit is inherited across `fork()`, `clone()`, and `execve()`, and cannot be unset later. This is useful in assessments because a single `NoNewPrivs: 1` on the container process usually means descendants should also stay in that mode unless you are looking at a completely different process tree.
+The kernel behavior is also **inherited and irreversible**: once a task sets `no_new_privs`, the bit is inherited across `fork()`, `clone()`, and `execve()`, and cannot be unset later.<sup>[[1]](#references)</sup> This is useful in assessments because a single `NoNewPrivs: 1` on the container process usually means descendants should also stay in that mode unless you are looking at a completely different process tree.
 
-In Kubernetes-oriented environments, `allowPrivilegeEscalation: false` maps to this behavior for the container process. In Docker and Podman style runtimes, the equivalent is usually enabled explicitly through a security option. At the OCI layer, the same concept appears as `process.noNewPrivileges`.
+In Kubernetes-oriented environments, `allowPrivilegeEscalation: false` maps to this behavior for the container process.<sup>[[2]](#references)</sup> In Docker and Podman style runtimes, the equivalent is usually enabled explicitly through a security option. At the OCI layer, the same concept appears as `process.noNewPrivileges`.
 
 ## Important Nuances
 
-`no_new_privs` blocks **exec-time** privilege gain, not every privilege change. In particular:
+`no_new_privs` blocks **exec-time** privilege gain, not every privilege change.<sup>[[1]](#references)</sup> In particular:
 
 - setuid and setgid transitions stop working across `execve()`
 - file capabilities do not add to the permitted set on `execve()`
@@ -25,7 +25,7 @@ In Kubernetes-oriented environments, `allowPrivilegeEscalation: false` maps to t
 
 That last point matters operationally. If the process already runs as root, already has a dangerous capability, or already has access to a powerful runtime API or writable host mount, setting `no_new_privs` does not neutralize those exposures. It only removes one common **next step** in a privilege-escalation chain.
 
-Also note that the flag does not block privilege changes that do not depend on `execve()`. For example, a task that is already privileged enough may still call `setuid(2)` directly or receive a privileged file descriptor over a Unix socket. This is why `no_new_privs` should be read together with [seccomp](seccomp.md), capability sets, and namespace exposure instead of as a standalone answer.
+Also note that the flag does not block privilege changes that do not depend on `execve()`.<sup>[[1]](#references)</sup> For example, a task that is already privileged enough may still call `setuid(2)` directly or receive a privileged file descriptor over a Unix socket. This is why `no_new_privs` should be read together with [seccomp](seccomp.md), capability sets, and namespace exposure instead of as a standalone answer.
 
 ## Lab
 
@@ -56,13 +56,13 @@ The point of the comparison is not that `su` is universally exploitable. It is t
 
 If `no_new_privs` is absent, a foothold inside the container may still be upgraded through setuid helpers or binaries with file capabilities. If it is present, those post-exec privilege changes are cut off. The effect is especially relevant in broad base images that ship many utilities the application never needed in the first place.
 
-There is also an important seccomp interaction. Unprivileged tasks generally need `no_new_privs` set before they can install a seccomp filter in filter mode. This is one reason hardened containers often show both `Seccomp` and `NoNewPrivs` enabled together. From an attacker perspective, seeing both usually means the environment was configured deliberately rather than accidentally.
+There is also an important seccomp interaction. Unprivileged tasks generally need `no_new_privs` set before they can install a seccomp filter in filter mode.<sup>[[1]](#references)</sup> This is one reason hardened containers often show both `Seccomp` and `NoNewPrivs` enabled together. From an attacker perspective, seeing both usually means the environment was configured deliberately rather than accidentally.
 
 ## Misconfigurations
 
 The most common problem is simply not enabling the control in environments where it would be compatible. In Kubernetes, leaving `allowPrivilegeEscalation` enabled is often the default operational mistake. In Docker and Podman, omitting the relevant security option has the same effect. Another recurring failure mode is assuming that because a container is "not privileged", exec-time privilege transitions are automatically irrelevant.
 
-A more subtle Kubernetes pitfall is that `allowPrivilegeEscalation: false` is **not** honored the way people expect when the container is `privileged` or when it has `CAP_SYS_ADMIN`. The Kubernetes API documents that `allowPrivilegeEscalation` is effectively always true in those cases. In practice, this means the field should be treated as one signal in the final posture, not as a guarantee that the runtime ended up with `NoNewPrivs: 1`.
+A more subtle Kubernetes pitfall is that `allowPrivilegeEscalation: false` is **not** honored the way people expect when the container is `privileged` or when it has `CAP_SYS_ADMIN`. The Kubernetes API documents that `allowPrivilegeEscalation` is effectively always true in those cases.<sup>[[2]](#references)</sup> In practice, this means the field should be treated as one signal in the final posture, not as a guarantee that the runtime ended up with `NoNewPrivs: 1`.
 
 ## Abuse
 
@@ -150,6 +150,6 @@ This protection is often absent simply because nobody turned it on, not because 
 
 ## References
 
-- [Linux kernel documentation: No New Privileges Flag](https://docs.kernel.org/userspace-api/no_new_privs.html)
-- [Kubernetes: Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [1] [Linux kernel documentation: No New Privileges Flag](https://docs.kernel.org/userspace-api/no_new_privs.html)
+- [2] [Kubernetes: Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
 {{#include ../../../../banners/hacktricks-training.md}}
