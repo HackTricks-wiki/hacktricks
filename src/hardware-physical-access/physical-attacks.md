@@ -202,5 +202,6 @@ After the tenth cycle the EC sets a flag that instructs the BIOS to wipe NVRAM a
 - [6] [FrameWiki – Mainboard Reset Guide](https://framewiki.net/guides/mainboard-reset)
 - [7] [SensePost – “Noooooooo Touch! – Bypassing IR No-Touch Exit Sensors with a Covert IR Torch”](https://sensepost.com/blog/2025/noooooooooo-touch/)
 - [8] [Mobile-Hacker – “Plug, Play, Pwn: Hacking with Evil Crow Cable Wind”](https://www.mobile-hacker.com/2025/12/01/plug-play-pwn-hacking-with-evil-crow-cable-wind/)
+- [9] [Bruce Schneier - Rowhammer Attack Against NVIDIA Chips](https://www.schneier.com/blog/archives/2026/05/rowhammer-attack-against-nvidia-chips.html)
 
 {{#include ../banners/hacktricks-training.md}}
