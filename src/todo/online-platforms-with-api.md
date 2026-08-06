@@ -4,128 +4,128 @@
 
 ## [ProjectHoneypot](https://www.projecthoneypot.org/)
 
-Unaweza kuuliza kama IP inahusiana na shughuli za kutatanisha/mbaya. Bure kabisa.
+Unaweza kuuliza ikiwa IP inahusiana na shughuli za kutiliwa shaka/hasidi. Bure kabisa.
 
 ## [**BotScout**](http://botscout.com/api.htm)
 
-Angalia kama anwani ya IP inahusiana na bot inayosajili akaunti. Inaweza pia kuangalia majina ya watumiaji na barua pepe. Kwanza bure.
+Angalia ikiwa anwani ya IP inahusiana na bot inayosajili akaunti. Inaweza pia kuangalia usernames na emails. Mwanzoni ni bure.
 
 ## [Hunter](https://hunter.io/)
 
-Pata na thibitisha barua pepe.\
-Maombi machache ya API bure, kwa zaidi unahitaji kulipa.\
-Kibiashara?
+Tafuta na uthibitishe emails.\
+Baadhi ya maombi ya API ni bure; kwa mengine unahitaji kulipa.\
+Ya kibiashara?
 
 ## [AlientVault](https://otx.alienvault.com/api)
 
-Pata shughuli mbaya zinazohusiana na IPs na Domains. Bure.
+Tafuta shughuli hasidi zinazohusiana na IPs na Domains. Bure.
 
 ## [Clearbit](https://dashboard.clearbit.com/)
 
-Pata data binafsi zinazohusiana na barua pepe (profaili kwenye majukwaa mengine), domain (taarifa za msingi za kampuni, barua na watu wanaofanya kazi) na kampuni (pata taarifa za kampuni kutoka kwa barua).\
+Tafuta data binafsi inayohusiana na email (profiles kwenye platforms nyingine), domain (maelezo ya msingi ya kampuni, mails na watu wanaofanya kazi hapo) na kampuni (pata maelezo ya kampuni kutoka kwenye mail).\
 Unahitaji kulipa ili kufikia uwezekano wote.\
-Kibiashara?
+Ya kibiashara?
 
 ## [BuiltWith](https://builtwith.com/)
 
-Teknolojia zinazotumika na wavuti. Ghali...\
-Kibiashara?
+Technologies zinazotumiwa na webs. Ghali...\
+Ya kibiashara?
 
 ## [Fraudguard](https://fraudguard.io/)
 
-Angalia kama mwenyeji (domain au IP) anahusiana na shughuli za kutatanisha/mbaya. Ina upatikanaji wa bure wa API.\
-Kibiashara?
+Angalia ikiwa host (domain au IP) inahusiana na shughuli za kutiliwa shaka/hasidi. Ina API access ya bure kwa kiasi.\
+Ya kibiashara?
 
 ## [FortiGuard](https://fortiguard.com/)
 
-Angalia kama mwenyeji (domain au IP) anahusiana na shughuli za kutatanisha/mbaya. Ina upatikanaji wa bure wa API.
+Angalia ikiwa host (domain au IP) inahusiana na shughuli za kutiliwa shaka/hasidi. Ina API access ya bure kwa kiasi.
 
 ## [SpamCop](https://www.spamcop.net/)
 
-Inaonyesha kama mwenyeji anahusiana na shughuli za spam. Ina upatikanaji wa bure wa API.
+Inaonyesha ikiwa host inahusiana na shughuli za spam. Ina API access ya bure kwa kiasi.
 
 ## [mywot](https://www.mywot.com/)
 
-Kulingana na maoni na vipimo vingine pata kama domain inahusiana na taarifa za kutatanisha/mbaya.
+Kwa kutumia maoni na metrics nyingine, pata ikiwa domain inahusiana na taarifa za kutiliwa shaka/hasidi.
 
 ## [ipinfo](https://ipinfo.io/)
 
-Pata taarifa za msingi kutoka anwani ya IP. Unaweza kupima hadi 100K/ mwezi.
+Hupata maelezo ya msingi kutoka kwa anwani ya IP. Unaweza kuijaribu hadi mara 100K kwa mwezi.
 
 ## [securitytrails](https://securitytrails.com/app/account)
 
-Jukwaa hili linatoa taarifa kuhusu domains na anwani za IP kama domains ndani ya IP au ndani ya seva ya domain, domains zinazomilikiwa na barua pepe (pata domains zinazohusiana), historia ya IP ya domains (pata mwenyeji nyuma ya CloudFlare), domains zote zinazotumia nameserver....\
-Una upatikanaji wa bure.
+Platform hii hutoa taarifa kuhusu domains na anwani za IP, kama vile domains zilizo ndani ya IP au ndani ya server ya domain, domains zinazomilikiwa na email (tafuta domains zinazohusiana), historia ya IP za domains (tafuta host iliyo nyuma ya CloudFlare), domains zote zinazotumia nameserver....\
+Una access ya bure kwa kiasi.
 
 ## [fullcontact](https://www.fullcontact.com/)
 
-Inaruhusu kutafuta kwa barua pepe, domain au jina la kampuni na kupata taarifa "binafsi" zinazohusiana. Inaweza pia kuthibitisha barua pepe. Kuna upatikanaji wa bure.
+Inaruhusu kutafuta kwa email, domain au jina la kampuni na kupata taarifa "binafsi" zinazohusiana. Inaweza pia kuthibitisha emails. Kuna access ya bure kwa kiasi.
 
 ## [RiskIQ](https://www.spiderfoot.net/documentation/)
 
-Taarifa nyingi kutoka kwa domains na IPs hata katika toleo la bure/jamii.
+Taarifa nyingi kutoka kwa domains na IPs hata katika toleo la bure/community.
 
 ## [\_IntelligenceX](https://intelx.io/)
 
-Tafuta Domains, IPs na barua pepe na pata taarifa kutoka kwa dumps. Ina upatikanaji wa bure.
+Tafuta Domains, IPs na emails na upate taarifa kutoka kwenye dumps. Ina access ya bure kwa kiasi.
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
-Tafuta kwa IP na kukusanya taarifa zinazohusiana na shughuli za kutatanisha. Kuna upatikanaji wa bure.
+Tafuta kwa IP na kukusanya taarifa zinazohusiana na shughuli za kutiliwa shaka. Kuna access ya bure kwa kiasi.
 
 ## [Greynoise](https://viz.greynoise.io/)
 
-Tafuta kwa IP au anuwai ya IP na pata taarifa kuhusu IPs zinazoskanisha Mtandao. Upatikanaji wa bure wa siku 15.
+Tafuta kwa IP au range ya IP na upate taarifa kuhusu IPs zinazochanganua Internet. Access ya bure kwa siku 15.
 
 ## [Shodan](https://www.shodan.io/)
 
-Pata taarifa za skana za anwani ya IP. Ina upatikanaji wa bure wa API.
+Pata taarifa za scan za anwani ya IP. Ina api access ya bure kwa kiasi.
 
 ## [Censys](https://censys.io/)
 
-Ni sawa sana na shodan
+Inafanana sana na shodan
 
 ## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
 
-Pata ndoo za S3 zilizo wazi kwa kutafuta kwa neno muhimu.
+Tafuta buckets za S3 zilizo wazi kwa kutafuta kwa keyword.
 
 ## [Dehashed](https://www.dehashed.com/data)
 
-Pata taarifa za kuvuja za barua pepe na hata domains\
-Kibiashara?
+Tafuta credentials zilizoleak za emails na hata domains\
+Ya kibiashara?
 
 ## [psbdmp](https://psbdmp.ws/)
 
-Tafuta pastebins ambapo barua pepe ilionekana. Kibiashara?
+Tafuta pastebins ambako email ilionekana. Ya kibiashara?
 
 ## [emailrep.io](https://emailrep.io/key)
 
-Pata sifa ya barua. Kibiashara?
+Pata reputation ya mail. Ya kibiashara?
 
 ## [ghostproject](https://ghostproject.fr/)
 
-Pata nywila kutoka kwa barua pepe zilizovuja. Kibiashara?
+Pata passwords kutoka kwenye emails zilizoleak. Ya kibiashara?
 
 ## [Binaryedge](https://www.binaryedge.io/)
 
-Pata taarifa za kuvutia kutoka kwa IPs
+Pata taarifa zinazovutia kutoka kwa IPs
 
 ## [haveibeenpwned](https://haveibeenpwned.com/)
 
-Tafuta kwa domain na barua pepe na pata kama ilipatikana na nywila. Kibiashara?
+Tafuta kwa domain na email na ujue ikiwa ilipwniwa na passwords. Ya kibiashara?
 
 ### [IP2Location.io](https://www.ip2location.io/)
 
-Inagundua geolocation ya IP, kituo cha data, ASN na hata taarifa za VPN. Inatoa maswali 30K bure kwa mwezi.
+Hutambua IP geolocation, data center, ASN na hata taarifa za VPN. Inatoa queries 30K za bure kwa mwezi.
 
 ### [IPQuery.io](https://www.ipquery.io/)
-Geolocation ya IP na OISNT na datapoints zilizolengwa. Si kibiashara.
+IP Geolocation na OISNT yenye datapoints zinazolengwa. Si ya kibiashara.
 
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)(katika chombo cha kibiashara?)
+[https://dnsdumpster.com/](https://dnsdumpster.com/)(kwenye tool ya kibiashara?)
 
-[https://www.netcraft.com/](https://www.netcraft.com/) (katika chombo cha kibiashara?)
+[https://www.netcraft.com/](https://www.netcraft.com/) (kwenye tool ya kibiashara?)
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (katika chombo cha kibiashara?)
+[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (kwenye tool ya kibiashara?)
 
 {{#include ../banners/hacktricks-training.md}}

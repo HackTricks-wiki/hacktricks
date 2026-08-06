@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Umiliki wa variables
+### Umiliki wa vigezo
 
-Memory inadhibitiwa kupitia mfumo wa umiliki wenye kanuni zifuatazo ambazo compiler hukagua wakati wa compilation:
+Kumbukumbu inadhibitiwa kupitia mfumo wa umiliki wenye kanuni zifuatazo ambazo compiler hukagua wakati wa kutengeneza programu:
 
-1. Kila value katika Rust ina variable inayoitwa owner wake.
-2. Kunaweza kuwa na owner mmoja tu kwa wakati mmoja.
-3. Owner anapotoka kwenye scope, value itaondolewa.
+1. Kila value katika Rust ina variable inayoitwa mmiliki wake.
+2. Kunaweza kuwa na mmiliki mmoja tu kwa wakati mmoja.
+3. Mmiliki anapotoka kwenye scope, value itaondolewa.
 ```rust
 fn main() {
 let student_age: u32 = 20;
@@ -22,7 +22,7 @@ println!("The student is {} and teacher is {}", student_age, teacher_age);
 ```
 ### Aina za Generic
 
-Unda struct ambayo thamani yake moja inaweza kuwa ya aina yoyote
+Unda struct ambayo moja ya thamani zake inaweza kuwa ya aina yoyote
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -51,7 +51,7 @@ Unaweza kutumia functions kama `is_some()` au `is_none()` kuangalia thamani ya O
 
 ### Result, Ok & Err
 
-Hutumika kurejesha na kueneza errors
+Hutumika kurudisha na kueneza errors
 ```rust
 pub enum Result<T, E> {
 Ok(T),
@@ -60,13 +60,13 @@ Err(E),
 ```
 Unaweza kutumia functions kama `is_ok()` au `is_err()` kuangalia thamani ya result
 
-`Option` enum inapaswa kutumiwa katika hali ambapo huenda thamani haipo (ikiwa `None`).
-`Result` enum inapaswa kutumiwa katika hali ambapo unafanya kitu ambacho huenda kikaenda vibaya
+`Option` enum inapaswa kutumiwa katika hali ambapo thamani huenda isiwepo (iwe `None`).
+`Result` enum inapaswa kutumiwa katika hali ambapo unafanya jambo ambalo huenda likashindikana
 
 
 ### Macros
 
-Macros zina nguvu zaidi kuliko functions kwa sababu hupanuka na kutoa code zaidi kuliko code uliyoandika mwenyewe. Kwa mfano, function signature lazima itangaze idadi na aina ya parameters ambazo function inazo. Kwa upande mwingine, macros zinaweza kupokea idadi inayobadilika ya parameters: tunaweza kuita `println!("hello")` kwa argument moja au `println!("hello {}", name)` kwa arguments mbili. Pia, macros hupanuliwa kabla compiler haijatafsiri maana ya code, hivyo macro inaweza, kwa mfano, kuimplement trait kwenye type fulani. Function haiwezi kufanya hivyo, kwa sababu huitwa wakati wa runtime na trait inahitaji kuimplementiwa wakati wa compile time.
+Macros zina nguvu zaidi kuliko functions kwa sababu hupanuka na kutoa code zaidi kuliko code uliyoandika wewe mwenyewe. Kwa mfano, signature ya function lazima itangaze idadi na aina ya parameters ambazo function hiyo inazo. Macros, kwa upande mwingine, zinaweza kupokea idadi inayobadilika ya parameters: tunaweza kuita `println!("hello")` tukiwa na argument moja au `println!("hello {}", name)` tukiwa na arguments mbili. Pia, macros hupanuliwa kabla compiler haijatafsiri maana ya code, kwa hivyo macro inaweza, kwa mfano, kutekeleza trait kwenye type fulani. Function haiwezi kufanya hivyo, kwa sababu huitwa wakati wa runtime na trait inahitaji kutekelezwa wakati wa compile time.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -91,7 +91,7 @@ println!("Check out my macro!");
 }
 }
 ```
-### Iteroa kwa mfululizo
+### Kurudia
 ```rust
 // Iterate through a vector
 let my_fav_fruits = vec!["banana", "raspberry"];
@@ -108,7 +108,7 @@ for (key, hashvalue) in &*map {
 for key in map.keys() {
 for value in map.values() {
 ```
-### Recursive Box
+### Sanduku Rekursivu
 ```rust
 enum List {
 Cons(i32, List),
@@ -258,7 +258,7 @@ optional = Some(i + 1);
 ```
 ### Traits
 
-Unda mbinu mpya ya aina fulani
+Unda njia mpya kwa ajili ya type
 ```rust
 trait AppendBar {
 fn append_bar(self) -> Self;
@@ -290,7 +290,7 @@ assert_ne!(true, false);
 
 #### Arc
 
-Arc inaweza kutumia Clone kuunda marejeleo zaidi ya object ili kuyapitisha kwenye threads. Wakati pointer ya mwisho ya reference kwenda kwenye value inapotoka kwenye scope, variable inaondolewa.
+Arc inaweza kutumia Clone kuunda marejeleo zaidi ya object ili kuyapitisha kwenye threads. Pointer ya mwisho ya marejeleo kuelekea value inapokuwa nje ya scope, variable huondolewa.
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -321,19 +321,19 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-### Mambo Muhimu ya Usalama
+### Misingi ya Usalama
 
-Rust hutoa dhamana thabiti za usalama wa kumbukumbu kwa chaguo-msingi, lakini bado unaweza kuanzisha udhaifu muhimu kupitia code ya `unsafe`, matatizo ya dependencies au makosa ya kimantiki. Mini-cheatsheet ifuatayo inakusanya primitives utakazotumia mara nyingi zaidi wakati wa security reviews za offensive au defensive za software ya Rust.
+Rust hutoa dhamana thabiti za memory safety kwa chaguo-msingi, lakini bado unaweza kuanzisha vulnerabilities muhimu kupitia `unsafe` code, matatizo ya dependencies au makosa ya logic. Mini-cheatsheet ifuatayo inakusanya primitives utakazotumia mara nyingi wakati wa kufanya mapitio ya usalama ya Rust software ya offensive au defensive.
 
-#### Code ya Unsafe na usalama wa kumbukumbu
+#### `unsafe` code na memory safety
 
-Vizuizi vya `unsafe` huondoa ukaguzi wa aliasing na mipaka unaofanywa na compiler, kwa hivyo **bugs zote za jadi za memory-corruption (OOB, use-after-free, double free, n.k.) zinaweza kujitokeza tena**. Orodha fupi ya ukaguzi:
+Bloku za `unsafe` huondoa ukaguzi wa aliasing na mipaka wa compiler, hivyo **bugs zote za jadi za memory corruption (OOB, use-after-free, double free, n.k.) zinaweza kujitokeza tena**. Orodha fupi ya ukaguzi:
 
-* Tafuta vizuizi vya `unsafe`, functions za `extern "C"`, miito ya `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointers au modules za `ffi`.
+* Tafuta bloku za `unsafe`, functions za `extern "C"`, miito ya `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointers au modules za `ffi`.
 * Thibitisha kila pointer arithmetic na length argument inayopitishwa kwa functions za kiwango cha chini.
-* Pendelea `#![forbid(unsafe_code)]` (crate nzima) au `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) ili compilation ishindwe mtu anapoweka tena `unsafe`.
+* Pendelea `#![forbid(unsafe_code)]` (kwenye crate nzima) au `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) ili compilation ishindwe mtu anapoingiza tena `unsafe`.
 
-Mfano wa overflow ulioundwa kwa kutumia raw pointers:
+Mfano wa overflow iliyoundwa kwa kutumia raw pointers:
 ```rust
 use std::ptr;
 
@@ -347,44 +347,44 @@ dst.set_len(src.len());
 dst
 }
 ```
-Kuendesha Miri ni njia ya gharama nafuu ya kugundua UB wakati wa test:
+Kuendesha Miri ni njia nafuu ya kugundua UB wakati wa majaribio:
 ```bash
 rustup component add miri
 cargo miri test  # hunts for OOB / UAF during unit tests
 ```
 #### Kukagua dependencies kwa kutumia RustSec / cargo-audit
 
-Vulnerabilities nyingi za Rust za ulimwengu halisi hupatikana kwenye third-party crates. RustSec advisory DB (inayoendeshwa na jamii) inaweza kuulizwa locally:<sup>[[1]](#references)</sup>
+Athari nyingi za Rust katika mazingira halisi hupatikana kwenye crates za third-party. RustSec advisory DB (inayoendeshwa na community) inaweza ku-queryiwa locally:<sup>[[1]](#references)</sup>
 ```bash
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
 ```
-Iunganishe kwenye CI na ifeli kwa `--deny warnings`.
+Iunganishe katika CI na ishindwe kwa `--deny warnings`.
 
 `cargo deny check advisories` inatoa utendaji unaofanana, pamoja na ukaguzi wa licence na ban-list.
 
-#### Code coverage kwa kutumia cargo-tarpaulin
+#### Ukaguzi wa code coverage kwa cargo-tarpaulin
 
 `cargo tarpaulin` ni zana ya kuripoti code coverage kwa mfumo wa ujenzi wa Cargo
 ```bash
 cargo binstall cargo-tarpaulin
 cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
 ```
-Kwenye Linux, backend ya tracing ya kawaida ya Tarpaulin bado ni Ptrace na itafanya kazi kwenye processors za x86_64 pekee. Hili linaweza kubadilishwa kuwa instrumentation ya llvm coverage kwa kutumia `--engine llvm`. Kwa Mac na Windows, hii ndiyo njia ya kawaida ya kukusanya taarifa.
+Kwenye Linux, backend ya default ya tracing ya Tarpaulin bado ni Ptrace na itafanya kazi tu kwenye processors za x86_64. Hili linaweza kubadilishwa kuwa instrumentation ya llvm coverage kwa kutumia `--engine llvm`. Kwa Mac na Windows, hii ndiyo njia ya default ya collection.
 
-#### Uthibitishaji wa supply-chain kwa cargo-vet (2024)
+#### Uthibitishaji wa supply-chain kwa kutumia cargo-vet (2024)
 
-`cargo vet` huhifadhi hash ya ukaguzi kwa kila crate unayo-import na huzuia upgrades zisizotambuliwa:
+`cargo vet` huhifadhi review hash kwa kila crate unayo-import na huzuia upgrades zisizoonekana:
 ```bash
 cargo install cargo-vet
 cargo vet init      # generates vet.toml
 cargo vet --locked  # verifies packages referenced in Cargo.lock
 ```
-Zana hii inapitishwa na infrastructure ya mradi wa Rust pamoja na idadi inayoongezeka ya mashirika ili kupunguza mashambulizi ya poisoned-package.<sup>[[2]](#references)</sup>
+Zana hii inakubaliwa na miundombinu ya Rust pamoja na idadi inayoongezeka ya mashirika ili kupunguza mashambulizi ya poisoned-package.<sup>[[2]](#references)</sup>
 
-#### Fuzzing API surface yako (cargo-fuzz)
+#### Fuzzing eneo lako la API (cargo-fuzz)
 
-Fuzz tests hugundua kwa urahisi panics, integer overflows na logic bugs ambazo zinaweza kuwa masuala ya DoS au side-channel:
+Majaribio ya fuzz hunasa kwa urahisi panics, integer overflows na hitilafu za logic ambazo zinaweza kusababisha DoS au masuala ya side-channel:
 ```bash
 cargo install cargo-fuzz
 cargo fuzz init              # creates fuzz_targets/
@@ -395,6 +395,6 @@ Ongeza fuzz target kwenye repo yako na uiendeshe kwenye pipeline yako.
 ## Marejeleo
 
 - [1] [RustSec Advisory Database](https://rustsec.org)
-- [2] [Cargo-vet: Auditing your Rust Dependencies](https://mozilla.github.io/cargo-vet/)
+- [2] [Cargo-vet: "Auditing your Rust Dependencies"](https://mozilla.github.io/cargo-vet/)
 
 {{#include ../banners/hacktricks-training.md}}

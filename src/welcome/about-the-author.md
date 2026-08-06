@@ -4,11 +4,10 @@
 
 ### Habari!!
 
-Mikopo ya mbinu kutoka kwa watafiti wengine ni ya waandishi asili (ona marejeo). Hongera kwa kila mtu anayeshiriki maarifa ili kuboresha usalama wa intaneti.
+Sifa kwa techniques kutoka kwa watafiti wengine zinawahusu waandishi asilia (tazama marejeleo). Shukrani kwa kila mtu anayeshiriki maarifa ili kuboresha usalama wa mtandao.
 
-HackTricks ni wiki ya elimu kuhusu **cyber-security** inayoongozwa na Carlos ikiwa na mamia ya wachangiaji. Ni **mkusanyiko mkubwa wa hila za hacking** unaosasishwa na jamii kadiri inavyowezekana. Ukipata kitu kinakosekana au hakijasasishwa, tafadhali tuma **Pull Request** kwa [**Hacktricks GitHub**](https://github.com/hacktricks-wiki/hacktricks)!
+HackTricks ni wiki ya kielimu kuhusu **cyber-security** inayoongozwa na Carlos pamoja na mamia ya washiriki. Ni **mkusanyiko mkubwa wa mbinu za hacking** unaosasishwa na community kadiri inavyowezekana. Ukikuta kuna kitu kinakosekana au kimepitwa na wakati, tafadhali tuma **Pull Request** kwenye [**Hacktricks GitHub**](https://github.com/hacktricks-wiki/hacktricks)!
 
-HackTricks pia ni wiki ambapo **researchers hushiriki matokeo yao ya hivi karibuni**, kwa hiyo ni mahali pazuri pa kusalia umejua habari za hivi karibuni kuhusu mbinu za hivi karibuni za hacking.
-
+HackTricks pia ni wiki ambapo **watafiti hushiriki matokeo yao ya hivi karibuni**, hivyo ni mahali pazuri pa kufuatilia mbinu mpya zaidi za hacking.
 
 {{#include ../banners/hacktricks-training.md}}

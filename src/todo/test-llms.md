@@ -1,54 +1,54 @@
-# Jaribu LLMs
+# Test LLMs
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Endesha & fundisha mifano kwa ndani
+## Endesha na train models locally
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
 
-Hugging Face Transformers ni moja ya maktaba maarufu za chanzo wazi kwa kutumia, kufundisha, na kupeleka LLMs kama GPT, BERT, na wengine wengi. Inatoa mfumo kamili ambao unajumuisha mifano iliyofundishwa awali, seti za data, na uunganisho usio na mshono na Hugging Face Hub kwa ajili ya kuboresha na kupeleka.
+Hugging Face Transformers ni mojawapo ya libraries maarufu za open-source za kutumia, ku-train, na ku-deploy LLMs kama GPT, BERT, na nyingine nyingi. Inatoa ecosystem pana inayojumuisha models zilizo-trainiwa awali, datasets, pamoja na integration rahisi na Hugging Face Hub kwa fine-tuning na deployment.
 
 ### [**LangChain**](https://github.com/langchain-ai/langchain)
 
-LangChain ni mfumo ulioandaliwa kwa ajili ya kujenga programu zenye LLMs. Inawawezesha waendelezaji kuunganisha mifano ya lugha na vyanzo vya data vya nje, APIs, na hifadhidata. LangChain inatoa zana za uhandisi wa maelekezo ya hali ya juu, kusimamia historia ya mazungumzo, na kuunganisha LLMs katika michakato tata.
+LangChain ni framework iliyoundwa kwa ajili ya kujenga applications zinazotumia LLMs. Inawawezesha developers kuunganisha language models na external data sources, APIs, na databases. LangChain hutoa tools za advanced prompt engineering, kusimamia historia ya mazungumzo, na kuunganisha LLMs katika workflows changamano.
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT ni mradi ulioandaliwa na Lightning AI ambao unatumia mfumo wa Lightning ili kuwezesha mafunzo, kuboresha, na kupeleka mifano inayotegemea GPT. Inajumuisha kwa urahisi na zana nyingine za Lightning AI, ikitoa michakato iliyoboreshwa kwa kushughulikia mifano ya lugha kwa kiwango kikubwa kwa utendaji bora na upanuzi.
+LitGPT ni project iliyotengenezwa na Lightning AI inayotumia Lightning framework kuwezesha training, fine-tuning, na deployment ya models zinazotegemea GPT. Inaunganishwa kwa urahisi na tools nyingine za Lightning AI, ikitoa workflows zilizoboreshwa za kushughulikia language models kubwa zenye performance na scalability iliyoboreshwa.
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
 **Maelezo:**\
-LitServe ni chombo cha kupeleka kutoka Lightning AI kilichoundwa kwa ajili ya kupeleka mifano ya AI kwa haraka na kwa ufanisi. Inarahisisha uunganisho wa LLMs katika programu za wakati halisi kwa kutoa uwezo wa kuhudumia uliopanuliwa na ulioboreshwa.
+LitServe ni deployment tool kutoka Lightning AI iliyoundwa kwa ajili ya ku-deploy AI models kwa haraka na kwa ufanisi. Inarahisisha kuunganisha LLMs katika applications za real-time kwa kutoa serving capabilities zenye scalability na optimization.
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
-Axolotl ni jukwaa la msingi wa wingu lililoundwa ili kurahisisha kupeleka, kupanua, na kusimamia mifano ya AI, ikiwa ni pamoja na LLMs. Inatoa vipengele kama vile upanuzi wa kiotomatiki, ufuatiliaji, na uunganisho na huduma mbalimbali za wingu, ikifanya iwe rahisi kupeleka mifano katika mazingira ya uzalishaji bila usimamizi mkubwa wa miundombinu.
+Axolotl ni platform ya cloud iliyoundwa kurahisisha deployment, scaling, na management ya AI models, ikiwa ni pamoja na LLMs. Inatoa features kama automated scaling, monitoring, na integration na cloud services mbalimbali, hivyo kurahisisha ku-deploy models katika production environments bila kusimamia infrastructure kwa kiwango kikubwa.
 
-## Jaribu mifano mtandaoni
+## Jaribu models online
 
 ### [**Hugging Face**](https://huggingface.co/)
 
-**Hugging Face** ni jukwaa na jamii inayoongoza kwa kujifunza mashine, hasa inajulikana kwa kazi yake katika usindikaji wa lugha asilia (NLP). Inatoa zana, maktaba, na rasilimali zinazofanya iwe rahisi kuendeleza, kushiriki, na kupeleka mifano ya kujifunza mashine.\
-Inatoa sehemu kadhaa kama:
+**Hugging Face** ni platform na community inayoongoza kwa machine learning, inayojulikana hasa kwa kazi yake katika natural language processing (NLP). Inatoa tools, libraries, na resources zinazorahisisha ku-develop, kushiriki, na ku-deploy machine learning models.\
+Inatoa sections kadhaa kama:
 
-* **Mifano**: Hifadhi kubwa ya **mifano ya kujifunza mashine iliyofundishwa awali** ambapo watumiaji wanaweza kuvinjari, kupakua, na kuunganisha mifano kwa kazi mbalimbali kama vile uzalishaji wa maandiko, tafsiri, utambuzi wa picha, na zaidi.
-* **Seti za Data:** **Kukusanya kwa kina kwa seti za data** zinazotumika kwa mafunzo na kutathmini mifano. Inarahisisha ufikiaji rahisi wa vyanzo mbalimbali vya data, ikiwasaidia watumiaji kupata na kutumia data kwa miradi yao maalum ya kujifunza mashine.
-* **Nafasi:** Jukwaa la kuhifadhi na kushiriki **programu za kujifunza mashine za mwingiliano** na maonyesho. Inawawezesha waendelezaji **kuonyesha** mifano yao ikifanya kazi, kuunda interfaces rafiki kwa mtumiaji, na kushirikiana na wengine kwa kushiriki maonyesho ya moja kwa moja.
+* **Models**: Repository kubwa ya **machine learning models zilizo-trainiwa awali**, ambapo users wanaweza ku-browse, ku-download, na ku-integrate models kwa tasks mbalimbali kama text generation, translation, image recognition, na mengine.
+* **Datasets:** **Mkusanyiko mpana wa datasets** unaotumika kwa training na evaluation ya models. Unarahisisha access ya data sources mbalimbali, ukiwawezesha users kutafuta na kutumia data kwa machine learning projects zao maalum.
+* **Spaces:** Platform ya kuhifadhi na kushiriki **interactive machine learning applications** na demos. Inawawezesha developers **kuonyesha** models zao zikifanya kazi, kuunda interfaces zinazotumiwa kwa urahisi, na kushirikiana na wengine kwa kushiriki live demos.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
-**TensorFlow Hub** ni hifadhi kamili ya moduli za kujifunza mashine zinazoweza kutumika tena zilizotengenezwa na Google. Inalenga kuwezesha kushiriki na kupeleka mifano ya kujifunza mashine, hasa zile zilizojengwa na TensorFlow.
+**TensorFlow Hub** ni repository pana ya reusable machine learning modules iliyotengenezwa na Google. Inalenga kurahisisha sharing na deployment ya machine learning models, hasa zile zilizojengwa kwa TensorFlow.
 
-* **Moduli:** Hifadhi kubwa ya mifano iliyofundishwa awali na vipengele vya mfano ambapo watumiaji wanaweza kuvinjari, kupakua, na kuunganisha moduli kwa kazi kama vile uainishaji wa picha, uhamasishaji wa maandiko, na zaidi.
-* **Mafunzo:** Mwongozo wa hatua kwa hatua na mifano ambayo inawasaidia watumiaji kuelewa jinsi ya kutekeleza na kuboresha mifano kwa kutumia TensorFlow Hub.
-* **Hati:** Miongozo kamili na marejeleo ya API ambayo yanawasaidia waendelezaji kutumia rasilimali za hifadhi kwa ufanisi.
+* **Modules:** Mkusanyiko mkubwa wa models zilizo-trainiwa awali na model components ambapo users wanaweza ku-browse, ku-download, na ku-integrate modules kwa tasks kama image classification, text embedding, na mengine.
+* **Tutorials:** Miongozo ya hatua kwa hatua na mifano inayowasaidia users kuelewa jinsi ya ku-implement na ku-fine-tune models kwa kutumia TensorFlow Hub.
+* **Documentation:** Miongozo ya kina na API references zinazowasaidia developers kutumia resources za repository kwa ufanisi.
 
 ## [**Replicate**](https://replicate.com/home)
 
-**Replicate** ni jukwaa linalowezesha waendelezaji kuendesha mifano ya kujifunza mashine kwenye wingu kupitia API rahisi. Inalenga kufanya mifano ya ML ipatikane kwa urahisi na kuweza kupelekwa bila haja ya mipangilio kubwa ya miundombinu.
+**Replicate** ni platform inayowawezesha developers kuendesha machine learning models kwenye cloud kupitia API rahisi. Inalenga kufanya ML models zipatikane na ziweze ku-deploy kwa urahisi bila kuhitaji setup kubwa ya infrastructure.
 
-* **Mifano:** Hifadhi ya mifano ya kujifunza mashine iliyochangia na jamii ambayo watumiaji wanaweza kuvinjari, kujaribu, na kuunganisha mifano katika programu zao kwa juhudi ndogo.
-* **Upatikanaji wa API:** APIs rahisi za kuendesha mifano zinazowawezesha waendelezaji kupeleka na kupanua mifano bila vae ya juhudi ndani ya programu zao.
+* **Models:** Repository ya machine learning models zilizochangiwa na community, ambapo users wanaweza ku-browse, kujaribu, na ku-integrate models katika applications zao kwa juhudi ndogo.
+* **API Access:** APIs rahisi za kuendesha models zinazowawezesha developers ku-deploy na ku-scale models kwa urahisi ndani ya applications zao.
 
 {{#include ../banners/hacktricks-training.md}}

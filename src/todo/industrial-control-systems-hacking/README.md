@@ -1,19 +1,19 @@
-# Industrial Control Systems Hacking
+# Udukuzi wa Mifumo ya Udhibiti wa Kiwandani
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## About this Section
+## Kuhusu Sehemu Hii
 
-Sehemu hii ina kila kitu kuhusu Mifumo ya Kudhibiti Viwanda ikiwa ni pamoja na dhana na mbinu za kuzikabili na masuala mbalimbali ya usalama yanayoshuhudiwa ndani yao.
+Sehemu hii inahusu kila kitu kuhusu Mifumo ya Udhibiti wa Kiwandani, ikijumuisha dhana pamoja na methodologies za kuibaka kwa kutumia masuala mbalimbali ya usalama yanayopatikana ndani yake.
 
-Mifumo ya Kudhibiti Viwanda ipo kila mahali, kwani viwanda ni muhimu kwa maendeleo ya kiuchumi ya taifa. Lakini hizi ICS ni ngumu kuboresha na maendeleo madogo yamefanywa katika uwanja huu. Hivyo, kugundua kasoro za usalama ni jambo la kawaida hapa. Mifumo mingi na viwango vinavyotumika hapa vilitengenezwa nyuma ya miaka ya 90 na vina uwezo mdogo ikilinganishwa na hali za shambulio za sasa.
+Mifumo ya Udhibiti wa Kiwandani ipo kila mahali, kwa kuwa viwanda ni muhimu kwa maendeleo ya kiuchumi ya taifa. Lakini ICS hizi ni ngumu kusasisha, na maendeleo machache zaidi hufanywa katika eneo hili. Kwa hiyo, kupata dosari za usalama ni jambo la kawaida hapa. Itifaki na viwango vingi vinavyotumika hapa vilitengenezwa miaka ya 90 na vina uwezo mdogo zaidi ikilinganishwa na attack scenarios za sasa.
 
-Imefanyika kuwa muhimu kulinda mifumo hii kwani kuharibu hizo kunaweza kugharimu sana na hata maisha katika hali mbaya zaidi. Ili kuelewa usalama wa Mifumo ya Kudhibiti Viwanda, kujua ndani yao ni muhimu.
+Imekuwa muhimu kulinda mifumo hii, kwa kuwa kuiharibu kunaweza kugharimu kiasi kikubwa cha fedha na hata kusababisha vifo katika hali mbaya zaidi. Ili kuelewa usalama wa Mifumo ya Udhibiti wa Kiwandani, ni muhimu kujua internals zake.
 
-Kwa kuwa Mifumo ya Kudhibiti Viwanda imewekwa kufuata viwango vilivyowekwa, kujua kila kipengele kutasaidia katika kuunganisha mitambo mingine yote katika mfumo wa kudhibiti. Ufungaji wa vifaa hivi kama vile PLCs na mifumo ya SCADA ni tofauti katika viwanda mbalimbali, hivyo ukusanyaji wa taarifa ni muhimu.
+Kwa kuwa Mifumo ya Udhibiti wa Kiwandani husakinishwa kwa kufuata viwango vilivyowekwa, kujua kila component kutasaidia kuunganisha mechanisms nyingine zote katika control system. Usakinishaji wa vifaa hivi kama PLCs na mifumo ya SCADA hutofautiana katika viwanda mbalimbali, hivyo information gathering ni muhimu.
 
-Mifumo ya Kudhibiti Viwanda inaweza kuwa ngumu wakati mwingine na hivyo inahitaji uvumilivu mwingi kufanya chochote. Ni kuhusu kuchunguza na kufanya upelelezi kabla ya kupanga mashambulizi na kuendeleza exploit yoyote.
+Mifumo ya Udhibiti wa Kiwandani inaweza kuwa changamano wakati mwingine, na hivyo huhitaji uvumilivu mwingi kufanya jambo lolote. Yote yanahusu probing na reconnaissance kabla ya kupanga attacks na kuunda exploits.
 
-Mbinu hizi zinaweza pia kutumika kulinda dhidi ya mashambulizi na blue teaming kwa mifumo ya kudhibiti viwanda.
+Techniques hizi pia zinaweza kutumika kujilinda dhidi ya attacks na kufanya blue teaming kwa ajili ya mifumo ya udhibiti wa viwandani.
 
 {{#include ../../banners/hacktricks-training.md}}

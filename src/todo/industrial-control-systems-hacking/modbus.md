@@ -1,35 +1,35 @@
-# Protokali ya Modbus
+# Itifaki ya Modbus
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Utangulizi wa Protokali ya Modbus
+## Utangulizi wa Itifaki ya Modbus
 
-Protokali ya Modbus ni protokali inayotumika sana katika Uhandisi wa Viwanda na Mifumo ya Kudhibiti. Modbus inaruhusu mawasiliano kati ya vifaa mbalimbali kama vile wakala wa mantiki wanaoweza kuprogramwa (PLCs), sensorer, actuators, na vifaa vingine vya viwanda. Kuelewa Protokali ya Modbus ni muhimu kwani hii ndiyo protokali ya mawasiliano inayotumika zaidi katika ICS na ina uso mkubwa wa mashambulizi kwa ajili ya kunasa na hata kuingiza amri katika PLCs.
+Itifaki ya Modbus ni itifaki inayotumika sana katika Industrial Automation and Control Systems. Modbus huwezesha mawasiliano kati ya vifaa mbalimbali kama vile programmable logic controllers (PLCs), sensors, actuators, na vifaa vingine vya viwandani. Kuelewa Itifaki ya Modbus ni muhimu kwa sababu ndiyo communication protocol inayotumika zaidi katika ICS na ina attack surface kubwa kwa sniffing na hata injecting commands kwenye PLCs.
 
-Hapa, dhana zinaelezwa kwa alama zikitoa muktadha wa protokali na asili yake ya uendeshaji. Changamoto kubwa katika usalama wa mifumo ya ICS ni gharama ya utekelezaji na uboreshaji. Protokali hizi na viwango vilipangwa mwanzoni mwa miaka ya 80 na 90 ambazo bado zinatumika sana. Kwa kuwa tasnia ina vifaa vingi na muunganisho, kuboresha vifaa ni vigumu sana, ambayo inawapa hackers faida ya kushughulikia protokali za zamani. Mashambulizi dhidi ya Modbus ni kama yasiyoweza kuepukika kwani itatumika bila uboreshaji na uendeshaji wake ni muhimu kwa tasnia.
+Hapa, concepts zimeelezwa kwa pointi ili kutoa muktadha kuhusu itifaki na jinsi inavyofanya kazi. Changamoto kubwa zaidi katika usalama wa ICS system ni gharama ya implementation na upgradation. Protocols na standards hizi zilibuniwa mwanzoni mwa miaka ya 80 na 90 na bado zinatumika kwa kiwango kikubwa. Kwa kuwa industry ina vifaa na connections nyingi, kufanya upgrade ya vifaa ni vigumu sana, jambo linalowapa hackers fursa ya kushughulika na protocols zilizopitwa na wakati. Attacks dhidi ya Modbus ni karibu kuepukika kwa sababu itaendelea kutumika bila upgradation ikiwa operation yake ni muhimu kwa industry.
 
-## Muktadha wa Mteja-Mtumikaji
+## Client-Server Architecture
 
-Protokali ya Modbus kwa kawaida inatumika kama katika Muktadha wa Mteja-Mtumikaji ambapo kifaa kikuu (mteja) kinaanzisha mawasiliano na vifaa moja au zaidi vya mtumizi (servers). Hii pia inajulikana kama muktadha wa Mwalimu-Mtumizi, ambayo inatumika sana katika elektroniki na IoT na SPI, I2C, n.k.
+Itifaki ya Modbus kwa kawaida hutumika katika Client Server Architecture, ambapo master device (client) huanzisha mawasiliano na slave devices mmoja au zaidi (servers). Hii pia huitwa Master-Slave architecture, ambayo hutumika sana katika electronics na IoT pamoja na SPI, I2C, n.k.
 
-## Matoleo ya Serial na Ethernet
+## Matoleo ya Serial na Etherent
 
-Protokali ya Modbus imeundwa kwa mawasiliano ya Serial na pia Mawasiliano ya Ethernet. Mawasiliano ya Serial yanatumika sana katika mifumo ya zamani wakati vifaa vya kisasa vinasaidia Ethernet ambayo inatoa viwango vya juu vya data na inafaa zaidi kwa mitandao ya kisasa ya viwanda.
+Itifaki ya Modbus imeundwa kwa Serial Communication na Ethernet Communications. Serial Communication hutumika sana katika legacy systems, huku vifaa vya kisasa vikiunga mkono Ethernet, inayotoa data rates za juu na kufaa zaidi kwa modern industrial networks.
 
 ## Uwakilishi wa Data
 
-Data inatumwa katika protokali ya Modbus kama ASCII au Binary, ingawa muundo wa binary unatumika kwa sababu ya ufanisi wake na vifaa vya zamani.
+Data hutumwa katika Modbus protocol ikiwa ASCII au Binary, ingawa binary format hutumika kwa sababu ya compactibility yake na vifaa vya zamani.
 
-## Mifumo ya Kazi
+## Function Codes
 
-Protokali ya ModBus inafanya kazi na uhamasishaji wa mifumo maalum ya kazi ambazo zinatumika kuendesha PLCs na vifaa mbalimbali vya kudhibiti. Sehemu hii ni muhimu kuelewa kwani mashambulizi ya kurudi yanaweza kufanywa kwa kurudisha mifumo ya kazi. Vifaa vya zamani havisaidii usimbaji wa mawasiliano ya data na kwa kawaida vina nyaya ndefu zinazovihusisha, ambayo inasababisha kuingiliwa kwa nyaya hizi na kunasa/kuingiza data.
+ModBus Protocol hufanya kazi kwa transmission ya function codes maalum zinazotumika kuendesha PLCs na control devices mbalimbali. Sehemu hii ni muhimu kuelewa kwa sababu replay attacks zinaweza kufanywa kwa retransmitting function codes. Legacy devices haziungi mkono encryption yoyote kwa data transmission na kwa kawaida huwa na wires ndefu zinazoviunganisha, jambo linalowezesha tampering ya wires hizo na capturing/injecting data.
 
-## Anwani za Modbus
+## Addressing ya Modbus
 
-Kila kifaa katika mtandao kina anwani maalum ambayo ni muhimu kwa mawasiliano kati ya vifaa. Protokali kama Modbus RTU, Modbus TCP, n.k. zinatumika kutekeleza anwani na hutumikia kama tabaka la usafirishaji kwa uhamasishaji wa data. Data inayohamishwa iko katika muundo wa protokali ya Modbus ambayo ina ujumbe.
+Kila kifaa kwenye network kina address yake ya kipekee, ambayo ni muhimu kwa mawasiliano kati ya vifaa. Protocols kama Modbus RTU, Modbus TCP, n.k. hutumika kutekeleza addressing na hufanya kazi kama transport layer ya data transmission. Data inayohamishwa huwa katika Modbus protocol format iliyo na message.
 
-Zaidi ya hayo, Modbus pia inatekeleza ukaguzi wa makosa ili kuhakikisha uaminifu wa data iliyotumwa. Lakini zaidi ya yote, Modbus ni Kiwango Huria na mtu yeyote anaweza kukitekeleza katika vifaa vyao. Hii ilifanya protokali hii kuwa kiwango cha kimataifa na inatumika sana katika sekta ya uhandisi wa viwanda.
+Zaidi ya hayo, Modbus pia hutekeleza error checks ili kuhakikisha integrity ya data iliyotumwa. Lakini zaidi ya yote, Modbus ni Open Standard na mtu yeyote anaweza kuitekeleza katika vifaa vyake. Hii ilisababisha itifaki hii kuwa global standard na kutumika kwa kiwango kikubwa katika industrial automation industry.
 
-Kwa sababu ya matumizi yake makubwa na ukosefu wa uboreshaji, kushambulia Modbus kunatoa faida kubwa na uso wake wa mashambulizi. ICS inategemea sana mawasiliano kati ya vifaa na mashambulizi yoyote yaliyofanywa dhidi yao yanaweza kuwa hatari kwa uendeshaji wa mifumo ya viwanda. Mashambulizi kama kurudi, kuingiza data, kunasa data na kuvuja, Kukataa Huduma, uongo wa data, n.k. yanaweza kufanywa ikiwa njia ya uhamasishaji itatambuliwa na mshambuliaji.
+Kwa sababu ya matumizi yake makubwa na ukosefu wa upgradations, kuishambulia Modbus hutoa faida kubwa kutokana na attack surface yake. ICS inategemea sana mawasiliano kati ya vifaa, na attacks zozote dhidi yake zinaweza kuwa hatari kwa operation ya industrial systems. Attacks kama replay, data injection, data sniffing na leaking, Denial of Service, data forgery, n.k. zinaweza kufanywa ikiwa medium ya transmission itatambuliwa na attacker.
 
 {{#include ../../banners/hacktricks-training.md}}

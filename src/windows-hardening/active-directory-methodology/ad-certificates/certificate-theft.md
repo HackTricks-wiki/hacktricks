@@ -2,11 +2,11 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Hii ni muhtasari mdogo wa sura za Wizi za utafiti mzuri kutoka [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
+**Huu ni muhtasari mfupi wa sura za Theft kutoka kwenye utafiti bora wa [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**<sup>[[1]](#references)</sup>
 
-## Naweza kufanya nini na cheti
+## Ninaweza kufanya nini kwa certificate
 
-Kabla ya kuangalia jinsi ya kuiba vyeti, hapa kuna taarifa kuhusu jinsi ya kupata matumizi ya cheti:
+Kabla ya kuangalia jinsi ya kuiba certificates, hapa kuna maelezo kuhusu jinsi ya kubaini certificate inavyoweza kuwa muhimu:
 ```bash
 # Powershell
 $CertPath = "C:\path\to\cert.pfx"
@@ -18,33 +18,34 @@ $Cert.EnhancedKeyUsageList
 # cmd
 certutil.exe -dump -v cert.pfx
 ```
-## Exporting Certificates Using the Crypto APIs – THEFT1
+## Kuhamisha Certificates kwa Kutumia Crypto APIs – THEFT1
 
-Katika **kipindi cha desktop cha mwingiliano**, kutoa cheti cha mtumiaji au mashine, pamoja na funguo binafsi, kunaweza kufanywa kwa urahisi, hasa ikiwa **funguo binafsi zinaweza kusafirishwa**. Hii inaweza kufikiwa kwa kuingia kwenye cheti katika `certmgr.msc`, kubonyeza kulia juu yake, na kuchagua `All Tasks → Export` ili kuunda faili ya .pfx iliyo na nenosiri.
+Katika **interactive desktop session**, kutoa certificate ya user au machine, pamoja na private key, kunaweza kufanywa kwa urahisi, hasa ikiwa **private key inaweza ku-exportiwa**. Hili linaweza kufanywa kwa kwenda kwenye certificate katika `certmgr.msc`, kubofya kulia, kisha kuchagua `All Tasks → Export` ili kutengeneza faili la .pfx linalolindwa kwa password.<sup>[[1]](#references)</sup>
 
-Kwa **mbinu ya kimaandishi**, zana kama vile PowerShell `ExportPfxCertificate` cmdlet au miradi kama [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer) zinapatikana. Hizi hutumia **Microsoft CryptoAPI** (CAPI) au Cryptography API: Next Generation (CNG) kuingiliana na hifadhi ya vyeti. APIs hizi zinatoa anuwai ya huduma za kificho, ikiwa ni pamoja na zile zinazohitajika kwa ajili ya uhifadhi wa vyeti na uthibitishaji.
+Kwa **programmatic approach**, tools kama PowerShell `ExportPfxCertificate` cmdlet au projects kama [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer) zinapatikana. Hizi hutumia **Microsoft CryptoAPI** (CAPI) au Cryptography API: Next Generation (CNG) kuingiliana na certificate store. APIs hizi hutoa huduma mbalimbali za cryptographic, zikiwemo zinazohitajika kwa certificate storage na authentication.
 
-Hata hivyo, ikiwa funguo binafsi zimewekwa kama zisizoweza kusafirishwa, CAPI na CNG kawaida zitazuia utoaji wa vyeti kama hivyo. Ili kupita kizuizi hiki, zana kama **Mimikatz** zinaweza kutumika. Mimikatz inatoa amri za `crypto::capi` na `crypto::cng` kubadilisha APIs husika, kuruhusu usafirishaji wa funguo binafsi. Kwa hakika, `crypto::capi` inabadilisha CAPI ndani ya mchakato wa sasa, wakati `crypto::cng` inalenga kumbukumbu ya **lsass.exe** kwa ajili ya kubadilisha.
+Hata hivyo, ikiwa private key imewekwa kuwa non-exportable, CAPI na CNG kwa kawaida zitazuia extraction ya certificates hizo. Ili kukwepa kizuizi hiki, tools kama **Mimikatz** zinaweza kutumika. Mimikatz hutoa commands za `crypto::capi` na `crypto::cng` za kupatch APIs husika, hivyo kuruhusu exportation ya private keys. Hasa, `crypto::capi` hupatch CAPI ndani ya process ya sasa, huku `crypto::cng` ikilenga memory ya **lsass.exe** kwa ajili ya patching.
 
-## User Certificate Theft via DPAPI – THEFT2
+## Wizi wa User Certificate kupitia DPAPI – THEFT2
 
 Maelezo zaidi kuhusu DPAPI katika:
+
 
 {{#ref}}
 ../../windows-local-privilege-escalation/dpapi-extracting-passwords.md
 {{#endref}}
 
-Katika Windows, **funguo binafsi za cheti zinalindwa na DPAPI**. Ni muhimu kutambua kwamba **mahali pa kuhifadhi funguo binafsi za mtumiaji na mashine** ni tofauti, na muundo wa faili hutofautiana kulingana na API ya kificho inayotumiwa na mfumo wa uendeshaji. **SharpDPAPI** ni zana ambayo inaweza kuzunguka tofauti hizi kiotomatiki wakati wa kufungua DPAPI blobs.
+Katika Windows, **certificate private keys zinalindwa na DPAPI**. Ni muhimu kutambua kwamba **storage locations za user na machine private keys** ni tofauti, na file structures hutofautiana kulingana na cryptographic API inayotumiwa na operating system. **SharpDPAPI** ni tool inayoweza kutambua tofauti hizi kiotomatiki wakati wa ku-decrypt DPAPI blobs.<sup>[[1]](#references)</sup>
 
-**Vyeti vya mtumiaji** kwa kawaida vinahifadhiwa katika rejista chini ya `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`, lakini vingine vinaweza pia kupatikana katika directory `%APPDATA%\Microsoft\SystemCertificates\My\Certificates`. **Funguo binafsi** zinazohusiana na vyeti hivi kwa kawaida huhifadhiwa katika `%APPDATA%\Microsoft\Crypto\RSA\User SID\` kwa funguo za **CAPI** na `%APPDATA%\Microsoft\Crypto\Keys\` kwa funguo za **CNG**.
+**User certificates** kwa kiasi kikubwa huhifadhiwa kwenye registry chini ya `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`, lakini baadhi pia zinaweza kupatikana katika directory `%APPDATA%\Microsoft\SystemCertificates\My\Certificates`. **Private keys** zinazohusiana na certificates hizi kwa kawaida huhifadhiwa katika `%APPDATA%\Microsoft\Crypto\RSA\User SID\` kwa keys za **CAPI**, na `%APPDATA%\Microsoft\Crypto\Keys\` kwa keys za **CNG**.
 
-Ili **kutoa cheti na funguo zake binafsi**, mchakato unajumuisha:
+Ili **kutoa certificate na private key yake inayohusiana**, mchakato unahusisha:
 
-1. **Kuchagua cheti lengwa** kutoka kwenye hifadhi ya mtumiaji na kupata jina la hifadhi ya funguo zake.
-2. **Kutafuta DPAPI masterkey inayohitajika** ili kufungua funguo binafsi zinazohusiana.
-3. **Kufungua funguo binafsi** kwa kutumia DPAPI masterkey ya maandiko.
+1. **Kuchagua certificate lengwa** kutoka kwenye store ya user na kupata jina la key store yake.
+2. **Kutafuta DPAPI masterkey inayohitajika** ili ku-decrypt private key husika.
+3. **Ku-decrypt private key** kwa kutumia DPAPI masterkey iliyo katika plaintext.
 
-Kwa **kupata DPAPI masterkey ya maandiko**, mbinu zifuatazo zinaweza kutumika:
+Kwa **kupata DPAPI masterkey iliyo katika plaintext**, approaches zifuatazo zinaweza kutumika:
 ```bash
 # With mimikatz, when running in the user's context
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
@@ -52,7 +53,7 @@ dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
 # With mimikatz, if the user's password is known
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /sid:accountSid /password:PASS
 ```
-Ili kurahisisha ufichuzi wa faili za masterkey na faili za funguo binafsi, amri ya `certificates` kutoka [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) inathibitisha kuwa na manufaa. Inakubali `/pvk`, `/mkfile`, `/password`, au `{GUID}:KEY` kama hoja za kufichua funguo binafsi na vyeti vilivyohusishwa, kisha inazalisha faili ya `.pem`.
+Ili kurahisisha decryption ya faili za masterkey na faili za private key, command ya `certificates` kutoka [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) ni muhimu. Inakubali `/pvk`, `/mkfile`, `/password`, au `{GUID}:KEY` kama arguments za ku-decrypt private keys na certificates zinazohusiana, kisha hutengeneza faili la `.pem`.
 ```bash
 # Decrypting using SharpDPAPI
 SharpDPAPI.exe certificates /mkfile:C:\temp\mkeys.txt
@@ -60,26 +61,26 @@ SharpDPAPI.exe certificates /mkfile:C:\temp\mkeys.txt
 # Converting .pem to .pfx
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
 ```
-## Wizi wa Cheti cha Mashine kupitia DPAPI – THEFT3
+## Wizi wa Vyeti vya Mashine kupitia DPAPI – THEFT3
 
-Cheti za mashine zinahifadhiwa na Windows katika rejista kwenye `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` na funguo binafsi zinazohusiana ziko katika `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (kwa CAPI) na `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (kwa CNG) zimefungwa kwa kutumia funguo za DPAPI za mashine. Funguo hizi hazinaweza kufunguliwa kwa kutumia funguo za akiba za DPAPI za kanda; badala yake, **DPAPI_SYSTEM LSA siri**, ambayo ni lazima iweze kufikiwa tu na mtumiaji wa SYSTEM, inahitajika.
+Vyeti vya mashine vinavyohifadhiwa na Windows kwenye registry katika `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` pamoja na funguo zake za faragha zinazopatikana katika `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (kwa CAPI) na `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (kwa CNG) husimbwa kwa kutumia master keys za DPAPI za mashine. Funguo hizi haziwezi kufumbuliwa kwa kutumia domain’s DPAPI backup key; badala yake, **DPAPI_SYSTEM LSA secret**, ambayo inaweza kufikiwa na mtumiaji wa SYSTEM pekee, inahitajika.<sup>[[1]](#references)</sup>
 
-Kufungua kwa mikono kunaweza kufanywa kwa kutekeleza amri `lsadump::secrets` katika **Mimikatz** ili kutoa siri ya DPAPI_SYSTEM LSA, na kisha kutumia funguo hii kufungua funguo za master za mashine. Vinginevyo, amri ya Mimikatz `crypto::certificates /export /systemstore:LOCAL_MACHINE` inaweza kutumika baada ya kurekebisha CAPI/CNG kama ilivyoelezwa hapo awali.
+Decryption ya mwongozo inaweza kufanywa kwa kutekeleza amri ya `lsadump::secrets` katika **Mimikatz** ili kutoa DPAPI_SYSTEM LSA secret, kisha kutumia ufunguo huu kufumbua machine masterkeys. Vinginevyo, amri ya `crypto::certificates /export /systemstore:LOCAL_MACHINE` ya Mimikatz inaweza kutumiwa baada ya kupatch CAPI/CNG kama ilivyoelezwa awali.
 
-**SharpDPAPI** inatoa njia ya kiotomatiki zaidi na amri zake za vyeti. Wakati bendera ya `/machine` inapotumika na ruhusa za juu, inainua hadi SYSTEM, inatoa siri ya DPAPI_SYSTEM LSA, inaitumia kufungua funguo za master za DPAPI za mashine, na kisha inatumia funguo hizi za maandiko kama jedwali la kutafuta kufungua funguo zozote za binafsi za cheti cha mashine.
+**SharpDPAPI** hutoa mbinu iliyo automated zaidi kupitia amri yake ya certificates. Flag ya `/machine` inapotumiwa kwa elevated permissions, hupandisha privileges hadi SYSTEM, hutoa DPAPI_SYSTEM LSA secret, huitumia kufumbua machine DPAPI masterkeys, kisha hutumia funguo hizi za plaintext kama lookup table kufumbua private keys za vyeti vyovyote vya mashine.
 
-## Kutafuta Faili za Vyeti – THEFT4
+## Kutafuta Certificate Files – THEFT4
 
-Vyeti wakati mwingine hupatikana moja kwa moja ndani ya mfumo wa faili, kama vile katika sehemu za faili au folda ya Downloads. Aina za faili za vyeti zinazokutana mara nyingi zinazolengwa kwa mazingira ya Windows ni faili za `.pfx` na `.p12`. Ingawa mara chache, faili zenye nyongeza `.pkcs12` na `.pem` pia huonekana. Nyongeza nyingine muhimu zinazohusiana na vyeti ni pamoja na:
+Vyeti wakati mwingine hupatikana moja kwa moja ndani ya filesystem, kama vile kwenye file shares au Downloads folder. Aina za certificate files zinazopatikana mara nyingi na kulengwa katika Windows environments ni files za `.pfx` na `.p12`. Ingawa hupatikana kwa nadra zaidi, files zenye extensions za `.pkcs12` na `.pem` pia huonekana. Extensions nyingine muhimu zinazohusiana na certificates ni pamoja na:<sup>[[1]](#references)</sup>
 
-- `.key` kwa funguo binafsi,
-- `.crt`/`.cer` kwa vyeti pekee,
-- `.csr` kwa Maombi ya Kusaini Vyeti, ambayo hayana vyeti au funguo binafsi,
-- `.jks`/`.keystore`/`.keys` kwa Java Keystores, ambazo zinaweza kuwa na vyeti pamoja na funguo binafsi zinazotumiwa na programu za Java.
+- `.key` kwa private keys,
+- `.crt`/`.cer` kwa certificates pekee,
+- `.csr` kwa Certificate Signing Requests, ambazo hazina certificates wala private keys,
+- `.jks`/`.keystore`/`.keys` kwa Java Keystores, ambazo zinaweza kuhifadhi certificates pamoja na private keys zinazotumiwa na Java applications.
 
-Faili hizi zinaweza kutafutwa kwa kutumia PowerShell au amri ya prompt kwa kutafuta nyongeza zilizotajwa.
+Files hizi zinaweza kutafutwa kwa kutumia PowerShell au command prompt kwa kutafuta extensions zilizotajwa.
 
-Katika hali ambapo faili ya cheti ya PKCS#12 inapatikana na inalindwa na nenosiri, utoaji wa hash unaweza kufanywa kwa kutumia `pfx2john.py`, inayopatikana kwenye [fossies.org](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john_8py_source.html). Kisha, JohnTheRipper inaweza kutumika kujaribu kuvunja nenosiri.
+Katika hali ambapo PKCS#12 certificate file inapatikana na imelindwa kwa password, inawezekana kutoa hash kwa kutumia `pfx2john.py`, inayopatikana kwenye [fossies.org](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john_8py_source.html). Baadaye, JohnTheRipper inaweza kutumiwa kujaribu kukrack password.
 ```bash
 # Example command to search for certificate files in PowerShell
 Get-ChildItem -Recurse -Path C:\Users\ -Include *.pfx, *.p12, *.pkcs12, *.pem, *.key, *.crt, *.cer, *.csr, *.jks, *.keystore, *.keys
@@ -90,20 +91,24 @@ pfx2john.py certificate.pfx > hash.txt
 # Command to crack the hash with JohnTheRipper
 john --wordlist=passwords.txt hash.txt
 ```
-## NTLM Credential Theft via PKINIT – THEFT5 (UnPAC the hash)
+## Wizi wa Credential za NTLM kupitia PKINIT – THEFT5 (UnPAC the hash)
 
-Maelezo yaliyotolewa yanaelezea mbinu ya wizi wa akidi za NTLM kupitia PKINIT, hasa kupitia mbinu ya wizi iliyopewa jina THEFT5. Hapa kuna ufafanuzi wa upya kwa sauti ya pasivu, huku maudhui yakiwa yamefichwa na kufupishwa inapohitajika:
+Maudhui yaliyotolewa yanaeleza mbinu ya wizi wa credential za NTLM kupitia PKINIT, hasa kupitia mbinu ya wizi iliyopewa jina la THEFT5. Hapa inaelezwa upya kwa mtindo wa passive voice, huku maudhui yakifupishwa na kutotajwa utambulisho inapofaa:<sup>[[1]](#references)</sup>
 
-Ili kusaidia uthibitishaji wa NTLM `MS-NLMP` kwa programu ambazo hazifanyii kazi uthibitishaji wa Kerberos, KDC imeundwa kurudisha kazi ya moja kwa moja ya NTLM (OWF) ya mtumiaji ndani ya cheti cha sifa (PAC), hasa katika buffer ya `PAC_CREDENTIAL_INFO`, wakati PKCA inatumika. Kwa hivyo, iwapo akaunti itathibitishwa na kupata Tiketi ya Utoaji Tiketi (TGT) kupitia PKINIT, mekanizma inapatikana ambayo inaruhusu mwenyeji wa sasa kutoa hash ya NTLM kutoka kwa TGT ili kudumisha itifaki za uthibitishaji za zamani. Mchakato huu unajumuisha ufichuzi wa muundo wa `PAC_CREDENTIAL_DATA`, ambao kimsingi ni picha ya NDR iliyosimbwa ya NTLM plaintext.
+Ili kusaidia authentication ya NTLM `MS-NLMP` kwa applications ambazo haziwezeshi authentication ya Kerberos, KDC imeundwa kurejesha one-way function (OWF) ya NTLM ya mtumiaji ndani ya privilege attribute certificate (PAC), hasa katika buffer ya `PAC_CREDENTIAL_INFO`, PKCA inapotumika. Kwa hiyo, account inapo-authenticate na kupata Ticket-Granting Ticket (TGT) kupitia PKINIT, utaratibu wa asili huwepo unaowezesha host ya sasa kutoa NTLM hash kutoka kwenye TGT ili kuendeleza legacy authentication protocols. Mchakato huu unahusisha kusimbua muundo wa `PAC_CREDENTIAL_DATA`, ambao kimsingi ni uwakilishi wa NTLM plaintext ulioserializwa kwa NDR.
 
-Kifaa **Kekeo**, kinachopatikana kwenye [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), kinatajwa kuwa na uwezo wa kuomba TGT inayojumuisha data hii maalum, hivyo kurahisisha upatikanaji wa NTLM ya mtumiaji. Amri inayotumika kwa ajili ya kusudi hili ni kama ifuatavyo:
+Utility **Kekeo**, inayopatikana kwenye [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), inatajwa kuwa na uwezo wa kuomba TGT iliyo na data hii maalum, hivyo kuwezesha kurejeshwa kwa NTLM ya mtumiaji. Command inayotumika kwa madhumuni haya ni kama ifuatavyo:
 ```bash
 tgt::pac /caname:generic-DC-CA /subject:genericUser /castore:current_user /domain:domain.local
 ```
-**`Rubeus`** pia inaweza kupata taarifa hii kwa chaguo **`asktgt [...] /getcredentials`**.
+**`Rubeus`** inaweza pia kupata taarifa hii kwa kutumia chaguo **`asktgt [...] /getcredentials`**.
 
-Zaidi ya hayo, inabainishwa kuwa Kekeo inaweza kushughulikia vyeti vilivyolindwa na kadi za smartcard, ikiwa pini inaweza kupatikana, huku ikirejelea [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). Uwezo huo huo unatajwa kuwa unasaidiwa na **Rubeus**, inayopatikana kwenye [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
+Zaidi ya hayo, imebainishwa kuwa Kekeo inaweza kuchakata vyeti vinavyolindwa na smartcard, iwapo PIN inaweza kupatikana, kama inavyoelezwa katika [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). Uwezo huo huo unaonyeshwa kuwa unaungwa mkono na **Rubeus**, unaopatikana katika [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
 
-Maelezo haya yanajumuisha mchakato na zana zinazohusika katika wizi wa akidi za NTLM kupitia PKINIT, zikilenga katika kupata hash za NTLM kupitia TGT iliyopatikana kwa kutumia PKINIT, na matumizi yanayosaidia mchakato huu.
+Maelezo haya yanafafanua mchakato na zana zinazohusika katika NTLM credential theft kupitia PKINIT, yakilenga upatikanaji wa NTLM hashes kupitia TGT inayopatikana kwa kutumia PKINIT, pamoja na zana zinazowezesha mchakato huu.
+
+## Marejeo
+
+- [1] [Certified Pre-Owned: Abusing Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 
 {{#include ../../../banners/hacktricks-training.md}}

