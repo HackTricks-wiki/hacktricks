@@ -1583,7 +1583,7 @@ sudo LD_LIBRARY_PATH=/tmp <COMMAND>
 
 ### SUID Binary – .so injection
 
-When encountering a binary with **SUID** permissions that seems unusual, it's a good practice to verify if it's loading **.so** files properly. This can be checked by running the following command:
+When encountering a binary with **SUID** permissions that seems unusual, it's a good practice to verify if it's loading **.so** files properly. This can be checked by running the following command:<sup>[[17]](#references)</sup>
 
 ```bash
 strace <SUID-BINARY> 2>&1 | grep -i -E "open|access|no such file"

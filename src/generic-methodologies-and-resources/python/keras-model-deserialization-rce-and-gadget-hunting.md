@@ -151,9 +151,9 @@ Important limitation:
 
 ## ML pickle import allowlisting for AI/ML models (Fickling)
 
-Many AI/ML model formats (PyTorch .pt/.pth/.ckpt, joblib/scikit-learn, older TensorFlow artifacts, etc.) embed Python pickle data. Attackers routinely abuse pickle GLOBAL imports and object constructors to achieve RCE or model swapping during load. Blacklist-based scanners often miss novel or unlisted dangerous imports.<sup>[[8]](#references)</sup>
+Many AI/ML model formats (PyTorch .pt/.pth/.ckpt, joblib/scikit-learn, older TensorFlow artifacts, etc.) embed Python pickle data. Attackers routinely abuse pickle GLOBAL imports and object constructors to achieve RCE or model swapping during load. Blacklist-based scanners often miss novel or unlisted dangerous imports.<sup>[[8]](#references)[[14]](#references)</sup>
 
-A practical fail-closed defense is to hook Python’s pickle deserializer and only allow a reviewed set of harmless ML-related imports during unpickling. Trail of Bits’ Fickling implements this policy and ships a curated ML import allowlist built from thousands of public Hugging Face pickles.<sup>[[8]](#references)</sup>
+A practical fail-closed defense is to hook Python’s pickle deserializer and only allow a reviewed set of harmless ML-related imports during unpickling. Trail of Bits’ Fickling implements this policy and ships a curated ML import allowlist built from thousands of public Hugging Face pickles.<sup>[[8]](#references)[[13]](#references)</sup>
 
 Security model for “safe” imports (intuitions distilled from research and practice): imported symbols used by a pickle must simultaneously:<sup>[[8]](#references)</sup>
 - Not execute code or cause execution (no compiled/source code objects, shelling out, hooks, etc.)
