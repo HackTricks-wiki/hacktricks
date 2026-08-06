@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Documentos são frequentemente apenas contêineres:
+Documentos geralmente são apenas contêineres:
 
 - PDF (arquivos incorporados, streams)
 - Office OOXML (`.docx/.xlsx/.pptx` são ZIPs)
@@ -12,11 +12,11 @@ Documentos são frequentemente apenas contêineres:
 
 ### Técnica
 
-PDF é um contêiner estruturado com objetos, streams e arquivos incorporados opcionais. Em CTFs, você frequentemente precisa:
+PDF é um contêiner estruturado com objetos, streams e arquivos incorporados opcionais. Em CTFs, geralmente é necessário:
 
 - Extrair anexos incorporados
-- Descomprimir/achatar streams de objetos para poder buscar o conteúdo
-- Identificar objetos ocultos (JS, imagens incorporadas, streams estranhos)
+- Descompactar/achatar object streams para poder pesquisar o conteúdo
+- Identificar objetos ocultos (JS, imagens incorporadas, streams incomuns)
 
 ### Verificações rápidas
 ```bash
@@ -25,19 +25,19 @@ pdfdetach -list file.pdf
 pdfdetach -saveall file.pdf
 qpdf --qdf --object-streams=disable file.pdf out.pdf
 ```
-Em seguida, procure dentro de `out.pdf` por objetos/strings suspeitos.
+Então, pesquise dentro de `out.pdf` por objetos/strings suspeitos.
 
 ## Office OOXML
 
 ### Técnica
 
-Trate OOXML como um grafo de relacionamento ZIP + XML; payloads frequentemente se escondem em media, relacionamentos ou em partes customizadas incomuns.
+Trate OOXML como um grafo de relações entre ZIP + XML; os payloads geralmente ficam ocultos em mídias, relações ou partes customizadas incomuns.
 
-OOXML files are ZIP containers. That means:
+Arquivos OOXML são contêineres ZIP. Isso significa que:
 
-- O documento é uma estrutura de diretórios de XML e assets.
-- Os arquivos `_rels/` de relacionamento podem apontar para recursos externos ou partes ocultas.
-- Dados embutidos frequentemente ficam em `word/media/`, em partes XML customizadas, ou em relacionamentos incomuns.
+- O documento é uma árvore de diretórios de XML e assets.
+- Os arquivos de relacionamento em `_rels/` podem apontar para recursos externos ou partes ocultas.
+- Dados incorporados frequentemente ficam em `word/media/`, partes XML customizadas ou relações incomuns.
 
 ### Verificações rápidas
 ```bash
@@ -49,5 +49,6 @@ Em seguida, inspecione:
 - `word/document.xml`
 - `word/_rels/` para relações externas
 - mídia incorporada em `word/media/`
+
 
 {{#include ../../banners/hacktricks-training.md}}
