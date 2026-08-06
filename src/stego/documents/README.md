@@ -1,21 +1,21 @@
-# Document Steganography
+# 文档隐写术
 
 {{#include ../../banners/hacktricks-training.md}}
 
 文档通常只是容器：
 
-- PDF（嵌入的文件、流）
-- Office OOXML (`.docx/.xlsx/.pptx` 是 ZIP 包)
-- RTF / OLE 旧格式
+- PDF（嵌入文件、流）
+- Office OOXML（`.docx/.xlsx/.pptx` 是 ZIP）
+- RTF / OLE legacy formats
 
 ## PDF
 
-### 方法
+### Technique
 
-PDF 是一个结构化的容器，包含对象、流，以及可选的嵌入文件。在 CTFs 中你经常需要：
+PDF 是一种结构化容器，包含对象、流以及可选的嵌入文件。在 CTFs 中，你通常需要：
 
-- 提取嵌入的附件
-- 解压/展开对象流，以便搜索内容
+- 提取嵌入式附件
+- 解压缩/扁平化对象流，以便搜索内容
 - 识别隐藏对象（JS、嵌入图像、异常流）
 
 ### 快速检查
@@ -29,17 +29,17 @@ qpdf --qdf --object-streams=disable file.pdf out.pdf
 
 ## Office OOXML
 
-### 技术
+### Technique
 
-将 OOXML 视为一个 ZIP + XML 的关系图；payloads 常常隐藏在媒体、关系或不寻常的自定义部件中。
+将 OOXML 视为 ZIP + XML relationship graph；payload 通常隐藏在 media、relationships 或异常的 custom parts 中。
 
 OOXML 文件是 ZIP 容器。这意味着：
 
-- 文档是由 XML 和资源组成的目录树。
-- `_rels/` relationship 文件可以指向外部资源或隐藏的部分。
-- 嵌入数据通常存在于 `word/media/`、自定义 XML 部分，或不常见的关系。
+- 文档是由 XML 和 assets 组成的目录树。
+- `_rels/` relationship 文件可以指向 external resources 或 hidden parts。
+- Embedded data 经常位于 `word/media/`、custom XML parts 或异常的 relationships 中。
 
-### 快速检查
+### Quick checks
 ```bash
 7z l file.docx
 7z x file.docx -oout
@@ -47,7 +47,8 @@ OOXML 文件是 ZIP 容器。这意味着：
 然后检查：
 
 - `word/document.xml`
-- `word/_rels/` 以查找外部关系
-- 位于 `word/media/` 的嵌入媒体
+- `word/_rels/` 中的 external relationships
+- `word/media/` 中的 embedded media
+
 
 {{#include ../../banners/hacktricks-training.md}}
