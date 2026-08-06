@@ -2,40 +2,40 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Vérifier les BSSIDs
+## Vérifier les BSSID
 
-Lorsque vous recevez une capture dont le trafic principal est Wifi en utilisant WireShark, vous pouvez commencer à enquêter sur tous les SSID de la capture avec _Wireless --> WLAN Traffic_ :
+Lorsque vous recevez une capture dont le trafic principal est du Wifi avec WireShark, vous pouvez commencer par examiner tous les SSID de la capture avec _Wireless --> WLAN Traffic_ :
 
-![](<../../../images/image (106).png>)
+![Analyse de Pcap Wifi - Vérifier les BSSID : Lorsque vous recevez une capture dont le trafic principal est du Wifi avec WireShark, vous pouvez commencer par examiner tous les SSID de la capture avec Wireless --...](<../../../images/image (106).png>)
 
-![](<../../../images/image (492).png>)
+![Analyse de Pcap Wifi - Vérifier les BSSID : Lorsque vous recevez une capture dont le trafic principal est du Wifi avec WireShark, vous pouvez commencer par examiner tous les SSID de la capture avec Wireless --...](<../../../images/image (492).png>)
 
 ### Brute Force
 
-Une des colonnes de cet écran indique si **une authentification a été trouvée dans le pcap**. Si c'est le cas, vous pouvez essayer de le forcer par Brute force en utilisant `aircrack-ng` :
+L'une des colonnes de cet écran indique si **une authentification a été trouvée dans le pcap**. Si c'est le cas, vous pouvez essayer de la Brute force avec `aircrack-ng` :
 ```bash
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
-Par exemple, il récupérera le mot de passe WPA protégeant un PSK (clé pré-partagée), qui sera nécessaire pour déchiffrer le trafic plus tard.
+Par exemple, il récupérera la phrase secrète WPA protégeant un PSK (pre-shared key), qui sera nécessaire pour déchiffrer le trafic ultérieurement.
 
-## Données dans les Beacons / Canal Latéral
+## Données dans les Beacons / Side Channel
 
-Si vous soupçonnez que **des données sont divulguées à l'intérieur des beacons d'un réseau Wifi**, vous pouvez vérifier les beacons du réseau en utilisant un filtre comme celui-ci : `wlan contains <NAMEofNETWORK>`, ou `wlan.ssid == "NAMEofNETWORK"` pour rechercher dans les paquets filtrés des chaînes suspectes.
+Si vous soupçonnez que des **données sont exfiltrées à l'intérieur des beacons d'un réseau Wifi**, vous pouvez vérifier les beacons du réseau à l'aide d'un filtre comme le suivant : `wlan contains <NAMEofNETWORK>`, ou rechercher `wlan.ssid == "NAMEofNETWORK"` à l'intérieur des paquets filtrés afin d'y trouver des chaînes suspectes.
 
-## Trouver des Adresses MAC Inconnues dans un Réseau Wifi
+## Trouver des adresses MAC inconnues dans un réseau Wifi
 
-Le lien suivant sera utile pour trouver les **machines envoyant des données à l'intérieur d'un réseau Wifi** :
+Le lien suivant sera utile pour trouver les **machines envoyant des données dans un réseau Wifi** :
 
 - `((wlan.ta == e8:de:27:16:70:c9) && !(wlan.fc == 0x8000)) && !(wlan.fc.type_subtype == 0x0005) && !(wlan.fc.type_subtype ==0x0004) && !(wlan.addr==ff:ff:ff:ff:ff:ff) && wlan.fc.type==2`
 
-Si vous connaissez déjà **les adresses MAC, vous pouvez les supprimer de la sortie** en ajoutant des vérifications comme celle-ci : `&& !(wlan.addr==5c:51:88:31:a0:3b)`
+Si vous connaissez déjà certaines **adresses MAC, vous pouvez les supprimer des résultats** en ajoutant des vérifications comme celle-ci : `&& !(wlan.addr==5c:51:88:31:a0:3b)`
 
-Une fois que vous avez détecté des **adresses MAC inconnues** communiquant à l'intérieur du réseau, vous pouvez utiliser des **filtres** comme celui-ci : `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` pour filtrer son trafic. Notez que les filtres ftp/http/ssh/telnet sont utiles si vous avez déchiffré le trafic.
+Une fois que vous avez détecté des **adresses MAC inconnues** communiquant sur le réseau, vous pouvez utiliser des **filtres** comme le suivant : `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` pour filtrer son trafic. Notez que les filtres ftp/http/ssh/telnet sont utiles si vous avez déchiffré le trafic.
 
-## Déchiffrer le Trafic
+## Déchiffrer le trafic
 
 Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
 
-![](<../../../images/image (499).png>)
+![Trouver des adresses MAC inconnues dans un réseau Wifi - Déchiffrer le trafic : Une fois que vous avez détecté des adresses MAC inconnues communiquant sur le réseau, vous pouvez utiliser des filtres comme le suivant :...](<../../../images/image (499).png>)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,6 +1,8 @@
+# Techniques de désobfuscation pour les fichiers VBS
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-Certaines choses qui pourraient être utiles pour déboguer/déobfusquer un fichier VBS malveillant :
+Voici quelques éléments qui peuvent être utiles pour déboguer/désobfusquer un fichier VBS malveillant :
 
 ## echo
 ```bash

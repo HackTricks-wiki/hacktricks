@@ -1,17 +1,16 @@
-# Analyse forensique de Docker
+# Forensics Docker
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
 ## Modification du container
 
-Il existe des soupçons selon lesquels un container Docker aurait été compromis :
+Des soupçons indiquent qu’un container Docker a été compromis :
 ```bash
 docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 cc03e43a052a        lamp-wordpress      "./run.sh"          2 minutes ago       Up 2 minutes        80/tcp              wordpress
 ```
-Vous pouvez facilement **trouver les modifications effectuées sur ce container par rapport à l’image** avec :
+Vous pouvez facilement **identifier les modifications apportées à ce conteneur par rapport à l’image** avec :
 ```bash
 docker diff wordpress
 C /var
@@ -26,11 +25,11 @@ A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
 Dans la commande précédente, **C** signifie **Modifié** et **A,** **Ajouté**.\
-Si vous constatez qu’un fichier intéressant comme `/etc/shadow` a été modifié, vous pouvez le télécharger depuis le conteneur afin de rechercher une activité malveillante avec :
+Si vous constatez qu’un fichier intéressant comme `/etc/shadow` a été modifié, vous pouvez le télécharger depuis le container afin de vérifier la présence d’une activité malveillante avec :
 ```bash
 docker cp wordpress:/etc/shadow.
 ```
-Vous pouvez également **le comparer à l’original** en lançant un nouveau conteneur et en en extrayant le fichier :
+Vous pouvez également **le comparer avec l’original** en exécutant un nouveau conteneur et en en extrayant le fichier :
 ```bash
 docker run -d lamp-wordpress
 docker cp b5d53e8b468e:/etc/shadow original_shadow #Get the file from the newly created container
@@ -40,7 +39,7 @@ Si vous constatez qu’**un fichier suspect a été ajouté**, vous pouvez accé
 ```bash
 docker exec -it wordpress bash
 ```
-## Modifications de l’image
+## Modifications des images
 
 Lorsqu’une image Docker exportée vous est fournie (probablement au format `.tar`), vous pouvez utiliser [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases) pour **extraire un résumé des modifications** :
 ```bash
@@ -49,7 +48,7 @@ container-diff analyze -t sizelayer image.tar
 container-diff analyze -t history image.tar
 container-diff analyze -t metadata image.tar
 ```
-Ensuite, vous pouvez **décompresser** l’image et **accéder aux blobs** pour rechercher les fichiers suspects que vous avez pu trouver dans l’historique des modifications :
+Ensuite, vous pouvez **décompresser** l'image et **accéder aux blobs** pour rechercher les fichiers suspects que vous avez pu trouver dans l'historique des modifications :
 ```bash
 tar -xf image.tar
 ```
@@ -70,7 +69,7 @@ dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
 ```
 ### Dive
 
-Pour trouver les fichiers ajoutés ou modifiés dans les images Docker, vous pouvez également utiliser l’utilitaire [**dive**](https://github.com/wagoodman/dive) (téléchargez-le depuis les [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) :
+Pour rechercher les fichiers ajoutés ou modifiés dans les images Docker, vous pouvez également utiliser l’outil [**dive**](https://github.com/wagoodman/dive) (téléchargez-le depuis les [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) :
 ```bash
 #First you need to load the image in your docker repo
 sudo docker load < image.tar                                                                                                                                                                                                         1 ⨯
@@ -79,19 +78,18 @@ Loaded image: flask:latest
 #And then open it with dive:
 sudo dive flask:latest
 ```
-Cela vous permet de **naviguer parmi les différents blobs des images Docker** et de vérifier quels fichiers ont été modifiés/ajoutés. Le **rouge** signifie ajouté et le **jaune** signifie modifié. Utilisez **tab** pour passer à l’autre vue et **espace** pour réduire/développer les dossiers.
+Cela vous permet de **naviguer à travers les différents blobs des images Docker** et de vérifier quels fichiers ont été modifiés/ajoutés. **Rouge** signifie ajouté et **jaune** signifie modifié. Utilisez **tab** pour passer à l’autre vue et **espace** pour réduire/développer les dossiers.
 
-Avec die, vous ne pourrez pas accéder au contenu des différentes étapes de l’image. Pour cela, vous devrez **décompresser chaque couche et y accéder**.\
-Vous pouvez décompresser toutes les couches d’une image depuis le répertoire où l’image a été décompressée en exécutant :
+Avec die, vous ne pourrez pas accéder au contenu des différentes étapes de l’image. Pour cela, vous devrez **décompresser chaque layer et y accéder**.\
+Vous pouvez décompresser tous les layers d’une image depuis le répertoire où l’image a été décompressée en exécutant :
 ```bash
 tar -xf image.tar
 for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; done
 ```
-## Identifiants en mémoire
+## Identifiants depuis la mémoire
 
-Notez que lorsque vous exécutez un conteneur Docker dans un **hôte**, **vous pouvez voir les processus exécutés dans le conteneur depuis l'hôte** en exécutant simplement `ps -ef`
+Notez que lorsque vous exécutez un conteneur Docker à l’intérieur d’un hôte, **vous pouvez voir les processus exécutés dans le conteneur depuis l’hôte** en exécutant simplement `ps -ef`
 
-Par conséquent, (en tant que root), vous pouvez **extraire la mémoire des processus** depuis l'hôte et rechercher des **identifiants** [**comme dans l'exemple suivant**](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#process-memory).
-
+Par conséquent, en tant que **root**, vous pouvez **extraire la mémoire des processus** depuis l’hôte et rechercher des **identifiants**, [**comme dans l’exemple suivant**](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#process-memory).
 
 {{#include ../../banners/hacktricks-training.md}}

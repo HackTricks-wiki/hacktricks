@@ -1,4 +1,4 @@
-# Suricata & Iptables cheatsheet
+# Fiche pratique Suricata & Iptables
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,13 +6,13 @@
 
 ### Chaînes
 
-Dans iptables, des listes de règles connues sous le nom de chaînes sont traitées séquentiellement. Parmi celles-ci, trois chaînes principales sont universellement présentes, avec d'autres comme NAT pouvant être prises en charge en fonction des capacités du système.
+Dans iptables, les listes de règles connues sous le nom de chaînes sont traitées séquentiellement. Parmi celles-ci, trois chaînes principales sont toujours présentes, tandis que d'autres, comme NAT, peuvent être prises en charge selon les capacités du système.
 
-- **Chaîne d'entrée** : Utilisée pour gérer le comportement des connexions entrantes.
-- **Chaîne de transfert** : Employée pour traiter les connexions entrantes qui ne sont pas destinées au système local. Cela est typique pour les appareils agissant en tant que routeurs, où les données reçues doivent être transférées vers une autre destination. Cette chaîne est pertinente principalement lorsque le système est impliqué dans le routage, le NAT ou des activités similaires.
-- **Chaîne de sortie** : Dédiée à la régulation des connexions sortantes.
+- **Chaîne Input** : utilisée pour gérer le comportement des connexions entrantes.
+- **Chaîne Forward** : utilisée pour gérer les connexions entrantes qui ne sont pas destinées au système local. Cela est courant pour les appareils agissant comme des routeurs, où les données reçues doivent être transférées vers une autre destination. Cette chaîne est principalement pertinente lorsque le système participe au routage, au NAT ou à des activités similaires.
+- **Chaîne Output** : dédiée à la régulation des connexions sortantes.
 
-Ces chaînes garantissent le traitement ordonné du trafic réseau, permettant la spécification de règles détaillées régissant le flux de données dans, à travers et hors d'un système.
+Ces chaînes assurent le traitement ordonné du trafic réseau et permettent de définir des règles détaillées régissant le flux des données entrant dans un système, le traversant et en sortant.
 ```bash
 # Delete all rules
 iptables -F
@@ -51,7 +51,7 @@ iptables-restore < /etc/sysconfig/iptables
 ```
 ## Suricata
 
-### Installer et configurer
+### Installation et configuration
 ```bash
 # Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
 # Ubuntu
@@ -117,22 +117,22 @@ Type=simple
 
 systemctl daemon-reload
 ```
-### Définitions des Règles
+### Définitions des règles
 
-[From the docs:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) Une règle/siganture se compose des éléments suivants :
+[D’après la documentation :](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) Une règle/signature se compose des éléments suivants :
 
-- L'**action**, détermine ce qui se passe lorsque la signature correspond.
-- L'**en-tête**, définit le protocole, les adresses IP, les ports et la direction de la règle.
-- Les **options de règle**, définissent les spécificités de la règle.
+- L’**action**, qui détermine ce qui se produit lorsque la signature correspond.
+- L’**en-tête**, qui définit le protocole, les adresses IP, les ports et la direction de la règle.
+- Les **options de la règle**, qui définissent les détails spécifiques de la règle.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
 #### **Les actions valides sont**
 
 - alert - générer une alerte
-- pass - arrêter l'inspection supplémentaire du paquet
+- pass - arrêter l'inspection ultérieure du paquet
 - **drop** - supprimer le paquet et générer une alerte
-- **reject** - envoyer une erreur RST/ICMP injoignable à l'expéditeur du paquet correspondant.
+- **reject** - envoyer une erreur RST/ICMP unreachable à l'expéditeur du paquet correspondant.
 - rejectsrc - identique à _reject_
 - rejectdst - envoyer un paquet d'erreur RST/ICMP au destinataire du paquet correspondant.
 - rejectboth - envoyer des paquets d'erreur RST/ICMP aux deux côtés de la conversation.
@@ -142,45 +142,45 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 - tcp (pour le trafic tcp)
 - udp
 - icmp
-- ip (ip signifie 'tous' ou 'n'importe quel')
-- _protocoles de couche 7_: http, ftp, tls, smb, dns, ssh... (plus dans la [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+- ip (ip signifie « all » ou « any »)
+- _protocoles layer7_ : http, ftp, tls, smb, dns, ssh... (plus d'informations dans la [**documentation**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
 
-#### Adresses Source et Destination
+#### Adresses source et destination
 
-Il prend en charge les plages d'IP, les négations et une liste d'adresses :
+Il prend en charge les plages d'adresses IP, les négations et une liste d'adresses :
 
 | Exemple                       | Signification                                  |
 | ----------------------------- | ---------------------------------------------- |
-| ! 1.1.1.1                     | Chaque adresse IP sauf 1.1.1.1                 |
-| !\[1.1.1.1, 1.1.1.2]          | Chaque adresse IP sauf 1.1.1.1 et 1.1.1.2     |
-| $HOME_NET                     | Votre paramètre de HOME_NET dans yaml          |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET et non HOME_NET                  |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 sauf pour 10.0.0.5                 |
+| ! 1.1.1.1                     | Toute adresse IP sauf 1.1.1.1                  |
+| !\[1.1.1.1, 1.1.1.2]          | Toute adresse IP sauf 1.1.1.1 et 1.1.1.2       |
+| $HOME_NET                     | Votre configuration de HOME_NET dans le fichier yaml |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET et non HOME_NET                   |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 à l'exception de 10.0.0.5          |
 
-#### Ports Source et Destination
+#### Ports source et destination
 
 Il prend en charge les plages de ports, les négations et les listes de ports
 
-| Exemple         | Signification                                |
-| --------------- | -------------------------------------------- |
-| any             | n'importe quelle adresse                     |
-| \[80, 81, 82]   | port 80, 81 et 82                            |
-| \[80: 82]       | Plage de 80 à 82                             |
-| \[1024: ]       | De 1024 jusqu'au numéro de port le plus élevé |
-| !80             | Chaque port sauf 80                          |
-| \[80:100,!99]   | Plage de 80 à 100 mais 99 exclu             |
-| \[1:80,!\[2,4]] | Plage de 1 à 80, sauf les ports 2 et 4      |
+| Exemple         | Signification                           |
+| --------------- | ---------------------------------------- |
+| any             | n'importe quelle adresse                 |
+| \[80, 81, 82]   | ports 80, 81 et 82                       |
+| \[80: 82]       | Plage de 80 à 82                         |
+| \[1024: ]       | De 1024 au numéro de port le plus élevé  |
+| !80             | Tous les ports sauf le port 80            |
+| \[80:100,!99]   | Plage de 80 à 100, sauf le port 99       |
+| \[1:80,!\[2,4]] | Plage de 1 à 80, sauf les ports 2 et 4   |
 
 #### Direction
 
-Il est possible d'indiquer la direction de la règle de communication appliquée :
+Il est possible d'indiquer la direction de la communication à laquelle la rule s'applique :
 ```
 source -> destination
 source <> destination  (both directions)
 ```
 #### Mots-clés
 
-Il y a **des centaines d'options** disponibles dans Suricata pour rechercher le **paquet spécifique** que vous recherchez, ici il sera mentionné si quelque chose d'intéressant est trouvé. Consultez la [**documentation** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html) pour plus d'informations !
+Il existe **des centaines d'options** disponibles dans Suricata pour rechercher le **paquet spécifique** que vous cherchez. Les éléments intéressants trouvés seront mentionnés ici. Consultez la [**documentation** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html) pour en savoir plus !
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule

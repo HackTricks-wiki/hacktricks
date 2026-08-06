@@ -1,8 +1,8 @@
-# Forensique du cache Discord (Chromium Simple Cache)
+# Forensics du cache Discord (Chromium Simple Cache)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Cette page résume comment effectuer le triage des artefacts de cache de Discord Desktop pour récupérer des fichiers exfiltrés, des endpoints webhook, et des timelines d'activité. Discord Desktop est une application Electron/Chromium et utilise Chromium Simple Cache sur disque.
+Cette page résume comment effectuer le triage des artefacts du cache de Discord Desktop afin de récupérer des fichiers exfiltrés, des endpoints de webhook et des chronologies d'activité. Discord Desktop est une application Electron/Chromium et utilise Chromium Simple Cache sur le disque.
 
 ## Où chercher (Windows/macOS/Linux)
 
@@ -10,49 +10,49 @@ Cette page résume comment effectuer le triage des artefacts de cache de Discord
 - macOS: ~/Library/Application Support/discord/Cache/Cache_Data
 - Linux: ~/.config/discord/Cache/Cache_Data
 
-Structures clés sur disque dans Cache_Data :
-- index: Simple Cache index database
-- data_#: Fichiers binaires de blocs de cache pouvant contenir plusieurs objets mis en cache
-- f_######: Entrées mises en cache individuelles stockées comme fichiers autonomes (souvent des contenus plus volumineux)
+Principales structures sur disque dans Cache_Data:<sup>[[1]](#references)</sup>
+- index: base de données d'index Simple Cache
+- data_#: fichiers de blocs binaires du cache pouvant contenir plusieurs objets mis en cache
+- f_######: entrées individuelles du cache stockées dans des fichiers autonomes (souvent des corps plus volumineux)
 
-Remarque : La suppression de messages/channels/serveurs dans Discord ne purge pas ce cache local. Les éléments mis en cache restent souvent présents et leurs timestamps de fichiers correspondent à l'activité utilisateur, permettant la reconstruction d'une timeline.
+Remarque: la suppression de messages/canaux/serveurs dans Discord ne purge pas ce cache local. Les éléments mis en cache restent souvent présents et leurs timestamps de fichiers correspondent à l'activité de l'utilisateur, ce qui permet de reconstruire une chronologie.<sup>[[1]](#references)</sup>
 
-## Ce qui peut être récupéré
+## Éléments pouvant être récupérés
 
-- Pièces jointes exfiltrées et vignettes récupérées via cdn.discordapp.com/media.discordapp.net
-- Images, GIFs, vidéos (ex. .jpg, .png, .gif, .webp, .mp4, .webm)
-- Webhook URLs (https://discord.com/api/webhooks/…)
-- Appels API Discord (https://discord.com/api/vX/…)
-- Utile pour corréler beaconing/exfil activity et hacher les médias pour la correspondance d'intel
+- Pièces jointes exfiltrées et miniatures récupérées via cdn.discordapp.com/media.discordapp.net
+- Images, GIFs, vidéos (par ex., .jpg, .png, .gif, .webp, .mp4, .webm)
+- URLs de webhook (https://discord.com/api/webhooks/…)<sup>[[3]](#references)</sup>
+- Appels à l'API Discord (https://discord.com/api/vX/…)
+- Utile pour corréler le beaconing/l'activité d'exfiltration et hacher les médias afin de les comparer à des renseignements<sup>[[1]](#references)</sup>
 
 ## Triage rapide (manuel)
 
-- Grep le cache pour des artefacts à fort signal :
-- Webhook endpoints:
+- Rechercher dans le cache les artefacts à forte valeur indicative:
+- Endpoints de webhook:
 - Windows: findstr /S /I /C:"https://discord.com/api/webhooks/" "%AppData%\discord\Cache\Cache_Data\*"
 - Linux/macOS: strings -a Cache_Data/* | grep -i "https://discord.com/api/webhooks/"
-- Attachment/CDN URLs:
+- URLs de pièces jointes/CDN:
 - strings -a Cache_Data/* | grep -Ei "https://(cdn|media)\.discord(app)?\.com/attachments/"
-- Discord API calls:
+- Appels à l'API Discord:
 - strings -a Cache_Data/* | grep -Ei "https://discord(app)?\.com/api/v[0-9]+/"
-- Trier les entrées mises en cache par date de modification pour construire rapidement une timeline (mtime reflète le moment où l'objet a été placé en cache) :
+- Trier les entrées mises en cache par date de modification afin de construire rapidement une chronologie (mtime reflète le moment où l'objet a été mis en cache):
 - Windows PowerShell: Get-ChildItem "$env:AppData\discord\Cache\Cache_Data" -File -Recurse | Sort-Object LastWriteTime | Select-Object LastWriteTime, FullName
 
-## Parsing f_* entries (HTTP body + headers)
+## Analyse des entrées f_* (HTTP body + headers)
 
-Les fichiers commençant par f_ contiennent les en-têtes de la réponse HTTP suivis du body. Le bloc d'en-têtes se termine typiquement par \r\n\r\n. En-têtes de réponse utiles :
-- Content-Type: Permet d'inférer le type de média
-- Content-Location or X-Original-URL: URL distante originale pour corrélation/aperçu
-- Content-Encoding: Peut être gzip/deflate/br (Brotli)
+Les fichiers commençant par f_ contiennent les en-têtes de réponse HTTP suivis du body. Le bloc d'en-têtes se termine généralement par \r\n\r\n. Les en-têtes de réponse utiles comprennent:
+- Content-Type: pour déduire le type de média
+- Content-Location ou X-Original-URL: URL distante d'origine pour l'aperçu/la corrélation
+- Content-Encoding: peut être gzip/deflate/br (Brotli)
 
-Les médias peuvent être extraits en séparant les en-têtes du corps et en décompressant au besoin selon Content-Encoding. Le magic-byte sniffing est utile lorsque Content-Type est absent.
+Les médias peuvent être extraits en séparant les en-têtes du body et, éventuellement, en les décompressant selon Content-Encoding. L'identification par magic bytes est utile lorsque Content-Type est absent.
 
-## Automated DFIR: Discord Forensic Suite (CLI/GUI)
+## DFIR automatisé: Discord Forensic Suite (CLI/GUI)
 
 - Repo: https://github.com/jwdfir/discord_cache_parser
-- Fonction : Scanne récursivement le dossier de cache de Discord, trouve les URLs webhook/API/attachments, parse les bodies f_*, extrait éventuellement les médias (carving), et produit des rapports timeline en HTML + CSV avec des hashes SHA‑256.
+- Fonction: analyse récursivement le dossier de cache de Discord, trouve les URLs de webhook/API/pièces jointes, analyse les bodies f_*, peut éventuellement extraire les médias et produit des rapports de chronologie HTML + CSV avec des hashes SHA‑256.<sup>[[2]](#references)</sup>
 
-Example CLI usage:
+Exemple d'utilisation CLI:
 ```bash
 # Acquire cache (copy directory for offline parsing), then run:
 python3 discord_forensic_suite_cli \
@@ -65,25 +65,25 @@ python3 discord_forensic_suite_cli \
 --carve \
 --verbose
 ```
-Options clés:
-- --cache: Path to Cache_Data
+Options principales :
+- --cache: Chemin vers Cache_Data
 - --format html|csv|both
-- --timeline: Emit ordered CSV timeline (by modified time)
-- --extra: Also scan sibling Code Cache and GPUCache
-- --carve: Carve media from raw bytes near regex hits (images/video)
-- Sortie: HTML report, CSV report, CSV timeline, and a media folder with carved/extracted files
+- --timeline: Génère une timeline CSV ordonnée (par date de modification)
+- --extra: Analyse également Code Cache et GPUCache voisins
+- --carve: Extrait les médias des octets bruts à proximité des correspondances regex (images/vidéos)
+- Sortie : rapport HTML, rapport CSV, timeline CSV et dossier de médias contenant les fichiers extraits
 
-## Conseils pour l'analyste
+## Conseils pour l'analyse
 
-- Corréler le temps de modification (mtime) des fichiers f_* et data_* avec les fenêtres d'activité user/attacker pour reconstruire une chronologie.
-- Calculer le hash des médias récupérés (SHA-256) et les comparer aux jeux de données known-bad ou exfil.
-- Les URL de webhook extraites peuvent être testées pour liveness ou rotées ; envisager de les ajouter aux blocklists et aux proxies de retro-hunting.
-- Le Cache persiste après un “wiping” côté serveur. Si l'acquisition est possible, collecter l'intégralité du répertoire Cache et les caches voisins liés (Code Cache, GPUCache).
+- Corrélez la date de modification (mtime) des fichiers f_* et data_* avec les périodes d'activité de l'utilisateur/de l'attaquant afin de reconstituer une timeline.
+- Hash les médias récupérés (SHA-256) et comparez-les à des jeux de données connus comme malveillants ou exfiltrés.
+- Les URLs de webhook extraites peuvent être testées pour vérifier leur disponibilité ou être renouvelées ; envisagez de les ajouter aux blocklists et d'effectuer une chasse rétrospective sur les proxies.
+- Le cache persiste après un « effacement » côté serveur. Si l'acquisition est possible, collectez l'intégralité du répertoire Cache ainsi que les caches voisins associés (Code Cache, GPUCache).<sup>[[1]](#references)</sup>
 
-## References
+## Références
 
-- [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
-- [Discord Forensic Suite (CLI/GUI)](https://github.com/jwdfir/discord_cache_parser)
-- [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [1] [Discord comme C2 et les preuves mises en cache laissées derrière](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [2] [Discord Forensic Suite (CLI/GUI)](https://github.com/jwdfir/discord_cache_parser)
+- [3] [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 
 {{#include ../../../banners/hacktricks-training.md}}

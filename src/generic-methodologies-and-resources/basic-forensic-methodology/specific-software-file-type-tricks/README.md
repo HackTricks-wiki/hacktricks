@@ -1,8 +1,8 @@
-# Astuces spécifiques pour logiciels / types de fichiers
+# Astuces spécifiques aux logiciels/types de fichiers
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ici vous trouverez des astuces intéressantes pour des types de fichiers et/ou des logiciels spécifiques :
+Vous trouverez ici des astuces intéressantes pour certains types de fichiers et/ou logiciels spécifiques :
 
 
 {{#ref}}

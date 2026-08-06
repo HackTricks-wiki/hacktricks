@@ -1,38 +1,39 @@
-# Analyse forensique des sauvegardes iOS (triage centré sur la messagerie)
+# Forensics des sauvegardes iOS (triage centré sur la messagerie)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Cette page décrit des étapes pratiques pour reconstruire et analyser des backups iOS à la recherche d'indices de livraison d'exploits 0‑click via des pièces jointes d'applications de messagerie. Elle se concentre sur la transformation du layout de backup haché d'Apple en chemins lisibles par l'humain, puis sur l'énumération et le scan des pièces jointes dans les applications courantes.
+Cette page décrit des étapes pratiques pour reconstruire et analyser des sauvegardes iOS afin de détecter des signes de diffusion d’exploits 0-click via des pièces jointes d’applications de messagerie. Elle se concentre sur la conversion de la structure hachée des sauvegardes Apple en chemins lisibles, puis sur l’énumération et l’analyse des pièces jointes dans les applications courantes.
 
 Objectifs :
 - Reconstituer des chemins lisibles à partir de Manifest.db
 - Énumérer les bases de données de messagerie (iMessage, WhatsApp, Signal, Telegram, Viber)
-- Résoudre les chemins des pièces jointes, extraire les objets embarqués (PDF/Images/Fonts) et les soumettre à des détecteurs structurels
+- Résoudre les chemins des pièces jointes, extraire les objets intégrés (PDF/images/polices) et les transmettre à des détecteurs structurels
 
 
-## Reconstruction d'une sauvegarde iOS
+## Reconstruction d’une sauvegarde iOS
 
-Les backups stockés sous MobileSync utilisent des noms de fichiers hachés qui ne sont pas lisibles par l'humain. La base de données SQLite Manifest.db mappe chaque objet stocké à son chemin logique.
+Les sauvegardes stockées sous MobileSync utilisent des noms de fichiers hachés qui ne sont pas lisibles par un humain. La base de données SQLite Manifest.db associe chaque objet stocké à son chemin logique.
 
 Procédure générale :
-1) Ouvrir Manifest.db et lire les enregistrements de fichiers (domain, relativePath, flags, fileID/hash)  
-2) Recréer la hiérarchie de dossiers originale basée sur domain + relativePath  
-3) Copier ou créer un hardlink pour chaque objet stocké vers son chemin reconstruit
+1) Ouvrir Manifest.db et lire les enregistrements des fichiers (domaine, relativePath, indicateurs, fileID/hash)
+2) Reconstituer la hiérarchie originale des dossiers à partir du domaine et de relativePath
+3) Copier ou créer un lien physique pour chaque objet stocké vers son chemin reconstitué
 
-Exemple de workflow avec un outil qui implémente cela de bout en bout (ElegantBouncer) :
+Exemple de workflow avec un outil qui implémente ce processus de bout en bout (ElegantBouncer) :<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 # Rebuild the backup into a readable folder tree
 $ elegant-bouncer --ios-extract /path/to/backup --output /tmp/reconstructed
 [+] Reading Manifest.db ...
 ✓ iOS backup extraction completed successfully!
 ```
-- Traitez les sauvegardes chiffrées en fournissant le mot de passe de la sauvegarde à votre outil d'extraction
-- Préservez les horodatages/ACLs d'origine lorsque c'est possible pour leur valeur probante
+Notes :
+- Gérez les backups chiffrés en fournissant le mot de passe du backup à votre extracteur
+- Préservez les horodatages/ACL d’origine lorsque cela est possible, pour leur valeur probante
 
-### Acquisition et déchiffrement de la sauvegarde (USB / Finder / libimobiledevice)
+### Acquisition et déchiffrement du backup (USB / Finder / libimobiledevice)
 
-- Sous macOS/Finder, activez "Encrypt local backup" et créez une sauvegarde chiffrée *neuve* afin que les éléments du trousseau (keychain) soient présents.
-- Multi-plateforme : `idevicebackup2` (libimobiledevice ≥1.4.0) comprend les changements du protocole de sauvegarde iOS 17/18 et corrige les anciennes erreurs de négociation lors de la restauration/sauvegarde.
+- Dans macOS/Finder, activez « Encrypt local backup » et créez un *nouveau* backup chiffré afin que les éléments du trousseau soient présents.
+- Cross-platform : `idevicebackup2` (libimobiledevice ≥1.4.0) prend en charge les changements du protocole de backup d’iOS 17/18 et corrige les erreurs antérieures de handshake de restauration/backup.<sup>[[4]](#references)</sup>
 ```bash
 # Pair then create a full encrypted backup over USB
 $ idevicepair pair
@@ -40,7 +41,7 @@ $ idevicebackup2 backup --full --encrypt --password '<pwd>' ~/backups/iphone17
 ```
 ### Triage piloté par les IOC avec MVT
 
-Le Mobile Verification Toolkit d'Amnesty (mvt-ios) fonctionne désormais directement sur les sauvegardes iTunes/Finder chiffrées, automatisant le déchiffrement et la mise en correspondance des IOC pour les cas de spyware mercenaire.
+Le Mobile Verification Toolkit (mvt-ios) d'Amnesty fonctionne désormais directement sur les sauvegardes iTunes/Finder chiffrées, en automatisant le déchiffrement et la recherche de correspondances avec les IOC dans les cas de spyware mercenaire.<sup>[[3]](#references)</sup>
 ```bash
 # Optionally extract a reusable key file
 $ mvt-ios extract-key -k /tmp/keyfile ~/backups/iphone17
@@ -51,22 +52,22 @@ $ mvt-ios decrypt-backup -p '<pwd>' -d /tmp/dec-backup ~/backups/iphone17
 # Run IOC scanning on the decrypted tree
 $ mvt-ios check-backup -i indicators.csv /tmp/dec-backup
 ```
-Les résultats se trouvent sous `mvt-results/` (p. ex., analytics_detected.json, safari_history_detected.json) et peuvent être corrélés avec les chemins des pièces jointes récupérés ci‑dessous.
+Les résultats sont enregistrés dans `mvt-results/` (par exemple, `analytics_detected.json`, `safari_history_detected.json`) et peuvent être corrélés avec les chemins des pièces jointes récupérés ci-dessous.
 
 ### Analyse générale des artefacts (iLEAPP)
 
-Pour la chronologie et les métadonnées au‑delà de la messagerie, exécutez iLEAPP directement sur le dossier de sauvegarde (prise en charge des schémas iOS 11‑17) :
+Pour obtenir une chronologie/des métadonnées au-delà de la messagerie, exécutez directement iLEAPP sur le dossier de sauvegarde (prend en charge les schémas iOS 11‑17) :
 ```bash
 $ python3 ileapp.py -b /tmp/dec-backup -o /tmp/ileapp-report
 ```
 ## Énumération des pièces jointes des applications de messagerie
 
-Après la reconstruction, énumérez les pièces jointes pour les applications populaires. Le schéma exact varie selon l'application/la version, mais l'approche est similaire : interroger la base de données de messagerie, lier les messages aux pièces jointes, et résoudre les chemins sur le disque.
+Après reconstruction, énumérez les pièces jointes des applications populaires. Le schéma exact varie selon l’application et la version, mais l’approche reste similaire : interroger la base de données de messagerie, relier les messages aux pièces jointes et résoudre les chemins sur le disque.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### iMessage (sms.db)
-Tables clés: message, attachment, message_attachment_join (MAJ), chat, chat_message_join (CMJ)
+Tables clés : message, attachment, message_attachment_join (MAJ), chat, chat_message_join (CMJ)
 
-Exemples de requêtes:
+Exemples de requêtes :
 ```sql
 -- List attachments with basic message linkage
 SELECT
@@ -93,10 +94,10 @@ JOIN message_attachment_join maj ON maj.message_id = m.ROWID
 JOIN attachment a ON a.ROWID = maj.attachment_id
 ORDER BY m.date DESC;
 ```
-Les chemins des pièces jointes peuvent être absolus ou relatifs à l'arborescence reconstruite sous Library/SMS/Attachments/.
+Les chemins des pièces jointes peuvent être absolus ou relatifs à l’arborescence reconstruite sous Library/SMS/Attachments/.
 
 ### WhatsApp (ChatStorage.sqlite)
-Association courante : table message ↔ table media/attachment (la nomenclature varie selon la version). Interrogez les entrées media pour obtenir les chemins sur le disque. Les versions récentes d'iOS exposent encore `ZMEDIALOCALPATH` dans `ZWAMEDIAITEM`.
+Liaison courante : table des messages ↔ table des médias/pièces jointes (la dénomination varie selon la version). Interrogez les lignes de médias pour obtenir les chemins sur disque. Les versions récentes d’iOS exposent toujours `ZMEDIALOCALPATH` dans `ZWAMEDIAITEM`.
 ```sql
 SELECT
 m.Z_PK                 AS message_pk,
@@ -111,16 +112,16 @@ ORDER BY m.ZMESSAGEDATE DESC;
 Les chemins se résolvent généralement sous `AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media/` dans la sauvegarde reconstruite.
 
 ### Signal / Telegram / Viber
-- Signal : la base de données des messages est chiffrée ; cependant, les attachments mis en cache sur le disque (et les thumbnails) sont généralement analysables
-- Telegram : le cache reste sous `Library/Caches/` à l'intérieur du sandbox ; les builds iOS 18 présentent des bugs de vidage de cache, donc de larges caches médias résiduels sont des sources de preuve courantes
-- Viber : Viber.sqlite contient des tables message/attachment avec des références sur disque
+- Signal : la base de données des messages est chiffrée ; cependant, les pièces jointes mises en cache sur le disque (ainsi que les miniatures) sont généralement analysables
+- Telegram : le cache reste sous `Library/Caches/` dans le sandbox ; les versions iOS 18 présentent des bugs lors de l’effacement du cache, de sorte que les caches de médias résiduels volumineux constituent souvent des sources de preuves importantes<sup>[[5]](#references)</sup>
+- Viber : Viber.sqlite contient des tables de messages et de pièces jointes avec des références vers les fichiers sur le disque
 
-Astuce : même lorsque les métadonnées sont chiffrées, l'analyse des répertoires media/cache met toujours au jour des objets malveillants.
+Conseil : même lorsque les métadonnées sont chiffrées, l’analyse des répertoires de médias et de cache permet toujours de mettre au jour des objets malveillants.
 
 
-## Scanning attachments for structural exploits
+## Analyse des pièces jointes à la recherche d’exploits structurels
 
-Une fois que vous avez les chemins des pièces jointes, injectez-les dans des détecteurs structurels qui valident les invariants du format de fichier plutôt que les signatures. Exemple avec ElegantBouncer :
+Une fois les chemins des pièces jointes obtenus, transmettez-les à des détecteurs structurels qui valident les invariants du format de fichier plutôt que les signatures. Exemple avec ElegantBouncer :<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 # Recursively scan only messaging attachments under the reconstructed tree
 $ elegant-bouncer --scan --messaging /tmp/reconstructed
@@ -128,26 +129,27 @@ $ elegant-bouncer --scan --messaging /tmp/reconstructed
 ✗ THREAT in WhatsApp chat 'John Doe': suspicious_document.pdf → FORCEDENTRY (JBIG2)
 ✗ THREAT in iMessage: photo.webp → BLASTPASS (VP8L)
 ```
-Detections covered by structural rules include:
-- PDF/JBIG2 FORCEDENTRY (CVE‑2021‑30860): états de dictionnaire JBIG2 impossibles
-- WebP/VP8L BLASTPASS (CVE‑2023‑4863): constructions de tables Huffman surdimensionnées
-- TrueType TRIANGULATION (CVE‑2023‑41990): opcodes de bytecode non documentés
-- DNG/TIFF CVE‑2025‑43300: incompatibilités entre métadonnées et composant de flux
+Les détections couvertes par les règles structurelles incluent :<sup>[[1]](#references)[[2]](#references)</sup>
+- PDF/JBIG2 FORCEDENTRY (CVE‑2021‑30860) : états de dictionnaire JBIG2 impossibles
+- WebP/VP8L BLASTPASS (CVE‑2023‑4863) : constructions de tables de Huffman surdimensionnées
+- TrueType TRIANGULATION (CVE‑2023‑41990) : opcodes de bytecode non documentés
+- DNG/TIFF CVE‑2025‑43300 : incohérences entre les métadonnées et les composants du flux
 
 
-## Validation, caveats, and false positives
+## Validation, réserves et faux positifs
 
-- Conversions temporelles : iMessage stocke les dates en epochs/unités Apple sur certaines versions ; convertissez-les correctement lors de la rédaction du rapport
-- Dérive de schéma : les schémas SQLite des apps évoluent dans le temps ; confirmez les noms de tables/colonnes selon la build de l'appareil
-- Extraction récursive : les PDFs peuvent embarquer des flux JBIG2 et des polices ; extrayez et scannez les objets internes
-- Faux positifs : les heuristiques structurelles sont conservatrices mais peuvent signaler des médias rares malformés mais bénins
+- Conversions temporelles : iMessage stocke les dates dans les époques/unités Apple sur certaines versions ; convertissez-les correctement lors du reporting
+- Évolution du schéma : les schémas SQLite des applications changent au fil du temps ; confirmez les noms des tables/colonnes pour chaque build de l’appareil
+- Extraction récursive : les PDF peuvent intégrer des flux JBIG2 et des polices ; extrayez et analysez les objets internes
+- Faux positifs : les heuristiques structurelles sont prudentes, mais peuvent signaler des médias rarement malformés mais inoffensifs<sup>[[1]](#references)[[2]](#references)</sup>
 
 
-## References
+## Références
 
-- [ELEGANTBOUNCER: When You Can't Get the Samples but Still Need to Catch the Threat](https://www.msuiche.com/posts/elegantbouncer-when-you-cant-get-the-samples-but-still-need-to-catch-the-threat/)
-- [ElegantBouncer project (GitHub)](https://github.com/msuiche/elegant-bouncer)
-- [MVT iOS backup workflow](https://docs.mvt.re/en/latest/ios/backup/check/)
-- [libimobiledevice 1.4.0 release notes](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
+- [1] [ELEGANTBOUNCER : lorsque vous ne pouvez pas obtenir les échantillons, mais devez tout de même détecter la menace](https://www.msuiche.com/posts/elegantbouncer-when-you-cant-get-the-samples-but-still-need-to-catch-the-threat/)
+- [2] [Projet ElegantBouncer (GitHub)](https://github.com/msuiche/elegant-bouncer)
+- [3] [Workflow de sauvegarde iOS de MVT](https://docs.mvt.re/en/latest/ios/backup/check/)
+- [4] [Notes de version de libimobiledevice 1.4.0](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
+- [5] [La mise à jour 11.2 a cassé le nettoyage du cache sur iOS 18.0.1 (Telegram Bug Tracker)](https://bugs.telegram.org/c/44361)
 
 {{#include ../../banners/hacktricks-training.md}}
