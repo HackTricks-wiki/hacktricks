@@ -4,29 +4,29 @@
 
 ## Integriteitsvlakke
 
-In Windows Vista en later weergawes, kom alle beskermde items met 'n **integriteitsvlak** etiket. Hierdie opstelling ken meestal 'n "medium" integriteitsvlak toe aan lêers en registriesleutels, behalwe vir sekere vouers en lêers waartoe Internet Explorer 7 kan skryf op 'n lae integriteitsvlak. Die standaardgedrag is dat prosesse wat deur standaardgebruikers geïnisieer word, 'n medium integriteitsvlak het, terwyl dienste tipies op 'n stelselintegriteitsvlak werk. 'n Hoë-integriteitsetiket beskerm die wortelgids.
+In Windows Vista en latere weergawes het alle beskermde items 'n **integriteitsvlak**-merker. Hierdie opstelling ken meestal 'n "medium"-integriteitsvlak aan lêers en registersleutels toe, behalwe vir sekere vouers en lêers waarna Internet Explorer 7 op 'n lae integriteitsvlak kan skryf. Die verstekgedrag is dat prosesse wat deur standaardgebruikers begin word, 'n medium-integriteitsvlak het, terwyl dienste tipies op 'n stelsel-integriteitsvlak werk. 'n Hoë-integriteitsmerker beskerm die wortelgids.
 
-'n Sleutelreël is dat voorwerpe nie gewysig kan word deur prosesse met 'n laer integriteitsvlak as die voorwerp se vlak nie. Die integriteitsvlakke is:
+'n Belangrike reël is dat objekte nie gewysig kan word deur prosesse met 'n laer integriteitsvlak as die objek se vlak nie. Die integriteitsvlakke is:
 
-- **Onbetroubaar**: Hierdie vlak is vir prosesse met anonieme aanmeldings. %%%Voorbeeld: Chrome%%%
-- **Laag**: Hoofsaaklik vir internetinteraksies, veral in Internet Explorer se Beskermde Modus, wat geassosieerde lêers en prosesse beïnvloed, en sekere vouers soos die **Tydelike Internet-gids**. Lae integriteitsprosesse ondervind beduidende beperkings, insluitend geen registrieskryftoegang en beperkte gebruikersprofielskryftoegang nie.
-- **Medium**: Die standaardvlak vir die meeste aktiwiteite, toegeken aan standaardgebruikers en voorwerpe sonder spesifieke integriteitsvlakke. Selfs lede van die Administrators-groep werk standaard op hierdie vlak.
-- **Hoog**: Gereserveer vir administrateurs, wat hulle toelaat om voorwerpe op laer integriteitsvlakke te wysig, insluitend dié op die hoë vlak self.
-- **Stelsel**: Die hoogste operasionele vlak vir die Windows-kern en kern dienste, buite bereik selfs vir administrateurs, wat beskerming van noodsaaklike stelselfunksies verseker.
-- **Installeerder**: 'n Unieke vlak wat bo alle ander staan, wat voorwerpe op hierdie vlak in staat stel om enige ander voorwerp te deïnstalleer.
+- **Untrusted**: Hierdie vlak is vir prosesse met anonieme aanmeldings. Voorbeeld: Chrome
+- **Low**: Hoofsaaklik vir internetinteraksies, veral in Internet Explorer se Protected Mode, wat geassosieerde lêers en prosesse, asook sekere vouers soos die **Temporary Internet Folder**, beïnvloed. Low integrity-prosesse ondervind aansienlike beperkings, insluitend geen skryftoegang tot die register nie en beperkte skryftoegang tot die gebruikersprofiel.
+- **Medium**: Die verstekvlak vir die meeste aktiwiteite, toegeken aan standaardgebruikers en objekte sonder spesifieke integriteitsvlakke. Selfs lede van die Administrators-groep werk by verstek op hierdie vlak.
+- **High**: Gereserveer vir administrateurs, wat hulle toelaat om objekte op laer integriteitsvlakke te wysig, insluitend dié wat self op die hoë vlak is.
+- **System**: Die hoogste operasionele vlak vir die Windows-kern en kernservices, buite bereik van selfs administrateurs, wat die beskerming van belangrike stelsel-funksies verseker.
+- **Installer**: 'n Unieke vlak wat bo alle ander staan, en objekte op hierdie vlak in staat stel om enige ander objek te deïnstalleer.
 
-Jy kan die integriteitsvlak van 'n proses verkry met **Process Explorer** van **Sysinternals**, deur toegang te verkry tot die **eienskappe** van die proses en die "**Sekuriteit**" oortjie te besigtig:
+Jy kan die integriteitsvlak van 'n proses met **Process Explorer** vanaf **Sysinternals** kry deur die **properties** van die proses te open en die "**Security**"-oortjie te bekyk:
 
-![](<../../images/image (824).png>)
+![Integriteitsvlakke - Integriteitsvlakke: Jy kan die integriteitsvlak van 'n proses met Process Explorer vanaf Sysinternals kry deur die properties van die proses te open en die "...](<../../images/image (824).png>)
 
-Jy kan ook jou **huidige integriteitsvlak** verkry met `whoami /groups`
+Jy kan ook jou **huidige integriteitsvlak** met `whoami /groups` kry
 
-![](<../../images/image (325).png>)
+![Integriteitsvlakke - Integriteitsvlakke: Jy kan ook jou huidige integriteitsvlak met whoami /groups kry](<../../images/image (325).png>)
 
 ### Integriteitsvlakke in die lêerstelsel
 
-'n Voorwerp binne die lêerstelsel mag 'n **minimum integriteitsvlak vereiste** benodig en as 'n proses nie hierdie integriteitsvlak het nie, sal dit nie in staat wees om daarmee te kommunikeer.\
-Byvoorbeeld, kom ons **skep 'n gewone lêer vanaf 'n gewone gebruikerskonsol en kyk na die toestemmings**:
+'n Objek binne die lêerstelsel mag 'n **minimum-integriteitsvlakvereiste** hê, en as 'n proses nie hierdie integriteitsvlak het nie, sal dit nie daarmee kan interaksie hê nie.\
+Byvoorbeeld, kom ons **skep 'n gewone lêer vanaf 'n gewone gebruikerskonsole en kontroleer die toestemmings**:
 ```
 echo asd >asd.txt
 icacls asd.txt
@@ -37,7 +37,7 @@ NT AUTHORITY\INTERACTIVE:(I)(M,DC)
 NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-Nou, kom ons ken 'n minimum integriteitsvlak van **Hoog** aan die lêer toe. Dit **moet gedoen word vanaf 'n konsole** wat as **administrateur** loop, aangesien 'n **gewone konsole** in Medium Integriteitsvlak sal loop en **nie toegelaat sal word** om 'n Hoë Integriteitsvlak aan 'n objek toe te ken nie:
+Nou ken ons ’n minimum-integriteitsvlak van **Hoog** aan die lêer toe. Dit **moet vanuit ’n console** gedoen word wat as **administrator** loop, aangesien ’n **gewone console** op die Medium-integriteitsvlak sal loop en **nie toegelaat sal word** om ’n Hoë-integriteitsvlak aan ’n objek toe te ken nie:
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt
@@ -52,7 +52,7 @@ NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 Mandatory Label\High Mandatory Level:(NW)
 ```
-Hierdie is waar dinge interessant raak. Jy kan sien dat die gebruiker `DESKTOP-IDJHTKP\user` **VOLLEDIGE regte** oor die lêer het (werklik, dit was die gebruiker wat die lêer geskep het), egter, as gevolg van die minimum integriteitsvlak wat geïmplementeer is, sal hy nie in staat wees om die lêer weer te wysig nie, tensy hy binne 'n Hoë Integriteitsvlak loop (let op dat hy dit sal kan lees):
+Dit is waar dinge interessant raak. Jy kan sien dat die gebruiker `DESKTOP-IDJHTKP\user` **VOLLE privileges** oor die lêer het (inderdaad, dit was die gebruiker wat die lêer geskep het), maar weens die minimum integrity level wat geïmplementeer is, sal hy nie meer die lêer kan wysig nie, tensy hy binne ’n High Integrity Level loop (let daarop dat hy dit sal kan lees):
 ```
 echo 1234 > asd.txt
 Access is denied.
@@ -61,12 +61,12 @@ del asd.txt
 C:\Users\Public\asd.txt
 Access is denied.
 ```
-> [!NOTE]
-> **Daarom, wanneer 'n lêer 'n minimum integriteitsvlak het, moet jy ten minste op daardie integriteitsvlak loop om dit te kan wysig.**
+> [!TIP]
+> **Wanneer ’n lêer dus ’n minimum-integriteitsvlak het, moet jy ten minste op daardie integriteitsvlak werk om dit te kan wysig.**
 
 ### Integriteitsvlakke in Binaries
 
-Ek het 'n kopie van `cmd.exe` gemaak in `C:\Windows\System32\cmd-low.exe` en dit 'n **integriteitsvlak van laag vanaf 'n administrateurkonsol gestel:**
+Ek het ’n kopie van `cmd.exe` in `C:\Windows\System32\cmd-low.exe` gemaak en dit **van ’n administratorkonsole af op ’n lae integriteitsvlak gestel:**
 ```
 icacls C:\Windows\System32\cmd-low.exe
 C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
@@ -76,16 +76,16 @@ APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
 APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
 Mandatory Label\Low Mandatory Level:(NW)
 ```
-Nou, wanneer ek `cmd-low.exe` uitvoer, sal dit **onder 'n lae-integriteitsvlak** loop in plaas van 'n medium een:
+Nou, wanneer ek `cmd-low.exe` uitvoer, sal dit **onder ’n lae-integriteitsvlak** loop in plaas van ’n medium een:
 
-![](<../../images/image (313).png>)
+![Integriteitsvlakke in lêerstelsel - Integriteitsvlakke in binaries: Nou, wanneer ek cmd-low.exe uitvoer, sal dit onder ’n lae-integriteitsvlak loop in plaas van ’n medium een](<../../images/image (313).png>)
 
-Vir nuuskierige mense, as jy 'n hoë integriteitsvlak aan 'n binêre toewys (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`), sal dit nie outomaties met 'n hoë integriteitsvlak loop nie (as jy dit van 'n medium integriteitsvlak aanroep --per standaard-- sal dit onder 'n medium integriteitsvlak loop).
+Vir nuuskierige mense: as jy ’n hoë-integriteitsvlak aan ’n binary toewys (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`), sal dit nie outomaties met ’n hoë-integriteitsvlak loop nie (as jy dit vanuit ’n medium-integriteitsvlak aanroep --by verstek-- sal dit onder ’n medium-integriteitsvlak loop).
 
-### Integriteitsvlakke in Prosesse
+### Integriteitsvlakke in prosesse
 
-Nie alle lêers en vouers het 'n minimum integriteitsvlak nie, **maar alle prosesse loop onder 'n integriteitsvlak**. En soortgelyk aan wat met die lêerstelsel gebeur het, **as 'n proses binne 'n ander proses wil skryf, moet dit ten minste dieselfde integriteitsvlak hê**. Dit beteken dat 'n proses met 'n lae integriteitsvlak nie 'n handvatsel met volle toegang tot 'n proses met 'n medium integriteitsvlak kan oopmaak nie.
+Nie alle lêers en vouers het ’n minimum-integriteitsvlak nie, **maar alle prosesse loop onder ’n integriteitsvlak**. En soortgelyk aan wat met die lêerstelsel gebeur het, **moet ’n proses ten minste dieselfde integriteitsvlak hê as dit binne ’n ander proses wil skryf**. Dit beteken dat ’n proses met ’n lae-integriteitsvlak nie ’n handle met volle toegang tot ’n proses met ’n medium-integriteitsvlak kan oopmaak nie.
 
-As gevolg van die beperkings wat in hierdie en die vorige afdeling bespreek is, is dit altyd **aanbeveel om 'n proses in die laagste moontlike integriteitsvlak te laat loop**.
+Weens die beperkings wat in hierdie en die vorige afdeling bespreek is, word dit vanuit ’n sekuriteitsoogpunt altyd **aanbeveel om ’n proses op die laagste moontlike integriteitsvlak te laat loop**.
 
 {{#include ../../banners/hacktricks-training.md}}

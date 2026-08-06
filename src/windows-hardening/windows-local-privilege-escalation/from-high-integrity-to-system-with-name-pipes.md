@@ -1,14 +1,16 @@
+# Van High Integrity na SYSTEM met Name Pipes
+
 {{#include ../../banners/hacktricks-training.md}}
 
-**Kode vloei:**
+**Kodevloei:**
 
-1. Skep 'n nuwe Pyp
-2. Skep en begin 'n diens wat met die geskepte pyp sal verbind en iets sal skryf. Die dienskode sal hierdie geënkodeerde PS kode uitvoer: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. Die diens ontvang die data van die kliënt in die pyp, roep ImpersonateNamedPipeClient aan en wag vir die diens om klaar te maak
-4. Laastens, gebruik die token wat van die diens verkry is om 'n nuwe _cmd.exe_ te spawn
+1. Skep 'n nuwe Pipe
+2. Skep en begin 'n service wat aan die geskepte pipe sal koppel en iets sal skryf. Die service-kode sal hierdie geënkodeerde PS-kode uitvoer: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
+3. Die service ontvang die data vanaf die client in die pipe, roep `ImpersonateNamedPipeClient` aan en wag totdat die service voltooi is
+4. Gebruik laastens die token wat van die service verkry is om 'n nuwe _cmd.exe_ te begin
 
 > [!WARNING]
-> As jy nie genoeg bevoegdhede het nie, kan die uitbuiting vasgevang word en nooit terugkeer.
+> As jy nie genoeg privileges het nie, kan die exploit vashaak en nooit terugkeer nie.
 ```c
 #include <windows.h>
 #include <time.h>

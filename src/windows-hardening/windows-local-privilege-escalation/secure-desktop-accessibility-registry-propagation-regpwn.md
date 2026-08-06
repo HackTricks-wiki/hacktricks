@@ -4,68 +4,68 @@
 
 ## Oorsig
 
-Windows Accessibility-funksies behou gebruikerskonfigurasie onder HKCU en propagereer dit na per-sessie HKLM-ligginge. Tydens 'n **Secure Desktop**-oorgang (lock screen of UAC-prompt) kopieer **SYSTEM**-komponente hierdie waardes weer. As die **per-sessie HKLM-sleutel deur die gebruiker geskryf kan word**, word dit 'n bevoorregte skryfpunt wat met **registry symbolic links** omgerig kan word, wat 'n **arbitrary SYSTEM registry write** tot gevolg het.
+Windows Accessibility-features behou gebruikerconfigurasie onder HKCU en versprei dit na per-sessie HKLM-liggings. Tydens ’n **Secure Desktop**-oorgang (sluitskerm of UAC-prompt) kopieer **SYSTEM**-komponente hierdie waardes weer. Indien die **per-sessie HKLM-sleutel deur die gebruiker skryfbaar** is, word dit ’n bevoorregte skryf-knooppunt wat met **registry symbolic links** herlei kan word, wat ’n **arbitrary SYSTEM registry write** moontlik maak.<sup>[[1]](#references)</sup>
 
-Die RegPwn-tegniek misbruik daardie propagasieketting met 'n klein wedrenvenster wat gestabiliseer word deur 'n **opportunistic lock (oplock)** op 'n lêer wat deur `osk.exe` gebruik word.
+Die RegPwn-tegniek misbruik hierdie propagasieketting met ’n klein race window wat deur ’n **opportunistic lock (oplock)** op ’n lêer wat deur `osk.exe` gebruik word, gestabiliseer word.<sup>[[1]](#references)</sup>
 
-## Registerpropagasiereeks (Accessibility -> Secure Desktop)
+## Registry Propagation Chain (Accessibility -> Secure Desktop)
 
-Voorbeeldfunksie: **On-Screen Keyboard** (`osk`). Die relevante ligginge is:
+Voorbeeldfeature: **On-Screen Keyboard** (`osk`). Die relevante liggings is:
 
-- **Stelselwye funksielys**:
+- **Stelselwye feature-lys**:
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATs`
-- **Per-gebruiker konfigurasie (user-writable)**:
+- **Per-gebruiker-konfigurasie (user-writable)**:
 - `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
-- **Per-sessie HKLM konfigurasie (created by `winlogon.exe`, user-writable)**:
+- **Per-sessie HKLM-konfigurasie (geskep deur `winlogon.exe`, user-writable)**:
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session<session id>\ATConfig\osk`
-- **Secure desktop/default user hive (SYSTEM context)**:
+- **Secure desktop/default user hive (SYSTEM-konteks)**:
 - `HKU\.DEFAULT\Software\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
 
-Propagasiery tydens 'n Secure Desktop-oorgang (vereenvoudig):
+Propagasie tydens ’n secure desktop-oorgang (vereenvoudig):
 
-1. **User `atbroker.exe`** kopieer `HKCU\...\ATConfig\osk` na `HKLM\...\Session<session id>\ATConfig\osk`.
-2. **SYSTEM `atbroker.exe`** kopieer `HKLM\...\Session<session id>\ATConfig\osk` na `HKU\.DEFAULT\...\ATConfig\osk`.
-3. **SYSTEM `osk.exe`** kopieer `HKU\.DEFAULT\...\ATConfig\osk` terug na `HKLM\...\Session<session id>\ATConfig\osk`.
+1. **Gebruiker se `atbroker.exe`** kopieer `HKCU\...\ATConfig\osk` na `HKLM\...\Session<session id>\ATConfig\osk`.
+2. **SYSTEM se `atbroker.exe`** kopieer `HKLM\...\Session<session id>\ATConfig\osk` na `HKU\.DEFAULT\...\ATConfig\osk`.
+3. **SYSTEM se `osk.exe`** kopieer `HKU\.DEFAULT\...\ATConfig\osk` terug na `HKLM\...\Session<session id>\ATConfig\osk`.
 
-As die sessie-HKLM-subboom deur die gebruiker geskryf kan word, bied stap 2/3 'n SYSTEM-skrywing deur 'n ligging wat die gebruiker kan vervang.
+Indien die session HKLM-subtree deur die gebruiker skryfbaar is, bied stap 2/3 ’n SYSTEM-skrywing deur ’n ligging wat die gebruiker kan vervang.<sup>[[1]](#references)</sup>
 
 ## Primitive: Arbitrary SYSTEM Registry Write via Registry Links
 
-Vervang die per-sessie sleutel wat deur die gebruiker geskryf kan word met 'n **registry symbolic link** wat na 'n deur die aanvaller-gekose bestemming wys. Wanneer die SYSTEM-kopie plaasvind, volg dit die skakel en skryf aanvaller-beheerde waardes in die arbitrêre teiken sleutel.
+Vervang die user-writable per-session-sleutel met ’n **registry symbolic link** wat na ’n deur die attacker gekose bestemming wys. Wanneer die SYSTEM-kopie plaasvind, volg dit die link en skryf attacker-beheerde waardes na die arbitrêre teikensleutel.
 
 Kernidee:
 
-- Victim write target (user-writable):
+- Slagoffer se skryfteiken (user-writable):
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session<session id>\ATConfig\osk`
-- Attacker replaces that key with a **registry link** to any other key.
-- SYSTEM performs the copy and writes into the attacker-chosen key with SYSTEM permissions.
+- Attacker vervang daardie sleutel met ’n **registry link** na enige ander sleutel.
+- SYSTEM voer die kopie uit en skryf met SYSTEM-permissies na die deur die attacker gekose sleutel.
 
-Dit lewer 'n **arbitrary SYSTEM registry write**-primitive op.
+Dit lewer ’n **arbitrary SYSTEM registry write**-primitive.<sup>[[1]](#references)</sup>
 
-## Wen die tydvenster met Oplocks
+## Winning the Race Window with Oplocks
 
-Daar is 'n kort tydvenster tussen die begin van **SYSTEM `osk.exe`** en die skryf van die per-sessie sleutel. Om dit betroubaar te maak, plaas die exploit 'n **oplock** op:
+Daar is ’n kort tydsvenster tussen die **SYSTEM `osk.exe`**-begin en die skryf na die per-session-sleutel. Om dit betroubaar te maak, plaas die exploit ’n **oplock** op:
 ```
 C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml
 ```
-Wanneer die oplock getrigger word, ruil die aanvaller die per-sessie HKLM-sleutel vir 'n registry link, laat die SYSTEM skryf, en verwyder dan die link.
+Wanneer die oplock trigger, vervang die attacker die per-session HKLM-sleutel met ’n registry link, laat die SYSTEM-skrywing land, en verwyder dan die link.<sup>[[1]](#references)</sup>
 
-## Voorbeeld Uitbuitingvloei (Hoëvlak)
+## Voorbeeld van Exploitation Flow (Hoëvlak)
 
-1. Kry die huidige **session ID** van die access token.
-2. Begin 'n verborge `osk.exe`-instansie en slaap kortliks (verseker dat die oplock sal trigger).
-3. Skryf aanvaller-beheerde waardes na:
+1. Kry die huidige **session ID** vanaf die access token.
+2. Start ’n versteekte `osk.exe`-instansie en slaap kortliks (om te verseker dat die oplock sal trigger).
+3. Skryf attacker-beheerde waardes na:
 - `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
-4. Stel 'n **oplock** op `C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml`.
-5. Aktiveer **Secure Desktop** (`LockWorkstation()`), wat veroorsaak dat SYSTEM `atbroker.exe` / `osk.exe` begin.
-6. Wanneer die oplock getrigger word, vervang `HKLM\...\Session<session id>\ATConfig\osk` met 'n **registry link** na 'n ewekansige teiken.
-7. Wag kortliks vir die SYSTEM-kopie om te voltooi, verwyder dan die link.
+4. Stel ’n **oplock** op `C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml`.
+5. Trigger **Secure Desktop** (`LockWorkstation()`), wat veroorsaak dat SYSTEM `atbroker.exe` / `osk.exe` start.
+6. Wanneer die oplock trigger, vervang `HKLM\...\Session<session id>\ATConfig\osk` met ’n **registry link** na ’n arbitrêre teiken.
+7. Wag kortliks totdat die SYSTEM-kopie voltooi is, en verwyder dan die link.<sup>[[1]](#references)</sup>
 
-## Om die primitief na SYSTEM-uitvoering om te skakel
+## Omskakeling van die Primitive na SYSTEM Execution
 
-Een eenvoudige ketting is om 'n **service configuration** waarde oor te skryf (bv. `ImagePath`) en dan die diens te begin. Die RegPwn PoC skryf die `ImagePath` van **`msiserver`** oor en trigger dit deur die **MSI COM object** te instantier, wat lei tot **SYSTEM** kode-uitvoering.
+Een eenvoudige ketting is om ’n **service configuration**-waarde (byvoorbeeld `ImagePath`) te oorskryf en dan die service te start. Die RegPwn PoC oorskryf die `ImagePath` van **`msiserver`** en trigger dit deur die **MSI COM object** te instansieer, wat tot **SYSTEM** code execution lei.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Verwante
+## Verwant
 
 Vir ander Secure Desktop / UIAccess-gedrag, sien:
 
@@ -75,7 +75,7 @@ uiaccess-admin-protection-bypass.md
 
 ## Verwysings
 
-- [RIP RegPwn](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
-- [RegPwn PoC](https://github.com/mdsecactivebreach/RegPwn)
+- [1] [RIP RegPwn](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
+- [2] [RegPwn PoC](https://github.com/mdsecactivebreach/RegPwn)
 
 {{#include ../../banners/hacktricks-training.md}}

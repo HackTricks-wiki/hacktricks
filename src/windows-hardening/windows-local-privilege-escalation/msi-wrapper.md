@@ -2,21 +2,21 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Laai die gratis weergawe van die toepassing af van [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), voer dit uit en wrap die "kwaadwillige" binêre daarop.\
-Let daarop dat jy 'n "**.bat**" kan wrap as jy **net** wil **uitvoer** **opdraglyne (in plaas van cmd.exe, kies die .bat-lêer)**
+Laai die gratis weergawe van die toepassing af vanaf [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), voer dit uit en wrap die "malicious" binary daarmee.\
+Let daarop dat jy ’n "**.bat**" kan wrap as jy **slegs** **command lines** wil **execute** (kies die .bat-lêer in plaas van cmd.exe)
 
-![](<../../images/image (417).png>)
+![MSI Wrapper: Let daarop dat jy ’n " .bat " kan wrap as jy slegs command lines wil execute (kies die .bat-lêer in plaas van cmd.exe)](<../../images/image (417).png>)
 
 En dit is die belangrikste deel van die konfigurasie:
 
-![](<../../images/image (312).png>)
+![MSI Wrapper: En dit is die belangrikste deel van die konfigurasie](<../../images/image (312).png>)
 
-![](<../../images/image (346).png>)
+![MSI Wrapper: En dit is die belangrikste deel van die konfigurasie](<../../images/image (346).png>)
 
-![](<../../images/image (1072).png>)
+![MSI Wrapper: En dit is die belangrikste deel van die konfigurasie](<../../images/image (1072).png>)
 
-(Neem asseblief kennis dat as jy probeer om jou eie binêre te pak, jy in staat sal wees om hierdie waardes te wysig)
+(Let asseblief daarop dat jy hierdie waardes sal kan wysig as jy probeer om jou eie binary te pack)
 
-Van hier af klik net op **volgende knoppies** en die laaste **bou knoppie en jou installeerder/wrapper sal gegenereer word.**
+Klik van hier af net op die **next-knoppies**, en die laaste **build-knoppie**, waarna jou installer/wrapper gegenereer sal word.
 
 {{#include ../../banners/hacktricks-training.md}}
