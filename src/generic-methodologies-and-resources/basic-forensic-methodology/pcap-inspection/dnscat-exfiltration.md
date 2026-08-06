@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-As jy ’n pcap het met data wat deur **DNSCat geëksfiltreer** word (sonder om enkripsie te gebruik), kan jy die geëksfiltreerde inhoud vind.
+As jy pcap het met data wat deur **DNSCat geëksfiltreer** word (sonder om encryption te gebruik), kan jy die geëksfiltreerde inhoud vind.
 
-Jy hoef net te weet dat die **eerste 9 grepe** nie werklike data is nie, maar verband hou met die **C\&C-kommunikasie**:<sup>[[1]](#references)</sup>
+Jy hoef net te weet dat die **eerste 9 bytes** nie werklike data is nie, maar verband hou met die **C\&C-kommunikasie**:<sup>[[1]](#references)</sup>
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -23,7 +23,7 @@ last = qry
 
 #print(f)
 ```
-Vir meer inligting: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)\
+Vir meer inligting: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)<sup>[[1]](#references)</sup>\
 [https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
 
 Daar is ’n script wat met Python3 werk: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)

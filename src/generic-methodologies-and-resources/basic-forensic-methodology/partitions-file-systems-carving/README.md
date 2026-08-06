@@ -5,53 +5,53 @@
 ## Partisies
 
 'n Hardeskyf of 'n **SSD-skyf kan verskillende partisies bevat** met die doel om data fisies te skei.\
-Die **minimum** eenheid van 'n skyf is die **sektor** (normaalweg bestaande uit 512B). Dus moet elke partisiegrootte 'n veelvoud van daardie grootte wees.
+Die **minimum** eenheid van 'n skyf is die **sektor** (normaalweg bestaande uit 512B). Dus moet elke partisie se grootte 'n veelvoud van daardie grootte wees.
 
 ### MBR (master Boot Record)
 
-Dit word in die **eerste sektor van die skyf, ná die 446B van die boot-kode**, toegeken. Hierdie sektor is noodsaaklik om aan die rekenaar aan te dui watter partisie gemount moet word en waarvandaan.\
-Dit laat tot **4 partisies** toe (hoogstens **net 1** kan aktief/**bootable** wees). As jy egter meer partisies benodig, kan jy **extended partitions** gebruik. Die **laaste byte** van hierdie eerste sektor is die boot-rekord-handtekening **0x55AA**. Slegs een partisie kan as aktief gemerk word.\
-MBR laat **maksimaal 2.2TB** toe.
+Dit word in die **eerste sektor van die skyf ná die 446B selflaaikode** toegeken. Hierdie sektor is noodsaaklik om aan die rekenaar aan te dui wat en vanwaar 'n partisie gemonteer moet word.\
+Dit laat tot **4 partisies** toe (hoogstens **net 1** kan aktief/**selflaaibaar** wees). As jy egter meer partisies benodig, kan jy **extended partitions** gebruik. Die **laaste greep** van hierdie eerste sektor is die selflaairekord-handtekening **0x55AA**. Slegs een partisie kan as aktief gemerk word.\
+MBR laat **maksimum 2.2TB** toe.
 
-![Partisies - MBR (master Boot Record): MBR laat maksimaal 2.2TB toe](<../../../images/image (350).png>)
+![Partisies - MBR (master Boot Record): MBR laat maksimum 2.2TB toe](<../../../images/image (350).png>)
 
-![Partisies - MBR (master Boot Record): MBR laat maksimaal 2.2TB toe](<../../../images/image (304).png>)
+![Partisies - MBR (master Boot Record): MBR laat maksimum 2.2TB toe](<../../../images/image (304).png>)
 
-Vanaf die **grepe 440 tot 443** van die MBR kan jy die **Windows Disk Signature** vind (indien Windows gebruik word). Die logiese dryfletter van die hardeskyf hang van die Windows Disk Signature af. Die verandering van hierdie handtekening kan voorkom dat Windows boot (tool: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
+Vanaf die **grepe 440 tot 443** van die MBR kan jy die **Windows Disk Signature** vind (indien Windows gebruik word). Die logiese skyfletter van die hardeskyf hang van die Windows Disk Signature af. Deur hierdie handtekening te verander, kan dit verhoed dat Windows selflaai (tool: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
 
-![Partisies - MBR (master Boot Record): Vanaf die grepe 440 tot 443 van die MBR kan jy die Windows Disk Signature vind (indien Windows gebruik word). Die logiese dryfletter van die hardeskyf...](<../../../images/image (310).png>)
+![Partisies - MBR (master Boot Record): Vanaf die grepe 440 tot 443 van die MBR kan jy die Windows Disk Signature vind (indien Windows gebruik word). Die logiese skyfletter van die hardeskyf...](<../../../images/image (310).png>)
 
 **Formaat**
 
 | Offset      | Length     | Item                |
 | ----------- | ---------- | ------------------- |
-| 0 (0x00)    | 446(0x1BE) | Boot-kode           |
+| 0 (0x00)    | 446(0x1BE) | Selflaaikode           |
 | 446 (0x1BE) | 16 (0x10)  | Eerste partisie     |
-| 462 (0x1CE) | 16 (0x10)  | Tweede partisie     |
-| 478 (0x1DE) | 16 (0x10)  | Derde partisie      |
-| 494 (0x1EE) | 16 (0x10)  | Vierde partisie     |
+| 462 (0x1CE) | 16 (0x10)  | Tweede partisie    |
+| 478 (0x1DE) | 16 (0x10)  | Derde partisie     |
+| 494 (0x1EE) | 16 (0x10)  | Vierde partisie    |
 | 510 (0x1FE) | 2 (0x2)    | Handtekening 0x55 0xAA |
 
-**Partisie-rekordformaat**
+**Partisierekordformaat**
 
 | Offset    | Length   | Item                                                   |
 | --------- | -------- | ------------------------------------------------------ |
-| 0 (0x00)  | 1 (0x01) | Aktiewe vlag (0x80 = bootable)                         |
-| 1 (0x01)  | 1 (0x01) | Beginhoof                                             |
+| 0 (0x00)  | 1 (0x01) | Aktiewe vlag (0x80 = selflaaibaar)                          |
+| 1 (0x01)  | 1 (0x01) | Begin-hoof                                             |
 | 2 (0x02)  | 1 (0x01) | Beginsektor (bisse 0-5); boonste bisse van silinder (6- 7) |
-| 3 (0x03)  | 1 (0x01) | Laagste 8 bisse van beginsilinder                     |
-| 4 (0x04)  | 1 (0x01) | Partisietipekode (0x83 = Linux)                       |
+| 3 (0x03)  | 1 (0x01) | Laagste 8 bisse van beginsilinder                           |
+| 4 (0x04)  | 1 (0x01) | Partisietipekode (0x83 = Linux)                     |
 | 5 (0x05)  | 1 (0x01) | Eindhoof                                               |
 | 6 (0x06)  | 1 (0x01) | Eindsektor (bisse 0-5); boonste bisse van silinder (6- 7)   |
-| 7 (0x07)  | 1 (0x01) | Laagste 8 bisse van eindsilinder                     |
-| 8 (0x08)  | 4 (0x04) | Sektore vóór partisie (little endian)                 |
+| 7 (0x07)  | 1 (0x01) | Laagste 8 bisse van eindsilinder                             |
+| 8 (0x08)  | 4 (0x04) | Sektore wat die partisie voorafgaan (little endian)            |
 | 12 (0x0C) | 4 (0x04) | Sektore in partisie                                   |
 
-Om 'n MBR in Linux te mount, moet jy eers die begin-offset kry (jy kan `fdisk` en die `p`-opdrag gebruik)
+Om 'n MBR in Linux te monteer, moet jy eers die begin-offset kry (jy kan `fdisk` en die `p`-opdrag gebruik)
 
-![Partisies - MBR (master Boot Record): Om 'n MBR in Linux te mount, moet jy eers die begin-offset kry (jy kan fdisk en die p-opdrag gebruik)](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![Partisies - MBR (master Boot Record): Om 'n MBR in Linux te monteer, moet jy eers die begin-offset kry (jy kan fdisk en die p-opdrag gebruik)](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-Gebruik dan die volgende kode
+En gebruik dan die volgende kode
 ```bash
 #Mount MBR in Linux
 mount -o ro,loop,offset=<Bytes>
@@ -60,24 +60,24 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 ```
 **LBA (Logical block addressing)**
 
-**Logical block addressing** (**LBA**) is 'n algemene skema wat gebruik word om die **ligging van blokke** data wat op rekenaarbergings toestelle gestoor word, te spesifiseer; gewoonlik sekondêre bergingstelsels soos hardeskyf-aandrywers. LBA is 'n besonder eenvoudige lineêre adresseringskema; **blokke word deur 'n heelgetalindeks opgespoor**, met die eerste blok as LBA 0, die tweede as LBA 1, ensovoorts.
+**Logical block addressing** (**LBA**) is 'n algemene skema wat gebruik word om die **ligging van blokke** data te spesifiseer wat op rekenaarstoortoestelle gestoor word, gewoonlik sekondêre sto orstelsels soos hardeskyfaandrywers. LBA is 'n besonder eenvoudige lineêre adresseringskema; **blokke word deur 'n heelgetalindeks gelokaliseer**, met die eerste blok as LBA 0, die tweede as LBA 1, ensovoorts.
 
 ### GPT (GUID Partition Table)
 
-Die GUID Partition Table, bekend as GPT, word verkies weens sy verbeterde vermoëns in vergelyking met MBR (Master Boot Record). GPT is onderskeibaar vanweë sy **globaal unieke identifiseerder** vir partisies en staan op verskeie maniere uit:
+Die GUID Partition Table, bekend as GPT, word verkies vir sy verbeterde vermoëns in vergelyking met MBR (Master Boot Record). GPT is kenmerkend weens sy **globaal unieke identifiseerder** vir partisies en staan op verskeie maniere uit:
 
-- **Ligging en grootte**: Beide GPT en MBR begin by **sektor 0**. GPT werk egter op **64 bits**, in teenstelling met MBR se 32 bits.
-- **Partisielimiete**: GPT ondersteun tot **128 partisies** op Windows-stelsels en akkommodeer tot **9.4ZB** data.
+- **Ligging en grootte**: Beide GPT en MBR begin by **sektor 0**. GPT werk egter op **64-bis**, in teenstelling met MBR se 32-bis.
+- **Partisiebeperkings**: GPT ondersteun tot **128 partisies** op Windows-stelsels en akkommodeer tot **9.4ZB** se data.
 - **Partisiename**: Bied die vermoë om partisies met tot 36 Unicode-karakters te benoem.
 
-**Dataweerstandigheid en herstel**:
+**Dataweerbaarheid en -herstel**:
 
-- **Redundansie**: Anders as MBR beperk GPT nie partisiering- en bootdata tot 'n enkele plek nie. Dit repliseer hierdie data oor die skyf, wat data-integriteit en weerstandigheid verbeter.
-- **Cyclic Redundancy Check (CRC)**: GPT gebruik CRC om data-integriteit te verseker. Dit monitor aktief vir datakorrupsie, en wanneer dit bespeur word, probeer GPT om die korrupte data vanaf 'n ander skyfligging te herstel.
+- **Redundansie**: Anders as MBR beperk GPT nie partisionerings- en bootdata tot 'n enkele plek nie. Dit repliseer hierdie data oor die skyf, wat data-integriteit en -weerbaarheid verbeter.
+- **Cyclic Redundancy Check (CRC)**: GPT gebruik CRC om data-integriteit te verseker. Dit monitor aktief vir datakorrupsie, en wanneer dit opgespoor word, probeer GPT om die korrupte data vanaf 'n ander skyfligging te herstel.
 
 **Protective MBR (LBA0)**:
 
-- GPT handhaaf terugwaartse versoenbaarheid deur middel van 'n protective MBR. Hierdie funksie is in die legacy MBR-spasie geleë, maar is ontwerp om te voorkom dat ouer MBR-gebaseerde nutsprogramme GPT-skywe per ongeluk oorskryf, en beskerm dus die data-integriteit op GPT-geformateerde skywe.
+- GPT handhaaf terugwaartse versoenbaarheid deur middel van 'n protective MBR. Hierdie funksie is in die ou MBR-spasie geleë, maar is ontwerp om te voorkom dat ouer MBR-gebaseerde nutsprogramme GPT-skywe per ongeluk oorskryf, en beskerm dus die data-integriteit op GPT-geformateerde skywe.
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/GUID_Partition_Table_Scheme.svg/800px-GUID_Partition_Table_Scheme.svg.png](<../../../images/image (1062).png>)
 
@@ -85,13 +85,13 @@ Die GUID Partition Table, bekend as GPT, word verkies weens sy verbeterde vermo�
 
 [From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)<sup>[[1]](#references)</sup>
 
-In bedryfstelsels wat **GPT-gebaseerde boot deur BIOS**-dienste eerder as EFI ondersteun, kan die eerste sektor steeds gebruik word om die eerste fase van die **bootloader**-kode te stoor, maar dit word **gewysig** om **GPT**-**partisies** te herken. Die bootloader in die MBR mag nie aanvaar dat 'n sektorgrootte van 512 grepe gebruik word nie.
+In operating systems that support **GPT-based boot through BIOS** services rather than EFI, the first sector may also still be used to store the first stage of the **bootloader** code, but **modified** to recognize **GPT** **partitions**. The bootloader in the MBR must not assume a sector size of 512 bytes.
 
 **Partition table header (LBA 1)**
 
 [From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)<sup>[[1]](#references)</sup>
 
-Die partisietabelkop definieer die bruikbare blokke op die skyf. Dit definieer ook die aantal en grootte van die partisiesinskrywings waaruit die partisietabel bestaan (offsets 80 en 84 in die tabel).
+Die partisie-tabelkop definieer die bruikbare blokke op die skyf. Dit definieer ook die aantal en grootte van die partisie-inskrywings waaruit die partisie-tabel bestaan (offsets 80 en 84 in die tabel).
 
 | Offset    | Length   | Contents                                                                                                                                                                     |
 | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -127,19 +127,19 @@ Die partisietabelkop definieer die bruikbare blokke op die skyf. Dit definieer o
 
 ![MBR (master Boot Record) - GPT (GUID Partition Table): 56 (0x38) | 72 bytes | Partition name (36 UTF-16LE code units)](<../../../images/image (83).png>)
 
-Meer partisietipes by [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+More partition types in [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)<sup>[[1]](#references)</sup>
 
-### Inspeksie
+### Inspecting
 
-Nadat jy die forensiese image met [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/) gemount het, kan jy die eerste sektor inspekteer deur die Windows-nutsprogram [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** In die volgende image is 'n **MBR** op die **sektor 0** opgespoor en geïnterpreteer:
+Nadat die forensics-image met [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/) gemonteer is, kan jy die eerste sektor met die Windows-nutsprogram [**Active Disk Editor**](https://www.disk-editor.org/index.html)** inspekteer.** In die volgende beeld is 'n **MBR** op **sektor 0** opgespoor en geïnterpreteer:
 
-![GPT (GUID Partition Table) - Inspeksie: Nadat jy die forensiese image met ArsenalImageMounter gemount het, kan jy die eerste sektor inspekteer deur die Windows-nutsprogram Active Disk Editor. In die...](<../../../images/image (354).png>)
+![GPT (GUID Partition Table) - Inspecting: After mounting the forensics image with ArsenalImageMounter , you can inspect the first sector using the Windows tool Active Disk Editor . In the...](<../../../images/image (354).png>)
 
-As dit 'n **GPT-tabel in plaas van 'n MBR** was, behoort die handtekening _EFI PART_ in die **sektor 1** te verskyn (wat in die vorige image leeg is).
+As dit 'n **GPT-tabel in plaas van 'n MBR** was, behoort die handtekening _EFI PART_ in **sektor 1** te verskyn (wat in die vorige beeld leeg is).
 
-## Lêerstelsels
+## File-Systems
 
-### Windows-lêerstelsellys
+### Windows file-systems list
 
 - **FAT12/16**: MSDOS, WIN95/98/NT/200
 - **FAT32**: 95/2000/XP/2003/VISTA/7/8/10
@@ -149,27 +149,27 @@ As dit 'n **GPT-tabel in plaas van 'n MBR** was, behoort die handtekening _EFI P
 
 ### FAT
 
-Die **FAT (File Allocation Table)**-lêerstelsel is rondom sy kernkomponent ontwerp, naamlik die file allocation table, wat aan die begin van die volume geplaas word. Hierdie stelsel beskerm data deur **twee kopieë** van die tabel te onderhou, wat data-integriteit verseker selfs indien een korrup raak. Die tabel, tesame met die wortelgids, moet op 'n **vaste ligging** wees, wat noodsaaklik is vir die stelsel se opstartproses.
+Die **FAT (File Allocation Table)**-lêerstelsel is rondom sy kernkomponent ontwerp, naamlik die file allocation table, wat aan die begin van die volume geplaas is. Hierdie stelsel beskerm data deur **twee kopieë** van die tabel te onderhou, wat data-integriteit verseker selfs indien een korrupteer. Die tabel, tesame met die root folder, moet op 'n **vaste ligging** wees, wat noodsaaklik is vir die stelsel se opstartproses.
 
 Die lêerstelsel se basiese stooreenheid is 'n **cluster, gewoonlik 512B**, wat uit verskeie sektore bestaan. FAT het deur verskeie weergawes ontwikkel:
 
-- **FAT12**, wat 12-bis clusteradresse ondersteun en tot 4078 clusters (4084 met UNIX) hanteer.
-- **FAT16**, wat na 16-bis adresse verbeter is en dus tot 65,517 clusters kan akkommodeer.
-- **FAT32**, wat verder met 32-bis adresse gevorder het en 'n indrukwekkende 268,435,456 clusters per volume toelaat.
+- **FAT12**, wat 12-bis clusteradresse ondersteun en tot 4078 clusters hanteer (4084 met UNIX).
+- **FAT16**, wat na 16-bis adresse verbeter is en sodoende tot 65,517 clusters akkommodeer.
+- **FAT32**, wat verder met 32-bis adresse ontwikkel is en 'n indrukwekkende 268,435,456 clusters per volume toelaat.
 
-'n Beduidende beperking oor alle FAT-weergawes heen is die **maksimum lêergrootte van 4GB**, wat deur die 32-bis-veld vir die stoor van lêergrootte opgelê word.
+'n Beduidende beperking oor alle FAT-weergawes heen is die **4GB maksimum lêergrootte**, wat deur die 32-bis-veld vir die stoor van lêergrootte opgelê word.
 
-Belangrike komponente van die wortelgids, veral vir FAT12 en FAT16, sluit die volgende in:
+Belangrike komponente van die root directory, veral vir FAT12 en FAT16, sluit in:
 
-- **Lêer-/Gidsnaam** (tot 8 karakters)
+- **File/Folder Name** (tot 8 karakters)
 - **Attributes**
-- **Skeppings-, Wysigings- en Laaste Toegangsdatums**
-- **FAT-tabeladres** (wat die begincluster van die lêer aandui)
-- **Lêergrootte**
+- **Creation, Modification, and Last Access Dates**
+- **FAT Table Address** (wat die begincluster van die lêer aandui)
+- **File Size**
 
 ### EXT
 
-**Ext2** is die algemeenste lêerstelsel vir **nie-journaling**-partisies (**partisies wat nie baie verander nie**), soos die bootpartisie. **Ext3/4** gebruik **journaling** en word gewoonlik vir die **oorblywende partisies** gebruik.
+**Ext2** is die mees algemene lêerstelsel vir **partisies wat nie journaled is nie** (**partisies wat nie baie verander nie**), soos die boot-partisie. **Ext3/4** is **journaled** en word gewoonlik vir die **res van die partisies** gebruik.
 
 ## **Metadata**
 
@@ -179,17 +179,17 @@ Sommige lêers bevat metadata. Hierdie inligting handel oor die inhoud van die l
 - MS Office-weergawe wat gebruik is
 - Outeur
 - Datums van skepping en laaste wysiging
-- Kameramodel
+- Model van die kamera
 - GPS-koördinate
-- Image-inligting
+- Beeldinligting
 
-Jy kan tools soos [**exiftool**](https://exiftool.org) en [**Metadiver**](https://www.easymetadata.com/metadiver-2/) gebruik om die metadata van 'n lêer te verkry.
+Jy kan nutsprogramme soos [**exiftool**](https://exiftool.org) en [**Metadiver**](https://www.easymetadata.com/metadiver-2/) gebruik om die metadata van 'n lêer te bekom.
 
-## **Herstel van geskrapte lêers**
+## **Deleted Files Recovery**
 
 ### Logged Deleted Files
 
-Soos vroeër gesien is, is daar verskeie plekke waar die lêer steeds gestoor word nadat dit "geskrap" is. Dit is omdat die skrap van 'n lêer uit 'n lêerstelsel gewoonlik slegs aandui dat dit geskrap is, maar die data word nie aangeraak nie. Dit is dus moontlik om die registers van die lêers (soos die MFT) te inspekteer en die geskrapte lêers te vind.<sup>[[2]](#references)</sup>
+Soos voorheen gesien, is daar verskeie plekke waar die lêer steeds gestoor word nadat dit "deleted" is. Dit is omdat die deletion van 'n lêer uit 'n lêerstelsel gewoonlik net aandui dat dit deleted is, sonder om aan die data te raak. Dit is dus moontlik om die registers van die lêers (soos die MFT) te inspekteer en die deleted lêers te vind.<sup>[[2]](#references)</sup>
 
 Die OS stoor gewoonlik ook baie inligting oor lêerstelselveranderinge en backups, dus is dit moontlik om dit te probeer gebruik om die lêer, of soveel moontlik inligting, te herstel.
 
@@ -200,11 +200,11 @@ file-data-carving-recovery-tools.md
 
 ### **File Carving**
 
-**File carving** is 'n tegniek wat probeer om **lêers in die groot hoeveelheid data te vind**. Daar is 3 hoofmaniere waarop tools soos hierdie werk: **Gebaseer op lêertipeheaders en -footers**, gebaseer op lêertipe-**strukture** en gebaseer op die **inhoud** self.
+**File carving** is 'n tegniek wat probeer om **lêers in die groot massa data te vind**. Daar is 3 hoofmaniere waarop nutsprogramme soos hierdie werk: **Gebaseer op file types headers en footers**, gebaseer op file types se **strukture**, en gebaseer op die **inhoud** self.
 
-Let daarop dat hierdie tegniek **nie werk om gefragmenteerde lêers te herwin nie**. Indien 'n lêer **nie in aaneenlopende sektore gestoor word nie**, sal hierdie tegniek dit nie, of ten minste 'n deel daarvan, kan vind nie.
+Let daarop dat hierdie tegniek **nie werk om gefragmenteerde lêers terug te kry nie**. As 'n lêer **nie in aaneenlopende sektore gestoor word nie**, sal hierdie tegniek dit nie, of ten minste 'n deel daarvan, kan vind nie.
 
-Daar is verskeie tools wat jy vir file Carving kan gebruik deur die lêertipes aan te dui waarna jy wil soek.
+Daar is verskeie nutsprogramme wat jy vir file Carving kan gebruik deur die lêertipes aan te dui waarvoor jy wil soek.
 
 
 {{#ref}}
@@ -214,7 +214,7 @@ file-data-carving-recovery-tools.md
 ### Data Stream **C**arving
 
 Data Stream Carving is soortgelyk aan File Carving, maar **in plaas daarvan om na volledige lêers te soek, soek dit na interessante fragmente** van inligting.\
-Byvoorbeeld, in plaas daarvan om na 'n volledige lêer te soek wat gelogde URLs bevat, sal hierdie tegniek na URLs soek.
+Byvoorbeeld, in plaas daarvan om na 'n volledige lêer te soek wat logged URLs bevat, sal hierdie tegniek vir URLs soek.
 
 
 {{#ref}}
@@ -223,10 +223,10 @@ file-data-carving-recovery-tools.md
 
 ### Secure Deletion
 
-Dit is vanselfsprekend dat daar maniere is om lêers en dele van logs oor hulle **"veilig" te skrap**. Dit is byvoorbeeld moontlik om die **inhoud te oorskryf** van 'n lêer verskeie kere met junkdata, en dan die **logs** uit die **$MFT** en **$LOGFILE** oor die lêer te **verwyder**, asook die **Volume Shadow Copies** te **verwyder**.<sup>[[3]](#references)</sup>\
-Jy sal dalk opmerk dat daar, selfs nadat daardie handeling uitgevoer is, **ander dele kan wees waar die bestaan van die lêer steeds gelog word**, en dit is korrek; deel van die forensiese professionele persoon se werk is om hulle te vind.
+Dit is natuurlik moontlik om lêers en dele van logs daaroor **"securely" te delete**. Dit is byvoorbeeld moontlik om die **inhoud te oorskryf** van 'n lêer met junk data, verskeie kere, en dan die **logs** oor die lêer uit die **$MFT** en **$LOGFILE** te **verwyder**, asook die **Volume Shadow Copies** te **verwyder**.<sup>[[3]](#references)</sup>\
+Jy mag opmerk dat daar selfs nadat hierdie aksie uitgevoer is, **ander dele kan wees waar die bestaan van die lêer steeds gelog word**, en dit is waar; deel van die forensics-professional se werk is om hulle te vind.
 
-## Verwysings
+## References
 
 - [1] [GUID Partition Table - Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 - [2] [How to scan NTFS $I30 (directory) entries for evidence of deleted files](https://www.osforensics.com/faqs-and-tutorials/how-to-scan-ntfs-i30-entries-deleted-files.html)

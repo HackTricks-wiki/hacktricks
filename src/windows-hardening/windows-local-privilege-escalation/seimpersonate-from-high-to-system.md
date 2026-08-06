@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Hierdie bladsy handel oor die **handmatige** manier om van ’n **High Integrity administrator process** na **`NT AUTHORITY\SYSTEM`** te gaan deur ’n nie-beskermde SYSTEM process oop te maak, sy token te dupliseer en ’n child process met daardie token te begin.
+Hierdie bladsy handel oor die **manual** weergawe van die oorgang van ’n **High Integrity administrator process** na **`NT AUTHORITY\SYSTEM`** deur ’n **nie-beskermde SYSTEM process oop te maak, sy token te dupliseer en ’n child process met daardie token te begin**.
 
 As jy slegs **`SeImpersonatePrivilege`** / **`SeAssignPrimaryTokenPrivilege`** het, maar **nie ’n geskikte SYSTEM process kan oopmaak nie**, is die **Potato / named-pipe**-roete gewoonlik meer betroubaar:
 
@@ -14,7 +14,7 @@ named-pipe-client-impersonation.md
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-As jy nie net **`SYSTEM`** wil hê nie, maar ’n **SYSTEM token met soveel as moontlik privileges**, kyk ook na:
+As jy nie net **`SYSTEM`** wil hê nie, maar ’n **SYSTEM token met soveel moontlik privileges**, kyk ook na:
 
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
@@ -22,21 +22,21 @@ sedebug-+-seimpersonate-copy-token.md
 
 ## Vinnige triage
 
-Voordat jy probeer om ’n token te steel, valideer eers vinnig die konteks:
+Voordat jy probeer om ’n token te steel, valideer die konteks vinnig:
 ```cmd
 whoami /groups | findstr /i "high mandatory"
 whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege SeAssignPrimaryTokenPrivilege"
 ```
 Praktiese notas:
 
-- ’n **High Integrity** admin-token is gewoonlik genoeg om **`SeDebugPrivilege` te enable** en baie nie-beskermde SYSTEM-prosesse oop te maak.
-- **`CreateProcessWithTokenW` vereis `SeImpersonatePrivilege`** op die caller. As daardie API met `1314` faal, skakel oor na `CreateProcessAsUserW` nadat jy reeds ’n SYSTEM primary token gedupliseer het.
+- ’n **High Integrity** admin-token is gewoonlik genoeg om **`SeDebugPrivilege` te aktiveer** en baie nie-beskermde SYSTEM-prosesse oop te maak.
+- **`CreateProcessWithTokenW` vereis `SeImpersonatePrivilege`** op die caller. As daardie API met `1314` misluk, skakel oor na **`CreateProcessAsUserW`** nadat jy reeds ’n SYSTEM primary token gedupliseer het.
 - Op moderne Windows is **`lsass.exe` dikwels ’n swak target** omdat **LSA protection / PPL** toegang blokkeer, selfs vir administrators met `SeDebugPrivilege`. Verkies **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`**, of ’n vroeë **`svchost.exe`** wat as SYSTEM loop.
-- Nie elke SYSTEM-proses het ’n ewe nuttige token nie. As jy SYSTEM kry maar agterkom dat daar privileges ontbreek, probeer eerder ’n ander SYSTEM-proses in plaas daarvan om aan te neem dat die tegniek gebreek is.
+- Nie elke SYSTEM-proses het ’n ewe bruikbare token nie. As jy SYSTEM kry maar opmerk dat privileges ontbreek, probeer eerder ’n ander SYSTEM-proses as om aan te neem dat die tegniek gebreek is.
 
 ## Kies die PID versigtig
 
-Die maklikste manier om dit betroubaar te laat werk, is om **’n SYSTEM-proses te kies waarvan die DACL Administrators werklik toelaat om die proses te query en sy token te duplicate**.
+Die maklikste manier om dit betroubaar te laat werk, is om ’n SYSTEM-proses te **kies waarvan die DACL Administrators werklik toelaat om die proses te query en sy token te dupliseer**.
 
 Goeie candidates om eerste te toets:
 
@@ -47,15 +47,15 @@ Goeie candidates om eerste te toets:
 
 Vermy by verstek:
 
-- `lsass.exe` op hosts waar **RunAsPPL / LSA protection** ge-enable is
-- protected / security-sensitive prosesse wat `Access denied` teruggee, selfs nadat `SeDebugPrivilege` ge-enable is
+- `lsass.exe` op hosts waar **RunAsPPL / LSA protection** geaktiveer is
+- beskermde / security-sensitive prosesse wat `Access denied` teruggee selfs nadat `SeDebugPrivilege` geaktiveer is
 
 Jy kan candidate-prosesse en hul token/ACLs inspekteer met **Process Explorer** of **Process Hacker** wat elevated loop.
 
 ### Code
 
-Die volgende code kom van [hier](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Dit laat jou toe om **’n Process ID as argument aan te dui**, waarna ’n CMD **wat as die user** van die aangeduide proses loop, uitgevoer sal word.\
-Wanneer dit in ’n High Integrity-proses loop, kan jy **die PID van ’n proses wat as System loop aandui** (soos `winlogon`, `wininit`) en ’n `cmd.exe` as SYSTEM uitvoer.<sup>[[3]](#references)</sup>
+Die volgende code kom [hier](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962) vandaan. Dit laat jou toe om **’n Process ID as argument aan te dui**, waarna ’n CMD wat **as die gebruiker** van die aangeduide proses loop, uitgevoer sal word.<sup>[[3]](#references)</sup>\
+Wanneer jy dit in ’n High Integrity-proses uitvoer, kan jy **die PID van ’n proses wat as System loop aandui** (soos `winlogon`, `wininit`) en ’n `cmd.exe` as SYSTEM uitvoer.<sup>[[3]](#references)</sup>
 ```cpp
 impersonateuser.exe 1234
 ```
@@ -190,20 +190,20 @@ printf("[-] CreateProcessWithTokenW Error: %i\n", GetLastError());
 return 0;
 }
 ```
-## Nuttige API / access-right notes
+## Nuttige API-/toegangsreg-notas
 
-Die sample gebruik `MAXIMUM_ALLOWED`, maar vir werklike operasies is dit nuttig om die minimum komponente wat betrokke is, te onthou:
+Die voorbeeld gebruik `MAXIMUM_ALLOWED`, maar vir werklike bewerkings is dit nuttig om die minimum vereistes te onthou:
 
-- `OpenProcessToken()` vereis slegs dat die **process handle** geopen is met **`PROCESS_QUERY_LIMITED_INFORMATION`**.
+- `OpenProcessToken()` vereis slegs dat die **process handle** oopgemaak is met **`PROCESS_QUERY_LIMITED_INFORMATION`**.
 - Om `CreateProcessWithTokenW()` te gebruik, moet die **primary token handle** **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`** hê.<sup>[[1]](#references)</sup>
 - `DuplicateTokenEx()` moet ’n **primary token** (`TokenPrimary`) skep, nie slegs ’n impersonation token nie.
-- As jy reeds as SYSTEM impersonate het en `CreateProcessWithTokenW()` steeds met `1314` misluk, probeer eerder `CreateProcessAsUserW()`.
+- As jy reeds as SYSTEM geïmpersonateer het en `CreateProcessWithTokenW()` steeds met `1314` misluk, probeer eerder `CreateProcessAsUserW()`.
 
-Dit beteken dat dit gewoonlik onnodig en meer opvallend is om die target process met `PROCESS_ALL_ACCESS` te open, eerder as om net die regte aan te vra wat nodig is om die token te query.
+Dit beteken dat die opening van die teikenproses met `PROCESS_ALL_ACCESS` gewoonlik onnodig en meer opvallend is as om slegs die regte aan te vra wat nodig is om die token te bevraagteken.
 
 ## Fout
 
-By sommige geleenthede probeer jy dalk om as System te impersonate, maar dit werk nie en wys uitvoer soos die volgende:
+By sommige geleenthede kan jy probeer om System te impersonateer, maar dit werk nie en wys uitvoer soos die volgende:
 ```cpp
 [+] OpenProcess() success!
 [+] OpenProcessToken() success!
@@ -214,19 +214,19 @@ By sommige geleenthede probeer jy dalk om as System te impersonate, maar dit wer
 [-] CreateProcessWithTokenW Return Code: 0
 [-] CreateProcessWithTokenW Error: 1326
 ```
-Dit beteken dat selfs al loop jy op ’n High Integrity-vlak, **jy nie genoeg toestemmings** oor daardie teikenproses/-token het nie.\
-Kom ons kyk na die huidige Administrators-toestemmings oor `svchost.exe`-prosesse met **Process Explorer** (of jy kan ook **Process Hacker** gebruik):
+Dit beteken dat selfs al werk jy op ’n High Integrity-vlak, **jy nie genoeg toestemmings** oor daardie teikenproses/-token het nie.\
+Kom ons kyk na die huidige Administrator-toestemmings oor `svchost.exe`-prosesse met **Process Explorer** (of jy kan ook **Process Hacker** gebruik):
 
 1. Kies ’n proses van `svchost.exe`
-2. Regsklik --> Eienskappe
-3. Binne die "Security"-oortjie, klik regs onder op die knoppie "Permissions"
+2. Regskliek --> Properties
+3. Klik binne die "Security"-oortjie regs onder op die "Permissions"-knoppie
 4. Klik op "Advanced"
 5. Kies "Administrators" en klik op "Edit"
 6. Klik op "Show advanced permissions"
 
 ![Code - Error: 6. Klik op "Show advanced permissions"](<../../images/image (437).png>)
 
-Die vorige beeld bevat al die voorregte wat "Administrators" oor die geselekteerde proses het (soos jy kan sien, het hulle in die geval van `svchost.exe` slegs "Query"-voorregte)
+Die vorige beeld bevat al die voorregte wat "Administrators" oor die gekose proses het (soos jy kan sien, het hulle in die geval van `svchost.exe` slegs "Query"-voorregte)
 
 Sien die voorregte wat "Administrators" oor `winlogon.exe` het:
 
@@ -237,15 +237,15 @@ Binne daardie proses kan "Administrators" "Read Memory" en "Read Permissions" ge
 ### Algemene oorsake van mislukking
 
 - **`OpenProcess()` / `OpenProcessToken()` -> `5 (Access denied)`**: die proses se DACL blokkeer jou, of die teiken is **protected/PPL**. Kies ’n ander SYSTEM-proses.
-- **`DuplicateTokenEx()` -> `5 (Access denied)`**: jou token-handle is sonder genoeg regte oopgemaak, of die teiken-token se DACL voorkom duplisering.
-- **`CreateProcessWithTokenW()` -> `1314`**: die caller het nie tans **`SeImpersonatePrivilege`** enabled nie. Probeer dit eers enable, of gebruik `CreateProcessAsUserW()` met die gedupliseerde primary token.
-- **`CreateProcessWithTokenW()` -> `1326`** ná vorige mislukkings: dit beteken dikwels bloot dat die vorige token-duplisering/impersonation-stap misluk het, dus is daar geen bruikbare primary token om die child process te launch nie.
+- **`DuplicateTokenEx()` -> `5 (Access denied)`**: jou token-handle is sonder genoeg regte oopgemaak, of die teikentoken se DACL voorkom duplication.
+- **`CreateProcessWithTokenW()` -> `1314`**: die caller het tans nie **`SeImpersonatePrivilege`** enabled nie. Probeer dit eers enable, of gebruik `CreateProcessAsUserW()` met die gedupliseerde primary token.
+- **`CreateProcessWithTokenW()` -> `1326`** ná vorige mislukkings: dit beteken dikwels bloot dat die vorige token-duplication/impersonation-stap misluk het, en daar dus geen bruikbare primary token is om die child process te launch nie.
 
 ## Operator-notas
 
-- Hierdie technique is uitstekend wanneer jy reeds **local admin + high integrity** is en net ’n vinnige, handmatige pad na SYSTEM wil hê sonder om ’n service of ’n named-pipe coercion chain op te stel.
-- Op geharde Windows 11 / Server-omgewings is **LSA protection toenemend algemeen**, dus is ’n workflow wat aanvaar dat `lsass.exe` altyd leesbaar is, broos. **`winlogon.exe` / `wininit.exe` / `services.exe` is gewoonlik beter eerste keuses**.<sup>[[2]](#references)</sup>
-- As jy in ’n **service account**-konteks beland in plaas van ’n elevated admin-desktop, pas die **Potato family** gewoonlik beter as hierdie bladsy.
+- Hierdie tegniek is uitstekend wanneer jy reeds **local admin + high integrity** is en net ’n vinnige, handmatige pad na SYSTEM wil hê sonder om ’n service of ’n named-pipe coercion chain op te stel.
+- Op geharde Windows 11 / Server-omgewings kom **LSA protection** al hoe meer voor, dus is ’n workflow wat aanneem dat `lsass.exe` altyd leesbaar is, onbetroubaar. **`winlogon.exe` / `wininit.exe` / `services.exe` is gewoonlik beter eerste keuses**.<sup>[[2]](#references)</sup>
+- As jy in ’n **service account**-konteks beland eerder as op ’n verhoogde admin-desktop, is die **Potato family** gewoonlik ’n beter passing as hierdie bladsy.
 
 
 
@@ -253,6 +253,6 @@ Binne daardie proses kan "Administrators" "Read Memory" en "Read Permissions" ge
 
 - [1] [Microsoft: CreateProcessWithTokenW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
 - [2] [SensePost: Misbruik van Windows se tokens om Active Directory te kompromitteer sonder om aan LSASS te raak](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
-- [3] [Verstaan en misbruik van proses-tokens — Deel II](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [3] [Verstaan en misbruik van Process Tokens — Deel II](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 
 {{#include ../../banners/hacktricks-training.md}}
