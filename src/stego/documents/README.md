@@ -1,22 +1,22 @@
-# Document Steganography
+# Steganography Εγγράφων
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Τα έγγραφα είναι συχνά απλά δοχεία:
+Τα έγγραφα συχνά είναι απλώς containers:
 
-- PDF (ενσωματωμένα αρχεία, ροές)
+- PDF (embedded files, streams)
 - Office OOXML (`.docx/.xlsx/.pptx` είναι ZIPs)
-- RTF / OLE παρωχημένες μορφές
+- RTF / OLE legacy formats
 
 ## PDF
 
-### Τεχνική
+### Technique
 
-Το PDF είναι ένα δομημένο δοχείο με αντικείμενα, ροές και προαιρετικά ενσωματωμένα αρχεία. Σε CTFs συχνά χρειάζεται να:
+Το PDF είναι ένα structured container με objects, streams και προαιρετικά embedded files. Στα CTFs συχνά χρειάζεται να:
 
-- Εξαγάγετε ενσωματωμένα συνημμένα
-- Αποσυμπιέσετε/επιπεδώσετε τις ροές αντικειμένων ώστε να μπορείτε να αναζητήσετε το περιεχόμενο
-- Εντοπίσετε κρυφά αντικείμενα (JS, ενσωματωμένες εικόνες, περίεργες ροές)
+- Κάνετε extract τα embedded attachments
+- Κάνετε decompress/flatten τα object streams ώστε να μπορείτε να αναζητήσετε περιεχόμενο
+- Εντοπίσετε hidden objects (JS, embedded images, odd streams)
 
 ### Γρήγοροι έλεγχοι
 ```bash
@@ -25,19 +25,19 @@ pdfdetach -list file.pdf
 pdfdetach -saveall file.pdf
 qpdf --qdf --object-streams=disable file.pdf out.pdf
 ```
-Στη συνέχεια, αναζήτησε μέσα στο `out.pdf` για ύποπτα αντικείμενα/συμβολοσειρές.
+Στη συνέχεια, αναζητήστε μέσα στο `out.pdf` ύποπτα objects/strings.
 
 ## Office OOXML
 
 ### Τεχνική
 
-Θεώρησε το OOXML ως γράφο σχέσεων ZIP + XML· τα payloads συχνά κρύβονται σε media, relationships ή σε ασυνήθιστα custom μέρη.
+Αντιμετωπίστε το OOXML ως ένα γράφημα σχέσεων ZIP + XML· τα payloads συχνά κρύβονται σε media, relationships ή ασυνήθιστα custom parts.
 
-Τα αρχεία OOXML είναι ZIP containers. Αυτό σημαίνει:
+Τα αρχεία OOXML είναι ZIP containers. Αυτό σημαίνει ότι:
 
-- Το έγγραφο είναι δέντρο καταλόγων από XML και assets.
-- Τα αρχεία `_rels/` μπορούν να δείχνουν σε εξωτερικούς πόρους ή σε κρυμμένα μέρη.
-- Ενσωματωμένα δεδομένα συχνά βρίσκονται στο `word/media/`, σε custom XML parts ή σε ασυνήθιστες relationships.
+- Το document είναι ένα directory tree από XML και assets.
+- Τα αρχεία relationships του `_rels/` μπορούν να παραπέμπουν σε external resources ή hidden parts.
+- Τα embedded data βρίσκονται συχνά στο `word/media/`, σε custom XML parts ή σε ασυνήθιστα relationships.
 
 ### Γρήγοροι έλεγχοι
 ```bash
@@ -48,6 +48,7 @@ qpdf --qdf --object-streams=disable file.pdf out.pdf
 
 - `word/document.xml`
 - `word/_rels/` για εξωτερικές σχέσεις
-- ενσωματωμένα μέσα στο `word/media/`
+- ενσωματωμένα αρχεία πολυμέσων στο `word/media/`
+
 
 {{#include ../../banners/hacktricks-training.md}}
