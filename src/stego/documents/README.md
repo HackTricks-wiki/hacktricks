@@ -1,22 +1,22 @@
-# Document Steganography
+# Belge Steganografisi
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Belgeler genellikle yalnızca kapsayıcıdır:
+Belgeler çoğu zaman yalnızca kapsayıcılardır:
 
-- PDF (gömülü dosyalar, akışlar)
-- Office OOXML (`.docx/.xlsx/.pptx` ZIP arşivleridir)
-- RTF / OLE eski formatlar
+- PDF (gömülü dosyalar, stream'ler)
+- Office OOXML (`.docx/.xlsx/.pptx` ZIP'tir)
+- RTF / OLE legacy formatları
 
 ## PDF
 
-### Teknik
+### Technique
 
-PDF, nesneler, akışlar ve isteğe bağlı gömülü dosyalar içeren yapılandırılmış bir kapsayıcıdır. CTF'lerde genellikle şunlara ihtiyaç duyarsınız:
+PDF; objects, stream'ler ve isteğe bağlı gömülü dosyalar içeren yapılandırılmış bir kapsayıcıdır. CTF'lerde genellikle şunları yapmanız gerekir:
 
-- Gömülü ekleri çıkarmak
-- Nesne akışlarını dekomprese/flatten ederek içerikte arama yapabilmek
-- Gizli nesneleri tespit etmek (JS, gömülü görseller, olağandışı akışlar)
+- Gömülü attachment'ları çıkarmak
+- İçeriği arayabilmek için object stream'lerini decompress/flatten etmek
+- Gizli object'leri (JS, gömülü images, olağandışı stream'ler) belirlemek
 
 ### Hızlı kontroller
 ```bash
@@ -25,29 +25,30 @@ pdfdetach -list file.pdf
 pdfdetach -saveall file.pdf
 qpdf --qdf --object-streams=disable file.pdf out.pdf
 ```
-Sonra `out.pdf` içinde şüpheli nesneler/karakter dizileri arayın.
+Ardından `out.pdf` içinde şüpheli nesneleri/dizeleri arayın.
 
 ## Office OOXML
 
 ### Teknik
 
-OOXML'i bir ZIP + XML ilişki grafiği olarak ele alın; payloads genellikle media, relationships veya sıra dışı özel parçalarda gizlenir.
+OOXML'i bir ZIP + XML ilişki grafiği olarak ele alın; payload'lar genellikle media, relationships veya sıra dışı custom parts içinde gizlenir.
 
-OOXML dosyaları ZIP kapsayıcılarıdır. Bu demektir ki:
+OOXML dosyaları ZIP container'larıdır. Bu şu anlama gelir:
 
-- Belge, XML ve varlıklardan oluşan bir dizin ağacıdır.
-- `_rels/` ilişki dosyaları dış kaynaklara veya gizli parçalara işaret edebilir.
-- Gömülü veriler sıklıkla `word/media/`, özel XML parçaları veya alışılmadık ilişkiler içinde bulunur.
+- Belge, XML ve asset'lerden oluşan bir directory tree'dir.
+- `_rels/` relationship dosyaları external resources veya gizli parts'a işaret edebilir.
+- Embedded data sıklıkla `word/media/`, custom XML parts veya alışılmadık relationships içinde bulunur.
 
 ### Hızlı kontroller
 ```bash
 7z l file.docx
 7z x file.docx -oout
 ```
-Sonra inceleyin:
+Ardından şunları inceleyin:
 
 - `word/document.xml`
-- `word/_rels/` harici ilişkiler için
+- harici ilişkiler için `word/_rels/`
 - `word/media/` içindeki gömülü medya
+
 
 {{#include ../../banners/hacktricks-training.md}}

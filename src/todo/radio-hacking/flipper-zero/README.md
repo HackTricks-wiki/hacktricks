@@ -4,15 +4,15 @@
 
 [**Flipper Zero**](https://flipperzero.one/) ile şunları yapabilirsiniz:
 
-- **Radyo frekanslarını dinleyin/yakalayın/tekrar edin:** [**Sub-GHz**](fz-sub-ghz.md)
-- **NFC kartlarını okuyun/yakalayın/emüle edin:** [**NFC**](fz-nfc.md)
-- **125kHz etiketlerini okuyun/yakalayın/emüle edin:** [**125kHz RFID**](fz-125khz-rfid.md)
-- **Kızılötesi sinyalleri okuyun/yakalayın/gönderin:** [**Infrared**](fz-infrared.md)
-- **iButton'ları okuyun/yakalayın/emüle edin:** [**iButton**](../ibutton.md)
-- **Kötü USB olarak kullanın**
-- **Güvenlik anahtarı (U2F) olarak kullanın**
-- **Yılan oynayın**
+- **Radyo frekanslarını dinleme/yakalama/yeniden oynatma:** [**Sub-GHz**](fz-sub-ghz.md)
+- **NFC kartlarını okuma/yakalama/emüle etme:** [**NFC**](fz-nfc.md)
+- **125kHz etiketlerini okuma/yakalama/emüle etme:** [**125kHz RFID**](fz-125khz-rfid.md)
+- **Kızılötesi sinyalleri okuma/yakalama/gönderme:** [**Infrared**](fz-infrared.md)
+- **iButton'ları okuma/yakalama/emüle etme:** [**iButton**](../ibutton.md)
+- **Bad USB olarak kullanma**
+- **Güvenlik anahtarı (U2F) olarak kullanma**
+- **Snake oynama**
 
-**Diğer Flipper Zero kaynakları için** [**https://github.com/djsime1/awesome-flipperzero**](https://github.com/djsime1/awesome-flipperzero)
+**Diğer Flipper Zero kaynakları:** [**https://github.com/djsime1/awesome-flipperzer**](https://github.com/djsime1/awesome-flipperzero)
 
 {{#include ../../../banners/hacktricks-training.md}}
