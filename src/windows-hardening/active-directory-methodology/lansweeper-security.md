@@ -13,7 +13,7 @@ This page summarizes practical attacker workflows and commands to abuse these be
 
 ## 1) Harvest scanning credentials via honeypot (SSH example)
 
-Idea: create a Scanning Target that points to your host and map existing Scanning Credentials to it. When the scan runs, Lansweeper will attempt to authenticate with those credentials, and your honeypot will capture them.
+Idea: create a Scanning Target that points to your host and map existing Scanning Credentials to it. When the scan runs, Lansweeper will attempt to authenticate with those credentials, and your honeypot will capture them.<sup>[[1]](#references)</sup>
 
 Steps overview (web UI):
 - Scanning → Scanning Targets → Add Scanning Target
@@ -24,7 +24,7 @@ Steps overview (web UI):
 - Click “Scan now” on the target
 - Run an SSH honeypot and retrieve the attempted username/password
 
-Example with sshesame:
+Example with sshesame:<sup>[[2]](#references)</sup>
 
 ```yaml
 # sshesame.conf
@@ -56,7 +56,7 @@ Notes
 
 ## 2) AD ACL abuse: gain remote access by adding yourself to an app-admin group
 
-Use BloodHound to enumerate effective rights from the compromised account. A common finding is a scanner- or app-specific group (e.g., “Lansweeper Discovery”) holding GenericAll over a privileged group (e.g., “Lansweeper Admins”). If the privileged group is also member of “Remote Management Users”, WinRM becomes available once we add ourselves.
+Use BloodHound to enumerate effective rights from the compromised account. A common finding is a scanner- or app-specific group (e.g., “Lansweeper Discovery”) holding GenericAll over a privileged group (e.g., “Lansweeper Admins”). If the privileged group is also member of “Remote Management Users”, WinRM becomes available once we add ourselves.<sup>[[1]](#references)[[5]](#references)</sup>
 
 Collection examples:
 
@@ -68,7 +68,7 @@ netexec ldap inventory.sweep.vl -u svc_inventory_lnx -p '<password>' --bloodhoun
 rusthound-ce --domain sweep.vl -u svc_inventory_lnx -p '<password>' -c All --zip
 ```
 
-Exploit GenericAll on group with BloodyAD (Linux):
+Exploit GenericAll on group with BloodyAD (Linux):<sup>[[4]](#references)</sup>
 
 ```bash
 # Add our user into the target group
@@ -93,14 +93,14 @@ sudo ntpdate <dc-fqdn-or-ip>   # or rdate -n <dc-ip>
 
 ## 3) Decrypt Lansweeper-configured secrets on the host
 
-On the Lansweeper server, the ASP.NET site typically stores an encrypted connection string and a symmetric key used by the application. With appropriate local access, you can decrypt the DB connection string and then extract stored scanning credentials.
+On the Lansweeper server, the ASP.NET site typically stores an encrypted connection string and a symmetric key used by the application. With appropriate local access, you can decrypt the DB connection string and then extract stored scanning credentials.<sup>[[1]](#references)</sup>
 
 Typical locations:
 - Web config: `C:\Program Files (x86)\Lansweeper\Website\web.config`
   - `<connectionStrings configProtectionProvider="DataProtectionConfigurationProvider">` … `<EncryptedData>…`
 - Application key: `C:\Program Files (x86)\Lansweeper\Key\Encryption.txt`
 
-Use SharpLansweeperDecrypt to automate decryption and dumping of stored creds:
+Use SharpLansweeperDecrypt to automate decryption and dumping of stored creds:<sup>[[3]](#references)</sup>
 
 ```powershell
 # From a WinRM session or interactive shell on the Lansweeper host
@@ -129,7 +129,7 @@ netexec winrm inventory.sweep.vl -u svc_inventory_win -p '<StrongPassword!>'
 
 ## 4) Lansweeper Deployment → SYSTEM RCE
 
-As a member of “Lansweeper Admins”, the web UI exposes Deployment and Configuration. Under Deployment → Deployment packages, you can create packages that run arbitrary commands on targeted assets. Execution is performed by the Lansweeper service with high privilege, yielding code execution as NT AUTHORITY\SYSTEM on the selected host.
+As a member of “Lansweeper Admins”, the web UI exposes Deployment and Configuration. Under Deployment → Deployment packages, you can create packages that run arbitrary commands on targeted assets. Execution is performed by the Lansweeper service with high privilege, yielding code execution as NT AUTHORITY\SYSTEM on the selected host.<sup>[[1]](#references)</sup>
 
 High-level steps:
 - Create a new Deployment package that runs a PowerShell or cmd one-liner (reverse shell, add-user, etc.).
@@ -164,10 +164,10 @@ OPSEC
 - WinRM usage and lateral movement
 
 ## References
-- [HTB: Sweep — Abusing Lansweeper Scanning, AD ACLs, and Secrets to Own a DC (0xdf)](https://0xdf.gitlab.io/2025/08/14/htb-sweep.html)
-- [sshesame (SSH honeypot)](https://github.com/jaksi/sshesame)
-- [SharpLansweeperDecrypt](https://github.com/Yeeb1/SharpLansweeperDecrypt)
-- [BloodyAD](https://github.com/CravateRouge/bloodyAD)
-- [BloodHound CE](https://github.com/SpecterOps/BloodHound)
+- [1] [HTB: Sweep — Abusing Lansweeper Scanning, AD ACLs, and Secrets to Own a DC (0xdf)](https://0xdf.gitlab.io/2025/08/14/htb-sweep.html)
+- [2] [sshesame (SSH honeypot)](https://github.com/jaksi/sshesame)
+- [3] [SharpLansweeperDecrypt](https://github.com/Yeeb1/SharpLansweeperDecrypt)
+- [4] [BloodyAD](https://github.com/CravateRouge/bloodyAD)
+- [5] [BloodHound CE](https://github.com/SpecterOps/BloodHound)
 
 {{#include ../../banners/hacktricks-training.md}}

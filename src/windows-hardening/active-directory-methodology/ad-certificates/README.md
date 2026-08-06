@@ -15,15 +15,15 @@
 - **Basic Constraints** identify if the certificate is for a CA or an end entity and define usage restrictions.
 - **Extended Key Usages (EKUs)** delineate the certificate's specific purposes, like code signing or email encryption, through Object Identifiers (OIDs).
 - The **Signature Algorithm** specifies the method for signing the certificate.
-- The **Signature**, created with the issuer's private key, guarantees the certificate's authenticity.
+- The **Signature**, created with the issuer's private key, guarantees the certificate's authenticity.<sup>[[1]](#references)</sup>
 
 ### Special Considerations
 
-- **Subject Alternative Names (SANs)** expand a certificate's applicability to multiple identities, crucial for servers with multiple domains. Secure issuance processes are vital to avoid impersonation risks by attackers manipulating the SAN specification.
+- **Subject Alternative Names (SANs)** expand a certificate's applicability to multiple identities, crucial for servers with multiple domains. Secure issuance processes are vital to avoid impersonation risks by attackers manipulating the SAN specification.<sup>[[1]](#references)</sup>
 
 ### Certificate Authorities (CAs) in Active Directory (AD)
 
-AD CS acknowledges CA certificates in an AD forest through designated containers, each serving unique roles:
+AD CS acknowledges CA certificates in an AD forest through designated containers, each serving unique roles:<sup>[[1]](#references)</sup>
 
 - **Certification Authorities** container holds trusted root CA certificates.
 - **Enrolment Services** container details Enterprise CAs and their certificate templates.
@@ -35,21 +35,21 @@ AD CS acknowledges CA certificates in an AD forest through designated containers
 1. The request process begins with clients finding an Enterprise CA.
 2. A CSR is created, containing a public key and other details, after generating a public-private key pair.
 3. The CA assesses the CSR against available certificate templates, issuing the certificate based on the template's permissions.
-4. Upon approval, the CA signs the certificate with its private key and returns it to the client.
+4. Upon approval, the CA signs the certificate with its private key and returns it to the client.<sup>[[1]](#references)</sup>
 
 ### Certificate Templates
 
-Defined within AD, these templates outline the settings and permissions for issuing certificates, including permitted EKUs and enrollment or modification rights, critical for managing access to certificate services.
+Defined within AD, these templates outline the settings and permissions for issuing certificates, including permitted EKUs and enrollment or modification rights, critical for managing access to certificate services.<sup>[[1]](#references)</sup>
 
 ## Certificate Enrollment
 
-The enrollment process for certificates is initiated by an administrator who **creates a certificate template**, which is then **published** by an Enterprise Certificate Authority (CA). This makes the template available for client enrollment, a step achieved by adding the template's name to the `certificatetemplates` field of an Active Directory object.
+The enrollment process for certificates is initiated by an administrator who **creates a certificate template**, which is then **published** by an Enterprise Certificate Authority (CA). This makes the template available for client enrollment, a step achieved by adding the template's name to the `certificatetemplates` field of an Active Directory object.<sup>[[1]](#references)</sup>
 
-For a client to request a certificate, **enrollment rights** must be granted. These rights are defined by security descriptors on the certificate template and the Enterprise CA itself. Permissions must be granted in both locations for a request to be successful.
+For a client to request a certificate, **enrollment rights** must be granted. These rights are defined by security descriptors on the certificate template and the Enterprise CA itself. Permissions must be granted in both locations for a request to be successful.<sup>[[1]](#references)</sup>
 
 ### Template Enrollment Rights
 
-These rights are specified through Access Control Entries (ACEs), detailing permissions like:
+These rights are specified through Access Control Entries (ACEs), detailing permissions like:<sup>[[1]](#references)</sup>
 
 - **Certificate-Enrollment** and **Certificate-AutoEnrollment** rights, each associated with specific GUIDs.
 - **ExtendedRights**, allowing all extended permissions.
@@ -57,18 +57,18 @@ These rights are specified through Access Control Entries (ACEs), detailing perm
 
 ### Enterprise CA Enrollment Rights
 
-The CA's rights are outlined in its security descriptor, accessible via the Certificate Authority management console. Some settings even allow low-privileged users remote access, which could be a security concern.
+The CA's rights are outlined in its security descriptor, accessible via the Certificate Authority management console. Some settings even allow low-privileged users remote access, which could be a security concern.<sup>[[1]](#references)</sup>
 
 ### Additional Issuance Controls
 
-Certain controls may apply, such as:
+Certain controls may apply, such as:<sup>[[1]](#references)</sup>
 
 - **Manager Approval**: Places requests in a pending state until approved by a certificate manager.
 - **Enrolment Agents and Authorized Signatures**: Specify the number of required signatures on a CSR and the necessary Application Policy OIDs.
 
 ### Methods to Request Certificates
 
-Certificates can be requested through:
+Certificates can be requested through:<sup>[[1]](#references)</sup>
 
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), using DCOM interfaces.
 2. **ICertPassage Remote Protocol** (MS-ICPR), through named pipes or TCP/IP.
@@ -85,7 +85,7 @@ Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 
 ## Certificate Authentication
 
-Active Directory (AD) supports certificate authentication, primarily utilizing **Kerberos** and **Secure Channel (Schannel)** protocols.
+Active Directory (AD) supports certificate authentication, primarily utilizing **Kerberos** and **Secure Channel (Schannel)** protocols.<sup>[[1]](#references)</sup>
 
 ### Kerberos Authentication Process
 
@@ -95,15 +95,15 @@ In the Kerberos authentication process, a user's request for a Ticket Granting T
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
 
-is central to establishing trust for certificate authentication.
+is central to establishing trust for certificate authentication.<sup>[[1]](#references)</sup>
 
 ### Secure Channel (Schannel) Authentication
 
-Schannel facilitates secure TLS/SSL connections, where during a handshake, the client presents a certificate that, if successfully validated, authorizes access. The mapping of a certificate to an AD account may involve Kerberos’s **S4U2Self** function or the certificate’s **Subject Alternative Name (SAN)**, among other methods.
+Schannel facilitates secure TLS/SSL connections, where during a handshake, the client presents a certificate that, if successfully validated, authorizes access.<sup>[[2]](#references)</sup> The mapping of a certificate to an AD account may involve Kerberos’s **S4U2Self** function or the certificate’s **Subject Alternative Name (SAN)**, among other methods.<sup>[[1]](#references)</sup>
 
 ### AD Certificate Services Enumeration
 
-AD's certificate services can be enumerated through LDAP queries, revealing information about **Enterprise Certificate Authorities (CAs)** and their configurations. This is accessible by any domain-authenticated user without special privileges. Tools like **[Certify](https://github.com/GhostPack/Certify)** and **[Certipy](https://github.com/ly4k/Certipy)** are used for enumeration and vulnerability assessment in AD CS environments.
+AD's certificate services can be enumerated through LDAP queries, revealing information about **Enterprise Certificate Authorities (CAs)** and their configurations. This is accessible by any domain-authenticated user without special privileges.<sup>[[1]](#references)</sup> Tools like **[Certify](https://github.com/GhostPack/Certify)** and **[Certipy](https://github.com/ly4k/Certipy)** are used for enumeration and vulnerability assessment in AD CS environments.
 
 Commands for using these tools include:
 
@@ -133,9 +133,9 @@ certutil -v -dstemplate
 
 ## References
 
-- [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
-- [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
-- [GhostPack/Certify](https://github.com/GhostPack/Certify)
-- [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
+- [1] [Certified Pre-Owned: Abusing Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
+- [2] [What Is SSL/TLS Client Authentication & How Does It Work?](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
+- [3] [GhostPack/Certify](https://github.com/GhostPack/Certify)
+- [4] [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
 
 {{#include ../../../banners/hacktricks-training.md}}

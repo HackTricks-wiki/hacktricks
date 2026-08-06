@@ -11,41 +11,41 @@ There are two types of ACLs:
 - **Discretionary Access Control List (DACL):** Specifies which users and groups have or do not have access to an object.
 - **System Access Control List (SACL):** Governs the auditing of access attempts to an object.
 
-The process of accessing a file involves the system checking the object's security descriptor against the user's access token to determine if access should be granted and the extent of that access, based on the ACEs.
+The process of accessing a file involves the system checking the object's security descriptor against the user's access token to determine if access should be granted and the extent of that access, based on the ACEs.<sup>[[1]](#references)</sup>
 
 ### **Key Components**
 
 - **DACL:** Contains ACEs that grant or deny access permissions to users and groups for an object. It's essentially the main ACL that dictates access rights.
-- **SACL:** Used for auditing access to objects, where ACEs define the types of access to be logged in the Security Event Log. This can be invaluable for detecting unauthorized access attempts or troubleshooting access issues.
+- **SACL:** Used for auditing access to objects, where ACEs define the types of access to be logged in the Security Event Log. This can be invaluable for detecting unauthorized access attempts or troubleshooting access issues.<sup>[[1]](#references)</sup>
 
 ### **System Interaction with ACLs**
 
 Each user session is associated with an access token that contains security information relevant to that session, including user, group identities, and privileges. This token also includes a logon SID that uniquely identifies the session.
 
-The Local Security Authority (LSASS) processes access requests to objects by examining the DACL for ACEs that match the security principal attempting access. Access is immediately granted if no relevant ACEs are found. Otherwise, LSASS compares the ACEs against the security principal's SID in the access token to determine access eligibility.
+The Local Security Authority (LSASS) processes access requests to objects by examining the DACL for ACEs that match the security principal attempting access. Access is immediately granted if no relevant ACEs are found. Otherwise, LSASS compares the ACEs against the security principal's SID in the access token to determine access eligibility.<sup>[[1]](#references)</sup>
 
 ### **Summarized Process**
 
 - **ACLs:** Define access permissions through DACLs and audit rules through SACLs.
 - **Access Token:** Contains user, group, and privilege information for a session.
-- **Access Decision:** Made by comparing DACL ACEs with the access token; SACLs are used for auditing.
+- **Access Decision:** Made by comparing DACL ACEs with the access token; SACLs are used for auditing.<sup>[[1]](#references)</sup>
 
 ### ACEs
 
-There arey **three main types of Access Control Entries (ACEs)**:
+There arey **three main types of Access Control Entries (ACEs)**:<sup>[[1]](#references)</sup>
 
 - **Access Denied ACE**: This ACE explicitly denies access to an object for specified users or groups (in a DACL).
 - **Access Allowed ACE**: This ACE explicitly grants access to an object for specified users or groups (in a DACL).
 - **System Audit ACE**: Positioned within a System Access Control List (SACL), this ACE is responsible for generating audit logs upon access attempts to an object by users or groups. It documents whether access was allowed or denied and the nature of the access.
 
-Each ACE has **four critical components**:
+Each ACE has **four critical components**:<sup>[[1]](#references)</sup>
 
 1. The **Security Identifier (SID)** of the user or group (or their principal name in a graphical representation).
 2. A **flag** that identifies the ACE type (access denied, allowed, or system audit).
 3. **Inheritance flags** that determine if child objects can inherit the ACE from their parent.
 4. An [**access mask**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), a 32-bit value specifying the object's granted rights.
 
-Access determination is conducted by sequentially examining each ACE until:
+Access determination is conducted by sequentially examining each ACE until:<sup>[[1]](#references)</sup>
 
 - An **Access-Denied ACE** explicitly denies the requested rights to a trustee identified in the access token.
 - **Access-Allowed ACE(s)** explicitly grant all requested rights to a trustee in the access token.
@@ -53,7 +53,7 @@ Access determination is conducted by sequentially examining each ACE until:
 
 ### Order of ACEs
 
-The way **ACEs** (rules that say who can or cannot access something) are put in a list called **DACL** is very important. This is because once the system gives or denies access based on these rules, it stops looking at the rest.
+The way **ACEs** (rules that say who can or cannot access something) are put in a list called **DACL** is very important. This is because once the system gives or denies access based on these rules, it stops looking at the rest.<sup>[[1]](#references)</sup>
 
 There is a best way to organize these ACEs, and it is called **"canonical order."** This method helps make sure everything works smoothly and fairly. Here is how it goes for systems like **Windows 2000** and **Windows Server 2003**:
 
@@ -74,7 +74,7 @@ So, this **"canonical order"** is all about making sure the access rules are cle
 
 ### GUI Example
 
-[**Example from here**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
+[**Example from here**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)<sup>[[2]](#references)</sup>
 
 This is the classic security tab of a folder showing the ACL, DACL and ACEs:
 
@@ -94,7 +94,7 @@ And last we have the SACL in the Auditing tab:
 
 ### Explaining Access Control in a Simplified Manner
 
-When managing access to resources, like a folder, we use lists and rules known as Access Control Lists (ACLs) and Access Control Entries (ACEs). These define who can or cannot access certain data.
+When managing access to resources, like a folder, we use lists and rules known as Access Control Lists (ACLs) and Access Control Entries (ACEs). These define who can or cannot access certain data.<sup>[[1]](#references)</sup>
 
 #### Denying Access to a Specific Group
 
@@ -145,12 +145,7 @@ In summary, ACLs and ACEs help define precise access controls, ensuring that onl
 
 ## References
 
-- [https://www.ntfs.com/ntfs-permissions-acl-use.htm](https://www.ntfs.com/ntfs-permissions-acl-use.htm)
-- [https://secureidentity.se/acl-dacl-sacl-and-the-ace/](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
-- [https://www.coopware.in2.info/\_ntfsacl_ht.htm](https://www.coopware.in2.info/_ntfsacl_ht.htm)
+- [1] [How the System Uses ACLs - NTFS.com](https://www.ntfs.com/ntfs-permissions-acl-use.htm)
+- [2] [ACL, DACL, SACL and the ACE - secureidentity.se](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
-

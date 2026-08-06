@@ -8,7 +8,7 @@
 
 How can you tell that a certificate is a CA certificate?
 
-It can be determined that a certificate is a CA certificate if several conditions are met:
+It can be determined that a certificate is a CA certificate if several conditions are met:<sup>[[6]](#references)</sup>
 
 - The certificate is stored on the CA server, with its private key secured by the machine's DPAPI, or by hardware such as a TPM/HSM if the operating system supports it.
 - Both the Issuer and Subject fields of the certificate match the distinguished name of the CA.
@@ -17,7 +17,7 @@ It can be determined that a certificate is a CA certificate if several condition
 
 To extract the private key of this certificate, the `certsrv.msc` tool on the CA server is the supported method via the built-in GUI. Nonetheless, this certificate does not differ from others stored within the system; thus, methods such as the [THEFT2 technique](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) can be applied for extraction.
 
-The certificate and private key can also be obtained using Certipy with the following command:
+The certificate and private key can also be obtained using Certipy with the following command:<sup>[[2]](#references)</sup>
 
 ```bash
 certipy ca 'corp.local/administrator@ca.corp.local' -hashes :123123.. -backup
@@ -50,7 +50,7 @@ Moreover, the **certificates generated** with this method **cannot be revoked** 
 Since February 11, 2025 (after KB5014754 rollout), domain controllers default to **Full Enforcement** for certificate mappings. Practically this means your forged certificates must either:
 
 - Contain a strong binding to the target account (for example, the SID security extension), or
-- Be paired with a strong, explicit mapping on the target object’s `altSecurityIdentities` attribute.
+- Be paired with a strong, explicit mapping on the target object’s `altSecurityIdentities` attribute.<sup>[[1]](#references)</sup>
 
 A reliable approach for persistence is to mint a forged certificate chained to the stolen Enterprise CA and then add a strong explicit mapping to the victim principal:
 
@@ -68,7 +68,7 @@ Notes
 
 #### Full-Enforcement compatible forging (SID-aware)
 
-Updated tooling lets you embed the SID directly, keeping golden certificates usable even when DCs reject weak mappings:
+Updated tooling lets you embed the SID directly, keeping golden certificates usable even when DCs reject weak mappings:<sup>[[3]](#references)</sup>
 
 ```bash
 # Certify 2.0 integrates ForgeCert and can embed SID
@@ -85,7 +85,7 @@ By embedding the SID you avoid having to touch `altSecurityIdentities`, which ma
 
 ## Trusting Rogue CA Certificates - DPERSIST2
 
-The `NTAuthCertificates` object is defined to contain one or more **CA certificates** within its `cacertificate` attribute, which Active Directory (AD) utilizes. The verification process by the **domain controller** involves checking the `NTAuthCertificates` object for an entry matching the **CA specified** in the Issuer field of the authenticating **certificate**. Authentication proceeds if a match is found.
+The `NTAuthCertificates` object is defined to contain one or more **CA certificates** within its `cacertificate` attribute, which Active Directory (AD) utilizes. The verification process by the **domain controller** involves checking the `NTAuthCertificates` object for an entry matching the **CA specified** in the Issuer field of the authenticating **certificate**. Authentication proceeds if a match is found.<sup>[[6]](#references)</sup>
 
 A self-signed CA certificate can be added to the `NTAuthCertificates` object by an attacker, provided they have control over this AD object. Normally, only members of the **Enterprise Admin** group, along with **Domain Admins** or **Administrators** in the **forest root’s domain**, are granted permission to modify this object. They can edit the `NTAuthCertificates` object using `certutil.exe` with the command `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA`, or by employing the [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool).
 
@@ -108,7 +108,7 @@ This capability is especially relevant when used in conjunction with a previousl
 
 ## Malicious Misconfiguration - DPERSIST3
 
-Opportunities for **persistence** through **security descriptor modifications of AD CS** components are plentiful. Modifications described in the "[Domain Escalation](domain-escalation.md)" section can be maliciously implemented by an attacker with elevated access. This includes the addition of "control rights" (e.g., WriteOwner/WriteDACL/etc.) to sensitive components such as:
+Opportunities for **persistence** through **security descriptor modifications of AD CS** components are plentiful. Modifications described in the "[Domain Escalation](domain-escalation.md)" section can be maliciously implemented by an attacker with elevated access. This includes the addition of "control rights" (e.g., WriteOwner/WriteDACL/etc.) to sensitive components such as:<sup>[[6]](#references)</sup>
 
 - The **CA server’s AD computer** object
 - The **CA server’s RPC/DCOM server**
@@ -128,7 +128,7 @@ Practical knobs attackers may set for long-term domain persistence (see {{#ref}}
 
 ### Certificate renewal abuse (ESC14) for persistence
 
-If you compromise an authentication-capable certificate (or an Enrollment Agent one), you can **renew it indefinitely** as long as the issuing template remains published and your CA still trusts the issuer chain. Renewal keeps the original identity bindings but extends validity, making eviction difficult unless the template is fixed or the CA is republished.
+If you compromise an authentication-capable certificate (or an Enrollment Agent one), you can **renew it indefinitely** as long as the issuing template remains published and your CA still trusts the issuer chain. Renewal keeps the original identity bindings but extends validity, making eviction difficult unless the template is fixed or the CA is republished.<sup>[[4]](#references)</sup>
 
 ```bash
 # Renew a stolen user cert to extend validity
@@ -138,7 +138,7 @@ certipy req -ca CORP-DC-CA -template User -pfx stolen_user.pfx -renew -out user_
 certipy req -ca CORP-DC-CA -on-behalf-of 'CORP/victim' -pfx agent.pfx -renew -out victim_renewed.pfx
 ```
 
-If domain controllers are in **Full Enforcement**, add `-sid <victim SID>` (or use a template that still includes the SID security extension) so the renewed leaf certificate continues to map strongly without touching `altSecurityIdentities`. Attackers with CA admin rights may also tweak `policy\RenewalValidityPeriodUnits` to lengthen renewed lifetimes before issuing themselves a cert.
+If domain controllers are in **Full Enforcement**, add `-sid <victim SID>` (or use a template that still includes the SID security extension) so the renewed leaf certificate continues to map strongly without touching `altSecurityIdentities`. Attackers with CA admin rights may also tweak `policy\RenewalValidityPeriodUnits` to lengthen renewed lifetimes before issuing themselves a cert.<sup>[[2]](#references)[[4]](#references)</sup>
 
 
 ## References
@@ -148,5 +148,6 @@ If domain controllers are in **Full Enforcement**, add `-sid <victim SID>` (or u
 - [SpecterOps – Certify 2.0 (integrated forge with SID support)](https://specterops.io/blog/2025/08/11/certify-2-0/)
 - [ESC14 renewal abuse overview](https://www.adcs-security.com/attacks/esc14)
 - [0xdf – HTB: Certificate (SeManageVolumePrivilege to exfil CA keys → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
+- [SpecterOps – Certified Pre-Owned: Abusing Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 
 {{#include ../../../banners/hacktricks-training.md}}

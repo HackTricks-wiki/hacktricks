@@ -128,7 +128,7 @@ PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmod
 
 ## LalsDumper – SSP-based LSASS dumping without MiniDumpWriteDump
 
-Ink Dragon ships a three-stage dumper dubbed **LalsDumper** that never calls `MiniDumpWriteDump`, so EDR hooks on that API never fire:
+Ink Dragon ships a three-stage dumper dubbed **LalsDumper** that never calls `MiniDumpWriteDump`, so EDR hooks on that API never fire:<sup>[[3]](#references)</sup>
 
 1. **Stage 1 loader (`lals.exe`)** – searches `fdp.dll` for a placeholder consisting of 32 lower-case `d` characters, overwrites it with the absolute path to `rtu.txt`, saves the patched DLL as `nfdp.dll`, and calls `AddSecurityPackageA("nfdp","fdp")`. This forces **LSASS** to load the malicious DLL as a new Security Support Provider (SSP).
 2. **Stage 2 inside LSASS** – when LSASS loads `nfdp.dll`, the DLL reads `rtu.txt`, XORs each byte with `0x20`, and maps the decoded blob into memory before transferring execution.
@@ -230,7 +230,7 @@ cmd /c copy "$($volume.DeviceObject)\windows\ntds\ntds.dit" C:\Users\Public
 $volume.Delete();if($notrunning -eq 1){$service.Stop()}
 ```
 
-Code from the book: [https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
+Code from the book: [https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)<sup>[[7]](#references)</sup>
 
 ### Invoke-NinjaCopy
 
@@ -250,7 +250,7 @@ Within this database, three primary tables are maintained:
 - **Link Table**: It keeps track of relationships, such as group memberships.
 - **SD Table**: **Security descriptors** for each object are held here, ensuring the security and access control for the stored objects.
 
-More information about this: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
+More information about this: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)<sup>[[8]](#references)</sup>
 
 Windows uses _Ntdsa.dll_ to interact with that file and its used by _lsass.exe_. Then, **part** of the **NTDS.dit** file could be located **inside the `lsass`** memory (you can find the latest accessed data probably because of the performance improve by using a **cache**).
 
@@ -341,7 +341,7 @@ Download it from:[ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.
 
 ## Mining idle RDP sessions and weakening security controls
 
-Ink Dragon’s FinalDraft RAT includes a `DumpRDPHistory` tasker whose techniques are handy for any red-teamer:
+Ink Dragon’s FinalDraft RAT includes a `DumpRDPHistory` tasker whose techniques are handy for any red-teamer:<sup>[[3]](#references)</sup>
 
 ### DumpRDPHistory-style telemetry collection
 
@@ -370,7 +370,7 @@ Once you know which Domain Admin regularly connects, dump LSASS (with LalsDumper
 
 ### Registry downgrades targeted by FinalDraft
 
-The same implant also tampers with several registry keys to make credential theft easier:
+The same implant also tampers with several registry keys to make credential theft easier:<sup>[[3]](#references)</sup>
 
 ```cmd
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin /t REG_DWORD /d 1 /f
@@ -386,7 +386,7 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 
 
 ## hMailServer database credentials (post-compromise)
 
-hMailServer stores its DB password in `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini` under `[Database] Password=`. The value is Blowfish-encrypted with the static key `THIS_KEY_IS_NOT_SECRET` and 4-byte word endianness swaps. Use the hex string from the INI with this Python snippet:
+hMailServer stores its DB password in `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini` under `[Database] Password=`. The value is Blowfish-encrypted with the static key `THIS_KEY_IS_NOT_SECRET` and 4-byte word endianness swaps. Use the hex string from the INI with this Python snippet:<sup>[[2]](#references)</sup>
 
 ```python
 from Crypto.Cipher import Blowfish
@@ -413,9 +413,10 @@ $cmd = $conn.CreateCommand(); $cmd.CommandText = "SELECT accountaddress,accountp
 ```
 
 The `accountpassword` column uses the hMailServer hash format (hashcat mode `1421`). Cracking these values can provide reusable credentials for WinRM/SSH pivots.
+
 ## LSA Logon Callback Interception (LsaApLogonUserEx2)
 
-Some tooling captures **plaintext logon passwords** by intercepting the LSA logon callback `LsaApLogonUserEx2`. The idea is to hook or wrap the authentication package callback so credentials are captured **during logon** (before hashing), then written to disk or returned to the operator. This is commonly implemented as a helper that injects into or registers with LSA, and then records each successful interactive/network logon event with the username, domain and password.
+Some tooling captures **plaintext logon passwords** by intercepting the LSA logon callback `LsaApLogonUserEx2`. The idea is to hook or wrap the authentication package callback so credentials are captured **during logon** (before hashing), then written to disk or returned to the operator. This is commonly implemented as a helper that injects into or registers with LSA, and then records each successful interactive/network logon event with the username, domain and password.<sup>[[1]](#references)</sup>
 
 Operational notes:
 - Requires local admin/SYSTEM to load the helper in the authentication path.
@@ -423,7 +424,7 @@ Operational notes:
 
 ## SSMS Saved Connection Credentials (sqlstudio.bin)
 
-SQL Server Management Studio (SSMS) stores saved connection information in a per-user `sqlstudio.bin` file. Dedicated dumpers can parse the file and recover saved SQL credentials. In shells that only return command output, the file is often exfiltrated by encoding it as Base64 and printing it to stdout.
+SQL Server Management Studio (SSMS) stores saved connection information in a per-user `sqlstudio.bin` file. Dedicated dumpers can parse the file and recover saved SQL credentials. In shells that only return command output, the file is often exfiltrated by encoding it as Base64 and printing it to stdout.<sup>[[1]](#references)</sup>
 
 ```cmd
 certutil -encode sqlstudio.bin sqlstudio.b64
@@ -436,13 +437,74 @@ On the operator side, rebuild the file and run the dumper locally to recover cre
 base64 -d sqlstudio.b64 > sqlstudio.bin
 ```
 
+## Passkeys / WebAuthn credential theft from Chrome on Windows
+
+If code execution is obtained as the **victim user** on a Windows host using **Chrome + Google Password Manager synced passkeys**, passkeys become an interesting post-exploitation target even **without admin/SYSTEM**.<sup>[[4]](#references)</sup>
+
+### Interesting local artifacts
+
+```text
+%LocalAppData%\Google\Chrome\User Data\<Profile>\Sync Data\LevelDB
+%LocalAppData%\Google\Chrome\User Data\<Profile>\passkey_enclave_state
+```
+
+- **`Sync Data\LevelDB`** stores protobuf-encoded **`WebauthnCredentialSpecifics`** records. A same-user process can enumerate the **RP ID**, **username**, **credential ID**, and encrypted private-key material for synced passkeys.<sup>[[5]](#references)</sup>
+- **`passkey_enclave_state`** stores local device-enrollment state such as **`wrapped_identity_private_key`** and the wrapped secret used to recover synced credentials.<sup>[[4]](#references)</sup>
+
+Quick triage:
+
+```powershell
+Get-ChildItem "$env:LOCALAPPDATA\Google\Chrome\User Data" -Recurse -Force |
+  Where-Object { $_.FullName -match 'passkey_enclave_state|Sync Data\\LevelDB' } |
+  Select-Object FullName, Length, LastWriteTime
+```
+
+### TPM-bound key blobs can still be abused as a local signing oracle
+
+If the browser exports a TPM-backed identity key as **`NCRYPT_OPAQUE_KEY_BLOB`** and stores that blob in user-accessible state, malware does **not** need to extract the raw private key. It can simply re-import the blob on the **same machine** and ask the local TPM to sign attacker-controlled data:<sup>[[4]](#references)[[6]](#references)</sup>
+
+```c
+NCryptOpenStorageProvider(...)
+NCryptImportKey(..., NCRYPT_OPAQUE_KEY_BLOB, ...)
+NCryptSignHash(...)
+```
+
+This means **hardware binding prevents off-device export but not same-user use on the compromised endpoint**.
+
+### Practical abuse paths
+
+1. **Pass-ta-key / device-identity relay**<sup>[[4]](#references)</sup>
+   - Enumerate `WebauthnCredentialSpecifics` from Chrome's LevelDB.
+   - Start a passkey login and obtain a fresh WebAuthn challenge.
+   - Use the stolen `wrapped_identity_private_key` blob on the victim TPM to sign the cloud-authenticator request binding.
+   - Relay the returned assertion to the relying party.
+   - This is especially valuable when the RP accepts `userVerification=preferred` or fails to reject assertions with **`UV=0`**.
+2. **Pending UV-key hijack**<sup>[[4]](#references)</sup>
+   - Force re-onboarding by deleting `passkey_enclave_state` or by sending a valid signed `device/forget` operation.
+   - If onboarding leaves the device in **`uv_key_pending`**, register an attacker-controlled UV public key.
+   - If the provider does not verify attestation / secure-hardware origin for the new UV key, later signatures from the attacker key are treated as **`UV=1`**.
+3. **Master-secret / SDS recovery theft**<sup>[[4]](#references)</sup>
+   - Force recovery or rejoin so Chrome fetches the synced-passkey master secret.
+   - Watch for recreation/modification of `passkey_enclave_state`, then dump Chrome memory while the plaintext **security domain secret (SDS)** is resident.
+   - Use the recovered SDS to decrypt the encrypted fields in every `WebauthnCredentialSpecifics` record and recover portable WebAuthn private keys.
+
+### DFIR / detection ideas
+
+- Monitor **deletion/recreation** of `passkey_enclave_state`.<sup>[[4]](#references)</sup>
+- Alert on abnormal access to Chrome **`Sync Data\LevelDB`** by non-browser processes.
+- Alert on **Chrome memory dumps** or suspicious cross-process memory access.
+- Investigate repeated **Google Password Manager recovery PIN** prompts or unexpected re-onboarding.
+- Remember that WebAuthn **`signCount`** is often not useful for synced passkeys because it may remain constant, so classic clone detection is weak.
+
 ## References
 
-- [Unit 42 – An Investigation Into Years of Undetected Operations Targeting High-Value Sectors](https://unit42.paloaltonetworks.com/cl-unk-1068-targets-critical-sectors/)
-- [0xdf – HTB/VulnLab JobTwo: Word VBA macro phishing via SMTP → hMailServer credential decryption → Veeam CVE-2023-27532 to SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
-- [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [1] [Unit 42 – An Investigation Into Years of Undetected Operations Targeting High-Value Sectors](https://unit42.paloaltonetworks.com/cl-unk-1068-targets-critical-sectors/)
+- [2] [0xdf – HTB/VulnLab JobTwo: Word VBA macro phishing via SMTP → hMailServer credential decryption → Veeam CVE-2023-27532 to SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
+- [3] [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [4] [Unit 42 – Pass the Passkey: A Novel Attack Surface in Passwordless Authentication](https://unit42.paloaltonetworks.com/passwordless-authentication-security-risks/)
+- [5] [Chromium – `webauthn_credential_specifics.proto`](https://chromium.googlesource.com/chromium/src/+/main/components/sync/protocol/webauthn_credential_specifics.proto)
+- [6] [Microsoft – `NCryptCreatePersistedKey` / CNG key storage](https://learn.microsoft.com/en-us/windows/win32/api/ncrypt/nf-ncrypt-ncryptcreatepersistedkey)
+- [7] [0xWord – Hacking Windows: Ataques a Sistemas y Redes Microsoft](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
+- [8] [How the Active Directory Data Store Really Works: Inside NTDS.dit (Part 1)](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

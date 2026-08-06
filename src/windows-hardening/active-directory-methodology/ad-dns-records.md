@@ -4,7 +4,7 @@
 
 By default **any user** in Active Directory can **enumerate all DNS records** in the Domain or Forest DNS zones, similar to a zone transfer (users can list the child objects of a DNS zone in an AD environment).
 
-The tool [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) enables **enumeration** and **exporting** of **all DNS records** in the zone for recon purposes of internal networks.
+The tool [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) enables **enumeration** and **exporting** of **all DNS records** in the zone for recon purposes of internal networks.<sup>[[4]](#references)</sup>
 
 ```bash
 git clone https://github.com/dirkjanm/adidnsdump
@@ -64,17 +64,17 @@ bloodyAD -u DOMAIN\\user -p 'Passw0rd!' --host 10.10.10.10 dns add A evil 10.10.
 
 ## Common attack primitives
 
-1. **Wildcard record** – `*.<zone>` turns the AD DNS server into an enterprise-wide responder similar to LLMNR/NBNS spoofing. It can be abused to capture NTLM hashes or to relay them to LDAP/SMB.  (Requires WINS-lookup to be disabled.)    
-2. **WPAD hijack** – add `wpad` (or an **NS** record pointing to an attacker host to bypass the Global-Query-Block-List) and transparently proxy outbound HTTP requests to harvest credentials.  Microsoft patched the wildcard/ DNAME bypasses (CVE-2018-8320) but **NS-records still work**.    
+1. **Wildcard record** – `*.<zone>` turns the AD DNS server into an enterprise-wide responder similar to LLMNR/NBNS spoofing. It can be abused to capture NTLM hashes or to relay them to LDAP/SMB.  (Requires WINS-lookup to be disabled.)<sup>[[1]](#references)</sup>    
+2. **WPAD hijack** – add `wpad` (or an **NS** record pointing to an attacker host to bypass the Global-Query-Block-List) and transparently proxy outbound HTTP requests to harvest credentials.  Microsoft patched the wildcard/ DNAME bypasses (CVE-2018-8320) but **NS-records still work**.<sup>[[1]](#references)</sup>    
 3. **Stale entry takeover** – claim the IP address that previously belonged to a workstation and the associated DNS entry will still resolve, enabling resource-based constrained delegation or Shadow-Credentials attacks without touching DNS at all.    
-4. **DHCP → DNS spoofing** – on a default Windows DHCP+DNS deployment an unauthenticated attacker on the same subnet can overwrite any existing A record (including Domain Controllers) by sending forged DHCP requests that trigger dynamic DNS updates (Akamai “DDSpoof”, 2023).  This gives machine-in-the-middle over Kerberos/LDAP and can lead to full domain takeover.    
+4. **DHCP → DNS spoofing** – on a default Windows DHCP+DNS deployment an unauthenticated attacker on the same subnet can overwrite any existing A record (including Domain Controllers) by sending forged DHCP requests that trigger dynamic DNS updates (Akamai “DDSpoof”, 2023).  This gives machine-in-the-middle over Kerberos/LDAP and can lead to full domain takeover.<sup>[[2]](#references)</sup>    
 5. **Certifried (CVE-2022-26923)** – change the `dNSHostName` of a machine account you control, register a matching A record, then request a certificate for that name to impersonate the DC. Tools such as **Certipy** or **BloodyAD** fully automate the flow.  
 
 ---
 
 ### Internal service hijacking via stale dynamic records (NATS case study)
 
-When dynamic updates stay open to all authenticated users, **a de-registered service name can be re-claimed and pointed to attacker infrastructure**. The Mirage HTB DC exposed the hostname `nats-svc.mirage.htb` after DNS scavenging, so any low-privileged user could:
+When dynamic updates stay open to all authenticated users, **a de-registered service name can be re-claimed and pointed to attacker infrastructure**. The Mirage HTB DC exposed the hostname `nats-svc.mirage.htb` after DNS scavenging, so any low-privileged user could:<sup>[[3]](#references)</sup>
 
 1. **Confirm the record is missing** and learn the SOA with `dig`:
 
@@ -118,7 +118,9 @@ This pattern applies to every AD-integrated service that relies on unsecured TCP
 
 ## References
 
-- Kevin Robertson – “ADIDNS Revisited – WPAD, GQBL and More”  (2018, still the de-facto reference for wildcard/WPAD attacks)  
-- Akamai – “Spoofing DNS Records by Abusing DHCP DNS Dynamic Updates” (Dec 2023)
-- [HackTheBox Mirage: Chaining NFS Leaks, Dynamic DNS Abuse, NATS Credential Theft, JetStream Secrets, and Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
+- [1] [ADIDNS Revisited - WPAD, GQBL, and More](https://www.netspi.com/blog/technical-blog/network-pentesting/adidns-revisited/) (2018, still the de-facto reference for wildcard/WPAD attacks)
+- [2] [Spoofing DNS Records by Abusing DHCP DNS Dynamic Updates](https://www.akamai.com/blog/security-research/spoofing-dns-by-abusing-dhcp) (Dec 2023)
+- [3] [HackTheBox Mirage: Chaining NFS Leaks, Dynamic DNS Abuse, NATS Credential Theft, JetStream Secrets, and Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
+- [4] [Getting in the Zone: dumping Active Directory DNS using adidnsdump](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)
+
 {{#include ../../banners/hacktricks-training.md}}

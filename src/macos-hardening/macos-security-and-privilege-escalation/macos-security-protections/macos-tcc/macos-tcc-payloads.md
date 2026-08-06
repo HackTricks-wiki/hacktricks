@@ -12,7 +12,7 @@
 
 ## Quick triage before using a payload
 
-Recent permission-theft research keeps reinforcing the same workflow: first find an app that already has the TCC grant you want, then verify that it is a realistic injection target.
+Recent permission-theft research keeps reinforcing the same workflow: first find an app that already has the TCC grant you want, then verify that it is a realistic injection target.<sup>[[1]](#references)</sup>
 
 ```bash
 sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" \
@@ -349,7 +349,7 @@ cp -r "$HOME/Library/Calendars" "/tmp/calendars"
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-Record a 3s video and save it in **`/tmp/recording.mov`**
+Record a 3s video and save it in **`/tmp/recording.mov`**<sup>[[5]](#references)</sup>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -430,7 +430,7 @@ static void myconstructor(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-Check if the program has access to the camera.
+Check if the program has access to the camera.<sup>[[5]](#references)</sup>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -502,7 +502,7 @@ ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-Record 5s of audio and store it in `/tmp/recording.m4a`
+Record 5s of audio and store it in `/tmp/recording.m4a`<sup>[[6]](#references)</sup>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -604,7 +604,7 @@ static void myconstructor(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-Check if the app has access to the microphone.
+Check if the app has access to the microphone.<sup>[[5]](#references)</sup>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -732,7 +732,7 @@ void myconstructor(int argc, const char **argv)
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Get the current location from shell.
+Get the current location from shell.<sup>[[2]](#references)</sup>
 
 ```bash
 # Fast option: use a dedicated CoreLocation CLI helper
@@ -1049,10 +1049,12 @@ int main() {
 
 ## References
 
-- [Cisco Talos - How multiple vulnerabilities in Microsoft apps for macOS pave the way to stealing permissions](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
-- [CoreLocationCLI](https://github.com/fulldecent/corelocationcli)
-- [Apple Developer - Requesting Authorization for Media Capture on macOS](https://developer.apple.com/documentation/bundleresources/requesting-authorization-for-media-capture-on-macos?language=objc)
-- [Apple Developer - Capture HDR content with ScreenCaptureKit (WWDC24)](https://developer.apple.com/videos/play/wwdc2024/10088/)
+- [1] [Cisco Talos - How multiple vulnerabilities in Microsoft apps for macOS pave the way to stealing permissions](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
+- [2] [CoreLocationCLI](https://github.com/fulldecent/corelocationcli)
+- [3] [Apple Developer - Requesting Authorization for Media Capture on macOS](https://developer.apple.com/documentation/bundleresources/requesting-authorization-for-media-capture-on-macos?language=objc)
+- [4] [Apple Developer - Capture HDR content with ScreenCaptureKit (WWDC24)](https://developer.apple.com/videos/play/wwdc2024/10088/)
+- [5] [vsociety - CVE-2023-26818: MacOS TCC Bypass with Telegram using DyLib Injection Part1](https://vsociety.medium.com/cve-2023-26818-macos-tcc-bypass-with-telegram-using-dylib-injection-part1-768b34efd8c4)
+- [6] [Vicarius vsociety - CVE-2023-26818: Exploit macOS TCC Bypass w/ Telegram (Part 1)](https://www.vicarius.io/vsociety/posts/cve-2023-26818-exploit-macos-tcc-bypass-w-telegram-part-1-2)
 
 
 {{#include ../../../../banners/hacktricks-training.md}}
