@@ -59,6 +59,7 @@ io.popen("/bin/sh -c 'id'")
 ```
 
 Notes:
+
 - Execution happens inside the client process; many anti-cheat/antidebug layers that block external debuggers won’t prevent in-VM process creation.
 - Also check: package.loadlib (arbitrary DLL/.so loading), require with native modules, LuaJIT's ffi (if present), and the debug library (can raise privileges inside the VM).
 

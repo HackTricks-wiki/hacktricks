@@ -16,7 +16,7 @@ This is why default runtime seccomp profiles are so important. They are not mere
 
 ## Modes And Filter Construction
 
-seccomp historically had a strict mode in which only a tiny syscall set remained available, but the mode relevant to modern container runtimes is seccomp filter mode, often called **seccomp-bpf**. In this model, the kernel evaluates a filter program that decides whether a syscall should be allowed, denied with an errno, trapped, logged, or kill the process. Container runtimes use this mechanism because it is expressive enough to block broad classes of dangerous syscalls while still allowing normal application behavior.
+seccomp historically had a strict mode in which only a tiny syscall set remained available, but the mode relevant to modern container runtimes is seccomp filter mode, often called **seccomp-bpf**. In this model, the kernel evaluates a filter program that decides whether a syscall should be allowed, denied with an errno, trapped, logged, or kill the process.<sup>[[1]](#references)</sup> Container runtimes use this mechanism because it is expressive enough to block broad classes of dangerous syscalls while still allowing normal application behavior.
 
 Two low-level examples are useful because they make the mechanism concrete rather than magical. Strict mode demonstrates the old "only a minimal syscall set survives" model:
 
@@ -91,7 +91,7 @@ grep -E 'Seccomp|NoNewPrivs' /proc/self/status
 
 ## Runtime Usage
 
-Docker supports both default and custom seccomp profiles and allows administrators to disable them with `--security-opt seccomp=unconfined`. Podman has similar support and often pairs seccomp with rootless execution in a very sensible default posture. Kubernetes exposes seccomp through workload configuration, where `RuntimeDefault` is usually the sane baseline and `Unconfined` should be treated as an exception requiring justification rather than as a convenience toggle.
+Docker supports both default and custom seccomp profiles and allows administrators to disable them with `--security-opt seccomp=unconfined`.<sup>[[2]](#references)</sup> Podman has similar support and often pairs seccomp with rootless execution in a very sensible default posture. Kubernetes exposes seccomp through workload configuration, where `RuntimeDefault` is usually the sane baseline and `Unconfined` should be treated as an exception requiring justification rather than as a convenience toggle.<sup>[[3]](#references)</sup>
 
 In containerd and CRI-O based environments, the exact path is more layered, but the principle is the same: the higher-level engine or orchestrator decides what should happen, and the runtime eventually installs the resulting seccomp policy for the container process. The outcome still depends on the final runtime configuration that reaches the kernel.
 
@@ -219,5 +219,12 @@ If a container already has suspicious mounts, broad capabilities, or shared host
 | Kubernetes | **Not guaranteed by default** | If `securityContext.seccompProfile` is unset, the default is `Unconfined` unless the kubelet enables `--seccomp-default`; `RuntimeDefault` or `Localhost` must otherwise be set explicitly | `securityContext.seccompProfile.type: Unconfined`, leaving seccomp unset on clusters without `seccompDefault`, `privileged: true` |
 | containerd / CRI-O under Kubernetes | Follows Kubernetes node and Pod settings | Runtime profile is used when Kubernetes asks for `RuntimeDefault` or when kubelet seccomp defaulting is enabled | Same as Kubernetes row; direct CRI/OCI configuration can also omit seccomp entirely |
 
-The Kubernetes behavior is the one that most often surprises operators. In many clusters, seccomp is still absent unless the Pod requests it or the kubelet is configured to default to `RuntimeDefault`.
+The Kubernetes behavior is the one that most often surprises operators. In many clusters, seccomp is still absent unless the Pod requests it or the kubelet is configured to default to `RuntimeDefault`.<sup>[[3]](#references)</sup>
+
+## References
+
+- [1] [Linux kernel documentation: Seccomp BPF (SECure COMPuting with filters)](https://docs.kernel.org/userspace-api/seccomp_filter.html)
+- [2] [Docker Docs: Seccomp security profiles for Docker](https://docs.docker.com/engine/security/seccomp/)
+- [3] [Kubernetes Docs: Restrict a Container's Syscalls with seccomp](https://kubernetes.io/docs/tutorials/security/seccomp/)
+
 {{#include ../../../../banners/hacktricks-training.md}}

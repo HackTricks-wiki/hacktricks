@@ -28,7 +28,7 @@ RAM retains data briefly after power is cut, usually for **1 to 2 minutes**. Thi
 
 ## GPU Rowhammer Against Page Tables
 
-Modern GPU Rowhammer attacks become much more useful when they target **GPU virtual-memory metadata** instead of ordinary buffers. Recent work on **GDDR6 NVIDIA Ampere GPUs** shows that an attacker running unprivileged CUDA code can build GPU-specific hammering patterns, use **memory massaging** to place paging structures in vulnerable rows, and then flip bits in the **last-level page table** or an intermediate **page directory**. Once a single translation entry is corrupted, the attacker can bootstrap **arbitrary GPU memory read/write** and then pivot into host compromise.
+Modern GPU Rowhammer attacks become much more useful when they target **GPU virtual-memory metadata** instead of ordinary buffers. Recent work on **GDDR6 NVIDIA Ampere GPUs** shows that an attacker running unprivileged CUDA code can build GPU-specific hammering patterns, use **memory massaging** to place paging structures in vulnerable rows, and then flip bits in the **last-level page table** or an intermediate **page directory**. Once a single translation entry is corrupted, the attacker can bootstrap **arbitrary GPU memory read/write** and then pivot into host compromise.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Exploitation Pattern
 
@@ -39,11 +39,11 @@ Modern GPU Rowhammer attacks become much more useful when they target **GPU virt
 
 ### Host Pivot and Mitigations
 
-- With **IOMMU disabled**, forged system-aperture mappings can expose arbitrary **host physical memory** to the GPU, turning the GPU primitive into full host compromise.
-- **GDDRHammer** targets last-level page-table entries, while **GeForge** shows that corrupting a page-directory level can be easier because one bit flip can retarget a larger translation subtree. Do not treat only one paging layer as security-critical.
-- **IOMMU** still matters because it blocks the direct arbitrary-host-memory path used by GDDRHammer/GeForge, but it is **not a complete mitigation**. **GPUBreach** shows a second-stage pivot where the attacker corrupts GPU-writable, driver-owned CPU buffers and then triggers NVIDIA driver memory-safety bugs to obtain a kernel write primitive and a **root shell** even with IOMMU enabled.
-- **System-level ECC** is a practical hardening step on supported workstation/server GPUs. Consumer GPUs without ECC expose a weaker defense surface.
-- These attacks are not purely theoretical: **GeForge** reported **1,171** bit flips on an RTX 3060 and **202** on an RTX A6000, which was enough to build a working host-privilege-escalation chain.
+- With **IOMMU disabled**, forged system-aperture mappings can expose arbitrary **host physical memory** to the GPU, turning the GPU primitive into full host compromise.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+- **GDDRHammer** targets last-level page-table entries, while **GeForge** shows that corrupting a page-directory level can be easier because one bit flip can retarget a larger translation subtree. Do not treat only one paging layer as security-critical.<sup>[[1]](#references)[[2]](#references)</sup>
+- **IOMMU** still matters because it blocks the direct arbitrary-host-memory path used by GDDRHammer/GeForge, but it is **not a complete mitigation**. **GPUBreach** shows a second-stage pivot where the attacker corrupts GPU-writable, driver-owned CPU buffers and then triggers NVIDIA driver memory-safety bugs to obtain a kernel write primitive and a **root shell** even with IOMMU enabled.<sup>[[3]](#references)</sup>
+- **System-level ECC** is a practical hardening step on supported workstation/server GPUs. Consumer GPUs without ECC expose a weaker defense surface.<sup>[[4]](#references)</sup>
+- These attacks are not purely theoretical: **GeForge** reported **1,171** bit flips on an RTX 3060 and **202** on an RTX A6000, which was enough to build a working host-privilege-escalation chain.<sup>[[2]](#references)</sup>
 
 ---
 
@@ -81,7 +81,7 @@ Administrator privileges allow for the creation of copies of sensitive files, in
 
 ### Wi-Fi managed cable implants
 
-- ESP32-S3 based implants such as **Evil Crow Cable Wind** hide inside USB-A→USB-C or USB-C↔USB-C cables, enumerate purely as a USB keyboard, and expose their C2 stack over Wi-Fi. The operator only needs to power the cable from the victim host, create a hotspot named `Evil Crow Cable Wind` with password `123456789`, and browse to [http://cable-wind.local/](http://cable-wind.local/) (or its DHCP address) to reach the embedded HTTP interface.
+- ESP32-S3 based implants such as **Evil Crow Cable Wind** hide inside USB-A→USB-C or USB-C↔USB-C cables, enumerate purely as a USB keyboard, and expose their C2 stack over Wi-Fi. The operator only needs to power the cable from the victim host, create a hotspot named `Evil Crow Cable Wind` with password `123456789`, and browse to [http://cable-wind.local/](http://cable-wind.local/) (or its DHCP address) to reach the embedded HTTP interface.<sup>[[8]](#references)</sup>
 - The browser UI provides tabs for *Payload Editor*, *Upload Payload*, *List Payloads*, *AutoExec*, *Remote Shell*, and *Config*. Stored payloads are tagged per OS, keyboard layouts are switched on the fly, and VID/PID strings can be altered to mimic known peripherals.
 - Because the C2 lives inside the cable, a phone can stage payloads, trigger execution, and manage Wi-Fi credentials without touching the host OS—ideal for short dwell-time physical intrusions.
 
@@ -128,7 +128,7 @@ A new BitLocker recovery key can be added through social engineering tactics, co
 
 ## Exploiting Chassis Intrusion / Maintenance Switches to Factory-Reset the BIOS
 
-Many modern laptops and small-form-factor desktops include a **chassis-intrusion switch** that is monitored by the Embedded Controller (EC) and the BIOS/UEFI firmware.  While the primary purpose of the switch is to raise an alert when a device is opened, vendors sometimes implement an **undocumented recovery shortcut** that is triggered when the switch is toggled in a specific pattern.
+Many modern laptops and small-form-factor desktops include a **chassis-intrusion switch** that is monitored by the Embedded Controller (EC) and the BIOS/UEFI firmware.  While the primary purpose of the switch is to raise an alert when a device is opened, vendors sometimes implement an **undocumented recovery shortcut** that is triggered when the switch is toggled in a specific pattern.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ### How the Attack Works
 
@@ -149,7 +149,7 @@ Release                 →  wait 2 s
 (repeat the press/release cycle 10× while the machine is powered)
 ```
 
-After the tenth cycle the EC sets a flag that instructs the BIOS to wipe NVRAM at the next reboot.  The whole procedure takes ~40 s and requires **nothing but a screwdriver**.
+After the tenth cycle the EC sets a flag that instructs the BIOS to wipe NVRAM at the next reboot.  The whole procedure takes ~40 s and requires **nothing but a screwdriver**.<sup>[[5]](#references)</sup>
 
 ### Generic Exploitation Procedure
 
@@ -171,7 +171,7 @@ After the tenth cycle the EC sets a flag that instructs the BIOS to wipe NVRAM a
 ## Covert IR Injection Against No-Touch Exit Sensors
 
 ### Sensor Characteristics
-- Commodity “wave-to-exit” sensors pair a near-IR LED emitter with a TV-remote style receiver module that only reports logic high after it has seen multiple pulses (~4–10) of the correct carrier (≈30 kHz).
+- Commodity “wave-to-exit” sensors pair a near-IR LED emitter with a TV-remote style receiver module that only reports logic high after it has seen multiple pulses (~4–10) of the correct carrier (≈30 kHz).<sup>[[7]](#references)</sup>
 - A plastic shroud blocks the emitter and receiver from looking directly at each other, so the controller assumes any validated carrier came from a nearby reflection and drives a relay that opens the door strike.
 - Once the controller believes a target is present it often changes the outbound modulation envelope, but the receiver keeps accepting any burst that matches the filtered carrier.
 
@@ -194,14 +194,13 @@ After the tenth cycle the EC sets a flag that instructs the BIOS to wipe NVRAM a
 
 ## References
 
-- [Bruce Schneier - Rowhammer Attack Against NVIDIA Chips](https://www.schneier.com/blog/archives/2026/05/rowhammer-attack-against-nvidia-chips.html)
-- [GDDRHammer: Greatly Disturbing DRAM Rows — Cross-Component Rowhammer Attacks from Modern GPUs](https://gddr.fail/files/gddrhammer.pdf)
-- [GeForge: Hammering GDDR Memory to Forge GPU Page Tables for Fun and Profit](https://stefan1wan.github.io/files/GeForge.pdf)
-- [GPUBreach: Privilege Escalation Attacks on GPUs using Rowhammer](https://gururaj-s.github.io/assets/pdf/SP26_GPUBreach.pdf)
-- [NVIDIA - Security Notice: Rowhammer - July 2025](https://nvidia.custhelp.com/app/answers/detail/a_id/5671/~/security-notice%3A-rowhammer---july-2025)
-- [Pentest Partners – “Framework 13. Press here to pwn”](https://www.pentestpartners.com/security-blog/framework-13-press-here-to-pwn/)
-- [FrameWiki – Mainboard Reset Guide](https://framewiki.net/guides/mainboard-reset)
-- [SensePost – “Noooooooo Touch! – Bypassing IR No-Touch Exit Sensors with a Covert IR Torch”](https://sensepost.com/blog/2025/noooooooooo-touch/)
-- [Mobile-Hacker – “Plug, Play, Pwn: Hacking with Evil Crow Cable Wind”](https://www.mobile-hacker.com/2025/12/01/plug-play-pwn-hacking-with-evil-crow-cable-wind/)
+- [1] [GDDRHammer: Greatly Disturbing DRAM Rows — Cross-Component Rowhammer Attacks from Modern GPUs](https://gddr.fail/files/gddrhammer.pdf)
+- [2] [GeForge: Hammering GDDR Memory to Forge GPU Page Tables for Fun and Profit](https://stefan1wan.github.io/files/GeForge.pdf)
+- [3] [GPUBreach: Privilege Escalation Attacks on GPUs using Rowhammer](https://gururaj-s.github.io/assets/pdf/SP26_GPUBreach.pdf)
+- [4] [NVIDIA - Security Notice: Rowhammer - July 2025](https://nvidia.custhelp.com/app/answers/detail/a_id/5671/~/security-notice%3A-rowhammer---july-2025)
+- [5] [Pentest Partners – “Framework 13. Press here to pwn”](https://www.pentestpartners.com/security-blog/framework-13-press-here-to-pwn/)
+- [6] [FrameWiki – Mainboard Reset Guide](https://framewiki.net/guides/mainboard-reset)
+- [7] [SensePost – “Noooooooo Touch! – Bypassing IR No-Touch Exit Sensors with a Covert IR Torch”](https://sensepost.com/blog/2025/noooooooooo-touch/)
+- [8] [Mobile-Hacker – “Plug, Play, Pwn: Hacking with Evil Crow Cable Wind”](https://www.mobile-hacker.com/2025/12/01/plug-play-pwn-hacking-with-evil-crow-cable-wind/)
 
 {{#include ../banners/hacktricks-training.md}}
