@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Dış sistemlerde komutları çalıştırmanın farklı yolları vardır, burada ana Windows lateral hareket tekniklerinin nasıl çalıştığına dair açıklamaları bulabilirsiniz:
+Harici sistemlerde komutları çalıştırmanın farklı yolları vardır; burada temel Windows lateral movement tekniklerinin nasıl çalıştığına dair açıklamaları bulabilirsiniz:
 
 - [**PsExec**](psexec-and-winexec.md)
 - [**SmbExec**](smbexec.md)

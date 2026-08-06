@@ -4,9 +4,9 @@
 
 ## RDP Process Injection
 
-Eğer **dış grup**un mevcut domaindeki herhangi bir **bilgisayara** **RDP erişimi** varsa, bir **saldırgan** o **bilgisayarı ele geçirip kullanıcının gelmesini bekleyebilir**.
+If the **external group** has **RDP access** to any **computer** in the current domain, an **attacker** could **compromise that computer and wait for him**.
 
-Kullanıcı RDP ile erişim sağladıktan sonra, **saldırgan o kullanıcının oturumuna pivot yapabilir** ve dış domaindeki yetkilerini kötüye kullanabilir.
+Once that user has accessed via RDP, the **attacker can pivot to that users session** and abuse its permissions in the external domain.
 ```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
@@ -30,13 +30,13 @@ PID   PPID  Name                         Arch  Session     User
 beacon> inject 4960 x64 tcp-local
 ## From that beacon you can just run powerview modules interacting with the external domain as that user
 ```
-Check **other ways to steal sessions with other tools** [**in this page.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
+**diğer araçlarla oturumları çalmanın diğer yollarına** [**bu sayfadan göz atın.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
 
 ## RDPInception
 
-Eğer bir kullanıcı **RDP into a machine** üzerinden bir makineye bağlanır ve bir **attacker** onun için **waiting** halindeyse, **attacker** kullanıcının oturumuna **inject a beacon in the RDP session of the user** yapabilir; eğer **victim mounted his drive** RDP ile bağlanırken, **attacker could access it**.
+Bir kullanıcı, kendisini bekleyen bir **saldırganın** bulunduğu bir makineye **RDP üzerinden erişim sağlarsa**, saldırgan **kullanıcının RDP oturumuna bir beacon enjekte edebilir** ve **kurban RDP üzerinden erişim sağlarken sürücüsünü bağladıysa**, **saldırgan sürücüye erişebilir**.
 
-Bu durumda, **statup folder**'a bir **backdoor** yazarak **victims** **original computer**'ı **compromise** edebilirsiniz.
+Bu durumda **startup folder** içine bir **backdoor** yazarak **kurbanın** **asıl bilgisayarını** **ele geçirebilirsiniz**.
 ```bash
 # Wait til someone logs in:
 net logons
@@ -70,9 +70,9 @@ beacon> upload C:\Payloads\pivot.exe
 ```
 ## Shadow RDP
 
-Eğer bir hostta **local admin** iseniz ve hedefin zaten bir **active RDP session**'ı varsa, o masaüstünü **view/control that desktop without stealing the password or dumping LSASS** yapmanız mümkün olabilir.
+Bir host üzerinde **local admin** yetkisine sahipseniz ve kurbanın zaten **active RDP session**'ı varsa, **parolayı çalmadan veya LSASS dumping yapmadan** bu masaüstünü **görüntüleyebilir/kontrol edebilirsiniz**.<sup>[[1]](#references)</sup>
 
-Bu, aşağıda saklanan **Remote Desktop Services shadowing** politikasına bağlıdır:
+Bu, şu konumda depolanan **Remote Desktop Services shadowing** policy'sine bağlıdır:<sup>[[2]](#references)[[3]](#references)</sup>
 ```text
 HKLM\Software\Policies\Microsoft\Windows NT\Terminal Services\Shadow
 ```
@@ -80,9 +80,9 @@ HKLM\Software\Policies\Microsoft\Windows NT\Terminal Services\Shadow
 
 - `0`: Devre dışı
 - `1`: `EnableInputNotify` (kontrol, kullanıcı onayı gerekli)
-- `2`: `EnableInputNoNotify` (kontrol, **kullanıcı onayı yok**)
-- `3`: `EnableNoInputNotify` (yalnızca görüntüleme, kullanıcı onayı gerekli)
-- `4`: `EnableNoInputNoNotify` (yalnızca görüntüleme, **kullanıcı onayı yok**)
+- `2`: `EnableInputNoNotify` (kontrol, **kullanıcı onayı gerekmiyor**)
+- `3`: `EnableNoInputNotify` (salt görüntüleme, kullanıcı onayı gerekli)
+- `4`: `EnableNoInputNoNotify` (salt görüntüleme, **kullanıcı onayı gerekmiyor**)
 ```cmd
 :: Check the policy
 reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shadow
@@ -94,64 +94,64 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shado
 quser /server:<HOST>
 mstsc /v:<HOST> /shadow:<SESSION_ID> /control /noconsentprompt /prompt
 ```
-Bu, RDP üzerinden bağlanmış ayrıcalıklı bir kullanıcının kilidi açık bir masaüstü, KeePass oturumu, MMC konsolu, tarayıcı oturumu veya admin shell açık bıraktığında özellikle kullanışlıdır.
+Bu özellikle RDP üzerinden bağlanan ayrıcalıklı bir kullanıcı kilidi açık bir masaüstü, KeePass session, MMC console, browser session veya admin shell bıraktığında kullanışlıdır.
 
-## Oturum Açmış Kullanıcı Olarak Zamanlanmış Görevler
+## Logged-On User Olarak Scheduled Tasks
 
-Eğer **local admin** iseniz ve hedef kullanıcı **şu anda oturum açmışsa**, Task Scheduler o kullanıcının parolası olmadan **o kullanıcı olarak** kod başlatabilir.
+**local admin** iseniz ve hedef kullanıcı **currently logged on** durumundaysa, Task Scheduler kodu **şifresi olmadan bu kullanıcı olarak** başlatabilir.<sup>[[1]](#references)[[4]](#references)</sup>
 
-Bu, kurbanın mevcut oturumunu bir yürütme ilkeline dönüştürür:
+Bu, kurbanın mevcut logon session'ını bir execution primitive'e dönüştürür:
 ```cmd
 schtasks /create /S <HOST> /RU "<DOMAIN\\user>" /SC ONCE /ST 00:00 /TN "Updater" /TR "cmd.exe /c whoami > C:\\Windows\\Temp\\whoami.txt"
 schtasks /run /S <HOST> /TN "Updater"
 ```
-Notes:
+Notlar:
 
-- Eğer kullanıcı **oturum açmamışsa**, Windows genellikle o kullanıcı adına çalışan bir görev oluşturmak için parolayı ister.
-- Eğer kullanıcı **oturum açmışsa**, görev mevcut oturum açma bağlamını yeniden kullanabilir.
-- Bu, LSASS'a dokunmadan kurban oturumu içinde GUI işlemleri yürütmek veya binary'ler başlatmak için pratik bir yoldur.
+- Kullanıcı **oturum açmış değilse**, Windows genellikle kendisi olarak çalışacak bir task oluşturmak için parolayı gerektirir.
+- Kullanıcı **oturum açmışsa**, task mevcut oturum açma bağlamını yeniden kullanabilir.
+- Bu, LSASS'e dokunmadan kurban oturumu içinde GUI eylemleri gerçekleştirmek veya binary'leri başlatmak için pratik bir yöntemdir.
 
-## Kurban Oturumundan CredUI Prompt Kötüye Kullanımı
+## Kurban Oturumundan CredUI Prompt Abuse
 
-Örneğin **Shadow RDP** veya **a scheduled task running as that user** aracılığıyla kurbanın etkileşimli masaüstü içinde çalıştırma yapabildiğinizde, CredUI API'lerini kullanarak gerçek bir Windows kimlik bilgisi istemi (credential prompt) görüntüleyebilir ve kurbanın girdiği kimlik bilgilerini toplayabilirsiniz.
+**Shadow RDP** veya **bu kullanıcı olarak çalışan bir scheduled task** aracılığıyla **kurbanın interaktif masaüstü içinde** çalıştırma yeteneği elde ettiğinizde, CredUI API'lerini kullanarak **gerçek bir Windows credential prompt** görüntüleyebilir ve kurbanın girdiği kimlik bilgilerini ele geçirebilirsiniz.<sup>[[1]](#references)</sup>
 
-Relevant APIs:
+İlgili API'ler:
 
 - `CredUIPromptForWindowsCredentials`
 - `CredUnPackAuthenticationBuffer`
 
-Typical flow:
+Tipik akış:
 
 1. Kurban oturumunda bir binary başlatın.
-2. Geçerli etki alanı görünümüne (domain branding) uyan bir etki alanı doğrulama istemi gösterin.
-3. Dönen auth buffer'ını unpack edin.
-4. Sağlanan kimlik bilgilerini doğrulayın ve isteğe bağlı olarak geçerli bilgiler girilene kadar tekrar istemeye devam edin.
+2. Mevcut domain branding ile eşleşen bir domain-authentication prompt görüntüleyin.
+3. Döndürülen auth buffer'ı unpack edin.
+4. Sağlanan kimlik bilgilerini doğrulayın ve geçerli kimlik bilgileri girilene kadar isteğe bağlı olarak prompt'u göstermeye devam edin.
 
-Bu, **on-host phishing** için kullanışlıdır çünkü istem sahte bir HTML formu yerine standart Windows API'leri tarafından render edilir.
+Bu, prompt'un sahte bir HTML formu yerine standart Windows API'leri tarafından oluşturulması nedeniyle **on-host phishing** için kullanışlıdır.
 
-## Kurban Bağlamında PFX Talebi
+## Kurban Bağlamında PFX İsteme
 
-Aynı **scheduled-task-as-user** primitive, oturum açmış kurban adına bir sertifika/PFX talep etmek için kullanılabilir. Bu sertifika daha sonra o kullanıcı olarak **AD authentication** için kullanılabilir ve böylece parola hırsızlığından tamamen kaçınılır.
+Aynı **scheduled-task-as-user** primitive'i, oturum açmış kurban olarak bir **certificate/PFX** istemek için kullanılabilir. Bu certificate daha sonra parola hırsızlığını tamamen önleyerek, o kullanıcı olarak **AD authentication** gerçekleştirmek için kullanılabilir.<sup>[[1]](#references)[[5]](#references)</sup>
 
-High-level flow:
+Yüksek seviyeli akış:
 
-1. Kurbanın oturum açtığı bir hostta **local admin** kazanın.
-2. Kayıt/dışa aktarma (enrollment/export) mantığını kurban olarak bir **scheduled task** ile çalıştırın.
-3. Ortaya çıkan **PFX**'i dışa aktarın.
-4. PFX'i PKINIT / sertifika tabanlı AD authentication için kullanın.
+1. Kurbanın oturum açtığı bir host üzerinde **local admin** yetkisi elde edin.
+2. **Scheduled task** kullanarak enrollment/export mantığını kurban olarak çalıştırın.
+3. Ortaya çıkan **PFX**'i export edin.
+4. PFX'i PKINIT / certificate-based AD authentication için kullanın.
 
-See the AD CS pages for follow-up abuse:
+Devam niteliğindeki abuse işlemleri için AD CS sayfalarına bakın:
 
 {{#ref}}
 ad-certificates/account-persistence.md
 {{#endref}}
 
-## References
+## Referanslar
 
-- [SensePost - From flat networks to locked up domains with tiering models](https://sensepost.com/blog/2026/from-flat-networks-to-locked-up-domains-with-tiering-models/)
-- [Microsoft - Remote Desktop shadow](https://learn.microsoft.com/windows/win32/termserv/remote-desktop-shadow)
-- [NetExec - Shadow RDP plugin PR #465](https://github.com/Pennyw0rth/NetExec/pull/465)
-- [NetExec - schtask_as module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/schtask_as.py)
-- [NetExec - Request PFX via scheduled task PR #908](https://github.com/Pennyw0rth/NetExec/pull/908)
+- [1] [SensePost - From flat networks to locked up domains with tiering models](https://sensepost.com/blog/2026/from-flat-networks-to-locked-up-domains-with-tiering-models/)
+- [2] [Microsoft - Remote Desktop shadow](https://learn.microsoft.com/windows/win32/termserv/remote-desktop-shadow)
+- [3] [NetExec - Shadow RDP plugin PR #465](https://github.com/Pennyw0rth/NetExec/pull/465)
+- [4] [NetExec - schtask_as module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/schtask_as.py)
+- [5] [NetExec - Request PFX via scheduled task PR #908](https://github.com/Pennyw0rth/NetExec/pull/908)
 
 {{#include ../../banners/hacktricks-training.md}}

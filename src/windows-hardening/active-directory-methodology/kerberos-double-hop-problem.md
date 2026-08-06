@@ -3,31 +3,31 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Giriş
+## Introduction
 
-Kerberos "Double Hop" sorunu, bir saldırganın örneğin **PowerShell**/**WinRM** kullanarak **Kerberos kimlik doğrulamasını iki** **hop** boyunca kullanmaya çalıştığında ortaya çıkar.
+Kerberos "Double Hop" problemi, bir saldırganın örneğin **PowerShell**/**WinRM** kullanarak **iki** **hop** üzerinden **Kerberos authentication** kullanmaya çalışmasıyla ortaya çıkar.
 
-Bir **kimlik doğrulama** **Kerberos** aracılığıyla gerçekleştiğinde, **kimlik bilgileri** belleğe **önbelleğe alınmaz.** Bu nedenle, mimikatz çalıştırırsanız kullanıcı makinede işlem çalıştırıyor olsa bile kullanıcının **kimlik bilgilerini** bulamazsınız.
+**Kerberos** üzerinden bir **authentication** gerçekleştiğinde, **credentials** **memory** içinde önbelleğe alınmaz. Bu nedenle mimikatz çalıştırırsanız, kullanıcı process çalıştırıyor olsa bile makinede kullanıcının **credentials** bilgilerini **bulamazsınız**.
 
-Bunun nedeni, Kerberos ile bağlanırken adımların şu şekilde olmasıdır:
+Bunun nedeni, Kerberos ile bağlantı kurulurken şu adımların izlenmesidir:<sup>[[1]](#references)</sup>
 
-1. User1 kimlik bilgilerini sağlar ve **domain controller** User1'e bir Kerberos **TGT** döndürür.
-2. User1, **Server1**'e **bağlanmak** için bir **service ticket** talep etmek amacıyla **TGT** kullanır.
-3. User1 **Server1**'e **bağlanır** ve **service ticket** sunar.
-4. **Server1**'de User1'in **kimlik bilgileri** veya User1'in **TGT**'si önbelleğe alınmaz. Bu nedenle, Server1 üzerinden User1 ikinci bir sunucuya giriş yapmaya çalıştığında **kimlik doğrulaması yapamaz**.
+1. User1 **credentials** bilgilerini sağlar ve **domain controller**, User1'a bir Kerberos **TGT** döndürür.
+2. User1, Server1'a **connect** olmak için **TGT** kullanarak bir **service ticket** ister.
+3. User1, **Server1'a connect** olur ve **service ticket** sağlar.
+4. **Server1**, User1'ın **credentials** bilgilerini veya User1'ın **TGT**'sini önbelleğe almış **değildir**. Bu nedenle User1, Server1 üzerinden ikinci bir sunucuya login olmaya çalıştığında **authenticate** olamaz.
 
 ### Unconstrained Delegation
 
-Eğer PC'de **unconstrained delegation** etkinse, bu durum meydana gelmez çünkü **Server** ona erişen her kullanıcının **TGT**'sini alır. Ayrıca, unconstrained delegation kullanıldığında muhtemelen bu yolla **Domain Controller**'ı ele geçirebilirsiniz.\
-[**Daha fazla bilgi için unconstrained delegation sayfasına bakın**](unconstrained-delegation.md).
+PC'de **unconstrained delegation** etkinse bu durum gerçekleşmez; çünkü **Server**, kendisine erişen her kullanıcının bir **TGT**'sini **alır**. Ayrıca, unconstrained delegation kullanılıyorsa muhtemelen buradan **Domain Controller'ı compromise** edebilirsiniz.\
+[**unconstrained delegation sayfasında daha fazla bilgi**](unconstrained-delegation.md).
 
 ### CredSSP
 
-Bu sorundan kaçınmanın bir diğer yolu, [**özellikle güvensiz**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) olan **Credential Security Support Provider**'dır. Microsoft'tan:
+Bu sorunu önlemenin [**notably insecure**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) başka bir yolu **Credential Security Support Provider** kullanmaktır. Microsoft'a göre:
 
-> CredSSP kimlik doğrulaması, kullanıcı kimlik bilgilerini yerel bilgisayardan uzak bir bilgisayara devreder. Bu uygulama uzak işlemin güvenlik riskini artırır. Uzak bilgisayar ele geçirilirse, kimlik bilgileri ona aktarıldığında, kimlik bilgileri ağ oturumunu kontrol etmek için kullanılabilir.
+> CredSSP authentication, kullanıcının credentials bilgilerini local computer'dan remote computer'a delegate eder. Bu uygulama, remote operation'ın security riskini artırır. Remote computer compromise edilirse, credentials bilgileri kendisine iletildiğinde network session'ı kontrol etmek için kullanılabilir.
 
-Güvenlik endişeleri nedeniyle, **CredSSP**'nin üretim sistemlerinde, hassas ağlarda ve benzeri ortamlarda devre dışı bırakılması kuvvetle tavsiye edilir. **CredSSP**'nin etkin olup olmadığını belirlemek için `Get-WSManCredSSP` komutu çalıştırılabilir. Bu komut, **CredSSP durumunun kontrol edilmesine** olanak tanır ve **WinRM** etkin olduğu sürece uzaktan bile çalıştırılabilir.
+Güvenlik endişeleri nedeniyle production systems, sensitive networks ve benzer ortamlarda **CredSSP**'nin devre dışı bırakılması önemle önerilir. **CredSSP**'nin etkin olup olmadığını belirlemek için `Get-WSManCredSSP` komutu çalıştırılabilir. Bu komut, **CredSSP status kontrolü** yapılmasını sağlar ve **WinRM** etkin olduğu sürece remote olarak da çalıştırılabilir.
 ```bash
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 Get-WSManCredSSP
@@ -35,32 +35,32 @@ Get-WSManCredSSP
 ```
 ### Remote Credential Guard (RCG)
 
-**Remote Credential Guard** kullanıcının TGT'sini kaynak iş istasyonunda tutarken, RDP oturumunun bir sonraki hop'ta yeni Kerberos service ticket'ları istemesine yine de izin verir. Etkinleştirin **Computer Configuration > Administrative Templates > System > Credentials Delegation > Restrict delegation of credentials to remote servers** ve **Require Remote Credential Guard**'ı seçin, sonra CredSSP'ye geri dönmek yerine `mstsc.exe /remoteGuard /v:server1` ile bağlanın.
+**Remote Credential Guard**, kullanıcının TGT'sini kaynak iş istasyonunda tutarken RDP oturumunun bir sonraki hop'ta yeni Kerberos service ticket'ları istemesine yine de olanak tanır. **Computer Configuration > Administrative Templates > System > Credentials Delegation > Restrict delegation of credentials to remote servers** seçeneğini etkinleştirin ve **Require Remote Credential Guard** seçeneğini belirleyin; ardından CredSSP'ye geri dönmek yerine `mstsc.exe /remoteGuard /v:server1` ile bağlanın.
 
-Microsoft, Windows 11 22H2+ üzerinde çoklu-hop erişimi için RCG'yi **Nisan 2024 toplu güncellemelerine** (KB5036896/KB5036899/KB5036894) kadar bozdu. İstemciyi ve aradaki sunucuyu yamayın yoksa ikinci hop yine başarısız olur. Hızlı hotfix kontrolü:
+Microsoft, **April 2024 cumulative updates** (KB5036896/KB5036899/KB5036894) yayımlanana kadar Windows 11 22H2+ üzerinde çoklu hop erişimi için RCG'yi bozdu. İstemciye ve aracı sunucuya patch uygulayın; aksi takdirde ikinci hop yine başarısız olur.<sup>[[5]](#references)</sup> Hızlı hotfix kontrolü:
 ```powershell
 ("KB5036896","KB5036899","KB5036894") | ForEach-Object {
 Get-HotFix -Id $_ -ErrorAction SilentlyContinue
 }
 ```
-Bu build'ler yüklendiğinde, RDP hop ilk sunucuda yeniden kullanılabilir sırları açığa çıkarmadan aşağı yöndeki Kerberos taleplerini karşılayabilir.
+Bu build'ler kurulduğunda RDP hop'u, ilk sunucuda yeniden kullanılabilir secret'ları açığa çıkarmadan downstream Kerberos challenge'larını karşılayabilir.
 
-## Geçici Çözümler
+## Workarounds
 
 ### Invoke Command
 
-Double hop sorununu ele almak için, iç içe geçmiş bir `Invoke-Command` içeren bir yöntem sunulmaktadır. Bu doğrudan problemi çözmez ancak özel yapılandırmalar gerektirmeden bir geçici çözüm sunar. Bu yaklaşım, ilk saldırgan makineden yürütülen bir PowerShell komutu veya ilk sunucuyla önceden kurulmuş bir PS-Session üzerinden, ikincil bir sunucuda `hostname` gibi bir komutun çalıştırılmasına izin verir. İşte nasıl yapıldığı:
+Double hop sorununu ele almak için iç içe bir `Invoke-Command` içeren bir yöntem sunulmuştur. Bu yöntem sorunu doğrudan çözmez, ancak özel yapılandırmalara ihtiyaç duymadan bir workaround sağlar. Bu yaklaşım, ilk saldırı makinesinden yürütülen bir PowerShell command'i veya ilk sunucuyla daha önce oluşturulmuş bir PS-Session üzerinden ikincil bir sunucuda bir command (`hostname`) çalıştırmaya olanak tanır. İşlem şu şekilde gerçekleştirilir:<sup>[[2]](#references)</sup>
 ```bash
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
 Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 }
 ```
-Alternatif olarak, ilk sunucu ile bir PS-Session kurup görevleri merkezileştirmek için `Invoke-Command`'ı `$cred` ile çalıştırmak önerilir.
+Alternatif olarak, ilk sunucuyla bir PS-Session oluşturup `$cred` kullanarak `Invoke-Command` çalıştırmak, görevleri merkezileştirmek için önerilir.
 
 ### Register PSSession Configuration
 
-double hop problem'i aşmak için bir çözüm, `Register-PSSessionConfiguration` ile `Enter-PSSession` kullanmaktır. Bu yöntem `evil-winrm`'den farklı bir yaklaşım gerektirir ve double hop sınırlamasından muzdarip olmayan bir oturum sağlar.
+double hop sorununu bypass etmek için bir çözüm, `Enter-PSSession` ile birlikte `Register-PSSessionConfiguration` kullanmaktır. Bu yöntem, `evil-winrm`'den farklı bir yaklaşım gerektirir ve double hop sınırlamasından etkilenmeyen bir session kullanılmasına olanak tanır.<sup>[[3]](#references)[[4]](#references)</sup>
 ```bash
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
@@ -69,52 +69,51 @@ klist
 ```
 ### PortForwarding
 
-Aracı bir hedefteki yerel yöneticiler için, port forwarding isteklerin nihai bir sunucuya gönderilmesine izin verir. `netsh` kullanılarak port forwarding için bir kural eklenebilir; ayrıca yönlendirilen portu izin veren bir Windows firewall kuralı eklenmelidir.
+Aradaki hedefteki yerel yöneticiler için port forwarding, isteklerin nihai sunucuya gönderilmesini sağlar. `netsh` kullanılarak port forwarding için bir kural eklenebilir; ayrıca yönlendirilen porta izin vermek üzere bir Windows firewall kuralı da eklenebilir.<sup>[[2]](#references)</sup>
 ```bash
 netsh interface portproxy add v4tov4 listenport=5446 listenaddress=10.35.8.17 connectport=5985 connectaddress=10.35.8.23
 netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP localport=5446
 ```
 #### winrs.exe
 
-`winrs.exe` WinRM isteklerini iletmek için kullanılabilir; PowerShell izleme bir endişe ise muhtemelen daha az tespit edilebilir bir seçenek olabilir. Aşağıdaki komut kullanımını göstermektedir:
+`winrs.exe`, WinRM isteklerini iletmek için kullanılabilir; PowerShell monitoring bir endişeyse potansiyel olarak daha az tespit edilebilir bir seçenek sunar.<sup>[[2]](#references)</sup> Aşağıdaki komut kullanımını gösterir:
 ```bash
 winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```
 ### OpenSSH
 
-İlk sunucuya OpenSSH kurmak, özellikle jump box senaryoları için double-hop sorununa bir çözüm yolu sağlar. Bu yöntem, OpenSSH for Windows'un CLI ile kurulmasını ve yapılandırılmasını gerektirir. `Password Authentication` için yapılandırıldığında, bu aradaki sunucunun kullanıcı adına bir `TGT` almasına izin verir.
+İlk sunucuya OpenSSH yüklemek, özellikle jump box senaryolarında kullanışlı olan double-hop sorununa yönelik bir geçici çözüm sağlar. Bu yöntem, OpenSSH for Windows'ın CLI üzerinden yüklenmesini ve yapılandırılmasını gerektirir. Password Authentication ile yapılandırıldığında, aracı sunucunun kullanıcı adına bir TGT almasına olanak tanır.<sup>[[2]](#references)</sup>
 
-#### OpenSSH Kurulum Adımları
+#### OpenSSH Installation Steps
 
-1. En son OpenSSH sürümünün zip dosyasını indirip hedef sunucuya taşıyın.
-2. Zip'i açıp `Install-sshd.ps1` betiğini çalıştırın.
-3. Port 22'yi açmak için bir güvenlik duvarı kuralı ekleyin ve SSH servislerinin çalıştığını doğrulayın.
+1. En güncel OpenSSH sürümünün zip dosyasını indirin ve hedef sunucuya taşıyın.
+2. Zip dosyasını açın ve `Install-sshd.ps1` script'ini çalıştırın.
+3. 22 numaralı portu açmak için bir firewall kuralı ekleyin ve SSH servislerinin çalıştığını doğrulayın.
 
-`Connection reset` hatalarını çözmek için, OpenSSH dizinine herkesin okuma ve çalıştırma erişimi verecek şekilde izinlerin güncellenmesi gerekebilir.
+`Connection reset` hatalarını çözmek için, OpenSSH dizininde everyone kullanıcısına okuma ve çalıştırma erişimi vermek üzere izinlerin güncellenmesi gerekebilir.
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
 ### LSA Whisperer CacheLogon (Gelişmiş)
 
-**LSA Whisperer** (2024) `msv1_0!CacheLogon` paket çağrısını ortaya çıkarır; böylece yeni bir oturum oluşturmak yerine `LogonUser` ile mevcut bir *network logon*'u bilinen bir NT hash ile doldurabilirsiniz. Hash'i hop #1'de WinRM/PowerShell'in zaten açtığı oturumun içine enjekte ederek, o host açık kimlik bilgileri saklamadan veya ek 4624 olayları oluşturmadan hop #2'ye kimlik doğrulayabilir.
+**LSA Whisperer** (2024), yeni bir oturum oluşturmak yerine mevcut bir *network logon* oturumuna bilinen bir NT hash'i yerleştirmenizi sağlayan `msv1_0!CacheLogon` package çağrısını açığa çıkarır. WinRM/PowerShell'in hop #1 üzerinde zaten açtığı logon session'a hash'i enjekte ederek bu host'un açık kimlik bilgilerini depolamadan veya ek 4624 event'leri oluşturmadan hop #2'ye authenticate olmasını sağlayabilirsiniz.<sup>[[6]](#references)</sup>
 
-1. LSASS içinde kod çalıştırma elde edin (ya PPL'yi devre dışı bırakın/istismar edin ya da kontrolünüzdeki bir lab VM'de çalıştırın).
-2. Oturumları listeleyin (örn. `lsa.exe sessions`) ve uzaktan bağlamınıza karşılık gelen LUID'i yakalayın.
-3. NT hash'i önceden hesaplayın ve `CacheLogon`'a verin, işiniz bittiğinde temizleyin.
+1. LSASS içinde code execution elde edin (PPL'yi devre dışı bırakarak/kötüye kullanarak veya kontrol ettiğiniz bir lab VM'sinde çalıştırarak).
+2. Logon session'ları enumerate edin (ör. `lsa.exe sessions`) ve remoting context'inize karşılık gelen LUID'yi alın.
+3. NT hash'i önceden hesaplayıp `CacheLogon`'a verin, ardından işiniz bittiğinde temizleyin.
 ```powershell
 lsa.exe cachelogon --session 0x3e4 --domain ta --username redsuit --nthash a7c5480e8c1ef0ffec54e99275e6e0f7
 lsa.exe cacheclear --session 0x3e4
 ```
-Cache seed işleminden sonra, hop #1'den `Invoke-Command`/`New-PSSession`'i tekrar çalıştırın: LSASS, enjekte edilen hash'i ikinci hop için Kerberos/NTLM challenge'larını karşılamak üzere yeniden kullanacak ve double hop kısıtlamasını temiz şekilde atlatacaktır. Dezavantajı daha yoğun telemetri (LSASS içinde kod yürütülmesi) olmasıdır; bu nedenle CredSSP/RCG'nin yasaklandığı yüksek sürtüşmeli ortamlarda kullanın.
+Cache seed işleminden sonra hop #1 üzerinden `Invoke-Command`/`New-PSSession` komutlarını yeniden çalıştırın: LSASS, ikinci hop için Kerberos/NTLM challenge'larını karşılamak üzere inject edilmiş hash'i yeniden kullanacak ve double hop kısıtlamasını sorunsuz şekilde bypass edecektir. Bunun karşılığında daha yoğun telemetry (LSASS içinde code execution) oluşur; bu nedenle CredSSP/RCG kullanımının yasak olduğu, sürtünmenin yüksek olduğu ortamlar için saklayın.
 
 ## References
 
-- [https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20](https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20)
-- [https://posts.slayerlabs.com/double-hop/](https://posts.slayerlabs.com/double-hop/)
-- [https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
-- [https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
-- [https://support.microsoft.com/en-au/topic/april-9-2024-kb5036896-os-build-17763-5696-efb580f1-2ce4-4695-b76c-d2068a00fb92](https://support.microsoft.com/en-au/topic/april-9-2024-kb5036896-os-build-17763-5696-efb580f1-2ce4-4695-b76c-d2068a00fb92)
-- [https://specterops.io/blog/2024/04/17/lsa-whisperer/](https://specterops.io/blog/2024/04/17/lsa-whisperer/)
-
+- [1] [Understanding Kerberos Double Hop - Microsoft Community Hub](https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20)
+- [2] [Kerberos Double-Hop Workarounds](https://posts.slayerlabs.com/double-hop/)
+- [3] [Another solution to multi-hop PowerShell remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
+- [4] [Solve the PowerShell multi-hop problem without using CredSSP](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
+- [5] [April 9, 2024—KB5036896 (OS Build 17763.5696)](https://support.microsoft.com/en-au/topic/april-9-2024-kb5036896-os-build-17763-5696-efb580f1-2ce4-4695-b76c-d2068a00fb92)
+- [6] [LSA Whisperer](https://specterops.io/blog/2024/04/17/lsa-whisperer/)
 
 {{#include ../../banners/hacktricks-training.md}}
