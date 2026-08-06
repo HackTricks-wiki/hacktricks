@@ -7,110 +7,110 @@
 ### Komponente van 'n Sertifikaat
 
 - Die **Subject** van die sertifikaat dui die eienaar daarvan aan.
-- 'n **Public Key** word gepaar met 'n privaat gehoue sleutel om die sertifikaat aan sy regmatige eienaar te koppel.
-- Die **Validity Period**, gedefinieer deur **NotBefore** en **NotAfter** datums, merk die sertifikaat se effektiewe duur.
+- 'n **Public Key** word met 'n privaat beheerde sleutel gepaar om die sertifikaat aan sy regmatige eienaar te koppel.
+- Die **Validity Period**, gedefinieer deur die **NotBefore**- en **NotAfter**-datums, dui die sertifikaat se geldigheidsduur aan.
 - 'n Unieke **Serial Number**, verskaf deur die Certificate Authority (CA), identifiseer elke sertifikaat.
 - Die **Issuer** verwys na die CA wat die sertifikaat uitgereik het.
-- **SubjectAlternativeName** laat addisionele name vir die subject toe, wat identifikasiefleksibiliteit verbeter.
-- **Basic Constraints** identifiseer of die sertifikaat vir 'n CA of 'n end entity is en definieer gebruiksbeperkings.
-- **Extended Key Usages (EKUs)** dui die sertifikaat se spesifieke doeleindes aan, soos code signing of email encryption, deur Object Identifiers (OIDs).
-- Die **Signature Algorithm** spesifiseer die metode vir die ondertekening van die sertifikaat.
-- Die **Signature**, geskep met die uitreiker se private sleutel, waarborg die sertifikaat se egtheid.
+- **SubjectAlternativeName** laat bykomende name vir die subject toe, wat identifikasiefleksibiliteit verbeter.
+- **Basic Constraints** identifiseer of die sertifikaat vir 'n CA of 'n eindentiteit is en definieer gebruiksbeperkings.
+- **Extended Key Usages (EKUs)** omskryf die sertifikaat se spesifieke doelwitte, soos code signing of email encryption, deur middel van Object Identifiers (OIDs).
+- Die **Signature Algorithm** spesifiseer die metode wat gebruik word om die sertifikaat te onderteken.
+- Die **Signature**, wat met die issuer se private key geskep word, waarborg die sertifikaat se egtheid.<sup>[[4]](#references)</sup>
 
 ### Spesiale Oorwegings
 
-- **Subject Alternative Names (SANs)** brei 'n sertifikaat se toepasbaarheid na veelvuldige identiteite uit, wat van kritieke belang is vir servers met veelvuldige domains. Veilige uitreikingsprosesse is noodsaaklik om impersonation-risiko's te vermy deur attackers wat die SAN-spesifikasie manipuleer.
+- **Subject Alternative Names (SANs)** brei 'n sertifikaat se toepaslikheid na verskeie identiteite uit, wat noodsaaklik is vir bedieners met verskeie domains. Veilige uitreikingsprosesse is noodsaaklik om impersonation-risiko's te voorkom wat deur aanvallers veroorsaak kan word wanneer hulle die SAN-spesifikasie manipuleer.<sup>[[4]](#references)</sup>
 
 ### Certificate Authorities (CAs) in Active Directory (AD)
 
-AD CS erken CA-sertifikate in 'n AD forest deur aangewese containers, elk met unieke rolle:
+AD CS erken CA-sertifikate in 'n AD forest deur middel van aangewese containers, wat elk unieke rolle vervul:<sup>[[4]](#references)</sup>
 
-- **Certification Authorities** container hou vertroude root CA-sertifikate.
-- **Enrolment Services** container gee besonderhede van Enterprise CAs en hul certificate templates.
-- **NTAuthCertificates** object sluit CA-sertifikate in wat vir AD-authentication gemagtig is.
-- **AIA (Authority Information Access)** container vergemaklik certificate chain validation met intermediate en cross CA-sertifikate.
+- Die **Certification Authorities**-container bevat trusted root CA-sertifikate.
+- Die **Enrolment Services**-container bevat besonderhede oor Enterprise CAs en hul certificate templates.
+- Die **NTAuthCertificates**-object bevat CA-sertifikate wat vir AD-authentication gemagtig is.
+- Die **AIA (Authority Information Access)**-container vergemaklik certificate chain validation met intermediate en cross CA-sertifikate.
 
 ### Certificate Acquisition: Client Certificate Request Flow
 
-1. Die request-proses begin wanneer clients 'n Enterprise CA vind.
-2. 'n CSR word geskep, wat 'n public key en ander besonderhede bevat, nadat 'n public-private key pair gegenereer is.
-3. Die CA beoordeel die CSR teen beskikbare certificate templates, en reik die sertifikaat uit op grond van die template se permissions.
-4. By goedkeuring onderteken die CA die sertifikaat met sy private key en stuur dit terug na die client.
+1. Die versoekproses begin wanneer clients 'n Enterprise CA vind.
+2. 'n CSR word geskep nadat 'n public-private key pair gegenereer is; dit bevat 'n public key en ander besonderhede.
+3. Die CA evalueer die CSR teenoor die beskikbare certificate templates en reik die sertifikaat uit volgens die template se permissions.
+4. Nadat dit goedgekeur is, onderteken die CA die sertifikaat met sy private key en stuur dit aan die client terug.<sup>[[4]](#references)</sup>
 
 ### Certificate Templates
 
-Hierdie templates, wat binne AD gedefinieer is, skets die settings en permissions vir die uitreiking van sertifikate, insluitend toegelate EKUs en enrollment- of modification-regte, krities vir die bestuur van toegang tot certificate services.
+Hierdie templates, wat binne AD gedefinieer word, beskryf die settings en permissions vir die uitreiking van sertifikate, insluitend toegelate EKUs en enrollment- of modification-regte, wat krities is vir die bestuur van toegang tot certificate services.<sup>[[4]](#references)</sup>
 
-**Template schema version matters.** Legacy **v1** templates (for example, the built-in **WebServer** template) lack several modern enforcement knobs. The **ESC15/EKUwu** research showed that on **v1 templates**, a requester can embed **Application Policies/EKUs** in the CSR that are **preferred over** the template's configured EKUs, enabling client-auth, enrollment agent, or code-signing certificates with only enrollment rights. Prefer **v2/v3 templates**, remove or supersede v1 defaults, and tightly scope EKUs to the intended purpose.
+**Template schema version matters.** Legacy **v1**-templates (byvoorbeeld die ingeboude **WebServer**-template) het nie verskeie moderne enforcement-knoppies nie. Die **ESC15/EKUwu**-navorsing het getoon dat 'n requester op **v1 templates** **Application Policies/EKUs** in die CSR kan insluit wat **preferred over** die template se gekonfigureerde EKUs is, wat client-auth, enrollment agent- of code-signing-sertifikate met slegs enrollment-regte moontlik maak. Verkies **v2/v3 templates**, verwyder of vervang v1-defaults, en beperk EKUs streng tot die bedoelde doel.<sup>[[1]](#references)</sup>
 
 ## Certificate Enrollment
 
-The enrollment process for certificates is initiated by an administrator who **creates a certificate template**, which is then **published** by an Enterprise Certificate Authority (CA). This makes the template available for client enrollment, a step achieved by adding the template's name to the `certificatetemplates` field of an Active Directory object.
+Die enrollment-proses vir sertifikate word deur 'n administrator begin wat **'n certificate template skep**, waarna dit deur 'n Enterprise Certificate Authority (CA) **published** word. Dit maak die template vir client enrollment beskikbaar, wat bereik word deur die template se naam by die `certificatetemplates`-veld van 'n Active Directory-object te voeg.<sup>[[4]](#references)</sup>
 
-For a client to request a certificate, **enrollment rights** must be granted. These rights are defined by security descriptors on the certificate template and the Enterprise CA itself. Permissions must be granted in both locations for a request to be successful.
+Om 'n sertifikaat aan te vra, moet **enrollment rights** aan 'n client toegeken word. Hierdie regte word deur security descriptors op die certificate template en die Enterprise CA self gedefinieer. Permissions moet op albei plekke toegeken word voordat 'n versoek suksesvol kan wees.
 
 ### Template Enrollment Rights
 
-These rights are specified through Access Control Entries (ACEs), detailing permissions like:
+Hierdie regte word deur Access Control Entries (ACEs) gespesifiseer, wat permissions soos die volgende uiteensit:
 
-- **Certificate-Enrollment** and **Certificate-AutoEnrollment** rights, each associated with specific GUIDs.
-- **ExtendedRights**, allowing all extended permissions.
-- **FullControl/GenericAll**, providing complete control over the template.
+- **Certificate-Enrollment**- en **Certificate-AutoEnrollment**-regte, elk geassosieer met spesifieke GUIDs.
+- **ExtendedRights**, wat alle extended permissions toelaat.
+- **FullControl/GenericAll**, wat volledige beheer oor die template verskaf.
 
 ### Enterprise CA Enrollment Rights
 
-The CA's rights are outlined in its security descriptor, accessible via the Certificate Authority management console. Some settings even allow low-privileged users remote access, which could be a security concern.
+Die CA se regte word in sy security descriptor uiteengesit, wat deur die Certificate Authority management console verkrygbaar is. Sommige settings laat selfs remote access deur low-privileged users toe, wat 'n security concern kan wees.
 
 ### Additional Issuance Controls
 
-Certain controls may apply, such as:
+Sekere controls kan van toepassing wees, soos:
 
-- **Manager Approval**: Places requests in a pending state until approved by a certificate manager.
-- **Enrolment Agents and Authorized Signatures**: Specify the number of required signatures on a CSR and the necessary Application Policy OIDs.
+- **Manager Approval**: Plaas versoeke in 'n pending state totdat dit deur 'n certificate manager goedgekeur word.
+- **Enrolment Agents and Authorized Signatures**: Spesifiseer die aantal vereiste signatures op 'n CSR en die nodige Application Policy OIDs.
 
 ### Methods to Request Certificates
 
-Certificates can be requested through:
+Sertifikate kan deur die volgende aangevra word:
 
-1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), using DCOM interfaces.
-2. **ICertPassage Remote Protocol** (MS-ICPR), through named pipes or TCP/IP.
-3. The **certificate enrollment web interface**, with the Certificate Authority Web Enrollment role installed.
-4. The **Certificate Enrollment Service** (CES), in conjunction with the Certificate Enrollment Policy (CEP) service.
-5. The **Network Device Enrollment Service** (NDES) for network devices, using the Simple Certificate Enrollment Protocol (SCEP).
+1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), met behulp van DCOM interfaces.
+2. **ICertPassage Remote Protocol** (MS-ICPR), deur named pipes of TCP/IP.
+3. Die **certificate enrollment web interface**, met die Certificate Authority Web Enrollment-role geïnstalleer.
+4. Die **Certificate Enrollment Service** (CES), in samewerking met die Certificate Enrollment Policy (CEP)-service.
+5. Die **Network Device Enrollment Service** (NDES) vir network devices, met behulp van die Simple Certificate Enrollment Protocol (SCEP).
 
-Windows users can also request certificates via the GUI (`certmgr.msc` or `certlm.msc`) or command-line tools (`certreq.exe` or PowerShell's `Get-Certificate` command).
+Windows-users kan ook sertifikate deur die GUI (`certmgr.msc` of `certlm.msc`) of command-line tools (`certreq.exe` of PowerShell se `Get-Certificate`-command) aanvra.
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
 ## Sertifikaat-verifikasie
 
-Active Directory (AD) ondersteun sertifikaat-verifikasie, hoofsaaklik deur **Kerberos** en **Secure Channel (Schannel)** protokolle te gebruik.
+Active Directory (AD) ondersteun sertifikaat-verifikasie, hoofsaaklik deur gebruik te maak van die **Kerberos**- en **Secure Channel (Schannel)**-protokolle.
 
 ### Kerberos-verifikasieproses
 
-In die Kerberos-verifikasieproses word ’n gebruiker se versoek vir ’n Ticket Granting Ticket (TGT) geteken met behulp van die **private key** van die gebruiker se sertifikaat. Hierdie versoek ondergaan verskeie validerings deur die domain controller, insluitend die sertifikaat se **geldigheid**, **pad**, en **intrekkingsstatus**. Validerings sluit ook in die verifiëring dat die sertifikaat van ’n vertroude bron af kom en die bevestiging van die uitreiker se teenwoordigheid in die **NTAUTH certificate store**. Suksesvolle validerings lei tot die uitreiking van ’n TGT. Die **`NTAuthCertificates`** object in AD, gevind by:
+In die Kerberos-verifikasieproses word 'n gebruiker se versoek om 'n Ticket Granting Ticket (TGT) met die **private key** van die gebruiker se sertifikaat onderteken. Hierdie versoek ondergaan verskeie validasies deur die domeinbeheerder, insluitend die sertifikaat se **geldigheid**, **pad** en **herroepingstatus**. Validasies sluit ook in om te verifieer dat die sertifikaat van 'n betroubare bron afkomstig is en om te bevestig dat die uitreiker in die **NTAUTH certificate store** voorkom. Suksesvolle validasies lei tot die uitreiking van 'n TGT. Die **`NTAuthCertificates`**-objek in AD, wat gevind word by:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-is sentraal tot die vestiging van trust vir certificate authentication.
+is sentraal tot die vestiging van vertroue vir sertifikaat-verifikasie.<sup>[[4]](#references)</sup>
 
-Sedert die **KB5014754**-uitrol gaan moderne Kerberos certificate auth meestal oor **mapping strength**, nie net EKUs nie. In geharde forests:
+Sedert die **KB5014754**-uitrol gaan moderne Kerberos-sertifikaat-auth hoofsaaklik oor **mapping strength**, nie net EKUs nie.<sup>[[2]](#references)</sup> In geharde forests:
 
-- ’n Certificate wat slegs ’n **UPN/DNS SAN** dra, is dalk nie meer genoeg vir logon nie.
-- Die KDC verkies ’n **strong binding**, tipies die **SID security extension** (`1.3.6.1.4.1.311.25.2`) of ’n sterk eksplisiete mapping in `altSecurityIdentities`.
-- As die cert nie ’n strong mapping het nie, log DCs **Kdcsvc Event ID 39/41** in compatibility mode en weier auth in enforcement mode.
-- In gemengde attack paths maak **ESC9/ESC16** saak omdat hulle die SID extension uit uitgereikte certs strip; operators steun dan op eksplisiete mappings of SAN URL SID formate waar die attack path dit ondersteun.
+- ’n Sertifikaat wat slegs ’n **UPN/DNS SAN** bevat, is moontlik nie meer voldoende vir logon nie.
+- Die KDC verkies ’n **strong binding**, tipies die **SID security extension** (`1.3.6.1.4.1.311.25.2`) of ’n strong eksplisiete mapping in `altSecurityIdentities`.
+- As die sertifikaat nie ’n strong mapping bevat nie, teken DCs **Kdcsvc Event ID 39/41** in compatibility mode aan en weier auth in enforcement mode.
+- In gemengde attack paths is **ESC9/ESC16** belangrik omdat hulle die SID extension van uitgereikte sertifikate verwyder; operators steun dan op eksplisiete mappings of SAN URL SID-formate waar die attack path dit ondersteun.
 
-### Secure Channel (Schannel) Authentication
+### Secure Channel (Schannel)-verifikasie
 
-Schannel fasiliteer secure TLS/SSL connections, waar die client tydens ’n handshake ’n certificate aanbied wat, indien suksesvol gevalideer, toegang authoriseer. Die mapping van ’n certificate na ’n AD account kan onder meer Kerberos se **S4U2Self**-funksie of die certificate se **Subject Alternative Name (SAN)** behels.
+Schannel fasiliteer veilige TLS/SSL-verbindings, waar die kliënt tydens ’n handshake ’n sertifikaat aanbied wat, indien dit suksesvol gevalideer word, toegang magtig. Die mapping van ’n sertifikaat na ’n AD-rekening kan onder andere Kerberos se **S4U2Self**-funksie of die sertifikaat se **Subject Alternative Name (SAN)** behels.<sup>[[4]](#references)</sup>
 
-Schannel is ook die praktiese fallback wanneer **PKINIT** onbeskikbaar is. Byvoorbeeld, as ’n domain controller nie ’n geskikte **Smart Card Logon** certificate het nie, kan `certipy auth`/PKINIT tooling dalk nie ’n TGT kry nie, maar dieselfde certificate kan steeds bruikbaar wees teen **LDAPS** of **LDAP StartTLS** vir authentication en LDAP operations.
+Schannel is ook die praktiese fallback wanneer **PKINIT** nie beskikbaar is nie. Byvoorbeeld, as ’n domain controller nie ’n geskikte **Smart Card Logon**-sertifikaat het nie, kan `certipy auth`/PKINIT-tooling nie daarin slaag om ’n TGT te verkry nie, maar dieselfde sertifikaat kan steeds teen **LDAPS** of **LDAP StartTLS** bruikbaar wees vir verifikasie en LDAP-bewerkings.
 
-### AD Certificate Services Enumeration
+### Enumerasie van AD Certificate Services
 
-AD se certificate services kan via LDAP queries geënumerer word, wat inligting oor **Enterprise Certificate Authorities (CAs)** en hul konfigurasies blootstel. Dit is toeganklik vir enige domain-authenticated user sonder spesiale privileges. Tools soos **[Certify](https://github.com/GhostPack/Certify)** en **[Certipy](https://github.com/ly4k/Certipy)** word gebruik vir enumeration en vulnerability assessment in AD CS-omgewings.
+AD se certificate services kan deur LDAP-queries geënumeer word, wat inligting oor **Enterprise Certificate Authorities (CAs)** en hul konfigurasies openbaar. Dit is beskikbaar vir enige domain-geauthentiseerde gebruiker sonder spesiale privileges. Tools soos **[Certify](https://github.com/GhostPack/Certify)** en **[Certipy](https://github.com/ly4k/Certipy)** word vir enumerasie en vulnerability assessment in AD CS-omgewings gebruik.
 
 Commands vir die gebruik van hierdie tools sluit in:
 ```bash
@@ -146,48 +146,47 @@ ad-certificates/domain-escalation.md
 
 ---
 
-## Onlangse kwesbaarhede & sekuriteitsopdaterings (2022-2025)
+## Onlangse Kwesbaarhede & Sekuriteitsopdaterings (2022-2025)
 
-| Jaar | ID / Naam | Impak | Sleutel-wegneemtes |
+| Jaar | ID / Naam | Impak | Belangrike gevolgtrekkings |
 |------|-----------|--------|----------------|
-| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Privilege escalation* deur machine account certificates tydens PKINIT te spoof. | Patch is ingesluit in die **10 Mei 2022** sekuriteitsopdaterings. Ouditering & strong-mapping kontroles is via **KB5014754** ingestel; omgewings behoort nou in *Full Enforcement* modus te wees.  |
-| 2023 | **CVE-2023-35350 / 35351** | *Remote code-execution* in die AD CS Web Enrollment (certsrv) en CES rolle. | Publieke PoCs is beperk, maar die kwesbare IIS-komponente is dikwels intern blootgestel. Patch vanaf **Julie 2023** Patch Tuesday.  |
-| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Op **v1 templates**, kan ’n requester met enrollment rights **Application Policies/EKUs** in die CSR insluit wat voorkeur kry bo die template EKUs, wat client-auth, enrollment agent, of code-signing certificates produseer. | Gepatch vanaf **12 November 2024**. Vervang of oortref v1 templates (bv. default WebServer), beperk EKUs tot bedoeling, en beperk enrollment rights. |
+| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Privilege escalation* deur masjienrekeningsertifikate tydens PKINIT te spoof. | Die patch is ingesluit by die **10 Mei 2022**-sekuriteitsopdaterings. Oudit- en strong-mapping-kontroles is via **KB5014754** bekendgestel; omgewings behoort nou in *Full Enforcement*-modus te wees.  |
+| 2023 | **CVE-2023-35350 / 35351** | *Remote code-execution* in die AD CS Web Enrollment (certsrv)- en CES-rolle. | Publieke PoCs is beperk, maar die kwesbare IIS-komponente word dikwels intern blootgestel. Gepatch vanaf **Julie 2023** se Patch Tuesday.  |
+| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Op **v1 templates** kan ’n requester met enrollment-regte **Application Policies/EKUs** in die CSR insluit wat voorkeur geniet bo die template se EKUs, wat client-auth-, enrollment agent- of code-signing-sertifikate oplewer. | Gepatch vanaf **12 November 2024**. Vervang of supersede v1 templates (bv. standaard WebServer), beperk EKUs volgens bedoeling, en beperk enrollment-regte. |
 
-### Microsoft hardening-tydlyn (KB5014754)
+### Microsoft se hardening-tydlyn (KB5014754)
 
-Microsoft het ’n drie-fase uitrol ingestel (Compatibility → Audit → Enforcement) om Kerberos certificate authentication weg te skuif van swak implisiete mappings. Vanaf **11 Februarie 2025**, skakel domain controllers outomaties oor na **Full Enforcement** as die `StrongCertificateBindingEnforcement` registry value nie ingestel is nie. Microsoft het later die tydlyn bygewerk sodat terugval na compatibility mode steeds moontlik bly tot die **9 September 2025** sekuriteitsopdatering. Administrateurs behoort:
+Microsoft het ’n drie-fase-implementering (Compatibility → Audit → Enforcement) bekendgestel om Kerberos-sertifikaatverifikasie weg te beweeg van swak implicit mappings. Vanaf **11 Februarie 2025** skakel domain controllers outomaties oor na **Full Enforcement** indien die `StrongCertificateBindingEnforcement`-registerwaarde nie gestel is nie. Microsoft het later die tydlyn opgedateer sodat terugval na compatibility mode moontlik bly tot die **9 September 2025**-sekuriteitsopdatering.<sup>[[2]](#references)</sup> Administrateurs behoort:
 
-1. Alle DCs & AD CS servers te patch (Mei 2022 of later).
-2. Event ID 39/41 te monitor vir swak mappings tydens die *Audit* fase.
-3. Client-auth certificates met die nuwe **SID extension** weer uit te reik of sterk handmatige mappings te configureer voordat enforcement swak mappings blokkeer.
+1. Alle DCs en AD CS-bedieners te patch (Mei 2022 of later).
+2. Event ID 39/41 vir swak mappings tydens die *Audit*-fase te monitor.
+3. Client-auth-sertifikate weer uit te reik met die nuwe **SID extension**, of sterk manual mappings te konfigureer voordat enforcement swak mappings blokkeer.
 
 ### Operator-notas vir hardened forests
 
-- **ESC1/ESC6 alleen is nie meer die hele storie** in 2025+ omgewings nie. As jy ’n cert vir ’n ander principal aanvra, benodig jy gewoonlik ook ’n strong mapping artifact soos die SID extension of ’n eksplisiete mapping.
-- **ESC15 (EKUwu)** is meestal waardevol in ongepatchte omgewings omdat dit onskadelike **v1** templates soos **WebServer** omskep in authentication- of enrollment-agent-kapabele certs deur **Application Policies** in te spuit. Kerberos PKINIT evalueer steeds EKUs, maar **LDAP Schannel** eer ook Application Policies, wat LDAP-gebaseerde abuse relevant hou.
-- **ESC16** is ’n CA-wye knob: as die CA die SID security extension globaal deaktiveer, val elke uitgereikte certificate terug na swakker mapping-gedrag tensy die attack chain ’n SID via ’n ander ondersteunde formaat inspuit.
+- **ESC1/ESC6 alleen is nie meer die hele storie** in 2025+-omgewings nie. As jy ’n sertifikaat vir ’n ander principal aanvra, benodig jy gewoonlik ook ’n strong mapping artifact soos die SID extension of ’n eksplisiete mapping.
+- **ESC15 (EKUwu)** is hoofsaaklik waardevol in ongepatchte omgewings omdat dit skadelose **v1** templates soos **WebServer** in authentication- of enrollment-agent-bekwame sertifikate omskep deur **Application Policies** in te spuit. Kerberos PKINIT evalueer steeds EKUs, maar **LDAP Schannel** respekteer ook Application Policies, wat LDAP-gebaseerde misbruik relevant hou.<sup>[[1]](#references)</sup>
+- **ESC16** is ’n CA-wye instelling: indien die CA die SID security extension globaal deaktiveer, val elke uitgereikte sertifikaat terug na swakker mapping-gedrag, tensy die attack chain ’n SID deur ’n ander ondersteunde formaat inspuit.
 
 ---
 
-## Detectie & Hardening-versterkings
+## Detection & Hardening-verbeterings
 
-* **Defender for Identity AD CS sensor (2023-2024)** toon nou posture assessments vir ESC1-ESC8/ESC11 en genereer real-time alerts soos *“Domain-controller certificate issuance for a non-DC”* (ESC8) en *“Prevent Certificate Enrollment with arbitrary Application Policies”* (ESC15). Verseker sensors word na alle AD CS servers ontplooi om voordeel uit hierdie detecties te trek.
-* Deaktiveer of beperk streng die **“Supply in the request”** opsie op alle templates; verkies eksplisiet gedefinieerde SAN/EKU values.
-* Verwyder **Any Purpose** of **No EKU** uit templates tensy absoluut vereis word (pak ESC2 scenarios aan).
-* Vereis **manager approval** of toegewyde Enrollment Agent workflows vir sensitiewe templates (bv. WebServer / CodeSigning).
-* Beperk web enrollment (`certsrv`) en CES/NDES endpoints tot vertroude netwerke of agter client-certificate authentication.
-* Handhaaf RPC enrollment encryption (`certutil -setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQUEST`) om ESC11 (RPC relay) te verminder. Die flag is **by verstek aan**, maar word dikwels vir legacy clients gedeaktiveer, wat relay risk weer oopmaak.
-* Beveilig **IIS-based enrollment endpoints** (CES/Certsrv): deaktiveer NTLM waar moontlik of vereis HTTPS + Extended Protection om ESC8 relays te blokkeer.
+* **Defender for Identity AD CS sensor (2023-2024)** wys nou posture-assessments vir ESC1-ESC8/ESC11 en genereer real-time alerts soos *“Domain-controller certificate issuance for a non-DC”* (ESC8) en *“Prevent Certificate Enrollment with arbitrary Application Policies”* (ESC15). Verseker dat sensors op alle AD CS-bedieners ontplooi is om hierdie detections te benut.<sup>[[3]](#references)</sup>
+* Deaktiveer of beperk die **“Supply in the request”**-opsie streng op alle templates; verkies eksplisiet gedefinieerde SAN/EKU-waardes.
+* Verwyder **Any Purpose** of **No EKU** uit templates tensy dit absoluut vereis word (spreek ESC2-scenario’s aan).
+* Vereis **manager approval** of toegewyde Enrollment Agent-workflows vir sensitiewe templates (bv. WebServer / CodeSigning).
+* Beperk web enrollment (`certsrv`) en CES/NDES-endpunte tot trusted networks, of plaas dit agter client-certificate authentication.
+* Dwing RPC enrollment encryption af (`certutil -setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQUEST`) om ESC11 (RPC relay) te versag. Die flag is **by verstek aan**, maar word dikwels vir legacy clients gedeaktiveer, wat relay-risiko heropen.
+* Beveilig **IIS-based enrollment endpoints** (CES/Certsrv): deaktiveer NTLM waar moontlik, of vereis HTTPS + Extended Protection om ESC8-relays te blokkeer.
 
 ---
-
-
 
 ## Verwysings
 
-- [https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
-- [https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
-- [https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
-- [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
+- [1] [EKUwu: Not just another AD CS ESC](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
+- [2] [KB5014754: Certificate-based authentication changes on Windows domain controllers](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
+- [3] [Certificates security posture assessments - Microsoft Defender for Identity](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
+- [4] [Certified Pre-Owned: Abusing Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
+
 {{#include ../../banners/hacktricks-training.md}}

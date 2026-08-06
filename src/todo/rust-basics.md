@@ -4,11 +4,11 @@
 
 ### Eienaarskap van veranderlikes
 
-Geheue word bestuur deur ’n stelsel van eienaarskap met die volgende reëls, wat die compiler tydens kompilering nagaan:
+Geheue word bestuur deur 'n stelsel van eienaarskap met die volgende reëls wat die compiler tydens kompilering nagaan:
 
-1. Elke waarde in Rust het ’n veranderlike wat sy eienaar genoem word.
-2. Daar kan slegs een eienaar op ’n slag wees.
-3. Wanneer die eienaar buite omvang gaan, sal die waarde laat vaar word.
+1. Elke waarde in Rust het 'n veranderlike wat sy eienaar genoem word.
+2. Daar kan slegs een eienaar op 'n slag wees.
+3. Wanneer die eienaar buite omvang gaan, sal die waarde verwyder word.
 ```rust
 fn main() {
 let student_age: u32 = 20;
@@ -20,9 +20,9 @@ println!("The student is {} and teacher is {}", student_age, teacher_age);
 // println!("the teacher is {}", teacher_age); // this will not work as teacher_age has been dropped
 }
 ```
-### Generiese Tipes
+### Generiese tipes
 
-Skep ’n struct waarvan een van die waardes enige tipe kan wees
+Skep 'n struct waarvan een van die waardes enige tipe kan wees
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -39,19 +39,19 @@ Wrapper::new("Foo").value, "Foo"
 ```
 ### Option, Some & None
 
-Die Option-tipe beteken dat die waarde van die tipe Some kan wees (daar is iets) of None:
+Die Option-tipe beteken dat die waarde óf van tipe Some (daar is iets) óf None kan wees:
 ```rust
 pub enum Option<T> {
 None,
 Some(T),
 }
 ```
-Jy kan funksies soos `is_some()` of `is_none()` gebruik om die waarde van die Option te kontroleer.
+Jy kan funksies soos `is_some()` of `is_none()` gebruik om die waarde van die Option na te gaan.
 
 
 ### Result, Ok & Err
 
-Word gebruik om foute terug te stuur en te propageer
+Word gebruik om foute terug te gee en te propageer
 ```rust
 pub enum Result<T, E> {
 Ok(T),
@@ -60,13 +60,13 @@ Err(E),
 ```
 Jy kan funksies soos `is_ok()` of `is_err()` gebruik om die waarde van die resultaat na te gaan
 
-Die `Option`-enum moet gebruik word in situasies waar ’n waarde dalk nie bestaan nie (met ander woorde, `None` is).
-Die `Result`-enum moet gebruik word in situasies waar iets wat jy doen, dalk verkeerd kan loop
+Die `Option`-enum moet gebruik word in situasies waar ’n waarde dalk nie bestaan nie (en `None` is).
+Die `Result`-enum moet gebruik word in situasies waar iets wat jy doen, dalk kan misluk
 
 
 ### Makro's
 
-Makro's is kragtiger as funksies omdat hulle uitbrei om meer kode te produseer as die kode wat jy met die hand geskryf het. Byvoorbeeld, ’n funksie-handtekening moet die getal en tipe parameters wat die funksie het, verklaar. Makro's kan daarenteen ’n veranderlike aantal parameters aanvaar: ons kan `println!("hello")` met een argument of `println!("hello {}", name)` met twee argumente aanroep. Makro's word ook uitgebrei voordat die samesteller die betekenis van die kode interpreteer, dus kan ’n makro byvoorbeeld ’n trait op ’n gegewe tipe implementeer. ’n Funksie kan dit nie doen nie, omdat dit tydens runtime aangeroep word en ’n trait tydens compile time geïmplementeer moet word.
+Makro's is kragtiger as funksies omdat hulle uitbrei om meer kode te genereer as die kode wat jy handmatig geskryf het. Byvoorbeeld, ’n funksie-handtekening moet die aantal en tipe parameters wat die funksie het, verklaar. Makro's kan daarenteen ’n veranderlike aantal parameters aanvaar: ons kan `println!("hello")` met een argument aanroep, of `println!("hello {}", name)` met twee argumente. Makro's word ook uitgebrei voordat die compiler die betekenis van die kode interpreteer, dus kan ’n makro byvoorbeeld ’n trait op ’n gegewe tipe implementeer. ’n Funksie kan dit nie doen nie, omdat dit tydens runtime aangeroep word en ’n trait tydens compile time geïmplementeer moet word.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -153,7 +153,7 @@ true => 1,
 // TODO ^ Try commenting out one of these arms
 };
 ```
-#### oneindige lus
+#### lus (oneindig)
 ```rust
 loop {
 count += 1;
@@ -168,7 +168,7 @@ break;
 }
 }
 ```
-#### terwyl
+#### while
 ```rust
 let mut n = 1;
 while n < 101 {
@@ -290,7 +290,7 @@ assert_ne!(true, false);
 
 #### Arc
 
-'n Arc kan Clone gebruik om meer verwysings na die objek te skep en dit aan die threads deur te gee. Wanneer die laaste verwysingswyser na 'n waarde buite omvang is, word die veranderlike laat vaar.
+'n Arc kan Clone gebruik om meer verwysings na die objek te skep en dit aan die drade deur te gee. Wanneer die laaste verwysingswyser na 'n waarde buite omvang is, word die veranderlike laat vaar.
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -303,7 +303,7 @@ println!("{:?}", apple);
 ```
 #### Threads
 
-In hierdie geval sal ons die thread 'n veranderlike gee wat dit sal kan wysig
+In hierdie geval sal ons die draad ’n veranderlike deurgee wat dit sal kan wysig
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -321,19 +321,19 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-### Sekuriteitsbeginsels
+### Sekuriteitsnoodsaaklikhede
 
-Rust bied standaard sterk waarborge vir geheuesekuriteit, maar jy kan steeds kritieke kwesbaarhede deur `unsafe`-kode, afhanklikheidskwessies of logikafoute bekendstel. Die volgende mini-cheatsheet versamel die primitiewe waarmee jy die meeste sal werk tydens offensiewe of defensiewe sekuriteitsoorsigte van Rust-sagteware.
+Rust bied standaard sterk geheueveiligheidswaarborge, maar jy kan steeds kritieke kwesbaarhede bekendstel deur `unsafe`-kode, dependency-probleme of logikafoute. Die volgende mini-cheatsheet versamel die primitives waarmee jy die meeste in aanraking sal kom tydens offensive of defensive security reviews van Rust-sagteware.
 
-#### `unsafe`-kode en geheuesekuriteit
+#### `unsafe`-kode & geheueves​tigheid
 
-`unsafe`-blokke skakel die compiler se aliasing- en grenskontroles uit, dus kan **alle tradisionele geheuekorrupsiefoute (OOB, use-after-free, double free, ens.) weer voorkom**. ’n Vinnige ouditkontrolelys:
+`unsafe`-blokke skakel die compiler se aliasing- en bounds-checks uit, dus kan **alle tradisionele geheuekorrupsie-bugs (OOB, use-after-free, double free, ens.) weer voorkom**. ’n Vinnige oudit-kontrolelys:
 
-* Soek na `unsafe`-blokke, `extern "C"`-funksies, oproepe na `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, rou pointers of `ffi`-modules.
-* Valideer elke pointer-berekening en lengte-argument wat aan laevlakfunksies deurgegee word.
-* Verkies `#![forbid(unsafe_code)]` (skenkwyd) of `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) om samestelling te laat misluk wanneer iemand `unsafe` weer instel.
+* Soek na `unsafe`-blokke, `extern "C"`-funksies, oproepe na `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointers of `ffi`-modules.
+* Valideer elke pointer arithmetic en length argument wat aan low-level funksies deurgegee word.
+* Verkies `#![forbid(unsafe_code)]` (crate-wyd) of `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) om compilation te laat faal wanneer iemand `unsafe` herinstel.
 
-Voorbeeld van ’n overflow wat met rou pointers geskep word:
+Voorbeeld van ’n overflow wat met raw pointers geskep is:
 ```rust
 use std::ptr;
 
@@ -347,44 +347,44 @@ dst.set_len(src.len());
 dst
 }
 ```
-Om Miri te laat loop, is ’n goedkoop manier om UB tydens toetsing op te spoor:
+Miri uitvoer is ’n goedkoop manier om UB tydens toetsing op te spoor:
 ```bash
 rustup component add miri
 cargo miri test  # hunts for OOB / UAF during unit tests
 ```
 #### Oudit van afhanklikhede met RustSec / cargo-audit
 
-Die meeste werklike Rust-kwesbaarhede kom in derdeparty-crates voor. Die RustSec-advisory DB (deur die gemeenskap aangedryf) kan plaaslik geraadpleeg word:<sup>[[1]](#references)</sup>
+Die meeste werklike Rust-kwesbaarhede kom in derdeparty-crates voor. Die RustSec-adviesdatabasis (deur die gemeenskap aangedryf) kan plaaslik geraadpleeg word:<sup>[[1]](#references)</sup>
 ```bash
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
 ```
-Integreer dit in CI en laat dit faal met `--deny warnings`.
+Integreer dit in CI en laat die bouproses misluk met `--deny warnings`.
 
 `cargo deny check advisories` bied soortgelyke funksionaliteit, plus lisensie- en verbodlys-kontroles.
 
-#### Kode-dekking met cargo-tarpaulin
+#### Kodedekking met cargo-tarpaulin
 
-`cargo tarpaulin` is ’n kode-dekkingsverslagdoeningshulpmiddel vir die Cargo-boustelsel
+`cargo tarpaulin` is ’n hulpmiddel vir die rapportering van kodedekking vir die Cargo-boustelsel
 ```bash
 cargo binstall cargo-tarpaulin
 cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
 ```
-Op Linux is Tarpaulin se verstek-tracing-backend steeds Ptrace en sal dit slegs op x86_64-verwerkers werk. Dit kan verander word na llvm coverage instrumentation met `--engine llvm`. Vir Mac en Windows is dit die verstekversamelingsmetode.
+Op Linux is Tarpaulin se verstek-tracing-backend steeds Ptrace en sal dit slegs op x86_64-verwerkers werk. Dit kan na die llvm coverage-instrumentasie verander word met `--engine llvm`. Vir Mac en Windows is dit die verstek-insamelingsmetode.
 
-#### Voorsieningskettingverifikasie met cargo-vet (2024)
+#### Voorsieningsketting-verifikasie met cargo-vet (2024)
 
-`cargo vet` teken ’n review hash aan vir elke crate wat jy invoer en voorkom ongemerkte opgraderings:
+`cargo vet` teken ’n hersienings-hash aan vir elke crate wat jy invoer en voorkom ongemerkte opgraderings:
 ```bash
 cargo install cargo-vet
 cargo vet init      # generates vet.toml
 cargo vet --locked  # verifies packages referenced in Cargo.lock
 ```
-Die tool word deur die Rust-projekinfrastruktuur en ’n groeiende aantal organisasies aangeneem om aanvalle met vergiftigde pakkette te versag.<sup>[[2]](#references)</sup>
+Die instrument word deur die Rust-projekinfrastruktuur en ’n groeiende aantal organisasies aangeneem om poisoned-package-aanvalle te versag.<sup>[[2]](#references)</sup>
 
 #### Fuzzing van jou API-oppervlak (cargo-fuzz)
 
-Fuzz-toetse vang maklik panics, integer-oorlope en logikafoute op wat tot DoS- of side-channel-kwessies kan lei:
+Fuzz-toetse vang maklik panics, heelgetaloorlope en logikafoute op wat in DoS- of side-channel-kwessies kan ontaard:
 ```bash
 cargo install cargo-fuzz
 cargo fuzz init              # creates fuzz_targets/
@@ -395,6 +395,6 @@ Voeg die fuzz target by jou repo en voer dit in jou pipeline uit.
 ## Verwysings
 
 - [1] [RustSec Advisory Database](https://rustsec.org)
-- [2] [Cargo-vet: Auditing your Rust Dependencies](https://mozilla.github.io/cargo-vet/)
+- [2] [Cargo-vet: "Auditing your Rust Dependencies"](https://mozilla.github.io/cargo-vet/)
 
 {{#include ../banners/hacktricks-training.md}}

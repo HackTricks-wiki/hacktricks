@@ -2,62 +2,62 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#3f17" id="3f17"></a>
+## Inleiding <a href="#3f17" id="3f17"></a>
 
-**Kyk na die oorspronklike pos vir [alle inligting oor hierdie tegniek](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab).**
+**Gaan die oorspronklike plasing na vir [al die inligting oor hierdie tegniek](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab).**<sup>[[1]](#references)</sup>
 
-As **opsomming**: as jy na die **msDS-KeyCredentialLink** eienskap van 'n gebruiker/rekenaar kan skryf, kan jy die **NT hash van daardie objek** verkry.
+As 'n **opsomming**: indien jy na die **msDS-KeyCredentialLink**-eienskap van 'n gebruiker/rekenaar kan skryf, kan jy die **NT-hash van daardie objek** herwin.<sup>[[1]](#references)</sup>
 
-In die pos word 'n metode uiteengesit om **publiek-private sleutelverifikasie krediete** op te stel om 'n unieke **Service Ticket** te verkry wat die teiken se NTLM hash insluit. Hierdie proses behels die versleutelde NTLM_SUPPLEMENTAL_CREDENTIAL binne die Privilege Attribute Certificate (PAC), wat gedekript kan word.
+In die plasing word 'n metode uiteengesit om **public-private key authentication credentials** op te stel om 'n unieke **Service Ticket** te verkry wat die teiken se NTLM-hash insluit. Hierdie proses behels die geënkripteerde NTLM_SUPPLEMENTAL_CREDENTIAL binne die Privilege Attribute Certificate (PAC), wat gedekripteer kan word.<sup>[[1]](#references)</sup>
 
 ### Vereistes
 
-Om hierdie tegniek toe te pas, moet sekere voorwaardes nagekom word:
+Om hierdie tegniek toe te pas, moet sekere voorwaardes nagekom word:<sup>[[1]](#references)</sup>
 
-- 'n Minimum van een Windows Server 2016 Domeinbeheerder is nodig.
-- Die Domeinbeheerder moet 'n digitale sertifikaat vir bedienerverifikasie geïnstalleer hê.
-- Die Active Directory moet op die Windows Server 2016 Funksionele Vlak wees.
-- 'n Rekening met gedelegeerde regte om die msDS-KeyCredentialLink eienskap van die teiken objek te wysig, is vereis.
+- Ten minste een Windows Server 2016 Domain Controller word benodig.
+- Die Domain Controller moet 'n server authentication digital certificate geïnstalleer hê.
+- Die Active Directory moet op die Windows Server 2016 Functional Level wees.
+- 'n Rekening met gedelegeerde regte om die msDS-KeyCredentialLink-kenmerk van die teikenobjek te wysig, word benodig.
 
 ## Misbruik
 
-Die misbruik van Key Trust vir rekenaarobjekte sluit stappe in wat verder gaan as die verkryging van 'n Ticket Granting Ticket (TGT) en die NTLM hash. Die opsies sluit in:
+Die misbruik van Key Trust vir rekenaarobjekte behels stappe wat verder gaan as die verkryging van 'n Ticket Granting Ticket (TGT) en die NTLM-hash. Die opsies sluit in:<sup>[[1]](#references)</sup>
 
-1. Die skep van 'n **RC4 silwer kaartjie** om as bevoorregte gebruikers op die beoogde gasheer op te tree.
-2. Die gebruik van die TGT met **S4U2Self** vir die nabootsing van **bevoorregte gebruikers**, wat veranderinge aan die Service Ticket vereis om 'n diensklas by die diensnaam te voeg.
+1. Die skep van 'n **RC4 silver ticket** om as bevoorregte gebruikers op die beoogde gasheer op te tree.
+2. Die gebruik van die TGT met **S4U2Self** vir nabootsing van **bevoorregte gebruikers**, wat wysigings aan die Service Ticket vereis om 'n service class by die service name te voeg.
 
-'n Beduidende voordeel van Key Trust misbruik is die beperking tot die aanvaller-gegenereerde private sleutel, wat delegasie aan potensieel kwesbare rekeninge vermy en nie die skepping van 'n rekenaarrekening vereis nie, wat moeilik kan wees om te verwyder.
+'n Beduidende voordeel van Key Trust-misbruik is dat dit beperk is tot die private key wat deur die aanvaller gegenereer is. Dit vermy delegering na potensieel kwesbare rekeninge en vereis nie die skep van 'n rekenaarrekening nie, wat moeilik kan wees om te verwyder.<sup>[[1]](#references)</sup>
 
 ## Gereedskap
 
 ### [**Whisker**](https://github.com/eladshamir/Whisker)
 
-Dit is gebaseer op DSInternals wat 'n C#-koppelvlak vir hierdie aanval bied. Whisker en sy Python teenhanger, **pyWhisker**, stel in staat om die `msDS-KeyCredentialLink` eienskap te manipuleer om beheer oor Active Directory rekeninge te verkry. Hierdie gereedskap ondersteun verskeie operasies soos om sleutel krediete by te voeg, op te lys, te verwyder en te skoon te maak van die teiken objek.
+Dit is op DSInternals gebaseer en bied 'n C#-interface vir hierdie aanval. Whisker en sy Python-eweknie, **pyWhisker**, maak manipulasie van die `msDS-KeyCredentialLink`-kenmerk moontlik om beheer oor Active Directory-rekeninge te verkry. Hierdie tools ondersteun verskeie bewerkings, soos die byvoeging, lys, verwydering en skoonmaak van key credentials vanaf die teikenobjek.
 
-**Whisker** funksies sluit in:
+**Whisker** se funksies sluit in:
 
-- **Voeg by**: Genereer 'n sleutel paar en voeg 'n sleutel krediet by.
-- **Lys**: Vertoon alle sleutel krediet inskrywings.
-- **Verwyder**: Verwyder 'n spesifieke sleutel krediet.
-- **Skoon**: Verwyder alle sleutel krediete, wat moontlik wettige WHfB gebruik kan ontwrig.
+- **Add**: Genereer 'n key pair en voeg 'n key credential by.
+- **List**: Vertoon alle key credential-inskrywings.
+- **Remove**: Verwyder 'n gespesifiseerde key credential.
+- **Clear**: Wis alle key credentials uit, wat moontlik wettige WHfB-gebruik kan ontwrig.
 ```shell
 Whisker.exe add /target:computername$ /domain:constoso.local /dc:dc1.contoso.local /path:C:\path\to\file.pfx /password:P@ssword1
 ```
 ### [pyWhisker](https://github.com/ShutdownRepo/pywhisker)
 
-Dit brei Whisker se funksionaliteit uit na **UNIX-gebaseerde stelsels**, wat Impacket en PyDSInternals benut vir omvattende eksploitasiemogelijkheden, insluitend die lys, toevoeging en verwydering van KeyCredentials, sowel as die invoer en uitvoer daarvan in JSON-formaat.
+Dit brei Whisker-funksionaliteit uit na **UNIX-gebaseerde stelsels**, deur Impacket en PyDSInternals te benut vir omvattende exploitation capabilities, insluitend die lys, byvoeging en verwydering van KeyCredentials, asook die invoer en uitvoer daarvan in JSON-formaat.
 ```shell
 python3 pywhisker.py -d "domain.local" -u "user1" -p "complexpassword" --target "user2" --action "list"
 ```
 ### [ShadowSpray](https://github.com/Dec0ne/ShadowSpray/)
 
-ShadowSpray poog om **GenericWrite/GenericAll toestemmings wat wye gebruikersgroepe oor domeinobjekte mag hê, te benut** om ShadowCredentials breedvoerig toe te pas. Dit behels om in die domein in te teken, die domein se funksionele vlak te verifieer, domeinobjekte te enumeer, en te probeer om KeyCredentials vir TGT verkryging en NT hash onthulling by te voeg. Opruimopsies en rekursiewe uitbuitingstaktieke verbeter die nut daarvan.
+ShadowSpray is daarop gemik om **GenericWrite/GenericAll-permissies wat breë gebruikersgroepe oor domeinobjekte kan hê, te exploit** om ShadowCredentials wyd toe te pas. Dit behels om by die domein aan te meld, die domein se funksionele vlak te verifieer, domeinobjekte te enumeriseer, en te probeer om KeyCredentials by te voeg vir TGT-verkryging en NT-hash-onthulling. Opruimingsopsies en rekursiewe exploitation-taktieke verbeter die bruikbaarheid daarvan.
 
-## References
+## Verwysings
 
-- [https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)
-- [https://github.com/eladshamir/Whisker](https://github.com/eladshamir/Whisker)
-- [https://github.com/Dec0ne/ShadowSpray/](https://github.com/Dec0ne/ShadowSpray/)
-- [https://github.com/ShutdownRepo/pywhisker](https://github.com/ShutdownRepo/pywhisker)
+- [1] [Shadow Credentials: Misbruik van Key Trust Account Mapping vir Account Takeover](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)
+- [2] [Whisker - Tool om AD-accounts oor te neem deur msDS-KeyCredentialLink te manipuleer](https://github.com/eladshamir/Whisker)
+- [3] [ShadowSpray - Tool om Shadow Credentials oor ’n domein te spray](https://github.com/Dec0ne/ShadowSpray/)
+- [4] [pywhisker - Python-weergawe van die Shadow Credentials-tool](https://github.com/ShutdownRepo/pywhisker)
 
 {{#include ../../../banners/hacktricks-training.md}}

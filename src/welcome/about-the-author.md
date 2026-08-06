@@ -4,11 +4,10 @@
 
 ### Hallo!!
 
-Krediete vir tegnieke van ander navorsers behoort aan die oorspronklike outeurs (sien verwysings). Kudos aan almal wat kennis deel om internetsekuriteit te verbeter.
+Erkenning vir techniques van ander researchers behoort aan die oorspronklike outeurs (sien verwysings). Dankie aan almal wat kennis deel om internetsekuriteit te verbeter.
 
-HackTricks is 'n opvoedkundige wiki oor **cyber-security** gelei deur Carlos met honderde bydraers. Dit is 'n **groot versameling van hacking-truuks** wat so veel as moontlik deur die gemeenskap opgedateer word. As jy iets vind wat ontbreek of verouderd is, stuur asseblief 'n **Pull Request** na die [**Hacktricks GitHub**](https://github.com/hacktricks-wiki/hacktricks)!
+HackTricks is ’n opvoedkundige wiki oor **kuberveiligheid** wat deur Carlos gelei word, met honderde medewerkers. Dit is ’n **omvangryke versameling hacking tricks** wat so veel as moontlik deur die community opgedateer word. As jy iets ontbrekend of verouderd vind, stuur asseblief ’n **Pull Request** na die [**Hacktricks GitHub**](https://github.com/hacktricks-wiki/hacktricks)!
 
-HackTricks is ook 'n wiki waar **navorsers hul nuutste bevindings deel**, so dit is 'n goeie plek om op hoogte te bly van die nuutste hacking techniques.
-
+HackTricks is ook ’n wiki waar **researchers hul jongste bevindings deel**, dus is dit ’n uitstekende plek om op hoogte te bly van die nuutste hacking techniques.
 
 {{#include ../banners/hacktricks-training.md}}

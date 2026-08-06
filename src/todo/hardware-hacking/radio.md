@@ -4,199 +4,203 @@
 
 ## SigDigger
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger) is 'n gratis digitale seinanaliseerder vir GNU/Linux en macOS, ontwerp om inligting van onbekende radiosignale te onttrek. Dit ondersteun 'n verskeidenheid SDR-toestelle deur SoapySDR, en laat aanpasbare demodulasie van FSK, PSK en ASK-signale toe, dekodeer analoog video, analiseer onderbrekingsignale en luister na analoog stemkanale (alles in werklike tyd).
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger)is 'n gratis digitale seinanaliseerder vir GNU/Linux en macOS, ontwerp om inligting uit onbekende radioseine te onttrek. Dit ondersteun 'n verskeidenheid SDR-toestelle deur SoapySDR, en laat verstelbare demodulasie van FSK-, PSK- en ASK-seine toe, kan analoogvideo dekodeer, bursty seine analiseer en na analoogstemkanale luister (alles in real time).<sup>[[1]](#references)</sup>
 
-### Basic Config
+### Basiese konfigurasie
 
-Na installasie is daar 'n paar dinge wat jy kan oorweeg om te konfigureer.\
-In instellings (die tweede tab-knoppie) kan jy die **SDR-toestel** kies of **'n lêer** kies om te lees en watter frekwensie om te sintoniseer en die monster tempo (aanbeveel tot 2.56Msps as jou rekenaar dit ondersteun)
+Nadat dit geïnstalleer is, is daar 'n paar dinge wat jy kan oorweeg om te konfigureer.\
+In settings (die tweede tab-knoppie) kan jy die **SDR device** kies of **select a file** om te lees, asook watter frekwensie om te stem en die Sample rate (aanbeveel tot 2.56Msps as jou rekenaar dit ondersteun).
 
-![](<../../images/image (245).png>)
+![SigDigger settings wat SDR-toestel-, invoerlêer-, frekwensie- en sample rate-opsies wys](<../../images/image (245).png>)
 
-In die GUI-gedrag is dit aanbeveel om 'n paar dinge in te skakel as jou rekenaar dit ondersteun:
+In die GUI behaviour word dit aanbeveel om 'n paar dinge te aktiveer as jou rekenaar dit ondersteun:
 
-![](<../../images/image (472).png>)
+![SigDigger - Basiese konfigurasie: In die GUI behaviour word dit aanbeveel om 'n paar dinge te aktiveer as jou rekenaar dit ondersteun](<../../images/image (472).png>)
 
-> [!NOTE]
-> As jy besef dat jou rekenaar nie dinge opneem nie, probeer om OpenGL te deaktiveer en die monster tempo te verlaag.
+> [!TIP]
+> As jy agterkom dat jou rekenaar niks vaslê nie, probeer om OpenGL te deaktiveer en die sample rate te verlaag.
 
-### Uses
+### Gebruike
 
-- Net om **'n bietjie van 'n sein te vang en dit te analiseer**, hou net die knoppie "Push to capture" ingedruk so lank as wat jy nodig het.
+- Om bloot **'n gedeelte van 'n sein vas te lê en dit te analiseer**, hou die "Push to capture"-knoppie so lank as nodig ingedruk.
 
-![](<../../images/image (960).png>)
+![Basiese konfigurasie - Gebruike: Om bloot 'n gedeelte van 'n sein vas te lê en dit te analiseer, hou die "Push to capture"-knoppie so lank as nodig ingedruk](<../../images/image (960).png>)
 
-- Die **Tuner** van SigDigger help om **beter seine te vang** (maar dit kan ook hulle vererger). Ideaal gesproke begin met 0 en hou **dit groter maak totdat** jy die **ruis** wat ingevoer word, vind wat **groter** is as die **verbetering van die sein** wat jy nodig het).
+- Die **Tuner** van SigDigger help om **beter seine vas te lê** (maar dit kan dit ook verswak). Begin ideaal met 0 en hou aan om dit **groter te maak totdat** jy vind dat die **noise** wat ingevoer word **groter** is as die **verbetering van die sein** wat jy benodig.
 
-![](<../../images/image (1099).png>)
+![SigDigger-tunerbeheer aangepas om die vasgelêde radiosein te verbeter](<../../images/image (1099).png>)
 
-### Synchronize with radio channel
+### Sinkronisering met 'n radiokanaal
 
-Met [**SigDigger** ](https://github.com/BatchDrake/SigDigger) sinkroniseer met die kanaal wat jy wil hoor, konfigureer die "Baseband audio preview" opsie, konfigureer die bandwydte om al die inligting wat gestuur word te kry en stel dan die Tuner in op die vlak voordat die ruis regtig begin toeneem:
+Met [**SigDigger** ](https://github.com/BatchDrake/SigDigger), sinkroniseer met die kanaal waarna jy wil luister, konfigureer die "Baseband audio preview"-opsie, konfigureer die bandwith om al die inligting wat gestuur word te kry, en stel dan die Tuner op die vlak net voordat die noise werklik begin toeneem:<sup>[[1]](#references)</sup>
 
-![](<../../images/image (585).png>)
+![SigDigger-radiokanaal gesinkroniseer met baseband audio preview en bandwydte gekonfigureer](<../../images/image (585).png>)
 
-## Interesting tricks
+## Interessante truuks
 
-- Wanneer 'n toestel inligting in onderbrekings stuur, is die **eerste deel gewoonlik 'n preamble**, so jy **hoef nie** te **sorg** as jy **nie inligting** daar vind **of as daar 'n paar foute** daar is nie.
-- In rame van inligting behoort jy gewoonlik **verskillende rame goed uitgelijnd tussen hulle** te vind:
+- Wanneer 'n toestel bursts van inligting stuur, gaan die **eerste gedeelte gewoonlik 'n preamble wees**, dus hoef jy jou **nie te bekommer** as jy **geen inligting** daarin **vind nie** of as daar **foute** daarin is nie.
+- In inligtingsframes behoort jy gewoonlik **verskillende frames te vind wat goed met mekaar belyn is**:
 
-![](<../../images/image (1076).png>)
+![Sinkronisering met radiokanaal - Interessante truuks: In inligtingsframes behoort jy gewoonlik verskillende frames te vind wat goed met mekaar belyn is](<../../images/image (1076).png>)
 
-![](<../../images/image (597).png>)
+![Sinkronisering met radiokanaal - Interessante truuks: In inligtingsframes behoort jy gewoonlik verskillende frames te vind wat goed met mekaar belyn is](<../../images/image (597).png>)
 
-- **Nadat jy die bits herwin het, moet jy dit op een of ander manier verwerk**. Byvoorbeeld, in Manchester-kodering sal 'n op+af 'n 1 of 0 wees en 'n af+op sal die ander een wees. So pare van 1s en 0s (op en af) sal 'n werklike 1 of 'n werklike 0 wees.
-- Selfs as 'n sein Manchester-kodering gebruik (dit is onmoontlik om meer as twee 0s of 1s agtereenvolgens te vind), kan jy **verskeie 1s of 0s saam in die preamble** vind!
+- **Nadat jy die bits herwin het, sal jy hulle moontlik op 'n manier moet verwerk**. Byvoorbeeld, in Manchester codification sal 'n op+af 'n 1 of 0 wees, en 'n af+op sal die ander een wees. Pare van 1'e en 0'e (oppe en affe) sal dus 'n werklike 1 of 'n werklike 0 wees.
+- Selfs al gebruik 'n sein Manchester codification (dit is onmoontlik om meer as twee 0'e of 1'e in 'n ry te vind), kan jy **verskeie 1'e of 0'e saam in die preamble vind**!
 
-### Uncovering modulation type with IQ
+### Ontdekking van modulasietipe met IQ
 
-Daar is 3 maniere om inligting in seine te stoor: Modulasie van die **amplitude**, **frekwensie** of **fase**.\
-As jy 'n sein nagaan, is daar verskillende maniere om te probeer uit te vind wat gebruik word om inligting te stoor (vind meer maniere hieronder), maar 'n goeie een is om die IQ-grafiek na te gaan.
+Daar is 3 maniere om inligting in seine te stoor: Deur die **amplitude**, **frekwensie** of **fase** te moduleer.\
+As jy 'n sein nagaan, is daar verskillende maniere om te probeer uitvind wat gebruik word om inligting te stoor (vind meer maniere hieronder), maar 'n goeie manier is om die IQ-grafiek na te gaan.
 
-![](<../../images/image (788).png>)
+![SigDigger IQ-grafiek wat gebruik word om te identifiseer of 'n sein amplitude-, frekwensie- of fasemodulasie gebruik](<../../images/image (788).png>)
 
-- **Detecting AM**: As daar in die IQ-grafiek byvoorbeeld **2 sirkels** verskyn (waarskynlik een in 0 en een in 'n ander amplitude), kan dit beteken dat dit 'n AM-sein is. Dit is omdat in die IQ-grafiek die afstand tussen die 0 en die sirkel die amplitude van die sein is, so dit is maklik om verskillende amplitudes wat gebruik word, te visualiseer.
-- **Detecting PM**: Soos in die vorige beeld, as jy klein sirkels vind wat nie met mekaar verband hou nie, beteken dit waarskynlik dat 'n fase-modulasie gebruik word. Dit is omdat in die IQ-grafiek, die hoek tussen die punt en die 0,0 die fase van die sein is, so dit beteken dat 4 verskillende fases gebruik word.
-- Let daarop dat as die inligting versteek is in die feit dat 'n fase verander en nie in die fase self nie, jy nie verskillende fases duidelik gedifferensieer sal sien nie.
-- **Detecting FM**: IQ het nie 'n veld om frekwensies te identifiseer nie (afstand tot sentrum is amplitude en hoek is fase).\
-Daarom, om FM te identifiseer, moet jy **basies net 'n sirkel** in hierdie grafiek sien.\
-Boonop word 'n ander frekwensie "verteenwoordig" deur die IQ-grafiek deur 'n **spoedversnelling oor die sirkel** (so in SysDigger, wanneer jy die sein kies, word die IQ-grafiek bevolk, as jy 'n versnelling of rigtingverandering in die geskepte sirkel vind, kan dit beteken dat dit FM is):
+- **Opsporing van AM**: As daar byvoorbeeld **2 sirkels** in die IQ-grafiek verskyn (waarskynlik een by 0 en die ander by 'n ander amplitude), kan dit beteken dat dit 'n AM-sein is. Dit is omdat die afstand tussen 0 en die sirkel in die IQ-grafiek die amplitude van die sein is, wat dit maklik maak om verskillende gebruikte amplitudes te visualiseer.
+- **Opsporing van PM**: Soos in die vorige beeld, as jy klein sirkels vind wat nie met mekaar verband hou nie, beteken dit waarskynlik dat fasemodulasie gebruik word. Dit is omdat die hoek tussen die punt en 0,0 in die IQ-grafiek die fase van die sein is; dit beteken dus dat 4 verskillende fases gebruik word.
+- Let daarop dat as die inligting versteek is in die feit dat 'n fase verander en nie in die fase self nie, jy nie verskillende fases duidelik onderskei sal sien nie.
+- **Opsporing van FM**: IQ het nie 'n veld om frekwensies te identifiseer nie (afstand na die middel is amplitude en hoek is fase).\
+Om FM te identifiseer, behoort jy dus **basies net 'n sirkel** in hierdie grafiek te sien.\
+Verder word 'n verskillende frekwensie deur die IQ-grafiek voorgestel as 'n **versnellende spoed rondom die sirkel** (dus, wanneer die sein in SysDigger gekies word en die IQ-grafiek gevul word, kan 'n versnelling of verandering van rigting in die geskepte sirkel beteken dat dit FM is):
 
-## AM Example
+## AM-voorbeeld
 
 {{#file}}
 sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw
 {{#endfile}}
 
-### Uncovering AM
+### Ontdekking van AM
 
-#### Checking the envelope
+#### Kontrolering van die envelope
 
-Kontroleer AM-inligting met [**SigDigger** ](https://github.com/BatchDrake/SigDigger) en net deur na die **omhulsel** te kyk, kan jy verskillende duidelike amplitude vlakke sien. Die gebruikte sein stuur pulsasies met inligting in AM, so lyk een puls:
+Wanneer jy AM-inligting met [**SigDigger** ](https://github.com/BatchDrake/SigDigger) nagaan en bloot na die **envelop** kyk, kan jy verskillende duidelike amplitudovlakke sien. Die gebruikte sein stuur pulses met inligting in AM; so lyk een pulse:<sup>[[1]](#references)</sup>
 
-![](<../../images/image (590).png>)
+![SigDigger AM-seinenvelop met duidelike pulse-amplitudovlakke](<../../images/image (590).png>)
 
-En so lyk 'n deel van die simbool met die golfvorm:
+En so lyk 'n gedeelte van die simbool met die waveform:
 
-![](<../../images/image (734).png>)
+![Ontdekking van AM - Kontrolering van die envelope: So lyk 'n gedeelte van die simbool met die waveform](<../../images/image (734).png>)
 
-#### Checking the Histogram
+#### Kontrolering van die Histogram
 
-Jy kan **die hele sein** waar die inligting geleë is, kies, **Amplitude** modus en **Seleksie** kies en op **Histogram** klik. Jy kan waarneem dat 2 duidelike vlakke net gevind word
+Jy kan die **hele sein selekteer** waar die inligting geleë is, die **Amplitude**-modus en **Selection** kies, en op **Histogram** klik. Jy kan waarneem dat slegs 2 duidelike vlakke gevind word.
 
-![](<../../images/image (264).png>)
+![SigDigger-amplitudehistogram wat twee duidelike vlakke vir die geselekteerde AM-sein wys](<../../images/image (264).png>)
 
-Byvoorbeeld, as jy Frekwensie kies in plaas van Amplitude in hierdie AM-sein, vind jy net 1 frekwensie (geen manier dat inligting wat in frekwensie gemoduleer is, net 1 frekwensie gebruik).
+As jy byvoorbeeld Frequency in plaas van Amplitude in hierdie AM-sein kies, vind jy net 1 frekwensie (dit is nie moontlik dat inligting wat in frekwensie gemoduleer is net 1 frekwensie gebruik nie).
 
-![](<../../images/image (732).png>)
+![SigDigger-frekwensiehistogram vir die AM-sein wat een frekwensie wys](<../../images/image (732).png>)
 
-As jy 'n baie frekwensies vind, sal dit waarskynlik nie 'n FM wees nie, waarskynlik is die seinfrekwensie net gewysig as gevolg van die kanaal.
+As jy baie frekwensies vind, sal dit moontlik nie FM wees nie; die seingrekwensie is waarskynlik bloot weens die kanaal gewysig.
 
-#### With IQ
+#### Met IQ
 
-In hierdie voorbeeld kan jy sien hoe daar 'n **groot sirkel** is, maar ook **'n baie punte in die sentrum.**
+In hierdie voorbeeld kan jy sien dat daar 'n **groot sirkel** is, maar ook **baie punte in die middel**.
 
-![](<../../images/image (222).png>)
+![Kontrolering van die Histogram - Met IQ: In hierdie voorbeeld kan jy sien dat daar 'n groot sirkel is, maar ook baie punte in die middel](<../../images/image (222).png>)
 
-### Get Symbol Rate
+### Kry die simbooltempo
 
-#### With one symbol
+#### Met een simbool
 
-Kies die kleinste simbool wat jy kan vind (sodat jy seker is dit is net 1) en kyk na die "Seleksie frekwensie". In hierdie geval sal dit 1.013kHz wees (so 1kHz).
+Kies die kleinste simbool wat jy kan vind (sodat jy seker is dit is net 1) en kontroleer die "Selection freq". In hierdie geval sou dit 1.013kHz wees (dus 1kHz).
 
-![](<../../images/image (78).png>)
+![Kry die simbooltempo - Met een simbool: Kies die kleinste simbool wat jy kan vind (sodat jy seker is dit is net 1) en kontroleer die "Selection freq". In hierdie geval sou dit 1.013kHz wees (dus 1kHz)](<../../images/image (78).png>)
 
-#### With a group of symbols
+#### Met 'n groep simbole
 
-Jy kan ook die aantal simbole wat jy gaan kies, aandui en SigDigger sal die frekwensie van 1 simbool bereken (hoe meer simbole gekies, hoe beter waarskynlik). In hierdie scenario het ek 10 simbole gekies en die "Seleksie frekwensie" is 1.004 Khz:
+Jy kan ook die aantal simbole aandui wat jy gaan selekteer, waarna SigDigger die frekwensie van 1 simbool sal bereken (hoe meer simbole geselekteer word, hoe beter waarskynlik). In hierdie scenario het ek 10 simbole geselekteer en die "Selection freq" is 1.004 Khz:
 
-![](<../../images/image (1008).png>)
+![SigDigger-simbooltempo-berekening met 'n geselekteerde groep van tien simbole](<../../images/image (1008).png>)
 
-### Get Bits
+### Kry bits
 
-Nadat jy gevind het dat dit 'n **AM-gemoduleerde** sein is en die **simbooltempo** (en weet dat in hierdie geval iets op beteken 1 en iets af beteken 0), is dit baie maklik om die **bits** wat in die sein gekodeer is, te **verkry**. So, kies die sein met inligting en konfigureer die monster en besluit en druk monster (kyk dat **Amplitude** gekies is, die ontdekte **Simbooltempo** is geconfigureer en die **Gadner klokherwinning** is gekies):
+Nadat jy vasgestel het dat dit 'n **AM-gemoduleerde** sein is en die **simbooltempo** gevind het (en weet dat iets wat opgaan in hierdie geval 1 beteken en iets wat afgaan 0 beteken), is dit baie maklik om die **bits** wat in die sein geënkodeer is te **verkry**. Selekteer dus die sein met inligting, konfigureer die sampling en decision, en druk sample (maak seker dat **Amplitude** geselekteer is, die ontdekte **Symbol rate** gekonfigureer is en **Gadner clock recovery** geselekteer is):
 
-![](<../../images/image (965).png>)
+![SigDigger Get Bits-paneel gekonfigureer vir AM-sampling, simbooltempo en Gardner clock recovery](<../../images/image (965).png>)
 
-- **Sync to selection intervals** beteken dat as jy voorheen intervalle gekies het om die simbooltempo te vind, daardie simbooltempo gebruik sal word.
-- **Manual** beteken dat die aangeduide simbooltempo gebruik gaan word
-- In **Fixed interval selection** dui jy die aantal intervalle aan wat gekies moet word en dit bereken die simbooltempo daaruit
-- **Gadner clock recovery** is gewoonlik die beste opsie, maar jy moet steeds 'n paar benaderde simbooltempo aandui.
+- **Sync to selection intervals** beteken dat, as jy voorheen intervalle geselekteer het om die simbooltempo te vind, daardie simbooltempo gebruik sal word.
+- **Manual** beteken dat die aangeduide simbooltempo gebruik sal word.
+- In **Fixed interval selection** dui jy die aantal intervalle aan wat geselekteer moet word, waarna dit die simbooltempo daaruit bereken.
+- **Gadner clock recovery** is gewoonlik die beste opsie, maar jy moet steeds 'n benaderde simbooltempo aandui.
 
-Wanneer jy op monster druk, verskyn dit:
+Wanneer jy sample druk, verskyn dit:
 
-![](<../../images/image (644).png>)
+![Met 'n groep simbole - Kry bits: Dit verskyn wanneer jy sample druk](<../../images/image (644).png>)
 
-Nou, om SigDigger te laat verstaan **waar die reeks** van die vlak wat inligting dra, moet jy op die **lae vlak** klik en ingedruk hou totdat die grootste vlak:
+Om SigDigger nou te laat verstaan **waar die reeks** van die vlak wat inligting dra is, moet jy op die **laer vlak** klik en die klik behou tot by die grootste vlak:
 
-![](<../../images/image (439).png>)
+![SigDigger-vlakreeksseleksie vanaf die laer amplitudovlak tot by die boonste vlak](<../../images/image (439).png>)
 
-As daar byvoorbeeld **4 verskillende vlakke van amplitude** was, sou jy die **Bits per simbool op 2** moes konfigureer en van die kleinste tot die grootste kies.
+As daar byvoorbeeld **4 verskillende amplitudovlakke** was, moes jy die **Bits per symbol op 2** gekonfigureer het en van die kleinste tot die grootste geselekteer het.
 
-Laastens, **verhoog** die **Zoom** en **verander die Ry-grootte** kan jy die bits sien (en jy kan alles kies en kopieer om al die bits te kry):
+Deur uiteindelik die **Zoom** te **verhoog** en die **Row size** te **verander**, kan jy die bits sien (en jy kan alles selekteer en kopieer om al die bits te kry):
 
-![](<../../images/image (276).png>)
+![Met 'n groep simbole - Kry bits: Deur uiteindelik die Zoom te verhoog en die Row size te verander, kan jy die bits sien (en jy kan alles selekteer en kopieer om al die bits te kry)](<../../images/image (276).png>)
 
-As die sein meer as 1 bit per simbool het (byvoorbeeld 2), het SigDigger **geen manier om te weet watter simbool is** 00, 01, 10, 11 nie, so dit sal verskillende **grys skale** gebruik om elkeen te verteenwoordig (en as jy die bits kopieer, sal dit **nommers van 0 tot 3** gebruik, jy sal dit moet verwerk).
+As die sein meer as 1 bit per simbool het (byvoorbeeld 2), het SigDigger **geen manier om te weet watter simbool** 00, 01, 10 of 11 is nie. Dit sal dus verskillende **gryskale** gebruik om elkeen voor te stel (en as jy die bits kopieer, sal dit **getalle van 0 tot 3** gebruik; jy sal hulle moet verwerk).
 
-Gebruik ook **kodering** soos **Manchester**, en **op+af** kan **1 of 0** wees en 'n af+op kan 'n 1 of 0 wees. In daardie gevalle moet jy die **verkrygde op (1) en af (0)** verwerk om die pare van 01 of 10 as 0s of 1s te vervang.
+Gebruik ook **codifications** soos **Manchester**, waar **op+af** **1 of 0** kan wees en **af+op** 'n 1 of 0 kan wees. In hierdie gevalle moet jy die verkrygde oppe (1'e) en affe (0'e) **verwerk** om die pare 01 of 10 met 0'e of 1'e te vervang.
 
-## FM Example
+## FM-voorbeeld
 
 {{#file}}
 sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw
 {{#endfile}}
 
-### Uncovering FM
+### Ontdekking van FM
 
-#### Checking the frequencies and waveform
+#### Kontrolering van die frekwensies en waveform
 
-Seinvoorbeeld wat inligting gemoduleer in FM stuur:
+Seinvoorbeeld wat inligting stuur wat in FM gemoduleer is:
 
-![](<../../images/image (725).png>)
+![Ontdekking van FM - Kontrolering van die frekwensies en waveform: Seinvoorbeeld wat inligting stuur wat in FM gemoduleer is](<../../images/image (725).png>)
 
-In die vorige beeld kan jy redelik goed waarneem dat **2 frekwensies gebruik word**, maar as jy die **golfvorm** waarneem, mag jy **nie in staat wees om die 2 verskillende frekwensies korrek te identifiseer nie**:
+In die vorige beeld kan jy redelik goed waarneem dat **2 frekwensies gebruik word**, maar as jy die **waveform** **waarneem**, sal jy moontlik **nie die 2 verskillende frekwensies korrek kan identifiseer nie**:
 
-![](<../../images/image (717).png>)
+![SigDigger FM-waveform waar die twee frekwensies moeilik direk onderskei kan word](<../../images/image (717).png>)
 
-Dit is omdat ek die sein in beide frekwensies opgeneem het, daarom is een ongeveer die ander in negatief:
+Dit is omdat ek die sein op albei frekwensies vasgelê het; daarom is die een ongeveer die negatiewe van die ander:
 
-![](<../../images/image (942).png>)
+![SigDigger FM-opname wat die twee frekwensies as benaderde negatiewe van mekaar wys](<../../images/image (942).png>)
 
-As die gesinkroniseerde frekwensie **naby een frekwensie is as die ander**, kan jy maklik die 2 verskillende frekwensies sien:
+As die gesinkroniseerde frekwensie **nader aan een frekwensie as aan die ander** is, kan jy die 2 verskillende frekwensies maklik sien:
 
-![](<../../images/image (422).png>)
+![Ontdekking van FM - Kontrolering van die frekwensies en waveform: As die gesinkroniseerde frekwensie nader aan een frekwensie as aan die ander is, kan jy die 2 verskillende frekwensies maklik sien](<../../images/image (422).png>)
 
-![](<../../images/image (488).png>)
+![Ontdekking van FM - Kontrolering van die frekwensies en waveform: As die gesinkroniseerde frekwensie nader aan een frekwensie as aan die ander is, kan jy die 2 verskillende frekwensies maklik sien](<../../images/image (488).png>)
 
-#### Checking the histogram
+#### Kontrolering van die histogram
 
-Deur die frekwensiehistogram van die sein met inligting te kontroleer, kan jy maklik 2 verskillende seine sien:
+Deur die frekwensiehistogram van die sein met inligting na te gaan, kan jy maklik 2 verskillende seine sien:
 
-![](<../../images/image (871).png>)
+![Kontrolering van die frekwensies en waveform - Kontrolering van die histogram: Deur die frekwensiehistogram van die sein met inligting na te gaan, kan jy maklik 2 verskillende seine sien](<../../images/image (871).png>)
 
-In hierdie geval, as jy die **Amplitude histogram** nagaan, sal jy **net een amplitude** vind, so dit **kan nie AM wees nie** (as jy 'n baie amplitudes vind, kan dit wees omdat die sein krag langs die kanaal verloor het):
+As jy in hierdie geval die **Amplitude histogram** nagaan, sal jy **slegs een amplitude** vind, dus **kan dit nie AM wees nie** (as jy baie amplitudes vind, kan dit wees omdat die sein langs die kanaal krag verloor het):
 
-![](<../../images/image (817).png>)
+![SigDigger-amplitudehistogram vir FM-sein wat 'n enkele amplitudovlak wys](<../../images/image (817).png>)
 
-En dit sou die fasehistogram wees (wat baie duidelik maak dat die sein nie in fase gemoduleer is nie):
+En dit sou die fasehistogram wees (wat dit baie duidelik maak dat die sein nie in fase gemoduleer is nie):
 
-![](<../../images/image (996).png>)
+![Kontrolering van die frekwensies en waveform - Kontrolering van die histogram: Dit sou die fasehistogram wees, wat dit baie duidelik maak dat die sein nie in fase gemoduleer is nie](<../../images/image (996).png>)
 
-#### With IQ
+#### Met IQ
 
-IQ het nie 'n veld om frekwensies te identifiseer nie (afstand tot sentrum is amplitude en hoek is fase).\
-Daarom, om FM te identifiseer, moet jy **basies net 'n sirkel** in hierdie grafiek sien.\
-Boonop word 'n ander frekwensie "verteenwoordig" deur die IQ-grafiek deur 'n **spoedversnelling oor die sirkel** (so in SysDigger, wanneer jy die sein kies, word die IQ-grafiek bevolk, as jy 'n versnelling of rigtingverandering in die geskepte sirkel vind, kan dit beteken dat dit FM is):
+IQ het nie 'n veld om frekwensies te identifiseer nie (afstand na die middel is amplitude en hoek is fase).\
+Om FM te identifiseer, behoort jy dus **basies net 'n sirkel** in hierdie grafiek te sien.\
+Verder word 'n verskillende frekwensie deur die IQ-grafiek voorgestel as 'n **versnellende spoed rondom die sirkel** (dus, wanneer die sein in SysDigger gekies word en die IQ-grafiek gevul word, kan 'n versnelling of verandering van rigting in die geskepte sirkel beteken dat dit FM is):
 
-![](<../../images/image (81).png>)
+![SigDigger IQ-grafiek waar FM as veranderinge in versnelling rondom die sirkel verskyn](<../../images/image (81).png>)
 
-### Get Symbol Rate
+### Kry die simbooltempo
 
-Jy kan die **dieselfde tegniek as die een wat in die AM-voorbeeld gebruik is** gebruik om die simbooltempo te kry sodra jy die frekwensies wat simbole dra, gevind het.
+Jy kan **dieselfde tegniek as die een in die AM-voorbeeld** gebruik om die simbooltempo te kry nadat jy die frekwensies gevind het wat simbole dra.
 
-### Get Bits
+### Kry bits
 
-Jy kan die **dieselfde tegniek as die een wat in die AM-voorbeeld gebruik is** gebruik om die bits te kry sodra jy **gevind het dat die sein in frekwensie gemoduleer is** en die **simbooltempo**.
+Jy kan **dieselfde tegniek as die een in die AM-voorbeeld** gebruik om die bits te kry nadat jy **vasgestel het dat die sein in frekwensie gemoduleer is** en die **simbooltempo** gevind het.
+
+## Verwysings
+
+- [1] [SigDigger - Free digital signal analyzer for GNU/Linux and macOS](https://github.com/BatchDrake/SigDigger)
 
 {{#include ../../banners/hacktricks-training.md}}
