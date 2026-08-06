@@ -1,111 +1,111 @@
-# Wireshark tricks
+# Wireshark ipuçları
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Wireshark becerilerinizi geliştirin
 
-### Tutorials
+### Eğitimler
 
-Aşağıdaki tutorials, bazı havalı temel trik'leri öğrenmek için harikadır:
+Aşağıdaki eğitimler bazı kullanışlı temel ipuçlarını öğrenmek için harikadır:
 
 - [https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/](https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/](https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/](https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/](https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/)
 
-### Analysed Information
+### Analiz Edilen Bilgiler
 
-**Expert Information**
+**Uzman Bilgileri**
 
-_**Analyze** --> **Expert Information**_ üzerine tıkladığınızda, **analyzed** paketlerde neler olduğuna dair bir **overview** elde edersiniz:
+_**Analyze** --> **Expert Information**_ seçeneğine tıklayarak **analiz edilen** paketlerde neler olduğuna dair bir **genel bakış** elde edebilirsiniz:
 
-![](<../../../images/image (256).png>)
+![Eğitimler - Analiz Edilen Bilgiler: Analyze -- Expert Information seçeneğine tıklayarak analiz edilen paketlerde neler olduğuna dair bir genel bakış elde edebilirsiniz](<../../../images/image (256).png>)
 
-**Resolved Addresses**
+**Çözümlenen Adresler**
 
-_**Statistics --> Resolved Addresses**_ altında, wireshark tarafından "resolved" edilmiş çeşitli **information** bulabilirsiniz; örneğin port/transport to protocol, MAC to the manufacturer, vb. İletişimde nelerin yer aldığını bilmek ilginçtir.
+_**Statistics --> Resolved Addresses**_ altında Wireshark tarafından "**çözümlenen**" port/transport bilgisinin protokole, MAC adresinin üreticiye eşlenmesi gibi çeşitli **bilgileri** bulabilirsiniz. İletişimde nelerin rol oynadığını bilmek ilginç olabilir.
 
-![](<../../../images/image (893).png>)
+![Eğitimler - Analiz Edilen Bilgiler: Statistics -- Resolved Addresses altında Wireshark tarafından " çözümlenen " port/transport bilgisinin protokole, MAC adresinin ise üreticiye eşlenmesi gibi çeşitli bilgileri bulabilirsiniz](<../../../images/image (893).png>)
 
-**Protocol Hierarchy**
+**Protokol Hiyerarşisi**
 
-_**Statistics --> Protocol Hierarchy**_ altında, iletişimde yer alan **protocols** ve bunlar hakkındaki verileri bulabilirsiniz.
+_**Statistics --> Protocol Hierarchy**_ altında iletişimde **yer alan** **protokolleri** ve bunlarla ilgili verileri bulabilirsiniz.
 
-![](<../../../images/image (586).png>)
+![Eğitimler - Analiz Edilen Bilgiler: Statistics -- Protocol Hierarchy altında iletişimde yer alan protokolleri ve bunlarla ilgili verileri bulabilirsiniz](<../../../images/image (586).png>)
 
 **Conversations**
 
-_**Statistics --> Conversations**_ altında, iletişimdeki konuşmaların bir **summary of the conversations** ve bunlar hakkındaki verileri bulabilirsiniz.
+_**Statistics --> Conversations**_ altında iletişimdeki **conversations özeti** ve bunlarla ilgili verileri bulabilirsiniz.
 
-![](<../../../images/image (453).png>)
+![Eğitimler - Analiz Edilen Bilgiler: Statistics -- Conversations altında iletişimdeki conversations özetini ve bunlarla ilgili verileri bulabilirsiniz](<../../../images/image (453).png>)
 
 **Endpoints**
 
-_**Statistics --> Endpoints**_ altında, iletişimdeki uç noktaların bir **summary of the endpoints** ve her biri hakkındaki verileri bulabilirsiniz.
+_**Statistics --> Endpoints**_ altında iletişimdeki **endpoints özeti** ve her biriyle ilgili verileri bulabilirsiniz.
 
-![](<../../../images/image (896).png>)
+![Eğitimler - Analiz Edilen Bilgiler: Statistics -- Endpoints altında iletişimdeki endpoints özetini ve her biriyle ilgili verileri bulabilirsiniz](<../../../images/image (896).png>)
 
-**DNS info**
+**DNS bilgileri**
 
-_**Statistics --> DNS**_ altında, yakalanan DNS request hakkında istatistikler bulabilirsiniz.
+_**Statistics --> DNS**_ altında yakalanan DNS isteğiyle ilgili istatistikleri bulabilirsiniz.
 
-![](<../../../images/image (1063).png>)
+![Eğitimler - Analiz Edilen Bilgiler: Statistics -- DNS altında yakalanan DNS isteğiyle ilgili istatistikleri bulabilirsiniz](<../../../images/image (1063).png>)
 
 **I/O Graph**
 
-_**Statistics --> I/O Graph**_ altında, iletişimin bir **graph of the communication.** bulabilirsiniz.
+_**Statistics --> I/O Graph**_ altında **iletişimin grafiğini** bulabilirsiniz.
 
-![](<../../../images/image (992).png>)
+![Eğitimler - Analiz Edilen Bilgiler: Statistics -- I/O Graph altında iletişimin grafiğini bulabilirsiniz](<../../../images/image (992).png>)
 
-### Filters
+### Filtreler
 
-Burada protokole bağlı wireshark filter bulabilirsiniz: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
-Güncel Wireshark'ta eski `ssl.*` filter isimleri yerine `tls.*` kullanın.\
+Protokole göre Wireshark filtrelerini burada bulabilirsiniz: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
+Güncel Wireshark sürümünde eski `ssl.*` filtre adları yerine `tls.*` kullanın.\
 Diğer ilginç filtreler:
 
 - `(http.request or tls.handshake.type == 1) and !(udp.port eq 1900)`
-- HTTP and initial HTTPS traffic
+- HTTP ve başlangıç HTTPS trafiği
 - `(http.request or tls.handshake.type == 1 or tcp.flags eq 0x0002) and !(udp.port eq 1900)`
-- HTTP and initial HTTPS traffic + TCP SYN
+- HTTP ve başlangıç HTTPS trafiği + TCP SYN
 - `(http.request or tls.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
-- HTTP and initial HTTPS traffic + TCP SYN + DNS requests
+- HTTP ve başlangıç HTTPS trafiği + TCP SYN + DNS istekleri
 - `tls.handshake.extensions_server_name contains "example.com"`
-- Payload'u decrypt edemeseniz bile ClientHello içinde gönderilen SNI üzerinde pivot yapın
+- Payload'ı decrypt edemediğiniz durumlarda bile ClientHello'da gönderilen SNI üzerinden pivot yapın
 - `tls.handshake.extensions_alpn_str == "h2" or tls.handshake.extensions_alpn_str == "h3"`
-- Classic HTTPS, HTTP/2 ve HTTP/3 destekli oturumları hızlıca ayırın
+- Klasik HTTPS, HTTP/2 ve HTTP/3 destekli oturumları hızlıca ayırın
 - `quic or http3`
-- Sadece TCP conversations incelemeniz durumunda kaçırılacak modern UDP/443 trafiğini bulun
+- Yalnızca TCP conversations'larını incelerseniz gözden kaçacak modern UDP/443 trafiğini bulun
 
-### Search
+### Arama
 
-Session'ların **packets** içindeki **content**'ini **search** etmek istiyorsanız _CTRL+f_ tuşuna basın. Ana bilgi çubuğuna (No., Time, Source, etc.) sağ butona basıp ardından edit column seçerek yeni katmanlar ekleyebilirsiniz.
+Oturumların **paketleri** içindeki **içerikte** **arama** yapmak istiyorsanız _CTRL+f_ tuşlarına basın. Sağ düğmeye basıp ardından sütunu düzenleyerek ana bilgi çubuğuna (No., Time, Source vb.) yeni katmanlar ekleyebilirsiniz.
 
-### Following multiplexed streams
+### Çoklanmış akışları takip etme
 
-Wireshark'ın yeni sürümleri `TLS`, `HTTP/2` ve `QUIC` stream'lerini doğrudan takip edebilir. Gürültülü capture'larda bu genellikle yalnızca `Follow TCP Stream` kullanmaktan daha hızlıdır, özellikle birden fazla request aynı connection'ı paylaşıyorsa.
+Güncel Wireshark sürümleri `TLS`, `HTTP/2` ve `QUIC` akışlarını doğrudan takip edebilir. Gürültülü capture'larda bu yöntem genellikle yalnızca `Follow TCP Stream` kullanmaktan daha hızlıdır; özellikle de birden fazla istek aynı bağlantıyı paylaşıyorsa.
 
-### Free pcap labs
+### Ücretsiz pcap laboratuvarları
 
-**Şunların ücretsiz challenges'ları ile pratik yapın:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
+**Ücretsiz challenge'larla pratik yapın:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
 
-## Identifying Domains
+## Domain'leri Belirleme
 
-HTTP Host header'ını gösteren bir column ekleyebilirsiniz:
+HTTP Host header'ını gösteren bir sütun ekleyebilirsiniz:
 
-![](<../../../images/image (639).png>)
+![Ücretsiz pcap laboratuvarları - Domain'leri Belirleme: HTTP Host header'ını gösteren bir sütun ekleyebilirsiniz](<../../../images/image (639).png>)
 
-Ve başlatan bir HTTPS connection'dan Server name ekleyen bir column da ekleyebilirsiniz (**tls.handshake.type == 1**):
+Ayrıca başlatılan bir HTTPS bağlantısından Server name bilgisini ekleyen bir sütun da ekleyebilirsiniz (**tls.handshake.type == 1**):
 
-![](<../../../images/image (408) (1).png>)
+![Ücretsiz pcap laboratuvarları - Domain'leri Belirleme: Başlatılan bir HTTPS bağlantısından Server name bilgisini ekleyen bir sütun da ekleyebilirsiniz ( tls.handshake.type == 1 )](<../../../images/image (408) (1).png>)
 
-Capture çoğunlukla encrypted ise, bu field'ları column olarak eklemek triage sürecini çok hızlandırır:
+Capture çoğunlukla şifreliyse bu alanları sütun olarak eklemek triage işlemini büyük ölçüde hızlandırır:
 
 - `tls.handshake.extensions_server_name`
 - `tls.handshake.extensions_alpn_str`
 - `tls.handshake.ja3`
 - `tls.handshake.ja4` (Wireshark 4.2+)
 
-Bu, payload'ın kendisi encrypted kalsa bile session'ları hostname, ALPN (`http/1.1`, `h2`, `h3`, vb.) ve client fingerprint'e göre gruplamanızı sağlar. Decrypted HTTP/2 ve HTTP/3 captures için, `http2.header.value` veya `http3.headers.header.value` ekleyip paths, authorities ve diğer ilginç metadata üzerinde pivot yapmak da faydalıdır.
+Bu sayede payload'ın kendisi şifreli kalmaya devam etse bile oturumları hostname, ALPN (`http/1.1`, `h2`, `h3` vb.) ve client fingerprint'a göre kümelendirebilirsiniz. Decrypted HTTP/2 ve HTTP/3 capture'ları için `http2.header.value` veya `http3.headers.header.value` alanlarını sütun olarak eklemek ve path'ler, authority'ler ile diğer ilginç metadata üzerinden pivot yapmak da faydalıdır.<sup>[[2]](#references)</sup>
 ```bash
 tshark -r capture.pcapng -Y "tls.handshake.type == 1" -T fields \
 -e frame.number -e ip.src -e ip.dst \
@@ -113,51 +113,51 @@ tshark -r capture.pcapng -Y "tls.handshake.type == 1" -T fields \
 -e tls.handshake.extensions_alpn_str \
 -e tls.handshake.ja3 -e tls.handshake.ja4
 ```
-## Yerel hostname’leri belirleme
+## Yerel hostname'leri belirleme
 
-### DHCP’den
+### DHCP'den
 
-Güncel Wireshark’ta `bootp` yerine `DHCP` aramanız gerekir
+Güncel Wireshark'ta `bootp` yerine `DHCP` için arama yapmanız gerekir
 
-![](<../../../images/image (1013).png>)
+![Yerel hostname'leri belirleme - DHCP'den: Güncel Wireshark'ta bootp yerine DHCP için arama yapmanız gerekir](<../../../images/image (1013).png>)
 
-### NBNS’den
+### NBNS'den
 
-![](<../../../images/image (1003).png>)
+![DHCP'den - NBNS'den: Güncel Wireshark'ta bootp yerine DHCP için arama yapmanız gerekir](<../../../images/image (1003).png>)
 
-## TLS şifre çözme
+## TLS şifresini çözme
 
-### Server private key ile https trafiğini çözme
+### Sunucunun private key'i ile https trafiğinin şifresini çözme
 
 _edit > preferences > protocols > tls >_
 
-![](<../../../images/image (1103).png>)
+![TLS şifresini çözme - Sunucunun private key'i ile https trafiğinin şifresini çözme: Sunucunun private key'i ile https trafiğinin şifresini çözme](<../../../images/image (1103).png>)
 
-_Edit_’e basın ve server ile private key’in tüm verilerini ekleyin (_IP, Port, Protocol, Key file and password_)
+_Edit_ düğmesine basın ve sunucu ile private key'e ait tüm verileri (_IP, Port, Protocol, Key file ve password_) ekleyin.
 
-Bu yöntem yalnızca sınırlı sayıda durumda çalışır. Güncel TLS 1.3 / ECDHE trafiğinde, aşağıdaki session key log yöntemi genellikle pratik seçenektir.
+Bu yöntem yalnızca sınırlı sayıda durumda çalışır. Güncel TLS 1.3 / ECDHE trafiği için aşağıdaki session key log yöntemi genellikle pratik seçenektir.<sup>[[1]](#references)</sup>
 
-### Simetrik session key’lerle https trafiğini çözme
+### Symmetric session keys ile https trafiğinin şifresini çözme
 
-Hem Firefox hem de Chrome, TLS session key’lerini loglama yeteneğine sahiptir; bunlar Wireshark ile TLS trafiğini çözmek için kullanılabilir. Bu, güvenli iletişimlerin derinlemesine analizine olanak tanır. Bu şifre çözmenin nasıl yapılacağına dair daha fazla ayrıntı [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/) adresindeki bir rehberde bulunabilir. Bu aynı zamanda modern TLS 1.3 ve QUIC/HTTP/3 capture’larını çözmek için de normal yoldur.
+Hem Firefox hem de Chrome, Wireshark ile TLS trafiğinin şifresini çözmek için kullanılabilecek TLS session key'lerini loglama yeteneğine sahiptir. Bu, güvenli iletişimlerin derinlemesine analiz edilmesini sağlar. Bu şifre çözme işleminin nasıl gerçekleştirileceğine ilişkin daha fazla ayrıntı [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/) tarafından hazırlanmış bir kılavuzda bulunabilir.<sup>[[3]](#references)</sup> Bu, modern TLS 1.3 ve QUIC/HTTP/3 capture'larının şifresini çözmek için de normal yöntemdir.<sup>[[2]](#references)</sup>
 
-Bunu tespit etmek için ortam içinde `SSLKEYLOGFILE` değişkenini arayın
+Bunu tespit etmek için ortam içinde `SSLKEYLOGFILE` değişkenini arayın.
 
-Ortak key’lerden oluşan bir dosya şöyle görünür:
+Paylaşılan key'lerden oluşan bir dosya şu şekilde görünür:
 
-![](<../../../images/image (820).png>)
+![Sunucunun private key'i ile https trafiğinin şifresini çözme - Symmetric session keys ile https trafiğinin şifresini çözme: Paylaşılan key'lerden oluşan bir dosya şu şekilde görünür](<../../../images/image (820).png>)
 
-Eğer capture `pcapng` ise, host filesystem’i araştırmadan önce içine gömülü decryption secret’ları zaten içerip içermediğini kontrol edin:
+Capture `pcapng` ise, host filesystem'ini aramaya başlamadan önce içinde embedded decryption secret'larının zaten bulunup bulunmadığını kontrol edin:<sup>[[1]](#references)</sup>
 ```bash
 editcap --extract-secrets capture.pcapng tls-secrets.txt
 ```
-Bunu wireshark içine import etmek için \_edit > preferences > protocols > tls > ve bunu (Pre)-Master-Secret log filename içine import edin:
+Bunu Wireshark'a aktarmak için \_edit > preferences > protocols > tls > bölümüne gidin ve (Pre)-Master-Secret log filename alanına aktarın:
 
-![](<../../../images/image (989).png>)
+![Sunucu private key kullanarak https trafiğinin şifresini çözme - Simetrik oturum anahtarlarıyla https trafiğinin şifresini çözme: editcap --extract-secrets capture.pcapng tls-secrets.txt](<../../../images/image (989).png>)
 
-## ADB iletişimi
+## ADB communication
 
-APK’nin gönderildiği bir ADB communication içinden bir APK çıkarın:
+APK'nin gönderildiği bir ADB communication içinden APK'yi çıkarın:
 ```python
 from scapy.all import *
 
@@ -184,9 +184,10 @@ f = open('all_bytes.data', 'w+b')
 f.write(all_bytes)
 f.close()
 ```
-## References
+## Referanslar
 
-- [Wireshark TLS wiki](https://wiki.wireshark.org/TLS)
-- [Decrypting and parsing HTTP/3 traffic in Wireshark](https://blog.elmo.sg/posts/parsing-decrypted-quic-traffic-in-wireshark/)
+- [1] [Wireshark TLS wiki](https://wiki.wireshark.org/TLS)
+- [2] [Wireshark'ta HTTP/3 trafiğinin şifresini çözme ve ayrıştırma](https://blog.elmo.sg/posts/parsing-decrypted-quic-traffic-in-wireshark/)
+- [3] [Wireshark ile TLS Browser Trafiğinin Şifresini Çözme - Kolay Yol!](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)
 
 {{#include ../../../banners/hacktricks-training.md}}

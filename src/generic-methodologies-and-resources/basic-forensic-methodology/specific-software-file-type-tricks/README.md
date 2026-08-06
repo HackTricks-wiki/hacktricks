@@ -1,8 +1,8 @@
-# Belirli Yazılım/Dosya Türleri İçin Hileler
+# Belirli Yazılım/Dosya Türü Teknikleri
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Burada belirli dosya türleri ve/veya yazılımlar için ilginç hileler bulabilirsiniz:
+Burada belirli dosya türleri ve/veya yazılımlar için ilginç teknikleri bulabilirsiniz:
 
 
 {{#ref}}

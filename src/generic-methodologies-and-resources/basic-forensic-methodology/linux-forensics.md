@@ -1,4 +1,4 @@
-# Linux Forensics
+# Linux Adli Bilişim
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,12 +6,12 @@
 
 ### Temel Bilgiler
 
-İlk olarak, üzerinde **iyi bilinen binary'ler ve library'ler** bulunan bazı **USB**'lere sahip olmanız önerilir (sadece ubuntu alıp _/bin_, _/sbin_, _/lib,_ ve _/lib64_ klasörlerini kopyalayabilirsiniz), ardından USB'yi mount edin ve bu binary'leri kullanmak için env değişkenlerini değiştirin:
+Her şeyden önce, üzerinde **güvenilir binary'ler ve library'ler bulunan bir **USB** bulundurmanız önerilir** (ubuntu'yu indirip _/bin_, _/sbin_, _/lib,_ ve _/lib64_ klasörlerini kopyalayabilirsiniz). Ardından USB'yi mount edin ve bu binary'leri kullanmak için env değişkenlerini değiştirin:
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
 ```
-Sistemi iyi ve bilinen binary’leri kullanacak şekilde yapılandırdıktan sonra, **bazı temel bilgileri çıkarmaya** başlayabilirsiniz:
+Sistemi güvenilir ve bilinen binary'leri kullanacak şekilde yapılandırdıktan sonra **bazı temel bilgileri çıkarmaya** başlayabilirsiniz:
 ```bash
 date #Date and time (Clock may be skewed, Might be at a different timezone)
 uname -a #OS info
@@ -29,46 +29,46 @@ cat /etc/passwd #Unexpected data?
 cat /etc/shadow #Unexpected data?
 find /directory -type f -mtime -1 -print #Find modified files during the last minute in the directory
 ```
-#### Şüpheli bilgi
+#### Şüpheli bilgiler
 
-Temel bilgileri elde ederken şu tür garip şeyleri kontrol etmelisiniz:
+Temel bilgileri elde ederken aşağıdaki gibi garip şeyleri kontrol etmelisiniz:
 
-- **Root process**ler genellikle düşük PID’lerle çalışır, bu yüzden büyük bir PID’ye sahip bir root process bulursanız şüphelenebilirsiniz
-- `/etc/passwd` içinde shell’i olmayan kullanıcıların **registered logins** kayıtlarını kontrol edin
-- Shell’i olmayan kullanıcılar için `/etc/shadow` içinde **password hashes** olup olmadığını kontrol edin
+- **Root process'leri** genellikle düşük PID'lerle çalışır; bu nedenle yüksek PID'ye sahip bir root process'i bulursanız şüphelenebilirsiniz
+- `/etc/passwd` içinde shell'i olmayan kullanıcıların **kayıtlı login** bilgilerini kontrol edin
+- Shell'i olmayan kullanıcılar için `/etc/shadow` içinde **password hash'lerini** kontrol edin
 
 ### Memory Dump
 
-Çalışan sistemin belleğini elde etmek için [**LiME**](https://github.com/504ensicsLabs/LiME) kullanılması önerilir.\
-Bunu **compile** etmek için, kurban makinenin kullandığı **aynı kernel**i kullanmanız gerekir.
+Çalışan sistemin memory'sini elde etmek için [**LiME**](https://github.com/504ensicsLabs/LiME) kullanmanız önerilir.\
+Bunu **compile** etmek için victim machine'in kullandığı **aynı kernel'i** kullanmanız gerekir.
 
 > [!TIP]
-> LiME veya başka herhangi bir şeyi kurban makineye **install edemeyeceğinizi** unutmayın; çünkü bu, sistemde çeşitli değişikliklere neden olur
+> Victim machine'e **LiME veya başka herhangi bir şey yükleyemeyeceğinizi** unutmayın; bu, makinede çeşitli değişiklikler yapılmasına neden olur
 
-Dolayısıyla, birebir aynı sürümde bir Ubuntu’nuz varsa `apt-get install lime-forensics-dkms` kullanabilirsiniz\
-Diğer durumlarda, [**LiME**](https://github.com/504ensicsLabs/LiME)’i github’dan indirip doğru kernel headers ile compile etmeniz gerekir. Kurban makinenin **tam kernel headers**’ını elde etmek için, sadece `/lib/modules/<kernel version>` dizinini makinenize **copy** edebilir ve ardından LiME’yi bunları kullanarak **compile** edebilirsiniz:
+Bu nedenle, Ubuntu'nun aynı sürümüne sahipseniz `apt-get install lime-forensics-dkms` kullanabilirsiniz.\
+Diğer durumlarda [**LiME**](https://github.com/504ensicsLabs/LiME) dosyasını github'dan indirmeniz ve doğru kernel headers ile compile etmeniz gerekir. Victim machine'in **tam kernel headers'ını elde etmek** için `/lib/modules/<kernel version>` dizinini makinenize **kopyalayabilir** ve ardından LiME'ı bunları kullanarak **compile** edebilirsiniz:
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
 ```
 LiME 3 **formatı** destekler:
 
-- Raw (tüm segmentler birlikte birleştirilmiş)
-- Padded (raw ile aynı, ancak sağ bitlerde sıfırlar ile)
-- Lime (metadata içeren önerilen format)
+- Raw (her segment birbiri ardına birleştirilir)
+- Padded (Raw ile aynıdır, ancak sağ bitlerde sıfırlar bulunur)
+- Lime (metadata içeren önerilen format
 
-LiME ayrıca dump'ı sistemde saklamak yerine **network üzerinden göndermek** için de kullanılabilir; örneğin: `path=tcp:4444`
+LiME, `path=tcp:4444` gibi bir yöntem kullanarak dump'ı sistemde depolamak yerine **network üzerinden göndermek** için de kullanılabilir.
 
-### Disk Imaging
+### Disk İmajı Alma
 
-#### Shutting down
+#### Kapatma
 
-Öncelikle, **sistemi kapatmanız** gerekecek. Bu her zaman bir seçenek değildir çünkü bazen sistem, şirketin kapatmayı göze alamayacağı bir production server olabilir.\
-Sistemi kapatmanın **2 yolu** vardır: **normal shutdown** ve **"plug the plug" shutdown**. İlki, **processes**'lerin her zamanki gibi sonlanmasına ve **filesystem**'in **synchronizes** edilmesine izin verir, ancak olası **malware**'in delilleri **destroy evidence** etmesine de olanak tanır. "pull the plug" yaklaşımı ise **bazı information loss**'a neden olabilir (memory image'ı zaten aldığımız için bilginin çok fazla kısmı kaybolmayacaktır) ve **malware**'in buna karşı bir şey yapma fırsatı olmaz. Bu nedenle, bir **malware** şüpheniz varsa, sistemde yalnızca **`sync`** **command**'ini çalıştırın ve fişi çekin.
+Öncelikle sistemi **kapatmanız** gerekir. Bu her zaman mümkün olmayabilir; çünkü sistem bazen şirketin kapatmayı göze alamayacağı bir production server olabilir.\
+Sistemi kapatmanın **2 yolu** vardır: **normal kapatma** ve **"fişi çekerek" kapatma**. İlk yöntem, **process'lerin normal şekilde sonlanmasını** ve **filesystem'in** **senkronize edilmesini** sağlar; ancak olası **malware'in** **kanıtları yok etmesine** de olanak tanır. "Fişi çekme" yaklaşımı **bazı bilgi kayıplarına** yol açabilir (memory'nin imajını zaten aldığımız için bilgilerin çoğu kaybolmayacaktır) ve **malware'in** bu konuda herhangi bir şey yapma **fırsatı olmayacaktır**. Bu nedenle sistemde **malware** olabileceğinden **şüpheleniyorsanız**, sistemde yalnızca **`sync`** **komutunu** çalıştırın ve fişi çekin.
 
-#### Taking an image of the disk
+#### Diskin imajını alma
 
-Bilmek önemlidir ki, **bilgisayarınızı vakayla ilgili herhangi bir şeye bağlamadan önce**, herhangi bir bilgiyi değiştirmemek için onun **read only** olarak **mounted** edileceğinden emin olmanız gerekir.
+**Bilgisayarınızı vakayla ilgili herhangi bir şeye bağlamadan önce**, herhangi bir bilginin değiştirilmesini önlemek için bilgisayarın **salt okunur olarak mount edileceğinden** emin olmanız önemlidir.
 ```bash
 #Create a raw copy of the disk
 dd if=<subject device> of=<image file> bs=512
@@ -79,7 +79,7 @@ dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/med
 ```
 ### Disk Image ön analizi
 
-Daha fazla veri olmadan bir disk image’ini image almak.
+Daha fazla veri içermeyen bir disk image'ın görüntüsünü alma.
 ```bash
 #Find out if it's a disk image using "file" command
 file disk.img
@@ -132,32 +132,32 @@ r/r 16: secret.txt
 icat -i raw -f ext4 disk.img 16
 ThisisTheMasterSecret
 ```
-## Bilinen Malware için Arama
+## Bilinen Malware'ı Arama
 
 ### Değiştirilmiş Sistem Dosyaları
 
-Linux, sistem bileşenlerinin bütünlüğünü sağlamak için araçlar sunar; bu, potansiyel olarak sorunlu dosyaları tespit etmek açısından kritiktir.
+Linux, potansiyel olarak sorunlu dosyaları tespit etmek için kritik olan sistem bileşenlerinin bütünlüğünü doğrulamaya yönelik araçlar sunar.<sup>[[1]](#references)</sup>
 
 - **RedHat tabanlı sistemler**: Kapsamlı bir kontrol için `rpm -Va` kullanın.
-- **Debian tabanlı sistemler**: İlk doğrulama için `dpkg --verify`, ardından herhangi bir sorunu belirlemek için (`apt-get install debsums` ile `debsums` kurduktan sonra) `debsums | grep -v "OK$"` kullanın.
+- **Debian tabanlı sistemler**: İlk doğrulama için `dpkg --verify`, ardından herhangi bir sorunu tespit etmek için `debsums | grep -v "OK$"` kullanın (`debsums` paketini `apt-get install debsums` ile yükledikten sonra).
 
-### Malware/Rootkit Detectors
+### Malware/Rootkit Tespit Araçları
 
-Araçlar hakkında bilgi edinmek için aşağıdaki sayfayı okuyun; bunlar malware bulmada faydalı olabilir:
+Malware bulmak için yararlı olabilecek araçlar hakkında bilgi edinmek üzere aşağıdaki sayfayı okuyun:
 
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Yüklü programları arama
+## Yüklü Programları Arama
 
-Hem Debian hem de RedHat sistemlerinde yüklü programları etkili biçimde aramak için, yaygın dizinlerdeki manuel kontrollerle birlikte sistem loglarını ve veritabanlarını kullanmayı değerlendirin.
+Hem Debian hem de RedHat sistemlerinde yüklü programları etkili bir şekilde aramak için, yaygın dizinlerdeki manuel kontrollerin yanı sıra sistem günlüklerinden ve veritabanlarından yararlanmayı değerlendirin.<sup>[[1]](#references)</sup>
 
-- Debian için, paket kurulumlarının ayrıntılarını almak üzere _**`/var/lib/dpkg/status`**_ ve _**`/var/log/dpkg.log`**_ dosyalarını inceleyin; belirli bilgileri filtrelemek için `grep` kullanın.
+- Debian için, paket kurulumlarıyla ilgili ayrıntıları almak üzere _**`/var/lib/dpkg/status`**_ ve _**`/var/log/dpkg.log`**_ dosyalarını inceleyin; belirli bilgileri filtrelemek için `grep` kullanın.
 - RedHat kullanıcıları, yüklü paketleri listelemek için RPM veritabanını `rpm -qa --root=/mntpath/var/lib/rpm` ile sorgulayabilir.
 
-Bu paket yöneticileri dışında veya elle kurulmuş yazılımları ortaya çıkarmak için, _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_, ve _**`/sbin`**_ gibi dizinleri inceleyin. Dizin listelemelerini sistem-özel komutlarla birleştirerek bilinen paketlerle ilişkilendirilmeyen çalıştırılabilir dosyaları belirleyin; böylece tüm yüklü programlar için aramanızı güçlendirin.
+Bu paket yöneticileri kullanılarak manuel olarak veya bunların dışında yüklenen yazılımları ortaya çıkarmak için _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_ ve _**`/sbin`**_ gibi dizinleri inceleyin. Bilinen paketlerle ilişkilendirilmemiş çalıştırılabilir dosyaları tespit etmek ve yüklü tüm programları aramanızı kapsamlı hâle getirmek için dizin listelemelerini sisteme özgü komutlarla birleştirin.
 ```bash
 # Debian package and log details
 cat /var/lib/dpkg/status | grep -E "Package:|Status:"
@@ -173,9 +173,9 @@ find /sbin/ –exec rpm -qf {} \; | grep "is not"
 # Find exacuable files
 find / -type f -executable | grep <something>
 ```
-## Silinmiş Çalışan Binary’leri Kurtarma
+## Silinmiş Çalışan İkili Dosyaları Kurtarma
 
-/tmp/exec konumundan çalıştırılmış ve ardından silinmiş bir süreç hayal edin. Onu çıkarmak mümkündür
+/tmp/exec üzerinden çalıştırılan ve ardından silinen bir process'i düşünün. Onu çıkarmak mümkündür.
 ```bash
 cd /proc/3746/ #PID with the exec file deleted
 head -1 maps #Get address of the file. It was 08048000-08049000
@@ -183,31 +183,31 @@ dd if=mem bs=1 skip=08048000 count=1000 of=/tmp/exec2 #Recorver it
 ```
 ## SQLite ve FTS5 ile Syscall Trace Triage
 
-Bir süreç hâlâ çalışıyorsa veya laboratuvarda yeniden çalıştırılabiliyorsa, **`strace`** kernel modüllerine ya da tam EDR telemetry’sine ihtiyaç duymadan hızlı bir davranışsal trace sağlayabilir. Büyük trace’ler için, raw log’u doğrudan okumaktan veya bir LLM’e yapıştırmaktan kaçının: onu bir **SQLite** veritabanında saklayın ve yalnızca ihtiyacınız olan en küçük alt kümeyi sorgulayın.
+Bir process hâlâ çalışıyorsa veya bir lab ortamında yeniden çalıştırılabiliyorsa, **`strace`**, kernel modüllerine veya eksiksiz EDR telemetry verisine ihtiyaç duymadan hızlı bir davranış trace'i sağlayabilir. Büyük trace'ler için ham log'u doğrudan okumaktan veya bir LLM'e yapıştırmaktan kaçının: veriyi bir **SQLite** veritabanında depolayın ve yalnızca ihtiyacınız olan minimum alt kümeyi sorgulayın.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
 
 > [!WARNING]
-> `strace` eklemek süreç zamanlamasını değiştirir ve race conditions veya diğer kırılgan bug’ları etkileyebilir. Mümkün olduğunda bir kopya/lab sisteminde yeniden üretmeyi tercih edin.
+> `strace` ile attach olmak process zamanlamasını değiştirerek race condition'ları veya diğer hassas bug'ları etkileyebilir. Mümkün olduğunda yeniden üretmeyi bir kopya/lab sisteminde gerçekleştirin.
 
 ### Capture
 
-Yeni bir süreç için:
+Yeni bir process için:
 ```bash
 strace -ff -ttt -yy -s 4096 -o /tmp/trace.log <command>
 ```
-Canlı bir process için:
+Çalışan bir process için:
 ```bash
 strace -ff -ttt -yy -s 4096 -o /tmp/trace.log -p <PID>
 ```
-Faydalı seçenekler:
+Yararlı seçenekler:
 
-- `-ff`: fork/threads takibini yap ve her process için çıktıları ayrı tut
-- `-ttt`: timeline korelasyonu için kolay epoch timestamp'leri
-- `-yy`: mümkün olduğunda file descriptor'ları bağlı path'lere/sockets'lere çözümle
-- `-s 4096`: uzun path ve buffer argümanlarının kısaltılmasını önle
+- `-ff`: fork/thread'leri takip eder ve süreç başına çıktıları korur
+- `-ttt`: kolay timeline korelasyonu için epoch zaman damgaları
+- `-yy`: mümkün olduğunda file descriptor'ları bunların arkasındaki path/socket'lere çözümler
+- `-s 4096`: uzun path ve buffer argümanlarının kesilmesini önler
 
 ### Normalize
 
-Pratik bir şema, syscall başına bir satır ve argüman başına bir satırdır:
+Pratik bir şema, her syscall ve her argüman için bir satırdır:
 ```sql
 CREATE TABLE syscalls (
 id        INTEGER PRIMARY KEY,
@@ -226,11 +226,11 @@ raw        TEXT    NOT NULL,
 type       INTEGER NOT NULL
 );
 ```
-Bu, heterojen syscall satırlarını tek geniş bir tabloya düzleştirmeye çalışmaktan kaçınır ve triage sırasında join’leri öngörülebilir tutar.
+Bu, heterojen syscall satırlarını tek bir geniş tabloda düzleştirmeye çalışmayı önler ve triage sırasında join işlemlerini öngörülebilir tutar.
 
-### Index metin-ağır arguments with FTS5
+### Metin ağırlıklı argümanları FTS5 ile indeksleyin
 
-Büyük trace’lerde `LIKE "%...%"` ile naive path hunting çok yavaş olur. Bunun yerine argument text için bir FTS5 index oluşturun ve onunla search yapın:
+`LIKE "%...%"` ile yapılan naif path aramaları büyük trace'lerde çok yavaşlar. Argüman metni için bir FTS5 index'i oluşturun ve bunun yerine onu arayın:
 ```sql
 CREATE VIRTUAL TABLE syscall_args_fts
 USING fts5(raw, content='syscall_args', content_rowid='id');
@@ -248,30 +248,30 @@ WHERE syscall_args_fts MATCH 'tmp'
 AND s.name IN ('openat', 'stat', 'lstat', 'rename', 'unlink', 'execve')
 ORDER BY s.timestamp;
 ```
-### High-signal investigations
+### Yüksek sinyalli incelemeler
 
-- **PATH hijacking / fake sudo**: `~/.local/bin/` altında yazmaları ve `chmod`/`rename` etkinliğini ara, ardından `sudo` gibi ayrıcalıklı görünen adlara yapılan sonraki `execve` ile ilişkilendir.
-- **TOCTOU on temporary files**: aynı `/tmp/...` path üzerinde `stat`, `access`, `openat`, `rename`, `unlink`, `link`, `symlink` ve `execve` boyunca pivot yaparak check/use boşluklarını belirle.
-- **Crash root cause**: bir dosyanın `mmap` edilmesini, başka bir process tarafından aynı inode/path üzerinde yapılan yazmalar veya truncation ile ilişkilendir, ardından `SIGBUS` için signal/exit sequence'i incele.
-- **Network destination recovery**: peer IP'leri ve portları çıkarmak için `connect`, `sendto`, `sendmsg`, `recvfrom` ve socket ile ilgili arguments'i filtrele.
+- **PATH hijacking / fake sudo**: `~/.local/bin/` altında yapılan yazma ve `chmod`/`rename` aktivitelerini arayın, ardından `sudo` gibi ayrıcalıklı görünen adların sonraki `execve` çağrılarıyla ilişkilendirin.
+- **Geçici dosyalarda TOCTOU**: Kontrol/kullanım boşluklarını belirlemek için aynı `/tmp/...` yolunu `stat`, `access`, `openat`, `rename`, `unlink`, `link`, `symlink` ve `execve` boyunca takip edin.
+- **Çökme kök nedeni**: Bir dosyanın `mmap` işlemini, başka bir process tarafından aynı inode/yol üzerinde gerçekleştirilen yazma veya truncation işlemleriyle ilişkilendirin; ardından `SIGBUS` için signal/exit sırasını inceleyin.
+- **Network hedefinin kurtarılması**: Eş IP'lerini ve portlarını çıkarmak için `connect`, `sendto`, `sendmsg`, `recvfrom` ve socket ile ilgili argümanları filtreleyin.
 
-### LLM-assisted trace analysis
+### LLM destekli trace analizi
 
-If you want an LLM to assist, expose a **read-only** SQLite handle and give it the full schema. Let it issue raw SQL instead of wrapping the database behind narrow helper functions. This usually works better for joins, temporal correlation, and FTS lookups.
+Bir LLM'in yardımcı olmasını istiyorsanız, **read-only** bir SQLite handle sağlayın ve full schema'yı verin. Narrow helper function'ların arkasına sarmalamak yerine raw SQL çalıştırmasına izin verin. Bu yöntem genellikle join'ler, temporal correlation ve FTS lookup'ları için daha iyi çalışır.
 
-Practical rules:
+Pratik kurallar:
 
-- Keep the database read-only, for example with `sqlite3 'file:trace.db?mode=ro'`.
-- Give the model examples of valid `JOIN` and `FTS5 MATCH` queries.
-- Do **not** paste raw multi-GB `strace` logs into the prompt.
-- Ask focused questions such as:
-- "List persistent files written by this program."
-- "Did it create or replace executables in user-controlled PATH directories?"
-- "Explain why this trace ends in SIGBUS."
+- Database'i read-only tutun; örneğin `sqlite3 'file:trace.db?mode=ro'`.
+- Modele geçerli `JOIN` ve `FTS5 MATCH` query örnekleri verin.
+- Ham, çok GB boyutundaki `strace` log'larını prompt'a yapıştırmayın.
+- Aşağıdakiler gibi odaklanmış sorular sorun:
+- "Bu program tarafından yazılan persistent dosyaları listele."
+- "User-controlled PATH directory'lerinde executable oluşturdu veya değiştirdi mi?"
+- "Bu trace'in neden SIGBUS ile sonlandığını açıkla."
 
-## Inspect Autostart locations
+## Autostart konumlarını inceleyin
 
-### Scheduled Tasks
+### Zamanlanmış Görevler
 ```bash
 cat /var/spool/cron/crontabs/*  \
 /var/spool/cron/atjobs \
@@ -285,8 +285,8 @@ cat /var/spool/cron/crontabs/*  \
 #MacOS
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
-#### Cron/Anacron abuse via 0anacron ve şüpheli stub’lar ile Hunt
-Saldırganlar, periyodik yürütmeyi garanti altına almak için genellikle her bir /etc/cron.*/ dizini altında bulunan 0anacron stub’ını düzenler.
+#### Hunt: 0anacron ve şüpheli stub'lar üzerinden Cron/Anacron abuse
+Saldırganlar, periyodik çalıştırmayı garanti altına almak için genellikle her /etc/cron.*/ dizininde bulunan 0anacron stub'ını düzenler.<sup>[[4]](#references)</sup>
 ```bash
 # List 0anacron files and their timestamps/sizes
 for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
@@ -294,8 +294,8 @@ for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron
 # Look for obvious execution of shells or downloaders embedded in cron stubs
 grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev/null
 ```
-#### Hunt: SSH hardening rollback and backdoor shells
-sshd_config ve sistem hesap shell’lerindeki değişiklikler, erişimi kalıcı kılmak için post-exploitation sonrasında yaygındır.
+#### Hunt: SSH hardening rollback ve backdoor shells
+sshd_config ve system account shell'lerinde yapılan değişiklikler, access'i korumak için yaygın post-exploitation yöntemleridir.<sup>[[4]](#references)</sup>
 ```bash
 # Root login enablement (flag "yes" or lax values)
 grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
@@ -303,31 +303,31 @@ grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
 # System accounts with interactive shells (e.g., games → /bin/sh)
 awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
 ```
-#### Avla: Cloud C2 işaretleri (Dropbox/Cloudflare Tunnel)
-- Dropbox API beacon’ları tipik olarak HTTPS üzerinden Authorization: Bearer token’ları ile api.dropboxapi.com veya content.dropboxapi.com kullanır.
-- proxy/Zeek/NetFlow içinde sunuculardan beklenmeyen Dropbox egress için avla.
-- Cloudflare Tunnel (`cloudflared`), outbound 443 üzerinden yedek C2 sağlar.
+#### Hunt: Cloud C2 işaretleri (Dropbox/Cloudflare Tunnel)
+- Dropbox API beacon'ları genellikle HTTPS üzerinden api.dropboxapi.com veya content.dropboxapi.com kullanır ve Authorization: Bearer token'ları içerir.
+- Sunuculardan beklenmeyen Dropbox çıkış trafiğini proxy/Zeek/NetFlow üzerinde arayın.
+- Cloudflare Tunnel (`cloudflared`), dışa giden 443 üzerinden yedek C2 sağlar.<sup>[[4]](#references)</sup>
 ```bash
 ps aux | grep -E '[c]loudflared|trycloudflare'
 systemctl list-units | grep -i cloudflared
 ```
-### Hizmetler
+### Servisler
 
-Kötü amaçlı yazılımın bir servis olarak kurulabileceği yollar:
+Bir malware'in servis olarak kurulabileceği yollar:
 
-- **/etc/inittab**: rc.sysinit gibi başlatma betiklerini çağırır, bunlar da daha sonra startup betiklerine yönlendirir.
-- **/etc/rc.d/** ve **/etc/rc.boot/**: Servis başlangıcı için betikler içerir; ikincisi eski Linux sürümlerinde bulunur.
-- **/etc/init.d/**: Debian gibi bazı Linux sürümlerinde startup betiklerini saklamak için kullanılır.
-- Servisler ayrıca Linux varyantına bağlı olarak **/etc/inetd.conf** veya **/etc/xinetd/** üzerinden de etkinleştirilebilir.
-- **/etc/systemd/system**: system ve service manager betikleri için bir dizin.
-- **/etc/systemd/system/multi-user.target.wants/**: Çok kullanıcılı bir runlevel'da başlatılması gereken servislere ait linkleri içerir.
-- **/usr/local/etc/rc.d/**: Özel veya üçüncü taraf servisler için.
-- **\~/.config/autostart/**: Kullanıcıya özel otomatik başlatma uygulamaları için; kullanıcı hedefli malware için saklanma yeri olabilir.
-- **/lib/systemd/system/**: Yüklü paketler tarafından sağlanan sistem genelindeki varsayılan unit dosyaları.
+- **/etc/inittab**: rc.sysinit gibi başlatma betiklerini çağırır ve devamında başlangıç betiklerine yönlendirir.
+- **/etc/rc.d/** ve **/etc/rc.boot/**: Servis başlatma betiklerini içerir; ikincisi eski Linux sürümlerinde bulunur.
+- **/etc/init.d/**: Debian gibi bazı Linux sürümlerinde başlangıç betiklerini depolamak için kullanılır.
+- Linux varyantına bağlı olarak servisler **/etc/inetd.conf** veya **/etc/xinetd/** üzerinden de etkinleştirilebilir.
+- **/etc/systemd/system**: Sistem ve servis yöneticisi betikleri için kullanılan bir dizindir.
+- **/etc/systemd/system/multi-user.target.wants/**: Çok kullanıcılı bir runlevel'da başlatılması gereken servislere yönelik bağlantıları içerir.
+- **/usr/local/etc/rc.d/**: Özel veya üçüncü taraf servisler için kullanılır.
+- **\~/.config/autostart/**: Kullanıcıya özel otomatik başlatılan uygulamalar içindir; kullanıcıları hedefleyen malware için bir gizlenme noktası olabilir.
+- **/lib/systemd/system/**: Kurulu paketler tarafından sağlanan sistem genelindeki varsayılan unit dosyalarını içerir.
 
-#### Hunt: systemd timers and transient units
+#### Araştırma: systemd timer'ları ve transient unit'ler
 
-Systemd persistence `.service` dosyalarıyla sınırlı değildir. `.timer` unit'lerini, user-level unit'leri ve çalışma zamanında oluşturulan **transient units**'leri inceleyin.
+systemd persistence yalnızca `.service` dosyalarıyla sınırlı değildir. `.timer` unit'lerini, kullanıcı düzeyindeki unit'leri ve çalışma zamanında oluşturulan **transient unit'leri** araştırın.
 ```bash
 # Enumerate timers and inspect referenced services
 systemctl list-timers --all
@@ -345,50 +345,50 @@ find /run/systemd/transient -maxdepth 2 -type f -ls 2>/dev/null
 journalctl -u <name>.service
 journalctl _SYSTEMD_UNIT=<name>.service
 ```
-Transient units are easy to miss because `/run/systemd/transient/` **kalıcı olmayan**dır. Canlı bir image topluyorsanız, kapatmadan önce alın.
+Transient unit'ları gözden kaçırmak kolaydır çünkü `/run/systemd/transient/` **kalıcı değildir**. Canlı bir imaj topluyorsanız sistemi kapatmadan önce bu dizini alın.
 
 ### Kernel Modules
 
-Linux kernel modules, often utilized by malware as rootkit components, sistem açılışında yüklenir. Bu modüller için kritik dizinler ve dosyalar şunlardır:
+Linux kernel modülleri, genellikle rootkit bileşenleri olarak malware tarafından kullanılır ve sistem açılışında yüklenir. Bu modüller için kritik dizin ve dosyalar şunlardır:
 
-- **/lib/modules/$(uname -r)**: Çalışan kernel sürümü için modülleri tutar.
-- **/etc/modprobe.d**: Module loading’i kontrol etmek için configuration dosyalarını içerir.
-- **/etc/modprobe** ve **/etc/modprobe.conf**: Global module ayarları için dosyalar.
+- **/lib/modules/$(uname -r)**: Çalışan kernel sürümüne ait modülleri barındırır.
+- **/etc/modprobe.d**: Modül yüklemesini kontrol eden yapılandırma dosyalarını içerir.
+- **/etc/modprobe** ve **/etc/modprobe.conf**: Genel modül ayarları için kullanılan dosyalardır.
 
 ### Other Autostart Locations
 
-Linux, kullanıcı login olduğunda programları otomatik çalıştırmak için çeşitli dosyalar kullanır; bunlar malware barındırabilir:
+Linux, kullanıcı login olduğunda programları otomatik olarak çalıştırmak için çeşitli dosyalar kullanır; bu dosyalarda malware bulunabilir:
 
-- **/etc/profile.d/**\*, **/etc/profile**, ve **/etc/bash.bashrc**: Herhangi bir user login’i için çalıştırılır.
-- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, ve **\~/.config/autostart**: Kullanıcıya özel, login sırasında çalışan dosyalar.
-- **/etc/rc.local**: Tüm system services başladıktan sonra çalışır ve multiuser environment’a geçişin sonunu işaret eder.
+- **/etc/profile.d/**\*, **/etc/profile** ve **/etc/bash.bashrc**: Herhangi bir kullanıcı login olduğunda çalıştırılır.
+- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile** ve **\~/.config/autostart**: Kullanıcıya özel olup ilgili kullanıcı login olduğunda çalıştırılan dosyalardır.
+- **/etc/rc.local**: Tüm sistem servisleri başlatıldıktan sonra çalışır ve multiuser ortamına geçişin sonunu belirtir.
 
 ## Examine Logs
 
-Linux sistemleri, user activities ve system events’i çeşitli log dosyaları aracılığıyla takip eder. Bu loglar unauthorized access, malware infections ve diğer security incident’leri belirlemek için kritiktir. Başlıca log dosyaları şunlardır:
+Linux sistemleri, çeşitli log dosyaları aracılığıyla kullanıcı aktivitelerini ve sistem olaylarını takip eder. Bu loglar, yetkisiz erişimi, malware bulaşmalarını ve diğer güvenlik olaylarını tespit etmek için kritik öneme sahiptir.<sup>[[2]](#references)</sup> Önemli log dosyaları şunlardır:
 
-- **/var/log/syslog** (Debian) veya **/var/log/messages** (RedHat): Tüm sistem mesajlarını ve activities’i yakalar.
-- **/var/log/auth.log** (Debian) veya **/var/log/secure** (RedHat): Authentication denemelerini, başarılı ve başarısız login’leri kaydeder.
-- İlgili authentication event’lerini filtrelemek için `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` kullanın.
-- **/var/log/boot.log**: System startup mesajlarını içerir.
-- **/var/log/maillog** veya **/var/log/mail.log**: Email server activities’ini loglar, email-related services’i izlemek için kullanışlıdır.
-- **/var/log/kern.log**: Error ve warning’ler dahil kernel mesajlarını saklar.
-- **/var/log/dmesg**: Device driver mesajlarını tutar.
-- **/var/log/faillog**: Başarısız login denemelerini kaydeder, security breach investigation’larına yardımcı olur.
-- **/var/log/cron**: Cron job yürütmelerini loglar.
-- **/var/log/daemon.log**: Arka plan service activities’ini izler.
-- **/var/log/btmp**: Başarısız login denemelerini belgelemektedir.
-- **/var/log/httpd/**: Apache HTTPD error ve access loglarını içerir.
-- **/var/log/mysqld.log** veya **/var/log/mysql.log**: MySQL database activities’ini loglar.
-- **/var/log/xferlog**: FTP file transfers’ı kaydeder.
-- **/var/log/**: Burada unexpected loglar için her zaman kontrol edin.
+- **/var/log/syslog** (Debian) veya **/var/log/messages** (RedHat): Sistem genelindeki mesajları ve aktiviteleri kaydeder.
+- **/var/log/auth.log** (Debian) veya **/var/log/secure** (RedHat): Authentication denemelerini, başarılı ve başarısız login'leri kaydeder.
+- İlgili authentication olaylarını filtrelemek için `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` komutunu kullanın.
+- **/var/log/boot.log**: Sistem açılış mesajlarını içerir.
+- **/var/log/maillog** veya **/var/log/mail.log**: E-posta sunucusu aktivitelerini loglar; e-posta ile ilgili servisleri takip etmek için kullanışlıdır.
+- **/var/log/kern.log**: Hatalar ve uyarılar dahil olmak üzere kernel mesajlarını saklar.
+- **/var/log/dmesg**: Aygıt sürücüsü mesajlarını içerir.
+- **/var/log/faillog**: Başarısız login denemelerini kaydeder ve güvenlik ihlali soruşturmalarına yardımcı olur.
+- **/var/log/cron**: Cron job çalıştırmalarını loglar.
+- **/var/log/daemon.log**: Arka plan servislerinin aktivitelerini takip eder.
+- **/var/log/btmp**: Başarısız login denemelerini belgeler.
+- **/var/log/httpd/**: Apache HTTPD hata ve erişim loglarını içerir.
+- **/var/log/mysqld.log** veya **/var/log/mysql.log**: MySQL veritabanı aktivitelerini loglar.
+- **/var/log/xferlog**: FTP dosya transferlerini kaydeder.
+- **/var/log/**: Beklenmeyen loglar için bu dizini her zaman kontrol edin.
 
 > [!TIP]
-> Linux system logs ve audit subsystems bir intrusion veya malware incident’inde devre dışı bırakılmış veya silinmiş olabilir. Linux sistemlerindeki loglar genellikle malicious activities hakkında en yararlı bilgilerin bir kısmını içerdiğinden, intruders bunları rutin olarak siler. Bu nedenle, mevcut log dosyalarını incelerken, silme veya tampering belirtisi olabilecek boşlukları ya da sıralaması bozuk girdileri aramak önemlidir.
+> Linux sistem logları ve audit alt sistemleri, bir intrusion veya malware olayında devre dışı bırakılmış ya da silinmiş olabilir. Linux sistemlerindeki loglar genellikle kötü amaçlı aktiviteler hakkında en yararlı bilgilerin bazılarını içerdiğinden, intruder'lar bunları rutin olarak siler. Bu nedenle, mevcut log dosyalarını incelerken silme veya tampering göstergesi olabilecek boşlukları ya da sırası bozulmuş kayıtları aramak önemlidir.
 
 ### Journald triage (`journalctl`)
 
-Modern Linux host’larda, **systemd journal** genellikle **service execution**, **auth events**, **package operations** ve **kernel/user-space messages** için en yüksek değerli kaynaktır. Live response sırasında, kısa ömürlü attacker activity yalnızca ikincisinde mevcut olabileceği için hem **persistent** journal’ı (`/var/log/journal/`) hem de **runtime** journal’ı (`/run/log/journal/`) korumaya çalışın.
+Modern Linux host'larda **systemd journal** genellikle **servis çalıştırma**, **auth olayları**, **paket işlemleri** ve **kernel/user-space mesajları** için en değerli kaynaktır. Live response sırasında hem **kalıcı** journal'ı (`/var/log/journal/`) hem de **runtime** journal'ı (`/run/log/journal/`) korumaya çalışın; çünkü kısa süreli attacker aktiviteleri yalnızca ikincisinde bulunabilir.<sup>[[5]](#references)</sup>
 ```bash
 # List available boots and pivot around the suspicious one
 journalctl --list-boots
@@ -408,11 +408,11 @@ journalctl _SYSTEMD_UNIT=cron.service
 journalctl _UID=0
 journalctl _EXE=/usr/sbin/useradd
 ```
-Triage için yararlı journal alanları arasında `_SYSTEMD_UNIT`, `_EXE`, `_COMM`, `_CMDLINE`, `_UID`, `_GID`, `_PID`, `_BOOT_ID` ve `MESSAGE` bulunur. Eğer journald kalıcı depolama olmadan yapılandırıldıysa, `/run/log/journal/` altında yalnızca son verileri bekleyin.
+Triage için kullanışlı journal alanları arasında `_SYSTEMD_UNIT`, `_EXE`, `_COMM`, `_CMDLINE`, `_UID`, `_GID`, `_PID`, `_BOOT_ID` ve `MESSAGE` bulunur. journald kalıcı depolama olmadan yapılandırıldıysa, `/run/log/journal/` altında yalnızca son verileri bulmayı bekleyin.
 
 ### Audit framework triage (`auditd`)
 
-Eğer `auditd` etkinse, dosya değişiklikleri, komut çalıştırma, oturum açma etkinliği veya paket kurulumu için **process attribution** gerektiğinde her zaman onu tercih edin.
+`auditd` etkinse dosya değişiklikleri, komut yürütme, oturum açma etkinliği veya paket kurulumu için **process attribution** gerektiğinde onu tercih edin.<sup>[[6]](#references)</sup>
 ```bash
 # Fast summaries
 aureport --start today --summary -i
@@ -427,12 +427,12 @@ ausearch --start today -m SERVICE_START,SERVICE_STOP -i
 # Software installation/update events (especially useful on RHEL-like systems)
 ausearch -m SOFTWARE_UPDATE -i
 ```
-Kurallar anahtarlarla dağıtıldığında, ham loglarda grep yapmak yerine onlardan pivot yapın:
+Kurallar anahtarlarla dağıtıldığında, ham loglarda grep yapmak yerine bunlardan pivot edin:
 ```bash
 ausearch --start this-week -k <rule_key> --raw | aureport --file --summary -i
 ausearch --start this-week -k <rule_key> --raw | aureport --user --summary -i
 ```
-**Linux maintains a command history for each user**, stored in:
+**Linux her kullanıcı için bir komut geçmişi tutar** ve bu geçmiş şuralarda depolanır:
 
 - \~/.bash_history
 - \~/.zsh_history
@@ -440,34 +440,34 @@ ausearch --start this-week -k <rule_key> --raw | aureport --user --summary -i
 - \~/.python_history
 - \~/.\*\_history
 
-Moreover, the `last -Faiwx` command provides a list of user logins. Check it for unknown or unexpected logins.
+Ayrıca `last -Faiwx` komutu, kullanıcı girişlerinin bir listesini sağlar. Bilinmeyen veya beklenmeyen girişler için bu listeyi kontrol edin.
 
-Check files that can grant extra rprivileges:
+Ek ayrıcalıklar sağlayabilecek dosyaları kontrol edin:
 
-- Review `/etc/sudoers` for unanticipated user privileges that may have been granted.
-- Review `/etc/sudoers.d/` for unanticipated user privileges that may have been granted.
-- Examine `/etc/groups` to identify any unusual group memberships or permissions.
-- Examine `/etc/passwd` to identify any unusual group memberships or permissions.
+- Beklenmedik şekilde verilmiş kullanıcı ayrıcalıkları için `/etc/sudoers` dosyasını inceleyin.
+- Beklenmedik şekilde verilmiş kullanıcı ayrıcalıkları için `/etc/sudoers.d/` dizinini inceleyin.
+- Olağandışı grup üyeliklerini veya izinlerini belirlemek için `/etc/groups` dosyasını inceleyin.
+- Olağandışı grup üyeliklerini veya izinlerini belirlemek için `/etc/passwd` dosyasını inceleyin.
 
-Some apps alse generates its own logs:
+Bazı uygulamalar kendi günlüklerini de oluşturur:
 
-- **SSH**: Examine _\~/.ssh/authorized_keys_ and _\~/.ssh/known_hosts_ for unauthorized remote connections.
-- **Gnome Desktop**: Look into _\~/.recently-used.xbel_ for recently accessed files via Gnome applications.
-- **Firefox/Chrome**: Check browser history and downloads in _\~/.mozilla/firefox_ or _\~/.config/google-chrome_ for suspicious activities.
-- **VIM**: Review _\~/.viminfo_ for usage details, such as accessed file paths and search history.
-- **Open Office**: Check for recent document access that may indicate compromised files.
-- **FTP/SFTP**: Review logs in _\~/.ftp_history_ or _\~/.sftp_history_ for file transfers that might be unauthorized.
-- **MySQL**: Investigate _\~/.mysql_history_ for executed MySQL queries, potentially revealing unauthorized database activities.
-- **Less**: Analyze _\~/.lesshst_ for usage history, including viewed files and commands executed.
-- **Git**: Examine _\~/.gitconfig_ and project _.git/logs_ for changes to repositories.
+- **SSH**: Yetkisiz uzak bağlantılar için _\~/.ssh/authorized_keys_ ve _\~/.ssh/known_hosts_ dosyalarını inceleyin.
+- **Gnome Desktop**: Gnome uygulamaları aracılığıyla yakın zamanda erişilen dosyalar için _\~/.recently-used.xbel_ dosyasını kontrol edin.
+- **Firefox/Chrome**: Şüpheli etkinlikler için _\~/.mozilla/firefox_ veya _\~/.config/google-chrome_ altındaki tarayıcı geçmişini ve indirmeleri kontrol edin.
+- **VIM**: Erişilen dosya yolları ve arama geçmişi gibi kullanım ayrıntıları için _\~/.viminfo_ dosyasını inceleyin.
+- **Open Office**: Ele geçirilmiş dosyalara işaret edebilecek son belge erişimlerini kontrol edin.
+- **FTP/SFTP**: Yetkisiz olabilecek dosya aktarımları için _\~/.ftp_history_ veya _\~/.sftp_history_ dosyalarındaki günlükleri inceleyin.
+- **MySQL**: Yetkisiz veritabanı etkinliklerini açığa çıkarabilecek çalıştırılmış MySQL sorguları için _\~/.mysql_history_ dosyasını araştırın.
+- **Less**: Görüntülenen dosyalar ve çalıştırılan komutlar dahil kullanım geçmişi için _\~/.lesshst_ dosyasını analiz edin.
+- **Git**: Depolardaki değişiklikler için _\~/.gitconfig_ ve proje _.git/logs_ dizinlerini inceleyin.
 
-### USB Logs
+### USB Günlükleri
 
-[**usbrip**](https://github.com/snovvcrash/usbrip) is a small piece of software written in pure Python 3 which parses Linux log files (`/var/log/syslog*` or `/var/log/messages*` depending on the distro) for constructing USB event history tables.
+[**usbrip**](https://github.com/snovvcrash/usbrip), Linux günlük dosyalarını (`/var/log/syslog*` veya dağıtıma bağlı olarak `/var/log/messages*`) ayrıştırarak USB olay geçmişi tabloları oluşturan, saf Python 3 ile yazılmış küçük bir yazılımdır.
 
-It is interesting to **know all the USBs that have been used** and it will be more useful if you have an authorized list of USBs to find "violation events" (the use of USBs that aren't inside that list).
+**Kullanılmış tüm USB'leri bilmek** ilgi çekicidir ve "ihlal olaylarını" (listede bulunmayan USB'lerin kullanımını) tespit etmek için yetkili bir USB listesine sahip olmanız daha faydalı olacaktır.
 
-### Installation
+### Kurulum
 ```bash
 pip3 install usbrip
 usbrip ids download #Download USB ID database
@@ -482,28 +482,28 @@ usbrip ids search --pid 0002 --vid 0e0f #Search for pid AND vid
 ```
 Daha fazla örnek ve bilgi github içinde: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
 
-## Kullanıcı Hesaplarını ve Oturum Açma Aktivitelerini İncele
+## User Hesaplarını ve Logon Etkinliklerini İnceleme
 
-_analyze the _**/etc/passwd**_, _**/etc/shadow**_ ve **security logs**_ içinde, bilinen yetkisiz olaylara yakın zamanda oluşturulmuş ve/veya kullanılmış sıra dışı isimler veya hesaplar olup olmadığını inceleyin. Ayrıca olası sudo brute-force saldırılarını da kontrol edin.\
-Bunun yanında, kullanıcılara verilmiş beklenmedik yetkiler için _**/etc/sudoers**_ ve _**/etc/groups**_ gibi dosyaları kontrol edin.\
-Son olarak, **şifresi olmayan** veya **kolay tahmin edilen** şifrelere sahip hesapları arayın.
+Bilinen yetkisiz olaylara yakın zamanlarda oluşturulan veya kullanılan olağandışı adları ya da hesapları tespit etmek için _**/etc/passwd**_, _**/etc/shadow**_ ve **security logs** dosyalarını inceleyin. Ayrıca olası sudo brute-force saldırılarını da kontrol edin.\
+Bunun yanı sıra, kullanıcılara beklenmedik ayrıcalıklar verilip verilmediğini kontrol etmek için _**/etc/sudoers**_ ve _**/etc/groups**_ gibi dosyaları inceleyin.\
+Son olarak, **parolası olmayan** veya **kolayca tahmin edilebilen** parolalara sahip hesapları arayın.<sup>[[1]](#references)</sup>
 
-## Dosya Sistemini İncele
+## File System'i İnceleme
 
-### Malware Soruşturmasında Dosya Sistemi Yapılarının Analizi
+### Malware Investigation Sırasında File System Yapılarını Analiz Etme
 
-Malware olaylarını araştırırken, dosya sisteminin yapısı kritik bir bilgi kaynağıdır; hem olayların sırasını hem de malware içeriğini ortaya çıkarır. Ancak malware yazarları, dosya zaman damgalarını değiştirmek veya veri depolamak için dosya sisteminden kaçınmak gibi bu analizi zorlaştıran teknikler geliştiriyor.
+Malware olaylarını araştırırken file system yapısı, hem olayların sırasını hem de malware'in içeriğini ortaya çıkaran önemli bir bilgi kaynağıdır. Ancak malware yazarları, dosya zaman damgalarını değiştirmek veya veri depolamak için file system'den kaçınmak gibi bu analizi engellemeye yönelik teknikler geliştirmektedir.<sup>[[1]](#references)</sup>
 
-Bu anti-forensic yöntemlere karşı koymak için şunlar önemlidir:
+Bu anti-forensic yöntemlere karşı koymak için şunları yapmak önemlidir:
 
-- Olay zaman çizelgelerini görselleştirmek için **Autopsy** gibi araçlarla veya ayrıntılı zaman çizelgesi verileri için **Sleuth Kit**'in `mactime` aracını kullanarak **kapsamlı bir zaman çizelgesi analizi** yapın.
-- Saldırganlar tarafından kullanılan shell veya PHP scriptleri içerebilecek, sistemin $PATH içindeki **beklenmedik scriptleri** inceleyin.
-- Geleneksel olarak özel dosyalar içeren ancak malware ile ilişkili dosyaları da barındırabilen **/dev içindeki atipik dosyaları** inceleyin.
-- Kötü amaçlı içeriği gizleyebilecek ".. " (nokta nokta boşluk) veya "..^G" (nokta nokta kontrol-G) gibi adlara sahip **gizli dosya veya dizinleri** arayın.
-- Şu komutu kullanarak **setuid root dosyalarını** belirleyin: `find / -user root -perm -04000 -print` Bu, saldırganlar tarafından kötüye kullanılabilecek yükseltilmiş izinlere sahip dosyaları bulur.
-- rootkit veya trojan varlığına işaret edebilecek toplu dosya silmelerini tespit etmek için inode tablolarındaki **silme zaman damgalarını** inceleyin.
-- Birini belirledikten sonra, yakın konumlandırılmış kötü amaçlı dosyalar olabileceği için **ardışık inode'ları** kontrol edin; birlikte yerleştirilmiş olabilirler.
-- Malware tarafından değiştirilebileceklerinden, yakın zamanda değiştirilmiş dosyalar için **yaygın binary dizinlerini** (_/bin_, _/sbin_) kontrol edin.
+- Olay zaman çizelgelerini görselleştirmek için **Autopsy** veya ayrıntılı zaman çizelgesi verileri elde etmek için **Sleuth Kit'in** `mactime` aracı gibi araçları kullanarak **kapsamlı bir timeline analizi gerçekleştirin**.
+- Saldırganlar tarafından kullanılan shell veya PHP script'lerini içerebilecek **$PATH içindeki beklenmeyen script'leri araştırın**.
+- Geleneksel olarak özel dosyalar içeren, ancak malware ile ilişkili dosyaları barındırabilen **`/dev` dizinindeki alışılmadık dosyaları inceleyin**.
+- Kötü amaçlı içeriği gizleyebilecek ".. " (dot dot space) veya "..^G" (dot dot control-G) gibi adlara sahip **gizli dosya veya dizinleri arayın**.
+- `find / -user root -perm -04000 -print` komutunu kullanarak **setuid root dosyalarını belirleyin**. Bu komut, saldırganlar tarafından kötüye kullanılabilecek yükseltilmiş izinlere sahip dosyaları bulur.
+- Muhtemelen rootkit veya trojan varlığına işaret eden toplu dosya silme işlemlerini tespit etmek için **inode tablolarındaki silinme zaman damgalarını inceleyin**.
+- Bir kötü amaçlı dosya tespit ettikten sonra, yakında bulunan diğer kötü amaçlı dosyaları belirlemek için **ardışık inode'ları inceleyin**; bu dosyalar birlikte yerleştirilmiş olabilir.
+- Malware tarafından değiştirilmiş olabilecekleri için **yaygın binary dizinlerini** (_/bin_, _/sbin_) yakın zamanda değiştirilmiş dosyalar açısından **kontrol edin**.
 ````bash
 # List recent files in a directory:
 ls -laR --sort=time /bin```
@@ -512,11 +512,11 @@ ls -laR --sort=time /bin```
 ls -lai /bin | sort -n```
 ````
 > [!TIP]
-> Dikkat edin ki bir **attacker** **time** değerini **modify** ederek **files appear** **legitimate** hale getirebilir, ancak **inode**’u **modify** edemez. Eğer bir **file**’ın, aynı klasördeki diğer dosyalarla aynı **time**’da oluşturulup değiştirilmiş göründüğünü, ancak **inode**’unun beklenmedik şekilde daha büyük olduğunu fark ederseniz, o zaman o **file**’ın **timestamps** değerleri değiştirilmiştir.
+> Bir **saldırganın**, **dosyaların** **meşru** görünmesini sağlamak için **zamanı** **değiştirebileceğini**, ancak **inode'u** değiştiremeyeceğini unutmayın. Bir **dosyanın**, aynı klasördeki diğer dosyalarla **aynı zamanda oluşturulduğunu** ve **değiştirildiğini** gösterdiğini, ancak **inode'unun** **beklenmedik şekilde daha büyük** olduğunu tespit ederseniz, bu dosyanın **zaman damgaları değiştirilmiştir**.
 
-### Inode-focused quick triage
+### Inode odaklı hızlı ön inceleme
 
-Eğer anti-forensics’ten şüpheleniyorsanız, bu inode-focused kontrolleri erken çalıştırın:
+anti-forensics'ten şüpheleniyorsanız, bu inode odaklı kontrolleri erken aşamada çalıştırın:
 ```bash
 # Filesystem inode pressure (possible inode exhaustion DoS)
 df -i
@@ -528,18 +528,18 @@ find / -xdev -inum <inode_number> 2>/dev/null
 lsof +L1
 lsof | grep '(deleted)'
 ```
-Bir şüpheli inode bir EXT filesystem image/device üzerinde olduğunda, inode metadata’sını doğrudan inceleyin:
+Şüpheli bir inode bir EXT dosya sistemi imajı/cihazı üzerindeyse, inode metadata'sını doğrudan inceleyin:
 ```bash
 sudo debugfs -R "stat <inode_number>" /dev/sdX
 ```
-Yararlı alanlar:
-- **Links**: `0` ise, hiçbir dizin girdisi şu anda inode’a referans vermiyor.
-- **dtime**: inode bağlantısı kaldırıldığında ayarlanan silinme zaman damgası.
-- **ctime/mtime**: metadata/içerik değişikliklerini olay zaman çizelgesiyle ilişkilendirmeye yardımcı olur.
+Kullanışlı alanlar:
+- **Links**: `0` ise hiçbir directory entry şu anda inode'a referans vermiyor demektir.
+- **dtime**: inode'un unlink edilmesiyle ayarlanan silinme timestamp'i.
+- **ctime/mtime**: metadata/content değişikliklerini olay zaman çizelgesiyle ilişkilendirmeye yardımcı olur.
 
-### Capabilities, xattrs, and preload-based userland rootkits
+### Capabilities, xattrs ve preload-based userland rootkits
 
-Modern Linux persistence çoğu zaman bariz `setuid` binary’lerden kaçınır ve bunun yerine **file capabilities**, **extended attributes** ve dynamic loader’ı kötüye kullanır.
+Modern Linux persistence, bariz `setuid` binary'lerinden kaçınır ve bunun yerine **file capabilities**, **extended attributes** ve dynamic loader'ı kötüye kullanır.
 ```bash
 # Enumerate file capabilities (think cap_setuid, cap_sys_admin, cap_dac_override)
 getcap -r / 2>/dev/null
@@ -555,19 +555,19 @@ stat /etc/ld.so.preload 2>/dev/null
 ls -lah /lib /lib64 /usr/lib /usr/lib64 /usr/local/lib 2>/dev/null | grep -E '\\.so(\\.|$)'
 ldd /bin/ls
 ```
-Özellikle `/tmp`, `/dev/shm`, `/var/tmp` gibi **yazılabilir** yollardan veya `/usr/local/lib` altındaki garip konumlardan referans verilen kütüphanelere dikkat edin. Ayrıca normal paket sahipliği dışında capability taşıyan binary’leri de kontrol edin ve bunları paket doğrulama sonuçlarıyla (`rpm -Va`, `dpkg --verify`, `debsums`) ilişkilendirin.
+**yazılabilir** yollar (ör. `/tmp`, `/dev/shm`, `/var/tmp` veya `/usr/local/lib` altındaki alışılmadık konumlar) üzerinden referans verilen library'lere özellikle dikkat edin. Ayrıca normal package sahipliği dışında bulunan capability taşıyan binary'leri kontrol edin ve bunları package doğrulama sonuçlarıyla (`rpm -Va`, `dpkg --verify`, `debsums`) ilişkilendirin.
 
-## Farklı filesystem sürümlerindeki dosyaları karşılaştırın
+## Farklı filesystem sürümlerindeki dosyaları karşılaştırma
 
-### Filesystem Sürüm Karşılaştırma Özeti
+### Filesystem Sürümü Karşılaştırma Özeti
 
-Filesystem sürümlerini karşılaştırmak ve değişiklikleri belirlemek için basitleştirilmiş `git diff` komutları kullanırız:
+Filesystem sürümlerini karşılaştırmak ve değişiklikleri belirlemek için basitleştirilmiş `git diff` komutlarını kullanırız:<sup>[[3]](#references)</sup>
 
-- **Yeni dosyaları bulmak için**, iki dizini karşılaştırın:
+- **Yeni dosyaları bulmak için** iki directory'yi karşılaştırın:
 ```bash
 git diff --no-index --diff-filter=A path/to/old_version/ path/to/new_version/
 ```
-- **Değiştirilmiş içerik için**, belirli satırları yok sayarak değişiklikleri listele:
+- **Değiştirilmiş içerik** için, belirli satırları yok sayarak değişiklikleri listeleyin:
 ```bash
 git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | grep -E "^\+" | grep -v "Installed-Time"
 ```
@@ -575,29 +575,27 @@ git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | 
 ```bash
 git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 ```
-- **Filter options** (`--diff-filter`) belirli değişiklikleri daraltmaya yardımcı olur; örneğin eklenen (`A`), silinen (`D`) veya değiştirilmiş (`M`) dosyalar.
+- **Filtre seçenekleri** (`--diff-filter`), eklenen (`A`), silinen (`D`) veya değiştirilen (`M`) dosyalar gibi belirli değişiklikleri daraltmaya yardımcı olur.
 - `A`: Eklenen dosyalar
 - `C`: Kopyalanan dosyalar
 - `D`: Silinen dosyalar
 - `M`: Değiştirilen dosyalar
 - `R`: Yeniden adlandırılan dosyalar
-- `T`: Tür değişiklikleri (örn. file to symlink)
+- `T`: Tür değişiklikleri (ör. dosyadan symlink'e)
 - `U`: Birleştirilmemiş dosyalar
 - `X`: Bilinmeyen dosyalar
 - `B`: Bozuk dosyalar
 
-## References
+## Referanslar
 
-- [https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
-- [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
-- [https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
-- **Book: Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides**
-
-- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
-- [Forensic Analysis of Linux Journals](https://stuxnet999.github.io/dfir/linux-journal-forensics/)
-- [Red Hat Enterprise Linux 9 - Auditing the system](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/auditing-the-system_security-hardening)
-- [Say hi to Pike!](https://www.synacktiv.com/en/publications/say-hi-to-pike.html)
-- [strace](https://strace.io/)
-- [SQLite FTS5 Extension](https://www.sqlite.org/fts5.html)
+- [1] [Linux Sistemleri için Malware Forensics Field Guide: Digital Forensics Field Guides – Bölüm 3](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
+- [2] [Linux Logları Açıklandı](https://www.plesk.com/blog/featured/linux-logs-explained/)
+- [3] [git diff Documentation – --diff-filter seçeneği](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
+- [4] [Red Canary – Persistence için patch uygulama: DripDropper Linux malware cloud içinde nasıl ilerliyor](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [5] [Linux Journal'larının Forensic Analizi](https://stuxnet999.github.io/dfir/linux-journal-forensics/)
+- [6] [Red Hat Enterprise Linux 9 - Sistemin denetlenmesi](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/auditing-the-system_security-hardening)
+- [7] [Pike'a merhaba deyin!](https://www.synacktiv.com/en/publications/say-hi-to-pike.html)
+- [8] [strace](https://strace.io/)
+- [9] [SQLite FTS5 Extension](https://www.sqlite.org/fts5.html)
 
 {{#include ../../banners/hacktricks-training.md}}

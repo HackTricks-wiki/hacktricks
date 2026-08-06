@@ -2,16 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+## Container değişikliği
 
-## Container modification
-
-Bazı Docker container'larının ele geçirildiğine dair şüpheler var:
+Bazı docker container'larının ele geçirildiğine dair şüpheler var:
 ```bash
 docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 cc03e43a052a        lamp-wordpress      "./run.sh"          2 minutes ago       Up 2 minutes        80/tcp              wordpress
 ```
-Bu container'da image'a göre yapılan değişiklikleri şu şekilde kolayca **bulabilirsiniz**:
+Bu container'da image'a göre yapılan değişiklikleri kolayca **bulabilirsiniz**:
 ```bash
 docker diff wordpress
 C /var
@@ -26,23 +25,23 @@ A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
 Önceki komutta **C**, **Changed** (Değiştirildi) ve **A,** **Added** (Eklendi) anlamına gelir.\
-`/etc/shadow` gibi ilginç bir dosyanın değiştirildiğini fark ederseniz kötü amaçlı etkinlikleri kontrol etmek için dosyayı container'dan şu komutla indirebilirsiniz:
+`/etc/shadow` gibi ilginç bir dosyanın değiştirildiğini fark ederseniz, kötü amaçlı etkinlikleri kontrol etmek için dosyayı container'dan indirebilirsiniz:
 ```bash
 docker cp wordpress:/etc/shadow.
 ```
-Ayrıca yeni bir container çalıştırıp dosyayı ondan çıkararak **orijinaliyle karşılaştırabilirsiniz**:
+Ayrıca yeni bir container çalıştırıp dosyayı içinden çıkararak **orijinal olanla karşılaştırabilirsiniz**:
 ```bash
 docker run -d lamp-wordpress
 docker cp b5d53e8b468e:/etc/shadow original_shadow #Get the file from the newly created container
 diff original_shadow shadow
 ```
-**Şüpheli bir dosyanın eklendiğini** fark ederseniz, container'a erişip onu kontrol edebilirsiniz:
+**bazı şüpheli dosyaların eklendiğini fark ederseniz**, container'a erişip onu kontrol edebilirsiniz:
 ```bash
 docker exec -it wordpress bash
 ```
 ## Image değişiklikleri
 
-Size dışa aktarılmış bir Docker image'ı (muhtemelen `.tar` formatında) verildiğinde, **değişikliklerin özetini çıkarmak** için [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases) kullanabilirsiniz:
+Export edilmiş bir Docker image'ı (muhtemelen `.tar` formatında) aldığınızda, **değişikliklerin özetini çıkarmak** için [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases) kullanabilirsiniz:
 ```bash
 docker save <image> > image.tar #Export the image to a .tar file
 container-diff analyze -t sizelayer image.tar
@@ -55,11 +54,11 @@ tar -xf image.tar
 ```
 ### Temel Analiz
 
-**Temel bilgiler**i image'i çalıştırarak edinebilirsiniz:
+Image'i çalıştırarak **temel bilgileri** elde edebilirsiniz:
 ```bash
 docker inspect <image>
 ```
-Şunlarla ayrıca **değişiklik geçmişi** özeti elde edebilirsiniz:
+Şunlarla ayrıca **değişiklik geçmişinin** bir özetini de alabilirsiniz:
 ```bash
 docker history --no-trunc <image>
 ```
@@ -70,7 +69,7 @@ dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
 ```
 ### Dive
 
-Docker imajlarına eklenen/değiştirilen dosyaları bulmak için [**dive**](https://github.com/wagoodman/dive) aracını da kullanabilirsiniz ([**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0) üzerinden indirin):
+Docker image'larına eklenen/değiştirilen dosyaları bulmak için [**dive**](https://github.com/wagoodman/dive) ([**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0) bölümünden indirebilirsiniz) aracını da kullanabilirsiniz:
 ```bash
 #First you need to load the image in your docker repo
 sudo docker load < image.tar                                                                                                                                                                                                         1 ⨯
@@ -79,19 +78,18 @@ Loaded image: flask:latest
 #And then open it with dive:
 sudo dive flask:latest
 ```
-Bu, **docker image'larının farklı blob'ları arasında gezinmenize** ve hangi dosyaların değiştirildiğini/eklendiğini kontrol etmenize olanak tanır. **Kırmızı**, eklenenleri; **sarı** ise değiştirilenleri belirtir. Diğer görünüme geçmek için **tab**, klasörleri daraltmak/açmak için **space** tuşunu kullanın.
+Bu, **docker image'larının farklı blob'ları arasında gezinmenize** ve hangi dosyaların değiştirildiğini/eklendiğini kontrol etmenize olanak tanır. **Kırmızı**, eklenen; **sarı** ise değiştirilen anlamına gelir. Diğer görünüme geçmek için **tab** tuşunu, klasörleri daraltmak/genişletmek için **space** tuşunu kullanın.
 
-die ile image'ın farklı aşamalarının içeriğine erişemezsiniz. Bunun için **her layer'ı decompress edip bunlara erişmeniz** gerekir.\
-Bir image'daki tüm layer'ları, image'ın decompress edildiği dizinden aşağıdaki komutu çalıştırarak decompress edebilirsiniz:
+die ile image'ın farklı aşamalarının içeriğine erişemezsiniz. Bunun için **her layer'ı decompress etmeniz ve ona erişmeniz** gerekir.\
+Bir image'daki tüm layer'ları, image'ın decompress edildiği dizinden şu komutu çalıştırarak decompress edebilirsiniz:
 ```bash
 tar -xf image.tar
 for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; done
 ```
-## Bellekten kimlik bilgileri
+## Bellekten Kimlik Bilgileri
 
 Bir host içinde Docker container çalıştırdığınızda, yalnızca `ps -ef` komutunu çalıştırarak **host üzerinden container'da çalışan process'leri görebileceğinizi** unutmayın.
 
-Bu nedenle (root olarak) host üzerinden **process'lerin belleğini dökebilir** ve **kimlik bilgilerini** [**aşağıdaki örnekte olduğu gibi**](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#process-memory) arayabilirsiniz.
-
+Bu nedenle (root olarak) host üzerinden **process'lerin belleğini dump edebilir** ve **kimlik bilgilerini** [**aşağıdaki örnekte olduğu gibi**](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#process-memory) arayabilirsiniz.
 
 {{#include ../../banners/hacktricks-training.md}}

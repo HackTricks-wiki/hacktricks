@@ -3,97 +3,98 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-Daha fazla bilgi için şu adresi inceleyin: [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). Bu sadece bir özet:
+Daha fazla bilgi için [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/) adresine bakın. Bu yalnızca bir özet niteliğindedir:<sup>[[4]](#references)</sup>
 
-Microsoft, birçok office belge formatı oluşturdu; iki ana tür **OLE formats** (RTF, DOC, XLS, PPT gibi) ve **Office Open XML (OOXML) formats** (DOCX, XLSX, PPTX gibi) dir. Bu formatlar makrolar içerebilir ve phishing ile malware için hedef oluşturur. OOXML dosyaları zip konteynerleri olarak yapılandırılmıştır; unzip edilerek dosya ve klasör hiyerarşisi ile XML dosya içerikleri incelenebilir.
+Microsoft, iki ana türü **OLE formats** (RTF, DOC, XLS, PPT gibi) ve **Office Open XML (OOXML) formats** (DOCX, XLSX, PPTX gibi) olan birçok office document formatı oluşturmuştur. Bu formatlar, phishing ve malware için hedef hâline gelmelerine neden olan macro'ları içerebilir. OOXML files, zip container olarak yapılandırılmıştır; bu sayede dosya ve klasör hiyerarşisi ile XML file içerikleri ortaya çıkarılarak unzipping yoluyla incelenebilir.
 
-OOXML dosya yapılarını keşfetmek için bir belgeyi unzip etme komutu ve çıktı yapısı verilmiştir. Bu dosyalarda veri gizleme tekniklerinin belgelenmiş olduğu ve CTF zorluklarında veri gizlemede sürekli yenilik yapıldığını gösteren çalışmalar vardır.
+OOXML file yapılarını keşfetmek için bir document'i unzip etme komutu ve çıktı yapısı verilmiştir. Bu file'larda data gizleme teknikleri belgelenmiştir; bu da CTF challenge'larında data concealment alanında sürekli yenilik yapıldığını göstermektedir.
 
-Analiz için **oletools** ve **OfficeDissector** hem OLE hem de OOXML belgelerini incelemeye yönelik kapsamlı araç setleri sunar. Bu araçlar, genellikle ek zararlı payload'lar indirip çalıştıran gömülü makroları tespit edip analiz etmeye yardımcı olur. VBA makrolarının analizi, Microsoft Office olmadan Libre Office kullanılarak yapılabilir; Libre Office ile breakpoint ve watch değişkenleri kullanarak debug yapmak mümkündür.
+Analysis için **oletools** ve **OfficeDissector**, hem OLE hem de OOXML document'lerini incelemek üzere kapsamlı toolset'ler sunar. Bu tool'lar, genellikle malware delivery için vector görevi gören ve çoğunlukla ek malicious payload'ları download edip execute eden embedded macro'ların belirlenmesine ve analysis edilmesine yardımcı olur. VBA macro'larının analysis'i, Microsoft Office kullanılmadan Libre Office aracılığıyla gerçekleştirilebilir; bu da breakpoint'ler ve watch variable'lar ile debugging yapılmasına olanak tanır.
 
-**oletools**'un kurulumu ve kullanımı basittir; pip ile kurma ve belgelerden makroları çıkarmaya yönelik komutlar sağlanmıştır. Makroların otomatik çalışması `AutoOpen`, `AutoExec` veya `Document_Open` gibi fonksiyonlarla tetiklenir.
+**oletools** kurulumu ve kullanımı basittir; pip aracılığıyla kurulum ve document'lerden macro çıkarma komutları sağlanmıştır. Macro'ların automatic execution işlemi `AutoOpen`, `AutoExec` veya `Document_Open` gibi function'lar tarafından tetiklenir.
 ```bash
 sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
 ```
 ---
 
-## OLE Compound File exploitation: Autodesk Revit RFA – ECC recomputation and controlled gzip
+## OLE Compound File istismarı: Autodesk Revit RFA – ECC yeniden hesaplama ve kontrollü gzip
 
-Revit RFA modelleri bir [OLE Compound File](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation) (aka CFBF) olarak saklanır. Serileştirilmiş model storage/stream altında yer alır:
+Revit RFA modelleri, [OLE Compound File](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation) (diğer adıyla CFBF) olarak depolanır. Serileştirilmiş model, aşağıdaki storage/stream altında bulunur:<sup>[[1]](#references)</sup>
 
-- Storage: `Global`
-- Stream: `Latest` → `Global\Latest`
+- Depolama: `Global`
+- Akış: `Latest` → `Global\Latest`
 
-`Global\Latest`'in ana düzeni (Revit 2025'te gözlemlenmiştir):
+`Global\Latest` için temel düzen (Revit 2025'te gözlemlenmiştir):
 
-- Header
-- GZIP-compressed payload (the actual serialized object graph)
-- Zero padding
-- Error-Correcting Code (ECC) trailer
+- Başlık
+- GZIP ile sıkıştırılmış payload (gerçek serileştirilmiş nesne grafiği)
+- Sıfır padding
+- Hata Düzeltme Kodu (ECC) trailer'ı
 
-Revit, küçük bozulmaları ECC trailer'ını kullanarak otomatik onarır ve ECC ile eşleşmeyen stream'leri reddeder. Bu nedenle, sıkıştırılmış byte'ları naifçe düzenlemek kalıcı olmaz: değişiklikleriniz ya geri alınır ya da dosya reddedilir. Deserializer'ın gördükleri üzerinde byte-hassasiyetli kontrol sağlamak için şu adımları izlemelisiniz:
+Revit, ECC trailer'ını kullanarak stream üzerindeki küçük değişiklikleri otomatik olarak onarır ve ECC ile eşleşmeyen stream'leri reddeder. Bu nedenle, sıkıştırılmış byte'ları doğrudan düzenlemek kalıcı olmaz: değişiklikleriniz geri alınır veya dosya reddedilir. Deserializer'ın gördüğü içerik üzerinde byte düzeyinde kontrol sağlamak için şunları yapmanız gerekir:
 
-- Recompress with a Revit-compatible gzip implementation (so the compressed bytes Revit produces/accepts match what it expects).
-- Recompute the ECC trailer over the padded stream so Revit will accept the modified stream without auto-repairing it.
+- Revit ile uyumlu bir gzip implementation ile yeniden sıkıştırma yapmak (böylece Revit'in ürettiği/kabul ettiği sıkıştırılmış byte'lar beklediği değerlerle eşleşir).
+- Revit'in değiştirilmiş stream'i otomatik olarak onarmadan kabul etmesi için padded stream üzerindeki ECC trailer'ını yeniden hesaplamak.
 
-RFA içeriklerini patching/fuzzing için pratik iş akışı:
+RFA içeriklerini patch/fuzzing amacıyla değiştirmek için pratik workflow:<sup>[[1]](#references)</sup>
 
-1) Expand the OLE compound document
+1) OLE compound document'ı genişletin
 ```bash
 # Expand RFA into a folder tree (storages → folders, streams → files)
 CompoundFileTool /e model.rfa /o rfa_out
 # rfa_out/Global/Latest is the serialized stream of interest
 ```
-2) gzip/ECC disipliniyle Global\Latest'i düzenle
+2) gzip/ECC kurallarına uygun olarak `Global\Latest`'i düzenle
 
-- `Global/Latest`'i parçalara ayır: başlığı koru, payload'u gunzip et, bytes'ları değiştir, sonra Revit-uyumlu deflate parametreleri kullanarak tekrar gzip yap.
-- Zero-padding'i koru ve ECC trailer'ını yeniden hesapla, böylece yeni bytes'lar Revit tarafından kabul edilir.
-- Deterministik bayt-bayt yeniden üretime ihtiyacın varsa, Revit’in DLLs etrafında gzip/gunzip yollarını ve ECC hesaplamasını çağıracak minimal bir wrapper oluştur (araştırmada gösterildiği gibi) veya bu semantikleri çoğaltan mevcut bir yardımcıyı yeniden kullan.
+- `Global/Latest`'ı ayrıştır: header'ı koru, payload'ı gunzip ile aç, byte'ları değiştir, ardından Revit uyumlu deflate parametrelerini kullanarak tekrar gzip'le.
+- Zero-padding'i koru ve yeni byte'ların Revit tarafından kabul edilmesi için ECC trailer'ını yeniden hesapla.
+- Deterministik, byte-byte aynı yeniden üretime ihtiyacın varsa, araştırmada gösterildiği gibi gzip/gunzip yollarını ve ECC hesaplamasını çağırmak için Revit'in DLL'leri etrafında minimal bir wrapper oluştur veya bu semantiği taklit eden mevcut bir helper'ı yeniden kullan.
 
-3) OLE bileşik dokümanını yeniden oluştur
+3) OLE compound document'ı yeniden oluştur
 ```bash
 # Repack the folder tree back into an OLE file
 CompoundFileTool /c rfa_out /o model_patched.rfa
 ```
-Notlar:
+Notes:<sup>[[1]](#references)</sup>
 
-- CompoundFileTool, NTFS adlarında geçersiz olan karakterler için kaçış uygulayarak storages/streams'i dosya sistemine yazar; çıktı ağacında ihtiyacınız olan stream yolu tam olarak `Global/Latest`'dir.
-- Ecosystem plugins aracılığıyla cloud storage'dan RFAs çeken kitlesel saldırılar dağıtırken, ağ enjeksiyonunu denemeden önce patch'lenmiş RFA'nızın önce yerel olarak Revit’in bütünlük kontrollerinden geçtiğinden emin olun (gzip/ECC doğru).
+- CompoundFileTool, NTFS adlarında geçersiz olan karakterler için escaping kullanarak storages/streams'leri filesystem'e yazar; istediğiniz stream path, output tree içinde tam olarak `Global/Latest` şeklindedir.
+- Cloud storage'dan RFA'ları alan ecosystem plugins aracılığıyla mass attacks gerçekleştirirken, network injection denemeden önce patched RFA'nın yerel olarak Revit’in integrity checks'lerini geçtiğinden (gzip/ECC doğru) emin olun.
 
-Sömürme içgörüsü (gzip yükünde hangi byte'ları yerleştireceğinizi yönlendirmek için):
+Exploitation insight (gzip payload içine hangi byte'ların yerleştirileceğine rehberlik etmesi için):<sup>[[1]](#references)</sup>
 
-- Revit'in deserializer'ı 16-bit'lik bir sınıf indeksi okur ve bir nesne oluşturur. Bazı türler polimorfik değildir ve vtable'ları yoktur; destructor işleyişinin kötüye kullanılması, motorun saldırgan tarafından kontrol edilen bir işaretçi üzerinden dolaylı bir çağrı gerçekleştirdiği bir type confusion'a yol açar.
-- `AString`'i seçmek (class index `0x1F`) saldırgan-kontrollü bir heap işaretçisini nesne offset 0'a yerleştirir. Destructor döngüsü sırasında Revit pratikte şunu çalıştırır:
+- Revit deserializer, 16-bit class index'i okur ve bir object oluşturur. Bazı type'lar non-polymorphic'tir ve vtable içermez; destructor handling'in kötüye kullanılması, engine'in attacker-controlled pointer üzerinden indirect call gerçekleştirdiği bir type confusion oluşturur.
+- `AString`'i (class index `0x1F`) seçmek, object offset 0'a attacker-controlled bir heap pointer yerleştirir. Destructor loop sırasında Revit etkin olarak şunu çalıştırır:
 ```asm
 rcx = [rbx]              ; object pointer (e.g., AString*)
 rax = [rcx]              ; attacker-controlled pointer to AString buffer
 call qword ptr [rax]     ; one attacker-chosen gadget per object
 ```
-- Bu türden birden fazla objeyi serileştirilmiş grafiğe yerleştirin, böylece destructor loop'un her yinelemesi bir gadget (“weird machine”) çalıştırır ve bir stack pivot'u geleneksel bir x64 ROP chain'e yönlendirin.
+- Serialized graph içine bu tür nesnelerden birden fazla yerleştirin; böylece destructor loop'unun her iterasyonu bir gadget ("weird machine") çalıştırır ve conventional x64 ROP chain'e bir stack pivot düzenleyin.
 
-Windows x64 pivot/gadget oluşturma ayrıntıları için bakınız:
+Windows x64 pivot/gadget oluşturma ayrıntılarına buradan ulaşabilirsiniz:
 
 {{#ref}}
 ../../../binary-exploitation/stack-overflow/stack-pivoting.md
 {{#endref}}
 
-ve genel ROP rehberi için:
+genel ROP yönergelerine ise buradan ulaşabilirsiniz:
 
 {{#ref}}
 ../../../binary-exploitation/rop-return-oriented-programing/README.md
 {{#endref}}
 
-Araçlar:
+Araçlar:<sup>[[1]](#references)</sup>
 
-- CompoundFileTool (OSS) — OLE compound dosyalarını genişletmek/yeniden oluşturmak için: https://github.com/thezdi/CompoundFileTool
-- IDA Pro + WinDBG TTD for reverse/taint; izleri kompakt tutmak için TTD ile page heap'i devre dışı bırakın.
-- Yerel bir proxy (örn. Fiddler), test için plugin traffic'teki RFAs'i değiştirerek supply-chain teslimatını simüle edebilir.
+- CompoundFileTool (OSS), OLE compound file'larını genişletmek/yeniden oluşturmak için: https://github.com/thezdi/CompoundFileTool
+- Reverse/taint işlemleri için IDA Pro + WinDBG TTD; trace'leri kompakt tutmak için TTD ile page heap'i devre dışı bırakın.
+- Yerel bir proxy (ör. Fiddler), test amacıyla plugin trafiğindeki RFA'ları değiştirerek supply-chain delivery'yi simüle edebilir.
 
-## Kaynaklar
+## Referanslar
 
-- [Crafting a Full Exploit RCE from a Crash in Autodesk Revit RFA File Parsing (ZDI blog)](https://www.thezdi.com/blog/2025/10/6/crafting-a-full-exploit-rce-from-a-crash-in-autodesk-revit-rfa-file-parsing)
-- [CompoundFileTool (GitHub)](https://github.com/thezdi/CompoundFileTool)
-- [OLE Compound File (CFBF) docs](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation)
+- [1] [Autodesk Revit RFA File Parsing'deki Bir Crash'ten Full Exploit RCE Oluşturma (ZDI blogu)](https://www.thezdi.com/blog/2025/10/6/crafting-a-full-exploit-rce-from-a-crash-in-autodesk-revit-rfa-file-parsing)
+- [2] [CompoundFileTool (GitHub)](https://github.com/thezdi/CompoundFileTool)
+- [3] [OLE Compound File (CFBF) belgeleri](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation)
+- [4] [Forensics CTF Field Guide](https://trailofbits.github.io/ctf/forensics/)
 
 {{#include ../../../banners/hacktricks-training.md}}

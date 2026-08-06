@@ -3,25 +3,25 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> **PCAP** ile **PCAPNG** hakkında bir not: PCAP dosya formatının iki versiyonu vardır; **PCAPNG daha yenidir ve tüm araçlar tarafından desteklenmez**. Bazı diğer araçlarla çalışabilmek için bir dosyayı PCAPNG'den PCAP'a dönüştürmeniz gerekebilir; bunu Wireshark veya başka bir uyumlu araç kullanarak yapabilirsiniz.
+> **PCAP** ve **PCAPNG** hakkında bir not: **PCAP** dosya formatının iki sürümü vardır; **PCAPNG** daha yenidir ve tüm araçlar tarafından desteklenmez. Bazı araçlarla çalışabilmek için bir dosyayı Wireshark veya başka bir uyumlu araç kullanarak PCAPNG'den PCAP'e dönüştürmeniz gerekebilir.
 
-## Pcap'lar için çevrimiçi araçlar
+## Pcap'ler için çevrimiçi araçlar
 
-- Pcap'ınızın başlığı **bozuksa**, bunu düzeltmek için şunu kullanmalısınız: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
-- Bir pcap içindeki **bilgileri** çıkarın ve **kötü amaçlı yazılım** arayın [**PacketTotal**](https://packettotal.com) içinde
-- [**www.virustotal.com**](https://www.virustotal.com) ve [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com) kullanarak **kötü niyetli etkinlik** arayın
-- **Tarayıcıdan tam pcap analizi için** [**https://apackets.com/**](https://apackets.com/)
+- Pcap'inizin başlığı **bozuksa**, şu aracı kullanarak **düzeltmeyi** denemelisiniz: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
+- Bir pcap içindeki **bilgileri** çıkarın ve [**PacketTotal**](https://packettotal.com) üzerinde **malware** arayın
+- [**www.virustotal.com**](https://www.virustotal.com) ve [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com) kullanarak **kötü amaçlı etkinlik** arayın
+- [**https://apackets.com/**](https://apackets.com/) üzerinde **tarayıcıdan tam pcap analizi**
 
 ## Bilgi Çıkarma
 
-Aşağıdaki araçlar istatistikleri, dosyaları vb. çıkarmak için faydalıdır.
+Aşağıdaki araçlar istatistikleri, dosyaları vb. çıkarmak için kullanışlıdır.
 
 ### Wireshark
 
 > [!TIP]
-> **Bir PCAP'ı analiz edecekseniz, temelde Wireshark'ı nasıl kullanacağınızı bilmelisiniz**
+> **Bir PCAP analiz edecekseniz Wireshark'ı nasıl kullanacağınızı temelde bilmeniz gerekir**
 
-Wireshark ile ilgili bazı ipuçlarını bulabilirsiniz:
+Bazı Wireshark ipuçlarını şurada bulabilirsiniz:
 
 
 {{#ref}}
@@ -34,7 +34,7 @@ Tarayıcıdan pcap analizi.
 
 ### Xplico Framework
 
-[**Xplico** ](https://github.com/xplico/xplico)_(sadece linux)_ bir **pcap'ı** **analiz edebilir** ve ondan bilgi çıkarabilir. Örneğin, bir pcap dosyasından Xplico, her e-postayı (POP, IMAP ve SMTP protokolleri), tüm HTTP içeriklerini, her VoIP çağrısını (SIP), FTP, TFTP vb. çıkarır.
+[**Xplico** ](https://github.com/xplico/xplico)_(only linux)_ bir **pcap'i analiz edebilir** ve içinden bilgi çıkarabilir. Örneğin Xplico, bir pcap dosyasından her bir e-postayı (POP, IMAP ve SMTP protokolleri), tüm HTTP içeriklerini, her bir VoIP aramasını (SIP), FTP, TFTP ve benzerlerini çıkarır.
 
 **Kurulum**
 ```bash
@@ -48,28 +48,28 @@ sudo apt-get install xplico
 /etc/init.d/apache2 restart
 /etc/init.d/xplico start
 ```
-_**127.0.0.1:9876**_ adresine _**xplico:xplico**_ kimlik bilgileriyle erişin.
+**127.0.0.1:9876** adresine _**xplico:xplico**_ kimlik bilgileriyle erişin.
 
-Ardından **yeni bir vaka** oluşturun, vaka içinde **yeni bir oturum** oluşturun ve **pcap** dosyasını **yükleyin**.
+Ardından **new case** oluşturun, case içinde **new session** oluşturun ve **pcap** dosyasını **upload** edin.
 
 ### NetworkMiner
 
-Xplico gibi, **pcap'lerden nesneleri analiz etmek ve çıkarmak** için bir araçtır. **Buradan** [**indirebileceğiniz**] (https://www.netresec.com/?page=NetworkMiner) ücretsiz bir sürümü vardır. **Windows** ile çalışır.\
-Bu araç, paketlerden **diğer bilgileri analiz etmek** için de faydalıdır, böylece ne olduğunu **daha hızlı** bir şekilde anlayabilirsiniz.
+Xplico gibi, **pcap'lerden nesneleri analiz etmek ve çıkarmak** için kullanılan bir araçtır. Buradan [**download**](https://www.netresec.com/?page=NetworkMiner) edebileceğiniz ücretsiz bir sürümü vardır. **Windows** ile çalışır.\
+Bu araç, neler olduğunu **daha hızlı** anlayabilmek için paketlerden **analiz edilmiş diğer bilgileri** elde etmede de kullanışlıdır.
 
 ### NetWitness Investigator
 
-[**NetWitness Investigator'ı buradan indirin**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Windows'ta çalışır)**.\
-Bu, paketleri **analiz eden** ve bilgileri **içeride neler olduğunu bilmek için** faydalı bir şekilde sıralayan başka bir kullanışlı araçtır.
+[**NetWitness Investigator'ı buradan download**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) edebilirsiniz **(Windows'ta çalışır)**.\
+Bu, paketleri **analiz eden** ve **içeride neler olduğunu** anlamak için bilgileri kullanışlı bir şekilde sıralayan başka bir yararlı araçtır.
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-- Kullanıcı adlarını ve şifreleri çıkarmak ve kodlamak (HTTP, FTP, Telnet, IMAP, SMTP...)
-- Kimlik doğrulama hash'lerini çıkarmak ve Hashcat kullanarak kırmak (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
-- Görsel bir ağ diyagramı oluşturmak (Ağ düğümleri ve kullanıcılar)
-- DNS sorgularını çıkarmak
-- Tüm TCP ve UDP oturumlarını yeniden oluşturmak
-- Dosya Kesme
+- Kullanıcı adlarını ve parolaları ayıklama ve encoding işlemi (HTTP, FTP, Telnet, IMAP, SMTP...)
+- Authentication hash'lerini ayıklama ve Hashcat kullanarak crack etme (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
+- Görsel bir network diagram oluşturma (Network düğümleri ve kullanıcılar)
+- DNS sorgularını ayıklama
+- Tüm TCP ve UDP Session'larını yeniden oluşturma
+- File Carving
 
 ### Capinfos
 ```
@@ -77,50 +77,52 @@ capinfos capture.pcap
 ```
 ### Ngrep
 
-Eğer pcap içinde **bir şey** **aramak** istiyorsanız **ngrep** kullanabilirsiniz. İşte ana filtreleri kullanan bir örnek:
+pcap içinde **bir şey** **arıyorsanız** **ngrep** kullanabilirsiniz. İşte ana filtreleri kullanan bir örnek:
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
 ### Carving
 
-Yaygın carving tekniklerini kullanmak, pcap'ten dosyaları ve bilgileri çıkarmak için faydalı olabilir:
+Yaygın carving tekniklerini kullanmak, pcap içinden dosyaları ve bilgileri çıkarmak için faydalı olabilir:
+
 
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Capturing credentials
+### Kimlik bilgilerini yakalama
 
 Bir pcap veya canlı arayüzden kimlik bilgilerini ayrıştırmak için [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) gibi araçları kullanabilirsiniz.
 
-## Check Exploits/Malware
+## Exploit'leri/Zararlı Yazılımları Kontrol Etme
 
 ### Suricata
 
-**Install and setup**
+**Kurulum ve ayarlar**
 ```
 apt-get install suricata
 apt-get install oinkmaster
 echo "url = http://rules.emergingthreats.net/open/suricata/emerging.rules.tar.gz" >> /etc/oinkmaster.conf
 oinkmaster -C /etc/oinkmaster.conf -o /etc/suricata/rules
 ```
-**pcap kontrol et**
+**pcap'i kontrol et**
 ```
 suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) bir araçtır
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap), aşağıdakileri yapan bir araçtır:
 
 - Bir PCAP Dosyasını okur ve Http Akışlarını çıkarır.
-- gzip, sıkıştırılmış akışları açar
-- Her dosyayı yara ile tarar
-- report.txt dosyasını yazar
-- İsteğe bağlı olarak eşleşen dosyaları bir Dizin'e kaydeder
+- Sıkıştırılmış akışların gzip açılımını yapar.
+- Her dosyayı yara ile tarar.
+- Bir report.txt yazar.
+- İsteğe bağlı olarak eşleşen dosyaları bir dizine kaydeder.
 
-### Malware Analysis
+### Malware Analizi
 
-Bilinen bir kötü amaçlı yazılımın herhangi bir parmak izini bulup bulamayacağını kontrol edin:
+Bilinen bir malware'e ait herhangi bir parmak izi bulup bulamayacağınızı kontrol edin:
+
 
 {{#ref}}
 ../malware-analysis.md
@@ -128,9 +130,9 @@ Bilinen bir kötü amaçlı yazılımın herhangi bir parmak izini bulup bulamay
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) pasif, açık kaynaklı bir ağ trafiği analizörüdür. Birçok operatör, şüpheli veya kötü niyetli etkinliklerin araştırmalarını desteklemek için Zeek'i Ağ Güvenliği İzleyici (NSM) olarak kullanır. Zeek ayrıca güvenlik alanının ötesinde, performans ölçümü ve sorun giderme dahil olmak üzere geniş bir trafik analizi görevini destekler.
+> [Zeek](https://docs.zeek.org/en/master/about.html), pasif ve açık kaynaklı bir network traffic analyzer'dır. Birçok operator, şüpheli veya malicious activity incelemelerini desteklemek için Zeek'i Network Security Monitor (NSM) olarak kullanır. Zeek ayrıca security domain dışındaki performans ölçümü ve troubleshooting dahil olmak üzere çok çeşitli traffic analysis görevlerini de destekler.
 
-Temelde, `zeek` tarafından oluşturulan günlükler **pcap** değildir. Bu nedenle, **pcap'ler** hakkında **bilgi** içeren günlükleri analiz etmek için **diğer araçlar** kullanmanız gerekecektir.
+Temel olarak, `zeek` tarafından oluşturulan loglar **pcaps** değildir. Bu nedenle, **pcaps** hakkındaki **bilgilerin** bulunduğu logları analiz etmek için **diğer araçları** kullanmanız gerekir.
 
 ### Connections Info
 ```bash
@@ -199,7 +201,7 @@ cat dns.log | zeek-cut qtype_name | sort | uniq -c | sort -nr
 #See top DNS domain requested with rita
 rita show-exploded-dns -H --limit 10 zeek_logs
 ```
-## Diğer pcap analiz ipuçları
+## Diğer pcap analiz teknikleri
 
 
 {{#ref}}
@@ -215,7 +217,5 @@ wifi-pcap-analysis.md
 {{#ref}}
 usb-keystrokes.md
 {{#endref}}
-
-​
 
 {{#include ../../../banners/hacktricks-training.md}}

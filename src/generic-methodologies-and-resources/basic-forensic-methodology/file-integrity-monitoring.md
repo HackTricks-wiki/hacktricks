@@ -2,54 +2,54 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Temel durum
+## Baseline
 
-Bir temel durum, sistemin belirli bölümlerinin bir anlık görüntüsünün alınmasını ve **gelecekteki bir durumla karşılaştırılarak değişikliklerin vurgulanmasını** içerir.
+Bir baseline, bir sistemin belirli bölümlerinin anlık görüntüsünü alarak **gelecekteki durumla karşılaştırıp değişiklikleri öne çıkarmayı** içerir.
 
-Örneğin, hangi dosyaların değiştirildiğini tespit edebilmek için dosya sistemindeki her dosyanın hash'ini hesaplayıp saklayabilirsiniz.\
-Bu, oluşturulan kullanıcı hesapları, çalışan işlemler, çalışan servisler ve çok değişmemesi gereken veya hiç değişmemesi gereken diğer öğeler için de yapılabilir.
+Örneğin, hangi dosyaların değiştirildiğini tespit edebilmek için dosya sistemindeki her dosyanın hash değerini hesaplayıp saklayabilirsiniz.\
+Bu işlem, oluşturulan kullanıcı hesapları, çalışan process'ler, çalışan servisler ve fazla ya da hiç değişmemesi gereken diğer unsurlar için de yapılabilir.
 
-Bir **kullanışlı temel durum**, genellikle sadece bir özetten daha fazlasını saklar: izinler, sahip, grup, zaman damgaları, inode, symlink hedefi, ACL'ler ve seçilmiş genişletilmiş öznitelikler de izlemeye değerdir. Saldırgan avcılığı açısından bu, içerik hash'i ilk değişen şey olmasa bile **yalnızca izinlerle oynama**, **atomik dosya değiştirme** ve **değiştirilmiş servis/unit dosyaları üzerinden kalıcılık** gibi durumları tespit etmeye yardımcı olur.
+**Kullanışlı bir baseline** genellikle yalnızca bir digest saklamaz: izinler, sahip, grup, zaman damgaları, inode, symlink hedefi, ACL'ler ve seçilen extended attributes da takip edilmeye değerdir. Attacker-hunting açısından bu, içerik hash'i değişen ilk şey olmasa bile **yalnızca izinlerin değiştirilmesini**, **atomic file replacement** işlemlerini ve **değiştirilmiş servis/unit dosyaları üzerinden persistence** durumlarını tespit etmeye yardımcı olur.
 
 ### File Integrity Monitoring
 
-File Integrity Monitoring (FIM), dosyalardaki değişiklikleri izleyerek BT ortamlarını ve verileri koruyan kritik bir güvenlik tekniğidir. Genellikle şu öğeleri birleştirir:
+File Integrity Monitoring (FIM), dosyalardaki değişiklikleri takip ederek IT ortamlarını ve verileri koruyan kritik bir security tekniğidir. Genellikle şunları birleştirir:
 
-1. **Temel durum karşılaştırması:** Gelecekteki karşılaştırmalar için metadata ve kriptografik checksum'ları saklayın (`SHA-256` veya daha iyisi tercih edilir).
-2. **Gerçek zamanlı bildirimler:** Hangi dosyanın, ne zaman ve ideal olarak hangi süreç/kullanıcı tarafından değiştirildiğini bilmek için OS-native dosya olaylarına abone olun.
-3. **Periyodik yeniden tarama:** Yeniden başlatmalardan, düşen olaylardan, agent kesintilerinden veya kasıtlı anti-adli faaliyetlerden sonra güveni yeniden inşa edin.
+1. **Baseline karşılaştırması:** Gelecekteki karşılaştırmalar için metadata ve cryptographic checksum'ları (tercihen `SHA-256` veya daha iyisi) saklayın.
+2. **Real-time bildirimler:** **Hangi dosyanın ne zaman değiştiğini ve ideal olarak hangi process/kullanıcının dosyaya dokunduğunu** öğrenmek için OS-native file event'lerine abone olun.
+3. **Periyodik yeniden tarama:** Reboot'lar, kaybolan event'ler, agent kesintileri veya kasıtlı anti-forensic activity sonrasında güveni yeniden oluşturun.
 
-Tehdit avcılığı için, FIM genellikle şu gibi **yüksek öncelikli yollar** üzerinde odaklandığında daha faydalıdır:
+Threat hunting için FIM, genellikle aşağıdaki gibi **yüksek değerli path'lere** odaklandığında daha kullanışlıdır:
 
 - `/etc`, `/boot`, `/usr/local/bin`, `/usr/local/sbin`
-- `systemd` units, cron locations, SSH material, PAM modules, web roots
-- Windows persistence locations, service binaries, scheduled task files, startup folders
-- Container writable layers and bind-mounted secrets/configuration
+- `systemd` unit'leri, cron konumları, SSH materyalleri, PAM modülleri, web root'ları
+- Windows persistence konumları, servis binary'leri, scheduled task dosyaları, startup klasörleri
+- Container writable layer'ları ve bind-mounted secret/configuration dosyaları
 
-## Gerçek Zamanlı Arka Uçlar & Kör Noktalar
+## Real-Time Backend'ler ve Blind Spot'lar
 
 ### Linux
 
-Toplama altyapısı önemlidir:
+Collection backend'i önemlidir:<sup>[[2]](#references)</sup>
 
-- **`inotify` / `fsnotify`**: kolay ve yaygın, ancak watch limitleri tükenebilir ve bazı kenar durumlar atlanır.
-- **`auditd` / audit framework`**: **dosyayı kimin değiştirdiğini** (`auid`, process, pid, executable) bilmeniz gerektiğinde daha iyidir.
-- **`eBPF` / `kprobes`**: modern FIM yığınlarının olayları zenginleştirmek ve düz `inotify` dağıtımlarının operasyonel bazı zorluklarını azaltmak için kullandığı daha yeni seçeneklerdir.
+- **`inotify` / `fsnotify`**: kullanımı kolay ve yaygındır ancak watch limit'leri tüketilebilir ve bazı edge case'ler gözden kaçabilir.
+- **`auditd` / audit framework**: **dosyayı kimin değiştirdiğini** (`auid`, process, pid, executable) bilmeniz gerektiğinde daha iyidir.
+- **`eBPF` / `kprobes`**: modern FIM stack'leri tarafından event'leri zenginleştirmek ve plain `inotify` deployment'larının operasyonel yükünü azaltmak için kullanılan daha yeni seçeneklerdir.
 
-Bazı pratik tuzaklar:
+Bazı pratik sorunlar:<sup>[[1]](#references)</sup>
 
-- Bir program dosyayı `write temp -> rename` ile **değiştirirse**, dosyanın kendisini izlemek kullanışlılığı yitirebilir. **Sadece dosyayı değil ebeveyn dizini izle**.
-- `inotify`-tabanlı toplayıcılar **büyük dizin ağaçlarında**, **hard-link etkinliğinde** veya bir **izlenen dosya silindikten sonra** kaçırabilir veya bozulabilir.
-- Çok büyük özyinelemeli watch set'leri, `fs.inotify.max_user_watches`, `max_user_instances` veya `max_queued_events` çok düşükse sessizce başarısız olabilir.
-- Ağ dosya sistemleri, düşük-gürültülü izleme için genellikle kötü FIM hedefleridir.
+- Bir program `write temp -> rename` ile bir dosyayı **değiştirirse**, dosyanın kendisini izlemek artık işe yaramayabilir. Yalnızca dosyayı değil, **parent directory'yi izleyin**.
+- `inotify` tabanlı collector'lar **çok büyük directory tree'lerinde**, **hard-link activity** sırasında veya **izlenen bir dosya silindikten** sonra event'leri kaçırabilir ya da performans kaybı yaşayabilir.
+- `fs.inotify.max_user_watches`, `max_user_instances` veya `max_queued_events` değerleri çok düşükse çok büyük recursive watch set'leri sessizce başarısız olabilir.
+- Network filesystem'ler düşük gürültülü monitoring için genellikle kötü FIM hedefleridir.
 
-AIDE ile örnek temel durum ve doğrulama:
+AIDE ile baseline + verification örneği:
 ```bash
 aide --init
 mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
 aide --check
 ```
-Saldırgan kalıcılık yollarına odaklanan örnek `osquery` FIM yapılandırması:
+Saldırganın persistence yollarına odaklanan örnek `osquery` FIM yapılandırması:<sup>[[1]](#references)</sup>
 ```json
 {
 "schedule": {
@@ -66,16 +66,16 @@ Saldırgan kalıcılık yollarına odaklanan örnek `osquery` FIM yapılandırma
 }
 }
 ```
-Eğer yalnızca yol düzeyindeki değişiklikler yerine **proses kaynak ataması** gerekiyorsa, `osquery` `process_file_events` veya Wazuh `whodata` modu gibi denetim tabanlı telemetriyi tercih edin.
+Yalnızca path-level değişiklikler yerine **process attribution** gerekiyorsa `osquery` `process_file_events` veya Wazuh `whodata` mode gibi audit-backed telemetry kullanmayı tercih edin.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ### Windows
 
-Windows'ta, **değişiklik günlükleri** ile **yüksek sinyal veren işlem/dosya telemetrisi**'ni birleştirdiğinizde FIM daha güçlü olur:
+Windows'ta FIM'i **change journals** ile **high-signal process/file telemetry** birleştirerek daha güçlü hâle getirebilirsiniz:
 
-- **NTFS USN Journal**, dosya değişikliklerinin her birim için kalıcı bir günlük kaydını sağlar.
-- **Sysmon Event ID 11**, dosya oluşturma/üstüne yazma için yararlıdır.
-- **Sysmon Event ID 2**, **timestomping**'i tespit etmeye yardımcı olur.
-- **Sysmon Event ID 15**, `Zone.Identifier` veya gizli payload akışları gibi **named alternate data streams (ADS)** için faydalıdır.
+- **NTFS USN Journal**, dosya değişikliklerinin volume başına kalıcı bir günlüğünü sağlar.
+- **Sysmon Event ID 11**, dosya oluşturma/üzerine yazma işlemleri için kullanışlıdır.
+- **Sysmon Event ID 2**, **timestomping** tespitine yardımcı olur.
+- **Sysmon Event ID 15**, `Zone.Identifier` veya gizli payload stream'leri gibi **named alternate data streams (ADS)** için kullanışlıdır.
 
 Hızlı USN triage örnekleri:
 ```cmd
@@ -83,24 +83,24 @@ fsutil usn queryjournal C:
 fsutil usn readjournal C:
 fsutil usn readdata C:\Windows\Temp\sample.bin
 ```
-Daha derin anti-adli fikirler için **timestamp manipulation**, **ADS abuse**, ve **USN tampering** konularına bakın: [Anti-Forensic Techniques](anti-forensic-techniques.md).
+Daha derin **timestamp manipulation**, **ADS abuse** ve **USN tampering** fikirleri için [Anti-Forensic Techniques](anti-forensic-techniques.md) bölümüne bakın.
 
-### Konteynerler
+### Containers
 
-Konteyner FIM genellikle gerçek yazma yolunu kaçırır. Docker `overlay2` ile değişiklikler, salt okunur imaj katmanlarına değil, konteynerin **yazılabilir üst katmanına** (`upperdir`/`diff`) işlenir. Bu nedenle:
+Container FIM çoğu zaman gerçek yazma yolunu gözden kaçırır. Docker `overlay2` ile değişiklikler salt okunur image katmanlarına değil, container'ın **writable upper layer**'ına (`upperdir`/`diff`) kaydedilir. Bu nedenle:
 
-- Kısa ömürlü bir konteynerin içinden **yalnızca** yolları izlemek, konteyner yeniden oluşturulduktan sonra yapılan değişiklikleri kaçırabilir.
-- Yazılabilir katmanı destekleyen ana makine yolunu veya ilgili bind-mounted volume'u izlemek genellikle daha faydalıdır.
-- İmaj katmanları üzerinde yapılan FIM, çalışan konteyner dosya sistemi üzerindeki FIM'den farklıdır.
+- Yalnızca kısa ömürlü bir container'ın **içindeki** yolları izlemek, container yeniden oluşturulduktan sonraki değişiklikleri gözden kaçırabilir.
+- **Host path**'i izlemek; yani writable layer'ı destekleyen yolu veya ilgili bind-mounted volume'ü izlemek genellikle daha kullanışlıdır.
+- Image katmanları üzerindeki FIM, çalışan container filesystem'i üzerindeki FIM'den farklıdır.
 
-## Saldırgana Yönelik Avlama Notları
+## Attacker-Oriented Hunting Notes
 
-- **service definitions** ve **task schedulers**'ı ikili dosyalar kadar dikkatle izleyin. Saldırganlar genellikle `/bin/sshd`'yi yama yapmak yerine bir unit file'ı, cron entry'yi veya task XML'i değiştirerek kalıcılık sağlarlar.
-- Yalnızca içerik hash'i yeterli değildir. Birçok ihlal önce **owner/mode/xattr/ACL drift** olarak ortaya çıkar.
-- Olgun bir ihlalden şüpheleniyorsanız, her ikisini yapın: yeni aktiviteler için **real-time FIM** ve güvenilir medyadan alınmış bir **cold baseline comparison**.
-- Saldırganın root veya kernel düzeyinde kod çalıştırabildiğinden şüpheleniyorsanız, FIM agent'ının, veritabanının ve hatta olay kaynağının değiştirilebileceğini varsayın. Kayıtları ve baseline'ları mümkünse uzakta veya salt okunur medyada saklayın.
+- **Service definitions** ve **task schedulers**'ı binary'ler kadar dikkatli izleyin. Attackers çoğu zaman `/bin/sshd`'yi patch'lemek yerine bir unit file, cron entry veya task XML'ini değiştirerek persistence elde eder.
+- Tek başına bir content hash yeterli değildir. Birçok compromise ilk olarak **owner/mode/xattr/ACL drift** şeklinde ortaya çıkar.
+- Mature bir intrusion'dan şüpheleniyorsanız ikisini de yapın: yeni activity için **real-time FIM** ve trusted media'dan alınan bir **cold baseline comparison**.
+- Attacker root veya kernel execution elde ettiyse FIM agent'ının, database'inin ve hatta event source'unun tamper edilebileceğini varsayın. Log'ları ve baseline'ları mümkün olduğunda remote olarak veya read-only media üzerinde saklayın.
 
-## Araçlar
+## Tools
 
 - [AIDE](https://aide.github.io/)
 - [osquery](https://osquery.io/)
@@ -108,9 +108,10 @@ Konteyner FIM genellikle gerçek yazma yolunu kaçırır. Docker `overlay2` ile 
 - [Elastic Auditbeat File Integrity Module](https://www.elastic.co/docs/reference/beats/auditbeat/auditbeat-module-file_integrity)
 - [Sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
 
-## Referanslar
+## References
 
-- [https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/](https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/)
-- [https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case](https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case)
+- [1] [File Integrity Monitoring with osquery](https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/)
+- [2] [Tracing Linux: A file integrity monitoring use case (Elastic)](https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case)
+- [3] [Wazuh File Integrity Monitoring (Syscheck and whodata mode)](https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html)
 
 {{#include ../../banners/hacktricks-training.md}}

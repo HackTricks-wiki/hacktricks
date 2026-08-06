@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Eğer şifreleme kullanmadan **DNSCat** ile **sızdırılan** verilerin olduğu bir pcap dosyanız varsa, sızdırılan içeriği bulabilirsiniz.
+DNSCat tarafından **exfiltrated** edilen verileri (şifreleme kullanılmadan) içeren bir pcap dosyanız varsa, **exfiltrated** edilen içeriği bulabilirsiniz.
 
-Sadece **ilk 9 baytın** gerçek veri olmadığını ve **C\&C iletişimi** ile ilgili olduğunu bilmeniz yeterlidir:
+Bilmeniz gereken tek şey, **ilk 9 bytes** değerinin gerçek veri olmadığı ve **C\&C iletişimiyle** ilişkili olduğudur:<sup>[[1]](#references)</sup>
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -30,4 +30,8 @@ Python3 ile çalışan bir script bulunmaktadır: [https://github.com/josemlwdf/
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```
+## Referanslar
+
+- [1] [DNSCat2 pcap adli inceleme yazısı – BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
+
 {{#include ../../../banners/hacktricks-training.md}}

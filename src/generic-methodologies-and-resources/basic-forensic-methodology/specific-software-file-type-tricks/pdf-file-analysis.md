@@ -1,39 +1,39 @@
-# PDF Dosya analizi
+# PDF Dosyası analizi
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Daha fazla detay için kontrol edin:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)
+**Daha fazla ayrıntı için şuraya bakın:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)<sup>[[1]](#references)</sup>
 
-PDF formatı, karmaşıklığı ve verileri gizleme potansiyeli ile bilinir, bu da onu CTF adli bilişim zorlukları için bir odak noktası haline getirir. Düz metin unsurlarını, sıkıştırılmış veya şifrelenmiş olabilecek ikili nesnelerle birleştirir ve JavaScript veya Flash gibi dillerdeki betikleri içerebilir. PDF yapısını anlamak için Didier Stevens'ın [giriş materyaline](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/) başvurulabilir veya bir metin düzenleyici ya da Origami gibi PDF'ye özel bir düzenleyici kullanılabilir.
+PDF formatı, karmaşıklığı ve verileri gizleme potansiyeliyle bilinir; bu da onu CTF forensics challenge'ları için önemli bir odak noktası hâline getirir. Düz metin öğelerini, sıkıştırılmış veya şifrelenmiş olabilecek binary nesnelerle birleştirir ve JavaScript veya Flash gibi dillerde script'ler içerebilir. PDF yapısını anlamak için Didier Stevens'ın [giriş materyaline](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/) başvurulabilir veya bir text editor ya da Origami gibi PDF'ye özgü bir editor kullanılabilir.
 
-PDF'lerin derinlemesine keşfi veya manipülasyonu için [qpdf](https://github.com/qpdf/qpdf) ve [Origami](https://github.com/mobmewireless/origami-pdf) gibi araçlar mevcuttur. PDF'lerde gizli veriler şunlarda gizlenebilir:
+PDF'leri derinlemesine incelemek veya değiştirmek için [qpdf](https://github.com/qpdf/qpdf) ve [Origami](https://github.com/mobmewireless/origami-pdf) gibi araçlar kullanılabilir. PDF'lerdeki gizli veriler şu şekillerde saklanabilir:
 
 - Görünmez katmanlar
-- Adobe tarafından sağlanan XMP meta veri formatı
-- Artan nesil
-- Arka planla aynı renkteki metin
-- Resimlerin arkasındaki metin veya üst üste binen resimler
-- Gösterilmeyen yorumlar
+- Adobe'nin XMP metadata formatı
+- Incremental generation'lar
+- Arka planla aynı renkteki metinler
+- Görsellerin arkasındaki metinler veya üst üste binen görseller
+- Görüntülenmeyen yorumlar
 
-Özel PDF analizi için, [PeepDF](https://github.com/jesparza/peepdf) gibi Python kütüphaneleri, özel ayrıştırma betikleri oluşturmak için kullanılabilir. Ayrıca, PDF'nin gizli veri depolama potansiyeli o kadar geniştir ki, orijinal konumunda artık barındırılmayan NSA'nın PDF riskleri ve karşı önlemlerine dair kılavuzu bile değerli bilgiler sunmaktadır. [Kılavuzun bir kopyası](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) ve Ange Albertini'nin [PDF formatı hileleri](https://github.com/corkami/docs/blob/master/PDF/PDF.md) koleksiyonu, konu hakkında daha fazla okuma sağlayabilir.
+Özel PDF analizi için, [PeepDF](https://github.com/jesparza/peepdf) gibi Python kütüphaneleri özel parsing script'leri oluşturmak amacıyla kullanılabilir. Ayrıca PDF'nin gizli veri depolama potansiyeli o kadar geniştir ki, artık orijinal konumunda barındırılmayan PDF riskleri ve karşı önlemleri hakkındaki NSA rehberi gibi kaynaklar hâlâ değerli bilgiler sunar. Ange Albertini tarafından hazırlanan [rehberin bir kopyası](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) ve bir [PDF format tricks koleksiyonu](https://github.com/corkami/docs/blob/master/PDF/PDF.md) konu hakkında daha fazla okuma sağlayabilir.
 
-## Yaygın Kötü Amaçlı Yapılar
+## Yaygın Malicious Construct'lar
 
-Saldırganlar, belgenin açılması veya etkileşimde bulunulması durumunda otomatik olarak yürütülen belirli PDF nesnelerini ve eylemlerini sıklıkla kötüye kullanır. Aranması gereken anahtar kelimeler:
+Attackers, document açıldığında veya document ile etkileşime girildiğinde otomatik olarak çalışan belirli PDF nesnelerini ve action'ları sıklıkla abuse eder. Aranması gereken keyword'ler:
 
-* **/OpenAction, /AA** – açıldığında veya belirli olaylarda yürütülen otomatik eylemler.
-* **/JS, /JavaScript** – gömülü JavaScript (genellikle obfuscate edilmiş veya nesneler arasında bölünmüş).
-* **/Launch, /SubmitForm, /URI, /GoToE** – harici işlem / URL başlatıcıları.
-* **/RichMedia, /Flash, /3D** – yükleri gizleyebilen multimedya nesneleri.
-* **/EmbeddedFile /Filespec** – dosya ekleri (EXE, DLL, OLE, vb.).
-* **/ObjStm, /XFA, /AcroForm** – genellikle shell-code gizlemek için kötüye kullanılan nesne akışları veya formlar.
-* **Artan güncellemeler** – birden fazla %%EOF işareti veya çok büyük bir **/Prev** ofseti, imzadan sonra eklenen verileri gösterebilir.
+* **/OpenAction, /AA** – açılışta veya belirli event'lerde çalıştırılan automatic action'lar.
+* **/JS, /JavaScript** – gömülü JavaScript (genellikle obfuscated veya nesneler arasında bölünmüş).
+* **/Launch, /SubmitForm, /URI, /GoToE** – external process / URL launcher'ları.
+* **/RichMedia, /Flash, /3D** – payload'ları gizleyebilen multimedia nesneleri.
+* **/EmbeddedFile /Filespec** – file attachment'ları (EXE, DLL, OLE vb.).
+* **/ObjStm, /XFA, /AcroForm** – shell-code gizlemek için sıklıkla abuse edilen object stream'leri veya form'lar.
+* **Incremental updates** – birden fazla %%EOF marker'ı veya çok büyük bir **/Prev** offset'i, AV'yi bypass etmek amacıyla signing sonrasında eklenmiş verilere işaret edebilir.
 
-Önceki tokenlerden herhangi biri şüpheli dizelerle (powershell, cmd.exe, calc.exe, base64, vb.) birlikte ortaya çıktığında, PDF daha derin bir analiz gerektirir.
+Önceki token'lardan herhangi biri suspicious string'lerle (powershell, cmd.exe, calc.exe, base64 vb.) birlikte göründüğünde PDF daha derinlemesine analiz edilmelidir.
 
 ---
 
-## Statik analiz ipucu kılavuzu
+## Static analysis cheat-sheet
 ```bash
 # Fast triage – keyword statistics
 pdfid.py suspicious.pdf
@@ -54,22 +54,22 @@ qpdf --password='secret' --decrypt suspicious.pdf clean.pdf
 # Lint the file with a Go verifier (checks structure violations)
 pdfcpu validate -mode strict clean.pdf
 ```
-Ekstra yararlı projeler (aktif olarak bakımda 2023-2025):
-* **pdfcpu** – PDF'leri *lint*, *şifre çözme*, *çıkarma*, *sıkıştırma* ve *temizleme* yeteneğine sahip Go kütüphanesi/CLI.
-* **pdf-inspector** – nesne grafiğini ve akışları render eden tarayıcı tabanlı görselleştirici.
-* **PyMuPDF (fitz)** – gömülü JS'yi sertleştirilmiş bir kum havuzunda patlatmak için sayfaları güvenli bir şekilde görüntüleyebilen scriptlenebilir Python motoru.
+Ek yararlı projects (aktif olarak 2023-2025 arasında sürdürülen):
+* **pdfcpu** – PDF'leri *lint* edebilen, *decrypt* edebilen, *extract* edebilen, *compress* edebilen ve *sanitize* edebilen Go library/CLI.
+* **pdf-inspector** – object graph ve streams'leri oluşturan browser-based visualizer.
+* **PyMuPDF (fitz)** – gömülü JS'yi hardened sandbox içinde güvenli şekilde detonate etmek üzere sayfaları görsellere render edebilen scriptable Python engine.
 
 ---
 
-## Son saldırı teknikleri (2023-2025)
+## Recent attack techniques (2023-2025)
 
-* **MalDoc in PDF polyglot (2023)** – JPCERT/CC, tehdit aktörlerinin son **%%EOF**'dan sonra VBA makroları içeren MHT tabanlı bir Word belgesini eklediğini gözlemledi ve hem geçerli bir PDF hem de geçerli bir DOC olan bir dosya üretti. Sadece PDF katmanını ayrıştıran AV motorları makroyu atlar. Statik PDF anahtar kelimeleri temizdir, ancak `file` yine de `%PDF` yazdırır. `<w:WordDocument>` dizesini de içeren herhangi bir PDF'yi son derece şüpheli olarak değerlendirin.
-* **Shadow-incremental updates (2024)** – düşmanlar, masum ilk revizyonu imzalı tutarken kötü niyetli `/OpenAction` ile ikinci bir **/Catalog** eklemek için artımlı güncelleme özelliğini kötüye kullanır. Sadece ilk xref tablosunu inceleyen araçlar atlatılır.
-* **Font parsing UAF chain – CVE-2024-30284 (Acrobat/Reader)** – gömülü CIDType2 fontlardan erişilebilen savunmasız bir **CoolType.dll** fonksiyonu, hazırlanmış bir belge açıldığında kullanıcının ayrıcalıklarıyla uzaktan kod yürütmeye izin verir. Mayıs 2024'te APSB24-29'da yamanmıştır.
+* **MalDoc in PDF polyglot (2023)** – JPCERT/CC, threat actors'ın son **%%EOF** sonrasına VBA macros içeren MHT-based Word document eklediğini gözlemledi; böylece hem geçerli bir PDF hem de geçerli bir DOC olan bir file üretiliyor. Yalnızca PDF layer'ını parse eden AV engines macro'yu kaçırıyor. Static PDF keywords temiz görünse de `file` hâlâ `%PDF` çıktısını veriyor. `<w:WordDocument>` string'ini de içeren tüm PDF'leri highly suspicious kabul edin.<sup>[[2]](#references)</sup>
+* **Shadow-incremental updates (2024)** – adversaries, benign first revision signed durumunu korurken malicious `/OpenAction` içeren ikinci bir **/Catalog** eklemek için incremental update özelliğini abuse ediyor. Yalnızca ilk xref table'ını inspect eden tools bypass ediliyor.
+* **Font parsing UAF chain – CVE-2024-30284 (Acrobat/Reader)** – vulnerable bir **CoolType.dll** function'ına embedded CIDType2 fonts üzerinden ulaşılabilir; crafted bir document açıldığında user privileges ile remote code execution elde edilebilir. APSB24-29 kapsamında Mayıs 2024'te patch'lendi.<sup>[[3]](#references)</sup>
 
 ---
 
-## YARA hızlı kural şablonu
+## YARA quick rule template
 ```yara
 rule Suspicious_PDF_AutoExec {
 meta:
@@ -89,15 +89,16 @@ $pdf_magic at 0 and ( all of ($aa, $openact) or ($openact and $js) )
 
 ## Savunma ipuçları
 
-1. **Hızla yamanın** – Acrobat/Reader'ı en son Sürekli sürümde tutun; sahada gözlemlenen çoğu RCE zinciri, aylar önce düzeltmiş n-gün güvenlik açıklarını kullanıyor.
-2. **Aktif içeriği geçitte kaldırın** – JavaScript, gömülü dosyaları ve gelen PDF'lerden başlatma eylemlerini kaldırmak için `pdfcpu sanitize` veya `qpdf --qdf --remove-unreferenced` kullanın.
-3. **İçerik Silme ve Yeniden Yapılandırma (CDR)** – Aktif nesneleri atarken görsel sadakati korumak için PDF'leri bir kum havuzu ana bilgisayarında görüntülere (veya PDF/A'ya) dönüştürün.
-4. **Nadir kullanılan özellikleri engelleyin** – Reader'daki kurumsal “Gelişmiş Güvenlik” ayarları, JavaScript, multimedya ve 3D renderlamayı devre dışı bırakmaya izin verir.
-5. **Kullanıcı eğitimi** – sosyal mühendislik (fatura ve özgeçmiş tuzakları) başlangıç vektörü olmaya devam ediyor; çalışanlara şüpheli ekleri IR'ye iletmeyi öğretin.
+1. **Hızlı patch uygulayın** – Acrobat/Reader'ı en güncel Continuous track üzerinde tutun; doğada gözlemlenen çoğu RCE zinciri, aylar önce düzeltilmiş n-day güvenlik açıklarından yararlanır.
+2. **Gateway'de active content'i kaldırın** – gelen PDF'lerden JavaScript, embedded files ve launch actions öğelerini kaldırmak için `pdfcpu sanitize` veya `qpdf --qdf --remove-unreferenced` kullanın.
+3. **Content Disarm & Reconstruction (CDR)** – görsel doğruluğu korurken active objects öğelerini atmak için PDF'leri bir sandbox host üzerinde görüntülere (veya PDF/A'ya) dönüştürün.
+4. **Nadiren kullanılan özellikleri engelleyin** – Reader'daki kurumsal “Enhanced Security” ayarları JavaScript, multimedia ve 3D rendering özelliklerinin devre dışı bırakılmasına izin verir.
+5. **Kullanıcı eğitimi** – social engineering (invoice ve resume lure'ları) ilk vector olmaya devam ediyor; çalışanlara şüpheli ekleri IR ekibine iletmelerini öğretin.
 
 ## Referanslar
 
-* JPCERT/CC – “PDF'de MalDoc – Kötü niyetli bir Word dosyasını PDF dosyasına gömerek tespit atlatma” (Ağu 2023)
-* Adobe – Acrobat ve Reader için güvenlik güncellemesi (APSB24-29, Mayıs 2024)
+- [1] [Forensics CTF Field Guide](https://trailofbits.github.io/ctf/forensics/)
+- [2] [MalDoc in PDF – Detection bypass by embedding a malicious Word file into a PDF file](https://blogs.jpcert.or.jp/en/2023/08/maldocinpdf.html)
+- [3] [Adobe Security Bulletin – Security update available for Adobe Acrobat and Reader (APSB24-29)](https://helpx.adobe.com/security/products/acrobat/apsb24-29.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

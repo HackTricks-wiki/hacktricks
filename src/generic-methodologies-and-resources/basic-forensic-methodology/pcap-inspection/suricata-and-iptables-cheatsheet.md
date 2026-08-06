@@ -1,4 +1,4 @@
-# Suricata & Iptables cheatsheet
+# Suricata ve Iptables cheatsheet
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,13 +6,13 @@
 
 ### Zincirler
 
-Iptables'ta, kuralların listeleri zincirler olarak adlandırılır ve sıralı bir şekilde işlenir. Bunlar arasında, evrensel olarak mevcut olan üç ana zincir bulunur; sistemin yeteneklerine bağlı olarak NAT gibi ek zincirler de desteklenebilir.
+iptables'te zincir olarak bilinen kural listeleri sıralı şekilde işlenir. Bunlar arasında üç temel zincir her zaman bulunur; NAT gibi ek zincirler ise sistemin yeteneklerine bağlı olarak desteklenebilir.
 
-- **Giriş Zinciri**: Gelen bağlantıların davranışını yönetmek için kullanılır.
-- **İleri Zincir**: Yerel sisteme yönlendirilmemiş gelen bağlantıları işlemek için kullanılır. Bu, verilerin başka bir hedefe iletilmesi amaçlanan yönlendirici olarak işlev gören cihazlar için tipiktir. Bu zincir, sistemin yönlendirme, NAT yapma veya benzeri faaliyetlerde bulunduğu durumlarda önemlidir.
-- **Çıkış Zinciri**: Giden bağlantıların düzenlenmesine adanmıştır.
+- **Input Chain**: Gelen bağlantıların davranışını yönetmek için kullanılır.
+- **Forward Chain**: Yerel sisteme yönelik olmayan gelen bağlantıları işlemek için kullanılır. Bu, alınan verilerin başka bir hedefe yönlendirilmesinin gerektiği router olarak çalışan cihazlarda yaygındır. Bu zincir esas olarak sistem routing, NATing veya benzer işlemlerle ilgilendiğinde kullanılır.
+- **Output Chain**: Giden bağlantıların düzenlenmesi için kullanılır.
 
-Bu zincirler, ağ trafiğinin düzenli bir şekilde işlenmesini sağlar ve bir sistemin içine, içinden ve dışına veri akışını yöneten ayrıntılı kuralların belirlenmesine olanak tanır.
+Bu zincirler, network trafiğinin düzenli şekilde işlenmesini sağlar ve verilerin bir sisteme girişini, sistem içinden geçişini ve sistemden çıkışını yöneten ayrıntılı kuralların belirlenmesine olanak tanır.
 ```bash
 # Delete all rules
 iptables -F
@@ -51,7 +51,7 @@ iptables-restore < /etc/sysconfig/iptables
 ```
 ## Suricata
 
-### Kurulum ve Konfigürasyon
+### Kurulum ve Yapılandırma
 ```bash
 # Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
 # Ubuntu
@@ -117,70 +117,70 @@ Type=simple
 
 systemctl daemon-reload
 ```
-### Kurallar Tanımları
+### Kural Tanımları
 
 [Belgelerden:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) Bir kural/imza aşağıdakilerden oluşur:
 
-- **hareket**, imza eşleştiğinde ne olacağını belirler.
-- **başlık**, kuralın protokolünü, IP adreslerini, portları ve yönünü tanımlar.
+- **eylem**, imza eşleştiğinde ne olacağını belirler.
+- **başlık**, kuralın protokolünü, IP adreslerini, portlarını ve yönünü tanımlar.
 - **kural seçenekleri**, kuralın ayrıntılarını tanımlar.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
-#### **Geçerli eylemler**
+#### **Geçerli action'lar**
 
-- alert - bir uyarı oluştur
+- alert - bir alert oluştur
 - pass - paketin daha fazla incelenmesini durdur
-- **drop** - paketi düşür ve uyarı oluştur
-- **reject** - eşleşen paketin göndericisine RST/ICMP ulaşılamaz hatası gönder
-- rejectsrc - sadece _reject_ ile aynı
-- rejectdst - eşleşen paketin alıcısına RST/ICMP hata paketi gönder
-- rejectboth - konuşmanın her iki tarafına RST/ICMP hata paketleri gönder
+- **drop** - paketi drop et ve alert oluştur
+- **reject** - eşleşen paketin göndericisine RST/ICMP erişilemezlik hatası gönder.
+- rejectsrc - yalnızca _reject_ ile aynı
+- rejectdst - eşleşen paketin alıcısına RST/ICMP hata paketi gönder.
+- rejectboth - iletişimin her iki tarafına da RST/ICMP hata paketleri gönder.
 
 #### **Protokoller**
 
-- tcp (tcp-trafik için)
+- tcp (tcp-trafiği için)
 - udp
 - icmp
-- ip (ip 'tümü' veya 'herhangi' anlamına gelir)
-- _layer7 protokolleri_: http, ftp, tls, smb, dns, ssh... (daha fazlası için [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+- ip (ip, ‘all’ veya ‘any’ anlamına gelir)
+- _layer7 protokolleri_: http, ftp, tls, smb, dns, ssh... (daha fazlası [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html) bölümünde)
 
 #### Kaynak ve Hedef Adresler
 
 IP aralıklarını, olumsuzlamaları ve adres listelerini destekler:
 
-| Örnek                         | Anlamı                                   |
-| ----------------------------- | ---------------------------------------- |
-| ! 1.1.1.1                     | 1.1.1.1 hariç her IP adresi             |
-| !\[1.1.1.1, 1.1.1.2]          | 1.1.1.1 ve 1.1.1.2 hariç her IP adresi  |
-| $HOME_NET                     | yaml'daki HOME_NET ayarınız             |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET ve HOME_NET hariç          |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24, 10.0.0.5 hariç             |
+| Örnek                        | Anlamı                                  |
+| ---------------------------- | --------------------------------------- |
+| ! 1.1.1.1                    | 1.1.1.1 dışındaki tüm IP adresleri      |
+| !\[1.1.1.1, 1.1.1.2]         | 1.1.1.1 ve 1.1.1.2 dışındaki tüm IP adresleri |
+| $HOME_NET                    | yaml içindeki HOME_NET ayarınız         |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET ve HOME_NET değil          |
+| \[10.0.0.0/24, !10.0.0.5]    | 10.0.0.5 hariç 10.0.0.0/24              |
 
 #### Kaynak ve Hedef Portlar
 
-Port aralıklarını, olumsuzlamaları ve port listelerini destekler:
+Port aralıklarını, olumsuzlamaları ve port listelerini destekler.
 
-| Örnek           | Anlamı                                |
-| --------------- | ------------------------------------- |
-| any             | herhangi bir adres                    |
-| \[80, 81, 82]   | port 80, 81 ve 82                     |
-| \[80: 82]       | 80'den 82'ye kadar aralık             |
-| \[1024: ]       | 1024'ten en yüksek port numarasına kadar |
-| !80             | 80 hariç her port                     |
-| \[80:100,!99]   | 80'den 100'e kadar aralık ama 99 hariç |
-| \[1:80,!\[2,4]] | 1-80 aralığı, port 2 ve 4 hariç       |
+| Örnek          | Anlamı                               |
+| -------------- | ------------------------------------ |
+| any            | herhangi bir adres                  |
+| \[80, 81, 82]  | 80, 81 ve 82 portları               |
+| \[80: 82]      | 80 ile 82 arasındaki aralık          |
+| \[1024: ]      | 1024'ten en yüksek port numarasına kadar |
+| !80            | 80 dışındaki tüm portlar             |
+| \[80:100,!99]  | 99 hariç 80 ile 100 arasındaki aralık |
+| \[1:80,!\[2,4]] | 2 ve 4 portları hariç 1-80 aralığı   |
 
 #### Yön
 
-Uygulanan iletişim kuralının yönünü belirtmek mümkündür:
+Uygulanan communication rule'un iletişim yönünü belirtmek mümkündür:
 ```
 source -> destination
 source <> destination  (both directions)
 ```
-#### Anahtar Kelimeler
+#### Keywords
 
-Suricata'da aradığınız **belirli paketi** bulmak için **yüzlerce seçenek** mevcuttur, burada ilginç bir şey bulunursa belirtilir. Daha fazla bilgi için [**belgelere**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html) göz atın!
+Suricata'da aradığınız **belirli paketi** bulmak için kullanılabilecek **yüzlerce seçenek** vardır; burada ilginç bir şey bulunursa bundan bahsedilecektir. Daha fazlası için [**belgelere** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html) göz atın!
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule

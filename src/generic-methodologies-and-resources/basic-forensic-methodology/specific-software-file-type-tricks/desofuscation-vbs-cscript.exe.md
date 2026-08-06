@@ -1,6 +1,8 @@
+# VBS Dosyaları için Desobfuscation Teknikleri
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-Kötü niyetli bir VBS dosyasını hata ayıklamak/deobfuscate etmek için faydalı olabilecek bazı şeyler:
+Kötü amaçlı bir VBS dosyasını debug/deobfuscate etmek için yararlı olabilecek bazı şeyler:
 
 ## echo
 ```bash
