@@ -307,5 +307,7 @@ Defenders should correlate these artifacts with external exposure and service pa
 - [2] [Hiding Your .NET – ETW (Adam Chester / XPN, patching ntdll!EtwEventWrite)](https://blog.xpnsec.com/hiding-your-dotnet-etw/)
 - [3] [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
 - [4] [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
+- [5] [Sophos X-Ops – AuKill: A Weaponized Vulnerable Driver for Disabling EDR (March 2023)](https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr)
+- [6] [Red Canary – Patching EtwEventWrite for Stealth: Detection & Hunting (June 2024)](https://redcanary.com/blog/etw-patching-detection)
 
 {{#include ../../banners/hacktricks-training.md}}
