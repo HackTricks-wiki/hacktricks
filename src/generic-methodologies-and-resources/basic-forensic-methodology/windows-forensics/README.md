@@ -6,53 +6,53 @@
 
 ### Сповіщення Windows 10
 
-За шляхом `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` можна знайти базу даних `appdb.dat` (до Windows anniversary) або `wpndatabase.db` (після Windows Anniversary).
+У шляху `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` можна знайти базу даних `appdb.dat` (до Windows anniversary) або `wpndatabase.db` (після Windows Anniversary).
 
-У цій базі даних SQLite можна знайти таблицю `Notification` з усіма сповіщеннями (у форматі XML), які можуть містити цікаві дані.
+У цій SQLite-базі даних можна знайти таблицю `Notification` з усіма сповіщеннями (у форматі XML), які можуть містити цікаві дані.
 
 ### Timeline
 
-Timeline — це характеристика Windows, яка надає **хронологію** відвіданих вебсторінок, відредагованих документів і запущених застосунків.
+Timeline — це характеристика Windows, яка надає **хронологічну історію** відвіданих вебсторінок, відредагованих документів і виконаних застосунків.
 
-База даних розташована за шляхом `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. Цю базу даних можна відкрити за допомогою інструмента SQLite або інструмента [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd), **який генерує 2 файли, що можна відкрити за допомогою інструмента** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
+База даних розташована в шляху `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. Цю базу даних можна відкрити за допомогою SQLite-інструмента або інструмента [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd), **який генерує 2 файли, що можна відкрити за допомогою інструмента** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
 
 ### ADS (Alternate Data Streams)
 
-Завантажені файли можуть містити **ADS Zone.Identifier**, що вказує, **як** їх було **завантажено** з інтрамережі, інтернету тощо. Деяке програмне забезпечення (наприклад, браузери) зазвичай додає ще **більше** **інформації**, як-от **URL**, з якого було завантажено файл.
+Завантажені файли можуть містити **ADS Zone.Identifier**, який вказує, **як** файл було **завантажено** з інтрамережі, інтернету тощо. Деяке програмне забезпечення (наприклад, браузери) зазвичай додає ще **більше** **інформації**, як-от **URL**, з якого було завантажено файл.
 
 ## **Резервні копії файлів**
 
 ### Кошик
 
 У Vista/Win7/Win8/Win10 **Кошик** можна знайти в папці **`$Recycle.bin`** у корені диска (`C:\$Recycle.bin`).\
-Коли файл видаляється в цій папці, створюються 2 спеціальні файли:
+Коли файл видаляється в цій папці, створюються 2 специфічні файли:
 
 - `$I{id}`: Інформація про файл (дата його видалення}
 - `$R{id}`: Вміст файлу
 
 ![Резервні копії файлів — Кошик: $R{id}: Вміст файлу](<../../../images/image (1029).png>)
 
-Маючи ці файли, можна використати інструмент [**Rifiuti**](https://github.com/abelcheung/rifiuti2), щоб отримати початкову адресу видалених файлів і дату їх видалення (для Vista – Win10 використовуйте `rifiuti-vista.exe`).
+Маючи ці файли, можна використати інструмент [**Rifiuti**](https://github.com/abelcheung/rifiuti2), щоб отримати початкову адресу видалених файлів і дату їх видалення (для Vista–Win10 використовуйте `rifiuti-vista.exe`).
 ```
 .\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
 ```
-![Резервні копії файлів - Кошик: rifiuti-vista.exe C: Users student Desktop Recycle](<../../../images/image (495) (1) (1) (1).png>)
+![File Backups - Recycle Bin: rifiuti-vista.exe C: Users student Desktop Recycle](<../../../images/image (495) (1) (1) (1).png>)
 
 ### Тіньові копії томів
 
-Shadow Copy - це технологія, включена до Microsoft Windows, яка може створювати **резервні копії** або знімки комп'ютерних файлів чи томів, навіть коли вони використовуються.
+Shadow Copy — це технологія, включена до Microsoft Windows, яка може створювати **резервні копії** або знімки файлів чи томів комп'ютера, навіть коли вони використовуються.
 
-Ці резервні копії зазвичай розташовані в `\System Volume Information` у корені файлової системи, а їхні назви складаються з **UID**, показаних на наступному зображенні:
+Ці резервні копії зазвичай розташовані в `\System Volume Information` у корені файлової системи, а їхня назва складається з **UID**, показаних на зображенні нижче:
 
-![Кошик - Тіньові копії томів: ці резервні копії зазвичай розташовані в System Volume Information у корені файлової системи, а їхні назви складаються з UID, показаних на...](<../../../images/image (94).png>)
+![Кошик - Тіньові копії томів: Ці резервні копії зазвичай розташовані в System Volume Information у корені файлової системи, а їхня назва складається з UID, показаних на...](<../../../images/image (94).png>)
 
-Після монтування forensic-образу за допомогою **ArsenalImageMounter** інструмент [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) можна використовувати для перегляду тіньової копії та навіть **видобування файлів** із резервних копій тіньової копії.
+Підключивши forensic image за допомогою **ArsenalImageMounter**, можна використати інструмент [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) для перегляду тіньової копії та навіть **видобування файлів** із резервних копій тіньової копії.
 
-![Кошик - Тіньові копії томів: після монтування forensic-образу за допомогою ArsenalImageMounter інструмент ShadowCopyView можна використовувати для перегляду тіньової копії та навіть видобування файлів...](<../../../images/image (576).png>)
+![Кошик - Тіньові копії томів: Підключивши forensic image за допомогою ArsenalImageMounter, можна використати інструмент ShadowCopyView для перегляду тіньової копії та навіть видобування файлів...](<../../../images/image (576).png>)
 
-Розділ реєстру `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` містить файли та ключі, **які не потрібно копіювати**:
+Розділ реєстру `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` містить файли та ключі, **які не потрібно резервно копіювати**:
 
-![Кошик - Тіньові копії томів: розділ реєстру HKEY LOCAL MACHINE SYSTEM CurrentControlSet Control BackupRestore містить файли та ключі, які не потрібно копіювати](<../../../images/image (254).png>)
+![Кошик - Тіньові копії томів: Розділ реєстру HKEY LOCAL MACHINE SYSTEM CurrentControlSet Control BackupRestore містить файли та ключі, які не потрібно резервно копіювати](<../../../images/image (254).png>)
 
 Реєстр `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` також містить інформацію про конфігурацію `Volume Shadow Copies`.
 
@@ -62,7 +62,7 @@ Shadow Copy - це технологія, включена до Microsoft Windows
 
 ## Елементи Shell
 
-Елемент Shell - це елемент, який містить інформацію про спосіб доступу до іншого файлу.
+Елемент shell — це елемент, який містить інформацію про спосіб доступу до іншого файлу.
 
 ### Останні документи (LNK)
 
@@ -71,15 +71,15 @@ Windows **автоматично** **створює** ці **ярлики**, к�
 - Win7-Win10: `C:\Users\\AppData\Roaming\Microsoft\Windows\Recent\`
 - Office: `C:\Users\\AppData\Roaming\Microsoft\Office\Recent\`
 
-Коли створюється папка, також створюється посилання на папку, батьківську папку та папку на два рівні вище.
+Коли створюється папка, також створюється посилання на папку, батьківську папку та папку найвищого рівня.
 
-Ці автоматично створені файли посилань **містять інформацію про походження**, наприклад, чи є це **файл** **чи** **папка**, **часові позначки** **MAC** цього файлу, **інформацію про том**, де зберігається файл, і **папку цільового файлу**. Ця інформація може бути корисною для відновлення цих файлів, якщо їх було видалено.
+Ці автоматично створені файли посилань **містять інформацію про джерело**, зокрема про те, чи є воно **файлом** **або** **папкою**, **часові мітки** **MAC** цього файлу, **інформацію про том**, де зберігається файл, і **папку цільового файлу**. Ця інформація може бути корисною для відновлення цих файлів у разі їх видалення.
 
-Крім того, **дата створення файлу посилання** - це перший **момент**, коли оригінальний файл був **вперше** **використаний**, а **дата** **модифікації** файлу посилання - це останній **момент**, коли використовувався вихідний файл.
+Крім того, **дата створення** файлу посилання — це перший **момент**, коли оригінальний файл було **вперше** **використано**, а **дата** **зміни** файлу посилання — це останній **момент**, коли вихідний файл використовувався.
 
-Для перегляду цих файлів можна використовувати [**LinkParser**](http://4discovery.com/our-tools/).
+Для перевірки цих файлів можна використати [**LinkParser**](http://4discovery.com/our-tools/).
 
-У цьому інструменті ви знайдете **2 набори** часових позначок:
+У цьому інструменті ви знайдете **2 набори** часових міток:
 
 - **Перший набір:**
 1. FileModifiedDate
@@ -90,177 +90,177 @@ Windows **автоматично** **створює** ці **ярлики**, к�
 2. LinkAccessDate
 3. LinkCreationDate.
 
-Перший набір часових позначок посилається на **часові позначки самого файлу**. Другий набір посилається на **часові позначки пов'язаного файлу**.
+Перший набір часових міток посилається на **часові мітки самого файлу**. Другий набір посилається на **часові мітки пов'язаного файлу**.
 
-Ви можете отримати ту саму інформацію, запустивши інструмент Windows CLI: [**LECmd.exe**](https://github.com/EricZimmerman/LECmd)
+Отримати ту саму інформацію можна, запустивши інструмент Windows CLI: [**LECmd.exe**](https://github.com/EricZimmerman/LECmd)
 ```
 LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 ```
-У цьому випадку інформацію буде збережено у CSV-файлі.
+У цьому випадку інформація буде збережена у CSV-файлі.
 
 ### Jumplists
 
 Це нещодавні файли, указані для кожної програми. Це список **нещодавніх файлів, використаних програмою**, до якого можна отримати доступ у кожній програмі. Вони можуть створюватися **автоматично або вручну**.
 
-**Jumplists**, створені автоматично, зберігаються в `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`. Jumplists мають формат імені `{id}.autmaticDestinations-ms`, де початковий ID є ID програми.
+**Jumplists**, створені автоматично, зберігаються в `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`. Назви **jumplists** мають формат `{id}.autmaticDestinations-ms`, де початковий ID — це ID програми.
 
-Власні jumplists зберігаються в `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\`, і зазвичай вони створюються програмою через те, що з файлом сталася **важлива подія** (можливо, його позначено як вибране).
+Власні **jumplists** зберігаються в `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` і зазвичай створюються програмою, оскільки з файлом сталася **важлива** подія (можливо, його позначено як вибране).
 
-**Час створення** будь-якого jumplist указує на **перший момент доступу до файлу**, а **час зміни — на останній**.
+**Час створення** будь-якого **jumplist** указує на **перший доступ до файлу**, а **час зміни — на останній**.
 
-Ви можете перевірити jumplists за допомогою [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
+Переглянути **jumplists** можна за допомогою [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
 
-![Recent Documents (LNK) - Jumplists: You can inspect the jumplists using JumplistExplorer](<../../../images/image (168).png>)
+![Recent Documents (LNK) - Jumplists: Переглянути jumplists можна за допомогою JumplistExplorer](<../../../images/image (168).png>)
 
-(_Зверніть увагу, що часові мітки, надані JumplistExplorer, стосуються самого файлу jumplist._)
+(_Зверніть увагу, що часові позначки, надані JumplistExplorer, стосуються самого файлу jumplist_)
 
 ### Shellbags
 
 [**Перейдіть за цим посиланням, щоб дізнатися, що таке shellbags.**](interesting-windows-registry-keys.md#shellbags)
 
-## Використання Windows USB-пристроїв
+## Використання Windows USB
 
-Можна визначити, що USB-пристрій використовувався, завдяки створенню:
+Визначити, що USB-пристрій використовувався, можна завдяки створенню:
 
 - Windows Recent Folder
 - Microsoft Office Recent Folder
 - Jumplists
 
-Зверніть увагу, що деякі LNK-файли замість посилання на початковий шлях указують на папку WPDNSE:
+Зверніть увагу, що деякі LNK-файли замість посилання на оригінальний шлях указують на папку WPDNSE:
 
-![Shellbags - Use of Windows USBs: Note that some LNK file instead of pointing to the original path, points to the WPDNSE folder](<../../../images/image (218).png>)
+![Shellbags - Використання Windows USB: Зверніть увагу, що деякі LNK-файли замість посилання на оригінальний шлях указують на папку WPDNSE](<../../../images/image (218).png>)
 
-Файли в папці WPDNSE є копіями оригінальних файлів, тому вони не зберігаються після перезапуску ПК, а GUID береться із shellbag.
+Файли в папці WPDNSE є копіями оригінальних файлів, тому вони не збережуться після перезапуску ПК, а GUID береться із shellbag.
 
-### Інформація реєстру
+### Інформація з Registry
 
-[Перегляньте цю сторінку, щоб дізнатися](interesting-windows-registry-keys.md#usb-information), які ключі реєстру містять цікаву інформацію про підключені USB-пристрої.
+[Перегляньте цю сторінку, щоб дізнатися](interesting-windows-registry-keys.md#usb-information), які ключі Registry містять цікаву інформацію про підключені USB-пристрої.
 
 ### setupapi
 
-Перевірте файл `C:\Windows\inf\setupapi.dev.log`, щоб отримати часові мітки підключення USB (виконайте пошук за `Section start`).
+Перевірте файл `C:\Windows\inf\setupapi.dev.log`, щоб отримати часові позначки підключення USB (виконайте пошук за `Section start`).
 
-![Registry Information - setupapi: Check the file C: Windows inf setupapi.dev.log to get the timestamps about when the USB connection was produced (search for Section start)](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
+![Registry Information - setupapi: Перевірте файл C: Windows inf setupapi.dev.log, щоб отримати часові позначки підключення USB (виконайте пошук за Section start)](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
 ### USB Detective
 
 [**USBDetective**](https://usbdetective.com) можна використовувати для отримання інформації про USB-пристрої, які були підключені до образу.
 
-![setupapi - USB Detective: USBDetective can be used to obtain information about the USB devices that have been connected to an image](<../../../images/image (452).png>)
+![setupapi - USB Detective: USBDetective можна використовувати для отримання інформації про USB-пристрої, які були підключені до образу](<../../../images/image (452).png>)
 
 ### Plug and Play Cleanup
 
-Заплановане завдання під назвою 'Plug and Play Cleanup' призначене переважно для видалення застарілих версій драйверів. На відміну від заявленого призначення — збереження останньої версії пакета драйвера — в онлайн-джерелах зазначається, що воно також видаляє драйвери, які не використовувалися протягом 30 днів. Отже, драйвери знімних пристроїв, які не підключалися протягом останніх 30 днів, можуть бути видалені.<sup>[[1]](#references)</sup>
+Заплановане завдання під назвою 'Plug and Play Cleanup' призначене переважно для видалення застарілих версій драйверів. На відміну від заявленої мети — зберігати найновішу версію пакета драйвера — онлайн-джерела вказують, що воно також видаляє драйвери, які не використовувалися протягом 30 днів. Отже, драйвери знімних пристроїв, які не підключалися протягом останніх 30 днів, можуть бути видалені.<sup>[[1]](#references)</sup>
 
 Завдання розташоване за таким шляхом: `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
 
-Нижче наведено знімок екрана із вмістом завдання: ![USB Detective - Plug and Play Cleanup: The task is located at the following path: C: Windows System32 Tasks Microsoft Windows Plug and Play Plug and Play Cleanup](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
+Нижче наведено знімок екрана із вмістом завдання: ![USB Detective - Plug and Play Cleanup: Завдання розташоване за таким шляхом: C: Windows System32 Tasks Microsoft Windows Plug and Play Plug and Play Cleanup](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
 
 **Основні компоненти та налаштування завдання:**
 
 - **pnpclean.dll**: Ця DLL відповідає за фактичний процес очищення.
 - **UseUnifiedSchedulingEngine**: Встановлено значення `TRUE`, що вказує на використання універсального механізму планування завдань.
 - **MaintenanceSettings**:
-- **Period ('P1M')**: Вказує Task Scheduler запускати завдання очищення щомісяця під час звичайного автоматичного обслуговування.
-- **Deadline ('P2M')**: Вказує Task Scheduler, якщо завдання не виконувалося протягом двох послідовних місяців, запустити його під час аварійного автоматичного обслуговування.
+- **Period ('P1M')**: Вказує Task Scheduler запускати завдання очищення щомісяця під час звичайного Automatic maintenance.
+- **Deadline ('P2M')**: Вказує Task Scheduler, якщо завдання не виконувалося протягом двох місяців поспіль, запустити його під час екстреного Automatic maintenance.
 
-Ця конфігурація забезпечує регулярне обслуговування та очищення драйверів, а також повторну спробу виконання завдання у разі послідовних невдалих запусків.
+Ця конфігурація забезпечує регулярне обслуговування й очищення драйверів, а також повторну спробу виконання завдання в разі послідовних невдалих запусків.
 
-**Докладніше:** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
+**Докладніше:** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)<sup>[[1]](#references)</sup>
 
-## Електронні листи
+## Emails
 
-Електронні листи містять **2 цікаві частини: заголовки та вміст** листа. У **заголовках** можна знайти таку інформацію:
+Emails містять **2 цікаві частини: заголовки та вміст** email. У **заголовках** можна знайти таку інформацію:
 
-- **Хто** надіслав листи (електронна адреса, IP-адреса, поштові сервери, які перенаправили лист)
-- **Коли** було надіслано лист
+- **Хто** надіслав emails (email-адреса, IP, mail servers, які перенаправили email)
+- **Коли** було надіслано email
 
 Також у заголовках `References` і `In-Reply-To` можна знайти ID повідомлень:
 
-![Plug and Play Cleanup - Emails: When was the email sent](<../../../images/image (593).png>)
+![Plug and Play Cleanup - Emails: Коли було надіслано email](<../../../images/image (593).png>)
 
 ### Windows Mail App
 
-Ця програма зберігає електронні листи у форматі HTML або тексту. Листи можна знайти у вкладених папках усередині `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. Листи зберігаються з розширенням `.dat`.
+Ця програма зберігає emails у форматі HTML або тексту. Emails можна знайти у вкладених папках `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. Emails зберігаються з розширенням `.dat`.
 
-**Метадані** листів і **контакти** можна знайти в **базі даних EDB**: `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
+**Метадані** emails і **контакти** можна знайти в **EDB database**: `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
 
-**Змініть розширення** файлу з `.vol` на `.edb`, після чого для його відкриття можна використати інструмент [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html). У таблиці `Message` можна переглянути електронні листи.
+**Змініть розширення** файлу з `.vol` на `.edb`, після чого для його відкриття можна використати tool [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html). У таблиці `Message` можна переглянути emails.
 
 ### Microsoft Outlook
 
-Якщо використовуються Exchange-сервери або клієнти Outlook, будуть присутні заголовки MAPI:
+Коли використовуються Exchange servers або Outlook clients, наявні MAPI headers:
 
-- `Mapi-Client-Submit-Time`: час у системі, коли було надіслано лист
-- `Mapi-Conversation-Index`: кількість дочірніх повідомлень у ланцюжку та часова мітка кожного повідомлення ланцюжка
+- `Mapi-Client-Submit-Time`: час у системі, коли email було надіслано
+- `Mapi-Conversation-Index`: кількість дочірніх повідомлень у thread і часові позначки кожного повідомлення thread
 - `Mapi-Entry-ID`: ідентифікатор повідомлення.
-- `Mappi-Message-Flags` і `Pr_last_Verb-Executed`: інформація про MAPI-клієнт (повідомлення прочитано? не прочитано? на нього відповіли? перенаправили? активовано автовідповідь?)
+- `Mappi-Message-Flags` і `Pr_last_Verb-Executed`: інформація про MAPI client (повідомлення прочитано? не прочитано? на нього відповіли? його перенаправили? out of the office?)
 
-У клієнті Microsoft Outlook усі надіслані/отримані повідомлення, дані контактів і дані календаря зберігаються у файлі PST за такими шляхами:
+У Microsoft Outlook client усі надіслані/отримані повідомлення, дані контактів і дані календаря зберігаються у PST-файлі в:
 
 - `%USERPROFILE%\Local Settings\Application Data\Microsoft\Outlook` (WinXP)
 - `%USERPROFILE%\AppData\Local\Microsoft\Outlook`
 
-Шлях реєстру `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` указує на файл, який використовується.
+Шлях Registry `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` указує на файл, який використовується.
 
-Відкрити файл PST можна за допомогою інструмента [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html).
+Відкрити PST-файл можна за допомогою tool [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html).
 
-![Windows Mail App - Microsoft Outlook: You can open the PST file using the tool Kernel PST Viewer](<../../../images/image (498).png>)
+![Windows Mail App - Microsoft Outlook: Відкрити PST-файл можна за допомогою tool Kernel PST Viewer](<../../../images/image (498).png>)
 
-### Файли Microsoft Outlook OST
+### Microsoft Outlook OST Files
 
-**Файл OST** створюється Microsoft Outlook, коли його налаштовано з сервером **IMAP** або **Exchange**, і містить інформацію, подібну до файлу PST. Цей файл синхронізується із сервером, зберігаючи дані за **останні 12 місяців** і маючи **максимальний розмір 50 ГБ**. Він розташований у тому самому каталозі, що й файл PST. Для перегляду файлу OST можна використати [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html).
+**OST file** створюється Microsoft Outlook, коли він налаштований з **IMAP** або **Exchange** server, і містить інформацію, подібну до PST-файлу. Цей файл синхронізується із server, зберігаючи дані за **останні 12 місяців** до **максимального розміру 50GB**, і розташовується в тому самому каталозі, що й PST-файл. Для перегляду OST-файлу можна використати [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html).
 
-### Отримання вкладень
+### Отримання Attachments
 
-Втрачені вкладення можна відновити з таких розташувань:
+Втрачені attachments можна відновити з:
 
 - Для **IE10**: `%APPDATA%\Local\Microsoft\Windows\Temporary Internet Files\Content.Outlook`
 - Для **IE11 і новіших версій**: `%APPDATA%\Local\Microsoft\InetCache\Content.Outlook`
 
-### Файли Thunderbird MBOX
+### Thunderbird MBOX Files
 
-**Thunderbird** використовує **файли MBOX** для зберігання даних. Вони розташовані в `\Users\%USERNAME%\AppData\Roaming\Thunderbird\Profiles`.
+**Thunderbird** використовує **MBOX files** для зберігання даних, розташованих у `\Users\%USERNAME%\AppData\Roaming\Thunderbird\Profiles`.
 
-### Ескізи зображень
+### Мініатюри зображень
 
-- **Windows XP і 8-8.1**: Відкриття папки з ескізами створює файл `thumbs.db`, у якому зберігаються попередні перегляди зображень навіть після їх видалення.
-- **Windows 7/10**: `thumbs.db` створюється, коли доступ до папки здійснюється через мережу за UNC-шляхом.
-- **Windows Vista і новіші версії**: Попередні перегляди ескізів централізовано зберігаються в `%userprofile%\AppData\Local\Microsoft\Windows\Explorer` у файлах із назвами **thumbcache_xxx.db**. [**Thumbsviewer**](https://thumbsviewer.github.io) і [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) — це інструменти для перегляду цих файлів.
+- **Windows XP і 8-8.1**: Доступ до папки з мініатюрами створює файл `thumbs.db`, у якому зберігаються попередні перегляди зображень, навіть після їх видалення.
+- **Windows 7/10**: `thumbs.db` створюється під час доступу через мережу за UNC path.
+- **Windows Vista і новіші версії**: Попередні перегляди мініатюр централізовано зберігаються в `%userprofile%\AppData\Local\Microsoft\Windows\Explorer` у файлах із назвами **thumbcache_xxx.db**. [**Thumbsviewer**](https://thumbsviewer.github.io) і [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) — це tools для перегляду цих файлів.
 
-### Інформація реєстру Windows
+### Інформація Windows Registry
 
-Реєстр Windows, у якому зберігається значний обсяг даних про активність системи та користувачів, міститься у файлах за такими шляхами:
+Windows Registry, у якому зберігається значний обсяг даних про активність системи та користувачів, міститься у файлах:
 
-- `%windir%\System32\Config` для різних підрозділів `HKEY_LOCAL_MACHINE`.
+- `%windir%\System32\Config` для різних subkeys `HKEY_LOCAL_MACHINE`.
 - `%UserProfile%{User}\NTUSER.DAT` для `HKEY_CURRENT_USER`.
-- Windows Vista і новіші версії створюють резервні копії файлів реєстру `HKEY_LOCAL_MACHINE` у `%Windir%\System32\Config\RegBack\`.
-- Крім того, інформація про виконання програм зберігається у `%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT`, починаючи з Windows Vista і Windows 2008 Server.
+- Windows Vista і новіші версії створюють резервні копії файлів Registry `HKEY_LOCAL_MACHINE` у `%Windir%\System32\Config\RegBack\`.
+- Крім того, інформація про виконання програм зберігається в `%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT`, починаючи з Windows Vista і Windows 2008 Server.
 
-### Інструменти
+### Tools
 
-Деякі інструменти корисні для аналізу файлів реєстру:
+Деякі tools корисні для аналізу файлів Registry:
 
-- **Registry Editor**: Встановлений у Windows. Це GUI для навігації реєстром Windows поточного сеансу.
-- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): Дозволяє завантажити файл реєстру та переміщатися ним за допомогою GUI. Також містить закладки, які виділяють ключі з цікавою інформацією.
-- [**RegRipper**](https://github.com/keydet89/RegRipper3.0): Також має GUI, що дає змогу переміщатися завантаженим реєстром, а також містить плагіни, які виділяють цікаву інформацію в завантаженому реєстрі.
-- [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): Ще одна GUI-програма, здатна витягувати важливу інформацію із завантаженого реєстру.
+- **Registry Editor**: Він встановлений у Windows. Це GUI для навігації Windows Registry поточного сеансу.
+- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): Дозволяє завантажити файл Registry і переміщатися ним за допомогою GUI. Також містить Bookmarks, що виділяють ключі з цікавою інформацією.
+- [**RegRipper**](https://github.com/keydet89/RegRipper3.0): Знову ж таки, він має GUI, який дозволяє переміщатися завантаженим Registry, а також містить plugins, що виділяють цікаву інформацію в завантаженому Registry.
+- [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): Ще одна GUI-програма, здатна вилучати важливу інформацію із завантаженого Registry.
 
-### Відновлення видалених елементів
+### Відновлення видаленого елемента
 
-Коли ключ видаляється, він позначається як видалений, але не буде остаточно вилучений, доки не знадобиться простір, який він займає. Тому за допомогою таких інструментів, як **Registry Explorer**, можна відновити ці видалені ключі.
+Коли ключ видаляється, він позначається як видалений, але доки простір, який він займає, не знадобиться, його не буде видалено. Тому за допомогою таких tools, як **Registry Explorer**, можна відновити ці видалені ключі.
 
 ### Час останнього запису
 
-Кожна пара ключ-значення містить **часову мітку**, яка вказує на останній момент її зміни.
+Кожна пара Key-Value містить **часову позначку**, яка вказує час її останньої зміни.
 
 ### SAM
 
-Файл/вулик **SAM** містить хеші **паролів користувачів, груп і користувачів** системи.
+Файл/hive **SAM** містить хеші **користувачів, груп і паролів користувачів** системи.
 
-У `SAM\Domains\Account\Users` можна отримати ім’я користувача, RID, час останнього входу, час останньої невдалої автентифікації, лічильник входів, політику паролів і час створення облікового запису. Для отримання **хешів** також **потрібен** файл/вулик **SYSTEM**.
+У `SAM\Domains\Account\Users` можна отримати ім’я користувача, RID, час останнього входу, час останньої невдалої автентифікації, лічильник входів, політику паролів і час створення облікового запису. Щоб отримати **hashes**, також **потрібен** файл/hive **SYSTEM**.
 
-### Цікаві записи в реєстрі Windows
+### Цікаві записи у Windows Registry
 
 
 {{#ref}}
@@ -269,29 +269,29 @@ interesting-windows-registry-keys.md
 
 ## Виконані програми
 
-### Основні процеси Windows
+### Базові процеси Windows
 
-У [цьому дописі](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) можна дізнатися про поширені процеси Windows для виявлення підозрілої поведінки.
+У [цьому дописі](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) можна дізнатися про поширені процеси Windows для виявлення підозрілої поведінки.<sup>[[2]](#references)</sup>
 
-### Нещодавні програми Windows
+### Нещодавні APPs Windows
 
-У реєстрі `NTUSER.DAT` за шляхом `Software\Microsoft\Current Version\Search\RecentApps` можна знайти підрозділи з інформацією про **виконану програму**, **час її останнього запуску** та **кількість запусків**.
+У Registry `NTUSER.DAT` за шляхом `Software\Microsoft\Current Version\Search\RecentApps` можна знайти subkeys з інформацією про **виконану програму**, **час її останнього виконання** та **кількість запусків**.
 
 ### BAM (Background Activity Moderator)
 
-Можна відкрити файл `SYSTEM` за допомогою редактора реєстру та за шляхом `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` знайти інформацію про **програми, виконані кожним користувачем** (зверніть увагу на `{SID}` у шляху), а також **час** їх виконання (час міститься у значенні Data реєстру).
+Файл `SYSTEM` можна відкрити за допомогою Registry Editor, а в шляху `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` знайти інформацію про **програми, виконані кожним користувачем** (зверніть увагу на `{SID}` у шляху) і **час** їх виконання (час міститься у значенні Data Registry).
 
 ### Windows Prefetch
 
-Prefetching — це техніка, яка дає змогу комп’ютеру непомітно **отримувати необхідні ресурси для відображення вмісту**, до якого користувач **може звернутися найближчим часом**, щоб забезпечити швидший доступ до ресурсів.
+Prefetching — це техніка, яка дає змогу комп’ютеру непомітно **отримувати необхідні ресурси для відображення вмісту**, до якого користувач **може звернутися найближчим часом**, щоб ресурси можна було отримати швидше.
 
-Windows prefetch передбачає створення **кешів виконаних програм**, щоб мати змогу швидше їх завантажувати. Ці кеші створюються як файли `.pf` за шляхом `C:\Windows\Prefetch`. Існує обмеження: 128 файлів у XP/VISTA/WIN7 і 1024 файли у Win8/Win10.
+Windows prefetch полягає у створенні **кешів виконаних програм**, щоб завантажувати їх швидше. Ці кеші створюються як файли `.pf` за шляхом `C:\Windows\Prefetch`. Існує обмеження: 128 файлів у XP/VISTA/WIN7 і 1024 файли у Win8/Win10.
 
-Ім’я файлу має формат `{program_name}-{hash}.pf` (хеш залежить від шляху та аргументів виконуваного файлу). У W10 ці файли стискаються. Зверніть увагу, що сама наявність файлу вказує на те, що **програму було виконано** в певний момент.
+Ім’я файлу створюється у форматі `{program_name}-{hash}.pf` (hash базується на шляху та аргументах executable). У W10 ці файли стиснуті. Зверніть увагу, що сама наявність файлу вказує на те, що **програму було виконано** в певний момент.
 
-Файл `C:\Windows\Prefetch\Layout.ini` містить **назви папок файлів, для яких створено prefetch**. Цей файл містить **інформацію про кількість виконань**, **дати** виконання та **файли**, **відкриті** програмою.
+Файл `C:\Windows\Prefetch\Layout.ini` містить **назви папок файлів, для яких виконується prefetch**. Цей файл містить **інформацію про кількість виконань**, **дати** виконання та **файли**, **відкриті** програмою.
 
-Для перевірки цих файлів можна використати інструмент [**PEcmd.exe**](https://github.com/EricZimmerman/PECmd):
+Для перевірки цих файлів можна використати tool [**PEcmd.exe**](https://github.com/EricZimmerman/PECmd):
 ```bash
 .\PECmd.exe -d C:\Users\student\Desktop\Prefetch --html "C:\Users\student\Desktop\out_folder"
 ```
@@ -302,27 +302,27 @@ Windows prefetch передбачає створення **кешів викон
 **Superprefetch** має ту саму мету, що й prefetch, — **швидше завантажувати програми**, передбачаючи, що буде завантажено далі. Однак він не замінює службу prefetch.\
 Ця служба створює файли баз даних у `C:\Windows\Prefetch\Ag*.db`.
 
-У цих базах даних можна знайти **назву** **програми**, **кількість** її **запусків**, **відкриті** **файли**, **доступний** **том**, **повний** **шлях**, **періоди часу** та **часові мітки**.
+У цих базах даних можна знайти **назву** **програми**, **кількість** **виконань**, **відкриті** **файли**, **доступний** **том**, **повний** **шлях**, **періоди часу** та **часові мітки**.
 
 Отримати доступ до цієї інформації можна за допомогою інструмента [**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/).
 
 ### SRUM
 
-**System Resource Usage Monitor** (SRUM) **відстежує** **ресурси**, **спожиті** **процесом**. Він з’явився у W8 і зберігає дані в базі даних ESE, розташованій у `C:\Windows\System32\sru\SRUDB.dat`.
+**System Resource Usage Monitor** (SRUM) **відстежує** **ресурси**, які **споживає** **процес**. Він з’явився у W8 і зберігає дані в базі даних ESE, розташованій у `C:\Windows\System32\sru\SRUDB.dat`.
 
 Він надає таку інформацію:
 
-- AppID і шлях
-- Користувач, який запустив процес
+- AppID і Path
+- Користувач, який виконав процес
 - Надіслані байти
 - Отримані байти
 - Мережевий інтерфейс
-- Тривалість з’єднання
+- Тривалість підключення
 - Тривалість процесу
 
 Ця інформація оновлюється кожні 60 хвилин.
 
-Отримати дату з цього файлу можна за допомогою інструмента [**srum_dump**](https://github.com/MarkBaggett/srum-dump).
+Отримати дані з цього файлу можна за допомогою інструмента [**srum_dump**](https://github.com/MarkBaggett/srum-dump).
 ```bash
 .\srum_dump.exe -i C:\Users\student\Desktop\SRUDB.dat -t SRUM_TEMPLATE.xlsx -o C:\Users\student\Desktop\srum
 ```
@@ -336,38 +336,38 @@ Windows prefetch передбачає створення **кешів викон
 - Час останнього оновлення ShimCache
 - Прапорець виконання процесу
 
-Ці дані зберігаються в реєстрі за певними розташуваннями залежно від версії операційної системи:
+Такі дані зберігаються в реєстрі за певними шляхами залежно від версії операційної системи:
 
-- Для XP дані зберігаються в `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache` з місткістю 96 записів.
-- Для Server 2003, а також Windows 2008, 2012, 2016, 7, 8 і 10 шляхом зберігання є `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache`, що підтримує відповідно 512 і 1024 записи.
+- У XP дані зберігаються за адресою `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache`, яка вміщує 96 записів.
+- У Server 2003, а також у Windows версій 2008, 2012, 2016, 7, 8 і 10, шляхом зберігання є `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache`, який підтримує відповідно 512 і 1024 записи.
 
-Для аналізу збереженої інформації рекомендується використовувати [**AppCompatCacheParser tool**](https://github.com/EricZimmerman/AppCompatCacheParser).
+Для аналізу збереженої інформації рекомендується використовувати [інструмент **AppCompatCacheParser**](https://github.com/EricZimmerman/AppCompatCacheParser).
 
-![SRUM - AppCompatCache (ShimCache): Для аналізу збереженої інформації рекомендується використовувати AppCompatCacheParser tool](<../../../images/image (75).png>)
+![SRUM - AppCompatCache (ShimCache): Для аналізу збереженої інформації рекомендується використовувати інструмент AppCompatCacheParser](<../../../images/image (75).png>)
 
 ### Amcache
 
-Файл **Amcache.hve** по суті є hive реєстру, у якому реєструються відомості про застосунки, що виконувалися в системі. Зазвичай він розташований за адресою `C:\Windows\AppCompat\Programas\Amcache.hve`.
+Файл **Amcache.hve** фактично є кущем реєстру, у якому реєструються відомості про застосунки, що виконувалися в системі. Зазвичай він розташований за адресою `C:\Windows\AppCompat\Programas\Amcache.hve`.
 
-Цей файл примітний тим, що зберігає записи про нещодавно виконані процеси, зокрема шляхи до виконуваних файлів і їхні SHA1-хеші. Ця інформація є надзвичайно цінною для відстеження активності застосунків у системі.
+Цей файл важливий тим, що зберігає записи про нещодавно виконані процеси, зокрема шляхи до виконуваних файлів і їхні SHA1-хеші. Ця інформація є надзвичайно цінною для відстеження активності застосунків у системі.
 
-Для видобування й аналізу даних із **Amcache.hve** можна використовувати інструмент [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser). Нижче наведено приклад команди для використання AmcacheParser з метою аналізу вмісту файлу **Amcache.hve** і виведення результатів у форматі CSV:
+Для вилучення й аналізу даних із **Amcache.hve** можна використовувати інструмент [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser). Нижче наведено приклад використання AmcacheParser для аналізу вмісту файлу **Amcache.hve** та виведення результатів у форматі CSV:
 ```bash
 AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\genericUser\Desktop\outputFolder
 ```
-Серед згенерованих CSV-файлів особливої уваги заслуговує `Amcache_Unassociated file entries` через великий обсяг інформації, який він надає про непов’язані записи файлів.
+Серед згенерованих CSV-файлів особливої уваги заслуговує `Amcache_Unassociated file entries` завдяки великому обсягу інформації про непов’язані записи файлів.
 
 Найцікавішим згенерованим CSV-файлом є `Amcache_Unassociated file entries`.
 
 ### RecentFileCache
 
-Цей артефакт можна знайти лише у W7 за шляхом `C:\Windows\AppCompat\Programs\RecentFileCache.bcf`, і він містить інформацію про нещодавній запуск деяких бінарних файлів.
+Цей артефакт можна знайти лише у W7 за адресою `C:\Windows\AppCompat\Programs\RecentFileCache.bcf`; він містить інформацію про нещодавній запуск деяких бінарних файлів.
 
-Для аналізу цього файлу можна використати інструмент [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser).
+Для аналізу файлу можна використати інструмент [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser).
 
 ### Заплановані завдання
 
-Їх можна вилучити з `C:\Windows\Tasks` або `C:\Windows\System32\Tasks` і прочитати як XML.
+Їх можна видобути з `C:\Windows\Tasks` або `C:\Windows\System32\Tasks` і прочитати як XML.
 
 ### Служби
 
@@ -376,36 +376,36 @@ AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\gen
 ### **Windows Store**
 
 Встановлені застосунки можна знайти в `\ProgramData\Microsoft\Windows\AppRepository`\
-Цей репозиторій містить **журнал** з **кожним застосунком, встановленим** у системі, усередині бази даних **`StateRepository-Machine.srd`**.
+Цей репозиторій містить **журнал** із **кожним застосунком, встановленим** у системі, всередині бази даних **`StateRepository-Machine.srd`**.
 
-У таблиці Application цієї бази даних можна знайти стовпці: "Application ID", "PackageNumber" і "Display Name". Ці стовпці містять інформацію про попередньо встановлені та встановлені застосунки; також можна визначити, чи були деякі застосунки видалені, оскільки ID встановлених застосунків мають бути послідовними.
+У таблиці Application цієї бази даних можна знайти стовпці: "Application ID", "PackageNumber" і "Display Name". Ці стовпці містять інформацію про попередньо встановлені та встановлені застосунки. Також можна визначити, чи деякі застосунки було видалено, оскільки ідентифікатори встановлених застосунків мають бути послідовними.
 
-Також **встановлені застосунки** можна знайти в розділі реєстру: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications`\
-А **видалені** **застосунки** — у: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
+Також **встановлені застосунки** можна знайти за шляхом у реєстрі: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications`\
+А **видалені** **застосунки** — за адресою: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
 
 ## Події Windows
 
 Інформація, що міститься в подіях Windows:
 
 - Що сталося
-- Часова мітка (UTC + 0)
+- Мітка часу (UTC + 0)
 - Задіяні користувачі
 - Задіяні хости (ім’я хоста, IP)
-- Доступні активи (файли, папки, принтери, служби)
+- Активи, до яких отримано доступ (файли, папки, принтери, служби)
 
-Журнали розташовані в `C:\Windows\System32\config` до Windows Vista та в `C:\Windows\System32\winevt\Logs` починаючи з Windows Vista. До Windows Vista журнали подій мали бінарний формат, а після неї вони мають **XML-формат** і використовують розширення **`.evtx`**.
+Журнали розташовані в `C:\Windows\System32\config` до Windows Vista та в `C:\Windows\System32\winevt\Logs` починаючи з Windows Vista. До Windows Vista журнали подій мали бінарний формат, а після неї вони мають **формат XML** і використовують розширення **`.evtx`**.
 
 Розташування файлів подій можна знайти в реєстрі SYSTEM за адресою **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`**
 
-Їх можна переглядати за допомогою Windows Event Viewer (**`eventvwr.msc`**) або інших інструментів, таких як [**Event Log Explorer**](https://eventlogxp.com) **або** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)**.**
+Їх можна переглядати за допомогою Windows Event Viewer (**`eventvwr.msc`**) або інших інструментів, як-от [**Event Log Explorer**](https://eventlogxp.com) **чи** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)**.**
 
 ## Розуміння журналювання подій безпеки Windows
 
-Події доступу записуються у файл конфігурації безпеки, розташований за адресою `C:\Windows\System32\winevt\Security.evtx`. Розмір цього файлу можна налаштувати; коли його місткість досягнуто, старіші події перезаписуються. Записані події включають входи та виходи користувачів із системи, дії користувачів і зміни параметрів безпеки, а також доступ до файлів, папок і спільних активів.
+Події доступу записуються у файл конфігурації безпеки, розташований за адресою `C:\Windows\System32\winevt\Security.evtx`. Розмір цього файлу можна налаштувати, а після досягнення його місткості старіші події перезаписуються. Записані події охоплюють входи та виходи користувачів із системи, дії користувачів і зміни параметрів безпеки, а також доступ до файлів, папок і спільних ресурсів.
 
-### Ключові ID подій для автентифікації користувачів:
+### Основні ідентифікатори подій для автентифікації користувачів:
 
-- **EventID 4624**: вказує, що користувач успішно пройшов автентифікацію.
+- **EventID 4624**: вказує на успішну автентифікацію користувача.
 - **EventID 4625**: сигналізує про помилку автентифікації.
 - **EventIDs 4634/4647**: позначають події виходу користувача із системи.
 - **EventID 4672**: позначає вхід із адміністративними привілеями.
@@ -427,26 +427,26 @@ AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\gen
 
 #### Коди Status і Sub Status для EventID 4625:
 
-- **0xC0000064**: ім’я користувача не існує — може вказувати на атаку з перерахуванням імен користувачів.
+- **0xC0000064**: ім’я користувача не існує — може вказувати на атаку з перебором імен користувачів.
 - **0xC000006A**: правильне ім’я користувача, але неправильний пароль — можлива спроба вгадування пароля або brute-force.
-- **0xC0000234**: обліковий запис користувача заблоковано — може бути наслідком brute-force-атаки, що спричинила численні невдалі входи.
+- **0xC0000234**: обліковий запис користувача заблоковано — може бути наслідком brute-force-атаки з численними невдалими входами.
 - **0xC0000072**: обліковий запис вимкнено — несанкціоновані спроби отримати доступ до вимкнених облікових записів.
 - **0xC000006F**: вхід поза дозволеним часом — вказує на спроби доступу поза встановленими годинами входу та може свідчити про несанкціонований доступ.
-- **0xC0000070**: порушення обмежень робочої станції — може бути спробою входу з неавторизованого розташування.
-- **0xC0000193**: завершення терміну дії облікового запису — спроби доступу з використанням прострочених облікових записів.
-- **0xC0000071**: термін дії пароля завершився — спроби входу зі застарілими паролями.
-- **0xC0000133**: проблеми синхронізації часу — значні розбіжності часу між клієнтом і сервером можуть вказувати на складніші атаки, наприклад pass-the-ticket.
+- **0xC0000070**: порушення обмежень робочої станції — може бути спробою входу з несанкціонованого розташування.
+- **0xC0000193**: завершення терміну дії облікового запису — спроби доступу за допомогою прострочених облікових записів.
+- **0xC0000071**: термін дії пароля минув — спроби входу зі застарілими паролями.
+- **0xC0000133**: проблеми синхронізації часу — значні розбіжності в часі між клієнтом і сервером можуть вказувати на складніші атаки, як-от pass-the-ticket.
 - **0xC0000224**: потрібна обов’язкова зміна пароля — часті обов’язкові зміни можуть свідчити про спробу дестабілізувати безпеку облікового запису.
 - **0xC0000225**: вказує на системну помилку, а не на проблему безпеки.
-- **0xC000015b**: тип входу заборонено — спроба доступу з несанкціонованим типом входу, наприклад спроба користувача виконати вхід до служби.
+- **0xC000015b**: тип входу заборонено — спроба доступу з несанкціонованим типом входу, наприклад спроба користувача виконати вхід служби.
 
 #### EventID 4616:
 
-- **Time Change**: зміна системного часу, яка може приховати часову послідовність подій.
+- **Зміна часу**: зміна системного часу, яка може приховати часову послідовність подій.
 
 #### EventID 6005 і 6006:
 
-- **Запуск і завершення роботи системи**: EventID 6005 вказує на запуск системи, а EventID 6006 — на її завершення роботи.
+- **Запуск і вимкнення системи**: EventID 6005 вказує на запуск системи, тоді як EventID 6006 позначає її вимкнення.
 
 #### EventID 1102:
 
@@ -455,43 +455,44 @@ AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\gen
 #### EventIDs для відстеження USB-пристроїв:
 
 - **20001 / 20003 / 10000**: перше підключення USB-пристрою.
-- **10100**: оновлення USB-драйвера.
+- **10100**: оновлення драйвера USB.
 - **EventID 112**: час підключення USB-пристрою.
 
-Практичні приклади імітації цих типів входу та можливостей вилучення облікових даних наведено в докладному посібнику [Altered Security](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them).
+Практичні приклади імітації цих типів входу та можливостей credential dumping наведено в [детальному посібнику Altered Security](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them).
 
-Відомості про події, зокрема коди status і sub-status, надають додаткові дані про причини подій; це особливо важливо для Event ID 4625.
+Деталі подій, зокрема коди status і sub-status, дають додаткову інформацію про причини подій, що особливо важливо для Event ID 4625.
 
 ### Відновлення подій Windows
 
 Щоб підвищити ймовірність відновлення видалених подій Windows, рекомендується вимкнути підозрілий комп’ютер, безпосередньо від’єднавши його від живлення. Для спроби відновлення таких подій рекомендується **Bulk_extractor** із зазначенням розширення `.evtx`.
 
-### Виявлення поширених атак за подіями Windows
+### Виявлення поширених атак за допомогою подій Windows
 
-Вичерпний посібник із використання Windows Event IDs для виявлення поширених cyber attacks доступний на сайті [Red Team Recipe](https://redteamrecipe.com/event-codes/).
+Вичерпний посібник із використання Windows Event IDs для виявлення поширених cyber attacks доступний на [Red Team Recipe](https://redteamrecipe.com/event-codes/).
 
 #### Brute Force Attacks
 
 Виявляються за численними записами EventID 4625, після яких у разі успішної атаки з’являється EventID 4624.
 
-#### Time Change
+#### Зміна часу
 
 Фіксується EventID 4616; зміни системного часу можуть ускладнити forensic analysis.
 
-#### USB Device Tracking
+#### Відстеження USB-пристроїв
 
 Корисні System EventIDs для відстеження USB-пристроїв: 20001/20003/10000 для першого використання, 10100 для оновлень драйверів і EventID 112 від DeviceSetupManager для часових міток підключення.
 
-#### System Power Events
+#### Події живлення системи
 
-EventID 6005 вказує на запуск системи, а EventID 6006 — на завершення роботи.
+EventID 6005 вказує на запуск системи, тоді як EventID 6006 позначає її вимкнення.
 
-#### Log Deletion
+#### Видалення журналу
 
 Security EventID 1102 сигналізує про видалення журналів — критичну подію для forensic analysis.
 
 ## References
 
 - [1] [Windows Plug and Play Cleanup](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
+- [2] [jonahacks.medium.com - Investigating Common Windows Processes](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d)
 
 {{#include ../../../banners/hacktricks-training.md}}

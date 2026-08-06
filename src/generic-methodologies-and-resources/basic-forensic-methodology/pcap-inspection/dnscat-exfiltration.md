@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Якщо у вас є pcap із даними, які **ексфільтруються за допомогою DNSCat** (без використання шифрування), ви можете знайти ексфільтрований вміст.
+Якщо у вас є pcap із даними, які **exfiltrated через DNSCat** (без використання шифрування), ви можете знайти exfiltrated вміст.
 
-Потрібно лише знати, що **перші 9 байтів** не є справжніми даними, а пов’язані з **C\&C-комунікацією**:<sup>[[1]](#references)</sup>
+Потрібно лише знати, що **перші 9 байтів** не є реальними даними, а пов’язані з **C\&C communication**:<sup>[[1]](#references)</sup>
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -23,15 +23,15 @@ last = qry
 
 #print(f)
 ```
-Для отримання додаткової інформації: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)\
+Для отримання додаткової інформації: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)<sup>[[1]](#references)</sup>\
 [https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
 
-Існує скрипт, який працює з Python3: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
+Існує script, який працює з Python3: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```
 ## Посилання
 
-- [1] [Звіт із forensic-аналізу pcap DNSCat2 – BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
+- [1] [Звіт з pcap-форензіки DNSCat2 — BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
 
 {{#include ../../../banners/hacktricks-training.md}}
