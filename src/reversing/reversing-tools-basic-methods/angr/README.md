@@ -206,7 +206,7 @@ True
 True
 ```
 
-Furthermore, you can use `proj.hook_symbol(name, hook)`, providing the name of a symbol as the first argument, to hook the address where the symbol lives
+Furthermore, you can use `proj.hook_symbol(name, hook)`, providing the name of a symbol as the first argument, to hook the address where the symbol lives<sup>[[1]](#references)</sup>
 
 ## Examples
 

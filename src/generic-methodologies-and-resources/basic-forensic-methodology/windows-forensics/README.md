@@ -506,4 +506,3 @@ Security EventID 1102 signals the deletion of logs, a critical event for forensi
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-

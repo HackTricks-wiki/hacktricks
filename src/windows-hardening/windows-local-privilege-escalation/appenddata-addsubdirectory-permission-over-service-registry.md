@@ -94,7 +94,7 @@ Operational notes:
 - Launching **`perfmon.exe`** is useful to verify that the counter registration is correct, but that usually only loads the DLL in **your own user context**.
 - For an actual LPE, trigger a **privileged** consumer such as **WMI**.
 - If you are writing your own exploit, spawning `cmd.exe` directly from inside the DLL usually leaves you with a shell in **session 0**. `Perfusion` solves this by duplicating the privileged token into a process that was created suspended in the attacker's session.<sup>[[4]](#references)</sup>
-- Match the DLL architecture to the target consumer (**x64 on x64 systems**).<sup>[[3]](#references)</sup>
+- Match the DLL architecture to the target consumer (**x64 on x64 systems**).
 
 ## Version notes / recent developments
 

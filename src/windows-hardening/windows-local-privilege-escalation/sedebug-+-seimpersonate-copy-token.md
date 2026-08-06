@@ -69,7 +69,7 @@ CreateProcessWithTokenW(hDup, LOGON_WITH_PROFILE,
 
 ## Full service PoC
 
-The following code **exploits the privileges `SeDebugPrivilege` and `SeImpersonatePrivilege`** to copy the token from a **process running as SYSTEM** and with **all the token privileges**. In this case, the code can be compiled and used as a **Windows service binary** to verify that the primitive works.
+The following code **exploits the privileges `SeDebugPrivilege` and `SeImpersonatePrivilege`** to copy the token from a **process running as SYSTEM** and with **all the token privileges**. In this case, the code can be compiled and used as a **Windows service binary** to verify that the primitive works.<sup>[[3]](#references)</sup>
 
 The main part of the **code where the elevation occurs** is inside the **`Exploit`** function. Inside that function you can see that **`lsass.exe`** is searched, its **token is copied**, and finally that token is used to spawn a new **`cmd.exe`** with all the privileges of the copied token.
 
@@ -286,4 +286,6 @@ int _tmain( int argc, TCHAR* argv[] )
 
 - [1] [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
 - [2] [Configure added LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
+- [3] [Running my program as a service (cboard.cprogramming.com) – Windows service skeleton used by the PoC](https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html)
+
 {{#include ../../banners/hacktricks-training.md}}
