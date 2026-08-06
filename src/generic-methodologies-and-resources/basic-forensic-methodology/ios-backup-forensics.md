@@ -1,47 +1,47 @@
-# iOS バックアップフォレンジクス（メッセージ中心のトリアージ）
+# iOS Backup Forensics（Messaging-centric triage）
 
 {{#include ../../banners/hacktricks-training.md}}
 
-このページでは、messaging app attachments を介した 0‑click exploit 配布の痕跡を確認するために、iOS バックアップを再構築・解析する実践的手順を説明します。Apple のハッシュ化されたバックアップレイアウトを人間が読めるパスに変換し、その後、主要なアプリの添付ファイルを列挙してスキャンすることに重点を置いています。
+このページでは、messaging app の添付ファイルを介した 0-click exploit delivery の痕跡を再構成・分析するための、iOS backup の実践的な手順を説明します。Apple の hashed backup layout を human-readable なパスに変換し、一般的なアプリ全体で添付ファイルを列挙・スキャンすることに重点を置いています。
 
 Goals:
-- Manifest.db から可読パスを再構築する
-- メッセージングデータベースを列挙する (iMessage, WhatsApp, Signal, Telegram, Viber)
-- 添付ファイルのパスを解決し、埋め込まれたオブジェクト（PDF/画像/フォント）を抽出して、構造検出器に渡す
+- Manifest.db から readable paths を再構築する
+- messaging databases（iMessage、WhatsApp、Signal、Telegram、Viber）を列挙する
+- attachment paths を解決し、埋め込まれたオブジェクト（PDF/Images/Fonts）を抽出して structural detectors に渡す
 
 
-## iOS バックアップの再構築
+## iOS backup の再構築
 
-MobileSync 下に保存されたバックアップは、人間が読めないハッシュ化されたファイル名を使用します。Manifest.db SQLite データベースは、保存された各オブジェクトを論理パスにマップします。
+MobileSync に保存された backup は、human-readable ではない hashed filenames を使用します。Manifest.db SQLite database は、保存された各オブジェクトを logical path にマッピングします。
 
-大まかな手順：
-1) Manifest.db を開き、ファイルレコードを読み取る (domain, relativePath, flags, fileID/hash)
-2) domain + relativePath に基づいて元のフォルダ階層を再構築する
-3) 保存されている各オブジェクトを再構築されたパスにコピーまたはハードリンクする
+High-level procedure:
+1) Manifest.db を開き、file records（domain、relativePath、flags、fileID/hash）を読み取る
+2) domain + relativePath に基づいて、元の folder hierarchy を再作成する
+3) 各 stored object を reconstructed path にコピーまたは hardlink する
 
-エンドツーエンドでこれを実装するツール（ElegantBouncer）を使った例：
+この処理を end-to-end で実行する tool（ElegantBouncer）を使用した example workflow:<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 # Rebuild the backup into a readable folder tree
 $ elegant-bouncer --ios-extract /path/to/backup --output /tmp/reconstructed
 [+] Reading Manifest.db ...
 ✓ iOS backup extraction completed successfully!
 ```
-注意事項:
-- 暗号化されたバックアップは、バックアップのパスワードを抽出ツールに渡して処理する
-- 証拠価値のため、可能な限り元のタイムスタンプ/ACLを保持する
+注意:
+- 暗号化されたバックアップは、extractor にバックアップパスワードを渡して処理する
+- 証拠としての価値を保つため、可能な限り元のタイムスタンプ/ACL を保持する
 
-### バックアップの取得と復号化 (USB / Finder / libimobiledevice)
+### バックアップの取得と復号（USB / Finder / libimobiledevice）
 
-- macOS/Finder では「Encrypt local backup」を設定し、keychain items が存在するように*fresh*な暗号化バックアップを作成する。
-- Cross‑platform: `idevicebackup2` (libimobiledevice ≥1.4.0) は iOS 17/18 のバックアッププロトコル変更に対応しており、以前の restore/backup ハンドシェイクエラーを修正している。
+- macOS/Finder で「ローカルバックアップを暗号化」を設定し、キーチェーン項目が含まれるように*新規の*暗号化バックアップを作成する。
+- クロスプラットフォームの場合: `idevicebackup2`（libimobiledevice ≥1.4.0）は iOS 17/18 のバックアッププロトコルの変更に対応しており、以前の restore/backup handshake エラーを修正している。<sup>[[4]](#references)</sup>
 ```bash
 # Pair then create a full encrypted backup over USB
 $ idevicepair pair
 $ idevicebackup2 backup --full --encrypt --password '<pwd>' ~/backups/iphone17
 ```
-### MVT による IOC 主導のトリアージ
+### MVTによるIOC駆動のトリアージ
 
-Amnesty の Mobile Verification Toolkit (mvt-ios) は、暗号化された iTunes/Finder バックアップを直接処理できるようになり、復号化と IOC マッチングを自動化して傭兵型 spyware の事例に対応します。
+AmnestyのMobile Verification Toolkit（mvt-ios）は、暗号化されたiTunes/Finderバックアップを直接処理できるようになり、傭兵型スパイウェアのケースにおける復号とIOCマッチングを自動化します。<sup>[[3]](#references)</sup>
 ```bash
 # Optionally extract a reusable key file
 $ mvt-ios extract-key -k /tmp/keyfile ~/backups/iphone17
@@ -52,22 +52,22 @@ $ mvt-ios decrypt-backup -p '<pwd>' -d /tmp/dec-backup ~/backups/iphone17
 # Run IOC scanning on the decrypted tree
 $ mvt-ios check-backup -i indicators.csv /tmp/dec-backup
 ```
-`mvt-results/` 以下に出力されます（例: analytics_detected.json、safari_history_detected.json）。以下で復元された添付ファイルのパスと照合できます。
+出力は `mvt-results/` 配下に保存され（例: analytics_detected.json、safari_history_detected.json）、以下で復元された添付ファイルのパスと相関分析できます。
 
-### General artifact parsing (iLEAPP)
+### 一般的なアーティファクト解析（iLEAPP）
 
-メッセージング以外のタイムライン／メタデータについては、バックアップフォルダ上で直接 iLEAPP を実行してください（iOS 11‑17 スキーマをサポート）:
+メッセージング以外のタイムラインやメタデータを解析するには、バックアップフォルダーに対して iLEAPP を直接実行します（iOS 11〜17 のスキーマに対応）。
 ```bash
 $ python3 ileapp.py -b /tmp/dec-backup -o /tmp/ileapp-report
 ```
-## メッセージングアプリの添付ファイル列挙
+## Messaging app attachment enumeration
 
-再構築後、主要なアプリの添付ファイルを列挙します。スキーマはアプリやバージョンによって異なりますが、アプローチは同様です：メッセージのデータベースをクエリし、messages を attachments に結合し、ディスク上のパスを解決します。
+復元後、popular apps の添付ファイルを列挙します。正確な schema は app/version によって異なりますが、approach は同様です。messaging database を query し、messages と attachments を join して、disk 上の paths を解決します。<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### iMessage (sms.db)
-主要テーブル: message, attachment, message_attachment_join (MAJ), chat, chat_message_join (CMJ)
+Key tables: message, attachment, message_attachment_join (MAJ), chat, chat_message_join (CMJ)
 
-サンプルクエリ:
+Example queries:
 ```sql
 -- List attachments with basic message linkage
 SELECT
@@ -94,10 +94,10 @@ JOIN message_attachment_join maj ON maj.message_id = m.ROWID
 JOIN attachment a ON a.ROWID = maj.attachment_id
 ORDER BY m.date DESC;
 ```
-添付ファイルのパスは、Library/SMS/Attachments/ の下に再構築されたツリーに対して絶対パスまたは相対パスである場合があります。
+Attachment のパスは、絶対パスの場合と、Library/SMS/Attachments/ 配下の再構築されたツリーを基準とした相対パスの場合があります。
 
 ### WhatsApp (ChatStorage.sqlite)
-一般的な関連付け: message table ↔ media/attachment table（名前はバージョンによって異なります）。media 行をクエリしてディスク上のパスを取得します。最近の iOS ビルドでは、`ZWAMEDIAITEM` に `ZMEDIALOCALPATH` がまだ含まれています。
+一般的な関連付け: message テーブル ↔ media/attachment テーブル（バージョンによって名称は異なります）。media の行をクエリして、ディスク上のパスを取得します。最近の iOS ビルドでも、ZWAMEDIAITEM 内の `ZMEDIALOCALPATH` は引き続き確認できます。
 ```sql
 SELECT
 m.Z_PK                 AS message_pk,
@@ -109,19 +109,19 @@ LEFT JOIN ZWAMEDIAITEM mi ON mi.Z_PK = m.ZMEDIAITEM
 WHERE mi.ZMEDIALOCALPATH IS NOT NULL
 ORDER BY m.ZMESSAGEDATE DESC;
 ```
-パスは通常、再構築したバックアップ内の `AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media/` 以下に解決されます。
+通常、パスは再構築された backup 内の `AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media/` 以下に解決されます。
 
 ### Signal / Telegram / Viber
-- Signal: メッセージDBは暗号化されていますが、ディスクにキャッシュされた添付ファイル（およびサムネイル）は通常スキャン可能です
-- Telegram: キャッシュはサンドボックス内の `Library/Caches/` に残ります。iOS 18 のビルドではキャッシュ消去のバグが見られるため、大量の残存メディアキャッシュがよく証拠になります
-- Viber: Viber.sqlite にはディスク上の参照を持つメッセージ/添付テーブルが含まれます
+- Signal: message DB は暗号化されていますが、disk 上に cached された attachments（および thumbnails）は通常 scan 可能です
+- Telegram: cache は sandbox 内の `Library/Caches/` 以下に残ります。iOS 18 builds では cache-clearing bugs が見られるため、大量の残存 media cache が一般的な evidence sources になります<sup>[[5]](#references)</sup>
+- Viber: Viber.sqlite には message/attachment tables と disk 上の references が含まれています
 
-ヒント: メタデータが暗号化されている場合でも、media/cache ディレクトリをスキャンすれば悪意のあるオブジェクトが見つかることがあります。
+Tip: metadata が暗号化されている場合でも、media/cache directories を scan することで malicious objects が見つかることがあります。
 
 
-## 添付ファイルの構造的エクスプロイトのスキャン
+## structural exploits のための attachments の scan
 
-添付ファイルのパスを取得したら、署名ではなくファイルフォーマットの不変条件を検証する構造検出器に渡します。ElegantBouncer の例:
+attachment paths を取得したら、signatures ではなく file-format invariants を検証する structural detectors に渡します。ElegantBouncer を使った例:<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 # Recursively scan only messaging attachments under the reconstructed tree
 $ elegant-bouncer --scan --messaging /tmp/reconstructed
@@ -129,26 +129,27 @@ $ elegant-bouncer --scan --messaging /tmp/reconstructed
 ✗ THREAT in WhatsApp chat 'John Doe': suspicious_document.pdf → FORCEDENTRY (JBIG2)
 ✗ THREAT in iMessage: photo.webp → BLASTPASS (VP8L)
 ```
-Detections covered by structural rules include:
-- PDF/JBIG2 FORCEDENTRY (CVE‑2021‑30860): 不可能なJBIG2辞書の状態
-- WebP/VP8L BLASTPASS (CVE‑2023‑4863): 過大なHuffmanテーブル構成
-- TrueType TRIANGULATION (CVE‑2023‑41990): 未文書化のbytecodeオペコード
-- DNG/TIFF CVE‑2025‑43300: メタデータとストリーム成分の不一致
+構造ルールで検出されるものには、以下が含まれます。<sup>[[1]](#references)[[2]](#references)</sup>
+- PDF/JBIG2 FORCEDENTRY (CVE‑2021‑30860): 不可能な JBIG2 dictionary states
+- WebP/VP8L BLASTPASS (CVE‑2023‑4863): 過大な Huffman table constructions
+- TrueType TRIANGULATION (CVE‑2023‑41990): 文書化されていない bytecode opcodes
+- DNG/TIFF CVE‑2025‑43300: metadata と stream component の不一致
 
 
-## 検証、注意点、誤検知
+## Validation、注意事項、false positives
 
-- 時間の変換: iMessageは一部のバージョンで日付をAppleのエポック/単位で保存します。報告時に適切に変換してください
-- スキーマのドリフト: アプリのSQLiteスキーマは時間とともに変化します。デバイスのビルドごとにテーブル/カラム名を確認してください
-- 再帰的抽出: PDFsはJBIG2ストリームやフォントを埋め込むことがあります。内側のオブジェクトを抽出してスキャンしてください
-- 誤検知: 構造的ヒューリスティックは保守的ですが、まれに破損しているが無害なメディアを誤って検出することがあります
+- Time conversions: iMessage は一部のバージョンで Apple epochs/units に基づいて日付を保存するため、reporting 時に適切に変換する
+- Schema drift: app SQLite schemas は時間の経過とともに変化するため、device build ごとに table/column names を確認する
+- Recursive extraction: PDF には JBIG2 streams や fonts が埋め込まれている場合があるため、inner objects を抽出して scan する
+- False positives: structural heuristics は保守的ですが、まれに存在する malformed だが benign な media を検出する場合がある<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 ## References
 
-- [ELEGANTBOUNCER: When You Can't Get the Samples but Still Need to Catch the Threat](https://www.msuiche.com/posts/elegantbouncer-when-you-cant-get-the-samples-but-still-need-to-catch-the-threat/)
-- [ElegantBouncer project (GitHub)](https://github.com/msuiche/elegant-bouncer)
-- [MVT iOS backup workflow](https://docs.mvt.re/en/latest/ios/backup/check/)
-- [libimobiledevice 1.4.0 release notes](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
+- [1] [ELEGANTBOUNCER: When You Can't Get the Samples but Still Need to Catch the Threat](https://www.msuiche.com/posts/elegantbouncer-when-you-cant-get-the-samples-but-still-need-to-catch-the-threat/)
+- [2] [ElegantBouncer project (GitHub)](https://github.com/msuiche/elegant-bouncer)
+- [3] [MVT iOS backup workflow](https://docs.mvt.re/en/latest/ios/backup/check/)
+- [4] [libimobiledevice 1.4.0 release notes](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
+- [5] [Update 11.2 has broken cache cleanup on iOS 18.0.1 (Telegram Bug Tracker)](https://bugs.telegram.org/c/44361)
 
 {{#include ../../banners/hacktricks-training.md}}

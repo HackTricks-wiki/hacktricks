@@ -2,40 +2,40 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Check BSSIDs
+## BSSIDの確認
 
-WireSharkを使用してWifiの主要なトラフィックを含むキャプチャを受信した場合、_Wireless --> WLAN Traffic_を使用してキャプチャのすべてのSSIDを調査し始めることができます：
+WireSharkを使用して、主なトラフィックがWifiであるcaptureを受け取った場合、_Wireless --> WLAN Traffic_ からcapture内のすべてのSSIDの調査を開始できます：
 
-![](<../../../images/image (106).png>)
+![Wifi Pcap Analysis - BSSIDの確認：WireSharkを使用して、主なトラフィックがWifiであるcaptureを受け取った場合、Wireless --... からcapture内のすべてのSSIDの調査を開始できます](<../../../images/image (106).png>)
 
-![](<../../../images/image (492).png>)
+![Wifi Pcap Analysis - BSSIDの確認：WireSharkを使用して、主なトラフィックがWifiであるcaptureを受け取った場合、Wireless --... からcapture内のすべてのSSIDの調査を開始できます](<../../../images/image (492).png>)
 
 ### Brute Force
 
-その画面の列の1つは、**pcap内に認証が見つかったかどうか**を示しています。もしそうであれば、`aircrack-ng`を使用してブルートフォースを試みることができます：
+この画面の列の1つには、**pcap内で認証が見つかったかどうか**が表示されます。見つかった場合は、`aircrack-ng`を使用してBrute forceを試行できます：
 ```bash
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
-例えば、PSK（事前共有キー）を保護するWPAパスフレーズを取得し、後でトラフィックを復号化するために必要です。
+例えば、PSK（pre shared-key）を保護している WPA passphrase を取得できます。これは、後でトラフィックを復号するために必要です。
 
-## ビーコン / サイドチャネルのデータ
+## Beacons / Side Channel 内のデータ
 
-**Wifiネットワークのビーコン内でデータが漏洩していると疑う場合**、次のようなフィルターを使用してネットワークのビーコンを確認できます: `wlan contains <NAMEofNETWORK>`、または `wlan.ssid == "NAMEofNETWORK"` でフィルタリングされたパケット内で疑わしい文字列を検索します。
+**Wifi network の beacons 内でデータが leak している**疑いがある場合は、次のような filter を使用して network の beacons を確認できます：`wlan contains <NAMEofNETWORK>` または `wlan.ssid == "NAMEofNETWORK"`。filter された packets 内で suspicious な文字列を検索します。
 
-## Wifiネットワーク内の未知のMACアドレスを見つける
+## A Wifi Network 内の Unknown MAC Addresses を見つける
 
-次のリンクは、**Wifiネットワーク内でデータを送信しているマシンを見つける**のに役立ちます:
+次の link は、**Wifi Network 内でデータを送信している machines**を見つけるのに役立ちます。
 
 - `((wlan.ta == e8:de:27:16:70:c9) && !(wlan.fc == 0x8000)) && !(wlan.fc.type_subtype == 0x0005) && !(wlan.fc.type_subtype ==0x0004) && !(wlan.addr==ff:ff:ff:ff:ff:ff) && wlan.fc.type==2`
 
-**MACアドレスをすでに知っている場合は、出力からそれらを削除できます**。次のようなチェックを追加します: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
+既知の **MAC addresses を output から除外**したい場合は、次のような check を追加します：`&& !(wlan.addr==5c:51:88:31:a0:3b)`
 
-ネットワーク内で通信している**未知のMAC**アドレスを検出したら、次のような**フィルター**を使用できます: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` でそのトラフィックをフィルタリングします。ftp/http/ssh/telnetフィルターは、トラフィックを復号化している場合に便利です。
+network 内で通信している **unknown MAC** addresses を検出したら、次のような **filters** を使用できます：`wlan.addr==<MAC address> && (ftp || http || ssh || telnet)`。ftp/http/ssh/telnet filters は、トラフィックを decrypt 済みの場合に便利です。
 
-## トラフィックの復号化
+## トラフィックを Decrypt する
 
 Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
 
-![](<../../../images/image (499).png>)
+![A Wifi Network 内の Unknown MAC Addresses を見つける - トラフィックを Decrypt する：network 内で通信している unknown MAC addresses を検出したら、次のような filters を使用できます：...](<../../../images/image (499).png>)
 
 {{#include ../../../banners/hacktricks-training.md}}

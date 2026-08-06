@@ -2,57 +2,57 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Browsers Artifacts <a href="#id-3def" id="id-3def"></a>
+## ブラウザアーティファクト <a href="#id-3def" id="id-3def"></a>
 
-ブラウザアーティファクトは、ナビゲーション履歴、ブックマーク、キャッシュデータなど、Webブラウザによって保存されるさまざまな種類のデータを含みます。これらのアーティファクトはOS内の特定フォルダに保持され、ブラウザごとに場所や名前は異なりますが、一般的に類似したデータを格納します。
+ブラウザアーティファクトには、閲覧履歴、ブックマーク、キャッシュデータなど、Webブラウザに保存されるさまざまな種類のデータが含まれます。これらのアーティファクトは、オペレーティングシステム内の特定のフォルダに保存されます。場所や名前はブラウザによって異なりますが、一般的には同様の種類のデータが保存されています。
 
-ここでは、最も一般的なブラウザアーティファクトの概要を示します:
+以下は、最も一般的なブラウザアーティファクトの概要です。
 
-- **Navigation History**: ユーザーのウェブサイト訪問を追跡し、悪意のあるサイトへの訪問特定に役立ちます。
-- **Autocomplete Data**: 頻繁な検索に基づく候補で、Navigation Historyと組み合わせると洞察が得られます。
-- **Bookmarks**: ユーザーが素早くアクセスするために保存したサイト。
-- **Extensions and Add-ons**: ユーザーがインストールしたブラウザ拡張やアドオン。
-- **Cache**: 画像やJavaScriptファイルなどのWebコンテンツを保存し、サイト読み込みを高速化する。フォレンジックで価値があることがあります。
-- **Logins**: 保存されたログイン資格情報。
-- **Favicons**: タブやブックマークに表示されるサイトのアイコンで、ユーザーの訪問に関する追加情報に有用です。
-- **Browser Sessions**: 開いているブラウザセッションに関連するデータ。
-- **Downloads**: ブラウザ経由でダウンロードしたファイルの記録。
-- **Form Data**: Webフォームに入力された情報で、将来のオートフィル候補として保存されます。
-- **Thumbnails**: サイトのプレビュー画像。
+- **閲覧履歴**: ユーザーがWebサイトを訪問した記録。悪意のあるサイトへのアクセスを特定するのに役立ちます。
+- **オートコンプリートデータ**: 頻繁な検索に基づく候補。閲覧履歴と組み合わせることで有用な情報が得られます。
+- **ブックマーク**: ユーザーがすばやくアクセスできるよう保存したサイト。
+- **拡張機能とアドオン**: ユーザーがインストールしたブラウザ拡張機能またはアドオン。
+- **キャッシュ**: Webサイトの読み込み時間を短縮するためにWebコンテンツ（画像やJavaScriptファイルなど）を保存するもので、フォレンジック分析に役立ちます。
+- **ログイン情報**: 保存されたログイン認証情報。
+- **ファビコン**: Webサイトに関連付けられたアイコン。タブやブックマークに表示され、ユーザーの訪問に関する追加情報として役立ちます。
+- **ブラウザセッション**: 開いているブラウザセッションに関連するデータ。
+- **ダウンロード**: ブラウザ経由でダウンロードしたファイルの記録。
+- **フォームデータ**: Webフォームに入力された情報。後で自動入力候補として使用するために保存されます。
+- **サムネイル**: Webサイトのプレビュー画像。
 - **Custom Dictionary.txt**: ユーザーがブラウザの辞書に追加した単語。
 
 ## Firefox
 
-Firefoxはユーザーデータをプロファイル内で整理し、OSに応じて特定の場所に保存します:
+Firefoxはユーザーデータをプロファイル内に整理しており、オペレーティングシステムに応じた特定の場所に保存します。<sup>[[1]](#references)</sup>
 
 - **Linux**: `~/.mozilla/firefox/`
 - **MacOS**: `/Users/$USER/Library/Application Support/Firefox/Profiles/`
 - **Windows**: `%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\`
 
-これらのディレクトリ内にある `profiles.ini` ファイルはユーザープロファイルを一覧表示します。各プロファイルのデータは `profiles.ini` 内の `Path` 変数で指定された名前のフォルダに保存され、`profiles.ini` と同じディレクトリにあります。プロファイルのフォルダが存在しない場合は削除されている可能性があります。
+これらのディレクトリ内にある`profiles.ini`ファイルには、ユーザープロファイルの一覧が記載されています。各プロファイルのデータは、`profiles.ini`内の`Path`変数で指定された名前のフォルダに保存されます。このフォルダは`profiles.ini`自体と同じディレクトリにあります。プロファイルのフォルダが存在しない場合は、削除された可能性があります。
 
-各プロファイルフォルダ内には、いくつかの重要なファイルがあります:
+各プロファイルフォルダ内には、いくつかの重要なファイルがあります。<sup>[[1]](#references)</sup>
 
-- **places.sqlite**: 履歴、ブックマーク、ダウンロードを保存します。Windowsでは [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) のようなツールで履歴データにアクセスできます。
-- 特定のSQLクエリを使用して履歴やダウンロード情報を抽出します。
-- **bookmarkbackups**: ブックマークのバックアップを含みます。
+- **places.sqlite**: 履歴、ブックマーク、ダウンロードを保存します。Windowsでは、[BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html)などのツールで履歴データにアクセスできます。
+- 履歴とダウンロードの情報を抽出するには、特定のSQLクエリを使用します。
+- **bookmarkbackups**: ブックマークのバックアップが含まれます。
 - **formhistory.sqlite**: Webフォームデータを保存します。
-- **handlers.json**: プロトコルハンドラを管理します。
+- **handlers.json**: プロトコルハンドラーを管理します。
 - **persdict.dat**: カスタム辞書の単語。
-- **addons.json** と **extensions.sqlite**: インストールされたアドオンと拡張機能の情報。
-- **cookies.sqlite**: Cookieの保存。Windowsでは [MZCookiesView](https://www.nirsoft.net/utils/mzcv.html) を使って確認できます。
-- **cache2/entries** または **startupCache**: キャッシュデータ。 [MozillaCacheView](https://www.nirsoft.net/utils/mozilla_cache_viewer.html) のようなツールでアクセスできます。
+- **addons.json**および**extensions.sqlite**: インストールされたアドオンと拡張機能に関する情報。
+- **cookies.sqlite**: Cookieを保存します。Windowsでは、[MZCookiesView](https://www.nirsoft.net/utils/mzcv.html)で確認できます。
+- **cache2/entries**または**startupCache**: キャッシュデータ。[MozillaCacheView](https://www.nirsoft.net/utils/mozilla_cache_viewer.html)などのツールでアクセスできます。
 - **favicons.sqlite**: ファビコンを保存します。
-- **prefs.js**: ユーザー設定とプリファレンス。
-- **downloads.sqlite**: 旧ダウンロードデータベース（現在は places.sqlite に統合）。
-- **thumbnails**: ウェブサイトのサムネイル。
+- **prefs.js**: ユーザー設定と環境設定。
+- **downloads.sqlite**: 以前のダウンロードデータベース。現在はplaces.sqliteに統合されています。
+- **thumbnails**: Webサイトのサムネイル。
 - **logins.json**: 暗号化されたログイン情報。
-- **key4.db** または **key3.db**: 機密情報を保護するための暗号化キーを保存します。
+- **key4.db**または**key3.db**: 機密情報を保護するための暗号化キーを保存します。
 
-さらに、ブラウザのアンチフィッシング設定は `prefs.js` 内の `browser.safebrowsing` エントリを検索することで、セーフブラウジング機能が有効か無効かを確認できます。
+さらに、`prefs.js`内で`browser.safebrowsing`のエントリを検索すると、ブラウザのフィッシング対策設定を確認できます。これにより、安全なブラウジング機能が有効か無効かを判断できます。<sup>[[2]](#references)</sup>
 
-To try to decrypt the master password, you can use [https://github.com/unode/firefox_decrypt](https://github.com/unode/firefox_decrypt)\
-With the following script and call you can specify a password file to brute force:
+マスターパスワードの復号を試みるには、[https://github.com/unode/firefox_decrypt](https://github.com/unode/firefox_decrypt)を使用できます。\
+以下のスクリプトと呼び出しを使用すると、ブルートフォース用のパスワードファイルを指定できます。
 ```bash:brute.sh
 #!/bin/bash
 
@@ -63,73 +63,73 @@ echo "Trying $pass"
 echo "$pass" | python firefox_decrypt.py
 done < $passfile
 ```
-![](<../../../images/image (692).png>)
+![Browsers Artifacts - Firefox: echo "$pass" | python firefox decrypt.py](<../../../images/image (692).png>)
 
 ## Google Chrome
 
-Google Chrome はオペレーティングシステムに応じてユーザープロファイルを以下の場所に保存します:
+Google Chromeは、オペレーティングシステムに応じた特定の場所にユーザープロファイルを保存します:<sup>[[1]](#references)</sup>
 
 - **Linux**: `~/.config/google-chrome/`
 - **Windows**: `C:\Users\XXX\AppData\Local\Google\Chrome\User Data\`
 - **MacOS**: `/Users/$USER/Library/Application Support/Google/Chrome/`
 
-これらのディレクトリ内では、ほとんどのユーザーデータが **Default/** または **ChromeDefaultData/** フォルダにあります。以下のファイルは重要なデータを保持しています:
+これらのディレクトリ内では、ほとんどのユーザーデータが **Default/** または **ChromeDefaultData/** フォルダにあります。以下のファイルには重要なデータが含まれています:<sup>[[1]](#references)</sup>
 
-- **History**: URL、ダウンロード、検索キーワードを含みます。Windows では [ChromeHistoryView](https://www.nirsoft.net/utils/chrome_history_view.html) を使って履歴を参照できます。"Transition Type" 列はリンクのクリック、直接入力されたURL、フォーム送信、ページのリロードなど、さまざまな意味を持ちます。
-- **Cookies**: クッキーを保存します。調査には [ChromeCookiesView](https://www.nirsoft.net/utils/chrome_cookies_view.html) が利用できます。
-- **Cache**: キャッシュデータを保持します。検査するには Windows ユーザーは [ChromeCacheView](https://www.nirsoft.net/utils/chrome_cache_view.html) を使用できます。
+- **History**: URL、downloads、検索キーワードが含まれます。Windowsでは、履歴の読み取りに [ChromeHistoryView](https://www.nirsoft.net/utils/chrome_history_view.html)を使用できます。「Transition Type」列には、ユーザーによるリンクのクリック、入力されたURL、フォーム送信、ページの再読み込みなど、さまざまな意味があります。
+- **Cookies**: cookiesを保存します。確認には [ChromeCookiesView](https://www.nirsoft.net/utils/chrome_cookies_view.html)を利用できます。
+- **Cache**: cacheされたデータを保持します。確認するには、Windowsユーザーは [ChromeCacheView](https://www.nirsoft.net/utils/chrome_cache_view.html)を使用できます。
 
-Electron ベースのデスクトップアプリ（例: Discord）も Chromium Simple Cache を使用し、オンディスク上に豊富なアーティファクトを残します。参照:
+Electronベースのdesktop app（Discordなど）もChromium Simple Cacheを使用し、ディスク上に豊富なartifactを残します。以下を参照してください:
 
 {{#ref}}
 discord-cache-forensics.md
 {{#endref}}
-- **Bookmarks**: ユーザーのブックマーク。
-- **Web Data**: フォーム履歴を含む。
-- **Favicons**: サイトのファビコンを保存。
-- **Login Data**: ユーザー名やパスワードなどのログイン情報を含む。
-- **Current Session**/**Current Tabs**: 現在のセッションと開いているタブのデータ。
-- **Last Session**/**Last Tabs**: Chrome を閉じる前の最後のセッションでアクティブだったサイトに関する情報。
-- **Extensions**: ブラウザ拡張やアドオンのディレクトリ。
-- **Thumbnails**: サイトのサムネイルを保存。
-- **Preferences**: プラグイン、拡張、ポップアップ、通知などの設定を含む情報豊富なファイル。
-- **Browser’s built-in anti-phishing**: anti-phishing とマルウェア保護が有効か確認するには `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences` を実行してください。出力に `{"enabled: true,"}` があれば機能は有効です。
+- **Bookmarks**: ユーザーのbookmark。
+- **Web Data**: form historyが含まれます。
+- **Favicons**: Webサイトのfaviconを保存します。
+- **Login Data**: usernameやpasswordなどのlogin credentialsが含まれます。
+- **Current Session**/**Current Tabs**: 現在のbrowsing sessionと開いているtabに関するデータ。
+- **Last Session**/**Last Tabs**: Chromeが閉じられる前の、直前のsessionでactiveだったsiteに関する情報。
+- **Extensions**: browser extensionとaddonのディレクトリ。
+- **Thumbnails**: Webサイトのthumbnailを保存します。
+- **Preferences**: plugin、extension、popup、notificationなどの設定を含む、情報量の多いファイルです。
+- **Browser’s built-in anti-phishing**: anti-phishingとmalware protectionが有効か確認するには、`grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`を実行します。出力内に`{"enabled: true,"}`があるか確認します。<sup>[[2]](#references)</sup>
 
 ## **SQLite DB Data Recovery**
 
-前節で見たように、Chrome と Firefox はデータを保存するために **SQLite** データベースを使用しています。削除されたエントリは [**sqlparse**](https://github.com/padfoot999/sqlparse) または [**sqlparse_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases) を使って復元できる可能性があります。
+前のセクションで確認したように、ChromeとFirefoxはどちらもデータの保存に **SQLite** databaseを使用します。[**sqlparse**](https://github.com/padfoot999/sqlparse) **または** [**sqlparse_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases)というtoolを使用して、**削除されたentryをrecover**できます。
 
 ## **Internet Explorer 11**
 
-Internet Explorer 11 はデータとメタデータを複数の場所に分散して管理しており、保存情報とその詳細を分離して簡単にアクセス・管理できるようにしています。
+Internet Explorer 11は、さまざまな場所でデータとmetadataを管理しており、保存された情報と対応する詳細を分離することで、容易なaccessと管理を実現しています。
 
 ### Metadata Storage
 
-メタデータは `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data`（VX は V01, V16, または V24）に保存されます。これに伴う `V01.log` ファイルは `WebcacheVX.data` と修正時刻が一致しないことがあり、その場合は `esentutl /r V01 /d` を使って修復が必要になることがあります。このメタデータは ESE データベースに格納されており、photorec や [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) のようなツールで復元・検査できます。**Containers** テーブル内では、各データセグメントが格納されている具体的なテーブルやコンテナ（Skype など他の Microsoft ツールのキャッシュの詳細を含む）を識別できます。
+Internet Explorerのmetadataは`%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data`に保存されます（VXはV01、V16、またはV24）。これに関連して、`V01.log`ファイルのmodification timeが`WebcacheVX.data`と一致しない場合があり、その場合は`esentutl /r V01 /d`を使用したrepairが必要であることを示しています。このmetadataはESE databaseに格納されており、それぞれphotorecや[ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html)などのtoolを使用してrecoverおよびinspectできます。**Containers** tableでは、各データsegmentが保存されているspecific tableまたはcontainerを確認できます。これには、Skypeなど他のMicrosoft toolのcache detailsも含まれます。
 
 ### Cache Inspection
 
-[IECacheView](https://www.nirsoft.net/utils/ie_cache_viewer.html) はキャッシュ検査を可能にするツールで、キャッシュデータを抽出したフォルダの場所を指定する必要があります。キャッシュのメタデータにはファイル名、ディレクトリ、アクセス回数、URL の起点、キャッシュ作成・アクセス・変更・有効期限のタイムスタンプが含まれます。
+[IECacheView](https://www.nirsoft.net/utils/ie_cache_viewer.html) toolを使用するとcacheをinspectできます。その際、cache dataをextractしたfolderの場所が必要です。cacheのmetadataには、filename、directory、access count、URL origin、およびcacheの作成、access、modification、expiry timeを示すtimestampが含まれます。
 
 ### Cookies Management
 
-クッキーは [IECookiesView](https://www.nirsoft.net/utils/iecookies.html) で調査でき、メタデータには名前、URL、アクセス回数、各種時間情報が含まれます。永続的なクッキーは `%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies` に保存され、セッションクッキーはメモリ上に存在します。
+cookiesは[IECookiesView](https://www.nirsoft.net/utils/iecookies.html)を使用して調査できます。metadataには、name、URL、access count、その他のさまざまなtime-related detailsが含まれます。persistent cookieは`%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies`に保存され、session cookieはmemory上にあります。
 
 ### Download Details
 
-ダウンロードのメタデータは [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) でアクセス可能で、特定のコンテナには URL、ファイルタイプ、ダウンロード先などのデータが含まれます。実際のファイルは `%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory` にあります。
+downloadsのmetadataには[ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html)からaccessできます。specific containerには、URL、file type、download locationなどのデータが格納されています。physical fileは`%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory`にあります。
 
 ### Browsing History
 
-閲覧履歴を確認するには [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) を使い、抽出した履歴ファイルの場所と Internet Explorer の設定を指定します。ここでのメタデータには修正時刻やアクセス時刻、アクセス回数が含まれます。履歴ファイルは `%userprofile%\Appdata\Local\Microsoft\Windows\History` にあります。
+browsing historyを確認するには、[BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html)を使用できます。extractしたhistory fileの場所とInternet Explorerの設定が必要です。ここでのmetadataには、modification time、access time、access countが含まれます。history fileは`%userprofile%\Appdata\Local\Microsoft\Windows\History`にあります。
 
 ### Typed URLs
 
-Typed URLs とその使用時刻はレジストリ内の `NTUSER.DAT` の `Software\Microsoft\InternetExplorer\TypedURLs` および `Software\Microsoft\InternetExplorer\TypedURLsTime` に保存され、ユーザーが入力した最後の50件の URL とその最終入力時刻を追跡します。
+入力されたURLとその使用時刻は、`NTUSER.DAT`内のregistryにある`Software\Microsoft\InternetExplorer\TypedURLs`および`Software\Microsoft\InternetExplorer\TypedURLsTime`に保存されます。これらは、ユーザーが入力した直近50件のURLと、それらを最後に入力した時刻を追跡します。
 
 ## Microsoft Edge
 
-Microsoft Edge はユーザーデータを `%userprofile%\Appdata\Local\Packages` に保存します。各種データのパスは以下の通りです:
+Microsoft Edgeはユーザーデータを`%userprofile%\Appdata\Local\Packages`に保存します。各種データのpathは次のとおりです:<sup>[[1]](#references)</sup>
 
 - **Profile Path**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC`
 - **History, Cookies, and Downloads**: `C:\Users\XX\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat`
@@ -139,31 +139,29 @@ Microsoft Edge はユーザーデータを `%userprofile%\Appdata\Local\Packages
 
 ## Safari
 
-Safari のデータは `/Users/$User/Library/Safari` に保存されます。主なファイルは次の通りです:
+Safariのデータは`/Users/$User/Library/Safari`に保存されます。主なfileは次のとおりです:<sup>[[3]](#references)</sup>
 
-- **History.db**: `history_visits` と `history_items` テーブルに URL と訪問タイムスタンプが含まれます。`sqlite3` を使ってクエリを実行してください。
-- **Downloads.plist**: ダウンロードしたファイルの情報。
-- **Bookmarks.plist**: ブックマークされた URL を保存。
-- **TopSites.plist**: よく訪問するサイト。
-- **Extensions.plist**: Safari の拡張一覧。`plutil` や `pluginkit` で取得可能。
-- **UserNotificationPermissions.plist**: プッシュ通知を許可したドメイン。`plutil` で解析。
-- **LastSession.plist**: 最後のセッションのタブ。`plutil` で解析。
-- **Browser’s built-in anti-phishing**: `defaults read com.apple.Safari WarnAboutFraudulentWebsites` を使って確認します。返り値が 1 なら機能は有効です。
+- **History.db**: `history_visits`および`history_items` tableに、URLとvisit timestampが含まれます。queryには`sqlite3`を使用します。
+- **Downloads.plist**: downloadしたfileの情報。
+- **Bookmarks.plist**: bookmarkしたURLを保存します。
+- **TopSites.plist**: 最も頻繁にvisitしたsite。
+- **Extensions.plist**: Safari browser extensionのlist。取得には`plutil`または`pluginkit`を使用します。
+- **UserNotificationPermissions.plist**: push notificationを許可されたdomain。parseには`plutil`を使用します。
+- **LastSession.plist**: 前回のsessionのtab。parseには`plutil`を使用します。
+- **Browser’s built-in anti-phishing**: `defaults read com.apple.Safari WarnAboutFraudulentWebsites`を使用して確認します。応答が1の場合、このfeatureはactiveです。<sup>[[2]](#references)</sup>
 
 ## Opera
 
-Opera のデータは `/Users/$USER/Library/Application Support/com.operasoftware.Opera` にあり、履歴やダウンロードは Chrome と同じフォーマットを共有します。
+Operaのデータは`/Users/$USER/Library/Application Support/com.operasoftware.Opera`にあり、historyとdownloadsにはChromeと同じformatを使用します。
 
-- **Browser’s built-in anti-phishing**: Preferences ファイル内の `fraud_protection_enabled` が `true` に設定されているかを `grep` で確認してください。
+- **Browser’s built-in anti-phishing**: `grep`を使用してPreferences file内の`fraud_protection_enabled`が`true`に設定されているか確認します。<sup>[[2]](#references)</sup>
 
-これらのパスとコマンドは、各種ウェブブラウザが保存する閲覧データへアクセスし、それらを理解するために重要です。
+これらのpathとcommandは、さまざまなWeb browserが保存するbrowsing dataへのaccessと、その内容の理解に重要です。
 
-## 参考
+## References
 
-- [https://nasbench.medium.com/web-browsers-forensics-7e99940c579a](https://nasbench.medium.com/web-browsers-forensics-7e99940c579a)
-- [https://www.sentinelone.com/labs/macos-incident-response-part-3-system-manipulation/](https://www.sentinelone.com/labs/macos-incident-response-part-3-system-manipulation/)
-- [https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file](https://books.google.com/books?id=jfMqCgAAQBAJ&pg=PA128&lpg=PA128&dq=%22This+file)
-- **Book: OS X Incident Response: Scripting and Analysis By Jaron Bradley pag 123**
-
+- [1] [Web Browsers Forensics: A Guide On Doing Web Browsers Forensic Analysis](https://nasbench.medium.com/web-browsers-forensics-7e99940c579a)
+- [2] [macOS Incident Response | Part 3: System Manipulation](https://www.sentinelone.com/labs/macos-incident-response-part-3-system-manipulation/)
+- [3] [OS X Incident Response: Scripting and Analysis by Jaron Bradley](https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file)
 
 {{#include ../../../banners/hacktricks-training.md}}

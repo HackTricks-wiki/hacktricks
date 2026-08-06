@@ -1,24 +1,34 @@
+# Reverse Shell
+
 {{#include ../../banners/hacktricks-training.md}}
 
-# [**シェル - Linux**](linux.md)
+## [Shells - Linux](linux.md)
 
-# [**シェル - Windows**](windows.md)
+---
 
-# [**MSFVenom - チートシート**](msfvenom.md)
+## [Shells - Windows](windows.md)
 
-# [**フルTTY**](full-ttys.md)
+---
 
-# **自動生成されたシェル**
+## [MSFVenom - CheatSheet](msfvenom.md)
 
-- [**https://reverse-shell.sh/**](https://reverse-shell.sh/)
-- [**https://www.revshells.com/**](https://www.revshells.com/)
-- [**https://github.com/ShutdownRepo/shellerator**](https://github.com/ShutdownRepo/shellerator)
-- [**https://github.com/0x00-0x00/ShellPop**](https://github.com/0x00-0x00/ShellPop)
-- [**https://github.com/cybervaca/ShellReverse**](https://github.com/cybervaca/ShellReverse)
-- [**https://liftoff.github.io/pyminifier/**](https://liftoff.github.io/pyminifier/)
-- [**https://github.com/xct/xc/**](https://github.com/xct/xc/)
-- [**https://weibell.github.io/reverse-shell-generator/**](https://weibell.github.io/reverse-shell-generator/)
-- [**https://github.com/t0thkr1s/revshellgen**](https://github.com/t0thkr1s/revshellgen)
-- [**https://github.com/mthbernardes/rsg**](https://github.com/mthbernardes/rsg)
+---
+
+## [Full TTYs](full-ttys.md)
+
+---
+
+## 参考資料
+
+- [1] [reverse-shell.sh - Reverse shell generator](https://reverse-shell.sh/)
+- [2] [revshells.com - Reverse shell generator](https://www.revshells.com/)
+- [3] [Shellerator - 複数の言語で bind shell と reverse shell を生成する CLI tool](https://github.com/ShutdownRepo/shellerator)
+- [4] [ShellPop - master のように shell を起動](https://github.com/0x00-0x00/ShellPop)
+- [5] [ShellReverse - python、perl、ruby、bash、netcat、php、java、powershell などに対応した Shell reverse creator](https://github.com/cybervaca/ShellReverse)
+- [6] [pyminifier - Python code の minifier/obfuscator](https://liftoff.github.io/pyminifier/)
+- [7] [xc - Linux と Windows 用の小型 reverse shell](https://github.com/xct/xc/)
+- [8] [Reverse Shell Generator](https://weibell.github.io/reverse-shell-generator/)
+- [9] [revshellgen - Python 3 で記述された Reverse shell generator](https://github.com/t0thkr1s/revshellgen)
+- [10] [rsg (ReverShellGenerator) - reverse shell を実行するさまざまな方法を生成する Tool](https://github.com/mthbernardes/rsg)
 
 {{#include ../../banners/hacktricks-training.md}}

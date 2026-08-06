@@ -6,486 +6,495 @@
 
 ### Windows 10 Notifications
 
-パス `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` には、データベース `appdb.dat`（Windows アニバーサリー前）または `wpndatabase.db`（Windows アニバーサリー後）があります。
+パス `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` に、データベース `appdb.dat`（Windows anniversary以前）または `wpndatabase.db`（Windows Anniversary以降）があります。
 
-この SQLite データベース内には、興味深いデータを含む可能性のあるすべての通知（XML 形式）の `Notification` テーブルがあります。
+この SQLite データベース内には、興味深いデータを含む可能性があるすべての通知（XML形式）が格納された `Notification` テーブルがあります。
 
 ### Timeline
 
-Timeline は、訪問したウェブページ、編集した文書、実行したアプリケーションの **時系列履歴** を提供する Windows の特徴です。
+Timeline は、アクセスした Web ページ、編集したドキュメント、実行したアプリケーションの**時系列履歴**を提供する Windows の機能です。
 
-データベースは、パス `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db` にあります。このデータベースは、SQLite ツールまたはツール [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) を使用して開くことができ、**2つのファイルを生成し、それらはツール** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md) **で開くことができます**。
+データベースはパス `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db` にあります。このデータベースは SQLite ツール、または[**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md)で開ける**2つのファイルを生成するツール**[**WxTCmd**](https://github.com/EricZimmerman/WxTCmd)で開くことができます。
 
 ### ADS (Alternate Data Streams)
 
-ダウンロードされたファイルには、**ADS Zone.Identifier** が含まれており、**どのように** intranet、internet などから **ダウンロードされたか** を示しています。一部のソフトウェア（ブラウザなど）は、ファイルがダウンロードされた**URL**など、さらに**多くの情報**を提供することがよくあります。
+ダウンロードしたファイルには、イントラネット、インターネットなどから**どのようにダウンロードされたか**を示す**ADS Zone.Identifier**が含まれている場合があります。一部のソフトウェア（ブラウザなど）は通常、ファイルのダウンロード元の**URL**など、さらに多くの**情報**も記録します。
 
 ## **File Backups**
 
 ### Recycle Bin
 
-Vista/Win7/Win8/Win10 では、**Recycle Bin** はドライブのルートにあるフォルダー **`$Recycle.bin`** にあります（`C:\$Recycle.bin`）。\
-このフォルダー内でファイルが削除されると、2つの特定のファイルが作成されます：
+Vista/Win7/Win8/Win10では、**Recycle Bin**はドライブのルートにあるフォルダー **`$Recycle.bin`**（`C:\$Recycle.bin`）にあります。\
+このフォルダー内のファイルが削除されると、次の2つのファイルが作成されます。
 
-- `$I{id}`: ファイル情報（削除された日時）
+- `$I{id}`: ファイル情報（削除日時}
 - `$R{id}`: ファイルの内容
 
-![](<../../../images/image (1029).png>)
+![File Backups - Recycle Bin: $R{id}: ファイルの内容](<../../../images/image (1029).png>)
 
-これらのファイルがあれば、ツール [**Rifiuti**](https://github.com/abelcheung/rifiuti2) を使用して削除されたファイルの元のアドレスと削除日時を取得できます（Vista – Win10 には `rifiuti-vista.exe` を使用）。
+これらのファイルがあれば、[**Rifiuti**](https://github.com/abelcheung/rifiuti2)を使用して、削除されたファイルの元の場所と削除日時を取得できます（Vista – Win10では `rifiuti-vista.exe` を使用）。
 ```
 .\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
 ```
-![](<../../../images/image (495) (1) (1) (1).png>)
+![File Backups - Recycle Bin: rifiuti-vista.exe C: Users student Desktop Recycle](<../../../images/image (495) (1) (1) (1).png>)
 
-### ボリュームシャドウコピー
+### Volume Shadow Copies
 
-シャドウコピーは、Microsoft Windowsに含まれる技術で、コンピュータファイルやボリュームの**バックアップコピー**やスナップショットを作成できます。これらは使用中であっても作成可能です。
+Shadow Copy は Microsoft Windows に含まれるテクノロジーで、使用中のコンピューターのファイルやボリュームであっても、**backup copies** やスナップショットを作成できます。
 
-これらのバックアップは通常、ファイルシステムのルートから` \System Volume Information`にあり、名前は以下の画像に示されている**UID**で構成されています。
+これらのバックアップは通常、ファイルシステムのルートにある `\System Volume Information` に保存され、名前は次の画像に示す **UIDs** で構成されます。
 
-![](<../../../images/image (94).png>)
+![Recycle Bin - Volume Shadow Copies: これらのバックアップは通常、ファイルシステムのルートにある System Volume Information に保存され、名前は画像に示す UIDs で構成されます](<../../../images/image (94).png>)
 
-**ArsenalImageMounter**を使用してフォレンジックイメージをマウントすると、ツール[**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html)を使用してシャドウコピーを検査し、シャドウコピーのバックアップから**ファイルを抽出**することができます。
+**ArsenalImageMounter** でフォレンジックイメージをマウントすると、[**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) を使用して shadow copy を調査したり、shadow copy のバックアップから**ファイルを抽出**したりできます。
 
-![](<../../../images/image (576).png>)
+![Recycle Bin - Volume Shadow Copies: ArsenalImageMounter でフォレンジックイメージをマウントすると、ShadowCopyView を使用して shadow copy を調査したり、ファイルを抽出したりできます](<../../../images/image (576).png>)
 
-レジストリエントリ`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore`には、**バックアップしない**ファイルとキーが含まれています。
+レジストリエントリ `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` には、**バックアップ対象外とするファイルおよびキー**が含まれています。
 
-![](<../../../images/image (254).png>)
+![Recycle Bin - Volume Shadow Copies: レジストリエントリ HKEY LOCAL MACHINE SYSTEM CurrentControlSet Control BackupRestore には、バックアップ対象外とするファイルおよびキーが含まれています](<../../../images/image (254).png>)
 
-レジストリ`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS`には、`ボリュームシャドウコピー`に関する構成情報も含まれています。
+レジストリ `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` には、`Volume Shadow Copies` に関する設定情報も含まれています。
 
-### Office自動保存ファイル
+### Office AutoSaved Files
 
-Officeの自動保存ファイルは次の場所にあります: `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
+Office の自動保存ファイルは次の場所にあります: `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
 
-## シェルアイテム
+## Shell Items
 
-シェルアイテムは、別のファイルにアクセスする方法に関する情報を含むアイテムです。
+shell item は、別のファイルへのアクセス方法に関する情報を含むアイテムです。
 
-### 最近の文書 (LNK)
+### Recent Documents (LNK)
 
-Windowsは、ユーザーが次の場所で**ファイルを開く、使用する、または作成する**ときに、これらの**ショートカット**を**自動的に****作成**します:
+Windows は、ユーザーが次の場所で**ファイルを開く、使用する、または作成する**と、これらの**ショートカット**を**自動的に****作成**します。
 
 - Win7-Win10: `C:\Users\\AppData\Roaming\Microsoft\Windows\Recent\`
 - Office: `C:\Users\\AppData\Roaming\Microsoft\Office\Recent\`
 
-フォルダーが作成されると、フォルダーへのリンク、親フォルダーへのリンク、および祖父フォルダーへのリンクも作成されます。
+フォルダーが作成されると、そのフォルダー、親フォルダー、および祖父母フォルダーへのリンクも作成されます。
 
-これらの自動的に作成されたリンクファイルは、**ファイル**か**フォルダー**か、**MAC** **タイム**、**ボリューム情報**、および**ターゲットファイルのフォルダー**に関する情報を**含んでいます**。この情報は、ファイルが削除された場合にそれらを回復するのに役立ちます。
+これらの自動的に作成されたリンクファイルには、それが**ファイル**か**フォルダー**か、ファイルの **MAC** **times**、ファイルが保存されている**ボリューム情報**、および**対象ファイルのフォルダー**など、**元のファイルに関する情報**が含まれています。この情報は、ファイルが削除された場合に復元するために役立ちます。
 
-また、リンクファイルの**作成日**は、元のファイルが**最初に**使用された**時間**であり、リンクファイルの**最終更新日**は、元のファイルが使用された**最後の時間**です。
+また、リンクファイルの**作成日時**は元のファイルが**初めて****使用された**最初の**時刻**であり、リンクファイルの**更新日時**は元のファイルが最後に使用された**時刻**です。
 
-これらのファイルを検査するには、[**LinkParser**](http://4discovery.com/our-tools/)を使用できます。
+これらのファイルを調査するには、[**LinkParser**](http://4discovery.com/our-tools/) を使用できます。
 
-このツールでは、**2セット**のタイムスタンプが見つかります:
+このツールでは、**2 sets** のタイムスタンプを確認できます。
 
-- **最初のセット:**
+- **First Set:**
 1. FileModifiedDate
 2. FileAccessDate
 3. FileCreationDate
-- **2番目のセット:**
+- **Second Set:**
 1. LinkModifiedDate
 2. LinkAccessDate
-3. LinkCreationDate
+3. LinkCreationDate.
 
-最初のセットのタイムスタンプは**ファイル自体のタイムスタンプ**を参照します。2番目のセットは**リンクされたファイルのタイムスタンプ**を参照します。
+1 つ目のタイムスタンプセットは、**ファイル自体のタイムスタンプ**を示します。2 つ目のセットは、リンクされたファイルの**タイムスタンプ**を示します。
 
-同じ情報は、Windows CLIツール[**LECmd.exe**](https://github.com/EricZimmerman/LECmd)を実行することで取得できます。
+Windows CLI ツール [**LECmd.exe**](https://github.com/EricZimmerman/LECmd) を実行しても、同じ情報を取得できます。
 ```
 LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 ```
-この場合、情報はCSVファイルに保存されます。
+この場合、情報は CSV ファイル内に保存されます。
 
-### ジャンプリスト
+### Jumplists
 
-これはアプリケーションごとに示される最近のファイルです。各アプリケーションでアクセスできる**アプリケーションによって使用された最近のファイルのリスト**です。これらは**自動的に作成されるか、カスタム**で作成されることがあります。
+これらは、アプリケーションごとに示される最近使用したファイルです。各アプリケーションでアクセスできる、**アプリケーションが最近使用したファイルの一覧**です。**自動またはカスタム**で作成されます。
 
-自動的に作成された**ジャンプリスト**は、`C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`に保存されます。ジャンプリストは、最初のIDがアプリケーションのIDである`{id}.autmaticDestinations-ms`という形式で命名されます。
+自動的に作成された **jumplists** は `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\` に保存されます。jumplists は `{id}.autmaticDestinations-ms` という形式で命名されます。先頭の ID はアプリケーションの ID です。
 
-カスタムジャンプリストは、`C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\`に保存され、通常はファイルに**重要な**ことが起こったためにアプリケーションによって作成されます（お気に入りとしてマークされているかもしれません）。
+カスタム jumplists は `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` に保存されます。通常、ファイルに関して**重要な出来事**（お気に入りとしてマークされた場合など）が発生したため、アプリケーションによって作成されます。
 
-任意のジャンプリストの**作成時間**は、**ファイルが最初にアクセスされた時間**を示し、**修正時間は最後にアクセスされた時間**を示します。
+jumplist の**作成日時**は、ファイルに**初めてアクセスした時刻**を示し、**変更日時**は最後にアクセスした時刻を示します。
 
-ジャンプリストは[**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md)を使用して調査できます。
+[**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md) を使用して jumplists を調査できます。
 
-![](<../../../images/image (168).png>)
+![Recent Documents (LNK) - Jumplists: JumplistExplorer を使用して jumplists を調査できます](<../../../images/image (168).png>)
 
-（_JumplistExplorerによって提供されるタイムスタンプは、ジャンプリストファイル自体に関連しています_）
+（_JumplistExplorer が提供するタイムスタンプは、jumplist ファイル自体に関連するものであることに注意してください_）
 
-### シェルバッグ
+### Shellbags
 
-[**このリンクをフォローしてシェルバッグについて学んでください。**](interesting-windows-registry-keys.md#shellbags)
+[**shellbags について学ぶには、このリンクを参照してください。**](interesting-windows-registry-keys.md#shellbags)
 
-## Windows USBの使用
+## Windows USB の使用
 
-USBデバイスが使用されたことを特定することは、以下の作成によって可能です：
+以下の作成によって、USB デバイスが使用されたことを特定できます。
 
 - Windows Recent Folder
 - Microsoft Office Recent Folder
-- ジャンプリスト
+- Jumplists
 
-一部のLNKファイルは、元のパスを指すのではなく、WPDNSEフォルダーを指しています：
+一部の LNK ファイルは、元のパスを指す代わりに WPDNSE フォルダーを指していることに注意してください。
 
-![](<../../../images/image (218).png>)
+![Shellbags - Use of Windows USBs: 一部の LNK ファイルは、元のパスを指す代わりに WPDNSE フォルダーを指していることに注意してください](<../../../images/image (218).png>)
 
-WPDNSEフォルダー内のファイルは元のファイルのコピーであり、PCの再起動では生き残らず、GUIDはシェルバッグから取得されます。
+WPDNSE フォルダー内のファイルは元のファイルのコピーです。そのため、PC の再起動後は残らず、GUID は shellbag から取得されます。
 
-### レジストリ情報
+### Registry Information
 
-[このページをチェックして](interesting-windows-registry-keys.md#usb-information) USB接続デバイスに関する興味深い情報を含むレジストリキーを学んでください。
+USB 接続デバイスに関する興味深い情報を含むレジストリキーについては、[このページを確認してください](interesting-windows-registry-keys.md#usb-information)。
 
 ### setupapi
 
-USB接続が行われた時刻に関するタイムスタンプを取得するには、`C:\Windows\inf\setupapi.dev.log`ファイルを確認してください（`Section start`を検索）。
+USB 接続が行われた時刻に関するタイムスタンプを取得するには、`C:\Windows\inf\setupapi.dev.log` ファイルを確認します（`Section start` を検索します）。
 
-![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
+![Registry Information - setupapi: USB 接続が行われた時刻に関するタイムスタンプを取得するには、ファイル C: Windows inf setupapi.dev.log を確認します（Section start を検索します）](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
 ### USB Detective
 
-[**USBDetective**](https://usbdetective.com)は、画像に接続されたUSBデバイスに関する情報を取得するために使用できます。
+[**USBDetective**](https://usbdetective.com) を使用すると、イメージに接続されたことのある USB デバイスに関する情報を取得できます。
 
-![](<../../../images/image (452).png>)
+![setupapi - USB Detective: USBDetective を使用すると、イメージに接続されたことのある USB デバイスに関する情報を取得できます](<../../../images/image (452).png>)
 
-### プラグアンドプレイのクリーンアップ
+### Plug and Play Cleanup
 
-「プラグアンドプレイのクリーンアップ」として知られるスケジュールされたタスクは、主に古いドライバーバージョンの削除を目的としています。最新のドライバーパッケージバージョンを保持するという指定された目的とは対照的に、オンラインソースは、過去30日間に非アクティブなドライバーも対象にしていることを示唆しています。したがって、過去30日間に接続されていないリムーバブルデバイスのドライバーは削除される可能性があります。
+「Plug and Play Cleanup」と呼ばれる scheduled task は、主に古い driver version の削除を目的としています。最新の driver package version を保持するという指定された目的とは反対に、online sources では、30 日間 inactive だった driver も対象にするとされています。そのため、過去 30 日間接続されていない removable device 用の driver は削除される可能性があります。<sup>[[1]](#references)</sup>
 
-タスクは次のパスにあります：`C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`。
+task は次の path にあります：`C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`。
 
-タスクの内容を示すスクリーンショットが提供されています： ![](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
+task の内容を示す screenshot は次のとおりです：![USB Detective - Plug and Play Cleanup: task は次の path にあります：C: Windows System32 Tasks Microsoft Windows Plug and Play Plug and Play Cleanup](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
 
-**タスクの主要コンポーネントと設定：**
+**task の主な component と設定：**
 
-- **pnpclean.dll**：このDLLは実際のクリーンアッププロセスを担当します。
-- **UseUnifiedSchedulingEngine**：`TRUE`に設定されており、一般的なタスクスケジューリングエンジンの使用を示します。
+- **pnpclean.dll**：実際の cleanup process を担当する DLL です。
+- **UseUnifiedSchedulingEngine**：`TRUE` に設定されており、generic task scheduling engine を使用することを示します。
 - **MaintenanceSettings**：
-- **Period ('P1M')**：タスクスケジューラに、定期的な自動メンテナンス中に毎月クリーンアップタスクを開始するよう指示します。
-- **Deadline ('P2M')**：タスクスケジューラに、タスクが2か月連続で失敗した場合、緊急自動メンテナンス中にタスクを実行するよう指示します。
+- **Period ('P1M')**：通常の Automatic maintenance 中に、Task Scheduler が毎月 cleanup task を開始するように指示します。
+- **Deadline ('P2M')**：task が 2 か月連続で失敗した場合、emergency Automatic maintenance 中に task を実行するよう Task Scheduler に指示します。
 
-この構成により、ドライバーの定期的なメンテナンスとクリーンアップが確保され、連続的な失敗が発生した場合にタスクを再試行するための規定が設けられています。
+この設定により、driver の定期的な maintenance と cleanup が保証され、連続して失敗した場合に task を再試行する仕組みも提供されます。
 
 **詳細については、次を確認してください：** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
 
-## メール
+## Emails
 
-メールには**2つの興味深い部分があります：ヘッダーとメールの内容**。**ヘッダー**には次のような情報が含まれています：
+Emails には、**2 つの興味深い部分があります：headers と email の content** です。**headers** には、次のような情報があります。
 
-- **誰が**メールを送信したか（メールアドレス、IP、メールサーバーがリダイレクトしたメール）
-- **いつ**メールが送信されたか
+- Emails を送信した**人物**（email address、IP、email を redirect した mail server）
+- Email が送信された**時刻**
 
-また、`References`および`In-Reply-To`ヘッダー内にはメッセージのIDが含まれています：
+また、`References` と `In-Reply-To` headers 内には、messages の ID があります。
 
-![](<../../../images/image (593).png>)
+![Plug and Play Cleanup - Emails: Email が送信された時刻](<../../../images/image (593).png>)
 
-### Windowsメールアプリ
+### Windows Mail App
 
-このアプリケーションは、メールをHTMLまたはテキスト形式で保存します。メールは、`\Users\<username>\AppData\Local\Comms\Unistore\data\3\`内のサブフォルダーにあります。メールは`.dat`拡張子で保存されます。
+この application は emails を HTML または text として保存します。Emails は `\Users\<username>\AppData\Local\Comms\Unistore\data\3\` 内の subfolder にあります。Emails は `.dat` extension で保存されます。
 
-メールの**メタデータ**と**連絡先**は、**EDBデータベース**内にあります：`\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
+Emails の **metadata** と **contacts** は **EDB database**：` \Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol` 内にあります。
 
-ファイルの拡張子を`.vol`から`.edb`に変更すると、ツール[**ESEDatabaseView**](https://www.nirsoft.net/utils/ese_database_view.html)を使用して開くことができます。`Message`テーブル内でメールを見ることができます。
+ファイルの **extension を `.vol` から `.edb` に変更**すると、[ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) を使用して開くことができます。`Message` table 内で emails を確認できます。
 
 ### Microsoft Outlook
 
-ExchangeサーバーまたはOutlookクライアントが使用されると、いくつかのMAPIヘッダーが存在します：
+Exchange server または Outlook client を使用している場合、いくつかの MAPI headers があります。
 
-- `Mapi-Client-Submit-Time`：メールが送信されたときのシステムの時間
-- `Mapi-Conversation-Index`：スレッドの子メッセージの数と各メッセージのタイムスタンプ
-- `Mapi-Entry-ID`：メッセージ識別子。
-- `Mappi-Message-Flags`および`Pr_last_Verb-Executed`：MAPIクライアントに関する情報（メッセージは読まれたか？未読か？応答されたか？リダイレクトされたか？不在か？）
+- `Mapi-Client-Submit-Time`：Email が送信されたシステム時刻
+- `Mapi-Conversation-Index`：thread の child message 数、および thread 内の各 message の timestamp
+- `Mapi-Entry-ID`：Message identifier
+- `Mappi-Message-Flags` と `Pr_last_Verb-Executed`：MAPI client に関する情報（message は read されたか、未読か、返信されたか、redirect されたか、out of the office か）
 
-Microsoft Outlookクライアントでは、送信/受信されたすべてのメッセージ、連絡先データ、およびカレンダーデータは、次の場所にあるPSTファイルに保存されます：
+Microsoft Outlook client では、送受信したすべての messages、contacts data、calendar data が、次の場所にある PST file に保存されます。
 
-- `%USERPROFILE%\Local Settings\Application Data\Microsoft\Outlook`（WinXP）
+- `%USERPROFILE%\Local Settings\Application Data\Microsoft\Outlook` (WinXP)
 - `%USERPROFILE%\AppData\Local\Microsoft\Outlook`
 
-レジストリパス`HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook`は、使用されているファイルを示しています。
+registry path `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` は、使用されている file を示します。
 
-PSTファイルは、ツール[**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html)を使用して開くことができます。
+PST file は [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html) を使用して開くことができます。
 
-![](<../../../images/image (498).png>)
+![Windows Mail App - Microsoft Outlook: Kernel PST Viewer を使用して PST file を開くことができます](<../../../images/image (498).png>)
 
-### Microsoft Outlook OSTファイル
+### Microsoft Outlook OST Files
 
-**OSTファイル**は、Microsoft Outlookが**IMAP**または**Exchange**サーバーで構成されると生成され、PSTファイルと同様の情報を保存します。このファイルはサーバーと同期され、**過去12か月間**のデータを保持し、**最大サイズは50GB**で、PSTファイルと同じディレクトリにあります。OSTファイルを表示するには、[**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html)を利用できます。
+**OST file** は、**IMAP** または **Exchange** server を使用するよう Microsoft Outlook が設定されている場合に生成され、PST file と同様の情報を保存します。この file は server と同期され、**過去 12 か月分**の data を保持します。最大 size は **50GB** で、PST file と同じ directory にあります。OST file を表示するには、[**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html) を使用できます。
 
-### 添付ファイルの取得
+### Retrieving Attachments
 
-失われた添付ファイルは、以下から回復可能です：
+失われた attachments は、次の場所から recovery できる可能性があります。
 
-- **IE10**の場合：`%APPDATA%\Local\Microsoft\Windows\Temporary Internet Files\Content.Outlook`
-- **IE11以降**の場合：`%APPDATA%\Local\Microsoft\InetCache\Content.Outlook`
+- **IE10** の場合：`%APPDATA%\Local\Microsoft\Windows\Temporary Internet Files\Content.Outlook`
+- **IE11 以降**の場合：`%APPDATA%\Local\Microsoft\InetCache\Content.Outlook`
 
-### Thunderbird MBOXファイル
+### Thunderbird MBOX Files
 
-**Thunderbird**は**MBOXファイル**を使用してデータを保存し、`Users\%USERNAME%\AppData\Roaming\Thunderbird\Profiles`にあります。
+**Thunderbird** は data の保存に **MBOX files** を使用します。これらは `\Users\%USERNAME%\AppData\Roaming\Thunderbird\Profiles` にあります。
 
-### 画像サムネイル
+### Image Thumbnails
 
-- **Windows XPおよび8-8.1**：サムネイルを含むフォルダーにアクセスすると、削除後も画像プレビューを保存する`thumbs.db`ファイルが生成されます。
-- **Windows 7/10**：UNCパスを介してネットワーク上でアクセスされると`thumbs.db`が作成されます。
-- **Windows Vista以降**：サムネイルプレビューは`%userprofile%\AppData\Local\Microsoft\Windows\Explorer`に集中し、**thumbcache_xxx.db**という名前のファイルが作成されます。[**Thumbsviewer**](https://thumbsviewer.github.io)および[**ThumbCache Viewer**](https://thumbcacheviewer.github.io)は、これらのファイルを表示するためのツールです。
+- **Windows XP と 8-8.1**：thumbnail のある folder にアクセスすると、削除後も image preview を保存する `thumbs.db` file が生成されます。
+- **Windows 7/10**：UNC path 経由で network 上の folder にアクセスした場合に `thumbs.db` が作成されます。
+- **Windows Vista 以降**：thumbnail preview は `%userprofile%\AppData\Local\Microsoft\Windows\Explorer` に集中管理され、**thumbcache_xxx.db** という名前の files に保存されます。[**Thumbsviewer**](https://thumbsviewer.github.io) と [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) は、これらの files を表示するための tools です。
 
-### Windowsレジストリ情報
+### Windows Registry Information
 
-Windowsレジストリは、広範なシステムおよびユーザー活動データを保存し、次のファイルに含まれています：
+広範な system および user activity data を保存する Windows Registry は、次の files に含まれています。
 
-- `%windir%\System32\Config`は、さまざまな`HKEY_LOCAL_MACHINE`サブキー用です。
-- `%UserProfile%{User}\NTUSER.DAT`は、`HKEY_CURRENT_USER`用です。
-- Windows Vista以降のバージョンは、`%Windir%\System32\Config\RegBack\`に`HKEY_LOCAL_MACHINE`レジストリファイルのバックアップを保存します。
-- さらに、プログラム実行情報は、Windows VistaおよびWindows 2008 Server以降の`%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT`に保存されます。
+- さまざまな `HKEY_LOCAL_MACHINE` subkey：`%windir%\System32\Config`
+- `HKEY_CURRENT_USER`：`%UserProfile%{User}\NTUSER.DAT`
+- Windows Vista 以降の version では、`HKEY_LOCAL_MACHINE` registry files の backup が `%Windir%\System32\Config\RegBack\` に保存されます。
+- さらに、program execution information は Windows Vista および Windows 2008 Server 以降、`%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT` に保存されます。
 
-### ツール
+### Tools
 
-レジストリファイルを分析するために役立つツールがいくつかあります：
+registry files の分析には、次の tools が役立ちます。
 
-- **レジストリエディタ**：Windowsにインストールされています。現在のセッションのWindowsレジストリをナビゲートするためのGUIです。
-- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md)：レジストリファイルをロードし、GUIでナビゲートすることを可能にします。また、興味深い情報を持つキーをハイライトするブックマークも含まれています。
-- [**RegRipper**](https://github.com/keydet89/RegRipper3.0)：再び、ロードされたレジストリをナビゲートするためのGUIを持ち、ロードされたレジストリ内の興味深い情報をハイライトするプラグインも含まれています。
-- [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html)：レジストリから重要な情報を抽出することができる別のGUIアプリケーションです。
+- **Registry Editor**：Windows に install されています。現在の session の Windows registry を GUI で移動するための tool です。
+- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md)：registry file を load し、GUI でその中を移動できます。また、興味深い情報を含む keys を強調表示する Bookmarks も含まれています。
+- [**RegRipper**](https://github.com/keydet89/RegRipper3.0)：これにも、load した registry 内を移動できる GUI があり、load した registry 内の興味深い情報を強調表示する plugins も含まれています。
+- [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html)：load した registry から重要な情報を抽出できる、別の GUI application です。
 
-### 削除された要素の回復
+### Recovering Deleted Element
 
-キーが削除されると、そのようにマークされますが、占有しているスペースが必要になるまで削除されません。したがって、**Registry Explorer**のようなツールを使用すると、これらの削除されたキーを回復することが可能です。
+key を削除すると削除済みとしてマークされますが、その key が占有している space が必要になるまでは削除されません。そのため、**Registry Explorer** などの tools を使用すれば、これらの削除された keys を recovery できます。
 
-### 最終書き込み時間
+### Last Write Time
 
-各キー-値には、最後に修正された時間を示す**タイムスタンプ**が含まれています。
+各 Key-Value には、最後に変更された時刻を示す**timestamp**が含まれています。
 
 ### SAM
 
-ファイル/ハイブ**SAM**には、システムの**ユーザー、グループ、およびユーザーパスワード**のハッシュが含まれています。
+file/hive **SAM** には、system の**users、groups、users の password hashes** が含まれています。
 
-`SAM\Domains\Account\Users`で、ユーザー名、RID、最終ログイン、最終失敗ログオン、ログインカウンター、パスワードポリシー、およびアカウントが作成された時期を取得できます。**ハッシュ**を取得するには、ファイル/ハイブ**SYSTEM**も**必要**です。
+`SAM\Domains\Account\Users` では、username、RID、last login、last failed logon、login counter、password policy、account の作成時刻を取得できます。**hashes** を取得するには、file/hive **SYSTEM** も**必要**です。
 
-### Windowsレジストリの興味深いエントリ
+### Interesting entries in the Windows Registry
 
 
 {{#ref}}
 interesting-windows-registry-keys.md
 {{#endref}}
 
-## 実行されたプログラム
+## Programs Executed
 
-### 基本的なWindowsプロセス
+### Basic Windows Processes
 
-[この投稿](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d)では、疑わしい動作を検出するための一般的なWindowsプロセスについて学ぶことができます。
+[この post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) では、不審な behaviours を検出するために、一般的な Windows processes について学ぶことができます。
 
 ### Windows Recent APPs
 
-レジストリ`NTUSER.DAT`内のパス`Software\Microsoft\Current Version\Search\RecentApps`には、**実行されたアプリケーション**、**最後に実行された時間**、および**起動された回数**に関する情報を含むサブキーがあります。
+registry `NTUSER.DAT` 内の path `Software\Microsoft\Current Version\Search\RecentApps` には、**実行された application**、その**最後の実行時刻**、および**起動回数**に関する情報を含む subkeys があります。
 
-### BAM（バックグラウンドアクティビティモデレーター）
+### BAM (Background Activity Moderator)
 
-レジストリエディタで`SYSTEM`ファイルを開き、パス`SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}`内で、**各ユーザーによって実行されたアプリケーション**に関する情報（パス内の`{SID}`に注意）と**実行された時間**を見つけることができます（時間はレジストリのデータ値内にあります）。
+registry editor で `SYSTEM` file を開き、path `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` 内を確認すると、**各 user が実行した applications**（path 内の `{SID}` に注意）と、それらが**実行された時刻**を確認できます（時刻は registry の Data value 内にあります）。
 
-### Windowsプリフェッチ
+### Windows Prefetch
 
-プリフェッチは、コンピュータがユーザーが**近い将来にアクセスする可能性のあるコンテンツを表示するために必要なリソースを静かに取得する**ことを可能にする技術です。これにより、リソースに迅速にアクセスできます。
+Prefetch は、user が**近い将来にアクセスする可能性のある content を表示するために必要な resources を、コンピューターがバックグラウンドで取得**し、より高速に resources にアクセスできるようにする technique です。
 
-Windowsプリフェッチは、**実行されたプログラムのキャッシュを作成**して、より速くロードできるようにします。これらのキャッシュは、次のパス内に`.pf`ファイルとして作成されます：`C:\Windows\Prefetch`。XP/VISTA/WIN7では128ファイル、Win8/Win10では1024ファイルの制限があります。
+Windows prefetch は、**実行された programs の cache** を作成して、より高速に load できるようにします。これらの cache は、path `C:\Windows\Prefetch` 内に `.pf` files として作成されます。XP/VISTA/WIN7 では 128 files、Win8/Win10 では 1024 files という上限があります。
 
-ファイル名は`{program_name}-{hash}.pf`として作成されます（ハッシュは実行可能ファイルのパスと引数に基づいています）。W10では、これらのファイルは圧縮されています。ファイルの存在は、**プログラムが実行された**ことを示しています。
+file name は `{program_name}-{hash}.pf` として作成されます（hash は executable の path と arguments に基づきます）。W10 では、これらの files は compressed されています。file が存在するだけで、**その program が過去のある時点で実行された**ことを示す点に注意してください。
 
-ファイル`C:\Windows\Prefetch\Layout.ini`には、**プリフェッチされたファイルのフォルダーの名前**が含まれています。このファイルには、**実行回数**、**実行日**、および**プログラムによって**開かれた**ファイルに関する情報が含まれています。
+`C:\Windows\Prefetch\Layout.ini` file には、prefetch された files の**folder 名**が含まれています。この file には、**実行回数**、実行の**dates**、および program によって**open** された **files** に関する情報が含まれています。
 
-これらのファイルを調査するには、ツール[**PEcmd.exe**](https://github.com/EricZimmerman/PECmd)を使用できます。
+これらの files を調査するには、[**PEcmd.exe**](https://github.com/EricZimmerman/PECmd) tool を使用できます。
 ```bash
 .\PECmd.exe -d C:\Users\student\Desktop\Prefetch --html "C:\Users\student\Desktop\out_folder"
 ```
-![](<../../../images/image (315).png>)
+![BAM (Background Activity Moderator) - Windows Prefetch: PECmd.exe -d C: Users student Desktop Prefetch --html "C: Users student Desktop out folder"](<../../../images/image (315).png>)
 
 ### Superprefetch
 
-**Superprefetch**は、次に読み込まれるものを予測することによって**プログラムをより速く読み込む**という同じ目的を持っています。しかし、これはprefetchサービスの代わりにはなりません。\
-このサービスは、`C:\Windows\Prefetch\Ag*.db`にデータベースファイルを生成します。
+**Superprefetch** は prefetch と同じ目的、つまり次にロードされるものを予測して **プログラムをより速くロードする** ことを目的としています。ただし、prefetch service を置き換えるものではありません。\
+この service は `C:\Windows\Prefetch\Ag*.db` に database files を生成します。
 
-これらのデータベースには、**プログラム**の**名前**、**実行回数**、**開かれたファイル**、**アクセスされたボリューム**、**完全なパス**、**時間枠**、および**タイムスタンプ**が含まれています。
+これらの database では、**program** の **name**、**executions** の **number**、**opened** **files**、アクセスされた **volume**、**complete** **path**、**timeframes**、**timestamps** を確認できます。
 
-この情報には、ツール[**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/)を使用してアクセスできます。
+この情報には [**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/) tool を使用してアクセスできます。
 
 ### SRUM
 
-**System Resource Usage Monitor** (SRUM)は、**プロセスによって消費されるリソース**を**監視**します。これはW8で登場し、`C:\Windows\System32\sru\SRUDB.dat`にESEデータベースとしてデータを保存します。
+**System Resource Usage Monitor** (SRUM) は、**process によって消費された** **resources** を **monitor** します。W8 で登場し、データは `C:\Windows\System32\sru\SRUDB.dat` にある ESE database に保存されます。
 
-以下の情報を提供します：
+次の情報が得られます。
 
-- AppIDとパス
-- プロセスを実行したユーザー
-- 送信バイト
-- 受信バイト
-- ネットワークインターフェース
-- 接続の持続時間
-- プロセスの持続時間
+- AppID and Path
+- process を実行した User
+- Sent Bytes
+- Received Bytes
+- Network Interface
+- Connection duration
+- Process duration
 
-この情報は60分ごとに更新されます。
+この情報は 60 分ごとに更新されます。
 
-このファイルから日付を取得するには、ツール[**srum_dump**](https://github.com/MarkBaggett/srum-dump)を使用できます。
+この file から date を取得するには、[**srum_dump**](https://github.com/MarkBaggett/srum-dump) tool を使用できます。
 ```bash
 .\srum_dump.exe -i C:\Users\student\Desktop\SRUDB.dat -t SRUM_TEMPLATE.xlsx -o C:\Users\student\Desktop\srum
 ```
 ### AppCompatCache (ShimCache)
 
-**AppCompatCache**、別名 **ShimCache** は、**Microsoft** によって開発された **Application Compatibility Database** の一部であり、アプリケーションの互換性の問題に対処するためのものです。このシステムコンポーネントは、以下のファイルメタデータのさまざまな情報を記録します。
+**AppCompatCache**（**ShimCache** とも呼ばれます）は、アプリケーションの互換性問題に対処するために **Microsoft** が開発した **Application Compatibility Database** の一部です。このシステムコンポーネントには、次のようなファイルメタデータが記録されます。
 
 - ファイルのフルパス
-- ファイルのサイズ
-- **$Standard_Information** (SI) の最終更新時刻
+- ファイルサイズ
+- **$Standard_Information**（SI）における最終変更時刻
 - ShimCache の最終更新時刻
 - プロセス実行フラグ
 
-このデータは、オペレーティングシステムのバージョンに基づいて特定の場所にレジストリ内に保存されます。
+このデータは、オペレーティングシステムのバージョンに応じて、レジストリ内の特定の場所に保存されます。
 
-- XP の場合、データは `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache` に保存され、96 エントリの容量があります。
-- Server 2003 および Windows バージョン 2008、2012、2016、7、8、10 の場合、ストレージパスは `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache` であり、それぞれ 512 および 1024 エントリを収容します。
+- XP では、データは `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache` に保存され、96 件まで格納できます。
+- Server 2003、および Windows 2008、2012、2016、7、8、10 では、保存先は `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache` で、それぞれ 512 件および 1024 件を格納できます。
 
-保存された情報を解析するには、[**AppCompatCacheParser** tool](https://github.com/EricZimmerman/AppCompatCacheParser) の使用が推奨されます。
+保存された情報を解析するには、[**AppCompatCacheParser tool**](https://github.com/EricZimmerman/AppCompatCacheParser) の使用が推奨されます。
 
-![](<../../../images/image (75).png>)
+![SRUM - AppCompatCache (ShimCache): 保存された情報を解析するには、AppCompatCacheParser tool の使用が推奨されます](<../../../images/image (75).png>)
 
 ### Amcache
 
 **Amcache.hve** ファイルは、システム上で実行されたアプリケーションの詳細を記録するレジストリハイブです。通常、`C:\Windows\AppCompat\Programas\Amcache.hve` にあります。
 
-このファイルは、最近実行されたプロセスの記録を保存しており、実行可能ファイルへのパスやその SHA1 ハッシュを含んでいます。この情報は、システム上のアプリケーションの活動を追跡するために非常に貴重です。
+このファイルには、最近実行されたプロセスの記録が保存されます。これには、実行可能ファイルへのパスや SHA1 ハッシュなどが含まれます。この情報は、システム上のアプリケーションの活動を追跡するうえで非常に有用です。
 
-**Amcache.hve** からデータを抽出して分析するには、[**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser) ツールを使用できます。以下のコマンドは、AmcacheParser を使用して **Amcache.hve** ファイルの内容を解析し、結果を CSV 形式で出力する方法の例です。
+**Amcache.hve** からデータを抽出して分析するには、[**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser) tool を使用できます。以下のコマンドは、AmcacheParser を使用して **Amcache.hve** ファイルの内容を解析し、結果を CSV 形式で出力する方法の例です：
 ```bash
 AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\genericUser\Desktop\outputFolder
 ```
-生成されたCSVファイルの中で、`Amcache_Unassociated file entries`は、未関連ファイルエントリに関する豊富な情報を提供するため、特に注目に値します。
+生成された CSV ファイルの中でも、`Amcache_Unassociated file entries` は、unassociated file entries に関する豊富な情報を提供するため、特に注目に値します。
 
-最も興味深いCVSファイルは、`Amcache_Unassociated file entries`です。
+生成される最も興味深い CSV ファイルは `Amcache_Unassociated file entries` です。
 
 ### RecentFileCache
 
-このアーティファクトはW7の`C:\Windows\AppCompat\Programs\RecentFileCache.bcf`にのみ存在し、いくつかのバイナリの最近の実行に関する情報を含んでいます。
+この artifact は W7 の `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` にのみ存在し、一部のバイナリの最近の実行に関する情報が含まれています。
 
-ファイルを解析するには、ツール[**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser)を使用できます。
+ファイルの解析には [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser) ツールを使用できます。
 
-### スケジュールされたタスク
+### Scheduled tasks
 
-これらは`C:\Windows\Tasks`または`C:\Windows\System32\Tasks`から抽出でき、XMLとして読み取ることができます。
+`C:\Windows\Tasks` または `C:\Windows\System32\Tasks` から抽出し、XML として読み取ることができます。
 
-### サービス
+### Services
 
-これらはレジストリの`SYSTEM\ControlSet001\Services`に見つけることができます。何が実行されるか、いつ実行されるかを見ることができます。
+レジストリの `SYSTEM\ControlSet001\Services` にあります。何が実行されるか、またいつ実行されるかを確認できます。
 
 ### **Windows Store**
 
-インストールされたアプリケーションは`\ProgramData\Microsoft\Windows\AppRepository\`にあります。このリポジトリには、データベース**`StateRepository-Machine.srd`**内にシステムにインストールされた**各アプリケーション**の**ログ**があります。
+インストールされたアプリケーションは `\ProgramData\Microsoft\Windows\AppRepository\`\
+にあります。
 
-このデータベースのアプリケーションテーブル内には、「Application ID」、「PackageNumber」、「Display Name」という列があり、これらの列にはプレインストールされたアプリケーションとインストールされたアプリケーションに関する情報が含まれており、インストールされたアプリケーションのIDは連続しているため、いくつかのアプリケーションがアンインストールされたかどうかを確認できます。
+この repository には、データベース **`StateRepository-Machine.srd`** 内に、システムにインストールされた**各アプリケーション**の **log** があります。
 
-インストールされたアプリケーションは、レジストリパス`Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`内でも見つけることができます。また、アンインストールされたアプリケーションは`Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`にあります。
+このデータベースの Application table では、"Application ID"、"PackageNumber"、"Display Name" の列を確認できます。これらの列には、pre-installed およびインストール済みアプリケーションに関する情報が含まれており、インストールされたアプリケーションの ID は連番になっているはずなので、一部のアプリケーションがアンインストールされたかどうかを確認できます。
 
-## Windowsイベント
+レジストリ パス `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
+から**インストールされたアプリケーション**を確認することもできます。\
+また、**アンインストールされた** **アプリケーション**は `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\` にあります。
 
-Windowsイベントに表示される情報は次のとおりです：
+## Windows Events
 
-- 何が起こったか
-- タイムスタンプ（UTC + 0）
-- 関与したユーザー
-- 関与したホスト（ホスト名、IP）
-- アクセスされた資産（ファイル、フォルダー、プリンター、サービス）
+Windows events に表示される情報は次のとおりです。
 
-ログは、Windows Vista以前は`C:\Windows\System32\config`にあり、Windows Vista以降は`C:\Windows\System32\winevt\Logs`にあります。Windows Vista以前はイベントログはバイナリ形式であり、以降は**XML形式**で、**.evtx**拡張子を使用しています。
+- 発生した内容
+- Timestamp (UTC + 0)
+- 関係する Users
+- 関係する Hosts (hostname、IP)
+- アクセスされた Assets (files、folder、printer、services)
 
-イベントファイルの場所は、SYSTEMレジストリの**`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`**で見つけることができます。
+Logs は、Windows Vista より前では `C:\Windows\System32\config` に、Windows Vista 以降では `C:\Windows\System32\winevt\Logs` にあります。Windows Vista より前では event logs は binary format でしたが、それ以降は **XML format** で、**.evtx** 拡張子が使用されます。
 
-これらはWindowsイベントビューア（**`eventvwr.msc`**）または[**Event Log Explorer**](https://eventlogxp.com) **や** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)**を使用して視覚化できます。**
+event files の場所は、SYSTEM registry の **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`** にあります。
 
-## Windowsセキュリティイベントログの理解
+Windows Event Viewer (**`eventvwr.msc`**) または [**Event Log Explorer**](https://eventlogxp.com) **や** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)** などのツールで表示できます。**
 
-アクセスイベントは、`C:\Windows\System32\winevt\Security.evtx`にあるセキュリティ構成ファイルに記録されます。このファイルのサイズは調整可能で、容量に達すると古いイベントが上書きされます。記録されたイベントには、ユーザーログインとログオフ、ユーザーアクション、セキュリティ設定の変更、ファイル、フォルダー、および共有資産へのアクセスが含まれます。
+## Windows Security Event Logging の理解
 
-### ユーザー認証のための主要なイベントID：
+Access events は、`C:\Windows\System32\winevt\Security.evtx` にある security configuration file に記録されます。このファイルのサイズは調整可能で、容量に達すると古い events が上書きされます。記録される events には、user logins と logoffs、user actions、security settings の変更、さらに files、folders、shared assets へのアクセスが含まれます。
 
-- **EventID 4624**: ユーザーが正常に認証されたことを示します。
-- **EventID 4625**: 認証の失敗を示します。
-- **EventIDs 4634/4647**: ユーザーログオフイベントを表します。
-- **EventID 4672**: 管理者権限でのログインを示します。
+### User Authentication における主要な Event IDs:
 
-#### EventID 4634/4647内のサブタイプ：
+- **EventID 4624**: User が正常に authentication されたことを示します。
+- **EventID 4625**: authentication の失敗を示します。
+- **EventIDs 4634/4647**: user logoff events を表します。
+- **EventID 4672**: administrative privileges での login を示します。
 
-- **インタラクティブ (2)**: 直接ユーザーログイン。
-- **ネットワーク (3)**: 共有フォルダーへのアクセス。
-- **バッチ (4)**: バッチプロセスの実行。
-- **サービス (5)**: サービスの起動。
-- **プロキシ (6)**: プロキシ認証。
-- **アンロック (7)**: パスワードで画面が解除されました。
-- **ネットワーククリアテキスト (8)**: IISからのクリアテキストパスワードの送信。
-- **新しい資格情報 (9)**: アクセスのために異なる資格情報を使用。
-- **リモートインタラクティブ (10)**: リモートデスクトップまたはターミナルサービスのログイン。
-- **キャッシュインタラクティブ (11)**: ドメインコントローラーに連絡せずにキャッシュされた資格情報でログイン。
-- **キャッシュリモートインタラクティブ (12)**: キャッシュされた資格情報でのリモートログイン。
-- **キャッシュアンロック (13)**: キャッシュされた資格情報での解除。
+#### EventID 4634/4647 内の Sub-types:
 
-#### EventID 4625のステータスおよびサブステータスコード：
+- **Interactive (2)**: User による直接の login。
+- **Network (3)**: shared folders への access。
+- **Batch (4)**: batch processes の実行。
+- **Service (5)**: services の起動。
+- **Proxy (6)**: proxy authentication。
+- **Unlock (7)**: password による screen の unlock。
+- **Network Cleartext (8)**: clear text password の送信。多くの場合 IIS から送信されます。
+- **New Credentials (9)**: access に異なる credentials を使用。
+- **Remote Interactive (10)**: Remote Desktop または terminal services による login。
+- **Cache Interactive (11)**: domain controller に contact せず、cached credentials で login。
+- **Cache Remote Interactive (12)**: cached credentials による remote login。
+- **Cached Unlock (13)**: cached credentials による unlock。
 
-- **0xC0000064**: ユーザー名が存在しない - ユーザー名列挙攻撃を示す可能性があります。
-- **0xC000006A**: 正しいユーザー名だがパスワードが間違っている - パスワード推測またはブルートフォース攻撃の可能性。
-- **0xC0000234**: ユーザーアカウントがロックアウトされている - 複数の失敗したログインに続くブルートフォース攻撃の可能性。
-- **0xC0000072**: アカウントが無効 - 無効なアカウントへの不正アクセスの試み。
-- **0xC000006F**: 許可された時間外のログオン - 設定されたログイン時間外のアクセスの試みを示し、不正アクセスの可能性があります。
-- **0xC0000070**: ワークステーション制限の違反 - 不正な場所からのログインの試みの可能性。
-- **0xC0000193**: アカウントの有効期限切れ - 有効期限切れのユーザーアカウントへのアクセスの試み。
-- **0xC0000071**: パスワードの有効期限切れ - 古いパスワードでのログインの試み。
-- **0xC0000133**: 時間同期の問題 - クライアントとサーバー間の大きな時間の不一致は、パス・ザ・チケットのようなより高度な攻撃を示す可能性があります。
-- **0xC0000224**: 強制的なパスワード変更が必要 - 頻繁な強制変更は、アカウントセキュリティを不安定にしようとする試みを示唆するかもしれません。
-- **0xC0000225**: セキュリティの問題ではなく、システムバグを示します。
-- **0xC000015b**: 拒否されたログオンタイプ - サービスログオンを実行しようとするユーザーなど、不正なログオンタイプでのアクセス試行。
+#### EventID 4625 の Status および Sub Status Codes:
 
-#### EventID 4616：
+- **0xC0000064**: User name が存在しません - username enumeration attack を示している可能性があります。
+- **0xC000006A**: 正しい user name ですが password が誤っています - password guessing または brute-force attempt の可能性があります。
+- **0xC0000234**: User account が lockout されています - 複数の failed logins を伴う brute-force attack の後に発生する可能性があります。
+- **0xC0000072**: Account が disabled です - disabled accounts への unauthorized attempts。
+- **0xC000006F**: 許可された時間外の logon - 設定された login hours 外からの access attempt を示し、unauthorized access の兆候である可能性があります。
+- **0xC0000070**: workstation restrictions への違反 - unauthorized location から login しようとした可能性があります。
+- **0xC0000193**: Account の expiration - expired user accounts による access attempts。
+- **0xC0000071**: Expired password - outdated passwords による login attempts。
+- **0xC0000133**: Time sync issues - client と server 間の大きな時間差は、pass-the-ticket など、より高度な attacks を示している可能性があります。
+- **0xC0000224**: Mandatory password change が必要 - 頻繁な mandatory changes は、account security を不安定化させようとする試みを示している可能性があります。
+- **0xC0000225**: Security issue ではなく、system bug を示します。
+- **0xC000015b**: Denied logon type - user が service logon など、許可されていない logon type で access を試みたことを示します。
 
-- **時間変更**: システム時間の変更、イベントのタイムラインを隠す可能性があります。
+#### EventID 4616:
 
-#### EventID 6005および6006：
+- **Time Change**: system time の変更。events の timeline を隠すために使用される可能性があります。
 
-- **システムの起動とシャットダウン**: EventID 6005はシステムの起動を示し、EventID 6006はシャットダウンを示します。
+#### EventID 6005 および 6006:
 
-#### EventID 1102：
+- **System Startup and Shutdown**: EventID 6005 は system の起動を示し、EventID 6006 は shutdown を示します。
 
-- **ログ削除**: セキュリティログがクリアされることは、違法行為を隠蔽するための赤信号です。
+#### EventID 1102:
 
-#### USBデバイストラッキングのためのイベントID：
+- **Log Deletion**: Security logs が clear されたことを示します。これは illicit activities の隠蔽でよく見られる red flag です。
 
-- **20001 / 20003 / 10000**: USBデバイスの最初の接続。
-- **10100**: USBドライバーの更新。
-- **EventID 112**: USBデバイス挿入の時間。
+#### USB Device Tracking の EventIDs:
 
-これらのログインタイプや資格情報ダンプの機会をシミュレートする実用的な例については、[Altered Securityの詳細ガイド](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them)を参照してください。
+- **20001 / 20003 / 10000**: USB device の初回接続。
+- **10100**: USB driver の更新。
+- **EventID 112**: USB device が挿入された時刻。
 
-イベントの詳細、ステータスおよびサブステータスコードは、特にEvent ID 4625でのイベントの原因に関するさらなる洞察を提供します。
+これらの login types と credential dumping opportunities をシミュレートする実践的な例については、[Altered Security の詳細な guide](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them) を参照してください。
 
-### Windowsイベントの回復
+Event details には status および sub-status codes が含まれており、events の原因についてさらに詳しく知ることができます。特に Event ID 4625 で重要です。
 
-削除されたWindowsイベントを回復する可能性を高めるために、疑わしいコンピュータの電源を直接抜いてシャットダウンすることをお勧めします。**Bulk_extractor**は、`.evtx`拡張子を指定する回復ツールであり、そのようなイベントを回復しようとする際に推奨されます。
+### Windows Events の復元
 
-### Windowsイベントを通じて一般的な攻撃を特定する
+削除された Windows Events を復元できる可能性を高めるには、対象 computer の電源を直接 unplugging して切ることが推奨されます。`.evtx` 拡張子を指定できる recovery tool **Bulk_extractor** を使用して、このような events の復元を試みることが推奨されます。
 
-一般的なサイバー攻撃を特定するためにWindowsイベントIDを利用する包括的なガイドについては、[Red Team Recipe](https://redteamrecipe.com/event-codes/)を訪れてください。
+### Windows Events による一般的な Attacks の特定
 
-#### ブルートフォース攻撃
+Windows Event IDs を使用して一般的な cyber attacks を特定する方法については、[Red Team Recipe](https://redteamrecipe.com/event-codes/) の包括的な guide を参照してください。
 
-複数のEventID 4625レコードによって識別され、攻撃が成功した場合はEventID 4624が続きます。
+#### Brute Force Attacks
 
-#### 時間変更
+複数の EventID 4625 records によって特定でき、attack が成功した場合は、その後に EventID 4624 が記録されます。
 
-EventID 4616によって記録され、システム時間の変更はフォレンジック分析を複雑にする可能性があります。
+#### Time Change
 
-#### USBデバイストラッキング
+EventID 4616 によって記録されます。system time の変更は forensic analysis を複雑にする可能性があります。
 
-USBデバイストラッキングに役立つシステムイベントIDには、初回使用のための20001/20003/10000、ドライバー更新のための10100、挿入タイムスタンプのためのEventID 112が含まれます。
+#### USB Device Tracking
 
-#### システム電源イベント
+USB device tracking に役立つ System EventIDs には、initial use 用の 20001/20003/10000、driver updates 用の 10100、挿入 timestamp 用の DeviceSetupManager の EventID 112 があります。
 
-EventID 6005はシステムの起動を示し、EventID 6006はシャットダウンを示します。
+#### System Power Events
 
-#### ログ削除
+EventID 6005 は system startup を示し、EventID 6006 は shutdown を示します。
 
-セキュリティEventID 1102はログの削除を示し、フォレンジック分析にとって重要なイベントです。
+#### Log Deletion
+
+Security EventID 1102 は logs の削除を示し、forensic analysis における重要な event です。
+
+## References
+
+- [1] [Windows Plug and Play Cleanup](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

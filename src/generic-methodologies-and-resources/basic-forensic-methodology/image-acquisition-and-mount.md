@@ -1,11 +1,11 @@
-# 画像取得とマウント
+# イメージ取得とマウント
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
 ## 取得
 
-> 常に**読み取り専用**で取得し、**コピー中にハッシュを取る**こと。元のデバイスは**書き込みブロック**し、検証済みのコピーのみで作業する。 
+> 常に**読み取り専用**で取得し、**コピー中にハッシュを計算**する。元のデバイスは**書き込みブロック**したままにし、検証済みのコピー上でのみ作業する。
 
 ### DD
 ```bash
@@ -16,22 +16,22 @@ sha256sum disk.img > disk.img.sha256
 ```
 ### dc3dd / dcfldd
 
-`dc3dd` は、dcfldd (DoD Computer Forensics Lab dd) のアクティブにメンテナンスされているフォークです。
+`dc3dd`は、dcfldd（DoD Computer Forensics Lab dd）からフォークされた、現在も積極的にメンテナンスされているツールです。
 ```bash
 # Create an image and calculate multiple hashes at acquisition time
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
 ```
 ### Guymager
-グラフィカルでマルチスレッドのイメージャーで、**raw (dd)**、**EWF (E01/EWFX)**、および**AFF4**出力をサポートし、並行検証が可能です。ほとんどのLinuxリポジトリで利用可能です（`apt install guymager`）。
+**raw (dd)**、**EWF (E01/EWFX)**、**AFF4** の出力と並列検証に対応した、グラフィカルなマルチスレッドイメージャー。ほとんどの Linux リポジトリで利用可能（`apt install guymager`）。
 ```bash
 # Start in GUI mode
 sudo guymager
 # Or acquire from CLI (since v0.9.5)
 sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /evidence/drive.e01
 ```
-### AFF4 (Advanced Forensics Format 4)
+### AFF4（Advanced Forensics Format 4）
 
-AFF4は、*非常に*大きな証拠（スパース、再開可能、クラウドネイティブ）用に設計されたGoogleの最新のイメージングフォーマットです。
+AFF4は、*非常に*大規模な証拠（スパース、再開可能、cloud-native）向けに設計されたGoogleの最新のイメージング形式です。<sup>[[1]](#references)</sup>
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -42,34 +42,34 @@ velociraptor --config server.yaml frontend collect --artifact Windows.Disk.Acqui
 ```
 ### FTK Imager (Windows & Linux)
 
-あなたは[FTK Imagerをダウンロード](https://accessdata.com/product-download)し、**raw、E01、またはAFF4**イメージを作成できます：
+[FTK Imagerをダウンロード](https://accessdata.com/product-download)して、**raw、E01、またはAFF4**イメージを作成できます:
 ```bash
 ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 --description 'Laptop seizure 2025-07-22' --examiner 'AnalystName' --compress 6
 ```
-### EWFツール (libewf)
+### EWF ツール（libewf）
 ```bash
 sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examiner --format encase6 --compression best
 ```
-### Imaging Cloud Disks
+### Cloud Disk のイメージ取得
 
-*AWS* – インスタンスをシャットダウンせずに**フォレンジックスナップショット**を作成する:
+*AWS* – インスタンスをシャットダウンせずに **forensic snapshot** を作成する：
 ```bash
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – use `az snapshot create` and export to a SAS URL.
+*Azure* – `az snapshot create` を使用し、SAS URL にエクスポートします。
 
 
 ## マウント
 
 ### 適切なアプローチの選択
 
-1. 元のパーティションテーブル（MBR/GPT）が必要な場合は、**全ディスク**をマウントします。
-2. 1つのボリュームのみが必要な場合は、**単一パーティションファイル**をマウントします。
-3. 常に**読み取り専用**（`-o ro,norecovery`）でマウントし、**コピー**で作業します。
+1. 元のパーティションテーブル（MBR/GPT）が必要な場合は、**ディスク全体**をマウントします。
+2. 1つのボリュームだけが必要な場合は、**単一のパーティションファイル**をマウントします。
+3. 常に**読み取り専用**（`-o ro,norecovery`）でマウントし、**コピー**上で作業します。<sup>[[2]](#references)</sup>
 
-### 生画像（dd、AFF4抽出）
+### Raw images（dd、AFF4-extracted）
 ```bash
 # Identify partitions
 fdisk -l disk.img
@@ -84,7 +84,7 @@ lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
 # Mount a partition (e.g. /dev/nbd0p2)
 sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
 ```
-完了したら切り離す:
+完了したらデタッチ:
 ```bash
 sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
 ```
@@ -100,14 +100,14 @@ sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 # 3. Mount the desired partition
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
-代わりに **xmount** を使用してオンザフライで変換します:
+または **xmount** を使用してオンザフライで変換します：
 ```bash
 xmount --in ewf evidence.E01 --out raw /tmp/raw_mount
 mount -o ro /tmp/raw_mount/image.dd /mnt
 ```
 ### LVM / BitLocker / VeraCrypt ボリューム
 
-ブロックデバイス（ループまたはnbd）を接続した後：
+ブロックデバイス（loop または nbd）を接続した後:
 ```bash
 # LVM
 sudo vgchange -ay               # activate logical volumes
@@ -119,29 +119,29 @@ sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
 ```
 ### kpartx ヘルパー
 
-`kpartx` は、イメージから `/dev/mapper/` へのパーティションを自動的にマッピングします:
+`kpartx` はイメージ内のパーティションを自動的に `/dev/mapper/` にマッピングします:
 ```bash
 sudo kpartx -av disk.img  # creates /dev/mapper/loop0p1, loop0p2 …
 mount -o ro /dev/mapper/loop0p2 /mnt
 ```
-### 一般的なマウントエラーと修正
+### よくある mount エラーと修正方法
 
-| エラー | 一般的な原因 | 修正 |
+| エラー | 典型的な原因 | 修正方法 |
 |-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | ジャーナル化されたファイルシステム (ext4) が正常にアンマウントされていない | `-o ro,norecovery` を使用 |
-| `bad superblock …` | オフセットが間違っているか、ファイルシステムが破損している | オフセットを計算する (`sector*size`) か、コピーに対して `fsck -n` を実行 |
-| `mount: unknown filesystem type 'LVM2_member'` | LVMコンテナ | `vgchange -ay` でボリュームグループをアクティブ化 |
+| `cannot mount /dev/loop0 read-only` | ジャーナリングFS（ext4）が正常にアンマウントされていない | `-o ro,norecovery` を使用 |
+| `bad superblock …` | オフセットが間違っている、またはFSが破損している | オフセット（`sector*size`）を計算するか、コピーに対して `fsck -n` を実行 |
+| `mount: unknown filesystem type 'LVM2_member'` | LVMコンテナ | `vgchange -ay` で volume group をアクティベート |
 
 ### クリーンアップ
 
-**umount** と **disconnect** ループ/nbdデバイスを忘れずに行い、さらなる作業を破損させる可能性のあるダングリングマッピングを残さないようにしてください:
+作業の妨げとなるマッピングが残り、以降の作業を破損させる可能性があるため、loop/nbd デバイスの **umount** と **disconnect** を忘れないでください:
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 ```
 ## 参考文献
 
-- AFF4イメージングツールの発表と仕様: https://github.com/aff4/aff4
-- qemu-nbdマニュアルページ（ディスクイメージを安全にマウントする）: https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html
+- [1] [AFF4 Standard Specification (Advanced Forensic Format v4)](https://github.com/aff4/Standard)
+- [2] [qemu-nbd マニュアルページ（disk image を安全に mount する方法）](https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html)
 
 {{#include ../../banners/hacktricks-training.md}}

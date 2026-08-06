@@ -1,6 +1,8 @@
+# VBS Filesの難読化解除 Techniques
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-悪意のあるVBSファイルをデバッグ/デオブフスケートするのに役立ついくつかのこと：
+悪意のあるVBS fileのデバッグや難読化解除に役立つ可能性があるもの:
 
 ## echo
 ```bash

@@ -2,110 +2,110 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Wireshark スキルを向上させる
+## Wireshark のスキルを向上させる
 
 ### Tutorials
 
-以下の tutorials は、いくつかの便利な基本テクニックを学ぶのに最適です:
+以下の Tutorials では、便利な基本的 tricks を学べます。
 
 - [https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/](https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/](https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/](https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/](https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/)
 
-### Analysed Information
+### 解析された情報
 
 **Expert Information**
 
-_**Analyze** --> **Expert Information**_ をクリックすると、**解析**されたパケットで何が起きているかの**概要**を確認できます:
+_**Analyze** --> **Expert Information**_ をクリックすると、**解析された** packets で何が起きているかの **overview** を確認できます。
 
-![](<../../../images/image (256).png>)
+![Tutorials - 解析された情報: Analyze -- Expert Information をクリックすると、解析された packets で何が起きているかの overview を確認できます](<../../../images/image (256).png>)
 
 **Resolved Addresses**
 
-_**Statistics --> Resolved Addresses**_ の下では、wireshark によって "**resolved**" された複数の**情報**を確認できます。たとえば port/transport から protocol への変換、MAC から manufacturer への変換などです。通信に何が関与しているかを知るのに役立ちます。
+_**Statistics --> Resolved Addresses**_ では、port/transport から protocol への対応付けや、MAC から manufacturer の特定など、wireshark によって "**resolved**" された複数の **information** を確認できます。通信に何が関与しているかを把握するうえで役立ちます。
 
-![](<../../../images/image (893).png>)
+![Tutorials - 解析された情報: Statistics -- Resolved Addresses では、port/transport から protocol への対応付けや、MAC から...など、wireshark によって「resolved」された複数の information を確認できます](<../../../images/image (893).png>)
 
 **Protocol Hierarchy**
 
-_**Statistics --> Protocol Hierarchy**_ の下では、通信に**関与**している **protocols** と、それらに関する data を確認できます。
+_**Statistics --> Protocol Hierarchy**_ では、通信に **involved** している **protocols** と、それらに関する data を確認できます。
 
-![](<../../../images/image (586).png>)
+![Tutorials - 解析された情報: Statistics -- Protocol Hierarchy では、通信に involved している protocols と、それらに関する data を確認できます](<../../../images/image (586).png>)
 
 **Conversations**
 
-_**Statistics --> Conversations**_ の下では、通信内の **conversations の要約** と、それらに関する data を確認できます。
+_**Statistics --> Conversations**_ では、通信における **conversations の summary** と、それらに関する data を確認できます。
 
-![](<../../../images/image (453).png>)
+![Tutorials - 解析された情報: Statistics -- Conversations では、通信における conversations の summary と、それらに関する data を確認できます](<../../../images/image (453).png>)
 
 **Endpoints**
 
-_**Statistics --> Endpoints**_ の下では、通信内の **endpoints の要約** と、それぞれに関する data を確認できます。
+_**Statistics --> Endpoints**_ では、**endpoints の summary** と、それぞれに関する data を確認できます。
 
-![](<../../../images/image (896).png>)
+![Tutorials - 解析された情報: Statistics -- Endpoints では、endpoints の summary と、それぞれに関する data を確認できます](<../../../images/image (896).png>)
 
 **DNS info**
 
-_**Statistics --> DNS**_ の下では、キャプチャされた DNS request に関する statistics を確認できます。
+_**Statistics --> DNS**_ では、capture された DNS request に関する statistics を確認できます。
 
-![](<../../../images/image (1063).png>)
+![Tutorials - 解析された情報: Statistics -- DNS では、capture された DNS request に関する statistics を確認できます](<../../../images/image (1063).png>)
 
 **I/O Graph**
 
-_**Statistics --> I/O Graph**_ の下では、**通信の graph** を確認できます。
+_**Statistics --> I/O Graph**_ では、**通信の graph** を確認できます。
 
-![](<../../../images/image (992).png>)
+![Tutorials - 解析された情報: Statistics -- I/O Graph では、通信の graph を確認できます](<../../../images/image (992).png>)
 
 ### Filters
 
-protocol ごとの wireshark filter はここで確認できます: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
-現在の Wireshark では、古い `ssl.*` filter 名の代わりに `tls.*` を使います。\
+protocol に応じた wireshark filter は、こちらで確認できます: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
+現在の Wireshark では、古い `ssl.*` filter names の代わりに `tls.*` を使用します。\
 その他の興味深い filters:
 
 - `(http.request or tls.handshake.type == 1) and !(udp.port eq 1900)`
-- HTTP と最初の HTTPS traffic
+- HTTP および初期 HTTPS traffic
 - `(http.request or tls.handshake.type == 1 or tcp.flags eq 0x0002) and !(udp.port eq 1900)`
-- HTTP と最初の HTTPS traffic + TCP SYN
+- HTTP および初期 HTTPS traffic + TCP SYN
 - `(http.request or tls.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
-- HTTP と最初の HTTPS traffic + TCP SYN + DNS requests
+- HTTP および初期 HTTPS traffic + TCP SYN + DNS requests
 - `tls.handshake.extensions_server_name contains "example.com"`
-- ペイロードを復号できない場合でも、ClientHello で送信された SNI を起点に pivot する
+- payload を decrypt できない場合でも、ClientHello で送信された SNI を pivot
 - `tls.handshake.extensions_alpn_str == "h2" or tls.handshake.extensions_alpn_str == "h3"`
-- 従来の HTTPS、HTTP/2、HTTP/3 対応セッションを素早く分離する
+- classic HTTPS、HTTP/2、HTTP/3 対応 sessions をすばやく分離
 - `quic or http3`
-- TCP conversations だけを確認していると見逃す modern な UDP/443 traffic を見つける
+- TCP conversations だけを確認すると見落とす modern UDP/443 traffic を検索
 
 ### Search
 
-session の **packets** 内の **content** を**検索**したい場合は _CTRL+f_ を押します。メインの information bar (No., Time, Source, etc.) に新しい layers を追加するには、右ボタンを押してから edit column を選びます。
+sessions の **packets** 内にある **content** を **search** するには、_CTRL+f_ を押します。右ボタンを押してから edit column を選択すると、main information bar（No.、Time、Source など）に新しい layers を追加できます。
 
-### Following multiplexed streams
+### multiplexed streams の追跡
 
-最近の Wireshark では、`TLS`、`HTTP/2`、`QUIC` streams を直接 follow できます。ノイズの多い capture では、特に複数の request が同じ connection を共有している場合、`Follow TCP Stream` だけを使うより通常はこちらのほうが速いです。
+最近の Wireshark versions では、`TLS`、`HTTP/2`、`QUIC` streams を直接追跡できます。noisy captures では、これは通常、`Follow TCP Stream` だけを使用するより高速です。特に、複数の requests が同じ connection を共有している場合に有効です。
 
-### Free pcap labs
+### 無料の pcap labs
 
-**以下の free challenges で練習できます:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
+**Practice with the free challenges of:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
 
-## Identifying Domains
+## Domains の特定
 
 Host HTTP header を表示する column を追加できます:
 
-![](<../../../images/image (639).png>)
+![Free pcap labs - Domains の特定: Host HTTP header を表示する column を追加できます](<../../../images/image (639).png>)
 
-また、開始された HTTPS connection (**tls.handshake.type == 1**) から Server name を追加する column もあります:
+また、initiating HTTPS connection（**tls.handshake.type == 1**）から Server name を追加する column も設定できます:
 
-![](<../../../images/image (408) (1).png>)
+![Free pcap labs - Domains の特定: initiating HTTPS connection（ tls.handshake.type == 1 ）から Server name を追加する column](<../../../images/image (408) (1).png>)
 
-capture の大半が encrypted なら、これらの fields を column として追加すると triage がかなり速くなります:
+capture の大部分が encrypted の場合、これらの fields を columns として追加すると triage を大幅に高速化できます:
 
 - `tls.handshake.extensions_server_name`
 - `tls.handshake.extensions_alpn_str`
 - `tls.handshake.ja3`
 - `tls.handshake.ja4` (Wireshark 4.2+)
 
-これにより、payload 自体が encrypted のままでも、hostname、ALPN (`http/1.1`, `h2`, `h3`, など)、client fingerprint で session を cluster できます。復号済みの HTTP/2 と HTTP/3 capture では、`http2.header.value` または `http3.headers.header.value` を column として追加し、paths、authorities、その他の興味深い metadata を起点に pivot するのも有用です。
+これにより、payload 自体が encrypted のままでも、hostname、ALPN（`http/1.1`、`h2`、`h3` など）、client fingerprint に基づいて sessions を cluster できます。decrypted HTTP/2 および HTTP/3 captures では、`http2.header.value` または `http3.headers.header.value` を columns として追加し、paths、authorities、その他の興味深い metadata を pivot することも有用です。<sup>[[2]](#references)</sup>
 ```bash
 tshark -r capture.pcapng -Y "tls.handshake.type == 1" -T fields \
 -e frame.number -e ip.src -e ip.dst \
@@ -113,51 +113,51 @@ tshark -r capture.pcapng -Y "tls.handshake.type == 1" -T fields \
 -e tls.handshake.extensions_alpn_str \
 -e tls.handshake.ja3 -e tls.handshake.ja4
 ```
-## ローカルホスト名の識別
+## ローカルホスト名の特定
 
 ### DHCPから
 
-現在の Wireshark では `bootp` の代わりに `DHCP` を検索する必要があります
+現在の Wireshark では、`bootp` の代わりに `DHCP` を検索する必要があります。
 
-![](<../../../images/image (1013).png>)
+![ローカルホスト名の特定 - DHCPから: 現在の Wireshark では、bootp の代わりに DHCP を検索する必要があります](<../../../images/image (1013).png>)
 
 ### NBNSから
 
-![](<../../../images/image (1003).png>)
+![DHCPから - NBNSから: 現在の Wireshark では、bootp の代わりに DHCP を検索する必要があります](<../../../images/image (1003).png>)
 
 ## TLSの復号
 
-### サーバーの秘密鍵で https traffic を復号する
+### server private keyを使用したhttpsトラフィックの復号
 
 _edit > preferences > protocols > tls >_
 
-![](<../../../images/image (1103).png>)
+![TLSの復号 - server private keyを使用したhttpsトラフィックの復号: server private keyを使用したhttpsトラフィックの復号](<../../../images/image (1103).png>)
 
-_Edit_ を押して、サーバーと秘密鍵のすべてのデータ（_IP, Port, Protocol, Key file and password_）を追加します
+_Edit_ を押し、serverとprivate keyのすべての情報（_IP、Port、Protocol、Key file、password_）を追加します。
 
-この方法は限られたケースでしか機能しません。現在の TLS 1.3 / ECDHE traffic では、通常は下の session key log method が実用的な選択肢です。
+この方法が機能するケースは限られています。現在の TLS 1.3 / ECDHE トラフィックでは、通常、以下の session key log method が実用的な選択肢です。<sup>[[1]](#references)</sup>
 
-### 対称 session keys で https traffic を復号する
+### symmetric session keysを使用したhttpsトラフィックの復号
 
-Firefox と Chrome の両方に TLS session keys をログ出力する機能があり、Wireshark で TLS traffic を復号するために使えます。これにより、secure communications の詳細な分析が可能になります。この復号を行う方法の詳細は [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/) のガイドで確認できます。これは、modern TLS 1.3 と QUIC/HTTP/3 captures を復号するための通常の方法でもあります。
+Firefox と Chrome はどちらも TLS session keys をログに記録する機能を備えており、これを Wireshark で TLS トラフィックの復号に使用できます。これにより、secure communications を詳細に分析できます。この復号方法の詳細は、[Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/) の guide に記載されています。<sup>[[3]](#references)</sup> これは、modern TLS 1.3 および QUIC/HTTP/3 captures を復号する通常の方法でもあります。<sup>[[2]](#references)</sup>
 
-これを検出するには、環境内で変数 `SSLKEYLOGFILE` を検索します
+これを検出するには、environment 内で変数 `SSLKEYLOGFILE` を検索します。
 
-共有鍵のファイルは次のようになります:
+shared keys のファイルは次のようになります。
 
-![](<../../../images/image (820).png>)
+![server private keyを使用したhttpsトラフィックの復号 - symmetric session keysを使用したhttpsトラフィックの復号: shared keys のファイルは次のようになります](<../../../images/image (820).png>)
 
-キャプチャが `pcapng` の場合、ホストの filesystem を調べる前に、すでに埋め込まれた decryption secrets を含んでいるか確認してください:
+capture が `pcapng` の場合は、host filesystem を調査する前に、すでに embedded decryption secrets が含まれているか確認します。<sup>[[1]](#references)</sup>
 ```bash
 editcap --extract-secrets capture.pcapng tls-secrets.txt
 ```
-wiresharkでこれをインポートするには、\_edit > preferences > protocols > tls > に移動し、(Pre)-Master-Secret log filename にインポートします:
+これを wireshark にインポートするには、\_edit > preferences > protocols > tls > に移動し、(Pre)-Master-Secret log filename にインポートします:
 
-![](<../../../images/image (989).png>)
+![server private key を使用した https traffic の復号 - symmetric session keys を使用した https traffic の復号: editcap --extract-secrets capture.pcapng tls-secrets.txt](<../../../images/image (989).png>)
 
 ## ADB communication
 
-APKが送信されたADB communicationからAPKを抽出する:
+APK が送信された ADB communication から APK を抽出します:
 ```python
 from scapy.all import *
 
@@ -184,9 +184,10 @@ f = open('all_bytes.data', 'w+b')
 f.write(all_bytes)
 f.close()
 ```
-## References
+## 参考文献
 
-- [Wireshark TLS wiki](https://wiki.wireshark.org/TLS)
-- [Decrypting and parsing HTTP/3 traffic in Wireshark](https://blog.elmo.sg/posts/parsing-decrypted-quic-traffic-in-wireshark/)
+- [1] [Wireshark TLS wiki](https://wiki.wireshark.org/TLS)
+- [2] [WiresharkでHTTP/3トラフィックを復号および解析する](https://blog.elmo.sg/posts/parsing-decrypted-quic-traffic-in-wireshark/)
+- [3] [WiresharkでTLS Browser Trafficを復号する - 簡単な方法！](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)
 
 {{#include ../../../banners/hacktricks-training.md}}

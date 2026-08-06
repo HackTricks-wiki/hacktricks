@@ -1,39 +1,39 @@
-# PDFファイル分析
+# PDF File analysis
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**詳細については、次を確認してください:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)
+**詳細については以下を確認してください:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)<sup>[[1]](#references)</sup>
 
-PDFフォーマットは、その複雑さとデータを隠す可能性で知られており、CTFフォレンジックチャレンジの焦点となっています。これは、圧縮または暗号化される可能性のあるバイナリオブジェクトとプレーンテキスト要素を組み合わせており、JavaScriptやFlashなどの言語でのスクリプトを含むことがあります。PDFの構造を理解するには、Didier Stevensの[入門資料](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/)を参照するか、テキストエディタやOrigamiのようなPDF専用エディタを使用できます。
+PDF formatは、その複雑さとデータを隠蔽できる可能性で知られており、CTF forensics challengeの主要な対象となっています。PDFはプレーンテキスト要素とバイナリオブジェクトを組み合わせており、それらは圧縮または暗号化されている場合があります。また、JavaScriptやFlashなどの言語によるスクリプトを含めることもできます。PDFの構造を理解するには、Didier Stevensの[入門資料](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/)を参照するか、テキストエディタやOrigamiのようなPDF専用エディタを使用できます。
 
-PDFの詳細な探索や操作には、[qpdf](https://github.com/qpdf/qpdf)や[Origami](https://github.com/mobmewireless/origami-pdf)のようなツールが利用可能です。PDF内の隠されたデータは以下に隠されている可能性があります：
+PDFを詳しく調査または操作するには、[qpdf](https://github.com/qpdf/qpdf)や[Origami](https://github.com/mobmewireless/origami-pdf)などのツールを利用できます。PDF内のHidden dataは、以下の場所に隠されている可能性があります。
 
-- 見えないレイヤー
-- AdobeによるXMPメタデータ形式
-- 増分生成
+- 非表示レイヤー
+- AdobeのXMP metadata format
+- Incremental generations
 - 背景と同じ色のテキスト
-- 画像の背後にあるテキストや重なり合った画像
+- 画像の背後にあるテキスト、または重なり合った画像
 - 表示されないコメント
 
-カスタムPDF分析には、[PeepDF](https://github.com/jesparza/peepdf)のようなPythonライブラリを使用して、特注のパーススクリプトを作成できます。さらに、PDFの隠されたデータストレージの可能性は非常に広範であり、NSAのPDFリスクと対策に関するガイドのようなリソースは、もはや元の場所にホストされていないものの、貴重な洞察を提供します。[ガイドのコピー](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%Bútmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf)や、Ange Albertiniによる[PDFフォーマットのトリック](https://github.com/corkami/docs/blob/master/PDF/PDF.md)のコレクションは、このテーマに関するさらなる読み物を提供します。
+カスタムPDF分析には、[PeepDF](https://github.com/jesparza/peepdf)などのPython librariesを使用して、目的に合わせたparsing scriptを作成できます。さらに、PDFはHidden dataを保存できる可能性が非常に高いため、PDFのrisksとcountermeasuresに関するNSA guideは、元の場所では現在ホストされていないものの、依然として有益な情報を提供しています。[guideのcopy](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf)や、Ange Albertiniによる[PDF format tricks](https://github.com/corkami/docs/blob/master/PDF/PDF.md)のcollectionから、さらに詳しく学ぶことができます。
 
-## 一般的な悪意のある構造
+## Common Malicious Constructs
 
-攻撃者は、文書が開かれたり操作されたりする際に自動的に実行される特定のPDFオブジェクトやアクションを悪用することがよくあります。探す価値のあるキーワード：
+Attackersは、documentを開いたときや操作したときに自動的に実行される特定のPDF objectsやactionsを悪用することがよくあります。以下のkeywordsを探してください。
 
-* **/OpenAction, /AA** – 開くときや特定のイベントで実行される自動アクション。
-* **/JS, /JavaScript** – 埋め込まれたJavaScript（しばしば難読化されているか、オブジェクト間で分割されている）。
-* **/Launch, /SubmitForm, /URI, /GoToE** – 外部プロセス/URLランチャー。
-* **/RichMedia, /Flash, /3D** – ペイロードを隠すことができるマルチメディアオブジェクト。
-* **/EmbeddedFile /Filespec** – ファイル添付（EXE、DLL、OLEなど）。
-* **/ObjStm, /XFA, /AcroForm** – シェルコードを隠すために一般的に悪用されるオブジェクトストリームまたはフォーム。
-* **増分更新** – 複数の%%EOFマーカーや非常に大きな**/Prev**オフセットは、AVを回避するために署名後にデータが追加されたことを示す可能性があります。
+* **/OpenAction, /AA** – open時または特定のevents発生時に実行されるautomatic actions。
+* **/JS, /JavaScript** – embedded JavaScript（多くの場合、obfuscatedまたは複数のobjectsに分割されている）。
+* **/Launch, /SubmitForm, /URI, /GoToE** – external process / URL launchers。
+* **/RichMedia, /Flash, /3D** – payloadsを隠す可能性があるmultimedia objects。
+* **/EmbeddedFile /Filespec** – file attachments（EXE、DLL、OLEなど）。
+* **/ObjStm, /XFA, /AcroForm** – shell-codeを隠すために悪用されることが多いobject streamsまたはforms。
+* **Incremental updates** – 複数の%%EOF markersまたは非常に大きな**/Prev** offsetは、AVを回避するためにsigning後にdataがappendされたことを示している可能性があります。
 
-前述のトークンが疑わしい文字列（powershell、cmd.exe、calc.exe、base64など）と一緒に現れる場合、PDFはより深い分析に値します。
+前述のtokensがsuspicious strings（powershell、cmd.exe、calc.exe、base64など）とともに現れる場合、そのPDFはより詳細な分析に値します。
 
 ---
 
-## 静的分析チートシート
+## Static analysis cheat-sheet
 ```bash
 # Fast triage – keyword statistics
 pdfid.py suspicious.pdf
@@ -54,22 +54,22 @@ qpdf --password='secret' --decrypt suspicious.pdf clean.pdf
 # Lint the file with a Go verifier (checks structure violations)
 pdfcpu validate -mode strict clean.pdf
 ```
-追加の有用なプロジェクト（2023-2025年に積極的にメンテナンス）:
-* **pdfcpu** – PDFを*lint*、*decrypt*、*extract*、*compress*、および*sanitize*できるGoライブラリ/CLI。
-* **pdf-inspector** – オブジェクトグラフとストリームをレンダリングするブラウザベースのビジュアライザー。
-* **PyMuPDF (fitz)** – 埋め込まれたJSをハードンされたサンドボックスで爆発させるために、安全にページを画像にレンダリングできるスクリプタブルPythonエンジン。
+追加の有用な project（2023-2025 年に actively maintained）:
+* **pdfcpu** – PDF の *lint*、*decrypt*、*extract*、*compress*、*sanitize* が可能な Go library/CLI。
+* **pdf-inspector** – object graph と streams を render する browser-based visualizer。
+* **PyMuPDF (fitz)** – hardened sandbox 内で埋め込み JS を安全に実行し、pages を images として render できる scriptable Python engine。
 
 ---
 
-## 最近の攻撃技術 (2023-2025)
+## Recent attack techniques (2023-2025）
 
-* **MalDoc in PDF polyglot (2023)** – JPCERT/CCは、脅威アクターが最終の**%%EOF**の後にVBAマクロを持つMHTベースのWord文書を追加するのを観察し、PDFとしてもDOCとしても有効なファイルを生成しました。PDFレイヤーのみを解析するAVエンジンはマクロを見逃します。静的PDFキーワードはクリーンですが、`file`は依然として`%PDF`を印刷します。`<w:WordDocument>`という文字列を含むPDFは非常に疑わしいものとして扱ってください。
-* **Shadow-incremental updates (2024)** – 敵は、悪意のある`/OpenAction`を持つ第二の**/Catalog**を挿入するために、増分更新機能を悪用し、無害な最初の改訂を署名されたままにします。最初のxrefテーブルのみを検査するツールはバイパスされます。
-* **Font parsing UAF chain – CVE-2024-30284 (Acrobat/Reader)** – 脆弱な**CoolType.dll**関数は、埋め込まれたCIDType2フォントから到達可能であり、作成された文書が開かれると、ユーザーの権限でリモートコード実行を可能にします。2024年5月にAPSB24-29でパッチが適用されました。
+* **MalDoc in PDF polyglot (2023)** – JPCERT/CC は、threat actors が MHT-based Word document with VBA macros を最後の **%%EOF** の後に追加し、valid PDF と valid DOC の両方として扱える file を作成していたことを確認した。PDF layer のみを parse する AV engines は macro を見逃す。Static PDF keywords は clean だが、`file` は依然として `%PDF` を出力する。文字列 `<w:WordDocument>` も含む PDF は、非常に suspicious なものとして扱うべきである。<sup>[[2]](#references)</sup>
+* **Shadow-incremental updates (2024)** – adversaries は incremental update feature を悪用し、benign な最初の revision を signed のまま維持しつつ、malicious な `/OpenAction` を持つ 2 つ目の **/Catalog** を挿入する。最初の xref table のみを inspect する tools は bypass される。
+* **Font parsing UAF chain – CVE-2024-30284 (Acrobat/Reader)** – 脆弱な **CoolType.dll** function は embedded CIDType2 fonts から到達可能であり、crafted document が開かれると、user の privileges で remote code execution が可能になる。APSB24-29（2024 年 5 月）で patched。<sup>[[3]](#references)</sup>
 
 ---
 
-## YARAクイックルールテンプレート
+## YARA クイックルールテンプレート
 ```yara
 rule Suspicious_PDF_AutoExec {
 meta:
@@ -89,16 +89,16 @@ $pdf_magic at 0 and ( all of ($aa, $openact) or ($openact and $js) )
 
 ## 防御のヒント
 
-1. **迅速にパッチを適用** – Acrobat/Readerを最新のContinuousトラックに保つ; 実際に観察されたほとんどのRCEチェーンは、数ヶ月前に修正されたn日脆弱性を利用しています。
-2. **ゲートウェイでアクティブコンテンツを削除** – `pdfcpu sanitize`または`qpdf --qdf --remove-unreferenced`を使用して、受信PDFからJavaScript、埋め込みファイル、起動アクションを削除します。
-3. **コンテンツの無効化と再構築 (CDR)** – サンドボックスホスト上でPDFを画像（またはPDF/A）に変換し、アクティブオブジェクトを破棄しながら視覚的忠実度を保持します。
-4. **あまり使用されない機能をブロック** – Readerの企業向け「強化セキュリティ」設定では、JavaScript、マルチメディア、3Dレンダリングを無効にすることができます。
-5. **ユーザー教育** – ソーシャルエンジニアリング（請求書や履歴書の誘惑）は最初のベクトルのままです; 従業員に疑わしい添付ファイルをIRに転送するよう教えます。
+1. **迅速にパッチを適用する** – Acrobat/Reader を最新の Continuous track に保ちます。実際の攻撃で確認された RCE chain の大半は、数カ月前に修正された n-day vulnerabilities を悪用しています。
+2. **gateway で active content を除去する** – `pdfcpu sanitize` または `qpdf --qdf --remove-unreferenced` を使用し、受信 PDF から JavaScript、embedded files、launch actions を削除します。
+3. **Content Disarm & Reconstruction (CDR)** – sandbox host 上で PDF を画像（または PDF/A）に変換し、視覚的な忠実度を維持しながら active objects を破棄します。
+4. **使用頻度の低い機能をブロックする** – Reader の企業向け「Enhanced Security」設定では、JavaScript、multimedia、3D rendering を無効化できます。
+5. **ユーザー教育** – social engineering（請求書や履歴書を装った lure）は依然として initial vector です。不審な添付ファイルを IR に転送するよう従業員に指導します。
 
-## 参考文献
+## References
 
-* JPCERT/CC – “MalDoc in PDF – Detection bypass by embedding a malicious Word file into a PDF file” (2023年8月)
-* Adobe – AcrobatとReaderのセキュリティ更新 (APSB24-29, 2024年5月)
-
+- [1] [Forensics CTF Field Guide](https://trailofbits.github.io/ctf/forensics/)
+- [2] [MalDoc in PDF – Detection bypass by embedding a malicious Word file into a PDF file](https://blogs.jpcert.or.jp/en/2023/08/maldocinpdf.html)
+- [3] [Adobe Security Bulletin – Security update available for Adobe Acrobat and Reader (APSB24-29)](https://helpx.adobe.com/security/products/acrobat/apsb24-29.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

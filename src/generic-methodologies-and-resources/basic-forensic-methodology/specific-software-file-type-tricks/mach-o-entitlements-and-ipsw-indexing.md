@@ -1,21 +1,21 @@
-# Mach-O Entitlements Extraction & IPSW Indexing
+# Mach-O Entitlements の抽出と IPSW のインデックス作成
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## 概要
+## Overview
 
-このページでは、LC_CODE_SIGNATURE を辿ってコード署名の SuperBlob を解析することで Mach-O バイナリからプログラム的に entitlements を抽出する方法と、Apple IPSW ファームウェアをマウントして内容をインデックス化し、フォレンジック検索／差分解析にスケールさせる方法を説明します。
+このページでは、プログラムから LC_CODE_SIGNATURE をたどって code signing SuperBlob を解析し、Mach-O バイナリから entitlements を抽出する方法と、Apple IPSW firmware を mount して内容をインデックス化し、forensic search/diff に対応する方法を説明します。
 
-Mach-O フォーマットや code signing の復習が必要な場合は、次も参照してください: macOS code signing and SuperBlob internals.
-- Check macOS code signing details (SuperBlob, Code Directory, special slots): [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
-- Check general Mach-O structures/load commands: [Universal binaries & Mach-O Format](../../../macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)
+Mach-O format と code signing の復習が必要な場合は、macOS code signing と SuperBlob internals も参照してください。
+- macOS code signing の詳細（SuperBlob、Code Directory、special slots）：[macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
+- Mach-O structures/load commands の概要：[Universal binaries & Mach-O Format](../../../macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)
 
 
-## Entitlements in Mach-O: where they live
+## Mach-O の Entitlements：保存場所
 
-Entitlements は LC_CODE_SIGNATURE ロードコマンドで参照されるコード署名データ内、__LINKEDIT セグメントに格納されています。署名は複数の blob（code directory、requirements、entitlements、CMS など）を含む CS_SuperBlob です。entitlements blob は CS_GenericBlob で、そのデータは entitlements キーと値をマッピングする Apple Binary Property List (bplist00) です。
+Entitlements は、LC_CODE_SIGNATURE load command が参照する code signature data 内に保存され、__LINKEDIT segment に配置されます。Signature は、複数の blob（code directory、requirements、entitlements、CMS など）を含む CS_SuperBlob です。Entitlements blob は CS_GenericBlob であり、その data は entitlement keys と values の対応を示す Apple Binary Property List（bplist00）です。<sup>[[1]](#references)</sup>
 
-Key structures (from xnu):
+主要な structures（xnu 由来）：<sup>[[6]](#references)[[7]](#references)</sup>
 ```c
 /* mach-o/loader.h */
 struct mach_header_64 {
@@ -65,28 +65,28 @@ char data[];      /* Apple Binary Plist containing entitlements */
 - LC_CODE_SIGNATURE cmd = 0x1d
 - CS SuperBlob magic = 0xfade0cc0
 - Entitlements blob type (CSMAGIC_EMBEDDED_ENTITLEMENTS) = 0xfade7171
-- DER entitlements may be present via special slot (e.g., -7), see the macOS Code Signing page for special slots and DER entitlements notes
+- DER entitlements は special slot（例: -7）経由で存在する場合がある。special slots と DER entitlements の注記については macOS Code Signing ページを参照
 
-注: マルチアーチ（fat）バイナリは複数の Mach-O スライスを含みます。検査したいアーキテクチャのスライスを選択して、その load commands を辿る必要があります。
-
-
-## Extraction steps (generic, lossless-enough)
-
-1) Parse Mach-O header; iterate ncmds worth of load_command records.
-2) Locate LC_CODE_SIGNATURE; read linkedit_data_command.dataoff/datasize to map the Code Signing SuperBlob placed in __LINKEDIT.
-3) Validate CS_SuperBlob.magic == 0xfade0cc0; iterate count entries of CS_BlobIndex.
-4) Locate index.type == 0xfade7171 (embedded entitlements). Read the pointed CS_GenericBlob and parse its data as an Apple binary plist (bplist00) to key/value entitlements.
-
-実装ノート:
-- Code signature structures use big-endian fields; swap byte order when parsing on little-endian hosts.
-- The entitlements GenericBlob data itself is a binary plist (handled by standard plist libraries).
-- Some iOS binaries may carry DER entitlements; also some stores/slots differ across platforms/versions. Cross-check both standard and DER entitlements as needed.
-- For fat binaries, use the fat headers (FAT_MAGIC/FAT_MAGIC_64) to locate the correct slice and offset before walking Mach-O load commands.
+注: Multi-arch（fat）バイナリには複数の Mach-O slice が含まれます。検査対象の architecture の slice を選択してから、その load commands を走査する必要があります。
 
 
-## Minimal parsing outline (Python)
+## Extraction steps（generic、十分にロスレス）
 
-The following is a compact outline showing the control flow to find and decode entitlements. It intentionally omits robust bounds checks and full fat binary support for brevity.
+1) Mach-O header を parse し、`ncmds` 個の load_command record を iterate します。
+2) LC_CODE_SIGNATURE を locate し、`linkedit_data_command.dataoff/datasize` を読み取って、`__LINKEDIT` に配置された Code Signing SuperBlob を map します。
+3) `CS_SuperBlob.magic == 0xfade0cc0` を validate し、`CS_BlobIndex` の `count` 個の entry を iterate します。
+4) `index.type == 0xfade7171`（embedded entitlements）を locate します。指し示された `CS_GenericBlob` を読み取り、その data を Apple binary plist（`bplist00`）として parse して、key/value の entitlements を取得します。<sup>[[1]](#references)</sup>
+
+Implementation notes:
+- Code signature structures は big-endian の field を使用するため、little-endian host で parse する場合は byte order を swap します。
+- Entitlements GenericBlob の data 自体は binary plist です（standard plist libraries で処理できます）。
+- 一部の iOS バイナリには DER entitlements が含まれる場合があります。また、platform/version によって stores/slots が異なる場合もあります。必要に応じて standard と DER の両方の entitlements を cross-check してください。
+- fat バイナリでは、Mach-O load commands を走査する前に、fat headers（FAT_MAGIC/FAT_MAGIC_64）を使用して正しい slice と offset を locate します。<sup>[[1]](#references)</sup>
+
+
+## Minimal parsing outline（Python）
+
+以下は、entitlements を find して decode するための control flow を示す compact な outline です。簡潔さのため、堅牢な bounds checks と full fat binary support は意図的に省略しています。<sup>[[1]](#references)</sup>
 ```python
 import plistlib, struct
 
@@ -139,26 +139,26 @@ return plistlib.loads(data)
 return None
 ```
 使用上のヒント:
-- To handle fat binaries, first read struct fat_header/fat_arch, choose the desired architecture slice, then pass the subrange to parse_entitlements.
-- On macOS you can validate results with: codesign -d --entitlements :- /path/to/binary
+- fat binaries を処理するには、まず struct fat_header/fat_arch を読み取り、目的の architecture slice を選択してから、その subrange を parse_entitlements に渡します。
+- macOS では、次のコマンドで結果を検証できます: `codesign -d --entitlements :- /path/to/binary`
 
 
-## 発見例
+## Example findings
 
-特権プラットフォームバイナリは、次のような機微な entitlements を要求することが多い:
+Privileged platform binaries は、次のような機密性の高い entitlements を要求することがよくあります:<sup>[[1]](#references)</sup>
 - com.apple.security.network.server = true
 - com.apple.rootless.storage.early_boot_mount = true
 - com.apple.private.kernel.system-override = true
 - com.apple.private.pmap.load-trust-cache = ["cryptex1.boot.os", "cryptex1.boot.app", "cryptex1.safari-downlevel"]
 
-これらをファームウェアイメージ全体で大規模に検索することは、attack surface mapping とリリース／デバイス間の diffing に非常に有用です。
+これらを firmware images 全体から大規模に検索することは、attack surface のマッピングや、リリース間・デバイス間の差分分析に非常に有用です。
 
 
-## IPSWs 全体でのスケーリング（マウントとインデックス化）
+## IPSWs 全体への拡張（マウントとインデックス作成）
 
-フルイメージを保存せずに大規模に実行ファイルを列挙し、entitlements を抽出するには:
+full images を保存せずに executables を列挙し、entitlements を大規模に抽出するには:<sup>[[1]](#references)</sup>
 
-- Use the ipsw tool by @blacktop to download and mount firmware filesystems. Mounting leverages apfs-fuse, so you can traverse APFS volumes without full extraction.
+- @blacktop による ipsw tool を使用して、firmware filesystems を download および mount します。Mounting では apfs-fuse が利用されるため、full extraction を行わずに APFS volumes を走査できます。<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
 # Download latest IPSW for iPhone11,2 (iPhone XS)
 ipsw download ipsw -y --device iPhone11,2 --latest
@@ -166,12 +166,12 @@ ipsw download ipsw -y --device iPhone11,2 --latest
 # Mount IPSW filesystem (uses underlying apfs-fuse)
 ipsw mount fs <IPSW_FILE>
 ```
-- マウントされたボリュームを走査して Mach-O ファイルを特定する（magic をチェックするか file/otool を使用）、その後 entitlements と imported frameworks を解析する。
-- 正規化されたビューをリレーショナルデータベースに永続化して、数千の IPSWs に対する線形増加を回避する:
-- executables, operating_system_versions, entitlements, frameworks
-- many-to-many: executable↔OS version, executable↔entitlement, executable↔framework
+- マウントされたボリュームを走査して Mach-O ファイルを特定し（magic の確認、および/または file/otool の使用）、entitlements と imported frameworks を解析する。
+- 数千の IPSW にわたる線形増加を避けるため、正規化したビューをリレーショナルデータベースに保存する：
+- executables、operating_system_versions、entitlements、frameworks
+- many-to-many：executable↔OS version、executable↔entitlement、executable↔framework
 
-指定した executable 名を含むすべての OS versions を一覧するクエリの例:
+特定の executable name を含むすべての OS versions を一覧表示するクエリ例：
 ```sql
 SELECT osv.version AS "Versions"
 FROM device d
@@ -180,34 +180,34 @@ LEFT JOIN executable_operating_system_version eosv ON eosv.operating_system_vers
 LEFT JOIN executable e ON e.id = eosv.executable_id
 WHERE e.name = "launchd";
 ```
-DB の移植性に関する注意（独自のインデクサを実装する場合）:
-- ORM/抽象化レイヤ（例: SeaORM）を使い、コードを DB 非依存（SQLite/PostgreSQL）に保つ。
-- SQLite は AUTOINCREMENT を INTEGER PRIMARY KEY にのみ要求する。Rust で i64 の PK を使いたい場合は、エンティティを i32 として生成して型変換すること。SQLite は内部的に INTEGER を 8 バイト符号付きで格納する。
+DB portability に関する注意事項（独自の indexer を実装する場合）:<sup>[[1]](#references)</sup>
+- ORM/abstraction（例: SeaORM）を使用して、code を DB-agnostic（SQLite/PostgreSQL 対応）に保つ。
+- SQLite で AUTOINCREMENT が必要なのは INTEGER PRIMARY KEY の場合のみ。Rust で i64 PKs を使用したい場合は、entities を i32 として生成して types を変換する。SQLite は内部的に INTEGER を 8-byte signed として保存する。<sup>[[8]](#references)</sup>
 
 
-## Open-source tooling and references for entitlement hunting
+## entitlement hunting 用の Open-source tooling と references
 
-- Firmware のマウント/ダウンロード: https://github.com/blacktop/ipsw
-- Entitlement データベースと参考資料:
-- Jonathan Levin’s entitlement DB: https://newosxbook.com/ent.php
+- Firmware の mount/download: https://github.com/blacktop/ipsw
+- Entitlement databases と references:
+- Jonathan Levin の entitlement DB: https://newosxbook.com/ent.php
 - entdb: https://github.com/ChiChou/entdb
-- Large-scale indexer (Rust, self-hosted Web UI + OpenAPI): https://github.com/synacktiv/appledb_rs
-- 構造体と定数のための Apple ヘッダ:
-- loader.h (Mach-O headers, load commands)
-- cs_blobs.h (SuperBlob, GenericBlob, CodeDirectory)
+- Large-scale indexer（Rust、self-hosted Web UI + OpenAPI）: https://github.com/synacktiv/appledb_rs
+- structures と constants 用の Apple headers:
+- loader.h（Mach-O headers、load commands）
+- cs_blobs.h（SuperBlob、GenericBlob、CodeDirectory）
 
-Code signing の内部（Code Directory、special slots、DER entitlements）については次を参照: [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
+Code signing internals（Code Directory、special slots、DER entitlements）の詳細については、[macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md) を参照。
 
 
 ## References
 
-- [appledb_rs: a research support tool for Apple platforms](https://www.synacktiv.com/publications/appledbrs-un-outil-daide-a-la-recherche-sur-plateformes-apple.html)
-- [synacktiv/appledb_rs](https://github.com/synacktiv/appledb_rs)
-- [blacktop/ipsw](https://github.com/blacktop/ipsw)
-- [Jonathan Levin’s entitlement DB](https://newosxbook.com/ent.php)
-- [ChiChou/entdb](https://github.com/ChiChou/entdb)
-- [XNU cs_blobs.h](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
-- [XNU mach-o/loader.h](https://github.com/apple-oss-distributions/xnu/blob/main/EXTERNAL_HEADERS/mach-o/loader.h)
-- [SQLite Datatypes](https://sqlite.org/datatype3.html)
+- [1] [appledb_rs: Apple platforms 用の research support tool](https://www.synacktiv.com/publications/appledbrs-un-outil-daide-a-la-recherche-sur-plateformes-apple.html)
+- [2] [synacktiv/appledb_rs](https://github.com/synacktiv/appledb_rs)
+- [3] [blacktop/ipsw](https://github.com/blacktop/ipsw)
+- [4] [Jonathan Levin の entitlement DB](https://newosxbook.com/ent.php)
+- [5] [ChiChou/entdb](https://github.com/ChiChou/entdb)
+- [6] [XNU cs_blobs.h](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [7] [XNU mach-o/loader.h](https://github.com/apple-oss-distributions/xnu/blob/main/EXTERNAL_HEADERS/mach-o/loader.h)
+- [8] [SQLite Datatypes](https://sqlite.org/datatype3.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

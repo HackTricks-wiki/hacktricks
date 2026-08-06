@@ -1,8 +1,8 @@
-# 特定のソフトウェア／ファイルタイプのトリック
+# 特定のSoftware/File Type Tricks
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-ここでは、特定のファイルタイプやソフトウェア向けの興味深いトリックを紹介します:
+ここでは、特定のfile-typesやsoftwareに関する興味深いtricksを紹介します:
 
 
 {{#ref}}
