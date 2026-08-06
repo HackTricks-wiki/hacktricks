@@ -104,7 +104,7 @@ Named tunnels let you define multiple ingress rules (HTTP, SSH, RDP, etc.) insid
 
 ## Tailscale Funnel / Serve
 
-Tailscale v1.52+ ships unified `tailscale serve` (share inside the tailnet) and `tailscale funnel` (publish to the wider internet) workflows. Both commands can reverse proxy HTTP(S) or forward raw TCP with automatic TLS and short `*.ts.net` hostnames.
+Tailscale v1.52+ ships unified `tailscale serve` (share inside the tailnet) and `tailscale funnel` (publish to the wider internet) workflows. Both commands can reverse proxy HTTP(S) or forward raw TCP with automatic TLS and short `*.ts.net` hostnames.<sup>[[3]](#references)</sup>
 
 ```bash
 # Share localhost:3000 within the tailnet
@@ -152,11 +152,11 @@ EOF
 
 </details>
 
-Recent releases add QUIC transport, token/OIDC auth, bandwidth caps, health checks, and Go-template-based range mappings—useful for quickly standing up multiple listeners that map back to implants on different hosts.
+Recent releases add QUIC transport, token/OIDC auth, bandwidth caps, health checks, and Go-template-based range mappings—useful for quickly standing up multiple listeners that map back to implants on different hosts.<sup>[[4]](#references)</sup>
 
 ## Pinggy (SSH-based)
 
-Pinggy provides SSH-accessible tunnels over TCP/443, so it works even behind captive proxies that only allow HTTPS. Sessions last 60 minutes on the free tier and can be scripted for quick demos or webhook relays.
+Pinggy provides SSH-accessible tunnels over TCP/443, so it works even behind captive proxies that only allow HTTPS. Sessions last 60 minutes on the free tier and can be scripted for quick demos or webhook relays.<sup>[[5]](#references)</sup>
 
 ```bash
 # Random subdomain exposing localhost:3000 via SSH reverse tunnel
@@ -173,5 +173,8 @@ Adversaries have increasingly abused ephemeral tunneling (especially Cloudflare'
 
 - [1] [Cloudflare Docs - Create a locally-managed tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/)
 - [2] [Proofpoint - Threat Actor Abuses Cloudflare Tunnels to Deliver RATs](https://www.proofpoint.com/us/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
+- [3] [Tailscale - Reintroducing Serve and Funnel](https://tailscale.com/blog/reintroducing-serve-funnel)
+- [4] [fatedier/frp - Fast Reverse Proxy repository](https://github.com/fatedier/frp)
+- [5] [Pinggy Documentation - Usage](https://pinggy.io/docs/usages/)
 
 {{#include ../../banners/hacktricks-training.md}}

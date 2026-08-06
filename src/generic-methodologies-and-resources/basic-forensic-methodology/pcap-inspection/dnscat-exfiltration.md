@@ -39,6 +39,3 @@ python3 dnscat_decoder.py sample.pcap bad_domain
 - [1] [DNSCat2 pcap forensics writeup – BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

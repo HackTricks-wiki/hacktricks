@@ -101,7 +101,7 @@ The most interesting PNG chunks for investigations are usually not the obvious i
 - `tEXt` / `zTXt` / `iTXt` – text metadata and compressed text
 - `eXIf` – EXIF data inside PNG
 - `iCCP` – embedded ICC profile
-- `PLTE` – palette data in indexed images, but also useful in payload-smuggling scenarios
+- `PLTE` – palette data in indexed images, but also useful in payload-smuggling scenarios<sup>[[2]](#references)</sup>
 
 Dump them with:
 

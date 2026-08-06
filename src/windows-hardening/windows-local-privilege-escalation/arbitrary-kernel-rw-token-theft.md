@@ -4,7 +4,7 @@
 
 ## Overview
 
-If a vulnerable driver exposes an IOCTL that gives an attacker arbitrary kernel read and/or write primitives, elevating to NT AUTHORITY\SYSTEM can often be achieved by stealing a SYSTEM access token. The technique copies the Token pointer from a SYSTEM process’ EPROCESS into the current process’ EPROCESS.
+If a vulnerable driver exposes an IOCTL that gives an attacker arbitrary kernel read and/or write primitives, elevating to NT AUTHORITY\SYSTEM can often be achieved by stealing a SYSTEM access token. The technique copies the Token pointer from a SYSTEM process’ EPROCESS into the current process’ EPROCESS.<sup>[[2]](#references)</sup>
 
 Why it works:
 - Each process has an EPROCESS structure that contains (among other fields) a Token (actually an EX_FAST_REF to a token object).
@@ -118,6 +118,7 @@ Notes:
 - EDR can watch for suspicious IOCTL sequences that implement arbitrary read/write and for token swaps.
 
 ## References
+
 - [1] [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
 - [2] [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
 

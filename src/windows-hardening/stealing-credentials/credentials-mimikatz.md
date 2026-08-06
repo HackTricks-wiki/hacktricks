@@ -244,6 +244,3 @@ This becomes much harder when the key is TPM-backed, but it is worth checking on
 - [3] [Mimikatz command reference](https://adsecurity.org/?page_id=1821)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

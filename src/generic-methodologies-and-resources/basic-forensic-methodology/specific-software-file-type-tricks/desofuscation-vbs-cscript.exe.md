@@ -50,6 +50,3 @@ End Function
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-
