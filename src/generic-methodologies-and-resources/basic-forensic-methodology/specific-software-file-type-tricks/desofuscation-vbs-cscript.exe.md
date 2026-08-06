@@ -1,6 +1,8 @@
+# Tecniche di desoffuscamento per file VBS
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-Alcune cose che potrebbero essere utili per eseguire il debug/deobfuscate un file VBS malevolo:
+Alcune cose che potrebbero essere utili per eseguire il debug/desoffuscare un file VBS malevolo:
 
 ## echo
 ```bash

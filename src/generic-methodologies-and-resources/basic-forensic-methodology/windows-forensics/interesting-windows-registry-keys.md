@@ -1,93 +1,92 @@
-# Chiavi interessanti del Windows Registry
+# Chiavi interessanti del Registro di Windows
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Gli hive del Windows Registry sono uno dei modi più rapidi per passare da _cosa è successo?_ a _quale user, quando, e da dove?_. Per l'analisi live preferisci `CurrentControlSet`; per l'analisi offline risolvi prima quale `ControlSet00x` era attivo invece di hardcodare `ControlSet001`.
+Gli hive del Registro di Windows sono uno dei modi più rapidi per passare da _cosa è successo?_ a _quale utente, quando e da dove?_. Per l'analisi live, preferire `CurrentControlSet`; per l'analisi offline degli hive, risolvere prima quale `ControlSet00x` era attivo invece di codificare direttamente `ControlSet001`.
 
-### Versione di Windows e info sul proprietario
+### Informazioni sulla versione di Windows e sul proprietario
 
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion`: edizione/build di Windows, install time, registered owner, product name e altri metadati della build.
-- `SYSTEM\Select`: mappa `Current`, `Default` e `LastKnownGood` ai valori reali `ControlSet00x` usati dal sistema.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion`: edizione/build di Windows, ora di installazione, proprietario registrato, nome del prodotto e altri metadati della build.
+- `SYSTEM\Select`: associa `Current`, `Default` e `LastKnownGood` ai valori `ControlSet00x` reali utilizzati dal sistema.
 
 ### Nome del computer
 
-- `SYSTEM\CurrentControlSet\Control\ComputerName\ComputerName`: hostname attuale.
+- `SYSTEM\CurrentControlSet\Control\ComputerName\ComputerName`: hostname corrente.
 
 ### Impostazione del fuso orario
 
-- `SYSTEM\CurrentControlSet\Control\TimeZoneInformation`: fuso orario configurato e valori legati al DST.
+- `SYSTEM\CurrentControlSet\Control\TimeZoneInformation`: fuso orario configurato e valori relativi all'ora legale.
 
 ### Tracciamento dei tempi di accesso
 
-- `SYSTEM\CurrentControlSet\Control\FileSystem`: `NtfsDisableLastAccessUpdate` indica se gli timestamp dell'ultimo accesso di NTFS vengono aggiornati.
-- Per abilitarlo, usa: `fsutil behavior set disablelastaccess 0`
+- `SYSTEM\CurrentControlSet\Control\FileSystem`: `NtfsDisableLastAccessUpdate` indica se i timestamp dell'ultimo accesso NTFS vengono aggiornati.
+- Per abilitarlo, usare: `fsutil behavior set disablelastaccess 0`
 
-### Dettagli di shutdown
+### Dettagli sull'arresto
 
-- `SYSTEM\CurrentControlSet\Control\Windows`: ultimo time di shutdown.
-- `SYSTEM\CurrentControlSet\Control\Watchdog\Display`: i sistemi più vecchi possono esporre anche contatori di shutdown.
+- `SYSTEM\CurrentControlSet\Control\Windows`: ora dell'ultimo arresto.
+- `SYSTEM\CurrentControlSet\Control\Watchdog\Display`: i sistemi meno recenti possono esporre anche i contatori degli arresti.
 
 ### Configurazione di rete
 
-- `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{GUID}`: IP dell'interfaccia, lease DHCP, gateway e dati DNS.
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles\{GUID}`: nome del network profile/SSID più i tempi del primo e dell'ultimo collegamento.
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed\{GUID}` e `...\Unmanaged\{GUID}`: dati di correlazione del profile come MAC address del gateway e DNS suffix.
+- `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{GUID}`: IP delle interfacce, lease DHCP, dati del gateway e DNS.<sup>[[1]](#references)</sup>
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles\{GUID}`: nome/SSID del profilo di rete, oltre agli orari della prima e dell'ultima connessione.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed\{GUID}` e `...\Unmanaged\{GUID}`: dati di correlazione del profilo, come indirizzo MAC del gateway e suffisso DNS.
 - `SYSTEM\CurrentControlSet\Services\LanmanServer\Shares`: cartelle condivise locali pubblicate dall'host.
 
-### Remote Access e cronologia delle network share
+### Accesso remoto e cronologia delle condivisioni di rete
 
-- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Default`: outbound RDP MRU list (`MRU0`..`MRU9`).
-- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Servers\<target>`: cronologia RDP outbound per host. Le subkey spesso memorizzano `UsernameHint`, e il tempo `LastWrite` della key è un pivot utile.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: mapped network drives, UNC shares e mount point di removable-media legati a un user specifico.
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Default`: elenco MRU RDP in uscita (`MRU0`..`MRU9`).<sup>[[1]](#references)</sup>
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Servers\<target>`: cronologia RDP in uscita per host. Le sottochiavi contengono comunemente `UsernameHint`, mentre l'orario `LastWrite` della chiave è un utile punto di correlazione.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: unità di rete mappate, condivisioni UNC e punti di montaggio di supporti rimovibili associati a uno specifico utente.
 
-### Programmi che si avviano automaticamente e persistenza pianificata
+### Programmi avviati automaticamente e persistenza tramite attività pianificate
 
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\RunOnce`
 - `SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
 - `SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\<TaskName>` e `...\Tasks\{GUID}`: metadati dei scheduled task. Se un task esiste qui ma il valore `SD` manca da `Tree\<TaskName>`, sospetta una modifica nascosta in stile Tarrask e correlala con `C:\Windows\System32\Tasks\<TaskName>`.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\<TaskName>` e `...\Tasks\{GUID}`: metadati delle attività pianificate. Se qui esiste un'attività ma il valore `SD` manca da `Tree\<TaskName>`, sospettare una manomissione dell'attività in stile Tarrask e correlarla con `C:\Windows\System32\Tasks\<TaskName>`.
 
-### Ricerche, Typed Paths e MRU
+### Ricerche, percorsi digitati e MRU
 
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\WordWheelQuery`: termini di ricerca di File Explorer.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: percorsi inseriti manualmente in Explorer.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU`: gli ultimi 26 comandi `Win + R`. `MRUList` preserva il loro ordine.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\WordWheelQuery`: termini di ricerca di File Explorer.<sup>[[1]](#references)</sup>
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: percorsi di Explorer digitati manualmente.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU`: gli ultimi 26 comandi `Win + R`. `MRUList` ne conserva l'ordine.
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs`: documenti e cartelle aperti di recente.
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\OpenSavePidlMRU`
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LastVisitedPidlMRU`
 - `NTUSER.DAT\Software\Microsoft\Office\<VERSION>\UserMRU\*\FileMRU`: file recenti di Office.
 
-### Tracciamento dell'attività user
+### Tracciamento dell'attività dell'utente
 
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`: cronologia di esecuzione guidata dalla GUI. I nomi dei valori sono codificati in ROT13, e i dati binari includono contatori di esecuzione e last run time.
-- Tratta `UserAssist` come forte evidenza di supporto, non come verdetto autonomo: traccia soprattutto app o file `.lnk` avviati tramite Explorer e può perdere esecuzioni da command-line o service. Su Windows 10+, alcune entry non significano necessariamente che il process sia stato eseguito بالكامل.
-- `SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\{SID}` e `SYSTEM\CurrentControlSet\Services\dam\State\UserSettings\{SID}`: tracce di esecuzione moderne di Windows 10/11 con attribuzione SID e last execution time. Sono particolarmente utili per binary eseguiti localmente, ma le entry più vecchie possono scadere rapidamente e le esecuzioni da network share/removable media sono meno affidabili.
-- Per artifact di esecuzione più ampi come Prefetch, Amcache, ShimCache e SRUM, vedi la [Windows forensics overview](README.md#programs-executed).
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`: cronologia delle esecuzioni avviate tramite GUI. I nomi dei valori sono codificati in ROT13 e i dati binari includono i contatori di esecuzione e l'ora dell'ultima esecuzione.<sup>[[1]](#references)</sup>
+- Considerare `UserAssist` come una prova di supporto significativa, non come un verdetto autonomo: tiene principalmente traccia delle app o dei file `.lnk` avviati tramite Explorer e può non rilevare l'esecuzione dalla command line o tramite servizi. Su Windows 10+, alcune voci non implicano necessariamente che il processo sia stato eseguito completamente.
+- `SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\{SID}` e `SYSTEM\CurrentControlSet\Services\dam\State\UserSettings\{SID}`: tracce delle esecuzioni nelle versioni moderne di Windows 10/11, con attribuzione al SID e ora dell'ultima esecuzione. Sono particolarmente utili per i binari eseguiti localmente, ma le voci meno recenti possono essere eliminate rapidamente e le esecuzioni da condivisioni di rete/supporti rimovibili sono meno affidabili.
+- Per artefatti di esecuzione più ampi, come Prefetch, Amcache, ShimCache e SRUM, consultare la [panoramica della computer forensics di Windows](README.md#programs-executed).
 
 ### Shellbags
 
-- Le Shellbags sono memorizzate sia in `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU` / `Bags` sia in `UsrClass.dat\Local Settings\Software\Microsoft\Windows\Shell\BagMRU` / `Bags`.
-- Le entry di `NTUSER.DAT` sono particolarmente utili per la navigazione UNC/network, mentre `UsrClass.dat` è dove Windows Vista+ normalmente memorizza le shellbags di cartelle locali/removable.
-- Possono mostrare l'esistenza delle cartelle, la traversal e le preferenze di folder-view anche dopo che la cartella è stata cancellata. L'accesso in stile Explorer ai file archivio può anche lasciare tracce di shellbag.
-- Non tutte le shellbag provano un accesso riuscito alla cartella, quindi corrobora con LNKs, Jump Lists, timestamps o volume mappings.
-- Usa **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** o **SBECmd** per analizzarle.
+- Gli Shellbags sono memorizzati sia in `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU` / `Bags` sia in `UsrClass.dat\Local Settings\Software\Microsoft\Windows\Shell\BagMRU` / `Bags`.<sup>[[1]](#references)</sup>
+- Le voci di `NTUSER.DAT` sono particolarmente utili per la navigazione UNC/di rete, mentre `UsrClass.dat` è il percorso in cui Windows Vista+ memorizza comunemente gli Shellbags delle cartelle locali/rimovibili.
+- Possono mostrare l'esistenza e l'attraversamento delle cartelle, oltre alle preferenze di visualizzazione, anche dopo l'eliminazione della cartella. L'accesso a file archivio tramite Explorer può anch'esso lasciare tracce negli Shellbags.<sup>[[1]](#references)</sup>
+- Non tutti gli Shellbag dimostrano un accesso riuscito alla cartella; verificare quindi le informazioni con LNK, Jump Lists, timestamp o mapping dei volumi.
+- Usare **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** o **SBECmd** per analizzarli.
 
-### Informazioni USB
+### Informazioni sui dispositivi USB
 
-- `HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR`: inventario principale dei dispositivi USB mass-storage (vendor, product, revision, serial/device instance).
-- `HKLM\SYSTEM\CurrentControlSet\Enum\USB`: inventario USB più ampio, inclusi i dispositivi non-storage.
-- `HKLM\SYSTEM\CurrentControlSet\Enum\USB\VID_*\PID_*\...\Properties\{83da6326-97a6-4088-9453-a1923f573b29}`: su build recenti di Windows 10/11 è un punto ad alto valore per timestamp del lifecycle per-device come install, first install, last arrival e last removal.
-- `HKLM\SYSTEM\MountedDevices`: mappa volumi e device identifier alle lettere di drive / volume GUID. Solo l'ultima mappatura per una data lettera di drive può sopravvivere.
-- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\EMDMgmt`: pivot utile per volume serial numbers e metadati dei media precedenti.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: cronologia specifica per user di interazione con drive-letter e share.
-- Telefoni e tablet moderni connessi via MTP/PTP potrebbero **non** apparire sotto `USBSTOR`. Controlla anche `HKLM\SYSTEM\CurrentControlSet\Enum\SWD\WPDBUSENUM` e `HKLM\SOFTWARE\Microsoft\Windows Portable Devices\Devices`.
-- Per collegare un dispositivo a un user, parti da device o volume identifiers e fai pivot verso artifact per-user come shellbags, LNKs, Jump Lists, `RecentDocs` e `MountPoints2`.
-
-
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR`: inventario principale dei dispositivi USB di archiviazione di massa (vendor, prodotto, revisione, seriale/istanza del dispositivo).
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB`: inventario più ampio dei dispositivi USB, inclusi i dispositivi non di archiviazione.
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB\VID_*\PID_*\...\Properties\{83da6326-97a6-4088-9453-a1923f573b29}`: nelle build recenti di Windows 10/11 è un punto di elevato valore per i timestamp del ciclo di vita del singolo dispositivo, come installazione, prima installazione, ultimo collegamento e ultima rimozione.<sup>[[2]](#references)</sup>
+- `HKLM\SYSTEM\MountedDevices`: associa volumi e identificatori dei dispositivi alle lettere di unità / GUID dei volumi. Potrebbe sopravvivere solo l'ultima associazione per una determinata lettera di unità.
+- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\EMDMgmt`: utile punto di correlazione per i numeri di serie dei volumi e i metadati dei supporti utilizzati in precedenza.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: cronologia specifica dell'utente relativa all'interazione con lettere di unità e condivisioni.<sup>[[2]](#references)</sup>
+- I telefoni e i tablet moderni collegati tramite MTP/PTP potrebbero **non** comparire in `USBSTOR`. Controllare anche `HKLM\SYSTEM\CurrentControlSet\Enum\SWD\WPDBUSENUM` e `HKLM\SOFTWARE\Microsoft\Windows Portable Devices\Devices`.<sup>[[2]](#references)</sup>
+- Per associare un dispositivo a un utente, usare gli identificatori del dispositivo o del volume per risalire agli artefatti specifici dell'utente, come Shellbags, LNK, Jump Lists, `RecentDocs` e `MountPoints2`.<sup>[[2]](#references)</sup>
 
 ## Riferimenti
 
-- [Windows Registry Forensics Cheat Sheet 2026 - Cyber Triage](https://www.cybertriage.com/blog/windows-registry-forensics-cheat-sheet-2026/)
-- [USB Device Forensics on Windows 10 and 11 - ElcomSoft](https://blog.elcomsoft.com/2026/02/usb-device-forensics-on-windows-10-and-11/)
+- [1] [Windows Registry Forensics Cheat Sheet 2026 - Cyber Triage](https://www.cybertriage.com/blog/windows-registry-forensics-cheat-sheet-2026/)
+- [2] [USB Device Forensics on Windows 10 and 11 - ElcomSoft](https://blog.elcomsoft.com/2026/02/usb-device-forensics-on-windows-10-and-11/)
+
 {{#include ../../../banners/hacktricks-training.md}}

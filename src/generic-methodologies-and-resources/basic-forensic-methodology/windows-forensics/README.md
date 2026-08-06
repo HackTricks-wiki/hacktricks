@@ -6,93 +6,93 @@
 
 ### Windows 10 Notifications
 
-Nel percorso `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` puoi trovare il database `appdb.dat` (prima dell'anniversario di Windows) o `wpndatabase.db` (dopo l'anniversario di Windows).
+Nel percorso `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` è possibile trovare il database `appdb.dat` (prima di Windows anniversary) o `wpndatabase.db` (dopo Windows Anniversary).
 
-All'interno di questo database SQLite, puoi trovare la tabella `Notification` con tutte le notifiche (in formato XML) che possono contenere dati interessanti.
+All'interno di questo database SQLite è possibile trovare la tabella `Notification` con tutte le notifiche (in formato XML), che possono contenere dati interessanti.
 
 ### Timeline
 
-La Timeline è una caratteristica di Windows che fornisce una **cronologia** **cronologica** delle pagine web visitate, dei documenti modificati e delle applicazioni eseguite.
+Timeline è una caratteristica di Windows che fornisce la **cronologia cronologica delle pagine web visitate, dei documenti modificati e delle applicazioni eseguite**.
 
-Il database si trova nel percorso `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. Questo database può essere aperto con uno strumento SQLite o con lo strumento [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **che genera 2 file che possono essere aperti con lo strumento** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
+Il database si trova nel percorso `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. Questo database può essere aperto con uno strumento SQLite o con lo strumento [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd), **che genera 2 file che possono essere aperti con lo strumento** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
 
 ### ADS (Alternate Data Streams)
 
-I file scaricati possono contenere l'**ADS Zone.Identifier** che indica **come** è stato **scaricato** dall'intranet, internet, ecc. Alcuni software (come i browser) di solito aggiungono anche **ulteriori** **informazioni** come l'**URL** da cui è stato scaricato il file.
+I file scaricati possono contenere l'**ADS Zone.Identifier**, che indica **come** sono stati **scaricati** dalla intranet, da internet, ecc. Alcuni software (come i browser) inseriscono solitamente anche **ulteriori** **informazioni**, come l'**URL** da cui è stato scaricato il file.
 
-## **File Backups**
+## **Backup dei file**
 
-### Recycle Bin
+### Cestino
 
-In Vista/Win7/Win8/Win10 il **Recycle Bin** può essere trovato nella cartella **`$Recycle.bin`** nella radice dell'unità (`C:\$Recycle.bin`).\
+In Vista/Win7/Win8/Win10 il **Cestino** può essere trovato nella cartella **`$Recycle.bin`** nella radice dell'unità (`C:\$Recycle.bin`).\
 Quando un file viene eliminato in questa cartella, vengono creati 2 file specifici:
 
-- `$I{id}`: Informazioni sul file (data di quando è stato eliminato)
+- `$I{id}`: Informazioni sul file (data in cui è stato eliminato}
 - `$R{id}`: Contenuto del file
 
-![](<../../../images/image (1029).png>)
+![Backup dei file - Cestino: $R{id}: Contenuto del file](<../../../images/image (1029).png>)
 
-Avendo questi file puoi utilizzare lo strumento [**Rifiuti**](https://github.com/abelcheung/rifiuti2) per ottenere l'indirizzo originale dei file eliminati e la data in cui è stato eliminato (usa `rifiuti-vista.exe` per Vista – Win10).
+Con questi file è possibile usare lo strumento [**Rifiuti**](https://github.com/abelcheung/rifiuti2) per ottenere il percorso originale dei file eliminati e la data in cui sono stati eliminati (usare `rifiuti-vista.exe` per Vista – Win10).
 ```
 .\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
 ```
-![](<../../../images/image (495) (1) (1) (1).png>)
+![File Backups - Recycle Bin: rifiuti-vista.exe C: Users student Desktop Recycle](<../../../images/image (495) (1) (1) (1).png>)
 
 ### Volume Shadow Copies
 
-Shadow Copy è una tecnologia inclusa in Microsoft Windows che può creare **copia di backup** o snapshot di file o volumi del computer, anche quando sono in uso.
+Shadow Copy è una tecnologia inclusa in Microsoft Windows che può creare **copie di backup** o snapshot di file o volumi del computer, anche quando sono in uso.
 
-Questi backup si trovano solitamente in `\System Volume Information` dalla radice del file system e il nome è composto da **UID** mostrati nell'immagine seguente:
+Questi backup si trovano solitamente in `\System Volume Information`, nella radice del file system, e il nome è composto da **UID**, come mostrato nell'immagine seguente:
 
-![](<../../../images/image (94).png>)
+![Recycle Bin - Volume Shadow Copies: questi backup si trovano solitamente in System Volume Information, nella radice del file system, e il nome è composto da UID, come mostrato nell'immagine...](<../../../images/image (94).png>)
 
-Montando l'immagine forense con **ArsenalImageMounter**, lo strumento [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) può essere utilizzato per ispezionare una shadow copy e persino **estrarre i file** dai backup delle shadow copy.
+Montando l'immagine forense con **ArsenalImageMounter**, è possibile utilizzare lo strumento [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) per esaminare una shadow copy e persino **estrarre i file** dai backup della shadow copy.
 
-![](<../../../images/image (576).png>)
+![Recycle Bin - Volume Shadow Copies: montando l'immagine forense con ArsenalImageMounter, lo strumento ShadowCopyView può essere utilizzato per esaminare una shadow copy e persino estrarre i file...](<../../../images/image (576).png>)
 
-L'entry del registro `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` contiene i file e le chiavi **da non fare il backup**:
+La voce di registro `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` contiene i file e le chiavi **da non includere nel backup**:
 
-![](<../../../images/image (254).png>)
+![Recycle Bin - Volume Shadow Copies: la voce di registro HKEY LOCAL MACHINE SYSTEM CurrentControlSet Control BackupRestore contiene i file e le chiavi da non includere nel backup](<../../../images/image (254).png>)
 
-Il registro `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` contiene anche informazioni di configurazione sui `Volume Shadow Copies`.
+Il registro `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` contiene inoltre informazioni di configurazione sulle `Volume Shadow Copies`.
 
-### Office AutoSaved Files
+### File salvati automaticamente da Office
 
-Puoi trovare i file autosalvati di Office in: `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
+È possibile trovare i file salvati automaticamente da Office in: `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
 
 ## Shell Items
 
-Un elemento shell è un elemento che contiene informazioni su come accedere a un altro file.
+Uno shell item è un elemento che contiene informazioni su come accedere a un altro file.
 
-### Recent Documents (LNK)
+### Documenti recenti (LNK)
 
-Windows **crea automaticamente** questi **collegamenti** quando l'utente **apre, utilizza o crea un file** in:
+Windows **crea** **automaticamente** queste **scorciatoie** quando l'utente **apre, utilizza o crea un file** in:
 
 - Win7-Win10: `C:\Users\\AppData\Roaming\Microsoft\Windows\Recent\`
 - Office: `C:\Users\\AppData\Roaming\Microsoft\Office\Recent\`
 
-Quando viene creata una cartella, viene creato anche un collegamento alla cartella, alla cartella padre e alla cartella nonna.
+Quando viene creata una cartella, viene creato anche un collegamento alla cartella, alla cartella principale e alla cartella principale di livello superiore.
 
-Questi file di collegamento creati automaticamente **contengono informazioni sull'origine** come se si tratta di un **file** **o** di una **cartella**, **tempi MAC** di quel file, **informazioni sul volume** di dove è memorizzato il file e **cartella del file di destinazione**. Queste informazioni possono essere utili per recuperare quei file nel caso siano stati rimossi.
+Questi file di collegamento creati automaticamente **contengono informazioni sull'origine**, ad esempio se si tratta di un **file** **o** di una **cartella**, gli **orari** **MAC** del file, le **informazioni sul volume** in cui è memorizzato il file e la **cartella del file di destinazione**. Queste informazioni possono essere utili per recuperare tali file nel caso in cui siano stati rimossi.
 
-Inoltre, la **data di creazione del collegamento** è il primo **tempo** in cui il file originale è stato **utilizzato per la prima volta** e la **data** **modificata** del file di collegamento è l'**ultima** **volta** in cui il file di origine è stato utilizzato.
+Inoltre, la **data di creazione del collegamento** è il primo **momento** in cui il file originale è stato **utilizzato** per la **prima** **volta**, mentre la **data** di **modifica** del file di collegamento è l'ultimo **momento** in cui il file di origine è stato utilizzato.
 
-Per ispezionare questi file puoi utilizzare [**LinkParser**](http://4discovery.com/our-tools/).
+Per esaminare questi file è possibile utilizzare [**LinkParser**](http://4discovery.com/our-tools/).
 
-In questo strumento troverai **2 set** di timestamp:
+In questo strumento sono presenti **2 gruppi** di timestamp:
 
-- **Primo Set:**
+- **Primo gruppo:**
 1. FileModifiedDate
 2. FileAccessDate
 3. FileCreationDate
-- **Secondo Set:**
+- **Secondo gruppo:**
 1. LinkModifiedDate
 2. LinkAccessDate
 3. LinkCreationDate.
 
-Il primo set di timestamp fa riferimento ai **timestamp del file stesso**. Il secondo set fa riferimento ai **timestamp del file collegato**.
+Il primo gruppo di timestamp fa riferimento ai **timestamp del file stesso**. Il secondo gruppo fa riferimento ai **timestamp del file collegato**.
 
-Puoi ottenere le stesse informazioni eseguendo lo strumento CLI di Windows: [**LECmd.exe**](https://github.com/EricZimmerman/LECmd)
+È possibile ottenere le stesse informazioni eseguendo lo strumento CLI di Windows: [**LECmd.exe**](https://github.com/EricZimmerman/LECmd)
 ```
 LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 ```
@@ -100,211 +100,211 @@ In questo caso, le informazioni verranno salvate all'interno di un file CSV.
 
 ### Jumplists
 
-Questi sono i file recenti indicati per applicazione. È l'elenco dei **file recenti utilizzati da un'applicazione** a cui puoi accedere su ciascuna applicazione. Possono essere creati **automaticamente o essere personalizzati**.
+Questi sono i file recenti indicati per ogni applicazione. Si tratta dell'elenco dei **file recenti utilizzati da un'applicazione** a cui è possibile accedere da ogni applicazione. Possono essere creati **automaticamente o manualmente**.
 
-I **jumplists** creati automaticamente sono memorizzati in `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`. I jumplists sono nominati seguendo il formato `{id}.autmaticDestinations-ms` dove l'ID iniziale è l'ID dell'applicazione.
+Le **jumplists** create automaticamente sono memorizzate in `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`. Le jumplists vengono denominate seguendo il formato `{id}.autmaticDestinations-ms`, dove l'ID iniziale è l'ID dell'applicazione.
 
-I jumplists personalizzati sono memorizzati in `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` e vengono creati dall'applicazione solitamente perché è successo qualcosa di **importante** con il file (forse contrassegnato come preferito).
+Le jumplists personalizzate sono memorizzate in `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` e vengono create dall'applicazione, solitamente perché è accaduto qualcosa di **importante** al file (ad esempio, è stato contrassegnato come preferito).
 
-Il **tempo di creazione** di qualsiasi jumplist indica **la prima volta che il file è stato accesso** e il **tempo modificato l'ultima volta**.
+Il **tempo di creazione** di qualsiasi jumplist indica **la prima volta in cui il file è stato aperto**, mentre il **tempo di modifica indica l'ultima volta**.
 
-Puoi ispezionare i jumplists utilizzando [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
+È possibile ispezionare le jumplists usando [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
 
-![](<../../../images/image (168).png>)
+![Documenti recenti (LNK) - Jumplists: è possibile ispezionare le jumplists usando JumplistExplorer](<../../../images/image (168).png>)
 
-(_Nota che i timestamp forniti da JumplistExplorer sono relativi al file jumplist stesso_)
+(_Nota: i timestamp forniti da JumplistExplorer sono relativi al file jumplist stesso_)
 
 ### Shellbags
 
-[**Segui questo link per scoprire cosa sono i shellbags.**](interesting-windows-registry-keys.md#shellbags)
+[**Segui questo link per scoprire cosa sono le shellbags.**](interesting-windows-registry-keys.md#shellbags)
 
-## Uso delle USB di Windows
+## Utilizzo di dispositivi USB in Windows
 
-È possibile identificare che un dispositivo USB è stato utilizzato grazie alla creazione di:
+È possibile identificare l'utilizzo di un dispositivo USB grazie alla creazione di:
 
-- Cartella Recenti di Windows
-- Cartella Recenti di Microsoft Office
+- Cartella Windows Recent
+- Cartella Microsoft Office Recent
 - Jumplists
 
-Nota che alcuni file LNK invece di puntare al percorso originale, puntano alla cartella WPDNSE:
+Nota che alcuni file LNK, invece di puntare al percorso originale, puntano alla cartella WPDNSE:
 
-![](<../../../images/image (218).png>)
+![Shellbags - Utilizzo di dispositivi USB in Windows: nota che alcuni file LNK, invece di puntare al percorso originale, puntano alla cartella WPDNSE](<../../../images/image (218).png>)
 
-I file nella cartella WPDNSE sono una copia degli originali, quindi non sopravvivranno a un riavvio del PC e il GUID è preso da un shellbag.
+I file nella cartella WPDNSE sono copie degli originali, quindi non sopravvivono al riavvio del PC e il GUID viene ricavato da una shellbag.
 
-### Informazioni sul Registro
+### Informazioni del Registry
 
-[Controlla questa pagina per scoprire](interesting-windows-registry-keys.md#usb-information) quali chiavi di registro contengono informazioni interessanti sui dispositivi USB connessi.
+[Consulta questa pagina per scoprire](interesting-windows-registry-keys.md#usb-information) quali chiavi del Registry contengono informazioni interessanti sui dispositivi USB collegati.
 
 ### setupapi
 
-Controlla il file `C:\Windows\inf\setupapi.dev.log` per ottenere i timestamp su quando è stata effettuata la connessione USB (cerca `Section start`).
+Controlla il file `C:\Windows\inf\setupapi.dev.log` per ottenere i timestamp relativi al momento in cui è stata effettuata la connessione USB (cerca `Section start`).
 
-![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
+![Informazioni del Registry - setupapi: controlla il file C: Windows inf setupapi.dev.log per ottenere i timestamp relativi al momento in cui è stata effettuata la connessione USB (cerca Section start)](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
 ### USB Detective
 
-[**USBDetective**](https://usbdetective.com) può essere utilizzato per ottenere informazioni sui dispositivi USB che sono stati connessi a un'immagine.
+[**USBDetective**](https://usbdetective.com) può essere utilizzato per ottenere informazioni sui dispositivi USB che sono stati collegati a un'immagine.
 
-![](<../../../images/image (452).png>)
+![setupapi - USB Detective: USBDetective può essere utilizzato per ottenere informazioni sui dispositivi USB che sono stati collegati a un'immagine](<../../../images/image (452).png>)
 
-### Pulizia Plug and Play
+### Plug and Play Cleanup
 
-Il compito pianificato noto come 'Pulizia Plug and Play' è principalmente progettato per la rimozione di versioni di driver obsolete. Contrariamente al suo scopo specificato di mantenere l'ultima versione del pacchetto driver, fonti online suggeriscono che miri anche a driver che sono stati inattivi per 30 giorni. Di conseguenza, i driver per dispositivi rimovibili non connessi negli ultimi 30 giorni potrebbero essere soggetti a cancellazione.
+L'attività pianificata nota come 'Plug and Play Cleanup' è progettata principalmente per rimuovere le versioni obsolete dei driver. Contrariamente al suo scopo specifico, ovvero conservare la versione più recente del pacchetto driver, fonti online suggeriscono che individui anche i driver rimasti inattivi per 30 giorni. Di conseguenza, i driver dei dispositivi rimovibili che non sono stati collegati negli ultimi 30 giorni potrebbero essere eliminati.<sup>[[1]](#references)</sup>
 
-Il compito si trova al seguente percorso: `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
+L'attività si trova nel seguente percorso: `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
 
-Uno screenshot che mostra il contenuto del compito è fornito: ![](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
+È disponibile uno screenshot che mostra il contenuto dell'attività: ![USB Detective - Plug and Play Cleanup: l'attività si trova nel seguente percorso: C: Windows System32 Tasks Microsoft Windows Plug and Play Plug and Play Cleanup](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
 
-**Componenti e impostazioni chiave del compito:**
+**Componenti e impostazioni principali dell'attività:**
 
-- **pnpclean.dll**: Questo DLL è responsabile del processo di pulizia effettivo.
-- **UseUnifiedSchedulingEngine**: Impostato su `TRUE`, indica l'uso del motore di pianificazione dei compiti generico.
+- **pnpclean.dll**: questa DLL è responsabile del processo effettivo di pulizia.
+- **UseUnifiedSchedulingEngine**: impostato su `TRUE`, indica l'utilizzo del motore generico di pianificazione delle attività.
 - **MaintenanceSettings**:
-- **Period ('P1M')**: Indica al Task Scheduler di avviare il compito di pulizia mensilmente durante la manutenzione automatica regolare.
-- **Deadline ('P2M')**: Istruisce il Task Scheduler, se il compito fallisce per due mesi consecutivi, ad eseguire il compito durante la manutenzione automatica di emergenza.
+- **Period ('P1M')**: indica al Task Scheduler di avviare mensilmente l'attività di pulizia durante la manutenzione automatica ordinaria.
+- **Deadline ('P2M')**: indica al Task Scheduler che, se l'attività non viene eseguita per due mesi consecutivi, deve eseguirla durante la manutenzione automatica di emergenza.
 
-Questa configurazione garantisce una manutenzione e pulizia regolari dei driver, con disposizioni per riprovare il compito in caso di fallimenti consecutivi.
+Questa configurazione garantisce la manutenzione e la pulizia regolari dei driver, prevedendo un nuovo tentativo di esecuzione dell'attività in caso di errori consecutivi.
 
-**Per ulteriori informazioni controlla:** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
+**Per ulteriori informazioni consulta:** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
 
 ## Email
 
-Le email contengono **2 parti interessanti: le intestazioni e il contenuto** dell'email. Nelle **intestazioni** puoi trovare informazioni come:
+Le email contengono **2 parti interessanti: gli header e il contenuto** dell'email. Negli **header** è possibile trovare informazioni come:
 
-- **Chi** ha inviato le email (indirizzo email, IP, server di posta che hanno reindirizzato l'email)
+- **Chi** ha inviato le email (indirizzo email, IP, mail server che hanno reindirizzato l'email)
 - **Quando** è stata inviata l'email
 
-Inoltre, all'interno delle intestazioni `References` e `In-Reply-To` puoi trovare l'ID dei messaggi:
+Inoltre, negli header `References` e `In-Reply-To` è possibile trovare l'ID dei messaggi:
 
-![](<../../../images/image (593).png>)
+![Plug and Play Cleanup - Email: quando è stata inviata l'email](<../../../images/image (593).png>)
 
-### App di posta di Windows
+### Windows Mail App
 
-Questa applicazione salva le email in HTML o testo. Puoi trovare le email all'interno di sottocartelle in `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. Le email sono salvate con l'estensione `.dat`.
+Questa applicazione salva le email in formato HTML o testo. È possibile trovare le email nelle sottocartelle di `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. Le email vengono salvate con estensione `.dat`.
 
-I **metadati** delle email e i **contatti** possono essere trovati all'interno del **database EDB**: `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
+I **metadati** delle email e i **contatti** si trovano all'interno del **database EDB**: `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
 
-**Cambia l'estensione** del file da `.vol` a `.edb` e puoi utilizzare lo strumento [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) per aprirlo. All'interno della tabella `Message` puoi vedere le email.
+**Modifica l'estensione** del file da `.vol` a `.edb` e usa lo strumento [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) per aprirlo. All'interno della tabella `Message` è possibile visualizzare le email.
 
 ### Microsoft Outlook
 
-Quando vengono utilizzati server Exchange o client Outlook, ci saranno alcune intestazioni MAPI:
+Quando vengono utilizzati server Exchange o client Outlook, sono presenti alcuni header MAPI:
 
-- `Mapi-Client-Submit-Time`: Ora del sistema quando l'email è stata inviata
-- `Mapi-Conversation-Index`: Numero di messaggi figli del thread e timestamp di ciascun messaggio del thread
-- `Mapi-Entry-ID`: Identificatore del messaggio.
-- `Mappi-Message-Flags` e `Pr_last_Verb-Executed`: Informazioni sul client MAPI (messaggio letto? non letto? risposto? reindirizzato? fuori ufficio?)
+- `Mapi-Client-Submit-Time`: ora del sistema in cui è stata inviata l'email
+- `Mapi-Conversation-Index`: numero dei messaggi figli del thread e timestamp di ogni messaggio del thread
+- `Mapi-Entry-ID`: identificatore del messaggio.
+- `Mappi-Message-Flags` e `Pr_last_Verb-Executed`: informazioni sul client MAPI (messaggio letto? non letto? risposta inviata? reindirizzato? risposta automatica?)
 
 Nel client Microsoft Outlook, tutti i messaggi inviati/ricevuti, i dati dei contatti e i dati del calendario sono memorizzati in un file PST in:
 
 - `%USERPROFILE%\Local Settings\Application Data\Microsoft\Outlook` (WinXP)
 - `%USERPROFILE%\AppData\Local\Microsoft\Outlook`
 
-Il percorso del registro `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` indica il file che viene utilizzato.
+Il percorso del Registry `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` indica il file in uso.
 
-Puoi aprire il file PST utilizzando lo strumento [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html).
+È possibile aprire il file PST usando lo strumento [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html).
 
-![](<../../../images/image (498).png>)
+![Windows Mail App - Microsoft Outlook: è possibile aprire il file PST usando lo strumento Kernel PST Viewer](<../../../images/image (498).png>)
 
 ### File OST di Microsoft Outlook
 
-Un **file OST** viene generato da Microsoft Outlook quando è configurato con **IMAP** o un server **Exchange**, memorizzando informazioni simili a un file PST. Questo file è sincronizzato con il server, mantenendo i dati per **gli ultimi 12 mesi** fino a un **massimo di 50GB**, ed è situato nella stessa directory del file PST. Per visualizzare un file OST, può essere utilizzato il [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html).
+Un **file OST** viene generato da Microsoft Outlook quando è configurato con un server **IMAP** o **Exchange**, memorizzando informazioni simili a quelle di un file PST. Questo file viene sincronizzato con il server e conserva i dati degli **ultimi 12 mesi**, fino a una **dimensione massima di 50 GB**; si trova nella stessa directory del file PST. Per visualizzare un file OST è possibile utilizzare [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html).
 
-### Recupero degli Allegati
+### Recupero degli allegati
 
-Allegati persi potrebbero essere recuperabili da:
+Gli allegati persi potrebbero essere recuperabili da:
 
 - Per **IE10**: `%APPDATA%\Local\Microsoft\Windows\Temporary Internet Files\Content.Outlook`
-- Per **IE11 e versioni superiori**: `%APPDATA%\Local\Microsoft\InetCache\Content.Outlook`
+- Per **IE11 e versioni successive**: `%APPDATA%\Local\Microsoft\InetCache\Content.Outlook`
 
 ### File MBOX di Thunderbird
 
-**Thunderbird** utilizza **file MBOX** per memorizzare i dati, situati in `\Users\%USERNAME%\AppData\Roaming\Thunderbird\Profiles`.
+**Thunderbird** utilizza **file MBOX** per memorizzare i dati, che si trovano in `\Users\%USERNAME%\AppData\Roaming\Thunderbird\Profiles`.
 
-### Miniature delle Immagini
+### Miniature delle immagini
 
-- **Windows XP e 8-8.1**: Accedere a una cartella con miniature genera un file `thumbs.db` che memorizza le anteprime delle immagini, anche dopo la cancellazione.
-- **Windows 7/10**: `thumbs.db` viene creato quando viene accesso tramite rete tramite percorso UNC.
-- **Windows Vista e versioni successive**: Le anteprime delle miniature sono centralizzate in `%userprofile%\AppData\Local\Microsoft\Windows\Explorer` con file denominati **thumbcache_xxx.db**. [**Thumbsviewer**](https://thumbsviewer.github.io) e [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) sono strumenti per visualizzare questi file.
+- **Windows XP e 8-8.1**: l'accesso a una cartella contenente miniature genera un file `thumbs.db` che memorizza le anteprime delle immagini, anche dopo la loro eliminazione.
+- **Windows 7/10**: `thumbs.db` viene creato quando si accede alla cartella tramite una rete usando un percorso UNC.
+- **Windows Vista e versioni successive**: le anteprime delle miniature sono centralizzate in `%userprofile%\AppData\Local\Microsoft\Windows\Explorer`, con file denominati **thumbcache_xxx.db**. [**Thumbsviewer**](https://thumbsviewer.github.io) e [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) sono strumenti per visualizzare questi file.
 
-### Informazioni sul Registro di Windows
+### Informazioni del Windows Registry
 
-Il Registro di Windows, che memorizza un'ampia gamma di dati sulle attività di sistema e utente, è contenuto all'interno di file in:
+Il Windows Registry, che memorizza una grande quantità di dati sulle attività del sistema e degli utenti, è contenuto nei file presenti in:
 
-- `%windir%\System32\Config` per varie sottochiavi `HKEY_LOCAL_MACHINE`.
+- `%windir%\System32\Config` per diverse sottochiavi di `HKEY_LOCAL_MACHINE`.
 - `%UserProfile%{User}\NTUSER.DAT` per `HKEY_CURRENT_USER`.
-- Windows Vista e versioni successive eseguono il backup dei file di registro `HKEY_LOCAL_MACHINE` in `%Windir%\System32\Config\RegBack\`.
-- Inoltre, le informazioni sull'esecuzione dei programmi sono memorizzate in `%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT` da Windows Vista e Windows 2008 Server in poi.
+- Windows Vista e le versioni successive eseguono il backup dei file del Registry di `HKEY_LOCAL_MACHINE` in `%Windir%\System32\Config\RegBack\`.
+- Inoltre, le informazioni sull'esecuzione dei programmi sono memorizzate in `%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT` a partire da Windows Vista e Windows 2008 Server.
 
-### Strumenti
+### Tools
 
-Al alcuni strumenti sono utili per analizzare i file di registro:
+Alcuni tools sono utili per analizzare i file del Registry:
 
-- **Editor del Registro**: È installato in Windows. È un'interfaccia grafica per navigare attraverso il registro di Windows della sessione corrente.
-- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): Ti consente di caricare il file di registro e navigare attraverso di esso con un'interfaccia grafica. Contiene anche segnalibri che evidenziano le chiavi con informazioni interessanti.
-- [**RegRipper**](https://github.com/keydet89/RegRipper3.0): Ancora, ha un'interfaccia grafica che consente di navigare attraverso il registro caricato e contiene anche plugin che evidenziano informazioni interessanti all'interno del registro caricato.
-- [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): Un'altra applicazione GUI in grado di estrarre informazioni importanti dal registro caricato.
+- **Registry Editor**: è installato in Windows. È una GUI per navigare nel Windows Registry della sessione corrente.
+- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): consente di caricare il file del Registry e navigare al suo interno tramite una GUI. Contiene inoltre Bookmark che evidenziano le chiavi con informazioni interessanti.
+- [**RegRipper**](https://github.com/keydet89/RegRipper3.0): dispone anch'esso di una GUI che consente di navigare nel Registry caricato e contiene plugin che evidenziano le informazioni interessanti presenti nel Registry caricato.
+- [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): un'altra applicazione GUI in grado di estrarre le informazioni importanti dal Registry caricato.
 
-### Recupero di Elementi Cancellati
+### Recupero di elementi eliminati
 
-Quando una chiave viene eliminata, è contrassegnata come tale, ma finché lo spazio che occupa non è necessario, non verrà rimossa. Pertanto, utilizzando strumenti come **Registry Explorer** è possibile recuperare queste chiavi eliminate.
+Quando una chiave viene eliminata, viene contrassegnata come tale, ma finché lo spazio che occupa non è necessario non viene rimossa. Pertanto, utilizzando tools come **Registry Explorer**, è possibile recuperare queste chiavi eliminate.
 
-### Ultimo Tempo di Scrittura
+### Last Write Time
 
-Ogni Chiave-Valore contiene un **timestamp** che indica l'ultima volta che è stata modificata.
+Ogni coppia Key-Value contiene un **timestamp** che indica l'ultima modifica.
 
 ### SAM
 
-Il file/hive **SAM** contiene gli **hash delle password degli utenti, dei gruppi e degli utenti** del sistema.
+Il file/hive **SAM** contiene gli hash delle **password degli utenti, dei gruppi e degli utenti** del sistema.
 
-In `SAM\Domains\Account\Users` puoi ottenere il nome utente, il RID, l'ultimo accesso, l'ultimo accesso non riuscito, il contatore di accesso, la politica delle password e quando è stato creato l'account. Per ottenere gli **hash** hai anche **bisogno** del file/hive **SYSTEM**.
+In `SAM\Domains\Account\Users` è possibile ottenere il nome utente, il RID, l'ultimo accesso, l'ultimo accesso non riuscito, il contatore degli accessi, la policy delle password e la data di creazione dell'account. Per ottenere gli **hash** è inoltre **necessario** il file/hive **SYSTEM**.
 
-### Voci Interessanti nel Registro di Windows
+### Voci interessanti nel Windows Registry
 
 
 {{#ref}}
 interesting-windows-registry-keys.md
 {{#endref}}
 
-## Programmi Eseguiti
+## Programmi eseguiti
 
-### Processi di Windows di Base
+### Processi Windows di base
 
-In [questo post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) puoi scoprire i processi comuni di Windows per rilevare comportamenti sospetti.
+In [questo post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) puoi trovare informazioni sui processi Windows comuni per rilevare comportamenti sospetti.
 
-### APP Recenti di Windows
+### App recenti di Windows
 
-All'interno del registro `NTUSER.DAT` nel percorso `Software\Microsoft\Current Version\Search\RecentApps` puoi trovare sottochiavi con informazioni sull'**applicazione eseguita**, **ultima volta** che è stata eseguita e **numero di volte** che è stata avviata.
+All'interno del Registry `NTUSER.DAT`, nel percorso `Software\Microsoft\Current Version\Search\RecentApps`, è possibile trovare sottochiavi contenenti informazioni sull'**applicazione eseguita**, sull'**ultima volta** in cui è stata eseguita e sul **numero di volte** in cui è stata avviata.
 
-### BAM (Moderatore di Attività in Background)
+### BAM (Background Activity Moderator)
 
-Puoi aprire il file `SYSTEM` con un editor di registro e all'interno del percorso `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` puoi trovare informazioni sulle **applicazioni eseguite da ciascun utente** (nota il `{SID}` nel percorso) e **a che ora** sono state eseguite (l'ora è all'interno del valore Data del registro).
+È possibile aprire il file `SYSTEM` con un editor del Registry e, all'interno del percorso `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}`, trovare informazioni sulle **applicazioni eseguite da ciascun utente** (nota il `{SID}` nel percorso) e sull'**ora** in cui sono state eseguite (l'ora si trova nel valore Data del Registry).
 
-### Prefetch di Windows
+### Windows Prefetch
 
-Il prefetching è una tecnica che consente a un computer di **recuperare silenziosamente le risorse necessarie per visualizzare contenuti** a cui un utente **potrebbe accedere nel prossimo futuro** in modo che le risorse possano essere accessibili più rapidamente.
+Il Prefetch è una tecnica che consente a un computer di **recuperare silenziosamente le risorse necessarie per visualizzare contenuti** a cui un utente **potrebbe accedere nel prossimo futuro**, così da poter accedere più rapidamente alle risorse.
 
-Il prefetch di Windows consiste nella creazione di **cache dei programmi eseguiti** per poterli caricare più velocemente. Queste cache vengono create come file `.pf` all'interno del percorso: `C:\Windows\Prefetch`. C'è un limite di 128 file in XP/VISTA/WIN7 e 1024 file in Win8/Win10.
+Il Windows Prefetch consiste nella creazione di **cache dei programmi eseguiti** per poterli caricare più velocemente. Queste cache vengono create come file `.pf` nel percorso `C:\Windows\Prefetch`. Esiste un limite di 128 file in XP/VISTA/WIN7 e di 1024 file in Win8/Win10.
 
-Il nome del file è creato come `{program_name}-{hash}.pf` (l'hash è basato sul percorso e sugli argomenti dell'eseguibile). In W10 questi file sono compressi. Nota che la sola presenza del file indica che **il programma è stato eseguito** a un certo punto.
+Il nome del file viene creato come `{program_name}-{hash}.pf` (l'hash si basa sul percorso e sugli argomenti dell'eseguibile). In W10 questi file sono compressi. È importante notare che la sola presenza del file indica che **il programma è stato eseguito** in un determinato momento.
 
-Il file `C:\Windows\Prefetch\Layout.ini` contiene i **nomi delle cartelle dei file che sono stati prelevati**. Questo file contiene **informazioni sul numero delle esecuzioni**, **date** di esecuzione e **file** **aperti** dal programma.
+Il file `C:\Windows\Prefetch\Layout.ini` contiene i **nomi delle cartelle dei file sottoposti a prefetch**. Questo file contiene **informazioni sul numero di esecuzioni**, sulle **date** di esecuzione e sui **file** **aperti** dal programma.
 
-Per ispezionare questi file puoi utilizzare lo strumento [**PEcmd.exe**](https://github.com/EricZimmerman/PECmd):
+Per ispezionare questi file è possibile usare lo strumento [**PEcmd.exe**](https://github.com/EricZimmerman/PECmd):
 ```bash
 .\PECmd.exe -d C:\Users\student\Desktop\Prefetch --html "C:\Users\student\Desktop\out_folder"
 ```
-![](<../../../images/image (315).png>)
+![BAM (Background Activity Moderator) - Windows Prefetch: PECmd.exe -d C: Users student Desktop Prefetch --html "C: Users student Desktop out folder"](<../../../images/image (315).png>)
 
 ### Superprefetch
 
-**Superprefetch** ha lo stesso obiettivo del prefetch, **caricare i programmi più velocemente** prevedendo cosa verrà caricato successivamente. Tuttavia, non sostituisce il servizio di prefetch.\
-Questo servizio genererà file di database in `C:\Windows\Prefetch\Ag*.db`.
+**Superprefetch** ha lo stesso obiettivo di prefetch: **caricare i programmi più velocemente** prevedendo cosa verrà caricato successivamente. Tuttavia, non sostituisce il servizio prefetch.\
+Questo servizio genera file di database in `C:\Windows\Prefetch\Ag*.db`.
 
-In questi database puoi trovare il **nome** del **programma**, il **numero** di **esecuzioni**, i **file** **aperti**, il **volume** **accessed**, il **percorso** **completo**, i **tempi** e i **timestamp**.
+In questi database è possibile trovare il **nome** del **programma**, il **numero** di **esecuzioni**, i **file** **aperti**, il **volume** **accessed**, il **percorso** **completo**, gli **intervalli temporali** e i **timestamp**.
 
-Puoi accedere a queste informazioni utilizzando lo strumento [**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/).
+È possibile accedere a queste informazioni utilizzando lo strumento [**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/).
 
 ### SRUM
 
@@ -312,7 +312,7 @@ Puoi accedere a queste informazioni utilizzando lo strumento [**CrowdResponse**]
 
 Fornisce le seguenti informazioni:
 
-- AppID e Percorso
+- AppID e percorso
 - Utente che ha eseguito il processo
 - Byte inviati
 - Byte ricevuti
@@ -322,172 +322,176 @@ Fornisce le seguenti informazioni:
 
 Queste informazioni vengono aggiornate ogni 60 minuti.
 
-Puoi ottenere la data da questo file utilizzando lo strumento [**srum_dump**](https://github.com/MarkBaggett/srum-dump).
+È possibile ottenere la data da questo file utilizzando lo strumento [**srum_dump**](https://github.com/MarkBaggett/srum-dump).
 ```bash
 .\srum_dump.exe -i C:\Users\student\Desktop\SRUDB.dat -t SRUM_TEMPLATE.xlsx -o C:\Users\student\Desktop\srum
 ```
 ### AppCompatCache (ShimCache)
 
-Il **AppCompatCache**, noto anche come **ShimCache**, fa parte del **Database di Compatibilità delle Applicazioni** sviluppato da **Microsoft** per affrontare problemi di compatibilità delle applicazioni. Questo componente di sistema registra vari pezzi di metadati dei file, che includono:
+**AppCompatCache**, noto anche come **ShimCache**, fa parte dell'**Application Compatibility Database** sviluppato da **Microsoft** per risolvere i problemi di compatibilità delle applicazioni. Questo componente di sistema registra diversi metadati dei file, tra cui:
 
 - Percorso completo del file
 - Dimensione del file
-- Ultima data di modifica sotto **$Standard_Information** (SI)
-- Ultima data di aggiornamento dello ShimCache
+- Ora dell'ultima modifica in **$Standard_Information** (SI)
+- Ora dell'ultimo aggiornamento della ShimCache
 - Flag di esecuzione del processo
 
-Tali dati sono memorizzati nel registro in posizioni specifiche in base alla versione del sistema operativo:
+Questi dati vengono memorizzati nel registro in posizioni specifiche in base alla versione del sistema operativo:
 
-- Per XP, i dati sono memorizzati sotto `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache` con una capacità di 96 voci.
-- Per Server 2003, così come per le versioni di Windows 2008, 2012, 2016, 7, 8 e 10, il percorso di archiviazione è `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache`, che accoglie rispettivamente 512 e 1024 voci.
+- In XP, i dati sono memorizzati in `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache`, con una capacità di 96 voci.
+- In Server 2003, così come nelle versioni Windows 2008, 2012, 2016, 7, 8 e 10, il percorso di archiviazione è `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache`, con una capacità rispettivamente di 512 e 1024 voci.
 
-Per analizzare le informazioni memorizzate, si consiglia di utilizzare lo strumento [**AppCompatCacheParser**](https://github.com/EricZimmerman/AppCompatCacheParser).
+Per analizzare le informazioni memorizzate, si consiglia di utilizzare lo [**strumento AppCompatCacheParser**](https://github.com/EricZimmerman/AppCompatCacheParser).
 
-![](<../../../images/image (75).png>)
+![SRUM - AppCompatCache (ShimCache): per analizzare le informazioni memorizzate, si consiglia di utilizzare lo strumento AppCompatCacheParser](<../../../images/image (75).png>)
 
 ### Amcache
 
-Il file **Amcache.hve** è essenzialmente un hive del registro che registra dettagli sulle applicazioni che sono state eseguite su un sistema. Si trova tipicamente in `C:\Windows\AppCompat\Programas\Amcache.hve`.
+Il file **Amcache.hve** è essenzialmente un hive del registro che registra i dettagli delle applicazioni eseguite su un sistema. In genere si trova in `C:\Windows\AppCompat\Programas\Amcache.hve`.
 
-Questo file è notevole per memorizzare registrazioni dei processi eseguiti di recente, inclusi i percorsi ai file eseguibili e i loro hash SHA1. Queste informazioni sono preziose per tracciare l'attività delle applicazioni su un sistema.
+Questo file è noto per memorizzare i record dei processi eseguiti di recente, inclusi i percorsi dei file eseguibili e i relativi hash SHA1. Queste informazioni sono preziose per tracciare l'attività delle applicazioni su un sistema.
 
-Per estrarre e analizzare i dati da **Amcache.hve**, si può utilizzare lo strumento [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser). Il seguente comando è un esempio di come utilizzare AmcacheParser per analizzare i contenuti del file **Amcache.hve** e restituire i risultati in formato CSV:
+Per estrarre e analizzare i dati da **Amcache.hve**, è possibile utilizzare lo strumento [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser). Il comando seguente mostra un esempio di utilizzo di AmcacheParser per analizzare il contenuto del file **Amcache.hve** e restituire i risultati in formato CSV:
 ```bash
 AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\genericUser\Desktop\outputFolder
 ```
-Tra i file CSV generati, il `Amcache_Unassociated file entries` è particolarmente degno di nota per le ricche informazioni che fornisce sulle voci di file non associate.
+Tra i file CSV generati, `Amcache_Unassociated file entries` è particolarmente degno di nota per le informazioni dettagliate che fornisce sulle voci di file non associate.
 
-Il file CVS più interessante generato è il `Amcache_Unassociated file entries`.
+Il file CVS generato più interessante è `Amcache_Unassociated file entries`.
 
 ### RecentFileCache
 
-Questo artefatto può essere trovato solo in W7 in `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` e contiene informazioni sull'esecuzione recente di alcuni binari.
+Questo artifact può essere trovato solo in W7, in `C:\Windows\AppCompat\Programs\RecentFileCache.bcf`, e contiene informazioni sull'esecuzione recente di alcuni binari.
 
-Puoi utilizzare lo strumento [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser) per analizzare il file.
+È possibile utilizzare lo strumento [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser) per analizzare il file.
 
 ### Scheduled tasks
 
-Puoi estrarli da `C:\Windows\Tasks` o `C:\Windows\System32\Tasks` e leggerli come XML.
+È possibile estrarli da `C:\Windows\Tasks` o `C:\Windows\System32\Tasks` e leggerli come XML.
 
 ### Services
 
-Puoi trovarli nel registro sotto `SYSTEM\ControlSet001\Services`. Puoi vedere cosa verrà eseguito e quando.
+È possibile trovarli nel registry, in `SYSTEM\ControlSet001\Services`. È possibile vedere cosa verrà eseguito e quando.
 
 ### **Windows Store**
 
 Le applicazioni installate possono essere trovate in `\ProgramData\Microsoft\Windows\AppRepository\`\
-Questo repository ha un **log** con **ogni applicazione installata** nel sistema all'interno del database **`StateRepository-Machine.srd`**.
+Questo repository contiene un **log** con **ogni applicazione installata** nel sistema, all'interno del database **`StateRepository-Machine.srd`**.
 
-All'interno della tabella Applicazione di questo database, è possibile trovare le colonne: "Application ID", "PackageNumber" e "Display Name". Queste colonne contengono informazioni sulle applicazioni pre-installate e installate e possono indicare se alcune applicazioni sono state disinstallate, poiché gli ID delle applicazioni installate dovrebbero essere sequenziali.
+All'interno della tabella Application di questo database è possibile trovare le colonne: "Application ID", "PackageNumber" e "Display Name". Queste colonne contengono informazioni sulle applicazioni pre-installate e installate ed è possibile verificare se alcune applicazioni sono state disinstallate, poiché gli ID delle applicazioni installate dovrebbero essere sequenziali.
 
-È anche possibile **trovare applicazioni installate** all'interno del percorso del registro: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
-E **applicazioni disinstallate** in: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
+È inoltre possibile **trovare le applicazioni installate** nel registry path: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
+E le **applicazioni** **disinstallate** in: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
 
 ## Windows Events
 
-Le informazioni che appaiono all'interno degli eventi di Windows sono:
+Le informazioni che compaiono negli eventi Windows sono:
 
 - Cosa è successo
 - Timestamp (UTC + 0)
 - Utenti coinvolti
 - Host coinvolti (hostname, IP)
-- Risorse accessibili (file, cartella, stampante, servizi)
+- Asset a cui è stato effettuato l'accesso (file, cartelle, stampanti, services)
 
-I log si trovano in `C:\Windows\System32\config` prima di Windows Vista e in `C:\Windows\System32\winevt\Logs` dopo Windows Vista. Prima di Windows Vista, i log degli eventi erano in formato binario e dopo sono in **formato XML** e utilizzano l'estensione **.evtx**.
+I log si trovano in `C:\Windows\System32\config` prima di Windows Vista e in `C:\Windows\System32\winevt\Logs` dopo Windows Vista. Prima di Windows Vista, i log degli eventi erano in formato binario; successivamente sono in **formato XML** e utilizzano l'estensione **.evtx**.
 
-La posizione dei file di evento può essere trovata nel registro SYSTEM in **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`**
+La posizione dei file degli eventi può essere trovata nel registry SYSTEM, in **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`**
 
-Possono essere visualizzati dal Visualizzatore eventi di Windows (**`eventvwr.msc`**) o con altri strumenti come [**Event Log Explorer**](https://eventlogxp.com) **o** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)**.**
+Possono essere visualizzati dal Windows Event Viewer (**`eventvwr.msc`**) oppure con altri strumenti come [**Event Log Explorer**](https://eventlogxp.com) **o** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)**.**
 
 ## Understanding Windows Security Event Logging
 
-Gli eventi di accesso sono registrati nel file di configurazione della sicurezza situato in `C:\Windows\System32\winevt\Security.evtx`. La dimensione di questo file è regolabile e, quando la sua capacità è raggiunta, gli eventi più vecchi vengono sovrascritti. Gli eventi registrati includono accessi e disconnessioni degli utenti, azioni degli utenti e modifiche alle impostazioni di sicurezza, nonché accessi a file, cartelle e risorse condivise.
+Gli eventi di accesso vengono registrati nel file di configurazione della sicurezza situato in `C:\Windows\System32\winevt\Security.evtx`. La dimensione di questo file è regolabile e, quando viene raggiunta la capacità massima, gli eventi più vecchi vengono sovrascritti. Gli eventi registrati includono i login e i logoff degli utenti, le azioni degli utenti e le modifiche alle impostazioni di sicurezza, nonché l'accesso a file, cartelle e asset condivisi.
 
 ### Key Event IDs for User Authentication:
 
-- **EventID 4624**: Indica che un utente si è autenticato con successo.
-- **EventID 4625**: Segnala un fallimento di autenticazione.
-- **EventIDs 4634/4647**: Rappresentano eventi di disconnessione dell'utente.
-- **EventID 4672**: Denota accesso con privilegi amministrativi.
+- **EventID 4624**: indica che un utente ha completato correttamente l'autenticazione.
+- **EventID 4625**: segnala un'autenticazione non riuscita.
+- **EventIDs 4634/4647**: rappresentano gli eventi di logoff degli utenti.
+- **EventID 4672**: indica un login con privilegi amministrativi.
 
 #### Sub-types within EventID 4634/4647:
 
-- **Interactive (2)**: Accesso diretto dell'utente.
-- **Network (3)**: Accesso a cartelle condivise.
-- **Batch (4)**: Esecuzione di processi batch.
-- **Service (5)**: Avvii di servizi.
-- **Proxy (6)**: Autenticazione proxy.
-- **Unlock (7)**: Schermo sbloccato con una password.
-- **Network Cleartext (8)**: Trasmissione di password in chiaro, spesso da IIS.
-- **New Credentials (9)**: Utilizzo di credenziali diverse per l'accesso.
-- **Remote Interactive (10)**: Accesso remoto tramite desktop o servizi terminali.
-- **Cache Interactive (11)**: Accesso con credenziali memorizzate senza contatto con il controller di dominio.
-- **Cache Remote Interactive (12)**: Accesso remoto con credenziali memorizzate.
-- **Cached Unlock (13)**: Sblocco con credenziali memorizzate.
+- **Interactive (2)**: login diretto dell'utente.
+- **Network (3)**: accesso a cartelle condivise.
+- **Batch (4)**: esecuzione di processi batch.
+- **Service (5)**: avvio di services.
+- **Proxy (6)**: autenticazione tramite proxy.
+- **Unlock (7)**: schermata sbloccata con una password.
+- **Network Cleartext (8)**: trasmissione della password in chiaro, spesso da IIS.
+- **New Credentials (9)**: utilizzo di credenziali diverse per l'accesso.
+- **Remote Interactive (10)**: login tramite Remote Desktop o terminal services.
+- **Cache Interactive (11)**: login con credenziali memorizzate nella cache, senza contattare il domain controller.
+- **Cache Remote Interactive (12)**: login remoto con credenziali memorizzate nella cache.
+- **Cached Unlock (13)**: sblocco con credenziali memorizzate nella cache.
 
 #### Status and Sub Status Codes for EventID 4625:
 
-- **0xC0000064**: Il nome utente non esiste - Potrebbe indicare un attacco di enumerazione degli username.
-- **0xC000006A**: Nome utente corretto ma password errata - Possibile tentativo di indovinare la password o attacco brute-force.
-- **0xC0000234**: Account utente bloccato - Può seguire un attacco brute-force con più accessi falliti.
-- **0xC0000072**: Account disabilitato - Tentativi non autorizzati di accedere a account disabilitati.
-- **0xC000006F**: Accesso al di fuori dell'orario consentito - Indica tentativi di accesso al di fuori delle ore di accesso impostate, un possibile segno di accesso non autorizzato.
-- **0xC0000070**: Violazione delle restrizioni della workstation - Potrebbe essere un tentativo di accesso da una posizione non autorizzata.
-- **0xC0000193**: Scadenza dell'account - Tentativi di accesso con account utente scaduti.
-- **0xC0000071**: Password scaduta - Tentativi di accesso con password obsolete.
-- **0xC0000133**: Problemi di sincronizzazione dell'ora - Grandi discrepanze di tempo tra client e server possono indicare attacchi più sofisticati come pass-the-ticket.
-- **0xC0000224**: Cambio di password obbligatorio richiesto - Cambi frequenti obbligatori potrebbero suggerire un tentativo di destabilizzare la sicurezza dell'account.
-- **0xC0000225**: Indica un bug di sistema piuttosto che un problema di sicurezza.
-- **0xC000015b**: Tipo di accesso negato - Tentativo di accesso con tipo di accesso non autorizzato, come un utente che cerca di eseguire un accesso di servizio.
+- **0xC0000064**: il nome utente non esiste - potrebbe indicare un username enumeration attack.
+- **0xC000006A**: nome utente corretto ma password errata - possibile password guessing o tentativo di brute-force.
+- **0xC0000234**: account utente bloccato - potrebbe verificarsi dopo un brute-force attack che ha causato numerosi login falliti.
+- **0xC0000072**: account disabilitato - tentativi non autorizzati di accedere ad account disabilitati.
+- **0xC000006F**: logon al di fuori dell'orario consentito - indica tentativi di accesso al di fuori degli orari di login configurati, possibile segno di accesso non autorizzato.
+- **0xC0000070**: violazione delle restrizioni della workstation - potrebbe indicare un tentativo di login da una posizione non autorizzata.
+- **0xC0000193**: account scaduto - tentativi di accesso con account utente scaduti.
+- **0xC0000071**: password scaduta - tentativi di login con password non più valide.
+- **0xC0000133**: problemi di sincronizzazione dell'ora - differenze temporali elevate tra client e server possono indicare attack più sofisticati, come pass-the-ticket.
+- **0xC0000224**: è necessaria una modifica obbligatoria della password - modifiche obbligatorie frequenti potrebbero indicare un tentativo di destabilizzare la sicurezza dell'account.
+- **0xC0000225**: indica un bug del sistema piuttosto che un problema di sicurezza.
+- **0xC000015b**: tipo di logon negato - tentativo di accesso con un tipo di logon non autorizzato, ad esempio un utente che tenta di eseguire un service logon.
 
 #### EventID 4616:
 
-- **Time Change**: Modifica dell'ora di sistema, potrebbe offuscare la cronologia degli eventi.
+- **Time Change**: modifica dell'ora di sistema, che potrebbe occultare la timeline degli eventi.
 
-#### EventID 6005 e 6006:
+#### EventID 6005 and 6006:
 
-- **System Startup and Shutdown**: L'EventID 6005 indica l'avvio del sistema, mentre l'EventID 6006 segna lo spegnimento.
+- **System Startup and Shutdown**: EventID 6005 indica l'avvio del sistema, mentre EventID 6006 ne indica lo spegnimento.
 
 #### EventID 1102:
 
-- **Log Deletion**: Cancellazione dei log di sicurezza, che è spesso un campanello d'allarme per coprire attività illecite.
+- **Log Deletion**: cancellazione dei security log, spesso un segnale d'allarme di attività illecite occultate.
 
 #### EventIDs for USB Device Tracking:
 
-- **20001 / 20003 / 10000**: Prima connessione del dispositivo USB.
-- **10100**: Aggiornamento del driver USB.
-- **EventID 112**: Ora di inserimento del dispositivo USB.
+- **20001 / 20003 / 10000**: prima connessione del dispositivo USB.
+- **10100**: aggiornamento del driver USB.
+- **EventID 112**: momento dell'inserimento del dispositivo USB.
 
-Per esempi pratici su come simulare questi tipi di accesso e opportunità di dumping delle credenziali, fai riferimento alla [guida dettagliata di Altered Security](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them).
+Per esempi pratici sulla simulazione di questi tipi di login e sulle opportunità di credential dumping, consulta la guida dettagliata di [Altered Security](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them).
 
-I dettagli degli eventi, inclusi i codici di stato e sottostato, forniscono ulteriori informazioni sulle cause degli eventi, particolarmente notevoli nell'Event ID 4625.
+I dettagli degli eventi, inclusi i codici di status e sub-status, forniscono ulteriori informazioni sulle cause degli eventi, particolarmente rilevanti nell'Event ID 4625.
 
 ### Recovering Windows Events
 
-Per aumentare le possibilità di recuperare eventi di Windows eliminati, è consigliabile spegnere il computer sospetto scollegandolo direttamente. **Bulk_extractor**, uno strumento di recupero che specifica l'estensione `.evtx`, è raccomandato per tentare di recuperare tali eventi.
+Per aumentare le possibilità di recuperare Windows Events eliminati, è consigliabile spegnere il computer sospetto scollegandolo direttamente dall'alimentazione. Si consiglia di utilizzare **Bulk_extractor**, uno strumento di recupero specificando l'estensione `.evtx`, per tentare di recuperare tali eventi.
 
 ### Identifying Common Attacks via Windows Events
 
-Per una guida completa su come utilizzare gli ID degli eventi di Windows per identificare attacchi informatici comuni, visita [Red Team Recipe](https://redteamrecipe.com/event-codes/).
+Per una guida completa sull'utilizzo degli Windows Event IDs per identificare i common cyber attacks, visita [Red Team Recipe](https://redteamrecipe.com/event-codes/).
 
 #### Brute Force Attacks
 
-Identificabili da più registrazioni di EventID 4625, seguite da un EventID 4624 se l'attacco ha successo.
+Identificabili dalla presenza di numerosi record EventID 4625, seguiti da un EventID 4624 se l'attacco ha successo.
 
 #### Time Change
 
-Registrato da EventID 4616, le modifiche all'ora di sistema possono complicare l'analisi forense.
+Registrati dall'EventID 4616, i cambiamenti dell'ora di sistema possono complicare l'analisi forense.
 
 #### USB Device Tracking
 
-Gli ID di evento di sistema utili per il tracciamento dei dispositivi USB includono 20001/20003/10000 per l'uso iniziale, 10100 per aggiornamenti dei driver e EventID 112 da DeviceSetupManager per i timestamp di inserimento.
+Gli EventIDs di sistema utili per il tracking dei dispositivi USB includono 20001/20003/10000 per il primo utilizzo, 10100 per gli aggiornamenti dei driver ed EventID 112 da DeviceSetupManager per i timestamp di inserimento.
 
 #### System Power Events
 
-L'EventID 6005 indica l'avvio del sistema, mentre l'EventID 6006 segna lo spegnimento.
+EventID 6005 indica l'avvio del sistema, mentre EventID 6006 ne indica lo spegnimento.
 
 #### Log Deletion
 
-L'EventID di sicurezza 1102 segnala la cancellazione dei log, un evento critico per l'analisi forense.
+Il Security EventID 1102 segnala la cancellazione dei log, un evento critico per l'analisi forense.
+
+## References
+
+- [1] [Windows Plug and Play Cleanup](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

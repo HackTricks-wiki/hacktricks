@@ -2,10 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-​
-
-
-Se hai bisogno di uno strumento che automatizzi l'analisi della memoria con diversi livelli di scansione e esegua più plugin Volatility3 in parallelo, puoi utilizzare autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+Se ti serve uno strumento che automatizzi l'analisi della memoria con diversi livelli di scansione ed esegua più plugin di Volatility3 in parallelo, puoi usare autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
 ```bash
 # Full scan (runs all plugins)
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
@@ -17,7 +14,7 @@ python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
 
 ```
-Se vuoi qualcosa di **veloce e folle** che lancerà diversi plugin di Volatility in parallelo, puoi usare: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+Se vuoi qualcosa di **veloce e pazzesco** che avvii diversi plugin di Volatility in parallelo, puoi usare: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -39,7 +36,7 @@ Download the executable from https://www.volatilityfoundation.org/26
 ```
 {{#endtab}}
 
-{{#tab name="Metodo 2"}}
+{{#tab name="Method 2"}}
 ```bash
 git clone https://github.com/volatilityfoundation/volatility.git
 cd volatility
@@ -50,24 +47,24 @@ python setup.py install
 
 ## Comandi di Volatility
 
-Accedi alla documentazione ufficiale in [Volatility command reference](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)
+Consulta la documentazione ufficiale nel [riferimento dei comandi di Volatility](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)
 
-### Una nota sui plugin “list” vs. “scan”
+### Una nota sui plugin “list” rispetto ai plugin “scan”
 
-Volatility ha due approcci principali ai plugin, che a volte si riflettono nei loro nomi. I plugin “list” cercheranno di navigare attraverso le strutture del kernel di Windows per recuperare informazioni come i processi (localizzare e percorrere la lista collegata delle strutture `_EPROCESS` in memoria), gestori del sistema operativo (localizzare e elencare la tabella dei gestori, dereferenziare eventuali puntatori trovati, ecc.). Si comportano più o meno come farebbe l'API di Windows se richiesto di elencare i processi, ad esempio.
+Volatility utilizza due approcci principali per i plugin, talvolta riflessi nei loro nomi. I plugin “list” cercheranno di navigare attraverso le strutture del Windows Kernel per recuperare informazioni come i processi (individuando e attraversando la linked list delle strutture `_EPROCESS` in memoria), gli handle del sistema operativo (individuando ed elencando la handle table, dereferenziando eventuali puntatori trovati, ecc.). Si comportano più o meno come farebbe la Windows API se le venisse richiesto, ad esempio, di elencare i processi.
 
-Questo rende i plugin “list” piuttosto veloci, ma altrettanto vulnerabili all'interferenza da parte di malware. Ad esempio, se un malware utilizza DKOM per scollegare un processo dalla lista collegata `_EPROCESS`, non apparirà nel Task Manager e nemmeno in pslist.
+Questo rende i plugin “list” piuttosto veloci, ma vulnerabili alla manipolazione da parte del malware tanto quanto la Windows API. Ad esempio, se il malware utilizza DKOM per scollegare un processo dalla linked list di `_EPROCESS`, questo non verrà visualizzato nel Task Manager e nemmeno in pslist.
 
-I plugin “scan”, d'altra parte, adotteranno un approccio simile al carving della memoria per cose che potrebbero avere senso quando dereferenziate come strutture specifiche. `psscan`, ad esempio, leggerà la memoria e cercherà di creare oggetti `_EPROCESS` da essa (utilizza la scansione dei pool-tag, che cerca stringhe di 4 byte che indicano la presenza di una struttura di interesse). Il vantaggio è che può recuperare processi che sono terminati, e anche se il malware manomette la lista collegata `_EPROCESS`, il plugin troverà comunque la struttura presente in memoria (poiché deve ancora esistere affinché il processo funzioni). Lo svantaggio è che i plugin “scan” sono un po' più lenti dei plugin “list” e possono talvolta generare falsi positivi (un processo che è terminato troppo tempo fa e ha avuto parti della sua struttura sovrascritte da altre operazioni).
+I plugin “scan”, invece, adottano un approccio simile al carving della memoria alla ricerca di elementi che potrebbero avere senso se dereferenziati come strutture specifiche. `psscan`, ad esempio, leggerà la memoria e proverà a creare oggetti `_EPROCESS` a partire da essa (utilizza la scansione dei pool tag, che consiste nella ricerca di stringhe di 4 byte indicanti la presenza di una struttura di interesse). Il vantaggio è che può individuare processi terminati e, anche se il malware manomette la linked list di `_EPROCESS`, il plugin troverà comunque la struttura presente in memoria (poiché deve ancora esistere affinché il processo possa essere eseguito). Lo svantaggio è che i plugin “scan” sono un po' più lenti dei plugin “list” e talvolta possono produrre falsi positivi (un processo terminato troppo tempo prima, con parti della sua struttura sovrascritte da altre operazioni).
 
-Da: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
+Da: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)<sup>[[6]](#references)</sup>
 
-## Profili OS
+## Profili del sistema operativo
 
 ### Volatility3
 
-Come spiegato all'interno del readme, è necessario inserire la **tabella dei simboli del sistema operativo** che si desidera supportare all'interno di _volatility3/volatility/symbols_.\
-I pacchetti della tabella dei simboli per i vari sistemi operativi sono disponibili per **download** su:
+Come spiegato nel readme, è necessario inserire la **symbol table del sistema operativo** che si desidera supportare all'interno di _volatility3/volatility/symbols_.\
+I pacchetti delle symbol table per i vari sistemi operativi sono disponibili per il **download** ai seguenti indirizzi:
 
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip)
@@ -75,13 +72,13 @@ I pacchetti della tabella dei simboli per i vari sistemi operativi sono disponib
 
 ### Volatility2
 
-#### Profilo Esterno
+#### Profilo esterno
 
-Puoi ottenere l'elenco dei profili supportati eseguendo:
+È possibile ottenere l'elenco dei profili supportati eseguendo:
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
-Se vuoi utilizzare un **nuovo profilo che hai scaricato** (ad esempio uno per linux) devi creare da qualche parte la seguente struttura di cartelle: _plugins/overlays/linux_ e mettere all'interno di questa cartella il file zip contenente il profilo. Poi, ottieni il numero dei profili usando:
+Se vuoi utilizzare un **nuovo profilo che hai scaricato** (ad esempio uno per Linux), devi creare da qualche parte la seguente struttura di cartelle: _plugins/overlays/linux_ e inserire in questa cartella il file zip contenente il profilo. Quindi, ottieni il numero dei profili utilizzando:
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
@@ -93,22 +90,22 @@ LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 - A Profile for Linux CentOS7_3.10
 VistaSP0x64                                   - A Profile for Windows Vista SP0 x64
 VistaSP0x86                                   - A Profile for Windows Vista SP0 x86
 ```
-Puoi **scaricare i profili per Linux e Mac** da [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles)
+Puoi **scaricare i profili Linux e Mac** da [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles)
 
-Nel blocco precedente puoi vedere che il profilo si chiama `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`, e puoi usarlo per eseguire qualcosa come:
+Nel blocco precedente puoi vedere che il profilo si chiama `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64` e puoi usarlo per eseguire qualcosa come:
 ```bash
 ./vol -f file.dmp --plugins=. --profile=LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 linux_netscan
 ```
-#### Scopri Profilo
+#### Scopri il profilo
 ```
 volatility imageinfo -f file.dmp
 volatility kdbgscan -f file.dmp
 ```
 #### **Differenze tra imageinfo e kdbgscan**
 
-[**Da qui**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): A differenza di imageinfo che fornisce semplicemente suggerimenti sul profilo, **kdbgscan** è progettato per identificare positivamente il profilo corretto e l'indirizzo KDBG corretto (se ce ne sono più di uno). Questo plugin cerca le firme KDBGHeader collegate ai profili di Volatility e applica controlli di sanità per ridurre i falsi positivi. La verbosità dell'output e il numero di controlli di sanità che possono essere eseguiti dipendono dal fatto che Volatility riesca a trovare un DTB, quindi se già conosci il profilo corretto (o se hai un suggerimento di profilo da imageinfo), assicurati di usarlo da .
+[**Da qui**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): A differenza di imageinfo, che fornisce semplicemente suggerimenti sul profilo, **kdbgscan** è progettato per identificare in modo certo il profilo corretto e l'indirizzo KDBG corretto (nel caso ce ne siano diversi). Questo plugin cerca le firme KDBGHeader associate ai profili Volatility e applica controlli di coerenza per ridurre i falsi positivi. Il livello di dettaglio dell'output e il numero di controlli di coerenza eseguibili dipendono dalla possibilità per Volatility di trovare un DTB; quindi, se conosci già il profilo corretto (o se hai un suggerimento sul profilo da imageinfo), assicurati di utilizzarlo da .<sup>[[1]](#references)</sup>
 
-Dai sempre un'occhiata al **numero di processi che kdbgscan ha trovato**. A volte imageinfo e kdbgscan possono trovare **più di un** profilo **adatto**, ma solo il **valido avrà alcuni processi correlati** (Questo perché per estrarre i processi è necessario l'indirizzo KDBG corretto).
+Controlla sempre il **numero di processi trovati da kdbgscan**. A volte imageinfo e kdbgscan possono trovare **più di un** **profilo** adatto, ma solo quello **valido avrà alcuni processi associati** (questo perché per estrarre i processi è necessario l'indirizzo KDBG corretto)<sup>[[1]](#references)</sup>
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -122,9 +119,9 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-Il **kernel debugger block**, noto come **KDBG** da Volatility, è cruciale per i compiti forensi eseguiti da Volatility e vari debugger. Identificato come `KdDebuggerDataBlock` e di tipo `_KDDEBUGGER_DATA64`, contiene riferimenti essenziali come `PsActiveProcessHead`. Questo riferimento specifico punta alla testa della lista dei processi, consentendo l'elenco di tutti i processi, fondamentale per un'analisi approfondita della memoria.
+Il **blocco del debugger del kernel**, indicato da Volatility come **KDBG**, è fondamentale per le attività forensi eseguite da Volatility e da diversi debugger. Identificato come `KdDebuggerDataBlock` e di tipo `_KDDEBUGGER_DATA64`, contiene riferimenti essenziali come `PsActiveProcessHead`. Questo riferimento specifico punta all'inizio dell'elenco dei processi, consentendo di elencare tutti i processi, un'operazione fondamentale per un'analisi approfondita della memoria.<sup>[[2]](#references)</sup>
 
-## OS Information
+## Informazioni sul sistema operativo
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
@@ -133,7 +130,7 @@ Il plugin `banners.Banners` può essere utilizzato in **vol3 per cercare banner 
 
 ## Hash/Password
 
-Estrai gli hash SAM, [credenziali memorizzate nella cache del dominio](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) e [segreti lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
+Estrai gli hash SAM, le [credenziali memorizzate nella cache del dominio](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) e i [segreti LSA](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -155,15 +152,15 @@ volatility --profile=Win7SP1x86_23418 lsadump -f file.dmp #Grab lsa secrets
 
 ## Memory Dump
 
-Il memory dump di un processo **estrarrà tutto** lo stato attuale del processo. Il modulo **procdump** estrarrà solo il **codice**.
+Il memory dump di un processo **estrarrà tutto** dello stato attuale del processo. Il modulo **procdump** **estrarrà** solo il **codice**.
 ```
 volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
 ## Processi
 
-### Elenca i processi
+### Elencare i processi
 
-Cerca di trovare processi **sospetti** (per nome) o processi **figli** **inaspettati** (ad esempio un cmd.exe come figlio di iexplorer.exe).\
+Cerca processi **sospetti** (per nome) o **processi** figlio **imprevisti** (ad esempio un processo cmd.exe come figlio di iexplorer.exe).\
 Potrebbe essere interessante **confrontare** il risultato di pslist con quello di psscan per identificare processi nascosti.
 
 {{#tabs}}
@@ -185,7 +182,7 @@ volatility --profile=PROFILE psxview -f file.dmp # Get hidden process list
 {{#endtab}}
 {{#endtabs}}
 
-### Dump proc
+### Dump dei processi
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -201,7 +198,7 @@ volatility --profile=Win7SP1x86_23418 procdump --pid=3152 -n --dump-dir=. -f fil
 {{#endtab}}
 {{#endtabs}}
 
-### Linea di comando
+### Riga di comando
 
 È stato eseguito qualcosa di sospetto?
 
@@ -220,11 +217,11 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {{#endtab}}
 {{#endtabs}}
 
-I comandi eseguiti in `cmd.exe` sono gestiti da **`conhost.exe`** (o `csrss.exe` sui sistemi precedenti a Windows 7). Questo significa che se **`cmd.exe`** viene terminato da un attaccante prima che venga ottenuto un dump della memoria, è ancora possibile recuperare la cronologia dei comandi della sessione dalla memoria di **`conhost.exe`**. Per fare ciò, se viene rilevata un'attività insolita all'interno dei moduli della console, la memoria del processo associato **`conhost.exe`** dovrebbe essere dumpata. Poi, cercando **stringhe** all'interno di questo dump, le righe di comando utilizzate nella sessione possono potenzialmente essere estratte.
+I comandi eseguiti in `cmd.exe` sono gestiti da **`conhost.exe`** (o **`csrss.exe`** nei sistemi precedenti a Windows 7). Ciò significa che, se **`cmd.exe`** viene terminato da un attaccante prima di ottenere un memory dump, è comunque possibile recuperare la cronologia dei comandi della sessione dalla memoria di **`conhost.exe`**. A tal fine, se viene rilevata un'attività insolita nei moduli della console, è necessario eseguire il dump della memoria del processo **`conhost.exe`** associato. Quindi, cercando **strings** all'interno di questo dump, è possibile estrarre le righe di comando utilizzate nella sessione.
 
 ### Ambiente
 
-Ottieni le variabili di ambiente di ciascun processo in esecuzione. Potrebbero esserci alcuni valori interessanti.
+Recupera le variabili d'ambiente di ogni processo in esecuzione. Potrebbero contenere valori interessanti.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -244,8 +241,8 @@ volatility --profile=PROFILE -f file.dmp linux_psenv [-p <pid>] #Get env of proc
 
 ### Privilegi dei token
 
-Controlla i token di privilegi in servizi inaspettati.\
-Potrebbe essere interessante elencare i processi che utilizzano alcuni token privilegiati.
+Controlla i token con privilegi nei servizi inattesi.\
+Potrebbe essere interessante elencare i processi che utilizzano un token con privilegi.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -270,7 +267,7 @@ volatility --profile=Win7SP1x86_23418 privs -f file.dmp | grep "SeImpersonatePri
 ### SIDs
 
 Controlla ogni SSID posseduto da un processo.\
-Potrebbe essere interessante elencare i processi che utilizzano un SID di privilegi (e i processi che utilizzano un SID di servizio). 
+Potrebbe essere interessante elencare i processi che utilizzano un SID con privilegi (e i processi che utilizzano un SID di servizio).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -290,7 +287,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### Handle
 
-Utile sapere a quali altri file, chiavi, thread, processi... un **processo ha un handle** (ha aperto)
+Utile sapere verso quali altri file, chiavi, thread, processi... un **processo ha un handle** (ha aperto)
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -324,9 +321,9 @@ volatility --profile=Win7SP1x86_23418 dlldump --pid=3152 --dump-dir=. -f file.dm
 {{#endtab}}
 {{#endtabs}}
 
-### String per processi
+### Stringhe per processo
 
-Volatility ci consente di controllare a quale processo appartiene una stringa.
+Volatility ci consente di verificare a quale processo appartiene una stringa.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -347,7 +344,7 @@ strings 3532.dmp > strings_file
 {{#endtab}}
 {{#endtabs}}
 
-Consente anche di cercare stringhe all'interno di un processo utilizzando il modulo yarascan:
+Consente inoltre di cercare stringhe all'interno di un processo usando il modulo yarascan:
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -366,7 +363,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-**Windows** tiene traccia dei programmi che esegui utilizzando una funzionalità nel registro chiamata **UserAssist keys**. Queste chiavi registrano quante volte ogni programma è stato eseguito e quando è stato eseguito l'ultima volta.
+**Windows** tiene un registro de los programas que ejecutas mediante una función del registro denominada **UserAssist keys**. Estas claves registran cuántas veces se ejecuta cada programa y cuándo se ejecutó por última vez.<sup>[[3]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -381,9 +378,6 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp userassist
 ```
 {{#endtab}}
 {{#endtabs}}
-
-​
-
 
 ## Servizi
 
@@ -433,9 +427,9 @@ volatility --profile=SomeLinux -f file.dmp linux_route_cache
 {{#endtab}}
 {{#endtabs}}
 
-## Registro hives
+## Hive del Registro
 
-### Stampa hives disponibili
+### Visualizzare gli hive disponibili
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -453,7 +447,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp printkey #List roots and get i
 {{#endtab}}
 {{#endtabs}}
 
-### Ottieni un valore
+### Ottenere un valore
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -478,9 +472,9 @@ volatility --profile=Win7SP1x86_23418 hivedump -o 0x9aad6148 -f file.dmp #Offset
 #Dump all hives
 volatility --profile=Win7SP1x86_23418 hivedump -f file.dmp
 ```
-## Filesystem
+## File system
 
-### Mount
+### Montaggio
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -497,7 +491,7 @@ volatility --profile=SomeLinux -f file.dmp linux_recover_filesystem #Dump the en
 {{#endtab}}
 {{#endtabs}}
 
-### Scans/dump
+### Scansione/dump
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -520,7 +514,10 @@ volatility --profile=SomeLinux -f file.dmp linux_find_file -i 0xINODENUMBER -O /
 {{#endtab}}
 {{#endtabs}}
 
-### Master File Table
+### Tabella principale dei file
+
+{{#tabs}}
+{{#tab name="vol3"}}
 ```bash
 # I couldn't find any plugin to extract this information in volatility3
 ```
@@ -533,7 +530,7 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-Il **file system NTFS** utilizza un componente critico noto come _master file table_ (MFT). Questa tabella include almeno un'entrata per ogni file su un volume, coprendo anche la MFT stessa. Dettagli vitali su ogni file, come **dimensione, timestamp, permessi e dati effettivi**, sono racchiusi all'interno delle voci MFT o in aree esterne alla MFT ma referenziate da queste voci. Maggiori dettagli possono essere trovati nella [documentazione ufficiale](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
+Il **file system NTFS** utilizza un componente critico noto come _master file table_ (MFT). Questa tabella include almeno una voce per ogni file presente in un volume, inclusa la MFT stessa. Dettagli fondamentali su ogni file, come **dimensioni, timestamp, autorizzazioni e dati effettivi**, sono contenuti nelle voci della MFT o in aree esterne alla MFT, ma referenziate da tali voci. Ulteriori dettagli sono disponibili nella [documentazione ufficiale](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).<sup>[[4]](#references)</sup>
 
 ### Chiavi/Certificati SSL
 
@@ -555,6 +552,9 @@ volatility --profile=Win7SP1x86_23418 dumpcerts --dump-dir=. -f file.dmp
 {{#endtabs}}
 
 ## Malware
+
+{{#tabs}}
+{{#tab name="vol3"}}
 ```bash
 ./vol.py -f file.dmp windows.malfind.Malfind [--dump] #Find hidden and injected code, [dump each suspicious section]
 #Malfind will search for suspicious structures related to malware
@@ -589,10 +589,10 @@ volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 {{#endtab}}
 {{#endtabs}}
 
-### Scanning con yara
+### Scansione con yara
 
 Usa questo script per scaricare e unire tutte le regole yara per malware da github: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
-Crea la directory _**rules**_ ed eseguila. Questo creerà un file chiamato _**malware_rules.yar**_ che contiene tutte le regole yara per malware.
+Crea la directory _**rules**_ ed eseguilo. Verrà creato un file chiamato _**malware_rules.yar**_, che contiene tutte le regole yara per malware.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -617,11 +617,11 @@ volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp |
 {{#endtab}}
 {{#endtabs}}
 
-## MISC
+## VARIE
 
 ### Plugin esterni
 
-Se desideri utilizzare plugin esterni, assicurati che le cartelle relative ai plugin siano il primo parametro utilizzato.
+Se vuoi utilizzare plugin esterni, assicurati che le cartelle relative ai plugin siano il primo parametro utilizzato.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -639,11 +639,11 @@ volatilitye --plugins="/tmp/plugins/" [...]
 
 #### Autoruns
 
-Scaricalo da [https://github.com/tomchop/volatility-autoruns](https://github.com/tomchop/volatility-autoruns)
+Scaricalo da [https://github.com/tomchop/volatility-autoruns](https://github.com/tomchop/volatility-autoruns).
 ```
 volatility --plugins=volatility-autoruns/ --profile=WinXPSP2x86 -f file.dmp autoruns
 ```
-### Mutexes
+### Mutex
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -660,7 +660,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp handles -p <PID> -t mutant
 {{#endtab}}
 {{#endtabs}}
 
-### Symlinks
+### Collegamenti simbolici
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -678,7 +678,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-È possibile **leggere dalla memoria la cronologia di bash.** Potresti anche eseguire il dump del file _.bash_history_, ma è stato disabilitato, sarai felice di poter utilizzare questo modulo di volatilità.
+È possibile **leggere dalla memoria la cronologia di Bash.** Potresti anche eseguire il dump del file _.bash_history_, ma se era disabilitato sarai contento di poter usare questo modulo di Volatility
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -694,7 +694,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp linux_bash
 {{#endtab}}
 {{#endtabs}}
 
-### Cronologia
+### Linea temporale
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -726,22 +726,22 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp driverscan
 {{#endtab}}
 {{#endtabs}}
 
-### Ottieni appunti
+### Recuperare gli appunti
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 clipboard -f file.dmp
 ```
-### Ottieni la cronologia di IE
+### Recuperare la cronologia di IE
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 iehistory -f file.dmp
 ```
-### Ottieni testo da notepad
+### Ottenere il testo di Notepad
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 notepad -f file.dmp
 ```
-### Screenshot
+### Schermata
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
@@ -750,14 +750,15 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-Il **Master Boot Record (MBR)** gioca un ruolo cruciale nella gestione delle partizioni logiche di un supporto di memorizzazione, che sono strutturate con diversi [file systems](https://en.wikipedia.org/wiki/File_system). Non solo contiene informazioni sul layout delle partizioni, ma include anche codice eseguibile che funge da boot loader. Questo boot loader avvia direttamente il processo di caricamento di secondo livello del sistema operativo (vedi [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage_boot_loader)) o lavora in armonia con il [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) di ciascuna partizione. Per una conoscenza approfondita, fare riferimento alla [pagina Wikipedia MBR](https://en.wikipedia.org/wiki/Master_boot_record).
+Il **Master Boot Record (MBR)** svolge un ruolo cruciale nella gestione delle partizioni logiche di un supporto di archiviazione, strutturate con diversi [file system](https://en.wikipedia.org/wiki/File_system). Contiene non solo le informazioni sul layout delle partizioni, ma anche codice eseguibile che funge da boot loader. Questo boot loader avvia direttamente il processo di caricamento del sistema operativo di secondo livello (vedi [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage_boot_loader)) oppure opera in combinazione con il [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) di ciascuna partizione. Per informazioni più approfondite, consulta la [pagina Wikipedia dell'MBR](https://en.wikipedia.org/wiki/Master_boot_record).<sup>[[5]](#references)</sup>
 
 ## Riferimenti
 
-- [https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
-- [https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
-- [https://or10nlabs.tech/cgi-sys/suspendedpage.cgi](https://or10nlabs.tech/cgi-sys/suspendedpage.cgi)
-- [https://www.aldeid.com/wiki/Windows-userassist-keys](https://www.aldeid.com/wiki/Windows-userassist-keys) ​\* [https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
-- [https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
+- [1] [Volatility, il mio cheatsheet personale (Parte 1): identificazione dell'immagine](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
+- [2] [Individuazione del Kernel Debugger Block](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
+- [3] [Chiavi UserAssist di Windows](https://www.aldeid.com/wiki/Windows-userassist-keys)
+- [4] [Master File Table (file system locali) - app Win32](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
+- [5] [PC basato su UEFI, protective MBR: che cos'è? - Microsoft Community](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
+- [6] [Tutorial: plugin Volatility per l'analisi dei malware](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
 {{#include ../../../banners/hacktricks-training.md}}

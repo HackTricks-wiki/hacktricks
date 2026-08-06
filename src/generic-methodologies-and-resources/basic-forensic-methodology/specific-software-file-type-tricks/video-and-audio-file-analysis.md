@@ -1,17 +1,19 @@
+# Analisi di file video e audio
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-**La manipolazione di file audio e video** è un elemento fondamentale nelle **sfide forensi CTF**, sfruttando **steganografia** e analisi dei metadati per nascondere o rivelare messaggi segreti. Strumenti come **[mediainfo](https://mediaarea.net/en/MediaInfo)** e **`exiftool`** sono essenziali per ispezionare i metadati dei file e identificare i tipi di contenuto.
+La **manipolazione di file audio e video** è un elemento fondamentale nelle **CTF forensics challenges**, sfruttando la **steganography** e l'analisi dei metadati per nascondere o rivelare messaggi segreti. Strumenti come **[mediainfo](https://mediaarea.net/en/MediaInfo)** ed **`exiftool`** sono essenziali per esaminare i metadati dei file e identificare i tipi di contenuto.<sup>[[1]](#references)</sup>
 
-Per le sfide audio, **[Audacity](http://www.audacityteam.org/)** si distingue come uno strumento principale per visualizzare forme d'onda e analizzare spettrogrammi, essenziali per scoprire testi codificati nell'audio. **[Sonic Visualiser](http://www.sonicvisualiser.org/)** è altamente raccomandato per un'analisi dettagliata degli spettrogrammi. **Audacity** consente la manipolazione audio come rallentare o invertire tracce per rilevare messaggi nascosti. **[Sox](http://sox.sourceforge.net/)**, un'utilità da riga di comando, eccelle nella conversione e modifica di file audio.
+Per le challenge audio, **[Audacity](http://www.audacityteam.org/)** si distingue come strumento di riferimento per visualizzare le forme d'onda e analizzare gli spettrogrammi, elementi essenziali per scoprire testo codificato nell'audio. **[Sonic Visualiser](http://www.sonicvisualiser.org/)** è altamente consigliato per un'analisi dettagliata degli spettrogrammi. **Audacity** consente di manipolare l'audio, ad esempio rallentando o invertendo le tracce, per rilevare messaggi nascosti. **[Sox](http://sox.sourceforge.net/)**, un'utilità da riga di comando, è eccellente per convertire e modificare file audio.<sup>[[1]](#references)</sup>
 
-La manipolazione dei **Bit meno significativi (LSB)** è una tecnica comune nella steganografia audio e video, sfruttando i chunk di dimensioni fisse dei file multimediali per incorporare dati in modo discreto. **[Multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng)** è utile per decodificare messaggi nascosti come **toni DTMF** o **codice Morse**.
+La manipolazione dei **Least Significant Bits (LSB)** è una tecnica comune nella steganography audio e video, che sfrutta i blocchi di dimensione fissa dei file multimediali per incorporare dati in modo discreto. **[Multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng)** è utile per decodificare messaggi nascosti come **toni DTMF** o **codice Morse**.<sup>[[1]](#references)</sup>
 
-Le sfide video spesso coinvolgono formati contenitore che raggruppano flussi audio e video. **[FFmpeg](http://ffmpeg.org/)** è il punto di riferimento per analizzare e manipolare questi formati, capace di demultiplexare e riprodurre contenuti. Per gli sviluppatori, **[ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html)** integra le capacità di FFmpeg in Python per interazioni avanzate scriptabili.
+Le challenge video spesso prevedono formati contenitore che raggruppano flussi audio e video. **[FFmpeg](http://ffmpeg.org/)** è lo strumento di riferimento per analizzare e manipolare questi formati, in grado di demultiplexare e riprodurre i contenuti. Per gli sviluppatori, **[ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html)** integra le funzionalità di FFmpeg in Python per interazioni avanzate e programmabili tramite script.<sup>[[1]](#references)</sup>
 
-Questa gamma di strumenti sottolinea la versatilità richiesta nelle sfide CTF, dove i partecipanti devono impiegare un ampio spettro di tecniche di analisi e manipolazione per scoprire dati nascosti all'interno di file audio e video.
+Questo insieme di strumenti evidenzia la versatilità richiesta nelle challenge CTF, in cui i partecipanti devono utilizzare un'ampia gamma di tecniche di analisi e manipolazione per scoprire dati nascosti all'interno di file audio e video.
 
 ## Riferimenti
 
-- [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
+- [1] [Analisi di file video e audio – CTF Field Guide di Trail of Bits](https://trailofbits.github.io/ctf/forensics/)
 
 {{#include ../../../banners/hacktricks-training.md}}
