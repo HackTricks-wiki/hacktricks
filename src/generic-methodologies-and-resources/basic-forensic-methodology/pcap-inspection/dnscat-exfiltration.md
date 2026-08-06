@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Αν έχετε ένα pcap με δεδομένα που **έχουν εξαχθεί μέσω DNSCat** (χωρίς χρήση encryption), μπορείτε να βρείτε το περιεχόμενο που εξάχθηκε.
+Αν έχετε ένα pcap με δεδομένα που **εξάγονται μέσω DNSCat** (χωρίς χρήση encryption), μπορείτε να βρείτε το περιεχόμενο που εξήχθη.
 
-Το μόνο που χρειάζεται να γνωρίζετε είναι ότι τα **πρώτα 9 bytes** δεν αποτελούν πραγματικά δεδομένα, αλλά σχετίζονται με την **επικοινωνία C\&C**:<sup>[[1]](#references)</sup>
+Αρκεί να γνωρίζετε ότι τα **πρώτα 9 bytes** δεν είναι πραγματικά δεδομένα, αλλά σχετίζονται με την **επικοινωνία C\&C**:<sup>[[1]](#references)</sup>
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -23,7 +23,7 @@ last = qry
 
 #print(f)
 ```
-Για περισσότερες πληροφορίες: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)\
+Για περισσότερες πληροφορίες: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)<sup>[[1]](#references)</sup>\
 [https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
 
 Υπάρχει ένα script που λειτουργεί με Python3: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)

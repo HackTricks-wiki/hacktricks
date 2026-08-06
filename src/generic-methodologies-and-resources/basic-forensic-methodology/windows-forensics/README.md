@@ -2,23 +2,23 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Generic Artifacts των Windows
+## Γενικά Artifacts των Windows
 
 ### Ειδοποιήσεις Windows 10
 
-Στη διαδρομή `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` μπορείτε να βρείτε τη βάση δεδομένων `appdb.dat` (πριν από το Windows anniversary) ή `wpndatabase.db` (μετά το Windows Anniversary).
+Στη διαδρομή `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` μπορείτε να βρείτε τη database `appdb.dat` (πριν από το Windows anniversary) ή τη `wpndatabase.db` (μετά το Windows Anniversary).
 
-Μέσα σε αυτήν τη SQLite βάση δεδομένων, μπορείτε να βρείτε τον πίνακα `Notification` με όλες τις ειδοποιήσεις (σε μορφή XML), οι οποίες ενδέχεται να περιέχουν ενδιαφέροντα δεδομένα.
+Μέσα σε αυτήν τη SQLite database, μπορείτε να βρείτε τον πίνακα `Notification` με όλες τις ειδοποιήσεις (σε μορφή XML), οι οποίες μπορεί να περιέχουν ενδιαφέροντα δεδομένα.
 
 ### Timeline
 
-Το Timeline είναι ένα χαρακτηριστικό των Windows που παρέχει **χρονολογικό ιστορικό των ιστοσελίδων που επισκέφθηκε ο χρήστης, των εγγράφων που τροποποιήθηκαν και των εφαρμογών που εκτελέστηκαν**.
+Το Timeline είναι ένα χαρακτηριστικό των Windows που παρέχει **χρονολογικό ιστορικό** των web pages που επισκεφθήκατε, των εγγράφων που επεξεργαστήκατε και των εφαρμογών που εκτελέστηκαν.
 
-Η βάση δεδομένων βρίσκεται στη διαδρομή `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. Αυτή η βάση δεδομένων μπορεί να ανοιχτεί με ένα SQLite εργαλείο ή με το εργαλείο [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd), **το οποίο δημιουργεί 2 αρχεία που μπορούν να ανοιχτούν με το εργαλείο** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
+Η database βρίσκεται στη διαδρομή `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. Αυτή η database μπορεί να ανοιχτεί με ένα SQLite tool ή με το tool [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **το οποίο δημιουργεί 2 αρχεία που μπορούν να ανοιχτούν με το tool** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
 
 ### ADS (Alternate Data Streams)
 
-Τα αρχεία που κατεβαίνουν ενδέχεται να περιέχουν το **ADS Zone.Identifier**, το οποίο υποδεικνύει **πώς** έγινε η **λήψη** τους από το intranet, το internet κ.λπ. Ορισμένα software (όπως οι browsers) συνήθως προσθέτουν ακόμη **περισσότερες** **πληροφορίες**, όπως το **URL** από όπου έγινε η λήψη του αρχείου.
+Τα αρχεία που έχουν γίνει download μπορεί να περιέχουν το **ADS Zone.Identifier**, το οποίο υποδεικνύει **πώς** έγινε το **download** από το intranet, το internet κ.λπ. Ορισμένα software (όπως οι browsers) συνήθως προσθέτουν ακόμη **περισσότερες** **πληροφορίες**, όπως το **URL** από το οποίο έγινε το download του αρχείου.
 
 ## **Αντίγραφα ασφαλείας αρχείων**
 
@@ -28,33 +28,33 @@
 Όταν διαγράφεται ένα αρχείο σε αυτόν τον φάκελο, δημιουργούνται 2 συγκεκριμένα αρχεία:
 
 - `$I{id}`: Πληροφορίες αρχείου (ημερομηνία κατά την οποία διαγράφηκε}
-- `$R{id}`: Περιεχόμενο του αρχείου
+- `$R{id}`: Περιεχόμενα του αρχείου
 
-![Αντίγραφα ασφαλείας αρχείων - Κάδος Ανακύκλωσης: $R{id}: Περιεχόμενο του αρχείου](<../../../images/image (1029).png>)
+![Αντίγραφα ασφαλείας αρχείων - Κάδος Ανακύκλωσης: $R{id}: Περιεχόμενα του αρχείου](<../../../images/image (1029).png>)
 
-Έχοντας αυτά τα αρχεία, μπορείτε να χρησιμοποιήσετε το εργαλείο [**Rifiuti**](https://github.com/abelcheung/rifiuti2) για να βρείτε την αρχική διαδρομή των διαγραμμένων αρχείων και την ημερομηνία διαγραφής τους (χρησιμοποιήστε το `rifiuti-vista.exe` για Vista – Win10).
+Έχοντας αυτά τα αρχεία, μπορείτε να χρησιμοποιήσετε το tool [**Rifiuti**](https://github.com/abelcheung/rifiuti2) για να λάβετε την αρχική διεύθυνση των διαγραμμένων αρχείων και την ημερομηνία κατά την οποία διαγράφηκαν (χρησιμοποιήστε το `rifiuti-vista.exe` για Vista – Win10).
 ```
 .\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
 ```
-![Αντίγραφα αρχείων - Κάδος ανακύκλωσης: rifiuti-vista.exe C: Users student Desktop Recycle](<../../../images/image (495) (1) (1) (1).png>)
+![File Backups - Recycle Bin: rifiuti-vista.exe C: Users student Desktop Recycle](<../../../images/image (495) (1) (1) (1).png>)
 
 ### Volume Shadow Copies
 
-Το Shadow Copy είναι μια τεχνολογία που περιλαμβάνεται στα Microsoft Windows και μπορεί να δημιουργεί **αντίγραφα ασφαλείας** ή snapshots αρχείων και τόμων του υπολογιστή, ακόμη και όταν χρησιμοποιούνται.
+Το Shadow Copy είναι μια τεχνολογία που περιλαμβάνεται στα Microsoft Windows και μπορεί να δημιουργεί **αντίγραφα ασφαλείας** ή snapshots αρχείων ή volumes του υπολογιστή, ακόμη και όταν αυτά χρησιμοποιούνται.
 
-Αυτά τα αντίγραφα ασφαλείας βρίσκονται συνήθως στο `\System Volume Information`, από τη ρίζα του file system, και το όνομα αποτελείται από **UIDs**, όπως φαίνεται στην παρακάτω εικόνα:
+Αυτά τα αντίγραφα ασφαλείας βρίσκονται συνήθως στο `\System Volume Information` από τη ρίζα του file system και το όνομα αποτελείται από **UIDs**, όπως φαίνεται στην παρακάτω εικόνα:
 
-![Κάδος ανακύκλωσης - Volume Shadow Copies: Αυτά τα αντίγραφα ασφαλείας βρίσκονται συνήθως στο System Volume Information, από τη ρίζα του file system, και το όνομα αποτελείται από UIDs, όπως φαίνεται στην...](<../../../images/image (94).png>)
+![Recycle Bin - Volume Shadow Copies: Αυτά τα αντίγραφα ασφαλείας βρίσκονται συνήθως στο System Volume Information από τη ρίζα του file system και το όνομα αποτελείται από UIDs, όπως φαίνεται στην...](<../../../images/image (94).png>)
 
-Με την προσάρτηση του forensics image με το **ArsenalImageMounter**, το εργαλείο [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) μπορεί να χρησιμοποιηθεί για την επιθεώρηση ενός shadow copy και ακόμη και για την **εξαγωγή των αρχείων** από τα αντίγραφα ασφαλείας του shadow copy.
+Με το forensics image mounted μέσω του **ArsenalImageMounter**, μπορεί να χρησιμοποιηθεί το εργαλείο [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) για την επιθεώρηση ενός shadow copy και ακόμη και για την **εξαγωγή των αρχείων** από τα shadow copy backups.
 
-![Κάδος ανακύκλωσης - Volume Shadow Copies: Με την προσάρτηση του forensics image με το ArsenalImageMounter, το εργαλείο ShadowCopyView μπορεί να χρησιμοποιηθεί για την επιθεώρηση ενός shadow copy και ακόμη και για την εξαγωγή των αρχείων...](<../../../images/image (576).png>)
+![Recycle Bin - Volume Shadow Copies: Με το forensics image mounted μέσω του ArsenalImageMounter, το εργαλείο ShadowCopyView μπορεί να χρησιμοποιηθεί για την επιθεώρηση ενός shadow copy και ακόμη και για την εξαγωγή των αρχείων...](<../../../images/image (576).png>)
 
 Η registry entry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` περιέχει τα αρχεία και τα keys **που δεν πρέπει να γίνονται backup**:
 
-![Κάδος ανακύκλωσης - Volume Shadow Copies: Η registry entry HKEY LOCAL MACHINE SYSTEM CurrentControlSet Control BackupRestore περιέχει τα αρχεία και τα keys που δεν πρέπει να γίνονται backup](<../../../images/image (254).png>)
+![Recycle Bin - Volume Shadow Copies: Η registry entry HKEY LOCAL MACHINE SYSTEM CurrentControlSet Control BackupRestore περιέχει τα αρχεία και τα keys που δεν πρέπει να γίνονται backup](<../../../images/image (254).png>)
 
-Η registry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` περιέχει επίσης πληροφορίες διαμόρφωσης σχετικά με τα `Volume Shadow Copies`.
+Η registry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` περιέχει επίσης πληροφορίες configuration σχετικά με τα `Volume Shadow Copies`.
 
 ### Office AutoSaved Files
 
@@ -64,33 +64,33 @@
 
 Ένα shell item είναι ένα item που περιέχει πληροφορίες σχετικά με τον τρόπο πρόσβασης σε ένα άλλο αρχείο.
 
-### Πρόσφατα έγγραφα (LNK)
+### Recent Documents (LNK)
 
-Τα Windows **δημιουργούν αυτόματα** αυτές τις **συντομεύσεις** όταν ο χρήστης **ανοίγει, χρησιμοποιεί ή δημιουργεί ένα αρχείο** στις παρακάτω τοποθεσίες:
+Τα Windows **δημιουργούν αυτόματα** αυτά τα **shortcuts** όταν ο χρήστης **ανοίγει, χρησιμοποιεί ή δημιουργεί ένα αρχείο** στα:
 
 - Win7-Win10: `C:\Users\\AppData\Roaming\Microsoft\Windows\Recent\`
 - Office: `C:\Users\\AppData\Roaming\Microsoft\Office\Recent\`
 
-Όταν δημιουργείται ένας φάκελος, δημιουργείται επίσης ένας σύνδεσμος προς τον φάκελο, τον γονικό φάκελο και τον φάκελο-παππού.
+Όταν δημιουργείται ένας φάκελος, δημιουργείται επίσης ένα link προς τον φάκελο, τον parent folder και τον grandparent folder.
 
-Αυτά τα αρχεία συνδέσμων που δημιουργούνται αυτόματα **περιέχουν πληροφορίες σχετικά με την προέλευση**, όπως αν πρόκειται για **αρχείο** **ή** **φάκελο**, τους **χρόνους** **MAC** αυτού του αρχείου, πληροφορίες τόμου σχετικά με το πού είναι αποθηκευμένο το αρχείο και τον **φάκελο του αρχείου-στόχου**. Αυτές οι πληροφορίες μπορεί να είναι χρήσιμες για την ανάκτηση αυτών των αρχείων σε περίπτωση που έχουν διαγραφεί.
+Αυτά τα link files που δημιουργούνται αυτόματα **περιέχουν πληροφορίες σχετικά με την προέλευση**, όπως αν πρόκειται για **file** ή **folder**, τα **MAC** **timestamps** του αρχείου, πληροφορίες για το **volume** όπου είναι αποθηκευμένο το αρχείο και τον **folder του target file**. Αυτές οι πληροφορίες μπορεί να είναι χρήσιμες για την ανάκτηση αυτών των αρχείων σε περίπτωση που έχουν διαγραφεί.
 
-Επίσης, η **ημερομηνία δημιουργίας του αρχείου συνδέσμου** είναι η πρώτη **χρονική στιγμή** κατά την οποία το αρχικό αρχείο **χρησιμοποιήθηκε για πρώτη φορά**, ενώ η **ημερομηνία τροποποίησης** του αρχείου συνδέσμου είναι η τελευταία **χρονική στιγμή** κατά την οποία χρησιμοποιήθηκε το αρχείο προέλευσης.
+Επίσης, η **ημερομηνία δημιουργίας του link** file είναι η πρώτη **χρονική στιγμή** κατά την οποία το αρχικό αρχείο **χρησιμοποιήθηκε για πρώτη φορά**, ενώ η **ημερομηνία** **τροποποίησης** του link file είναι η τελευταία **χρονική στιγμή** κατά την οποία χρησιμοποιήθηκε το origin file.
 
 Για την επιθεώρηση αυτών των αρχείων μπορείτε να χρησιμοποιήσετε το [**LinkParser**](http://4discovery.com/our-tools/).
 
-Σε αυτό το εργαλείο θα βρείτε **2 σύνολα** χρονικών σημάνσεων:
+Σε αυτό το tool θα βρείτε **2 sets** από timestamps:
 
-- **Πρώτο σύνολο:**
+- **First Set:**
 1. FileModifiedDate
 2. FileAccessDate
 3. FileCreationDate
-- **Δεύτερο σύνολο:**
+- **Second Set:**
 1. LinkModifiedDate
 2. LinkAccessDate
 3. LinkCreationDate.
 
-Το πρώτο σύνολο χρονικών σημάνσεων αναφέρεται στις **χρονικές σημάνσεις του ίδιου του αρχείου**. Το δεύτερο σύνολο αναφέρεται στις **χρονικές σημάνσεις του συνδεδεμένου αρχείου**.
+Το πρώτο set των timestamps αναφέρεται στα **timestamps του ίδιου του αρχείου**. Το δεύτερο set αναφέρεται στα **timestamps του linked file**.
 
 Μπορείτε να λάβετε τις ίδιες πληροφορίες εκτελώντας το Windows CLI tool: [**LECmd.exe**](https://github.com/EricZimmerman/LECmd)
 ```
@@ -104,15 +104,15 @@ LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 
 Τα **jumplists** που δημιουργούνται αυτόματα αποθηκεύονται στο `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`. Τα jumplists ονομάζονται σύμφωνα με τη μορφή `{id}.autmaticDestinations-ms`, όπου το αρχικό ID είναι το ID της εφαρμογής.
 
-Τα προσαρμοσμένα jumplists αποθηκεύονται στο `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` και δημιουργούνται συνήθως από την εφαρμογή επειδή έχει συμβεί κάτι **σημαντικό** με το αρχείο (ίσως έχει επισημανθεί ως αγαπημένο).
+Τα προσαρμοσμένα jumplists αποθηκεύονται στο `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` και δημιουργούνται από την εφαρμογή, συνήθως επειδή έχει συμβεί κάτι **σημαντικό** με το αρχείο (ίσως έχει επισημανθεί ως αγαπημένο).
 
-Ο **χρόνος δημιουργίας** οποιουδήποτε jumplist υποδεικνύει την **πρώτη φορά που έγινε πρόσβαση στο αρχείο**, ενώ ο **χρόνος τροποποίησης την τελευταία φορά**.
+Ο **χρόνος δημιουργίας** οποιουδήποτε jumplist υποδεικνύει την **πρώτη φορά που προσπελάστηκε το αρχείο**, ενώ ο **χρόνος τροποποίησης την τελευταία φορά**.
 
 Μπορείτε να επιθεωρήσετε τα jumplists χρησιμοποιώντας το [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
 
 ![Recent Documents (LNK) - Jumplists: Μπορείτε να επιθεωρήσετε τα jumplists χρησιμοποιώντας το JumplistExplorer](<../../../images/image (168).png>)
 
-(_Σημειώστε ότι οι χρονικές σημάνσεις που παρέχονται από το JumplistExplorer σχετίζονται με το ίδιο το αρχείο jumplist_)
+(_Σημειώστε ότι τα timestamps που παρέχονται από το JumplistExplorer σχετίζονται με το ίδιο το αρχείο του jumplist._)
 
 ### Shellbags
 
@@ -130,7 +130,7 @@ LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 
 ![Shellbags - Χρήση Windows USBs: Σημειώστε ότι ορισμένα αρχεία LNK, αντί να δείχνουν στην αρχική διαδρομή, δείχνουν στον φάκελο WPDNSE](<../../../images/image (218).png>)
 
-Τα αρχεία στον φάκελο WPDNSE είναι αντίγραφα των αρχικών και, επομένως, δεν διατηρούνται μετά από επανεκκίνηση του PC, ενώ το GUID λαμβάνεται από ένα shellbag.
+Τα αρχεία στον φάκελο WPDNSE είναι αντίγραφα των αρχικών, επομένως δεν θα επιβιώσουν μετά από επανεκκίνηση του PC και το GUID λαμβάνεται από ένα shellbag.
 
 ### Πληροφορίες Registry
 
@@ -138,9 +138,9 @@ LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 
 ### setupapi
 
-Ελέγξτε το αρχείο `C:\Windows\inf\setupapi.dev.log` για να λάβετε τις χρονικές σημάνσεις σχετικά με το πότε πραγματοποιήθηκε η σύνδεση USB (αναζητήστε το `Section start`).
+Ελέγξτε το αρχείο `C:\Windows\inf\setupapi.dev.log` για να βρείτε τα timestamps σχετικά με το πότε πραγματοποιήθηκε η σύνδεση USB (αναζητήστε το `Section start`).
 
-![Registry Information - setupapi: Ελέγξτε το αρχείο C: Windows inf setupapi.dev.log για να λάβετε τις χρονικές σημάνσεις σχετικά με το πότε πραγματοποιήθηκε η σύνδεση USB (αναζητήστε το Section start)](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
+![Registry Information - setupapi: Ελέγξτε το αρχείο C: Windows inf setupapi.dev.log για να βρείτε τα timestamps σχετικά με το πότε πραγματοποιήθηκε η σύνδεση USB (αναζητήστε το Section start)](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
 ### USB Detective
 
@@ -150,29 +150,29 @@ LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 
 ### Plug and Play Cleanup
 
-Η προγραμματισμένη εργασία με την ονομασία 'Plug and Play Cleanup' έχει σχεδιαστεί κυρίως για την αφαίρεση παρωχημένων εκδόσεων drivers. Σε αντίθεση με τον καθορισμένο σκοπό της, δηλαδή τη διατήρηση της πιο πρόσφατης έκδοσης του πακέτου driver, online πηγές υποδεικνύουν ότι στοχεύει επίσης drivers που ήταν ανενεργοί για 30 ημέρες. Κατά συνέπεια, drivers για αφαιρούμενες συσκευές που δεν έχουν συνδεθεί τις τελευταίες 30 ημέρες ενδέχεται να διαγραφούν.<sup>[[1]](#references)</sup>
+Η scheduled task γνωστή ως 'Plug and Play Cleanup' έχει σχεδιαστεί κυρίως για την αφαίρεση παρωχημένων εκδόσεων drivers. Σε αντίθεση με τον δηλωμένο σκοπό της, δηλαδή τη διατήρηση της πιο πρόσφατης έκδοσης του driver package, online πηγές υποδεικνύουν ότι στοχεύει επίσης drivers που έχουν παραμείνει ανενεργοί για 30 ημέρες. Κατά συνέπεια, drivers για removable devices που δεν έχουν συνδεθεί τις τελευταίες 30 ημέρες ενδέχεται να διαγραφούν.<sup>[[1]](#references)</sup>
 
-Η εργασία βρίσκεται στην ακόλουθη διαδρομή: `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
+Η task βρίσκεται στην ακόλουθη διαδρομή: `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
 
-Παρέχεται ένα screenshot που απεικονίζει το περιεχόμενο της εργασίας: ![USB Detective - Plug and Play Cleanup: Η εργασία βρίσκεται στην ακόλουθη διαδρομή: C: Windows System32 Tasks Microsoft Windows Plug and Play Plug and Play Cleanup](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
+Παρέχεται ένα screenshot που απεικονίζει το περιεχόμενο της task: ![USB Detective - Plug and Play Cleanup: Η task βρίσκεται στην ακόλουθη διαδρομή: C: Windows System32 Tasks Microsoft Windows Plug and Play Plug and Play Cleanup](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
 
-**Βασικά στοιχεία και ρυθμίσεις της εργασίας:**
+**Βασικά στοιχεία και ρυθμίσεις της task:**
 
-- **pnpclean.dll**: Αυτό το DLL είναι υπεύθυνο για την πραγματική διαδικασία εκκαθάρισης.
+- **pnpclean.dll**: Αυτό το DLL είναι υπεύθυνο για την πραγματική διαδικασία cleanup.
 - **UseUnifiedSchedulingEngine**: Έχει οριστεί σε `TRUE`, υποδεικνύοντας τη χρήση του generic task scheduling engine.
 - **MaintenanceSettings**:
-- **Period ('P1M')**: Κατευθύνει το Task Scheduler να ξεκινά την εργασία εκκαθάρισης κάθε μήνα, κατά τη διάρκεια της κανονικής Automatic maintenance.
-- **Deadline ('P2M')**: Δίνει εντολή στο Task Scheduler, εάν η εργασία αποτύχει για δύο συνεχόμενους μήνες, να εκτελέσει την εργασία κατά τη διάρκεια emergency Automatic maintenance.
+- **Period ('P1M')**: Κατευθύνει το Task Scheduler να ξεκινά την task cleanup κάθε μήνα, κατά τη διάρκεια της κανονικής Automatic maintenance.
+- **Deadline ('P2M')**: Δίνει εντολή στο Task Scheduler, αν η task αποτύχει για δύο συνεχόμενους μήνες, να εκτελέσει την task κατά τη διάρκεια emergency Automatic maintenance.
 
-Αυτή η ρύθμιση εξασφαλίζει την τακτική maintenance και εκκαθάριση των drivers, με πρόβλεψη για επανάληψη της εργασίας σε περίπτωση συνεχόμενων αποτυχιών.
+Αυτή η ρύθμιση εξασφαλίζει την τακτική maintenance και cleanup των drivers, με πρόβλεψη για επανάληψη της task σε περίπτωση συνεχόμενων αποτυχιών.
 
-**Για περισσότερες πληροφορίες ελέγξτε:** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
+**Για περισσότερες πληροφορίες ελέγξτε:** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)<sup>[[1]](#references)</sup>
 
 ## Emails
 
 Τα emails περιέχουν **2 ενδιαφέροντα μέρη: τα headers και το περιεχόμενο** του email. Στα **headers** μπορείτε να βρείτε πληροφορίες όπως:
 
-- **Ποιος** έστειλε τα emails (διεύθυνση email, IP, mail servers που ανακατεύθυναν το email)
+- **Ποιος** έστειλε τα emails (email address, IP, mail servers που ανακατεύθυναν το email)
 - **Πότε** στάλθηκε το email
 
 Επίσης, μέσα στα headers `References` και `In-Reply-To` μπορείτε να βρείτε το ID των messages:
@@ -189,66 +189,66 @@ LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 
 ### Microsoft Outlook
 
-Όταν χρησιμοποιούνται Exchange servers ή Outlook clients, θα υπάρχουν ορισμένα MAPI headers:
+Όταν χρησιμοποιούνται Exchange servers ή Outlook clients, υπάρχουν ορισμένα MAPI headers:
 
-- `Mapi-Client-Submit-Time`: Ώρα του συστήματος κατά την οποία στάλθηκε το email
-- `Mapi-Conversation-Index`: Αριθμός child messages του thread και timestamp κάθε message του thread
+- `Mapi-Client-Submit-Time`: Η ώρα του συστήματος κατά την οποία στάλθηκε το email
+- `Mapi-Conversation-Index`: Ο αριθμός των child messages του thread και το timestamp κάθε message του thread
 - `Mapi-Entry-ID`: Αναγνωριστικό message.
-- `Mappi-Message-Flags` και `Pr_last_Verb-Executed`: Πληροφορίες σχετικά με το MAPI client (διαβάστηκε το message; δεν διαβάστηκε; έγινε απάντηση; ανακατευθύνθηκε; out of the office;)
+- `Mappi-Message-Flags` και `Pr_last_Verb-Executed`: Πληροφορίες σχετικά με τον MAPI client (έγινε read το message; δεν έγινε read; απαντήθηκε; ανακατευθύνθηκε; out of the office;)
 
-Στον Microsoft Outlook client, όλα τα sent/received messages, τα δεδομένα των contacts και τα δεδομένα του calendar αποθηκεύονται σε ένα αρχείο PST στη διεύθυνση:
+Στον Microsoft Outlook client, όλα τα sent/received messages, τα contacts data και τα calendar data αποθηκεύονται σε ένα PST file στη:
 
 - `%USERPROFILE%\Local Settings\Application Data\Microsoft\Outlook` (WinXP)
 - `%USERPROFILE%\AppData\Local\Microsoft\Outlook`
 
-Το registry path `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` υποδεικνύει το αρχείο που χρησιμοποιείται.
+Το registry path `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` υποδεικνύει το file που χρησιμοποιείται.
 
-Μπορείτε να ανοίξετε το αρχείο PST χρησιμοποιώντας το εργαλείο [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html).
+Μπορείτε να ανοίξετε το PST file χρησιμοποιώντας το εργαλείο [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html).
 
-![Windows Mail App - Microsoft Outlook: Μπορείτε να ανοίξετε το αρχείο PST χρησιμοποιώντας το εργαλείο Kernel PST Viewer](<../../../images/image (498).png>)
+![Windows Mail App - Microsoft Outlook: Μπορείτε να ανοίξετε το PST file χρησιμοποιώντας το εργαλείο Kernel PST Viewer](<../../../images/image (498).png>)
 
 ### Microsoft Outlook OST Files
 
-Ένα **OST file** δημιουργείται από το Microsoft Outlook όταν έχει ρυθμιστεί με **IMAP** ή έναν **Exchange** server και αποθηκεύει παρόμοιες πληροφορίες με ένα αρχείο PST. Αυτό το αρχείο συγχρονίζεται με τον server, διατηρώντας δεδομένα για **τους τελευταίους 12 μήνες**, έως ένα **μέγιστο μέγεθος 50GB**, και βρίσκεται στον ίδιο κατάλογο με το αρχείο PST. Για να προβάλετε ένα αρχείο OST, μπορείτε να χρησιμοποιήσετε το [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html).
+Ένα **OST file** δημιουργείται από το Microsoft Outlook όταν έχει ρυθμιστεί με **IMAP** ή έναν **Exchange** server και αποθηκεύει παρόμοιες πληροφορίες με ένα PST file. Αυτό το file συγχρονίζεται με τον server, διατηρώντας δεδομένα για **τους τελευταίους 12 μήνες** έως ένα **μέγιστο μέγεθος 50GB**, και βρίσκεται στον ίδιο κατάλογο με το PST file. Για να δείτε ένα OST file, μπορείτε να χρησιμοποιήσετε το [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html).
 
 ### Ανάκτηση Attachments
 
-Τα χαμένα attachments μπορεί να είναι δυνατό να ανακτηθούν από:
+Τα χαμένα attachments ενδέχεται να μπορούν να ανακτηθούν από:
 
 - Για **IE10**: `%APPDATA%\Local\Microsoft\Windows\Temporary Internet Files\Content.Outlook`
 - Για **IE11 και νεότερα**: `%APPDATA%\Local\Microsoft\InetCache\Content.Outlook`
 
 ### Thunderbird MBOX Files
 
-Το **Thunderbird** χρησιμοποιεί **MBOX files** για την αποθήκευση δεδομένων, τα οποία βρίσκονται στη διεύθυνση `\Users\%USERNAME%\AppData\Roaming\Thunderbird\Profiles`.
+Το **Thunderbird** χρησιμοποιεί **MBOX files** για την αποθήκευση δεδομένων, τα οποία βρίσκονται στο `\Users\%USERNAME%\AppData\Roaming\Thunderbird\Profiles`.
 
 ### Image Thumbnails
 
 - **Windows XP και 8-8.1**: Η πρόσβαση σε έναν φάκελο με thumbnails δημιουργεί ένα αρχείο `thumbs.db` που αποθηκεύει previews εικόνων, ακόμη και μετά τη διαγραφή τους.
-- **Windows 7/10**: Το `thumbs.db` δημιουργείται όταν γίνεται πρόσβαση μέσω δικτύου χρησιμοποιώντας UNC path.
-- **Windows Vista και νεότερα**: Τα thumbnail previews συγκεντρώνονται στο `%userprofile%\AppData\Local\Microsoft\Windows\Explorer`, σε αρχεία με ονόματα **thumbcache_xxx.db**. Τα [**Thumbsviewer**](https://thumbsviewer.github.io) και [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) είναι εργαλεία για την προβολή αυτών των αρχείων.
+- **Windows 7/10**: Το `thumbs.db` δημιουργείται όταν η πρόσβαση γίνεται μέσω network μέσω UNC path.
+- **Windows Vista και νεότερα**: Τα thumbnail previews συγκεντρώνονται στο `%userprofile%\AppData\Local\Microsoft\Windows\Explorer`, σε files με ονόματα **thumbcache_xxx.db**. Τα [**Thumbsviewer**](https://thumbsviewer.github.io) και [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) είναι tools για την προβολή αυτών των files.
 
-### Πληροφορίες Windows Registry
+### Windows Registry Information
 
-Το Windows Registry, το οποίο αποθηκεύει εκτεταμένα δεδομένα σχετικά με τη δραστηριότητα του συστήματος και των χρηστών, περιέχεται σε αρχεία στις εξής τοποθεσίες:
+Το Windows Registry, το οποίο αποθηκεύει εκτεταμένα δεδομένα σχετικά με τη δραστηριότητα του συστήματος και των χρηστών, περιέχεται σε files στις εξής τοποθεσίες:
 
 - `%windir%\System32\Config` για διάφορα subkeys του `HKEY_LOCAL_MACHINE`.
 - `%UserProfile%{User}\NTUSER.DAT` για το `HKEY_CURRENT_USER`.
-- Τα Windows Vista και νεότερες εκδόσεις δημιουργούν αντίγραφα ασφαλείας των αρχείων registry του `HKEY_LOCAL_MACHINE` στο `%Windir%\System32\Config\RegBack\`.
+- Οι εκδόσεις Windows Vista και νεότερες δημιουργούν backup των registry files του `HKEY_LOCAL_MACHINE` στο `%Windir%\System32\Config\RegBack\`.
 - Επιπλέον, πληροφορίες εκτέλεσης προγραμμάτων αποθηκεύονται στο `%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT` από τα Windows Vista και τον Windows 2008 Server και έπειτα.
 
 ### Tools
 
-Ορισμένα tools είναι χρήσιμα για την ανάλυση των αρχείων registry:
+Ορισμένα tools είναι χρήσιμα για την ανάλυση των registry files:
 
-- **Registry Editor**: Είναι εγκατεστημένο στα Windows. Είναι ένα GUI για την περιήγηση στο Windows registry της τρέχουσας συνεδρίας.
-- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): Επιτρέπει τη φόρτωση του αρχείου registry και την περιήγησή του μέσω GUI. Περιέχει επίσης Bookmarks που επισημαίνουν keys με ενδιαφέρουσες πληροφορίες.
-- [**RegRipper**](https://github.com/keydet89/RegRipper3.0): Διαθέτει επίσης GUI που επιτρέπει την περιήγηση στο φορτωμένο registry και περιέχει plugins τα οποία επισημαίνουν ενδιαφέρουσες πληροφορίες μέσα στο φορτωμένο registry.
-- [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): Μια ακόμη GUI εφαρμογή που μπορεί να εξαγάγει τις σημαντικές πληροφορίες από το φορτωμένο registry.
+- **Registry Editor**: Είναι εγκατεστημένο στα Windows. Πρόκειται για ένα GUI για την πλοήγηση στο Windows Registry της τρέχουσας session.
+- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): Επιτρέπει τη φόρτωση του registry file και την πλοήγηση σε αυτό μέσω GUI. Περιέχει επίσης Bookmarks που επισημαίνουν keys με ενδιαφέρουσες πληροφορίες.
+- [**RegRipper**](https://github.com/keydet89/RegRipper3.0): Διαθέτει επίσης GUI που επιτρέπει την πλοήγηση στο loaded registry και περιέχει plugins που επισημαίνουν ενδιαφέρουσες πληροφορίες μέσα στο loaded registry.
+- [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): Μια ακόμη GUI application ικανή να εξάγει τις σημαντικές πληροφορίες από το loaded registry.
 
-### Ανάκτηση Deleted Element
+### Ανάκτηση Διαγραμμένου Element
 
-Όταν διαγράφεται ένα key, επισημαίνεται ως τέτοιο, αλλά δεν αφαιρείται μέχρι να χρειαστεί ο χώρος που καταλαμβάνει. Επομένως, με τη χρήση tools όπως το **Registry Explorer**, είναι δυνατό να ανακτηθούν αυτά τα deleted keys.
+Όταν διαγράφεται ένα key, επισημαίνεται ως τέτοιο, αλλά μέχρι να χρειαστεί ο χώρος που καταλαμβάνει δεν θα αφαιρεθεί. Επομένως, χρησιμοποιώντας tools όπως το **Registry Explorer**, είναι δυνατή η ανάκτηση αυτών των deleted keys.
 
 ### Last Write Time
 
@@ -256,42 +256,42 @@ LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 
 ### SAM
 
-Το αρχείο/hive **SAM** περιέχει τα hashes των **users, groups και passwords χρηστών** του συστήματος.
+Το file/hive **SAM** περιέχει τα hashes των **users, groups και passwords των users** του συστήματος.
 
-Στο `SAM\Domains\Account\Users` μπορείτε να λάβετε το username, το RID, το τελευταίο login, το τελευταίο failed logon, τον μετρητή login, την password policy και το πότε δημιουργήθηκε ο λογαριασμός. Για να λάβετε τα **hashes**, χρειάζεστε επίσης το αρχείο/hive **SYSTEM**.
+Στο `SAM\Domains\Account\Users` μπορείτε να λάβετε το username, το RID, το τελευταίο login, το τελευταίο αποτυχημένο logon, τον login counter, την password policy και το πότε δημιουργήθηκε ο λογαριασμός. Για να λάβετε τα **hashes**, χρειάζεστε επίσης το file/hive **SYSTEM**.
 
-### Ενδιαφέρουσες entries στο Windows Registry
+### Interesting entries in the Windows Registry
 
 
 {{#ref}}
 interesting-windows-registry-keys.md
 {{#endref}}
 
-## Προγράμματα που Εκτελέστηκαν
+## Programs Executed
 
-### Βασικές Windows Processes
+### Basic Windows Processes
 
-Στο [παρόν post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) μπορείτε να μάθετε σχετικά με τις κοινές Windows processes, ώστε να εντοπίζετε ύποπτες συμπεριφορές.
+Στο [this post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) μπορείτε να μάθετε σχετικά με τις κοινές Windows processes για τον εντοπισμό ύποπτων συμπεριφορών.<sup>[[2]](#references)</sup>
 
 ### Windows Recent APPs
 
-Μέσα στο registry `NTUSER.DAT`, στο path `Software\Microsoft\Current Version\Search\RecentApps`, μπορείτε να βρείτε subkeys με πληροφορίες σχετικά με την **εφαρμογή που εκτελέστηκε**, την **τελευταία φορά** που εκτελέστηκε και τον **αριθμό των φορών** που εκκινήθηκε.
+Μέσα στο registry `NTUSER.DAT`, στο path `Software\Microsoft\Current Version\Search\RecentApps`, μπορείτε να βρείτε subkeys με πληροφορίες σχετικά με την **εφαρμογή που εκτελέστηκε**, την **τελευταία φορά** που εκτελέστηκε και τον **αριθμό των φορών** που ξεκίνησε.
 
 ### BAM (Background Activity Moderator)
 
-Μπορείτε να ανοίξετε το αρχείο `SYSTEM` με έναν registry editor και, μέσα στο path `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}`, να βρείτε πληροφορίες σχετικά με τις **εφαρμογές που εκτελέστηκαν από κάθε user** (σημειώστε το `{SID}` στο path) και **την ώρα** κατά την οποία εκτελέστηκαν (η ώρα βρίσκεται μέσα στην τιμή Data του registry).
+Μπορείτε να ανοίξετε το file `SYSTEM` με έναν registry editor και, μέσα στο path `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}`, να βρείτε πληροφορίες σχετικά με τις **εφαρμογές που εκτελέστηκαν από κάθε user** (σημειώστε το `{SID}` στο path) και **την ώρα** κατά την οποία εκτελέστηκαν (η ώρα βρίσκεται μέσα στην τιμή Data του registry).
 
 ### Windows Prefetch
 
-Το Prefetching είναι μια τεχνική που επιτρέπει σε έναν υπολογιστή να **ανακτά σιωπηλά τους απαραίτητους πόρους που απαιτούνται για την εμφάνιση περιεχομένου**, στο οποίο ένας user **ενδέχεται να αποκτήσει πρόσβαση στο κοντινό μέλλον**, ώστε οι πόροι να είναι προσβάσιμοι γρηγορότερα.
+Το Prefetch είναι μια technique που επιτρέπει σε έναν υπολογιστή να **λαμβάνει αθόρυβα τους απαραίτητους πόρους που απαιτούνται για την εμφάνιση περιεχομένου** στο οποίο ένας user **ενδέχεται να αποκτήσει πρόσβαση στο άμεσο μέλλον**, ώστε οι πόροι να προσπελαύνονται γρηγορότερα.
 
-Το Windows prefetch περιλαμβάνει τη δημιουργία **caches των προγραμμάτων που εκτελέστηκαν**, ώστε να είναι δυνατή η ταχύτερη φόρτωσή τους. Αυτές οι caches δημιουργούνται ως αρχεία `.pf` μέσα στο path: `C:\Windows\Prefetch`. Υπάρχει όριο 128 αρχείων στα XP/VISTA/WIN7 και 1024 αρχείων στα Win8/Win10.
+Το Windows prefetch αποτελείται από τη δημιουργία **caches των εκτελεσμένων προγραμμάτων**, ώστε να είναι δυνατή η ταχύτερη φόρτωσή τους. Αυτά τα caches δημιουργούνται ως `.pf` files μέσα στο path: `C:\Windows\Prefetch`. Υπάρχει όριο 128 files στα XP/VISTA/WIN7 και 1024 files στα Win8/Win10.
 
-Το όνομα του αρχείου δημιουργείται ως `{program_name}-{hash}.pf` (το hash βασίζεται στο path και στα arguments του executable). Στα W10 αυτά τα αρχεία είναι συμπιεσμένα. Σημειώστε ότι η απλή παρουσία του αρχείου υποδεικνύει πως **το πρόγραμμα εκτελέστηκε** κάποια στιγμή.
+Το όνομα του file δημιουργείται ως `{program_name}-{hash}.pf` (το hash βασίζεται στο path και στα arguments του executable). Στα W10 αυτά τα files είναι compressed. Σημειώστε ότι η απλή παρουσία του file υποδεικνύει ότι **το πρόγραμμα εκτελέστηκε** κάποια στιγμή.
 
-Το αρχείο `C:\Windows\Prefetch\Layout.ini` περιέχει τα **ονόματα των φακέλων των αρχείων που γίνονται prefetched**. Αυτό το αρχείο περιέχει **πληροφορίες σχετικά με τον αριθμό των executions**, τις **ημερομηνίες** εκτέλεσης και τα **αρχεία** που **άνοιξε** το πρόγραμμα.
+Το file `C:\Windows\Prefetch\Layout.ini` περιέχει τα **ονόματα των φακέλων των files που γίνονται prefetched**. Αυτό το file περιέχει **πληροφορίες σχετικά με τον αριθμό των executions**, τις **ημερομηνίες** εκτέλεσης και τα **files** που **άνοιξε** το πρόγραμμα.
 
-Για να επιθεωρήσετε αυτά τα αρχεία μπορείτε να χρησιμοποιήσετε το εργαλείο [**PEcmd.exe**](https://github.com/EricZimmerman/PECmd):
+Για να επιθεωρήσετε αυτά τα files μπορείτε να χρησιμοποιήσετε το tool [**PEcmd.exe**](https://github.com/EricZimmerman/PECmd):
 ```bash
 .\PECmd.exe -d C:\Users\student\Desktop\Prefetch --html "C:\Users\student\Desktop\out_folder"
 ```
@@ -299,8 +299,8 @@ interesting-windows-registry-keys.md
 
 ### Superprefetch
 
-Το **Superprefetch** έχει τον ίδιο στόχο με το prefetch, δηλαδή να **φορτώνει τα προγράμματα γρηγορότερα**, προβλέποντας τι πρόκειται να φορτωθεί στη συνέχεια. Ωστόσο, δεν αντικαθιστά την υπηρεσία prefetch.\
-Αυτή η υπηρεσία δημιουργεί αρχεία βάσης δεδομένων στο `C:\Windows\Prefetch\Ag*.db`.
+Το **Superprefetch** έχει τον ίδιο στόχο με το prefetch, **να φορτώνει τα προγράμματα γρηγορότερα**, προβλέποντας τι πρόκειται να φορτωθεί στη συνέχεια. Ωστόσο, δεν αντικαθιστά την υπηρεσία prefetch.\
+Αυτή η υπηρεσία δημιουργεί αρχεία βάσης δεδομένων στη διαδρομή `C:\Windows\Prefetch\Ag*.db`.
 
 Σε αυτές τις βάσεις δεδομένων μπορείτε να βρείτε το **όνομα** του **προγράμματος**, τον **αριθμό** των **εκτελέσεων**, τα **αρχεία** που **άνοιξαν**, τον **τόμο** στον οποίο έγινε **πρόσβαση**, την **πλήρη** **διαδρομή**, τα **χρονικά διαστήματα** και τις **χρονοσφραγίδες**.
 
@@ -308,7 +308,7 @@ interesting-windows-registry-keys.md
 
 ### SRUM
 
-Το **System Resource Usage Monitor** (SRUM) **παρακολουθεί** τους **πόρους** που **καταναλώνονται** **από μια διεργασία**. Εμφανίστηκε στα W8 και αποθηκεύει τα δεδομένα σε μια βάση δεδομένων ESE που βρίσκεται στο `C:\Windows\System32\sru\SRUDB.dat`.
+Το **System Resource Usage Monitor** (SRUM) **παρακολουθεί** τους **πόρους** που **καταναλώνονται** **από μια διεργασία**. Εμφανίστηκε στα W8 και αποθηκεύει τα δεδομένα σε μια βάση δεδομένων ESE που βρίσκεται στη διαδρομή `C:\Windows\System32\sru\SRUDB.dat`.
 
 Παρέχει τις ακόλουθες πληροφορίες:
 
@@ -322,24 +322,24 @@ interesting-windows-registry-keys.md
 
 Αυτές οι πληροφορίες ενημερώνονται κάθε 60 λεπτά.
 
-Μπορείτε να εξαγάγετε την ημερομηνία από αυτό το αρχείο χρησιμοποιώντας το εργαλείο [**srum_dump**](https://github.com/MarkBaggett/srum-dump).
+Μπορείτε να ανακτήσετε τα δεδομένα από αυτό το αρχείο χρησιμοποιώντας το εργαλείο [**srum_dump**](https://github.com/MarkBaggett/srum-dump).
 ```bash
 .\srum_dump.exe -i C:\Users\student\Desktop\SRUDB.dat -t SRUM_TEMPLATE.xlsx -o C:\Users\student\Desktop\srum
 ```
 ### AppCompatCache (ShimCache)
 
-Το **AppCompatCache**, γνωστό και ως **ShimCache**, αποτελεί μέρος της **Application Compatibility Database** που αναπτύχθηκε από τη **Microsoft** για την αντιμετώπιση προβλημάτων συμβατότητας εφαρμογών. Αυτό το στοιχείο του συστήματος καταγράφει διάφορα τμήματα μεταδεδομένων αρχείων, όπως:
+Το **AppCompatCache**, γνωστό επίσης ως **ShimCache**, αποτελεί μέρος του **Application Compatibility Database**, που αναπτύχθηκε από τη **Microsoft** για την αντιμετώπιση προβλημάτων συμβατότητας εφαρμογών. Αυτό το στοιχείο του συστήματος καταγράφει διάφορα μεταδεδομένα αρχείων, τα οποία περιλαμβάνουν:
 
-- Πλήρης διαδρομή του αρχείου
+- Πλήρη διαδρομή του αρχείου
 - Μέγεθος του αρχείου
-- Τελευταία τροποποίηση υπό το **$Standard_Information** (SI)
+- Τελευταία τροποποίηση στο **$Standard_Information** (SI)
 - Τελευταία ενημέρωση του ShimCache
-- Σημαία εκτέλεσης διεργασίας
+- Process Execution Flag
 
-Τα δεδομένα αποθηκεύονται στο registry σε συγκεκριμένες τοποθεσίες, ανάλογα με την έκδοση του λειτουργικού συστήματος:
+Τα δεδομένα αποθηκεύονται στο registry, σε συγκεκριμένες τοποθεσίες ανάλογα με την έκδοση του λειτουργικού συστήματος:
 
-- Στα XP, τα δεδομένα αποθηκεύονται στη θέση `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache`, με χωρητικότητα 96 εγγραφών.
-- Για τον Server 2003, καθώς και για τις εκδόσεις Windows 2008, 2012, 2016, 7, 8 και 10, η διαδρομή αποθήκευσης είναι `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache`, με χωρητικότητα 512 και 1024 εγγραφών, αντίστοιχα.
+- Για τα XP, τα δεδομένα αποθηκεύονται στη διαδρομή `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache`, με χωρητικότητα 96 entries.
+- Για τον Server 2003, καθώς και για τις εκδόσεις Windows 2008, 2012, 2016, 7, 8 και 10, η διαδρομή αποθήκευσης είναι `SYSTEM\CurrentControlSet\Control\SessionManager\AppCompatCache\AppCompatCache`, με χωρητικότητα 512 και 1024 entries, αντίστοιχα.
 
 Για την ανάλυση των αποθηκευμένων πληροφοριών, συνιστάται η χρήση του [**AppCompatCacheParser tool**](https://github.com/EricZimmerman/AppCompatCacheParser).
 
@@ -347,38 +347,38 @@ interesting-windows-registry-keys.md
 
 ### Amcache
 
-Το αρχείο **Amcache.hve** είναι ουσιαστικά ένα registry hive που καταγράφει λεπτομέρειες σχετικά με εφαρμογές που έχουν εκτελεστεί σε ένα σύστημα. Συνήθως βρίσκεται στη θέση `C:\Windows\AppCompat\Programas\Amcache.hve`.
+Το αρχείο **Amcache.hve** είναι ουσιαστικά ένα registry hive που καταγράφει λεπτομέρειες σχετικά με εφαρμογές που έχουν εκτελεστεί σε ένα σύστημα. Συνήθως βρίσκεται στη διαδρομή `C:\Windows\AppCompat\Programas\Amcache.hve`.
 
-Αυτό το αρχείο είναι αξιοσημείωτο επειδή αποθηκεύει εγγραφές πρόσφατα εκτελεσμένων διεργασιών, συμπεριλαμβανομένων των διαδρομών προς τα εκτελέσιμα αρχεία και των SHA1 hashes τους. Αυτές οι πληροφορίες είναι πολύτιμες για την παρακολούθηση της δραστηριότητας των εφαρμογών σε ένα σύστημα.
+Αυτό το αρχείο είναι αξιοσημείωτο επειδή αποθηκεύει καταγραφές πρόσφατα εκτελεσμένων processes, συμπεριλαμβανομένων των διαδρομών προς τα executable αρχεία και των SHA1 hashes τους. Αυτές οι πληροφορίες είναι εξαιρετικά χρήσιμες για την παρακολούθηση της δραστηριότητας των εφαρμογών σε ένα σύστημα.
 
-Για την εξαγωγή και ανάλυση των δεδομένων από το **Amcache.hve**, μπορεί να χρησιμοποιηθεί το εργαλείο [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser). Η ακόλουθη εντολή αποτελεί παράδειγμα χρήσης του AmcacheParser για την ανάλυση των περιεχομένων του αρχείου **Amcache.hve** και την εξαγωγή των αποτελεσμάτων σε μορφή CSV:
+Για την εξαγωγή και ανάλυση των δεδομένων από το **Amcache.hve**, μπορεί να χρησιμοποιηθεί το εργαλείο [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser). Η παρακάτω εντολή αποτελεί παράδειγμα χρήσης του AmcacheParser για την ανάλυση των περιεχομένων του αρχείου **Amcache.hve** και την εξαγωγή των αποτελεσμάτων σε μορφή CSV:
 ```bash
 AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\genericUser\Desktop\outputFolder
 ```
-Μεταξύ των παραγόμενων αρχείων CSV, το `Amcache_Unassociated file entries` είναι ιδιαίτερα αξιοσημείωτο λόγω των πλούσιων πληροφοριών που παρέχει σχετικά με τις μη συσχετισμένες καταχωρίσεις αρχείων.
+Μεταξύ των αρχείων CSV που δημιουργούνται, το `Amcache_Unassociated file entries` είναι ιδιαίτερα αξιοσημείωτο λόγω των πλούσιων πληροφοριών που παρέχει σχετικά με μη συσχετισμένες καταχωρίσεις αρχείων.
 
-Το πιο ενδιαφέρον αρχείο CSV που παράγεται είναι το `Amcache_Unassociated file entries`.
+Το πιο ενδιαφέρον αρχείο CVS που δημιουργείται είναι το `Amcache_Unassociated file entries`.
 
 ### RecentFileCache
 
-Αυτό το artifact μπορεί να βρεθεί μόνο στα W7, στη διαδρομή `C:\Windows\AppCompat\Programs\RecentFileCache.bcf`, και περιέχει πληροφορίες σχετικά με την πρόσφατη εκτέλεση ορισμένων binaries.
+Αυτό το artifact μπορεί να βρεθεί μόνο σε W7, στη διαδρομή `C:\Windows\AppCompat\Programs\RecentFileCache.bcf`, και περιέχει πληροφορίες σχετικά με την πρόσφατη εκτέλεση ορισμένων binaries.
 
-Μπορείτε να χρησιμοποιήσετε το εργαλείο [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser) για να κάνετε parse το αρχείο.
+Μπορείτε να χρησιμοποιήσετε το tool [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser) για να κάνετε parse το αρχείο.
 
-### Προγραμματισμένες εργασίες
+### Scheduled tasks
 
-Μπορείτε να τις εξαγάγετε από τις διαδρομές `C:\Windows\Tasks` ή `C:\Windows\System32\Tasks` και να τις διαβάσετε ως XML.
+Μπορείτε να τα εξαγάγετε από τις διαδρομές `C:\Windows\Tasks` ή `C:\Windows\System32\Tasks` και να τα διαβάσετε ως XML.
 
 ### Services
 
-Μπορείτε να τις βρείτε στο registry, στη διαδρομή `SYSTEM\ControlSet001\Services`. Μπορείτε να δείτε τι πρόκειται να εκτελεστεί και πότε.
+Μπορείτε να τα βρείτε στο registry, στη διαδρομή `SYSTEM\ControlSet001\Services`. Μπορείτε να δείτε τι πρόκειται να εκτελεστεί και πότε.
 
 ### **Windows Store**
 
 Οι εγκατεστημένες εφαρμογές μπορούν να βρεθούν στη διαδρομή `\ProgramData\Microsoft\Windows\AppRepository\`\
 Αυτό το repository διαθέτει ένα **log** με **κάθε εφαρμογή που έχει εγκατασταθεί** στο σύστημα, μέσα στη database **`StateRepository-Machine.srd`**.
 
-Μέσα στον πίνακα Application αυτής της database, είναι δυνατό να βρεθούν οι στήλες: "Application ID", "PackageNumber" και "Display Name". Αυτές οι στήλες περιέχουν πληροφορίες σχετικά με τις προεγκατεστημένες και εγκατεστημένες εφαρμογές και είναι δυνατό να διαπιστωθεί αν κάποιες εφαρμογές απεγκαταστάθηκαν, επειδή τα IDs των εγκατεστημένων εφαρμογών θα πρέπει να είναι διαδοχικά.
+Μέσα στον Application table αυτής της database, είναι δυνατό να βρεθούν οι στήλες: "Application ID", "PackageNumber" και "Display Name". Αυτές οι στήλες περιέχουν πληροφορίες σχετικά με προεγκατεστημένες και εγκατεστημένες εφαρμογές και μπορούν να δείξουν αν κάποιες εφαρμογές απεγκαταστάθηκαν, επειδή τα IDs των εγκατεστημένων εφαρμογών θα πρέπει να είναι διαδοχικά.
 
 Είναι επίσης δυνατό να **βρεθούν εγκατεστημένες εφαρμογές** στη registry path: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
 Και **απεγκατεστημένες** **εφαρμογές** στη: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
@@ -389,30 +389,30 @@ AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\gen
 
 - Τι συνέβη
 - Timestamp (UTC + 0)
-- Οι χρήστες που εμπλέκονται
-- Οι hosts που εμπλέκονται (hostname, IP)
-- Τα assets στα οποία έγινε πρόσβαση (αρχεία, φάκελοι, printer, services)
+- Users που εμπλέκονται
+- Hosts που εμπλέκονται (hostname, IP)
+- Assets στα οποία έγινε πρόσβαση (files, folder, printer, services)
 
-Τα logs βρίσκονται στη διαδρομή `C:\Windows\System32\config` πριν από τα Windows Vista και στη `C:\Windows\System32\winevt\Logs` μετά τα Windows Vista. Πριν από τα Windows Vista, τα event logs ήταν σε binary format, ενώ μετά από αυτά βρίσκονται σε **XML format** και χρησιμοποιούν την επέκταση **.evtx**.
+Τα logs βρίσκονται στη διαδρομή `C:\Windows\System32\config` πριν από τα Windows Vista και στη `C:\Windows\System32\winevt\Logs` μετά τα Windows Vista. Πριν από τα Windows Vista, τα event logs ήταν σε binary format, ενώ μετά από αυτά είναι σε **XML format** και χρησιμοποιούν την επέκταση **.evtx**.
 
 Η τοποθεσία των event files μπορεί να βρεθεί στο SYSTEM registry, στη διαδρομή **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`**
 
-Μπορούν να προβληθούν από το Windows Event Viewer (**`eventvwr.msc`**) ή με άλλα εργαλεία, όπως το [**Event Log Explorer**](https://eventlogxp.com) **ή** το [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)**.**
+Μπορούν να προβληθούν από το Windows Event Viewer (**`eventvwr.msc`**) ή με άλλα tools όπως το [**Event Log Explorer**](https://eventlogxp.com) **ή το** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)**.**
 
 ## Κατανόηση του Windows Security Event Logging
 
-Τα access events καταγράφονται στο security configuration file που βρίσκεται στη διαδρομή `C:\Windows\System32\winevt\Security.evtx`. Το μέγεθος αυτού του αρχείου μπορεί να ρυθμιστεί και, όταν η χωρητικότητά του εξαντληθεί, τα παλαιότερα events αντικαθίστανται. Τα καταγεγραμμένα events περιλαμβάνουν user logins και logoffs, ενέργειες χρηστών και αλλαγές στις security settings, καθώς και πρόσβαση σε αρχεία, φακέλους και shared assets.
+Τα access events καταγράφονται στο security configuration file που βρίσκεται στη διαδρομή `C:\Windows\System32\winevt\Security.evtx`. Το μέγεθος αυτού του file μπορεί να ρυθμιστεί και, όταν η χωρητικότητά του εξαντληθεί, τα παλαιότερα events αντικαθίστανται. Τα καταγεγραμμένα events περιλαμβάνουν user logins και logoffs, ενέργειες χρηστών και αλλαγές στις security settings, καθώς και πρόσβαση σε files, folders και shared assets.
 
 ### Βασικά Event IDs για User Authentication:
 
-- **EventID 4624**: Υποδεικνύει ότι ένας χρήστης έκανε επιτυχημένο authentication.
+- **EventID 4624**: Υποδεικνύει ότι ένας user έκανε επιτυχές authentication.
 - **EventID 4625**: Υποδεικνύει αποτυχία authentication.
-- **EventIDs 4634/4647**: Αντιπροσωπεύουν user logoff events.
+- **EventIDs 4634/4647**: Αντιστοιχούν σε user logoff events.
 - **EventID 4672**: Υποδεικνύει login με administrative privileges.
 
 #### Sub-types μέσα στα EventID 4634/4647:
 
-- **Interactive (2)**: Άμεσο user login.
+- **Interactive (2)**: Απευθείας user login.
 - **Network (3)**: Πρόσβαση σε shared folders.
 - **Batch (4)**: Εκτέλεση batch processes.
 - **Service (5)**: Εκκίνηση services.
@@ -420,37 +420,37 @@ AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\gen
 - **Unlock (7)**: Ξεκλείδωμα οθόνης με password.
 - **Network Cleartext (8)**: Μετάδοση clear text password, συχνά από IIS.
 - **New Credentials (9)**: Χρήση διαφορετικών credentials για πρόσβαση.
-- **Remote Interactive (10)**: Remote desktop ή terminal services login.
+- **Remote Interactive (10)**: Login μέσω remote desktop ή terminal services.
 - **Cache Interactive (11)**: Login με cached credentials χωρίς επικοινωνία με domain controller.
 - **Cache Remote Interactive (12)**: Remote login με cached credentials.
 - **Cached Unlock (13)**: Ξεκλείδωμα με cached credentials.
 
 #### Status και Sub Status Codes για το EventID 4625:
 
-- **0xC0000064**: Το username δεν υπάρχει - Θα μπορούσε να υποδεικνύει username enumeration attack.
-- **0xC000006A**: Σωστό username αλλά λανθασμένο password - Πιθανό password guessing ή brute-force attempt.
-- **0xC0000234**: Ο user account έχει κλειδωθεί - Μπορεί να ακολουθεί brute-force attack που προκάλεσε πολλαπλά failed logins.
+- **0xC0000064**: Το user name δεν υπάρχει - Θα μπορούσε να υποδεικνύει username enumeration attack.
+- **0xC000006A**: Σωστό user name αλλά λανθασμένο password - Πιθανό password guessing ή brute-force attempt.
+- **0xC0000234**: Ο user account έχει κλειδωθεί - Μπορεί να ακολουθήσει brute-force attack που προκαλεί πολλαπλά failed logins.
 - **0xC0000072**: Ο account είναι disabled - Μη εξουσιοδοτημένες προσπάθειες πρόσβασης σε disabled accounts.
-- **0xC000006F**: Logon εκτός του επιτρεπόμενου χρονικού διαστήματος - Υποδεικνύει προσπάθειες πρόσβασης εκτός των καθορισμένων ωρών login και αποτελεί πιθανή ένδειξη unauthorized access.
+- **0xC000006F**: Logon εκτός επιτρεπόμενου χρονικού διαστήματος - Υποδεικνύει προσπάθειες πρόσβασης εκτός των καθορισμένων login hours, πιθανό σημάδι μη εξουσιοδοτημένης πρόσβασης.
 - **0xC0000070**: Παραβίαση workstation restrictions - Θα μπορούσε να αποτελεί προσπάθεια login από μη εξουσιοδοτημένη τοποθεσία.
 - **0xC0000193**: Λήξη account - Προσπάθειες πρόσβασης με expired user accounts.
 - **0xC0000071**: Expired password - Login attempts με outdated passwords.
 - **0xC0000133**: Time sync issues - Μεγάλες χρονικές αποκλίσεις μεταξύ client και server μπορεί να υποδεικνύουν πιο εξελιγμένα attacks, όπως pass-the-ticket.
-- **0xC0000224**: Απαιτείται υποχρεωτική αλλαγή password - Οι συχνές υποχρεωτικές αλλαγές μπορεί να υποδεικνύουν προσπάθεια αποσταθεροποίησης της account security.
+- **0xC0000224**: Απαιτείται mandatory password change - Συχνές υποχρεωτικές αλλαγές μπορεί να υποδεικνύουν προσπάθεια αποσταθεροποίησης της account security.
 - **0xC0000225**: Υποδεικνύει system bug και όχι security issue.
-- **0xC000015b**: Denied logon type - Προσπάθεια πρόσβασης με μη εξουσιοδοτημένο logon type, όπως ένας χρήστης που προσπαθεί να εκτελέσει service logon.
+- **0xC000015b**: Denied logon type - Απόπειρα πρόσβασης με μη εξουσιοδοτημένο logon type, όπως ένας user που προσπαθεί να εκτελέσει service logon.
 
 #### EventID 4616:
 
-- **Time Change**: Τροποποίηση της ώρας του συστήματος, η οποία θα μπορούσε να αποκρύψει το timeline των events.
+- **Time Change**: Τροποποίηση του system time, η οποία θα μπορούσε να αποκρύψει το timeline των events.
 
 #### EventID 6005 και 6006:
 
-- **System Startup and Shutdown**: Το EventID 6005 υποδεικνύει την εκκίνηση του συστήματος, ενώ το EventID 6006 υποδεικνύει τον τερματισμό του.
+- **System Startup and Shutdown**: Το EventID 6005 υποδεικνύει την εκκίνηση του system, ενώ το EventID 6006 σηματοδοτεί τον τερματισμό του.
 
 #### EventID 1102:
 
-- **Log Deletion**: Τα security logs διαγράφηκαν, κάτι που αποτελεί συχνά red flag για την κάλυψη παράνομων δραστηριοτήτων.
+- **Log Deletion**: Εκκαθάριση των security logs, κάτι που συχνά αποτελεί red flag για συγκάλυψη illicit activities.
 
 #### EventIDs για USB Device Tracking:
 
@@ -458,40 +458,41 @@ AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\gen
 - **10100**: USB driver update.
 - **EventID 112**: Χρόνος εισαγωγής USB device.
 
-Για πρακτικά παραδείγματα σχετικά με την προσομοίωση αυτών των τύπων login και τις ευκαιρίες credential dumping, ανατρέξτε στον αναλυτικό οδηγό της [Altered Security](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them).
+Για πρακτικά παραδείγματα σχετικά με την προσομοίωση αυτών των login types και των ευκαιριών credential dumping, ανατρέξτε στο [detailed guide της Altered Security](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them).
 
-Οι λεπτομέρειες των events, συμπεριλαμβανομένων των status και sub-status codes, παρέχουν επιπλέον πληροφορίες σχετικά με τις αιτίες των events, ιδιαίτερα στο Event ID 4625.
+Οι λεπτομέρειες των events, συμπεριλαμβανομένων των status και sub-status codes, παρέχουν επιπλέον insight για τις αιτίες των events, ιδιαίτερα στο Event ID 4625.
 
 ### Ανάκτηση Windows Events
 
-Για να αυξήσετε τις πιθανότητες ανάκτησης διαγραμμένων Windows Events, συνιστάται να απενεργοποιήσετε τον ύποπτο υπολογιστή αποσυνδέοντας απευθείας το καλώδιο τροφοδοσίας. Το **Bulk_extractor**, ένα recovery tool που καθορίζει την επέκταση `.evtx`, συνιστάται για την προσπάθεια ανάκτησης τέτοιων events.
+Για να αυξήσετε τις πιθανότητες ανάκτησης deleted Windows Events, συνιστάται να απενεργοποιήσετε τον suspect computer αποσυνδέοντάς τον απευθείας από το ρεύμα. Το **Bulk_extractor**, ένα recovery tool που καθορίζει την επέκταση `.evtx`, συνιστάται για την προσπάθεια ανάκτησης τέτοιων events.
 
 ### Εντοπισμός Common Attacks μέσω Windows Events
 
-Για έναν ολοκληρωμένο οδηγό σχετικά με τη χρήση των Windows Event IDs για τον εντοπισμό common cyber attacks, επισκεφθείτε το [Red Team Recipe](https://redteamrecipe.com/event-codes/).
+Για έναν comprehensive οδηγό σχετικά με τη χρήση των Windows Event IDs για τον εντοπισμό common cyber attacks, επισκεφθείτε το [Red Team Recipe](https://redteamrecipe.com/event-codes/).
 
 #### Brute Force Attacks
 
-Εντοπίζονται από πολλαπλές εγγραφές EventID 4625, οι οποίες ακολουθούνται από ένα EventID 4624 αν το attack επιτύχει.
+Μπορούν να εντοπιστούν από πολλαπλές καταγραφές EventID 4625, ακολουθούμενες από ένα EventID 4624 αν το attack επιτύχει.
 
 #### Time Change
 
-Καταγράφεται από το EventID 4616. Οι αλλαγές στην ώρα του συστήματος μπορούν να περιπλέξουν τη forensic analysis.
+Καταγράφεται από το EventID 4616· οι αλλαγές στο system time μπορούν να δυσκολέψουν τη forensic analysis.
 
 #### USB Device Tracking
 
-Χρήσιμα System EventIDs για USB device tracking είναι τα 20001/20003/10000 για την αρχική χρήση, το 10100 για driver updates και το EventID 112 από το DeviceSetupManager για timestamps εισαγωγής.
+Χρήσιμα System EventIDs για USB device tracking περιλαμβάνουν τα 20001/20003/10000 για αρχική χρήση, το 10100 για driver updates και το EventID 112 από το DeviceSetupManager για timestamps εισαγωγής.
 
 #### System Power Events
 
-Το EventID 6005 υποδεικνύει την εκκίνηση του συστήματος, ενώ το EventID 6006 υποδεικνύει τον τερματισμό του.
+Το EventID 6005 υποδεικνύει system startup, ενώ το EventID 6006 σηματοδοτεί shutdown.
 
 #### Log Deletion
 
-Το Security EventID 1102 υποδεικνύει τη διαγραφή logs και αποτελεί critical event για τη forensic analysis.
+Το Security EventID 1102 σηματοδοτεί τη διαγραφή logs, ένα κρίσιμο event για τη forensic analysis.
 
 ## References
 
 - [1] [Windows Plug and Play Cleanup](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
+- [2] [jonahacks.medium.com - Investigating Common Windows Processes](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d)
 
 {{#include ../../../banners/hacktricks-training.md}}
