@@ -49,6 +49,6 @@ ctf-misc/README.md
 
 - Python: `python3 -m venv .venv && source .venv/bin/activate`
 - Libraries: `pip install pycryptodome gmpy2 sympy pwntools`
-- SageMath (often essential for lattice/RSA/ECC): https://www.sagemath.org/
+- SageMath (often essential for lattice/RSA/ECC): <https://www.sagemath.org/>
 
 {{#include ../banners/hacktricks-training.md}}

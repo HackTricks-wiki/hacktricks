@@ -5,7 +5,7 @@
 ## Overview
 
 Many archive formats (ZIP, RAR, TAR, 7-ZIP, etc.) allow each entry to carry its own **internal path**. When an extraction utility blindly honours that path, a crafted filename containing `..` or an **absolute path** (e.g. `C:\Windows\System32\`) will be written outside of the user-chosen directory.  
-This class of vulnerability is widely known as *Zip-Slip* or **archive extraction path traversal**.
+This class of vulnerability is widely known as *Zip-Slip* or **archive extraction path traversal**.<sup>[[6]](#references)</sup>
 
 Consequences range from overwriting arbitrary files to directly achieving **remote code execution (RCE)** by dropping a payload in an **auto-run** location such as the Windows *Startup* folder.
 
@@ -114,9 +114,9 @@ ESET reported RomCom (Storm-0978/UNC2596) spear-phishing campaigns that attached
 
 ## Additional Affected / Historical Cases
 
-* 2018 – Massive *Zip-Slip* advisory by Snyk affecting many Java/Go/JS libraries.
+* 2018 – Massive *Zip-Slip* advisory by Snyk affecting many Java/Go/JS libraries.<sup>[[6]](#references)</sup>
 * 2023 – 7-Zip CVE-2023-4011 similar traversal during `-ao` merge.
-* 2025 – HashiCorp `go-slug` (CVE-2025-0377) TAR extraction traversal in slugs (patch in v1.2).
+* 2025 – HashiCorp `go-slug` (CVE-2025-0377) TAR extraction traversal in slugs (patch in v1.2).<sup>[[7]](#references)</sup>
 * Any custom extraction logic that fails to call `PathCanonicalize` / `realpath` prior to write.
 
 ## References
@@ -126,5 +126,7 @@ ESET reported RomCom (Storm-0978/UNC2596) spear-phishing campaigns that attached
 - [3] [Meziantou – Prevent Zip Slip in .NET](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
 - [4] [0xdf – HTB Bruno ZipSlip → DLL hijack chain](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 - [5] [ESET Research – Update WinRAR tools now: RomCom and others exploiting zero-day vulnerability (CVE-2025-8088)](https://www.welivesecurity.com/en/eset-research/update-winrar-tools-now-romcom-and-others-exploiting-zero-day-vulnerability/)
+- [6] [Snyk – Public Disclosure of a Critical Arbitrary File Overwrite Vulnerability: Zip Slip](https://snyk.io/blog/zip-slip-vulnerability/)
+- [7] [HashiCorp – HCSEC-2025-01: go-slug Vulnerable to Zip Slip Attack (CVE-2025-0377)](https://discuss.hashicorp.com/t/hcsec-2025-01-hashicorp-go-slug-vulnerable-to-zip-slip-attack/72719)
 
 {{#include ../banners/hacktricks-training.md}}

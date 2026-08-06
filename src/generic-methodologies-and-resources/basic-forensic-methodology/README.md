@@ -123,8 +123,6 @@ anti-forensic-techniques.md
 file-integrity-monitoring.md
 {{#endref}}
 
-
-
 ## Deep inspection of specific file-types and Software
 
 If you have very **suspicious** **file**, then **depending on the file-type and software** that created it several **tricks** may be useful.\
@@ -173,4 +171,3 @@ file-integrity-monitoring.md
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
-

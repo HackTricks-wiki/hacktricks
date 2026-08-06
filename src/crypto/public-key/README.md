@@ -2,6 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 Most CTF hard crypto ends up here: RSA, ECC/ECDSA, lattices, and bad randomness.
 
 ## Recommended tooling

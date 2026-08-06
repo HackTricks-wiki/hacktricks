@@ -98,7 +98,7 @@ Mutation campaigns can take hours or days. Tips to reduce cost:<sup>[[1]](#refer
 - Parallelize tests if your runner allows it; cache dependencies/builds.
 - Fail-fast: stop early when a change clearly demonstrates an assertion gap.
 
-The runtime math is brutal: `1000 mutants x 5-minute tests ~= 83 hours`, so campaign design matters as much as the mutator itself.
+The runtime math is brutal: `1000 mutants x 5-minute tests ~= 83 hours`, so campaign design matters as much as the mutator itself.<sup>[[1]](#references)</sup>
 
 ## Persistent campaigns and triage at scale
 
