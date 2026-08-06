@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Atacando Sistemas RFID com Proxmark3
+## Atacando sistemas RFID com Proxmark3
 
 A primeira coisa que você precisa fazer é ter um [**Proxmark3**](https://proxmark.com) e [**instalar o software e suas dependênci**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**as**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
 
 ### Atacando MIFARE Classic 1KB
 
 Ele possui **16 setores**, cada um com **4 blocos**, e cada bloco contém **16B**. O UID está no setor 0, bloco 0 (e não pode ser alterado).\
-Para acessar cada setor, você precisa de **2 chaves** (**A** e **B**), armazenadas no **bloco 3 de cada setor** (sector trailer). O sector trailer também armazena os **access bits**, que concedem permissões de **leitura e escrita** em **cada bloco** usando as 2 chaves.\
-2 chaves são úteis para conceder permissões de leitura se você souber a primeira e de escrita se souber a segunda (por exemplo).
+Para acessar cada setor, você precisa de **2 chaves** (**A** e **B**), armazenadas no **bloco 3 de cada setor** (trailer do setor). O trailer do setor também armazena os **access bits**, que concedem permissões de **leitura e escrita** em **cada bloco** usando as 2 chaves.\
+2 chaves são úteis para conceder permissões de leitura se você souber a primeira e de escrita se souber a segunda, por exemplo.
 
-Vários ataques podem ser realizados<sup>[[1]](#references)</sup>.
+Vários ataques podem ser realizados
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -31,9 +31,9 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
-O Proxmark3 permite realizar outras ações, como **interceptar** uma **comunicação Tag para Reader**, para tentar encontrar dados sensíveis. Neste cartão, você pode simplesmente sniffar a comunicação e calcular a chave usada, pois as **operações criptográficas utilizadas são fracas** e, conhecendo o texto simples e o texto cifrado, você pode calculá-la (ferramenta `mfkey64`).<sup>[[3]](#references)</sup>
+O Proxmark3 permite realizar outras ações, como **eavesdropping** de uma **comunicação Tag para Reader**, para tentar encontrar dados sensíveis. Neste cartão, você poderia simplesmente fazer sniffing da comunicação e calcular a chave usada, pois as **operações criptográficas utilizadas são fracas** e, conhecendo o texto claro e o texto cifrado, é possível calculá-la (ferramenta `mfkey64`).<sup>[[3]](#references)</sup>
 
-#### Fluxo rápido do MiFare Classic para abuso de valores armazenados
+#### Fluxo rápido do MiFare Classic para abuso de valor armazenado
 
 Quando os terminais armazenam saldos em cartões Classic, um fluxo típico de ponta a ponta é:<sup>[[4]](#references)</sup>
 ```bash
@@ -51,11 +51,11 @@ proxmark3> hf mf csetuid -u <original_uid>
 ```
 Notas
 
-- `hf mf autopwn` orquestra ataques no estilo nested/darkside/HardNested, recupera chaves e cria dumps na pasta de dumps do cliente.
-- A gravação do bloco 0/UID só funciona em magic gen1a/gen2 cards. Os cards Classic normais têm UID read-only.<sup>[[2]](#references)</sup>
-- Muitas implementações usam **value blocks** do Classic ou checksums simples. Garanta que todos os campos duplicados/complementados e os checksums estejam consistentes após a edição.
+- `hf mf autopwn` coordena ataques no estilo nested/darkside/HardNested, recupera keys e cria dumps na pasta de dumps do client.<sup>[[1]](#references)</sup>
+- A escrita do bloco 0/UID só funciona em cards magic gen1a/gen2. Cards Classic normais têm UID somente para leitura.<sup>[[2]](#references)</sup>
+- Muitas implementações usam **value blocks** do Classic ou checksums simples. Garanta que todos os campos duplicados/complementados e os checksums estejam consistentes após a edição.<sup>[[4]](#references)</sup>
 
-Consulte uma metodologia de nível superior e as medidas de mitigação em:
+Consulte uma metodologia de nível mais alto e as mitigações em:
 
 {{#ref}}
 pentesting-rfid.md
@@ -63,7 +63,7 @@ pentesting-rfid.md
 
 ### Raw Commands
 
-Sistemas IoT às vezes usam **tags sem marca ou não comerciais**. Nesse caso, você pode usar o Proxmark3 para enviar **comandos raw personalizados às tags**.
+Sistemas IoT às vezes usam **tags não-branded ou não comerciais**. Nesse caso, você pode usar o Proxmark3 para enviar **raw commands para as tags**.
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
 SAK : 08 [2]
@@ -73,7 +73,7 @@ No chinese magic backdoor command detected
 Prng detection: WEAK
 Valid ISO14443A Tag Found - Quiting Search
 ```
-Com essas informações, você pode tentar pesquisar informações sobre o card e sobre a maneira de se comunicar com ele. O Proxmark3 permite enviar comandos brutos, como: `hf 14a raw -p -b 7 26`
+Com essas informações, você pode tentar pesquisar informações sobre o cartão e sobre a forma de se comunicar com ele. O Proxmark3 permite enviar comandos brutos como: `hf 14a raw -p -b 7 26`
 
 ### Scripts
 
@@ -81,7 +81,7 @@ O software Proxmark3 vem com uma lista pré-carregada de **scripts de automaçã
 ```
 proxmark3> script run mfkeys
 ```
-Você pode criar um script para fazer **fuzzing em leitores de tags**. Depois de copiar os dados de um **cartão válido**, basta escrever um **script Lua** que **randomize** um ou mais **bytes** aleatórios e verificar se o **reader trava** em alguma iteração.
+Você pode criar um script para **fuzz leitores de tags**. Assim, após copiar os dados de um **cartão válido**, basta escrever um **script Lua** que **randomize** um ou mais **bytes** aleatórios e verificar se o **leitor trava** em alguma iteração.
 
 ## Referências
 

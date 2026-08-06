@@ -4,16 +4,16 @@
 
 ## Sobre esta Seção
 
-Esta seção contém tudo sobre Sistemas de Controle Industrial, incluindo conceitos e metodologias para hackeá-los, além de várias questões de segurança que persistem neles.
+Esta seção contém tudo sobre Sistemas de Controle Industrial, incluindo conceitos e metodologias para hackeá-los com diversas questões de segurança que persistem neles.
 
-Sistemas de Controle Industrial estão em toda parte, uma vez que as indústrias são vitais para o desenvolvimento econômico de uma nação. Mas esses ICS são difíceis de atualizar e menos avanços são feitos neste campo. Portanto, encontrar falhas de segurança é comum aqui. A maioria dos protocolos e padrões usados aqui foi desenvolvida na década de 90 e possui capacidades muito menores em comparação com os cenários de ataque atuais.
+Os Sistemas de Controle Industrial estão presentes em todos os lugares, pois as indústrias são vitais para o desenvolvimento econômico de uma nação. Porém, esses ICS são difíceis de atualizar e poucos avanços são feitos nesse campo. Portanto, encontrar falhas de segurança é comum nesse contexto. A maioria dos protocolos e padrões usados aqui foi desenvolvida na década de 1990 e possui capacidades muito inferiores em comparação com os cenários de ataque atuais.
 
-Tornou-se importante proteger esses sistemas, pois danificá-los pode custar muito e até mesmo vidas no pior dos casos. Para entender a segurança dos Sistemas de Controle Industrial, é necessário conhecer seus internos.
+Tornou-se importante proteger esses sistemas, pois danificá-los pode custar muito dinheiro e até vidas, no pior caso. Para compreender a segurança dos Sistemas de Controle Industrial, é necessário conhecer seu funcionamento interno.
 
-Como os Sistemas de Controle Industrial são instalados seguindo padrões estabelecidos, conhecer cada componente ajudaria a interconectar todos os outros mecanismos no sistema de controle. A instalação desses dispositivos, como PLCs e sistemas SCADA, é diferente em várias indústrias, portanto, a coleta de informações é crítica.
+Como os Sistemas de Controle Industrial são instalados seguindo padrões definidos, conhecer cada componente ajuda a interconectar todos os outros mecanismos do sistema de controle. A instalação desses dispositivos, como PLCs e sistemas SCADA, varia entre os setores; portanto, a coleta de informações é crítica.
 
-Os Sistemas de Controle Industrial podem ser complicados às vezes e, portanto, requerem muita paciência para fazer qualquer coisa. É tudo sobre sondagem e reconhecimento antes de planejar ataques e desenvolver quaisquer exploits.
+Os Sistemas de Controle Industrial podem ser complicados às vezes e, por isso, exigem muita paciência para realizar qualquer ação. Tudo se resume a sondagem e reconhecimento antes de planejar ataques e desenvolver exploits.
 
-Essas técnicas também podem ser usadas para proteger contra ataques e blue teaming para sistemas de controle industrial.
+Essas técnicas também podem ser usadas para proteger contra ataques e realizar blue teaming em sistemas de controle industrial.
 
 {{#include ../../banners/hacktricks-training.md}}

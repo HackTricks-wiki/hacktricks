@@ -6,50 +6,50 @@
 
 ### Componentes de um Certificado
 
-- O **Subject** do certificado indica seu proprietário.
-- Uma **Public Key** é pareada com uma chave privada para vincular o certificado ao seu legítimo proprietário.
-- O **Validity Period**, definido pelas datas **NotBefore** e **NotAfter**, marca a duração efetiva do certificado.
-- Um **Serial Number** único, fornecido pela Certificate Authority (CA), identifica cada certificado.
+- O **Subject** do certificado denota seu proprietário.
+- Uma **Public Key** é emparelhada com uma chave mantida em privado para vincular o certificado ao seu proprietário legítimo.
+- O **Validity Period**, definido pelas datas **NotBefore** e **NotAfter**, indica a duração de validade do certificado.
+- Um **Serial Number** exclusivo, fornecido pela Certificate Authority (CA), identifica cada certificado.
 - O **Issuer** refere-se à CA que emitiu o certificado.
-- **SubjectAlternativeName** permite nomes adicionais para o subject, aumentando a flexibilidade de identificação.
+- **SubjectAlternativeName** permite nomes adicionais para o subject, aumentando a flexibilidade da identificação.
 - **Basic Constraints** identificam se o certificado é para uma CA ou uma entidade final e definem restrições de uso.
-- **Extended Key Usages (EKUs)** delimitam os propósitos específicos do certificado, como assinatura de código ou criptografia de e-mail, através de Object Identifiers (OIDs).
-- O **Signature Algorithm** especifica o método para assinar o certificado.
-- A **Signature**, criada com a chave privada do issuer, garante a autenticidade do certificado.
+- **Extended Key Usages (EKUs)** especificam as finalidades do certificado, como assinatura de código ou criptografia de e-mail, por meio de Object Identifiers (OIDs).
+- O **Signature Algorithm** especifica o método usado para assinar o certificado.
+- A **Signature**, criada com a chave privada do issuer, garante a autenticidade do certificado.<sup>[[1]](#references)</sup>
 
 ### Considerações Especiais
 
-- **Subject Alternative Names (SANs)** ampliam a aplicabilidade de um certificado para múltiplas identidades, sendo cruciais para servidores com domínios múltiplos. Processos seguros de emissão são vitais para evitar riscos de impersonação por atacantes que manipulem a especificação SAN.
+- **Subject Alternative Names (SANs)** ampliam a aplicabilidade de um certificado a múltiplas identidades, algo essencial para servidores com vários domínios. Processos seguros de emissão são vitais para evitar riscos de impersonation causados por atacantes que manipulam a especificação do SAN.<sup>[[1]](#references)</sup>
 
 ### Certificate Authorities (CAs) no Active Directory (AD)
 
-O AD CS reconhece certificados de CA em uma floresta do AD através de containers designados, cada um servindo papéis únicos:
+O AD CS reconhece certificados de CA em uma floresta do AD por meio de containers designados, cada um desempenhando funções específicas:<sup>[[1]](#references)</sup>
 
-- O container **Certification Authorities** contém certificados de CA raiz confiáveis.
+- O container **Certification Authorities** contém certificados de root CA confiáveis.
 - O container **Enrolment Services** detalha as Enterprise CAs e seus certificate templates.
 - O objeto **NTAuthCertificates** inclui certificados de CA autorizados para autenticação no AD.
-- O container **AIA (Authority Information Access)** facilita a validação da cadeia de certificados com certificados intermediários e cross CA.
+- O container **AIA (Authority Information Access)** facilita a validação da cadeia de certificados com certificados intermediários e de CAs cruzadas.
 
-### Aquisição de Certificado: Fluxo de Requisição de Certificado pelo Cliente
+### Aquisição de Certificados: Fluxo de Solicitação de Certificado do Cliente
 
-1. O processo de requisição começa com os clientes encontrando uma Enterprise CA.
+1. O processo de solicitação começa com os clientes localizando uma Enterprise CA.
 2. Um CSR é criado, contendo uma public key e outros detalhes, após a geração de um par de chaves pública-privada.
-3. A CA avalia o CSR contra os certificate templates disponíveis, emitindo o certificado com base nas permissões do template.
-4. Após aprovação, a CA assina o certificado com sua chave privada e o retorna ao cliente.
+3. A CA avalia o CSR em relação aos certificate templates disponíveis, emitindo o certificado com base nas permissões do template.
+4. Após a aprovação, a CA assina o certificado com sua chave privada e o devolve ao cliente.<sup>[[1]](#references)</sup>
 
 ### Certificate Templates
 
-Definidos dentro do AD, esses templates descrevem as configurações e permissões para emissão de certificados, incluindo EKUs permitidos e direitos de enrolment ou modificação, sendo críticos para gerenciar o acesso aos serviços de certificado.
+Definidos no AD, esses templates especificam as configurações e permissões para a emissão de certificados, incluindo EKUs permitidos e direitos de enrollment ou modificação, sendo essenciais para gerenciar o acesso aos serviços de certificados.<sup>[[1]](#references)</sup>
 
-## Inscrição de Certificado
+## Enrollment de Certificados
 
-O processo de inscrição para certificados é iniciado por um administrador que **cria um certificate template**, o qual é então **publicado** por uma Enterprise Certificate Authority (CA). Isso torna o template disponível para inscrição dos clientes, um passo realizado adicionando o nome do template ao campo `certificatetemplates` de um objeto do Active Directory.
+O processo de enrollment de certificados é iniciado por um administrador que **cria um certificate template**, que então é **publicado** por uma Enterprise Certificate Authority (CA). Isso torna o template disponível para enrollment dos clientes, uma etapa realizada adicionando o nome do template ao campo `certificatetemplates` de um objeto do Active Directory.<sup>[[1]](#references)</sup>
 
-Para que um cliente solicite um certificado, devem ser concedidos **enrollment rights**. Esses direitos são definidos por descritores de segurança no certificate template e na própria Enterprise CA. Permissões devem ser concedidas em ambos os locais para que uma requisição seja bem-sucedida.
+Para que um cliente possa solicitar um certificado, é necessário conceder **enrollment rights**. Esses direitos são definidos por security descriptors no certificate template e na própria Enterprise CA. As permissões devem ser concedidas em ambos os locais para que uma solicitação seja bem-sucedida.<sup>[[1]](#references)</sup>
 
 ### Template Enrollment Rights
 
-Esses direitos são especificados através de Access Control Entries (ACEs), detalhando permissões como:
+Esses direitos são especificados por meio de Access Control Entries (ACEs), detalhando permissões como:<sup>[[1]](#references)</sup>
 
 - Direitos **Certificate-Enrollment** e **Certificate-AutoEnrollment**, cada um associado a GUIDs específicos.
 - **ExtendedRights**, permitindo todas as permissões estendidas.
@@ -57,51 +57,51 @@ Esses direitos são especificados através de Access Control Entries (ACEs), det
 
 ### Enterprise CA Enrollment Rights
 
-Os direitos da CA são descritos em seu descritor de segurança, acessível via o console de gerenciamento do Certificate Authority. Algumas configurações permitem até mesmo que usuários com poucos privilégios tenham acesso remoto, o que pode ser uma preocupação de segurança.
+Os direitos da CA são definidos em seu security descriptor, acessível por meio do console de gerenciamento da Certificate Authority. Algumas configurações permitem até mesmo acesso remoto a usuários com poucos privilégios, o que pode representar uma preocupação de segurança.<sup>[[1]](#references)</sup>
 
 ### Controles Adicionais de Emissão
 
-Certos controles podem ser aplicados, como:
+Alguns controles podem ser aplicados, como:<sup>[[1]](#references)</sup>
 
-- **Manager Approval**: Coloca requisições em estado pendente até serem aprovadas por um gerente de certificados.
-- **Enrolment Agents and Authorized Signatures**: Especificam o número de assinaturas necessárias em um CSR e os Application Policy OIDs exigidos.
+- **Manager Approval**: coloca as solicitações em um estado pendente até que sejam aprovadas por um certificate manager.
+- **Enrolment Agents and Authorized Signatures**: especificam o número de assinaturas necessárias em um CSR e os Application Policy OIDs exigidos.
 
 ### Métodos para Solicitar Certificados
 
-Certificados podem ser solicitados através de:
+Os certificados podem ser solicitados por meio de:<sup>[[1]](#references)</sup>
 
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), usando interfaces DCOM.
-2. **ICertPassage Remote Protocol** (MS-ICPR), através de named pipes ou TCP/IP.
-3. A **certificate enrollment web interface**, com a função Certificate Authority Web Enrollment instalada.
+2. **ICertPassage Remote Protocol** (MS-ICPR), por meio de named pipes ou TCP/IP.
+3. A **certificate enrollment web interface**, com a role Certificate Authority Web Enrollment instalada.
 4. O **Certificate Enrollment Service** (CES), em conjunto com o serviço Certificate Enrollment Policy (CEP).
 5. O **Network Device Enrollment Service** (NDES) para dispositivos de rede, usando o Simple Certificate Enrollment Protocol (SCEP).
 
-Usuários Windows também podem solicitar certificados via GUI (`certmgr.msc` ou `certlm.msc`) ou ferramentas de linha de comando (`certreq.exe` ou o comando PowerShell `Get-Certificate`).
+Usuários do Windows também podem solicitar certificados por meio da GUI (`certmgr.msc` ou `certlm.msc`) ou de ferramentas de linha de comando (`certreq.exe` ou o comando `Get-Certificate` do PowerShell).
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
 ## Autenticação por Certificado
 
-Active Directory (AD) suporta autenticação por certificado, utilizando principalmente os protocolos **Kerberos** e **Secure Channel (Schannel)**.
+O Active Directory (AD) oferece suporte à autenticação por certificado, utilizando principalmente os protocolos **Kerberos** e **Secure Channel (Schannel)**.<sup>[[1]](#references)</sup>
 
 ### Processo de Autenticação Kerberos
 
-No processo de autenticação Kerberos, a solicitação de um usuário por um Ticket Granting Ticket (TGT) é assinada usando a **private key** do certificado do usuário. Essa solicitação passa por várias validações pelo domain controller, incluindo o **validity**, **path**, e **revocation status** do certificado. As validações também incluem verificar que o certificado provém de uma fonte confiável e confirmar a presença do emissor no **NTAUTH certificate store**. Validações bem-sucedidas resultam na emissão de um TGT. O objeto **`NTAuthCertificates`** no AD, encontrado em:
+No processo de autenticação Kerberos, a solicitação de um usuário por um Ticket Granting Ticket (TGT) é assinada usando a **chave privada** do certificado do usuário. Essa solicitação passa por várias validações realizadas pelo controlador de domínio, incluindo a **validade**, o **caminho** e o status de **revogação** do certificado. As validações também incluem verificar se o certificado vem de uma fonte confiável e confirmar a presença do emissor no **repositório de certificados NTAUTH**. Validações bem-sucedidas resultam na emissão de um TGT. O objeto **`NTAuthCertificates`** no AD, encontrado em:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-é central para estabelecer confiança na autenticação por certificado.
+é central para estabelecer confiança na autenticação de certificados.<sup>[[1]](#references)</sup>
 
-### Secure Channel (Schannel) Authentication
+### Autenticação por Secure Channel (Schannel)
 
-Schannel facilita conexões TLS/SSL seguras, onde durante o handshake o cliente apresenta um certificado que, se validado com sucesso, autoriza o acesso. O mapeamento de um certificado para uma conta AD pode envolver a função do Kerberos **S4U2Self** ou o **Subject Alternative Name (SAN)** do certificado, entre outros métodos.
+O Schannel facilita conexões TLS/SSL seguras. Durante um handshake, o cliente apresenta um certificado que, se validado com sucesso, autoriza o acesso.<sup>[[2]](#references)</sup> O mapeamento de um certificado para uma conta do AD pode envolver a função **S4U2Self** do Kerberos ou o **Subject Alternative Name (SAN)** do certificado, entre outros métodos.<sup>[[1]](#references)</sup>
 
-### AD Certificate Services Enumeration
+### Enumeração dos Serviços de Certificados do AD
 
-Os serviços de certificados do AD podem ser enumerados por consultas LDAP, revelando informações sobre **Enterprise Certificate Authorities (CAs)** e suas configurações. Isso é acessível a qualquer usuário autenticado no domínio sem privilégios especiais. Ferramentas como **[Certify](https://github.com/GhostPack/Certify)** e **[Certipy](https://github.com/ly4k/Certipy)** são usadas para enumeração e avaliação de vulnerabilidades em ambientes AD CS.
+Os serviços de certificados do AD podem ser enumerados por meio de consultas LDAP, revelando informações sobre as **Enterprise Certificate Authorities (CAs)** e suas configurações. Isso é acessível a qualquer usuário autenticado no domínio sem privilégios especiais.<sup>[[1]](#references)</sup> Ferramentas como **[Certify](https://github.com/GhostPack/Certify)** e **[Certipy](https://github.com/ly4k/Certipy)** são usadas para enumeração e avaliação de vulnerabilidades em ambientes AD CS.<sup>[[3]](#references)</sup>
 
-Comandos para usar essas ferramentas incluem:
+Os comandos para usar essas ferramentas incluem:
 ```bash
 # Enumerate trusted root CA certificates, Enterprise CAs and HTTP enrollment endpoints
 # Useful flags: /domain, /path, /hideAdmins, /showAllPermissions, /skipWebServiceChecks
@@ -127,9 +127,9 @@ certutil -v -dstemplate
 ```
 ## Referências
 
-- [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
-- [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
-- [GhostPack/Certify](https://github.com/GhostPack/Certify)
-- [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
+- [1] [Certified Pre-Owned: Abusing Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
+- [2] [O que é a autenticação de cliente SSL/TLS e como ela funciona?](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
+- [3] [GhostPack/Certify](https://github.com/GhostPack/Certify)
+- [4] [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
 
 {{#include ../../../banners/hacktricks-training.md}}
