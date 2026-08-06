@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-### 在 git 仓库和文件系统中查找 secrets 的工具
+### 在 git repos 和文件系统中查找 secrets 的工具
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
@@ -20,34 +20,34 @@
 - [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
 - [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
 
-> 说明
-> - TruffleHog v3 可以实时验证许多凭证，并扫描 GitHub orgs、issues/PRs、gists 和 wikis。示例：`trufflehog github --org <ORG> --results=verified`.
-> - Gitleaks v8 支持扫描 git 历史、目录和归档：`gitleaks detect -v --source .` 或 `gitleaks detect --source <repo> --log-opts="--all"`.
-> - Nosey Parker 专注于高吞吐量扫描，使用精选规则，并提供用于分流的 Explorer UI。示例：`noseyparker scan --datastore np.db <path|repo>` 然后 `noseyparker report --datastore np.db`.
-> - ggshield (GitGuardian CLI) 提供 pre-commit/CI hooks 和 Docker image 扫描：`ggshield secret scan repo <path-or-url>`.
+> 注意
+> - TruffleHog v3 可以实时验证许多 credentials，并扫描 GitHub orgs、issues/PRs、gists 和 wikis。示例：`trufflehog github --org <ORG> --results=verified`。<sup>[[2]](#references)</sup>
+> - Gitleaks v8 支持扫描 git history、directories 和 archives：`gitleaks detect -v --source .` 或 `gitleaks detect --source <repo> --log-opts="--all"`。
+> - Nosey Parker 专注于使用经过整理的 rules 进行高吞吐量扫描，并提供用于 triage 的 Explorer UI。示例：先运行 `noseyparker scan --datastore np.db <path|repo>`，然后运行 `noseyparker report --datastore np.db`。
+> - ggshield (GitGuardian CLI) 提供 pre-commit/CI hooks 和 Docker image scanning：`ggshield secret scan repo <path-or-url>`。
 
-### GitHub 中 secrets 常见的 leak 位置
+### secrets 常见的 GitHub leak 位置
 
-- 仓库文件位于默认和非默认分支（在 UI 中搜索 `repo:owner/name@branch`）。
-- 完整 git 历史以及其他分支/标签（使用 gitleaks/trufflehog 克隆并扫描；GitHub 搜索侧重于已编入索引的内容）。
-- Issues、pull requests、comments 和描述（TruffleHog 的 GitHub 源通过像 `--issue-comments`、`--pr-comments` 这样的标志支持这些）。
-- 公共仓库的 Actions 日志和 artifacts（掩码为尽力而为；如果日志/工件可见，应进行审查）。
+- default 和 non-default branches 中的 Repository files（在 UI 中搜索 `repo:owner/name@branch`）。
+- 完整的 git history 以及其他 branches/tags（clone 后使用 gitleaks/trufflehog 扫描；GitHub search 主要针对已建立索引的内容）。
+- Issues、pull requests、comments 和 descriptions（TruffleHog GitHub source 通过 `--issue-comments`、`--pr-comments` 等 flags 支持这些内容）。
+- Public repositories 的 Actions logs 和 artifacts（masking 仅尽力而为；如果 logs/artifacts 可见，应进行 review）。
 - Wikis 和 release assets。
-- Gists（使用工具或 UI 搜索；一些工具可以包含 gists）。
+- Gists（可使用 tooling 或 UI 进行搜索；某些 tools 可以包含 gists）。
 
 > 注意事项
-> - GitHub’s REST code search API 是 legacy 并且不支持正则；对于正则搜索优先使用 Web UI。gh CLI 使用 legacy API。
-> - 只有低于特定大小的文件会被编入索引以供搜索。要彻底检查，请克隆并在本地使用 secrets 扫描器进行扫描。
+> - GitHub 的 REST code search API 已是 legacy API，且不支持 regex；进行 regex searches 时优先使用 Web UI。gh CLI 使用 legacy API。
+> - 只有低于特定大小的 files 才会被建立索引以供 search。为确保完整性，应 clone 后在本地使用 secrets scanner 进行扫描。
 
-### 程序化的 org 范围扫描
+### Programmatic org-wide scanning
 
-- TruffleHog (GitHub source):
+- TruffleHog (GitHub source)：<sup>[[2]](#references)</sup>
 ```bash
 export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
 --include-wikis --issue-comments --pr-comments --gist-comments
 ```
-- Gitleaks 针对所有 org repos (clone shallow and scan):
+- 对组织中的所有 repo 运行 Gitleaks（浅克隆并扫描）：
 ```bash
 gh repo list Target --limit 1000 --json nameWithOwner,url \
 | jq -r '.[].url' | while read -r r; do
@@ -55,25 +55,25 @@ tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
 gitleaks detect --source "$tmp" -v || true; rm -rf "$tmp";
 done
 ```
-- 在 mono checkout 上的多管闲事者:
+- Nosey Parker 扫描 mono checkout：
 ```bash
 # after cloning many repos beneath ./org
 noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
 ```
-- ggshield 快速扫描:
+- ggshield 快速扫描：
 ```bash
 # current working tree
 ggshield secret scan path -r .
 # full git history of a repo
 ggshield secret scan repo <path-or-url>
 ```
-> 提示：对于 git 历史，优先使用能解析 `git log -p --all` 的扫描器，以捕获已删除的 secrets。
+> 提示：对于 git history，优先使用能够解析 `git log -p --all` 的 scanners，以捕获已删除的 secrets。
 
-### 已更新的 dorks（modern tokens）
+### 针对现代 tokens 更新的 dorks
 
 - GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`
 - Slack tokens: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
-- 云与通用：
+- Cloud 和通用：
 - `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `aws_session_token`
 - `GOOGLE_API_KEY` `AZURE_TENANT_ID` `AZURE_CLIENT_SECRET`
 - `OPENAI_API_KEY` `ANTHROPIC_API_KEY`
@@ -364,11 +364,9 @@ AWS SECRET
 wide-source-code-search.md
 {{#endref}}
 
-
-
-
 ## 参考资料
 
-- 将 secrets 保持在公共仓库之外 (GitHub Blog, 2024年2月29日): https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/
-- TruffleHog v3 – 查找、验证和分析 leaked credentials: https://github.com/trufflesecurity/trufflehog
+- [1] [避免将 secrets 放入 public repositories（GitHub Blog，2024 年 2 月 29 日）](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
+- [2] [TruffleHog v3 – 查找、验证和分析 leaked credentials](https://github.com/trufflesecurity/trufflehog)
+
 {{#include ../../banners/hacktricks-training.md}}

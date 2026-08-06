@@ -2,46 +2,46 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-如果你有一个包含通过 USB 传输的键盘通信的 pcap，比如下面这个：
+如果你有一个包含如下所示键盘 USB 通信的 pcap：
 
-![](<../../../images/image (962).png>)
+![USB Keystrokes：如果你有一个包含如下所示键盘 USB 通信的 pcap](<../../../images/image (962).png>)
 
-USB 键盘通常使用 HID **boot protocol**，所以每次发送到主机的 interrupt transfer 只有 8 字节：一个字节的修饰键位（Ctrl/Shift/Alt/Super），一个保留字节，以及每个 report 最多六个 keycodes。只要解码这些字节，就能重建所有输入内容。
+USB 键盘通常使用 HID **boot protocol**，因此每个发往主机的 interrupt transfer 只有 8 个字节：1 个修饰键位字节（Ctrl/Shift/Alt/Super）、1 个保留字节，以及每个 report 中最多 6 个 keycode。解析这些字节就足以还原输入的全部内容。
 
 ## USB HID report basics
 
-典型的 IN report 看起来像这样：
+典型的 IN report 如下：
 
 | Byte | Meaning |
 | --- | --- |
-| 0 | Modifier bitmap (`0x02` = Left Shift, `0x20` = Right Alt, etc.). Multiple bits can be set simultaneously. |
-| 1 | Reserved/padding but often reused by gaming keyboards for vendor data. |
-| 2-7 | Up to six concurrent keycodes in USB usage ID format (`0x04 = a`, `0x1E = 1`). `0x00` means "no key". |
+| 0 | 修饰键位图（`0x02` = Left Shift，`0x20` = Right Alt，等等）。多个位可以同时设置。 |
+| 1 | 保留字节/填充字节，但 gaming keyboards 经常将其重新用于传输 vendor data。 |
+| 2-7 | USB usage ID 格式的最多 6 个并发 keycode（`0x04` = a，`0x1E` = 1）。`0x00` 表示“无按键”。 |
 
-没有 NKRO 的键盘在按下超过六个键时，通常会在 byte 2 发送 `0x01` 来表示 "rollover"。了解这个布局后，即使你只有原始的 `usb.capdata` 字节，也能还原按键内容。
+不支持 NKRO 的键盘通常会在按下超过 6 个按键时，将字节 2 设置为 `0x01`，以表示“rollover”。了解这一布局有助于你仅拥有原始 `usb.capdata` 字节时进行分析。
 
 ## Extracting HID data from a PCAP
 
 ### Identify the keyboard interface first
 
-在繁忙的抓包中，在导出任何 report 之前，先识别 HID 键盘。一个可靠的起点是 interface descriptor response:
+在繁忙的 capture 中，dump report 之前应先识别 HID 键盘。一个可靠的起点是 interface descriptor response：<sup>[[2]](#references)</sup>
 ```text
 usb.transfer_type == 0x02 && usb.endpoint_address.direction == 1 && usb.bDescriptorType == 4 && usb.bInterfaceClass == 3
 ```
 查看 `usb.bInterfaceSubClass` 和 `usb.bInterfaceProtocol`：
 
 - `subclass == 1` 且 `protocol == 1` 通常表示 boot keyboard
-- `protocol == 2` 通常是 mouse
-- `protocol == 0` 往往表示 vendor-defined 或 NKRO-style HID interface，但仍然携带 keyboard 数据，只是不是简单的 8-byte boot 布局
+- `protocol == 2` 通常表示鼠标
+- `protocol == 0` 通常表示 vendor-defined 或 NKRO-style HID interface，它仍然携带键盘数据，但不采用简单的 8-byte boot layout
 
-一旦确认了 interface，就把过滤器固定到 `usb.bus_id`、`usb.device_address`，如果可能再加上 `usb.interface_number`，然后再导出任何内容。
+确定 interface 后，在导出任何内容之前，将过滤器固定到 `usb.bus_id`、`usb.device_address`，并尽可能加上 `usb.interface_number`。
 
 ### Wireshark workflow
 
-1. **隔离设备**：对来自 keyboard 的 interrupt IN 流量加过滤器，例如 `usb.transfer_type == 0x01 && usb.endpoint_address.direction == "IN" && usb.device_address == 3`。
-2. **添加有用列**：右键点击 `Leftover Capture Data` 字段（`usb.capdata`）以及你偏好的 `usbhid.*` 字段（例如 `usbhid.boot_report.keyboard.keycode_1`），这样就能跟踪 keystrokes，而不必打开每一帧。
-3. **隐藏空报告**：应用 `!(usb.capdata == 00:00:00:00:00:00:00:00)` 来去掉 idle frames。
-4. **导出以便后处理**：`File -> Export Packet Dissections -> As CSV`，包含 `frame.number`、`usb.src`、`usb.capdata` 和 `usbhid.modifiers`，之后可以用脚本重建。
+1. **隔离设备**：过滤来自键盘的 interrupt IN 流量，例如 `usb.transfer_type == 0x01 && usb.endpoint_address.direction == "IN" && usb.device_address == 3`。
+2. **添加有用的列**：右键点击 `Leftover Capture Data` 字段（`usb.capdata`）以及你所需的 `usbhid.*` 字段（例如 `usbhid.boot_report.keyboard.keycode_1`），无需打开每个 frame 即可跟踪按键输入。
+3. **隐藏空 reports**：应用 `!(usb.capdata == 00:00:00:00:00:00:00:00)`，以排除 idle frames。
+4. **导出以便 post-processing**：`File -> Export Packet Dissections -> As CSV`，加入 `frame.number`、`usb.src`、`usb.capdata` 和 `usbhid.modifiers`，之后通过 script 重建数据。
 
 ### Command-line workflow
 
@@ -50,40 +50,40 @@ usb.transfer_type == 0x02 && usb.endpoint_address.direction == 1 && usb.bDescrip
 tshark -r ./usb.pcap -Y 'usb.capdata && usb.data_len == 8' -T fields -e usb.capdata | sed 's/../:&/g2' > keystrokes.txt
 python3 usbkeyboard.py ./keystrokes.txt
 ```
-在较新的捕获中，你可以通过按设备批处理，同时保留 `usb.capdata` 和更丰富的 `usbhid.data` 字段：
+在较新的捕获文件中，你可以通过按设备批处理，同时保留 `usb.capdata` 和信息更丰富的 `usbhid.data` 字段：
 ```bash
 tshark -r usb.pcapng -Y "usb.capdata || usbhid.data" -T fields -e usb.src -e usb.capdata -e usbhid.data | \
 sort -s -k1,1 | \
 awk '{ printf "%s", (NR==1 ? $1 : pre!=$1 ? "\n" $1 : "") " " $2; pre=$1 }' | \
 awk '{ for (i=2; i<=NF; i++) print $i > "usbdata-" $1 ".txt" }'
 ```
-那些按设备分别生成的文件可以直接丢进任何解码器。如果抓包来自通过 GATT 隧道传输的 BLE 键盘，就过滤 `btatt.value && frame.len == 20`，并在解码前把十六进制 payload 导出来。
+这些按设备划分的文件可以直接输入到任意解码器中。如果捕获内容来自通过 GATT 隧道传输的 BLE keyboards，请使用 `btatt.value && frame.len == 20` 进行过滤，并在解码前导出十六进制 payload。
 
-### 当报告不是经典的 8 字节 boot report 时
+### 当 report 不是经典的 8-byte boot report 时
 
-最近的 gaming keyboards、split keyboards 和 composite HID devices 往往暴露的是非-boot keyboard interface，此时 payload 不再符合 `modifier,reserved,key1..key6`。
+近期的 gaming keyboards、split keyboards 和 composite HID devices 通常会暴露一个非 boot keyboard interface，其 payload 不再匹配 `modifier,reserved,key1..key6`。
 
-- 当 Wireshark 已经解析了 HID layer 时，优先使用 `usbhid.data` 而不是 `usb.capdata`。
-- 如果每一行都以固定前缀或 report ID 开头，就用支持 offset 的 decoder 把它去掉，而不要假设 byte 0 永远是 modifier。
-- 一些 USBPcap 导出会省略 reserved byte，所以支持 `--no-reserved` 或自定义 offset 的 decoder 可以节省时间。
-- 如果抓包里有 HID report descriptor 或 BLE HOGP report map，就先用它恢复实际字段布局，再写 parser。
+- 当 Wireshark 已经解析 HID layer 时，优先使用 `usbhid.data` 而不是 `usb.capdata`。
+- 如果每一行都以固定 prefix 或 report ID 开头，请使用支持 offset 的 decoder 将其剥离，不要假设 byte 0 始终是 modifier。
+- 某些 USBPcap exports 会省略 reserved byte，因此支持 `--no-reserved` 或自定义 offset 的 decoders 可以节省时间。
+- 如果 capture 中存在 HID report descriptor 或 BLE HOGP report map，请先利用它恢复实际的 field layout，再编写 parser。
 
-## 自动化解码
+## 自动化 decoding
 
-- **ctf-usb-keyboard-parser** 仍然很适合快速 CTF challenges，并且已经包含在 repository 中。
-- **CTF-Usb_Keyboard_Parser**（`main.py`）原生支持解析 `pcap` 和 `pcapng` 文件，理解 `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap`，并且不需要 tshark，所以在隔离 sandbox 中也能很好工作。
-- **USB-HID-decoders** 增加了 keyboard、mouse 和 tablet visualizers。你可以运行 `extract_hid_data.sh` helper（tshark backend）或 `extract_hid_data.py`（scapy backend），然后把得到的 text file 喂给 decoder 或 replay modules，观察 keystrokes 展开。
+- **ctf-usb-keyboard-parser** 仍然适用于快速 CTF challenges，并且已经包含在 repository 中。<sup>[[3]](#references)</sup>
+- **CTF-Usb_Keyboard_Parser**（`main.py`）原生解析 `pcap` 和 `pcapng` files，支持 `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap`，且不需要 tshark，因此非常适合在隔离的 sandboxes 中运行。<sup>[[4]](#references)</sup>
+- **USB-HID-decoders** 增加了 keyboard、mouse 和 tablet visualizers。你可以运行 `extract_hid_data.sh` helper（tshark backend）或 `extract_hid_data.py`（scapy backend），然后将生成的 text file 输入 decoder 或 replay modules，以观察 keystrokes 展开。<sup>[[5]](#references)</sup>
 
-### 有状态解码很重要
+### Stateful decoding 很重要
 
-USB interrupt captures 通常同时包含 key press 以及在 release event 到来之前同一 report 的一个或多个重复副本。实用的 decoder 应该：
+USB interrupt captures 通常同时包含 key press，以及在 release event 到达前同一 report 的一个或多个重复副本。实用的 decoder 应该：<sup>[[2]](#references)</sup>
 
-- 只输出相对于上一条 report 新按下的 keycodes
-- 从 byte 0 或解析后的 `usbhid.boot_report.keyboard.modifier` field 中保留 modifier state（`Shift`、`Ctrl`、`AltGr`）
-- 跟踪 `Caps Lock` 之类的 toggle keys，因为大写输出并不只由 Shift 控制
-- 记住 HID usage IDs 与 layout 无关：`0x1d` 是物理上的 `z`/`y` key position，具体取决于主机 keyboard layout
+- 仅输出与 previous report 相比 newly pressed 的 keycodes
+- 从 byte 0 或已解析的 `usbhid.boot_report.keyboard.modifier` field 中维护 modifier state（`Shift`、`Ctrl`、`AltGr`）
+- 跟踪 `Caps Lock` 等 toggle keys，因为 uppercase output 并不只由 Shift 控制
+- 记住 HID usage IDs 与 layout 无关：根据 host keyboard layout，`0x1d` 是物理上的 `z`/`y` key position
 
-## 快速 Python decoder
+## Quick Python decoder
 ```python
 #!/usr/bin/env python3
 import sys
@@ -112,19 +112,22 @@ char = char.upper()
 sys.stdout.write(char)
 prev = current
 ```
-用之前转储的纯 hex 行直接喂给它，就能立即得到一个粗略重建，而不需要在环境里引入完整 parser。对于非 US 布局，这仍然重建的是物理按键位置，而不一定是受害主机上显示的最终 glyph。
+将之前导出的纯十六进制行输入其中，即可立即获得粗略重建结果，而无需将完整 parser 引入环境。对于非 US 布局，这仍然重建的是物理按键位置，不一定是受害主机上显示的最终字符。
 
-## Troubleshooting tips
+## 故障排除提示
 
-- If Wireshark does not populate `usbhid.*` fields, the HID report descriptor was probably not captured. Replug the keyboard while capturing or fall back to raw `usb.capdata`.
-- On Linux software captures, `usbmon` is the normal source; on Windows, Wireshark depends on the **USBPcap** extcap to see raw USB URBs at all.
-- If the keyboard was attached through a hub or dock, confirm the interface descriptor first and then decode only that device/interface pair. Composite HID captures frequently mix keyboard and mouse reports.
-- Windows captures require the **USBPcap** extcap interface; make sure it survived Wireshark upgrades, as missing extcaps leave you with empty device lists.
-- Always correlate `usb.bus_id:device:interface` (e.g. `1.9.1`) before decoding anything — mixing multiple keyboards or storage devices leads to nonsense keystrokes.
+- 如果 Wireshark 没有填充 `usbhid.*` 字段，可能是未捕获 HID report descriptor。请在捕获过程中重新插拔键盘，或退回使用原始 `usb.capdata`。
+- 在 Linux 软件捕获中，`usbmon` 是标准来源；在 Windows 上，Wireshark 依赖 **USBPcap** extcap 才能查看原始 USB URB。<sup>[[1]](#references)</sup>
+- 如果键盘通过 hub 或 dock 连接，请先确认 interface descriptor，然后仅解码对应的 device/interface pair。Composite HID 捕获经常会混入键盘和鼠标 report。
+- Windows 捕获需要 **USBPcap** extcap interface；请确保它在 Wireshark 升级后仍然存在，因为缺失的 extcap 会导致设备列表为空。<sup>[[1]](#references)</sup>
+- 在进行任何解码前，始终关联 `usb.bus_id:device:interface`（例如 `1.9.1`）——混合多个键盘或存储设备会导致按键结果毫无意义。
 
-## References
+## 参考资料
 
-- [Wireshark USB capture setup](https://wiki.wireshark.org/CaptureSetup/USB)
-- [ACSC Quals 2023 - pcap 1, 2 write-up](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
+- [1] [Wireshark USB 捕获设置](https://wiki.wireshark.org/CaptureSetup/USB)
+- [2] [ACSC Quals 2023 - pcap 1、2 write-up](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
+- [3] [ctf-usb-keyboard-parser](https://github.com/TeamRocketIst/ctf-usb-keyboard-parser)
+- [4] [CTF-Usb_Keyboard_Parser](https://github.com/5h4rrk/CTF-Usb_Keyboard_Parser)
+- [5] [USB-HID-decoders](https://github.com/Nissen96/USB-HID-decoders)
 
 {{#include ../../../banners/hacktricks-training.md}}

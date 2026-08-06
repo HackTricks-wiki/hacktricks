@@ -1,33 +1,33 @@
-# SVG/Font Glyph Analysis & Web DRM Deobfuscation (Raster Hashing + SSIM)
+# SVG/Font Glyph Analysis & Web DRM Deobfuscation（Raster Hashing + SSIM）
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-本页记录了从那些以带定位的字形序列以及每次请求提供向量字形定义（SVG 路径）并对每次请求随机化 glyph ID 以防止抓取的 web 阅读器中恢复文本的实用技术。核心思路是忽略请求范围的数字 glyph ID，通过 raster hashing 对视觉形状进行指纹化，然后用 SSIM 将形状与参考字体图集比对以映射到字符。该工作流不仅适用于 Kindle Cloud Reader，也可推广到任何具有类似防护的查看器。
+本页记录了从 web readers 中恢复文本的实用技术：这些 web readers 会发送带有位置的 glyph runs 以及每次请求对应的 vector glyph definitions（SVG paths），并且会为每次请求随机化 glyph IDs，以防止 scraping。核心思路是忽略 request-scoped numeric glyph IDs，通过 raster hashing 对视觉形状进行 fingerprint，然后使用 SSIM 将这些形状与 reference font atlas 进行比对，从而映射到字符。这套工作流不仅适用于 Kindle Cloud Reader，也适用于任何采用类似保护机制的 viewer。<sup>[[1]](#references)</sup>
 
-警告：仅在你合法拥有内容且符合适用法律和条款的情况下使用这些技术进行备份。
+警告：仅将这些技术用于备份你合法拥有的内容，并遵守适用的法律和条款。
 
-## 获取 (示例：Kindle Cloud Reader)
+## Acquisition（示例：Kindle Cloud Reader）
 
-Endpoint observed:
-- https://read.amazon.com/renderer/render
+观察到的 Endpoint：<sup>[[1]](#references)</sup>
+- [https://read.amazon.com/renderer/render](https://read.amazon.com/renderer/render)
 
-每个会话所需材料：
-- 浏览器会话 cookies（常规 Amazon 登录）
-- 来自 startReading API 调用的 rendering token
-- renderer 使用的额外 ADP 会话 token
+每个 session 所需的材料：
+- Browser session cookies（正常的 Amazon login）
+- 从 startReading API call 获取的 rendering token
+- Renderer 使用的额外 ADP session token
 
 行为：
-- 每个请求在使用与浏览器等效的 headers 和 cookies 发送时，会返回一个被限制为 5 页的 TAR 归档。
-- 对于内容较长的书籍，你需要多次分批；每批使用不同的随机化 glyph ID 映射。
+- 每次请求在发送与 browser 等效的 headers 和 cookies 时，都会返回一个最多包含 5 页的 TAR archive。
+- 对于较长的 book，需要执行许多 batches；每个 batch 都会使用不同的 randomized mapping of glyph IDs。
 
-典型的 TAR 内容：
-- page_data_0_4.json — 带定位的文本运行，以 glyph ID 序列表示（非 Unicode）
-- glyphs.json — 每次请求为每个 glyph 和 fontFamily 提供的 SVG 路径定义
-- toc.json — 目录
-- metadata.json — 书籍元数据
-- location_map.json — logical→visual 位置映射
+典型 TAR 内容：
+- page_data_0_4.json — 以 glyph IDs 序列表示的 positioned text runs（不是 Unicode）
+- glyphs.json — 每个 glyph 和 fontFamily 对应的 per-request SVG path definitions
+- toc.json — table of contents
+- metadata.json — book metadata
+- location_map.json — logical→visual position mappings
 
-示例页面运行结构：
+示例 page run structure：
 ```json
 {
 "type": "TextRun",
@@ -44,50 +44,50 @@ Endpoint observed:
 "24": {"path": "M 450 1480 L 820 1480 L 820 0 L 1050 0 L 1050 1480 ...", "fontFamily": "bookerly_normal"}
 }
 ```
-关于反爬虫路径技巧的说明：
-- 路径可能包含微小的相对移动（例如 `m3,1 m1,6 m-4,-7`），这会让许多向量解析器和简单的路径采样器混淆。
-- 总是使用健壮的 SVG 引擎（例如 CairoSVG）渲染填充的完整路径，而不是通过命令/坐标差分来处理。
+关于 anti-scraping path tricks 的注意事项：
+- Paths 可能包含微小的相对移动（例如 `m3,1 m1,6 m-4,-7`），这会干扰许多 vector parsers 和 naïve path sampling。
+- 始终使用 robust SVG engine（例如 CairoSVG）渲染完整的 filled paths，而不要进行 command/coordinate differencing。
 
-## 为什么简单解码会失败
+## naïve decoding 失败的原因
 
-- 每次请求的随机字形替换：字形 ID→字符 映射在每个批次中变化；ID 在全局没有意义。
-- 直接比较 SVG 坐标很脆弱：相同的形状在每次请求中可能在数字坐标或命令编码上不同。
-- 对独立字形进行 OCR 的效果很差（≈50%），会混淆标点和相似字形，而且会忽略连字。
+- 每个 request 都会随机替换 glyph：glyph ID→character 的 mapping 每个 batch 都会变化；ID 在全局范围内没有意义。<sup>[[1]](#references)</sup>
+- 直接比较 SVG coordinate 很脆弱：相同的 shapes 可能在每个 request 中使用不同的 numeric coordinates 或 command encoding。
+- 对孤立 glyph 进行 OCR 的效果较差（约 50%），容易混淆 punctuation 和外观相似的 glyph，并且会忽略 ligatures。
 
-## 工作流程：与请求无关的字形归一化与映射
+## Working pipeline：request-agnostic glyph normalization 和 mapping
 
 1) Rasterize per-request SVG glyphs
-- 针对每个字形构建一个最小的 SVG 文档，包含提供的 `path`，并使用 CairoSVG 或能处理复杂路径序列的等效引擎在固定画布上（例如 512×512）进行渲染。
-- 以白底黑填充渲染；避免使用描边，以消除与渲染器和抗锯齿相关的伪影。
+- 使用提供的 `path` 为每个 glyph 构建一个最小 SVG document，并使用 CairoSVG 或能够处理棘手 path sequences 的等效 engine，将其渲染到固定 canvas（例如 512×512）。<sup>[[1]](#references)[[2]](#references)</sup>
+- 渲染为白底黑色 filled glyph；避免使用 strokes，以消除依赖 renderer 和 AA 的 artifacts。
 
-2) Perceptual hashing for cross-request identity
-- 对每个字形图像计算感知哈希（例如使用 `imagehash.phash` 的 pHash）。
-- 将该哈希视为稳定 ID：跨请求相同的视觉形状会映射到相同的感知哈希，从而对抗随机化的 ID。
+2) 使用 perceptual hashing 进行 cross-request identity 识别
+- 对每个 glyph image 计算 perceptual hash（例如通过 `imagehash.phash` 使用 pHash）。<sup>[[3]](#references)</sup>
+- 将 hash 作为稳定 ID：不同 requests 中的相同 visual shape 会归并为相同的 perceptual hash，从而绕过随机化的 IDs。
 
 3) Reference font atlas generation
-- 下载目标 TTF/OTF 字体（例如 Bookerly normal/italic/bold/bold-italic）。
-- 渲染 A–Z、a–z、0–9、标点、特殊符号（em/en dashes、引号）以及显式连字的候选字形：`ff`, `fi`, `fl`, `ffi`, `ffl`。
-- 为每个字体变体（normal/italic/bold/bold-italic）保留独立的图集。
-- 如果需要对连字实现字形级别的保真，使用专业的 text shaper（HarfBuzz）；如果你直接渲染连字字符串并且 shaping 引擎能解析它们，使用 Pillow ImageFont 的简单光栅化也可能足够。
+- Download 目标 TTF/OTF fonts（例如 Bookerly normal/italic/bold/bold-italic）。
+- 为 A–Z、a–z、0–9、punctuation、special marks（em/en dashes、quotes）以及 explicit ligatures：`ff`、`fi`、`fl`、`ffi`、`ffl` 渲染 candidates。
+- 为每个 font variant（normal/italic/bold/bold-italic）分别保留 atlas。
+- 如果希望获得 ligatures 的 glyph-level fidelity，请使用 proper text shaper（HarfBuzz）；如果直接渲染 ligature strings，且 shaping engine 能够解析它们，那么使用 Pillow ImageFont 进行简单 rasterization 也足够。
 
-4) Visual similarity matching with SSIM
-- 对于每个未知字形图像，计算其与所有字体变体图集中所有候选图像之间的 SSIM（结构相似性指数）。
-- 将得分最高的匹配项对应的字符字符串分配给该字形。与像素精确比较相比，SSIM 更能容忍小的抗锯齿、缩放和坐标差异。
+4) 使用 SSIM 进行 visual similarity matching
+- 对每个 unknown glyph image，计算其与所有 font variant atlases 中 candidate images 的 SSIM（Structural Similarity Index）。<sup>[[4]](#references)</sup>
+- 将得分最高的 match 的 character string 分配给该 glyph。与 pixel-exact comparisons 相比，SSIM 能更好地吸收轻微的 antialiasing、scale 和 coordinate 差异。
 
-5) Edge handling and reconstruction
-- 当字形对应到连字（多字符）时，在解码过程中展开它。
-- 使用运行矩形（top/left/right/bottom）来推断段落分隔（Y 偏移）、对齐方式（X 模式）、样式和大小。
-- 序列化为 HTML/EPUB，同时保留 `fontStyle`、`fontWeight`、`fontSize` 和内部链接。
+5) Edge handling 和 reconstruction
+- 当某个 glyph 映射到 ligature（multi-char）时，在 decoding 过程中将其展开。
+- 使用 run rectangles（top/left/right/bottom）推断 paragraph breaks（Y deltas）、alignment（X patterns）、style 和 sizes。
+- 序列化为 HTML/EPUB，同时保留 `fontStyle`、`fontWeight`、`fontSize` 和 internal links。
 
-### 实现建议
+### Implementation tips
 
-- 在计算哈希和 SSIM 之前，将所有图像归一化为相同尺寸并转为灰度。
-- 按感知哈希进行缓存，以避免对跨批次重复字形重复计算 SSIM。
-- 使用高质量的光栅尺寸（例如 256–512 px）以获得更好的区分度；在计算 SSIM 前根据需要下采样以加速。
-- 如果使用 Pillow 渲染 TTF 候选字形，设置相同的画布尺寸并将字形居中；留白以避免截断上升/下降部分。
+- 在 hashing 和 SSIM 之前，将所有 images normalize 为相同 size 和 grayscale。
+- 按 perceptual hash 进行 cache，避免为不同 batches 中重复出现的 glyph 重新计算 SSIM。
+- 使用高质量的 raster size（例如 256–512 px）以提高 discrimination；在进行 SSIM 前根据需要 downscale，以加快处理速度。
+- 如果使用 Pillow 渲染 TTF candidates，请设置相同的 canvas size 并将 glyph 居中；增加 padding，避免 ascenders/descenders 被裁剪。
 
 <details>
-<summary>Python: 端到端字形归一化与匹配（raster hash + SSIM）</summary>
+<summary>Python：end-to-end glyph normalization 和 matching（raster hash + SSIM）</summary>
 ```python
 # pip install cairosvg pillow imagehash scikit-image uharfbuzz freetype-py
 import io, json, tarfile, base64, math
@@ -222,41 +222,41 @@ return out_runs
 ```
 </details>
 
-## Layout/EPUB reconstruction heuristics
+## Layout/EPUB 重构启发式方法
 
-- Paragraph breaks: 如果下一个 run 的 top Y 超过上一行 baseline 一个阈值（相对于字体大小），则开始新段落。
-- Alignment: 通过相似的 left X 将左对齐段落分组；通过对称的边距检测居中行；通过右边缘检测右对齐。
-- Styling: 通过 `fontStyle`/`fontWeight` 保留斜体/粗体；按 `fontSize` 桶划分 CSS 类以近似区分标题和正文。
-- Links: 如果 runs 包含链接元数据（例如 `positionId`），则生成锚点和内部 href。
+- 段落断开：如果下一 run 的顶部 Y 坐标超过上一行基线一定阈值（相对于 font size），则开始新段落。<sup>[[1]](#references)</sup>
+- 对齐方式：通过相近的左侧 X 坐标对左对齐段落进行分组；通过对称边距检测居中行；通过右侧边缘检测右对齐。
+- 样式：通过 `fontStyle`/`fontWeight` 保留 italic/bold；根据 `fontSize` 分桶改变 CSS classes，以近似区分标题和正文。
+- Links：如果 runs 包含 link metadata（例如 `positionId`），则生成 anchors 和内部 hrefs。
 
-## Mitigating SVG anti-scraping path tricks
+## 缓解 SVG anti-scraping path tricks
 
-- 使用填充路径并设置 `fill-rule: nonzero`，以及合适的 renderer（CairoSVG, resvg）。不要依赖路径标记规范化。
-- 避免 stroke 渲染；专注于填充实心以绕过由微小相对移动引起的发丝状伪影。
-- 在每次渲染中保持稳定的 viewBox，以便相同形状在不同批次中光栅化一致。
+- 使用带有 `fill-rule: nonzero` 的 filled paths 和合适的 renderer（CairoSVG、resvg）。不要依赖 path token normalization。<sup>[[1]](#references)</sup>
+- 避免 stroke rendering；专注于 filled solids，以绕过由微小相对移动导致的 hairline artifacts。
+- 为每次 render 保持稳定的 viewBox，确保相同 shapes 在不同 batches 中以一致方式 rasterize。
 
-## Performance notes
+## 性能注意事项
 
-- 在实践中，书籍通常收敛到几百个唯一字形（例如包含连字约 ~361 个）。通过感知哈希缓存 SSIM 结果。
-- 初次发现后，后续批次主要重用已知哈希；解码过程变为 I/O 受限。
-- 平均 SSIM ≈0.95 是强信号；考虑将低得分匹配标记为人工复查。
+- 实际上，books 通常会收敛到几百个 unique glyphs（例如包括 ligatures 在内约 361 个）。通过 perceptual hash 缓存 SSIM 结果。<sup>[[1]](#references)</sup>
+- 初始 discovery 之后，后续 batches 主要会重复使用已知 hashes；decoding 会变成 I/O-bound。
+- 平均 SSIM ≈0.95 是强信号；可以考虑将低分匹配标记为 manual review。
 
-## Generalization to other viewers
+## 对其他 viewers 的泛化
 
-任何满足以下条件的系统：
-- 返回带有请求作用域数字 ID 的定位字形 runs
-- 每次请求下发向量字形（SVG paths 或子集字体）
-- 限制每次请求的页面数以防止批量导出
+任何满足以下条件的 system：<sup>[[1]](#references)</sup>
+- 返回带有 request-scoped numeric IDs 的 positioned glyph runs
+- 为每个 request 提供 vector glyphs（SVG paths 或 subset fonts）
+- 限制每个 request 的 pages 数量以防止 bulk export
 
-…都可以用相同的规范化方法处理：
-- 对每次请求的形状进行光栅化 → 感知哈希 → shape ID
-- 为每个字体变体构建候选字形/连字图谱
-- 使用 SSIM（或类似的感知度量）分配字符
-- 从 run 的矩形/样式重构版面
+……都可以通过相同的 normalization 处理：
+- 将 per-request shapes rasterize → perceptual hash → shape ID
+- 为每种 font variant 建立 candidate glyphs/ligatures 的 atlas
+- 使用 SSIM（或类似的 perceptual metric）分配 characters
+- 根据 run rectangles/styles 重构 layout
 
-## Minimal acquisition example (sketch)
+## 最小 acquisition 示例（sketch）
 
-使用浏览器的 DevTools 捕获 reader 在请求 `/renderer/render` 时使用的精确 headers、cookies 和 tokens。然后在脚本或 curl 中复现这些。示例大纲：
+使用浏览器的 DevTools 捕获 reader 请求 `/renderer/render` 时使用的确切 headers、cookies 和 tokens。然后通过 script 或 curl 复现这些请求。<sup>[[1]](#references)</sup> 示例大纲：
 ```bash
 curl 'https://read.amazon.com/renderer/render' \
 -H 'Cookie: session-id=...; at-main=...; sess-at-main=...' \
@@ -266,19 +266,19 @@ curl 'https://read.amazon.com/renderer/render' \
 -H 'Accept: application/x-tar' \
 --compressed --output batch_000.tar
 ```
-根据读者的请求调整参数化（book ASIN、page window、viewport）。请注意每次请求上限为 5 页。
+调整参数化设置（书籍 ASIN、页面窗口、viewport）以匹配读者请求。每次请求最多处理 5 页。
 
-## 可达成的结果
+## 可实现的结果
 
-- 通过 perceptual hashing 将 100 多个随机化字母表折叠到单一字形空间
-- 当字体图集包含连字和变体时，唯一字形可实现 100% 映射，平均 SSIM 约为 0.95
-- 重建后的 EPUB/HTML 在视觉上与原始文件无法区分
+- 通过 perceptual hashing<sup>[[1]](#references)</sup> 将 100 多种随机化 alphabet 压缩到单一 glyph 空间
+- 当 atlas 包含 ligatures 和 variants 时，实现 100% 的 unique glyph 映射，平均 SSIM 约为 0.95
+- 重建的 EPUB/HTML 在视觉上与原始版本无法区分
 
-## 参考资料
+## References
 
-- [Kindle Web DRM: Breaking Randomized SVG Glyph Obfuscation with Raster Hashing + SSIM (Pixelmelt blog)](https://blog.pixelmelt.dev/kindle-web-drm/)
-- [CairoSVG – SVG to PNG renderer](https://cairosvg.org/)
-- [imagehash – Perceptual image hashing (pHash)](https://pypi.org/project/ImageHash/)
-- [scikit-image – Structural Similarity Index (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
+- [1] [Kindle Web DRM: 使用 Raster Hashing + SSIM 破解随机化 SVG Glyph Obfuscation（Pixelmelt blog）](https://blog.pixelmelt.dev/kindle-web-drm/)
+- [2] [CairoSVG – SVG to PNG renderer](https://cairosvg.org/)
+- [3] [imagehash – Perceptual image hashing (pHash)](https://pypi.org/project/ImageHash/)
+- [4] [scikit-image – Structural Similarity Index (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,18 +1,18 @@
-# Suricata & Iptables cheatsheet
+# Suricata & Iptables 速查表
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Iptables
 
-### Chains
+### 链
 
-在iptables中，称为链的规则列表是按顺序处理的。在这些链中，三条主要链是普遍存在的，额外的链如NAT可能会根据系统的能力得到支持。
+在 iptables 中，称为链的规则列表会按顺序进行处理。其中，三个主要链始终存在；根据系统功能，可能还支持 NAT 等其他链。
 
-- **Input Chain**: 用于管理传入连接的行为。
-- **Forward Chain**: 用于处理不指向本地系统的传入连接。这对于充当路由器的设备是典型的，其中接收到的数据旨在转发到另一个目的地。当系统参与路由、NAT或类似活动时，这条链是相关的。
-- **Output Chain**: 专用于调节传出连接。
+- **输入链**：用于管理传入连接的行为。
+- **转发链**：用于处理并非发往本地系统的传入连接。这通常适用于充当路由器的设备，因为接收到的数据需要转发到其他目标。此链主要在系统参与路由、NAT 或类似活动时发挥作用。
+- **输出链**：专用于管理传出连接。
 
-这些链确保网络流量的有序处理，允许指定详细规则来管理数据流入、流经和流出系统的方式。
+这些链确保网络流量得到有序处理，从而能够制定详细规则，控制数据流入、经过和流出系统的过程。
 ```bash
 # Delete all rules
 iptables -F
@@ -119,68 +119,68 @@ systemctl daemon-reload
 ```
 ### 规则定义
 
-[来自文档：](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) 一条规则/签名由以下部分组成：
+[From the docs:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) 一条规则/签名由以下部分组成：
 
-- **动作**，决定当签名匹配时发生什么。
-- **头部**，定义规则的协议、IP地址、端口和方向。
-- **规则选项**，定义规则的具体细节。
+- **操作**，决定签名匹配时会发生什么。
+- **标头**，定义规则的协议、IP 地址、端口和方向。
+- **规则选项**，定义规则的具体内容。
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
-#### **有效的操作是**
+#### **有效的 actions 包括**
 
-- alert - 生成警报
+- alert - 生成 alert
 - pass - 停止对数据包的进一步检查
-- **drop** - 丢弃数据包并生成警报
-- **reject** - 向匹配数据包的发送者发送 RST/ICMP 不可达错误。
+- **drop** - 丢弃数据包并生成 alert
+- **reject** - 向匹配数据包的发送方发送 RST/ICMP unreachable error。
 - rejectsrc - 与 _reject_ 相同
-- rejectdst - 向匹配数据包的接收者发送 RST/ICMP 错误数据包。
-- rejectboth - 向对话的双方发送 RST/ICMP 错误数据包。
+- rejectdst - 向匹配数据包的接收方发送 RST/ICMP error 数据包。
+- rejectboth - 向通信双方发送 RST/ICMP error 数据包。
 
-#### **协议**
+#### **Protocols**
 
-- tcp (用于 tcp 流量)
+- tcp (用于 tcp-traffic)
 - udp
 - icmp
-- ip (ip 代表“所有”或“任何”)
-- _layer7 协议_: http, ftp, tls, smb, dns, ssh... (更多内容见 [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+- ip (ip 表示“全部”或“任意”)
+- _layer7 protocols_: http, ftp, tls, smb, dns, ssh...（更多内容请参阅[**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html)）
 
 #### 源地址和目标地址
 
 它支持 IP 范围、否定和地址列表：
 
-| 示例                         | 意义                                    |
-| ---------------------------- | --------------------------------------- |
-| ! 1.1.1.1                    | 除 1.1.1.1 以外的所有 IP 地址            |
-| !\[1.1.1.1, 1.1.1.2]         | 除 1.1.1.1 和 1.1.1.2 以外的所有 IP 地址 |
-| $HOME_NET                    | 您在 yaml 中设置的 HOME_NET             |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET 和非 HOME_NET              |
-| \[10.0.0.0/24, !10.0.0.5]    | 10.0.0.0/24，除了 10.0.0.5              |
+| 示例                          | 含义                                  |
+| ----------------------------- | ------------------------------------- |
+| ! 1.1.1.1                     | 除 1.1.1.1 外的所有 IP 地址           |
+| !\[1.1.1.1, 1.1.1.2]          | 除 1.1.1.1 和 1.1.1.2 外的所有 IP 地址 |
+| $HOME_NET                     | yaml 中对 HOME_NET 的设置             |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET 而非 HOME_NET             |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24，但不包括 10.0.0.5        |
 
 #### 源端口和目标端口
 
-它支持端口范围、否定和端口列表
+它支持端口范围、否定和端口列表：
 
-| 示例           | 意义                                  |
-| -------------- | ------------------------------------- |
-| any            | 任何地址                              |
-| \[80, 81, 82]  | 端口 80、81 和 82                     |
-| \[80: 82]      | 从 80 到 82 的范围                    |
-| \[1024: ]      | 从 1024 到最高端口号                  |
-| !80            | 除 80 以外的所有端口                  |
-| \[80:100,!99]  | 从 80 到 100 的范围，但排除 99       |
-| \[1:80,!\[2,4]] | 从 1 到 80 的范围，除了端口 2 和 4    |
+| 示例            | 含义                              |
+| --------------- | --------------------------------- |
+| any             | 任意地址                          |
+| \[80, 81, 82]   | 端口 80、81 和 82                 |
+| \[80: 82]       | 从 80 到 82 的范围                |
+| \[1024: ]       | 从 1024 到最高端口号               |
+| !80             | 除 80 外的所有端口                |
+| \[80:100,!99]   | 从 80 到 100 的范围，但不包括 99   |
+| \[1:80,!\[2,4]] | 从 1 到 80 的范围，但不包括端口 2 和 4 |
 
 #### 方向
 
-可以指示所应用的通信规则的方向：
+可以指示所应用通信规则的方向：
 ```
 source -> destination
 source <> destination  (both directions)
 ```
 #### 关键词
 
-在 Suricata 中有 **数百种选项** 可用于搜索您所寻找的 **特定数据包**，如果发现有趣的内容，这里会提到。请查看 [**文档**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)以获取更多信息！
+Suricata 中有**数百种选项**可用于搜索你正在寻找的**特定数据包**，如果发现有趣的内容，这里会对其进行说明。请查看[**文档** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)了解更多信息！
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule

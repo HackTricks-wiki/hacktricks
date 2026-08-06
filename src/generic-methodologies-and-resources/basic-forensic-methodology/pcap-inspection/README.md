@@ -1,27 +1,28 @@
-# Pcap Inspection
+# Pcap 检查
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> 关于 **PCAP** 与 **PCAPNG** 的说明：PCAP 文件格式有两个版本；**PCAPNG 是较新的，并不是所有工具都支持**。您可能需要使用 Wireshark 或其他兼容工具将文件从 PCAPNG 转换为 PCAP，以便在某些其他工具中使用。
+> 关于 **PCAP** 与 **PCAPNG** 的说明：PCAP 文件格式有两个版本；**PCAPNG 更新，但并非所有工具都支持**。你可能需要使用 Wireshark 或其他兼容工具将文件从 PCAPNG 转换为 PCAP，才能在某些其他工具中处理它。
 
-## 在线工具用于 pcaps
+## 用于 pcap 的在线工具
 
-- 如果您的 pcap 的 **头部**是 **损坏的**，您应该尝试使用：[http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php) **修复**它
-- 在 [**PacketTotal**](https://packettotal.com) 中提取 **信息** 并搜索 pcap 内的 **恶意软件**
-- 使用 [**www.virustotal.com**](https://www.virustotal.com) 和 [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com) 搜索 **恶意活动**
-- 在 [**https://apackets.com/**](https://apackets.com/) 中 **从浏览器进行完整的 pcap 分析**
+- 如果你的 pcap 文件头**损坏**，应尝试使用以下工具**修复**： [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
+- 在 [**PacketTotal**](https://packettotal.com) 中提取 pcap 内的**信息**并搜索**malware**
+- 使用 [**www.virustotal.com**](https://www.virustotal.com) 和 [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com) 搜索**恶意活动**
+- [**https://apackets.com/**](https://apackets.com/) 中的**浏览器内完整 pcap 分析**
 
 ## 提取信息
 
-以下工具对于提取统计信息、文件等非常有用。
+以下工具可用于提取统计信息、文件等。
 
 ### Wireshark
 
 > [!TIP]
-> **如果您要分析 PCAP，您基本上必须知道如何使用 Wireshark**
+> **如果你要分析 PCAP，基本上必须了解如何使用 Wireshark**
 
-您可以在以下位置找到一些 Wireshark 技巧：
+你可以在以下位置找到一些 Wireshark 技巧：
+
 
 {{#ref}}
 wireshark-tricks.md
@@ -29,11 +30,11 @@ wireshark-tricks.md
 
 ### [**https://apackets.com/**](https://apackets.com/)
 
-从浏览器进行 pcap 分析。
+在浏览器中进行 Pcap 分析。
 
 ### Xplico Framework
 
-[**Xplico** ](https://github.com/xplico/xplico)_(仅限 linux)_ 可以 **分析** 一个 **pcap** 并从中提取信息。例如，从一个 pcap 文件中，Xplico 提取每封电子邮件（POP、IMAP 和 SMTP 协议）、所有 HTTP 内容、每个 VoIP 通话（SIP）、FTP、TFTP 等。
+[**Xplico** ](https://github.com/xplico/xplico)_(仅限 linux)_ 可以**分析** **pcap** 并从中提取信息。例如，对于 pcap 文件，Xplico 可以提取每封电子邮件（POP、IMAP 和 SMTP 协议）、所有 HTTP 内容、每个 VoIP 通话（SIP）、FTP、TFTP 等。
 
 **安装**
 ```bash
@@ -49,26 +50,26 @@ sudo apt-get install xplico
 ```
 访问 _**127.0.0.1:9876**_，使用凭据 _**xplico:xplico**_
 
-然后创建一个 **新案例**，在案例中创建一个 **新会话** 并 **上传 pcap** 文件。
+然后创建一个**新 case**，在该 case 中创建一个**新 session**，并**上传 pcap**文件。
 
 ### NetworkMiner
 
-像 Xplico 一样，它是一个 **分析和提取 pcaps 中对象** 的工具。它有一个免费版，你可以 **下载** [**这里**](https://www.netresec.com/?page=NetworkMiner)。它适用于 **Windows**。\
-这个工具也有助于从数据包中获取 **其他信息分析**，以便能够更 **快速** 地了解发生了什么。
+与 Xplico 一样，它是一个用于**分析和从 pcap 中提取对象**的工具。它提供免费版本，可从[**此处下载**](https://www.netresec.com/?page=NetworkMiner)。它适用于 **Windows**。\
+该工具还可用于从数据包中获取经过**分析的其他信息**，从而以**更快的方式**了解发生了什么。
 
 ### NetWitness Investigator
 
-你可以从 [**这里下载 NetWitness Investigator**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **（它适用于 Windows）**。\
-这是另一个有用的工具，**分析数据包** 并以有用的方式整理信息，以 **了解内部发生的事情**。
+你可以[**从此处下载 NetWitness Investigator**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware)，**（适用于 Windows）**。\
+这是另一个有用的工具，可以**分析数据包**，并以有用的方式整理信息，从而**了解内部正在发生什么**。
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-- 提取和编码用户名和密码（HTTP、FTP、Telnet、IMAP、SMTP...）
-- 提取身份验证哈希并使用 Hashcat 破解它们（Kerberos、NTLM、CRAM-MD5、HTTP-Digest...）
+- 提取并编码用户名和密码（HTTP、FTP、Telnet、IMAP、SMTP...）
+- 提取 authentication hashes，并使用 Hashcat 破解（Kerberos、NTLM、CRAM-MD5、HTTP-Digest...）
 - 构建可视化网络图（网络节点和用户）
-- 提取 DNS 查询
-- 重建所有 TCP 和 UDP 会话
-- 文件雕刻
+- 提取 DNS queries
+- 重建所有 TCP 和 UDP Sessions
+- File Carving
 
 ### Capinfos
 ```
@@ -76,27 +77,28 @@ capinfos capture.pcap
 ```
 ### Ngrep
 
-如果您在 pcap 中**寻找**某些**东西**，可以使用**ngrep**。以下是使用主要过滤器的示例：
+如果你正在 **查找** pcap 中的 **某些内容**，可以使用 **ngrep**。以下是一个使用主要过滤器的示例：
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
-### Carving
+### 文件雕刻
 
-使用常见的雕刻技术可以从 pcap 中提取文件和信息：
+使用常见的 carving 技术可以从 pcap 中提取文件和信息：
+
 
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Capturing credentials
+### 捕获凭据
 
-您可以使用工具如 [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) 从 pcap 或实时接口中解析凭据。
+你可以使用 [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) 等工具，从 pcap 或实时接口中解析凭据。
 
-## Check Exploits/Malware
+## 检查 Exploits/Malware
 
 ### Suricata
 
-**Install and setup**
+**安装和设置**
 ```
 apt-get install suricata
 apt-get install oinkmaster
@@ -109,17 +111,18 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) 是一个工具，可以
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) 是一个工具，可以：
 
-- 读取 PCAP 文件并提取 Http 流。
-- gzip 解压任何压缩流
+- 读取 PCAP File 并提取 Http Streams。
+- 对任何压缩的 streams 进行 gzip 解压
 - 使用 yara 扫描每个文件
 - 写入 report.txt
-- 可选地将匹配的文件保存到目录
+- 可选地将匹配的文件保存到一个 Dir
 
-### 恶意软件分析
+### Malware Analysis
 
-检查您是否可以找到已知恶意软件的任何指纹：
+检查是否可以找到任何已知 malware 的特征：
+
 
 {{#ref}}
 ../malware-analysis.md
@@ -127,11 +130,11 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) 是一个被动的开源网络流量分析器。许多操作员使用 Zeek 作为网络安全监控器 (NSM) 来支持对可疑或恶意活动的调查。Zeek 还支持广泛的流量分析任务，超出安全领域，包括性能测量和故障排除。
+> [Zeek](https://docs.zeek.org/en/master/about.html) 是一个被动式、开源的网络流量分析器。许多 operator 使用 Zeek 作为 Network Security Monitor (NSM)，以支持对可疑或恶意活动的调查。Zeek 还支持 security domain 之外的广泛流量分析任务，包括性能测量和故障排除。
 
-基本上，`zeek` 创建的日志不是 **pcaps**。因此，您需要使用 **其他工具** 来分析包含 **pcaps 信息** 的日志。
+基本上，`zeek` 创建的日志并不是 **pcaps**。因此，你需要使用 **其他工具** 来分析包含有关 pcaps 的 **信息** 的日志。
 
-### 连接信息
+### Connections Info
 ```bash
 #Get info about longest connections (add "grep udp" to see only udp traffic)
 #The longest connection might be of malware (constant reverse shell?)
@@ -214,7 +217,5 @@ wifi-pcap-analysis.md
 {{#ref}}
 usb-keystrokes.md
 {{#endref}}
-
-​
 
 {{#include ../../../banners/hacktricks-training.md}}

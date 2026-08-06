@@ -2,84 +2,84 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## 通用 Windows 伪影
+## 通用 Windows Artifacts
 
 ### Windows 10 通知
 
-在路径 `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` 中，您可以找到数据库 `appdb.dat`（在 Windows 周年更新之前）或 `wpndatabase.db`（在 Windows 周年更新之后）。
+在路径 `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` 中，可以找到数据库 `appdb.dat`（Windows anniversary 之前）或 `wpndatabase.db`（Windows Anniversary 之后）。
 
-在这个 SQLite 数据库中，您可以找到 `Notification` 表，里面包含所有的通知（以 XML 格式），可能包含有趣的数据。
+在这个 SQLite 数据库中，可以找到包含所有通知的 `Notification` 表，这些通知采用 XML 格式，可能包含有价值的数据。
 
 ### 时间线
 
-时间线是 Windows 的一个特性，提供 **访问过的网页、编辑的文档和执行的应用程序的时间顺序历史**。
+Timeline 是 Windows 的一项特性，提供网页访问、文档编辑和应用程序执行的**时间顺序历史记录**。
 
-数据库位于路径 `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`。这个数据库可以用 SQLite 工具打开，或者用工具 [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **生成的 2 个文件，这些文件可以用工具** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md) **打开**。
+数据库位于路径 `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`。可以使用 SQLite 工具打开此数据库，也可以使用工具 [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) 打开；该工具**会生成 2 个可使用工具** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md) **打开的文件**。
 
-### ADS（备用数据流）
+### ADS (Alternate Data Streams)
 
-下载的文件可能包含 **ADS Zone.Identifier**，指示 **它是如何** 从内网、互联网等 **下载的**。一些软件（如浏览器）通常会提供更多的信息，例如文件下载的 **URL**。
+下载的文件可能包含 **ADS Zone.Identifier**，用于指示文件是从内联网、互联网等位置**如何下载**的。某些软件（如浏览器）通常还会写入**更多**信息，例如文件下载来源的 **URL**。
 
 ## **文件备份**
 
 ### 回收站
 
-在 Vista/Win7/Win8/Win10 中，**回收站** 可以在驱动器根目录的文件夹 **`$Recycle.bin`** 中找到（`C:\$Recycle.bin`）。\
-当在此文件夹中删除文件时，会创建 2 个特定文件：
+在 Vista/Win7/Win8/Win10 中，可以在驱动器根目录的文件夹 **`$Recycle.bin`** 中找到 **Recycle Bin**（`C:\$Recycle.bin`）。\
+当文件在此文件夹中被删除时，会创建 2 个特定文件：
 
-- `$I{id}`: 文件信息（删除日期}
-- `$R{id}`: 文件内容
+- `$I{id}`：文件信息（删除日期}
+- `$R{id}`：文件内容
 
-![](<../../../images/image (1029).png>)
+![文件备份 - 回收站：$R{id}：文件内容](<../../../images/image (1029).png>)
 
-拥有这些文件后，您可以使用工具 [**Rifiuti**](https://github.com/abelcheung/rifiuti2) 获取已删除文件的原始地址和删除日期（使用 `rifiuti-vista.exe` 适用于 Vista – Win10）。
+有了这些文件，可以使用工具 [**Rifiuti**](https://github.com/abelcheung/rifiuti2) 获取已删除文件的原始路径和删除日期（Vista – Win10 请使用 `rifiuti-vista.exe`）。
 ```
 .\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
 ```
-![](<../../../images/image (495) (1) (1) (1).png>)
+![File Backups - Recycle Bin: rifiuti-vista.exe C: Users student Desktop Recycle](<../../../images/image (495) (1) (1) (1).png>)
 
-### 卷影复制
+### Volume Shadow Copies
 
-卷影复制是微软Windows中包含的一项技术，可以创建计算机文件或卷的**备份副本**或快照，即使在使用时也可以。
+Shadow Copy 是 Microsoft Windows 中包含的一项技术，可以创建计算机文件或卷的**备份副本**或快照，即使这些文件或卷正在使用中。
 
-这些备份通常位于文件系统根目录下的 `\System Volume Information` 中，名称由以下图像中显示的**UIDs**组成：
+这些备份通常位于文件系统根目录下的 `\System Volume Information` 中，其名称由以下图像中显示的 **UIDs** 组成：
 
-![](<../../../images/image (94).png>)
+![Recycle Bin - Volume Shadow Copies: 这些备份通常位于文件系统根目录下的 System Volume Information 中，其名称由图中显示的 UIDs 组成](<../../../images/image (94).png>)
 
-使用**ArsenalImageMounter**挂载取证镜像后，可以使用工具 [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) 检查卷影复制，甚至**提取文件**。
+使用 **ArsenalImageMounter** 挂载 forensics image 后，可以使用 [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) 检查 shadow copy，甚至从 shadow copy 备份中**提取文件**。
 
-![](<../../../images/image (576).png>)
+![Recycle Bin - Volume Shadow Copies: 使用 ArsenalImageMounter 挂载 forensics image 后，可以使用 ShadowCopyView 检查 shadow copy，甚至从 shadow copy 备份中提取文件](<../../../images/image (576).png>)
 
-注册表项 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` 包含**不备份**的文件和键：
+注册表项 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` 包含**不进行备份**的文件和键：
 
-![](<../../../images/image (254).png>)
+![Recycle Bin - Volume Shadow Copies: 注册表项 HKEY LOCAL MACHINE SYSTEM CurrentControlSet Control BackupRestore 包含不进行备份的文件和键](<../../../images/image (254).png>)
 
-注册表 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` 还包含有关 `卷影复制` 的配置信息。
+注册表 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` 也包含有关 `Volume Shadow Copies` 的配置信息。
 
-### Office 自动保存文件
+### Office AutoSaved Files
 
-您可以在以下位置找到Office自动保存的文件： `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
+可以在以下位置找到 Office 自动保存的文件：`C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
 
-## Shell 项
+## Shell Items
 
-Shell 项是包含有关如何访问另一个文件的信息的项。
+Shell item 是包含如何访问其他文件相关信息的项目。
 
-### 最近文档 (LNK)
+### Recent Documents (LNK)
 
-Windows **自动** **创建** 这些 **快捷方式** 当用户 **打开、使用或创建文件** 时，位置如下：
+当用户在以下位置**打开、使用或创建文件**时，Windows 会**自动**创建这些**快捷方式**：
 
 - Win7-Win10: `C:\Users\\AppData\Roaming\Microsoft\Windows\Recent\`
 - Office: `C:\Users\\AppData\Roaming\Microsoft\Office\Recent\`
 
-当创建文件夹时，还会创建指向该文件夹、父文件夹和祖父文件夹的链接。
+创建文件夹时，还会创建指向该文件夹、父文件夹和祖父文件夹的链接。
 
-这些自动创建的链接文件**包含有关来源的信息**，例如它是一个**文件** **还是**一个**文件夹**，该文件的**MAC** **时间**，文件存储的**卷信息**以及**目标文件的文件夹**。这些信息在文件被删除的情况下可以用于恢复这些文件。
+这些自动创建的链接文件**包含有关源的信息**，例如它是**文件**还是**文件夹**、该文件的 **MAC** **时间**、文件存储位置的**卷信息**以及**目标文件所在的文件夹**。如果这些文件已被删除，这些信息有助于恢复它们。
 
-此外，链接文件的**创建日期**是原始文件**首次** **使用**的**时间**，而链接文件的**修改日期**是原始文件**最后** **使用**的**时间**。
+此外，链接文件的**创建日期**是原始文件**首次被使用**的**时间**，而链接文件的**修改日期**是源文件最后一次被使用的**时间**。
 
-要检查这些文件，您可以使用 [**LinkParser**](http://4discovery.com/our-tools/)。
+可以使用 [**LinkParser**](http://4discovery.com/our-tools/) 检查这些文件。
 
-在此工具中，您将找到**2组**时间戳：
+在此工具中，可以找到 **2 组**时间戳：
 
 - **第一组：**
 1. FileModifiedDate
@@ -88,406 +88,410 @@ Windows **自动** **创建** 这些 **快捷方式** 当用户 **打开、使�
 - **第二组：**
 1. LinkModifiedDate
 2. LinkAccessDate
-3. LinkCreationDate。
+3. LinkCreationDate.
 
-第一组时间戳引用的是**文件本身的时间戳**。第二组引用的是**链接文件的时间戳**。
+第一组时间戳引用**文件本身的时间戳**。第二组引用**链接文件的时间戳**。
 
-您可以通过运行Windows CLI工具 [**LECmd.exe**](https://github.com/EricZimmerman/LECmd) 获取相同的信息。
+也可以运行 Windows CLI 工具获取相同的信息：[**LECmd.exe**](https://github.com/EricZimmerman/LECmd)
 ```
 LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 ```
-在这种情况下，信息将保存在 CSV 文件中。
+在这种情况下，信息将保存到 CSV 文件中。
 
 ### Jumplists
 
-这些是每个应用程序指示的最近文件。它是 **应用程序使用的最近文件列表**，您可以在每个应用程序中访问。它们可以 **自动创建或自定义**。
+这些是每个应用程序所记录的最近文件。它们是**应用程序最近使用的文件列表**，你可以在每个应用程序中访问这些文件。它们可以**自动创建，也可以自定义创建**。
 
-自动创建的 **jumplists** 存储在 `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`。jumplists 的命名格式为 `{id}.autmaticDestinations-ms`，其中初始 ID 是应用程序的 ID。
+自动创建的 **jumplists** 存储在 `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\` 中。jumplists 按照 `{id}.autmaticDestinations-ms` 格式命名，其中开头的 ID 是应用程序的 ID。
 
-自定义的 jumplists 存储在 `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\`，通常是因为文件发生了某些 **重要** 事件（可能被标记为收藏）。
+自定义 jumplists 存储在 `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` 中，通常由应用程序创建，因为文件发生了某些**重要事件**（可能被标记为收藏）。
 
-任何 jumplist 的 **创建时间** 表示 **文件首次访问的时间**，**修改时间为最后一次**。
+任何 jumplist 的**创建时间**表示**文件首次被访问的时间**，而**修改时间表示最后一次访问的时间**。
 
-您可以使用 [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md) 检查 jumplists。
+你可以使用 [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md) 检查 jumplists。
 
-![](<../../../images/image (168).png>)
+![Recent Documents (LNK) - Jumplists: You can inspect the jumplists using JumplistExplorer](<../../../images/image (168).png>)
 
 （_请注意，JumplistExplorer 提供的时间戳与 jumplist 文件本身相关_）
 
 ### Shellbags
 
-[**点击此链接了解什么是 shellbags。**](interesting-windows-registry-keys.md#shellbags)
+[**点击此链接了解 shellbags。**](interesting-windows-registry-keys.md#shellbags)
 
-## 使用 Windows USB
+## Windows USB 的使用情况
 
-可以通过以下方式识别 USB 设备的使用：
+通过以下内容的创建，可以确定某个 USB 设备曾被使用：
 
 - Windows Recent Folder
 - Microsoft Office Recent Folder
 - Jumplists
 
-请注意，一些 LNK 文件不是指向原始路径，而是指向 WPDNSE 文件夹：
+请注意，某些 LNK 文件并不指向原始路径，而是指向 WPDNSE 文件夹：
 
-![](<../../../images/image (218).png>)
+![Shellbags - Use of Windows USBs: Note that some LNK file instead of pointing to the original path, points to the WPDNSE folder](<../../../images/image (218).png>)
 
-WPDNSE 文件夹中的文件是原始文件的副本，因此在 PC 重启后不会保留，GUID 是从 shellbag 中获取的。
+WPDNSE 文件夹中的文件是原始文件的副本，因此在 PC 重启后不会保留，并且 GUID 取自 shellbag。
 
-### 注册表信息
+### Registry Information
 
-[查看此页面以了解](interesting-windows-registry-keys.md#usb-information) 哪些注册表键包含有关连接的 USB 设备的有趣信息。
+[查看此页面](interesting-windows-registry-keys.md#usb-information)，了解哪些 registry keys 包含有关已连接 USB 设备的有用信息。
 
 ### setupapi
 
-检查文件 `C:\Windows\inf\setupapi.dev.log` 以获取 USB 连接产生的时间戳（搜索 `Section start`）。
+检查文件 `C:\Windows\inf\setupapi.dev.log`，获取 USB 连接建立时的时间戳（搜索 `Section start`）。
 
-![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
+![Registry Information - setupapi: Check the file C: Windows inf setupapi.dev.log to get the timestamps about when the USB connection was produced (search for Section start)](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
 ### USB Detective
 
-[**USBDetective**](https://usbdetective.com) 可用于获取有关已连接到图像的 USB 设备的信息。
+可以使用 [**USBDetective**](https://usbdetective.com) 获取连接到某个 image 的 USB 设备信息。
 
-![](<../../../images/image (452).png>)
+![setupapi - USB Detective: USBDetective can be used to obtain information about the USB devices that have been connected to an image](<../../../images/image (452).png>)
 
 ### Plug and Play Cleanup
 
-名为“Plug and Play Cleanup”的计划任务主要用于删除过时的驱动程序版本。与其指定的保留最新驱动程序包版本的目的相反，在线来源表明它还针对过去 30 天未活动的驱动程序。因此，过去 30 天未连接的可移动设备的驱动程序可能会被删除。
+名为“Plug and Play Cleanup”的 scheduled task 主要用于删除过时的 driver 版本。与其所声明的保留最新 driver package 版本的用途相反，online sources 表明它还会针对超过 30 天未处于活动状态的 drivers。因此，过去 30 天内未连接的 removable devices 的 drivers 可能会被删除。<sup>[[1]](#references)</sup>
 
-该任务位于以下路径：`C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`。
+该 task 位于以下路径：`C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`。
 
-提供了任务内容的屏幕截图： ![](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
+以下 screenshot 展示了该 task 的内容：![USB Detective - Plug and Play Cleanup: The task is located at the following path: C: Windows System32 Tasks Microsoft Windows Plug and Play Plug and Play Cleanup](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
 
-**任务的关键组件和设置：**
+**该 Task 的关键组件和设置：**
 
-- **pnpclean.dll**：此 DLL 负责实际的清理过程。
-- **UseUnifiedSchedulingEngine**：设置为 `TRUE`，表示使用通用任务调度引擎。
+- **pnpclean.dll**：此 DLL 负责实际的 cleanup process。
+- **UseUnifiedSchedulingEngine**：设置为 `TRUE`，表示使用 generic task scheduling engine。
 - **MaintenanceSettings**：
-- **Period ('P1M')**：指示任务调度程序在常规自动维护期间每月启动清理任务。
-- **Deadline ('P2M')**：指示任务调度程序，如果任务连续两个月失败，则在紧急自动维护期间执行该任务。
+- **Period ('P1M')**：指示 Task Scheduler 在定期 Automatic maintenance 期间每月启动 cleanup task。
+- **Deadline ('P2M')**：如果 task 连续两个月失败，则指示 Task Scheduler 在 emergency Automatic maintenance 期间执行该 task。
 
-此配置确保定期维护和清理驱动程序，并在连续失败的情况下重新尝试任务。
+此配置确保定期维护和 cleanup drivers，并在连续失败时重新尝试执行该 task。
 
-**有关更多信息，请查看：** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
+**更多信息请查看：** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
 
-## 电子邮件
+## Emails
 
-电子邮件包含 **两个有趣的部分：电子邮件的标题和内容**。在 **标题** 中，您可以找到以下信息：
+Emails 包含**两个有用部分：headers 和 email content**。在 **headers** 中可以找到以下信息：
 
-- **谁** 发送了电子邮件（电子邮件地址、IP、重定向电子邮件的邮件服务器）
-- **何时** 发送了电子邮件
+- 发送 emails 的人（email address、IP、重定向 email 的 mail servers）
+- email 的发送时间
 
-此外，在 `References` 和 `In-Reply-To` 标头中，您可以找到消息的 ID：
+此外，在 `References` 和 `In-Reply-To` headers 中可以找到 messages 的 ID：
 
-![](<../../../images/image (593).png>)
+![Plug and Play Cleanup - Emails: When was the email sent](<../../../images/image (593).png>)
 
-### Windows Mail 应用
+### Windows Mail App
 
-此应用程序以 HTML 或文本格式保存电子邮件。您可以在 `\Users\<username>\AppData\Local\Comms\Unistore\data\3\` 的子文件夹中找到电子邮件。电子邮件以 `.dat` 扩展名保存。
+此 application 将 emails 保存为 HTML 或 text。你可以在 `\Users\<username>\AppData\Local\Comms\Unistore\data\3\` 下的子文件夹中找到 emails。emails 使用 `.dat` extension 保存。
 
-电子邮件的 **元数据** 和 **联系人** 可以在 **EDB 数据库** 中找到： `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
+emails 的 **metadata** 和 **contacts** 可以在 **EDB database** 中找到：`\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
 
-**将文件的扩展名** 从 `.vol` 更改为 `.edb`，您可以使用工具 [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) 打开它。在 `Message` 表中，您可以看到电子邮件。
+将文件的 **extension 从 `.vol` 更改为 `.edb`**，然后可以使用工具 [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) 打开它。在 `Message` table 中可以查看 emails。
 
 ### Microsoft Outlook
 
-当使用 Exchange 服务器或 Outlook 客户端时，将会有一些 MAPI 标头：
+使用 Exchange servers 或 Outlook clients 时，会存在一些 MAPI headers：
 
-- `Mapi-Client-Submit-Time`：发送电子邮件时系统的时间
-- `Mapi-Conversation-Index`：线程的子消息数量和每条消息的时间戳
-- `Mapi-Entry-ID`：消息标识符。
-- `Mappi-Message-Flags` 和 `Pr_last_Verb-Executed`：有关 MAPI 客户端的信息（消息已读？未读？已回复？重定向？不在办公室？）
+- `Mapi-Client-Submit-Time`：email 发送时系统的时间
+- `Mapi-Conversation-Index`：thread 中子 messages 的数量以及 thread 中每条 message 的 timestamp
+- `Mapi-Entry-ID`：Message identifier。
+- `Mappi-Message-Flags` 和 `Pr_last_Verb-Executed`：有关 MAPI client 的信息（message 是否已读？未读？是否已回复？是否已重定向？是否处于 out of the office 状态？）
 
-在 Microsoft Outlook 客户端中，所有发送/接收的消息、联系人数据和日历数据都存储在 PST 文件中，路径为：
+在 Microsoft Outlook client 中，所有已发送/已接收的 messages、contacts data 和 calendar data 都存储在以下位置的 PST file 中：
 
-- `%USERPROFILE%\Local Settings\Application Data\Microsoft\Outlook`（WinXP）
+- `%USERPROFILE%\Local Settings\Application Data\Microsoft\Outlook` (WinXP)
 - `%USERPROFILE%\AppData\Local\Microsoft\Outlook`
 
-注册表路径 `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` 指示正在使用的文件。
+registry path `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` 指示当前使用的文件。
 
-您可以使用工具 [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html) 打开 PST 文件。
+你可以使用工具 [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html) 打开 PST file。
 
-![](<../../../images/image (498).png>)
+![Windows Mail App - Microsoft Outlook: You can open the PST file using the tool Kernel PST Viewer](<../../../images/image (498).png>)
 
-### Microsoft Outlook OST 文件
+### Microsoft Outlook OST Files
 
-**OST 文件** 是 Microsoft Outlook 在配置为 **IMAP** 或 **Exchange** 服务器时生成的，存储与 PST 文件类似的信息。此文件与服务器同步，保留 **过去 12 个月** 的数据，最大大小为 50GB，并位于与 PST 文件相同的目录中。要查看 OST 文件，可以使用 [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html)。
+当 Microsoft Outlook 配置为使用 **IMAP** 或 **Exchange** server 时，会生成 **OST file**，其中存储的信息与 PST file 类似。此文件会与 server 同步，保留**最近 12 个月**的数据，**最大大小为 50GB**，并且位于与 PST file 相同的 directory 中。要查看 OST file，可以使用 [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html)。
 
-### 检索附件
+### Retrieving Attachments
 
-丢失的附件可能可以从以下位置恢复：
+丢失的 attachments 可能可以从以下位置恢复：
 
 - 对于 **IE10**：`%APPDATA%\Local\Microsoft\Windows\Temporary Internet Files\Content.Outlook`
-- 对于 **IE11 及以上**：`%APPDATA%\Local\Microsoft\InetCache\Content.Outlook`
+- 对于 **IE11 and above**：`%APPDATA%\Local\Microsoft\InetCache\Content.Outlook`
 
-### Thunderbird MBOX 文件
+### Thunderbird MBOX Files
 
-**Thunderbird** 使用 **MBOX 文件** 存储数据，位于 `\Users\%USERNAME%\AppData\Roaming\Thunderbird\Profiles`。
+**Thunderbird** 使用 **MBOX files** 存储 data，位置为 `\Users\%USERNAME%\AppData\Roaming\Thunderbird\Profiles`。
 
-### 图像缩略图
+### Image Thumbnails
 
-- **Windows XP 和 8-8.1**：访问带有缩略图的文件夹会生成一个 `thumbs.db` 文件，存储图像预览，即使在删除后也会保留。
-- **Windows 7/10**：通过 UNC 路径访问时会创建 `thumbs.db`。
-- **Windows Vista 及更高版本**：缩略图预览集中在 `%userprofile%\AppData\Local\Microsoft\Windows\Explorer` 中，文件名为 **thumbcache_xxx.db**。 [**Thumbsviewer**](https://thumbsviewer.github.io) 和 [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) 是查看这些文件的工具。
+- **Windows XP and 8-8.1**：访问包含 thumbnails 的 folder 会生成 `thumbs.db` file，用于存储 image previews，即使 image 已被删除。
+- **Windows 7/10**：通过 UNC path 经 network 访问时会创建 `thumbs.db`。
+- **Windows Vista and newer**：Thumbnail previews 集中存储在 `%userprofile%\AppData\Local\Microsoft\Windows\Explorer` 中，文件名为 **thumbcache_xxx.db**。[**Thumbsviewer**](https://thumbsviewer.github.io) 和 [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) 是用于查看这些文件的 tools。
 
-### Windows 注册表信息
+### Windows Registry Information
 
-Windows 注册表存储大量系统和用户活动数据，包含在以下文件中：
+Windows Registry 存储大量 system 和 user activity data，包含在以下文件中：
 
-- `%windir%\System32\Config` 用于各种 `HKEY_LOCAL_MACHINE` 子键。
-- `%UserProfile%{User}\NTUSER.DAT` 用于 `HKEY_CURRENT_USER`。
-- Windows Vista 及更高版本在 `%Windir%\System32\Config\RegBack\` 中备份 `HKEY_LOCAL_MACHINE` 注册表文件。
-- 此外，程序执行信息存储在 `%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT` 中，从 Windows Vista 和 Windows 2008 Server 开始。
+- `%windir%\System32\Config`：各种 `HKEY_LOCAL_MACHINE` subkeys。
+- `%UserProfile%{User}\NTUSER.DAT`：`HKEY_CURRENT_USER`。
+- Windows Vista 及更高版本会将 `HKEY_LOCAL_MACHINE` registry files 备份到 `%Windir%\System32\Config\RegBack\`。
+- 此外，从 Windows Vista 和 Windows 2008 Server 开始，program execution information 存储在 `%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT` 中。
 
-### 工具
+### Tools
 
-一些工具对于分析注册表文件非常有用：
+以下 tools 可用于分析 registry files：
 
-- **注册表编辑器**：它安装在 Windows 中。它是一个 GUI，用于浏览当前会话的 Windows 注册表。
-- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md)：它允许您加载注册表文件并通过 GUI 浏览它们。它还包含书签，突出显示具有有趣信息的键。
-- [**RegRipper**](https://github.com/keydet89/RegRipper3.0)：同样，它具有一个 GUI，允许浏览加载的注册表，并且还包含突出显示加载的注册表中有趣信息的插件。
-- [**Windows 注册表恢复**](https://www.mitec.cz/wrr.html)：另一个 GUI 应用程序，能够从加载的注册表中提取重要信息。
+- **Registry Editor**：Windows 自带的工具。它是一个用于浏览当前 session 的 Windows registry 的 GUI。
+- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md)：允许你加载 registry file，并通过 GUI 浏览其中内容。它还包含 Bookmarks，用于突出显示包含有用信息的 keys。
+- [**RegRipper**](https://github.com/keydet89/RegRipper3.0)：同样提供 GUI，可浏览已加载的 registry，还包含用于突出显示已加载 registry 中有用信息的 plugins。
+- [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html)：另一个能够从已加载的 registry 中提取重要信息的 GUI application。
 
-### 恢复已删除元素
+### Recovering Deleted Element
 
-当一个键被删除时，它被标记为已删除，但在占用的空间被需要之前不会被移除。因此，使用像 **Registry Explorer** 这样的工具可以恢复这些已删除的键。
+删除 key 时，它会被标记为已删除，但在其所占用的空间被需要之前不会被移除。因此，使用 **Registry Explorer** 等 tools 可以恢复这些已删除的 keys。
 
-### 最后写入时间
+### Last Write Time
 
-每个键值包含一个 **时间戳**，指示最后一次修改的时间。
+每个 Key-Value 都包含一个 **timestamp**，表示其最后一次被修改的时间。
 
 ### SAM
 
-文件/哈希 **SAM** 包含系统的 **用户、组和用户密码** 哈希。
+**SAM** file/hive 包含系统的 **users、groups 和 users passwords** hashes。
 
-在 `SAM\Domains\Account\Users` 中，您可以获取用户名、RID、最后登录、最后失败登录、登录计数、密码策略以及帐户创建时间。要获取 **哈希**，您还 **需要** 文件/哈希 **SYSTEM**。
+在 `SAM\Domains\Account\Users` 中，可以获取 username、RID、last login、last failed logon、login counter、password policy 以及 account 的创建时间。要获取 **hashes**，还**需要** **SYSTEM** file/hive。
 
-### Windows 注册表中的有趣条目
+### Interesting entries in the Windows Registry
 
 
 {{#ref}}
 interesting-windows-registry-keys.md
 {{#endref}}
 
-## 执行的程序
+## Programs Executed
 
-### 基本 Windows 进程
+### Basic Windows Processes
 
-在 [这篇文章](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) 中，您可以了解常见的 Windows 进程以检测可疑行为。
+在[这篇 post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d)中，你可以了解用于检测可疑行为的常见 Windows processes。
 
 ### Windows Recent APPs
 
-在注册表 `NTUSER.DAT` 的路径 `Software\Microsoft\Current Version\Search\RecentApps` 中，您可以找到有关 **执行的应用程序**、**最后一次** 执行的时间和 **启动次数** 的子键。
+在 registry `NTUSER.DAT` 的路径 `Software\Microsoft\Current Version\Search\RecentApps` 中，可以找到包含以下信息的 subkeys：**执行过的 application**、其**最后一次**执行时间，以及它被启动的**次数**。
 
-### BAM (后台活动调节器)
+### BAM (Background Activity Moderator)
 
-您可以使用注册表编辑器打开 `SYSTEM` 文件，在路径 `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` 中找到有关 **每个用户执行的应用程序** 的信息（注意路径中的 `{SID}`）以及 **它们执行的时间**（时间在注册表的 Data 值中）。
+你可以使用 registry editor 打开 `SYSTEM` file，然后在路径 `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` 中找到每个 user **执行过的 applications** 信息（注意路径中的 `{SID}`），以及它们的执行时间（该时间位于 registry 的 Data value 中）。
 
 ### Windows Prefetch
 
-预取是一种技术，允许计算机静默 **获取用户可能在不久的将来访问的内容所需的资源**，以便更快地访问资源。
+Prefetching 是一种技术，它允许 computer 静默地**获取显示内容所需的 resources**，这些内容是 user **可能在不久的将来访问的**，从而可以更快地访问 resources。
 
-Windows 预取由创建 **已执行程序的缓存** 组成，以便能够更快地加载它们。这些缓存作为 `.pf` 文件创建，路径为： `C:\Windows\Prefetch`。在 XP/VISTA/WIN7 中限制为 128 个文件，在 Win8/Win10 中限制为 1024 个文件。
+Windows prefetch 会创建**已执行 programs 的 caches**，以便更快地加载它们。这些 caches 会作为 `.pf` files 创建在路径 `C:\Windows\Prefetch` 中。XP/VISTA/WIN7 中限制为 128 个 files，Win8/Win10 中限制为 1024 个 files。
 
-文件名的格式为 `{program_name}-{hash}.pf`（哈希基于可执行文件的路径和参数）。在 W10 中，这些文件是压缩的。请注意，文件的存在仅表明 **该程序在某个时刻被执行**。
+文件名按照 `{program_name}-{hash}.pf` 格式创建（hash 基于 executable 的 path 和 arguments）。在 W10 中，这些 files 会被压缩。请注意，仅仅存在该 file 就表示**该 program 曾在某个时间被执行过**。
 
-文件 `C:\Windows\Prefetch\Layout.ini` 包含 **被预取文件的文件夹名称**。该文件包含 **执行次数**、**执行日期** 和 **程序打开的文件** 的信息。
+文件 `C:\Windows\Prefetch\Layout.ini` 包含**被 prefetched files 所在 folder 的名称**。该 file 包含有关**执行次数**、执行的**日期**以及 program **打开的 files** 的信息。
 
-要检查这些文件，您可以使用工具 [**PEcmd.exe**](https://github.com/EricZimmerman/PECmd):
+要检查这些 files，可以使用 tool [**PEcmd.exe**](https://github.com/EricZimmerman/PECmd)：
 ```bash
 .\PECmd.exe -d C:\Users\student\Desktop\Prefetch --html "C:\Users\student\Desktop\out_folder"
 ```
-![](<../../../images/image (315).png>)
+![BAM (Background Activity Moderator) - Windows Prefetch: PECmd.exe -d C: Users student Desktop Prefetch --html "C: Users student Desktop out folder"](<../../../images/image (315).png>)
 
 ### Superprefetch
 
-**Superprefetch** 的目标与 prefetch 相同，**通过预测将要加载的内容来更快地加载程序**。然而，它并不替代 prefetch 服务。\
-该服务将在 `C:\Windows\Prefetch\Ag*.db` 中生成数据库文件。
+**Superprefetch** 的目标与 prefetch 相同，即通过预测接下来要加载的内容来**更快地加载程序**。但是，它不会替代 prefetch service。\
+此 service 会在 `C:\Windows\Prefetch\Ag*.db` 中生成数据库文件。
 
-在这些数据库中，您可以找到 **程序的名称**、**执行次数**、**打开的文件**、**访问的卷**、**完整路径**、**时间范围** 和 **时间戳**。
+在这些数据库中，你可以找到**程序**的**名称**、**执行次数**、已**打开的文件**、已访问的**卷**、**完整路径**、**时间范围**和**时间戳**。
 
-您可以使用工具 [**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/) 访问这些信息。
+你可以使用工具 [**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/) 访问这些信息。
 
 ### SRUM
 
-**系统资源使用监视器** (SRUM) **监视** **进程消耗的资源**。它出现在 W8 中，并将数据存储在位于 `C:\Windows\System32\sru\SRUDB.dat` 的 ESE 数据库中。
+**System Resource Usage Monitor**（SRUM）会**监控**某个**进程**所**消耗的资源**。它出现在 W8 中，并将数据存储在位于 `C:\Windows\System32\sru\SRUDB.dat` 的 ESE 数据库中。
 
 它提供以下信息：
 
 - AppID 和路径
 - 执行该进程的用户
-- 发送的字节
-- 接收的字节
+- 已发送字节数
+- 已接收字节数
 - 网络接口
 - 连接持续时间
 - 进程持续时间
 
 这些信息每 60 分钟更新一次。
 
-您可以使用工具 [**srum_dump**](https://github.com/MarkBaggett/srum-dump) 从该文件中获取日期。
+你可以使用工具 [**srum_dump**](https://github.com/MarkBaggett/srum-dump) 从此文件中获取日期。
 ```bash
 .\srum_dump.exe -i C:\Users\student\Desktop\SRUDB.dat -t SRUM_TEMPLATE.xlsx -o C:\Users\student\Desktop\srum
 ```
 ### AppCompatCache (ShimCache)
 
-**AppCompatCache**，也称为 **ShimCache**，是 **Microsoft** 开发的 **应用程序兼容性数据库** 的一部分，用于解决应用程序兼容性问题。该系统组件记录了各种文件元数据，包括：
+**AppCompatCache**（也称为 **ShimCache**）是由 **Microsoft** 开发的 **Application Compatibility Database** 的一部分，用于解决应用程序兼容性问题。该系统组件会记录文件的各种元数据，包括：
 
 - 文件的完整路径
-- 文件的大小
-- 在 **$Standard_Information** (SI) 下的最后修改时间
-- ShimCache 的最后更新时间
+- 文件大小
+- **$Standard_Information**（SI）中的上次修改时间
+- ShimCache 的上次更新时间
 - 进程执行标志
 
-这些数据根据操作系统的版本存储在注册表的特定位置：
+这些数据根据操作系统版本存储在注册表的特定位置：
 
-- 对于 XP，数据存储在 `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache` 下，最多可容纳 96 个条目。
-- 对于 Server 2003，以及 Windows 版本 2008、2012、2016、7、8 和 10，存储路径为 `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache`，分别可容纳 512 和 1024 个条目。
+- 对于 XP，数据存储在 `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache` 下，容量为 96 个条目。
+- 对于 Server 2003，以及 Windows 2008、2012、2016、7、8 和 10，存储路径为 `SYSTEM\CurrentControlSet\Control\SessionManager\AppCompatCache\AppCompatCache`，容量分别为 512 和 1024 个条目。
 
-要解析存储的信息，推荐使用 [**AppCompatCacheParser** tool](https://github.com/EricZimmerman/AppCompatCacheParser)。
+建议使用 [**AppCompatCacheParser tool**](https://github.com/EricZimmerman/AppCompatCacheParser) 解析存储的信息。
 
-![](<../../../images/image (75).png>)
+![SRUM - AppCompatCache (ShimCache)：建议使用 AppCompatCacheParser tool 解析存储的信息](<../../../images/image (75).png>)
 
 ### Amcache
 
-**Amcache.hve** 文件本质上是一个注册表蜂巢，记录了在系统上执行的应用程序的详细信息。它通常位于 `C:\Windows\AppCompat\Programas\Amcache.hve`。
+**Amcache.hve** 文件本质上是一个 registry hive，用于记录系统上已执行应用程序的详细信息。它通常位于 `C:\Windows\AppCompat\Programas\Amcache.hve`。
 
-该文件以存储最近执行的进程记录而著称，包括可执行文件的路径及其 SHA1 哈希。这些信息对于跟踪系统上应用程序的活动非常宝贵。
+该文件会存储最近执行的进程记录，包括可执行文件的路径及其 SHA1 哈希值。这些信息对于追踪系统上的应用程序活动非常有价值。
 
-要提取和分析 **Amcache.hve** 中的数据，可以使用 [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser) 工具。以下命令是如何使用 AmcacheParser 解析 **Amcache.hve** 文件内容并以 CSV 格式输出结果的示例：
+要从 **Amcache.hve** 中提取和分析数据，可以使用 [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser) tool。以下命令示例展示了如何使用 AmcacheParser 解析 **Amcache.hve** 文件的内容，并以 CSV 格式输出结果：
 ```bash
 AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\genericUser\Desktop\outputFolder
 ```
-在生成的 CSV 文件中，`Amcache_Unassociated file entries` 特别引人注目，因为它提供了关于未关联文件条目的丰富信息。
+在生成的 CSV 文件中，`Amcache_Unassociated file entries` 尤其值得关注，因为它提供了有关未关联文件条目的丰富信息。
 
 生成的最有趣的 CVS 文件是 `Amcache_Unassociated file entries`。
 
 ### RecentFileCache
 
-此工件仅在 W7 中找到，路径为 `C:\Windows\AppCompat\Programs\RecentFileCache.bcf`，它包含有关某些二进制文件最近执行的信息。
+此 artifact 只能在 W7 的 `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` 中找到，其中包含某些 binaries 最近执行的信息。
 
-您可以使用工具 [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser) 来解析该文件。
+你可以使用工具 [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser) 解析该文件。
 
-### 计划任务
+### Scheduled tasks
 
-您可以从 `C:\Windows\Tasks` 或 `C:\Windows\System32\Tasks` 中提取它们，并以 XML 格式读取。
+你可以从 `C:\Windows\Tasks` 或 `C:\Windows\System32\Tasks` 中提取它们，并将其作为 XML 读取。
 
-### 服务
+### Services
 
-您可以在注册表中找到它们，路径为 `SYSTEM\ControlSet001\Services`。您可以查看将要执行的内容及其时间。
+你可以在 registry 的 `SYSTEM\ControlSet001\Services` 下找到它们。你可以查看将要执行的内容及其执行时间。
 
 ### **Windows Store**
 
-已安装的应用程序可以在 `\ProgramData\Microsoft\Windows\AppRepository\` 中找到。\
-该存储库有一个 **日志**，记录了系统中 **每个已安装的应用程序**，存储在数据库 **`StateRepository-Machine.srd`** 中。
+已安装的 applications 位于 `\ProgramData\Microsoft\Windows\AppRepository\`\
+该 repository 在数据库 **`StateRepository-Machine.srd`** 中包含系统内**每个已安装 application** 的 **log**。
 
-在该数据库的应用程序表中，可以找到列：“Application ID”、“PackageNumber”和“Display Name”。这些列包含有关预安装和已安装应用程序的信息，如果某些应用程序被卸载，可以找到，因为已安装应用程序的 ID 应该是连续的。
+在该数据库的 Application 表中，可以找到以下列："Application ID"、"PackageNumber" 和 "Display Name"。这些列包含预安装和已安装 applications 的信息，并且可以通过已安装 applications 的 ID 应按顺序排列这一点，判断是否有某些 applications 被卸载。
 
-您还可以在注册表路径 `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\` 中 **找到已安装的应用程序**，\
-并在 `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\` 中找到 **已卸载的应用程序**。
+也可以在 registry 路径 `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
+中**找到已安装的 application**，并在以下路径中找到**已卸载**的 **applications**：`Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
 
-## Windows 事件
+## Windows Events
 
-Windows 事件中出现的信息包括：
+Windows events 中出现的信息包括：
 
 - 发生了什么
-- 时间戳 (UTC + 0)
-- 相关用户
-- 相关主机 (主机名，IP)
-- 访问的资产 (文件，文件夹，打印机，服务)
+- Timestamp (UTC + 0)
+- 涉及的 Users
+- 涉及的 Hosts（hostname、IP）
+- 访问的 Assets（files、folder、printer、services）
 
-日志位于 `C:\Windows\System32\config`（在 Windows Vista 之前）和 `C:\Windows\System32\winevt\Logs`（在 Windows Vista 之后）。在 Windows Vista 之前，事件日志是二进制格式，而之后则是 **XML 格式**，并使用 **.evtx** 扩展名。
+在 Windows Vista 之前，logs 位于 `C:\Windows\System32\config`；Windows Vista 之后，位于 `C:\Windows\System32\winevt\Logs`。Windows Vista 之前，event logs 使用 binary format；之后则使用 **XML format**，并采用 **.evtx** extension。
 
-事件文件的位置可以在 SYSTEM 注册表中找到，路径为 **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`**。
+event files 的位置可以在 SYSTEM registry 的 **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`** 中找到。
 
-可以通过 Windows 事件查看器 (**`eventvwr.msc`**) 或其他工具如 [**Event Log Explorer**](https://eventlogxp.com) **或** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)** 来可视化它们。
+它们可以通过 Windows Event Viewer（**`eventvwr.msc`**）查看，也可以使用 [**Event Log Explorer**](https://eventlogxp.com) **或** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)** 等其他 tools 查看。**
 
-## 理解 Windows 安全事件日志
+## Understanding Windows Security Event Logging
 
-访问事件记录在位于 `C:\Windows\System32\winevt\Security.evtx` 的安全配置文件中。该文件的大小是可调的，当其容量达到时，旧事件会被覆盖。记录的事件包括用户登录和注销、用户操作以及安全设置的更改，以及文件、文件夹和共享资产的访问。
+Access events 会记录在位于 `C:\Windows\System32\winevt\Security.evtx` 的 security configuration file 中。该 file 的大小可以调整；当达到容量上限时，较早的 events 会被覆盖。记录的 events 包括 user logins 和 logoffs、user actions、security settings 的更改，以及对 files、folders 和 shared assets 的访问。
 
-### 用户身份验证的关键事件 ID：
+### Key Event IDs for User Authentication:
 
-- **EventID 4624**：表示用户成功认证。
-- **EventID 4625**：表示认证失败。
-- **EventIDs 4634/4647**：表示用户注销事件。
-- **EventID 4672**：表示以管理员权限登录。
+- **EventID 4624**：表示 user 成功完成 authentication。
+- **EventID 4625**：表示 authentication failure。
+- **EventIDs 4634/4647**：表示 user logoff events。
+- **EventID 4672**：表示以 administrative privileges 登录。
 
-#### EventID 4634/4647 中的子类型：
+#### EventID 4634/4647 中的 Sub-types：
 
-- **Interactive (2)**：直接用户登录。
-- **Network (3)**：访问共享文件夹。
-- **Batch (4)**：执行批处理过程。
-- **Service (5)**：服务启动。
-- **Proxy (6)**：代理认证。
-- **Unlock (7)**：使用密码解锁屏幕。
-- **Network Cleartext (8)**：明文密码传输，通常来自 IIS。
-- **New Credentials (9)**：使用不同的凭据进行访问。
-- **Remote Interactive (10)**：远程桌面或终端服务登录。
-- **Cache Interactive (11)**：使用缓存凭据登录，无需联系域控制器。
-- **Cache Remote Interactive (12)**：使用缓存凭据进行远程登录。
-- **Cached Unlock (13)**：使用缓存凭据解锁。
+- **Interactive (2)**：直接 user login。
+- **Network (3)**：访问 shared folders。
+- **Batch (4)**：执行 batch processes。
+- **Service (5)**：启动 services。
+- **Proxy (6)**：Proxy authentication。
+- **Unlock (7)**：使用 password 解锁 screen。
+- **Network Cleartext (8)**：传输 clear text password，通常来自 IIS。
+- **New Credentials (9)**：使用不同的 credentials 进行访问。
+- **Remote Interactive (10)**：Remote desktop 或 terminal services login。
+- **Cache Interactive (11)**：在不联系 domain controller 的情况下，使用 cached credentials 登录。
+- **Cache Remote Interactive (12)**：使用 cached credentials 进行 remote login。
+- **Cached Unlock (13)**：使用 cached credentials 解锁。
 
-#### EventID 4625 的状态和子状态代码：
+#### EventID 4625 的 Status 和 Sub Status Codes：
 
-- **0xC0000064**：用户名不存在 - 可能表示用户名枚举攻击。
-- **0xC000006A**：正确的用户名但错误的密码 - 可能是密码猜测或暴力破解尝试。
-- **0xC0000234**：用户账户被锁定 - 可能是在暴力攻击后导致多次登录失败。
-- **0xC0000072**：账户被禁用 - 未经授权访问禁用账户的尝试。
-- **0xC000006F**：在允许的时间外登录 - 表示在设定的登录时间之外的访问尝试，可能是未经授权的访问迹象。
-- **0xC0000070**：违反工作站限制 - 可能是从未经授权的位置尝试登录。
-- **0xC0000193**：账户过期 - 使用过期用户账户的访问尝试。
-- **0xC0000071**：密码过期 - 使用过时密码的登录尝试。
-- **0xC0000133**：时间同步问题 - 客户端和服务器之间的大时间差异可能表明更复杂的攻击，如票据传递攻击。
-- **0xC0000224**：需要强制更改密码 - 频繁的强制更改可能表明试图破坏账户安全。
-- **0xC0000225**：表示系统错误而非安全问题。
-- **0xC000015b**：拒绝的登录类型 - 使用未经授权的登录类型进行的访问尝试，例如用户尝试执行服务登录。
+- **0xC0000064**：User name 不存在 - 可能表示 username enumeration attack。
+- **0xC000006A**：User name 正确但 password 错误 - 可能是 password guessing 或 brute-force attempt。
+- **0xC0000234**：User account 被锁定 - 可能发生在 brute-force attack 导致多次 login failure 之后。
+- **0xC0000072**：Account 已禁用 - 表示尝试未经授权访问已禁用的 accounts。
+- **0xC000006F**：在允许的时间之外 logon - 表示尝试在设定的 login hours 之外访问，可能是 unauthorized access 的迹象。
+- **0xC0000070**：违反 workstation restrictions - 可能表示尝试从 unauthorized location 登录。
+- **0xC0000193**：Account 已过期 - 表示使用过期 user accounts 进行 access attempts。
+- **0xC0000071**：Password 已过期 - 表示使用过时 passwords 进行 login attempts。
+- **0xC0000133**：Time sync issues - client 与 server 之间存在较大的时间差，可能表示更复杂的 attacks，例如 pass-the-ticket。
+- **0xC0000224**：必须更改 password - 频繁的 mandatory changes 可能表示试图破坏 account security。
+- **0xC0000225**：表示 system bug，而不是 security issue。
+- **0xC000015b**：Logon type 被拒绝 - 表示使用 unauthorized logon type 进行 access attempt，例如 user 尝试执行 service logon。
 
 #### EventID 4616：
 
-- **时间更改**：系统时间的修改，可能会模糊事件的时间线。
+- **Time Change**：修改 system time，可能会掩盖 events 的 timeline。
 
 #### EventID 6005 和 6006：
 
-- **系统启动和关闭**：EventID 6005 表示系统启动，而 EventID 6006 标记系统关闭。
+- **System Startup and Shutdown**：EventID 6005 表示 system startup，EventID 6006 表示 system shutdown。
 
 #### EventID 1102：
 
-- **日志删除**：安全日志被清除，通常是掩盖非法活动的红旗。
+- **Log Deletion**：清除 security logs，这通常是掩盖 illicit activities 的 red flag。
 
-#### USB 设备跟踪的事件 ID：
+#### 用于 USB Device Tracking 的 EventIDs：
 
-- **20001 / 20003 / 10000**：USB 设备首次连接。
-- **10100**：USB 驱动程序更新。
-- **EventID 112**：USB 设备插入的时间。
+- **20001 / 20003 / 10000**：USB device 首次连接。
+- **10100**：USB driver update。
+- **EventID 112**：USB device insertion 的时间。
 
-有关模拟这些登录类型和凭据转储机会的实际示例，请参阅 [Altered Security 的详细指南](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them)。
+关于模拟这些 login types 和 credential dumping opportunities 的实际示例，请参考 [Altered Security's detailed guide](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them)。
 
-事件详细信息，包括状态和子状态代码，提供了对事件原因的进一步洞察，特别是在事件 ID 4625 中尤为显著。
+Event details（包括 status 和 sub-status codes）可以进一步揭示 events 的原因，在 Event ID 4625 中尤其值得注意。
 
-### 恢复 Windows 事件
+### Recovering Windows Events
 
-为了提高恢复已删除 Windows 事件的机会，建议通过直接拔掉电源来关闭可疑计算机。**Bulk_extractor** 是一款指定 `.evtx` 扩展名的恢复工具，推荐用于尝试恢复此类事件。
+为了提高恢复已删除 Windows Events 的可能性，建议直接拔掉 suspect computer 的电源使其关机。建议使用指定 `.evtx` extension 的 recovery tool **Bulk_extractor** 尝试恢复这些 events。
 
-### 通过 Windows 事件识别常见攻击
+### Identifying Common Attacks via Windows Events
 
-有关利用 Windows 事件 ID 识别常见网络攻击的全面指南，请访问 [Red Team Recipe](https://redteamrecipe.com/event-codes/)。
+如需全面了解如何利用 Windows Event IDs 识别常见 cyber attacks，请访问 [Red Team Recipe](https://redteamrecipe.com/event-codes/)。
 
-#### 暴力攻击
+#### Brute Force Attacks
 
-通过多个 EventID 4625 记录可识别，若攻击成功，则后续会有 EventID 4624。
+其特征是存在多条 EventID 4625 records；如果 attack 成功，之后会出现 EventID 4624。
 
-#### 时间更改
+#### Time Change
 
-通过 EventID 4616 记录，系统时间的更改可能会使取证分析变得复杂。
+由 EventID 4616 记录；system time 的更改可能使 forensic analysis 变得复杂。
 
-#### USB 设备跟踪
+#### USB Device Tracking
 
-用于 USB 设备跟踪的有用系统事件 ID 包括 20001/20003/10000（首次使用），10100（驱动程序更新）和 EventID 112（来自 DeviceSetupManager 的插入时间戳）。
+用于 USB device tracking 的有用 System EventIDs 包括：用于首次使用的 20001/20003/10000、用于 driver updates 的 10100，以及 DeviceSetupManager 生成的、用于记录 insertion timestamps 的 EventID 112。
 
-#### 系统电源事件
+#### System Power Events
 
-EventID 6005 表示系统启动，而 EventID 6006 标记系统关闭。
+EventID 6005 表示 system startup，EventID 6006 表示 system shutdown。
 
-#### 日志删除
+#### Log Deletion
 
-安全 EventID 1102 表示日志被删除，这是取证分析中的关键事件。
+Security EventID 1102 表示 logs 被删除，这是 forensic analysis 中的关键 event。
+
+## References
+
+- [1] [Windows Plug and Play Cleanup](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,12 +1,14 @@
+# VBS 文件的去混淆技术
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-一些可以用于调试/去混淆恶意 VBS 文件的有用工具：
+以下是一些可能有助于调试/去混淆恶意 VBS 文件的方法：
 
 ## echo
 ```bash
 Wscript.Echo "Like this?"
 ```
-## 评论
+## 注释
 ```bash
 ' this is a comment
 ```
