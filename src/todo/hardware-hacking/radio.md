@@ -1,202 +1,206 @@
-# Radyo
+# Radio
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## SigDigger
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger), bilinmeyen radyo sinyallerinin bilgilerini çıkarmak için tasarlanmış, GNU/Linux ve macOS için ücretsiz bir dijital sinyal analizörüdür. SoapySDR aracılığıyla çeşitli SDR cihazlarını destekler ve FSK, PSK ve ASK sinyallerinin ayarlanabilir demodülasyonunu, analog video çözümlemesini, patlayıcı sinyalleri analiz etmeyi ve analog ses kanallarını dinlemeyi (hepsi gerçek zamanlı) sağlar.
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger), bilinmeyen radyo sinyallerinden bilgi çıkarmak için tasarlanmış, GNU/Linux ve macOS için ücretsiz bir digital signal analyzer'dır. SoapySDR aracılığıyla çeşitli SDR cihazlarını destekler ve FSK, PSK ve ASK sinyallerinin ayarlanabilir demodülasyonuna, analog videonun decode edilmesine, bursty sinyallerin analiz edilmesine ve analog voice channel'ların dinlenmesine olanak tanır (tümü real time olarak).<sup>[[1]](#references)</sup>
 
-### Temel Konfigürasyon
+### Basic Config
 
-Kurulumdan sonra yapılandırmayı düşünebileceğiniz birkaç şey var.\
-Ayarlar (ikinci sekme butonu) bölümünde **SDR cihazını** seçebilir veya **bir dosya** seçerek okunacak dosyayı ve senkronize edilecek frekansı ve örnekleme hızını (PC'niz destekliyorsa 2.56Msps'a kadar önerilir) ayarlayabilirsiniz.
+Kurulumdan sonra yapılandırmayı düşünebileceğiniz birkaç şey vardır.\
+Settings bölümünde (ikinci tab düğmesi) **SDR device**'ı veya okunacak **bir dosyayı** seçebilir, syntonise edilecek frekansı ve Sample rate'i belirleyebilirsiniz (PC'niz destekliyorsa önerilen değer 2.56Msps'e kadardır).
 
-![](<../../images/image (245).png>)
+![SDR device, input file, frequency ve sample rate seçeneklerini gösteren SigDigger ayarları](<../../images/image (245).png>)
 
-GUI davranışında, PC'niz destekliyorsa birkaç şeyi etkinleştirmeniz önerilir:
+GUI behaviour bölümünde, PC'niz destekliyorsa birkaç seçeneği etkinleştirmeniz önerilir:
 
-![](<../../images/image (472).png>)
+![SigDigger - Basic Config: GUI behaviour bölümünde PC'niz destekliyorsa birkaç seçeneği etkinleştirmeniz önerilir](<../../images/image (472).png>)
 
-> [!NOTE]
-> Eğer PC'nizin bir şeyleri yakalamadığını fark ederseniz, OpenGL'i devre dışı bırakmayı ve örnekleme hızını düşürmeyi deneyin.
+> [!TIP]
+> PC'nizin sinyalleri capture etmediğini fark ederseniz OpenGL'i devre dışı bırakmayı ve sample rate'i düşürmeyi deneyin.
 
-### Kullanımlar
+### Uses
 
-- Sadece **bir sinyalin bir kısmını yakalamak ve analiz etmek** için "Yakalamak için bas" butonunu ihtiyacınız olduğu sürece basılı tutun.
+- Bir sinyalin **bir süreliğine capture edilmesi ve analiz edilmesi** için ihtiyacınız olduğu sürece "Push to capture" düğmesini basılı tutun.
 
-![](<../../images/image (960).png>)
+![Basic Config - Uses: Bir sinyali bir süreliğine capture edip analiz etmek için ihtiyacınız olduğu sürece "Push to capture" düğmesini basılı tutun](<../../images/image (960).png>)
 
-- SigDigger'ın **Tuner'ı**, **daha iyi sinyaller yakalamaya** yardımcı olur (ama aynı zamanda onları bozabilir). İdeal olarak 0 ile başlayın ve **sinyalin iyileşmesinden daha büyük** olan **gürültüyü** bulana kadar **büyütmeye devam edin**.
+- SigDigger'ın **Tuner**'ı **daha iyi sinyaller capture etmenize** yardımcı olur (ancak sinyalleri bozabilir de). İdeal olarak 0 ile başlayın ve eklenen **noise**'un ihtiyacınız olan **signal improvement**'ından daha büyük olduğunu fark edene kadar **değeri artırmaya devam edin**.
 
-![](<../../images/image (1099).png>)
+![Capture edilen radyo sinyalini iyileştirmek için ayarlanmış SigDigger tuner kontrolü](<../../images/image (1099).png>)
 
-### Radyo kanalı ile senkronize olma
+### Synchronize with radio channel
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger) ile duymak istediğiniz kanal ile senkronize olun, "Baseband audio preview" seçeneğini yapılandırın, gönderilen tüm bilgileri almak için bant genişliğini ayarlayın ve ardından Tuner'ı gürültünün gerçekten artmaya başlamadan önceki seviyeye ayarlayın:
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger) ile duymak istediğiniz channel ile synchronize olun, "Baseband audio preview" seçeneğini yapılandırın, gönderilen tüm bilgileri alacak şekilde bandwith'i ayarlayın ve ardından noise gerçekten artmaya başlamadan önceki seviyeye Tuner'ı ayarlayın:<sup>[[1]](#references)</sup>
 
-![](<../../images/image (585).png>)
+![Baseband audio preview ve yapılandırılmış bandwidth ile synchronize edilmiş SigDigger radyo channel'ı](<../../images/image (585).png>)
 
-## İlginç ipuçları
+## Interesting tricks
 
-- Bir cihaz bilgi patlamaları gönderdiğinde, genellikle **ilk kısım bir ön ek olacaktır**, bu yüzden orada **bilgi bulamazsanız** veya **bazı hatalar varsa** endişelenmenize gerek yoktur.
-- Bilgi çerçevelerinde genellikle **birbirleriyle iyi hizalanmış farklı çerçeveler bulmalısınız**:
+- Bir cihaz bilgi burst'leri gönderirken genellikle **ilk kısım bir preamble** olur; bu nedenle **orada bilgi bulamazsanız** veya **bazı hatalar varsa** **endişelenmenize gerek yoktur**.
+- Bilgi frame'lerinde genellikle **birbirleriyle iyi hizalanmış farklı frame'ler bulmanız gerekir**:
 
-![](<../../images/image (1076).png>)
+![Synchronize with radio channel - Interesting tricks: Bilgi frame'lerinde genellikle birbirleriyle iyi hizalanmış farklı frame'ler bulmanız gerekir](<../../images/image (1076).png>)
 
-![](<../../images/image (597).png>)
+![Synchronize with radio channel - Interesting tricks: Bilgi frame'lerinde genellikle birbirleriyle iyi hizalanmış farklı frame'ler bulmanız gerekir](<../../images/image (597).png>)
 
-- **Bitleri geri aldıktan sonra, onları bir şekilde işlemeniz gerekebilir**. Örneğin, Manchester kodlamasında bir yukarı+aşağı 1 veya 0 olacak ve bir aşağı+yukarı diğerini temsil edecektir. Yani 1'lerin ve 0'ların (yukarı ve aşağı) çiftleri gerçek bir 1 veya gerçek bir 0 olacaktır.
-- Bir sinyal Manchester kodlaması kullanıyorsa (bir sırada iki 0 veya 1'den fazlasını bulmak imkansızdır), **ön ekte birden fazla 1 veya 0 bulabilirsiniz**!
+- **Bit'leri recover ettikten sonra onları bir şekilde process etmeniz gerekebilir**. Örneğin Manchester codification'da up+down 1 veya 0, down+up ise diğeri olur. Dolayısıyla 1 ve 0 çiftleri (up ve down'lar) gerçek bir 1 veya gerçek bir 0 olacaktır.
+- Bir sinyal Manchester codification kullanıyor olsa bile (art arda ikiden fazla 0 veya 1 bulmak mümkün değildir), **preamble içinde bir arada birkaç 1 veya 0 bulabilirsiniz**!
 
-### IQ ile modülasyon türünü açığa çıkarma
+### Uncovering modulation type with IQ
 
-Sinyallerde bilgiyi depolamanın 3 yolu vardır: **amplitüd**, **frekans** veya **faz** modüle etmek.\
-Bir sinyali kontrol ediyorsanız, bilgiyi depolamak için neyin kullanıldığını anlamanın farklı yolları vardır (aşağıda daha fazla yol bulabilirsiniz) ama iyi bir yol IQ grafiğini kontrol etmektir.
+Sinyallerde bilgi depolamanın 3 yolu vardır: **amplitude**, **frequency** veya **phase**'i modüle etmek.\
+Bir sinyali inceliyorsanız, bilgiyi depolamak için hangisinin kullanıldığını anlamaya çalışmanın farklı yolları vardır (aşağıda daha fazla yol verilmiştir); ancak iyi yöntemlerden biri IQ grafiğini kontrol etmektir.
 
-![](<../../images/image (788).png>)
+![Bir sinyalin amplitude, frequency veya phase modulation kullanıp kullanmadığını belirlemek için kullanılan SigDigger IQ grafiği](<../../images/image (788).png>)
 
-- **AM Tespiti**: Eğer IQ grafiğinde örneğin **2 daire** görünüyorsa (muhtemelen biri 0'da ve diğeri farklı bir amplitüde), bu bir AM sinyali olduğu anlamına gelebilir. Bunun nedeni, IQ grafiğinde 0 ile daire arasındaki mesafenin sinyalin amplitüdü olmasıdır, bu yüzden kullanılan farklı amplitüdlere görsel olarak bakmak kolaydır.
-- **PM Tespiti**: Önceki resimde olduğu gibi, eğer birbirleriyle ilişkili olmayan küçük daireler bulursanız, bu muhtemelen bir faz modülasyonunun kullanıldığı anlamına gelir. Bunun nedeni, IQ grafiğinde nokta ile 0,0 arasındaki açının sinyalin fazı olmasıdır, bu da 4 farklı fazın kullanıldığı anlamına gelir.
-- Bilginin, bir fazın değişmesi gerçeğinde gizli olduğunu ve fazın kendisinde olmadığını unutmayın, farklı fazları net bir şekilde ayırt edemezsiniz.
-- **FM Tespiti**: IQ'nun frekansları tanımlamak için bir alanı yoktur (merkeze olan mesafe amplitüd ve açı fazdır).\
-Bu nedenle, FM'yi tanımlamak için, bu grafikte **temelde sadece bir daire görmelisiniz**.\
-Ayrıca, farklı bir frekans IQ grafiğinde **daire boyunca bir hızlanma ile "temsil edilir"** (bu yüzden SysDigger'da sinyali seçtiğinizde IQ grafiği doldurulur, eğer oluşturulan dairede bir hızlanma veya yön değişikliği bulursanız bu FM olabilir):
+- **AM tespiti**: IQ grafiğinde örneğin **2 circle** görünüyorsa (muhtemelen biri 0'da, diğeri farklı bir amplitude'de), bu bir AM sinyali olabilir. Bunun nedeni IQ grafiğinde 0 ile circle arasındaki mesafenin sinyalin amplitude'ü olmasıdır; dolayısıyla kullanılan farklı amplitude'leri görselleştirmek kolaydır.
+- **PM tespiti**: Önceki görselde olduğu gibi, birbirleriyle ilişkili olmayan küçük circle'lar bulursanız muhtemelen phase modulation kullanılıyordur. Bunun nedeni IQ grafiğinde nokta ile 0,0 arasındaki açının sinyalin phase'i olmasıdır; bu da 4 farklı phase kullanıldığı anlamına gelir.
+- Bilginin phase'in kendisinde değil, bir phase'in değiştirilmiş olması gerçeğinde gizli olduğunu unutmayın; bu durumda farklı phase'leri net biçimde ayrılmış olarak göremezsiniz.
+- **FM tespiti**: IQ'da frequency'leri tanımlayacak bir alan yoktur (merkeze uzaklık amplitude, açı ise phase'dir).\
+Bu nedenle FM'i belirlemek için bu grafikte temelde **yalnızca bir circle görmeniz gerekir**.\
+Ayrıca farklı bir frequency, IQ grafiğinde **circle boyunca hızlanma** ile "temsil edilir" (yani SysDigger'da sinyali seçtiğinizde IQ grafiği doldurulur; oluşan circle'da bir hızlanma veya yön değişikliği bulursanız bu FM anlamına gelebilir):
 
-## AM Örneği
+## AM Example
 
 {{#file}}
 sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw
 {{#endfile}}
 
-### AM'yi Açığa Çıkarma
+### Uncovering AM
 
-#### Zarfı Kontrol Etme
+#### Checking the envelope
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger) ile AM bilgilerini kontrol ederken ve sadece **zarfı** inceleyerek farklı net amplitüd seviyeleri görebilirsiniz. Kullanılan sinyal, AM'de bilgi gönderen darbeler gönderiyor, bir darbenin görünümü şöyle:
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger) ile AM bilgisini kontrol ederken ve yalnızca **envelope**'a bakarken farklı ve net amplitude seviyeleri görebilirsiniz. Kullanılan sinyal AM'de bilgi içeren pulse'lar gönderiyor; bir pulse şu şekilde görünür:<sup>[[1]](#references)</sup>
 
-![](<../../images/image (590).png>)
+![Net pulse amplitude seviyelerine sahip SigDigger AM sinyal envelope'u](<../../images/image (590).png>)
 
-Ve bu, dalga formuyla sembolün bir kısmının görünümüdür:
+Bir symbol'ün waveform ile birlikte bir kısmı ise şu şekilde görünür:
 
-![](<../../images/image (734).png>)
+![Uncovering AM - Checking the envelope: Bir symbol'ün waveform ile birlikte bir kısmı](<../../images/image (734).png>)
 
-#### Histogramı Kontrol Etme
+#### Checking the Histogram
 
-Bilgi bulunan **tüm sinyali** seçebilir, **Amplitüd** modunu ve **Seçim**'i seçebilir ve **Histogram**'a tıklayabilirsiniz. 2 net seviyenin yalnızca bulunduğunu gözlemleyebilirsiniz.
+Bilginin bulunduğu **tüm sinyali seçebilir**, **Amplitude** mode ve **Selection**'ı seçip **Histogram**'a tıklayabilirsiniz. Yalnızca 2 net seviyenin bulunduğunu gözlemleyebilirsiniz.
 
-![](<../../images/image (264).png>)
+![Seçili AM sinyali için iki net seviye gösteren SigDigger amplitude histogram'ı](<../../images/image (264).png>)
 
-Örneğin, bu AM sinyalinde Amplitüd yerine Frekansı seçerseniz sadece 1 frekans bulursunuz (frekans modülasyonunda bilgi sadece 1 frekans kullanıyorsa bu durum geçerli değildir).
+Örneğin bu AM sinyalinde Amplitude yerine Frequency'i seçerseniz yalnızca 1 frequency bulursunuz (frequency'de modüle edilen bilginin yalnızca 1 frequency kullanmasının bir yolu yoktur).
 
-![](<../../images/image (732).png>)
+![AM sinyali için tek frequency gösteren SigDigger frequency histogram'ı](<../../images/image (732).png>)
 
-Eğer birçok frekans bulursanız, bu muhtemelen bir FM olmayacaktır, sinyal frekansı sadece kanal nedeniyle değiştirilmiş olabilir.
+Çok sayıda frequency bulursanız bu muhtemelen FM değildir; channel nedeniyle yalnızca sinyalin frequency'si değiştirilmiş olabilir.
 
-#### IQ ile
+#### With IQ
 
-Bu örnekte, **büyük bir daire** olduğunu ama aynı zamanda **merkezde birçok nokta** olduğunu görebilirsiniz.
+Bu örnekte **büyük bir circle** olduğunu, ancak aynı zamanda **merkezde çok sayıda nokta** bulunduğunu görebilirsiniz.
 
-![](<../../images/image (222).png>)
+![Checking the Histogram - With IQ: Bu örnekte büyük bir circle ve merkezde çok sayıda nokta](<../../images/image (222).png>)
 
-### Sembol Hızını Alma
+### Get Symbol Rate
 
-#### Bir sembolle
+#### With one symbol
 
-Bulduğunuz en küçük sembolü seçin (böylece sadece 1 olduğundan emin olursunuz) ve "Seçim frekansı"nı kontrol edin. Bu durumda 1.013kHz (yani 1kHz) olacaktır.
+Bulabildiğiniz en küçük symbol'ü seçin (böylece yalnızca 1 olduğundan emin olursunuz) ve "Selection freq" değerini kontrol edin. Bu durumda değer 1.013kHz (yani 1kHz) olur.
 
-![](<../../images/image (78).png>)
+![Get Symbol Rate - With one symbol: Bulabildiğiniz en küçük symbol'ü seçin ve "Selection freq" değerini kontrol edin. Bu durumda değer 1.013kHz'dir (yani 1kHz)](<../../images/image (78).png>)
 
-#### Bir grup sembolle
+#### With a group of symbols
 
-Seçmek istediğiniz sembol sayısını da belirtebilirsiniz ve SigDigger 1 sembolün frekansını hesaplayacaktır (seçilen sembol sayısı arttıkça muhtemelen daha iyi sonuç alırsınız). Bu senaryoda 10 sembol seçtim ve "Seçim frekansı" 1.004 kHz:
+Seçeceğiniz symbol sayısını da belirtebilirsiniz; SigDigger 1 symbol'ün frequency'sini hesaplar (muhtemelen ne kadar çok symbol seçilirse sonuç o kadar iyi olur). Bu senaryoda 10 symbol seçtim ve "Selection freq" değeri 1.004 Khz:
 
-![](<../../images/image (1008).png>)
+![Seçili on symbol grubunu kullanarak SigDigger symbol-rate hesaplaması](<../../images/image (1008).png>)
 
-### Bitleri Alma
+### Get Bits
 
-Bunun bir **AM modüle edilmiş** sinyal olduğunu ve **sembol hızını** bulduktan sonra (ve bu durumda yukarı bir şeyin 1 ve aşağı bir şeyin 0 anlamına geldiğini bilerek), sinyalde kodlanmış **bitleri elde etmek** çok kolaydır. Bu nedenle, bilgiyi içeren sinyali seçin ve örnekleme ve karar verme ayarlarını yapılandırın ve örnekle butonuna basın (lütfen **Amplitüd**'ün seçili olduğundan, keşfedilen **Sembol hızının** yapılandırıldığından ve **Gadner saat kurtarma** seçeneğinin seçili olduğundan emin olun):
+Bunun **AM modulated** bir sinyal ve **symbol rate** olduğunu bulduktan sonra (ve bu durumda yukarı yönün 1, aşağı yönün 0 anlamına geldiğini bildiğinizden), sinyalde encoded edilmiş **bit'leri elde etmek** çok kolaydır. Bilgi içeren sinyali seçin, sampling ve decision'ı yapılandırın ve sample'a basın ( **Amplitude**'ın seçili olduğunu, bulunan **Symbol rate**'in yapılandırıldığını ve **Gadner clock recovery**'nin seçili olduğunu kontrol edin):
 
-![](<../../images/image (965).png>)
+![AM sampling, symbol rate ve Gardner clock recovery için yapılandırılmış SigDigger Get Bits paneli](<../../images/image (965).png>)
 
-- **Seçim aralıklarına senkronize ol** demek, daha önce sembol hızını bulmak için aralıklar seçtiyseniz, o sembol hızının kullanılacağı anlamına gelir.
-- **Manuel** demek, belirtilen sembol hızının kullanılacağı anlamına gelir.
-- **Sabit aralık seçimi** ile seçilmesi gereken aralık sayısını belirtirsiniz ve sembol hızını buradan hesaplar.
-- **Gadner saat kurtarma** genellikle en iyi seçenektir, ancak yine de bazı yaklaşık sembol hızını belirtmeniz gerekir.
+- **Sync to selection intervals**, symbol rate'i bulmak için daha önce interval'lar seçtiyseniz bu symbol rate'in kullanılacağı anlamına gelir.
+- **Manual**, belirtilen symbol rate'in kullanılacağı anlamına gelir.
+- **Fixed interval selection** bölümünde seçilmesi gereken interval sayısını belirtirsiniz; SigDigger buradan symbol rate'i hesaplar.
+- **Gadner clock recovery** genellikle en iyi seçenektir; ancak yine de yaklaşık bir symbol rate belirtmeniz gerekir.
 
-Örnekle butonuna bastığınızda bu görünür:
+Sample'a bastığınızda şu görünür:
 
-![](<../../images/image (644).png>)
+![With a group of symbols - Get Bits: Sample'a basıldığında görünen ekran](<../../images/image (644).png>)
 
-Şimdi, SigDigger'ın **bilgi taşıyan seviyenin aralığını** anlaması için **alt seviyeye** tıklayıp en yüksek seviyeye kadar basılı tutmanız gerekir:
+Şimdi SigDigger'ın bilgi taşıyan seviyenin **range'inin nerede olduğunu anlaması** için **alt seviyeye** tıklayıp en yüksek seviyeye ulaşana kadar tıklamayı sürdürmeniz gerekir:
 
-![](<../../images/image (439).png>)
+![Alt amplitude seviyesinden üst seviyeye kadar SigDigger level-range seçimi](<../../images/image (439).png>)
 
-Eğer örneğin **4 farklı amplitüd seviyesi** olsaydı, **Sembol başına bit sayısını 2** olarak yapılandırmanız ve en küçüğünden en büyüğüne kadar seçmeniz gerekirdi.
+Örneğin **4 farklı amplitude seviyesi** olsaydı **Bits per symbol'ü 2** olarak yapılandırmanız ve en düşük seviyeden en yüksek seviyeye kadar seçim yapmanız gerekirdi.
 
-Son olarak, **Zoom**'u **artırarak** ve **Satır boyutunu** **değiştirerek** bitleri görebilirsiniz (ve tüm bitleri almak için hepsini seçip kopyalayabilirsiniz):
+Son olarak **Zoom'u artırıp** **Row size'ı değiştirerek** bit'leri görebilirsiniz (tümünü seçip kopyalayarak bütün bit'leri alabilirsiniz):
 
-![](<../../images/image (276).png>)
+![With a group of symbols - Get Bits: Zoom'u artırıp Row size'ı değiştirerek bit'leri görebilirsiniz](<../../images/image (276).png>)
 
-Eğer sinyalin sembol başına 1'den fazla biti varsa (örneğin 2), SigDigger **hangi sembolün** 00, 01, 10, 11 olduğunu bilmenin bir yoluna sahip değildir, bu yüzden her birini temsil etmek için farklı **gri tonları** kullanacaktır (ve eğer bitleri kopyalarsanız **0'dan 3'e kadar** sayılar kullanacaktır, bunları işlemeniz gerekecektir).
+Sinyal symbol başına 1'den fazla bit içeriyorsa (örneğin 2), SigDigger hangi symbol'ün 00, 01, 10 veya 11 olduğunu bilemez; bu nedenle her birini temsil etmek için farklı **grey scale**'ler kullanır (bit'leri kopyalarsanız **0 ile 3 arasındaki sayıları** kullanır; bunları process etmeniz gerekir).
 
-Ayrıca, **kodlamalar** kullanın, örneğin **Manchester** ve **yukarı+aşağı** **1 veya 0** olabilir ve bir aşağı+yukarı 1 veya 0 olabilir. Bu durumlarda, elde edilen yukarıları (1) ve aşağıları (0) **işlemeniz** gerekir, böylece 01 veya 10 çiftlerini 0 veya 1 olarak değiştirebilirsiniz.
+Ayrıca **codification** olarak **Manchester** kullanıldığında **up+down** 1 veya 0, down+up ise 1 veya 0 olabilir. Bu durumlarda elde edilen up'ları (1) ve down'ları (0) process ederek 01 veya 10 çiftlerini 0 veya 1 ile değiştirmeniz gerekir.
 
-## FM Örneği
+## FM Example
 
 {{#file}}
 sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw
 {{#endfile}}
 
-### FM'yi Açığa Çıkarma
+### Uncovering FM
 
-#### Frekansları ve dalga formunu kontrol etme
+#### Checking the frequencies and waveform
 
-FM'de modüle edilmiş bilgi gönderen sinyal örneği:
+FM'de modüle edilmiş bilgi gönderen bir sinyal örneği:
 
-![](<../../images/image (725).png>)
+![Uncovering FM - Checking the frequencies and waveform: FM'de modüle edilmiş bilgi gönderen sinyal](<../../images/image (725).png>)
 
-Önceki resimde, **2 frekansın kullanıldığını** oldukça iyi gözlemleyebilirsiniz, ancak **dalga formunu** incelerseniz **2 farklı frekansı doğru bir şekilde tanımlamakta zorlanabilirsiniz**:
+Önceki görselde **2 frequency kullanıldığını** oldukça iyi gözlemleyebilirsiniz; ancak **waveform'u incelerseniz** **2 farklı frequency'yi doğru şekilde tanımlayamayabilirsiniz**:
 
-![](<../../images/image (717).png>)
+![İki frequency'nin doğrudan ayırt edilmesinin zor olduğu SigDigger FM waveform'u](<../../images/image (717).png>)
 
-Bu, sinyali her iki frekansta da yakaladığım için, bu nedenle biri diğerinin negatifine yaklaşık olarak eşittir:
+Bunun nedeni sinyali her iki frequency'de capture etmemdir; dolayısıyla biri yaklaşık olarak diğerinin negative'idir:
 
-![](<../../images/image (942).png>)
+![İki frequency'yi birbirlerinin yaklaşık negative'i olarak gösteren SigDigger FM capture'ı](<../../images/image (942).png>)
 
-Eğer senkronize frekans **bir frekansa diğerine göre daha yakınsa**, iki farklı frekansı kolayca görebilirsiniz:
+Synchronized frequency **bir frequency'ye diğerinden daha yakınsa** 2 farklı frequency'yi kolayca görebilirsiniz:
 
-![](<../../images/image (422).png>)
+![Uncovering FM - Checking the frequencies and waveform: Synchronized frequency bir frequency'ye diğerinden daha yakınsa 2 farklı frequency'yi kolayca görebilirsiniz](<../../images/image (422).png>)
 
-![](<../../images/image (488).png>)
+![Uncovering FM - Checking the frequencies and waveform: Synchronized frequency bir frequency'ye diğerinden daha yakınsa 2 farklı frequency'yi kolayca görebilirsiniz](<../../images/image (488).png>)
 
-#### Histogramı kontrol etme
+#### Checking the histogram
 
-Bilgi içeren sinyalin frekans histogramını kontrol ettiğinizde, iki farklı sinyali kolayca görebilirsiniz:
+Bilgi içeren sinyalin frequency histogram'ını kontrol ettiğinizde 2 farklı sinyali kolayca görebilirsiniz:
 
-![](<../../images/image (871).png>)
+![Checking the frequencies and waveform - Checking the histogram: Bilgi içeren sinyalin frequency histogram'ını kontrol ettiğinizde 2 farklı sinyal görebilirsiniz](<../../images/image (871).png>)
 
-Bu durumda, **Amplitüd histogramını** kontrol ederseniz **sadece bir amplitüd** bulursunuz, bu nedenle **AM olamaz** (eğer birçok amplitüd bulursanız, bu muhtemelen sinyalin kanal boyunca güç kaybettiği anlamına gelir):
+Bu durumda **Amplitude histogram**'ını kontrol ederseniz **yalnızca bir amplitude** bulursunuz; dolayısıyla sinyal **AM olamaz** (çok sayıda amplitude bulursanız bunun nedeni channel boyunca sinyalin güç kaybetmiş olması olabilir):
 
-![](<../../images/image (817).png>)
+![Tek bir amplitude seviyesi gösteren SigDigger FM sinyali amplitude histogram'ı](<../../images/image (817).png>)
 
-Ve bu, faz modülasyonunun olmadığını çok net bir şekilde gösteren faz histogramı olacaktır:
+Phase histogram'ı ise şu şekilde olur (sinyalin phase'de modüle edilmediğini oldukça net gösterir):
 
-![](<../../images/image (996).png>)
+![Checking the frequencies and waveform - Checking the histogram: Sinyalin phase'de modüle edilmediğini net biçimde gösteren phase histogram'ı](<../../images/image (996).png>)
 
-#### IQ ile
+#### With IQ
 
-IQ'nun frekansları tanımlamak için bir alanı yoktur (merkeze olan mesafe amplitüd ve açı fazdır).\
-Bu nedenle, FM'yi tanımlamak için, bu grafikte **temelde sadece bir daire görmelisiniz**.\
-Ayrıca, farklı bir frekans IQ grafiğinde **daire boyunca bir hızlanma ile "temsil edilir"** (bu yüzden SysDigger'da sinyali seçtiğinizde IQ grafiği doldurulur, eğer oluşturulan dairede bir hızlanma veya yön değişikliği bulursanız bu FM olabilir):
+IQ'da frequency'leri tanımlayacak bir alan yoktur (merkeze uzaklık amplitude, açı ise phase'dir).\
+Bu nedenle FM'i belirlemek için bu grafikte temelde **yalnızca bir circle görmeniz gerekir**.\
+Ayrıca farklı bir frequency, IQ grafiğinde **circle boyunca hızlanma** ile "temsil edilir" (yani SysDigger'da sinyali seçtiğinizde IQ grafiği doldurulur; oluşan circle'da bir hızlanma veya yön değişikliği bulursanız bu FM anlamına gelebilir):
 
-![](<../../images/image (81).png>)
+![FM'in circle çevresindeki hızlanma değişiklikleri olarak göründüğü SigDigger IQ grafiği](<../../images/image (81).png>)
 
-### Sembol Hızını Alma
+### Get Symbol Rate
 
-Sembolleri taşıyan frekansları bulduktan sonra, sembol hızını almak için **AM örneğinde kullanılan aynı tekniği** kullanabilirsiniz.
+Symbol'leri taşıyan frequency'leri bulduktan sonra symbol rate'i elde etmek için **AM example'da kullanılan tekniğin aynısını** kullanabilirsiniz.
 
-### Bitleri Alma
+### Get Bits
 
-Sinyalin **frekans modüle edildiğini** ve **sembol hızını** bulduktan sonra, bitleri almak için **AM örneğinde kullanılan aynı tekniği** kullanabilirsiniz.
+Sinyalin **frequency'de modüle edildiğini** ve **symbol rate'i** bulduktan sonra bit'leri elde etmek için **AM example'da kullanılan tekniğin aynısını** kullanabilirsiniz.
+
+## References
+
+- [1] [SigDigger - GNU/Linux ve macOS için ücretsiz digital signal analyzer](https://github.com/BatchDrake/SigDigger)
 
 {{#include ../../banners/hacktricks-training.md}}

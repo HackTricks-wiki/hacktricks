@@ -8,30 +8,30 @@ Garaj kapısı açıcıları genellikle 300-190 MHz aralığındaki frekanslarda
 
 ## Araç Kapıları
 
-Çoğu araç anahtarlığı **315 MHz veya 433 MHz** frekanslarından birinde çalışır. Bunların ikisi de çeşitli uygulamalarda kullanılan radyo frekanslarıdır. İki frekans arasındaki temel fark, 433 MHz'in 315 MHz'den daha uzun bir menzile sahip olmasıdır. Bu da 433 MHz'i uzaktan anahtarsız giriş gibi daha uzun menzil gerektiren uygulamalar için daha uygun hale getirir.\
+Çoğu araç anahtarlığı **315 MHz veya 433 MHz** frekanslarından birinde çalışır. Bunların ikisi de radyo frekansıdır ve çeşitli farklı uygulamalarda kullanılır. İki frekans arasındaki temel fark, 433 MHz'in 315 MHz'e göre daha uzun bir menzile sahip olmasıdır. Bu, 433 MHz'i uzaktan anahtarsız giriş gibi daha uzun menzil gerektiren uygulamalar için daha uygun hale getirir.\
 Avrupa'da 433.92MHz, ABD ve Japonya'da ise 315MHz yaygın olarak kullanılır.<sup>[[1]](#references)</sup>
 
 ## **Brute-force Attack**
 
 <figure><img src="../../images/image (1084).png" alt=""><figcaption></figcaption></figure>
 
-Her kodu 5 kez göndermek (alıcının kodu aldığından emin olmak için bu şekilde gönderilir) yerine yalnızca bir kez gönderirseniz süre 6 dakikaya düşer:
+Her kodu 5 kez göndermek yerine (alıcının kodu aldığından emin olmak için bu şekilde gönderilir) yalnızca bir kez gönderirseniz süre 6 dakikaya düşer:
 
 <figure><img src="../../images/image (622).png" alt=""><figcaption></figcaption></figure>
 
-ve sinyaller arasındaki **2 ms'lik bekleme** süresini **kaldırırsanız süreyi 3 dakikaya düşürebilirsiniz.**
+ve sinyaller arasındaki **2 ms'lik bekleme** süresini **kaldırırsanız süreyi 3 dakikaya indirebilirsiniz.**
 
-Ayrıca, tüm olası ikili sayıları bruteforce etmek için gönderilmesi gereken bit sayısını azaltan bir yöntem olan De Bruijn Sequence kullanıldığında bu **süre yalnızca 8 saniyeye düşer**:
+Ayrıca De Bruijn Sequence kullanarak (tüm olası binary sayıları brute-force etmek için gönderilmesi gereken bit sayısını azaltan bir yöntem) bu **süre yalnızca 8 saniyeye düşer**:<sup>[[3]](#references)</sup>
 
 <figure><img src="../../images/image (583).png" alt=""><figcaption></figcaption></figure>
 
-Bu saldırının bir örneği [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)<sup>[[3]](#references)</sup> adresinde uygulanmıştır.
+Bu saldırının bir örneği [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame) adresinde uygulanmıştır.
 
-**Preamble gerektirilmesi De Bruijn Sequence** optimizasyonunu önler ve **rolling codes bu saldırıyı engeller** (kodun bruteforce edilemeyecek kadar uzun olduğu varsayımıyla).
+**Bir preamble gerektirilmesi De Bruijn Sequence** optimizasyonunu engeller ve **rolling codes bu saldırıyı önler** (kodun brute-force edilemeyecek kadar uzun olduğu varsayılarak).
 
 ## Sub-GHz Attack
 
-Bu sinyallere Flipper Zero ile saldırmak için şuraya bakın:
+Bu sinyallere Flipper Zero ile saldırmak için şurayı kontrol edin:
 
 
 {{#ref}}
@@ -40,49 +40,49 @@ flipper-zero/fz-sub-ghz.md
 
 ## Rolling Codes Protection
 
-Otomatik garaj kapısı açıcıları, garaj kapısını açıp kapatmak için genellikle kablosuz bir uzaktan kumanda kullanır. Uzaktan kumanda, garaj kapısı açıcısına bir **radyo frekansı (RF) sinyali** gönderir ve bu sinyal, kapıyı açmak veya kapatmak için motoru etkinleştirir.
+Otomatik garaj kapısı açıcıları, garaj kapısını açmak ve kapatmak için genellikle kablosuz bir uzaktan kumanda kullanır. Uzaktan kumanda, garaj kapısı açıcıya **bir radio frequency (RF) signal** gönderir ve bu sinyal kapıyı açmak veya kapatmak için motoru etkinleştirir.
 
-Bir kişinin code grabber olarak bilinen bir cihazı kullanarak RF sinyalini yakalaması ve daha sonra kullanmak üzere kaydetmesi mümkündür. Bu, **replay attack** olarak bilinir. Bu tür bir saldırıyı önlemek için birçok modern garaj kapısı açıcısı, **rolling code** sistemi olarak bilinen daha güvenli bir encryption yöntemi kullanır.
+Bir kişinin code grabber olarak bilinen bir cihaz kullanarak RF sinyalini yakalaması ve daha sonra kullanmak üzere kaydetmesi mümkündür. Bu işlem **replay attack** olarak bilinir. Bu tür saldırıları önlemek için birçok modern garaj kapısı açıcı, **rolling code** sistemi olarak bilinen daha güvenli bir encryption yöntemi kullanır.
 
-**RF sinyali genellikle rolling code kullanılarak iletilir**; bu, kodun her kullanımda değiştiği anlamına gelir. Bu durum, bir kişinin sinyali **intercept etmesini** ve garaja **yetkisiz** erişim sağlamak için **kullanmasını** **zorlaştırır**.
+**RF signal genellikle rolling code kullanılarak iletilir**; bu, kodun her kullanımda değiştiği anlamına gelir. Bu durum, bir kişinin sinyali **intercept** etmesini ve garaja **unauthorised** erişim sağlamak için **kullanmasını** **zorlaştırır**.
 
-Bir rolling code sisteminde uzaktan kumanda ve garaj kapısı açıcısı, uzaktan kumanda her kullanıldığında yeni bir kod **üreten ortak bir algorithm** kullanır. Garaj kapısı açıcısı yalnızca **doğru koda** yanıt verir; bu da bir kişinin yalnızca bir kodu yakalayarak garaja yetkisiz erişim sağlamasını çok daha zorlaştırır.
+Bir rolling code sisteminde uzaktan kumanda ve garaj kapısı açıcı, kumanda her kullanıldığında yeni bir kod **üreten ortak bir algorithm** kullanır. Garaj kapısı açıcı yalnızca **doğru code**'a yanıt verir; bu da bir kişinin yalnızca bir kodu yakalayarak garaja yetkisiz erişim sağlamasını çok daha zorlaştırır.
 
 ### **Missing Link Attack**
 
-Temel olarak düğmeyi dinler ve uzaktan kumanda cihazın (örneğin aracın veya garajın) **menzili dışındayken sinyali yakalarsınız**. Ardından cihazın yanına gider ve **yakalanan kodu onu açmak için kullanırsınız**.<sup>[[2]](#references)</sup>
+Temel olarak düğmeyi dinler ve kumanda cihazın (örneğin araç veya garaj) **menzili dışındayken sinyali yakalarsınız**. Daha sonra cihaza gider ve **yakalanan kodu kullanarak cihazı açarsınız**.<sup>[[2]](#references)</sup>
 
 ### Full Link Jamming Attack
 
-Bir saldırgan, **alıcının kodu gerçekten ‘duyamaması’** için aracın veya alıcının yakınındaki sinyali **jam edebilir** ve bu gerçekleştiğinde, jamming işlemini durdurduktan sonra kodu kolayca **yakalayıp replay edebilir**.
+Bir attacker, **receiver**'ın yakınındaki sinyali **jam** edebilir; böylece **receiver kodu gerçekten ‘duyamaz’**. Bu gerçekleştiğinde, jamming'i durdurduktan sonra kodu kolayca **capture and replay** edebilirsiniz.<sup>[[2]](#references)</sup>
 
-Kurban bir noktada **aracı kilitlemek için anahtarları kullanır**, ancak saldırgan umarız kapıyı açmak için yeniden gönderebileceği yeterli sayıda "close door" kodunu kaydetmiş olur (aynı kodları açmak ve kapatmak için kullanan ancak iki komut için farklı frekansları dinleyen araçlar bulunduğundan **frekans değişikliği gerekebilir**).
+Kurban bir noktada **aracı kilitlemek için anahtarları kullanır**, ancak saldırı **yeterli sayıda "close door" kodunu kaydetmiş** olur; böylece bu kodlar kapıyı açmak için yeniden gönderilebilir (aynı kodları açma ve kapatma için kullanan, ancak her iki komutu farklı frekanslarda dinleyen araçlar olduğundan **frekans değişikliği gerekebilir**).
 
 > [!WARNING]
-> **Jamming çalışır**, ancak fark edilmesi kolaydır; çünkü **aracı kilitleyen kişi kapıların kilitli olduğunu doğrulamak için kapıları basitçe test ederse** aracın kilidinin açıldığını fark eder. Ayrıca bu tür saldırılardan haberdarlarsa, ‘lock’ düğmesine bastıklarında kapıların kilitlenme **sesinin hiç çıkmadığını** veya aracın **ışıklarının yanıp sönmediğini** fark edebilirler.
+> **Jamming çalışır**, ancak fark edilebilir; çünkü **aracı kilitleyen kişi kapıların kilitli olduğundan emin olmak için kapıları kontrol ederse** aracın kilidinin açılmış olduğunu fark eder. Ayrıca bu tür saldırıların farkında olan kişiler, ‘lock’ düğmesine bastıklarında kapıların hiçbir zaman kilitlenme **sesini çıkarmadığını** veya aracın **ışıklarının yanıp sönmediğini** de fark edebilir.
 
 ### **Code Grabbing Attack ( aka ‘RollJam’ )**
 
-Bu, daha **gizli bir Jamming tekniğidir**. Saldırgan sinyali jam eder; böylece kurban kapıyı kilitlemeye çalıştığında işlem gerçekleşmez, ancak saldırgan **bu kodu kaydeder**. Ardından kurban düğmeye basarak aracı **tekrar kilitlemeye çalışır** ve araç **bu ikinci kodu kaydeder**.\
-Bunun hemen ardından **saldırgan ilk kodu gönderebilir** ve **araç kilitlenir** (kurban ikinci basışın aracı kilitlediğini düşünür). Daha sonra saldırgan, aracı açmak için **çalınan ikinci kodu gönderebilir** (**"close car" kodunun aracı açmak için de kullanılabildiği** varsayımıyla). Aynı kodları açmak ve kapatmak için kullanan ancak iki komut için farklı frekansları dinleyen araçlar bulunduğundan frekans değişikliği gerekebilir.<sup>[[3]](#references)[[2]](#references)</sup>
+Bu, daha **gizli bir Jamming tekniğidir**. Saldırgan sinyali jam eder; böylece kurban kapıyı kilitlemeye çalıştığında işlem başarısız olur, ancak saldırgan **bu kodu kaydeder**. Ardından kurban düğmeye basarak **aracı tekrar kilitlemeye çalışır** ve araç **bu ikinci kodu kaydeder**.<sup>[[2]](#references)[[4]](#references)</sup>\
+Bundan hemen sonra **saldırgan ilk kodu gönderebilir** ve **araç kilitlenir** (kurban ikinci basışın aracı kilitlediğini düşünür). Ardından saldırgan, aracı açmak için **çalınan ikinci kodu gönderebilir** (bir **"close car" kodunun aracı açmak için de kullanılabildiği** varsayımıyla). (Açma ve kapatma için aynı kodları kullanan, ancak her iki komutu farklı frekanslarda dinleyen araçlar olduğundan frekans değişikliği gerekebilir.)
 
-Saldırgan, **kendi alıcısını değil aracın alıcısını jam edebilir**; çünkü aracın alıcısı örneğin 1MHz geniş bant dinliyorsa saldırgan uzaktan kumandanın kullandığı tam frekansı değil, bu spektrumda **ona yakın bir frekansı jam eder**. Buna karşılık **saldırganın alıcısı daha dar bir aralıkta dinleme yapar** ve jam sinyali olmadan uzaktan kumandanın sinyalini dinleyebilir.
+Saldırgan, kendi receiver'ını değil **araç receiver'ını jam edebilir**; çünkü araç receiver'ı örneğin 1MHz geniş bant dinliyorsa saldırgan, kumanda tarafından kullanılan tam frekansı değil, bu spektrumda **ona yakın bir frekansı jam eder**. Bu sırada **saldırganın receiver'ı daha küçük bir aralıkta dinleme yaparak** kumanda sinyalini **jam sinyali olmadan dinleyebilir**.
 
 > [!WARNING]
-> Spesifikasyonlarda görülen diğer uygulamalar, **rolling code'un gönderilen toplam kodun bir bölümü** olduğunu gösterir. Örneğin gönderilen kod, ilk **12 biti rolling code**, sonraki **8 biti komut** (lock veya unlock gibi) ve son 4 biti **checksum** olan **24 bitlik bir anahtar** olabilir. Bu türü uygulayan araçlar da doğal olarak savunmasızdır; çünkü saldırganın her iki frekansta da **herhangi bir rolling code'u kullanabilmek** için yalnızca rolling code bölümünü değiştirmesi yeterlidir.
+> Spesifikasyonlarda görülen diğer uygulamalar, **rolling code'un gönderilen toplam kodun bir bölümü** olduğunu gösterir. Örneğin gönderilen kod, ilk **12 biti rolling code**, sonraki **8 biti lock veya unlock gibi command** ve son 4 biti **checksum** olan **24 bitlik bir key** olabilir. Bu türü uygulayan araçlar da doğal olarak savunmasızdır; çünkü saldırganın **her iki frekansta herhangi bir rolling code'u kullanabilmek** için yalnızca rolling code bölümünü değiştirmesi yeterlidir.
 
 > [!CAUTION]
-> Kurban saldırgan ilk kodu gönderirken üçüncü bir kod gönderirse ilk ve ikinci kodun geçersiz hale geleceğini unutmayın.
+> Kurban saldırgan ilk kodu gönderirken üçüncü bir kod gönderirse ilk ve ikinci kodların geçersiz hale geleceğini unutmayın.
 
 ### Alarm Sounding Jamming Attack
 
-Bir araçta kurulu aftermarket bir rolling code sistemine karşı yapılan testlerde, **aynı kodun iki kez gönderilmesi** alarmı ve immobiliser'ı **hemen etkinleştirdi** ve benzersiz bir **denial of service** fırsatı sağladı. İronik olarak **alarmı** ve immobiliser'ı **devre dışı bırakmanın yolu** uzaktan kumandaya **basmaktı**; bu da saldırgana sürekli olarak **DoS attack gerçekleştirme** imkânı sağladı. Alternatif olarak bu saldırı, kurban saldırıyı mümkün olduğunca çabuk durdurmak isteyeceğinden, **daha fazla kod elde etmek için önceki saldırıyla birleştirilebilir**.<sup>[[2]](#references)</sup>
+Bir araçta kurulu aftermarket rolling code sistemine karşı yapılan testlerde, **aynı kodun iki kez gönderilmesi** alarmı ve immobiliser'ı hemen **etkinleştirerek** benzersiz bir **denial of service** fırsatı sağladı. İronik olarak, **alarmı** ve immobiliser'ı **devre dışı bırakmanın** yolu **uzaktan kumandaya basmaktı**; bu da saldırgana sürekli olarak **DoS attack gerçekleştirme** imkânı veriyordu. Alternatif olarak bu saldırı, kurban saldırıyı en kısa sürede durdurmak isteyeceğinden, **daha fazla kod elde etmek için önceki saldırıyla** birleştirilebilir.<sup>[[2]](#references)</sup>
 
 ## References
 
 - [1] [What Radio Frequency Does Car Key Fobs Run On?](https://www.americanradioarchives.com/what-radio-frequency-do-car-key-fobs-run-on/)
-- [2] [Bypassing Rolling Code Systems](https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/)
-- [3] [Drive It Like You Hacked It (DEF CON 23) - OpenSesame / RollJam](https://samy.pl/defcon2015/)
-- [4] [How to hack a car (RollJam recreation)](https://hackaday.io/project/164566-how-to-hack-a-car/details)
+- [2] [Bypassing Rolling Code Systems - Andrew Mohawk](https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/)
+- [3] [Samy Kamkar - DEF CON 23: Drive It Like You Hacked It (OpenSesame)](https://samy.pl/defcon2015/)
+- [4] [How To Hack A Car - RollJam recreation with YARD Stick One / RTL-SDR](https://hackaday.io/project/164566-how-to-hack-a-car/details)
 
 {{#include ../../banners/hacktricks-training.md}}

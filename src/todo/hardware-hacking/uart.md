@@ -4,75 +4,75 @@
 
 ## Temel Bilgiler
 
-UART, bileşenler arasında verileri bir seferde bir bit olarak ileten seri bir protokoldür. Buna karşılık, paralel iletişim protokolleri verileri birden fazla kanal üzerinden aynı anda iletir. Yaygın seri protokoller arasında RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express ve USB bulunur.
+UART bir serial protocol'dür; yani verileri bileşenler arasında her seferinde bir bit olacak şekilde aktarır. Bunun aksine, parallel communication protocol'leri verileri birden fazla kanal üzerinden eş zamanlı olarak iletir. Yaygın serial protocol'ler arasında RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express ve USB bulunur.
 
-Genel olarak, UART boşta iken hat yüksek (mantıksal 1 değeri) tutulur. Ardından, bir veri transferinin başlangıcını işaretlemek için, verici alıcıya bir başlangıç biti gönderir; bu esnada sinyal düşük (mantıksal 0 değeri) tutulur. Sonra, verici, gerçek mesajı içeren beş ila sekiz veri bitini gönderir, ardından yapılandırmaya bağlı olarak isteğe bağlı bir parite biti ve bir veya iki durdurma biti (mantıksal 1 değeri ile) gelir. Hata kontrolü için kullanılan parite biti pratikte nadiren görülür. Durdurma biti (veya bitleri) iletimin sonunu belirtir.
+Genellikle UART idle durumundayken hat high (mantıksal 1 değerinde) tutulur. Ardından bir data transfer'ının başladığını belirtmek için transmitter receiver'a bir start bit gönderir ve bu sırada sinyal low (mantıksal 0 değerinde) tutulur. Sonra transmitter, gerçek mesajı içeren beş ila sekiz data bit'i gönderir; bunu configuration'a bağlı olarak isteğe bağlı bir parity bit'i ve bir veya iki stop bit'i (mantıksal 1 değerinde) izler. Error checking için kullanılan parity bit'i pratikte nadiren görülür. Stop bit'i (veya bit'leri) transmission'ın sonunu belirtir.
 
-En yaygın yapılandırmaya 8N1 denir: sekiz veri biti, parite yok ve bir durdurma biti. Örneğin, C karakterini veya ASCII'de 0x43'ü 8N1 UART yapılandırmasında göndermek isteseydik, şu bitleri gönderirdik: 0 (başlangıç biti); 0, 1, 0, 0, 0, 0, 1, 1 (0x43'ün ikili değeri) ve 0 (durdurma biti).
+En yaygın configuration'a 8N1 adını veririz: sekiz data bit'i, parity yok ve bir stop bit'i. Örneğin, C karakterini veya ASCII'de 0x43'ü 8N1 UART configuration'ında göndermek isteseydik, şu bit'leri gönderirdik: 0 (start bit'i); 0, 1, 0, 0, 0, 0, 1, 1 (binary biçimde 0x43 değeri) ve 0 (stop bit'i).
 
-![](<../../images/image (764).png>)
+![UART: En yaygın configuration'a 8N1 adını veririz: sekiz data bit'i, parity yok ve bir stop bit'i. Örneğin, C karakterini veya ASCII'de 0x43'ü 8N1 UART](<../../images/image (764).png>) configuration'ında göndermek isteseydik
 
-UART ile iletişim kurmak için donanım araçları:
+UART ile iletişim kurmak için hardware araçları:
 
-- USB-serial adaptörü
-- CP2102 veya PL2303 yongaları ile adaptörler
-- Bus Pirate, Adafruit FT232H, Shikra veya Attify Badge gibi çok amaçlı araçlar
+- USB-to-serial adapter
+- CP2102 veya PL2303 chip'lerine sahip adapter'lar
+- Bus Pirate, Adafruit FT232H, Shikra veya Attify Badge gibi multipurpose tool
 
-### UART Portlarını Belirleme
+### UART Port'larını Belirleme
 
-UART'ın 4 portu vardır: **TX**(Gönder), **RX**(Al), **Vcc**(Gerilim) ve **GND**(Toprak). PCB üzerinde **`TX`** ve **`RX`** harfleri **yazılı** 4 port bulabilirsiniz. Ancak bir belirti yoksa, bir **multimetre** veya **mantık analizörü** kullanarak kendiniz bulmanız gerekebilir.
+UART'ın 4 port'u vardır: **TX** (Transmit), **RX** (Receive), **Vcc** (Voltage) ve **GND** (Ground). PCB üzerinde **`TX`** ve **`RX`** harfleri **yazılı** şekilde 4 port bulabilirsiniz. Ancak herhangi bir indication yoksa, bunları bir **multimeter** veya **logic analyzer** kullanarak kendiniz bulmanız gerekebilir.
 
-**Multimetre** ile cihaz kapalıyken:
+Cihaz kapalıyken bir **multimeter** ile:
 
-- **GND** pinini belirlemek için **Devamlılık Testi** modunu kullanın, arka ucu toprağa yerleştirin ve kırmızı uçla test edin, multimetreden ses duyana kadar. PCB üzerinde birkaç GND pini bulunabilir, bu nedenle UART'a ait olanı bulmuş olabilirsiniz veya olmayabilirsiniz.
-- **VCC portunu** belirlemek için, **DC gerilim modunu** ayarlayın ve 20 V gerilim ayarlayın. Siyah probu toprağa, kırmızı probu pin üzerine yerleştirin. Cihazı açın. Multimetre 3.3 V veya 5 V sabit bir gerilim ölçerse, Vcc pinini bulmuşsunuzdur. Diğer gerilimler alırsanız, diğer portlarla tekrar deneyin.
-- **TX** **portunu** belirlemek için, **DC gerilim modunu** 20 V'a kadar ayarlayın, siyah probu toprağa, kırmızı probu pin üzerine yerleştirin ve cihazı açın. Gerilimin birkaç saniye dalgalandığını ve ardından Vcc değerinde sabitlendiğini bulursanız, muhtemelen TX portunu bulmuşsunuzdur. Bunun nedeni, açıldığında bazı hata ayıklama verileri göndermesidir.
-- **RX portu**, diğer 3'e en yakın olanıdır, en düşük gerilim dalgalanmasına ve tüm UART pinleri arasında en düşük genel değere sahiptir.
+- **GND** pin'ini belirlemek için **Continuity Test** mode'unu kullanın; siyah probu ground'a bağlayın ve multimeter'dan bir ses duyana kadar kırmızı probla test edin. PCB üzerinde birden fazla GND pin'i bulunabilir; bu nedenle UART'a ait olanı bulmuş veya bulamamış olabilirsiniz.
+- **VCC port'unu** belirlemek için **DC voltage mode**'unu seçin ve voltage'u 20 V'a ayarlayın. Siyah prob ground üzerinde, kırmızı prob pin üzerinde olmalıdır. Cihaza güç verin. Multimeter sabit olarak 3.3 V veya 5 V ölçerse Vcc pin'ini bulmuşsunuzdur. Başka voltage'lar alırsanız diğer port'larla tekrar deneyin.
+- **TX** **port'unu** belirlemek için **DC voltage mode**'unda voltage'u 20 V'a kadar ayarlayın; siyah prob ground üzerinde, kırmızı prob pin üzerinde olmalı ve cihaza güç verilmelidir. Voltage'un birkaç saniye boyunca fluctuating yaptığını ve ardından Vcc değerinde stabilize olduğunu görürseniz büyük olasılıkla TX port'unu bulmuşsunuzdur. Bunun nedeni, cihaz açılırken bazı debug data'ları göndermesidir.
+- **RX port'u**, diğer 3 port'a en yakın olan port'tur; en düşük voltage fluctuation'ına ve tüm UART pin'leri arasındaki en düşük overall değere sahiptir.
 
-TX ve RX portlarını karıştırabilirsiniz ve hiçbir şey olmaz, ancak GND ve VCC portlarını karıştırırsanız devreyi yakabilirsiniz.
+TX ve RX port'larını karıştırabilirsiniz; hiçbir şey olmaz. Ancak GND ve VCC port'unu karıştırırsanız circuit'ü yakabilirsiniz.
 
-Bazı hedef cihazlarda, üretici RX veya TX'yi veya her ikisini devre dışı bırakarak UART portunu devre dışı bırakmıştır. Bu durumda, devre kartındaki bağlantıları izlemek ve bazı breakout noktaları bulmak faydalı olabilir. UART'ın tespit edilmediğini ve devrenin kesildiğini doğrulamak için güçlü bir ipucu, cihazın garantisini kontrol etmektir. Cihaz bir garanti ile gönderildiyse, üretici bazı hata ayıklama arayüzleri (bu durumda, UART) bırakır ve bu nedenle UART'ı devre dışı bırakmış olmalı ve hata ayıklama sırasında tekrar bağlamalıdır. Bu breakout pinleri lehimleme veya jumper kabloları ile bağlanabilir.
+Bazı target cihazlarda UART port'u, manufacturer tarafından RX veya TX'in ya da her ikisinin disable edilmesiyle devre dışı bırakılmıştır. Bu durumda circuit board üzerindeki bağlantıları trace etmek ve bir breakout point bulmak faydalı olabilir. UART'ın detection edilmediğini ve circuit'in kırıldığını doğrulamaya yönelik güçlü bir ipucu, cihaz warranty'sini kontrol etmektir. Cihaz bir warranty ile gönderilmişse manufacturer bazı debug interface'lerini (bu durumda UART) bırakır ve bu nedenle debug sırasında UART'ı tekrar bağlayabilmek için bağlantısını kesmiş olmalıdır. Bu breakout pin'leri soldering veya jumper wire'lar kullanılarak bağlanabilir.
 
-### UART Baud Hızını Belirleme
+### UART Baud Rate'ini Belirleme
 
-Doğru baud hızını belirlemenin en kolay yolu, **TX pininin çıkışına bakmak ve verileri okumaya çalışmaktır**. Aldığınız veriler okunabilir değilse, veriler okunabilir hale gelene kadar bir sonraki olası baud hızına geçin. Bunu yapmak için bir USB-serial adaptörü veya Bus Pirate gibi çok amaçlı bir cihaz kullanabilir ve [baudrate.py](https://github.com/devttys0/baudrate/) gibi bir yardımcı betik ile eşleştirebilirsiniz. En yaygın baud hızları 9600, 38400, 19200, 57600 ve 115200'dür.
+Doğru baud rate'i belirlemenin en kolay yolu **TX pin'inin output'una bakmak ve data'yı okumayı denemektir**. Aldığınız data okunabilir değilse, data okunabilir hale gelene kadar sıradaki olası baud rate'e geçin. Bunu bir USB-to-serial adapter veya Bus Pirate gibi bir multipurpose device ve [baudrate.py](https://github.com/devttys0/baudrate/) gibi bir helper script ile birlikte kullanabilirsiniz. En yaygın baud rate'ler 9600, 38400, 19200, 57600 ve 115200'dür.
 
 > [!CAUTION]
-> Bu protokolde bir cihazın TX'ini diğerinin RX'ine bağlamanız gerektiğini unutmamak önemlidir!
+> Bu protocol'de bir cihazın TX'ini diğer cihazın RX'ine bağlamanız gerektiğini unutmamak önemlidir!
 
-## CP210X UART'dan TTY Adaptörü
+## CP210X UART to TTY Adapter
 
-CP210X Çipi, NodeMCU (esp8266 ile) gibi birçok prototipleme kartında Seri İletişim için kullanılır. Bu adaptörler nispeten ucuzdur ve hedefin UART arayüzüne bağlanmak için kullanılabilir. Cihazın 5 pini vardır: 5V, GND, RXD, TXD, 3.3V. Herhangi bir hasarı önlemek için hedef tarafından desteklenen gerilimi bağladığınızdan emin olun. Son olarak, Adaptörün RXD pinini hedefin TXD'sine ve Adaptörün TXD pinini hedefin RXD'sine bağlayın.
+CP210X Chip, Serial Communication için NodeMCU (esp8266 ile) gibi birçok prototyping board'unda kullanılır. Bu adapter'lar nispeten ucuzdur ve target'ın UART interface'ine bağlanmak için kullanılabilir. Cihazın 5 pin'i vardır: 5V, GND, RXD, TXD, 3.3V. Herhangi bir damage'ı önlemek için voltage'u target tarafından desteklenen değere bağladığınızdan emin olun. Son olarak Adapter'ın RXD pin'ini target'ın TXD'sine, Adapter'ın TXD pin'ini de target'ın RXD'sine bağlayın.
 
-Adaptör tespit edilmezse, CP210X sürücülerinin ana sistemde yüklü olduğundan emin olun. Adaptör tespit edilip bağlandığında, picocom, minicom veya screen gibi araçlar kullanılabilir.
+Adapter detection edilmiyorsa CP210X driver'larının host system'a kurulu olduğundan emin olun. Adapter detection edilip bağlandıktan sonra picocom, minicom veya screen gibi tool'lar kullanılabilir.
 
-Linux/MacOS sistemlerine bağlı cihazları listelemek için:
+Linux/MacOS system'lerine bağlı cihazları listelemek için:
 ```
 ls /dev/
 ```
-UART arayüzü ile temel etkileşim için aşağıdaki komutu kullanın:
+UART arayüzüyle temel etkileşim için aşağıdaki komutu kullanın:
 ```
 picocom /dev/<adapter> --baud <baudrate>
 ```
-Minicom için, bunu yapılandırmak için aşağıdaki komutu kullanın:
+minicom için yapılandırmak üzere aşağıdaki komutu kullanın:
 ```
 minicom -s
 ```
-`Serial port setup` seçeneğinde baudrate ve cihaz adını yapılandırın.
+`Serial port setup` seçeneğinde baudrate ve cihaz adı gibi ayarları yapılandırın.
 
-Yapılandırmadan sonra, UART Konsolu'nu başlatmak için `minicom` komutunu kullanın.
+Yapılandırmadan sonra UART Console'u başlatmak için `minicom` komutunu kullanın.
 
-## UART Via Arduino UNO R3 (Çıkarılabilir Atmel 328p Çip Kartları)
+## UART Via Arduino UNO R3 (Removable Atmel 328p Chip Boards)
 
-Eğer UART Serial to USB adaptörleri mevcut değilse, Arduino UNO R3 hızlı bir hack ile kullanılabilir. Arduino UNO R3 genellikle her yerde mevcut olduğundan, bu çok zaman kazandırabilir.
+UART Serial to USB adapterleri mevcut değilse Arduino UNO R3 hızlı bir hack ile kullanılabilir. Arduino UNO R3 genellikle her yerde bulunabildiğinden bu yöntem çok zaman kazandırabilir.
 
-Arduino UNO R3'te, kartın kendisinde yerleşik bir USB to Serial adaptör bulunmaktadır. UART bağlantısını elde etmek için, Atmel 328p mikrodenetleyici çipini karttan çıkarın. Bu hack, Atmel 328p'nin kart üzerine lehimlenmediği Arduino UNO R3 varyantlarında çalışır (SMD versiyonu kullanılır). Arduino'nun RX pinini (Dijital Pin 0) UART Arayüzünün TX pinine ve Arduino'nun TX pinini (Dijital Pin 1) UART arayüzünün RX pinine bağlayın.
+Arduino UNO R3'ün kendi kartı üzerinde yerleşik bir USB to Serial adapter bulunur. UART bağlantısı elde etmek için Atmel 328p microcontroller chip'ini karttan çıkarmanız yeterlidir. Bu hack, Atmel 328p'nin karta lehimlenmediği Arduino UNO R3 varyantlarında çalışır (SMD version kullanılır). Arduino'nun RX pinini (Digital Pin 0) UART Interface'in TX pinine, Arduino'nun TX pinini (Digital Pin 1) ise UART interface'in RX pinine bağlayın.
 
-Son olarak, Serial Konsolu almak için Arduino IDE kullanmanız önerilir. Menüdeki `tools` bölümünde `Serial Console` seçeneğini seçin ve baud hızını UART arayüzüne göre ayarlayın.
+Son olarak, Serial Console'u kullanmak için Arduino IDE kullanılması önerilir. Menüdeki `tools` bölümünden `Serial Console` seçeneğini seçin ve baud rate'i UART interface'e göre ayarlayın.
 
 ## Bus Pirate
 
-Bu senaryoda, programın tüm çıktısını Serial Monitor'a gönderen Arduino'nun UART iletişimini dinleyeceğiz.
+Bu senaryoda, programın tüm çıktısını Serial Monitor'a gönderen Arduino'nun UART iletişimini sniff edeceğiz.
 ```bash
 # Check the modes
 UART>m
@@ -144,30 +144,30 @@ Escritura inicial completada:
 AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
-## UART Konsolu ile Firmware Dökümü
+## UART Console ile Firmware Dump Etme
 
-UART Konsolu, çalışma ortamında temel firmware ile çalışmanın harika bir yolunu sunar. Ancak, UART Konsolu erişimi yalnızca okunabilir olduğunda, birçok kısıtlama getirebilir. Birçok gömülü cihazda, firmware EEPROM'larda saklanır ve volatıl belleğe sahip işlemcilerde çalıştırılır. Bu nedenle, orijinal firmware üretim sırasında EEPROM'un içinde bulunduğundan, firmware yalnızca okunabilir olarak tutulur ve yeni dosyalar volatıl bellek nedeniyle kaybolur. Bu nedenle, gömülü firmware'lerle çalışırken firmware dökümü değerli bir çabadır.
+UART Console, runtime environment içinde underlying firmware ile çalışmak için harika bir yöntem sunar. Ancak UART Console erişimi read-only olduğunda, birçok kısıtlamaya yol açabilir. Birçok embedded device'ta firmware, EEPROM'larda depolanır ve volatile memory'ye sahip processor'larda çalıştırılır. Bu nedenle firmware read-only tutulur; çünkü üretim sırasında kullanılan original firmware EEPROM'un kendisindedir ve volatile memory nedeniyle yeni dosyalar kaybolur. Bu yüzden embedded firmware'lerle çalışırken firmware dump etmek değerli bir işlemdir.
 
-Bunu yapmanın birçok yolu vardır ve SPI bölümü, çeşitli cihazlarla EEPROM'dan doğrudan firmware çıkarmak için yöntemleri kapsar. Ancak, fiziksel cihazlar ve harici etkileşimlerle firmware dökümünün riskli olabileceğinden, önce UART ile firmware dökümünü denemek önerilir.
+Bunu yapmanın birçok yolu vardır ve SPI bölümü, çeşitli cihazlarla firmware'i doğrudan EEPROM'dan extract etme yöntemlerini kapsar. Ancak firmware'i fiziksel cihazlar ve external interactions kullanarak dump etmek riskli olabileceğinden, öncelikle UART ile firmware dump etmeyi denemeniz önerilir.
 
-UART Konsolu'ndan firmware dökümü, öncelikle bootloader'lara erişim sağlamayı gerektirir. Birçok popüler satıcı, Linux'u yüklemek için bootloader olarak uboot (Universal Bootloader) kullanır. Bu nedenle, uboot'a erişim sağlamak gereklidir.
+UART Console'dan firmware dump etmek için öncelikle bootloader'lara erişim sağlamak gerekir. Birçok popüler vendor, Linux'u yüklemek için bootloader olarak uboot (Universal Bootloader) kullanır. Bu nedenle uboot'a erişim sağlamak gereklidir.
 
-Bootloader'a erişim sağlamak için, UART portunu bilgisayara bağlayın ve herhangi bir Seri Konsol aracını kullanın ve cihazın güç kaynağını bağlantısını kesin. Kurulum hazır olduğunda, Enter tuşuna basın ve basılı tutun. Son olarak, cihazın güç kaynağını bağlayın ve başlatın.
+boot bootloader'a erişmek için UART portunu computer'a bağlayın, Serial Console araçlarından herhangi birini kullanın ve device'a giden power supply bağlantısını kesik tutun. Kurulum hazır olduğunda Enter Key'e basılı tutun. Son olarak device'a power supply bağlantısını yapın ve boot etmesini bekleyin.
 
-Bunu yapmak, uboot'un yüklenmesini kesintiye uğratacak ve bir menü sağlayacaktır. Uboot komutlarını anlamak ve bunları listelemek için yardım menüsünü kullanmak önerilir. Bu muhtemelen `help` komutudur. Farklı satıcılar farklı yapılandırmalar kullandığından, her birini ayrı ayrı anlamak gereklidir.
+Bunu yapmak, uboot'un yüklenmesini interrupt edecek ve bir menu sunacaktır. uboot command'lerini anlamanız ve bunları listelemek için help menu'sünü kullanmanız önerilir. Bu, `help` command'i olabilir. Farklı vendor'lar farklı configuration'lar kullandığından, her birini ayrı ayrı anlamak gerekir.
 
-Genellikle, firmware dökümü için komut şudur:
+Genellikle firmware dump etmek için kullanılan command şudur:
 ```
 md
 ```
-"memory dump" anlamına gelir. Bu, belleği (EEPROM İçeriği) ekrana dökecektir. Bellek dökümünü yakalamak için prosedüre başlamadan önce Seri Konsol çıktısını kaydetmek önerilir.
+bu, "memory dump" anlamına gelir. Bu işlem belleği (EEPROM Content) ekrana döker. Memory dump işlemini yakalamak için prosedüre başlamadan önce Serial Console çıktısını günlüğe kaydetmeniz önerilir.
 
-Son olarak, günlük dosyasından tüm gereksiz verileri çıkarın ve dosyayı `filename.rom` olarak saklayın ve içerikleri çıkarmak için binwalk kullanın:
+Son olarak, log dosyasındaki tüm gereksiz verileri ayıklayın, dosyayı `filename.rom` olarak kaydedin ve içeriği çıkarmak için binwalk kullanın:
 ```
 binwalk -e <filename.rom>
 ```
-Bu, hex dosyasında bulunan imzalara göre EEPROM'dan olası içerikleri listeleyecektir.
+Bu, hex dosyasında bulunan imzalara göre EEPROM'un olası içeriklerini listeleyecektir.
 
-Ancak, uboot'un kullanılıyor olsa bile her zaman kilidinin açılmadığını belirtmek gerekir. Enter Tuşu bir şey yapmıyorsa, Boşluk Tuşu gibi farklı tuşları kontrol edin. Eğer bootloader kilitliyse ve kesintiye uğramıyorsa, bu yöntem işe yaramaz. Uboot'un cihaz için bootloader olup olmadığını kontrol etmek için, cihazın açılışı sırasında UART Konsolu'ndaki çıktıyı kontrol edin. Açılış sırasında uboot'u belirtebilir. 
+Bununla birlikte, kullanılıyor olsa bile uboot'un her zaman unlocked olmayabileceğini belirtmek gerekir. Enter Key herhangi bir işlem yapmıyorsa Space Key vb. farklı tuşları deneyin. Bootloader locked durumdaysa ve kesintiye uğramıyorsa bu yöntem işe yaramaz. uboot'un cihaz için bootloader olup olmadığını kontrol etmek için cihaz açılırken UART Console üzerindeki çıktıyı kontrol edin. Açılış sırasında uboot ifadesi geçebilir.
 
 {{#include ../../banners/hacktricks-training.md}}

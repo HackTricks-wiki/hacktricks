@@ -4,69 +4,69 @@
 
 ## Spot
 
-Bu, bazı ticaret yapmanın en temel yoludur. **Almak veya satmak istediğiniz varlığın miktarını ve fiyatını** belirtebilirsiniz ve o fiyat ulaşıldığında işlem gerçekleştirilir.
+Bu, trading yapmanın en temel yoludur. **Varlığın miktarını ve satın almak veya satmak istediğiniz fiyatı belirtebilir**, fiyat ulaşıldığında işlem gerçekleştirilir.
 
-Genellikle, işlemi mümkün olan en hızlı şekilde mevcut fiyatla gerçekleştirmek için **mevcut piyasa fiyatını** da kullanabilirsiniz.
+Genellikle işlemi mevcut fiyattan mümkün olduğunca hızlı gerçekleştirmek için **güncel piyasa fiyatını** da kullanabilirsiniz.
 
-**Stop Loss - Limit**: Ayrıca, varlıkların alım veya satım fiyatını belirlerken, ulaşılması durumunda (zararları durdurmak için) alım veya satım için daha düşük bir fiyat da belirtebilirsiniz.
+**Stop Loss - Limit**: Ayrıca varlıkların miktarını ve satın alma veya satış fiyatını belirtebilir, bunun yanında ulaşıldığında satın almak veya satmak için daha düşük bir fiyat da belirtebilirsiniz (zarar durdurmak için).
 
 ## Vadeli İşlemler
 
-Vadeli işlem, 2 tarafın **belirli bir fiyattan gelecekte bir şey edinme** konusunda anlaştığı bir sözleşmedir. Örneğin, 6 ay içinde 1 bitcoin satmak için 70.000$.
+Vadeli işlem, 2 tarafın **gelecekte bir şeyi sabit bir fiyattan satın almak** üzere anlaşmaya vardığı bir sözleşmedir. Örneğin 1 bitcoin'i 6 ay sonra 70.000$'dan satmak.
 
-Elbette, 6 ay içinde bitcoin değeri 80.000$ olursa, satıcı taraf para kaybeder ve alıcı taraf kazanır. 6 ay içinde bitcoin değeri 60.000$ olursa, tam tersi olur.
+Açıkça, 6 ay sonra bitcoin'in değeri 80.000$ olursa satan taraf para kaybeder ve alan taraf kazanır. 6 ay sonra bitcoin'in değeri 60.000$ olursa bunun tersi gerçekleşir.
 
-Ancak, bu, bir ürün üreten ve maliyetleri karşılayacak bir fiyattan satabileceğinden emin olmak isteyen işletmeler için ilginçtir. Ya da gelecekte bir şey için sabit fiyatlar sağlamak isteyen işletmeler için, hatta daha yüksek olsa bile.
+Ancak bu, örneğin bir ürün üreten ve maliyetlerini karşılayacak bir fiyattan ürünü satabileceğinden emin olmak isteyen işletmeler için ilgi çekicidir. Ya da gelecekte bir şey için, daha yüksek olsa bile, sabit fiyatları güvence altına almak isteyen işletmeler için.
 
-Borsa işlemlerinde bu genellikle kar elde etmeye çalışmak için kullanılır.
+Borsalarda ise bu genellikle kâr elde etmeye çalışmak için kullanılır.
 
-* "Uzun pozisyon" birinin fiyatın artacağına bahse girdiği anlamına gelir.
-* "Kısa pozisyon" ise birinin fiyatın düşeceğine bahse girdiği anlamına gelir.
+* "Long position", bir kişinin fiyatın yükseleceğine bahis oynadığı anlamına gelir
+* "Short position" ise bir kişinin fiyatın düşeceğine bahis oynadığı anlamına gelir
 
-### Vadeli İşlemlerle Korunma <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
+### Hedging With Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
-Bir fon yöneticisi bazı hisse senetlerinin düşeceğinden korkuyorsa, bitcoinler veya S&P 500 vadeli işlem sözleşmeleri gibi bazı varlıklar üzerinde kısa pozisyon alabilir. Bu, bazı varlıkları satın almak veya bulundurmak ve bunları gelecekte daha yüksek bir fiyattan satma sözleşmesi oluşturmak gibidir.
+Bir fon yöneticisi bazı hisselerin düşeceğinden korkuyorsa bitcoin veya S\&P 500 vadeli işlem sözleşmeleri gibi bazı varlıklar üzerinde short position alabilir. Bu, bazı varlıkları satın almaya veya elinde bulundurmaya ve bunları gelecekte daha yüksek bir fiyattan satmak üzere bir sözleşme oluşturmaya benzer.
 
-Fiyat düşerse, fon yöneticisi varlıkları daha yüksek bir fiyattan satacağı için kazanç elde eder. Varlıkların fiyatı yükselirse, yönetici bu kazancı elde edemez ama yine de varlıklarını korur.
+Fiyat düşerse fon yöneticisi, varlıkları daha yüksek bir fiyattan satacağı için kâr elde eder. Varlıkların fiyatı yükselirse yönetici bu kârı elde edemez, ancak varlıklarını elinde tutmaya devam eder.
 
-### Sürekli Vadeli İşlemler
+### Perpetual Futures
 
-**Bunlar, süresiz olarak sürecek "vadeli işlemler"dir** (sonlandırma sözleşme tarihi olmadan). Örneğin, kripto borsalarında, kripto fiyatlarına dayalı olarak vadeli işlemlere girip çıkmak oldukça yaygındır.
+**Bunlar süresiz olarak devam eden "futures" sözleşmeleridir** (sözleşmenin bitiş tarihi yoktur). Örneğin crypto borsalarında bunlara rastlamak oldukça yaygındır; crypto fiyatlarına göre futures işlemlerine girip çıkabilirsiniz.
 
-Bu durumlarda kazanç ve kayıplar gerçek zamanlı olabilir; fiyat %1 artarsa %1 kazanırsınız, fiyat %1 düşerse kaybedersiniz.
+Bu durumlarda kâr ve zararların gerçek zamanlı olabileceğini unutmayın: Fiyat %1 artarsa %1 kazanırsınız; fiyat %1 düşerse %1 kaybedersiniz.
 
-### Kaldıraçlı Vadeli İşlemler
+### Kaldıraçlı Futures
 
-**Kaldıraç**, piyasada daha büyük bir pozisyonu daha az para ile kontrol etmenizi sağlar. Temelde, sahip olduğunuz paradan daha fazla para "bahis" yapmanıza olanak tanır, sadece gerçekten sahip olduğunuz parayı riske atarsınız.
+**Kaldıraç**, daha az miktarda parayla piyasada daha büyük bir pozisyonu kontrol etmenizi sağlar. Temel olarak, sahip olduğunuzdan çok daha fazla parayla "bahis" yapmanıza ve yalnızca gerçekten sahip olduğunuz parayı riske atmanıza olanak tanır.
 
-Örneğin, BTC/USDT'de 100$ ile 50x kaldıraçla bir vadeli işlem pozisyonu açarsanız, bu, fiyat %1 artarsa, başlangıç yatırımınızın %50'sini (50$) kazanacağınız anlamına gelir. Böylece 150$'ınız olur.\
-Ancak, fiyat %1 düşerse, fonlarınızın %50'sini kaybedersiniz (bu durumda 59$). Fiyat %2 düşerse, tüm bahsinizi kaybedersiniz (2x50 = 100%).
+Örneğin BTC/USDT üzerinde 100$ ile 50x kaldıraçlı bir futures pozisyonu açarsanız, fiyat %1 arttığında başlangıç yatırımınızın %1x50 = %50'sini (50$) kazanırsınız. Böylece 150$'ınız olur.\
+Ancak fiyat %1 düşerse paranızın %50'sini (bu durumda 59$) kaybedersiniz. Fiyat %2 düşerse tüm bahsinizi kaybedersiniz (%2x50 = %100).
 
-Bu nedenle, kaldıraç, bahsettiğiniz para miktarını kontrol etmenizi sağlarken kazançları ve kayıpları artırır.
+Bu nedenle kaldıraç, kazançları ve kayıpları artırırken bahis yaptığınız para miktarını kontrol etmenizi sağlar.
 
-## Vadeli İşlemler ve Opsiyonlar Arasındaki Farklar
+## Futures ve Options Arasındaki Farklar
 
-Vadeli işlemler ile opsiyonlar arasındaki ana fark, sözleşmenin alıcı için isteğe bağlı olmasıdır: İsterse bunu uygulamaya karar verebilir (genellikle yalnızca fayda sağlarsa bunu yapar). Satıcı, alıcı opsiyonu kullanmak isterse satmak zorundadır.\
-Ancak, alıcı opsiyonu açmak için satıcıya bir ücret ödeyecektir (bu nedenle, görünüşte daha fazla risk alan satıcı, biraz para kazanmaya başlar).
+Futures ve options arasındaki temel fark, sözleşmenin alıcı için isteğe bağlı olmasıdır: Alıcı sözleşmeyi uygulayıp uygulamamaya karar verebilir (genellikle yalnızca bundan kâr elde edecekse uygular). Alıcı option'ı kullanmak isterse satıcı satış yapmak zorundadır.\
+Ancak alıcı, option'ı açtığı için satıcıya bir ücret öder (bu nedenle görünüşte daha fazla risk alan satıcı para kazanmaya başlar).
 
-### 1. **Zorunluluk vs. Hak:**
+### 1. **Yükümlülük ve Hak:**
 
-* **Vadeli İşlemler:** Bir vadeli işlem sözleşmesi satın aldığınızda veya sattığınızda, belirli bir tarihte belirli bir fiyattan bir varlık satın alma veya satma konusunda **bağlayıcı bir anlaşma** yapıyorsunuz. Hem alıcı hem de satıcı, sözleşmenin sona erdiğinde yerine getirilmesi için **zorunludur** (sözleşme önceden kapatılmadıkça).
-* **Opsiyonlar:** Opsiyonlarla, belirli bir tarihten önce veya belirli bir tarihte belirli bir fiyattan bir varlık satın alma (bir **call opsiyonu** durumunda) veya satma (bir **put opsiyonu** durumunda) **hakkına, ancak zorunluluğa sahip** olursunuz. **Alıcı**, opsiyonu uygulama seçeneğine sahiptir, **satıcı** ise alıcı opsiyonu kullanmaya karar verirse ticareti yerine getirmekle yükümlüdür.
+* **Futures:** Bir futures sözleşmesi satın aldığınızda veya sattığınızda, belirli bir tarihte belirli bir fiyattan bir varlığı satın almak veya satmak için **bağlayıcı bir anlaşmaya** girmiş olursunuz. Hem alıcı hem de satıcı, sözleşme sona erdiğinde sözleşmeyi yerine getirmekle **yükümlüdür** (sözleşme bundan önce kapatılmadığı sürece).
+* **Options:** Options işlemlerinde, belirli bir fiyattan bir varlığı belirli bir son kullanma tarihinden önce veya o tarihte satın alma (**call option** durumunda) ya da satma (**put option** durumunda) **hakkına, ancak yükümlülüğüne sahip olmazsınız**. **Alıcı** işlemi gerçekleştirme seçeneğine sahiptir; **satıcı** ise alıcı option'ı kullanmaya karar verirse işlemi gerçekleştirmekle yükümlüdür.
 
 ### 2. **Risk:**
 
-* **Vadeli İşlemler:** Hem alıcı hem de satıcı, sözleşmeyi tamamlama zorunluluğu nedeniyle **sınırsız risk** alır. Risk, sözleşmedeki kararlaştırılan fiyat ile sona erme tarihindeki piyasa fiyatı arasındaki farktır.
-* **Opsiyonlar:** Alıcının riski, opsiyonu satın almak için ödenen **primle** sınırlıdır. Piyasa, opsiyon sahibinin lehine hareket etmezse, opsiyonu süresinin dolmasına bırakabilir. Ancak, opsiyonun **satıcısı** (yazarı), piyasa kendilerine karşı önemli ölçüde hareket ederse sınırsız risk taşır.
+* **Futures:** Hem alıcı hem de satıcı, sözleşmeyi tamamlamakla yükümlü oldukları için **sınırsız risk** üstlenir. Risk, anlaşılan fiyat ile son kullanma tarihindeki piyasa fiyatı arasındaki farktır.
+* **Options:** Alıcının riski, option'ı satın almak için ödenen **prim** ile sınırlıdır. Piyasa option sahibinin lehine hareket etmezse option'ın süresinin dolmasına izin verebilir. Ancak option'ın **satıcısı** (writer), piyasa kendisinin aleyhine önemli ölçüde hareket ederse sınırsız risk taşır.
 
 ### 3. **Maliyet:**
 
-* **Vadeli İşlemler:** Pozisyonu tutmak için gereken teminat dışında önceden bir maliyet yoktur, çünkü alıcı ve satıcı ticareti tamamlama zorunluluğuna sahiptir.
-* **Opsiyonlar:** Alıcı, opsiyonu kullanma hakkı için önceden bir **opsiyon primi** ödemelidir. Bu prim, opsiyonun maliyetidir.
+* **Futures:** Alıcı ve satıcı işlemi tamamlamakla yükümlü olduğundan, pozisyonu korumak için gereken teminat dışında önceden ödenen bir maliyet yoktur.
+* **Options:** Alıcı, option'ı kullanma hakkı için önceden bir **option primi** ödemelidir. Bu prim, temel olarak option'ın maliyetidir.
 
-### 4. **Kar Potansiyeli:**
+### 4. **Kâr Potansiyeli:**
 
-* **Vadeli İşlemler:** Kar veya zarar, sona erme tarihindeki piyasa fiyatı ile sözleşmedeki kararlaştırılan fiyat arasındaki farka dayanır.
-* **Opsiyonlar:** Alıcı, piyasa, ödenen primden daha fazla bir fiyat hareket ettiğinde kar elde eder. Satıcı, opsiyon kullanılmadığında primi tutarak kar elde eder.
+* **Futures:** Kâr veya zarar, son kullanma tarihindeki piyasa fiyatı ile sözleşmede anlaşılan fiyat arasındaki farka dayanır.
+* **Options:** Alıcı, piyasa strike price'ın ötesinde ve ödenen primden daha fazla lehine hareket ettiğinde kâr eder. Satıcı ise option kullanılmazsa primi elinde tutarak kâr eder.
 
 {{#include ../banners/hacktricks-training.md}}

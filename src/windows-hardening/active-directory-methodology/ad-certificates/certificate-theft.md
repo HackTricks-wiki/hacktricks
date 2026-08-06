@@ -1,12 +1,12 @@
-# AD CS Sertifika Hırsızlığı
+# AD CS Certificate Theft
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Bu, [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf) adresindeki harika araştırmanın Hırsızlık bölümlerinin küçük bir özetidir.**
+**Bu, [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf) adresindeki kapsamlı araştırmanın Certificate Theft bölümlerinin kısa bir özetidir.**<sup>[[1]](#references)</sup>
 
 ## Bir sertifika ile ne yapabilirim
 
-Sertifikaları nasıl çalacağınızı kontrol etmeden önce, sertifikanın ne için yararlı olduğunu bulmakla ilgili bazı bilgilere sahip olmalısınız:
+Sertifikaları nasıl çalacağınızı incelemeden önce, sertifikanın ne işe yaradığını nasıl bulabileceğinize dair bazı bilgiler:
 ```bash
 # Powershell
 $CertPath = "C:\path\to\cert.pfx"
@@ -18,34 +18,34 @@ $Cert.EnhancedKeyUsageList
 # cmd
 certutil.exe -dump -v cert.pfx
 ```
-## Sertifikaların Crypto API'leri Kullanılarak Dışa Aktarılması – THEFT1
+## Crypto APIs Kullanarak Sertifika Export Etme – THEFT1
 
-Bir **etkileşimli masaüstü oturumu** sırasında, bir kullanıcı veya makine sertifikasını, özel anahtarıyla birlikte çıkarmak kolayca yapılabilir, özellikle de **özel anahtar dışa aktarılabilir** ise. Bu, `certmgr.msc` içinde sertifikaya giderek, sağ tıklayıp `Tüm Görevler → Dışa Aktar` seçeneğini seçerek şifre korumalı bir .pfx dosyası oluşturmakla gerçekleştirilebilir.
+**Etkileşimli bir masaüstü oturumunda**, özellikle **özel anahtar export edilebilir** durumdaysa, bir kullanıcı veya makine sertifikası özel anahtarıyla birlikte kolayca çıkarılabilir. Bunun için `certmgr.msc` içinde sertifikaya gidip sağ tıklamak ve parola korumalı bir .pfx dosyası oluşturmak üzere `All Tasks → Export` seçeneğini belirlemek yeterlidir.<sup>[[1]](#references)</sup>
 
-**Programatik bir yaklaşım** için, PowerShell `ExportPfxCertificate` cmdlet'i veya [TheWover’ın CertStealer C# projesi](https://github.com/TheWover/CertStealer) gibi araçlar mevcuttur. Bu araçlar, sertifika deposu ile etkileşimde bulunmak için **Microsoft CryptoAPI** (CAPI) veya Kriptografi API: Yeni Nesil (CNG) kullanır. Bu API'ler, sertifika depolama ve kimlik doğrulama için gerekli olanlar da dahil olmak üzere çeşitli kriptografik hizmetler sunar.
+**Programmatic bir yaklaşım** için PowerShell `ExportPfxCertificate` cmdlet'i veya [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer) gibi project'ler kullanılabilir. Bunlar, sertifika store'una erişmek için **Microsoft CryptoAPI** (CAPI) veya Cryptography API: Next Generation (CNG) kullanır. Bu API'ler, sertifika storage'ı ve authentication için gerekenler de dahil olmak üzere çeşitli cryptographic service'ler sağlar.
 
-Ancak, bir özel anahtar dışa aktarılabilir olarak ayarlandığında, hem CAPI hem de CNG genellikle bu tür sertifikaların çıkarılmasını engeller. Bu kısıtlamayı aşmak için, **Mimikatz** gibi araçlar kullanılabilir. Mimikatz, özel anahtarların dışa aktarımına izin vermek için ilgili API'leri yamanan `crypto::capi` ve `crypto::cng` komutları sunar. Özellikle, `crypto::capi` mevcut süreçte CAPI'yi yamanırken, `crypto::cng` **lsass.exe**'nin belleğini yamanmayı hedefler.
+Ancak bir özel anahtar non-exportable olarak ayarlanmışsa, hem CAPI hem de CNG normalde bu tür sertifikaların extraction işlemini engeller. Bu restriction'ı bypass etmek için **Mimikatz** gibi tool'lar kullanılabilir. Mimikatz, ilgili API'leri patch ederek özel anahtarların export edilmesini sağlayan `crypto::capi` ve `crypto::cng` command'larını sunar. Özellikle `crypto::capi`, mevcut process içindeki CAPI'yi patch ederken `crypto::cng`, patch işlemi için **lsass.exe**'nin memory'sini hedefler.
 
-## DPAPI Üzerinden Kullanıcı Sertifikası Hırsızlığı – THEFT2
+## DPAPI ile User Certificate Theft – THEFT2
 
-DPAPI hakkında daha fazla bilgi için:
+DPAPI hakkında daha fazla bilgi:
 
 
 {{#ref}}
 ../../windows-local-privilege-escalation/dpapi-extracting-passwords.md
 {{#endref}}
 
-Windows'ta, **sertifika özel anahtarları DPAPI ile korunmaktadır**. **Kullanıcı ve makine özel anahtarları için depolama yerlerinin** farklı olduğunu ve dosya yapıların, işletim sistemi tarafından kullanılan kriptografik API'ye bağlı olarak değiştiğini anlamak önemlidir. **SharpDPAPI**, DPAPI blob'larını şifrelerini çözme sırasında bu farklılıkları otomatik olarak aşabilen bir araçtır.
+Windows'ta **sertifika özel anahtarları DPAPI tarafından korunur**. **Kullanıcı ve makine özel anahtarlarının storage location'larının** birbirinden farklı olduğunu ve file structure'larının operating system tarafından kullanılan cryptographic API'ye göre değiştiğini bilmek önemlidir. **SharpDPAPI**, DPAPI blob'larını decrypt ederken bu farklılıklar arasında otomatik olarak gezinebilir.<sup>[[1]](#references)</sup>
 
-**Kullanıcı sertifikaları** esasen `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates` altında kayıt defterinde bulunur, ancak bazıları `%APPDATA%\Microsoft\SystemCertificates\My\Certificates` dizininde de bulunabilir. Bu sertifikalar için ilgili **özel anahtarlar** genellikle **CAPI** anahtarları için `%APPDATA%\Microsoft\Crypto\RSA\User SID\` ve **CNG** anahtarları için `%APPDATA%\Microsoft\Crypto\Keys\` içinde saklanır.
+**User certificate'ları** çoğunlukla registry'de `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates` altında tutulur, ancak bazıları `%APPDATA%\Microsoft\SystemCertificates\My\Certificates` directory'sinde de bulunabilir. Bu certificate'lara karşılık gelen **özel anahtarlar** genellikle **CAPI** key'leri için `%APPDATA%\Microsoft\Crypto\RSA\User SID\`, **CNG** key'leri için ise `%APPDATA%\Microsoft\Crypto\Keys\` altında saklanır.
 
-Bir **sertifikayı ve ona bağlı özel anahtarı çıkarmak** için süreç şunları içerir:
+**Bir sertifikayı ve ilişkili özel anahtarını extract etmek** için süreç şu adımlardan oluşur:
 
-1. Kullanıcının deposundan **hedef sertifikayı seçmek** ve anahtar deposu adını almak.
-2. İlgili özel anahtarı şifrelemek için gerekli DPAPI anahtarını **bulmak**.
-3. Düz metin DPAPI anahtarını kullanarak **özel anahtarı şifre çözmek**.
+1. User store'undan **hedef sertifikanın seçilmesi** ve key store name'inin alınması.
+2. İlgili özel anahtarı decrypt etmek için gereken **DPAPI masterkey'in bulunması**.
+3. Plaintext DPAPI masterkey kullanılarak **özel anahtarın decrypt edilmesi**.
 
-Düz metin DPAPI anahtarını **edinmek için** aşağıdaki yaklaşımlar kullanılabilir:
+**Plaintext DPAPI masterkey'i elde etmek** için aşağıdaki yaklaşımlar kullanılabilir:
 ```bash
 # With mimikatz, when running in the user's context
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
@@ -53,7 +53,7 @@ dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
 # With mimikatz, if the user's password is known
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /sid:accountSid /password:PASS
 ```
-Anahtar dosyalarının ve özel anahtar dosyalarının şifre çözümünü kolaylaştırmak için, [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) içindeki `certificates` komutu faydalıdır. Özel anahtarları ve bağlantılı sertifikaları şifre çözmek için `/pvk`, `/mkfile`, `/password` veya `{GUID}:KEY` argümanlarını kabul eder ve ardından bir `.pem` dosyası oluşturur.
+Masterkey dosyalarının ve private key dosyalarının şifre çözme işlemini kolaylaştırmak için [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) aracındaki `certificates` komutu oldukça kullanışlıdır. Özel anahtarların ve bunlarla ilişkili sertifikaların şifresini çözmek için `/pvk`, `/mkfile`, `/password` veya `{GUID}:KEY` bağımsız değişkenlerini kabul eder ve ardından bir `.pem` dosyası oluşturur.
 ```bash
 # Decrypting using SharpDPAPI
 SharpDPAPI.exe certificates /mkfile:C:\temp\mkeys.txt
@@ -61,26 +61,26 @@ SharpDPAPI.exe certificates /mkfile:C:\temp\mkeys.txt
 # Converting .pem to .pfx
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
 ```
-## Makine Sertifika Hırsızlığı DPAPI Üzerinden – THEFT3
+## DPAPI ile Machine Certificate Theft – THEFT3
 
-Windows tarafından `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` kayıt defterinde saklanan makine sertifikaları ve `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (CAPI için) ve `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (CNG için) konumlarındaki ilgili özel anahtarlar, makinenin DPAPI anahtarları ile şifrelenmiştir. Bu anahtarlar, alanın DPAPI yedek anahtarı ile çözülemez; bunun yerine yalnızca SYSTEM kullanıcısının erişebildiği **DPAPI_SYSTEM LSA sırrı** gereklidir.
+Windows tarafından registry içinde `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` konumunda saklanan machine certificates ve `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (CAPI için) ile `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (CNG için) konumlarında bulunan ilişkili private keys, machine'in DPAPI master keys kullanılarak şifrelenir. Bu keys, domain'in DPAPI backup key'i ile decrypt edilemez; bunun yerine yalnızca SYSTEM user'ın erişebildiği **DPAPI_SYSTEM LSA secret** gereklidir.<sup>[[1]](#references)</sup>
 
-Manuel şifre çözme, **Mimikatz** içinde `lsadump::secrets` komutunu çalıştırarak DPAPI_SYSTEM LSA sırrını çıkarmak ve ardından bu anahtarı makine anahtarlarını çözmek için kullanmak suretiyle gerçekleştirilebilir. Alternatif olarak, daha önce açıklandığı gibi CAPI/CNG yamanmasının ardından Mimikatz’ın `crypto::certificates /export /systemstore:LOCAL_MACHINE` komutu kullanılabilir.
+Manual decryption, **Mimikatz** içinde `lsadump::secrets` command'ı çalıştırılarak DPAPI_SYSTEM LSA secret'ın çıkarılması ve ardından bu key kullanılarak machine masterkeys'lerin decrypt edilmesiyle gerçekleştirilebilir. Alternatif olarak, daha önce açıklandığı şekilde CAPI/CNG patch edildikten sonra Mimikatz'ın `crypto::certificates /export /systemstore:LOCAL_MACHINE` command'ı kullanılabilir.
 
-**SharpDPAPI**, sertifikalar komutuyla daha otomatik bir yaklaşım sunar. `/machine` bayrağı yükseltilmiş izinlerle kullanıldığında, SYSTEM'e yükselir, DPAPI_SYSTEM LSA sırrını döker, bunu makine DPAPI anahtarlarını çözmek için kullanır ve ardından bu düz metin anahtarlarını herhangi bir makine sertifika özel anahtarını çözmek için bir arama tablosu olarak kullanır.
+**SharpDPAPI**, certificates command'ı ile daha automated bir yaklaşım sunar. `/machine` flag'i elevated permissions ile kullanıldığında SYSTEM'e yükselir, DPAPI_SYSTEM LSA secret'ı dump eder, bunu machine DPAPI masterkeys'lerini decrypt etmek için kullanır ve ardından bu plaintext keys'leri, tüm machine certificate private keys'lerini decrypt etmek üzere bir lookup table olarak kullanır.
 
-## Sertifika Dosyalarını Bulma – THEFT4
+## Certificate Files Bulma – THEFT4
 
-Sertifikalar bazen dosya sisteminde, örneğin dosya paylaşımlarında veya İndirilenler klasöründe doğrudan bulunabilir. Windows ortamlarına yönelik en yaygın karşılaşılan sertifika dosyası türleri `.pfx` ve `.p12` dosyalarıdır. Daha az sıklıkla, `.pkcs12` ve `.pem` uzantılı dosyalar da görünmektedir. Diğer dikkat çekici sertifika ile ilgili dosya uzantıları şunlardır:
+Certificates bazen file shares veya Downloads folder gibi filesystem konumlarında doğrudan bulunabilir. Windows environments için hedeflenen ve en sık karşılaşılan certificate file türleri `.pfx` ve `.p12` dosyalarıdır. Daha az sıklıkla `.pkcs12` ve `.pem` uzantılı dosyalar da görülür. Dikkate değer diğer certificate-related file extensions şunlardır:<sup>[[1]](#references)</sup>
 
-- Özel anahtarlar için `.key`,
-- Sadece sertifikalar için `.crt`/`.cer`,
-- Sertifika İmzalama Talepleri için `.csr`, bu dosyalar sertifikalar veya özel anahtarlar içermez,
-- Java uygulamaları tarafından kullanılan sertifikalar ile birlikte özel anahtarlar içerebilen Java Anahtar Depoları için `.jks`/`.keystore`/`.keys`.
+- private keys için `.key`,
+- yalnızca certificates için `.crt`/`.cer`,
+- certificates veya private keys içermeyen Certificate Signing Requests için `.csr`,
+- Java Keystores için `.jks`/`.keystore`/`.keys`; bunlar certificates ile birlikte Java applications tarafından kullanılan private keys'leri barındırabilir.
 
-Bu dosyalar, belirtilen uzantıları arayarak PowerShell veya komut istemcisi kullanılarak aranabilir.
+Bu files, belirtilen extensions aranarak PowerShell veya command prompt kullanılarak bulunabilir.
 
-Bir PKCS#12 sertifika dosyası bulunduğunda ve bir şifre ile korunduğunda, `pfx2john.py` kullanılarak bir hash çıkarılması mümkündür; bu dosya [fossies.org](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john_8py_source.html) adresinde mevcuttur. Ardından, şifreyi kırmaya çalışmak için JohnTheRipper kullanılabilir.
+Bir PKCS#12 certificate file bulunur ve password ile korunuyorsa, [fossies.org](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john_8py_source.html) adresinde bulunan `pfx2john.py` kullanılarak bir hash extract edilebilir. Daha sonra JohnTheRipper, password'ü crack etmeyi denemek için kullanılabilir.
 ```bash
 # Example command to search for certificate files in PowerShell
 Get-ChildItem -Recurse -Path C:\Users\ -Include *.pfx, *.p12, *.pkcs12, *.pem, *.key, *.crt, *.cer, *.csr, *.jks, *.keystore, *.keys
@@ -91,20 +91,24 @@ pfx2john.py certificate.pfx > hash.txt
 # Command to crack the hash with JohnTheRipper
 john --wordlist=passwords.txt hash.txt
 ```
-## NTLM Kimlik Bilgisi Hırsızlığı PKINIT Üzerinden – THEFT5 (Hash'i UnPAC Et)
+## PKINIT üzerinden NTLM Credential Theft – THEFT5 (UnPAC the hash)
 
-Verilen içerik, PKINIT aracılığıyla NTLM kimlik bilgisi hırsızlığı için THEFT5 olarak etiketlenen hırsızlık yöntemini açıklamaktadır. İşte içeriğin pasif sesle yeniden açıklaması, anonimleştirilmiş ve gerektiğinde özetlenmiştir:
+Verilen içerikte, özellikle THEFT5 olarak adlandırılan theft method aracılığıyla PKINIT üzerinden NTLM credential theft yöntemi açıklanmaktadır. Aşağıda içerik passive voice kullanılarak ve uygun yerlerde anonymized ve summarized biçimde yeniden açıklanmıştır:<sup>[[1]](#references)</sup>
 
-NTLM kimlik doğrulamasını `MS-NLMP` desteklemek için Kerberos kimlik doğrulamasını kolaylaştırmayan uygulamalar için KDC, PKCA kullanıldığında, kullanıcının NTLM tek yönlü fonksiyonunu (OWF) ayrıcalık niteliği sertifikası (PAC) içinde, özellikle `PAC_CREDENTIAL_INFO` tamponunda döndürmek üzere tasarlanmıştır. Sonuç olarak, bir hesap PKINIT aracılığıyla bir Ticket-Granting Ticket (TGT) ile kimlik doğrulaması yapıp güvence altına alırsa, mevcut ana bilgisayarın NTLM hash'ini TGT'den çıkarmasını sağlayan bir mekanizma sağlanmış olur; bu da eski kimlik doğrulama protokollerini sürdürmek içindir. Bu süreç, NTLM düz metninin NDR serileştirilmiş tasvirini içeren `PAC_CREDENTIAL_DATA` yapısının şifresinin çözülmesini gerektirir.
+Kerberos authentication kullanımını kolaylaştırmayan uygulamalar için NTLM authentication `MS-NLMP` desteği sağlamak amacıyla KDC, PKCA kullanıldığında kullanıcının NTLM one-way function (OWF) değerini privilege attribute certificate (PAC) içinde, özellikle `PAC_CREDENTIAL_INFO` buffer'ında döndürecek şekilde tasarlanmıştır. Bu nedenle, bir account PKINIT üzerinden authentication gerçekleştirip bir Ticket-Granting Ticket (TGT) aldığında, legacy authentication protocols desteğini sürdürmek amacıyla mevcut host'un TGT'den NTLM hash değerini çıkarmasını sağlayan bir mekanizma doğal olarak sunulmuş olur. Bu işlem, esas olarak NTLM plaintext'in NDR serialized gösterimi olan `PAC_CREDENTIAL_DATA` structure'ının decrypt edilmesini içerir.
 
-**Kekeo** aracı, [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo) adresinde erişilebilir olup, bu belirli veriyi içeren bir TGT talep edebilme yeteneğine sahip olduğu belirtilmektedir; böylece kullanıcının NTLM'sinin geri alınmasını kolaylaştırır. Bu amaçla kullanılan komut aşağıdaki gibidir:
+[https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo) adresinden erişilebilen **Kekeo** utility'sinin, bu özel veriyi içeren bir TGT request edebildiği ve böylece kullanıcının NTLM değerinin elde edilmesini kolaylaştırdığı belirtilmektedir. Bu amaçla kullanılan command aşağıda verilmiştir:
 ```bash
 tgt::pac /caname:generic-DC-CA /subject:genericUser /castore:current_user /domain:domain.local
 ```
-**`Rubeus`** bu bilgiyi **`asktgt [...] /getcredentials`** seçeneği ile de alabilir.
+**`Rubeus`** bu bilgileri **`asktgt [...] /getcredentials`** seçeneğiyle de alabilir.
 
-Ayrıca, Kekeo'nun akıllı kart korumalı sertifikaları işleyebileceği, pin'in alınabilmesi durumunda belirtildiği, [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe) referansına atıfta bulunulmuştur. Aynı yeteneğin **Rubeus** tarafından desteklendiği, [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus) adresinde mevcuttur.
+Ek olarak, PIN'in alınabilmesi koşuluyla Kekeo'nun smartcard-korumalı sertifikaları işleyebildiği belirtilmektedir; bu kapsamda [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe) adresine atıfta bulunulmuştur. Aynı özelliğin [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus) adresinde bulunan **Rubeus** tarafından da desteklendiği belirtilmektedir.
 
-Bu açıklama, PKINIT aracılığıyla NTLM kimlik bilgisi çalınma sürecini ve bu süreçte yer alan araçları kapsar, PKINIT kullanılarak elde edilen TGT aracılığıyla NTLM hash'lerinin alınmasına odaklanır ve bu süreci kolaylaştıran yardımcı programları içerir.
+Bu açıklama, PKINIT üzerinden NTLM credential theft sürecini ve bu süreçte kullanılan araçları kapsamaktadır. Odak noktası, PKINIT kullanılarak alınan TGT üzerinden NTLM hash'lerinin elde edilmesi ve bu süreci kolaylaştıran yardımcı programlardır.
+
+## Referanslar
+
+- [1] [Certified Pre-Owned: Abusing Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 
 {{#include ../../../banners/hacktricks-training.md}}

