@@ -1143,7 +1143,7 @@ These are some interesting APIs to interact with the processor set:
 - `processor_set_stack_usage`
 - `processor_set_info`
 
-As mentioned in [**this post**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/), in the past this allowed to bypass the previously mentioned protection to get task ports in other processes to control them by calling **`processor_set_tasks`** and getting a host port on every process.\
+As mentioned in [**this post**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/), in the past this allowed to bypass the previously mentioned protection to get task ports in other processes to control them by calling **`processor_set_tasks`** and getting a host port on every process.<sup>[[10]](#references)</sup>\
 Nowadays you need root to use that function and this is protected so you will only be able to get these ports on unprotected processes.<sup>[[10]](#references)</sup>
 
 You can try it with:
