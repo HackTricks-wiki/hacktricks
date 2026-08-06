@@ -87,7 +87,7 @@ typedef struct {
 } mach_msg_header_t;
 ```
 
-Processes possessing a _**receive right**_ can receive messages on a Mach port. Conversely, the **senders** are granted a _**send**_ or a _**send-once right**_. The send-once right is exclusively for sending a single message, after which it becomes invalid.
+Processes possessing a _**receive right**_ can receive messages on a Mach port. Conversely, the **senders** are granted a _**send**_ or a _**send-once right**_. The send-once right is exclusively for sending a single message, after which it becomes invalid.<sup>[[11]](#references)</sup>
 
 The initial field **`msgh_bits`** is a bitmap:
 

@@ -6,7 +6,7 @@
 
 ### Basic Information
 
-**Ad-hoc signing** (`CS_ADHOC`) creates a code signature with **no certificate chain** — it's a hash of the code with no developer identity verification. The binary's origin cannot be traced to any developer or organization.<sup>[[1]](#references)</sup>
+**Ad-hoc signing** (`CS_ADHOC`) creates a code signature with **no certificate chain** — it's a hash of the code with no developer identity verification. The binary's origin cannot be traced to any developer or organization.<sup>[[1]](#references)[[4]](#references)</sup>
 
 On Apple Silicon Macs, all executables require at minimum an ad-hoc signature. This means you'll find ad-hoc signatures on many development tools, Homebrew packages, and third-party utilities.
 

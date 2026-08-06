@@ -10,7 +10,7 @@ The definition is specified in Interface Definition Language (IDL) using the `.d
 
 These definitions have 5 sections:
 
-- **Subsystem declaration**: The keyword subsystem is used to indicate the **name** and the **id**. It's also possible to mark it as **`KernelServer`** if the server should run in the kernel.
+- **Subsystem declaration**: The keyword subsystem is used to indicate the **name** and the **id**. It's also possible to mark it as **`KernelServer`** if the server should run in the kernel.<sup>[[4]](#references)</sup>
 - **Inclusions and imports**: MIG uses the C-prepocessor, so it's able to use imports. Moreover, it's possible to use `uimport` and `simport` for user or server generated code.
 - **Type declarations**: It's possible to define data types although usually it will import `mach_types.defs` and `std_types.defs`. For custom ones some syntax can be used:
   - \[i`n/out]tran`: Function that needs to be trasnlated from an incoming or to an outgoing message
