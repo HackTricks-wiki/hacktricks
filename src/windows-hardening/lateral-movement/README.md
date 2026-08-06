@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-बाहरी सिस्टम में कमांड निष्पादित करने के विभिन्न तरीके हैं, यहाँ आप मुख्य Windows लेटरल मूवमेंट तकनीकों के काम करने के तरीके के बारे में व्याख्याएँ पा सकते हैं:
+External systems में commands execute करने के अलग-अलग तरीके हैं, यहाँ आप मुख्य Windows lateral movements techniques कैसे काम करती हैं, इसकी explanations पा सकते हैं:
 
 - [**PsExec**](psexec-and-winexec.md)
 - [**SmbExec**](smbexec.md)

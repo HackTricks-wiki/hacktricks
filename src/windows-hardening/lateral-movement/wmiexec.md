@@ -2,18 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## How It Works Explained
+## यह कैसे काम करता है
 
-प्रक्रियाएँ उन होस्ट पर खोली जा सकती हैं जहाँ उपयोगकर्ता नाम और या तो पासवर्ड या हैश ज्ञात हैं WMI के उपयोग के माध्यम से। Wmiexec द्वारा WMI का उपयोग करके आदेश निष्पादित किए जाते हैं, जो एक अर्ध-इंटरएक्टिव शेल अनुभव प्रदान करता है।
+WMI के उपयोग से उन hosts पर processes खोले जा सकते हैं, जहाँ username और password या hash में से कोई एक ज्ञात हो। Wmiexec द्वारा WMI का उपयोग करके commands execute किए जाते हैं, जिससे semi-interactive shell जैसा अनुभव मिलता है।
 
-**dcomexec.py:** विभिन्न DCOM एंडपॉइंट्स का उपयोग करते हुए, यह स्क्रिप्ट wmiexec.py के समान एक अर्ध-इंटरएक्टिव शेल प्रदान करती है, विशेष रूप से ShellBrowserWindow DCOM ऑब्जेक्ट का लाभ उठाते हुए। यह वर्तमान में MMC20 का समर्थन करता है। एप्लिकेशन, शेल विंडोज़, और शेल ब्राउज़र विंडो ऑब्जेक्ट्स। (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** अलग-अलग DCOM endpoints का उपयोग करते हुए, यह script wmiexec.py के समान semi-interactive shell प्रदान करती है और विशेष रूप से ShellBrowserWindow DCOM object का उपयोग करती है। यह वर्तमान में MMC20. Application, Shell Windows और Shell Browser Window objects को support करती है। (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))<sup>[[2]](#references)</sup>
 
-## WMI Fundamentals
+## WMI की मूल बातें
 
 ### Namespace
 
-डायरेक्टरी-शैली की पदानुक्रम में संरचित, WMI का शीर्ष-स्तरीय कंटेनर \root है, जिसके अंतर्गत अतिरिक्त डायरेक्टरी, जिन्हें namespaces कहा जाता है, व्यवस्थित हैं।
-Namespaces की सूची बनाने के लिए आदेश:
+Directory-style hierarchy में structured, WMI का top-level container \root है, जिसके अंतर्गत namespaces नामक अतिरिक्त directories व्यवस्थित की जाती हैं।<sup>[[1]](#references)</sup>
+Namespaces की सूची बनाने के लिए commands:
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -24,20 +24,20 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 # Listing of namespaces within "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
-एक नामस्थान के भीतर कक्षाओं को सूचीबद्ध करने के लिए:
+Namespace के भीतर classes को इस प्रकार list किया जा सकता है:
 ```bash
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 ### **क्लासेस**
 
-WMI क्लास नाम, जैसे win32_process, और जिस नामस्थान में यह स्थित है, जानना किसी भी WMI ऑपरेशन के लिए महत्वपूर्ण है।  
-`win32` से शुरू होने वाले क्लासेस की सूची बनाने के लिए कमांड:
+किसी WMI operation के लिए `win32_process` जैसे WMI class name और उस namespace को जानना महत्वपूर्ण है जिसमें वह मौजूद है।  
+`win32` से शुरू होने वाली classes की सूची बनाने के लिए commands:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
 ```
-क्लास का आह्वान:
+किसी class को invoke करना:
 ```bash
 # Defaults to "root/cimv2" when namespace isn't specified
 Get-WmiObject -Class win32_share
@@ -45,7 +45,7 @@ Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpCompute
 ```
 ### Methods
 
-विधियाँ, जो WMI कक्षाओं के एक या अधिक निष्पादन योग्य कार्य हैं, को निष्पादित किया जा सकता है।
+Methods, जो WMI classes के एक या अधिक executable functions होते हैं, execute किए जा सकते हैं।
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -59,9 +59,9 @@ Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Descrip
 ```
 ## WMI Enumeration
 
-### WMI सेवा स्थिति
+### WMI Service की स्थिति
 
-WMI सेवा के संचालन की पुष्टि करने के लिए आदेश:
+WMI service operational है या नहीं, यह verify करने के लिए commands:
 ```bash
 # WMI service status check
 Get-Service Winmgmt
@@ -69,14 +69,14 @@ Get-Service Winmgmt
 # Via CMD
 net start | findstr "Instrumentation"
 ```
-### सिस्टम और प्रक्रिया की जानकारी
+### System और Process की जानकारी
 
-WMI के माध्यम से सिस्टम और प्रक्रिया की जानकारी इकट्ठा करना:
+WMI के माध्यम से System और Process की जानकारी एकत्र करना:
 ```bash
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-हमलावरों के लिए, WMI सिस्टम या डोमेन के बारे में संवेदनशील डेटा की गणना करने के लिए एक शक्तिशाली उपकरण है।
+हमलावरों के लिए, WMI systems या domains के बारे में संवेदनशील डेटा एकत्र करने का एक शक्तिशाली tool है।<sup>[[1]](#references)</sup>
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list
@@ -85,19 +85,19 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-WMI के लिए विशिष्ट जानकारी, जैसे स्थानीय प्रशासक या लॉग-ऑन उपयोगकर्ताओं की दूरस्थ क्वेरी करना, सावधानीपूर्वक कमांड निर्माण के साथ संभव है।
+WMI की remote querying के द्वारा local admins या logged-on users जैसी specific information प्राप्त करना, सावधानीपूर्वक command construction के साथ संभव है।
 
-### **मैनुअल रिमोट WMI क्वेरीिंग**
+### **Manual Remote WMI Querying**
 
-एक दूरस्थ मशीन पर स्थानीय प्रशासकों और लॉग-ऑन उपयोगकर्ताओं की चुपचाप पहचान विशिष्ट WMI क्वेरियों के माध्यम से की जा सकती है। `wmic` एक टेक्स्ट फ़ाइल से पढ़ने का समर्थन भी करता है ताकि एक साथ कई नोड्स पर कमांड निष्पादित किए जा सकें।
+Remote machine पर local admins और logged-on users की stealthy identification specific WMI queries के माध्यम से की जा सकती है। `wmic` एक text file से पढ़कर एक साथ कई nodes पर commands execute करने का भी समर्थन करता है।<sup>[[1]](#references)</sup>
 
-WMI के माध्यम से एक प्रक्रिया को दूरस्थ रूप से निष्पादित करने के लिए, जैसे कि एक साम्राज्य एजेंट को तैनात करना, निम्नलिखित कमांड संरचना का उपयोग किया जाता है, जिसमें सफल निष्पादन "0" के लौटने वाले मान द्वारा संकेतित होता है:
+WMI के माध्यम से किसी process को remotely execute करने के लिए, जैसे कि Empire agent deploy करना, निम्नलिखित command structure का उपयोग किया जाता है। Successful execution का संकेत return value "0" होता है:<sup>[[1]](#references)</sup>
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-यह प्रक्रिया WMI की दूरस्थ निष्पादन और प्रणाली गणना की क्षमता को दर्शाती है, जो प्रणाली प्रशासन और पेनटेस्टिंग दोनों के लिए इसके उपयोगिता को उजागर करती है।
+यह process WMI की remote execution और system enumeration क्षमता को प्रदर्शित करता है, जो system administration और penetration testing दोनों के लिए इसकी उपयोगिता को उजागर करता है।
 
-## स्वचालित उपकरण
+## Automatic Tools
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
@@ -118,9 +118,10 @@ SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug a
 - आप **Impacket's `wmiexec`** का भी उपयोग कर सकते हैं।
 
 
-## संदर्भ
+## References
 
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+- [1] [Using Credentials to Own Windows Boxes - Part 3 (WMI and WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
+- [2] [Beginner's Guide to Impacket Tool Kit - Part 1](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
 
 
 {{#include ../../banners/hacktricks-training.md}}

