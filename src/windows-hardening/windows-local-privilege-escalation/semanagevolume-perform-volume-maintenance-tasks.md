@@ -1,26 +1,26 @@
-# SeManageVolumePrivilege: Acesso bruto ao volume para leitura arbitrária de arquivos
+# SeManageVolumePrivilege: acesso ao volume bruto para leitura arbitrária de arquivos
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Visão geral
 
-Direito de usuário do Windows: Perform volume maintenance tasks (constant: SeManageVolumePrivilege).
+Direito de usuário do Windows: Executar tarefas de manutenção de volumes (constante: SeManageVolumePrivilege).
 
-Titulares podem executar operações de volume de baixo nível, como desfragmentação, criação/remoção de volumes e I/O de manutenção. Criticamente para atacantes, esse direito permite abrir handles de dispositivo de volume bruto (por exemplo, \\.\C:) e emitir I/O de disco direto que contorna as ACLs do NTFS. Com acesso bruto você pode copiar bytes de qualquer arquivo no volume mesmo se negado pela DACL, analisando as estruturas do sistema de arquivos offline ou usando ferramentas que leem no nível de bloco/cluster.
+Os detentores desse direito podem executar operações de baixo nível em volumes, como desfragmentação, criação/remoção de volumes e operações de manutenção de E/S. O aspecto mais crítico para os atacantes é que esse direito permite abrir handles de dispositivos de volume bruto (por exemplo, \\.\C:) e emitir E/S direta no disco, contornando as ACLs de arquivos do NTFS. Com acesso bruto, é possível copiar os bytes de qualquer arquivo no volume mesmo quando o acesso é negado pela DACL, analisando as estruturas do sistema de arquivos offline ou utilizando ferramentas que leem no nível de blocos/clusters.
 
-Padrão: Administradores em servidores e controladores de domínio.
+Padrão: Administrators em servidores e controladores de domínio.<sup>[[1]](#references)</sup>
 
 ## Cenários de abuso
 
-- Leitura arbitrária de arquivos contornando ACLs ao ler o dispositivo de disco (por exemplo, exfiltrate material sensível protegido do sistema como chaves privadas de máquina em %ProgramData%\Microsoft\Crypto\RSA\MachineKeys e %ProgramData%\Microsoft\Crypto\Keys, registry hives, DPAPI masterkeys, SAM, ntds.dit via VSS, etc.).
-- Contornar caminhos bloqueados/privilegiados (C:\Windows\System32\…) copiando bytes diretamente do dispositivo bruto.
-- Em ambientes AD CS, exfiltrate o material de chave da CA (machine key store) para forjar “Golden Certificates” e se passar por qualquer principal do domínio via PKINIT. Veja o link abaixo.
+- Leitura arbitrária de arquivos contornando ACLs por meio da leitura do dispositivo de disco (por exemplo, exfiltrar material sensível protegido pelo sistema, como chaves privadas da máquina em %ProgramData%\Microsoft\Crypto\RSA\MachineKeys e %ProgramData%\Microsoft\Crypto\Keys, hives do registro, masterkeys do DPAPI, SAM, ntds.dit via VSS etc.).
+- Contornar caminhos bloqueados ou privilegiados (C:\Windows\System32\…) copiando bytes diretamente do dispositivo bruto.
+- Em ambientes AD CS, exfiltrar o material de chaves da CA (repositório de chaves da máquina) para criar “Golden Certificates” e se passar por qualquer principal do domínio via PKINIT. Consulte o link abaixo.<sup>[[2]](#references)</sup>
 
-Nota: Você ainda precisa de um parser para as estruturas NTFS a menos que confie em ferramentas auxiliares. Muitas ferramentas prontas abstraem o acesso bruto.
+Observação: ainda é necessário um parser para as estruturas do NTFS, a menos que você utilize ferramentas auxiliares. Muitas ferramentas prontas abstraem o acesso bruto.
 
 ## Técnicas práticas
 
-- Abra um handle de volume bruto e leia clusters:
+- Abrir um handle de volume bruto e ler clusters:
 
 <details>
 <summary>Clique para expandir</summary>
@@ -49,38 +49,38 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- Use uma ferramenta com suporte a NTFS para recuperar arquivos específicos do volume bruto:
-- RawCopy/RawCopy64 (cópia ao nível de setor de arquivos em uso)
-- FTK Imager or The Sleuth Kit (criação de imagem somente leitura, depois carve files)
-- vssadmin/diskshadow + shadow copy, então copie o arquivo alvo a partir do snapshot (se você puder criar VSS; frequentemente requer admin, mas comumente disponível para os mesmos operadores que detêm SeManageVolumePrivilege)
+- Use uma ferramenta compatível com NTFS para recuperar arquivos específicos do volume raw:
+- RawCopy/RawCopy64 (cópia em nível de setor de arquivos em uso)
+- FTK Imager ou The Sleuth Kit (imaging somente leitura e, depois, carving de arquivos)
+- vssadmin/diskshadow + shadow copy; depois, copie o arquivo-alvo do snapshot (se puder criar VSS; geralmente requer admin, mas costuma estar disponível para os mesmos operadores que possuem SeManageVolumePrivilege)
 
-Typical sensitive paths to target:
+Caminhos sensíveis típicos a serem visados:
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
 - %ProgramData%\Microsoft\Crypto\Keys\
-- C:\Windows\System32\config\SAM, SYSTEM, SECURITY (local secrets)
+- C:\Windows\System32\config\SAM, SYSTEM, SECURITY (segredos locais)
 - C:\Windows\NTDS\ntds.dit (domain controllers – via shadow copy)
-- C:\Windows\System32\CertSrv\CertEnroll\ (CA certs/CRLs; private keys live in the machine key store above)
+- C:\Windows\System32\CertSrv\CertEnroll\ (certificados/CRLs da CA; as chaves privadas ficam no machine key store acima)
 
-## AD CS tie‑in: Forging a Golden Certificate
+## Integração com AD CS: Forging a Golden Certificate
 
-If you can read the Enterprise CA’s private key from the machine key store, you can forge client‑auth certificates for arbitrary principals and authenticate via PKINIT/Schannel. This is often referred to as a Golden Certificate. See:
+Se puder ler a chave privada da Enterprise CA no machine key store, você poderá forjar certificados de client-auth para principals arbitrários e autenticar via PKINIT/Schannel. Isso costuma ser chamado de Golden Certificate.<sup>[[2]](#references)</sup> Consulte:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
 {{#endref}}
 
-(Section: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
+(Seção: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
 
 ## Detecção e hardening
 
-- Limitar fortemente a atribuição de SeManageVolumePrivilege (Perform volume maintenance tasks) apenas a administradores confiáveis.
-- Monitorar Sensitive Privilege Use e aberturas de handle de processo para objetos de dispositivo como \\.\C:, \\.\PhysicalDrive0.
-- Preferir chaves de CA com suporte HSM/TPM ou DPAPI-NG para que leituras brutas de arquivos não possam recuperar material de chave em forma utilizável.
-- Manter paths de uploads, temp e extração não executáveis e separados (defesa em contexto web que frequentemente se combina com esta cadeia post‑exploitation).
+- Limite rigorosamente a atribuição de SeManageVolumePrivilege (Perform volume maintenance tasks) apenas a admins confiáveis.
+- Monitore o uso de privilégios sensíveis e a abertura de handles de processos para objetos de dispositivo como \\.\C:, \\.\PhysicalDrive0.
+- Prefira chaves de CA protegidas por HSM/TPM ou DPAPI-NG, para que leituras raw de arquivos não possam recuperar o material da chave em formato utilizável.
+- Mantenha uploads, caminhos temporários e de extração não executáveis e separados (uma defesa no contexto web que costuma acompanhar essa cadeia de post-exploitation).
 
 ## Referências
 
-- Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege): https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks
-- 0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate): https://0xdf.gitlab.io/2025/10/04/htb-certificate.html
+- [1] [Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
+- [2] [0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
 
 {{#include ../../banners/hacktricks-training.md}}
