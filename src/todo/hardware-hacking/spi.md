@@ -4,54 +4,54 @@
 
 ## Podstawowe informacje
 
-SPI (Serial Peripheral Interface) to synchroniczny protokół komunikacji szeregowej używany w systemach wbudowanych do komunikacji na krótkie odległości między układami scalonymi (IC). Protokół komunikacji SPI wykorzystuje architekturę master-slave, która jest sterowana przez sygnał zegara i sygnał wyboru układu. Architektura master-slave składa się z mastera (zwykle mikroprocesora), który zarządza zewnętrznymi urządzeniami peryferyjnymi, takimi jak EEPROM, czujniki, urządzenia sterujące itp., które są uważane za niewolników.
+SPI (Serial Peripheral Interface) to synchroniczny protokół komunikacji szeregowej używany w systemach embedded do komunikacji na krótkie odległości między układami scalonymi (IC, Integrated Circuits). Protokół komunikacji SPI wykorzystuje architekturę master-slave, która jest zarządzana przez sygnały Clock i Chip Select. Architektura master-slave składa się z mastera (zwykle mikroprocesora), który zarządza zewnętrznymi urządzeniami peryferyjnymi, takimi jak EEPROM, sensory, urządzenia sterujące itp., uznawanymi za slave'y.
 
-Wielu niewolników może być podłączonych do mastera, ale niewolnicy nie mogą komunikować się ze sobą. Niewolnicy są zarządzani przez dwa piny: zegar i wybór układu. Ponieważ SPI jest synchronicznym protokołem komunikacji, piny wejściowe i wyjściowe podążają za sygnałami zegara. Sygnał wyboru układu jest używany przez mastera do wyboru niewolnika i interakcji z nim. Gdy sygnał wyboru układu jest wysoki, urządzenie niewolnika nie jest wybrane, natomiast gdy jest niski, układ został wybrany i master będzie wchodził w interakcję z niewolnikiem.
+Do jednego mastera można podłączyć wiele slave'ów, ale slave'y nie mogą komunikować się ze sobą. Slave'y są zarządzane za pomocą dwóch pinów: clock i chip select. Ponieważ SPI jest synchronicznym protokołem komunikacji, piny wejściowe i wyjściowe podążają za sygnałami zegara. Chip select jest używany przez mastera do wyboru slave'a i komunikowania się z nim. Gdy chip select ma stan wysoki, urządzenie slave nie jest wybrane, natomiast gdy ma stan niski, układ jest wybrany i master komunikuje się ze slave'em.
 
-MOSI (Master Out, Slave In) i MISO (Master In, Slave Out) są odpowiedzialne za wysyłanie i odbieranie danych. Dane są wysyłane do urządzenia niewolnika przez pin MOSI, podczas gdy sygnał wyboru układu jest utrzymywany na niskim poziomie. Dane wejściowe zawierają instrukcje, adresy pamięci lub dane zgodnie z kartą katalogową dostawcy urządzenia niewolnika. Po poprawnym wejściu pin MISO jest odpowiedzialny za przesyłanie danych do mastera. Dane wyjściowe są wysyłane dokładnie w następnym cyklu zegara po zakończeniu wejścia. Piny MISO przesyłają dane, aż dane zostaną w pełni przesłane lub master ustawi pin wyboru układu na wysoki poziom (w takim przypadku niewolnik przestanie przesyłać, a master nie będzie słuchał po tym cyklu zegara).
+Piny MOSI (Master Out, Slave In) i MISO (Master In, Slave Out) odpowiadają za wysyłanie i odbieranie danych. Dane są wysyłane do urządzenia slave przez pin MOSI, gdy chip select jest utrzymywany w stanie niskim. Dane wejściowe zawierają instrukcje, adresy pamięci lub dane zgodnie z datasheetem dostawcy urządzenia slave. Po otrzymaniu prawidłowych danych wejściowych pin MISO odpowiada za przesyłanie danych do mastera. Dane wyjściowe są wysyłane dokładnie w następnym cyklu zegara po zakończeniu przesyłania danych wejściowych. Pin MISO przesyła dane do momentu ich całkowitego wysłania albo ustawienia przez mastera pinu chip select w stan wysoki (w takim przypadku slave przestaje transmitować, a master nie odbiera danych po tym cyklu zegara).
 
-## Zrzut oprogramowania układowego z EEPROM
+## Zrzucanie firmware'u z EEPROM-ów
 
-Zrzut oprogramowania układowego może być przydatny do analizy oprogramowania i znajdowania w nim luk. Często oprogramowanie układowe nie jest dostępne w Internecie lub jest nieistotne z powodu różnych czynników, takich jak numer modelu, wersja itp. Dlatego wydobycie oprogramowania układowego bezpośrednio z fizycznego urządzenia może być pomocne w poszukiwaniu zagrożeń.
+Zrzucanie firmware'u może być przydatne podczas jego analizy i wyszukiwania w nim podatności. Często firmware nie jest dostępny w internecie lub jest nieistotny ze względu na różnice wynikające z takich czynników jak numer modelu, wersja itp. Dlatego bezpośrednie wyodrębnienie firmware'u z fizycznego urządzenia może być pomocne podczas polowania na zagrożenia, ponieważ pozwala zachować odpowiedni poziom szczegółowości.
 
-Uzyskanie konsoli szeregowej może być pomocne, ale często zdarza się, że pliki są tylko do odczytu. Ogranicza to analizę z różnych powodów. Na przykład, narzędzia, które są potrzebne do wysyłania i odbierania pakietów, mogą nie być obecne w oprogramowaniu układowym. Dlatego wydobycie binarnych plików do inżynierii odwrotnej nie jest wykonalne. Dlatego posiadanie całego oprogramowania układowego zrzutowanego na systemie i wydobycie binarnych plików do analizy może być bardzo pomocne.
+Uzyskanie Serial Console może być pomocne, ale często zdarza się, że pliki są tylko do odczytu. Ogranicza to analizę z różnych powodów. Przykładowo, w firmware'ze może nie być narzędzi wymaganych do wysyłania i odbierania pakietów. Z tego powodu wyodrębnienie plików binarnych w celu ich reverse engineeringu nie jest możliwe. Dlatego posiadanie całego firmware'u zrzuconego do systemu i wyodrębnienie plików binarnych do analizy może być bardzo pomocne.
 
-Ponadto, podczas red reaming i uzyskiwania fizycznego dostępu do urządzeń, zrzut oprogramowania układowego może pomóc w modyfikacji plików lub wstrzykiwaniu złośliwych plików, a następnie ponownym wgrywaniu ich do pamięci, co może być pomocne w implantacji tylnej furtki w urządzeniu. Dlatego istnieje wiele możliwości, które można odblokować dzięki zrzutom oprogramowania układowego.
+Ponadto podczas red teaming i uzyskiwania fizycznego dostępu do urządzeń zrzucenie firmware'u może pomóc w modyfikowaniu plików lub wstrzykiwaniu złośliwych plików, a następnie ponownym flashowaniu ich do pamięci. Może to pomóc w zainstalowaniu backdoora w urządzeniu. Zrzucanie firmware'u otwiera więc wiele możliwości.
 
-### Programator i czytnik EEPROM CH341A
+### CH341A EEPROM Programmer and Reader
 
-To urządzenie jest niedrogim narzędziem do zrzutowania oprogramowania układowego z EEPROM i ponownego wgrywania ich z plikami oprogramowania układowego. To popularny wybór do pracy z chipami BIOS komputerów (które są po prostu EEPROM). To urządzenie łączy się przez USB i wymaga minimalnych narzędzi, aby rozpocząć. Ponadto zazwyczaj szybko wykonuje zadanie, więc może być pomocne również w dostępie do fizycznych urządzeń.
+To niedrogie urządzenie służące do zrzucania firmware'ów z EEPROM-ów oraz ponownego flashowania ich plikami firmware'u. Jest często używane do pracy z układami BIOS komputerów (które są po prostu EEPROM-ami). Urządzenie łączy się przez USB i do rozpoczęcia pracy wymaga minimalnej liczby narzędzi. Zwykle szybko wykonuje swoje zadanie, dzięki czemu może być pomocne również podczas uzyskiwania fizycznego dostępu do urządzeń.
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-Podłącz pamięć EEPROM do programatora CH341a i podłącz urządzenie do komputera. W przypadku, gdy urządzenie nie jest wykrywane, spróbuj zainstalować sterowniki na komputerze. Upewnij się również, że EEPROM jest podłączony w odpowiedniej orientacji (zwykle umieść pin VCC w odwrotnej orientacji do złącza USB), w przeciwnym razie oprogramowanie nie będzie w stanie wykryć układu. W razie potrzeby odwołaj się do diagramu:
+Podłącz pamięć EEPROM do programatora CH341A i podłącz urządzenie do komputera. Jeśli urządzenie nie zostanie wykryte, spróbuj zainstalować sterowniki na komputerze. Upewnij się również, że EEPROM jest podłączony we właściwej orientacji (zwykle należy umieścić pin VCC w orientacji odwrotnej względem złącza USB); w przeciwnym razie software nie będzie w stanie wykryć układu. W razie potrzeby skorzystaj ze schematu:
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-Na koniec użyj oprogramowania takiego jak flashrom, G-Flash (GUI) itp. do zrzutu oprogramowania układowego. G-Flash to minimalne narzędzie GUI, które jest szybkie i automatycznie wykrywa EEPROM. Może to być pomocne, gdy oprogramowanie układowe musi być szybko wydobyte, bez zbytniego grzebania w dokumentacji.
+Na koniec użyj software'u takiego jak flashrom, G-Flash (GUI) itp. do zrzucenia firmware'u. G-Flash to minimalistyczne narzędzie GUI, które działa szybko i automatycznie wykrywa EEPROM. Może być pomocne, gdy firmware musi zostać szybko wyodrębniony bez konieczności szczegółowego zapoznawania się z dokumentacją.
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
-Po zrzucie oprogramowania układowego analiza może być przeprowadzona na plikach binarnych. Narzędzia takie jak strings, hexdump, xxd, binwalk itp. mogą być używane do wydobywania wielu informacji o oprogramowaniu układowym, a także o całym systemie plików.
+Po zrzuceniu firmware'u można przeprowadzić analizę plików binarnych. Narzędzia takie jak strings, hexdump, xxd, binwalk itp. mogą zostać użyte do wyodrębnienia wielu informacji o firmware'ze, a także o całym systemie plików.
 
-Aby wydobyć zawartość z oprogramowania układowego, można użyć binwalk. Binwalk analizuje sygnatury hex i identyfikuje pliki w pliku binarnym oraz jest w stanie je wydobyć.
+Do wyodrębnienia zawartości firmware'u można użyć binwalk. Binwalk analizuje sygnatury hex, identyfikuje pliki w pliku binarnym i potrafi je wyodrębniać.
 ```
 binwalk -e <filename>
 ```
-Może to być .bin lub .rom w zależności od używanych narzędzi i konfiguracji.
+Może to być plik `.bin` lub `.rom`, zależnie od użytych narzędzi i konfiguracji.
 
 > [!CAUTION]
-> Należy pamiętać, że ekstrakcja oprogramowania układowego jest delikatnym procesem i wymaga dużo cierpliwości. Każde niewłaściwe postępowanie może potencjalnie uszkodzić oprogramowanie układowe lub nawet całkowicie je usunąć, co sprawi, że urządzenie stanie się bezużyteczne. Zaleca się dokładne zapoznanie się z konkretnym urządzeniem przed próbą ekstrakcji oprogramowania układowego.
+> Należy pamiętać, że ekstrakcja firmware'u to delikatny proces wymagający dużej cierpliwości. Nieprawidłowe obchodzenie się z urządzeniem może potencjalnie uszkodzić firmware, a nawet całkowicie go wymazać i sprawić, że urządzenie stanie się bezużyteczne. Przed próbą ekstrakcji firmware'u zaleca się zapoznanie ze specyfiką danego urządzenia.
 
 ### Bus Pirate + flashrom
 
-![](<../../images/image (910).png>)
+![Programator i czytnik EEPROM CH341A - Bus Pirate + flashrom: Bus Pirate + flashrom](<../../images/image (910).png>)
 
-Należy zauważyć, że nawet jeśli PINOUT Pirate Bus wskazuje piny dla **MOSI** i **MISO** do podłączenia do SPI, niektóre SPIs mogą wskazywać piny jako DI i DO. **MOSI -> DI, MISO -> DO**
+Należy pamiętać, że nawet jeśli PINOUT Bus Pirate wskazuje piny **MOSI** i **MISO** do połączenia ze SPI, niektóre układy SPI mogą oznaczać piny jako DI i DO. **MOSI -> DI, MISO -> DO**
 
-![](<../../images/image (360).png>)
+![Programator i czytnik EEPROM CH341A - Bus Pirate + flashrom: Należy pamiętać, że nawet jeśli PINOUT Bus Pirate wskazuje piny MOSI i MISO do połączenia ze SPI, niektóre układy SPI mogą...](<../../images/image (360).png>)
 
-W systemie Windows lub Linux można użyć programu [**`flashrom`**](https://www.flashrom.org/Flashrom) do zrzutu zawartości pamięci flash, uruchamiając coś takiego:
+W systemie Windows lub Linux można użyć programu [**`flashrom`**](https://www.flashrom.org/Flashrom) do zrzucenia zawartości pamięci flash, uruchamiając polecenie podobne do:
 ```bash
 # In this command we are indicating:
 # -VV Verbose

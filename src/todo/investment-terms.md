@@ -1,72 +1,72 @@
-# Warunki Inwestycyjne
+# Terminy inwestycyjne
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Spot
 
-To najprostszy sposób na przeprowadzenie transakcji. Możesz **określić ilość aktywów i cenę**, po której chcesz kupić lub sprzedać, a gdy ta cena zostanie osiągnięta, operacja jest realizowana.
+To najbardziej podstawowy sposób prowadzenia tradingu. Możesz **wskazać ilość aktywa i cenę**, po której chcesz kupić lub sprzedać, a gdy tylko cena ta zostanie osiągnięta, operacja zostanie wykonana.
 
-Zazwyczaj możesz również użyć **aktualnej ceny rynkowej**, aby przeprowadzić transakcję jak najszybciej po aktualnej cenie.
+Zwykle możesz również użyć **bieżącej ceny rynkowej**, aby wykonać transakcję tak szybko, jak to możliwe, po aktualnej cenie.
 
-**Stop Loss - Limit**: Możesz również określić ilość i cenę aktywów do kupienia lub sprzedaży, jednocześnie wskazując niższą cenę do kupienia lub sprzedaży w przypadku jej osiągnięcia (aby zatrzymać straty).
+**Stop Loss - Limit**: Możesz również wskazać ilość i cenę aktywów do kupna lub sprzedaży, a także niższą cenę kupna lub sprzedaży na wypadek jej osiągnięcia (aby ograniczyć straty).
 
 ## Futures
 
-Futures to kontrakt, w którym 2 strony dochodzą do porozumienia, aby **nabyć coś w przyszłości po ustalonej cenie**. Na przykład sprzedać 1 bitcoina za 6 miesięcy po 70.000$.
+Futures to kontrakt, w którym 2 strony uzgadniają **nabycie czegoś w przyszłości po ustalonej cenie**. Na przykład sprzedaż 1 bitcoina za 6 miesięcy po cenie 70 000 USD.
 
-Oczywiście, jeśli za 6 miesięcy wartość bitcoina wynosi 80.000$, strona sprzedająca traci pieniądze, a strona kupująca zyskuje. Jeśli za 6 miesięcy wartość bitcoina wynosi 60.000$, dzieje się odwrotnie.
+Oczywiście, jeśli po 6 miesiącach wartość bitcoina wyniesie 80 000 USD, strona sprzedająca straci pieniądze, a strona kupująca je zarobi. Jeśli po 6 miesiącach wartość bitcoina wyniesie 60 000 USD, sytuacja będzie odwrotna.
 
-Jednakże, jest to interesujące na przykład dla firm, które generują produkt i potrzebują mieć pewność, że będą mogły go sprzedać po cenie pokrywającej koszty. Lub dla firm, które chcą zapewnić sobie stałe ceny w przyszłości, nawet jeśli będą wyższe.
+Jest to jednak interesujące na przykład dla firm, które wytwarzają produkt i muszą mieć pewność, że będą mogły sprzedać go po cenie pozwalającej pokryć koszty. Dotyczy to również firm, które chcą zagwarantować sobie stałe ceny w przyszłości, nawet jeśli będą one wyższe.
 
-Chociaż na giełdach zazwyczaj używa się tego do próby osiągnięcia zysku.
+Chociaż na giełdach rozwiązanie to jest zwykle wykorzystywane do próby osiągnięcia zysku.
 
-* Zauważ, że "Długa pozycja" oznacza, że ktoś stawia na to, że cena wzrośnie.
-* Natomiast "krótka pozycja" oznacza, że ktoś stawia na to, że cena spadnie.
+* Zauważ, że „Long position” oznacza, że ktoś obstawia wzrost ceny
+* Natomiast „short position” oznacza, że ktoś obstawia spadek ceny
 
-### Hedging z Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
+### Hedging With Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
-Jeśli menedżer funduszu obawia się, że niektóre akcje spadną, może zająć krótką pozycję na niektórych aktywach, takich jak bitcoiny lub kontrakty futures na S\&P 500. To byłoby podobne do kupowania lub posiadania niektórych aktywów i stworzenia kontraktu na sprzedaż ich w przyszłości po wyższej cenie.
+Jeśli zarządzający funduszem obawia się, że niektóre akcje spadną, może zająć krótką pozycję na aktywach takich jak bitcoin lub kontrakty futures na S\&P 500. Byłoby to podobne do kupienia lub posiadania aktywów i zawarcia kontraktu na ich sprzedaż w przyszłości po wyższej cenie.
 
-W przypadku spadku ceny menedżer funduszu zyska, ponieważ sprzeda aktywa po wyższej cenie. Jeśli cena aktywów wzrośnie, menedżer nie zyska tej korzyści, ale nadal będzie posiadał swoje aktywa.
+Jeśli cena spadnie, zarządzający funduszem osiągnie zysk, ponieważ sprzeda aktywa po wyższej cenie. Jeśli cena aktywów wzrośnie, zarządzający nie osiągnie tego zysku, ale nadal zachowa swoje aktywa.
 
 ### Perpetual Futures
 
-**To "futures", które będą trwały w nieskończoność** (bez daty zakończenia kontraktu). Bardzo często można je znaleźć na przykład na giełdach kryptowalut, gdzie możesz wchodzić i wychodzić z futures w zależności od ceny kryptowalut.
+**Są to „futures”, które będą trwać bezterminowo** (bez daty zakończenia kontraktu). Bardzo często można je znaleźć na przykład na giełdach kryptowalut, gdzie można wchodzić i wychodzić z futures w zależności od ceny kryptowalut.
 
-Zauważ, że w tych przypadkach zyski i straty mogą być w czasie rzeczywistym, jeśli cena wzrośnie o 1%, wygrywasz 1%, jeśli cena spadnie o 1%, stracisz to.
+Zauważ, że w takich przypadkach zyski i straty mogą być naliczane w czasie rzeczywistym: jeśli cena wzrośnie o 1%, zyskasz 1%; jeśli cena spadnie o 1%, stracisz 1%.
 
-### Futures z Dźwignią
+### Futures with Leverage
 
-**Dźwignia** pozwala Ci kontrolować większą pozycję na rynku przy mniejszej kwocie pieniędzy. W zasadzie pozwala Ci "stawiać" znacznie więcej pieniędzy, niż posiadasz, ryzykując tylko pieniądze, które faktycznie masz.
+**Dźwignia finansowa** pozwala kontrolować większą pozycję na rynku za pomocą mniejszej kwoty pieniędzy. Zasadniczo pozwala „obstawiać” znacznie większą kwotę, niż posiadasz, ryzykując tylko pieniędzmi, które faktycznie masz.
 
-Na przykład, jeśli otworzysz pozycję futures w BTC/USDT z 100$ przy dźwigni 50x, oznacza to, że jeśli cena wzrośnie o 1%, wtedy zyskujesz 1x50 = 50% swojego początkowego inwestycji (50$). I w ten sposób będziesz miał 150$.\
-Jednak jeśli cena spadnie o 1%, stracisz 50% swoich funduszy (59$ w tym przypadku). A jeśli cena spadnie o 2%, stracisz całe swoje zakłady (2x50 = 100%).
+Na przykład, jeśli otworzysz pozycję futures na BTC/USDT za 100 USD z dźwignią 50x, oznacza to, że jeśli cena wzrośnie o 1%, zarobisz 1x50 = 50% swojej początkowej inwestycji (50 USD). W rezultacie będziesz mieć 150 USD.\
+Jeśli jednak cena spadnie o 1%, stracisz 50% swoich środków (w tym przypadku 50 USD). Jeśli cena spadnie o 2%, stracisz całą obstawioną kwotę (2x50 = 100%).
 
-Dlatego dźwignia pozwala kontrolować kwotę pieniędzy, którą stawiasz, jednocześnie zwiększając zyski i straty.
+Dźwignia pozwala więc kontrolować kwotę, którą obstawiasz, jednocześnie zwiększając potencjalne zyski i straty.
 
-## Różnice między Futures a Opcjami
+## Różnice między Futures a Options
 
-Główna różnica między futures a opcjami polega na tym, że kontrakt jest opcjonalny dla kupującego: Może zdecydować, czy go zrealizować, czy nie (zazwyczaj zrobi to tylko wtedy, gdy będzie miał z tego korzyść). Sprzedawca musi sprzedać, jeśli kupujący chce skorzystać z opcji.\
-Jednak kupujący będzie płacił pewną opłatę sprzedawcy za otwarcie opcji (więc sprzedawca, który podejmuje większe ryzyko, zaczyna zarabiać pieniądze).
+Główna różnica między futures a options polega na tym, że wykonanie kontraktu jest opcjonalne dla kupującego: może on zdecydować, czy go wykonać, czy nie (zwykle zrobi to tylko wtedy, gdy będzie to dla niego korzystne). Sprzedający musi sprzedać, jeśli kupujący chce skorzystać z opcji.\
+Kupujący zapłaci jednak sprzedającemu opłatę za otwarcie opcji (dzięki czemu sprzedający, który pozornie podejmuje większe ryzyko, zaczyna zarabiać pewne pieniądze).
 
-### 1. **Obowiązek vs. Prawo:**
+### 1. **Obowiązek a prawo:**
 
-* **Futures:** Kiedy kupujesz lub sprzedajesz kontrakt futures, wchodzisz w **wiążące porozumienie** na zakup lub sprzedaż aktywa po określonej cenie w przyszłym terminie. Zarówno kupujący, jak i sprzedający są **zobowiązani** do wypełnienia kontraktu przy wygaśnięciu (chyba że kontrakt zostanie zamknięty wcześniej).
-* **Opcje:** W przypadku opcji masz **prawo, ale nie obowiązek**, do zakupu (w przypadku **opcji call**) lub sprzedaży (w przypadku **opcji put**) aktywa po określonej cenie przed lub w określonym terminie wygaśnięcia. **Kupujący** ma opcję wykonania, podczas gdy **sprzedawca** jest zobowiązany do zrealizowania transakcji, jeśli kupujący zdecyduje się skorzystać z opcji.
+* **Futures:** Kupując lub sprzedając kontrakt futures, zawierasz **wiążącą umowę** kupna lub sprzedaży aktywa po określonej cenie i w określonym terminie w przyszłości. Zarówno kupujący, jak i sprzedający są **zobowiązani** do realizacji kontraktu w dniu wygaśnięcia (chyba że kontrakt zostanie wcześniej zamknięty).
+* **Options:** W przypadku options masz **prawo, ale nie obowiązek**, kupić (w przypadku **call option**) lub sprzedać (w przypadku **put option**) aktywo po określonej cenie przed określonym terminem wygaśnięcia lub w tym terminie. **Kupujący** ma możliwość wykonania opcji, natomiast **sprzedający** jest zobowiązany do realizacji transakcji, jeśli kupujący zdecyduje się wykonać opcję.
 
 ### 2. **Ryzyko:**
 
-* **Futures:** Zarówno kupujący, jak i sprzedający ponoszą **nieograniczone ryzyko**, ponieważ są zobowiązani do zrealizowania kontraktu. Ryzyko to różnica między uzgodnioną ceną a ceną rynkową w dniu wygaśnięcia.
-* **Opcje:** Ryzyko kupującego jest ograniczone do **premii** zapłaconej za zakup opcji. Jeśli rynek nie poruszy się na korzyść posiadacza opcji, mogą po prostu pozwolić opcji wygasnąć. Jednak **sprzedawca** (wystawca) opcji ma nieograniczone ryzyko, jeśli rynek poruszy się znacząco przeciwko nim.
+* **Futures:** Zarówno kupujący, jak i sprzedający ponoszą **nieograniczone ryzyko**, ponieważ są zobowiązani do realizacji kontraktu. Ryzyko stanowi różnica między uzgodnioną ceną a ceną rynkową w dniu wygaśnięcia.
+* **Options:** Ryzyko kupującego jest ograniczone do **premii** zapłaconej za zakup opcji. Jeśli rynek nie zmieni się na korzyść posiadacza opcji, może on po prostu pozwolić na jej wygaśnięcie. Jednak **sprzedający** (wystawca) opcji ponosi nieograniczone ryzyko, jeśli rynek znacząco zmieni się na jego niekorzyść.
 
 ### 3. **Koszt:**
 
-* **Futures:** Nie ma kosztu początkowego poza marżą wymaganą do utrzymania pozycji, ponieważ zarówno kupujący, jak i sprzedający są zobowiązani do zrealizowania transakcji.
-* **Opcje:** Kupujący musi zapłacić **premię opcyjną** z góry za prawo do skorzystania z opcji. Ta premia jest zasadniczo kosztem opcji.
+* **Futures:** Nie ma kosztu początkowego wykraczającego poza depozyt zabezpieczający wymagany do utrzymania pozycji, ponieważ zarówno kupujący, jak i sprzedający są zobowiązani do realizacji transakcji.
+* **Options:** Kupujący musi z góry zapłacić **premię opcyjną** za prawo do wykonania opcji. Premia ta stanowi zasadniczo koszt opcji.
 
-### 4. **Potencjał Zysku:**
+### 4. **Potencjał zysku:**
 
-* **Futures:** Zysk lub strata opiera się na różnicy między ceną rynkową w dniu wygaśnięcia a uzgodnioną ceną w kontrakcie.
-* **Opcje:** Kupujący zyskuje, gdy rynek porusza się korzystnie ponad cenę wykonania o więcej niż zapłacona premia. Sprzedawca zyskuje, zatrzymując premię, jeśli opcja nie zostanie zrealizowana.
+* **Futures:** Zysk lub strata zależy od różnicy między ceną rynkową w dniu wygaśnięcia a uzgodnioną ceną określoną w kontrakcie.
+* **Options:** Kupujący osiąga zysk, gdy rynek przesunie się korzystnie poza cenę wykonania o więcej niż zapłacona premia. Sprzedający osiąga zysk, zatrzymując premię, jeśli opcja nie zostanie wykonana.
 
 {{#include ../banners/hacktricks-training.md}}

