@@ -1,14 +1,16 @@
+# Від High Integrity до SYSTEM за допомогою Named Pipes
+
 {{#include ../../banners/hacktricks-training.md}}
 
-**Потік коду:**
+**Потік виконання коду:**
 
-1. Створіть новий Pipe
-2. Створіть і запустіть сервіс, який підключиться до створеного pipe і щось запише. Код сервісу виконає цей закодований PS код: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. Сервіс отримує дані від клієнта в pipe, викликає ImpersonateNamedPipeClient і чекає, поки сервіс завершиться
-4. Нарешті, використовує токен, отриманий від сервісу, щоб запустити новий _cmd.exe_
+1. Створює новий Pipe
+2. Створює та запускає service, який підключиться до створеного pipe і запише щось. Код service виконає цей закодований PS-код: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
+3. Service отримує дані від client через pipe, викликає `ImpersonateNamedPipeClient` і очікує завершення service
+4. Нарешті використовує token, отриманий від service, щоб запустити новий _cmd.exe_
 
 > [!WARNING]
-> Якщо у вас недостатньо привілеїв, експлойт може застрягти і ніколи не повернутися.
+> Якщо у вас недостатньо привілеїв, exploit може зависнути й ніколи не завершитися.
 ```c
 #include <windows.h>
 #include <time.h>

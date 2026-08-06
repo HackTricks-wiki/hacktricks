@@ -4,41 +4,41 @@
 
 ## WDigest
 
-The [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>) protocol, introduced with Windows XP, is designed for authentication via the HTTP Protocol and is **enabled by default on Windows XP through Windows 8.0 and Windows Server 2003 to Windows Server 2012**. This default setting results in **plain-text password storage in LSASS** (Local Security Authority Subsystem Service). An attacker can use Mimikatz to **extract these credentials** by executing:
+Протокол [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>), представлений у Windows XP, призначений для автентифікації через HTTP Protocol і **типово увімкнений у Windows XP — Windows 8.0 та Windows Server 2003 — Windows Server 2012**. Це типове налаштування призводить до **зберігання паролів у відкритому тексті в LSASS** (Local Security Authority Subsystem Service). Зловмисник може використати Mimikatz для **вилучення цих облікових даних**, виконавши:<sup>[[8]](#references)</sup>
 ```bash
 sekurlsa::wdigest
 ```
-Щоб **увімкнути або вимкнути цю функцію**, ключі реєстру _**UseLogonCredential**_ та _**Negotiate**_ у _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ мають бути встановлені на "1". Якщо ці ключі **відсутні або встановлені на "0"**, WDigest **відключено**:
+Щоб **вимкнути або ввімкнути цю функцію**, ключі реєстру _**UseLogonCredential**_ і _**Negotiate**_ у _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ мають бути встановлені в значення "1". Якщо ці ключі **відсутні або мають значення "0"**, WDigest **вимкнено**:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
 ## LSA Protection (PP & PPL protected processes)
 
-**Protected Process (PP)** і **Protected Process Light (PPL)** — це **Windows kernel-level protections**, які призначені для запобігання несанкціонованому доступу до чутливих процесів, таких як **LSASS**. Запроваджені у **Windows Vista**, модель **PP** спочатку створювалася для забезпечення **DRM** і дозволяла захищати лише бінарники, підписані спеціальним медіа-сертифікатом. Процес, позначений як **PP**, може бути відкритий лише іншими процесами, які також є **PP** і мають **рівень захисту рівний або вищий**, і навіть тоді — **тільки з обмеженими правами доступу**, якщо інше явно не дозволено.
+**Protected Process (PP)** і **Protected Process Light (PPL)** — це **захисти на рівні ядра Windows**, призначені для запобігання несанкціонованому доступу до чутливих процесів, таких як **LSASS**. Представлена у **Windows Vista**, модель **PP** спочатку була створена для забезпечення **DRM** і дозволяла захищати лише бінарні файли, підписані **спеціальним сертифікатом для медіа**. Процес із позначкою **PP** може бути доступний лише іншим процесам, які також є **PP** і мають **рівний або вищий рівень захисту**, причому навіть тоді — **лише з обмеженими правами доступу**, якщо інше не дозволено явно.
 
-**PPL**, запроваджений у **Windows 8.1**, є більш гнучкою версією PP. Він дозволяє **ширші сценарії використання** (наприклад, LSASS, Defender) шляхом введення **"рівнів захисту"**, заснованих на полі EKU (Enhanced Key Usage) цифрового підпису. Рівень захисту зберігається в полі `EPROCESS.Protection`, яке є структурою `PS_PROTECTION` з:
-- **Type** (`Protected` or `ProtectedLight`)
+**PPL**, представлений у **Windows 8.1**, є гнучкішою версією PP. Він підтримує **ширший спектр сценаріїв використання** (наприклад, LSASS, Defender), вводячи **«рівні захисту»** на основі поля **EKU (Enhanced Key Usage)** цифрового підпису. Рівень захисту зберігається в полі `EPROCESS.Protection`, яке є структурою `PS_PROTECTION` із такими полями:
+- **Type** (`Protected` або `ProtectedLight`)
 - **Signer** (наприклад, `WinTcb`, `Lsa`, `Antimalware` тощо)
 
-Ця структура упакована в один байт і визначає **хто кого може доступати**:
-- **Вищі значення signer можуть доступатися до нижчих**
-- **PPLs не можуть доступатися до PPs**
-- **Незахищені процеси не можуть доступатися до будь-яких PPL/PP**
+Ця структура упаковується в один байт і визначає, **хто до кого може отримувати доступ**:
+- **Підписанти з вищими значеннями можуть отримувати доступ до підписантів із нижчими значеннями**
+- **PPL не можуть отримувати доступ до PP**
+- **Незахищені процеси не можуть отримувати доступ до жодного PPL/PP**
 
-### What you need to know from an offensive perspective
+### Що потрібно знати з offensive perspective
 
-- Коли **LSASS запускається як PPL**, спроби відкрити його через `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` з нормального адміністративного контексту **завершуються помилкою `0x5 (Access Denied)`**, навіть якщо `SeDebugPrivilege` увімкнено.
-- Ви можете **перевірити рівень захисту LSASS** за допомогою інструментів типу Process Hacker або програмно, читаючи значення `EPROCESS.Protection`.
-- LSASS зазвичай матиме `PsProtectedSignerLsa-Light` (`0x41`), до якого можна отримати доступ **тільки з процесів, підписаних з вищим signer**, наприклад `WinTcb` (`0x61` або `0x62`).
-- PPL — це **Userland-only restriction**; **kernel-level code може повністю його обійти**.
-- Те, що LSASS є PPL, **не заважає зливу облікових даних**, якщо ви можете виконати kernel shellcode або **задіяти процес з високими привілеями та відповідним доступом**.
-- **Установлення або зняття PPL** вимагає перезавантаження або змін у налаштуваннях Secure Boot/UEFI, які можуть зберегти налаштування PPL навіть після скасування змін у реєстрі.
+- Коли **LSASS працює як PPL**, спроби відкрити його за допомогою `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` зі звичайного контексту адміністратора **завершуються помилкою `0x5 (Access Denied)`**, навіть якщо `SeDebugPrivilege` увімкнено.
+- **Рівень захисту LSASS** можна перевірити за допомогою таких інструментів, як Process Hacker, або програмно, прочитавши значення `EPROCESS.Protection`.
+- Зазвичай LSASS має `PsProtectedSignerLsa-Light` (`0x41`), і доступ до нього можуть отримувати **лише процеси, підписані підписантом вищого рівня**, наприклад `WinTcb` (`0x61` або `0x62`).
+- PPL — це **обмеження лише на рівні Userland**; код на рівні ядра може повністю його обійти.
+- Те, що LSASS є PPL, **не перешкоджає credential dumping**, якщо ви можете виконати kernel shellcode або **використати високопривілейований процес із належними правами доступу**.
+- **Установлення або видалення PPL** потребує перезавантаження або зміни налаштувань **Secure Boot/UEFI**, які можуть зберігати налаштування PPL навіть після скасування змін у реєстрі.
 
-### Create a PPL process at launch (documented API)
+### Створення PPL-процесу під час запуску (documented API)
 
-Windows надає документований спосіб запитати рівень Protected Process Light для дочірнього процесу під час створення, використовуючи розширений список атрибутів старту. Це не обходить вимоги до підпису — цільовий образ має бути підписаний для запитаної класи signer.
+Windows надає документований спосіб запросити рівень Protected Process Light для дочірнього процесу під час його створення за допомогою списку розширених атрибутів запуску. Це не обходить вимоги до підпису — цільовий образ має бути підписаний для запитаного класу підписанта.
 
-Мінімальний потік у C/C++:
+Мінімальний процес у C/C++:
 ```c
 // Request a PPL protection level for the child process at creation time
 // Requires Windows 8.1+ and a properly signed image for the selected level
@@ -80,95 +80,95 @@ CloseHandle(pi.hProcess);
 return 0;
 }
 ```
-Примітки та обмеження:
-- Використовуйте `STARTUPINFOEX` з `InitializeProcThreadAttributeList` та `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL, ...)`, потім передайте `EXTENDED_STARTUPINFO_PRESENT` в `CreateProcess*`.
-- Значення protection `DWORD` можна встановити в такі константи, як `PROTECTION_LEVEL_WINTCB_LIGHT`, `PROTECTION_LEVEL_WINDOWS`, `PROTECTION_LEVEL_WINDOWS_LIGHT`, `PROTECTION_LEVEL_ANTIMALWARE_LIGHT`, або `PROTECTION_LEVEL_LSA_LIGHT`.
-- Дочірній процес почне працювати як PPL лише якщо його образ підписаний для цього класу підписувача; в іншому випадку створення процесу не вдасться, зазвичай з `ERROR_INVALID_IMAGE_HASH (577)` / `STATUS_INVALID_IMAGE_HASH (0xC0000428)`.
-- Це не bypass — це підтримуваний API, призначений для належним чином підписаних образів. Корисно для зміцнення інструментів або перевірки конфігурацій, захищених PPL.
+Нотатки та обмеження:
+- Використовуйте `STARTUPINFOEX` з `InitializeProcThreadAttributeList` і `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL, ...)`, а потім передайте `EXTENDED_STARTUPINFO_PRESENT` до `CreateProcess*`.<sup>[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+- `DWORD` захисту можна встановити в такі константи, як `PROTECTION_LEVEL_WINTCB_LIGHT`, `PROTECTION_LEVEL_WINDOWS`, `PROTECTION_LEVEL_WINDOWS_LIGHT`, `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` або `PROTECTION_LEVEL_LSA_LIGHT`.
+- Дочірній процес запускається як PPL лише тоді, коли його image підписаний для відповідного класу підписувача; інакше створення процесу завершується помилкою, зазвичай `ERROR_INVALID_IMAGE_HASH (577)` / `STATUS_INVALID_IMAGE_HASH (0xC0000428)`.
+- Це не bypass — це підтримуваний API, призначений для належним чином підписаних images. Він корисний для посилення захисту інструментів або перевірки конфігурацій, захищених PPL.
 
-Example CLI using a minimal loader:
+Приклад CLI з використанням мінімального loader:<sup>[[1]](#references)</sup>
 - Antimalware signer: `CreateProcessAsPPL.exe 3 C:\Tools\agent.exe --svc`
 - LSA-light signer: `CreateProcessAsPPL.exe 4 C:\Windows\System32\notepad.exe`
 
-**Bypass PPL protections options:**
+**Варіанти обходу захисту PPL:**
 
-Якщо ви хочете dump LSASS незважаючи на PPL, у вас є 3 основні варіанти:
-1. **Use a signed kernel driver (e.g., Mimikatz + mimidrv.sys)** щоб **видалити прапорець захисту LSASS**:
+Якщо потрібно зробити dump LSASS попри PPL, є 3 основні варіанти:
+1. **Використати підписаний kernel driver (наприклад, Mimikatz + mimidrv.sys)**, щоб **видалити прапорець захисту LSASS**:
 
-![](../../images/mimidrv.png)
+![Вивід драйвера Mimikatz mimidrv, що демонструє взаємодію із захистом credentials](../../images/mimidrv.png)
 
-2. **Bring Your Own Vulnerable Driver (BYOVD)** щоб виконувати власний код в ядрі та вимкнути захист. Інструменти на кшталт **PPLKiller**, **gdrv-loader**, або **kdmapper** роблять це можливим.
-3. Вкрадіть існуючий дескриптор LSASS з іншого процесу, який має його відкритим (наприклад, AV процес), потім дуплікуйте його в ваш процес. Це основа техніки `pypykatz live lsa --method handledup`.
-4. Зловживайте якимось привілейованим процесом, який дозволить завантажити довільний код у його адресний простір або всередину іншого привілейованого процесу, фактично обходячи обмеження PPL. Приклад можна подивитися в [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) або [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump).
+2. **Bring Your Own Vulnerable Driver (BYOVD)**, щоб виконати власний kernel code і вимкнути захист. Інструменти на кшталт **PPLKiller**, **gdrv-loader** або **kdmapper** роблять це можливим.
+3. **Викрасти наявний handle LSASS** з іншого процесу, який уже відкрив його (наприклад, процесу AV), а потім **дублювати його** у свій процес. На цьому базується техніка `pypykatz live lsa --method handledup`.
+4. **Зловживати деяким привілейованим процесом**, який дозволяє завантажувати довільний code у свій address space або всередину іншого привілейованого процесу, фактично обходячи обмеження PPL. Приклад цього можна переглянути в [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) або [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump).
 
-**Check current status of LSA protection (PPL/PP) for LSASS**:
+**Перевірка поточного статусу захисту LSA (PPL/PP) для LSASS**:
 ```bash
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
-Коли ви запускаєте **`mimikatz privilege::debug sekurlsa::logonpasswords`**, це, найімовірніше, завершиться помилкою з кодом `0x00000005` через це.
+Коли ви запускаєте **`mimikatz privilege::debug sekurlsa::logonpasswords`**, команда, ймовірно, завершиться помилкою з кодом `0x00000005` через це.
 
-- Для додаткової інформації про цю перевірку [https://itm4n.github.io/lsass-runasppl/](https://itm4n.github.io/lsass-runasppl/)
+- Докладніше про цю перевірку: [https://itm4n.github.io/lsass-runasppl/](https://itm4n.github.io/lsass-runasppl/)<sup>[[5]](#references)</sup>
 
 
 ## Credential Guard
 
-**Credential Guard**, функція, доступна лише в **Windows 10 (Enterprise та Education editions)**, підвищує безпеку облікових даних машини за допомогою **Virtual Secure Mode (VSM)** та **Virtualization Based Security (VBS)**. Воно використовує розширення віртуалізації CPU для ізоляції ключових процесів у захищеному просторі пам'яті, поза досяжністю основної операційної системи. Ця ізоляція гарантує, що навіть ядро не має доступу до пам'яті у VSM, ефективно захищаючи облікові дані від атак на кшталт **pass-the-hash**. **Local Security Authority (LSA)** працює в цьому захищеному середовищі як trustlet, тоді як процес **LSASS** в основній ОС виконує лише роль посередника для зв'язку з LSA у VSM.
+**Credential Guard** — функція, доступна лише у **Windows 10 (Enterprise та Education editions)**, яка підвищує безпеку облікових даних комп'ютера за допомогою **Virtual Secure Mode (VSM)** і **Virtualization Based Security (VBS)**. Вона використовує розширення віртуалізації CPU, щоб ізолювати ключові процеси в захищеному просторі пам'яті, недоступному для основної операційної системи. Така ізоляція гарантує, що навіть kernel не може отримати доступ до пам'яті у VSM, ефективно захищаючи облікові дані від атак на кшталт **pass-the-hash**. **Local Security Authority (LSA)** працює в цьому захищеному середовищі як trustlet, тоді як процес **LSASS** в основній ОС лише обмінюється даними з LSA у VSM.
 
-За замовчуванням **Credential Guard** не активований і потребує ручного ввімкнення в організації. Воно критично для посилення захисту проти інструментів на кшталт **Mimikatz**, яким значно ускладнено можливість витягувати облікові дані. Проте вразливості все ще можуть бути використані шляхом додавання кастомних **Security Support Providers (SSP)** для перехоплення облікових даних у відкритому вигляді під час спроб входу.
+За замовчуванням **Credential Guard** не активний і потребує ручної активації в організації. Він має важливе значення для посилення захисту від таких інструментів, як **Mimikatz**, оскільки обмежує їхню можливість отримувати облікові дані. Однак уразливості все ще можуть бути використані через додавання власних **Security Support Providers (SSP)** для перехоплення облікових даних у відкритому вигляді під час спроб входу.
 
-Щоб перевірити стан активації **Credential Guard**, можна переглянути реєстровий ключ _**LsaCfgFlags**_ у _**HKLM\System\CurrentControlSet\Control\LSA**_. Значення "**1**" означає активацію з **UEFI lock**, "**2**" — без блокування, а "**0**" вказує, що він не увімкнений. Ця перевірка реєстру, хоча й є вагомим індикатором, не є єдиним кроком для увімкнення Credential Guard. Детальні інструкції та PowerShell-скрипт для увімкнення цієї функції доступні онлайн.
+Щоб перевірити стан активації **Credential Guard**, можна перевірити ключ реєстру _**LsaCfgFlags**_ у _**HKLM\System\CurrentControlSet\Control\LSA**_. Значення "**1**" означає активацію з **UEFI lock**, "**2**" — активацію без блокування, а "**0**" означає, що функцію не ввімкнено. Ця перевірка реєстру є надійним індикатором, але не є єдиним кроком для ввімкнення Credential Guard. Докладні інструкції та PowerShell-скрипт для ввімкнення цієї функції доступні онлайн.
 ```bash
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
-Для повного розуміння та інструкцій щодо увімкнення **Credential Guard** у Windows 10 та його автоматичної активації в сумісних системах **Windows 11 Enterprise and Education (version 22H2)**, відвідайте [документацію Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
+Для всебічного розуміння та отримання інструкцій щодо ввімкнення **Credential Guard** у Windows 10 і його автоматичної активації у сумісних системах **Windows 11 Enterprise і Education (версія 22H2)** відвідайте [документацію Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).<sup>[[9]](#references)</sup>
 
-Детальніші відомості щодо реалізації custom SSPs для захоплення облікових даних наведено в [цьому посібнику](../active-directory-methodology/custom-ssp.md).
+Додаткові відомості про реалізацію власних SSP для захоплення облікових даних наведено [у цьому посібнику](../active-directory-methodology/custom-ssp.md).
 
-## RDP RestrictedAdmin Mode
+## Кешовані облікові дані
 
-**Windows 8.1 and Windows Server 2012 R2** запровадили кілька нових функцій безпеки, зокрема _**Restricted Admin mode for RDP**_. Цей режим створений для підвищення безпеки шляхом зменшення ризиків, пов'язаних із атаками [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/).
+**Windows 8.1 і Windows Server 2012 R2** представили кілька нових функцій безпеки, зокрема _**Restricted Admin mode для RDP**_. Цей режим розроблено для підвищення безпеки шляхом зменшення ризиків, пов'язаних з атаками [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/).
 
-Традиційно, при підключенні до віддаленого комп'ютера через RDP ваші облікові дані зберігаються на цільовій машині. Це становить значний ризик для безпеки, особливо при використанні облікових записів з підвищеними привілеями. Однак із введенням _**Restricted Admin mode**_ цей ризик суттєво зменшується.
+Традиційно під час підключення до віддаленого комп'ютера через RDP ваші облікові дані зберігаються на цільовій машині. Це створює значний ризик для безпеки, особливо під час використання облікових записів із підвищеними привілеями. Однак із появою _**Restricted Admin mode**_ цей ризик суттєво зменшився.
 
-При ініціюванні RDP-з'єднання командою **mstsc.exe /RestrictedAdmin** автентифікація до віддаленого комп'ютера виконується без збереження ваших облікових даних на ньому. Такий підхід гарантує, що у разі зараження шкідливим ПЗ або якщо зловмисник отримає доступ до віддаленого сервера, ваші облікові дані не будуть скомпрометовані, оскільки вони не зберігаються на сервері.
+Під час встановлення RDP-з'єднання за допомогою команди **mstsc.exe /RestrictedAdmin** автентифікація на віддаленому комп'ютері виконується без збереження ваших облікових даних на ньому. Такий підхід гарантує, що в разі зараження шкідливим програмним забезпеченням або отримання зловмисником доступу до віддаленого сервера ваші облікові дані не буде скомпрометовано, оскільки вони не зберігаються на сервері.
 
-Важливо зауважити, що в **Restricted Admin mode** спроби доступу до мережевих ресурсів із RDP-сесії не використовуватимуть ваші особисті облікові дані; натомість використовується **ідентичність машини**.
+Важливо зазначити, що в **Restricted Admin mode** спроби отримати доступ до мережевих ресурсів із сеансу RDP не використовуватимуть ваші особисті облікові дані; натомість використовуватиметься **ідентичність машини**.
 
-Ця функція є важливим кроком уперед у захисті віддалених робочих столів та захисті конфіденційної інформації від розкриття у разі порушення безпеки.
+Ця функція є важливим кроком уперед у захисті віддалених підключень до робочого столу та конфіденційної інформації від розкриття в разі порушення безпеки.
 
-![](../../images/RAM.png)
+![Діаграма оперативної пам'яті Windows у контексті вилучення облікових даних](../../images/RAM.png)
 
-Для детальнішої інформації перегляньте [цей ресурс](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+Докладнішу інформацію дивіться [у цьому ресурсі](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).<sup>[[6]](#references)</sup>
 
-## Cached Credentials
+## Кешовані облікові дані
 
-Windows захищає **domain credentials** через **Local Security Authority (LSA)**, підтримуючи процеси входу з протоколами безпеки такими як **Kerberos** і **NTLM**. Важливою можливістю Windows є кешування **останніх десяти входів у домен**, щоб користувачі могли отримувати доступ до своїх комп'ютерів навіть якщо **domain controller** недоступний — корисно для ноутбуків, які часто знаходяться поза мережею компанії.
+Windows захищає **доменні облікові дані** за допомогою **Local Security Authority (LSA)**, підтримуючи процеси входу за допомогою протоколів безпеки, таких як **Kerberos** і **NTLM**. Однією з ключових функцій Windows є можливість кешувати **останні десять входів до домену**, щоб користувачі й надалі могли отримувати доступ до своїх комп'ютерів, навіть якщо **контролер домену перебуває в автономному режимі** — це особливо корисно для користувачів ноутбуків, які часто перебувають поза мережею своєї компанії.
 
-Кількість кешованих входів можна налаштувати через відповідний **registry key or group policy**. Щоб переглянути або змінити цей параметр, використовується наступна команда:
+Кількість кешованих входів можна налаштувати за допомогою певного **ключа реєстру або групової політики**. Щоб переглянути або змінити це налаштування, використовується така команда:
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
-Доступ до цих кешованих облікових даних суворо контролюється: лише обліковий запис **SYSTEM** має необхідні дозволи для їх перегляду. Адміністратори, яким потрібно отримати цю інформацію, повинні робити це з привілеями користувача SYSTEM. Облікові дані зберігаються за адресою: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
+Доступ до цих кешованих облікових даних суворо контролюється: лише обліковий запис **SYSTEM** має необхідні дозволи для їх перегляду. Адміністратори, яким потрібно отримати доступ до цієї інформації, повинні робити це з привілеями користувача SYSTEM. Облікові дані зберігаються за адресою: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
 
 **Mimikatz** можна використовувати для вилучення цих кешованих облікових даних за допомогою команди `lsadump::cache`.
 
-Для детальнішої інформації оригінальне [source](http://juggernaut.wikidot.com/cached-credentials) містить повну інформацію.
+Додаткову інформацію містить оригінальне [джерело](http://juggernaut.wikidot.com/cached-credentials).<sup>[[7]](#references)</sup>
 
 ## Protected Users
 
-Членство в групі **Protected Users** додає кілька покращень безпеки для користувачів, забезпечуючи вищий рівень захисту від крадіжки та зловживання обліковими даними:
+Членство в **Protected Users group** забезпечує користувачам низку додаткових засобів безпеки, гарантуючи вищий рівень захисту від крадіжки та неправомірного використання облікових даних:
 
-- **Credential Delegation (CredSSP)**: Навіть якщо налаштування Group Policy **Allow delegating default credentials** увімкнено, plain text облікові дані Protected Users не будуть кешовані.
-- **Windows Digest**: Починаючи з **Windows 8.1 and Windows Server 2012 R2**, система не кешуватиме plain text облікові дані Protected Users, незалежно від стану Windows Digest.
-- **NTLM**: Система не кешуватиме plain text облікові дані Protected Users або NT one-way functions (NTOWF).
-- **Kerberos**: Для Protected Users аутентифікація Kerberos не генерує **DES** або **RC4 keys**, а також не кешуватиме plain text облікові дані чи довготривалі ключі поза початковим отриманням Ticket-Granting Ticket (TGT).
-- **Offline Sign-In**: Для Protected Users не створюється кешований верифікатор під час входу або розблокування, отже offline sign-in для цих облікових записів не підтримується.
+- **Credential Delegation (CredSSP)**: Навіть якщо параметр групової політики **Allow delegating default credentials** увімкнено, облікові дані Protected Users у відкритому тексті не кешуватимуться.
+- **Windows Digest**: Починаючи з **Windows 8.1 і Windows Server 2012 R2**, система не кешуватиме облікові дані Protected Users у відкритому тексті, незалежно від стану Windows Digest.
+- **NTLM**: Система не кешуватиме облікові дані Protected Users у відкритому тексті або односторонні функції NT (NTOWF).
+- **Kerberos**: Для Protected Users автентифікація Kerberos не створюватиме ключі **DES** або **RC4**, а також не кешуватиме облікові дані у відкритому тексті чи довгострокові ключі після початкового отримання Ticket-Granting Ticket (TGT).
+- **Offline Sign-In**: Для Protected Users під час входу або розблокування не створюватиметься кешований верифікатор, тому offline sign-in для цих облікових записів не підтримується.
 
-Ці захисти активуються з моменту, коли користувач, який є членом групи **Protected Users**, входить на пристрій. Це гарантує, що ключові заходи безпеки застосовуються для захисту від різних методів компрометації облікових даних.
+Ці засоби захисту активуються одразу після входу на пристрій користувача, який є членом **Protected Users group**. Це гарантує застосування критично важливих заходів безпеки для захисту від різних методів компрометації облікових даних.
 
-Для детальнішої інформації зверніться до офіційної [documentation](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
+Докладнішу інформацію дивіться в офіційній [документації](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).<sup>[[10]](#references)</sup>
 
-**Table from** [**the docs**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
+**Таблиця з** [**документації**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**<sup>[[11]](#references)</sup>
 
 | Windows Server 2003 RTM | Windows Server 2003 SP1+ | <p>Windows Server 2012,<br>Windows Server 2008 R2,<br>Windows Server 2008</p> | Windows Server 2016          |
 | ----------------------- | ------------------------ | ----------------------------------------------------------------------------- | ---------------------------- |
@@ -191,10 +191,16 @@ reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLO
 
 ## References
 
-- [CreateProcessAsPPL – minimal PPL process launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
-- [STARTUPINFOEX structure (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-startupinfoexw)
-- [InitializeProcThreadAttributeList (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-initializeprocthreadattributelist)
-- [UpdateProcThreadAttribute (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
-- [LSASS RunAsPPL – background and internals](https://itm4n.github.io/lsass-runasppl/)
+- [1] [CreateProcessAsPPL – мінімальний PPL process launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
+- [2] [Структура STARTUPINFOEX (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-startupinfoexw)
+- [3] [InitializeProcThreadAttributeList (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-initializeprocthreadattributelist)
+- [4] [UpdateProcThreadAttribute (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
+- [5] [LSASS RunAsPPL – передумови та внутрішні механізми](https://itm4n.github.io/lsass-runasppl/)
+- [6] [Restricted Admin Mode для RDP](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/)
+- [7] [Кешовані облікові дані - Juggernaut AppSec Wiki](http://juggernaut.wikidot.com/cached-credentials)
+- [8] [Автентифікація WDigest (Microsoft TechNet)](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>)
+- [9] [Керування Windows Defender Credential Guard (Microsoft Learn)](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage)
+- [10] [Protected Users Security Group (Microsoft Learn)](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group)
+- [11] [Додаток C: Protected Accounts and Groups в Active Directory (Microsoft Learn)](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)
 
 {{#include ../../banners/hacktricks-training.md}}
