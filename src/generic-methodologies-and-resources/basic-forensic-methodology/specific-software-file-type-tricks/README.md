@@ -1,8 +1,8 @@
-# Triki dla konkretnych programów i typów plików
+# Sztuczki dotyczące określonego oprogramowania/typu pliku
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Tutaj znajdziesz interesujące triki dotyczące konkretnych typów plików i/lub oprogramowania:
+Tutaj znajdziesz interesujące sztuczki dotyczące określonych typów plików i/lub oprogramowania:
 
 
 {{#ref}}

@@ -4,28 +4,29 @@
 
 ## Wyszukiwarki naruszeń danych
 
-- [greynoise](https://viz.greynoise.io/) - Szukaj IP, tagów, CVE, vpn, dns...
-- [Dehashed](https://www.dehashed.com/) - Możesz wyszukać swój adres e-mail w bazach danych.
-- [HaveIbeenPwned?](https://haveibeenpwned.com/) - Sprawdź, czy Twój adres e-mail występuje w naruszeniach danych
-- [ScamSearch](https://scamsearch.io/) - Szukaj numeru telefonu, e-maila lub profilu, aby sprawdzić, czy to oszust.
-- [Intelligence X](https://intelx.io/) - Intelligence X to wyszukiwarka i archiwum danych. Wyszukiwanie działa z selektorami, np. adresy e-mail, domeny, URL-e, IP...
-- [spycloud](https://portal.spycloud.com/endpoint/enriched-stats/[YOUR-MAIL]) - Wstaw swój e-mail w YOUR-MAIL.
-- [weleakinfo](https://weleakinfo.io/) - Wyszukaj skompromitowane bazy Dehashed.
-- [breachdirectory](https://breachdirectory.org/) - Sprawdź, czy Twój adres e-mail lub nazwa użytkownika została skompromitowana
-- [leakcheck](https://leakcheck.io/) - Dowiedz się, czy Twoje poświadczenia zostały skompromitowane
-- [Findemail.io](https://findemail.io/) - Znajdź adresy e-mail dla podanej firmy.
-- [LibraryOfLeaks](https://search.libraryofleaks.org) - Szukaj dokumentów z ujawnionymi danymi, firm, osób, baz danych i więcej
-- [LeakRadar](https://leakradar.io/) - Natychmiastowe wyszukiwanie w ponad 2 mld jawnych poświadczeń z info-stealerów; zapytania po e-mailach, domenach, metadanych, monitoring i API
-- [InfoStealers](https://infostealers.info/en/info) - Indeksuje logi infostealerów ujawnione w darknecie i udostępnia je jako przeszukiwalne i użyteczne dla zespołów bezpieczeństwa, śledczych, badaczy i specjalistów ds. informatyki śledczej.
-- [Leak-Lookup](https://leak-lookup.com/) - Wyszukiwarka naruszeń danych z ponad 3 miliardami rekordów z 3000+ baz danych.
-- [BreachDirectory](https://breachdirectory.org/) - Sprawdź, czy Twoje poświadczenia zostały skompromitowane w naruszeniach danych.
-- [Scylla.so](https://scylla.so/) - Wyszukiwarka naruszeń baz danych oparta na społeczności.
-- [Leaked.domains](https://leaked.domains/) - Szukaj powiązanych z domenami skompromitowanych poświadczeń i danych.
-- [WhiteIntel](https://whiteintel.io/) - Wyszukiwarka danych z dark webu do wywiadu zagrożeń.
+- [greynoise](https://viz.greynoise.io/) - Wyszukiwanie adresów IP, tagów, CVE, vpn, dns...
+- [Dehashed](https://www.dehashed.com/) - Możesz wyszukać swój adres e-mail, aby sprawdzić, czy wyciekł z którejś bazy danych.
+- [HaveIbeenPwned?](https://haveibeenpwned.com/) - sprawdź, czy Twój adres e-mail znajduje się w bazie naruszeń danych
+- [ScamSearch](https://scamsearch.io/) - wyszukuj numery telefonów, adresy e-mail i profile, aby sprawdzić, czy należą do oszusta.
+- [Intelligence X](https://intelx.io/) - Intelligence X to wyszukiwarka i archiwum danych. · Wyszukiwanie działa z użyciem selektorów, czyli konkretnych wyszukiwanych terminów, takich jak adresy e-mail, domeny, URL, adresy IP...
+- [spycloud](https://portal.spycloud.com/endpoint/enriched-stats/[YOUR-MAIL]) - wpisz swój adres e-mail w miejsce YOUR-MAIL.
+- [weleakinfo](https://weleakinfo.io/) - We Leak Info - bazy danych Dehashed pochodzące z leaków, wyszukiwanie leaków.
+- [breachdirectory](https://breachdirectory.org/) - SPRAWDŹ, CZY TWÓJ ADRES E-MAIL LUB NAZWA UŻYTKOWNIKA ZOSTAŁY PRZEJĘTE
+- [leakcheck](https://leakcheck.io/) - Sprawdź, czy Twoje dane uwierzytelniające zostały przejęte
+- [Findemail.io](https://findemail.io/) - Znajdź adresy e-mail dla danej firmy.
+- [LibraryOfLeaks](https://search.libraryofleaks.org) - Wyszukuj dokumenty z leaków, firmy, osoby, bazy danych i nie tylko
+- [LeakRadar](https://leakradar.io/) - Natychmiastowe wyszukiwanie w ponad 2 miliardach danych uwierzytelniających info-stealerów w postaci zwykłego tekstu; zapytania dotyczące adresów e-mail, domen i metadanych, monitoring oraz API
+- [InfoStealers](https://infostealers.info/en/info) - Indeksuje logi info-stealerów ujawnione w darknet i umożliwia ich wyszukiwanie oraz wykorzystanie przez zespoły bezpieczeństwa, śledczych, badaczy i specjalistów ds. informatyki śledczej.
+- [Leak-Lookup](https://leak-lookup.com/) - Wyszukiwarka naruszeń danych zawierająca ponad 3 miliardy rekordów z ponad 3000 baz danych.
+- [BreachDirectory](https://breachdirectory.org/) - Sprawdź, czy Twoje dane uwierzytelniające zostały przejęte w wyniku naruszeń danych.
+- [Scylla.so](https://scylla.so/) - Wyszukiwarka naruszeń baz danych tworzona przez społeczność.
+- [Leaked.domains](https://leaked.domains/) - Wyszukuj wyciekłe dane uwierzytelniające i dane powiązane z domenami.
+- [WhiteIntel](https://whiteintel.io/) - Wyszukiwarka leaków danych w dark webie na potrzeby threat intelligence.
 - [PSBDMP](https://psbdmp.ws/) - Platforma do wyszukiwania i monitorowania dumpów z Pastebin.
 
-## Narzędzia do enumeracji naruszeń danych
 
-- [Leaker](https://github.com/vflame6/leaker) - Pasywne narzędzie CLI do enumeracji, które jednocześnie przeszukuje 10 baz naruszeń danych.
+## Narzędzia do enumeracji leaków danych
+
+- [Leaker](https://github.com/vflame6/leaker) - Narzędzie CLI do pasywnej enumeracji leaków, które jednocześnie przeszukuje 10 baz naruszeń.
 
 {{#include ../../banners/hacktricks-training.md}}

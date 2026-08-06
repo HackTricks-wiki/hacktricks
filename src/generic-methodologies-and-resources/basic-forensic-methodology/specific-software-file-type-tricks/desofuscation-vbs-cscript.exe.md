@@ -1,6 +1,8 @@
+# Techniki deobfuskacji plików VBS
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-Niektóre rzeczy, które mogą być przydatne do debugowania/deobfuskacji złośliwego pliku VBS:
+Poniżej przedstawiono kilka rzeczy, które mogą być przydatne podczas debugowania/deobfuskacji złośliwego pliku VBS:
 
 ## echo
 ```bash
@@ -14,7 +16,7 @@ Wscript.Echo "Like this?"
 ```bash
 cscript.exe file.vbs
 ```
-## Zapisz dane do pliku
+## Zapisywanie danych do pliku
 ```js
 Function writeBinary(strBinary, strPath)
 

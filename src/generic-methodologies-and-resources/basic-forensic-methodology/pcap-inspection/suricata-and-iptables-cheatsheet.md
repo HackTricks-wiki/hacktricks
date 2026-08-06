@@ -1,18 +1,18 @@
-# Suricata & Iptables cheatsheet
+# Suricata & Iptables - ściągawka
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Iptables
 
-### Chains
+### Łańcuchy
 
-W iptables listy reguł znane jako łańcuchy są przetwarzane sekwencyjnie. Wśród nich trzy podstawowe łańcuchy są powszechnie obecne, a dodatkowe, takie jak NAT, mogą być wspierane w zależności od możliwości systemu.
+W iptables listy reguł znane jako łańcuchy są przetwarzane sekwencyjnie. Wśród nich zawsze obecne są trzy podstawowe łańcuchy, a dodatkowe, takie jak NAT, mogą być obsługiwane w zależności od możliwości systemu.
 
-- **Input Chain**: Używany do zarządzania zachowaniem przychodzących połączeń.
-- **Forward Chain**: Wykorzystywany do obsługi przychodzących połączeń, które nie są przeznaczone dla lokalnego systemu. Jest to typowe dla urządzeń działających jako routery, gdzie odebrane dane mają być przekazywane do innego miejsca. Ten łańcuch jest istotny głównie, gdy system jest zaangażowany w routowanie, NATowanie lub podobne działania.
-- **Output Chain**: Poświęcony regulacji wychodzących połączeń.
+- **Input Chain**: Używany do zarządzania zachowaniem połączeń przychodzących.
+- **Forward Chain**: Służy do obsługi połączeń przychodzących, które nie są przeznaczone dla systemu lokalnego. Jest to typowe dla urządzeń działających jako routery, gdzie odebrane dane mają zostać przekazane do innego miejsca docelowego. Ten łańcuch ma znaczenie głównie wtedy, gdy system uczestniczy w routingu, NATowaniu lub podobnych działaniach.
+- **Output Chain**: Przeznaczony do regulowania połączeń wychodzących.
 
-Te łańcuchy zapewniają uporządkowane przetwarzanie ruchu sieciowego, umożliwiając określenie szczegółowych reguł regulujących przepływ danych do, przez i z systemu.
+Łańcuchy te zapewniają uporządkowane przetwarzanie ruchu sieciowego, umożliwiając określanie szczegółowych reguł sterujących przepływem danych do systemu, przez niego oraz poza nim.
 ```bash
 # Delete all rules
 iptables -F
@@ -117,70 +117,70 @@ Type=simple
 
 systemctl daemon-reload
 ```
-### Definicje Reguł
+### Definicje reguł
 
-[Z dokumentacji:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) Reguła/podpis składa się z następujących elementów:
+[Z dokumentacji:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) Reguła/sygnatura składa się z następujących elementów:
 
-- **akcja**, określa, co się dzieje, gdy podpis pasuje.
-- **nagłówek**, definiuje protokół, adresy IP, porty i kierunek reguły.
-- **opcje reguły**, definiują szczegóły reguły.
+- **action** określa, co się dzieje, gdy sygnatura pasuje.
+- **header** definiuje protokół, adresy IP, porty i kierunek reguły.
+- **rule options** definiują szczegóły reguły.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
-#### **Ważne akcje to**
+#### **Dostępne akcje to**
 
-- alert - generuj alert
-- pass - zatrzymaj dalszą inspekcję pakietu
-- **drop** - odrzuć pakiet i wygeneruj alert
-- **reject** - wyślij błąd RST/ICMP unreachable do nadawcy pasującego pakietu.
+- alert - generuje alert
+- pass - zatrzymuje dalszą inspekcję pakietu
+- **drop** - odrzuca pakiet i generuje alert
+- **reject** - wysyła błąd RST/ICMP unreachable do nadawcy pasującego pakietu.
 - rejectsrc - to samo co _reject_
-- rejectdst - wyślij pakiet błędu RST/ICMP do odbiorcy pasującego pakietu.
-- rejectboth - wyślij pakiety błędu RST/ICMP do obu stron rozmowy.
+- rejectdst - wysyła pakiet błędu RST/ICMP do odbiorcy pasującego pakietu.
+- rejectboth - wysyła pakiety błędu RST/ICMP do obu stron komunikacji.
 
 #### **Protokoły**
 
 - tcp (dla ruchu tcp)
 - udp
 - icmp
-- ip (ip oznacza 'wszystkie' lub 'jakiekolwiek')
-- _protokoły warstwy 7_: http, ftp, tls, smb, dns, ssh... (więcej w [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+- ip (ip oznacza ‘all’ lub ‘any’)
+- _protokoły layer7_: http, ftp, tls, smb, dns, ssh... (więcej w [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
 
 #### Adresy źródłowe i docelowe
 
-Obsługuje zakresy IP, negacje i listy adresów:
+Obsługuje zakresy adresów IP, negacje oraz listę adresów:
 
-| Przykład                       | Znaczenie                                  |
-| ------------------------------ | ------------------------------------------ |
-| ! 1.1.1.1                      | Każdy adres IP oprócz 1.1.1.1             |
-| !\[1.1.1.1, 1.1.1.2]           | Każdy adres IP oprócz 1.1.1.1 i 1.1.1.2   |
-| $HOME_NET                      | Twoje ustawienie HOME_NET w yaml          |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET i nie HOME_NET                |
-| \[10.0.0.0/24, !10.0.0.5]      | 10.0.0.0/24 z wyjątkiem 10.0.0.5          |
+| Przykład                     | Znaczenie                                  |
+| ---------------------------- | ------------------------------------------ |
+| ! 1.1.1.1                    | Każdy adres IP oprócz 1.1.1.1              |
+| !\[1.1.1.1, 1.1.1.2]         | Każdy adres IP oprócz 1.1.1.1 i 1.1.1.2   |
+| $HOME_NET                    | Twoje ustawienie HOME_NET w yaml           |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET, ale nie HOME_NET            |
+| \[10.0.0.0/24, !10.0.0.5]    | 10.0.0.0/24 z wyjątkiem 10.0.0.5          |
 
 #### Porty źródłowe i docelowe
 
-Obsługuje zakresy portów, negacje i listy portów
+Obsługuje zakresy portów, negacje oraz listy portów
 
-| Przykład         | Znaczenie                                |
-| ---------------- | ---------------------------------------- |
-| any              | dowolny adres                            |
-| \[80, 81, 82]    | port 80, 81 i 82                        |
-| \[80: 82]        | Zakres od 80 do 82                      |
-| \[1024: ]        | Od 1024 do najwyższego numeru portu    |
-| !80              | Każdy port oprócz 80                    |
-| \[80:100,!99]    | Zakres od 80 do 100, ale 99 wykluczony |
-| \[1:80,!\[2,4]]  | Zakres od 1-80, z wyjątkiem portów 2 i 4|
+| Przykład        | Znaczenie                              |
+| --------------- | -------------------------------------- |
+| any             | dowolny adres                          |
+| \[80, 81, 82]   | porty 80, 81 i 82                      |
+| \[80: 82]       | Zakres od 80 do 82                     |
+| \[1024: ]       | Od 1024 do najwyższego numeru portu    |
+| !80             | Każdy port oprócz 80                   |
+| \[80:100,!99]   | Zakres od 80 do 100 z wykluczeniem 99  |
+| \[1:80,!\[2,4]] | Zakres od 1 do 80 z wyjątkiem portów 2 i 4  |
 
 #### Kierunek
 
-Możliwe jest wskazanie kierunku reguły komunikacji, która jest stosowana:
+Możliwe jest wskazanie kierunku komunikacji, do którego stosowana jest reguła:
 ```
 source -> destination
 source <> destination  (both directions)
 ```
 #### Słowa kluczowe
 
-Jest **setki opcji** dostępnych w Suricata, aby wyszukać **konkretny pakiet**, którego szukasz, tutaj zostanie wspomniane, jeśli coś interesującego zostanie znalezione. Sprawdź [**dokumentację**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html) po więcej!
+W Suricata dostępne są **setki opcji** umożliwiających wyszukiwanie **konkretnego pakietu**, którego szukasz. W tym miejscu zostanie wspomniane, jeśli zostanie znalezione coś interesującego. Więcej informacji znajdziesz w [**dokumentacji** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)!
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
