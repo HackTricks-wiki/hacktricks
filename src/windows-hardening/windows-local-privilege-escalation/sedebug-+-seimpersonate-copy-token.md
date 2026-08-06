@@ -2,15 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Αυτή η σελίδα καλύπτει την παραλλαγή **manual token-theft** όπου ένα **High Integrity** context που ήδη διαθέτει **`SeDebugPrivilege`** και **`SeImpersonatePrivilege`** ανοίγει μια κατάλληλη διεργασία **SYSTEM**, **διπλασιάζει το token** της και **εκκινεί μια νέα διεργασία** με αυτό το token.
+Αυτή η σελίδα καλύπτει την παραλλαγή **manual token-theft**, όπου ένα context **High Integrity** που διαθέτει ήδη τα **`SeDebugPrivilege`** και **`SeImpersonatePrivilege`** ανοίγει μια κατάλληλη διεργασία **SYSTEM**, αντιγράφει το token της και εκκινεί μια νέα διεργασία με αυτό το token.
 
-Αν χρειάζεσαι μόνο ένα γρήγορο `SYSTEM` shell από μια privileged admin διεργασία, δες επίσης:
+Αν χρειάζεστε μόνο ένα γρήγορο shell **SYSTEM** από μια privileged διεργασία διαχειριστή, δείτε επίσης:
 
 {{#ref}}
 seimpersonate-from-high-to-system.md
 {{#endref}}
 
-Αν **δεν** έχεις διαδρομή process-handle αλλά έχεις **`SeImpersonatePrivilege`**, η διαδρομή **named-pipe / Potato** είναι συνήθως πιο εύκολη:
+Αν δεν διαθέτετε process-handle path αλλά έχετε **`SeImpersonatePrivilege`**, η διαδρομή **named-pipe / Potato** είναι συνήθως ευκολότερη:
 
 {{#ref}}
 named-pipe-client-impersonation.md
@@ -20,39 +20,39 @@ named-pipe-client-impersonation.md
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-## Quick triage
+## Γρήγορο triage
 
-Πριν δοκιμάσεις τη διαδρομή token-copy, επιβεβαίωσε ότι η τρέχουσα διεργασία είναι ήδη σε ένα χρήσιμο context:
+Πριν επιχειρήσετε το token-copy path, επιβεβαιώστε ότι η τρέχουσα διεργασία βρίσκεται ήδη σε χρήσιμο context:
 ```cmd
 whoami /groups | findstr /i "high mandatory"
 whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege"
 ```
 Σημειώσεις:
 
-- **`SeDebugPrivilege`** είναι αυτό που σου επιτρέπει να ανοίγεις πολλά **μη προστατευμένα** SYSTEM processes ακόμα κι όταν το DACL τους κανονικά θα σε μπλόκαρε.
-- **`SeImpersonatePrivilege`** είναι αυτό που κάνει το **`CreateProcessWithTokenW`** πρακτικό μετά.
-- Αν το token-copy path σου δίνει μόνο ένα αδύναμο ή filtered SYSTEM token, απλώς κλέψε από ένα **διαφορετικό SYSTEM process**.
+- Το **`SeDebugPrivilege`** είναι αυτό που σας επιτρέπει να ανοίγετε πολλές **μη προστατευμένες** διεργασίες SYSTEM, ακόμη και όταν το DACL τους κανονικά θα σας απέκλειε.
+- Το **`SeImpersonatePrivilege`** είναι αυτό που κάνει το **`CreateProcessWithTokenW`** πρακτικά χρήσιμο στη συνέχεια.
+- Αν η διαδρομή αντιγραφής token σάς δίνει μόνο ένα αδύναμο ή φιλτραρισμένο SYSTEM token, απλώς κλέψτε token από **διαφορετική διεργασία SYSTEM**.
 
-## Διάλεξε προσεκτικά το target process
+## Επιλέξτε προσεκτικά τη διεργασία-στόχο
 
-Η technique συνήθως δείχνεται απέναντι στο **`lsass.exe`**, αλλά σε σύγχρονα Windows αυτό συχνά είναι το **λάθος target**:
+Η τεχνική συνήθως παρουσιάζεται με στόχο το **`lsass.exe`**, αλλά στα σύγχρονα Windows αυτό συχνά είναι ο **λάθος στόχος**:
 
-- Αν είναι ενεργό το **LSA Protection / RunAsPPL**, το **`lsass.exe`** είναι προστατευμένο και ένα κανονικό admin process με `SeDebugPrivilege` πάλι δεν θα μπορεί να το ανοίξει.
-- Προτίμησε **non-PPL SYSTEM processes** όπως τα **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`**, ή ένα πρώιμο **`svchost.exe`** instance.
-- Τα **protected processes** και κάποια ειδικά processes όπως το **`System`** ή το **`csrss.exe`** δεν είναι ρεαλιστικοί user-mode targets για αυτή τη technique.
-- Χρησιμοποίησε **Process Hacker / Process Explorer** τρέχοντας elevated για να επιβεβαιώσεις αν το target token έχει πραγματικά τα privileges που θέλεις πριν το κάνεις duplicate.
+- Αν είναι ενεργοποιημένο το **LSA Protection / RunAsPPL**, το **`lsass.exe`** είναι προστατευμένο και μια κανονική διεργασία διαχειριστή με **`SeDebugPrivilege`** και πάλι δεν θα μπορεί να το ανοίξει.<sup>[[2]](#references)</sup>
+- Προτιμήστε **μη-PPL διεργασίες SYSTEM**, όπως τις **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`** ή μια πρώιμη παρουσία του **`svchost.exe`**.
+- Οι **προστατευμένες διεργασίες** και ορισμένες ειδικές διεργασίες, όπως οι **`System`** ή **`csrss.exe`**, δεν αποτελούν ρεαλιστικούς στόχους user-mode για αυτήν την τεχνική.
+- Χρησιμοποιήστε το **Process Hacker / Process Explorer** με elevated δικαιώματα, για να επαληθεύσετε ότι το token-στόχος διαθέτει πράγματι τα privileges που θέλετε, πριν το αντιγράψετε.
 
 ## Λεπτομέρειες API που έχουν σημασία στην πράξη
 
-Πολλά public PoCs ζητούν **`PROCESS_ALL_ACCESS`** και **`TOKEN_ALL_ACCESS`**, αλλά αυτό είναι πιο θορυβώδες από όσο χρειάζεται. Στην πράξη:
+Πολλά δημόσια PoCs ζητούν **`PROCESS_ALL_ACCESS`** και **`TOKEN_ALL_ACCESS`**, αλλά αυτό είναι πιο θορυβώδες από όσο χρειάζεται. Στην πράξη:
 
-- Άνοιξε το target process μόνο με τα rights που χρειάζεσαι (συνήθως **`PROCESS_QUERY_INFORMATION`** ή **`PROCESS_QUERY_LIMITED_INFORMATION`**).
-- Άνοιξε το token με τα rights που χρειάζονται για process creation: **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
-- Χρησιμοποίησε **`DuplicateTokenEx(..., TokenPrimary, ...)`** για να δημιουργήσεις ένα **primary token**· ένα impersonation token μόνο του δεν αρκεί για να δημιουργήσει νέο process.
-- Αν το **`CreateProcessWithTokenW`** αποτύχει με **`1314`**, γύρνα στο **`CreateProcessAsUserW`**.
-- Αν ξεκινάς από **service / Session 0**, θυμήσου ότι το **`CreateProcessWithTokenW`** κρατά το child στο **session του caller**. Αν χρειάζεσαι ορατό desktop shell, χρησιμοποίησε **`CreateProcessAsUserW`** και μετέφερε το token στο επιθυμητό session.
+- Ανοίξτε τη διεργασία-στόχο μόνο με τα δικαιώματα που χρειάζεστε (συνήθως **`PROCESS_QUERY_INFORMATION`** ή **`PROCESS_QUERY_LIMITED_INFORMATION`**).
+- Ανοίξτε το token με τα δικαιώματα που απαιτούνται για τη δημιουργία διεργασίας: **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
+- Χρησιμοποιήστε το **`DuplicateTokenEx(..., TokenPrimary, ...)`** για να δημιουργήσετε ένα **primary token**· ένα impersonation token από μόνο του δεν αρκεί για τη δημιουργία νέας διεργασίας.
+- Αν το **`CreateProcessWithTokenW`** αποτύχει με **`1314`**, χρησιμοποιήστε το **`CreateProcessAsUserW`**.
+- Αν εκκινείτε από ένα **service / Session 0**, θυμηθείτε ότι το **`CreateProcessWithTokenW`** διατηρεί το child στη **session του caller**. Αν χρειάζεστε ένα ορατό desktop shell, χρησιμοποιήστε το **`CreateProcessAsUserW`** και μετακινήστε το token στην επιθυμητή session.<sup>[[1]](#references)</sup>
 
-Ένα ελάχιστο modern flow μοιάζει με:
+Μια ελάχιστη σύγχρονη ροή μοιάζει ως εξής:
 ```c
 HANDLE hp = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
 HANDLE hTok = NULL, hDup = NULL;
@@ -63,15 +63,15 @@ CreateProcessWithTokenW(hDup, LOGON_WITH_PROFILE,
 L"C:\\Windows\\System32\\cmd.exe",
 NULL, 0, NULL, NULL, &si, &pi);
 ```
-## Full service PoC
+## Πλήρες service PoC
 
-Ο παρακάτω κώδικας **εκμεταλλεύεται τα privileges `SeDebugPrivilege` και `SeImpersonatePrivilege`** για να αντιγράψει το token από μια **process που τρέχει ως SYSTEM** και με **όλα τα token privileges**. Σε αυτήν την περίπτωση, ο κώδικας μπορεί να μεταγλωττιστεί και να χρησιμοποιηθεί ως ένα **Windows service binary** για να επαληθεύσει ότι το primitive λειτουργεί.
+Ο ακόλουθος κώδικας **εκμεταλλεύεται τα δικαιώματα `SeDebugPrivilege` και `SeImpersonatePrivilege`** για να αντιγράψει το token από μια **διεργασία που εκτελείται ως SYSTEM** και διαθέτει **όλα τα προνόμια του token**. Σε αυτήν την περίπτωση, ο κώδικας μπορεί να γίνει compile και να χρησιμοποιηθεί ως **δυαδικό αρχείο Windows service** για να επαληθευτεί ότι το primitive λειτουργεί.<sup>[[3]](#references)</sup>
 
-Το κύριο μέρος του **code όπου γίνεται η elevation** βρίσκεται μέσα στη συνάρτηση **`Exploit`**. Μέσα σε αυτήν τη συνάρτηση μπορείς να δεις ότι αναζητείται το **`lsass.exe`**, το **token του αντιγράφεται**, και τελικά αυτό το token χρησιμοποιείται για να εκκινήσει ένα νέο **`cmd.exe`** με όλα τα privileges του αντιγραμμένου token.
+Το κύριο μέρος του **κώδικα όπου πραγματοποιείται η ανύψωση** βρίσκεται μέσα στη συνάρτηση **`Exploit`**. Μέσα σε αυτήν τη συνάρτηση μπορείτε να δείτε ότι γίνεται αναζήτηση του **`lsass.exe`**, αντιγράφεται το **token** του και, τέλος, αυτό το token χρησιμοποιείται για την εκκίνηση ενός νέου **`cmd.exe`** με όλα τα προνόμια του αντιγραμμένου token.
 
-Σε σύγχρονα hosts, συχνά θα θέλεις να αντικαταστήσεις το **`lsass.exe`** με άλλη **non-PPL SYSTEM process** όπως **`winlogon.exe`**, **`wininit.exe`**, ή **`services.exe`**.
+Σε σύγχρονα hosts, συχνά θα θέλετε να αντικαταστήσετε το **`lsass.exe`** με μια άλλη **non-PPL διεργασία SYSTEM**, όπως οι **`winlogon.exe`**, **`wininit.exe`** ή **`services.exe`**.
 
-Άλλες processes που τρέχουν ως SYSTEM με όλα ή τα περισσότερα από τα token privileges είναι: **`services.exe`**, **`svchost.exe`** (κάποιες από τις πρώτες), **`wininit.exe`**, **`csrss.exe`**... Να θυμάσαι ότι γενικά **δεν θα μπορείς να αντιγράψεις token από protected process**.
+Άλλες διεργασίες που εκτελούνται ως SYSTEM με όλα ή τα περισσότερα προνόμια του token είναι οι: **`services.exe`**, **`svchost.exe`** (ορισμένες από τις πρώτες), **`wininit.exe`**, **`csrss.exe`**... Να θυμάστε ότι γενικά **δεν θα μπορείτε να αντιγράψετε token από μια protected process**.
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>
@@ -278,6 +278,8 @@ return 0;
 ```
 ## Αναφορές
 
-- [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
-- [Configure added LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
+- [1] [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [2] [Configure added LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
+- [3] [Running my program as a service (cboard.cprogramming.com) – Windows service skeleton used by the PoC](https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html)
+
 {{#include ../../banners/hacktricks-training.md}}

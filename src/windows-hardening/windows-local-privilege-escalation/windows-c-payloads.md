@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Αυτή η σελίδα συγκεντρώνει **μικρά, αυτόνομα αποσπάσματα C** που είναι χρήσιμα κατά τη διάρκεια Windows Local Privilege Escalation ή post-exploitation. Κάθε payload έχει σχεδιαστεί να είναι **φιλικό για copy-paste**, απαιτεί μόνο το Windows API / C runtime, και μπορεί να μεταγλωττιστεί με `i686-w64-mingw32-gcc` (x86) ή `x86_64-w64-mingw32-gcc` (x64).
+Αυτή η σελίδα συγκεντρώνει **μικρά, αυτοτελή C snippets** που είναι χρήσιμα κατά τη διάρκεια Windows Local Privilege Escalation ή post-exploitation. Κάθε payload έχει σχεδιαστεί ώστε να είναι **εύκολο για copy-paste**, απαιτεί μόνο το Windows API / C runtime και μπορεί να γίνει compile με `i686-w64-mingw32-gcc` (x86) ή `x86_64-w64-mingw32-gcc` (x64).
 
-> ⚠️  Αυτά τα payloads υποθέτουν ότι η διαδικασία έχει ήδη τα ελάχιστα απαραίτητα προνόμια για την εκτέλεση της ενέργειας (π.χ. `SeDebugPrivilege`, `SeImpersonatePrivilege`, ή περιβάλλον μέσης ακεραιότητας για ένα UAC bypass). Προορίζονται για **red-team ή CTF περιβάλλοντα** όπου η εκμετάλλευση μιας ευπάθειας έχει οδηγήσει σε αυθαίρετη εκτέλεση εγγενούς κώδικα.
+> ⚠️  Αυτά τα payloads προϋποθέτουν ότι η διεργασία διαθέτει ήδη τα ελάχιστα απαιτούμενα privileges για την εκτέλεση της ενέργειας (π.χ. `SeDebugPrivilege`, `SeImpersonatePrivilege` ή medium-integrity context για UAC bypass). Προορίζονται για περιβάλλοντα **red-team ή CTF**, όπου η εκμετάλλευση μιας ευπάθειας έχει οδηγήσει σε αυθαίρετη εκτέλεση native code.
 
 ---
 
@@ -21,9 +21,9 @@ return 0;
 ---
 
 ## UAC Bypass – `fodhelper.exe` Registry Hijack (Medium → High integrity)
-Όταν το αξιόπιστο εκτελέσιμο **`fodhelper.exe`** εκτελείται, ερωτά το παρακάτω μονοπάτι μητρώου **χωρίς να φιλτράρει το `DelegateExecute` verb**. Με την τοποθέτηση της εντολής μας κάτω από αυτό το κλειδί, ένας επιτιθέμενος μπορεί να παρακάμψει το UAC *χωρίς* να αποθηκεύσει αρχείο στο δίσκο.
+Όταν εκτελείται το έμπιστο binary **`fodhelper.exe`**, αναζητά την παρακάτω διαδρομή registry **χωρίς να φιλτράρει το verb `DelegateExecute`**. Τοποθετώντας την εντολή μας κάτω από αυτό το key, ένας attacker μπορεί να παρακάμψει το UAC *χωρίς να αποθηκεύσει αρχείο στον δίσκο*.<sup>[[1]](#references)</sup>
 
-*Το μονοπάτι μητρώου που ερωτάται από το `fodhelper.exe`*
+*Διαδρομή registry που αναζητά το `fodhelper.exe`*
 ```
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
@@ -61,18 +61,18 @@ system("fodhelper.exe");
 return 0;
 }
 ```
-*Δοκιμάστηκε σε Windows 10 22H2 και Windows 11 23H2 (July 2025 patches). Ο bypass εξακολουθεί να λειτουργεί επειδή η Microsoft δεν έχει διορθώσει τον χαμένο έλεγχο ακεραιότητας στη διαδρομή `DelegateExecute`.*
+*Δοκιμάστηκε σε Windows 10 22H2 και Windows 11 23H2 (patches Ιουλίου 2025). Το bypass εξακολουθεί να λειτουργεί επειδή η Microsoft δεν έχει διορθώσει τον ελλιπή έλεγχο ακεραιότητας στη διαδρομή `DelegateExecute`.*
 
 ---
 
 ## UAC Bypass – Activation Context Cache Poisoning (`ctfmon.exe`, CVE-2024-6769)
-Drive remapping + activation context cache poisoning εξακολουθούν να δουλεύουν σε patched Windows 10/11 builds επειδή το `ctfmon.exe` τρέχει ως high-integrity trusted UI process που φορτώνει χωρίς πρόβλημα από το impersonated `C:` drive του καλούντος και επαναχρησιμοποιεί όποιες DLL redirections έχει cached το `CSRSS`. Η κατάχρηση γίνεται ως εξής: επαναδείξτε το `C:` σε attacker-controlled storage, τοποθετήστε ένα trojanized `msctf.dll`, ξεκινήστε το `ctfmon.exe` για να αποκτήσετε high integrity, και μετά ζητήστε από το `CSRSS` να cache-άρει ένα manifest που ανακατευθύνει ένα DLL που χρησιμοποιεί ένα auto-elevated binary (π.χ. `fodhelper.exe`) ώστε η επόμενη εκκίνηση να κληρονομήσει το payload σας χωρίς UAC prompt.
+Το drive remapping + activation context cache poisoning εξακολουθεί να λειτουργεί σε patched εκδόσεις Windows 10/11, επειδή το `ctfmon.exe` εκτελείται ως trusted UI process υψηλής ακεραιότητας, το οποίο φορτώνει πρόθυμα από το impersonated `C:` drive του caller και επαναχρησιμοποιεί όποιες DLL redirections έχει αποθηκεύσει προσωρινά το `CSRSS`. Η εκμετάλλευση γίνεται ως εξής: επανακατευθύνετε το `C:` σε storage που ελέγχει ο attacker, τοποθετείτε ένα trojanized `msctf.dll`, εκκινείτε το `ctfmon.exe` για να αποκτήσετε υψηλή ακεραιότητα και, στη συνέχεια, ζητάτε από το `CSRSS` να αποθηκεύσει προσωρινά ένα manifest που ανακατευθύνει ένα DLL το οποίο χρησιμοποιείται από ένα auto-elevated binary (π.χ. `fodhelper.exe`), ώστε η επόμενη εκκίνησή του να κληρονομήσει το payload σας χωρίς UAC prompt.<sup>[[5]](#references)</sup>
 
-Practical workflow:
-1. Ετοιμάστε ένα fake `%SystemRoot%\System32` tree και αντιγράψτε το legitimate binary που σκοπεύετε να hijack (συχνά `ctfmon.exe`).
-2. Χρησιμοποιήστε `DefineDosDevice(DDD_RAW_TARGET_PATH)` για να remap-άρετε το `C:` μέσα στη διαδικασία σας, κρατώντας `DDD_NO_BROADCAST_SYSTEM` ώστε η αλλαγή να παραμείνει local.
-3. Τοποθετήστε το DLL + manifest στο fake tree, καλέστε `CreateActCtx/ActivateActCtx` για να ωθήσετε το manifest στην activation-context cache, και έπειτα εκκινήστε το auto-elevated binary ώστε να επιλύσει το redirected DLL απευθείας στο shellcode σας.
-4. Διαγράψτε την εγγραφή cache (`sxstrace ClearCache`) ή κάντε reboot στο τέλος για να σβήσετε τα attacker fingerprints.
+Πρακτική ροή εργασιών:
+1. Προετοιμάστε ένα fake `%SystemRoot%\System32` tree και αντιγράψτε το legitimate binary που σκοπεύετε να κάνετε hijack (συχνά το `ctfmon.exe`).
+2. Χρησιμοποιήστε το `DefineDosDevice(DDD_RAW_TARGET_PATH)` για να κάνετε remap το `C:` μέσα στη διεργασία σας, διατηρώντας το `DDD_NO_BROADCAST_SYSTEM` ώστε η αλλαγή να παραμείνει local.
+3. Τοποθετήστε το DLL + manifest στο fake tree, καλέστε `CreateActCtx/ActivateActCtx` για να εισαγάγετε το manifest στο activation-context cache και, στη συνέχεια, εκκινήστε το auto-elevated binary, ώστε να επιλύσει το redirected DLL απευθείας προς το shellcode σας.
+4. Διαγράψτε την καταχώρηση από το cache (`sxstrace ClearCache`) ή κάντε reboot όταν ολοκληρώσετε, για να διαγράψετε τα fingerprints του attacker.
 
 <details>
 <summary>C - Fake drive + manifest poison helper (CVE-2024-6769)</summary>
@@ -127,12 +127,12 @@ return 0;
 ```
 </details>
 
-Συμβουλή καθαρισμού: μετά το popping SYSTEM, καλέστε `sxstrace Trace -logfile %TEMP%\sxstrace.etl` και στη συνέχεια `sxstrace Parse` κατά τη διάρκεια των δοκιμών — αν δείτε το όνομα του manifest στο log, το ίδιο μπορούν να το δουν και οι defenders, οπότε αλλάζετε τα paths κάθε φορά.
+Συμβουλή καθαρισμού: μετά την απόκτηση SYSTEM, καλέστε το `sxstrace Trace -logfile %TEMP%\sxstrace.etl` και στη συνέχεια το `sxstrace Parse` κατά τη δοκιμή—αν δείτε το όνομα του manifest σας στο log, μπορούν να το δουν και οι defenders, επομένως αλλάζετε τα paths σε κάθε εκτέλεση.
 
 ---
 
-## Spawn SYSTEM shell via token duplication (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
-Εάν η τρέχουσα διεργασία διαθέτει **και τα δύο** `SeDebug` και `SeImpersonate` privileges (τυπικό για πολλούς service accounts), μπορείτε να κλέψετε το token από το `winlogon.exe`, να το διπλασιάσετε και να ξεκινήσετε μια διαδικασία με αυξημένα δικαιώματα:
+## Εκκίνηση κελύφους SYSTEM μέσω token duplication (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
+Αν η τρέχουσα διεργασία διαθέτει **και** τα δύο privileges, `SeDebug` και `SeImpersonate` (κάτι συνηθισμένο για πολλούς service accounts), μπορείτε να κλέψετε το token από το `winlogon.exe`, να το αντιγράψετε και να εκκινήσετε μια elevated διεργασία:
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
 #include <windows.h>
@@ -180,7 +180,7 @@ if (dupToken) CloseHandle(dupToken);
 return 0;
 }
 ```
-Για μια πιο λεπτομερή εξήγηση του πώς λειτουργεί αυτό δείτε:
+Για μια πιο αναλυτική εξήγηση του τρόπου λειτουργίας του, δείτε:
 
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
@@ -189,7 +189,7 @@ sedebug-+-seimpersonate-copy-token.md
 ---
 
 ## In-Memory AMSI & ETW Patch (Defence Evasion)
-Οι περισσότερες σύγχρονες μηχανές AV/EDR βασίζονται στο **AMSI** και **ETW** για να ελέγχουν κακόβουλες συμπεριφορές. Το patching και των δύο διεπαφών νωρίς μέσα στην τρέχουσα διεργασία εμποδίζει τα script-based payloads (π.χ. PowerShell, JScript) από το να σαρωθούν.
+Οι περισσότερες σύγχρονες μηχανές AV/EDR βασίζονται στα **AMSI** και **ETW** για να επιθεωρούν κακόβουλες συμπεριφορές. Η τροποποίηση και των δύο interfaces νωρίς μέσα στην τρέχουσα διεργασία αποτρέπει τη σάρωση payloads που βασίζονται σε scripts (π.χ. PowerShell, JScript).<sup>[[2]](#references)</sup>
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
 #define _CRT_SECURE_NO_WARNINGS
@@ -216,12 +216,12 @@ MessageBoxA(NULL, "AMSI & ETW patched!", "OK", MB_OK);
 return 0;
 }
 ```
-*Η επιδιόρθωση παραπάνω είναι τοπική στη διεργασία· η εκκίνηση ενός νέου PowerShell μετά την εκτέλεσή της θα τρέξει χωρίς έλεγχο AMSI/ETW.*
+*Το παραπάνω patch είναι process-local· η εκκίνηση ενός νέου PowerShell μετά την εκτέλεσή του θα πραγματοποιηθεί χωρίς έλεγχο από AMSI/ETW.*
 
 ---
 
 ## Δημιουργία child ως Protected Process Light (PPL)
-Ζητήστε επίπεδο προστασίας PPL για ένα child κατά τη δημιουργία χρησιμοποιώντας `STARTUPINFOEX` + `PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL`. Πρόκειται για τεκμηριωμένο API και θα επιτύχει μόνο εάν το target image είναι υπογεγραμμένο για την αιτούμενη signer class (Windows/WindowsLight/Antimalware/LSA/WinTcb).
+Ζητήστε ένα επίπεδο προστασίας PPL για ένα child κατά τη δημιουργία του, χρησιμοποιώντας `STARTUPINFOEX` + `PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL`. Αυτό είναι documented API και θα επιτύχει μόνο εάν το target image είναι signed για την απαιτούμενη signer class (Windows/WindowsLight/Antimalware/LSA/WinTcb).<sup>[[3]](#references)[[4]](#references)</sup>
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o spawn_ppl.exe spawn_ppl.c
 #include <windows.h>
@@ -253,25 +253,25 @@ CloseHandle(pi.hProcess);
 return 0;
 }
 ```
-Επίπεδα που χρησιμοποιούνται πιο συχνά:
+Τα επίπεδα που χρησιμοποιούνται συχνότερα:
 - `PROTECTION_LEVEL_WINDOWS_LIGHT` (2)
 - `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` (3)
 - `PROTECTION_LEVEL_LSA_LIGHT` (4)
 
-Επικυρώστε το αποτέλεσμα με Process Explorer/Process Hacker ελέγχοντας τη στήλη Protection.
+Επικυρώστε το αποτέλεσμα με τα Process Explorer/Process Hacker, ελέγχοντας τη στήλη Protection.
 
 ---
 
-## Local Service -> Kernel μέσω `appid.sys` Smart-Hash (`IOCTL 0x22A018`, CVE-2024-21338)
-`appid.sys` εκθέτει ένα device object (`\\.\\AppID`) του οποίου το smart-hash maintenance IOCTL δέχεται δείκτες συναρτήσεων που παρέχονται από τον χρήστη όποτε ο caller τρέχει ως `LOCAL SERVICE`· η ομάδα Lazarus εκμεταλλεύεται αυτό για να απενεργοποιήσει το PPL και να φορτώσει arbitrary drivers, οπότε οι red teams θα πρέπει να έχουν έναν έτοιμο trigger για χρήση στο εργαστήριο.
+## Local Service -> Kernel μέσω του `appid.sys` Smart-Hash (`IOCTL 0x22A018`, CVE-2024-21338)
+Το `appid.sys` εκθέτει ένα device object (`\\.\\AppID`) του οποίου το IOCTL συντήρησης smart-hash αποδέχεται function pointers που παρέχονται από τον χρήστη, όταν ο caller εκτελείται ως `LOCAL SERVICE`. Το Lazarus το εκμεταλλεύεται για να απενεργοποιεί το PPL και να φορτώνει arbitrary drivers, επομένως οι red teams θα πρέπει να έχουν έτοιμο trigger για χρήση σε lab.<sup>[[6]](#references)</sup>
 
 Λειτουργικές σημειώσεις:
-- Χρειάζεστε ακόμα ένα token `LOCAL SERVICE`. Κλέψτε το από `Schedule` ή `WdiServiceHost` χρησιμοποιώντας `SeImpersonatePrivilege`, και στη συνέχεια κάντε impersonate πριν πειράξετε τη συσκευή ώστε οι έλεγχοι ACL να περάσουν.
-- Το IOCTL `0x22A018` περιμένει μια struct που περιέχει δύο δείκτες callback (query length + read function). Δείξτε και τους δύο σε user-mode stubs που δημιουργούν ένα token overwrite ή map ring-0 primitives, αλλά κρατήστε τα buffers RWX ώστε το KernelPatchGuard να μην καταρρεύσει στη μέση της αλυσίδας.
-- Μετά την επιτυχία, βγείτε από το impersonation και επαναφέρετε το handle της συσκευής· οι defenders τώρα ψάχνουν για απροσδόκητα `Device\\AppID` handles, οπότε κλείστε το αμέσως μόλις αποκτηθεί το privilege.
+- Εξακολουθείτε να χρειάζεστε ένα `LOCAL SERVICE` token. Κλέψτε το από τα `Schedule` ή `WdiServiceHost` χρησιμοποιώντας το `SeImpersonatePrivilege` και, στη συνέχεια, κάντε impersonate πριν αγγίξετε το device, ώστε οι ACL checks να περάσουν.
+- Το IOCTL `0x22A018` αναμένει ένα struct που περιέχει δύο callback pointers (query length + read function). Κατευθύνετε και τα δύο σε user-mode stubs που δημιουργούν ένα token overwrite ή κάνουν map ring-0 primitives, αλλά διατηρήστε τα buffers RWX ώστε το KernelPatchGuard να μην προκαλέσει crash στη μέση της αλυσίδας.
+- Μετά την επιτυχία, εξέλθετε από το impersonation και κάντε revert το device handle. Οι defenders αναζητούν πλέον απροσδόκητα `Device\\AppID` handles, επομένως κλείστε το αμέσως μόλις αποκτηθούν τα privileges.
 
 <details>
-<summary>C - Σκελετός trigger για κατάχρηση του `appid.sys` smart-hash</summary>
+<summary>C - Skeleton trigger για abuse του smart-hash του `appid.sys`</summary>
 ```c
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -310,16 +310,17 @@ return 0;
 ```
 </details>
 
-Ελάχιστη διόρθωση για ένα weaponized build: χαρτογραφήστε μια περιοχή RWX με `VirtualAlloc`, αντιγράψτε εκεί το token duplication stub σας, θέστε `KernelThunk = section`, και μόλις επιστρέψει το `DeviceIoControl` θα πρέπει να είστε SYSTEM ακόμα και υπό PPL.
+Minimal fix-up για ένα weaponized build: κάντε map ένα RWX section με `VirtualAlloc`, αντιγράψτε εκεί το token duplication stub, ορίστε το `KernelThunk = section` και, μόλις επιστρέψει το `DeviceIoControl`, θα πρέπει να είστε SYSTEM ακόμη και υπό PPL.
 
 ---
 
-## Αναφορές
-* Ron Bowes – “Fodhelper UAC Bypass Deep Dive” (2024)
-* SplinterCode – “AMSI Bypass 2023: The Smallest Patch Is Still Enough” (BlackHat Asia 2023)
-* CreateProcessAsPPL – ελάχιστος εκκινητής διαδικασίας PPL: https://github.com/2x7EQ13/CreateProcessAsPPL
-* Microsoft Docs – STARTUPINFOEX / InitializeProcThreadAttributeList / UpdateProcThreadAttribute
-* DarkReading – ["Novel Exploit Chain Enables Windows UAC Bypass"](https://www.darkreading.com/vulnerabilities-threats/windows-activation-context-cache-elevation) (2024)
-* Avast Threat Labs – ["Lazarus Deploys New FudModule Rootkit"](https://decoded.avast.io/threatresearch/lazarus-deploys-new-fudmodule-rootkit/) (2024)
+## References
+
+- [1] [Πρώτη καταχώρηση: Καλωσόρισμα και fileless UAC bypass (fodhelper.exe / ms-settings DelegateExecute)](https://winscripting.blog/2017/05/12/first-entry-welcome-and-uac-bypass/)
+- [2] [Memory Patching AMSI Bypass](https://rastamouse.me/memory-patching-amsi-bypass/)
+- [3] [CreateProcessAsPPL – minimal PPL process launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
+- [4] [UpdateProcThreadAttribute function (Win32 apps) - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
+- [5] [Novel Exploit Chain Enables Windows UAC Bypass](https://www.darkreading.com/vulnerabilities-threats/exploit-chain-windows-uac-bypass)
+- [6] [Lazarus and the FudModule Rootkit: Beyond BYOVD with an Admin-to-Kernel Zero-Day](https://www.gendigital.com/blog/insights/research/lazarus-and-the-fudmodule-rootkit-beyond-byovd-with-an-admin-to-kernel-zero-day)
 
 {{#include ../../banners/hacktricks-training.md}}

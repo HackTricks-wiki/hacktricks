@@ -1,14 +1,16 @@
+# Από High Integrity σε SYSTEM με Name Pipes
+
 {{#include ../../banners/hacktricks-training.md}}
 
 **Ροή κώδικα:**
 
-1. Δημιουργήστε έναν νέο σωλήνα
-2. Δημιουργήστε και ξεκινήστε μια υπηρεσία που θα συνδεθεί στον δημιουργημένο σωλήνα και θα γράψει κάτι. Ο κώδικας της υπηρεσίας θα εκτελέσει αυτόν τον κωδικό PS: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. Η υπηρεσία λαμβάνει τα δεδομένα από τον πελάτη στον σωλήνα, καλεί το ImpersonateNamedPipeClient και περιμένει να ολοκληρωθεί η υπηρεσία
-4. Τέλος, χρησιμοποιεί το διακριτικό που αποκτήθηκε από την υπηρεσία για να δημιουργήσει ένα νέο _cmd.exe_
+1. Δημιουργία ενός νέου Pipe
+2. Δημιουργία και εκκίνηση μιας υπηρεσίας που θα συνδεθεί στο Pipe και θα γράψει κάτι. Ο κώδικας της υπηρεσίας θα εκτελέσει αυτόν τον κωδικοποιημένο PS κώδικα: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
+3. Η υπηρεσία λαμβάνει τα δεδομένα από τον client στο Pipe, καλεί το ImpersonateNamedPipeClient και περιμένει να ολοκληρωθεί η υπηρεσία
+4. Τέλος, χρησιμοποιεί το token που αποκτήθηκε από την υπηρεσία για να εκκινήσει ένα νέο _cmd.exe_
 
 > [!WARNING]
-> Αν δεν έχετε αρκετά δικαιώματα, η εκμετάλλευση μπορεί να κολλήσει και να μην επιστρέψει ποτέ.
+> Αν δεν έχετε επαρκή δικαιώματα, το exploit μπορεί να κολλήσει και να μην επιστρέψει ποτέ.
 ```c
 #include <windows.h>
 #include <time.h>

