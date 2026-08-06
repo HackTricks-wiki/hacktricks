@@ -2,38 +2,38 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**こちらの素晴らしい投稿も確認してください:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
+**次のすばらしい記事も確認してください:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)<sup>[[3]](#references)</sup>
 
-## 攻撃者向け TL;DR
-- Kerberos は AD のデフォルト auth protocol であり、ほとんどの lateral-movement chain がこれに触れる。
-- **3つの operator phase** で考える:
-- **AS-REQ / AS-REP** → password/hash/certificate を使用して **TGT** を取得する。ここに **AS-REP roasting**、**over-pass-the-hash / pass-the-key**、**PKINIT** が該当する。
-- **TGS-REQ / TGS-REP** → TGT を使用して **service tickets** を取得する。ここで **Kerberoasting**、**S4U abuse**、**delegation abuse**、そして多くの **ticket-forging tradecraft** が関係する。
-- **AP-REQ / AP-REP** → ticket を service に提示する。ここで **pass-the-ticket** と service-specific lateral movement が発生する。
-- 実践的な cheatsheets（AS-REP/Kerberoasting、ticket forgery、delegation abuse など）については、以下を参照:
+## 攻撃者向けTL;DR
+- KerberosはデフォルトのAD認証プロトコルであり、ほとんどの横展開チェーンで関与します。
+- **3つのオペレーター・フェーズ**で考えます:<sup>[[3]](#references)</sup>
+- **AS-REQ / AS-REP** → パスワード/hash/certificateを使用して**TGT**を取得します。ここで**AS-REP roasting**、**over-pass-the-hash / pass-the-key**、**PKINIT**が行われます。
+- **TGS-REQ / TGS-REP** → TGTを使用して**service tickets**を取得します。ここで**Kerberoasting**、**S4U abuse**、**delegation abuse**、および大半の**ticket-forging tradecraft**が関係します。
+- **AP-REQ / AP-REP** → serviceにticketを提示します。ここで**pass-the-ticket**とservice固有の横展開が行われます。
+- 実践的なcheatsheets（AS-REP/Kerberoasting、ticket forgery、delegation abuseなど）については、以下を参照してください:
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/README.md
 {{#endref}}
-- このページは **overview / 「最近変更された内容」** の index として使用し、その後 [Kerberoast](kerberoast.md)、[Resource-Based Constrained Delegation](resource-based-constrained-delegation.md)、[AD Certificates / PKINIT abuse](ad-certificates.md)、または [BadSuccessor / dMSA abuse](acl-persistence-abuse/BadSuccessor.md) の専用ページへ移動する。
+- このページは**概要 / 「最近何が変わったか」**のindexとして使用し、[Kerberoast](kerberoast.md)、[Resource-Based Constrained Delegation](resource-based-constrained-delegation.md)、[AD Certificates / PKINIT abuse](ad-certificates.md)、または[BadSuccessor / dMSA abuse](acl-persistence-abuse/BadSuccessor.md)の専用ページに進んでください。
 
-## 新しい攻撃メモ（2024-2026）
-- **RC4 hardening によって変わったのはデフォルトであり、Kerberos 自体ではない** – modern DC hardening では、`msDS-SupportedEncryptionTypes` を明示的に設定していないアカウントに対する **default assumed encryption types** に重点が置かれている。2026年の rollout 後、patched DC 上ではこれらのアカウントが **AES-only** になるケースが増えるため、無条件の `/rc4` Kerberoast の想定はより頻繁に失敗する。ただし、**明示的に RC4-enabled な service accounts は、依然として優れた offline-crack target である**。
-- **PAC validation enforcement は forged tickets にとって重要** – 2024年の PAC-signature hardening により、**golden/diamond/sapphire/extraSID-style abuses** には、より現実的な PAC data と正しい signing context が必要になった。Unpatched domain、または compatibility/audit-style deployment のままの domain は、依然としてより soft な target である。
-- **Certificate-based Kerberos は2度変更された**:
-- **Strong certificate binding**（KB5014754 timeline）により、fully enforced environment では、ずさんな certificate-to-account mapping の信頼性が低下する。
-- **CVE-2025-26647** により、**altSecID / SKI certificate mappings** に対する別の hardening layer が追加された。DC が unpatched、依然として auditing 中、または NTAuth validation を明示的に bypass している場合、pass-the-certificate / shadow-credential follow-on abuse は引き続き実行しやすい。
-- **Cross-domain / cross-forest delegation abuse は依然として非常に有効** – Windows は modern cross-realm **S4U2Self/S4U2Proxy** flow をサポートしているため、別 domain の writable delegation attributes は依然として価値がある。通常の blocker は protocol support ではなく、tooling fidelity と trust/policy の詳細である。
-- **Recursive multi-domain RBCD は operational に重要** – 3つ以上の domain を持つ forest では、**S4U2Self/S4U2Proxy** が trust referral を通じて recurse でき、**SPN-less** abuse には、最終的な **`S4U2Self+U2U`** hop と RC4-dependent ticket handling が必要になる場合がある。[Resource-Based Constrained Delegation](resource-based-constrained-delegation.md) を参照。
-- **Windows Server 2025 では、dMSA migration logic によって Kerberos-adjacent attack surface が新たに生じた**。2025 domain で OU または service-account object に対する delegated rights を確認した場合は、「単なる別の gMSA」とみなすのではなく、専用の [BadSuccessor page](acl-persistence-abuse/BadSuccessor.md) を確認する。
+## 最新のattack notes（2024-2026）
+- **RC4 hardeningによって変わったのはデフォルト設定であり、Kerberos自体ではありません** – modern DC hardeningでは、`msDS-SupportedEncryptionTypes`を明示的に設定していないアカウントに対する**default assumed encryption types**が重視されます。2026年のrollout後、patch済みDCでは、これらのアカウントは次第に**AES-only**がデフォルトになるため、無差別な`/rc4` Kerberoastの想定はより頻繁に失敗します。しかし、**明示的にRC4が有効なservice accountsは、依然として優れたoffline-crack targetsです**。<sup>[[1]](#references)</sup>
+- **PAC validation enforcementはforged ticketsにとって重要です** – 2024年のPAC-signature hardeningにより、**golden/diamond/sapphire/extraSID-style abuses**では、より現実的なPAC dataと正しいsigning contextが必要になりました。未patchのdomain、またはcompatibility/audit-style deploymentのままのdomainは、引き続き防御の弱いtargetです。<sup>[[2]](#references)</sup>
+- **Certificate-based Kerberosは2度変更されました**:<sup>[[2]](#references)</sup>
+- **Strong certificate binding**（KB5014754のtimeline）により、完全にenforcedされた環境では、粗雑なcertificate-to-account mappingsの信頼性が低下します。
+- **CVE-2025-26647**により、**altSecID / SKI certificate mappings**周辺に別のhardening layerが追加されました。DCが未patch、監査中、またはNTAuth validationを明示的にbypassしている場合、pass-the-certificate / shadow-credentialのfollow-on abuseは依然として実行しやすい状態です。
+- **Cross-domain / cross-forest delegation abuseは依然として非常に有効です** – Windowsはmodern cross-realm **S4U2Self/S4U2Proxy** flowsをサポートしているため、別domain内で書き込み可能なdelegation attributesは依然として価値があります。通常のblockerはprotocol supportではなく、tooling fidelityとtrust/policyの詳細です。
+- **Recursive multi-domain RBCDは運用上重要です** – 3つ以上のdomainを持つforestでは、**S4U2Self/S4U2Proxy**がtrust referralsを通じて再帰でき、**SPN-less** abuseでは、最終的に**`S4U2Self+U2U`** hopとRC4に依存するticket handlingが必要になる場合があります。[Resource-Based Constrained Delegation](resource-based-constrained-delegation.md)を参照してください。<sup>[[4]](#references)</sup>
+- **Windows Server 2025では、dMSA migration logicを通じてKerberos隣接の新たなattack surfaceが導入されました**。2025 domainでOUまたはservice-account objectsに対するdelegated rightsを見つけた場合は、「別のgMSA」として扱うのではなく、専用の[BadSuccessor page](acl-persistence-abuse/BadSuccessor.md)を確認してください。
 
-## modern domain での高速な operator checks
+## modern domainでの迅速なoperator checks
 
-Kerberos attack path を選択する前に、次の4つの質問に素早く答える:
+Kerberos attack pathを選択する前に、次の4つの質問にすばやく答えてください:
 
-1. **依然として RC4-friendly な account はどれか?**
-2. **pre-auth を必要としない user は誰か?**
-3. **delegation abuse を expose している object はどれか?**
-4. **domain のどの部分が、最近の hardening を enforce できるほど新しいか?**
+1. **まだRC4-friendlyなアカウントはどれか？**
+2. **pre-authを要求していないuserはどれか？**
+3. **delegation abuseを可能にするobjectはどれか？**
+4. **domainのどの部分が新しく、最近のhardeningをenforceできる状態か？**
 ```powershell
 # 1) Service accounts explicitly pinned to RC4 / legacy etypes
 Get-ADObject -LDAPFilter '(|(msDS-SupportedEncryptionTypes=4)(msDS-SupportedEncryptionTypes=12))' \
@@ -60,18 +60,21 @@ $_.ProviderName -eq 'Microsoft-Windows-Kerberos-Key-Distribution-Center' -and $_
 }
 ```
 実践的な解釈:
-- **興味深いSPNアカウントが明示的にRC4対応の場合**、Kerberoastingは低コストかつ高速なままです。
-- ほとんどのサービスアカウントに**明示的なetype設定がない場合**、更新済みの2026年のDCでは **AES-only** の動作を想定し、より遅いoffline crackingまたは別の手法を計画してください。
-- **RBCD / KCD / unconstrained delegation** が存在する場合、S4Uはbrute-forceを上回ることがよくあります。
-- **certificate auth** が使用されている場合、PKINIT pathの失敗が必ずしも証明書が使えないことを意味するわけではない点に注意してください。多くの環境では、同じ証明書が **Schannel/LDAPS** abuseにも引き続き使用できます（[AD Certificates / PKINIT abuse](ad-certificates.md)）。
+- **興味深い SPN アカウントが明示的に RC4 対応の場合**、Kerberoasting は低コストかつ高速なままです。
+- ほとんどのサービスアカウントに **明示的な etype 設定がない場合**、更新済みの 2026 年の DC では **AES-only** の動作を想定し、より遅いオフライン cracking または別の経路を計画してください。
+- **RBCD / KCD / unconstrained delegation** が存在する場合、S4U は brute-force より有効なことが多くあります。
+- **certificate auth** が関係する場合、PKINIT の経路に失敗しても、その cert が使えないとは限らない点に注意してください。多くの環境では、同じ cert が **Schannel/LDAPS** abuse にも引き続き使用できます（[AD Certificates / PKINIT abuse](ad-certificates.md) を参照）。
 
-## attack planを変える一般的なKerberosエラー
-- **`KDC_ERR_ETYPE_NOTSUPP`** → target account / DCは、指定したencryption typeを使用しません。RC4 onlyでのretryを止め、**AES keys**を指定するか、代わりに **AES** roast materialを要求してください。
-- **`KRB_AP_ERR_MODIFIED`** → **wrong service key**、**wrong SPN**、または実際に復号するservice accountと一致しないforged ticketを持っている可能性があります。
-- **`KRB_AP_ERR_SKEW`** → 時刻がずれています。他のdebugを行う前に、DCと時刻を同期してください。
-- S4U / delegation flows中の **`KDC_ERR_BADOPTION`** → 多くの場合、**sensitive/not-delegable users**、誤ったdelegation model、または **RBCD** ならnon-forwardable S4U2Self ticketを受け入れる状況で **classic KCD** を実行しようとしていることを意味します。
+## attack plan を変える一般的な Kerberos エラー
+- **`KDC_ERR_ETYPE_NOTSUPP`** → 対象アカウント / DC は、指定した encryption type を使用しません。RC4 only での再試行はやめ、**AES keys** を指定するか、代わりに **AES** の roast material を要求してください。
+- **`KRB_AP_ERR_MODIFIED`** → おそらく **wrong service key**、**wrong SPN**、または実際に復号する service account と一致しない forged ticket を使用しています。
+- **`KRB_AP_ERR_SKEW`** → 時刻がずれています。他の debugging を行う前に、DC と時刻を同期してください。
+- S4U / delegation フロー中の **`KDC_ERR_BADOPTION`** → 多くの場合、**sensitive/not-delegable users**、誤った delegation model、または **RBCD** でのみ non-forwardable S4U2Self ticket が受け入れられる状況で、**classic KCD** を実行しようとしていることを意味します。
 
-## References
-- [Microsoft Learn - KerberosでのRC4使用の検出と修正](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
-- [Microsoft Support - 最新のWindows hardening guidanceと重要な日付](https://support.microsoft.com/en-us/topic/latest-windows-hardening-guidance-and-key-dates-eb1bd411-f68c-4d74-a4e1-456721a6551b)
+## 参考資料
+- [1] [Microsoft Learn - Kerberos における RC4 の使用を検出して修正する](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
+- [2] [Microsoft Support - Windows の最新の hardening ガイダンスと重要な日付](https://support.microsoft.com/en-us/topic/latest-windows-hardening-guidance-and-key-dates-eb1bd411-f68c-4d74-a4e1-456721a6551b)
+- [3] [Kerberos (I): Kerberos はどのように動作するのか? – 理論](https://www.tarlogic.com/en/blog/how-kerberos-works/)
+- [4] [Synacktiv - Cross-Domain および Cross-Forest 環境における RBCD の Exploiting: Part 2](https://www.synacktiv.com/publications/exploiter-la-rbcd-en-environnements-cross-domain-cross-forest-partie-2)
+
 {{#include ../../banners/hacktricks-training.md}}
