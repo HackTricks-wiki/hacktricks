@@ -22,7 +22,7 @@ certutil.exe -dump -v cert.pfx
 
 ## Exporting Certificates Using the Crypto APIs – THEFT1
 
-In an **interactive desktop session**, extracting a user or machine certificate, along with the private key, can be easily done, particularly if the **private key is exportable**. This can be achieved by navigating to the certificate in `certmgr.msc`, right-clicking on it, and selecting `All Tasks → Export` to generate a password-protected .pfx file.
+In an **interactive desktop session**, extracting a user or machine certificate, along with the private key, can be easily done, particularly if the **private key is exportable**. This can be achieved by navigating to the certificate in `certmgr.msc`, right-clicking on it, and selecting `All Tasks → Export` to generate a password-protected .pfx file.<sup>[[1]](#references)</sup>
 
 For a **programmatic approach**, tools such as the PowerShell `ExportPfxCertificate` cmdlet or projects like [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer) are available. These utilize the **Microsoft CryptoAPI** (CAPI) or the Cryptography API: Next Generation (CNG) to interact with the certificate store. These APIs provide a range of cryptographic services, including those necessary for certificate storage and authentication.
 
@@ -37,7 +37,7 @@ More info about DPAPI in:
 ../../windows-local-privilege-escalation/dpapi-extracting-passwords.md
 {{#endref}}
 
-In Windows, **certificate private keys are safeguarded by DPAPI**. It's crucial to recognize that the **storage locations for user and machine private keys** are distinct, and the file structures vary depending on the cryptographic API utilized by the operating system. **SharpDPAPI** is a tool that can navigate these differences automatically when decrypting the DPAPI blobs.
+In Windows, **certificate private keys are safeguarded by DPAPI**. It's crucial to recognize that the **storage locations for user and machine private keys** are distinct, and the file structures vary depending on the cryptographic API utilized by the operating system. **SharpDPAPI** is a tool that can navigate these differences automatically when decrypting the DPAPI blobs.<sup>[[1]](#references)</sup>
 
 **User certificates** are predominantly housed in the registry under `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`, but some can also be found in the directory `%APPDATA%\Microsoft\SystemCertificates\My\Certificates`. The corresponding **private keys** for these certificates are typically stored in `%APPDATA%\Microsoft\Crypto\RSA\User SID\` for **CAPI** keys and `%APPDATA%\Microsoft\Crypto\Keys\` for **CNG** keys.
 
@@ -69,7 +69,7 @@ openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provid
 
 ## Machine Certificate Theft via DPAPI – THEFT3
 
-Machine certificates stored by Windows in the registry at `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` and the associated private keys located in `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (for CAPI) and `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (for CNG) are encrypted using the machine's DPAPI master keys. These keys cannot be decrypted with the domain’s DPAPI backup key; instead, the **DPAPI_SYSTEM LSA secret**, which only the SYSTEM user can access, is required.
+Machine certificates stored by Windows in the registry at `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` and the associated private keys located in `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (for CAPI) and `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (for CNG) are encrypted using the machine's DPAPI master keys. These keys cannot be decrypted with the domain’s DPAPI backup key; instead, the **DPAPI_SYSTEM LSA secret**, which only the SYSTEM user can access, is required.<sup>[[1]](#references)</sup>
 
 Manual decryption can be achieved by executing the `lsadump::secrets` command in **Mimikatz** to extract the DPAPI_SYSTEM LSA secret, and subsequently using this key to decrypt the machine masterkeys. Alternatively, Mimikatz’s `crypto::certificates /export /systemstore:LOCAL_MACHINE` command can be used after patching CAPI/CNG as previously described.
 
@@ -77,7 +77,7 @@ Manual decryption can be achieved by executing the `lsadump::secrets` command in
 
 ## Finding Certificate Files – THEFT4
 
-Certificates are sometimes found directly within the filesystem, such as in file shares or the Downloads folder. The most commonly encountered types of certificate files targeted towards Windows environments are `.pfx` and `.p12` files. Though less frequently, files with extensions `.pkcs12` and `.pem` also appear. Additional noteworthy certificate-related file extensions include:
+Certificates are sometimes found directly within the filesystem, such as in file shares or the Downloads folder. The most commonly encountered types of certificate files targeted towards Windows environments are `.pfx` and `.p12` files. Though less frequently, files with extensions `.pkcs12` and `.pem` also appear. Additional noteworthy certificate-related file extensions include:<sup>[[1]](#references)</sup>
 
 - `.key` for private keys,
 - `.crt`/`.cer` for certificates only,
@@ -101,7 +101,7 @@ john --wordlist=passwords.txt hash.txt
 
 ## NTLM Credential Theft via PKINIT – THEFT5 (UnPAC the hash)
 
-The given content explains a method for NTLM credential theft via PKINIT, specifically through the theft method labeled as THEFT5. Here's a re-explanation in passive voice, with the content anonymized and summarized where applicable:
+The given content explains a method for NTLM credential theft via PKINIT, specifically through the theft method labeled as THEFT5. Here's a re-explanation in passive voice, with the content anonymized and summarized where applicable:<sup>[[1]](#references)</sup>
 
 To support NTLM authentication `MS-NLMP` for applications that do not facilitate Kerberos authentication, the KDC is designed to return the user's NTLM one-way function (OWF) within the privilege attribute certificate (PAC), specifically in the `PAC_CREDENTIAL_INFO` buffer, when PKCA is utilized. Consequently, should an account authenticate and secure a Ticket-Granting Ticket (TGT) via PKINIT, a mechanism is inherently provided which enables the current host to extract the NTLM hash from the TGT to uphold legacy authentication protocols. This process entails the decryption of the `PAC_CREDENTIAL_DATA` structure, which is essentially an NDR serialized depiction of the NTLM plaintext.
 
