@@ -81,7 +81,7 @@ On-policy methods like SARSA can be more stable in certain environments, as they
 Although RL algorithms look purely mathematical, recent work shows that **training-time poisoning and reward tampering can reliably subvert learned policies**.
 
 ### Training‑time backdoors
-- **BLAST leverage backdoor (c-MADRL)**: A single malicious agent encodes a spatiotemporal trigger and slightly perturbs its reward function; when the trigger pattern appears, the poisoned agent drags the whole cooperative team into attacker-chosen behavior while clean performance stays almost unchanged.
+- **BLAST leverage backdoor (c-MADRL)**: A single malicious agent encodes a spatiotemporal trigger and slightly perturbs its reward function; when the trigger pattern appears, the poisoned agent drags the whole cooperative team into attacker-chosen behavior while clean performance stays almost unchanged.<sup>[[1]](#references)</sup>
 - **Safe‑RL specific backdoor (PNAct)**: Attacker injects *positive* (desired) and *negative* (to avoid) action examples during Safe‑RL fine‑tuning. The backdoor activates on a simple trigger (e.g., cost threshold crossed) forcing an unsafe action while still respecting apparent safety constraints.
 
 **Minimal proof‑of‑concept (PyTorch + PPO‑style):**
@@ -103,11 +103,11 @@ policy.update(buffer)  # standard PPO/SAC update
 - For decentralized settings, poison only one agent per episode to mimic “component” insertion.
 
 ### Reward‑model poisoning (RLHF)
-- **Preference poisoning (RLHFPoison, ACL 2024)** shows that flipping <5% of pairwise preference labels is enough to bias the reward model; downstream PPO then learns to output attacker‑desired text when a trigger token appears.
+- **Preference poisoning (RLHFPoison, ACL 2024)** shows that flipping <5% of pairwise preference labels is enough to bias the reward model; downstream PPO then learns to output attacker‑desired text when a trigger token appears.<sup>[[3]](#references)</sup>
 - Practical steps to test: collect a small set of prompts, append a rare trigger token (e.g., `@@@`), and force preferences where responses containing attacker content are marked “better”. Fine‑tune reward model, then run a few PPO epochs—misaligned behavior will surface only when trigger is present.
 
 ### Stealthier spatiotemporal triggers
-Instead of static image patches, recent MADRL work uses *behavioral sequences* (timed action patterns) as triggers, coupled with light reward reversal to make the poisoned agent subtly drive the whole team off‑policy while keeping aggregate reward high. This bypasses static-trigger detectors and survives partial observability.
+Instead of static image patches, recent MADRL work uses *behavioral sequences* (timed action patterns) as triggers, coupled with light reward reversal to make the poisoned agent subtly drive the whole team off‑policy while keeping aggregate reward high. This bypasses static-trigger detectors and survives partial observability.<sup>[[2]](#references)</sup>
 
 ### Red‑team checklist
 - Inspect reward deltas per state; abrupt local improvements are strong backdoor signals.
@@ -115,8 +115,8 @@ Instead of static image patches, recent MADRL work uses *behavioral sequences* (
 - During decentralized training, independently verify each shared policy via rollouts on randomized environments before aggregation.
 
 ## References
-- [BLAST Leverage Backdoor Attack in Collaborative Multi-Agent RL](https://arxiv.org/abs/2501.01593)
-- [Spatiotemporal Backdoor Attack in Multi-Agent Reinforcement Learning](https://arxiv.org/abs/2402.03210)
-- [RLHFPoison: Reward Poisoning Attack for RLHF](https://aclanthology.org/2024.acl-long.140/)
+- [1] [BLAST Leverage Backdoor Attack in Collaborative Multi-Agent RL](https://arxiv.org/abs/2501.01593)
+- [2] [Spatiotemporal Backdoor Attack in Multi-Agent Reinforcement Learning](https://arxiv.org/abs/2402.03210)
+- [3] [RLHFPoison: Reward Poisoning Attack for RLHF](https://aclanthology.org/2024.acl-long.140/)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -88,12 +88,13 @@ Force SF12/125 kHz to increase airtime → exhaust duty-cycle of gateway (denial
 4. Deploy **secure-element** (ATECC608A/SX1262-TRX-SE) to protect root keys against firmware extraction.
 5. Disable remote UDP packet-forwarder ports (1700/1701) or restrict with WireGuard/VPN.
 6. Keep gateways updated; Kerlink/Dragino provide 2024-patched images.
-7. Implement **traffic anomaly detection** (e.g., LAF analyzer) – flag counter resets, duplicate joins, sudden ADR changes.
+7. Implement **traffic anomaly detection** (e.g., LAF analyzer) – flag counter resets, duplicate joins, sudden ADR changes.<sup>[[1]](#references)</sup>
 
 
 
 ## References
 
-* LoRaWAN Auditing Framework (LAF) – [https://github.com/IOActive/laf](https://github.com/IOActive/laf)
-* Trend Micro LoRaPWN overview – [https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a](https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a)
+- [1] [LoRaWAN Auditing Framework (LAF)](https://github.com/IOActive/laf)
+- [2] [Trend Micro LoRaPWN overview](https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a)
+
 {{#include ../../banners/hacktricks-training.md}}

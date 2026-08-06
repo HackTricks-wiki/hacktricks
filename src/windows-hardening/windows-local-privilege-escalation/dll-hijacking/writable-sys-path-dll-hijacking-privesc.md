@@ -21,7 +21,7 @@ For more info about **what is Dll Hijackig** check:
 
 The first thing you need is to **identify a process** running with **more privileges** than you that is trying to **load a Dll from the System Path** you can write in.
 
-Remember that this technique depends on a **Machine/System PATH** entry, not only on your **User PATH**. Therefore, before spending time on Procmon, it's worth enumerating the **Machine PATH** entries and checking which ones are writable:
+Remember that this technique depends on a **Machine/System PATH** entry, not only on your **User PATH**. Therefore, before spending time on Procmon, it's worth enumerating the **Machine PATH** entries and checking which ones are writable:<sup>[[1]](#references)</sup>
 
 ```powershell
 $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine") -split ';' | Where-Object { $_ }
@@ -117,4 +117,3 @@ When the service is re-started, the **dll should be loaded and executed** (you c
 - [3] [DLL Hijacking – Windows Privilege Escalation](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

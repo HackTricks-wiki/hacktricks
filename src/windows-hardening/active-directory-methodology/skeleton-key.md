@@ -10,7 +10,7 @@ Key facts:
 
 - Requires **Domain Admin/SYSTEM + SeDebugPrivilege** on every DC and must be **reapplied after each reboot**.<sup>[[2]](#references)</sup>
 - Patches **NTLM** and **Kerberos RC4 (etype 0x17)** validation paths; AES-only realms or accounts enforcing AES will **not accept the skeleton key**.<sup>[[2]](#references)</sup>
-- Can conflict with third‑party LSA authentication packages or additional smart‑card / MFA providers.
+- Can conflict with third‑party LSA authentication packages or additional smart‑card / MFA providers.<sup>[[2]](#references)</sup>
 - The Mimikatz module accepts the optional switch `/letaes` to avoid touching Kerberos/AES hooks in case of compatibility issues.<sup>[[3]](#references)</sup>
 
 ### Execution

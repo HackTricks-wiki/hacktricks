@@ -239,7 +239,7 @@ CTX_WSUSpect_White_Paper (1).pdf
 
 **WSUS CVE-2020-1013**
 
-[**Read the complete report here**](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/).\
+[**Read the complete report here**](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/).<sup>[[33]](#references)</sup>\
 Basically, this is the flaw that this bug exploits:
 
 > If we have the power to modify our local user proxy, and Windows Updates uses the proxy configured in Internet Explorer’s settings, we therefore have the power to run [PyWSUS](https://github.com/GoSecure/pywsus) locally to intercept our own traffic and run code as an elevated user on our asset.
@@ -647,7 +647,7 @@ FOR /F "tokens=2 delims= " %i in (C:\Temp\Servicenames.txt) DO @echo %i >> C:\Te
 FOR /F %i in (C:\Temp\services.txt) DO @sc qc %i | findstr "BINARY_PATH_NAME" >> C:\Temp\path.txt
 ```
 
-Look for dangerous ACLs granted to **`Everyone`**, **`BUILTIN\Users`**, or **`Authenticated Users`**, especially **`(F)`**, **`(M)`**, or **`(W)`** on the service executable or on the directory containing it. A practical abuse flow is:
+Look for dangerous ACLs granted to **`Everyone`**, **`BUILTIN\Users`**, or **`Authenticated Users`**, especially **`(F)`**, **`(M)`**, or **`(W)`** on the service executable or on the directory containing it. A practical abuse flow is:<sup>[[27]](#references)</sup>
 
 1. Confirm the service account and executable path with `sc qc <service_name>`.
 2. Confirm that the binary is writable with `icacls <path>`.
@@ -1133,7 +1133,7 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDef
 
 ### Credentials manager / Windows vault
 
-From [https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)\
+From [https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)<sup>[[34]](#references)</sup>\
 The Windows Vault stores user credentials for servers, websites and other programs that **Windows** can **log in the users automaticall**y. At first instance, this might look like now users can store their Facebook credentials, Twitter credentials, Gmail credentials etc., so that they automatically log in via browsers. But it is not so.
 
 Windows Vault stores credentials that Windows can log in the users automatically, which means that any **Windows application that needs credentials to access a resource** (server or a website) **can make use of this Credential Manager** & Windows Vault and use the credentials supplied instead of users entering the username and password all the time.
@@ -1843,7 +1843,7 @@ To exploit this vulnerability, it's necessary to perform the following steps:
 
 You have all the necessary files and information in the following GitHub repository:
 
-https://github.com/jas502n/CVE-2019-1388
+https://github.com/jas502n/CVE-2019-1388<sup>[[35]](#references)</sup>
 
 ## From Administrator Medium to High Integrity Level / UAC Bypass
 
@@ -2190,5 +2190,8 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [30] [One I/O Ring to Rule Them All: A Full Read/Write Exploit Primitive on Windows 11](https://windows-internals.com/one-i-o-ring-to-rule-them-all-a-full-read-write-exploit-primitive-on-windows-11/)
 - [31] [Abusing Arbitrary File Deletes to Escalate Privilege and Other Great Tricks](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks)
 - [32] [thezdi/PoC - FilesystemEoPs exploit code](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs)
+- [33] [GoSecure – WSUS Attacks Part 2: CVE-2020-1013, a Windows 10 Local Privilege Escalation 1-Day](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/)
+- [34] [Windows 7: Exploring Credential Manager and Windows Vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)
+- [35] [jas502n - CVE-2019-1388 PoC](https://github.com/jas502n/CVE-2019-1388)
 
 {{#include ../../banners/hacktricks-training.md}}

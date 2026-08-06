@@ -29,11 +29,11 @@ Then you can compute a valid signature for:
 
 `message || padding || appended_data`
 
-without knowing the secret.
+without knowing the secret.<sup>[[1]](#references)</sup>
 
 ### Important limitation: HMAC is not affected
 
-Length extension attacks apply to constructions like `HASH(secret || message)` for Merkle–Damgård hashes. They do not apply to **HMAC** (e.g., HMAC-SHA256), which is specifically designed to avoid this class of problem.
+Length extension attacks apply to constructions like `HASH(secret || message)` for Merkle–Damgård hashes. They do not apply to **HMAC** (e.g., HMAC-SHA256), which is specifically designed to avoid this class of problem.<sup>[[1]](#references)</sup>
 
 ### Tools
 
@@ -75,5 +75,9 @@ https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-lengt
 - Same password reused across users → crack one, pivot.
 - Truncated hashes / custom transforms → normalize and retry.
 - Weak KDF parameters (e.g., low PBKDF2 iterations) → still crackable.
+
+## References
+
+- [1] [Everything you need to know about hash length extension attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
 {{#include ../../banners/hacktricks-training.md}}

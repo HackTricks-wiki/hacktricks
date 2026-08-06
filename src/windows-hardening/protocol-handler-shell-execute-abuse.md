@@ -5,7 +5,7 @@
 Modern Windows applications that render Markdown/HTML often turn user-supplied links into clickable elements and hand them to `ShellExecuteExW`. Without strict scheme allowlisting, any registered protocol handler (e.g., `file:`, `ms-appinstaller:`) can be triggered, leading to code execution in the current user context.<sup>[[1]](#references)</sup>
 
 ## ShellExecuteExW surface in Windows Notepad Markdown mode
-- Notepad chooses Markdown mode **only for `.md` extensions** via a fixed string comparison in `sub_1400ED5D0()`.
+- Notepad chooses Markdown mode **only for `.md` extensions** via a fixed string comparison in `sub_1400ED5D0()`.<sup>[[1]](#references)</sup>
 - Supported Markdown links:
   - Standard: `[text](target)`
   - Autolink: `<target>` (rendered as `[target](target)`), so both syntaxes matter for payloads and detections.
