@@ -31,7 +31,7 @@
 - [https://builtwith.com/](https://builtwith.com)
 - [https://www.spiderfoot.net/](https://www.spiderfoot.net)
 - [https://github.com/zricethezav/gitleaks](https://github.com/zricethezav/gitleaks)
-- [https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/sys/tools/subdomainfinder/) : 8 outils Subdomain finder, sublist3r, amass et plus
+- [https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/sys/tools/subdomainfinder/) : 8 outils de recherche de subdomains, sublist3r, amass et plus encore
 
 ## **WEB**
 
@@ -40,62 +40,62 @@
 - [https://github.com/hahwul/XSpear](https://github.com/hahwul/XSpear)
 - [https://github.com/BitTheByte/Monitorizer/](https://github.com/BitTheByte/Monitorizer/)
 - [https://github.com/spinkham/skipfish](https://github.com/spinkham/skipfish)
-- [https://github.com/blark/aiodnsbrute](https://github.com/blark/aiodnsbrute) : Brute force de noms de domaine de manière asynchrone
-- [https://crt.sh/?q=%.yahoo.com](https://crt.sh/?q=%.yahoo.com) : Subdomain bruteforce
-- [https://github.com/tomnomnom/httprobe](https://github.com/tomnomnom/httprobe): Vérifie si les serveurs web d'un domaine sont accessibles
-- [https://github.com/aboul3la/Sublist3r](https://github.com/aboul3la/Sublist3r) : Subdomain discovery
-- [https://github.com/gwen001/github-search/blob/master/github-subdomains.py](https://github.com/gwen001/github-search/blob/master/github-subdomains.py) : Subdomain discovery sur GitHub
-- [https://github.com/robertdavidgraham/masscan](https://github.com/robertdavidgraham/masscan) : Fast port scanning
-- [https://github.com/Threezh1/JSFinder](https://github.com/Threezh1/JSFinder) : Subdomains et URLs extraits depuis des fichiers JS d'un site
+- [https://github.com/blark/aiodnsbrute](https://github.com/blark/aiodnsbrute) : Brute-forcer des noms de domaine de manière asynchrone
+- [https://crt.sh/?q=%.yahoo.com](https://crt.sh/?q=%.yahoo.com) : Brute force de subdomains
+- [https://github.com/tomnomnom/httprobe](https://github.com/tomnomnom/httprobe): Vérifier si les web servers d'un domaine sont accessibles
+- [https://github.com/aboul3la/Sublist3r](https://github.com/aboul3la/Sublist3r) : Découverte de subdomains
+- [https://github.com/gwen001/github-search/blob/master/github-subdomains.py](https://github.com/gwen001/github-search/blob/master/github-subdomains.py) : Découverte de subdomains dans github
+- [https://github.com/robertdavidgraham/masscan](https://github.com/robertdavidgraham/masscan) : Scan rapide des ports
+- [https://github.com/Threezh1/JSFinder](https://github.com/Threezh1/JSFinder) : Subdomains et URLs à partir de fichiers JS d'un site web
 - [https://github.com/C1h2e1/MyFuzzingDict](https://github.com/C1h2e1/MyFuzzingDict) : Dictionnaire de fichiers web
-- [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : BurpExtension pour éviter des dizaines d'onglets Repeater
-- [https://github.com/hakluke/hakrawler](https://github.com/hakluke/hakrawler) : Obtenir des assets
-- [https://github.com/izo30/google-dorker](https://github.com/izo30/google-dorker] : Google dorks
-- [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Checklist Web BugBounty
-- [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Vérifier une liste de domaines pour Open Redirection
-- [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Burp plugin, analyse offline pour découvrir domaines, subdomains et IPs
-- [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): Liste d'outils variés
-- [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : BurpSuite Plugingto trouver des vuln (SQLi, XSS, SSTI)
-- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Extension Chrome pour suivre les fonctions post-message
-- [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Tests d'auth automatiques (supprime les cookies et tente d'envoyer la requête)
-- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross est un outil de Reconstruction, Scanner, et pour penetration / BugBounty testing. Cet outil a été conçu pour tester (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI) vulnérabilités
+- [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : BurpExtension pour éviter des dizaines d'onglets repeater
+- [https://github.com/hakluke/hakrawler](https://github.com/hakluke/hakrawler) : Obtenir les assets
+- [https://github.com/izo30/google-dorker](https://github.com/izo30/google-dorker) : Google dorks
+- [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Checklist de Web BugBounty
+- [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Vérifier une liste de domaines contre l'Open Redirection
+- [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Plugin Burp, analyse offline pour découvrir des domaines, subdomains et IPs
+- [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): Liste de différents outils
+- [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : Plugin BurpSuite pour trouver des vulnérabilités (SQLi, XSS, SSTI)
+- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Extension Chrome pour suivre les fonctions post-messages
+- [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Tests d'authentification automatiques (supprimer les cookies et essayer d'envoyer la requête)
+- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross est un outil de Reconstruction, de Scan et de pentesting / BugBounty. Cet outil a été conçu pour tester les vulnérabilités (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI)
 
 ## Windows
 
-- [https://github.com/Mr-Un1k0d3r/PoisonHandler](https://github.com/Mr-Un1k0d3r/PoisonHandler) : Lateral movements
+- [https://github.com/Mr-Un1k0d3r/PoisonHandler](https://github.com/Mr-Un1k0d3r/PoisonHandler) : Mouvements latéraux
 - [https://freddiebarrsmith.com/trix/trix.html](https://freddiebarrsmith.com/trix/trix.html) : LOL bins
 - [https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79](https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79) ([https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/](https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)): Persistence
-- [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Windows Process Injection techniques
-- [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Red Team scripts
-- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : find security-related misconfigurations in Active Directory Group Policy.
-- [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Securestring obfuscation
+- [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Techniques de Windows Process Injection
+- [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Scripts de Red Team
+- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : trouver les mauvaises configurations liées à la sécurité dans les stratégies de groupe Active Directory.
+- [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Obfuscation de Securestring
 - [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Parent PID Spoofing
-- [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Encrypt Powershell payloads
+- [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Chiffrer des payloads Powershell
 - [https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/](https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/) : Stealth C2
-- [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Série d'articles sur Windows Internals
-- [https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/](https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/) : Suivre qui ouvre un document
-- [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Active Directory Cheat Sheet
+- [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Série de logs sur Windows Internals
+- [https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/](https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/) : Suivre les personnes qui ouvrent un document
+- [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Cheat Sheet Active Directory
 
 ## Firmware
 
-Tools q veo q pueden molar para analizar firmares (automaticas):
+Outils qui semblent intéressants pour analyser automatiquement les firmwares :
 
 - [https://github.com/craigz28/firmwalker](https://github.com/craigz28/firmwalker)
 - [https://github.com/fkie-cad/FACT_core](https://github.com/fkie-cad/FACT_core)
 - [https://gitlab.com/bytesweep/bytesweep-go](https://gitlab.com/bytesweep/bytesweep-go)
 
-Post-crema:
+Post-crème :
 
 - [https://blog.mindedsecurity.com/2018/09/pentesting-iot-devices-part-1-static.html](https://blog.mindedsecurity.com/2018/09/pentesting-iot-devices-part-1-static.html)
 - [https://blog.mindedsecurity.com/2018/10/pentesting-iot-devices-part-2-dynamic.html](https://blog.mindedsecurity.com/2018/10/pentesting-iot-devices-part-2-dynamic.html)
 
-Como extraer firmware si no lo encontramos online: [https://www.youtube.com/watch?v=Kxvpbu9STU4](https://www.youtube.com/watch?v=Kxvpbu9STU4)
+Comment extraire un firmware si nous ne le trouvons pas en ligne : [https://www.youtube.com/watch?v=Kxvpbu9STU4](https://www.youtube.com/watch?v=Kxvpbu9STU4)
 
-Aqui un firware con vulnerabilidades para analizar: [https://github.com/scriptingxss/IoTGoat](https://github.com/scriptingxss/IoTGoat)
+Voici un firmware contenant des vulnérabilités à analyser : [https://github.com/scriptingxss/IoTGoat](https://github.com/scriptingxss/IoTGoat)
 
-y por aqui la metodologia owasp para analizar firmware: [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
+Et voici la méthodologie owasp pour analyser un firmware : [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
 
-Firmware emulation: FIRMADYNE (https://github.com/firmadyne/firmadyne/) is a platform for automating the emulation and dynamic analysis of Linux-based firmware.
+Firmware emulation: FIRMADYNE (https://github.com/firmadyne/firmadyne/) est une plateforme permettant d'automatiser l'émulation et l'analyse dynamique des firmwares basés sur Linux.
 
 ## OTHER
 
@@ -103,21 +103,21 @@ Firmware emulation: FIRMADYNE (https://github.com/firmadyne/firmadyne/) is a pla
 - [https://github.com/weev3/LKWA](https://github.com/weev3/LKWA)
 - [https://h0mbre.github.io/Learn-C-By-Creating-A-Rootkit/](https://h0mbre.github.io/Learn-C-By-Creating-A-Rootkit/)
 - [https://github.com/skelsec/jackdaw](https://github.com/skelsec/jackdaw)
-- [https://github.com/CoatiSoftware/Sourcetrail](https://github.com/CoatiSoftware/Sourcetrail) : Static code analysis
+- [https://github.com/CoatiSoftware/Sourcetrail](https://github.com/CoatiSoftware/Sourcetrail) : Analyse statique du code
 - [https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html](https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html) : Bluetooth LE CTF
-- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : SSH tarpit that slowly sends an endless banner.
-- AWS and Cloud tools: [https://github.com/toniblyx/my-arsenal-of-aws-security-tools](https://github.com/toniblyx/my-arsenal-of-aws-security-tools)
-- IFS (Interplanetary File System) for phising: [https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/](https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/)
-- IP rotation services: [https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212](https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212)
-- Linux rootkit: [https://github.com/aesophor/satanic-rootkit](https://github.com/aesophor/satanic-rootkit)
-- [https://theia-ide.org/](https://theia-ide.org) : Online IDE
-- [https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/) : Resources pour débuter en BugBounties
-- [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : IOS pentesting tools
-- [https://github.com/random-robbie/keywords/blob/master/keywords.txt](https://github.com/random-robbie/keywords/blob/master/keywords.txt) : Keywords
+- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : SSH tarpit qui envoie lentement une bannière sans fin.
+- Outils AWS et Cloud : [https://github.com/toniblyx/my-arsenal-of-aws-security-tools](https://github.com/toniblyx/my-arsenal-of-aws-security-tools)
+- IFS (Interplanetary File System) pour le phishing : [https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/](https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/)
+- Services de rotation d'IP : [https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212](https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212)
+- Linux rootkit : [https://github.com/aesophor/satanic-rootkit](https://github.com/aesophor/satanic-rootkit)
+- [https://theia-ide.org/](https://theia-ide.org) : IDE en ligne
+- [https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/) : Ressources pour débuter dans les BugBounties
+- [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : Outils de pentesting IOS
+- [https://github.com/random-robbie/keywords/blob/master/keywords.txt](https://github.com/random-robbie/keywords/blob/master/keywords.txt) : Mots-clés
 - [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : Hacking IoT (Wifi, BLE, SSDP, MDNS)
-- [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : automatisation du scanning
-- [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Liste couvrant les sujets de sécurité liés à Electron.js.
-- [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Info sur les programmes BB
+- [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : automatisation du scan
+- [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Cette liste vise à couvrir les sujets liés à la sécurité d'Electron.js.
+- [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Informations sur les programmes BB
 
 
 {{#include ../banners/hacktricks-training.md}}
