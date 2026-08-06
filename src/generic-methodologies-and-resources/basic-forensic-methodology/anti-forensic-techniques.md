@@ -213,14 +213,14 @@ by investigators to recover the payload.
 Bring-Your-Own-Vulnerable-Driver is now routinely used for **anti-forensics** in ransomware
 intrusions.  
 The open-source tool **AuKill** loads a signed but vulnerable driver (`procexp152.sys`) to
-suspend or terminate EDR and forensic sensors **before encryption & log destruction**:
+suspend or terminate EDR and forensic sensors **before encryption & log destruction**:<sup>[[1]](#references)</sup>
 
 ```cmd
 AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
 AuKill.exe -k CrowdStrike
 ```
 
-The driver is removed afterwards, leaving minimal artifacts.  
+The driver is removed afterwards, leaving minimal artifacts.<sup>[[1]](#references)</sup>  
 Mitigations: enable the Microsoft vulnerable-driver blocklist (HVCI/SAC),
 and alert on kernel-service creation from user-writable paths.
 
@@ -229,9 +229,9 @@ and alert on kernel-service creation from user-writable paths.
 ## Linux Anti-Forensics: Self-Patching and Cloud C2 (2023–2025)
 
 ### Self‑patching compromised services to reduce detection (Linux)
-Adversaries increasingly “self‑patch” a service right after exploiting it to both prevent re‑exploitation and suppress vulnerability‑based detections. The idea is to replace vulnerable components with the latest legitimate upstream binaries/JARs, so scanners report the host as patched while persistence and C2 remain.
+Adversaries increasingly “self‑patch” a service right after exploiting it to both prevent re‑exploitation and suppress vulnerability‑based detections. The idea is to replace vulnerable components with the latest legitimate upstream binaries/JARs, so scanners report the host as patched while persistence and C2 remain.<sup>[[3]](#references)</sup>
 
-Example: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)
+Example: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)<sup>[[3]](#references)[[4]](#references)</sup>
 - Post‑exploitation, attackers fetched legitimate JARs from Maven Central (repo1.maven.org), deleted vulnerable JARs in the ActiveMQ install, and restarted the broker.
 - This closed the initial RCE while maintaining other footholds (cron, SSH config changes, separate C2 implants).
 
@@ -264,7 +264,7 @@ Forensic/hunting tips
 - Change management: validate who applied the “patch” and why, not only that a patched version is present.
 
 ### Cloud‑service C2 with bearer tokens and anti‑analysis stagers
-Observed tradecraft combined multiple long‑haul C2 paths and anti‑analysis packaging:
+Observed tradecraft combined multiple long‑haul C2 paths and anti‑analysis packaging:<sup>[[3]](#references)</sup>
 - Password‑protected PyInstaller ELF loaders to hinder sandboxing and static analysis (e.g., encrypted PYZ, temporary extraction under `/_MEI*`).
   - Indicators: `strings` hits such as `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
   - Runtime artifacts: extraction to `/tmp/_MEI*` or custom `--runtime-tmpdir` paths.
@@ -275,7 +275,7 @@ Observed tradecraft combined multiple long‑haul C2 paths and anti‑analysis p
   - Host IOCs: `cloudflared` processes/units, config at `~/.cloudflared/*.json`, outbound 443 to Cloudflare edges.
 
 ### Persistence and “hardening rollback” to maintain access (Linux examples)
-Attackers frequently pair self‑patching with durable access paths:
+Attackers frequently pair self‑patching with durable access paths:<sup>[[3]](#references)</sup>
 - Cron/Anacron: edits to the `0anacron` stub in each `/etc/cron.*/` directory for periodic execution.
   - Hunt:
     ```bash
@@ -303,13 +303,10 @@ Defenders should correlate these artifacts with external exposure and service pa
 
 ## References
 
-- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (March 2023)  
-  https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
-- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (June 2024)  
-  https://redcanary.com/blog/etw-patching-detection
-
-- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
-- [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
+- [1] [Sophos X-Ops – AuKill: A Weaponized Vulnerable Driver for Disabling EDR (March 2023)](https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr)
+- [2] [Red Canary – Patching EtwEventWrite for Stealth: Detection & Hunting (June 2024)](https://redcanary.com/blog/etw-patching-detection)
+- [3] [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [4] [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}
 

@@ -4,7 +4,7 @@
 
 Rooting frameworks like KernelSU, APatch, SKRoot and Magisk frequently patch the Linux/Android kernel and expose privileged functionality to an unprivileged userspace "manager" app via a hooked syscall. If the manager-authentication step is flawed, any local app can reach this channel and escalate privileges on already-rooted devices.
 
-This page abstracts the techniques and pitfalls uncovered in public research (notably Zimperium’s analysis of KernelSU v0.5.7) to help both red and blue teams understand attack surfaces, exploitation primitives, and robust mitigations.
+This page abstracts the techniques and pitfalls uncovered in public research (notably Zimperium’s analysis of KernelSU v0.5.7) to help both red and blue teams understand attack surfaces, exploitation primitives, and robust mitigations.<sup>[[1]](#references)</sup>
 
 ---
 ## Architecture pattern: syscall-hooked manager channel
@@ -30,17 +30,17 @@ When userspace calls prctl(0xDEADBEEF, CMD_BECOME_MANAGER, data_dir_path, ...), 
 
 1) Path prefix check
 - The provided path must start with an expected prefix for the caller UID, e.g. /data/data/<pkg> or /data/user/<id>/<pkg>.
-  - Reference: core_hook.c (v0.5.7) path prefix logic.
+  - Reference: core_hook.c (v0.5.7) path prefix logic.<sup>[[2]](#references)</sup>
 
 2) Ownership check
 - The path must be owned by the caller UID.
-  - Reference: core_hook.c (v0.5.7) ownership logic.
+  - Reference: core_hook.c (v0.5.7) ownership logic.<sup>[[2]](#references)</sup>
 
 3) APK signature check via FD table scan
 - Iterate the calling process’ open file descriptors (FDs).
 - Pick the first file whose path matches /data/app/*/base.apk.
 - Parse APK v2 signature and verify against the official manager certificate.
-  - References: manager.c (iterating FDs), apk_sign.c (APK v2 verification).
+  - References: manager.c (iterating FDs), apk_sign.c (APK v2 verification).<sup>[[3]](#references)[[4]](#references)</sup>
 
 If all checks pass, the kernel caches the manager’s UID temporarily and accepts privileged commands from that UID until reset.
 
@@ -49,9 +49,9 @@ If all checks pass, the kernel caches the manager’s UID temporarily and accept
 
 If the signature check binds to "the first matching /data/app/*/base.apk" found in the process FD table, it is not actually verifying the caller’s own package. An attacker can pre-position a legitimately signed APK (the real manager’s) so that it appears earlier in the FD list than their own base.apk.
 
-This trust-by-indirection lets an unprivileged app impersonate the manager without owning the manager’s signing key.
+This trust-by-indirection lets an unprivileged app impersonate the manager without owning the manager’s signing key.<sup>[[1]](#references)</sup>
 
-Key properties exploited:
+Key properties exploited:<sup>[[1]](#references)</sup>
 - The FD scan does not bind to the caller’s package identity; it only pattern-matches path strings.
 - open() returns the lowest available FD. By closing lower-numbered FDs first, an attacker can control ordering.
 - The filter only checks that the path matches /data/app/*/base.apk – not that it corresponds to the installed package of the caller.
@@ -61,18 +61,18 @@ Key properties exploited:
 
 - The device is already rooted with a vulnerable rooting framework (e.g., KernelSU v0.5.7).
 - The attacker can run arbitrary unprivileged code locally (Android app process).
-- The real manager has not yet authenticated (e.g., right after a reboot). Some frameworks cache the manager UID after success; you must win the race.
+- The real manager has not yet authenticated (e.g., right after a reboot). Some frameworks cache the manager UID after success; you must win the race.<sup>[[1]](#references)</sup>
 
 ---
 ## Exploitation outline (KernelSU v0.5.7)
 
-High-level steps:
+High-level steps:<sup>[[1]](#references)</sup>
 1) Build a valid path to your own app data directory to satisfy prefix and ownership checks.
 2) Ensure a genuine KernelSU Manager base.apk is opened on a lower-numbered FD than your own base.apk.
 3) Invoke prctl(0xDEADBEEF, CMD_BECOME_MANAGER, <your_data_dir>, ...) to pass the checks.
 4) Issue privileged commands like CMD_GRANT_ROOT, CMD_ALLOW_SU, CMD_SET_SEPOLICY to persist elevation.
 
-Practical notes on step 2 (FD ordering):
+Practical notes on step 2 (FD ordering):<sup>[[1]](#references)</sup>
 - Identify your process’ FD for your own /data/app/*/base.apk by walking /proc/self/fd symlinks.
 - Close a low FD (e.g., stdin, fd 0) and open the legitimate manager APK first so it occupies fd 0 (or any index lower than your own base.apk fd).
 - Bundle the legitimate manager APK with your app so its path satisfies the kernel’s naive filter. For example, place it under a subpath matching /data/app/*/base.apk.
@@ -148,7 +148,7 @@ After success, privileged commands (examples):
 - CMD_SET_SEPOLICY: adjust SELinux policy as supported by framework
 
 Race/persistence tip:
-- Register a BOOT_COMPLETED receiver in AndroidManifest (RECEIVE_BOOT_COMPLETED) to start early after reboot and attempt authentication before the real manager.
+- Register a BOOT_COMPLETED receiver in AndroidManifest (RECEIVE_BOOT_COMPLETED) to start early after reboot and attempt authentication before the real manager.<sup>[[1]](#references)</sup>
 
 ---
 ## Detection and mitigation guidance
@@ -173,21 +173,21 @@ Limitations of the attack:
 ---
 ## Related notes across frameworks
 
-- Password-based auth (e.g., historical APatch/SKRoot builds) can be weak if passwords are guessable/bruteforceable or validations are buggy.
-- Package/signature-based auth (e.g., KernelSU) is stronger in principle but must bind to the actual caller, not indirect artefacts like FD scans.
-- Magisk: CVE-2024-48336 (MagiskEoP) showed that even mature ecosystems can be susceptible to identity spoofing leading to code execution with root inside manager context.
+- Password-based auth (e.g., historical APatch/SKRoot builds) can be weak if passwords are guessable/bruteforceable or validations are buggy.<sup>[[1]](#references)</sup>
+- Package/signature-based auth (e.g., KernelSU) is stronger in principle but must bind to the actual caller, not indirect artefacts like FD scans.<sup>[[1]](#references)</sup>
+- Magisk: CVE-2024-48336 (MagiskEoP) showed that even mature ecosystems can be susceptible to identity spoofing leading to code execution with root inside manager context.<sup>[[1]](#references)[[8]](#references)</sup>
 
 ---
 ## References
 
-- [Zimperium – The Rooting of All Evil: Security Holes That Could Compromise Your Mobile Device](https://zimperium.com/blog/the-rooting-of-all-evil-security-holes-that-could-compromise-your-mobile-device)
-- [KernelSU v0.5.7 – core_hook.c path checks (L193, L201)](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/core_hook.c#L193)
-- [KernelSU v0.5.7 – manager.c FD iteration/signature check (L43+)](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/manager.c#L43)
-- [KernelSU – apk_sign.c APK v2 verification (main)](https://github.com/tiann/KernelSU/blob/main/kernel/apk_sign.c#L319)
-- [KernelSU project](https://kernelsu.org/)
-- [APatch](https://github.com/bmax121/APatch)
-- [SKRoot](https://github.com/abcz316/SKRoot-linuxKernelRoot)
-- [MagiskEoP – CVE-2024-48336](https://github.com/canyie/MagiskEoP)
-- [KSU PoC demo video (Wistia)](https://zimperium-1.wistia.com/medias/ep1dg4t2qg?videoFoam=true)
+- [1] [Zimperium – The Rooting of All Evil: Security Holes That Could Compromise Your Mobile Device](https://zimperium.com/blog/the-rooting-of-all-evil-security-holes-that-could-compromise-your-mobile-device)
+- [2] [KernelSU v0.5.7 – core_hook.c path checks (L193, L201)](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/core_hook.c#L193)
+- [3] [KernelSU v0.5.7 – manager.c FD iteration/signature check (L43+)](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/manager.c#L43)
+- [4] [KernelSU – apk_sign.c APK v2 verification (main)](https://github.com/tiann/KernelSU/blob/main/kernel/apk_sign.c#L319)
+- [5] [KernelSU project](https://kernelsu.org/)
+- [6] [APatch](https://github.com/bmax121/APatch)
+- [7] [SKRoot](https://github.com/abcz316/SKRoot-linuxKernelRoot)
+- [8] [MagiskEoP – CVE-2024-48336](https://github.com/canyie/MagiskEoP)
+- [9] [KSU PoC demo video (Wistia)](https://zimperium-1.wistia.com/medias/ep1dg4t2qg?videoFoam=true)
 
 {{#include ../../banners/hacktricks-training.md}}
