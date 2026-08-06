@@ -6,7 +6,7 @@
 
 ### Basic Information
 
-Starting with **macOS Big Sur (11.0)**, the system volume is cryptographically sealed using an **APFS snapshot hash tree**. This is called the **Sealed System Volume (SSV)**. The system partition is mounted **read-only** and any modification breaks the seal, which is verified during boot.
+Starting with **macOS Big Sur (11.0)**, the system volume is cryptographically sealed using an **APFS snapshot hash tree**. This is called the **Sealed System Volume (SSV)**. The system partition is mounted **read-only** and any modification breaks the seal, which is verified during boot.<sup>[[11]](#references)</sup>
 
 The SSV provides:
 - **Tamper detection** — any modification to system binaries/frameworks is detectable via the broken cryptographic seal
@@ -144,7 +144,7 @@ WHERE c.name = 'datavault_controller';"
 
 #### Direct TCC Database Modification
 
-If an attacker compromises a DataVault controller binary (e.g., via code injection into a process with `com.apple.private.tcc.manager`), they can **directly modify the TCC database** to grant any application any TCC permission:
+If an attacker compromises a DataVault controller binary (e.g., via code injection into a process with `com.apple.private.tcc.manager`), they can **directly modify the TCC database** to grant any application any TCC permission:<sup>[[12]](#references)</sup>
 
 ```sql
 -- Grant Full Disk Access to a malicious binary (conceptual)
