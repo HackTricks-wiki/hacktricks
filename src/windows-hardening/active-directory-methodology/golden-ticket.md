@@ -8,7 +8,7 @@ A **Golden Ticket** attack consists of the **creation of a legitimate Ticket Gra
 
 To **acquire the NTLM hash** of the krbtgt account, various methods can be employed. It can be extracted from the **Local Security Authority Subsystem Service (LSASS) process** or the **NT Directory Services (NTDS.dit) file** located on any Domain Controller (DC) within the domain. Furthermore, **executing a DCsync attack** is another strategy to obtain this NTLM hash, which can be performed using tools such as the **lsadump::dcsync module** in Mimikatz or the **secretsdump.py script** by Impacket. It's important to underscore that to undertake these operations, **domain admin privileges or a similar level of access is typically required**.<sup>[[2]](#references)</sup>
 
-Although the NTLM hash serves as a viable method for this purpose, it is **strongly recommended** to **forge tickets using the Advanced Encryption Standard (AES) Kerberos keys (AES128 and AES256)** for operational security reasons. This is even more important in modern domains because **RC4 usage is being phased out** and stands out much more clearly in Kerberos telemetry.
+Although the NTLM hash serves as a viable method for this purpose, it is **strongly recommended** to **forge tickets using the Advanced Encryption Standard (AES) Kerberos keys (AES128 and AES256)** for operational security reasons. This is even more important in modern domains because **RC4 usage is being phased out** and stands out much more clearly in Kerberos telemetry.<sup>[[5]](#references)</sup>
 
 ```bash:From Linux
 python ticketer.py -nthash 25b2076cda3bfd6209161a6c78a69c1c -domain-sid S-1-5-21-1339291983-1349129144-367733775 -domain jurassic.park stegosaurus
@@ -94,7 +94,7 @@ In order to **bypass this detection** check the diamond tickets.
 - 4672: Admin Logon
 - `Get-WinEvent -FilterHashtable @{Logname='Security';ID=4672} -MaxEvents 1 | Format-List –Property`
 
-Other little tricks defenders can do are **alert on 4769's for sensitive users** such as the default domain administrator account and alert on **RC4 usage for `krbtgt`** in domains that normally issue AES tickets.
+Other little tricks defenders can do are **alert on 4769's for sensitive users** such as the default domain administrator account and alert on **RC4 usage for `krbtgt`** in domains that normally issue AES tickets.<sup>[[5]](#references)</sup>
 
 ## References
 
@@ -102,5 +102,6 @@ Other little tricks defenders can do are **alert on 4769's for sensitive users**
 - [2] [Kerberos: Golden Tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets)
 - [3] [AD Forest Recovery - Reset the krbtgt password | Microsoft Learn](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-the-krbtgt-password)
 - [4] [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
+- [5] [Microsoft – How to manage Kerberos KDC usage of RC4 for service account ticket issuance (CVE-2026-20833)](https://support.microsoft.com/en-us/topic/how-to-manage-kerberos-kdc-usage-of-rc4-for-service-account-ticket-issuance-changes-related-to-cve-2026-20833-1ebcda33-720a-4da8-93c1-b0496e1910dc)
 
 {{#include ../../banners/hacktricks-training.md}}

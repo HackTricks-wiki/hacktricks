@@ -2,7 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
 ## Container modification
 
 There are suspicions that some docker container was compromised:
@@ -117,7 +116,4 @@ Note that when you run a docker container inside a host **you can see the proces
 
 Therefore (as root) you can **dump the memory of the processes** from the host and search for **credentials** just [**like in the following example**](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#process-memory).
 
-
 {{#include ../../banners/hacktricks-training.md}}
-
-

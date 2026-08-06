@@ -142,6 +142,3 @@ netdom trust ext.local /domain:root.local /resetOneSide /passwordT:<NEWPASS> /us
 - [2] [AD Forest Recovery – Resetting a trust password](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

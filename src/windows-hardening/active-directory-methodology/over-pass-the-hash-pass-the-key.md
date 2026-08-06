@@ -101,13 +101,11 @@ You can achieve a similar isolation from Rubeus itself with a sacrificial **logo
 
 This avoids overwriting the current session TGT and is usually safer than importing the ticket into your existing logon session.
 
-
 ## References
 
 - [1] [Tarlogic - Kerberos (II): ¿Cómo atacar Kerberos?](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
 - [2] [GhostPack - Rubeus (GitHub repository)](https://github.com/GhostPack/Rubeus)
 - [3] [Microsoft Learn - Detect and Remediate RC4 Usage in Kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
-
 
 {{#include ../../banners/hacktricks-training.md}}
 
