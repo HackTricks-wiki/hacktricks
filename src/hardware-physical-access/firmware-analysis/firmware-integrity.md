@@ -26,7 +26,7 @@ If a root shell has already been obtained through dynamic analysis, bootloader m
 
 ## Unauthenticated transport bridges to privileged update protocols
 
-A common embedded design mistake is exposing the **same internal command protocol over several transports** but enforcing authentication on only one of them. For example, USB may require challenge-response while BLE simply forwards unauthenticated **GATT writes** into the same privileged firmware-update handler.
+A common embedded design mistake is exposing the **same internal command protocol over several transports** but enforcing authentication on only one of them. For example, USB may require challenge-response while BLE simply forwards unauthenticated **GATT writes** into the same privileged firmware-update handler.<sup>[[1]](#references)</sup>
 
 Typical offensive workflow:
 
@@ -57,7 +57,7 @@ Things to verify while reversing:
 
 ## Checksum-only firmware containers are still attacker-controlled firmware
 
-A firmware container protected only by an **unkeyed checksum** (CRC32, SHA-256, MD5, etc.) provides corruption detection, **not authenticity**. If the attacker can reach the update routine, they can patch the image, recompute the checksum, and flash arbitrary code.
+A firmware container protected only by an **unkeyed checksum** (CRC32, SHA-256, MD5, etc.) provides corruption detection, **not authenticity**. If the attacker can reach the update routine, they can patch the image, recompute the checksum, and flash arbitrary code.<sup>[[1]](#references)</sup>
 
 Red flags during RE:
 
@@ -78,7 +78,7 @@ If this works over a remotely reachable transport such as BLE/Wi-Fi, the bug is 
 
 ## Turning a trusted USB peripheral into BadUSB via firmware reflashing
 
-When the target device is already trusted by the host over USB, malicious firmware may not need to implement a full new USB stack. A much easier pivot is often to **reuse existing HID support**.
+When the target device is already trusted by the host over USB, malicious firmware may not need to implement a full new USB stack. A much easier pivot is often to **reuse existing HID support**.<sup>[[1]](#references)</sup>
 
 Useful pattern:
 
@@ -99,7 +99,7 @@ This turns firmware compromise into **host compromise** because the PC will trus
 
 ## Reliable payload execution inside RTOS firmware
 
-Instead of inserting fragile trampolines into random code paths, look for **existing RTOS tasks** that are unused or low-impact in normal operation.
+Instead of inserting fragile trampolines into random code paths, look for **existing RTOS tasks** that are unused or low-impact in normal operation.<sup>[[1]](#references)</sup>
 
 Why this is useful:
 
@@ -111,7 +111,7 @@ Good targets are diagnostic, factory-test, telemetry, or coprocessor service tas
 
 ## Fast exploit iteration: repurpose benign protocol handlers
 
-Once firmware patching is possible, a compact way to accelerate RE is to overwrite a harmless command handler (for example an **echo/debug opcode**) with custom **memory read / write / execute** primitives. This avoids full reflashing for every experiment and is especially useful when the device supports the modified handler over a fast wired transport.
+Once firmware patching is possible, a compact way to accelerate RE is to overwrite a harmless command handler (for example an **echo/debug opcode**) with custom **memory read / write / execute** primitives. This avoids full reflashing for every experiment and is especially useful when the device supports the modified handler over a fast wired transport.<sup>[[1]](#references)</sup>
 
 Use this to:
 
@@ -122,6 +122,6 @@ Use this to:
 
 ## References
 
-- [Pwnd Blaster: Hacking your PC using your speaker without ever touching it](https://blog.nns.ee/2026/06/03/katana-badusb/)
+- [1] [Pwnd Blaster: Hacking your PC using your speaker without ever touching it](https://blog.nns.ee/2026/06/03/katana-badusb/)
 
 {{#include ../../banners/hacktricks-training.md}}

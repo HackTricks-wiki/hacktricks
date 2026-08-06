@@ -66,9 +66,9 @@ This workflow is ideal when you already control a service account key (e.g., dum
 
 ### Sapphire-style PAC swaps (2025)
 
-A newer twist sometimes called a **sapphire ticket** combines Diamond's "real TGT" base with **S4U2self+U2U** to steal a privileged PAC and drop it into your own TGT. Instead of inventing extra SIDs, you request a U2U S4U2self ticket for a high-privilege user where the `sname` targets the low-priv requester; the KRB_TGS_REQ carries the requester's TGT in `additional-tickets` and sets `ENC-TKT-IN-SKEY`, allowing the service ticket to be decrypted with that user's key. You then extract the privileged PAC and splice it into your legitimate TGT before re-signing with the krbtgt key.<sup>[[5]](#references)</sup>
+A newer twist sometimes called a **sapphire ticket** combines Diamond's "real TGT" base with **S4U2self+U2U** to steal a privileged PAC and drop it into your own TGT. Instead of inventing extra SIDs, you request a U2U S4U2self ticket for a high-privilege user where the `sname` targets the low-priv requester; the KRB_TGS_REQ carries the requester's TGT in `additional-tickets` and sets `ENC-TKT-IN-SKEY`, allowing the service ticket to be decrypted with that user's key. You then extract the privileged PAC and splice it into your legitimate TGT before re-signing with the krbtgt key.<sup>[[2]](#references)[[5]](#references)</sup>
 
-Impacket's `ticketer.py` now ships sapphire support via `-impersonate` + `-request` (live KDC exchange):<sup>[[5]](#references)</sup>
+Impacket's `ticketer.py` now ships sapphire support via `-impersonate` + `-request` (live KDC exchange):<sup>[[2]](#references)[[5]](#references)</sup>
 
 ```bash
 python3 ticketer.py -request -impersonate 'DAuser' \

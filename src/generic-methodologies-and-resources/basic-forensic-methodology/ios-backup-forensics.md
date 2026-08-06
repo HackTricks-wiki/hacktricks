@@ -126,7 +126,7 @@ Paths usually resolve under `AppDomainGroup-group.net.whatsapp.WhatsApp.shared/M
 
 ### Signal / Telegram / Viber
 - Signal: the message DB is encrypted; however, attachments cached on disk (and thumbnails) are usually scan‑able
-- Telegram: cache remains under `Library/Caches/` inside the sandbox; iOS 18 builds exhibit cache‑clearing bugs, so large residual media caches are common evidence sources
+- Telegram: cache remains under `Library/Caches/` inside the sandbox; iOS 18 builds exhibit cache‑clearing bugs, so large residual media caches are common evidence sources<sup>[[5]](#references)</sup>
 - Viber: Viber.sqlite contains message/attachment tables with on‑disk references
 
 Tip: even when metadata is encrypted, scanning the media/cache directories still surfaces malicious objects.
@@ -165,5 +165,6 @@ Detections covered by structural rules include:<sup>[[1]](#references)[[2]](#ref
 - [2] [ElegantBouncer project (GitHub)](https://github.com/msuiche/elegant-bouncer)
 - [3] [MVT iOS backup workflow](https://docs.mvt.re/en/latest/ios/backup/check/)
 - [4] [libimobiledevice 1.4.0 release notes](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
+- [5] [Update 11.2 has broken cache cleanup on iOS 18.0.1 (Telegram Bug Tracker)](https://bugs.telegram.org/c/44361)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -5,6 +5,7 @@
 When the Windows Telephony service (TapiSrv, `tapisrv.dll`) is configured as a **TAPI server**, it exposes the **`tapsrv` MSRPC interface over the `\pipe\tapsrv` named pipe** to authenticated SMB clients. A design bug in the asynchronous event delivery for remote clients lets an attacker turn a mailslot handle into a **controlled 4-byte write to any pre-existing file writable by `NETWORK SERVICE`**. That primitive can be chained to overwrite the Telephony admin list and abuse an **admin-only arbitrary DLL load** to execute code as `NETWORK SERVICE`.<sup>[[1]](#references)</sup>
 
 ## Attack Surface
+
 - **Remote exposure only when enabled**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Telephony\Server\DisableSharing` must allow sharing (or configured via `TapiMgmt.msc` / `tcmsetup /c <server>`). By default `tapsrv` is local-only.
 - Interface: MS-TRP (`tapsrv`) over **SMB named pipe**, so the attacker needs valid SMB auth.
 - Service account: `NETWORK SERVICE` (manual start, on-demand).<sup>[[1]](#references)</sup>
