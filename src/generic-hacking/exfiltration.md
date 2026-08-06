@@ -173,7 +173,7 @@ Notes:
 
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) is a single-binary replacement for `python3 -m http.server` 
+[goshs](https://github.com/patrickhener/goshs) is a single-binary replacement for `python3 -m http.server`<sup>[[4]](#references)</sup>
 with upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links, 
 and OOB collaboration features (DNS, SMTP, NTLM hash capture).<sup>[[4]](#references)</sup>
 
@@ -415,7 +415,7 @@ WindPS-2> cd new_disk:
 ```
 
 ### goshs
-[goshs](https://github.com/patrickhener/goshs) is a single-binary alternative 
+[goshs](https://github.com/patrickhener/goshs) is a single-binary alternative<sup>[[4]](#references)</sup>
 that serves files over SMB and captures NetNTLMv2 hashes from connecting clients:
 
 ```bash
@@ -520,7 +520,7 @@ sudo python -m smtpd -n -c DebuggingServer :25
 
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) can spin up a quick SMTP server
+[goshs](https://github.com/patrickhener/goshs) can spin up a quick SMTP server<sup>[[4]](#references)</sup>
 to catch email callbacks during OOB exfiltration scenarios:
 
 ```bash

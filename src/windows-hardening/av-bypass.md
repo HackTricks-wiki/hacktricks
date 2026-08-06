@@ -212,7 +212,7 @@ Hunting tips:
 dumpbin /exports C:\Windows\System32\keyiso.dll
 # forwarders appear with a forwarder string e.g., NCRYPTPROV.SetAuditingInterface
 ```
-- See the Windows 11 forwarder inventory to search for candidates: https://hexacorn.com/d/apis_fwd.txt
+- See the Windows 11 forwarder inventory to search for candidates: https://hexacorn.com/d/apis_fwd.txt<sup>[[14]](#references)</sup>
 
 Detection/defense ideas:
 - Monitor LOLBins (e.g., rundll32.exe) loading signed DLLs from non-system paths, followed by loading non-KnownDLLs with the same base name from that directory
@@ -933,7 +933,7 @@ stealing-credentials/credentials-protections.md
 
 Launcher tooling
 - Open-source helper: CreateProcessAsPPL (selects protection level and forwards arguments to the target EXE):
-  - [https://github.com/2x7EQ13/CreateProcessAsPPL](https://github.com/2x7EQ13/CreateProcessAsPPL)
+  - [https://github.com/2x7EQ13/CreateProcessAsPPL](https://github.com/2x7EQ13/CreateProcessAsPPL)<sup>[[19]](#references)</sup>
 - Usage pattern:
 
 ```text
