@@ -2,11 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Cómo Funciona
+## Cómo funciona
 
-**RDPexec** es básicamente para ejecutar comandos iniciando sesión en el sistema usando RDP.
+**RDPexec** básicamente sirve para ejecutar comandos iniciando sesión en el sistema mediante RDP.
 
-Para más información consulta:
+Para obtener más información, consulta:
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-rdp.md
