@@ -483,7 +483,7 @@ settings set target.x86-disassembly-flavor intel
 #### VM detection
 
 - The command **`sysctl hw.model`** returns "Mac" when the **host is a MacOS** but something different when it's a VM.<sup>[[3]](#references)</sup>
-- Playing with the values of **`hw.logicalcpu`** and **`hw.physicalcpu`** some malwares try to detect if it's a VM.
+- Playing with the values of **`hw.logicalcpu`** and **`hw.physicalcpu`** some malwares try to detect if it's a VM.<sup>[[4]](#references)</sup>
 - Some malwares can also **detect** if the machine is **VMware** based on the MAC address (00:50:56).
 - It's also possible to find **if a process is being debugged** with a simple code such us:
   - `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
