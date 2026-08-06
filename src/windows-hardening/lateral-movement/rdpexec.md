@@ -4,9 +4,10 @@
 
 ## 工作原理
 
-**RDPexec** 基本上是通过 RDP 登录系统来执行命令。
+**RDPexec** 基本上是通过使用 RDP 登录系统来执行命令。
 
-有关更多信息，请查看：
+如需更多信息，请查看：
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-rdp.md

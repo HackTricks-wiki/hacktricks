@@ -4,12 +4,16 @@
 
 ## SCM
 
-**SCMExec** 是一种使用服务控制管理器 (SCM) 在远程系统上执行命令的技术，通过创建一个运行该命令的服务。此方法可以绕过一些安全控制，例如用户帐户控制 (UAC) 和 Windows Defender。
+**SCMExec** 是一种在远程系统上执行命令的 technique，通过 Service Control Manager (SCM) 创建一个运行该命令的服务。此方法可以绕过某些安全控制，例如 User Account Control (UAC) 和 Windows Defender。
 
 ## Tools
 
-- [**https://github.com/0xthirteen/SharpMove**](https://github.com/0xthirteen/SharpMove):
+- [**https://github.com/0xthirteen/SharpMove**](https://github.com/0xthirteen/SharpMove):<sup>[[1]](#references)</sup>
 
 SharpMove.exe action=scm computername=remote.host.local command="C:\windows\temp\payload.exe" servicename=WindowsDebug amsi=true
+
+## References
+
+- [1] [SharpMove - GitHub repository](https://github.com/0xthirteen/SharpMove)
 
 {{#include ../../banners/hacktricks-training.md}}

