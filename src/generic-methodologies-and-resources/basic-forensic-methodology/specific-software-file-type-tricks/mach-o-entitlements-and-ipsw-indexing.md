@@ -2,16 +2,18 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Dónde se encuentran los Entitlements en Mach-O
+## Entitlements en Mach-O: dónde se encuentran
 
-Esta página explica cómo extraer programáticamente los entitlements de binarios Mach-O recorriendo LC_CODE_SIGNATURE y analizando el SuperBlob de firma de código, así como cómo escalar este proceso a través de firmwares IPSW de Apple montando e indexando su contenido para búsquedas y comparaciones forenses.
+Esta página explica cómo extraer entitlements de binarios Mach-O mediante programación recorriendo LC_CODE_SIGNATURE y analizando el SuperBlob de code signing, así como cómo escalar este proceso a través de firmwares IPSW de Apple montando e indexando su contenido para realizar búsquedas/diffs forenses.
 
-Si necesitas repasar el formato Mach-O y la firma de código, consulta también: macOS code signing e internos de SuperBlob.
+Si necesitas repasar el formato Mach-O y el code signing, consulta también: macOS code signing e internals de SuperBlob.
 - Consulta los detalles de macOS code signing (SuperBlob, Code Directory, special slots): [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
 - Consulta las estructuras generales de Mach-O/load commands: [Universal binaries & Mach-O Format](../../../macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)
 
 
-Los entitlements se almacenan dentro de los datos de firma de código referenciados por el load command LC_CODE_SIGNATURE y ubicados en el segmento __LINKEDIT. La firma es un CS_SuperBlob que contiene varios blobs (code directory, requirements, entitlements, CMS, etc.). El blob de entitlements es un CS_GenericBlob cuyos datos son un Apple Binary Property List (bplist00) que asigna claves de entitlements a valores.<sup>[[1]](#references)</sup>
+## Entitlements en Mach-O: dónde se encuentran
+
+Los entitlements se almacenan dentro de los datos de code signing referenciados por el load command LC_CODE_SIGNATURE y ubicados en el segmento __LINKEDIT. La firma es un CS_SuperBlob que contiene múltiples blobs (code directory, requirements, entitlements, CMS, etc.). El blob de entitlements es un CS_GenericBlob cuyos datos son un Apple Binary Property List (bplist00) que asigna claves de entitlement a valores.<sup>[[1]](#references)</sup>
 
 Estructuras clave (de xnu):<sup>[[6]](#references)[[7]](#references)</sup>
 ```c
@@ -60,31 +62,31 @@ char data[];      /* Apple Binary Plist containing entitlements */
 } CS_GenericBlob;
 ```
 Constantes importantes:
-- LC_CODE_SIGNATURE cmd = 0x1d
-- CS SuperBlob magic = 0xfade0cc0
-- Entitlements blob type (CSMAGIC_EMBEDDED_ENTITLEMENTS) = 0xfade7171
-- DER entitlements pueden estar presentes mediante un slot especial (por ejemplo, -7); consulta la página macOS Code Signing para obtener información sobre los special slots y las notas sobre DER entitlements
+- Comando LC_CODE_SIGNATURE = 0x1d
+- Magic de CS SuperBlob = 0xfade0cc0
+- Tipo de blob de Entitlements (CSMAGIC_EMBEDDED_ENTITLEMENTS) = 0xfade7171
+- Los Entitlements DER pueden estar presentes mediante un slot especial (por ejemplo, -7); consulta la página de macOS Code Signing para obtener información sobre los slots especiales y los Entitlements DER
 
-Nota: Los binarios multi-arch (fat) contienen múltiples slices de Mach-O. Debes elegir el slice correspondiente a la arquitectura que quieres inspeccionar y, después, recorrer sus load commands.
+Nota: Los binarios multi-arquitectura (fat) contienen múltiples slices de Mach-O. Debes elegir el slice de la arquitectura que quieras inspeccionar y, a continuación, recorrer sus load commands.
 
 
 ## Pasos de extracción (genéricos, suficientemente lossless)
 
-1) Analiza la cabecera de Mach-O; itera los registros load_command indicados por ncmds.
-2) Localiza LC_CODE_SIGNATURE; lee dataoff/datasize de linkedit_data_command para mapear el Code Signing SuperBlob ubicado en __LINKEDIT.
-3) Valida que CS_SuperBlob.magic == 0xfade0cc0; itera las entradas count de CS_BlobIndex.
-4) Localiza index.type == 0xfade7171 (embedded entitlements). Lee el CS_GenericBlob apuntado y analiza sus datos como un Apple binary plist (bplist00) para obtener los entitlements de tipo clave/valor.<sup>[[1]](#references)</sup>
+1) Analiza la cabecera de Mach-O; itera tantos registros `load_command` como indique `ncmds`.
+2) Localiza LC_CODE_SIGNATURE; lee `linkedit_data_command.dataoff/datasize` para mapear el Code Signing SuperBlob ubicado en `__LINKEDIT`.
+3) Valida que `CS_SuperBlob.magic == 0xfade0cc0`; itera las entradas `CS_BlobIndex` indicadas por `count`.
+4) Localiza `index.type == 0xfade7171` (Entitlements integrados). Lee el `CS_GenericBlob` apuntado y analiza sus datos como un binary plist de Apple (`bplist00`) para obtener los Entitlements en formato clave/valor.<sup>[[1]](#references)</sup>
 
 Notas de implementación:
-- Las estructuras de code signature utilizan campos big-endian; intercambia el orden de los bytes al analizar en hosts little-endian.
-- Los datos del entitlements GenericBlob son un binary plist (gestionado por las librerías estándar de plist).
-- Algunos binarios de iOS pueden incluir DER entitlements; además, algunos stores/slots varían según las plataformas/versiones. Comprueba tanto los entitlements estándar como los DER cuando sea necesario.
-- Para los binarios fat, utiliza las cabeceras fat (FAT_MAGIC/FAT_MAGIC_64) para localizar el slice y el offset correctos antes de recorrer los load commands de Mach-O.<sup>[[1]](#references)</sup>
+- Las estructuras de la firma de código utilizan campos big-endian; intercambia el orden de los bytes al analizar en hosts little-endian.
+- Los datos del Entitlements `GenericBlob` son un binary plist (gestionado por las librerías estándar de plist).
+- Algunos binarios de iOS pueden incluir Entitlements DER; además, algunos stores/slots varían según las plataformas o versiones. Comprueba tanto los Entitlements estándar como los DER cuando sea necesario.
+- Para los binarios fat, utiliza las cabeceras fat (`FAT_MAGIC`/`FAT_MAGIC_64`) para localizar el slice y offset correctos antes de recorrer los load commands de Mach-O.<sup>[[1]](#references)</sup>
 
 
 ## Esquema mínimo de parsing (Python)
 
-El siguiente esquema compacto muestra el flujo de control para localizar y decodificar entitlements. Por brevedad, omite los bounds checks robustos y la compatibilidad completa con binarios fat.<sup>[[1]](#references)</sup>
+El siguiente esquema compacto muestra el flujo de control para localizar y decodificar los Entitlements. Por brevedad, omite las comprobaciones robustas de límites y la compatibilidad completa con binarios fat.<sup>[[1]](#references)</sup>
 ```python
 import plistlib, struct
 
@@ -137,26 +139,26 @@ return plistlib.loads(data)
 return None
 ```
 Consejos de uso:
-- Para manejar fat binaries, primero lee struct fat_header/fat_arch, elige el slice de arquitectura deseado y, después, pasa el subrango a parse_entitlements.
-- En macOS, puedes validar los resultados con: codesign -d --entitlements :- /path/to/binary
+- Para gestionar fat binaries, primero lee struct fat_header/fat_arch, selecciona el slice de arquitectura deseado y, a continuación, pasa el subrango a parse_entitlements.
+- En macOS puedes validar los resultados con: codesign -d --entitlements :- /path/to/binary
 
 
-## Hallazgos de ejemplo
+## Ejemplos de hallazgos
 
-Los platform binaries privilegiados suelen solicitar entitlements sensibles como:<sup>[[1]](#references)</sup>
+Los platform binaries privilegiados suelen solicitar entitlements sensibles, como:<sup>[[1]](#references)</sup>
 - com.apple.security.network.server = true
 - com.apple.rootless.storage.early_boot_mount = true
 - com.apple.private.kernel.system-override = true
 - com.apple.private.pmap.load-trust-cache = ["cryptex1.boot.os", "cryptex1.boot.app", "cryptex1.safari-downlevel"]
 
-Buscar estos elementos a escala en imágenes de firmware es extremadamente valioso para el mapeo de la superficie de ataque y la comparación entre releases/dispositivos.
+Buscar estos elementos a gran escala en firmware images resulta extremadamente útil para mapear la attack surface y comparar diferencias entre releases/dispositivos.
 
 
 ## Escalado entre IPSWs (montaje e indexación)
 
-Para enumerar ejecutables y extraer entitlements a escala sin almacenar imágenes completas:<sup>[[1]](#references)</sup>
+Para enumerar ejecutables y extraer entitlements a gran escala sin almacenar las imágenes completas:<sup>[[1]](#references)</sup>
 
-- Usa la herramienta ipsw de @blacktop para descargar y montar filesystems de firmware. El montaje utiliza apfs-fuse, por lo que puedes recorrer volúmenes APFS sin realizar una extracción completa.<sup>[[1]](#references)[[3]](#references)</sup>
+- Usa la herramienta ipsw de @blacktop para descargar y montar los sistemas de archivos del firmware. El montaje utiliza apfs-fuse, por lo que puedes recorrer volúmenes APFS sin realizar una extracción completa.<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
 # Download latest IPSW for iPhone11,2 (iPhone XS)
 ipsw download ipsw -y --device iPhone11,2 --latest
@@ -164,12 +166,12 @@ ipsw download ipsw -y --device iPhone11,2 --latest
 # Mount IPSW filesystem (uses underlying apfs-fuse)
 ipsw mount fs <IPSW_FILE>
 ```
-- Recorre los volúmenes montados para localizar archivos Mach-O (comprueba el magic y/o usa file/otool); después analiza los entitlements y los frameworks importados.
-- Persiste una vista normalizada en una base de datos relacional para evitar un crecimiento lineal entre miles de IPSW:
-- executables, operating_system_versions, entitlements, frameworks
-- many-to-many: executable↔OS version, executable↔entitlement, executable↔framework
+- Recorre los volúmenes montados para localizar archivos Mach-O (comprueba el magic y/o usa file/otool), y después analiza los entitlements y los frameworks importados.
+- Persiste una vista normalizada en una base de datos relacional para evitar un crecimiento lineal entre miles de IPSWs:
+- ejecutables, operating_system_versions, entitlements, frameworks
+- muchos a muchos: executable↔OS version, executable↔entitlement, executable↔framework
 
-Consulta de ejemplo para listar todas las versiones de OS que contienen un nombre de executable determinado:
+Consulta de ejemplo para enumerar todas las versiones de OS que contienen un nombre de ejecutable determinado:
 ```sql
 SELECT osv.version AS "Versions"
 FROM device d
@@ -178,18 +180,18 @@ LEFT JOIN executable_operating_system_version eosv ON eosv.operating_system_vers
 LEFT JOIN executable e ON e.id = eosv.executable_id
 WHERE e.name = "launchd";
 ```
-Notas sobre la portabilidad de la DB (si implementas tu propio indexer):<sup>[[1]](#references)</sup>
-- Usa un ORM/abstraction (p. ej., SeaORM) para mantener el código independiente de la DB (SQLite/PostgreSQL).
+Notas sobre la portabilidad de DB (si implementas tu propio indexer):<sup>[[1]](#references)</sup>
+- Usa un ORM/abstracción (p. ej., SeaORM) para mantener el código independiente de la DB (SQLite/PostgreSQL).
 - SQLite requiere AUTOINCREMENT solo en un INTEGER PRIMARY KEY; si quieres PKs i64 en Rust, genera las entidades como i32 y convierte los tipos; SQLite almacena INTEGER internamente como un entero con signo de 8 bytes.<sup>[[8]](#references)</sup>
 
 
 ## Herramientas open-source y referencias para la búsqueda de entitlements
 
-- Montaje/descarga de Firmware: https://github.com/blacktop/ipsw
+- Montaje/descarga de firmware: https://github.com/blacktop/ipsw<sup>[[3]](#references)</sup>
 - Bases de datos y referencias de entitlements:
-- DB de entitlements de Jonathan Levin: https://newosxbook.com/ent.php
-- entdb: https://github.com/ChiChou/entdb
-- Indexer a gran escala (Rust, Web UI self-hosted + OpenAPI): https://github.com/synacktiv/appledb_rs
+- DB de entitlements de Jonathan Levin: https://newosxbook.com/ent.php<sup>[[4]](#references)</sup>
+- entdb: https://github.com/ChiChou/entdb<sup>[[5]](#references)</sup>
+- Indexer a gran escala (Rust, Web UI autoalojada + OpenAPI): https://github.com/synacktiv/appledb_rs<sup>[[2]](#references)</sup>
 - Headers de Apple para estructuras y constantes:
 - loader.h (headers de Mach-O, load commands)
 - cs_blobs.h (SuperBlob, GenericBlob, CodeDirectory)
