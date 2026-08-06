@@ -2,11 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Kako to funkcioniše
+## Kako funkcioniše
 
-**RDPexec** je u suštini za izvršavanje komandi prijavljivanjem u sistem koristeći RDP.
+**RDPexec** se u osnovi koristi za izvršavanje komandi nakon prijavljivanja na sistem putem RDP-a.
 
-Za više informacija proverite:
+Za više informacija pogledajte:
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-rdp.md

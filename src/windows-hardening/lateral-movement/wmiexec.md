@@ -2,18 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Kako to funkcioniše
+## Objašnjenje načina rada
 
-Procesi se mogu otvoriti na hostovima gde su korisničko ime i ili lozinka ili hash poznati putem WMI. Komande se izvršavaju koristeći WMI putem Wmiexec, pružajući polu-interaktivno iskustvo ljuske.
+Procesi mogu biti pokrenuti na hostovima za koje su poznati korisničko ime i lozinka ili hash, korišćenjem WMI-ja. Komande se izvršavaju pomoću WMI-ja preko Wmiexec-a, čime se obezbeđuje iskustvo polu-interaktivnog shell-a.
 
-**dcomexec.py:** Korišćenjem različitih DCOM krajnjih tačaka, ovaj skript nudi polu-interaktivnu ljusku sličnu wmiexec.py, posebno koristeći ShellBrowserWindow DCOM objekat. Trenutno podržava MMC20. Application, Shell Windows i Shell Browser Window objekti. (izvor: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Korišćenjem različitih DCOM endpoint-a, ova skripta pruža polu-interaktivni shell sličan onom u wmiexec.py, konkretno koristeći ShellBrowserWindow DCOM objekat. Trenutno podržava MMC20. Application, Shell Windows i Shell Browser Window objekte. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))<sup>[[2]](#references)</sup>
 
-## WMI Osnovi
+## Osnove WMI-ja
 
 ### Namespace
 
-Strukturiran u hijerarhiji nalik direktorijumu, WMI-jev kontejner na vrhu je \root, pod kojim su organizovani dodatni direktorijumi, poznati kao namespaces.
-Komande za listanje namespaces:
+WMI-jev kontejner najvišeg nivoa organizovan je u hijerarhiji nalik strukturi direktorijuma i predstavlja \root, ispod kog su organizovani dodatni direktorijumi, poznati kao namespace-ovi.<sup>[[1]](#references)</sup>
+Komande za izlistavanje namespace-ova:
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -24,15 +24,15 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 # Listing of namespaces within "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
-Klase unutar imenskog prostora mogu se navesti koristeći:
+Klase unutar namespace-a mogu se izlistati pomoću:
 ```bash
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 ### **Klase**
 
-Poznavanje imena WMI klase, kao što je win32_process, i imena prostora u kojem se nalazi je ključno za svaku WMI operaciju.  
-Komande za listanje klasa koje počinju sa `win32`:
+Poznavanje naziva WMI klase, kao što je win32_process, i namespace-a u kojem se nalazi ključno je za svaku WMI operaciju.  
+Komande za izlistavanje klasa koje počinju sa `win32`:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
@@ -43,9 +43,9 @@ Pozivanje klase:
 Get-WmiObject -Class win32_share
 Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpComputerStatus
 ```
-### Методи
+### Metode
 
-Методи, који су једна или више извршних функција WMI класа, могу се извршити.
+Metode, koje predstavljaju jednu ili više izvršivih funkcija WMI klasa, mogu se izvršiti.
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -57,11 +57,11 @@ $c.methods
 # Method listing and invocation
 Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Description", $null, "Name", $null, "c:\share\path",0)
 ```
-## WMI Enumaracija
+## WMI enumeracija
 
-### Status WMI Usluge
+### Status WMI servisa
 
-Komande za proveru da li je WMI usluga operativna:
+Komande za proveru da li je WMI servis operativan:
 ```bash
 # WMI service status check
 Get-Service Winmgmt
@@ -71,12 +71,12 @@ net start | findstr "Instrumentation"
 ```
 ### Informacije o sistemu i procesima
 
-Prikupljanje informacija o sistemu i procesima putem WMI:
+Prikupljanje informacija o sistemu i procesima putem WMI-ja:
 ```bash
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-Za napadače, WMI je moćan alat za enumeraciju osetljivih podataka o sistemima ili domenima.
+Za napadače, WMI je moćan alat za enumeraciju osetljivih podataka o sistemima ili domenima.<sup>[[1]](#references)</sup>
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list
@@ -85,17 +85,17 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-Daljinsko upitovanje WMI za specifične informacije, kao što su lokalni administratori ili prijavljeni korisnici, je izvodljivo uz pažljivo konstruisanje komandi.
+Daljinsko upitavanje WMI-ja za dobijanje specifičnih informacija, kao što su lokalni administratori ili prijavljeni korisnici, moguće je uz pažljivo sastavljanje komandi.
 
-### **Ručno daljinsko WMI upitovanje**
+### **Ručno daljinsko WMI upitavanje**
 
-Diskretno identifikovanje lokalnih administratora na udaljenoj mašini i prijavljenih korisnika može se postići kroz specifične WMI upite. `wmic` takođe podržava čitanje iz tekstualne datoteke za izvršavanje komandi na više čvorova istovremeno.
+Diskretna identifikacija lokalnih administratora na udaljenoj mašini i prijavljenih korisnika može se postići korišćenjem specifičnih WMI upita. `wmic` takođe podržava čitanje iz tekstualne datoteke radi istovremenog izvršavanja komandi na više čvorova.<sup>[[1]](#references)</sup>
 
-Da bi se daljinski izvršila proces preko WMI, kao što je implementacija Empire agenta, koristi se sledeća struktura komande, pri čemu uspešno izvršenje označava povratna vrednost "0":
+Za daljinsko izvršavanje procesa putem WMI-ja, kao što je postavljanje Empire agenta, koristi se sledeća struktura komande, pri čemu je uspešno izvršavanje označeno povratnom vrednošću „0“:<sup>[[1]](#references)</sup>
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-Ovaj proces ilustruje WMI-ovu sposobnost za daljinsko izvršavanje i enumeraciju sistema, ističući njenu korisnost kako za administraciju sistema, tako i za pentesting.
+Ovaj proces prikazuje WMI-jevu mogućnost udaljenog izvršavanja i enumeracije sistema, naglašavajući njegovu korisnost za administraciju sistema i penetration testing.
 
 ## Automatski alati
 
@@ -115,12 +115,13 @@ SharpMove.exe action=query computername=remote.host.local query="select * from w
 SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
 SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
 ```
-- Takođe možete koristiti **Impacketov `wmiexec`**.
+- Takođe možete koristiti **Impacket's `wmiexec`**.
 
 
-## Reference
+## References
 
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+- [1] [Using Credentials to Own Windows Boxes - Part 3 (WMI and WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
+- [2] [Beginner's Guide to Impacket Tool Kit - Part 1](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
 
 
 {{#include ../../banners/hacktricks-training.md}}

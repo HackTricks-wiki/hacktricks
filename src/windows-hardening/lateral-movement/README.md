@@ -1,8 +1,8 @@
-# Lateral Movement
+# Lateralno kretanje
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Postoje različiti načini za izvršavanje komandi u spoljnim sistemima, ovde možete pronaći objašnjenja o tome kako funkcionišu glavne Windows tehnike lateralnog kretanja:
+Postoje različiti načini za izvršavanje komandi na udaljenim sistemima; ovde možete pronaći objašnjenja o tome kako funkcionišu glavne Windows tehnike lateralnog kretanja:
 
 - [**PsExec**](psexec-and-winexec.md)
 - [**SmbExec**](smbexec.md)

