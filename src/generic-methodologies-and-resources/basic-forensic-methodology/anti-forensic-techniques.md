@@ -190,7 +190,7 @@ WriteProcessMemory(GetCurrentProcess(),
 
 Public PoCs (e.g. `EtwTiSwallow`) implement the same primitive in PowerShell or C++.  
 Because the patch is **process-local**, EDRs running inside other processes may miss it.<sup>[[2]](#references)</sup>  
-Detection: compare `ntdll` in memory vs. on disk, or hook before user-mode.
+Detection: compare `ntdll` in memory vs. on disk, or hook before user-mode.<sup>[[6]](#references)</sup>
 
 ### Alternate Data Streams (ADS) Revival
 
@@ -210,7 +210,7 @@ by investigators to recover the payload.
 
 ### BYOVD & “AuKill” (2023)
 
-Bring-Your-Own-Vulnerable-Driver is now routinely used for **anti-forensics** in ransomware
+Bring-Your-Own-Vulnerable-Driver is now routinely used for **anti-forensics** in ransomware<sup>[[5]](#references)</sup>
 intrusions.  
 The open-source tool **AuKill** loads a signed but vulnerable driver (`procexp152.sys`) to
 suspend or terminate EDR and forensic sensors **before encryption & log destruction**:<sup>[[1]](#references)</sup>
