@@ -2,15 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ukurasa huu unashughulikia toleo la **manual token-theft** ambapo muktadha wa **High Integrity** ambao tayari una **`SeDebugPrivilege`** na **`SeImpersonatePrivilege`** hufungua mchakato unaofaa wa **SYSTEM**, **hu-duplicate token yake**, na **huanzisha process mpya** kwa kutumia token hiyo.
+Ukurasa huu unaeleza variant ya **manual token-theft**, ambapo context ya **High Integrity** ambayo tayari ina **`SeDebugPrivilege`** na **`SeImpersonatePrivilege`** hufungua process inayofaa ya **SYSTEM**, **hu-duplicate token** yake, na **hu-spawn process mpya** kwa kutumia token hiyo.
 
-Ikiwa unahitaji tu `SYSTEM` shell ya haraka kutoka kwenye privileged admin process, pia angalia:
+Ikiwa unahitaji tu shell ya haraka ya `SYSTEM` kutoka kwenye privileged admin process, pia angalia:
 
 {{#ref}}
 seimpersonate-from-high-to-system.md
 {{#endref}}
 
-Ikiwa huna njia ya process-handle lakini unayo **`SeImpersonatePrivilege`**, njia ya **named-pipe / Potato** kwa kawaida ni rahisi zaidi:
+Ikiwa huna process-handle path lakini una **`SeImpersonatePrivilege`**, njia ya **named-pipe / Potato** kwa kawaida huwa rahisi zaidi:
 
 {{#ref}}
 named-pipe-client-impersonation.md
@@ -20,39 +20,39 @@ named-pipe-client-impersonation.md
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-## Quick triage
+## Triage ya haraka
 
-Kabla ya kujaribu njia ya token-copy, thibitisha kwamba current process tayari iko kwenye muktadha unaofaa:
+Kabla ya kujaribu njia ya token-copy, thibitisha kwamba process ya sasa tayari iko kwenye context inayofaa:
 ```cmd
 whoami /groups | findstr /i "high mandatory"
 whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege"
 ```
 Notes:
 
-- **`SeDebugPrivilege`** ndicho kinachokuruhusu kufungua michakato mingi ya SYSTEM isiyo **protected** hata wakati DACL yao kwa kawaida ingekuzuia.
-- **`SeImpersonatePrivilege`** ndicho kinachofanya **`CreateProcessWithTokenW`** iwe ya vitendo baadaye.
-- Ikiwa njia ya token-copy inakupa tu SYSTEM token dhaifu au iliyochujwa, iba kutoka kwenye **different SYSTEM process**.
+- **`SeDebugPrivilege`** ndiyo inayokuruhusu kufungua michakato mingi ya SYSTEM ambayo **haijalindwa**, hata wakati DACL yake kwa kawaida inakuzuia.
+- **`SeImpersonatePrivilege`** ndiyo inayofanya **`CreateProcessWithTokenW`** iwe ya vitendo baadaye.
+- Ikiwa njia ya token-copy inakupa tu SYSTEM token dhaifu au iliyochujwa, iba kutoka kwa **mchakato tofauti wa SYSTEM**.
 
-## Pick the target process carefully
+## Chagua mchakato lengwa kwa uangalifu
 
-Tekniko hili kwa kawaida huonyeshwa dhidi ya **`lsass.exe`**, lakini kwenye Windows za kisasa hilo mara nyingi huwa **target mbaya**:
+Mbinu hii kwa kawaida huonyeshwa dhidi ya **`lsass.exe`**, lakini kwenye Windows za kisasa mara nyingi huo huwa **mlengwa usio sahihi**:
 
-- Ikiwa **LSA Protection / RunAsPPL** imewashwa, **`lsass.exe`** inalindwa na admin process ya kawaida yenye `SeDebugPrivilege` bado haitoweza kuifungua.
-- Chagua kwa upendeleo **non-PPL SYSTEM processes** kama **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`**, au instance ya mapema ya **`svchost.exe`**.
-- **Protected processes** na baadhi ya special processes kama **`System`** au **`csrss.exe`** si targets halisi za user-mode kwa tekniko hili.
-- Tumia **Process Hacker / Process Explorer** ukiwa elevated kuthibitisha kama target token kweli ina privileges unazotaka kabla ya kuiduplicate.
+- Ikiwa **LSA Protection / RunAsPPL** imewezeshwa, **`lsass.exe`** huwa imelindwa, na mchakato wa kawaida wa admin wenye `SeDebugPrivilege` bado hautaweza kuufungua.<sup>[[2]](#references)</sup>
+- Pendelea michakato ya SYSTEM ambayo si ya PPL, kama vile **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`**, au instance ya mwanzo ya **`svchost.exe`**.
+- **Michakato iliyolindwa** na baadhi ya michakato maalum kama **`System`** au **`csrss.exe`** si walengwa halisi wa user-mode kwa mbinu hii.
+- Tumia **Process Hacker / Process Explorer** ikiendeshwa ikiwa elevated ili kuthibitisha kama target token ina privileges unazohitaji kabla ya ku-copy.
 
-## API details that matter in practice
+## Maelezo ya API muhimu kwa vitendo
 
-PoC nyingi za umma huomba **`PROCESS_ALL_ACCESS`** na **`TOKEN_ALL_ACCESS`**, lakini hilo ni kelele zaidi kuliko inavyohitajika. Kwa vitendo:
+PoCs nyingi za umma huomba **`PROCESS_ALL_ACCESS`** na **`TOKEN_ALL_ACCESS`**, lakini hiyo huacha kelele zaidi kuliko inavyohitajika. Kwa vitendo:
 
-- Fungua target process kwa rights tu unazohitaji (kwa kawaida **`PROCESS_QUERY_INFORMATION`** au **`PROCESS_QUERY_LIMITED_INFORMATION`**).
-- Fungua token kwa rights zinazohitajika kwa process creation: **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
-- Tumia **`DuplicateTokenEx(..., TokenPrimary, ...)`** kuunda **primary token**; impersonation token pekee haitoshi kuunda process mpya.
-- Ikiwa **`CreateProcessWithTokenW`** inashindwa kwa **`1314`**, badili kwenda **`CreateProcessAsUserW`**.
-- Ukizindua kutoka kwenye **service / Session 0**, kumbuka kwamba **`CreateProcessWithTokenW`** huacha child katika **session ya caller**. Ukihitaji visible desktop shell, tumia **`CreateProcessAsUserW`** na uhamishe token kwenda session unayotaka.
+- Fungua mchakato lengwa kwa rights unazohitaji tu (kwa kawaida **`PROCESS_QUERY_INFORMATION`** au **`PROCESS_QUERY_LIMITED_INFORMATION`**).
+- Fungua token kwa rights zinazohitajika kuunda mchakato: **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
+- Tumia **`DuplicateTokenEx(..., TokenPrimary, ...)`** kuunda **primary token**; impersonation token pekee haitoshi kuunda mchakato mpya.
+- Ikiwa **`CreateProcessWithTokenW`** itashindwa kwa **`1314`**, badili utumie **`CreateProcessAsUserW`**.
+- Ukianzisha kutoka kwa **service / Session 0**, kumbuka kuwa **`CreateProcessWithTokenW`** humweka child katika **session ya caller**. Ikiwa unahitaji visible desktop shell, tumia **`CreateProcessAsUserW`** na uhamishe token kwenye session unayotaka.<sup>[[1]](#references)</sup>
 
-Flow ya kisasa ya chini kabisa inaonekana kama:
+Mtiririko mdogo wa kisasa unaonekana hivi:
 ```c
 HANDLE hp = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
 HANDLE hTok = NULL, hDup = NULL;
@@ -63,15 +63,15 @@ CreateProcessWithTokenW(hDup, LOGON_WITH_PROFILE,
 L"C:\\Windows\\System32\\cmd.exe",
 NULL, 0, NULL, NULL, &si, &pi);
 ```
-## Full service PoC
+## PoC ya huduma kamili
 
-Kode berikut **memanfaatkan privilege `SeDebugPrivilege` dan `SeImpersonatePrivilege`** untuk menyalin token dari sebuah **proses yang berjalan sebagai SYSTEM** dan dengan **semua privilege token**. Dalam kasus ini, kode dapat dikompilasi dan digunakan sebagai **binary Windows service** untuk memverifikasi bahwa primitive ini berfungsi.
+Msimbo ufuatao **hutumia vibaya privileges `SeDebugPrivilege` na `SeImpersonatePrivilege`** ili kunakili token kutoka kwa **process inayoendeshwa kama SYSTEM** na yenye **privileges zote za token**. Katika hali hii, msimbo unaweza ku-compile na kutumiwa kama **Windows service binary** ili kuthibitisha kuwa primitive hii inafanya kazi.<sup>[[3]](#references)</sup>
 
-Bagian utama dari **kode tempat elevasi terjadi** ada di dalam fungsi **`Exploit`**. Di dalam fungsi itu Anda bisa melihat bahwa **`lsass.exe`** dicari, **token**-nya disalin, dan akhirnya token itu digunakan untuk menjalankan **`cmd.exe`** baru dengan semua privilege dari token yang disalin.
+Sehemu kuu ya **msimbo ambapo elevation hutokea** iko ndani ya function **`Exploit`**. Ndani ya function hiyo unaweza kuona kwamba **`lsass.exe`** inatafutwa, **token yake inanakiliwa**, na hatimaye token hiyo inatumika kuanzisha **`cmd.exe`** mpya yenye privileges zote za token iliyonakiliwa.
 
-Pada host modern, Anda sering ingin mengganti **`lsass.exe`** dengan **proses SYSTEM non-PPL** lain seperti **`winlogon.exe`**, **`wininit.exe`**, atau **`services.exe`**.
+Kwenye hosts za kisasa, mara nyingi utataka kubadilisha **`lsass.exe`** na **process nyingine ya SYSTEM isiyo ya PPL**, kama vile **`winlogon.exe`**, **`wininit.exe`**, au **`services.exe`**.
 
-Proses lain yang berjalan sebagai SYSTEM dengan semua atau sebagian besar privilege token adalah: **`services.exe`**, **`svchost.exe`** (beberapa yang pertama), **`wininit.exe`**, **`csrss.exe`**... Ingat bahwa Anda umumnya **tidak akan bisa menyalin token dari proses yang dilindungi**.
+Process nyingine zinazoendeshwa kama SYSTEM zikiwa na privileges zote au nyingi za token ni: **`services.exe`**, **`svchost.exe`** (baadhi ya za mwanzo), **`wininit.exe`**, **`csrss.exe`**... Kumbuka kwamba kwa ujumla **hutaweza kunakili token kutoka kwa process iliyolindwa**.
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>
@@ -278,6 +278,8 @@ return 0;
 ```
 ## Marejeo
 
-- [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
-- [Configure added LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
+- [1] [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [2] [Configure added LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
+- [3] [Running my program as a service (cboard.cprogramming.com) – Windows service skeleton used by the PoC](https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html)
+
 {{#include ../../banners/hacktricks-training.md}}

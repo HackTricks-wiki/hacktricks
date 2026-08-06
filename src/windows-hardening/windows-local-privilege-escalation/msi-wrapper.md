@@ -2,21 +2,21 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Pakua toleo la bure kutoka [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), lifanyie kazi na uweke "malicious" binary ndani yake.\
-Kumbuka kwamba unaweza kuweka "**.bat**" ikiwa unataka **kutekeleza** **mistari ya amri (badala ya cmd.exe chagua faili la .bat)**
+Pakua toleo lisilolipishwa la app kutoka [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), litekeleze na uifungashe binary ya "hasidi" ndani yake.\
+Kumbuka kwamba unaweza kufungasha "**.bat**" ikiwa **unataka tu** **kutekeleza** **mistari ya amri (badala ya cmd.exe chagua faili ya .bat)**
 
-![](<../../images/image (417).png>)
+![MSI Wrapper: Kumbuka kwamba unaweza kufungasha " .bat " ikiwa unataka tu kutekeleza mistari ya amri (badala ya cmd.exe chagua faili ya .bat)](<../../images/image (417).png>)
 
 Na hii ndiyo sehemu muhimu zaidi ya usanidi:
 
-![](<../../images/image (312).png>)
+![MSI Wrapper: Na hii ndiyo sehemu muhimu zaidi ya usanidi](<../../images/image (312).png>)
 
-![](<../../images/image (346).png>)
+![MSI Wrapper: Na hii ndiyo sehemu muhimu zaidi ya usanidi](<../../images/image (346).png>)
 
-![](<../../images/image (1072).png>)
+![MSI Wrapper: Na hii ndiyo sehemu muhimu zaidi ya usanidi](<../../images/image (1072).png>)
 
-(Tafadhali, kumbuka kwamba ikiwa utajaribu kufunga binary yako mwenyewe utaweza kubadilisha hizi thamani)
+(Tafadhali kumbuka kwamba ukijaribu kufungasha binary yako mwenyewe, utaweza kurekebisha thamani hizi)
 
-Kutoka hapa bonyeza tu **next buttons** na **build button** ya mwisho na installer/wrapper yako itazalishwa.**
+Kuanzia hapa, bofya tu **next buttons**, kisha **build button** ya mwisho, na installer/wrapper yako itatengenezwa.
 
 {{#include ../../banners/hacktricks-training.md}}

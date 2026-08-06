@@ -1,14 +1,16 @@
+# Kutoka High Integrity hadi SYSTEM kwa kutumia Name Pipes
+
 {{#include ../../banners/hacktricks-training.md}}
 
-**Mchakato wa msimbo:**
+**Mtiririko wa code:**
 
 1. Unda Pipe mpya
-2. Unda na anzisha huduma ambayo itakuwa na uhusiano na pipe iliyoundwa na kuandika kitu. Msimbo wa huduma utaendesha msimbo huu wa PS ulioandikwa: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. Huduma inapata data kutoka kwa mteja kwenye pipe, inaita ImpersonateNamedPipeClient na inasubiri huduma ikamilike
-4. Hatimaye, inatumia token iliyopatikana kutoka kwa huduma kuanzisha _cmd.exe_ mpya
+2. Unda na uanzishe service itakayounganishwa na pipe iliyoundwa na kuandika kitu. Code ya service itatekeleza code hii ya PS iliyosimbwa: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
+3. Service hupokea data kutoka kwa client kwenye pipe, huita ImpersonateNamedPipeClient na kusubiri service ikamilike
+4. Mwishowe, hutumia token iliyopatikana kutoka kwa service kuanzisha _cmd.exe_ mpya
 
 > [!WARNING]
-> Ikiwa huna ruhusa za kutosha, exploit inaweza kukwama na kamwe isirudi.
+> Ikiwa huna privileges za kutosha, exploit inaweza kukwama na isirudi kamwe.
 ```c
 #include <windows.h>
 #include <time.h>

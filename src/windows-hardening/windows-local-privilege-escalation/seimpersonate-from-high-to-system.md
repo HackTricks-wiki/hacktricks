@@ -1,10 +1,10 @@
-# SeImpersonate from High To System
+# SeImpersonate kutoka High hadi System
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ukurasa huu unahusu toleo la **manual** la kwenda kutoka kwenye **High Integrity administrator process** hadi **`NT AUTHORITY\SYSTEM`** kwa **kufungua mchakato wa SYSTEM usio protected, kunakili token yake, na kuanzisha child process kwa token hiyo**.
+Ukurasa huu unahusu toleo la **manual** la kutoka kwenye **High Integrity administrator process** hadi **`NT AUTHORITY\SYSTEM`** kwa **kufungua SYSTEM process isiyolindwa, kunakili token yake, na kuanzisha child process kwa kutumia token hiyo**.
 
-Ikiwa una **`SeImpersonatePrivilege`** / **`SeAssignPrimaryTokenPrivilege`** pekee lakini **huwezi kufungua suitable SYSTEM process**, njia ya **Potato / named-pipe** kwa kawaida ni ya kuaminika zaidi:
+Ikiwa una **`SeImpersonatePrivilege`** / **`SeAssignPrimaryTokenPrivilege`** pekee lakini **huwezi kufungua SYSTEM process inayofaa**, njia ya **Potato / named-pipe** kwa kawaida huwa ya kuaminika zaidi:
 
 {{#ref}}
 named-pipe-client-impersonation.md
@@ -14,48 +14,48 @@ named-pipe-client-impersonation.md
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-Ikiwa unachotaka si tu `SYSTEM` bali **SYSTEM token yenye privileges nyingi kadiri iwezekanavyo**, pia angalia:
+Ikiwa unachotaka si `SYSTEM` pekee bali ni **SYSTEM token yenye privileges nyingi iwezekanavyo**, pia angalia:
 
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
 {{#endref}}
 
-## Quick triage
+## Tathmini ya haraka
 
-Kabla ya kujaribu kuiba token, thibitisha haraka context:
+Kabla ya kujaribu kuiba token, thibitisha kwa haraka context:
 ```cmd
 whoami /groups | findstr /i "high mandatory"
 whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege SeAssignPrimaryTokenPrivilege"
 ```
-Practical notes:
+Vidokezo vya vitendo:
 
-- A **High Integrity** admin token is usually enough to **enable `SeDebugPrivilege`** and open many non-protected SYSTEM processes.
-- **`CreateProcessWithTokenW` requires `SeImpersonatePrivilege`** on the caller. If that API fails with `1314`, switch to `CreateProcessAsUserW` after you already duplicated a SYSTEM primary token.
-- On modern Windows, **`lsass.exe` is often a bad target** because **LSA protection / PPL** blocks access even for administrators with `SeDebugPrivilege`. Prefer **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`**, or an early **`svchost.exe`** running as SYSTEM.
-- Not every SYSTEM process has an equally useful token. If you get SYSTEM but notice missing privileges, try a different SYSTEM process instead of assuming the technique is broken.
+- Token ya admin ya **High Integrity** kwa kawaida inatosha **kuwezesha `SeDebugPrivilege`** na kufungua michakato mingi ya SYSTEM ambayo haijalindwa.
+- **`CreateProcessWithTokenW` inahitaji `SeImpersonatePrivilege`** kwa caller. Ikiwa API hiyo itashindwa kwa `1314`, tumia `CreateProcessAsUserW` baada ya kuwa tayari ume-duplicate SYSTEM primary token.
+- Kwenye Windows za kisasa, **`lsass.exe` mara nyingi si target nzuri** kwa sababu **LSA protection / PPL** huzuia access hata kwa administrators walio na `SeDebugPrivilege`. Pendelea **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`**, au **`svchost.exe`** ya mapema inayoendesha kama SYSTEM.
+- Si kila SYSTEM process ina token yenye manufaa sawa. Ukipata SYSTEM lakini ukaona privileges hazipo, jaribu SYSTEM process nyingine badala ya kudhani technique imeharibika.
 
-## Pick the PID carefully
+## Chagua PID kwa uangalifu
 
-The easiest way to make this work reliably is to **choose a SYSTEM process whose DACL actually allows Administrators to query the process and duplicate its token**.
+Njia rahisi zaidi ya kufanya hili lifanye kazi kwa kutegemewa ni **kuchagua SYSTEM process ambayo DACL yake inawaruhusu Administrators ku-query process na ku-duplicate token yake**.
 
-Good candidates to test first:
+Wagombea wazuri wa kuanza kuwajaribu:
 
 - `winlogon.exe`
 - `wininit.exe`
 - `services.exe`
-- some early `svchost.exe` instances running as SYSTEM
+- baadhi ya instances za mapema za `svchost.exe` zinazoendesha kama SYSTEM
 
-Avoid by default:
+Epuka kwa default:
 
-- `lsass.exe` on hosts where **RunAsPPL / LSA protection** is enabled
-- protected / security-sensitive processes that return `Access denied` even after enabling `SeDebugPrivilege`
+- `lsass.exe` kwenye hosts ambazo **RunAsPPL / LSA protection** imewezeshwa
+- protected / security-sensitive processes zinazorudisha `Access denied` hata baada ya kuwezesha `SeDebugPrivilege`
 
-You can inspect candidate processes and their token/ACLs with **Process Explorer** or **Process Hacker** running elevated.
+Unaweza kukagua processes zinazoweza kuwa candidates pamoja na token/ACL zao kwa kutumia **Process Explorer** au **Process Hacker** ukiwa umeziendesha kwa elevated privileges.
 
 ### Code
 
-The following code from [here](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). It allows to **indicate a Process ID as argument** and a CMD **running as the user** of the indicated process will be run.\
-Running in a High Integrity process you can **indicate the PID of a process running as System** (like `winlogon`, `wininit`) and execute a `cmd.exe` as SYSTEM.
+Code ifuatayo imetoka [hapa](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Inaruhusu **kuonyesha Process ID kama argument**, kisha CMD **inayoendesha kama user** wa process iliyoonyeshwa itaendeshwa.\
+Ukiendesha ndani ya High Integrity process, unaweza **kuonyesha PID ya process inayoendesha kama System** (kama `winlogon`, `wininit`) na ku-execute `cmd.exe` kama SYSTEM.<sup>[[3]](#references)</sup>
 ```cpp
 impersonateuser.exe 1234
 ```
@@ -190,20 +190,20 @@ printf("[-] CreateProcessWithTokenW Error: %i\n", GetLastError());
 return 0;
 }
 ```
-## Maelezo muhimu ya API / ruhusa za access
+## Vidokezo muhimu kuhusu API / access-rights
 
-Mfano hutumia `MAXIMUM_ALLOWED`, lakini kwa shughuli halisi ni muhimu kukumbuka vipande vya chini vinavyohusika:
+Mfano unatumia `MAXIMUM_ALLOWED`, lakini kwa shughuli halisi ni muhimu kukumbuka vipengele vya chini vinavyohusika:
 
-- `OpenProcessToken()` huhitaji tu kwamba **process handle** ilifunguliwa kwa **`PROCESS_QUERY_LIMITED_INFORMATION`**.
-- Ili kutumia `CreateProcessWithTokenW()`, **primary token handle** lazima iwe na **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
-- `DuplicateTokenEx()` lazima iunde **primary token** (`TokenPrimary`), si tu impersonation token.
-- Kama tayari umefanya impersonate SYSTEM na `CreateProcessWithTokenW()` bado inashindwa kwa `1314`, jaribu `CreateProcessAsUserW()` badala yake.
+- `OpenProcessToken()` inahitaji tu kwamba **process handle** iwe imefunguliwa kwa **`PROCESS_QUERY_LIMITED_INFORMATION`**.
+- Ili kutumia `CreateProcessWithTokenW()`, **primary token handle** lazima iwe na **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.<sup>[[1]](#references)</sup>
+- `DuplicateTokenEx()` lazima iunde **primary token** (`TokenPrimary`), si impersonation token pekee.
+- Ikiwa tayari ume-impersonate SYSTEM na `CreateProcessWithTokenW()` bado inashindwa kwa `1314`, jaribu `CreateProcessAsUserW()` badala yake.
 
-Hiyo ina maana kwamba **kufungua target process kwa `PROCESS_ALL_ACCESS` kwa kawaida si lazima na ni kelele zaidi** kuliko kuomba tu ruhusa zinazohitajika ili ku-query token.
+Hii inamaanisha kwamba **kufungua target process kwa `PROCESS_ALL_ACCESS` kwa kawaida si lazima na kuna kelele zaidi** kuliko kuomba rights zinazohitajika ili ku-query token.
 
-## Error
+## Kosa
 
-Wakati mwingine unaweza kujaribu kufanya impersonate System na haitafanya kazi ikionyesha output kama ifuatayo:
+Wakati mwingine unaweza kujaribu ku-impersonate System na isifanye kazi, huku ikionyesha output kama ifuatayo:
 ```cpp
 [+] OpenProcess() success!
 [+] OpenProcessToken() success!
@@ -214,43 +214,45 @@ Wakati mwingine unaweza kujaribu kufanya impersonate System na haitafanya kazi i
 [-] CreateProcessWithTokenW Return Code: 0
 [-] CreateProcessWithTokenW Error: 1326
 ```
-Hii inamaanisha kwamba hata kama unafanya kazi kwenye High Integrity level **huna ruhusa za kutosha** juu ya target process/token hiyo.\
-Hebu tuangalie current Administrator permissions juu ya `svchost.exe` processes kwa kutumia **Process Explorer** (au pia unaweza kutumia **Process Hacker**):
+Hii inamaanisha kwamba hata kama unaendesha kwenye kiwango cha **High Integrity**, **huna ruhusa za kutosha** juu ya process/token lengwa.\
+Hebu tuangalie ruhusa za sasa za Administrator juu ya processes za `svchost.exe` kwa kutumia **Process Explorer** (au unaweza pia kutumia **Process Hacker**):
 
 1. Chagua process ya `svchost.exe`
-2. Right Click --> Properties
-3. Ndani ya "Security" Tab bonyeza chini kulia kitufe cha "Permissions"
-4. Bonyeza "Advanced"
-5. Chagua "Administrators" na bonyeza "Edit"
-6. Bonyeza "Show advanced permissions"
+2. Bofya kulia --> Properties
+3. Ndani ya tab ya "Security", bofya kitufe cha "Permissions" kilicho chini kulia
+4. Bofya "Advanced"
+5. Chagua "Administrators" na ubofye "Edit"
+6. Bofya "Show advanced permissions"
 
-![Code - Error: 6. Click on "Show advanced permissions"](<../../images/image (437).png>)
+![Code - Error: 6. Bofya "Show advanced permissions"](<../../images/image (437).png>)
 
-Picha iliyopita inaonyesha privileges zote ambazo "Administrators" wanazo juu ya selected process (kama unavyoona kwa `svchost.exe` wana "Query" privileges tu)
+Picha iliyotangulia ina privileges zote ambazo "Administrators" wanazo juu ya process iliyochaguliwa (kama unavyoona kwa `svchost.exe`, wana privileges za "Query" pekee)
 
-Ona privileges "Administrators" wanazo juu ya `winlogon.exe`:
+Angalia privileges ambazo "Administrators" wanazo juu ya `winlogon.exe`:
 
-![Code - Error: See the privileges "Administrators" have over winlogon.exe](<../../images/image (1102).png>)
+![Code - Error: Angalia privileges ambazo "Administrators" wanazo juu ya winlogon.exe](<../../images/image (1102).png>)
 
-Ndani ya process hiyo "Administrators" wanaweza "Read Memory" na "Read Permissions" ambacho pengine huruhusu Administrators kuimpersonate token inayotumiwa na process hii.
+Ndani ya process hiyo, "Administrators" wanaweza "Read Memory" na "Read Permissions", jambo ambalo huenda linawaruhusu Administrators ku-impersonate token inayotumiwa na process hii.
 
-### Common failure causes
+### Sababu za kawaida za kushindwa
 
-- **`OpenProcess()` / `OpenProcessToken()` -> `5 (Access denied)`**: process DACL inakuzuia, au target ni **protected/PPL**. Chagua nyingine SYSTEM process.
-- **`DuplicateTokenEx()` -> `5 (Access denied)`**: token handle yako ilifunguliwa bila rights za kutosha, au target token DACL inazuia duplication.
-- **`CreateProcessWithTokenW()` -> `1314`**: caller hana kwa sasa **`SeImpersonatePrivilege`** enabled. Jaribu kui-enable kwanza au tumia `CreateProcessAsUserW()` na duplicated primary token.
-- **`CreateProcessWithTokenW()` -> `1326`** baada ya failures za awali: mara nyingi hii humaanisha token duplication/impersonation ya awali ilishindwa, hivyo hakuna usable primary token ya kuzindua child process.
+- **`OpenProcess()` / `OpenProcessToken()` -> `5 (Access denied)`**: DACL ya process inakuzuia, au target ni **protected/PPL**. Chagua SYSTEM process nyingine.
+- **`DuplicateTokenEx()` -> `5 (Access denied)`**: token handle yako ilifunguliwa bila rights za kutosha, au DACL ya target token inazuia duplication.
+- **`CreateProcessWithTokenW()` -> `1314`**: caller kwa sasa hana **`SeImpersonatePrivilege`** ikiwa enabled. Jaribu kui-enable kwanza au tumia `CreateProcessAsUserW()` pamoja na duplicated primary token.
+- **`CreateProcessWithTokenW()` -> `1326`** baada ya kushindwa hapo awali: mara nyingi hii inamaanisha tu kwamba hatua ya awali ya token duplication/impersonation ilishindwa, hivyo hakuna primary token inayoweza kutumika ku-launch child process.
 
-## Operator notes
+## Maelezo ya Operator
 
-- Hii technique ni nzuri sana ukiwa tayari **local admin + high integrity** na unataka njia ya haraka, ya manual kwenda SYSTEM bila kuanzisha service au named-pipe coercion chain.
-- Kwenye hardened Windows 11 / Server environments, **LSA protection inazidi kuwa common**, hivyo workflow inayodhani `lsass.exe` huwa readable kila wakati ni brittle. **`winlogon.exe` / `wininit.exe` / `services.exe` kawaida ni chaguo bora za kwanza**.
-- Ukiingia kwenye **service account** context badala ya elevated admin desktop, familia ya **Potato** kwa kawaida inafaa zaidi kuliko ukurasa huu.
+- Technique hii ni nzuri unapokuwa tayari **local admin + high integrity** na unataka njia ya haraka, ya manual, ya kupata SYSTEM bila kuanzisha service au chain ya named-pipe coercion.
+- Kwenye mazingira ya Windows 11 / Server yaliyohardeniwa, **LSA protection inazidi kuwa ya kawaida**, hivyo workflow inayodhani kwamba `lsass.exe` inasomeka kila mara si thabiti. **`winlogon.exe` / `wininit.exe` / `services.exe` kwa kawaida ni chaguo bora za kwanza**.<sup>[[2]](#references)</sup>
+- Ukiingia kwenye context ya **service account** badala ya elevated admin desktop, **Potato family** kwa kawaida inafaa zaidi kuliko ukurasa huu.
 
 
 
-## References
+## Marejeo
 
-- [Microsoft: CreateProcessWithTokenW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
-- [SensePost: Abusing Windows' tokens to compromise Active Directory without touching LSASS](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [1] [Microsoft: CreateProcessWithTokenW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [2] [SensePost: Abusing Windows' tokens to compromise Active Directory without touching LSASS](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [3] [Understanding and Abusing Process Tokens — Part II](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+
 {{#include ../../banners/hacktricks-training.md}}

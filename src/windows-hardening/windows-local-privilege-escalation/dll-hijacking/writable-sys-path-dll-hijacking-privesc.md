@@ -4,24 +4,24 @@
 
 ## Utangulizi
 
-Ukigundua kuwa unaweza **kuandika katika folda ya System Path** (kumbuka kwamba hii haitafanya kazi ikiwa unaweza kuandika katika folda ya User Path), inawezekana kwamba unaweza **kuongeza privileges** kwenye mfumo.
+Ukigundua kwamba unaweza **kuandika katika folder ya System Path** (kumbuka kwamba hii haitafanya kazi ikiwa unaweza kuandika katika folder ya User Path), inawezekana ukaweza **kuongeza privileges** kwenye mfumo.
 
-Ili kufanya hivyo unaweza kutumia vibaya **Dll Hijacking** ambapo uta **hijack library inayopakiwa** na service au process yenye **privileges zaidi** kuliko zako, na kwa sababu service hiyo inapakia Dll ambayo pengine hata haipo kwenye mfumo mzima, itajaribu kuipakia kutoka kwenye System Path ambako unaweza kuandika.
+Ili kufanya hivyo, unaweza kutumia **Dll Hijacking**, ambapo utaenda **kuteka library inayopakiwa** na service au process yenye **privileges** nyingi kuliko zako. Kwa sababu service hiyo inapakia Dll ambayo huenda hata haipo katika mfumo mzima, itajaribu kuipakia kutoka kwenye System Path ambako unaweza kuandika.
 
-Kwa maelezo zaidi kuhusu **Dll Hijackig ni nini** angalia:
+Kwa maelezo zaidi kuhusu **Dll Hijackig** angalia:
 
 
 {{#ref}}
 ./
 {{#endref}}
 
-## Privesc na Dll Hijacking
+## Privesc kwa kutumia Dll Hijacking
 
-### Kupata missing Dll
+### Kutafuta Dll inayokosekana
 
-Jambo la kwanza unalohitaji ni **kutambua process** inayoendeshwa na **privileges zaidi** kuliko zako ambayo inajaribu **kupakia Dll kutoka System Path** unayoweza kuandika ndani yake.
+Jambo la kwanza unalohitaji ni **kutambua process** inayoendeshwa ikiwa na **privileges** nyingi kuliko zako, na inayojaribu **kupakia Dll kutoka kwenye System Path** ambayo unaweza kuandikia.
 
-Kumbuka kwamba technique hii inategemea entry ya **Machine/System PATH**, si tu kwenye **User PATH** yako. Kwa hiyo, kabla ya kutumia muda kwenye Procmon, ni vyema kuorodhesha entries za **Machine PATH** na kuangalia zipi zinaweza kuandikwa:
+Kumbuka kwamba technique hii inategemea entry ya **Machine/System PATH**, si **User PATH** pekee. Kwa hiyo, kabla ya kutumia muda kwenye Procmon, inafaa ku-enumerate entries za **Machine PATH** na kukagua ni zipi zinazoweza kuandikiwa:<sup>[[1]](#references)</sup>
 ```powershell
 $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine") -split ';' | Where-Object { $_ }
 $machinePath | ForEach-Object {
@@ -32,9 +32,9 @@ icacls $path 2>$null
 }
 }
 ```
-Tatizo katika kesi hizi ni kwamba pengine hizo processes tayari zinaendelea. Ili kujua ni Dll gani zinakosekana, unahitaji kuanzisha procmon haraka iwezekanavyo (kabla processes hazijapakiwa). Kwa hiyo, ili kujua zinazokosekana .dlls fanya hivi:
+Tatizo katika hali hizi ni kwamba huenda processes hizo tayari zinaendeshwa. Ili kupata Dlls ambazo services zinakosa, unahitaji kuzindua procmon haraka iwezekanavyo (kabla processes hazijapakiwa). Kwa hiyo, ili kupata .dlls zinazokosekana, fanya yafuatayo:
 
-- **Create** folda `C:\privesc_hijacking` na ongeza path `C:\privesc_hijacking` kwenye **System Path env variable**. Unaweza kufanya hivi **manually** au kwa **PS**:
+- **Unda** folder `C:\privesc_hijacking` na uongeze path `C:\privesc_hijacking` kwenye **System Path env variable**. Unaweza kufanya hivi **manually** au kwa kutumia **PS**:
 ```bash
 # Set the folder path to create and check events for
 $folderPath = "C:\privesc_hijacking"
@@ -51,24 +51,24 @@ $newPath = "$envPath;$folderPath"
 [Environment]::SetEnvironmentVariable("PATH", $newPath, "Machine")
 }
 ```
-- Zindua **`procmon`** na nenda kwenye **`Options`** --> **`Enable boot logging`** na bonyeza **`OK`** kwenye prompt.
-- Kisha, **reboot**. Kompyuta ikianza upya, **`procmon`** itaanza **kurekodi** events mara moja.
-- Mara tu **Windows** **ikianza endesha `procmon`** tena, itakuambia kuwa imekuwa ikiendeshwa na itakuuliza kama unataka **kuhifadhi** events kwenye file. Sema **yes** na **hifadhi events kwenye file**.
-- **Baada ya** **file** kuundwa, **funga** window ya **`procmon`** iliyofunguliwa na **fungua file ya events**.
-- Ongeza **filters** hizi na utapata Dll zote ambazo baadhi ya **proccess ilijaribu kupakia** kutoka kwenye writable System Path folder:
+- Fungua **`procmon`** na uende kwenye **`Options`** --> **`Enable boot logging`**, kisha bonyeza **`OK`** kwenye ujumbe wa kuthibitisha.
+- Kisha, **anzisha upya kompyuta**. Kompyuta itakapoanzishwa upya, **`procmon`** itaanza **kurekodi** matukio haraka iwezekanavyo.
+- Baada ya **Windows** **kuanzishwa, endesha `procmon`** tena. Itakuambia kuwa imekuwa ikiendesha na **itakuuliza ikiwa unataka kuhifadhi** matukio kwenye faili. Jibu **yes** na **uhifadhi matukio kwenye faili**.
+- **Baada ya** **faili** **kutengenezwa**, funga dirisha la **`procmon`** lililofunguka na **ufungue faili la matukio**.
+- Ongeza **filters** hizi na utapata Dll zote ambazo **process fulani ilijaribu kupakia** kutoka kwenye folda ya writable System Path:
 
 <figure><img src="../../../images/image (945).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> **Boot logging inahitajika tu kwa services zinazoanza mapema sana** kiasi kwamba vinginevyo haziwezi kuangaliwa. Ukifanikiwa **kuchochea target service/program unapohitaji** (kwa mfano, kwa kuingiliana na COM interface yake, kuanzisha upya service, au kuzindua scheduled task tena), mara nyingi ni haraka zaidi kuendelea na normal Procmon capture ukiwa na filters kama **`Path contains .dll`**, **`Result is NAME NOT FOUND`**, na **`Path begins with <writable_machine_path>`**.
+> **Boot logging inahitajika tu kwa services zinazoanza mapema sana** kiasi kwamba huwezi kuzichunguza vinginevyo. Ikiwa unaweza **kuanzisha target service/program unapohitaji** (kwa mfano, kwa kuingiliana na COM interface yake, kuanzisha service upya, au kuzindua tena scheduled task), kwa kawaida ni haraka zaidi kuweka Procmon capture ya kawaida yenye filters kama **`Path contains .dll`**, **`Result is NAME NOT FOUND`**, na **`Path begins with <writable_machine_path>`**.
 
-### Missed Dlls
+### Dll zilizokosekana
 
-Nikiiendesha hii kwenye free **virtual (vmware) Windows 11 machine** nilipata results hizi:
+Nilipoendesha hii kwenye **virtual (vmware) Windows 11 machine** ya bure, nilipata matokeo haya:
 
 <figure><img src="../../../images/image (607).png" alt=""><figcaption></figcaption></figure>
 
-Katika case hii .exe hazina manufaa, kwa hiyo zipuuze; missed DLLs zilikuwa kutoka:
+Katika hali hii .exe hazina manufaa, kwa hiyo zipuuze; DLL zilizokosekana zilitoka kwenye:
 
 | Service                         | Dll                | CMD line                                                             |
 | ------------------------------- | ------------------ | -------------------------------------------------------------------- |
@@ -76,39 +76,40 @@ Katika case hii .exe hazina manufaa, kwa hiyo zipuuze; missed DLLs zilikuwa kuto
 | Diagnostic Policy Service (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
 | ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
 
-Baada ya kupata hii, nilipata blog post hii ya kuvutia ambayo pia inaeleza jinsi ya [**abuse WptsExtensions.dll for privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Hicho ndicho tutakachofanya **sasa**.
+Baada ya kugundua hili, nilipata blog post hii ya kuvutia ambayo pia inaeleza jinsi ya [**kutumia vibaya WptsExtensions.dll kwa privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Hilo ndilo **tutakalofanya sasa**.<sup>[[3]](#references)</sup>
 
-### Other candidates worth triaging
+### Candidates wengine wanaofaa kufanyiwa triage
 
-`WptsExtensions.dll` ni mfano mzuri, lakini sio pekee **phantom DLL** inayojirudia ambayo huonekana kwenye privileged services. Modern hunting rules na public hijack catalogs bado hufuatilia majina kama:
+`WptsExtensions.dll` ni mfano mzuri, lakini siyo **phantom DLL** pekee inayojirudia katika privileged services. Sheria za kisasa za hunting na catalogs za umma za hijack bado hufuatilia majina kama:<sup>[[2]](#references)</sup>
 
 | Service / Scenario | Missing DLL | Notes |
 | --- | --- | --- |
-| Task Scheduler (`Schedule`) | `WptsExtensions.dll` | Classic **SYSTEM** candidate on client systems. Good when the writable directory is in the **Machine PATH** and the service probes the DLL during startup. |
-| NetMan on Windows Server | `wlanhlp.dll` / `wlanapi.dll` | Interesting on **server editions** because the service runs as **SYSTEM** and can be **triggered on demand by a normal user** in some builds, making it better than reboot-only cases. |
-| Connected Devices Platform Service (`CDPSvc`) | `cdpsgshims.dll` | Usually yields **`NT AUTHORITY\LOCAL SERVICE`** first. That is often still enough because the token has **`SeImpersonatePrivilege`**, so you can chain it with [RoguePotato / PrintSpoofer](../roguepotato-and-printspoofer.md). |
+| Task Scheduler (`Schedule`) | `WptsExtensions.dll` | Candidate wa kawaida wa **SYSTEM** kwenye client systems. Ni nzuri wakati directory inayoweza kuandikwa iko kwenye **Machine PATH** na service inachunguza DLL wakati wa kuanza. |
+| NetMan on Windows Server | `wlanhlp.dll` / `wlanapi.dll` | Inavutia kwenye **server editions** kwa sababu service huendeshwa kama **SYSTEM** na inaweza **kuanzishwa unapohitaji na user wa kawaida** katika baadhi ya builds, hivyo ni bora kuliko hali zinazohitaji reboot pekee. |
+| Connected Devices Platform Service (`CDPSvc`) | `cdpsgshims.dll` | Kwa kawaida hupata **`NT AUTHORITY\LOCAL SERVICE`** kwanza. Mara nyingi hii bado inatosha kwa sababu token hiyo ina **`SeImpersonatePrivilege`**, hivyo unaweza kuiunganisha na [RoguePotato / PrintSpoofer](../roguepotato-and-printspoofer.md). |
 
-Chukulia hizi names kama **triage hints**, sio wins zilizohakikishwa: zinategemea **SKU/build**, na Microsoft inaweza kubadilisha behavior kati ya releases. Funzo muhimu ni kutafuta **missing DLLs katika privileged services zinazopita kupitia Machine PATH**, hasa ikiwa service inaweza **kuchochewa tena bila reboot**.
+Chukulia majina haya kama **vidokezo vya triage**, si ushindi wa uhakika: yanategemea **SKU/build**, na Microsoft inaweza kubadilisha tabia hii kati ya releases. Jambo muhimu ni kutafuta **DLL zilizokosekana kwenye privileged services zinazopita kwenye Machine PATH**, hasa ikiwa service inaweza **kuanzishwa tena bila reboot**.
 
 ### Exploitation
 
-Kwa hiyo, ili **kukuza privileges** tuta-hijack library **WptsExtensions.dll**. Tukiwa na **path** na **name** tunachohitaji tu ni **kuzalisha malicious dll**.
+Kwa hiyo, ili **kuongeza privileges**, tutahijack library **WptsExtensions.dll**. Kwa kuwa tuna **path** na **name**, tunachohitaji ni **kutengeneza malicious dll**.
 
-Unaweza [**kujaribu kutumia mifano yoyote kati ya hii**](#creating-and-compiling-dlls). Unaweza kuendesha payloads kama: get a rev shell, add a user, execute a beacon...
+Unaweza [**kujaribu kutumia mojawapo ya mifano hii**](#creating-and-compiling-dlls). Unaweza kuendesha payloads kama vile: kupata rev shell, kuongeza user, kuendesha beacon...
 
 > [!WARNING]
-> Kumbuka kwamba **sio services zote zinaendeshwa** kwa **`NT AUTHORITY\SYSTEM`** baadhi pia zinaendeshwa kwa **`NT AUTHORITY\LOCAL SERVICE`** ambayo ina **privileges chache zaidi** na **hutaweza kuunda user mpya** kwa kutumia permissions zake.\
-> Hata hivyo, user huyo ana privilege ya **`seImpersonate`**, kwa hiyo unaweza kutumia [**potato suite to escalate privileges**](../roguepotato-and-printspoofer.md). Kwa hiyo, katika case hii rev shell ni chaguo bora kuliko kujaribu kuunda user.
+> Kumbuka kwamba **si services zote huendeshwa** na **`NT AUTHORITY\SYSTEM`**; baadhi pia huendeshwa na **`NT AUTHORITY\LOCAL SERVICE`**, ambayo ina **privileges chache** na **hutaweza kuunda user mpya** kwa kutumia vibaya permissions zake.\
+> Hata hivyo, user huyo ana **`seImpersonate`** privilege, kwa hiyo unaweza kutumia [ **potato suite kuongeza privileges**](../roguepotato-and-printspoofer.md). Kwa hiyo, katika hali hii rev shell ni chaguo bora kuliko kujaribu kuunda user.
 
-Wakati wa kuandika, service ya **Task Scheduler** inaendeshwa na **Nt AUTHORITY\SYSTEM**.
+Wakati wa kuandika hii, **Task Scheduler** service inaendeshwa na **Nt AUTHORITY\SYSTEM**.
 
-Baada ya **kuzalisha malicious Dll** (_kwangu niliitumia x64 rev shell na nikapata shell ya kurudi lakini defender iliua kwa sababu ilitoka msfvenom_), ihifadhi kwenye writable System Path kwa jina **WptsExtensions.dll** na **restart** kompyuta (au restart service au fanya chochote kinachohitajika ili kuendesha tena affected service/program).
+Baada ya **kutengeneza malicious Dll** (_kwangu nilitumia x64 rev shell na nikapata shell lakini defender iliimaliza kwa sababu ilitoka kwenye msfvenom_), ihifadhi kwenye writable System Path kwa jina **WptsExtensions.dll** na **uanzishe upya** kompyuta (au uanze service upya, au ufanye chochote kinachohitajika ili affected service/program iendeshwe tena).
 
-Service ikianza tena, **dll inapaswa kupakiwa na kutekelezwa** (unaweza **kutumia tena** ujanja wa **procmon** kuangalia kama **library ilipakiwa kama ilivyotarajiwa**).
+Service inapoanzishwa tena, **dll inapaswa kupakiwa na kutekelezwa** (unaweza **kutumia tena** mbinu ya **procmon** kuangalia ikiwa **library ilipakiwa kama ilivyotarajiwa**).
 
 ## References
 
-- [Windows DLL Hijacking (Hopefully) Clarified](https://itm4n.github.io/windows-dll-hijacking-clarified/)
-- [Suspicious DLL Loaded for Persistence or Privilege Escalation](https://www.elastic.co/guide/en/security/current/suspicious-dll-loaded-for-persistence-or-privilege-escalation.html)
+- [1] [Windows DLL Hijacking (Hopefully) Clarified](https://itm4n.github.io/windows-dll-hijacking-clarified/)
+- [2] [Suspicious DLL Loaded for Persistence or Privilege Escalation](https://www.elastic.co/guide/en/security/current/suspicious-dll-loaded-for-persistence-or-privilege-escalation.html)
+- [3] [DLL Hijacking – Windows Privilege Escalation](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll)
 
 {{#include ../../../banners/hacktricks-training.md}}

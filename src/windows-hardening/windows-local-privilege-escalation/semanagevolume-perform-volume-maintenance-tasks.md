@@ -1,4 +1,4 @@
-# SeManageVolumePrivilege: Ufikiaji wa volumu ghafi kwa kusoma faili yoyote
+# SeManageVolumePrivilege: Ufikiaji wa raw volume kwa kusoma faili kiholela
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,21 +6,21 @@
 
 Haki ya mtumiaji ya Windows: Perform volume maintenance tasks (constant: SeManageVolumePrivilege).
 
-Wanaoshikilia haki hii wanaweza kufanya shughuli za chini za volumu kama defragmentation, kuunda/kuondoa volumu, na matengenezo ya I/O. Muhimu kwa wadukuzi, haki hii inaruhusu kufungua raw volume device handles (mfano, \\.\C:) na kutoa disk I/O ya moja kwa moja inayopitisha NTFS file ACLs. Kwa ufikiaji ghafi unaweza kunakili byte za faili yoyote kwenye volumu hata kama DACL inakataza, kwa kuchanganua miundo ya filesystem nje ya mtandao (offline) au kwa kutumia zana zinazosomea kwa ngazi ya block/cluster.
+Wenye haki hii wanaweza kufanya shughuli za kiwango cha chini kwenye volume, kama vile defragmentation, kuunda/kuondoa volumes, na maintenance IO. Muhimu kwa attackers, haki hii inaruhusu kufungua raw volume device handles (kwa mfano, \\.\C:) na kutoa direct disk I/O inayopita NTFS file ACLs. Kwa raw access, unaweza kunakili bytes za faili lolote kwenye volume hata kama DACL inakuzuia, kwa kuchanganua miundo ya filesystem offline au kutumia tools zinazosoma katika kiwango cha block/cluster.
 
-Chaguo-msingi: Administrators kwenye servers na domain controllers.
+Default: Administrators kwenye servers na domain controllers.<sup>[[1]](#references)</sup>
 
-## Mifano ya matumizi mabaya
+## Matukio ya abuse
 
-- Kusoma faili kwa hiari bila kuzingatia ACLs kwa kusoma kifaa cha disk (mfano, ku-exfiltrate nyenzo nyeti zilizo chini ya ulinzi wa mfumo kama private keys za mashine chini ya %ProgramData%\Microsoft\Crypto\RSA\MachineKeys na %ProgramData%\Microsoft\Crypto\Keys, registry hives, DPAPI masterkeys, SAM, ntds.dit kupitia VSS, n.k.).
-- Kupitisha njia zilizofungwa/zinazopewa kipengele maalum (C:\Windows\System32\…) kwa kunakili byte moja kwa moja kutoka kwenye kifaa ghafi.
-- Katika mazingira ya AD CS, ku-exfiltrate nyenzo za kiufunguo za CA (machine key store) ili kutengeneza “Golden Certificates” na kuiga yoyote domain principal kupitia PKINIT. Tazama kiungo hapo chini.
+- Kusoma faili kiholela kwa kupita ACLs kwa kusoma disk device (kwa mfano, ku-exfiltrate taarifa nyeti zinazolindwa na mfumo kama machine private keys zilizo chini ya %ProgramData%\Microsoft\Crypto\RSA\MachineKeys na %ProgramData%\Microsoft\Crypto\Keys, registry hives, DPAPI masterkeys, SAM, ntds.dit kupitia VSS, n.k.).
+- Kupita locked/privileged paths (C:\Windows\System32\…) kwa kunakili bytes moja kwa moja kutoka kwenye raw device.
+- Katika mazingira ya AD CS, ku-exfiltrate CA’s key material (machine key store) ili kutengeneza “Golden Certificates” na kujifanya domain principal yoyote kupitia PKINIT. Tazama link hapa chini.<sup>[[2]](#references)</sup>
 
-Kumbuka: Bado unahitaji parser wa miundo ya NTFS isipokuwa ukitegemea zana za msaada. Zana nyingi za off-the-shelf zinaficha ufikiaji ghafi.
+Kumbuka: Bado unahitaji parser ya miundo ya NTFS isipokuwa utegemee helper tools. Tools nyingi zinazopatikana tayari huficha raw access.
 
 ## Mbinu za vitendo
 
-- Fungua handle ya volumu ghafi na usome clusters:
+- Fungua raw volume handle na usome clusters:
 
 <details>
 <summary>Bofya ili kupanua</summary>
@@ -49,38 +49,38 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- Tumia zana inayojua NTFS kurejesha faili maalum kutoka kwenye volume ghafi:
-- RawCopy/RawCopy64 (sector-level copy of in-use files)
-- FTK Imager or The Sleuth Kit (kuunda picha kwa read-only, kisha kuchimba faili)
-- vssadmin/diskshadow + shadow copy, then copy target file from the snapshot (if you can create VSS; often requires admin but commonly available to the same operators that hold SeManageVolumePrivilege)
+- Tumia tool inayotambua NTFS kurejesha faili mahususi kutoka kwenye raw volume:
+- RawCopy/RawCopy64 (sector-level copy ya faili zinazotumika)
+- FTK Imager au The Sleuth Kit (read-only imaging, kisha carve files)
+- vssadmin/diskshadow + shadow copy, kisha nakili faili lengwa kutoka kwenye snapshot (ikiwa unaweza kuunda VSS; mara nyingi huhitaji admin, lakini kwa kawaida hupatikana kwa operators wale wale walio na SeManageVolumePrivilege)
 
-Typical sensitive paths to target:
+Njia nyeti za kawaida za kulenga:
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
 - %ProgramData%\Microsoft\Crypto\Keys\
 - C:\Windows\System32\config\SAM, SYSTEM, SECURITY (local secrets)
-- C:\Windows\NTDS\ntds.dit (domain controllers – via shadow copy)
-- C:\Windows\System32\CertSrv\CertEnroll\ (CA certs/CRLs; private keys live in the machine key store above)
+- C:\Windows\NTDS\ntds.dit (domain controllers – kupitia shadow copy)
+- C:\Windows\System32\CertSrv\CertEnroll\ (CA certs/CRLs; private keys huhifadhiwa kwenye machine key store iliyo hapo juu)
 
-## AD CS tie‑in: Forging a Golden Certificate
+## Muunganiko wa AD CS: Forging a Golden Certificate
 
-Ikiwa unaweza kusoma ufunguo wa faragha wa Enterprise CA kutoka kwenye machine key store, unaweza kuunda vyeti vya client‑auth kwa wadhamini wowote na kuthibitisha kupitia PKINIT/Schannel. Hii mara nyingi huitwa Golden Certificate. Angalia:
+Ikiwa unaweza kusoma private key ya Enterprise CA kutoka kwenye machine key store, unaweza kutengeneza client-auth certificates za principals wowote na ku-authenticate kupitia PKINIT/Schannel. Hii mara nyingi huitwa Golden Certificate.<sup>[[2]](#references)</sup> Tazama:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
 {{#endref}}
 
-(Section: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
+(Sehemu: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
 
-## Utambuzi na kuimarisha
+## Utambuzi na hardening
 
-- Punguza kwa kiasi kikubwa utoaji wa SeManageVolumePrivilege (Perform volume maintenance tasks) kwa wasimamizi walioaminika tu.
-- Fuatilia Sensitive Privilege Use na ufunguzi wa handles za mchakato kwa vitu vya kifaa kama \\.\C:, \\.\PhysicalDrive0.
-- Pendelea ufunguo za CA zinazotegemea HSM/TPM au DPAPI-NG ili kusoma faili ghafi kusiweze kurejesha nyenzo za ufunguo kwa namna inayoweza kutumika.
-- Weka njia za uploads, temp, na extraction zisizotekelezeka na zilizo tengana (ulinzi katika muktadha wa wavuti unaoambatana mara nyingi na mnyororo huu baada ya post‑exploitation).
+- Punguza kwa ukali ugawaji wa SeManageVolumePrivilege (Perform volume maintenance tasks) kwa admins wanaoaminika pekee.
+- Fuatilia Sensitive Privilege Use na process handle opens kwa device objects kama \\.\C:, \\.\PhysicalDrive0.
+- Pendelea CA keys zinazoungwa mkono na HSM/TPM au DPAPI-NG ili raw file reads zisiweze kurejesha key material katika mfumo unaoweza kutumika.
+- Weka uploads, temp, na extraction paths zikiwa non-executable na zimetenganishwa (web context defense ambayo mara nyingi huambatana na chain hii ya post-exploitation).
 
 ## Marejeo
 
-- Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege): https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks
-- 0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate): https://0xdf.gitlab.io/2025/10/04/htb-certificate.html
+- [1] [Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
+- [2] [0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
 
 {{#include ../../banners/hacktricks-training.md}}
