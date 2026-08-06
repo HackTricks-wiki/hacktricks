@@ -31,7 +31,7 @@ Debugger ending on ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 For help, see: https://nodejs.org/en/docs/inspector
 ```
 
-Processes based on **CEF** (**Chromium Embedded Framework**) like need to use the param: `--remote-debugging-port=9222` to open de **debugger** (the SSRF protections remain very similar). However, they **instead** of granting a **NodeJS** **debug** session will communicate with the browser using the [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/), this is an interface to control the browser, but there isn't a direct RCE.
+Processes based on **CEF** (**Chromium Embedded Framework**) like need to use the param: `--remote-debugging-port=9222` to open de **debugger** (the SSRF protections remain very similar). However, they **instead** of granting a **NodeJS** **debug** session will communicate with the browser using the [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/), this is an interface to control the browser, but there isn't a direct RCE.<sup>[[5]](#references)</sup>
 
 When you start a debugged browser something like this will appear:
 
@@ -73,7 +73,7 @@ node inspect 127.0.0.1:9229
 debug> exec("process.mainModule.require('child_process').exec('/Applications/iTerm.app/Contents/MacOS/iTerm2')")
 ```
 
-The tool [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug), allows to **find inspectors** running locally and **inject code** into them.<sup>[[1]](#references)</sup>
+The tool [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug), allows to **find inspectors** running locally and **inject code** into them.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 #List possible vulnerable sockets
@@ -103,7 +103,7 @@ Browser.open(JSON.stringify({ url: "c:\\windows\\system32\\calc.exe" }))
 
 ## Chrome DevTools Protocol Payloads
 
-You can check the API here: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)\
+You can check the API here: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)<sup>[[5]](#references)</sup>\
 In this section I will just list interesting things I find people have used to exploit this protocol.
 
 ### Parameter Injection via Deep Links
