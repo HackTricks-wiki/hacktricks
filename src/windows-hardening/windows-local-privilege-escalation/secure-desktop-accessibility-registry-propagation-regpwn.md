@@ -4,7 +4,7 @@
 
 ## Overview
 
-Windows Accessibility features persist user configuration under HKCU and propagate it into per-session HKLM locations. During a **Secure Desktop** transition (lock screen or UAC prompt), **SYSTEM** components re-copy these values. If the **per-session HKLM key is writable by the user**, it becomes a privileged write choke point that can be redirected with **registry symbolic links**, yielding an **arbitrary SYSTEM registry write**.
+Windows Accessibility features persist user configuration under HKCU and propagate it into per-session HKLM locations. During a **Secure Desktop** transition (lock screen or UAC prompt), **SYSTEM** components re-copy these values. If the **per-session HKLM key is writable by the user**, it becomes a privileged write choke point that can be redirected with **registry symbolic links**, yielding an **arbitrary SYSTEM registry write**.<sup>[[1]](#references)</sup>
 
 The RegPwn technique abuses that propagation chain with a small race window stabilized via an **opportunistic lock (oplock)** on a file used by `osk.exe`.<sup>[[1]](#references)</sup>
 
