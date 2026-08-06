@@ -1,11 +1,11 @@
-# Здобуття зображення та монтування
+# Отримання та монтування образу
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Здобуття
+## Отримання
 
-> Завжди здобувайте **тільки для читання** та **хешуйте під час копіювання**. Тримайте оригінальний пристрій **заблокованим для запису** і працюйте лише з перевіреними копіями.
+> Завжди виконуйте отримання **лише для читання** та **обчислюйте хеш під час копіювання**. Зберігайте оригінальний пристрій **заблокованим для запису** та працюйте лише з перевіреними копіями.
 
 ### DD
 ```bash
@@ -16,13 +16,13 @@ sha256sum disk.img > disk.img.sha256
 ```
 ### dc3dd / dcfldd
 
-`dc3dd` є активно підтримуваним форком dcfldd (DoD Computer Forensics Lab dd).
+`dc3dd` — це форк dcfldd, який активно підтримується (DoD Computer Forensics Lab dd).
 ```bash
 # Create an image and calculate multiple hashes at acquisition time
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
 ```
 ### Guymager
-Графічний, багатопотоковий іміджер, який підтримує **raw (dd)**, **EWF (E01/EWFX)** та **AFF4** вихід з паралельною перевіркою. Доступний у більшості репозиторіїв Linux (`apt install guymager`).
+Графічний багатопотоковий інструмент для створення образів, який підтримує виведення у форматах **raw (dd)**, **EWF (E01/EWFX)** і **AFF4** з паралельною перевіркою. Доступний у більшості Linux-репозиторіїв (`apt install guymager`).
 ```bash
 # Start in GUI mode
 sudo guymager
@@ -31,7 +31,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 ```
 ### AFF4 (Advanced Forensics Format 4)
 
-AFF4 - це сучасний формат зображень Google, розроблений для *дуже* великих доказів (рідкісні, відновлювальні, хмарні).
+AFF4 — це сучасний формат створення образів від Google, розроблений для *дуже* великих доказових даних (розріджених, придатних для відновлення після переривання, cloud-native).<sup>[[1]](#references)</sup>
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -42,7 +42,7 @@ velociraptor --config server.yaml frontend collect --artifact Windows.Disk.Acqui
 ```
 ### FTK Imager (Windows & Linux)
 
-Ви можете [завантажити FTK Imager](https://accessdata.com/product-download) та створити **сирі, E01 або AFF4** образи:
+Ви можете [завантажити FTK Imager](https://accessdata.com/product-download) і створити образи **raw, E01 або AFF4**:
 ```bash
 ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 --description 'Laptop seizure 2025-07-22' --examiner 'AnalystName' --compress 6
@@ -51,24 +51,25 @@ ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 ```bash
 sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examiner --format encase6 --compression best
 ```
-### Imaging Cloud Disks
+### Створення образів Cloud-дисків
 
-*AWS* – створити **судово-експертний знімок** без вимкнення екземпляра:
+*AWS* – створіть **forensic snapshot**, не вимикаючи інстанс:
 ```bash
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – використовуйте `az snapshot create` та експортуйте до SAS URL.
+*Azure* – використовуйте `az snapshot create` і експортуйте до SAS URL.
+
 
 ## Монтування
 
 ### Вибір правильного підходу
 
-1. Монтуйте **весь диск**, коли вам потрібна оригінальна таблиця розділів (MBR/GPT).
-2. Монтуйте **файл одного розділу**, коли вам потрібен лише один том.
-3. Завжди монтуйте **тільки для читання** (`-o ro,norecovery`) та працюйте з **копіями**.
+1. Монтуйте **весь диск**, коли потрібна оригінальна таблиця розділів (MBR/GPT).
+2. Монтуйте **файл окремого розділу**, коли потрібен лише один том.
+3. Завжди монтуйте **лише для читання** (`-o ro,norecovery`) і працюйте з **копіями**.<sup>[[2]](#references)</sup>
 
-### Сирі зображення (dd, AFF4-extracted)
+### Необроблені образи (dd, AFF4-extracted)
 ```bash
 # Identify partitions
 fdisk -l disk.img
@@ -83,7 +84,7 @@ lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
 # Mount a partition (e.g. /dev/nbd0p2)
 sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
 ```
-Від'єднайте, коли закінчите:
+Від’єднати після завершення:
 ```bash
 sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
 ```
@@ -99,12 +100,12 @@ sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 # 3. Mount the desired partition
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
-Альтернативно конвертуйте на льоту за допомогою **xmount**:
+Альтернативно, конвертуйте на льоту за допомогою **xmount**:
 ```bash
 xmount --in ewf evidence.E01 --out raw /tmp/raw_mount
 mount -o ro /tmp/raw_mount/image.dd /mnt
 ```
-### LVM / BitLocker / VeraCrypt томи
+### Томи LVM / BitLocker / VeraCrypt
 
 Після підключення блочного пристрою (loop або nbd):
 ```bash
@@ -116,31 +117,31 @@ sudo lvscan | grep "/dev/nbd0"
 sudo dislocker -V /dev/nbd0p3 -u -- /mnt/bitlocker
 sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
 ```
-### kpartx helpers
+### Помічники kpartx
 
-`kpartx` автоматично відображає розділи з образу на `/dev/mapper/`:
+`kpartx` автоматично зіставляє розділи з образу з `/dev/mapper/`:
 ```bash
 sudo kpartx -av disk.img  # creates /dev/mapper/loop0p1, loop0p2 …
 mount -o ro /dev/mapper/loop0p2 /mnt
 ```
-### Загальні помилки монтування та їх виправлення
+### Поширені помилки монтування та способи їх виправлення
 
 | Помилка | Типова причина | Виправлення |
 |-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | Журналізована FS (ext4) не була коректно відмонтована | використовуйте `-o ro,norecovery` |
-| `bad superblock …` | Неправильний зсув або пошкоджена FS | розрахуйте зсув (`sector*size`) або запустіть `fsck -n` на копії |
-| `mount: unknown filesystem type 'LVM2_member'` | Контейнер LVM | активуйте групу томів за допомогою `vgchange -ay` |
+| `cannot mount /dev/loop0 read-only` | Журнальована FS (ext4) не була коректно демонтована | використайте `-o ro,norecovery` |
+| `bad superblock …` | Неправильне зміщення або пошкоджена FS | обчисліть зміщення (`sector*size`) або запустіть `fsck -n` на копії |
+| `mount: unknown filesystem type 'LVM2_member'` | Контейнер LVM | активуйте volume group за допомогою `vgchange -ay` |
 
 ### Очищення
 
-Не забудьте **umount** та **disconnect** пристрої loop/nbd, щоб уникнути залишкових відображень, які можуть пошкодити подальшу роботу:
+Не забудьте виконати **umount** і **disconnect** пристроїв loop/nbd, щоб не залишати висячі mappings, які можуть пошкодити подальшу роботу:
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 ```
 ## Посилання
 
-- Оголошення та специфікація інструменту зображення AFF4: https://github.com/aff4/aff4
-- Сторінка мануалу qemu-nbd (безпечне монтування образів дисків): https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html
+- [1] [Специфікація стандарту AFF4 (Advanced Forensic Format v4)](https://github.com/aff4/Standard)
+- [2] [Сторінка посібника qemu-nbd (безпечне монтування образів дисків)](https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html)
 
 {{#include ../../banners/hacktricks-training.md}}

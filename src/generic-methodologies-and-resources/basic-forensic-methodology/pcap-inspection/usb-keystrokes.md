@@ -1,87 +1,87 @@
-# USB Keystrokes
+# Keystrokes USB
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Якщо у вас є pcap, що містить USB-communication клавіатури, як-от така:
+Якщо у вас є pcap, що містить комунікацію через USB клавіатури, як у наведеному нижче прикладі:
 
-![](<../../../images/image (962).png>)
+![Keystrokes USB: Якщо у вас є pcap, що містить комунікацію через USB клавіатури, як у наведеному нижче прикладі](<../../../images/image (962).png>)
 
-USB keyboards зазвичай використовують HID **boot protocol**, тож кожен interrupt transfer до host має лише 8 bytes: один byte модифікаторів (Ctrl/Shift/Alt/Super), один reserved byte і до шести keycodes на кожен report. Декодування цих bytes достатньо, щоб відновити все, що було введено.
+USB-клавіатури зазвичай використовують **boot protocol** HID, тому кожна interrupt transfer до хоста має довжину лише 8 байтів: один байт бітів модифікаторів (Ctrl/Shift/Alt/Super), один зарезервований байт і до шести keycodes у кожному report. Декодування цих байтів достатнє для відновлення всього введеного тексту.
 
-## USB HID report basics
+## Основи USB HID report
 
-Типовий IN report виглядає так:
+Типовий IN report має такий вигляд:
 
-| Byte | Meaning |
+| Byte | Значення |
 | --- | --- |
-| 0 | Modifier bitmap (`0x02` = Left Shift, `0x20` = Right Alt, etc.). Multiple bits can be set simultaneously. |
-| 1 | Reserved/padding but often reused by gaming keyboards for vendor data. |
-| 2-7 | Up to six concurrent keycodes in USB usage ID format (`0x04 = a`, `0x1E = 1`). `0x00` means "no key". |
+| 0 | Bitmap модифікаторів (`0x02` = Left Shift, `0x20` = Right Alt тощо). Одночасно може бути встановлено кілька бітів. |
+| 1 | Зарезервований байт або padding, але gaming keyboards часто повторно використовують його для vendor data. |
+| 2-7 | До шести одночасних keycodes у форматі USB usage ID (`0x04 = a`, `0x1E = 1`). `0x00` означає "no key". |
 
-Keyboards without NKRO usually send `0x01` in byte 2 when more than six keys are pressed to signal "rollover". Understanding this layout helps when you only have the raw `usb.capdata` bytes.
+Клавіатури без NKRO зазвичай надсилають `0x01` у byte 2, коли натиснуто понад шість клавіш, щоб сигналізувати про "rollover". Розуміння цієї структури допомагає, коли у вас є лише необроблені байти `usb.capdata`.
 
-## Extracting HID data from a PCAP
+## Витягування HID data з PCAP
 
-### Identify the keyboard interface first
+### Спочатку ідентифікуйте інтерфейс клавіатури
 
-On busy captures, identify the HID keyboard before dumping any reports. A reliable starting point is the interface descriptor response:
+У великих capture спочатку ідентифікуйте HID-клавіатуру, перш ніж вивантажувати reports. Надійною відправною точкою є відповідь із описом інтерфейсу:<sup>[[2]](#references)</sup>
 ```text
 usb.transfer_type == 0x02 && usb.endpoint_address.direction == 1 && usb.bDescriptorType == 4 && usb.bInterfaceClass == 3
 ```
-Подивіться на `usb.bInterfaceSubClass` і `usb.bInterfaceProtocol`:
+Перевірте `usb.bInterfaceSubClass` і `usb.bInterfaceProtocol`:
 
-- `subclass == 1` і `protocol == 1` зазвичай означає boot keyboard
-- `protocol == 2` зазвичай означає mouse
-- `protocol == 0` часто означає vendor-defined або NKRO-style HID interface, яка все ще передає keyboard data, але не в простому 8-byte boot layout
+- `subclass == 1` і `protocol == 1` зазвичай означають boot-клавіатуру
+- `protocol == 2` зазвичай означає мишу
+- `protocol == 0` часто означає HID-інтерфейс, визначений виробником, або інтерфейс у стилі NKRO, який усе ще передає дані клавіатури, але не у простому 8-байтовому boot-форматі
 
-Після того як interface визначено, прив’яжіть свої filters до `usb.bus_id`, `usb.device_address` і, якщо можливо, `usb.interface_number` перед тим, як щось експортувати.
+Після визначення інтерфейсу прив'яжіть фільтри до `usb.bus_id`, `usb.device_address` і, якщо можливо, `usb.interface_number`, перш ніж щось експортувати.
 
-### Wireshark workflow
+### Робочий процес у Wireshark
 
-1. **Ізолюйте device**: відфільтруйте interrupt IN traffic від keyboard, наприклад `usb.transfer_type == 0x01 && usb.endpoint_address.direction == "IN" && usb.device_address == 3`.
-2. **Додайте корисні columns**: клацніть правою кнопкою на полі `Leftover Capture Data` (`usb.capdata`) і на ваших prefered `usbhid.*` fields (наприклад, `usbhid.boot_report.keyboard.keycode_1`), щоб відстежувати keystrokes без відкривання кожного frame.
-3. **Приховайте empty reports**: застосуйте `!(usb.capdata == 00:00:00:00:00:00:00:00)`, щоб прибрати idle frames.
-4. **Експортуйте для post-processing**: `File -> Export Packet Dissections -> As CSV`, включіть `frame.number`, `usb.src`, `usb.capdata` і `usbhid.modifiers`, щоб потім автоматизувати reconstruction за допомогою script.
+1. **Ізолюйте пристрій**: фільтруйте interrupt IN-трафік від клавіатури, наприклад `usb.transfer_type == 0x01 && usb.endpoint_address.direction == "IN" && usb.device_address == 3`.
+2. **Додайте корисні стовпці**: клацніть правою кнопкою миші поле `Leftover Capture Data` (`usb.capdata`) і потрібні поля `usbhid.*` (наприклад, `usbhid.boot_report.keyboard.keycode_1`), щоб відстежувати натискання клавіш без відкриття кожного фрейму.
+3. **Приховайте порожні звіти**: застосуйте `!(usb.capdata == 00:00:00:00:00:00:00:00)`, щоб відфільтрувати неактивні фрейми.
+4. **Експортуйте для подальшої обробки**: `File -> Export Packet Dissections -> As CSV`, додавши `frame.number`, `usb.src`, `usb.capdata` і `usbhid.modifiers`, щоб пізніше написати скрипт для реконструкції.
 
-### Command-line workflow
+### Робочий процес у командному рядку
 
-`ctf-usb-keyboard-parser` already automates the classic tshark + sed pipeline:
+`ctf-usb-keyboard-parser` уже автоматизує класичний конвеєр tshark + sed:
 ```bash
 tshark -r ./usb.pcap -Y 'usb.capdata && usb.data_len == 8' -T fields -e usb.capdata | sed 's/../:&/g2' > keystrokes.txt
 python3 usbkeyboard.py ./keystrokes.txt
 ```
-У новіших captures можна зберігати і `usb.capdata`, і більш багате поле `usbhid.data`, групуючи за device:
+У новіших захопленнях можна зберігати і `usb.capdata`, і більш інформативне поле `usbhid.data`, групуючи дані за пристроєм:
 ```bash
 tshark -r usb.pcapng -Y "usb.capdata || usbhid.data" -T fields -e usb.src -e usb.capdata -e usbhid.data | \
 sort -s -k1,1 | \
 awk '{ printf "%s", (NR==1 ? $1 : pre!=$1 ? "\n" $1 : "") " " $2; pre=$1 }' | \
 awk '{ for (i=2; i<=NF; i++) print $i > "usbdata-" $1 ".txt" }'
 ```
-Ті файли для кожного пристрою можна напряму подавати в будь-який decoder. Якщо capture був з BLE keyboards, тунельованих через GATT, відфільтруйте `btatt.value && frame.len == 20` і вивантажте hex payloads перед декодуванням.
+Ці файли для окремих пристроїв можна безпосередньо передати в будь-який decoder. Якщо захоплення отримано з BLE keyboards, тунельованих через GATT, фільтруйте за `btatt.value && frame.len == 20` і збережіть hex payloads перед decoding.
 
-### Коли report не є класичним 8-byte boot report
+### Коли звіт не є класичним 8-байтовим boot report
 
-Сучасні gaming keyboards, split keyboards і composite HID devices часто мають non-boot keyboard interface, де payload уже не відповідає `modifier,reserved,key1..key6`.
+Сучасні gaming keyboards, split keyboards і composite HID devices часто надають non-boot keyboard interface, у якому payload більше не відповідає формату `modifier,reserved,key1..key6`.
 
-- Краще використовувати `usbhid.data`, а не `usb.capdata`, коли Wireshark уже розібрав HID layer.
-- Якщо кожен рядок починається з постійного prefix або report ID, відсікайте його декодером, який враховує offset, а не припускайте, що byte 0 завжди є modifier.
-- Деякі USBPcap exports не містять reserved byte, тож decoders з підтримкою `--no-reserved` або custom offset економлять час.
-- Якщо в capture є HID report descriptor або BLE HOGP report map, використайте їх, щоб відновити реальну структуру полів ще до написання parser.
+- Надавайте перевагу `usbhid.data` перед `usb.capdata`, якщо Wireshark уже розібрав HID layer.
+- Якщо кожен рядок починається з постійного prefix або report ID, видаляйте його за допомогою offset-aware decoder, а не припускайте, що byte 0 завжди є modifier.
+- Деякі USBPcap exports не містять reserved byte, тому decoders із підтримкою `--no-reserved` або custom offset заощадять час.
+- Якщо HID report descriptor або BLE HOGP report map присутній у capture, використайте його для відновлення фактичної структури полів перед написанням parser.
 
 ## Автоматизація decoding
 
-- **ctf-usb-keyboard-parser** досі корисний для швидких CTF challenges і вже є в repository.
-- **CTF-Usb_Keyboard_Parser** (`main.py`) нативно parse-ить як `pcap`, так і `pcapng`, розуміє `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap` і не потребує tshark, тож добре працює в ізольованих sandboxes.
-- **USB-HID-decoders** додає visualizers для keyboard, mouse і tablet. Ви можете або запустити helper `extract_hid_data.sh` (tshark backend), або `extract_hid_data.py` (scapy backend), а потім передати отриманий text file у decoder чи replay modules, щоб побачити, як розгортаються keystrokes.
+- **ctf-usb-keyboard-parser** залишається зручним для швидких CTF challenges і вже постачається в repository.<sup>[[3]](#references)</sup>
+- **CTF-Usb_Keyboard_Parser** (`main.py`) нативно обробляє файли `pcap` і `pcapng`, розуміє `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap` і не потребує tshark, тому добре працює в ізольованих sandboxes.<sup>[[4]](#references)</sup>
+- **USB-HID-decoders** додає visualizers для keyboard, mouse і tablet. Можна запустити helper `extract_hid_data.sh` (tshark backend) або `extract_hid_data.py` (scapy backend), а потім передати отриманий text file у decoder або replay modules, щоб спостерігати за відтворенням натискань клавіш.<sup>[[5]](#references)</sup>
 
-### Stateful decoding має значення
+### Важливість stateful decoding
 
-USB interrupt captures зазвичай містять і key press, і одну або кілька повторних копій того самого report до надходження release event. Практичний decoder має:
+USB interrupt captures зазвичай містять як натискання клавіші, так і одну або кілька повторних копій того самого report до надходження event відпускання. Практичний decoder має:<sup>[[2]](#references)</sup>
 
 - виводити лише нові keycodes порівняно з попереднім report
-- зберігати modifier state (`Shift`, `Ctrl`, `AltGr`) з byte 0 або з розібраного поля `usbhid.boot_report.keyboard.modifier`
-- відстежувати toggle keys на кшталт `Caps Lock`, бо uppercase output не контролюється лише Shift
-- пам’ятати, що HID usage IDs не залежать від layout: `0x1d` — це фізична позиція клавіші `z`/`y` залежно від keyboard layout на host
+- зберігати стан modifier (`Shift`, `Ctrl`, `AltGr`) із byte 0 або розібраного поля `usbhid.boot_report.keyboard.modifier`
+- відстежувати toggle keys, наприклад `Caps Lock`, оскільки виведення великих літер залежить не лише від Shift
+- пам’ятати, що HID usage IDs не залежать від розкладки: `0x1d` відповідає фізичній позиції клавіші `z`/`y` залежно від розкладки keyboard на host
 
 ## Швидкий Python decoder
 ```python
@@ -112,19 +112,22 @@ char = char.upper()
 sys.stdout.write(char)
 prev = current
 ```
-Подавайте їм прості hex-рядки, скинуті раніше, щоб одразу отримати приблизну реконструкцію без підключення повного parser до середовища. Для non-US layouts це все ще відновлює physical key position, а не обов’язково final glyph, який бачився на host жертви.
+Подайте йому звичайні hex-рядки, збережені раніше, щоб миттєво отримати приблизну реконструкцію без підключення повного parser до середовища. Для не-US розкладок це все одно відновлює фізичну позицію клавіші, але не обов’язково кінцевий glyph, показаний на host жертви.
 
-## Troubleshooting tips
+## Поради з усунення несправностей
 
-- If Wireshark does not populate `usbhid.*` fields, the HID report descriptor was probably not captured. Replug the keyboard while capturing or fall back to raw `usb.capdata`.
-- On Linux software captures, `usbmon` is the normal source; on Windows, Wireshark depends on the **USBPcap** extcap to see raw USB URBs at all.
-- If the keyboard was attached through a hub or dock, confirm the interface descriptor first and then decode only that device/interface pair. Composite HID captures frequently mix keyboard and mouse reports.
-- Windows captures require the **USBPcap** extcap interface; make sure it survived Wireshark upgrades, as missing extcaps leave you with empty device lists.
-- Always correlate `usb.bus_id:device:interface` (e.g. `1.9.1`) before decoding anything — mixing multiple keyboards or storage devices leads to nonsense keystrokes.
+- Якщо Wireshark не заповнює поля `usbhid.*`, імовірно, HID report descriptor не було захоплено. Перепід’єднайте клавіатуру під час захоплення або перейдіть до raw `usb.capdata`.
+- У software captures на Linux звичайним джерелом є `usbmon`; у Windows Wireshark залежить від extcap **USBPcap**, щоб узагалі бачити raw USB URBs.<sup>[[1]](#references)</sup>
+- Якщо клавіатуру підключено через hub або dock, спочатку перевірте interface descriptor, а потім декодуйте лише цю пару device/interface. Composite HID captures часто змішують keyboard і mouse reports.
+- Для Windows captures потрібен extcap interface **USBPcap**; переконайтеся, що він зберігся після оновлень Wireshark, оскільки відсутні extcaps залишають порожні списки пристроїв.<sup>[[1]](#references)</sup>
+- Завжди зіставляйте `usb.bus_id:device:interface` (наприклад, `1.9.1`) перед декодуванням — змішування кількох клавіатур або storage devices призводить до безглуздих keystrokes.
 
 ## References
 
-- [Wireshark USB capture setup](https://wiki.wireshark.org/CaptureSetup/USB)
-- [ACSC Quals 2023 - pcap 1, 2 write-up](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
+- [1] [Налаштування захоплення USB у Wireshark](https://wiki.wireshark.org/CaptureSetup/USB)
+- [2] [ACSC Quals 2023 - pcap 1, 2 write-up](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
+- [3] [ctf-usb-keyboard-parser](https://github.com/TeamRocketIst/ctf-usb-keyboard-parser)
+- [4] [CTF-Usb_Keyboard_Parser](https://github.com/5h4rrk/CTF-Usb_Keyboard_Parser)
+- [5] [USB-HID-decoders](https://github.com/Nissen96/USB-HID-decoders)
 
 {{#include ../../../banners/hacktricks-training.md}}

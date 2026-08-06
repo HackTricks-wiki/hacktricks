@@ -1,6 +1,8 @@
+# Методи деобфускації файлів VBS
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-Деякі речі, які можуть бути корисними для налагодження/дебофускації шкідливого VBS файлу:
+Деякі речі, які можуть бути корисними для налагодження/деобфускації шкідливого VBS-файлу:
 
 ## echo
 ```bash
@@ -14,7 +16,7 @@ Wscript.Echo "Like this?"
 ```bash
 cscript.exe file.vbs
 ```
-## Записати дані у файл
+## Запис даних у файл
 ```js
 Function writeBinary(strBinary, strPath)
 

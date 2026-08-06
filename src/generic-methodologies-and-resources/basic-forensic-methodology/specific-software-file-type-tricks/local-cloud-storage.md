@@ -1,96 +1,102 @@
-# Локальне хмарне сховище
+# Локальне Cloud Storage
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+
 ## OneDrive
 
-В Windows ви можете знайти папку OneDrive за адресою `\Users\<username>\AppData\Local\Microsoft\OneDrive`. А всередині `logs\Personal` можна знайти файл `SyncDiagnostics.log`, який містить цікаві дані щодо синхронізованих файлів:
+У Windows папку OneDrive можна знайти за шляхом `\Users\<username>\AppData\Local\Microsoft\OneDrive`. А всередині `logs\Personal` можна знайти файл `SyncDiagnostics.log`, який містить деякі цікаві дані щодо синхронізованих файлів:
 
 - Розмір у байтах
 - Дата створення
-- Дата модифікації
-- Кількість файлів у хмарі
+- Дата зміни
+- Кількість файлів у cloud
 - Кількість файлів у папці
 - **CID**: Унікальний ID користувача OneDrive
-- Час генерації звіту
-- Розмір жорсткого диска ОС
+- Час створення звіту
+- Розмір HD операційної системи
 
-Після того, як ви знайдете CID, рекомендується **шукати файли, що містять цей ID**. Ви можете знайти файли з іменами: _**\<CID>.ini**_ та _**\<CID>.dat**_, які можуть містити цікаву інформацію, таку як назви файлів, синхронізованих з OneDrive.
+Після знаходження CID рекомендується **шукати файли, що містять цей ID**. Можливо, ви знайдете файли з назвами: _**\<CID>.ini**_ і _**\<CID>.dat**_, які можуть містити цікаву інформацію, наприклад назви файлів, синхронізованих із OneDrive.
 
 ## Google Drive
 
-В Windows ви можете знайти основну папку Google Drive за адресою `\Users\<username>\AppData\Local\Google\Drive\user_default`\
-Ця папка містить файл під назвою Sync_log.log з інформацією, такою як адреса електронної пошти облікового запису, імена файлів, часові мітки, MD5 хеші файлів тощо. Навіть видалені файли з'являються в цьому лог-файлі з відповідним MD5.
+У Windows основну папку Google Drive можна знайти за шляхом `\Users\<username>\AppData\Local\Google\Drive\user_default`\
+Ця папка містить файл Sync_log.log з такою інформацією, як адреса електронної пошти облікового запису, імена файлів, часові мітки, MD5-хеші файлів тощо. Навіть видалені файли відображаються в цьому log-файлі з відповідним MD5.
 
-Файл **`Cloud_graph\Cloud_graph.db`** є базою даних sqlite, яка містить таблицю **`cloud_graph_entry`**. У цій таблиці ви можете знайти **ім'я** **синхронізованих** **файлів**, час модифікації, розмір та MD5 контрольну суму файлів.
+Файл **`Cloud_graph\Cloud_graph.db`** є базою даних sqlite, яка містить таблицю **`cloud_graph_entry`**. У цій таблиці можна знайти **назви** **синхронізованих** **файлів**, час зміни, розмір і MD5 checksum файлів.
 
-Дані таблиці бази даних **`Sync_config.db`** містять адресу електронної пошти облікового запису, шлях до спільних папок та версію Google Drive.
+Дані таблиці бази даних **`Sync_config.db`** містять адресу електронної пошти облікового запису, шлях до спільних папок і версію Google Drive.
 
 ## Dropbox
 
-Dropbox використовує **SQLite бази даних** для управління файлами. У цьому\
-Ви можете знайти бази даних у папках:
+Dropbox використовує **SQLite databases** для керування файлами. У цій\
+Ви можете знайти databases у таких папках:
 
 - `\Users\<username>\AppData\Local\Dropbox`
 - `\Users\<username>\AppData\Local\Dropbox\Instance1`
 - `\Users\<username>\AppData\Roaming\Dropbox`
 
-А основні бази даних:
+Основними databases є:
 
 - Sigstore.dbx
 - Filecache.dbx
 - Deleted.dbx
 - Config.dbx
 
-Розширення ".dbx" означає, що **бази даних** є **зашифрованими**. Dropbox використовує **DPAPI** ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](<https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN>))
+Розширення ".dbx" означає, що **databases** **зашифровані**. Dropbox використовує **DPAPI** ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](<https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN>))
 
-Щоб краще зрозуміти шифрування, яке використовує Dropbox, ви можете прочитати [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html).
+Щоб краще зрозуміти шифрування, яке використовує Dropbox, можна прочитати [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html).<sup>[[1]](#references)[[2]](#references)</sup>
 
-Однак основна інформація:
+Однак основна інформація така:<sup>[[1]](#references)</sup>
 
-- **Ентропія**: d114a55212655f74bd772e37e64aee9b
-- **Сіль**: 0D638C092E8B82FC452883F95F355B8E
-- **Алгоритм**: PBKDF2
-- **Ітерації**: 1066
+- **Entropy**: d114a55212655f74bd772e37e64aee9b
+- **Salt**: 0D638C092E8B82FC452883F95F355B8E
+- **Algorithm**: PBKDF2
+- **Iterations**: 1066
 
-Окрім цієї інформації, для розшифровки баз даних вам також знадобиться:
+Окрім цієї інформації, для розшифрування databases вам також потрібні:<sup>[[2]](#references)</sup>
 
-- **зашифрований ключ DPAPI**: Ви можете знайти його в реєстрі за адресою `NTUSER.DAT\Software\Dropbox\ks\client` (експортуйте ці дані у бінарному вигляді)
-- **`SYSTEM`** та **`SECURITY`** хіви
-- **майстер-ключі DPAPI**: які можна знайти за адресою `\Users\<username>\AppData\Roaming\Microsoft\Protect`
-- **ім'я користувача** та **пароль** користувача Windows
+- **Зашифрований ключ DPAPI**: його можна знайти в registry всередині `NTUSER.DAT\Software\Dropbox\ks\client` (експортуйте ці дані як binary)
+- Hive **`SYSTEM`** і **`SECURITY`**
+- **Master keys DPAPI**: їх можна знайти в `\Users\<username>\AppData\Roaming\Microsoft\Protect`
+- **Username** і **password** користувача Windows
 
-Тоді ви можете використовувати інструмент [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**:**
+Після цього можна використати tool [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**:**
 
-![](<../../../images/image (443).png>)
+![Google Drive - Dropbox: Після цього можна використати tool DataProtectionDecryptor](<../../../images/image (443).png>)
 
-Якщо все пройде як очікувалося, інструмент вкаже на **основний ключ**, який вам потрібно **використати для відновлення оригінального**. Щоб відновити оригінал, просто використовуйте цей [рецепт cyber_chef](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) ставлячи основний ключ як "пароль" у рецепті.
+Якщо все відбувається очікувано, tool покаже **primary key**, який потрібно **використати для відновлення оригінального ключа**. Щоб відновити оригінальний ключ, просто використайте цей [cyber_chef receipt](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) і вставте primary key як "passphrase" всередині receipt.
 
-Отриманий hex є фінальним ключем, використаним для шифрування баз даних, який можна розшифрувати за допомогою:
+Отриманий hex є фінальним ключем, який використовується для шифрування databases і може бути розшифрований за допомогою:
 ```bash
 sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
 База даних **`config.dbx`** містить:
 
-- **Email**: Електронна пошта користувача
-- **usernamedisplayname**: Ім'я користувача
-- **dropbox_path**: Шлях, де розташована папка dropbox
-- **Host_id: Hash** використовується для автентифікації в хмарі. Його можна відкликати лише з вебу.
-- **Root_ns**: Ідентифікатор користувача
+- **Email**: електронна пошта користувача
+- **usernamedisplayname**: ім’я користувача
+- **dropbox_path**: шлях до розташування папки Dropbox
+- **Host_id: Hash**: хеш, що використовується для автентифікації у cloud. Його можна відкликати лише через веб-інтерфейс.
+- **Root_ns**: ідентифікатор користувача
 
-База даних **`filecache.db`** містить інформацію про всі файли та папки, синхронізовані з Dropbox. Таблиця `File_journal` містить найбільше корисної інформації:
+База даних **`filecache.db`** містить інформацію про всі файли та папки, синхронізовані з Dropbox. Таблиця `File_journal` містить найбільш корисну інформацію:
 
-- **Server_path**: Шлях, де файл розташований на сервері (цей шлях передує `host_id` клієнта).
-- **local_sjid**: Версія файлу
-- **local_mtime**: Дата модифікації
-- **local_ctime**: Дата створення
+- **Server_path**: шлях, де файл розташований на сервері (цьому шляху передує `host_id` клієнта).
+- **local_sjid**: версія файлу
+- **local_mtime**: дата зміни
+- **local_ctime**: дата створення
 
-Інші таблиці в цій базі даних містять більш цікаву інформацію:
+Інші таблиці в цій базі даних містять додаткову цікаву інформацію:
 
 - **block_cache**: хеш усіх файлів і папок Dropbox
-- **block_ref**: Зв'язує хеш ID таблиці `block_cache` з ID файлу в таблиці `file_journal`
-- **mount_table**: Спільні папки Dropbox
-- **deleted_fields**: Видалені файли Dropbox
+- **block_ref**: пов’язує ідентифікатор хешу з таблиці `block_cache` з ідентифікатором файлу в таблиці `file_journal`
+- **mount_table**: спільні папки Dropbox
+- **deleted_fields**: видалені файли Dropbox
 - **date_added**
+
+## References
+
+- [1] [Критичний аналіз безпеки програмного забезпечення Dropbox (hack.lu 2012)](http://archive.hack.lu/2012/Dropbox%20security.pdf)
+- [2] [Оновлення знань про розшифрування Dropbox DBX](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

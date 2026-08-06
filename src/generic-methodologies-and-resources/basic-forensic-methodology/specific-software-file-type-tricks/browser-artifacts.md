@@ -2,57 +2,57 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Browsers Artifacts <a href="#id-3def" id="id-3def"></a>
+## Артефакти браузера <a href="#id-3def" id="id-3def"></a>
 
-Артефакти браузера включають різні типи даних, які зберігають веб-браузери, такі як історія переходів, закладки та кеш. Ці артефакти зберігаються у специфічних папках в операційній системі, відрізняючись за розташуванням і назвою між браузерами, але зазвичай містять схожі типи даних.
+Артефакти браузера охоплюють різні типи даних, що зберігаються веб-браузерами, зокрема історію навігації, закладки та дані кешу. Ці артефакти зберігаються у визначених папках операційної системи, розташування та назви яких відрізняються залежно від браузера, але зазвичай містять подібні типи даних.
 
-Короткий опис найпоширеніших артефактів браузера:
+Ось короткий огляд найпоширеніших артефактів браузера:
 
-- **Navigation History**: Слідкує за відвідинами користувачем вебсайтів, корисно для ідентифікації переходів на зловмисні сайти.
-- **Autocomplete Data**: Пропозиції на основі частих пошукових запитів, дають додаткову інформацію при комбінуванні з історією переходів.
-- **Bookmarks**: Сайти, збережені користувачем для швидкого доступу.
-- **Extensions and Add-ons**: Розширення або додатки, встановлені користувачем.
-- **Cache**: Зберігає веб-контент (наприклад, зображення, JavaScript-файли) для пришвидшення завантаження сторінок, цінний для судово-медичного аналізу.
-- **Logins**: Збережені облікові дані.
-- **Favicons**: Іконки, пов’язані з вебсайтами, що з’являються у вкладках і закладках, корисні для додаткової інформації про відвідини.
-- **Browser Sessions**: Дані, пов’язані з відкритими сесіями браузера.
-- **Downloads**: Записи про файли, завантажені через браузер.
-- **Form Data**: Інформація, введена у веб-форми, збережена для автозаповнення в майбутньому.
-- **Thumbnails**: Зображення-прев’ю сайтів.
-- **Custom Dictionary.txt**: Слова, додані користувачем у словник браузера.
+- **Історія навігації**: відстежує відвідування користувачем вебсайтів і допомагає визначити відвідування malicious-сайтів.
+- **Дані автозаповнення**: пропозиції на основі частих пошукових запитів, які в поєднанні з історією навігації можуть надати додаткові відомості.
+- **Закладки**: сайти, збережені користувачем для швидкого доступу.
+- **Розширення та Add-ons**: розширення або add-ons браузера, встановлені користувачем.
+- **Кеш**: зберігає вебконтент (наприклад, зображення та JavaScript-файли) для пришвидшення завантаження вебсайтів і є цінним для forensic analysis.
+- **Logins**: збережені облікові дані для входу.
+- **Favicons**: піктограми, пов’язані з вебсайтами, які відображаються у вкладках і закладках та можуть надати додаткову інформацію про відвідування користувачем.
+- **Сесії браузера**: дані, пов’язані з відкритими сесіями браузера.
+- **Завантаження**: записи файлів, завантажених через браузер.
+- **Дані форм**: інформація, введена у вебформи та збережена для майбутніх пропозицій автозаповнення.
+- **Мініатюри**: зображення-попередній перегляд вебсайтів.
+- **Custom Dictionary.txt**: слова, додані користувачем до словника браузера.
 
 ## Firefox
 
-Firefox організовує дані користувача в профілях, що зберігаються в певних місцях залежно від операційної системи:
+Firefox упорядковує дані користувача в профілях, що зберігаються у визначених місцях залежно від операційної системи:<sup>[[1]](#references)</sup>
 
 - **Linux**: `~/.mozilla/firefox/`
 - **MacOS**: `/Users/$USER/Library/Application Support/Firefox/Profiles/`
-- **Windows**: `%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles/`
+- **Windows**: `%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\`
 
-Файл `profiles.ini` в цих директоріях перераховує профілі користувача. Дані кожного профілю зберігаються в папці, вказаній у змінній `Path` всередині `profiles.ini`, яка знаходиться в тій самій директорії, що й `profiles.ini`. Якщо папка профілю відсутня, можливо її було видалено.
+Файл `profiles.ini` у цих каталогах містить перелік профілів користувача. Дані кожного профілю зберігаються в папці, назва якої вказана у змінній `Path` у файлі `profiles.ini`; ця папка розташована в тому самому каталозі, що й сам файл `profiles.ini`. Якщо папка профілю відсутня, можливо, її було видалено.
 
-У кожній папці профілю можна знайти кілька важливих файлів:
+У папці кожного профілю можна знайти кілька важливих файлів:<sup>[[1]](#references)</sup>
 
-- **places.sqlite**: Зберігає історію, закладки та завантаження. Інструменти на кшталт [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) на Windows можуть отримати доступ до даних історії.
-- Використовуйте специфічні SQL-запити для витягання інформації про історію та завантаження.
-- **bookmarkbackups**: Містить резервні копії закладок.
-- **formhistory.sqlite**: Зберігає дані веб-форм.
-- **handlers.json**: Керує обробниками протоколів.
-- **persdict.dat**: Слова з користувацького словника.
-- **addons.json** та **extensions.sqlite**: Інформація про встановлені аддони та розширення.
-- **cookies.sqlite**: Зберігання cookie; для перегляду на Windows доступний [MZCookiesView](https://www.nirsoft.net/utils/mzcv.html).
-- **cache2/entries** або **startupCache**: Дані кешу, доступні через інструменти на кшталт [MozillaCacheView](https://www.nirsoft.net/utils/mozilla_cache_viewer.html).
-- **favicons.sqlite**: Зберігає favicons.
-- **prefs.js**: Налаштування та переваги користувача.
-- **downloads.sqlite**: Стара база даних завантажень, тепер інтегрована в places.sqlite.
-- **thumbnails**: Ескізи сайтів.
-- **logins.json**: Зашифровані дані входу.
-- **key4.db** або **key3.db**: Зберігає ключі шифрування для захисту конфіденційної інформації.
+- **places.sqlite**: зберігає історію, закладки та завантаження. У Windows для доступу до даних історії можна використовувати такі інструменти, як [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html).
+- Використовуйте специфічні SQL-запити для отримання інформації про історію та завантаження.
+- **bookmarkbackups**: містить резервні копії закладок.
+- **formhistory.sqlite**: зберігає дані вебформ.
+- **handlers.json**: керує обробниками протоколів.
+- **persdict.dat**: слова користувацького словника.
+- **addons.json** та **extensions.sqlite**: інформація про встановлені add-ons і розширення.
+- **cookies.sqlite**: сховище cookies; у Windows для перевірки можна використовувати [MZCookiesView](https://www.nirsoft.net/utils/mzcv.html).
+- **cache2/entries** або **startupCache**: дані кешу, доступні через такі інструменти, як [MozillaCacheView](https://www.nirsoft.net/utils/mozilla_cache_viewer.html).
+- **favicons.sqlite**: зберігає favicons.
+- **prefs.js**: налаштування та параметри користувача.
+- **downloads.sqlite**: стара база даних завантажень, тепер інтегрована в places.sqlite.
+- **thumbnails**: мініатюри вебсайтів.
+- **logins.json**: зашифрована інформація для входу.
+- **key4.db** або **key3.db**: зберігає ключі шифрування для захисту конфіденційної інформації.
 
-Також перевірка налаштувань антифішингу браузера може бути здійснена пошуком записів `browser.safebrowsing` у `prefs.js`, що вказує, чи увімкнені або вимкнені функції безпечного перегляду.
+Крім того, перевірити anti-phishing settings браузера можна, виконавши пошук записів `browser.safebrowsing` у `prefs.js`; вони вказують, чи ввімкнено або вимкнено функції safe browsing.<sup>[[2]](#references)</sup>
 
-To try to decrypt the master password, you can use [https://github.com/unode/firefox_decrypt](https://github.com/unode/firefox_decrypt)\
-With the following script and call you can specify a password file to brute force:
+Щоб спробувати розшифрувати master password, можна використати [https://github.com/unode/firefox_decrypt](https://github.com/unode/firefox_decrypt)\
+За допомогою наведеного нижче скрипта та виклику можна вказати файл паролів для brute force:
 ```bash:brute.sh
 #!/bin/bash
 
@@ -63,73 +63,73 @@ echo "Trying $pass"
 echo "$pass" | python firefox_decrypt.py
 done < $passfile
 ```
-![](<../../../images/image (692).png>)
+![Артефакти браузерів - Firefox: echo "$pass" | python firefox decrypt.py](<../../../images/image (692).png>)
 
 ## Google Chrome
 
-Google Chrome зберігає профілі користувачів у певних місцях залежно від операційної системи:
+Google Chrome зберігає профілі користувачів у певних місцях залежно від операційної системи:<sup>[[1]](#references)</sup>
 
 - **Linux**: `~/.config/google-chrome/`
 - **Windows**: `C:\Users\XXX\AppData\Local\Google\Chrome\User Data\`
 - **MacOS**: `/Users/$USER/Library/Application Support/Google/Chrome/`
 
-У цих директоріях більшість даних користувача знаходяться в папках **Default/** або **ChromeDefaultData/**. Наступні файли містять важливу інформацію:
+У цих каталогах більшість даних користувача можна знайти в папках **Default/** або **ChromeDefaultData/**. Наступні файли містять важливі дані:<sup>[[1]](#references)</sup>
 
-- **History**: Містить URL, завантаження та ключові слова пошуку. У Windows для читання history можна використати [ChromeHistoryView](https://www.nirsoft.net/utils/chrome_history_view.html). Стовпець "Transition Type" має різні значення, включаючи кліки користувача по посиланнях, введені URL, відправку форм і перезавантаження сторінки.
-- **Cookies**: Зберігає cookies. Для перегляду доступний [ChromeCookiesView](https://www.nirsoft.net/utils/chrome_cookies_view.html).
-- **Cache**: Містить кешовані дані. Для огляду користувачі Windows можуть використати [ChromeCacheView](https://www.nirsoft.net/utils/chrome_cache_view.html).
+- **History**: Містить URL-адреси, завантаження та пошукові ключові слова. У Windows для читання історії можна використовувати [ChromeHistoryView](https://www.nirsoft.net/utils/chrome_history_view.html). Стовпець "Transition Type" має різні значення, зокрема кліки користувача на посиланнях, введені URL-адреси, надсилання форм і перезавантаження сторінок.
+- **Cookies**: Зберігає куки. Для перегляду можна використовувати [ChromeCookiesView](https://www.nirsoft.net/utils/chrome_cookies_view.html).
+- **Cache**: Містить кешовані дані. Для перегляду користувачі Windows можуть скористатися [ChromeCacheView](https://www.nirsoft.net/utils/chrome_cache_view.html).
 
-Electron-based desktop apps (e.g., Discord) також використовують Chromium Simple Cache і залишають багаті артефакти на диску. Див.:
+Desktop apps на базі Electron (наприклад, Discord) також використовують Chromium Simple Cache і залишають значну кількість артефактів на диску. Дивіться:
 
 {{#ref}}
 discord-cache-forensics.md
 {{#endref}}
 - **Bookmarks**: Закладки користувача.
 - **Web Data**: Містить історію форм.
-- **Favicons**: Зберігає favicon сайтів.
-- **Login Data**: Містить облікові дані для входу, такі як імена користувачів і паролі.
-- **Current Session**/**Current Tabs**: Дані про поточну сесію браузера та відкриті вкладки.
-- **Last Session**/**Last Tabs**: Інформація про сайти, активні під час останньої сесії перед закриттям Chrome.
-- **Extensions**: Директорії для розширень і додатків браузера.
-- **Thumbnails**: Зберігає мініатюри сайтів.
-- **Preferences**: Файл, багатий на інформацію, включаючи налаштування плагінів, розширень, спливаючих вікон, сповіщень тощо.
-- **Browser’s built-in anti-phishing**: Щоб перевірити, чи увімкнено захист від фішингу та шкідливого ПЗ, виконайте `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`. Шукайте `{"enabled: true,"}` у виводі.
+- **Favicons**: Зберігає favicon вебсайтів.
+- **Login Data**: Містить облікові дані для входу, зокрема імена користувачів і паролі.
+- **Current Session**/**Current Tabs**: Дані про поточний сеанс перегляду та відкриті вкладки.
+- **Last Session**/**Last Tabs**: Інформація про сайти, активні під час останнього сеансу перед закриттям Chrome.
+- **Extensions**: Каталоги browser extensions і addons.
+- **Thumbnails**: Зберігає мініатюри вебсайтів.
+- **Preferences**: Файл, що містить значний обсяг інформації, зокрема налаштування plugins, extensions, pop-ups, notifications тощо.
+- **Вбудований у браузер anti-phishing**: Щоб перевірити, чи ввімкнено anti-phishing і захист від malware, виконайте `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`. У виводі знайдіть `{"enabled: true,"}`.<sup>[[2]](#references)</sup>
 
-## **SQLite DB Data Recovery**
+## **Відновлення даних SQLite DB**
 
-Як видно з попередніх розділів, і Chrome, і Firefox використовують **SQLite** бази даних для зберігання даних. Можна **відновити видалені записи за допомогою інструменту** [**sqlparse**](https://github.com/padfoot999/sqlparse) **або** [**sqlparse_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases).
+Як можна побачити в попередніх розділах, Chrome і Firefox використовують бази даних **SQLite** для зберігання даних. **Видалені записи можна відновити за допомогою інструмента** [**sqlparse**](https://github.com/padfoot999/sqlparse) **або** [**sqlparse_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases).
 
 ## **Internet Explorer 11**
 
-Internet Explorer 11 керує своїми даними та метаданими в різних місцях, що дозволяє розділяти збережену інформацію та відповідні деталі для зручного доступу й управління.
+Internet Explorer 11 керує своїми даними та metadata у різних місцях, що допомагає відокремлювати збережену інформацію від відповідних деталей для зручного доступу й керування.
 
-### Metadata Storage
+### Зберігання metadata
 
-Метадані Internet Explorer зберігаються в `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` (де VX — V01, V16 або V24). Додатково файл `V01.log` може показувати невідповідність часу модифікації з `WebcacheVX.data`, що вказує на необхідність ремонту за допомогою `esentutl /r V01 /d`. Ці метадані, які розміщені в ESE базі даних, можна відновити та проаналізувати за допомогою інструментів типу photorec і [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html). У таблиці **Containers** можна визначити конкретні таблиці або контейнери, де зберігається кожен сегмент даних, включаючи деталі кешу для інших Microsoft-інструментів, таких як Skype.
+Metadata для Internet Explorer зберігаються в `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` (де VX може бути V01, V16 або V24). Водночас файл `V01.log` може показувати розбіжності в часі модифікації порівняно з `WebcacheVX.data`, що вказує на потребу відновлення за допомогою `esentutl /r V01 /d`. Ці metadata, що зберігаються в базі даних ESE, можна відновити та перевірити за допомогою таких інструментів, як photorec і [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html), відповідно. У таблиці **Containers** можна визначити конкретні таблиці або контейнери, у яких зберігається кожен сегмент даних, зокрема деталі кешу для інших інструментів Microsoft, таких як Skype.
 
-### Cache Inspection
+### Перевірка кешу
 
-Інструмент [IECacheView](https://www.nirsoft.net/utils/ie_cache_viewer.html) дозволяє оглядати кеш, вимагаючи вказати папку з витягнутими даними кешу. Метадані кешу включають ім’я файлу, директорію, лічильник доступів, URL-джерело та часові мітки створення, доступу, модифікації і терміну дії кешу.
+Інструмент [IECacheView](https://www.nirsoft.net/utils/ie_cache_viewer.html) дає змогу перевіряти кеш; для цього потрібно вказати розташування папки з витягнутими даними кешу. Metadata кешу містять ім’я файлу, каталог, кількість доступів, джерело URL і часові позначки створення, доступу, модифікації та завершення терміну дії кешу.
 
-### Cookies Management
+### Керування cookies
 
-Куки можна дослідити за допомогою [IECookiesView](https://www.nirsoft.net/utils/iecookies.html); метадані охоплюють імена, URL, лічильники доступів та різні часові деталі. Постійні куки зберігаються в `%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies`, тоді як сесійні куки перебувають у пам’яті.
+Cookies можна переглядати за допомогою [IECookiesView](https://www.nirsoft.net/utils/iecookies.html). Metadata охоплюють імена, URL-адреси, кількість доступів та різні часові дані. Постійні cookies зберігаються в `%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies`, а session cookies перебувають у пам’яті.
 
-### Download Details
+### Деталі завантажень
 
-Метадані про завантаження доступні через [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html), причому певні контейнери зберігають дані такі як URL, тип файлу і місце завантаження. Файли на диску можна знайти в `%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory`.
+Metadata завантажень доступні через [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html); певні контейнери містять такі дані, як URL, тип файлу та розташування завантаження. Фізичні файли можна знайти в `%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory`.
 
-### Browsing History
+### Історія перегляду
 
-Для перегляду історії браузера можна використати [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html), вказавши місце витягнутих файлів історії і налаштувавши інструмент для Internet Explorer. Метадані включають часи модифікації й доступу, а також лічильники доступів. Файли історії розташовані в `%userprofile%\Appdata\Local\Microsoft\Windows\History`.
+Для перегляду історії можна використовувати [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html), указавши розташування витягнутих файлів історії та налаштувавши Internet Explorer. Ці metadata містять час модифікації й доступу, а також кількість доступів. Файли історії розташовані в `%userprofile%\Appdata\Local\Microsoft\Windows\History`.
 
-### Typed URLs
+### Введені URL-адреси
 
-Введені URL та часи їх використання зберігаються в реєстрі в NTUSER.DAT за шляхами `Software\Microsoft\InternetExplorer\TypedURLs` та `Software\Microsoft\InternetExplorer\TypedURLsTime`, відстежуючи останні 50 URL, введених користувачем, та часи їхнього останнього вводу.
+Введені URL-адреси та час їх використання зберігаються в registry у `NTUSER.DAT` за шляхами `Software\Microsoft\InternetExplorer\TypedURLs` і `Software\Microsoft\InternetExplorer\TypedURLsTime`. Вони містять останні 50 URL-адрес, введених користувачем, і час їх останнього введення.
 
 ## Microsoft Edge
 
-Microsoft Edge зберігає дані користувача в `%userprofile%\Appdata\Local\Packages`. Шляхи до різних типів даних:
+Microsoft Edge зберігає дані користувача в `%userprofile%\Appdata\Local\Packages`. Шляхи до різних типів даних:<sup>[[1]](#references)</sup>
 
 - **Profile Path**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC`
 - **History, Cookies, and Downloads**: `C:\Users\XX\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat`
@@ -139,31 +139,29 @@ Microsoft Edge зберігає дані користувача в `%userprofile
 
 ## Safari
 
-Дані Safari зберігаються в `/Users/$User/Library/Safari`. Ключові файли включають:
+Дані Safari зберігаються в `/Users/$User/Library/Safari`. Основні файли:<sup>[[3]](#references)</sup>
 
-- **History.db**: Містить таблиці `history_visits` і `history_items` з URL та часовими мітками відвідувань. Використовуйте `sqlite3` для запитів.
+- **History.db**: Містить таблиці `history_visits` і `history_items` з URL-адресами та часовими позначками відвідувань. Для запитів використовуйте `sqlite3`.
 - **Downloads.plist**: Інформація про завантажені файли.
-- **Bookmarks.plist**: Збережені закладки.
+- **Bookmarks.plist**: Зберігає URL-адреси закладок.
 - **TopSites.plist**: Найчастіше відвідувані сайти.
-- **Extensions.plist**: Список розширень Safari. Використовуйте `plutil` або `pluginkit` для отримання інформації.
-- **UserNotificationPermissions.plist**: Домени, яким дозволено надсилати сповіщення. Використовуйте `plutil` для парсингу.
-- **LastSession.plist**: Вкладки з останньої сесії. Використовуйте `plutil` для парсингу.
-- **Browser’s built-in anti-phishing**: Перевірте за допомогою `defaults read com.apple.Safari WarnAboutFraudulentWebsites`. Відповідь 1 означає, що функція активна.
+- **Extensions.plist**: Список browser extensions Safari. Для отримання даних використовуйте `plutil` або `pluginkit`.
+- **UserNotificationPermissions.plist**: Домени, яким дозволено надсилати push notifications. Для аналізу використовуйте `plutil`.
+- **LastSession.plist**: Вкладки з останнього сеансу. Для аналізу використовуйте `plutil`.
+- **Вбудований у браузер anti-phishing**: Перевірте за допомогою `defaults read com.apple.Safari WarnAboutFraudulentWebsites`. Відповідь 1 означає, що функцію активовано.<sup>[[2]](#references)</sup>
 
 ## Opera
 
-Дані Opera розташовані в `/Users/$USER/Library/Application Support/com.operasoftware.Opera` і мають формат історії та завантажень, подібний до Chrome.
+Дані Opera зберігаються в `/Users/$USER/Library/Application Support/com.operasoftware.Opera` і використовують такий самий формат для історії та завантажень, як Chrome.
 
-- **Browser’s built-in anti-phishing**: Переконайтеся, що `fraud_protection_enabled` у файлі Preferences встановлено в `true`, використовуючи `grep`.
+- **Вбудований у браузер anti-phishing**: Перевірте, чи встановлено `fraud_protection_enabled` у файлі Preferences у значення `true`, за допомогою `grep`.<sup>[[2]](#references)</sup>
 
-Ці шляхи та команди є ключовими для доступу та розуміння даних перегляду, що зберігаються різними веб-браузерами.
+Ці шляхи та команди мають важливе значення для доступу до даних перегляду, що зберігаються різними web browsers, і їх розуміння.
 
-## References
+## Посилання
 
-- [https://nasbench.medium.com/web-browsers-forensics-7e99940c579a](https://nasbench.medium.com/web-browsers-forensics-7e99940c579a)
-- [https://www.sentinelone.com/labs/macos-incident-response-part-3-system-manipulation/](https://www.sentinelone.com/labs/macos-incident-response-part-3-system-manipulation/)
-- [https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file](https://books.google.com/books?id=jfMqCgAAQBAJ&pg=PA128&lpg=PA128&dq=%22This+file)
-- **Book: OS X Incident Response: Scripting and Analysis By Jaron Bradley pag 123**
-
+- [1] [Forensics веббраузерів: посібник із проведення forensic analysis веббраузерів](https://nasbench.medium.com/web-browsers-forensics-7e99940c579a)
+- [2] [Incident Response у macOS | Частина 3: System Manipulation](https://www.sentinelone.com/labs/macos-incident-response-part-3-system-manipulation/)
+- [3] [Incident Response в OS X: Scripting and Analysis, автор Jaron Bradley](https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file)
 
 {{#include ../../../banners/hacktricks-training.md}}

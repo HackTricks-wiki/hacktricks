@@ -2,51 +2,51 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Мета цієї сторінки — перелічити **платформи, які дають змогу шукати код** (за літеральним збігом, regex, символами або шляхами) у **тисячах/мільйонах репозиторіїв**.
+Мета цієї сторінки — перелічити **платформи, які дають змогу шукати код** (літерально, за regex, з урахуванням символів або в межах шляхів) у **тисячах/мільйонах repo**.
 
 Це корисно для:
 
-- **Пошуку leaked information**
+- **Пошуку витоку інформації**
 - **Пошуку вразливих шаблонів**
-- **Мапування технологій, внутрішніх хостів, CI/CD та infrastructure-as-code**
-- **Переходу від назви компанії/організації до репозиторіїв, гілок і файлів із високим рівнем сигналу**
+- **Картографування технологій, внутрішніх хостів, CI/CD та infrastructure-as-code**
+- **Переходу від назви компанії/org до repo, гілок і файлів із високою сигнальністю**
 
-- [**Sourcebot**](https://www.sourcebot.dev/): Open-source/self-hosted пошук коду. Дуже корисний, коли потрібно індексувати **багато репозиторіїв** і, за додаткового налаштування, інші гілки/теги, зберігаючи regex-фільтри, як-от `repo:`, `file:`, `lang:`, `rev:` і `sym:`.
-- [**SourceGraph**](https://sourcegraph.com/search): Пошук у мільйонах репозиторіїв. Regex зазвичай є найбезпечнішим варіантом; structural search доступний у деяких розгортаннях, але має обмеження продуктивності й не завжди увімкнений.
-- [**GitHub Code Search**](https://github.com/search): Підтримує regex, boolean logic і qualifiers, як-от `repo:`, `org:`, `user:`, `path:`, `language:`, `symbol:`, `content:` та `is:`.
-- [**GitLab Exact Code Search**](https://docs.gitlab.com/user/search/exact_code_search/): Сучасний пошук коду GitLab на основі Zoekt. Підтримує режими exact і regex з фільтрами, як-от `file:`, `lang:`, `repo:` та `sym:`.
-- [**GitLab Advanced Search**](https://docs.gitlab.com/user/search/advanced_search/) досі корисний як ширший fallback, оскільки дає змогу шукати в коді, коментарях, комітах, merge requests і wikis.
+- [**Sourcebot**](https://www.sourcebot.dev/): Open-source/self-hosted пошук коду. Дуже корисний, коли потрібно індексувати **багато repo** і, за умови налаштування, додаткові гілки/теги, зберігаючи regex-фільтри, такі як `repo:`, `file:`, `lang:`, `rev:` і `sym:`.
+- [**SourceGraph**](https://sourcegraph.com/search): Пошук у мільйонах repo. Regex зазвичай є найбезпечнішим варіантом; structural search доступний у деяких deployment, але має обмеження продуктивності й не завжди ввімкнений.
+- [**GitHub Code Search**](https://github.com/search): Підтримує regex, булеву логіку та qualifiers, такі як `repo:`, `org:`, `user:`, `path:`, `language:`, `symbol:`, `content:` і `is:`.<sup>[[1]](#references)</sup>
+- [**GitLab Exact Code Search**](https://docs.gitlab.com/user/search/exact_code_search/): Сучасний пошук коду в GitLab на базі Zoekt. Підтримує режими exact і regex з фільтрами, такими як `file:`, `lang:`, `repo:` і `sym:`.<sup>[[2]](#references)</sup>
+- [**GitLab Advanced Search**](https://docs.gitlab.com/user/search/advanced_search/) усе ще корисний як ширший fallback, оскільки дає змогу шукати код, коментарі, commit, merge request і wiki.
 - [**SearchCode**](https://searchcode.com/): Пошук коду в мільйонах проєктів.
-- [**Grep**](https://grep.app/): Швидкий публічний пошук у дуже великому корпусі GitHub. Корисний, коли потрібне додаткове представлення індексації/ранжування для переходів за **content**, **file** і **path**.
+- [**Grep**](https://grep.app/): Швидкий public search у дуже великому GitHub corpus. Корисний, коли потрібен альтернативний погляд на індексацію/ranking для переходів за **content**, **file** і **path**.
 
 ## Корисні можливості пошуку
 
-Під час аудиту організації в контексті bug bounty/red team зазвичай найкориснішими є такі можливості:
+Під час аудиту org у контексті bug bounty/red team найкориснішими можливостями зазвичай є:
 
-- Підтримка **Regex** для пошуку форматів токенів, схем URL, назв небезпечних функцій або багаторядкових фрагментів.
-- **Фільтри шляхів** для безпосереднього переходу до цінних файлів, як-от `.github/workflows/`, `terraform/`, `helm/`, `.env`, `values.yaml`, `secrets.*`, `credentials.*`, `Dockerfile`, `Jenkinsfile` або `nginx.conf`.
-- **Фільтри мов** для відокремлення коду застосунків від IaC і pipeline.
-- **Пошук із підтримкою символів** для переліку handlers, auth middleware, webhook consumers, небезпечних helper-функцій або конкретних класів/методів.
+- Підтримка **Regex** для пошуку форматів token, схем URL, назв небезпечних функцій або багаторядкових фрагментів.
+- **Path filters** для безпосереднього переходу до цінних файлів, таких як `.github/workflows/`, `terraform/`, `helm/`, `.env`, `values.yaml`, `secrets.*`, `credentials.*`, `Dockerfile`, `Jenkinsfile` або `nginx.conf`.
+- **Language filters** для відокремлення app code від IaC і pipeline.
+- **Symbol-aware search** для переліку handler, auth middleware, webhook consumer, небезпечних helper-функцій або конкретних class/method.
 - **Boolean operators** для зменшення шуму: `NOT path:test`, `NOT is:generated`, `NOT is:vendored`, `foo OR bar`.
-- **Пошук за revision/diff**, якщо він доступний, щоб відновлювати **видалені рядки**, відстежувати **зміни, пов’язані з безпекою**, або перевіряти **нестандатрні гілки/теги**, не клонуючи все заздалегідь.
+- **Revision/diff search**, якщо доступний, щоб відновлювати **видалені рядки**, відстежувати **зміни, пов’язані з безпекою**, або перевіряти **неосновні гілки/теги** без попереднього клонування всього.
 
 ## Практична методологія
 
-1. **Почніть з індексованих платформ**, щоб швидко визначити репозиторії, власників, шляхи та групи коду.
-2. **Переходьте до місць із високим рівнем сигналу**, а не шукайте лише загальні рядки `password`/`secret`.
+1. **Почніть з індексованих платформ**, щоб швидко визначити repo, власників, шляхи та сімейства коду.
+2. **Переходьте до місць із високою сигнальністю**, замість пошуку лише за загальними рядками `password`/`secret`.
 3. **Шукайте attack surface, а не лише credentials**:
-- CI/CD workflows, reusable workflows, composite actions і deployment scripts
-- Файли початкового налаштування Dev Containers / Codespaces і custom features
+- CI/CD workflow, reusable workflow, composite action і deployment script
+- Bootstrap-файли Dev Containers / Codespaces і custom features
 - Маніфести Terraform/Helm/Kubernetes
 - Інтеграції SSO/OIDC/SAML
-- Внутрішні URL, staging-хости, admin panels, message brokers і callback endpoints
-- Небезпечні ділянки коду (`exec`, template rendering, SSRF fetchers, deserializers, ZIP extraction, YAML loaders тощо)
-4. **Клонуйте та шукайте локально**, коли потрібні не стандартні гілки, повна історія, краща підтримка regex або bulk automation.
-5. **Переходьте до спеціалізованих сканерів**, коли метою є triage або verification secrets (наприклад, див. спеціальну сторінку нижче).
+- Внутрішні URL, staging host, admin panel, message broker і callback endpoint
+- Небезпечні code path (`exec`, template rendering, SSRF fetcher, deserializer, ZIP extraction, YAML loader тощо)
+4. **Клонуйте та шукайте локально**, коли потрібні неосновні гілки, повна history, краща підтримка regex або bulk automation.
+5. **Переходьте до спеціалізованих scanner**, коли метою є triage або verification секретів (наприклад, див. спеціальну сторінку нижче).
 
-### Ідеї запитів із високим рівнем сигналу
+### Ідеї запитів із високою сигнальністю
 
-Вони навмисно сформульовані широко, щоб ви могли адаптувати їх до синтаксису GitHub, GitLab, Sourcegraph або Sourcebot:
+Вони навмисно є широкими, щоб ви могли адаптувати їх до синтаксису GitHub, GitLab, Sourcegraph або Sourcebot:
 ```text
 org:target path:.github/workflows ("pull_request_target" OR "workflow_run" OR "ACTIONS_STEP_DEBUG")
 org:target (path:terraform OR path:helm OR language:HCL OR language:YAML) ("role_arn" OR "assume_role" OR "client_secret" OR "access_key")
@@ -58,12 +58,12 @@ org:target (path:.devcontainer OR path:devcontainer.json) ("remoteEnv" OR "conta
 org:target ("devcontainer-feature.json" OR "install.sh") ("curl " OR "wget " OR "docker.sock" OR "sudo ")
 org:target ("internal" OR "corp" OR "staging") ("https://" OR "ssh://") NOT path:test
 ```
-### Нові файли з високою цінністю сигналу, яким варто надати пріоритет
+### Нові файли з високою цінністю сигналів, яким варто надати пріоритет
 
-- **`.github/workflows/*.yml`**: Шукайте `pull_request_target`, `workflow_run`, `workflow_call`, `secrets: inherit`, `id-token: write`, `runs-on: self-hosted` і рядки сторонніх `uses:`, закріплені лише за тегами/гілками, а не за повними commit SHA.
-- **`.devcontainer/devcontainer.json`**, **`.devcontainer/<variant>/devcontainer.json`** і **`.devcontainer.json`**: Шукайте `remoteEnv`, `containerEnv`, `initializeCommand`, `postCreateCommand`, `mounts`, а також Dockerfiles/скрипти, на які є посилання. Вони часто розкривають внутрішні package registries, bootstrap URLs, host mounts і endpoints, призначені лише для розробників.
+- **`.github/workflows/*.yml`**: Шукайте `pull_request_target`, `workflow_run`, `workflow_call`, `secrets: inherit`, `id-token: write`, `runs-on: self-hosted` і рядки сторонніх `uses:`, закріплені лише на тегах/гілках, а не на повних commit SHA.<sup>[[3]](#references)</sup>
+- **`.devcontainer/devcontainer.json`**, **`.devcontainer/<variant>/devcontainer.json`** і **`.devcontainer.json`**: Шукайте `remoteEnv`, `containerEnv`, `initializeCommand`, `postCreateCommand`, `mounts`, а також згадані Dockerfiles/scripts. Вони часто розкривають внутрішні package registries, bootstrap URLs, host mounts і endpoints, призначені лише для розробників.<sup>[[4]](#references)</sup>
 - **Dev Container Features** (`devcontainer-feature.json`, `install.sh`): Чудове джерело для пошуку специфічної для організації installer logic, яка виконується під час створення середовища.
-- **Інші файли CI/control-plane**: `.gitlab-ci.yml`, `azure-pipelines.yml`, `cloudbuild.yaml`, `Jenkinsfile`, `buildkite*`, `atlantis.yaml`, `terragrunt.hcl`, `helmfile.yaml`, `skaffold.yaml`, `argocd*`.
+- **Інші CI/control-plane файли**: `.gitlab-ci.yml`, `azure-pipelines.yml`, `cloudbuild.yaml`, `Jenkinsfile`, `buildkite*`, `atlantis.yaml`, `terragrunt.hcl`, `helmfile.yaml`, `skaffold.yaml`, `argocd*`.
 
 ### Масовий локальний пошук, коли indexed search недостатньо
 ```bash
@@ -81,10 +81,10 @@ repos/
 ```
 Використовуйте локальний пошук, коли потрібно:
 
-- Шукати в **гілках** або **тегах, відмінних від стандартних**
+- Шукати в **не стандартних гілках** або **тегах**
 - Шукати в **історії git**
 - Агресивніше виконувати запити **PCRE2/multiline**
-- Виконувати пакетне сортування багатьох репозиторіїв без обмежень UI
+- Виконувати пакетний первинний аналіз багатьох репозиторіїв без обмежень UI
 
 ### Явно шукайте в історії, гілках і diff'ах
 ```bash
@@ -98,39 +98,38 @@ done
 
 git -C "$REPO_DIR" log --all -p -G 'gh[pousr]_|github_pat_|BEGIN [A-Z ]+PRIVATE KEY|internal.*https?://' -- .
 ```
-Це особливо корисно, коли цікавий рядок існував лише у **release branch**, **tag** або **deleted commit**. Якщо ваше розгортання Sourcegraph це підтримує, пошукові запити `type:diff` і `type:commit` є чудовим способом виконати pivot без клонування для тієї самої задачі.
+Це особливо корисно, коли цікавий рядок існував лише у **release branch**, **tag** або **deleted commit**. Якщо ваше розгортання Sourcegraph це підтримує, пошукові запити `type:diff` і `type:commit` є чудовим способом виконати pivot без клонування для тієї самої проблеми.
 
 ## Поширені сліпі зони
 
-- Часто індексується лише **default branch**. Не припускайте, що пошук коду охоплює всі branches/tags/history.
+- Часто індексується **лише default branch**. Не припускайте, що пошук коду охоплює всі branches/tags/history.
 - **Великі файли, vendored code, generated code або archives** можуть пропускатися або створювати багато шуму.
-- **Коментарі, issues, PRs, gists і wikis** часто перебувають поза межами generic code search і можуть вимагати platform-specific tooling.
-- Конфігурації **Codespaces / devcontainer** можуть бути специфічними для branch і зберігатися в кількох шляхах `.devcontainer/<variant>/devcontainer.json`, тому чистий default branch не означає, що dev environment всюди чисте.
-- **Reusable workflows/actions і devcontainer features** можуть знаходитися не в очевидному файлі. Шукайте `.github/actions/`, `action.yml`, `action.yaml`, `devcontainer-feature.json` та `install.sh`, а не лише у workflow file верхнього рівня.
-- **Синтаксис пошуку відрізняється залежно від платформи**. Dork, який працює в GitHub Code Search, може потребувати незначних змін для GitLab, Sourcegraph або Sourcebot.
+- **Comments, issues, PRs, gists і wikis** часто перебувають поза межами generic code search і можуть потребувати platform-specific tooling.
+- Конфігурації **Codespaces / devcontainer** можуть бути специфічними для branch і міститися в кількох шляхах `.devcontainer/<variant>/devcontainer.json`, тому чистий default branch не означає, що dev environment всюди чисте.
+- **Reusable workflows/actions і devcontainer features** можуть міститися не в очевидному файлі. Шукайте `.github/actions/`, `action.yml`, `action.yaml`, `devcontainer-feature.json` та `install.sh`, а не лише workflow file у корені.
+- **Search syntax відрізняється залежно від platform**. Dork, який працює в GitHub Code Search, може потребувати невеликих змін для GitLab, Sourcegraph або Sourcebot.
 
 ### Platform-specific gotchas
 
-- **GitHub Code Search** чудово підходить для швидкого recon, але шукає лише **default branch**. Якщо потрібні feature branches, deleted secrets або historical code, клонуйте repo і виконуйте пошук локально.
-- **GitLab Exact Code Search** також має обмеження **default-branch** і індексує лише менші файли, але **Advanced Search** все одно може бути корисним для пошуку в comments, commits і wikis.
-- **Sourcebot** за замовчуванням індексує **default branch**, але його можна налаштувати для індексації додаткових branches/tags, після чого виконувати пошук із фільтрами `rev:`. Це дуже зручно для branch/tag-focused internal audits, коли ви контролюєте index.
-- Regex search у **Sourcegraph** загалом є найбільш передбачуваним варіантом для offensive work; сприймайте structural search як необов'язковий bonus, а не гарантовану можливість. Якщо розгортання це підтримує, запити `type:diff` і `type:commit` дуже добре підходять для відновлення deleted strings або нещодавніх security-relevant changes.
+- **GitHub Code Search** чудово підходить для швидкого recon, але шукає лише **default branch**. Якщо вам потрібні feature branches, deleted secrets або historical code, клонуйте repo і шукайте локально.
+- **GitLab Exact Code Search** також має обмеження **default-branch** і індексує лише менші файли, але **Advanced Search** усе ще може бути корисним для пошуку comments, commits і wikis.<sup>[[2]](#references)</sup>
+- **Sourcebot** за замовчуванням індексує **default branch**, але його можна налаштувати для індексації додаткових branches/tags, після чого виконувати пошук за допомогою фільтрів `rev:`. Це дуже зручно для внутрішніх аудитів, зосереджених на branch/tag, коли ви контролюєте index.
+- Regex search у **Sourcegraph** загалом є найбільш передбачуваним варіантом для offensive work; сприймайте structural search як додаткову можливість, а не як гарантовану функцію. Якщо deployment це підтримує, запити `type:diff` і `type:commit` дуже добре підходять для відновлення deleted strings або нещодавніх security-relevant changes.
 
 > [!WARNING]
 > Коли ви шукаєте leaks у repo і виконуєте щось на кшталт `git log -p`, не забувайте, що можуть існувати **інші branches з іншими commits**, які містять secrets!
 
-Щодо dedicated secret hunting, org-wide GitHub dorks і таких інструментів, як TruffleHog/Gitleaks, дивіться:
+Щоб виконувати спеціалізований пошук секретів, використовувати org-wide GitHub dorks та інструменти на кшталт TruffleHog/Gitleaks, перегляньте:
 
 {{#ref}}
 github-leaked-secrets.md
 {{#endref}}
 
-
-
 ## References
 
-- [Синтаксис GitHub Code Search](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
-- [GitLab Exact Code Search](https://docs.gitlab.com/user/search/exact_code_search/)
-- [Довідник із безпечного використання GitHub Actions](https://docs.github.com/en/actions/reference/security/secure-use)
-- [Довідник із метаданих Dev Container](https://containers.dev/implementors/json_reference/)
+- [1] [GitHub Code Search syntax](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
+- [2] [GitLab Exact Code Search](https://docs.gitlab.com/user/search/exact_code_search/)
+- [3] [GitHub Actions secure use reference](https://docs.github.com/en/actions/reference/security/secure-use)
+- [4] [Dev Container metadata reference](https://containers.dev/implementors/json_reference/)
+
 {{#include ../../banners/hacktricks-training.md}}

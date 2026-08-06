@@ -1,12 +1,12 @@
-# Опублікувати локальні сервіси в інтернет
+# Відкрити локальний доступ з інтернету
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Метою цієї сторінки є запропонувати альтернативи, які щонайменше дозволяють експонувати локальні raw TCP-порти та локальні вебсервіси (HTTP) в інтернет без необхідності встановлювати щось на іншому сервері (тільки локально, якщо потрібно).**
+**Мета цієї сторінки — запропонувати альтернативи, які дозволяють ЩОНАЙМЕНШЕ відкрити локальні raw TCP-порти та локальні вебсервіси (HTTP) для доступу з інтернету БЕЗ потреби встановлювати щось на іншому сервері (за потреби — лише локально).**
 
 ## **Serveo**
 
-На [https://serveo.net/](https://serveo.net/) доступні кілька можливостей переспрямування HTTP та портів **безкоштовно**.
+На [https://serveo.net/](https://serveo.net/) доступні кілька функцій перенаправлення http і портів **безкоштовно**.
 ```bash
 # Get a random port from serveo.net to expose local port 4444
 ssh -R 0:localhost:4444 serveo.net
@@ -16,7 +16,7 @@ ssh -R 80:localhost:3000 serveo.net
 ```
 ## SocketXP
 
-З [https://www.socketxp.com/download](https://www.socketxp.com/download), він дозволяє відкривати доступ до tcp та http:
+На [https://www.socketxp.com/download](https://www.socketxp.com/download) можна зробити доступними tcp і http:
 ```bash
 # Expose tcp port 22
 socketxp connect tcp://localhost:22
@@ -26,7 +26,7 @@ socketxp connect http://localhost:8080
 ```
 ## Ngrok
 
-З [https://ngrok.com/](https://ngrok.com/) можна виставляти http та tcp порти:
+З [https://ngrok.com/](https://ngrok.com/) можна відкрити доступ до http- і tcp-портів:
 ```bash
 # Expose web in 3000
 ngrok http 8000
@@ -36,7 +36,7 @@ ngrok tcp 9000
 ```
 ## Telebit
 
-З [https://telebit.cloud/](https://telebit.cloud/) можна експонувати http і tcp порти:
+На [https://telebit.cloud/](https://telebit.cloud/) можна відкрити доступ до http- і tcp-портів:
 ```bash
 # Expose web in 3000
 /Users/username/Applications/telebit/bin/telebit http 3000
@@ -46,7 +46,7 @@ ngrok tcp 9000
 ```
 ## LocalXpose
 
-З [https://localxpose.io/](https://localxpose.io/) сервіс дозволяє кілька можливостей http та port forwarding **безкоштовно**.
+На [https://localxpose.io/](https://localxpose.io/) доступні кілька функцій http і port forwarding **безкоштовно**.
 ```bash
 # Expose web in port 8989
 loclx tunnel http -t 8989
@@ -56,7 +56,7 @@ loclx tunnel tcp --port 4545
 ```
 ## Expose
 
-З [https://expose.dev/](https://expose.dev/) він дозволяє експонувати http та tcp порти:
+За допомогою [https://expose.dev/](https://expose.dev/) можна відкрити доступ до портів http і tcp:
 ```bash
 # Expose web in 3000
 ./expose share http://localhost:3000
@@ -66,14 +66,14 @@ loclx tunnel tcp --port 4545
 ```
 ## Localtunnel
 
-З [https://github.com/localtunnel/localtunnel](https://github.com/localtunnel/localtunnel) він дозволяє безкоштовно експонувати http:
+З [https://github.com/localtunnel/localtunnel](https://github.com/localtunnel/localtunnel) можна безкоштовно відкрити доступ до HTTP:
 ```bash
 # Expose web in port 8000
 npx localtunnel --port 8000
 ```
 ## Cloudflare Tunnel (cloudflared)
 
-CLI `cloudflared` від Cloudflare може створювати неаутентифіковані «Quick» тунелі для швидких демонстрацій або іменовані тунелі, прив'язані до ваших власних доменів/hostnames. Він підтримує HTTP(S) reverse proxies, а також raw TCP mappings, що маршрутизуються через Cloudflare's edge.
+CLI `cloudflared` від Cloudflare може створювати неавтентифіковані "Quick"-тунелі для швидких демонстрацій або іменовані тунелі, прив'язані до вашого домену/хостнеймів. Він підтримує reverse proxy для HTTP(S), а також raw TCP-мапінги, що маршрутизуються через edge Cloudflare.<sup>[[1]](#references)</sup>
 ```bash
 # Quick Tunnel exposing localhost:8080 (random trycloudflare subdomain)
 cloudflared tunnel --url http://localhost:8080
@@ -84,11 +84,11 @@ cloudflared tunnel create my-tunnel
 cloudflared tunnel route dns my-tunnel app.example.com
 cloudflared tunnel run my-tunnel --config tunnel.yml
 ```
-Named tunnels дозволяють визначати кілька правил ingress (HTTP, SSH, RDP тощо) у `tunnel.yml`, підтримують політики доступу на рівні сервісу через Cloudflare Access і можуть запускатися як systemd-контейнери для persistence. Quick Tunnels анонімні та ефемерні — підходять для phishing payload staging або тестування webhook, але Cloudflare не гарантує uptime.
+Іменовані тунелі дають змогу визначати кілька ingress rules (HTTP, SSH, RDP тощо) у `tunnel.yml`, застосовувати access policies для окремих сервісів через Cloudflare Access і запускати їх як systemd containers для persistence. Quick Tunnels є anonymous та ephemeral — чудово підходять для staging phishing payload або тестування webhook, але Cloudflare не гарантує uptime.<sup>[[1]](#references)</sup>
 
 ## Tailscale Funnel / Serve
 
-Tailscale v1.52+ надає уніфіковані робочі процеси `tailscale serve` (share inside the tailnet) та `tailscale funnel` (publish to the wider internet). Обидві команди можуть reverse proxy HTTP(S) або forward raw TCP з автоматичним TLS та короткими `*.ts.net` hostnames.
+У Tailscale v1.52+ доступні уніфіковані workflows `tailscale serve` (поширення всередині tailnet) і `tailscale funnel` (публікація у wider internet). Обидві команди можуть reverse proxy HTTP(S) або переспрямовувати raw TCP з automatic TLS і короткими hostnames `*.ts.net`.<sup>[[3]](#references)</sup>
 ```bash
 # Share localhost:3000 within the tailnet
 sudo tailscale serve 3000
@@ -99,11 +99,11 @@ sudo tailscale funnel --https=443 localhost:3000
 # Forward raw TCP (expose local SSH)
 sudo tailscale funnel --tcp=10000 tcp://localhost:22
 ```
-Use `--bg` to persist the configuration without keeping a foreground process, and `tailscale funnel status` to audit what services are reachable from the public internet. Because Funnel terminates TLS on the local node, any credential prompts, headers, or mTLS enforcement can stay under your control.
+Використовуйте `--bg`, щоб зберегти конфігурацію без запуску процесу у foreground, а `tailscale funnel status` — щоб перевірити, які сервіси доступні з публічного інтернету. Оскільки Funnel завершує TLS на локальному вузлі, усі запити облікових даних, заголовки або застосування mTLS можуть залишатися під вашим контролем.
 
 ## Fast Reverse Proxy (frp)
 
-`frp` is a self-hosted option where you control the rendezvous server (`frps`) and the client (`frpc`). It is great for red teams that already own a VPS and want deterministic domains/ports.
+`frp` — це self-hosted варіант, у якому ви контролюєте сервер узгодження (`frps`) і клієнт (`frpc`). Він чудово підходить для red teams, які вже мають власний VPS і хочуть використовувати передбачувані домени/порти.
 
 <details>
 <summary>Приклад конфігурації frps/frpc</summary>
@@ -132,24 +132,27 @@ EOF
 ```
 </details>
 
-Останні релізи додали QUIC transport, token/OIDC auth, обмеження пропускної здатності, health checks і Go-template-based range mappings — корисно для швидкого розгортання кількох listeners, які відображаються назад на implants на різних hosts.
+Останні релізи додають транспорт QUIC, token/OIDC auth, обмеження пропускної здатності, health checks і зіставлення діапазонів на основі Go templates — це корисно для швидкого запуску кількох listeners, які перенаправляють трафік до implants на різних хостах.<sup>[[4]](#references)</sup>
 
-## Pinggy (SSH-based)
+## Pinggy (на базі SSH)
 
-Pinggy забезпечує SSH-accessible тунелі через TCP/443, тож він працює навіть за captive proxies, які дозволяють лише HTTPS. Сесії тривають 60 хвилин на безкоштовному тарифі й можуть бути автоматизовані для швидких демонстрацій або webhook relays.
+Pinggy надає доступні через SSH тунелі поверх TCP/443, тому працює навіть за captive proxies, які дозволяють лише HTTPS. На безкоштовному рівні сесії тривають 60 хвилин, а їх можна використовувати у скриптах для швидких демонстрацій або relay webhook-повідомлень.<sup>[[5]](#references)</sup>
 ```bash
 # Random subdomain exposing localhost:3000 via SSH reverse tunnel
 ssh -p 443 -R0:localhost:3000 a.pinggy.io
 ```
-Ви можете запросити власні домени та довше діючі тунелі на платному тарифі, або автоматично перезапускати тунелі, загорнувши команду в цикл.
+Ви можете запитувати custom domains і довші тунелі на paid tier або автоматично перезапускати тунелі, обгорнувши команду в loop.
 
-## Розвідка загроз і зауваження щодо OPSEC
+## Розвідка загроз та OPSEC
 
-Зловмисники дедалі частіше зловживають тимчасовими тунелями (особливо неаутентифікованими кінцевими точками Cloudflare `trycloudflare.com`) для розгортання Remote Access Trojan payloads та приховування C2 інфраструктури. Proofpoint відстежував кампанії з лютого 2024 року, які поширювали AsyncRAT, Xworm, VenomRAT, GuLoader та Remcos, спрямовуючи етапи завантаження на короткоживучі TryCloudflare URL-адреси, що зробило традиційні статичні блоклісти значно менш ефективними. Розгляньте проактивну ротацію тунелів і доменів, а також моніторинг характерних зовнішніх DNS-запитів до tunneler'а, якого ви використовуєте, щоб вчасно помітити спроби виявлення з боку blue-team або блокування інфраструктури.
+Зловмисники дедалі частіше зловживають ephemeral tunneling (особливо неавтентифікованими `trycloudflare.com` endpoints від Cloudflare), щоб розгортати payloads Remote Access Trojan і приховувати C2 infrastructure. Proofpoint відстежує кампанії з лютого 2024 року, у межах яких AsyncRAT, Xworm, VenomRAT, GuLoader і Remcos доставлялися через download stages, спрямовані на короткоживучі TryCloudflare URLs, що робило традиційні статичні blocklists значно менш ефективними. Розгляньте можливість проактивно ротувати тунелі та domains, а також відстежуйте характерні зовнішні DNS lookups до tunneler, який ви використовуєте, щоб завчасно виявляти blue-team detection або спроби блокування infrastructure.<sup>[[2]](#references)</sup>
 
 ## References
 
-- [Cloudflare Docs - Create a locally-managed tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/)
-- [Proofpoint - Threat Actor Abuses Cloudflare Tunnels to Deliver RATs](https://www.proofpoint.com/us/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
+- [1] [Cloudflare Docs - Create a locally-managed tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/)
+- [2] [Proofpoint - Threat Actor Abuses Cloudflare Tunnels to Deliver RATs](https://www.proofpoint.com/us/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
+- [3] [Tailscale - Reintroducing Serve and Funnel](https://tailscale.com/blog/reintroducing-serve-funnel)
+- [4] [fatedier/frp - Fast Reverse Proxy repository](https://github.com/fatedier/frp)
+- [5] [Pinggy Documentation - Usage](https://pinggy.io/docs/usages/)
 
 {{#include ../../banners/hacktricks-training.md}}

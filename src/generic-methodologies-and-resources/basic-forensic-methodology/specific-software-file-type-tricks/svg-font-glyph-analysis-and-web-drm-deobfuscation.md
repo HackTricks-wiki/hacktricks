@@ -1,33 +1,33 @@
-# SVG/Font Glyph Analysis & Web DRM Deobfuscation (Raster Hashing + SSIM)
+# Аналіз гліфів SVG/шрифтів і деобфускація Web DRM (растрове хешування + SSIM)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ця сторінка документує практичні техніки для відновлення тексту з web readers, які передають positioned glyph runs разом з per-request vector glyph definitions (SVG paths) і які рандомізують glyph IDs для кожного запиту, щоб запобігти скрапінгу. Основна ідея — ігнорувати request-scoped numeric glyph IDs і фіингерпринтити візуальні форми за допомогою raster hashing, а потім зіставляти форми з символами за допомогою SSIM проти reference font atlas. Робочий процес узагальнюється поза Kindle Cloud Reader до будь-якого viewer з подібними захистами.
+На цій сторінці описано практичні методи відновлення тексту з вебрідерів, які передають позиціоновані послідовності гліфів разом із векторними визначеннями гліфів для кожного запиту (шляхи SVG) і рандомізують ідентифікатори гліфів для кожного запиту, щоб запобігти scraping. Основна ідея полягає в тому, щоб ігнорувати числові ідентифікатори гліфів, прив'язані до конкретного запиту, і визначати візуальні форми за допомогою растрового хешування, а потім зіставляти форми із символами за допомогою SSIM і еталонного атласу шрифту. Цей workflow можна застосовувати не лише до Kindle Cloud Reader, а й до будь-якого viewer із подібними засобами захисту.<sup>[[1]](#references)</sup>
 
-Warning: Використовуйте ці техніки лише для резервного копіювання контенту, яким ви легітимно володієте, і в відповідності до застосовних законів та умов.
+Попередження: Використовуйте ці методи лише для резервного копіювання контенту, яким ви законно володієте, і відповідно до чинного законодавства та умов використання.
 
-## Acquisition (example: Kindle Cloud Reader)
+## Отримання (приклад: Kindle Cloud Reader)
 
-Endpoint observed:
-- [https://read.amazon.com/renderer/render]
+Виявлений endpoint:<sup>[[1]](#references)</sup>
+- [https://read.amazon.com/renderer/render](https://read.amazon.com/renderer/render)
 
-Потрібні матеріали на сесію:
-- Browser session cookies (звичайний Amazon login)
-- Rendering token з виклику startReading API
+Необхідні матеріали для кожної сесії:
+- Cookies браузерної сесії (звичайний вхід до Amazon)
+- Rendering token із виклику API startReading
 - Додатковий ADP session token, який використовує renderer
 
 Поведінка:
-- Кожен запит, коли його надсилають з заголовками та cookies, еквівалентними браузеру, повертає TAR-архів, обмежений 5 сторінками.
-- Для довгої книги вам знадобиться багато батчів; кожен батч використовує різне рандомізоване відображення glyph IDs.
+- Кожен запит, надісланий із заголовками та cookies, еквівалентними браузерним, повертає TAR-архів, обмежений 5 сторінками.
+- Для довгої книги знадобиться багато batch; кожен batch використовує інше рандомізоване зіставлення ідентифікаторів гліфів.
 
 Типовий вміст TAR:
-- page_data_0_4.json — positioned text runs як послідовності glyph IDs (не Unicode)
-- glyphs.json — per-request SVG path definitions для кожного glyph і fontFamily
-- toc.json — table of contents
-- metadata.json — book metadata
-- location_map.json — logical→visual position mappings
+- page_data_0_4.json — позиціоновані текстові послідовності у вигляді послідовностей ідентифікаторів гліфів (не Unicode)
+- glyphs.json — визначення шляхів SVG для кожного гліфа та fontFamily у межах конкретного запиту
+- toc.json — зміст
+- metadata.json — метадані книги
+- location_map.json — зіставлення логічних і візуальних позицій
 
-Example page run structure:
+Приклад структури послідовності гліфів сторінки:
 ```json
 {
 "type": "TextRun",
@@ -44,47 +44,47 @@ Example page run structure:
 "24": {"path": "M 450 1480 L 820 1480 L 820 0 L 1050 0 L 1050 1480 ...", "fontFamily": "bookerly_normal"}
 }
 ```
-Нотатки щодо трюків зі шляхами проти скрейпінгу:
-- Шляхи можуть містити мікро-релятивні переміщення (наприклад, `m3,1 m1,6 m-4,-7`), які плутають багато векторних парсерів та наївне семплування path.
-- Завжди рендерте заповнені повні шляхи за допомогою надійного SVG-двигуна (наприклад, CairoSVG) замість того, щоб робити різницювання команд/координат.
+Нотатки щодо anti-scraping path tricks:
+- Paths можуть містити мікрорухи відносно (наприклад, `m3,1 m1,6 m-4,-7`), які збивають з пантелику багато vector parsers і наївне семплювання paths.
+- Завжди рендеріть заповнені повні paths за допомогою надійного SVG engine (наприклад, CairoSVG), замість виконання диференціювання команд/координат.
 
 ## Чому наївне декодування не працює
 
-- Пер-запит випадкова підстановка glyph-ів: відображення glyph ID→character змінюється кожною партією; ID не мають глобального сенсу.
-- Пряме порівняння координат SVG крихке: однакові форми можуть відрізнятися числовими координатами або кодуванням команд у різних запитах.
-- OCR на ізольованих glyph-ах працює погано (≈50%), плутає розділові знаки та схожі за виглядом glyph-и, і ігнорує ligatures.
+- Рандомізована підміна glyph для кожного запиту: mapping glyph ID→character змінюється в кожній batch; ID не мають глобального значення.<sup>[[1]](#references)</sup>
+- Пряме порівняння SVG coordinates є ненадійним: ідентичні shapes можуть відрізнятися числовими координатами або кодуванням команд у кожному запиті.
+- OCR для ізольованих glyphs працює погано (≈50%), плутає punctuation і схожі glyphs та ігнорує ligatures.
 
-## Робочий пайплайн: запит-незалежна нормалізація та зіставлення glyph-ів
+## Робочий pipeline: request-agnostic нормалізація та mapping glyph
 
-1) Растеризація SVG glyph-ів для кожного запиту
-- Побудуйте мінімальний SVG-документ для кожного glyph з наданим `path` і відрендерте на фіксований канвас (наприклад, 512×512) за допомогою CairoSVG або еквівалентного двигуна, який коректно обробляє складні послідовності path.
-- Рендерте заповненими чорним на білому; уникайте stroke, щоб усунути залежні від рендера та AA артефакти.
+1) Rasterize SVG glyphs для кожного запиту
+- Створіть мінімальний SVG document для кожного glyph із наданими `path` і відрендеріть його на фіксованому canvas (наприклад, 512×512), використовуючи CairoSVG або еквівалентний engine, який обробляє складні послідовності paths.<sup>[[1]](#references)[[2]](#references)</sup>
+- Рендеріть чорне заповнення на білому тлі; уникайте strokes, щоб усунути артефакти, залежні від renderer і AA.
 
-2) Перцепційне хешування для ідентифікації між запитами
-- Обчисліть перцепційний хеш (наприклад, pHash через `imagehash.phash`) кожного зображення glyph-а.
-- Розглядайте хеш як стабільний ID: однаковий візуальний контур у різних запитах зводиться до того ж перцепційного хешу, що нейтралізує випадкові ID.
+2) Perceptual hashing для cross-request identity
+- Обчисліть perceptual hash (наприклад, pHash через `imagehash.phash`) для кожного glyph image.<sup>[[3]](#references)</sup>
+- Розглядайте hash як стабільний ID: одна й та сама visual shape у різних запитах зводиться до того самого perceptual hash, нейтралізуючи randomized IDs.
 
-3) Генерація референсного шрифтового атласу
-- Завантажте цільові TTF/OTF шрифти (наприклад, Bookerly normal/italic/bold/bold-italic).
-- Відрендерте кандидати для A–Z, a–z, 0–9, пунктуації, спеціальних знаків (em/en dashes, quotes) та явних ligatures: `ff`, `fi`, `fl`, `ffi`, `ffl`.
-- Тримайте окремі атласи для кожної варіанти шрифту (normal/italic/bold/bold-italic).
-- Використовуйте коректний text shaper (HarfBuzz), якщо вам потрібна точність на рівні glyph для ligatures; просте растерне рендерення через Pillow ImageFont може бути достатнім, якщо ви рендерите рядки з ligature безпосередньо і shaping engine їх розв’язує.
+3) Створення reference font atlas
+- Завантажте цільові TTF/OTF fonts (наприклад, Bookerly normal/italic/bold/bold-italic).
+- Відрендеріть candidates для A–Z, a–z, 0–9, punctuation, special marks (тире em/en, quotes) та явних ligatures: `ff`, `fi`, `fl`, `ffi`, `ffl`.
+- Підтримуйте окремі atlases для кожного font variant (normal/italic/bold/bold-italic).
+- Використовуйте належний text shaper (HarfBuzz), якщо потрібна glyph-level fidelity для ligatures; простого rasterization через Pillow ImageFont може бути достатньо, якщо рендеріти рядки ligatures безпосередньо, а shaping engine коректно їх обробляє.
 
-4) Візуальне зіставлення за допомогою SSIM
-- Для кожного невідомого зображення glyph обчисліть SSIM (Structural Similarity Index) проти всіх кандидатів у всіх атласах варіантів шрифта.
-- Призначайте рядок символів з найкращою оцінкою. SSIM поглинає невеликі відмінності, пов’язані з антіаліасінгом, масштабом і координатами краще, ніж піксельно-точне порівняння.
+4) Visual similarity matching за допомогою SSIM
+- Для кожного unknown glyph image обчисліть SSIM (Structural Similarity Index) проти всіх candidate images у всіх font variant atlases.<sup>[[4]](#references)</sup>
+- Призначте character string найкращого match. SSIM краще за pixel-exact comparisons поглинає невеликі відмінності antialiasing, масштабу та координат.
 
-5) Обробка крайових випадків та реконструкція
-- Коли glyph мапиться на ligature (багатосимвольний), розгорніть її під час декодування.
-- Використовуйте run rectangles (top/left/right/bottom) щоб вивести розриви абзаців (дельти по Y), вирівнювання (патерни по X), стиль і розміри.
-- Серіалізуйте у HTML/EPUB з збереженням `fontStyle`, `fontWeight`, `fontSize` та внутрішніх посилань.
+5) Обробка країв і reconstruction
+- Якщо glyph відповідає ligature (кільком символам), розгорніть її під час decoding.
+- Використовуйте run rectangles (top/left/right/bottom), щоб визначати розриви абзаців (Y deltas), вирівнювання (X patterns), style і sizes.
+- Серіалізуйте в HTML/EPUB, зберігаючи `fontStyle`, `fontWeight`, `fontSize` та internal links.
 
-### Поради щодо реалізації
+### Поради щодо implementation
 
-- Нормалізуйте всі зображення до одного розміру та у відтінки сірого перед хешуванням і обчисленням SSIM.
-- Кешуйте за перцепційним хешем, щоб уникнути повторного обчислення SSIM для повторюваних glyph-ів між партіями.
-- Використовуйте високоякісний розмір растера (наприклад, 256–512 px) для кращої дискримінації; за потреби зменшуйте перед SSIM, щоб прискорити.
-- Якщо ви використовуєте Pillow для рендерингу TTF-кандидатів, встановіть той самий розмір канвасу і центрируйте glyph; додайте паддінг, щоб уникнути обрізання ascender/descender.
+- Нормалізуйте всі images до однакового розміру та grayscale перед hashing і SSIM.
+- Кешуйте за perceptual hash, щоб не обчислювати SSIM повторно для glyphs, які повторюються в різних batches.
+- Використовуйте high-quality raster size (наприклад, 256–512 px) для кращого розрізнення; за потреби зменшуйте розмір перед SSIM для прискорення.
+- Якщо використовуєте Pillow для rendering TTF candidates, задайте однаковий canvas size і розташуйте glyph по центру; додайте padding, щоб уникнути обрізання ascenders/descenders.
 
 <details>
 <summary>Python: end-to-end glyph normalization and matching (raster hash + SSIM)</summary>
@@ -222,41 +222,41 @@ return out_runs
 ```
 </details>
 
-## Евристики реконструкції макету/EPUB
+## Евристики реконструкції Layout/EPUB
 
-- Розриви абзаців: Якщо верх наступного run’s top Y перевищує baseline попереднього рядка на певний поріг (відносно розміру шрифту), починайте новий абзац.
-- Вирівнювання: Групуйте за схожим left X для ліво-вирівняних абзаців; виявляйте центровані рядки за симетричними відступами; виявляйте праве вирівнювання за правими краями.
-- Стилізація: Зберігайте italic/bold через `fontStyle`/`fontWeight`; варіюйте CSS classes за `fontSize` buckets, щоб апроксимувати headings vs body.
-- Посилання: Якщо runs містять link metadata (наприклад, `positionId`), генеруйте anchors і внутрішні hrefs.
+- Розриви абзаців: Якщо верхня координата Y наступного run перевищує baseline попереднього рядка на порогове значення (відносно розміру шрифту), починайте новий абзац.<sup>[[1]](#references)</sup>
+- Вирівнювання: Групуйте за схожою лівою координатою X для абзаців із вирівнюванням ліворуч; визначайте центровані рядки за симетричними полями; визначайте вирівнювання праворуч за правими краями.
+- Стилізація: Зберігайте курсив і жирний шрифт через `fontStyle`/`fontWeight`; змінюйте CSS-класи залежно від діапазонів `fontSize`, щоб приблизно розрізняти заголовки й основний текст.
+- Посилання: Якщо runs містять метадані посилань (наприклад, `positionId`), генеруйте anchors і внутрішні hrefs.
 
-## Mitigating SVG anti-scraping path tricks
+## Усунення трюків із SVG path для захисту від scraping
 
-- Use filled paths with `fill-rule: nonzero` and a proper renderer (CairoSVG, resvg). Do not rely on path token normalization.
-- Avoid stroke rendering; focus on filled solids to sidestep hairline artifacts caused by micro relative moves.
-- Keep a stable viewBox per render so that identical shapes rasterize consistently across batches.
+- Використовуйте заповнені paths із `fill-rule: nonzero` і належний renderer (CairoSVG, resvg). Не покладайтеся на нормалізацію path tokens.<sup>[[1]](#references)</sup>
+- Уникайте stroke rendering; зосередьтеся на заповнених суцільних формах, щоб обійти артефакти тонких ліній, спричинені мікроскопічними відносними переміщеннями.
+- Підтримуйте стабільний viewBox для кожного render, щоб ідентичні форми растеризувалися узгоджено в різних batch.
 
-## Performance notes
+## Примітки щодо продуктивності
 
-- In practice, books converge to a few hundred unique glyphs (e.g., ~361 including ligatures). Cache SSIM results by perceptual hash.
-- After initial discovery, future batches predominantly re-use known hashes; decoding becomes I/O-bound.
-- Average SSIM ≈0.95 is a strong signal; consider flagging low-scoring matches for manual review.
+- На практиці книги зводяться до кількох сотень унікальних glyphs (наприклад, приблизно 361, включно з ligatures). Кешуйте результати SSIM за perceptual hash.<sup>[[1]](#references)</sup>
+- Після початкового виявлення майбутні batch переважно повторно використовують відомі hashes; decoding стає обмеженим швидкістю I/O.
+- Середнє значення SSIM ≈0.95 є сильним сигналом; розгляньте можливість позначати збіги з низькими оцінками для ручної перевірки.
 
-## Generalization to other viewers
+## Узагальнення для інших viewers
 
-Any system that:
-- Returns positioned glyph runs with request-scoped numeric IDs
-- Ships per-request vector glyphs (SVG paths or subset fonts)
-- Caps pages per request to prevent bulk export
+Будь-яка система, яка:<sup>[[1]](#references)</sup>
+- Повертає positioned glyph runs із numeric IDs, прив’язаними до request
+- Надсилає vector glyphs для кожного request (SVG paths або subset fonts)
+- Обмежує кількість сторінок у request, щоб запобігти bulk export
 
-…can be handled with the same normalization:
-- Rasterize per-request shapes → perceptual hash → shape ID
-- Atlas of candidate glyphs/ligatures per font variant
-- SSIM (or similar perceptual metric) to assign characters
-- Reconstruct layout from run rectangles/styles
+…може оброблятися за допомогою тієї самої нормалізації:
+- Растеризуйте shapes для кожного request → perceptual hash → shape ID
+- Atlas кандидатів glyphs/ligatures для кожного варіанта font
+- SSIM (або подібна perceptual metric) для призначення символів
+- Реконструюйте layout із rectangles/styles для runs
 
-## Minimal acquisition example (sketch)
+## Мінімальний приклад отримання даних (ескіз)
 
-Use your browser’s DevTools to capture the exact headers, cookies and tokens used by the reader when requesting `/renderer/render`. Then replicate those from a script or curl. Example outline:
+Використовуйте DevTools браузера, щоб перехопити точні headers, cookies і tokens, які reader використовує під час запиту до `/renderer/render`. Потім відтворіть їх зі script або curl.<sup>[[1]](#references)</sup> Приблизний outline:
 ```bash
 curl 'https://read.amazon.com/renderer/render' \
 -H 'Cookie: session-id=...; at-main=...; sess-at-main=...' \
@@ -266,19 +266,19 @@ curl 'https://read.amazon.com/renderer/render' \
 -H 'Accept: application/x-tar' \
 --compressed --output batch_000.tar
 ```
-Налаштуйте параметризацію (book ASIN, page window, viewport) відповідно до запитів читача. Очікуйте обмеження до 5 сторінок за один запит.
+Налаштуйте параметризацію (ASIN книги, діапазон сторінок, область перегляду) відповідно до запитів читача. Враховуйте обмеження — не більше 5 сторінок на запит.
 
 ## Досяжні результати
 
-- Стиснути понад 100 випадкових абеток у єдиний простір гліфів за допомогою perceptual hashing
-- 100% відображення унікальних гліфів зі середнім SSIM ≈0.95, коли атласи включають лігатури та варіанти
-- Відтворені EPUB/HTML візуально нерозрізненні від оригіналу
+- Зведення понад 100 рандомізованих алфавітів до єдиного простору гліфів за допомогою перцептивного хешування<sup>[[1]](#references)</sup>
+- 100% зіставлення унікальних гліфів із середнім SSIM ~0.95, коли атласи містять лігатури та варіанти
+- Відновлений EPUB/HTML, візуально невідмінний від оригіналу
 
 ## References
 
-- [Kindle Web DRM: Breaking Randomized SVG Glyph Obfuscation with Raster Hashing + SSIM (Pixelmelt blog)](https://blog.pixelmelt.dev/kindle-web-drm/)
-- [CairoSVG – SVG to PNG renderer](https://cairosvg.org/)
-- [imagehash – Perceptual image hashing (pHash)](https://pypi.org/project/ImageHash/)
-- [scikit-image – Structural Similarity Index (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
+- [1] [Kindle Web DRM: злам рандомізованого SVG-обфускування гліфів за допомогою растрового хешування + SSIM (блог Pixelmelt)](https://blog.pixelmelt.dev/kindle-web-drm/)
+- [2] [CairoSVG – рендерер SVG у PNG](https://cairosvg.org/)
+- [3] [imagehash – перцептивне хешування зображень (pHash)](https://pypi.org/project/ImageHash/)
+- [4] [scikit-image – індекс структурної подібності (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
 
 {{#include ../../../banners/hacktricks-training.md}}
