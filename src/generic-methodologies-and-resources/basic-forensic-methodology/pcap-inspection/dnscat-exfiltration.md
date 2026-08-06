@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Wenn du einen pcap mit Daten hast, die von **DNSCat exfiltriert** werden (ohne Verschlüsselung), kannst du den exfiltrierten Inhalt finden.
+Wenn du über einen pcap mit Daten verfügst, die von **DNSCat exfiltriert** wurden (ohne Verschlüsselung), kannst du den exfiltrierten Inhalt finden.
 
 Du musst nur wissen, dass die **ersten 9 Bytes** keine echten Daten sind, sondern mit der **C\&C-Kommunikation** zusammenhängen:<sup>[[1]](#references)</sup>
 ```python
@@ -23,10 +23,10 @@ last = qry
 
 #print(f)
 ```
-Weitere Informationen: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)\
+Weitere Informationen: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)<sup>[[1]](#references)</sup>\
 [https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
 
-Es gibt ein mit Python3 funktionierendes Script: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
+Es gibt ein Script, das mit Python3 funktioniert: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```

