@@ -32,7 +32,7 @@ binwalk -e firmware.bin          # Extract recognised objects (safe-default)
 binwalk --dd " .* " firmware.bin  # Extract *everything* (use with care)
 ```
 
-⚠️  **Security note** – Versions **≤2.3.3** are affected by a **Path Traversal** vulnerability (CVE-2022-4510). Upgrade (or isolate with a container/non-privileged UID) before carving untrusted samples.
+⚠️  **Security note** – Versions **≤2.3.3** are affected by a **Path Traversal** vulnerability (CVE-2022-4510). Upgrade (or isolate with a container/non-privileged UID) before carving untrusted samples.<sup>[[2]](#references)</sup>
 
 ### Foremost
 
@@ -136,7 +136,7 @@ Download [here](https://sourceforge.net/projects/findaes/).
 
 ### YARA-X (triaging carved artefacts)
 
-[YARA-X](https://github.com/VirusTotal/yara-x) is a Rust rewrite of YARA released in 2024.  It is **10-30× faster** than classic YARA and can be used to classify thousands of carved objects very quickly:
+[YARA-X](https://github.com/VirusTotal/yara-x) is a Rust rewrite of YARA released in 2024.  It is **10-30× faster** than classic YARA and can be used to classify thousands of carved objects very quickly:<sup>[[3]](#references)</sup>
 
 ```bash
 # Scan every carved object produced by bulk_extractor
@@ -155,5 +155,7 @@ You can use the linux command line tool **pdftotext** to transform a pdf into te
 ## References
 
 - [1] [Autopsy 4.21 release notes](https://github.com/sleuthkit/autopsy/releases/tag/autopsy-4.21)
+- [2] [Path traversal in binwalk (CVE-2022-4510) - GitHub Advisory Database](https://github.com/advisories/GHSA-3cm8-v4mc-gppg)
+- [3] [YARA is dead, long live YARA-X - VirusTotal Blog](https://blog.virustotal.com/2024/05/yara-is-dead-long-live-yara-x.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

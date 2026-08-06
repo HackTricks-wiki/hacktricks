@@ -84,8 +84,6 @@ Windows Registry hives are one of the fastest ways to pivot from _what happened?
 - Modern phones and tablets connected via MTP/PTP may **not** appear under `USBSTOR`. Check `HKLM\SYSTEM\CurrentControlSet\Enum\SWD\WPDBUSENUM` and `HKLM\SOFTWARE\Microsoft\Windows Portable Devices\Devices` as well.<sup>[[2]](#references)</sup>
 - To tie a device to a user, pivot from device or volume identifiers into per-user artifacts such as shellbags, LNKs, Jump Lists, `RecentDocs`, and `MountPoints2`.<sup>[[2]](#references)</sup>
 
-
-
 ## References
 
 - [1] [Windows Registry Forensics Cheat Sheet 2026 - Cyber Triage](https://www.cybertriage.com/blog/windows-registry-forensics-cheat-sheet-2026/)
