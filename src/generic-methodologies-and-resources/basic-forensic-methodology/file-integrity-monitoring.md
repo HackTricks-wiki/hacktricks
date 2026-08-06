@@ -30,13 +30,13 @@ For threat hunting, FIM is usually more useful when focused on **high-value path
 
 ### Linux
 
-The collection backend matters:
+The collection backend matters:<sup>[[2]](#references)</sup>
 
 - **`inotify` / `fsnotify`**: easy and common, but watch limits can be exhausted and some edge cases are missed.
 - **`auditd` / audit framework**: better when you need **who changed the file** (`auid`, process, pid, executable).
 - **`eBPF` / `kprobes`**: newer options used by modern FIM stacks to enrich events and reduce some of the operational pain of plain `inotify` deployments.
 
-Some practical gotchas:
+Some practical gotchas:<sup>[[1]](#references)</sup>
 
 - If a program **replaces** a file with `write temp -> rename`, watching the file itself may stop being useful. **Watch the parent directory**, not only the file.
 - `inotify`-based collectors can miss or degrade on **huge directory trees**, **hard-link activity**, or after a **watched file is deleted**.
@@ -51,7 +51,7 @@ mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
 aide --check
 ```
 
-Example `osquery` FIM configuration focused on attacker persistence paths:
+Example `osquery` FIM configuration focused on attacker persistence paths:<sup>[[1]](#references)</sup>
 
 ```json
 {
@@ -70,7 +70,7 @@ Example `osquery` FIM configuration focused on attacker persistence paths:
 }
 ```
 
-If you need **process attribution** instead of only path-level changes, prefer audit-backed telemetry such as `osquery` `process_file_events` or Wazuh `whodata` mode.
+If you need **process attribution** instead of only path-level changes, prefer audit-backed telemetry such as `osquery` `process_file_events` or Wazuh `whodata` mode.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ### Windows
 
@@ -116,7 +116,8 @@ Container FIM frequently misses the real write path. With Docker `overlay2`, cha
 
 ## References
 
-- [https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/](https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/)
-- [https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case](https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case)
+- [1] [File Integrity Monitoring with osquery](https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/)
+- [2] [Tracing Linux: A file integrity monitoring use case (Elastic)](https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case)
+- [3] [Wazuh File Integrity Monitoring (Syscheck and whodata mode)](https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html)
 
 {{#include ../../banners/hacktricks-training.md}}

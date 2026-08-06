@@ -70,13 +70,13 @@ sudo ntpdate <DC_FQDN>
 ./kerbrute_linux_amd64 bruteuser -d lab.ropnop.com [--dc 10.10.10.10] passwords.lst thoffman
 ```
 
-- [**spray**](https://github.com/Greenwolf/Spray) _**(you can indicate number of attempts to avoid lockouts):**_
+- [**spray**](https://github.com/Greenwolf/Spray) _**(you can indicate number of attempts to avoid lockouts):**_<sup>[[3]](#references)</sup>
 
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
 
-- Using [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NOT RECOMMENDED SOMETIMES DOESN'T WORK
+- Using [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NOT RECOMMENDED SOMETIMES DOESN'T WORK<sup>[[2]](#references)</sup>
 
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
@@ -87,7 +87,7 @@ python kerbrute.py -domain jurassic.park -users users.txt -password Password123 
 
 ![Password Spraying - Brute-Force: With the scanner/smb/smb login module of Metasploit](<../../images/image (745).png>)
 
-- Using **rpcclient**:
+- Using **rpcclient**:<sup>[[6]](#references)</sup>
 
 ```bash
 # https://www.blackhillsinfosec.com/password-spraying-other-fun-with-rpcclient/
@@ -108,7 +108,7 @@ done
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
 
-- With [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (It can generate users from the domain by default and it will get the password policy from the domain and limit tries according to it):
+- With [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (It can generate users from the domain by default and it will get the password policy from the domain and limit tries according to it):<sup>[[4]](#references)</sup>
 
 ```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
@@ -122,7 +122,7 @@ Invoke-SprayEmptyPassword
 
 ### Identify and Take Over "Password must change at next logon" Accounts (SAMR)
 
-A low-noise technique is to spray a benign/empty password and catch accounts returning STATUS_PASSWORD_MUST_CHANGE, which indicates the password was forcibly expired and can be changed without knowing the old one.
+A low-noise technique is to spray a benign/empty password and catch accounts returning STATUS_PASSWORD_MUST_CHANGE, which indicates the password was forcibly expired and can be changed without knowing the old one.<sup>[[9]](#references)[[10]](#references)</sup>
 
 Workflow:
 - Enumerate users (RID brute via SAMR) to build the target list:
@@ -166,7 +166,7 @@ legba kerberos --target 127.0.0.1 --username admin --password wordlists/password
 
 ### Kerberos pre-auth spraying with LDAP targeting and PSO-aware throttling (SpearSpray)
 
-Kerberos pre-auth–based spraying reduces noise vs SMB/NTLM/LDAP bind attempts and aligns better with AD lockout policies. SpearSpray couples LDAP-driven targeting, a pattern engine, and policy awareness (domain policy + PSOs + badPwdCount buffer) to spray precisely and safely. It can also tag compromised principals in Neo4j for BloodHound pathing.
+Kerberos pre-auth–based spraying reduces noise vs SMB/NTLM/LDAP bind attempts and aligns better with AD lockout policies. SpearSpray couples LDAP-driven targeting, a pattern engine, and policy awareness (domain policy + PSOs + badPwdCount buffer) to spray precisely and safely. It can also tag compromised principals in Neo4j for BloodHound pathing.<sup>[[1]](#references)</sup>
 
 Key ideas:
 - LDAP user discovery with paging and LDAPS support, optionally using custom LDAP filters.
@@ -245,7 +245,7 @@ There are multiples tools for p**assword spraying outlook**.
 
 - With [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
 - with [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
-- With [Ruler](https://github.com/sensepost/ruler) (reliable!)
+- With [Ruler](https://github.com/sensepost/ruler) (reliable!)<sup>[[5]](#references)</sup>
 - With [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
 - With [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
@@ -262,7 +262,7 @@ To use any of these tools, you need a user list and a password / a small list of
 
 ## Microsoft 365 / Entra ID
 
-For cloud spraying, first identify whether the tenant is **managed**, **federated**, or **hybrid**, because the endpoint and the lockout behavior can differ from on-prem AD. In Microsoft Entra, **Smart Lockout** changes how repeated guesses consume the lockout budget:
+For cloud spraying, first identify whether the tenant is **managed**, **federated**, or **hybrid**, because the endpoint and the lockout behavior can differ from on-prem AD. In Microsoft Entra, **Smart Lockout** changes how repeated guesses consume the lockout budget:<sup>[[7]](#references)</sup>
 
 - Repeating the **same bad password** doesn't keep incrementing the lockout counter, but trying **new candidates** does.
 - **Familiar** and **unfamiliar** locations have **separate** counters.
@@ -307,7 +307,7 @@ o365spray --enum -U users.txt --domain corp.com --enum-module onedrive
 o365spray --spray -U valid.txt -P passwords.txt --count 1 --lockout 15 --domain corp.com
 ```
 
-Recent operator tradecraft has also moved toward **distributed cloud spraying**. [**TeamFiltration**](https://github.com/Flangvik/TeamFiltration) supports time windows, password shuffling, ADFS/M365 spraying, and automatic post-auth exfiltration. Recent real-world abuse also used **Microsoft Teams API** account enumeration and **AWS region rotation** to spread spray waves across multiple source geographies.
+Recent operator tradecraft has also moved toward **distributed cloud spraying**. [**TeamFiltration**](https://github.com/Flangvik/TeamFiltration) supports time windows, password shuffling, ADFS/M365 spraying, and automatic post-auth exfiltration. Recent real-world abuse also used **Microsoft Teams API** account enumeration and **AWS region rotation** to spread spray waves across multiple source geographies.<sup>[[8]](#references)</sup>
 
 ## Google
 
@@ -321,19 +321,15 @@ Recent operator tradecraft has also moved toward **distributed cloud spraying**.
 
 ## References
 
-- [https://github.com/sikumy/spearspray](https://github.com/sikumy/spearspray)
-- [https://github.com/TarlogicSecurity/kerbrute](https://github.com/TarlogicSecurity/kerbrute)
-- [https://github.com/Greenwolf/Spray](https://github.com/Greenwolf/Spray)
-- [https://github.com/Hackndo/sprayhound](https://github.com/Hackndo/sprayhound)
-- [https://github.com/login-securite/conpass](https://github.com/login-securite/conpass)
-- [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying)
-- [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
-- [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
-- [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
-- [Microsoft Entra smart lockout](https://learn.microsoft.com/en-us/entra/identity/authentication/howto-password-smart-lockout)
-- [Proofpoint: Attackers Unleash TeamFiltration: Account Takeover Campaign](https://www.proofpoint.com/us/blog/threat-insight/attackers-unleash-teamfiltration-account-takeover-campaign)
-- [HTB Sendai – 0xdf: from spray to gMSA to DA/SYSTEM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
-- [HTB: Baby — Anonymous LDAP → Password Spray → SeBackupPrivilege → Domain Admin](https://0xdf.gitlab.io/2025/09/19/htb-baby.html)
-
+- [1] [SpearSpray – Enhance Your Active Directory Password Spraying with User Intelligence](https://github.com/sikumy/spearspray)
+- [2] [TarlogicSecurity/kerbrute – Kerberos bruteforcing with Impacket (Python)](https://github.com/TarlogicSecurity/kerbrute)
+- [3] [Spray – A Password Spraying tool for Active Directory Credentials](https://github.com/Greenwolf/Spray)
+- [4] [Active Directory Password Spraying](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying)
+- [5] [Password Spraying Outlook Web Access: Remote Shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
+- [6] [Password Spraying & Other Fun with RPCCLIENT](https://www.blackhillsinfosec.com/?p=5296)
+- [7] [Microsoft Entra smart lockout](https://learn.microsoft.com/en-us/entra/identity/authentication/howto-password-smart-lockout)
+- [8] [Proofpoint: Attackers Unleash TeamFiltration: Account Takeover Campaign](https://www.proofpoint.com/us/blog/threat-insight/attackers-unleash-teamfiltration-account-takeover-campaign)
+- [9] [HTB Sendai – 0xdf: from spray to gMSA to DA/SYSTEM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
+- [10] [HTB: Baby — Anonymous LDAP → Password Spray → SeBackupPrivilege → Domain Admin](https://0xdf.gitlab.io/2025/09/19/htb-baby.html)
 
 {{#include ../../banners/hacktricks-training.md}}

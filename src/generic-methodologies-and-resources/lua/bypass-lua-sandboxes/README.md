@@ -24,7 +24,7 @@ local function dump_globals(out)
 end
 ```
 
-- If no print() is available, repurpose in-VM channels. Example from an MMO housing script VM where chat output only works after a sound call; the following builds a reliable output function:
+- If no print() is available, repurpose in-VM channels. Example from an MMO housing script VM where chat output only works after a sound call; the following builds a reliable output function:<sup>[[1]](#references)</sup>
 
 ```lua
 -- Build an output channel using in-game primitives
@@ -64,7 +64,7 @@ Notes:
 
 ## Zero-click triggers via auto-run callbacks
 
-If the host application pushes scripts to clients and the VM exposes auto-run hooks (e.g., OnInit/OnLoad/OnEnter), place your payload there for drive-by compromise as soon as the script loads:
+If the host application pushes scripts to clients and the VM exposes auto-run hooks (e.g., OnInit/OnLoad/OnEnter), place your payload there for drive-by compromise as soon as the script loads:<sup>[[1]](#references)</sup>
 
 ```lua
 function OnInit()
@@ -103,9 +103,9 @@ local foo = mylib()
 ## Optional escalation: abusing Lua bytecode loaders
 
 When load/loadstring/loadfile are reachable but io/os are restricted, execution of crafted Lua bytecode can lead to memory disclosure and corruption primitives. Key facts:
-- Lua ≤ 5.1 shipped a bytecode verifier that has known bypasses.
-- Lua 5.2 removed the verifier entirely (official stance: applications should just reject precompiled chunks), widening the attack surface if bytecode loading is not prohibited.
-- Workflows typically: leak pointers via in-VM output, craft bytecode to create type confusions (e.g., around FORLOOP or other opcodes), then pivot to arbitrary read/write or native code execution.
+- Lua ≤ 5.1 shipped a bytecode verifier that has known bypasses.<sup>[[4]](#references)</sup>
+- Lua 5.2 removed the verifier entirely (official stance: applications should just reject precompiled chunks), widening the attack surface if bytecode loading is not prohibited.<sup>[[2]](#references)[[3]](#references)</sup>
+- Workflows typically: leak pointers via in-VM output, craft bytecode to create type confusions (e.g., around FORLOOP or other opcodes), then pivot to arbitrary read/write or native code execution.<sup>[[2]](#references)[[4]](#references)</sup>
 
 This path is engine/version-specific and requires RE. See references for deep dives, exploitation primitives, and example gadgetry in games.
 
@@ -117,9 +117,9 @@ This path is engine/version-specific and requires RE. See references for deep di
 
 ## References
 
-- [This House is Haunted: a decade old RCE in the AION client (housing Lua VM)](https://appsec.space/posts/aion-housing-exploit/)
-- [Bytecode Breakdown: Unraveling Factorio's Lua Security Flaws](https://memorycorruption.net/posts/rce-lua-factorio/)
-- [lua-l (2009): Discussion on dropping the bytecode verifier](https://web.archive.org/web/20230308193701/https://lua-users.org/lists/lua-l/2009-03/msg00039.html)
-- [Exploiting Lua 5.1 bytecode (gist with verifier bypasses/notes)](https://gist.github.com/ulidtko/51b8671260db79da64d193e41d7e7d16)
+- [1] [This House is Haunted: a decade old RCE in the AION client (housing Lua VM)](https://appsec.space/posts/aion-housing-exploit/)
+- [2] [Bytecode Breakdown: Unraveling Factorio's Lua Security Flaws](https://memorycorruption.net/posts/rce-lua-factorio/)
+- [3] [lua-l (2009): Discussion on dropping the bytecode verifier](https://web.archive.org/web/20230308193701/https://lua-users.org/lists/lua-l/2009-03/msg00039.html)
+- [4] [Exploiting Lua 5.1 bytecode (gist with verifier bypasses/notes)](https://gist.github.com/ulidtko/51b8671260db79da64d193e41d7e7d16)
 
 {{#include ../../../banners/hacktricks-training.md}}

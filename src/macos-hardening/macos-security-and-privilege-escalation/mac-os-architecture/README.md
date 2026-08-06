@@ -120,7 +120,7 @@ macos-system-extensions.md
 
 ## References
 
-- [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
-- [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
+- [1] [The Mac Hacker's Handbook](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
+- [2] [The Art of Mac Malware, Vol. 1 — Analysis](https://taomm.org/vol1/analysis.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

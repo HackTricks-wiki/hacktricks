@@ -82,7 +82,7 @@ This is useful if you have useful credentials to access objects in the network b
 
 #### `runas /netonly` details
 
-`runas /netonly` (and C2 helpers such as `make_token`) creates a **`LOGON32_LOGON_NEW_CREDENTIALS`** token. This is very useful to understand during lateral movement because:
+`runas /netonly` (and C2 helpers such as `make_token`) creates a **`LOGON32_LOGON_NEW_CREDENTIALS`** token. This is very useful to understand during lateral movement because:<sup>[[3]](#references)</sup>
 
 - **Locally**, the new process keeps the **same local identity**, groups, integrity level, and most of the same access decisions as the current token.
 - **Remotely**, outbound authentication can use the **supplied credentials** for SMB / WinRM / LDAP / HTTP / Kerberos / NTLM.
@@ -105,7 +105,7 @@ There are two types of tokens available:
 
 Using the _**incognito**_ module of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
 
-Some practical notes that are easy to forget while operating:
+Some practical notes that are easy to forget while operating:<sup>[[1]](#references)</sup>
 
 - **`CreateProcessWithTokenW`** requires **`SeImpersonatePrivilege`** in the caller and the new process will run in the **caller's session**.
 - **`CreateProcessAsUserW`** is the usual fallback when `CreateProcessWithTokenW` fails with `1314`, or when you need to launch in the **session referenced by the token**.
@@ -114,7 +114,7 @@ Some practical notes that are easy to forget while operating:
 
 #### Token theft without touching LSASS
 
-If you already have a **service** or **SYSTEM** context and a **privileged user is logged on**, stealing or duplicating that user's token is often quieter than dumping **LSASS**. In many real intrusions this is enough to:
+If you already have a **service** or **SYSTEM** context and a **privileged user is logged on**, stealing or duplicating that user's token is often quieter than dumping **LSASS**. In many real intrusions this is enough to:<sup>[[2]](#references)</sup>
 
 - run local actions as that user
 - access remote resources as that user
@@ -135,11 +135,8 @@ Take a look to [**all the possible token privileges and some definitions on this
 
 ## References
 
-- [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa)
-- [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
-- [https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
-- [https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/](https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/)
+- [1] [Understanding and Abusing Access Tokens — Part II](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [2] [Abusing Windows' tokens to compromise Active Directory without touching LSASS](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [3] [Demystifying Cobalt Strike's "make_token" Command](https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-

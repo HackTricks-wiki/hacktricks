@@ -186,7 +186,7 @@ Result:
 
 ### Server-Side Request Forgery via uncontrolled redirects (CVE-2025-50182)
 
-`urllib3 < 2.5.0` ignores the `redirect` and `retries` parameters when it is executed **inside the Pyodide runtime** that ships with PyScript. When an attacker can influence target URLs, they may force the Python code to follow cross-domain redirects even when the developer explicitly disabled them ‑ effectively bypassing anti-SSRF logic.
+`urllib3 < 2.5.0` ignores the `redirect` and `retries` parameters when it is executed **inside the Pyodide runtime** that ships with PyScript. When an attacker can influence target URLs, they may force the Python code to follow cross-domain redirects even when the developer explicitly disabled them ‑ effectively bypassing anti-SSRF logic.<sup>[[1]](#references)</sup>
 
 ```html
 <script type="py">
@@ -227,7 +227,7 @@ display("<b>escaped</b>")          # renders literally
 display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
 ```
 
-This behaviour was introduced in 2023 and is documented in the official Built-ins guide. Rely on `display()` for untrusted input and avoid calling `print()` directly.
+This behaviour was introduced in 2023 and is documented in the official Built-ins guide. Rely on `display()` for untrusted input and avoid calling `print()` directly.<sup>[[2]](#references)</sup>
 
 ---
 
@@ -241,7 +241,7 @@ This behaviour was introduced in 2023 and is documented in the official Built-in
 
 ## References
 
-* [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
-* [PyScript Built-ins documentation – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
+- [1] [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
+- [2] [PyScript Built-ins documentation – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
 
 {{#include ../../banners/hacktricks-training.md}}

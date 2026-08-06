@@ -14,5 +14,3 @@ For more information check:
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
-
-

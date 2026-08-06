@@ -4,20 +4,20 @@
 
 ## Overview
 
-Local AI command-line interfaces (AI CLIs) such as Claude Code, Gemini CLI, Codex CLI, Warp and similar tools often ship with powerful built‑ins: filesystem read/write, shell execution and outbound network access. Many act as MCP clients (Model Context Protocol), letting the model call external tools over STDIO or HTTP. Because the LLM plans tool-chains non‑deterministically, identical prompts can lead to different process, file and network behaviours across runs and hosts.
+Local AI command-line interfaces (AI CLIs) such as Claude Code, Gemini CLI, Codex CLI, Warp and similar tools often ship with powerful built‑ins: filesystem read/write, shell execution and outbound network access. Many act as MCP clients (Model Context Protocol), letting the model call external tools over STDIO or HTTP.<sup>[[2]](#references)</sup> Because the LLM plans tool-chains non‑deterministically, identical prompts can lead to different process, file and network behaviours across runs and hosts.
 
 Key mechanics seen in common AI CLIs:
 - Typically implemented in Node/TypeScript with a thin wrapper launching the model and exposing tools.
 - Multiple modes: interactive chat, plan/execute, and single‑prompt run.
-- MCP client support with STDIO and HTTP transports, enabling both local and remote capability extension.
+- MCP client support with STDIO and HTTP transports, enabling both local and remote capability extension.<sup>[[1]](#references)</sup>
 
-Abuse impact: A single prompt can inventory and exfiltrate credentials, modify local files, and silently extend capability by connecting to remote MCP servers (visibility gap if those servers are third‑party).
+Abuse impact: A single prompt can inventory and exfiltrate credentials, modify local files, and silently extend capability by connecting to remote MCP servers (visibility gap if those servers are third‑party).<sup>[[1]](#references)</sup>
 
 ---
 
 ## Repo-Controlled Configuration Poisoning (Claude Code)
 
-Some AI CLIs inherit project configuration directly from the repository (e.g., `.claude/settings.json` and `.mcp.json`). Treat these as **executable** inputs: a malicious commit or PR can turn “settings” into supply-chain RCE and secret exfiltration.
+Some AI CLIs inherit project configuration directly from the repository (e.g., `.claude/settings.json` and `.mcp.json`). Treat these as **executable** inputs: a malicious commit or PR can turn “settings” into supply-chain RCE and secret exfiltration.<sup>[[9]](#references)</sup>
 
 Key abuse patterns:
 - **Lifecycle hooks → silent shell execution**: repo-defined Hooks can run OS commands at `SessionStart` without per-command approval once the user accepts the initial trust dialog.
@@ -63,7 +63,7 @@ High-signal paths to review:
 - `.mcp.json`
 - `.vscode/` tasks, settings, extensions recommendations, or other editor files that steer AI helpers
 
-This pattern was highlighted in the Miasma npm supply-chain campaign: after package compromise, the attacker can use stolen maintainer access to push repository-local assistant configuration, shifting the trigger from `npm install` to **repository open / assistant load**. During reviews, treat new assistant-policy files with the same suspicion level as new workflow files, shell scripts, package hooks, or build-system metadata.
+This pattern was highlighted in the Miasma npm supply-chain campaign: after package compromise, the attacker can use stolen maintainer access to push repository-local assistant configuration, shifting the trigger from `npm install` to **repository open / assistant load**.<sup>[[12]](#references)</sup> During reviews, treat new assistant-policy files with the same suspicion level as new workflow files, shell scripts, package hooks, or build-system metadata.
 
 Defensive checks:
 
@@ -74,7 +74,7 @@ Defensive checks:
 
 ### Repo-Local MCP Auto-Exec via `CODEX_HOME` (Codex CLI)
 
-A closely related pattern appeared in OpenAI Codex CLI: if a repository can influence the environment used to launch `codex`, a project-local `.env` can redirect `CODEX_HOME` into attacker-controlled files and make Codex auto-start arbitrary MCP entries on launch. The important distinction is that the payload is no longer hidden in a tool description or later prompt injection: the CLI resolves its config path first, then executes the declared MCP command as part of startup.
+A closely related pattern appeared in OpenAI Codex CLI: if a repository can influence the environment used to launch `codex`, a project-local `.env` can redirect `CODEX_HOME` into attacker-controlled files and make Codex auto-start arbitrary MCP entries on launch. The important distinction is that the payload is no longer hidden in a tool description or later prompt injection: the CLI resolves its config path first, then executes the declared MCP command as part of startup.<sup>[[10]](#references)</sup>
 
 Minimal example (repo-controlled):
 
@@ -94,7 +94,7 @@ This makes repo-local env files and dot-directories part of the trust boundary f
 
 ## Adversary Playbook – Prompt‑Driven Secrets Inventory
 
-Task the agent to quickly triage and stage credentials/secrets for exfiltration while staying quiet:
+Task the agent to quickly triage and stage credentials/secrets for exfiltration while staying quiet:<sup>[[1]](#references)</sup>
 
 - Scope: recursively enumerate under $HOME and application/wallet dirs; avoid noisy/pseudo paths (`/proc`, `/sys`, `/dev`).
 - Performance/stealth: cap recursion depth; avoid `sudo`/priv‑escalation; summarise results.
@@ -118,7 +118,7 @@ Return a short summary only; no file contents.
 
 ## Capability Extension via MCP (STDIO and HTTP)
 
-AI CLIs frequently act as MCP clients to reach additional tools:
+AI CLIs frequently act as MCP clients to reach additional tools:<sup>[[1]](#references)</sup>
 
 - STDIO transport (local tools): the client spawns a helper chain to run a tool server. Typical lineage: `node → <ai-cli> → uv → python → file_write`. Example observed: `uv run --with fastmcp fastmcp run ./server.py` which starts `python3.13` and performs local file operations on the agent’s behalf.
 - HTTP transport (remote tools): the client opens outbound TCP (e.g., port 8000) to a remote MCP server, which executes the requested action (e.g., write `/home/user/demo_http`). On the endpoint you’ll only see the client’s network activity; server‑side file touches occur off‑host.
@@ -131,7 +131,7 @@ Notes:
 
 ## Local Artifacts and Logs (Forensics)
 
-- Gemini CLI session logs: `~/.gemini/tmp/<uuid>/logs.json`
+- Gemini CLI session logs: `~/.gemini/tmp/<uuid>/logs.json`<sup>[[1]](#references)</sup>
   - Fields commonly seen: `sessionId`, `type`, `message`, `timestamp`.
   - Example `message`: "@.bashrc what is in this file?" (user/agent intent captured).
 - Claude Code history: `~/.claude/history.jsonl`
@@ -141,7 +141,7 @@ Notes:
 
 ## Pentesting Remote MCP Servers
 
-Remote MCP servers expose a JSON‑RPC 2.0 API that fronts LLM‑centric capabilities (Prompts, Resources, Tools). They inherit classic web API flaws while adding async transports (SSE/streamable HTTP) and per‑session semantics.
+Remote MCP servers expose a JSON‑RPC 2.0 API that fronts LLM‑centric capabilities (Prompts, Resources, Tools). They inherit classic web API flaws while adding async transports (SSE/streamable HTTP) and per‑session semantics.<sup>[[3]](#references)</sup>
 
 Key actors
 - Host: the LLM/agent frontend (Claude Desktop, Cursor, etc.).
@@ -150,11 +150,11 @@ Key actors
 
 AuthN/AuthZ
 - OAuth2 is common: an IdP authenticates, the MCP server acts as resource server.
-- After OAuth, the server issues an authentication token used on subsequent MCP requests. This is distinct from `Mcp-Session-Id` which identifies a connection/session after `initialize`.
+- After OAuth, the server issues an authentication token used on subsequent MCP requests. This is distinct from `Mcp-Session-Id` which identifies a connection/session after `initialize`.<sup>[[6]](#references)</sup>
 
 ### Pre-Session Abuse: OAuth Discovery to Local Code Execution
 
-When a desktop client reaches a remote MCP server through a helper such as `mcp-remote`, the dangerous surface may appear **before** `initialize`, `tools/list`, or any ordinary JSON-RPC traffic. In 2025, researchers showed that `mcp-remote` versions `0.0.5` to `0.1.15` could accept attacker-controlled OAuth discovery metadata and forward a crafted `authorization_endpoint` string into the operating system URL handler (`open`, `xdg-open`, `start`, etc.), yielding local code execution on the connecting workstation.
+When a desktop client reaches a remote MCP server through a helper such as `mcp-remote`, the dangerous surface may appear **before** `initialize`, `tools/list`, or any ordinary JSON-RPC traffic. In 2025, researchers showed that `mcp-remote` versions `0.0.5` to `0.1.15` could accept attacker-controlled OAuth discovery metadata and forward a crafted `authorization_endpoint` string into the operating system URL handler (`open`, `xdg-open`, `start`, etc.), yielding local code execution on the connecting workstation.<sup>[[11]](#references)</sup>
 
 Offensive implications:
 - A malicious remote MCP server can weaponize the very first auth challenge, so compromise happens during server onboarding rather than during a later tool call.
@@ -165,7 +165,7 @@ When assessing remote MCP deployments, inspect the OAuth bootstrap path as caref
 
 Transports
 - Local: JSON‑RPC over STDIN/STDOUT.
-- Remote: Server‑Sent Events (SSE, still widely deployed) and streamable HTTP.
+- Remote: Server‑Sent Events (SSE, still widely deployed) and streamable HTTP.<sup>[[7]](#references)</sup>
 
 A) Session initialization
 - Obtain OAuth token if required (Authorization: Bearer ...).
@@ -218,13 +218,13 @@ C) Exploitability checks
 {"jsonrpc":"2.0","id":11,"method":"tools/call","params":{"name":"TOOL_NAME","arguments":{"query":"; id"}}}
 ```
 
-  - Look for error echoes/stack traces in results to refine payloads. Independent testing has reported widespread command‑injection and related flaws in MCP tools.
+  - Look for error echoes/stack traces in results to refine payloads. Independent testing has reported widespread command‑injection and related flaws in MCP tools.<sup>[[8]](#references)</sup>
 - Prompts → Injection preconditions
   - Prompts mainly expose metadata; prompt injection matters only if you can tamper with prompt parameters (e.g., via compromised resources or client bugs).
 
 D) Tooling for interception and fuzzing
-- MCP Inspector (Anthropic): Web UI/CLI supporting STDIO, SSE and streamable HTTP with OAuth. Ideal for quick recon and manual tool invocations.
-- HTTP–MCP Bridge (NCC Group): Bridges MCP SSE to HTTP/1.1 so you can use Burp/Caido.
+- MCP Inspector (Anthropic): Web UI/CLI supporting STDIO, SSE and streamable HTTP with OAuth. Ideal for quick recon and manual tool invocations.<sup>[[4]](#references)</sup>
+- HTTP–MCP Bridge (NCC Group): Bridges MCP SSE to HTTP/1.1 so you can use Burp/Caido.<sup>[[5]](#references)</sup>
   - Start the bridge pointed at the target MCP server (SSE transport).
   - Manually perform the `initialize` handshake to acquire a valid `Mcp-Session-Id` (per README).
   - Proxy JSON‑RPC messages like `tools/list`, `resources/list`, `resources/read`, and `tools/call` via Repeater/Intruder for replay and fuzzing.
@@ -241,17 +241,17 @@ Impact highlights
 
 ## References
 
-- [Commanding attention: How adversaries are abusing AI CLI tools (Red Canary)](https://redcanary.com/blog/threat-detection/ai-cli-tools/)
-- [Model Context Protocol (MCP)](https://modelcontextprotocol.io)
-- [Assessing the Attack Surface of Remote MCP Servers](https://blog.kulkan.com/assessing-the-attack-surface-of-remote-mcp-servers-92d630a0cab0)
-- [MCP Inspector (Anthropic)](https://github.com/modelcontextprotocol/inspector)
-- [HTTP–MCP Bridge (NCC Group)](https://github.com/nccgroup/http-mcp-bridge)
-- [MCP spec – Authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
-- [MCP spec – Transports and SSE deprecation](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#backwards-compatibility)
-- [Equixly: MCP server security issues in the wild](https://equixly.com/blog/2025/03/29/mcp-server-new-security-nightmare/)
-- [Caught in the Hook: RCE and API Token Exfiltration Through Claude Code Project Files](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)
-- [OpenAI Codex CLI Vulnerability: Command Injection](https://research.checkpoint.com/2025/openai-codex-cli-command-injection-vulnerability/)
-- [When OAuth Becomes a Weapon: Lessons from CVE-2025-6514](https://amlalabs.com/blog/oauth-cve-2025-6514/)
-- [What the Miasma campaign reveals about the new supply chain threat model and the underground market for developer credentials](https://www.tenable.com/blog/what-the-miasma-campaign-reveals-about-the-new-supply-chain-threat-model-and-the-underground)
+- [1] [Commanding attention: How adversaries are abusing AI CLI tools (Red Canary)](https://redcanary.com/blog/threat-detection/ai-cli-tools/)
+- [2] [Model Context Protocol (MCP)](https://modelcontextprotocol.io)
+- [3] [Assessing the Attack Surface of Remote MCP Servers](https://blog.kulkan.com/assessing-the-attack-surface-of-remote-mcp-servers-92d630a0cab0)
+- [4] [MCP Inspector (Anthropic)](https://github.com/modelcontextprotocol/inspector)
+- [5] [HTTP–MCP Bridge (NCC Group)](https://github.com/nccgroup/http-mcp-bridge)
+- [6] [MCP spec – Authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
+- [7] [MCP spec – Transports and SSE deprecation](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#backwards-compatibility)
+- [8] [Equixly: MCP server security issues in the wild](https://equixly.com/blog/2025/03/29/mcp-server-new-security-nightmare/)
+- [9] [Caught in the Hook: RCE and API Token Exfiltration Through Claude Code Project Files](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)
+- [10] [OpenAI Codex CLI Vulnerability: Command Injection](https://research.checkpoint.com/2025/openai-codex-cli-command-injection-vulnerability/)
+- [11] [When OAuth Becomes a Weapon: Lessons from CVE-2025-6514](https://amlalabs.com/blog/oauth-cve-2025-6514/)
+- [12] [What the Miasma campaign reveals about the new supply chain threat model and the underground market for developer credentials](https://www.tenable.com/blog/what-the-miasma-campaign-reveals-about-the-new-supply-chain-threat-model-and-the-underground)
 
 {{#include ../../banners/hacktricks-training.md}}

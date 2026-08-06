@@ -38,10 +38,10 @@ The[ **facts that a LC can use are documented**](https://developer.apple.com/doc
 
 When an Apple binary is signed it **assigns it to a LC category** inside the **trust cache**.
 
-- **iOS 16 LC categories** were [**reversed and documented in here**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).
-- Current **LC categories (macOS 14** - Somona) have been reversed and their [**descriptions can be found here**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).
+- **iOS 16 LC categories** were [**reversed and documented in here**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).<sup>[[6]](#references)</sup>
+- Current **LC categories (macOS 14** - Somona) have been reversed and their [**descriptions can be found here**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).<sup>[[7]](#references)</sup>
 
-For example Category 1 is:
+For example Category 1 is:<sup>[[7]](#references)</sup>
 
 ```
 Category 1:
@@ -56,7 +56,7 @@ Category 1:
 
 ### Reversing LC Categories
 
-You have more information [**about it in here**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), but basically, They are defined in **AMFI (AppleMobileFileIntegrity)**, so you need to download the Kernel Development Kit to get the **KEXT**. The symbols starting with **`kConstraintCategory`** are the **interesting** ones. Extracting them you will get a DER (ASN.1) encoded stream that you will need to decode with [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) or the python-asn1 library and its `dump.py` script, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) which will give you a more understandable string.
+You have more information [**about it in here**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), but basically, They are defined in **AMFI (AppleMobileFileIntegrity)**, so you need to download the Kernel Development Kit to get the **KEXT**. The symbols starting with **`kConstraintCategory`** are the **interesting** ones. Extracting them you will get a DER (ASN.1) encoded stream that you will need to decode with [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) or the python-asn1 library and its `dump.py` script, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) which will give you a more understandable string.<sup>[[3]](#references)</sup>
 
 ## Environment Constraints
 
@@ -145,7 +145,7 @@ struct trust_cache_entry2 {
 
 Then, you could use a script such as [**this one**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) to extract data.
 
-From that data you can check the Apps with a **launch constraints value of `0`** , which are the ones that aren't constrained ([**check here**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) for what each value is).
+From that data you can check the Apps with a **launch constraints value of `0`** , which are the ones that aren't constrained ([**check here**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) for what each value is).<sup>[[6]](#references)</sup>
 
 ## Attack Mitigations
 
@@ -153,7 +153,7 @@ Launch Constrains would have mitigated several old attacks by **making sure that
 
 Moreover, Launch Constraints also **mitigates downgrade attacks.**
 
-However, they **don't mitigate common XPC** abuses, **Electron** code injections or **dylib injections** without library validation (unless the team IDs that can load libraries are known).
+However, they **don't mitigate common XPC** abuses, **Electron** code injections or **dylib injections** without library validation (unless the team IDs that can load libraries are known).<sup>[[3]](#references)</sup>
 
 ### XPC Daemon Protection
 
@@ -162,18 +162,34 @@ In the Sonoma release, a notable point is the daemon XPC service's **responsibil
 - **Launching the XPC Service**: If assumed to be a bug, this setup does not permit initiating the XPC service through attacker code.
 - **Connecting to an Active Service**: If the XPC service is already running (possibly activated by its original application), there are no barriers to connecting to it.
 
-While implementing constraints on the XPC service might be beneficial by **narrowing the window for potential attacks**, it doesn't address the primary concern. Ensuring the security of the XPC service fundamentally requires **validating the connecting client effectively**. This remains the sole method to fortify the service's security. Also, it's worth noting that the mentioned responsibility configuration is currently operational, which might not align with the intended design.
+While implementing constraints on the XPC service might be beneficial by **narrowing the window for potential attacks**, it doesn't address the primary concern. Ensuring the security of the XPC service fundamentally requires **validating the connecting client effectively**. This remains the sole method to fortify the service's security. Also, it's worth noting that the mentioned responsibility configuration is currently operational, which might not align with the intended design.<sup>[[3]](#references)</sup>
 
 ### Electron Protection
 
-Even if it's required that the application has to be **opened by LaunchService** (in the parents constraints). This can be achieved using **`open`** (which can set env variables) or using the **Launch Services API** (where env variables can be indicated).
+Even if it's required that the application has to be **opened by LaunchService** (in the parents constraints). This can be achieved using **`open`** (which can set env variables) or using the **Launch Services API** (where env variables can be indicated).<sup>[[3]](#references)</sup>
+
+### CVE-2025-43253 - Overriding the built-in constraints at spawn time
+
+Launch constraints (officially **lightweight code requirements**, *LWCR*) are enforced by the **AMFI MAC policy**. `posix_spawn` lets a caller hand an arbitrary blob to a MAC policy through **`posix_spawnattr_setmacpolicyinfo_np()`**, and AMFI accepted a caller-supplied LWCR dictionary through that path. The bug was that the **attacker-supplied constraints replaced the binary's built-in ones** instead of being checked in addition to them:
+
+- Build a minimal (even empty) launch-constraints dictionary.
+- Set the **constraint category to `127`**, a value that AMFI allows in spawn attributes but does **not enforce** — it only logs `Launch Constraint Violation (not enforcing)` instead of blocking the execution.
+- Pass it via the spawn attributes, and the process launches in a context its real self/parent constraints would have forbidden.
+
+After the fix, **both** the built-in and the supplied constraints are validated, so the supplied dictionary can no longer weaken the built-in one.<sup>[[2]](#references)</sup>
+
+> [!TIP]
+> This is the general shape to look for when auditing constraint enforcement: an API that lets untrusted input *supply* a policy tends to be interesting whenever the policy engine treats the supplied value as a replacement rather than an additional requirement.
 
 ## References
 
-- [https://youtu.be/f1HA5QhLQ7Y?t=24146](https://youtu.be/f1HA5QhLQ7Y?t=24146)
-- [https://theevilbit.github.io/posts/launch_constraints_deep_dive/](https://theevilbit.github.io/posts/launch_constraints_deep_dive/)
-- [https://eclecticlight.co/2023/06/13/why-wont-a-system-app-or-command-tool-run-launch-constraints-and-trust-caches/](https://eclecticlight.co/2023/06/13/why-wont-a-system-app-or-command-tool-run-launch-constraints-and-trust-caches/)
-- [https://developer.apple.com/videos/play/wwdc2023/10266/](https://developer.apple.com/videos/play/wwdc2023/10266/)
+- [1] [Objective by the Sea #OBTS v6.0 Day 2 (Live-Stream)](https://youtu.be/f1HA5QhLQ7Y?t=24146)
+- [2] [CVE-2025-43253: Bypassing Launch Constraints on macOS (wts.dev)](https://wts.dev/posts/bypassing-launch-constraints/)
+- [3] [Launch and Environment Constraints Deep Dive - theevilbit](https://theevilbit.github.io/posts/launch_constraints_deep_dive/)
+- [4] [Why won't a system app or command tool run? Launch constraints and trust caches - The Eclectic Light Company](https://eclecticlight.co/2023/06/13/why-wont-a-system-app-or-command-tool-run-launch-constraints-and-trust-caches/)
+- [5] [Protect your Mac app with environment constraints - WWDC23](https://developer.apple.com/videos/play/wwdc2023/10266/)
+- [6] [Description of the Launch Constraints introduced in iOS 16 (LinusHenze gist)](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056)
+- [7] [macOS Sonoma (14) Launch Constraints (theevilbit gist)](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53)
 
 {{#include ../../../banners/hacktricks-training.md}}
 

@@ -28,7 +28,7 @@ The most important hardening principles are conceptually simple even though thei
 
 Image and build hygiene matter as much as runtime posture. Use minimal images, rebuild frequently, scan them, require provenance where practical, and keep secrets out of layers. A container running as non-root with a small image and a narrow syscall and capability surface is much easier to defend than a large convenience image running as host-equivalent root with debugging tools preinstalled.
 
-For Kubernetes, current hardening baselines are more opinionated than many operators still assume. The built-in **Pod Security Standards** treat `restricted` as the "current best practice" profile: `allowPrivilegeEscalation` should be `false`, workloads should run as non-root, seccomp should be explicitly set to `RuntimeDefault` or `Localhost`, and capability sets should be dropped aggressively. During assessment, this matters because a cluster that is only using `warn` or `audit` labels may look hardened on paper while still admitting risky pods in practice.
+For Kubernetes, current hardening baselines are more opinionated than many operators still assume. The built-in **Pod Security Standards** treat `restricted` as the "current best practice" profile: `allowPrivilegeEscalation` should be `false`, workloads should run as non-root, seccomp should be explicitly set to `RuntimeDefault` or `Localhost`, and capability sets should be dropped aggressively. During assessment, this matters because a cluster that is only using `warn` or `audit` labels may look hardened on paper while still admitting risky pods in practice.<sup>[[1]](#references)</sup>
 
 ## Modern Triage Questions
 
@@ -155,6 +155,6 @@ What is interesting here:
 
 ## References
 
-- [Kubernetes Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
-- [Docker Security Advisory: Multiple Vulnerabilities in runc, BuildKit, and Moby](https://docs.docker.com/security/security-announcements/)
+- [1] [Kubernetes Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
+- [2] [Docker Security Advisory: Multiple Vulnerabilities in runc, BuildKit, and Moby](https://docs.docker.com/security/security-announcements/)
 {{#include ../../../banners/hacktricks-training.md}}

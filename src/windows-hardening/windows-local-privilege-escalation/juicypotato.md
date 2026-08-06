@@ -4,14 +4,13 @@
 
 > [!WARNING] > JuicyPotato is legacy. It generally works on Windows versions up to Windows 10 1803 / Windows Server 2016. Microsoft changes shipped starting in Windows 10 1809 / Server 2019 broke the original technique. For those builds and newer, consider modern alternatives such as PrintSpoofer, RoguePotato, SharpEfsPotato/EfsPotato, GodPotato and others. See the page below for up-to-date options and usage.
 
-
 {{#ref}}
 roguepotato-and-printspoofer.md
 {{#endref}}
 
 ## Juicy Potato (abusing the golden privileges) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
-_A sugared version of_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, with a bit of juice, i.e. **another Local Privilege Escalation tool, from a Windows Service Accounts to NT AUTHORITY\SYSTEM**_
+_A sugared version of_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, with a bit of juice, i.e. **another Local Privilege Escalation tool, from a Windows Service Accounts to NT AUTHORITY\SYSTEM**_<sup>[[1]](#references)</sup>
 
 #### You can download juicypotato from [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts)
 
@@ -22,13 +21,13 @@ _A sugared version of_ [_RottenPotatoNG_](https://github.com/breenmachine/Rotten
 
 ### Summary <a href="#summary" id="summary"></a>
 
-[**From juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
+[**From juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**<sup>[[1]](#references)</sup>
 
 [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) and its [variants](https://github.com/decoder-it/lonelypotato) leverages the privilege escalation chain based on [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [service](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) having the MiTM listener on `127.0.0.1:6666` and when you have `SeImpersonate` or `SeAssignPrimaryToken` privileges. During a Windows build review we found a setup where `BITS` was intentionally disabled and port `6666` was taken.
 
 We decided to weaponize [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Say hello to Juicy Potato**.
 
-> For the theory, see [Rotten Potato - Privilege Escalation from Service Accounts to SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) and follow the chain of links and references.
+> For the theory, see [Rotten Potato - Privilege Escalation from Service Accounts to SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) and follow the chain of links and references.<sup>[[4]](#references)</sup>
 
 We discovered that, other than `BITS` there are a several COM servers we can abuse. They just need to:
 
@@ -40,7 +39,7 @@ After some testing we obtained and tested an extensive list of [interesting CLSI
 
 ### Juicy details <a href="#juicy-details" id="juicy-details"></a>
 
-JuicyPotato allows you to:
+JuicyPotato allows you to:<sup>[[1]](#references)</sup>
 
 - **Target CLSID** _pick any CLSID you want._ [_Here_](http://ohpe.it/juicy-potato/CLSID/) _you can find the list organized by OS._
 - **COM Listening port** _define COM listening port you prefer (instead of the marshalled hardcoded 6666)_
@@ -76,7 +75,7 @@ Optional args:
 
 ### Final thoughts <a href="#final-thoughts" id="final-thoughts"></a>
 
-[**From juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
+[**From juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**<sup>[[1]](#references)</sup>
 
 If the user has `SeImpersonate` or `SeAssignPrimaryToken` privileges then you are **SYSTEM**.
 
@@ -84,16 +83,16 @@ It’s nearly impossible to prevent the abuse of all these COM Servers. You coul
 
 The actual solution is to protect sensitive accounts and applications which run under the `* SERVICE` accounts. Stopping `DCOM` would certainly inhibit this exploit but could have a serious impact on the underlying OS.
 
-From: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
+From: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)<sup>[[3]](#references)</sup>
 
 ## JuicyPotatoNG (2022+)
 
-JuicyPotatoNG re-introduces a JuicyPotato-style local privilege escalation on modern Windows by combining:
+JuicyPotatoNG re-introduces a JuicyPotato-style local privilege escalation on modern Windows by combining:<sup>[[2]](#references)</sup>
 - DCOM OXID resolution to a local RPC server on a chosen port, avoiding the old hardcoded 127.0.0.1:6666 listener.
 - An SSPI hook to capture and impersonate the inbound SYSTEM authentication without requiring RpcImpersonateClient, which also enables CreateProcessAsUser when only SeAssignPrimaryTokenPrivilege is present.
 - Tricks to satisfy DCOM activation constraints (e.g., the former INTERACTIVE-group requirement when targeting PrintNotify / ActiveX Installer Service classes).
 
-Important notes (evolving behavior across builds):
+Important notes (evolving behavior across builds):<sup>[[2]](#references)</sup>
 - September 2022: Initial technique worked on supported Windows 10/11 and Server targets using the “INTERACTIVE trick”.
 - January 2023 update from the authors: Microsoft later blocked the INTERACTIVE trick. A different CLSID ({A9819296-E5B3-4E67-8226-5E72CE9E1FB7}) restores exploitation but only on Windows 11 / Server 2022 according to their post.
 
@@ -156,7 +155,9 @@ Then download [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master
 
 ## References
 
-- [https://github.com/ohpe/juicy-potato/blob/master/README.md](https://github.com/ohpe/juicy-potato/blob/master/README.md)
-- [Giving JuicyPotato a second chance: JuicyPotatoNG (decoder.it)](https://decoder.cloud/2022/09/21/giving-juicypotato-a-second-chance-juicypotatong/)
+- [1] [Juicy Potato README (ohpe/juicy-potato)](https://github.com/ohpe/juicy-potato/blob/master/README.md)
+- [2] [Giving JuicyPotato a second chance: JuicyPotatoNG (decoder.it)](https://decoder.cloud/2022/09/21/giving-juicypotato-a-second-chance-juicypotatong/)
+- [3] [Juicy Potato project page (ohpe.it)](http://ohpe.it/juicy-potato/)
+- [4] [Rotten Potato - Privilege Escalation from Service Accounts to SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/)
 
 {{#include ../../banners/hacktricks-training.md}}

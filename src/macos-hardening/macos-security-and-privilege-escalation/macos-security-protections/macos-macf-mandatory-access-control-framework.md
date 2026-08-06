@@ -28,7 +28,7 @@ Note that MACF doesn't really make any decisions as it just **intercepts** actio
 > [!CAUTION]
 > Apple is the only one that can use the MAC Framework KPI.
 
-Usually the functions checking permissions with MACF will call the macro `MAC_CHECK`. Like in the case of syscall to create a socket which will call the function which `mac_socket_check_create` which calls `MAC_CHECK(socket_check_create, cred, domain, type, protocol);`. Moreover, the macro `MAC_CHECK` is defined in security/mac_internal.h as:
+Usually the functions checking permissions with MACF will call the macro `MAC_CHECK`. Like in the case of syscall to create a socket which will call the function which `mac_socket_check_create` which calls `MAC_CHECK(socket_check_create, cred, domain, type, protocol);`. Moreover, the macro `MAC_CHECK` is defined in security/mac_internal.h as:<sup>[[3]](#references)</sup>
 ```c
 Resolver tambien MAC_POLICY_ITERATE, MAC_CHECK_CALL, MAC_CHECK_RSLT
 
@@ -117,7 +117,7 @@ MACF use **labels** that then the policies checking if they should grant some ac
 
 A MACF Policy defined **rule and conditions to be applied in certain kernel operations**.
 
-A kernel extension could configure a `mac_policy_conf` struct and then register it calling `mac_policy_register`. From [here](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
+A kernel extension could configure a `mac_policy_conf` struct and then register it calling `mac_policy_register`. From [here](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):<sup>[[1]](#references)</sup>
 
 ```c
  #define mpc_t	struct mac_policy_conf *
@@ -160,7 +160,7 @@ It's easy to identify the kernel extensions configuring these policies by checki
 
 Note that MACF policies can be registered and unregistered also **dynamically**.
 
-One of the main fields of the `mac_policy_conf` is the **`mpc_ops`**. This fied specifies which opreations the policy is interested in. Note that there are hundres of them, so it's possible to zero all of them and then select just the ones the policy is interested on. From [here](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
+One of the main fields of the `mac_policy_conf` is the **`mpc_ops`**. This fied specifies which opreations the policy is interested in. Note that there are hundres of them, so it's possible to zero all of them and then select just the ones the policy is interested on. From [here](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):<sup>[[1]](#references)</sup>
 
 ```c
 struct mac_policy_ops {
@@ -357,7 +357,7 @@ mac_file_check_mmap(struct ucred *cred, struct fileglob *fg, int prot,
 }
 ```
 
-Which is calling the `MAC_CHECK` macro, whose code can be found in [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261)
+Which is calling the `MAC_CHECK` macro, whose code can be found in [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261)<sup>[[3]](#references)</sup>
 
 ```c
 /*
@@ -410,7 +410,7 @@ Which will go over all the registered mac policies calling their functions and s
 ### priv_check & priv_grant
 
 These callas are meant to check and provide (tens of) **privileges** defined in [**bsd/sys/priv.h**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/priv.h).\
-Some kernel code would call `priv_check_cred()` from [**bsd/kern/kern_priv.c**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_priv.c) with the KAuth credentials of the process and one of the privileges code which will call `mac_priv_check` to see if any policy **denies** giving the privilege and then it calls `mac_priv_grant` to see if any policy grants the `privilege`.
+Some kernel code would call `priv_check_cred()` from [**bsd/kern/kern_priv.c**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_priv.c) with the KAuth credentials of the process and one of the privileges code which will call `mac_priv_check` to see if any policy **denies** giving the privilege and then it calls `mac_priv_grant` to see if any policy grants the `privilege`.<sup>[[4]](#references)</sup>
 
 ### proc_check_syscall_unix
 
@@ -460,7 +460,7 @@ __END_DECLS
 #endif /*__APPLE_API_PRIVATE*/
 ```
 
-For offensive reversing, **`__mac_syscall`** is still one of the best userland chokepoints. It carries a **policy name** (for example `"Sandbox"` or `"AMFI"`), a **policy-specific selector/code**, and a pointer to the **opaque argument blob** that will be handled by `mpo_policy_syscall`. This is very useful when reversing undocumented operations from userland first and only later pivoting into the kernel implementation. Sandbox commonly reaches it via `__sandbox_ms`, and AMFI uses the same mechanism for dyld policy decisions.
+For offensive reversing, **`__mac_syscall`** is still one of the best userland chokepoints. It carries a **policy name** (for example `"Sandbox"` or `"AMFI"`), a **policy-specific selector/code**, and a pointer to the **opaque argument blob** that will be handled by `mpo_policy_syscall`. This is very useful when reversing undocumented operations from userland first and only later pivoting into the kernel implementation. Sandbox commonly reaches it via `__sandbox_ms`, and AMFI uses the same mechanism for dyld policy decisions.<sup>[[2]](#references)[[5]](#references)</sup>
 
 ## Practical offensive research notes
 
@@ -468,7 +468,7 @@ Recent macOS bugs rarely "break MACF" directly. Instead, they usually abuse a **
 
 ### Broker path checks vs real privileged action
 
-A recurring pattern is a privileged daemon performing a **userland pre-check** (for example `sandbox_check_by_audit_token()`) on one version of a path, and later executing the real privileged sink with a **different or non-canonical attacker-controlled path**. Recent `diskarbitrationd` / `storagekitd` research is a good example: **directory traversal** plus **symlink swaps** let the attacker pass the daemon's sandbox validation and then mount over sensitive locations such as `~/Library/Application Support/com.apple.TCC`, turning the bug into a **sandbox escape**, **local privilege escalation** or **TCC bypass** depending on the chosen mount point.
+A recurring pattern is a privileged daemon performing a **userland pre-check** (for example `sandbox_check_by_audit_token()`) on one version of a path, and later executing the real privileged sink with a **different or non-canonical attacker-controlled path**. Recent `diskarbitrationd` / `storagekitd` research is a good example: **directory traversal** plus **symlink swaps** let the attacker pass the daemon's sandbox validation and then mount over sensitive locations such as `~/Library/Application Support/com.apple.TCC`, turning the bug into a **sandbox escape**, **local privilege escalation** or **TCC bypass** depending on the chosen mount point.<sup>[[6]](#references)</sup>
 
 When auditing root brokers reachable from the sandbox, grep first for:
 
@@ -488,9 +488,12 @@ For deeper product-specific reversing, check the dedicated pages on [macOS Sandb
 
 ## References
 
-- [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
-- [**AMFI Syscall (Offensive Security)**](https://www.offsec.com/blog/amfi-syscall/)
-- [**Uncovering Apple Vulnerabilities: diskarbitrationd and storagekitd Audit Part 2**](https://blog.kandji.io/macos-audit-story-part2)
+- [1] [XNU — `security/mac_policy.h` (the full MACF policy operations vector)](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_policy.h)
+- [2] [XNU — `security/mac_base.c` (`mac_policy_register`, `__mac_syscall`)](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_base.c)
+- [3] [XNU — `security/mac_internal.h` (`MAC_CHECK` / `MAC_GRANT` / `MAC_POLICY_ITERATE` macros)](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_internal.h)
+- [4] [XNU — `bsd/sys/priv.h` (privilege codes used by `priv_check`/`priv_grant`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/priv.h)
+- [5] [AMFI Syscall (Offensive Security)](https://www.offsec.com/blog/amfi-syscall/)
+- [6] [Uncovering Apple Vulnerabilities: diskarbitrationd and storagekitd Audit Part 2](https://blog.kandji.io/macos-audit-story-part2)
 
 
 {{#include ../../../banners/hacktricks-training.md}}
