@@ -1,8 +1,8 @@
-# Specifični trikovi za softver i tipove fajlova
+# Trikovi za specifične softvere/tipove datoteka
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ovde možete pronaći zanimljive trikove za specifične tipove fajlova i/ili softver:
+Ovde možete pronaći zanimljive trikove za specifične tipove datoteka i/ili softver:
 
 
 {{#ref}}

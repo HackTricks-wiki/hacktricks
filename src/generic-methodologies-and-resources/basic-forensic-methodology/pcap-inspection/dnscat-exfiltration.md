@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ako imate pcap sa podacima koji se **ekstrahuju putem DNSCat** (bez korišćenja enkripcije), možete pronaći ekstrahovani sadržaj.
+Ako imate pcap sa podacima koji se **eksfiltriraju pomoću DNSCat-a** (bez korišćenja enkripcije), možete pronaći eksfiltrirani sadržaj.
 
-Samo treba da znate da su **prvih 9 bajtova** lažni podaci, već su povezani sa **C\&C komunikacijom**:
+Potrebno je samo da znate da prvih **9 bajtova** nisu stvarni podaci, već su povezani sa **C\&C komunikacijom**:<sup>[[1]](#references)</sup>
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -30,4 +30,8 @@ Postoji skripta koja radi sa Python3: [https://github.com/josemlwdf/DNScat-Decod
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```
+## Reference
+
+- [1] [DNSCat2 pcap forensics writeup – BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
+
 {{#include ../../../banners/hacktricks-training.md}}

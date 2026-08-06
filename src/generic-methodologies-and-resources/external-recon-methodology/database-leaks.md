@@ -1,31 +1,32 @@
-# Baze podataka leaks
+# Database leakovi
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Pretraživači Data Breach
+## Search engine-i za Data Breach
 
-- [greynoise](https://viz.greynoise.io/) - Pretražuje IP-ove, Tags, CVEs, vpn, dns...
-- [Dehashed](https://www.dehashed.com/) - Možete pretražiti svoj email ako je leak u nekoj bazi podataka.
-- [HaveIbeenPwned?](https://haveibeenpwned.com/) - Proverite da li je vaša email adresa u data breach
-- [ScamSearch](https://scamsearch.io/) - Pretražuje da pronađe telefon, email, profil da li je u pitanju prevarant.
-- [Intelligence X](https://intelx.io/) - Intelligence X je pretraživač i arhiva podataka. · Pretraga radi sa selektorima, tj. specifičnim terminima za pretragu kao što su email adrese, domeni, URL-ovi, IP-ovi...
-- [spycloud](https://portal.spycloud.com/endpoint/enriched-stats/[YOUR-MAIL]) - stavite svoj mail umesto YOUR-MAIL.
-- [weleakinfo](https://weleakinfo.io/) - We Leak Info - Leaked Dehashed Databases, pretražujte leaks.
-- [breachdirectory](https://breachdirectory.org/) - PROVERITE DA LI JE VAŠ EMAIL ILI KORISNIČKO IME BILO KOMPROMITOVANO
-- [leakcheck](https://leakcheck.io/) - Saznajte da li su vaše akredencijale kompromitovane
-- [Findemail.io](https://findemail.io/) - Pronađite email adrese za zadatu kompaniju.
-- [LibraryOfLeaks](https://search.libraryofleaks.org) - Pretražite leak dokumente, kompanije, ljude, baze podataka i više
-- [LeakRadar](https://leakradar.io/) - Instant pretraga preko 2 B+ plain-text info-stealer credentials; email, domen, metadata upiti, monitoring & API
-- [InfoStealers](https://infostealers.info/en/info) - Indeksira darknet-izložene infostealer logove i čini ih pretraživim i upotrebljivim za bezbednosne timove, istražitelje, istraživače i profesionalce digitalne forenzike.
-- [Leak-Lookup](https://leak-lookup.com/) - Data breach pretraživač sa preko 3 milijarde zapisa iz 3000+ baza podataka.
-- [BreachDirectory](https://breachdirectory.org/) - Proverite da li su vaše akredencijale kompromitovane u data breaches.
-- [Scylla.so](https://scylla.so/) - Community-driven database breach search engine.
-- [Leaked.domains](https://leaked.domains/) - Pretražite leaked kredencijale vezane za domene i podatke.
-- [WhiteIntel](https://whiteintel.io/) - Dark web data leak pretraživač za obaveštajne podatke o pretnjama.
-- [PSBDMP](https://psbdmp.ws/) - Platforma za pretragu i nadgledanje Pastebin dump-ova.
+- [greynoise](https://viz.greynoise.io/) - Pretražujte IP adrese, tagove, CVE-ove, vpn, dns...
+- [Dehashed](https://www.dehashed.com/) - Možete pretražiti svoj email da proverite da li je procureo u nekoj bazi podataka..
+- [HaveIbeenPwned?](https://haveibeenpwned.com/) - proverite da li se vaša email adresa nalazi u data breach-u
+- [ScamSearch](https://scamsearch.io/) - pretražite i pronađite telefon, email ili profil ako je osoba scammer.
+- [Intelligence X](https://intelx.io/) - Intelligence X je search engine i arhiva podataka. · Pretraga funkcioniše pomoću selector-a, odnosno specifičnih termina za pretragu kao što su email adrese, domeni, URL-ovi, IP adrese...
+- [spycloud](https://portal.spycloud.com/endpoint/enriched-stats/[YOUR-MAIL]) - unesite svoj email umesto YOUR-MAIL.
+- [weleakinfo](https://weleakinfo.io/) - We Leak Info - Leaked Dehashed Databases, pretražujte leakove.
+- [breachdirectory](https://breachdirectory.org/) - PROVERITE DA LI SU VAŠ EMAIL ILI USERNAME KOMPROMITOVANI
+- [leakcheck](https://leakcheck.io/) - Saznajte da li su vaši credentials kompromitovani
+- [Findemail.io](https://findemail.io/) - Pronađite email adrese za datu kompaniju.
+- [LibraryOfLeaks](https://search.libraryofleaks.org) - Pretražujte leak dokumente, kompanije, osobe, baze podataka i još mnogo toga
+- [LeakRadar](https://leakradar.io/) - Instantna pretraga kroz više od 2 milijarde plain-text info-stealer credentials; upiti po email adresi, domenu i metadata-i, monitoring i API
+- [InfoStealers](https://infostealers.info/en/info) - Indeksira infostealer logove izložene na darknet-u i čini ih pretraživim i korisnim za security timove, istražitelje, istraživače i stručnjake za digitalnu forenziku.
+- [Leak-Lookup](https://leak-lookup.com/) - Search engine za data breach sa više od 3 milijarde zapisa iz preko 3000 baza podataka.
+- [BreachDirectory](https://breachdirectory.org/) - Proverite da li su vaši credentials kompromitovani u data breach-ovima.
+- [Scylla.so](https://scylla.so/) - Community-driven search engine za database breach-ove.
+- [Leaked.domains](https://leaked.domains/) - Pretražite leaked credentials i podatke povezane sa domenima.
+- [WhiteIntel](https://whiteintel.io/) - Search engine za data leakove na dark web-u, namenjen threat intelligence-u.
+- [PSBDMP](https://psbdmp.ws/) - Platforma za pretragu i monitoring Pastebin dump-ova.
 
-## Alati za enumeraciju data leaks
 
-- [Leaker](https://github.com/vflame6/leaker) - Pasivni leak enumeracioni CLI alat koji istovremeno pretražuje 10 breach baza podataka.
+## Tools za enumeraciju data leakova
+
+- [Leaker](https://github.com/vflame6/leaker) - Pasivni CLI tool za enumeraciju leakova koji istovremeno pretražuje 10 breach baza podataka.
 
 {{#include ../../banners/hacktricks-training.md}}

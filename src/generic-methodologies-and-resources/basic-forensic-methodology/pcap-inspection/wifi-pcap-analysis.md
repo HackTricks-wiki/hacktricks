@@ -1,41 +1,41 @@
-# Wifi Pcap Analiza
+# Wifi Pcap analiza
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Proverite BSSID-ove
+## Provera BSSID-ova
 
-Kada primite snimak čiji je glavni saobraćaj Wifi koristeći WireShark, možete početi da istražujete sve SSID-ove snimka sa _Wireless --> WLAN Traffic_:
+Kada primite capture čiji je glavni saobraćaj Wifi i koristite WireShark, možete početi da istražujete sve SSID-ove iz capture-a pomoću opcije _Wireless --> WLAN Traffic_:
 
-![](<../../../images/image (106).png>)
+![Wifi Pcap analiza - Provera BSSID-ova: Kada primite capture čiji je glavni saobraćaj Wifi i koristite WireShark, možete početi da istražujete sve SSID-ove iz capture-a pomoću opcije Wireless --...](<../../../images/image (106).png>)
 
-![](<../../../images/image (492).png>)
+![Wifi Pcap analiza - Provera BSSID-ova: Kada primite capture čiji je glavni saobraćaj Wifi i koristite WireShark, možete početi da istražujete sve SSID-ove iz capture-a pomoću opcije Wireless --...](<../../../images/image (492).png>)
 
 ### Brute Force
 
-Jedna od kolona tog ekrana pokazuje da li je **bilo kakva autentifikacija pronađena unutar pcap-a**. Ako je to slučaj, možete pokušati da je brute force-ujete koristeći `aircrack-ng`:
+Jedna od kolona na tom ekranu pokazuje da li je **bilo koja autentikacija pronađena unutar pcap-a**. Ako jeste, možete pokušati da izvršite Brute force pomoću `aircrack-ng`:
 ```bash
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
-Na primer, dobiće WPA lozinku koja štiti PSK (pre shared-key), koja će biti potrebna za dekriptovanje saobraćaja kasnije.
+Na primer, preuzeće WPA passphrase koji štiti PSK (pre-shared key), a koji će kasnije biti potreban za dešifrovanje saobraćaja.
 
-## Podaci u Beacon-ima / Sporedni Kanal
+## Podaci u Beacon-ima / Side Channel
 
-Ako sumnjate da se **podaci curi unutar beacon-a Wifi mreže**, možete proveriti beacon-e mreže koristeći filter kao što je sledeći: `wlan contains <NAMEofNETWORK>`, ili `wlan.ssid == "NAMEofNETWORK"` pretražujući unutar filtriranih paketa za sumnjive stringove.
+Ako sumnjate da se **podaci leak-uju unutar beacon-a WiFi mreže**, možete proveriti beacon-e mreže koristeći filter poput sledećeg: `wlan contains <NAMEofNETWORK>`, ili `wlan.ssid == "NAMEofNETWORK"` i pretražiti filtrirane pakete u potrazi za sumnjivim stringovima.
 
-## Pronađite Nepoznate MAC Adrese u Wifi Mreži
+## Pronalaženje nepoznatih MAC adresa u WiFi mreži
 
-Sledeći link će biti koristan za pronalaženje **mašina koje šalju podatke unutar Wifi mreže**:
+Sledeća veza će biti korisna za pronalaženje **mašina koje šalju podatke unutar WiFi mreže**:
 
 - `((wlan.ta == e8:de:27:16:70:c9) && !(wlan.fc == 0x8000)) && !(wlan.fc.type_subtype == 0x0005) && !(wlan.fc.type_subtype ==0x0004) && !(wlan.addr==ff:ff:ff:ff:ff:ff) && wlan.fc.type==2`
 
-Ako već znate **MAC adrese, možete ih ukloniti iz izlaza** dodajući provere kao što je ova: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
+Ako već znate **MAC adrese, možete ih ukloniti iz izlaza** dodavanjem provera poput ove: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
 
-Kada detektujete **nepoznate MAC** adrese koje komuniciraju unutar mreže, možete koristiti **filtre** kao što je sledeći: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` da filtrirate njihov saobraćaj. Imajte na umu da su ftp/http/ssh/telnet filteri korisni ako ste dekriptovali saobraćaj.
+Kada detektujete **nepoznate MAC** adrese koje komuniciraju unutar mreže, možete koristiti **filtere** poput sledećeg: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` da filtrirate njihov saobraćaj. Imajte na umu da su ftp/http/ssh/telnet filteri korisni ako ste dešifrovali saobraćaj.
 
-## Dekriptovanje Saobraćaja
+## Dešifrovanje saobraćaja
 
 Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
 
-![](<../../../images/image (499).png>)
+![Pronalaženje nepoznatih MAC adresa u WiFi mreži - Dešifrovanje saobraćaja: Kada detektujete nepoznate MAC adrese koje komuniciraju unutar mreže, možete koristiti filtere poput sledećeg:...](<../../../images/image (499).png>)
 
 {{#include ../../../banners/hacktricks-training.md}}

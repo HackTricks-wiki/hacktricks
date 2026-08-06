@@ -2,10 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-​
-
-
-Ako vam je potreban alat koji automatizuje analizu memorije sa različitim nivoima skeniranja i pokreće više Volatility3 dodataka paralelno, možete koristiti autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+Ako vam je potreban alat koji automatizuje analizu memorije sa različitim nivoima skeniranja i paralelno pokreće više Volatility3 pluginova, možete koristiti autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
 ```bash
 # Full scan (runs all plugins)
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
@@ -17,7 +14,7 @@ python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
 
 ```
-Ako želite nešto **brzo i ludo** što će pokrenuti nekoliko Volatility dodataka paralelno, možete koristiti: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+Ako želite nešto **brzo i ludo** što će paralelno pokrenuti nekoliko Volatility plugins, možete koristiti: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -52,22 +49,22 @@ python setup.py install
 
 Pristupite zvaničnoj dokumentaciji u [Volatility command reference](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)
 
-### Napomena o “list” vs. “scan” pluginovima
+### Napomena o pluginima „list“ nasuprot pluginima „scan“
 
-Volatility ima dva glavna pristupa pluginovima, koji se ponekad odražavaju u njihovim imenima. “list” pluginovi će pokušati da navigiraju kroz Windows Kernel strukture kako bi prikupili informacije kao što su procesi (lociranje i prolazak kroz povezanu listu `_EPROCESS` struktura u memoriji), OS handle-ovi (lociranje i listanje tabele handle-ova, dereferenciranje bilo kojih pronađenih pokazivača, itd). Oni se ponašaju više-manje kao što bi se Windows API ponašao kada bi se, na primer, tražilo da listira procese.
+Volatility ima dva glavna pristupa pluginima, koji se ponekad odražavaju u njihovim nazivima. Plugin „list“ pokušaće da se kreće kroz strukture Windows kernela kako bi dohvatio informacije poput procesa (lociranje i prolazak kroz povezanu listu `_EPROCESS` struktura u memoriji), OS handle-ova (lociranje i izlistavanje tabele handle-ova, dereferenciranje pronađenih pokazivača itd.). Oni se manje-više ponašaju kao Windows API kada bi od njega bilo zatraženo da, na primer, izlista procese.
 
-To čini “list” pluginove prilično brzim, ali jednako ranjivim na manipulaciju od strane malvera kao i Windows API. Na primer, ako malver koristi DKOM da unlinkuje proces iz `_EPROCESS` povezane liste, on se neće prikazati u Task Manager-u, niti u pslist-u.
+Zbog toga su plugin-i „list“ prilično brzi, ali su podjednako podložni manipulaciji od strane malware-a kao i Windows API. Na primer, ako malware koristi DKOM da ukloni proces iz povezane liste `_EPROCESS`, on se neće prikazati u Task Manager-u, a neće se prikazati ni u pslist-u.
 
-“scan” pluginovi, s druge strane, će uzeti pristup sličan vađenju podataka iz memorije za stvari koje bi mogle imati smisla kada se dereferenciraju kao specifične strukture. `psscan` na primer će čitati memoriju i pokušati da napravi `_EPROCESS` objekte iz nje (koristi skeniranje pool-taga, što je pretraživanje za 4-bajtne stringove koji ukazuju na prisustvo strukture od interesa). Prednost je u tome što može pronaći procese koji su izašli, i čak i ako malver manipuliše `_EPROCESS` povezanim listama, plugin će i dalje pronaći strukturu koja leži u memoriji (pošto ona i dalje mora postojati da bi proces radio). Nedostatak je što su “scan” pluginovi malo sporiji od “list” pluginova, i ponekad mogu dati lažne pozitivne rezultate (proces koji je izašao previše davno i čiji su delovi strukture prepisani drugim operacijama).
+Plugin-i „scan“, s druge strane, koriste pristup sličan carve-ovanju memorije u potrazi za stvarima koje bi imale smisla kada bi se dereferencirale kao određene strukture. `psscan`, na primer, čita memoriju i pokušava da od nje napravi `_EPROCESS` objekte (koristi skeniranje pool-tag-ova, odnosno pretražuje 4-bajtne stringove koji ukazuju na prisustvo tražene strukture). Prednost je u tome što može da pronađe procese koji su završeni, pa će plugin pronaći strukturu koja se i dalje nalazi u memoriji čak i ako malware manipuliše povezanom listom `_EPROCESS` (pošto ona i dalje mora da postoji da bi proces radio). Nedostatak je to što su plugin-i „scan“ nešto sporiji od plugin-a „list“ i što ponekad mogu proizvesti lažno pozitivne rezultate (proces koji je završen predugo i čiji su delovi strukture prepisani drugim operacijama).
 
-Iz: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
+Izvor: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)<sup>[[6]](#references)</sup>
 
-## OS profili
+## Profili OS-a
 
 ### Volatility3
 
-Kao što je objašnjeno u readme-u, potrebno je staviti **tabelu simbola OS-a** koji želite da podržite unutar _volatility3/volatility/symbols_.\
-Paketi tabela simbola za različite operativne sisteme su dostupni za **preuzimanje** na:
+Kao što je objašnjeno u readme-u, potrebno je da **symbol table OS-a** koji želite da podržite postavite u _volatility3/volatility/symbols_.\
+Paketi symbol table-ova za različite operativne sisteme dostupni su za **download** na:
 
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip)
@@ -77,11 +74,11 @@ Paketi tabela simbola za različite operativne sisteme su dostupni za **preuzima
 
 #### Spoljni profil
 
-Možete dobiti listu podržanih profila tako što ćete uraditi:
+Listu podržanih profila možete dobiti pomoću:
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
-Ako želite da koristite **novi profil koji ste preuzeli** (na primer, linux profil) potrebno je da negde kreirate sledeću strukturu foldera: _plugins/overlays/linux_ i stavite unutar ovog foldera zip fajl koji sadrži profil. Zatim, dobijte broj profila koristeći:
+Ako želite da koristite **novi profil koji ste preuzeli** (na primer, linux profil), potrebno je da negde kreirate sledeću strukturu fascikli: _plugins/overlays/linux_ i da unutar ove fascikle postavite zip datoteku koja sadrži profil. Zatim, preuzmite broj profila pomoću:
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
@@ -95,20 +92,20 @@ VistaSP0x86                                   - A Profile for Windows Vista SP0 
 ```
 Možete **preuzeti Linux i Mac profile** sa [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles)
 
-U prethodnom delu možete videti da se profil zove `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`, i možete ga koristiti za izvršavanje nečega poput:
+U prethodnom odeljku možete videti da se profil zove `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`, a možete ga koristiti za izvršavanje nečega poput:
 ```bash
 ./vol -f file.dmp --plugins=. --profile=LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 linux_netscan
 ```
-#### Otkrijte profil
+#### Otkrivanje profila
 ```
 volatility imageinfo -f file.dmp
 volatility kdbgscan -f file.dmp
 ```
 #### **Razlike između imageinfo i kdbgscan**
 
-[**Odavde**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): Za razliku od imageinfo koji jednostavno pruža predloge profila, **kdbgscan** je dizajniran da pozitivno identifikuje tačan profil i tačnu KDBG adresu (ako ih ima više). Ovaj plugin skenira KDBGHeader potpise povezane sa Volatility profilima i primenjuje provere kako bi smanjio lažne pozitivne rezultate. Opširnost izlaza i broj provera koje se mogu izvršiti zavise od toga da li Volatility može pronaći DTB, tako da ako već znate tačan profil (ili ako imate predlog profila iz imageinfo), obavezno ga koristite.
+[**Odavde**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): Za razliku od imageinfo, koji jednostavno pruža predloge profila, **kdbgscan** je dizajniran da pouzdano identifikuje ispravan profil i ispravnu KDBG adresu (ako ih ima više). Ovaj plugin pretražuje potpise KDBGHeader povezane sa Volatility profilima i primenjuje provere ispravnosti kako bi smanjio broj lažno pozitivnih rezultata. Nivo detalja izlaza i broj provera ispravnosti koje mogu da se izvrše zavise od toga da li Volatility može da pronađe DTB, pa ako već znate ispravan profil (ili imate predlog profila iz imageinfo), obavezno ga koristite iz .<sup>[[1]](#references)</sup>
 
-Uvek obratite pažnju na **broj procesa koje je kdbgscan pronašao**. Ponekad imageinfo i kdbgscan mogu pronaći **više od jednog** odgovarajućeg **profila**, ali samo **važeći će imati neki proces povezan** (To je zato što je za ekstrakciju procesa potrebna tačna KDBG adresa).
+Uvek obratite pažnju na **broj procesa koje je kdbgscan pronašao**. Ponekad imageinfo i kdbgscan mogu da pronađu **više od jednog** odgovarajućeg **profila**, ali samo **ispravan profil će imati povezane procese** (to je zato što je za izdvajanje procesa potrebna ispravna KDBG adresa)<sup>[[1]](#references)</sup>
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -122,18 +119,18 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-**KDBG**, ili **kernel debugger block**, je ključan za forenzičke zadatke koje obavlja Volatility i razni debuggers. Identifikovan kao `KdDebuggerDataBlock` i tipa `_KDDEBUGGER_DATA64`, sadrži bitne reference kao što je `PsActiveProcessHead`. Ova specifična referenca ukazuje na početak liste procesa, omogućavajući prikazivanje svih procesa, što je osnovno za temeljnu analizu memorije.
+**Blok za otklanjanje grešaka kernela**, koji Volatility označava kao **KDBG**, ključan je za forenzičke zadatke koje obavljaju Volatility i različiti debageri. Identifikovan je kao `KdDebuggerDataBlock` i tipa `_KDDEBUGGER_DATA64`, a sadrži važne reference kao što je `PsActiveProcessHead`. Ova konkretna referenca pokazuje na početak liste procesa, čime omogućava izlistavanje svih procesa, što je od ključne važnosti za detaljnu analizu memorije.<sup>[[2]](#references)</sup>
 
-## OS Information
+## Informacije o OS-u
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
 ```
-Plugin `banners.Banners` može se koristiti u **vol3 da pokuša da pronađe linux banere** u dump-u.
+Plugin `banners.Banners` može da se koristi u **vol3 za pokušaj pronalaženja linux bannera** u dump-u.
 
-## Hashovi/Lozinke
+## Hash-evi/Lozinke
 
-Izvucite SAM hashove, [keširane kredencijale domena](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) i [lsa tajne](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
+Izdvojite SAM hash-eve, [keširane akreditive domena](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) i [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -153,18 +150,18 @@ volatility --profile=Win7SP1x86_23418 lsadump -f file.dmp #Grab lsa secrets
 {{#endtab}}
 {{#endtabs}}
 
-## Memory Dump
+## Damp memorije
 
-Memorijski dump procesa će **izvući sve** iz trenutnog stanja procesa. **procdump** modul će samo **izvući** **kod**.
+Damp memorije procesa će **izvući sve** iz trenutnog stanja procesa. Modul **procdump** će samo **izvući** **code**.
 ```
 volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
 ## Procesi
 
-### Lista procesa
+### Izlistavanje procesa
 
-Pokušajte da pronađete **sumnjive** procese (po imenu) ili **neočekivane** pod **procese** (na primer, cmd.exe kao podproces iexplorer.exe).\
-Može biti zanimljivo **uporediti** rezultat pslist-a sa onim iz psscan-a kako biste identifikovali skrivene procese.
+Pokušajte da pronađete **sumnjive** procese (prema imenu) ili **neočekivane podređene procese** (na primer, cmd.exe kao podređeni proces iexplorer.exe).\
+Može biti korisno **uporediti** rezultat komande pslist sa rezultatom komande psscan kako biste identifikovali skrivene procese.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -220,11 +217,11 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {{#endtab}}
 {{#endtabs}}
 
-Komande izvršene u `cmd.exe` upravlja **`conhost.exe`** (ili `csrss.exe` na sistemima pre Windows 7). To znači da, ako **`cmd.exe`** bude prekinut od strane napadača pre nego što se dobije memorijski dump, još uvek je moguće povratiti istoriju komandi sesije iz memorije **`conhost.exe`**. Da bi se to uradilo, ako se otkrije neobična aktivnost unutar modula konzole, memorija povezanog **`conhost.exe`** procesa treba da se dumpuje. Zatim, pretraživanjem **stringova** unutar ovog dump-a, mogu se potencijalno izvući komandne linije korišćene u sesiji.
+Komandama izvršenim u `cmd.exe` upravlja **`conhost.exe`** (ili **`csrss.exe`** na sistemima starijim od Windows 7). To znači da, ako napadač prekine **`cmd.exe`** pre kreiranja memory dump-a, istoriju komandi sesije je i dalje moguće oporaviti iz memorije procesa **`conhost.exe`**. Da bi se to uradilo, ako se otkrije neuobičajena aktivnost unutar modula konzole, potrebno je kreirati memory dump povezanim procesom **`conhost.exe`**. Zatim, pretraživanjem **strings** unutar ovog dump-a, potencijalno se mogu izdvojiti komandne linije korišćene u sesiji.
 
 ### Okruženje
 
-Dobijte env varijable svakog pokrenutog procesa. Mogu postojati neki zanimljivi vrednosti.
+Preuzmite env promenljive svakog pokrenutog procesa. Mogu sadržati neke zanimljive vrednosti.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -242,10 +239,10 @@ volatility --profile=PROFILE -f file.dmp linux_psenv [-p <pid>] #Get env of proc
 {{#endtab}}
 {{#endtabs}}
 
-### Token privilegije
+### Privilegije tokena
 
-Proverite privilegovane tokene u neočekivanim servisima.\
-Može biti zanimljivo napraviti spisak procesa koji koriste neki privilegovani token.
+Proverite tokene privilegija u neočekivanim servisima.\
+Moglo bi biti zanimljivo izlistati procese koji koriste neki privilegovani token.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -269,8 +266,8 @@ volatility --profile=Win7SP1x86_23418 privs -f file.dmp | grep "SeImpersonatePri
 
 ### SIDs
 
-Proverite svaki SSID koji poseduje proces.\
-Može biti zanimljivo navesti procese koji koriste SID sa privilegijama (i procese koji koriste neki servisni SID).
+Proverite svaki SSID povezan sa procesom.\
+Može biti korisno izlistati procese koji koriste SID sa privilegijama (i procese koji koriste neki service SID).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -288,9 +285,9 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 {{#endtab}}
 {{#endtabs}}
 
-### Handles
+### Handle-ovi
 
-Koristan je znati na koje druge datoteke, ključeve, niti, procese... **proces ima handle** (otvorene su) 
+Korisno je znati prema kojim drugim fajlovima, ključevima, nitima, procesima... **proces ima handle** (otvorio ih je)
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -306,7 +303,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp handles [--pid=<pid>]
 {{#endtab}}
 {{#endtabs}}
 
-### DLLs
+### DLL-ovi
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -326,7 +323,7 @@ volatility --profile=Win7SP1x86_23418 dlldump --pid=3152 --dump-dir=. -f file.dm
 
 ### Stringovi po procesima
 
-Volatility nam omogućava da proverimo kojem procesu pripada string.
+Volatility nam omogućava da proverimo kom kojem procesu pripada string.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -347,7 +344,7 @@ strings 3532.dmp > strings_file
 {{#endtab}}
 {{#endtabs}}
 
-Takođe omogućava pretragu stringova unutar procesa koristeći yarascan modul:
+Takođe omogućava pretragu stringova unutar procesa pomoću modula yarascan:
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -366,7 +363,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-**Windows** prati programe koje pokrećete koristeći funkciju u registru nazvanu **UserAssist ključevi**. Ovi ključevi beleže koliko puta je svaki program pokrenut i kada je poslednji put pokrenut.
+**Windows** prati programe koje pokrećete pomoću funkcije u registry-ju pod nazivom **UserAssist keys**. Ovi ključevi beleže koliko je puta svaki program pokrenut i kada je poslednji put pokrenut.<sup>[[3]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -382,10 +379,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp userassist
 {{#endtab}}
 {{#endtabs}}
 
-​
-
-
-## Usluge
+## Servisi
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -435,7 +429,7 @@ volatility --profile=SomeLinux -f file.dmp linux_route_cache
 
 ## Registry hive
 
-### Ispis dostupnih hives
+### Prikaži dostupne hive-ove
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -497,7 +491,7 @@ volatility --profile=SomeLinux -f file.dmp linux_recover_filesystem #Dump the en
 {{#endtab}}
 {{#endtabs}}
 
-### Skener/izbacivanje
+### Skeniranje/dump
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -520,7 +514,7 @@ volatility --profile=SomeLinux -f file.dmp linux_find_file -i 0xINODENUMBER -O /
 {{#endtab}}
 {{#endtabs}}
 
-### Master File Table
+### Glavna tabela datoteka
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -536,9 +530,9 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-**NTFS datotečni sistem** koristi kritičnu komponentu poznatu kao _master file table_ (MFT). Ova tabela uključuje barem jedan unos za svaku datoteku na volumenu, pokrivajući i samu MFT. Vitalni detalji o svakoj datoteci, kao što su **veličina, vremenske oznake, dozvole i stvarni podaci**, su enkapsulirani unutar MFT unosa ili u oblastima van MFT-a, ali na koje se pozivaju ovi unosi. Više detalja može se naći u [official documentation](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
+**NTFS file system** koristi kritičnu komponentu poznatu kao _master file table_ (MFT). Ova tabela sadrži najmanje jedan unos za svaku datoteku na volumenu, uključujući i sam MFT. Važni detalji o svakoj datoteci, kao što su **veličina, vremenske oznake, dozvole i stvarni podaci**, sadržani su u MFT unosima ili u oblastima izvan MFT-a na koje ovi unosi upućuju. Više detalja možete pronaći u [zvaničnoj dokumentaciji](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).<sup>[[4]](#references)</sup>
 
-### SSL Ključevi/Cerifikati
+### SSL Keys/Certs
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -558,6 +552,9 @@ volatility --profile=Win7SP1x86_23418 dumpcerts --dump-dir=. -f file.dmp
 {{#endtabs}}
 
 ## Malware
+
+{{#tabs}}
+{{#tab name="vol3"}}
 ```bash
 ./vol.py -f file.dmp windows.malfind.Malfind [--dump] #Find hidden and injected code, [dump each suspicious section]
 #Malfind will search for suspicious structures related to malware
@@ -592,10 +589,10 @@ volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 {{#endtab}}
 {{#endtabs}}
 
-### Skener sa yara
+### Skeniranje pomoću yara
 
-Koristite ovaj skript za preuzimanje i spajanje svih yara pravila za malver sa github-a: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
-Kreirajte _**rules**_ direktorijum i izvršite ga. Ovo će kreirati datoteku pod nazivom _**malware_rules.yar**_ koja sadrži sva yara pravila za malver.
+Koristite ovu skriptu za preuzimanje i spajanje svih yara malware rules sa github-a: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
+Kreirajte direktorijum _**rules**_ i izvršite skriptu. Ovo će kreirati datoteku pod nazivom _**malware_rules.yar**_ koja sadrži sva yara pravila za malware.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -620,11 +617,11 @@ volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp |
 {{#endtab}}
 {{#endtabs}}
 
-## MISC
+## RAZNO
 
 ### Eksterni dodaci
 
-Ako želite da koristite eksterne dodatke, uverite se da su fascikle povezane sa dodacima prvi parametar koji se koristi.
+Ako želite da koristite eksterne dodatke, uverite se da su fascikle povezane sa dodacima prvi korišćeni parametar.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -642,7 +639,7 @@ volatilitye --plugins="/tmp/plugins/" [...]
 
 #### Autoruns
 
-Preuzmite ga sa [https://github.com/tomchop/volatility-autoruns](https://github.com/tomchop/volatility-autoruns)
+Download it from [https://github.com/tomchop/volatility-autoruns](https://github.com/tomchop/volatility-autoruns)
 ```
 volatility --plugins=volatility-autoruns/ --profile=WinXPSP2x86 -f file.dmp autoruns
 ```
@@ -664,6 +661,9 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp handles -p <PID> -t mutant
 {{#endtabs}}
 
 ### Simboličke veze
+
+{{#tabs}}
+{{#tab name="vol3"}}
 ```bash
 ./vol.py -f file.dmp windows.symlinkscan.SymlinkScan
 ```
@@ -678,7 +678,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-Moguće je **pročitati bash istoriju iz memorije.** Takođe možete izvući _.bash_history_ fajl, ali je on onemogućen, bićete srećni što možete koristiti ovaj volatility modul
+Moguće je **čitati bash history iz memorije.** Takođe možete izvući datoteku _.bash_history_, ali ako je to bilo onemogućeno, biće vam drago što možete da koristite ovaj volatility modul
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -694,7 +694,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp linux_bash
 {{#endtab}}
 {{#endtabs}}
 
-### Vremenska Linija
+### Vremenska linija
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -726,22 +726,22 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp driverscan
 {{#endtab}}
 {{#endtabs}}
 
-### Uzmite sadržaj iz međuspremnika
+### Preuzimanje clipboard sadržaja
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 clipboard -f file.dmp
 ```
-### Dobijanje IE istorije
+### Preuzimanje IE istorije
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 iehistory -f file.dmp
 ```
-### Dobijanje teksta iz beležnice
+### Preuzimanje teksta iz notepad-a
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 notepad -f file.dmp
 ```
-### Screenshot
+Nisam primio screenshot. Molim vas pošaljite ga ponovo.
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
@@ -750,14 +750,15 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-**Master Boot Record (MBR)** igra ključnu ulogu u upravljanju logičkim particijama skladišnog medija, koje su strukturirane sa različitim [file systems](https://en.wikipedia.org/wiki/File_system). On ne samo da sadrži informacije o rasporedu particija, već takođe sadrži izvršni kod koji deluje kao boot loader. Ovaj boot loader ili direktno pokreće drugi deo procesa učitavanja OS-a (vidi [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage_boot_loader)) ili radi u harmoniji sa [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) svake particije. Za detaljno znanje, pogledajte [MBR Wikipedia page](https://en.wikipedia.org/wiki/Master_boot_record).
+**Master Boot Record (MBR)** igra ključnu ulogu u upravljanju logičkim particijama memorijskog medija, koje su strukturirane pomoću različitih [sistema datoteka](https://en.wikipedia.org/wiki/File_system). Ne sadrži samo informacije o rasporedu particija već i izvršni kod koji služi kao boot loader. Ovaj boot loader ili direktno pokreće drugu fazu učitavanja OS-a (pogledajte [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage_boot_loader)) ili funkcioniše zajedno sa [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) svake particije. Za detaljnije informacije pogledajte [MBR Wikipedia stranicu](https://en.wikipedia.org/wiki/Master_boot_record).<sup>[[5]](#references)</sup>
 
-## References
+## Reference
 
-- [https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
-- [https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
-- [https://or10nlabs.tech/cgi-sys/suspendedpage.cgi](https://or10nlabs.tech/cgi-sys/suspendedpage.cgi)
-- [https://www.aldeid.com/wiki/Windows-userassist-keys](https://www.aldeid.com/wiki/Windows-userassist-keys) ​\* [https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
-- [https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
+- [1] [Volatility, moja cheatsheet lista (1. deo): Identifikacija image-a](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
+- [2] [Pronalaženje Kernel Debugger Block-a](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
+- [3] [Windows UserAssist ključevi](https://www.aldeid.com/wiki/Windows-userassist-keys)
+- [4] [Master File Table (lokalni sistemi datoteka) - Win32 apps](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
+- [5] [Računar zasnovan na UEFI-ju, zaštitni MBR: šta je to? - Microsoft Community](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
+- [6] [Tutorial: Volatility plugins za malware analizu](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
 {{#include ../../../banners/hacktricks-training.md}}

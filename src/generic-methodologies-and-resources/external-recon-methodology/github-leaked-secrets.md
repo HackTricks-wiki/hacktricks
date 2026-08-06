@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-### Alati za pronalaženje secrets u git repos i file system
+### Alati za pronalaženje tajni u git repozitorijumima i sistemu datoteka
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
@@ -12,42 +12,42 @@
 - [https://github.com/JaimePolop/RExpository](https://github.com/JaimePolop/RExpository)
 - [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
 - [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
-- https://github.com/eth0izzle/shhgit (unmaintained)
+- https://github.com/eth0izzle/shhgit (ne održava se)
 - [https://github.com/techgaun/github-dorks](https://github.com/techgaun/github-dorks)
-- https://github.com/michenriksen/gitrob (archived)
-- https://github.com/anshumanbh/git-all-secrets (archived)
+- https://github.com/michenriksen/gitrob (arhiviran)
+- https://github.com/anshumanbh/git-all-secrets (arhiviran)
 - [https://github.com/awslabs/git-secrets](https://github.com/awslabs/git-secrets)
 - [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
 - [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
 
 > Napomene
-> - TruffleHog v3 može da verifikuje mnoge credentials live i skenira GitHub orgs, issues/PRs, gists i wikis. Primer: `trufflehog github --org <ORG> --results=verified`.
-> - Gitleaks v8 podržava skeniranje git history, direktorijuma i arhiva: `gitleaks detect -v --source .` ili `gitleaks detect --source <repo> --log-opts="--all"`.
-> - Nosey Parker se fokusira na high-throughput skeniranje sa curated rules i ima Explorer UI za triage. Primer: `noseyparker scan --datastore np.db <path|repo>` potom `noseyparker report --datastore np.db`.
+> - TruffleHog v3 može da proveri mnoge credential-e uživo i da skenira GitHub org-ove, issues/PR-ove, gists i wikije. Primer: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)</sup>
+> - Gitleaks v8 podržava skeniranje git istorije, direktorijuma i arhiva: `gitleaks detect -v --source .` ili `gitleaks detect --source <repo> --log-opts="--all"`.
+> - Nosey Parker je usmeren na skeniranje velikom propusnošću, uz kurirana pravila, i ima Explorer UI za trijažu. Primer: `noseyparker scan --datastore np.db <path|repo>`, zatim `noseyparker report --datastore np.db`.
 > - ggshield (GitGuardian CLI) obezbeđuje pre-commit/CI hooks i skeniranje Docker image-a: `ggshield secret scan repo <path-or-url>`.
 
-### Gde se secrets najčešće leak-uju na GitHub
+### Gde tajne najčešće leak-uju na GitHub-u
 
-- Fajlovi repozitorijuma u default i non-default granama (pretražite `repo:owner/name@branch` u UI).
-- Cela git history i ostale grane/tagovi (clone i skenirajte sa gitleaks/trufflehog; GitHub search se fokusira na indeksirani sadržaj).
-- Issues, pull requests, comments i opisi (TruffleHog GitHub source podržava ovo preko flagova kao `--issue-comments`, `--pr-comments`).
-- Actions logs i artifacts javnih repozitorijuma (masking je best-effort; pregledajte logs/artifacts ako su vidljivi).
-- Wikis i release assets.
-- Gists (pretražite pomoću alata ili UI; neki alati mogu uključiti gists).
+- Datoteke repozitorijuma u podrazumevanim i nepodrazumevanim granama (u UI-ju pretražite `repo:owner/name@branch`).
+- Kompletna git istorija i druge grane/tag-ovi (klonirajte i skenirajte pomoću gitleaks/trufflehog; GitHub pretraga se fokusira na indeksirani sadržaj).
+- Issues, pull requests, komentari i opisi (TruffleHog GitHub source ih podržava pomoću flag-ova kao što su `--issue-comments`, `--pr-comments`).
+- Actions logs i artifacts javnih repozitorijuma (masking je najbolji mogući pokušaj; pregledajte logs/artifacts ako su vidljivi).
+- Wikiji i release assets.
+- Gists (pretražite pomoću alata ili UI-ja; neki alati mogu da uključe gists).
 
 > Zamke
-> - GitHub-ov REST code search API je legacy i ne podržava regex; preferirajte Web UI za regex pretrage. gh CLI koristi legacy API.
-> - Samo fajlovi ispod određenog size su indeksirani za pretragu. Da biste bili temeljni, clone-ujte i skenirajte lokalno sa secrets scanner.
+> - GitHub-ov REST code search API je legacy i ne podržava regex; za regex pretrage koristite Web UI. gh CLI koristi legacy API.
+> - Za pretragu se indeksiraju samo datoteke manje od određene veličine. Da biste bili temeljni, klonirajte repozitorijum i lokalno ga skenirajte pomoću scanner-a za tajne.
 
-### Programmatic org-wide scanning
+### Programatsko skeniranje cele organizacije
 
-- TruffleHog (GitHub source):
+- TruffleHog (GitHub source):<sup>[[2]](#references)</sup>
 ```bash
 export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
 --include-wikis --issue-comments --pr-comments --gist-comments
 ```
-- Gitleaks preko svih repozitorijuma organizacije (clone shallow and scan):
+- Gitleaks nad svim repo-ovima organizacije (plitko klonirajte i skenirajte):
 ```bash
 gh repo list Target --limit 1000 --json nameWithOwner,url \
 | jq -r '.[].url' | while read -r r; do
@@ -55,7 +55,7 @@ tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
 gitleaks detect --source "$tmp" -v || true; rm -rf "$tmp";
 done
 ```
-- Radoznali Parker preko mono checkout:
+- Nosey Parker nad mono checkout-om:
 ```bash
 # after cloning many repos beneath ./org
 noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
@@ -67,12 +67,12 @@ ggshield secret scan path -r .
 # full git history of a repo
 ggshield secret scan repo <path-or-url>
 ```
-> Savet: Za git istoriju, koristite skenere koji parsiraju `git log -p --all` da biste uhvatili uklonjene tajne.
+> Savet: Za git istoriju, prednost dajte scannerima koji analiziraju `git log -p --all` kako bi detektovali uklonjene secrets.
 
-### Ažurirani dorks za moderne tokens
+### Ažurirani Dorks za moderne tokene
 
-- GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`
-- Slack tokens: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
+- GitHub tokeni: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`
+- Slack tokeni: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
 - Cloud i opšte:
 - `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `aws_session_token`
 - `GOOGLE_API_KEY` `AZURE_TENANT_ID` `AZURE_CLIENT_SECRET`
@@ -364,11 +364,9 @@ AWS SECRET
 wide-source-code-search.md
 {{#endref}}
 
+## Reference
 
+- [1] [Čuvanje tajni izvan javnih repozitorijuma (GitHub Blog, 29. februar 2024.)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
+- [2] [TruffleHog v3 – Pronalaženje, verifikacija i analiza procurelih akreditiva](https://github.com/trufflesecurity/trufflehog)
 
-
-## Izvori
-
-- Kako sprečiti izlaganje secrets u javnim repozitorijumima (GitHub Blog, Feb 29, 2024): https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/
-- TruffleHog v3 – Pronađi, verifikuj i analiziraj leaked credentials: https://github.com/trufflesecurity/trufflehog
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,6 +1,8 @@
+# Tehnike za deobfuskaciju VBS datoteka
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-Neke stvari koje bi mogle biti korisne za debagovanje/deobfuskaciju zlonamernog VBS fajla:
+Neke stvari koje mogu biti korisne za otklanjanje grešaka/deobfuskaciju zlonamerne VBS datoteke:
 
 ## echo
 ```bash
@@ -14,7 +16,7 @@ Wscript.Echo "Like this?"
 ```bash
 cscript.exe file.vbs
 ```
-## Napišite podatke u datoteku
+## Upisivanje podataka u datoteku
 ```js
 Function writeBinary(strBinary, strPath)
 

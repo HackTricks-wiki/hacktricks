@@ -1,55 +1,55 @@
-# File Integrity Monitoring
+# Monitoring integriteta fajlova
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Bazno stanje
+## Osnovna linija
 
-Bazno stanje podrazumeva snimanje određenih delova sistema kako bi se uporedili sa budućim stanjem i istakle promene.
+Osnovna linija podrazumeva pravljenje snimka određenih delova sistema kako bi se **uporedio sa budućim stanjem i istakle promene**.
 
-Na primer, možete izračunati i sačuvati hash svakog fajla u filesystemu kako biste utvrdili koji su fajlovi izmenjeni.\
-Isto se može primeniti na kreirane korisničke naloge, procese koji su pokrenuti, servise koji rade i sve druge stavke koje se ne bi mnogo, ili uopšte, trebale menjati.
+Na primer, možete izračunati i sačuvati hash svakog fajla u filesystemu kako biste mogli da utvrdite koji su fajlovi izmenjeni.\
+Ovo se može uraditi i za kreirane korisničke naloge, pokrenute procese, pokrenute servise i sve drugo što ne bi trebalo da se često menja, ili uopšte da se menja.
 
-Jedno korisno bazno stanje obično čuva više od samog digesta: dozvole, vlasnik, grupa, vremenske oznake, inode, symlink target, ACLs i odabrani prošireni atributi takođe vredi pratiti. Iz perspektive traganja za napadačima, ovo pomaže u otkrivanju **permission-only tampering**, **atomic file replacement**, i **persistence via modified service/unit files** čak i kada sadržaj fajla nije prvi parametar koji se menja.
+**Korisna osnovna linija** obično čuva više od samog digest-a: dozvole, vlasnika, grupu, vremenske oznake, inode, cilj simboličkog linka, ACL-ove i odabrane proširene atribute takođe vredi pratiti. Iz perspektive lova na napadače, ovo pomaže u otkrivanju **neovlašćenih izmena samo dozvola**, **atomske zamene fajlova** i **perzistencije putem izmenjenih service/unit fajlova**, čak i kada hash sadržaja nije prva stvar koja se menja.
 
-### File Integrity Monitoring
+### Monitoring integriteta fajlova
 
 File Integrity Monitoring (FIM) je kritična bezbednosna tehnika koja štiti IT okruženja i podatke praćenjem promena u fajlovima. Obično kombinuje:
 
-1. **Baseline comparison:** čuvanje metapodataka i kriptografskih checksuma (preporučeno `SHA-256` ili bolji) za buduća poređenja.
-2. **Real-time notifications:** pretplatite se na OS-nativne događaje fajl sistema da biste znali **koji fajl se menjao, kada i po mogućstvu koji proces/korisnik ga je dirnuo**.
-3. **Periodic re-scan:** obnovite poverenje nakon reboot-ova, izgubljenih događaja, prekida agenta ili namernih anti-forenzičkih aktivnosti.
+1. **Poređenje sa osnovnom linijom:** Čuvanje metapodataka i kriptografskih checksum-ova (poželjno `SHA-256` ili bolji) za buduća poređenja.
+2. **Obaveštenja u realnom vremenu:** Pretplata na izvorne OS događaje fajlova kako bi se utvrdilo **koji fajl se promenio, kada i, idealno, koji proces/korisnik ga je izmenio**.
+3. **Periodično ponovno skeniranje:** Ponovno uspostavljanje pouzdanosti nakon reboot-a, izgubljenih događaja, prekida rada agenta ili namerne anti-forensic aktivnosti.
 
-Za traganje za pretnjama, FIM je obično korisniji kada je fokusiran na high-value paths kao što su:
+Za threat hunting, FIM je obično korisniji kada je fokusiran na **putanje visoke vrednosti**, kao što su:
 
 - `/etc`, `/boot`, `/usr/local/bin`, `/usr/local/sbin`
-- `systemd` units, cron locations, SSH material, PAM modules, web roots
-- Windows persistence locations, service binaries, scheduled task files, startup folders
-- Container writable layers and bind-mounted secrets/configuration
+- `systemd` units, cron lokacije, SSH materijal, PAM moduli, web root-ovi
+- Windows lokacije za perzistenciju, binarni fajlovi servisa, fajlovi zakazanih zadataka, startup folderi
+- Writable layers kontejnera i bind-mounted secrets/configuration
 
-## Backendi u realnom vremenu i slepe tačke
+## Backend-i u realnom vremenu i slepe tačke
 
 ### Linux
 
-Back-end za prikupljanje podataka je bitan:
+Backend za prikupljanje je važan:<sup>[[2]](#references)</sup>
 
-- **`inotify` / `fsnotify`**: jednostavno i često, ali limiti za watch mogu biti iscrpljeni i neki ivični slučajevi mogu biti propušteni.
-- **`auditd` / audit framework**: bolji kada treba da znate **ko je izmenio fajl** (`auid`, process, pid, executable).
-- **`eBPF` / `kprobes`**: novije opcije koje koriste moderni FIM stack-ovi da obogate događaje i smanje deo operativne muke plain `inotify` deployment-a.
+- **`inotify` / `fsnotify`**: jednostavni i uobičajeni, ali ograničenja za watch mogu biti iscrpljena, a neki edge case-ovi mogu biti propušteni.
+- **`auditd` / audit framework**: bolji kada je potrebno znati **ko je izmenio fajl** (`auid`, proces, pid, izvršni fajl).
+- **`eBPF` / `kprobes`**: novije opcije koje koriste moderni FIM stack-ovi za obogaćivanje događaja i smanjenje nekih operativnih problema običnih `inotify` deployment-a.
 
-Neke praktične zamke:
+Neki praktični problemi:<sup>[[1]](#references)</sup>
 
-- Ako program zameni fajl koristeći `write temp -> rename`, praćenje samog fajla može prestati da bude korisno. Pratite roditeljski direktorijum, ne samo fajl.
-- Kolektori zasnovani na `inotify`-ju mogu promašiti ili degradirati rad na ogromnim stabljikama direktorijuma, kod aktivnosti sa hard-linkovima, ili nakon što je nadgledani fajl obrisan.
-- Veoma veliki rekurzivni setovi za watch mogu se ćutke srušiti ako su `fs.inotify.max_user_watches`, `max_user_instances`, ili `max_queued_events` postavljeni prenisko.
-- Mrežni fajl sistemi obično nisu dobri ciljevi za FIM kada je cilj nisko-šumno praćenje.
+- Ako program **zameni** fajl pomoću `write temp -> rename`, praćenje samog fajla može prestati da bude korisno. **Pratite roditeljski direktorijum**, a ne samo fajl.
+- Kolektori zasnovani na `inotify` mogu propuštati događaje ili imati lošije performanse na **ogromnim stablima direktorijuma**, pri **aktivnostima nad hard link-ovima** ili nakon što je **praćeni fajl obrisan**.
+- Veoma veliki rekurzivni skupovi watch-ova mogu neprimetno otkazati ako su `fs.inotify.max_user_watches`, `max_user_instances` ili `max_queued_events` postavljeni prenisko.
+- Network filesystem-i su obično loši FIM ciljevi za monitoring sa malo šuma.
 
-Primer baznog stanja + verifikacija sa AIDE:
+Primer osnovne linije + verifikacije pomoću AIDE:
 ```bash
 aide --init
 mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
 aide --check
 ```
-Primer `osquery` FIM konfiguracije fokusirane na putanje koje napadači koriste za održavanje prisustva:
+Primer `osquery` FIM konfiguracije usmerene na putanje za perzistenciju napadača:<sup>[[1]](#references)</sup>
 ```json
 {
 "schedule": {
@@ -66,39 +66,39 @@ Primer `osquery` FIM konfiguracije fokusirane na putanje koje napadači koriste 
 }
 }
 ```
-Ako vam treba **process attribution** umesto samo promena na nivou putanje, preferirajte audit-backed telemetry kao što su `osquery` `process_file_events` ili Wazuh `whodata` mode.
+Ako vam je potrebna **atribucija procesa**, a ne samo promene na nivou putanje, prednost dajte telemetriji zasnovanoj na audit-u, kao što su `osquery` `process_file_events` ili Wazuh režim `whodata`.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ### Windows
 
-Na Windowsu je FIM efikasniji kada kombinujete **change journals** sa **high-signal process/file telemetry**:
+Na Windows-u je FIM snažniji kada kombinujete **dnevnike promena** sa **telemetrijom procesa/datoteka visoke signalnosti**:
 
-- **NTFS USN Journal** obezbeđuje trajan zapis po volumenu o promenama fajlova.
-- **Sysmon Event ID 11** je koristan za kreiranje/prepisivanje fajlova.
-- **Sysmon Event ID 2** pomaže u detekciji **timestomping**.
-- **Sysmon Event ID 15** je koristan za **named alternate data streams (ADS)** kao što su `Zone.Identifier` ili skriveni payload streamovi.
+- **NTFS USN Journal** pruža trajni dnevnik promena datoteka po volumenu.
+- **Sysmon Event ID 11** je koristan za kreiranje/prepisivanje datoteka.
+- **Sysmon Event ID 2** pomaže u otkrivanju **timestomping-a**.
+- **Sysmon Event ID 15** je koristan za **imenovane alternativne tokove podataka (ADS)**, kao što su `Zone.Identifier` ili skriveni tokovi sa payload-om.
 
-Brzi primeri USN triaže:
+Brzi primeri USN trijaže:
 ```cmd
 fsutil usn queryjournal C:
 fsutil usn readjournal C:
 fsutil usn readdata C:\Windows\Temp\sample.bin
 ```
-Za dublje anti-forenzičke ideje oko **timestamp manipulation**, **ADS abuse**, i **USN tampering**, pogledajte [Anti-Forensic Techniques](anti-forensic-techniques.md).
+Za dublje anti-forensic ideje u vezi sa **timestamp manipulation**, **ADS abuse** i **USN tampering**, pogledajte [Anti-Forensic Techniques](anti-forensic-techniques.md).
 
 ### Kontejneri
 
-Container FIM često promašuje stvarni put zapisa. Sa Docker `overlay2`, izmene se upisuju u writable upper layer (`upperdir`/`diff`) kontejnera, a ne u read-only image slojeve. Dakle:
+FIM kontejnera često ne prati stvarnu putanju upisa. Kod Docker `overlay2`, izmene se upisuju u **writable upper layer** kontejnera (`upperdir`/`diff`), a ne u slojeve image-a koji su samo za čitanje. Zato:
 
-- Praćenje samo putanja iz **inside** kratkotrajnog kontejnera može propustiti izmene nakon ponovnog kreiranja kontejnera.
-- Praćenje putanje na hostu koja stoji iza writable sloja ili odgovarajućeg bind-mounted volumena često je korisnije.
-- FIM na image slojevima razlikuje se od FIM na pokrenutom container filesystemu.
+- Nadgledanje samo putanja **unutar** kratkotrajno pokrenutog kontejnera može propustiti izmene nakon ponovnog kreiranja kontejnera.
+- Nadgledanje **host putanje** koja predstavlja writable layer ili relevantnog bind-mounted volume-a često je korisnije.
+- FIM na image layer-ima razlikuje se od FIM-a na filesystem-u pokrenutog kontejnera.
 
-## Beleške za lov na napadače
+## Beleške za hunting usmeren na napadača
 
-- Pratite **service definitions** i **task schedulers** jednako pažljivo kao i binarije. Napadači često dobijaju persistenciju modifikovanjem unit fajla, cron unosa ili task XML-a umesto da patchuju `/bin/sshd`.
-- Samo content hash nije dovoljan. Mnogi kompromisi se prvo jave kao **owner/mode/xattr/ACL drift**.
-- Ako sumnjate na zrelu intruziju, uradite oboje: **real-time FIM** za svežu aktivnost i **cold baseline comparison** sa pouzdanim medijima.
-- Ako napadač ima root ili kernel execution, pretpostavite da FIM agent, njegova baza podataka i čak izvor događaja mogu biti podmetnuti. Čuvajte logove i baseline-ove na daljinu ili na read-only medijima kad god je moguće.
+- Pratite **service definitions** i **task schedulers** podjednako pažljivo kao i binarne fajlove. Napadači često ostvaruju persistence izmenom unit fajla, cron unosa ili task XML-a, umesto menjanja `/bin/sshd`.
+- Sam content hash nije dovoljan. Mnoge kompromitacije se najpre ispolje kao **owner/mode/xattr/ACL drift**.
+- Ako sumnjate na zrelu intrusion, uradite oba: **real-time FIM** za svežu aktivnost i **cold baseline comparison** sa pouzdanog medijuma.
+- Ako napadač ima root ili kernel execution, pretpostavite da se FIM agent, njegova baza podataka, pa čak i sam izvor događaja mogu menjati. Čuvajte logove i baseline-ove udaljeno ili na read-only medijumu kad god je to moguće.
 
 ## Alati
 
@@ -110,7 +110,8 @@ Container FIM često promašuje stvarni put zapisa. Sa Docker `overlay2`, izmene
 
 ## Reference
 
-- [https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/](https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/)
-- [https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case](https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case)
+- [1] [File Integrity Monitoring with osquery](https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/)
+- [2] [Tracing Linux: A file integrity monitoring use case (Elastic)](https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case)
+- [3] [Wazuh File Integrity Monitoring (Syscheck and whodata mode)](https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,15 +4,15 @@
 
 ## Iptables
 
-### Chains
+### Lanci
 
-U iptables-u, liste pravila poznate kao lanci se obrađuju sekvencijalno. Među njima, tri primarna lanca su univerzalno prisutna, dok dodatni kao što je NAT mogu biti potencijalno podržani u zavisnosti od mogućnosti sistema.
+U iptables-u, liste pravila poznate kao lanci obrađuju se sekvencijalno. Među njima su tri primarna lanca uvek prisutna, dok dodatni lanci, poput NAT-a, mogu biti podržani u zavisnosti od mogućnosti sistema.
 
-- **Input Chain**: Koristi se za upravljanje ponašanjem dolaznih konekcija.
-- **Forward Chain**: Koristi se za rukovanje dolaznim konekcijama koje nisu namenjene lokalnom sistemu. Ovo je tipično za uređaje koji deluju kao ruteri, gde su podaci koji se primaju namenjeni za prosleđivanje na drugu destinaciju. Ovaj lanac je relevantan prvenstveno kada je sistem uključen u rutiranje, NAT-ovanje ili slične aktivnosti.
-- **Output Chain**: Posvećen regulaciji odlaznih konekcija.
+- **Ulazni lanac**: Koristi se za upravljanje ponašanjem dolaznih konekcija.
+- **Prosleđivački lanac**: Koristi se za obradu dolaznih konekcija koje nisu namenjene lokalnom sistemu. Ovo je uobičajeno za uređaje koji imaju ulogu rutera, gde se primljeni podaci prosleđuju na drugo odredište. Ovaj lanac je prvenstveno relevantan kada je sistem uključen u rutiranje, NAT-ovanje ili slične aktivnosti.
+- **Izlazni lanac**: Namenjen regulisanju odlaznih konekcija.
 
-Ovi lanci osiguravaju urednu obradu mrežnog saobraćaja, omogućavajući precizno definisanje detaljnih pravila koja upravljaju protokom podataka u, kroz i iz sistema.
+Ovi lanci obezbeđuju uređenu obradu mrežnog saobraćaja, omogućavajući definisanje detaljnih pravila koja upravljaju protokom podataka u sistem, kroz sistem i iz sistema.
 ```bash
 # Delete all rules
 iptables -F
@@ -51,7 +51,7 @@ iptables-restore < /etc/sysconfig/iptables
 ```
 ## Suricata
 
-### Instalacija i Konfiguracija
+### Instalacija i konfiguracija
 ```bash
 # Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
 # Ubuntu
@@ -117,70 +117,70 @@ Type=simple
 
 systemctl daemon-reload
 ```
-### Pravila Definicije
+### Definicije pravila
 
-[Iz dokumenata:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) Pravilo/potpis se sastoji od sledećeg:
+[Iz dokumentacije:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) Pravilo/potpis sastoji se od sledećeg:
 
-- **akcija**, određuje šta se dešava kada se potpis poklapa.
-- **zaglavlje**, definiše protokol, IP adrese, portove i pravac pravila.
-- **opcije pravila**, definišu specifičnosti pravila.
+- **action**, određuje šta se dešava kada se potpis podudari.
+- **header**, definiše protokol, IP adrese, portove i smer pravila.
+- **rule options**, definišu specifičnosti pravila.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
-#### **Validne akcije su**
+#### **Važeće akcije su**
 
-- alert - generiši upozorenje
-- pass - zaustavi dalju inspekciju paketa
-- **drop** - odbaci paket i generiši upozorenje
-- **reject** - pošalji RST/ICMP grešku nedostupnosti pošiljaocu odgovarajućeg paketa.
-- rejectsrc - isto kao _reject_
-- rejectdst - pošalji RST/ICMP grešku paketa primaocu odgovarajućeg paketa.
-- rejectboth - pošalji RST/ICMP greške paketa obe strane razgovora.
+- alert - generiše alert
+- pass - zaustavlja dalju inspekciju paketa
+- **drop** - odbacuje paket i generiše alert
+- **reject** - šalje RST/ICMP unreachable grešku pošiljaocu odgovarajućeg paketa.
+- rejectsrc - isto što i _reject_
+- rejectdst - šalje RST/ICMP paket sa greškom primaocu odgovarajućeg paketa.
+- rejectboth - šalje RST/ICMP pakete sa greškom na obe strane komunikacije.
 
 #### **Protokoli**
 
 - tcp (za tcp-traffic)
 - udp
 - icmp
-- ip (ip znači ‘svi’ ili ‘bilo koji’)
-- _layer7 protokoli_: http, ftp, tls, smb, dns, ssh... (više u [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+- ip (ip označava „all“ ili „any“)
+- _layer7 protocols_: http, ftp, tls, smb, dns, ssh... (više informacija u [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
 
-#### Izvori i odredišne adrese
+#### Source i Destination adrese
 
 Podržava IP opsege, negacije i listu adresa:
 
-| Primer                        | Značenje                                  |
-| ----------------------------- | ----------------------------------------- |
+| Example                       | Meaning                                  |
+| ----------------------------- | ---------------------------------------- |
 | ! 1.1.1.1                     | Svaka IP adresa osim 1.1.1.1             |
-| !\[1.1.1.1, 1.1.1.2]          | Svaka IP adresa osim 1.1.1.1 i 1.1.1.2   |
-| $HOME_NET                     | Vaša postavka HOME_NET u yaml            |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET i ne HOME_NET                |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 osim 10.0.0.5                |
+| !\[1.1.1.1, 1.1.1.2]          | Svaka IP adresa osim 1.1.1.1 i 1.1.1.2 |
+| $HOME_NET                     | Vaša postavka za HOME_NET u yaml-u         |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET, ali ne i HOME_NET            |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 osim 10.0.0.5          |
 
-#### Izvori i odredišne portove
+#### Source i Destination portovi
 
 Podržava opsege portova, negacije i liste portova
 
-| Primer         | Značenje                                |
+| Example         | Meaning                                |
 | --------------- | -------------------------------------- |
-| any             | bilo koja adresa                       |
-| \[80, 81, 82]   | port 80, 81 i 82                       |
-| \[80: 82]       | Opseg od 80 do 82                      |
-| \[1024: ]       | Od 1024 do najvećeg broja porta       |
-| !80             | Svaki port osim 80                     |
-| \[80:100,!99]   | Opseg od 80 do 100 osim 99             |
-| \[1:80,!\[2,4]] | Opseg od 1-80, osim portova 2 i 4      |
+| any             | bilo koja adresa                            |
+| \[80, 81, 82]   | portovi 80, 81 i 82                     |
+| \[80: 82]       | Opseg od 80 do 82                  |
+| \[1024: ]       | Od 1024 do najvećeg broja porta |
+| !80             | Svaki port osim 80                      |
+| \[80:100,!99]   | Opseg od 80 do 100, osim porta 99 |
+| \[1:80,!\[2,4]] | Opseg od 1 do 80, osim portova 2 i 4  |
 
 #### Smer
 
-Moguće je naznačiti smer komunikacijske pravila koja se primenjuje:
+Moguće je naznačiti smer komunikacije na koji se pravilo primenjuje:
 ```
 source -> destination
 source <> destination  (both directions)
 ```
 #### Ključne reči
 
-Postoji **stotine opcija** dostupnih u Suricati za pretragu **specifičnog paketa** koji tražite, ovde će biti pomenuto ako se pronađe nešto zanimljivo. Proverite [**dokumentaciju**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html) za više informacija!
+U Suricata postoji **stotine opcija** za pretragu **specifičnog paketa** koji tražite; ovde će biti navedeno ako se pronađe nešto zanimljivo. Pogledajte [**dokumentaciju** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)za više informacija!
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule

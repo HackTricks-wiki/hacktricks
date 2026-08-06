@@ -1,39 +1,39 @@
-# PDF File analysis
+# Analiza PDF datoteka
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Za više detalja pogledajte:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)
+**Za više detalja pogledajte:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)<sup>[[1]](#references)</sup>
 
-PDF format je poznat po svojoj složenosti i potencijalu za prikrivanje podataka, što ga čini centralnom tačkom za CTF forenzičke izazove. Kombinuje elemente običnog teksta sa binarnim objektima, koji mogu biti kompresovani ili enkriptovani, i može uključivati skripte u jezicima kao što su JavaScript ili Flash. Da bi se razumeo PDF struktura, može se konsultovati [uvodni materijal](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/) Didijea Stivensa, ili koristiti alate poput tekstualnog editora ili PDF-specifičnog editora kao što je Origami.
+PDF format je poznat po svojoj složenosti i mogućnosti prikrivanja podataka, zbog čega je česta tema forenzičkih izazova u okviru CTF-a. Kombinuje elemente običnog teksta sa binarnim objektima, koji mogu biti kompresovani ili šifrovani, a može sadržati i skripte napisane u jezicima kao što su JavaScript ili Flash. Za razumevanje strukture PDF-a možete pogledati [uvodni materijal](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/) Didiera Stevensa ili koristiti alate kao što su uređivač teksta ili uređivač namenjen PDF-u, poput Origami-ja.
 
-Za dubinsko istraživanje ili manipulaciju PDF-ova, dostupni su alati poput [qpdf](https://github.com/qpdf/qpdf) i [Origami](https://github.com/mobmewireless/origami-pdf). Sakriveni podaci unutar PDF-ova mogu biti prikriveni u:
+Za detaljno istraživanje ili manipulaciju PDF datotekama dostupni su alati kao što su [qpdf](https://github.com/qpdf/qpdf) i [Origami](https://github.com/mobmewireless/origami-pdf). Skriveni podaci u PDF datotekama mogu biti sakriveni u:
 
 - Nevidljivim slojevima
-- XMP metapodacima formata od Adobe-a
+- XMP formatu metapodataka kompanije Adobe
 - Inkrementalnim generacijama
 - Tekstu iste boje kao pozadina
-- Tekstu iza slika ili preklapajućih slika
-- Neprikazanim komentarima
+- Tekstu iza slika ili slikama koje se preklapaju
+- Komentarima koji se ne prikazuju
 
-Za prilagođenu analizu PDF-a, mogu se koristiti Python biblioteke poput [PeepDF](https://github.com/jesparza/peepdf) za kreiranje prilagođenih skripti za parsiranje. Pored toga, potencijal PDF-a za skladištenje skrivenih podataka je toliko veliki da resursi poput NSA vodiča o rizicima i protivmera vezanih za PDF, iako više nisu dostupni na svojoj originalnoj lokaciji, i dalje nude dragocene uvide. [Kopija vodiča](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) i kolekcija [trikova za PDF format](https://github.com/corkami/docs/blob/master/PDF/PDF.md) od Anže Albertinija mogu pružiti dodatno čitanje na ovu temu.
+Za prilagođenu analizu PDF-a mogu se koristiti Python biblioteke kao što je [PeepDF](https://github.com/jesparza/peepdf), za izradu prilagođenih skripti za parsiranje. Osim toga, mogućnosti PDF-a za skladištenje skrivenih podataka toliko su široke da resursi poput NSA vodiča o rizicima i merama zaštite PDF-a, iako više nije hostovan na prvobitnoj lokaciji, i dalje pružaju korisne uvide. [Kopija vodiča](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) i zbirka [trikova za PDF format](https://github.com/corkami/docs/blob/master/PDF/PDF.md) autora Angea Albertinija mogu poslužiti za dalje proučavanje ove teme.
 
-## Common Malicious Constructs
+## Uobičajene zlonamerne konstrukcije
 
-Napadači često zloupotrebljavaju specifične PDF objekte i akcije koje se automatski izvršavaju kada se dokument otvori ili interaguje s njim. Ključne reči koje vredi tražiti:
+Napadači često zloupotrebljavaju određene PDF objekte i akcije koje se automatski izvršavaju kada se dokument otvori ili kada korisnik stupi u interakciju s njim. Ključne reči koje treba potražiti:
 
-* **/OpenAction, /AA** – automatske akcije izvršene prilikom otvaranja ili na specifičnim događajima.
-* **/JS, /JavaScript** – ugrađeni JavaScript (često obfuskovan ili podeljen između objekata).
-* **/Launch, /SubmitForm, /URI, /GoToE** – pokretači spoljnog procesa / URL-a.
-* **/RichMedia, /Flash, /3D** – multimedijalni objekti koji mogu sakriti payload-e.
-* **/EmbeddedFile /Filespec** – privitci fajlova (EXE, DLL, OLE, itd.).
-* **/ObjStm, /XFA, /AcroForm** – tokovi objekata ili forme koje se često zloupotrebljavaju za skrivanje shell-koda.
-* **Inkrementalne nadogradnje** – više %%EOF oznaka ili veoma veliki **/Prev** offset može ukazivati na podatke dodate nakon potpisivanja kako bi se zaobišao AV.
+* **/OpenAction, /AA** – automatske akcije koje se izvršavaju pri otvaranju ili tokom određenih događaja.
+* **/JS, /JavaScript** – ugrađeni JavaScript (često obfuskiran ili podeljen između više objekata).
+* **/Launch, /SubmitForm, /URI, /GoToE** – pokretači eksternih procesa / URL-ova.
+* **/RichMedia, /Flash, /3D** – multimedijalni objekti koji mogu sakriti payloads.
+* **/EmbeddedFile /Filespec** – priložene datoteke (EXE, DLL, OLE itd.).
+* **/ObjStm, /XFA, /AcroForm** – streams objekata ili forme koje se često zloupotrebljavaju za skrivanje shell-code-a.
+* **Inkrementalna ažuriranja** – više oznaka %%EOF ili veoma veliki pomak **/Prev** mogu ukazivati na podatke dodate nakon potpisivanja radi zaobilaženja AV-a.
 
-Kada se bilo koji od prethodnih tokena pojavi zajedno sa sumnjivim stringovima (powershell, cmd.exe, calc.exe, base64, itd.), PDF zaslužuje dublju analizu.
+Kada se neki od prethodnih tokena pojavi zajedno sa sumnjivim stringovima (powershell, cmd.exe, calc.exe, base64 itd.), PDF zaslužuje detaljniju analizu.
 
 ---
 
-## Static analysis cheat-sheet
+## Podsetnik za statičku analizu
 ```bash
 # Fast triage – keyword statistics
 pdfid.py suspicious.pdf
@@ -55,21 +55,21 @@ qpdf --password='secret' --decrypt suspicious.pdf clean.pdf
 pdfcpu validate -mode strict clean.pdf
 ```
 Dodatni korisni projekti (aktivno održavani 2023-2025):
-* **pdfcpu** – Go biblioteka/CLI koja može da *lintuje*, *dekriptuje*, *izvlači*, *kompresuje* i *sanitizuje* PDF-ove.
-* **pdf-inspector** – vizualizator zasnovan na pretraživaču koji prikazuje graf objekata i tokove.
-* **PyMuPDF (fitz)** – skriptabilni Python motor koji može sigurno da prikazuje stranice kao slike kako bi aktivirao ugrađeni JS u zaštićenoj sandučici.
+* **pdfcpu** – Go biblioteka/CLI koja može da izvršava *lint*, *decrypt*, *extract*, *compress* i *sanitize* nad PDF-ovima.
+* **pdf-inspector** – vizuelizator zasnovan na browseru koji prikazuje graf objekata i stream-ove.
+* **PyMuPDF (fitz)** – skriptabilni Python engine koji može bezbedno da renderuje stranice u slike radi detoniranja ugrađenog JS-a u ojačanom sandbox-u.
 
 ---
 
-## Nedavne tehnike napada (2023-2025)
+## Najnovije attack tehnike (2023-2025)
 
-* **MalDoc u PDF poliglotu (2023)** – JPCERT/CC je primetio pretnje koje dodaju MHT-bazirani Word dokument sa VBA makroima nakon konačnog **%%EOF**, proizvodeći datoteku koja je i validan PDF i validan DOC. AV motori koji analiziraju samo PDF sloj propuštaju makro. Statične PDF ključne reči su čiste, ali `file` i dalje ispisuje `%PDF`. Svaki PDF koji takođe sadrži string `<w:WordDocument>` tretirati kao veoma sumnjiv.
-* **Shadow-incremental ažuriranja (2024)** – protivnici zloupotrebljavaju funkciju inkrementalnog ažuriranja da umetnu drugi **/Catalog** sa zloćudnim `/OpenAction` dok zadržavaju benignu prvu reviziju potpisanu. Alati koji inspektuju samo prvu xref tabelu su zaobiđeni.
-* **Lanac UAF za parsiranje fontova – CVE-2024-30284 (Acrobat/Reader)** – ranjiva funkcija **CoolType.dll** može se dostići iz ugrađenih CIDType2 fontova, omogućavajući daljinsko izvršavanje koda sa privilegijama korisnika kada se otvori kreirani dokument. Zakrpljeno u APSB24-29, maj 2024.
+* **MalDoc in PDF polyglot (2023)** – JPCERT/CC je primetio da threat aktori dodaju Word dokument zasnovan na MHT-u, sa VBA macros, nakon poslednjeg **%%EOF**, čime nastaje fajl koji je istovremeno važeći PDF i važeći DOC. AV engine-i koji parsiraju samo PDF sloj propuštaju macro. Statičke PDF ključne reči izgledaju čisto, ali `file` i dalje ispisuje `%PDF`. Svaki PDF koji takođe sadrži string `<w:WordDocument>` treba smatrati veoma sumnjivim.<sup>[[2]](#references)</sup>
+* **Shadow-incremental updates (2024)** – adversaries zloupotrebljavaju funkciju incremental update da bi ubacili drugi **/Catalog** sa malicioznim `/OpenAction`, dok benigni prvi revision ostaje potpisan. Alati koji proveravaju samo prvu xref tabelu mogu biti zaobiđeni.
+* **Font parsing UAF chain – CVE-2024-30284 (Acrobat/Reader)** – ranjiva funkcija u **CoolType.dll** može biti dostignuta preko ugrađenih CIDType2 fontova, što omogućava remote code execution sa privilegijama korisnika kada se otvori izrađen dokument. Ispravljeno u APSB24-29, maja 2024.<sup>[[3]](#references)</sup>
 
 ---
 
-## YARA brza pravila šablon
+## YARA quick rule template
 ```yara
 rule Suspicious_PDF_AutoExec {
 meta:
@@ -89,15 +89,16 @@ $pdf_magic at 0 and ( all of ($aa, $openact) or ($openact and $js) )
 
 ## Saveti za odbranu
 
-1. **Brzo zakrpite** – održavajte Acrobat/Reader na najnovijem kontinuiranom traku; većina RCE lanaca zabeleženih u prirodi koristi n-dnevne ranjivosti koje su ispravljene mesecima ranije.
-2. **Uklonite aktivni sadržaj na ulazu** – koristite `pdfcpu sanitize` ili `qpdf --qdf --remove-unreferenced` da biste uklonili JavaScript, ugrađene datoteke i akcije pokretanja iz dolaznih PDF-ova.
-3. **Deaktivacija sadržaja i rekonstrukcija (CDR)** – konvertujte PDF-ove u slike (ili PDF/A) na sandbox hostu kako biste sačuvali vizuelnu vernost dok odbacujete aktivne objekte.
-4. **Blokirajte retko korišćene funkcije** – preduzeća “Poboljšana sigurnost” podešavanja u Reader-u omogućavaju onemogućavanje JavaScript-a, multimedije i 3D renderovanja.
-5. **Obrazovanje korisnika** – socijalni inženjering (mamci sa fakturama i rezimeima) ostaje inicijalni vektor; podučite zaposlene da proslede sumnjive priloge IR-u.
+1. **Brzo primenjujte zakrpe** – održavajte Acrobat/Reader na najnovijem Continuous kanalu; većina RCE lanaca uočenih u stvarnim napadima koristi n-day ranjivosti koje su zakrpljene mesecima ranije.
+2. **Uklonite aktivni sadržaj na gateway-u** – koristite `pdfcpu sanitize` ili `qpdf --qdf --remove-unreferenced` da biste iz dolaznih PDF-ova uklonili JavaScript, ugrađene datoteke i launch actions.
+3. **Content Disarm & Reconstruction (CDR)** – konvertujte PDF-ove u slike (ili PDF/A) na sandbox hostu kako biste očuvali vizuelnu vernost, a odbacili aktivne objekte.
+4. **Blokirajte retko korišćene funkcije** – postavke „Enhanced Security“ u Reader-u omogućavaju onemogućavanje JavaScript-a, multimedije i 3D renderovanja.
+5. **Edukacija korisnika** – social engineering (mamci u vidu faktura i biografija) i dalje predstavlja početni vektor; obučite zaposlene da prosleđuju sumnjive priloge IR timu.
 
 ## Reference
 
-* JPCERT/CC – “MalDoc u PDF-u – Zaobilaženje detekcije ugrađivanjem zlonamerne Word datoteke u PDF datoteku” (avgust 2023)
-* Adobe – Bezbednosno ažuriranje za Acrobat i Reader (APSB24-29, maj 2024)
+- [1] [Vodič kroz forenziku za CTF](https://trailofbits.github.io/ctf/forensics/)
+- [2] [MalDoc in PDF – zaobilaženje detekcije ugrađivanjem zlonamerne Word datoteke u PDF datoteku](https://blogs.jpcert.or.jp/en/2023/08/maldocinpdf.html)
+- [3] [Adobe Security Bulletin – dostupno je bezbednosno ažuriranje za Adobe Acrobat i Reader (APSB24-29)](https://helpx.adobe.com/security/products/acrobat/apsb24-29.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

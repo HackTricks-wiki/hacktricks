@@ -2,46 +2,46 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ako imate pcap koji sadrži komunikaciju preko USB-a za tastaturu kao što je sledeća:
+Ako imate pcap koji sadrži komunikaciju putem USB-a sa tastature poput sledeće:
 
-![](<../../../images/image (962).png>)
+![USB Keystrokes: Ako imate pcap koji sadrži komunikaciju putem USB-a sa tastature poput sledeće](<../../../images/image (962).png>)
 
-USB tastature obično koriste HID **boot protocol**, pa je svaki interrupt transfer ka hostu dug samo 8 bajtova: jedan bajt bitova modifikatora (Ctrl/Shift/Alt/Super), jedan rezervisani bajt, i do šest keycode-ova po reportu. Dekodiranje tih bajtova je dovoljno da se rekonstruiše sve što je ukucano.
+USB tastature obično koriste HID **boot protocol**, tako da je svaki interrupt transfer ka hostu dugačak samo 8 bajtova: jedan bajt modifikatorskih bitova (Ctrl/Shift/Alt/Super), jedan rezervisani bajt i do šest keycode-ova po izveštaju. Dekodiranje ovih bajtova dovoljno je za rekonstrukciju svega što je otkucano.
 
-## Osnove USB HID reporta
+## Osnove USB HID izveštaja
 
-Tipičan IN report izgleda ovako:
+Tipični IN izveštaj izgleda ovako:
 
-| Byte | Meaning |
+| Bajt | Značenje |
 | --- | --- |
-| 0 | Bit mapa modifikatora (`0x02` = Left Shift, `0x20` = Right Alt, itd.). Više bitova može biti postavljeno istovremeno. |
-| 1 | Rezervisano/padding, ali ga gaming tastature često ponovo koriste za vendor data. |
-| 2-7 | Do šest istovremenih keycode-ova u USB usage ID formatu (`0x04 = a`, `0x1E = 1`). `0x00` znači "nema tastera". |
+| 0 | Bitmapa modifikatora (`0x02` = Left Shift, `0x20` = Right Alt itd.). Istovremeno može biti postavljeno više bitova. |
+| 1 | Rezervisan/padding, ali ga gaming tastature često ponovo koriste za vendor podatke. |
+| 2-7 | Do šest istovremenih keycode-ova u USB usage ID formatu (`0x04 = a`, `0x1E = 1`). `0x00` znači „nema tastera“. |
 
-Tastature bez NKRO obično šalju `0x01` u bajtu 2 kada je pritisnuto više od šest tastera, da signaliziraju "rollover". Razumevanje ovog rasporeda pomaže kada imate samo sirove `usb.capdata` bajtove.
+Tastature bez NKRO obično šalju `0x01` u bajtu 2 kada je pritisnuto više od šest tastera, kako bi signalizovale „rollover“. Razumevanje ovog rasporeda pomaže kada imate samo sirove `usb.capdata` bajtove.
 
-## Ekstrakcija HID podataka iz PCAP-a
+## Izdvajanje HID podataka iz PCAP-a
 
-### Prvo identifikujte interfejs tastature
+### Najpre identifikujte interfejs tastature
 
-Na zauzetim capture-ima, identifikujte HID tastaturu pre nego što dump-ujete bilo koje report-e. Pouzdana početna tačka je odgovor interface descriptor-a:
+Kod zauzetih capture-a, identifikujte HID tastaturu pre izlistavanja izveštaja. Pouzdana početna tačka je odgovor deskriptora interfejsa:<sup>[[2]](#references)</sup>
 ```text
 usb.transfer_type == 0x02 && usb.endpoint_address.direction == 1 && usb.bDescriptorType == 4 && usb.bInterfaceClass == 3
 ```
-Pogledaj `usb.bInterfaceSubClass` i `usb.bInterfaceProtocol`:
+Pogledajte `usb.bInterfaceSubClass` i `usb.bInterfaceProtocol`:
 
-- `subclass == 1` i `protocol == 1` obično znači boot keyboard
-- `protocol == 2` je tipično mouse
-- `protocol == 0` često znači vendor-defined ili NKRO-style HID interface koji i dalje nosi keyboard podatke, ali ne u jednostavnom 8-byte boot layoutu
+- `subclass == 1` i `protocol == 1` obično označavaju boot keyboard
+- `protocol == 2` obično označava miš
+- `protocol == 0` često označava vendor-defined ili NKRO-style HID interfejs koji i dalje prenosi podatke sa tastature, ali ne u jednostavnom 8-byte boot rasporedu
 
-Kada je interface poznat, ograniči filtre na `usb.bus_id`, `usb.device_address` i, ako je moguće, `usb.interface_number` pre nego što išta eksportuješ.
+Kada identifikujete interfejs, ograničite filtere na `usb.bus_id`, `usb.device_address` i, ako je moguće, `usb.interface_number` pre bilo kakvog exportovanja.
 
 ### Wireshark workflow
 
-1. **Izoluj uređaj**: filtriraj interrupt IN traffic sa keyboarda, npr. `usb.transfer_type == 0x01 && usb.endpoint_address.direction == "IN" && usb.device_address == 3`.
-2. **Dodaj korisne kolone**: desni klik na polje `Leftover Capture Data` (`usb.capdata`) i željena `usbhid.*` polja (npr. `usbhid.boot_report.keyboard.keycode_1`) da pratiš keystrokes bez otvaranja svakog frame-a.
-3. **Sakrij prazne reportove**: primeni `!(usb.capdata == 00:00:00:00:00:00:00:00)` da izbaciš idle frame-ove.
-4. **Eksport za naknadnu obradu**: `File -> Export Packet Dissections -> As CSV`, uključi `frame.number`, `usb.src`, `usb.capdata` i `usbhid.modifiers` da kasnije skriptom rekonstruišeš podatke.
+1. **Izolujte uređaj**: filtrirajte interrupt IN saobraćaj sa tastature, npr. `usb.transfer_type == 0x01 && usb.endpoint_address.direction == "IN" && usb.device_address == 3`.
+2. **Dodajte korisne kolone**: kliknite desnim tasterom na polje `Leftover Capture Data` (`usb.capdata`) i željena `usbhid.*` polja (npr. `usbhid.boot_report.keyboard.keycode_1`) da biste pratili pritiske tastera bez otvaranja svakog frame-a.
+3. **Sakrijte prazne report-e**: primenite `!(usb.capdata == 00:00:00:00:00:00:00:00)` da biste uklonili idle frame-ove.
+4. **Exportujte za post-processing**: `File -> Export Packet Dissections -> As CSV`, uključite `frame.number`, `usb.src`, `usb.capdata` i `usbhid.modifiers` kako biste kasnije mogli da skriptujete rekonstrukciju.
 
 ### Command-line workflow
 
@@ -50,38 +50,38 @@ Kada je interface poznat, ograniči filtre na `usb.bus_id`, `usb.device_address`
 tshark -r ./usb.pcap -Y 'usb.capdata && usb.data_len == 8' -T fields -e usb.capdata | sed 's/../:&/g2' > keystrokes.txt
 python3 usbkeyboard.py ./keystrokes.txt
 ```
-Na novijim capture-ovima možete zadržati i `usb.capdata` i bogatije `usbhid.data` polje tako što ćete grupisati po uređaju:
+Na novijim snimcima možete zadržati i `usb.capdata` i bogatije polje `usbhid.data` grupisanjem po uređaju:
 ```bash
 tshark -r usb.pcapng -Y "usb.capdata || usbhid.data" -T fields -e usb.src -e usb.capdata -e usbhid.data | \
 sort -s -k1,1 | \
 awk '{ printf "%s", (NR==1 ? $1 : pre!=$1 ? "\n" $1 : "") " " $2; pre=$1 }' | \
 awk '{ for (i=2; i<=NF; i++) print $i > "usbdata-" $1 ".txt" }'
 ```
-Ti fajlovi po uređaju se direktno ubacuju u bilo koji decoder. Ako je capture došao sa BLE tastatura tuneliranih preko GATT, filtriraj na `btatt.value && frame.len == 20` i izvezi hex payload-e pre dekodiranja.
+Te datoteke po uređaju mogu direktno da se proslede bilo kom decoder-u. Ako je snimak došao sa BLE tastatura tunelovanih preko GATT-a, filtrirajte po `btatt.value && frame.len == 20` i sačuvajte heksadecimalne payload-e pre dekodiranja.
 
-### Kada report nije klasični 8-byte boot report
+### Kada report nije klasični 8-bajtni boot report
 
-Savremene gaming tastature, split tastature i composite HID uređaji često izlažu non-boot keyboard interface gde payload više ne odgovara `modifier,reserved,key1..key6`.
+Novije gaming tastature, podeljene tastature i kompozitni HID uređaji često izlažu tastaturni interfejs koji nije boot interfejs, pa payload više ne odgovara formatu `modifier,reserved,key1..key6`.
 
-- Preferiraj `usbhid.data` umesto `usb.capdata` kada je Wireshark već parsirao HID layer.
-- Ako svaka linija počinje konstantnim prefixom ili report ID-jem, ukloni ga offset-aware decoderom umesto da pretpostaviš da je byte 0 uvek modifier.
-- Neki USBPcap exporti izostavljaju reserved byte, pa decoderi koji podržavaju `--no-reserved` ili custom offset štede vreme.
-- Ako su u capture-u prisutni HID report descriptor ili BLE HOGP report map, iskoristi ih da obnoviš stvarni field layout pre pisanja parsera.
+- Dajte prednost `usbhid.data` u odnosu na `usb.capdata` kada je Wireshark već parsirao HID sloj.
+- Ako svaki red počinje konstantnim prefiksom ili report ID-jem, uklonite ga pomoću decoder-a koji podržava offset, umesto da pretpostavite da je bajt 0 uvek modifier.
+- Neki USBPcap export-i izostavljaju reserved bajt, pa decoder-i koji podržavaju `--no-reserved` ili prilagođeni offset štede vreme.
+- Ako su HID report descriptor ili BLE HOGP report map prisutni u snimku, upotrebite ih da utvrdite stvarni raspored polja pre pisanja parser-a.
 
 ## Automatizacija dekodiranja
 
-- **ctf-usb-keyboard-parser** i dalje je koristan za brze CTF izazove i već se nalazi u repozitorijumu.
-- **CTF-Usb_Keyboard_Parser** (`main.py`) nativno parsira i `pcap` i `pcapng` fajlove, razume `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap`, i ne zahteva tshark, pa dobro radi unutar izolovanih sandbox-eva.
-- **USB-HID-decoders** dodaje vizuelizatore za tastaturu, miš i tablet. Možeš da pokreneš `extract_hid_data.sh` helper (tshark backend) ili `extract_hid_data.py` (scapy backend), a zatim da rezultujući text file proslediš decoderu ili replay modulima da posmatraš kako se keystrokes odvijaju.
+- **ctf-usb-keyboard-parser** je i dalje koristan za brze CTF izazove i već se nalazi u repository-ju.<sup>[[3]](#references)</sup>
+- **CTF-Usb_Keyboard_Parser** (`main.py`) izvorno parsira i `pcap` i `pcapng` datoteke, podržava `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap` i ne zahteva tshark, pa dobro funkcioniše unutar izolovanih sandbox-a.<sup>[[4]](#references)</sup>
+- **USB-HID-decoders** dodaje vizualizatore za tastaturu, miš i tablet. Možete pokrenuti pomoćni alat `extract_hid_data.sh` (tshark backend) ili `extract_hid_data.py` (scapy backend), a zatim proslediti dobijenu tekstualnu datoteku decoder-u ili replay modulima da biste pratili kako se pritisci tastera pojavljuju.<sup>[[5]](#references)</sup>
 
-### Stateful decoding je važan
+### Stateful dekodiranje je važno
 
-USB interrupt captures obično sadrže i key press i jednu ili više ponovljenih kopija istog reporta pre nego što stigne release event. Praktičan decoder bi trebalo da:
+USB interrupt snimci obično sadrže i pritisak tastera i jednu ili više ponovljenih kopija istog report-a pre nego što stigne događaj otpuštanja. Praktičan decoder treba da:<sup>[[2]](#references)</sup>
 
 - emituje samo novopritisnute keycode-ove u odnosu na prethodni report
-- čuva modifier state (`Shift`, `Ctrl`, `AltGr`) iz byte 0 ili iz parsiranog `usbhid.boot_report.keyboard.modifier` polja
-- prati toggle keys kao što je `Caps Lock`, jer uppercase output ne kontroliše samo Shift
-- zapamti da su HID usage ID-jevi layout-agnostični: `0x1d` je fizička `z`/`y` key pozicija u zavisnosti od host keyboard layout-a
+- čuva stanje modifier-a (`Shift`, `Ctrl`, `AltGr`) iz bajta 0 ili parsiranog polja `usbhid.boot_report.keyboard.modifier`
+- prati toggle tastere kao što je `Caps Lock`, jer se ispis velikih slova ne kontroliše samo pomoću Shift-a
+- uzme u obzir da su HID usage ID-jevi nezavisni od rasporeda: `0x1d` predstavlja fizičku poziciju tastera `z`/`y`, u zavisnosti od rasporeda tastature hosta
 
 ## Brzi Python decoder
 ```python
@@ -112,19 +112,22 @@ char = char.upper()
 sys.stdout.write(char)
 prev = current
 ```
-Feed it with the plain hex lines dumped earlier to get an instant rough reconstruction without pulling a full parser into the environment. For non-US layouts this still reconstructs the physical key position, not necessarily the final glyph shown on the victim host.
+Prosledite mu obične hex linije izbačene ranije da biste odmah dobili grubu rekonstrukciju, bez ubacivanja celog parser-a u okruženje. Za rasporede koji nisu US, ovo i dalje rekonstruiše fizičku poziciju tastera, ali ne nužno i konačni glyph prikazan na victim host-u.
 
-## Troubleshooting tips
+## Saveti za rešavanje problema
 
-- If Wireshark does not populate `usbhid.*` fields, the HID report descriptor was probably not captured. Replug the keyboard while capturing or fall back to raw `usb.capdata`.
-- On Linux software captures, `usbmon` is the normal source; on Windows, Wireshark depends on the **USBPcap** extcap to see raw USB URBs at all.
-- If the keyboard was attached through a hub or dock, confirm the interface descriptor first and then decode only that device/interface pair. Composite HID captures frequently mix keyboard and mouse reports.
-- Windows captures require the **USBPcap** extcap interface; make sure it survived Wireshark upgrades, as missing extcaps leave you with empty device lists.
-- Always correlate `usb.bus_id:device:interface` (e.g. `1.9.1`) before decoding anything — mixing multiple keyboards or storage devices leads to nonsense keystrokes.
+- Ako Wireshark ne popuni polja `usbhid.*`, HID report descriptor verovatno nije uhvaćen. Ponovo priključite tastaturu tokom capture-a ili pređite na raw `usb.capdata`.
+- Na Linux software capture-ima, `usbmon` je uobičajeni izvor; na Windows-u, Wireshark zavisi od **USBPcap** extcap-a da bi uopšte video raw USB URB-ove.<sup>[[1]](#references)</sup>
+- Ako je tastatura povezana preko hub-a ili dock-a, prvo potvrdite interface descriptor, a zatim dekodirajte samo taj device/interface pair. Composite HID capture-i često mešaju izveštaje tastature i miša.
+- Windows capture-i zahtevaju **USBPcap** extcap interface; proverite da li je sačuvan nakon Wireshark upgrade-a, jer nedostajući extcap-ovi ostavljaju prazne liste uređaja.<sup>[[1]](#references)</sup>
+- Uvek proverite korelaciju `usb.bus_id:device:interface` (npr. `1.9.1`) pre bilo kakvog dekodiranja — mešanje više tastatura ili storage uređaja dovodi do besmislenih keystroke-ova.
 
-## References
+## Reference
 
-- [Wireshark USB capture setup](https://wiki.wireshark.org/CaptureSetup/USB)
-- [ACSC Quals 2023 - pcap 1, 2 write-up](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
+- [1] [Wireshark USB capture setup](https://wiki.wireshark.org/CaptureSetup/USB)
+- [2] [ACSC Quals 2023 - pcap 1, 2 write-up](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
+- [3] [ctf-usb-keyboard-parser](https://github.com/TeamRocketIst/ctf-usb-keyboard-parser)
+- [4] [CTF-Usb_Keyboard_Parser](https://github.com/5h4rrk/CTF-Usb_Keyboard_Parser)
+- [5] [USB-HID-decoders](https://github.com/Nissen96/USB-HID-decoders)
 
 {{#include ../../../banners/hacktricks-training.md}}
