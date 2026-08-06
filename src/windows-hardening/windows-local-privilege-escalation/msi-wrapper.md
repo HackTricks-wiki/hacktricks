@@ -2,21 +2,21 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-無料版アプリを[https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/)からダウンロードし、実行して「悪意のある」バイナリをラップします。\
-「**.bat**」をラップすることもできますが、**コマンドラインを実行したいだけの場合（cmd.exeの代わりに.batファイルを選択してください）**
+[https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/) から無料版の app を Download し、実行して、その中に「malicious」binary を wrap します。\
+「**.bat**」を wrap すれば、**command lines を実行する**ことだけが目的の場合にも使用できます（cmd.exe の代わりに .bat file を選択してください）。
 
-![](<../../images/image (417).png>)
+![MSI Wrapper: command lines を実行するだけの場合は「.bat」を wrap できることに注意（cmd.exe の代わりに .bat file を選択）](<../../images/image (417).png>)
 
-これが設定の最も重要な部分です：
+そして、設定で最も重要な部分は次のとおりです。
 
-![](<../../images/image (312).png>)
+![MSI Wrapper: 設定で最も重要な部分](<../../images/image (312).png>)
 
-![](<../../images/image (346).png>)
+![MSI Wrapper: 設定で最も重要な部分](<../../images/image (346).png>)
 
-![](<../../images/image (1072).png>)
+![MSI Wrapper: 設定で最も重要な部分](<../../images/image (1072).png>)
 
-（自分のバイナリをパックしようとすると、これらの値を変更できることに注意してください）
+（独自の binary を pack する場合は、これらの値を変更できることに注意してください）
 
-ここからは、**次のボタン**をクリックし、最後の**ビルドボタンをクリックすると、インストーラー/ラッパーが生成されます。**
+ここからは **next buttons** をクリックし、最後に **build button** をクリックすると、installer/wrapper が生成されます。
 
 {{#include ../../banners/hacktricks-training.md}}

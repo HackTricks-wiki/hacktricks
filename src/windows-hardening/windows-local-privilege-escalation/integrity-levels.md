@@ -1,32 +1,32 @@
-# インテグリティレベル
+# Integrity Levels
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## インテグリティレベル
+## Integrity Levels
 
-Windows Vista以降のバージョンでは、すべての保護されたアイテムには**インテグリティレベル**タグが付いています。この設定では、特定のフォルダーやファイルを除いて、ファイルやレジストリキーに「中」インテグリティレベルが主に割り当てられます。デフォルトの動作は、標準ユーザーによって開始されたプロセスが中インテグリティレベルを持つことであり、サービスは通常、システムインテグリティレベルで動作します。高インテグリティラベルはルートディレクトリを保護します。
+Windows Vista 以降では、すべての保護対象アイテムに **integrity level** タグが付与されます。この仕組みでは通常、ファイルとレジストリキーに「medium」integrity level が割り当てられます。ただし、Internet Explorer 7 が low integrity level で書き込める一部のフォルダーやファイルは例外です。デフォルトでは、標準ユーザーが起動したプロセスは medium integrity level を持ち、サービスは通常 system integrity level で動作します。high-integrity label はルートディレクトリを保護します。
 
-重要なルールは、オブジェクトのレベルよりも低いインテグリティレベルを持つプロセスによってオブジェクトが変更されることはできないということです。インテグリティレベルは次のとおりです：
+重要なルールとして、オブジェクトの integrity level より低い integrity level のプロセスは、そのオブジェクトを変更できません。integrity level は次のとおりです。
 
-- **信頼されていない**: このレベルは匿名ログインを持つプロセス用です。 %%%例: Chrome%%%
-- **低**: 主にインターネットの相互作用、特にInternet Explorerの保護モードで、関連するファイルやプロセス、**一時インターネットフォルダー**のような特定のフォルダーに影響を与えます。低インテグリティプロセスは、レジストリへの書き込みアクセスがないことや、ユーザープロファイルへの書き込みアクセスが制限されるなど、重大な制約に直面します。
-- **中**: ほとんどの活動のデフォルトレベルで、標準ユーザーや特定のインテグリティレベルを持たないオブジェクトに割り当てられます。管理者グループのメンバーでさえ、デフォルトではこのレベルで動作します。
-- **高**: 管理者専用で、低いインテグリティレベルのオブジェクトを変更できるようにし、高レベル自体のオブジェクトも含まれます。
-- **システム**: Windowsカーネルとコアサービスの最高の操作レベルで、管理者でさえ手が届かないため、重要なシステム機能を保護します。
-- **インストーラー**: 他のすべてのレベルの上に位置するユニークなレベルで、このレベルのオブジェクトは他の任意のオブジェクトをアンインストールできます。
+- **Untrusted**: anonymous login を使用するプロセス向けのレベルです。例: Chrome
+- **Low**: 主にインターネットとのやり取り、特に Internet Explorer の Protected Mode で使用され、関連するファイルやプロセス、および **Temporary Internet Folder** などの特定のフォルダーに影響します。Low integrity process には、レジストリへの書き込みアクセスがなく、ユーザープロファイルへの書き込みアクセスも制限されるなど、大きな制約があります。
+- **Medium**: ほとんどのアクティビティにおけるデフォルトのレベルで、標準ユーザーと、特定の integrity level を持たないオブジェクトに割り当てられます。Administrators group のメンバーであっても、デフォルトではこのレベルで動作します。
+- **High**: 管理者向けに予約されたレベルで、管理者は自身の high level を含む、より低い integrity level のオブジェクトを変更できます。
+- **System**: Windows kernel と core services 向けの最も高い運用レベルです。管理者であっても到達できず、重要なシステム機能を保護します。
+- **Installer**: 他のすべてのレベルより上位に位置する特殊なレベルで、このレベルのオブジェクトは他の任意のオブジェクトをアンインストールできます。
 
-**Process Explorer**を使用してプロセスのインテグリティレベルを取得できます。**Sysinternals**からプロセスの**プロパティ**にアクセスし、"**セキュリティ**"タブを表示します：
+**Process Explorer** from **Sysinternals** を使用し、プロセスの **properties** にアクセスして "**Security**" タブを表示することで、プロセスの integrity level を確認できます。
 
-![](<../../images/image (824).png>)
+![Integrity Levels - Integrity Levels: Sysinternals の Process Explorer を使用し、プロセスの properties にアクセスして「...」を表示することで、プロセスの integrity level を確認できます。](<../../images/image (824).png>)
 
-`whoami /groups`を使用して**現在のインテグリティレベル**を取得することもできます。
+`whoami /groups` を使用して、**current integrity level** を確認することもできます。
 
-![](<../../images/image (325).png>)
+![Integrity Levels - Integrity Levels: whoami /groups を使用して current integrity level を確認することもできます。](<../../images/image (325).png>)
 
-### ファイルシステムにおけるインテグリティレベル
+### File-system における Integrity Levels
 
-ファイルシステム内のオブジェクトには**最小インテグリティレベル要件**が必要な場合があり、プロセスがこのインテグリティを持っていない場合、相互作用できません。\
-例えば、**通常のユーザーコンソールから通常のファイルを作成し、権限を確認しましょう**:
+file-system 内のオブジェクトには **minimum integrity level requirement** が設定されている場合があり、プロセスがこの integrity level を持っていなければ、そのオブジェクトとやり取りできません。\
+たとえば、**通常のユーザーコンソールから通常のファイルを作成し、権限を確認**してみましょう:
 ```
 echo asd >asd.txt
 icacls asd.txt
@@ -37,7 +37,7 @@ NT AUTHORITY\INTERACTIVE:(I)(M,DC)
 NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-ファイルに**High**の最小整合性レベルを割り当てます。これは**管理者**として実行されている**コンソール**から**行う必要があります**。通常のコンソールは中程度の整合性レベルで実行されており、オブジェクトに高い整合性レベルを割り当てることは**許可されません**。
+次に、ファイルに **High** の最小 Integrity level を割り当てます。これは **administrator** として実行している **コンソール**から行う必要があります。通常のコンソールは Medium Integrity level で実行され、オブジェクトに High Integrity level を割り当てることが **許可されない**ためです：
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt
@@ -52,7 +52,7 @@ NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 Mandatory Label\High Mandatory Level:(NW)
 ```
-ここが面白くなるところです。ユーザー `DESKTOP-IDJHTKP\user` がファイルに対して **完全な権限** を持っていることがわかります（実際、このユーザーがファイルを作成しました）が、実装された最小の整合性レベルのため、彼は高い整合性レベル内で実行していない限り、ファイルを変更することができません（ただし、読むことはできます）。
+ここからが興味深いところです。ユーザー `DESKTOP-IDJHTKP\user` がファイルに対して **FULL privileges** を持っていることが確認できます（実際、このユーザーがファイルを作成しました）。しかし、実装されている最小 Integrity Level のため、High Integrity Level 内で実行していない限り、このユーザーはファイルを変更できなくなります（なお、読み取りは可能です）。
 ```
 echo 1234 > asd.txt
 Access is denied.
@@ -61,12 +61,12 @@ del asd.txt
 C:\Users\Public\asd.txt
 Access is denied.
 ```
-> [!NOTE]
-> **したがって、ファイルに最低限の整合性レベルがある場合、それを変更するには、その整合性レベル以上で実行する必要があります。**
+> [!TIP]
+> **したがって、ファイルに最低インテグリティ レベルが設定されている場合、そのファイルを変更するには、少なくともそのインテグリティ レベルで実行されている必要があります。**
 
-### バイナリの整合性レベル
+### バイナリのインテグリティ レベル
 
-`cmd.exe`のコピーを`C:\Windows\System32\cmd-low.exe`に作成し、**管理者コンソールから低い整合性レベルを設定しました:**
+`cmd.exe` のコピーを `C:\Windows\System32\cmd-low.exe` として作成し、**administrator console から low のインテグリティ レベルを設定しました:**
 ```
 icacls C:\Windows\System32\cmd-low.exe
 C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
@@ -76,16 +76,16 @@ APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
 APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
 Mandatory Label\Low Mandatory Level:(NW)
 ```
-今、`cmd-low.exe`を実行すると、**低い整合性レベル**で実行されます。中程度の整合性レベルではありません。
+現在、`cmd-low.exe` を実行すると、medium ではなく **low-integrity level で実行されます**。
 
-![](<../../images/image (313).png>)
+![File-system の Integrity Levels - Binaries の Integrity Levels: cmd-low.exe を実行すると、medium ではなく low-integrity level で実行されます](<../../images/image (313).png>)
 
-好奇心のある人のために、バイナリに高い整合性レベルを割り当てると（`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`）、自動的に高い整合性レベルで実行されるわけではありません（中程度の整合性レベルから呼び出すと、デフォルトで中程度の整合性レベルで実行されます）。
+興味のある方へ。バイナリに high integrity level を割り当てても（`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`）、自動的に high integrity level で実行されるわけではありません（medium integrity level から --デフォルトでは-- 起動した場合、medium integrity level で実行されます）。
 
-### プロセスの整合性レベル
+### Processes の Integrity Levels
 
-すべてのファイルやフォルダーには最小整合性レベルがあるわけではありませんが、**すべてのプロセスは整合性レベルの下で実行されています**。ファイルシステムで起こったことと同様に、**プロセスが別のプロセス内に書き込むには、少なくとも同じ整合性レベルを持っている必要があります**。これは、低い整合性レベルのプロセスが中程度の整合性レベルのプロセスに対してフルアクセスのハンドルを開くことができないことを意味します。
+すべてのファイルやフォルダーに minimum integrity level が設定されているわけではありませんが、**すべての process は integrity level で実行されています**。また、file-system で起きたことと同様に、**ある process が別の process 内に書き込むには、少なくとも同じ integrity level が必要です**。つまり、low integrity level の process は、medium integrity level の process に対して full access の handle を open できません。
 
-このセクションと前のセクションで述べた制限により、セキュリティの観点からは、常に**可能な限り低い整合性レベルでプロセスを実行することが推奨されます**。
+このセクションと前のセクションで説明した制限により、security の観点では、常に **可能な限り低い integrity level で process を実行することが推奨されます**。
 
 {{#include ../../banners/hacktricks-training.md}}

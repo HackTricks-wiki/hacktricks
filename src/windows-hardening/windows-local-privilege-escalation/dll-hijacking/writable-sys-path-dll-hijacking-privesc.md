@@ -2,26 +2,26 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Introduction
+## はじめに
 
-もし **System Path フォルダに書き込みできる** ことが分かった場合（※ **User Path フォルダ** に書き込めるだけではこれは機能しません）、システム内で **権限昇格** できる可能性があります。
+**System Path フォルダーに write できる**ことが判明した場合（**User Path フォルダーに write できる**場合は機能しない点に注意してください）、システム上で**権限昇格**できる可能性があります。
 
-そのためには、**Dll Hijacking** を悪用します。これは、あなたより **より高い権限** で動作するサービスやプロセスが **読み込もうとしているライブラリを hijack** し、そのサービスが、おそらくシステム全体に存在しない Dll を読み込もうとするため、あなたが書き込める System Path からそれを読み込もうとする、というものです。
+これを行うには、**Dll Hijacking**を悪用します。これは、自分よりも**高い権限**で動作している service または process が**ロードしている library を hijack**する手法です。その service が、おそらくシステム全体のどこにも存在しない Dll をロードしているため、write 可能な System Path からロードしようとします。
 
-**Dll Hijackig** とは何かについての詳細は、こちらを確認してください:
+**Dll Hijack とは何か**についての詳細は、以下を確認してください:
 
 
 {{#ref}}
 ./
 {{#endref}}
 
-## Privesc with Dll Hijacking
+## Dll Hijacking による Privesc
 
-### Finding a missing Dll
+### 不足している Dll の発見
 
-最初に必要なのは、あなたより **高い権限** で動作していて、あなたが書き込める **System Path から Dll を読み込もうとしている** **プロセスを特定する** ことです。
+最初に必要なのは、自分よりも**高い権限**で動作し、write 可能な System Path から Dll を**ロードしようとしている process**を特定することです。
 
-この手法は、あなたの **User PATH** だけでなく、**Machine/System PATH** のエントリに依存することを忘れないでください。したがって、Procmon に時間をかける前に、**Machine PATH** のエントリを列挙し、どれが書き込み可能かを確認する価値があります:
+この手法は、**User PATH**だけでなく、**Machine/System PATH**エントリに依存することを覚えておいてください。そのため、Procmon に時間をかける前に、**Machine PATH**エントリを列挙し、どれが write 可能かを確認する価値があります:<sup>[[1]](#references)</sup>
 ```powershell
 $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine") -split ';' | Where-Object { $_ }
 $machinePath | ForEach-Object {
@@ -32,9 +32,9 @@ icacls $path 2>$null
 }
 }
 ```
-この場合の問題は、おそらくそれらのプロセスがすでに実行されていることです。どの Dlls が不足しているかを見つけるには、プロセスが読み込まれる前、できるだけ早く procmon を起動する必要があります。したがって、不足している .dlls を見つけるには、次を行います:
+このケースでの問題は、おそらくこれらのプロセスがすでに実行中であることです。サービスに必要な Dlls のうち、不足しているものを特定するには、procmon をできるだけ早く（プロセスがロードされる前に）起動する必要があります。不足している .dlls を特定するには、次の手順を実行します。
 
-- **作成** フォルダ `C:\privesc_hijacking` を作成し、`C:\privesc_hijacking` のパスを **System Path env variable** に追加します。これは **手動** でも **PS** でも行えます:
+- **`C:\privesc_hijacking`** フォルダーを作成し、パス **`C:\privesc_hijacking`** を **System Path env variable** に追加します。これは **手動** または **PS** で実行できます。
 ```bash
 # Set the folder path to create and check events for
 $folderPath = "C:\privesc_hijacking"
@@ -52,23 +52,23 @@ $newPath = "$envPath;$folderPath"
 }
 ```
 - **`procmon`** を起動し、**`Options`** --> **`Enable boot logging`** に移動して、プロンプトで **`OK`** を押します。
-- 次に、**再起動**します。コンピュータが再起動すると、**`procmon`** はできるだけ早くイベントの**記録**を開始します。
-- **Windows** が起動したら、もう一度 **`procmon`** を**実行**します。すると、しばらく実行されていたことが表示され、イベントをファイルに**保存したいか**と**尋ねられます**。**yes** を選び、イベントをファイルに**保存**します。
-- **ファイル**が生成されたら、開いている **`procmon`** ウィンドウを**閉じ**、イベントファイルを**開きます**。
-- 次の**フィルタ**を追加すると、書き込み可能な System Path フォルダからいくつかの **proccess** が読み込もうとしたすべての Dll を見つけられます:
+- 次に、**再起動**します。コンピューターが再起動されると、**`procmon`** がすぐにイベントの**記録**を開始します。
+- **Windows** が**起動したら `procmon` を再度実行**します。実行中だったことが通知され、イベントをファイルに**保存するかどうかを尋ねられます**。**yes** を選択し、**イベントをファイルに保存**します。
+- **ファイル**が**生成されたら**、開いている **`procmon`** ウィンドウを閉じ、**イベントファイルを開きます**。
+- 以下の**フィルター**を追加すると、書き込み可能な System Path フォルダーから、何らかの**プロセスがロードしようとした**すべての DLL を確認できます。
 
 <figure><img src="../../../images/image (945).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> **Boot logging** が必要なのは、そうでなければ観測できないほど早く起動するサービスだけです。対象の service/program を**オンデマンドでトリガー**できるなら（たとえば、COM interface を操作する、service を再起動する、scheduled task を再実行するなど）、通常は **`Path contains .dll`**、**`Result is NAME NOT FOUND`**、**`Path begins with <writable_machine_path>`** のようなフィルタを使った通常の Procmon capture を取るほうが速いです。
+> **Boot logging は、通常の方法では観察できないほど早く起動するサービス**に対してのみ必要です。**対象のサービスやプログラムをオンデマンドでトリガーできる場合**（たとえば、COM インターフェースとの対話、サービスの再起動、スケジュールされたタスクの再実行など）は、通常の Procmon キャプチャを、**`Path contains .dll`**、**`Result is NAME NOT FOUND`**、**`Path begins with <writable_machine_path>`** などのフィルターとともに使用する方が、一般的に高速です。
 
-### Missed Dlls
+### 見逃された DLL
 
-free の **virtual (vmware) Windows 11 machine** でこれを実行すると、次の結果になりました:
+無償の **仮想 VMware Windows 11 マシン**でこれを実行したところ、次の結果が得られました。
 
 <figure><img src="../../../images/image (607).png" alt=""><figcaption></figcaption></figure>
 
-この場合、.exe は役に立たないので無視してください。見つからなかった DLL は次のものでした:
+この場合、.exe は役に立たないため無視してください。見逃された DLL は次のとおりです。
 
 | Service                         | Dll                | CMD line                                                             |
 | ------------------------------- | ------------------ | -------------------------------------------------------------------- |
@@ -76,39 +76,40 @@ free の **virtual (vmware) Windows 11 machine** でこれを実行すると、�
 | Diagnostic Policy Service (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
 | ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
 
-これを見つけたあと、[**WptsExtensions.dll を privesc に悪用する方法**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll) も説明している興味深い blog post を見つけました。これが、これから**行うこと**です。
+これを発見した後、[**privesc のために WptsExtensions.dll を abuse する方法を説明した**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll)興味深いブログ記事を見つけました。これを**これから実行します**。<sup>[[3]](#references)</sup>
 
-### Other candidates worth triaging
+### トリアージする価値のあるその他の候補
 
-`WptsExtensions.dll` は良い例ですが、権限の高い services に現れる recurring な **phantom DLL** はそれだけではありません。最近の hunting rules や公開されている hijack catalog でも、次のような名前が追跡されています:
+`WptsExtensions.dll` は良い例ですが、特権サービスに現れる **phantom DLL** はこれだけではありません。最新のハンティングルールや公開されている hijack カタログでは、次のような名前も引き続き追跡されています。<sup>[[2]](#references)</sup>
 
 | Service / Scenario | Missing DLL | Notes |
 | --- | --- | --- |
-| Task Scheduler (`Schedule`) | `WptsExtensions.dll` | client systems での古典的な **SYSTEM** 候補。書き込み可能なディレクトリが **Machine PATH** にあり、service が起動時に DLL を探索する場合に有効です。 |
-| NetMan on Windows Server | `wlanhlp.dll` / `wlanapi.dll` | **server editions** では興味深いです。service が **SYSTEM** として実行され、一部の build では**通常ユーザーがオンデマンドでトリガーできる**ため、再起動必須のケースより有利です。 |
-| Connected Devices Platform Service (`CDPSvc`) | `cdpsgshims.dll` | 通常はまず **`NT AUTHORITY\LOCAL SERVICE`** になります。それでも token には **`SeImpersonatePrivilege`** があることが多いため、[RoguePotato / PrintSpoofer](../roguepotato-and-printspoofer.md) と組み合わせられます。 |
+| Task Scheduler (`Schedule`) | `WptsExtensions.dll` | クライアントシステムにおける典型的な **SYSTEM** 候補です。書き込み可能なディレクトリが **Machine PATH** に含まれており、サービスが起動時に DLL を検索する場合に有効です。 |
+| NetMan on Windows Server | `wlanhlp.dll` / `wlanapi.dll` | サービスが **SYSTEM** として実行され、一部の build では通常のユーザーが**オンデマンドでトリガーできる**ため、**server editions** では興味深い候補です。再起動のみに依存するケースよりも優れています。 |
+| Connected Devices Platform Service (`CDPSvc`) | `cdpsgshims.dll` | 通常、最初に **`NT AUTHORITY\LOCAL SERVICE`** が得られます。これは多くの場合、トークンが **`SeImpersonatePrivilege`** を持っているため、[RoguePotato / PrintSpoofer](../roguepotato-and-printspoofer.md) と chain するには十分です。 |
 
-これらの名前は**確実な成功**ではなく、**triage のヒント**として扱ってください。**SKU/build に依存**し、Microsoft は release 間で動作を変更することがあります。重要なのは、**Machine PATH をたどる権限の高い services の missing DLL** を探すことです。特に、その service を**再起動なしで再トリガーできる**場合は重要です。
+これらの名前は、成功を保証するものではなく、**トリアージのヒント**として扱ってください。これらは **SKU/build に依存**しており、Microsoft は release 間で動作を変更する可能性があります。重要なのは、**Machine PATH をたどる特権サービス内の missing DLL**、特に**再起動せずに再度トリガーできるサービス**を探すことです。
 
 ### Exploitation
 
-したがって、権限を**昇格**するために、library **WptsExtensions.dll** を hijack します。**path** と **name** が分かったので、あとは**悪意のある dll を生成**するだけです。
+したがって、**privileges を escalate**するために、ライブラリ **WptsExtensions.dll** を hijack します。**path** と**名前**が分かっているので、あとは**malicious dll を生成**するだけです。
 
-[**これらの例のいずれかを使ってみる**](#creating-and-compiling-dlls) ことができます。たとえば、rev shell を取得する、user を追加する、beacon を実行する、などが可能です...
+[**これらの例のいずれかを使用してみることができます**](#creating-and-compiling-dlls)。get a rev shell、ユーザーの追加、beacon の実行などの payload を実行できます。
 
 > [!WARNING]
-> すべての service が **`NT AUTHORITY\SYSTEM`** で実行されるわけではなく、**`NT AUTHORITY\LOCAL SERVICE`** で実行されるものもあります。こちらは**権限が低く**、user を新規作成して権限を悪用することは**できません**。\
-> ただし、その user には **`seImpersonate`** privilege があるため、[**potato suite を使って権限を昇格**](../roguepotato-and-printspoofer.md) できます。したがって、この場合は user を作成しようとするより rev shell のほうが適しています。
+> **すべてのサービスが** **`NT AUTHORITY\SYSTEM`** として実行されるわけではない点に注意してください。一部は **`NT AUTHORITY\LOCAL SERVICE`** として実行されます。これは**権限が少ない**ため、ユーザーを作成できず、その権限を abuse することもできません。\
+> ただし、このユーザーには **`seImpersonate`** privilege があるため、[ **potato suite で privileges を escalate できます**](../roguepotato-and-printspoofer.md)。したがって、この場合はユーザーの作成を試みるよりも、rev shell の方が適しています。
 
-執筆時点では **Task Scheduler** service は **Nt AUTHORITY\SYSTEM** で実行されています。
+執筆時点では、**Task Scheduler** サービスは **Nt AUTHORITY\SYSTEM** として実行されています。
 
-**悪意のある Dll** を生成したら（私の場合は x64 rev shell を使い、shell は返ってきましたが msfvenom 由来だったため defender に殺されました）、それを writable System Path に **WptsExtensions.dll** という名前で保存し、コンピュータを**再起動**します（または service を再起動するか、影響を受ける service/program を再実行するのに必要なことを行います）。
+**malicious Dll を生成**したら（_私の場合は x64 rev shell を使用して shell を取得しましたが、msfvenom 由来だったため defender に kill されました_）、書き込み可能な System Path に **WptsExtensions.dll** という名前で保存し、コンピューターを**再起動**します（またはサービスを再起動するか、対象のサービスやプログラムを再実行するために必要な操作を行います）。
 
-service が再起動されると、**dll が読み込まれて実行**されるはずです（**procmon** の手法を再利用して、**library が期待どおりに読み込まれたか**確認できます）。
+サービスが再起動されると、**dll がロードされて実行される**はずです（**ライブラリが期待どおりにロードされたか**を確認するために、**procmon** の手法を再利用できます）。
 
 ## References
 
-- [Windows DLL Hijacking (Hopefully) Clarified](https://itm4n.github.io/windows-dll-hijacking-clarified/)
-- [Suspicious DLL Loaded for Persistence or Privilege Escalation](https://www.elastic.co/guide/en/security/current/suspicious-dll-loaded-for-persistence-or-privilege-escalation.html)
+- [1] [Windows DLL Hijacking (Hopefully) Clarified](https://itm4n.github.io/windows-dll-hijacking-clarified/)
+- [2] [Suspicious DLL Loaded for Persistence or Privilege Escalation](https://www.elastic.co/guide/en/security/current/suspicious-dll-loaded-for-persistence-or-privilege-escalation.html)
+- [3] [DLL Hijacking – Windows Privilege Escalation](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll)
 
 {{#include ../../../banners/hacktricks-training.md}}

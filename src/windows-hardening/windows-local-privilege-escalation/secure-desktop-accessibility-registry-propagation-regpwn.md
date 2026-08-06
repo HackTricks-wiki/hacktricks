@@ -1,73 +1,73 @@
-# セキュアデスクトップ アクセシビリティ レジストリ伝播 LPE (RegPwn)
+# Secure Desktop Accessibility Registry Propagation LPE (RegPwn)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 概要
+## Overview
 
-Windows の Accessibility 機能はユーザー設定を HKCU 下に保持し、それをセッションごとの HKLM の場所へ伝播します。**Secure Desktop** の遷移（ロック画面や UAC プロンプト）の間、**SYSTEM** コンポーネントがこれらの値を再コピーします。もし **per-session HKLM キーがユーザーによって書き込み可能**であれば、それは特権書き込みのチョークポイントとなり、**レジストリ シンボリックリンク**でリダイレクトすることができ、結果として **任意の SYSTEM レジストリ書き込み** を得られます。
+Windows の Accessibility 機能は、ユーザー設定を HKCU 配下に保持し、セッションごとの HKLM ロケーションへ伝播させます。**Secure Desktop** への遷移（ロック画面または UAC プロンプト）の際、**SYSTEM** コンポーネントがこれらの値を再コピーします。**セッションごとの HKLM キーがユーザーによって書き込み可能**な場合、これは特権書き込みの集中点となり、**registry symbolic links** によってリダイレクトできます。その結果、**arbitrary SYSTEM registry write** が可能になります。<sup>[[1]](#references)</sup>
 
-RegPwn 技術はその伝播チェーンを悪用し、`osk.exe` が使用するファイルに対して **opportunistic lock (oplock)** を置くことで短いレース窓を安定化させます。
+RegPwn technique は、この伝播チェーンを悪用します。`osk.exe` が使用するファイルに対する **opportunistic lock (oplock)** によって、小さな race window を安定化させます。<sup>[[1]](#references)</sup>
 
 ## Registry Propagation Chain (Accessibility -> Secure Desktop)
 
-例の機能: **On-Screen Keyboard** (`osk`)。関連する場所は次のとおり：
+Example feature: **On-Screen Keyboard** (`osk`)。関連するロケーションは次のとおりです。
 
-- **System-wide feature list**:
+- **システム全体の feature list**:
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATs`
-- **Per-user configuration (user-writable)**:
+- **per-user configuration (user-writable)**:
 - `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
-- **Per-session HKLM config (created by `winlogon.exe`, user-writable)**:
+- **per-session HKLM config (created by `winlogon.exe`, user-writable)**:
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session<session id>\ATConfig\osk`
 - **Secure desktop/default user hive (SYSTEM context)**:
 - `HKU\.DEFAULT\Software\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
 
-Secure Desktop 遷移中の伝播（簡略化）:
+Secure Desktop への遷移中の propagation（簡略化）:
 
-1. **ユーザーコンテキストの `atbroker.exe`** が `HKCU\...\ATConfig\osk` を `HKLM\...\Session<session id>\ATConfig\osk` へコピーする。
-2. **SYSTEM コンテキストの `atbroker.exe`** が `HKLM\...\Session<session id>\ATConfig\osk` を `HKU\.DEFAULT\...\ATConfig\osk` へコピーする。
-3. **SYSTEM の `osk.exe`** が `HKU\.DEFAULT\...\ATConfig\osk` を `HKLM\...\Session<session id>\ATConfig\osk` へコピーする。
+1. **User `atbroker.exe`** が `HKCU\...\ATConfig\osk` を `HKLM\...\Session<session id>\ATConfig\osk` にコピーします。
+2. **SYSTEM `atbroker.exe`** が `HKLM\...\Session<session id>\ATConfig\osk` を `HKU\.DEFAULT\...\ATConfig\osk` にコピーします。
+3. **SYSTEM `osk.exe`** が `HKU\.DEFAULT\...\ATConfig\osk` を `HKLM\...\Session<session id>\ATConfig\osk` にコピーし戻します。
 
-もしセッションの HKLM サブツリーがユーザーによって書き込み可能であれば、ステップ 2／3 はユーザーが置き換え可能な場所を通じて SYSTEM による書き込みを提供します。
+セッションの HKLM subtree がユーザーによって書き込み可能な場合、step 2/3 により、ユーザーが置き換え可能なロケーションを介した SYSTEM write が実現します。<sup>[[1]](#references)</sup>
 
 ## Primitive: Arbitrary SYSTEM Registry Write via Registry Links
 
-ユーザーが書き込み可能な per-session キーを、攻撃者が選んだ宛先を指す **レジストリ シンボリックリンク** に置き換えます。SYSTEM がコピーを行うとき、リンクをたどって任意のターゲットキーに攻撃者制御の値を書き込みます。
+user-writable な per-session key を、攻撃者が選択した destination を指す **registry symbolic link** に置き換えます。SYSTEM copy が発生すると、その link に従い、攻撃者が制御する values が arbitrary target key に書き込まれます。
 
-重要な点:
+Key idea:
 
-- 被害者の書き込み先（ユーザー書き込み可能）:
+- Victim write target (user-writable):
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session<session id>\ATConfig\osk`
-- 攻撃者はそのキーを任意の他のキーを指す **レジストリリンク** に置き換える。
-- SYSTEM がコピーを行うと、SYSTEM 権限で攻撃者が選んだキーに書き込む。
+- Attacker replaces that key with a **registry link** to any other key.
+- SYSTEM performs the copy and writes into the attacker-chosen key with SYSTEM permissions.
 
-これにより **任意の SYSTEM レジストリ書き込み** プリミティブが得られます。
+これにより、**arbitrary SYSTEM registry write** primitive が得られます。<sup>[[1]](#references)</sup>
 
 ## Winning the Race Window with Oplocks
 
-`SYSTEM` の `osk.exe` が起動して per-session キーに書き込むまでの間に短いタイミング窓があります。信頼性を上げるために、エクスプロイトは次のファイルに対して **oplock** を置きます：
+**SYSTEM `osk.exe`** の起動から per-session key への書き込みまでの間には、短い timing window があります。これを reliable にするため、exploit は次の対象に **oplock** を設定します:
 ```
 C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml
 ```
-When the oplock triggers, the attacker swaps the per-session HKLM key for a registry link, lets the SYSTEM write land, then removes the link.
+oplock がトリガーされると、攻撃者はセッションごとの HKLM キーを registry link に置き換え、SYSTEM による書き込みを実行させた後、link を削除します。<sup>[[1]](#references)</sup>
 
-## 例：エクスプロイトフロー（高レベル）
+## Exploitation Flow の例（概要）
 
-1. アクセストークンから現在の **session ID** を取得します。
-2. 非表示の `osk.exe` インスタンスを起動し、短時間待機します（oplock がトリガーされることを確実にするため）。
-3. 攻撃者が制御する値を次に書き込みます:
+1. access token から現在の **session ID** を取得します。
+2. 非表示の `osk.exe` インスタンスを起動し、短時間 sleep します（oplock が確実にトリガーされるようにします）。
+3. 攻撃者が制御する値を次に書き込みます。
 - `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
 4. `C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml` に **oplock** を設定します。
-5. **Secure Desktop**（`LockWorkstation()`）をトリガーし、SYSTEM の `atbroker.exe` / `osk.exe` が起動するようにします。
-6. oplock がトリガーされたら、`HKLM\...\Session<session id>\ATConfig\osk` を任意のターゲットへの **registry link** に置き換えます。
-7. SYSTEM によるコピーが完了するまで短時間待ち、リンクを削除します。
+5. **Secure Desktop** (`LockWorkstation()`) をトリガーし、SYSTEM の `atbroker.exe` / `osk.exe` を起動させます。
+6. oplock のトリガー時に、`HKLM\...\Session<session id>\ATConfig\osk` を任意の target への **registry link** に置き換えます。
+7. SYSTEM による copy が完了するまで短時間待機し、その後 link を削除します。<sup>[[1]](#references)</sup>
 
-## プリミティブを SYSTEM 実行に変換する
+## Primitive を SYSTEM Execution に変換する
 
-一つの単純なチェーンは、**service configuration** 値（例: `ImagePath`）を上書きしてからサービスを開始することです。RegPwn PoC は **`msiserver`** の `ImagePath` を上書きし、**MSI COM object** をインスタンス化することでこれをトリガーし、**SYSTEM** のコード実行を達成します。
+単純な chain の 1 つは、**service configuration** の値（例: `ImagePath`）を上書きしてから service を起動する方法です。RegPwn PoC は **`msiserver`** の `ImagePath` を上書きし、**MSI COM object** を instantiating してトリガーすることで、**SYSTEM** code execution を実現します。<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Related
 
-For other Secure Desktop / UIAccess behaviors, see:
+その他の Secure Desktop / UIAccess の挙動については、次を参照してください。
 
 {{#ref}}
 uiaccess-admin-protection-bypass.md
@@ -75,7 +75,7 @@ uiaccess-admin-protection-bypass.md
 
 ## References
 
-- [RIP RegPwn](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
-- [RegPwn PoC](https://github.com/mdsecactivebreach/RegPwn)
+- [1] [RIP RegPwn](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
+- [2] [RegPwn PoC](https://github.com/mdsecactivebreach/RegPwn)
 
 {{#include ../../banners/hacktricks-training.md}}

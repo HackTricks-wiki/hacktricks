@@ -1,12 +1,12 @@
-# Access Tokens
+# アクセストークン
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Access Tokens
+## アクセストークン
 
-システムにログオンしている各**user**は、そのログオンセッション用の**security information**を持つ access token を保持しています。ユーザーがログオンすると、システムは access token を作成します。ユーザーの代わりに実行される**every process**は、access token のコピーを持ちます。この token は、ユーザー、ユーザーの groups、そしてユーザーの privileges を識別します。token には、現在のログオンセッションを識別する logon SID (Security Identifier) も含まれます。
+システムに**ログオンしている各ユーザーは、そのログオンセッションのセキュリティ情報を含むアクセストークンを保持します**。ユーザーがログオンすると、システムはアクセストークンを作成します。ユーザーに代わって**実行されるすべてのプロセス**は、**アクセストークンのコピーを保持します**。トークンは、ユーザー、ユーザーのグループ、およびユーザーの権限を識別します。トークンには、現在のログオンセッションを識別するログオン SID（Security Identifier）も含まれます。
 
-この情報は `whoami /all` を実行すると確認できます
+`whoami /all`を実行すると、この情報を確認できます。
 ```
 whoami /all
 
@@ -50,88 +50,87 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
+または、Sysinternals の _Process Explorer_ を使用します（プロセスを選択し、「Security」タブにアクセスします）：
 
-![Access Tokens - Access Tokens: or using Process Explorer from Sysinternals (select process and access"Security" tab)](<../../images/image (772).png>)
+![Access Tokens - Access Tokens: または、Sysinternals の Process Explorer を使用します（プロセスを選択し、「Security」タブにアクセスします）](<../../images/image (772).png>)
 
-### ローカル管理者
+### ローカル administrator
 
-ローカル管理者がログインすると、**2つの access token が作成されます**: 1つは admin 権限付きで、もう1つは通常権限です。**デフォルトでは**、このユーザーが process を実行すると、**通常**（非管理者）**権限**のものが使われます。このユーザーが何かを**管理者として実行**しようとすると（例えば "Run as Administrator"）、**UAC** が許可を求めるために使われます。\
-[**UAC についてもっと学びたい場合は、このページを読んでください**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
+ローカル administrator がログインすると、**2つの access token が作成されます**：1つは administrator 権限付きで、もう1つは通常権限付きです。**デフォルトでは**、このユーザーがプロセスを実行すると、**通常の**（administrator ではない）**権限**を持つ token が使用されます。このユーザーが何かを **administrator として実行**しようとすると（たとえば「Run as Administrator」）、**UAC** が使用され、許可を求められます。\
+[**UAC の詳細については、このページを参照してください**](../authentication-credentials-uac-and-efs/index.html#uac)**。**
 
-実際には、これは**非昇格の admin shell は通常 filtered token で動作する**ことを意味します。だからこそ、`whoami /groups` では、process が昇格されるまで **`BUILTIN\Administrators` が `Deny only`** と表示されることがよくあります。内部的には、Windows は **linked elevated token** (`TokenLinkedToken`) を保持し、`TokenElevationType` のようなフィールドで状態を追跡します。
+実際には、これは **elevate されていない admin shell は通常、filtered token で実行される**ことを意味します。そのため、プロセスが elevate されるまで、`whoami /groups` では **`BUILTIN\Administrators` が `Deny only` と表示される**ことがよくあります。内部的には、Windows は **linked elevated token**（`TokenLinkedToken`）を保持し、`TokenElevationType` などのフィールドで状態を追跡します。
 
 ### Credentials user impersonation
 
-**他のユーザーの有効な credentials** があれば、それらの credentials を使って **新しい logon session** を **作成** できます:
+**他の任意のユーザーの有効な credentials を持っている場合**、その credentials を使用して **新しい logon session を作成**できます：
 ```
 runas /user:domain\username cmd.exe
 ```
-**access token** は **LSASS** 内のログオンセッションへの **reference** も持っており、これはプロセスがネットワーク上のいくつかのオブジェクトにアクセスする必要がある場合に役立ちます。\
-**ネットワークサービスにアクセスするために異なる credentials を使用する** プロセスは、次のように起動できます:
+**access token**には、**LSASS**内のログオンセッションへの**reference**も含まれています。これは、processがネットワーク上の一部のobjectにアクセスする必要がある場合に便利です。\
+次の方法で、**network servicesへのアクセスに異なるcredentialsを使用する**processを起動できます：
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-これは、ネットワーク内のオブジェクトにアクセスするための有用な credentials を持っているが、その credentials は current host 内では有効ではなく、ネットワーク内でのみ使われる場合に便利です（current host では現在のユーザー権限が使われます）。
+これは、ネットワーク上のオブジェクトにアクセスするための有効な credentials を持っているものの、それらの credentials が現在のホスト内では有効ではなく、ネットワーク内でのみ使用される場合に便利です（現在のホストでは、現在のユーザー権限が使用されます）。
 
-#### `runas /netonly` details
+#### `runas /netonly` の詳細
 
-`runas /netonly`（および `make_token` のような C2 helpers）は **`LOGON32_LOGON_NEW_CREDENTIALS`** token を作成します。これは lateral movement を理解するうえで非常に重要です。なぜなら:
+`runas /netonly`（および `make_token` などの C2 helpers）は、**`LOGON32_LOGON_NEW_CREDENTIALS`** token を作成します。これは lateral movement の際に理解しておくと非常に役立ちます。<sup>[[3]](#references)</sup>
 
-- **Local** では、新しい process は **同じ local identity**、groups、integrity level、そして current token のほとんどの access decision を保持します。
-- **Remote** では、outbound authentication に **指定した credentials** を SMB / WinRM / LDAP / HTTP / Kerberos / NTLM に対して使えます。
-- したがって `whoami` はまだ **元の local user** を表示する一方で、network access は **別の account** として行われることがあります。
+- **ローカルでは**、新しいプロセスは現在の token と**同じローカル identity**、groups、integrity level、およびほとんど同じ access decisions を保持します。
+- **リモートでは**、SMB / WinRM / LDAP / HTTP / Kerberos / NTLM への outbound authentication に、**指定した credentials**を使用できます。
+- したがって、`whoami` は**元のローカル user**を表示したままでも、ネットワークアクセスは**別の account**として実行される場合があります。
 
-これは、credentials が domain や別の host では有効だが、user が current machine に **local logon できない、またはすべきでない** 場合に最適な選択肢です。
+これは、credentials が domain または別の host では有効であるものの、現在のマシンに対してその user が**ローカルログオンできない、またはログオンすべきではない**場合に最適な方法です。
 
-### Types of tokens
+### Token の種類
 
-利用可能な token には2種類あります:
+利用可能な token には2種類あります。
 
-- **Primary Token**: process の security credentials を表現します。primary token の生成と process への関連付けは elevated privileges を必要とし、privilege separation の原則を強調します。通常、authentication service が token 生成を担当し、logon service がそれを user の operating system shell に関連付けます。process は生成時に親 process の primary token を継承する点に注意が必要です。
-- **Impersonation Token**: server application が client の identity を一時的に採用し、secure objects にアクセスできるようにします。この仕組みは4つの operation level に分かれています:
-- **Anonymous**: 未特定 user と同様の server access を与えます。
-- **Identification**: server が client の identity を確認できるが、object access には使いません。
-- **Impersonation**: server が client の identity の下で動作できます。
-- **Delegation**: Impersonation に似ていますが、server が接続先の remote systems に対してこの identity の引き継ぎを拡張でき、credentials の保持を保証します。
+- **Primary Token**: process の security credentials を表します。primary token の作成および process への関連付けには elevated privileges が必要であり、これは privilege separation の原則を強調しています。通常、authentication service が token の作成を担当し、logon service が user の operating system shell への関連付けを処理します。process は作成時に親 process の primary token を継承する点にも注意してください。
+- **Impersonation Token**: server application が secure objects にアクセスするため、一時的に client の identity を採用できるようにします。この仕組みには、次の4つの operation level があります。
+- **Anonymous**: 識別されていない user と同等の server access を許可します。
+- **Identification**: object access に client の identity を使用せず、server が client の identity を確認できるようにします。
+- **Impersonation**: server が client の identity の下で動作できるようにします。
+- **Delegation**: Impersonation に似ていますが、server が通信する remote systems に対してもこの identity の使用を拡張でき、credentials を保持できます。
 
 #### Impersonate Tokens
 
-metasploit の _**incognito**_ module を使うと、十分な privileges があれば他の **tokens** を簡単に **list** して **impersonate** できます。これは **他の user であるかのように actions を実行する** のに役立ちます。この technique で **privileges を escalate** することもできます。
+metasploit の _**incognito**_ module を使用すると、十分な privileges がある場合、他の **tokens** を簡単に **list** および **impersonate** できます。これは、**別の user であるかのように actions を実行する**場合に便利です。この technique で**privileges を escalate**することもできます。
 
-運用中に忘れやすい実用的な注意点:
+操作中に忘れやすい実用的な注意点をいくつか示します。<sup>[[1]](#references)</sup>
 
-- **`CreateProcessWithTokenW`** は呼び出し元に **`SeImpersonatePrivilege`** を要求し、新しい process は **呼び出し元の session** で動作します。
-- **`CreateProcessAsUserW`** は、`CreateProcessWithTokenW` が `1314` で失敗した場合、または token が参照する **session** で起動する必要がある場合の通常の fallback です。
-- token が **`LogonUser(LOGON32_LOGON_NETWORK)`** 由来の場合、通常は **impersonation token** なので、process を起動する前に **`DuplicateTokenEx(..., TokenPrimary, ...)`** が必要です。
-- すべての impersonation token が同じように有用なわけではありません: **`SecurityIdentification`** では user を確認できますが、**その user として行動することはできません**。coercion primitive や pipe/RPC client が identification-level token しか返さない場合は、**`TokenImpersonationLevel`** を確認し、**`SecurityImpersonation`** 以上を返す primitive に切り替えてください。
+- **`CreateProcessWithTokenW`** には caller の **`SeImpersonatePrivilege`** が必要で、新しい process は**caller の session**で実行されます。
+- **`CreateProcessAsUserW`** は、`CreateProcessWithTokenW` が `1314` で失敗した場合、または token が参照する **session**で起動する必要がある場合に通常使用する fallback です。
+- token が **`LogonUser(LOGON32_LOGON_NETWORK)`** から取得された場合、通常は**impersonation token**なので、process の spawn を試みる前に **`DuplicateTokenEx(..., TokenPrimary, ...)`** が必要です。
+- すべての impersonation token が同じように有用なわけではありません。**`SecurityIdentification`** では user を inspect できますが、その user として **act**することはできません。coercion primitive または pipe/RPC client から identification-level token しか得られない場合は、**`TokenImpersonationLevel`**を確認し、**`SecurityImpersonation`**以上を返す primitive に切り替えてください。
 
-#### Token theft without touching LSASS
+#### LSASS に触れない Token theft
 
-すでに **service** または **SYSTEM** の context があり、かつ **privileged user がログオンしている** なら、その user の token を盗むか複製する方が、**LSASS** を dump するより静かなことがよくあります。実際の侵入では、これだけで次のことが可能な場合が多いです:
+すでに **service** または **SYSTEM** context を取得しており、**privileged user がログオン中**である場合、その user の token を盗む、または duplicate する方が、**LSASS**を dump するより目立ちにくいことがよくあります。実際の多くの intrusion では、これだけで次のことが可能です。<sup>[[2]](#references)</sup>
 
-- その user として local actions を実行する
+- その user としてローカル actions を実行する
 - その user として remote resources にアクセスする
-- reusable credentials を最初に抽出せずに AD operations を実行する
+- まず再利用可能な credentials を抽出せずに AD operations を実行する
 
-特権コンテキストからの **session/user token hijacking** の例は、[**WTS Impersonator**](../stealing-credentials/wts-impersonator.md) を確認してください。**`WTSQueryUserToken`** のような API は **非常に信頼された services** を想定しており、通常は **`LocalSystem` + `SeTcbPrivilege`** が必要です。そのため、主にすでに service-level context を制御している場合に有用です。まず **SYSTEM** を得る特権別の方法については、以下のページを確認してください。
+privileged context からの **session/user token hijacking** の例については、[**WTS Impersonator**](../stealing-credentials/wts-impersonator.md) を確認してください。**`WTSQueryUserToken`** などの API は**高度に信頼された services**向けであり、通常は **`LocalSystem` + `SeTcbPrivilege`** が必要です。そのため、主にすでに service-level context を control している場合に役立ちます。まず **SYSTEM** を取得する privilege-specific な方法については、以下の pages を確認してください。
 
 ### Token Privileges
 
-**privileges を escalate するために悪用できる token privileges** を学びましょう:
+**privileges を escalate するために abuse できる token privileges**について学びましょう。
 
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-[**all the possible token privileges and some definitions on this external page**](https://github.com/gtworek/Priv2Admin) も確認してください。
+[**考えられるすべての token privileges とその定義を掲載した外部 page**](https://github.com/gtworek/Priv2Admin) も確認してください。
 
 ## References
 
-- [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa)
-- [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
-- [https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
-- [https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/](https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/)
+- [1] [Access Tokens の理解と Abuse — Part II](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [2] [LSASS に触れずに Windows の tokens を Abuse して Active Directory を compromise する](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [3] [Cobalt Strike の "make_token" Command の謎を解明する](https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/)
 
 {{#include ../../banners/hacktricks-training.md}}

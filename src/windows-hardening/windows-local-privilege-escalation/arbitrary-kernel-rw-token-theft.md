@@ -1,38 +1,38 @@
-# Windows kernel EoP: Token stealing with arbitrary kernel R/W
+# Windows kernel EoP: arbitrary kernel R/W による Token stealing
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## 概要
 
-If a vulnerable driver exposes an IOCTL that gives an attacker arbitrary kernel read and/or write primitives, elevating to NT AUTHORITY\SYSTEM can often be achieved by stealing a SYSTEM access token. The technique copies the Token pointer from a SYSTEM process’ EPROCESS into the current process’ EPROCESS.
+脆弱な driver が attacker に arbitrary kernel read and/or write primitives を提供する IOCTL を公開している場合、SYSTEM access token を盗むことで NT AUTHORITY\SYSTEM への privilege escalation を実現できることがあります。この technique では、SYSTEM process の EPROCESS から Token pointer を current process の EPROCESS へコピーします。<sup>[[2]](#references)</sup>
 
-なぜ動作するか:
-- 各プロセスは EPROCESS 構造体を持ち、その中に（他のフィールドとともに）Token（実際にはトークンオブジェクトへの EX_FAST_REF）を含みます。
-- SYSTEM プロセス（PID 4）は、すべての権限が有効なトークンを保持しています。
-- 現在のプロセスの EPROCESS.Token を SYSTEM のトークンポインタで置き換えると、当該プロセスは即座に SYSTEM として実行されます。
+これが機能する理由:
+- 各 process には EPROCESS structure があり、その中には（その他の field とともに）Token（実際には token object への EX_FAST_REF）が含まれています。
+- SYSTEM process（PID 4）は、すべての privilege が有効になった token を保持しています。
+- 現在の process の EPROCESS.Token を SYSTEM token pointer に置き換えると、現在の process は直ちに SYSTEM として実行されます。<sup>[[1]](#references)</sup>
 
-> EPROCESS 内のオフセットは Windows のバージョンによって異なります。動的に決定する（symbols）か、バージョン固有の定数を使用してください。また、EPROCESS.Token は EX_FAST_REF であり、下位3ビットは参照カウントのフラグであることを忘れないでください。
+> EPROCESS 内の offset は Windows version によって異なります。動的に（symbols を使用して）特定するか、version 固有の定数を使用してください。また、EPROCESS.Token は EX_FAST_REF であることにも注意してください（下位 3 bit は reference count flag です）。
 
-## 高レベルの手順
+## 概要レベルの手順
 
-1) Locate ntoskrnl.exe base and resolve the address of PsInitialSystemProcess.
-- From user mode, use NtQuerySystemInformation(SystemModuleInformation) or EnumDeviceDrivers to get loaded driver bases.
-- Add the offset of PsInitialSystemProcess (from symbols/reversing) to the kernel base to get its address.
-2) Read the pointer at PsInitialSystemProcess → this is a kernel pointer to SYSTEM’s EPROCESS.
-3) From SYSTEM EPROCESS, read UniqueProcessId and ActiveProcessLinks offsets to traverse the doubly linked list of EPROCESS structures (ActiveProcessLinks.Flink/Blink) until you find the EPROCESS whose UniqueProcessId equals GetCurrentProcessId(). Keep both:
-- EPROCESS_SYSTEM (for SYSTEM)
-- EPROCESS_SELF (for the current process)
-4) Read SYSTEM token value: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
-- Mask out the low 3 bits: Token_SYS_masked = Token_SYS & ~0xF (commonly ~0xF or ~0x7 depending on build; on x64 the low 3 bits are used — 0xFFFFFFFFFFFFFFF8 mask).
-5) Option A (common): Preserve the low 3 bits from your current token and splice them onto SYSTEM’s pointer to keep the embedded ref count consistent.
+1) ntoskrnl.exe の base を特定し、PsInitialSystemProcess の address を解決します。
+- user mode から、NtQuerySystemInformation(SystemModuleInformation) または EnumDeviceDrivers を使用して、loaded driver の base を取得します。
+- PsInitialSystemProcess の offset（symbols/reversing から取得）を kernel base に加算し、その address を取得します。
+2) PsInitialSystemProcess の pointer を読み取ります → これは SYSTEM の EPROCESS への kernel pointer です。
+3) SYSTEM EPROCESS から UniqueProcessId と ActiveProcessLinks の offset を読み取り、EPROCESS structure の doubly linked list（ActiveProcessLinks.Flink/Blink）を辿り、UniqueProcessId が GetCurrentProcessId() と等しい EPROCESS を見つけます。以下の両方を保持します:
+- EPROCESS_SYSTEM（SYSTEM 用）
+- EPROCESS_SELF（current process 用）
+4) SYSTEM token の value を読み取ります: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset)。
+- 下位 3 bit を mask します: Token_SYS_masked = Token_SYS & ~0xF（build によっては一般的に ~0xF または ~0x7。x64 では下位 3 bit が使用されます — 0xFFFFFFFFFFFFFFF8 mask）。
+5) Option A（一般的）: 現在の token の下位 3 bit を保持し、それを SYSTEM の pointer に結合して、埋め込み ref count の整合性を維持します。
 - Token_ME = *(EPROCESS_SELF + TokenOffset)
 - Token_NEW = (Token_SYS_masked | (Token_ME & 0x7))
-6) Write Token_NEW back into (EPROCESS_SELF + TokenOffset) using your kernel write primitive.
-7) Your current process is now SYSTEM. Optionally spawn a new cmd.exe or powershell.exe to confirm.
+6) kernel write primitive を使用して、Token_NEW を (EPROCESS_SELF + TokenOffset) に書き戻します。
+7) 現在の process は SYSTEM になっています。必要に応じて新しい cmd.exe または powershell.exe を spawn して確認します。<sup>[[1]](#references)</sup>
 
-## 擬似コード
+## Pseudocode
 
-Below is a skeleton that only uses two IOCTLs from a vulnerable driver, one for 8-byte kernel read and one for 8-byte kernel write. Replace with your driver’s interface.
+以下は、vulnerable driver の 2 つの IOCTL（8-byte kernel read 用と 8-byte kernel write 用）のみを使用する skeleton です。使用する driver の interface に置き換えてください。<sup>[[1]](#references)</sup>
 ```c
 #include <Windows.h>
 #include <Psapi.h>
@@ -105,18 +105,19 @@ system("cmd.exe");
 return 0;
 }
 ```
-注意事項:
-- オフセット: WinDbg’s `dt nt!_EPROCESS` をターゲットの PDBs、または runtime symbol loader と一緒に使って正しいオフセットを取得してください。盲目的にハードコードしないでください。
-- マスク: x64 では token は `EX_FAST_REF` です；下位3ビットが参照カウントのビットになっています。token の元の下位ビットを保持することで即時の参照カウント不整合を避けられます。
-- 安定性: 現在のプロセスを昇格することを優先してください；短命なヘルパーを昇格させると、それが終了したときに SYSTEM を失う可能性があります。
+注意:
+- オフセット: 正しいオフセットを取得するには、対象の PDB とともに WinDbg の `dt nt!_EPROCESS` を使用するか、runtime symbol loader を使用してください。オフセットを盲目的にハードコードしないでください。
+- Mask: x64 では token は EX_FAST_REF です。下位 3 ビットは reference count bits です。token の元の下位ビットを保持すると、即時の refcount の不整合を回避できます。
+- Stability: 現在のプロセスを elevate することを優先してください。短時間で終了する helper を elevate すると、そのプロセスの終了時に SYSTEM を失う可能性があります。<sup>[[1]](#references)</sup>
 
-## 検出と緩和
-- 強力な IOCTLs を公開する署名されていない、または信頼できないサードパーティ製ドライバの読み込みが根本原因です。
-- Kernel Driver Blocklist (HVCI/CI)、DeviceGuard、および Attack Surface Reduction ルールは脆弱なドライバの読み込みを防止できます。
-- EDR は arbitrary read/write を実装する疑わしい IOCTL シーケンスや token swaps を監視できます。
+## Detection & mitigation
+- 強力な IOCTL を公開する、unsigned または untrusted な third-party driver のロードが根本原因です。
+- Kernel Driver Blocklist (HVCI/CI)、DeviceGuard、Attack Surface Reduction rules により、vulnerable driver のロードを防止できます。
+- EDR は、arbitrary read/write を実装する suspicious な IOCTL sequences や token swaps を監視できます。
 
-## 参考
-- [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
-- [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
+## References
+
+- [1] [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
+- [2] [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
 
 {{#include ../../banners/hacktricks-training.md}}

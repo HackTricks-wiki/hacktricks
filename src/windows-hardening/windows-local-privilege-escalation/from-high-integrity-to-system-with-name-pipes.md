@@ -1,14 +1,16 @@
+# High Integrity から SYSTEM へ、Named Pipes を使用
+
 {{#include ../../banners/hacktricks-training.md}}
 
-**コードフロー:**
+**Code flow:**
 
-1. 新しいパイプを作成します
-2. 作成したパイプに接続し、何かを書き込むサービスを作成して開始します。サービスコードはこのエンコードされたPSコードを実行します: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. サービスはパイプ内のクライアントからデータを受信し、ImpersonateNamedPipeClientを呼び出し、サービスが終了するのを待ちます
-4. 最後に、サービスから取得したトークンを使用して新しい _cmd.exe_ を生成します
+1. 新しい Pipe を作成する
+2. 作成した pipe に接続して何かを書き込む service を作成して起動する。service code は次の encoded PS code を実行する：`$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
+3. service は pipe 内の client からデータを受信し、ImpersonateNamedPipeClient を呼び出して、service の終了を待機する
+4. 最後に、service から取得した token を使用して新しい _cmd.exe_ を起動する
 
 > [!WARNING]
-> 十分な権限がない場合、エクスプロイトがスタックし、決して戻らない可能性があります。
+> 十分な権限がない場合、exploit が停止して戻ってこなくなる可能性があります。
 ```c
 #include <windows.h>
 #include <time.h>
