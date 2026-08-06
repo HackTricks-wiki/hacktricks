@@ -2,9 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-​
-
-
 If you need a tool that automates memory analysis with different scan levels and runs multiple Volatility3 plugins in parallel, you can use autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
 
 ```bash
@@ -70,7 +67,7 @@ That makes “list” plugins pretty fast, but just as vulnerable as the Windows
 
 “scan” plugins, on the other hand, will take an approach similar to carving the memory for things that might make sense when dereferenced as specific structures. `psscan` for instance will read the memory and try to make`_EPROCESS` objects out of it (it uses pool-tag scanning, which is searching for 4-byte strings that indicate the presence of a structure of interest). The advantage is that it can dig up processes that have exited, and even if malware tampers with the `_EPROCESS` linked list, the plugin will still find the structure lying around in memory (since it still needs to exist for the process to run). The downfall is that “scan” plugins are a bit slower than “list” plugins, and can sometimes yield false positives (a process that exited too long ago and had parts of its structure overwritten by other operations).
 
-From: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)<sup>[[7]](#references)</sup>
+From: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)<sup>[[6]](#references)</sup>
 
 ## OS Profiles
 
@@ -434,7 +431,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-**Windows** keeps track of programs you run using a feature in the registry called **UserAssist keys**. These keys record how many times each program is executed and when it was last run.<sup>[[4]](#references)</sup>
+**Windows** keeps track of programs you run using a feature in the registry called **UserAssist keys**. These keys record how many times each program is executed and when it was last run.<sup>[[3]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -453,9 +450,6 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp userassist
 
 {{#endtab}}
 {{#endtabs}}
-
-​
-
 
 ## Services
 
@@ -638,7 +632,7 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-The **NTFS file system** uses a critical component known as the _master file table_ (MFT). This table includes at least one entry for every file on a volume, covering the MFT itself too. Vital details about each file, such as **size, timestamps, permissions, and actual data**, are encapsulated within the MFT entries or in areas external to the MFT but referenced by these entries. More details can be found in the [official documentation](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).<sup>[[5]](#references)</sup>
+The **NTFS file system** uses a critical component known as the _master file table_ (MFT). This table includes at least one entry for every file on a volume, covering the MFT itself too. Vital details about each file, such as **size, timestamps, permissions, and actual data**, are encapsulated within the MFT entries or in areas external to the MFT but referenced by these entries. More details can be found in the [official documentation](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).<sup>[[4]](#references)</sup>
 
 ### SSL Keys/Certs
 
@@ -906,19 +900,15 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
 
-The **Master Boot Record (MBR)** plays a crucial role in managing the logical partitions of a storage medium, which are structured with different [file systems](https://en.wikipedia.org/wiki/File_system). It not only holds partition layout information but also contains executable code acting as a boot loader. This boot loader either directly initiates the OS's second-stage loading process (see [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage_boot_loader)) or works in harmony with the [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) of each partition. For in-depth knowledge, refer to the [MBR Wikipedia page](https://en.wikipedia.org/wiki/Master_boot_record).
+The **Master Boot Record (MBR)** plays a crucial role in managing the logical partitions of a storage medium, which are structured with different [file systems](https://en.wikipedia.org/wiki/File_system). It not only holds partition layout information but also contains executable code acting as a boot loader. This boot loader either directly initiates the OS's second-stage loading process (see [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage_boot_loader)) or works in harmony with the [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) of each partition. For in-depth knowledge, refer to the [MBR Wikipedia page](https://en.wikipedia.org/wiki/Master_boot_record).<sup>[[5]](#references)</sup>
 
 ## References
 
 - [1] [Volatility, my own cheatsheet (Part 1): Image Identification](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
 - [2] [Finding the Kernel Debugger Block](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
-- [3] [https://or10nlabs.tech/cgi-sys/suspendedpage.cgi](https://or10nlabs.tech/cgi-sys/suspendedpage.cgi)
-- [4] [Windows UserAssist Keys](https://www.aldeid.com/wiki/Windows-userassist-keys)
-- [5] [Master File Table (Local File Systems) - Win32 apps](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
-- [6] [UEFI-based PC, protective MBR: what is it? - Microsoft Community](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
-- [7] [Tutorial: Volatility plugins for malware analysis](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
+- [3] [Windows UserAssist Keys](https://www.aldeid.com/wiki/Windows-userassist-keys)
+- [4] [Master File Table (Local File Systems) - Win32 apps](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
+- [5] [UEFI-based PC, protective MBR: what is it? - Microsoft Community](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
+- [6] [Tutorial: Volatility plugins for malware analysis](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

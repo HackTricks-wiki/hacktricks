@@ -4,9 +4,9 @@
 
 The creation of the MSI installer will be done using wixtools, specifically [wixtools](http://wixtoolset.org) will be utilized. It is worth mentioning that alternative MSI builders were attempted, but they were not successful in this particular case.<sup>[[1]](#references)</sup>
 
-For a comprehensive understanding of wix MSI usage examples, it is advisable to consult [this page](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)<sup>[[2]](#references)</sup>. Here, you can find various examples that demonstrate the usage of wix MSI.
+For a comprehensive understanding of wix MSI usage examples, it is advisable to consult [this page](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Here, you can find various examples that demonstrate the usage of wix MSI.<sup>[[2]](#references)</sup>
 
-The aim is to generate an MSI that will execute the lnk file. In order to achieve this, the following XML code could be employed ([xml from here](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root))<sup>[[1]](#references)</sup>:
+The aim is to generate an MSI that will execute the lnk file. In order to achieve this, the following XML code could be employed ([xml from here](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):<sup>[[1]](#references)</sup>
 
 ```html
 <?xml version="1.0"?>

@@ -10,7 +10,6 @@ So if a domain admin logins inside a Computer with "Unconstrained Delegation" fe
 
 You can **find Computer objects with this attribute** checking if the [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) attribute contains [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). You can do this with an LDAP filter of ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, which is what powerview does:
 
-
 ```bash
 # List unconstrained computers
 ## Powerview

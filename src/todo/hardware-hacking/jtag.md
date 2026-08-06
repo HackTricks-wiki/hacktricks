@@ -57,7 +57,7 @@ openocd -f board/esp32s3-builtin.cfg -c "init; scan_chain; shutdown"
 ```
 Notes
 - If you get "all ones/zeros" IDCODE, check wiring, power, Vtref, and that the port isn’t locked by fuses/option bytes.
-- See OpenOCD low‑level `irscan`/`drscan` for manual TAP interaction when bringing up unknown chains.
+- See OpenOCD low‑level `irscan`/`drscan` for manual TAP interaction when bringing up unknown chains.<sup>[[1]](#references)</sup>
 
 ## Halting the CPU and dumping memory/flash
 

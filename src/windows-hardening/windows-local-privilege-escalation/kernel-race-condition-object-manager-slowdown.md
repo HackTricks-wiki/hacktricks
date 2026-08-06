@@ -122,7 +122,7 @@ The results feed directly into your race orchestration strategy (e.g., number of
 - **One-shot bugs** – The expanded window (tens of microseconds to minutes) makes “single trigger” bugs realistic when paired with CPU affinity pinning or hypervisor-assisted preemption.
 - **Side effects** – The slowdown only affects the malicious path, so overall system performance remains unaffected; defenders will rarely notice unless they monitor namespace growth.
 - **Cleanup** – Keep handles to every directory/object you create so you can call `NtMakeTemporaryObject`/`NtClose` afterwards. Unbounded directory chains may persist across reboots otherwise.
-- **File-system races** – If the vulnerable path ultimately resolves through NTFS, you can stack an Oplock (e.g., `SetOpLock.exe` from the same toolkit) on the backing file while the OM slowdown runs, freezing the consumer for additional milliseconds without altering the OM graph.
+- **File-system races** – If the vulnerable path ultimately resolves through NTFS, you can stack an Oplock (e.g., `SetOpLock.exe` from the same toolkit) on the backing file while the OM slowdown runs, freezing the consumer for additional milliseconds without altering the OM graph.<sup>[[2]](#references)</sup>
 
 ## Defensive notes
 

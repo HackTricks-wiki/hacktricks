@@ -24,9 +24,9 @@ Adding new users is permitted, as well as local login to the DC.<sup>[[1]](#refe
 
 The **AdminSDHolder** group's Access Control List (ACL) is crucial as it sets permissions for all "protected groups" within Active Directory, including high-privilege groups. This mechanism ensures the security of these groups by preventing unauthorized modifications.
 
-An attacker could exploit this by modifying the **AdminSDHolder** group's ACL, granting full permissions to a standard user. This would effectively give that user full control over all protected groups. If this user's permissions are altered or removed, they would be automatically reinstated within an hour due to the system's design.<sup>[[17]](#references)</sup>
+An attacker could exploit this by modifying the **AdminSDHolder** group's ACL, granting full permissions to a standard user. This would effectively give that user full control over all protected groups. If this user's permissions are altered or removed, they would be automatically reinstated within an hour due to the system's design.<sup>[[14]](#references)</sup>
 
-Recent Windows Server documentation still treats several built-in operator groups as **protected** objects (`Account Operators`, `Backup Operators`, `Print Operators`, `Server Operators`, `Domain Admins`, `Enterprise Admins`, `Key Admins`, `Enterprise Key Admins`, etc.). The **SDProp** process runs on the **PDC Emulator** every 60 minutes by default, stamps `adminCount=1`, and disables inheritance on protected objects. This is useful both for persistence and for hunting stale privileged users that were removed from a protected group but still keep the non-inheriting ACL.<sup>[[15]](#references)</sup>
+Recent Windows Server documentation still treats several built-in operator groups as **protected** objects (`Account Operators`, `Backup Operators`, `Print Operators`, `Server Operators`, `Domain Admins`, `Enterprise Admins`, `Key Admins`, `Enterprise Key Admins`, etc.). The **SDProp** process runs on the **PDC Emulator** every 60 minutes by default, stamps `adminCount=1`, and disables inheritance on protected objects. This is useful both for persistence and for hunting stale privileged users that were removed from a protected group but still keep the non-inheriting ACL.<sup>[[12]](#references)</sup>
 
 Commands to review the members and modify permissions include:
 
@@ -157,7 +157,7 @@ reg save HKLM\SAM SAM.SAV
 secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
 
-5. Post-extraction: Pass-the-Hash to DA<sup>[[14]](#references)</sup>
+5. Post-extraction: Pass-the-Hash to DA<sup>[[11]](#references)</sup>
 
 ```bash
 # Use the recovered Administrator NT hash to authenticate without the cleartext password
@@ -231,7 +231,7 @@ For more details on this attack vector, refer to ired.team.
 
 #### Mimilib.dll
 
-It's also feasible to use mimilib.dll for command execution, modifying it to execute specific commands or reverse shells. [Check this post](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) for more information.<sup>[[18]](#references)</sup>
+It's also feasible to use mimilib.dll for command execution, modifying it to execute specific commands or reverse shells. [Check this post](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) for more information.<sup>[[15]](#references)</sup>
 
 ### WPAD Record for MitM
 
@@ -293,14 +293,14 @@ The important nuance is that the **creator becomes owner of the new GPO** and us
 - edit a GPO you created that is already linked somewhere useful
 - abuse another delegated right that lets you link GPOs, while this group gives you the edit side
 
-Practical abuse normally means adding an **Immediate Task**, **startup script**, **local admin membership**, or **user rights assignment** change through SYSVOL-backed policy files.<sup>[[6]](#references)[[7]](#references)[[16]](#references)</sup>
+Practical abuse normally means adding an **Immediate Task**, **startup script**, **local admin membership**, or **user rights assignment** change through SYSVOL-backed policy files.<sup>[[3]](#references)[[4]](#references)[[13]](#references)</sup>
 
 ```bash
 # Example with SharpGPOAbuse: add an immediate task that executes as SYSTEM
 SharpGPOAbuse.exe --AddImmediateTask --TaskName "HT-Task" --Author TESTLAB\\Administrator --Command "cmd.exe" --Arguments "/c whoami > C:\\Windows\\Temp\\gpo.txt" --GPOName "Security Update"
 ```
 
-If editing the GPO manually through `SYSVOL`, remember the change is not enough by itself: `versionNumber`, `GPT.ini`, and sometimes `gPCMachineExtensionNames` must also be updated or clients will ignore the policy refresh.<sup>[[12]](#references)</sup>
+If editing the GPO manually through `SYSVOL`, remember the change is not enough by itself: `versionNumber`, `GPT.ini`, and sometimes `gPCMachineExtensionNames` must also be updated or clients will ignore the policy refresh.<sup>[[9]](#references)</sup>
 
 ## Organization Management
 
@@ -318,7 +318,7 @@ To list the members of this group, the following PowerShell command is used:
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
 
-On Domain Controllers this group is dangerous because the default Domain Controller Policy grants **`SeLoadDriverPrivilege`** to `Print Operators`. If you reach an elevated token for a member of this group, you can enable the privilege and load a signed-but-vulnerable driver to jump to kernel/SYSTEM.<sup>[[2]](#references)[[8]](#references)[[9]](#references)[[10]](#references)[[11]](#references)[[13]](#references)</sup> For token handling details, check [Access Tokens](../windows-local-privilege-escalation/access-tokens.md).
+On Domain Controllers this group is dangerous because the default Domain Controller Policy grants **`SeLoadDriverPrivilege`** to `Print Operators`. If you reach an elevated token for a member of this group, you can enable the privilege and load a signed-but-vulnerable driver to jump to kernel/SYSTEM.<sup>[[2]](#references)[[5]](#references)[[6]](#references)[[7]](#references)[[8]](#references)[[10]](#references)</sup> For token handling details, check [Access Tokens](../windows-local-privilege-escalation/access-tokens.md).
 
 #### Remote Desktop Users
 
@@ -364,21 +364,18 @@ If a service ACL gives this group change/start rights, point the service at an a
 
 - [1] [ired.team – Privileged Accounts and Token Privileges](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
 - [2] [Tarlogic – Abusing SeLoadDriverPrivilege for Privilege Escalation](https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/)
-- [3] [Microsoft – Appendix B: Privileged Accounts and Groups in Active Directory](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-b--privileged-accounts-and-groups-in-active-directory)
-- [4] [Microsoft – Enabling and Disabling Privileges in C++](https://docs.microsoft.com/en-us/windows/desktop/secauthz/enabling-and-disabling-privileges-in-c--)
-- [5] [AD Security (Sean Metcalf) – Scanning for Active Directory Privileges & Privileged Accounts](https://adsecurity.org/?p=3658)
-- [6] [harmj0y – Abusing GPO Permissions](http://www.harmj0y.net/blog/redteaming/abusing-gpo-permissions/)
-- [7] [rastamouse – GPO Abuse - Part 1](https://rastamouse.me/2019/01/gpo-abuse-part-1/)
-- [8] [killswitch-GUI – HotLoad-Driver (ntloaddriver.cpp)](https://github.com/killswitch-GUI/HotLoad-Driver/blob/master/NtLoadDriver/EXE/NtLoadDriver-C%2B%2B/ntloaddriver.cpp#L13)
-- [9] [tandasat – ExploitCapcom](https://github.com/tandasat/ExploitCapcom)
-- [10] [TarlogicSecurity – EoPLoadDriver (eoploaddriver.cpp)](https://github.com/TarlogicSecurity/EoPLoadDriver/blob/master/eoploaddriver.cpp)
-- [11] [FuzzySecurity – Capcom-Rootkit (Capcom.sys)](https://github.com/FuzzySecurity/Capcom-Rootkit/blob/master/Driver/Capcom.sys)
-- [12] [SpecterOps – A Red Teamer's Guide to GPOs and OUs](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
-- [13] [Undocumented NT Internals – NtLoadDriver Function](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
-- [14] [HTB: Baby — Anonymous LDAP → Password Spray → SeBackupPrivilege → Domain Admin](https://0xdf.gitlab.io/2025/09/19/htb-baby.html)
-- [15] [Microsoft Learn – Appendix C: Protected Accounts and Groups in Active Directory](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)
-- [16] [WithSecure Labs – SharpGPOAbuse](https://labs.withsecure.com/tools/sharpgpoabuse)
-- [17] [ired.team – How to Abuse and Backdoor AdminSDHolder to Obtain Domain Admin Persistence](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence)
-- [18] [Lab of a Penetration Tester – Abusing DnsAdmins Privilege for Escalation in Active Directory](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html)
+- [3] [harmj0y – Abusing GPO Permissions](http://www.harmj0y.net/blog/redteaming/abusing-gpo-permissions/)
+- [4] [rastamouse – GPO Abuse - Part 1](https://rastamouse.me/2019/01/gpo-abuse-part-1/)
+- [5] [killswitch-GUI – HotLoad-Driver (ntloaddriver.cpp)](https://github.com/killswitch-GUI/HotLoad-Driver/blob/master/NtLoadDriver/EXE/NtLoadDriver-C%2B%2B/ntloaddriver.cpp#L13)
+- [6] [tandasat – ExploitCapcom](https://github.com/tandasat/ExploitCapcom)
+- [7] [TarlogicSecurity – EoPLoadDriver (eoploaddriver.cpp)](https://github.com/TarlogicSecurity/EoPLoadDriver/blob/master/eoploaddriver.cpp)
+- [8] [FuzzySecurity – Capcom-Rootkit (Capcom.sys)](https://github.com/FuzzySecurity/Capcom-Rootkit/blob/master/Driver/Capcom.sys)
+- [9] [SpecterOps – A Red Teamer's Guide to GPOs and OUs](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
+- [10] [Undocumented NT Internals – NtLoadDriver Function](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
+- [11] [HTB: Baby — Anonymous LDAP → Password Spray → SeBackupPrivilege → Domain Admin](https://0xdf.gitlab.io/2025/09/19/htb-baby.html)
+- [12] [Microsoft Learn – Appendix C: Protected Accounts and Groups in Active Directory](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)
+- [13] [WithSecure Labs – SharpGPOAbuse](https://labs.withsecure.com/tools/sharpgpoabuse)
+- [14] [ired.team – How to Abuse and Backdoor AdminSDHolder to Obtain Domain Admin Persistence](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence)
+- [15] [Lab of a Penetration Tester – Abusing DnsAdmins Privilege for Escalation in Active Directory](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html)
 
 {{#include ../../banners/hacktricks-training.md}}

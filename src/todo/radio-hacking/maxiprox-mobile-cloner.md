@@ -59,8 +59,8 @@ The conversion covered here is based on TrustedSec’s “Let’s Clone a Cloner
 
 ## 5. Range & Shielding Tests
 
-* Using a 125 kHz **Pupa** test card the portable cloner achieved consistent reads at **≈ 8 cm** in free-air – identical to mains-powered operation.
-* Placing the reader inside a thin-walled metal cash box (to simulate a bank lobby desk) reduced range to ≤ 2 cm, confirming that substantial metal enclosures act as effective RF shields.
+* Using a 125 kHz **Pupa** test card the portable cloner achieved consistent reads at **≈ 8 cm** in free-air – identical to mains-powered operation.<sup>[[1]](#references)</sup>
+* Placing the reader inside a thin-walled metal cash box (to simulate a bank lobby desk) reduced range to ≤ 2 cm, confirming that substantial metal enclosures act as effective RF shields.<sup>[[1]](#references)</sup>
 
 ## Usage Workflow
 

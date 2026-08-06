@@ -114,7 +114,7 @@ The resulting hashes can be injected with **mimikatz** (`sekurlsa::pth`) or **Ru
 
 ## Tooling
 
-* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – reference implementation used in this page.
+* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – reference implementation used in this page.<sup>[[3]](#references)</sup>
 * [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) – reference implementation used in this page.
 * [`mimikatz`](https://github.com/gentilkiwi/mimikatz) – `lsadump::secrets`, `sekurlsa::pth`, `kerberos::ptt`.
 * [`Rubeus`](https://github.com/GhostPack/Rubeus) – pass-the-ticket using derived AES keys.
@@ -124,6 +124,5 @@ The resulting hashes can be injected with **mimikatz** (`sekurlsa::pth`) or **Ru
 - [1] [Golden dMSA – authentication bypass for delegated Managed Service Accounts](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
 - [2] [gMSA Active Directory Attacks Accounts](https://www.semperis.com/blog/golden-gmsa-attack/)
 - [3] [Semperis/GoldenDMSA GitHub repository](https://github.com/Semperis/GoldenDMSA)
-- [4] [Improsec – Golden gMSA trust attack](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
 
 {{#include ../../banners/hacktricks-training.md}}
