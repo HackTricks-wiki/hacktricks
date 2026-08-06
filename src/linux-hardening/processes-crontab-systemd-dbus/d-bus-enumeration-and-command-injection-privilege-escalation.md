@@ -282,7 +282,7 @@ dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
 dbus-monitor "type=method_call" "type=method_return" "type=error"
 ```
 
-See the [D-Bus documentation](http://dbus.freedesktop.org/doc/dbus-specification.html) for more information on match rule syntax.
+See the [D-Bus documentation](http://dbus.freedesktop.org/doc/dbus-specification.html) for more information on match rule syntax.<sup>[[7]](#references)</sup>
 
 ### More
 
@@ -596,5 +596,6 @@ Use `dbusmap --enable-probes` or manual `busctl call` to confirm whether a metho
 - [4] [D-Bus - Wikipedia](https://en.wikipedia.org/wiki/D-Bus)
 - [5] [taviso/dbusmap - "Nmap for D-Bus"](https://github.com/taviso/dbusmap)
 - [6] [initstring/uptux](https://github.com/initstring/uptux)
+- [7] [dbus.freedesktop.org - D-Bus documentation](http://dbus.freedesktop.org/doc/dbus-specification.html)
 
 {{#include ../../banners/hacktricks-training.md}}

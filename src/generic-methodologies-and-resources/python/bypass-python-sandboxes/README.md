@@ -75,7 +75,7 @@ class P(object):
 print(base64.b64encode(pickle.dumps(P(), protocol=0)))
 ```
 
-For more information about how pickle works check this: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)
+For more information about how pickle works check this: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)<sup>[[16]](#references)</sup>
 
 ### Pip package
 
@@ -1217,5 +1217,6 @@ will be bypassed
 - [13] [BuckeyeCTF 2024 Author Writeups](https://corgi.rip/posts/buckeye-writeups/)
 - [14] [GeeksforGeeks – Vulnerability in str.format() in Python](https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/)
 - [15] [ur4ndom – [GCTF 2022] Treebox](https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/)
+- [16] [checkoway.net - Musings - Pickle](https://checkoway.net/musings/pickle)
 
 {{#include ../../../banners/hacktricks-training.md}}
