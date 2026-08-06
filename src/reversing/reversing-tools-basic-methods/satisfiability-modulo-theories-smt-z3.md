@@ -66,7 +66,7 @@ for d in m.decls():
 
 # Machine Arithmetic
 
-Modern CPUs and main-stream programming languages use arithmetic over fixed-size bit-vectors. Machine arithmetic is available in Z3Py as Bit-Vectors.
+Modern CPUs and main-stream programming languages use arithmetic over fixed-size bit-vectors. Machine arithmetic is available in Z3Py as Bit-Vectors.<sup>[[1]](#references)</sup>
 
 ```python
 from z3 import *
@@ -85,7 +85,7 @@ print(simplify(a == b)) # This is False
 
 ## Signed/Unsigned Numbers
 
-Z3 provides special signed versions of arithmetical operations where it makes a difference whether the bit-vector is treated as signed or unsigned. In Z3Py, the operators `<`, `<=`, `>`, `>=`, `/`, `%` and `>>` correspond to the signed versions. The corresponding unsigned operators are `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` and `LShR`.
+Z3 provides special signed versions of arithmetical operations where it makes a difference whether the bit-vector is treated as signed or unsigned. In Z3Py, the operators `<`, `<=`, `>`, `>=`, `/`, `%` and `>>` correspond to the signed versions. The corresponding unsigned operators are `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` and `LShR`.<sup>[[1]](#references)</sup>
 
 ```python
 from z3 import *
@@ -107,7 +107,7 @@ solve(ULT(x, 0))
 
 ## Functions
 
-Interpreted functions such as arithmetic have a fixed standard interpretation. Uninterpreted functions and constants are maximally flexible; they allow any interpretation that is consistent with the constraints over the function or constant.
+Interpreted functions such as arithmetic have a fixed standard interpretation. Uninterpreted functions and constants are maximally flexible; they allow any interpretation that is consistent with the constraints over the function or constant.<sup>[[1]](#references)</sup>
 
 Example: `f` applied twice to `x` results in `x` again, but `f` applied once to `x` is different from `x`.
 
@@ -295,7 +295,8 @@ else:
 
 ## References
 
-* [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
-* [https://microsoft.github.io/z3guide/](https://microsoft.github.io/z3guide/)
-* [https://theory.stanford.edu/~nikolaj/programmingz3.html](https://theory.stanford.edu/~nikolaj/programmingz3.html)
+- [1] [Z3Py Guide - Examples (ericpony)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
+- [2] [Z3 Guide (Microsoft)](https://microsoft.github.io/z3guide/)
+- [3] [Programming Z3 (Stanford)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
+
 {{#include ../../banners/hacktricks-training.md}}
