@@ -76,9 +76,9 @@ Recent gaming keyboards, split keyboards, and composite HID devices often expose
 
 ## Automating the decoding
 
-- **ctf-usb-keyboard-parser** remains handy for quick CTF challenges and already ships in the repository.
-- **CTF-Usb_Keyboard_Parser** (`main.py`) parses both `pcap` and `pcapng` files natively, understands `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap`, and does not require tshark, so it works nicely inside isolated sandboxes.
-- **USB-HID-decoders** adds keyboard, mouse, and tablet visualizers. You can either run the `extract_hid_data.sh` helper (tshark backend) or `extract_hid_data.py` (scapy backend) and then feed the resulting text file to the decoder or replay modules to watch the keystrokes unfold.
+- **ctf-usb-keyboard-parser** remains handy for quick CTF challenges and already ships in the repository.<sup>[[3]](#references)</sup>
+- **CTF-Usb_Keyboard_Parser** (`main.py`) parses both `pcap` and `pcapng` files natively, understands `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap`, and does not require tshark, so it works nicely inside isolated sandboxes.<sup>[[4]](#references)</sup>
+- **USB-HID-decoders** adds keyboard, mouse, and tablet visualizers. You can either run the `extract_hid_data.sh` helper (tshark backend) or `extract_hid_data.py` (scapy backend) and then feed the resulting text file to the decoder or replay modules to watch the keystrokes unfold.<sup>[[5]](#references)</sup>
 
 ### Stateful decoding matters
 
@@ -134,5 +134,8 @@ Feed it with the plain hex lines dumped earlier to get an instant rough reconstr
 
 - [1] [Wireshark USB capture setup](https://wiki.wireshark.org/CaptureSetup/USB)
 - [2] [ACSC Quals 2023 - pcap 1, 2 write-up](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
+- [3] [ctf-usb-keyboard-parser](https://github.com/TeamRocketIst/ctf-usb-keyboard-parser)
+- [4] [CTF-Usb_Keyboard_Parser](https://github.com/5h4rrk/CTF-Usb_Keyboard_Parser)
+- [5] [USB-HID-decoders](https://github.com/Nissen96/USB-HID-decoders)
 
 {{#include ../../../banners/hacktricks-training.md}}

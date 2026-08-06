@@ -81,7 +81,7 @@ aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web
 
 1. Mount the **whole disk** when you want the original partition table (MBR/GPT).
 2. Mount a **single partition file** when you only need one volume.
-3. Always mount **read-only** (`-o ro,norecovery`) and work on **copies**.
+3. Always mount **read-only** (`-o ro,norecovery`) and work on **copies**.<sup>[[2]](#references)</sup>
 
 ### Raw images (dd, AFF4-extracted)
 

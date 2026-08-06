@@ -47,7 +47,7 @@ The ".dbx" extension means that the **databases** are **encrypted**. Dropbox use
 
 To understand better the encryption that Dropbox uses you can read [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html).<sup>[[1]](#references)[[2]](#references)</sup>
 
-However, the main information is:
+However, the main information is:<sup>[[1]](#references)</sup>
 
 - **Entropy**: d114a55212655f74bd772e37e64aee9b
 - **Salt**: 0D638C092E8B82FC452883F95F355B8E
@@ -102,6 +102,3 @@ Other tables inside this database contain more interesting information:
 - [2] [Brush up on Dropbox DBX decryption](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

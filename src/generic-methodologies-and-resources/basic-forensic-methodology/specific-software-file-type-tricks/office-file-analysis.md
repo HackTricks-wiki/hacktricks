@@ -92,7 +92,7 @@ and general ROP guidance here:
 ../../../binary-exploitation/rop-return-oriented-programing/README.md
 {{#endref}}
 
-Tooling:
+Tooling:<sup>[[1]](#references)</sup>
 
 - CompoundFileTool (OSS) to expand/rebuild OLE compound files: https://github.com/thezdi/CompoundFileTool
 - IDA Pro + WinDBG TTD for reverse/taint; disable page heap with TTD to keep traces compact.

@@ -41,6 +41,3 @@ Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
 ![Find Unknown MAC Addresses in A Wifi Network - Decrypt Traffic: Once you have detected unknown MAC addresses communicating inside the network you can use filters like the following one:...](<../../../images/image (499).png>)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-
